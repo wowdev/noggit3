@@ -522,13 +522,13 @@ void MapTile::loadTexture( )
 	for( std::vector<std::string>::iterator it = mTextureFilenames.begin( ); it != mTextureFilenames.end( ); it++ )
 	{
 		std::string lTexture = *it;
-		if( video.mSupportShaders )
+		/*if( video.mSupportShaders )
 		{
 			std::string lTemp = lTexture;
 			lTemp.insert( lTemp.length( ) - 4, "_s" );
 			if( MPQFileExists( lTemp.c_str( ) ) )
 				lTexture = lTemp;
-		}
+		}*/
 		video.textures.add( lTexture );
 		textures.push_back( lTexture );
 	}
@@ -1732,8 +1732,10 @@ void MapChunk::drawPass(int anim)
 		}
 		glFrontFace(GL_CCW);
 	}
-	else glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
+	else
 	*/
+	glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
+	
 
 	if (anim) 
 	{
@@ -1869,6 +1871,7 @@ void MapChunk::draw()
 //	if( nameID == -1 )
 //		nameID = SelectionNames.add( this );
 //	glPushName(nameID);
+
 	if (nTextures==0)
 	{
 		glActiveTexture(GL_TEXTURE0);
@@ -1895,10 +1898,12 @@ void MapChunk::draw()
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, textures[i+1]);
+
 		// this time, use blending:
 		glActiveTexture(GL_TEXTURE1);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, alphamaps[i]);
+
 
 		drawPass(animated[i+1]);
 

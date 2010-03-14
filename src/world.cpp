@@ -45,6 +45,11 @@ bool IsEditableWorld( int pMapId )
 	}
 
 	MPQFile mf( ssfilename.str( ).c_str( ) );
+
+	//sometimes, wdts don't open, so ignore them...
+	if(mf.isEof())
+		return false;
+
 	const char * lPointer = reinterpret_cast<const char*>( mf.getPointer( ) );
 
 	// Not using the libWDT here doubles performance. You might want to look at your lib again and improve it.
