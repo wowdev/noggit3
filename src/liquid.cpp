@@ -29,7 +29,7 @@ void Liquid::initFromTerrain(MPQFile &f, int flags)
 	}
 	else if (flags & 4) {
 		// river/lake
-		initTextures<1,30>( "XTextures\\river\\lake_a.%d.blp" );
+		initTextures<1,30>( "XTextures\\lake_a\\lake_a.%d.blp" );
 		type = 2; // dynamic color
 		pType = 1;
 		mTransparency = true;
@@ -67,7 +67,7 @@ void Liquid::initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor)
 		mTransparency = false;
 	}
 	else {
-		initTextures<1,30>( "XTextures\\river\\lake_a.%d.blp" );
+		initTextures<1,30>( "XTextures\\lake_a\\lake_a.%d.blp" );
 		if (indoor) {
 			trans = true;
 			type = 1;
@@ -294,7 +294,7 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 	catch( ... )
 	{
 		// Fallback, when there is no information.
-		initTextures<1,30>( "XTextures\\river\\lake_a.%d.blp" );
+		initTextures<1,30>( "XTextures\\lake_a\\lake_a.%d.blp" );
 		mLiquidType = 0;
 		mShaderType = 1;
 	}
@@ -377,7 +377,7 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	catch( ... )
 	{
 		// Fallback, when there is no information.
-		initTextures<1,30>( "XTextures\\river\\lake_a.%d.blp" );
+		initTextures<1,30>( "XTextures\\lake_a\\lake_a.%d.blp" );
 		mLiquidType = 0;
 		mShaderType = 1;
 	}

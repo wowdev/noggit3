@@ -133,9 +133,13 @@ MPQFile::MPQFile( std::string filename ) : eof( false ), buffer( 0 ), pointer( 0
 
 		/// TODO: This sometimes is pretty slow. May be a HDD issue? Is this slow for others too?
 		
-		if( ( error = libmpq__file_read( mpq_a, fileno, buffer, size, 0 ) ) < 0 )
+		if( ( error = libmpq__file_read( mpq_a, fileno, buffer, size, 0 ) ) < 0 ){
 			LogError << "When opening \"" << filepath << "\", libMPQ gave error #" << error << "!" << std::endl;
-		
+			LogError << "Loading file: " <<filepath << " failed!" << std::endl;
+			eof = true;
+			buffer = 0;	
+		}
+
 		External = false;
 
 		return;
