@@ -7,7 +7,7 @@
 #include "maptile.h"
 #include "world.h"
 #include "vec3d.h"
-//#include "shaders.h"
+#include "shaders.h"
 #include "Log.h"
 
 using namespace std;
@@ -21,7 +21,7 @@ using namespace std;
 #define MAPCHUNK_RADIUS	47.140452079103168293389624140323
 
 
-bool DrawMapContour=false;
+bool DrawMapContour=true;
 bool drawFlags=false;
 
 
