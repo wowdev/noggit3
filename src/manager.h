@@ -13,7 +13,7 @@ public:
 	std::string name;
 	ManagedItem(std::string n): refcount(0) 
 	{
-		std::transform( n.begin( ), n.end( ), n.begin( ), ::tolower );
+		//std::transform( n.begin( ), n.end( ), n.begin( ), ::tolower );
 		name = n;
 	}
 

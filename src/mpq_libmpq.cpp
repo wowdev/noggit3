@@ -67,7 +67,7 @@ void MPQArchive::close( )
 
 void FixFilePath( std::string & pFilename )
 {
-	std::transform( pFilename.begin( ), pFilename.end( ), pFilename.begin( ), ::tolower );
+	//std::transform( pFilename.begin( ), pFilename.end( ), pFilename.begin( ), ::tolower );
 	
 	size_t found = pFilename.find( "/" );
 	while( found != std::string::npos )
@@ -80,23 +80,21 @@ void FixFilePath( std::string & pFilename )
 MPQFile::MPQFile( std::string filename ) : eof( false ), buffer( 0 ), pointer( 0 ), size( 0 )
 {
 	FixFilePath( filename );
-	
-	std::string filepath = Project::getInstance( )->getPath( ); filepath.append( filename );
 
-	/// TODO: Is this right? Shouldn't one save the filename, not the one with the path on the disc? Oo
-	fname = filepath;
+	// First try to read from disk
+	std::string diskpath = Project::getInstance()->getPath().append(filename) ;
 
-	FILE* fd = fopen( filepath.c_str( ), "rb" );
+	FILE* fd = fopen( diskpath.c_str() , "rb" );
 	if( !fd )
 	{
-		filepath = Project::getInstance( )->getPath( ); filepath.append( "Data/" ).append( filename );
-		fd = fopen( filepath.c_str( ), "rb" );
+		fd = fopen( diskpath.c_str( ), "rb" );
 	}
 
+	// if file is found on disk load binary data into buffer
 	if( fd )
 	{
-		fname = filepath;
-		
+		fname = diskpath;
+
 		fseek( fd, 0, SEEK_END );
 		size = ftell( fd);
 		
@@ -105,21 +103,30 @@ MPQFile::MPQFile( std::string filename ) : eof( false ), buffer( 0 ), pointer( 0
 		fread( buffer, 1, size, fd );
 		fclose( fd );
 		External = true;
-		Log << "Opening file \"" << filepath << "\" from disk." << std::endl;
+		Log << "Opening file \"" << filename << "\" from disk." << std::endl;
+		std::transform( fname.begin( ), fname.end( ), fname.begin( ), ::tolower );
 		return;
 	}
 
+	fname = filename;
+
+
+	// if not on disk search in MPQ archives.
 	for( ArchiveSet::reverse_iterator i = gOpenArchives.rbegin(); i != gOpenArchives.rend(); ++i )
 	{
 		mpq_archive_s * mpq_a = *i;
 		uint32_t fileno;
 		int32_t error = 0;
 		
+		
 		if( libmpq__file_number( mpq_a, filename.c_str( ), &fileno ) == LIBMPQ_ERROR_EXIST )
 			continue;
+		else if ( libmpq__file_number( mpq_a, filename.c_str( ), &fileno ) == LIBMPQ_ERROR_EXIST )
+			continue;
+			
 
 		if( ( error = libmpq__file_unpacked_size( mpq_a, fileno, &size ) ) < 0 )
-			LogError << "When opening \"" << filepath << "\", libMPQ gave error #" << error << "!" << std::endl;
+			LogError << "When opening \"" << filename << "\", libMPQ gave error #" << error << "!" << std::endl;
 
 		/// HACK: in patch.mpq some files don't want to open and give 1 for filesize
 		if( size <= 1 ) 
@@ -134,14 +141,13 @@ MPQFile::MPQFile( std::string filename ) : eof( false ), buffer( 0 ), pointer( 0
 		/// TODO: This sometimes is pretty slow. May be a HDD issue? Is this slow for others too?
 		
 		if( ( error = libmpq__file_read( mpq_a, fileno, buffer, size, 0 ) ) < 0 ){
-			LogError << "When opening \"" << filepath << "\", libMPQ gave error #" << error << "!" << std::endl;
-			LogError << "Loading file: " <<filepath << " failed!" << std::endl;
+			LogError << "When opening \"" << filename << "\", libMPQ gave error #" << error << "!" << std::endl;
 			eof = true;
 			buffer = 0;	
 		}
 
 		External = false;
-
+	std::transform( fname.begin( ), fname.end( ), fname.begin( ), ::tolower );
 		return;
 	}
 

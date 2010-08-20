@@ -22,21 +22,21 @@ void Liquid::initFromTerrain(MPQFile &f, int flags)
 	ydir = 1.0f;
 	if (flags & 16) {
 		// magma:
-		initTextures<1,30>( "XTextures\\lava\\lava.%d.blp" );
+		initTextures<1,30>( "XTEXTURES\\LAVA\\lava.%d.blp" );
 		type = 0; // not colored
 		pType = 2;
 		mTransparency = false;
 	}
 	else if (flags & 4) {
 		// river/lake
-		initTextures<1,30>( "XTextures\\lake_a\\lake_a.%d.blp" );
+		initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
 		type = 2; // dynamic color
 		pType = 1;
 		mTransparency = true;
 	}
 	else {
 		// ocean
-		initTextures<1,30>( "XTextures\\ocean\\ocean_h.%d.blp" );
+		initTextures<1,30>( "XTEXTURES\\ocean\\ocean_h.%d.blp" );
 		type = 2;
 		pType = 0;
 		mTransparency = true;
@@ -56,18 +56,18 @@ void Liquid::initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor)
 
 	// tmpflag is the flags value for the last drawn tile
 	if (tmpflag & 1) {
-		initTextures<1,30>( "XTextures\\slime\\slime.%d.blp" );
+		initTextures<1,30>( "XTEXTURES\\SLIME\\slime.%d.blp" );
 		type = 0;
 		texRepeats = 2.0f;
 		mTransparency = false;
 	}
 	else if (tmpflag & 2) {
-		initTextures<1,30>( "XTextures\\lava\\lava.%d.blp" );
+		initTextures<1,30>( "XTEXTURES\\LAVA\\lava.%d.blp" );
 		type = 0;
 		mTransparency = false;
 	}
 	else {
-		initTextures<1,30>( "XTextures\\lake_a\\lake_a.%d.blp" );
+		initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
 		if (indoor) {
 			trans = true;
 			type = 1;
@@ -79,29 +79,6 @@ void Liquid::initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor)
 		mTransparency = true;
 	}
 
-	/*
-	// HACK: this is just...wrong
-	// TODO: figure out proper way to identify liquid types
-	const char *texname = video.textures.items[mat.tex]->name.c_str();
-	char *pos = strstr(texname, "Slime");
-	if (pos!=0) {
-		// slime
-		initTextures("XTextures\\slime\\slime", 1, 30);
-		type = 0;
-		texRepeats = 4.0f;
-	} else {
-		if (mat.transparent == 1) {
-			// lava?
-			initTextures("XTextures\\lava\\lava", 1, 30);
-			type = 0;
-		} else {
-			// water?
-			initTextures("XTextures\\river\\lake_a", 1, 30);
-			type = 1;
-			col = Vec3D( ((mat.col2&0xFF0000)>>16)/255.0f, ((mat.col2&0xFF00)>>8)/255.0f, (mat.col2&0xFF)/255.0f);
-		}
-	}
-	*/
 }
 
 
@@ -294,7 +271,7 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 	catch( ... )
 	{
 		// Fallback, when there is no information.
-		initTextures<1,30>( "XTextures\\lake_a\\lake_a.%d.blp" );
+		initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
 		mLiquidType = 0;
 		mShaderType = 1;
 	}
@@ -377,7 +354,7 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	catch( ... )
 	{
 		// Fallback, when there is no information.
-		initTextures<1,30>( "XTextures\\lake_a\\lake_a.%d.blp" );
+		initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
 		mLiquidType = 0;
 		mShaderType = 1;
 	}

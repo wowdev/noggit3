@@ -13,8 +13,9 @@ class Texture : public ManagedItem
 public:
 	int w,h;
 	GLuint id;
+	std::string originalName;
 
-	Texture(std::string pname):ManagedItem(pname), w(0), h(0) {}
+	Texture(std::string pname):ManagedItem(pname), w(0), h(0), originalName(pname) {}
 };
 
 class TextureManager : public Manager<GLuint> 

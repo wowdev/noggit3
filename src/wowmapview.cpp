@@ -22,6 +22,7 @@
 #include "video.h"
 #include "directory.h"
 #include "dbc.h"
+#include "model.h"
 
 //#include "shaders.h"
 #include "liquid.h"
@@ -31,7 +32,9 @@
 
 #include "Settings.h"		// In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
 #include "Project.h"		// This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
-#include "Environment.h"	// This singleton holds all vars you dont must save. Like bools for display options.
+#include "Environment.h"	// This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
+
+#include <boost/shared_ptr.hpp>
 
 bool fullscreen = false;
 
@@ -50,27 +53,36 @@ freetype::font_data arialn13,arial12,arial14,arial16,arial24,arial32,morpheus40;
 
 GotoInfo gGoto;
 
-void getGamePath( bool pLoadFromConfig = false )
+
+void getGamePath(bool pLoadFromConfig = false)
 {
+	// temp to store path from registry
 	char temp[1024];
 
+	// no use of configuration file
 	if( !pLoadFromConfig )
 	{
-#ifdef _WIN32
-		HKEY key;
-		DWORD t,s;
-		s = 1024;
-		memset(temp,0,s);
-
-		RegOpenKeyEx( HKEY_LOCAL_MACHINE, "SOFTWARE\\Blizzard Entertainment\\World of Warcraft", 0, KEY_QUERY_VALUE, &key );
-		RegQueryValueEx( key, "InstallPath", 0, &t, (LPBYTE)temp, &s );
-		RegCloseKey( key );
-
-		wowpath = std::string( temp );
-#else
-		pLoadFromConfig=true;
-		wowpath = "/Applications/World of Warcraft/";
-#endif
+		#ifdef _WIN32
+			HKEY key;
+			DWORD t,s;
+			LONG l;
+			s = 1024;
+			memset(temp,0,s);
+			l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta",0,KEY_QUERY_VALUE,&key);
+			if (l != ERROR_SUCCESS)
+				l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
+			if (l != ERROR_SUCCESS)
+				l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
+			if (l == ERROR_SUCCESS) 
+			{
+				l = RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,&s);
+				RegCloseKey(key);
+				wowpath = std::string( temp );
+			}
+		#else
+			pLoadFromConfig=true;
+			wowpath = "/Applications/World of Warcraft/";
+		#endif
 	}
 	if( temp[0] == 0  || pLoadFromConfig )
 	{
@@ -81,8 +93,6 @@ void getGamePath( bool pLoadFromConfig = false )
 		}
 	}
 }
-
-
 Directory * gFileList;
 
 int	nTimers;
@@ -107,7 +117,179 @@ void CreateStrips();
 #ifdef __cplusplus
 extern "C"
 #endif
-int main( int argc, char *argv[] )
+
+
+
+int startUnittests()
+{
+// Start some Unittests
+
+	Settings::getInstance( );
+	Project::getInstance( );
+	Environment::getInstance( );
+
+	Project::getInstance()->setPath("H:\\Client333_enUS\\");
+	// Set up log.
+
+	InitLogging( );
+
+	Log << APP_TITLE << " " << APP_VERSION << std::endl;
+
+	if( !video.init( 800, 600, fullscreen ) )
+	{
+		LogError << "Initializing video failed." << std::endl;
+		return -1;
+	}
+	SDL_WM_SetCaption( "Noggit Screen Unit Test", "noggit.ico" );	
+
+	Log << "Init Screen" << std::endl;
+
+	wowpath = "H:/Client333_enUS/";
+
+	CreateStrips( );
+
+	Log << "Creat Stripes" << std::endl;
+
+	//libmpq__init( );
+	
+	Log << "Libmpq" << std::endl;
+
+	// data
+	std::vector<MPQArchive*> archives;
+	std::vector<std::string> archiveNames;
+	archiveNames.push_back( "common.MPQ" );
+	archiveNames.push_back( "common-2.MPQ" ); 
+	archiveNames.push_back( "expansion.MPQ" );
+	archiveNames.push_back( "lichking.MPQ" );
+	archiveNames.push_back( "patch.MPQ" );
+	archiveNames.push_back( "patch-2.MPQ" );
+	archiveNames.push_back( "patch-3.MPQ" );
+	// locals
+	archiveNames.push_back( "enUS/locale-enUS.MPQ" );
+	archiveNames.push_back( "enUS/expansion-locale-enUS.MPQ" );
+	archiveNames.push_back( "enUS/lichking-locale-enUS.MPQ" );
+	archiveNames.push_back( "enUS/patch-enUS.MPQ" );
+	archiveNames.push_back( "enUS/patch-enUS-2.MPQ" );
+	archiveNames.push_back( "enUS/patch-enUS-3.MPQ" );
+
+	for( size_t i = 0; i < archiveNames.size( ); i++ )
+	{
+		// load the hardcoded mpqs
+		std::string path = wowpath;
+		path.append( "Data/" ).append( archiveNames[i] );
+		archives.push_back( new MPQArchive( path.c_str( ) ) );
+	}
+
+		Log << "Archives added" << std::endl;
+
+	// Opening DBCs
+	OpenDBs( );
+	Log << "Open DBs" << std::endl;
+	// Initializing Fonts
+	morpheus40.initMPQ( "fonts\\MORPHEUS.TTF", 40 );
+	arialn13.initMPQ( "fonts\\arialn.TTF", 13 );
+	arial12.init( "arial.ttf", 12 );
+	arial14.init( "arial.ttf", 14 );
+	arial16.init( "arial.ttf", 16 );
+	arial24.init( "arial.ttf", 24 );
+	arial32.init( "arial.ttf", 32 );
+	Log << "Fonts added" << std::endl;
+
+	//Lood Model
+	boost::shared_ptr<Model> bg;
+
+	std::stringstream filename;
+	filename << "Interface\\Glues\\Models\\UI_Tauren\\UI_Tauren.m2";
+	
+    bg.reset( new Model( filename.str( ) ) );
+	bg->ind = true;
+
+	float mt = 1000.0f; 
+	Log << "Entering Main Loop" << std::endl;
+	bool done = false;
+	while( !done) 
+	{
+		SDL_Event event;
+		while ( SDL_PollEvent(&event) ) {
+			if ( event.type == SDL_QUIT ) {
+				done = true;
+			}
+			else if ( event.type == SDL_MOUSEMOTION) {
+				if(SDL_GetAppState()&SDL_APPMOUSEFOCUS)
+				{
+					// handle events.
+				}
+			}
+			else if ( (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)&&(SDL_GetAppState()&SDL_APPINPUTFOCUS)) {
+				
+				if(event.button.type == SDL_MOUSEBUTTONUP)
+				{
+					// handle events.
+					mt += 100.0f;
+				}
+				else if(SDL_GetAppState()&SDL_APPMOUSEFOCUS)
+				{
+					// handle events.
+				}
+			}
+			else if ( (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)) {
+				if(SDL_GetAppState()&SDL_APPINPUTFOCUS)
+				{
+					// handle events.
+				}
+			}
+			else if( event.type == SDL_VIDEORESIZE)
+			{
+				// reset the resolution in video object
+				video.resize(event.resize.w,event.resize.h);
+				// message to the aktive gui element
+				if(SDL_GetAppState())
+				{
+					// handle events.
+				}
+			}
+		}
+		video.clearScreen();
+
+		glDisable(GL_FOG);
+		glColor4f(1,1,1,1);
+		glEnable(GL_TEXTURE_2D);
+
+		if (bg) 
+		{
+			bg->updateEmitters( mt );
+			Vec4D la(0.1f,0.1f,0.1f,1);
+			glLightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
+
+			glEnable(GL_COLOR_MATERIAL);
+			glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+			glColor4f(1,1,1,1);
+			for (int i=0; i<8; i++) 
+			{
+				GLuint light = GL_LIGHT0 + i;
+				glLightf(light, GL_CONSTANT_ATTENUATION, 0);
+				glLightf(light, GL_LINEAR_ATTENUATION, 0.7f);
+				glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
+				glDisable(light);
+			}
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LEQUAL);
+			glEnable(GL_LIGHTING);
+			bg->cam.setup( mt );
+			bg->draw();
+		}
+
+
+
+		video.flip();
+	}
+		Log << "Close video" << std::endl;
+	video.close();
+
+	return 0;
+}
+
+int startNoggit( int argc, char *argv[] )
 {
 	Settings::getInstance( );
 	Project::getInstance( );
@@ -144,6 +326,7 @@ int main( int argc, char *argv[] )
 
 	int gowto = -1;
 
+	// handle starting parameters
 	for( int i = 1; i < argc; i++ ) 
 	{
 		if( !strcmp( argv[i], "-f" ) || !strcmp( argv[i], "-fullscreen" ) ) 
@@ -153,7 +336,6 @@ int main( int argc, char *argv[] )
 		else if( !strcmp( argv[i], "-g" ) || !strcmp( argv[i], "-goto" ) ) 
 			gowto = i + 1;
 
-		/// TODO: Remove these? Who uses them anyway?
 		else if( !strcmp( argv[i], "-w" ) || !strcmp( argv[i], "-windowed" ) ) 
 			fullscreen = false;
 		else if (!strcmp(argv[i],"-1024") || !strcmp(argv[i],"-1024x768")) {
@@ -221,6 +403,7 @@ int main( int argc, char *argv[] )
 	TimerStart();	
 
 	getGamePath( useConfig );
+
 	Log << "Game path: " << wowpath << std::endl;
 
 	if( Project::getInstance( )->getPath( ) == "" )
@@ -230,7 +413,7 @@ int main( int argc, char *argv[] )
 
 	CreateStrips( );
 	
-	libmpq__init( );
+	//libmpq__init( );
 
 	std::vector<MPQArchive*> archives;
 	std::vector<std::string> archiveNames;
@@ -242,14 +425,14 @@ int main( int argc, char *argv[] )
 	archiveNames.push_back( "patch-{number}.MPQ" );
 	archiveNames.push_back( "patch-{character}.MPQ" );
 	
-//	archiveNames.push_back( "{locale}/backup-{locale}.MPQ" );		// These do not really contain any files we want. And they get MPQFile::ctor slower as it needs to iterate one more file.
-//	archiveNames.push_back( "{locale}/base-{locale}.MPQ" );
+	//archiveNames.push_back( "{locale}/backup-{locale}.MPQ" );	
+	//archiveNames.push_back( "{locale}/base-{locale}.MPQ" );
 	archiveNames.push_back( "{locale}/locale-{locale}.MPQ" );
-//	archiveNames.push_back( "{locale}/speech-{locale}.MPQ" );
+	//archiveNames.push_back( "{locale}/speech-{locale}.MPQ" );
 	archiveNames.push_back( "{locale}/expansion-locale-{locale}.MPQ" );
-//	archiveNames.push_back( "{locale}/expansion-speech-{locale}.MPQ" );
+	//archiveNames.push_back( "{locale}/expansion-speech-{locale}.MPQ" );
 	archiveNames.push_back( "{locale}/lichking-locale-{locale}.MPQ" );
-//	archiveNames.push_back( "{locale}/lichking-speech-{locale}.MPQ" );
+	//archiveNames.push_back( "{locale}/lichking-speech-{locale}.MPQ" );
 	archiveNames.push_back( "{locale}/patch-{locale}.MPQ" );
 	archiveNames.push_back( "{locale}/patch-{locale}-{number}.MPQ" );
 	archiveNames.push_back( "{locale}/patch-{locale}-{character}.MPQ" );
@@ -302,7 +485,7 @@ int main( int argc, char *argv[] )
 				sprintf( temp, "%i", i );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
-					archives.push_back( new MPQArchive( path.c_str( ), true ) );
+					archives.push_back( new MPQArchive( path.c_str( ) ) );
 			}
 		}
 		else if( path.find( "{character}" ) != std::string::npos  )
@@ -315,12 +498,12 @@ int main( int argc, char *argv[] )
 				sprintf( temp, "%c", i );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
-					archives.push_back( new MPQArchive( path.c_str( ), true ) );
+					archives.push_back( new MPQArchive( path.c_str( ) ) );
 			}
 		}
 		else
 			if( FileExists( path ) )
-				archives.push_back( new MPQArchive( path.c_str( ), true ) );
+				archives.push_back( new MPQArchive( path.c_str( ) ) );
 	}
 
 	LogDebug << "main: mpqs: " << TimerStop( ) << " ms" << std::endl;
@@ -452,8 +635,8 @@ int main( int argc, char *argv[] )
 		}
 		if(SDL_GetAppState()&SDL_APPACTIVE)
 		{
-			as->tick(ftime, dt/1000.0f);
-			as->display(ftime, dt/1000.0f);
+				as->tick(ftime, dt/1000.0f);
+				as->display(ftime, dt/1000.0f);
 		}
 
 		if (gPop) 
@@ -486,7 +669,7 @@ int main( int argc, char *argv[] )
 
 	archives.clear();
 	
-	libmpq__shutdown( );
+	//libmpq__shutdown( );
 
 	LogDebug << "Exited" << std::endl;
 
@@ -506,4 +689,17 @@ float randfloat(float lower, float upper)
 int randint(int lower, int upper)
 {
     return lower + (int)((upper+1-lower)*frand());
+}
+
+int main( int argc, char *argv[] )
+{
+	#ifdef _UNITTEST
+		// start UNITTESTS IF IN UNITTEST MODE
+		startUnittests();
+	#else
+		// ELSE START APP
+		startNoggit( argc, argv );
+	#endif
+
+	return 0;
 }
