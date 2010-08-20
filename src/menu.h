@@ -9,6 +9,7 @@
 #include "appstate.h"
 #include "wowmapview.h"
 #include "vec3d.h"
+#include "ui.h"
 
 class World;
 class Model;
@@ -23,7 +24,7 @@ struct Clickable
 struct MapEntry : public Clickable 
 {
 	std::string name, description;
-	int loadingscreen;
+	int AreaType, IsBattleground, loadingscreen;
 	freetype::font_data font;
 };
 
@@ -45,6 +46,8 @@ class Menu : public AppState
 {
 	int sel, cmd, x, y, cz, cx;
 
+	int minimap_x, minimap_y;
+	minimapWindowUI *minimap_win;
 	World *world;
 
 	std::vector<MapEntry> maps;

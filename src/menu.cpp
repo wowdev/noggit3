@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <ctime> 
+#include <cstdlib> 
+#include <iostream>
 
 #include "menu.h"
 #include "mpq.h"
@@ -11,6 +14,7 @@
 #include "dbc.h"
 #include "Log.h"
 #include "world.h"
+#include <sstream>
 
 extern Directory * gFileList;
 
@@ -39,6 +43,11 @@ Menu::Menu( )
 
 	lastbg = -1;
 
+	minimap_x = 300;
+	minimap_y = 50;
+
+	minimap_win = new minimapWindowUI( minimap_x, minimap_y, 800, 800, "Select ADT to start!" );
+
 	int x = 5, y = 74, size;
 
 	for( int type = 0; type < 3; type++ )
@@ -57,7 +66,10 @@ Menu::Menu( )
 			e.name = i->getString( MapDB::InternalName );
 			e.description = i->getLocalizedString( MapDB::Name );
 			e.loadingscreen = i->getUInt( MapDB::LoadingScreen );
+			e.IsBattleground = i->getUInt( MapDB::IsBattleground );
+			e.AreaType = i->getUInt( MapDB::AreaType );
 
+			// load map from startparameters if it exists
 			if ( id == gGoto.mapid || e.name == gGoto.mapname )
 			{
 				try
@@ -97,7 +109,7 @@ Menu::Menu( )
 
 			e.x1 = e.x0 + freetype::width( e.font, e.name.c_str( ) );
 			e.y1 = e.y0 + size;
-
+			
 			maps.push_back( e );
 		}
 		y += 40;
@@ -113,29 +125,28 @@ Menu::Menu( )
 
 void Menu::randBackground( )
 {	
+	// STEFF:TODO first need to fix m2 bg loading.
+	// Noggit shows no ground if the deactivated gbs loaded
+	// Alphamapping?
 	std::vector<std::string> ui;
-	ui.push_back( "BloodElf" );
-	ui.push_back( "Deathknight" );
-	ui.push_back( "Draenei" );
-	ui.push_back( "Dwarf" );
-	ui.push_back( "Human" );
-	ui.push_back( "MainMenu" );
-	ui.push_back( "MainMenu_BurningCrusade" );
-	ui.push_back( "MainMenu_Northrend" );
-	ui.push_back( "NightElf" );
-	ui.push_back( "Orc" );
-	ui.push_back( "Scourge" );
-	ui.push_back( "Tauren" );
+	//ui.push_back( "BloodElf" );		// No
+	//ui.push_back( "Deathknight" );	// No
+	//ui.push_back( "Draenei" );		// No
+	ui.push_back( "Dwarf" );		    // Yes
+	//ui.push_back( "Human" );			// No
+	ui.push_back( "MainMenu" );			// Yes
+	//ui.push_back( "NightElf" );		// No
+	//ui.push_back( "Orc" );			// No
+	//ui.push_back( "Scourge" );		// No
+	//ui.push_back( "Tauren" );			// No
 
-	int randnum;
-	do
-		randnum = randint( 0, ui.size( ) - 1 );
-	while( randnum == lastbg );
-
-	lastbg = randnum;
+	// Random Background
+	srand((unsigned)time(0)); 
+    int randnum = (rand()%(ui.size( )- 1)+1); 
 
 	std::stringstream filename;
 	filename << "Interface\\Glues\\Models\\UI_" << ui[randnum] << "\\UI_" << ui[randnum] << ".m2";
+	
 	
     bg.reset( new Model( filename.str( ) ) );
 	bg->ind = true;
@@ -147,7 +158,7 @@ void Menu::tick( float t, float dt )
 	globalTime = int( mt );
 
 	if( bg )
-		bg->updateEmitters( dt );
+		bg->updateEmitters( mt );
 	else 
 		randBackground( );
 
@@ -260,24 +271,10 @@ void Menu::display(float t, float dt)
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_LIGHTING);
 
-	/* what was the sense of this?
-	if (darken) {
-		glDisable(GL_TEXTURE_2D);
-		// background is too light so tame it down a bit
-		glColor4f(0,0,0,0.35f);
-		glBegin(GL_QUADS);
-		glVertex2i(0,0);
-		glVertex2i(video.xres,0);
-		glVertex2i(video.xres,video.yres);
-		glVertex2i(0,video.yres);
-		glEnd();
-	}*/
-
 	glColor4f(1,1,1,1);
 
 	glEnable(GL_TEXTURE_2D);
-	int basex = 200;
-	int basey = 0;
+
 	int tilesize = 12;
 	
 	if (cmd==CMD_LOAD_WORLD) 
@@ -314,21 +311,33 @@ void Menu::display(float t, float dt)
 	{
 		if ((sel != -1) && (world!=0)) 
 		{
+			const int len = 768;
+
+			glDisable( GL_TEXTURE_2D );
+			// Draw window behind minimap						
+			minimap_win->hidden=false;		
+			minimap_win->render();
+			minimap_win->hidden=true;	
+
+			glEnable( GL_TEXTURE_2D );
+
+
+
 			if (world->minimap) 
 			{
 				// minimap time! ^_^
-				const int len = 768;
+
 				glColor4f(1,1,1,1);
 				glBindTexture(GL_TEXTURE_2D, world->minimap);
 				glBegin(GL_QUADS);
 				glTexCoord2f(0,0);
-				glVertex2i(basex,basey);
-				glTexCoord2f(1,0);
-				glVertex2i(basex+len,basey);
-				glTexCoord2f(1,1);
-				glVertex2i(basex+len,basey+len);
-				glTexCoord2f(0,1);
-				glVertex2i(basex,basey+len);
+				glVertex2i(minimap_x,minimap_y);
+				glTexCoord2f(0.9f,0);
+				glVertex2i(minimap_x+len,minimap_y);
+				glTexCoord2f(0.9f,0.9f);
+				glVertex2i(minimap_x+len,minimap_y+len);
+				glTexCoord2f(0,0.9f);
+				glVertex2i(minimap_x,minimap_y+len);
 				glEnd();
 			}
 
@@ -341,10 +350,10 @@ void Menu::display(float t, float dt)
 					{
 						glColor4f( 0.7f, 0.9f, 0.8f, 0.2f );
 						glBegin( GL_QUADS );
-						glVertex2i( basex + i * tilesize, basey + j * tilesize );
-						glVertex2i( basex + ( i + 1 ) * tilesize, basey + j * tilesize );
-						glVertex2i( basex + ( i + 1 ) * tilesize, basey + ( j + 1 ) * tilesize );
-						glVertex2i( basex + i * tilesize, basey + ( j + 1 ) * tilesize );
+						glVertex2i( minimap_x + i * tilesize, minimap_y + j * tilesize );
+						glVertex2i( minimap_x + ( i + 1 ) * tilesize, minimap_y + j * tilesize );
+						glVertex2i( minimap_x + ( i + 1 ) * tilesize, minimap_y + ( j + 1 ) * tilesize );
+						glVertex2i( minimap_x + i * tilesize, minimap_y + ( j + 1 ) * tilesize );
 						glEnd( );
 					}
 				}
@@ -382,10 +391,15 @@ void Menu::display(float t, float dt)
 
 		for ( unsigned int i = 0; i < maps.size( ); i++ ) 
 		{
+			std::stringstream out;		
+
+			out << maps[i].name << " - " << maps[i].AreaType << " - " << maps[i].IsBattleground ;
+			std::string Mapname = out.str();
+			
 			if( i == sel )
-				freetype::shprinty( maps[i].font, maps[i].x0, maps[i].y0, maps[i].name.c_str( ) );
+				freetype::shprinty( maps[i].font, maps[i].x0, maps[i].y0, Mapname.c_str( )  );
 			else
-				freetype::shprint( maps[i].font, maps[i].x0, maps[i].y0, maps[i].name.c_str( ) );
+				freetype::shprint( maps[i].font, maps[i].x0, maps[i].y0, Mapname.c_str( ) );
 		}
 
 		if ( sel != -1 ) 
@@ -430,14 +444,14 @@ void Menu::mouseclick( SDL_MouseButtonEvent *e )
 	if( cmd != CMD_SELECT ) 
 		return;
 
-	/// We are about entering a world
-	if( sel != -1 && world != 0 && ( e->y < 12*64 ) && ( e->x > 200 ) ) 
-	{
-		x = e->x - 200;
-		y = e->y;
-		cmd = CMD_LOAD_WORLD;
-		return;
-	}
+		/// We are about entering a world
+		if( sel != -1 && world != 0 && ( e->y < 768+minimap_y ) && (e->y > minimap_y) && (e->x < 768+minimap_x) && ( e->x > minimap_x ) ) 
+		{
+			x = e->x - minimap_x;
+			y = e->y - minimap_y;
+			cmd = CMD_LOAD_WORLD;
+			return;
+		}
 
 	int osel = sel;
 	

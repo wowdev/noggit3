@@ -1046,13 +1046,15 @@ void MapView::displayViewMode_3D( float t, float dt )
 	
 	video.set3D();
 
-	glActiveTexture(GL_TEXTURE1);
-	glDisable(GL_TEXTURE_2D);
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
-	
+	//glActiveTexture(GL_TEXTURE1);
+	//glDisable(GL_TEXTURE_2D);
+	//glActiveTexture(GL_TEXTURE0);
+	//glEnable(GL_TEXTURE_2D);
+
 	world->draw();
 
+
+	
 	if( hud ) 
 	{
 		video.set2D();
@@ -1290,10 +1292,11 @@ void MapView::display( float t, float dt )
 		break;
 	case eViewMode_3D:
 		displayViewMode_3D( t, dt );
+
 		break;
 	}
+			//CheckForGLError( "MapView::display( ), after displayViewMode_3D" );
 
-	CheckForGLError( "MapView::display( ), after drawing" );
 }
 
 

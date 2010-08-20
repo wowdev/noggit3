@@ -556,10 +556,18 @@ void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot)
 
 void WMO::drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper )
 {
+	try
+	{
 	if( Reloaded && reloadWMO )
 	{ 
 		reloadWMO->drawSkybox( pCamera, pLower, pUpper  );
 		return;
+	}
+	}
+	catch(...)
+	{
+		//TODO Steff
+		// Why dose it crash here
 	}
 
 	if( skybox && pCamera.IsInsideOf( pLower, pUpper ) ) 

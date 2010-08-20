@@ -30,8 +30,8 @@ GLuint TextureManager::get(std::string name)
 GLuint TextureManager::add(std::string name)
 {
 	GLuint id;
+	std::string originalName = name;
 	std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-
 	if( names.find( name ) != names.end( ) ) 
 	{
 		id = names[name];
@@ -42,9 +42,11 @@ GLuint TextureManager::add(std::string name)
 	glGenTextures( 1, &id );
 
 	Texture *tex = new Texture( name );
+	tex->originalName = originalName;
 	tex->id = id;
 	
 	LoadBLP(id, tex);
+
 	do_add(name, id, tex);
 
 	return id;
@@ -68,12 +70,13 @@ bool TextureManager::LoadBLP(GLuint id, Texture *tex)
 
 	glBindTexture( GL_TEXTURE_2D, id );
 	
-	MPQFile f( tex->name.c_str( ) );
+	MPQFile f( tex->originalName.c_str( ) );
 	if ( f.isEof( ) ) 
 	{
 		tex->id = 0;
 		return false;
 	}
+
 
 	lData = f.getPointer( );
 	lHeader = reinterpret_cast<BLPHeader*>( lData );

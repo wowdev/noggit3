@@ -321,6 +321,7 @@ void print(const font_data &ft_font, float x, float y, const char *fmt, ...)  {
 	//a regular expression library such as the one avliable from
 	//boost.org (I've only done it out by hand to avoid complicating
 	//this tutorial with unnecessary library dependencies).
+	
 	const char *start_line=text;
 	vector<string> lines;
 	const char *c=text;

@@ -611,6 +611,8 @@ void World::enterTile( int x, int z )
 
 void World::enterTileInit(int x, int z)
 {
+	// TODO Steff
+	// get the loading asyncron
 	if (!oktile(x,z)) {
 		noadt = true;
 		return;
@@ -964,28 +966,25 @@ void World::draw()
 	doodaddrawdistance2 = doodaddrawdistance * doodaddrawdistance;
 
 	// setup camera
-	// assume identity modelview matrix ^_^
-	//glMatrixMode(GL_MODELVIEW);
-	//glLoadIdentity();
-
 	gluLookAt(camera.x,camera.y,camera.z, lookat.x,lookat.y,lookat.z, 0, 1, 0);
 
 	// camera is set up
 	frustum.retrieve();
 
-	glDisable(GL_LIGHTING);
-	glColor4f(1,1,1,1);
+	///glDisable(GL_LIGHTING);
+	///glColor4f(1,1,1,1);
 
     //int tt = 1440;
 	//if (modelmanager.v>0) {
 	//	tt = (modelmanager.v *180 + 1440) % 2880;
 	//}		
-	
+
 	hadSky = false;
 	if( drawwmo || mHasAGlobalWMO )
 		for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); !hadSky && it != mWMOInstances.end(); ++it )
 			it->second.wmo->drawSkybox( this->camera, it->second.extents[0], it->second.extents[1] );
-	
+
+
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
@@ -993,7 +992,7 @@ void World::draw()
 	glDisable(GL_FOG);
 
 	int daytime = ((int)time)%2880;
-	outdoorLightStats = ol->getLightStats(daytime);
+	//outdoorLightStats = ol->getLightStats(daytime);
 	skies->initSky(camera, daytime);
 
 	if (!hadSky) 
@@ -1007,11 +1006,10 @@ void World::draw()
 
 	glDisable(GL_TEXTURE_2D);
 	
-	
 
 	outdoorLighting();
 	outdoorLights(true);
-
+	
 	glFogi(GL_FOG_MODE, GL_LINEAR);
 	setupFog();
 
@@ -1050,12 +1048,11 @@ void World::draw()
 	//glColorMaterial(GL_FRONT, GL_DIFFUSE);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	glColor4f(1,1,1,1);
-
 	// if we're using shaders let's give it some specular
 	if (video.mSupportShaders) {
-		Vec4D spec_color(1,1,1,1);
+		Vec4D spec_color(0.1,0.1,0.1,0.1);
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-		glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 20);
+		glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 5);
 
 		glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 	}
@@ -1083,7 +1080,9 @@ void World::draw()
 
 	// height map w/ a zillion texture passes
 	/// TODO: Do we need to push the matrix here?
+	
 	glPushMatrix();
+
 	if( drawterrain )
 		for( int j = 1; j < 4; j++ )
 			for( int i = 1; i < 4; i++ )
@@ -1103,10 +1102,6 @@ void World::draw()
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 
-		//glDisable(GL_FOG);
-		//glDisable(GL_DEPTH_FUNC);
-		//glDisable(GL_DEPTH_TEST);
-
 		setupFog();
 		for (int j=1; j<4; j++) {
 			for (int i=1; i<4; i++) {
@@ -1118,13 +1113,7 @@ void World::draw()
 				}
 			}
 		}
-		/*if(drawfog)
-			glEnable(GL_FOG);*/
-		//glEnable(GL_DEPTH_FUNC);
-		//glEnable(GL_DEPTH_TEST);
 	}
-	
-	
 	
 
 	glActiveTexture(GL_TEXTURE1);
@@ -1203,13 +1192,17 @@ void World::draw()
 	//glEnable(GL_LIGHTING);
 
 	// gosh darn alpha blended evil
+
 	LoadGLSettings();
+	// TODO Steff: Liquid generates GO_OUT_OF_MEMORY
 	setupFog();
+	/*
 	for (int j=1; j<4; j++) {
 		for (int i=1; i<4; i++) {
 			if (drawwater && oktile(i,j) && current[j][i] != 0)	current[j][i]->drawWater();
 		}
 	}
+	*/
 	glColor4f(1,1,1,1);
 	glEnable(GL_BLEND);
 
@@ -1441,7 +1434,9 @@ void World::drawTileMode(float ah)
 {
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT); 
 	glEnable(GL_BLEND);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glPushMatrix();
 	glScalef(zoom,zoom,1.0f);

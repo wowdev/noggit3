@@ -84,7 +84,6 @@ Model::Model(std::string name, bool forceAnim) : ManagedItem(name), forceAnim(fo
 		return;
 	}
 	
-	LogDebug << "Loading model \"" << name << "\"." << std::endl;
 
 	memcpy( &header, f.getBuffer( ), sizeof( ModelHeader ) );
 	

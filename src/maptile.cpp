@@ -675,8 +675,10 @@ int MapTileModelLoadThread( void * pMapTile )
 	while( !lThis->modelsLoaded )
 	{
 	//	SDL_LockMutex( gLoadThreadMutex );
+		
 		lThis->loadModel( );
-	//	SDL_UnlockMutex( gLoadThreadMutex );
+	
+		SDL_UnlockMutex( gLoadThreadMutex );
 	}
 
 	LogDebug << "Finished model Load thread." << std::endl;
@@ -958,7 +960,6 @@ void MapTile::drawTextures()
 	
 	//glTranslatef(-8,-8,0);
 	
-
 	for (int j=0; j<16; j++) {
 		for (int i=0; i<16; i++) {
 			if(((i+1+xOffset)>gWorld->minX)&&((j+1+yOffset)>gWorld->minY)&&((i+xOffset)<gWorld->maxX)&&((j+yOffset)<gWorld->maxY))
@@ -1904,9 +1905,7 @@ void MapChunk::draw()
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, alphamaps[i]);
 
-
 		drawPass(animated[i+1]);
-
 	}
 
 	if (nTextures>1) {
@@ -3270,6 +3269,7 @@ void MapTile::saveTile( )
 					lChunkExtents[0] = Vec3D( chunks[y][x].xbase, 0.0f, chunks[y][x].zbase );
 					lChunkExtents[1] = Vec3D( chunks[y][x].xbase + CHUNKSIZE, 0.0f, chunks[y][x].zbase + CHUNKSIZE );
 
+					// search all wmos that are inside this chunk
 					lID = 0;
 					for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
 					{
@@ -3279,6 +3279,7 @@ void MapTile::saveTile( )
 						lID++;
 					}
 					
+					// search all models that are inside this chunk
 					lID = 0;
 					/// TODO: THIS IS JUST PLAIN WRONG. ._.
 					for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
