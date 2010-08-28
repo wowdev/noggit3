@@ -1,5 +1,5 @@
 #include "textboxUI.h"
-#include "wowmapview.h"
+#include "noggit.h"
 
 TextBox::TextBox(float xPos,float yPos,float w, float h,GLuint tex, GLuint texd)
 {

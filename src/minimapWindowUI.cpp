@@ -1,4 +1,4 @@
-#include "wowmapview.h"
+#include "noggit.h"
 
 #include "minimapWindowUI.h"
 

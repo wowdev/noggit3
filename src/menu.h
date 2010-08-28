@@ -7,7 +7,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "appstate.h"
-#include "wowmapview.h"
+#include "noggit.h"
 #include "vec3d.h"
 #include "ui.h"
 
@@ -26,6 +26,7 @@ struct MapEntry : public Clickable
 	std::string name, description;
 	int AreaType, IsBattleground, loadingscreen;
 	freetype::font_data font;
+	int mid;
 };
 
 struct Bookmark : public Clickable 
@@ -33,6 +34,7 @@ struct Bookmark : public Clickable
 	std::string basename, name, label;
 	Vec3D pos;
 	float ah, av;
+	int mid;
 };
 
 enum Commands {
@@ -44,7 +46,14 @@ enum Commands {
 
 class Menu : public AppState
 {
-	int sel, cmd, x, y, cz, cx;
+	int sel, newsel,newbookmark, cmd, x, y, cz, cx;
+
+	// frame to place all gui elemnts on
+	frame guiFrame;
+
+	// status and menu bar
+	statusBar	*guiStatusbar;
+	menuBar		*mbar;
 
 	int minimap_x, minimap_y;
 	minimapWindowUI *minimap_win;
@@ -74,6 +83,11 @@ public:
 
 	void refreshBookmarks();
 	void randBackground();
+	void resizewindow();
+
+	void loadMap( int mid );
+	void loadBookmark( int mid );
+
 };
 
 

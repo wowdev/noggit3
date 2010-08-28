@@ -1,6 +1,6 @@
 #include "checkboxUI.h"
 #include "video.h"
-#include "wowmapview.h"
+#include "noggit.h"
 
 checkboxUI::checkboxUI( float xPos, float yPos, std::string pText )
 {

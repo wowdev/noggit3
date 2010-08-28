@@ -2,7 +2,7 @@
 #include <map>
 #include <list>
 
-#include "wowmapview.h"
+#include "noggit.h"
 #include "video.h"
 #include "maptile.h"
 #include "ui.h"

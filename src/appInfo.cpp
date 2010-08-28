@@ -1,7 +1,7 @@
 #include "appInfo.h"
 #include "video.h"
 #include "MinimizeButton.h"
-#include "wowmapview.h"
+#include "noggit.h"
 #include "modelUI.h"
 #include "model.h"
 

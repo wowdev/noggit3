@@ -1,5 +1,5 @@
-#ifndef WOWMAPVIEW_H
-#define WOWMAPVIEW_H
+#ifndef NOGGIT_H
+#define NOGGIT_H
 
 #define DEBUG__LOGGINGTOCONSOLE 1
 
@@ -7,7 +7,6 @@
 #include <string>
 #include "appstate.h"
 #include "freetype.h"
-//#include "Log.h"
 
 /// XXX this really needs to be refactored into a singleton class
 

@@ -57,6 +57,35 @@ public:
 	void render( );
 };
 
+class MenuItemSwitch : public MenuItem 
+{
+private:
+	bool * mMyState;
+	bool mInvert;
+
+public:
+	MenuItemSwitch( MenuPane * pParent, float pX, float pY, std::string pText, bool * pMyState, bool pInvert = 1 );
+
+	frame* processLeftClick( float pX, float pY );
+
+	void render( );
+};
+
+
+class MenuItemSet : public MenuItem 
+{
+private:
+	int mSet;
+	int * mMyState;
+
+public:
+	MenuItemSet( MenuPane * pParent, float pX, float pY, std::string pText, int * pMyState, int pSet = 1 );
+
+	frame* processLeftClick( float pX, float pY );
+
+	void render( );
+};
+
 class MenuItemSeperator : public MenuItem
 {
 public:
@@ -79,6 +108,9 @@ public:
 	
 	void AddMenuItemButton( std::string pName, void ( *pClickFunc )( frame *, int ), int pClickFuncID );
 	void AddMenuItemToggle( std::string pName, bool * pMyState, bool pInvert = false );
+	void AddMenuItemSwitch( std::string pName, bool * pMyState, bool pInvert = false );
+	void AddMenuItemSet( std::string pName, int * pMyIntState, int pSet = 1 );
+
 	void AddMenuItemSeperator( std::string pName );
 };
 

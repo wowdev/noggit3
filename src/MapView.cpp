@@ -6,7 +6,7 @@
 
 #include "MapView.h"
 //#include "trace.h"
-//#include "wowmapview.h"
+//#include "noggit.h"
 #include "Log.h"
 #include "dbc.h"
 #include "texturingui.h"
@@ -354,7 +354,7 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 	tileFrames.height=(float)video.yres;
 	tileFrames.width=(float)video.xres;
 
-	// creat main gui opject that creates all other gui elements
+	// create main gui opject that holds all other gui elements for access
 	mainGui = new Gui();
 
 	//register toolbar event functions

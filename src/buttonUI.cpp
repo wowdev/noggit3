@@ -1,5 +1,5 @@
 #include "buttonUI.h"
-#include "wowmapview.h"
+#include "noggit.h"
 
 buttonUI::buttonUI( float pX, float pY, float w, float h, GLuint tex, GLuint texd )
 {
