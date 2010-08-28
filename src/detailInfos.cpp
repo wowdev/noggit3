@@ -1,6 +1,6 @@
 #include "detailInfos.h"
 #include "MinimizeButton.h"
-#include "wowmapview.h"
+#include "noggit.h"
 
 detailInfos::detailInfos( float xPos, float yPos, float w, float h, Gui *setGui ) : window( xPos, yPos, w, h )
 {

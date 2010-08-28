@@ -4,7 +4,7 @@
 class TreeView;
 class TreeViewButton;
 
-#include "wowmapview.h"
+#include "noggit.h"
 #include "video.h"
 #include "textUI.h"
 #include "buttonUI.h"

@@ -1,5 +1,5 @@
 #include "slider.h"
-#include "wowmapview.h"
+#include "noggit.h"
 
 slider::slider(float xPos, float yPos, float w,float s,float o)
 {

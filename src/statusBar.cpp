@@ -1,6 +1,6 @@
 #include "statusBar.h"
 #include "video.h"
-#include "wowmapview.h"
+#include "noggit.h"
 
 statusBar::statusBar( float xPos, float yPos, float w, float h ) : window(xPos, yPos, w, h)
 {

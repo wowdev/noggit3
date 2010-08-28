@@ -1,5 +1,5 @@
 #include "Toolbar.h"
-#include "wowmapview.h"
+#include "noggit.h"
 #include "MinimizeButton.h"
 
 Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window(xPos, yPos, w, h), mainGui( setGui )

@@ -1,7 +1,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include "wowmapview.h"
+#include "noggit.h"
 #include "maptile.h"
 #include "wmo.h"
 #include "frustum.h"

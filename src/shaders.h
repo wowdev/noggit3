@@ -6,7 +6,7 @@
 #include "video.h"
 
 #include "mpq.h"
-#include "wowmapview.h"
+#include "noggit.h"
 
 class BLSShader
 {

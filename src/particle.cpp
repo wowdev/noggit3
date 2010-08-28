@@ -1,5 +1,5 @@
 #include "particle.h"
-#include "wowmapview.h"
+#include "noggit.h"
 
 #define MAX_PARTICLES 10000
 

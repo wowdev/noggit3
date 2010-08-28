@@ -202,6 +202,105 @@ void MenuItemToggle::render( )
 	glPopMatrix( );
 }
 
+MenuItemSwitch::MenuItemSwitch( MenuPane * pParent, float pX, float pY, std::string pText, bool * pMyState, bool pInvert ) : 
+	MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
+{
+	this->setText( pText.c_str( ) );
+	this->setLeft( );
+
+	mMyState = pMyState;
+	mInvert = pInvert;
+}
+
+frame* MenuItemSwitch::processLeftClick( float pX, float pY )
+{
+	clicked = true;
+	*mMyState = mInvert;
+	this->mParent->Close();
+	return this;
+}
+
+void MenuItemSwitch::render( )
+{
+	glColor3f( 1.0f, 1.0f, 1.0f );
+
+	glActiveTexture( GL_TEXTURE0 );
+
+	if( !clicked )
+		glBindTexture( GL_TEXTURE_2D, texture );
+	else
+		glBindTexture( GL_TEXTURE_2D, textureDown );
+
+	glPushMatrix( );
+		glTranslatef( x, y, 0.0f );
+
+		glEnable( GL_TEXTURE_2D );
+			glBegin( GL_TRIANGLE_STRIP );
+				glTexCoord2f( 0.0f, 0.0f );
+				glVertex2f( 0.0f, 0.0f );
+				glTexCoord2f( 1.0f, 0.0f );
+				glVertex2f( width, 0.0f );
+				glTexCoord2f( 0.0f, 1.0f );
+				glVertex2f( 0.0f, height );
+				glTexCoord2f( 1.0f, 1.0f );
+				glVertex2f( width, height );
+			glEnd( );
+		glDisable( GL_TEXTURE_2D );
+	
+		text->render( );
+	glPopMatrix( );
+}
+
+
+MenuItemSet::MenuItemSet( MenuPane * pParent, float pX, float pY, std::string pText, int * pMyState, int pSet ) : 
+	MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
+{
+	this->setText( pText.c_str( ) );
+	this->setLeft( );
+
+	mMyState = pMyState;
+	mSet = pSet;
+}
+
+frame* MenuItemSet::processLeftClick( float pX, float pY )
+{
+	clicked = true;
+	*mMyState = mSet;
+	this->mParent->Close();
+	return this;
+}
+
+void MenuItemSet::render( )
+{
+	glColor3f( 1.0f, 1.0f, 1.0f );
+
+	glActiveTexture( GL_TEXTURE0 );
+
+	if( !clicked )
+		glBindTexture( GL_TEXTURE_2D, texture );
+	else
+		glBindTexture( GL_TEXTURE_2D, textureDown );
+
+	glPushMatrix( );
+		glTranslatef( x, y, 0.0f );
+
+		glEnable( GL_TEXTURE_2D );
+			glBegin( GL_TRIANGLE_STRIP );
+				glTexCoord2f( 0.0f, 0.0f );
+				glVertex2f( 0.0f, 0.0f );
+				glTexCoord2f( 1.0f, 0.0f );
+				glVertex2f( width, 0.0f );
+				glTexCoord2f( 0.0f, 1.0f );
+				glVertex2f( 0.0f, height );
+				glTexCoord2f( 1.0f, 1.0f );
+				glVertex2f( width, height );
+			glEnd( );
+		glDisable( GL_TEXTURE_2D );
+	
+		text->render( );
+	glPopMatrix( );
+}
+
 
 MenuItemSeperator::MenuItemSeperator( MenuPane * pParent, float pX, float pY, std::string pText ) : 
 	MenuItem( pParent, pX, pY, 20.0f, pText, "Interface\\BUTTONS\\UI-SliderBar-Background.blp", "Interface\\BUTTONS\\UI-SliderBar-Background.blp" )
@@ -242,6 +341,16 @@ void MenuPane::AddMenuItemButton( std::string pName, void ( *pClickFunc )( frame
 void MenuPane::AddMenuItemToggle( std::string pName, bool * pMyState, bool pInvert )
 {
 	this->addChild( reinterpret_cast<frame*>( new MenuItemToggle( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pInvert ) ) );
+	this->height = 6.0f + mNumItems * 25.0f;
+}
+void MenuPane::AddMenuItemSwitch( std::string pName, bool * pMyState, bool pInvert )
+{
+	this->addChild( reinterpret_cast<frame*>( new MenuItemSwitch( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pInvert ) ) );
+	this->height = 6.0f + mNumItems * 25.0f;
+}
+void MenuPane::AddMenuItemSet( std::string pName, int * pMyState, int pSet )
+{
+	this->addChild( reinterpret_cast<frame*>( new MenuItemSet( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pSet ) ) );
 	this->height = 6.0f + mNumItems * 25.0f;
 }
 void MenuPane::AddMenuItemSeperator( std::string pName )

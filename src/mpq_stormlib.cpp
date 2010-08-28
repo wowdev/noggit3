@@ -1,5 +1,5 @@
 #include "mpq_stormlib.h"
-#include "wowmapview.h"
+#include "noggit.h"
 #include "Log.h"
 #include "directory.h"
 #include "Project.h"
@@ -75,11 +75,13 @@ MPQFile::openFile(const char* filename)
 	{
 		fd = fopen( diskpath.c_str( ), "rb" );
 	}
+	
+	fname = diskpath;
 
 	// if file is found on disk load binary data into buffer
 	if( fd )
 	{
-		fname = diskpath;
+
 
 		fseek( fd, 0, SEEK_END );
 		size = ftell( fd);
@@ -93,6 +95,7 @@ MPQFile::openFile(const char* filename)
 		std::transform( fname.begin( ), fname.end( ), fname.begin( ), ::tolower );
 		return;
 	}
+
 
 
 	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end(); ++i)
@@ -131,14 +134,14 @@ void MPQFile::SaveFile( )
 	FILE* fd;
 	
 	std::string lFilename = fname;
-	
+	LogDebug << fname << std::endl;
 	size_t found = lFilename.find( "\\" );
 	while( found != std::string::npos )
 	{
 		lFilename.replace( found, 1, "/" );
 		found = lFilename.find( "\\" );
 	}
-	
+	LogDebug << lFilename << std::endl;	
 	std::string lDirectoryName = lFilename;	
 
 	found = lDirectoryName.find_last_of("/\\");
@@ -146,7 +149,7 @@ void MPQFile::SaveFile( )
 		CreatePath( lDirectoryName.substr( 0, found + 1 ) );
 	else
 		LogError << "Is \"" << lDirectoryName << "\" really a location I can write to? Please report this line." << std::endl;
-	
+		LogDebug << lDirectoryName << std::endl;	
 	
 
 	fd = fopen( lFilename.c_str( ), "wb" );

@@ -1,5 +1,5 @@
 #include "ToggleGroup.h"
-#include "wowmapview.h"
+#include "noggit.h"
 
 ToggleGroup::ToggleGroup( int * pTarget )
 {
