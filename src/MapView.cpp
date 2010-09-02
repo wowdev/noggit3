@@ -508,7 +508,8 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Current texture", &SelectedTexture->hidden, true );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "Map chunk settings", &MapChunkWindow->hidden, true );
+	// Hide till its reimplemented.
+	//mbar->GetMenu( "View" )->AddMenuItemToggle( "Map chunk settings", &MapChunkWindow->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", &TexturePalette->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Toggle" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "F1  M2s", &world->drawmodels );

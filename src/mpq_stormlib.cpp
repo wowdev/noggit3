@@ -19,7 +19,7 @@ ArchiveSet gOpenArchives;
 
 std::list<std::string> gListfile;
 
-MPQArchive::MPQArchive(std::string filename)
+MPQArchive::MPQArchive(std::string filename,bool doListfile)
 {
 
 	bool result = !!SFileOpenArchive( filename.c_str(), 0, 0, &mpq_a );
@@ -30,6 +30,42 @@ MPQArchive::MPQArchive(std::string filename)
 	}
 	Log << "Opening archive:" << filename << std::endl;
 	gOpenArchives.push_back( make_pair( filename, &mpq_a ) );
+
+	if( !doListfile )
+	{
+		HANDLE fh;
+
+		if( !SFileOpenFileEx( mpq_a, "(listfile)", 0, &fh ) )
+		{
+			LogError << "No listfile in archive \"" << filename << "\"." << std::endl;	
+			SFileCloseArchive(&mpq_a);
+			return;
+		}
+
+		// Found!
+		DWORD filesize = SFileGetFileSize( fh );
+
+		// HACK: in patch.mpq some files don't want to open and give 1 for filesize
+		// TODO STEFF test if this is alos in StormLib version the case.
+		if (filesize<=1) {
+			return;
+		}
+
+		unsigned char *readbuffer = new unsigned char[filesize];
+		SFileReadFile( fh, readbuffer, filesize );
+		SFileCloseFile( fh );
+
+		char*file=strtok((char *)readbuffer,"\r\n");
+		while (file) 
+		{
+		  std::string line = file;
+		  std::transform( line.begin( ), line.end( ), line.begin( ), ::tolower );
+		  gListfile.push_back( line );
+	      
+		  file = (char*)strtok(NULL, "\r\n");
+		}
+		free(readbuffer);
+	}
 }
 
 MPQArchive::~MPQArchive()

@@ -51,13 +51,16 @@ Menu::Menu( )
 	guiFrame.y=0;
 	guiFrame.height=(float)video.yres;
 	guiFrame.width=(float)video.xres;
-
+	
 
 	minimap_x = 300;
 	minimap_y = 70;
 
-	minimap_win = new minimapWindowUI( minimap_x-10, minimap_y-20, 800, 800, "Select a ADT to start!" );
+	minimap_win = new minimapWindowUI( minimap_x-10, minimap_y-10, 790, 790);
 	guiFrame.addChild(minimap_win);
+
+	mCredits = new winCredits();
+	guiFrame.addChild(mCredits);
 
 	// create and register menubar
 	mbar = new menuBar( );
@@ -67,11 +70,9 @@ Menu::Menu( )
 	mbar->AddMenu( "BG" );
 	mbar->AddMenu( "Raid" );
 	mbar->AddMenu( "Bookmarks" );
-	mbar->AddMenu( "Last loaded" );	
 	guiFrame.addChild(mbar);
 
-	mbar->GetMenu( "File" )->AddMenuItemSwitch("exit       ESC",&gPop,true);
-
+	mbar->GetMenu( "File" )->AddMenuItemSwitch("exit                                  ESC",&gPop,true);
 	// create and register statusbar
 	guiStatusbar = new statusBar( 0.0f, video.yres - 30.0f, video.xres, 30.0f );
 	guiFrame.addChild(guiStatusbar);
@@ -150,10 +151,17 @@ Menu::Menu( )
 	
 	randBackground( );
 	refreshBookmarks( );
-
+	int bmcounter=0;
 	for( unsigned int i = 0; i < bookmarks.size( ); i++ ) 
 	{
-		mbar->GetMenu( "Bookmarks" )->AddMenuItemSet(bookmarks[i].basename,&newbookmark,bookmarks[i].mid);
+		if(bmcounter<20)mbar->GetMenu( "Bookmarks" )->AddMenuItemSet(bookmarks[i].basename,&newbookmark,bookmarks[i].mid);
+		if(bmcounter==20) mbar->AddMenu( "Bookmarks2" );
+		if(bmcounter>19 && bmcounter<40)mbar->GetMenu( "Bookmarks2" )->AddMenuItemSet(bookmarks[i].basename,&newbookmark,bookmarks[i].mid);
+		if(bmcounter==40) mbar->AddMenu( "Bookmarks3" );
+		if(bmcounter>39 && bmcounter<60)mbar->GetMenu( "Bookmarks3" )->AddMenuItemSet(bookmarks[i].basename,&newbookmark,bookmarks[i].mid);
+		if(bmcounter==60) mbar->AddMenu( "Bookmarks4" );
+		if(bmcounter>59 && bmcounter<80)mbar->GetMenu( "Bookmarks4" )->AddMenuItemSet(bookmarks[i].basename,&newbookmark,bookmarks[i].mid);
+		bmcounter++;
 	}
 	/// TODO: Take this out.
 /*	tv = new TreeView( 600, 10, gFileList, 0, TVSelectFunction );
@@ -263,12 +271,14 @@ void Menu::tick( float t, float dt )
 		if( video.fullscreen )
 			SDL_ShowCursor(SDL_ENABLE);
 		
-
+		resizewindow( );
 
 		cmd = CMD_SELECT;
 		setpos = true;
 		gWorld = 0;
-
+		sel = -1;
+		newsel = -1;
+		world = 0;
         randBackground( );
 	}
 }
@@ -277,12 +287,15 @@ void Menu::display(float t, float dt)
 {
 	if(newsel != sel)
 	{
+		this->mCredits->hidden=true;
 		this->loadMap(newsel);
 		newsel=sel;
 	}
 	
 	if(newbookmark>0)
 	{
+		this->mCredits->hidden=true;
+		this->minimap_win->hidden=true;
 		this->loadBookmark(newbookmark);
 		newbookmark=0;
 	}
@@ -297,7 +310,8 @@ void Menu::display(float t, float dt)
 		glEnable(GL_COLOR_MATERIAL);
 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 		glColor4f(1,1,1,1);
-		for (int i=0; i<8; i++) {
+		for (int i=0; i<8; i++) 
+		{
 			GLuint light = GL_LIGHT0 + i;
 			glLightf(light, GL_CONSTANT_ATTENUATION, 0);
 			glLightf(light, GL_LINEAR_ATTENUATION, 0.7f);
@@ -327,8 +341,8 @@ void Menu::display(float t, float dt)
 	if (cmd==CMD_SELECT) 
 		if ((sel != -1) && (world!=0)) 
 			minimap_win->hidden=false;
-		else
-			minimap_win->hidden=true;
+		else minimap_win->hidden=true;
+	else minimap_win->hidden=true;
 	
 	// Draw gui elements								
 	guiFrame.render();
@@ -343,7 +357,7 @@ void Menu::display(float t, float dt)
 		try 
 		{
 			DBCFile::Record screen = gLoadingScreensDB.getByID( maps[(sel != -1?sel:25)].loadingscreen );
-
+	
 			glEnable( GL_TEXTURE_2D );
 			glColor4f(1,1,1,1);
 			glBindTexture(GL_TEXTURE_2D, video.textures.add( screen.getString( LoadingScreensDB::Path ) ));
@@ -380,6 +394,7 @@ void Menu::display(float t, float dt)
 
 			if (world->minimap) 
 			{
+				
 				// draw the WDL data for the hole 64x64 ADTs
 
 				glColor4f(1,1,1,1);
@@ -398,9 +413,9 @@ void Menu::display(float t, float dt)
 
 			// draw the ADTs that are existing in the WDT with
 			// a transparent 11x11 box. 12x12 is the full size 
-			// so we get a smale border. Draw al not existing adts with 
+			// so we get a smale border. Draw all not existing adts with 
 			// a lighter box to have all 64x64 possible adts on screen. 
-			// Later we can creat adts over this view ore move them.
+			// Later we can create adts over this view ore move them.
 			glDisable( GL_TEXTURE_2D );
 			for( int j = 0; j < 64; j++ ) 
 			{
@@ -429,47 +444,12 @@ void Menu::display(float t, float dt)
 				}
 			}
 			glEnable( GL_TEXTURE_2D );
-
-			if( world->nMaps == 0 ) 
-			{
-				freetype::shprint( arial16, video.xres/2.0f-freetype::width( arial16, "Click to enter" )/2.0f, video.yres/2.0f, "Click to enter" );
-			} 	
+	
 		} 
-		else 
-		{
-		/*
-			freetype::shprint( morpheus40, video.xres/2.0f-freetype::width( morpheus40, "Nogg-It - A WoW Map Editor" )/2.0f, 1.0f, "Nogg-It - A WoW Map Editor" );
-			freetype::shprint( arial16, video.xres - 20 - freetype::width( arial16, APP_VERSION ), 10, APP_VERSION );
-			freetype::shprint( arial16, video.xres - 20 - freetype::width( arial16, APP_DATE ), 25, APP_DATE );
 
-			freetype::shprint( arial16, video.xres/2.0f-freetype::width( arial16, "Ufoz [...], Cryect, Beket, Schlumpf, Tigurius, Steff" )/2.0f-5, video.yres - 40, "Ufoz [...], Cryect, Beket, Schlumpf, Tigurius, Steff" );
-			freetype::shprint( arial16, video.xres/2.0f-freetype::width( arial16, "World of Warcraft is (C) Blizzard Entertainment" )/2.0f-5, video.yres - 22, "World of Warcraft is (C) Blizzard Entertainment" );
-
-			freetype::shprint( arial24, video.xres/2.0f-freetype::width( arial24, "Bookmarks" ), 74, "Bookmarks" );
-*/
-			/// TODO: Take this out.
-//			tv->render();
-
-
-		}
-
-		/*
-		for ( unsigned int i = 0; i < maps.size( ); i++ ) 
-		{
-			std::stringstream out;		
-
-			out << maps[i].name << " - " << maps[i].AreaType << " - " << maps[i].IsBattleground;
-			std::string Mapname = out.str();
-			
-			if( i == sel )
-				freetype::shprinty( maps[i].font, maps[i].x0, maps[i].y0, Mapname.c_str( )  );
-			else
-				freetype::shprint( maps[i].font, maps[i].x0, maps[i].y0, Mapname.c_str( ) );
-		}
-		*/
 		if ( sel != -1 ) 
 		{
-			freetype::shprint( arial32, video.xres/2.0f-freetype::width( arial32, maps[sel].name.c_str() )/2.0f-5, video.yres - 40, maps[sel].name.c_str() );
+			freetype::shprint( fritz16, video.xres/2.0f-freetype::width( fritz16, maps[sel].name.c_str() )/2.0f-5, video.yres - 25, maps[sel].name.c_str() );
 		}
 	}
 }
@@ -533,7 +513,7 @@ void Menu::mouseclick( SDL_MouseButtonEvent *e )
 
 	int osel = sel;
 	
-	
+	/*
 	/// Did I hit a map?
 	for( unsigned int i = 0; i < maps.size( ); i++ ) 
 	{
@@ -549,7 +529,10 @@ void Menu::mouseclick( SDL_MouseButtonEvent *e )
 			}
 		}
 	}
+	*/
 	
+
+	/*
 	/// Did I hit a bookmark?
 	for( unsigned int i = 0; i < bookmarks.size( ); i++ ) 
 	{
@@ -578,7 +561,10 @@ void Menu::mouseclick( SDL_MouseButtonEvent *e )
 			}
 		}
 	}
-/*
+
+	*/
+	this->mCredits->hidden=true;
+	/*
 	/// I hit nothing. ._.
 	if ( world != 0 ) 
 		delete world;

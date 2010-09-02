@@ -3274,45 +3274,25 @@ void MapTile::saveTile( )
 					lID = 0;
 					for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
 					{
-						/// TODO: This requires the extents already being calculated. See above.
+						//This requires the extents already being calculated. See above.
 						if( checkInside( lChunkExtents, it->second.extents ) )
 							lObjects.push_back( lID );
 						lID++;
 					}
-					// Das ist der part der nicht geht
-					// Obendrüber sucht er die WMOs raus das tut
 
 					// search all models that are inside this chunk
 					lID = 0;
-					/// TODO: THIS IS JUST PLAIN WRONG. ._.
-					
 					for( std::map<int, ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
-					{
-						Matrix Rot;
-						Rot.transpose( );
-						Rot.unit( );
-						Rot.rotate( it->second.dir );
-						Rot.m[0][3] += it->second.pos.x;
-						Rot.m[1][3] += it->second.pos.y;
-						Rot.m[2][3] += it->second.pos.z;
-						
-						/// TODO: Is this right? Also rotate in the beginning?
-						Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
-						lModelExtentsV1[0] = lChunkExtents[0] + Rot * it->second.model->header.BoundingBoxMin;
-						lModelExtentsV1[1] = lChunkExtents[1] + Rot * it->second.model->header.BoundingBoxMax;
-						lModelExtentsV2[0] = lChunkExtents[0] + Rot * it->second.model->header.VertexBoxMin;
-						lModelExtentsV2[1] = lChunkExtents[1] + Rot * it->second.model->header.VertexBoxMax;
-						
-						Model* pModel = it->second.model;
-						// wählt mal sprechendere Namen :P bist du sicher?
-						
-						float radius = pModel->header.BoundingBoxRadius;
-						// mus skurz überlegen 
+					{						
+						// get radius and position of the m2
+						float radius = it->second.model->header.BoundingBoxRadius;
 						Vec3D& pos = it->second.pos;
 
+						// Calculate the chunk zenter
 						Vec3D chunkMid(chunks[y][x].xbase + CHUNKSIZE / 2, 0, 
-							chunks[y][x].zbase + CHUNKSIZE / 2);
-
+						chunks[y][x].zbase + CHUNKSIZE / 2);
+	
+						// find out if the model is inside the reach of the chunk.
 						float dx = chunkMid.x - pos.x;
 						float dz = chunkMid.z - pos.z;
 						float dist = sqrtf(dx * dx + dz * dz);
@@ -3320,28 +3300,9 @@ void MapTile::saveTile( )
 
 						if(dist - radius <= ((sqrt2 / 2.0f) * CHUNKSIZE))
 						{
-							ids.insert(lID);
 							lDoodads.push_back(lID);
 						}
-						/*if(lChunkExtents[0].x <= pos.x + radius &&
-							lChunkExtents[0].z <= pos.z + radius &&
-							lChunkExtents[1].x >= pos.x - radius &&
-							lChunkExtents[1].z >= pos.z - radius)
-						{
-							lDoodads.push_back(lID);
-							if(ids.find(lID) == ids.end())
-								ids.insert(lID);
-						}*/
-
-						// können es auch mal ingame prüfen jau, ich seh aber nicht viel^^
-
-						// es werden oben die v3 cords des models errechnet und dann mit checkInside geprüft ob die in
-						// dem chunk sind. da kommt immer fals zurück da ich denke die werte einfach falsch berchnet
-						// werden Das geliche macht er oben mit dem WMOS und die gehen. Drunter schreibt er dann alle
-						// mcrf daten au jeh... das wird teuer...
-
-						/*if( checkInside( lChunkExtents, lModelExtentsV1 ) || checkInside( lChunkExtents, lModelExtentsV2 ) )
-							lDoodads.push_back( lID );*/
+	
 						lID++;
 					}
 
@@ -3358,10 +3319,16 @@ void MapTile::saveTile( )
 
 					lID = 0;
 					for( std::vector<int>::iterator it = lDoodads.begin( ); it != lDoodads.end( ); it++ )
+					{
 						lReferences[lID] = *it;
+						lID++;
+					}
 
 					for( std::vector<int>::iterator it = lObjects.begin( ); it != lObjects.end( ); it++ )
+					{
 						lReferences[lID] = *it;
+						lID++;
+					}
 
 					lCurrentPosition += 8 + lMCRF_Size;
 					lMCNK_Size += 8 + lMCRF_Size;

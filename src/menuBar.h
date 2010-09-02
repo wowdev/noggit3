@@ -132,7 +132,7 @@ public:
 	void resize();
 
 	void CloseAll( );
-
+	void ClearAll( );
 	void AddMenu( std::string pName );
 
 	MenuPane * GetMenu( std::string pName );

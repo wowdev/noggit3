@@ -3,6 +3,7 @@
 #include <list>
 
 #include "noggit.h"
+#include "log.h"
 #include "video.h"
 #include "maptile.h"
 #include "ui.h"
@@ -75,7 +76,6 @@ void LoadTextureNames()
 	char	*T2;
 	std::string	tString;
 	FILE *fid;
-
 
 	bool tilesetsfound = false;
 	for( std::list<std::string>::iterator it = gListfile.begin(); it != gListfile.end(); ++it )
@@ -272,7 +272,7 @@ frame *CreateTexturePalette( int rows, int cols, Gui *setgui )
 
 	for(int i=0;i<(pal_cols*pal_rows);i++)
 	{
-		curTextures[i]=new textureUI(8.0f+(i%pal_rows)*68.0f,22.0f+(i/pal_rows)*68.0f,64.0f,64.0f,video.textures.add("tileset/generic/black.blp"));
+		curTextures[i]=new textureUI(8.0f+(i%pal_rows)*68.0f,22.0f+(i/pal_rows)*68.0f,64.0f,64.0f,video.textures.add("tileset\\generic\\black.blp"));
 		curTextures[i]->setClickFunc(texturePaletteClick,i);
 		windowTexturePalette->addChild(curTextures[i]);
 	}
@@ -282,20 +282,20 @@ frame *CreateTexturePalette( int rows, int cols, Gui *setgui )
 
 	float DistFromMiddle=54.0f;
 	buttonUI	*B1;
-	B1=new buttonUI(284.0f/2.0f+DistFromMiddle,2.0f,20.0f,20.0f,video.textures.add("Interface/Buttons/UI-SpellbookIcon-NextPage-Up.blp"),video.textures.add("Interface/Buttons/UI-SpellbookIcon-NextPage-Down.blp"));
+	B1=new buttonUI(284.0f/2.0f+DistFromMiddle,2.0f,20.0f,20.0f,video.textures.add("Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up.blp"),video.textures.add("Interface//Buttons//UI-SpellbookIcon-NextPage-Down.blp"));
 	B1->setClickFunc( changePage, +1 );
 	windowTexturePalette->addChild(B1);
 
-	B1=new buttonUI(284.0f/2.0f-DistFromMiddle-20.0f,2.0f,20.0f,20.0f,video.textures.add("Interface/Buttons/UI-SpellbookIcon-PrevPage-Up.blp"),video.textures.add("Interface/Buttons/UI-SpellbookIcon-PrevPage-Down.blp"));
+	B1=new buttonUI(284.0f/2.0f-DistFromMiddle-20.0f,2.0f,20.0f,20.0f,video.textures.add("Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up.blp"),video.textures.add("Interface//Buttons//UI-SpellbookIcon-PrevPage-Down.blp"));
 	B1->setClickFunc( changePage, -1 );
 	windowTexturePalette->addChild(B1);
 
-	B1=new buttonUI(145.0f,windowTexturePalette->height-24.0f,132.0f,28.0f,video.textures.add("Interface/Buttons/UI-DialogBox-Button-Up.blp"),video.textures.add("Interface/Buttons/UI-DialogBox-Button-Down.blp"));
+	B1=new buttonUI(145.0f,windowTexturePalette->height-24.0f,132.0f,28.0f,video.textures.add("Interface\\Buttons\\UI-DialogBox-Button-Up.blp"),video.textures.add("Interface//Buttons//UI-DialogBox-Button-Down.blp"));
 	B1->setText("Load Textures");
 	B1->setClickFunc(showTextureLoader,0);
 	windowTexturePalette->addChild(B1);
 
-	B1=new buttonUI(7.0f,windowTexturePalette->height-24.0f,132.0f,28.0f,video.textures.add("Interface/Buttons/UI-DialogBox-Button-Up.blp"),video.textures.add("Interface/Buttons/UI-DialogBox-Button-Down.blp"));
+	B1=new buttonUI(7.0f,windowTexturePalette->height-24.0f,132.0f,28.0f,video.textures.add("Interface\\Buttons\\UI-DialogBox-Button-Up.blp"),video.textures.add("Interface//Buttons//UI-DialogBox-Button-Down.blp"));
 	B1->setText("Filter Textures");
 	B1->setClickFunc(showTextureFilter,0);
 	windowTexturePalette->addChild(B1);
@@ -308,7 +308,7 @@ frame *CreateSelectedTexture()
 	windowSelectedTexture = new closeWindowUI(video.xres-148.0f-128.0f,video.yres-320.0f,274.0f,288.0f,"Current Texture");
 	windowSelectedTexture->movable = true;
 
-	std::string lTexture = selectedTexture ? selectedTexture->name : "tileset/generic/black.blp";
+	std::string lTexture = selectedTexture ? selectedTexture->name : "tileset\\generic\\black.blp";
 
 	textureSelected = new textureUI( 9.0f, 24.0f, 256.0f, 256.0f, lTexture );
 	windowSelectedTexture->addChild( textureSelected );
@@ -356,8 +356,8 @@ frame *CreateTilesetLoader()
 			23.0f + 21.0f * ( i % columns ),
 			150.0f,
 			28.0f,
-			video.textures.add( "Interface/Buttons/UI-DialogBox-Button-Up.blp" ),
-			video.textures.add( "Interface/Buttons/UI-DialogBox-Button-Down.blp" )
+			video.textures.add( "Interface\\Buttons\\UI-DialogBox-Button-Up.blp" ),
+			video.textures.add( "Interface\\Buttons\\UI-DialogBox-Button-Down.blp" )
 		);
 		name->setText( tilesetNames[i].c_str() );
 		name->setClickFunc( LoadTileset, i );
@@ -515,7 +515,7 @@ frame *createMapChunkWindow()
 		chunkEffectWindow->addChild(chunkEffectModels[i]);
 		chunkEffectModels[i]->hidden=true;
 
-		chunkTexture[i]=new textureUI( 10.0f, yPos, 64.0f, 64.0f, "tileset/generic/black.blp" );
+		chunkTexture[i]=new textureUI( 10.0f, yPos, 64.0f, 64.0f, "tileset\\generic\\black.blp" );
 		chunkTextureWindow->addChild(chunkTexture[i]);
 		
 		chunkTextureNames[i]=new textUI(83.0f,yPos+5.0f,"Texture Name", &arial14, eJustifyLeft);

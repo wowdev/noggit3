@@ -34,7 +34,7 @@ public:
 	static const size_t IsBattleground = 3;		// uint
 	static const size_t Name = 4;				// loc
 
-	static const size_t LoadingScreen = 56;		// uint [LoadingScreen]
+	static const size_t LoadingScreen = 57;		// uint [LoadingScreen]
 };
 
 class LoadingScreensDB: public DBCFile

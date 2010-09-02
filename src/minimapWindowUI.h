@@ -1,12 +1,12 @@
 #ifndef __MINIMAPWINDOWUI_H
 #define __MINIMAPWINDOWUI_H
 
-#include "closeWindowUI.h"
+#include "window.h"
 
-class minimapWindowUI : public closeWindowUI
+class minimapWindowUI : public window
 {
 public:
-	minimapWindowUI( float x, float y, float w, float h, const std::string pTitle );
+	minimapWindowUI( float x, float y, float w, float h );
 };
 
 #endif

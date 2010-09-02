@@ -49,7 +49,7 @@ extern std::list<std::string> gListfile;
 
 float gFPS;
 
-freetype::font_data arialn13,arial12,arial14,arial16,arial24,arial32,morpheus40;	
+freetype::font_data arialn13,arial12,arial14,arial16,arial24,arial32,morpheus40,skurri32,fritz16;	
 
 GotoInfo gGoto;
 
@@ -186,6 +186,9 @@ int startUnittests()
 	OpenDBs( );
 	Log << "Open DBs" << std::endl;
 	// Initializing Fonts
+	
+	skurri32.initMPQ( "fonts\\SKURRI.TTF", 32 );
+	fritz16.initMPQ( "fonts\\FRIZQT__.TTF", 16 );
 	morpheus40.initMPQ( "fonts\\MORPHEUS.TTF", 40 );
 	arialn13.initMPQ( "fonts\\arialn.TTF", 13 );
 	arial12.init( "arial.ttf", 12 );
@@ -319,8 +322,9 @@ int startNoggit( int argc, char *argv[] )
 
 	srand( time( 0 ) );
 
-	int xres = 1024;
-	int yres = 768;
+	int xres = 1100;
+	int yres = 900;
+
 
 	bool useConfig = false;
 
@@ -550,6 +554,8 @@ int startNoggit( int argc, char *argv[] )
 	OpenDBs( );
 
 	// Initializing Fonts
+	skurri32.initMPQ( "fonts\\SKURRI.TTF", 32 );
+	fritz16.initMPQ( "fonts\\FRIZQT__.TTF", 16 );
 	morpheus40.initMPQ( "fonts\\MORPHEUS.TTF", 40 );
 	arialn13.initMPQ( "fonts\\arialn.TTF", 13 );
 	if( lFontWindows )
