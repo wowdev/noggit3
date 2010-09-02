@@ -1194,15 +1194,15 @@ void World::draw()
 	// gosh darn alpha blended evil
 
 	LoadGLSettings();
-	// TODO Steff: Liquid generates GO_OUT_OF_MEMORY
+	// TODO Steff: Liquid generates GL_OUT_OF_MEMORY
 	setupFog();
-	/*
+	
 	for (int j=1; j<4; j++) {
 		for (int i=1; i<4; i++) {
 			if (drawwater && oktile(i,j) && current[j][i] != 0)	current[j][i]->drawWater();
 		}
 	}
-	*/
+	
 	glColor4f(1,1,1,1);
 	glEnable(GL_BLEND);
 

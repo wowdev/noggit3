@@ -24,6 +24,7 @@
 #include "menuBar.h"
 #include "detailInfos.h"
 #include "minimapWindowUI.h"
+#include "win_credits.h"
 #include "TreeView.h"
 
 // 3D view UI

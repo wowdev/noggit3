@@ -30,7 +30,7 @@ class MPQArchive
 	//MPQHANDLE handle;
 	HANDLE mpq_a;
 public:
-	MPQArchive(std::string filename);
+	MPQArchive(std::string filename, bool doListfile = false );
 	~MPQArchive();
 
 	void close();

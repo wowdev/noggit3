@@ -10,8 +10,9 @@
 
 /// XXX this really needs to be refactored into a singleton class
 
-#define APP_TITLE "Nogg-It"
-#define APP_VERSION "$Rev: 117 $" 
+#define APP_TITLE "Noggit3 Studio"
+#define APP_SUBTITLE "a wow map editor"
+#define APP_VERSION "Rev: 120" 
 #define APP_DATE __DATE__ ", " __TIME__
 
 extern std::vector<AppState*> gStates;
@@ -24,7 +25,7 @@ typedef struct {
 } GotoInfo;
 extern GotoInfo gGoto;
 
-extern freetype::font_data arialn13,arial12,arial14,arial16,arial24,arial32,morpheus40;
+extern freetype::font_data arialn13,arial12,arial14,arial16,arial24,arial32,morpheus40,skurri32,fritz16;
 
 extern float gFPS;
 

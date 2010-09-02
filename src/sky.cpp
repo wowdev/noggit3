@@ -66,7 +66,9 @@ Sky::Sky( DBCFile::Iterator data )
 			}
 		}
 	}
-		/*try
+
+	/*
+		try
 		{
 			DBCFile::Record rec = gLightParamsDB.getByID( data->getInt( LightDB::DataIDs ) );
 			int skybox = rec.getInt( LightParamsDB::skybox);
@@ -78,12 +80,13 @@ Sky::Sky( DBCFile::Iterator data )
 				DBCFile::Record rec = gLightSkyboxDB.getByID(LightSkyboxDB::filename);
 				std::string skyname= rec.getString(skybox);
 				alt_sky=new Model(skyname);
-				gLog("Loaded sky %s\n",skyname.c_str());
+				Log << "Loaded sky " << skyname << std::endl;
 			}
 		}
 		catch(...)
 		{
-		}*/
+		}
+		*/
 }
 
 Vec3D Sky::colorFor(int r, int t) const

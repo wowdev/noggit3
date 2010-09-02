@@ -55,10 +55,11 @@ class Menu : public AppState
 	statusBar	*guiStatusbar;
 	menuBar		*mbar;
 
+	winCredits *mCredits;
+
 	int minimap_x, minimap_y;
 	minimapWindowUI *minimap_win;
 	World *world;
-
 	std::vector<MapEntry> maps;
 	std::vector<Bookmark> bookmarks;
 
