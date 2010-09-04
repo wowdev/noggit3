@@ -55,10 +55,9 @@ public:
 	short *strip;
 	int striplen;
 
-	MapChunk( ) : MapNode( 0, 0, 0 ) { };
+	MapChunk(MapTile* mt, MPQFile &f,bool bigAlpha);
 	~MapChunk( );
 
-	void init(MapTile* mt, MPQFile &f,bool bigAlpha);
 	void destroy();
 	void initStrip();
 

@@ -395,8 +395,7 @@ void MapTile::loadChunk( )
 	for( nextChunk = 0; nextChunk < 256; nextChunk++ ) 
 	{
 		theFile->seek( mcnk_offsets[nextChunk] );
-		chunks[nextChunk / 16][nextChunk % 16] = new MapChunk( );
-		chunks[nextChunk / 16][nextChunk % 16]->init( this, *theFile, mBigAlpha );	
+		chunks[nextChunk / 16][nextChunk % 16] = new MapChunk( this, *theFile, mBigAlpha );
 	}
 	
 	theFile->close( );
