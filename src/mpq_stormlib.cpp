@@ -105,6 +105,15 @@ MPQFile::openFile(const char* filename)
 	size = 0;
 
 	std::string diskpath = Project::getInstance()->getPath().append(filename) ;
+  
+	size_t found = diskpath.find( "\\" );
+	while( found != std::string::npos )
+	{
+		diskpath.replace( found, 1, "/" );
+		found = diskpath.find( "\\" );
+	}
+  
+  LogDebug << "trying to open " << diskpath << "." << std::endl;
 
 	FILE* fd = fopen( diskpath.c_str() , "rb" );
 	if( !fd )
@@ -117,8 +126,6 @@ MPQFile::openFile(const char* filename)
 	// if file is found on disk load binary data into buffer
 	if( fd )
 	{
-
-
 		fseek( fd, 0, SEEK_END );
 		size = ftell( fd);
 		
