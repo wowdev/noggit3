@@ -21,7 +21,7 @@ using namespace std;
 #define MAPCHUNK_RADIUS	47.140452079103168293389624140323
 
 
-bool DrawMapContour=true;
+bool DrawMapContour=false;
 bool drawFlags=false;
 
 
@@ -1019,9 +1019,8 @@ void MapChunk::init(MapTile* maintile, MPQFile &f,bool bigAlpha)
 			for (int j=0; j<17; j++) {
 				for (int i=0; i<((j%2)?8:9); i++) {
 					f.read(nor,3);
-					// order Z,X,Y ?
-					//*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
-					*ttn++ = Vec3D(-(float)nor[1]/127.0f, (float)nor[2]/127.0f, -(float)nor[0]/127.0f);
+					// order X,Z,Y 
+					*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
 				}
 			}
 		}
@@ -1072,9 +1071,11 @@ void MapChunk::init(MapTile* maintile, MPQFile &f,bool bigAlpha)
 		}
 		else if ( fourcc == 'MCSH' ) {
 			// shadow map 64 x 64
-
+			
+				
 			f.read( mShadowMap, 0x200 );
 			f.seekRelative( -0x200 );
+
 
 			unsigned char sbuf[64*64], *p, c[8];
 			p = sbuf;
@@ -3175,11 +3176,13 @@ void MapTile::saveTile( )
 
 					char * lNormals = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
 
+					// recalculate the normals
+					chunks[y][x]->recalcNorms();
 					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
 					{
-						lNormals[i*3+0] = roundc( -chunks[y][x]->tn[i].z * 127 );
-						lNormals[i*3+1] = roundc( -chunks[y][x]->tn[i].x * 127 );
-						lNormals[i*3+2] = roundc( -chunks[y][x]->tn[i].y * 127 );
+						lNormals[i*3+0] = roundc( chunks[y][x]->tn[i].x * 127 );
+						lNormals[i*3+1] = roundc( chunks[y][x]->tn[i].z * 127 );
+						lNormals[i*3+2] = roundc( chunks[y][x]->tn[i].y * 127 );
 					}
 					
 					lCurrentPosition += 8 + lMCNR_Size;
@@ -3237,7 +3240,6 @@ void MapTile::saveTile( )
 					lID = 0;
 					for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
 					{
-						/// TODO: This requires the extents already being calculated. See above.
 						if( checkInside( lChunkExtents, it->second.extents ) )
 							lObjects.push_back( lID );
 						lID++;
@@ -3299,8 +3301,6 @@ void MapTile::saveTile( )
 
 				// MCSH
 //				{
-					/// TODO: Somehow determine if we need to write this or not?
-					/// TODO: This sometime gets all shadows black.
 					if( chunks[y][x]->Flags & 1 )
 					{
 						int lMCSH_Size = 0x200;
@@ -3310,8 +3310,8 @@ void MapTile::saveTile( )
 						lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsShadow = lCurrentPosition - lMCNK_Position;
 						lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->sizeShadow = 0x200;
 
-						char * lLayer = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
-						
+						char * lLayer = lADTFile.GetPointer<char>( lCurrentPosition + 8 );	
+									
 						memcpy( lLayer, chunks[y][x]->mShadowMap, 0x200 );
 
 						lCurrentPosition += 8 + lMCSH_Size;
