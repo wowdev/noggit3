@@ -1331,11 +1331,13 @@ void MapTile::saveTile( )
 
 					char * lNormals = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
 
+					// recalculate the normals
+					chunks[y][x]->recalcNorms();
 					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
 					{
-						lNormals[i*3+0] = roundc( -chunks[y][x]->tn[i].z * 127 );
-						lNormals[i*3+1] = roundc( -chunks[y][x]->tn[i].x * 127 );
-						lNormals[i*3+2] = roundc( -chunks[y][x]->tn[i].y * 127 );
+						lNormals[i*3+0] = roundc( chunks[y][x]->tn[i].x * 127 );
+						lNormals[i*3+1] = roundc( chunks[y][x]->tn[i].z * 127 );
+						lNormals[i*3+2] = roundc( chunks[y][x]->tn[i].y * 127 );
 					}
 					
 					lCurrentPosition += 8 + lMCNR_Size;
