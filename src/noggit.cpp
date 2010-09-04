@@ -301,7 +301,7 @@ int startNoggit( int argc, char *argv[] )
 	
 	// Why should we load anything when there are missing files? ...
 
-	/// TODO: Get this file from %WINDOWS%
+	//! \todo  Get this file from %WINDOWS%
 #ifdef _WIN32
 	bool lFontWindows = FileExists( "C:\\windows\\fonts\\arial.ttf" );
 #else
@@ -458,7 +458,7 @@ int startNoggit( int argc, char *argv[] )
 		return -1;
 	}
 
-	/// TODO: This may be done faster. Maybe.
+	//! \todo  This may be done faster. Maybe.
 	for( size_t i = 0; i < archiveNames.size( ); i++ )
 	{
 		std::string path = wowpath;
@@ -513,7 +513,7 @@ int startNoggit( int argc, char *argv[] )
 	gListfile.sort( );
 	gListfile.unique( );
 
-	/// TODO: Get this out?
+	//! \todo  Get this out?
 	gFileList = new Directory( "root" );
 	size_t found;
 	// This is an example with filter:

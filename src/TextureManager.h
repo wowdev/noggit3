@@ -9,7 +9,7 @@ class TextureManager;
 
 class Texture : public ManagedItem 
 {
-	/// TODO: Private members?
+	//! \todo  Private members?
 public:
 	int w,h;
 	GLuint id;

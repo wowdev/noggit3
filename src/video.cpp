@@ -70,7 +70,7 @@ Video video;
 
 void Video::resize(int xres, int yres)
 {
-	/// TODO: Implement some minimum size.
+	//! \todo  Implement some minimum size.
 	//if(xres < 800.0 || yres<600.0f)
 	//{
 	//	if(xres < 800.0f) xres = 800.0f;
@@ -97,7 +97,7 @@ void Video::resize(int xres, int yres)
 
 	glViewport( 0.0f, 0.0f, xres, yres );
 
-	/// TODO: Should we really set to 3D here?
+	//! \todo  Should we really set to 3D here?
 	this->set3D( );
 }
 
@@ -137,7 +137,7 @@ bool Video::init( int xres, int yres, bool fullscreen_ )
 
 	glViewport( 0.0f, 0.0f, xres, yres );
 
-	/// TODO: Should we really set to 3D here?
+	//! \todo  Should we really set to 3D here?
 	this->set3D( );
 
 	// hmmm...
@@ -245,7 +245,7 @@ void CheckForGLError( std::string pLocation )
 		 		LogError << "OpenGL: (at " << pLocation << "): GL_TABLE_TOO_LARGE" << std::endl;
 		 		break;
 		 	case GL_NO_ERROR:
-			/// TODO: Add the missing ones.
+			//! \todo  Add the missing ones.
 		 	default:
 		 		LogError << "OpenGL: (at " << pLocation << "): GL_NO_ERROR (wat?)" << std::endl;
  		}

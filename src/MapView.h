@@ -52,7 +52,7 @@ public:
 	void mouseclick(SDL_MouseButtonEvent *e);
 	void resizewindow();
 
-	/// TODO: Remove when help is a window.
+	//! \todo  Remove when help is a window.
 	void ViewHelp()
 	{
 		mViewMode = eViewMode_Help;

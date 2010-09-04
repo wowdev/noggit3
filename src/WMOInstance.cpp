@@ -7,7 +7,7 @@ WMOInstance::WMOInstance( WMO *wmo, MPQFile &f ) : wmo (wmo)
 {
 	nameID = -1;
 
-	/// TODO: Where is the name ID? Oo What is up with this ctor?
+	//! \todo  Where is the name ID? Oo What is up with this ctor?
     f.read( &id, 4 );
 	f.read( (float*)pos, 12 );
 	f.read( (float*)dir, 12 );
@@ -18,7 +18,7 @@ WMOInstance::WMOInstance( WMO *wmo, MPQFile &f ) : wmo (wmo)
 	f.read( &mNameset, 2 );
 	f.read( &mUnknown, 2 );
 	
-	/// TODO: This really seems wrong. Where is this used and why doesn't this crash?
+	//! \todo  This really seems wrong. Where is this used and why doesn't this crash?
 	wmoID = id;
 }
 
@@ -56,7 +56,7 @@ void WMOInstance::draw()
 
 	float rot = 90.0f - dir.y;
 
-	// TODO: replace this with a single transform matrix calculated at load time
+	//! \todo  replace this with a single transform matrix calculated at load time
 
 	glRotatef( dir.y - 90.0f, 0.0f, 1.0f, 0.0f );
 	glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
@@ -80,7 +80,7 @@ void WMOInstance::drawSelect()
 
 	float rot = -90.0f + dir.y;
 
-	// TODO: replace this with a single transform matrix calculated at load time
+	//! \todo  replace this with a single transform matrix calculated at load time
 
 	glRotatef(dir.y - 90.0f, 0, 1, 0);
 	glRotatef(-dir.x, 0, 0, 1);

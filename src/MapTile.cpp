@@ -170,7 +170,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 	
 	// - MISC ----------------------------------------------
 	
-	/// TODO: Parse all chunks in the new style!
+	//! \todo  Parse all chunks in the new style!
 
 	while( !theFile->isEof() ) 
 	{
@@ -275,7 +275,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 									lTile.mHeightmap[i][j] = lTile.mHeightmap[i][j] < lTile.mMinimum ? lTile.mMinimum-10 : lTile.mHeightmap[i][j] > lTile.mMaximum ? lTile.mMaximum+10 : lTile.mHeightmap[i][j];
 
 							
-							/// TODO: This is wrong?
+							//! \todo  This is wrong?
 							if( lHeader[py * 16 + px].ofsRenderMask )
 							{
 								bool * lRenderBlock = reinterpret_cast<bool*>( lMH2O_Chunk + lHeader[py * 16 + px].ofsRenderMask + lLayer * 8 );
@@ -413,7 +413,7 @@ void MapTile::loadTexture( )
 	for( std::vector<std::string>::iterator it = mTextureFilenames.begin( ); it != mTextureFilenames.end( ); it++ )
 	{
 		std::string lTexture = *it;
-		/// TODO: Find a different way to do this.
+		//! \todo  Find a different way to do this.
 		/*
 		if( video.mSupportShaders )
 		{
@@ -535,7 +535,7 @@ void MapTile::loadWMOInstances()
 		WMO *wmo = (WMO*)gWorld->wmomanager.items[gWorld->wmomanager.get(wmos[wmoInstances[i].nameID])];
 		WMOInstance inst(wmo, &wmoInstances[i]);
 		
-		/// TODO: Get this out.
+		//! \todo  Get this out.
 //		wmois.push_back(inst);
 		
 		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( wmoInstances[i].uniqueID, inst ) );
@@ -693,7 +693,7 @@ void MapTile::drawSelect()
 	if (!ok) 
 		return;
 	
-	/// TODO: Do we really need to load textures for selecting? ..
+	//! \todo  Do we really need to load textures for selecting? ..
 	if(!mTexturesLoaded)
 		finishTextureLoad();
 	
@@ -751,7 +751,7 @@ void MapTile::drawWater()
 	if (!ok) 
 		return;
 
-	/// TODO: Do we really need textures for drawing water? ..
+	//! \todo  Do we really need textures for drawing water? ..
 	if(!mTexturesLoaded)
 		finishTextureLoad();
 
@@ -982,7 +982,7 @@ void MapTile::saveTile( )
 
 	for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
 	{
-		/// TODO: Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
+		//! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
 		std::string lTemp = it->second.model->filename;
 		transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
 		size_t found = lTemp.rfind( ".m2" );
@@ -1169,7 +1169,7 @@ void MapTile::saveTile( )
 		lID = 0;
 		for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
 		{
-			/// TODO: Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
+			//! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
 			std::string lTemp = it->second.model->filename;
 			transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
 			size_t found = lTemp.rfind( ".m2" );
@@ -1227,7 +1227,7 @@ void MapTile::saveTile( )
 			lMODF_Data[lID].rot[0] = it->second.dir.x;
 			lMODF_Data[lID].rot[1] = it->second.dir.y;
 			lMODF_Data[lID].rot[2] = it->second.dir.z;
-			/// TODO: Calculate them here or when rotating / moving? What is nicer? We should at least do it somewhere..
+			//! \todo  Calculate them here or when rotating / moving? What is nicer? We should at least do it somewhere..
 			lMODF_Data[lID].extents[0][0] = it->second.extents[0].x;
 			lMODF_Data[lID].extents[0][1] = it->second.extents[0].y;
 			lMODF_Data[lID].extents[0][2] = it->second.extents[0].z;
@@ -1245,7 +1245,7 @@ void MapTile::saveTile( )
 //	}
 
 	// MCNK
-	/// TODO: MCNK
+	//! \todo  MCNK
 //	{
 		for( int y = 0; y < 16; y++ )
 		{
@@ -1277,14 +1277,14 @@ void MapTile::saveTile( )
 				lMCNK_header->sizeShadow = -1;
 				lMCNK_header->nMapObjRefs = -1;
 
-				/// TODO: Implement sound emitter support. Or not.
+				//! \todo  Implement sound emitter support. Or not.
 				lMCNK_header->ofsSndEmitters = 0;
 				lMCNK_header->nSndEmitters = 0;
 
 				lMCNK_header->ofsLiquid = 0;
 				lMCNK_header->sizeLiquid = 8;
 
-				/// TODO: MCCV sub-chunk
+				//! \todo  MCCV sub-chunk
 				lMCNK_header->ofsMCCV = 0;
 
 				if( lMCNK_header->flags & 0x40 )
@@ -1393,7 +1393,7 @@ void MapTile::saveTile( )
 					lID = 0;
 					for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
 					{
-						/// TODO: This requires the extents already being calculated. See above.
+						//! \todo  This requires the extents already being calculated. See above.
 						if( checkInside( lChunkExtents, it->second.extents ) )
 							lObjects.push_back( lID );
 						lID++;
@@ -1455,8 +1455,8 @@ void MapTile::saveTile( )
 
 				// MCSH
 //				{
-					/// TODO: Somehow determine if we need to write this or not?
-					/// TODO: This sometime gets all shadows black.
+					//! \todo  Somehow determine if we need to write this or not?
+					//! \todo  This sometime gets all shadows black.
 					if( chunks[y][x]->Flags & 1 )
 					{
 						int lMCSH_Size = 0x200;
@@ -1596,8 +1596,8 @@ void MapTile::saveTile( )
 		lCurrentPosition += 8 + 36;
 	}
 
-	/// TODO: MH2O
-	/// TODO: MTFX
+	//! \todo  MH2O
+	//! \todo  MTFX
 	
 	MPQFile f( fname );
 	f.setBuffer( lADTFile.GetPointer<uint8_t>( ), lADTFile.mSize );

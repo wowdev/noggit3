@@ -1,4 +1,4 @@
-/// TODO: Use boost::filesystem.
+//! \todo  Use boost::filesystem.
 #ifdef _WIN32
 #include <direct.h>
 #else

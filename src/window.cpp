@@ -27,7 +27,7 @@ frame *window::processLeftClick( float mx, float my )
 
 void window::render( )
 {
-	/// TODO: Get this to work. Its supposed to cut elements outside of width and height.
+	//! \todo  Get this to work. Its supposed to cut elements outside of width and height.
 	/*
 	glClear( GL_STENCIL_BUFFER_BIT );
 	glColorMask( false, false, false, false );

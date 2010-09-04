@@ -145,7 +145,7 @@ void ParticleSystem::update(float dt)
 		p.life += dt;
 		float rlife = p.life / p.maxlife;
 		// calculate size and color based on lifetime
-		p.size = (size.getValue(manim, mtime).x+size.getValue(manim, mtime).y) / 2;	/// TODO: actually size them right and not only quadratic.
+		p.size = (size.getValue(manim, mtime).x+size.getValue(manim, mtime).y) / 2;	//! \todo  actually size them right and not only quadratic.
 		p.color = Vec4D( color.getValue(manim, mtime).x, color.getValue(manim, mtime).y, color.getValue(manim, mtime).z, opac.getValue(manim, mtime) );
 
 		//lifeRamp<float>(rlife, mid, sizes[0], sizes[1], sizes[2]);
@@ -256,7 +256,7 @@ void ParticleSystem::draw()
 	}
 
 	if (type==0 || type==2) {
-		// TODO: figure out type 2 (deeprun tram subway sign)
+		//! \todo  figure out type 2 (deeprun tram subway sign)
 		// - doesn't seem to be any different from 0 -_-
 		// regular particles
 		float f = 0.707106781f; // sqrt(2)/2
@@ -271,7 +271,7 @@ void ParticleSystem::draw()
 			bv2 = Vec3D(+f,0,-f);
 			bv3 = Vec3D(-f,0,-f);
 		}
-		// TODO: per-particle rotation in a non-expensive way?? :|
+		//! \todo  per-particle rotation in a non-expensive way?? :|
 
 		glBegin(GL_QUADS);
 		for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
@@ -404,7 +404,7 @@ void ParticleSystem::drawHighlight()
 	}
 
 	if (type==0 || type==2) {
-		// TODO: figure out type 2 (deeprun tram subway sign)
+		//! \todo  figure out type 2 (deeprun tram subway sign)
 		// - doesn't seem to be any different from 0 -_-
 		// regular particles
 		float f = 0.707106781f; // sqrt(2)/2
@@ -419,7 +419,7 @@ void ParticleSystem::drawHighlight()
 			bv2 = Vec3D(+f,0,-f);
 			bv3 = Vec3D(-f,0,-f);
 		}
-		// TODO: per-particle rotation in a non-expensive way?? :|
+		//! \todo  per-particle rotation in a non-expensive way?? :|
 
 		glBegin(GL_QUADS);
 		for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
@@ -474,7 +474,7 @@ void ParticleSystem::drawHighlight()
 Particle PlaneParticleEmitter::newParticle(int anim, int time)
 {
     Particle p;
-	// TODO: maybe evaluate these outside the spawn function, since they will be common for a given frame?
+	//! \todo  maybe evaluate these outside the spawn function, since they will be common for a given frame?
 	float w = sys->areal.getValue(anim, time) * 0.5f;
 	float l = sys->areaw.getValue(anim, time) * 0.5f;
 	float spd = sys->speed.getValue(anim, time);
@@ -507,7 +507,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time)
 
 	float t = randfloat(0,2*PI);
 
-	// TODO: fix shpere emitters to work properly
+	//! \todo  fix shpere emitters to work properly
 
 	//Vec3D bdir(l*cosf(t), 0, w*sinf(t));
 	Vec3D bdir(0, l*cosf(t), w*sinf(t));
@@ -559,7 +559,7 @@ void RibbonEmitter::init(MPQFile &f, ModelRibbonEmitterDef &mta, int *globals)
 
 	tpos = pos = fixCoordSystem(mta.pos);
 
-	// TODO: figure out actual correct way to calculate length
+	//! \todo  figure out actual correct way to calculate length
 	// in BFD, res is 60 and len is 0.6, the trails are very short (too long here)
 	// in CoT, res and len are like 10 but the trails are supposed to be much longer (too short here)
 	numsegs = (int)mta.res;
