@@ -353,7 +353,7 @@ void World::initMinimap()
 										t = (hval-1200) / 600.0f;
 									}
 
-									// TODO: add a regular palette here
+									//! \todo  add a regular palette here
 
 									r = (unsigned char)(r2*t + r1*(1.0f-t));
 									g = (unsigned char)(g2*t + g1*(1.0f-t));
@@ -777,7 +777,7 @@ MapTile *World::loadTile(int x, int z)
 		firstnull = maxidx;
 	}
 	
-	// TODO: make a loader thread  or something :(
+	//! \todo  make a loader thread  or something :(
 
 	char name[256];
 	sprintf(name,"World\\Maps\\%s\\%s_%d_%d.adt", basename.c_str(), basename.c_str(), x, z);
@@ -918,7 +918,7 @@ void World::setupFog()
 		//FOG_COLOR
 		Vec4D fogcolor(skies->colorSet[FOG_COLOR], 1);
 		glFogfv(GL_FOG_COLOR, fogcolor);
-		// TODO: retreive fogstart and fogend from lights.lit somehow
+		//! \todo  retreive fogstart and fogend from lights.lit somehow
 		glFogf(GL_FOG_END, fogdist);
 		glFogf(GL_FOG_START, fogdist * fogstart);
 
@@ -1075,7 +1075,7 @@ void World::draw()
 		const int lrr = 2;
 		for (int i=cx-lrr; i<=cx+lrr; i++) {
 			for (int j=cz-lrr; j<=cz+lrr; j++) {
-				// TODO: some annoying visual artifacts when the verylowres terrain overlaps
+				//! \todo  some annoying visual artifacts when the verylowres terrain overlaps
 				// maptiles that are close (1-off) - figure out how to fix.
 				// still less annoying than hoels in the horizon when only 2-off verylowres tiles are drawn
 				if ( !(i==cx&&j==cz) && oktile(i,j) && lowrestiles[j][i]) {
@@ -1130,7 +1130,7 @@ void World::draw()
 	uselowlod = drawfog;
 
 	// height map w/ a zillion texture passes
-	/// TODO: Do we need to push the matrix here?
+	//! \todo  Do we need to push the matrix here?
 	
 	glPushMatrix();
 
@@ -1230,7 +1230,7 @@ void World::draw()
 	// M2s / models	
 	if( drawmodels)
 	{
-		glEnable(GL_LIGHTING);	/// TODO: Is this needed? Or does this fuck something up?
+		glEnable(GL_LIGHTING);	//! \todo  Is this needed? Or does this fuck something up?
 		for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
 			it->second.draw();
 
@@ -1770,7 +1770,7 @@ void World::removeHole( float x, float z )
 
 void World::saveMap()
 {
-	/// TODO: Output as BLP.
+	//! \todo  Output as BLP.
 	unsigned char image[256*256*3];
 	char tfname[255];
 	MapTile *ATile;

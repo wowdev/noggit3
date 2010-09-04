@@ -172,7 +172,7 @@ void ModelInstance::draw( )
 	glPopMatrix( );
 }
 
-/// TODO: Get this drawn on the 2D view.
+//! \todo  Get this drawn on the 2D view.
 /*void ModelInstance::drawMapTile()
 {
 	if(CheckUniques(d1)) 

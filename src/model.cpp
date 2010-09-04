@@ -64,15 +64,15 @@ Model::Model(std::string name, bool forceAnim) : ManagedItem(name), forceAnim(fo
 	lights = 0;
 	transparency = 0;
 	particleSystems = 0;
-	header.nParticleEmitters = 0;			/// TODO: Get Particles to 3.*? ._.
-	header.nRibbonEmitters = 0;			/// TODO: Get Particles to 3.*? ._.
+	header.nParticleEmitters = 0;			//! \todo  Get Particles to 3.*? ._.
+	header.nRibbonEmitters = 0;			//! \todo  Get Particles to 3.*? ._.
 	ribbons = 0;
 	if (header.nGlobalSequences) {
 		globalSequences = new int[header.nGlobalSequences];
 		memcpy(globalSequences, (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
 	}
 	
-	/// TODO: This takes a biiiiiit long. Have a look at this.
+	//! \todo  This takes a biiiiiit long. Have a look at this.
 	if( animated )
 		initAnimated( f );
 	else 
@@ -338,7 +338,7 @@ inline void Model::initCommon(MPQFile &f)
 				if (tex[j].texunit==0) {
 					pass.texture = texid;
 					
-					// TODO: figure out these flags properly -_-
+					//! \todo  figure out these flags properly -_-
 					ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
 					
 					//pass.useenvmap = (rf.flags2 & 6)==6;
@@ -395,7 +395,7 @@ inline void Model::initCommon(MPQFile &f)
 
 		pass.texture = texid;
 		
-		// TODO: figure out these flags properly -_-
+		//! \todo  figure out these flags properly -_-
 		ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
 		
 		pass.useenvmap = texunitlookup[tex[j].texunit] == -1;
@@ -857,7 +857,7 @@ void Model::drawModel( /*bool unlit*/ )
 	}
 }
 
-/// TODO: Make animated models selectable.
+//! \todo  Make animated models selectable.
 void Model::drawModelSelect( )
 {
 	// assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY

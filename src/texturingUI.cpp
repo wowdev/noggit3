@@ -10,7 +10,7 @@
 #include "dbc.h"
 #include "mpq.h"
 
-/// TODO: Get this whole thing in a seperate class.
+//! \todo  Get this whole thing in a seperate class.
 
 //Texture Files
 std::vector<std::string> textureNames;
@@ -52,7 +52,7 @@ textUI			*chunkTextureNames[4];
 textUI			*chunkTextureFlags[4];
 textUI			*chunkTextureEffectID[4];
 
-/// TODO: Get this via singleton.
+//! \todo  Get this via singleton.
 Gui				*textGui;
 
 int pal_rows;
@@ -64,7 +64,7 @@ extern std::list<std::string> gListfile;
 std::map<int,std::string> gFilenameFilters;
 std::vector<std::string> gActiveFilenameFilters;
 
-/// TODO: Maybe get this out?
+//! \todo  Maybe get this out?
 bool gFilenameFiltersInited = false;
 
 void LoadTextureNames()
@@ -93,7 +93,7 @@ void LoadTextureNames()
 		}
 	}
 
-	/// TODO: Add real names again somehow.
+	//! \todo  Add real names again somehow.
 
 	for( std::vector<std::string>::iterator it = textureNames.begin(); it != textureNames.end(); ++it )
 	{
@@ -127,7 +127,7 @@ int checkTileset(const char*Texture)
 
 inline bool TextureInPalette( std::string pFName )
 {
-	/// TODO: Fix this.
+	//! \todo  Fix this.
 
 	if( pFName.find( "tileset" ) == std::string::npos )
 		return false;
@@ -150,7 +150,7 @@ inline bool TextureInPalette( std::string pFName )
 	
 	i = 0;
 	
-	/// TODO: Do this via a list too. 
+	//! \todo  Do this via a list too. 
 	for( std::vector<std::string>::iterator lFilter = tilesetDirectories.begin( ); lFilter != tilesetDirectories.end( ); lFilter++ )
 	{
 		if( tilesetFilter[i++] )
@@ -259,7 +259,7 @@ void showTextureFilter( frame *button, int id )
 	windowTextureFilter->hidden = !windowTextureFilter->hidden;
 }
 
-/// TODO: Make this cleaner.
+//! \todo  Make this cleaner.
 frame *CreateTexturePalette( int rows, int cols, Gui *setgui )
 {
 	gCurrentPage = 0;

@@ -79,7 +79,7 @@ public:
 
 	WMOManager wmomanager;
 	ModelManager modelmanager;
-	// TODO: Get these managed? ._.
+	//! \todo  Get these managed? ._.
 	std::map<int, ModelInstance> mModelInstances;
 	std::map<int, WMOInstance> mWMOInstances;
 

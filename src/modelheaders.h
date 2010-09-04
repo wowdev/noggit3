@@ -256,7 +256,7 @@ struct ModelCameraDef {
 };
 
 struct ModelParticleEmitterDef {
-	/// TODO: Do this one right. ._.
+	//! \todo  Do this one right. ._.
 
 	int32_t id;
 	int16_t flags;

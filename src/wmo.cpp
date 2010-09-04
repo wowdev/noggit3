@@ -572,7 +572,7 @@ void WMO::drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper )
 
 	if( skybox && pCamera.IsInsideOf( pLower, pUpper ) ) 
 	{
-		// TODO: only draw sky if we are "inside" the WMO... ?
+		//! \todo  only draw sky if we are "inside" the WMO... ?
 
 		// We need to clear the depth buffer, because the skybox model can (will?)
 		// require it *. This is inefficient - is there a better way to do this?
@@ -690,7 +690,7 @@ void WMOGroup::init(WMO *wmo, MPQFile &f, int num, char *names)
 	int nameOfs;
 	f.read(&nameOfs,4);
 
-	// TODO: get proper name from group header and/or dbc?
+	//! \todo  get proper name from group header and/or dbc?
 	if (nameOfs > 0) {
         name = string(names + nameOfs);
 	} else name = "(no name)";
@@ -881,7 +881,7 @@ void WMOGroup::initDisplayList()
 			lq->initFromWMO(gf, wmo->mat[hlq.type], (flags&0x2000)!=0);
 		}
 
-		// TODO: figure out/use MFOG ?
+		//! \todo  figure out/use MFOG ?
 
  		gf.seek((int)nextpos);
 	}
@@ -959,7 +959,7 @@ void WMOGroup::initDisplayList()
 		*/
 
 		if (overbright) {
-			// TODO: use emissive color from the WMO Material instead of 1,1,1,1
+			//! \todo  use emissive color from the WMO Material instead of 1,1,1,1
 			GLfloat em[4] = {1,1,1,1};
 			glMaterialfv(GL_FRONT, GL_EMISSION, em);
 		}
@@ -1121,7 +1121,7 @@ void WMOGroup::drawDoodads(int doodadset, const Vec3D& ofs, const float rot)
 	glColor4f(1,1,1,1);
 	for (int i=0; i<nDoodads; i++) {
 		short dd = ddr[i];
-		doodadset = 0;		// TODO: this somehow crashes sometimes without this fix.
+		doodadset = 0;		//! \todo  this somehow crashes sometimes without this fix.
 		if( ! ( wmo->doodadsets.size() < doodadset ) )
 			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {
 
@@ -1164,7 +1164,7 @@ void WMOGroup::drawDoodadsSelect(int doodadset, const Vec3D& ofs, const float ro
 	glColor4f(1,1,1,1);
 	for (int i=0; i<nDoodads; i++) {
 		short dd = ddr[i];
-		doodadset = 0;		// TODO: this somehow crashes sometimes without this fix.
+		doodadset = 0;		//! \todo  this somehow crashes sometimes without this fix.
 		if( ! ( wmo->doodadsets.size() < doodadset ) )
 			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {
 
@@ -1191,13 +1191,13 @@ void WMOGroup::drawLiquid()
 	if (!visible) return;
 
 	// draw liquid
-	// TODO: culling for liquid boundingbox or something
+	//! \todo  culling for liquid boundingbox or something
 	if (lq) {
 		setupFog();
 		if (outdoorLights) {
 			gWorld->outdoorLights(true);
 		} else {
-			// TODO: setup some kind of indoor lighting... ?
+			//! \todo  setup some kind of indoor lighting... ?
 			gWorld->outdoorLights(false);
 			glEnable(GL_LIGHT2);
 			glLightfv(GL_LIGHT2, GL_AMBIENT, Vec4D(0.1f,0.1f,0.1f,1));

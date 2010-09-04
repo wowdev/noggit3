@@ -16,7 +16,7 @@ public:
 
 	Vec3D pos, dir;
 
-	/// TODO: Get this out and do somehow else.
+	//! \todo  Get this out and do somehow else.
 	unsigned int d1;
 
 	float w, sc;

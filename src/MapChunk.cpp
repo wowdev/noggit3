@@ -433,7 +433,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 		}
 		else if( fourcc == 'MCCV' )
 		{
-			/// TODO: implement
+			//! \todo  implement
 		}
 		f.seek(nextpos);
 	}
@@ -667,7 +667,7 @@ void MapChunk::drawTextures()
 
 void MapChunk::initStrip()
 {
-	strip = new short[256]; // TODO: figure out exact length of strip needed
+	strip = new short[256]; //! \todo  figure out exact length of strip needed
 	short *s = strip;
 	bool first = true;
 	for (int y=0; y<4; y++) {
