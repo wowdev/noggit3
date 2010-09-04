@@ -11,10 +11,12 @@
 #include "dbc.h"
 #include "texturingui.h"
 #include "world.h"
+#include "MapChunk.h"
 
 #include "Settings.h"
 #include "Project.h"
 #include "Environment.h"
+
 
 using namespace std;
 
