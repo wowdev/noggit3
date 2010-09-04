@@ -5,7 +5,7 @@
 #include "noggit.h"
 #include "log.h"
 #include "video.h"
-#include "maptile.h"
+#include "MapChunk.h"
 #include "ui.h"
 #include "dbc.h"
 #include "mpq.h"

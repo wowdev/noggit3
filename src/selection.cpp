@@ -2,6 +2,7 @@
 
 #include "selection.h"
 #include "world.h"
+#include "MapChunk.h"
 
 nameEntryManager SelectionNames;
 

@@ -12,6 +12,7 @@
 
 #include "video.h"
 #include "Log.h"
+#include "MapChunk.h"
 
 using namespace std;
  
