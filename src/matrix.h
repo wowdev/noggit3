@@ -124,8 +124,8 @@ public:
 
 		//Rotate around the Y axis by B-90 
 		rot.unit();
-		cosV=cos((r.y-90)*PI/180);
-		sinV=sin((r.y-90)*PI/180);
+		cosV=cos((r.y-90)*PI/180.0f);
+		sinV=sin((r.y-90)*PI/180.0f);
 		rot.unit();
 		rot.m[0][0]=cosV;
 		rot.m[0][2]=sinV;
@@ -135,8 +135,8 @@ public:
 		
 		//Rotate around the Z axis by -A 
 		rot.unit();
-		cosV=cos(-r.x*PI/180);
-		sinV=sin(-r.x*PI/180);
+		cosV=cos(-r.x*PI/180.0f);
+		sinV=sin(-r.x*PI/180.0f);
 		rot.unit();
 		rot.m[0][0]=cosV;
 		rot.m[0][1]=sinV;
@@ -145,8 +145,8 @@ public:
 		this->operator*=(rot);
 
 		//Rotate around the X axis by C
-		cosV=cos(r.z*PI/180);
-		sinV=sin(r.z*PI/180);
+		cosV=cos(r.z*PI/180.0f);
+		sinV=sin(r.z*PI/180.0f);
 		rot.unit();
 		rot.m[1][1]=cosV;
 		rot.m[1][2]=sinV;

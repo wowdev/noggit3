@@ -195,6 +195,12 @@ void GenerateContourMap()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 }
 
+int indexMapBuf(int x, int y)
+{
+	return ((y+1)/2)*9 + (y/2)*8 + x;
+}
+
+
 void startTimer();
 void stopTimer();
 int stopTimer2();
@@ -249,52 +255,82 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 
 	SMAreaHeader Header;
 
-	/*
-	*These seems a little bit crappy to me
-	*ofcourse we should add new ADT parsing...
-	*/
-	while (!theFile->isEof()) {
+	// - MVER ----------------------------------------------
+	
+	uint32_t version;
+	
+	theFile->read( &fourcc, 4 );
+	theFile->seekRelative( 4 );
+	theFile->read( &version, 4 );
+	
+	assert( fourcc == 'MVER' && version == 18 );
+	
+	// - MHDR ----------------------------------------------
+	
+	theFile->read( &fourcc, 4 );
+	theFile->seekRelative( 4 );
+	
+	assert( fourcc == 'MHDR' );
+	
+	theFile->read( &Header, sizeof( SMAreaHeader ) );
+	
+	// - MCIN ----------------------------------------------
+	
+	theFile->seek( Header.mcin + 0x14 );
+	theFile->read( &fourcc, 4 );
+	theFile->seekRelative( 4 );
+	
+	assert( fourcc == 'MCIN' );
+	
+	for( int i = 0; i < 256; i++ ) 
+	{
+		theFile->read( &mcnk_offsets[i], 4 );
+		theFile->read( &mcnk_sizes[i], 4 );
+		theFile->seekRelative( 8 );
+	}
+	
+	// - MTEX ----------------------------------------------
+	
+	theFile->seek( Header.mtex + 0x14 );
+	theFile->read( &fourcc, 4 );
+	theFile->read( &size, 4 );
+	
+	assert( fourcc == 'MTEX' );
+	
+	if( size )
+	{
+		mTexturesLoaded = false;
+		
+		char * lBuffer = new char[size];
+		theFile->read( lBuffer, size );
+		
+		int lPosition = 0;
+		while( lPosition < size )
+		{
+			mTextureFilenames.push_back( std::string( lBuffer + lPosition ) );
+			lPosition += strlen( lBuffer + lPosition ) + 1;
+		}
+		
+		delete[] lBuffer;
+	}
+	else
+	{
+		mTexturesLoaded = true;
+	}
+	
+	// - MISC ----------------------------------------------
+	
+	/// TODO: Parse all chunks in the new style!
+
+	while( !theFile->isEof() ) 
+	{
 		theFile->read( &fourcc, 4 );
 		theFile->read( &size, 4 );
-
+		
 		size_t nextpos = theFile->getPos() + size;
-//next we must to read some info from .adt file
-		if ( fourcc == 'MHDR' ) {
-			theFile->read( &Header, sizeof(SMAreaHeader) );
-			mFlags = Header.flags;
-		}
-		else if ( fourcc == 'MCIN' ) {
-			// mapchunk offsets/sizes
-			for (int i=0; i<256; i++) {
-				theFile->read(&mcnk_offsets[i],4);
-				theFile->read(&mcnk_sizes[i],4);
-				theFile->seekRelative(8);
-			}
-		}
-		else if ( fourcc == 'MTEX' ) {
-			// texture lists
-			if( size )
-			{
-				mTexturesLoaded = false;
 
-				char * lBuffer = new char[size];
-				theFile->read( lBuffer, size );
-
-				int lPosition = 0;
-				while( lPosition < size )
-				{
-					mTextureFilenames.push_back( std::string( lBuffer + lPosition ) );
-					lPosition += strlen( lBuffer + lPosition ) + 1;
-				}
-
-				delete[] lBuffer;
-			}
-			else
-			{
-				mTexturesLoaded = true;
-			}
-		}
-		else if ( fourcc == 'MMDX' ) {
+		if ( fourcc == 'MMDX' ) 
+		{
 			// models ...
 			// MMID would be relative offsets for MMDX filenames
 			if(size!=0)
@@ -310,7 +346,8 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 				modelsLoaded=true;
 
 		}
-		else if ( fourcc == 'MWMO' ) {
+		else if ( fourcc == 'MWMO' ) 
+		{
 			// map objects
 			// MWID would be relative offsets for MWMO filenames			
 			if(size!=0)
@@ -324,19 +361,22 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 			else
 				wmosLoaded=true;
 		}
-		else if ( fourcc == 'MDDF' ) {
+		else if ( fourcc == 'MDDF' ) 
+		{
 			// model instance data
 			modelNum = (int)size / 36;
 			modelInstances=new ENTRY_MDDF[modelNum];
 			theFile->read((unsigned char *)modelInstances,size);
 		}
-		else if ( fourcc == 'MODF' ) {
+		else if ( fourcc == 'MODF' ) 
+		{
 			// wmo instance data
 			wmoNum = (int)size / 64;
 			wmoInstances=new ENTRY_MODF[wmoNum];
 			theFile->read((unsigned char *)wmoInstances,size);
 		}
-		else if ( fourcc == 'MH2O' ) {
+		else if ( fourcc == 'MH2O' ) 
+		{
 			// water data
 			uint8_t * lMH2O_Chunk = theFile->getPointer( );
 
@@ -346,9 +386,6 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 				for( int px = 0; px < 16; px++ )
 					for( int lLayer = 0; lLayer < lHeader[py * 16 + px].nLayers; lLayer++ )
 					{
-						// turn off to speed up
-						//gLog( "[%i][%i] (%i): %i\n", py, px, py*16+px, lLayer );
-
 						MH2O_Tile lTile;
 						if( lHeader[py * 16 + px].ofsInformation )
 						{
@@ -446,39 +483,43 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 					}
 		}
 
-		// MCNK data will be processed separately ^_^
-
 		theFile->seek((int)nextpos);
 	}
-
-	if( Header.flags&1 )
+	
+	// - MFBO ----------------------------------------------
+	
+	if( Header.flags & 1 )
 	{
-		if( Header.mfbo )
-		{
-			theFile->seek( Header.mfbo + 0x14 + 0x8 );
-			short mMaximum[9], mMinimum[9];
-			theFile->read( mMaximum, sizeof( short[9] ) );
-			theFile->read( mMinimum, sizeof( short[9] ) );
+		theFile->seek( Header.mfbo + 0x14 );
+		theFile->read( &fourcc, 4 );
+		theFile->read( &size, 4 );
+		
+		assert( fourcc == 'MFBO' );
+		
+		short mMaximum[9], mMinimum[9];
+		theFile->read( mMaximum, sizeof( short[9] ) );
+		theFile->read( mMinimum, sizeof( short[9] ) );
 			
-			float xPositions[] = { this->xbase, this->xbase + 266, this->xbase + 533 };
-			float yPositions[] = { this->zbase, this->zbase + 266, this->zbase + 533 };
-
-			for( int y = 0; y < 3; y++ )
+		const float xPositions[] = { this->xbase, this->xbase + 266.0f, this->xbase + 533.0f };
+		float yPositions[] = { this->zbase, this->zbase + 266.0f, this->zbase + 533.0f };
+		
+		for( int y = 0; y < 3; y++ )
+		{
+			for( int x = 0; x < 3; x++ )
 			{
-				for( int x = 0; x < 3; x++ )
-				{
-					int pos = x + y * 3;
-					mMinimumValues[pos*3 + 0] = xPositions[x];
-					mMinimumValues[pos*3 + 1] = mMinimum[pos];
-					mMinimumValues[pos*3 + 2] = yPositions[y];
-
-					mMaximumValues[pos*3 + 0] = xPositions[x];
-					mMaximumValues[pos*3 + 1] = mMaximum[pos];
-					mMaximumValues[pos*3 + 2] = yPositions[y];
-				}
+				int pos = x + y * 3;
+				mMinimumValues[pos*3 + 0] = xPositions[x];
+				mMinimumValues[pos*3 + 1] = mMinimum[pos];
+				mMinimumValues[pos*3 + 2] = yPositions[y];
+				
+				mMaximumValues[pos*3 + 0] = xPositions[x];
+				mMaximumValues[pos*3 + 1] = mMaximum[pos];
+				mMaximumValues[pos*3 + 2] = yPositions[y];
 			}
 		}
 	}
+	
+	// - Done. ---------------------------------------------
 
 	Log << "Finished processing everything but MCNKs in " << stopTimer2( ) << "ms." << std::endl;
 
@@ -504,7 +545,8 @@ void MapTile::loadChunk( )
 	for( nextChunk = 0; nextChunk < 256; nextChunk++ ) 
 	{
 		theFile->seek( mcnk_offsets[nextChunk] );
-		chunks[nextChunk/16][nextChunk%16].init( this, *theFile, mBigAlpha );	
+		chunks[nextChunk / 16][nextChunk % 16] = new MapChunk( );
+		chunks[nextChunk / 16][nextChunk % 16]->init( this, *theFile, mBigAlpha );	
 	}
 	
 	theFile->close( );
@@ -522,13 +564,16 @@ void MapTile::loadTexture( )
 	for( std::vector<std::string>::iterator it = mTextureFilenames.begin( ); it != mTextureFilenames.end( ); it++ )
 	{
 		std::string lTexture = *it;
-		/*if( video.mSupportShaders )
+		/// TODO: Find a different way to do this.
+		/*
+		if( video.mSupportShaders )
 		{
 			std::string lTemp = lTexture;
 			lTemp.insert( lTemp.length( ) - 4, "_s" );
 			if( MPQFileExists( lTemp.c_str( ) ) )
-				lTexture = lTemp;
-		}*/
+					lTexture = lTemp;
+		}
+		*/
 		video.textures.add( lTexture );
 		textures.push_back( lTexture );
 	}
@@ -675,10 +720,8 @@ int MapTileModelLoadThread( void * pMapTile )
 	while( !lThis->modelsLoaded )
 	{
 	//	SDL_LockMutex( gLoadThreadMutex );
-		
 		lThis->loadModel( );
-	
-		SDL_UnlockMutex( gLoadThreadMutex );
+	//	SDL_UnlockMutex( gLoadThreadMutex );
 	}
 
 	LogDebug << "Finished model Load thread." << std::endl;
@@ -717,7 +760,8 @@ void MapTile::finishLoading()
 
 MapTile::~MapTile()
 {
-	if (!ok) return;
+	if (!ok) 
+		return;
 
 	LogDebug << "Unloading tile " << x << "," << z << "." << std::endl;
 
@@ -727,14 +771,14 @@ MapTile::~MapTile()
 
 		for (int j=0; j<16; j++) {
 			for (int i=0; i<16; i++) {
-				chunks[j][i].destroy();
+				delete chunks[j][i];
 			}
 		}
 	}
 	else
 	{
 		for(int i=0;i<nextChunk;i++)
-			chunks[i/16][i%16].destroy();
+			delete chunks[i/16][i%16];
 	}
 
 	for (vector<string>::iterator it = textures.begin(); it != textures.end(); ++it) {
@@ -755,16 +799,17 @@ extern int terrainMode;
 
 void MapTile::draw()
 {
+	if (!ok) 
+		return;
+	
 	if(!mTexturesLoaded)
 		finishTextureLoad();
-	if(!chunksLoaded)
-	{
-		while(!chunksLoaded)
-			loadChunk();
-	}
-	if (!ok) return;
-
 	
+	while(!chunksLoaded)
+		loadChunk();
+
+
+	/* Selection circle
 	if( false && gWorld->IsSelection( eEntry_MapChunk ) && terrainMode != 3 )
 	{
 		int poly = gWorld->GetCurrentSelectedTriangle( );
@@ -787,88 +832,45 @@ void MapTile::draw()
 		//glEnable(GL_DEPTH_TEST);
 		glDepthMask(true);
 
-	}
+	}*/
 	glColor4f(1,1,1,1);
 
-	
-	for (int j=0; j<16; j++) {
-		for (int i=0; i<16; i++) {
-			chunks[j][i].visible = false;
-			chunks[j][i].draw();
-		}
-	}
-
-/*	if( this->MFBO )
-	{
-		MFBO->DrawMinimum();
-		MFBO->DrawMaximum();
-	}*/
-
-	
-	//topnode.draw();
+	for (int j=0; j<16; j++)
+		for (int i=0; i<16; i++)
+			chunks[j][i]->draw();
 }
 
 void MapTile::drawSelect()
-{	
-	if (!ok) return;
+{
+	if (!ok) 
+		return;
 	
 	/// TODO: Do we really need to load textures for selecting? ..
 	if(!mTexturesLoaded)
 		finishTextureLoad();
-	if(!chunksLoaded)
-	{
-		while(!chunksLoaded)
-			loadChunk();
-	}
 	
-	for (int j=0; j<16; j++) {
-		for (int i=0; i<16; i++) {
-			chunks[j][i].visible = false;
-			chunks[j][i].drawSelect();
-		}
-	}
-	//topnode.drawSelect();
+	while(!chunksLoaded)
+		loadChunk();
 	
+	for (int j=0; j<16; j++)
+		for (int i=0; i<16; i++)
+			chunks[j][i]->drawSelect();
 }
-
-void MapTile::drawColored()
-{	
-	if (!ok) return;
-	if(!mTexturesLoaded)
-		finishTextureLoad();
-	if(!chunksLoaded)
-	{
-		while(!chunksLoaded)
-			loadChunk();
-	}
-	
-	/*for (int j=0; j<16; j++) {
-		for (int i=0; i<16; i++) {
-			chunks[j][i].visible = false;
-			//chunks[j][i].draw();
-		}
-	}*/
-	glDisable(GL_COLOR_MATERIAL);
-	topnode.drawColor();
-	glEnable(GL_COLOR_MATERIAL);
-}
-
 
 void MapTile::drawLines()//draw red lines around the square of a chunk
 {
-	if(!chunksLoaded)
-	{
-		while(!chunksLoaded)
-			loadChunk();
-	}
-	glDisable(GL_COLOR_MATERIAL);
-	for (int j=0; j<16; j++) {
-		for (int i=0; i<16; i++) {
-			//if(chunks[j][i].visible)
-			chunks[j][i].drawLines();
-		}
-	}
+	if (!ok) 
+		return;
+	
+	while(!chunksLoaded)
+		loadChunk();
 
+	glDisable(GL_COLOR_MATERIAL);
+	
+	for (int j=0; j<16; j++)
+		for (int i=0; i<16; i++)
+			chunks[j][i]->drawLines();
+	
 	glEnable(GL_COLOR_MATERIAL);
 }
 
@@ -898,16 +900,15 @@ void enableWaterShader();
 
 void MapTile::drawWater()
 {
-//	if (!ok) return;
+	if (!ok) 
+		return;
 
 	/// TODO: Do we really need textures for drawing water? ..
 	if(!mTexturesLoaded)
 		finishTextureLoad();
-	if(!chunksLoaded)
-	{
-		while(!chunksLoaded)
-			loadChunk();
-	}
+
+	while(!chunksLoaded)
+		loadChunk();
 
 	glDisable(GL_COLOR_MATERIAL);
 	glDisable(GL_LIGHTING);
@@ -917,41 +918,20 @@ void MapTile::drawWater()
 
 	glEnable(GL_COLOR_MATERIAL);
 }
-/*
-void MapTile::drawPortals()
-{
-	if (!ok) return;
 
-	for( vector<WMOInstance>::iterator it = wmois.begin(); it != wmois.end(); ++it )
-	{
-		it->drawPortals();		/// or ->wmo->
-	}
-}
-*/
-
-/*void MapTile::drawModelsMapTile()
-{
-	if (!ok) return;
-
-	for( vector<ModelInstance>::iterator it = modelis.begin(); it != modelis.end(); ++it )
-	{
-		it->drawMapTile();
-	}
-}*/
-
+// This is for the 2D mode only.
 void MapTile::drawTextures()
 {
+	if (!ok) 
+		return;
+	
 	if(!mTexturesLoaded)
 		finishTextureLoad();
 
-	if(!chunksLoaded)
-	{
-		while(!chunksLoaded)
-			loadChunk();
-	}
-	
+	while(!chunksLoaded)
+		loadChunk();
+
 	float xOffset,yOffset;
-	if (!ok) return;
 
 	glPushMatrix();
 	xOffset=xbase/CHUNKSIZE;
@@ -963,40 +943,29 @@ void MapTile::drawTextures()
 	for (int j=0; j<16; j++) {
 		for (int i=0; i<16; i++) {
 			if(((i+1+xOffset)>gWorld->minX)&&((j+1+yOffset)>gWorld->minY)&&((i+xOffset)<gWorld->maxX)&&((j+yOffset)<gWorld->maxY))
-				chunks[j][i].drawTextures();
+				chunks[j][i]->drawTextures();
 		}
 	}
 	glPopMatrix();
 }
 
+// - MapChunk ----------------------------------------------------------------------------------------------------
 
-
-
-
-
-
-int indexMapBuf(int x, int y)
-{
-	return ((y+1)/2)*9 + (y/2)*8 + x;
-}
-
-
+/// TODO: Make this the constructor. Do it!
 void MapChunk::init(MapTile* maintile, MPQFile &f,bool bigAlpha)
 {	
 	mt=maintile;
 	mBigAlpha=bigAlpha;
 
-	f.seekRelative(4);
 	uint32_t fourcc;
 	uint32_t size;
-
+	
+	f.read(&fourcc, 4);
 	f.read(&size, 4);
 
-	// okay here we go ^_^
-	size_t lastpos = f.getPos() + size;
-
-	//char header[0x80];
+	assert( fourcc == 'MCNK' );
 	
+	size_t lastpos = f.getPos() + size;
 
 	f.read(&header, 0x80);
 
@@ -1011,7 +980,6 @@ void MapChunk::init(MapTile* maintile, MPQFile &f,bool bigAlpha)
 	py = header.iy;
 
 	holes = header.holes;
-	int chunkflags = header.flags;
 
 	hasholes = (holes != 0);
 
@@ -1082,7 +1050,7 @@ void MapChunk::init(MapTile* maintile, MPQFile &f,bool bigAlpha)
 			vmax.x = xbase + 8 * UNITSIZE;
 			vmax.z = zbase + 8 * UNITSIZE;
 			r = (vmax - vmin).length() * 0.5f;
-		
+
 		}
 		else if ( fourcc == 'MCLY' ) {
 			// texture info
@@ -1183,7 +1151,8 @@ void MapChunk::init(MapTile* maintile, MPQFile &f,bool bigAlpha)
 
 						}
 						memcpy(amap[layer-1]+63*64,amap[layer-1]+62*64,64);
-						glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[layer-1]);						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+						glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[layer-1]);
+						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 						glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -1241,7 +1210,7 @@ void MapChunk::init(MapTile* maintile, MPQFile &f,bool bigAlpha)
 
 				Liquid * lq = new Liquid(8, 8, Vec3D(xbase, waterlevel[1], zbase));
 				//lq->init(f);
-				lq->initFromTerrain(f, chunkflags);
+				lq->initFromTerrain(f, header.flags);
 
 				this->mt->mLiquids.push_back( lq );
 
@@ -1276,19 +1245,19 @@ void MapChunk::init(MapTile* maintile, MPQFile &f,bool bigAlpha)
 	glBindBuffer(GL_ARRAY_BUFFER, normals);
 	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), tn, GL_STATIC_DRAW);
 
-	if (hasholes) initStrip();
-	/*
-	else {
+	/*if (hasholes) */
+	//	initStrip();
+	
+	//else {
 		strip = gWorld->mapstrip;
 		striplen = 16*18 + 7*2 + 8*2; //stripsize;
-	}
-	*/
+	//}
+	
 
 	this->mt = mt;
 
 	vcenter = (vmin + vmax) * 0.5f;
 
-	deleted=false;
 	nameID = SelectionNames.add( this );
 
 
@@ -1522,21 +1491,19 @@ void MapChunk::initStrip()
 }
 
 
-void MapChunk::destroy()
+MapChunk::~MapChunk( )
 {
-	if(deleted)
-		return;
-	deleted=true;
 	// unload alpha maps
-	glDeleteTextures(3, alphamaps);
+	glDeleteTextures( 3, alphamaps );
 	// shadow maps, too
-	glDeleteTextures(1, &shadow);
+	glDeleteTextures( 1, &shadow );
 
 	// delete VBOs
-	glDeleteBuffers(1, &vertices);
-	glDeleteBuffers(1, &normals);
+	glDeleteBuffers( 1, &vertices );
+	glDeleteBuffers( 1, &normals );
 
-	if (hasholes) delete[] strip;
+	//if( strip ) 
+	//	delete strip;
 
 	if( nameID != -1 )
 	{
@@ -1666,7 +1633,6 @@ void MapChunk::drawColor()
 		if (gWorld->uselowlod) this->drawNoDetail();
 		return;
 	}
-	visible = true;
 
 	if( !hasholes )
 	{
@@ -1722,9 +1688,9 @@ void MapChunk::drawPass(int anim)
 		float f = ( ((int)(gWorld->animtime*(spd/15.0f))) % animspd) / (float)animspd;
 		glTranslatef(f*fdx,f*fdy,0);
 	}
-	/*
+	
 	if(!this->hasholes)
-	{
+	/*{
 		glFrontFace(GL_CW);
 		for(int i=0;i<8;i++)
 		{
@@ -1733,9 +1699,8 @@ void MapChunk::drawPass(int anim)
 		}
 		glFrontFace(GL_CCW);
 	}
-	else
-	*/
-	glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
+	 else*/
+		 glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
 	
 
 	if (anim) 
@@ -1834,11 +1799,10 @@ void MapChunk::draw()
 	if (!gWorld->frustum.intersects(vmin,vmax))		return;
 	float mydist = (gWorld->camera - vcenter).length() - r;
 	//if (mydist > gWorld->mapdrawdistance2) return;
-	if (mydist > gWorld->culldistance+75) {
+	/*if (mydist > gWorld->culldistance+75) {
 		if (gWorld->uselowlod) this->drawNoDetail();
 		return;
-	}
-	visible = true;	
+	}*/
 
 	if( !hasholes )
 	{
@@ -2633,10 +2597,10 @@ void MapNode::setup( MapTile *t )
 	if( size == 2 )
 	{
 		// children will be mapchunks
-		children[0] = &( mt->chunks[py][px] );
-		children[1] = &( mt->chunks[py][px+1] );
-		children[2] = &( mt->chunks[py+1][px] );
-		children[3] = &( mt->chunks[py+1][px+1] );
+		children[0] = mt->chunks[py][px];
+		children[1] = mt->chunks[py][px+1];
+		children[2] = mt->chunks[py+1][px];
+		children[3] = mt->chunks[py+1][px+1];
 	} 
 	else 
 	{
@@ -2677,10 +2641,10 @@ void MapNode::cleanup( )
 	}
 }
 
-MapChunk *MapTile::getChunk( unsigned int x, unsigned int z )
+MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )
 {
 	assert( x < 16 && z < 16 );
-	return &chunks[z][x];
+	return chunks[z][x];
 }
 
 char roundc( float a )
@@ -2895,9 +2859,9 @@ void MapTile::saveTile( )
 
 	for( int i = 0; i < 16; i++ )
 		for( int j = 0; j < 16; j++ )
-			for( int tex = 0; tex < chunks[i][j].nTextures; tex++ )
-				if( lTextures.find( video.textures.items[chunks[i][j].textures[tex]]->name ) == lTextures.end( ) )
-					lTextures.insert( pair<std::string, int>( video.textures.items[chunks[i][j].textures[tex]]->name, -1 ) ); 
+			for( int tex = 0; tex < chunks[i][j]->nTextures; tex++ )
+				if( lTextures.find( video.textures.items[chunks[i][j]->textures[tex]]->name ) == lTextures.end( ) )
+					lTextures.insert( pair<std::string, int>( video.textures.items[chunks[i][j]->textures[tex]]->name, -1 ) ); 
 	
 	lID = 0;
 	for( std::map<std::string, int>::iterator it = lTextures.begin( ); it != lTextures.end( ); it++ )
@@ -3127,7 +3091,6 @@ void MapTile::saveTile( )
 	// MCNK
 	/// TODO: MCNK
 //	{
-		static std::set<UINT> ids;
 		for( int y = 0; y < 16; y++ )
 		{
 			for( int x = 0; x < 16; x++ )
@@ -3139,12 +3102,12 @@ void MapTile::saveTile( )
 				lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 )->mEntries[y*16+x].offset = lCurrentPosition;
 
 				// MCNK data
-				lADTFile.Insert( lCurrentPosition + 8, 0x80, reinterpret_cast<char*>( &( this->chunks[y][x].header ) ) );
+				lADTFile.Insert( lCurrentPosition + 8, 0x80, reinterpret_cast<char*>( &( this->chunks[y][x]->header ) ) );
 				MapChunkHeader * lMCNK_header = lADTFile.GetPointer<MapChunkHeader>( lCurrentPosition + 8 );
 
-				lMCNK_header->flags = chunks[y][x].Flags;
-				lMCNK_header->holes = chunks[y][x].holes;
-				lMCNK_header->areaid = chunks[y][x].areaID;
+				lMCNK_header->flags = chunks[y][x]->Flags;
+				lMCNK_header->holes = chunks[y][x]->holes;
+				lMCNK_header->areaid = chunks[y][x]->areaID;
 				
 				lMCNK_header->nLayers = -1;
 				lMCNK_header->nDoodadRefs = -1;
@@ -3188,13 +3151,13 @@ void MapTile::saveTile( )
 
 					float lMedian = 0.0f;
 					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
-						lMedian = lMedian + chunks[y][x].tv[i].y;
+						lMedian = lMedian + chunks[y][x]->tv[i].y;
 
 					lMedian = lMedian / ( 9 * 9 + 8 * 8 );
 					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ypos = lMedian;
 
 					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
-						lHeightmap[i] = chunks[y][x].tv[i].y - lMedian;
+						lHeightmap[i] = chunks[y][x]->tv[i].y - lMedian;
 					
 					lCurrentPosition += 8 + lMCVT_Size;
 					lMCNK_Size += 8 + lMCVT_Size;
@@ -3214,9 +3177,9 @@ void MapTile::saveTile( )
 
 					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
 					{
-						lNormals[i*3+0] = roundc( -chunks[y][x].tn[i].z * 127 );
-						lNormals[i*3+1] = roundc( -chunks[y][x].tn[i].x * 127 );
-						lNormals[i*3+2] = roundc( -chunks[y][x].tn[i].y * 127 );
+						lNormals[i*3+0] = roundc( -chunks[y][x]->tn[i].z * 127 );
+						lNormals[i*3+1] = roundc( -chunks[y][x]->tn[i].x * 127 );
+						lNormals[i*3+2] = roundc( -chunks[y][x]->tn[i].y * 127 );
 					}
 					
 					lCurrentPosition += 8 + lMCNR_Size;
@@ -3233,28 +3196,28 @@ void MapTile::saveTile( )
 
 				// MCLY
 //				{
-					int lMCLY_Size = chunks[y][x].nTextures * 0x10;
+					int lMCLY_Size = chunks[y][x]->nTextures * 0x10;
 
 					lADTFile.Extend( 8 + lMCLY_Size );
 					SetChunkHeader( lADTFile, lCurrentPosition, 'MCLY', lMCLY_Size );
 
 					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsLayer = lCurrentPosition - lMCNK_Position;
-					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nLayers = chunks[y][x].nTextures;
+					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nLayers = chunks[y][x]->nTextures;
 			
 					// MCLY data
-					for( int j = 0; j < chunks[y][x].nTextures; j++ )
+					for( int j = 0; j < chunks[y][x]->nTextures; j++ )
 					{
 						ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>( lCurrentPosition + 8 + 0x10 * j );
 
-						lLayer->textureID = lTextures.find( video.textures.items[chunks[y][x].textures[j]]->name )->second;
+						lLayer->textureID = lTextures.find( video.textures.items[chunks[y][x]->textures[j]]->name )->second;
 
-						lLayer->flags = chunks[y][x].texFlags[j];
+						lLayer->flags = chunks[y][x]->texFlags[j];
 						
 						// if not first, have alpha layer, if first, have not. never have compression.
 						lLayer->flags = ( j > 0 ? lLayer->flags | 0x100 : lLayer->flags & ( ~0x100 ) ) & ( ~0x200 );
 
 						lLayer->ofsAlpha = ( j == 0 ? 0 : ( mBigAlpha ? 64 * 64 * ( j - 1 ) : 32 * 64 * ( j - 1 ) ) );
-						lLayer->effectID = chunks[y][x].effectID[j];
+						lLayer->effectID = chunks[y][x]->effectID[j];
 					}
 
 					lCurrentPosition += 8 + lMCLY_Size;
@@ -3267,14 +3230,14 @@ void MapTile::saveTile( )
 					std::vector<int> lObjects;
 					
 					Vec3D lChunkExtents[2];
-					lChunkExtents[0] = Vec3D( chunks[y][x].xbase, 0.0f, chunks[y][x].zbase );
-					lChunkExtents[1] = Vec3D( chunks[y][x].xbase + CHUNKSIZE, 0.0f, chunks[y][x].zbase + CHUNKSIZE );
+					lChunkExtents[0] = Vec3D( chunks[y][x]->xbase, 0.0f, chunks[y][x]->zbase );
+					lChunkExtents[1] = Vec3D( chunks[y][x]->xbase + CHUNKSIZE, 0.0f, chunks[y][x]->zbase + CHUNKSIZE );
 
 					// search all wmos that are inside this chunk
 					lID = 0;
 					for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
 					{
-						//This requires the extents already being calculated. See above.
+						/// TODO: This requires the extents already being calculated. See above.
 						if( checkInside( lChunkExtents, it->second.extents ) )
 							lObjects.push_back( lID );
 						lID++;
@@ -3289,8 +3252,8 @@ void MapTile::saveTile( )
 						Vec3D& pos = it->second.pos;
 
 						// Calculate the chunk zenter
-						Vec3D chunkMid(chunks[y][x].xbase + CHUNKSIZE / 2, 0, 
-						chunks[y][x].zbase + CHUNKSIZE / 2);
+						Vec3D chunkMid(chunks[y][x]->xbase + CHUNKSIZE / 2, 0, 
+						chunks[y][x]->zbase + CHUNKSIZE / 2);
 	
 						// find out if the model is inside the reach of the chunk.
 						float dx = chunkMid.x - pos.x;
@@ -3338,7 +3301,7 @@ void MapTile::saveTile( )
 //				{
 					/// TODO: Somehow determine if we need to write this or not?
 					/// TODO: This sometime gets all shadows black.
-					if( chunks[y][x].Flags & 1 )
+					if( chunks[y][x]->Flags & 1 )
 					{
 						int lMCSH_Size = 0x200;
 						lADTFile.Extend( 8 + lMCSH_Size );
@@ -3349,7 +3312,7 @@ void MapTile::saveTile( )
 
 						char * lLayer = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
 						
-						memcpy( lLayer, chunks[y][x].mShadowMap, 0x200 );
+						memcpy( lLayer, chunks[y][x]->mShadowMap, 0x200 );
 
 						lCurrentPosition += 8 + lMCSH_Size;
 						lMCNK_Size += 8 + lMCSH_Size;
@@ -3365,7 +3328,7 @@ void MapTile::saveTile( )
 //				{
 					int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
 
-					int lMaps = chunks[y][x].nTextures - 1;
+					int lMaps = chunks[y][x]->nTextures - 1;
 					lMaps = lMaps >= 0 ? lMaps : 0;
 
 					int lMCAL_Size = lDimensions * lMaps;
@@ -3383,14 +3346,14 @@ void MapTile::saveTile( )
 						//First thing we have to do is downsample the alpha maps before we can write them
 						if( mBigAlpha )
 							for( int k = 0; k < lDimensions; k++ )
-								lAlphaMaps[lDimensions * j + k] = chunks[y][x].amap[j][k];
+								lAlphaMaps[lDimensions * j + k] = chunks[y][x]->amap[j][k];
 						else
 						{
 							unsigned char upperNibble, lowerNibble;
 							for( int k = 0; k < lDimensions; k++ )
 							{
-								lowerNibble = (unsigned char)max(min( ( (float)chunks[y][x].amap[j][k * 2 + 0] ) * 0.05882f + 0.5f , 15.0f),0.0f);
-								upperNibble = (unsigned char)max(min( ( (float)chunks[y][x].amap[j][k * 2 + 1] ) * 0.05882f + 0.5f , 15.0f),0.0f);
+								lowerNibble = (unsigned char)max(min( ( (float)chunks[y][x]->amap[j][k * 2 + 0] ) * 0.05882f + 0.5f , 15.0f),0.0f);
+								upperNibble = (unsigned char)max(min( ( (float)chunks[y][x]->amap[j][k * 2 + 1] ) * 0.05882f + 0.5f , 15.0f),0.0f);
 								lAlphaMaps[lDimensions * j + k] = ( upperNibble << 4 ) + lowerNibble;
 							}
 						}
@@ -3456,13 +3419,6 @@ void MapTile::saveTile( )
 				lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 )->mEntries[y*16+x].size = lMCNK_Size;
 			}
 		}
-
-		std::map<INT, ModelInstance>::iterator itr = lModelInstances.begin();
-		for(int i = 0; itr != lModelInstances.end(); ++itr, ++i)
-		{
-			if(ids.find(i) == ids.end())
-				LogDebug << "Model '" << itr->second.model->name << "': not found!" << std::endl;
-		}
 //	}
 
 	// MFBO
@@ -3498,5 +3454,5 @@ bool MapTile::GetVertex( float x, float z, Vec3D *V )
 	int xcol = int( ( x - xbase ) / CHUNKSIZE );
 	int ycol = int( ( z - zbase ) / CHUNKSIZE );
 	
-	return xcol >= 0 && xcol <= 15 && ycol >= 0 && ycol <= 15 && chunks[ycol][xcol].GetVertex( x, z, V );
+	return xcol >= 0 && xcol <= 15 && ycol >= 0 && ycol <= 15 && chunks[ycol][xcol]->GetVertex( x, z, V );
 }

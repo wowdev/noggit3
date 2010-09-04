@@ -34,7 +34,7 @@
 #include "Project.h"		// This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
 #include "Environment.h"	// This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
 
-#include <boost/shared_ptr.hpp>
+#include "errorhandling.h"
 
 bool fullscreen = false;
 
@@ -113,12 +113,6 @@ int TimerStop()
 
 void CreateStrips();
 
-// OSX fix.
-#ifdef __cplusplus
-extern "C"
-#endif
-
-
 
 int startUnittests()
 {
@@ -191,21 +185,20 @@ int startUnittests()
 	fritz16.initMPQ( "fonts\\FRIZQT__.TTF", 16 );
 	morpheus40.initMPQ( "fonts\\MORPHEUS.TTF", 40 );
 	arialn13.initMPQ( "fonts\\arialn.TTF", 13 );
-	arial12.init( "arial.ttf", 12 );
-	arial14.init( "arial.ttf", 14 );
-	arial16.init( "arial.ttf", 16 );
-	arial24.init( "arial.ttf", 24 );
-	arial32.init( "arial.ttf", 32 );
+	arial12.init( "fonts/arial.ttf", 12 );
+	arial14.init( "fonts/arial.ttf", 14 );
+	arial16.init( "fonts/arial.ttf", 16 );
+	arial24.init( "fonts/arial.ttf", 24 );
+	arial32.init( "fonts/arial.ttf", 32 );
 	Log << "Fonts added" << std::endl;
 
 	//Lood Model
-	boost::shared_ptr<Model> bg;
+	Model * bg;
 
 	std::stringstream filename;
 	filename << "Interface\\Glues\\Models\\UI_Tauren\\UI_Tauren.m2";
 	
-    bg.reset( new Model( filename.str( ) ) );
-	bg->ind = true;
+    bg = new Model( filename.str( ) );
 
 	float mt = 1000.0f; 
 	Log << "Entering Main Loop" << std::endl;
@@ -287,6 +280,9 @@ int startUnittests()
 		video.flip();
 	}
 		Log << "Close video" << std::endl;
+	
+	delete bg;
+	
 	video.close();
 
 	return 0;
@@ -311,7 +307,7 @@ int startNoggit( int argc, char *argv[] )
 #else
 	bool lFontWindows = false;
 #endif
-	bool lFontLocal = FileExists( "arial.ttf" );
+	bool lFontLocal = FileExists( "fonts/arial.ttf" );
 	if( !lFontWindows && !lFontLocal )
 	{
 		Log << "Can not find arial.ttf. This is really weird if you have windows. Add the file to the noggit directory then!" << std::endl;
@@ -568,11 +564,11 @@ int startNoggit( int argc, char *argv[] )
 	}
 	else
 	{
-		arial12.init( "arial.ttf", 12 );
-		arial14.init( "arial.ttf", 14 );
-		arial16.init( "arial.ttf", 16 );
-		arial24.init( "arial.ttf", 24 );
-		arial32.init( "arial.ttf", 32 );
+		arial12.init( "fonts/arial.ttf", 12 );
+		arial14.init( "fonts/arial.ttf", 14 );
+		arial16.init( "fonts/arial.ttf", 16 );
+		arial24.init( "fonts/arial.ttf", 24 );
+		arial32.init( "fonts/arial.ttf", 32 );
 	}
 	
 	float ftime;
@@ -699,6 +695,8 @@ int randint(int lower, int upper)
 
 int main( int argc, char *argv[] )
 {
+	RegisterErrorHandlers();
+	
 	#ifdef _UNITTEST
 		// start UNITTESTS IF IN UNITTEST MODE
 		startUnittests();

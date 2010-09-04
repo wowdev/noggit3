@@ -1,5 +1,5 @@
-#ifndef __MODELUI_H
-#define __MODELUUI_H
+#ifndef MODELUI_H
+#define MODELUI_H
 
 #include "video.h"
 #include "frame.h"

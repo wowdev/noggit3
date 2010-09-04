@@ -532,7 +532,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 
 void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot)
 {
-	if( Reloaded && reloadWMO && doodadset )
+	if( Reloaded && reloadWMO )
 	{
 		reloadWMO->drawSelect(doodadset,ofs,rot);
 		return;

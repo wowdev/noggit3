@@ -1,0 +1,19 @@
+#find STORMLIB
+# STORMLIB_LIBRARIES, the name of the library to link against
+# STORMLIB_FOUND, if false, do not try to link
+# STORMLIB_INCLUDES, 
+
+find_path(STORMLIB_INCLUDE_DIR StormLib.h StormPort.h )
+find_library(STORMLIB_LIBRARY StormLib)
+
+if(STORMLIB_INCLUDE_DIR AND STORMLIB_LIBRARY)
+	SET(STORMLIB_FOUND TRUE)
+endif(STORMLIB_INCLUDE_DIR AND STORMLIB_LIBRARY)
+
+set(STORMLIB_INCLUDES ${STORMLIB_INCLUDE_DIR})
+set(STORMLIB_LIBRARIES ${STORMLIB_LIBRARY})
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(StormLib DEFAULT_MSG STORMLIB_LIBRARY STORMLIB_INCLUDE_DIR)
+
+mark_as_advanced(STORMLIB_INCLUDE_DIR STORMLIB_LIBRARY)

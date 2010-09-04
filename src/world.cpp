@@ -5,7 +5,6 @@
 #include <cassert>
 
 #include "time.h"
-#include "libworld/wdtlib/WDT.h"
 
 #include "Settings.h"
 #include "Project.h"
@@ -102,13 +101,14 @@ World::World( const char* name ) : basename( name ), mCurrentSelection( 0 )
 
 void World::init()
 {
-	for (int j=0; j<64; j++) {
-		for (int i=0; i<64; i++) {
+	for (int j=0; j<64; j++)
+	{
+		for (int i=0; i<64; i++)
+		{
 			lowrestiles[j][i] = 0;
 		}
 	}
 
-	nMaps = 0;
 	char fn[256];
 	sprintf(fn,"World\\Maps\\%s\\%s.wdt", basename.c_str(), basename.c_str());
 
@@ -119,35 +119,104 @@ void World::init()
 	loading = false;
 
 	drawfog = false;
-
-	memset(maps,0,sizeof(maps));
-
-	MPQFile f(fn);
-
-	libworld::Buffer tBuff = libworld::Buffer(reinterpret_cast<char*>(f.getBuffer()),f.getSize());
-	libworld::wdtlib::WDT *wdt=new libworld::wdtlib::WDT(tBuff);
-	for (int j=0; j<64; j++) {
-		for (int i=0; i<64; i++) {
-			if(wdt->hasADT(j,i)){
-				maps[j][i] = true;
-				nMaps++;
-			}
-			else
-				maps[j][i] = false;
-		}
-	}
-	//most likely this will ever be the case...
-	//even if I should add a hasWMOs() function just incase :/
-	//--Tig
-	mHasAGlobalWMO = !wdt->hasTerrain( );
-	mBigAlpha = wdt->hasBigAlpha();
-	f.close();
-
+	
 	mapstrip = 0;
 	mapstrip2 = 0;
-
+	
 	minimap = 0;
-	if (nMaps) initMinimap();
+	
+	mWmoFilename = "";
+
+	MPQFile theFile(fn);
+	uint32_t fourcc;
+	uint32_t size;
+
+	// - MVER ----------------------------------------------
+	
+	uint32_t version;
+	
+	theFile.read( &fourcc, 4 );
+	theFile.seekRelative( 4 );
+	theFile.read( &version, 4 );
+	
+	//! \todo find the correct version of WDT files.
+	assert( fourcc == 'MVER' && version == 18 );
+	
+	// - MHDR ----------------------------------------------
+	
+	uint32_t flags;
+	
+	theFile.read( &fourcc, 4 );
+	theFile.seekRelative( 4 );
+	
+	assert( fourcc == 'MPHD' );
+	
+	theFile.read( &flags, 4 );
+	theFile.seekRelative( 4 * 7 );
+	
+	mHasAGlobalWMO = flags & 1;
+	mBigAlpha = flags & 4;
+	
+	// - MAIN ----------------------------------------------
+	
+	theFile.read( &fourcc, 4 );
+	theFile.seekRelative( 4 );
+	
+	assert( fourcc == 'MAIN' );
+	
+	for( int j = 0; j < 64; j++ ) 
+	{
+		for( int i = 0; i < 64; i++ ) 
+		{
+			uint32_t temp;
+			theFile.read( &temp, 4 );
+			theFile.seekRelative( 4 );
+			maps[j][i] = temp & 1;
+		}
+	}
+	
+	if( !theFile.isEof() )
+	{
+	 //! \note We actually don't load WMO only worlds, so we just stop reading here, k?
+	 //! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
+	 
+	 mHasAGlobalWMO = false;
+	 
+#ifdef __ASSERTIONBUGFIXED
+		
+		// - MWMO ----------------------------------------------
+	
+		theFile.read( &fourcc, 4 );
+		theFile.read( &size, 4 );
+		
+		assert( fourcc == 'MWMO' );
+		
+		char * wmoFilenameBuf = new char[size];
+		theFile.read( &wmoFilenameBuf, size );
+		
+		mWmoFilename = wmoFilenameBuf;
+		
+		free(wmoFilenameBuf);
+	
+		// - MODF ----------------------------------------------
+	
+		theFile.read( &fourcc, 4 );
+		theFile.seekRelative( 4 );
+		
+		assert( fourcc == 'MODF' );
+		
+		theFile.read( &mWmoEntry, sizeof( ENTRY_MODF ) );
+		
+#endif //__ASSERTIONBUGFIXED
+
+	}
+	
+	// -----------------------------------------------------
+	
+	theFile.close( );
+	
+	if( !mHasAGlobalWMO )
+		initMinimap();
 }
 
 
@@ -495,39 +564,21 @@ void World::initDisplay()
 	doodaddrawdistance = 64.0f;
 
 	noadt = false;
-
-	initWMOs();
+	
+	if( mHasAGlobalWMO )
+	{
+		wmomanager.add( mWmoFilename );
+		WMOInstance inst( reinterpret_cast<WMO*>( wmomanager.items[ wmomanager.get( mWmoFilename ) ] ), &mWmoEntry );
+		
+		gWorld->mWMOInstances.insert( pair<int,WMOInstance>( mWmoEntry.uniqueID, inst ) );
+		camera = inst.pos;
+	}
 
 	skies = new Skies( mMapId );
 
 	ol = new OutdoorLighting("World\\dnc.db");
 
 	initLowresTerrain();
-}
-
-void World::initWMOs()
-{
-	char fn[256];
-	sprintf(fn,"World\\Maps\\%s\\%s.wdt", basename.c_str(), basename.c_str());
-
-	MPQFile f(fn);
-
-	libworld::Buffer tBuff=libworld::Buffer(reinterpret_cast<char*>(f.getBuffer()),f.getSize());
-	libworld::wdtlib::WDT *wdt=new libworld::wdtlib::WDT(tBuff);
-	if(!wdt->hasTerrain())
-	{
-		string path=string(wdt->getWMOName(),wdt->getLengthWMOName());
-		wmomanager.add(path);
-		gwmos.push_back(path);
-
-		WMO *wmo = (WMO*)wmomanager.items[wmomanager.get(gwmos[wdt->getWMOInfo().nameId])];
-		WMOInstance inst( wmo, f );
-		gWorld->mWMOInstances.insert( pair<int,WMOInstance>( wdt->getWMOInfo().uniqueId, inst ) );
-		camera = inst.pos;
-
-		mHasAGlobalWMO = true;
-	}
-	f.close();
 }
 
 World::~World()
@@ -540,10 +591,6 @@ World::~World()
 
 	for (int i=0; i<MAPTILECACHESIZE; i++) {
 		if (maptilecache[i] != 0) delete maptilecache[i];
-	}
-
-	for (vector<string>::iterator it = gwmos.begin(); it != gwmos.end(); ++it) {
-		wmomanager.delbyname(*it);
 	}
 
 	if (minimap) glDeleteTextures(1, &minimap);
@@ -1384,7 +1431,7 @@ void World::getSelection( int pSelectionMode )
 
 		lOffset = lOffset + 3 + lEntries;
 	}
-
+	
 	if( pSelectionMode == eSelectionMode_General )
 		mCurrentSelection = SelectionNames.findEntry( lMinimumName );
 	else if( pSelectionMode == eSelectionMode_Triangle )
@@ -1550,7 +1597,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16].changeTerrain(x,z,change,radius,BrushType);
+					current[j][i]->chunks[t/16][t%16]->changeTerrain(x,z,change,radius,BrushType);
 			}
 		}
 	}
@@ -1561,7 +1608,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16].recalcNorms();
+					current[j][i]->chunks[t/16][t%16]->recalcNorms();
 			}
 		}
 	}
@@ -1575,7 +1622,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16].flattenTerrain(x,z,h,remain,radius,BrushType);
+					current[j][i]->chunks[t/16][t%16]->flattenTerrain(x,z,h,remain,radius,BrushType);
 			}
 		}
 	}
@@ -1586,7 +1633,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16].recalcNorms();
+					current[j][i]->chunks[t/16][t%16]->recalcNorms();
 			}
 		}
 	}
@@ -1601,7 +1648,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16].blurTerrain(x, z, remain, radius, BrushType);
+					current[j][i]->chunks[t/16][t%16]->blurTerrain(x, z, remain, radius, BrushType);
 			}
 		}
 	}
@@ -1612,7 +1659,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16].recalcNorms();
+					current[j][i]->chunks[t/16][t%16]->recalcNorms();
 			}
 		}
 	}
@@ -1633,7 +1680,7 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 		if ((maptilecache[i] != 0)  && (maptilecache[i]->x >= newX-1) && (maptilecache[i]->x <= newX+1) && (maptilecache[i]->z >= newZ-1) && (maptilecache[i]->z <= newZ+1)) 
 		{
 			for(int t=0;t<256;t++)
-				succ = maptilecache[i]->chunks[t/16][t%16].paintTexture(x, z, Brush, strength, pressure, texture) || succ;
+				succ = maptilecache[i]->chunks[t/16][t%16]->paintTexture(x, z, Brush, strength, pressure, texture) || succ;
 		}
 	}
 	return succ;
@@ -1653,8 +1700,8 @@ void World::eraseTextures(float x, float z)
 		if ((maptilecache[i] != 0)  && (maptilecache[i]->x >= newX-1) && (maptilecache[i]->x <= newX+1) && (maptilecache[i]->z >= newZ-1) && (maptilecache[i]->z <= newZ+1)) 
 		{
 			for(int t=0;t<256;t++)
-				if((maptilecache[i]->chunks[t/16][t%16].xbase<x)&&(maptilecache[i]->chunks[t/16][t%16].xbase+CHUNKSIZE>x)&&(maptilecache[i]->chunks[t/16][t%16].zbase<z)&&(maptilecache[i]->chunks[t/16][t%16].zbase+CHUNKSIZE>z))
-					maptilecache[i]->chunks[t/16][t%16].eraseTextures();
+				if((maptilecache[i]->chunks[t/16][t%16]->xbase<x)&&(maptilecache[i]->chunks[t/16][t%16]->xbase+CHUNKSIZE>x)&&(maptilecache[i]->chunks[t/16][t%16]->zbase<z)&&(maptilecache[i]->chunks[t/16][t%16]->zbase+CHUNKSIZE>z))
+					maptilecache[i]->chunks[t/16][t%16]->eraseTextures();
 		}
 	}
 	return;
@@ -1677,7 +1724,7 @@ void World::addHole( float x, float z )
 			for( mcnk_x = 0; mcnk_x < 16; mcnk_x++ )
 				for( mcnk_y = 0; mcnk_y < 16; mcnk_y++ )
 				{
-					MapChunk * cnk = &( maptilecache[maptile]->chunks[mcnk_x][mcnk_y] );
+					MapChunk * cnk = maptilecache[maptile]->chunks[mcnk_x][mcnk_y];
 					if( ( cnk->xbase < x ) && ( cnk->xbase + CHUNKSIZE > x ) && ( cnk->zbase < z ) && ( cnk->zbase + CHUNKSIZE > z ) )
 					{
 						k = ( x - cnk->xbase ) / MINICHUNKSIZE;
@@ -1705,7 +1752,7 @@ void World::removeHole( float x, float z )
 			for( mcnk_x = 0; mcnk_x < 16; mcnk_x++ )
 				for( mcnk_y = 0; mcnk_y < 16; mcnk_y++ )
 				{
-					MapChunk * cnk = &( maptilecache[maptile]->chunks[mcnk_x][mcnk_y] );
+					MapChunk * cnk = maptilecache[maptile]->chunks[mcnk_x][mcnk_y];
 					if( ( cnk->xbase < x ) && ( cnk->xbase + CHUNKSIZE > x ) && ( cnk->zbase < z ) && ( cnk->zbase + CHUNKSIZE > z ) )
 					{
 						k = ( x - cnk->xbase ) / MINICHUNKSIZE;
