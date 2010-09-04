@@ -222,9 +222,8 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 			for (int j=0; j<17; j++) {
 				for (int i=0; i<((j%2)?8:9); i++) {
 					f.read(nor,3);
-					// order Z,X,Y ?
-					//*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
-					*ttn++ = Vec3D(-(float)nor[1]/127.0f, (float)nor[2]/127.0f, -(float)nor[0]/127.0f);
+					// order X,Z,Y 
+					*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
 				}
 			}
 		}
