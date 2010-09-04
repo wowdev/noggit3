@@ -75,7 +75,8 @@ nameEntry *nameEntryManager::findEntry( unsigned int ref )
 
 nameEntryManager::nameEntryManager( )
 {
-	NextName = 0;
+	items.push_back( new nameEntry( ) );
+	NextName = 1;
 }
 
 void nameEntryManager::del( unsigned int Ref )

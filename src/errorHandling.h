@@ -10,6 +10,8 @@
 #ifndef ERRORHANDLING_H_
 #define ERRORHANDLING_H_
 
+#ifndef WIN32
+
 #include <execinfo.h>
 #include <signal.h>
 
@@ -99,5 +101,14 @@ void leave(int sig)
 	
 	exit(sig);
 }
+
+#else
+
+void RegisterErrorHandlers()
+{
+	//! \todo Add error handling for windows.
+}
+
+#endif
 
 #endif

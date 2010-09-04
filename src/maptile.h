@@ -20,15 +20,17 @@ class MapChunk;
 class World;
 class brush;
 
-#define FLAG_SHADOW		0x1
-#define	FLAG_IMPASS		0x2
-#define	FLAG_LQ_RIVER	0x4
-#define	FLAG_LQ_OCEAN	0x8
-#define	FLAG_LQ_MAGMA	0x10
-#define FLAG_LQ_SLIME	0x20
-#define FLAG_MCCV		0x40
-#define FLAG_TBC		0x8000
-
+enum MCNKFlags
+{
+  FLAG_SHADOW = 1,
+  FLAG_IMPASS = 2,
+  FLAG_LQ_RIVER = 4,
+  FLAG_LQ_OCEAN = 8,
+  FLAG_LQ_MAGMA = 0x10,
+  FLAG_LQ_SLIME = 0x20,
+  FLAG_MCCV = 0x40,
+  FLAG_TBC = 0x8000
+};
 
 const int mapbufsize = 9*9 + 8*8;
 
@@ -70,14 +72,11 @@ public:
 	unsigned int areaID;
 
 	bool haswater;
-	bool visible;
 
 	bool hasholes;
 	int holes;
 
 	float waterlevel[2];
-
-	bool	deleted;
 
 	int				tex[4];
 	GLuint		textures[4];
@@ -96,7 +95,8 @@ public:
 	short *strip;
 	int striplen;
 
-	MapChunk():MapNode(0,0,0){};
+	MapChunk( ) : MapNode( 0, 0, 0 ) { };
+	~MapChunk( );
 
 	void init(MapTile* mt, MPQFile &f,bool bigAlpha);
 	void destroy();
@@ -235,7 +235,7 @@ public:
 
 	float xbase, zbase;
 
-	MapChunk chunks[16][16];
+	MapChunk * chunks[16][16];
 
 	MapNode topnode;
 
@@ -246,7 +246,6 @@ public:
 	void drawSelect();
 	void drawLines();
 	void drawWater();
-	void drawColored();
 	void drawSky();
 	//void drawPortals();
 	//void drawModelsMapTile();

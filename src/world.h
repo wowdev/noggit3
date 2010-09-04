@@ -49,9 +49,9 @@ public:
 	GLuint lowrestiles[64][64];
 	bool autoheight;
 
-	std::vector<std::string> gwmos;
-	int nMaps;
 	bool mHasAGlobalWMO;
+	std::string mWmoFilename;
+	ENTRY_MODF mWmoEntry;
 
 	float mapdrawdistance, modeldrawdistance, doodaddrawdistance, highresdistance;
 	float mapdrawdistance2, modeldrawdistance2, doodaddrawdistance2, highresdistance2;
@@ -94,7 +94,6 @@ public:
 	void init();
 	void initMinimap();
 	void initDisplay();
-	void initWMOs();
 	void initLowresTerrain();
 
 	void onTheFlyLoading();

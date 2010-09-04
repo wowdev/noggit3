@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 #include "appstate.h"
 #include "noggit.h"
 #include "vec3d.h"
@@ -60,13 +58,14 @@ class Menu : public AppState
 	int minimap_x, minimap_y;
 	minimapWindowUI *minimap_win;
 	World *world;
+
 	std::vector<MapEntry> maps;
 	std::vector<Bookmark> bookmarks;
 
 	bool setpos;
 	float ah,av;
 
-	boost::shared_ptr<Model> bg;
+	Model *bg;
 	GLuint loading;
 	float mt;
 
@@ -74,6 +73,7 @@ class Menu : public AppState
 
 public:
 	Menu();
+	~Menu();
 
 	void tick(float t, float dt);
 	void display(float t, float dt);
@@ -84,11 +84,10 @@ public:
 
 	void refreshBookmarks();
 	void randBackground();
-	void resizewindow();
-
+	
+	void resizewindow( );
 	void loadMap( int mid );
 	void loadBookmark( int mid );
-
 };
 
 

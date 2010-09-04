@@ -29,8 +29,7 @@ void TVSelectFunction( std::string pFile )
 
 extern std::list<std::string> gListfile;
 
-
-Menu::Menu( )
+Menu::Menu( ) : bg(0)
 {
 	sel = -1;
 	newsel = -1;
@@ -168,6 +167,15 @@ Menu::Menu( )
 	tv->Expand( );*/
 }
 
+Menu::~Menu()
+{
+	if( bg )
+	{
+		delete bg;
+		bg = 0;
+	}
+}
+
 void Menu::randBackground( )
 {	
 	// STEFF:TODO first need to fix m2 bg loading.
@@ -185,16 +193,19 @@ void Menu::randBackground( )
 	//ui.push_back( "Scourge" );		// No
 	//ui.push_back( "Tauren" );			// No
 
-	// Random Background
-	srand((unsigned)time(0)); 
-    int randnum = (rand()%(ui.size( )- 1)+1); 
+	int randnum;
+	do
+	{
+		randnum = randint( 0, ui.size( ) - 1 );
+	}
+	while( randnum == lastbg );
+
+	lastbg = randnum;
 
 	std::stringstream filename;
 	filename << "Interface\\Glues\\Models\\UI_" << ui[randnum] << "\\UI_" << ui[randnum] << ".m2";
 	
-	
-    bg.reset( new Model( filename.str( ) ) );
-	bg->ind = true;
+	bg = new Model( filename.str( ) );
 }
 
 void Menu::tick( float t, float dt )
@@ -223,7 +234,7 @@ void Menu::tick( float t, float dt )
 			cz = 0;
 			cx = 0;
 
-			if( world->nMaps > 0 )
+			if( !world->mHasAGlobalWMO )
 			{
 
 				float fx = ( x / 12.0f );
@@ -264,7 +275,12 @@ void Menu::tick( float t, float dt )
 		world = 0;
 
 		cmd = CMD_BACK_TO_MENU;
-		bg.reset( );
+		
+		if(bg)
+		{
+			delete bg;
+			bg = 0;
+		}
 	}
 	else if( cmd == CMD_BACK_TO_MENU )
 	{
@@ -602,7 +618,7 @@ void Menu::loadMap( int mid )
 
 void Menu::loadBookmark( int mid )
 {
-for( unsigned int i = 0; i < bookmarks.size( ); i++ ) 
+	for( unsigned int i = 0; i < bookmarks.size( ); i++ ) 
 	{
 		if( bookmarks[i].mid == mid ) 
 		{

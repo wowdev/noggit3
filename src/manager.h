@@ -7,96 +7,96 @@
 
 // base class for manager objects
 
-class ManagedItem {
+class ManagedItem 
+{
 	int refcount;
 public:
 	std::string name;
-	ManagedItem(std::string n): refcount(0) 
+	ManagedItem( std::string n ) : refcount( 0 )
 	{
-		//std::transform( n.begin( ), n.end( ), n.begin( ), ::tolower );
+		std::transform( n.begin( ), n.end( ), n.begin( ), ::tolower );
 		name = n;
 	}
 
-	virtual ~ManagedItem() {}
+	virtual ~ManagedItem( ) { }
 
-	void addref()
+	void addref( )
 	{
 		++refcount;
 	}
 
-	bool delref()
+	bool delref( )
 	{
-		return --refcount==0;
+		return --refcount == 0;
 	}
 	
 };
 
 
 template <class IDTYPE>
-class Manager {
+class Manager
+{
 public:
 	std::map<std::string, IDTYPE> names;
 	std::map<IDTYPE, ManagedItem*> items;
 
-	Manager()
-	{
-	}
+	Manager( ) { }
 
-	virtual IDTYPE add(std::string name) = 0;
+	virtual IDTYPE add( std::string name ) = 0;
 
-	virtual void del(IDTYPE id)
+	virtual void del( IDTYPE id )
 	{
-		if (items[id]->delref()) {
-			ManagedItem *i = items[id];
-			doDelete(id);
-			names.erase(names.find(i->name));
-			items.erase(items.find(id));
-			delete i;
+		if( items[id]->delref( ) )
+		{
+			doDelete( id );
+			
+			std::string name = items[id]->name;
+			printf("name: %s\n", name.c_str());
+			//	namemap::iterator nameit = names.find( name );
+			if( names.find( name ) != names.end( ) )
+				names.erase( names.find( name ) );
+			items.erase( items.find( id ) );
 		}
 	}
 
-	void delbyname(std::string name)
+	void delbyname( std::string name )
 	{
-		if (has(name)) del(get(name));
+		if( has( name ) )
+			del( get( name ) );
 	}
 
-	virtual void doDelete(IDTYPE id) {}
+	virtual void doDelete( IDTYPE id ) { }
 
-	bool has(std::string name)
+	bool has( std::string name )
 	{
-		return (names.find(name) != names.end());
+		return( names.find( name ) != names.end( ) );
 	}
 
-	IDTYPE get(std::string name)
+	IDTYPE get( std::string name )
 	{
 		return names[name];
 	}
 
-	
-
 protected:
-	void do_add(std::string name, IDTYPE id, ManagedItem* item)
+	void do_add( std::string name, IDTYPE id, ManagedItem* item )
 	{
 		names[name] = id;
-		item->addref();
+		item->addref( );
 		items[id] = item;
 	}
 };
 
-class SimpleManager : public Manager<int> {
+class SimpleManager : public Manager<int>
+{
 	int baseid;
 public:
-	SimpleManager() : baseid(0)
-	{
-	}
+	SimpleManager( ) : baseid( 0 ) { }
 
 protected:
-	int nextID()
+	int nextID( )
 	{
 		return baseid++;
 	}
-
-
 };
 
 #endif
