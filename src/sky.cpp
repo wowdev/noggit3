@@ -141,7 +141,7 @@ const int hseg = 32;
 void Skies::draw()
 {
 	// draw sky sphere?
-	// TODO: do this as a vertex array and use glColorPointer? :|
+	//! \todo  do this as a vertex array and use glColorPointer? :|
 	Vec3D basepos1[cnum], basepos2[cnum];
 	glBegin(GL_QUADS);
 	for (int h=0; h<hseg; h++) {
@@ -314,7 +314,7 @@ bool Skies::drawSky(const Vec3D &pos)
 	return true;
 }
 
-// TODO: figure out what dnc.db is _really_ used for
+//! \todo  figure out what dnc.db is _really_ used for
 
 void OutdoorLightStats::init(MPQFile &f)
 {
@@ -497,7 +497,7 @@ OutdoorLighting::OutdoorLighting( std::string fname)
 OutdoorLightStats OutdoorLighting::getLightStats(int time)
 {
 	// ASSUME: only 24 light info records, one for each whole hour
-	// TODO: generalize this if the data file changes in the future
+	//! \todo  generalize this if the data file changes in the future
 
 	OutdoorLightStats out;
 

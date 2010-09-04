@@ -102,7 +102,7 @@ void Liquid::initGeometry(MPQFile &f)
 			if (h > 100000) h = pos.y;
             lVertices[p] = Vec3D(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
 			//color[p]= map[p].c[0];
-/// TODO: if map[p].c[1] != 0, overwrite the type from the flags.
+//! \todo  if map[p].c[1] != 0, overwrite the type from the flags.
 //			gLog( "%i, {%i, %i, %i, %i}: %s\n", flags[p], map[p].c[0], map[p].c[1], map[p].c[2], map[p].c[3], gLiquidTypeDB.getByID( map[p].c[1] != 0 ? map[p].c[1] : pType ).getString( LiquidTypeDB::Name ) );
 		}
 	}
@@ -110,7 +110,7 @@ void Liquid::initGeometry(MPQFile &f)
 	mDrawList = glGenLists(1);
 	glNewList(mDrawList, GL_COMPILE);
 
-	// TODO: handle light/dark liquid colors
+	//! \todo  handle light/dark liquid colors
 	glNormal3f(0, 1, 0);
 	glBegin(GL_QUADS);
 	// draw tiles
@@ -266,7 +266,7 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 		initTextures<1,30>( lLiquidTypeRow.getString( LiquidTypeDB::TextureFilenames - 1 ) );
 		mLiquidType = lLiquidTypeRow.getInt( LiquidTypeDB::Type );
 		mShaderType = lLiquidTypeRow.getInt( LiquidTypeDB::ShaderType );
-		/// TODO: Get texRepeats too.
+		//! \todo  Get texRepeats too.
 	}
 	catch( ... )
 	{
@@ -279,7 +279,7 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 	mTransparency = mShaderType & 1;
 	
 	// generate vertices
-	/// TODO: Store them somehow else. Maybe an extensible array[][] over the whole ADT?
+	//! \todo  Store them somehow else. Maybe an extensible array[][] over the whole ADT?
 	Vec3D *lVertices = new Vec3D[info->width * info->height];
 	for( int j = 0; j < info->height; j++ ) 
 		for( int i = 0; i < info->width; i++ ) 
@@ -349,7 +349,7 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 		initTextures<1,30>( lLiquidTypeRow.getString( LiquidTypeDB::TextureFilenames - 1 ) );
 		mLiquidType = lLiquidTypeRow.getInt( LiquidTypeDB::Type );
 		mShaderType = lLiquidTypeRow.getInt( LiquidTypeDB::ShaderType );
-		/// TODO: Get texRepeats too.
+		//! \todo  Get texRepeats too.
 	}
 	catch( ... )
 	{
@@ -555,7 +555,7 @@ void Liquid::draw()
 		if (type==2) 
 		{
 			// dynamic color lookup! ^_^
-			col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]; // TODO: add variable water color
+			col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]; //! \todo  add variable water color
 			col2 = gWorld->skies->colorSet[WATER_COLOR_DARK];
 		}
 		glColor4f(col.x, col.y, col.z, tcol);
@@ -563,7 +563,7 @@ void Liquid::draw()
 #ifdef USEBLSFILES
 		glSecondaryColor3f(col2.x,col2.y,col2.z);
 #endif
-		//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); // TODO: check if ARB_texture_env_add is supported? :(
+		//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); //! \todo  check if ARB_texture_env_add is supported? :(
 	}
 
 	glActiveTexture(GL_TEXTURE0);

@@ -1,4 +1,6 @@
-#include "world.h"
+#include <cmath>
+
+#include "brush.h"
 
 void brush::init( )
 {

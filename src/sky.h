@@ -106,7 +106,7 @@ struct OutdoorLightStats {
 
 	void interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r);
 	void setupLighting();
-    // void setupFog(); // TODO: add fog maybe?
+    // void setupFog(); //! \todo  add fog maybe?
 
 };
 

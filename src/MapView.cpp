@@ -11,10 +11,16 @@
 #include "dbc.h"
 #include "texturingui.h"
 #include "world.h"
+#include "MapChunk.h"
 
 #include "Settings.h"
 #include "Project.h"
 #include "Environment.h"
+
+#include "brush.h" // brush
+
+#include "WMOInstance.h" // WMOInstance
+
 
 using namespace std;
 
@@ -205,7 +211,7 @@ void change_settings_window(int oldid, int newid)
 
 }
 
-/// TODO: Do this nicer?
+//! \todo  Do this nicer?
 void openHelp( frame *button, int id )
 {
 	reinterpret_cast<MapView*>( gStates.back() )->ViewHelp();
@@ -242,7 +248,7 @@ void SnapSelectedObjectToGround( frame *button, int id )
 
 void CopySelectedObject( frame *button, int id )
 {
-	/// TODO: copy selected object path to clipboard
+	//! \todo  copy selected object path to clipboard
 	if( gWorld->HasSelection( ) )
 		Environment::getInstance( )->set_clipboard( gWorld->GetCurrentSelection( ) );
 }
@@ -539,7 +545,7 @@ void MapView::tick( float t, float dt )
 {
 	Vec3D ObjPos;
 
-	/// TODO: Get this in a new thread.
+	//! \todo  Get this in a new thread.
 	world->onTheFlyLoading();
 	
 	if( dt > 1.0f )
@@ -557,7 +563,7 @@ void MapView::tick( float t, float dt )
 		{
 			dirUp.x = 0.0f;
 			dirUp.y = 1.0f;
-			dirRight *= 0.0f; /// TODO: WAT?
+			dirRight *= 0.0f; //! \todo  WAT?
 		}
 		else if( Environment::getInstance()->CtrlDown )
 		{
@@ -602,7 +608,7 @@ void MapView::tick( float t, float dt )
 
 			if( gWorld->IsSelection( eEntry_Model ) )
 			{
-				/// TODO: Tell me what this is.
+				//! \todo  Tell me what this is.
 				ObjPos = Selection->data.model->pos - world->camera;
 				rotate( 0.0f, 0.0f, &ObjPos.x, &ObjPos.y, av * PI / 180.0f );
 				rotate( 0.0f, 0.0f, &ObjPos.x, &ObjPos.z, ah * PI / 180.0f );
@@ -610,7 +616,7 @@ void MapView::tick( float t, float dt )
 			}
 			
 			// moving and scaling objects
-			/// TODO: Alternatively automatically align it to the terrain. Also try to move it where the mouse points.
+			//! \todo  Alternatively automatically align it to the terrain. Also try to move it where the mouse points.
 			if( MoveObj )
 				if( Selection->type == eEntry_WMO )
 				{
@@ -829,7 +835,7 @@ void MapView::doSelection( int selTyp )
 
 void MapView::displayViewMode_Help( float t, float dt )
 {
-	/// TODO: Make this a window instead of a view. Why should you do it as a view? ._.
+	//! \todo  Make this a window instead of a view. Why should you do it as a view? ._.
 	video.clearScreen();
 	video.set2D();
 	glEnable(GL_TEXTURE_2D);
@@ -932,7 +938,7 @@ void MapView::displayViewMode_Help( float t, float dt )
 
 void MapView::displayViewMode_Minimap( float t, float dt )
 {
-    /// TODO: try to use a real map from WoW? either the large map or the minimap would be nice
+    //! \todo  try to use a real map from WoW? either the large map or the minimap would be nice
 	video.clearScreen();
 	video.set2D();
 
@@ -963,7 +969,7 @@ void MapView::displayViewMode_Minimap( float t, float dt )
 		glVertex2f(fx + 10.0f*cosf(ah/180.0f*PI), fz + 10.0f*sinf(ah/180.0f*PI));
 	glEnd();
 
-	/// TODO: Something is wrong there.
+	//! \todo  Something is wrong there.
 	//world->skies->drawSky(Vec3D(0.0f,0.0f,0.0f));
 }
 
@@ -1098,7 +1104,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 			mainGui->guiappInfo->setText( s.str() );
 		}
 
-		/// TODO: Get this into a window. As Steff is already doing.
+		//! \todo  Get this into a window. As Steff is already doing.
 		if( !mainGui->guidetailInfos->hidden )
 		{
 			nameEntry * lSelection = gWorld->GetCurrentSelection( );
@@ -1107,7 +1113,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 				if( !MapChunkWindow->hidden )
 					setChunkWindow( lSelection->data.mapchunk );
 
-				/// TODO: Only do this if lSelection == Selection? ..
+				//! \todo  Only do this if lSelection == Selection? ..
 				mainGui->guiStatusbar->setRightInfo( lSelection->returnName() );
 
 				s.str("");
@@ -1272,7 +1278,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 
 void MapView::display( float t, float dt )
 {
-	/// TODO: Get this out or do it somehow else. This is ugly and is a senseless if each draw.
+	//! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
 	if( Saving )
 	{		
 		video.setTileMode();
@@ -1344,7 +1350,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			moving = 1.0f;
 		
 		// saving or movement
-		/// TODO: Write ctrl-s in the help. Also get these idiots up to date so they dont complain about it not saving again.
+		//! \todo  Write ctrl-s in the help. Also get these idiots up to date so they dont complain about it not saving again.
 		if( e->keysym.sym == SDLK_s )
 			if( !Environment::getInstance()->CtrlDown )
 				moving = -1.0f;
@@ -1599,7 +1605,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 #ifdef DEBUG
 		// Check for layers we have too much. this should filter out those that are completely covered.
-		/// TODO: Get this function to work.
+		//! \todo  Get this function to work.
 		if( e->keysym.sym == SDLK_k ) 
 		{
 			if((Selection!=0)&&(Selection->type==eEntry_MapChunk))
@@ -1752,7 +1758,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			}
 
 		// is not used somewere else!!
-		/// TODO: what is this?
+		//! \todo  what is this?
 		if( e->keysym.sym == SDLK_g )
 			drawFlags = !drawFlags;
 
@@ -1767,7 +1773,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		}
 
         // doodads set
-		/// TODO: Does anyone use these?
+		//! \todo  Does anyone use these?
 		if( e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9 && gWorld->IsSelection( eEntry_WMO ) )
 			gWorld->GetCurrentSelection( )->data.wmo->doodadset = e->keysym.sym - SDLK_0;
 		

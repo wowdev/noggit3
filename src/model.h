@@ -17,7 +17,7 @@ class Bone;
 #include "matrix.h"
 #include "vec3d.h"
 
-#include "mapheaders.h"
+//#include "mapheaders.h"
 #include "modelheaders.h"
 
 Vec3D fixCoordSystem(Vec3D v);
@@ -207,40 +207,6 @@ public:
 	void resetAnim();
 	void updateEmitters(float dt);
 	void reload();
-};
-
-
-class ModelInstance
-{
-public:
-	Model *model;
-
-	unsigned int nameID;
-
-	Vec3D pos, dir;
-
-	/// TODO: Get this out and do somehow else.
-	unsigned int d1;
-
-	float w, sc;
-
-	Vec3D ldir;
-	Vec3D lcol;
-
-	~ModelInstance( );
-	ModelInstance( );
-	ModelInstance( Model *m );
-	ModelInstance( Model *m, MPQFile &f );
-	ModelInstance( Model *m, ENTRY_MDDF *d );
-    void init2( Model *m, MPQFile &f );
-	void draw( );
-	void drawMapTile( );
-//	void drawHighlight( );
-	void drawSelect( );
-	void draw2( const Vec3D& ofs, const float rot );
-	void draw2Select( const Vec3D& ofs, const float rot );
-
-	void resetDirection( );
 };
 
 int addModelToList(Model *m, MPQFile &f);

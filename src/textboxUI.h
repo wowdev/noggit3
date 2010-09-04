@@ -7,7 +7,7 @@
 #include "textUI.h"
 #include <sstream>
 
-/// TODO: Combine and get it working.
+//! \todo  Combine and get it working.
 class textboxUI:public frame
 {
 protected:

@@ -572,7 +572,7 @@ void WMO::drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper )
 
 	if( skybox && pCamera.IsInsideOf( pLower, pUpper ) ) 
 	{
-		// TODO: only draw sky if we are "inside" the WMO... ?
+		//! \todo  only draw sky if we are "inside" the WMO... ?
 
 		// We need to clear the depth buffer, because the skybox model can (will?)
 		// require it *. This is inefficient - is there a better way to do this?
@@ -690,7 +690,7 @@ void WMOGroup::init(WMO *wmo, MPQFile &f, int num, char *names)
 	int nameOfs;
 	f.read(&nameOfs,4);
 
-	// TODO: get proper name from group header and/or dbc?
+	//! \todo  get proper name from group header and/or dbc?
 	if (nameOfs > 0) {
         name = string(names + nameOfs);
 	} else name = "(no name)";
@@ -881,7 +881,7 @@ void WMOGroup::initDisplayList()
 			lq->initFromWMO(gf, wmo->mat[hlq.type], (flags&0x2000)!=0);
 		}
 
-		// TODO: figure out/use MFOG ?
+		//! \todo  figure out/use MFOG ?
 
  		gf.seek((int)nextpos);
 	}
@@ -959,7 +959,7 @@ void WMOGroup::initDisplayList()
 		*/
 
 		if (overbright) {
-			// TODO: use emissive color from the WMO Material instead of 1,1,1,1
+			//! \todo  use emissive color from the WMO Material instead of 1,1,1,1
 			GLfloat em[4] = {1,1,1,1};
 			glMaterialfv(GL_FRONT, GL_EMISSION, em);
 		}
@@ -1121,7 +1121,7 @@ void WMOGroup::drawDoodads(int doodadset, const Vec3D& ofs, const float rot)
 	glColor4f(1,1,1,1);
 	for (int i=0; i<nDoodads; i++) {
 		short dd = ddr[i];
-		doodadset = 0;		// TODO: this somehow crashes sometimes without this fix.
+		doodadset = 0;		//! \todo  this somehow crashes sometimes without this fix.
 		if( ! ( wmo->doodadsets.size() < doodadset ) )
 			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {
 
@@ -1164,7 +1164,7 @@ void WMOGroup::drawDoodadsSelect(int doodadset, const Vec3D& ofs, const float ro
 	glColor4f(1,1,1,1);
 	for (int i=0; i<nDoodads; i++) {
 		short dd = ddr[i];
-		doodadset = 0;		// TODO: this somehow crashes sometimes without this fix.
+		doodadset = 0;		//! \todo  this somehow crashes sometimes without this fix.
 		if( ! ( wmo->doodadsets.size() < doodadset ) )
 			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {
 
@@ -1191,13 +1191,13 @@ void WMOGroup::drawLiquid()
 	if (!visible) return;
 
 	// draw liquid
-	// TODO: culling for liquid boundingbox or something
+	//! \todo  culling for liquid boundingbox or something
 	if (lq) {
 		setupFog();
 		if (outdoorLights) {
 			gWorld->outdoorLights(true);
 		} else {
-			// TODO: setup some kind of indoor lighting... ?
+			//! \todo  setup some kind of indoor lighting... ?
 			gWorld->outdoorLights(false);
 			glEnable(GL_LIGHT2);
 			glLightfv(GL_LIGHT2, GL_AMBIENT, Vec4D(0.1f,0.1f,0.1f,1));
@@ -1286,143 +1286,3 @@ void WMOManager::reload()
 	for (std::map<std::string, int>::iterator it = names.begin(); it != names.end(); ++it)
 		((WMO*)items[(*it).second])->reload((*it).first);
 }
-
-
-WMOInstance::WMOInstance( WMO *wmo, MPQFile &f ) : wmo (wmo)
-{
-	nameID = -1;
-
-	/// TODO: Where is the name ID? Oo What is up with this ctor?
-    f.read( &id, 4 );
-	f.read( (float*)pos, 12 );
-	f.read( (float*)dir, 12 );
-	f.read( (float*)extents[0], 12 );
-	f.read( (float*)extents[1], 12 );
-	f.read( &mFlags, 2 );
-	f.read( &doodadset, 2 );
-	f.read( &mNameset, 2 );
-	f.read( &mUnknown, 2 );
-	
-	/// TODO: This really seems wrong. Where is this used and why doesn't this crash?
-	wmoID = id;
-}
-
-WMOInstance::WMOInstance( WMO *wmo, ENTRY_MODF *d ) : wmo (wmo)
-{
-	nameID = -1;
-
-	wmoID = d->nameID;
-	id = d->uniqueID;
-	pos = Vec3D( d->pos[0], d->pos[1], d->pos[2] );
-	dir = Vec3D( d->rot[0], d->rot[1], d->rot[2] );
-	extents[0] = Vec3D( d->extents[0][0], d->extents[0][1], d->extents[0][2] );
-	extents[1] = Vec3D( d->extents[1][0], d->extents[1][1], d->extents[1][2] );
-	mFlags = d->flags;
-	doodadset = d->doodadSet;
-	mNameset = d->nameSet;
-	mUnknown = d->unknown;
-}
-
-WMOInstance::WMOInstance(WMO *wmo) : wmo (wmo)
-{
-	nameID = -1;
-}
-
-
-void WMOInstance::draw()
-{
-	if( ids.find( id ) != ids.end( ) ) 
-		return;
-
-	ids.insert( id );
-
-	glPushMatrix( );
-	glTranslatef( pos.x, pos.y, pos.z );
-
-	float rot = 90.0f - dir.y;
-
-	// TODO: replace this with a single transform matrix calculated at load time
-
-	glRotatef( dir.y - 90.0f, 0.0f, 1.0f, 0.0f );
-	glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
-	glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
-
-	if( gWorld->IsSelection( eEntry_WMO ) && gWorld->GetCurrentSelection( )->data.wmo->id == this->id )
-		wmo->draw( doodadset, pos, rot, true, true, true );
-	else
-		wmo->draw( doodadset, pos, rot, false, false, false );
-
-	glPopMatrix();
-}
-
-void WMOInstance::drawSelect()
-{
-	if (ids.find(id) != ids.end()) return;
-	ids.insert(id);
-
-	glPushMatrix();
-	glTranslatef(pos.x, pos.y, pos.z);
-
-	float rot = -90.0f + dir.y;
-
-	// TODO: replace this with a single transform matrix calculated at load time
-
-	glRotatef(dir.y - 90.0f, 0, 1, 0);
-	glRotatef(-dir.x, 0, 0, 1);
-	glRotatef(dir.z, 1, 0, 0);
-
-	if( nameID == -1 )
-		nameID = SelectionNames.add( this );
-	glPushName(nameID);
-	wmo->drawSelect(doodadset,pos,-rot);
-	glPopName();
-
-	glPopMatrix();
-}
-
-
-/*
-void WMOInstance::drawPortals()
-{
-	if (ids.find(id) != ids.end()) return;
-	ids.insert(id);
-
-	glPushMatrix();
-	glTranslatef(pos.x, pos.y, pos.z);
-
-	glRotatef(dir.y - 90.0f, 0, 1, 0);
-	glRotatef(-dir.x, 0, 0, 1);
-	glRotatef(dir.z, 1, 0, 0);
-
-	wmo->drawPortals();
-	glPopMatrix();
-}
-*/
-
-void WMOInstance::reset()
-{
-    ids.clear();
-}
-
-void WMOInstance::resetPosition(){
-	pos.x=0;
-	pos.y=0;
-	pos.z=0;
-}
-void WMOInstance::resetDirection(){
-	dir.x=0;
-	//dir.y=0; only reset incline
-	dir.z=0;
-}
-
-std::set<int> WMOInstance::ids;
-
-WMOInstance::~WMOInstance()
-{
-	if( nameID != -1 )
-	{
-		SelectionNames.del( nameID );
-		nameID = -1;
-	}
-}
-

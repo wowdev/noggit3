@@ -14,13 +14,14 @@
 #include "dbc.h"
 #include "Log.h"
 #include "world.h"
-#include <sstream>
+
+#include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
 
 extern Directory * gFileList;
 
 using namespace std;
 
-/// TODO: Take this out.
+//! \todo  Take this out.
 /*TreeView * tv;
 void TVSelectFunction( std::string pFile )
 {
@@ -162,7 +163,7 @@ Menu::Menu( ) : bg(0)
 		if(bmcounter>59 && bmcounter<80)mbar->GetMenu( "Bookmarks4" )->AddMenuItemSet(bookmarks[i].basename,&newbookmark,bookmarks[i].mid);
 		bmcounter++;
 	}
-	/// TODO: Take this out.
+	//! \todo  Take this out.
 /*	tv = new TreeView( 600, 10, gFileList, 0, TVSelectFunction );
 	tv->Expand( );*/
 }
@@ -401,7 +402,7 @@ void Menu::display(float t, float dt)
 	else if (cmd==CMD_SELECT) 
 	{
 
-		// TODO: Get this stuff into minimap_win
+		//! \todo  Get this stuff into minimap_win
 		if ((sel != -1) && (world!=0)) 
 		{
 			const int len = 768;
@@ -494,7 +495,7 @@ bool Clickable::hit( int x, int y )
 
 void Menu::mouseclick( SDL_MouseButtonEvent *e )
 {
-	/// TODO: Take this out.
+	//! \todo  Take this out.
 	// this is for the treeview test only. 
 /*	if( e->type == SDL_MOUSEBUTTONDOWN ) 
 	{
