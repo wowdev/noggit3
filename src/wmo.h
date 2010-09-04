@@ -8,7 +8,6 @@
 #include "vec3d.h"
 #include "mpq.h"
 #include "quaternion.h"
-#include "mapheaders.h"
 #include "video.h"
 
 #include "ModelInstance.h" // ModelInstance
