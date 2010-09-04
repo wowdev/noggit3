@@ -17,6 +17,10 @@
 #include "Project.h"
 #include "Environment.h"
 
+#include "brush.h" // brush
+
+#include "WMOInstance.h" // WMOInstance
+
 
 using namespace std;
 

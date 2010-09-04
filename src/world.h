@@ -1,23 +1,22 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include "noggit.h"
-#include "maptile.h"
-#include "wmo.h"
-#include "frustum.h"
-#include "sky.h"
-#include "selection.h"
-
 #include <string>
 
+#include "frustum.h" // Frustum
+#include "wmo.h" // WMOManager
+#include "model.h" // ModelManager
+#include "selection.h" // nameEntryManager
+#include "sky.h" // Skies, OutdoorLighting, OutdoorLightStats
 
-#include "brush.h"
- 
-#define MAPTILECACHESIZE 36
+class brush;
+class MapTile;
+
+static const int MAPTILECACHESIZE = 36;
 
 extern nameEntryManager SelectionNames;
 
-const float detail_size = 8.0f;
+static const float detail_size = 8.0f;
 
 bool IsEditableWorld( int pMapId );
 

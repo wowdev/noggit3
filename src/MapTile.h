@@ -128,6 +128,7 @@ public:
 
 int indexMapBuf(int x, int y);
 
+//! \todo get stripify related functions somewhere else.
 
 // 8x8x2 version with triangle strips, size = 8*18 + 7*2
 const int stripsize = 8*18 + 7*2;

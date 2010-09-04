@@ -1,6 +1,8 @@
 #ifndef __BRUSH_H
 #define __BRUSH_H
 
+#include "video.h" // GLuint
+
 class brush
 {
 private:

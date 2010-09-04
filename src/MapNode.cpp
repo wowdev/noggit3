@@ -1,5 +1,6 @@
 #include "MapNode.h"
 #include "MapChunk.h"
+#include "MapTile.h"
 #include "world.h"
 
 void MapNode::draw()
