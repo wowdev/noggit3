@@ -6,9 +6,10 @@
 #include "MapChunk.h"
 #include "Log.h"
 #include "world.h"
-#include "model.h" // ModelInstance
-#include "wmo.h" // WMOInstance
+#include "ModelInstance.h" // ModelInstance
+#include "WMOInstance.h" // WMOInstance
 #include "liquid.h"
+#include "noggit.h" // TimerStop, TimerStart
 
 void renderCylinder(float x1, float y1, float z1, float x2,float y2, float z2, float radius,int subdivisions,GLUquadricObj *quadric)
 {

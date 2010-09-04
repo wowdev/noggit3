@@ -13,6 +13,9 @@
 #include "video.h"
 #include "Log.h"
 #include "MapChunk.h"
+#include "MapTile.h"
+
+#include "WMOInstance.h" // WMOInstance
 
 using namespace std;
  

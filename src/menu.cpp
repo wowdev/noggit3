@@ -14,7 +14,8 @@
 #include "dbc.h"
 #include "Log.h"
 #include "world.h"
-#include <sstream>
+
+#include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
 
 extern Directory * gFileList;
 

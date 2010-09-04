@@ -3,6 +3,7 @@
 #include "world.h"
 #include "Environment.h"
 #include "liquid.h"
+#include "brush.h"
 
 #include "quaternion.h"
 
