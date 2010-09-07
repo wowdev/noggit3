@@ -223,7 +223,9 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 				for (int i=0; i<((j%2)?8:9); i++) {
 					f.read(nor,3);
 					// order X,Z,Y 
-					*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
+					//*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
+					*ttn++ = Vec3D(-(float)nor[1]/127.0f, (float)nor[2]/127.0f, -(float)nor[0]/127.0f);
+
 				}
 			}
 		}
@@ -1008,6 +1010,7 @@ void MapChunk::draw()
 
 	if( !hasholes )
 	{
+		
 		if ( mydist < gWorld->highresdistance2 ) 
 		{
 			strip = gWorld->mapstrip2;
@@ -1649,6 +1652,7 @@ int MapChunk::addTexture( GLuint texture )
 
 bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, float pressure, int texture)//paint with texture
 {
+	using namespace std; // Workaround for windows. For min and max function use later.
 	float zPos,xPos,change,xdiff,zdiff,dist, radius;
 
 	int texLevel=-1,i,j;
@@ -1710,12 +1714,13 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 			
 			target=strength;
 			tarAbove=1-target;
-			
+			//#undef min
+			//#undef max	
 			tPressure=pressure*Brush->getValue(dist);
 			if(texLevel>0)
-				amap[texLevel-1][i+j*64]=(unsigned char)std::max( std::min( (1-tPressure)*( (float)amap[texLevel-1][i+j*64] ) + tPressure*target + 0.5f ,255.0f) , 0.0f);
+				amap[texLevel-1][i+j*64]=(unsigned char)max( min( (1-tPressure)*( (float)amap[texLevel-1][i+j*64] ) + tPressure*target + 0.5f ,255.0f) , 0.0f);
 			for(int k=texLevel;k<nTextures-1;k++)
-				amap[k][i+j*64]=(unsigned char)std::max( std::min( (1-tPressure)*( (float)amap[k][i+j*64] ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f);
+				amap[k][i+j*64]=(unsigned char)max( min( (1-tPressure)*( (float)amap[k][i+j*64] ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f);
 			xPos+=change;
 		}
 		zPos+=change;
@@ -1747,7 +1752,9 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 //--Holes ;P
 bool MapChunk::isHole( int i, int j )
 {
-	return( holes & ( ( 1 << ((j*4)+i) ) ));
+	bool ishole = ( holes & ( ( 1 << ((j*4)+i) ) ));
+	LogDebug << "isHole: " << i << "-" << j << " = " << ishole << std::endl; 
+	return ishole;
 }
 
 void MapChunk::addHole( int i, int j )

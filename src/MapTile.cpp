@@ -948,6 +948,7 @@ void SetChunkHeader( sExtendableArray pArray, int pPosition, int pMagix, int pSi
 
 void MapTile::saveTile( )
 {
+	using namespace std; // Workaround for windows. For min and max function use later.
 	Log << "Saving ADT \"" << fname << "\"." << std::endl;
 
 	int lID;	// This is a global counting variable. Do not store something in here you need later.
@@ -1184,6 +1185,7 @@ void MapTile::saveTile( )
 				LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
 				return;
 			}
+
 			lMDDF_Data[lID].nameID = lMyFilenameThingey->second[0];
 			lMDDF_Data[lID].uniqueID = it->first;
 			lMDDF_Data[lID].pos[0] = it->second.pos.x;
@@ -1335,11 +1337,17 @@ void MapTile::saveTile( )
 					chunks[y][x]->recalcNorms();
 					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
 					{
-						lNormals[i*3+0] = roundc( chunks[y][x]->tn[i].x * 127 );
-						lNormals[i*3+1] = roundc( chunks[y][x]->tn[i].z * 127 );
+						lNormals[i*3+0] = roundc( -chunks[y][x]->tn[i].z * 127 );
+						lNormals[i*3+1] = roundc( -chunks[y][x]->tn[i].x * 127 );
 						lNormals[i*3+2] = roundc( chunks[y][x]->tn[i].y * 127 );
 					}
-					
+				//0 1
+				//2 2
+				//1 0
+						//*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
+					//*ttn++ = Vec3D(-(float)nor[1]/127.0f, (float)nor[2]/127.0f, -(float)nor[0]/127.0f);
+
+
 					lCurrentPosition += 8 + lMCNR_Size;
 					lMCNK_Size += 8 + lMCNR_Size;
 //				}
@@ -1510,8 +1518,8 @@ void MapTile::saveTile( )
 							unsigned char upperNibble, lowerNibble;
 							for( int k = 0; k < lDimensions; k++ )
 							{
-								lowerNibble = (unsigned char)std::max(std::min( ( (float)chunks[y][x]->amap[j][k * 2 + 0] ) * 0.05882f + 0.5f , 15.0f),0.0f);
-								upperNibble = (unsigned char)std::max(std::min( ( (float)chunks[y][x]->amap[j][k * 2 + 1] ) * 0.05882f + 0.5f , 15.0f),0.0f);
+								lowerNibble = (unsigned char)max(min( ( (float)chunks[y][x]->amap[j][k * 2 + 0] ) * 0.05882f + 0.5f , 15.0f),0.0f);
+								upperNibble = (unsigned char)max(min( ( (float)chunks[y][x]->amap[j][k * 2 + 1] ) * 0.05882f + 0.5f , 15.0f),0.0f);
 								lAlphaMaps[lDimensions * j + k] = ( upperNibble << 4 ) + lowerNibble;
 							}
 						}
