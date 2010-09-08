@@ -250,18 +250,20 @@ void CopySelectedObject( frame *button, int id )
 {
 	//! \todo  copy selected object path to clipboard
 	if( gWorld->HasSelection( ) )
+	{
 		Environment::getInstance( )->set_clipboard( gWorld->GetCurrentSelection( ) );
+	}
 }
 
 void PasteSelectedObject( frame *button, int id )
 {
 	// MODELCOPY
 	// paste object
-	// if selection then on selectin cords
+	// if selection then insert on selection cords
 	// else on current chunk cords
 	// TODO
 	if( gWorld->HasSelection( ) )
-	{
+	{	
 		nameEntry lClipboard = Environment::getInstance( )->get_clipboard( );
 		if( lClipboard.returnName( ) )
 		{
@@ -271,7 +273,7 @@ void PasteSelectedObject( frame *button, int id )
 				pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.model->pos );
 				break;
 			case eEntry_WMO:
-				pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.wmo->pos );
+				pWorld->addModel( lClipboard,  gWorld->GetCurrentSelection( )->data.wmo->pos);
 				break;
 			case eEntry_MapChunk:
 				pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.mapchunk->GetSelectionPosition( ) );

@@ -36,12 +36,12 @@ FILE( GLOB_RECURSE HeaderFiles "src/*.h" )
 FILE( GLOB_RECURSE SourceFiles "src/*.cpp" )
 
 # Search for stdint.h, present on unix, missing on windows.
-INCLUDE( CheckIncludeFiles )
-CHECK_INCLUDE_FILES( stdint.h HAS_STDINT_H )
+#INCLUDE( CheckIncludeFiles )
+#CHECK_INCLUDE_FILES( stdint.h HAS_STDINT_H )
 
-IF( NOT HAS_STDINT_H )
+# IF( NOT HAS_STDINT_H )
   SET( HeaderFiles ${HeaderFiles} "${CMAKE_SOURCE_DIR}/include/win/stdint.h" )
-ENDIF( NOT HAS_STDINT_H )
+# ENDIF( NOT HAS_STDINT_H )
 
 # If we are on OSX, we need additional files for SDL to work.
 IF( APPLE )
