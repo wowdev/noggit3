@@ -1753,7 +1753,6 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 bool MapChunk::isHole( int i, int j )
 {
 	bool ishole = ( holes & ( ( 1 << ((j*4)+i) ) ));
-	LogDebug << "isHole: " << i << "-" << j << " = " << ishole << std::endl; 
 	return ishole;
 }
 

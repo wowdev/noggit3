@@ -648,7 +648,10 @@ extern float groundBrushRadius;
 void MapTile::draw()
 {
 	if (!ok) 
+	{
+		LogError << "OK in maptiel draw()!" << std::endl;
 		return;
+	}
 	
 	if(!mTexturesLoaded)
 		finishTextureLoad();

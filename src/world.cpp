@@ -1847,12 +1847,18 @@ void World::deleteWMOInstance( int pUniqueID )
 
 void World::addModel( nameEntry entry, Vec3D newPos )
 {
-	int lModelMax = mModelInstances.rbegin( )->first;
-	int lObjectMax = mWMOInstances.rbegin( )->first;
-	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
 
+	int lModelMax;
+	if (mModelInstances.empty() == false)
+	lModelMax = mModelInstances.rbegin( )->first;
+	int lObjectMax;
+	if (mWMOInstances.empty() == false)
+	lObjectMax = mWMOInstances.rbegin( )->first;
+	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
+	
 	if( entry.type == eEntry_Model )
 	{
+
 		ModelInstance newModelis;
 		newModelis = *entry.data.model;
 		newModelis.nameID = -1;
@@ -1875,7 +1881,6 @@ void World::addModel( nameEntry entry, Vec3D newPos )
 
 			newModelis.sc = newModelis.sc * (( float( rand( ) ) / float( RAND_MAX ) * 0.2 ) + 0.90);
 		}
-
 		mModelInstances.insert( pair<int,ModelInstance>( lMaxUID, newModelis ));
 	}
 	else if( entry.type == eEntry_WMO )
