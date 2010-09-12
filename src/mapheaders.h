@@ -124,6 +124,8 @@ struct ENTRY_MCLY
 	uint32_t	effectID;
 };
 
+#include <string.h> // memcpy()
+// are these used?
 
 struct MH2O_Header{
 	uint32_t ofsInformation;

@@ -1,11 +1,11 @@
 #ifndef MAPCHUNK_H
 #define MAPCHUNK_H
 
-#include "MapNode.h"
 #include "mapheaders.h"
 
 #include "video.h" // GLuint
 #include "quaternion.h" // Vec4D
+#include "MapTile.h" // MapTile
 
 class MPQFile;
 class Vec4D;
@@ -13,9 +13,13 @@ class brush;
 
 static const int mapbufsize = 9*9 + 8*8;
 
-class MapChunk : public MapNode 
+class MapChunk
 {
+	MapTile *mt;
 public:
+	Vec3D vmin, vmax, vcenter;
+	int px, py, size;
+  
 	MapChunkHeader header;
 	bool Changed;
 	int nTextures;
