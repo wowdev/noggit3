@@ -17,23 +17,23 @@ public:
 	std::vector<Liquid*> mLiquids;
 
 private:
-	// MFBO:
-	GLfloat mMinimumValues[3*3*3], mMaximumValues[3*3*3];
-	GLshort lIndices[18];
+  // MFBO:
+  GLfloat mMinimumValues[3*3*3];
+  GLfloat mMaximumValues[3*3*3];
 
-	// MHDR:
-	int mFlags;
+  // MHDR:
+  int mFlags;
 
-	// Data to be loaded:
-	bool mTexturesLoaded;
-	std::vector<std::string> mTextureFilenames;
-  
+  // Data to be loaded:
+  bool mTexturesLoaded;
+  std::vector<std::string> mTextureFilenames;
+
   bool mModelsLoaded;
-	std::vector<std::string> mModelFilenames;
+  std::vector<std::string> mModelFilenames;
   std::vector<ENTRY_MDDF> mModelInstances;
-  
+
   bool mWMOsLoaded;
-	std::vector<std::string> mWMOFilenames;
+  std::vector<std::string> mWMOFilenames;
   std::vector<ENTRY_MODF> mWMOInstances;
   
 

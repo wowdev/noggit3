@@ -656,7 +656,7 @@ void MapTile::drawLines()//draw red lines around the square of a chunk
 
 void MapTile::drawMFBO()
 {
-	GLshort lIndices[] = { 4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1 };
+	static const GLshort lIndices[] = { 4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1 };
 
 	glColor4f(0,1,1,0.2f);
 	glBegin(GL_TRIANGLE_FAN);
