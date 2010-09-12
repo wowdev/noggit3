@@ -21,6 +21,7 @@ class MapView :public AppState
 	float ah,av,moving,strafing,updown,mousedir,movespd;
 	bool look;
 	bool hud;
+	bool ass_immodel;
 
 	World *world;
 

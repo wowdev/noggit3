@@ -1,3 +1,4 @@
+#include <sstream>
 #include "MapChunk.h"
 #include "Log.h"
 #include "world.h"
@@ -79,7 +80,7 @@ void HeightColor(float height, Vec3D *Color)
 }
 
 
-bool DrawMapContour=true;
+bool DrawMapContour=false;
 bool drawFlags=false;
 
 GLuint	Contour=0;
@@ -1003,14 +1004,9 @@ void MapChunk::draw()
 	if (!gWorld->frustum.intersects(vmin,vmax))		return;
 	float mydist = (gWorld->camera - vcenter).length() - r;
 	//if (mydist > gWorld->mapdrawdistance2) return;
-	/*if (mydist > gWorld->culldistance+75) {
-		if (gWorld->uselowlod) this->drawNoDetail();
-		return;
-	}*/
 
-	if( !hasholes )
+	if( !this->hasholes )
 	{
-		
 		if ( mydist < gWorld->highresdistance2 ) 
 		{
 			strip = gWorld->mapstrip2;
@@ -1021,8 +1017,22 @@ void MapChunk::draw()
 			strip = gWorld->mapstrip;
 			striplen = stripsize;
 		}
+	}	
+	else
+	{
+		std::stringstream out;
+		out << "Vorher Add Hole to chunk:" << this->px << "-" << this->py << std::endl;
+		for(int v=0;v<16;v++)
+		{
+
+			for(int f=0;f<16;f++)
+			{
+				out << strip[f+(v*16)]<< " ";
+			}
+			out << std::endl;
+		}
+		LogDebug << out.str() << std::endl;
 	}
-	
 
 	// setup vertex buffers
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
@@ -1714,8 +1724,7 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 			
 			target=strength;
 			tarAbove=1-target;
-			//#undef min
-			//#undef max	
+	
 			tPressure=pressure*Brush->getValue(dist);
 			if(texLevel>0)
 				amap[texLevel-1][i+j*64]=(unsigned char)max( min( (1-tPressure)*( (float)amap[texLevel-1][i+j*64] ) + tPressure*target + 0.5f ,255.0f) , 0.0f);
@@ -1758,10 +1767,36 @@ bool MapChunk::isHole( int i, int j )
 
 void MapChunk::addHole( int i, int j )
 {
+	std::stringstream out;
+	out << "Vorher Add Hole to chunk:" << this->px << "-" << this->py << std::endl;
+	for(int v=0;v<16;v++)
+	{
+
+		for(int f=0;f<16;f++)
+		{
+			out << strip[f+(v*16)]<< " ";
+		}
+		out << std::endl;
+	}
+	LogDebug << out.str() << std::endl;
+
 	holes = holes | ( ( 1 << ((j*4)+i)) );
 	hasholes = holes;
 	initStrip( );
+	
+	out << "Nachher Add Hole to chunk:" << this->px << "-" << this->py << std::endl;
+	for(int v=0;v<16;v++)
+	{
+
+		for(int f=0;f<16;f++)
+		{
+			out << strip[f+(v*16)]<< " ";
+		}
+		out << std::endl;
+	}
+	LogDebug << out.str() << std::endl;
 }
+
 
 void MapChunk::removeHole( int i, int j )
 {

@@ -1,6 +1,7 @@
 #include <cassert>
 #include <algorithm>
 #include <string>
+#include <sstream>
 
 #include "MapTile.h"
 #include "MapChunk.h"
@@ -461,7 +462,6 @@ void MapTile::loadModel( )
 
 	if(modelPos>=modelBuffer+modelSize)
 	{
-		Log << "Finished loading models for \"" << fname << "\"." << std::endl;
 		modelsLoaded=true;
 		//Need to load Model Instances now
 		//loadModelInstances();
@@ -1169,7 +1169,8 @@ void MapTile::saveTile( )
 
 		// MDDF data
 		ENTRY_MDDF * lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>( lCurrentPosition + 8 );
-
+	
+		int model_counter = 1;
 		lID = 0;
 		for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
 		{
@@ -1189,8 +1190,27 @@ void MapTile::saveTile( )
 				return;
 			}
 
+			// generate UID
+			int new_uid;	
+			std::stringstream UID_stream;
+			UID_stream << "1";
+			if (this->x < 10) {UID_stream << "0";}
+			UID_stream << this->x;
+			if (this->z < 10) {UID_stream << "0";}
+			UID_stream << this->z;
+			if (model_counter<10) 
+				{UID_stream << "000";}
+			else if (model_counter<100)
+				{UID_stream << "00";}
+			else if (model_counter<1000) 
+				{UID_stream << "0";}
+			UID_stream << model_counter;
+			model_counter++;			
+			UID_stream >> new_uid;
+			// UID end
+
 			lMDDF_Data[lID].nameID = lMyFilenameThingey->second[0];
-			lMDDF_Data[lID].uniqueID = it->first;
+			lMDDF_Data[lID].uniqueID = new_uid;
 			lMDDF_Data[lID].pos[0] = it->second.pos.x;
 			lMDDF_Data[lID].pos[1] = it->second.pos.y;
 			lMDDF_Data[lID].pos[2] = it->second.pos.z;
@@ -1207,6 +1227,7 @@ void MapTile::saveTile( )
 
 	// MODF
 //	{
+
 		int lMODF_Size = 0x40 * lObjectInstances.size( );
 		lADTFile.Extend( 8 + lMODF_Size );
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MODF', lMODF_Size );
@@ -1215,6 +1236,8 @@ void MapTile::saveTile( )
 		// MODF data
 		ENTRY_MODF * lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>( lCurrentPosition + 8 );
 
+		// reset model counter
+		model_counter = 1;
 		lID = 0;
 		for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
 		{
@@ -1224,8 +1247,28 @@ void MapTile::saveTile( )
 				LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
 				return;
 			}
+
+			// generate UID
+			int new_uid;	
+			std::stringstream UID_stream;
+			UID_stream << "2";
+			if (this->x < 10) {UID_stream << "0";}
+			UID_stream << this->x;
+			if (this->z < 10) {UID_stream << "0";}
+			UID_stream << this->z;
+			if (model_counter<10) 
+				{UID_stream << "000";}
+			else if (model_counter<100)
+				{UID_stream << "00";}
+			else if (model_counter<1000) 
+				{UID_stream << "0";}
+			UID_stream << model_counter;
+			model_counter++;			
+			UID_stream >> new_uid;
+			// UID end
+
 			lMODF_Data[lID].nameID = lMyFilenameThingey->second[0];
-			lMODF_Data[lID].uniqueID = it->first;
+			lMODF_Data[lID].uniqueID = new_uid;
 			lMODF_Data[lID].pos[0] = it->second.pos.x;
 			lMODF_Data[lID].pos[1] = it->second.pos.y;
 			lMODF_Data[lID].pos[2] = it->second.pos.z;
