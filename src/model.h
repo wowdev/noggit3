@@ -173,9 +173,6 @@ class Model: public ManagedItem, public AsyncObject {
 	void lightsOn(GLuint lbase);
 	void lightsOff(GLuint lbase);
 
-	bool Reloaded;
-	Model	*reloadModel;
-
 public:
 	std::string filename;
 	ModelCamera cam;
@@ -183,17 +180,14 @@ public:
 	GLuint *textures;
 	ModelHeader header;
 
-	bool ok;
-	bool ind;
-
 	float rad;
 	float trans;
 	bool animcalc;
+  bool mPerInstanceAnimation;
 	int anim, animtime;
 
 	Model(std::string name, bool forceAnim=false);	
 	~Model();
-	void reload(std::string name);
 	void draw();
 	void drawTileMode();
 	void drawSelect();
@@ -216,7 +210,6 @@ public:
 
 	void resetAnim();
 	void updateEmitters(float dt);
-	void reload();
 };
 
 int addModelToList(Model *m, MPQFile &f);

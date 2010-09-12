@@ -1644,16 +1644,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		}
 #endif
 		
-		// reloading the managers
-		if( e->keysym.sym == SDLK_F10 )
-			video.textures.reload( );
-		
-		if( e->keysym.sym == SDLK_F11 )
-			world->modelmanager.reload( );
-		
-		if( e->keysym.sym == SDLK_F12 )
-			world->wmomanager.reload( );
-		
 		// fog distance or brush radius
 		if( e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS ) 
 			if( Environment::getInstance()->AltDown )

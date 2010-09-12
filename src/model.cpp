@@ -31,17 +31,15 @@ Model::Model(std::string name, bool forceAnim) : ManagedItem(name), forceAnim(fo
   }
 
   filename = name;
-  Reloaded = false;
-  ok = false;
+  
+  textures = NULL;
 }
 
 void Model::finishLoading()
 {
-  
   MPQFile f( filename.c_str() );
-  ok = !f.isEof( );
   
-  if( !ok ) 
+  if( f.isEof( ) ) 
   {
     LogError << "Error loading file \"" << filename << "\". Aborting to load model." << std::endl;
     return;
@@ -89,56 +87,54 @@ void Model::finishLoading()
 
 Model::~Model()
 {
-  if (ok) 
-  {
-    LogDebug << "Unloading model \"" << filename << "\"." << std::endl;
+  LogDebug << "Unloading model \"" << filename << "\"." << std::endl;
     
-    if (header.nTextures) {
-      for (size_t i=0; i<header.nTextures; i++) {
-        if (textures[i]!=0) {
-          //Texture *tex = (Texture*)video.textures.items[textures[i]];
-          video.textures.del(textures[i]);
-        }
+  if (header.nTextures && textures) {
+    for (size_t i=0; i<header.nTextures; i++) {
+      if (textures[i]!=0) {
+        //Texture *tex = (Texture*)video.textures.items[textures[i]];
+        video.textures.del(textures[i]);
       }
-      delete[] textures;
     }
-
-    delete[] globalSequences;
-
-    if (animated) {
-      // unload all sorts of crap
-      //delete[] vertices;
-      //delete[] normals;
-      delete[] indices;
-      delete[] anims;
-      delete[] origVertices;
-      if (animBones) delete[] bones;
-      if (!animGeometry) {
-        glDeleteBuffers(1, &nbuf);
-      }
-      glDeleteBuffers(1, &vbuf);
-      glDeleteBuffers(1, &tbuf);
-
-      if (animTextures) delete[] texanims;
-      if (colors) delete[] colors;
-      if (transparency) delete[] transparency;
-      if (lights) delete[] lights;
-
-      if (particleSystems) delete[] particleSystems;
-      if (ribbons) delete[] ribbons;
-
-    } else {
-      glDeleteLists(ModelDrawList, 1);
-    }
-    if(Reloaded)
-      delete reloadModel;
+    delete[] textures;
   }
-}
 
-void Model::reload(std::string name)
-{
-  Reloaded=true;
-  reloadModel=new Model(name);
+  delete[] globalSequences;
+
+  if (animated) {
+    // unload all sorts of crap
+    //delete[] vertices;
+    //delete[] normals;
+    if(indices)
+      delete[] indices;
+    if(anims)
+      delete[] anims;
+    if(origVertices)
+      delete[] origVertices;
+    if(bones) 
+      delete[] bones;
+    if (!animGeometry) {
+      glDeleteBuffers(1, &nbuf);
+    }
+    glDeleteBuffers(1, &vbuf);
+    glDeleteBuffers(1, &tbuf);
+
+    if (animTextures) 
+      delete[] texanims;
+    if (colors) 
+      delete[] colors;
+    if (transparency) 
+      delete[] transparency;
+    if (lights) 
+      delete[] lights;
+
+    if (particleSystems) 
+      delete[] particleSystems;
+    if (ribbons) 
+      delete[] ribbons;
+  } else {
+    glDeleteLists(ModelDrawList, 1);
+  }
 }
 
 
@@ -149,7 +145,6 @@ bool Model::isAnimated(MPQFile &f)
 
   animGeometry = false;
   animBones = false;
-  ind = false;
 
 
   ModelVertex *verts = (ModelVertex*)(f.getBuffer() + header.ofsVertices);
@@ -160,7 +155,7 @@ bool Model::isAnimated(MPQFile &f)
         if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags&8)) {
           if (bb.flags&8) {
             // if we have billboarding, the model will need per-instance animation
-            ind = false;///true;
+            mPerInstanceAnimation = true;
           }
           animGeometry = false;///true;
           break;
@@ -1097,23 +1092,13 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 
 void Model::draw()
 {
-  if( Reloaded )
-  {
-    reloadModel->draw( );
-    return;
-  }
-  if( !ok ) 
-    return;
-
   if( !animated ) 
   {
     glCallList( ModelDrawList );
   } 
   else 
   {
-    if( ind ) 
-      animate( 0 );
-    else if( !animcalc ) 
+    if( !animcalc || mPerInstanceAnimation ) 
     {
       animate( 0 );
       animcalc = true;
@@ -1141,25 +1126,15 @@ void Model::draw()
 
 /*void Model::drawTileMode()
 {
-  if(Reloaded)
-  {
-    reloadModel->draw();
-    return;
-  }
-  if (!ok) return;
-
   if (!animated) {
     glCallList(TileModeModelDrawList);
   } 
   else 
   {
-    if (ind) animate(0);
-    else {
-      if (!animcalc) {
+      if (!animcalc || mPerInstanceAnimation) {
         animate(0);
         animcalc = true;
       }
-    }
     drawModel( true );
 
     // effects are unfogged..?
@@ -1209,28 +1184,15 @@ void reportModelTimes()
 
 void Model::drawSelect( )
 {
-  if( Reloaded )
-  {
-    reloadModel->drawSelect( );
-    return;
-  }
-  if( !ok ) 
-    return;
-  
   if( !animated )
     glCallList(SelectModelDrawList);
   else 
   {
-    if( ind ) 
-      animate(0);
-    else 
-    {
-      if( !animcalc )
+      if( !animcalc || mPerInstanceAnimation )
       {
         animate( 0 );
         animcalc = true;
       }
-    }
     
         drawModelSelect( );
     
@@ -1265,14 +1227,6 @@ void Model::lightsOff( GLuint lbase )
 
 void Model::updateEmitters( float dt )
 {
-  if( Reloaded )
-  {
-    reloadModel->updateEmitters( dt );
-    return;
-  }
-  if( !ok ) 
-    return;
-
   for( size_t i = 0; i < header.nParticleEmitters; i++ )
     particleSystems[i].update( dt );
 }
@@ -1297,12 +1251,6 @@ int ModelManager::add( std::string name )
 
   do_add( name, id, model );
   return id;
-}
-void ModelManager::reload( )
-{
-  LogDebug << "Reloading models." << std::endl;
-  for( std::map<std::string, int>::iterator it = names.begin( ); it != names.end( ); ++it )
-    reinterpret_cast<Model*>( items[it->second] )->reload( it->first );
 }
 void ModelManager::resetAnim( )
 {
