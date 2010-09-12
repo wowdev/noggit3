@@ -154,7 +154,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 		char * lBuffer = new char[size];
 		theFile->read( lBuffer, size );
 		
-		int lPosition = 0;
+		unsigned int lPosition = 0;
 		while( lPosition < size )
 		{
 			mTextureFilenames.push_back( std::string( lBuffer + lPosition ) );
@@ -168,6 +168,92 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 		mTexturesLoaded = true;
 	}
 	
+	// - MMDX ----------------------------------------------
+	
+	theFile->seek( Header.mmdx + 0x14 );
+	theFile->read( &fourcc, 4 );
+	theFile->read( &size, 4 );
+	
+	assert( fourcc == 'MMDX' );
+	
+	if( size )
+	{
+		mModelsLoaded = false;
+		
+		char * lBuffer = new char[size];
+		theFile->read( lBuffer, size );
+		
+		unsigned int lPosition = 0;
+		while( lPosition < size )
+		{
+			mModelFilenames.push_back( std::string( lBuffer + lPosition ) );
+			lPosition += strlen( lBuffer + lPosition ) + 1;
+		}
+		
+		delete[] lBuffer;
+	}
+	else
+	{
+		mModelsLoaded = true;
+	}
+	
+	// - MWMO ----------------------------------------------
+	
+	theFile->seek( Header.mwmo + 0x14 );
+	theFile->read( &fourcc, 4 );
+	theFile->read( &size, 4 );
+	
+	assert( fourcc == 'MWMO' );
+	
+	if( size )
+	{
+		mWMOsLoaded = false;
+		
+		char * lBuffer = new char[size];
+		theFile->read( lBuffer, size );
+		
+		unsigned int lPosition = 0;
+		while( lPosition < size )
+		{
+			mWMOFilenames.push_back( std::string( lBuffer + lPosition ) );
+			lPosition += strlen( lBuffer + lPosition ) + 1;
+		}
+		
+		delete[] lBuffer;
+	}
+	else
+	{
+		mWMOsLoaded = true;
+	}
+	
+	// - MDDF ----------------------------------------------
+	
+	theFile->seek( Header.mddf + 0x14 );
+	theFile->read( &fourcc, 4 );
+	theFile->read( &size, 4 );
+	
+	assert( fourcc == 'MDDF' );
+	
+  ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>( theFile->getPointer() );
+  for( unsigned int i = 0; i < size / 36; i++ )
+  {
+    mModelInstances.push_back( mddf_ptr[i] );
+  }
+	
+	// - MODF ----------------------------------------------
+	
+	theFile->seek( Header.modf + 0x14 );
+	theFile->read( &fourcc, 4 );
+	theFile->read( &size, 4 );
+	
+	assert( fourcc == 'MODF' );
+	
+  ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>( theFile->getPointer() );
+  for( unsigned int i = 0; i < size / 64; i++ )
+  {
+    mWMOInstances.push_back( modf_ptr[i] );
+  }
+	
 	// - MISC ----------------------------------------------
 	
 	//! \todo  Parse all chunks in the new style!
@@ -179,53 +265,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 		
 		size_t nextpos = theFile->getPos() + size;
 
-		if ( fourcc == 'MMDX' ) 
-		{
-			// models ...
-			// MMID would be relative offsets for MMDX filenames
-			if(size!=0)
-			{
-				modelSize=size;
-				modelBuffer=new char[size];
-				theFile->read(modelBuffer,size);
-				modelPos=modelBuffer;
-				modelsLoaded=false;
-				curModelID=0;
-			}
-			else
-				modelsLoaded=true;
-
-		}
-		else if ( fourcc == 'MWMO' ) 
-		{
-			// map objects
-			// MWID would be relative offsets for MWMO filenames			
-			if(size!=0)
-			{
-				wmoSize=size;
-				wmoBuffer=new char[size];
-				theFile->read(wmoBuffer,size);
-				wmoPos=wmoBuffer;
-				wmosLoaded=false;
-			}
-			else
-				wmosLoaded=true;
-		}
-		else if ( fourcc == 'MDDF' ) 
-		{
-			// model instance data
-			modelNum = (int)size / 36;
-			modelInstances=new ENTRY_MDDF[modelNum];
-			theFile->read((unsigned char *)modelInstances,size);
-		}
-		else if ( fourcc == 'MODF' ) 
-		{
-			// wmo instance data
-			wmoNum = (int)size / 64;
-			wmoInstances=new ENTRY_MODF[wmoNum];
-			theFile->read((unsigned char *)wmoInstances,size);
-		}
-		else if ( fourcc == 'MH2O' ) 
+		if ( fourcc == 'MH2O' ) 
 		{
 			// water data
 			uint8_t * lMH2O_Chunk = theFile->getPointer( );
@@ -234,7 +274,7 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 			
 			for( int py = 0; py < 16; py++ )
 				for( int px = 0; px < 16; px++ )
-					for( int lLayer = 0; lLayer < lHeader[py * 16 + px].nLayers; lLayer++ )
+					for( unsigned int lLayer = 0; lLayer < lHeader[py * 16 + px].nLayers; lLayer++ )
 					{
 						MH2O_Tile lTile;
 						if( lHeader[py * 16 + px].ofsInformation )
@@ -409,24 +449,24 @@ void MapTile::loadTexture( )
 {
 	if( mTexturesLoaded )
 		return;
-
+  
 	for( std::vector<std::string>::iterator it = mTextureFilenames.begin( ); it != mTextureFilenames.end( ); it++ )
 	{
 		std::string lTexture = *it;
 		//! \todo  Find a different way to do this.
 		/*
-		if( video.mSupportShaders )
-		{
-			std::string lTemp = lTexture;
-			lTemp.insert( lTemp.length( ) - 4, "_s" );
-			if( MPQFileExists( lTemp.c_str( ) ) )
-					lTexture = lTemp;
-		}
-		*/
+     if( video.mSupportShaders )
+     {
+     std::string lTemp = lTexture;
+     lTemp.insert( lTemp.length( ) - 4, "_s" );
+     if( MPQFileExists( lTemp.c_str( ) ) )
+     lTexture = lTemp;
+     }
+     */
 		video.textures.add( lTexture );
 		textures.push_back( lTexture );
 	}
-
+  
 	mTexturesLoaded = true;
 }
 
@@ -436,145 +476,47 @@ void MapTile::finishTextureLoad( )
 		loadTexture( );
 }
 
+
 void MapTile::loadModel( )
 {
-	if(modelsLoaded)
+	if( mModelsLoaded )
 		return;
-	
-	if(modelSize<=0)
+  
+	for( std::vector<std::string>::iterator it = mModelFilenames.begin( ); it != mModelFilenames.end( ); it++ )
 	{
-		modelsLoaded=true;
+		std::string lModel = *it;
+		gWorld->modelmanager.add( lModel );
+		models.push_back( lModel );
+	}
+  
+	for( std::vector<ENTRY_MDDF>::iterator it = mModelInstances.begin( ); it != mModelInstances.end( ); it++ )
+	{
+		Model *model = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(models[it->nameID])];
+		gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( model, &(*it) ) ) );
+	}
+  
+	mModelsLoaded = true;
+}
+
+void MapTile::loadWMO( )
+{
+	if( mWMOsLoaded )
 		return;
-	}
-	
-	
-	if(strlen(modelPos)>0)
+  
+	for( std::vector<std::string>::iterator it = mWMOFilenames.begin( ); it != mWMOFilenames.end( ); it++ )
 	{
-    std::string path(modelPos);
-		gWorld->modelmanager.add(path);
-		models.push_back(path);
-		loadModelInstances(curModelID);
-		curModelID++;
+		std::string lWMO = *it;
+		gWorld->wmomanager.add( lWMO );
+		wmos.push_back( lWMO );
 	}
-
-	modelPos+=strlen(modelPos)+1;
-
-	if(modelPos>=modelBuffer+modelSize)
+  
+	for( std::vector<ENTRY_MODF>::iterator it = mWMOInstances.begin( ); it != mWMOInstances.end( ); it++ )
 	{
-		Log << "Finished loading models for \"" << fname << "\"." << std::endl;
-		modelsLoaded=true;
-		//Need to load Model Instances now
-		//loadModelInstances();
-		delete modelInstances;
-		delete modelBuffer;				
+		WMO *wmo = (WMO*)gWorld->wmomanager.items[gWorld->wmomanager.get(wmos[it->nameID])];
+		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( wmo, &(*it) ) ) );
 	}
-}
-
-void MapTile::loadModelInstances(int id)//adding do the map ony models with current modelID
-{
-	for (int i=0; i<modelNum; i++)
-	{
-		if(modelInstances[i].nameID!=id)
-			continue;
-
-		Model *model = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(models[modelInstances[i].nameID])];
-		ModelInstance inst(model, &modelInstances[i]);
-
-		gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( modelInstances[i].uniqueID, inst ) );
-	}	
-}
-
-/*void MapTile::loadModelInstances()
-{
-	for (int i=0; i<modelNum; i++)
-	{
-		Model *model = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(models[modelInstances[i].nameID])];
-		ModelInstance inst(model, &modelInstances[i]);
-		inst.modelID=modelInstances[i].nameID;
-		//addModelToList(model,f);
-		modelis.push_back(inst);
-	}
-	nMDX=modelNum;
-	delete modelInstances;
-}*/
-
-void MapTile::loadWMO()//loading WMO
-{
-	if(wmosLoaded)
-		return;	
-
-	if(wmoSize<=0)
-	{
-		wmosLoaded=true;
-		return;
-	}
-	
-	if(strlen(wmoPos)>0)
-	{
-    std::string path(wmoPos);
-		gWorld->wmomanager.add(path);
-		wmos.push_back(path);
-	}
-
-	wmoPos+=strlen(wmoPos)+1;
-
-	if(wmoPos>=wmoBuffer+wmoSize)
-	{
-		Log << "Finished loading WMOs for \"" << fname << "\"." << std::endl;
-		wmosLoaded=true;
-		//Need to load WMO Instances now
-		loadWMOInstances();
-		delete wmoBuffer;				
-	}
-}
-
-void MapTile::loadWMOInstances()
-{
-	for (int i=0; i<wmoNum; i++)
-	{
-		WMO *wmo = (WMO*)gWorld->wmomanager.items[gWorld->wmomanager.get(wmos[wmoInstances[i].nameID])];
-		WMOInstance inst(wmo, &wmoInstances[i]);
-		
-		//! \todo  Get this out.
-//		wmois.push_back(inst);
-		
-		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( wmoInstances[i].uniqueID, inst ) );
-	}
-	delete wmoInstances;
-}
-
-SDL_mutex * gLoadThreadMutex;
-
-int MapTileWMOLoadThread( void * pMapTile )
-{
-	LogDebug << "Starting WMO Load thread with maptile at x" << std::hex << pMapTile << "." << std::endl;
-	MapTile * lThis = reinterpret_cast<MapTile*>( pMapTile );
-
-	while( !lThis->wmosLoaded )
-	{
-		SDL_LockMutex( gLoadThreadMutex );
-		lThis->loadWMO( );
-		SDL_UnlockMutex( gLoadThreadMutex );
-	}
-
-	LogDebug << "Finished WMO Load thread." << std::endl;
-	return 0;
-}
-
-int MapTileModelLoadThread( void * pMapTile )
-{
-	LogDebug << "Starting model Load thread with maptile at x" << std::hex << pMapTile << "." << std::endl;
-	MapTile * lThis = reinterpret_cast<MapTile*>( pMapTile );
-
-	while( !lThis->modelsLoaded )
-	{
-	//	SDL_LockMutex( gLoadThreadMutex );
-		lThis->loadModel( );
-	//	SDL_UnlockMutex( gLoadThreadMutex );
-	}
-
-	LogDebug << "Finished model Load thread." << std::endl;
-	return 0;
+  
+	mWMOsLoaded = true;
 }
 
 void MapTile::finishLoading()
@@ -583,28 +525,21 @@ void MapTile::finishLoading()
 	while(!mTexturesLoaded)
 		loadTexture();
 	LogDebug << "finishLoading(textures) took " << TimerStop( ) << " ms." << std::endl;
+  
 	TimerStart();
 	while(!chunksLoaded)
 		loadChunk();
 	LogDebug << "finishLoading(chunks) took " << TimerStop( ) << " ms." << std::endl;
-
-	while( !wmosLoaded )
+  
+	TimerStart();
+	while( !mWMOsLoaded )
 		loadWMO( );
-
-	while( !modelsLoaded )
+	LogDebug << "finishLoading(wmos) took " << TimerStop( ) << " ms." << std::endl;
+  
+	TimerStart();
+	while( !mModelsLoaded )
 		loadModel( );
-	//MapTileModelLoadThread( this );
-
-	//gLoadThreadMutex = SDL_CreateMutex( );
-
-	//SDL_Thread * lModelThread = SDL_CreateThread( MapTileModelLoadThread, this );
-	//SDL_Thread * lWMOThread = SDL_CreateThread( MapTileWMOLoadThread, this );
-
-	//SDL_WaitThread( lModelThread, 0 );
-	//SDL_WaitThread( lWMOThread, 0 );
-
-	//SDL_DestroyMutex( gLoadThreadMutex );
-
+	LogDebug << "finishLoading(models) took " << TimerStop( ) << " ms." << std::endl;
 }
 
 MapTile::~MapTile()

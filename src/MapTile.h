@@ -27,6 +27,15 @@ private:
 	// Data to be loaded:
 	bool mTexturesLoaded;
 	std::vector<std::string> mTextureFilenames;
+  
+  bool mModelsLoaded;
+	std::vector<std::string> mModelFilenames;
+  std::vector<ENTRY_MDDF> mModelInstances;
+  
+  bool mWMOsLoaded;
+	std::vector<std::string> mWMOFilenames;
+  std::vector<ENTRY_MODF> mWMOInstances;
+  
 
 	std::string fname;
 	
@@ -40,38 +49,14 @@ private:
 
 	void loadTexture();
 	void finishTextureLoad();
-
-	char	*modelBuffer;
-	char	*modelPos;
-	size_t	modelSize;
-	int		curModelID;
 	
-	uint32_t	modelNum;
-	ENTRY_MDDF	*modelInstances;
 	
 public:
 	void loadModel();
-	bool	modelsLoaded;
-private:
-	void loadModelInstances(int id);
-
-
-	char	*wmoBuffer;
-	char	*wmoPos;
-	size_t	wmoSize;
-	
-	uint32_t	wmoNum;
-	ENTRY_MODF	*wmoInstances;
-	
-public:
 	void loadWMO();
-	bool	wmosLoaded;
-private:
-	void loadWMOInstances();
 
-public:
 	void finishLoading();
-	bool isLoaded(){return mTexturesLoaded&modelsLoaded&wmosLoaded;};
+	bool isLoaded(){return mTexturesLoaded&&mModelsLoaded&&mWMOsLoaded;};
 	void partialLoad(){
 		if( !mTexturesLoaded )
 		{
@@ -82,9 +67,9 @@ public:
 			//loadChunk();
 			loadChunk();
 		}
-		else if(!wmosLoaded)
+		else if(!mWMOsLoaded)
 			loadWMO();
-		else if(!modelsLoaded)
+		else if(!mModelsLoaded)
 			loadModel();		
 	};
 	std::vector<std::string> textures;

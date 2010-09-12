@@ -6,7 +6,7 @@
 #include "appstate.h"
 #include "freetype.h"
 
-/// XXX this really needs to be refactored into a singleton class
+//! \todo this really needs to be refactored into a singleton class
 
 #define APP_TITLE "Noggit3 Studio"
 #define APP_SUBTITLE "a wow map editor"
@@ -34,57 +34,10 @@ int randint(int lower, int upper);
 class AreaDB;
 extern AreaDB gAreaDB;
 
-
 int TimerStop();
 void TimerStart();
 
-#endif
+class AsyncLoader;
+extern AsyncLoader* gAsyncLoader;
 
-/// Automated comments for needed commit to get the revision in this file ._. Talk to schlumpf for the script.
-// revision by schlumpf 
-// revision by Steff 
-// revision by schlumpf 
-// revision by schlumpf 
-// revision by schlumpf 
-// revision by schlumpf 
-// revision by schlumpf 
-// revision by schlumpf 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by schlumpf 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by schlumpf 
-// revision by Steff 
-// revision by schlumpf 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by Steff 
-// revision by schlumpf 
-// revision by schlumpf 
-// revision by schlumpf 
-// revision by schlumpf 
-// revision by Steff 
-// revision by schlumpf 
-// revision by schlumpf 
-// revision by schlumpf 
-// revision by schlumpf 
-// revision by Steff 
+#endif

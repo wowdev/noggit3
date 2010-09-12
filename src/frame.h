@@ -17,7 +17,7 @@ public:
 	bool clickable;
 	bool mustresize;
 
-	frame( ) : movable( false ), hidden( false ), clickable( false ), parent( 0 ), mustresize( false )
+	frame( ) : parent( 0 ), movable( false ), hidden( false ), clickable( false ), mustresize( false )
 	{
 		x = 0.0f;
 		y = 0.0f;
@@ -25,7 +25,7 @@ public:
 		height = 0.0f;
 	}
 
-	frame( float pX, float pY, float w, float h ) : movable( false ), hidden( false ), clickable( false ), parent( 0 ), mustresize( false )
+	frame( float pX, float pY, float w, float h ) : parent( 0 ), movable( false ), hidden( false ), clickable( false ), mustresize( false )
 	{
 		x = pX;
 		y = pY;

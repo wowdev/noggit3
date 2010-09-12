@@ -25,7 +25,7 @@ public:
 
 	bool mBigAlpha;
 
-	unsigned int nameID;
+  int nameID;
 
 	unsigned int Flags;
 	
@@ -86,7 +86,7 @@ public:
 	void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
 	void blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
-	bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, int texture);
+	bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, unsigned int texture);
 	int addTexture(GLuint texture);
 	void eraseTextures();
 
