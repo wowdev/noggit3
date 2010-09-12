@@ -33,10 +33,8 @@ public:
 
 	bool haswater;
 
-	bool hasholes;
 	int holes;
 
-	float waterlevel[2];
 
 	int				tex[4];
 	GLuint		textures[4];
@@ -74,8 +72,11 @@ public:
 
 	void recalcNorms();
 
-	Vec3D tn[mapbufsize], tv[mapbufsize], tm[mapbufsize];
-	Vec4D ts[mapbufsize];
+	Vec3D mNormals[mapbufsize];
+  Vec3D mVertices[mapbufsize];
+  //! \todo Is this needed? Can't we just use the real vertices?
+  Vec3D mMinimap[mapbufsize];
+	Vec4D mFakeShadows[mapbufsize];
 
 	void getSelectionCoord(float *x,float *z);
 	float getSelectionHeight();
