@@ -1406,7 +1406,7 @@ void MapChunk::recalcNorms()
 	glBindBuffer(GL_ARRAY_BUFFER, minishadows);
 	glBufferData(GL_ARRAY_BUFFER, mapbufsize*4*sizeof(float), mFakeShadows, GL_STATIC_DRAW);
 }
-//next is a manipulating of terrain
+
 void MapChunk::changeTerrain(float x, float z, float change, float radius, int BrushType)
 {
 	float dist,xdiff,zdiff;
@@ -1473,9 +1473,6 @@ void MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 
 		if(dist<radius)
 		{
-
-
-
 			if(BrushType==0)//Flat
 			{
 				mVertices[i].y=remain*mVertices[i].y+(1-remain)*h;
@@ -1647,7 +1644,7 @@ int MapChunk::addTexture( GLuint texture )
 	return texLevel;
 }
 
-bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, float pressure, unsigned int texture)//paint with texture
+bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, float pressure, unsigned int texture)
 {
 	float zPos,xPos,change,xdiff,zdiff,dist, radius;
 
@@ -1744,7 +1741,6 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 	return true;
 }
 
-//--Holes ;P
 bool MapChunk::isHole( int i, int j )
 {
 	return( holes & ( ( 1 << ((j*4)+i) ) ));
@@ -1762,7 +1758,6 @@ void MapChunk::removeHole( int i, int j )
 	initStrip( );
 }
 
-//-AreaID
 void MapChunk::setAreaID( int ID )
 {
 	areaID = ID;

@@ -539,7 +539,8 @@ void MapTile::drawWater()
 	
 	for( std::vector<Liquid*>::iterator liq = mLiquids.begin( ); liq != mLiquids.end( ); liq++ )
 		( *liq )->draw( );
-
+  
+	glEnable(GL_LIGHTING);
 	glEnable(GL_COLOR_MATERIAL);
 }
 
