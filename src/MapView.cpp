@@ -25,9 +25,9 @@
 using namespace std;
 
 
-#define XSENS 15.0f
-#define YSENS 15.0f
-#define SPEED 66.6f
+static const float XSENS = 15.0f;
+static const float YSENS = 15.0f;
+static const float SPEED = 66.6f;
 
 int MouseX;
 int MouseY;

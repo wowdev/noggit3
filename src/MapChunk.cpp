@@ -84,7 +84,7 @@ bool drawFlags=false;
 
 GLuint	Contour=0;
 float			CoordGen[4];
-#define CONTOUR_WIDTH	128
+static const int CONTOUR_WIDTH = 128;
 void GenerateContourMap()
 {
 	unsigned char	CTexture[CONTOUR_WIDTH*4];
@@ -536,7 +536,7 @@ void MapChunk::loadTextures()
 		textures[i] = video.textures.get(mt->textures[tex[i]]);
 }
 
-#define texDetail 8.0f
+static const float texDetail = 8.0f;
 
 void SetAnim(int anim)
 {
@@ -567,7 +567,7 @@ void RemoveAnim(int anim)
 	}
 }
 
-#define	TEX_RANGE 62.0f/64.0f
+static const float TEX_RANGE = 62.0f/64.0f;
 
 void MapChunk::drawTextures()
 {

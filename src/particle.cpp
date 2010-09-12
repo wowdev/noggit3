@@ -1,7 +1,7 @@
 #include "particle.h"
 #include "noggit.h"
 
-#define MAX_PARTICLES 10000
+static const int MAX_PARTICLES = 10000;
 
 Vec4D fromARGB(uint32_t color)
 {
