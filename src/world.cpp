@@ -20,7 +20,8 @@
 using namespace std;
  
 World *gWorld=0;
-#define BUFSIZE 8192
+
+static const int BUFSIZE = 8192;
 unsigned int	SelectBuffer[BUFSIZE];
 
 

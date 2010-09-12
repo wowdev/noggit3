@@ -1,8 +1,6 @@
 #ifndef NOGGIT_H
 #define NOGGIT_H
 
-#define DEBUG__LOGGINGTOCONSOLE 1
-
 #include <vector>
 #include <string>
 #include "appstate.h"
