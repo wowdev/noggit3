@@ -24,49 +24,15 @@ private:
   // MHDR:
   int mFlags;
 
-  // Data to be loaded:
-  bool mTexturesLoaded;
+  // Data to be loaded and later unloaded.
   std::vector<std::string> mTextureFilenames;
-
-  bool mModelsLoaded;
   std::vector<std::string> mModelFilenames;
-  std::vector<ENTRY_MDDF> mModelInstances;
-
-  bool mWMOsLoaded;
   std::vector<std::string> mWMOFilenames;
-  std::vector<ENTRY_MODF> mWMOInstances;
+
+  std::string mFilename;
   
-
-	std::string fname;
-	
-	MPQFile	*theFile;
-
-	bool	chunksLoaded;
-	int		nextChunk;
-	size_t mcnk_offsets[256], mcnk_sizes[256];
-	void	loadChunk();
-	void	finishChunkLoad();
-
-	void loadTexture();
-	void finishTextureLoad();
-	
-	
+  
 public:
-	void loadModel();
-	void loadWMO();
-
-	void finishLoading();
-	bool isLoaded(){return mTexturesLoaded&&mModelsLoaded&&mWMOsLoaded;};
-	void partialLoad(){
-		if( !mTexturesLoaded )
-				loadTexture();
-		else if(!chunksLoaded)
-			loadChunk();
-		else if(!mWMOsLoaded)
-			loadWMO();
-		else if(!mModelsLoaded)
-			loadModel();		
-	}
 
 	int x, z;
 	bool ok;

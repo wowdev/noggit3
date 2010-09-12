@@ -77,82 +77,83 @@ struct SMAreaHeader // 03-29-2005 By ObscuR, --schlumpf_ 02:35, 8 August 2009 (C
 };
 
 
-MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), topnode(0,0,16)
+MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha) : mFilename(filename), x(x0), z(z0), topnode(0,0,16)
 {
 	xbase = x0 * TILESIZE;
 	zbase = z0 * TILESIZE;
-	mBigAlpha=bigAlpha;
+	mBigAlpha = bigAlpha;
 
-	startTimer();
-	fname=filename;
-
-	theFile = new MPQFile(filename);
-	ok = !theFile->isEof();
+	MPQFile theFile( mFilename );
+	ok = !theFile.isEof( );
 	
 	if( !ok ) 
 	{
-		LogError << "Could not open tile " << x0 << ", " << z0 << " (\"" << fname << "\")" << std::endl;
+		LogError << "Could not open tile " << x0 << ", " << z0 << " (\"" << mFilename << "\")" << std::endl;
 		return;
 	}
 
-	if( theFile->isExternal( ) )
-		Log << "Opening tile " << x0 << ", " << z0 << " (\"" << fname << "\") from disk." << std::endl;
+	if( theFile.isExternal( ) )
+		Log << "Opening tile " << x0 << ", " << z0 << " (\"" << mFilename << "\") from disk." << std::endl;
 	else
-		Log << "Opening tile " << x0 << ", " << z0 << " (\"" << fname << "\") from MPQ." << std::endl;
-
+		Log << "Opening tile " << x0 << ", " << z0 << " (\"" << mFilename << "\") from MPQ." << std::endl;
+  
+  // - Parsing the file itself. --------------------------
+  
+  // We store this data to load it at the end.
+  uint32_t lMCNKOffsets[256];
+  std::vector<ENTRY_MDDF> lModelInstances;
+  std::vector<ENTRY_MODF> lWMOInstances;
+  
 	uint32_t fourcc;
 	uint32_t size;
-
+  
 	SMAreaHeader Header;
 
 	// - MVER ----------------------------------------------
 	
 	uint32_t version;
 	
-	theFile->read( &fourcc, 4 );
-	theFile->seekRelative( 4 );
-	theFile->read( &version, 4 );
+	theFile.read( &fourcc, 4 );
+	theFile.seekRelative( 4 );
+	theFile.read( &version, 4 );
 	
 	assert( fourcc == 'MVER' && version == 18 );
 	
 	// - MHDR ----------------------------------------------
 	
-	theFile->read( &fourcc, 4 );
-	theFile->seekRelative( 4 );
+	theFile.read( &fourcc, 4 );
+	theFile.seekRelative( 4 );
 	
 	assert( fourcc == 'MHDR' );
 	
-	theFile->read( &Header, sizeof( SMAreaHeader ) );
+	theFile.read( &Header, sizeof( SMAreaHeader ) );
 	
 	// - MCIN ----------------------------------------------
 	
-	theFile->seek( Header.mcin + 0x14 );
-	theFile->read( &fourcc, 4 );
-	theFile->seekRelative( 4 );
+	theFile.seek( Header.mcin + 0x14 );
+	theFile.read( &fourcc, 4 );
+	theFile.seekRelative( 4 );
 	
 	assert( fourcc == 'MCIN' );
 	
 	for( int i = 0; i < 256; i++ ) 
 	{
-		theFile->read( &mcnk_offsets[i], 4 );
-		theFile->read( &mcnk_sizes[i], 4 );
-		theFile->seekRelative( 8 );
+		theFile.read( &lMCNKOffsets[i], 4 );
+		theFile.seekRelative( 0xC );
 	}
 	
 	// - MTEX ----------------------------------------------
 	
-	theFile->seek( Header.mtex + 0x14 );
-	theFile->read( &fourcc, 4 );
-	theFile->read( &size, 4 );
+	theFile.seek( Header.mtex + 0x14 );
+	theFile.read( &fourcc, 4 );
+	theFile.read( &size, 4 );
 	
 	assert( fourcc == 'MTEX' );
 	
 	if( size )
 	{
-		mTexturesLoaded = false;
-		
 		char * lBuffer = new char[size];
-		theFile->read( lBuffer, size );
+		theFile.read( lBuffer, size );
 		
 		unsigned int lPosition = 0;
 		while( lPosition < size )
@@ -163,25 +164,19 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 		
 		delete[] lBuffer;
 	}
-	else
-	{
-		mTexturesLoaded = true;
-	}
 	
 	// - MMDX ----------------------------------------------
 	
-	theFile->seek( Header.mmdx + 0x14 );
-	theFile->read( &fourcc, 4 );
-	theFile->read( &size, 4 );
+	theFile.seek( Header.mmdx + 0x14 );
+	theFile.read( &fourcc, 4 );
+	theFile.read( &size, 4 );
 	
 	assert( fourcc == 'MMDX' );
 	
 	if( size )
 	{
-		mModelsLoaded = false;
-		
 		char * lBuffer = new char[size];
-		theFile->read( lBuffer, size );
+		theFile.read( lBuffer, size );
 		
 		unsigned int lPosition = 0;
 		while( lPosition < size )
@@ -192,25 +187,19 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 		
 		delete[] lBuffer;
 	}
-	else
-	{
-		mModelsLoaded = true;
-	}
 	
 	// - MWMO ----------------------------------------------
 	
-	theFile->seek( Header.mwmo + 0x14 );
-	theFile->read( &fourcc, 4 );
-	theFile->read( &size, 4 );
+	theFile.seek( Header.mwmo + 0x14 );
+	theFile.read( &fourcc, 4 );
+	theFile.read( &size, 4 );
 	
 	assert( fourcc == 'MWMO' );
 	
 	if( size )
 	{
-		mWMOsLoaded = false;
-		
 		char * lBuffer = new char[size];
-		theFile->read( lBuffer, size );
+		theFile.read( lBuffer, size );
 		
 		unsigned int lPosition = 0;
 		while( lPosition < size )
@@ -221,54 +210,50 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 		
 		delete[] lBuffer;
 	}
-	else
-	{
-		mWMOsLoaded = true;
-	}
 	
 	// - MDDF ----------------------------------------------
 	
-	theFile->seek( Header.mddf + 0x14 );
-	theFile->read( &fourcc, 4 );
-	theFile->read( &size, 4 );
+	theFile.seek( Header.mddf + 0x14 );
+	theFile.read( &fourcc, 4 );
+	theFile.read( &size, 4 );
 	
 	assert( fourcc == 'MDDF' );
 	
-  ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>( theFile->getPointer() );
+  ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>( theFile.getPointer() );
   for( unsigned int i = 0; i < size / 36; i++ )
   {
-    mModelInstances.push_back( mddf_ptr[i] );
+    lModelInstances.push_back( mddf_ptr[i] );
   }
 	
 	// - MODF ----------------------------------------------
 	
-	theFile->seek( Header.modf + 0x14 );
-	theFile->read( &fourcc, 4 );
-	theFile->read( &size, 4 );
+	theFile.seek( Header.modf + 0x14 );
+	theFile.read( &fourcc, 4 );
+	theFile.read( &size, 4 );
 	
 	assert( fourcc == 'MODF' );
 	
-  ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>( theFile->getPointer() );
+  ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>( theFile.getPointer() );
   for( unsigned int i = 0; i < size / 64; i++ )
   {
-    mWMOInstances.push_back( modf_ptr[i] );
+    lWMOInstances.push_back( modf_ptr[i] );
   }
 	
 	// - MISC ----------------------------------------------
 	
 	//! \todo  Parse all chunks in the new style!
 
-	while( !theFile->isEof() ) 
+	while( !theFile.isEof() ) 
 	{
-		theFile->read( &fourcc, 4 );
-		theFile->read( &size, 4 );
+		theFile.read( &fourcc, 4 );
+		theFile.read( &size, 4 );
 		
-		size_t nextpos = theFile->getPos() + size;
+		size_t nextpos = theFile.getPos() + size;
 
 		if ( fourcc == 'MH2O' ) 
 		{
 			// water data
-			uint8_t * lMH2O_Chunk = theFile->getPointer( );
+			uint8_t * lMH2O_Chunk = theFile.getPointer( );
 
 			MH2O_Header * lHeader = reinterpret_cast<MH2O_Header*>( lMH2O_Chunk );
 			
@@ -373,22 +358,22 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 					}
 		}
 
-		theFile->seek((int)nextpos);
+		theFile.seek((int)nextpos);
 	}
 	
 	// - MFBO ----------------------------------------------
 	
 	if( Header.flags & 1 )
 	{
-		theFile->seek( Header.mfbo + 0x14 );
-		theFile->read( &fourcc, 4 );
-		theFile->read( &size, 4 );
+		theFile.seek( Header.mfbo + 0x14 );
+		theFile.read( &fourcc, 4 );
+		theFile.read( &size, 4 );
 		
 		assert( fourcc == 'MFBO' );
 		
 		short mMaximum[9], mMinimum[9];
-		theFile->read( mMaximum, sizeof( short[9] ) );
-		theFile->read( mMinimum, sizeof( short[9] ) );
+		theFile.read( mMaximum, sizeof( short[9] ) );
+		theFile.read( mMinimum, sizeof( short[9] ) );
 			
 		const float xPositions[] = { this->xbase, this->xbase + 266.0f, this->xbase + 533.0f };
 		float yPositions[] = { this->zbase, this->zbase + 266.0f, this->zbase + 533.0f };
@@ -410,47 +395,9 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha): x(x0), z(z0), t
 	}
 	
 	// - Done. ---------------------------------------------
-
-	Log << "Finished processing everything but MCNKs in " << stopTimer2( ) << "ms." << std::endl;
-
-	//while(!texturesLoaded)
-	//	loadTexture();
-
-	// read individual map chunks
-	/*for (int j=0; j<16; j++) {
-		for (int i=0; i<16; i++) {
-			f.seek((int)mcnk_offsets[j*16+i]);
-			chunks[j][i].init(this, f);
-		}
-	}*/
-	chunksLoaded = false;
-	nextChunk = 0;
-}
-
-void MapTile::loadChunk( )
-{	
-	if( chunksLoaded )
-		return;
-	
-	for( nextChunk = 0; nextChunk < 256; nextChunk++ ) 
-	{
-		theFile->seek( mcnk_offsets[nextChunk] );
-		chunks[nextChunk / 16][nextChunk % 16] = new MapChunk( this, *theFile, mBigAlpha );
-	}
-	
-	theFile->close( );
-	chunksLoaded = true;
-	
-	topnode.setup( this );
-}
-
-
-void MapTile::loadTexture( )
-{
-	if( mTexturesLoaded )
-		return;
   
-	for( std::vector<std::string>::iterator it = mTextureFilenames.begin( ); it != mTextureFilenames.end( ); it++ )
+  // - Load textures -------------------------------------
+  for( std::vector<std::string>::iterator it = mTextureFilenames.begin( ); it != mTextureFilenames.end( ); it++ )
 	{
 		std::string lTexture = *it;
 		//! \todo  Find a different way to do this.
@@ -466,77 +413,40 @@ void MapTile::loadTexture( )
 		video.textures.add( lTexture );
 	}
   
-	mTexturesLoaded = true;
-}
-
-void MapTile::finishTextureLoad( )
-{
-	while( !mTexturesLoaded )
-		loadTexture( );
-}
-
-
-void MapTile::loadModel( )
-{
-	if( mModelsLoaded )
-		return;
-  
-	for( std::vector<std::string>::iterator it = mModelFilenames.begin( ); it != mModelFilenames.end( ); it++ )
-	{
-		std::string lModel = *it;
-		gWorld->modelmanager.add( lModel );
-	}
-  
-	for( std::vector<ENTRY_MDDF>::iterator it = mModelInstances.begin( ); it != mModelInstances.end( ); it++ )
-	{
-		Model *model = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(mModelFilenames[it->nameID])];
-		gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( model, &(*it) ) ) );
-	}
-  
-	mModelsLoaded = true;
-}
-
-void MapTile::loadWMO( )
-{
-	if( mWMOsLoaded )
-		return;
-  
+  // - Load WMOs -----------------------------------------
 	for( std::vector<std::string>::iterator it = mWMOFilenames.begin( ); it != mWMOFilenames.end( ); it++ )
 	{
-		std::string lWMO = *it;
-		gWorld->wmomanager.add( lWMO );
+		gWorld->wmomanager.add( *it );
 	}
   
-	for( std::vector<ENTRY_MODF>::iterator it = mWMOInstances.begin( ); it != mWMOInstances.end( ); it++ )
+	for( std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin( ); it != lWMOInstances.end( ); it++ )
 	{
 		WMO *wmo = (WMO*)gWorld->wmomanager.items[gWorld->wmomanager.get(mWMOFilenames[it->nameID])];
 		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( wmo, &(*it) ) ) );
 	}
   
-	mWMOsLoaded = true;
-}
-
-void MapTile::finishLoading()
-{
-	TimerStart();
-	while(!mTexturesLoaded)
-		loadTexture();
-	LogDebug << "finishLoading(textures) took " << TimerStop( ) << " ms." << std::endl;
+  // - Load M2s ------------------------------------------
+	for( std::vector<std::string>::iterator it = mModelFilenames.begin( ); it != mModelFilenames.end( ); it++ )
+	{
+		gWorld->modelmanager.add( *it );
+	}
   
-	TimerStart();
-	while(!chunksLoaded)
-		loadChunk();
-	LogDebug << "finishLoading(chunks) took " << TimerStop( ) << " ms." << std::endl;
+	for( std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin( ); it != lModelInstances.end( ); it++ )
+	{
+		Model *model = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(mModelFilenames[it->nameID])];
+		gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( model, &(*it) ) ) );
+	}
   
-	TimerStart();
-	while( !mWMOsLoaded )
-		loadWMO( );
-	LogDebug << "finishLoading(wmos) took " << TimerStop( ) << " ms." << std::endl;
-  
-	TimerStart();
-	while( !mModelsLoaded )
-		loadModel( );
-	LogDebug << "finishLoading(models) took " << TimerStop( ) << " ms." << std::endl;
+  // - Load chunks ---------------------------------------
+	for( int nextChunk = 0; nextChunk < 256; nextChunk++ ) 
+	{
+		theFile.seek( lMCNKOffsets[nextChunk] );
+		chunks[nextChunk / 16][nextChunk % 16] = new MapChunk( this, theFile, mBigAlpha );
+	}
+	
+	theFile.close( );
+	
+	topnode.setup( this );
 }
 
 MapTile::~MapTile()
@@ -546,24 +456,16 @@ MapTile::~MapTile()
 
 	LogDebug << "Unloading tile " << x << "," << z << "." << std::endl;
 
-	if(chunksLoaded)
-	{
-		topnode.cleanup();
+  topnode.cleanup();
 
-		for (int j=0; j<16; j++) {
-			for (int i=0; i<16; i++) {
-				delete chunks[j][i];
-			}
-		}
-	}
-	else
-	{
-		for(int i=0;i<nextChunk;i++)
-			delete chunks[i/16][i%16];
-	}
+  for (int j=0; j<16; j++) {
+    for (int i=0; i<16; i++) {
+      delete chunks[j][i];
+    }
+  }
 
 	for (std::vector<std::string>::iterator it = mTextureFilenames.begin(); it != mTextureFilenames.end(); ++it) {
-        video.textures.delbyname(*it);
+    video.textures.delbyname(*it);
 	}
 
 	for (std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); ++it) {
@@ -581,13 +483,6 @@ void MapTile::draw()
 {
 	if (!ok) 
 		return;
-	
-	if(!mTexturesLoaded)
-		finishTextureLoad();
-	
-	while(!chunksLoaded)
-		loadChunk();
-
 
 	/* Selection circle
 	if( false && gWorld->IsSelection( eEntry_MapChunk ) && terrainMode != 3 )
@@ -625,13 +520,6 @@ void MapTile::drawSelect()
 	if (!ok) 
 		return;
 	
-	//! \todo  Do we really need to load textures for selecting? ..
-	if(!mTexturesLoaded)
-		finishTextureLoad();
-	
-	while(!chunksLoaded)
-		loadChunk();
-	
 	for (int j=0; j<16; j++)
 		for (int i=0; i<16; i++)
 			chunks[j][i]->drawSelect();
@@ -642,9 +530,6 @@ void MapTile::drawLines()//draw red lines around the square of a chunk
 	if (!ok) 
 		return;
 	
-	while(!chunksLoaded)
-		loadChunk();
-
 	glDisable(GL_COLOR_MATERIAL);
 	
 	for (int j=0; j<16; j++)
@@ -683,13 +568,6 @@ void MapTile::drawWater()
 	if (!ok) 
 		return;
 
-	//! \todo  Do we really need textures for drawing water? ..
-	if(!mTexturesLoaded)
-		finishTextureLoad();
-
-	while(!chunksLoaded)
-		loadChunk();
-
 	glDisable(GL_COLOR_MATERIAL);
 	glDisable(GL_LIGHTING);
 	
@@ -704,12 +582,6 @@ void MapTile::drawTextures()
 {
 	if (!ok) 
 		return;
-	
-	if(!mTexturesLoaded)
-		finishTextureLoad();
-
-	while(!chunksLoaded)
-		loadChunk();
 
 	float xOffset,yOffset;
 
@@ -880,7 +752,7 @@ void SetChunkHeader( sExtendableArray pArray, int pPosition, int pMagix, int pSi
 
 void MapTile::saveTile( )
 {
-	Log << "Saving ADT \"" << fname << "\"." << std::endl;
+	Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
 
 	int lID;	// This is a global counting variable. Do not store something in here you need later.
 
@@ -1531,7 +1403,7 @@ void MapTile::saveTile( )
 	//! \todo  MH2O
 	//! \todo  MTFX
 	
-	MPQFile f( fname );
+	MPQFile f( mFilename );
 	f.setBuffer( lADTFile.GetPointer<uint8_t>( ), lADTFile.mSize );
 	f.SaveFile( );
 	f.close( );
