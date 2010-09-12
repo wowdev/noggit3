@@ -9,7 +9,6 @@
 class Vec3D;
 class Liquid;
 class MapChunk;
-class MPQFile;
 
 class MapTile 
 {
@@ -23,6 +22,7 @@ private:
 
   // MHDR:
   int mFlags;
+  bool mBigAlpha;
 
   // Data to be loaded and later unloaded.
   std::vector<std::string> mTextureFilenames;
@@ -30,42 +30,32 @@ private:
   std::vector<std::string> mWMOFilenames;
 
   std::string mFilename;
+
+  MapChunk * mChunks[16][16];
   
 public:
-
+  //! \brief Get the maximum height of terrain on this map tile.
   float getMaxHeight();
-  
+
+  //! \brief Get chunk for sub offset x,z.
+  MapChunk* getChunk( unsigned int x, unsigned int z );
+
 	int x, z;
 	float xbase, zbase;
-  
-  
-	bool ok;
 
-	bool mBigAlpha;
-
-
-	MapChunk * chunks[16][16];
-
-	MapTile(int x0, int z0, char* filename,bool bigAlpha);
+	MapTile(int x0, int z0, const std::string& filename,bool bigAlpha);
 	~MapTile();
 
 	void draw();
 	void drawSelect();
 	void drawLines();
 	void drawWater();
-	void drawSky();
-	//void drawPortals();
-	//void drawModelsMapTile();
 	void drawTextures();
 	void drawMFBO();
 
 	bool GetVertex(float x,float z, Vec3D *V);
-	
 
 	void saveTile();
-
-	/// Get chunk for sub offset x,z
-	MapChunk *getChunk(unsigned int x, unsigned int z);
   
   friend class MapChunk;
 };

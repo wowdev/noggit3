@@ -35,7 +35,6 @@ class WMOGroup {
 	Liquid *lq;
 	std::vector< std::pair<GLuint, int> > lists;
 public:
-	bool ok;
 	Vec3D BoundingBoxMin;
 	Vec3D BoundingBoxMax;
 	Vec3D VertexBoxMin;
@@ -128,9 +127,6 @@ struct WMOFog {
 };
 
 class WMO: public ManagedItem {
-private:
-	bool Reloaded;
-	WMO	*reloadWMO;
 public:
 	bool draw_group_boundingboxes;
 
@@ -140,7 +136,6 @@ public:
 	int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
 	WMOMaterial *mat;
 	Vec3D extents[2];
-	bool ok;
 	std::vector<std::string> textures;
 	std::vector<std::string> models;
 	std::vector<ModelInstance> modelis;
@@ -158,12 +153,6 @@ public:
 
 	WMO(std::string name);
 	~WMO();
-	void reload(std::string name){
-		if(Reloaded)
-			delete reloadWMO;
-		Reloaded=true;
-		reloadWMO=new WMO(name);
-	}
 	void draw(int doodadset, const Vec3D& ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight);
 	void drawSelect(int doodadset, const Vec3D& ofs, const float rot);
 	//void drawPortals();
@@ -176,7 +165,6 @@ public:
 class WMOManager: public SimpleManager {
 public:
 	int add(std::string name);
-	void reload();
 };
 
 
