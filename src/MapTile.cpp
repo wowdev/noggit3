@@ -1239,13 +1239,13 @@ void MapTile::saveTile( )
 
 					float lMedian = 0.0f;
 					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
-						lMedian = lMedian + chunks[y][x]->tv[i].y;
+						lMedian = lMedian + chunks[y][x]->mVertices[i].y;
 
 					lMedian = lMedian / ( 9 * 9 + 8 * 8 );
 					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ypos = lMedian;
 
 					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
-						lHeightmap[i] = chunks[y][x]->tv[i].y - lMedian;
+						lHeightmap[i] = chunks[y][x]->mVertices[i].y - lMedian;
 					
 					lCurrentPosition += 8 + lMCVT_Size;
 					lMCNK_Size += 8 + lMCVT_Size;
@@ -1265,9 +1265,9 @@ void MapTile::saveTile( )
 
 					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
 					{
-						lNormals[i*3+0] = roundc( -chunks[y][x]->tn[i].z * 127 );
-						lNormals[i*3+1] = roundc( -chunks[y][x]->tn[i].x * 127 );
-						lNormals[i*3+2] = roundc( -chunks[y][x]->tn[i].y * 127 );
+						lNormals[i*3+0] = roundc( -chunks[y][x]->mNormals[i].z * 127 );
+						lNormals[i*3+1] = roundc( -chunks[y][x]->mNormals[i].x * 127 );
+						lNormals[i*3+2] = roundc( -chunks[y][x]->mNormals[i].y * 127 );
 					}
 					
 					lCurrentPosition += 8 + lMCNR_Size;
