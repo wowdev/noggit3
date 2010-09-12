@@ -678,8 +678,6 @@ void World::enterTileInit(int x, int z)
 	for (int j=1; j<4; j++) {
 		for (int i=1; i<4; i++) {
 				current[j][i] = loadTile(x-2+i, z-2+j);
-				if(current[j][i])
-					current[j][i]->finishLoading();
 		}
 	}
 	if (autoheight && current[2][2]!=0 && current[2][2]->ok) {
@@ -935,9 +933,10 @@ bool primaryLoaded;
 int	loadingTile=0;
 int	update=0;
 
+//! \todo Implement the AsyncObject loading and remove this.
 void World::onTheFlyLoading()
 {
-	//On the fly loading
+/*	//On the fly loading
 	primaryLoaded=true;
 	for (int j=1; j<4; j++) {
 		for (int i=1; i<4; i++) {
@@ -1000,7 +999,7 @@ void World::onTheFlyLoading()
 				loadingTile=0;
 		}while(!workDone);		
 		
-	}
+	}*/
 }
 
 void World::draw()
@@ -1796,7 +1795,6 @@ void World::saveMap()
 			if ((!oktile(x,y))|| (maps[y][x] == 0))
 				continue;
 			ATile=loadTile(x,y);
-			ATile->finishLoading();
 			glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT); 
 
 			glPushMatrix();
