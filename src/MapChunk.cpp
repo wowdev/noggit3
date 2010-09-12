@@ -894,8 +894,8 @@ void MapChunk::drawPass(int anim)
 		glTranslatef(f*fdx,f*fdy,0);
 	}
 	
-	if(!this->hasholes)
-	/*{
+	/*if(!this->hasholes)?? mann wens das währe ...
+	{
 		glFrontFace(GL_CW);
 		for(int i=0;i<8;i++)
 		{
@@ -1768,7 +1768,6 @@ bool MapChunk::isHole( int i, int j )
 void MapChunk::addHole( int i, int j )
 {
 	std::stringstream out;
-	out << "Vorher Add Hole to chunk:" << this->px << "-" << this->py << std::endl;
 	for(int v=0;v<16;v++)
 	{
 
@@ -1784,17 +1783,6 @@ void MapChunk::addHole( int i, int j )
 	hasholes = holes;
 	initStrip( );
 	
-	out << "Nachher Add Hole to chunk:" << this->px << "-" << this->py << std::endl;
-	for(int v=0;v<16;v++)
-	{
-
-		for(int f=0;f<16;f++)
-		{
-			out << strip[f+(v*16)]<< " ";
-		}
-		out << std::endl;
-	}
-	LogDebug << out.str() << std::endl;
 }
 
 

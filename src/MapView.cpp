@@ -921,6 +921,9 @@ void MapView::tick( float t, float dt )
 
 			if( leftMouse && !LastClicked && selectedTexture )
 			{
+				// Da bin ich überfragt, keine Ahnung, was der Code macht :) Dann bin ich ja nicht alleine :)
+				// Aber grundsätzlich wird hier die Mouseposition errechnet. Auf mir unbekannte Art und weise.
+				// Mal was schauen, momen
 				float mX, mY;
 				mX = CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / world->zoom+world->camera.x;
 				mY = CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / world->zoom+world->camera.z;
@@ -2041,7 +2044,7 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 	if( leftMouse && Environment::getInstance()->AltDown )
 	{
 		switch( terrainMode )
-		{
+		{// das ist zum umstellen der brush größe
 		case 0:
 			groundBrushRadius += e->xrel / XSENS;
 			if( groundBrushRadius > 1000.0f )
