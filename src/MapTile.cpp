@@ -77,7 +77,7 @@ struct SMAreaHeader // 03-29-2005 By ObscuR, --schlumpf_ 02:35, 8 August 2009 (C
 };
 
 
-MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha) : mFilename(filename), x(x0), z(z0), topnode(0,0,16)
+MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha) : mFilename(filename), x(x0), z(z0) 
 {
 	xbase = x0 * TILESIZE;
 	zbase = z0 * TILESIZE;
@@ -443,10 +443,8 @@ MapTile::MapTile(int x0, int z0, char* filename, bool bigAlpha) : mFilename(file
 		theFile.seek( lMCNKOffsets[nextChunk] );
 		chunks[nextChunk / 16][nextChunk % 16] = new MapChunk( this, theFile, mBigAlpha );
 	}
-	
+  
 	theFile.close( );
-	
-	topnode.setup( this );
 }
 
 MapTile::~MapTile()
@@ -455,8 +453,6 @@ MapTile::~MapTile()
 		return;
 
 	LogDebug << "Unloading tile " << x << "," << z << "." << std::endl;
-
-  topnode.cleanup();
 
   for (int j=0; j<16; j++) {
     for (int i=0; i<16; i++) {
@@ -475,6 +471,16 @@ MapTile::~MapTile()
 	for (std::vector<std::string>::iterator it = mModelFilenames.begin(); it != mModelFilenames.end(); ++it) {
 		gWorld->modelmanager.delbyname(*it);
 	}
+}
+
+float MapTile::getMaxHeight()
+{
+  float maxHeight = -99999.0f;
+  for( int nextChunk = 0; nextChunk < 256; nextChunk++ ) 
+	{
+    maxHeight = std::max( chunks[nextChunk / 16][nextChunk % 16]->vmax.y, maxHeight );
+	}
+  return maxHeight;
 }
 
 extern float groundBrushRadius;

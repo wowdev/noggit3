@@ -4,9 +4,9 @@
 #include <vector>
 
 #include "mapheaders.h"
-#include "MapNode.h"
 #include "video.h" // GLfloat, GLshort, ...
 
+class Vec3D;
 class Liquid;
 class MapChunk;
 class MPQFile;
@@ -31,21 +31,20 @@ private:
 
   std::string mFilename;
   
-  
 public:
 
+  float getMaxHeight();
+  
 	int x, z;
+	float xbase, zbase;
+  
+  
 	bool ok;
 
 	bool mBigAlpha;
 
-	//World *world;
-
-	float xbase, zbase;
 
 	MapChunk * chunks[16][16];
-
-	MapNode topnode;
 
 	MapTile(int x0, int z0, char* filename,bool bigAlpha);
 	~MapTile();

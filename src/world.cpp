@@ -652,10 +652,9 @@ void World::enterTile( int x, int z )
 
 	if( autoheight && current[2][2] && current[2][2]->ok ) 
 	{
-		Vec3D vc = current[2][2]->topnode.vmax;
-		if( vc.y < 0 ) 
-			vc.y = 0;
-		camera.y = vc.y + 50.0f;
+		float maxHeight = current[2][2]->getMaxHeight();
+    maxHeight = std::max( maxHeight, 0.0f );
+		camera.y = maxHeight + 50.0f;
 
 		autoheight = false;
 	}
@@ -682,9 +681,9 @@ void World::enterTileInit(int x, int z)
 	}
 	if (autoheight && current[2][2]!=0 && current[2][2]->ok) {
 		//Vec3D vc = (current[1][1]->topnode.vmax + current[1][1]->topnode.vmin) * 0.5f;
-		Vec3D vc = current[2][2]->topnode.vmax;
-		if (vc.y < 0) vc.y = 0;
-		camera.y = vc.y + 50.0f;
+		float maxHeight = current[2][2]->getMaxHeight();
+		maxHeight = std::max( maxHeight, 0.0f );
+		camera.y = maxHeight + 50.0f;
 
 		autoheight = false;
 	}

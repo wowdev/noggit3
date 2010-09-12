@@ -155,7 +155,7 @@ void GenerateContourMap()
 }
 
 
-MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 0 )
+MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha) 
 {	
 	mt=maintile;
 	mBigAlpha=bigAlpha;
