@@ -21,20 +21,20 @@ static const float UNITSIZE = (CHUNKSIZE / 8.0f);
 static const float MINICHUNKSIZE = (CHUNKSIZE / 4.0f);
 static const float ZEROPOINT = (32.0f * (TILESIZE));
 
-struct MHDR//our .adt headers
+struct MHDR
 {
- /*000h*/  uint32_t flags;
- /*004h*/  uint32_t MCIN_Offset;	//Positions of MCNK's
- /*008h*/  uint32_t MTEX_Offset;	//List of all the textures used
- /*00Ch*/  uint32_t MMDX_Offset;	//List of all the md2's used
- /*010h*/  uint32_t MMID_Offset;	//Offsets into MMDX list for what each ID is
- /*014h*/  uint32_t MWMO_Offset;	//list of all the WMO's used
- /*018h*/  uint32_t MWID_Offset;	//Offsets into MWMO list for what each ID is
- /*01Ch*/  uint32_t MDDF_Offset;	//Doodad Information
- /*020h*/  uint32_t MODF_Offset;	//WMO Positioning Information
- /*024h*/  uint32_t MFBO_Offset;	
- /*028h*/  uint32_t MH2O_Offset;		
- /*02Ch*/  uint32_t MTFX_Offset;	
+ /*000h*/  uint32_t flags;        // &1: MFBO, &2: unknown. in some Northrend ones.
+ /*004h*/  uint32_t mcin;	//Positions of MCNK's
+ /*008h*/  uint32_t mtex;	//List of all the textures used
+ /*00Ch*/  uint32_t mmdx;	//List of all the md2's used
+ /*010h*/  uint32_t mmid;	//Offsets into MMDX list for what each ID is
+ /*014h*/  uint32_t mwmo;	//list of all the WMO's used
+ /*018h*/  uint32_t mwid;	//Offsets into MWMO list for what each ID is
+ /*01Ch*/  uint32_t mddf;	//Doodad Information
+ /*020h*/  uint32_t modf;	//WMO Positioning Information
+ /*024h*/  uint32_t mfbo;	// tbc, wotlk; only when flags&1
+ /*028h*/  uint32_t mh2o;  // wotlk
+ /*02Ch*/  uint32_t mtfx;	// wotlk
  /*030h*/  uint32_t pad4;		
  /*034h*/  uint32_t pad5;		
  /*038h*/  uint32_t pad6;		
