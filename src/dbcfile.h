@@ -79,8 +79,8 @@ public:
 		}
 	private:
 		Record(DBCFile &pfile, unsigned char *poffset): file(pfile), offset(poffset) {}
-		unsigned char *offset;
 		DBCFile &file;
+		unsigned char *offset;
 
 		friend class DBCFile;
 		friend class DBCFile::Iterator;

@@ -20,6 +20,10 @@ class Bone;
 //#include "mapheaders.h"
 #include "modelheaders.h"
 
+#include "AsyncObject.h" // AsyncObject
+#include "Log.h"
+#include "noggit.h"
+
 Vec3D fixCoordSystem(Vec3D v);
 
 class Bone {
@@ -124,7 +128,7 @@ struct ModelLight {
 	void setup(int time, GLuint l);
 };
 
-class Model: public ManagedItem {
+class Model: public ManagedItem, public AsyncObject {
 
 	GLuint ModelDrawList;
 	GLuint SelectModelDrawList;
@@ -196,6 +200,12 @@ public:
 	void updateEmitters(float dt);
 
 	friend struct ModelRenderPass;
+  
+  virtual bool finishedLoading()
+  {
+    return ok;
+  }
+  virtual void finishLoading();
 };
 
 class ModelManager: public SimpleManager {

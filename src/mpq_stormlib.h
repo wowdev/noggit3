@@ -52,7 +52,7 @@ class MPQFile
 	std::string fname;
 
 public:
-	MPQFile():eof(false),size(0),buffer(0),pointer(0) {}
+	MPQFile():eof(false),buffer(0),pointer(0),size(0) {}
 	MPQFile(std::string filename);	// filenames are not case sensitive
 	void openFile(const char* filename);
 	~MPQFile();

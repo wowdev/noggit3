@@ -301,7 +301,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 		else if ( fourcc == 'MCAL' ) 
 		{
 			unsigned int MCALbase = f.getPos();
-			for( int layer = 0; layer < header.nLayers; layer++ )
+			for( unsigned int layer = 0; layer < header.nLayers; layer++ )
 			{
 				if( texFlags[layer] & 0x100 )
 				{
@@ -1648,11 +1648,11 @@ int MapChunk::addTexture( GLuint texture )
 	return texLevel;
 }
 
-bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, float pressure, int texture)//paint with texture
+bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, float pressure, unsigned int texture)//paint with texture
 {
 	float zPos,xPos,change,xdiff,zdiff,dist, radius;
 
-	int texLevel=-1,i,j;
+	int texLevel=-1;
 
 	radius=Brush->getRadius();
 
@@ -1664,7 +1664,7 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 		return true;
 
 	//First Lets find out do we have the texture already
-	for(i=0;i<nTextures;i++)
+	for(int i=0;i<nTextures;i++)
 		if(textures[i]==texture)
 			texLevel=i;
 
@@ -1685,10 +1685,10 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 	texAbove=nTextures-texLevel-1;
 
 
-	for(j=0;j<63;j++)
+	for(int j=0;j<63;j++)
 	{
 		xPos=xbase;
-		for(i=0;i<63;i++)
+		for(int i=0;i<63;i++)
 		{
 			xdiff=xPos-x;
 			zdiff=zPos-z;
