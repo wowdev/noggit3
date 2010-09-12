@@ -464,7 +464,6 @@ void MapTile::loadTexture( )
      }
      */
 		video.textures.add( lTexture );
-		textures.push_back( lTexture );
 	}
   
 	mTexturesLoaded = true;
@@ -486,12 +485,11 @@ void MapTile::loadModel( )
 	{
 		std::string lModel = *it;
 		gWorld->modelmanager.add( lModel );
-		models.push_back( lModel );
 	}
   
 	for( std::vector<ENTRY_MDDF>::iterator it = mModelInstances.begin( ); it != mModelInstances.end( ); it++ )
 	{
-		Model *model = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(models[it->nameID])];
+		Model *model = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(mModelFilenames[it->nameID])];
 		gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( model, &(*it) ) ) );
 	}
   
@@ -507,12 +505,11 @@ void MapTile::loadWMO( )
 	{
 		std::string lWMO = *it;
 		gWorld->wmomanager.add( lWMO );
-		wmos.push_back( lWMO );
 	}
   
 	for( std::vector<ENTRY_MODF>::iterator it = mWMOInstances.begin( ); it != mWMOInstances.end( ); it++ )
 	{
-		WMO *wmo = (WMO*)gWorld->wmomanager.items[gWorld->wmomanager.get(wmos[it->nameID])];
+		WMO *wmo = (WMO*)gWorld->wmomanager.items[gWorld->wmomanager.get(mWMOFilenames[it->nameID])];
 		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( wmo, &(*it) ) ) );
 	}
   
@@ -565,15 +562,15 @@ MapTile::~MapTile()
 			delete chunks[i/16][i%16];
 	}
 
-	for (std::vector<std::string>::iterator it = textures.begin(); it != textures.end(); ++it) {
+	for (std::vector<std::string>::iterator it = mTextureFilenames.begin(); it != mTextureFilenames.end(); ++it) {
         video.textures.delbyname(*it);
 	}
 
-	for (std::vector<std::string>::iterator it = wmos.begin(); it != wmos.end(); ++it) {
+	for (std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); ++it) {
 		gWorld->wmomanager.delbyname(*it);
 	}
 
-	for (std::vector<std::string>::iterator it = models.begin(); it != models.end(); ++it) {
+	for (std::vector<std::string>::iterator it = mModelFilenames.begin(); it != mModelFilenames.end(); ++it) {
 		gWorld->modelmanager.delbyname(*it);
 	}
 }

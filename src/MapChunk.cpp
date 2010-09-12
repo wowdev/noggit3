@@ -270,7 +270,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 				} else {
 					animated[i] = 0;
 				}
-				textures[i] = video.textures.get(mt->textures[tex[i]]);
+				textures[i] = video.textures.get(mt->mTextureFilenames[tex[i]]);
 			}
 		}
 		else if ( fourcc == 'MCSH' ) {
@@ -533,7 +533,7 @@ void MapChunk::loadTextures()
 {
 	return;
 	for(int i=0;i<nTextures;i++)
-		textures[i] = video.textures.get(mt->textures[tex[i]]);
+		textures[i] = video.textures.get(mt->mTextureFilenames[tex[i]]);
 }
 
 static const float texDetail = 8.0f;

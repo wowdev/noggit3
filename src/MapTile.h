@@ -59,22 +59,14 @@ public:
 	bool isLoaded(){return mTexturesLoaded&&mModelsLoaded&&mWMOsLoaded;};
 	void partialLoad(){
 		if( !mTexturesLoaded )
-		{
 				loadTexture();
-		}		
 		else if(!chunksLoaded)
-		{
-			//loadChunk();
 			loadChunk();
-		}
 		else if(!mWMOsLoaded)
 			loadWMO();
 		else if(!mModelsLoaded)
 			loadModel();		
-	};
-	std::vector<std::string> textures;
-	std::vector<std::string> wmos;
-	std::vector<std::string> models;
+	}
 
 	int x, z;
 	bool ok;
@@ -109,6 +101,8 @@ public:
 
 	/// Get chunk for sub offset x,z
 	MapChunk *getChunk(unsigned int x, unsigned int z);
+  
+  friend class MapChunk;
 };
 
 int indexMapBuf(int x, int y);
