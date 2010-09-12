@@ -4,6 +4,9 @@
 #include <cmath>
 #include "vec3d.h"
 #include "quaternion.h"
+
+static double PI = 3.14159265358;
+
 class Matrix {
 public:
 	float m[4][4];
