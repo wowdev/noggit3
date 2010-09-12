@@ -55,27 +55,6 @@ void startTimer();
 void stopTimer();
 int stopTimer2();
 
-struct SMAreaHeader // 03-29-2005 By ObscuR, --schlumpf_ 02:35, 8 August 2009 (CEST)
-{
-/*000h*/  unsigned int flags;		// &1: MFBO, &2: unknown. in some Northrend ones.
-/*004h*/  unsigned int mcin;		
-/*008h*/  unsigned int mtex;		
-/*00Ch*/  unsigned int mmdx;		
-/*010h*/  unsigned int mmid;		
-/*014h*/  unsigned int mwmo;		
-/*018h*/  unsigned int mwid;		
-/*01Ch*/  unsigned int mddf;		
-/*020h*/  unsigned int modf;	
-/*024h*/  unsigned int mfbo; 		// tbc, wotlk; only when flags&1
-/*028h*/  unsigned int mh2o;		// wotlk
-/*02Ch*/  unsigned int mtfx;		// wotlk
-/*030h*/  unsigned int pad4;		
-/*034h*/  unsigned int pad5;		
-/*038h*/  unsigned int pad6;		
-/*03Ch*/  unsigned int pad7;	
-/*040h*/
-};
-
 MapTile::MapTile(int x0, int z0, const std::string& filename, bool bigAlpha) : mFilename(filename), x(x0), z(z0)
 {
 	xbase = x0 * TILESIZE;
@@ -97,7 +76,7 @@ MapTile::MapTile(int x0, int z0, const std::string& filename, bool bigAlpha) : m
 	uint32_t fourcc;
 	uint32_t size;
   
-	SMAreaHeader Header;
+	MHDR Header;
 
 	// - MVER ----------------------------------------------
 	
@@ -116,7 +95,7 @@ MapTile::MapTile(int x0, int z0, const std::string& filename, bool bigAlpha) : m
 	
 	assert( fourcc == 'MHDR' );
 	
-	theFile.read( &Header, sizeof( SMAreaHeader ) );
+	theFile.read( &Header, sizeof( MHDR ) );
 	
 	// - MCIN ----------------------------------------------
 	
@@ -844,7 +823,7 @@ void MapTile::saveTile( )
 //	{
 		lADTFile.Extend( 8 + 256 * 0x10 );
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MCIN', 256 * 0x10 );
-		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->MCIN_Offset = lCurrentPosition - 0x14;
+		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mcin = lCurrentPosition - 0x14;
 
 		// MCIN * MCIN_Data = lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 );
 
@@ -856,7 +835,7 @@ void MapTile::saveTile( )
 		int lMTEX_Position = lCurrentPosition;
 		lADTFile.Extend( 8 + 0 );	// We don't yet know how big this will be.
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MTEX' );
-		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->MTEX_Offset = lCurrentPosition - 0x14;
+		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mtex = lCurrentPosition - 0x14;
 
 		lCurrentPosition += 8 + 0;
 
@@ -875,7 +854,7 @@ void MapTile::saveTile( )
 		int lMMDX_Position = lCurrentPosition;
 		lADTFile.Extend( 8 + 0 );	// We don't yet know how big this will be.
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MMDX' );
-		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->MMDX_Offset = lCurrentPosition - 0x14;
+		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mmdx = lCurrentPosition - 0x14;
 
 		lCurrentPosition += 8 + 0;
 
@@ -895,7 +874,7 @@ void MapTile::saveTile( )
 		int lMMID_Size = 4 * lModels.size( );
 		lADTFile.Extend( 8 + lMMID_Size );
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MMID', lMMID_Size );
-		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->MMID_Offset = lCurrentPosition - 0x14;
+		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mmid = lCurrentPosition - 0x14;
 
 		// MMID data
 		int * lMMID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
@@ -912,7 +891,7 @@ void MapTile::saveTile( )
 		int lMWMO_Position = lCurrentPosition;
 		lADTFile.Extend( 8 + 0 );	// We don't yet know how big this will be.
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MWMO' );
-		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->MWMO_Offset = lCurrentPosition - 0x14;
+		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mwmo = lCurrentPosition - 0x14;
 
 		lCurrentPosition += 8 + 0;
 
@@ -932,7 +911,7 @@ void MapTile::saveTile( )
 		int lMWID_Size = 4 * lObjects.size( );
 		lADTFile.Extend( 8 + lMWID_Size );
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MWID', lMWID_Size );
-		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->MWID_Offset = lCurrentPosition - 0x14;
+		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mwid = lCurrentPosition - 0x14;
 
 		// MWID data
 		int * lMWID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
@@ -949,7 +928,7 @@ void MapTile::saveTile( )
 		int lMDDF_Size = 0x24 * lModelInstances.size( );
 		lADTFile.Extend( 8 + lMDDF_Size );
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MDDF', lMDDF_Size );
-		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->MDDF_Offset = lCurrentPosition - 0x14;
+		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mddf = lCurrentPosition - 0x14;
 
 		// MDDF data
 		ENTRY_MDDF * lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>( lCurrentPosition + 8 );
@@ -993,7 +972,7 @@ void MapTile::saveTile( )
 		int lMODF_Size = 0x40 * lObjectInstances.size( );
 		lADTFile.Extend( 8 + lMODF_Size );
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MODF', lMODF_Size );
-		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->MODF_Offset = lCurrentPosition - 0x14;
+		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->modf = lCurrentPosition - 0x14;
 
 		// MODF data
 		ENTRY_MODF * lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>( lCurrentPosition + 8 );
@@ -1370,7 +1349,7 @@ void MapTile::saveTile( )
 	{
 		lADTFile.Extend( 8 + 36 );	// We don't yet know how big this will be.
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MFBO', 36 );
-		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->MFBO_Offset = lCurrentPosition - 0x14;
+		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mfbo = lCurrentPosition - 0x14;
 
 		short * lMFBO_Data = lADTFile.GetPointer<short>( lCurrentPosition + 8 );
 		
