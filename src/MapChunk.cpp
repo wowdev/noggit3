@@ -79,7 +79,7 @@ void HeightColor(float height, Vec3D *Color)
 }
 
 
-bool DrawMapContour=true;
+bool DrawMapContour=false;
 bool drawFlags=false;
 
 GLuint	Contour=0;
@@ -220,7 +220,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 			for (int j=0; j<17; j++) {
 				for (int i=0; i<((j%2)?8:9); i++) {
 					f.read(nor,3);
-					// order Z,X,Y ?
+					// order X,Z,Y 
 					//*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
 					*ttn++ = Vec3D(-(float)nor[1]/127.0f, (float)nor[2]/127.0f, -(float)nor[0]/127.0f);
 				}
@@ -1001,10 +1001,6 @@ void MapChunk::draw()
 	if (!gWorld->frustum.intersects(vmin,vmax))		return;
 	float mydist = (gWorld->camera - vcenter).length() - r;
 	//if (mydist > gWorld->mapdrawdistance2) return;
-	/*if (mydist > gWorld->culldistance+75) {
-		if (gWorld->uselowlod) this->drawNoDetail();
-		return;
-	}*/
 
 	if( holes == 0 )
 	{
@@ -1019,7 +1015,6 @@ void MapChunk::draw()
 			striplen = stripsize;
 		}
 	}
-	
 
 	// setup vertex buffers
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
@@ -1646,6 +1641,7 @@ int MapChunk::addTexture( GLuint texture )
 
 bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, float pressure, unsigned int texture)
 {
+	using namespace std; // Workaround for windows. For min and max function use later.
 	float zPos,xPos,change,xdiff,zdiff,dist, radius;
 
 	int texLevel=-1;
@@ -1710,9 +1706,9 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 			
 			tPressure=pressure*Brush->getValue(dist);
 			if(texLevel>0)
-				amap[texLevel-1][i+j*64]=(unsigned char)std::max( std::min( (1-tPressure)*( (float)amap[texLevel-1][i+j*64] ) + tPressure*target + 0.5f ,255.0f) , 0.0f);
+				amap[texLevel-1][i+j*64]=(unsigned char)max( min( (1-tPressure)*( (float)amap[texLevel-1][i+j*64] ) + tPressure*target + 0.5f ,255.0f) , 0.0f);
 			for(int k=texLevel;k<nTextures-1;k++)
-				amap[k][i+j*64]=(unsigned char)std::max( std::min( (1-tPressure)*( (float)amap[k][i+j*64] ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f);
+				amap[k][i+j*64]=(unsigned char)max( min( (1-tPressure)*( (float)amap[k][i+j*64] ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f);
 			xPos+=change;
 		}
 		zPos+=change;

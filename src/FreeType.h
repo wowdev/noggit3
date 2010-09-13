@@ -1,5 +1,5 @@
-#ifndef FREE_NEHE_H
-#define FREE_NEHE_H
+#ifndef FREE_TYPE_H
+#define FREE_TYPE_H
 
 //FreeType Headers
 #include <ft2build.h>

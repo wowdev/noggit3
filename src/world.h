@@ -141,6 +141,8 @@ public:
 	void eraseTextures(float x, float z);
 	void addHole( float x, float z );
 	void addModel( nameEntry entry, Vec3D newPos);
+	void addM2( Model *model, Vec3D newPos );
+	void addWMO( WMO *wmo, Vec3D newPos );
 	void removeHole( float x, float z );
 	void saveMap();
 

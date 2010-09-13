@@ -1848,8 +1848,12 @@ void World::deleteWMOInstance( int pUniqueID )
 
 void World::addModel( nameEntry entry, Vec3D newPos )
 {
-	int lModelMax = mModelInstances.rbegin( )->first;
-	int lObjectMax = mWMOInstances.rbegin( )->first;
+	int lModelMax;
+	if (mModelInstances.empty() == false)
+	lModelMax = mModelInstances.rbegin( )->first;
+	int lObjectMax;
+	if (mWMOInstances.empty() == false)
+	lObjectMax = mWMOInstances.rbegin( )->first;
 	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
 
 	if( entry.type == eEntry_Model )
@@ -1876,7 +1880,6 @@ void World::addModel( nameEntry entry, Vec3D newPos )
 
 			newModelis.sc = newModelis.sc * (( float( rand( ) ) / float( RAND_MAX ) * 0.2 ) + 0.90);
 		}
-
 		mModelInstances.insert( pair<int,ModelInstance>( lMaxUID, newModelis ));
 	}
 	else if( entry.type == eEntry_WMO )
@@ -1888,4 +1891,60 @@ void World::addModel( nameEntry entry, Vec3D newPos )
 		newWMOis.nameID = -1;
 		mWMOInstances.insert( pair<int,WMOInstance>( lMaxUID, newWMOis ));
 	}
+}
+
+void World::addM2( Model *model, Vec3D newPos )
+{
+	int lModelMax;
+	if (mModelInstances.empty() == false)
+	lModelMax = mModelInstances.rbegin( )->first;
+	int lObjectMax;
+	if (mWMOInstances.empty() == false)
+	lObjectMax = mWMOInstances.rbegin( )->first;
+	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
+	
+		ModelInstance newModelis;
+		newModelis.model = model;
+		newModelis.nameID = -1;
+		newModelis.d1 = lMaxUID;
+		newModelis.pos = newPos;
+		newModelis.sc = 1;
+
+		if(Settings::getInstance()->copy_rot)
+		{
+			newModelis.dir.y += (rand() % 360 + 1);
+		}
+		
+		if(Settings::getInstance()->copy_tile)
+		{
+			newModelis.dir.x += (rand() % 5 + 1);
+			newModelis.dir.z += (rand() % 5 + 1);
+		}
+		
+		if(Settings::getInstance()->copy_size)
+		{
+
+			newModelis.sc = newModelis.sc * (( float( rand( ) ) / float( RAND_MAX ) * 0.2 ) + 0.90);
+		}
+		mModelInstances.insert( pair<int,ModelInstance>( lMaxUID, newModelis ));
+	
+}
+
+void World::addWMO( WMO *wmo, Vec3D newPos )
+{
+	int lModelMax;
+	if (mModelInstances.empty() == false)
+	lModelMax = mModelInstances.rbegin( )->first;
+	int lObjectMax;
+	if (mWMOInstances.empty() == false)
+	lObjectMax = mWMOInstances.rbegin( )->first;
+	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
+	
+	WMOInstance newWMOis(wmo);
+	newWMOis.pos = newPos;
+	newWMOis.id = lMaxUID;
+	newWMOis.wmoID = lMaxUID;
+	newWMOis.nameID = -1;
+	mWMOInstances.insert( pair<int,WMOInstance>( lMaxUID, newWMOis ));
+	
 }

@@ -3,6 +3,7 @@
 #include <map>
 #include <stdlib.h>
 #include <fstream>
+#include <iostream>
 
 #include "MapView.h"
 //#include "trace.h"
@@ -12,6 +13,7 @@
 #include "texturingui.h"
 #include "world.h"
 #include "MapChunk.h"
+#include "ConfigFile.h"
 
 #include "Settings.h"
 #include "Project.h"
@@ -250,18 +252,20 @@ void CopySelectedObject( frame *button, int id )
 {
 	//! \todo  copy selected object path to clipboard
 	if( gWorld->HasSelection( ) )
+	{
 		Environment::getInstance( )->set_clipboard( gWorld->GetCurrentSelection( ) );
+	}
 }
 
 void PasteSelectedObject( frame *button, int id )
 {
 	// MODELCOPY
 	// paste object
-	// if selection then on selectin cords
+	// if selection then insert on selection cords
 	// else on current chunk cords
 	// TODO
 	if( gWorld->HasSelection( ) )
-	{
+	{	
 		nameEntry lClipboard = Environment::getInstance( )->get_clipboard( );
 		if( lClipboard.returnName( ) )
 		{
@@ -271,7 +275,7 @@ void PasteSelectedObject( frame *button, int id )
 				pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.model->pos );
 				break;
 			case eEntry_WMO:
-				pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.wmo->pos );
+				pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.wmo->pos);
 				break;
 			case eEntry_MapChunk:
 				pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.mapchunk->GetSelectionPosition( ) );
@@ -287,6 +291,152 @@ void DeleteSelectedObject( frame *button, int id )
 		pWorld->deleteWMOInstance( gWorld->GetCurrentSelection( )->data.wmo->id );
 	else if( gWorld->IsSelection( eEntry_Model ) )
 		pWorld->deleteModelInstance( gWorld->GetCurrentSelection( )->data.model->d1 );
+}
+
+void InsertObject( frame *button, int id )
+{
+	// quick and easy implemantation so that the most wishe function is in
+	// if you set the path to the modelviewer log it imports all modesl that the user
+	// looked at in the viewer
+
+	// TODO
+
+	// Test if there is an selection
+	if( !gWorld->HasSelection() )
+		return;
+
+	// the list of the models to import
+	std::vector<std::string> m2s_to_add;
+	std::vector<std::string> wmos_to_add;
+
+	// the import file
+	string importFile;
+
+	// MODELINSERT FROM TEXTFILE
+		// is a source file set in config file?
+		if( FileExists( "noggIt.conf" ) )
+		{
+			ConfigFile config( "noggIt.conf" );
+			config.readInto( importFile, "ImportFile" );
+		}
+		// else use import.txt in noggit folder!
+		if (importFile=="")
+			importFile="Import.txt";
+
+		  size_t foundString;
+		  string line;
+		  string findThis;
+		  ifstream fileReader (importFile.c_str());
+		  if (fileReader.is_open())
+		  {
+			while (! fileReader.eof() )
+			{
+			  getline (fileReader,line);
+			  if(line.find(".m2")!= string::npos || line.find(".M2")!= string::npos )
+			  {
+					// M2 inside line
+					// is it the modelviewer log then cut the log messages out
+					findThis = 	"Loading model: ";
+					foundString = line.find(findThis);
+					if(foundString!= string::npos)
+					{
+						// cut path
+						line = line.substr( foundString+findThis.size() );
+					}
+					m2s_to_add.push_back( line );
+
+			  }
+			  else if(line.find(".wmo")!= string::npos || line.find(".WMO")!= string::npos )
+			  {
+					// WMO inside line
+					findThis = "Loading WMO ";
+					foundString = line.find(findThis);
+					// is it the modelviewer log then cut the log messages out
+					if(foundString != string::npos)
+					{
+						// cut path
+						line = line.substr( foundString+findThis.size() );
+					}
+					wmos_to_add.push_back(line);
+
+			  }
+			  
+			}
+			fileReader.close();
+		  }
+		  else 
+		  {
+  			// file not exist, no rights ore other error
+			LogError << "Faild to open file for import models"<<std::endl;
+			LogError << importFile << std::endl;
+		  }
+		
+
+		// handel WMOs
+		for( std::vector<std::string>::iterator it = wmos_to_add.begin(); it != wmos_to_add.end(); ++it )
+		{
+			// send to wmo manager - get wmoid
+			int newWMOID = gWorld->wmomanager.add(it->c_str());
+			// get the new model
+
+			WMO *wmo = (WMO*)gWorld->wmomanager.items[newWMOID];
+			if(!wmo->ok)
+			{			
+				LogDebug << "Could not add this WMO: " << it->c_str() << std::endl;
+			}
+			else
+			{
+				// add model on current selection.
+				switch( gWorld->GetCurrentSelection( )->type )
+				{
+				case eEntry_Model:
+					pWorld->addWMO( wmo, gWorld->GetCurrentSelection( )->data.model->pos );
+					break;
+				case eEntry_WMO:
+					pWorld->addWMO( wmo,  gWorld->GetCurrentSelection( )->data.wmo->pos);
+					break;
+				case eEntry_MapChunk:
+					pWorld->addWMO( wmo, gWorld->GetCurrentSelection( )->data.mapchunk->GetSelectionPosition( ) );
+					break;
+				}
+			}
+
+		}
+
+		// handel m2s
+		for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
+		{
+			// send to model manager - get modelid
+			int newModelID = gWorld->modelmanager.add(it->c_str());
+			// get the new model
+
+			Model *model = (Model*)gWorld->modelmanager.items[newModelID];
+			if(!model->ok)
+			{
+				LogDebug << "Could not add this model: " << it->c_str() << std::endl;
+			}
+			else
+			{
+				// add model on current selection.
+				switch( gWorld->GetCurrentSelection( )->type )
+				{
+				case eEntry_Model:
+					pWorld->addM2( model, gWorld->GetCurrentSelection( )->data.model->pos );
+					break;
+				case eEntry_WMO:
+					pWorld->addM2( model,  gWorld->GetCurrentSelection( )->data.wmo->pos);
+					break;
+				case eEntry_MapChunk:
+					pWorld->addM2( model, gWorld->GetCurrentSelection( )->data.mapchunk->GetSelectionPosition( ) );
+					break;
+				}
+			}
+
+
+		}
+		
+
+
 }
 
 void view_texture_palette( frame *button, int id )
@@ -489,6 +639,7 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 
 	mbar->AddMenu( "File" );
 	mbar->AddMenu( "Edit" );
+	mbar->AddMenu( "Assist" );
 	mbar->AddMenu( "View" );
 	mbar->AddMenu( "Help" );
 
@@ -510,6 +661,7 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Options" );
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Auto select mode", &Settings::getInstance()->AutoSelectingMode, false );
 
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Import model", InsertObject, 0  );
 	
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );
@@ -768,6 +920,9 @@ void MapView::tick( float t, float dt )
 
 			if( leftMouse && !LastClicked && selectedTexture )
 			{
+				// Da bin ich überfragt, keine Ahnung, was der Code macht :) Dann bin ich ja nicht alleine :)
+				// Aber grundsätzlich wird hier die Mouseposition errechnet. Auf mir unbekannte Art und weise.
+				// Mal was schauen, momen
 				float mX, mY;
 				mX = CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / world->zoom+world->camera.x;
 				mY = CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / world->zoom+world->camera.z;
@@ -1083,7 +1238,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 
-		freetype::shprint( arial16, 410, 4, gAreaDB.getAreaName( world->getAreaID( ) ).c_str() );
+		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( world->getAreaID( ) ).c_str() );
 		freetype::shprint( arial16, video.xres - 200, 5, "%.2f fps", gFPS );
 				
 		ostringstream s;
@@ -1871,7 +2026,7 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 	if( leftMouse && Environment::getInstance()->AltDown )
 	{
 		switch( terrainMode )
-		{
+		{// das ist zum umstellen der brush größe
 		case 0:
 			groundBrushRadius += e->xrel / XSENS;
 			if( groundBrushRadius > 1000.0f )
