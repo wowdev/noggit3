@@ -953,28 +953,17 @@ void MapTile::saveTile( )
 				LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
 				return;
 			}
-
-			// generate UID
-			int new_uid;	
-			std::stringstream UID_stream;
-			UID_stream << "1";
-			if (this->x < 10) {UID_stream << "0";}
-			UID_stream << this->x;
-			if (this->z < 10) {UID_stream << "0";}
-			UID_stream << this->z;
-			if (model_counter<10) 
-				{UID_stream << "000";}
-			else if (model_counter<100)
-				{UID_stream << "00";}
-			else if (model_counter<1000) 
-				{UID_stream << "0";}
-			UID_stream << model_counter;
-			model_counter++;			
-			UID_stream >> new_uid;
-			// UID end
+      
+      // XXZZTNNN
+      //        1
+      //     1000
+      //    10000
+      //  1000000
+      
+      int lNewUID = lID + this->x * 1000000 + this->z * 10000 + 1 * 1000;
 
 			lMDDF_Data[lID].nameID = lMyFilenameThingey->second[0];
-			lMDDF_Data[lID].uniqueID = new_uid;
+			lMDDF_Data[lID].uniqueID = lNewUID;
 			lMDDF_Data[lID].pos[0] = it->second.pos.x;
 			lMDDF_Data[lID].pos[1] = it->second.pos.y;
 			lMDDF_Data[lID].pos[2] = it->second.pos.z;
@@ -1010,28 +999,17 @@ void MapTile::saveTile( )
 				LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
 				return;
 			}
-
-			// generate UID
-			int new_uid;	
-			std::stringstream UID_stream;
-			UID_stream << "2";
-			if (this->x < 10) {UID_stream << "0";}
-			UID_stream << this->x;
-			if (this->z < 10) {UID_stream << "0";}
-			UID_stream << this->z;
-			if (model_counter<10) 
-				{UID_stream << "000";}
-			else if (model_counter<100)
-				{UID_stream << "00";}
-			else if (model_counter<1000) 
-				{UID_stream << "0";}
-			UID_stream << model_counter;
-			model_counter++;			
-			UID_stream >> new_uid;
-			// UID end
+      
+      // XXZZTNNN
+      //        1
+      //     1000
+      //    10000
+      //  1000000
+      
+      int lNewUID = lID + this->x * 1000000 + this->z * 10000 + 2 * 1000;
 
 			lMODF_Data[lID].nameID = lMyFilenameThingey->second[0];
-			lMODF_Data[lID].uniqueID = new_uid;
+			lMODF_Data[lID].uniqueID = lNewUID;
 			lMODF_Data[lID].pos[0] = it->second.pos.x;
 			lMODF_Data[lID].pos[1] = it->second.pos.y;
 			lMODF_Data[lID].pos[2] = it->second.pos.z;
@@ -1143,12 +1121,12 @@ void MapTile::saveTile( )
 					char * lNormals = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
 
 					// recalculate the normals
-					chunks[y][x]->recalcNorms();
+					mChunks[y][x]->recalcNorms();
 					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
 					{
-						lNormals[i*3+0] = roundc( -chunks[y][x]->tn[i].z * 127 );
-						lNormals[i*3+1] = roundc( -chunks[y][x]->tn[i].x * 127 );
-						lNormals[i*3+2] = roundc( chunks[y][x]->tn[i].y * 127 );
+						lNormals[i*3+0] = roundc( -mChunks[y][x]->mNormals[i].z * 127 );
+						lNormals[i*3+1] = roundc( -mChunks[y][x]->mNormals[i].x * 127 );
+						lNormals[i*3+2] = roundc(  mChunks[y][x]->mNormals[i].y * 127 );
 					}
 					
 					lCurrentPosition += 8 + lMCNR_Size;

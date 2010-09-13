@@ -33,6 +33,17 @@ Model::Model(std::string name, bool forceAnim) : ManagedItem(name), forceAnim(fo
   filename = name;
   
   textures = NULL;
+  globalSequences = NULL;
+  indices = NULL;
+  anims = NULL;
+  origVertices = NULL;
+  bones = NULL;
+  texanims = NULL;
+  colors = NULL;
+  transparency = NULL;
+  lights = NULL;
+  particleSystems = NULL;
+  ribbons = NULL;
 }
 
 void Model::finishLoading()
@@ -99,7 +110,8 @@ Model::~Model()
     delete[] textures;
   }
 
-  delete[] globalSequences;
+  if( globalSequences )
+    delete[] globalSequences;
 
   if (animated) {
     // unload all sorts of crap
@@ -119,7 +131,7 @@ Model::~Model()
     glDeleteBuffers(1, &vbuf);
     glDeleteBuffers(1, &tbuf);
 
-    if (animTextures) 
+    if (animTextures && texanims) 
       delete[] texanims;
     if (colors) 
       delete[] colors;

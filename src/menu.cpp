@@ -207,7 +207,7 @@ void Menu::randBackground( )
 	filename << "Interface\\Glues\\Models\\UI_" << ui[randnum] << "\\UI_" << ui[randnum] << ".m2";
 	
 	bg = new Model( filename.str( ) );
-  bg->finishLoading();
+  bg->finishLoading( );
 }
 
 void Menu::tick( float t, float dt )
