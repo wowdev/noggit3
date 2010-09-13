@@ -9,8 +9,6 @@ class Video;
 
 #include "TextureManager.h"
 
-#define PI 3.14159265358
-
 void SaveGLSettings();
 void LoadGLSettings();
 

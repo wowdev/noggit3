@@ -27,9 +27,9 @@
 using namespace std;
 
 
-#define XSENS 15.0f
-#define YSENS 15.0f
-#define SPEED 66.6f
+static const float XSENS = 15.0f;
+static const float YSENS = 15.0f;
+static const float SPEED = 66.6f;
 
 int MouseX;
 int MouseY;
@@ -484,7 +484,6 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 
 	look = false;
 	hud = true;
-	ass_immodel = false;
 	mViewMode = eViewMode_3D;
 
 	pWorld=world;
@@ -1442,13 +1441,6 @@ void MapView::display( float t, float dt )
 		Saving=false;
 	}
 
-	if(ass_immodel)
-	{
-		// menu import model selected.
-		// call the import method.
-	}
-
-
 	switch( mViewMode )
 	{
 	case eViewMode_Help:
@@ -1806,16 +1798,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			}
 		}
 #endif
-		
-		// reloading the managers
-		if( e->keysym.sym == SDLK_F10 )
-			video.textures.reload( );
-		
-		if( e->keysym.sym == SDLK_F11 )
-			world->modelmanager.reload( );
-		
-		if( e->keysym.sym == SDLK_F12 )
-			world->wmomanager.reload( );
 		
 		// fog distance or brush radius
 		if( e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS ) 

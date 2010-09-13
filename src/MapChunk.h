@@ -1,11 +1,11 @@
 #ifndef MAPCHUNK_H
 #define MAPCHUNK_H
 
-#include "MapNode.h"
 #include "mapheaders.h"
 
 #include "video.h" // GLuint
 #include "quaternion.h" // Vec4D
+#include "MapTile.h" // MapTile
 
 class MPQFile;
 class Vec4D;
@@ -13,9 +13,13 @@ class brush;
 
 static const int mapbufsize = 9*9 + 8*8;
 
-class MapChunk : public MapNode 
+class MapChunk
 {
+	MapTile *mt;
 public:
+	Vec3D vmin, vmax, vcenter;
+	int px, py, size;
+  
 	MapChunkHeader header;
 	bool Changed;
 	int nTextures;
@@ -25,7 +29,7 @@ public:
 
 	bool mBigAlpha;
 
-	unsigned int nameID;
+  int nameID;
 
 	unsigned int Flags;
 	
@@ -33,10 +37,8 @@ public:
 
 	bool haswater;
 
-	bool hasholes;
 	int holes;
 
-	float waterlevel[2];
 
 	int				tex[4];
 	GLuint		textures[4];
@@ -74,8 +76,11 @@ public:
 
 	void recalcNorms();
 
-	Vec3D tn[mapbufsize], tv[mapbufsize], tm[mapbufsize];
-	Vec4D ts[mapbufsize];
+	Vec3D mNormals[mapbufsize];
+  Vec3D mVertices[mapbufsize];
+  //! \todo Is this needed? Can't we just use the real vertices?
+  Vec3D mMinimap[mapbufsize];
+	Vec4D mFakeShadows[mapbufsize];
 
 	void getSelectionCoord(float *x,float *z);
 	float getSelectionHeight();
@@ -86,7 +91,7 @@ public:
 	void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
 	void blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
-	bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, int texture);
+	bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, unsigned int texture);
 	int addTexture(GLuint texture);
 	void eraseTextures();
 
