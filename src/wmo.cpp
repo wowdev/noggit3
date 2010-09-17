@@ -36,13 +36,10 @@ WMO::WMO(std::string name): ManagedItem(name)
 {
 	filename = name;
 	MPQFile f(name.c_str());
-	ok = !f.isEof();
-	if (!ok) {
+	if (f.isEof()) {
 		LogError << "Error loading WMO \"" << name << "\"." << std::endl;
 		return;
 	}
-	Reloaded=false;
-	reloadWMO=0;
 
 	/*if(!f.isExternal())
 		gLog("    Loading WMO from MPQ %s\n", name.c_str());
@@ -180,14 +177,14 @@ WMO::WMO(std::string name): ManagedItem(name)
 				{
 					LogDebug << "SKYBOX:" << std::endl;
 
-					sbid = gWorld->modelmanager.add(path);
-					skybox = (Model*)gWorld->modelmanager.items[sbid];
-
-					if (!skybox->ok) 
-					{
-						gWorld->modelmanager.del(sbid);
-						skybox = 0;
-					}
+          if( MPQFileExists( path ) )
+          {
+            skybox = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.add(path)];
+          }
+          else
+          {
+            skybox = NULL;
+          }
 				}
 			}
 		}
@@ -226,8 +223,6 @@ WMO::WMO(std::string name): ManagedItem(name)
 
 	f.close();
 	delete[] texbuf;
-	Reloaded=false;
-	reloadWMO=0;
 
 	for (int i=0; i<nGroups; i++) 
 		groups[i].initDisplayList();
@@ -235,27 +230,24 @@ WMO::WMO(std::string name): ManagedItem(name)
 
 WMO::~WMO()
 {
-	if (ok) {
-		LogDebug << "Unloading WMO \"" << name << "\"." << std::endl;
-		delete[] groups;
+  LogDebug << "Unloading WMO \"" << name << "\"." << std::endl;
+  if(groups)
+    delete[] groups;
 
-		for (vector<string>::iterator it = textures.begin(); it != textures.end(); ++it) {
-            video.textures.delbyname(*it);
-		}
+  for (vector<string>::iterator it = textures.begin(); it != textures.end(); ++it) {
+    video.textures.delbyname(*it);
+  }
 
-		for (vector<string>::iterator it = models.begin(); it != models.end(); ++it) {
-			gWorld->modelmanager.delbyname(*it);
-		}
+  for (vector<string>::iterator it = models.begin(); it != models.end(); ++it) {
+    gWorld->modelmanager.delbyname(*it);
+  }
 
-		delete[] mat;
-
-		if (skybox) {
-			//delete skybox;
-			gWorld->modelmanager.del(sbid);
-		}
-		if( Reloaded && reloadWMO )
-			delete reloadWMO;
-	}
+  delete[] mat;
+  
+  if (skybox) {
+    //delete skybox;
+    gWorld->modelmanager.del(sbid);
+  }
 }
 
 // model.cpp
@@ -263,13 +255,6 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
 
 void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight)
 {
-	if( Reloaded && reloadWMO )
-	{
-		reloadWMO->draw(doodadset,ofs,rot,boundingbox,groupboxes,highlight);
-		return;
-	}
-	if (!ok) return;
-
 	if (highlight && false)
 	{
 		//WIP STEFF
@@ -532,14 +517,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 
 void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot)
 {
-	if( Reloaded && reloadWMO )
-	{
-		reloadWMO->drawSelect(doodadset,ofs,rot);
-		return;
-	}
-	if (!ok) return;
-	
-	for (int i=0; i<nGroups; i++) {
+  for (int i=0; i<nGroups; i++) {
 		groups[i].draw(ofs, rot);
 	}
 
@@ -556,21 +534,7 @@ void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot)
 
 void WMO::drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper )
 {
-	try
-	{
-	if( Reloaded && reloadWMO )
-	{ 
-		reloadWMO->drawSkybox( pCamera, pLower, pUpper  );
-		return;
-	}
-	}
-	catch(...)
-	{
-		//TODO Steff
-		// Why dose it crash here
-	}
-
-	if( skybox && pCamera.IsInsideOf( pLower, pUpper ) ) 
+  if( skybox && pCamera.IsInsideOf( pLower, pUpper ) ) 
 	{
 		//! \todo  only draw sky if we are "inside" the WMO... ?
 
@@ -759,8 +723,7 @@ void WMOGroup::initDisplayList()
 	sprintf(fname,"%s_%03d.wmo",temp, num);
 
 	MPQFile gf(fname);
-    ok = !gf.isEof();
-	if (!ok) {
+	if (gf.isEof()) {
 		LogError << "Error loading WMO \"" << fname << "\"." << std::endl;
 		return;
 	}
@@ -1003,8 +966,6 @@ void WMOGroup::initDisplayList()
 
 void WMOGroup::initLighting(int nLR, short *useLights)
 {
-	if(!ok)
-		return;
 	//dl_light = 0;
 	// "real" lighting?
 	if ((flags&0x2000) && hascv) {
@@ -1038,8 +999,6 @@ void WMOGroup::initLighting(int nLR, short *useLights)
 
 void WMOGroup::draw(const Vec3D& ofs, const float rot)
 {
-	if(!ok)
-		return;
 	visible = false;
 	// view frustum culling
 	Vec3D pos = center + ofs;
@@ -1101,8 +1060,6 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot)
 
 void WMOGroup::drawDoodads(int doodadset, const Vec3D& ofs, const float rot)
 {
-	if(!ok)
-		return;
 	if (!visible) return;
 	if (nDoodads==0) return;
 
@@ -1144,8 +1101,6 @@ void WMOGroup::drawDoodads(int doodadset, const Vec3D& ofs, const float rot)
 
 void WMOGroup::drawDoodadsSelect(int doodadset, const Vec3D& ofs, const float rot)
 {
-	if(!ok)
-		return;
 	if (!visible) return;
 	if (nDoodads==0) return;
 
@@ -1186,8 +1141,6 @@ void WMOGroup::drawDoodadsSelect(int doodadset, const Vec3D& ofs, const float ro
 
 void WMOGroup::drawLiquid()
 {
-	if(!ok)
-		return;
 	if (!visible) return;
 
 	// draw liquid
@@ -1215,8 +1168,6 @@ void WMOGroup::drawLiquid()
 
 void WMOGroup::setupFog()
 {
-	if(!ok)
-		return;
 	if (outdoorLights || fog==-1) {
 		gWorld->setupFog();
 	} else {
@@ -1278,11 +1229,4 @@ int WMOManager::add(std::string name)
 	id = nextID();
     do_add(name, id, wmo);
     return id;
-}
-
-void WMOManager::reload()
-{
-	LogDebug << "Reloading WMOs." << std::endl;
-	for (std::map<std::string, int>::iterator it = names.begin(); it != names.end(); ++it)
-		((WMO*)items[(*it).second])->reload((*it).first);
 }

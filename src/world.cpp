@@ -20,7 +20,8 @@
 using namespace std;
  
 World *gWorld=0;
-#define BUFSIZE 8192
+
+static const int BUFSIZE = 8192;
 unsigned int	SelectBuffer[BUFSIZE];
 
 
@@ -649,12 +650,11 @@ void World::enterTile( int x, int z )
 		}
 	}*/
 
-	if( autoheight && current[2][2] && current[2][2]->ok ) 
+	if( autoheight && current[2][2] ) 
 	{
-		Vec3D vc = current[2][2]->topnode.vmax;
-		if( vc.y < 0 ) 
-			vc.y = 0;
-		camera.y = vc.y + 50.0f;
+		float maxHeight = current[2][2]->getMaxHeight();
+    maxHeight = std::max( maxHeight, 0.0f );
+		camera.y = maxHeight + 50.0f;
 
 		autoheight = false;
 	}
@@ -677,15 +677,13 @@ void World::enterTileInit(int x, int z)
 	for (int j=1; j<4; j++) {
 		for (int i=1; i<4; i++) {
 				current[j][i] = loadTile(x-2+i, z-2+j);
-				if(current[j][i])
-					current[j][i]->finishLoading();
 		}
 	}
-	if (autoheight && current[2][2]!=0 && current[2][2]->ok) {
+	if (autoheight && current[2][2] ) {
 		//Vec3D vc = (current[1][1]->topnode.vmax + current[1][1]->topnode.vmin) * 0.5f;
-		Vec3D vc = current[2][2]->topnode.vmax;
-		if (vc.y < 0) vc.y = 0;
-		camera.y = vc.y + 50.0f;
+		float maxHeight = current[2][2]->getMaxHeight();
+		maxHeight = std::max( maxHeight, 0.0f );
+		camera.y = maxHeight + 50.0f;
 
 		autoheight = false;
 	}
@@ -752,6 +750,14 @@ MapTile *World::loadTile(int x, int z)
 		//gLog("Tile %d,%d not in map\n", x, z);
 		return 0;
 	}
+  
+	char name[256];
+	sprintf(name,"World\\Maps\\%s\\%s_%d_%d.adt", basename.c_str(), basename.c_str(), x, z);
+  
+  if( !MPQFileExists( name ) )
+  {
+    return NULL;
+  }
 
 	int firstnull = MAPTILECACHESIZE;
 	for (int i=0; i<MAPTILECACHESIZE; i++) {
@@ -776,11 +782,6 @@ MapTile *World::loadTile(int x, int z)
 		delete maptilecache[maxidx];
 		firstnull = maxidx;
 	}
-	
-	//! \todo  make a loader thread  or something :(
-
-	char name[256];
-	sprintf(name,"World\\Maps\\%s\\%s_%d_%d.adt", basename.c_str(), basename.c_str(), x, z);
 
 	maptilecache[firstnull] = new MapTile(x,z,name,mBigAlpha);
 	return maptilecache[firstnull];
@@ -934,9 +935,10 @@ bool primaryLoaded;
 int	loadingTile=0;
 int	update=0;
 
+//! \todo Implement the AsyncObject loading and remove this.
 void World::onTheFlyLoading()
 {
-	//On the fly loading
+/*	//On the fly loading
 	primaryLoaded=true;
 	for (int j=1; j<4; j++) {
 		for (int i=1; i<4; i++) {
@@ -999,7 +1001,7 @@ void World::onTheFlyLoading()
 				loadingTile=0;
 		}while(!workDone);		
 		
-	}
+	}*/
 }
 
 void World::draw()
@@ -1601,7 +1603,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16]->changeTerrain(x,z,change,radius,BrushType);
+					current[j][i]->getChunk(t/16,t%16)->changeTerrain(x,z,change,radius,BrushType);
 			}
 		}
 	}
@@ -1612,7 +1614,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16]->recalcNorms();
+					current[j][i]->getChunk(t/16,t%16)->recalcNorms();
 			}
 		}
 	}
@@ -1626,7 +1628,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16]->flattenTerrain(x,z,h,remain,radius,BrushType);
+					current[j][i]->getChunk(t/16,t%16)->flattenTerrain(x,z,h,remain,radius,BrushType);
 			}
 		}
 	}
@@ -1637,7 +1639,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16]->recalcNorms();
+					current[j][i]->getChunk(t/16,t%16)->recalcNorms();
 			}
 		}
 	}
@@ -1652,7 +1654,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16]->blurTerrain(x, z, remain, radius, BrushType);
+					current[j][i]->getChunk(t/16,t%16)->blurTerrain(x, z, remain, radius, BrushType);
 			}
 		}
 	}
@@ -1663,7 +1665,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
             if (oktile(i,j) && current[j][i] != 0)
 			{
 				for(int t=0;t<256;t++)
-					current[j][i]->chunks[t/16][t%16]->recalcNorms();
+					current[j][i]->getChunk(t/16,t%16)->recalcNorms();
 			}
 		}
 	}
@@ -1684,7 +1686,7 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 		if ((maptilecache[i] != 0)  && (maptilecache[i]->x >= newX-1) && (maptilecache[i]->x <= newX+1) && (maptilecache[i]->z >= newZ-1) && (maptilecache[i]->z <= newZ+1)) 
 		{
 			for(int t=0;t<256;t++)
-				succ = maptilecache[i]->chunks[t/16][t%16]->paintTexture(x, z, Brush, strength, pressure, texture) || succ;
+				succ = maptilecache[i]->getChunk(t/16,t%16)->paintTexture(x, z, Brush, strength, pressure, texture) || succ;
 		}
 	}
 	return succ;
@@ -1704,8 +1706,8 @@ void World::eraseTextures(float x, float z)
 		if ((maptilecache[i] != 0)  && (maptilecache[i]->x >= newX-1) && (maptilecache[i]->x <= newX+1) && (maptilecache[i]->z >= newZ-1) && (maptilecache[i]->z <= newZ+1)) 
 		{
 			for(int t=0;t<256;t++)
-				if((maptilecache[i]->chunks[t/16][t%16]->xbase<x)&&(maptilecache[i]->chunks[t/16][t%16]->xbase+CHUNKSIZE>x)&&(maptilecache[i]->chunks[t/16][t%16]->zbase<z)&&(maptilecache[i]->chunks[t/16][t%16]->zbase+CHUNKSIZE>z))
-					maptilecache[i]->chunks[t/16][t%16]->eraseTextures();
+				if((maptilecache[i]->getChunk(t/16,t%16)->xbase<x)&&(maptilecache[i]->getChunk(t/16,t%16)->xbase+CHUNKSIZE>x)&&(maptilecache[i]->getChunk(t/16,t%16)->zbase<z)&&(maptilecache[i]->getChunk(t/16,t%16)->zbase+CHUNKSIZE>z))
+					maptilecache[i]->getChunk(t/16,t%16)->eraseTextures();
 		}
 	}
 	return;
@@ -1728,7 +1730,7 @@ void World::addHole( float x, float z )
 			for( mcnk_x = 0; mcnk_x < 16; mcnk_x++ )
 				for( mcnk_y = 0; mcnk_y < 16; mcnk_y++ )
 				{
-					MapChunk * cnk = maptilecache[maptile]->chunks[mcnk_x][mcnk_y];
+					MapChunk * cnk = maptilecache[maptile]->getChunk(mcnk_x,mcnk_y);
 					if( ( cnk->xbase < x ) && ( cnk->xbase + CHUNKSIZE > x ) && ( cnk->zbase < z ) && ( cnk->zbase + CHUNKSIZE > z ) )
 					{
 						k = ( x - cnk->xbase ) / MINICHUNKSIZE;
@@ -1756,7 +1758,7 @@ void World::removeHole( float x, float z )
 			for( mcnk_x = 0; mcnk_x < 16; mcnk_x++ )
 				for( mcnk_y = 0; mcnk_y < 16; mcnk_y++ )
 				{
-					MapChunk * cnk = maptilecache[maptile]->chunks[mcnk_x][mcnk_y];
+					MapChunk * cnk = maptilecache[maptile]->getChunk(mcnk_x,mcnk_y);
 					if( ( cnk->xbase < x ) && ( cnk->xbase + CHUNKSIZE > x ) && ( cnk->zbase < z ) && ( cnk->zbase + CHUNKSIZE > z ) )
 					{
 						k = ( x - cnk->xbase ) / MINICHUNKSIZE;
@@ -1795,7 +1797,6 @@ void World::saveMap()
 			if ((!oktile(x,y))|| (maps[y][x] == 0))
 				continue;
 			ATile=loadTile(x,y);
-			ATile->finishLoading();
 			glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT); 
 
 			glPushMatrix();
@@ -1854,7 +1855,7 @@ void World::addModel( nameEntry entry, Vec3D newPos )
 	if (mWMOInstances.empty() == false)
 	lObjectMax = mWMOInstances.rbegin( )->first;
 	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
-	
+
 	if( entry.type == eEntry_Model )
 	{
 		ModelInstance newModelis;

@@ -1,4 +1,3 @@
-#include <sstream>
 #include "MapChunk.h"
 #include "Log.h"
 #include "world.h"
@@ -85,7 +84,7 @@ bool drawFlags=false;
 
 GLuint	Contour=0;
 float			CoordGen[4];
-#define CONTOUR_WIDTH	128
+static const int CONTOUR_WIDTH = 128;
 void GenerateContourMap()
 {
 	unsigned char	CTexture[CONTOUR_WIDTH*4];
@@ -156,7 +155,7 @@ void GenerateContourMap()
 }
 
 
-MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 0 )
+MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha) 
 {	
 	mt=maintile;
 	mBigAlpha=bigAlpha;
@@ -184,8 +183,6 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 	py = header.iy;
 
 	holes = header.holes;
-
-	hasholes = (holes != 0);
 
 	/*
 	if (hasholes) {
@@ -219,19 +216,18 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 			nextpos = f.getPos() + 0x1C0; // size fix
 			// normal vectors
 			char nor[3];
-			Vec3D *ttn = tn;
+			Vec3D *ttn = mNormals;
 			for (int j=0; j<17; j++) {
 				for (int i=0; i<((j%2)?8:9); i++) {
 					f.read(nor,3);
 					// order X,Z,Y 
 					//*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
 					*ttn++ = Vec3D(-(float)nor[1]/127.0f, (float)nor[2]/127.0f, -(float)nor[0]/127.0f);
-
 				}
 			}
 		}
 		else if ( fourcc == 'MCVT' ) {
-			Vec3D *ttv = tv;
+			Vec3D *ttv = mVertices;
 
 			// vertices
 			for (int j=0; j<17; j++) {
@@ -272,7 +268,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 				} else {
 					animated[i] = 0;
 				}
-				textures[i] = video.textures.get(mt->textures[tex[i]]);
+				textures[i] = video.textures.get(mt->mTextureFilenames[tex[i]]);
 			}
 		}
 		else if ( fourcc == 'MCSH' ) {
@@ -303,7 +299,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 		else if ( fourcc == 'MCAL' ) 
 		{
 			unsigned int MCALbase = f.getPos();
-			for( int layer = 0; layer < header.nLayers; layer++ )
+			for( unsigned int layer = 0; layer < header.nLayers; layer++ )
 			{
 				if( texFlags[layer] & 0x100 )
 				{
@@ -406,6 +402,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 			else {
 				haswater = true;
 				f.seekRelative(-4);
+        float waterlevel[2];
 				f.read(waterlevel,8);//2 values - Lowest water Level, Highest Water Level
 
 				if (waterlevel[1] > vmax.y) vmax.y = waterlevel[1];
@@ -445,10 +442,10 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 	glGenBuffers(1,&normals);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
-	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), tv, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mVertices, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, normals);
-	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), tn, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mNormals, GL_STATIC_DRAW);
 
 	/*if (hasholes) */
 	//	initStrip();
@@ -467,7 +464,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 
 
 
-	Vec3D *ttv = tm;
+	Vec3D *ttv = mMinimap;
 
 	// vertices
 	for (int j=0; j<17; j++) {
@@ -508,37 +505,37 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha): MapNode( 0, 0, 
 	for (int j=0; j<mapbufsize;j++)
 	{
 		//tm[j].z=tv[j].y;
-		ShadowAmount=1.0f-(-tn[j].x+tn[j].y-tn[j].z);
+		ShadowAmount=1.0f-(-mNormals[j].x+mNormals[j].y-mNormals[j].z);
 		if(ShadowAmount<0)
 			ShadowAmount=0.0f;
 		if(ShadowAmount>1.0)
 			ShadowAmount=1.0f;
 		ShadowAmount*=0.5f;
 		//ShadowAmount=0.2;
-		ts[j].x=0;
-		ts[j].y=0;
-		ts[j].z=0;
-		ts[j].w=ShadowAmount;
+		mFakeShadows[j].x=0;
+		mFakeShadows[j].y=0;
+		mFakeShadows[j].z=0;
+		mFakeShadows[j].w=ShadowAmount;
 	}
 
 	glGenBuffers(1,&minimap);
 	glGenBuffers(1,&minishadows);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, minimap);
-	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), tm, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mMinimap, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, minishadows);
-	glBufferData(GL_ARRAY_BUFFER, mapbufsize*4*sizeof(float), ts, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, mapbufsize*4*sizeof(float), mFakeShadows, GL_STATIC_DRAW);
 }
 
 void MapChunk::loadTextures()
 {
 	return;
 	for(int i=0;i<nTextures;i++)
-		textures[i] = video.textures.get(mt->textures[tex[i]]);
+		textures[i] = video.textures.get(mt->mTextureFilenames[tex[i]]);
 }
 
-#define texDetail 8.0f
+static const float texDetail = 8.0f;
 
 void SetAnim(int anim)
 {
@@ -569,7 +566,7 @@ void RemoveAnim(int anim)
 	}
 }
 
-#define	TEX_RANGE 62.0f/64.0f
+static const float TEX_RANGE = 62.0f/64.0f;
 
 void MapChunk::drawTextures()
 {
@@ -731,7 +728,7 @@ bool MapChunk::GetVertex(float x,float z, Vec3D *V)
 	if((row<0)||(column<0)||(row>16)||(column>((row%2)?8:9)))
 		return false;
 
-	*V=tv[17*(row/2)+((row%2)?9:0)+column];
+	*V=mVertices[17*(row/2)+((row%2)?9:0)+column];
 	return true;
 }
 
@@ -840,7 +837,7 @@ void MapChunk::drawColor()
 		return;
 	}
 
-	if( !hasholes )
+	if( holes == 0 )
 	{
 		if ( mydist < gWorld->highresdistance2 ) 
 		{
@@ -865,10 +862,10 @@ void MapChunk::drawColor()
 	glBegin(GL_TRIANGLE_STRIP);
 	for(int i=0;i<striplen;i++)
 	{
-		HeightColor(tv[strip[i]].y,&Color);
+		HeightColor(mVertices[strip[i]].y,&Color);
 		glColor3fv(&Color.x);
-		glNormal3fv(&tn[strip[i]].x);
-		glVertex3fv(&tv[strip[i]].x);
+		glNormal3fv(&mNormals[strip[i]].x);
+		glVertex3fv(&mVertices[strip[i]].x);
 	}
 	glEnd();
 	//glEnable(GL_LIGHTING);
@@ -895,8 +892,8 @@ void MapChunk::drawPass(int anim)
 		glTranslatef(f*fdx,f*fdy,0);
 	}
 	
-	/*if(!this->hasholes)?? mann wens das währe ...
-	{
+	if(holes == 0)
+	/*{
 		glFrontFace(GL_CW);
 		for(int i=0;i<8;i++)
 		{
@@ -1025,7 +1022,7 @@ void MapChunk::draw()
 	float mydist = (gWorld->camera - vcenter).length() - r;
 	//if (mydist > gWorld->mapdrawdistance2) return;
 
-	if( !this->hasholes )
+	if( holes == 0 )
 	{
 		if ( mydist < gWorld->highresdistance2 ) 
 		{
@@ -1037,21 +1034,6 @@ void MapChunk::draw()
 			strip = gWorld->mapstrip;
 			striplen = stripsize;
 		}
-	}	
-	else
-	{
-		std::stringstream out;
-		out << "Vorher Add Hole to chunk:" << this->px << "-" << this->py << std::endl;
-		for(int v=0;v<16;v++)
-		{
-
-			for(int f=0;f<16;f++)
-			{
-				out << strip[f+(v*16)]<< " ";
-			}
-			out << std::endl;
-		}
-		LogDebug << out.str() << std::endl;
 	}
 
 	// setup vertex buffers
@@ -1210,9 +1192,9 @@ void MapChunk::draw()
 		glDepthMask( false );
 		glDisable( GL_DEPTH_TEST );
 		glBegin( GL_TRIANGLES );
-		glVertex3fv( tv[gWorld->mapstrip2[poly + 0]] );
-		glVertex3fv( tv[gWorld->mapstrip2[poly + 1]] );
-		glVertex3fv( tv[gWorld->mapstrip2[poly + 2]] );
+		glVertex3fv( mVertices[gWorld->mapstrip2[poly + 0]] );
+		glVertex3fv( mVertices[gWorld->mapstrip2[poly + 1]] );
+		glVertex3fv( mVertices[gWorld->mapstrip2[poly + 2]] );
 		glEnd( );		
 		glEnable( GL_CULL_FACE );
 		glEnable( GL_DEPTH_TEST );
@@ -1307,7 +1289,7 @@ void MapChunk::drawSelect( )
 	glPushName( nameID );
 	glBegin( GL_TRIANGLE_STRIP );
 	for( int i = 0; i < stripsize2; i++ )
-		glVertex3fv( tv[gWorld->mapstrip2[i]] );
+		glVertex3fv( mVertices[gWorld->mapstrip2[i]] );
 	glEnd( );
 	glPopName( );
 	glEnable( GL_CULL_FACE );	
@@ -1320,9 +1302,9 @@ void MapChunk::drawSelect2( )
 	{
 		glPushName( i );
 		glBegin( GL_TRIANGLES );
-		glVertex3fv( tv[gWorld->mapstrip2[i + 0]] );
-		glVertex3fv( tv[gWorld->mapstrip2[i + 1]] );
-		glVertex3fv( tv[gWorld->mapstrip2[i + 2]] );
+		glVertex3fv( mVertices[gWorld->mapstrip2[i + 0]] );
+		glVertex3fv( mVertices[gWorld->mapstrip2[i + 1]] );
+		glVertex3fv( mVertices[gWorld->mapstrip2[i + 2]] );
 		glEnd( );
 		glPopName( );	
 	}
@@ -1338,15 +1320,15 @@ void MapChunk::getSelectionCoord( float *x, float *z )
 		*z = -1000000.0f;
 		return;
 	}
-	*x = ( tv[gWorld->mapstrip2[Poly + 0]].x + tv[gWorld->mapstrip2[Poly + 1]].x + tv[gWorld->mapstrip2[Poly + 2]].x ) / 3;
-	*z = ( tv[gWorld->mapstrip2[Poly + 0]].z + tv[gWorld->mapstrip2[Poly + 1]].z + tv[gWorld->mapstrip2[Poly + 2]].z ) / 3;
+	*x = ( mVertices[gWorld->mapstrip2[Poly + 0]].x + mVertices[gWorld->mapstrip2[Poly + 1]].x + mVertices[gWorld->mapstrip2[Poly + 2]].x ) / 3;
+	*z = ( mVertices[gWorld->mapstrip2[Poly + 0]].z + mVertices[gWorld->mapstrip2[Poly + 1]].z + mVertices[gWorld->mapstrip2[Poly + 2]].z ) / 3;
 }
 
 float MapChunk::getSelectionHeight( )
 {
 	int Poly = gWorld->GetCurrentSelectedTriangle( );
 	if( Poly + 2 < striplen )
-		return ( tv[gWorld->mapstrip2[Poly + 0]].y + tv[gWorld->mapstrip2[Poly + 1]].y + tv[gWorld->mapstrip2[Poly + 2]].y ) / 3;
+		return ( mVertices[gWorld->mapstrip2[Poly + 0]].y + mVertices[gWorld->mapstrip2[Poly + 1]].y + mVertices[gWorld->mapstrip2[Poly + 2]].y ) / 3;
 	LogError << "Getting selection height fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
 	return 0.0f;
 }
@@ -1361,9 +1343,9 @@ Vec3D MapChunk::GetSelectionPosition( )
 	}
 
 	Vec3D lPosition;
-	lPosition  = Vec3D( tv[gWorld->mapstrip2[Poly + 0]].x, tv[gWorld->mapstrip2[Poly + 0]].y, tv[gWorld->mapstrip2[Poly + 0]].z );
-	lPosition += Vec3D( tv[gWorld->mapstrip2[Poly + 1]].x, tv[gWorld->mapstrip2[Poly + 1]].y, tv[gWorld->mapstrip2[Poly + 1]].z );
-	lPosition += Vec3D( tv[gWorld->mapstrip2[Poly + 2]].x, tv[gWorld->mapstrip2[Poly + 2]].y, tv[gWorld->mapstrip2[Poly + 2]].z );
+	lPosition  = Vec3D( mVertices[gWorld->mapstrip2[Poly + 0]].x, mVertices[gWorld->mapstrip2[Poly + 0]].y, mVertices[gWorld->mapstrip2[Poly + 0]].z );
+	lPosition += Vec3D( mVertices[gWorld->mapstrip2[Poly + 1]].x, mVertices[gWorld->mapstrip2[Poly + 1]].y, mVertices[gWorld->mapstrip2[Poly + 1]].z );
+	lPosition += Vec3D( mVertices[gWorld->mapstrip2[Poly + 2]].x, mVertices[gWorld->mapstrip2[Poly + 2]].y, mVertices[gWorld->mapstrip2[Poly + 2]].z );
 	lPosition *= 0.3333333f;
 
 	return lPosition;
@@ -1381,67 +1363,67 @@ void MapChunk::recalcNorms()
 
 	for(int i=0;i<mapbufsize;i++)
 	{
-		if(!gWorld->GetVertex(tv[i].x-UNITSIZE*0.5f,tv[i].z-UNITSIZE*0.5f,&P1))
+		if(!gWorld->GetVertex(mVertices[i].x-UNITSIZE*0.5f,mVertices[i].z-UNITSIZE*0.5f,&P1))
 		{
-			P1.x=tv[i].x-UNITSIZE*0.5f;
-			P1.y=tv[i].y;
-			P1.z=tv[i].z-UNITSIZE*0.5f;
+			P1.x=mVertices[i].x-UNITSIZE*0.5f;
+			P1.y=mVertices[i].y;
+			P1.z=mVertices[i].z-UNITSIZE*0.5f;
 		}
 
-		if(!gWorld->GetVertex(tv[i].x+UNITSIZE*0.5f,tv[i].z-UNITSIZE*0.5f,&P2))
+		if(!gWorld->GetVertex(mVertices[i].x+UNITSIZE*0.5f,mVertices[i].z-UNITSIZE*0.5f,&P2))
 		{
-			P2.x=tv[i].x+UNITSIZE*0.5f;
-			P2.y=tv[i].y;
-			P2.z=tv[i].z-UNITSIZE*0.5f;
+			P2.x=mVertices[i].x+UNITSIZE*0.5f;
+			P2.y=mVertices[i].y;
+			P2.z=mVertices[i].z-UNITSIZE*0.5f;
 		}
 
-		if(!gWorld->GetVertex(tv[i].x+UNITSIZE*0.5f,tv[i].z+UNITSIZE*0.5f,&P3))
+		if(!gWorld->GetVertex(mVertices[i].x+UNITSIZE*0.5f,mVertices[i].z+UNITSIZE*0.5f,&P3))
 		{
-			P3.x=tv[i].x+UNITSIZE*0.5f;
-			P3.y=tv[i].y;
-			P3.z=tv[i].z+UNITSIZE*0.5f;
+			P3.x=mVertices[i].x+UNITSIZE*0.5f;
+			P3.y=mVertices[i].y;
+			P3.z=mVertices[i].z+UNITSIZE*0.5f;
 		}
 
-		if(!gWorld->GetVertex(tv[i].x-UNITSIZE*0.5f,tv[i].z+UNITSIZE*0.5f,&P4))
+		if(!gWorld->GetVertex(mVertices[i].x-UNITSIZE*0.5f,mVertices[i].z+UNITSIZE*0.5f,&P4))
 		{
-			P4.x=tv[i].x-UNITSIZE*0.5f;
-			P4.y=tv[i].y;
-			P4.z=tv[i].z+UNITSIZE*0.5f;
+			P4.x=mVertices[i].x-UNITSIZE*0.5f;
+			P4.y=mVertices[i].y;
+			P4.z=mVertices[i].z+UNITSIZE*0.5f;
 		}
 
-		N1=(P2-tv[i])%(P1-tv[i]);
-		N2=(P3-tv[i])%(P2-tv[i]);
-		N3=(P4-tv[i])%(P3-tv[i]);
-		N4=(P1-tv[i])%(P4-tv[i]);
+		N1=(P2-mVertices[i])%(P1-mVertices[i]);
+		N2=(P3-mVertices[i])%(P2-mVertices[i]);
+		N3=(P4-mVertices[i])%(P3-mVertices[i]);
+		N4=(P1-mVertices[i])%(P4-mVertices[i]);
 
 		Norm=N1+N2+N3+N4;
 		Norm.normalize();
-		tn[i]=Norm;
+		mNormals[i]=Norm;
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, normals);
-	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), tn, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mNormals, GL_STATIC_DRAW);
 
 	float ShadowAmount;
 	for (int j=0; j<mapbufsize;j++)
 	{
 		//tm[j].z=tv[j].y;
-		ShadowAmount=1.0f-(-tn[j].x+tn[j].y-tn[j].z);
+		ShadowAmount=1.0f-(-mNormals[j].x+mNormals[j].y-mNormals[j].z);
 		if(ShadowAmount<0)
 			ShadowAmount=0;
 		if(ShadowAmount>1.0)
 			ShadowAmount=1.0f;
 		ShadowAmount*=0.5f;
 		//ShadowAmount=0.2;
-		ts[j].x=0;
-		ts[j].y=0;
-		ts[j].z=0;
-		ts[j].w=ShadowAmount;
+		mFakeShadows[j].x=0;
+		mFakeShadows[j].y=0;
+		mFakeShadows[j].z=0;
+		mFakeShadows[j].w=ShadowAmount;
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, minishadows);
-	glBufferData(GL_ARRAY_BUFFER, mapbufsize*4*sizeof(float), ts, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, mapbufsize*4*sizeof(float), mFakeShadows, GL_STATIC_DRAW);
 }
-//next is a manipulating of terrain
+
 void MapChunk::changeTerrain(float x, float z, float change, float radius, int BrushType)
 {
 	float dist,xdiff,zdiff;
@@ -1458,29 +1440,29 @@ void MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 	vmax.y = -9999999.0f;
 	for(int i=0;i<mapbufsize;i++)
 	{
-		xdiff=tv[i].x-x;
-		zdiff=tv[i].z-z;
+		xdiff=mVertices[i].x-x;
+		zdiff=mVertices[i].z-z;
 
 		dist=sqrt(xdiff*xdiff+zdiff*zdiff);
 
 		if(dist<radius)
 		{
 			if(BrushType==0)//Flat
-				tv[i].y+=change;
+				mVertices[i].y+=change;
 			else if(BrushType==1)//Linear
-				tv[i].y+=change*(1.0f-dist/radius);
+				mVertices[i].y+=change*(1.0f-dist/radius);
 			else if(BrushType==2)//Smooth
-				tv[i].y+=change/(1.0f+dist/radius);
+				mVertices[i].y+=change/(1.0f+dist/radius);
 			Changed=true;
 		}
 		
-		if (tv[i].y < vmin.y) vmin.y = tv[i].y;
-		if (tv[i].y > vmax.y) vmax.y = tv[i].y;
+		if (mVertices[i].y < vmin.y) vmin.y = mVertices[i].y;
+		if (mVertices[i].y > vmax.y) vmax.y = mVertices[i].y;
 	}
 	if(Changed)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vertices);
-		glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), tv, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mVertices, GL_STATIC_DRAW);
 	}
 }
 
@@ -1501,41 +1483,38 @@ void MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 
 	for(int i=0;i<mapbufsize;i++)
 	{
-		xdiff=tv[i].x-x;
-		zdiff=tv[i].z-z;
+		xdiff=mVertices[i].x-x;
+		zdiff=mVertices[i].z-z;
 
 		dist=sqrt(xdiff*xdiff+zdiff*zdiff);
 
 		if(dist<radius)
 		{
-
-
-
 			if(BrushType==0)//Flat
 			{
-				tv[i].y=remain*tv[i].y+(1-remain)*h;
+				mVertices[i].y=remain*mVertices[i].y+(1-remain)*h;
 			}
 			else if(BrushType==1)//Linear
 			{
 				nremain=1-(1-remain)*(1-dist/radius);
-				tv[i].y=nremain*tv[i].y+(1-nremain)*h;
+				mVertices[i].y=nremain*mVertices[i].y+(1-nremain)*h;
 			}
 			else if(BrushType==2)//Smooth
 			{
 				nremain=1.0f-pow(1.0f-remain,(1.0f+dist/radius));
-				tv[i].y=nremain*tv[i].y+(1-nremain)*h;
+				mVertices[i].y=nremain*mVertices[i].y+(1-nremain)*h;
 			}
 
 			Changed=true;
 		}
 		
-		if (tv[i].y < vmin.y) vmin.y = tv[i].y;
-		if (tv[i].y > vmax.y) vmax.y = tv[i].y;
+		if (mVertices[i].y < vmin.y) vmin.y = mVertices[i].y;
+		if (mVertices[i].y > vmax.y) vmax.y = mVertices[i].y;
 	}
 	if(Changed)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vertices);
-		glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), tv, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mVertices, GL_STATIC_DRAW);
 	}
 }
 
@@ -1556,8 +1535,8 @@ void MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 
 	for(int i=0;i<mapbufsize;i++)
 	{
-		xdiff=tv[i].x-x;
-		zdiff=tv[i].z-z;
+		xdiff=mVertices[i].x-x;
+		zdiff=mVertices[i].z-z;
 
 		dist=sqrt(xdiff*xdiff+zdiff*zdiff);
 
@@ -1579,8 +1558,8 @@ void MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 				for(int k=-Rad;k<=Rad;k++)
 				{
 					tx=x+k*UNITSIZE+(j%2)*UNITSIZE/2.0f;
-					xdiff=tx-tv[i].x;
-					zdiff=tz-tv[i].z;
+					xdiff=tx-mVertices[i].x;
+					zdiff=tz-mVertices[i].z;
 					dist2=sqrt(xdiff*xdiff+zdiff*zdiff);
 					if(dist2>radius)
 						continue;
@@ -1594,29 +1573,29 @@ void MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 
 			if(BrushType==0)//Flat
 			{
-				tv[i].y=remain*tv[i].y+(1-remain)*h;
+				mVertices[i].y=remain*mVertices[i].y+(1-remain)*h;
 			}
 			else if(BrushType==1)//Linear
 			{
 				nremain=1-(1-remain)*(1-dist/radius);
-				tv[i].y=nremain*tv[i].y+(1-nremain)*h;
+				mVertices[i].y=nremain*mVertices[i].y+(1-nremain)*h;
 			}
 			else if(BrushType==2)//Smooth
 			{
 				nremain=1.0f-pow(1.0f-remain,(1.0f+dist/radius));
-				tv[i].y=nremain*tv[i].y+(1-nremain)*h;
+				mVertices[i].y=nremain*mVertices[i].y+(1-nremain)*h;
 			}
 
 			Changed=true;
 		}
 		
-		if (tv[i].y < vmin.y) vmin.y = tv[i].y;
-		if (tv[i].y > vmax.y) vmax.y = tv[i].y;
+		if (mVertices[i].y < vmin.y) vmin.y = mVertices[i].y;
+		if (mVertices[i].y > vmax.y) vmax.y = mVertices[i].y;
 	}
 	if(Changed)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vertices);
-		glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), tv, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mVertices, GL_STATIC_DRAW);
 	}
 }
 
@@ -1682,12 +1661,12 @@ int MapChunk::addTexture( GLuint texture )
 	return texLevel;
 }
 
-bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, float pressure, int texture)//paint with texture
+bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, float pressure, unsigned int texture)
 {
 	using namespace std; // Workaround for windows. For min and max function use later.
 	float zPos,xPos,change,xdiff,zdiff,dist, radius;
 
-	int texLevel=-1,i,j;
+	int texLevel=-1;
 
 	radius=Brush->getRadius();
 
@@ -1699,7 +1678,7 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 		return true;
 
 	//First Lets find out do we have the texture already
-	for(i=0;i<nTextures;i++)
+	for(int i=0;i<nTextures;i++)
 		if(textures[i]==texture)
 			texLevel=i;
 
@@ -1720,10 +1699,10 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 	texAbove=nTextures-texLevel-1;
 
 
-	for(j=0;j<63;j++)
+	for(int j=0;j<63;j++)
 	{
 		xPos=xbase;
-		for(i=0;i<63;i++)
+		for(int i=0;i<63;i++)
 		{
 			xdiff=xPos-x;
 			zdiff=zPos-z;
@@ -1746,7 +1725,7 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 			
 			target=strength;
 			tarAbove=1-target;
-	
+			
 			tPressure=pressure*Brush->getValue(dist);
 			if(texLevel>0)
 				amap[texLevel-1][i+j*64]=(unsigned char)max( min( (1-tPressure)*( (float)amap[texLevel-1][i+j*64] ) + tPressure*target + 0.5f ,255.0f) , 0.0f);
@@ -1780,42 +1759,23 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 	return true;
 }
 
-//--Holes ;P
 bool MapChunk::isHole( int i, int j )
 {
-	bool ishole = ( holes & ( ( 1 << ((j*4)+i) ) ));
-	return ishole;
+	return( holes & ( ( 1 << ((j*4)+i) ) ));
 }
 
 void MapChunk::addHole( int i, int j )
 {
-	std::stringstream out;
-	for(int v=0;v<16;v++)
-	{
-
-		for(int f=0;f<16;f++)
-		{
-			out << strip[f+(v*16)]<< " ";
-		}
-		out << std::endl;
-	}
-	LogDebug << out.str() << std::endl;
-
 	holes = holes | ( ( 1 << ((j*4)+i)) );
-	hasholes = holes;
 	initStrip( );
-	
 }
-
 
 void MapChunk::removeHole( int i, int j )
 {
 	holes = holes & ~( ( 1 << ((j*4)+i)) );
-	hasholes = holes;
 	initStrip( );
 }
 
-//-AreaID
 void MapChunk::setAreaID( int ID )
 {
 	areaID = ID;

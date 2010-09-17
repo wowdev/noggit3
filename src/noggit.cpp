@@ -36,6 +36,8 @@
 
 #include "errorhandling.h"
 
+#include "AsyncLoader.h"
+
 bool fullscreen = false;
 
 
@@ -52,6 +54,7 @@ float gFPS;
 freetype::font_data arialn13,arial12,arial14,arial16,arial24,arial32,morpheus40,skurri32,fritz16;	
 
 GotoInfo gGoto;
+AsyncLoader* gAsyncLoader;
 
 
 void getGamePath(bool pLoadFromConfig = false)
@@ -412,6 +415,9 @@ int startNoggit( int argc, char *argv[] )
 	Log << "Project path: " << Project::getInstance( )->getPath( ) << std::endl;
 
 	CreateStrips( );
+  
+  gAsyncLoader = new AsyncLoader();
+  gAsyncLoader->start(1); //! \todo get the number of threads from the number of available cores.
 	
 	//libmpq__init( );
 

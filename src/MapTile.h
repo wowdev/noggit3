@@ -4,12 +4,11 @@
 #include <vector>
 
 #include "mapheaders.h"
-#include "MapNode.h"
 #include "video.h" // GLfloat, GLshort, ...
 
+class Vec3D;
 class Liquid;
 class MapChunk;
-class MPQFile;
 
 class MapTile 
 {
@@ -17,113 +16,48 @@ public:
 	std::vector<Liquid*> mLiquids;
 
 private:
-	// MFBO:
-	GLfloat mMinimumValues[3*3*3], mMaximumValues[3*3*3];
-	GLshort lIndices[18];
+  // MFBO:
+  GLfloat mMinimumValues[3*3*3];
+  GLfloat mMaximumValues[3*3*3];
 
-	// MHDR:
-	int mFlags;
+  // MHDR:
+  int mFlags;
+  bool mBigAlpha;
 
-	// Data to be loaded:
-	bool mTexturesLoaded;
-	std::vector<std::string> mTextureFilenames;
+  // Data to be loaded and later unloaded.
+  std::vector<std::string> mTextureFilenames;
+  std::vector<std::string> mModelFilenames;
+  std::vector<std::string> mWMOFilenames;
 
-	std::string fname;
-	
-	MPQFile	*theFile;
+  std::string mFilename;
 
-	bool	chunksLoaded;
-	int		nextChunk;
-	size_t mcnk_offsets[256], mcnk_sizes[256];
-	void	loadChunk();
-	void	finishChunkLoad();
-
-	void loadTexture();
-	void finishTextureLoad();
-
-	char	*modelBuffer;
-	char	*modelPos;
-	size_t	modelSize;
-	int		curModelID;
-	
-	uint32_t	modelNum;
-	ENTRY_MDDF	*modelInstances;
-	
+  MapChunk * mChunks[16][16];
+  
 public:
-	void loadModel();
-	bool	modelsLoaded;
-private:
-	void loadModelInstances(int id);
+  //! \brief Get the maximum height of terrain on this map tile.
+  float getMaxHeight();
 
-
-	char	*wmoBuffer;
-	char	*wmoPos;
-	size_t	wmoSize;
-	
-	uint32_t	wmoNum;
-	ENTRY_MODF	*wmoInstances;
-	
-public:
-	void loadWMO();
-	bool	wmosLoaded;
-private:
-	void loadWMOInstances();
-
-public:
-	void finishLoading();
-	bool isLoaded(){return mTexturesLoaded&modelsLoaded&wmosLoaded;};
-	void partialLoad(){
-		if( !mTexturesLoaded )
-		{
-				loadTexture();
-		}		
-		else if(!chunksLoaded)
-		{
-			//loadChunk();
-			loadChunk();
-		}
-		else if(!wmosLoaded)
-			loadWMO();
-		else if(!modelsLoaded)
-			loadModel();		
-	};
-	std::vector<std::string> textures;
-	std::vector<std::string> wmos;
-	std::vector<std::string> models;
+  //! \brief Get chunk for sub offset x,z.
+  MapChunk* getChunk( unsigned int x, unsigned int z );
 
 	int x, z;
-	bool ok;
-
-	bool mBigAlpha;
-
-	//World *world;
-
 	float xbase, zbase;
 
-	MapChunk * chunks[16][16];
-
-	MapNode topnode;
-
-	MapTile(int x0, int z0, char* filename,bool bigAlpha);
+	MapTile(int x0, int z0, const std::string& filename,bool bigAlpha);
 	~MapTile();
 
 	void draw();
 	void drawSelect();
 	void drawLines();
 	void drawWater();
-	void drawSky();
-	//void drawPortals();
-	//void drawModelsMapTile();
 	void drawTextures();
 	void drawMFBO();
 
 	bool GetVertex(float x,float z, Vec3D *V);
-	
 
 	void saveTile();
-
-	/// Get chunk for sub offset x,z
-	MapChunk *getChunk(unsigned int x, unsigned int z);
+  
+  friend class MapChunk;
 };
 
 int indexMapBuf(int x, int y);

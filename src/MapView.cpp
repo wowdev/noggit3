@@ -24,12 +24,9 @@
 #include "WMOInstance.h" // WMOInstance
 
 
-using namespace std;
-
-
-#define XSENS 15.0f
-#define YSENS 15.0f
-#define SPEED 66.6f
+static const float XSENS = 15.0f;
+static const float YSENS = 15.0f;
+static const float SPEED = 66.6f;
 
 int MouseX;
 int MouseY;
@@ -307,15 +304,15 @@ void InsertObject( frame *button, int id )
 	std::vector<std::string> wmos_to_add;
 
 	// the import file
-	string importFile;
+	std::string importFile;
 
 	// MODELINSERT FROM TEXTFILE
-		// is a source file set in config file?
-		if( FileExists( "noggIt.conf" ) )
-		{
-			ConfigFile config( "noggIt.conf" );
-			config.readInto( importFile, "ImportFile" );
-		}
+  // is a source file set in config file?
+  if( FileExists( "noggIt.conf" ) )
+  {
+    ConfigFile config( "noggIt.conf" );
+    config.readInto( importFile, "ImportFile" );
+  }
 		
 		// insert from modelviewer if file set and hit the right menu pount.
 		if(id==0 && importFile=="")
@@ -323,121 +320,100 @@ void InsertObject( frame *button, int id )
 		else if (id==2)
 			importFile="Import.txt"; //  use import.txt in noggit folder!
 
-
-		  size_t foundString;
-		  string line;
-		  string findThis;
-		  ifstream fileReader (importFile.c_str());
-		  if (fileReader.is_open())
-		  {
-			while (! fileReader.eof() )
-			{
-			  getline (fileReader,line);
-			  if(line.find(".m2")!= string::npos || line.find(".M2")!= string::npos )
-			  {
-					// M2 inside line
-					// is it the modelviewer log then cut the log messages out
-					findThis = 	"Loading model: ";
-					foundString = line.find(findThis);
-					if(foundString!= string::npos)
-					{
-						// cut path
-						line = line.substr( foundString+findThis.size() );
-					}
-					m2s_to_add.push_back( line );
-
-			  }
-			  else if(line.find(".wmo")!= string::npos || line.find(".WMO")!= string::npos )
-			  {
-					// WMO inside line
-					findThis = "Loading WMO ";
-					foundString = line.find(findThis);
-					// is it the modelviewer log then cut the log messages out
-					if(foundString != string::npos)
-					{
-						// cut path
-						line = line.substr( foundString+findThis.size() );
-					}
-					wmos_to_add.push_back(line);
-
-			  }
-			  
-			}
-			fileReader.close();
-		  }
-		  else 
-		  {
-  			// file not exist, no rights ore other error
-			LogError << "Faild to open file for import models"<<std::endl;
-			LogError << importFile << std::endl;
-		  }
+  
+  size_t foundString;
+  std::string line;
+  std::string findThis;
+  std::ifstream fileReader(importFile.c_str());
+  if (fileReader.is_open())
+  {
+    while (! fileReader.eof() )
+    {
+      getline (fileReader,line);
+      if(line.find(".m2")!= std::string::npos || line.find(".M2")!= std::string::npos )
+      {
+        // M2 inside line
+        // is it the modelviewer log then cut the log messages out
+        findThis = 	"Loading model: ";
+        foundString = line.find(findThis);
+        if(foundString!= std::string::npos)
+        {
+          // cut path
+          line = line.substr( foundString+findThis.size() );
+        }
+        m2s_to_add.push_back( line );
+      }
+      else if(line.find(".wmo")!= std::string::npos || line.find(".WMO")!= std::string::npos )
+      {
+        // WMO inside line
+        findThis = "Loading WMO ";
+        foundString = line.find(findThis);
+        // is it the modelviewer log then cut the log messages out
+        if(foundString != std::string::npos)
+        {
+          // cut path
+          line = line.substr( foundString+findThis.size() );
+        }
+        wmos_to_add.push_back(line);
+      }
+    }
+    fileReader.close();
+  }
+  else 
+  {
+    // file not exist, no rights ore other error
+    LogError << "Faild to open file for import models"<<std::endl;
+    LogError << importFile << std::endl;
+  }
 		
 
-		// handel WMOs
-		for( std::vector<std::string>::iterator it = wmos_to_add.begin(); it != wmos_to_add.end(); ++it )
-		{
-			// send to wmo manager - get wmoid
-			int newWMOID = gWorld->wmomanager.add(it->c_str());
-			// get the new model
+  for( std::vector<std::string>::iterator it = wmos_to_add.begin(); it != wmos_to_add.end(); ++it )
+  {
+    if(MPQFileExists(*it))
+    {
+      LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
+      continue;
+    }
+    
+    WMO *wmo = (WMO*)gWorld->wmomanager.items[gWorld->wmomanager.add(*it)];
 
-			WMO *wmo = (WMO*)gWorld->wmomanager.items[newWMOID];
-			if(!wmo->ok)
-			{			
-				LogDebug << "Could not add this WMO: " << it->c_str() << std::endl;
-			}
-			else
-			{
-				// add model on current selection.
-				switch( gWorld->GetCurrentSelection( )->type )
-				{
-				case eEntry_Model:
-					pWorld->addWMO( wmo, gWorld->GetCurrentSelection( )->data.model->pos );
-					break;
-				case eEntry_WMO:
-					pWorld->addWMO( wmo,  gWorld->GetCurrentSelection( )->data.wmo->pos);
-					break;
-				case eEntry_MapChunk:
-					pWorld->addWMO( wmo, gWorld->GetCurrentSelection( )->data.mapchunk->GetSelectionPosition( ) );
-					break;
-				}
-			}
+    switch( gWorld->GetCurrentSelection( )->type )
+    {
+    case eEntry_Model:
+      pWorld->addWMO( wmo, gWorld->GetCurrentSelection( )->data.model->pos );
+      break;
+    case eEntry_WMO:
+      pWorld->addWMO( wmo, gWorld->GetCurrentSelection( )->data.wmo->pos);
+      break;
+    case eEntry_MapChunk:
+      pWorld->addWMO( wmo, gWorld->GetCurrentSelection( )->data.mapchunk->GetSelectionPosition( ) );
+      break;
+    }
+  }
 
-		}
-
-		// handel m2s
-		for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
-		{
-			// send to model manager - get modelid
-			int newModelID = gWorld->modelmanager.add(it->c_str());
-			// get the new model
-
-			Model *model = (Model*)gWorld->modelmanager.items[newModelID];
-			if(!model->ok)
-			{
-				LogDebug << "Could not add this model: " << it->c_str() << std::endl;
-			}
-			else
-			{
-				// add model on current selection.
-				switch( gWorld->GetCurrentSelection( )->type )
-				{
-				case eEntry_Model:
-					pWorld->addM2( model, gWorld->GetCurrentSelection( )->data.model->pos );
-					break;
-				case eEntry_WMO:
-					pWorld->addM2( model,  gWorld->GetCurrentSelection( )->data.wmo->pos);
-					break;
-				case eEntry_MapChunk:
-					pWorld->addM2( model, gWorld->GetCurrentSelection( )->data.mapchunk->GetSelectionPosition( ) );
-					break;
-				}
-			}
-
-
-		}
-		
-
-
+  for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
+  {
+    if(MPQFileExists(*it))
+    {
+      LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
+      continue;
+    }
+    
+    Model *model = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.add(*it)];
+  
+    switch( gWorld->GetCurrentSelection( )->type )
+    {
+    case eEntry_Model:
+      pWorld->addM2( model, gWorld->GetCurrentSelection( )->data.model->pos );
+      break;
+    case eEntry_WMO:
+      pWorld->addM2( model, gWorld->GetCurrentSelection( )->data.wmo->pos);
+      break;
+    case eEntry_MapChunk:
+      pWorld->addM2( model, gWorld->GetCurrentSelection( )->data.mapchunk->GetSelectionPosition( ) );
+      break;
+    }
+  }
 }
 
 void view_texture_palette( frame *button, int id )
@@ -853,6 +829,8 @@ void MapView::tick( float t, float dt )
 				Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
 				yPos = Selection->data.mapchunk->getSelectionHeight( );
 
+        using namespace std;
+        
 				switch( terrainMode )
 				{
 				case 0:
@@ -1248,7 +1226,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( world->getAreaID( ) ).c_str() );
 		freetype::shprint( arial16, video.xres - 200, 5, "%.2f fps", gFPS );
 				
-		ostringstream s;
+    std::ostringstream s;
 		s << "Server cords(x:" << -(world->camera.x - ZEROPOINT) << " y:" << -(world->camera.z - ZEROPOINT) << " z:" << world->camera.y
 				<< ") Tile " << round((world->camera.x-(TILESIZE/2))/TILESIZE) << " " << round((world->camera.z-(TILESIZE/2))/TILESIZE)
 				<< " Client cords(x:" << world->camera.x<<" y:" << world->camera.z << " z:"<<world->camera.y << ") ";
@@ -1262,7 +1240,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 		if( mainGui->guiappInfo->hidden == false )
 		{	
 			s.str("");
-			s << "Project Path: " << Project::getInstance()->getPath() << endl;
+			s << "Project Path: " << Project::getInstance()->getPath() << std::endl;
 			mainGui->guiappInfo->setText( s.str() );
 		}
 
@@ -1283,16 +1261,16 @@ void MapView::displayViewMode_3D( float t, float dt )
 				switch( lSelection->type ) 
 				{
 				case eEntry_Model:
-					s << "TYPE: " << lSelection->type << endl;
-					s << "NAME: " << lSelection->returnName()<< endl;
-					s << "FILENAME: " << lSelection->data.model->model->filename.c_str( ) << endl;
+            s << "TYPE: " << lSelection->type << std::endl;
+					s << "NAME: " << lSelection->returnName()<< std::endl;
+					s << "FILENAME: " << lSelection->data.model->model->filename.c_str( ) << std::endl;
 
-					s << "UID-D1: " << lSelection->data.model->d1 << endl;
-//					s << "modelID: " << lSelection->data.model->modelID << endl;
-					s << "nameID: " << lSelection->data.model->nameID << endl << endl;
-					s << "Pos X: " << lSelection->data.model->pos.x << endl;
-					s << "Pos Y: " << lSelection->data.model->pos.y << endl;
-					s << "Pos Z: " << lSelection->data.model->pos.z << endl;
+					s << "UID-D1: " << lSelection->data.model->d1 << std::endl;
+//					s << "modelID: " << lSelection->data.model->modelID << std::endl;
+					s << "nameID: " << lSelection->data.model->nameID << std::endl << std::endl;
+					s << "Pos X: " << lSelection->data.model->pos.x << std::endl;
+					s << "Pos Y: " << lSelection->data.model->pos.y << std::endl;
+					s << "Pos Z: " << lSelection->data.model->pos.z << std::endl;
 					//s << "UniqueID: " << lSelection->Name << endl;
 					//s << "UniqueID: " << lSelection->Name << endl;
 					//freetype::shprint( arial16, 10, 83, "UniqueID: %d", lSelection->data.model->d1 );
@@ -1314,15 +1292,15 @@ void MapView::displayViewMode_3D( float t, float dt )
 					mainGui->guidetailInfos->setText(s.str().c_str() );
 				break;
 				case eEntry_WMO:
-					s << lSelection->data.wmo->wmo->filename.c_str( ) << endl;
+					s << lSelection->data.wmo->wmo->filename.c_str( ) << std::endl;
 					//freetype::shprint( arial16, 5, 63, lSelection->data.wmo->wmo->filename.c_str( ) );
-					s << "UniqueID: " << lSelection->data.wmo->id << endl;
+					s << "UniqueID: " << lSelection->data.wmo->id << std::endl;
 					//freetype::shprint( arial16, 10, 83, "UniqueID: %d", lSelection->data.wmo->id );
-					s <<  "Pos: (" <<  lSelection->data.wmo->pos.x << "," << lSelection->data.wmo->pos.y << "," << lSelection->data.wmo->pos.z << ")" << endl;					
+					s <<  "Pos: (" <<  lSelection->data.wmo->pos.x << "," << lSelection->data.wmo->pos.y << "," << lSelection->data.wmo->pos.z << ")" << std::endl;					
 					//freetype::shprint( arial16, 10, 103, "Pos: (%.2f, %.2f, %.2f)", lSelection->data.wmo->pos.x, lSelection->data.wmo->pos.y, lSelection->data.wmo->pos.z );
-					s << "Rot: (" << lSelection->data.wmo->dir.x << "," << lSelection->data.wmo->dir.y << "" << lSelection->data.wmo->dir.z << ")" << endl;					
+					s << "Rot: (" << lSelection->data.wmo->dir.x << "," << lSelection->data.wmo->dir.y << "" << lSelection->data.wmo->dir.z << ")" << std::endl;					
 					//freetype::shprint( arial16, 10, 123, "Rot: (%.2f, %.2f, %.2f)", lSelection->data.wmo->dir.x, lSelection->data.wmo->dir.y, lSelection->data.wmo->dir.z );
-					s << "Textures Used: " << lSelection->data.wmo->wmo->nTextures << endl;
+					s << "Textures Used: " << lSelection->data.wmo->wmo->nTextures << std::endl;
 					//freetype::shprint( arial16, 10, 143, "Textures Used: %d", lSelection->data.model->model->header.nTextures );
 
 					for( unsigned int j = 0; j < lSelection->data.wmo->wmo->nTextures; j++ )
@@ -1338,7 +1316,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 							//freetype::shprint( arial16, ( video.xres - 15 ) / 2, 163 + 20 * (j-25), "%d - %s", j, lSelection->data.wmo->wmo->textures[j].c_str( ) );
 						}
 					}
-					s << "Doodads set: " << lSelection->data.wmo->doodadset << endl;
+					s << "Doodads set: " << lSelection->data.wmo->doodadset << std::endl;
 					//freetype::shprint( arial16, 10, 143, "Doodads set: %d", lSelection->data.wmo->doodadset );
 
 					mainGui->guidetailInfos->setText(s.str().c_str() );
@@ -1812,16 +1790,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			}
 		}
 #endif
-		
-		// reloading the managers
-		if( e->keysym.sym == SDLK_F10 )
-			video.textures.reload( );
-		
-		if( e->keysym.sym == SDLK_F11 )
-			world->modelmanager.reload( );
-		
-		if( e->keysym.sym == SDLK_F12 )
-			world->wmomanager.reload( );
 		
 		// fog distance or brush radius
 		if( e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS ) 
