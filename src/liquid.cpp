@@ -22,21 +22,24 @@ void Liquid::initFromTerrain(MPQFile &f, int flags)
 	ydir = 1.0f;
 	if (flags & 16) {
 		// magma:
-		initTextures<1,30>( "XTEXTURES\\LAVA\\lava.%d.blp" );
+		//initTextures<1,30>( "XTEXTURES\\LAVA\\lava.%d.blp" );
+		initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
 		type = 0; // not colored
 		pType = 2;
 		mTransparency = false;
 	}
 	else if (flags & 4) {
 		// river/lake
-		initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
+		//initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" )
+			initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");;
 		type = 2; // dynamic color
 		pType = 1;
 		mTransparency = true;
 	}
 	else {
 		// ocean
-		initTextures<1,30>( "XTEXTURES\\ocean\\ocean_h.%d.blp" );
+		//initTextures<1,30>( "XTEXTURES\\ocean\\ocean_h.%d.blp" );
+		initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
 		type = 2;
 		pType = 0;
 		mTransparency = true;
@@ -56,18 +59,21 @@ void Liquid::initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor)
 
 	// tmpflag is the flags value for the last drawn tile
 	if (tmpflag & 1) {
-		initTextures<1,30>( "XTEXTURES\\SLIME\\slime.%d.blp" );
+		//initTextures<1,30>( "XTEXTURES\\SLIME\\slime.%d.blp" );
+		initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
 		type = 0;
 		texRepeats = 2.0f;
 		mTransparency = false;
 	}
 	else if (tmpflag & 2) {
-		initTextures<1,30>( "XTEXTURES\\LAVA\\lava.%d.blp" );
+		//initTextures<1,30>( "XTEXTURES\\LAVA\\lava.%d.blp" );
+		initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
 		type = 0;
 		mTransparency = false;
 	}
 	else {
-		initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
+		//initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
+		initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
 		if (indoor) {
 			trans = true;
 			type = 1;
@@ -263,15 +269,19 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 	try
 	{
 		DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID( info->LiquidType );
-		initTextures<1,30>( lLiquidTypeRow.getString( LiquidTypeDB::TextureFilenames - 1 ) );
+		//initTextures<1,30>( lLiquidTypeRow.getString( LiquidTypeDB::TextureFilenames - 1 ) );
+				initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
 		mLiquidType = lLiquidTypeRow.getInt( LiquidTypeDB::Type );
 		mShaderType = lLiquidTypeRow.getInt( LiquidTypeDB::ShaderType );
+				mLiquidType = 0;
+		mShaderType = 1;
 		//! \todo  Get texRepeats too.
 	}
 	catch( ... )
 	{
 		// Fallback, when there is no information.
-		initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
+		//initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
+		initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
 		mLiquidType = 0;
 		mShaderType = 1;
 	}
@@ -346,15 +356,20 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	try
 	{
 		DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID( pTileInformation.mLiquidType );
-		initTextures<1,30>( lLiquidTypeRow.getString( LiquidTypeDB::TextureFilenames - 1 ) );
+		//initTextures<1,30>( lLiquidTypeRow.getString( LiquidTypeDB::TextureFilenames - 1 ) );
+		initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
+		
 		mLiquidType = lLiquidTypeRow.getInt( LiquidTypeDB::Type );
 		mShaderType = lLiquidTypeRow.getInt( LiquidTypeDB::ShaderType );
+				mLiquidType = 0;
+		mShaderType = 1;
 		//! \todo  Get texRepeats too.
 	}
 	catch( ... )
 	{
 		// Fallback, when there is no information.
-		initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
+		//initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
+		initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
 		mLiquidType = 0;
 		mShaderType = 1;
 	}
@@ -420,10 +435,10 @@ void loadWaterShader()
 	mWaterShader = new BLSShader( "shaders\\pixel\\arbfp1\\psLiquidWater.bls" );
 	mMagmaShader = new BLSShader( "shaders\\pixel\\arbfp1\\psLiquidMagma.bls" );
 #else
-	FILE *shader = fopen( "shaders/water.ps", "r" );
+	FILE *shader = fopen( "shaders\\water.ps", "r" );
 	if( !shader )
 	{
-		LogError << "Unable to open water shader \"shaders/water.ps\"." << std::endl;
+		LogError << "Unable to open water shader \"shaders\\water.ps\"." << std::endl;
 	}
 	else
 	{
@@ -432,7 +447,7 @@ void loadWaterShader()
 		fclose(shader);
 		glGenProgramsARB(1, &waterShader);
 		if(waterShader==0)
-			LogError << "Failed to get program ID for water shader \"shaders/water.ps\"." << std::endl;
+			LogError << "Failed to get program ID for water shader \"shaders\\water.ps\"." << std::endl;
 		else
 		{
 			GLint errorPos, isNative;
@@ -447,7 +462,7 @@ void loadWaterShader()
 				int i, j;
 				const GLubyte *stringy;
 				char localbuffer[256];
-				LogError << "Water Shader \"shaders/water.ps\" Fragment program failed to load \nReason:\n";
+				LogError << "Water Shader \"shaders\\water.ps\" Fragment program failed to load \nReason:\n";
 				stringy=glGetString(GL_PROGRAM_ERROR_STRING_ARB);	//This is only available in ARB
 				LogError << (char *)stringy << std::endl;
 				for(i=errorPos, j=0; (i<length)&&(j<128); i++, j++)
@@ -462,7 +477,7 @@ void loadWaterShader()
 		}
 	}
 
-	shader=fopen("shaders/waterfog.ps", "r");
+	shader=fopen("shaders\\waterfog.ps", "r");
 	if(shader==0)
 		LogError << "Unable to open water shader \"shaders/waterfog.ps\"." << std::endl;
 	else
@@ -541,6 +556,7 @@ void Liquid::draw()
 	//glBindTexture(GL_TEXTURE_2D, textures[texidx]);
 	
 	const float tcol = mTransparency ? 0.75f : 1.0f;
+	
 	if( mTransparency ) 
 	{
 		glEnable(GL_BLEND);
@@ -549,7 +565,7 @@ void Liquid::draw()
 	}
 
 	if (type==0) 
-		glColor4f(1,1,1,1);
+		glColor4f(0,0,0,0.8);
 	else 
 	{
 		if (type==2) 
@@ -580,7 +596,7 @@ void Liquid::draw()
 	glDisable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
 	
-	glColor4f(1,1,1,1);
+	glColor4f(1,1,1,0.4f);
 	if( mTransparency ) 
 	{
 		glDepthMask(GL_TRUE);
@@ -595,6 +611,7 @@ void Liquid::draw()
 template<int pFirst, int pLast>
 void Liquid::initTextures( std::string pFilename )
 {
+	LogDebug << "Load Texture:" << pFilename.c_str( ) << std::endl;
 	char buf[1024];
 	for( int i = pFirst; i <= pLast; i++ ) 
 	{
