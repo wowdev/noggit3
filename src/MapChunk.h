@@ -65,6 +65,8 @@ public:
 
 	void draw();
 	void drawContour();
+	void drawAreaID();
+	void drawBlock();
 	void drawColor();
 	void drawSelect();
 	void drawSelect2();

@@ -292,11 +292,8 @@ void DeleteSelectedObject( frame *button, int id )
 
 void InsertObject( frame *button, int id )
 {
-	// quick and easy implemantation so that the most wishe function is in
-	// if you set the path to the modelviewer log it imports all modesl that the user
-	// looked at in the viewer
+	// ID switch the import way
 
-	// TODO
 
 	// Test if there is an selection
 	if( !gWorld->HasSelection() )
@@ -316,9 +313,13 @@ void InsertObject( frame *button, int id )
     ConfigFile config( "noggIt.conf" );
     config.readInto( importFile, "ImportFile" );
   }
-  // else use import.txt in noggit folder!
-  if (importFile=="")
-    importFile="Import.txt";
+		
+		// insert from modelviewer if file set and hit the right menu pount.
+		if(id==0 && importFile=="")
+			return; // path not set. Return ro editor.
+		else if (id==2)
+			importFile="Import.txt"; //  use import.txt in noggit folder!
+
   
   size_t foundString;
   std::string line;
@@ -460,6 +461,7 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 
 	look = false;
 	hud = true;
+	set_areaid = false;
 	mViewMode = eViewMode_3D;
 
 	pWorld=world;
@@ -615,8 +617,8 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 
 	mbar->AddMenu( "File" );
 	mbar->AddMenu( "Edit" );
-	mbar->AddMenu( "Assist" );
 	mbar->AddMenu( "View" );
+	mbar->AddMenu( "Assist" );
 	mbar->AddMenu( "Help" );
 
 	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + S   Save current tile", SaveOrReload, 0 );
@@ -637,8 +639,13 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Options" );
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Auto select mode", &Settings::getInstance()->AutoSelectingMode, false );
 
-	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Import model", InsertObject, 0  );
-	
+	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Import model from" );
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "ModelViewer", InsertObject, 0  );
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "File set", InsertObject, 1  );
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Import file", InsertObject, 2  );
+	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Set" );
+	mbar->GetMenu( "Assist" )->AddMenuItemToggle( "Area ID", &set_areaid, true  );
+
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Current texture", &SelectedTexture->hidden, true );
@@ -1418,6 +1425,13 @@ void MapView::display( float t, float dt )
 		world->saveMap();
 		Saving=false;
 	}
+
+	if(set_areaid)
+	{
+		// reset Area ID
+	
+	}
+
 
 	switch( mViewMode )
 	{
