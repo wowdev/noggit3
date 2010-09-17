@@ -183,6 +183,7 @@ Skies::Skies( int mapid )
 	{
 		for( DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i )
 		{
+
 			if( 0 == i->getUInt( LightDB::Map ) )
 			{
 				Sky s( i );

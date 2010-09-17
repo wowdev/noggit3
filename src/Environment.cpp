@@ -7,6 +7,7 @@ Environment::Environment( )
 	this->AltDown = false;
 	this->CtrlDown = false;
 	this->AutoSelecting = true;
+	
 }
 
 Environment* Environment::instance = 0;

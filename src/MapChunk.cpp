@@ -643,6 +643,7 @@ void MapChunk::drawTextures()
 		glVertex3f((float)px,py+1.0f,-2.0f);	
 		glEnd();
 
+
 		RemoveAnim(animated[i]);
 
 	}
@@ -970,6 +971,8 @@ void MapChunk::drawLines()
 		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);
 	}
 
+
+
 	glPopMatrix();
 	glEnable(GL_LIGHTING);
 	glColor4f(1,1,1,1);
@@ -997,6 +1000,23 @@ void MapChunk::drawContour()
 	drawPass(0);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_TEXTURE_GEN_S);
+}
+
+void MapChunk::drawAreaID()
+{
+		// Draw hole lines if view_subchunk_lines is true
+		glColor4f(0.0,0.0,1.0f,0.5f);
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, HoleStrip);
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[9]);
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[18]);		
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[27]);
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[36]);
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);	
+}
+
+void MapChunk::drawBlock()
+{
+	//
 }
 
 void MapChunk::draw()
@@ -1112,8 +1132,10 @@ void MapChunk::draw()
 	glDisable(GL_LIGHTING);
 
 	drawContour();
+	//drawAreaID();
+	//drawBlock();
+	//drawColor();
 
-	
 	if(drawFlags)
 	{
 		if(Flags&0x02)

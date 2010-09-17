@@ -22,10 +22,10 @@ Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window
 	SetIcon( 2, "Interface\\ICONS\\INV_Feather_16.blp" );
 	//Holes
 	SetIcon( 3, "Interface\\ICONS\\INV_Gizmo_HardenedAdamantiteTube.blp" );
-	SetIcon( 4, "Interface\\ICONS\\INV_Elemental_Mote_Fire01.blp" );
-	SetIcon( 5, "Interface\\ICONS\\INV_Enchant_EssenceAstralLarge.blp" );
+	SetIcon( 4, "Interface\\ICONS\\INV_Misc_Map07.blp" );
+	SetIcon( 5, "Interface\\ICONS\\INV_Misc_Net_01.blp" );
 	SetIcon( 6, "Interface\\ICONS\\INV_Misc_Flower_02.blp" );
-	SetIcon( 7, "Interface\\Icons\\INV_Misc_Map07.blp" );
+	SetIcon( 7, "Interface\\Icons\\INV_Enchant_EssenceAstralLarge.blp" );
 	SetIcon( 8, "Interface\\Icons\\Spell_Shaman_ThunderStorm.blp" );
 	SetIcon( 9, "Interface\\Icons\\Spell_Shaman_TidalWaves.blp" );
 
