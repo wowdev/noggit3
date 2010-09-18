@@ -24,17 +24,24 @@ bool IsEditableWorld( int pMapId );
 enum eSelectionMode
 {
 	eSelectionMode_General,
-	eSelectionMode_Triangle,
+	eSelectionMode_Triangle
 };
 
-class World {
+struct MapTileEntry
+{
+  uint32_t flags;
+  MapTile* tile;
+};
 
-	MapTile *maptilecache[MAPTILECACHESIZE];
-	MapTile *current[5][5];
+class World 
+{
+	//MapTile *maptilecache[MAPTILECACHESIZE];
+	//MapTile *current[5][5];
 	int ex,ez;
 
 	bool mBigAlpha;
 
+  MapTileEntry mTiles[64][64];
 	
 
 public:
@@ -44,7 +51,7 @@ public:
 	
 	std::string basename;
 
-	bool maps[64][64];
+	//bool maps[64][64];
 	GLuint lowrestiles[64][64];
 	bool autoheight;
 
@@ -98,7 +105,6 @@ public:
 	void onTheFlyLoading();
 
 	void enterTile(int x, int z);
-	void enterTileInit(int x, int z);
 	bool tileLoaded(int x, int z);
 	MapTile *loadTile(int x, int z);
 	void reloadTile(int x, int z);
@@ -148,6 +154,8 @@ public:
 
 	void deleteModelInstance( int pUniqueID );
 	void deleteWMOInstance( int pUniqueID );
+  
+  bool hasTile( int pX, int pZ );
 
 	float minX,maxX,minY,maxY;
 };

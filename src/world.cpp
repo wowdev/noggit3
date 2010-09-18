@@ -16,8 +16,6 @@
 #include "MapTile.h"
 
 #include "WMOInstance.h" // WMOInstance
-
-using namespace std;
  
 World *gWorld=0;
 
@@ -27,7 +25,7 @@ unsigned int	SelectBuffer[BUFSIZE];
 
 bool IsEditableWorld( int pMapId )
 {
-	string lMapName;
+	std::string lMapName;
 	try 
 	{
 		DBCFile::Record map = gMapDB.getByID( pMapId );
@@ -39,10 +37,10 @@ bool IsEditableWorld( int pMapId )
 		return false;
 	}
 
-	stringstream ssfilename;
+	std::stringstream ssfilename;
 	ssfilename << "World\\Maps\\" << lMapName << "\\" << lMapName << ".wdt";
 	
-	if( !MPQFileExists( ssfilename.str( ).c_str( ) ) )
+	if( !MPQFile::exists( ssfilename.str( ) ) )
 	{
 		Log << "World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
 		return false;
@@ -73,7 +71,7 @@ bool IsEditableWorld( int pMapId )
 
 World::World( const char* name ) : basename( name ), mCurrentSelection( 0 )
 {
-	mMapId = -1;
+	mMapId = 0xFFFFFFFF;
 	for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
 	{
 		if( !strcmp( name, i->getString( MapDB::InternalName ) ) )
@@ -82,14 +80,12 @@ World::World( const char* name ) : basename( name ), mCurrentSelection( 0 )
 			break;
 		}
 	}
-	if( mMapId == -1 )
+	if( mMapId == 0xFFFFFFFF )
 		LogError << "MapId for \"" << name << "\" not found! What is wrong here?" << std::endl;
 
 	//::gWorld = this;
 
 	LogDebug << "Loading world \"" << name << "\"." << std::endl;
-
-	for (int i=0; i<MAPTILECACHESIZE; i++) maptilecache[i] = 0;
 
 	autoheight = false;
 
@@ -113,9 +109,9 @@ void World::init()
 			lowrestiles[j][i] = 0;
 		}
 	}
-
-	char fn[256];
-	sprintf(fn,"World\\Maps\\%s\\%s.wdt", basename.c_str(), basename.c_str());
+  
+  std::stringstream filename; 
+  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
 
 	time = 1450;
 	animtime = 0;
@@ -132,7 +128,7 @@ void World::init()
 	
 	mWmoFilename = "";
 
-	MPQFile theFile(fn);
+	MPQFile theFile(filename.str());
 	uint32_t fourcc;
 	uint32_t size;
 
@@ -168,16 +164,20 @@ void World::init()
 	theFile.seekRelative( 4 );
 	
 	assert( fourcc == 'MAIN' );
+  
+  /// this is the theory. Sadly, we are also compiling on 64 bit machines with size_t being 8 byte, not 4. Therefore, we can't do the same thing, Blizzard does in its 32bit executable.
+  //theFile.read( &(mTiles[0][0]), sizeof( 8 * 64 * 64 ) );
 	
 	for( int j = 0; j < 64; j++ ) 
 	{
 		for( int i = 0; i < 64; i++ ) 
 		{
-			uint32_t temp;
-			theFile.read( &temp, 4 );
-			theFile.seekRelative( 4 );
-			maps[j][i] = temp & 1;
+			theFile.read( &mTiles[j][i].flags, 4 );
+      theFile.seekRelative( 4 );
+      mTiles[j][i].tile = NULL;
+      printf("%i ", mTiles[j][i].flags);
 		}
+    printf("\n");
 	}
 	
 	if( !theFile.isEof() )
@@ -227,9 +227,10 @@ void World::init()
 
 void World::initMinimap()
 {
-	char fn[256];
-	sprintf(fn,"World\\Maps\\%s\\%s.wdl", basename.c_str(), basename.c_str());
-	MPQFile f(fn);
+  std::stringstream filename; 
+  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
+  
+	MPQFile f(filename.str());
 	if (f.isEof()) {
 		LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
 		return;
@@ -399,15 +400,16 @@ Its an array of 16 shorts. Each short is a bitmask. If the bit is not set, there
 
 void World::initLowresTerrain()
 {
-	char fn[256];
-	sprintf(fn,"World\\Maps\\%s\\%s.wdl", basename.c_str(), basename.c_str());
+  std::stringstream filename; 
+  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
+  
 	short tilebuf[17*17];
 	short tilebuf2[16*16];
 	Vec3D lowres[17][17];
 	Vec3D lowsub[16][16];
 	int ofsbuf[64][64];
 
-	MPQFile f(fn);
+	MPQFile f(filename.str());
 
 	int fourcc;
 	size_t size;
@@ -575,7 +577,7 @@ void World::initDisplay()
 		wmomanager.add( mWmoFilename );
 		WMOInstance inst( reinterpret_cast<WMO*>( wmomanager.items[ wmomanager.get( mWmoFilename ) ] ), &mWmoEntry );
 		
-		gWorld->mWMOInstances.insert( pair<int,WMOInstance>( mWmoEntry.uniqueID, inst ) );
+		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( mWmoEntry.uniqueID, inst ) );
 		camera = inst.pos;
 	}
 
@@ -588,14 +590,21 @@ void World::initDisplay()
 
 World::~World()
 {
-	for (int j=0; j<64; j++) {
-		for (int i=0; i<64; i++) {
-			if (lowrestiles[j][i]!=0) glDeleteLists(lowrestiles[j][i],1);
+	for( int j = 0; j < 64; j++ ) 
+  {
+		for( int i = 0; i < 64; i++ ) 
+    {
+			if( lowrestiles[j][i] )
+      {
+        glDeleteLists( lowrestiles[j][i], 1 );
+      }
+      if( tileLoaded( j, i ) )
+      {
+        LogDebug << "Deleting tile " << j << " x " << i << std::endl;
+        delete mTiles[j][i].tile;
+        mTiles[j][i].tile = NULL;
+      }
 		}
-	}
-
-	for (int i=0; i<MAPTILECACHESIZE; i++) {
-		if (maptilecache[i] != 0) delete maptilecache[i];
 	}
 
 	if (minimap) glDeleteTextures(1, &minimap);
@@ -614,75 +623,35 @@ inline bool oktile( int i, int j )
 	return !( i < 0 || j < 0 || i > 64 || j > 64 );
 }
 
-//int	nextTileLoad=0;
-void World::enterTile( int x, int z )
+bool World::hasTile( int pZ, int pX )
 {
-	if( !oktile( x, z ) ) 
-	{
-		noadt = true;
-		return;
-	} 
-	else 
-		noadt = !maps[z][x];
-
-	cx = x;
-	cz = z;
-	for( int i = 0; i < 5; i++ )
-		for( int j = 0; j < 5; j++ )
-			current[j][i] = loadTile( i + x - 2, j + z - 2 );
-
-	/*
-	int time=SDL_GetTicks();;
-	for (int j=0; j<5; j++) {
-		for (int i=0; i<5; i++) {
-			if(((i==0)||(i==4)||(j==0)||(j==4))&&!tileLoaded(x-2+i,z-2+j))
-			{
-				if(nextTileLoad<time)
-				{
-					current[j][i] = loadTile(x-2+i, z-2+j);
-					//nextTileLoad=time+2000;
-				}
-				else
-					current[j][i] = 0;
-			}
-			else
-				current[j][i] = loadTile(x-2+i, z-2+j);
-		}
-	}*/
-
-	if( autoheight && current[2][2] ) 
-	{
-		float maxHeight = current[2][2]->getMaxHeight();
-    maxHeight = std::max( maxHeight, 0.0f );
-		camera.y = maxHeight + 50.0f;
-
-		autoheight = false;
-	}
+  return oktile( pZ, pX ) && ( mTiles[pZ][pX].flags & 1 );
 }
 
-void World::enterTileInit(int x, int z)
+void World::enterTile( int x, int z )
 {
-	// TODO Steff
-	// get the loading asyncron
-	if (!oktile(x,z)) {
-		noadt = true;
-		return;
-	} else noadt = !maps[z][x];
+  if( !hasTile( x, z ) )
+  {
+    noadt = true;
+    return;
+  }
+	
+  noadt = false;
 
 	cx = x;
 	cz = z;
-	for (int j=0; j<5; j++) 
-		for (int i=0; i<5; i++)
-			current[j][i] = 0;
-	for (int j=1; j<4; j++) {
-		for (int i=1; i<4; i++) {
-				current[j][i] = loadTile(x-2+i, z-2+j);
-		}
-	}
-	if (autoheight && current[2][2] ) {
-		//Vec3D vc = (current[1][1]->topnode.vmax + current[1][1]->topnode.vmin) * 0.5f;
-		float maxHeight = current[2][2]->getMaxHeight();
-		maxHeight = std::max( maxHeight, 0.0f );
+	for( int i = cz - 2; i < cz + 2; i++ )
+  {
+		for( int j = cx - 2; j < cx + 2; j++ )
+    {
+			mTiles[i][j].tile = loadTile( j, i );
+    }
+  }
+
+	if( autoheight && tileLoaded( cx, cz ) ) 
+	{
+		float maxHeight = mTiles[cz][cx].tile->getMaxHeight();
+    maxHeight = std::max( maxHeight, 0.0f );
 		camera.y = maxHeight + 50.0f;
 
 		autoheight = false;
@@ -691,100 +660,53 @@ void World::enterTileInit(int x, int z)
 
 void World::reloadTile(int x, int z)
 {
-	if (!oktile(x,z) || !maps[z][x]) {
-		//gLog("Tile %d,%d not in map\n", x, z);
-		return;
-	}
-
-
-	for (int i=0; i<MAPTILECACHESIZE; i++) {
-		if ((maptilecache[i] != 0)  && (maptilecache[i]->x == x) && (maptilecache[i]->z == z)) {
-            //k we found the tile time to remove it then readd it
-			delete maptilecache[i];
-			char name[256];
-			sprintf(name,"World\\Maps\\%s\\%s_%d_%d.adt", basename.c_str(), basename.c_str(), x, z);
-
-			maptilecache[i] = new MapTile(x,z,name,mBigAlpha);
-
-			//Now to treat it like we just rentered the current tile
-			enterTile(cx,cz);
-            return;
-		}
-	}
+  if( tileLoaded( z, x ) )
+  {
+    delete mTiles[z][x].tile;
+    
+    std::stringstream filename; 
+    filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+    
+    mTiles[z][x].tile = new MapTile( x, z, filename.str(), mBigAlpha );
+    enterTile( cx, cz );
+  }
 }
 
 void World::saveTile(int x, int z)
 {
-	if (!oktile(x,z) || !maps[z][x]) {
-		//gLog("Tile %d,%d not in map\n", x, z);
-		return;
-	}
-	for (int i=0; i<MAPTILECACHESIZE; i++) {
-		if ((maptilecache[i] != 0)  && (maptilecache[i]->x == x) && (maptilecache[i]->z == z)) 
-		{
-			maptilecache[i]->saveTile();
-		}
+  if( tileLoaded( z, x ) )
+  {
+    mTiles[z][x].tile->saveTile();
 	}
 }
 
-bool World::tileLoaded(int x, int z)
+inline bool World::tileLoaded(int z, int x)
 {
-	if (!oktile(x,z) || !maps[z][x]) {
-		LogDebug << "Tile " << x << "," << z << " not in map" << std::endl;
-		return true;
-	}
-
-	int firstnull = MAPTILECACHESIZE;
-	for (int i=0; i<MAPTILECACHESIZE; i++) {
-		if ((maptilecache[i] != 0)  && (maptilecache[i]->x == x) && (maptilecache[i]->z == z)) {
-            return true;
-		}
-		if (maptilecache[i] == 0 && i < firstnull) firstnull = i;
-	}
-	return false;
+  return hasTile( z, x ) && mTiles[z][x].tile;
 }
 
-MapTile *World::loadTile(int x, int z)
+MapTile* World::loadTile(int z, int x)
 {
-	if (!oktile(x,z) || !maps[z][x]) {
-		//gLog("Tile %d,%d not in map\n", x, z);
-		return 0;
+	if( !hasTile( z, x ) ) 
+	{
+		return NULL;
 	}
   
-	char name[256];
-	sprintf(name,"World\\Maps\\%s\\%s_%d_%d.adt", basename.c_str(), basename.c_str(), x, z);
+  if( tileLoaded( z, x ) )
+  {
+    return mTiles[z][x].tile;
+	}
   
-  if( !MPQFileExists( name ) )
+  std::stringstream filename; 
+  filename << "World\\Maps\\" << basename << "\\" << basename << "_" << z << "_" << x << ".adt";
+  
+  if( !MPQFile::exists( filename.str() ) )
   {
     return NULL;
   }
 
-	int firstnull = MAPTILECACHESIZE;
-	for (int i=0; i<MAPTILECACHESIZE; i++) {
-		if ((maptilecache[i] != 0)  && (maptilecache[i]->x == x) && (maptilecache[i]->z == z)) {
-            return maptilecache[i];
-		}
-		if (maptilecache[i] == 0 && i < firstnull) firstnull = i;
-	}
-	// ok we need to find a place in the cache
-	if (firstnull == MAPTILECACHESIZE) {
-		int score, maxscore = 0, maxidx = 0;
-		// oh shit we need to throw away a tile
-		for (int i=0; i<MAPTILECACHESIZE; i++) {
-			score = abs(maptilecache[i]->x - cx) + abs(maptilecache[i]->z - cz);
-			if (score>maxscore) {
-				maxscore = score;
-				maxidx = i;
-			}
-		}
-
-		// maxidx is the winner (loser)
-		delete maptilecache[maxidx];
-		firstnull = maxidx;
-	}
-
-	maptilecache[firstnull] = new MapTile(x,z,name,mBigAlpha);
-	return maptilecache[firstnull];
+	mTiles[z][x].tile = new MapTile( z, x, filename.str(), mBigAlpha );
+	return mTiles[z][x].tile;
 }
 
 
@@ -865,7 +787,7 @@ void World::outdoorLighting()
 	glLightfv(GL_LIGHT0, GL_AMBIENT, black);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
-	
+	*/
 	/*
 	Vec3D dd = outdoorLightStats.nightDir;
 	Vec4D pos(-dd.x, -dd.z, dd.y, 0);
@@ -1137,10 +1059,19 @@ void World::draw()
 	glPushMatrix();
 
 	if( drawterrain )
-		for( int j = 1; j < 4; j++ )
-			for( int i = 1; i < 4; i++ )
-				if( oktile( j, i ) && current[j][i] ) 
-					current[j][i]->draw( );
+  {
+		for( int j = 0; j < 64; j++ )
+    {
+			for( int i = 0; i < 64; i++ )
+      {
+				if( tileLoaded( j, i ) )
+        {
+					mTiles[j][i].tile->draw( );
+        }
+      }
+    }
+  }
+  
 	glPopMatrix();
 
 	
@@ -1156,16 +1087,17 @@ void World::draw()
 		
 
 		setupFog();
-		for (int j=1; j<4; j++) {
-			for (int i=1; i<4; i++) {
-				//uselowlod = drawfog;// && i==1 && j==1;
-				if (oktile(i,j) && current[j][i] != 0) 
-				{
-					current[j][i]->drawLines();
-					current[j][i]->drawMFBO();
-				}
-			}
-		}
+		for( int j = 0; j < 64; j++ )
+    {
+			for( int i = 0; i < 64; i++ )
+      {
+				if( tileLoaded( j, i ) )
+        {
+					mTiles[j][i].tile->drawLines( );
+					mTiles[j][i].tile->drawMFBO( );
+        }
+      }
+    }
 	}
 	
 
@@ -1250,11 +1182,16 @@ void World::draw()
 	// TODO Steff: Liquid generates GL_OUT_OF_MEMORY
 	setupFog();
 	
-	for (int j=1; j<4; j++) {
-		for (int i=1; i<4; i++) {
-			if (drawwater && oktile(i,j) && current[j][i] != 0)	current[j][i]->drawWater();
-		}
-	}
+  for( int j = 0; j < 64; j++ )
+  {
+    for( int i = 0; i < 64; i++ )
+    {
+      if( tileLoaded( j, i ) )
+      {
+        mTiles[j][i].tile->drawWater( );
+      }
+    }
+  }
 	
 	glColor4f(1,1,1,1);
 	glEnable(GL_BLEND);
@@ -1280,11 +1217,23 @@ void World::draw()
 
 	glColor4f(1,1,1,1);
 	glDisable(GL_COLOR_MATERIAL);
-
-	//WoWMapView says [1][1] instead !?!
-	if (current[2][2] != 0 || noadt) {
-		if (noadt || (camera.x<current[2][2]->xbase) || (camera.x>(current[2][2]->xbase+TILESIZE))
-			|| (camera.z<current[2][2]->zbase) || (camera.z>(current[2][2]->zbase+TILESIZE)) )
+  
+	
+  for( int j = 0; j < 64; j++ )
+  {
+    for( int i = 0; i < 64; i++ )
+    {
+      if( tileLoaded( j, i ) )
+      {
+        mTiles[j][i].tile->drawWater( );
+      }
+    }
+  }
+  
+	if( tileLoaded( cz, cx ) || noadt )
+  {
+		if ( noadt || (camera.x<mTiles[cz][cx].tile->xbase) || (camera.x>(mTiles[cz][cx].tile->xbase+TILESIZE))
+			|| (camera.z<mTiles[cz][cx].tile->zbase) || (camera.z>(mTiles[cz][cx].tile->zbase+TILESIZE)) )
 		{
 			ex = (int)(camera.x / TILESIZE);
 			ez = (int)(camera.z / TILESIZE);
@@ -1292,7 +1241,6 @@ void World::draw()
 			loading = true;
 		}
 	}
-
 }
 
 int	numTimers;
@@ -1361,14 +1309,17 @@ void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
 	uselowlod = drawfog;
 	if (drawterrain) 
 	{
-		for (int j=1; j<4; j++) 
-		{
-			for (int i=1; i<4; i++) 
-			{
-				if ( oktile(j,i) && current[j][i] ) 
-					current[j][i]->drawSelect();
-			}
-		}
+    for( int j = 0; j < 64; j++ )
+    {
+      for( int i = 0; i < 64; i++ )
+      {
+        if( tileLoaded( j, i ) )
+        {
+          LogDebug << "mTiles["<<j<<"]["<<i<<"].tile ( " << mTiles[j][i].tile << " )->drawSelect( );" << std::endl;
+          mTiles[j][i].tile->drawSelect( );
+        }
+      }
+    }
 	}
 	
 	if( pOnlyMap )
@@ -1472,7 +1423,7 @@ unsigned int World::getAreaID()
 
 	if ((mtx<cx-1) || (mtx>cx+1) || (mtz<cz-1) || (mtz>cz+1)) return 0;
 	
-	curTile = current[mtz-cz+2][mtx-cx+2];
+	curTile = mTiles[mtz][mtx].tile;
 	if(curTile == 0) return 0;
 
 	MapChunk *curChunk = curTile->getChunk(mcx, mcz);
@@ -1507,19 +1458,18 @@ void World::drawTileMode(float ah)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisable(GL_CULL_FACE);
 	glDepthMask(GL_FALSE);
-
-	for(int y=1;y<4;y++)
-	{
-		for(int x=1;x<4;x++)
-		{
-            if (oktile(x,y) && current[y][x] != 0)
-			{
-				//glTranslatef(16*x-16,16*y-16,0);
-				current[y][x]->drawTextures();
-			
-			}
-		}
-	}
+  
+  for( int j = 0; j < 64; j++ )
+  {
+    for( int i = 0; i < 64; i++ )
+    {
+      if( tileLoaded( j, i ) )
+      {
+        mTiles[j][i].tile->drawTextures( );
+      }
+    }
+  }
+  
 	glDisableClientState(GL_COLOR_ARRAY);
 	
 	glEnableClientState(GL_NORMAL_ARRAY);
@@ -1561,15 +1511,14 @@ void World::drawTileMode(float ah)
 	
 	glPopMatrix();	
 
-
-
-	if (current[2][2] != 0 || noadt) {
-		if (noadt || (camera.x<current[2][2]->xbase) || (camera.x>(current[2][2]->xbase+TILESIZE))
-			|| (camera.z<current[2][2]->zbase) || (camera.z>(current[2][2]->zbase+TILESIZE)) )
+	if( tileLoaded( cz, cx ) || noadt )
+  {
+		if ( (camera.x<mTiles[cz][cx].tile->xbase) || (camera.x>(mTiles[cz][cx].tile->xbase+TILESIZE))
+        || (camera.z<mTiles[cz][cx].tile->zbase) || (camera.z>(mTiles[cz][cx].tile->zbase+TILESIZE)) )
 		{
 			ex = (int)(camera.x / TILESIZE);
 			ez = (int)(camera.z / TILESIZE);
-
+      
 			loading = true;
 		}
 	}
@@ -1577,197 +1526,236 @@ void World::drawTileMode(float ah)
 
 bool World::GetVertex(float x,float z, Vec3D *V)
 {
-	int newX,newZ;
-	newX = (int)(x / TILESIZE);
-	newZ = (int)(z / TILESIZE);
-
-	if(!oktile(newX,newZ)|| !maps[newZ][newX])
+	const int newX = (int)(x / TILESIZE);
+	const int newZ = (int)(z / TILESIZE);
+  
+	if( !tileLoaded( newZ, newX ) ) 
+	{
 		return false;
-
-	for (int i=0; i<MAPTILECACHESIZE; i++) {
-		if ((maptilecache[i] != 0)  && (maptilecache[i]->x == newX) && (maptilecache[i]->z == newZ)) 
-		{
-			return maptilecache[i]->GetVertex(x,z,V);
-		}
 	}
-	return false;
-
+  
+  return mTiles[newZ][newX].tile->GetVertex(x,z,V);
 }
 
 void World::changeTerrain(float x, float z, float change, float radius, int BrushType)
 {
-	for(int j=1;j<4;j++)
-	{
-		for(int i=1;i<4;i++)
-		{
-            if (oktile(i,j) && current[j][i] != 0)
-			{
-				for(int t=0;t<256;t++)
-					current[j][i]->getChunk(t/16,t%16)->changeTerrain(x,z,change,radius,BrushType);
-			}
-		}
-	}
-	for(int j=1;j<4;j++)
-	{
-		for(int i=1;i<4;i++)
-		{
-            if (oktile(i,j) && current[j][i] != 0)
-			{
-				for(int t=0;t<256;t++)
-					current[j][i]->getChunk(t/16,t%16)->recalcNorms();
-			}
-		}
-	}
+  for( int j = 0; j < 64; j++ )
+  {
+    for( int i = 0; i < 64; i++ )
+    {
+      if( tileLoaded( j, i ) )
+      {
+        for( int ty = 0; ty < 16; ty++ )
+        {
+          for( int tx = 0; tx < 16; tx++ )
+          {
+            mTiles[j][i].tile->getChunk(ty,tx)->changeTerrain(x,z,change,radius,BrushType);
+          }
+        }
+      }
+    }
+  }
+  
+  for( int j = 0; j < 64; j++ )
+  {
+    for( int i = 0; i < 64; i++ )
+    {
+      if( tileLoaded( j, i ) )
+      {
+        for( int ty = 0; ty < 16; ty++ )
+        {
+          for( int tx = 0; tx < 16; tx++ )
+          {
+            mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
+          }
+        }
+      }
+    }
+  }
 }
 void World::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
 {
-	for(int j=1;j<4;j++)
-	{
-		for(int i=1;i<4;i++)
-		{
-            if (oktile(i,j) && current[j][i] != 0)
-			{
-				for(int t=0;t<256;t++)
-					current[j][i]->getChunk(t/16,t%16)->flattenTerrain(x,z,h,remain,radius,BrushType);
-			}
-		}
-	}
-	for(int j=1;j<4;j++)
-	{
-		for(int i=1;i<4;i++)
-		{
-            if (oktile(i,j) && current[j][i] != 0)
-			{
-				for(int t=0;t<256;t++)
-					current[j][i]->getChunk(t/16,t%16)->recalcNorms();
-			}
-		}
-	}
+  for( int j = 0; j < 64; j++ )
+  {
+    for( int i = 0; i < 64; i++ )
+    {
+      if( tileLoaded( j, i ) )
+      {
+        for( int ty = 0; ty < 16; ty++ )
+        {
+          for( int tx = 0; tx < 16; tx++ )
+          {
+            mTiles[j][i].tile->getChunk(ty,tx)->flattenTerrain(x,z,h,remain,radius,BrushType);
+          }
+        }
+      }
+    }
+  }
+  
+  for( int j = 0; j < 64; j++ )
+  {
+    for( int i = 0; i < 64; i++ )
+    {
+      if( tileLoaded( j, i ) )
+      {
+        for( int ty = 0; ty < 16; ty++ )
+        {
+          for( int tx = 0; tx < 16; tx++ )
+          {
+            mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
+          }
+        }
+      }
+    }
+  }
 }
 
 void World::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
-	for(int j=1;j<4;j++)
-	{
-		for(int i=1;i<4;i++)
-		{
-            if (oktile(i,j) && current[j][i] != 0)
-			{
-				for(int t=0;t<256;t++)
-					current[j][i]->getChunk(t/16,t%16)->blurTerrain(x, z, remain, radius, BrushType);
-			}
-		}
-	}
-	for(int j=1;j<4;j++)
-	{
-		for(int i=1;i<4;i++)
-		{
-            if (oktile(i,j) && current[j][i] != 0)
-			{
-				for(int t=0;t<256;t++)
-					current[j][i]->getChunk(t/16,t%16)->recalcNorms();
-			}
-		}
-	}
+  for( int j = 0; j < 64; j++ )
+  {
+    for( int i = 0; i < 64; i++ )
+    {
+      if( tileLoaded( j, i ) )
+      {
+        for( int ty = 0; ty < 16; ty++ )
+        {
+          for( int tx = 0; tx < 16; tx++ )
+          {
+            mTiles[j][i].tile->getChunk(ty,tx)->blurTerrain(x, z, remain, radius, BrushType);
+          }
+        }
+      }
+    }
+  }
+  
+  for( int j = 0; j < 64; j++ )
+  {
+    for( int i = 0; i < 64; i++ )
+    {
+      if( tileLoaded( j, i ) )
+      {
+        for( int ty = 0; ty < 16; ty++ )
+        {
+          for( int tx = 0; tx < 16; tx++ )
+          {
+            mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
+          }
+        }
+      }
+    }
+  }
 }
 
 bool World::paintTexture(float x, float z, brush *Brush, float strength, float pressure, int texture)
 {
-	int newX,newZ;
-	newX = (int)(x / TILESIZE);
-	newZ = (int)(z / TILESIZE);
-
-	if(!oktile(newX,newZ)|| !maps[newZ][newX])
-		return false;
+	const int newX = (int)(x / TILESIZE);
+	const int newZ = (int)(z / TILESIZE);
 
 	bool succ = false;
-
-	for (int i=0; i<MAPTILECACHESIZE; i++) {
-		if ((maptilecache[i] != 0)  && (maptilecache[i]->x >= newX-1) && (maptilecache[i]->x <= newX+1) && (maptilecache[i]->z >= newZ-1) && (maptilecache[i]->z <= newZ+1)) 
-		{
-			for(int t=0;t<256;t++)
-				succ = maptilecache[i]->getChunk(t/16,t%16)->paintTexture(x, z, Brush, strength, pressure, texture) || succ;
-		}
-	}
-	return succ;
+  
+  for( int j = newZ - 1; j < newZ + 1; j++ )
+  {
+    for( int i = newX - 1; i < newX + 1; i++ )
+    {
+      if( tileLoaded( i, j ) )
+      {
+        for( int ty = 0; ty < 16; ty++ )
+        {
+          for( int tx = 0; tx < 16; tx++ )
+          {
+            succ = succ || mTiles[j][i].tile->getChunk(ty,tx)->paintTexture(x, z, Brush, strength, pressure, texture);
+          }
+        }
+      }
+    }
+  }
+  return succ;
 }
 
 void World::eraseTextures(float x, float z)
 {
-	int newX,newZ;
-	newX = (int)(x / TILESIZE);
-	newZ = (int)(z / TILESIZE);
-
-	if(!oktile(newX,newZ)|| !maps[newZ][newX])
-		return;
-
-	for (int i=0; i<MAPTILECACHESIZE; i++)
-	{
-		if ((maptilecache[i] != 0)  && (maptilecache[i]->x >= newX-1) && (maptilecache[i]->x <= newX+1) && (maptilecache[i]->z >= newZ-1) && (maptilecache[i]->z <= newZ+1)) 
-		{
-			for(int t=0;t<256;t++)
-				if((maptilecache[i]->getChunk(t/16,t%16)->xbase<x)&&(maptilecache[i]->getChunk(t/16,t%16)->xbase+CHUNKSIZE>x)&&(maptilecache[i]->getChunk(t/16,t%16)->zbase<z)&&(maptilecache[i]->getChunk(t/16,t%16)->zbase+CHUNKSIZE>z))
-					maptilecache[i]->getChunk(t/16,t%16)->eraseTextures();
-		}
-	}
-	return;
-
+	const int newX = (int)(x / TILESIZE);
+	const int newZ = (int)(z / TILESIZE);
+  
+  for( int j = newZ - 1; j < newZ + 1; j++ )
+  {
+    for( int i = newX - 1; i < newX + 1; i++ )
+    {
+      if( tileLoaded( i, j ) )
+      {
+        for( int ty = 0; ty < 16; ty++ )
+        {
+          for( int tx = 0; tx < 16; tx++ )
+          {
+            MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
+            if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
+            {
+              chunk->eraseTextures();
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 void World::addHole( float x, float z )
 {
-	int newX, newZ, maptile, k, l, mcnk_x, mcnk_y;
-	newX = (int)(x / TILESIZE);
-	newZ = (int)(z / TILESIZE);
-
-	if( !oktile( newX, newZ )|| !maps[newZ][newX] )
-		return;
-
-	for( maptile = 0; maptile < MAPTILECACHESIZE; maptile++ )
-		if( maptilecache[maptile] && 
-		  ( maptilecache[maptile]->x >= newX-1 ) && ( maptilecache[maptile]->x <= newX+1 ) && 
-		  ( maptilecache[maptile]->z >= newZ-1 ) && ( maptilecache[maptile]->z <= newZ+1 ) ) 
-			for( mcnk_x = 0; mcnk_x < 16; mcnk_x++ )
-				for( mcnk_y = 0; mcnk_y < 16; mcnk_y++ )
-				{
-					MapChunk * cnk = maptilecache[maptile]->getChunk(mcnk_x,mcnk_y);
-					if( ( cnk->xbase < x ) && ( cnk->xbase + CHUNKSIZE > x ) && ( cnk->zbase < z ) && ( cnk->zbase + CHUNKSIZE > z ) )
-					{
-						k = ( x - cnk->xbase ) / MINICHUNKSIZE;
-						l = ( z - cnk->zbase ) / MINICHUNKSIZE;
-						cnk->addHole( k, l );
-					}
-				}
-
-	return;
+	const int newX = (int)(x / TILESIZE);
+	const int newZ = (int)(z / TILESIZE);
+  
+  for( int j = newZ - 1; j < newZ + 1; j++ )
+  {
+    for( int i = newX - 1; i < newX + 1; i++ )
+    {
+      if( tileLoaded( i, j ) )
+      {
+        for( int ty = 0; ty < 16; ty++ )
+        {
+          for( int tx = 0; tx < 16; tx++ )
+          {
+            MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
+            if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
+            {
+              int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
+              int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
+              chunk->addHole( k, l );
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 void World::removeHole( float x, float z )
 {
-	int newX, newZ, maptile, k, l, mcnk_x, mcnk_y;
-	newX = (int)(x / TILESIZE);
-	newZ = (int)(z / TILESIZE);
-
-	if( !oktile( newX, newZ )|| !maps[newZ][newX] )
-		return;
-
-	for( maptile = 0; maptile < MAPTILECACHESIZE; maptile++ )
-		if( maptilecache[maptile] && 
-		  ( maptilecache[maptile]->x >= newX-1 ) && ( maptilecache[maptile]->x <= newX+1 ) && 
-		  ( maptilecache[maptile]->z >= newZ-1 ) && ( maptilecache[maptile]->z <= newZ+1 ) ) 
-			for( mcnk_x = 0; mcnk_x < 16; mcnk_x++ )
-				for( mcnk_y = 0; mcnk_y < 16; mcnk_y++ )
-				{
-					MapChunk * cnk = maptilecache[maptile]->getChunk(mcnk_x,mcnk_y);
-					if( ( cnk->xbase < x ) && ( cnk->xbase + CHUNKSIZE > x ) && ( cnk->zbase < z ) && ( cnk->zbase + CHUNKSIZE > z ) )
-					{
-						k = ( x - cnk->xbase ) / MINICHUNKSIZE;
-						l = ( z - cnk->zbase ) / MINICHUNKSIZE;
-						cnk->removeHole( k, l );
-					}
-				}
-
-	return;
+	const int newX = (int)(x / TILESIZE);
+	const int newZ = (int)(z / TILESIZE);
+  
+  for( int j = newZ - 1; j < newZ + 1; j++ )
+  {
+    for( int i = newX - 1; i < newX + 1; i++ )
+    {
+      if( tileLoaded( i, j ) )
+      {
+        for( int ty = 0; ty < 16; ty++ )
+        {
+          for( int tx = 0; tx < 16; tx++ )
+          {
+            MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
+            if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
+            {
+              int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
+              int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
+              chunk->removeHole( k, l );
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 void World::saveMap()
@@ -1794,8 +1782,11 @@ void World::saveMap()
 	{
 		for(int x=0;x<64;x++)
 		{
-			if ((!oktile(x,y))|| (maps[y][x] == 0))
-				continue;
+      if( !( mTiles[y][x].flags & 1 ) ) 
+      {
+        continue;
+      }
+      
 			ATile=loadTile(x,y);
 			glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT); 
 
@@ -1803,13 +1794,13 @@ void World::saveMap()
 			glScalef(0.08333333f,0.08333333f,1.0f);
 
 			//glTranslatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
-			glTranslatef((float)-ATile->x*16-8,(float)-ATile->z*16-8,0);
+			glTranslatef((float)-x*16-8,(float)-y*16-8,0);
 	
 			ATile->drawTextures();
 			glPopMatrix();
 			glReadPixels(video.xres/2-128,video.yres/2-128,256,256,GL_RGB,GL_UNSIGNED_BYTE,image);
 			SDL_GL_SwapBuffers();
-			sprintf(tfname,"%s_map_%d_%d.raw",basename.c_str(),ATile->x,ATile->z);
+			sprintf(tfname,"%s_map_%d_%d.raw",basename.c_str(),x,y);
 			fid=fopen(tfname,"wb");
 			fwrite(image,256*3,256,fid);
 			fclose(fid);
@@ -1820,15 +1811,15 @@ void World::saveMap()
 	
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-
-	if (current[2][2] != 0 || noadt) {
-		if (noadt || (camera.x<current[2][2]->xbase) || (camera.x>(current[2][2]->xbase+TILESIZE))
-			|| (camera.z<current[2][2]->zbase) || (camera.z>(current[2][2]->zbase+TILESIZE)) )
+  
+	if( tileLoaded( cz, cx ) || noadt )
+  {
+		if ( (camera.x<mTiles[cz][cx].tile->xbase) || (camera.x>(mTiles[cz][cx].tile->xbase+TILESIZE))
+        || (camera.z<mTiles[cz][cx].tile->zbase) || (camera.z>(mTiles[cz][cx].tile->zbase+TILESIZE)) )
 		{
 			ex = (int)(camera.x / TILESIZE);
 			ez = (int)(camera.z / TILESIZE);
-
+      
 			loading = true;
 		}
 	}
@@ -1848,10 +1839,10 @@ void World::deleteWMOInstance( int pUniqueID )
 
 void World::addModel( nameEntry entry, Vec3D newPos )
 {
-	int lModelMax;
+	int lModelMax = 0;
 	if (mModelInstances.empty() == false)
 	lModelMax = mModelInstances.rbegin( )->first;
-	int lObjectMax;
+	int lObjectMax = 0;
 	if (mWMOInstances.empty() == false)
 	lObjectMax = mWMOInstances.rbegin( )->first;
 	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
@@ -1880,7 +1871,7 @@ void World::addModel( nameEntry entry, Vec3D newPos )
 
 			newModelis.sc = newModelis.sc * (( float( rand( ) ) / float( RAND_MAX ) * 0.2 ) + 0.90);
 		}
-		mModelInstances.insert( pair<int,ModelInstance>( lMaxUID, newModelis ));
+		mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
 	}
 	else if( entry.type == eEntry_WMO )
 	{
@@ -1889,16 +1880,16 @@ void World::addModel( nameEntry entry, Vec3D newPos )
 		newWMOis.id = lMaxUID;
 		newWMOis.wmoID = lMaxUID;
 		newWMOis.nameID = -1;
-		mWMOInstances.insert( pair<int,WMOInstance>( lMaxUID, newWMOis ));
+		mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
 	}
 }
 
 void World::addM2( Model *model, Vec3D newPos )
 {
-	int lModelMax;
+	int lModelMax = 0;
 	if (mModelInstances.empty() == false)
 	lModelMax = mModelInstances.rbegin( )->first;
-	int lObjectMax;
+	int lObjectMax = 0;
 	if (mWMOInstances.empty() == false)
 	lObjectMax = mWMOInstances.rbegin( )->first;
 	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
@@ -1926,16 +1917,16 @@ void World::addM2( Model *model, Vec3D newPos )
 
 			newModelis.sc = newModelis.sc * (( float( rand( ) ) / float( RAND_MAX ) * 0.2 ) + 0.90);
 		}
-		mModelInstances.insert( pair<int,ModelInstance>( lMaxUID, newModelis ));
+		mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
 	
 }
 
 void World::addWMO( WMO *wmo, Vec3D newPos )
 {
-	int lModelMax;
+	int lModelMax = 0;
 	if (mModelInstances.empty() == false)
 	lModelMax = mModelInstances.rbegin( )->first;
-	int lObjectMax;
+	int lObjectMax = 0;
 	if (mWMOInstances.empty() == false)
 	lObjectMax = mWMOInstances.rbegin( )->first;
 	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
@@ -1945,6 +1936,6 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
 	newWMOis.id = lMaxUID;
 	newWMOis.wmoID = lMaxUID;
 	newWMOis.nameID = -1;
-	mWMOInstances.insert( pair<int,WMOInstance>( lMaxUID, newWMOis ));
+	mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
 	
 }
