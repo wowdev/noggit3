@@ -13,10 +13,6 @@ endif( WIN32 )
 # Our own FindModule.cmake scripts.
 SET( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" )
 
-SET( Boost_USE_STATIC_LIBS  ON )
-SET( Boost_USE_MULTITHREADED OFF )
-SET( BOOST_LIBRARYDIR /usr/local/lib )
-FIND_PACKAGE( Boost REQUIRED COMPONENTS thread )
 FIND_PACKAGE( zlib REQUIRED )
 FIND_PACKAGE( Freetype REQUIRED )
 FIND_PACKAGE( OpenGL REQUIRED )
@@ -24,6 +20,54 @@ FIND_PACKAGE( OpenGL REQUIRED )
 # Hack as at least my FindOpenGL does not do this itself.
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( OpenGL DEFAULT_MSG OPENGL_LIBRARIES OPENGL_INCLUDE_DIR )
 
+
+# Bernd! Try if this also works for you! If not we must make a TV session to get it to work on all systems.
+
+    # HACK - CMake on Windows refuses to find the thread library unless BOOST_ROOT
+	#        is set, even though it can locate the Boost directory tree.
+	#        So we first look for base Boost, then set BOOST_ROOT and look again
+	#        for Boost Thread specifically.
+	
+	message(STATUS "-- Boost:")
+	set(Boost_USE_STATIC_LIBS OFF)
+	set(Boost_USE_MULTITHREADED ON)
+	set(Boost_ADDITIONAL_VERSIONS "1.44" "1.44.0" )
+	#set(Boost_FIND_QUIETLY ON)
+	find_package(Boost)
+	if(IS_DIRECTORY "${Boost_INCLUDE_DIR}")
+	  message(STATUS "boost headers : ${Boost_INCLUDE_DIR}")
+	else(IS_DIRECTORY "${Boost_INCLUDE_DIR}")
+	  if(UNIX)
+	    message(FATAL_ERROR "Cannot build without Boost Thread library. Please install libboost-thread-dev package or visit www.boost.org.")
+	  else(UNIX)
+	    message(FATAL_ERROR "Cannot build without Boost Thread library. Please install Boost from www.boost.org.")
+	  endif(UNIX)
+	endif(IS_DIRECTORY "${Boost_INCLUDE_DIR}")
+	#set(Boost_FIND_QUIETLY OFF)
+	if(WIN32)
+	  set(BOOST_ROOT ${Boost_INCLUDE_DIR})
+	endif(WIN32)
+	find_package(Boost COMPONENTS thread REQUIRED)
+	
+	# HACK - Make linking to Boost work on Windows systems.
+	string(REGEX REPLACE "/[^/]*$" ""
+	  Boost_STRIPPED_LIB_DIR "${Boost_THREAD_LIBRARY_DEBUG}")
+	
+	if(EXISTS "${Boost_THREAD_LIBRARY_DEBUG}")
+	  message(STATUS "boost lib dir : ${Boost_STRIPPED_LIB_DIR}")
+	  message(STATUS "thread lib    : ${Boost_THREAD_LIBRARY_DEBUG}")
+	else(EXISTS "${Boost_THREAD_LIBRARY_DEBUG}")
+	  message(FATAL_ERROR "Cannot build without Boost Thread library. Please install libboost-thread-dev package or visit www.boost.org.")
+	endif(EXISTS "${Boost_THREAD_LIBRARY_DEBUG}")
+	message(STATUS "")
+	
+	# HACK - Make linking to Boost work on Windows systems.
+	if(WIN32)
+	  link_directories(${Boost_STRIPPED_LIB_DIR})
+	endif(WIN32)
+
+
+FIND_PACKAGE( Boost REQUIRED COMPONENTS thread )
 FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
 FIND_PACKAGE( SDL REQUIRED )
