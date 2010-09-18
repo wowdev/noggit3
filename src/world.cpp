@@ -600,7 +600,6 @@ World::~World()
       }
       if( tileLoaded( j, i ) )
       {
-        LogDebug << "Deleting tile " << j << " x " << i << std::endl;
         delete mTiles[j][i].tile;
         mTiles[j][i].tile = NULL;
       }
@@ -630,7 +629,7 @@ bool World::hasTile( int pZ, int pX )
 
 void World::enterTile( int x, int z )
 {
-  if( !hasTile( x, z ) )
+  if( !hasTile( z, x ) )
   {
     noadt = true;
     return;
@@ -638,13 +637,16 @@ void World::enterTile( int x, int z )
 	
   noadt = false;
 
+  using std::min;
+  using std::max;
+  
 	cx = x;
 	cz = z;
-	for( int i = cz - 2; i < cz + 2; i++ )
+	for( int i = max(cz - 2, 0); i < min(cz + 2, 64); i++ )
   {
-		for( int j = cx - 2; j < cx + 2; j++ )
+		for( int j = max(cx - 2, 0); j < min(cx + 2, 64); j++ )
     {
-			mTiles[i][j].tile = loadTile( j, i );
+			mTiles[i][j].tile = loadTile( i, j );
     }
   }
 
@@ -698,10 +700,11 @@ MapTile* World::loadTile(int z, int x)
 	}
   
   std::stringstream filename; 
-  filename << "World\\Maps\\" << basename << "\\" << basename << "_" << z << "_" << x << ".adt";
+  filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
   
   if( !MPQFile::exists( filename.str() ) )
   {
+    LogError << "The requested tile \"" << filename.str() << "\" does not exist! Oo" << std::endl;
     return NULL;
   }
 
@@ -851,79 +854,6 @@ void World::setupFog()
 		culldistance = mapdrawdistance;
 	}
 	culldistance2 = culldistance * culldistance;
-}
-
-bool primaryLoaded;
-int	loadingTile=0;
-int	update=0;
-
-//! \todo Implement the AsyncObject loading and remove this.
-void World::onTheFlyLoading()
-{
-/*	//On the fly loading
-	primaryLoaded=true;
-	for (int j=1; j<4; j++) {
-		for (int i=1; i<4; i++) {
-			if (oktile(i,j) && current[j][i] != 0) 
-				primaryLoaded&=current[j][i]->isLoaded();
-		}
-	}
-
-	update++;
-	if(update==30)
-	{
-		enterTile(cx,cz);
-		update=0;
-	}
-	
-
-	if(!primaryLoaded)
-	{
-		for(loadingTile=0;loadingTile<9;loadingTile++)
-		{
-			if (oktile(loadingTile%3+1,loadingTile/3+1) && current[loadingTile/3+1][loadingTile%3+1] != 0) 
-			{
-				if(!current[loadingTile/3+1][loadingTile%3+1]->isLoaded())
-					current[loadingTile/3+1][loadingTile%3+1]->partialLoad();
-			}
-		}
-	}
-	else
-	{	
-		primaryLoaded=true;
-		for (int j=0; j<5; j++) {
-			for (int i=0; i<5; i++) {
-				if (oktile(i,j) && current[j][i] != 0) 
-					primaryLoaded&=current[j][i]->isLoaded();
-			}
-		}
-
-		if(primaryLoaded)
-			return;
-		
-		bool workDone=false;
-		do{
-			if (oktile(loadingTile%5,loadingTile/5) && current[loadingTile/5][loadingTile%5] != 0) 
-			{
-				if(!current[loadingTile/5][loadingTile%5]->isLoaded())
-				{
-					current[loadingTile/5][loadingTile%5]->partialLoad();		
-					workDone=true;
-				}
-			}
-
-			int i,j;
-			do{
-				loadingTile++;
-				i=loadingTile%5;
-				j=loadingTile/5;
-			}while((i!=0)&&(i!=4)&&(j!=0)&&(j!=4));
-
-			if(loadingTile==25)
-				loadingTile=0;
-		}while(!workDone);		
-		
-	}*/
 }
 
 void World::draw()
@@ -1230,17 +1160,8 @@ void World::draw()
     }
   }
   
-	if( tileLoaded( cz, cx ) || noadt )
-  {
-		if ( noadt || (camera.x<mTiles[cz][cx].tile->xbase) || (camera.x>(mTiles[cz][cx].tile->xbase+TILESIZE))
-			|| (camera.z<mTiles[cz][cx].tile->zbase) || (camera.z>(mTiles[cz][cx].tile->zbase+TILESIZE)) )
-		{
-			ex = (int)(camera.x / TILESIZE);
-			ez = (int)(camera.z / TILESIZE);
-
-			loading = true;
-		}
-	}
+  ex = (int)(camera.x / TILESIZE);
+  ez = (int)(camera.z / TILESIZE);
 }
 
 int	numTimers;
@@ -1315,7 +1236,6 @@ void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
       {
         if( tileLoaded( j, i ) )
         {
-          LogDebug << "mTiles["<<j<<"]["<<i<<"].tile ( " << mTiles[j][i].tile << " )->drawSelect( );" << std::endl;
           mTiles[j][i].tile->drawSelect( );
         }
       }
@@ -1397,13 +1317,8 @@ void World::getSelection( int pSelectionMode )
 
 void World::tick(float dt)
 {
-	if (loading) {
-		if (ex!=-1 && ez!=-1) {
-			enterTile(ex,ez);
-		}
-		ex = ez = -1;
-		loading = false;
-	}
+  enterTile(ex,ez);
+  
 	while (dt > 0.1f) {
 		modelmanager.updateEmitters(0.1f);
 		dt -= 0.1f;
@@ -1509,19 +1424,10 @@ void World::drawTileMode(float ah)
 		}
 	}
 	
-	glPopMatrix();	
-
-	if( tileLoaded( cz, cx ) || noadt )
-  {
-		if ( (camera.x<mTiles[cz][cx].tile->xbase) || (camera.x>(mTiles[cz][cx].tile->xbase+TILESIZE))
-        || (camera.z<mTiles[cz][cx].tile->zbase) || (camera.z>(mTiles[cz][cx].tile->zbase+TILESIZE)) )
-		{
-			ex = (int)(camera.x / TILESIZE);
-			ez = (int)(camera.z / TILESIZE);
-      
-			loading = true;
-		}
-	}
+	glPopMatrix();
+  
+  ex = (int)(camera.x / TILESIZE);
+  ez = (int)(camera.z / TILESIZE);
 }
 
 bool World::GetVertex(float x,float z, Vec3D *V)
@@ -1811,18 +1717,6 @@ void World::saveMap()
 	
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  
-	if( tileLoaded( cz, cx ) || noadt )
-  {
-		if ( (camera.x<mTiles[cz][cx].tile->xbase) || (camera.x>(mTiles[cz][cx].tile->xbase+TILESIZE))
-        || (camera.z<mTiles[cz][cx].tile->zbase) || (camera.z>(mTiles[cz][cx].tile->zbase+TILESIZE)) )
-		{
-			ex = (int)(camera.x / TILESIZE);
-			ez = (int)(camera.z / TILESIZE);
-      
-			loading = true;
-		}
-	}
 }
 
 void World::deleteModelInstance( int pUniqueID )

@@ -6,7 +6,7 @@
 class minimapWindowUI : public window
 {
 public:
-	minimapWindowUI( float x, float y, float w, float h );
+	minimapWindowUI( float x, float y);
 };
 
 #endif
