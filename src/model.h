@@ -138,7 +138,6 @@ class Model: public ManagedItem, public AsyncObject {
 	size_t vbufsize;
 	bool animated;
 	bool animGeometry,animTextures,animBones;
-
 	bool forceAnim;
 
 	void init(MPQFile &f);

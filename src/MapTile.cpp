@@ -75,7 +75,6 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
   
   mFilename = pFilename;
 
-  LogDebug << "MPQFile::exists(mFilename): " << MPQFile::exists(mFilename) << std::endl;
 	MPQFile theFile( mFilename );
 
   Log << "Opening tile " << mPositionX << ", " << mPositionZ << " (\"" << mFilename << "\") from " << (theFile.isExternal( ) ? "disk" : "MPQ") << "." << std::endl;
@@ -233,7 +232,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 		
 		size_t nextpos = theFile.getPos() + size;
 
-		if ( fourcc == 'MH2O' ) 
+		if ( fourcc == 'MH2O' && false ) // Do not even try to render water, it will be a fuckup anyway. ._. 
 		{
 			// water data
 			uint8_t * lMH2O_Chunk = theFile.getPointer( );
@@ -484,10 +483,11 @@ bool MapTile::isTile( int pX, int pZ )
 
 float MapTile::getMaxHeight()
 {
+  using std::max;
   float maxHeight = -99999.0f;
   for( int nextChunk = 0; nextChunk < 256; nextChunk++ ) 
 	{
-    maxHeight = std::max( mChunks[nextChunk / 16][nextChunk % 16]->vmax.y, maxHeight );
+    maxHeight = max( mChunks[nextChunk / 16][nextChunk % 16]->vmax.y, maxHeight );
 	}
   return maxHeight;
 }
@@ -766,6 +766,9 @@ void SetChunkHeader( sExtendableArray pArray, int pPosition, int pMagix, int pSi
 
 void MapTile::saveTile( )
 {
+  using std::min;
+  using std::max;
+  
 	Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
 
 	int lID;	// This is a global counting variable. Do not store something in here you need later.
@@ -1349,8 +1352,8 @@ void MapTile::saveTile( )
 							unsigned char upperNibble, lowerNibble;
 							for( int k = 0; k < lDimensions; k++ )
 							{
-								lowerNibble = (unsigned char)std::max(std::min( ( (float)mChunks[y][x]->amap[j][k * 2 + 0] ) * 0.05882f + 0.5f , 15.0f),0.0f);
-								upperNibble = (unsigned char)std::max(std::min( ( (float)mChunks[y][x]->amap[j][k * 2 + 1] ) * 0.05882f + 0.5f , 15.0f),0.0f);
+								lowerNibble = (unsigned char)max(min( ( (float)mChunks[y][x]->amap[j][k * 2 + 0] ) * 0.05882f + 0.5f , 15.0f),0.0f);
+								upperNibble = (unsigned char)max(min( ( (float)mChunks[y][x]->amap[j][k * 2 + 1] ) * 0.05882f + 0.5f , 15.0f),0.0f);
 								lAlphaMaps[lDimensions * j + k] = ( upperNibble << 4 ) + lowerNibble;
 							}
 						}

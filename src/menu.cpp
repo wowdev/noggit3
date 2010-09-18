@@ -526,10 +526,10 @@ void Menu::mouseclick( SDL_MouseButtonEvent *e )
 			cmd = CMD_LOAD_WORLD;
 			return;
 		}
-
-	int osel = sel;
 	
 	/*
+   
+   int osel = sel;
 	/// Did I hit a map?
 	for( unsigned int i = 0; i < maps.size( ); i++ ) 
 	{

@@ -396,7 +396,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 		else if ( fourcc == 'MCLQ' ) {
 			// liquid / water level
 			f.read(&fourcc,4);
-			if( fourcc != 'MCSE' ||  fourcc != 'MCNK' || header.sizeLiquid == 8 ) {
+			if( fourcc != 'MCSE' ||  fourcc != 'MCNK' || header.sizeLiquid == 8  || true ) { // Do not even try to read water..
 				haswater = false;
 			}
 			else {
@@ -972,6 +972,23 @@ void MapChunk::drawContour()
 	glDisable(GL_TEXTURE_GEN_S);
 }
 
+void MapChunk::drawAreaID()
+{
+		// Draw hole lines if view_subchunk_lines is true
+		glColor4f(0.0,0.0,1.0f,0.5f);
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, HoleStrip);
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[9]);
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[18]);		
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[27]);
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[36]);
+		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);	
+}
+
+void MapChunk::drawBlock()
+{
+	//
+}
+
 void MapChunk::draw()
 {
 	if (!gWorld->frustum.intersects(vmin,vmax))		return;
@@ -1070,8 +1087,10 @@ void MapChunk::draw()
 	glDisable(GL_LIGHTING);
 
 	drawContour();
+	//drawAreaID();
+	//drawBlock();
+	//drawColor();
 
-	
 	if(drawFlags)
 	{
 		if(Flags&0x02)
@@ -1617,7 +1636,6 @@ int MapChunk::addTexture( GLuint texture )
 
 bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, float pressure, unsigned int texture)
 {
-	using namespace std; // Workaround for windows. For min and max function use later.
 	float zPos,xPos,change,xdiff,zdiff,dist, radius;
 
 	int texLevel=-1;
@@ -1681,6 +1699,10 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 			tarAbove=1-target;
 			
 			tPressure=pressure*Brush->getValue(dist);
+      
+      using std::min;
+      using std::max;
+      
 			if(texLevel>0)
 				amap[texLevel-1][i+j*64]=(unsigned char)max( min( (1-tPressure)*( (float)amap[texLevel-1][i+j*64] ) + tPressure*target + 0.5f ,255.0f) , 0.0f);
 			for(int k=texLevel;k<nTextures-1;k++)

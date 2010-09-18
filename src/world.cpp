@@ -1735,11 +1735,13 @@ void World::addModel( nameEntry entry, Vec3D newPos )
 {
 	int lModelMax = 0;
 	if (mModelInstances.empty() == false)
-	lModelMax = mModelInstances.rbegin( )->first;
+    lModelMax = mModelInstances.rbegin( )->first;
 	int lObjectMax = 0;
 	if (mWMOInstances.empty() == false)
-	lObjectMax = mWMOInstances.rbegin( )->first;
-	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
+    lObjectMax = mWMOInstances.rbegin( )->first;
+  
+  using std::max;
+	int lMaxUID = max( lModelMax, lObjectMax )+ 1;
 
 	if( entry.type == eEntry_Model )
 	{
@@ -1782,11 +1784,13 @@ void World::addM2( Model *model, Vec3D newPos )
 {
 	int lModelMax = 0;
 	if (mModelInstances.empty() == false)
-	lModelMax = mModelInstances.rbegin( )->first;
+    lModelMax = mModelInstances.rbegin( )->first;
 	int lObjectMax = 0;
 	if (mWMOInstances.empty() == false)
-	lObjectMax = mWMOInstances.rbegin( )->first;
-	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
+    lObjectMax = mWMOInstances.rbegin( )->first;
+  
+  using std::max;
+	int lMaxUID = max( lModelMax, lObjectMax )+ 1;
 	
 		ModelInstance newModelis;
 		newModelis.model = model;
@@ -1819,11 +1823,13 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
 {
 	int lModelMax = 0;
 	if (mModelInstances.empty() == false)
-	lModelMax = mModelInstances.rbegin( )->first;
+    lModelMax = mModelInstances.rbegin( )->first;
 	int lObjectMax = 0;
 	if (mWMOInstances.empty() == false)
-	lObjectMax = mWMOInstances.rbegin( )->first;
-	int lMaxUID = ( lModelMax > lObjectMax ? lModelMax : lObjectMax ) + 1;
+    lObjectMax = mWMOInstances.rbegin( )->first;
+  
+  using std::max;
+	int lMaxUID = max( lModelMax, lObjectMax )+ 1;
 	
 	WMOInstance newWMOis(wmo);
 	newWMOis.pos = newPos;
