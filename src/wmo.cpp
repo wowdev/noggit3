@@ -839,8 +839,9 @@ void WMOGroup::initDisplayList()
 
 			//gLog("WMO Liquid: %dx%d, %dx%d, (%f,%f,%f) %d\n", hlq.X, hlq.Y, hlq.A, hlq.B, hlq.pos.x, hlq.pos.y, hlq.pos.z, hlq.type);
 
-			lq = new Liquid(hlq.A, hlq.B, Vec3D(hlq.pos.x, hlq.pos.z, -hlq.pos.y));
-			lq->initFromWMO(gf, wmo->mat[hlq.type], (flags&0x2000)!=0);
+      // Do not even try to render water..
+			//lq = new Liquid(hlq.A, hlq.B, Vec3D(hlq.pos.x, hlq.pos.z, -hlq.pos.y));
+			//lq->initFromWMO(gf, wmo->mat[hlq.type], (flags&0x2000)!=0);
 		}
 
 		//! \todo  figure out/use MFOG ?

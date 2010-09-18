@@ -13,7 +13,7 @@ public:
 	void set_clipboard(nameEntry* entry);
 
 	bool view_holelines;
-
+	std::vector<int> areaIDs; // List of all area IDs to draw them with different colors
 	// hold keys
 	bool ShiftDown;
 	bool AltDown;

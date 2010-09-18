@@ -13,16 +13,31 @@ endif( WIN32 )
 # Our own FindModule.cmake scripts.
 SET( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" )
 
-SET( Boost_USE_STATIC_LIBS  ON )
-SET( Boost_USE_MULTITHREADED OFF )
-SET( BOOST_LIBRARYDIR /usr/local/lib )
-FIND_PACKAGE( Boost REQUIRED COMPONENTS thread )
 FIND_PACKAGE( zlib REQUIRED )
 FIND_PACKAGE( Freetype REQUIRED )
 FIND_PACKAGE( OpenGL REQUIRED )
 
 # Hack as at least my FindOpenGL does not do this itself.
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( OpenGL DEFAULT_MSG OPENGL_LIBRARIES OPENGL_INCLUDE_DIR )
+
+# Hacky boost finding.
+SET( Boost_USE_STATIC_LIBS  ON )
+SET( Boost_USE_MULTITHREADED OFF )
+#SET( BOOST_LIBRARYDIR /usr/local/lib )
+
+IF( WIN32 )
+  SET( Boost_FIND_QUIETLY ON )
+  FIND_PACKAGE( Boost )
+  SET( Boost_FIND_QUIETLY OFF )
+  SET( BOOST_ROOT ${Boost_INCLUDE_DIR} )
+ENDIF( WIN32 )
+
+FIND_PACKAGE( Boost COMPONENTS thread REQUIRED )
+
+IF( WIN32 )
+  STRING( REGEX REPLACE "/[^/]*$" "" Boost_STRIPPED_LIB_DIR "${Boost_THREAD_LIBRARY_DEBUG}" )
+  LINK_DIRECTORIES( ${Boost_STRIPPED_LIB_DIR} )
+ENDIF( WIN32 )
 
 FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
@@ -35,18 +50,13 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS( SDL DEFAULT_MSG SDL_LIBRARY SDL_INCLUDE_DIR )
 SET( IncludeDirectories ${ZLIB_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${SDL_INCLUDE_DIR} ${STORMLIB_INCLUDES} ${Boost_INCLUDE_DIRS} )
 
 # Gather source files.
-
 FILE( GLOB_RECURSE HeaderFiles "src/*.h" )
 FILE( GLOB_RECURSE SourceFiles "src/*.cpp" )
 
 # Search for stdint.h, present on unix, missing on windows.
-INCLUDE( CheckIncludeFiles )
-CHECK_INCLUDE_FILES( stdint.h HAS_STDINT_H )
-
-MESSAGE( STATUS HAS_STDINT_H: ${HAS_STDINT_H} )
-IF( NOT HAS_STDINT_H )
-  SET( HeaderFiles ${HeaderFiles} "${CMAKE_SOURCE_DIR}/include/win/stdint.h" )
-ENDIF( NOT HAS_STDINT_H )
+IF( WIN32 )
+  SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/win/" )
+ENDIF( WIN32 )
 
 # If we are on OSX, we need additional files for SDL to work.
 IF( APPLE )
