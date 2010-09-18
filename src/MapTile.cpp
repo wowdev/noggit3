@@ -450,7 +450,7 @@ float MapTile::getMaxHeight()
   float maxHeight = -99999.0f;
   for( int nextChunk = 0; nextChunk < 256; nextChunk++ ) 
 	{
-    maxHeight = std::max( mChunks[nextChunk / 16][nextChunk % 16]->vmax.y, maxHeight );
+    maxHeight = max( mChunks[nextChunk / 16][nextChunk % 16]->vmax.y, maxHeight );
 	}
   return maxHeight;
 }
@@ -716,6 +716,7 @@ void SetChunkHeader( sExtendableArray pArray, int pPosition, int pMagix, int pSi
 
 void MapTile::saveTile( )
 {
+	using namespace std;
 	Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
 
 	int lID;	// This is a global counting variable. Do not store something in here you need later.
@@ -1299,8 +1300,8 @@ void MapTile::saveTile( )
 							unsigned char upperNibble, lowerNibble;
 							for( int k = 0; k < lDimensions; k++ )
 							{
-								lowerNibble = (unsigned char)std::max(std::min( ( (float)mChunks[y][x]->amap[j][k * 2 + 0] ) * 0.05882f + 0.5f , 15.0f),0.0f);
-								upperNibble = (unsigned char)std::max(std::min( ( (float)mChunks[y][x]->amap[j][k * 2 + 1] ) * 0.05882f + 0.5f , 15.0f),0.0f);
+								lowerNibble = (unsigned char)max(min( ( (float)mChunks[y][x]->amap[j][k * 2 + 0] ) * 0.05882f + 0.5f , 15.0f),0.0f);
+								upperNibble = (unsigned char)max(min( ( (float)mChunks[y][x]->amap[j][k * 2 + 1] ) * 0.05882f + 0.5f , 15.0f),0.0f);
 								lAlphaMaps[lDimensions * j + k] = ( upperNibble << 4 ) + lowerNibble;
 							}
 						}

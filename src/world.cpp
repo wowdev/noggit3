@@ -617,6 +617,7 @@ inline bool oktile( int i, int j )
 //int	nextTileLoad=0;
 void World::enterTile( int x, int z )
 {
+	using namespace std;
 	if( !oktile( x, z ) ) 
 	{
 		noadt = true;
@@ -653,7 +654,7 @@ void World::enterTile( int x, int z )
 	if( autoheight && current[2][2] ) 
 	{
 		float maxHeight = current[2][2]->getMaxHeight();
-    maxHeight = std::max( maxHeight, 0.0f );
+		maxHeight = max( maxHeight, 0.0f );
 		camera.y = maxHeight + 50.0f;
 
 		autoheight = false;
@@ -682,7 +683,7 @@ void World::enterTileInit(int x, int z)
 	if (autoheight && current[2][2] ) {
 		//Vec3D vc = (current[1][1]->topnode.vmax + current[1][1]->topnode.vmin) * 0.5f;
 		float maxHeight = current[2][2]->getMaxHeight();
-		maxHeight = std::max( maxHeight, 0.0f );
+		maxHeight = max( maxHeight, 0.0f );
 		camera.y = maxHeight + 50.0f;
 
 		autoheight = false;
