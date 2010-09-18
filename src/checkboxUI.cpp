@@ -2,7 +2,7 @@
 #include "video.h"
 #include "noggit.h"
 
-checkboxUI::checkboxUI( float xPos, float yPos, std::string pText )
+checkboxUI::checkboxUI( float xPos, float yPos, const std::string& pText )
 {
 	x = xPos;
 	y = yPos;
@@ -22,7 +22,7 @@ checkboxUI::checkboxUI( float xPos, float yPos, std::string pText )
 	mToggleGroup = 0;
 }
 
-checkboxUI::checkboxUI( float xPos, float yPos, std::string pText, void (*pClickFunc)(bool,int), int pClickFuncParameter )
+checkboxUI::checkboxUI( float xPos, float yPos, const std::string& pText, void (*pClickFunc)(bool,int), int pClickFuncParameter )
 {
 	x = xPos;
 	y = yPos;
@@ -43,7 +43,7 @@ checkboxUI::checkboxUI( float xPos, float yPos, std::string pText, void (*pClick
 	mToggleGroup = 0;
 }
 
-checkboxUI::checkboxUI( float pX, float pY, std::string pText, ToggleGroup * pToggleGroup, int pToggleID )
+checkboxUI::checkboxUI( float pX, float pY, const std::string& pText, ToggleGroup * pToggleGroup, int pToggleID )
 {
 	x = pX;
 	y = pY;
@@ -73,7 +73,7 @@ void checkboxUI::SetToggleGroup( ToggleGroup * pToggleGroup, int pToggleID )
 	clickFunc = 0;
 }
 
-void checkboxUI::setText( std::string pText )
+void checkboxUI::setText( const std::string& pText )
 {
 	text->setText( pText.c_str( ) );
 }

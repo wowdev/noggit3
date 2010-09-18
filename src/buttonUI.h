@@ -19,13 +19,13 @@ protected:
 
 public:
 	buttonUI( float x, float y, float width, float height, GLuint tex, GLuint texd );
-	buttonUI( float x, float y, float width, float height, std::string pText, GLuint tex, GLuint texd );
-	buttonUI( float x, float y, float width, float height, std::string pTexNormal, std::string pTexDown );
-	buttonUI( float x, float y, float width, float height, std::string pText, std::string pTexNormal, std::string pTexDown );
+	buttonUI( float x, float y, float width, float height, const std::string& pText, GLuint tex, GLuint texd );
+	buttonUI( float x, float y, float width, float height, const std::string& pTexNormal, const std::string& pTexDown );
+	buttonUI( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
 	void render( );
 
 	void setLeft( );
-	void setText( std::string pText );
+	void setText( const std::string& pText );
 	void setFont( freetype::font_data *font );
 
 	frame *processLeftClick( float mx, float my );

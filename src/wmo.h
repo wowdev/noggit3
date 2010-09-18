@@ -52,8 +52,8 @@ public:
 	void initLighting(int nLR, short *useLights);
 	void draw(const Vec3D& ofs, const float rot);
 	void drawLiquid();
-	void drawDoodads(int doodadset, const Vec3D& ofs, const float rot);
-	void drawDoodadsSelect(int doodadset, const Vec3D& ofs, const float rot);
+	void drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float rot);
+	void drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const float rot);
 	void setupFog();
 };
 
@@ -133,7 +133,7 @@ public:
 	std::string		WMOName;
 	std::string filename;
 	WMOGroup *groups;
-	int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
+	unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
 	WMOMaterial *mat;
 	Vec3D extents[2];
 	std::vector<std::string> textures;
@@ -151,7 +151,7 @@ public:
 	Model *skybox;
 	int sbid;
 
-	WMO(std::string name);
+	WMO(const std::string& name);
 	~WMO();
 	void draw(int doodadset, const Vec3D& ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight);
 	void drawSelect(int doodadset, const Vec3D& ofs, const float rot);
@@ -164,7 +164,7 @@ public:
 
 class WMOManager: public SimpleManager {
 public:
-	int add(std::string name);
+	int add(const std::string& name);
 };
 
 

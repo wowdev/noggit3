@@ -22,7 +22,7 @@ void TreeViewButton::SetClicked( bool pClicked )
 	clicked = pClicked;
 }
 
-TreeView::TreeView( float pX, float pY, Directory * pDirectory, TreeView * pParent, void (*pSelectFunction)( std::string ) )
+TreeView::TreeView( float pX, float pY, Directory * pDirectory, TreeView * pParent, void (*pSelectFunction)( const std::string& ) )
 {
 	x = pX;
 	y = pY;
@@ -134,7 +134,7 @@ void TreeView::render()
 	glPopMatrix( );
 }
 
-void TreeView::SetSelectFunction( void (*pSelectFunction)( std::string ) )
+void TreeView::SetSelectFunction( void (*pSelectFunction)( const std::string& ) )
 {
 	mSelectFunction = pSelectFunction;
 }

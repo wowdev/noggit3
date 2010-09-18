@@ -163,7 +163,7 @@ void Skies::draw()
 	glEnd();
 }
 
-Skies::Skies( int mapid )
+Skies::Skies( unsigned int mapid )
 {
 	numSkies = 0;
 	cs = -1;
@@ -472,7 +472,7 @@ void OutdoorLightStats::setupLighting()
 	// should really loop to GL_MAX_LIGHTS lol
 }
 
-OutdoorLighting::OutdoorLighting( std::string fname)
+OutdoorLighting::OutdoorLighting( const std::string& fname)
 {
 	MPQFile f(fname);
 	unsigned int n,d;

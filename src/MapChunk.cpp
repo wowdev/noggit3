@@ -780,7 +780,6 @@ void CreateStrips()
 			LineStrip[i]=(32-i)*17;
 	}
 
-
 	int iferget = 0;
 	
 	for( size_t i = 34; i < 43; i++ )
@@ -791,38 +790,15 @@ void CreateStrips()
 
 	for( size_t i = 102; i < 111; i++ )
  		HoleStrip[iferget++] = i;
-
-	
-	HoleStrip[iferget++]=2;
-	HoleStrip[iferget++]=19;
-	HoleStrip[iferget++]=36;
-	HoleStrip[iferget++]=53;
-	HoleStrip[iferget++]=70;
-	HoleStrip[iferget++]=87;
-	HoleStrip[iferget++]=104;
-	HoleStrip[iferget++]=121;
-	HoleStrip[iferget++]=138;
-
-	HoleStrip[iferget++]=4;
-	HoleStrip[iferget++]=21;
-	HoleStrip[iferget++]=38;
-	HoleStrip[iferget++]=55;
-	HoleStrip[iferget++]=72;
-	HoleStrip[iferget++]=89;
-	HoleStrip[iferget++]=106;
-	HoleStrip[iferget++]=123;
-	HoleStrip[iferget++]=140;
-	
-	HoleStrip[iferget++]=6;
-	HoleStrip[iferget++]=23;
-	HoleStrip[iferget++]=40;
-	HoleStrip[iferget++]=57;
-	HoleStrip[iferget++]=74;
-	HoleStrip[iferget++]=91;
-	HoleStrip[iferget++]=108;
-	HoleStrip[iferget++]=125;
-	HoleStrip[iferget++]=142;
-
+  
+  for( size_t i = 2; i < 139; i += 17 )
+    HoleStrip[iferget++] = i;
+  
+  for( size_t i = 4; i < 141; i += 17 )
+    HoleStrip[iferget++] = i;
+  
+  for( size_t i = 6; i < 143; i += 17 )
+    HoleStrip[iferget++] = i;
 }
 
 void MapChunk::drawColor()

@@ -186,7 +186,7 @@ public:
   bool mPerInstanceAnimation;
 	int anim, animtime;
 
-	Model(std::string name, bool forceAnim=false);	
+	Model(const std::string& name, bool forceAnim=false);	
 	~Model();
 	void draw();
 	void drawTileMode();
@@ -204,7 +204,7 @@ public:
 
 class ModelManager: public SimpleManager {
 public:
-	int add(std::string name);
+	int add(const std::string& name);
 
 	ModelManager() { }
 

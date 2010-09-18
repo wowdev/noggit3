@@ -4,8 +4,6 @@
 #include "shaders.h"
 #include "Log.h"
 
-using namespace std;
-
 void WMOHighlight( Vec4D color )
 {
 	glDisable( GL_ALPHA_TEST );
@@ -32,10 +30,10 @@ void WMOUnhighlight( )
 	glDepthMask( GL_TRUE );
 }
 
-WMO::WMO(std::string name): ManagedItem(name)
+WMO::WMO(const std::string& name): ManagedItem(name)
 {
 	filename = name;
-	MPQFile f(name.c_str());
+	MPQFile f(name);
 	if (f.isEof()) {
 		LogError << "Error loading WMO \"" << name << "\"." << std::endl;
 		return;
@@ -50,8 +48,8 @@ WMO::WMO(std::string name): ManagedItem(name)
 	uint32_t size;
 	float ff[3];
 
-	char *ddnames;
-	char *groupnames;
+	char *ddnames = NULL;
+	char *groupnames = NULL;
 
 	skybox = 0;
 
@@ -93,11 +91,11 @@ WMO::WMO(std::string name): ManagedItem(name)
 			// materials
 			//WMOMaterialBlock bl;
 
-			for (int i=0; i<nTextures; i++) {
+			for (unsigned int i=0; i<nTextures; i++) {
 				WMOMaterial *m = &mat[i];
 				f.read(m, 0x40);
 
-				string texpath(texbuf+m->nameStart);
+				std::string texpath(texbuf+m->nameStart);
 
 				m->tex = video.textures.add(texpath);
 				textures.push_back(texpath);
@@ -117,14 +115,14 @@ WMO::WMO(std::string name): ManagedItem(name)
 		}
 		else if ( fourcc == 'MOGI' ) {
 			// group info - important information! ^_^
-			for (int i=0; i<nGroups; i++) {
+			for (unsigned int i=0; i<nGroups; i++) {
 				groups[i].init(this, f, i, groupnames);
 
 			}
 		}
 		else if ( fourcc == 'MOLT' ) {
 			// Lights?
-			for (int i=0; i<nLights; i++) {
+			for (unsigned int i=0; i<nLights; i++) {
 				WMOLight l;
 				l.init(f);
 				lights.push_back(l);
@@ -139,7 +137,7 @@ WMO::WMO(std::string name): ManagedItem(name)
 
 				char *p=ddnames,*end=p+size;
 				while (p<end) {
-					string path(p);
+					std::string path(p);
 					p+=strlen(p)+1;
 					while ((p<end) && (*p==0)) p++;
 
@@ -150,7 +148,7 @@ WMO::WMO(std::string name): ManagedItem(name)
 			}
 		}
 		else if ( fourcc == 'MODS' ) {
-			for (int i=0; i<nDoodadSets; i++) {
+			for (unsigned int i=0; i<nDoodadSets; i++) {
 				WMODoodadSet dds;
 				f.read(&dds, 32);
 				doodadsets.push_back(dds);
@@ -158,7 +156,7 @@ WMO::WMO(std::string name): ManagedItem(name)
 		}
 		else if ( fourcc == 'MODD' ) {
 			nModels = (int)size / 0x28;
-			for (int i=0; i<nModels; i++) {
+			for (unsigned int i=0; i<nModels; i++) {
 				int ofs;
 				f.read(&ofs,4);
 				Model *m = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(ddnames + ofs)];
@@ -172,12 +170,12 @@ WMO::WMO(std::string name): ManagedItem(name)
 		{
 			if (size>4) 
 			{
-				string path = std::string( reinterpret_cast<char*>( f.getPointer( ) ) );
+				std::string path = std::string( reinterpret_cast<char*>( f.getPointer( ) ) );
 				if (path.length()) 
 				{
 					LogDebug << "SKYBOX:" << std::endl;
 
-          if( MPQFileExists( path ) )
+          if( MPQFile::exists( path ) )
           {
             skybox = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.add(path)];
           }
@@ -190,7 +188,7 @@ WMO::WMO(std::string name): ManagedItem(name)
 		}
 		else if ( fourcc == 'MOPV' ) {
 			WMOPV p;
-			for (int i=0; i<nP; i++) {
+			for (unsigned int i=0; i<nP; i++) {
 				f.read(ff,12);
 				p.a = Vec3D(ff[0],ff[2],-ff[1]);
 				f.read(ff,12);
@@ -224,7 +222,7 @@ WMO::WMO(std::string name): ManagedItem(name)
 	f.close();
 	delete[] texbuf;
 
-	for (int i=0; i<nGroups; i++) 
+	for (unsigned int i=0; i<nGroups; i++) 
 		groups[i].initDisplayList();
 }
 
@@ -234,11 +232,11 @@ WMO::~WMO()
   if(groups)
     delete[] groups;
 
-  for (vector<string>::iterator it = textures.begin(); it != textures.end(); ++it) {
+  for (std::vector<std::string>::iterator it = textures.begin(); it != textures.end(); ++it) {
     video.textures.delbyname(*it);
   }
 
-  for (vector<string>::iterator it = models.begin(); it != models.end(); ++it) {
+  for (std::vector<std::string>::iterator it = models.begin(); it != models.end(); ++it) {
     gWorld->modelmanager.delbyname(*it);
   }
 
@@ -262,17 +260,17 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 		WMOHighlight( Vec4D( 0.1f, 0.1f, 0.1f, 0.1f ) );
 	}
 
-	for (int i=0; i<nGroups; i++) {
+	for (unsigned int i=0; i<nGroups; i++) {
 		groups[i].draw(ofs, rot);
 	}
 
 	if (gWorld->drawdoodads) {
-		for (int i=0; i<nGroups; i++) {
+		for (unsigned int i=0; i<nGroups; i++) {
 			groups[i].drawDoodads(doodadset, ofs, rot);
 		}
 	}
 
-	for (int i=0; i<nGroups; i++) {
+	for (unsigned int i=0; i<nGroups; i++) {
 		groups[i].drawLiquid();
 	}
 
@@ -298,7 +296,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 		glEnable( GL_BLEND );
 		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		
-		for( int i = 0; i < nGroups; i++ )
+		for( unsigned int i = 0; i < nGroups; i++ )
 			DrawABox( groups[i].BoundingBoxMin, groups[i].BoundingBoxMax, Vec4D( 1.0f, 1.0f, 1.0f, 1.0f ), 1.0f );
 
 		/*glColor4fv( Vec4D( 1.0f, 0.0f, 0.0f, 1.0f ) );
@@ -432,7 +430,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 
 		glLineWidth(1.0);
 		glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-		for (int i=0; i<nGroups; i++) 
+		for (unsigned int i=0; i<nGroups; i++) 
 		{
 			WMOGroup &header = groups[i];
 			glBegin( GL_LINE_STRIP );	
@@ -517,17 +515,17 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 
 void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot)
 {
-  for (int i=0; i<nGroups; i++) {
+  for (unsigned int i=0; i<nGroups; i++) {
 		groups[i].draw(ofs, rot);
 	}
 
 	if (gWorld->drawdoodads) {
-		for (int i=0; i<nGroups; i++) {
+		for (unsigned int i=0; i<nGroups; i++) {
 			groups[i].drawDoodadsSelect(doodadset, ofs, rot);
 		}
 	}
 
-	for (int i=0; i<nGroups; i++) {
+	for (unsigned int i=0; i<nGroups; i++) {
 		groups[i].drawLiquid();
 	}
 }
@@ -656,7 +654,7 @@ void WMOGroup::init(WMO *wmo, MPQFile &f, int num, char *names)
 
 	//! \todo  get proper name from group header and/or dbc?
 	if (nameOfs > 0) {
-        name = string(names + nameOfs);
+        name = std::string(names + nameOfs);
 	} else name = "(no name)";
 
 	ddr = 0;
@@ -703,11 +701,12 @@ struct WMOGroupHeader {
 
 void WMOGroup::initDisplayList()
 {
-	Vec3D *vertices, *normals;
-	Vec2D *texcoords;
-	unsigned short *indices;
-	struct SMOPoly *materials;
-	WMOBatch *batches;
+	Vec3D *vertices = NULL;
+  Vec3D *normals = NULL;
+	Vec2D *texcoords = NULL;
+	unsigned short *indices = NULL;
+	struct SMOPoly *materials = NULL;
+	WMOBatch *batches = NULL;
 
 	WMOGroupHeader gh;
 
@@ -748,7 +747,7 @@ void WMOGroup::initDisplayList()
 	uint32_t fourcc;
 	uint32_t size;
 
-	unsigned int *cv;
+	unsigned int *cv = NULL;
 	hascv = false;
 
 	while (!gf.isEof()) {
@@ -884,7 +883,7 @@ void WMOGroup::initDisplayList()
 		bool overbright = ((mat->flags & 0x10) && !hascv);
 		bool spec_shader = (mat->specular && !hascv && !overbright);
 
-		pair<GLuint, int> currentList;
+		std::pair<GLuint, int> currentList;
 		currentList.first = list;
 		currentList.second = spec_shader ? 1 : 0;
 
@@ -978,7 +977,7 @@ void WMOGroup::initLighting(int nLR, short *useLights)
 			lenmin = 999999.0f*999999.0f;
 			lmin = 0;
 			ModelInstance &mi = wmo->modelis[ddr[i]];
-			for (int j=0; j<wmo->nLights; j++) {
+			for (unsigned int j=0; j<wmo->nLights; j++) {
 				WMOLight &l = wmo->lights[j];
 				Vec3D dir = l.pos - mi.pos;
 				float ll = dir.lengthSquared();
@@ -1058,7 +1057,7 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot)
 
 }
 
-void WMOGroup::drawDoodads(int doodadset, const Vec3D& ofs, const float rot)
+void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float rot)
 {
 	if (!visible) return;
 	if (nDoodads==0) return;
@@ -1099,7 +1098,7 @@ void WMOGroup::drawDoodads(int doodadset, const Vec3D& ofs, const float rot)
 }
 
 
-void WMOGroup::drawDoodadsSelect(int doodadset, const Vec3D& ofs, const float rot)
+void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const float rot)
 {
 	if (!visible) return;
 	if (nDoodads==0) return;
@@ -1214,7 +1213,7 @@ void WMOFog::setup()
 	}
 }
 
-int WMOManager::add(std::string name)
+int WMOManager::add(const std::string& name)
 {
 	int id;
 	if (names.find(name) != names.end()) {

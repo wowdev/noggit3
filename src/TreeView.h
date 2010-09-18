@@ -21,19 +21,19 @@ private:
 	TreeViewButton * mMyButton;
 	textUI * mMyText;
 
-	void (*mSelectFunction)( std::string );	
+	void (*mSelectFunction)( const std::string& );	
 
 	bool mExpanded;
 
 public:
-	TreeView( float pX, float pY, Directory * pDirectory, TreeView * pParent, void (*pSelectFunction)( std::string ) );
+	TreeView( float pX, float pY, Directory * pDirectory, TreeView * pParent, void (*pSelectFunction)( const std::string& ) );
 
 	void Expand( );
 	void Minimize( );
 	bool Expanded( );
 	void Toggle( );
 
-	void SetSelectFunction( void (*pSelectFunction)( std::string ) );
+	void SetSelectFunction( void (*pSelectFunction)( const std::string& ) );
 	std::string GetDirectoryName( )
 	{
 		return mMyDir->mName;

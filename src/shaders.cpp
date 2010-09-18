@@ -1,10 +1,10 @@
 #include "shaders.h"
 #include "Log.h"
 
-BLSShader::BLSShader( std::string pFilename )
+BLSShader::BLSShader( const std::string& pFilename )
 {
 	mOkay = false;
-	if( !MPQFileExists( pFilename.c_str( ) ) )
+	if( !MPQFile::exists( pFilename ) )
 	{
 		LogError << "Failed to get file for shader \"" << pFilename << "\"." << std::endl;
 		return;
@@ -14,7 +14,7 @@ BLSShader::BLSShader( std::string pFilename )
 	int length;
 	char * buffer;
 
-	MPQFile lShader( pFilename.c_str() );
+	MPQFile lShader( pFilename );
 	lShader.read( &magix, sizeof( int ) );
 	lShader.seek( 0x18 );
 	lShader.read( &length, sizeof( int ) );
@@ -22,7 +22,7 @@ BLSShader::BLSShader( std::string pFilename )
 	buffer = new char[length];
 	lShader.read( buffer, length );	
 
-	for( length; buffer[length] <= 0; length-- );
+	for( ; buffer[length] <= 0; length-- );
 
 	lShader.seek( 0x1C );
 	buffer = new char[length];
@@ -62,7 +62,7 @@ BLSShader::BLSShader( std::string pFilename )
 				localbuffer[j] = buffer[i];
 			}
 			localbuffer[j] = 0;
-			if( localbuffer )
+			if( localbuffer[0] )
 				LogError << "\tDump:\"" << localbuffer<< "\"" << std::endl;
 		}
 		else
@@ -103,8 +103,8 @@ Shader::Shader(GLenum target, const char *program, bool fromFile):id(0),target(t
 	}
 
 	const char *progtext;
-	char *buf;
 	if (fromFile) {
+    char *buf;
 		FILE *f = fopen(program, "rb");
 		if (!f) {
 			ok = false;
@@ -120,6 +120,7 @@ Shader::Shader(GLenum target, const char *program, bool fromFile):id(0),target(t
 		buf[len]=0;
 		fclose(f);
 		//gLog("Len: %d\nShader text:\n[%s]\n",len,progtext);
+    delete[] buf;
 	} else progtext = program;
 
 	glGenProgramsARB(1, &id);
@@ -133,7 +134,6 @@ Shader::Shader(GLenum target, const char *program, bool fromFile):id(0),target(t
 		ok = false;
 	} else ok = true;
 
-	if (fromFile) delete[] buf;
 }
 
 Shader::~Shader()

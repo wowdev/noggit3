@@ -12,10 +12,10 @@ class ManagedItem
 	int refcount;
 public:
 	std::string name;
-	ManagedItem( std::string n ) : refcount( 0 )
+	ManagedItem( const std::string& n ) : refcount( 0 )
 	{
-		std::transform( n.begin( ), n.end( ), n.begin( ), ::tolower );
 		name = n;
+		std::transform( name.begin( ), name.end( ), name.begin( ), ::tolower );
 	}
 
 	virtual ~ManagedItem( ) { }
@@ -42,7 +42,7 @@ public:
 
 	Manager( ) { }
 
-	virtual IDTYPE add( std::string name ) = 0;
+	virtual IDTYPE add( const std::string& name ) = 0;
 
 	virtual void del( IDTYPE id )
 	{
@@ -51,15 +51,13 @@ public:
 			doDelete( id );
 			
 			std::string name = items[id]->name;
-			printf("name: %s\n", name.c_str());
-			//	namemap::iterator nameit = names.find( name );
 			if( names.find( name ) != names.end( ) )
 				names.erase( names.find( name ) );
 			items.erase( items.find( id ) );
 		}
 	}
 
-	void delbyname( std::string name )
+	void delbyname( const std::string& name )
 	{
 		if( has( name ) )
 			del( get( name ) );
@@ -67,18 +65,18 @@ public:
 
 	virtual void doDelete( IDTYPE id ) { }
 
-	bool has( std::string name )
+	bool has( const std::string& name )
 	{
 		return( names.find( name ) != names.end( ) );
 	}
 
-	IDTYPE get( std::string name )
+	IDTYPE get( const std::string& name )
 	{
 		return names[name];
 	}
 
 protected:
-	void do_add( std::string name, IDTYPE id, ManagedItem* item )
+	void do_add( const std::string& name, IDTYPE id, ManagedItem* item )
 	{
 		names[name] = id;
 		item->addref( );

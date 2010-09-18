@@ -65,7 +65,7 @@ ModelInstance::ModelInstance(Model *m, MPQFile &f) : model (m)
 	f.read( &scale, 2 );
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	sc = scale / 1024.0f;
-	nameID=-1;
+	nameID=0xFFFFFFFF;
 }
 
 ModelInstance::ModelInstance(Model *m, ENTRY_MDDF *d) : model (m)
@@ -75,14 +75,14 @@ ModelInstance::ModelInstance(Model *m, ENTRY_MDDF *d) : model (m)
 	dir = Vec3D(d->rot[0],d->rot[1],d->rot[2]);
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	sc = d->scale / 1024.0f;
-	nameID=-1;
+	nameID=0xFFFFFFFF;
 }
 
 
 
 void ModelInstance::init2(Model *m, MPQFile &f)
 {
-	nameID=-1;
+	nameID=0xFFFFFFFF;
 	model = m;
 	nameID = SelectionNames.add( this );
 	float ff[3],temp;
@@ -213,7 +213,7 @@ void ModelInstance::drawSelect()
 	glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
 	glScalef( sc, sc, sc );
 
-	if( nameID == -1 )
+	if( nameID == 0xFFFFFFFF )
 		nameID = SelectionNames.add( this );
 
 	glPushName( nameID );
@@ -229,10 +229,10 @@ void ModelInstance::drawSelect()
 
 ModelInstance::~ModelInstance()
 {
-	if( nameID != -1 )
+	if( nameID != 0xFFFFFFFF )
 	{
 		SelectionNames.del( nameID );
-		nameID = -1;
+		nameID = 0xFFFFFFFF;
 	}
 }
 

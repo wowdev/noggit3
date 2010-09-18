@@ -19,7 +19,7 @@ appInfo::appInfo(float xPos, float yPos, float w, float h, Gui *setGui) : window
 	this->addChild( myTestmodel );
 }
 
-void appInfo::setText( std::string t )
+void appInfo::setText( const std::string& t )
 {
 	this->theInfos->setText( t );
 }

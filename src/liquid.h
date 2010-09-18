@@ -67,7 +67,7 @@ class Liquid
 	void initGeometry(MPQFile &f);
 
 	template<int pFirst, int pLast>
-	void initTextures( std::string pFilename );
+	void initTextures( const std::string& pFilename );
 
 	int type;
 	std::vector<GLuint> textures;

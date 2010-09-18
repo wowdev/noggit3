@@ -20,7 +20,7 @@ class MenuButton : public buttonUI
 private:
 	MenuPane * mPane;
 public:
-	MenuButton( MenuPane * pPane, float pX, float pY, std::string pText );
+	MenuButton( MenuPane * pPane, float pX, float pY, const std::string& pText );
 
 	frame* processLeftClick( float pX, float pY );
 };
@@ -31,13 +31,13 @@ protected:
 	MenuPane * mParent;
 
 public:
-	MenuItem( MenuPane * pParent, float pX, float pY, float pHeight, std::string pText, std::string pNormal, std::string pDown );
+	MenuItem( MenuPane * pParent, float pX, float pY, float pHeight, const std::string& pText, const std::string& pNormal, const std::string& pDown );
 };
 
 class MenuItemButton : public MenuItem 
 {
 public:
-	MenuItemButton( MenuPane * pParent, float pX, float pY, std::string pText, void ( *pClickFunc )( frame *, int ), int pClickFuncID );
+	MenuItemButton( MenuPane * pParent, float pX, float pY, const std::string& pText, void ( *pClickFunc )( frame *, int ), int pClickFuncID );
 
 	frame* processLeftClick( float pX, float pY );
 };
@@ -50,7 +50,7 @@ private:
 	bool mInvert;
 
 public:
-	MenuItemToggle( MenuPane * pParent, float pX, float pY, std::string pText, bool * pMyState, bool pInvert = false );
+	MenuItemToggle( MenuPane * pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert = false );
 
 	frame* processLeftClick( float pX, float pY );
 
@@ -64,7 +64,7 @@ private:
 	bool mInvert;
 
 public:
-	MenuItemSwitch( MenuPane * pParent, float pX, float pY, std::string pText, bool * pMyState, bool pInvert = 1 );
+	MenuItemSwitch( MenuPane * pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert = 1 );
 
 	frame* processLeftClick( float pX, float pY );
 
@@ -79,7 +79,7 @@ private:
 	int * mMyState;
 
 public:
-	MenuItemSet( MenuPane * pParent, float pX, float pY, std::string pText, int * pMyState, int pSet = 1 );
+	MenuItemSet( MenuPane * pParent, float pX, float pY, const std::string& pText, int * pMyState, int pSet = 1 );
 
 	frame* processLeftClick( float pX, float pY );
 
@@ -89,7 +89,7 @@ public:
 class MenuItemSeperator : public MenuItem
 {
 public:
-	MenuItemSeperator( MenuPane * pParent, float pX, float pY, std::string pText );
+	MenuItemSeperator( MenuPane * pParent, float pX, float pY, const std::string& pText );
 
 	frame* processLeftClick( float pX, float pY );
 };
@@ -106,12 +106,12 @@ public:
 	void Close();
 	void Open();
 	
-	void AddMenuItemButton( std::string pName, void ( *pClickFunc )( frame *, int ), int pClickFuncID );
-	void AddMenuItemToggle( std::string pName, bool * pMyState, bool pInvert = false );
-	void AddMenuItemSwitch( std::string pName, bool * pMyState, bool pInvert = false );
-	void AddMenuItemSet( std::string pName, int * pMyIntState, int pSet = 1 );
+	void AddMenuItemButton( const std::string& pName, void ( *pClickFunc )( frame *, int ), int pClickFuncID );
+	void AddMenuItemToggle( const std::string& pName, bool * pMyState, bool pInvert = false );
+	void AddMenuItemSwitch( const std::string& pName, bool * pMyState, bool pInvert = false );
+	void AddMenuItemSet( const std::string& pName, int * pMyIntState, int pSet = 1 );
 
-	void AddMenuItemSeperator( std::string pName );
+	void AddMenuItemSeperator( const std::string& pName );
 };
 
 
@@ -133,9 +133,9 @@ public:
 
 	void CloseAll( );
 	void ClearAll( );
-	void AddMenu( std::string pName );
+	void AddMenu( const std::string& pName );
 
-	MenuPane * GetMenu( std::string pName );
+	MenuPane * GetMenu( const std::string& pName );
 
 	frame * processLeftClick(float mx,float my);
 };

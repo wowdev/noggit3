@@ -15,7 +15,7 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, GLuint tex, GLuint tex
 	text = new textUI( w / 2.0f, 2.0f, &arial12, eJustifyCenter );
 }
 
-buttonUI::buttonUI( float pX, float pY, float w, float h, std::string pText, GLuint tex, GLuint texd )
+buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pText, GLuint tex, GLuint texd )
 {
 	x = pX;
 	y = pY;
@@ -29,7 +29,7 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, std::string pText, GLu
 	text = new textUI( w / 2.0f, 2.0f, pText, &arial12, eJustifyCenter );
 }
 
-buttonUI::buttonUI( float pX, float pY, float w, float h, std::string pTexNormal, std::string pTexDown )
+buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pTexNormal, const std::string& pTexDown )
 {
 	x = pX;
 	y = pY;
@@ -43,7 +43,7 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, std::string pTexNormal
 	text = new textUI( w / 2.0f, 2.0f, &arial12, eJustifyCenter );
 }
 
-buttonUI::buttonUI( float pX, float pY, float w, float h, std::string pText, std::string pTexNormal, std::string pTexDown )
+buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown )
 {
 	x = pX;
 	y = pY;
@@ -63,7 +63,7 @@ void buttonUI::setLeft( )
 	text->x = 10.0f;
 }
 
-void buttonUI::setText( std::string pText )
+void buttonUI::setText( const std::string& pText )
 {
 	text->setText( pText.c_str( ) );
 }

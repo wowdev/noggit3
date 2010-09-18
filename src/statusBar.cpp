@@ -61,12 +61,12 @@ void statusBar::resize( )
 	this->rightInfo->x = this->width - 8.0f;
 }
 
-void statusBar::setLeftInfo( std::string pText )
+void statusBar::setLeftInfo( const std::string& pText )
 {
 	this->leftInfo->setText( pText );
 }
 
-void statusBar::setRightInfo( std::string pText )
+void statusBar::setRightInfo( const std::string& pText )
 {
 	this->rightInfo->setText( pText );
 }

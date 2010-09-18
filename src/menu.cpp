@@ -19,11 +19,9 @@
 
 extern Directory * gFileList;
 
-using namespace std;
-
 //! \todo  Take this out.
 /*TreeView * tv;
-void TVSelectFunction( std::string pFile )
+void TVSelectFunction( const std::string& pFile )
 {
 	gLog( "Selected: %s\n", pFile.c_str() );
 }*/
@@ -56,7 +54,7 @@ Menu::Menu( ) : bg(0)
 	minimap_x = 300;
 	minimap_y = 70;
 
-	minimap_win = new minimapWindowUI( minimap_x-10, minimap_y-10, 790, 790);
+	minimap_win = new minimapWindowUI( minimap_x-10, minimap_y-10);
 	guiFrame.addChild(minimap_win);
 
 	mCredits = new winCredits();
@@ -267,7 +265,7 @@ void Menu::tick( float t, float dt )
 			av = -30.0f;
 		}
 
-		world->enterTileInit( cx, cz );
+		world->enterTile( cx, cz );
 		
 		MapView *t = new MapView( world, ah, av );
 
@@ -439,7 +437,7 @@ void Menu::display(float t, float dt)
 			{
 				for( int i=0; i < 64; i++ ) 
 				{
-					if( world->maps[j][i] ) 
+					if( world->hasTile(j,i) ) 
 					{
 						glColor4f( 0.8f, 0.8f, 0.8f, 0.4f );
 						glBegin( GL_QUADS );

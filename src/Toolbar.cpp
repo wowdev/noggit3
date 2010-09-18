@@ -40,7 +40,7 @@ Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window
 
 }
 
-void Toolbar::SetIcon( int pIcon, std::string pIconFile )
+void Toolbar::SetIcon( int pIcon, const std::string& pIconFile )
 {
 	mToolbarIcons[pIcon] = new Icon( 
 			( pIcon % 2 ) * 50.0f + 5.0f, 

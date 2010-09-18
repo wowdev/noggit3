@@ -16,7 +16,7 @@ public:
 	statusBar( float x, float y, float width, float height );
 	void render( );	
 	void resize( );
-	void setLeftInfo( std::string pText );
-	void setRightInfo( std::string pText );
+	void setLeftInfo( const std::string& pText );
+	void setRightInfo( const std::string& pText );
 };
 #endif

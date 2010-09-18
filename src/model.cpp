@@ -8,29 +8,28 @@
 #include "world.h"
 #include "Log.h"
 
-using namespace std;
-
 int globalTime = 0;
 
-Model::Model(std::string name, bool forceAnim) : ManagedItem(name), forceAnim(forceAnim)
+Model::Model(const std::string& name, bool forceAnim) : ManagedItem(name), forceAnim(forceAnim)
 {
-  transform( name.begin( ), name.end( ), name.begin( ), ::tolower );
-  size_t found = name.rfind( ".mdx" );
-  if( found != string::npos )
-    name.replace( found, 4, ".m2" );
+  filename = name;
   
-  found = name.rfind( ".mdl" );
-  if( found != string::npos )
-    name.replace( found, 4, ".m2" );
+  transform( filename.begin( ), filename.end( ), filename.begin( ), ::tolower );
+  size_t found = filename.rfind( ".mdx" );
+  if( found != std::string::npos )
+    filename.replace( found, 4, ".m2" );
+  
+  found = filename.rfind( ".mdl" );
+  if( found != std::string::npos )
+    filename.replace( found, 4, ".m2" );
     
-  found = name.rfind( ".m2" );
-  if( found == string::npos )
+  found = filename.rfind( ".m2" );
+  if( found == std::string::npos )
   {
-    LogError << "I can't use the model \"" << name << "\" as I can't get its ending to .m2." << std::endl;
+    LogError << "I can't use the model \"" << filename << "\" as I can't get its ending to .m2." << std::endl;
     return;
   }
 
-  filename = name;
   
   textures = NULL;
   globalSequences = NULL;
@@ -48,7 +47,7 @@ Model::Model(std::string name, bool forceAnim) : ManagedItem(name), forceAnim(fo
 
 void Model::finishLoading()
 {
-  MPQFile f( filename.c_str() );
+  MPQFile f( filename );
   
   if( f.isEof( ) ) 
   {
@@ -303,14 +302,14 @@ void Model::initCommon(MPQFile &f)
   // indices - allocate space, too
 
   // replace .M2 with 0i.skin
-  string skinfilename = filename;
-  stringstream temp; temp << "0" << ( header.nViews - 1 ) << ".skin";
+  std::string skinfilename = filename;
+  std::stringstream temp; temp << "0" << ( header.nViews - 1 ) << ".skin";
   
   size_t found = skinfilename.rfind( ".m2" );
-  if( found != string::npos )
+  if( found != std::string::npos )
     skinfilename.replace( found, 3, temp.str() );
 
-  MPQFile skin( skinfilename.c_str() );
+  MPQFile skin( skinfilename );
   if( skin.isEof() )
   {
     LogError << "Error when trying to load .skin file \"" << skinfilename << "\". Aborting." << std::endl;
@@ -593,7 +592,7 @@ void Model::animate(int anim)
 
     // transform vertices
     ModelVertex *ov = origVertices;
-    for (size_t i=0,k=0; i<header.nVertices; ++i,++ov) {
+    for (size_t i=0; i<header.nVertices; ++i,++ov) {
       Vec3D v(0,0,0), n(0,0,0);
 
       for (size_t b=0; b<4; b++) {
@@ -947,7 +946,7 @@ void ModelCamera::setup(int time)
   Vec3D t = target + tTarget.getValue(0, time);
 
   Vec3D u(0,1,0);
-  float roll = rot.getValue(0, time) / PI * 180.0f;
+  //float roll = rot.getValue(0, time) / PI * 180.0f;
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -1245,7 +1244,7 @@ void Model::updateEmitters( float dt )
 
 #include "AsyncLoader.h"
 
-int ModelManager::add( std::string name )
+int ModelManager::add( const std::string& name )
 {
   int id;
   if( names.find( name ) != names.end( ) ) 

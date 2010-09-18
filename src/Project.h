@@ -7,7 +7,7 @@ class Project
 {
 public:
 	static Project* getInstance();
-	void setPath(std::string setPath);
+	void setPath(const std::string& setPath);
 	std::string getPath();
 private:
 	Project();

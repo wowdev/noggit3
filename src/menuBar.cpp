@@ -66,7 +66,7 @@ void menuBar::CloseAll( )
 	}
 }
 
-void menuBar::AddMenu( std::string pName )
+void menuBar::AddMenu( const std::string& pName )
 {
 	MenuPane * lMenuPane = new MenuPane( this, 1.0f + mNumMenus * 101.0f, 33.0f );
 	MenuButton * lMenuButton = new MenuButton( lMenuPane, 3.0f + mNumMenus * 100.0f, 5.0f, pName );
@@ -79,7 +79,7 @@ void menuBar::AddMenu( std::string pName )
 	mNumMenus++;
 }
 
-MenuPane * menuBar::GetMenu( std::string pName )
+MenuPane * menuBar::GetMenu( const std::string& pName )
 {
 	return mMenuPanes[pName];
 }
@@ -100,7 +100,7 @@ frame *menuBar::processLeftClick(float mx,float my)
 
 
 
-MenuButton::MenuButton( MenuPane * pPane, float pX, float pY, std::string pText ) : buttonUI( pX, pY, 95.0f, 27.0f, video.textures.add( "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp" ), video.textures.add( "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" ) )
+MenuButton::MenuButton( MenuPane * pPane, float pX, float pY, const std::string& pText ) : buttonUI( pX, pY, 95.0f, 27.0f, video.textures.add( "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp" ), video.textures.add( "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" ) )
 {
 	this->setText( pText.c_str( ) );
 	mPane = pPane;
@@ -114,7 +114,7 @@ frame* MenuButton::processLeftClick( float pX, float pY )
 	return this;
 }
 
-MenuItem::MenuItem( MenuPane * pParent, float pX, float pY, float pHeight, std::string pText, std::string pNormal, std::string pDown ) : buttonUI( pX, pY, 170.0f, 30.0f, video.textures.add( pNormal), video.textures.add( pDown ) )
+MenuItem::MenuItem( MenuPane * pParent, float pX, float pY, float pHeight, const std::string& pText, const std::string& pNormal, const std::string& pDown ) : buttonUI( pX, pY, 170.0f, 30.0f, video.textures.add( pNormal), video.textures.add( pDown ) )
 {
 	this->setText( pText.c_str( ) );
 	this->height = pHeight;
@@ -123,7 +123,7 @@ MenuItem::MenuItem( MenuPane * pParent, float pX, float pY, float pHeight, std::
 	mParent = pParent;
 }
 
-MenuItemButton::MenuItemButton( MenuPane * pParent, float pX, float pY, std::string pText, void ( *pClickFunc )( frame *, int ), int pClickFuncID ) : 
+MenuItemButton::MenuItemButton( MenuPane * pParent, float pX, float pY, const std::string& pText, void ( *pClickFunc )( frame *, int ), int pClickFuncID ) : 
 	MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
 {
 	this->setClickFunc( pClickFunc, pClickFuncID );
@@ -139,7 +139,7 @@ frame* MenuItemButton::processLeftClick( float pX, float pY )
 	return this;
 }
 
-MenuItemToggle::MenuItemToggle( MenuPane * pParent, float pX, float pY, std::string pText, bool * pMyState, bool pInvert ) : 
+MenuItemToggle::MenuItemToggle( MenuPane * pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert ) : 
 	MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
 {
 	this->setText( pText.c_str( ) );
@@ -202,7 +202,7 @@ void MenuItemToggle::render( )
 	glPopMatrix( );
 }
 
-MenuItemSwitch::MenuItemSwitch( MenuPane * pParent, float pX, float pY, std::string pText, bool * pMyState, bool pInvert ) : 
+MenuItemSwitch::MenuItemSwitch( MenuPane * pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert ) : 
 	MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
 {
 	this->setText( pText.c_str( ) );
@@ -252,7 +252,7 @@ void MenuItemSwitch::render( )
 }
 
 
-MenuItemSet::MenuItemSet( MenuPane * pParent, float pX, float pY, std::string pText, int * pMyState, int pSet ) : 
+MenuItemSet::MenuItemSet( MenuPane * pParent, float pX, float pY, const std::string& pText, int * pMyState, int pSet ) : 
 	MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
 {
 	this->setText( pText.c_str( ) );
@@ -302,7 +302,7 @@ void MenuItemSet::render( )
 }
 
 
-MenuItemSeperator::MenuItemSeperator( MenuPane * pParent, float pX, float pY, std::string pText ) : 
+MenuItemSeperator::MenuItemSeperator( MenuPane * pParent, float pX, float pY, const std::string& pText ) : 
 	MenuItem( pParent, pX, pY, 20.0f, pText, "Interface\\BUTTONS\\UI-SliderBar-Background.blp", "Interface\\BUTTONS\\UI-SliderBar-Background.blp" )
 {
 	this->setText( pText.c_str( ) );
@@ -333,27 +333,27 @@ void MenuPane::Open()
 	this->hidden = false;
 }
 
-void MenuPane::AddMenuItemButton( std::string pName, void ( *pClickFunc )( frame *, int ), int pClickFuncID )
+void MenuPane::AddMenuItemButton( const std::string& pName, void ( *pClickFunc )( frame *, int ), int pClickFuncID )
 {
 	this->addChild( reinterpret_cast<frame*>( new MenuItemButton( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pClickFunc, pClickFuncID ) ) );
 	this->height = 6.0f + mNumItems * 25.0f;
 }
-void MenuPane::AddMenuItemToggle( std::string pName, bool * pMyState, bool pInvert )
+void MenuPane::AddMenuItemToggle( const std::string& pName, bool * pMyState, bool pInvert )
 {
 	this->addChild( reinterpret_cast<frame*>( new MenuItemToggle( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pInvert ) ) );
 	this->height = 6.0f + mNumItems * 25.0f;
 }
-void MenuPane::AddMenuItemSwitch( std::string pName, bool * pMyState, bool pInvert )
+void MenuPane::AddMenuItemSwitch( const std::string& pName, bool * pMyState, bool pInvert )
 {
 	this->addChild( reinterpret_cast<frame*>( new MenuItemSwitch( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pInvert ) ) );
 	this->height = 6.0f + mNumItems * 25.0f;
 }
-void MenuPane::AddMenuItemSet( std::string pName, int * pMyState, int pSet )
+void MenuPane::AddMenuItemSet( const std::string& pName, int * pMyState, int pSet )
 {
 	this->addChild( reinterpret_cast<frame*>( new MenuItemSet( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pSet ) ) );
 	this->height = 6.0f + mNumItems * 25.0f;
 }
-void MenuPane::AddMenuItemSeperator( std::string pName )
+void MenuPane::AddMenuItemSeperator( const std::string& pName )
 {
 	this->addChild( reinterpret_cast<frame*>( new MenuItemSeperator( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName ) ) );
 	this->height = 6.0f + mNumItems * 25.0f;

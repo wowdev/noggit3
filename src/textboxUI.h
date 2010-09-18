@@ -42,10 +42,10 @@ public:
 	TextBox(float xPos,float yPos,float w, float h,GLuint tex, GLuint texd);
 	void render();
 
-	void setValue( std::string pText )
+	void setValue( const std::string& pText )
 	{
 		mValue = pText;
-		mText->setText( mValue.c_str() );
+		mText->setText( mValue );
 	}
 	std::string	getValue( )
 	{

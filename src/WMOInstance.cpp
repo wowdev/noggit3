@@ -5,7 +5,7 @@
 
 WMOInstance::WMOInstance( WMO *wmo, MPQFile &f ) : wmo (wmo)
 {
-	nameID = -1;
+	nameID = 0xFFFFFFFF;
 
 	//! \todo  Where is the name ID? Oo What is up with this ctor?
     f.read( &id, 4 );
@@ -24,7 +24,7 @@ WMOInstance::WMOInstance( WMO *wmo, MPQFile &f ) : wmo (wmo)
 
 WMOInstance::WMOInstance( WMO *wmo, ENTRY_MODF *d ) : wmo (wmo)
 {
-	nameID = -1;
+	nameID = 0xFFFFFFFF;
 
 	wmoID = d->nameID;
 	id = d->uniqueID;
@@ -40,7 +40,7 @@ WMOInstance::WMOInstance( WMO *wmo, ENTRY_MODF *d ) : wmo (wmo)
 
 WMOInstance::WMOInstance(WMO *wmo) : wmo (wmo)
 {
-	nameID = -1;
+	nameID = 0xFFFFFFFF;
 }
 
 
@@ -86,7 +86,7 @@ void WMOInstance::drawSelect()
 	glRotatef(-dir.x, 0, 0, 1);
 	glRotatef(dir.z, 1, 0, 0);
 
-	if( nameID == -1 )
+	if( nameID == 0xFFFFFFFF )
 		nameID = SelectionNames.add( this );
 	glPushName(nameID);
 	wmo->drawSelect(doodadset,pos,-rot);
@@ -134,10 +134,10 @@ std::set<int> WMOInstance::ids;
 
 WMOInstance::~WMOInstance()
 {
-	if( nameID != -1 )
+	if( nameID != 0xFFFFFFFF )
 	{
 		SelectionNames.del( nameID );
-		nameID = -1;
+		nameID = 0xFFFFFFFF;
 	}
 }
 
