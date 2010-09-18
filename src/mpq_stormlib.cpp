@@ -94,82 +94,6 @@ void MPQArchive::close()
 	
 }
 
-void
-MPQFile::openFile( const std::string& filename )
-{
-	eof = false;
-	buffer = 0;
-	pointer = 0;
-	size = 0;
-
-	std::string diskpath = Project::getInstance()->getPath().append(filename) ;
-  
-	size_t found = diskpath.find( "\\" );
-	while( found != std::string::npos )
-	{
-		diskpath.replace( found, 1, "/" );
-		found = diskpath.find( "\\" );
-	}
-  
-  //LogDebug << "trying to open " << diskpath << "." << std::endl;
-
-	FILE* fd = fopen( diskpath.c_str() , "rb" );
-	if( !fd )
-	{
-		fd = fopen( diskpath.c_str( ), "rb" );
-	}
-	
-	fname = diskpath;
-
-	// if file is found on disk load binary data into buffer
-	if( fd )
-	{
-		fseek( fd, 0, SEEK_END );
-		size = ftell( fd);
-		
-		buffer = new uint8_t[size];
-		fseek( fd, 0, SEEK_SET );
-		fread( buffer, 1, size, fd );
-		fclose( fd );
-		External = true;
-		Log << "Opening file \"" << filename << "\" from disk." << std::endl;
-		std::transform( fname.begin( ), fname.end( ), fname.begin( ), ::tolower );
-		return;
-	}
-
-
-
-	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end(); ++i)
-	{
-		HANDLE &mpq_a = *i->second;
-
-		HANDLE fh;
-
-		if( !SFileOpenFileEx( mpq_a, filename.c_str(), 0, &fh ) )
-			continue;
-
-		// Found!
-		DWORD filesize = SFileGetFileSize( fh );
-		size = filesize;
-
-		// HACK: in patch.mpq some files don't want to open and give 1 for filesize
-		if (size<=1) {
-			eof = true;
-			buffer = 0;
-			return;
-		}
-
-		buffer = new unsigned char[size];
-		SFileReadFile( fh, buffer, size );
-		SFileCloseFile( fh );
-
-		return;
-	}
-
-	eof = true;
-	buffer = 0;
-}
-
 void MPQFile::SaveFile( )
 {	
 	FILE* fd;
@@ -208,11 +132,71 @@ void MPQFile::SaveFile( )
 
 MPQFile::MPQFile( const std::string& filename ):
 	eof(false),
-	buffer(0),
+	buffer(NULL),
 	pointer(0),
-	size(0)
+	size(0),
+  External(false)
 {
-	openFile( filename );
+	std::string diskpath = Project::getInstance()->getPath().append(filename);
+  
+	size_t found = diskpath.find( "\\" );
+	while( found != std::string::npos )
+	{
+		diskpath.replace( found, 1, "/" );
+		found = diskpath.find( "\\" );
+	}
+  
+	FILE* fd = fopen( diskpath.c_str(), "rb" );
+	
+	fname = diskpath;
+  
+	// if file is found on disk load binary data into buffer
+	if( fd )
+	{
+		fseek( fd, 0, SEEK_END );
+		size = ftell( fd);
+		
+		buffer = new uint8_t[size];
+		fseek( fd, 0, SEEK_SET );
+		fread( buffer, 1, size, fd );
+		fclose( fd );
+		External = true;
+		Log << "Opening file \"" << filename << "\" from disk." << std::endl;
+		std::transform( fname.begin( ), fname.end( ), fname.begin( ), ::tolower );
+		return;
+	}
+  
+	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end(); ++i)
+	{
+		HANDLE &mpq_a = *i->second;
+    
+		HANDLE fh;
+    
+		if( !SFileOpenFileEx( mpq_a, filename.c_str(), 0, &fh ) )
+			continue;
+    
+		// Found!
+		DWORD filesize = SFileGetFileSize( fh );
+		size = filesize;
+    
+		// HACK: in patch.mpq some files don't want to open and give 1 for filesize
+		if (size<=1) {
+			eof = true;
+			buffer = NULL;
+      
+      LogError << "size <= 1" << std::endl;
+			return;
+		}
+    
+		buffer = new unsigned char[size];
+		SFileReadFile( fh, buffer, size );
+		SFileCloseFile( fh );
+    
+		return;
+	}
+  
+	eof = true;
+	buffer = 0;
 }
 
 MPQFile::~MPQFile()

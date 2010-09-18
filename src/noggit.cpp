@@ -96,7 +96,7 @@ void getGamePath(bool pLoadFromConfig = false)
 		}
 	}
 }
-Directory * gFileList;
+//Directory * gFileList;
 
 int	nTimers;
 int Timers[25];
@@ -520,8 +520,8 @@ int startNoggit( int argc, char *argv[] )
 	gListfile.unique( );
 
 	//! \todo  Get this out?
-	gFileList = new Directory( "root" );
-	size_t found;
+	//gFileList = new Directory( "root" );
+	//size_t found;
 	// This is an example with filter:
 	/*
 		std::vector<std::string>::iterator it;
@@ -538,7 +538,7 @@ int startNoggit( int argc, char *argv[] )
 		}
 	*/
 	// This is an example for getting all files in the list.
-		std::list<std::string>::iterator it;
+	/*	std::list<std::string>::iterator it;
 		for( it = gListfile.begin(); it != gListfile.end(); ++it )
 		{
 			found = it->find_last_of("/\\");
@@ -547,6 +547,7 @@ int startNoggit( int argc, char *argv[] )
 			else
 				gFileList->AddFile( *it );
 		}
+   */
 
 	LogDebug << "main: directory: " << TimerStop() << " ms" << std::endl;
 	
@@ -595,8 +596,6 @@ int startNoggit( int argc, char *argv[] )
 		loadWaterShader();
 	else
 		LogError << "Your GPU does not support ARB vertex programs (shaders). Sorry." << std::endl;
-	
-	LogDebug << "main: start-up: " << TimerStop() << " ms" << std::endl;
 
 	bool done = false;
 	t = SDL_GetTicks( );

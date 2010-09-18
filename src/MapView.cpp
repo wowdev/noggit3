@@ -672,9 +672,6 @@ MapView::~MapView( )
 void MapView::tick( float t, float dt )
 {
 	Vec3D ObjPos;
-
-	//! \todo  Get this in a new thread.
-	world->onTheFlyLoading();
 	
 	if( dt > 1.0f )
 		dt = 1.0f;

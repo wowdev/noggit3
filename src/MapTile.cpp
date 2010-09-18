@@ -55,7 +55,7 @@ void startTimer();
 void stopTimer();
 int stopTimer2();
 
-MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha ) : mFilename( pFilename )
+MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 {
   mPositionX = pX;
   mPositionZ = pZ;
@@ -72,7 +72,10 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
       mChunks[i][j] = NULL;
     }
   }
+  
+  mFilename = pFilename;
 
+  LogDebug << "MPQFile::exists(mFilename): " << MPQFile::exists(mFilename) << std::endl;
 	MPQFile theFile( mFilename );
 
   Log << "Opening tile " << mPositionX << ", " << mPositionZ << " (\"" << mFilename << "\") from " << (theFile.isExternal( ) ? "disk" : "MPQ") << "." << std::endl;
@@ -439,17 +442,14 @@ MapTile::~MapTile( )
 {
 	LogDebug << "Unloading tile " << mPositionX << "," << mPositionZ << "." << std::endl;
 
-  if( mChunks )
+  for( int j = 0; j < 16; j++ ) 
   {
-    for( int j = 0; j < 16; j++ ) 
+    for( int i = 0; i < 16; i++ ) 
     {
-      for( int i = 0; i < 16; i++ ) 
+      if( mChunks[j][i] )
       {
-        if( mChunks[j][i] )
-        {
-          delete mChunks[j][i];
-          mChunks[j][i] = NULL;
-        }
+        delete mChunks[j][i];
+        mChunks[j][i] = NULL;
       }
     }
   }
@@ -601,8 +601,14 @@ void MapTile::drawTextures()
 
 MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )
 {
-	assert( x < 16 && z < 16 );
-	return mChunks[z][x];
+  if( x < 16 && z < 16 )
+  {
+    return mChunks[z][x];
+  }
+  else 
+  {
+    return NULL;
+  }
 }
 
 bool MapTile::GetVertex( float x, float z, Vec3D *V )
