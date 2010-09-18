@@ -12,7 +12,7 @@
 
 #include "directory.h"
 
-bool FileExists( const std::string filename )
+bool FileExists( const std::string& filename )
 {
 	std::fstream foo;
 	foo.open( filename.c_str() );
@@ -24,7 +24,7 @@ bool FileExists( const std::string filename )
 	return false;
 }
 
-void CreatePath( std::string filename )
+void CreatePath( const std::string& filename )
 {
 	size_t found = filename.substr( 0, filename.length( ) - 1 ).find_last_of("/\\");
 	if( found != std::string::npos )
@@ -38,30 +38,32 @@ void CreatePath( std::string filename )
 }
 
 
-File::File( const std::string pName )
+File::File( const std::string& pName )
 {
 	mName = pName;
 }
 
-Directory::Directory( const std::string pName )
+Directory::Directory( const std::string& pName )
 {
 	mName = pName;
 }
 
-Directory * Directory::AddSubDirectory( std::string pName )
+Directory * Directory::AddSubDirectory( const std::string& pName )
 {
+  std::string name = pName;
+  
 	Directory * lCurrentDir = this;
 	size_t found;
-	found = pName.find_last_of( "/\\" );
+	found = name.find_last_of( "/\\" );
 	while( found != std::string::npos )
 	{
-		lCurrentDir = lCurrentDir->AddSubDirectory( pName.substr( 0, found ) );
-		pName = pName.substr( found + 1 );
-		found = pName.find_last_of( "/\\" );
+		lCurrentDir = lCurrentDir->AddSubDirectory( name.substr( 0, found ) );
+		name = name.substr( found + 1 );
+		found = name.find_last_of( "/\\" );
 	}
-	if( ! lCurrentDir->mSubdirectories[pName] )
-		lCurrentDir->mSubdirectories[pName] = new Directory( pName );
-	return lCurrentDir->mSubdirectories[pName];
+	if( ! lCurrentDir->mSubdirectories[name] )
+		lCurrentDir->mSubdirectories[name] = new Directory( name );
+	return lCurrentDir->mSubdirectories[name];
 }
 Directory * Directory::AddSubDirectory( Directory * pDirectory )
 {
@@ -69,7 +71,7 @@ Directory * Directory::AddSubDirectory( Directory * pDirectory )
 	return mSubdirectories[pDirectory->mName];
 }
 
-File * Directory::AddFile( const std::string pName )
+File * Directory::AddFile( const std::string& pName )
 {
 	File * lNewFile = new File( pName );
 	mSubfiles.push_back( lNewFile );
@@ -81,7 +83,7 @@ File * Directory::AddFile( File * pFile )
 	return pFile;
 }
 
-Directory * Directory::operator[]( std::string pName )
+Directory * Directory::operator[]( const std::string& pName )
 {
 	return mSubdirectories[pName];
 }

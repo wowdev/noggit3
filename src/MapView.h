@@ -17,12 +17,13 @@ enum eViewMode
 class MapView :public AppState
 {
 	GLuint tex;
+  
+	World *world;
 
 	float ah,av,moving,strafing,updown,mousedir,movespd;
 	bool look;
 	bool hud;
 
-	World *world;
 
 	frame tileFrames;
 

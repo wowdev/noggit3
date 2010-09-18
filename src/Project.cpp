@@ -27,7 +27,7 @@ Project* Project::getInstance()
 	return instance;
 }
 
-void Project::setPath(std::string setPath)
+void Project::setPath(const std::string& setPath)
 {
 	path = setPath;
 }

@@ -216,7 +216,7 @@ void Video::setTileMode()
 	glLoadIdentity( );
 }
 
-void CheckForGLError( std::string pLocation )
+void CheckForGLError( const std::string& pLocation )
 {
 	int ErrorNum = glGetError( );
 	while( ErrorNum )

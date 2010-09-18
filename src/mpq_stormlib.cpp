@@ -12,17 +12,15 @@
 #include <sstream>
 #include <algorithm>
 
-using namespace std;
-
-typedef vector< pair< string, HANDLE* > > ArchiveSet;
+typedef std::vector< std::pair< std::string, HANDLE* > > ArchiveSet;
 ArchiveSet gOpenArchives;
 
 std::list<std::string> gListfile;
 
-MPQArchive::MPQArchive(std::string filename,bool doListfile)
+MPQArchive::MPQArchive(const std::string& filename,bool doListfile)
 {
 
-	bool result = !!SFileOpenArchive( filename.c_str(), 0, 0, &mpq_a );
+	bool result = SFileOpenArchive( filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE, &mpq_a );
 
 	if(!result) {
 		//gLog("Error opening archive %s\n", filename);
@@ -31,7 +29,7 @@ MPQArchive::MPQArchive(std::string filename,bool doListfile)
 	Log << "Opening archive:" << filename << std::endl;
 	gOpenArchives.push_back( make_pair( filename, &mpq_a ) );
 
-	if( !doListfile )
+	if( doListfile )
 	{
 		HANDLE fh;
 
@@ -97,7 +95,7 @@ void MPQArchive::close()
 }
 
 void
-MPQFile::openFile(const char* filename)
+MPQFile::openFile( const std::string& filename )
 {
 	eof = false;
 	buffer = 0;
@@ -113,7 +111,7 @@ MPQFile::openFile(const char* filename)
 		found = diskpath.find( "\\" );
 	}
   
-  LogDebug << "trying to open " << diskpath << "." << std::endl;
+  //LogDebug << "trying to open " << diskpath << "." << std::endl;
 
 	FILE* fd = fopen( diskpath.c_str() , "rb" );
 	if( !fd )
@@ -147,7 +145,7 @@ MPQFile::openFile(const char* filename)
 
 		HANDLE fh;
 
-		if( !SFileOpenFileEx( mpq_a, filename, 0, &fh ) )
+		if( !SFileOpenFileEx( mpq_a, filename.c_str(), 0, &fh ) )
 			continue;
 
 		// Found!
@@ -208,13 +206,13 @@ void MPQFile::SaveFile( )
 	}
 }
 
-MPQFile::MPQFile(std::string filename):
+MPQFile::MPQFile( const std::string& filename ):
 	eof(false),
 	buffer(0),
 	pointer(0),
 	size(0)
 {
-	openFile(filename.c_str());
+	openFile( filename );
 }
 
 MPQFile::~MPQFile()
@@ -222,13 +220,13 @@ MPQFile::~MPQFile()
 	close();
 }
 
-bool MPQFile::exists(const char* filename)
+bool MPQFile::exists( const std::string& filename )
 {
 	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
 	{
 		HANDLE &mpq_a = *i->second;
 
-		if( SFileHasFile( mpq_a, filename ) )
+		if( SFileHasFile( mpq_a, filename.c_str() ) )
 			return true;
 	}
 
@@ -304,14 +302,14 @@ void FixFilePath( std::string & pFilename )
 	}
 }
 
-int MPQFile::getSize(const char* filename)
+int MPQFile::getSize( const std::string& filename )
 {
 	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
 	{
 		HANDLE &mpq_a = *i->second;
 		HANDLE fh;
 		
-		if( !SFileOpenFileEx( mpq_a, filename, 0, &fh ) )
+		if( !SFileOpenFileEx( mpq_a, filename.c_str(), 0, &fh ) )
 			continue;
 
 		DWORD filesize = SFileGetFileSize( fh );
@@ -335,39 +333,4 @@ unsigned char* MPQFile::getBuffer()
 unsigned char* MPQFile::getPointer()
 {
 	return buffer + pointer;
-}
-
-bool MPQFileExists( std::string filename )
-{
-	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
-	{
-		HANDLE &mpq_a = *i->second;
-		HANDLE fh;
-		
-		if( !SFileOpenFileEx( mpq_a, filename.c_str(), 0, &fh ) )
-			return 1;
-	}
-
-	return 0;
-
-/*	FixFilePath( filename );
-	
-	uint32_t filenum;
-	
-	for( ArchiveSet::reverse_iterator i = gOpenArchives.rbegin( ); i != gOpenArchives.rend( ); ++i )
-		if( libmpq__file_number( *i, filename.c_str( ), &filenum ) != LIBMPQ_ERROR_EXIST )
-			return true;
-
-	std::string lTemp = Project::getInstance( )->getPath( ), lTemp2 = lTemp;
-	lTemp.append( filename );
-	lTemp2.append( "Data/" ).append( filename );
-	
-	if( FileExists( lTemp ) || FileExists( lTemp2 ) )
-	{
-		Log << "The file \"" << filename << "\" was found on the disk." << std::endl;
-		return true;
-	}
-	
-	return false;
-	*/
 }

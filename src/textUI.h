@@ -8,7 +8,7 @@ enum eJustify
 {
 	eJustifyLeft = 0,
 	eJustifyCenter = 1,
-	eJustifyRight = 2,
+	eJustifyRight = 2
 };
 
 class textUI : public frame
@@ -24,9 +24,9 @@ protected:
 	float bgColor[4];
 
 public:
-	textUI( float pX, float pY, std::string pText, freetype::font_data *pFont, int pJustify );
+	textUI( float pX, float pY, const std::string& pText, freetype::font_data *pFont, int pJustify );
 	textUI( float pX, float pY, freetype::font_data *pFont, int pJustify );
-	void setText( std::string pText );
+	void setText( const std::string& pText );
 	void setJustify( int j );
 	void setFont( freetype::font_data *font );
 	void setBackground( float r, float g, float b, float a );

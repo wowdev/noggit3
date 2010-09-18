@@ -16,7 +16,7 @@ private:
 	int mProgramType;
 	
 public: 
-	BLSShader( std::string pFilename );
+	BLSShader( const std::string& pFilename );
 	
 	void EnableShader()
 	{
@@ -34,8 +34,8 @@ void initShaders();
 void reloadShaders();
 
 class Shader {
-	GLenum target;
 	GLuint id;
+	GLenum target;
 public:
 	bool ok;
 

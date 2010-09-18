@@ -8,7 +8,7 @@ textureUI::textureUI( float xPos, float yPos, float w, float h, GLuint tex ) : f
 	id = 0;
 }
 
-textureUI::textureUI( float xPos, float yPos, float w, float h, std::string tex ) : frame( xPos, yPos, w, h )
+textureUI::textureUI( float xPos, float yPos, float w, float h, const std::string& tex ) : frame( xPos, yPos, w, h )
 {
 	texture = video.textures.add( tex );
 	highlight = false;

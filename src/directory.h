@@ -5,14 +5,14 @@
 #include <map>
 #include <vector>
 
-void CreatePath( std::string filename );
-bool FileExists( std::string filename );
+void CreatePath( const std::string& filename );
+bool FileExists( const std::string& filename );
 
 struct File
 {
 	std::string mName;
 
-	File( const std::string pName );
+	File( const std::string& pName );
 };
 
 struct Directory
@@ -22,16 +22,16 @@ struct Directory
 
 	std::string mName;
 	
-	Directory( const std::string pName );
+	Directory( const std::string& pName );
 	void PrintDirectory( const int pIndent );
 
-	Directory * AddSubDirectory( std::string pName );
+	Directory * AddSubDirectory( const std::string& pName );
 	Directory * AddSubDirectory( Directory * pDirectory );
 
-	File * AddFile( const std::string pName );
+	File * AddFile( const std::string& pName );
 	File * AddFile( File * pFile );
 	
-	Directory * operator[]( std::string pName );
+	Directory * operator[]( const std::string& pName );
 	Directory * operator[]( char * pName );
 };
 #endif

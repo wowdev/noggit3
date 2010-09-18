@@ -491,7 +491,7 @@ int startNoggit( int argc, char *argv[] )
 				sprintf( temp, "%i", i );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
-					archives.push_back( new MPQArchive( path.c_str( ) ) );
+					archives.push_back( new MPQArchive( path, true ) );
 			}
 		}
 		else if( path.find( "{character}" ) != std::string::npos  )
@@ -504,12 +504,12 @@ int startNoggit( int argc, char *argv[] )
 				sprintf( temp, "%c", i );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
-					archives.push_back( new MPQArchive( path.c_str( ) ) );
+					archives.push_back( new MPQArchive( path, true ) );
 			}
 		}
 		else
 			if( FileExists( path ) )
-				archives.push_back( new MPQArchive( path.c_str( ) ) );
+				archives.push_back( new MPQArchive( path, true ) );
 	}
 
 	LogDebug << "main: mpqs: " << TimerStop( ) << " ms" << std::endl;

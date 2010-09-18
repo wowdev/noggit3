@@ -21,11 +21,11 @@ protected:
 
 	ToggleGroup * mToggleGroup;
 public:
-	checkboxUI( float, float, std::string );
-	checkboxUI( float, float, std::string, ToggleGroup *, int );
-	checkboxUI( float xPos, float yPos, std::string pText, void (*pClickFunc)(bool,int), int pClickFuncParameter );
+	checkboxUI( float, float, const std::string& );
+	checkboxUI( float, float, const std::string&, ToggleGroup *, int );
+	checkboxUI( float xPos, float yPos, const std::string& pText, void (*pClickFunc)(bool,int), int pClickFuncParameter );
 	void SetToggleGroup( ToggleGroup * , int );
-	void setText( std::string );
+	void setText( const std::string& );
 	void setState( bool );
 	bool getState();
 	void setClickFunc( void (*f)( bool, int ),int );

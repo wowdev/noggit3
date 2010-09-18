@@ -21,33 +21,33 @@ struct BLPHeader
 };
 #pragma pack(pop)
 
-GLuint TextureManager::get(std::string name)
+GLuint TextureManager::get(const std::string& name)
 {
-	std::transform (name.begin(), name.end(), name.begin(), ::tolower );
-	return names[name];
+  std::string name_ = name;
+	std::transform (name_.begin(), name_.end(), name_.begin(), ::tolower );
+	return names[name_];
 }
 
-GLuint TextureManager::add(std::string name)
+GLuint TextureManager::add(const std::string& name)
 {
 	GLuint id;
-	std::string originalName = name;
-	std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-	if( names.find( name ) != names.end( ) ) 
+  std::string name_ = name;
+	std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
+	if( names.find( name_ ) != names.end( ) ) 
 	{
-		id = names[name];
+		id = names[name_];
 		items[id]->addref( );
 		return id;
 	}
 		
 	glGenTextures( 1, &id );
 
-	Texture *tex = new Texture( name );
-	tex->originalName = originalName;
+	Texture *tex = new Texture( name_ );
 	tex->id = id;
 	
 	LoadBLP(id, tex);
 
-	do_add(name, id, tex);
+	do_add(name_, id, tex);
 
 	return id;
 }
@@ -70,7 +70,7 @@ bool TextureManager::LoadBLP(GLuint id, Texture *tex)
 
 	glBindTexture( GL_TEXTURE_2D, id );
 	
-	MPQFile f( tex->originalName.c_str( ) );
+	MPQFile f( tex->name );
 	if ( f.isEof( ) ) 
 	{
 		tex->id = 0;
@@ -113,18 +113,23 @@ bool TextureManager::LoadBLP(GLuint id, Texture *tex)
 						for (int x=0; x<w; x++) {
 							unsigned int k = pal[*c++];
 							k = ((k&0x00FF0000)>>16) | ((k&0x0000FF00)) | ((k& 0x000000FF)<<16);
-							int alpha;
-							if (hasalpha) {
-								if (alphabits == 8) {
+							int alpha = 0xFF;
+							if (hasalpha) 
+              {
+								if (alphabits == 8) 
+                {
 									alpha = (*a++);
-								} else if (alphabits == 1) {
+								} 
+                else if (alphabits == 1)
+                {
 									alpha = (*a & (1 << cnt++)) ? 0xff : 0;
-									if (cnt == 8) {
+									if (cnt == 8) 
+                  {
 										cnt = 0;
 										a++;
 									}
 								}
-							} else alpha = 0xff;
+							}
 
 							k |= alpha << 24;
 							*p++ = k;

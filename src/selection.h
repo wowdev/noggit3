@@ -6,7 +6,7 @@ enum eSelectionEntryTypes
 	eEntry_Fake,
 	eEntry_Model,
 	eEntry_WMO,
-	eEntry_MapChunk,
+	eEntry_MapChunk
 };
 
 #include <string>

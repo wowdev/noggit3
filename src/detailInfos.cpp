@@ -12,7 +12,7 @@ detailInfos::detailInfos( float xPos, float yPos, float w, float h, Gui *setGui 
 	this->addChild( this->theInfos );
 }
 
-void detailInfos::setText( std::string t )
+void detailInfos::setText( const std::string& t )
 {
 	this->theInfos->setText( t );
 }

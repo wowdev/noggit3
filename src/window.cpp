@@ -5,7 +5,7 @@ window::window( float xPos, float yPos, float w, float h ) : frame( xPos, yPos, 
 	texture = video.textures.add( "interface\\tooltips\\ui-tooltip-border.blp" );
 }
 
-window::window( float xPos, float yPos, float w, float h, std::string pTexture ) : frame( xPos, yPos, w, h )
+window::window( float xPos, float yPos, float w, float h, const std::string& pTexture ) : frame( xPos, yPos, w, h )
 {
 	texture = video.textures.add( pTexture );
 }

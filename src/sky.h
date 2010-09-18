@@ -74,7 +74,7 @@ public:
 
 	Vec3D colorSet[18];
 
-	Skies( int mapid );
+	Skies( unsigned int mapid );
 	~Skies();
 
 	void findSkyWeights(Vec3D pos);
@@ -116,7 +116,7 @@ class OutdoorLighting {
 	std::vector<OutdoorLightStats> lightStats;
 
 public:
-	OutdoorLighting( std::string fname );
+	OutdoorLighting( const std::string& fname );
 
 	OutdoorLightStats getLightStats(int time);
 

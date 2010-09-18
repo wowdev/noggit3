@@ -39,7 +39,7 @@ enum Commands {
 	CMD_SELECT,
 	CMD_LOAD_WORLD,
 	CMD_DO_LOAD_WORLD,
-	CMD_BACK_TO_MENU,
+	CMD_BACK_TO_MENU
 };
 
 class Menu : public AppState

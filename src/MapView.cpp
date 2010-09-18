@@ -368,7 +368,7 @@ void InsertObject( frame *button, int id )
 
   for( std::vector<std::string>::iterator it = wmos_to_add.begin(); it != wmos_to_add.end(); ++it )
   {
-    if(MPQFileExists(*it))
+    if( MPQFile::exists(*it) )
     {
       LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
       continue;
@@ -392,7 +392,7 @@ void InsertObject( frame *button, int id )
 
   for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
   {
-    if(MPQFileExists(*it))
+    if( MPQFile::exists(*it) )
     {
       LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
       continue;
@@ -776,7 +776,7 @@ void MapView::tick( float t, float dt )
 			// rotating objects
 			if( look )
 			{
-				float * lTarget; 
+				float * lTarget = NULL; 
 				bool lModify = false;
 				
 				if( Selection->type == eEntry_Model )
@@ -1282,10 +1282,10 @@ void MapView::displayViewMode_3D( float t, float dt )
 						//s << j << ", " << lSelection->data.model->model->textures[j] << " - " << video.textures.items[lSelection->data.model->model->textures[j]]->name.c_str() << endl;WHY DID THIS CRASH!!!
 						//freetype::shprint( arial16, 15, 183 + 20 * j, "%d - %s", j, video.textures.items[lSelection->data.model->model->textures[j]]->name.c_str( ) );
 					}
-					mainGui->guidetailInfos->setText(s.str().c_str() );
+					mainGui->guidetailInfos->setText(s.str() );
 				break;
 				case eEntry_WMO:
-					s << lSelection->data.wmo->wmo->filename.c_str( ) << std::endl;
+					s << lSelection->data.wmo->wmo->filename << std::endl;
 					//freetype::shprint( arial16, 5, 63, lSelection->data.wmo->wmo->filename.c_str( ) );
 					s << "UniqueID: " << lSelection->data.wmo->id << std::endl;
 					//freetype::shprint( arial16, 10, 83, "UniqueID: %d", lSelection->data.wmo->id );
@@ -1312,7 +1312,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 					s << "Doodads set: " << lSelection->data.wmo->doodadset << std::endl;
 					//freetype::shprint( arial16, 10, 143, "Doodads set: %d", lSelection->data.wmo->doodadset );
 
-					mainGui->guidetailInfos->setText(s.str().c_str() );
+					mainGui->guidetailInfos->setText( s.str() );
 
 					break;
 				case eEntry_MapChunk:

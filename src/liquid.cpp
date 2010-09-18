@@ -593,7 +593,7 @@ void Liquid::draw()
 }
 
 template<int pFirst, int pLast>
-void Liquid::initTextures( std::string pFilename )
+void Liquid::initTextures( const std::string& pFilename )
 {
 	char buf[1024];
 	for( int i = pFirst; i <= pLast; i++ ) 

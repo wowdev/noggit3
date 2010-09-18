@@ -72,10 +72,7 @@ void LoadTextureNames()
 	if( textureNames.size() != 0 )
 		return;
 
-	char	Temp[512];
-	char	*T2;
 	std::string	tString;
-	FILE *fid;
 
 	bool tilesetsfound = false;
 	for( std::list<std::string>::iterator it = gListfile.begin(); it != gListfile.end(); ++it )
@@ -132,9 +129,6 @@ inline bool TextureInPalette( std::string pFName )
 	if( pFName.find( "tileset" ) == std::string::npos )
 		return false;
 
-	bool result = true;
-	bool lApplied = false;
-
 	int i = 0;
 	if( gActiveFilenameFilters.size( ) )
 	{
@@ -170,7 +164,7 @@ std::vector<GLuint>::iterator getPage( int pPage )
 	if( pPage == 0 )
 		return gTexturesInList.begin( );
 
-	int lOnePageSize = pal_cols * pal_rows;
+	unsigned int lOnePageSize = pal_cols * pal_rows;
 
 	if( gTexturesInList.size( ) < pPage * lOnePageSize )
 		return gTexturesInList.begin( );
@@ -326,7 +320,7 @@ void LoadTileset(frame *button,int id)
 	for(i=textureNames.begin();i!=textureNames.end();i++)
 	{
 		if(checkTileset(i->c_str())==id)
-			video.textures.add(i->c_str());
+			video.textures.add(*i);
 	}
 	updateTextures();
 }
@@ -349,7 +343,7 @@ frame *CreateTilesetLoader()
 		"Tileset Loading" );
 	windowTilesetLoader->movable=true;
 
-	for( int i = 0; i < tilesetNames.size(); i++ )
+	for( unsigned int i = 0; i < tilesetNames.size(); i++ )
 	{
 		name = new buttonUI(
 			5.0f + 152.0f * ( i / columns ),
@@ -359,7 +353,7 @@ frame *CreateTilesetLoader()
 			video.textures.add( "Interface\\Buttons\\UI-DialogBox-Button-Up.blp" ),
 			video.textures.add( "Interface\\Buttons\\UI-DialogBox-Button-Down.blp" )
 		);
-		name->setText( tilesetNames[i].c_str() );
+		name->setText( tilesetNames[i] );
 		name->setClickFunc( LoadTileset, i );
 		windowTilesetLoader->addChild( name );
 	}
@@ -428,9 +422,7 @@ void clickFileFilterTexture(bool value,int id)
 frame *CreateTextureFilter()
 {	
 	InitFilenameFilterList( );
-
-	checkboxUI		*check;
-	textUI			*text;
+  
 	LoadTextureNames( );
 	windowTextureFilter = new closeWindowUI( video.xres / 2.0f - 308.0f, video.yres / 2.0f - 314.5f, 616.0f, 630.0f, "Texture Filtering" );
 	windowTextureFilter->movable = true;
@@ -447,7 +439,7 @@ frame *CreateTextureFilter()
 	//Tileset Filters
 	windowTextureFilter->addChild( new textUI( 308.0f, 254.0f, "Tileset Filters", &arial14, eJustifyCenter ) );
 
-	for( int i = 0; i < tilesetNames.size(); i++ )
+	for( unsigned int i = 0; i < tilesetNames.size(); i++ )
 		windowTextureFilter->addChild( new checkboxUI( 5.0f + 152.0f * ( i / 12 ), 267.0f + 30.0f * ( i % 12 ), tilesetNames[i], clickFilterTexture, i ) );
 
 	return windowTextureFilter;
@@ -592,11 +584,11 @@ void setChunkWindow(MapChunk *chunk)
 	sprintf(Temp,"EffectID- %d",chunk->effectID[pl]);
 	chunkTextureEffectID[pl]->setText(Temp);
 
-	chunkTexture[pl]->setTexture(video.textures.add(video.textures.items[chunk->textures[pl]]->name.c_str()));
+	chunkTexture[pl]->setTexture(video.textures.add(video.textures.items[chunk->textures[pl]]->name));
 
-	chunkTextureNames[pl]->setText(video.textures.items[chunk->textures[pl]]->name.c_str());
+	chunkTextureNames[pl]->setText(video.textures.items[chunk->textures[pl]]->name);
 	}
-	for(pl;pl<4;pl++)
+	for(;pl<4;pl++)
 	{
 		chunkTexture[pl]->hidden=true;
 	    chunkTextureNames[pl]->hidden=true;

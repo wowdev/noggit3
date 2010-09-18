@@ -8,29 +8,11 @@
 #include <set>
 #include <vector>
 
-struct FileTreeItem {
-	std::string fn;
-	int col;
-
-
-	/// Comparison
-	bool operator<(const FileTreeItem &i) const {
-		return fn < i.fn;
-	}
-
-	bool operator>(const FileTreeItem &i) const {
-		return fn < i.fn;
-	}
-};
-
-bool MPQFileExists( const std::string filename );
-
 class MPQArchive
 {
-	//MPQHANDLE handle;
 	HANDLE mpq_a;
 public:
-	MPQArchive(std::string filename, bool doListfile = false );
+	MPQArchive(const std::string& filename, bool doListfile = false );
 	~MPQArchive();
 
 	void close();
@@ -39,7 +21,6 @@ public:
 
 class MPQFile
 {
-	//MPQHANDLE handle;
 	bool eof;
 	unsigned char *buffer;
 	size_t pointer, size;
@@ -53,8 +34,8 @@ class MPQFile
 
 public:
 	MPQFile():eof(false),buffer(0),pointer(0),size(0) {}
-	MPQFile(std::string filename);	// filenames are not case sensitive
-	void openFile(const char* filename);
+	MPQFile(const std::string& filename);	// filenames are not case sensitive
+	void openFile(const std::string& filename);
 	~MPQFile();
 	size_t read(void* dest, size_t bytes);
 	size_t getSize();
@@ -78,11 +59,11 @@ public:
 	
 	void SaveFile();
 	
-	static bool exists(const char* filename);
-	static int getSize(const char* filename); // Used to do a quick check to see if a file is corrupted
+	static bool exists( const std::string& filename );
+	static int getSize( const std::string& filename ); // Used to do a quick check to see if a file is corrupted
 };
 
-inline void flipcc(char *fcc)
+/*inline void flipcc(char *fcc)
 {
 	char t;
 	t=fcc[0];
@@ -91,9 +72,9 @@ inline void flipcc(char *fcc)
 	t=fcc[1];
 	fcc[1]=fcc[2];
 	fcc[2]=t;
-}
+}*/
 
-inline bool defaultFilterFunc(std::string) { return true; }
+inline bool defaultFilterFunc(const std::string&) { return true; }
 
 #endif
 

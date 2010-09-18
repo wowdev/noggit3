@@ -1,6 +1,6 @@
 #include "textUI.h"
 
-textUI::textUI( float pX, float pY, std::string pText, freetype::font_data *pFont, int pJustify ) : background( false )
+textUI::textUI( float pX, float pY, const std::string& pText, freetype::font_data *pFont, int pJustify ) : background( false )
 {
 	x = pX;
 	y = pY;
@@ -23,7 +23,7 @@ textUI::textUI( float pX, float pY, freetype::font_data *pFont, int pJustify ) :
 }
 
 
-void textUI::setText( std::string pText )
+void textUI::setText( const std::string& pText )
 {
 	mText = pText;
 	twidth = freetype::width( *font, mText.c_str( ) );

@@ -49,6 +49,6 @@ extern Video video;
 
 //GLuint loadTGA(const char *filename, bool mipmaps);
 bool isExtensionSupported(const char *search);
-void CheckForGLError( std::string pLocation );
+void CheckForGLError( const std::string& pLocation );
 
 #endif

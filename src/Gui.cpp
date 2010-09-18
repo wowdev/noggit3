@@ -17,4 +17,4 @@ Gui::Gui()
 	this->guiappInfo = new appInfo( 1.0f, video.yres - 440.0f, 420.0f, 410.0f, this );
 	this->guiappInfo->movable = true;
 	this->guiappInfo->hidden = true;
-};
+}

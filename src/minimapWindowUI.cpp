@@ -5,6 +5,6 @@
 #include "textUI.h"
 
 
-minimapWindowUI::minimapWindowUI( float px, float py, float w, float h ) : window( px, py, w, h )
+minimapWindowUI::minimapWindowUI( float px, float py ) : window( px, py, 790, 790 )
 {
 }

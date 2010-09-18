@@ -22,7 +22,7 @@ public:
 	// current active texture
 	textureUI *current_texture;
 	Toolbar(float x, float y, float width, float height, Gui *setGui);
-	void SetIcon( int pIcon, std::string pIconFile );
+	void SetIcon( int pIcon, const std::string& pIconFile );
 	void IconSelect(int i);
 };
 #endif

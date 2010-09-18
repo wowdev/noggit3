@@ -55,16 +55,27 @@ void startTimer();
 void stopTimer();
 int stopTimer2();
 
-MapTile::MapTile(int x0, int z0, const std::string& filename, bool bigAlpha) : mFilename(filename), x(x0), z(z0)
+MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha ) : mFilename( pFilename )
 {
-	xbase = x0 * TILESIZE;
-	zbase = z0 * TILESIZE;
+  mPositionX = pX;
+  mPositionZ = pZ;
   
-  mBigAlpha = bigAlpha;
+	xbase = mPositionX * TILESIZE;
+	zbase = mPositionZ * TILESIZE;
+
+  mBigAlpha = pBigAlpha;
+  
+  for( int i = 0; i < 16; i++ )
+  {
+    for( int j = 0; j < 16; j++ )
+    {
+      mChunks[i][j] = NULL;
+    }
+  }
 
 	MPQFile theFile( mFilename );
 
-  Log << "Opening tile " << x0 << ", " << z0 << " (\"" << mFilename << "\") from " << (theFile.isExternal( ) ? "disk" : "MPQ") << "." << std::endl;
+  Log << "Opening tile " << mPositionX << ", " << mPositionZ << " (\"" << mFilename << "\") from " << (theFile.isExternal( ) ? "disk" : "MPQ") << "." << std::endl;
   
   // - Parsing the file itself. --------------------------
   
@@ -420,29 +431,55 @@ MapTile::MapTile(int x0, int z0, const std::string& filename, bool bigAlpha) : m
 	theFile.close( );
   
 	// - Really done. --------------------------------------
+  
+	LogDebug << "Done loading tile " << mPositionX << "," << mPositionZ << "." << std::endl;
 }
 
-MapTile::~MapTile()
+MapTile::~MapTile( )
 {
-	LogDebug << "Unloading tile " << x << "," << z << "." << std::endl;
+	LogDebug << "Unloading tile " << mPositionX << "," << mPositionZ << "." << std::endl;
 
-  for (int j=0; j<16; j++) {
-    for (int i=0; i<16; i++) {
-      delete mChunks[j][i];
+  if( mChunks )
+  {
+    for( int j = 0; j < 16; j++ ) 
+    {
+      for( int i = 0; i < 16; i++ ) 
+      {
+        if( mChunks[j][i] )
+        {
+          delete mChunks[j][i];
+          mChunks[j][i] = NULL;
+        }
+      }
     }
   }
 
-	for (std::vector<std::string>::iterator it = mTextureFilenames.begin(); it != mTextureFilenames.end(); ++it) {
-    video.textures.delbyname(*it);
+	for( std::vector<std::string>::iterator it = mTextureFilenames.begin( ); it != mTextureFilenames.end( ); it++ )
+  {
+    video.textures.delbyname( *it );
 	}
 
-	for (std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); ++it) {
-		gWorld->wmomanager.delbyname(*it);
+	for( std::vector<std::string>::iterator it = mWMOFilenames.begin( ); it != mWMOFilenames.end( ); it++ ) 
+  {
+		gWorld->wmomanager.delbyname( *it );
 	}
 
-	for (std::vector<std::string>::iterator it = mModelFilenames.begin(); it != mModelFilenames.end(); ++it) {
-		gWorld->modelmanager.delbyname(*it);
+	for( std::vector<std::string>::iterator it = mModelFilenames.begin( ); it != mModelFilenames.end( ); it++ ) 
+  {
+		gWorld->modelmanager.delbyname( *it );
 	}
+  
+  for( std::vector<Liquid*>::iterator it = mLiquids.begin( ); it != mLiquids.end( ); it++ )
+  {
+    delete &(*it);
+  }
+  
+  mLiquids.clear();
+}
+
+bool MapTile::isTile( int pX, int pZ )
+{
+  return pX == mPositionX && pZ == mPositionZ;
 }
 
 float MapTile::getMaxHeight()
@@ -455,7 +492,7 @@ float MapTile::getMaxHeight()
   return maxHeight;
 }
 
-extern float groundBrushRadius;
+//extern float groundBrushRadius;
 
 void MapTile::draw()
 {
@@ -529,9 +566,6 @@ void MapTile::drawMFBO()
 	glEnd();
 }
 
-
-void enableWaterShader();
-
 void MapTile::drawWater()
 {
 	glDisable(GL_COLOR_MATERIAL);
@@ -570,6 +604,16 @@ MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )
 	assert( x < 16 && z < 16 );
 	return mChunks[z][x];
 }
+
+bool MapTile::GetVertex( float x, float z, Vec3D *V )
+{
+	int xcol = int( ( x - xbase ) / CHUNKSIZE );
+	int ycol = int( ( z - zbase ) / CHUNKSIZE );
+	
+	return xcol >= 0 && xcol <= 15 && ycol >= 0 && ycol <= 15 && mChunks[ycol][xcol]->GetVertex( x, z, V );
+}
+
+/// --- Only saving related below this line. --------------------------
 
 char roundc( float a )
 {
@@ -960,7 +1004,7 @@ void MapTile::saveTile( )
       //    10000
       //  1000000
       
-      int lNewUID = lID + this->x * 1000000 + this->z * 10000 + 1 * 1000;
+      int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 1 * 1000;
 
 			lMDDF_Data[lID].nameID = lMyFilenameThingey->second[0];
 			lMDDF_Data[lID].uniqueID = lNewUID;
@@ -1006,7 +1050,7 @@ void MapTile::saveTile( )
       //    10000
       //  1000000
       
-      int lNewUID = lID + this->x * 1000000 + this->z * 10000 + 2 * 1000;
+      int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 2 * 1000;
 
 			lMODF_Data[lID].nameID = lMyFilenameThingey->second[0];
 			lMODF_Data[lID].uniqueID = lNewUID;
@@ -1394,12 +1438,4 @@ void MapTile::saveTile( )
 	f.setBuffer( lADTFile.GetPointer<uint8_t>( ), lADTFile.mSize );
 	f.SaveFile( );
 	f.close( );
-}
-
-bool MapTile::GetVertex( float x, float z, Vec3D *V )
-{
-	int xcol = int( ( x - xbase ) / CHUNKSIZE );
-	int ycol = int( ( z - zbase ) / CHUNKSIZE );
-	
-	return xcol >= 0 && xcol <= 15 && ycol >= 0 && ycol <= 15 && mChunks[ycol][xcol]->GetVertex( x, z, V );
 }

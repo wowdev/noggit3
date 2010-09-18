@@ -7,7 +7,7 @@
 class DBCFile
 {
 public:
-	DBCFile(const std::string &filename);
+	DBCFile(const std::string& filename);
 	~DBCFile();
 
 	// Open database. It must be openened before it can be used.
@@ -17,11 +17,11 @@ public:
 	class Exception
 	{
 	public:
-		Exception(const std::string &pmessage): message(pmessage)
+		Exception(const std::string& pmessage): message(pmessage)
 		{ }
 		virtual ~Exception()
 		{ }
-		const std::string &getMessage() {return message;}
+		const std::string& getMessage() {return message;}
 	private:
 		std::string message;
 	};

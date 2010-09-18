@@ -15,6 +15,6 @@ private:
 
 public:
 	detailInfos( float x, float y, float width, float height, Gui *setGui );
-	void setText( std::string t );
+	void setText( const std::string& t );
 };
 #endif
