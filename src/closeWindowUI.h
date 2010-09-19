@@ -6,7 +6,7 @@
 class closeWindowUI : public window
 {
 public:
-	closeWindowUI( float x, float y, float w, float h, const std::string& pTitle );
+	closeWindowUI( float x, float y, float w, float h, const std::string& pTitle, bool pMoveable = false );
 };
 
 #endif
