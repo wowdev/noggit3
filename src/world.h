@@ -95,7 +95,7 @@ public:
 
 	GLuint minimap;
 
-	World(const char* name);
+	World( const std::string& name);
 	~World();
 	void init();
 	void initMinimap();

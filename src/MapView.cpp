@@ -264,21 +264,18 @@ void PasteSelectedObject( frame *button, int id )
 	if( gWorld->HasSelection( ) )
 	{	
 		nameEntry lClipboard = Environment::getInstance( )->get_clipboard( );
-		if( lClipboard.returnName( ) )
-		{
-			switch( gWorld->GetCurrentSelection( )->type )
-			{
-			case eEntry_Model:
-				pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.model->pos );
-				break;
-			case eEntry_WMO:
-				pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.wmo->pos);
-				break;
-			case eEntry_MapChunk:
-				pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.mapchunk->GetSelectionPosition( ) );
-				break;
-			}
-		}
+    switch( gWorld->GetCurrentSelection( )->type )
+    {
+    case eEntry_Model:
+      pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.model->pos );
+      break;
+    case eEntry_WMO:
+      pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.wmo->pos);
+      break;
+    case eEntry_MapChunk:
+      pWorld->addModel( lClipboard, gWorld->GetCurrentSelection( )->data.mapchunk->GetSelectionPosition( ) );
+      break;
+    }
 	}
 }
 
@@ -860,7 +857,7 @@ void MapView::tick( float t, float dt )
 							if( textureBrush.needUpdate( ) )
 								textureBrush.GenerateTexture( );
 							
-							if( !world->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), video.textures.add( selectedTexture->name.c_str( ) ) ) )
+							if( !world->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), video.textures.add( selectedTexture->name ) ) )
 								LogError << "paintTexture failed ._. " << std::endl;
 						}
 						
@@ -921,7 +918,7 @@ void MapView::tick( float t, float dt )
 					if( textureBrush.needUpdate( ) )
 						textureBrush.GenerateTexture( );
 					
-					world->paintTexture( mX, mY, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), video.textures.add( selectedTexture->name.c_str( ) ) );
+					world->paintTexture( mX, mY, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), video.textures.add( selectedTexture->name ) );
 				}
 			}
 
@@ -1265,7 +1262,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 				case eEntry_Model:
             s << "TYPE: " << lSelection->type << std::endl;
 					s << "NAME: " << lSelection->returnName()<< std::endl;
-					s << "FILENAME: " << lSelection->data.model->model->filename.c_str( ) << std::endl;
+					s << "FILENAME: " << lSelection->data.model->model->filename << std::endl;
 
 					s << "UID-D1: " << lSelection->data.model->d1 << std::endl;
 //					s << "modelID: " << lSelection->data.model->modelID << std::endl;
@@ -1288,14 +1285,14 @@ void MapView::displayViewMode_3D( float t, float dt )
 
 					for( unsigned int j = 0; j < lSelection->data.model->model->header.nTextures; j++ )
 					{
-						//s << j << ", " << lSelection->data.model->model->textures[j] << " - " << video.textures.items[lSelection->data.model->model->textures[j]]->name.c_str() << endl;WHY DID THIS CRASH!!!
-						//freetype::shprint( arial16, 15, 183 + 20 * j, "%d - %s", j, video.textures.items[lSelection->data.model->model->textures[j]]->name.c_str( ) );
+						//s << j << ", " << lSelection->data.model->model->textures[j] << " - " << video.textures.items[lSelection->data.model->model->textures[j]]->name << endl;WHY DID THIS CRASH!!!
+						//freetype::shprint( arial16, 15, 183 + 20 * j, "%d - %s", j, video.textures.items[lSelection->data.model->model->textures[j]]->name );
 					}
 					mainGui->guidetailInfos->setText(s.str() );
 				break;
 				case eEntry_WMO:
 					s << lSelection->data.wmo->wmo->filename << std::endl;
-					//freetype::shprint( arial16, 5, 63, lSelection->data.wmo->wmo->filename.c_str( ) );
+					//freetype::shprint( arial16, 5, 63, lSelection->data.wmo->wmo->filename );
 					s << "UniqueID: " << lSelection->data.wmo->id << std::endl;
 					//freetype::shprint( arial16, 10, 83, "UniqueID: %d", lSelection->data.wmo->id );
 					s <<  "Pos: (" <<  lSelection->data.wmo->pos.x << "," << lSelection->data.wmo->pos.y << "," << lSelection->data.wmo->pos.z << ")" << std::endl;					
@@ -1309,13 +1306,13 @@ void MapView::displayViewMode_3D( float t, float dt )
 					{
 						if( j < 25 )
 						{
-							//s << j << " - " << lSelection->data.wmo->wmo->textures[j].c_str( ) << endl; WHY DID THIS CRASH!!!
-							//freetype::shprint( arial16, 15, 163 + 20 * j, "%d - %s", j, lSelection->data.wmo->wmo->textures[j].c_str( ) );
+							//s << j << " - " << lSelection->data.wmo->wmo->textures[j] << endl; WHY DID THIS CRASH!!!
+							//freetype::shprint( arial16, 15, 163 + 20 * j, "%d - %s", j, lSelection->data.wmo->wmo->textures[j] );
 						}
 						else if( j < 50 )
 						{
-							//s << j << " - " << lSelection->data.wmo->wmo->textures[j].c_str( ) << endl; WHY DID THIS CRASH!!!
-							//freetype::shprint( arial16, ( video.xres - 15 ) / 2, 163 + 20 * (j-25), "%d - %s", j, lSelection->data.wmo->wmo->textures[j].c_str( ) );
+							//s << j << " - " << lSelection->data.wmo->wmo->textures[j] << endl; WHY DID THIS CRASH!!!
+							//freetype::shprint( arial16, ( video.xres - 15 ) / 2, 163 + 20 * (j-25), "%d - %s", j, lSelection->data.wmo->wmo->textures[j] );
 						}
 					}
 					s << "Doodads set: " << lSelection->data.wmo->doodadset << std::endl;
@@ -1368,8 +1365,8 @@ void MapView::displayViewMode_3D( float t, float dt )
 					TextOffset += 20;
 					for( int q = 0; q < lSelection->data.mapchunk->nTextures; q++ )
 					{
-						//s << q << "- " << video.textures.items[lSelection->data.mapchunk->textures[q]]->name.c_str() << "  Flags - " << lSelection->data.mapchunk->texFlags[q] << " Effect ID - " << lSelection->data.mapchunk->effectID[q] << endl; WHY DID THIS CRASH!!!
-						//freetype::shprint( arial16, 20, 103 + TextOffset, "%d - %s  Flags - %x Effect ID - %d", q, video.textures.items[lSelection->data.mapchunk->textures[q]]->name.c_str(), lSelection->data.mapchunk->texFlags[q], lSelection->data.mapchunk->effectID[q] );
+						//s << q << "- " << video.textures.items[lSelection->data.mapchunk->textures[q]]->name << "  Flags - " << lSelection->data.mapchunk->texFlags[q] << " Effect ID - " << lSelection->data.mapchunk->effectID[q] << endl; WHY DID THIS CRASH!!!
+						//freetype::shprint( arial16, 20, 103 + TextOffset, "%d - %s  Flags - %x Effect ID - %d", q, video.textures.items[lSelection->data.mapchunk->textures[q]]->name, lSelection->data.mapchunk->texFlags[q], lSelection->data.mapchunk->effectID[q] );
 						TextOffset += 20;
 						if( lSelection->data.mapchunk->effectID[q] != 0 )
 							for( int r = 0; r < 4; r++ )

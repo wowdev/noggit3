@@ -46,7 +46,7 @@ bool IsEditableWorld( int pMapId )
 		return false;
 	}
 
-	MPQFile mf( ssfilename.str( ).c_str( ) );
+	MPQFile mf( ssfilename.str( ) );
 
 	//sometimes, wdts don't open, so ignore them...
 	if(mf.isEof())
@@ -69,12 +69,12 @@ bool IsEditableWorld( int pMapId )
 	return false;
 }
 
-World::World( const char* name ) : basename( name ), mCurrentSelection( 0 )
+World::World( const std::string& name ) : basename( name ), mCurrentSelection( 0 )
 {
 	mMapId = 0xFFFFFFFF;
 	for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
 	{
-		if( !strcmp( name, i->getString( MapDB::InternalName ) ) )
+		if( name == std::string( i->getString( MapDB::InternalName ) ) )
 		{
 			mMapId = i->getUInt( MapDB::MapID );
 			break;

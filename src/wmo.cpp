@@ -39,11 +39,6 @@ WMO::WMO(const std::string& name): ManagedItem(name)
 		return;
 	}
 
-	/*if(!f.isExternal())
-		gLog("    Loading WMO from MPQ %s\n", name.c_str());
-	else
-		gLog("    Loading WMO from File %s\n", name.c_str());
-	*/
 	uint32_t fourcc;
 	uint32_t size;
 	float ff[3];
@@ -99,15 +94,6 @@ WMO::WMO(const std::string& name): ManagedItem(name)
 
 				m->tex = video.textures.add(texpath);
 				textures.push_back(texpath);
-
-				/*
-				// material logging
-				gLog("Material %d:\t%d\t%d\t%d\t%X\t%d\t%X\t%d\t%f\t%f",
-					i, m->flags, m->d1, m->transparent, m->col1, m->d3, m->col2, m->d4, m->f1, m->f2);
-				for (int j=0; j<5; j++) gLog("\t%d", m->dx[j]);
-				gLog("\t - %s\n", texpath.c_str());
-				*/
-				
 			}
 		}
 		else if ( fourcc == 'MOGN' ) {
@@ -707,6 +693,8 @@ void WMOGroup::initDisplayList()
 	short *useLights = 0;
 	int nLR = 0;
 
+  
+  //! \todo do this the std:: way. also: fixed sizes. arggh.
 	// open group file
 	char temp[256];
 	strcpy(temp, wmo->name.c_str());
@@ -798,28 +786,6 @@ void WMOGroup::initDisplayList()
 		else if ( fourcc == 'MOBA' ) {
 			nBatches = (int)size / 24;
 			batches = (WMOBatch*)gf.getPointer();
-			
-			/*
-			// batch logging
-			gLog("\nWMO group #%d - %s\nVertices: %d\nTriangles: %d\nIndices: %d\nBatches: %d\n",
-				this->num, this->name.c_str(), nVertices, nTriangles, nTriangles*3, nBatches);
-			WMOBatch *ba = batches;
-			for (int i=0; i<nBatches; i++) {
-				gLog("Batch %d:\t", i);
-				
-				for (int j=0; j<12; j++) {
-					if ((j%4)==0 && j!=0) gLog("| ");
-					gLog("%d\t", ba[i].bytes[j]);
-				}
-				
-				gLog("| %d\t%d\t| %d\t%d\t", ba[i].indexStart, ba[i].indexCount, ba[i].vertexStart, ba[i].vertexEnd);
-				gLog("%d\t%d\t%s\n", ba[i].flags, ba[i].texture, wmo->textures[ba[i].texture].c_str());
-
-			}
-			int l = nBatches-1;
-			gLog("Max index: %d\n", ba[l].indexStart + ba[l].indexCount);
-			*/
-			
 		}
 		else if ( fourcc == 'MOCV' ) {
 			//gLog("CV: %d\n", size);
@@ -1209,7 +1175,6 @@ int WMOManager::add(const std::string& name)
 	if (names.find(name) != names.end()) {
 		id = names[name];
 		items[id]->addref();
-		//gLog("Loading WMO %s [already loaded]\n",name.c_str());
 		return id;
 	}
 

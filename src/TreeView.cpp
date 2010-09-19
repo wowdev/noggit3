@@ -32,7 +32,7 @@ TreeView::TreeView( float pX, float pY, Directory * pDirectory, TreeView * pPare
 	mSelectFunction = pSelectFunction;
 
 	mMyButton = new TreeViewButton( 0, 0, this );
-	mMyText = new textUI( 13, 0, mMyDir->mName.c_str( ), &arial12, eJustifyLeft );
+	mMyText = new textUI( 13, 0, mMyDir->mName, &arial12, eJustifyLeft );
 
 	float lY = 13.0f;
 

@@ -79,7 +79,7 @@ void buttonUI::setLeft( )
 
 void buttonUI::setText( const std::string& pText )
 {
-	text->setText( pText.c_str( ) );
+	text->setText( pText );
 }
 
 void buttonUI::setFont( freetype::font_data *font )

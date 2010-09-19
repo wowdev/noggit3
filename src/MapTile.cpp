@@ -320,7 +320,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 									dbg.append( "\n" );
 								}
 
-								gLog( "%s\n", dbg.c_str());
+								LogDebug << dbg << std::endl;
 							}
 							else*/
 							{
@@ -389,7 +389,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
      {
      std::string lTemp = lTexture;
      lTemp.insert( lTemp.length( ) - 4, "_s" );
-     if( MPQFileExists( lTemp.c_str( ) ) )
+     if( MPQFile::exists( lTemp ) )
      lTexture = lTemp;
      }
      */
