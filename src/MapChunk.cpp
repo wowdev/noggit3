@@ -1326,6 +1326,8 @@ Vec3D MapChunk::GetSelectionPosition( )
 
 void MapChunk::recalcNorms()
 {
+  //! \todo This seems to be bad. Try clicking once in a Blizzard map and you will see a difference
+  
 	Vec3D P1,P2,P3,P4;
 	Vec3D Norm,N1,N2,N3,N4,D;
 
@@ -1647,7 +1649,7 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 	dist=sqrt(xdiff*xdiff+zdiff*zdiff);
 
 	if(dist>(radius+MAPCHUNK_RADIUS))
-		return true;
+		return false;
 
 	//First Lets find out do we have the texture already
 	for(int i=0;i<nTextures;i++)
@@ -1656,7 +1658,10 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 
 
 	if((texLevel==-1)&&(nTextures==4))
+  {
+    LogDebug << "paintTexture: No free texture slot" << std::endl;
 		return false;
+  }
 	
 	//Only 1 layer and its that layer
 	if((texLevel!=-1)&&(nTextures==1))
@@ -1692,7 +1697,10 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 				if(texLevel==0)
 					return true;
 				if(texLevel==-1)
-					return false;
+        {
+          LogDebug << "paintTexture: Unable to add texture." << std::endl;
+          return false;
+        }
 			}
 			
 			target=strength;
@@ -1713,7 +1721,10 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 	}
 
 	if( texLevel == -1 )
+  {
+    LogDebug << "Somehow no texture got painted." << std::endl;
 		return false;
+  }
 	
 	for( int j = texLevel; j < nTextures - 1; j++ )
 	{

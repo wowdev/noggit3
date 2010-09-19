@@ -175,9 +175,7 @@ void World::init()
 			theFile.read( &mTiles[j][i].flags, 4 );
       theFile.seekRelative( 4 );
       mTiles[j][i].tile = NULL;
-      printf("%i ", mTiles[j][i].flags);
 		}
-    printf("\n");
 	}
 	
 	if( !theFile.isEof() )
@@ -1564,13 +1562,13 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
   {
     for( int i = newX - 1; i < newX + 1; i++ )
     {
-      if( tileLoaded( i, j ) )
+      if( tileLoaded( j, i ) )
       {
         for( int ty = 0; ty < 16; ty++ )
         {
           for( int tx = 0; tx < 16; tx++ )
           {
-            succ = succ || mTiles[j][i].tile->getChunk(ty,tx)->paintTexture(x, z, Brush, strength, pressure, texture);
+            succ = mTiles[j][i].tile->getChunk(ty,tx)->paintTexture(x, z, Brush, strength, pressure, texture) || succ;
           }
         }
       }
@@ -1588,7 +1586,7 @@ void World::eraseTextures(float x, float z)
   {
     for( int i = newX - 1; i < newX + 1; i++ )
     {
-      if( tileLoaded( i, j ) )
+      if( tileLoaded( j, i ) )
       {
         for( int ty = 0; ty < 16; ty++ )
         {
@@ -1615,7 +1613,7 @@ void World::addHole( float x, float z )
   {
     for( int i = newX - 1; i < newX + 1; i++ )
     {
-      if( tileLoaded( i, j ) )
+      if( tileLoaded( j, i ) )
       {
         for( int ty = 0; ty < 16; ty++ )
         {
@@ -1644,7 +1642,7 @@ void World::removeHole( float x, float z )
   {
     for( int i = newX - 1; i < newX + 1; i++ )
     {
-      if( tileLoaded( i, j ) )
+      if( tileLoaded( j, i ) )
       {
         for( int ty = 0; ty < 16; ty++ )
         {
