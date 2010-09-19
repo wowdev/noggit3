@@ -389,6 +389,7 @@ int startNoggit( int argc, char *argv[] )
 	gGoto.mapid = -1;
 	gGoto.mapname = "NONE";
 
+  //! \todo Did anyone ever use this? We may want to get it out again.
 	if( gowto != -1 )
 	{
 		if( argc <= gowto )

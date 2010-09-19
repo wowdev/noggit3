@@ -10,23 +10,9 @@
 #ifndef ERRORHANDLING_H_
 #define ERRORHANDLING_H_
 
-#ifndef WIN32
-
-#include <execinfo.h>
 #include <signal.h>
 
-void leave( int sig );
-void RegisterErrorHandlers( );
-
-void RegisterErrorHandlers( )
-{
-    (void) signal( SIGABRT, leave );
-    (void) signal( SIGFPE, leave );
-    (void) signal( SIGILL, leave );
-    (void) signal( SIGINT, leave );
-    (void) signal( SIGSEGV, leave );
-    (void) signal( SIGTERM, leave );
-}
+void printStacktrace( );
 
 void leave(int sig)
 {
@@ -38,8 +24,8 @@ void leave(int sig)
 	signal(SIGSEGV, SIG_DFL);
 	signal(SIGTERM, SIG_DFL);
 	
-	char * description = 0;
-	char * sign = 0;
+	const char* description = NULL;
+	const char* sign = NULL;
 	
 	switch(sig)
 	{
@@ -74,12 +60,33 @@ void leave(int sig)
 	}
 	
 	printf("\n\n"
-		   "There was an exception of type \"%s\".\n"
-		   "\"%s\".\n\n"
-		   "Please excuse the inconvenience. You may want to report this error including the log.\n\n",
-		   sign,
-		   description );
+         "There was an exception of type \"%s\".\n"
+         "\"%s\".\n"
+         "Please excuse the inconvenience. You may want to report this error including the log to the developers.\n",
+         sign,
+         description );
 	
+	printStacktrace();
+	
+	exit(sig);
+}
+
+void RegisterErrorHandlers( )
+{
+  (void) signal( SIGABRT, leave );
+  (void) signal( SIGFPE, leave );
+  (void) signal( SIGILL, leave );
+  (void) signal( SIGINT, leave );
+  (void) signal( SIGSEGV, leave );
+  (void) signal( SIGTERM, leave );
+}
+
+#ifndef WIN32
+
+#include <execinfo.h>
+
+void printStacktrace( )
+{	
 	static const int nframes = 20;
 	
 	void *array[nframes];
@@ -98,15 +105,18 @@ void leave(int sig)
 	printf("\n");
 	
 	free (strings);
-	
-	exit(sig);
 }
 
 #else
 
-void RegisterErrorHandlers()
-{
-	//! \todo Add error handling for windows.
+void printStacktrace( )
+{	
+  /*!
+   \todo This is not compiling, yes. This is on purpose. You need to add windows specific code here.
+   The function CaptureStackBackTrace (see http://msdn.microsoft.com/en-us/library/bb204633(VS.85).aspx ) should help here.
+  */
+	
+  "compiler error" = true = "because you need to implement this. read the comment above.";
 }
 
 #endif
