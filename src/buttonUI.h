@@ -22,6 +22,7 @@ public:
 	buttonUI( float x, float y, float width, float height, const std::string& pText, GLuint tex, GLuint texd );
 	buttonUI( float x, float y, float width, float height, const std::string& pTexNormal, const std::string& pTexDown );
 	buttonUI( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
+	buttonUI( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, void (*pFunc)( frame *, int ), int pFuncParam );
 	void render( );
 
 	void setLeft( );

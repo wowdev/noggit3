@@ -57,6 +57,20 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pTe
 	text = new textUI( w / 2.0f, 2.0f, pText, &arial12, eJustifyCenter );
 }
 
+buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, void (*pFunc)( frame *, int ), int pFuncParam )
+{
+	x = pX;
+	y = pY;
+	width = w;
+	height = h;
+	texture = video.textures.add( pTexNormal );
+	textureDown = video.textures.add( pTexDown );
+	clickFunc = pFunc;
+	id = pFuncParam;
+	clicked = false;
+	text = new textUI( w / 2.0f, 2.0f, pText, &arial12, eJustifyCenter );
+}
+
 void buttonUI::setLeft( )
 {
 	text->setJustify( eJustifyLeft );

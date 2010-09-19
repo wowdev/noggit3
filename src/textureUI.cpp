@@ -21,6 +21,11 @@ void textureUI::setTexture( GLuint tex )
 	texture = tex;
 }
 
+void textureUI::setTexture( const std::string& tex )
+{
+	texture = video.textures.add( tex );
+}
+
 void textureUI::render( )
 {
 	glColor3f( 1.0f, 1.0f, 1.0f );
