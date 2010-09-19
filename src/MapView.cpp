@@ -673,7 +673,11 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 
 MapView::~MapView( )
 {
-	delete world;
+  if( world )
+  {
+    delete world;
+    world = NULL;
+  }
 }
 
 void MapView::tick( float t, float dt )

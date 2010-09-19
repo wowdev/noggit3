@@ -260,18 +260,16 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 		WMOHighlight( Vec4D( 0.1f, 0.1f, 0.1f, 0.1f ) );
 	}
 
-	for (unsigned int i=0; i<nGroups; i++) {
-		groups[i].draw(ofs, rot);
-	}
-
-	if (gWorld->drawdoodads) {
-		for (unsigned int i=0; i<nGroups; i++) {
+	for (unsigned int i=0; i<nGroups; i++) 
+  {
+    groups[i].draw(ofs, rot);
+      
+    if ( gWorld->drawdoodads)
+    {
 			groups[i].drawDoodads(doodadset, ofs, rot);
-		}
-	}
-
-	for (unsigned int i=0; i<nGroups; i++) {
-		groups[i].drawLiquid();
+    }
+		
+    groups[i].drawLiquid();
 	}
 
 	if(highlight && false)
@@ -517,15 +515,11 @@ void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot)
 {
   for (unsigned int i=0; i<nGroups; i++) {
 		groups[i].draw(ofs, rot);
-	}
-
-	if (gWorld->drawdoodads) {
-		for (unsigned int i=0; i<nGroups; i++) {
+    
+    if (gWorld->drawdoodads) {
 			groups[i].drawDoodadsSelect(doodadset, ofs, rot);
 		}
-	}
-
-	for (unsigned int i=0; i<nGroups; i++) {
+    
 		groups[i].drawLiquid();
 	}
 }
@@ -1053,9 +1047,6 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot)
 			//glCallList(dl_light);
 		}
 	}
-
-
-
 }
 
 void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float rot)
@@ -1078,7 +1069,6 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float
 	glColor4f(1,1,1,1);
 	for (int i=0; i<nDoodads; i++) {
 		short dd = ddr[i];
-		doodadset = 0;		//! \todo  this somehow crashes sometimes without this fix.
 		if( ! ( wmo->doodadsets.size() < doodadset ) )
 			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {
 
@@ -1119,7 +1109,6 @@ void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const
 	glColor4f(1,1,1,1);
 	for (int i=0; i<nDoodads; i++) {
 		short dd = ddr[i];
-		doodadset = 0;		//! \todo  this somehow crashes sometimes without this fix.
 		if( ! ( wmo->doodadsets.size() < doodadset ) )
 			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {
 
