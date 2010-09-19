@@ -122,9 +122,9 @@ void Liquid::initGeometry(MPQFile &f)
 	// draw tiles
 	for (int j=0; j<ytiles; j++) {
 		for (int i=0; i<xtiles; i++) {
-			unsigned char f = flags[j*xtiles+i];
-			if ((f&8)==0) {
-				tmpflag = f;
+			unsigned char flag = flags[j*xtiles+i];
+			if ((flag&8)==0) {
+				tmpflag = flag;
 				// 15 seems to be "don't draw"
 				size_t p = j*(xtiles+1)+i;
 

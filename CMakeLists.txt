@@ -72,6 +72,22 @@ IF( NOGGIT_LOGTOCONSOLE )
   ADD_DEFINITIONS( -DDEBUG__LOGGINGTOCONSOLE )
 ENDIF( NOGGIT_LOGTOCONSOLE )
 
+OPTION( ALL_WARNINGS   "Enable all warnings?" OFF )
+
+IF( ALL_WARNINGS )
+  MESSAGE( STATUS "Spilling out mass warnings." )
+  IF( WIN32 )
+    ADD_DEFINITIONS( /W4 /Wall /Wp64 )
+  ELSE( WIN32 )
+    ADD_DEFINITIONS( -W -Wall -Wshadow )
+  ENDIF( WIN32 )
+ENDIF( ALL_WARNINGS )
+
+# No console window shown on launch.
+if ( WIN32 )
+  SET_TARGET_PROPERTIES( noggit PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS" )
+endif()
+
 # And do the job.
 INCLUDE_DIRECTORIES( ${IncludeDirectories} )
 ADD_EXECUTABLE( noggit ${HeaderFiles} ${SourceFiles} )

@@ -19,20 +19,20 @@ public:
     \param t The absolute running time.
     \param dt The time difference since the last call.
   */
-  virtual void tick(float t, float dt) {};
+  virtual void tick(float t, float dt) { };
   
   /*!
     \brief This method gets called every tick to do display your AppState. It will be called right after tick().
     \param t The absolute running time.
     \param dt The time difference since the last call.
   */
-  virtual void display(float t, float dt) {};
+  virtual void display(float t, float dt) { };
 
   /*!
     \brief This method gets called upon mouse movement.
     \param e The event given by SDL containing information about the mouse motion.
   */
-  virtual void mousemove(SDL_MouseMotionEvent *e) {};
+  virtual void mousemove(SDL_MouseMotionEvent *e) { };
   
   /*!
    \brief This method gets called upon a mouse click.

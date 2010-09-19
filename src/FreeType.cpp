@@ -6,7 +6,7 @@
 
 
 //Include our header file.
-#include "freetype.h"
+#include "FreeType.h"
 #include "mpq.h"
 #include "Log.h"
 
@@ -124,8 +124,8 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 	//the x and y variables, then when we draw the
 	//quad, we will only reference the parts of the texture
 	//that we contain the character itself.
-	float	x=((float)bitmap.width+1) / (float)width,
-			y=((float)bitmap.rows+1) / (float)height;
+	//float	x=((float)bitmap.width+1) / (float)width,
+	//		y=((float)bitmap.rows+1) / (float)height;
 
 	//Here we draw the texturemaped quads.
 	//The bitmap that we got from FreeType was not 
@@ -156,11 +156,11 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 
 
 
-void font_data::init(const char * fname, unsigned int h) {
+void font_data::init(const char * fname, unsigned int _h) {
 	//Allocate some memory to store the texture ids.
 	textures = new GLuint[128];
 
-	this->h=h;
+	this->h=_h;
 
 	//Create and initilize a freetype font library.
 	FT_Library library;
@@ -187,7 +187,7 @@ void font_data::init(const char * fname, unsigned int h) {
 	//in terms of 1/64ths of pixels.  Thus, to make a font
 	//h pixels high, we need to request a size of h*64.
 	//(h << 6 is just a prettier way of writting h*64)
-	FT_Set_Char_Size( face, h << 6, h << 6, 72, 72);
+	FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72);
 
 	//Here we ask opengl to allocate resources for
 	//all the textures and displays lists which we
@@ -207,11 +207,11 @@ void font_data::init(const char * fname, unsigned int h) {
 	FT_Done_FreeType(library);
 }
 
-void font_data::initMPQ(const char * fname, unsigned int h) {
+void font_data::initMPQ(const char * fname, unsigned int _h) {
 	//Allocate some memory to store the texture ids.
 	textures = new GLuint[128];
 
-	this->h=h;
+	this->h=_h;
 
 	//Create and initilize a freetype font library.
 	FT_Library library;
@@ -242,7 +242,7 @@ void font_data::initMPQ(const char * fname, unsigned int h) {
 	//in terms of 1/64ths of pixels.  Thus, to make a font
 	//h pixels high, we need to request a size of h*64.
 	//(h << 6 is just a prettier way of writting h*64)
-	FT_Set_Char_Size( face, h << 6, h << 6, 72, 72);
+	FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72);
 
 	//Here we ask opengl to allocate resources for
 	//all the textures and displays lists which we
@@ -325,7 +325,7 @@ void print(const font_data &ft_font, float x, float y, const char *fmt, ...)  {
 	const char *start_line=text;
 	vector<string> lines;
 	const char *c=text;
-	for(c;*c;c++) {
+	for(;*c;c++) {
 		if(*c=='\n') {
 			string line;
 			for(const char *n=start_line;n<c;n++) line.append(1,*n);
@@ -359,7 +359,7 @@ void print(const font_data &ft_font, float x, float y, const char *fmt, ...)  {
 	//down by h. This is because when each character is
 	//draw it modifies the current matrix so that the next character
 	//will be drawn immediatly after it.  
-	for(int i=0;i<lines.size();i++) {
+	for(unsigned int i=0;i<lines.size();i++) {
 		glPushMatrix();
 		//glLoadIdentity();
 		glTranslatef(x,y+h*i,0);
@@ -431,8 +431,8 @@ void shprinty(const font_data &ft_font, float x, float y, const char *fmt, ...) 
 
 int width(const font_data &ft_font, const char *fmt, ...)  
 {
-	GLuint font=ft_font.list_base;
-	float h=ft_font.h/.63f;						//We make the height about 1.5* that of
+	//GLuint font=ft_font.list_base;
+	//float h=ft_font.h/.63f;						//We make the height about 1.5* that of
 	
 	char		text[256];								// Holds Our String
 	va_list		ap;										// Pointer To List Of Arguments
@@ -456,7 +456,7 @@ int width(const font_data &ft_font, const char *fmt, ...)
 	const char *start_line=text;
 	vector<string> lines;
 	const char *c=text;
-	for(c;*c;c++) {
+	for(;*c;c++) {
 		if(*c=='\n') {
 			string line;
 			for(const char *n=start_line;n<c;n++) line.append(1,*n);
@@ -473,11 +473,11 @@ int width(const font_data &ft_font, const char *fmt, ...)
 
 	int maxWidth=0;
 	
-	for(int i=0;i<lines.size();i++)
+	for(unsigned int i=0;i<lines.size();i++)
 	{
 		int	curWidth=0;
-		for(int j=0;j<lines[i].size();j++)
-			curWidth+=ft_font.charWidths[lines[i].c_str()[j]];
+		for(unsigned int j=0;j<lines[i].size();j++)
+			curWidth+=ft_font.charWidths[size_t(lines[i].c_str()[j])];
 		if(curWidth>maxWidth)
 			maxWidth=curWidth;
 	}

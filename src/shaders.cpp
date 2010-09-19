@@ -22,7 +22,7 @@ BLSShader::BLSShader( const std::string& pFilename )
 	buffer = new char[length];
 	lShader.read( buffer, length );	
 
-	for( ; buffer[length] <= 0; length-- );
+	for( ; buffer[length] <= 0; length-- ) { }
 
 	lShader.seek( 0x1C );
 	buffer = new char[length];
@@ -54,10 +54,10 @@ BLSShader::BLSShader( const std::string& pFilename )
 			stringy = glGetString(GL_PROGRAM_ERROR_STRING_ARB);			//This is only available in ARB
 			if( stringy )
 				LogError << "\t\"" << reinterpret_cast<const char*>( stringy ) << "\"" << std::endl;
-				
-			int j = 0;
+      
+      int j = 0;
 			char localbuffer[256];
-			for( int i = errorPos, j = 0; i < length && j < 128 ; i++, j++ )
+			for( int i = errorPos; i < length && j < 128 ; i++, j++ )
 			{
 				localbuffer[j] = buffer[i];
 			}
@@ -95,7 +95,7 @@ void reloadShaders()
 	waterShaders[0] = new ShaderPair(0, "shaders/wateroutdoor.fs", true);
 }
 
-Shader::Shader(GLenum target, const char *program, bool fromFile):id(0),target(target)
+Shader::Shader(GLenum _target, const char *program, bool fromFile):id(0),target(_target)
 {
 	if (!program || !strlen(program)) {
 		ok = true;

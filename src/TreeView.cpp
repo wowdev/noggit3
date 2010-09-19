@@ -3,7 +3,7 @@
 #include "TreeView.h"
 #include "video.h"
 
-TreeViewButton::TreeViewButton( float x, float y, TreeView* pTreeView ) : buttonUI(  x, y, 12.0f, 12.0f, 
+TreeViewButton::TreeViewButton( float _x, float _y, TreeView* pTreeView ) : buttonUI(  _x, _y, 12.0f, 12.0f, 
 	video.textures.add( "Interface\\Buttons\\UI-PlusButton-Up.blp" ),
 	video.textures.add( "Interface\\Buttons\\UI-PlusButton-Down.blp" ) )
 {

@@ -3,7 +3,7 @@
 #include "wmo.h" // WMO
 #include "world.h" // gWorld
 
-WMOInstance::WMOInstance( WMO *wmo, MPQFile &f ) : wmo (wmo)
+WMOInstance::WMOInstance( WMO *_wmo, MPQFile &f ) : wmo (_wmo)
 {
 	nameID = 0xFFFFFFFF;
 
@@ -22,7 +22,7 @@ WMOInstance::WMOInstance( WMO *wmo, MPQFile &f ) : wmo (wmo)
 	wmoID = id;
 }
 
-WMOInstance::WMOInstance( WMO *wmo, ENTRY_MODF *d ) : wmo (wmo)
+WMOInstance::WMOInstance( WMO *_wmo, ENTRY_MODF *d ) : wmo (_wmo)
 {
 	nameID = 0xFFFFFFFF;
 
@@ -38,7 +38,7 @@ WMOInstance::WMOInstance( WMO *wmo, ENTRY_MODF *d ) : wmo (wmo)
 	mUnknown = d->unknown;
 }
 
-WMOInstance::WMOInstance(WMO *wmo) : wmo (wmo)
+WMOInstance::WMOInstance(WMO *_wmo) : wmo (_wmo)
 {
 	nameID = 0xFFFFFFFF;
 }

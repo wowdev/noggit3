@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include "appstate.h"
-#include "freetype.h"
+#include "FreeType.h"
 
 //! \todo this really needs to be refactored into a singleton class
 
