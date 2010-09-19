@@ -423,7 +423,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 				if (flags & 8) lq.append(" ocean");
 				if (flags & 16) lq.append(" magma");
 				if (flags & 32) lq.append(" slime?");
-				gLog("LQ%s (base:%f)\n", lq.c_str(), waterlevel);
+				LogDebug << "LQ" << lq << " (base:" << waterlevel << ")" << std::endl;
 				*/
 
 			}

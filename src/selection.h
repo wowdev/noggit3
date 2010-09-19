@@ -42,7 +42,7 @@ public:
 	nameEntry( MapChunk *chunk );
 	nameEntry( );
 	
-	const char *returnName( );
+	const std::string& returnName( );
 };
 
 /**

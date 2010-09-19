@@ -61,11 +61,6 @@ void Model::finishLoading()
   
   animated = isAnimated( f ) || forceAnim;  // isAnimated will set animGeometry and animTextures
   
-  /*if(!f.isExternal())
-   gLog("    Loading model from MPQ %s%s\n", name.c_str(), animated ? " (animated)" : "");
-   else
-   gLog("    Loading model from File %s%s\n", name.c_str(), animated ? " (animated)" : "");
-   */
   trans = 1.0f;
   
   vbuf = nbuf = tbuf = 0;

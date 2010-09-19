@@ -174,7 +174,7 @@ int startUnittests()
 		// load the hardcoded mpqs
 		std::string path = wowpath;
 		path.append( "Data/" ).append( archiveNames[i] );
-		archives.push_back( new MPQArchive( path.c_str( ) ) );
+		archives.push_back( new MPQArchive( path ) );
 	}
 
 		Log << "Archives added" << std::endl;

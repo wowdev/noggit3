@@ -245,7 +245,7 @@ void Liquid::initGeometry(MPQFile &f)
 			//sprintf(buf, "%4d,%4d ", ival[0],ival[1]);slq.append(buf);
 			sprintf(buf, "%08x ", ival);slq.append(buf);
 		}
-		gLog("%s\n", slq.c_str());
+		LogDebug << slq << std::endl;
 	}
 	slq = "";
 	for (int i=0; i<ytiles*xtiles; i++) {
@@ -256,8 +256,8 @@ void Liquid::initGeometry(MPQFile &f)
 		} else sprintf(buf, "%3d ", bval);
 		slq.append(buf);
 		if ( ((i+1)%xtiles) == 0 ) slq.append("\n");
-	}
-	gLog("%s",slq.c_str());
+   }
+   LogDebug << slq << std::endl;
 	*/
 }
 

@@ -23,7 +23,7 @@ extern Directory * gFileList;
 /*TreeView * tv;
 void TVSelectFunction( const std::string& pFile )
 {
-	gLog( "Selected: %s\n", pFile.c_str() );
+	LogDebug << "Selected: " << pFile << std::endl;
 }*/
 
 extern std::list<std::string> gListfile;
@@ -105,7 +105,7 @@ Menu::Menu( ) : bg(0)
 					if( gGoto.mapid != -1 )
 						gGoto.mapname = gMapDB.getByID( gGoto.mapid ).getString( MapDB::InternalName );
 
-					world = new World( gGoto.mapname.c_str( ) );
+					world = new World( gGoto.mapname );
 					world->camera = Vec3D( gGoto.x, gGoto.y, gGoto.z );
 					cmd = CMD_LOAD_WORLD;
 					gGoto.mapid = -1;
@@ -540,7 +540,7 @@ void Menu::mouseclick( SDL_MouseButtonEvent *e )
 			{
 				if( world != 0 ) 
 					delete world;
-				world = new World( maps[i].name.c_str( ) );
+				world = new World( maps[i].name );
 				return;
 			}
 		}
@@ -566,7 +566,7 @@ void Menu::mouseclick( SDL_MouseButtonEvent *e )
 					ah = bookmarks[i].ah;
 					av = bookmarks[i].av;
 
-					world = new World( bookmarks[i].basename.c_str( ) );
+					world = new World( bookmarks[i].basename );
 					world->camera = bookmarks[i].pos;
 
 					cx = int(bookmarks[i].pos.x / TILESIZE);
@@ -610,7 +610,7 @@ void Menu::loadMap( int mid )
 			{
 				if( world != 0 ) 
 					delete world;
-				world = new World( maps[i].name.c_str( ) );
+				world = new World( maps[i].name );
 			}
 		}
 	}
@@ -634,7 +634,7 @@ void Menu::loadBookmark( int mid )
 					ah = bookmarks[i].ah;
 					av = bookmarks[i].av;
 
-					world = new World( bookmarks[i].basename.c_str( ) );
+					world = new World( bookmarks[i].basename );
 					world->camera = bookmarks[i].pos;
 
 					cx = int(bookmarks[i].pos.x / TILESIZE);

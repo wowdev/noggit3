@@ -44,9 +44,9 @@ nameEntry::nameEntry( )
 	Name = "Fake";
 }
 
-const char *nameEntry::returnName( )
+const std::string& nameEntry::returnName( )
 {
-	return Name.c_str( );
+	return Name;
 }
 
 /**

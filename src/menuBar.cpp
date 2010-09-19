@@ -102,7 +102,7 @@ frame *menuBar::processLeftClick(float mx,float my)
 
 MenuButton::MenuButton( MenuPane * pPane, float pX, float pY, const std::string& pText ) : buttonUI( pX, pY, 95.0f, 27.0f, video.textures.add( "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp" ), video.textures.add( "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" ) )
 {
-	this->setText( pText.c_str( ) );
+	this->setText( pText );
 	mPane = pPane;
 }
 
@@ -116,7 +116,7 @@ frame* MenuButton::processLeftClick( float pX, float pY )
 
 MenuItem::MenuItem( MenuPane * pParent, float pX, float pY, float pHeight, const std::string& pText, const std::string& pNormal, const std::string& pDown ) : buttonUI( pX, pY, 170.0f, 30.0f, video.textures.add( pNormal), video.textures.add( pDown ) )
 {
-	this->setText( pText.c_str( ) );
+	this->setText( pText );
 	this->height = pHeight;
 	this->setLeft( );
 
@@ -142,7 +142,7 @@ frame* MenuItemButton::processLeftClick( float pX, float pY )
 MenuItemToggle::MenuItemToggle( MenuPane * pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert ) : 
 	MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
 {
-	this->setText( pText.c_str( ) );
+	this->setText( pText );
 	this->setLeft( );
 
 	mMyCheckbox = new checkboxUI( 147.0f, -1.0f, "" );
@@ -205,7 +205,7 @@ void MenuItemToggle::render( )
 MenuItemSwitch::MenuItemSwitch( MenuPane * pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert ) : 
 	MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
 {
-	this->setText( pText.c_str( ) );
+	this->setText( pText );
 	this->setLeft( );
 
 	mMyState = pMyState;
@@ -255,7 +255,7 @@ void MenuItemSwitch::render( )
 MenuItemSet::MenuItemSet( MenuPane * pParent, float pX, float pY, const std::string& pText, int * pMyState, int pSet ) : 
 	MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
 {
-	this->setText( pText.c_str( ) );
+	this->setText( pText );
 	this->setLeft( );
 
 	mMyState = pMyState;
@@ -305,7 +305,7 @@ void MenuItemSet::render( )
 MenuItemSeperator::MenuItemSeperator( MenuPane * pParent, float pX, float pY, const std::string& pText ) : 
 	MenuItem( pParent, pX, pY, 20.0f, pText, "Interface\\BUTTONS\\UI-SliderBar-Background.blp", "Interface\\BUTTONS\\UI-SliderBar-Background.blp" )
 {
-	this->setText( pText.c_str( ) );
+	this->setText( pText );
 }
 
 frame* MenuItemSeperator::processLeftClick( float pX, float pY )
