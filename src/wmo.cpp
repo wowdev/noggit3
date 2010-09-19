@@ -30,12 +30,12 @@ void WMOUnhighlight( )
 	glDepthMask( GL_TRUE );
 }
 
-WMO::WMO(const std::string& name): ManagedItem(name)
+WMO::WMO(const std::string& _name): ManagedItem(_name)
 {
-	filename = name;
-	MPQFile f(name);
+	filename = _name;
+	MPQFile f(filename);
 	if (f.isEof()) {
-		LogError << "Error loading WMO \"" << name << "\"." << std::endl;
+		LogError << "Error loading WMO \"" << filename << "\"." << std::endl;
 		return;
 	}
 
@@ -617,10 +617,10 @@ void WMOLight::setupOnce(GLint light, Vec3D dir, Vec3D lcol)
 
 
 
-void WMOGroup::init(WMO *wmo, MPQFile &f, int num, char *names)
+void WMOGroup::init(WMO *_wmo, MPQFile &f, int _num, char *names)
 {
-	this->wmo = wmo;
-	this->num = num;
+	this->wmo = _wmo;
+	this->num = _num;
 
 	// extract group info from f
 	f.read(&flags,4);

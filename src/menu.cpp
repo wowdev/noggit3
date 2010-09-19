@@ -37,6 +37,8 @@ Menu::Menu( ) : bg(0)
 	world = 0;
 
 	mt = 0;
+  
+  mMapView = NULL;
 
 	setpos = true;
 	ah = -90.0f;
@@ -75,7 +77,7 @@ Menu::Menu( ) : bg(0)
 	guiStatusbar = new statusBar( 0.0f, video.yres - 30.0f, video.xres, 30.0f );
 	guiFrame.addChild(guiStatusbar);
 
-	int x = 5, y = 74, size;
+	int x = 5, y = 74, fontsize;
 
 	for( int type = 0; type < 3; type++ )
 	{
@@ -125,18 +127,18 @@ Menu::Menu( ) : bg(0)
 
 			if( e.name == "Azeroth" || e.name == "Kalimdor" || e.name == "Expansion01" || e.name == "Northrend" ) 
 			{
-				size = 24;
+				fontsize = 24;
 				e.font = arial24;
 			}
 			else
 			{
-				size = 16;
+				fontsize = 16;
 				e.font = arial16;
 			}
-			y += size;
+			y += fontsize;
 
 			e.x1 = e.x0 + freetype::width( e.font, e.name.c_str( ) );
-			e.y1 = e.y0 + size;
+			e.y1 = e.y0 + fontsize;
 
 			
 			if (e.AreaType==0) mbar->GetMenu( "Continent" )->AddMenuItemSet(e.name,&newsel,e.mid);
@@ -168,10 +170,15 @@ Menu::Menu( ) : bg(0)
 
 Menu::~Menu()
 {
+  if( mMapView )
+  {
+    delete mMapView;
+    mMapView = NULL;
+  }
 	if( bg )
 	{
 		delete bg;
-		bg = 0;
+		bg = NULL;
 	}
 }
 
@@ -237,8 +244,8 @@ void Menu::tick( float t, float dt )
 			if( !world->mHasAGlobalWMO )
 			{
 
-				float fx = ( x / 12.0f );
-				float fz = ( y / 12.0f );
+				float fx = ( click_x / 12.0f );
+				float fz = ( click_y / 12.0f );
 
 				cx = int( fx );
 				cz = int( fz );
@@ -267,9 +274,9 @@ void Menu::tick( float t, float dt )
 
 		world->enterTile( cx, cz );
 		
-		MapView *t = new MapView( world, ah, av );
+		mMapView = new MapView( world, ah, av );
 
-		gStates.push_back( t );
+		gStates.push_back( mMapView );
 
 		sel = -1;
 		world = 0;
@@ -521,8 +528,8 @@ void Menu::mouseclick( SDL_MouseButtonEvent *e )
 		/// We are about entering a world
 		if( sel != -1 && world != 0 && ( e->y < 768+minimap_y ) && (e->y > minimap_y) && (e->x < 768+minimap_x) && ( e->x > minimap_x ) ) 
 		{
-			x = e->x - minimap_x;
-			y = e->y - minimap_y;
+			click_x = e->x - minimap_x;
+			click_y = e->y - minimap_y;
 			cmd = CMD_LOAD_WORLD;
 			return;
 		}
@@ -608,7 +615,7 @@ void Menu::loadMap( int mid )
 			sel = i;
 			if( sel != osel ) 
 			{
-				if( world != 0 ) 
+				if( world )
 					delete world;
 				world = new World( maps[i].name );
 			}

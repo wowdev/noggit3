@@ -1226,8 +1226,8 @@ void MapTile::saveTile( )
 
 				// MCRF
 //				{
-					std::vector<int> lDoodads;
-					std::vector<int> lObjects;
+					std::list<int> lDoodadIDs;
+					std::list<int> lObjectIDs;
 					
 					Vec3D lChunkExtents[2];
 					lChunkExtents[0] = Vec3D( mChunks[y][x]->xbase, 0.0f, mChunks[y][x]->zbase );
@@ -1239,7 +1239,7 @@ void MapTile::saveTile( )
 					{
 						//! \todo  This requires the extents already being calculated. See above.
 						if( checkInside( lChunkExtents, it->second.extents ) )
-							lObjects.push_back( lID );
+							lObjectIDs.push_back( lID );
 						lID++;
 					}
 
@@ -1263,31 +1263,31 @@ void MapTile::saveTile( )
 
 						if(dist - radius <= ((sqrt2 / 2.0f) * CHUNKSIZE))
 						{
-							lDoodads.push_back(lID);
+							lDoodadIDs.push_back(lID);
 						}
 	
 						lID++;
 					}
 
-					int lMCRF_Size = 4 * ( lDoodads.size( ) + lObjects.size( ) );
+					int lMCRF_Size = 4 * ( lDoodadIDs.size( ) + lObjectIDs.size( ) );
 					lADTFile.Extend( 8 + lMCRF_Size );
 					SetChunkHeader( lADTFile, lCurrentPosition, 'MCRF', lMCRF_Size );
 
 					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsRefs = lCurrentPosition - lMCNK_Position;
-					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nDoodadRefs = lDoodads.size( );
-					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nMapObjRefs = lObjects.size( );
+					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nDoodadRefs = lDoodadIDs.size( );
+					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nMapObjRefs = lObjectIDs.size( );
 
 					// MCRF data
 					int * lReferences = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
 
 					lID = 0;
-					for( std::vector<int>::iterator it = lDoodads.begin( ); it != lDoodads.end( ); it++ )
+					for( std::list<int>::iterator it = lDoodadIDs.begin( ); it != lDoodadIDs.end( ); it++ )
 					{
 						lReferences[lID] = *it;
 						lID++;
 					}
 
-					for( std::vector<int>::iterator it = lObjects.begin( ); it != lObjects.end( ); it++ )
+					for( std::list<int>::iterator it = lObjectIDs.begin( ); it != lObjectIDs.end( ); it++ )
 					{
 						lReferences[lID] = *it;
 						lID++;

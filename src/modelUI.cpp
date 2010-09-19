@@ -80,7 +80,7 @@ void modelUI::setClickFunc(void (*f)(frame *,int), int num)
 	id=num;
 }
 
-void modelUI::setModel(Model* setModel)
+void modelUI::setModel(Model* _setModel)
 {
-	model = setModel;	
+	model = _setModel;	
 }

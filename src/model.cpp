@@ -10,9 +10,9 @@
 
 int globalTime = 0;
 
-Model::Model(const std::string& name, bool forceAnim) : ManagedItem(name), forceAnim(forceAnim)
+Model::Model(const std::string& _name, bool _forceAnim) : ManagedItem(_name), forceAnim(_forceAnim)
 {
-  filename = name;
+  filename = _name;
   
   transform( filename.begin( ), filename.end( ), filename.begin( ), ::tolower );
   size_t found = filename.rfind( ".mdx" );
@@ -551,21 +551,21 @@ void Model::initAnimated(MPQFile &f)
   animcalc = false;
 }
 
-void Model::calcBones(int anim, int time)
+void Model::calcBones(int _anim, int time)
 {
   for (size_t i=0; i<header.nBones; i++) {
     bones[i].calc = false;
   }
 
   for (size_t i=0; i<header.nBones; i++) {
-    bones[i].calcMatrix(bones, anim, time);
+    bones[i].calcMatrix(bones, _anim, time);
   }
 }
 
-void Model::animate(int anim)
+void Model::animate(int _anim)
 {
 
-  ModelAnimation &a = anims[anim];
+  ModelAnimation &a = anims[_anim];
   if (!a.Index)return;
   int t = globalTime; //(int)(gWorld->animtime / a.playSpeed);
   int tmax = a.length;
@@ -573,10 +573,10 @@ void Model::animate(int anim)
   t %= tmax;
   t += 0;
   animtime = t;
-  this->anim = anim;
+  this->anim = _anim;
 
   if (animBones) {
-    calcBones(anim, t);
+    calcBones(_anim, t);
   }
 
   if (animGeometry) {
@@ -630,7 +630,7 @@ void Model::animate(int anim)
 
   if (animTextures) {
     for (size_t i=0; i<header.nTexAnims; i++) {
-      texanims[i].calc(anim, t);
+      texanims[i].calc(_anim, t);
     }
   }
 }
@@ -1025,16 +1025,14 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
     m.translation(pivot);
     
     if (trans.used) {
-      Vec3D tr = trans.getValue(anim, time);
-      m *= Matrix::newTranslation(tr);
+      m *= Matrix::newTranslation(trans.getValue(anim, time));
     }
     if (rot.used) {
       q = rot.getValue(anim, time);
       m *= Matrix::newQuatRotate(q);
     }
     if (scale.used) {
-      Vec3D sc = scale.getValue(anim, time);
-      m *= Matrix::newScale(sc);
+      m *= Matrix::newScale(scale.getValue(anim, time));
     }
     if (billboard) {
       Matrix mtrans;

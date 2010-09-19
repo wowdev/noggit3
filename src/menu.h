@@ -11,6 +11,7 @@
 
 class World;
 class Model;
+class MapView;
 
 struct Clickable 
 {
@@ -44,7 +45,9 @@ enum Commands {
 
 class Menu : public AppState
 {
-	int sel, newsel,newbookmark, cmd, x, y, cz, cx;
+  MapView *mMapView;
+  
+	int sel, newsel,newbookmark, cmd, click_x, click_y, cz, cx;
 
 	// frame to place all gui elemnts on
 	frame guiFrame;

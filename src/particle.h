@@ -30,13 +30,13 @@ public:
 
 class PlaneParticleEmitter: public ParticleEmitter {
 public:
-	PlaneParticleEmitter(ParticleSystem *sys): ParticleEmitter(sys) {}
+	PlaneParticleEmitter(ParticleSystem *_sys): ParticleEmitter(_sys) {}
 	Particle newParticle(int anim, int time);
 };
 
 class SphereParticleEmitter: public ParticleEmitter {
 public:
-	SphereParticleEmitter(ParticleSystem *sys): ParticleEmitter(sys) {}
+	SphereParticleEmitter(ParticleSystem *_sys): ParticleEmitter(_sys) {}
 	Particle newParticle(int anim, int time);
 };
 

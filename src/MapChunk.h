@@ -18,7 +18,7 @@ class MapChunk
 	MapTile *mt;
 public:
 	Vec3D vmin, vmax, vcenter;
-	int px, py, size;
+	int px, py;
   
 	MapChunkHeader header;
 	bool Changed;

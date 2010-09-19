@@ -487,9 +487,9 @@ int startNoggit( int argc, char *argv[] )
 			char temp[10];
 			location = path.find( "{number}" );
 			path.replace( location, 8, " " );
-			for( int i = 2; i < 10; i++ )
+			for( int j = 2; j < 10; j++ )
 			{
-				sprintf( temp, "%i", i );
+				sprintf( temp, "%i", j );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
 					archives.push_back( new MPQArchive( path, true ) );
@@ -500,9 +500,9 @@ int startNoggit( int argc, char *argv[] )
 			char temp[10];
 			location = path.find( "{character}" );
 			path.replace( location, 11, " " );
-			for( char i = 'a'; i <= 'z'; i++ )
+			for( char c = 'a'; c <= 'z'; c++ )
 			{
-				sprintf( temp, "%c", i );
+				sprintf( temp, "%c", c );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
 					archives.push_back( new MPQArchive( path, true ) );

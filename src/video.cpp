@@ -68,7 +68,7 @@ void LoadGLSettings()
 
 Video video;
 
-void Video::resize(int xres, int yres)
+void Video::resize(int _xres, int _yres)
 {
 	//! \todo  Implement some minimum size.
 	//if(xres < 800.0 || yres<600.0f)
@@ -79,8 +79,8 @@ void Video::resize(int xres, int yres)
 	//	primary = SDL_SetVideoMode(xres, yres, 32, flags);
 	//}
 
-	this->xres = xres;
-	this->yres = yres;
+	this->xres = _xres;
+	this->yres = _yres;
 	this->ratio = float( xres ) / float( yres );
 	
 	// I shouldn't be changing these according to the documentation but it works
@@ -101,7 +101,7 @@ void Video::resize(int xres, int yres)
 	this->set3D( );
 }
 
-bool Video::init( int xres, int yres, bool fullscreen_ )
+bool Video::init( int _xres, int _yres, bool fullscreen_ )
 {
 	SDL_Init( SDL_INIT_TIMER | SDL_INIT_VIDEO );
 	flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
@@ -116,11 +116,11 @@ bool Video::init( int xres, int yres, bool fullscreen_ )
 	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
 #ifdef _WIN32
 	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 32 );
-	primary = SDL_SetVideoMode( xres, yres, 32, flags );
+	primary = SDL_SetVideoMode( _xres, _yres, 32, flags );
 #else
 	//nvidia dont support 32bpp on my linux :(
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	primary = SDL_SetVideoMode(xres, yres, 24, flags);
+	primary = SDL_SetVideoMode(_xres, _yres, 24, flags);
 #endif
 	if( !primary ) 
 	{
@@ -128,11 +128,11 @@ bool Video::init( int xres, int yres, bool fullscreen_ )
 		exit( 1 );
 	}
 
-	origX = xres;
-	origY = yres;
+	origX = _xres;
+	origY = _yres;
 
-	this->xres = xres;
-	this->yres = yres;
+	this->xres = _xres;
+	this->yres = _yres;
 	this->ratio = float( xres ) / float( yres );
 
 	glViewport( 0.0f, 0.0f, xres, yres );

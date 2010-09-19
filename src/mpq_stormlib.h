@@ -26,8 +26,8 @@ class MPQFile
 	size_t pointer, size;
 
 	// disable copying
-	MPQFile(const MPQFile &f) {}
-	void operator=(const MPQFile &f) {}
+	MPQFile(const MPQFile &f) { }
+	void operator=(const MPQFile &f) { }
 
 	bool External;
 	std::string fname;

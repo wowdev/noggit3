@@ -2,8 +2,8 @@
 #include "mpq.h"
 #include "Log.h"
 
-DBCFile::DBCFile(const std::string& filename):
-	filename(filename),
+DBCFile::DBCFile(const std::string& _filename):
+	filename(_filename),
 	data(0)
 {
 	
