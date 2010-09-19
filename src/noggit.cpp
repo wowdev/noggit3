@@ -699,9 +699,40 @@ int randint(int lower, int upper)
     return lower + (int)((upper+1-lower)*frand());
 }
 
+void setApplicationDirectory( const std::string& argv_0 )
+{
+  std::string fullpath = "";
+  if( argv_0.at( 0 ) == '/' || ( argv_0.at( 1 ) == ':' && argv_0.at( 2 ) == '/' ) )
+  {
+    fullpath = argv_0;
+  }
+  else
+  {
+    fullpath = std::string( getcwd( NULL, 0 ) ) + "/" + argv_0;
+  }
+  
+  fullpath = fullpath.substr( 0, fullpath.find_last_of("/\\") + 1 );
+  size_t found = fullpath.find( "/./" );
+  while( found != std::string::npos )
+  {
+    fullpath.replace( found, 3, "/" );
+    found = fullpath.find( "/./" );
+  }
+  found = fullpath.find( "/../" );
+  while( found != std::string::npos )
+  {
+    size_t pos_prev = fullpath.rfind( '/', found - 1 );
+    fullpath.replace( pos_prev, found - pos_prev + 4, "/" );
+    found = fullpath.find( "/../" );
+  }
+  
+  chdir( fullpath.c_str() );
+}
+
 int main( int argc, char *argv[] )
 {
 	RegisterErrorHandlers();
+  setApplicationDirectory( argv[0] );
 	
 	#ifdef _UNITTEST
 		// start UNITTESTS IF IN UNITTEST MODE
