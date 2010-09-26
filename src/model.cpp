@@ -30,7 +30,8 @@ Model::Model(const std::string& _name, bool _forceAnim) : ManagedItem(_name), fo
     LogError << "I can't use the model \"" << filename << "\" as I can't get its ending to .m2." << std::endl;
     return;
   }
-
+  
+  memset( &header, 0, sizeof( ModelHeader ) );
   
   textures = NULL;
   globalSequences = NULL;
@@ -44,6 +45,8 @@ Model::Model(const std::string& _name, bool _forceAnim) : ManagedItem(_name), fo
   lights = NULL;
   particleSystems = NULL;
   ribbons = NULL;
+  
+  finished = false;
 }
 
 void Model::finishLoading()
@@ -89,6 +92,8 @@ void Model::finishLoading()
     initStatic( f );
   
   f.close();
+  
+  finished = true;
 }
 
 Model::~Model()

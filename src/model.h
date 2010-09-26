@@ -191,10 +191,6 @@ public:
 
 	friend struct ModelRenderPass;
   
-  virtual bool finishedLoading()
-  {
-    return ok;
-  }
   virtual void finishLoading();
 };
 
