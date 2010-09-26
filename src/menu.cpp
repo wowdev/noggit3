@@ -579,7 +579,10 @@ void Menu::loadMap( int mid )
 			if( sel != osel ) 
 			{
 				if( world )
+        {
 					delete world;
+          world = NULL;
+        }
 				world = new World( maps[i].name );
 			}
 		}

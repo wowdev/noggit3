@@ -114,8 +114,8 @@ void Liquid::initGeometry(MPQFile &f)
 		}
 	}
 
-	mDrawList = glGenLists(1);
-	glNewList(mDrawList, GL_COMPILE);
+	mDrawList = new OpenGL::CallList();
+  mDrawList->startRecording();
 
 	//! \todo  handle light/dark liquid colors
 	glNormal3f(0, 1, 0);
@@ -225,41 +225,12 @@ void Liquid::initGeometry(MPQFile &f)
 	glEnd();
 	glEnable(GL_TEXTURE_2D);*/
 
-
-	glEndList();
-	delete[] lVertices;
-
-	/*
-	// only log .wmo
-	if (ydir > 0) return;
-	// LOGGING: debug info
-	std::string slq;
-	char buf[32];
-	for (int j=0; j<ytiles+1; j++) {
-		slq = "";
-		for (int i=0; i<xtiles+1; i++) {
-			//short ival[2];
-			unsigned int ival;
-			float fval;
-			f.read(&ival, 4);
-			f.read(&fval, 4);
-			//sprintf(buf, "%4d,%4d ", ival[0],ival[1]);slq.append(buf);
-			sprintf(buf, "%08x ", ival);slq.append(buf);
-		}
-		LogDebug << slq << std::endl;
-	}
-	slq = "";
-	for (int i=0; i<ytiles*xtiles; i++) {
-		unsigned char bval;
-		f.read(&bval,1);
-		if (bval==15) {
-            sprintf(buf,"    ");			
-		} else sprintf(buf, "%3d ", bval);
-		slq.append(buf);
-		if ( ((i+1)%xtiles) == 0 ) slq.append("\n");
-   }
-   LogDebug << slq << std::endl;
-	*/
+  mDrawList->endRecording();
+  if(lVertices)
+  {
+    delete[] lVertices;
+    lVertices = NULL;
+  }
 }
 
 void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, MH2O_Render *render )
@@ -297,8 +268,8 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 			if( render->mRender[j * info->width + i] )
 				lVertices[j * info->width + i] = Vec3D( pos.x + tilesize * i, HeightMap->mHeightValues[j][i], pos.z + ydir * tilesize * j );
 
-	mDrawList = glGenLists( 1 );
-	glNewList( mDrawList, GL_COMPILE );
+	mDrawList = new OpenGL::CallList();
+	mDrawList->startRecording();
 
 	glBegin( GL_QUADS );
 	
@@ -345,8 +316,12 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 
 	glEnd();
 
-	glEndList();
-	delete[] lVertices;
+	mDrawList->endRecording();
+  if(lVertices)
+  {
+    delete[] lVertices;
+    lVertices = NULL;
+  }
 }
 
 void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
@@ -382,9 +357,9 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	for( int j = 0; j < 9; j++ )
 		for( int i = 0; i < 9; i++ ) 
 			lVertices[j][i] = Vec3D( pos.x + tilesize * i, pTileInformation.mHeightmap[j][i], pos.z + ydir * tilesize * j );
-
-	mDrawList = glGenLists( 1 );
-	glNewList( mDrawList, GL_COMPILE );
+  
+	mDrawList = new OpenGL::CallList();
+	mDrawList->startRecording();
 
 	glBegin( GL_QUADS );
 	
@@ -419,7 +394,7 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 
 	glEnd();
 
-	glEndList();
+	mDrawList->endRecording();
 }
 
 #ifdef USEBLSFILES
@@ -590,7 +565,10 @@ void Liquid::draw()
 	glEnable(GL_TEXTURE_2D);
 
 
-    glCallList( mDrawList );
+  if( mDrawList )
+  {
+    mDrawList->render();
+  }
 
 
 	glActiveTexture(GL_TEXTURE1);
@@ -623,6 +601,11 @@ void Liquid::initTextures( const std::string& pFilename )
 
 Liquid::~Liquid()
 {
+  if( mDrawList )
+  {
+    delete mDrawList;
+    mDrawList = NULL;
+  }
 	for( size_t i=0; i<textures.size(); i++ ) 
 	{
 		TextureManager::del( textures[i] );

@@ -51,7 +51,10 @@ public:
 	void setBuffer(unsigned char *Buf, unsigned int Size)
 	{
 		if(buffer)
+    {
 			delete buffer;
+      buffer = NULL;
+    }
 		buffer=Buf;
 		size=Size;
 	};

@@ -43,7 +43,11 @@ public:
   
   static void doDelete( IDTYPE id )
   {
-    delete items[id];
+    if( items[id] )
+    {
+      delete items[id];
+      items[id] = NULL;
+    }
   }
   
   static void del( IDTYPE id )

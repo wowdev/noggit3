@@ -74,8 +74,8 @@ public:
 	Model *model;
 	float tofs;
 
-	ParticleSystem(): emitter(0) {};
-	~ParticleSystem() { delete emitter; }
+	ParticleSystem(): emitter(NULL) {};
+	~ParticleSystem() { if( emitter ) { delete emitter; emitter = NULL; } }
 
 	void init(MPQFile &f, ModelParticleEmitterDef &mta, int *globals);
 	void update(float dt);

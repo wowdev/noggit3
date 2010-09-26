@@ -43,7 +43,11 @@ void DBCFile::open()
 
 DBCFile::~DBCFile()
 {
-	delete [] data;
+  if( data )
+  {
+    delete[] data;
+    data = NULL;
+  }
 }
 
 DBCFile::Record DBCFile::getRecord(size_t id)
