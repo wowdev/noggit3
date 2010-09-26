@@ -129,20 +129,16 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	
 	assert( fourcc == 'MTEX' );
 	
-	if( size )
-	{
-		char * lBuffer = new char[size];
-		theFile.read( lBuffer, size );
-		
-		unsigned int lPosition = 0;
-		while( lPosition < size )
-		{
-			mTextureFilenames.push_back( std::string( lBuffer + lPosition ) );
-			lPosition += strlen( lBuffer + lPosition ) + 1;
-		}
-		
-		delete[] lBuffer;
-	}
+  {
+    char* lCurPos = reinterpret_cast<char*>( theFile.getPointer() );
+    char* lEnd = lCurPos + size;
+  
+    while( lCurPos < lEnd )
+    {
+      mTextureFilenames.push_back( std::string( lCurPos ) );
+      lCurPos += strlen( lCurPos ) + 1;
+    }
+  }
 	
 	// - MMDX ----------------------------------------------
 	
@@ -151,21 +147,17 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	theFile.read( &size, 4 );
 	
 	assert( fourcc == 'MMDX' );
-	
-	if( size )
-	{
-		char * lBuffer = new char[size];
-		theFile.read( lBuffer, size );
-		
-		unsigned int lPosition = 0;
-		while( lPosition < size )
-		{
-			mModelFilenames.push_back( std::string( lBuffer + lPosition ) );
-			lPosition += strlen( lBuffer + lPosition ) + 1;
-		}
-		
-		delete[] lBuffer;
-	}
+  
+  {
+    char* lCurPos = reinterpret_cast<char*>( theFile.getPointer() );
+    char* lEnd = lCurPos + size;
+    
+    while( lCurPos < lEnd )
+    {
+      mModelFilenames.push_back( std::string( lCurPos ) );
+      lCurPos += strlen( lCurPos ) + 1;
+    }
+  }
 	
 	// - MWMO ----------------------------------------------
 	
@@ -174,21 +166,17 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	theFile.read( &size, 4 );
 	
 	assert( fourcc == 'MWMO' );
-	
-	if( size )
-	{
-		char * lBuffer = new char[size];
-		theFile.read( lBuffer, size );
-		
-		unsigned int lPosition = 0;
-		while( lPosition < size )
-		{
-			mWMOFilenames.push_back( std::string( lBuffer + lPosition ) );
-			lPosition += strlen( lBuffer + lPosition ) + 1;
-		}
-		
-		delete[] lBuffer;
-	}
+  
+  {
+    char* lCurPos = reinterpret_cast<char*>( theFile.getPointer() );
+    char* lEnd = lCurPos + size;
+    
+    while( lCurPos < lEnd )
+    {
+      mWMOFilenames.push_back( std::string( lCurPos ) );
+      lCurPos += strlen( lCurPos ) + 1;
+    }
+  }
 	
 	// - MDDF ----------------------------------------------
 	
@@ -452,20 +440,27 @@ MapTile::~MapTile()
   {
     TextureManager::delbyname( *it );
 	}
+  mTextureFilenames.clear();
 
 	for( std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); it++ ) 
   {
 		WMOManager::delbyname( *it );
 	}
+  mWMOFilenames.clear();
 
 	for( std::vector<std::string>::iterator it = mModelFilenames.begin(); it != mModelFilenames.end(); it++ ) 
   {
 		ModelManager::delbyname( *it );
 	}
+  mModelFilenames.clear();
   
   for( std::vector<Liquid*>::iterator it = mLiquids.begin(); it != mLiquids.end(); it++ )
   {
-    delete &(*it);
+    if( *it )
+    {
+      delete *it;
+      *it = NULL;
+    }
   }
   
   mLiquids.clear();

@@ -474,6 +474,7 @@ int main( int argc, char *argv[] )
 			gPop = false;
 			gStates.pop_back();
 			delete as;
+      as = NULL;
 		}
     
 		frames++;

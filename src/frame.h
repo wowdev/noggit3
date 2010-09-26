@@ -37,7 +37,11 @@ public:
   {
     for(std::vector<frame*>::iterator it = children.begin(); it != children.end(); it++)
     {
-      delete *it;
+      if( *it )
+      {
+        delete *it;
+        *it = NULL;
+      }
     }
   }
 

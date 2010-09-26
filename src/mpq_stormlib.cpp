@@ -263,8 +263,11 @@ void MPQFile::seekRelative(int offset)
 
 void MPQFile::close()
 {
-	if (buffer) delete[] buffer;
-	buffer = 0;
+	if (buffer)
+  {
+    delete[] buffer;
+    buffer = NULL;
+  }
 	eof = true;
 }
 

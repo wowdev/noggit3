@@ -97,7 +97,11 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 		  0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data );
 
 	//With the texture created, we don't need to expanded data anymore
+  if( expanded_data )
+  {
     delete [] expanded_data;
+    expanded_data = NULL;
+  }
 
 	//So now we can create the display list
 	glNewList(list_base+ch,GL_COMPILE);
@@ -266,7 +270,11 @@ void font_data::initMPQ(const char * fname, unsigned int _h) {
 void font_data::clean() {
 	glDeleteLists(list_base,128);
 	glDeleteTextures(128,textures);
-	delete [] textures;
+  if( textures )
+  {
+    delete [] textures;
+    textures = NULL;
+  }
 }
 
 /// A fairly straight forward function that pushes

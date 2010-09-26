@@ -208,7 +208,11 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 	}
 
 	f.close();
-	delete[] texbuf;
+  if( texbuf )
+  {
+    delete[] texbuf;
+    texbuf = NULL;
+  }
 
 	for (unsigned int i=0; i<nGroups; i++) 
 		groups[i].initDisplayList();
@@ -218,7 +222,10 @@ WMO::~WMO()
 {
   LogDebug << "Unloading WMO \"" << name << "\"." << std::endl;
   if(groups)
+  {
     delete[] groups;
+    groups = NULL;
+  }
 
   for (std::vector<std::string>::iterator it = textures.begin(); it != textures.end(); ++it) {
     TextureManager::delbyname(*it);
@@ -228,11 +235,16 @@ WMO::~WMO()
     ModelManager::delbyname(*it);
   }
 
-  delete[] mat;
+  if( mat )
+  {
+    delete[] mat;
+    mat = NULL;
+  }
   
   if (skybox) {
     //delete skybox;
     ModelManager::del(sbid);
+    skybox = NULL;
   }
 }
 
@@ -1140,8 +1152,16 @@ WMOGroup::~WMOGroup()
 	//if (dl_light) glDeleteLists(dl_light, 1);
 	if (nBatches && lists.size()) glDeleteLists(lists[0].first, nBatches);
 
-	if (nDoodads) delete[] ddr;
-	if (lq) delete lq;
+	if (nDoodads)
+  {
+    delete[] ddr;
+    ddr = NULL;
+  }
+	if (lq)
+  {
+    delete lq;
+    lq = NULL;
+  }
 }
 
 

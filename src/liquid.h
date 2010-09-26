@@ -13,6 +13,8 @@ class Liquid;
 #include "maptile.h"
 #include "wmo.h"
 
+class OpenGL::CallList;
+
 void loadWaterShader();
 
 const float LQ_DEFAULT_TILESIZE = CHUNKSIZE / 8.0f;
@@ -56,7 +58,7 @@ class Liquid
 	bool mTransparency;
 
 	int xtiles, ytiles;
-	GLuint mDrawList;
+  OpenGL::CallList* mDrawList;
 
 	Vec3D pos;
 
@@ -85,6 +87,7 @@ public:
 		xtiles(x), ytiles(y), pos(base), tilesize(ptilesize)
 	{
 		ydir = 1.0f;
+    mDrawList = NULL;
 	}
 	~Liquid();
 	

@@ -60,7 +60,7 @@ namespace OpenGL
 
     inline void startRecording(GLuint mode = GL_COMPILE)
     {
-      glNewList(list,mode);
+      glNewList( list, mode );
     }
     inline void endRecording()
     {

@@ -618,13 +618,33 @@ World::~World()
 		}
 	}
 
-	if (minimap) glDeleteTextures(1, &minimap);
+	if (minimap)
+  {
+    glDeleteTextures(1, &minimap);
+    minimap = 0;
+  }
 
-	if (skies) delete skies;
-	if (ol) delete ol;
+	if (skies)
+  {
+    delete skies;
+    skies = NULL;
+  }
+	if (ol)
+  {
+    delete ol;
+    ol = NULL;
+  }
 
-	if (mapstrip) delete[] mapstrip;
-	if (mapstrip2) delete[] mapstrip2;
+	if (mapstrip)
+  {
+    delete[] mapstrip;
+    mapstrip = NULL;
+  }
+  if (mapstrip2)
+  {
+    delete[] mapstrip2;
+    mapstrip2 = NULL;
+  }
 
 	LogDebug << "Unloaded world \"" << basename << "\"." << std::endl;
 }
@@ -677,6 +697,7 @@ void World::reloadTile(int x, int z)
   if( tileLoaded( z, x ) )
   {
     delete mTiles[z][x].tile;
+    mTiles[z][x].tile = NULL;
     
     std::stringstream filename; 
     filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
