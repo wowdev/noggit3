@@ -3,10 +3,11 @@
 
 #include <vector>
 
-#include "video.h"
-#include "model.h"
 #include "mpq.h"
 #include "DBCFile.h"
+#include "Vec3D.h"
+
+class Model;
 
 struct SkyColor {
 	Vec3D color;

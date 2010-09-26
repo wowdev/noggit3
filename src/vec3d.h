@@ -1,7 +1,6 @@
 #ifndef VEC3D_H
 #define VEC3D_H
 
-#include <iostream>
 #include <cmath>
 
 class Vec3D {
@@ -100,12 +99,6 @@ public:
 		return r;
 	}
 
-	friend std::istream& operator>>(std::istream& in, Vec3D& v)
-	{
-		in >> v.x >> v.y >> v.z;
-		return in;
-	}
-
 	operator float*()
 	{
 		return (float*)this;
@@ -202,13 +195,6 @@ public:
 		Vec2D r(*this);
         r.normalize();
 		return r;
-	}
-
-
-	friend std::istream& operator>>(std::istream& in, Vec2D& v)
-	{
-        in >> v.x >> v.y;
-		return in;
 	}
 
 	operator float*()

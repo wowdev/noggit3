@@ -1,6 +1,9 @@
 #include "checkboxUI.h"
-#include "video.h"
-#include "noggit.h"
+//#include "video.h"
+#include "noggit.h" // arialn13
+#include "textureUI.h"
+#include "textUI.h"
+#include "ToggleGroup.h"
 
 checkboxUI::checkboxUI( float xPos, float yPos, const std::string& pText )
 {
@@ -10,9 +13,8 @@ checkboxUI::checkboxUI( float xPos, float yPos, const std::string& pText )
 	height = 30.0f;
 	checked = false;
 
-	box = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, video.textures.add("Interface\\Buttons\\UI-CheckBox-Up.blp") );
-	addChild( box );
-	check = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, video.textures.add("Interface\\Buttons\\UI-CheckBox-Check.blp") );
+	addChild( new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Up.blp" ) );
+	check = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Check.blp" );
 	check->hidden = true;
 	addChild( check );
 	text = new textUI( 32.0f, 8.0f, pText, &arialn13, eJustifyLeft );
@@ -30,9 +32,8 @@ checkboxUI::checkboxUI( float xPos, float yPos, const std::string& pText, void (
 	height = 30.0f;
 	checked = false;
 
-	box = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, video.textures.add("Interface\\Buttons\\UI-CheckBox-Up.blp") );
-	addChild( box );
-	check = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, video.textures.add("Interface\\Buttons\\UI-CheckBox-Check.blp") );
+	addChild( new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Up.blp" ) );
+	check = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Check.blp" );
 	check->hidden = true;
 	addChild( check );
 	text = new textUI( 32.0f, 8.0f, pText, &arialn13, eJustifyLeft );
@@ -51,9 +52,8 @@ checkboxUI::checkboxUI( float pX, float pY, const std::string& pText, ToggleGrou
 	height = 30.0f;
 	checked = false;
 
-	box = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, video.textures.add( "Interface\\Buttons\\UI-CheckBox-Up.blp" ) );
-	addChild( box );
-	check = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, video.textures.add( "Interface\\Buttons\\UI-CheckBox-Check.blp" ) );
+	addChild( new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Up.blp" ) );
+	check = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Check.blp" );
 	check->hidden = true;
 	addChild( check );
 	text = new textUI( 32.0f, 8.0f, pText, &arialn13, eJustifyLeft );
@@ -84,7 +84,7 @@ void checkboxUI::setState( bool c )
 	check->hidden= !checked;
 }
 
-bool checkboxUI::getState( )
+bool checkboxUI::getState()
 {
 	return checked;
 }

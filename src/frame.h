@@ -17,7 +17,7 @@ public:
 	bool clickable;
 	bool mustresize;
 
-	frame( ) : parent( 0 ), movable( false ), hidden( false ), clickable( false ), mustresize( false )
+	frame() : parent( 0 ), movable( false ), hidden( false ), clickable( false ), mustresize( false )
 	{
 		x = 0.0f;
 		y = 0.0f;
@@ -32,15 +32,23 @@ public:
 		width = w;
 		height = h;
 	}
+  
+  virtual ~frame()
+  {
+    for(std::vector<frame*>::iterator it = children.begin(); it != children.end(); it++)
+    {
+      delete *it;
+    }
+  }
 
 	void addChild( frame * );
-	virtual void render( );
+	virtual void render();
 	virtual frame *processLeftClick( float mx, float my );
 	virtual bool processLeftDrag( float mx, float my, float xChange, float yChange );
-	virtual	void processUnclick( ) { }
+	virtual	void processUnclick() { }
 	virtual bool processRightClick( float mx, float my );
 	virtual bool processKey( char key, bool shift, bool alt, bool ctrl );
-	virtual void resize( ) { }
+	virtual void resize() { }
 	void getOffset( float &xOff, float &yOff );
 
 	bool IsHit( float pX, float pY )

@@ -7,6 +7,7 @@
 #include "model.h"
 #include "world.h"
 #include "Log.h"
+#include "TextureManager.h" // TextureManager, Texture
 
 int globalTime = 0;
 
@@ -14,7 +15,7 @@ Model::Model(const std::string& _name, bool _forceAnim) : ManagedItem(_name), fo
 {
   filename = _name;
   
-  transform( filename.begin( ), filename.end( ), filename.begin( ), ::tolower );
+  transform( filename.begin(), filename.end(), filename.begin(), ::tolower );
   size_t found = filename.rfind( ".mdx" );
   if( found != std::string::npos )
     filename.replace( found, 4, ".m2" );
@@ -49,7 +50,7 @@ void Model::finishLoading()
 {
   MPQFile f( filename );
   
-  if( f.isEof( ) ) 
+  if( f.isEof() ) 
   {
     LogError << "Error loading file \"" << filename << "\". Aborting to load model." << std::endl;
     return;
@@ -57,7 +58,7 @@ void Model::finishLoading()
   
   LogDebug << "Loading model \"" << filename << "\"." << std::endl;
   
-  memcpy( &header, f.getBuffer( ), sizeof( ModelHeader ) );
+  memcpy( &header, f.getBuffer(), sizeof( ModelHeader ) );
   
   animated = isAnimated( f ) || forceAnim;  // isAnimated will set animGeometry and animTextures
   
@@ -97,8 +98,8 @@ Model::~Model()
   if (header.nTextures && textures) {
     for (size_t i=0; i<header.nTextures; i++) {
       if (textures[i]!=0) {
-        //Texture *tex = (Texture*)video.textures.items[textures[i]];
-        video.textures.del(textures[i]);
+        //Texture *tex = (Texture*)TextureManager::items[textures[i]];
+        TextureManager::del(textures[i]);
       }
     }
     delete[] textures;
@@ -271,7 +272,7 @@ void Model::initCommon(MPQFile &f)
       strncpy(texname, reinterpret_cast<char*>( f.getBuffer() ) + texdef[i].nameOfs, texdef[i].nameLen);
       texname[texdef[i].nameLen] = 0;
       std::string path( texname );
-      textures[i] = video.textures.add( path );
+      textures[i] = TextureManager::add( path );
     } 
     else 
     {
@@ -439,19 +440,19 @@ void Model::initCommon(MPQFile &f)
 
 void Model::initStatic( MPQFile &f )
 {
-  origVertices = ( ModelVertex* )( f.getBuffer( ) + header.ofsVertices );
+  origVertices = ( ModelVertex* )( f.getBuffer() + header.ofsVertices );
   
   initCommon( f );
   
   ModelDrawList = glGenLists( 1 );
   glNewList( ModelDrawList, GL_COMPILE );
     drawModel( /*false*/ );
-  glEndList( );
+  glEndList();
 
   SelectModelDrawList = glGenLists( 1 );
   glNewList( SelectModelDrawList, GL_COMPILE );
-    drawModelSelect( );
-  glEndList( );
+    drawModelSelect();
+  glEndList();
 
   // clean up vertices, indices etc
   if( vertices )
@@ -799,7 +800,7 @@ void ModelHighlight( Vec4D color )
 //  glDepthMask( GL_FALSE );
 }
 
-void ModelUnhighlight( )
+void ModelUnhighlight()
 {
   glEnable( GL_ALPHA_TEST );
    glDisable( GL_BLEND );
@@ -837,7 +838,7 @@ void Model::drawModel( /*bool unlit*/ )
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glAlphaFunc( GL_GREATER, 0.1f );
 
-  for( size_t i = 0; i < passes.size( ); i++ ) 
+  for( size_t i = 0; i < passes.size(); i++ ) 
   {
     ModelRenderPass &p = passes[i];
 
@@ -859,19 +860,19 @@ void Model::drawModel( /*bool unlit*/ )
           glTexCoord2fv( origVertices[a].texcoords );
           glVertex3fv( vertices[a] );
         }
-        glEnd( );
+        glEnd();
       }
     }
-    p.deinit( );
+    p.deinit();
   }
 }
 
 //! \todo  Make animated models selectable.
-void Model::drawModelSelect( )
+void Model::drawModelSelect()
 {
   // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
 
-  for( size_t i = 0; i < passes.size( ); i++ ) 
+  for( size_t i = 0; i < passes.size(); i++ ) 
   {
     ModelRenderPass &p = passes[i];
 
@@ -882,8 +883,8 @@ void Model::drawModelSelect( )
       uint16_t a = indices[b];
       glVertex3fv( vertices[a] );
     }
-    glEnd( );
-//    glPopName( );
+    glEnd();
+//    glPopName();
   }
 }
 
@@ -1118,10 +1119,10 @@ void Model::draw()
 
     // draw particle systems & ribbons
     for( size_t i = 0; i < header.nParticleEmitters; i++ ) 
-      particleSystems[i].draw( );
+      particleSystems[i].draw();
 
     for( size_t i = 0; i < header.nRibbonEmitters; i++ ) 
-      ribbons[i].draw( );
+      ribbons[i].draw();
 
     if( gWorld && gWorld->drawfog ) 
       glEnable( GL_FOG );
@@ -1157,36 +1158,7 @@ void Model::draw()
   }
 }*/
 
-void startTimer();
-int stopTimer2();
-
-int  modelTimes[15];
-
-void initModelTimer()
-{
-  for(int i=0;i<15;i++)
-    modelTimes[i]=0;
-}
-
-void stopModelTimer(int i)
-{
-  modelTimes[i]+=stopTimer2();
-}
-
-void reportModelTimes()
-{
-  LogDebug << "Total Model Time " << modelTimes[0] << " ms" << std::endl;
-  LogDebug << "Reload Time " << modelTimes[1] << " ms" << std::endl;
-  LogDebug << "Total Model Drawing Time " << modelTimes[2] << " ms" << std::endl;
-  LogDebug << "Calling Display Lists Time " << modelTimes[3] << " ms" << std::endl;
-  LogDebug << "Model Drawing Time " << modelTimes[4] << " ms" << std::endl;
-  LogDebug << "Particle Time " << modelTimes[6] << " ms" << std::endl;
-  LogDebug << "Ribbon Time " << modelTimes[7] << " ms" << std::endl;
-  LogDebug << "Reinit Time " << modelTimes[5] << " ms" << std::endl;
-  initModelTimer();
-}
-
-void Model::drawSelect( )
+void Model::drawSelect()
 {
   if( !animated )
     glCallList(SelectModelDrawList);
@@ -1198,14 +1170,14 @@ void Model::drawSelect( )
         animcalc = true;
       }
     
-        drawModelSelect( );
+        drawModelSelect();
     
     // effects are unfogged..?
     glDisable( GL_FOG );
 
     // draw particle systems
     for( size_t i = 0; i < header.nParticleEmitters; i++ )
-      particleSystems[i].draw( );
+      particleSystems[i].draw();
     
     // draw ribbons
     for( size_t i = 0; i < header.nRibbonEmitters; i++ )
@@ -1236,18 +1208,23 @@ void Model::updateEmitters( float dt )
 }
 
 #include "AsyncLoader.h"
+#include "noggit.h" // gAsyncLoader
 
-int ModelManager::add( const std::string& name )
+int ModelManager::baseid = 0;
+
+MODELIDTYPE ModelManager::add( const std::string& name )
 {
   int id;
-  if( names.find( name ) != names.end( ) ) 
-  {
-    id = names[name];
-    items[id]->addref( );
-    return id;
-  }
+  std::string name_ = name;
+	std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
+	if( names.find( name_ ) != names.end() ) 
+	{
+		id = names[name_];
+		items[id]->addref();
+		return id;
+	}
 
-  id = nextID( );
+  id = nextID();
   Model *model = new Model( name );
   model->finishLoading();
   
@@ -1256,7 +1233,7 @@ int ModelManager::add( const std::string& name )
   do_add( name, id, model );
   return id;
 }
-void ModelManager::resetAnim( )
+void ModelManager::resetAnim()
 {
   for( std::map<std::string, int>::iterator it = names.begin( ); it != names.end( ); ++it )
     reinterpret_cast<Model*>( items[it->second] )->animcalc = false;

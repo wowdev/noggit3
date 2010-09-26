@@ -1,5 +1,5 @@
 #include "ToggleGroup.h"
-#include "noggit.h"
+#include "checkboxUI.h"
 
 ToggleGroup::ToggleGroup( int * pTarget )
 {
@@ -28,7 +28,7 @@ void ToggleGroup::Activate( int pID )
 {
 	std::map<int,checkboxUI*>::iterator pFrameIterator, pFrame;
 	pFrame = mFrames.find( pID );
-	if( pFrame != mFrames.end( ) )
+	if( pFrame != mFrames.end() )
 	{
 		for( pFrameIterator = mFrames.begin(); pFrameIterator != mFrames.end(); pFrameIterator++ )
 			pFrameIterator->second->setState( false );

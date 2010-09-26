@@ -1,11 +1,11 @@
 #ifndef __DETAILINFOS_H
 #define __DETAILINFOS_H
 
-class detailInfos;
-
-#include "Gui.h"
-#include "textUI.h"
 #include "window.h"
+
+class detailInfos;
+class Gui;
+class textUI;
 
 class detailInfos : public window
 {

@@ -27,7 +27,7 @@ struct MH2O_Tile
 	float mHeightmap[9][9];
 	float mDepth[9][9];
 
-	MH2O_Tile( )
+	MH2O_Tile()
 	{
 		mLiquidType = 0;
 		mFlags = 0;

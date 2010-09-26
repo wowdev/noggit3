@@ -24,20 +24,20 @@ public:
 	Vec3D ldir;
 	Vec3D lcol;
 
-	~ModelInstance( );
-	ModelInstance( );
+	~ModelInstance();
+	ModelInstance();
 	ModelInstance( Model *m );
 	ModelInstance( Model *m, MPQFile &f );
 	ModelInstance( Model *m, ENTRY_MDDF *d );
     void init2( Model *m, MPQFile &f );
-	void draw( );
-	void drawMapTile( );
-//	void drawHighlight( );
-	void drawSelect( );
+	void draw();
+	void drawMapTile();
+//	void drawHighlight();
+	void drawSelect();
 	void draw2( const Vec3D& ofs, const float rot );
 	void draw2Select( const Vec3D& ofs, const float rot );
 
-	void resetDirection( );
+	void resetDirection();
 };
 
 #endif // MODELINSTANCE_H

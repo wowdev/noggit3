@@ -1,6 +1,9 @@
 #include "statusBar.h"
 #include "video.h"
-#include "noggit.h"
+#include "noggit.h" // arial16
+
+#include "textUI.h"
+#include "TextureManager.h" // TextureManager, Texture
 
 statusBar::statusBar( float xPos, float yPos, float w, float h ) : window(xPos, yPos, w, h)
 {
@@ -15,9 +18,9 @@ statusBar::statusBar( float xPos, float yPos, float w, float h ) : window(xPos, 
 	addChild( rightInfo );
 }
 
-void statusBar::render( )
+void statusBar::render()
 {
-	glPushMatrix( );
+	glPushMatrix();
 	glTranslatef( x, y, 0.0f );
 
 	glColor4f( 0.2f, 0.2f, 0.2f, 0.8f );
@@ -26,17 +29,18 @@ void statusBar::render( )
 	glVertex2f( width, 0.0f );
 	glVertex2f( 0.0f, height );
 	glVertex2f( width, height );
-	glEnd( );
+	glEnd();
 
-	for( std::vector<frame*>::iterator child = children.begin( ); child != children.end( ); child++ )
+	for( std::vector<frame*>::iterator child = children.begin(); child != children.end(); child++ )
 		if( !( *child )->hidden )
-			( *child )->render( );
+			( *child )->render();
 
 	glColor3f( 0.7f, 0.7f, 0.7f );
-
-	glActiveTexture( GL_TEXTURE0 );
-	glBindTexture( GL_TEXTURE_2D, texture );
-	glEnable( GL_TEXTURE_2D );
+  
+  Texture::setActiveTexture();
+  Texture::enableTexture();
+  
+  texture->render();
 
 	//Draw Top Side
 	glBegin( GL_TRIANGLE_STRIP );	
@@ -48,13 +52,14 @@ void statusBar::render( )
 	glVertex2f( 0.0f, -3.0f );
 	glTexCoord2f( 0.25f, 0.0f );
 	glVertex2f( width, -3.0f );
-	glEnd( );
-
-	glDisable( GL_TEXTURE_2D );
-	glPopMatrix( );
+	glEnd();
+  
+  Texture::disableTexture();
+  
+	glPopMatrix();
 }
 
-void statusBar::resize( )
+void statusBar::resize()
 {
 	this->y = video.yres - 30.0f;
 	this->width = video.xres;

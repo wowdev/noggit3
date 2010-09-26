@@ -1,18 +1,15 @@
 #ifndef __CHECKBOXUI_H
 #define __CHECKBOXUI_H
 
-class checkboxUI;
-
-#include "video.h"
 #include "frame.h"
-#include "textureUI.h"
-#include "textUI.h"
-#include "ToggleGroup.h"
+
+class textureUI;
+class textUI;
+class ToggleGroup;
 
 class checkboxUI : public frame
 {
 protected:
-	textureUI	*box;
 	textureUI	*check;
 	textUI		*text;
 	bool		checked;

@@ -1,5 +1,11 @@
 #include "Gui.h"
 
+#include "Toolbar.h" // Toolbar
+#include "statusBar.h" // statusBar
+#include "detailInfos.h" // detailInfos
+#include "appInfo.h" // appInfo
+#include "video.h" // video
+
 Gui::Gui()
 {
 	// Toolbar

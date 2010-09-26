@@ -1,14 +1,13 @@
 #ifndef __TREEVIEW_H
 #define __TREEVIEW_H
 
-class TreeView;
-class TreeViewButton;
-
-#include "noggit.h"
-#include "video.h"
-#include "textUI.h"
+#include "frame.h"
 #include "buttonUI.h"
-#include "directory.h"
+
+class textUI;
+class Directory;
+
+class TreeViewButton;
 
 class TreeView : public frame
 {
@@ -28,17 +27,14 @@ private:
 public:
 	TreeView( float pX, float pY, Directory * pDirectory, TreeView * pParent, void (*pSelectFunction)( const std::string& ) );
 
-	void Expand( );
-	void Minimize( );
-	bool Expanded( );
-	void Toggle( );
+	void Expand();
+	void Minimize();
+	bool Expanded();
+	void Toggle();
 
 	void SetSelectFunction( void (*pSelectFunction)( const std::string& ) );
-	std::string GetDirectoryName( )
-	{
-		return mMyDir->mName;
-	}
-	TreeView * GetParent( )
+	std::string GetDirectoryName();
+	TreeView * GetParent()
 	{
 		return mParent;
 	}

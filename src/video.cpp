@@ -98,7 +98,7 @@ void Video::resize(int _xres, int _yres)
 	glViewport( 0.0f, 0.0f, xres, yres );
 
 	//! \todo  Should we really set to 3D here?
-	this->set3D( );
+	this->set3D();
 }
 
 bool Video::init( int _xres, int _yres, bool fullscreen_ )
@@ -124,7 +124,7 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
 #endif
 	if( !primary ) 
 	{
-		LogError << "SDL: " << SDL_GetError( ) << std::endl;
+		LogError << "SDL: " << SDL_GetError() << std::endl;
 		exit( 1 );
 	}
 
@@ -138,14 +138,14 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
 	glViewport( 0.0f, 0.0f, xres, yres );
 
 	//! \todo  Should we really set to 3D here?
-	this->set3D( );
+	this->set3D();
 
 	// hmmm...
 	glEnableClientState( GL_VERTEX_ARRAY );
 	glEnableClientState( GL_NORMAL_ARRAY );
 	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
-	GLenum err = glewInit( );
+	GLenum err = glewInit();
 	if( GLEW_OK != err )
 	{
 		LogError << "GLEW: " << glewGetErrorString( err ) << std::endl;
@@ -162,32 +162,32 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
 	return mSupportCompression;
 }
 
-void Video::close( )
+void Video::close()
 {
 	//Crashes if I don't do this, so prolly why they say don't change those
 	primary->w = origX;
 	primary->h = origY;
-	SDL_Quit( );
+	SDL_Quit();
 }
 
-void Video::flip( )
+void Video::flip()
 {
-	SDL_GL_SwapBuffers( );
+	SDL_GL_SwapBuffers();
 }
 
-void Video::clearScreen( )
+void Video::clearScreen()
 {
 	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
-void Video::set3D( )
+void Video::set3D()
 {
 	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity( );
+	glLoadIdentity();
 	gluPerspective( 45.0f, this->ratio, 1.0f, 1024.0f );
 	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity( );
+	glLoadIdentity();
 }
 
 void Video::set3D_select()
@@ -195,13 +195,13 @@ void Video::set3D_select()
 	glMatrixMode( GL_PROJECTION );
 	gluPerspective( 45.0f, this->ratio, 1.0f, 1024.0f );
 	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity( );
+	glLoadIdentity();
 }
 
 void Video::set2D()
 {
 	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity( );
+	glLoadIdentity();
 	glOrtho( 0.0f, xres, yres, 0.0f, -1.0f, 1.0f );
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -210,15 +210,15 @@ void Video::set2D()
 void Video::setTileMode()
 {
 	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity( );
+	glLoadIdentity();
 	glOrtho( -2.0f * this->ratio, 2.0f * this->ratio, 2.0f, -2.0f, -100.0f, 300.0f );
 	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity( );
+	glLoadIdentity();
 }
 
 void CheckForGLError( const std::string& pLocation )
 {
-	int ErrorNum = glGetError( );
+	int ErrorNum = glGetError();
 	while( ErrorNum )
 	{
 		switch( ErrorNum )
@@ -250,7 +250,7 @@ void CheckForGLError( const std::string& pLocation )
 		 		LogError << "OpenGL: (at " << pLocation << "): GL_NO_ERROR (wat?)" << std::endl;
  		}
 
-		ErrorNum = glGetError( );
+		ErrorNum = glGetError();
 	}
 }
 

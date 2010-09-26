@@ -1,15 +1,21 @@
 #include "Toolbar.h"
-#include "noggit.h"
+#include "noggit.h" // arialn13
 #include "MinimizeButton.h"
+
+#include "Gui.h"
+#include "Icon.h"
+#include "textUI.h"
+#include "textureUI.h"
+#include "TextureManager.h" // TextureManager, Texture
 
 Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window(xPos, yPos, w, h), mainGui( setGui )
 {
 	this->movable = true;
-	texture = video.textures.add("interface\\tooltips\\ui-tooltip-border.blp");
+	texture = TextureManager::newTexture( "interface\\tooltips\\ui-tooltip-border.blp" );
 
 	// set title
 	text = new textUI( 8, 7, "Raise/Lower", &arialn13, eJustifyLeft );
-	addChild( text );
+	this->addChild( text );
 
 	//close button
 	this->addChild( reinterpret_cast<frame*>( new MinimizeButton( w, this ) ) );
@@ -31,7 +37,7 @@ Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window
 
 	IconSelect( 0 );
 
-	current_texture = new textureUI( 0, 0, 92.0f, 92.0f, video.textures.add( "tileset\\generic\\black.blp" ) );
+	current_texture = new textureUI( 0, 0, 92.0f, 92.0f, "tileset\\generic\\black.blp" );
 	
 	window *texture_border = new window( 5, 280, 95.0f, 95.0f );
 	texture_border->addChild( current_texture );
@@ -42,14 +48,7 @@ Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window
 
 void Toolbar::SetIcon( int pIcon, const std::string& pIconFile )
 {
-	mToolbarIcons[pIcon] = new Icon( 
-			( pIcon % 2 ) * 50.0f + 5.0f, 
-			( pIcon / 2 ) * 50.0f + 30.0f, 
-			45.0f, 
-			45.0f, 
-			video.textures.add( pIconFile ), 
-			video.textures.add( "Interface\\BUTTONS\\CheckButtonGlow.blp" ) 
-		);
+	mToolbarIcons[pIcon] = new Icon( ( pIcon % 2 ) * 50.0f + 5.0f, ( pIcon / 2 ) * 50.0f + 30.0f, 45.0f, 45.0f, pIconFile, "Interface\\BUTTONS\\CheckButtonGlow.blp" );
 	this->addChild( mToolbarIcons[pIcon] );	
 }
 

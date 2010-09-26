@@ -16,9 +16,9 @@ bool FileExists( const std::string& filename )
 {
 	std::fstream foo;
 	foo.open( filename.c_str() );
-	if( foo.is_open( ) )
+	if( foo.is_open() )
 	{
-		foo.close( );
+		foo.close();
 		return true;
 	}
 	return false;
@@ -26,14 +26,14 @@ bool FileExists( const std::string& filename )
 
 void CreatePath( const std::string& filename )
 {
-	size_t found = filename.substr( 0, filename.length( ) - 1 ).find_last_of("/\\");
+	size_t found = filename.substr( 0, filename.length() - 1 ).find_last_of("/\\");
 	if( found != std::string::npos )
 		CreatePath( filename.substr( 0, found + 1 ) );
 	
 #ifdef _WIN32
-	mkdir( filename.c_str( ) );
+	mkdir( filename.c_str() );
 #else
-	mkdir( filename.c_str( ), 0777 );
+	mkdir( filename.c_str(), 0777 );
 #endif
 }
 

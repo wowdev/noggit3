@@ -16,7 +16,7 @@
 #include "MapTile.h"
 
 #include "WMOInstance.h" // WMOInstance
- 
+
 World *gWorld=0;
 
 static const int BUFSIZE = 8192;
@@ -40,19 +40,19 @@ bool IsEditableWorld( int pMapId )
 	std::stringstream ssfilename;
 	ssfilename << "World\\Maps\\" << lMapName << "\\" << lMapName << ".wdt";
 	
-	if( !MPQFile::exists( ssfilename.str( ) ) )
+	if( !MPQFile::exists( ssfilename.str() ) )
 	{
 		Log << "World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
 		return false;
 	}
 
-	MPQFile mf( ssfilename.str( ) );
+	MPQFile mf( ssfilename.str() );
 
 	//sometimes, wdts don't open, so ignore them...
 	if(mf.isEof())
 		return false;
 
-	const char * lPointer = reinterpret_cast<const char*>( mf.getPointer( ) );
+	const char * lPointer = reinterpret_cast<const char*>( mf.getPointer() );
 
 	// Not using the libWDT here doubles performance. You might want to look at your lib again and improve it.
 	const int lFlags = *( reinterpret_cast<const int*>( lPointer + 8 + 4 + 8 ) );
@@ -216,7 +216,7 @@ void World::init()
 	
 	// -----------------------------------------------------
 	
-	theFile.close( );
+	theFile.close();
 	
 	if( !mHasAGlobalWMO )
 		initMinimap();
@@ -572,8 +572,8 @@ void World::initDisplay()
 	
 	if( mHasAGlobalWMO )
 	{
-		wmomanager.add( mWmoFilename );
-		WMOInstance inst( reinterpret_cast<WMO*>( wmomanager.items[ wmomanager.get( mWmoFilename ) ] ), &mWmoEntry );
+		WMOManager::add( mWmoFilename );
+		WMOInstance inst( reinterpret_cast<WMO*>( WMOManager::items[ WMOManager::get( mWmoFilename ) ] ), &mWmoEntry );
 		
 		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( mWmoEntry.uniqueID, inst ) );
 		camera = inst.pos;
@@ -588,6 +588,7 @@ void World::initDisplay()
 
 World::~World()
 {
+  
 	for( int j = 0; j < 64; j++ ) 
   {
 		for( int i = 0; i < 64; i++ ) 
@@ -859,7 +860,7 @@ void World::draw()
 	//Now for drawing code
 
 	WMOInstance::reset();
-	modelmanager.resetAnim();
+	ModelManager::resetAnim();
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -876,11 +877,6 @@ void World::draw()
 
 	///glDisable(GL_LIGHTING);
 	///glColor4f(1,1,1,1);
-
-    //int tt = 1440;
-	//if (modelmanager.v>0) {
-	//	tt = (modelmanager.v *180 + 1440) % 2880;
-	//}		
 
 	hadSky = false;
 	if( drawwmo || mHasAGlobalWMO )
@@ -994,7 +990,7 @@ void World::draw()
       {
 				if( tileLoaded( j, i ) )
         {
-					mTiles[j][i].tile->draw( );
+					mTiles[j][i].tile->draw();
         }
       }
     }
@@ -1021,8 +1017,8 @@ void World::draw()
       {
 				if( tileLoaded( j, i ) )
         {
-					mTiles[j][i].tile->drawLines( );
-					mTiles[j][i].tile->drawMFBO( );
+					mTiles[j][i].tile->drawLines();
+					mTiles[j][i].tile->drawMFBO();
         }
       }
     }
@@ -1085,7 +1081,7 @@ void World::draw()
 				it->second.draw();
 
 	outdoorLights( true );
-	setupFog( );
+	setupFog();
 
 	glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 
@@ -1116,7 +1112,7 @@ void World::draw()
     {
       if( tileLoaded( j, i ) )
       {
-        mTiles[j][i].tile->drawWater( );
+        mTiles[j][i].tile->drawWater();
       }
     }
   }
@@ -1153,7 +1149,7 @@ void World::draw()
     {
       if( tileLoaded( j, i ) )
       {
-        mTiles[j][i].tile->drawWater( );
+        mTiles[j][i].tile->drawWater();
       }
     }
   }
@@ -1161,31 +1157,6 @@ void World::draw()
   ex = (int)(camera.x / TILESIZE);
   ez = (int)(camera.z / TILESIZE);
 }
-
-int	numTimers;
-int startTime[25];
-void reportModelTimes();
-
-void startTimer()
-{
-	startTime[numTimers]=SDL_GetTicks();
-	numTimers++;
-}
-
-void stopTimer()
-{
-	int endTime=SDL_GetTicks();
-	numTimers--;
-	Log << endTime-startTime[numTimers] << "ms" << std::endl;
-}
-
-int stopTimer2()
-{
-	int endTime=SDL_GetTicks();
-	numTimers--;
-	return endTime-startTime[numTimers];
-}
-
 
 void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
 {
@@ -1206,7 +1177,7 @@ void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
 			WMOInstance::reset();
 
 		if( drawmodels )
-			modelmanager.resetAnim();
+			ModelManager::resetAnim();
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1234,7 +1205,7 @@ void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
       {
         if( tileLoaded( j, i ) )
         {
-          mTiles[j][i].tile->drawSelect( );
+          mTiles[j][i].tile->drawSelect();
         }
       }
     }
@@ -1271,7 +1242,7 @@ void World::drawSelectionChunk(int cursorX,int cursorY)
 	video.set3D_select();
 
 	WMOInstance::reset();
-	modelmanager.resetAnim();
+	ModelManager::resetAnim();
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -1287,7 +1258,7 @@ void World::drawSelectionChunk(int cursorX,int cursorY)
 
 	glClear(GL_DEPTH_BUFFER_BIT); 
 	glInitNames();
-	gWorld->GetCurrentSelection( )->data.mapchunk->drawSelect2();
+	gWorld->GetCurrentSelection()->data.mapchunk->drawSelect2();
 }
 
 void World::getSelection( int pSelectionMode )
@@ -1318,10 +1289,10 @@ void World::tick(float dt)
   enterTile(ex,ez);
   
 	while (dt > 0.1f) {
-		modelmanager.updateEmitters(0.1f);
+		ModelManager::updateEmitters(0.1f);
 		dt -= 0.1f;
 	}
-	modelmanager.updateEmitters(dt);
+	ModelManager::updateEmitters(dt);
 }
 
 unsigned int World::getAreaID()
@@ -1378,7 +1349,7 @@ void World::drawTileMode(float ah)
     {
       if( tileLoaded( j, i ) )
       {
-        mTiles[j][i].tile->drawTextures( );
+        mTiles[j][i].tile->drawTextures();
       }
     }
   }
@@ -1720,114 +1691,64 @@ void World::saveMap()
 void World::deleteModelInstance( int pUniqueID )
 {
 	mModelInstances.erase( mModelInstances.find( pUniqueID ) );
-	ResetSelection( );
+	ResetSelection();
 }
 
 void World::deleteWMOInstance( int pUniqueID )
 {
 	mWMOInstances.erase( mWMOInstances.find( pUniqueID ) );
-	ResetSelection( );
+	ResetSelection();
 }
 
 void World::addModel( nameEntry entry, Vec3D newPos )
-{
-	int lModelMax = 0;
-	if (mModelInstances.empty() == false)
-    lModelMax = mModelInstances.rbegin( )->first;
-	int lObjectMax = 0;
-	if (mWMOInstances.empty() == false)
-    lObjectMax = mWMOInstances.rbegin( )->first;
-  
-  using std::max;
-	int lMaxUID = max( lModelMax, lObjectMax )+ 1;
-
+{	
 	if( entry.type == eEntry_Model )
 	{
-		ModelInstance newModelis;
-		newModelis = *entry.data.model;
-		newModelis.nameID = -1;
-		newModelis.d1 = lMaxUID;
-		newModelis.pos = newPos;
-
-		if(Settings::getInstance()->copy_rot)
-		{
-			newModelis.dir.y += (rand() % 360 + 1);
-		}
-		
-		if(Settings::getInstance()->copy_tile)
-		{
-			newModelis.dir.x += (rand() % 5 + 1);
-			newModelis.dir.z += (rand() % 5 + 1);
-		}
-		
-		if(Settings::getInstance()->copy_size)
-		{
-
-			newModelis.sc = newModelis.sc * (( float( rand( ) ) / float( RAND_MAX ) * 0.2 ) + 0.90);
-		}
-		mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
+    addM2( entry.data.model->model, newPos );
 	}
 	else if( entry.type == eEntry_WMO )
 	{
-		WMOInstance newWMOis(*entry.data.wmo);
-		newWMOis.pos = newPos;
-		newWMOis.id = lMaxUID;
-		newWMOis.wmoID = lMaxUID;
-		newWMOis.nameID = -1;
-		mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
+    addWMO( entry.data.wmo->wmo, newPos );
 	}
 }
 
 void World::addM2( Model *model, Vec3D newPos )
 {
-	int lModelMax = 0;
-	if (mModelInstances.empty() == false)
-    lModelMax = mModelInstances.rbegin( )->first;
-	int lObjectMax = 0;
-	if (mWMOInstances.empty() == false)
-    lObjectMax = mWMOInstances.rbegin( )->first;
-  
   using std::max;
-	int lMaxUID = max( lModelMax, lObjectMax )+ 1;
+  const int lMaxUID = max( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
+                           ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 	
-		ModelInstance newModelis;
-		newModelis.model = model;
-		newModelis.nameID = -1;
-		newModelis.d1 = lMaxUID;
-		newModelis.pos = newPos;
-		newModelis.sc = 1;
+  ModelInstance newModelis;
+  newModelis.model = model;
+  newModelis.nameID = -1;
+  newModelis.d1 = lMaxUID;
+  newModelis.pos = newPos;
+  newModelis.sc = 1;
+  
+  if(Settings::getInstance()->copy_rot)
+  {
+    newModelis.dir.y += (rand() % 360 + 1);
+  }
 
-		if(Settings::getInstance()->copy_rot)
-		{
-			newModelis.dir.y += (rand() % 360 + 1);
-		}
-		
-		if(Settings::getInstance()->copy_tile)
-		{
-			newModelis.dir.x += (rand() % 5 + 1);
-			newModelis.dir.z += (rand() % 5 + 1);
-		}
-		
-		if(Settings::getInstance()->copy_size)
-		{
+  if(Settings::getInstance()->copy_tile)
+  {
+    newModelis.dir.x += (rand() % 5 + 1);
+    newModelis.dir.z += (rand() % 5 + 1);
+  }
 
-			newModelis.sc = newModelis.sc * (( float( rand( ) ) / float( RAND_MAX ) * 0.2 ) + 0.90);
-		}
-		mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
-	
+  if(Settings::getInstance()->copy_size)
+  {
+    newModelis.sc = newModelis.sc * (( float( rand() ) / float( RAND_MAX ) * 0.2 ) + 0.90);
+  }
+  
+  mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
 }
 
 void World::addWMO( WMO *wmo, Vec3D newPos )
 {
-	int lModelMax = 0;
-	if (mModelInstances.empty() == false)
-    lModelMax = mModelInstances.rbegin( )->first;
-	int lObjectMax = 0;
-	if (mWMOInstances.empty() == false)
-    lObjectMax = mWMOInstances.rbegin( )->first;
-  
   using std::max;
-	int lMaxUID = max( lModelMax, lObjectMax )+ 1;
+  const int lMaxUID = max( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
+                           ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 	
 	WMOInstance newWMOis(wmo);
 	newWMOis.pos = newPos;
@@ -1835,5 +1756,4 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
 	newWMOis.wmoID = lMaxUID;
 	newWMOis.nameID = -1;
 	mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
-	
 }

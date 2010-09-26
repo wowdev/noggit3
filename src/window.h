@@ -1,19 +1,20 @@
 #ifndef __WINDOW_H
 #define __WINDOW_H
 
-#include "video.h"
 #include "frame.h"
+
+class Texture;
 
 class window : public frame
 {
 protected:
-	GLuint	texture;
+	Texture* texture;
 
 public:
 	window( float xPos, float yPos, float w, float h );
-	window( float xPos, float yPos, float w, float h, const std::string& pTexture );
+	//window( float xPos, float yPos, float w, float h, const std::string& pTexture );
 	frame *processLeftClick( float mx, float my );
-	void render( );	
+	void render();	
 };
 
 #endif

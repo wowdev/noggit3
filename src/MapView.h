@@ -2,7 +2,8 @@
 #define TEST_H
 
 #include "appstate.h"
-#include "ui.h"
+
+class frame;
 
 class World;
 
@@ -16,8 +17,6 @@ enum eViewMode
  
 class MapView :public AppState
 {
-	GLuint tex;
-  
 	World *world;
 
 	float ah,av,moving,strafing,updown,mousedir,movespd;
@@ -26,7 +25,7 @@ class MapView :public AppState
 	bool set_areaid;
 
 
-	frame tileFrames;
+	frame* tileFrames;
 
 	float lastBrushUpdate;
 

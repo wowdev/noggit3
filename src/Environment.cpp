@@ -1,6 +1,6 @@
 #include "Environment.h"
 
-Environment::Environment( )
+Environment::Environment()
 {
 	this->view_holelines = false;
 	this->ShiftDown = false;
@@ -11,14 +11,14 @@ Environment::Environment( )
 
 Environment* Environment::instance = 0;
 
-Environment* Environment::getInstance( )
+Environment* Environment::getInstance()
 {
 	if( !instance )
-		instance = new Environment( );
+		instance = new Environment();
 	return instance;
 }
 
-nameEntry Environment::get_clipboard( )
+nameEntry Environment::get_clipboard()
 {
 	return clipboard;
 }

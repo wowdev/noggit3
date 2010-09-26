@@ -4,28 +4,59 @@
 class Texture;
 class TextureManager;
 
-#include "manager.h"
+#include <map>
+#include <string>
 #include <GL/glew.h>
 
-class Texture : public ManagedItem 
+#include "manager.h" // ManagedItem
+
+class Texture : public ManagedItem
 {
-	//! \todo  Private members?
-public:
+private:
 	int w,h;
 	GLuint id;
-
+  
+public:
 	Texture(const std::string& pname): ManagedItem(pname), w(0), h(0) {}
+  const GLuint getId() const
+  {
+    return id;
+  }
+  void render() const
+  {
+    glBindTexture( GL_TEXTURE_2D, id );
+  }
+  
+  static void enableTexture()
+  {
+    glEnable( GL_TEXTURE_2D );
+  }
+  static void disableTexture()
+  {
+    glDisable( GL_TEXTURE_2D );
+  }
+  static void setActiveTexture( size_t num = 0 )
+  {
+    glActiveTexture( GL_TEXTURE0 + num );
+  }
+  
+  friend class TextureManager;
 };
 
-class TextureManager : public Manager<GLuint> 
+class TextureManager : public Manager<GLuint>
 {
-	bool LoadBLP(GLuint id, Texture *tex);
-
+private:
+	static bool LoadBLP(GLuint id, Texture *tex);
 public:
-	void reload();
-	virtual GLuint add(const std::string& name);
-	void doDelete(GLuint id);
-	GLuint get(const std::string& name);
+	static void reload();
+	static GLuint add(const std::string& name);
+	static void doDelete(GLuint id);
+	static GLuint get(const std::string& name);
+  
+  static Texture* newTexture(const std::string& name)
+  {
+    return (Texture*)TextureManager::items[TextureManager::add( name )];
+  }
 };
 
 #endif

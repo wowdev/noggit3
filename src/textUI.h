@@ -1,8 +1,11 @@
 #ifndef __TEXTUI_H
 #define __TEXTUI_H
 
-#include "FreeType.h"
+#include <string>
+
 #include "frame.h"
+
+namespace freetype { class font_data; }
 
 enum eJustify
 {
@@ -30,8 +33,8 @@ public:
 	void setJustify( int j );
 	void setFont( freetype::font_data *font );
 	void setBackground( float r, float g, float b, float a );
-	void render( );
-	std::string getText( )
+	void render();
+	std::string getText()
 	{
 		return mText;
 	}

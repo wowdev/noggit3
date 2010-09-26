@@ -22,7 +22,6 @@ class Bone;
 
 #include "AsyncObject.h" // AsyncObject
 #include "Log.h"
-#include "noggit.h"
 
 Vec3D fixCoordSystem(Vec3D v);
 
@@ -201,14 +200,21 @@ public:
   virtual void finishLoading();
 };
 
-class ModelManager: public SimpleManager {
+typedef unsigned int MODELIDTYPE;
+
+class ModelManager: public Manager<MODELIDTYPE>
+{
+private:
+	static int baseid;
 public:
-	int add(const std::string& name);
-
-	ModelManager() { }
-
-	void resetAnim();
-	void updateEmitters(float dt);
+	static MODELIDTYPE add(const std::string& name);
+  
+	static void resetAnim();
+	static void updateEmitters(float dt);
+  static int nextID()
+  {
+    return baseid++;
+  }
 };
 
 int addModelToList(Model *m, MPQFile &f);

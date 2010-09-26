@@ -2,14 +2,14 @@
 
 #include "brush.h"
 
-void brush::init( )
+void brush::init()
 {
 	radius = 15;
 	hardness = 0.5f;
 	iradius = hardness * radius;
 	oradius = radius - iradius;
 	glGenTextures( 1, &texID );
-	GenerateTexture( );
+	GenerateTexture();
 }
 
 void brush::GenerateTexture()
@@ -58,11 +58,11 @@ void brush::setRadius( float R )
 	iradius = hardness * radius;
 	oradius = radius - iradius;
 }
-float brush::getHardness( )
+float brush::getHardness()
 {
 	return hardness;
 }
-float brush::getRadius( )
+float brush::getRadius()
 {
 	return radius;
 }
@@ -74,11 +74,11 @@ float brush::getValue( float dist )
 		return 1.0f;	
 	return( 1.0f - ( dist - iradius ) / oradius );
 }
-GLuint brush::getTexture( )
+GLuint brush::getTexture()
 { 
 	return texID; 
 }
-bool brush::needUpdate( )
+bool brush::needUpdate()
 { 
 	return update; 
 }

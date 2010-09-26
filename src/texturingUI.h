@@ -2,13 +2,23 @@
 #define __TEXTURINGUI_H
 
 class MapChunk;
+class frame;
+class Gui;
+class Texture;
 
-frame *CreateSelectedTexture();
-frame *CreateTexturePalette(int rows, int cols,Gui *setgui);
-frame *CreateTilesetLoader();
-frame *CreateTextureFilter();
-frame *createMapChunkWindow();
-void setChunk(MapChunk *chunk);
-void setChunkWindow(MapChunk *chunk);
+class TexturingUI
+{
+public:
+  static frame* createSelectedTexture();
+  static frame* createTexturePalette(int rows, int cols,Gui* setgui);
+  static frame* createTilesetLoader();
+  static frame* createTextureFilter();
+  static frame* createMapChunkWindow();
+  static void setChunk(MapChunk *chunk);
+  static void setChunkWindow(MapChunk *chunk);
+
+};
+
+static Texture* selectedTexture;
 
 #endif

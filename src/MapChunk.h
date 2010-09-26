@@ -58,7 +58,7 @@ public:
 	int striplen;
 
 	MapChunk(MapTile* mt, MPQFile &f,bool bigAlpha);
-	~MapChunk( );
+	~MapChunk();
 
 	void destroy();
 	void initStrip();
@@ -87,7 +87,7 @@ public:
 	void getSelectionCoord(float *x,float *z);
 	float getSelectionHeight();
 
-	Vec3D GetSelectionPosition( );
+	Vec3D GetSelectionPosition();
 
 	void changeTerrain(float x, float z, float change, float radius, int BrushType);
 	void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);

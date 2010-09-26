@@ -4,6 +4,7 @@
 #include "world.h"
 #include "dbc.h"
 #include "Log.h"
+#include "model.h" // ModelManager
 
 const float skymul = 36.0f;
 
@@ -79,7 +80,7 @@ Sky::Sky( DBCFile::Iterator data )
 			else{
 				DBCFile::Record rec = gLightSkyboxDB.getByID(LightSkyboxDB::filename);
 				std::string skyname= rec.getString(skybox);
-				alt_sky=new Model(skyname);
+				alt_sky=new Model(skyname); // if this is ever uncommented, use ModelManager::
 				Log << "Loaded sky " << skyname << std::endl;
 			}
 		}
@@ -197,15 +198,20 @@ Skies::Skies( unsigned int mapid )
 
 	// sort skies from smallest to largest; global last.
 	// smaller skies will have precedence when calculating weights to achieve smooth transitions etc.
-	std::sort( skies.begin( ), skies.end( ) );
-
-	stars = new Model( "Environments\\Stars\\Stars.mdx", true );
+	std::sort( skies.begin(), skies.end() );
+  
+	stars = reinterpret_cast<Model*>( ModelManager::items[ModelManager::add( "Environments\\Stars\\Stars.mdx" )] );
+  
 
 }
 
 Skies::~Skies()
 {
-	delete stars;
+  if( stars )
+  {
+    ModelManager::delbyname( "Environments\\Stars\\Stars.mdx" );
+    stars = NULL;
+  }
 }
 
 void Skies::findSkyWeights(Vec3D pos)

@@ -21,6 +21,9 @@ struct BLPHeader
 };
 #pragma pack(pop)
 
+template <class IDTYPE> std::map<std::string, IDTYPE> Manager<IDTYPE>::names;
+template <class IDTYPE> std::map<IDTYPE, ManagedItem*> Manager<IDTYPE>::items;
+
 GLuint TextureManager::get(const std::string& name)
 {
   std::string name_ = name;
@@ -33,10 +36,10 @@ GLuint TextureManager::add(const std::string& name)
 	GLuint id;
   std::string name_ = name;
 	std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
-	if( names.find( name_ ) != names.end( ) ) 
+	if( names.find( name_ ) != names.end() ) 
 	{
 		id = names[name_];
-		items[id]->addref( );
+		items[id]->addref();
 		return id;
 	}
 		
@@ -55,9 +58,9 @@ GLuint TextureManager::add(const std::string& name)
 void TextureManager::reload()
 {
 	LogDebug << "Reloading textures.." << std::endl;
-	for( std::map<std::string, GLuint>::iterator it = names.begin( ); it != names.end( ); ++it )
+	for( std::map<std::string, GLuint>::iterator it = names.begin(); it != names.end(); ++it )
 	{
-		LoadBLP( it->second, reinterpret_cast<Texture*>( items[it->second] ) );
+		LoadBLP( it->second, (Texture*)items[it->second] );
 	}
 	Log << "Finished reloading textures." << std::endl;
 }
@@ -71,14 +74,14 @@ bool TextureManager::LoadBLP(GLuint id, Texture *tex)
 	glBindTexture( GL_TEXTURE_2D, id );
 	
 	MPQFile f( tex->name );
-	if ( f.isEof( ) ) 
+	if ( f.isEof() ) 
 	{
 		tex->id = 0;
 		return false;
 	}
 
 
-	lData = f.getPointer( );
+	lData = f.getPointer();
 	lHeader = reinterpret_cast<BLPHeader*>( lData );
 	tex->w = w = lHeader->resx;
 	tex->h = h = lHeader->resy;

@@ -1,11 +1,13 @@
 #ifndef __TEXTBOXUI_H
 #define __TEXTBOXUI_H
 
-#include "video.h"
 #include "frame.h"
-#include "textureUI.h"
-#include "textUI.h"
-#include <sstream>
+#include <string>
+
+class textUI;
+class textureUI;
+class SDL_KeyboardEvent;
+class Texture;
 
 //! \todo  Combine and get it working.
 class textboxUI:public frame
@@ -16,68 +18,29 @@ protected:
 	textureUI	*background;
 	textUI		*theText;
 public:
-	textboxUI(float xpos, float ypos, float w)
-	{
-		x=xpos;
-		y=ypos;
-		width=w;
-		height=32;
-		background=new textureUI(0,0,w,32,video.textures.add("Interface\\Common\\Common-Input-Border.blp"));
-	};
-	frame *processLeftClick(float mx,float my){return this;};
-	bool processKey(char key, bool shift, bool alt, bool ctrl){text[length]=key;text[length+1]=0;length++;return true;};
-	void render();
+	textboxUI(float xpos, float ypos, float w);
+	frame *processLeftClick(float mx,float my);
+	bool processKey(char key, bool shift, bool alt, bool ctrl);
+	//void render();
 };
 
 class TextBox : public frame
 {
 private:
-	GLuint	texture;
-	GLuint	textureDown;
+	Texture* texture;
+	Texture* textureDown;
 
 	bool	mFocus;
 	textUI	*mText;
 	std::string mValue;
 public:
-	TextBox(float xPos,float yPos,float w, float h,GLuint tex, GLuint texd);
+	TextBox(float xPos,float yPos,float w, float h,const std::string& tex, const std::string& texd);
 	void render();
 
-	void setValue( const std::string& pText )
-	{
-		mValue = pText;
-		mText->setText( mValue );
-	}
-	std::string	getValue( )
-	{
-		return mValue;
-	}
+	void setValue( const std::string& pText );
+	std::string	getValue();
 
-	bool KeyBoardEvent( SDL_KeyboardEvent *e )
-	{
-		// The input is fixed to be ascii. its not really "working" with other keyboard layouts. maybe do this somehow else .. but how? ._. stupid SDL.
-
-		if( !mFocus )
-			return false;
-		if( e->type != SDL_KEYDOWN )
-			return false;
-
-		if( e->keysym.sym == 8 )
-			mValue = mValue.substr( 0, mValue.size() - 1 );
-		else
-			if( e->keysym.sym == 13 )
-				mFocus = false;
-			else
-				if( e->keysym.sym < 127 && e->keysym.sym > 31 )
-					mValue += char( e->keysym.sym );
-				else
-				{
-					std::stringstream ss; ss << "\\x" << e->keysym.sym;
-					mValue += ss.str();
-				}
-
-		setValue( mValue );
-		return true;
-	}
+	bool KeyBoardEvent( SDL_KeyboardEvent *e );
 	
 	frame *processLeftClick( float mx, float my );
 	void processUnclick() { }

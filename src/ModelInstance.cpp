@@ -29,19 +29,19 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth )
   glVertex3f( pMin.x, pMax.y, pMax.z );
   glVertex3f( pMin.x, pMin.y, pMax.z );
   glVertex3f( pMin.x, pMin.y, pMin.z );
-	glEnd( );
+	glEnd();
 	glBegin( GL_LINES );
   glVertex3f( pMin.x, pMin.y, pMax.z );
   glVertex3f( pMax.x, pMin.y, pMax.z );
-	glEnd( );
+	glEnd();
 	glBegin( GL_LINES );
   glVertex3f( pMax.x, pMax.y, pMin.z );
   glVertex3f( pMax.x, pMin.y, pMin.z );
-	glEnd( );
+	glEnd();
 	glBegin( GL_LINES );
   glVertex3f( pMin.x, pMax.y, pMax.z );
   glVertex3f( pMax.x, pMax.y, pMax.z );
-	glEnd( );
+	glEnd();
 }
 
 ModelInstance::ModelInstance()
@@ -100,9 +100,9 @@ void ModelInstance::init2(Model *m, MPQFile &f)
 }
 
 
-void ModelInstance::draw( )
+void ModelInstance::draw()
 {
-/*	float dist = ( pos - gWorld->camera ).length( ) - model->rad;
+/*	float dist = ( pos - gWorld->camera ).length() - model->rad;
 
 	if( dist > 2.0f * gWorld->modeldrawdistance ) 
 		return;
@@ -112,7 +112,7 @@ void ModelInstance::draw( )
 	if( !gWorld->frustum.intersectsSphere( pos, model->rad * sc ) ) 
 		return;
 
-	glPushMatrix( );
+	glPushMatrix();
 
 	glTranslatef( pos.x, pos.y, pos.z );
 	glRotatef( dir.y - 90.0f, 0.0f, 1.0f, 0.0f );
@@ -120,9 +120,9 @@ void ModelInstance::draw( )
 	glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
 	glScalef( sc, sc, sc );
 
-	model->draw( );
+	model->draw();
 
-	if( gWorld->IsSelection( eEntry_Model ) && gWorld->GetCurrentSelection( )->data.model->d1 == d1 )
+	if( gWorld->IsSelection( eEntry_Model ) && gWorld->GetCurrentSelection()->data.model->d1 == d1 )
 	{
 		if( gWorld && gWorld->drawfog ) 
 			glDisable( GL_FOG );
@@ -144,19 +144,19 @@ void ModelInstance::draw( )
 		glBegin( GL_LINES );
 			glVertex3f( 0.0f, 0.0f, 0.0f );
 			glVertex3f( model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f );
-		glEnd( );
+		glEnd();
 
 		glColor4fv( Vec4D( 0.0f, 1.0f, 0.0f, 1.0f ) );
 		glBegin( GL_LINES );
 			glVertex3f( 0.0f, 0.0f, 0.0f );
 			glVertex3f( 0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f );
-		glEnd( );
+		glEnd();
 
 		glColor4fv( Vec4D( 0.0f, 0.0f, 1.0f, 1.0f ) );
 		glBegin( GL_LINES );
 			glVertex3f( 0.0f, 0.0f, 0.0f );
 			glVertex3f( 0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f );
-		glEnd( );
+		glEnd();
 
 		glActiveTexture( GL_TEXTURE1 );
 		glDisable( GL_TEXTURE_2D );
@@ -169,7 +169,7 @@ void ModelInstance::draw( )
 			glEnable( GL_FOG );
 	}
 
-	glPopMatrix( );
+	glPopMatrix();
 }
 
 //! \todo  Get this drawn on the 2D view.
@@ -195,7 +195,7 @@ void ModelInstance::draw( )
 
 void ModelInstance::drawSelect()
 {
-	/*float dist = ( pos - gWorld->camera ).length( ) - model->rad;
+	/*float dist = ( pos - gWorld->camera ).length() - model->rad;
 
 	if( dist > 2.0f * gWorld->modeldrawdistance ) 
 		return;
@@ -205,7 +205,7 @@ void ModelInstance::drawSelect()
 	if( !gWorld->frustum.intersectsSphere( pos, model->rad * sc ) ) 
 		return;
 
-	glPushMatrix( );
+	glPushMatrix();
 
 	glTranslatef( pos.x, pos.y, pos.z );
 	glRotatef( dir.y - 90.0f, 0.0f, 1.0f, 0.0f );
@@ -218,11 +218,11 @@ void ModelInstance::drawSelect()
 
 	glPushName( nameID );
 
-	model->drawSelect( );
+	model->drawSelect();
 
-	glPopName( );
+	glPopName();
 
-	glPopMatrix( );
+	glPopMatrix();
 }
 
 

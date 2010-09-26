@@ -1,5 +1,5 @@
 #include "particle.h"
-#include "noggit.h"
+#include "noggit.h" // rand*
 
 static const unsigned int MAX_PARTICLES = 10000;
 

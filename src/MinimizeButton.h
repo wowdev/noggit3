@@ -2,7 +2,8 @@
 #define __MINIMIZEBUTTON_H
 
 #include "buttonUI.h"
-#include "video.h"
+
+class frame;
 
 class MinimizeButton : public buttonUI
 {

@@ -1,7 +1,6 @@
 #ifndef __GRADIENT_H
 #define __GRADIENT_H
 
-#include "video.h"
 #include "quaternion.h"
 #include "frame.h"
 

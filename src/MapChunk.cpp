@@ -4,6 +4,7 @@
 #include "Environment.h"
 #include "liquid.h"
 #include "brush.h"
+#include "TextureManager.h" // TextureManager, Texture
 
 #include "quaternion.h"
 
@@ -268,7 +269,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 				} else {
 					animated[i] = 0;
 				}
-				textures[i] = video.textures.get(mt->mTextureFilenames[tex[i]]);
+				textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
 			}
 		}
 		else if ( fourcc == 'MCSH' ) {
@@ -447,14 +448,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 	glBindBuffer(GL_ARRAY_BUFFER, normals);
 	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mNormals, GL_STATIC_DRAW);
 
-	/*if (hasholes) */
-	//	initStrip();
-	
-	//else {
-		strip = gWorld->mapstrip;
-		striplen = 16*18 + 7*2 + 8*2; //stripsize;
-	//}
-	
+  initStrip();
 
 	this->mt = mt;
 
@@ -532,7 +526,7 @@ void MapChunk::loadTextures()
 {
 	return;
 	for(int i=0;i<nTextures;i++)
-		textures[i] = video.textures.get(mt->mTextureFilenames[tex[i]]);
+		textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
 }
 
 static const float texDetail = 8.0f;
@@ -693,7 +687,7 @@ void MapChunk::initStrip()
 }
 
 
-MapChunk::~MapChunk( )
+MapChunk::~MapChunk()
 {
 	// unload alpha maps
 	glDeleteTextures( 3, alphamaps );
@@ -704,8 +698,11 @@ MapChunk::~MapChunk( )
 	glDeleteBuffers( 1, &vertices );
 	glDeleteBuffers( 1, &normals );
 
-	//if( strip ) 
-	//	delete strip;
+	if( strip )
+  {
+		delete strip;
+    strip = NULL;
+  }
 
 	if( nameID != -1 )
 	{
@@ -812,20 +809,6 @@ void MapChunk::drawColor()
 		return;
 	}
 
-	if( holes == 0 )
-	{
-		if ( mydist < gWorld->highresdistance2 ) 
-		{
-			strip = gWorld->mapstrip2;
-			striplen = stripsize2;
-		} 
-		else 
-		{
-			strip = gWorld->mapstrip;
-			striplen = stripsize;
-		}
-	}
-
 	glActiveTexture(GL_TEXTURE1);
 	glDisable(GL_TEXTURE_2D);
 
@@ -866,19 +849,8 @@ void MapChunk::drawPass(int anim)
 		float f = ( ((int)(gWorld->animtime*(spd/15.0f))) % animspd) / (float)animspd;
 		glTranslatef(f*fdx,f*fdy,0);
 	}
-	
-	if(holes == 0)
-	/*{
-		glFrontFace(GL_CW);
-		for(int i=0;i<8;i++)
-		{
-			glDrawElements(GL_TRIANGLE_STRIP, 18, GL_UNSIGNED_SHORT, &OddStrips[i*18]);
-			glDrawElements(GL_TRIANGLE_STRIP, 18, GL_UNSIGNED_SHORT, &EvenStrips[i*18]);
-		}
-		glFrontFace(GL_CCW);
-	}
-	 else*/
-		 glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
+  
+  glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
 	
 
 	if (anim) 
@@ -974,14 +946,7 @@ void MapChunk::drawContour()
 
 void MapChunk::drawAreaID()
 {
-		// Draw hole lines if view_subchunk_lines is true
-		glColor4f(0.0,0.0,1.0f,0.5f);
-		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, HoleStrip);
-		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[9]);
-		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[18]);		
-		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[27]);
-		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[36]);
-		glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);	
+  //
 }
 
 void MapChunk::drawBlock()
@@ -992,22 +957,8 @@ void MapChunk::drawBlock()
 void MapChunk::draw()
 {
 	if (!gWorld->frustum.intersects(vmin,vmax))		return;
-	float mydist = (gWorld->camera - vcenter).length() - r;
+	//float mydist = (gWorld->camera - vcenter).length() - r;
 	//if (mydist > gWorld->mapdrawdistance2) return;
-
-	if( holes == 0 )
-	{
-		if ( mydist < gWorld->highresdistance2 ) 
-		{
-			strip = gWorld->mapstrip2;
-			striplen = stripsize2;
-		} 
-		else 
-		{
-			strip = gWorld->mapstrip;
-			striplen = stripsize;
-		}
-	}
 
 	// setup vertex buffers
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
@@ -1116,9 +1067,9 @@ void MapChunk::draw()
 			drawPass(0);
 		}
 	}
-	if( gWorld->IsSelection( eEntry_MapChunk ) && gWorld->GetCurrentSelection( )->data.mapchunk == this && terrainMode != 3 )
+	if( gWorld->IsSelection( eEntry_MapChunk ) && gWorld->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3 )
 	{
-		int poly = gWorld->GetCurrentSelectedTriangle( );
+		int poly = gWorld->GetCurrentSelectedTriangle();
 
 		//glClear( /*GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT |*/ GL_STENCIL_BUFFER_BIT );
 		/*glColorMask( false, false, false, false );
@@ -1159,7 +1110,7 @@ void MapChunk::draw()
 		//glColor4f(1.0f,0.3f,0.3f,0.2f);
 		glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
 
-		glPushMatrix( );
+		glPushMatrix();
 
 		glDisable( GL_CULL_FACE );
 		glDepthMask( false );
@@ -1168,12 +1119,12 @@ void MapChunk::draw()
 		glVertex3fv( mVertices[gWorld->mapstrip2[poly + 0]] );
 		glVertex3fv( mVertices[gWorld->mapstrip2[poly + 1]] );
 		glVertex3fv( mVertices[gWorld->mapstrip2[poly + 2]] );
-		glEnd( );		
+		glEnd();		
 		glEnable( GL_CULL_FACE );
 		glEnable( GL_DEPTH_TEST );
 		glDepthMask( true );
 
-		glPopMatrix( );
+		glPopMatrix();
 	}
 	
 	glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -1215,7 +1166,7 @@ void MapChunk::draw()
 	
 }
 
-void MapChunk::drawNoDetail( )
+void MapChunk::drawNoDetail()
 {
 	glActiveTexture( GL_TEXTURE1 );
 	glDisable( GL_TEXTURE_2D );
@@ -1244,7 +1195,7 @@ void MapChunk::drawNoDetail( )
 	glEnable( GL_TEXTURE_2D );
 }
 
-void MapChunk::drawSelect( )
+void MapChunk::drawSelect()
 {
 	if( !gWorld->frustum.intersects( vmin, vmax ) ) 
 		return;
@@ -1263,12 +1214,12 @@ void MapChunk::drawSelect( )
 	glBegin( GL_TRIANGLE_STRIP );
 	for( int i = 0; i < stripsize2; i++ )
 		glVertex3fv( mVertices[gWorld->mapstrip2[i]] );
-	glEnd( );
-	glPopName( );
+	glEnd();
+	glPopName();
 	glEnable( GL_CULL_FACE );	
 }
 
-void MapChunk::drawSelect2( )
+void MapChunk::drawSelect2()
 {
 	glDisable( GL_CULL_FACE );
 	for( int i = 0; i < stripsize2 - 2; i++ )
@@ -1278,15 +1229,15 @@ void MapChunk::drawSelect2( )
 		glVertex3fv( mVertices[gWorld->mapstrip2[i + 0]] );
 		glVertex3fv( mVertices[gWorld->mapstrip2[i + 1]] );
 		glVertex3fv( mVertices[gWorld->mapstrip2[i + 2]] );
-		glEnd( );
-		glPopName( );	
+		glEnd();
+		glPopName();	
 	}
 	glEnable( GL_CULL_FACE );	
 }
 
 void MapChunk::getSelectionCoord( float *x, float *z )
 {
-	int Poly = gWorld->GetCurrentSelectedTriangle( );
+	int Poly = gWorld->GetCurrentSelectedTriangle();
 	if( Poly + 2 > stripsize2 )
 	{
 		*x = -1000000.0f;
@@ -1297,18 +1248,18 @@ void MapChunk::getSelectionCoord( float *x, float *z )
 	*z = ( mVertices[gWorld->mapstrip2[Poly + 0]].z + mVertices[gWorld->mapstrip2[Poly + 1]].z + mVertices[gWorld->mapstrip2[Poly + 2]].z ) / 3;
 }
 
-float MapChunk::getSelectionHeight( )
+float MapChunk::getSelectionHeight()
 {
-	int Poly = gWorld->GetCurrentSelectedTriangle( );
-	if( Poly + 2 < striplen )
+	int Poly = gWorld->GetCurrentSelectedTriangle();
+	if( Poly + 2 < stripsize2 )
 		return ( mVertices[gWorld->mapstrip2[Poly + 0]].y + mVertices[gWorld->mapstrip2[Poly + 1]].y + mVertices[gWorld->mapstrip2[Poly + 2]].y ) / 3;
 	LogError << "Getting selection height fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
 	return 0.0f;
 }
 
-Vec3D MapChunk::GetSelectionPosition( )
+Vec3D MapChunk::GetSelectionPosition()
 {
-	int Poly = gWorld->GetCurrentSelectedTriangle( );
+	int Poly = gWorld->GetCurrentSelectedTriangle();
 	if( Poly + 2 > stripsize2 )
 	{
 		LogError << "Getting selection position fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
@@ -1600,7 +1551,7 @@ L=(1-Level)
 u=pow(L*x*x/(y*y),1.0f/3.0f)
 w=sqrt(L*z/(u*y))
 */
-void MapChunk::eraseTextures( )
+void MapChunk::eraseTextures()
 {
 	nTextures = 0;
 }
@@ -1754,13 +1705,13 @@ bool MapChunk::isHole( int i, int j )
 void MapChunk::addHole( int i, int j )
 {
 	holes = holes | ( ( 1 << ((j*4)+i)) );
-	initStrip( );
+	initStrip();
 }
 
 void MapChunk::removeHole( int i, int j )
 {
 	holes = holes & ~( ( 1 << ((j*4)+i)) );
-	initStrip( );
+	initStrip();
 }
 
 void MapChunk::setAreaID( int ID )
