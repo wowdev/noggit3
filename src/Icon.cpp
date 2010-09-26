@@ -1,13 +1,15 @@
 #include "Icon.h"
+#include "video.h" // gl*
+#include "TextureManager.h" // TextureManager, Texture
 
-Icon::Icon(float xPos,float yPos,float w, float h,GLuint tex, GLuint texd)
+Icon::Icon(float xPos,float yPos,float w, float h, const std::string& tex,  const std::string& texd)
 {
 	x=xPos;
 	y=yPos;
 	width=w;
 	height=h;
-	texture=tex;
-	textureSelected=texd;
+	texture = TextureManager::newTexture( tex );
+	textureSelected = TextureManager::newTexture( texd );
 	clickFunc=0;
 	id=0;
 	selected=false;
@@ -16,11 +18,12 @@ Icon::Icon(float xPos,float yPos,float w, float h,GLuint tex, GLuint texd)
 void Icon::render()
 {
 	glColor3f(1.0f,1.0f,1.0f);
+  
+  Texture::setActiveTexture();
+  Texture::enableTexture();
+  
+  texture->render();
 
-	glActiveTexture(GL_TEXTURE0);
-
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glEnable(GL_TEXTURE_2D);
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(0.0f,0.0f);
 	glVertex2f(x,y);
@@ -32,12 +35,16 @@ void Icon::render()
 	glVertex2f(x+width,y+height);
 	glEnd();
 
-	glDisable(GL_TEXTURE_2D);
-	if(this->selected==true)
+  Texture::disableTexture();
+  
+	if(this->selected)
 	{
-		int sizer = 18;
-		glBindTexture(GL_TEXTURE_2D, textureSelected);
-		glEnable(GL_TEXTURE_2D);
+		static const int sizer = 18;
+    
+    Texture::enableTexture();
+    
+    textureSelected->render();
+
 		glBegin(GL_TRIANGLE_STRIP);
 		glTexCoord2f(0.0f,0.0f);
 		glVertex2f(x-sizer,y-sizer);
@@ -48,8 +55,8 @@ void Icon::render()
 		glTexCoord2f(1.0f,1.0f);
 		glVertex2f(x+width+sizer,y+height+sizer);
 		glEnd();
-
-		glDisable(GL_TEXTURE_2D);
+    
+    Texture::disableTexture();
 	}
 
 	glPushMatrix();

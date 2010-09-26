@@ -2,10 +2,12 @@
 
 #include "TreeView.h"
 #include "video.h"
+#include "textUI.h"
+#include "directory.h"
 
-TreeViewButton::TreeViewButton( float _x, float _y, TreeView* pTreeView ) : buttonUI(  _x, _y, 12.0f, 12.0f, 
-	video.textures.add( "Interface\\Buttons\\UI-PlusButton-Up.blp" ),
-	video.textures.add( "Interface\\Buttons\\UI-PlusButton-Down.blp" ) )
+#include "noggit.h" // arial12
+
+TreeViewButton::TreeViewButton( float _x, float _y, TreeView* pTreeView ) : buttonUI(  _x, _y, 12.0f, 12.0f, "Interface\\Buttons\\UI-PlusButton-Up.blp", "Interface\\Buttons\\UI-PlusButton-Down.blp" )
 {
 	mTreeView = pTreeView;
 }
@@ -13,7 +15,7 @@ TreeViewButton::TreeViewButton( float _x, float _y, TreeView* pTreeView ) : butt
 frame * TreeViewButton::processLeftClick(float mx,float my)
 {
 	SetClicked( true );
-	mTreeView->Toggle( );
+	mTreeView->Toggle();
 	return this;
 }
 
@@ -51,19 +53,24 @@ TreeView::TreeView( float pX, float pY, Directory * pDirectory, TreeView * pPare
 	}
 }
 
-void TreeView::Expand( )
+void TreeView::Expand()
 {
 	mExpanded = true;
 }
 
-void TreeView::Minimize( )
+void TreeView::Minimize()
 {
 	mExpanded = false;
 }
 
-bool TreeView::Expanded( )
+bool TreeView::Expanded()
 {
 	return mExpanded;
+}
+
+std::string TreeView::GetDirectoryName()
+{
+  return mMyDir->mName;
 }
 
 void TreeView::Move( int pEntries, TreeView * pFrom )
@@ -77,7 +84,7 @@ void TreeView::Move( int pEntries, TreeView * pFrom )
 	}
 
 	std::vector<textUI*>::iterator childfiles;
-	for( childfiles = mFiles.begin( ); childfiles != mFiles.end( ); ++childfiles )
+	for( childfiles = mFiles.begin(); childfiles != mFiles.end(); ++childfiles )
 	{
 		(*childfiles)->y = (*childfiles)->y + pEntries * 13;
 	}
@@ -88,16 +95,16 @@ void TreeView::Move( int pEntries, TreeView * pFrom )
 	}
 }
 
-void TreeView::Toggle( )
+void TreeView::Toggle()
 {
 	mExpanded = !mExpanded;
 	mMyButton->SetClicked( mExpanded );
 
 	std::vector<TreeView*>::iterator childtreeviews;
-	for( childtreeviews = mOthers.begin( ); childtreeviews != mOthers.end( ); ++childtreeviews )
+	for( childtreeviews = mOthers.begin(); childtreeviews != mOthers.end(); ++childtreeviews )
 	{
-		if( (*childtreeviews)->Expanded( ) )
-			(*childtreeviews)->Toggle( );
+		if( (*childtreeviews)->Expanded() )
+			(*childtreeviews)->Toggle();
 	}
 	
 	if( mParent )
@@ -112,26 +119,26 @@ void TreeView::render()
 	if( hidden )
 		return;
 
-	glPushMatrix( );
+	glPushMatrix();
 	glTranslatef( x, y, 0 );
-	mMyButton->render( );
-	mMyText->render( );
+	mMyButton->render();
+	mMyText->render();
 
 	if( mExpanded )
 	{
 		std::vector<TreeView*>::iterator childtreeviews;
-		for( childtreeviews = mOthers.begin( ); childtreeviews != mOthers.end( ); ++childtreeviews )
+		for( childtreeviews = mOthers.begin(); childtreeviews != mOthers.end(); ++childtreeviews )
 		{
-			(*childtreeviews)->render( );
+			(*childtreeviews)->render();
 		}
 		std::vector<textUI*>::iterator childfiles;
-		for( childfiles = mFiles.begin( ); childfiles != mFiles.end( ); ++childfiles )
+		for( childfiles = mFiles.begin(); childfiles != mFiles.end(); ++childfiles )
 		{
-			(*childfiles)->render( );
+			(*childfiles)->render();
 		}
 	}
 
-	glPopMatrix( );
+	glPopMatrix();
 }
 
 void TreeView::SetSelectFunction( void (*pSelectFunction)( const std::string& ) )
@@ -151,7 +158,7 @@ frame * TreeView::processLeftClick( float mx, float my )
 
 	std::vector<textUI*>::iterator childfiles;
 	if( mSelectFunction )
-		for( childfiles = mFiles.begin( ); childfiles != mFiles.end( ); ++childfiles )
+		for( childfiles = mFiles.begin(); childfiles != mFiles.end(); ++childfiles )
 		{
 			if( (!(*childfiles)->hidden)&&((*childfiles)->x<mx)&&((*childfiles)->x+(*childfiles)->width>mx)&&((*childfiles)->y<my)&&((*childfiles)->y+(*childfiles)->height>my) )
 			{
@@ -159,10 +166,10 @@ frame * TreeView::processLeftClick( float mx, float my )
 				TreeView * lParent = this;
 				while( lParent )
 				{
-					lPath.insert( 0, std::string( lParent->GetDirectoryName( ) + "/" ) );
-					lParent = lParent->GetParent( );
+					lPath.insert( 0, std::string( lParent->GetDirectoryName() + "/" ) );
+					lParent = lParent->GetParent();
 				}
-				mSelectFunction( lPath + (*childfiles)->getText( ) );
+				mSelectFunction( lPath + (*childfiles)->getText() );
 				return *childfiles;
 			}
 		}
@@ -170,7 +177,7 @@ frame * TreeView::processLeftClick( float mx, float my )
 	if( mExpanded )
 	{
 		std::vector<TreeView*>::iterator childtreeviews;
-		for( childtreeviews = mOthers.begin( ); childtreeviews != mOthers.end( ); ++childtreeviews )
+		for( childtreeviews = mOthers.begin(); childtreeviews != mOthers.end(); ++childtreeviews )
 		{
 			(*childtreeviews)->processLeftClick(mx,my);
 		}

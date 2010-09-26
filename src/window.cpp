@@ -1,19 +1,21 @@
 #include "window.h"
+#include "video.h"
+#include "TextureManager.h" // TextureManager, Texture
 
 window::window( float xPos, float yPos, float w, float h ) : frame( xPos, yPos, w, h )
 {
-	texture = video.textures.add( "interface\\tooltips\\ui-tooltip-border.blp" );
+	texture = TextureManager::newTexture( "interface\\tooltips\\ui-tooltip-border.blp" );
 }
 
-window::window( float xPos, float yPos, float w, float h, const std::string& pTexture ) : frame( xPos, yPos, w, h )
+/*window::window( float xPos, float yPos, float w, float h, const std::string& pTexture ) : frame( xPos, yPos, w, h )
 {
-	texture = video.textures.add( pTexture );
-}
+	texture = TextureManager::add( pTexture );
+}*/
 
 frame *window::processLeftClick( float mx, float my )
 {
 	frame * lTemp;
-	for( std::vector<frame*>::reverse_iterator child = children.rbegin( ); child != children.rend( ); child++ )
+	for( std::vector<frame*>::reverse_iterator child = children.rbegin(); child != children.rend(); child++ )
 	{
 		if( !( *child )->hidden && ( *child )->IsHit( mx, my ) )
 		{
@@ -25,7 +27,7 @@ frame *window::processLeftClick( float mx, float my )
 	return this;
 }
 
-void window::render( )
+void window::render()
 {
 	//! \todo  Get this to work. Its supposed to cut elements outside of width and height.
 	/*
@@ -73,7 +75,7 @@ void window::render( )
 
 	glDisable( GL_STENCIL_TEST );*/
 
-	glPushMatrix( );
+	glPushMatrix();
 	glTranslatef( x, y, 0.0f );
 
 	glColor4f( 0.2f, 0.2f, 0.2f, 0.8f );
@@ -82,17 +84,18 @@ void window::render( )
 	glVertex2f( width, 0.0f );
 	glVertex2f( 0.0f, height );
 	glVertex2f( width, height );
-	glEnd( );
+	glEnd();
 
-	for( std::vector<frame*>::iterator child = children.begin( ); child != children.end( ); child++ )
+	for( std::vector<frame*>::iterator child = children.begin(); child != children.end(); child++ )
 		if( !( *child )->hidden )
-			( *child )->render( );
+			( *child )->render();
 
 	glColor3f( 1.0f, 1.0f, 1.0f );
-
-	glActiveTexture( GL_TEXTURE0 );
-	glBindTexture( GL_TEXTURE_2D, texture );
-	glEnable( GL_TEXTURE_2D );
+  
+  Texture::setActiveTexture();
+  Texture::enableTexture();
+  
+  texture->render();
 
 	//Draw Bottom left Corner First
 	glBegin( GL_TRIANGLE_STRIP );	
@@ -104,7 +107,7 @@ void window::render( )
 	glVertex2f( -3.0f, height - 13.0f );
 	glTexCoord2f( 0.875f, 0.0f );
 	glVertex2f( 13.0f, height - 13.0f );
-	glEnd( );
+	glEnd();
 
 	//Draw Bottom Right Corner
 	glBegin( GL_TRIANGLE_STRIP );	
@@ -116,7 +119,7 @@ void window::render( )
 	glVertex2f( width - 13.0f, height - 13.0f );
 	glTexCoord2f( 1.0f, 0.0f );
 	glVertex2f( width + 3.0f, height - 13.0f );
-	glEnd( );
+	glEnd();
 
 	//Draw Top Left Corner
 
@@ -129,7 +132,7 @@ void window::render( )
 	glVertex2f( -3.0f, -3.0f );
 	glTexCoord2f( 0.625f, 0.0f );
 	glVertex2f( 13.0f, -3.0f );
-	glEnd( );
+	glEnd();
 
 	//Draw Top Right Corner
 	glBegin( GL_TRIANGLE_STRIP );
@@ -141,7 +144,7 @@ void window::render( )
 	glVertex2f( width - 13.0f, -3.0f );
 	glTexCoord2f( 0.75f, 0.0f );
 	glVertex2f( width + 3.0f, -3.0f );
-	glEnd( );
+	glEnd();
 
 	//Draw Left Side
 	glBegin( GL_TRIANGLE_STRIP );
@@ -153,7 +156,7 @@ void window::render( )
 	glVertex2f( -3.0f, 13.0f );
 	glTexCoord2f( 0.125f, 0.0f );
 	glVertex2f( 13, 13.0f );
-	glEnd( );
+	glEnd();
 
 	//Draw Right Side
 	glBegin( GL_TRIANGLE_STRIP );
@@ -165,7 +168,7 @@ void window::render( )
 	glVertex2f( width - 13.0f, 13.0f );
 	glTexCoord2f( 0.25f, 0.0f );
 	glVertex2f( width + 3.0f, 13.0f );
-	glEnd( );
+	glEnd();
 
 	//Draw Top Side
 	glBegin( GL_TRIANGLE_STRIP );
@@ -177,7 +180,7 @@ void window::render( )
 	glVertex2f( 13, height - 13.0f );
 	glTexCoord2f( 0.375f, 0.0f );
 	glVertex2f( width - 13.0f, height - 13.0f );
-	glEnd( );
+	glEnd();
 
 	//Draw Bottom Side
 	glBegin( GL_TRIANGLE_STRIP );
@@ -189,8 +192,9 @@ void window::render( )
 	glVertex2f( 13.0f, -3.0f );
 	glTexCoord2f( 0.25f, 0.0f );
 	glVertex2f( width - 13.0f, -3.0f );
-	glEnd( );
-
-	glDisable( GL_TEXTURE_2D );
-	glPopMatrix( );
+	glEnd();
+  
+  Texture::disableTexture();
+  
+	glPopMatrix();
 }

@@ -40,9 +40,9 @@ public:
 	nameEntry( ModelInstance *model );
 	nameEntry( WMOInstance *wmo );
 	nameEntry( MapChunk *chunk );
-	nameEntry( );
+	nameEntry();
 	
-	const std::string& returnName( );
+	const std::string& returnName();
 };
 
 /**
@@ -58,7 +58,7 @@ private:
 	unsigned int NextName;
 	std::vector<nameEntry*> items;
 public:
-	nameEntryManager( );
+	nameEntryManager();
 	
 	unsigned int add( ModelInstance *mod );
 	unsigned int add( WMOInstance *wmo );

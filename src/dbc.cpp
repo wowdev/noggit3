@@ -13,19 +13,19 @@ GroundEffectDoodadDB gGroundEffectDoodadDB;
 GroundEffectTextureDB gGroundEffectTextureDB;
 LiquidTypeDB gLiquidTypeDB;
 
-void OpenDBs( )
+void OpenDBs()
 {
-	gAreaDB.open( );
-	gMapDB.open( );
-	gLoadingScreensDB.open( );
-	gLightDB.open( );
-	gLightParamsDB.open( );
-	gLightSkyboxDB.open( );
-	gLightIntBandDB.open( );
-	gLightFloatBandDB.open( );
-	gGroundEffectDoodadDB.open( );
-	gGroundEffectTextureDB.open( );
-	gLiquidTypeDB.open( );
+	gAreaDB.open();
+	gMapDB.open();
+	gLoadingScreensDB.open();
+	gLightDB.open();
+	gLightParamsDB.open();
+	gLightSkyboxDB.open();
+	gLightIntBandDB.open();
+	gLightFloatBandDB.open();
+	gGroundEffectDoodadDB.open();
+	gGroundEffectTextureDB.open();
+	gLiquidTypeDB.open();
 }
 
 std::string AreaDB::getAreaName( int pAreaID )

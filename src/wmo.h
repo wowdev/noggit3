@@ -161,10 +161,19 @@ public:
 
 };
 
+typedef unsigned int WMOIDTYPE;
 
-class WMOManager: public SimpleManager {
+class WMOManager: public Manager<WMOIDTYPE>
+{
+private:
+	static int baseid;
 public:
-	int add(const std::string& name);
+	static WMOIDTYPE add(const std::string& name);
+  
+  static int nextID()
+  {
+    return baseid++;
+  }
 };
 
 

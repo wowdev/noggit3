@@ -1,19 +1,19 @@
 #include "frame.h"
-#include "video.h"
+#include "video.h" // gl*
 
-void frame::render( )
+void frame::render()
 {
 	if( hidden )
 		return;
 
-	glPushMatrix( );
+	glPushMatrix();
 	glTranslatef( x, y, 0.0f );
 
-	for( std::vector<frame*>::iterator child = children.begin( ); child != children.end( ); child++ )
+	for( std::vector<frame*>::iterator child = children.begin(); child != children.end(); child++ )
 		if( !( *child )->hidden )
-			( *child )->render( );
+			( *child )->render();
 
-	glPopMatrix( );
+	glPopMatrix();
 }
 
 void frame::addChild( frame *c )
@@ -25,7 +25,7 @@ void frame::addChild( frame *c )
 frame * frame::processLeftClick( float mx, float my )
 {
 	frame * lTemp;
-	for( std::vector<frame*>::reverse_iterator child = children.rbegin( ); child != children.rend( ); child++ )
+	for( std::vector<frame*>::reverse_iterator child = children.rbegin(); child != children.rend(); child++ )
 	{
 		if( !( *child )->hidden && ( *child )->IsHit( mx, my ) )
 		{
@@ -51,7 +51,7 @@ bool frame::processLeftDrag( float mx, float my, float xDrag, float yDrag )
 
 bool frame::processRightClick( float mx, float my )
 {
-	for( std::vector<frame*>::iterator child = children.begin( ); child != children.end( ); child++ )
+	for( std::vector<frame*>::iterator child = children.begin(); child != children.end(); child++ )
 		if( !( *child )->hidden && ( *child )->IsHit( mx, my ) )
 			if( ( *child )->processRightClick( mx - ( *child )->x, my - ( *child )->y ) )
 				return true;

@@ -14,13 +14,22 @@
 #include "dbc.h"
 #include "Log.h"
 #include "world.h"
+#include "TextureManager.h" // TextureManager, Texture
+#include "noggit.h" // fonts, APP_*
 
 #include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
 
-extern Directory * gFileList;
+// ui classes
+#include "frame.h" // frame
+#include "statusBar.h" // statusBar
+#include "menuBar.h" // menuBar, menu items, ..
+#include "win_credits.h" // winCredits
+#include "minimapWindowUI.h" // minimapWindowUI
 
 //! \todo  Take this out.
-/*TreeView * tv;
+/*
+extern Directory * gFileList;
+TreeView * tv;
 void TVSelectFunction( const std::string& pFile )
 {
 	LogDebug << "Selected: " << pFile << std::endl;
@@ -28,17 +37,15 @@ void TVSelectFunction( const std::string& pFile )
 
 extern std::list<std::string> gListfile;
 
-Menu::Menu( ) : bg(0)
+Menu::Menu() : bg( NULL )
 {
 	sel = -1;
 	newsel = -1;
 	newbookmark = -1;
 	cmd = CMD_SELECT;
-	world = 0;
+	world = NULL;
 
 	mt = 0;
-  
-  mMapView = NULL;
 
 	setpos = true;
 	ah = -90.0f;
@@ -47,41 +54,32 @@ Menu::Menu( ) : bg(0)
 	lastbg = -1;
 
 	// create frame for gui elements.
-	guiFrame.x=0;
-	guiFrame.y=0;
-	guiFrame.height=(float)video.yres;
-	guiFrame.width=(float)video.xres;
-	
+  guiFrame = new frame( 0.0f, 0.0f, video.xres, video.yres );
 
 	minimap_x = 300;
 	minimap_y = 70;
 
 	minimap_win = new minimapWindowUI( minimap_x-10, minimap_y-10);
-	guiFrame.addChild(minimap_win);
+	guiFrame->addChild(minimap_win);
 
 	mCredits = new winCredits();
-	guiFrame.addChild(mCredits);
+	guiFrame->addChild(mCredits);
 
 	// create and register menubar
-	mbar = new menuBar( );
-
+	mbar = new menuBar();
 	mbar->AddMenu( "File" );
-	mbar->AddMenu( "Continent" );
-	mbar->AddMenu( "BG" );
-	mbar->AddMenu( "Raid" );
-	mbar->AddMenu( "Bookmarks" );
-	guiFrame.addChild(mbar);
-
-	mbar->GetMenu( "File" )->AddMenuItemSwitch("exit                                  ESC",&gPop,true);
-	// create and register statusbar
+	mbar->GetMenu( "File" )->AddMenuItemSwitch( "exit                                  ESC", &gPop, true );
+	guiFrame->addChild( mbar );
+	
+  // create and register statusbar
 	guiStatusbar = new statusBar( 0.0f, video.yres - 30.0f, video.xres, 30.0f );
-	guiFrame.addChild(guiStatusbar);
+	guiFrame->addChild(guiStatusbar);
 
 	int x = 5, y = 74, fontsize;
 
 	for( int type = 0; type < 3; type++ )
 	{
-		for( DBCFile::Iterator i = gMapDB.begin( ); i != gMapDB.end( ); ++i ) 
+		for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i ) 
 		{
 			if( y > video.yres - 32 )
 			{
@@ -98,26 +96,6 @@ Menu::Menu( ) : bg(0)
 			e.loadingscreen = i->getUInt( MapDB::LoadingScreen );
 			e.IsBattleground = i->getUInt( MapDB::IsBattleground );
 			e.AreaType = i->getUInt( MapDB::AreaType );
-
-			// load map from startparameters if it exists
-			if ( id == gGoto.mapid || e.name == gGoto.mapname )
-			{
-				try
-				{
-					if( gGoto.mapid != -1 )
-						gGoto.mapname = gMapDB.getByID( gGoto.mapid ).getString( MapDB::InternalName );
-
-					world = new World( gGoto.mapname );
-					world->camera = Vec3D( gGoto.x, gGoto.y, gGoto.z );
-					cmd = CMD_LOAD_WORLD;
-					gGoto.mapid = -1;
-					gGoto.mapname = "NONE";
-				}
-				catch( ... )
-				{
-					LogError << "Did not find matching map for id " << gGoto.mapid << ". Aborting.." << std::endl;
-				}
-			}
 
 			if( i->getInt( MapDB::AreaType ) != type || !IsEditableWorld( id ) )
 				continue;
@@ -137,53 +115,87 @@ Menu::Menu( ) : bg(0)
 			}
 			y += fontsize;
 
-			e.x1 = e.x0 + freetype::width( e.font, e.name.c_str( ) );
+			e.x1 = e.x0 + freetype::width( e.font, e.name.c_str() );
 			e.y1 = e.y0 + fontsize;
 
-			
-			if (e.AreaType==0) mbar->GetMenu( "Continent" )->AddMenuItemSet(e.name,&newsel,e.mid);
-			if (e.AreaType==1) mbar->GetMenu( "BG" )->AddMenuItemSet(e.name,&newsel,e.mid);
-			if (e.AreaType==2) mbar->GetMenu( "Raid" )->AddMenuItemSet(e.name,&newsel,e.mid);
 			maps.push_back( e );
 		}
 		y += 40;
 	}
-	
-	randBackground( );
-	refreshBookmarks( );
-	int bmcounter=0;
-	for( unsigned int i = 0; i < bookmarks.size( ); i++ ) 
-	{
-		if(bmcounter<20)mbar->GetMenu( "Bookmarks" )->AddMenuItemSet(bookmarks[i].basename,&newbookmark,bookmarks[i].mid);
-		if(bmcounter==20) mbar->AddMenu( "Bookmarks2" );
-		if(bmcounter>19 && bmcounter<40)mbar->GetMenu( "Bookmarks2" )->AddMenuItemSet(bookmarks[i].basename,&newbookmark,bookmarks[i].mid);
-		if(bmcounter==40) mbar->AddMenu( "Bookmarks3" );
-		if(bmcounter>39 && bmcounter<60)mbar->GetMenu( "Bookmarks3" )->AddMenuItemSet(bookmarks[i].basename,&newbookmark,bookmarks[i].mid);
-		if(bmcounter==60) mbar->AddMenu( "Bookmarks4" );
-		if(bmcounter>59 && bmcounter<80)mbar->GetMenu( "Bookmarks4" )->AddMenuItemSet(bookmarks[i].basename,&newbookmark,bookmarks[i].mid);
-		bmcounter++;
-	}
+  
+  
+  static const char* typeToName[3] = { "Continent", "Dungeons", "Raid" };
+  
+	mbar->AddMenu( typeToName[0] );
+	mbar->AddMenu( typeToName[1] );
+	mbar->AddMenu( typeToName[2] );
+  
+  for( std::vector<MapEntry>::iterator it = maps.begin(); it != maps.end(); it++ )
+  {
+    mbar->GetMenu( typeToName[it->AreaType] )->AddMenuItemSet( it->name, &newsel, it->mid );
+  }
+  
+	refreshBookmarks();
+  
+  static const size_t nBookmarksPerMenu = 20;
+  const size_t nBookmarkMenus = ( bookmarks.size() / nBookmarksPerMenu ) + 1;
+  
+  if( nBookmarkMenus )
+  {
+    mbar->AddMenu( "Bookmarks" );
+  }
+  
+  for( size_t i = 1; i < nBookmarkMenus; i++ )
+  {
+    std::stringstream name;
+    name << "Bookmarks (" << ( i + 1 ) << ")";
+    mbar->AddMenu( name.str() );
+  }
+  
+  int n = 0;
+  for( std::vector<Bookmark>::iterator it = bookmarks.begin(); it != bookmarks.end(); it++ )
+  {
+    std::stringstream name;
+    const int page = ( n++ / nBookmarksPerMenu );
+    if( page )
+    {
+      name << "Bookmarks (" << ( page + 1 ) << ")";
+    }
+    else
+    {
+      name << "Bookmarks";
+    }
+    mbar->GetMenu( name.str() )->AddMenuItemSet( it->basename, &newbookmark, it->mid );
+  }
+  
+	randBackground();
+  
 	//! \todo  Take this out.
 /*	tv = new TreeView( 600, 10, gFileList, 0, TVSelectFunction );
-	tv->Expand( );*/
+	tv->Expand();*/
 }
 
 Menu::~Menu()
 {
-  if( mMapView )
+  if( guiFrame )
   {
-    delete mMapView;
-    mMapView = NULL;
+    delete guiFrame;
+    guiFrame = NULL;
   }
-	if( bg )
-	{
-		delete bg;
-		bg = NULL;
-	}
+  if( world )
+  {
+    delete world;
+    world = NULL;
+  }
+  if( bg )
+  {
+    ModelManager::delbyname( bg->name );
+    bg = NULL;
+  }
 }
 
-void Menu::randBackground( )
-{	
+void Menu::randBackground()
+{
 	// STEFF:TODO first need to fix m2 bg loading.
 	// Noggit shows no ground if the deactivated gbs loaded
 	// Alphamapping?
@@ -202,7 +214,7 @@ void Menu::randBackground( )
 	int randnum;
 	do
 	{
-		randnum = randint( 0, ui.size( ) - 1 );
+		randnum = randint( 0, ui.size() - 1 );
 	}
 	while( randnum == lastbg );
 
@@ -210,9 +222,14 @@ void Menu::randBackground( )
 
 	std::stringstream filename;
 	filename << "Interface\\Glues\\Models\\UI_" << ui[randnum] << "\\UI_" << ui[randnum] << ".m2";
-	
-	bg = new Model( filename.str( ) );
-  bg->finishLoading( );
+  
+  if( bg )
+  {
+    ModelManager::delbyname( bg->name );
+    bg = NULL;
+  }
+  
+	bg = reinterpret_cast<Model*>( ModelManager::items[ModelManager::add( filename.str() )] );
 }
 
 void Menu::tick( float t, float dt )
@@ -222,8 +239,6 @@ void Menu::tick( float t, float dt )
 
 	if( bg )
 		bg->updateEmitters( mt );
-	else 
-		randBackground( );
 
 	if( cmd == CMD_DO_LOAD_WORLD ) 
 	{
@@ -233,7 +248,7 @@ void Menu::tick( float t, float dt )
 
 		gWorld = world;
 
-		world->initDisplay( );
+		world->initDisplay();
 		// calc coordinates
 
 		if( setpos )
@@ -257,7 +272,7 @@ void Menu::tick( float t, float dt )
 			{
 				Vec3D p;
 				if( world->mHasAGlobalWMO ) 
-					p = world->mWMOInstances.begin( )->second.pos;
+					p = world->mWMOInstances.begin()->second.pos;
 				else 
 					p = Vec3D( 0.0f, 0.0f, 0.0f ); // empty map? :|
 				
@@ -274,19 +289,17 @@ void Menu::tick( float t, float dt )
 
 		world->enterTile( cx, cz );
 		
-		mMapView = new MapView( world, ah, av );
-
-		gStates.push_back( mMapView );
+		gStates.push_back( new MapView( world, ah, av ) ); // on gPop, MapView is deleted.
 
 		sel = -1;
-		world = 0;
+		world = NULL; // world will be deleted in ~MapView
 
 		cmd = CMD_BACK_TO_MENU;
 		
-		if(bg)
+		if( bg )
 		{
-			delete bg;
-			bg = 0;
+      ModelManager::delbyname( bg->name );
+      bg = NULL;
 		}
 	}
 	else if( cmd == CMD_BACK_TO_MENU )
@@ -294,15 +307,15 @@ void Menu::tick( float t, float dt )
 		if( video.fullscreen )
 			SDL_ShowCursor(SDL_ENABLE);
 		
-		resizewindow( );
+		resizewindow();
 
 		cmd = CMD_SELECT;
 		setpos = true;
-		gWorld = 0;
+		gWorld = NULL;
 		sel = -1;
 		newsel = -1;
-		world = 0;
-        randBackground( );
+		world = NULL;
+    randBackground();
 	}
 }
 
@@ -368,7 +381,7 @@ void Menu::display(float t, float dt)
 	else minimap_win->hidden=true;
 	
 	// Draw gui elements								
-	guiFrame.render();
+	guiFrame->render();
 
 
 	glEnable(GL_TEXTURE_2D);
@@ -383,7 +396,7 @@ void Menu::display(float t, float dt)
 	
 			glEnable( GL_TEXTURE_2D );
 			glColor4f(1,1,1,1);
-			glBindTexture(GL_TEXTURE_2D, video.textures.add( screen.getString( LoadingScreensDB::Path ) ));
+			glBindTexture(GL_TEXTURE_2D, TextureManager::add( screen.getString( LoadingScreensDB::Path ) ));
 			glBegin(GL_QUADS);	
 			
 			glTexCoord2f(0,0);
@@ -418,7 +431,7 @@ void Menu::display(float t, float dt)
 			if (world->minimap) 
 			{
 				
-				// draw the WDL data for the hole 64x64 ADTs
+				// draw the WDL data for the whole 64x64 ADTs
 
 				glColor4f(1,1,1,1);
 				glBindTexture(GL_TEXTURE_2D, world->minimap);
@@ -452,7 +465,7 @@ void Menu::display(float t, float dt)
 						glVertex2i( (minimap_x + ( i + 1 ) * tilesize) - 1, minimap_y + j * tilesize );
 						glVertex2i( (minimap_x + ( i + 1 ) * tilesize) - 1, (minimap_y + ( j + 1 ) * tilesize) -1 );
 						glVertex2i( minimap_x + i * tilesize, (minimap_y + ( j + 1 ) * tilesize) -1 );
-						glEnd( );
+						glEnd();
 					}
 					else
 					{
@@ -462,7 +475,7 @@ void Menu::display(float t, float dt)
 						glVertex2i( (minimap_x + ( i + 1 ) * tilesize) - 1, minimap_y + j * tilesize );
 						glVertex2i( (minimap_x + ( i + 1 ) * tilesize) - 1, (minimap_y + ( j + 1 ) * tilesize) -1 );
 						glVertex2i( minimap_x + i * tilesize, (minimap_y + ( j + 1 ) * tilesize) -1 );
-						glEnd( );
+						glEnd();
 					}
 				}
 			}
@@ -515,7 +528,7 @@ void Menu::mouseclick( SDL_MouseButtonEvent *e )
 	if( e->type == SDL_MOUSEBUTTONDOWN ) 
 		if( e->button == SDL_BUTTON_LEFT )
 		{
-			guiFrame.processLeftClick( float( e->x ), float( e->y ) );
+			guiFrame->processLeftClick( float( e->x ), float( e->y ) );
 		}
 
 
@@ -525,68 +538,17 @@ void Menu::mouseclick( SDL_MouseButtonEvent *e )
 	if( cmd != CMD_SELECT ) 
 		return;
 
-		/// We are about entering a world
-		if( sel != -1 && world != 0 && ( e->y < 768+minimap_y ) && (e->y > minimap_y) && (e->x < 768+minimap_x) && ( e->x > minimap_x ) ) 
-		{
-			click_x = e->x - minimap_x;
-			click_y = e->y - minimap_y;
-			cmd = CMD_LOAD_WORLD;
-			return;
-		}
+  /// We are about entering a world
+  if( sel != -1 && world != 0 && ( e->y < 768+minimap_y ) && (e->y > minimap_y) && (e->x < 768+minimap_x) && ( e->x > minimap_x ) ) 
+  {
+    click_x = e->x - minimap_x;
+    click_y = e->y - minimap_y;
+    cmd = CMD_LOAD_WORLD;
+    return;
+  }
 	
-	/*
-   
-   int osel = sel;
-	/// Did I hit a map?
-	for( unsigned int i = 0; i < maps.size( ); i++ ) 
-	{
-		if ( maps[i].hit( e->x, e->y ) )
-		{
-			sel = i;
-			if( sel != osel ) 
-			{
-				if( world != 0 ) 
-					delete world;
-				world = new World( maps[i].name );
-				return;
-			}
-		}
-	}
-	*/
-	
-
-	/*
-	/// Did I hit a bookmark?
-	for( unsigned int i = 0; i < bookmarks.size( ); i++ ) 
-	{
-		if( bookmarks[i].hit( e->x, e->y ) ) 
-		{
-			for ( unsigned int j = 0; j < maps.size( ); j++ ) 
-			{
-				if ( maps[j].name == bookmarks[i].basename ) 
-				{
-					sel = j;
-					cmd = CMD_LOAD_WORLD;
-					setpos = false;
-
-					// setup camera, ah, av
-					ah = bookmarks[i].ah;
-					av = bookmarks[i].av;
-
-					world = new World( bookmarks[i].basename );
-					world->camera = bookmarks[i].pos;
-
-					cx = int(bookmarks[i].pos.x / TILESIZE);
-					cz = int(bookmarks[i].pos.z / TILESIZE);
-
-					return;
-				}
-			}
-		}
-	}
-
-	*/
-	this->mCredits->hidden=true;
+	this->mCredits->hidden = true;
+  
 	/*
 	/// I hit nothing. ._.
 	if ( world != 0 ) 
@@ -598,17 +560,17 @@ void Menu::mouseclick( SDL_MouseButtonEvent *e )
 	*/
 }
 
-void Menu::resizewindow( )
+void Menu::resizewindow()
 {
-	for( std::vector<frame*>::iterator child = guiFrame.children.begin(); child != guiFrame.children.end(); ++child )
+	for( std::vector<frame*>::iterator child = guiFrame->children.begin(); child != guiFrame->children.end(); ++child )
 		if( (*child)->mustresize )
-			(*child)->resize( );
+			(*child)->resize();
 }
 
 void Menu::loadMap( int mid )
 {
 	int osel = sel;
-	for( unsigned int i = 0; i < maps.size( ); i++ )
+	for( unsigned int i = 0; i < maps.size(); i++ )
 	{
 		if ( maps[i].mid == mid ) 
 		{
@@ -625,11 +587,11 @@ void Menu::loadMap( int mid )
 
 void Menu::loadBookmark( int mid )
 {
-	for( unsigned int i = 0; i < bookmarks.size( ); i++ ) 
+	for( unsigned int i = 0; i < bookmarks.size(); i++ ) 
 	{
 		if( bookmarks[i].mid == mid ) 
 		{
-			for ( unsigned int j = 0; j < maps.size( ); j++ ) 
+			for ( unsigned int j = 0; j < maps.size(); j++ ) 
 			{
 				if ( maps[j].name == bookmarks[i].basename ) 
 				{
@@ -654,12 +616,14 @@ void Menu::loadBookmark( int mid )
 
 void Menu::refreshBookmarks()
 {
-	bookmarks.clear( );
-	mbar->GetMenu("Bookmarks")->children.clear();
+	bookmarks.clear();
+  
 	std::ifstream f( "bookmarks.txt" );
-	if( !f.is_open( ) )
-		// No bookmarks file
+	if( !f.is_open() )
+  {
+		LogDebug << "No bookmarks file." << std::endl;
 		return;
+  }
 
 	int y = 110;
 	const int x = video.xres/2.0f-130.0f;
@@ -697,8 +661,7 @@ void Menu::refreshBookmarks()
 		y += 16;
 		b.mid = count_id;
 		count_id++;
-		//mbar->GetMenu("Bookmarks")->AddMenuItemSwitch(b.name,&gPop,true);
 		bookmarks.push_back( b );
 	}
-	f.close( );
+	f.close();
 }

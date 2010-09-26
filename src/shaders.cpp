@@ -73,7 +73,7 @@ BLSShader::BLSShader( const std::string& pFilename )
 
 ShaderPair *terrainShaders[4]={0,0,0,0}, *wmoShader=0, *waterShaders[1]={0};
 
-void initShaders( )
+void initShaders()
 {
 	if( video.mSupportShaders )
 		reloadShaders();

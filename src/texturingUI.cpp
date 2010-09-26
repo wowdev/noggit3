@@ -1,14 +1,26 @@
 #include <algorithm>
 #include <map>
 #include <list>
+#include <sstream>
 
-#include "noggit.h"
+#include "noggit.h" // arial14, arialn13
 #include "log.h"
 #include "video.h"
 #include "MapChunk.h"
-#include "ui.h"
+//#include "ui.h"
 #include "dbc.h"
 #include "mpq.h"
+#include "texturingUI.h"
+#include "TextureManager.h" // TextureManager, Texture
+
+// ui classes
+#include "closeWindowUI.h" // closeWindowUI
+#include "textureUI.h" // textureUI
+#include "textUI.h" // textUI
+#include "checkboxUI.h" // checkboxUI
+#include "Gui.h" // Gui
+#include "Toolbar.h" // Toolbar
+#include "buttonUI.h" // buttonUI
 
 //! \todo  Get this whole thing in a seperate class.
 
@@ -35,7 +47,6 @@ closeWindowUI	*windowTexturePalette;
 
 textureUI	*curTextures[64];
 GLuint gTexturesInPage[64];
-ManagedItem	*selectedTexture;
 textUI *gPageNumber;
 
 //Selected Texture Window
@@ -108,9 +119,9 @@ bool TextureInPalette( const std::string& pFName )
 		return false;
   }
 
-	if( gActiveFilenameFilters.size( ) )
+	if( gActiveFilenameFilters.size() )
 	{
-		for( std::vector<std::string>::iterator lFilter = gActiveFilenameFilters.begin( ); lFilter != gActiveFilenameFilters.end( ); lFilter++ )
+		for( std::vector<std::string>::iterator lFilter = gActiveFilenameFilters.begin(); lFilter != gActiveFilenameFilters.end(); lFilter++ )
 		{
 			if( pFName.find( *lFilter ) != std::string::npos )
 			{
@@ -120,9 +131,9 @@ bool TextureInPalette( const std::string& pFName )
 		return false;
 	}
   
-	if( gActiveDirectoryFilters.size( ) )
+	if( gActiveDirectoryFilters.size() )
 	{
-    for( std::vector<std::string>::iterator lFilter = gActiveDirectoryFilters.begin( ); lFilter != gActiveDirectoryFilters.end( ); lFilter++ )
+    for( std::vector<std::string>::iterator lFilter = gActiveDirectoryFilters.begin(); lFilter != gActiveDirectoryFilters.end(); lFilter++ )
     {
       if( pFName.find( *lFilter ) != std::string::npos )
       {
@@ -143,7 +154,7 @@ void showPage( int pPage )
 
 	if( selectedTexture )
   {
-		for( std::map<GLuint, ManagedItem*>::iterator i = video.textures.items.begin( ); i != video.textures.items.end( ); i++ )
+		for( std::map<GLuint, ManagedItem*>::iterator i = TextureManager::items.begin(); i != TextureManager::items.end(); i++ )
     {
 			if( i->second->name == selectedTexture->name )
       {
@@ -155,14 +166,14 @@ void showPage( int pPage )
   if( gPageNumber )
   {
     std::stringstream pagenumber;
-    pagenumber << (pPage+1) << " / " << int( gTexturesInList.size( ) / ( pal_cols * pal_rows ) + 1 );
+    pagenumber << (pPage+1) << " / " << int( gTexturesInList.size() / ( pal_cols * pal_rows ) + 1 );
     gPageNumber->setText( pagenumber.str() );
   }
 
 	int i = 0;
 	const unsigned int lIndex = pal_cols * pal_rows * pPage;
   
-	for( std::vector<GLuint>::iterator lPageStart = gTexturesInList.begin( ) + ( lIndex > gTexturesInList.size() ? 0 : lIndex ); lPageStart != gTexturesInList.end( ); lPageStart++ )
+	for( std::vector<GLuint>::iterator lPageStart = gTexturesInList.begin() + ( lIndex > gTexturesInList.size() ? 0 : lIndex ); lPageStart != gTexturesInList.end(); lPageStart++ )
 	{
 		curTextures[i]->hidden = false;
 		curTextures[i]->setTexture( *lPageStart );
@@ -185,7 +196,7 @@ void showPage( int pPage )
 void updateTextures()
 {
   gTexturesInList.clear();
-	for( std::map<GLuint, ManagedItem*>::iterator t = video.textures.items.begin( ); t != video.textures.items.end( ); t++ )
+	for( std::map<GLuint, ManagedItem*>::iterator t = TextureManager::items.begin(); t != TextureManager::items.end(); t++ )
   {
 		if( TextureInPalette( t->second->name ) )
     {
@@ -200,7 +211,7 @@ void changePage( frame*, int direction )
   using std::min;
   using std::max;
   gCurrentPage = max( gCurrentPage + direction, 0 );
-  gCurrentPage = min( gCurrentPage, int( gTexturesInList.size( ) / ( pal_cols * pal_rows ) ) );
+  gCurrentPage = min( gCurrentPage, int( gTexturesInList.size() / ( pal_cols * pal_rows ) ) );
   showPage( gCurrentPage );
 }
 
@@ -209,7 +220,7 @@ void texturePaletteClick( frame *f, int id )
 	if( curTextures[id]->hidden )
 		return;
 	
-  selectedTexture = video.textures.items.find( gTexturesInPage[id] )->second;
+  selectedTexture = (Texture*)TextureManager::items.find( gTexturesInPage[id] )->second;
   
 	if( selectedTexture )
   {
@@ -235,7 +246,7 @@ void LoadTileset( frame *button, int id )
 	{
 		if( it->find( tilesetDirectories[id] ) != std::string::npos )
     {
-			video.textures.add( *it );
+			TextureManager::add( *it );
     }
 	}
 	updateTextures();
@@ -243,7 +254,7 @@ void LoadTileset( frame *button, int id )
 
 // --- Filtering stuff ---------------------
 
-void InitFilenameFilterList( )
+void InitFilenameFilterList()
 {
 	if( gFilenameFiltersInited )
 		return;
@@ -297,7 +308,7 @@ void clickFilterTexture(bool value,int id)
 	}
 	else
   {
-		for( std::vector<std::string>::iterator it = gActiveDirectoryFilters.begin( ); it != gActiveDirectoryFilters.end( ); it++ )
+		for( std::vector<std::string>::iterator it = gActiveDirectoryFilters.begin(); it != gActiveDirectoryFilters.end(); it++ )
     {
 			if( *it == tilesetDirectories[id] )
 			{
@@ -319,7 +330,7 @@ void clickFileFilterTexture(bool value,int id)
 	}
 	else
   {
-		for( std::vector<std::string>::iterator it = gActiveFilenameFilters.begin( ); it != gActiveFilenameFilters.end( ); it++ )
+		for( std::vector<std::string>::iterator it = gActiveFilenameFilters.begin(); it != gActiveFilenameFilters.end(); it++ )
     {
 			if( *it == gFilenameFilters[id] )
 			{
@@ -334,7 +345,7 @@ void clickFileFilterTexture(bool value,int id)
 
 
 //! \todo  Make this cleaner.
-frame *CreateTexturePalette( int rows, int cols, Gui *setgui )
+frame* TexturingUI::createTexturePalette( int rows, int cols, Gui *setgui )
 {
 	gCurrentPage = 0;
 
@@ -345,10 +356,13 @@ frame *CreateTexturePalette( int rows, int cols, Gui *setgui )
 
 	for(int i=0;i<(pal_cols*pal_rows);i++)
 	{
-		curTextures[i]=new textureUI(8.0f+(i%pal_rows)*68.0f,22.0f+(i/pal_rows)*68.0f,64.0f,64.0f,video.textures.add("tileset\\generic\\black.blp"));
+		curTextures[i]=new textureUI(8.0f+(i%pal_rows)*68.0f,22.0f+(i/pal_rows)*68.0f,64.0f,64.0f,"tileset\\generic\\black.blp");
 		curTextures[i]->setClickFunc(texturePaletteClick,i);
 		windowTexturePalette->addChild(curTextures[i]);
 	}
+  
+  gPageNumber = NULL;
+  textSelectedTexture = NULL;
 	
 	updateTextures();
 	texturePaletteClick( 0, 0 );
@@ -363,7 +377,7 @@ frame *CreateTexturePalette( int rows, int cols, Gui *setgui )
 	return windowTexturePalette;
 }
 
-frame *CreateSelectedTexture()
+frame* TexturingUI::createSelectedTexture()
 {
 	windowSelectedTexture = new closeWindowUI( video.xres - 148.0f - 128.0f, video.yres - 320.0f, 274.0f, 288.0f, "Current Texture", true );
 
@@ -379,7 +393,7 @@ frame *CreateSelectedTexture()
 	return windowSelectedTexture;
 }
 
-frame *CreateTilesetLoader()
+frame* TexturingUI::createTilesetLoader()
 {	
 	LoadTextureNames();
 
@@ -415,18 +429,18 @@ frame *CreateTilesetLoader()
 	return windowTilesetLoader;
 }
 
-frame *CreateTextureFilter()
+frame* TexturingUI::createTextureFilter()
 {	
-	InitFilenameFilterList( );
+	InitFilenameFilterList();
   
-	LoadTextureNames( );
+	LoadTextureNames();
 	windowTextureFilter = new closeWindowUI( video.xres / 2.0f - 308.0f, video.yres / 2.0f - 314.5f, 616.0f, 630.0f, "Texture Filtering", true );
 	windowTextureFilter->hidden = true;
 
 	//Filename Filters
 	windowTextureFilter->addChild( new textUI( 308.0f, 26.0f, "Filename Filters", &arial14, eJustifyCenter ) );
 
-	for( std::map<int,std::string>::iterator it = gFilenameFilters.begin( ); it != gFilenameFilters.end( ); it++ )
+	for( std::map<int,std::string>::iterator it = gFilenameFilters.begin(); it != gFilenameFilters.end(); it++ )
   {
 		windowTextureFilter->addChild( new checkboxUI( 5.0f + 152.0f * ( it->first / 6 ), 43.0f + 30.0f * ( it->first % 6 ), it->second, clickFileFilterTexture, it->first ) );
   }
@@ -444,7 +458,7 @@ frame *CreateTextureFilter()
 	return windowTextureFilter;
 }
 
-frame *createMapChunkWindow()
+frame* TexturingUI::createMapChunkWindow()
 {
 	window *chunkSettingsWindow,*chunkTextureWindow,*chunkEffectWindow;
 	windowMapChunk=new closeWindowUI(video.xres/2.0f-316.0f,video.yres-369.0f,634.0f,337.0f,"Map Chunk Settings");
@@ -524,7 +538,7 @@ frame *createMapChunkWindow()
 	return windowMapChunk;
 }
 
-void setChunkWindow(MapChunk *chunk)
+void TexturingUI::setChunkWindow(MapChunk *chunk)
 {
 	char Temp[255];
 
@@ -583,9 +597,9 @@ void setChunkWindow(MapChunk *chunk)
 	sprintf(Temp,"EffectID- %d",chunk->effectID[pl]);
 	chunkTextureEffectID[pl]->setText(Temp);
 
-	chunkTexture[pl]->setTexture(video.textures.add(video.textures.items[chunk->textures[pl]]->name));
+	chunkTexture[pl]->setTexture(TextureManager::items[chunk->textures[pl]]->name);
 
-	chunkTextureNames[pl]->setText(video.textures.items[chunk->textures[pl]]->name);
+	chunkTextureNames[pl]->setText(TextureManager::items[chunk->textures[pl]]->name);
 	}
 	for(;pl<4;pl++)
 	{

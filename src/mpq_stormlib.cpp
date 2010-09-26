@@ -1,5 +1,4 @@
 #include "mpq_stormlib.h"
-#include "noggit.h"
 #include "Log.h"
 #include "directory.h"
 #include "Project.h"
@@ -57,7 +56,7 @@ MPQArchive::MPQArchive(const std::string& filename,bool doListfile)
 		while (file) 
 		{
 		  std::string line = file;
-		  std::transform( line.begin( ), line.end( ), line.begin( ), ::tolower );
+		  std::transform( line.begin(), line.end(), line.begin(), ::tolower );
 		  gListfile.push_back( line );
 	      
 		  file = (char*)strtok(NULL, "\r\n");
@@ -94,7 +93,7 @@ void MPQArchive::close()
 	
 }
 
-void MPQFile::SaveFile( )
+void MPQFile::SaveFile()
 {	
 	FILE* fd;
 	
@@ -117,7 +116,7 @@ void MPQFile::SaveFile( )
 		LogDebug << lDirectoryName << std::endl;	
 	
 
-	fd = fopen( lFilename.c_str( ), "wb" );
+	fd = fopen( lFilename.c_str(), "wb" );
 
 	if( fd )
 	{
@@ -162,7 +161,7 @@ MPQFile::MPQFile( const std::string& filename ):
 		fclose( fd );
 		External = true;
 		Log << "Opening file \"" << filename << "\" from disk." << std::endl;
-		std::transform( fname.begin( ), fname.end( ), fname.begin( ), ::tolower );
+		std::transform( fname.begin(), fname.end(), fname.begin(), ::tolower );
 		return;
 	}
   
@@ -276,7 +275,7 @@ size_t MPQFile::getSize()
 
 void FixFilePath( std::string & pFilename )
 {
-	//std::transform( pFilename.begin( ), pFilename.end( ), pFilename.begin( ), ::tolower );
+	//std::transform( pFilename.begin(), pFilename.end(), pFilename.begin(), ::tolower );
 	
 	size_t found = pFilename.find( "/" );
 	while( found != std::string::npos )

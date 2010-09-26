@@ -1,11 +1,7 @@
 #include "MinimizeButton.h"
+#include <string>
 
-MinimizeButton::MinimizeButton( float pWidth, frame * pParent ) : buttonUI(
-	pWidth - 29.0f, 1.0f,
-	30.0f, 30.0f, 
-	video.textures.add( "Interface\\Buttons\\UI-Panel-MinimizeButton-Up.blp" ), 
-	video.textures.add( "Interface\\Buttons\\UI-Panel-MinimizeButton-Down.blp" )
-	)
+MinimizeButton::MinimizeButton( float pWidth, frame * pParent ) : buttonUI( pWidth - 29.0f, 1.0f, 30.0f, 30.0f, "Interface\\Buttons\\UI-Panel-MinimizeButton-Up.blp", "Interface\\Buttons\\UI-Panel-MinimizeButton-Down.blp" )
 {
 	mParent = pParent;
 }

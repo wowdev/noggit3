@@ -1,7 +1,7 @@
 /*
  * ErrorHandling.h
  *
- * Description: Simple implementation of signal handlers. Include this and call RegisterErrorHandlers( ); in main( ) once.
+ * Description: Simple implementation of signal handlers. Include this and call RegisterErrorHandlers(); in main() once.
  *
  *  Created on: Apr 26, 2010
  *      Author: loerwald
@@ -12,7 +12,7 @@
 
 #include <signal.h>
 
-void printStacktrace( );
+void printStacktrace();
 
 void leave(int sig)
 {
@@ -71,7 +71,7 @@ void leave(int sig)
 	exit(sig);
 }
 
-void RegisterErrorHandlers( )
+void RegisterErrorHandlers()
 {
   (void) signal( SIGABRT, leave );
   (void) signal( SIGFPE, leave );
@@ -85,7 +85,7 @@ void RegisterErrorHandlers( )
 
 #include <execinfo.h>
 
-void printStacktrace( )
+void printStacktrace()
 {	
 	static const int nframes = 20;
 	
@@ -109,7 +109,7 @@ void printStacktrace( )
 
 #else
 
-void printStacktrace( )
+void printStacktrace()
 {	
   /*!
    \todo This is not compiling, yes. This is on purpose. You need to add windows specific code here.

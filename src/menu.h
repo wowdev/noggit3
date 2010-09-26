@@ -5,9 +5,15 @@
 #include <vector>
 
 #include "appstate.h"
-#include "noggit.h"
+#include "freetype.h"
 #include "vec3d.h"
-#include "ui.h"
+
+// ui classes
+class frame;
+class statusBar;
+class menuBar;
+class winCredits;
+class minimapWindowUI;
 
 class World;
 class Model;
@@ -45,22 +51,20 @@ enum Commands {
 
 class Menu : public AppState
 {
-  MapView *mMapView;
-  
 	int sel, newsel,newbookmark, cmd, click_x, click_y, cz, cx;
 
 	// frame to place all gui elemnts on
-	frame guiFrame;
+	frame* guiFrame;
 
 	// status and menu bar
-	statusBar	*guiStatusbar;
-	menuBar		*mbar;
+	statusBar* guiStatusbar;
+	menuBar* mbar;
 
-	winCredits *mCredits;
+	winCredits* mCredits;
 
 	int minimap_x, minimap_y;
-	minimapWindowUI *minimap_win;
-	World *world;
+	minimapWindowUI* minimap_win;
+	World* world;
 
 	std::vector<MapEntry> maps;
 	std::vector<Bookmark> bookmarks;
@@ -68,8 +72,7 @@ class Menu : public AppState
 	bool setpos;
 	float ah,av;
 
-	Model *bg;
-	GLuint loading;
+	Model* bg;
 	float mt;
 
 	int lastbg;
@@ -88,7 +91,7 @@ public:
 	void refreshBookmarks();
 	void randBackground();
 	
-	void resizewindow( );
+	void resizewindow();
 	void loadMap( int mid );
 	void loadBookmark( int mid );
 };

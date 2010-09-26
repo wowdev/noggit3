@@ -165,7 +165,7 @@ public:
 	static int getLiquidType( int pID );
 };
 
-void OpenDBs( );
+void OpenDBs();
 
 const char * getGroundEffectDoodad( unsigned int effectID, int DoodadNum );
 

@@ -1,16 +1,17 @@
 #ifndef __BUTTONUI_H
 #define __BUTTONUI_H
 
-#include "video.h"
 #include "frame.h"
-#include "textUI.h"
-#include "FreeType.h"
 
+class Texture;
+class textUI;
+namespace freetype { class font_data; };
+  
 class buttonUI : public frame
 {
 protected:
-	GLuint texture;
-	GLuint textureDown;
+	Texture* texture;
+	Texture* textureDown;
 	void ( *clickFunc )( frame *, int );
 	int	id;
 
@@ -18,19 +19,18 @@ protected:
 	textUI *text;
 
 public:
-	buttonUI( float x, float y, float width, float height, GLuint tex, GLuint texd );
-	buttonUI( float x, float y, float width, float height, const std::string& pText, GLuint tex, GLuint texd );
 	buttonUI( float x, float y, float width, float height, const std::string& pTexNormal, const std::string& pTexDown );
 	buttonUI( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
 	buttonUI( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, void (*pFunc)( frame *, int ), int pFuncParam );
-	void render( );
+  
+  void render();
 
-	void setLeft( );
+	void setLeft();
 	void setText( const std::string& pText );
 	void setFont( freetype::font_data *font );
 
 	frame *processLeftClick( float mx, float my );
 	void setClickFunc( void (*f)( frame *, int ), int num );
-	void processUnclick( );
+	void processUnclick();
 };
 #endif

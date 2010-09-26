@@ -6,18 +6,18 @@ std::ofstream gLogStream;
 
 std::ostream& _LogError( const char * pFile, int pLine )
 {
-	return std::cerr << "(" << pFile << ":" << pLine << "): [Error] ";
+	return std::cerr << "(" << ((strrchr(pFile, '/') ?: pFile - 1) + 1) << ":" << pLine << "): [Error] ";
 }
 std::ostream& _LogDebug( const char * pFile, int pLine )
 {
-	return std::clog << "(" << pFile << ":" << pLine << "): [Debug] ";
+	return std::clog << "(" << ((strrchr(pFile, '/') ?: pFile - 1) + 1) << ":" << pLine << "): [Debug] ";
 }
 std::ostream& _Log( const char * pFile, int pLine )
 {
-	return std::cout << "(" << pFile << ":" << pLine << "): ";
+	return std::cout << "(" << ((strrchr(pFile, '/') ?: pFile - 1) + 1) << ":" << pLine << "): ";
 }
 
-void InitLogging( )
+void InitLogging()
 {
 #if DEBUG__LOGGINGTOCONSOLE
 	LogDebug << "Logging to console window." << std::endl;
@@ -26,9 +26,9 @@ void InitLogging( )
 	gLogStream.open( "log.txt", std::ios_base::out | std::ios_base::trunc );
 	if( gLogStream )
 	{
-		std::cout.rdbuf( gLogStream.rdbuf( ) );
-		std::clog.rdbuf( gLogStream.rdbuf( ) );
-		std::cerr.rdbuf( gLogStream.rdbuf( ) );
+		std::cout.rdbuf( gLogStream.rdbuf() );
+		std::clog.rdbuf( gLogStream.rdbuf() );
+		std::cerr.rdbuf( gLogStream.rdbuf() );
 	}
 #endif
 }

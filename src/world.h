@@ -35,8 +35,6 @@ struct MapTileEntry
 
 class World 
 {
-	//MapTile *maptilecache[MAPTILECACHESIZE];
-	//MapTile *current[5][5];
 	int ex,ez;
 
 	bool mBigAlpha;
@@ -51,7 +49,6 @@ public:
 	
 	std::string basename;
 
-	//bool maps[64][64];
 	GLuint lowrestiles[64][64];
 	bool autoheight;
 
@@ -83,9 +80,7 @@ public:
 	bool noadt;
 
 	unsigned int mMapId;
-
-	WMOManager wmomanager;
-	ModelManager modelmanager;
+  
 	//! \todo  Get these managed? ._.
 	std::map<int, ModelInstance> mModelInstances;
 	std::map<int, WMOInstance> mWMOInstances;
@@ -133,11 +128,11 @@ private:
 	GLuint mCurrentSelectedTriangle;
 
 public:
-	bool HasSelection( ) { return mCurrentSelection; }
-	bool IsSelection( int pSelectionType ) { return HasSelection( ) && mCurrentSelection->type == pSelectionType; }
-	nameEntry * GetCurrentSelection( ) { return mCurrentSelection; }
-	void ResetSelection( ) { mCurrentSelection = 0; }
-	GLuint GetCurrentSelectedTriangle( ) { return mCurrentSelectedTriangle; }
+	bool HasSelection() { return mCurrentSelection; }
+	bool IsSelection( int pSelectionType ) { return HasSelection() && mCurrentSelection->type == pSelectionType; }
+	nameEntry * GetCurrentSelection() { return mCurrentSelection; }
+	void ResetSelection() { mCurrentSelection = 0; }
+	GLuint GetCurrentSelectedTriangle() { return mCurrentSelectedTriangle; }
 
 	bool GetVertex(float x,float z, Vec3D *V);
 	void changeTerrain(float x, float z, float change, float radius, int BrushType);

@@ -1,10 +1,9 @@
 #ifndef __TOGGLEGROUP_H
 #define __TOGGLEGROUP_H
 
-class ToggleGroup;
-
-#include "checkboxUI.h"
 #include <map>
+
+class checkboxUI;
 
 class ToggleGroup
 {

@@ -3,6 +3,7 @@
 #include "shaders.h"
 #include "dbc.h"
 #include "Log.h"
+#include "TextureManager.h" // TextureManager, Texture
 
 struct LiquidVertex {
 	unsigned char c[4];
@@ -342,9 +343,9 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 				glVertex3fv(lVertices[p+info->width]);*/
 			}
 
-	glEnd( );
+	glEnd();
 
-	glEndList( );
+	glEndList();
 	delete[] lVertices;
 }
 
@@ -416,9 +417,9 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 				glVertex3fv( lVertices[j + 1][i] );
 			}
 
-	glEnd( );
+	glEnd();
 
-	glEndList( );
+	glEndList();
 }
 
 #ifdef USEBLSFILES
@@ -614,8 +615,8 @@ void Liquid::initTextures( const std::string& pFilename )
 	char buf[1024];
 	for( int i = pFirst; i <= pLast; i++ ) 
 	{
-		sprintf( buf, pFilename.c_str( ), i );
-		textures.push_back( video.textures.add( buf )) ;
+		sprintf( buf, pFilename.c_str(), i );
+		textures.push_back( TextureManager::add( buf )) ;
 	}
 }
 
@@ -624,6 +625,6 @@ Liquid::~Liquid()
 {
 	for( size_t i=0; i<textures.size(); i++ ) 
 	{
-		video.textures.del( textures[i] );
+		TextureManager::del( textures[i] );
 	}
 }

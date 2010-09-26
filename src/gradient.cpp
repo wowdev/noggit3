@@ -1,4 +1,5 @@
 #include "gradient.h"
+#include "video.h" // gl*
 
 void gradient::render()
 {

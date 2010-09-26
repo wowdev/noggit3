@@ -1,6 +1,11 @@
 #ifndef __MENUBAR_H
 #define __MENUBAR_H
 
+#include <map>
+
+#include "buttonUI.h"
+#include "window.h"
+
 class MenuButton;
 class MenuPane;
 class MenuItem;
@@ -9,9 +14,8 @@ class MenuItemToggle;
 class MenuItemSeperator;
 class menuBar;
 
-#include "Gui.h"
-#include "buttonUI.h"
-#include "checkboxUI.h"
+class Gui;
+class checkboxUI;
 
 // This file contains more than one class as they are needed together.
 
@@ -54,7 +58,7 @@ public:
 
 	frame* processLeftClick( float pX, float pY );
 
-	void render( );
+	void render();
 };
 
 class MenuItemSwitch : public MenuItem 
@@ -67,8 +71,6 @@ public:
 	MenuItemSwitch( MenuPane * pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert = 1 );
 
 	frame* processLeftClick( float pX, float pY );
-
-	void render( );
 };
 
 
@@ -82,8 +84,6 @@ public:
 	MenuItemSet( MenuPane * pParent, float pX, float pY, const std::string& pText, int * pMyState, int pSet = 1 );
 
 	frame* processLeftClick( float pX, float pY );
-
-	void render( );
 };
 
 class MenuItemSeperator : public MenuItem
@@ -127,12 +127,12 @@ private:
 public:
 	bool mustResize;
 
-	menuBar( );
+	menuBar();
 	void render();	
 	void resize();
 
-	void CloseAll( );
-	void ClearAll( );
+	void CloseAll();
+	void ClearAll();
 	void AddMenu( const std::string& pName );
 
 	MenuPane * GetMenu( const std::string& pName );

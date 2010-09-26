@@ -15,15 +15,15 @@ private:
 	bool update;
 
 public:
-	void GenerateTexture( );
+	void GenerateTexture();
 	void setHardness( float H );
 	void setRadius( float R );
-	float getHardness( );
-	float getRadius( );
+	float getHardness();
+	float getRadius();
 	float getValue( float dist );
-	GLuint getTexture( );
-	bool needUpdate( );
-	void init( );
+	GLuint getTexture();
+	bool needUpdate();
+	void init();
 };
 
 #endif

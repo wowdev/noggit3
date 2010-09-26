@@ -1,14 +1,15 @@
 #ifndef __SLIDER_H
 #define __SLIDER_H
 
-#include "video.h"
 #include "frame.h"
+
+class Texture;
 
 class slider:public frame
 {
 protected:
-	GLuint	texture;
-	GLuint	sliderTexture;
+	Texture* texture;
+	Texture* sliderTexture;
 	float	scale;
 	float	offset;
 	void (*func)(float);

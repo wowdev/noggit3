@@ -11,7 +11,7 @@ public:
 	~DBCFile();
 
 	// Open database. It must be openened before it can be used.
-	void open( );
+	void open();
 
 	// Database exceptions
 	class Exception
@@ -126,7 +126,7 @@ public:
 	size_t getFieldCount() const { return fieldCount; }
 	Record getByID( unsigned int id, size_t field = 0 ) 
 	{
-		for( Iterator i = begin( ); i!=end( ); ++i )
+		for( Iterator i = begin(); i!=end(); ++i )
 		{
 			if( i->getUInt( field ) == id )
 				return ( *i );

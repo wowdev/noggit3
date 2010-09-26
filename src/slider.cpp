@@ -1,5 +1,9 @@
 #include "slider.h"
-#include "noggit.h"
+#include "noggit.h" // arial12
+#include "video.h"
+#include "TextureManager.h" // TextureManager, Texture
+
+#include "FreeType.h" // freetype::
 
 slider::slider(float xPos, float yPos, float w,float s,float o)
 {
@@ -15,8 +19,8 @@ slider::slider(float xPos, float yPos, float w,float s,float o)
 	scale=s;
 	offset=o;
 	text[0]=0;
-	texture=video.textures.add("Interface\\Buttons\\UI-SliderBar-Border.blp");
-	sliderTexture=video.textures.add("Interface\\Buttons\\UI-SliderBar-Button-Horizontal.blp");
+	texture = TextureManager::newTexture( "Interface\\Buttons\\UI-SliderBar-Border.blp" );
+	sliderTexture = TextureManager::newTexture( "Interface\\Buttons\\UI-SliderBar-Button-Horizontal.blp" );
 }
 
 void slider::setFunc(void(*f)(float))
@@ -91,33 +95,24 @@ void slider::render()
 	glPushMatrix();
 	glTranslatef(x,y,0);
 
-
-
-
 	glColor3f(1.0f,1.0f,1.0f);
 	
-	
-
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
-
 	char Temp[255];
 
 	if(text[0]!=0)
 	{
 		int twidth;
-		//OGLFT::BBox	Box;
 		sprintf(Temp,text,value*scale+offset);
-	
 		twidth=freetype::width(arial12,Temp);
-		
-		
 		freetype::shprint(arial12,width/2-twidth/2,-16,Temp);	
 	}
 	
 	glPushMatrix();
-
-	glBindTexture(GL_TEXTURE_2D, texture);
+  
+  Texture::setActiveTexture();
+  Texture::enableTexture();
+  
+  texture->render();
 	
 
 	//Draw Bottom left Corner First
@@ -223,8 +218,9 @@ void slider::render()
 	}
 
 	glPopMatrix();
-
-	glBindTexture(GL_TEXTURE_2D, sliderTexture);
+  
+  sliderTexture->render();
+  
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(0.0f,0.0f);
 	glVertex2f(width*value-16.0f,height/2-16.0f);
@@ -236,8 +232,7 @@ void slider::render()
 	glVertex2f(width*value+16.0f,height/2+16.0f);
 	glEnd();
 	
-
-	glDisable(GL_TEXTURE_2D);
+  Texture::disableTexture();
 
 
 	glPopMatrix();

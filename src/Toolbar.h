@@ -1,13 +1,12 @@
 #ifndef __TOOLBAR_H
 #define __TOOLBAR_H
 
-class Toolbar;
-
-#include "Gui.h"
 #include "window.h"
-#include "Icon.h"
-#include "textUI.h"
-#include "textureUI.h"
+
+class Gui;
+class textUI;
+class Icon;
+class textureUI;
 
 class Toolbar:public window
 {

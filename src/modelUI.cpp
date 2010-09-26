@@ -1,4 +1,6 @@
 #include "modelUI.h"
+#include "video.h"
+#include "model.h"
 
 modelUI::modelUI(float xPos,float yPos,float w,float h)
 {
@@ -27,7 +29,7 @@ void modelUI::render()
 
 
 
-	glPushMatrix( );
+	glPushMatrix();
 
 
 	glTranslatef( x + width / 2.0f, y + height / 2.0f, 0.0f );
@@ -61,7 +63,7 @@ void modelUI::render()
 
 	glEnable(GL_TEXTURE_2D);
 
-	glPopMatrix( );
+	glPopMatrix();
 }
 
 frame *modelUI::processLeftClick(float mx,float my)

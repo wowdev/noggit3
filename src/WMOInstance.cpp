@@ -46,12 +46,12 @@ WMOInstance::WMOInstance(WMO *_wmo) : wmo (_wmo)
 
 void WMOInstance::draw()
 {
-	if( ids.find( id ) != ids.end( ) ) 
+	if( ids.find( id ) != ids.end() ) 
 		return;
 
 	ids.insert( id );
 
-	glPushMatrix( );
+	glPushMatrix();
 	glTranslatef( pos.x, pos.y, pos.z );
 
 	float rot = 90.0f - dir.y;
@@ -62,7 +62,7 @@ void WMOInstance::draw()
 	glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
 	glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
 
-	if( gWorld->IsSelection( eEntry_WMO ) && gWorld->GetCurrentSelection( )->data.wmo->id == this->id )
+	if( gWorld->IsSelection( eEntry_WMO ) && gWorld->GetCurrentSelection()->data.wmo->id == this->id )
 		wmo->draw( doodadset, pos, rot, true, true, true );
 	else
 		wmo->draw( doodadset, pos, rot, false, false, false );

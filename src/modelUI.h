@@ -1,9 +1,9 @@
 #ifndef MODELUI_H
 #define MODELUI_H
 
-#include "video.h"
 #include "frame.h"
-#include "model.h"
+
+class Model;
 
 class modelUI:public frame
 {

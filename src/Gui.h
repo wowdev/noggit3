@@ -1,12 +1,10 @@
 #ifndef __GUI_H
 #define __GUI_H
 
-class Gui;
-
-#include "Toolbar.h"
-#include "statusBar.h"
-#include "detailInfos.h"
-#include "appInfo.h"
+class Toolbar;
+class statusBar;
+class detailInfos;
+class appInfo;
 
 class Gui
 {

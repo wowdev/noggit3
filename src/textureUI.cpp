@@ -1,16 +1,17 @@
 #include "textureUI.h"
+#include "TextureManager.h" // TextureManager, Texture
 
-textureUI::textureUI( float xPos, float yPos, float w, float h, GLuint tex ) : frame( xPos, yPos, w, h )
+/*textureUI::textureUI( float xPos, float yPos, float w, float h, GLuint tex ) : frame( xPos, yPos, w, h )
 {
 	texture = tex;
 	highlight = false;
 	clickFunc = 0;
 	id = 0;
-}
+}*/
 
 textureUI::textureUI( float xPos, float yPos, float w, float h, const std::string& tex ) : frame( xPos, yPos, w, h )
 {
-	texture = video.textures.add( tex );
+	texture = TextureManager::newTexture( tex );
 	highlight = false;
 	clickFunc = 0;
 	id = 0;
@@ -18,21 +19,23 @@ textureUI::textureUI( float xPos, float yPos, float w, float h, const std::strin
 
 void textureUI::setTexture( GLuint tex )
 {
-	texture = tex;
+	texture = (Texture*)TextureManager::items[tex];
 }
 
 void textureUI::setTexture( const std::string& tex )
 {
-	texture = video.textures.add( tex );
+	texture = TextureManager::newTexture( tex );
 }
 
-void textureUI::render( )
+void textureUI::render()
 {
 	glColor3f( 1.0f, 1.0f, 1.0f );
 
-	glActiveTexture( GL_TEXTURE0 );
-	glBindTexture( GL_TEXTURE_2D, texture );
-	glEnable( GL_TEXTURE_2D );
+  Texture::setActiveTexture();
+  Texture::enableTexture();
+  
+  texture->render();
+
 	glBegin( GL_TRIANGLE_STRIP );
 	glTexCoord2f( 0.0f, 0.0f );
 	glVertex2f( x, y );
@@ -42,9 +45,9 @@ void textureUI::render( )
 	glVertex2f( x, y + height );
 	glTexCoord2f( 1.0f, 1.0f );
 	glVertex2f( x + width, y + height );
-	glEnd( );
-
-	glDisable( GL_TEXTURE_2D );
+	glEnd();
+  
+  Texture::disableTexture();
 
 	if( highlight )
 	{
@@ -54,7 +57,7 @@ void textureUI::render( )
 		glVertex2f( x + width, y );
 		glVertex2f( x + width, y + height );
 		glVertex2f( x - 1.0f, y + height );
-		glEnd( );
+		glEnd();
 	}
 }
 

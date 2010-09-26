@@ -6,7 +6,6 @@
 #include "video.h"
 
 #include "mpq.h"
-#include "noggit.h"
 
 class BLSShader
 {

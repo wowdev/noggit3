@@ -3,6 +3,7 @@
 #include "liquid.h"
 #include "shaders.h"
 #include "Log.h"
+#include "TextureManager.h" // TextureManager, Texture
 
 void WMOHighlight( Vec4D color )
 {
@@ -19,7 +20,7 @@ void WMOHighlight( Vec4D color )
 	glDepthMask( GL_FALSE );
 }
 
-void WMOUnhighlight( )
+void WMOUnhighlight()
 {
 	glEnable( GL_ALPHA_TEST );
  	glDisable( GL_BLEND );
@@ -92,7 +93,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 
 				std::string texpath(texbuf+m->nameStart);
 
-				m->tex = video.textures.add(texpath);
+				m->tex = TextureManager::add(texpath);
 				textures.push_back(texpath);
 			}
 		}
@@ -119,7 +120,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 			// MMID would be relative offsets for MMDX filenames
 			if (size) {
 
-				ddnames = reinterpret_cast<char*>( f.getPointer( ) );
+				ddnames = reinterpret_cast<char*>( f.getPointer() );
 
 				char *p=ddnames,*end=p+size;
 				while (p<end) {
@@ -127,7 +128,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 					p+=strlen(p)+1;
 					while ((p<end) && (*p==0)) p++;
 
-					gWorld->modelmanager.add(path);
+					ModelManager::add(path);
 					models.push_back(path);
 				}
 				f.seekRelative((int)size);
@@ -145,7 +146,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 			for (unsigned int i=0; i<nModels; i++) {
 				int ofs;
 				f.read(&ofs,4);
-				Model *m = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(ddnames + ofs)];
+				Model *m = (Model*)ModelManager::items[ModelManager::get(ddnames + ofs)];
 				ModelInstance mi;
 				mi.init2(m,f);
 				modelis.push_back(mi);
@@ -156,14 +157,14 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 		{
 			if (size>4) 
 			{
-				std::string path = std::string( reinterpret_cast<char*>( f.getPointer( ) ) );
+				std::string path = std::string( reinterpret_cast<char*>( f.getPointer() ) );
 				if (path.length()) 
 				{
 					LogDebug << "SKYBOX:" << std::endl;
 
           if( MPQFile::exists( path ) )
           {
-            skybox = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.add(path)];
+            skybox = (Model*)ModelManager::items[ModelManager::add(path)];
           }
           else
           {
@@ -219,18 +220,18 @@ WMO::~WMO()
     delete[] groups;
 
   for (std::vector<std::string>::iterator it = textures.begin(); it != textures.end(); ++it) {
-    video.textures.delbyname(*it);
+    TextureManager::delbyname(*it);
   }
 
   for (std::vector<std::string>::iterator it = models.begin(); it != models.end(); ++it) {
-    gWorld->modelmanager.delbyname(*it);
+    ModelManager::delbyname(*it);
   }
 
   delete[] mat;
   
   if (skybox) {
     //delete skybox;
-    gWorld->modelmanager.del(sbid);
+    ModelManager::del(sbid);
   }
 }
 
@@ -287,19 +288,19 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 		glBegin( GL_LINES );
 			glVertex3f( 0.0f, 0.0f, 0.0f );
 			glVertex3f( this->header.BoundingBoxMax.x + header.BoundingBoxMax.x / 5.0f, 0.0f, 0.0f );
-		glEnd( );
+		glEnd();
 
 		glColor4fv( Vec4D( 0.0f, 1.0f, 0.0f, 1.0f ) );
 		glBegin( GL_LINES );
 			glVertex3f( 0.0f, 0.0f, 0.0f );
 			glVertex3f( 0.0f, header.BoundingBoxMax.z + header.BoundingBoxMax.z / 5.0f, 0.0f );
-		glEnd( );
+		glEnd();
 
 		glColor4fv( Vec4D( 0.0f, 0.0f, 1.0f, 1.0f ) );
 		glBegin( GL_LINES );
 			glVertex3f( 0.0f, 0.0f, 0.0f );
 			glVertex3f( 0.0f, 0.0f, header.BoundingBoxMax.y + header.BoundingBoxMax.y / 5.0f );
-		glEnd( );*/
+		glEnd();*/
 
 		glActiveTexture( GL_TEXTURE1 );
 		glDisable( GL_TEXTURE_2D );
@@ -347,40 +348,40 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 				glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
 				glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
 				glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );		
-			glEnd( );
+			glEnd();
 
 			glBegin( GL_LINES );
 				glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
 				glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
-			glEnd( );
+			glEnd();
 			glBegin( GL_LINES );
 				glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
 				glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
-			glEnd( );
+			glEnd();
 			glBegin( GL_LINES );
 				glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
 				glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
-			glEnd( );
+			glEnd();
 			
 			// draw axis
 			glColor4fv( Vec4D( 1, 0, 0, 1 ) );
 			glBegin( GL_LINES );
 				glVertex3f( 0, 0, 0 );
 				glVertex3f( header.BoundingBoxMax.x + 6, 0, 0 );
-			glEnd( );
+			glEnd();
 
 			
 			glColor4fv( Vec4D( 0, 1, 0, 1 ) );
 			glBegin( GL_LINES );
 				glVertex3f( 0, 0, 0 );
 				glVertex3f( 0, header.BoundingBoxMax.y + 6, 0 );
-			glEnd( );
+			glEnd();
 
 			glColor4fv( Vec4D( 0, 0, 1, 1 ) );
 			glBegin( GL_LINES );
 				glVertex3f( 0, 0, 0 );
 				glVertex3f( 0, 0, header.BoundingBoxMax.x + 6 );
-			glEnd( );
+			glEnd();
 
 
 
@@ -438,23 +439,23 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 				glVertex3f( header.VertexBoxMin.x, header.VertexBoxMin.y, header.VertexBoxMax.z );
 			//C
 				glVertex3f( header.VertexBoxMin.x, header.VertexBoxMin.y, header.VertexBoxMin.z );
-			glEnd( );
+			glEnd();
 			
 			glBegin( GL_LINES );
 			// F G
 				glVertex3f( header.VertexBoxMin.x, header.VertexBoxMin.y, header.VertexBoxMax.z );
 				glVertex3f( header.VertexBoxMax.x, header.VertexBoxMin.y, header.VertexBoxMax.z );
-			glEnd( );
+			glEnd();
 			glBegin( GL_LINES );
 			// B D
 				glVertex3f( header.VertexBoxMax.x, header.VertexBoxMax.y, header.VertexBoxMin.z );
 				glVertex3f( header.VertexBoxMax.x, header.VertexBoxMin.y, header.VertexBoxMin.z );
-			glEnd( );
+			glEnd();
 			glBegin( GL_LINES );
 			// E H
 				glVertex3f( header.VertexBoxMin.x, header.VertexBoxMax.y, header.VertexBoxMax.z );
 				glVertex3f( header.VertexBoxMax.x, header.VertexBoxMax.y, header.VertexBoxMax.z );
-			glEnd( );
+			glEnd();
 		}
 		// Back to normal light rendering
 		glActiveTexture(GL_TEXTURE1);
@@ -994,9 +995,9 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot)
 	{
 		if( video.mSupportShaders && lists[i].second )
 		{
-			wmoShader->bind( );
+			wmoShader->bind();
 			glCallList( lists[i].first );
-			wmoShader->unbind( );
+			wmoShader->unbind();
 		}
 		else
 		{
@@ -1169,11 +1170,16 @@ void WMOFog::setup()
 	}
 }
 
-int WMOManager::add(const std::string& name)
+int WMOManager::baseid = 0;
+
+WMOIDTYPE WMOManager::add(const std::string& name)
 {
 	int id;
-	if (names.find(name) != names.end()) {
-		id = names[name];
+  std::string name_ = name;
+	std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
+	if( names.find( name_ ) != names.end() ) 
+	{
+		id = names[name_];
 		items[id]->addref();
 		return id;
 	}

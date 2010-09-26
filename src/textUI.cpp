@@ -1,4 +1,5 @@
 #include "textUI.h"
+#include "FreeType.h"
 
 textUI::textUI( float pX, float pY, const std::string& pText, freetype::font_data *pFont, int pJustify ) : background( false )
 {
@@ -8,7 +9,7 @@ textUI::textUI( float pX, float pY, const std::string& pText, freetype::font_dat
 	justify = pJustify;
 	font = pFont;
 
-	twidth = freetype::width( *font, mText.c_str( ) );
+	twidth = freetype::width( *font, mText.c_str() );
 }
 
 textUI::textUI( float pX, float pY, freetype::font_data *pFont, int pJustify ) : background( false )
@@ -19,14 +20,14 @@ textUI::textUI( float pX, float pY, freetype::font_data *pFont, int pJustify ) :
 	justify = pJustify;
 	font = pFont;
 	
-	twidth = freetype::width( *font, mText.c_str( ) );
+	twidth = freetype::width( *font, mText.c_str() );
 }
 
 
 void textUI::setText( const std::string& pText )
 {
 	mText = pText;
-	twidth = freetype::width( *font, mText.c_str( ) );
+	twidth = freetype::width( *font, mText.c_str() );
 }
 
 void textUI::setJustify(int j)
@@ -37,10 +38,10 @@ void textUI::setJustify(int j)
 void textUI::setFont( freetype::font_data *f )
 {
 	font = f;
-	twidth = freetype::width( *font, mText.c_str( ) );
+	twidth = freetype::width( *font, mText.c_str() );
 }
 
-void textUI::render( )
+void textUI::render()
 {
 	width = twidth;
 	height = font->h;
@@ -70,19 +71,19 @@ void textUI::render( )
 			glVertex2f( x + 2.0f, y + font->h + 3.0f);	
 			break;
 		}
-		glEnd( );
+		glEnd();
 	}
 
 	switch( justify )
 	{
 	case eJustifyLeft:
-		freetype::shprint( *font, x, y, mText.c_str( ) );		
+		freetype::shprint( *font, x, y, mText.c_str() );		
 		break;
 	case eJustifyCenter:
-		freetype::shprint( *font, x - twidth / 2.0f, y, mText.c_str( ) );
+		freetype::shprint( *font, x - twidth / 2.0f, y, mText.c_str() );
 		break;
 	case eJustifyRight:
-		freetype::shprint( *font, x - twidth, y, mText.c_str( ) );
+		freetype::shprint( *font, x - twidth, y, mText.c_str() );
 		break;
 	}
 }

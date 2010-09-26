@@ -1,13 +1,13 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include <string>
+
 class Video;
 
 #define GL_GLEXT_PROTOTYPES 1
 #include <GL/glew.h>
 #include <SDL/SDL.h>
-
-#include "TextureManager.h"
 
 void SaveGLSettings();
 void LoadGLSettings();
@@ -33,8 +33,6 @@ public:
 	void set2D();
 	void setTileMode();
 	void resize(int w, int h);
-
-	TextureManager textures;
     
 	int xres, yres;
 	int origX, origY;

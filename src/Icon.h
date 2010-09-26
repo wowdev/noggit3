@@ -1,20 +1,21 @@
 #ifndef __ICON_H
 #define __ICON_H
 
-#include "video.h"
 #include "frame.h"
+
+class Texture;
 
 class Icon:public frame
 {
 protected:
-	GLuint	texture;
-	GLuint	textureSelected;
+	Texture* texture;
+	Texture* textureSelected;
 	void (*clickFunc)(frame *,int);
 	int		id;
 
 
 public:
-	Icon(float x,float y,float width,float height,GLuint tex,GLuint texd);
+	Icon(float x,float y,float width,float height, const std::string& tex, const std::string& texd);
 	void	render();
 	bool	selected;
 	frame *processLeftClick(float mx,float my);

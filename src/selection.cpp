@@ -21,30 +21,30 @@ nameEntry::nameEntry( ModelInstance *model )
 {
 	type = eEntry_Model;
 	data.model = model;
-	std::stringstream temp; temp << "Object: " << model->d1 << " (M2)"; Name = temp.str( );
+	std::stringstream temp; temp << "Object: " << model->d1 << " (M2)"; Name = temp.str();
 }
 
 nameEntry::nameEntry( WMOInstance *wmo )
 {
 	type = eEntry_WMO;
 	data.wmo = wmo;
-	std::stringstream temp; temp << "Object: " << wmo->id << " (WMO)"; Name = temp.str( );
+	std::stringstream temp; temp << "Object: " << wmo->id << " (WMO)"; Name = temp.str();
 }
 
 nameEntry::nameEntry( MapChunk *chunk )
 {
 	type = eEntry_MapChunk;
 	data.mapchunk = chunk;
-	std::stringstream temp; temp << "Mapchunk: " << chunk->px << ", " << chunk->py; Name = temp.str( );
+	std::stringstream temp; temp << "Mapchunk: " << chunk->px << ", " << chunk->py; Name = temp.str();
 }
 
-nameEntry::nameEntry( )
+nameEntry::nameEntry()
 {
 	type = eEntry_Fake;
 	Name = "Fake";
 }
 
-const std::string& nameEntry::returnName( )
+const std::string& nameEntry::returnName()
 {
 	return Name;
 }
@@ -77,9 +77,9 @@ nameEntry *nameEntryManager::findEntry( unsigned int ref )
 	return items[ref];
 }
 
-nameEntryManager::nameEntryManager( )
+nameEntryManager::nameEntryManager()
 {
-	items.push_back( new nameEntry( ) );
+	items.push_back( new nameEntry() );
 	NextName = 1;
 }
 
@@ -87,8 +87,8 @@ void nameEntryManager::del( unsigned int Ref )
 {
 	if( items[Ref] )
 	{
-		if( gWorld->GetCurrentSelection( ) == items[Ref] )
-			gWorld->ResetSelection( );
+		if( gWorld->GetCurrentSelection() == items[Ref] )
+			gWorld->ResetSelection();
 		delete( items[Ref] );
 		items[Ref] = 0;
 	}
