@@ -4,7 +4,8 @@
 #include "world.h"
 #include "dbc.h"
 #include "Log.h"
-#include "model.h" // ModelManager
+#include "model.h" // Model
+#include "ModelManager.h" // ModelManager
 
 const float skymul = 36.0f;
 

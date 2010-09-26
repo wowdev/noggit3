@@ -16,6 +16,7 @@
 #include "MapTile.h"
 
 #include "WMOInstance.h" // WMOInstance
+#include "ModelManager.h" // ModelManager
 
 World *gWorld=0;
 

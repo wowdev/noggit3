@@ -18,6 +18,7 @@
 #include "noggit.h" // fonts, APP_*
 
 #include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
+#include "ModelManager.h" // ModelManager
 
 // ui classes
 #include "frame.h" // frame

@@ -154,7 +154,7 @@ void showPage( int pPage )
 
 	if( selectedTexture )
   {
-		for( std::map<GLuint, ManagedItem*>::iterator i = TextureManager::items.begin(); i != TextureManager::items.end(); i++ )
+		for( std::map<GLuint, Texture*>::iterator i = TextureManager::items.begin(); i != TextureManager::items.end(); i++ )
     {
 			if( i->second->name == selectedTexture->name )
       {
@@ -196,7 +196,7 @@ void showPage( int pPage )
 void updateTextures()
 {
   gTexturesInList.clear();
-	for( std::map<GLuint, ManagedItem*>::iterator t = TextureManager::items.begin(); t != TextureManager::items.end(); t++ )
+	for( std::map<GLuint, Texture*>::iterator t = TextureManager::items.begin(); t != TextureManager::items.end(); t++ )
   {
 		if( TextureInPalette( t->second->name ) )
     {

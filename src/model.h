@@ -6,9 +6,7 @@
 class Model;
 class Bone;
 
-#include "manager.h"
 #include "mpq.h"
-#include "video.h"
 
 #include "animated.h"
 #include "particle.h"
@@ -17,11 +15,11 @@ class Bone;
 #include "matrix.h"
 #include "vec3d.h"
 
-//#include "mapheaders.h"
 #include "modelheaders.h"
 
+#include "video.h" // GLuint
+#include "manager.h" // ManagedItem
 #include "AsyncObject.h" // AsyncObject
-#include "Log.h"
 
 Vec3D fixCoordSystem(Vec3D v);
 
@@ -199,27 +197,5 @@ public:
   }
   virtual void finishLoading();
 };
-
-typedef unsigned int MODELIDTYPE;
-
-class ModelManager: public Manager<MODELIDTYPE>
-{
-private:
-	static int baseid;
-public:
-	static MODELIDTYPE add(const std::string& name);
-  
-	static void resetAnim();
-	static void updateEmitters(float dt);
-  static int nextID()
-  {
-    return baseid++;
-  }
-};
-
-int addModelToList(Model *m, MPQFile &f);
-void removeModelFromList(int id);
-void drawModelList();
-void drawModelListSelect();
 
 #endif

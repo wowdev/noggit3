@@ -4,6 +4,7 @@
 #include "shaders.h"
 #include "Log.h"
 #include "TextureManager.h" // TextureManager, Texture
+#include "ModelManager.h" // ModelManager
 
 void WMOHighlight( Vec4D color )
 {
@@ -1171,6 +1172,9 @@ void WMOFog::setup()
 }
 
 int WMOManager::baseid = 0;
+
+template <class IDTYPE,class MANAGEDITEM> std::map<std::string, WMOIDTYPE> Manager<WMOIDTYPE,WMO>::names;
+template <class IDTYPE,class MANAGEDITEM> std::map<WMOIDTYPE, WMO*> Manager<WMOIDTYPE,WMO>::items;
 
 WMOIDTYPE WMOManager::add(const std::string& name)
 {

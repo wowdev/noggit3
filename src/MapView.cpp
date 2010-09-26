@@ -26,6 +26,7 @@
 
 #include "WMOInstance.h" // WMOInstance
 #include "TextureManager.h" // TextureManager, Texture
+#include "ModelManager.h" // ModelManager
 
 #include "directory.h" // FileExists
 

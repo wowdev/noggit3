@@ -4,6 +4,7 @@
 #include <cassert>
 #include <utility>
 #include <vector>
+#include <map>
 
 #include "vec3d.h"
 #include "quaternion.h"
