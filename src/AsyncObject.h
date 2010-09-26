@@ -3,8 +3,13 @@
 
 class AsyncObject
 {
+protected:
+  bool finished;
 public:
-  virtual bool finishedLoading() = 0;
+  virtual bool finishedLoading()
+  {
+    return finished;
+  }
   virtual void finishLoading() = 0;
 };
 

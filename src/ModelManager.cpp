@@ -31,14 +31,12 @@ MODELIDTYPE ModelManager::add( const std::string& name )
 }
 void ModelManager::resetAnim()
 {
-  return;
   for( std::map<std::string, MODELIDTYPE>::iterator it = names.begin( ); it != names.end( ); ++it )
     reinterpret_cast<Model*>( items[it->second] )->animcalc = false;
 }
 
 void ModelManager::updateEmitters( float dt )
 {
-  return;
   for( std::map<std::string, MODELIDTYPE>::iterator it = names.begin( ); it != names.end( ); ++it )
     reinterpret_cast<Model*>( items[it->second] )->updateEmitters( dt );
 }

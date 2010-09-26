@@ -9,6 +9,7 @@
 #include "selection.h" // nameEntryManager
 #include "sky.h" // Skies, OutdoorLighting, OutdoorLightStats
 
+class OpenGL::CallList;
 class brush;
 class MapTile;
 
@@ -49,7 +50,7 @@ public:
 	
 	std::string basename;
 
-	GLuint lowrestiles[64][64];
+	OpenGL::CallList* lowrestiles[64][64];
 	bool autoheight;
 
 	bool mHasAGlobalWMO;

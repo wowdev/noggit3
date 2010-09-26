@@ -43,6 +43,36 @@ public:
 	bool mSupportCompression;
 };
 
+namespace OpenGL
+{
+  class CallList
+  {
+    GLuint list;
+  public:
+    inline CallList()
+    {
+      list = glGenLists( 1 );
+    }
+    inline ~CallList()
+    {
+      glDeleteLists( list, 1 );
+    }
+
+    inline void startRecording(GLuint mode = GL_COMPILE)
+    {
+      glNewList(list,mode);
+    }
+    inline void endRecording()
+    {
+      glEndList();
+    }
+    inline void render()
+    {
+      glCallList( list );
+    }
+  };
+}
+
 extern Video video;
 
 //GLuint loadTGA(const char *filename, bool mipmaps);

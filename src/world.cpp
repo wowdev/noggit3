@@ -103,11 +103,11 @@ World::World( const std::string& name ) : basename( name ), mCurrentSelection( 0
 
 void World::init()
 {
-	for (int j=0; j<64; j++)
+	for( size_t j = 0; j < 64; j++ )
 	{
-		for (int i=0; i<64; i++)
+		for( size_t i = 0; i < 64; i++ )
 		{
-			lowrestiles[j][i] = 0;
+			lowrestiles[j][i] = NULL;
 		}
 	}
   
@@ -451,38 +451,49 @@ void World::initLowresTerrain()
 								lowsub[y][x] = Vec3D(TILESIZE*(i+(x+0.5f)/16.0f), tilebuf2[y*16+x], TILESIZE*(j+(y+0.5f)/16.0f));
 							}
 						}
-
-						GLuint dl;
-						dl = glGenLists(1);
-						glNewList(dl, GL_COMPILE);
-						/*
-						// draw tiles 16x16?
-						glBegin(GL_TRIANGLE_STRIP);
-						for (int y=0; y<16; y++) {
-							// end jump
-							if (y>0) glVertex3fv(lowres[y][0]);
-							for (int x=0; x<17; x++) {
-								glVertex3fv(lowres[y][x]);
-								glVertex3fv(lowres[y+1][x]);
+            
+            lowrestiles[j][i] = new OpenGL::CallList();
+            lowrestiles[j][i]->startRecording();
+            
+						glBegin( GL_TRIANGLES );
+						for( size_t y = 0; y < 16; y++ )
+            {
+							for( size_t x = 0; x < 16; x++ )
+              {
+								glVertex3fv( lowres[y][x] );
+                glVertex3fv( lowsub[y][x] );
+                glVertex3fv( lowres[y][x+1] );
+								glVertex3fv( lowres[y][x+1] );
+                glVertex3fv( lowsub[y][x] );
+                glVertex3fv( lowres[y+1][x+1] );
+								glVertex3fv( lowres[y+1][x+1] );
+                glVertex3fv( lowsub[y][x]) ;
+                glVertex3fv( lowres[y+1][x] );
+								glVertex3fv( lowres[y+1][x] );
+                glVertex3fv( lowsub[y][x] );
+                glVertex3fv( lowres[y][x] );
 							}
-							// start jump
-							if (y<15) glVertex3fv(lowres[y+1][16]);
 						}
 						glEnd();
-						*/
+						
+            lowrestiles[j][i]->endRecording();
+            
+						/* OLD:
+             // draw tiles 16x16?
+             glBegin(GL_TRIANGLE_STRIP);
+             for (int y=0; y<16; y++) {
+             // end jump
+             if (y>0) glVertex3fv(lowres[y][0]);
+             for (int x=0; x<17; x++) {
+             glVertex3fv(lowres[y][x]);
+             glVertex3fv(lowres[y+1][x]);
+             }
+             // start jump
+             if (y<15) glVertex3fv(lowres[y+1][16]);
+             }
+             glEnd();
+             */
 						// draw tiles 17*17+16*16
-						glBegin(GL_TRIANGLES);
-						for (int y=0; y<16; y++) {
-							for (int x=0; x<16; x++) {
-								glVertex3fv(lowres[y][x]);		glVertex3fv(lowsub[y][x]);	glVertex3fv(lowres[y][x+1]);
-								glVertex3fv(lowres[y][x+1]);	glVertex3fv(lowsub[y][x]);	glVertex3fv(lowres[y+1][x+1]);
-								glVertex3fv(lowres[y+1][x+1]);	glVertex3fv(lowsub[y][x]);	glVertex3fv(lowres[y+1][x]);
-								glVertex3fv(lowres[y+1][x]);	glVertex3fv(lowsub[y][x]);	glVertex3fv(lowres[y][x]);
-							}
-						}
-						glEnd();
-						glEndList();
-						lowrestiles[j][i] = dl;
 					}
 				}
 			}
@@ -596,7 +607,8 @@ World::~World()
     {
 			if( lowrestiles[j][i] )
       {
-        glDeleteLists( lowrestiles[j][i], 1 );
+        delete lowrestiles[j][i];
+        lowrestiles[j][i] = NULL;
       }
       if( tileLoaded( j, i ) )
       {
@@ -927,8 +939,9 @@ void World::draw()
 				//! \todo  some annoying visual artifacts when the verylowres terrain overlaps
 				// maptiles that are close (1-off) - figure out how to fix.
 				// still less annoying than hoels in the horizon when only 2-off verylowres tiles are drawn
-				if ( !(i==cx&&j==cz) && oktile(i,j) && lowrestiles[j][i]) {
-					glCallList(lowrestiles[j][i]);
+				if ( !(i==cx&&j==cz) && oktile(i,j) && lowrestiles[j][i])
+        {
+					lowrestiles[j][i]->render();
 				}
 			}
 		}
