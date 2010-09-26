@@ -4,6 +4,7 @@
 #include "noggit.h" // arial14
 #include "modelUI.h" // modelUI
 #include "model.h" // Model
+#include "ModelManager.h" // ModelManager
 #include "Gui.h" // Gui
 #include "textUI.h" // textUI
 

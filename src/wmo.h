@@ -163,7 +163,7 @@ public:
 
 typedef unsigned int WMOIDTYPE;
 
-class WMOManager: public Manager<WMOIDTYPE>
+class WMOManager: public Manager<WMOIDTYPE,WMO>
 {
 private:
 	static int baseid;

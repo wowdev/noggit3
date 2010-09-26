@@ -1,11 +1,9 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
-#include <string>
-#include <map>
-#include <algorithm>
-
-#include "Log.h"
+#include <string> // std::string
+#include <map> // std::map
+#include <algorithm> // std::transform()
 
 // base class for manager objects
 
@@ -34,12 +32,12 @@ public:
   }
 };
 
-template <class IDTYPE>
+template <class IDTYPE,class MANAGEDITEM>
 class Manager
 {
 public:
 	static std::map<std::string, IDTYPE> names;
-	static std::map<IDTYPE, ManagedItem*> items;
+	static std::map<IDTYPE, MANAGEDITEM*> items;
 
 	static IDTYPE add( const std::string& name );
   
@@ -50,11 +48,6 @@ public:
   
   static void del( IDTYPE id )
   {
-    if( items.find( id ) == items.end() )
-    {
-      LogError << "tried deleting item with unknown id " << id << "." << std::endl;
-      return;
-    }
     if( items[id]->delref() )
     {
       names.erase( names.find( items[id]->name ) );
@@ -71,7 +64,6 @@ public:
     
     if( has( name_ ) )
     {
-      LogDebug << "del(" << name_ << ")" << std::endl;
       del( get( name_ ) );
     }
   }
@@ -91,9 +83,8 @@ public:
   }
 
 protected:
-  static void do_add( const std::string& name, IDTYPE id, ManagedItem* item )
+  static void do_add( const std::string& name, IDTYPE id, MANAGEDITEM* item )
   {
-    LogDebug << "Adding " << name << " with id " << id << "." << std::endl;
     std::string name_ = name;
     std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
     

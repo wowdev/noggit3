@@ -7,6 +7,7 @@ class RibbonEmitter;
 
 #include "model.h"
 #include "animated.h"
+#include "video.h" // GLuint
 
 #include <list>
 

@@ -43,7 +43,7 @@ public:
   friend class TextureManager;
 };
 
-class TextureManager : public Manager<GLuint>
+class TextureManager : public Manager<GLuint,Texture>
 {
 private:
 	static bool LoadBLP(GLuint id, Texture *tex);

@@ -21,8 +21,8 @@ struct BLPHeader
 };
 #pragma pack(pop)
 
-template <class IDTYPE> std::map<std::string, IDTYPE> Manager<IDTYPE>::names;
-template <class IDTYPE> std::map<IDTYPE, ManagedItem*> Manager<IDTYPE>::items;
+template <class IDTYPE,class MANAGEDITEM> std::map<std::string, GLuint> Manager<GLuint, Texture>::names;
+template <class IDTYPE,class MANAGEDITEM> std::map<GLuint, Texture*> Manager<GLuint,Texture>::items;
 
 GLuint TextureManager::get(const std::string& name)
 {
