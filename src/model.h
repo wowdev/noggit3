@@ -24,14 +24,12 @@ class Bone;
 Vec3D fixCoordSystem(Vec3D v);
 
 class Bone {
-	
-
 	Animated<Vec3D> trans;
-	Animated<Quaternion> rot;
+	Animated<Quaternion, PACK_QUATERNION, Quat16ToQuat32> rot;
 	Animated<Vec3D> scale;
 
 public:
-	Vec3D pivot;
+	Vec3D pivot, transPivot;
 	int parent;
 
 	bool billboard;
@@ -40,7 +38,7 @@ public:
 
 	bool calc;
 	void calcMatrix(Bone* allbones, int anim, int time);
-	void init(MPQFile &f, ModelBoneDef &b, int *global);
+	void init(MPQFile &f, ModelBoneDef &b, int *global, MPQFile **animfiles);
 
 };
 
@@ -53,7 +51,7 @@ public:
 
 	void calc(int anim, int time);
 	void init(MPQFile &f, ModelTexAnimDef &mta, int *global);
-	void setup();
+	void setup(int anim);
 };
 
 struct ModelColor {
@@ -76,17 +74,28 @@ enum BlendModes {
 	BM_ALPHA_BLEND,
 	BM_ADDITIVE,
 	BM_ADDITIVE_ALPHA,
-	BM_MODULATE
+	BM_MODULATE,
+	BM_MODULATE2
 };
 
 struct ModelRenderPass {
 	uint16_t indexStart, indexCount, vertexStart, vertexEnd;
-	GLuint texture, texture2;
-	bool usetex2, useenvmap, cull, trans, unlit, nozwrite;
+	//GLuint texture, texture2;
+  int tex;
+	bool usetex2, useenvmap, cull, trans, unlit, nozwrite, billboard;
 	float p;
 	
-	short texanim, color, opacity, blendmode, order;
+	int16_t texanim, color, opacity, blendmode, order;
 
+  // Geoset ID
+	int geoset;
+  
+	// texture wrapping
+	bool swrap, twrap;
+  
+	// colours
+	Vec4D ocol, ecol;
+  
 	bool init(Model *m);
 	void deinit();
 
@@ -118,8 +127,8 @@ struct ModelLight {
 	Vec3D pos, tpos, dir, tdir;
 	Animated<Vec3D> diffColor, ambColor;
 	Animated<float> diffIntensity, ambIntensity;
-	Animated<float> attStart,attEnd;
-	Animated<bool> Enabled;
+	//Animated<float> attStart,attEnd;
+	//Animated<bool> Enabled;
 
 	void init(MPQFile &f, ModelLightDef &mld, int *global);
 	void setup(int time, GLuint l);
@@ -129,13 +138,14 @@ class Model: public ManagedItem, public AsyncObject {
 
 	GLuint ModelDrawList;
 	GLuint SelectModelDrawList;
-	GLuint TileModeModelDrawList;
+	//GLuint TileModeModelDrawList;
 
 	GLuint vbuf, nbuf, tbuf;
 	size_t vbufsize;
 	bool animated;
 	bool animGeometry,animTextures,animBones;
 	bool forceAnim;
+	MPQFile **animfiles;
 
 	void init(MPQFile &f);
 
@@ -170,11 +180,24 @@ class Model: public ManagedItem, public AsyncObject {
 	void lightsOff(GLuint lbase);
 
 public:
-	std::string filename;
+	std::string filename; //! \todo ManagedItem already has a name. Use that?
 	ModelCamera cam;
 	Bone *bones;
-	GLuint *textures;
 	ModelHeader header;
+  
+	// ===============================
+	// Toggles
+	bool *showGeosets;
+  
+	// ===============================
+	// Texture data
+	// ===============================
+	GLuint *textures;
+  #define	TEXTURE_MAX	100
+  //! \todo vectors.
+	int specialTextures[TEXTURE_MAX];
+	GLuint replaceTextures[TEXTURE_MAX];
+	bool useReplaceTextures[TEXTURE_MAX];
 
 	float rad;
 	float trans;

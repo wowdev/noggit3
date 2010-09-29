@@ -10,6 +10,9 @@ textUI::textUI( float pX, float pY, const std::string& pText, freetype::font_dat
 	font = pFont;
 
 	twidth = freetype::width( *font, mText.c_str() );
+  
+	width = twidth;
+	height = font->h;
 }
 
 textUI::textUI( float pX, float pY, freetype::font_data *pFont, int pJustify ) : background( false )
@@ -21,6 +24,9 @@ textUI::textUI( float pX, float pY, freetype::font_data *pFont, int pJustify ) :
 	font = pFont;
 	
 	twidth = freetype::width( *font, mText.c_str() );
+  
+	width = twidth;
+	height = font->h;
 }
 
 
@@ -28,6 +34,8 @@ void textUI::setText( const std::string& pText )
 {
 	mText = pText;
 	twidth = freetype::width( *font, mText.c_str() );
+	width = twidth;
+	height = font->h;
 }
 
 void textUI::setJustify(int j)
@@ -39,13 +47,12 @@ void textUI::setFont( freetype::font_data *f )
 {
 	font = f;
 	twidth = freetype::width( *font, mText.c_str() );
-}
-
-void textUI::render()
-{
 	width = twidth;
 	height = font->h;
+}
 
+void textUI::render() const
+{
 	if( background )
 	{
 		glColor4fv( bgColor );

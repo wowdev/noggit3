@@ -28,7 +28,7 @@ nameEntry::nameEntry( WMOInstance *wmo )
 {
 	type = eEntry_WMO;
 	data.wmo = wmo;
-	std::stringstream temp; temp << "Object: " << wmo->id << " (WMO)"; Name = temp.str();
+	std::stringstream temp; temp << "Object: " << wmo->mUniqueID << " (WMO)"; Name = temp.str();
 }
 
 nameEntry::nameEntry( MapChunk *chunk )
@@ -72,7 +72,7 @@ unsigned int nameEntryManager::add( MapChunk *chunk )
 	return NextName++;
 }
 
-nameEntry *nameEntryManager::findEntry( unsigned int ref )
+nameEntry *nameEntryManager::findEntry( unsigned int ref ) const
 {
 	return items[ref];
 }

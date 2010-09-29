@@ -1,6 +1,7 @@
 #include "shaders.h"
 #include "Log.h"
 
+#ifdef USEBLSSHADER
 BLSShader::BLSShader( const std::string& pFilename )
 {
 	mOkay = false;
@@ -57,7 +58,7 @@ BLSShader::BLSShader( const std::string& pFilename )
       
       int j = 0;
 			char localbuffer[256];
-			for( int i = errorPos; i < length && j < 128 ; i++, j++ )
+			for( int i = errorPos; i < length && j < 128 ; ++i, j++ )
 			{
 				localbuffer[j] = buffer[i];
 			}
@@ -69,6 +70,7 @@ BLSShader::BLSShader( const std::string& pFilename )
 			mOkay = true;
 	}
 }
+#endif
 
 
 ShaderPair *terrainShaders[4]={NULL,NULL,NULL,NULL}, *wmoShader=NULL, *waterShaders[1]={NULL};
@@ -83,7 +85,7 @@ void initShaders()
 
 void reloadShaders()
 {
-	for (int i=0; i<4; i++)
+	for (int i=0; i<4; ++i)
   {
     if( terrainShaders[i] )
     {
@@ -191,7 +193,7 @@ ShaderPair::ShaderPair(const char *vprog, const char *fprog, bool fromFile)
 
 void ShaderPair::bind()
 {
-	/*if (vertex) 
+	if (vertex) 
 	{
 		vertex->bind();
 	} else {
@@ -201,13 +203,11 @@ void ShaderPair::bind()
 		fragment->bind();
 	} else {
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
-	}*/
+	}
 }
 
 void ShaderPair::unbind()
 {
-	/*
 	if (vertex) vertex->unbind();
 	if (fragment) fragment->unbind();
-	*/
 }

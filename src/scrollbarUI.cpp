@@ -56,7 +56,7 @@ void scrollbarUI::setChangeFunc(void (*f)(int))
 	changeFunc=f;
 }
 
-int	 scrollbarUI::getValue()
+int	 scrollbarUI::getValue() const
 {
   return value;
 }

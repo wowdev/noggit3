@@ -301,7 +301,7 @@ void PasteSelectedObject( frame *button, int id )
 void DeleteSelectedObject( frame *button, int id )
 {
 	if( gWorld->IsSelection( eEntry_WMO ) )
-		pWorld->deleteWMOInstance( gWorld->GetCurrentSelection()->data.wmo->id );
+		pWorld->deleteWMOInstance( gWorld->GetCurrentSelection()->data.wmo->mUniqueID );
 	else if( gWorld->IsSelection( eEntry_Model ) )
 		pWorld->deleteModelInstance( gWorld->GetCurrentSelection()->data.model->d1 );
 }
@@ -451,7 +451,7 @@ int round(float d)
 {
   return d<0?d-.5f:d+.5f;
 }
-MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mTimespeed( 0.0f )
+MapView::MapView(World *w, float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 {
 	LastClicked=0;
 
@@ -469,31 +469,13 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 	set_areaid = false;
 	mViewMode = eViewMode_3D;
 
-	pWorld=world;
-
-	world->lighting = true;
-	world->drawmodels = true;
-	world->drawdoodads = true;
-	world->drawterrain = true;
-	world->drawlines = false;
-	world->drawwmo = true;
-	world->drawfog = true; 
-	world->drawwater = true;
-	// in the wow client, fog distance is stored in wtf\config.wtf as "farclip"
-	// minimum is 357, maximum is 777
-	world->fogdistance = 777.0f;
-
-	world->l_const = 0.0f;
-	world->l_linear = 0.7f;
-	world->l_quadratic = 0.03f;
-
   tileFrames = new frame( 0.0f, 0.0f, video.xres, video.yres );
 
 	// create main gui opject that holds all other gui elements for access
 	mainGui = new Gui();
 
 	//register toolbar event functions
-	for( int i = 0; i < 10; i++ )
+	for( int i = 0; i < 10; ++i )
 		if( mainGui->guiToolbar->mToolbarIcons[i] )
 			mainGui->guiToolbar->mToolbarIcons[i]->setClickFunc( Toolbar_SelectIcon, i+1 );
 
@@ -653,15 +635,15 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 	//mbar->GetMenu( "View" )->AddMenuItemToggle( "Map chunk settings", &MapChunkWindow->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", &TexturePalette->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Toggle" );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F1  M2s", &world->drawmodels );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F2  WMO doodadsets", &world->drawdoodads );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F3  Terrain", &world->drawterrain );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F4  Water", &world->drawwater );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F6  WMOs", &world->drawwmo );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F7  Lines", &world->drawlines );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F1  M2s", &gWorld->drawmodels );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F2  WMO doodadsets", &gWorld->drawdoodads );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F3  Terrain", &gWorld->drawterrain );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F4  Water", &gWorld->drawwater );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F6  WMOs", &gWorld->drawwmo );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F7  Lines", &gWorld->drawlines );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "F8  Detail infos", &mainGui->guidetailInfos->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "F9  Map contour infos", &DrawMapContour );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F   Fog", &world->drawfog );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F   Fog", &gWorld->drawfog );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Holelines always on", &Settings::getInstance()->holelinesOn, false );
 
 	mbar->GetMenu( "Help" )->AddMenuItemButton( "Key Bindings", openHelp, 0 );
@@ -670,7 +652,6 @@ MapView::MapView(World *w, float ah0, float av0): world(w), ah(ah0), av(av0), mT
 	tileFrames->addChild( mbar );
 }
 
-
 MapView::~MapView()
 {
   if( mainGui )
@@ -678,10 +659,10 @@ MapView::~MapView()
     delete mainGui;
     mainGui = NULL;
   }
-  if( world )
+  if( gWorld )
   {
-    delete world;
-    world = NULL;
+    delete gWorld;
+    gWorld = NULL;
   }
   if( tileFrames )
   {
@@ -755,7 +736,7 @@ void MapView::tick( float t, float dt )
 			if( gWorld->IsSelection( eEntry_Model ) )
 			{
 				//! \todo  Tell me what this is.
-				ObjPos = Selection->data.model->pos - world->camera;
+				ObjPos = Selection->data.model->pos - gWorld->camera;
 				rotate( 0.0f, 0.0f, &ObjPos.x, &ObjPos.y, av * PI / 180.0f );
 				rotate( 0.0f, 0.0f, &ObjPos.x, &ObjPos.z, ah * PI / 180.0f );
 				ObjPos.x = abs( ObjPos.x );
@@ -844,19 +825,19 @@ void MapView::tick( float t, float dt )
 				{
 				case 0:
 					if( Environment::getInstance()->ShiftDown )
-						world->changeTerrain( xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+						gWorld->changeTerrain( xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
 					else if( Environment::getInstance()->CtrlDown )
-						world->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+						gWorld->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
 						
 					break;
 					
 				case 1:
 					if( Environment::getInstance()->ShiftDown )
-						world->flattenTerrain( xPos, zPos, yPos, pow( 0.2f, dt ), blurBrushRadius, blurBrushType );
+						gWorld->flattenTerrain( xPos, zPos, yPos, pow( 0.2f, dt ), blurBrushRadius, blurBrushType );
 					else if( Environment::getInstance()->CtrlDown )
           {
             using std::min;
-						world->blurTerrain( xPos, zPos, pow( 0.2f, dt ), min( blurBrushRadius, 30.0f ), blurBrushType );
+						gWorld->blurTerrain( xPos, zPos, pow( 0.2f, dt ), min( blurBrushRadius, 30.0f ), blurBrushType );
           }
 					
 					break;
@@ -864,13 +845,13 @@ void MapView::tick( float t, float dt )
 				case 2:
 					if( Environment::getInstance()->ShiftDown ) // 3D Paint
 						if( Environment::getInstance()->CtrlDown ) // clear chunk texture
-							world->eraseTextures(xPos, zPos);
+							gWorld->eraseTextures(xPos, zPos);
 						else if( selectedTexture )
 						{
 							if( textureBrush.needUpdate() )
 								textureBrush.GenerateTexture();
 							
-							if( !world->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( selectedTexture->name ) ) )
+							if( !gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( selectedTexture->name ) ) )
 								LogError << "paintTexture failed ._. " << std::endl;
 						}
 						
@@ -878,9 +859,9 @@ void MapView::tick( float t, float dt )
 					
 				case 3:
 					if( Environment::getInstance()->ShiftDown  )
-						world->removeHole( xPos, zPos );
+						gWorld->removeHole( xPos, zPos );
 					else if( Environment::getInstance()->CtrlDown )
-						world->addHole( xPos, zPos );
+						gWorld->addHole( xPos, zPos );
 						
 					break;
 				}
@@ -890,30 +871,30 @@ void MapView::tick( float t, float dt )
 		if( mViewMode != eViewMode_2D )
 		{
 			if( moving ) 
-				world->camera += dir * dt * movespd * moving;
+				gWorld->camera += dir * dt * movespd * moving;
 			if( strafing ) 
 			{
 				Vec3D right = dir % Vec3D( 0.0f, 1.0f ,0.0f );
 				right.normalize();
-				world->camera += right * dt * movespd * strafing;
+				gWorld->camera += right * dt * movespd * strafing;
 			}
 			if( updown ) 
-				world->camera += Vec3D( 0.0f, dt * movespd * updown, 0.0f );
+				gWorld->camera += Vec3D( 0.0f, dt * movespd * updown, 0.0f );
 			
-			world->lookat = world->camera + dir;
+			gWorld->lookat = gWorld->camera + dir;
 		}
 		else
 		{
 			if( moving ) 
-				world->camera.z -= dt * movespd * moving / ( world->zoom * 1.5f );
+				gWorld->camera.z -= dt * movespd * moving / ( gWorld->zoom * 1.5f );
 			if( strafing ) 
-				world->camera.x += dt * movespd * strafing / ( world->zoom * 1.5f );
+				gWorld->camera.x += dt * movespd * strafing / ( gWorld->zoom * 1.5f );
 			if( updown ) 
-				world->zoom *= pow( 2.0f, dt * updown * 4.0f );
-			if( world->zoom > 2.0f )
-				world->zoom = 2.0f;
-			else if( world->zoom < 0.1f )
-				world->zoom = 0.1f;
+				gWorld->zoom *= pow( 2.0f, dt * updown * 4.0f );
+      
+      using std::min;
+      using std::max;
+      gWorld->zoom = min( max( gWorld->zoom, 0.1f ), 2.0f );
 
 			if( leftMouse && !LastClicked && selectedTexture )
 			{
@@ -921,17 +902,17 @@ void MapView::tick( float t, float dt )
 				// Aber grundsätzlich wird hier die Mouseposition errechnet. Auf mir unbekannte Art und weise.
 				// Mal was schauen, momen
 				float mX, mY;
-				mX = CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / world->zoom+world->camera.x;
-				mY = CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / world->zoom+world->camera.z;
+				mX = CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x;
+				mY = CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z;
 
 				if( Environment::getInstance()->CtrlDown )
-					world->eraseTextures( mX, mY );
+					gWorld->eraseTextures( mX, mY );
 				else
 				{		
 					if( textureBrush.needUpdate() )
 						textureBrush.GenerateTexture();
 					
-					world->paintTexture( mX, mY, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( selectedTexture->name ) );
+					gWorld->paintTexture( mX, mY, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( selectedTexture->name ) );
 				}
 			}
 
@@ -951,24 +932,24 @@ void MapView::tick( float t, float dt )
 	if( ( t - lastBrushUpdate ) > 0.1f && textureBrush.needUpdate() )
 		textureBrush.GenerateTexture();
 
-	world->time += this->mTimespeed * dt;
-	world->animtime += dt * 1000.0f;
-	globalTime = (int)world->animtime;
+	gWorld->time += this->mTimespeed * dt;
+	gWorld->animtime += dt * 1000.0f;
+	globalTime = (int)gWorld->animtime;
 	
-	world->tick(dt);
+	gWorld->tick(dt);
 }
 
 void MapView::doSelection( int selTyp )
 {
-	world->drawSelection( MouseX, MouseY, TestSelection );
-	world->getSelection( eSelectionMode_General );
+	gWorld->drawSelection( MouseX, MouseY, TestSelection );
+	gWorld->getSelection( eSelectionMode_General );
 	
 	if( gWorld->GetCurrentSelection() )
 	{
 		if( gWorld->IsSelection( eEntry_MapChunk ) )
 		{
-			world->drawSelectionChunk( MouseX, MouseY );
-			world->getSelection( eSelectionMode_Triangle );
+			gWorld->drawSelectionChunk( MouseX, MouseY );
+			gWorld->getSelection( eSelectionMode_Triangle );
 
 			Environment::getInstance()->AutoSelecting = true;
 		}
@@ -1100,7 +1081,7 @@ void MapView::displayViewMode_Minimap( float t, float dt )
 
 	glColor4f(1.0f,1.0f,1.0f,1.0f);
 	glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, world->minimap);
+		glBindTexture(GL_TEXTURE_2D, gWorld->minimap);
 		glBegin(GL_QUADS);
 			glTexCoord2f(0.0f,0.0f);
 			glVertex2i(basex,basey);
@@ -1114,36 +1095,36 @@ void MapView::displayViewMode_Minimap( float t, float dt )
 	glDisable(GL_TEXTURE_2D);
 	glBegin(GL_LINES);
 		float fx, fz;
-		fx = basex + world->camera.x / TILESIZE * 12.0f;
-		fz = basey + world->camera.z / TILESIZE * 12.0f;
+		fx = basex + gWorld->camera.x / TILESIZE * 12.0f;
+		fz = basey + gWorld->camera.z / TILESIZE * 12.0f;
 		glVertex2f(fx, fz);
 		glColor4f(1.0f,1.0f,1.0f,0.0f);
 		glVertex2f(fx + 10.0f*cosf(ah/180.0f*PI), fz + 10.0f*sinf(ah/180.0f*PI));
 	glEnd();
 
 	//! \todo  Something is wrong there.
-	//world->skies->drawSky(Vec3D(0.0f,0.0f,0.0f));
+	//gWorld->skies->drawSky(Vec3D(0.0f,0.0f,0.0f));
 }
 
 void MapView::displayViewMode_2D( float t, float dt )
 {
 	video.setTileMode();
-	world->drawTileMode(ah);
+	gWorld->drawTileMode(ah);
 	
 	float mX,mY,tRadius;
 	mX=4.0f*video.ratio*((float)MouseX/(float)video.xres-0.5f);
 	mY=4.0f*((float)MouseY/(float)video.yres-0.5f);
 
-	mX=CHUNKSIZE*4.0f*video.ratio*((float)MouseX/(float)video.xres-0.5f)/world->zoom+world->camera.x;
-	mY=CHUNKSIZE*4.0f*((float)MouseY/(float)video.yres-0.5f)/world->zoom+world->camera.z;
+	mX=CHUNKSIZE*4.0f*video.ratio*((float)MouseX/(float)video.xres-0.5f)/gWorld->zoom+gWorld->camera.x;
+	mY=CHUNKSIZE*4.0f*((float)MouseY/(float)video.yres-0.5f)/gWorld->zoom+gWorld->camera.z;
 
 	mX=mX/CHUNKSIZE;
 	mY=mY/CHUNKSIZE;
 
 	// draw brush
 	glPushMatrix();
-		glScalef(world->zoom,world->zoom,1.0f);
-		glTranslatef(-world->camera.x/CHUNKSIZE,-world->camera.z/CHUNKSIZE,0);
+		glScalef(gWorld->zoom,gWorld->zoom,1.0f);
+		glTranslatef(-gWorld->camera.x/CHUNKSIZE,-gWorld->camera.z/CHUNKSIZE,0);
 
 		glColor4f(1.0f,1.0f,1.0f,0.5f);
 		glActiveTexture(GL_TEXTURE1);
@@ -1152,7 +1133,7 @@ void MapView::displayViewMode_2D( float t, float dt )
 		glEnable(GL_TEXTURE_2D);
 
 		glBindTexture(GL_TEXTURE_2D, textureBrush.getTexture());
-		tRadius=textureBrush.getRadius()/CHUNKSIZE;//*world->zoom;
+		tRadius=textureBrush.getRadius()/CHUNKSIZE;//*gWorld->zoom;
 		glBegin(GL_QUADS);
 			glTexCoord2f(0.0f,0.0f);
 			glVertex3f(mX-tRadius,mY+tRadius,0);
@@ -1188,12 +1169,12 @@ void MapView::displayViewMode_2D( float t, float dt )
 
 	if (hud) 
 	{
-		freetype::shprint( arial16, 410.0f, 4.0f, gAreaDB.getAreaName( world->getAreaID() ).c_str() );
+		freetype::shprint( arial16, 410.0f, 4.0f, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
 		freetype::shprint( arial16, video.xres - 200.0f, 5, "%.2f fps", gFPS );
 	}
 
-	if (world->loading) 
-		freetype::shprint( arial16, video.xres / 2 - freetype::width( arial16, world->noadt ? "No ADT at this Point" : "Loading..." ) / 2, 30.0f, ( world->noadt ? "No ADT at this Point" : "Loading..." ) );
+	if (gWorld->loading) 
+		freetype::shprint( arial16, video.xres / 2 - freetype::width( arial16, gWorld->noadt ? "No ADT at this Point" : "Loading..." ) / 2, 30.0f, ( gWorld->noadt ? "No ADT at this Point" : "Loading..." ) );
 }
 
 void MapView::displayViewMode_3D( float t, float dt )
@@ -1210,7 +1191,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 	//glActiveTexture(GL_TEXTURE0);
 	//glEnable(GL_TEXTURE_2D);
 
-	world->draw();
+	gWorld->draw();
 
 
 	
@@ -1235,16 +1216,16 @@ void MapView::displayViewMode_3D( float t, float dt )
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 
-		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( world->getAreaID() ).c_str() );
+		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
 		freetype::shprint( arial16, video.xres - 200, 5, "%.2f fps", gFPS );
 				
     std::ostringstream s;
-		s << "Server cords(x:" << -(world->camera.x - ZEROPOINT) << " y:" << -(world->camera.z - ZEROPOINT) << " z:" << world->camera.y
-				<< ") Tile " << round((world->camera.x-(TILESIZE/2))/TILESIZE) << " " << round((world->camera.z-(TILESIZE/2))/TILESIZE)
-				<< " Client cords(x:" << world->camera.x<<" y:" << world->camera.z << " z:"<<world->camera.y << ") ";
+		s << "Server cords(x:" << -(gWorld->camera.x - ZEROPOINT) << " y:" << -(gWorld->camera.z - ZEROPOINT) << " z:" << gWorld->camera.y
+				<< ") Tile " << round((gWorld->camera.x-(TILESIZE/2))/TILESIZE) << " " << round((gWorld->camera.z-(TILESIZE/2))/TILESIZE)
+				<< " Client cords(x:" << gWorld->camera.x<<" y:" << gWorld->camera.z << " z:"<<gWorld->camera.y << ") ";
 		mainGui->guiStatusbar->setLeftInfo( s.str() );
 		
-		int time = int( world->time ) % 2880;
+		int time = int( gWorld->time ) % 2880;
 
 		
 		freetype::shprint( arial16, video.xres - 100.0f, 5.0f, "Time:  %02d:%02d", time / 120, (time % 120) / 2 );
@@ -1306,7 +1287,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 				case eEntry_WMO:
 					s << lSelection->data.wmo->wmo->filename << std::endl;
 					//freetype::shprint( arial16, 5, 63, lSelection->data.wmo->wmo->filename );
-					s << "UniqueID: " << lSelection->data.wmo->id << std::endl;
+					s << "UniqueID: " << lSelection->data.wmo->mUniqueID << std::endl;
 					//freetype::shprint( arial16, 10, 83, "UniqueID: %d", lSelection->data.wmo->id );
 					s <<  "Pos: (" <<  lSelection->data.wmo->pos.x << "," << lSelection->data.wmo->pos.y << "," << lSelection->data.wmo->pos.z << ")" << std::endl;					
 					//freetype::shprint( arial16, 10, 103, "Pos: (%.2f, %.2f, %.2f)", lSelection->data.wmo->pos.x, lSelection->data.wmo->pos.y, lSelection->data.wmo->pos.z );
@@ -1407,7 +1388,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 		}
 	}
 
-	if ( world->loading ) 
+	if ( gWorld->loading ) 
 	{
 		video.set2D();
 		glEnable(GL_BLEND);
@@ -1422,7 +1403,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 		glDisable(GL_LIGHTING);
 		glColor4f(1,1,1,1);
 
-		freetype::shprint( arial16, video.xres/2 - freetype::width( arial16, world->noadt ? "No ADT at this Point" : "Loading..." ) / 2, 30, ( world->noadt ? "No ADT at this Point" : "Loading..." ) );
+		freetype::shprint( arial16, video.xres/2 - freetype::width( arial16, gWorld->noadt ? "No ADT at this Point" : "Loading..." ) / 2, 30, ( gWorld->noadt ? "No ADT at this Point" : "Loading..." ) );
 	}
 }
 
@@ -1434,7 +1415,7 @@ void MapView::display( float t, float dt )
 	if( Saving )
 	{		
 		video.setTileMode();
-		world->saveMap();
+		gWorld->saveMap();
 		Saving=false;
 	}
 
@@ -1514,7 +1495,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			if( !Environment::getInstance()->CtrlDown )
 				moving = -1.0f;
 			else
-				world->saveTile( int( world->camera.x ) / TILESIZE, int( world->camera.z ) / TILESIZE );
+				gWorld->saveTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
 		
 		if( e->keysym.sym == SDLK_a )
 			strafing = -1.0f;
@@ -1601,11 +1582,11 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 						Environment::getInstance()->set_clipboard(Selection);
 						if( Selection->type == eEntry_Model )
 						{
-							world->deleteModelInstance( Selection->data.model );
+							gWorld->deleteModelInstance( Selection->data.model );
 						}
 						else if( Selection->type == eEntry_WMO )
 						{
-							world->deleteWMOInstance( Selection->data.wmo );
+							gWorld->deleteWMOInstance( Selection->data.wmo );
 						}
 						Selection = 0;
 					}
@@ -1665,7 +1646,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 		// toggle lightning
 		if( e->keysym.sym == SDLK_l ) 
-			world->lighting = !world->lighting;
+			gWorld->lighting = !gWorld->lighting;
 
 		// toggle interface
 		if( e->keysym.sym == SDLK_TAB )
@@ -1677,42 +1658,42 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			{
 				if( alloff )
 				{
-					alloff_models = world->drawmodels;
-					alloff_doodads = world->drawdoodads;
+					alloff_models = gWorld->drawmodels;
+					alloff_doodads = gWorld->drawdoodads;
 					alloff_contour = DrawMapContour;
-					alloff_wmo = world->drawwmo;
-					alloff_fog = world->drawfog;
-					alloff_terrain = world->drawterrain;
+					alloff_wmo = gWorld->drawwmo;
+					alloff_fog = gWorld->drawfog;
+					alloff_terrain = gWorld->drawterrain;
 
-					world->drawmodels = false;
-					world->drawdoodads = false;
+					gWorld->drawmodels = false;
+					gWorld->drawdoodads = false;
 					DrawMapContour = true;
-					world->drawwmo = false;
-					world->drawterrain = true;
-					world->drawfog = false;
+					gWorld->drawwmo = false;
+					gWorld->drawterrain = true;
+					gWorld->drawfog = false;
 				}
 				else
 				{
-					world->drawmodels = alloff_models;
-					world->drawdoodads = alloff_doodads;
+					gWorld->drawmodels = alloff_models;
+					gWorld->drawdoodads = alloff_doodads;
 					DrawMapContour = alloff_contour;
-					world->drawwmo = alloff_wmo;
-					world->drawterrain = alloff_terrain;
-					world->drawfog = alloff_fog;
+					gWorld->drawwmo = alloff_wmo;
+					gWorld->drawterrain = alloff_terrain;
+					gWorld->drawfog = alloff_fog;
 				}
 				alloff = !alloff;
 			}
 			else
-				world->drawmodels = !world->drawmodels;
+				gWorld->drawmodels = !gWorld->drawmodels;
 	
 
 		// toggle drawing of doodads in WMOs.
 		if( e->keysym.sym == SDLK_F2 ) 
-			world->drawdoodads = !world->drawdoodads;
+			gWorld->drawdoodads = !gWorld->drawdoodads;
 
 		// toggle terrain
 		if( e->keysym.sym == SDLK_F3 ) 
-			world->drawterrain = !world->drawterrain;
+			gWorld->drawterrain = !gWorld->drawterrain;
 
 		// toggle better selection mode
 		if( e->keysym.sym == SDLK_F4 && Environment::getInstance()->ShiftDown )
@@ -1722,7 +1703,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		
 		// toggle better selection mode
 		if( e->keysym.sym == SDLK_F4 && !Environment::getInstance()->ShiftDown )
-				world->drawwater = !world->drawwater;
+				gWorld->drawwater = !gWorld->drawwater;
 
 		// toggle chunk limitation lines
 		if( e->keysym.sym == SDLK_F7 ) 
@@ -1731,11 +1712,11 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 				Environment::getInstance()->view_holelines = !Environment::getInstance()->view_holelines;
 			}
 			else
-			world->drawlines = !world->drawlines;
+			gWorld->drawlines = !gWorld->drawlines;
 
 		// toggle drawing of WMOs
 		if( e->keysym.sym == SDLK_F6 ) 
-			world->drawwmo = !world->drawwmo;
+			gWorld->drawwmo = !gWorld->drawwmo;
 
 		// toggle showing a lot of information about selected item
 		if( e->keysym.sym == SDLK_F8 ) 
@@ -1756,11 +1737,11 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 		// draw fog
 		if( e->keysym.sym == SDLK_f ) 
-			world->drawfog = !world->drawfog;
+			gWorld->drawfog = !gWorld->drawfog;
 
 		// reload a map tile
 		if( e->keysym.sym == SDLK_j && Environment::getInstance()->ShiftDown )
-			world->reloadTile( int( world->camera.x ) / TILESIZE, int( world->camera.z ) / TILESIZE );
+			gWorld->reloadTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
 
 #ifdef DEBUG
 		// Check for layers we have too much. this should filter out those that are completely covered.
@@ -1775,7 +1756,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 					gLog( "\tTesting layer %i:\n", layer );
 					bool used = false;
 					for( int j = 0; j < 63 && !used; j++ )
-						for( int i = 0; i < 63 && !used; i++ )
+						for( int i = 0; i < 63 && !used; ++i )
 							if( Selection->data.mapchunk->amap[layer][i + j * 64] != 255.0f )
 							{
 								gLog( "\t\tValue at %i,%i (%i) is %f (!= 255.0f)\n", i, j, i + j * 64, Selection->data.mapchunk->amap[layer][i + j * 64] );
@@ -1836,7 +1817,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 				}
 			}
 			else if( Environment::getInstance()->ShiftDown )
-				world->fogdistance += 60.0f;
+				gWorld->fogdistance += 60.0f;
 			else
 			{
 				//change selected model sizesize
@@ -1875,7 +1856,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 				}
 			}
 			else if( Environment::getInstance()->ShiftDown )
-				world->fogdistance -= 60.0f;
+        gWorld->fogdistance -= 60.0f;
 			else
 			{
 				//change selected model sizesize
@@ -1930,7 +1911,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_F5 ) 
 		{
 			std::ofstream f( "bookmarks.txt", std::ios_base::app );
-			f << world->basename << " " << world->camera.x << " " << world->camera.y << " " << world->camera.z << " " << ah << " " << av << " " << world->getAreaID() << std::endl;
+			f << gWorld->basename << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << ah << " " << av << " " << gWorld->getAreaID() << std::endl;
 			f.close();
 		}
 	}

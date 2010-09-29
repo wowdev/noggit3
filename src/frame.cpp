@@ -1,7 +1,7 @@
 #include "frame.h"
 #include "video.h" // gl*
 
-void frame::render()
+void frame::render() const
 {
 	if( hidden )
 		return;
@@ -9,7 +9,7 @@ void frame::render()
 	glPushMatrix();
 	glTranslatef( x, y, 0.0f );
 
-	for( std::vector<frame*>::iterator child = children.begin(); child != children.end(); child++ )
+	for( std::vector<frame*>::const_iterator child = children.begin(); child != children.end(); child++ )
 		if( !( *child )->hidden )
 			( *child )->render();
 
@@ -20,6 +20,15 @@ void frame::addChild( frame *c )
 {
 	children.push_back( c );
 	c->parent = this;
+}
+
+void frame::removeChild( frame* c )
+{
+  std::vector<frame*>::iterator it = std::find( children.begin(), children.end(), c );
+  if( it != children.end() )
+  {
+    children.erase( it );
+  }
 }
 
 frame * frame::processLeftClick( float mx, float my )

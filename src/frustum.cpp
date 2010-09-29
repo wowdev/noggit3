@@ -67,7 +67,7 @@ void Frustum::retrieve()
 
 bool Frustum::contains(const Vec3D &v) const
 {
-	for (int i=0; i<6; i++) {
+	for (int i=0; i<6; ++i) {
 		if ((planes[i].a*v.x + planes[i].b*v.y + planes[i].c*v.z + planes[i].d) <= 0) {
             return false;
 		}
@@ -88,7 +88,7 @@ bool Frustum::intersects(const Vec3D &v1, const Vec3D &v2) const
 	points[7] = Vec3D(v2.x,v2.y,v2.z);
 
 	
- 	for (int i=0; i<6; i++) {
+ 	for (int i=0; i<6; ++i) {
 		int numIn = 0;
 
 		for (int k=0; k<8; k++) {

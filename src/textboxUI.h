@@ -35,7 +35,7 @@ private:
 	std::string mValue;
 public:
 	TextBox(float xPos,float yPos,float w, float h,const std::string& tex, const std::string& texd);
-	void render();
+	void render() const;
 
 	void setValue( const std::string& pText );
 	std::string	getValue();

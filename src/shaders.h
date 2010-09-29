@@ -7,6 +7,7 @@
 
 #include "mpq.h"
 
+#ifdef USEBLSSHADER
 class BLSShader
 {
 private:
@@ -25,7 +26,7 @@ public:
 	
 	bool IsOkay() { return mOkay; }
 };
-
+#endif
 
 //Shaders WoWMapView 3.x
 
@@ -39,7 +40,7 @@ public:
 	bool ok;
 
 	Shader(GLenum target, const char *program, bool fromFile = false);
-	~Shader();
+	virtual ~Shader();
 
 	virtual void bind();
 	virtual void unbind();

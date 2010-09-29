@@ -8,7 +8,7 @@ class DBCFile
 {
 public:
 	DBCFile(const std::string& filename);
-	~DBCFile();
+	virtual ~DBCFile();
 
 	// Open database. It must be openened before it can be used.
 	void open();

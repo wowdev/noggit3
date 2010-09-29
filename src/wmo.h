@@ -153,10 +153,10 @@ public:
 
 	WMO(const std::string& name);
 	~WMO();
-	void draw(int doodadset, const Vec3D& ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight);
-	void drawSelect(int doodadset, const Vec3D& ofs, const float rot);
+	void draw(int doodadset, const Vec3D& ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight) const;
+	void drawSelect(int doodadset, const Vec3D& ofs, const float rot) const;
 	//void drawPortals();
-	void drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper );
+	void drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const;
 
 
 };

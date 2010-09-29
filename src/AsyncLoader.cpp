@@ -51,7 +51,7 @@ void AsyncLoader::addObject(AsyncObject* _pObject)
 
 void AsyncLoader::start(int _numThreads)
 {
-  for(int i = 0; i < _numThreads; i++)
+  for(int i = 0; i < _numThreads; ++i)
   {
     m_threads.add_thread(new boost::thread(&AsyncLoader::process, this));
   }

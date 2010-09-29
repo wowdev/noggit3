@@ -19,7 +19,7 @@ public:
 	textureUI( float x, float y, float width, float height, const std::string& tex );
 	void setTexture( GLuint tex );
   void setTexture( const std::string& tex );
-	void render();
+	void render() const;
 
 	frame *processLeftClick( float mx, float my );
 	void setClickFunc( void (*f)( frame *,int ), int num );

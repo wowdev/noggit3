@@ -7,7 +7,9 @@ class Video;
 
 #define GL_GLEXT_PROTOTYPES 1
 #include <GL/glew.h>
-#include <SDL/SDL.h>
+//#include <SDL/SDL.h>
+
+class SDL_Surface;
 
 void SaveGLSettings();
 void LoadGLSettings();
@@ -26,12 +28,12 @@ public:
 
 	void close();
 
-	void flip();
-	void clearScreen();
-	void set3D();
-	void set3D_select();
-	void set2D();
-	void setTileMode();
+	void flip() const;
+	void clearScreen() const;
+	void set3D() const;
+	void set3D_select() const;
+	void set2D() const;
+	void setTileMode() const;
 	void resize(int w, int h);
     
 	int xres, yres;

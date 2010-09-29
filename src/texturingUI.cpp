@@ -154,7 +154,7 @@ void showPage( int pPage )
 
 	if( selectedTexture )
   {
-		for( std::map<GLuint, Texture*>::iterator i = TextureManager::items.begin(); i != TextureManager::items.end(); i++ )
+		for( std::map<GLuint, Texture*>::iterator i = TextureManager::items.begin(); i != TextureManager::items.end(); ++i )
     {
 			if( i->second->name == selectedTexture->name )
       {
@@ -189,7 +189,7 @@ void showPage( int pPage )
 	while( i < ( pal_cols * pal_rows ) )
 	{
 		curTextures[i]->hidden = true;
-		i++;
+		++i;
 	}
 }
 
@@ -232,7 +232,7 @@ void texturePaletteClick( frame *f, int id )
       textGui->guiToolbar->current_texture->setTexture( selectedTexture->name );
   }
 
-	for( int i = 0; i < ( pal_cols * pal_rows ); i++ )
+	for( int i = 0; i < ( pal_cols * pal_rows ); ++i )
   {
 		curTextures[i]->setHighlight( i == id );
   }
@@ -242,7 +242,7 @@ void texturePaletteClick( frame *f, int id )
 
 void LoadTileset( frame *button, int id )
 {
-	for( std::vector<std::string>::iterator it = textureNames.begin(); it != textureNames.end(); it++ )
+	for( std::vector<std::string>::iterator it = textureNames.begin(); it != textureNames.end(); ++it )
 	{
 		if( it->find( tilesetDirectories[id] ) != std::string::npos )
     {
@@ -308,7 +308,7 @@ void clickFilterTexture(bool value,int id)
 	}
 	else
   {
-		for( std::vector<std::string>::iterator it = gActiveDirectoryFilters.begin(); it != gActiveDirectoryFilters.end(); it++ )
+		for( std::vector<std::string>::iterator it = gActiveDirectoryFilters.begin(); it != gActiveDirectoryFilters.end(); ++it )
     {
 			if( *it == tilesetDirectories[id] )
 			{
@@ -330,7 +330,7 @@ void clickFileFilterTexture(bool value,int id)
 	}
 	else
   {
-		for( std::vector<std::string>::iterator it = gActiveFilenameFilters.begin(); it != gActiveFilenameFilters.end(); it++ )
+		for( std::vector<std::string>::iterator it = gActiveFilenameFilters.begin(); it != gActiveFilenameFilters.end(); ++it )
     {
 			if( *it == gFilenameFilters[id] )
 			{
@@ -354,7 +354,7 @@ frame* TexturingUI::createTexturePalette( int rows, int cols, Gui *setgui )
 	pal_cols = cols;
 	windowTexturePalette = new closeWindowUI( 115.0f, 38.0f, ( pal_rows * 68.0f ) + 10.0f, ( pal_cols * 68.0f ) + 50.0f, "Texture Palette", true );
 
-	for(int i=0;i<(pal_cols*pal_rows);i++)
+	for(int i=0;i<(pal_cols*pal_rows);++i)
 	{
 		curTextures[i]=new textureUI(8.0f+(i%pal_rows)*68.0f,22.0f+(i/pal_rows)*68.0f,64.0f,64.0f,"tileset\\generic\\black.blp");
 		curTextures[i]->setClickFunc(texturePaletteClick,i);
@@ -410,7 +410,7 @@ frame* TexturingUI::createTilesetLoader()
 		"Tileset Loading" );
 	windowTilesetLoader->movable=true;
 
-	for( unsigned int i = 0; i < tilesetDirectories.size(); i++ )
+	for( unsigned int i = 0; i < tilesetDirectories.size(); ++i )
 	{
 		name = new buttonUI(
 			5.0f + 152.0f * ( i / columns ),
@@ -440,7 +440,7 @@ frame* TexturingUI::createTextureFilter()
 	//Filename Filters
 	windowTextureFilter->addChild( new textUI( 308.0f, 26.0f, "Filename Filters", &arial14, eJustifyCenter ) );
 
-	for( std::map<int,std::string>::iterator it = gFilenameFilters.begin(); it != gFilenameFilters.end(); it++ )
+	for( std::map<int,std::string>::iterator it = gFilenameFilters.begin(); it != gFilenameFilters.end(); ++it )
   {
 		windowTextureFilter->addChild( new checkboxUI( 5.0f + 152.0f * ( it->first / 6 ), 43.0f + 30.0f * ( it->first % 6 ), it->second, clickFileFilterTexture, it->first ) );
   }
@@ -450,7 +450,7 @@ frame* TexturingUI::createTextureFilter()
 	//Tileset Filters
 	windowTextureFilter->addChild( new textUI( 308.0f, 254.0f, "Tileset Filters", &arial14, eJustifyCenter ) );
 
-	for( unsigned int i = 0; i < tilesetDirectories.size(); i++ )
+	for( unsigned int i = 0; i < tilesetDirectories.size(); ++i )
   {
 		windowTextureFilter->addChild( new checkboxUI( 5.0f + 152.0f * ( i / 12 ), 267.0f + 30.0f * ( i % 12 ), tilesetDirectories[i], clickFilterTexture, i ) );
   }
@@ -514,7 +514,7 @@ frame* TexturingUI::createMapChunkWindow()
 	
 	float yPos = 11.0f;
 
-    for(int i=1;i<4;i++)
+    for(int i=1;i<4;++i)
 	{
 		chunkEffectModels[i]=new textUI(8.0f,chunkEffectModels[i-1]->y+20.0f,"Effect Doodad", &arial14, eJustifyLeft);
 		chunkEffectWindow->addChild(chunkEffectModels[i]);

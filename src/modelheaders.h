@@ -47,10 +47,10 @@ struct ModelHeader {
 	uint32_t nTexReplace;
 	uint32_t ofsTexReplace;
 
-	uint32_t nRenderFlags;
-	uint32_t ofsRenderFlags;
-	uint32_t nBoneLookupTable;
-	uint32_t ofsBoneLookupTable;
+	uint32_t nTexFlags; // Render Flags
+	uint32_t ofsTexFlags; // Blending modes / render flags.
+	uint32_t nBoneLookup; // BonesAndLookups
+	uint32_t ofsBoneLookup; // A bone lookup table.
 
 	uint32_t nTexLookup;
 	uint32_t ofsTexLookup;
@@ -185,26 +185,26 @@ struct ModelGeoset {
 	uint16_t d4; // ? always 1 to 4
 	uint16_t d5; // ?
 	uint16_t d6; // root bone?
-	Vec3D v;
-	float unknown[4]; // Added in WoW 2.0?
+	Vec3D BoundingBox[2];
+	float radius;
 };
 
 /// A texture unit (sub of material)
 struct ModelTexUnit {
 	// probably the texture units
 	// size always >=number of materials it seems
-	uint16_t flags; // Flags
-	uint16_t order; // ?
-	uint16_t op; // Material this texture is part of (index into mat)
-	uint16_t op2; // Always same as above?
-	int16_t colorIndex; // color or -1
-	uint16_t flagsIndex; // more flags...
-	uint16_t texunit; // Texture unit (0 or 1)
-	uint16_t d4; // ? (seems to be always 1)
-	uint16_t textureid; // Texture id (index into global texture list)
-	uint16_t texunit2; // copy of texture unit value?
-	uint16_t transid; // transparency id (index into transparency list)
-	uint16_t texanimid; // texture animation id
+	uint16_t flags;		// Flags
+	uint16_t shading;		// If set to 0x8000: shaders. Used in skyboxes to ditch the need for depth buffering. See below.
+	uint16_t op;			// Material this texture is part of (index into mat)
+	uint16_t op2;			// Always same as above?
+	int16_t colorIndex;	// color or -1
+	uint16_t flagsIndex;	// more flags...
+	uint16_t texunit;		// Texture unit (0 or 1)
+	uint16_t mode;			// ? (seems to be always 1)
+	uint16_t textureid;	// Texture id (index into global texture list)
+	uint16_t texunit2;	// copy of texture unit value?
+	uint16_t transid;		// transparency id (index into transparency list)
+	uint16_t texanimid;	// texture animation id
 };
 
 // block X - render flags
@@ -238,8 +238,8 @@ struct ModelLightDef {
 	Vec3D pos;
 	AnimationBlock ambColor;
 	AnimationBlock ambIntensity;
-	AnimationBlock diffcolor;
-	AnimationBlock diffintensity;
+	AnimationBlock color;
+	AnimationBlock intensity;
 	AnimationBlock attStart;
 	AnimationBlock attEnd;
 	AnimationBlock Enabled;
@@ -255,59 +255,63 @@ struct ModelCameraDef {
 	AnimationBlock rot;
 };
 
-struct ModelParticleEmitterDef {
-	//! \todo  Do this one right. ._.
-
-	int32_t id;
-	int16_t flags;
-	int16_t flags2;
-	Vec3D pos;
-	int16_t bone;
-	int16_t texture;
-	int32_t lenModelName;
-	int32_t ofsModelName;
-	int32_t lenParticleName;
-	int32_t ofsParticleName;
-	int8_t blend;
-	int16_t emittertype;
-	int16_t particletype;
-	int8_t pad;
-	int16_t rot;
-	int16_t rows;
-	int16_t cols;
-	AnimationBlock Emissionspeed;
-	AnimationBlock SpeedVariation;
-	AnimationBlock VerticalRange;
-	AnimationBlock HorizontalRange;
-	AnimationBlock Gravity;
-	AnimationBlock Lifespan;
-	int32_t unknown1;
-	AnimationBlock EmissionRate;
-	int32_t unknown2;
-	AnimationBlock EmissionAreaLength;
-	AnimationBlock EmissionAreaWidth;
-	AnimationBlock Gravity2;
-	FakeAnimationBlock colors;
-	FakeAnimationBlock opacity;
-	FakeAnimationBlock sizes;
+struct ModelParticleParams {
+	FakeAnimationBlock colors; 	// (short, vec3f)	This one points to 3 floats defining red, green and blue.
+	FakeAnimationBlock opacity;      // (short, short)		Looks like opacity (short), Most likely they all have 3 timestamps for {start, middle, end}.
+	FakeAnimationBlock sizes; 		// (short, vec2f)	It carries two floats per key. (x and y scale)
 	int32_t d[2];
-	FakeAnimationBlock intensity;
-	FakeAnimationBlock unknownblock;
+	FakeAnimationBlock Intensity; 	// Some kind of intensity values seen: 0,16,17,32(if set to different it will have high intensity) (short, short)
+	FakeAnimationBlock unk2; 		// (short, short)
 	float unk[3];
 	float scales[3];
 	float slowdown;
-	float unknown3[2];
-	float rotation; //Sprite Rotation
-	float unknown4[2];
-	float Rot1[3]; //Model Rotation 1
-	float Rot2[3]; //Model Rotation 2
-	float Trans[3]; //Model Translation
+	float unknown1[2];
+	float rotation;				//Sprite Rotation
+	float unknown2[2];
+	float Rot1[3];					//Model Rotation 1
+	float Rot2[3];					//Model Rotation 2
+	float Trans[3];				//Model Translation
 	float f2[4];
-	int nUnknownReference;
-	int ofsUnknownReference;
-	AnimationBlock Enabled;
-	AnimationBlock p;			// temporary to get rid of errors.
+	int32_t nUnknownReference;
+	int32_t ofsUnknownReferenc;
 };
+
+#define	MODELPARTICLE_DONOTTRAIL			0x10
+#define	MODELPARTICLE_DONOTBILLBOARD	0x1000
+struct ModelParticleEmitterDef {
+  int32_t id;
+	int32_t flags;
+	Vec3D pos; // The position. Relative to the following bone.
+	int16_t bone; // The bone its attached to.
+	int16_t texture; // And the texture that is used.
+	int32_t nModelFileName;
+	int32_t ofsModelFileName;
+	int32_t nParticleFileName;
+	int32_t ofsParticleFileName; // TODO
+	int8_t blend;
+	int8_t EmitterType;
+	int16_t ParticleColor;
+	int8_t ParticleType;
+	int8_t HeadorTail;
+	int16_t TextureTileRotation;
+	int16_t cols;
+	int16_t rows;
+	AnimationBlock EmissionSpeed; // All of the following blocks should be floats.
+	AnimationBlock SpeedVariation; // Variation in the flying-speed. (range: 0 to 1)
+	AnimationBlock VerticalRange; // Drifting away vertically. (range: 0 to pi)
+	AnimationBlock HorizontalRange; // They can do it horizontally too! (range: 0 to 2*pi)
+	AnimationBlock Gravity; // Fall down, apple!
+	AnimationBlock Lifespan; // Everyone has to die.
+	int32_t unknown;
+	AnimationBlock EmissionRate; // Stread your particles, emitter.
+	int32_t unknown2;
+	AnimationBlock EmissionAreaLength; // Well, you can do that in this area.
+	AnimationBlock EmissionAreaWidth;
+	AnimationBlock Gravity2; // A second gravity? Its strong.
+	ModelParticleParams p;
+	AnimationBlock en;
+};
+
 
 struct ModelRibbonEmitterDef {
 	int32_t id;
@@ -321,12 +325,13 @@ struct ModelRibbonEmitterDef {
 	AnimationBlock opacity;
 	AnimationBlock above;
 	AnimationBlock below;
-	float res, length, unk;
+	float res, length, Emissionangle;
 	int16_t s1, s2;
 	AnimationBlock unk1;
-	AnimationBlock enabled;
+	AnimationBlock unk2;
 	int32_t unknown;
 };
+
 
 struct ModelEvents {
 	char id[4];

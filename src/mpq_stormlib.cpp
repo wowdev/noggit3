@@ -244,7 +244,7 @@ size_t MPQFile::read(void* dest, size_t bytes)
 	return bytes;
 }
 
-bool MPQFile::isEof()
+bool MPQFile::isEof() const
 {
     return eof;
 }
@@ -271,7 +271,7 @@ void MPQFile::close()
 	eof = true;
 }
 
-size_t MPQFile::getSize()
+size_t MPQFile::getSize() const
 {
 	return size;
 }
@@ -306,17 +306,17 @@ int MPQFile::getSize( const std::string& filename )
 	return 0;
 }
 
-size_t MPQFile::getPos()
+size_t MPQFile::getPos() const
 {
 	return pointer;
 }
 
-unsigned char* MPQFile::getBuffer()
+unsigned char* MPQFile::getBuffer() const
 {
 	return buffer;
 }
 
-unsigned char* MPQFile::getPointer()
+unsigned char* MPQFile::getPointer() const
 {
 	return buffer + pointer;
 }

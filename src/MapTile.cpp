@@ -62,7 +62,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 
   mBigAlpha = pBigAlpha;
   
-  for( int i = 0; i < 16; i++ )
+  for( int i = 0; i < 16; ++i )
   {
     for( int j = 0; j < 16; j++ )
     {
@@ -115,7 +115,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	
 	assert( fourcc == 'MCIN' );
 	
-	for( int i = 0; i < 256; i++ ) 
+	for( int i = 0; i < 256; ++i ) 
 	{
 		theFile.read( &lMCNKOffsets[i], 4 );
 		theFile.seekRelative( 0xC );
@@ -187,7 +187,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	assert( fourcc == 'MDDF' );
 	
   ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>( theFile.getPointer() );
-  for( unsigned int i = 0; i < size / 36; i++ )
+  for( unsigned int i = 0; i < size / 36; ++i )
   {
     lModelInstances.push_back( mddf_ptr[i] );
   }
@@ -201,7 +201,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	assert( fourcc == 'MODF' );
 	
   ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>( theFile.getPointer() );
-  for( unsigned int i = 0; i < size / 64; i++ )
+  for( unsigned int i = 0; i < size / 64; ++i )
   {
     lWMOInstances.push_back( modf_ptr[i] );
   }
@@ -246,7 +246,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 								lDepthInfo = reinterpret_cast<char*>( lMH2O_Chunk + lInfoBlock->ofsHeightMap + sizeof( float ) * ( lInfoBlock->width + 1 ) * ( lInfoBlock->height + 1 ) );
 
 							if( lInfoBlock->ofsHeightMap )
-								for( int i = lInfoBlock->yOffset; i < lInfoBlock->yOffset + lInfoBlock->height + 1; i++ )
+								for( int i = lInfoBlock->yOffset; i < lInfoBlock->yOffset + lInfoBlock->height + 1; ++i )
 									for( int j = lInfoBlock->xOffset; j < lInfoBlock->xOffset + lInfoBlock->width + 1; j++ )
 									{
 										if( lTile.mFlags & 2 )
@@ -256,13 +256,13 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 										lTile.mDepth[i][j] = lDepthInfo[( i - lInfoBlock->yOffset ) * lInfoBlock->width + j]/255.0f;
 									}
 							else
-								for( int i = 0; i < 9; i++ )
+								for( int i = 0; i < 9; ++i )
 									for( int j = 0; j < 9; j++ ){
 										lTile.mHeightmap[i][j] = lTile.mMinimum;
 										lTile.mDepth[i][j] = 0.0f;
 									}
 
-							for( int i = 0; i < 9; i++ )
+							for( int i = 0; i < 9; ++i )
 								for( int j = 0; j < 9; j++ )
 									lTile.mHeightmap[i][j] = lTile.mHeightmap[i][j] < lTile.mMinimum ? lTile.mMinimum-10 : lTile.mHeightmap[i][j] > lTile.mMaximum ? lTile.mMaximum+10 : lTile.mHeightmap[i][j];
 
@@ -273,19 +273,19 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 								bool * lRenderBlock = reinterpret_cast<bool*>( lMH2O_Chunk + lHeader[py * 16 + px].ofsRenderMask + lLayer * 8 );
 
 								int k = 0;
-								for( int i = 0; i < 8; i++ )
+								for( int i = 0; i < 8; ++i )
 									for( int j = 0; j < 8; j++ )
 										lTile.mRender[i][j] = lRenderBlock[k++];
 							}
 							else
 								// --Slartibartfast 00:41, 30 October 2008 (CEST): "If the block is omitted, the whole thing is rendered"
-								for( int i = 0; i < 8; i++ )
+								for( int i = 0; i < 8; ++i )
 									for( int j = 0; j < 8; j++ )
 										lTile.mRender[i][j] = true;
 
 						/*	if( lInfoBlock->ofsInfoMask )
 							{
-								for( int i = 0; i < 8; i++ )
+								for( int i = 0; i < 8; ++i )
 									for( int j = 0; j < 8; j++ )
 										lTile.mRender[i][j] = false;
 
@@ -294,7 +294,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 								int k = 0;
 
 								string dbg = "";
-								for( int i = lInfoBlock->yOffset; i < lInfoBlock->yOffset + lInfoBlock->height; i++ )
+								for( int i = lInfoBlock->yOffset; i < lInfoBlock->yOffset + lInfoBlock->height; ++i )
 								{
 									gLog( "\t\t\tx%2x (%c)\n", lMaskInfo2[i], lMaskInfo2[i] );
 									for( int j = lInfoBlock->xOffset; j < lInfoBlock->xOffset + lInfoBlock->width; j++ )
@@ -309,11 +309,11 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 							}
 							else*/
 							{
-								for( int i = 0; i < 8; i++ )
+								for( int i = 0; i < 8; ++i )
 									for( int j = 0; j < 8; j++ )
 										lTile.mRender[i][j] = false;
 
-								for( int i = lInfoBlock->yOffset; i < lInfoBlock->yOffset + lInfoBlock->height; i++ )
+								for( int i = lInfoBlock->yOffset; i < lInfoBlock->yOffset + lInfoBlock->height; ++i )
 									for( int j = lInfoBlock->xOffset; j < lInfoBlock->xOffset + lInfoBlock->width; j++ )
 										lTile.mRender[i][j] = true;
 							}
@@ -365,7 +365,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
   
   // - Load textures -------------------------------------
   
-  for( std::vector<std::string>::iterator it = mTextureFilenames.begin(); it != mTextureFilenames.end(); it++ )
+  for( std::vector<std::string>::iterator it = mTextureFilenames.begin(); it != mTextureFilenames.end(); ++it )
 	{
 		std::string lTexture = *it;
 		//! \todo  Find a different way to do this.
@@ -383,24 +383,24 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
   
   // - Load WMOs -----------------------------------------
   
-	for( std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); it++ )
+	for( std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); ++it )
 	{
 		WMOManager::add( *it );
 	}
   
-	for( std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); it++ )
+	for( std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it )
 	{
 		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::get(mWMOFilenames[it->nameID])]), &(*it) ) ) );
 	}
   
   // - Load M2s ------------------------------------------
   
-	for( std::vector<std::string>::iterator it = mModelFilenames.begin(); it != mModelFilenames.end(); it++ )
+	for( std::vector<std::string>::iterator it = mModelFilenames.begin(); it != mModelFilenames.end(); ++it )
 	{
 		ModelManager::add( *it );
 	}
   
-	for( std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); it++ )
+	for( std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
 	{
 		gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( reinterpret_cast<Model*>(ModelManager::items[ModelManager::get(mModelFilenames[it->nameID])]), &(*it) ) ) );
 	}
@@ -426,7 +426,7 @@ MapTile::~MapTile()
 
   for( int j = 0; j < 16; j++ ) 
   {
-    for( int i = 0; i < 16; i++ ) 
+    for( int i = 0; i < 16; ++i ) 
     {
       if( mChunks[j][i] )
       {
@@ -436,25 +436,25 @@ MapTile::~MapTile()
     }
   }
 
-	for( std::vector<std::string>::iterator it = mTextureFilenames.begin(); it != mTextureFilenames.end(); it++ )
+	for( std::vector<std::string>::iterator it = mTextureFilenames.begin(); it != mTextureFilenames.end(); ++it )
   {
     TextureManager::delbyname( *it );
 	}
   mTextureFilenames.clear();
 
-	for( std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); it++ ) 
+	for( std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); ++it ) 
   {
 		WMOManager::delbyname( *it );
 	}
   mWMOFilenames.clear();
 
-	for( std::vector<std::string>::iterator it = mModelFilenames.begin(); it != mModelFilenames.end(); it++ ) 
+	for( std::vector<std::string>::iterator it = mModelFilenames.begin(); it != mModelFilenames.end(); ++it ) 
   {
 		ModelManager::delbyname( *it );
 	}
   mModelFilenames.clear();
   
-  for( std::vector<Liquid*>::iterator it = mLiquids.begin(); it != mLiquids.end(); it++ )
+  for( std::vector<Liquid*>::iterator it = mLiquids.begin(); it != mLiquids.end(); ++it )
   {
     if( *it )
     {
@@ -513,14 +513,14 @@ void MapTile::draw()
 	glColor4f(1,1,1,1);
 
 	for (int j=0; j<16; j++)
-		for (int i=0; i<16; i++)
+		for (int i=0; i<16; ++i)
 			mChunks[j][i]->draw();
 }
 
 void MapTile::drawSelect()
 {
 	for (int j=0; j<16; j++)
-		for (int i=0; i<16; i++)
+		for (int i=0; i<16; ++i)
 			mChunks[j][i]->drawSelect();
 }
 
@@ -529,7 +529,7 @@ void MapTile::drawLines()//draw red lines around the square of a chunk
 	glDisable(GL_COLOR_MATERIAL);
 	
 	for (int j=0; j<16; j++)
-		for (int i=0; i<16; i++)
+		for (int i=0; i<16; ++i)
 			mChunks[j][i]->drawLines();
 	
 	glEnable(GL_COLOR_MATERIAL);
@@ -541,7 +541,7 @@ void MapTile::drawMFBO()
 
 	glColor4f(0,1,1,0.2f);
 	glBegin(GL_TRIANGLE_FAN);
-	for( int i = 0; i < 18; i++ )
+	for( int i = 0; i < 18; ++i )
 	{
 		glVertex3f( mMinimumValues[lIndices[i]*3 + 0], mMinimumValues[lIndices[i]*3 + 1], mMinimumValues[lIndices[i]*3 + 2]	);
 	}
@@ -549,7 +549,7 @@ void MapTile::drawMFBO()
 	
 	glColor4f(1,1,0,0.2f);
 	glBegin(GL_TRIANGLE_FAN);
-	for( int i = 0; i < 18; i++ )
+	for( int i = 0; i < 18; ++i )
 	{
 		glVertex3f( mMaximumValues[lIndices[i]*3 + 0], mMaximumValues[lIndices[i]*3 + 1], mMaximumValues[lIndices[i]*3 + 2]	);
 	}
@@ -581,7 +581,7 @@ void MapTile::drawTextures()
 	//glTranslatef(-8,-8,0);
 	
 	for (int j=0; j<16; j++) {
-		for (int i=0; i<16; i++) {
+		for (int i=0; i<16; ++i) {
 			if(((i+1+xOffset)>gWorld->minX)&&((j+1+yOffset)>gWorld->minY)&&((i+xOffset)<gWorld->maxX)&&((j+yOffset)<gWorld->maxY))
 				mChunks[j][i]->drawTextures();
 		}
@@ -808,7 +808,7 @@ void MapTile::saveTile()
 	}
 	
 	lID = 0;
-	for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); it++ )
+	for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); ++it )
 		it->second[0] = lID++;
 
 	std::map<std::string, int*> lObjects;
@@ -818,20 +818,20 @@ void MapTile::saveTile()
 			lObjects.insert( std::pair<std::string, int*>( ( it->second.wmo->filename ), new int[2] ) ); 
 	
 	lID = 0;
-	for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); it++ )
+	for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
 		it->second[0] = lID++;
 
 	// Check which textures are on this ADT.
 	std::map<std::string, int> lTextures;
 
-	for( int i = 0; i < 16; i++ )
+	for( int i = 0; i < 16; ++i )
 		for( int j = 0; j < 16; j++ )
 			for( int tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
 				if( lTextures.find( TextureManager::items[mChunks[i][j]->textures[tex]]->name ) == lTextures.end() )
 					lTextures.insert( std::pair<std::string, int>( TextureManager::items[mChunks[i][j]->textures[tex]]->name, -1 ) ); 
 	
 	lID = 0;
-	for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); it++ )
+	for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
 		it->second = lID++;
 
 	// Now write the file.
@@ -884,7 +884,7 @@ void MapTile::saveTile()
 		lCurrentPosition += 8 + 0;
 
 		// MTEX data
-		for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); it++ )
+		for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
 		{
 			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, const_cast<char*>( it->first.c_str() ) );
 			lCurrentPosition += it->first.size() + 1;
@@ -903,7 +903,7 @@ void MapTile::saveTile()
 		lCurrentPosition += 8 + 0;
 
 		// MMDX data
-		for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); it++ )
+		for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); ++it )
 		{
 			it->second[1] = lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize;
 			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, const_cast<char*>( it->first.c_str() ) );
@@ -924,7 +924,7 @@ void MapTile::saveTile()
 		int * lMMID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
 		
 		lID = 0;
-		for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); it++ )
+		for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); ++it )
 			lMMID_Data[lID++] = it->second[1];
 
 		lCurrentPosition += 8 + lMMID_Size;
@@ -940,7 +940,7 @@ void MapTile::saveTile()
 		lCurrentPosition += 8 + 0;
 
 		// MWMO data
-		for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); it++ )
+		for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
 		{
 			it->second[1] = lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize;
 			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, const_cast<char*>( it->first.c_str() ) );
@@ -961,7 +961,7 @@ void MapTile::saveTile()
 		int * lMWID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
 		
 		lID = 0;
-		for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); it++ )
+		for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
 			lMWID_Data[lID++] = it->second[1];
 
 		lCurrentPosition += 8 + lMWID_Size;
@@ -1138,13 +1138,13 @@ void MapTile::saveTile()
 					float * lHeightmap = lADTFile.GetPointer<float>( lCurrentPosition + 8 );
 
 					float lMedian = 0.0f;
-					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
+					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
 						lMedian = lMedian + mChunks[y][x]->mVertices[i].y;
 
 					lMedian = lMedian / ( 9 * 9 + 8 * 8 );
 					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ypos = lMedian;
 
-					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
+					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
 						lHeightmap[i] = mChunks[y][x]->mVertices[i].y - lMedian;
 					
 					lCurrentPosition += 8 + lMCVT_Size;
@@ -1165,7 +1165,7 @@ void MapTile::saveTile()
 
 					// recalculate the normals
 					mChunks[y][x]->recalcNorms();
-					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); i++ )
+					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
 					{
 						lNormals[i*3+0] = roundc( -mChunks[y][x]->mNormals[i].z * 127 );
 						lNormals[i*3+1] = roundc( -mChunks[y][x]->mNormals[i].x * 127 );
@@ -1271,13 +1271,13 @@ void MapTile::saveTile()
 					int * lReferences = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
 
 					lID = 0;
-					for( std::list<int>::iterator it = lDoodadIDs.begin(); it != lDoodadIDs.end(); it++ )
+					for( std::list<int>::iterator it = lDoodadIDs.begin(); it != lDoodadIDs.end(); ++it )
 					{
 						lReferences[lID] = *it;
 						lID++;
 					}
 
-					for( std::list<int>::iterator it = lObjectIDs.begin(); it != lObjectIDs.end(); it++ )
+					for( std::list<int>::iterator it = lObjectIDs.begin(); it != lObjectIDs.end(); ++it )
 					{
 						lReferences[lID] = *it;
 						lID++;
@@ -1421,10 +1421,10 @@ void MapTile::saveTile()
 		short * lMFBO_Data = lADTFile.GetPointer<short>( lCurrentPosition + 8 );
 		
 		lID = 0;
-		for( int i = 0; i < 9; i++ )
+		for( int i = 0; i < 9; ++i )
 			lMFBO_Data[lID++] = mMinimumValues[i * 3 + 1];
 
-		for( int i = 0; i < 9; i++ )
+		for( int i = 0; i < 9; ++i )
 			lMFBO_Data[lID++] = mMaximumValues[i * 3 + 1];
 
 		lCurrentPosition += 8 + 36;

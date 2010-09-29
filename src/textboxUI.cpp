@@ -1,10 +1,12 @@
+#include <SDL/SDL.h>
+#include <sstream>
+
 #include "textboxUI.h"
 #include "noggit.h" // arial12
 
 #include "video.h"
 #include "textureUI.h"
 #include "textUI.h"
-#include <sstream>
 #include "TextureManager.h" // TextureManager, Texture
 
 TextBox::TextBox(float xPos,float yPos,float w, float h, const std::string& tex, const std::string& texd)
@@ -19,7 +21,7 @@ TextBox::TextBox(float xPos,float yPos,float w, float h, const std::string& tex,
 	mText = new textUI( w / 2.0f, 2.0f, &arial12, eJustifyCenter );
 }
 
-void TextBox::render()
+void TextBox::render() const
 {
 	glColor3f(1.0f,1.0f,1.0f);
   

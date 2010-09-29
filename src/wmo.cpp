@@ -88,7 +88,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 			// materials
 			//WMOMaterialBlock bl;
 
-			for (unsigned int i=0; i<nTextures; i++) {
+			for (unsigned int i=0; i<nTextures; ++i) {
 				WMOMaterial *m = &mat[i];
 				f.read(m, 0x40);
 
@@ -103,14 +103,14 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 		}
 		else if ( fourcc == 'MOGI' ) {
 			// group info - important information! ^_^
-			for (unsigned int i=0; i<nGroups; i++) {
+			for (unsigned int i=0; i<nGroups; ++i) {
 				groups[i].init(this, f, i, groupnames);
 
 			}
 		}
 		else if ( fourcc == 'MOLT' ) {
 			// Lights?
-			for (unsigned int i=0; i<nLights; i++) {
+			for (unsigned int i=0; i<nLights; ++i) {
 				WMOLight l;
 				l.init(f);
 				lights.push_back(l);
@@ -136,7 +136,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 			}
 		}
 		else if ( fourcc == 'MODS' ) {
-			for (unsigned int i=0; i<nDoodadSets; i++) {
+			for (unsigned int i=0; i<nDoodadSets; ++i) {
 				WMODoodadSet dds;
 				f.read(&dds, 32);
 				doodadsets.push_back(dds);
@@ -144,7 +144,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 		}
 		else if ( fourcc == 'MODD' ) {
 			nModels = (int)size / 0x28;
-			for (unsigned int i=0; i<nModels; i++) {
+			for (unsigned int i=0; i<nModels; ++i) {
 				int ofs;
 				f.read(&ofs,4);
 				Model *m = (Model*)ModelManager::items[ModelManager::get(ddnames + ofs)];
@@ -176,7 +176,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 		}
 		else if ( fourcc == 'MOPV' ) {
 			WMOPV p;
-			for (unsigned int i=0; i<nP; i++) {
+			for (unsigned int i=0; i<nP; ++i) {
 				f.read(ff,12);
 				p.a = Vec3D(ff[0],ff[2],-ff[1]);
 				f.read(ff,12);
@@ -191,13 +191,13 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 		else if ( fourcc == 'MOPR' ) {
 			int nn = (int)size / 8;
 			WMOPR *pr = (WMOPR*)f.getPointer();
-			for (int i=0; i<nn; i++) {
+			for (int i=0; i<nn; ++i) {
 				prs.push_back(*pr++);
 			}
 		}
 		else if ( fourcc == 'MFOG' ) {
 			int nfogs = (int)size / 0x30;
-			for (int i=0; i<nfogs; i++) {
+			for (int i=0; i<nfogs; ++i) {
 				WMOFog fog;
 				fog.init(f);
 				fogs.push_back(fog);
@@ -214,7 +214,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
     texbuf = NULL;
   }
 
-	for (unsigned int i=0; i<nGroups; i++) 
+	for (unsigned int i=0; i<nGroups; ++i) 
 		groups[i].initDisplayList();
 }
 
@@ -251,7 +251,7 @@ WMO::~WMO()
 // model.cpp
 void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
 
-void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight)
+void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight) const
 {
 	if (highlight && false)
 	{
@@ -260,7 +260,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 		WMOHighlight( Vec4D( 0.1f, 0.1f, 0.1f, 0.1f ) );
 	}
 
-	for (unsigned int i=0; i<nGroups; i++) 
+	for (unsigned int i=0; i<nGroups; ++i) 
   {
     groups[i].draw(ofs, rot);
       
@@ -294,7 +294,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 		glEnable( GL_BLEND );
 		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		
-		for( unsigned int i = 0; i < nGroups; i++ )
+		for( unsigned int i = 0; i < nGroups; ++i )
 			DrawABox( groups[i].BoundingBoxMin, groups[i].BoundingBoxMax, Vec4D( 1.0f, 1.0f, 1.0f, 1.0f ), 1.0f );
 
 		/*glColor4fv( Vec4D( 1.0f, 0.0f, 0.0f, 1.0f ) );
@@ -345,7 +345,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 
 		glLineWidth(1.0);
 		glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-		for (int i=0; i<nGroups; i++) 
+		for (int i=0; i<nGroups; ++i) 
 		{
 			WMOGroup &header = groups[i];
 			/// Bounding box
@@ -428,7 +428,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 
 		glLineWidth(1.0);
 		glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-		for (unsigned int i=0; i<nGroups; i++) 
+		for (unsigned int i=0; i<nGroups; ++i) 
 		{
 			WMOGroup &header = groups[i];
 			glBegin( GL_LINE_STRIP );	
@@ -485,7 +485,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 	/*
 	// draw portal relations
 	glBegin(GL_LINES);
-	for (size_t i=0; i<prs.size(); i++) {
+	for (size_t i=0; i<prs.size(); ++i) {
 		WMOPR &pr = prs[i];
 		WMOPV &pv = pvs[pr.portal];
 		if (pr.dir>0) glColor4f(1,0,0,1);
@@ -498,7 +498,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 	glEnd();
 	glColor4f(1,1,1,1);
 	// draw portals
-	for (int i=0; i<nP; i++) {
+	for (int i=0; i<nP; ++i) {
 		glBegin(GL_LINE_STRIP);
 		glVertex3fv(pvs[i].d);
 		glVertex3fv(pvs[i].c);
@@ -511,9 +511,9 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 	*/
 }
 
-void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot)
+void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot) const
 {
-  for (unsigned int i=0; i<nGroups; i++) {
+  for (unsigned int i=0; i<nGroups; ++i) {
 		groups[i].draw(ofs, rot);
     
     if (gWorld->drawdoodads) {
@@ -524,7 +524,7 @@ void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot)
 	}
 }
 
-void WMO::drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper )
+void WMO::drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const
 {
   if( skybox && pCamera.IsInsideOf( pLower, pUpper ) ) 
 	{
@@ -557,7 +557,7 @@ void WMO::drawPortals()
 {
 	// not used ;)
 	glBegin(GL_QUADS);
-	for (int i=0; i<nP; i++) {
+	for (int i=0; i<nP; ++i) {
 		glVertex3fv(pvs[i].d);
 		glVertex3fv(pvs[i].c);
 		glVertex3fv(pvs[i].b);
@@ -770,7 +770,7 @@ void WMOGroup::initDisplayList()
 			VertexBoxMin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
 			VertexBoxMax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
 			rad = 0;
-			for (int i=0; i<nVertices; i++) {
+			for (int i=0; i<nVertices; ++i) {
 				Vec3D v(vertices[i].x, vertices[i].z, -vertices[i].y);
 				if (v.x < VertexBoxMin.x) VertexBoxMin.x = v.x;
 				if (v.y < VertexBoxMin.y) VertexBoxMin.y = v.y;
@@ -903,7 +903,7 @@ void WMOGroup::initDisplayList()
 		
 		// render
 		glBegin(GL_TRIANGLES);
-		for (int t=0, i=batch->indexStart; t<batch->indexCount; t++,i++) {
+		for (int t=0, i=batch->indexStart; t<batch->indexCount; t++,++i) {
 			int a = indices[i];
 			if (indoor && hascv) {
 	            setGLColor(cv[a]);
@@ -948,7 +948,7 @@ void WMOGroup::initLighting(int nLR, short *useLights)
 		float lenmin;
 		int lmin;
 
-		for (int i=0; i<nDoodads; i++) {
+		for (int i=0; i<nDoodads; ++i) {
 			lenmin = 999999.0f*999999.0f;
 			lmin = 0;
 			ModelInstance &mi = wmo->modelis[ddr[i]];
@@ -1004,7 +1004,7 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot)
 	//glCallList(dl);
 	glDisable(GL_BLEND);
 	glColor4f(1,1,1,1);
-	for (int i=0; i<nBatches; i++) 
+	for (int i=0; i<nBatches; ++i) 
 	{
 		if( video.mSupportShaders && lists[i].second )
 		{
@@ -1047,7 +1047,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float
 
 	// draw doodads
 	glColor4f(1,1,1,1);
-	for (int i=0; i<nDoodads; i++) {
+	for (int i=0; i<nDoodads; ++i) {
 		short dd = ddr[i];
 		if( ! ( wmo->doodadsets.size() < doodadset ) )
 			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {
@@ -1087,7 +1087,7 @@ void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const
 
 	// draw doodads
 	glColor4f(1,1,1,1);
-	for (int i=0; i<nDoodads; i++) {
+	for (int i=0; i<nDoodads; ++i) {
 		short dd = ddr[i];
 		if( ! ( wmo->doodadsets.size() < doodadset ) )
 			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {

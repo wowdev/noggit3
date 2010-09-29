@@ -37,16 +37,19 @@ public:
 	MPQFile(const std::string& filename);	// filenames are not case sensitive
 	~MPQFile();
 	size_t read(void* dest, size_t bytes);
-	size_t getSize();
-	size_t getPos();
-	unsigned char* getBuffer();
-	unsigned char* getPointer();
-	bool isEof();
+	size_t getSize() const;
+	size_t getPos() const;
+	unsigned char* getBuffer() const;
+	unsigned char* getPointer() const;
+	bool isEof() const;
 	void seek(int offset);
 	void seekRelative(int offset);
 	void close();
 	void save(const char* filename);
-	bool isExternal(){return External;};
+	bool isExternal() const
+  {
+    return External;
+  }
 
 	void setBuffer(unsigned char *Buf, unsigned int Size)
 	{
@@ -64,19 +67,6 @@ public:
 	static bool exists( const std::string& filename );
 	static int getSize( const std::string& filename ); // Used to do a quick check to see if a file is corrupted
 };
-
-/*inline void flipcc(char *fcc)
-{
-	char t;
-	t=fcc[0];
-	fcc[0]=fcc[3];
-	fcc[3]=t;
-	t=fcc[1];
-	fcc[1]=fcc[2];
-	fcc[2]=t;
-}*/
-
-inline bool defaultFilterFunc(const std::string&) { return true; }
 
 #endif
 

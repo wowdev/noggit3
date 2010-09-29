@@ -88,7 +88,7 @@ bool slider::processLeftDrag(float mx,float my, float xChange, float yChange)
 //Top Left Corner
 //Top Right Corner
 
-void slider::render()
+void slider::render() const
 {
 	if(hidden)
 		return;

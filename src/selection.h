@@ -66,7 +66,7 @@ public:
 	
 	void del( unsigned int Ref );
 	
-	nameEntry *findEntry( unsigned int ref );
+	nameEntry *findEntry( unsigned int ref ) const;
 };
 
 #endif

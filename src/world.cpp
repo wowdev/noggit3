@@ -24,7 +24,7 @@ static const int BUFSIZE = 8192;
 unsigned int	SelectBuffer[BUFSIZE];
 
 
-bool IsEditableWorld( int pMapId )
+bool World::IsEditableWorld( int pMapId )
 {
 	std::string lMapName;
 	try 
@@ -70,9 +70,8 @@ bool IsEditableWorld( int pMapId )
 	return false;
 }
 
-World::World( const std::string& name ) : basename( name ), mCurrentSelection( 0 )
+World::World( const std::string& name ) : cx( -1 ), cz( -1 ), ex( -1 ), ez( -1 ), mCurrentSelection( NULL ), mCurrentSelectedTriangle( 0 ), SelectionMode( false ), mBigAlpha( false ), mWmoFilename( "" ), mWmoEntry( ENTRY_MODF() ), detailtexcoords( 0 ), alphatexcoords( 0 ), mMapId( 0xFFFFFFFF ), ol( NULL ), l_const( 0.0f ), l_linear( 0.7f ), l_quadratic( 0.03f ), drawdoodads( true ), drawfog( true ), drawlines( false ), drawmodels( true ), drawterrain( true ), drawwater( true ), drawwmo( true ), lighting( true ), uselowlod( drawfog ), animtime( 0 ), time( 1450 ), basename( name ), fogdistance( 777.0f ), culldistance( fogdistance ), autoheight( false ), minX( 0.0f ), maxX( 0.0f ), minY( 0.0f ), maxY( 0.0f ), zoom( 0.25f ), skies( NULL ), mHasAGlobalWMO( false ), loading( false ), noadt( false ), hadSky( false ), outdoorLightStats( OutdoorLightStats() ), minimap( 0 ), mapstrip( NULL ), mapstrip2( NULL ), camera( Vec3D( 0.0f, 0.0f, 0.0f ) ), lookat( Vec3D( 0.0f, 0.0f, 0.0f ) ), frustum( Frustum() )
 {
-	mMapId = 0xFFFFFFFF;
 	for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
 	{
 		if( name == std::string( i->getString( MapDB::InternalName ) ) )
@@ -84,28 +83,11 @@ World::World( const std::string& name ) : basename( name ), mCurrentSelection( 0
 	if( mMapId == 0xFFFFFFFF )
 		LogError << "MapId for \"" << name << "\" not found! What is wrong here?" << std::endl;
 
-	//::gWorld = this;
-
 	LogDebug << "Loading world \"" << name << "\"." << std::endl;
 
-	autoheight = false;
-
-	init();
-	skies = 0;
-	ol = 0;
-
-	zoom=0.25;
-
-	// don't load map objects while still on the menu screen
-	//initDisplay();
-}
-
-
-void World::init()
-{
 	for( size_t j = 0; j < 64; j++ )
 	{
-		for( size_t i = 0; i < 64; i++ )
+		for( size_t i = 0; i < 64; ++i )
 		{
 			lowrestiles[j][i] = NULL;
 		}
@@ -113,26 +95,11 @@ void World::init()
   
   std::stringstream filename; 
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
-
-	time = 1450;
-	animtime = 0;
-
-	ex = ez = -1;
-	loading = false;
-
-	drawfog = false;
-	
-	mapstrip = 0;
-	mapstrip2 = 0;
-	
-	minimap = 0;
-	
-	mWmoFilename = "";
-
+  
 	MPQFile theFile(filename.str());
 	uint32_t fourcc;
 	uint32_t size;
-
+  
 	// - MVER ----------------------------------------------
 	
 	uint32_t version;
@@ -171,7 +138,7 @@ void World::init()
 	
 	for( int j = 0; j < 64; j++ ) 
 	{
-		for( int i = 0; i < 64; i++ ) 
+		for( int i = 0; i < 64; ++i ) 
 		{
 			theFile.read( &mTiles[j][i].flags, 4 );
       theFile.seekRelative( 4 );
@@ -181,15 +148,15 @@ void World::init()
 	
 	if( !theFile.isEof() )
 	{
-	 //! \note We actually don't load WMO only worlds, so we just stop reading here, k?
-	 //! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
-	 
-	 mHasAGlobalWMO = false;
-	 
+    //! \note We actually don't load WMO only worlds, so we just stop reading here, k?
+    //! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
+    
+    mHasAGlobalWMO = false;
+    
 #ifdef __ASSERTIONBUGFIXED
 		
 		// - MWMO ----------------------------------------------
-	
+    
 		theFile.read( &fourcc, 4 );
 		theFile.read( &size, 4 );
 		
@@ -201,9 +168,9 @@ void World::init()
 		mWmoFilename = wmoFilenameBuf;
 		
 		free(wmoFilenameBuf);
-	
+    
 		// - MODF ----------------------------------------------
-	
+    
 		theFile.read( &fourcc, 4 );
 		theFile.seekRelative( 4 );
 		
@@ -212,7 +179,7 @@ void World::init()
 		theFile.read( &mWmoEntry, sizeof( ENTRY_MODF ) );
 		
 #endif //__ASSERTIONBUGFIXED
-
+    
 	}
 	
 	// -----------------------------------------------------
@@ -221,6 +188,9 @@ void World::init()
 	
 	if( !mHasAGlobalWMO )
 		initMinimap();
+
+	// don't load map objects while still on the menu screen
+	//initDisplay();
 }
 
 
@@ -276,7 +246,7 @@ void World::initMinimap()
 			short tilebuf[17*17];
 
 			for (int j=0; j<64; j++) {
-				for (int i=0; i<64; i++) {
+				for (int i=0; i<64; ++i) {
 					if (ofsbuf[j][i]) {
 						f.seek(ofsbuf[j][i]+8);
 						// read height values ^_^
@@ -429,7 +399,7 @@ void World::initLowresTerrain()
 
 			for (int j=0; j<64; j++) 
 			{
-				for (int i=0; i<64; i++) 
+				for (int i=0; i<64; ++i) 
 				{
 					if (ofsbuf[j][i]) 
 					{
@@ -518,7 +488,7 @@ void initGlobalVBOs( GLuint &pDetailTexCoords, GLuint &pAlphaTexCoords )
 		vt = temp;
 		const float detail_half = 0.5f * detail_size / 8.0f;
 		for (int j=0; j<17; j++) {
-			for (int i=0; i<((j%2)?8:9); i++) {
+			for (int i=0; i<((j%2)?8:9); ++i) {
 				tx = detail_size / 8.0f * i;
 				ty = detail_size / 8.0f * j * 0.5f;
 				if (j%2) {
@@ -538,7 +508,7 @@ void initGlobalVBOs( GLuint &pDetailTexCoords, GLuint &pAlphaTexCoords )
 
 		const float alpha_half = 0.5f * (62.0f/64.0f) / 8.0f;
 		for (int j=0; j<17; j++) {
-			for (int i=0; i<((j%2)?8:9); i++) {
+			for (int i=0; i<((j%2)?8:9); ++i) {
 				tx = (62.0f/64.0f) / 8.0f * i;
 				ty = (62.0f/64.0f) / 8.0f * j * 0.5f;
 				if (j%2) {
@@ -562,23 +532,18 @@ void World::initDisplay()
 {
 	// default strip indices
 	short *defstrip = new short[stripsize];
-	for (int i=0; i<stripsize; i++) defstrip[i] = i; // note: this is ugly and should be handled in stripify
+	for (int i=0; i<stripsize; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
 	mapstrip = new short[stripsize];
 	stripify<short>(defstrip, mapstrip);
 	delete[] defstrip;
 
 	defstrip = new short[stripsize2];
-	for (int i=0; i<stripsize2; i++) defstrip[i] = i; // note: this is ugly and should be handled in stripify
+	for (int i=0; i<stripsize2; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
 	mapstrip2 = new short[stripsize2];
 	stripify2<short>(defstrip, mapstrip2);
 	delete[] defstrip;
 
 	initGlobalVBOs( detailtexcoords, alphatexcoords );
-
-	highresdistance = 384.0f;
-	mapdrawdistance = 998.0f;
-	modeldrawdistance = 384.0f;
-	doodaddrawdistance = 64.0f;
 
 	noadt = false;
 	
@@ -603,7 +568,7 @@ World::~World()
   
 	for( int j = 0; j < 64; j++ ) 
   {
-		for( int i = 0; i < 64; i++ ) 
+		for( int i = 0; i < 64; ++i ) 
     {
 			if( lowrestiles[j][i] )
       {
@@ -674,7 +639,7 @@ void World::enterTile( int x, int z )
   
 	cx = x;
 	cz = z;
-	for( int i = max(cz - 2, 0); i < min(cz + 2, 64); i++ )
+	for( int i = max(cz - 2, 0); i < min(cz + 2, 64); ++i )
   {
 		for( int j = max(cx - 2, 0); j < min(cx + 2, 64); j++ )
     {
@@ -886,22 +851,13 @@ void World::setupFog()
 		glDisable(GL_FOG);
 		culldistance = mapdrawdistance;
 	}
-	culldistance2 = culldistance * culldistance;
 }
 
 void World::draw()
 {
-	//Now for drawing code
-
-	WMOInstance::reset();
 	ModelManager::resetAnim();
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	highresdistance2 = highresdistance * highresdistance;
-	mapdrawdistance2 = mapdrawdistance * mapdrawdistance;
-	modeldrawdistance2 = modeldrawdistance * modeldrawdistance;
-	doodaddrawdistance2 = doodaddrawdistance * doodaddrawdistance;
 
 	// setup camera
 	gluLookAt(camera.x,camera.y,camera.z, lookat.x,lookat.y,lookat.z, 0, 1, 0);
@@ -955,7 +911,7 @@ void World::draw()
 		//glColor3f(0,1,0);
 		//glDisable(GL_FOG);
 		const int lrr = 2;
-		for (int i=cx-lrr; i<=cx+lrr; i++) {
+		for (int i=cx-lrr; i<=cx+lrr; ++i) {
 			for (int j=cz-lrr; j<=cz+lrr; j++) {
 				//! \todo  some annoying visual artifacts when the verylowres terrain overlaps
 				// maptiles that are close (1-off) - figure out how to fix.
@@ -1021,7 +977,7 @@ void World::draw()
   {
 		for( int j = 0; j < 64; j++ )
     {
-			for( int i = 0; i < 64; i++ )
+			for( int i = 0; i < 64; ++i )
       {
 				if( tileLoaded( j, i ) )
         {
@@ -1048,7 +1004,7 @@ void World::draw()
 		setupFog();
 		for( int j = 0; j < 64; j++ )
     {
-			for( int i = 0; i < 64; i++ )
+			for( int i = 0; i < 64; ++i )
       {
 				if( tileLoaded( j, i ) )
         {
@@ -1087,7 +1043,7 @@ void World::draw()
 	glDisable(GL_ALPHA_TEST);
 
 	// TEMP: for fucking around with lighting
-	for (int i=0; i<8; i++) {
+	for (int i=0; i<8; ++i) {
 		GLuint light = GL_LIGHT0 + i;
 		glLightf(light, GL_CONSTANT_ATTENUATION, l_const);
 		glLightf(light, GL_LINEAR_ATTENUATION, l_linear);
@@ -1143,7 +1099,7 @@ void World::draw()
 	
   for( int j = 0; j < 64; j++ )
   {
-    for( int i = 0; i < 64; i++ )
+    for( int i = 0; i < 64; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1180,7 +1136,7 @@ void World::draw()
 	
   for( int j = 0; j < 64; j++ )
   {
-    for( int i = 0; i < 64; i++ )
+    for( int i = 0; i < 64; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1208,19 +1164,11 @@ void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
 
 	if( !pOnlyMap )
 	{
-		if( drawwmo )
-			WMOInstance::reset();
-
 		if( drawmodels )
 			ModelManager::resetAnim();
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	highresdistance2 = highresdistance * highresdistance;
-	mapdrawdistance2 = mapdrawdistance * mapdrawdistance;
-	modeldrawdistance2 = modeldrawdistance * modeldrawdistance;
-	doodaddrawdistance2 = doodaddrawdistance * doodaddrawdistance;
 
 	gluLookAt(camera.x,camera.y,camera.z, lookat.x,lookat.y,lookat.z, 0, 1, 0);
 
@@ -1236,7 +1184,7 @@ void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
 	{
     for( int j = 0; j < 64; j++ )
     {
-      for( int i = 0; i < 64; i++ )
+      for( int i = 0; i < 64; ++i )
       {
         if( tileLoaded( j, i ) )
         {
@@ -1276,15 +1224,9 @@ void World::drawSelectionChunk(int cursorX,int cursorY)
 	gluPickMatrix(cursorX,viewport[3]-cursorY,12,12,viewport);
 	video.set3D_select();
 
-	WMOInstance::reset();
 	ModelManager::resetAnim();
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	highresdistance2 = highresdistance * highresdistance;
-	mapdrawdistance2 = mapdrawdistance * mapdrawdistance;
-	modeldrawdistance2 = modeldrawdistance * modeldrawdistance;
-	doodaddrawdistance2 = doodaddrawdistance * doodaddrawdistance;
 
 	gluLookAt(camera.x,camera.y,camera.z, lookat.x,lookat.y,lookat.z, 0, 1, 0);
 
@@ -1380,7 +1322,7 @@ void World::drawTileMode(float ah)
   
   for( int j = 0; j < 64; j++ )
   {
-    for( int i = 0; i < 64; i++ )
+    for( int i = 0; i < 64; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1451,7 +1393,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
 {
   for( int j = 0; j < 64; j++ )
   {
-    for( int i = 0; i < 64; i++ )
+    for( int i = 0; i < 64; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1468,7 +1410,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
   
   for( int j = 0; j < 64; j++ )
   {
-    for( int i = 0; i < 64; i++ )
+    for( int i = 0; i < 64; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1487,7 +1429,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
 {
   for( int j = 0; j < 64; j++ )
   {
-    for( int i = 0; i < 64; i++ )
+    for( int i = 0; i < 64; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1504,7 +1446,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
   
   for( int j = 0; j < 64; j++ )
   {
-    for( int i = 0; i < 64; i++ )
+    for( int i = 0; i < 64; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1524,7 +1466,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
 {
   for( int j = 0; j < 64; j++ )
   {
-    for( int i = 0; i < 64; i++ )
+    for( int i = 0; i < 64; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1541,7 +1483,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
   
   for( int j = 0; j < 64; j++ )
   {
-    for( int i = 0; i < 64; i++ )
+    for( int i = 0; i < 64; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1566,7 +1508,7 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
   
   for( int j = newZ - 1; j < newZ + 1; j++ )
   {
-    for( int i = newX - 1; i < newX + 1; i++ )
+    for( int i = newX - 1; i < newX + 1; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1590,7 +1532,7 @@ void World::eraseTextures(float x, float z)
   
   for( int j = newZ - 1; j < newZ + 1; j++ )
   {
-    for( int i = newX - 1; i < newX + 1; i++ )
+    for( int i = newX - 1; i < newX + 1; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1617,7 +1559,7 @@ void World::addHole( float x, float z )
   
   for( int j = newZ - 1; j < newZ + 1; j++ )
   {
-    for( int i = newX - 1; i < newX + 1; i++ )
+    for( int i = newX - 1; i < newX + 1; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1646,7 +1588,7 @@ void World::removeHole( float x, float z )
   
   for( int j = newZ - 1; j < newZ + 1; j++ )
   {
-    for( int i = newX - 1; i < newX + 1; i++ )
+    for( int i = newX - 1; i < newX + 1; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1709,7 +1651,7 @@ void World::saveMap()
 			ATile->drawTextures();
 			glPopMatrix();
 			glReadPixels(video.xres/2-128,video.yres/2-128,256,256,GL_RGB,GL_UNSIGNED_BYTE,image);
-			SDL_GL_SwapBuffers();
+			video.flip();
 			sprintf(tfname,"%s_map_%d_%d.raw",basename.c_str(),x,y);
 			fid=fopen(tfname,"wb");
 			fwrite(image,256*3,256,fid);
@@ -1787,8 +1729,6 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
 	
 	WMOInstance newWMOis(wmo);
 	newWMOis.pos = newPos;
-	newWMOis.id = lMaxUID;
-	newWMOis.wmoID = lMaxUID;
-	newWMOis.nameID = -1;
+	newWMOis.mUniqueID = lMaxUID;
 	mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
 }

@@ -155,38 +155,38 @@ struct MH2O_HeightMask{
 		mWidth=Width;
 		mHeight=Height;
 		mHeightValues=new float*[mHeight];
-		for(int i=0;i<mHeight;i++)
+		for(int i=0;i<mHeight;++i)
 			mHeightValues[i]=new float[mWidth];
 		mTransparency=new uint8_t*[mHeight];
-		for(int i=0;i<mHeight;i++)
+		for(int i=0;i<mHeight;++i)
 			mTransparency[i]=new uint8_t[mWidth];
-		for(int i=0;i<mHeight;i++)
+		for(int i=0;i<mHeight;++i)
 			memcpy(mHeightValues[i],file+Position+i*mWidth*sizeof(float),mWidth*sizeof(float));
-		for(int i=0;i<mHeight;i++)
+		for(int i=0;i<mHeight;++i)
 			memcpy(mTransparency[i],file+Position+mWidth*mHeight*sizeof(float)+i*mWidth*sizeof(uint8_t),mWidth*sizeof(uint8_t));
 	}
 	MH2O_HeightMask(int Width,int Height,float*HeightValues,uint8_t *Transparency){
 		mWidth=Width;
 		mHeight=Height;
 		mHeightValues=new float*[mHeight];
-		for(int i=0;i<mHeight;i++)
+		for(int i=0;i<mHeight;++i)
 			mHeightValues[i]=new float[mWidth];
 		mTransparency=new uint8_t*[mHeight];
-		for(int i=0;i<mHeight;i++)
+		for(int i=0;i<mHeight;++i)
 			mTransparency[i]=new uint8_t[mWidth];
-		for(int i=0;i<mHeight;i++)
+		for(int i=0;i<mHeight;++i)
 			memcpy(mHeightValues[i],HeightValues+i*mWidth*sizeof(float),mWidth*sizeof(float));
-		for(int i=0;i<mHeight;i++)
+		for(int i=0;i<mHeight;++i)
 			memcpy(mTransparency[i],Transparency+i*mWidth*sizeof(uint8_t),mWidth*sizeof(uint8_t));
 	}
 	MH2O_HeightMask(int Width=0,int Height=0){
 		mWidth=Width;
 		mHeight=Height;
 		mHeightValues=new float*[mHeight];
-		for(int i=0;i<mHeight;i++)
+		for(int i=0;i<mHeight;++i)
 			mHeightValues[i]=new float[mWidth];
 		mTransparency=new uint8_t*[mHeight];
-		for(int i=0;i<mHeight;i++)
+		for(int i=0;i<mHeight;++i)
 			mTransparency[i]=new uint8_t[mWidth];
 	}
 };
@@ -197,7 +197,7 @@ struct MH2O_Render{
 		
 	}
 	MH2O_Render(uint64_t Mask){
-		for(int i=0;i<64;i++){
+		for(int i=0;i<64;++i){
 			uint8_t t= Mask<<i;
 			mRender[i]=((t&0x1)==1);
 		}
