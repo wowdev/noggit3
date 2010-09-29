@@ -84,13 +84,13 @@ void textUI::render() const
 	switch( justify )
 	{
 	case eJustifyLeft:
-		freetype::shprint( *font, x, y, mText.c_str() );		
+		freetype::shprint( *font, x, y, mText );		
 		break;
 	case eJustifyCenter:
-		freetype::shprint( *font, x - twidth / 2.0f, y, mText.c_str() );
+		freetype::shprint( *font, x - twidth / 2.0f, y, mText );
 		break;
 	case eJustifyRight:
-		freetype::shprint( *font, x - twidth, y, mText.c_str() );
+		freetype::shprint( *font, x - twidth, y, mText );
 		break;
 	}
 }

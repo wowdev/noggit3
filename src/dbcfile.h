@@ -114,17 +114,27 @@ public:
 	private:
 		Record record;
 	};
-
-	// Get record by id
-	Record getRecord(size_t id);
-	/// Get begin iterator over records
-	Iterator begin();
-	/// Get begin iterator over records
-	Iterator end();
+  
+  inline Record getRecord(size_t id)
+  {
+    //	assert(data);
+    return Record(*this, data + id*recordSize);
+  }
+  
+  inline Iterator begin()
+  {
+    //	assert(data);
+    return Iterator(*this, data);
+  }
+  inline Iterator end()
+  {
+    //	assert(data);
+    return Iterator(*this, stringTable);
+  }
 	/// Trivial
-	size_t getRecordCount() const { return recordCount;}
-	size_t getFieldCount() const { return fieldCount; }
-	Record getByID( unsigned int id, size_t field = 0 ) 
+	inline size_t getRecordCount() const { return recordCount;}
+	inline size_t getFieldCount() const { return fieldCount; }
+	inline Record getByID( unsigned int id, size_t field = 0 ) 
 	{
 		for( Iterator i = begin(); i!=end(); ++i )
 		{
