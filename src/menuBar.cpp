@@ -134,7 +134,9 @@ frame* MenuItemButton::processLeftClick( float pX, float pY )
 	if( this->clickFunc )
 		this->clickFunc( this, this->id );
 
-	if(!Environment::getInstance()->CtrlDown) this->mParent->Close();
+	if(!Environment::getInstance()->CtrlDown) 
+    this->mParent->Close();
+
 	return this;
 }
 

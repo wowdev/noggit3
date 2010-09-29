@@ -13,7 +13,7 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pTe
 	height = h;
 	texture = TextureManager::newTexture( pTexNormal );
 	textureDown = TextureManager::newTexture( pTexDown );
-	clickFunc = 0;
+	clickFunc = NULL;
 	id = 0;
 	clicked = false;
 	text = new textUI( w / 2.0f, 2.0f, &arial12, eJustifyCenter );
@@ -28,7 +28,7 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pTe
 	height = h;
 	texture = TextureManager::newTexture( pTexNormal );
 	textureDown = TextureManager::newTexture( pTexDown );
-	clickFunc = 0;
+	clickFunc = NULL;
 	id = 0;
 	clicked = false;
 	text = new textUI( w / 2.0f, 2.0f, pText, &arial12, eJustifyCenter );

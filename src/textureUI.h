@@ -20,10 +20,10 @@ public:
 	void setTexture( GLuint tex );
   void setTexture( const std::string& tex );
 	void render() const;
-
+  
 	frame *processLeftClick( float mx, float my );
 	void setClickFunc( void (*f)( frame *,int ), int num );
-    void setHighlight( bool h )
+  void setHighlight( bool h )
 	{
 		highlight = h;
 	}

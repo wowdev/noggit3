@@ -2,19 +2,12 @@
 #include "video.h"
 #include "model.h"
 
-modelUI::modelUI(float xPos,float yPos,float w,float h)
+modelUI::modelUI(float xPos,float yPos,float w,float h) : frame( xPos, yPos, w, h )
 {
-	x=xPos;
-	y=yPos;
-	width=w;
-	height=h;
-	clickFunc=0;
-	id=0;
 }
 
 void modelUI::render() const
 {
-	
 	glMatrixMode(GL_PROJECTION);
 	gluPerspective(45.0f, (GLfloat)video.xres/(GLfloat)video.yres, 1.0f, 1024.0f);
 	glMatrixMode(GL_MODELVIEW);
@@ -65,22 +58,6 @@ void modelUI::render() const
 	glEnable(GL_TEXTURE_2D);
 
 	glPopMatrix();
-}
-
-frame *modelUI::processLeftClick(float mx,float my)
-{
-	if(clickFunc)
-	{
-		clickFunc(this,id);
-		return this;
-	}
-	return 0;
-}
-
-void modelUI::setClickFunc(void (*f)(frame *,int), int num)
-{
-	clickFunc=f;
-	id=num;
 }
 
 void modelUI::setModel(Model* _setModel)
