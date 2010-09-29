@@ -4,9 +4,9 @@
 
 DBCFile::DBCFile(const std::string& _filename):
 	filename(_filename),
-	data(0)
+	data( NULL )
 {
-	
+	open();
 }
 void DBCFile::open()
 {
@@ -50,20 +50,4 @@ DBCFile::~DBCFile()
   }
 }
 
-DBCFile::Record DBCFile::getRecord(size_t id)
-{
-	assert(data);
-	return Record(*this, data + id*recordSize);
-}
-
-DBCFile::Iterator DBCFile::begin()
-{
-	assert(data);
-	return Iterator(*this, data);
-}
-DBCFile::Iterator DBCFile::end()
-{
-	assert(data);
-	return Iterator(*this, stringTable);
-}
 

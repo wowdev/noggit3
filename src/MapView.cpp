@@ -1170,7 +1170,8 @@ void MapView::displayViewMode_2D( float t, float dt )
 	if (hud) 
 	{
 		freetype::shprint( arial16, 410.0f, 4.0f, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
-		freetype::shprint( arial16, video.xres - 200.0f, 5, "%.2f fps", gFPS );
+    std::stringstream fps; fps << gFPS << " fps";
+		freetype::shprint( arial16, video.xres - 200.0f, 5, fps.str() );
 	}
 
 	if (gWorld->loading) 
@@ -1216,8 +1217,9 @@ void MapView::displayViewMode_3D( float t, float dt )
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 
-		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
-		freetype::shprint( arial16, video.xres - 200, 5, "%.2f fps", gFPS );
+		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
+    std::stringstream fps; fps << gFPS << " fps";
+		freetype::shprint( arial16, video.xres - 200.0f, 5, fps.str() );
 				
     std::ostringstream s;
 		s << "Server cords(x:" << -(gWorld->camera.x - ZEROPOINT) << " y:" << -(gWorld->camera.z - ZEROPOINT) << " z:" << gWorld->camera.y
@@ -1226,9 +1228,9 @@ void MapView::displayViewMode_3D( float t, float dt )
 		mainGui->guiStatusbar->setLeftInfo( s.str() );
 		
 		int time = int( gWorld->time ) % 2880;
-
-		
-		freetype::shprint( arial16, video.xres - 100.0f, 5.0f, "Time:  %02d:%02d", time / 120, (time % 120) / 2 );
+    
+    std::stringstream timestrs; timestrs << "Time: " << (time/120) << ":" << (time%120);
+		freetype::shprint( arial16, video.xres - 100.0f, 5, timestrs.str() );
 		
 		if( mainGui->guiappInfo->hidden == false )
 		{	

@@ -601,6 +601,7 @@ void Model::animate(int _anim)
     glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2*vbufsize, NULL, GL_STREAM_DRAW_ARB);
 		vertices = (Vec3D*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
     
+    //! \todo this is pretty cpu intensive. maybe able to do it differently?
 		// transform vertices
 		ModelVertex *ov = origVertices;
 		for (size_t i=0; i<header.nVertices; ++i,++ov) {
