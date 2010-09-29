@@ -5,96 +5,73 @@
 #include <vector>
 
 #include "appstate.h"
-#include "freetype.h"
 #include "vec3d.h"
 
 // ui classes
 class frame;
 class statusBar;
-class menuBar;
 class winCredits;
 class minimapWindowUI;
+class menuBar;
 
 class World;
 class Model;
 class MapView;
 
-struct Clickable 
+struct MapEntry
 {
-	int x0, y0, x1, y1;
-
-	bool hit( int x, int y );
+  int mapID;
+	std::string name;
+  int areaType;
 };
 
-struct MapEntry : public Clickable 
+struct BookmarkEntry
 {
-	std::string name, description;
-	int AreaType, IsBattleground, loadingscreen;
-	freetype::font_data font;
-	int mid;
-};
-
-struct Bookmark : public Clickable 
-{
-	std::string basename, name, label;
+  int mapID;
+	std::string name;
 	Vec3D pos;
-	float ah, av;
-	int mid;
-};
-
-enum Commands {
-	CMD_SELECT,
-	CMD_LOAD_WORLD,
-	CMD_DO_LOAD_WORLD,
-	CMD_BACK_TO_MENU
+	float ah;
+  float av;
 };
 
 class Menu : public AppState
 {
-	int sel, newsel,newbookmark, cmd, click_x, click_y, cz, cx;
+private:
+	frame* mGUIFrame;
+	statusBar* mGUIStatusbar;
+	winCredits* mGUICreditsWindow;
+	minimapWindowUI* mGUIMinimapWindow;
+  menuBar* mGUImenuBar;
 
-	// frame to place all gui elemnts on
-	frame* guiFrame;
+	std::vector<MapEntry> mMaps;
+	std::vector<BookmarkEntry> mBookmarks;
 
-	// status and menu bar
-	statusBar* guiStatusbar;
-	menuBar* mbar;
-
-	winCredits* mCredits;
-
-	int minimap_x, minimap_y;
-	minimapWindowUI* minimap_win;
-	World* world;
-
-	std::vector<MapEntry> maps;
-	std::vector<Bookmark> bookmarks;
-
-	bool setpos;
-	float ah,av;
-
-	Model* bg;
-	float mt;
-
-	int lastbg;
+	Model* mBackgroundModel;
+	int mLastBackgroundId;
+  
+	void createBookmarkList();
+	void createMapList();
+	void buildMenuBar();
+	void randBackground();
+	
+	void resizewindow();
 
 public:
 	Menu();
 	~Menu();
 
-	void tick(float t, float dt);
-	void display(float t, float dt);
+	void tick( float t, float dt );
+	void display( float t, float dt );
 
-	void keypressed(SDL_KeyboardEvent *e);
-	void mousemove(SDL_MouseMotionEvent *e);
-	void mouseclick(SDL_MouseButtonEvent *e);
-
-	void refreshBookmarks();
-	void randBackground();
-	
-	void resizewindow();
-	void loadMap( int mid );
-	void loadBookmark( int mid );
+	void keypressed( SDL_KeyboardEvent *e );
+	void mouseclick( SDL_MouseButtonEvent *e );
+  
+  //! \todo Make private when new buttons are implemented.
+	void loadMap( int mapID );
+	void loadBookmark( int bookmarkID );
+  
+  //! \brief Enter the the map on the given location.
+  void enterMapAt( Vec3D pos, bool autoHeight = true, float av = -30.0f, float ah = -90.0f );
 };
-
 
 #endif

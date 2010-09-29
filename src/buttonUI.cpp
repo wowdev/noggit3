@@ -65,7 +65,7 @@ void buttonUI::setFont( freetype::font_data *font )
 {
 	text->setFont( font );
 }
-void buttonUI::render()
+void buttonUI::render() const
 {
 	glPushMatrix();
 	glTranslatef( x, y, 0.0f );

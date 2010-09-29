@@ -32,6 +32,8 @@
 #include "ConfigFile.h"
 #include "Log.h"
 
+#include "FreeType.h" // fonts.
+
 #include "Settings.h"		// In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
 #include "Project.h"		// This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
 #include "Environment.h"	// This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
@@ -182,7 +184,7 @@ int main( int argc, char *argv[] )
 	int gowto = -1;
   
 	// handle starting parameters
-	for( int i = 1; i < argc; i++ ) 
+	for( int i = 1; i < argc; ++i ) 
 	{
 		if( !strcmp( argv[i], "-f" ) || !strcmp( argv[i], "-fullscreen" ) ) 
 			fullscreen = true;
@@ -279,7 +281,7 @@ int main( int argc, char *argv[] )
 	const char * locale = "****";
 	
 	// Find locale, take first one.
-	for( int i = 0; i < 10; i++ )
+	for( int i = 0; i < 10; ++i )
 	{
 		std::string path = wowpath;
 		path.append( "Data/" ).append( locales[i] ).append( "/realmlist.wtf" );
@@ -297,7 +299,7 @@ int main( int argc, char *argv[] )
 	}
   
 	//! \todo  This may be done faster. Maybe.
-	for( size_t i = 0; i < archiveNames.size(); i++ )
+	for( size_t i = 0; i < archiveNames.size(); ++i )
 	{
 		std::string path = wowpath;
 		path.append( "Data/" ).append( archiveNames[i] );

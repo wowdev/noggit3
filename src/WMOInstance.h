@@ -9,30 +9,32 @@
 
 class WMO;
 
-class WMOInstance {
-	static std::set<int> ids;
+class WMOInstance
+{
 public:
-	WMO *wmo;
+	WMO* wmo;
 	Vec3D pos;
 	Vec3D	extents[2];
 	Vec3D	dir;
-	int id;
-	short mFlags, mUnknown, mNameset, doodadset;
-	unsigned int nameID;
-	unsigned int wmoID;
-
-	WMOInstance(WMO *wmo, MPQFile &f);
-	WMOInstance(WMO *wmo, ENTRY_MODF *d);
-	WMOInstance(WMO *wmo);
-	void draw();
-	void drawSelect();
-	//void drawPortals();
-	
-	void resetPosition(); 
-	void resetDirection(); 
-
-	static void reset();
+	int mUniqueID;
+	short mFlags;
+  short mUnknown;
+  short mNameset;
+  short doodadset;
+  
+private:
+	unsigned int mSelectionID;
+  
+public:
+	WMOInstance( WMO* _wmo, MPQFile& _file );
+	WMOInstance( WMO* _wmo, ENTRY_MODF* d );
+	WMOInstance( WMO* _wmo );
 	~WMOInstance();
+
+	void draw() const;
+	void drawSelect() const;
+
+	void resetDirection();
 };
 
 

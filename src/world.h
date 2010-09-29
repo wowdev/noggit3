@@ -13,14 +13,13 @@ class OpenGL::CallList;
 class brush;
 class MapTile;
 
-static const int MAPTILECACHESIZE = 36;
-
 extern nameEntryManager SelectionNames;
 
 static const float detail_size = 8.0f;
-
-bool IsEditableWorld( int pMapId );
-
+static const float highresdistance = 384.0f;
+static const float mapdrawdistance = 998.0f;
+static const float modeldrawdistance = 384.0f;
+static const float doodaddrawdistance = 64.0f;
 
 enum eSelectionMode
 {
@@ -28,113 +27,151 @@ enum eSelectionMode
 	eSelectionMode_Triangle
 };
 
-struct MapTileEntry
+/*!
+ \brief This class is only a holder to have easier access to MapTiles and their flags for easier WDT parsing. This is private and for the class World only.
+ */
+class MapTileEntry
 {
+private:
   uint32_t flags;
   MapTile* tile;
+  
+  MapTileEntry() : flags( 0 ), tile( NULL ) {}
+  
+  friend class World;
 };
 
+//! \todo Split this. There should be a seperate class for WDTs.
 class World 
 {
-	int ex,ez;
+  // Which tile are we over / entering?
+	int cx;
+  int cz;
+	int ex;
+  int ez;
 
-	bool mBigAlpha;
-
+  // Holding all MapTiles there can be in a World.
   MapTileEntry mTiles[64][64];
 	
-
-public:
-	float LastRaise;
-	float zoom;
-	bool SelectionMode;	
+  // Information about the currently selected model / WMO / triangle.
+	nameEntry* mCurrentSelection;
+	int mCurrentSelectedTriangle;
+	bool SelectionMode;
+  
+  // Is the WDT telling us to use a different alphamap structure.
+	bool mBigAlpha;
 	
-	std::string basename;
-
+  // Call lists for the low resolution heightmaps.
 	OpenGL::CallList* lowrestiles[64][64];
-	bool autoheight;
 
-	bool mHasAGlobalWMO;
+  // Temporary variables for loading a WMO, if we have a global WMO.
 	std::string mWmoFilename;
 	ENTRY_MODF mWmoEntry;
+  
+  // Vertex Buffer Objects for coordinates used for drawing.
+	GLuint detailtexcoords;
+  GLuint alphatexcoords;
 
-	float mapdrawdistance, modeldrawdistance, doodaddrawdistance, highresdistance;
-	float mapdrawdistance2, modeldrawdistance2, doodaddrawdistance2, highresdistance2;
-
-	float culldistance, culldistance2, fogdistance;
-
-	float l_const, l_linear, l_quadratic;
-
-	Skies *skies;
-	float time,animtime;
-
-    bool hadSky;
-
-	bool lighting, drawmodels, drawdoodads, drawterrain, drawwmo, loading, drawfog, drawlines, drawwater, uselowlod;
-
-	GLuint detailtexcoords, alphatexcoords;
-
-	short *mapstrip,*mapstrip2;
-
-	Vec3D camera, lookat;
-	Frustum frustum;
-	int cx,cz;
-	bool noadt;
-
+  // Map ID of this World.
 	unsigned int mMapId;
   
-	//! \todo  Get these managed? ._.
+  // The lighting used.
+	OutdoorLighting *ol;
+  
+  // Light attenuation related parameters.
+  float l_const;
+  float l_linear;
+  float l_quadratic;
+  
+	void initMinimap();
+	void initLowresTerrain();
+  
+	bool tileLoaded(int x, int z);
+	MapTile *loadTile(int x, int z);
+  
+	void outdoorLighting();
+	void outdoorLighting2();
+  
+public:
+  // Do we draw *? Should be moved somewhere else, these are not World related.
+  bool drawdoodads;
+  bool drawfog;
+  bool drawlines;
+  bool drawmodels;
+  bool drawterrain;
+  bool drawwater;
+  bool drawwmo;
+	bool lighting;
+  bool uselowlod;
+  
+  // Time of the day.
+  float animtime;
+  float time;
+  
+  //! \brief Name of this map.
+	std::string basename;
+  
+  // Dynamic distances for rendering. Actually, these should be the same..
+  float fogdistance;
+  float culldistance;
+  
+	bool autoheight;
+  
+	float minX;
+  float maxX;
+  float minY;
+  float maxY;
+	float zoom;
+  
+	Skies *skies;
+  bool mHasAGlobalWMO;
+  bool loading;
+	bool noadt;
+  bool hadSky;
+  
+  //! \todo  Get these managed? ._.
 	std::map<int, ModelInstance> mModelInstances;
 	std::map<int, WMOInstance> mWMOInstances;
-
-	OutdoorLighting *ol;
+  
 	OutdoorLightStats outdoorLightStats;
-
+  
 	GLuint minimap;
+  
+	short *mapstrip;
+  short *mapstrip2;
+  
+	Vec3D camera;
+  Vec3D lookat;
+	Frustum frustum;
 
 	World( const std::string& name);
 	~World();
-	void init();
-	void initMinimap();
+
 	void initDisplay();
-	void initLowresTerrain();
-
-	void onTheFlyLoading();
-
 	void enterTile(int x, int z);
-	bool tileLoaded(int x, int z);
-	MapTile *loadTile(int x, int z);
 	void reloadTile(int x, int z);
 	void saveTile(int x, int z);
 	void tick(float dt);
 	void draw();
 	
-
-	void outdoorLighting();
-	void outdoorLighting2();
 	void outdoorLights(bool on);
 	void setupFog();
-
-	/// Get the tile on wich the camera currently is on
+  
+	//! \brief Get the area ID of the tile on which the camera currently is on.
 	unsigned int getAreaID();
-
+  
 	void drawSelection(int cursorX,int cursorY, bool pOnlyMap = false );
 	void drawSelectionChunk(int cursorX,int cursorY);
 	void drawTileMode(float ah);
-
-
+  
+  // Selection related methods.
 	void getSelection( int pSelectionMode );
-
-private:
-	nameEntry * mCurrentSelection;
-	GLuint mCurrentSelectedTriangle;
-
-public:
 	bool HasSelection() { return mCurrentSelection; }
 	bool IsSelection( int pSelectionType ) { return HasSelection() && mCurrentSelection->type == pSelectionType; }
 	nameEntry * GetCurrentSelection() { return mCurrentSelection; }
-	void ResetSelection() { mCurrentSelection = 0; }
+	void ResetSelection() { mCurrentSelection = NULL; }
 	GLuint GetCurrentSelectedTriangle() { return mCurrentSelectedTriangle; }
-
+  
 	bool GetVertex(float x,float z, Vec3D *V);
 	void changeTerrain(float x, float z, float change, float radius, int BrushType);
 	void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);	
@@ -147,22 +184,18 @@ public:
 	void addWMO( WMO *wmo, Vec3D newPos );
 	void removeHole( float x, float z );
 	void saveMap();
-
+  
 	void deleteModelInstance( int pUniqueID );
 	void deleteWMOInstance( int pUniqueID );
   
   bool hasTile( int pX, int pZ );
-
-	float minX,maxX,minY,maxY;
+  
+  static bool IsEditableWorld( int pMapId );
 };
-
 
 extern World *gWorld;
 
-
 void lightingDefaults();
 void myFakeLighting();
-
-
 
 #endif

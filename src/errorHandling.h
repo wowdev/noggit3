@@ -10,7 +10,7 @@
 #ifndef ERRORHANDLING_H_
 #define ERRORHANDLING_H_
 
-#include <signal.h>
+#include <csignal>
 
 void printStacktrace();
 
@@ -99,7 +99,7 @@ void printStacktrace()
 	
 	printf ("Obtained %zd stack frames.\n", size);
 	
-	for (i = 0; i < size; i++)
+	for (i = 0; i < size; ++i)
 		printf ("%s\n", strings[i]);
 	
 	printf("\n");

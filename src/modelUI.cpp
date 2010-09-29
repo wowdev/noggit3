@@ -12,7 +12,7 @@ modelUI::modelUI(float xPos,float yPos,float w,float h)
 	id=0;
 }
 
-void modelUI::render()
+void modelUI::render() const
 {
 	
 	glMatrixMode(GL_PROJECTION);
@@ -31,9 +31,10 @@ void modelUI::render()
 
 	glPushMatrix();
 
+  static const float rot = 45.0f;
 
 	glTranslatef( x + width / 2.0f, y + height / 2.0f, 0.0f );
-	glRotatef( ( id = id++ % 360 ), 0.0f, 1.0f, 0.0f );
+	glRotatef( rot, 0.0f, 1.0f, 0.0f );
 	glRotatef( 180, 1.0f, 0.0f, 0.0f );
 	glScalef( 5.0f, 5.0f, 5.0f );
 

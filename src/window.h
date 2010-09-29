@@ -12,9 +12,9 @@ protected:
 
 public:
 	window( float xPos, float yPos, float w, float h );
-	//window( float xPos, float yPos, float w, float h, const std::string& pTexture );
+	window( float xPos, float yPos, float w, float h, const std::string& pTexture );
 	frame *processLeftClick( float mx, float my );
-	void render();	
+	void render() const;
 };
 
 #endif

@@ -1,9 +1,8 @@
 #include "ToggleGroup.h"
 #include "checkboxUI.h"
 
-ToggleGroup::ToggleGroup( int * pTarget )
+ToggleGroup::ToggleGroup( int * pTarget ) : mTarget( pTarget )
 {
-	mTarget = pTarget;
 }
 
 void ToggleGroup::Add( checkboxUI * pFrame, int pValue )

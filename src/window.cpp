@@ -2,19 +2,18 @@
 #include "video.h"
 #include "TextureManager.h" // TextureManager, Texture
 
-window::window( float xPos, float yPos, float w, float h ) : frame( xPos, yPos, w, h )
+window::window( float xPos, float yPos, float w, float h ) : frame( xPos, yPos, w, h ), texture( TextureManager::newTexture( "interface\\tooltips\\ui-tooltip-border.blp" ) )
 {
-	texture = TextureManager::newTexture( "interface\\tooltips\\ui-tooltip-border.blp" );
 }
 
-/*window::window( float xPos, float yPos, float w, float h, const std::string& pTexture ) : frame( xPos, yPos, w, h )
+window::window( float xPos, float yPos, float w, float h, const std::string& pTexture ) : frame( xPos, yPos, w, h ), texture( TextureManager::newTexture( pTexture ) )
 {
-	texture = TextureManager::add( pTexture );
-}*/
+  //! \todo save pTexture to release it in the desctructor.
+}
 
-frame *window::processLeftClick( float mx, float my )
+frame* window::processLeftClick( float mx, float my )
 {
-	frame * lTemp;
+	frame* lTemp;
 	for( std::vector<frame*>::reverse_iterator child = children.rbegin(); child != children.rend(); child++ )
 	{
 		if( !( *child )->hidden && ( *child )->IsHit( mx, my ) )
@@ -27,7 +26,7 @@ frame *window::processLeftClick( float mx, float my )
 	return this;
 }
 
-void window::render()
+void window::render() const
 {
 	//! \todo  Get this to work. Its supposed to cut elements outside of width and height.
 	/*
@@ -86,7 +85,7 @@ void window::render()
 	glVertex2f( width, height );
 	glEnd();
 
-	for( std::vector<frame*>::iterator child = children.begin(); child != children.end(); child++ )
+	for( std::vector<frame*>::const_iterator child = children.begin(); child != children.end(); child++ )
 		if( !( *child )->hidden )
 			( *child )->render();
 

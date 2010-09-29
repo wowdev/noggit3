@@ -14,7 +14,7 @@ protected:
 	Model *model;
 public:
 	modelUI(float x,float y,float width,float height);
-	void	render();
+	void	render() const;
 	void	setModel(Model* setModel);
 
 	frame *processLeftClick(float mx,float my);

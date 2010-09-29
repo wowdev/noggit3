@@ -23,14 +23,14 @@ Sky::Sky( DBCFile::Iterator data )
 	r1 = data->getFloat( LightDB::RadiusInner ) / skymul;
 	r2 = data->getFloat( LightDB::RadiusOuter ) / skymul;
 
-	for (int i=0; i<36; i++) 
+	for (int i=0; i<36; ++i) 
 		mmin[i] = -2;
 
 	global = ( pos.x == 0.0f && pos.y == 0.0f && pos.z == 0.0f );
 
 	int FirstId = data->getInt( LightDB::DataIDs ) * 18;
 
-	for( int i = 0; i < 18; i++ ) 
+	for( int i = 0; i < 18; ++i ) 
 	{
 		try
 		{
@@ -147,7 +147,7 @@ void Skies::draw()
 	Vec3D basepos1[cnum], basepos2[cnum];
 	glBegin(GL_QUADS);
 	for (int h=0; h<hseg; h++) {
-		for (int i=0; i<cnum; i++) {
+		for (int i=0; i<cnum; ++i) {
 			basepos1[i] = basepos2[i] = Vec3D(cosf(angles[i]*PI/180.0f)*rad,sinf(angles[i]*PI/180.0f)*rad,0);
 			rotate(0,0,&basepos1[i].x, &basepos1[i].z,PI*2.0f/hseg*h);
 			rotate(0,0,&basepos2[i].x, &basepos2[i].z,PI*2.0f/hseg*(h+1));
@@ -201,9 +201,7 @@ Skies::Skies( unsigned int mapid )
 	// smaller skies will have precedence when calculating weights to achieve smooth transitions etc.
 	std::sort( skies.begin(), skies.end() );
   
-	stars = reinterpret_cast<Model*>( ModelManager::items[ModelManager::add( "Environments\\Stars\\Stars.mdx" )] );
-  
-
+	stars = ModelManager::items[ModelManager::add( "Environments\\Stars\\Stars.mdx" )];
 }
 
 Skies::~Skies()
@@ -246,13 +244,13 @@ void Skies::initSky(Vec3D pos, int t)
 
 	findSkyWeights(pos);
 
-	for (int i=0; i<18; i++) colorSet[i] = Vec3D(1,1,1);
+	for (int i=0; i<18; ++i) colorSet[i] = Vec3D(1,1,1);
 
 	// interpolation
 	for (size_t j=0; j<skies.size(); j++) {
 		if (skies[j].weight>0) {
 			// now calculate the color rows
-			for (int i=0; i<18; i++) {
+			for (int i=0; i<18; ++i) {
 				if((skies[j].colorFor(i,t).x>1.0f)||(skies[j].colorFor(i,t).y>1.0f)||(skies[j].colorFor(i,t).z>1.0f))
 				{
 					LogDebug << "Sky " << j << " " << i << " is out of bounds!" << std::endl;
@@ -262,7 +260,7 @@ void Skies::initSky(Vec3D pos, int t)
 			}
 		}
 	}
-	for (int i=0; i<18; i++) 
+	for (int i=0; i<18; ++i) 
 	{
 		colorSet[i] -= Vec3D( 1, 1, 1 );
 	}
@@ -272,7 +270,7 @@ void drawCircle(unsigned int *buf, int dim, float x, float y, float r, unsigned 
 {
     float circ = 2*r*PI;
 	glBegin( GL_LINES );
-	for (int i=0; i<circ; i++) {
+	for (int i=0; i<circ; ++i) {
 		float phi = 2*PI*i/circ;
 		int px = (int)(x + r * cosf(phi));
 		int py = (int)(y + r * sinf(phi));
@@ -285,7 +283,7 @@ void drawCircle(unsigned int *buf, int dim, float x, float y, float r, unsigned 
 void Skies::debugDraw(unsigned int *buf, int dim)
 {
 	float worldSize = 64.0f*533.333333f;
-	for (size_t i=1; i<skies.size(); i++) {
+	for (size_t i=1; i<skies.size(); ++i) {
 		Sky &s = skies[i];
 		float cx = dim * s.pos.x / worldSize;
 		float cy = dim * s.pos.z / worldSize;

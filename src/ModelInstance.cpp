@@ -266,7 +266,7 @@ void ModelInstance::draw2Select(const Vec3D& ofs, const float rot)
 {
 	Vec3D tpos(ofs + pos);
 	rotate(ofs.x,ofs.z,&tpos.x,&tpos.z,rot*PI/180.0f);
-	if ( (tpos - gWorld->camera).lengthSquared() > (gWorld->doodaddrawdistance2*model->rad*sc) ) return;
+	if ( (tpos - gWorld->camera).lengthSquared() > ((doodaddrawdistance*doodaddrawdistance)*model->rad*sc) ) return;
 	if (!gWorld->frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
 	glPushMatrix();

@@ -58,7 +58,7 @@ public:
 
 	frame* processLeftClick( float pX, float pY );
 
-	void render();
+	void render() const;
 };
 
 class MenuItemSwitch : public MenuItem 
@@ -118,8 +118,6 @@ public:
 class menuBar : public window
 {
 private:
-	Gui *mainGui;
-
 	std::map<std::string,MenuPane*> mMenuPanes;
 
 	int mNumMenus;
@@ -128,7 +126,7 @@ public:
 	bool mustResize;
 
 	menuBar();
-	void render();	
+	void render() const;	
 	void resize();
 
 	void CloseAll();

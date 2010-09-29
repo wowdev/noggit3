@@ -35,11 +35,11 @@ struct MH2O_Tile
 		mFlags = 0;
 		mMinimum = 0.0f;
 		mMaximum = 0.0f;
-		for( int i = 0; i < 8; i++ )
+		for( int i = 0; i < 8; ++i )
 			for( int j = 0; j < 8; j++ )
 				mRender[i][j] = false;
 		
-		for( int i = 0; i < 9; i++ )
+		for( int i = 0; i < 9; ++i )
 			for( int j = 0; j < 9; j++ )
 			{
 				mHeightmap[i][j] = 0.0f;

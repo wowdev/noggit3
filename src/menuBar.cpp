@@ -15,7 +15,7 @@ menuBar::menuBar() : window( 0.0f, 0.0f, video.xres, video.yres )
 	mNumMenus = 0;
 }
 
-void menuBar::render()
+void menuBar::render() const
 {
 	glColor4f(0.2f,0.2f,0.2f,0.5f);
 	glBegin(GL_TRIANGLE_STRIP);
@@ -26,7 +26,7 @@ void menuBar::render()
 	glEnd();
 
 
-	for(unsigned int i=0;i<children.size();i++)
+	for(unsigned int i=0;i<children.size();++i)
 		if(!children[i]->hidden)
 			children[i]->render();
 
@@ -86,7 +86,7 @@ MenuPane* menuBar::GetMenu( const std::string& pName )
 
 frame* menuBar::processLeftClick(float mx,float my)
 {
-  for( std::vector<frame*>::iterator it = children.begin(); it != children.end(); it++ )
+  for( std::vector<frame*>::iterator it = children.begin(); it != children.end(); ++it )
   {
 		if( !(*it)->hidden && ( (*it)->x < mx ) && ( ( (*it)->x + (*it)->width ) > mx ) && ( (*it)->y < my ) && ( ( (*it)->y + (*it)->height ) > my ) )
 		{
@@ -164,7 +164,7 @@ frame* MenuItemToggle::processLeftClick( float pX, float pY )
 	return this;
 }
 
-void MenuItemToggle::render()
+void MenuItemToggle::render() const
 {
 	if( mInvert )
 		mMyCheckbox->setState( !( *mMyState ) );

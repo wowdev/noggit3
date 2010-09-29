@@ -22,6 +22,6 @@ public:
 	slider(float x, float y, float width, float s,float o);
 	frame *processLeftClick(float mx,float my);
 	bool processLeftDrag(float mx,float my, float xChange, float yChange);
-	void render();	
+	void render() const;	
 };
 #endif

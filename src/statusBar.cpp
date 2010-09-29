@@ -18,7 +18,7 @@ statusBar::statusBar( float xPos, float yPos, float w, float h ) : window(xPos, 
 	addChild( rightInfo );
 }
 
-void statusBar::render()
+void statusBar::render() const
 {
 	glPushMatrix();
 	glTranslatef( x, y, 0.0f );
@@ -31,7 +31,7 @@ void statusBar::render()
 	glVertex2f( width, height );
 	glEnd();
 
-	for( std::vector<frame*>::iterator child = children.begin(); child != children.end(); child++ )
+	for( std::vector<frame*>::const_iterator child = children.begin(); child != children.end(); child++ )
 		if( !( *child )->hidden )
 			( *child )->render();
 

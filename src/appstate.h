@@ -38,13 +38,13 @@ public:
    \brief This method gets called upon a mouse click.
    \param e The event given by SDL containing information about the mouse click.
    */
-  virtual void mouseclick(SDL_MouseButtonEvent *e) {};
+  virtual void mouseclick(SDL_MouseButtonEvent *e) { };
   
   /*!
    \brief This method gets called when a key is pressed or released.
    \param e The event given by SDL containing information about the key stroke.
    */
-  virtual void keypressed(SDL_KeyboardEvent *e) {};
+  virtual void keypressed(SDL_KeyboardEvent *e) { };
   
   /*!
    \brief This is called when the window is getting resized.

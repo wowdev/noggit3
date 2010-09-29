@@ -10,7 +10,7 @@
 
 winCredits::winCredits( ) : closeWindowUI( ((float)video.xres/2) - (winWidth/2),((float)video.yres/2) - (winHeight/2),winWidth,winHeight,"")
 {
-	this->mustresize = true;
+  mustresize = true;
 	addChild( new textureUI( 20.0f, 20.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Potion_83.blp" ) );
 	addChild( new textUI( 73.0f, 24.0f, APP_TITLE, &skurri32, eJustifyLeft ) );
 	addChild( new textUI( 165.0f, 55.0f, APP_SUBTITLE, &fritz16, eJustifyLeft ) );

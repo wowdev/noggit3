@@ -45,6 +45,13 @@ Model::Model(const std::string& _name, bool _forceAnim) : ManagedItem(_name), fo
   lights = NULL;
   particleSystems = NULL;
   ribbons = NULL;
+
+  showGeosets = NULL;
+  for (int i=0; i<TEXTURE_MAX; ++i) {
+		specialTextures[i] = -1;
+		replaceTextures[i] = 0;
+		useReplaceTextures[i] = false;
+	}
   
   finished = false;
 }
@@ -101,7 +108,7 @@ Model::~Model()
   LogDebug << "Unloading model \"" << filename << "\"." << std::endl;
     
   if (header.nTextures && textures) {
-    for (size_t i=0; i<header.nTextures; i++) {
+    for (size_t i=0; i<header.nTextures; ++i) {
       if (textures[i]!=0) {
         //Texture *tex = (Texture*)TextureManager::items[textures[i]];
         TextureManager::del(textures[i]);
@@ -157,10 +164,10 @@ bool Model::isAnimated(MPQFile &f)
 
   animGeometry = false;
   animBones = false;
-
+  mPerInstanceAnimation = false;
 
   ModelVertex *verts = (ModelVertex*)(f.getBuffer() + header.ofsVertices);
-  for (size_t i=0; i<header.nVertices && !animGeometry; i++) {
+  for (size_t i=0; i<header.nVertices && !animGeometry; ++i) {
     for (size_t b=0; b<4; b++) {
       if (verts[i].weights[b]>0) {
         ModelBoneDef &bb = bo[verts[i].bones[b]];
@@ -169,7 +176,7 @@ bool Model::isAnimated(MPQFile &f)
             // if we have billboarding, the model will need per-instance animation
             mPerInstanceAnimation = true;
           }
-          animGeometry = false;///true;
+          animGeometry = true;
           break;
         }
       }
@@ -178,7 +185,7 @@ bool Model::isAnimated(MPQFile &f)
 
   if (animGeometry) animBones = true;
   else {
-    for (size_t i=0; i<header.nBones; i++) {
+    for (size_t i=0; i<header.nBones; ++i) {
       ModelBoneDef &bb = bo[i];
       if (bb.translation.type || bb.rotation.type || bb.scaling.type) {
         animBones = true;
@@ -199,7 +206,7 @@ bool Model::isAnimated(MPQFile &f)
   // animated colors
   if (header.nColors) {
     ModelColorDef *cols = (ModelColorDef*)(f.getBuffer() + header.ofsColors);
-    for (size_t i=0; i<header.nColors; i++) {
+    for (size_t i=0; i<header.nColors; ++i) {
       if (cols[i].color.type!=0 || cols[i].opacity.type!=0) {
         animMisc = true;
         break;
@@ -210,7 +217,7 @@ bool Model::isAnimated(MPQFile &f)
   // animated opacity
   if (header.nTransparency && !animMisc) {
     ModelTransDef *trs = (ModelTransDef*)(f.getBuffer() + header.ofsTransparency);
-    for (size_t i=0; i<header.nTransparency; i++) {
+    for (size_t i=0; i<header.nTransparency; ++i) {
       if (trs[i].trans.type!=0) {
         animMisc = true;
         break;
@@ -248,7 +255,7 @@ void Model::initCommon(MPQFile &f)
   }
 
   // vertices, normals
-  for (size_t i=0; i<header.nVertices; i++) {
+  for (size_t i=0; i<header.nVertices; ++i) {
     origVertices[i].pos = fixCoordSystem(origVertices[i].pos);
     origVertices[i].normal = fixCoordSystem(origVertices[i].normal);
 
@@ -262,185 +269,175 @@ void Model::initCommon(MPQFile &f)
       rad = len;
     }
   }
-
   rad = sqrtf(rad);
 
-  // textures
-  ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + header.ofsTextures);
-  char texname[256];
-  textures = new GLuint[ header.nTextures ];
-  for (size_t i=0; i<header.nTextures; i++) 
-  {
-    if (texdef[i].type == 0) 
-    {
-      // std::string( f.getBuffer() + texdef[i].nameOfs )
-      strncpy(texname, reinterpret_cast<char*>( f.getBuffer() ) + texdef[i].nameOfs, texdef[i].nameLen);
-      texname[texdef[i].nameLen] = 0;
-      std::string path( texname );
-      textures[i] = TextureManager::add( path );
-    } 
-    else 
-    {
-      // special texture - only on characters and such...
-            textures[i] = 0;
-    }
-  }
+	// textures
+	ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + header.ofsTextures);
+	if (header.nTextures) {
+		textures = new GLuint[header.nTextures];
+		char texname[256];
+		for (size_t i=0; i<header.nTextures; ++i) {
+			// Error check
+			if (i > TEXTURE_MAX-1) {
+				LogError << "Model Texture " << header.nTextures << " over " << TEXTURE_MAX << std::endl;
+				break;
+			}
+      
+			if (texdef[i].type == 0) {
+				strncpy(texname, (const char*)(f.getBuffer() + texdef[i].nameOfs), texdef[i].nameLen);
+				texname[texdef[i].nameLen] = 0;
+				textures[i] = TextureManager::add(texname);
+			} else {
+				// special texture - only on characters and such...
+        textures[i] = 0;
+				specialTextures[i] = texdef[i].type;
+        
+				if (texdef[i].type < TEXTURE_MAX)
+					useReplaceTextures[texdef[i].type] = true;
+        
+				if (texdef[i].type == 3) {
+					// a fix for weapons with type-3 textures.
+					replaceTextures[texdef[i].type] = TextureManager::add("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP");
+				}
+			}
+		}
+	}
 
   // init colors
   if (header.nColors) {
     colors = new ModelColor[header.nColors];
     ModelColorDef *colorDefs = (ModelColorDef*)(f.getBuffer() + header.ofsColors);
-    for (size_t i=0; i<header.nColors; i++) colors[i].init(f, colorDefs[i], globalSequences);
+    for (size_t i=0; i<header.nColors; ++i) colors[i].init(f, colorDefs[i], globalSequences);
   }
   // init transparency
   int16_t *transLookup = (int16_t*)(f.getBuffer() + header.ofsTransparencyLookup);
   if (header.nTransparency) {
     transparency = new ModelTransparency[header.nTransparency];
     ModelTransDef *trDefs = (ModelTransDef*)(f.getBuffer() + header.ofsTransparency);
-    for (size_t i=0; i<header.nTransparency; i++) transparency[i].init(f, trDefs[i], globalSequences);
+    for (size_t i=0; i<header.nTransparency; ++i) transparency[i].init(f, trDefs[i], globalSequences);
   }
 
-  // indices - allocate space, too
-
-  // replace .M2 with 0i.skin
-  std::string skinfilename = filename;
-  std::stringstream temp; temp << "0" << ( header.nViews - 1 ) << ".skin";
   
-  size_t found = skinfilename.rfind( ".m2" );
-  if( found != std::string::npos )
-    skinfilename.replace( found, 3, temp.str() );
-
-  MPQFile skin( skinfilename );
-  if( skin.isEof() )
-  {
-    LogError << "Error when trying to load .skin file \"" << skinfilename << "\". Aborting." << std::endl;
-    return;
-  }
-
-  ModelView *view = (ModelView*)(skin.getBuffer());
-
-  uint16_t *indexLookup = (uint16_t*)(skin.getBuffer() + view->ofsIndex);
-  uint16_t *triangles = (uint16_t*)(skin.getBuffer() + view->ofsTris);
-  nIndices = view->nTris;
-  indices = new uint16_t[nIndices];
-  for (size_t i = 0; i<nIndices; i++) {
-        indices[i] = indexLookup[triangles[i]];
-  }
-
-  // render ops
-  ModelGeoset *ops = (ModelGeoset*)(skin.getBuffer() + view->ofsSub);
-  ModelTexUnit *tex = (ModelTexUnit*)(skin.getBuffer() + view->ofsTex);
-  ModelRenderFlags *renderFlags = (ModelRenderFlags*)(f.getBuffer() + header.ofsRenderFlags);
-  uint16_t *texlookup = (uint16_t*)(f.getBuffer() + header.ofsTexLookup);
-  uint16_t *texanimlookup = (uint16_t*)(f.getBuffer() + header.ofsTexAnimLookup);
-  int16_t *texunitlookup = (int16_t*)(f.getBuffer() + header.ofsTexUnitLookup);
-
-  /*
-  for (size_t i = 0; i<view->nSub; i++) {
-    ModelRenderPass pass;
-    pass.usetex2 = false;
-    pass.indexStart = ops[i].istart;
-    pass.indexCount = ops[i].icount;
-
-    // textures
-    for (size_t j = 0; j<view->nTex; j++) {
-      if (tex[j].op==i) {
-
-        GLuint texid = textures[texlookup[tex[j].textureid]];
-
-        if (tex[j].texunit==0) {
-          pass.texture = texid;
-          
-          //! \todo  figure out these flags properly -_-
-          ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
-          
-          //pass.useenvmap = (rf.flags2 & 6)==6;
-          //pass.useenvmap = rf.blend == 6; // ???
-          pass.useenvmap = texunitlookup[tex[j].texunit] == -1;
-
-          pass.blendmode = rf.blend;
-          pass.color = tex[j].colorIndex;
-          pass.opacity = transLookup[tex[j].transid];
-
-          pass.cull = (rf.flags & 4)==0 && rf.blend==0;
-          pass.unlit = (rf.flags & 3)!=0;
-
-          pass.nozwrite = pass.blendmode >= 2; //(rf.flags & 16)!=0;
-
-          pass.trans = pass.blendmode != 0;
-
-          pass.p = ops[i].v.x;
-
-
-          if (animTextures) {
-            if (tex[j].flags & 16) {
-              pass.texanim = -1; // no texture animation
-            } else {
-              pass.texanim = texanimlookup[tex[j].texanimid];
-            }
-          } else {
-            pass.texanim = -1; // no texture animation
-          }
-        }
-        else if (tex[j].texunit==1) {
-          pass.texture2 = texid;
-          //pass.usetex2 = true;
-        }
-      }
-    }
-
-        passes.push_back(pass);
-  }
-  */
-  for (size_t j = 0; j<view->nTex; j++) {
-    ModelRenderPass pass;
-    pass.usetex2 = false;
-    pass.texture2 = 0;
-    size_t geoset = tex[j].op;
-    pass.indexStart = ops[geoset].istart;
-    pass.indexCount = ops[geoset].icount;
-    pass.vertexStart = ops[geoset].vstart;
-    pass.vertexEnd = pass.vertexStart + ops[geoset].vcount;
-
-    pass.order = tex[j].order;
-
-    GLuint texid = textures[texlookup[tex[j].textureid]];
-
-    pass.texture = texid;
+	// just use the first LOD/view
+  
+	if (header.nViews > 0) {
+    // indices - allocate space, too
+		std::string lodname = filename.substr(0, filename.length()-3);
+		lodname.append("00.skin");
+		MPQFile g(lodname.c_str());
+		if (g.isEof()) {
+			LogError << "loading skinfile " << lodname << std::endl;
+			g.close();
+			return;
+		}
+		ModelView *view = (ModelView*)(g.getBuffer());
     
-    //! \todo  figure out these flags properly -_-
-    ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
+		uint16 *indexLookup = (uint16*)(g.getBuffer() + view->ofsIndex);
+		uint16 *triangles = (uint16*)(g.getBuffer() + view->ofsTris);
+		nIndices = view->nTris;
+		indices = new uint16[nIndices];
+		for (size_t i = 0; i<nIndices; ++i) {
+			indices[i] = indexLookup[triangles[i]];
+		}
     
-    pass.useenvmap = texunitlookup[tex[j].texunit] == -1;
-
-    pass.blendmode = rf.blend;
-    pass.color = tex[j].colorIndex;
-    pass.opacity = transLookup[tex[j].transid];
-
-    pass.cull = (rf.flags & 4)==0 && rf.blend==0;
-    pass.unlit = (rf.flags & 3)!=0;
-
-    pass.nozwrite = pass.blendmode >= 2; //(rf.flags & 16)!=0;
-
-    pass.trans = pass.blendmode != 0;
-
-    pass.p = ops[geoset].v.x;
-
-    if (animTextures) {
-      if (tex[j].flags & 16) {
-        pass.texanim = -1; // no texture animation
-      } else {
-        pass.texanim = texanimlookup[tex[j].texanimid];
-      }
-    } else {
-      pass.texanim = -1; // no texture animation
-    }
-
-    passes.push_back(pass);
-  }
-
-  // transparent parts come later
-  std::sort(passes.begin(), passes.end());
+		// render ops
+		ModelGeoset *ops = (ModelGeoset*)(g.getBuffer() + view->ofsSub);
+		ModelTexUnit *tex = (ModelTexUnit*)(g.getBuffer() + view->ofsTex);
+		ModelRenderFlags *renderFlags = (ModelRenderFlags*)(f.getBuffer() + header.ofsTexFlags);
+		uint16_t *texlookup = (uint16_t*)(f.getBuffer() + header.ofsTexLookup);
+		uint16_t *texanimlookup = (uint16_t*)(f.getBuffer() + header.ofsTexAnimLookup);
+		int16_t *texunitlookup = (int16_t*)(f.getBuffer() + header.ofsTexUnitLookup);
+    
+		showGeosets = new bool[view->nSub];
+		for (size_t i=0; i<view->nSub; ++i) {
+			showGeosets[i] = true;
+		}
+    
+		for (size_t j = 0; j<view->nTex; j++) {
+			ModelRenderPass pass;
+      
+			pass.usetex2 = false;
+			pass.useenvmap = false;
+			pass.cull = false;
+			pass.trans = false;
+			pass.unlit = false;
+			pass.nozwrite = false;
+			pass.billboard = false;
+      
+			size_t geoset = tex[j].op;
+      
+			pass.geoset = (int)geoset;
+      
+			pass.indexStart = ops[geoset].istart;
+			pass.indexCount = ops[geoset].icount;
+			pass.vertexStart = ops[geoset].vstart;
+			pass.vertexEnd = pass.vertexStart + ops[geoset].vcount;
+      
+			pass.order = tex[j].shading;
+      
+			//TextureID texid = textures[texlookup[tex[j].textureid]];
+			//pass.texture = texid;
+			pass.tex = texlookup[tex[j].textureid];
+			
+			// TODO: figure out these flags properly -_-
+			ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
+			
+      
+			pass.blendmode = rf.blend;
+			pass.color = tex[j].colorIndex;
+			pass.opacity = transLookup[tex[j].transid];
+      
+      enum RenderFlags
+      {
+        RENDERFLAGS_UNLIT = 1,
+        RENDERFLAGS_UNFOGGED = 2,
+        RENDERFLAGS_TWOSIDED = 4,
+        RENDERFLAGS_BILLBOARD = 8,
+        RENDERFLAGS_ZBUFFERED = 16,
+      };
+      
+			pass.unlit = (rf.flags & RENDERFLAGS_UNLIT)!=0;
+			pass.cull = (rf.flags & RENDERFLAGS_TWOSIDED)==0 && rf.blend==0;
+      
+			pass.billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
+      
+			pass.useenvmap = (texunitlookup[tex[j].texunit] == -1) && pass.billboard && rf.blend>2;
+			pass.nozwrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
+      
+			// ToDo: Work out the correct way to get the true/false of transparency
+			pass.trans = (pass.blendmode>0) && (pass.opacity>0);	// Transparency - not the correct way to get transparency
+      
+			pass.p = ops[geoset].BoundingBox[0].x;
+      
+			// Texture flags
+      enum TextureFlags {
+        TEXTURE_WRAPX=1,
+        TEXTURE_WRAPY
+      };
+      
+			pass.swrap = (texdef[pass.tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
+			pass.twrap = (texdef[pass.tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
+      
+      static const int TEXTUREUNIT_STATIC = 16;
+      
+			if (animTextures) {
+				if (tex[j].flags & TEXTUREUNIT_STATIC) {
+					pass.texanim = -1; // no texture animation
+				} else {
+					pass.texanim = texanimlookup[tex[j].texanimid];
+				}
+			} else {
+				pass.texanim = -1; // no texture animation
+			}
+      
+      passes.push_back(pass);
+		}
+		g.close();
+		// transparent parts come later
+		std::sort(passes.begin(), passes.end());
+	}
+  
+	// zomg done
 }
 
 void Model::initStatic( MPQFile &f )
@@ -474,320 +471,367 @@ void Model::initStatic( MPQFile &f )
 
 void Model::initAnimated(MPQFile &f)
 {  
-  origVertices = new ModelVertex[header.nVertices];
-  memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
-
-  glGenBuffers(1,&vbuf);
-  glGenBuffers(1,&tbuf);
-  const size_t size = header.nVertices * sizeof(float);
-  vbufsize = 3 * size;
+	origVertices = new ModelVertex[header.nVertices];
+	memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
   
-  initCommon( f );
+	glGenBuffersARB(1,&vbuf);
+	glGenBuffersARB(1,&tbuf);
+	const size_t size = header.nVertices * sizeof(float);
+	vbufsize = 3 * size;
   
-  if (animBones) 
-  {
-    // init bones...
-    bones = new Bone[header.nBones];
-    ModelBoneDef *mb = (ModelBoneDef*)(f.getBuffer() + header.ofsBones);
-    for (size_t i=0; i<header.nBones; i++)
-    {
-      bones[i].init(f, mb[i], globalSequences);
-    }
-  }
-
-  if (!animGeometry) {
-    glBindBuffer(GL_ARRAY_BUFFER, vbuf);
-    glBufferData(GL_ARRAY_BUFFER, vbufsize, vertices, GL_STATIC_DRAW);
-    glGenBuffers(1,&nbuf);
-    glBindBuffer(GL_ARRAY_BUFFER, nbuf);
-    glBufferData(GL_ARRAY_BUFFER, vbufsize, normals, GL_STATIC_DRAW);
-    //delete[] vertices;
-    delete[] normals;
-  }
+	initCommon(f);
   
-  Vec2D *texcoords = new Vec2D[header.nVertices];
-  for (size_t i=0; i<header.nVertices; i++) texcoords[i] = origVertices[i].texcoords;
-  glBindBuffer(GL_ARRAY_BUFFER, tbuf);
-  glBufferData(GL_ARRAY_BUFFER, 2*size, texcoords, GL_STATIC_DRAW);
-  delete[] texcoords;
-
-  if (animTextures) {
-    texanims = new TextureAnim[header.nTexAnims];
-    ModelTexAnimDef *ta = (ModelTexAnimDef*)(f.getBuffer() + header.ofsTexAnims);
-    for (size_t i=0; i<header.nTexAnims; i++) {
-      texanims[i].init(f, ta[i], globalSequences);
-    }
-  }
-
-  if (header.nParticleEmitters) {
-    ModelParticleEmitterDef *pdefs = (ModelParticleEmitterDef *)(f.getBuffer() + header.ofsParticleEmitters);
-    particleSystems = new ParticleSystem[header.nParticleEmitters];
-    for (size_t i=0; i<header.nParticleEmitters; i++) {
-      particleSystems[i].model = this;
-      particleSystems[i].init(f, pdefs[i], globalSequences);
-    }
-  }
-
-  // ribbons
-  if (header.nRibbonEmitters) {
-    ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(f.getBuffer() + header.ofsRibbonEmitters);
-    ribbons = new RibbonEmitter[header.nRibbonEmitters];
-    for (size_t i=0; i<header.nRibbonEmitters; i++) {
-      ribbons[i].model = this;
-      ribbons[i].init(f, rdefs[i], globalSequences);
-    }
-  }
-
-  // just use the first camera, meh
-  if (header.nCameras>0) {
-    ModelCameraDef *camDefs = (ModelCameraDef*)(f.getBuffer() + header.ofsCameras);
-    cam.init(f, camDefs[0], globalSequences);
-  }
-
-  // init lights
-  if (header.nLights) {
-    lights = new ModelLight[header.nLights];
-    ModelLightDef *lDefs = (ModelLightDef*)(f.getBuffer() + header.ofsLights);
-    for (size_t i=0; i<header.nLights; i++) lights[i].init(f, lDefs[i], globalSequences);
-  }
-
-  anims = new ModelAnimation[header.nAnimations];
-  memcpy(anims, f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
-
-  animcalc = false;
+	if (header.nAnimations > 0) {
+		anims = new ModelAnimation[header.nAnimations];
+		memcpy(anims, f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
+    
+		animfiles = new MPQFile*[header.nAnimations];
+		char tempname[256];
+		for(size_t i=0; i<header.nAnimations; ++i) {
+      std::string lodname = filename.substr(0, filename.length()-3);
+			sprintf(tempname, "%s%04d-%02d.anim", lodname.c_str(), anims[i].animID, anims[i].subAnimID);
+			if (MPQFile::getSize(tempname) > 0) {
+				animfiles[i] = new MPQFile(tempname);
+			}
+      else
+      {
+        animfiles[i] = NULL;
+        LogError << "Error loading anim file " << tempname << std::endl;
+      }
+		}
+	}
+  
+	if (animBones) {
+		// init bones...
+		bones = new Bone[header.nBones];
+		ModelBoneDef *mb = (ModelBoneDef*)(f.getBuffer() + header.ofsBones);
+		for (size_t i=0; i<header.nBones; ++i) {
+			bones[i].init(f, mb[i], globalSequences, animfiles);
+		}
+	}
+  
+	if (!animGeometry) {
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
+		glGenBuffersARB(1,&nbuf);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
+		delete[] vertices;
+		delete[] normals;
+	}
+	Vec2D *texcoords = new Vec2D[header.nVertices];
+	for (size_t i=0; i<header.nVertices; ++i) 
+		texcoords[i] = origVertices[i].texcoords;
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2*size, texcoords, GL_STATIC_DRAW_ARB);
+	delete[] texcoords;
+  
+	if (animTextures) {
+		texanims = new TextureAnim[header.nTexAnims];
+		ModelTexAnimDef *ta = (ModelTexAnimDef*)(f.getBuffer() + header.ofsTexAnims);
+		for (size_t i=0; i<header.nTexAnims; ++i) {
+			texanims[i].init(f, ta[i], globalSequences);
+		}
+	}
+  
+	// particle systems
+	if (header.nParticleEmitters) {
+		ModelParticleEmitterDef *pdefs = (ModelParticleEmitterDef *)(f.getBuffer() + header.ofsParticleEmitters);
+		particleSystems = new ParticleSystem[header.nParticleEmitters];
+		for (size_t i=0; i<header.nParticleEmitters; ++i) {
+			particleSystems[i].model = this;
+			particleSystems[i].init(f, pdefs[i], globalSequences);
+		}
+	}
+  
+	// ribbons
+	if (header.nRibbonEmitters) {
+		ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(f.getBuffer() + header.ofsRibbonEmitters);
+		ribbons = new RibbonEmitter[header.nRibbonEmitters];
+		for (size_t i=0; i<header.nRibbonEmitters; ++i) {
+			ribbons[i].model = this;
+			ribbons[i].init(f, rdefs[i], globalSequences);
+		}
+	}
+  
+	// just use the first camera, meh
+	if (header.nCameras>0) {
+		ModelCameraDef *camDefs = (ModelCameraDef*)(f.getBuffer() + header.ofsCameras);
+		cam.init(f, camDefs[0], globalSequences);
+	}
+  
+	// init lights
+	if (header.nLights) {
+		lights = new ModelLight[header.nLights];
+		ModelLightDef *lDefs = (ModelLightDef*)(f.getBuffer() + header.ofsLights);
+		for (size_t i=0; i<header.nLights; ++i) 
+			lights[i].init(f, lDefs[i], globalSequences);
+	}
+  
+	animcalc = false;
 }
 
 void Model::calcBones(int _anim, int time)
 {
-  for (size_t i=0; i<header.nBones; i++) {
+  for (size_t i=0; i<header.nBones; ++i) {
     bones[i].calc = false;
   }
 
-  for (size_t i=0; i<header.nBones; i++) {
+  for (size_t i=0; i<header.nBones; ++i) {
     bones[i].calcMatrix(bones, _anim, time);
   }
 }
 
 void Model::animate(int _anim)
 {
-
-  ModelAnimation &a = anims[_anim];
-  if (!a.Index)return;
-  int t = globalTime; //(int)(gWorld->animtime / a.playSpeed);
-  int tmax = a.length;
-  if (tmax==0)return;
-  t %= tmax;
-  t += 0;
-  animtime = t;
-  this->anim = _anim;
-
-  if (animBones) {
-    calcBones(_anim, t);
-  }
-
-  if (animGeometry) {
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbuf);
-        glBufferData(GL_ARRAY_BUFFER, 2*vbufsize, NULL, GL_STREAM_DRAW);
-    vertices = (Vec3D*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-
-    // transform vertices
-    ModelVertex *ov = origVertices;
-    for (size_t i=0; i<header.nVertices; ++i,++ov) {
-      Vec3D v(0,0,0), n(0,0,0);
-
-      for (size_t b=0; b<4; b++) {
-        if (ov->weights[b]>0) {
-          Vec3D tv = bones[ov->bones[b]].mat * ov->pos;
-          Vec3D tn = bones[ov->bones[b]].mrot * ov->normal;
-          v += tv * ((float)ov->weights[b] / 255.0f);
-          n += tn * ((float)ov->weights[b] / 255.0f);
-        }
-      }
-
-      /*
-      vertices[i] = v;
-      normals[i] = n;
-      */             
-      vertices[i] = v;
-      vertices[header.nVertices + i] = n.normalize(); // shouldn't these be normal by default?
-    }
-
-        glUnmapBuffer(GL_ARRAY_BUFFER);
-
-  }
-
-  for (size_t i=0; i<header.nLights; i++) {
-    if (lights[i].parent>=0) {
-      lights[i].tpos = bones[lights[i].parent].mat * lights[i].pos;
-      lights[i].tdir = bones[lights[i].parent].mrot * lights[i].dir;
-    }
-  }
-  //TEMPORARILY
-  /*for (size_t i=0; i<header.nParticleEmitters; i++) {
-    // random time distribution for teh win ..?
-    int pt = (t + (int)(tmax*particleSystems[i].tofs)) % tmax;
-    particleSystems[i].setup(anim, pt);
-  }
-
-  for (size_t i=0; i<header.nRibbonEmitters; i++) {
-    ribbons[i].setup(anim, t);
-  }*/
-
-  if (animTextures) {
-    for (size_t i=0; i<header.nTexAnims; i++) {
-      texanims[i].calc(_anim, t);
-    }
-  }
+	ModelAnimation &a = anims[anim];
+	int t = globalTime; //(int)(gWorld->animtime /* / a.playSpeed*/);
+	int tmax = a.length;
+	t %= tmax;
+	animtime = t;
+	this->anim = anim;
+  
+	if (animBones) {
+		calcBones(anim, t);
+	}
+  
+	if (animGeometry) {
+    
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2*vbufsize, NULL, GL_STREAM_DRAW_ARB);
+		vertices = (Vec3D*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
+    
+		// transform vertices
+		ModelVertex *ov = origVertices;
+		for (size_t i=0; i<header.nVertices; ++i,++ov) {
+			Vec3D v(0,0,0), n(0,0,0);
+      
+			for (size_t b=0; b<4; b++) {
+				if (ov->weights[b]>0) {
+					Vec3D tv = bones[ov->bones[b]].mat * ov->pos;
+					Vec3D tn = bones[ov->bones[b]].mrot * ov->normal;
+					v += tv * ((float)ov->weights[b] / 255.0f);
+					n += tn * ((float)ov->weights[b] / 255.0f);
+				}
+			}
+      
+			/*
+       vertices[i] = v;
+       normals[i] = n;
+       */
+			vertices[i] = v;
+			vertices[header.nVertices + i] = n.normalize(); // shouldn't these be normal by default?
+		}
+    
+    glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
+    
+	}
+  
+	for (size_t i=0; i<header.nLights; ++i) {
+		if (lights[i].parent>=0) {
+			lights[i].tpos = bones[lights[i].parent].mat * lights[i].pos;
+			lights[i].tdir = bones[lights[i].parent].mrot * lights[i].dir;
+		}
+	}
+  
+	for (size_t i=0; i<header.nParticleEmitters; ++i) {
+		// random time distribution for teh win ..?
+		int pt = (t + (int)(tmax*particleSystems[i].tofs)) % tmax;
+		particleSystems[i].setup(anim, pt);
+	}
+  
+	for (size_t i=0; i<header.nRibbonEmitters; ++i) {
+		ribbons[i].setup(anim, t);
+	}
+  
+	if (animTextures) {
+		for (size_t i=0; i<header.nTexAnims; ++i) {
+			texanims[i].calc(anim, t);
+		}
+	}
 }
 
 bool ModelRenderPass::init(Model *m)
 {
-  // blend mode
-  switch (blendmode) {
-  case BM_OPAQUE:  // 0
-    glDisable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    break;
-  case BM_TRANSPARENT: // 1
-    glDisable(GL_BLEND);
-    glEnable(GL_ALPHA_TEST);
-    break;
-  case BM_ALPHA_BLEND: // 2
-    glDisable(GL_ALPHA_TEST);
-    glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // default blend func
-    break;
-  case BM_ADDITIVE: // 3
-    glDisable(GL_ALPHA_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_COLOR, GL_ONE);
-    break;
-  case BM_ADDITIVE_ALPHA: // 4
-    glDisable(GL_ALPHA_TEST);
-     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    break;
-  default:
-    // ???
-    glDisable(GL_ALPHA_TEST);
-  glEnable(GL_BLEND);
-    glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-  }
-
-  if (nozwrite) {
-    glDepthMask(GL_FALSE);
-  }
-
-  if (cull) {
-        glEnable(GL_CULL_FACE);
-  } else {
-        glDisable(GL_CULL_FACE);
-  }
+	// May aswell check that we're going to render the geoset before doing all this crap.
+	if (m->showGeosets[geoset]) {
+    
+		// COLOUR
+		// Get the colour and transparency and check that we should even render
+		ocol = Vec4D(1.0f, 1.0f, 1.0f, m->trans);
+		ecol = Vec4D(0.0f, 0.0f, 0.0f, 0.0f);
+    
+		//if (m->trans == 1.0f)
+		//	return false;
+    
+		// emissive colors
+		if (color!=-1 && m->colors[color].color.uses(0)) {
+			Vec3D c = m->colors[color].color.getValue(0,m->animtime);
+			if (m->colors[color].opacity.uses(m->anim)) {
+				float o = m->colors[color].opacity.getValue(m->anim,m->animtime);
+				ocol.w = o;
+			}
+      
+			if (unlit) {
+				ocol.x = c.x; ocol.y = c.y; ocol.z = c.z;
+			} else {
+				ocol.x = ocol.y = ocol.z = 0;
+			}
+      
+			ecol = Vec4D(c, ocol.w);
+			glMaterialfv(GL_FRONT, GL_EMISSION, ecol);
+		}
+    
+		// opacity
+		if (opacity!=-1) {
+			if (m->transparency[opacity].trans.uses(0))
+				ocol.w *= m->transparency[opacity].trans.getValue(0, m->animtime);
+		}
+    
+		// exit and return false before affecting the opengl render state
+		if (!((ocol.w > 0) && (color==-1 || ecol.w > 0)))
+			return false;
+    
+		// TEXTURE
+		// bind to our texture
+		GLuint bindtex = 0;
+		if (m->specialTextures[tex]==-1) 
+			bindtex = m->textures[tex];
+		else 
+			bindtex = m->replaceTextures[m->specialTextures[tex]];
+		
+		glBindTexture(GL_TEXTURE_2D, bindtex);
+		// --
+		
+		// TODO: Add proper support for multi-texturing.
+    
+		// blend mode
+		switch (blendmode) {
+      case BM_OPAQUE:	// 0
+        break;
+      case BM_TRANSPARENT: // 1
+        glEnable(GL_ALPHA_TEST);
+        glAlphaFunc(GL_GEQUAL,0.7f);
+        break;
+      case BM_ALPHA_BLEND: // 2
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        break;
+      case BM_ADDITIVE: // 3
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_COLOR, GL_ONE);
+        break;
+      case BM_ADDITIVE_ALPHA: // 4
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        break;
+      case BM_MODULATE: // 5
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+        break;
+      case BM_MODULATE2: // 6
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_DST_COLOR,GL_SRC_COLOR); 
+        break;
+      default:
+        LogError << "Unknown blendmode: " << blendmode << std::endl;
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		}
+    
+		//if (cull)
+		//	glEnable(GL_CULL_FACE);
+    
+		// Texture wrapping around the geometry
+		if (swrap)
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+		if (twrap)
+			glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+    
+		// no writing to the depth buffer.
+		if (nozwrite)
+			glDepthMask(GL_FALSE);
+    
+		if (unlit) {
+			glDisable(GL_LIGHTING);
+			// unfogged = unlit?
+			glDisable(GL_FOG);
+		}
+    
+		// Environmental mapping, material, and effects
+		if (useenvmap) {
+			// Turn on the 'reflection' shine, using 18.0f as that is what WoW uses based on the reverse engineering
+			// This is now set in InitGL(); - no need to call it every render.
+			glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
+      
+			// env mapping
+			glEnable(GL_TEXTURE_GEN_S);
+			glEnable(GL_TEXTURE_GEN_T);
+      
+			const GLint maptype = GL_SPHERE_MAP;
+			//const GLint maptype = GL_REFLECTION_MAP_ARB;
+      
+			glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, maptype);
+			glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
+		}
+		
+		if (texanim!=-1) {
+			glMatrixMode(GL_TEXTURE);
+			glPushMatrix();
+      
+			m->texanims[texanim].setup(texanim);
+		}
+    
+		// color
+		glColor4fv(ocol);
+		//glMaterialfv(GL_FRONT, GL_SPECULAR, ocol);
+    
+		// don't use lighting on the surface
+		if (unlit)
+			glDisable(GL_LIGHTING);
+    
+		if (blendmode<=1 && ocol.w<1.0f)
+			glEnable(GL_BLEND);
+    
+		return true;
+	}
   
-//  glPushName(texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-
-  if (usetex2) {
-    glActiveTexture(GL_TEXTURE1);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-  }
-
-  if (unlit) {
-    glDisable(GL_LIGHTING);
-    // unfogged = unlit?
-    if((blendmode==3)||(blendmode==4))
-      glDisable(GL_FOG);
-  }
-
-  if (useenvmap) {
-    // env mapping
-    glEnable(GL_TEXTURE_GEN_S);
-    glEnable(GL_TEXTURE_GEN_T);
-
-    const GLint maptype = GL_SPHERE_MAP;
-    //const GLint maptype = GL_REFLECTION_MAP;
-
-    glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, maptype);
-    glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
-  }
-
-  if (texanim!=-1) {
-    glMatrixMode(GL_TEXTURE);
-    glPushMatrix();
-
-    m->texanims[texanim].setup();
-    glMatrixMode(GL_MODELVIEW);
-  }
-
-  Vec4D ocol(1,1,1,m->trans);
-  Vec4D ecol(0,0,0,0);
-
-  // emissive colors
-  if (color!=-1) {
-    Vec3D c = m->colors[color].color.getValue(m->anim,m->animtime);
-    ocol.w *= m->colors[color].opacity.getValue(m->anim,m->animtime);
-    if (unlit) {
-      ocol.x = c.x; ocol.y = c.y; ocol.z = c.z;
-    } else {
-      ocol.x = ocol.y = ocol.z = 0;
-    }
-    ecol = Vec4D(c, 1.0f);
-  }
-  glMaterialfv(GL_FRONT, GL_EMISSION, ecol);
-
-  // opacity
-  if (opacity!=-1) {
-      ocol.w *= m->transparency[opacity].trans.getValue(m->anim,m->animtime);
-  }
-
-  // color
-  glColor4fv(ocol);
-
-  if (blendmode<=1 && ocol.w!=1.0f) glEnable(GL_BLEND);
-
-  return (ocol.w > 0) || (ecol.lengthSquared() > 0);
+	return false;
 }
 
 void ModelRenderPass::deinit()
 {
-  switch (blendmode) {
-  case BM_OPAQUE:
-    break;
-  case BM_TRANSPARENT:
-    break;
-  case BM_ALPHA_BLEND:
-    //glDepthMask(GL_TRUE);
-    break;
-  default:
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // default blend func
-  }
-  if (nozwrite) {
-    glDepthMask(GL_TRUE);
-  }
-  if (texanim!=-1) {
-    glMatrixMode(GL_TEXTURE);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-  }
-  if (unlit) {
-    glEnable(GL_LIGHTING);
-    //if (gWorld && gWorld->drawfog) glEnable(GL_FOG);
-    if((blendmode==3)||(blendmode==4))
-      glEnable(GL_FOG);
-  }
-  if (useenvmap) {
-    glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_GEN_T);
-  }
-  if (usetex2) {
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-  }
-//  glPopName();
-  //glColor4f(1,1,1,1); //???
+	switch (blendmode) {
+    case BM_OPAQUE:
+      break;
+    case BM_TRANSPARENT:
+      break;
+    case BM_ALPHA_BLEND:
+      //glDepthMask(GL_TRUE);
+      break;
+    default:
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // default blend func
+	}
+	if (nozwrite) {
+		glDepthMask(GL_TRUE);
+	}
+	if (texanim!=-1) {
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+	}
+	if (unlit) {
+		glEnable(GL_LIGHTING);
+		if (gWorld && gWorld->drawfog) glEnable(GL_FOG);
+	}
+	if (useenvmap) {
+		glDisable(GL_TEXTURE_GEN_S);
+		glDisable(GL_TEXTURE_GEN_T);
+	}
+	if (usetex2) {
+		glDisable(GL_TEXTURE_2D);
+		glActiveTextureARB(GL_TEXTURE0);
+	}
+	//glColor4f(1,1,1,1); //???
 }
 
 void ModelHighlight( Vec4D color )
@@ -841,35 +885,45 @@ void Model::drawModel( /*bool unlit*/ )
   }
 
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-  glAlphaFunc( GL_GREATER, 0.1f );
-
-  for( size_t i = 0; i < passes.size(); i++ ) 
-  {
-    ModelRenderPass &p = passes[i];
-
-    //if( unlit )
-    //  p.unlit = true;
+  glAlphaFunc( GL_GREATER, 0.3f );
+  
+	for (size_t i=0; i<passes.size(); ++i) {
+		ModelRenderPass &p = passes[i];
     
-    if( p.init( this ) ) 
-    {      
-      if( animated ) 
-      {
-        glDrawRangeElements( GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart );
-      } 
-      else 
-      {
-        glBegin( GL_TRIANGLES );
-        for( size_t k = 0, b = p.indexStart; k < p.indexCount; k++, b++ ) 
-        {
-          uint16_t a = indices[b];
-          glTexCoord2fv( origVertices[a].texcoords );
-          glVertex3fv( vertices[a] );
-        }
-        glEnd();
-      }
-    }
-    p.deinit();
-  }
+		if (p.init(this)) {
+			// we don't want to render completely transparent parts
+      
+			// render
+			if (animated) {
+				//glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+				// a GDC OpenGL Performace Tuning paper recommended glDrawRangeElements over glDrawElements
+				// I can't notice a difference but I guess it can't hurt
+					glDrawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+
+			} else {
+				glBegin(GL_TRIANGLES);
+				for (size_t k = 0, b=p.indexStart; k<p.indexCount; k++,b++) {
+					uint16 a = indices[b];
+					glNormal3fv(normals[a]);
+					glTexCoord2fv(origVertices[a].texcoords);
+					glVertex3fv(vertices[a]);
+				}
+				glEnd();
+			}
+      
+			p.deinit();
+		}
+    
+	}
+	// done with all render ops
+  
+	glAlphaFunc (GL_GREATER, 0.0f);
+	glDisable (GL_ALPHA_TEST);
+  
+	GLfloat czero[4] = {0,0,0,1};
+	glMaterialfv(GL_FRONT, GL_EMISSION, czero);
+	glColor4f(1,1,1,1);
+	glDepthMask(GL_TRUE);
 }
 
 //! \todo  Make animated models selectable.
@@ -877,7 +931,7 @@ void Model::drawModelSelect()
 {
   // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
 
-  for( size_t i = 0; i < passes.size(); i++ ) 
+  for( size_t i = 0; i < passes.size(); ++i ) 
   {
     ModelRenderPass &p = passes[i];
 
@@ -895,27 +949,27 @@ void Model::drawModelSelect()
 
 void TextureAnim::calc(int anim, int time)
 {
-  if (trans.used) {
+  if (trans.uses(anim)) {
     tval = trans.getValue(anim, time);
   }
-  if (rot.used) {
+  if (rot.uses(anim)) {
         rval = rot.getValue(anim, time);
   }
-  if (scale.used) {
+  if (scale.uses(anim)) {
         sval = scale.getValue(anim, time);
   }
 }
 
-void TextureAnim::setup()
+void TextureAnim::setup(int anim)
 {
   glLoadIdentity();
-  if (trans.used) {
+  if (trans.uses(anim)) {
     glTranslatef(tval.x, tval.y, tval.z);
   }
-  if (rot.used) {
+  if (rot.uses(anim)) {
     glRotatef(rval.x, 0, 0, 1); // this is wrong, I have no idea what I'm doing here ;)
   }
-  if (scale.used) {
+  if (scale.uses(anim)) {
     glScalef(sval.x, sval.y, sval.z);
   }
 }
@@ -968,35 +1022,42 @@ void ModelTransparency::init(MPQFile &f, ModelTransDef &mcd, int *global)
 
 void ModelLight::init(MPQFile &f, ModelLightDef &mld, int *global)
 {
-  tpos = pos = fixCoordSystem(mld.pos);
-  tdir = dir = Vec3D(0,1,0); // no idea
-  type = mld.type;
-  parent = mld.bone;
-  ambColor.init(mld.ambColor, f, global);
-  ambIntensity.init(mld.ambIntensity, f, global);
-  diffColor.init(mld.diffcolor, f, global);
-  diffIntensity.init(mld.diffintensity, f, global);
-  attStart.init(mld.attStart,f,global);
-  attEnd.init(mld.attEnd,f,global);
+	tpos = pos = fixCoordSystem(mld.pos);
+	tdir = dir = Vec3D(0,1,0); // no idea
+	type = mld.type;
+	parent = mld.bone;
+	ambColor.init(mld.ambColor, f, global);
+	ambIntensity.init(mld.ambIntensity, f, global);
+	diffColor.init(mld.color, f, global);
+	diffIntensity.init(mld.intensity, f, global);
 }
 
 void ModelLight::setup(int time, GLuint l)
 {
-  Vec4D ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
-  Vec4D diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
-  Vec4D p;
-  if (type==0) {
-    // directional
-    p = Vec4D(tdir, 0.0f);
-  } else {
-    // point
-    p = Vec4D(tpos, 1.0f);
-  }
-  //gLog("Light %d (%f,%f,%f) (%f,%f,%f) [%f,%f,%f]\n", l-GL_LIGHT4, ambcol.x, ambcol.y, ambcol.z, diffcol.x, diffcol.y, diffcol.z, p.x, p.y, p.z);
-  glLightfv(l, GL_POSITION, p);
-  glLightfv(l, GL_DIFFUSE, diffcol);
-  glLightfv(l, GL_AMBIENT, ambcol);
-  glEnable(l);
+	Vec4D ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
+	Vec4D diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
+	Vec4D p;
+  
+  enum ModelLightTypes {
+    MODELLIGHT_DIRECTIONAL=0,
+    MODELLIGHT_POINT
+  };
+  
+	if (type==MODELLIGHT_DIRECTIONAL) {
+		// directional
+		p = Vec4D(tdir, 0.0f);
+	} else if (type==MODELLIGHT_POINT) {
+		// point
+		p = Vec4D(tpos, 1.0f);
+	} else {
+		p = Vec4D(tpos, 1.0f);
+		LogError << "Light type " << type << " is unknown." << std::endl;
+	}
+	//gLog("Light %d (%f,%f,%f) (%f,%f,%f) [%f,%f,%f]\n", l-GL_LIGHT4, ambcol.x, ambcol.y, ambcol.z, diffcol.x, diffcol.y, diffcol.z, p.x, p.y, p.z);
+	glLightfv(l, GL_POSITION, p);
+	glLightfv(l, GL_DIFFUSE, diffcol);
+	glLightfv(l, GL_AMBIENT, ambcol);
+	glEnable(l);
 }
 
 void TextureAnim::init(MPQFile &f, ModelTexAnimDef &mta, int *global)
@@ -1006,97 +1067,80 @@ void TextureAnim::init(MPQFile &f, ModelTexAnimDef &mta, int *global)
   scale.init(mta.scale, f, global);
 }
 
-void Bone::init(MPQFile &f, ModelBoneDef &b, int *global)
+void Bone::init(MPQFile &f, ModelBoneDef &b, int *global, MPQFile **animfiles)
 {
-  parent = b.parent;
-  pivot = fixCoordSystem(b.pivot);
-  billboard = (b.flags & 8) != 0;
-
-  trans.init(b.translation, f, global);
-  rot.init(b.rotation, f, global);
-  scale.init(b.scaling, f, global);
-  trans.fix(fixCoordSystem);
-  rot.fix(fixCoordSystemQuat);
-  scale.fix(fixCoordSystem2);
+	parent = b.parent;
+	pivot = fixCoordSystem(b.pivot);
+  
+  static const int MODELBONE_BILLBOARD = 8;
+  
+	billboard = (b.flags & MODELBONE_BILLBOARD) != 0;
+  
+	trans.init(b.translation, f, global, animfiles);
+	rot.init(b.rotation, f, global, animfiles);
+	scale.init(b.scaling, f, global, animfiles);
+	trans.fix(fixCoordSystem);
+	rot.fix(fixCoordSystemQuat);
+	scale.fix(fixCoordSystem2);
 }
 
 void Bone::calcMatrix(Bone *allbones, int anim, int time)
 {
-  if (calc) return;
-  Matrix m;
-  Quaternion q;
-
-  bool tr = rot.used || scale.used || trans.used || billboard;
-  if (tr) {
-    m.translation(pivot);
+	if (calc) return;
+	Matrix m;
+	Quaternion q;
+  
+	bool tr = rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard;
+	if (tr) {
+		m.translation(pivot);
+		
+		if (trans.uses(anim)) {
+			Vec3D tr = trans.getValue(anim, time);
+			m *= Matrix::newTranslation(tr);
+		}
+		if (rot.uses(anim)) {
+			q = rot.getValue(anim, time);
+			m *= Matrix::newQuatRotate(q);
+		}
+		if (scale.uses(anim)) {
+			Vec3D sc = scale.getValue(anim, time);
+			m *= Matrix::newScale(sc);
+		}
+		if (billboard) {
+			float modelview[16];
+			glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+      
+			Vec3D vRight = Vec3D(modelview[0], modelview[4], modelview[8]);
+			Vec3D vUp = Vec3D(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+			//Vec3D vUp = Vec3D(0,1,0); // Cylindrical billboarding
+			vRight = vRight * -1;
+			m.m[0][2] = vRight.x;
+			m.m[1][2] = vRight.y;
+			m.m[2][2] = vRight.z;
+			m.m[0][1] = vUp.x;
+			m.m[1][1] = vUp.y;
+			m.m[2][1] = vUp.z;
+		}
     
-    if (trans.used) {
-      m *= Matrix::newTranslation(trans.getValue(anim, time));
-    }
-    if (rot.used) {
-      q = rot.getValue(anim, time);
-      m *= Matrix::newQuatRotate(q);
-    }
-    if (scale.used) {
-      m *= Matrix::newScale(scale.getValue(anim, time));
-    }
-    if (billboard) {
-      Matrix mtrans;
-      glGetFloatv(GL_MODELVIEW_MATRIX, &(mtrans.m[0][0]));
-      mtrans.transpose();
-      mtrans.invert();
-      Vec3D camera = mtrans * Vec3D(0,0,0);
-      Vec3D look = (camera - pivot).normalize();
-      //Vec3D up(0,1,0);
-      Vec3D up = ((mtrans * Vec3D(0,1,0)) - camera).normalize();
-      // these should be normalized by default but fp inaccuracy kicks in when looking down :(
-      Vec3D right = (up % look).normalize();
-      up = (look % right).normalize();
-
-      // calculate a billboard matrix
-      Matrix mbb;
-      mbb.unit();
-      mbb.m[0][2] = right.x;
-      mbb.m[1][2] = right.y;
-      mbb.m[2][2] = right.z;
-      mbb.m[0][1] = up.x;
-      mbb.m[1][1] = up.y;
-      mbb.m[2][1] = up.z;
-      mbb.m[0][0] = look.x;
-      mbb.m[1][0] = look.y;
-      mbb.m[2][0] = look.z;
-      /*
-      mbb.m[0][1] = right.x;
-      mbb.m[1][1] = right.y;
-      mbb.m[2][1] = right.z;
-      mbb.m[0][2] = up.x;
-      mbb.m[1][2] = up.y;
-      mbb.m[2][2] = up.z;
-      mbb.m[0][0] = look.x;
-      mbb.m[1][0] = look.y;
-      mbb.m[2][0] = look.z;
-      */
-      m *= mbb;
-    }
-
-    m *= Matrix::newTranslation(pivot*-1.0f);
-    
-  } else m.unit();
-
-  if (parent>=0) {
-    allbones[parent].calcMatrix(allbones, anim, time);
-    mat = allbones[parent].mat * m;
-  } else mat = m;
-
-  // transform matrix for normal vectors ... ??
-  if (rot.used) {
-    if (parent>=0) {
-      mrot = allbones[parent].mrot * Matrix::newQuatRotate(q);
-    } else mrot = Matrix::newQuatRotate(q);
-  } else mrot.unit();
-
-  calc = true;
-
+		m *= Matrix::newTranslation(pivot*-1.0f);
+		
+	} else m.unit();
+  
+	if (parent>=0) {
+		allbones[parent].calcMatrix(allbones, anim, time);
+		mat = allbones[parent].mat * m;
+	} else mat = m;
+  
+	// transform matrix for normal vectors ... ??
+	if (rot.uses(anim)) {
+		if (parent>=0) {
+			mrot = allbones[parent].mrot * Matrix::newQuatRotate(q);
+		} else mrot = Matrix::newQuatRotate(q);
+	} else mrot.unit();
+  
+	transPivot = mat * pivot;
+  
+	calc = true;
 }
 
 
@@ -1123,45 +1167,16 @@ void Model::draw()
       glDisable( GL_FOG );
 
     // draw particle systems & ribbons
-    for( size_t i = 0; i < header.nParticleEmitters; i++ ) 
+    for( size_t i = 0; i < header.nParticleEmitters; ++i ) 
       particleSystems[i].draw();
 
-    for( size_t i = 0; i < header.nRibbonEmitters; i++ ) 
+    for( size_t i = 0; i < header.nRibbonEmitters; ++i ) 
       ribbons[i].draw();
 
     if( gWorld && gWorld->drawfog ) 
       glEnable( GL_FOG );
   }
 }
-
-/*void Model::drawTileMode()
-{
-  if (!animated) {
-    glCallList(TileModeModelDrawList);
-  } 
-  else 
-  {
-      if (!animcalc || mPerInstanceAnimation) {
-        animate(0);
-        animcalc = true;
-      }
-    drawModel( true );
-
-    // effects are unfogged..?
-    if( gWorld && gWorld->drawfog ) 
-      glDisable( GL_FOG );
-
-    // draw particle systems & ribbons
-    for (size_t i=0; i<header.nParticleEmitters; i++)
-      particleSystems[i].draw();
-
-    for (size_t i=0; i<header.nRibbonEmitters; i++)
-      ribbons[i].draw();
-
-    if( gWorld && gWorld->drawfog ) 
-      glEnable( GL_FOG );
-  }
-}*/
 
 void Model::drawSelect()
 {
@@ -1181,11 +1196,11 @@ void Model::drawSelect()
     glDisable( GL_FOG );
 
     // draw particle systems
-    for( size_t i = 0; i < header.nParticleEmitters; i++ )
+    for( size_t i = 0; i < header.nParticleEmitters; ++i )
       particleSystems[i].draw();
     
     // draw ribbons
-    for( size_t i = 0; i < header.nRibbonEmitters; i++ )
+    for( size_t i = 0; i < header.nRibbonEmitters; ++i )
       ribbons[i].draw();
     
     if( gWorld && gWorld->drawfog ) 
@@ -1193,22 +1208,21 @@ void Model::drawSelect()
   }
 }
 
-
-void Model::lightsOn( GLuint lbase )
+void Model::lightsOn(GLuint lbase)
 {
-  for( size_t i = 0, l = lbase; i < header.nLights; i++ ) 
-    lights[i].setup( animtime, l++ );
+	// setup lights
+	for (unsigned int i=0, l=lbase; i<header.nLights; ++i) lights[i].setup(animtime, l++);
 }
 
-void Model::lightsOff( GLuint lbase )
+void Model::lightsOff(GLuint lbase)
 {
-  for( size_t i = 0, l = lbase; i < header.nLights; i++ ) 
-    glDisable( l++ );
+	for (unsigned int i=0, l=lbase; i<header.nLights; ++i) glDisable(l++);
 }
 
-void Model::updateEmitters( float dt )
+void Model::updateEmitters(float dt)
 {
-  for( size_t i = 0; i < header.nParticleEmitters; i++ )
-    particleSystems[i].update( dt );
+	if (!ok) return;
+	for (size_t i=0; i<header.nParticleEmitters; ++i) {
+		particleSystems[i].update(dt);
+	}
 }
-

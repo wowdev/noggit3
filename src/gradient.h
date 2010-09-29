@@ -22,6 +22,6 @@ public:
 	void	setClickColor(float r, float g, float b, float a);
 	frame	*processLeftClick(float mx,float my);
 	bool	processLeftDrag(float mx,float my, float xChange, float yChange);
-	void	render();
+	void	render() const;
 };
 #endif

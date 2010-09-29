@@ -23,7 +23,7 @@ void brush::GenerateTexture()
 	for( int j = 0; j < 256; j++ )
 	{
 		x = -1;
-		for( int i = 0; i < 256; i++ )
+		for( int i = 0; i < 256; ++i )
 		{
 			dist = sqrt( x * x + y * y );
 			if( dist > 1 )

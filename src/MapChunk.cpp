@@ -96,7 +96,7 @@ void GenerateContourMap()
 	CoordGen[3]=0.0f;
   
 	
-	for(int i=0;i<(CONTOUR_WIDTH*4);i++)
+	for(int i=0;i<(CONTOUR_WIDTH*4);++i)
 		CTexture[i]=0;
 	CTexture[3+CONTOUR_WIDTH/2]=0xff;
 	CTexture[7+CONTOUR_WIDTH/2]=0xff;
@@ -109,37 +109,37 @@ void GenerateContourMap()
 	gluBuild2DMipmaps(GL_TEXTURE_2D,4,CONTOUR_WIDTH,1,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
 	/*glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,CONTOUR_WIDTH,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
    
-   for(int i=0;i<(CONTOUR_WIDTH*4)/2;i++)
+   for(int i=0;i<(CONTOUR_WIDTH*4)/2;++i)
    CTexture[i]=0;
    CTexture[3]=0xff;
    
    glTexImage1D(GL_TEXTURE_1D,1,GL_RGBA,CONTOUR_WIDTH/2,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
    
-   for(int i=0;i<(CONTOUR_WIDTH*4)/4;i++)
+   for(int i=0;i<(CONTOUR_WIDTH*4)/4;++i)
    CTexture[i]=0;
    CTexture[3]=0x80;
    
    glTexImage1D(GL_TEXTURE_1D,2,GL_RGBA,CONTOUR_WIDTH/4,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
    
-   for(int i=0;i<(CONTOUR_WIDTH*4)/8;i++)
+   for(int i=0;i<(CONTOUR_WIDTH*4)/8;++i)
    CTexture[i]=0;
    CTexture[3]=0x40;
    
    glTexImage1D(GL_TEXTURE_1D,3,GL_RGBA,CONTOUR_WIDTH/8,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
    
-   for(int i=0;i<(CONTOUR_WIDTH*4)/16;i++)
+   for(int i=0;i<(CONTOUR_WIDTH*4)/16;++i)
    CTexture[i]=0;
    CTexture[3]=0x20;
    
    glTexImage1D(GL_TEXTURE_1D,4,GL_RGBA,CONTOUR_WIDTH/16,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
    
-   for(int i=0;i<(CONTOUR_WIDTH*4)/32;i++)
+   for(int i=0;i<(CONTOUR_WIDTH*4)/32;++i)
    CTexture[i]=0;
    CTexture[3]=0x10;
    
    glTexImage1D(GL_TEXTURE_1D,5,GL_RGBA,CONTOUR_WIDTH/32,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
    
-   for(int i=0;i<(CONTOUR_WIDTH*4)/64;i++)
+   for(int i=0;i<(CONTOUR_WIDTH*4)/64;++i)
    CTexture[i]=0;
    CTexture[3]=0x08;
    
@@ -190,7 +190,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 		gLog("Holes: %d\n", holes);
 		int k=1;
 		for (int j=0; j<4; j++) {
-			for (int i=0; i<4; i++) {
+			for (int i=0; i<4; ++i) {
 				gLog((holes & k)?"1":"0");
 				k <<= 1;
 			}
@@ -219,7 +219,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 			char nor[3];
 			Vec3D *ttn = mNormals;
 			for (int j=0; j<17; j++) {
-				for (int i=0; i<((j%2)?8:9); i++) {
+				for (int i=0; i<((j%2)?8:9); ++i) {
 					f.read(nor,3);
 					// order X,Z,Y 
 					//*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
@@ -232,7 +232,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 
 			// vertices
 			for (int j=0; j<17; j++) {
-				for (int i=0; i<((j%2)?8:9); i++) {
+				for (int i=0; i<((j%2)?8:9); ++i) {
 					float h,xpos,zpos;
 					f.read(&h,4);
 					xpos = i * UNITSIZE;
@@ -258,7 +258,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 			// texture info
 			nTextures = (int)size / 16;
 			//gLog("=\n");
-			for (int i=0; i<nTextures; i++) {
+			for (int i=0; i<nTextures; ++i) {
 				f.read(&tex[i],4);
 				f.read(&texFlags[i], 4);
 				f.read(&MCALoffset[i], 4);
@@ -282,7 +282,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 			p = sbuf;
 			for (int j=0; j<64; j++) {
 				f.read(c,8);
-				for (int i=0; i<8; i++) {
+				for (int i=0; i<8; ++i) {
 					for (int b=0x01; b!=0x100; b<<=1) {
 						*p++ = (c[i] & b) ? 85 : 0;
 					}
@@ -347,7 +347,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 						uint8_t *abuf = f.getPointer();
 						p = amap[layer-1];
 						for (int j=0; j<64; j++) {
-							for (int i=0; i<64; i++) {
+							for (int i=0; i<64; ++i) {
 								*p++ = *abuf++;
 							}
 
@@ -368,7 +368,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 						uint8_t *abuf = f.getPointer();
 						p = amap[layer-1];
 						for (int j=0; j<63; j++) {
-							for (int i=0; i<32; i++) {
+							for (int i=0; i<32; ++i) {
 								unsigned char c = *abuf++;
 								if(i!=31)
 								{
@@ -462,7 +462,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 
 	// vertices
 	for (int j=0; j<17; j++) {
-		for (int i=0; i<((j%2)?8:9); i++) {
+		for (int i=0; i<((j%2)?8:9); ++i) {
 			float xpos,zpos;
 				//f.read(&h,4);
 			xpos = i * 0.125f;
@@ -479,7 +479,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 	{
 		/** We have no shadow map (MCSH), so we got no shadows at all!  **
 		 ** This results in everything being black.. Yay. Lets fake it! **/
-		for( size_t i = 0; i < 512; i++ )
+		for( size_t i = 0; i < 512; ++i )
 			mShadowMap[i] = 0;
 
 		unsigned char sbuf[64*64];
@@ -525,7 +525,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 void MapChunk::loadTextures()
 {
 	return;
-	for(int i=0;i<nTextures;i++)
+	for(int i=0;i<nTextures;++i)
 		textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
 }
 
@@ -603,7 +603,7 @@ void MapChunk::drawTextures()
 		//glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
 		//glDepthMask(GL_FALSE);
 	}
-	for(int i=1;i<nTextures;i++)
+	for(int i=1;i<nTextures;++i)
 	{
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
@@ -738,7 +738,7 @@ void CreateStrips()
 	unsigned short Temp[18];
 	int j;
 
-	for(int i=0;i<8;i++)
+	for(int i=0;i<8;++i)
 	{
 		OddStrips[i*18+0]=i*17+17;
 		for(j=0;j<8;j++)
@@ -754,7 +754,7 @@ void CreateStrips()
 	}
 
 	//Reverse the order whoops
-	for(int i=0;i<8;i++)
+	for(int i=0;i<8;++i)
 	{
 		for(j=0;j<18;j++)
 			Temp[17-j]=OddStrips[i*18+j];
@@ -765,7 +765,7 @@ void CreateStrips()
 
 	}
 
-	for(int i=0;i<32;i++)
+	for(int i=0;i<32;++i)
 	{
 		if(i<9)
 			LineStrip[i]=i;
@@ -779,13 +779,13 @@ void CreateStrips()
 
 	int iferget = 0;
 	
-	for( size_t i = 34; i < 43; i++ )
+	for( size_t i = 34; i < 43; ++i )
  		HoleStrip[iferget++] = i;
 	
-	for( size_t i = 68; i < 77; i++ )
+	for( size_t i = 68; i < 77; ++i )
 		HoleStrip[iferget++] = i;
 
-	for( size_t i = 102; i < 111; i++ )
+	for( size_t i = 102; i < 111; ++i )
  		HoleStrip[iferget++] = i;
   
   for( size_t i = 2; i < 139; i += 17 )
@@ -803,7 +803,7 @@ void MapChunk::drawColor()
 	
 	if (!gWorld->frustum.intersects(vmin,vmax)) return;
 	float mydist = (gWorld->camera - vcenter).length() - r;
-	//if (mydist > gWorld->mapdrawdistance2) return;
+	if (mydist > (mapdrawdistance * mapdrawdistance)) return;
 	if (mydist > gWorld->culldistance) {
 		if (gWorld->uselowlod) this->drawNoDetail();
 		return;
@@ -818,7 +818,7 @@ void MapChunk::drawColor()
 
 	Vec3D Color;
 	glBegin(GL_TRIANGLE_STRIP);
-	for(int i=0;i<striplen;i++)
+	for(int i=0;i<striplen;++i)
 	{
 		HeightColor(mVertices[strip[i]].y,&Color);
 		glColor3fv(&Color.x);
@@ -865,7 +865,7 @@ void MapChunk::drawLines()
 {
 	if (!gWorld->frustum.intersects(vmin,vmax))		return;
 	float mydist = (gWorld->camera - vcenter).length() - r;
-	if (mydist > gWorld->mapdrawdistance2) return;
+	if (mydist > (mapdrawdistance * mapdrawdistance)) return;
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
 	glVertexPointer(3, GL_FLOAT, 0, 0);
@@ -957,8 +957,8 @@ void MapChunk::drawBlock()
 void MapChunk::draw()
 {
 	if (!gWorld->frustum.intersects(vmin,vmax))		return;
-	//float mydist = (gWorld->camera - vcenter).length() - r;
-	//if (mydist > gWorld->mapdrawdistance2) return;
+	float mydist = (gWorld->camera - vcenter).length() - r;
+	if (mydist > (mapdrawdistance * mapdrawdistance)) return;
 
 	// setup vertex buffers
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
@@ -1000,7 +1000,7 @@ void MapChunk::draw()
 	}
 
 	// additional passes: if required
-	for (int i=0; i<nTextures-1; i++) {
+	for (int i=0; i<nTextures-1; ++i) {
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, textures[i+1]);
@@ -1143,7 +1143,7 @@ void MapChunk::draw()
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_TEXTURE_2D);
 	glTranslatef(xbase, ybase, zbase);
-	for (int i=0; i<8; i++) {
+	for (int i=0; i<8; ++i) {
 		int v = 1 << (7-i);
 		for (int j=0; j<4; j++) {
 			if (animated[j] & v) {
@@ -1200,10 +1200,10 @@ void MapChunk::drawSelect()
 	if( !gWorld->frustum.intersects( vmin, vmax ) ) 
 		return;
 
-/*	float mydist = (gWorld->camera - vcenter).length() - r;
-	//if (mydist > gWorld->mapdrawdistance2) return;
+	float mydist = (gWorld->camera - vcenter).length() - r;
+	if (mydist > (mapdrawdistance * mapdrawdistance)) return;
 	if (mydist > gWorld->culldistance)
-		return;*/
+		return;
 
 
 	if( nameID == -1 )
@@ -1212,7 +1212,7 @@ void MapChunk::drawSelect()
 	glDisable( GL_CULL_FACE );
 	glPushName( nameID );
 	glBegin( GL_TRIANGLE_STRIP );
-	for( int i = 0; i < stripsize2; i++ )
+	for( int i = 0; i < stripsize2; ++i )
 		glVertex3fv( mVertices[gWorld->mapstrip2[i]] );
 	glEnd();
 	glPopName();
@@ -1222,7 +1222,7 @@ void MapChunk::drawSelect()
 void MapChunk::drawSelect2()
 {
 	glDisable( GL_CULL_FACE );
-	for( int i = 0; i < stripsize2 - 2; i++ )
+	for( int i = 0; i < stripsize2 - 2; ++i )
 	{
 		glPushName( i );
 		glBegin( GL_TRIANGLES );
@@ -1287,7 +1287,7 @@ void MapChunk::recalcNorms()
 		return;
 	Changed=false;
 
-	for(int i=0;i<mapbufsize;i++)
+	for(int i=0;i<mapbufsize;++i)
 	{
 		if(!gWorld->GetVertex(mVertices[i].x-UNITSIZE*0.5f,mVertices[i].z-UNITSIZE*0.5f,&P1))
 		{
@@ -1364,7 +1364,7 @@ void MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 		return;
 	vmin.y =  9999999.0f;
 	vmax.y = -9999999.0f;
-	for(int i=0;i<mapbufsize;i++)
+	for(int i=0;i<mapbufsize;++i)
 	{
 		xdiff=mVertices[i].x-x;
 		zdiff=mVertices[i].z-z;
@@ -1407,7 +1407,7 @@ void MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 	vmin.y =  9999999.0f;
 	vmax.y = -9999999.0f;
 
-	for(int i=0;i<mapbufsize;i++)
+	for(int i=0;i<mapbufsize;++i)
 	{
 		xdiff=mVertices[i].x-x;
 		zdiff=mVertices[i].z-z;
@@ -1459,7 +1459,7 @@ void MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 	vmin.y =  9999999.0f;
 	vmax.y = -9999999.0f;
 
-	for(int i=0;i<mapbufsize;i++)
+	for(int i=0;i<mapbufsize;++i)
 	{
 		xdiff=mVertices[i].x-x;
 		zdiff=mVertices[i].z-z;
@@ -1603,7 +1603,7 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 		return false;
 
 	//First Lets find out do we have the texture already
-	for(int i=0;i<nTextures;i++)
+	for(int i=0;i<nTextures;++i)
 		if(textures[i]==texture)
 			texLevel=i;
 
@@ -1630,7 +1630,7 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 	for(int j=0;j<63;j++)
 	{
 		xPos=xbase;
-		for(int i=0;i<63;i++)
+		for(int i=0;i<63;++i)
 		{
 			xdiff=xPos-x;
 			zdiff=zPos-z;

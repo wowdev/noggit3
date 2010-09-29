@@ -15,7 +15,7 @@ protected:
 public:
 	void	clickReturn(int);
 	scrollbarUI(float xpos, float ypos, float height, int num);
-	int		getValue();
+	int		getValue() const;
 	void	setValue(int i);
 	void	setNum(int i);
 	void	setChangeFunc(void (*f)(int));

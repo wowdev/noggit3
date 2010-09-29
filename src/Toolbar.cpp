@@ -8,10 +8,9 @@
 #include "textureUI.h"
 #include "TextureManager.h" // TextureManager, Texture
 
-Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window(xPos, yPos, w, h), mainGui( setGui )
+Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window( xPos, yPos, w, h, "interface\\tooltips\\ui-tooltip-border.blp" ), mainGui( setGui )
 {
 	this->movable = true;
-	texture = TextureManager::newTexture( "interface\\tooltips\\ui-tooltip-border.blp" );
 
 	// set title
 	text = new textUI( 8, 7, "Raise/Lower", &arialn13, eJustifyLeft );

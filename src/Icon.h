@@ -16,7 +16,7 @@ protected:
 
 public:
 	Icon(float x,float y,float width,float height, const std::string& tex, const std::string& texd);
-	void	render();
+	void	render() const;
 	bool	selected;
 	frame *processLeftClick(float mx,float my);
 	void setClickFunc(void (*f)(frame *,int), int num);

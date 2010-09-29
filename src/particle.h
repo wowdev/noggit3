@@ -12,10 +12,11 @@ class RibbonEmitter;
 #include <list>
 
 struct Particle {
-	Vec3D pos, speed, down, origin;
+	Vec3D pos, speed, down, origin, dir;
+	Vec3D	corners[4];
 	//Vec3D tpos;
 	float size, life, maxlife;
-	int tile;
+	unsigned int tile;
 	Vec4D color;
 };
 
@@ -26,19 +27,19 @@ protected:
 	ParticleSystem *sys;
 public:
 	ParticleEmitter(ParticleSystem *psys): sys(psys) {}
-	virtual Particle newParticle(int anim, int time) = 0;
+	virtual Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2) = 0;
 };
 
 class PlaneParticleEmitter: public ParticleEmitter {
 public:
 	PlaneParticleEmitter(ParticleSystem *_sys): ParticleEmitter(_sys) {}
-	Particle newParticle(int anim, int time);
+	Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
 class SphereParticleEmitter: public ParticleEmitter {
 public:
 	SphereParticleEmitter(ParticleSystem *_sys): ParticleEmitter(_sys) {}
-	Particle newParticle(int anim, int time);
+	Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
 struct TexCoordSet {
@@ -46,16 +47,14 @@ struct TexCoordSet {
 };
 
 class ParticleSystem {
-	Animated<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw, grav2;
-	Animated<Vec3D> color;
-	Animated<Vec2D> size;
-	Animated<float,short,ShortToFloat> opac;
+	Animated<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw, deacceleration;
+	Animated<uint8_t> enabled;
 	Vec4D colors[3];
 	float sizes[3];
+	ParticleEmitter *emitter;
 	float mid, slowdown, rotation;
 	Vec3D pos;
 	GLuint texture;
-	ParticleEmitter *emitter;
 	ParticleList particles;
 	int blend,order,type;
 	int manim,mtime;
@@ -69,12 +68,31 @@ class ParticleSystem {
 
 	// unknown parameters omitted for now ...
 	Bone *parent;
+  int32_t flags;
+	int16_t pType;
 
 public:
 	Model *model;
 	float tofs;
 
-	ParticleSystem(): emitter(NULL) {};
+	ParticleSystem(): emitter(NULL), mid(0), rem(0)
+	{
+		blend = 0;
+		order = 0;
+		type = 0;
+		manim = 0;
+		mtime = 0;
+		rows = 0;
+		cols = 0;
+    
+		model = 0;
+		parent = 0;
+		texture = 0;
+    
+		slowdown = 0;
+		rotation = 0;
+		tofs = 0;
+	}
 	~ParticleSystem() { if( emitter ) { delete emitter; emitter = NULL; } }
 
 	void init(MPQFile &f, ModelParticleEmitterDef &mta, int *globals);

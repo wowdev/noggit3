@@ -19,6 +19,7 @@ textureUI::textureUI( float xPos, float yPos, float w, float h, const std::strin
 
 void textureUI::setTexture( GLuint tex )
 {
+  //! \todo Free current texture.
 	texture = (Texture*)TextureManager::items[tex];
 }
 
@@ -27,7 +28,7 @@ void textureUI::setTexture( const std::string& tex )
 	texture = TextureManager::newTexture( tex );
 }
 
-void textureUI::render()
+void textureUI::render() const
 {
 	glColor3f( 1.0f, 1.0f, 1.0f );
 

@@ -33,8 +33,8 @@ public:
 	void setJustify( int j );
 	void setFont( freetype::font_data *font );
 	void setBackground( float r, float g, float b, float a );
-	void render();
-	std::string getText()
+	void render() const;
+	const std::string& getText() const
 	{
 		return mText;
 	}

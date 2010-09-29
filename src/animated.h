@@ -102,7 +102,6 @@ template <class T, class D=T, class Conv=Identity<T> >
 class Animated {
 public:
 
-	bool used;
 	int type, seq;
 	int *globals;
 
@@ -111,52 +110,56 @@ public:
 	// for nonlinear interpolations:
 	std::map<int, std::vector<T> > in, out;
 	size_t size; // for fix function
+  
+  bool uses(unsigned int anim)
+	{
+		if (seq>-1)
+    {
+			anim = 0;
+    }
+		
+    return (data[anim].size() > 0);
+	}
 
 	T getValue(unsigned int anim, unsigned int time)
 	{
- // by Flow
-		if( !data[anim].size() ) { // HACK
-			return T();
+    // obtain a time value and a data range
+		if (seq>-1) {
+			// TODO
+			if (globals[seq]==0) 
+				time = 0;
+			else 
+				time = globalTime % globals[seq];
+			anim = 0;
 		}
-
-
-		if (type != INTERPOLATION_NONE || data[anim].size()>1) {
-			// obtain a time value and a data range
-			if (seq>-1) {
-				if (globals[seq]==0) 
-					time = 0;
-				else 
-					time = globalTime % globals[seq];
+		if (data[anim].size()>1 && times[anim].size()>1) {
+			size_t t1, t2;
+			size_t pos=0;
+			int max_time = times[anim][times[anim].size()-1];
+			if (max_time > 0)
+				time %= max_time; // I think this might not be necessary?
+			for (size_t i=0; i<times[anim].size()-1; ++i) {
+				if (time >= times[anim][i] && time < times[anim][i+1]) {
+					pos = i;
+					break;
+				}
 			}
-
- 			if (times[anim].size() > 1) {
-				size_t t1, t2;
-				size_t pos=0;
-				for (size_t i=0; i<times[anim].size()-1; i++) {
-					if (time >= times[anim][i] && time < times[anim][i+1]) {
-						pos = i;
-						break;
-					}
-				}
-				t1 = times[anim][pos];
-				t2 = times[anim][pos+1];
-				float r = (time-t1)/(float)(t2-t1);
-
-				if (type == INTERPOLATION_LINEAR) 
-					return interpolate<T>(r,data[anim][pos],data[anim][pos+1]);
-				else if (type == INTERPOLATION_NONE) 
-					return data[anim][pos];
-				else {
-					// INTERPOLATION_HERMITE is only used in cameras afaik?
-					return interpolateHermite<T>(r,data[anim][pos],data[anim][pos+1],in[anim][pos],out[anim][pos]);
-				}
-			} else {
-				return data[anim][0];
+			t1 = times[anim][pos];
+			t2 = times[anim][pos+1];
+			float r = (time-t1)/(float)(t2-t1);
+      
+			if (type == INTERPOLATION_LINEAR) 
+				return interpolate<T>(r,data[anim][pos],data[anim][pos+1]);
+			else if (type == INTERPOLATION_NONE) 
+				return data[anim][pos];
+			else {
+				// INTERPOLATION_HERMITE is only used in cameras afaik?
+				return interpolateHermite<T>(r,data[anim][pos],data[anim][pos+1],in[anim][pos],out[anim][pos]);
 			}
 		} else {
 			// default value
 			if (data[anim].size() == 0)
-				return 0;
+				return T();
 			else
 				return data[anim][0];
 		}
@@ -171,15 +174,9 @@ public:
 			assert(gs);
 		}
 
-		// Old method
-		//used = (type != INTERPOLATION_NONE) || (seq != -1);
-		// New method suggested by Cryect
-		used = (b.nKeys > 0);
-
 
 		// times
 		assert(b.nTimes == b.nKeys);
-	// by Flow
 		size = b.nTimes;
 		if( b.nTimes == 0 )
 			return;
@@ -188,7 +185,7 @@ public:
 			AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
 		
 			uint32_t *ptimes = (uint32_t*)(f.getBuffer() + pHeadTimes->ofsEntrys);
-			for (size_t i=0; i < pHeadTimes->nEntrys; i++)
+			for (size_t i=0; i < pHeadTimes->nEntrys; ++i)
 				times[j].push_back(ptimes[i]);
 		}
 
@@ -200,11 +197,11 @@ public:
 			switch (type) {
 				case INTERPOLATION_NONE:
 				case INTERPOLATION_LINEAR:
-					for (size_t i = 0; i < pHeadKeys->nEntrys; i++) 
+					for (size_t i = 0; i < pHeadKeys->nEntrys; ++i) 
 						data[j].push_back(Conv::conv(keys[i]));
 					break;
 				case INTERPOLATION_HERMITE:
-					for (size_t i = 0; i < pHeadKeys->nEntrys; i++) {
+					for (size_t i = 0; i < pHeadKeys->nEntrys; ++i) {
 						data[j].push_back(Conv::conv(keys[i*3]));
 						in[j].push_back(Conv::conv(keys[i*3+1]));
 						out[j].push_back(Conv::conv(keys[i*3+2]));
@@ -214,59 +211,7 @@ public:
 		}
 	}
 
-	void init(FakeAnimationBlock &b, MPQFile &f, int *gs)
-	{
-		globals = gs;
-		type = 0;
-		seq = -1;
-		if (seq!=-1) {
-			assert(gs);
-		}
-
-		// Old method
-		//used = (type != INTERPOLATION_NONE) || (seq != -1);
-		// New method suggested by Cryect
-		used = (b.nKeys > 0);
-
-
-		// times
-		assert(b.nTimes == b.nKeys);
-	// by Flow
-		size = b.nTimes;
-		if( b.nTimes == 0 )
-			return;
-
-		for(size_t j=0; j < b.nTimes; j++) {
-			AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
-		
-			uint32_t *ptimes = (uint32_t*)(f.getBuffer() + pHeadTimes->ofsEntrys);
-			for (size_t i=0; i < pHeadTimes->nEntrys; i++)
-				times[j].push_back(ptimes[i]);
-		}
-
-		// keyframes
-		for(size_t j=0; j < b.nKeys; j++) {
-			AnimationBlockHeader* pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
-
-			D *keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
-			switch (type) {
-				case INTERPOLATION_NONE:
-				case INTERPOLATION_LINEAR:
-					for (size_t i = 0; i < pHeadKeys->nEntrys; i++) 
-						data[j].push_back(Conv::conv(keys[i]));
-					break;
-				case INTERPOLATION_HERMITE:
-					for (size_t i = 0; i < pHeadKeys->nEntrys; i++) {
-						data[j].push_back(Conv::conv(keys[i*3]));
-						in[j].push_back(Conv::conv(keys[i*3+1]));
-						out[j].push_back(Conv::conv(keys[i*3+2]));
-					}
-					break;
-			}
-		}
-	}
-
-	void init(AnimationBlock &b, MPQFile &f, int *gs, MPQFile *animfiles)
+	void init(AnimationBlock &b, MPQFile &f, int *gs, MPQFile **animfiles)
 	{
 		globals = gs;
 		type = b.type;
@@ -274,11 +219,6 @@ public:
 		if (seq!=-1) {
 			assert(gs);
 		}
-
-		// Old method
-		//used = (type != INTERPOLATION_NONE) || (seq != -1);
-		// New method suggested by Cryect
-		used = (b.nKeys > 0);
 
 		// times
 		assert(b.nTimes == b.nKeys);
@@ -289,13 +229,12 @@ public:
 		for(size_t j=0; j < b.nTimes; j++) {
 			AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
 			uint32_t *ptimes;
-			if (animfiles[j].getSize() > 0)
-				ptimes = (uint32_t*)(animfiles[j].getBuffer() + pHeadTimes->ofsEntrys);
+			if (animfiles[j] && animfiles[j]->getSize() > 0)
+				ptimes = (uint32_t*)(animfiles[j]->getBuffer() + pHeadTimes->ofsEntrys);
 			else
 				ptimes = (uint32_t*)(f.getBuffer() + pHeadTimes->ofsEntrys);
-			for (size_t i=0; i < pHeadTimes->nEntrys; i++)
+			for (size_t i=0; i < pHeadTimes->nEntrys; ++i)
 				times[j].push_back(ptimes[i]);
-
 		}
 
 		// keyframes
@@ -303,18 +242,18 @@ public:
 			AnimationBlockHeader* pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
 			assert((D*)(f.getBuffer() + pHeadKeys->ofsEntrys));
 			D *keys;
-			if (animfiles[j].getSize() > 0)
-				keys = (D*)(animfiles[j].getBuffer() + pHeadKeys->ofsEntrys);
+			if (animfiles[j] && animfiles[j]->getSize() > 0)
+				keys = (D*)(animfiles[j]->getBuffer() + pHeadKeys->ofsEntrys);
 			else 
 				keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
 			switch (type) {
 				case INTERPOLATION_NONE:
 				case INTERPOLATION_LINEAR:
-					for (size_t i = 0; i < pHeadKeys->nEntrys; i++) 
+					for (size_t i = 0; i < pHeadKeys->nEntrys; ++i) 
 						data[j].push_back(Conv::conv(keys[i]));
 					break;
 				case INTERPOLATION_HERMITE:
-					for (size_t i = 0; i < pHeadKeys->nEntrys; i++) {
+					for (size_t i = 0; i < pHeadKeys->nEntrys; ++i) {
 						data[j].push_back(Conv::conv(keys[i*3]));
 						in[j].push_back(Conv::conv(keys[i*3+1]));
 						out[j].push_back(Conv::conv(keys[i*3+2]));
@@ -329,14 +268,14 @@ public:
 		switch (type) {
 			case INTERPOLATION_NONE:
 			case INTERPOLATION_LINEAR:
-				for (size_t i=0; i<size; i++) {
+				for (size_t i=0; i<size; ++i) {
 					for (size_t j=0; j<data[i].size(); j++) {
 						data[i][j] = fixfunc(data[i][j]);
 					}
 				}
 				break;
 			case INTERPOLATION_HERMITE:
-				for (size_t i=0; i<size; i++) {
+				for (size_t i=0; i<size; ++i) {
 					for (size_t j=0; j<data[i].size(); j++) {
 						data[i][j] = fixfunc(data[i][j]);
 						in[i][j] = fixfunc(in[i][j]);

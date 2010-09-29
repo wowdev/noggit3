@@ -103,7 +103,7 @@ void Liquid::initGeometry(MPQFile &f)
 	Vec3D * lVertices = new Vec3D[(xtiles+1)*(ytiles+1)];
 	//color = new unsigned char[(xtiles+1)*(ytiles+1)];
 	for (int j=0; j<ytiles+1; j++) {
-		for (int i=0; i<xtiles+1; i++) {
+		for (int i=0; i<xtiles+1; ++i) {
 			size_t p = j*(xtiles+1)+i;
 			float h = map[p].h;
 			if (h > 100000) h = pos.y;
@@ -122,7 +122,7 @@ void Liquid::initGeometry(MPQFile &f)
 	glBegin(GL_QUADS);
 	// draw tiles
 	for (int j=0; j<ytiles; j++) {
-		for (int i=0; i<xtiles; i++) {
+		for (int i=0; i<xtiles; ++i) {
 			unsigned char flag = flags[j*xtiles+i];
 			if ((flag&8)==0) {
 				tmpflag = flag;
@@ -185,7 +185,7 @@ void Liquid::initGeometry(MPQFile &f)
 	glDisable(GL_LIGHTING);
 	glBegin(GL_TRIANGLES);
 	for (int j=0; j<ytiles+1; j++) {
-		for (int i=0; i<xtiles+1; i++) {
+		for (int i=0; i<xtiles+1; ++i) {
 			size_t p = j*(xtiles+1)+i;
 			Vec3D v = verts[p];
 			//short s = *( (short*) (f.getPointer() + p*8) );
@@ -264,7 +264,7 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 	//! \todo  Store them somehow else. Maybe an extensible array[][] over the whole ADT?
 	Vec3D *lVertices = new Vec3D[info->width * info->height];
 	for( int j = 0; j < info->height; j++ ) 
-		for( int i = 0; i < info->width; i++ ) 
+		for( int i = 0; i < info->width; ++i ) 
 			if( render->mRender[j * info->width + i] )
 				lVertices[j * info->width + i] = Vec3D( pos.x + tilesize * i, HeightMap->mHeightValues[j][i], pos.z + ydir * tilesize * j );
 
@@ -277,7 +277,7 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 
 	// draw tiles
 	for( int j = 0; j < info->height; j++ ) 
-		for( int i = 0; i < info->width; i++ ) 
+		for( int i = 0; i < info->width; ++i ) 
 			if( render->mRender[j * info->width + i] )
 			{
 				size_t p = j * info->width + i;
@@ -355,7 +355,7 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	// generate vertices
 	Vec3D lVertices[9][9];
 	for( int j = 0; j < 9; j++ )
-		for( int i = 0; i < 9; i++ ) 
+		for( int i = 0; i < 9; ++i ) 
 			lVertices[j][i] = Vec3D( pos.x + tilesize * i, pTileInformation.mHeightmap[j][i], pos.z + ydir * tilesize * j );
   
 	mDrawList = new OpenGL::CallList();
@@ -367,7 +367,7 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 
 	// draw tiles
 	for( int j = 0; j < 8; j++ ) 
-		for( int i = 0; i < 8; i++ ) 
+		for( int i = 0; i < 8; ++i ) 
 			if( pTileInformation.mRender[j][i] )
 			{
 				float c;
@@ -441,7 +441,7 @@ void loadWaterShader()
 				LogError << "Water Shader \"shaders\\water.ps\" Fragment program failed to load \nReason:\n";
 				stringy=glGetString(GL_PROGRAM_ERROR_STRING_ARB);	//This is only available in ARB
 				LogError << (char *)stringy << std::endl;
-				for(i=errorPos, j=0; (i<length)&&(j<128); i++, j++)
+				for(i=errorPos, j=0; (i<length)&&(j<128); ++i, j++)
 				{
 					localbuffer[j]=buffer[i];
 				}
@@ -481,7 +481,7 @@ void loadWaterShader()
 				LogError << "Water Shader \"shaders/waterfog.ps\" Fragment program failed to load \nReason:\n";
 				stringy=glGetString(GL_PROGRAM_ERROR_STRING_ARB);	//This is only available in ARB
 				LogError << (char *)stringy << std::endl;
-				for(i=errorPos, j=0; (i<length)&&(j<128); i++, j++)
+				for(i=errorPos, j=0; (i<length)&&(j<128); ++i, j++)
 				{
 					localbuffer[j]=buffer[i];
 				}
@@ -591,7 +591,7 @@ template<int pFirst, int pLast>
 void Liquid::initTextures( const std::string& pFilename )
 {
 	char buf[1024];
-	for( int i = pFirst; i <= pLast; i++ ) 
+	for( int i = pFirst; i <= pLast; ++i ) 
 	{
 		sprintf( buf, pFilename.c_str(), i );
 		textures.push_back( TextureManager::add( buf )) ;
@@ -606,7 +606,7 @@ Liquid::~Liquid()
     delete mDrawList;
     mDrawList = NULL;
   }
-	for( size_t i=0; i<textures.size(); i++ ) 
+	for( size_t i=0; i<textures.size(); ++i ) 
 	{
 		TextureManager::del( textures[i] );
 	}

@@ -7,9 +7,8 @@
 
 #include "noggit.h" // arial12
 
-TreeViewButton::TreeViewButton( float _x, float _y, TreeView* pTreeView ) : buttonUI(  _x, _y, 12.0f, 12.0f, "Interface\\Buttons\\UI-PlusButton-Up.blp", "Interface\\Buttons\\UI-PlusButton-Down.blp" )
+TreeViewButton::TreeViewButton( float _x, float _y, TreeView* pTreeView ) : buttonUI(  _x, _y, 12.0f, 12.0f, "Interface\\Buttons\\UI-PlusButton-Up.blp", "Interface\\Buttons\\UI-PlusButton-Down.blp" ), mTreeView( pTreeView )
 {
-	mTreeView = pTreeView;
 }
 
 frame * TreeViewButton::processLeftClick(float mx,float my)
@@ -24,15 +23,8 @@ void TreeViewButton::SetClicked( bool pClicked )
 	clicked = pClicked;
 }
 
-TreeView::TreeView( float pX, float pY, Directory * pDirectory, TreeView * pParent, void (*pSelectFunction)( const std::string& ) )
+TreeView::TreeView( float pX, float pY, Directory * pDirectory, TreeView * pParent, void (*pSelectFunction)( const std::string& ) ) : frame( pX, pY, 0.0f, 0.0f ), mParent( pParent ), mMyDir( pDirectory ), mSelectFunction( pSelectFunction ), mExpanded( false )
 {
-	x = pX;
-	y = pY;
-	mMyDir = pDirectory;
-	mParent = pParent;
-	mExpanded = false;
-	mSelectFunction = pSelectFunction;
-
 	mMyButton = new TreeViewButton( 0, 0, this );
 	mMyText = new textUI( 13, 0, mMyDir->mName, &arial12, eJustifyLeft );
 
@@ -114,7 +106,7 @@ void TreeView::Toggle()
 			mParent->Move( ( mOthers.size() + mFiles.size() ), this );
 }
 
-void TreeView::render()
+void TreeView::render() const
 {
 	if( hidden )
 		return;
@@ -126,12 +118,12 @@ void TreeView::render()
 
 	if( mExpanded )
 	{
-		std::vector<TreeView*>::iterator childtreeviews;
+		std::vector<TreeView*>::const_iterator childtreeviews;
 		for( childtreeviews = mOthers.begin(); childtreeviews != mOthers.end(); ++childtreeviews )
 		{
 			(*childtreeviews)->render();
 		}
-		std::vector<textUI*>::iterator childfiles;
+		std::vector<textUI*>::const_iterator childfiles;
 		for( childfiles = mFiles.begin(); childfiles != mFiles.end(); ++childfiles )
 		{
 			(*childfiles)->render();

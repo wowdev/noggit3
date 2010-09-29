@@ -101,7 +101,7 @@ bool TextureManager::LoadBLP(GLuint id, Texture *tex)
 			int alphabits = lHeader->attr_1_alphadepth;
 			bool hasalpha = alphabits != 0;
 
-			for (int i=0; i<16; i++) {
+			for (int i=0; i<16; ++i) {
 				if (w==0) w = 1;
 				if (h==0) h = 1;
 				if (lHeader->offsets[i] && lHeader->sizes[i]) {
@@ -165,7 +165,7 @@ bool TextureManager::LoadBLP(GLuint id, Texture *tex)
 			format = format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT ? ( lHeader->attr_1_alphadepth == 1 ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT ) : format;
 
 			// do every mipmap level
-			for( int i = 0; i < 16; i++ ) 
+			for( int i = 0; i < 16; ++i ) 
 			{
 				w = w == 0 ? 1 : w;
 				h = h == 0 ? 1 : h;

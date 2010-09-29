@@ -1,3 +1,5 @@
+#include <SDL/SDL.h>
+
 #include "video.h"
 #include "Log.h"
 
@@ -170,18 +172,18 @@ void Video::close()
 	SDL_Quit();
 }
 
-void Video::flip()
+void Video::flip() const
 {
 	SDL_GL_SwapBuffers();
 }
 
-void Video::clearScreen()
+void Video::clearScreen() const
 {
 	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
-void Video::set3D()
+void Video::set3D() const
 {
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
@@ -190,7 +192,7 @@ void Video::set3D()
 	glLoadIdentity();
 }
 
-void Video::set3D_select()
+void Video::set3D_select() const
 {
 	glMatrixMode( GL_PROJECTION );
 	gluPerspective( 45.0f, this->ratio, 1.0f, 1024.0f );
@@ -198,7 +200,7 @@ void Video::set3D_select()
 	glLoadIdentity();
 }
 
-void Video::set2D()
+void Video::set2D() const
 {
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
@@ -207,7 +209,7 @@ void Video::set2D()
 	glLoadIdentity();
 }
 
-void Video::setTileMode()
+void Video::setTileMode() const
 {
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();

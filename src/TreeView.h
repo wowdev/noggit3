@@ -41,7 +41,7 @@ public:
 
 	void Move( int pEntries, TreeView * pFrom );
 
-	void render();
+	void render() const;
 	
 	frame * processLeftClick( float mx,float my );
 };

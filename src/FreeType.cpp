@@ -76,7 +76,7 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 	//is the the Freetype bitmap otherwise.
 	memset(expanded_data,0,width*height*2);
 	for(int j=0; j <height;j++) {
-		for(int i=0; i < width; i++){
+		for(int i=0; i < width; ++i){
 			expanded_data[2*(i+j*width)]=expanded_data[2*(i+j*width)+1]= 
 				(i>=bitmap.width || j>=bitmap.rows) ?
 				0 : (unsigned char)min((float)(bitmap.buffer[i + bitmap.width*j])*1.5f,255.0f);
@@ -200,7 +200,7 @@ void font_data::init(const char * fname, unsigned int _h) {
 	glGenTextures( 128, textures );
 
 	//This is where we actually create each of the fonts display lists.
-	for(unsigned char i=0;i<128;i++)
+	for(unsigned char i=0;i<128;++i)
 		charWidths[i]=make_dlist(face,i,list_base,textures,h);
 
 	//We don't need the face information now that the display
@@ -255,7 +255,7 @@ void font_data::initMPQ(const char * fname, unsigned int _h) {
 	glGenTextures( 128, textures );
 
 	//This is where we actually create each of the fonts display lists.
-	for(unsigned char i=0;i<128;i++)
+	for(unsigned char i=0;i<128;++i)
 		charWidths[i]=make_dlist(face,i,list_base,textures,h);
 
 	//We don't need the face information now that the display
@@ -367,7 +367,7 @@ void print(const font_data &ft_font, float x, float y, const char *fmt, ...)  {
 	//down by h. This is because when each character is
 	//draw it modifies the current matrix so that the next character
 	//will be drawn immediatly after it.  
-	for(unsigned int i=0;i<lines.size();i++) {
+	for(unsigned int i=0;i<lines.size();++i) {
 		glPushMatrix();
 		//glLoadIdentity();
 		glTranslatef(x,y+h*i,0);
@@ -481,7 +481,7 @@ int width(const font_data &ft_font, const char *fmt, ...)
 
 	int maxWidth=0;
 	
-	for(unsigned int i=0;i<lines.size();i++)
+	for(unsigned int i=0;i<lines.size();++i)
 	{
 		int	curWidth=0;
 		for(unsigned int j=0;j<lines[i].size();j++)

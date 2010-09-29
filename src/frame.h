@@ -35,7 +35,7 @@ public:
   
   virtual ~frame()
   {
-    for(std::vector<frame*>::iterator it = children.begin(); it != children.end(); it++)
+    for(std::vector<frame*>::iterator it = children.begin(); it != children.end(); ++it)
     {
       if( *it )
       {
@@ -46,13 +46,19 @@ public:
   }
 
 	void addChild( frame * );
-	virtual void render();
+  void removeChild( frame* );
+	virtual void render() const;
 	virtual frame *processLeftClick( float mx, float my );
 	virtual bool processLeftDrag( float mx, float my, float xChange, float yChange );
 	virtual	void processUnclick() { }
 	virtual bool processRightClick( float mx, float my );
 	virtual bool processKey( char key, bool shift, bool alt, bool ctrl );
-	virtual void resize() { }
+	virtual void resize()
+  {
+    for( std::vector<frame*>::iterator it = children.begin(); it != children.end(); ++it )
+      if( (*it)->mustresize )
+        (*it)->resize();
+  }
 	void getOffset( float &xOff, float &yOff );
 
 	bool IsHit( float pX, float pY )
