@@ -16,7 +16,7 @@ public:
 
 	Vec3D pos, dir;
 
-	//! \todo  Get this out and do somehow else.
+	//! \todo	Get this out and do somehow else.
 	unsigned int d1;
 
 	float w, sc;
@@ -29,7 +29,7 @@ public:
 	ModelInstance( Model *m );
 	ModelInstance( Model *m, MPQFile &f );
 	ModelInstance( Model *m, ENTRY_MDDF *d );
-    void init2( Model *m, MPQFile &f );
+		void init2( Model *m, MPQFile &f );
 	void draw();
 	void drawMapTile();
 //	void drawHighlight();

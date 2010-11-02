@@ -15,32 +15,32 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth )
 	glEnable( GL_LINE_SMOOTH );
 	glLineWidth( pLineWidth );
 	glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-  
+	
 	glColor4fv( pColor );
-  
+	
 	glBegin( GL_LINE_STRIP );	
-  glVertex3f( pMin.x, pMax.y, pMin.z );
-  glVertex3f( pMin.x, pMin.y, pMin.z );
-  glVertex3f( pMax.x, pMin.y, pMin.z );
-  glVertex3f( pMax.x, pMin.y, pMax.z );
-  glVertex3f( pMax.x, pMax.y, pMax.z );
-  glVertex3f( pMax.x, pMax.y, pMin.z );
-  glVertex3f( pMin.x, pMax.y, pMin.z );
-  glVertex3f( pMin.x, pMax.y, pMax.z );
-  glVertex3f( pMin.x, pMin.y, pMax.z );
-  glVertex3f( pMin.x, pMin.y, pMin.z );
+	glVertex3f( pMin.x, pMax.y, pMin.z );
+	glVertex3f( pMin.x, pMin.y, pMin.z );
+	glVertex3f( pMax.x, pMin.y, pMin.z );
+	glVertex3f( pMax.x, pMin.y, pMax.z );
+	glVertex3f( pMax.x, pMax.y, pMax.z );
+	glVertex3f( pMax.x, pMax.y, pMin.z );
+	glVertex3f( pMin.x, pMax.y, pMin.z );
+	glVertex3f( pMin.x, pMax.y, pMax.z );
+	glVertex3f( pMin.x, pMin.y, pMax.z );
+	glVertex3f( pMin.x, pMin.y, pMin.z );
 	glEnd();
 	glBegin( GL_LINES );
-  glVertex3f( pMin.x, pMin.y, pMax.z );
-  glVertex3f( pMax.x, pMin.y, pMax.z );
+	glVertex3f( pMin.x, pMin.y, pMax.z );
+	glVertex3f( pMax.x, pMin.y, pMax.z );
 	glEnd();
 	glBegin( GL_LINES );
-  glVertex3f( pMax.x, pMax.y, pMin.z );
-  glVertex3f( pMax.x, pMin.y, pMin.z );
+	glVertex3f( pMax.x, pMax.y, pMin.z );
+	glVertex3f( pMax.x, pMin.y, pMin.z );
 	glEnd();
 	glBegin( GL_LINES );
-  glVertex3f( pMin.x, pMax.y, pMax.z );
-  glVertex3f( pMax.x, pMax.y, pMax.z );
+	glVertex3f( pMin.x, pMax.y, pMax.z );
+	glVertex3f( pMax.x, pMax.y, pMax.z );
 	glEnd();
 }
 
@@ -56,7 +56,7 @@ ModelInstance::ModelInstance(Model *m, MPQFile &f) : model (m)
 {
 	float ff[3];
 	
-    f.read(&d1, 4);
+		f.read(&d1, 4);
 	f.read(ff,12);
 	pos = Vec3D(ff[0],ff[1],ff[2]);
 	f.read(ff,12);
@@ -172,7 +172,7 @@ void ModelInstance::draw()
 	glPopMatrix();
 }
 
-//! \todo  Get this drawn on the 2D view.
+//! \todo	Get this drawn on the 2D view.
 /*void ModelInstance::drawMapTile()
 {
 	if(CheckUniques(d1)) 

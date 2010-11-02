@@ -2,6 +2,8 @@
 #pragma comment(lib,"OpenGL32.lib")
 #pragma comment(lib,"glu32.lib")
 
+#include <direct.h> 
+
 #define NOMINMAX
 #include <windows.h>
 #include <winerror.h>
@@ -87,7 +89,7 @@ void getGamePath(bool pLoadFromConfig = false)
 			wowpath = "/Applications/World of Warcraft/";
 		#endif
 	}
-	if( temp[0] == 0  || pLoadFromConfig )
+	if( temp[0] == 0	|| pLoadFromConfig )
 	{
 		if( FileExists( "NoggIt.conf" ) )
 		{
@@ -101,7 +103,7 @@ void CreateStrips();
 
 float frand()
 {
-    return rand()/(float)RAND_MAX;
+		return rand()/(float)RAND_MAX;
 }
 
 float randfloat(float lower, float upper)
@@ -111,56 +113,64 @@ float randfloat(float lower, float upper)
 
 int randint(int lower, int upper)
 {
-    return lower + (int)((upper+1-lower)*frand());
+		return lower + (int)((upper+1-lower)*frand());
 }
 
 void setApplicationDirectory( const std::string& argv_0 )
 {
-  std::string fullpath = "";
-  if( argv_0.at( 0 ) == '/' || ( argv_0.at( 1 ) == ':' && argv_0.at( 2 ) == '/' ) )
-  {
-    fullpath = argv_0;
-  }
-  else
-  {
-    fullpath = std::string( getcwd( NULL, 0 ) ) + "/" + argv_0;
-  }
-  
-  fullpath = fullpath.substr( 0, fullpath.find_last_of("/\\") + 1 );
-  size_t found = fullpath.find( "/./" );
-  while( found != std::string::npos )
-  {
-    fullpath.replace( found, 3, "/" );
-    found = fullpath.find( "/./" );
-  }
-  found = fullpath.find( "/../" );
-  while( found != std::string::npos )
-  {
-    size_t pos_prev = fullpath.rfind( '/', found - 1 );
-    fullpath.replace( pos_prev, found - pos_prev + 4, "/" );
-    found = fullpath.find( "/../" );
-  }
-  
-  chdir( fullpath.c_str() );
+	std::string fullpath = "";
+	if( argv_0.at( 0 ) == '/' || ( argv_0.at( 1 ) == ':' && argv_0.at( 2 ) == '/' ) )
+	{
+		fullpath = argv_0;
+	}
+	else
+	{
+#ifdef _WIN32	
+		fullpath = std::string( _getcwd( NULL, 0 ) ) + "/" + argv_0;
+#else
+		fullpath = std::string( getcwd( NULL, 0 ) ) + "/" + argv_0;
+#endif 
+
+	}
+	
+	fullpath = fullpath.substr( 0, fullpath.find_last_of("/\\") + 1 );
+	size_t found = fullpath.find( "/./" );
+	while( found != std::string::npos )
+	{
+		fullpath.replace( found, 3, "/" );
+		found = fullpath.find( "/./" );
+	}
+	found = fullpath.find( "/../" );
+	while( found != std::string::npos )
+	{
+		size_t pos_prev = fullpath.rfind( '/', found - 1 );
+		fullpath.replace( pos_prev, found - pos_prev + 4, "/" );
+		found = fullpath.find( "/../" );
+	}
+#ifdef _WIN32	
+	_chdir( fullpath.c_str() );
+#else
+	chdir( fullpath.c_str() );
+#endif
 }
 
 int main( int argc, char *argv[] )
 {
 	RegisterErrorHandlers();
-  setApplicationDirectory( argv[0] );
+	setApplicationDirectory( argv[0] );
 	
 	Settings::getInstance();
 	Project::getInstance();
 	Environment::getInstance();
-  
+	
 	// Set up log.
 	InitLogging();
-  
+	
 	Log << APP_TITLE << " " << APP_VERSION << std::endl;
 	
 	// Why should we load anything when there are missing files? ...
-  
-	//! \todo  Get this file from %WINDOWS%
+	
+	//! \todo	Get this file from %WINDOWS%
 #ifdef _WIN32
 	bool lFontWindows = FileExists( "C:\\windows\\fonts\\arial.ttf" );
 #else
@@ -172,17 +182,17 @@ int main( int argc, char *argv[] )
 		Log << "Can not find arial.ttf. This is really weird if you have windows. Add the file to the noggit directory then!" << std::endl;
 		return -1;
 	}
-  
+	
 	srand( time( 0 ) );
-  
+	
 	int xres = 1100;
 	int yres = 900;
-  
-  
+	
+	
 	bool useConfig = false;
-  
+	
 	int gowto = -1;
-  
+	
 	// handle starting parameters
 	for( int i = 1; i < argc; ++i ) 
 	{
@@ -192,7 +202,7 @@ int main( int argc, char *argv[] )
 			useConfig = true;
 		else if( !strcmp( argv[i], "-g" ) || !strcmp( argv[i], "-goto" ) ) 
 			gowto = i + 1;
-    
+		
 		else if( !strcmp( argv[i], "-w" ) || !strcmp( argv[i], "-windowed" ) ) 
 			fullscreen = false;
 		else if (!strcmp(argv[i],"-1024") || !strcmp(argv[i],"-1024x768")) {
@@ -238,23 +248,23 @@ int main( int argc, char *argv[] )
 		LogError << "Initializing video failed." << std::endl;
 		return -1;
 	}
-  
+	
 	SDL_WM_SetCaption( APP_TITLE, "noggit.bmp" );
-  
+	
 	getGamePath( useConfig );
-  
+	
 	Log << "Game path: " << wowpath << std::endl;
-  
+	
 	if( Project::getInstance()->getPath() == "" )
 		Project::getInstance()->setPath( wowpath );
-  
+	
 	Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
-  
+	
 	CreateStrips();
-  
-  gAsyncLoader = new AsyncLoader();
-  gAsyncLoader->start(1); //! \todo get the number of threads from the number of available cores.
-  
+	
+	gAsyncLoader = new AsyncLoader();
+	gAsyncLoader->start(1); //! \todo get the number of threads from the number of available cores.
+	
 	std::vector<MPQArchive*> archives;
 	std::vector<std::string> archiveNames;
 	archiveNames.push_back( "common.MPQ" );
@@ -276,7 +286,7 @@ int main( int argc, char *argv[] )
 	archiveNames.push_back( "{locale}/patch-{locale}.MPQ" );
 	archiveNames.push_back( "{locale}/patch-{locale}-{number}.MPQ" );
 	archiveNames.push_back( "{locale}/patch-{locale}-{character}.MPQ" );
-  
+	
 	const char * locales[] = { "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "zhTW", "esES", "esMX", "ruRU" };
 	const char * locale = "****";
 	
@@ -297,14 +307,14 @@ int main( int argc, char *argv[] )
 		LogError << "Could not find locale directory. Be sure, that there is one containing the file \"realmlist.wtf\"." << std::endl;
 		return -1;
 	}
-  
-	//! \todo  This may be done faster. Maybe.
+	
+	//! \todo	This may be done faster. Maybe.
 	for( size_t i = 0; i < archiveNames.size(); ++i )
 	{
 		std::string path = wowpath;
 		path.append( "Data/" ).append( archiveNames[i] );
 		std::string::size_type location = std::string::npos;
-    
+		
 		do
 		{
 			location = path.find( "{locale}" );
@@ -314,7 +324,7 @@ int main( int argc, char *argv[] )
 			}
 		} 
 		while( location != std::string::npos );
-    
+		
 		if( path.find( "{number}" ) != std::string::npos )
 		{
 			char temp[10];
@@ -328,7 +338,7 @@ int main( int argc, char *argv[] )
 					archives.push_back( new MPQArchive( path, true ) );
 			}
 		}
-		else if( path.find( "{character}" ) != std::string::npos  )
+		else if( path.find( "{character}" ) != std::string::npos	)
 		{
 			char temp[10];
 			location = path.find( "{character}" );
@@ -345,44 +355,44 @@ int main( int argc, char *argv[] )
 			if( FileExists( path ) )
 				archives.push_back( new MPQArchive( path, true ) );
 	}
-  
+	
 	// sort listfiles.
 	gListfile.sort();
 	gListfile.unique();
-  
-	//! \todo  Get this out?
+	
+	//! \todo	Get this out?
 	//gFileList = new Directory( "root" );
 	//size_t found;
 	// This is an example with filter:
 	/*
-   std::vector<std::string>::iterator it;
-   for( it = gListfile.begin(); it != gListfile.end(); ++it )
-   {
-   if( it->find( pFilter ) != std::string::npos )
-   {
-   found = it->find_last_of("/\\");
-   if( found != std::string::npos )
-   mDirectory->AddSubDirectory( it->substr(0,found) )->AddFile( it->substr(found+1) );
-   else
-   mDirectory->AddFile( *it );
-   }
-   }
-   */
+	 std::vector<std::string>::iterator it;
+	 for( it = gListfile.begin(); it != gListfile.end(); ++it )
+	 {
+	 if( it->find( pFilter ) != std::string::npos )
+	 {
+	 found = it->find_last_of("/\\");
+	 if( found != std::string::npos )
+	 mDirectory->AddSubDirectory( it->substr(0,found) )->AddFile( it->substr(found+1) );
+	 else
+	 mDirectory->AddFile( *it );
+	 }
+	 }
+	 */
 	// This is an example for getting all files in the list.
 	/*	std::list<std::string>::iterator it;
-   for( it = gListfile.begin(); it != gListfile.end(); ++it )
-   {
-   found = it->find_last_of("/\\");
-   if( found != std::string::npos )
-   gFileList->AddSubDirectory( it->substr(0,found) )->AddFile( it->substr(found+1) );
-   else
-   gFileList->AddFile( *it );
-   }
-   */
+	 for( it = gListfile.begin(); it != gListfile.end(); ++it )
+	 {
+	 found = it->find_last_of("/\\");
+	 if( found != std::string::npos )
+	 gFileList->AddSubDirectory( it->substr(0,found) )->AddFile( it->substr(found+1) );
+	 else
+	 gFileList->AddFile( *it );
+	 }
+	 */
 	
 	// Opening DBCs
 	OpenDBs();
-  
+	
 	// Initializing Fonts
 	skurri32.initMPQ( "fonts\\SKURRI.TTF", 32 );
 	fritz16.initMPQ( "fonts\\FRIZQT__.TTF", 16 );
@@ -409,33 +419,33 @@ int main( int argc, char *argv[] )
 	Uint32 t, last_t, frames = 0, time = 0, fcount = 0, ft = 0;
 	AppState *as;
 	gFPS = 0;
-  
+	
 	LogDebug << "Creating Menu" << std::endl;
-  
+	
 	Menu *m = new Menu();
 	as = m;
-  
+	
 	gStates.push_back( as );
-  
+	
 	if( video.mSupportShaders )
 		loadWaterShader();
 	else
 		LogError << "Your GPU does not support ARB vertex programs (shaders). Sorry." << std::endl;
-  
+	
 	bool done = false;
 	t = SDL_GetTicks();
-  
+	
 	LogDebug << "Entering Main Loop" << std::endl;
-  
+	
 	while(gStates.size()>0 && !done) {
 		last_t = t;
 		t = SDL_GetTicks();
 		Uint32 dt = t - last_t;
 		time += dt;
 		ftime = time / 1000.0f;
-    
+		
 		as = gStates[gStates.size()-1];
-    
+		
 		SDL_Event event;
 		while ( SDL_PollEvent(&event) ) {
 			if ( event.type == SDL_QUIT ) {
@@ -467,42 +477,42 @@ int main( int argc, char *argv[] )
 		}
 		if(SDL_GetAppState()&SDL_APPACTIVE)
 		{
-      as->tick(ftime, dt/1000.0f);
-      as->display(ftime, dt/1000.0f);
+			as->tick(ftime, dt/1000.0f);
+			as->display(ftime, dt/1000.0f);
 		}
-    
+		
 		if (gPop) 
 		{
 			gPop = false;
 			gStates.pop_back();
 			delete as;
-      as = NULL;
+			as = NULL;
 		}
-    
+		
 		frames++;
 		fcount++;
 		ft += dt;
 		if (ft >= 1000) 
 		{
 			gFPS = (float)fcount / (float)ft * 1000.0f;
-      //	char buf[32];
-      //	sprintf(buf, APP_TITLE " - %.2f fps",fps);
-      //	SDL_WM_SetCaption(buf,NULL);
-      ft = 0;
+			//	char buf[32];
+			//	sprintf(buf, APP_TITLE " - %.2f fps",fps);
+			//	SDL_WM_SetCaption(buf,NULL);
+			ft = 0;
 			fcount = 0;
 		}
-    
+		
 		video.flip();
 	}
 	
 	video.close();
-  
+	
 	for( std::vector<MPQArchive*>::iterator it = archives.begin(); it != archives.end(); ++it )
-    (*it)->close();
-  
+		(*it)->close();
+	
 	archives.clear();
-  
+	
 	LogDebug << "Exited" << std::endl;
-  
+	
 	return 0;
 }

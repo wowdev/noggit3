@@ -18,13 +18,13 @@ public:
 	Vec3D	dir;
 	int mUniqueID;
 	short mFlags;
-  short mUnknown;
-  short mNameset;
-  short doodadset;
-  
+	short mUnknown;
+	short mNameset;
+	short doodadset;
+	
 private:
 	unsigned int mSelectionID;
-  
+	
 public:
 	WMOInstance( WMO* _wmo, MPQFile& _file );
 	WMOInstance( WMO* _wmo, ENTRY_MODF* d );

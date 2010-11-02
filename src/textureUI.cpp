@@ -19,7 +19,7 @@ textureUI::textureUI( float xPos, float yPos, float w, float h, const std::strin
 
 void textureUI::setTexture( GLuint tex )
 {
-  //! \todo Free current texture.
+	//! \todo Free current texture.
 	texture = (Texture*)TextureManager::items[tex];
 }
 
@@ -32,10 +32,10 @@ void textureUI::render() const
 {
 	glColor3f( 1.0f, 1.0f, 1.0f );
 
-  Texture::setActiveTexture();
-  Texture::enableTexture();
-  
-  texture->render();
+	Texture::setActiveTexture();
+	Texture::enableTexture();
+	
+	texture->render();
 
 	glBegin( GL_TRIANGLE_STRIP );
 	glTexCoord2f( 0.0f, 0.0f );
@@ -47,8 +47,8 @@ void textureUI::render() const
 	glTexCoord2f( 1.0f, 1.0f );
 	glVertex2f( x + width, y + height );
 	glEnd();
-  
-  Texture::disableTexture();
+	
+	Texture::disableTexture();
 
 	if( highlight )
 	{

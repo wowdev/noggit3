@@ -58,7 +58,7 @@ class Liquid
 	bool mTransparency;
 
 	int xtiles, ytiles;
-  OpenGL::CallList* mDrawList;
+	OpenGL::CallList* mDrawList;
 
 	Vec3D pos;
 
@@ -77,7 +77,7 @@ class Liquid
 	int tmpflag;
 	bool trans;
 	
-	unsigned char  *color;
+	unsigned char	*color;
 	unsigned char	*waterFlags;
 
 public:
@@ -87,7 +87,7 @@ public:
 		xtiles(x), ytiles(y), pos(base), tilesize(ptilesize)
 	{
 		ydir = 1.0f;
-    mDrawList = NULL;
+		mDrawList = NULL;
 	}
 	~Liquid();
 	

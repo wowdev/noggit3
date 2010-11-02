@@ -103,11 +103,11 @@ slider *ground_brush_radius;
 float groundBrushRadius=15.0f;
 slider *ground_brush_speed;
 float groundBrushSpeed=1.0f;
-int	  groundBrushType=2;
+int		groundBrushType=2;
 
 slider *blur_brush;
 float blurBrushRadius=10.0f;
-int	  blurBrushType=2;
+int		blurBrushType=2;
 
 slider *paint_brush;
 
@@ -137,6 +137,7 @@ ToggleGroup * gGroundToggleGroup;
 window *setting_ground;
 window *setting_blur;
 window *settings_paint;
+
 
 //TextBox * textbox;
 
@@ -227,7 +228,7 @@ void change_settings_window(int oldid, int newid)
 
 }
 
-//! \todo  Do this nicer?
+//! \todo	Do this nicer?
 void openHelp( frame *button, int id )
 {
 	reinterpret_cast<MapView*>( gStates.back() )->ViewHelp();
@@ -264,7 +265,7 @@ void SnapSelectedObjectToGround( frame *button, int id )
 
 void CopySelectedObject( frame *button, int id )
 {
-	//! \todo  copy selected object path to clipboard
+	//! \todo	copy selected object path to clipboard
 	if( gWorld->HasSelection() )
 	{
 		Environment::getInstance()->set_clipboard( gWorld->GetCurrentSelection() );
@@ -281,18 +282,19 @@ void PasteSelectedObject( frame *button, int id )
 	if( gWorld->HasSelection() )
 	{	
 		nameEntry lClipboard = Environment::getInstance()->get_clipboard();
-    switch( gWorld->GetCurrentSelection()->type )
-    {
-    case eEntry_Model:
-      gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.model->pos );
-      break;
-    case eEntry_WMO:
-      gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.wmo->pos);
-      break;
-    case eEntry_MapChunk:
-      gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition() );
-      break;
-    }
+		switch( gWorld->GetCurrentSelection()->type )
+		 {
+			case eEntry_Model:
+				gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.model->pos );
+				break;
+			case eEntry_WMO:
+				gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.wmo->pos);
+				break;
+			case eEntry_MapChunk:
+				gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition() );
+				break;
+			default: break;
+		}	
 	}
 }
 
@@ -321,102 +323,102 @@ void InsertObject( frame *button, int id )
 	std::string importFile;
 
 	// MODELINSERT FROM TEXTFILE
-  // is a source file set in config file?
-  if( FileExists( "noggIt.conf" ) )
-  {
-    ConfigFile config( "noggIt.conf" );
-    config.readInto( importFile, "ImportFile" );
-  }
+	// is a source file set in config file?
+	if( FileExists( "noggIt.conf" ) )
+	{
+		ConfigFile config( "noggIt.conf" );
+		config.readInto( importFile, "ImportFile" );
+	}
 		
 		// insert from modelviewer if file set and hit the right menu pount.
 		if(id==0 && importFile=="")
 			return; // path not set. Return ro editor.
 		else if (id==2)
-			importFile="Import.txt"; //  use import.txt in noggit folder!
+			importFile="Import.txt"; //	use import.txt in noggit folder!
 
-  
-  size_t foundString;
-  std::string line;
-  std::string findThis;
-  std::ifstream fileReader(importFile.c_str());
-  if (fileReader.is_open())
-  {
-    while (! fileReader.eof() )
-    {
-      getline (fileReader,line);
-      if(line.find(".m2")!= std::string::npos || line.find(".M2")!= std::string::npos )
-      {
-        // M2 inside line
-        // is it the modelviewer log then cut the log messages out
-        findThis = 	"Loading model: ";
-        foundString = line.find(findThis);
-        if(foundString!= std::string::npos)
-        {
-          // cut path
-          line = line.substr( foundString+findThis.size() );
-        }
-        m2s_to_add.push_back( line );
-      }
-      else if(line.find(".wmo")!= std::string::npos || line.find(".WMO")!= std::string::npos )
-      {
-        // WMO inside line
-        findThis = "Loading WMO ";
-        foundString = line.find(findThis);
-        // is it the modelviewer log then cut the log messages out
-        if(foundString != std::string::npos)
-        {
-          // cut path
-          line = line.substr( foundString+findThis.size() );
-        }
-        wmos_to_add.push_back(line);
-      }
-    }
-    fileReader.close();
-  }
-  else 
-  {
-    // file not exist, no rights ore other error
-    LogError << "Faild to open file for import models"<<std::endl;
-    LogError << importFile << std::endl;
-  }
-  
-  Vec3D selectionPosition;
-  switch( gWorld->GetCurrentSelection()->type )
-  {
-    case eEntry_Model:
-      selectionPosition = gWorld->GetCurrentSelection()->data.model->pos;
-      break;
-    case eEntry_WMO:
-      selectionPosition = gWorld->GetCurrentSelection()->data.wmo->pos;
-      break;
-    case eEntry_MapChunk:
-      selectionPosition = gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition();
-      break;
-  }
+	
+	size_t foundString;
+	std::string line;
+	std::string findThis;
+	std::ifstream fileReader(importFile.c_str());
+	if (fileReader.is_open())
+	{
+		while (! fileReader.eof() )
+		{
+			getline (fileReader,line);
+			if(line.find(".m2")!= std::string::npos || line.find(".M2")!= std::string::npos )
+			{
+				// M2 inside line
+				// is it the modelviewer log then cut the log messages out
+				findThis = 	"Loading model: ";
+				foundString = line.find(findThis);
+				if(foundString!= std::string::npos)
+				{
+					// cut path
+					line = line.substr( foundString+findThis.size() );
+				}
+				m2s_to_add.push_back( line );
+			}
+			else if(line.find(".wmo")!= std::string::npos || line.find(".WMO")!= std::string::npos )
+			{
+				// WMO inside line
+				findThis = "Loading WMO ";
+				foundString = line.find(findThis);
+				// is it the modelviewer log then cut the log messages out
+				if(foundString != std::string::npos)
+				{
+					// cut path
+					line = line.substr( foundString+findThis.size() );
+				}
+				wmos_to_add.push_back(line);
+			}
+		}
+		fileReader.close();
+	}
+	else 
+	{
+		// file not exist, no rights ore other error
+		LogError << "Faild to open file for import models"<<std::endl;
+		LogError << importFile << std::endl;
+	}
+	
+	Vec3D selectionPosition;
+	switch( gWorld->GetCurrentSelection()->type )
+	{
+		case eEntry_Model:
+			selectionPosition = gWorld->GetCurrentSelection()->data.model->pos;
+			break;
+		case eEntry_WMO:
+			selectionPosition = gWorld->GetCurrentSelection()->data.wmo->pos;
+			break;
+		case eEntry_MapChunk:
+			selectionPosition = gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition();
+			break;
+	}
 
-  for( std::vector<std::string>::iterator it = wmos_to_add.begin(); it != wmos_to_add.end(); ++it )
-  {
-    if( MPQFile::exists(*it) )
-    {
-      LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
-      continue;
-    }
+	for( std::vector<std::string>::iterator it = wmos_to_add.begin(); it != wmos_to_add.end(); ++it )
+	{
+		if( MPQFile::exists(*it) )
+		{
+			LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
+			continue;
+		}
 
-    gWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
-  }
+		gWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
+	}
 
-  for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
-  {
-    if( MPQFile::exists(*it) )
-    {
-      LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
-      continue;
-    }
+	for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
+	{
+		if( MPQFile::exists(*it) )
+		{
+			LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
+			continue;
+		}
 
-    gWorld->addM2( reinterpret_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
-  }
-  
-  //! \todo Memoryleak: These models will never get deleted.
+		gWorld->addM2( reinterpret_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
+	}
+	
+	//! \todo Memoryleak: These models will never get deleted.
 }
 
 void view_texture_palette( frame *button, int id )
@@ -447,7 +449,7 @@ void exit_tilemode( frame *button, int id )
 //dirty hack
 int round(float d)
 {
-  return d<0?d-.5f:d+.5f;
+	return d<0 ? d-.5f : d+.5f;
 }
 MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 {
@@ -467,7 +469,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	set_areaid = false;
 	mViewMode = eViewMode_3D;
 
-  tileFrames = new frame( 0.0f, 0.0f, video.xres, video.yres );
+	tileFrames = new frame( 0.0f, 0.0f, video.xres, video.yres );
 
 	// create main gui opject that holds all other gui elements for access
 	mainGui = new Gui();
@@ -508,7 +510,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	setting_ground->addChild( new checkboxUI( 6.0f, 40.0f, "Smooth", gGroundToggleGroup, 2 ) );
 	gGroundToggleGroup->Activate( 2 );
 
-	ground_brush_radius=new slider(6.0f,85.0f,167.0f,100.0f,0.00001f);
+	ground_brush_radius=new slider(6.0f,85.0f,167.0f,1000.0f,0.00001f);
 	ground_brush_radius->setFunc(setGroundBrushRadius);
 	ground_brush_radius->setValue(groundBrushRadius/1000);
 	ground_brush_radius->setText("Brush radius: %.2f");
@@ -534,7 +536,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	setting_blur->addChild( new checkboxUI( 6.0f, 40.0f, "Smooth", gBlurToggleGroup, 2 ) );
 	gBlurToggleGroup->Activate( 2 );
 
-	blur_brush=new slider(6.0f,85.0f,167.0f,100.0f,0.00001f);
+	blur_brush=new slider(6.0f,85.0f,167.0f,1000.0f,0.00001f);
 	blur_brush->setFunc(setBlurBrushRadius);
 	blur_brush->setValue(blurBrushRadius/1000);
 	blur_brush->setText("Brush radius: %.2f");
@@ -601,30 +603,30 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->AddMenu( "Assist" );
 	mbar->AddMenu( "Help" );
 
-	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + S   Save current tile", SaveOrReload, 0 );
-	mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT + J  Reload current tile", SaveOrReload, 1 );
-	mbar->GetMenu( "File" )->AddMenuItemButton( "ESC        Exit", exit_tilemode, 0 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + S	 Save current tile", SaveOrReload, 0 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT + J	Reload current tile", SaveOrReload, 1 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "ESC				Exit", exit_tilemode, 0 );
 
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "selected object" );
-	mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + C   copy", CopySelectedObject, 0  );
-	mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + V   past", PasteSelectedObject, 0  );
-	mbar->GetMenu( "Edit" )->AddMenuItemButton( "DEL   delete", DeleteSelectedObject, 0  );
-	mbar->GetMenu( "Edit" )->AddMenuItemButton( "CTRL + R   reset rotation", ResetSelectedObjectRotation, 0 );
-	mbar->GetMenu( "Edit" )->AddMenuItemButton( "PAGE DOWN  set to ground", SnapSelectedObjectToGround, 0 );
+	mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + C	 copy", CopySelectedObject, 0	);
+	mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + V	 past", PasteSelectedObject, 0	);
+	mbar->GetMenu( "Edit" )->AddMenuItemButton( "DEL	 delete", DeleteSelectedObject, 0	);
+	mbar->GetMenu( "Edit" )->AddMenuItemButton( "CTRL + R	 reset rotation", ResetSelectedObjectRotation, 0 );
+	mbar->GetMenu( "Edit" )->AddMenuItemButton( "PAGE DOWN	set to ground", SnapSelectedObjectToGround, 0 );
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "m2 copy options" );
-	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "copy random rotation", &Settings::getInstance()->copy_rot, false  );
-	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "copy random tile", &Settings::getInstance()->copy_tile, false  );
-	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "copy random size", &Settings::getInstance()->copy_size, false  );
+	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "copy random rotation", &Settings::getInstance()->copy_rot, false	);
+	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "copy random tile", &Settings::getInstance()->copy_tile, false	);
+	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "copy random size", &Settings::getInstance()->copy_size, false	);
 	
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Options" );
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Auto select mode", &Settings::getInstance()->AutoSelectingMode, false );
 
 	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Import model from" );
-	mbar->GetMenu( "Assist" )->AddMenuItemButton( "ModelViewer", InsertObject, 0  );
-	mbar->GetMenu( "Assist" )->AddMenuItemButton( "File set", InsertObject, 1  );
-	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Import file", InsertObject, 2  );
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "ModelViewer", InsertObject, 0	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "File set", InsertObject, 1	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Import file", InsertObject, 2	);
 	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Set" );
-	mbar->GetMenu( "Assist" )->AddMenuItemToggle( "Area ID", &set_areaid, true  );
+	mbar->GetMenu( "Assist" )->AddMenuItemToggle( "Area ID", &set_areaid, true	);
 
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );
@@ -633,15 +635,15 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	//mbar->GetMenu( "View" )->AddMenuItemToggle( "Map chunk settings", &MapChunkWindow->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", &TexturePalette->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Toggle" );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F1  M2s", &gWorld->drawmodels );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F2  WMO doodadsets", &gWorld->drawdoodads );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F3  Terrain", &gWorld->drawterrain );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F4  Water", &gWorld->drawwater );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F6  WMOs", &gWorld->drawwmo );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F7  Lines", &gWorld->drawlines );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F8  Detail infos", &mainGui->guidetailInfos->hidden, true );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F9  Map contour infos", &DrawMapContour );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F   Fog", &gWorld->drawfog );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F1	M2s", &gWorld->drawmodels );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F2	WMO doodadsets", &gWorld->drawdoodads );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F3	Terrain", &gWorld->drawterrain );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F4	Water", &gWorld->drawwater );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F6	WMOs", &gWorld->drawwmo );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F7	Lines", &gWorld->drawlines );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F8	Detail infos", &mainGui->guidetailInfos->hidden, true );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F9	Map contour infos", &DrawMapContour );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F	 Fog", &gWorld->drawfog );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Holelines always on", &Settings::getInstance()->holelinesOn, false );
 
 	mbar->GetMenu( "Help" )->AddMenuItemButton( "Key Bindings", openHelp, 0 );
@@ -652,21 +654,21 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
 MapView::~MapView()
 {
-  if( mainGui )
-  {
-    delete mainGui;
-    mainGui = NULL;
-  }
-  if( gWorld )
-  {
-    delete gWorld;
-    gWorld = NULL;
-  }
-  if( tileFrames )
-  {
-    delete tileFrames;
-    tileFrames = NULL;
-  }
+	if( mainGui )
+	{
+		delete mainGui;
+		mainGui = NULL;
+	}
+	if( gWorld )
+	{
+		delete gWorld;
+		gWorld = NULL;
+	}
+	if( tileFrames )
+	{
+		delete tileFrames;
+		tileFrames = NULL;
+	}
 }
 
 void MapView::tick( float t, float dt )
@@ -688,7 +690,7 @@ void MapView::tick( float t, float dt )
 		{
 			dirUp.x = 0.0f;
 			dirUp.y = 1.0f;
-			dirRight *= 0.0f; //! \todo  WAT?
+			dirRight *= 0.0f; //! \todo	WAT?
 		}
 		else if( Environment::getInstance()->CtrlDown )
 		{
@@ -733,7 +735,7 @@ void MapView::tick( float t, float dt )
 
 			if( gWorld->IsSelection( eEntry_Model ) )
 			{
-				//! \todo  Tell me what this is.
+				//! \todo	Tell me what this is.
 				ObjPos = Selection->data.model->pos - gWorld->camera;
 				rotate( 0.0f, 0.0f, &ObjPos.x, &ObjPos.y, av * PI / 180.0f );
 				rotate( 0.0f, 0.0f, &ObjPos.x, &ObjPos.z, ah * PI / 180.0f );
@@ -741,7 +743,7 @@ void MapView::tick( float t, float dt )
 			}
 			
 			// moving and scaling objects
-			//! \todo  Alternatively automatically align it to the terrain. Also try to move it where the mouse points.
+			//! \todo	Alternatively automatically align it to the terrain. Also try to move it where the mouse points.
 			if( MoveObj )
 				if( Selection->type == eEntry_WMO )
 				{
@@ -818,7 +820,7 @@ void MapView::tick( float t, float dt )
 				float xPos, yPos, zPos;
 				Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
 				yPos = Selection->data.mapchunk->getSelectionHeight();
-        
+				
 				switch( terrainMode )
 				{
 				case 0:
@@ -833,10 +835,10 @@ void MapView::tick( float t, float dt )
 					if( Environment::getInstance()->ShiftDown )
 						gWorld->flattenTerrain( xPos, zPos, yPos, pow( 0.2f, dt ), blurBrushRadius, blurBrushType );
 					else if( Environment::getInstance()->CtrlDown )
-          {
-            using std::min;
+					{
+						using std::min;
 						gWorld->blurTerrain( xPos, zPos, pow( 0.2f, dt ), min( blurBrushRadius, 30.0f ), blurBrushType );
-          }
+					}
 					
 					break;
 					
@@ -856,7 +858,7 @@ void MapView::tick( float t, float dt )
 					break;
 					
 				case 3:
-					if( Environment::getInstance()->ShiftDown  )
+					if( Environment::getInstance()->ShiftDown	)
 						gWorld->removeHole( xPos, zPos );
 					else if( Environment::getInstance()->CtrlDown )
 						gWorld->addHole( xPos, zPos );
@@ -889,10 +891,10 @@ void MapView::tick( float t, float dt )
 				gWorld->camera.x += dt * movespd * strafing / ( gWorld->zoom * 1.5f );
 			if( updown ) 
 				gWorld->zoom *= pow( 2.0f, dt * updown * 4.0f );
-      
-      using std::min;
-      using std::max;
-      gWorld->zoom = min( max( gWorld->zoom, 0.1f ), 2.0f );
+			
+			using std::min;
+			using std::max;
+			gWorld->zoom = min( max( gWorld->zoom, 0.1f ), 2.0f );
 
 			if( leftMouse && !LastClicked && selectedTexture )
 			{
@@ -966,7 +968,7 @@ void MapView::doSelection( int selTyp )
 
 void MapView::displayViewMode_Help( float t, float dt )
 {
-	//! \todo  Make this a window instead of a view. Why should you do it as a view? ._.
+	//! \todo	Make this a window instead of a view. Why should you do it as a view? ._.
 	video.clearScreen();
 	video.set2D();
 	glEnable(GL_TEXTURE_2D);
@@ -990,7 +992,7 @@ void MapView::displayViewMode_Help( float t, float dt )
 	
 	freetype::shprint( arial24, 74.0f, 120.0f, "Basic controles" );
 	freetype::shprint( arial16, 74.0f, 160.0f, 
-            "Left mouse button moves the camera\n"
+						"Left mouse button moves the camera\n"
 			"I - invert mouse up and down\n"
 			"Q,E - move up,down\n"
 			"A,D,W,S - move left,right,forward,backward\n"
@@ -1014,7 +1016,7 @@ void MapView::displayViewMode_Help( float t, float dt )
 			"F7 - toggle chunk (red) and ADT (green) lines\n"
 			"F8 - toggle detailed infotext\n"
 			"F9 - toggle map contour\n"
-			"F  - toggle fog\n"
+			"F	- toggle fog\n"
 			"TAB - toggle UI view"
 	);		
 		
@@ -1033,11 +1035,11 @@ void MapView::displayViewMode_Help( float t, float dt )
 			"Y - changes brush type\n"
 			"ALT + left mouse + mouse move - change brush size\n"
 			"Terrain mode - raise/lower\n"
-			"  Left mouse click + Shift - raise terrain\n"
-			"  Left mouse click + Alt   - lower terrain\n"
+			"	Left mouse click + Shift - raise terrain\n"
+			"	Left mouse click + Alt	 - lower terrain\n"
 			"Terrain mode - flatten/blur\n"
-			"  Left mouse click + Shift - flatten terrain\n"
-			"  Left mouse  click + Alt   - blur terrain\n"			
+			"	Left mouse click + Shift - flatten terrain\n"
+			"	Left mouse	click + Alt	 - blur terrain\n"			
 	);
 
 	freetype::shprint( arial24, video.xres - 400.0f, 360.0f, "Edit objects" );
@@ -1058,7 +1060,7 @@ void MapView::displayViewMode_Help( float t, float dt )
 
 	freetype::shprint( arial24, video.xres - 400.0f, 590.0f, "Files" );
 	freetype::shprint( arial16, video.xres - 400.0f, 630.0f,
-			"F5  - save bookmark\n"
+			"F5	- save bookmark\n"
 			"F10 - reload BLP\n"
 			"F11 - reload M2s\n"
 			"F12 - reload wmo\n"
@@ -1069,7 +1071,7 @@ void MapView::displayViewMode_Help( float t, float dt )
 
 void MapView::displayViewMode_Minimap( float t, float dt )
 {
-    //! \todo  try to use a real map from WoW? either the large map or the minimap would be nice
+		//! \todo	try to use a real map from WoW? either the large map or the minimap would be nice
 	video.clearScreen();
 	video.set2D();
 
@@ -1100,7 +1102,7 @@ void MapView::displayViewMode_Minimap( float t, float dt )
 		glVertex2f(fx + 10.0f*cosf(ah/180.0f*PI), fz + 10.0f*sinf(ah/180.0f*PI));
 	glEnd();
 
-	//! \todo  Something is wrong there.
+	//! \todo	Something is wrong there.
 	//gWorld->skies->drawSky(Vec3D(0.0f,0.0f,0.0f));
 }
 
@@ -1168,8 +1170,8 @@ void MapView::displayViewMode_2D( float t, float dt )
 	if (hud) 
 	{
 		freetype::shprint( arial16, 410.0f, 4.0f, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
-    std::stringstream fps; fps << gFPS << " fps";
-		freetype::shprint( arial16, video.xres - 200.0f, 5, fps.str() );
+		std::stringstream fps; fps << gFPS << " fps";
+		freetype::shprint( arial16, video.xres - 200.0f, 5, "%.2f fps", gFPS );
 	}
 
 	if (gWorld->loading) 
@@ -1215,20 +1217,20 @@ void MapView::displayViewMode_3D( float t, float dt )
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 
-		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
-    std::stringstream fps; fps << gFPS << " fps";
-		freetype::shprint( arial16, video.xres - 200.0f, 5, fps.str() );
+		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
+		std::stringstream fps; fps << gFPS << " fps";
+		freetype::shprint( arial16, video.xres - 200, 5, "%.2f fps", gFPS );
 				
-    std::ostringstream s;
+		std::ostringstream s;
 		s << "Server cords(x:" << -(gWorld->camera.x - ZEROPOINT) << " y:" << -(gWorld->camera.z - ZEROPOINT) << " z:" << gWorld->camera.y
 				<< ") Tile " << round((gWorld->camera.x-(TILESIZE/2))/TILESIZE) << " " << round((gWorld->camera.z-(TILESIZE/2))/TILESIZE)
 				<< " Client cords(x:" << gWorld->camera.x<<" y:" << gWorld->camera.z << " z:"<<gWorld->camera.y << ") ";
 		mainGui->guiStatusbar->setLeftInfo( s.str() );
 		
 		int time = int( gWorld->time ) % 2880;
-    
-    std::stringstream timestrs; timestrs << "Time: " << (time/120) << ":" << (time%120);
-		freetype::shprint( arial16, video.xres - 100.0f, 5, timestrs.str() );
+
+		std::stringstream timestrs; timestrs << "Time: " << (time/120) << ":" << (time%120);
+		freetype::shprint( arial16, video.xres - 100.0f, 5.0f, "Time:	%02d:%02d", time / 120, (time % 120) / 2 );
 		
 		if( mainGui->guiappInfo->hidden == false )
 		{	
@@ -1237,7 +1239,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 			mainGui->guiappInfo->setText( s.str() );
 		}
 
-		//! \todo  Get this into a window. As Steff is already doing.
+		//! \todo	Get this into a window. As Steff is already doing.
 		if( !mainGui->guidetailInfos->hidden )
 		{
 			nameEntry * lSelection = gWorld->GetCurrentSelection();
@@ -1246,7 +1248,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 				if( !MapChunkWindow->hidden )
 					TexturingUI::setChunkWindow( lSelection->data.mapchunk );
 
-				//! \todo  Only do this if lSelection == Selection? ..
+				//! \todo	Only do this if lSelection == Selection? ..
 				mainGui->guiStatusbar->setRightInfo( lSelection->returnName() );
 
 				s.str("");
@@ -1254,7 +1256,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 				switch( lSelection->type ) 
 				{
 				case eEntry_Model:
-            s << "TYPE: " << lSelection->type << std::endl;
+						s << "TYPE: " << lSelection->type << std::endl;
 					s << "NAME: " << lSelection->returnName()<< std::endl;
 					s << "FILENAME: " << lSelection->data.model->model->filename << std::endl;
 
@@ -1267,21 +1269,21 @@ void MapView::displayViewMode_3D( float t, float dt )
 					//s << "UniqueID: " << lSelection->Name << endl;
 					//s << "UniqueID: " << lSelection->Name << endl;
 					//freetype::shprint( arial16, 10, 83, "UniqueID: %d", lSelection->data.model->d1 );
-					//s <<  "Pos: (" <<  lSelection->data.model->pos.x << "," << lSelection->data.model->pos.y << "," << lSelection->data.model->pos.z << ")" << endl;					
+					//s <<	"Pos: (" <<	lSelection->data.model->pos.x << "," << lSelection->data.model->pos.y << "," << lSelection->data.model->pos.z << ")" << endl;					
 					//freetype::shprint( arial16, 10, 103, "Pos: (%.2f, %.2f, %.2f)", lSelection->data.model->pos.x, lSelection->data.model->pos.y, lSelection->data.model->pos.z );
 					//s << "Rot: (" << lSelection->data.model->dir.x << "," << lSelection->data.model->dir.y << "" << lSelection->data.model->dir.z << ")" << endl;					
 					//freetype::shprint( arial16, 10, 123, "Rot: (%.2f, %.2f, %.2f)", lSelection->data.model->dir.x, lSelection->data.model->dir.y, lSelection->data.model->dir.z );
-					//s << "Scale: " <<  lSelection->data.model->sc << endl;					
+					//s << "Scale: " <<	lSelection->data.model->sc << endl;					
 					//freteype::shprint( arial16, 10, 143, "Scale: %.2f", lSelection->data.model->sc );
 					//s << "Textures Used: " << lSelection->data.model->model->header.nTextures << endl;					
 					//freetype::shprint( arial16, 10, 163, "Textures Used: %d", lSelection->data.model->model->header.nTextures );
 				
 
-					for( unsigned int j = 0; j < lSelection->data.model->model->header.nTextures; j++ )
-					{
+				//	for( unsigned int j = 0; j < lSelection->data.model->model->header.nTextures; j++ )
+				//	{
 						//s << j << ", " << lSelection->data.model->model->textures[j] << " - " << TextureManager::items[lSelection->data.model->model->textures[j]]->name << endl;WHY DID THIS CRASH!!!
 						//freetype::shprint( arial16, 15, 183 + 20 * j, "%d - %s", j, TextureManager::items[lSelection->data.model->model->textures[j]]->name );
-					}
+				//	}
 					mainGui->guidetailInfos->setText(s.str() );
 				break;
 				case eEntry_WMO:
@@ -1289,14 +1291,14 @@ void MapView::displayViewMode_3D( float t, float dt )
 					//freetype::shprint( arial16, 5, 63, lSelection->data.wmo->wmo->filename );
 					s << "UniqueID: " << lSelection->data.wmo->mUniqueID << std::endl;
 					//freetype::shprint( arial16, 10, 83, "UniqueID: %d", lSelection->data.wmo->id );
-					s <<  "Pos: (" <<  lSelection->data.wmo->pos.x << "," << lSelection->data.wmo->pos.y << "," << lSelection->data.wmo->pos.z << ")" << std::endl;					
+					s <<	"Pos: (" <<	lSelection->data.wmo->pos.x << "," << lSelection->data.wmo->pos.y << "," << lSelection->data.wmo->pos.z << ")" << std::endl;					
 					//freetype::shprint( arial16, 10, 103, "Pos: (%.2f, %.2f, %.2f)", lSelection->data.wmo->pos.x, lSelection->data.wmo->pos.y, lSelection->data.wmo->pos.z );
 					s << "Rot: (" << lSelection->data.wmo->dir.x << "," << lSelection->data.wmo->dir.y << "" << lSelection->data.wmo->dir.z << ")" << std::endl;					
 					//freetype::shprint( arial16, 10, 123, "Rot: (%.2f, %.2f, %.2f)", lSelection->data.wmo->dir.x, lSelection->data.wmo->dir.y, lSelection->data.wmo->dir.z );
 					s << "Textures Used: " << lSelection->data.wmo->wmo->nTextures << std::endl;
 					//freetype::shprint( arial16, 10, 143, "Textures Used: %d", lSelection->data.model->model->header.nTextures );
 
-					for( unsigned int j = 0; j < lSelection->data.wmo->wmo->nTextures; j++ )
+				/*	for( unsigned int j = 0; j < lSelection->data.wmo->wmo->nTextures; j++ )
 					{
 						if( j < 25 )
 						{
@@ -1308,7 +1310,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 							//s << j << " - " << lSelection->data.wmo->wmo->textures[j] << endl; WHY DID THIS CRASH!!!
 							//freetype::shprint( arial16, ( video.xres - 15 ) / 2, 163 + 20 * (j-25), "%d - %s", j, lSelection->data.wmo->wmo->textures[j] );
 						}
-					}
+					}*/
 					s << "Doodads set: " << lSelection->data.wmo->doodadset << std::endl;
 					//freetype::shprint( arial16, 10, 143, "Doodads set: %d", lSelection->data.wmo->doodadset );
 
@@ -1359,8 +1361,8 @@ void MapView::displayViewMode_3D( float t, float dt )
 					TextOffset += 20;
 					for( int q = 0; q < lSelection->data.mapchunk->nTextures; q++ )
 					{
-						//s << q << "- " << TextureManager::items[lSelection->data.mapchunk->textures[q]]->name << "  Flags - " << lSelection->data.mapchunk->texFlags[q] << " Effect ID - " << lSelection->data.mapchunk->effectID[q] << endl; WHY DID THIS CRASH!!!
-						//freetype::shprint( arial16, 20, 103 + TextOffset, "%d - %s  Flags - %x Effect ID - %d", q, TextureManager::items[lSelection->data.mapchunk->textures[q]]->name, lSelection->data.mapchunk->texFlags[q], lSelection->data.mapchunk->effectID[q] );
+						//s << q << "- " << TextureManager::items[lSelection->data.mapchunk->textures[q]]->name << "	Flags - " << lSelection->data.mapchunk->texFlags[q] << " Effect ID - " << lSelection->data.mapchunk->effectID[q] << endl; WHY DID THIS CRASH!!!
+						//freetype::shprint( arial16, 20, 103 + TextOffset, "%d - %s	Flags - %x Effect ID - %d", q, TextureManager::items[lSelection->data.mapchunk->textures[q]]->name, lSelection->data.mapchunk->texFlags[q], lSelection->data.mapchunk->effectID[q] );
 						TextOffset += 20;
 						if( lSelection->data.mapchunk->effectID[q] != 0 )
 							for( int r = 0; r < 4; r++ )
@@ -1411,7 +1413,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 
 void MapView::display( float t, float dt )
 {
-	//! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
+	//! \todo	Get this out or do it somehow else. This is ugly and is a senseless if each draw.
 	if( Saving )
 	{		
 		video.setTileMode();
@@ -1490,7 +1492,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			moving = 1.0f;
 		
 		// saving or movement
-		//! \todo  Write ctrl-s in the help. Also get these idiots up to date so they dont complain about it not saving again.
+		//! \todo	Write ctrl-s in the help. Also get these idiots up to date so they dont complain about it not saving again.
 		if( e->keysym.sym == SDLK_s )
 			if( !Environment::getInstance()->CtrlDown )
 				moving = -1.0f;
@@ -1548,9 +1550,10 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			setChunk(Selection->data.mapchunk);
 		}*/
 
+		//! \todo Deletion kills noggit.
 		// delete object
-		if( e->keysym.sym == SDLK_DELETE )
-			DeleteSelectedObject( 0, 0 );
+	//	if( e->keysym.sym == SDLK_DELETE )
+	//		DeleteSelectedObject( 0, 0 );
 
 		// open chunk settings window or copy & paste
 		if( e->keysym.sym == SDLK_c)
@@ -1745,7 +1748,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 #ifdef DEBUG
 		// Check for layers we have too much. this should filter out those that are completely covered.
-		//! \todo  Get this function to work.
+		//! \todo	Get this function to work.
 		if( e->keysym.sym == SDLK_k ) 
 		{
 			if((Selection!=0)&&(Selection->type==eEntry_MapChunk))
@@ -1856,7 +1859,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 				}
 			}
 			else if( Environment::getInstance()->ShiftDown )
-        gWorld->fogdistance -= 60.0f;
+				gWorld->fogdistance -= 60.0f;
 			else
 			{
 				//change selected model sizesize
@@ -1888,7 +1891,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			}
 
 		// is not used somewere else!!
-		//! \todo  what is this?
+		//! \todo	what is this?
 		if( e->keysym.sym == SDLK_g )
 			drawFlags = !drawFlags;
 
@@ -1902,8 +1905,8 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			gWorld->ResetSelection();
 		}
 
-        // doodads set
-		//! \todo  Does anyone use these?
+				// doodads set
+		//! \todo	Does anyone use these?
 		if( e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9 && gWorld->IsSelection( eEntry_WMO ) )
 			gWorld->GetCurrentSelection()->data.wmo->doodadset = e->keysym.sym - SDLK_0;
 		
@@ -2118,4 +2121,5 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 		else Environment::getInstance()->view_holelines = false;
 	}
 }
+
 

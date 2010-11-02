@@ -5,7 +5,7 @@
 
 WMOInstance::WMOInstance( WMO* _wmo, MPQFile& _file ) : wmo( _wmo ), mSelectionID( SelectionNames.add( this ) )
 {
-  _file.read( &mUniqueID, 4 );
+	_file.read( &mUniqueID, 4 );
 	_file.read( (float*)pos, 12 );
 	_file.read( (float*)dir, 12 );
 	_file.read( (float*)extents[0], 12 );
@@ -30,9 +30,9 @@ void WMOInstance::draw() const
 {
 	glPushMatrix();
 	glTranslatef( pos.x, pos.y, pos.z );
-  
-  const float roty = dir.y - 90.0f;
-  
+	
+	const float roty = dir.y - 90.0f;
+	
 	glRotatef( roty, 0.0f, 1.0f, 0.0f );
 	glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
 	glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
@@ -48,19 +48,19 @@ void WMOInstance::draw() const
 void WMOInstance::drawSelect() const
 {
 	glPushMatrix();
-  
+	
 	glTranslatef( pos.x, pos.y, pos.z );
-  
-  const float roty = dir.y - 90.0f;
+	
+	const float roty = dir.y - 90.0f;
 
 	glRotatef( roty, 0.0f, 1.0f, 0.0f );
 	glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
 	glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
 
 	glPushName( mSelectionID );
-  
+	
 	wmo->drawSelect( doodadset, pos, -roty );
-  
+	
 	glPopName();
 
 	glPopMatrix();
@@ -68,27 +68,27 @@ void WMOInstance::drawSelect() const
 
 /*void WMOInstance::drawPortals()
 {
-  glPushMatrix();
+	glPushMatrix();
  
-  glTranslatef( pos.x, pos.y, pos.z );
+	glTranslatef( pos.x, pos.y, pos.z );
 
-  const float roty = dir.y - 90.0f;
+	const float roty = dir.y - 90.0f;
  
-  glRotatef( roty, 0.0f, 1.0f, 0.0f );
-  glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
-  glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
+	glRotatef( roty, 0.0f, 1.0f, 0.0f );
+	glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
+	glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
 
-  wmo->drawPortals();
+	wmo->drawPortals();
  
-  glPopMatrix();
+	glPopMatrix();
 }*/
 
 void WMOInstance::resetDirection()
 {
-  dir = Vec3D( 0.0f, dir.y, 0.0f );
+	dir = Vec3D( 0.0f, dir.y, 0.0f );
 }
 
 WMOInstance::~WMOInstance()
 {
-  SelectionNames.del( mSelectionID );
+	SelectionNames.del( mSelectionID );
 }

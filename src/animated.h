@@ -21,7 +21,7 @@ template<class T>
 inline T interpolateHermite(const float r, const T &v1, const T &v2, const T &in, const T &out)
 {
 	// dummy
-    //return interpolate<T>(r,v1,v2);
+		//return interpolate<T>(r,v1,v2);
 
 	// basis functions
 	float h1 = 2.0f*r*r*r - 3.0f*r*r + 1.0f;
@@ -63,8 +63,8 @@ public:
 
 // In WoW 2.0+ Blizzard are now storing rotation data in 16bit values instead of 32bit.
 // I don't really understand why as its only a very minor saving in model sizes and adds extra overhead in
-// processing the models.  Need this structure to read the data into.
-struct PACK_QUATERNION {int16_t x,y,z,w;  }; 
+// processing the models.	Need this structure to read the data into.
+struct PACK_QUATERNION {int16_t x,y,z,w;	}; 
 
 class Quat16ToQuat32 {
 public:
@@ -110,20 +110,20 @@ public:
 	// for nonlinear interpolations:
 	std::map<int, std::vector<T> > in, out;
 	size_t size; // for fix function
-  
-  bool uses(unsigned int anim)
+	
+	bool uses(unsigned int anim)
 	{
 		if (seq>-1)
-    {
+		{
 			anim = 0;
-    }
+		}
 		
-    return (data[anim].size() > 0);
+		return (data[anim].size() > 0);
 	}
 
 	T getValue(unsigned int anim, unsigned int time)
 	{
-    // obtain a time value and a data range
+		// obtain a time value and a data range
 		if (seq>-1) {
 			// TODO
 			if (globals[seq]==0) 
@@ -147,7 +147,7 @@ public:
 			t1 = times[anim][pos];
 			t2 = times[anim][pos+1];
 			float r = (time-t1)/(float)(t2-t1);
-      
+			
 			if (type == INTERPOLATION_LINEAR) 
 				return interpolate<T>(r,data[anim][pos],data[anim][pos+1]);
 			else if (type == INTERPOLATION_NONE) 

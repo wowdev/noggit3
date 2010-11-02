@@ -21,11 +21,18 @@ inline int next_p2 ( int a )
 	return rval;
 }
 
+#ifndef min
+inline int min( int a, int b )
+{
+	return a < b ? a : b;
+}
+#endif
+
 ///Create a display list coresponding to the give character.
 int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int fontsize ) {
 
 	//The first thing we do is get FreeType to render our character
-	//into a bitmap.  This actually requires a couple of FreeType commands:
+	//into a bitmap.	This actually requires a couple of FreeType commands:
 
 	//Load the Glyph for our character.
 	if(FT_Load_Glyph( face, FT_Get_Char_Index( face, ch ), FT_LOAD_DEFAULT ))
@@ -35,8 +42,8 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 	}
 
 	//Move the face's glyph into a Glyph object.
-    FT_Glyph glyph;
-    if(FT_Get_Glyph( face->glyph, &glyph ))
+	FT_Glyph glyph;
+	if(FT_Get_Glyph( face->glyph, &glyph ))
 	{
 		LogError << "FT_Get_Glyph failed" << std::endl;
 		throw std::runtime_error("FT_Get_Glyph failed");
@@ -45,7 +52,7 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 
 	//Convert the glyph to a bitmap.
 	FT_Glyph_To_Bitmap( &glyph, FT_RENDER_MODE_NORMAL, 0, 1 );
-    FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
+	FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
 
 	//This reference will make accessing the bitmap easier
 	FT_Bitmap& bitmap=bitmap_glyph->bitmap;
@@ -80,7 +87,7 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 	}
 
 	//Now we just setup some texture paramaters.
-    glBindTexture( GL_TEXTURE_2D, tex_base[ch]);
+	glBindTexture( GL_TEXTURE_2D, tex_base[ch]);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -89,15 +96,15 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 	//Here we actually create the texture itself, notice
 	//that we are using GL_LUMINANCE_ALPHA to indicate that
 	//we are using 2 channel data.
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width, height,
-		  0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data );
+	glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width, height,
+			0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data );
 
 	//With the texture created, we don't need to expanded data anymore
-  if( expanded_data )
-  {
-    delete [] expanded_data;
-    expanded_data = NULL;
-  }
+	if( expanded_data )
+	{
+		delete [] expanded_data;
+		expanded_data = NULL;
+	}
 
 	//So now we can create the display list
 	glNewList(list_base+ch,GL_COMPILE);
@@ -184,14 +191,14 @@ void font_data::init(const char * fname, unsigned int _h) {
 	}
 
 	//For some twisted reason, Freetype measures font size
-	//in terms of 1/64ths of pixels.  Thus, to make a font
+	//in terms of 1/64ths of pixels.	Thus, to make a font
 	//h pixels high, we need to request a size of h*64.
 	//(h << 6 is just a prettier way of writting h*64)
 	FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72);
 
 	//Here we ask opengl to allocate resources for
 	//all the textures and displays lists which we
-	//are about to create.  
+	//are about to create.	
 	list_base=glGenLists(128);
 	glGenTextures( 128, textures );
 
@@ -239,14 +246,14 @@ void font_data::initMPQ(const char * fname, unsigned int _h) {
 
 
 	//For some twisted reason, Freetype measures font size
-	//in terms of 1/64ths of pixels.  Thus, to make a font
+	//in terms of 1/64ths of pixels.	Thus, to make a font
 	//h pixels high, we need to request a size of h*64.
 	//(h << 6 is just a prettier way of writting h*64)
 	FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72);
 
 	//Here we ask opengl to allocate resources for
 	//all the textures and displays lists which we
-	//are about to create.  
+	//are about to create.	
 	list_base=glGenLists(128);
 	glGenTextures( 128, textures );
 
@@ -266,11 +273,11 @@ void font_data::initMPQ(const char * fname, unsigned int _h) {
 void font_data::clean() {
 	glDeleteLists(list_base,128);
 	glDeleteTextures(128,textures);
-  if( textures )
-  {
-    delete [] textures;
-    textures = NULL;
-  }
+	if( textures )
+	{
+		delete [] textures;
+		textures = NULL;
+	}
 }
 
 /// A fairly straight forward function that pushes
@@ -298,25 +305,37 @@ inline void pop_projection_matrix() {
 
 ///Much like Nehe's glPrint function, but modified to work
 ///with freetype fonts.
-  void print(const font_data &ft_font, float x, float y, const std::string& text)  {
+void print(const font_data &ft_font, float x, float y, const char *fmt, ...)	{
 	
 	// We want a coordinate system where things coresponding to window pixels.
 	//pushScreenCoordinateMatrix();					
 	
 	GLuint font=ft_font.list_base;
 	float h=ft_font.h/.90f;						//We make the height about 1.5* that of
+	
+	char		text[10000];								// Holds Our String
+	va_list		ap;										// Pointer To List Of Arguments
+
+	if (fmt == NULL)									// If There's No Text
+		*text=0;											// Do Nothing
+
+	else {
+	va_start(ap, fmt);									// Parses The String For Variables
+			vsprintf(text, fmt, ap);						// And Converts Symbols To Actual Numbers
+	va_end(ap);											// Results Are Stored In Text
+	}
 
 
 	//Here is some code to split the text that we have been
-	//given into a set of lines.  
+	//given into a set of lines.	
 	//This could be made much neater by using
 	//a regular expression library such as the one avliable from
 	//boost.org (I've only done it out by hand to avoid complicating
 	//this tutorial with unnecessary library dependencies).
 	
-	const char *start_line=text.c_str();
+	const char *start_line=text;
 	vector<string> lines;
-	const char *c=text.c_str();
+	const char *c=text;
 	for(;*c;c++) {
 		if(*c=='\n') {
 			string line;
@@ -331,7 +350,7 @@ inline void pop_projection_matrix() {
 		lines.push_back(line);
 	}
 
-	glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT | GL_TRANSFORM_BIT);	
+	glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT	| GL_ENABLE_BIT | GL_TRANSFORM_BIT);	
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
@@ -350,17 +369,17 @@ inline void pop_projection_matrix() {
 	//Notice that we need to reset the matrix, rather than just translating
 	//down by h. This is because when each character is
 	//draw it modifies the current matrix so that the next character
-	//will be drawn immediatly after it.  
+	//will be drawn immediatly after it.	
 	for(unsigned int i=0;i<lines.size();++i) {
 		glPushMatrix();
 		//glLoadIdentity();
 		glTranslatef(x,y+h*i,0);
 		//glMultMatrixf(modelview_matrix);
 
-	//  The commented out raster position stuff can be useful if you need to
-	//  know the length of the text that you are creating.
-	//  If you decide to use it make sure to also uncomment the glBitmap command
-	//  in make_dlist().
+	//	The commented out raster position stuff can be useful if you need to
+	//	know the length of the text that you are creating.
+	//	If you decide to use it make sure to also uncomment the glBitmap command
+	//	in make_dlist().
 	//	glRasterPos2f(0,0);
 		glCallLists(lines[i].length(), GL_UNSIGNED_BYTE, lines[i].c_str());
 	//	float rpos[4];
@@ -375,25 +394,79 @@ inline void pop_projection_matrix() {
 	//pop_projection_matrix();
 }
 
-void shprint( const font_data &ft_font, float x, float y, const std::string& text, float colorR, float colorG, float colorB )
-{
+void shprint(const font_data &ft_font, float x, float y, const char *fmt, ...)	{	
+	char		text[10000];								// Holds Our String
+	va_list		ap;										// Pointer To List Of Arguments
+
+	if (fmt == NULL)									// If There's No Text
+		*text=0;											// Do Nothing
+
+	else {
+	va_start(ap, fmt);									// Parses The String For Variables
+			vsprintf(text, fmt, ap);						// And Converts Symbols To Actual Numbers
+	va_end(ap);											// Results Are Stored In Text
+	}
+
+	//glTranslatef(2.0f,2.0f,0.0f);
+
 	glColor3f(0.0f,0.0f,0.0f);
 	print(ft_font, x+2.0f, y+2.0f, text);
-	glColor3f(colorR,colorG,colorB);
+	//glTranslatef(-2.0f,-2.0f,0.0f);
+	glColor3f(1.0f,1.0f,1.0f);
 	print(ft_font, x, y, text);
+
 }
 
-int width(const font_data &ft_font, const std::string& text)  
+void shprinty(const font_data &ft_font, float x, float y, const char *fmt, ...)	{	
+	char		text[10000];								// Holds Our String
+	va_list		ap;										// Pointer To List Of Arguments
+
+	if (fmt == NULL)									// If There's No Text
+		*text=0;											// Do Nothing
+
+	else {
+	va_start(ap, fmt);									// Parses The String For Variables
+			vsprintf(text, fmt, ap);						// And Converts Symbols To Actual Numbers
+	va_end(ap);											// Results Are Stored In Text
+	}
+
+	//glTranslatef(2.0f,2.0f,0.0f);
+
+	glColor3f(0.0f,0.0f,0.0f);
+	print(ft_font, x+2.0f, y+2.0f, text);
+	//glTranslatef(-2.0f,-2.0f,0.0f);
+	glColor3f(0.0f,1.0f,1.0f);
+	print(ft_font, x, y, text);
+
+}
+
+int width(const font_data &ft_font, const char *fmt, ...)	
 {
+	//GLuint font=ft_font.list_base;
+	//float h=ft_font.h/.63f;						//We make the height about 1.5* that of
+	
+	char		text[256];								// Holds Our String
+	va_list		ap;										// Pointer To List Of Arguments
+
+	if (fmt == NULL)									// If There's No Text
+		*text=0;											// Do Nothing
+
+	else {
+	va_start(ap, fmt);									// Parses The String For Variables
+			vsprintf(text, fmt, ap);						// And Converts Symbols To Actual Numbers
+	va_end(ap);											// Results Are Stored In Text
+	}
+
+
 	//Here is some code to split the text that we have been
-	//given into a set of lines.  
+	//given into a set of lines.	
 	//This could be made much neater by using
 	//a regular expression library such as the one avliable from
 	//boost.org (I've only done it out by hand to avoid complicating
 	//this tutorial with unnecessary library dependencies).
-	const char *start_line=text.c_str();
+	const char *start_line=text;
 	vector<string> lines;
-	const char *c=text.c_str();
+	const char *c=text;
 	for(;*c;c++) {
 		if(*c=='\n') {
 			string line;

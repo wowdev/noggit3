@@ -47,17 +47,17 @@ public:
 	void close();
 	void save(const char* filename);
 	bool isExternal() const
-  {
-    return External;
-  }
+	{
+		return External;
+	}
 
 	void setBuffer(unsigned char *Buf, unsigned int Size)
 	{
 		if(buffer)
-    {
+		{
 			delete buffer;
-      buffer = NULL;
-    }
+			buffer = NULL;
+		}
 		buffer=Buf;
 		size=Size;
 	};

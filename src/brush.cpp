@@ -27,7 +27,7 @@ void brush::GenerateTexture()
 		{
 			dist = sqrt( x * x + y * y );
 			if( dist > 1 )
-                tex[j*256+i] = 0;
+								tex[j*256+i] = 0;
 			else if( dist < hardness )
 				tex[j*256+i] = (unsigned char) 255;
 			else

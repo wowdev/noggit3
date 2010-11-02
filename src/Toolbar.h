@@ -2,6 +2,7 @@
 #define __TOOLBAR_H
 
 #include "window.h"
+#include "FreeType.h" // fonts.
 
 class Gui;
 class textUI;

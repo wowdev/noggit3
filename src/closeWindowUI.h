@@ -2,6 +2,7 @@
 #define __CLOSEWINDOWUI_H
 
 #include "window.h"
+#include "FreeType.h" // fonts.
 
 class closeWindowUI : public window
 {

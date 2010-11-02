@@ -127,14 +127,14 @@ Vec3D Sky::colorFor(int r, int t) const
 	}
 
 	float tt = (float)(t - t1) / (float)(t2-t1);
-    return c1*(1.0f-tt) + c2*tt;
+		return c1*(1.0f-tt) + c2*tt;
 }
 
 const float rad = 400.0f;
 
 //.......................top....med....medh........horiz..........bottom
 const float angles[] = {90.0f, 30.0f, 15.0f, 5.0f, 0.0f, -30.0f, -90.0f};
-const int skycolors[] = {2,      3,      4,    5,    6,    7,     7};
+const int skycolors[] = {2,			3,			4,		5,		6,		7,		 7};
 const int cnum = 7;
 
 
@@ -143,7 +143,7 @@ const int hseg = 32;
 void Skies::draw()
 {
 	// draw sky sphere?
-	//! \todo  do this as a vertex array and use glColorPointer? :|
+	//! \todo	do this as a vertex array and use glColorPointer? :|
 	Vec3D basepos1[cnum], basepos2[cnum];
 	glBegin(GL_QUADS);
 	for (int h=0; h<hseg; h++) {
@@ -200,17 +200,17 @@ Skies::Skies( unsigned int mapid )
 	// sort skies from smallest to largest; global last.
 	// smaller skies will have precedence when calculating weights to achieve smooth transitions etc.
 	std::sort( skies.begin(), skies.end() );
-  
+	
 	stars = ModelManager::items[ModelManager::add( "Environments\\Stars\\Stars.mdx" )];
 }
 
 Skies::~Skies()
 {
-  if( stars )
-  {
-    ModelManager::delbyname( "Environments\\Stars\\Stars.mdx" );
-    stars = NULL;
-  }
+	if( stars )
+	{
+		ModelManager::delbyname( "Environments\\Stars\\Stars.mdx" );
+		stars = NULL;
+	}
 }
 
 void Skies::findSkyWeights(Vec3D pos)
@@ -220,7 +220,7 @@ void Skies::findSkyWeights(Vec3D pos)
 	cs = maxsky;
 	for (int i=maxsky-1; i>=0; i--) {
 		Sky &s = skies[i];
-        float dist = (pos - s.pos).length();
+				float dist = (pos - s.pos).length();
 		if (dist < s.r1) {
 			// we're in a sky, zero out the rest
 			s.weight = 1.0f;
@@ -268,14 +268,14 @@ void Skies::initSky(Vec3D pos, int t)
 
 void drawCircle(unsigned int *buf, int dim, float x, float y, float r, unsigned int col)
 {
-    float circ = 2*r*PI;
+		float circ = 2*r*PI;
 	glBegin( GL_LINES );
 	for (int i=0; i<circ; ++i) {
 		float phi = 2*PI*i/circ;
 		int px = (int)(x + r * cosf(phi));
 		int py = (int)(y + r * sinf(phi));
 		if (px>=0 && px<dim && py>=0 && py<dim) {
-            buf[py*dim+px] = col;
+						buf[py*dim+px] = col;
 		}
 	}
 }
@@ -311,7 +311,7 @@ bool Skies::drawSky(const Vec3D &pos)
 		glScalef(sc,sc,sc);
 		glEnable(GL_TEXTURE_2D);
 		stars->trans = ni;
-        stars->draw();
+				stars->draw();
 	}
 
 	glPopMatrix();
@@ -319,7 +319,7 @@ bool Skies::drawSky(const Vec3D &pos)
 	return true;
 }
 
-//! \todo  figure out what dnc.db is _really_ used for
+//! \todo	figure out what dnc.db is _really_ used for
 
 void OutdoorLightStats::init(MPQFile &f)
 {
@@ -385,7 +385,7 @@ void OutdoorLightStats::init(MPQFile &f)
 	f.seekRelative(4);
 	f.read(&fogColor.z,4);
 
-    time = (int)h * 60 * 2 + (int)m * 2;
+		time = (int)h * 60 * 2 + (int)m * 2;
 
 	// HACK: make day & night intensity exclusive; set day intensity to 1.0
 	if (dayIntensity > 0) {
@@ -502,7 +502,7 @@ OutdoorLighting::OutdoorLighting( const std::string& fname)
 OutdoorLightStats OutdoorLighting::getLightStats(int time)
 {
 	// ASSUME: only 24 light info records, one for each whole hour
-	//! \todo  generalize this if the data file changes in the future
+	//! \todo	generalize this if the data file changes in the future
 
 	OutdoorLightStats out;
 
@@ -514,7 +514,7 @@ OutdoorLightStats OutdoorLighting::getLightStats(int time)
 	a = &lightStats[ta];
 	b = &lightStats[tb];
 
-    out.interpolate(a,b,r);
+		out.interpolate(a,b,r);
 
-    return out;
+		return out;
 }

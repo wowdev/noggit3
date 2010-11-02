@@ -19,7 +19,7 @@ class MapChunk
 public:
 	Vec3D vmin, vmax, vcenter;
 	int px, py;
-  
+	
 	MapChunkHeader header;
 	bool Changed;
 	int nTextures;
@@ -29,7 +29,7 @@ public:
 
 	bool mBigAlpha;
 
-  int nameID;
+	int nameID;
 
 	unsigned int Flags;
 	
@@ -79,9 +79,9 @@ public:
 	void recalcNorms();
 
 	Vec3D mNormals[mapbufsize];
-  Vec3D mVertices[mapbufsize];
-  //! \todo Is this needed? Can't we just use the real vertices?
-  Vec3D mMinimap[mapbufsize];
+	Vec3D mVertices[mapbufsize];
+	//! \todo Is this needed? Can't we just use the real vertices?
+	Vec3D mMinimap[mapbufsize];
 	Vec4D mFakeShadows[mapbufsize];
 
 	void getSelectionCoord(float *x,float *z);

@@ -81,21 +81,21 @@ enum BlendModes {
 struct ModelRenderPass {
 	uint16_t indexStart, indexCount, vertexStart, vertexEnd;
 	//GLuint texture, texture2;
-  int tex;
+	int tex;
 	bool usetex2, useenvmap, cull, trans, unlit, nozwrite, billboard;
 	float p;
 	
 	int16_t texanim, color, opacity, blendmode, order;
 
-  // Geoset ID
+	// Geoset ID
 	int geoset;
-  
+	
 	// texture wrapping
 	bool swrap, twrap;
-  
+	
 	// colours
 	Vec4D ocol, ecol;
-  
+	
 	bool init(Model *m);
 	void deinit();
 
@@ -184,17 +184,17 @@ public:
 	ModelCamera cam;
 	Bone *bones;
 	ModelHeader header;
-  
+	
 	// ===============================
 	// Toggles
 	bool *showGeosets;
-  
+	
 	// ===============================
 	// Texture data
 	// ===============================
 	GLuint *textures;
-  #define	TEXTURE_MAX	100
-  //! \todo vectors.
+	#define	TEXTURE_MAX	100
+	//! \todo vectors.
 	int specialTextures[TEXTURE_MAX];
 	GLuint replaceTextures[TEXTURE_MAX];
 	bool useReplaceTextures[TEXTURE_MAX];
@@ -202,7 +202,7 @@ public:
 	float rad;
 	float trans;
 	bool animcalc;
-  bool mPerInstanceAnimation;
+	bool mPerInstanceAnimation;
 	int anim, animtime;
 
 	Model(const std::string& name, bool forceAnim=false);	
@@ -213,8 +213,8 @@ public:
 	void updateEmitters(float dt);
 
 	friend struct ModelRenderPass;
-  
-  virtual void finishLoading();
+	
+	virtual void finishLoading();
 };
 
 #endif

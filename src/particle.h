@@ -43,7 +43,7 @@ public:
 };
 
 struct TexCoordSet {
-    Vec2D tc[4];
+		Vec2D tc[4];
 };
 
 class ParticleSystem {
@@ -68,7 +68,7 @@ class ParticleSystem {
 
 	// unknown parameters omitted for now ...
 	Bone *parent;
-  int32_t flags;
+	int32_t flags;
 	int16_t pType;
 
 public:
@@ -84,11 +84,11 @@ public:
 		mtime = 0;
 		rows = 0;
 		cols = 0;
-    
+		
 		model = 0;
 		parent = 0;
 		texture = 0;
-    
+		
 		slowdown = 0;
 		rotation = 0;
 		tofs = 0;

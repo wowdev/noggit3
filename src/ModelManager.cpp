@@ -5,13 +5,16 @@
 
 int ModelManager::baseid = 0;
 
-template <class IDTYPE,class MANAGEDITEM> std::map<std::string, MODELIDTYPE> Manager<MODELIDTYPE,Model>::names;
-template <class IDTYPE,class MANAGEDITEM> std::map<MODELIDTYPE, Model*> Manager<MODELIDTYPE,Model>::items;
+template <> 
+std::map<std::string, MODELIDTYPE> Manager<MODELIDTYPE,Model>::names;
+
+template <> 
+std::map<MODELIDTYPE, Model*> Manager<MODELIDTYPE,Model>::items;
 
 MODELIDTYPE ModelManager::add( const std::string& name )
 {
-  int id;
-  std::string name_ = name;
+	int id;
+	std::string name_ = name;
 	std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
 	if( names.find( name_ ) != names.end() ) 
 	{
@@ -19,24 +22,24 @@ MODELIDTYPE ModelManager::add( const std::string& name )
 		items[id]->addref();
 		return id;
 	}
-  
-  id = nextID();
-  Model *model = new Model( name );
-  model->finishLoading();
-  
-  gAsyncLoader->addObject( model );
-  
-  do_add( name, id, model );
-  return id;
+	
+	id = nextID();
+	Model *model = new Model( name );
+	model->finishLoading();
+	
+	gAsyncLoader->addObject( model );
+	
+	do_add( name, id, model );
+	return id;
 }
 void ModelManager::resetAnim()
 {
-  for( std::map<std::string, MODELIDTYPE>::iterator it = names.begin( ); it != names.end( ); ++it )
-    reinterpret_cast<Model*>( items[it->second] )->animcalc = false;
+	for( std::map<std::string, MODELIDTYPE>::iterator it = names.begin( ); it != names.end( ); ++it )
+		reinterpret_cast<Model*>( items[it->second] )->animcalc = false;
 }
 
 void ModelManager::updateEmitters( float dt )
 {
-  for( std::map<std::string, MODELIDTYPE>::iterator it = names.begin( ); it != names.end( ); ++it )
-    reinterpret_cast<Model*>( items[it->second] )->updateEmitters( dt );
+	for( std::map<std::string, MODELIDTYPE>::iterator it = names.begin( ); it != names.end( ); ++it )
+		reinterpret_cast<Model*>( items[it->second] )->updateEmitters( dt );
 }

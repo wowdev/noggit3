@@ -1,6 +1,7 @@
 #ifndef __FRAME_H
 #define __FRAME_H
 
+#include "FreeType.h" // fonts.
 #include <vector>
 
 class frame
@@ -32,21 +33,21 @@ public:
 		width = w;
 		height = h;
 	}
-  
-  virtual ~frame()
-  {
-    for(std::vector<frame*>::iterator it = children.begin(); it != children.end(); ++it)
-    {
-      if( *it )
-      {
-        delete *it;
-        *it = NULL;
-      }
-    }
-  }
+	
+	virtual ~frame()
+	{
+		for(std::vector<frame*>::iterator it = children.begin(); it != children.end(); ++it)
+		{
+			if( *it )
+			{
+				delete *it;
+				*it = NULL;
+			}
+		}
+	}
 
 	void addChild( frame * );
-  void removeChild( frame* );
+	void removeChild( frame* );
 	virtual void render() const;
 	virtual frame *processLeftClick( float mx, float my );
 	virtual bool processLeftDrag( float mx, float my, float xChange, float yChange );
@@ -54,11 +55,11 @@ public:
 	virtual bool processRightClick( float mx, float my );
 	virtual bool processKey( char key, bool shift, bool alt, bool ctrl );
 	virtual void resize()
-  {
-    for( std::vector<frame*>::iterator it = children.begin(); it != children.end(); ++it )
-      if( (*it)->mustresize )
-        (*it)->resize();
-  }
+	{
+		for( std::vector<frame*>::iterator it = children.begin(); it != children.end(); ++it )
+			if( (*it)->mustresize )
+				(*it)->resize();
+	}
 	void getOffset( float &xOff, float &yOff );
 
 	bool IsHit( float pX, float pY )

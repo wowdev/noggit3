@@ -6,7 +6,7 @@
 class Texture;
 class textUI;
 namespace freetype { class font_data; };
-  
+	
 class buttonUI : public frame
 {
 protected:
@@ -22,8 +22,8 @@ public:
 	buttonUI( float x, float y, float width, float height, const std::string& pTexNormal, const std::string& pTexDown );
 	buttonUI( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
 	buttonUI( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, void (*pFunc)( frame *, int ), int pFuncParam );
-  
-  void render() const;
+	
+	void render() const;
 
 	void setLeft();
 	void setText( const std::string& pText );

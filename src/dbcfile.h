@@ -63,7 +63,7 @@ public:
 			int loc = locale;
 			if( locale == -1 )
 			{
-				assert(field < file.fieldCount -  8 );
+				assert(field < file.fieldCount -	8 );
 				for( loc = 0; loc < 8; loc++ )
 				{
 					size_t stringOffset = getUInt(field + loc);

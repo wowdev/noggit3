@@ -11,25 +11,25 @@ class ManagedItem
 {
 	int refcount;
 public:
-  //! \todo make this private, create getName().
+	//! \todo make this private, create getName().
 	std::string name;
 
-  ManagedItem( const std::string& n ) : refcount( 0 )
-  {
-    name = n;
-    std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-  }
+	ManagedItem( const std::string& n ) : refcount( 0 )
+	{
+		name = n;
+		std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+	}
 	virtual ~ManagedItem() { }
 
-  void addref()
-  {
-    ++refcount;
-  }
+	void addref()
+	{
+		++refcount;
+	}
 
-  bool delref()
-  {
-    return --refcount == 0;
-  }
+	bool delref()
+	{
+		return --refcount == 0;
+	}
 };
 
 template <class IDTYPE,class MANAGEDITEM>
@@ -40,63 +40,63 @@ public:
 	static std::map<IDTYPE, MANAGEDITEM*> items;
 
 	static IDTYPE add( const std::string& name );
-  
-  static void doDelete( IDTYPE id )
-  {
-    if( items[id] )
-    {
-      delete items[id];
-      items[id] = NULL;
-    }
-  }
-  
-  static void del( IDTYPE id )
-  {
-    if( items[id]->delref() )
-    {
-      names.erase( names.find( items[id]->name ) );
-      
-      doDelete( id );
-      
-      items.erase( items.find( id ) );
-    }
-  }
-  static void delbyname( const std::string& name )
-  {
-    std::string name_ = name;
-    std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
-    
-    if( has( name_ ) )
-    {
-      del( get( name_ ) );
-    }
-  }
-  static bool has( const std::string& name )
-  {
-    std::string name_ = name;
-    std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
-    
-    return( names.find( name_ ) != names.end() );
-  }
-  static IDTYPE get( const std::string& name )
-  {
-    std::string name_ = name;
-    std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
-    
-    return names[name_];
-  }
+	
+	static void doDelete( IDTYPE id )
+	{
+		if( items[id] )
+		{
+			delete items[id];
+			items[id] = NULL;
+		}
+	}
+	
+	static void del( IDTYPE id )
+	{
+		if( items[id]->delref() )
+		{
+			names.erase( names.find( items[id]->name ) );
+			
+			doDelete( id );
+			
+			items.erase( items.find( id ) );
+		}
+	}
+	static void delbyname( const std::string& name )
+	{
+		std::string name_ = name;
+		std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
+		
+		if( has( name_ ) )
+		{
+			del( get( name_ ) );
+		}
+	}
+	static bool has( const std::string& name )
+	{
+		std::string name_ = name;
+		std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
+		
+		return( names.find( name_ ) != names.end() );
+	}
+	static IDTYPE get( const std::string& name )
+	{
+		std::string name_ = name;
+		std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
+		
+		return names[name_];
+	}
 
 protected:
-  static void do_add( const std::string& name, IDTYPE id, MANAGEDITEM* item )
-  {
-    std::string name_ = name;
-    std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
-    
-    names[name_] = id;
-    item->addref();
-    item->name = name_;
-    items[id] = item;
-  }
+	static void do_add( const std::string& name, IDTYPE id, MANAGEDITEM* item )
+	{
+		std::string name_ = name;
+		std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
+		
+		names[name_] = id;
+		item->addref();
+		item->name = name_;
+		items[id] = item;
+	}
 };
 
 #endif

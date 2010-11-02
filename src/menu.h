@@ -20,18 +20,18 @@ class MapView;
 
 struct MapEntry
 {
-  int mapID;
+	int mapID;
 	std::string name;
-  int areaType;
+	int areaType;
 };
 
 struct BookmarkEntry
 {
-  int mapID;
+	int mapID;
 	std::string name;
 	Vec3D pos;
 	float ah;
-  float av;
+	float av;
 };
 
 class Menu : public AppState
@@ -41,14 +41,14 @@ private:
 	statusBar* mGUIStatusbar;
 	winCredits* mGUICreditsWindow;
 	minimapWindowUI* mGUIMinimapWindow;
-  menuBar* mGUImenuBar;
+	menuBar* mGUImenuBar;
 
 	std::vector<MapEntry> mMaps;
 	std::vector<BookmarkEntry> mBookmarks;
 
 	Model* mBackgroundModel;
 	int mLastBackgroundId;
-  
+	
 	void createBookmarkList();
 	void createMapList();
 	void buildMenuBar();
@@ -65,13 +65,13 @@ public:
 
 	void keypressed( SDL_KeyboardEvent *e );
 	void mouseclick( SDL_MouseButtonEvent *e );
-  
-  //! \todo Make private when new buttons are implemented.
+	
+	//! \todo Make private when new buttons are implemented.
 	void loadMap( int mapID );
 	void loadBookmark( int bookmarkID );
-  
-  //! \brief Enter the the map on the given location.
-  void enterMapAt( Vec3D pos, bool autoHeight = true, float av = -30.0f, float ah = -90.0f );
+	
+	//! \brief Enter the the map on the given location.
+	void enterMapAt( Vec3D pos, bool autoHeight = true, float av = -30.0f, float ah = -90.0f );
 };
 
 #endif

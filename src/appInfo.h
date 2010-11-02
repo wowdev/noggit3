@@ -4,6 +4,7 @@
 #include <string>
 
 #include "window.h"
+#include "FreeType.h" // fonts.
 
 class Gui;
 class textUI;
@@ -13,11 +14,11 @@ class appInfo:public window
 private:
 	Gui *mainGui;
 	textUI *theInfos;
-  std::string mModelToLoad;
+	std::string mModelToLoad;
 
 public:
 	appInfo(float x, float y, float width, float height, Gui *setGui);
-  ~appInfo();
+	~appInfo();
 	void setText( const std::string& t );
 };
 #endif

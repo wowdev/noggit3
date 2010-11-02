@@ -1,4 +1,4 @@
-//! \todo  Use boost::filesystem.
+//! \todo	Use boost::filesystem.
 #ifdef _WIN32
 #include <direct.h>
 #else
@@ -50,8 +50,8 @@ Directory::Directory( const std::string& pName )
 
 Directory * Directory::AddSubDirectory( const std::string& pName )
 {
-  std::string name = pName;
-  
+	std::string name = pName;
+	
 	Directory * lCurrentDir = this;
 	size_t found;
 	found = name.find_last_of( "/\\" );

@@ -257,7 +257,7 @@ struct ModelCameraDef {
 
 struct ModelParticleParams {
 	FakeAnimationBlock colors; 	// (short, vec3f)	This one points to 3 floats defining red, green and blue.
-	FakeAnimationBlock opacity;      // (short, short)		Looks like opacity (short), Most likely they all have 3 timestamps for {start, middle, end}.
+	FakeAnimationBlock opacity;			// (short, short)		Looks like opacity (short), Most likely they all have 3 timestamps for {start, middle, end}.
 	FakeAnimationBlock sizes; 		// (short, vec2f)	It carries two floats per key. (x and y scale)
 	int32_t d[2];
 	FakeAnimationBlock Intensity; 	// Some kind of intensity values seen: 0,16,17,32(if set to different it will have high intensity) (short, short)
@@ -279,7 +279,7 @@ struct ModelParticleParams {
 #define	MODELPARTICLE_DONOTTRAIL			0x10
 #define	MODELPARTICLE_DONOTBILLBOARD	0x1000
 struct ModelParticleEmitterDef {
-  int32_t id;
+	int32_t id;
 	int32_t flags;
 	Vec3D pos; // The position. Relative to the following bone.
 	int16_t bone; // The bone its attached to.

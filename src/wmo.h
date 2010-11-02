@@ -169,11 +169,11 @@ private:
 	static int baseid;
 public:
 	static WMOIDTYPE add(const std::string& name);
-  
-  static int nextID()
-  {
-    return baseid++;
-  }
+	
+	static int nextID()
+	{
+		return baseid++;
+	}
 };
 
 

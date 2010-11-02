@@ -32,10 +32,10 @@ void menuBar::render() const
 
 	glColor3f(1.0f,1.0f,1.0f);
 
-  Texture::setActiveTexture();
-  Texture::enableTexture();
-  
-  texture->render();
+	Texture::setActiveTexture();
+	Texture::enableTexture();
+	
+	texture->render();
 
 	//Draw Top Side
 	glBegin(GL_TRIANGLE_STRIP);	
@@ -48,8 +48,8 @@ void menuBar::render() const
 		glTexCoord2f(0.375f,0.0f);
 		glVertex2f(video.xres,17.0f);
 	glEnd();
-  
-  Texture::disableTexture();
+	
+	Texture::disableTexture();
 }
 
 void menuBar::resize()
@@ -86,13 +86,13 @@ MenuPane* menuBar::GetMenu( const std::string& pName )
 
 frame* menuBar::processLeftClick(float mx,float my)
 {
-  for( std::vector<frame*>::iterator it = children.begin(); it != children.end(); ++it )
-  {
+	for( std::vector<frame*>::iterator it = children.begin(); it != children.end(); ++it )
+	{
 		if( !(*it)->hidden && ( (*it)->x < mx ) && ( ( (*it)->x + (*it)->width ) > mx ) && ( (*it)->y < my ) && ( ( (*it)->y + (*it)->height ) > my ) )
 		{
 			return (*it)->processLeftClick( mx - (*it)->x, my - (*it)->y );
 		}
-  }
+	}
 	CloseAll();	
 	return 0;
 }
@@ -135,7 +135,7 @@ frame* MenuItemButton::processLeftClick( float pX, float pY )
 		this->clickFunc( this, this->id );
 
 	if(!Environment::getInstance()->CtrlDown) 
-    this->mParent->Close();
+		this->mParent->Close();
 
 	return this;
 }
@@ -176,32 +176,32 @@ void MenuItemToggle::render() const
 	glColor3f( 1.0f, 1.0f, 1.0f );
 
 	glPushMatrix();
-  glTranslatef( x, y, 0.0f );
-  
-  Texture::setActiveTexture();
-  Texture::enableTexture();
-  
+	glTranslatef( x, y, 0.0f );
+	
+	Texture::setActiveTexture();
+	Texture::enableTexture();
+	
 	if( !clicked )
-    texture->render();
-  else
-    textureDown->render();
+		texture->render();
+	else
+		textureDown->render();
 
-  glBegin( GL_TRIANGLE_STRIP );
-  glTexCoord2f( 0.0f, 0.0f );
-  glVertex2f( 0.0f, 0.0f );
-  glTexCoord2f( 1.0f, .0f );
-  glVertex2f( width, 0.0f );
-  glTexCoord2f( 0.0f, 1.0f );
-  glVertex2f( 0.0f, height );
-  glTexCoord2f( 1.0f, 1.0f );
-  glVertex2f( width, height );
-  glEnd();
-  
-  Texture::disableTexture();
-  
-  text->render();
+	glBegin( GL_TRIANGLE_STRIP );
+	glTexCoord2f( 0.0f, 0.0f );
+	glVertex2f( 0.0f, 0.0f );
+	glTexCoord2f( 1.0f, .0f );
+	glVertex2f( width, 0.0f );
+	glTexCoord2f( 0.0f, 1.0f );
+	glVertex2f( 0.0f, height );
+	glTexCoord2f( 1.0f, 1.0f );
+	glVertex2f( width, height );
+	glEnd();
+	
+	Texture::disableTexture();
+	
+	text->render();
 	mMyCheckbox->render();
-  
+	
 	glPopMatrix();
 }
 

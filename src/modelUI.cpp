@@ -24,7 +24,7 @@ void modelUI::render() const
 
 	glPushMatrix();
 
-  static const float rot = 45.0f;
+	static const float rot = 45.0f;
 
 	glTranslatef( x + width / 2.0f, y + height / 2.0f, 0.0f );
 	glRotatef( rot, 0.0f, 1.0f, 0.0f );

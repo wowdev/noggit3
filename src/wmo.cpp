@@ -163,14 +163,14 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 				{
 					LogDebug << "SKYBOX:" << std::endl;
 
-          if( MPQFile::exists( path ) )
-          {
-            skybox = (Model*)ModelManager::items[ModelManager::add(path)];
-          }
-          else
-          {
-            skybox = NULL;
-          }
+					if( MPQFile::exists( path ) )
+					{
+						skybox = (Model*)ModelManager::items[ModelManager::add(path)];
+					}
+					else
+					{
+						skybox = NULL;
+					}
 				}
 			}
 		}
@@ -208,11 +208,11 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 	}
 
 	f.close();
-  if( texbuf )
-  {
-    delete[] texbuf;
-    texbuf = NULL;
-  }
+	if( texbuf )
+	{
+		delete[] texbuf;
+		texbuf = NULL;
+	}
 
 	for (unsigned int i=0; i<nGroups; ++i) 
 		groups[i].initDisplayList();
@@ -220,32 +220,32 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 
 WMO::~WMO()
 {
-  LogDebug << "Unloading WMO \"" << name << "\"." << std::endl;
-  if(groups)
-  {
-    delete[] groups;
-    groups = NULL;
-  }
+	LogDebug << "Unloading WMO \"" << name << "\"." << std::endl;
+	if(groups)
+	{
+		delete[] groups;
+		groups = NULL;
+	}
 
-  for (std::vector<std::string>::iterator it = textures.begin(); it != textures.end(); ++it) {
-    TextureManager::delbyname(*it);
-  }
+	for (std::vector<std::string>::iterator it = textures.begin(); it != textures.end(); ++it) {
+		TextureManager::delbyname(*it);
+	}
 
-  for (std::vector<std::string>::iterator it = models.begin(); it != models.end(); ++it) {
-    ModelManager::delbyname(*it);
-  }
+	for (std::vector<std::string>::iterator it = models.begin(); it != models.end(); ++it) {
+		ModelManager::delbyname(*it);
+	}
 
-  if( mat )
-  {
-    delete[] mat;
-    mat = NULL;
-  }
-  
-  if (skybox) {
-    //delete skybox;
-    ModelManager::del(sbid);
-    skybox = NULL;
-  }
+	if( mat )
+	{
+		delete[] mat;
+		mat = NULL;
+	}
+	
+	if (skybox) {
+		//delete skybox;
+		ModelManager::del(sbid);
+		skybox = NULL;
+	}
 }
 
 // model.cpp
@@ -261,15 +261,15 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 	}
 
 	for (unsigned int i=0; i<nGroups; ++i) 
-  {
-    groups[i].draw(ofs, rot);
-      
-    if ( gWorld->drawdoodads)
-    {
+	{
+		groups[i].draw(ofs, rot);
+			
+		if ( gWorld->drawdoodads)
+		{
 			groups[i].drawDoodads(doodadset, ofs, rot);
-    }
+		}
 		
-    groups[i].drawLiquid();
+		groups[i].drawLiquid();
 	}
 
 	if(highlight && false)
@@ -405,7 +405,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_LIGHTING);
-	} // end bounding  boxes.*/
+	} // end bounding	boxes.*/
 
 	if(false && groupboxes)
 	{
@@ -513,22 +513,22 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 
 void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot) const
 {
-  for (unsigned int i=0; i<nGroups; ++i) {
+	for (unsigned int i=0; i<nGroups; ++i) {
 		groups[i].draw(ofs, rot);
-    
-    if (gWorld->drawdoodads) {
+		
+		if (gWorld->drawdoodads) {
 			groups[i].drawDoodadsSelect(doodadset, ofs, rot);
 		}
-    
+		
 		groups[i].drawLiquid();
 	}
 }
 
 void WMO::drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const
 {
-  if( skybox && pCamera.IsInsideOf( pLower, pUpper ) ) 
+	if( skybox && pCamera.IsInsideOf( pLower, pUpper ) ) 
 	{
-		//! \todo  only draw sky if we are "inside" the WMO... ?
+		//! \todo	only draw sky if we are "inside" the WMO... ?
 
 		// We need to clear the depth buffer, because the skybox model can (will?)
 		// require it *. This is inefficient - is there a better way to do this?
@@ -545,7 +545,7 @@ void WMO::drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const
 		glTranslatef(o.x, o.y, o.z);
 		const float sc = 2.0f;
 		glScalef(sc,sc,sc);
-        skybox->draw();
+				skybox->draw();
 		glPopMatrix();
 		gWorld->hadSky = true;
 		glEnable(GL_DEPTH_TEST);
@@ -582,8 +582,8 @@ void WMOLight::init(MPQFile &f)
 	// rgb? bgr? hm
 	float fa = ((color & 0xff000000) >> 24) / 255.0f;
 	float fr = ((color & 0x00ff0000) >> 16) / 255.0f;
-	float fg = ((color & 0x0000ff00) >>  8) / 255.0f;
-	float fb = ((color & 0x000000ff)      ) / 255.0f;
+	float fg = ((color & 0x0000ff00) >>	8) / 255.0f;
+	float fb = ((color & 0x000000ff)			) / 255.0f;
 
 	fcolor = Vec4D(fr,fg,fb,fa);
 	fcolor *= intensity;
@@ -646,9 +646,9 @@ void WMOGroup::init(WMO *_wmo, MPQFile &f, int _num, char *names)
 	int nameOfs;
 	f.read(&nameOfs,4);
 
-	//! \todo  get proper name from group header and/or dbc?
+	//! \todo	get proper name from group header and/or dbc?
 	if (nameOfs > 0) {
-        name = std::string(names + nameOfs);
+				name = std::string(names + nameOfs);
 	} else name = "(no name)";
 
 	ddr = 0;
@@ -673,7 +673,7 @@ void setGLColor(unsigned int col)
 	r = (col & 0x00FF0000) >> 16;
 	g = (col & 0x0000FF00) >> 8;
 	b = (col & 0x000000FF);
-    glColor4ub(r,g,b,1);
+		glColor4ub(r,g,b,1);
 }
 
 Vec4D colorFromInt(unsigned int col) {
@@ -685,7 +685,7 @@ Vec4D colorFromInt(unsigned int col) {
 	return Vec4D(r/255.0f, g/255.0f, b/255.0f, a/255.0f);
 }
 struct WMOGroupHeader {
-    int nameStart, nameStart2, flags;
+		int nameStart, nameStart2, flags;
 	float box1[3], box2[3];
 	short portalStart, portalCount;
 	short batches[4];
@@ -696,7 +696,7 @@ struct WMOGroupHeader {
 void WMOGroup::initDisplayList()
 {
 	Vec3D *vertices = NULL;
-  Vec3D *normals = NULL;
+	Vec3D *normals = NULL;
 	Vec2D *texcoords = NULL;
 	unsigned short *indices = NULL;
 	struct SMOPoly *materials = NULL;
@@ -707,12 +707,12 @@ void WMOGroup::initDisplayList()
 	short *useLights = 0;
 	int nLR = 0;
 
-  
-  //! \todo do this the std:: way. also: fixed sizes. arggh.
+	
+	//! \todo do this the std:: way. also: fixed sizes. arggh.
 	// open group file
 	char temp[256];
 	strcpy(temp, wmo->name.c_str());
-    temp[wmo->name.length()-4] = 0;
+		temp[wmo->name.length()-4] = 0;
 	
 	char fname[256];
 	sprintf(fname,"%s_%03d.wmo",temp, num);
@@ -724,9 +724,9 @@ void WMOGroup::initDisplayList()
 	}
 	
 	/*if(!gf.isExternal())
-		gLog("    Loading WMO from MPQ %s\n", fname);
+		gLog("		Loading WMO from MPQ %s\n", fname);
 	else
-		gLog("    Loading WMO from File %s\n", fname);
+		gLog("		Loading WMO from File %s\n", fname);
 	*/
 	gf.seek(0x14);
 	// read header
@@ -761,12 +761,12 @@ void WMOGroup::initDisplayList()
 		}
 		else if ( fourcc == 'MOVI' ) {
 			// indices
-			indices =  (unsigned short*)gf.getPointer();
+			indices =	(unsigned short*)gf.getPointer();
 		}
 		else if ( fourcc == 'MOVT' ) {
 			nVertices = (int)size / 12;
 			// let's hope it's padded to 12 bytes, not 16...
-			vertices =  (Vec3D*)gf.getPointer();
+			vertices =	(Vec3D*)gf.getPointer();
 			VertexBoxMin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
 			VertexBoxMax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
 			rad = 0;
@@ -783,14 +783,14 @@ void WMOGroup::initDisplayList()
 			rad = (VertexBoxMax-center).length();
 		}
 		else if ( fourcc == 'MONR' ) {
-			normals =  (Vec3D*)gf.getPointer();
+			normals =	(Vec3D*)gf.getPointer();
 		}
 		else if ( fourcc == 'MOTV' ) {
-			texcoords =  (Vec2D*)gf.getPointer();
+			texcoords =	(Vec2D*)gf.getPointer();
 		}
 		else if ( fourcc == 'MOLR' ) {
 			nLR = (int)size / 2;
-			useLights =  (short*)gf.getPointer();
+			useLights =	(short*)gf.getPointer();
 		}
 		else if ( fourcc == 'MODR' ) {
 			nDoodads = (int)size / 2;
@@ -813,12 +813,12 @@ void WMOGroup::initDisplayList()
 
 			//gLog("WMO Liquid: %dx%d, %dx%d, (%f,%f,%f) %d\n", hlq.X, hlq.Y, hlq.A, hlq.B, hlq.pos.x, hlq.pos.y, hlq.pos.z, hlq.type);
 
-      // Do not even try to render water..
+			// Do not even try to render water..
 			//lq = new Liquid(hlq.A, hlq.B, Vec3D(hlq.pos.x, hlq.pos.z, -hlq.pos.y));
 			//lq->initFromWMO(gf, wmo->mat[hlq.type], (flags&0x2000)!=0);
 		}
 
-		//! \todo  figure out/use MFOG ?
+		//! \todo	figure out/use MFOG ?
 
  		gf.seek((int)nextpos);
 	}
@@ -864,7 +864,7 @@ void WMOGroup::initDisplayList()
 
 		glNewList(list, GL_COMPILE);
 
-        // setup texture
+				// setup texture
 		glBindTexture(GL_TEXTURE_2D, mat->tex);
 
 		bool atest = (mat->transparent) != 0;
@@ -872,7 +872,7 @@ void WMOGroup::initDisplayList()
 		if (atest) {
 			glEnable(GL_ALPHA_TEST);
 			float aval = 0;
-            if (mat->flags & 0x80) aval = 0.3f;
+						if (mat->flags & 0x80) aval = 0.3f;
 			if (mat->flags & 0x01) aval = 0.0f;
 			glAlphaFunc(GL_GREATER, aval);
 		}
@@ -896,7 +896,7 @@ void WMOGroup::initDisplayList()
 		*/
 
 		if (overbright) {
-			//! \todo  use emissive color from the WMO Material instead of 1,1,1,1
+			//! \todo	use emissive color from the WMO Material instead of 1,1,1,1
 			GLfloat em[4] = {1,1,1,1};
 			glMaterialfv(GL_FRONT, GL_EMISSION, em);
 		}
@@ -906,7 +906,7 @@ void WMOGroup::initDisplayList()
 		for (int t=0, i=batch->indexStart; t<batch->indexCount; t++,++i) {
 			int a = indices[i];
 			if (indoor && hascv) {
-	            setGLColor(cv[a]);
+							setGLColor(cv[a]);
 			}
 			glNormal3f(normals[a].x, normals[a].z, -normals[a].y);
 			glTexCoord2fv(texcoords[a]);
@@ -1113,13 +1113,13 @@ void WMOGroup::drawLiquid()
 	if (!visible) return;
 
 	// draw liquid
-	//! \todo  culling for liquid boundingbox or something
+	//! \todo	culling for liquid boundingbox or something
 	if (lq) {
 		setupFog();
 		if (outdoorLights) {
 			gWorld->outdoorLights(true);
 		} else {
-			//! \todo  setup some kind of indoor lighting... ?
+			//! \todo	setup some kind of indoor lighting... ?
 			gWorld->outdoorLights(false);
 			glEnable(GL_LIGHT2);
 			glLightfv(GL_LIGHT2, GL_AMBIENT, Vec4D(0.1f,0.1f,0.1f,1));
@@ -1153,15 +1153,15 @@ WMOGroup::~WMOGroup()
 	if (nBatches && lists.size()) glDeleteLists(lists[0].first, nBatches);
 
 	if (nDoodads)
-  {
-    delete[] ddr;
-    ddr = NULL;
-  }
+	{
+		delete[] ddr;
+		ddr = NULL;
+	}
 	if (lq)
-  {
-    delete lq;
-    lq = NULL;
-  }
+	{
+		delete lq;
+		lq = NULL;
+	}
 }
 
 
@@ -1193,13 +1193,13 @@ void WMOFog::setup()
 
 int WMOManager::baseid = 0;
 
-template <class IDTYPE,class MANAGEDITEM> std::map<std::string, WMOIDTYPE> Manager<WMOIDTYPE,WMO>::names;
-template <class IDTYPE,class MANAGEDITEM> std::map<WMOIDTYPE, WMO*> Manager<WMOIDTYPE,WMO>::items;
+template <> std::map<std::string, WMOIDTYPE> Manager<WMOIDTYPE,WMO>::names;
+template <> std::map<WMOIDTYPE, WMO*> Manager<WMOIDTYPE,WMO>::items;
 
 WMOIDTYPE WMOManager::add(const std::string& name)
 {
 	int id;
-  std::string name_ = name;
+	std::string name_ = name;
 	std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
 	if( names.find( name_ ) != names.end() ) 
 	{
@@ -1211,6 +1211,6 @@ WMOIDTYPE WMOManager::add(const std::string& name)
 	// load new
 	WMO *wmo = new WMO(name);
 	id = nextID();
-    do_add(name, id, wmo);
-    return id;
+		do_add(name, id, wmo);
+		return id;
 }

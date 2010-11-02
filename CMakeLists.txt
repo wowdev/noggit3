@@ -5,9 +5,9 @@ PROJECT( Noggit )
 
 # Additional search paths for find_package.
 if( WIN32 )
-  # Set this to more paths you windows guys need.
-  SET( CMAKE_INCLUDE_PATH "C:/Program Files/Microsoft Visual Studio 9.0/VC/include/" "C:/Program Files/Microsoft SDKs/Windows/v6.0A/include/" )
-  SET( CMAKE_LIBRARY_PATH "C:/Program Files/Microsoft Visual Studio 9.0/VC/lib/" "C:/Program Files/Microsoft SDKs/Windows/v6.0A/lib/" )
+	# Set this to more paths you windows guys need.
+	SET( CMAKE_INCLUDE_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include/" "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/include/" )
+	SET( CMAKE_LIBRARY_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/" "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/lib/" )
 endif( WIN32 )
 
 # Our own FindModule.cmake scripts.
@@ -21,22 +21,22 @@ FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( OpenGL DEFAULT_MSG OPENGL_LIBRARIES OPENGL_INCLUDE_DIR )
 
 # Hacky boost finding.
-SET( Boost_USE_STATIC_LIBS  ON )
+SET( Boost_USE_STATIC_LIBS	ON )
 SET( Boost_USE_MULTITHREADED OFF )
 #SET( BOOST_LIBRARYDIR /usr/local/lib )
 
 IF( WIN32 )
-  SET( Boost_FIND_QUIETLY ON )
-  FIND_PACKAGE( Boost )
-  SET( Boost_FIND_QUIETLY OFF )
-  SET( BOOST_ROOT ${Boost_INCLUDE_DIR} )
+	SET( Boost_FIND_QUIETLY ON )
+	FIND_PACKAGE( Boost )
+	SET( Boost_FIND_QUIETLY OFF )
+	SET( BOOST_ROOT ${Boost_INCLUDE_DIR} )
 ENDIF( WIN32 )
 
-FIND_PACKAGE( Boost COMPONENTS thread REQUIRED )
+#FIND_PACKAGE( Boost COMPONENTS thread REQUIRED )
 
 IF( WIN32 )
-  STRING( REGEX REPLACE "/[^/]*$" "" Boost_STRIPPED_LIB_DIR "${Boost_THREAD_LIBRARY_DEBUG}" )
-  LINK_DIRECTORIES( ${Boost_STRIPPED_LIB_DIR} )
+	STRING( REGEX REPLACE "/[^/]*$" "" Boost_STRIPPED_LIB_DIR "${Boost_THREAD_LIBRARY_DEBUG}" )
+	LINK_DIRECTORIES( ${Boost_STRIPPED_LIB_DIR} )
 ENDIF( WIN32 )
 
 FIND_PACKAGE( GLEW REQUIRED )
@@ -55,48 +55,48 @@ FILE( GLOB_RECURSE SourceFiles "src/*.cpp" )
 
 # Search for stdint.h, present on unix, missing on windows.
 IF( WIN32 )
-  SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/win/" )
+	SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/win/" )
 ENDIF( WIN32 )
 
 # If we are on OSX, we need additional files for SDL to work.
 IF( APPLE )
-  MESSAGE( STATUS "Also using osx/SDLmain.m" )
-  SET( SourceFiles ${SourceFiles} "${CMAKE_SOURCE_DIR}/include/osx/SDLmain.m" )
+	MESSAGE( STATUS "Also using osx/SDLmain.m" )
+	SET( SourceFiles ${SourceFiles} "${CMAKE_SOURCE_DIR}/include/osx/SDLmain.m" )
 ENDIF( APPLE )
 
 # Log to console for easier debugging.
-OPTION( NOGGIT_LOGTOCONSOLE   "Log to console instead of log.txt?" OFF )
+OPTION( NOGGIT_LOGTOCONSOLE	 "Log to console instead of log.txt?" OFF )
 
 IF( NOGGIT_LOGTOCONSOLE )
-  MESSAGE( STATUS "And writing log to console instead of log.txt" )
-  ADD_DEFINITIONS( -DDEBUG__LOGGINGTOCONSOLE )
+	MESSAGE( STATUS "And writing log to console instead of log.txt" )
+	ADD_DEFINITIONS( -DDEBUG__LOGGINGTOCONSOLE )
 ENDIF( NOGGIT_LOGTOCONSOLE )
 
-OPTION( ALL_WARNINGS   "Enable all warnings?" OFF )
+OPTION( ALL_WARNINGS	 "Enable all warnings?" OFF )
 
 IF( ALL_WARNINGS )
-  MESSAGE( STATUS "Spilling out mass warnings." )
-  IF( WIN32 )
-    ADD_DEFINITIONS( /W4 /Wall /Wp64 )
-  ELSE( WIN32 )
-    ADD_DEFINITIONS( -W -Wall -Wshadow )
-  ENDIF( WIN32 )
+	MESSAGE( STATUS "Spilling out mass warnings." )
+	IF( WIN32 )
+		ADD_DEFINITIONS( /W4 /Wall /Wp64 )
+	ELSE( WIN32 )
+		ADD_DEFINITIONS( -W -Wall -Wshadow )
+	ENDIF( WIN32 )
 ENDIF( ALL_WARNINGS )
 
 # No console window shown on launch.
-IF ( WIN32 )
-  SET_TARGET_PROPERTIES( noggit PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS" )
-ENDIF( WIN32 )
+#IF ( WIN32 )
+#	SET_TARGET_PROPERTIES( noggit PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS" )
+#ENDIF( WIN32 )
 
 # And do the job.
 INCLUDE_DIRECTORIES( ${IncludeDirectories} )
 IF( APPLE )
-  ADD_EXECUTABLE( noggit MACOSX_BUNDLE  ${HeaderFiles} ${SourceFiles} "${CMAKE_SOURCE_DIR}/bin/fonts/arial.ttf" "${CMAKE_SOURCE_DIR}/media/noggit.icns" )
-  SET_TARGET_PROPERTIES( noggit PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/media/Info.plist" )
-  SET_SOURCE_FILES_PROPERTIES( "${CMAKE_SOURCE_DIR}/bin/fonts/arial.ttf" PROPERTIES MACOSX_PACKAGE_LOCATION MacOS/fonts )
-  SET_SOURCE_FILES_PROPERTIES( "${CMAKE_SOURCE_DIR}/media/noggit.icns" PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
+	ADD_EXECUTABLE( noggit MACOSX_BUNDLE	${HeaderFiles} ${SourceFiles} "${CMAKE_SOURCE_DIR}/bin/fonts/arial.ttf" "${CMAKE_SOURCE_DIR}/media/noggit.icns" )
+	SET_TARGET_PROPERTIES( noggit PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/media/Info.plist" )
+	SET_SOURCE_FILES_PROPERTIES( "${CMAKE_SOURCE_DIR}/bin/fonts/arial.ttf" PROPERTIES MACOSX_PACKAGE_LOCATION MacOS/fonts )
+	SET_SOURCE_FILES_PROPERTIES( "${CMAKE_SOURCE_DIR}/media/noggit.icns" PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
 ELSE( APPLE )
-  ADD_EXECUTABLE( noggit  ${HeaderFiles} ${SourceFiles} )
+	ADD_EXECUTABLE( noggit	${HeaderFiles} ${SourceFiles} )
 ENDIF( APPLE )
 TARGET_LINK_LIBRARIES( noggit ${ZLIB_LIBRARIES} ${OPENGL_LIBRARIES} ${FREETYPE_LIBRARIES} ${SDL_LIBRARY} ${STORMLIB_LIBRARIES} ${Boost_LIBRARIES} ${GLEW_LIBRARY} )
 

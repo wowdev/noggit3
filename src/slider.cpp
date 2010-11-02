@@ -47,7 +47,7 @@ void slider::setText(const char *t)
 frame *slider::processLeftClick(float mx,float my)
 {
 	/*if((mx>(width*value-16))&&(mx<(width*value+16)))
-        return this;
+				return this;
 	return 0;*/
 
 	value=mx/width;
@@ -108,11 +108,11 @@ void slider::render() const
 	}
 	
 	glPushMatrix();
-  
-  Texture::setActiveTexture();
-  Texture::enableTexture();
-  
-  texture->render();
+	
+	Texture::setActiveTexture();
+	Texture::enableTexture();
+	
+	texture->render();
 	
 
 	//Draw Bottom left Corner First
@@ -218,9 +218,9 @@ void slider::render() const
 	}
 
 	glPopMatrix();
-  
-  sliderTexture->render();
-  
+	
+	sliderTexture->render();
+	
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(0.0f,0.0f);
 	glVertex2f(width*value-16.0f,height/2-16.0f);
@@ -232,7 +232,7 @@ void slider::render() const
 	glVertex2f(width*value+16.0f,height/2+16.0f);
 	glEnd();
 	
-  Texture::disableTexture();
+	Texture::disableTexture();
 
 
 	glPopMatrix();

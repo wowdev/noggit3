@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 #include <cassert>
+#include <algorithm>
+#include <iostream>
 
 #include "time.h"
 
@@ -85,21 +87,21 @@ World::World( const std::string& name ) : cx( -1 ), cz( -1 ), ex( -1 ), ez( -1 )
 
 	LogDebug << "Loading world \"" << name << "\"." << std::endl;
 
-	for( size_t j = 0; j < 64; j++ )
+	for( size_t j = 0; j < 64; ++j )
 	{
 		for( size_t i = 0; i < 64; ++i )
 		{
 			lowrestiles[j][i] = NULL;
 		}
 	}
-  
-  std::stringstream filename; 
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
-  
+	
+	std::stringstream filename; 
+	filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
+	
 	MPQFile theFile(filename.str());
 	uint32_t fourcc;
 	uint32_t size;
-  
+	
 	// - MVER ----------------------------------------------
 	
 	uint32_t version;
@@ -132,31 +134,31 @@ World::World( const std::string& name ) : cx( -1 ), cz( -1 ), ex( -1 ), ez( -1 )
 	theFile.seekRelative( 4 );
 	
 	assert( fourcc == 'MAIN' );
-  
-  /// this is the theory. Sadly, we are also compiling on 64 bit machines with size_t being 8 byte, not 4. Therefore, we can't do the same thing, Blizzard does in its 32bit executable.
-  //theFile.read( &(mTiles[0][0]), sizeof( 8 * 64 * 64 ) );
 	
-	for( int j = 0; j < 64; j++ ) 
+	/// this is the theory. Sadly, we are also compiling on 64 bit machines with size_t being 8 byte, not 4. Therefore, we can't do the same thing, Blizzard does in its 32bit executable.
+	//theFile.read( &(mTiles[0][0]), sizeof( 8 * 64 * 64 ) );
+	
+	for( int j = 0; j < 64; ++j ) 
 	{
 		for( int i = 0; i < 64; ++i ) 
 		{
 			theFile.read( &mTiles[j][i].flags, 4 );
-      theFile.seekRelative( 4 );
-      mTiles[j][i].tile = NULL;
+			theFile.seekRelative( 4 );
+			mTiles[j][i].tile = NULL;
 		}
 	}
 	
 	if( !theFile.isEof() )
 	{
-    //! \note We actually don't load WMO only worlds, so we just stop reading here, k?
-    //! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
-    
-    mHasAGlobalWMO = false;
-    
+		//! \note We actually don't load WMO only worlds, so we just stop reading here, k?
+		//! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
+		
+		mHasAGlobalWMO = false;
+		
 #ifdef __ASSERTIONBUGFIXED
 		
 		// - MWMO ----------------------------------------------
-    
+		
 		theFile.read( &fourcc, 4 );
 		theFile.read( &size, 4 );
 		
@@ -168,9 +170,9 @@ World::World( const std::string& name ) : cx( -1 ), cz( -1 ), ex( -1 ), ez( -1 )
 		mWmoFilename = wmoFilenameBuf;
 		
 		free(wmoFilenameBuf);
-    
+		
 		// - MODF ----------------------------------------------
-    
+		
 		theFile.read( &fourcc, 4 );
 		theFile.seekRelative( 4 );
 		
@@ -179,7 +181,7 @@ World::World( const std::string& name ) : cx( -1 ), cz( -1 ), ex( -1 ), ez( -1 )
 		theFile.read( &mWmoEntry, sizeof( ENTRY_MODF ) );
 		
 #endif //__ASSERTIONBUGFIXED
-    
+		
 	}
 	
 	// -----------------------------------------------------
@@ -196,9 +198,9 @@ World::World( const std::string& name ) : cx( -1 ), cz( -1 ), ex( -1 ), ez( -1 )
 
 void World::initMinimap()
 {
-  std::stringstream filename; 
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
-  
+	std::stringstream filename; 
+	filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
+	
 	MPQFile f(filename.str());
 	if (f.isEof()) {
 		LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
@@ -245,7 +247,7 @@ void World::initMinimap()
 			// as alpha is unused, maybe I should try 24bpp? :(
 			short tilebuf[17*17];
 
-			for (int j=0; j<64; j++) {
+			for (int j=0; j<64; ++j) {
 				for (int i=0; i<64; ++i) {
 					if (ofsbuf[j][i]) {
 						f.seek(ofsbuf[j][i]+8);
@@ -324,7 +326,7 @@ void World::initMinimap()
 										t = (hval-1200) / 600.0f;
 									}
 
-									//! \todo  add a regular palette here
+									//! \todo	add a regular palette here
 
 									r = (unsigned char)(r2*t + r1*(1.0f-t));
 									g = (unsigned char)(g2*t + g1*(1.0f-t));
@@ -353,7 +355,7 @@ After each MARE chunk there follows a MAHO (MapAreaHOles) chunk. It may be left 
 Its an array of 16 shorts. Each short is a bitmask. If the bit is not set, there is a hole at this position.
 */
 		} 
-	/*	else  {
+	/*	else	{
 			char fcc[5];
 			f.seekRelative(-8);
 			f.read(fcc,4);
@@ -369,9 +371,9 @@ Its an array of 16 shorts. Each short is a bitmask. If the bit is not set, there
 
 void World::initLowresTerrain()
 {
-  std::stringstream filename; 
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
-  
+	std::stringstream filename; 
+	filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
+	
 	short tilebuf[17*17];
 	short tilebuf2[16*16];
 	Vec3D lowres[17][17];
@@ -397,7 +399,7 @@ void World::initLowresTerrain()
 		{
 			f.read(ofsbuf,64*64*4);
 
-			for (int j=0; j<64; j++) 
+			for (int j=0; j<64; ++j) 
 			{
 				for (int i=0; i<64; ++i) 
 				{
@@ -421,48 +423,48 @@ void World::initLowresTerrain()
 								lowsub[y][x] = Vec3D(TILESIZE*(i+(x+0.5f)/16.0f), tilebuf2[y*16+x], TILESIZE*(j+(y+0.5f)/16.0f));
 							}
 						}
-            
-            lowrestiles[j][i] = new OpenGL::CallList();
-            lowrestiles[j][i]->startRecording();
-            
+						
+						lowrestiles[j][i] = new OpenGL::CallList();
+						lowrestiles[j][i]->startRecording();
+						
 						glBegin( GL_TRIANGLES );
 						for( size_t y = 0; y < 16; y++ )
-            {
+						{
 							for( size_t x = 0; x < 16; x++ )
-              {
+							{
 								glVertex3fv( lowres[y][x] );
-                glVertex3fv( lowsub[y][x] );
-                glVertex3fv( lowres[y][x+1] );
+								glVertex3fv( lowsub[y][x] );
 								glVertex3fv( lowres[y][x+1] );
-                glVertex3fv( lowsub[y][x] );
-                glVertex3fv( lowres[y+1][x+1] );
+								glVertex3fv( lowres[y][x+1] );
+								glVertex3fv( lowsub[y][x] );
 								glVertex3fv( lowres[y+1][x+1] );
-                glVertex3fv( lowsub[y][x]) ;
-                glVertex3fv( lowres[y+1][x] );
+								glVertex3fv( lowres[y+1][x+1] );
+								glVertex3fv( lowsub[y][x]) ;
 								glVertex3fv( lowres[y+1][x] );
-                glVertex3fv( lowsub[y][x] );
-                glVertex3fv( lowres[y][x] );
+								glVertex3fv( lowres[y+1][x] );
+								glVertex3fv( lowsub[y][x] );
+								glVertex3fv( lowres[y][x] );
 							}
 						}
 						glEnd();
 						
-            lowrestiles[j][i]->endRecording();
-            
+						lowrestiles[j][i]->endRecording();
+						
 						/* OLD:
-             // draw tiles 16x16?
-             glBegin(GL_TRIANGLE_STRIP);
-             for (int y=0; y<16; y++) {
-             // end jump
-             if (y>0) glVertex3fv(lowres[y][0]);
-             for (int x=0; x<17; x++) {
-             glVertex3fv(lowres[y][x]);
-             glVertex3fv(lowres[y+1][x]);
-             }
-             // start jump
-             if (y<15) glVertex3fv(lowres[y+1][16]);
-             }
-             glEnd();
-             */
+						 // draw tiles 16x16?
+						 glBegin(GL_TRIANGLE_STRIP);
+						 for (int y=0; y<16; y++) {
+						 // end jump
+						 if (y>0) glVertex3fv(lowres[y][0]);
+						 for (int x=0; x<17; x++) {
+						 glVertex3fv(lowres[y][x]);
+						 glVertex3fv(lowres[y+1][x]);
+						 }
+						 // start jump
+						 if (y<15) glVertex3fv(lowres[y+1][16]);
+						 }
+						 glEnd();
+						 */
 						// draw tiles 17*17+16*16
 					}
 				}
@@ -487,7 +489,7 @@ void initGlobalVBOs( GLuint &pDetailTexCoords, GLuint &pAlphaTexCoords )
 		// init texture coordinates for detail map:
 		vt = temp;
 		const float detail_half = 0.5f * detail_size / 8.0f;
-		for (int j=0; j<17; j++) {
+		for (int j=0; j<17; ++j) {
 			for (int i=0; i<((j%2)?8:9); ++i) {
 				tx = detail_size / 8.0f * i;
 				ty = detail_size / 8.0f * j * 0.5f;
@@ -507,7 +509,7 @@ void initGlobalVBOs( GLuint &pDetailTexCoords, GLuint &pAlphaTexCoords )
 		vt = temp;
 
 		const float alpha_half = 0.5f * (62.0f/64.0f) / 8.0f;
-		for (int j=0; j<17; j++) {
+		for (int j=0; j<17; ++j) {
 			for (int i=0; i<((j%2)?8:9); ++i) {
 				tx = (62.0f/64.0f) / 8.0f * i;
 				ty = (62.0f/64.0f) / 8.0f * j * 0.5f;
@@ -565,51 +567,51 @@ void World::initDisplay()
 
 World::~World()
 {
-  
-	for( int j = 0; j < 64; j++ ) 
-  {
+	
+	for( int j = 0; j < 64; ++j ) 
+	{
 		for( int i = 0; i < 64; ++i ) 
-    {
+		{
 			if( lowrestiles[j][i] )
-      {
-        delete lowrestiles[j][i];
-        lowrestiles[j][i] = NULL;
-      }
-      if( tileLoaded( j, i ) )
-      {
-        delete mTiles[j][i].tile;
-        mTiles[j][i].tile = NULL;
-      }
+			{
+				delete lowrestiles[j][i];
+				lowrestiles[j][i] = NULL;
+			}
+			if( tileLoaded( j, i ) )
+			{
+				delete mTiles[j][i].tile;
+				mTiles[j][i].tile = NULL;
+			}
 		}
 	}
 
 	if (minimap)
-  {
-    glDeleteTextures(1, &minimap);
-    minimap = 0;
-  }
+	{
+		glDeleteTextures(1, &minimap);
+		minimap = 0;
+	}
 
 	if (skies)
-  {
-    delete skies;
-    skies = NULL;
-  }
+	{
+		delete skies;
+		skies = NULL;
+	}
 	if (ol)
-  {
-    delete ol;
-    ol = NULL;
-  }
+	{
+		delete ol;
+		ol = NULL;
+	}
 
 	if (mapstrip)
-  {
-    delete[] mapstrip;
-    mapstrip = NULL;
-  }
-  if (mapstrip2)
-  {
-    delete[] mapstrip2;
-    mapstrip2 = NULL;
-  }
+	{
+		delete[] mapstrip;
+		mapstrip = NULL;
+	}
+	if (mapstrip2)
+	{
+		delete[] mapstrip2;
+		mapstrip2 = NULL;
+	}
 
 	LogDebug << "Unloaded world \"" << basename << "\"." << std::endl;
 }
@@ -621,36 +623,37 @@ inline bool oktile( int i, int j )
 
 bool World::hasTile( int pZ, int pX )
 {
-  return oktile( pZ, pX ) && ( mTiles[pZ][pX].flags & 1 );
+	return oktile( pZ, pX ) && ( mTiles[pZ][pX].flags & 1 );
 }
 
 void World::enterTile( int x, int z )
 {
-  if( !hasTile( z, x ) )
-  {
-    noadt = true;
-    return;
-  }
+	if( !hasTile( z, x ) )
+	{
+		noadt = true;
+		return;
+	}
 	
-  noadt = false;
+	noadt = false;
 
-  using std::min;
-  using std::max;
-  
+	using std::min;
+	using std::max;
+	
 	cx = x;
 	cz = z;
 	for( int i = max(cz - 2, 0); i < min(cz + 2, 64); ++i )
-  {
-		for( int j = max(cx - 2, 0); j < min(cx + 2, 64); j++ )
-    {
+	{
+		for( int j = max(cx - 2, 0); j < min(cx + 2, 64); ++j )
+		{
 			mTiles[i][j].tile = loadTile( i, j );
-    }
-  }
+		}
+	}
 
 	if( autoheight && tileLoaded( cx, cz ) ) 
 	{
 		float maxHeight = mTiles[cz][cx].tile->getMaxHeight();
-    maxHeight = std::max( maxHeight, 0.0f );
+		using std::max ;
+		maxHeight = max( maxHeight, 0.0f );
 		camera.y = maxHeight + 50.0f;
 
 		autoheight = false;
@@ -659,30 +662,30 @@ void World::enterTile( int x, int z )
 
 void World::reloadTile(int x, int z)
 {
-  if( tileLoaded( z, x ) )
-  {
-    delete mTiles[z][x].tile;
-    mTiles[z][x].tile = NULL;
-    
-    std::stringstream filename; 
-    filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
-    
-    mTiles[z][x].tile = new MapTile( x, z, filename.str(), mBigAlpha );
-    enterTile( cx, cz );
-  }
+	if( tileLoaded( z, x ) )
+	{
+		delete mTiles[z][x].tile;
+		mTiles[z][x].tile = NULL;
+		
+		std::stringstream filename; 
+		filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+		
+		mTiles[z][x].tile = new MapTile( x, z, filename.str(), mBigAlpha );
+		enterTile( cx, cz );
+	}
 }
 
 void World::saveTile(int x, int z)
 {
-  if( tileLoaded( z, x ) )
-  {
-    mTiles[z][x].tile->saveTile();
+	if( tileLoaded( z, x ) )
+	{
+		mTiles[z][x].tile->saveTile();
 	}
 }
 
 inline bool World::tileLoaded(int z, int x)
 {
-  return hasTile( z, x ) && mTiles[z][x].tile;
+	return hasTile( z, x ) && mTiles[z][x].tile;
 }
 
 MapTile* World::loadTile(int z, int x)
@@ -691,20 +694,20 @@ MapTile* World::loadTile(int z, int x)
 	{
 		return NULL;
 	}
-  
-  if( tileLoaded( z, x ) )
-  {
-    return mTiles[z][x].tile;
+	
+	if( tileLoaded( z, x ) )
+	{
+		return mTiles[z][x].tile;
 	}
-  
-  std::stringstream filename; 
-  filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
-  
-  if( !MPQFile::exists( filename.str() ) )
-  {
-    LogError << "The requested tile \"" << filename.str() << "\" does not exist! Oo" << std::endl;
-    return NULL;
-  }
+	
+	std::stringstream filename; 
+	filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+	
+	if( !MPQFile::exists( filename.str() ) )
+	{
+		LogError << "The requested tile \"" << filename.str() << "\" does not exist! Oo" << std::endl;
+		return NULL;
+	}
 
 	mTiles[z][x].tile = new MapTile( z, x, filename.str(), mBigAlpha );
 	return mTiles[z][x].tile;
@@ -842,7 +845,7 @@ void World::setupFog()
 		//FOG_COLOR
 		Vec4D fogcolor(skies->colorSet[FOG_COLOR], 1);
 		glFogfv(GL_FOG_COLOR, fogcolor);
-		//! \todo  retreive fogstart and fogend from lights.lit somehow
+		//! \todo	retreive fogstart and fogend from lights.lit somehow
 		glFogf(GL_FOG_END, fogdist);
 		glFogf(GL_FOG_START, fogdist * fogstart);
 
@@ -880,7 +883,7 @@ void World::draw()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_FOG);
 
-	int daytime = ((int)time)%2880;
+	int daytime = ((int)time) % 2880;
 	//outdoorLightStats = ol->getLightStats(daytime);
 	skies->initSky(camera, daytime);
 
@@ -912,12 +915,12 @@ void World::draw()
 		//glDisable(GL_FOG);
 		const int lrr = 2;
 		for (int i=cx-lrr; i<=cx+lrr; ++i) {
-			for (int j=cz-lrr; j<=cz+lrr; j++) {
-				//! \todo  some annoying visual artifacts when the verylowres terrain overlaps
+			for (int j=cz-lrr; j<=cz+lrr; ++j) {
+				//! \todo	some annoying visual artifacts when the verylowres terrain overlaps
 				// maptiles that are close (1-off) - figure out how to fix.
 				// still less annoying than hoels in the horizon when only 2-off verylowres tiles are drawn
 				if ( !(i==cx&&j==cz) && oktile(i,j) && lowrestiles[j][i])
-        {
+				{
 					lowrestiles[j][i]->render();
 				}
 			}
@@ -969,24 +972,24 @@ void World::draw()
 	uselowlod = drawfog;
 
 	// height map w/ a zillion texture passes
-	//! \todo  Do we need to push the matrix here?
+	//! \todo	Do we need to push the matrix here?
 	
 	glPushMatrix();
 
 	if( drawterrain )
-  {
-		for( int j = 0; j < 64; j++ )
-    {
+	{
+		for( int j = 0; j < 64; ++j )
+		{
 			for( int i = 0; i < 64; ++i )
-      {
+			{
 				if( tileLoaded( j, i ) )
-        {
+				{
 					mTiles[j][i].tile->draw();
-        }
-      }
-    }
-  }
-  
+				}
+			}
+		}
+	}
+	
 	glPopMatrix();
 
 	
@@ -1002,17 +1005,17 @@ void World::draw()
 		
 
 		setupFog();
-		for( int j = 0; j < 64; j++ )
-    {
+		for( int j = 0; j < 64; ++j )
+		{
 			for( int i = 0; i < 64; ++i )
-      {
+			{
 				if( tileLoaded( j, i ) )
-        {
+				{
 					mTiles[j][i].tile->drawLines();
 					mTiles[j][i].tile->drawMFBO();
-        }
-      }
-    }
+				}
+			}
+		}
 	}
 	
 
@@ -1079,7 +1082,7 @@ void World::draw()
 	// M2s / models	
 	if( drawmodels)
 	{
-		glEnable(GL_LIGHTING);	//! \todo  Is this needed? Or does this fuck something up?
+		glEnable(GL_LIGHTING);	//! \todo	Is this needed? Or does this fuck something up?
 		for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
 			it->second.draw();
 
@@ -1097,16 +1100,16 @@ void World::draw()
 	// TODO Steff: Liquid generates GL_OUT_OF_MEMORY
 	setupFog();
 	
-  for( int j = 0; j < 64; j++ )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        mTiles[j][i].tile->drawWater();
-      }
-    }
-  }
+	for( int j = 0; j < 64; ++j )
+	{
+		for( int i = 0; i < 64; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				mTiles[j][i].tile->drawWater();
+			}
+		}
+	}
 	
 	glColor4f(1,1,1,1);
 	glEnable(GL_BLEND);
@@ -1132,21 +1135,21 @@ void World::draw()
 
 	glColor4f(1,1,1,1);
 	glDisable(GL_COLOR_MATERIAL);
-  
 	
-  for( int j = 0; j < 64; j++ )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        mTiles[j][i].tile->drawWater();
-      }
-    }
-  }
-  
-  ex = (int)(camera.x / TILESIZE);
-  ez = (int)(camera.z / TILESIZE);
+	
+	for( int j = 0; j < 64; ++j )
+	{
+		for( int i = 0; i < 64; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				mTiles[j][i].tile->drawWater();
+			}
+		}
+	}
+	
+	ex = (int)(camera.x / TILESIZE);
+	ez = (int)(camera.z / TILESIZE);
 }
 
 void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
@@ -1182,16 +1185,16 @@ void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
 	uselowlod = drawfog;
 	if (drawterrain) 
 	{
-    for( int j = 0; j < 64; j++ )
-    {
-      for( int i = 0; i < 64; ++i )
-      {
-        if( tileLoaded( j, i ) )
-        {
-          mTiles[j][i].tile->drawSelect();
-        }
-      }
-    }
+		for( int j = 0; j < 64; ++j )
+		{
+			for( int i = 0; i < 64; ++i )
+			{
+				if( tileLoaded( j, i ) )
+				{
+					mTiles[j][i].tile->drawSelect();
+				}
+			}
+		}
 	}
 	
 	if( pOnlyMap )
@@ -1263,8 +1266,8 @@ void World::getSelection( int pSelectionMode )
 
 void World::tick(float dt)
 {
-  enterTile(ex,ez);
-  
+	enterTile(ex,ez);
+	
 	while (dt > 0.1f) {
 		ModelManager::updateEmitters(0.1f);
 		dt -= 0.1f;
@@ -1319,18 +1322,18 @@ void World::drawTileMode(float ah)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisable(GL_CULL_FACE);
 	glDepthMask(GL_FALSE);
-  
-  for( int j = 0; j < 64; j++ )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        mTiles[j][i].tile->drawTextures();
-      }
-    }
-  }
-  
+	
+	for( int j = 0; j < 64; ++j )
+	{
+		for( int i = 0; i < 64; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				mTiles[j][i].tile->drawTextures();
+			}
+		}
+	}
+	
 	glDisableClientState(GL_COLOR_ARRAY);
 	
 	glEnableClientState(GL_NORMAL_ARRAY);
@@ -1371,132 +1374,132 @@ void World::drawTileMode(float ah)
 	}
 	
 	glPopMatrix();
-  
-  ex = (int)(camera.x / TILESIZE);
-  ez = (int)(camera.z / TILESIZE);
+	
+	ex = (int)(camera.x / TILESIZE);
+	ez = (int)(camera.z / TILESIZE);
 }
 
 bool World::GetVertex(float x,float z, Vec3D *V)
 {
 	const int newX = (int)(x / TILESIZE);
 	const int newZ = (int)(z / TILESIZE);
-  
+	
 	if( !tileLoaded( newZ, newX ) ) 
 	{
 		return false;
 	}
-  
-  return mTiles[newZ][newX].tile->GetVertex(x,z,V);
+	
+	return mTiles[newZ][newX].tile->GetVertex(x,z,V);
 }
 
 void World::changeTerrain(float x, float z, float change, float radius, int BrushType)
 {
-  for( int j = 0; j < 64; j++ )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( int ty = 0; ty < 16; ty++ )
-        {
-          for( int tx = 0; tx < 16; tx++ )
-          {
-            mTiles[j][i].tile->getChunk(ty,tx)->changeTerrain(x,z,change,radius,BrushType);
-          }
-        }
-      }
-    }
-  }
-  
-  for( int j = 0; j < 64; j++ )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( int ty = 0; ty < 16; ty++ )
-        {
-          for( int tx = 0; tx < 16; tx++ )
-          {
-            mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
-          }
-        }
-      }
-    }
-  }
+	for( int j = 0; j < 64; ++j )
+	{
+		for( int i = 0; i < 64; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				for( int ty = 0; ty < 16; ++ty )
+				{
+					for( int tx = 0; tx < 16; ++tx )
+					{
+						mTiles[j][i].tile->getChunk(ty,tx)->changeTerrain(x,z,change,radius,BrushType);
+					}
+				}
+			}
+		}
+	}
+	
+	for( int j = 0; j < 64; ++j )
+	{
+		for( int i = 0; i < 64; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				for( int ty = 0; ty < 16; ++ty )
+				{
+					for( int tx = 0; tx < 16; ++tx )
+					{
+						mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
+					}
+				}
+			}
+		}
+	}
 }
 void World::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
 {
-  for( int j = 0; j < 64; j++ )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( int ty = 0; ty < 16; ty++ )
-        {
-          for( int tx = 0; tx < 16; tx++ )
-          {
-            mTiles[j][i].tile->getChunk(ty,tx)->flattenTerrain(x,z,h,remain,radius,BrushType);
-          }
-        }
-      }
-    }
-  }
-  
-  for( int j = 0; j < 64; j++ )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( int ty = 0; ty < 16; ty++ )
-        {
-          for( int tx = 0; tx < 16; tx++ )
-          {
-            mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
-          }
-        }
-      }
-    }
-  }
+	for( int j = 0; j < 64; ++j )
+	{
+		for( int i = 0; i < 64; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				for( int ty = 0; ty < 16; ++ty )
+				{
+					for( int tx = 0; tx < 16; ++tx )
+					{
+						mTiles[j][i].tile->getChunk(ty,tx)->flattenTerrain(x,z,h,remain,radius,BrushType);
+					}
+				}
+			}
+		}
+	}
+	
+	for( int j = 0; j < 64; ++j )
+	{
+		for( int i = 0; i < 64; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				for( int ty = 0; ty < 16; ++ty )
+				{
+					for( int tx = 0; tx < 16; ++tx )
+					{
+						mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
+					}
+				}
+			}
+		}
+	}
 }
 
 void World::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
-  for( int j = 0; j < 64; j++ )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( int ty = 0; ty < 16; ty++ )
-        {
-          for( int tx = 0; tx < 16; tx++ )
-          {
-            mTiles[j][i].tile->getChunk(ty,tx)->blurTerrain(x, z, remain, radius, BrushType);
-          }
-        }
-      }
-    }
-  }
-  
-  for( int j = 0; j < 64; j++ )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( int ty = 0; ty < 16; ty++ )
-        {
-          for( int tx = 0; tx < 16; tx++ )
-          {
-            mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
-          }
-        }
-      }
-    }
-  }
+	for( int j = 0; j < 64; ++j )
+	{
+		for( int i = 0; i < 64; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				for( int ty = 0; ty < 16; ++ty )
+				{
+					for( int tx = 0; tx < 16; ++tx )
+					{
+						mTiles[j][i].tile->getChunk(ty,tx)->blurTerrain(x, z, remain, radius, BrushType);
+					}
+				}
+			}
+		}
+	}
+	
+	for( int j = 0; j < 64; ++j )
+	{
+		for( int i = 0; i < 64; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				for( int ty = 0; ty < 16; ++ty )
+				{
+					for( int tx = 0; tx < 16; ++tx )
+					{
+						mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
+					}
+				}
+			}
+		}
+	}
 }
 
 bool World::paintTexture(float x, float z, brush *Brush, float strength, float pressure, int texture)
@@ -1505,114 +1508,114 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 	const int newZ = (int)(z / TILESIZE);
 
 	bool succ = false;
-  
-  for( int j = newZ - 1; j < newZ + 1; j++ )
-  {
-    for( int i = newX - 1; i < newX + 1; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( int ty = 0; ty < 16; ty++ )
-        {
-          for( int tx = 0; tx < 16; tx++ )
-          {
-            succ = mTiles[j][i].tile->getChunk(ty,tx)->paintTexture(x, z, Brush, strength, pressure, texture) || succ;
-          }
-        }
-      }
-    }
-  }
-  return succ;
+	
+	for( int j = newZ - 1; j < newZ + 1; ++j )
+	{
+		for( int i = newX - 1; i < newX + 1; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				for( int ty = 0; ty < 16; ++ty )
+				{
+					for( int tx = 0; tx < 16; ++tx )
+					{
+						succ = mTiles[j][i].tile->getChunk(ty,tx)->paintTexture(x, z, Brush, strength, pressure, texture) || succ;
+					}
+				}
+			}
+		}
+	}
+	return succ;
 }
 
 void World::eraseTextures(float x, float z)
 {
 	const int newX = (int)(x / TILESIZE);
 	const int newZ = (int)(z / TILESIZE);
-  
-  for( int j = newZ - 1; j < newZ + 1; j++ )
-  {
-    for( int i = newX - 1; i < newX + 1; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( int ty = 0; ty < 16; ty++ )
-        {
-          for( int tx = 0; tx < 16; tx++ )
-          {
-            MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
-            if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
-            {
-              chunk->eraseTextures();
-            }
-          }
-        }
-      }
-    }
-  }
+	
+	for( int j = newZ - 1; j < newZ + 1; ++j )
+	{
+		for( int i = newX - 1; i < newX + 1; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				for( int ty = 0; ty < 16; ++ty )
+				{
+					for( int tx = 0; tx < 16; ++tx )
+					{
+						MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
+						if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
+						{
+							chunk->eraseTextures();
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void World::addHole( float x, float z )
 {
 	const int newX = (int)(x / TILESIZE);
 	const int newZ = (int)(z / TILESIZE);
-  
-  for( int j = newZ - 1; j < newZ + 1; j++ )
-  {
-    for( int i = newX - 1; i < newX + 1; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( int ty = 0; ty < 16; ty++ )
-        {
-          for( int tx = 0; tx < 16; tx++ )
-          {
-            MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
-            if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
-            {
-              int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
-              int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
-              chunk->addHole( k, l );
-            }
-          }
-        }
-      }
-    }
-  }
+	
+	for( int j = newZ - 1; j < newZ + 1; ++j )
+	{
+		for( int i = newX - 1; i < newX + 1; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				for( int ty = 0; ty < 16; ++ty )
+				{
+					for( int tx = 0; tx < 16; ++tx )
+					{
+						MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
+						if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
+						{
+							int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
+							int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
+							chunk->addHole( k, l );
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void World::removeHole( float x, float z )
 {
 	const int newX = (int)(x / TILESIZE);
 	const int newZ = (int)(z / TILESIZE);
-  
-  for( int j = newZ - 1; j < newZ + 1; j++ )
-  {
-    for( int i = newX - 1; i < newX + 1; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( int ty = 0; ty < 16; ty++ )
-        {
-          for( int tx = 0; tx < 16; tx++ )
-          {
-            MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
-            if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
-            {
-              int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
-              int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
-              chunk->removeHole( k, l );
-            }
-          }
-        }
-      }
-    }
-  }
+	
+	for( int j = newZ - 1; j < newZ + 1; ++j )
+	{
+		for( int i = newX - 1; i < newX + 1; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				for( int ty = 0; ty < 16; ++ty )
+				{
+					for( int tx = 0; tx < 16; ++tx )
+					{
+						MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
+						if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
+						{
+							int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
+							int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
+							chunk->removeHole( k, l );
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void World::saveMap()
 {
-	//! \todo  Output as BLP.
+	//! \todo	Output as BLP.
 	unsigned char image[256*256*3];
 	char tfname[255];
 	MapTile *ATile;
@@ -1634,11 +1637,11 @@ void World::saveMap()
 	{
 		for(int x=0;x<64;x++)
 		{
-      if( !( mTiles[y][x].flags & 1 ) ) 
-      {
-        continue;
-      }
-      
+			if( !( mTiles[y][x].flags & 1 ) ) 
+			{
+				continue;
+			}
+			
 			ATile=loadTile(x,y);
 			glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT); 
 
@@ -1681,51 +1684,63 @@ void World::addModel( nameEntry entry, Vec3D newPos )
 {	
 	if( entry.type == eEntry_Model )
 	{
-    addM2( entry.data.model->model, newPos );
+		Log << "Try to add M2...";
+		this->addM2( entry.data.model->model, newPos );
 	}
 	else if( entry.type == eEntry_WMO )
 	{
-    addWMO( entry.data.wmo->wmo, newPos );
+		this->addWMO( entry.data.wmo->wmo, newPos );
 	}
 }
 
 void World::addM2( Model *model, Vec3D newPos )
 {
-  using std::max;
-  const int lMaxUID = max( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
-                           ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
+	Log << "Get MaxId...";
+	using std::max;
+	int temp = 0;
+	if  (mModelInstances.empty()) {
+		Log << "this is 0";
+		temp = 0;
+	}
+	else{
+		Log << "last+1";
+		temp = mModelInstances.rbegin()->first + 1;
+	}
+	const int lMaxUID = temp;
+//	( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
+//													 ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
+	Log << "Trying to add M2";
+	ModelInstance newModelis = ModelInstance();
+	newModelis.model = model;
+	newModelis.nameID = -1;
+	newModelis.d1 = lMaxUID;
+	newModelis.pos = newPos;
+	newModelis.sc = 1;
 	
-  ModelInstance newModelis;
-  newModelis.model = model;
-  newModelis.nameID = -1;
-  newModelis.d1 = lMaxUID;
-  newModelis.pos = newPos;
-  newModelis.sc = 1;
-  
-  if(Settings::getInstance()->copy_rot)
-  {
-    newModelis.dir.y += (rand() % 360 + 1);
-  }
+	if(Settings::getInstance()->copy_rot)
+	{
+		newModelis.dir.y += (rand() % 360 + 1);
+	}
 
-  if(Settings::getInstance()->copy_tile)
-  {
-    newModelis.dir.x += (rand() % 5 + 1);
-    newModelis.dir.z += (rand() % 5 + 1);
-  }
+	if(Settings::getInstance()->copy_tile)
+	{
+		newModelis.dir.x += (rand() % 5 + 1);
+		newModelis.dir.z += (rand() % 5 + 1);
+	}
 
-  if(Settings::getInstance()->copy_size)
-  {
-    newModelis.sc = newModelis.sc * (( float( rand() ) / float( RAND_MAX ) * 0.2 ) + 0.90);
-  }
-  
-  mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
+	if(Settings::getInstance()->copy_size)
+	{
+		newModelis.sc = newModelis.sc * (( float( rand() ) / float( RAND_MAX ) * 0.2 ) + 0.90);
+	}
+	Log << "Insert M2 into array...";	
+	mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
 }
 
 void World::addWMO( WMO *wmo, Vec3D newPos )
 {
-  using std::max;
-  const int lMaxUID = max( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
-                           ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
+	using std::max;
+	const int lMaxUID = max( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
+													 ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 	
 	WMOInstance newWMOis(wmo);
 	newWMOis.pos = newPos;

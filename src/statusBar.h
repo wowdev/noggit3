@@ -2,6 +2,7 @@
 #define __STATUSBAR_H
 
 #include "window.h"
+#include "FreeType.h" // fonts.
 
 class textUI;
 

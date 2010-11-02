@@ -17,7 +17,7 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pTe
 	id = 0;
 	clicked = false;
 	text = new textUI( w / 2.0f, 2.0f, &arial12, eJustifyCenter );
-  addChild( text );
+	addChild( text );
 }
 
 buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown )
@@ -32,7 +32,7 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pTe
 	id = 0;
 	clicked = false;
 	text = new textUI( w / 2.0f, 2.0f, pText, &arial12, eJustifyCenter );
-  addChild( text );
+	addChild( text );
 }
 
 buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, void (*pFunc)( frame *, int ), int pFuncParam )
@@ -47,7 +47,7 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pTe
 	id = pFuncParam;
 	clicked = false;
 	text = new textUI( w / 2.0f, 2.0f, pText, &arial12, eJustifyCenter );
-  addChild( text );
+	addChild( text );
 }
 
 void buttonUI::setLeft()
@@ -71,27 +71,27 @@ void buttonUI::render() const
 	glTranslatef( x, y, 0.0f );
 
 	glColor3f( 1.0f, 1.0f, 1.0f );
-  
-  Texture::setActiveTexture();
-  Texture::enableTexture();
+	
+	Texture::setActiveTexture();
+	Texture::enableTexture();
 
 	if( !clicked )
-    texture->render();
-  else
-    textureDown->render();
-  
-  glBegin( GL_TRIANGLE_STRIP );
-    glTexCoord2f( 0.0f, 0.0f );
-    glVertex2f( 0.0f, 0.0f );
-    glTexCoord2f( 1.0f, 0.0f );
-    glVertex2f( width, 0.0f );
-    glTexCoord2f( 0.0f, 1.0f );
-    glVertex2f( 0.0f, height );
-    glTexCoord2f( 1.0f, 1.0f );
-    glVertex2f( width, height );
-  glEnd();
+		texture->render();
+	else
+		textureDown->render();
 	
-  Texture::disableTexture();
+	glBegin( GL_TRIANGLE_STRIP );
+		glTexCoord2f( 0.0f, 0.0f );
+		glVertex2f( 0.0f, 0.0f );
+		glTexCoord2f( 1.0f, 0.0f );
+		glVertex2f( width, 0.0f );
+		glTexCoord2f( 0.0f, 1.0f );
+		glVertex2f( 0.0f, height );
+		glTexCoord2f( 1.0f, 1.0f );
+		glVertex2f( width, height );
+	glEnd();
+	
+	Texture::disableTexture();
 	
 	text->render();
 

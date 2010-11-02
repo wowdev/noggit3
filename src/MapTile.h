@@ -15,50 +15,50 @@ class MapTile
 public:
 	MapTile( int x0, int z0, const std::string& pFilename, bool pBigAlpha );
 	~MapTile();
-  
-  //! \brief Get the maximum height of terrain on this map tile.
-  float getMaxHeight();
-  
-  //! \brief Get chunk for sub offset x,z.
-  MapChunk* getChunk( unsigned int x, unsigned int z );
-  
+	
+	//! \brief Get the maximum height of terrain on this map tile.
+	float getMaxHeight();
+	
+	//! \brief Get chunk for sub offset x,z.
+	MapChunk* getChunk( unsigned int x, unsigned int z );
+	
 	int mPositionX;
-  int mPositionZ;
+	int mPositionZ;
 	float xbase, zbase;
-  
+	
 	void draw();
 	void drawSelect();
 	void drawLines();
 	void drawWater();
 	void drawTextures();
 	void drawMFBO();
-  
+	
 	bool GetVertex( float x, float z, Vec3D *V );
-  
+	
 	void saveTile();
-  
-  bool isTile( int pX, int pZ );
-  
+	
+	bool isTile( int pX, int pZ );
+	
 private:
-  // MFBO:
-  GLfloat mMinimumValues[3*3*3];
-  GLfloat mMaximumValues[3*3*3];
+	// MFBO:
+	GLfloat mMinimumValues[3*3*3];
+	GLfloat mMaximumValues[3*3*3];
 
-  // MHDR:
-  int mFlags;
-  bool mBigAlpha;
+	// MHDR:
+	int mFlags;
+	bool mBigAlpha;
 
-  // Data to be loaded and later unloaded.
-  std::vector<std::string> mTextureFilenames;
-  std::vector<std::string> mModelFilenames;
-  std::vector<std::string> mWMOFilenames;
+	// Data to be loaded and later unloaded.
+	std::vector<std::string> mTextureFilenames;
+	std::vector<std::string> mModelFilenames;
+	std::vector<std::string> mWMOFilenames;
 
-  std::string mFilename;
+	std::string mFilename;
 
-  MapChunk * mChunks[16][16];
+	MapChunk * mChunks[16][16];
 	std::vector<Liquid*> mLiquids;
-  
-  friend class MapChunk;
+	
+	friend class MapChunk;
 };
 
 int indexMapBuf(int x, int y);

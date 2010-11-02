@@ -45,7 +45,7 @@ using std::vector;
 using std::string;
 
 //This holds all of the information related to any
-//freetype font that we want to create.  
+//freetype font that we want to create.	
 struct font_data {
 	float h;			///< Holds the height of the font.
 	GLuint * textures;	///< Holds the texture id's 
@@ -63,10 +63,11 @@ struct font_data {
 
 //The flagship function of the library - this thing will print
 //out text at window coordinates x,y, using the font ft_font.
-//The current modelview matrix will also be applied to the text.
-void print( const font_data& ft_font, float x, float y, const std::string& text );
-void shprint( const font_data& ft_font, float x, float y, const std::string& text, float colorR = 1.0f, float colorG = 1.0f, float colorB = 1.0f );
-int width( const font_data &ft_font, const std::string& text );
+//The current modelview matrix will also be applied to the text. 
+void print(const font_data &ft_font, float x, float y, const char *fmt, ...) ;
+void shprint(const font_data &ft_font, float x, float y, const char *fmt, ...);
+void shprinty(const font_data &ft_font, float x, float y, const char *fmt, ...);
+int width(const font_data &ft_font, const char *fmt, ...) ;
 
 }
 

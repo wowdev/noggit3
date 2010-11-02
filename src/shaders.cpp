@@ -55,8 +55,8 @@ BLSShader::BLSShader( const std::string& pFilename )
 			stringy = glGetString(GL_PROGRAM_ERROR_STRING_ARB);			//This is only available in ARB
 			if( stringy )
 				LogError << "\t\"" << reinterpret_cast<const char*>( stringy ) << "\"" << std::endl;
-      
-      int j = 0;
+			
+			int j = 0;
 			char localbuffer[256];
 			for( int i = errorPos; i < length && j < 128 ; ++i, j++ )
 			{
@@ -86,23 +86,23 @@ void initShaders()
 void reloadShaders()
 {
 	for (int i=0; i<4; ++i)
-  {
-    if( terrainShaders[i] )
-    {
-      delete terrainShaders[i];
-      terrainShaders[i] = NULL;
-    }
-  }
-  if( wmoShader )
-  {
-    delete wmoShader;
-    wmoShader = NULL;
-  }
-  if( waterShaders[0] )
-  {
-    delete waterShaders[0];
-    waterShaders[0] = NULL;
-  }
+	{
+		if( terrainShaders[i] )
+		{
+			delete terrainShaders[i];
+			terrainShaders[i] = NULL;
+		}
+	}
+	if( wmoShader )
+	{
+		delete wmoShader;
+		wmoShader = NULL;
+	}
+	if( waterShaders[0] )
+	{
+		delete waterShaders[0];
+		waterShaders[0] = NULL;
+	}
 
 	terrainShaders[0] = new ShaderPair(0, "shaders/terrain1.fs", true);
 	terrainShaders[1] = new ShaderPair(0, "shaders/terrain2.fs", true);
@@ -121,7 +121,7 @@ Shader::Shader(GLenum _target, const char *program, bool fromFile):id(0),target(
 
 	const char *progtext;
 	if (fromFile) {
-    char *buf;
+		char *buf;
 		FILE *f = fopen(program, "rb");
 		if (!f) {
 			ok = false;
@@ -137,11 +137,11 @@ Shader::Shader(GLenum _target, const char *program, bool fromFile):id(0),target(
 		buf[len]=0;
 		fclose(f);
 		//gLog("Len: %d\nShader text:\n[%s]\n",len,progtext);
-    if( buf )
-    {
-      delete[] buf;
-      buf = NULL;
-    }
+		if( buf )
+		{
+			delete[] buf;
+			buf = NULL;
+		}
 	} else progtext = program;
 
 	glGenProgramsARB(1, &id);
