@@ -138,8 +138,6 @@ window *setting_ground;
 window *setting_blur;
 window *settings_paint;
 
-World *pWorld;
-
 //TextBox * textbox;
 
 void setGroundBrushRadius(float f)
@@ -253,13 +251,13 @@ void SnapSelectedObjectToGround( frame *button, int id )
 	if( gWorld->IsSelection( eEntry_WMO ) )
 	{
 		Vec3D t = Vec3D( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, 0 );
-		pWorld->GetVertex( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, &t );
+		gWorld->GetVertex( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, &t );
 		gWorld->GetCurrentSelection()->data.wmo->pos = t;
 	}
 	else if( gWorld->IsSelection( eEntry_Model ) )
 	{
 		Vec3D t = Vec3D( gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, 0 );
-		pWorld->GetVertex( gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, &t );
+		gWorld->GetVertex( gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, &t );
 		gWorld->GetCurrentSelection()->data.model->pos = t;				
 	}
 }
@@ -286,13 +284,13 @@ void PasteSelectedObject( frame *button, int id )
     switch( gWorld->GetCurrentSelection()->type )
     {
     case eEntry_Model:
-      pWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.model->pos );
+      gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.model->pos );
       break;
     case eEntry_WMO:
-      pWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.wmo->pos);
+      gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.wmo->pos);
       break;
     case eEntry_MapChunk:
-      pWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition() );
+      gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition() );
       break;
     }
 	}
@@ -301,9 +299,9 @@ void PasteSelectedObject( frame *button, int id )
 void DeleteSelectedObject( frame *button, int id )
 {
 	if( gWorld->IsSelection( eEntry_WMO ) )
-		pWorld->deleteWMOInstance( gWorld->GetCurrentSelection()->data.wmo->mUniqueID );
+		gWorld->deleteWMOInstance( gWorld->GetCurrentSelection()->data.wmo->mUniqueID );
 	else if( gWorld->IsSelection( eEntry_Model ) )
-		pWorld->deleteModelInstance( gWorld->GetCurrentSelection()->data.model->d1 );
+		gWorld->deleteModelInstance( gWorld->GetCurrentSelection()->data.model->d1 );
 }
 
 void InsertObject( frame *button, int id )
@@ -404,7 +402,7 @@ void InsertObject( frame *button, int id )
       continue;
     }
 
-    pWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
+    gWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
   }
 
   for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
@@ -415,7 +413,7 @@ void InsertObject( frame *button, int id )
       continue;
     }
 
-    pWorld->addM2( reinterpret_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
+    gWorld->addM2( reinterpret_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
   }
   
   //! \todo Memoryleak: These models will never get deleted.
@@ -451,7 +449,7 @@ int round(float d)
 {
   return d<0?d-.5f:d+.5f;
 }
-MapView::MapView(World *w, float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
+MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 {
 	LastClicked=0;
 
@@ -510,7 +508,7 @@ MapView::MapView(World *w, float ah0, float av0): ah(ah0), av(av0), mTimespeed( 
 	setting_ground->addChild( new checkboxUI( 6.0f, 40.0f, "Smooth", gGroundToggleGroup, 2 ) );
 	gGroundToggleGroup->Activate( 2 );
 
-	ground_brush_radius=new slider(6.0f,85.0f,167.0f,1000.0f,0.00001f);
+	ground_brush_radius=new slider(6.0f,85.0f,167.0f,100.0f,0.00001f);
 	ground_brush_radius->setFunc(setGroundBrushRadius);
 	ground_brush_radius->setValue(groundBrushRadius/1000);
 	ground_brush_radius->setText("Brush radius: %.2f");
@@ -536,7 +534,7 @@ MapView::MapView(World *w, float ah0, float av0): ah(ah0), av(av0), mTimespeed( 
 	setting_blur->addChild( new checkboxUI( 6.0f, 40.0f, "Smooth", gBlurToggleGroup, 2 ) );
 	gBlurToggleGroup->Activate( 2 );
 
-	blur_brush=new slider(6.0f,85.0f,167.0f,1000.0f,0.00001f);
+	blur_brush=new slider(6.0f,85.0f,167.0f,100.0f,0.00001f);
 	blur_brush->setFunc(setBlurBrushRadius);
 	blur_brush->setValue(blurBrushRadius/1000);
 	blur_brush->setText("Brush radius: %.2f");

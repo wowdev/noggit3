@@ -40,7 +40,7 @@ class MapView :public AppState
 
 public:
 
-	MapView(World *w, float ah0 = -90.0f, float av0 = -30.0f);
+	MapView(float ah0 = -90.0f, float av0 = -30.0f);
 	~MapView();
 
 	void tick(float t, float dt);

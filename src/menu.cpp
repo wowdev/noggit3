@@ -142,7 +142,7 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
   gWorld->initDisplay();
   gWorld->enterTile( int( tile.x ), int( tile.y ) );
   
-  gStates.push_back( new MapView( gWorld, ah, av ) ); // on gPop, MapView is deleted.
+  gStates.push_back( new MapView( ah, av ) ); // on gPop, MapView is deleted.
   
   randBackground();
 }

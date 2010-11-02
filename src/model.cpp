@@ -63,10 +63,11 @@ void Model::finishLoading()
   if( f.isEof() ) 
   {
     LogError << "Error loading file \"" << filename << "\". Aborting to load model." << std::endl;
+    finished = true;
     return;
   }
   
-  LogDebug << "Loading model \"" << filename << "\"." << std::endl;
+  //LogDebug << "Loading model \"" << filename << "\"." << std::endl;
   
   memcpy( &header, f.getBuffer(), sizeof( ModelHeader ) );
   
@@ -496,7 +497,6 @@ void Model::initAnimated(MPQFile &f)
       else
       {
         animfiles[i] = NULL;
-        LogError << "Error loading anim file " << tempname << std::endl;
       }
 		}
 	}
@@ -1222,7 +1222,6 @@ void Model::lightsOff(GLuint lbase)
 
 void Model::updateEmitters(float dt)
 {
-	if (!ok) return;
 	for (size_t i=0; i<header.nParticleEmitters; ++i) {
 		particleSystems[i].update(dt);
 	}

@@ -6,7 +6,6 @@ DBCFile::DBCFile(const std::string& _filename):
 	filename(_filename),
 	data( NULL )
 {
-	open();
 }
 void DBCFile::open()
 {
