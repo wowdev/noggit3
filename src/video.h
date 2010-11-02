@@ -35,7 +35,7 @@ public:
 	void set2D() const;
 	void setTileMode() const;
 	void resize(int w, int h);
-    
+		
 	int xres, yres;
 	int origX, origY;
 	float ratio;
@@ -47,32 +47,32 @@ public:
 
 namespace OpenGL
 {
-  class CallList
-  {
-    GLuint list;
-  public:
-    inline CallList()
-    {
-      list = glGenLists( 1 );
-    }
-    inline ~CallList()
-    {
-      glDeleteLists( list, 1 );
-    }
+	class CallList
+	{
+		GLuint list;
+	public:
+		inline CallList()
+		{
+			list = glGenLists( 1 );
+		}
+		inline ~CallList()
+		{
+			glDeleteLists( list, 1 );
+		}
 
-    inline void startRecording(GLuint mode = GL_COMPILE)
-    {
-      glNewList( list, mode );
-    }
-    inline void endRecording()
-    {
-      glEndList();
-    }
-    inline void render()
-    {
-      glCallList( list );
-    }
-  };
+		inline void startRecording(GLuint mode = GL_COMPILE)
+		{
+			glNewList( list, mode );
+		}
+		inline void endRecording()
+		{
+			glEndList();
+		}
+		inline void render()
+		{
+			glCallList( list );
+		}
+	};
 }
 
 extern Video video;

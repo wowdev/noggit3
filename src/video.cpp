@@ -72,7 +72,7 @@ Video video;
 
 void Video::resize(int _xres, int _yres)
 {
-	//! \todo  Implement some minimum size.
+	//! \todo	Implement some minimum size.
 	//if(xres < 800.0 || yres<600.0f)
 	//{
 	//	if(xres < 800.0f) xres = 800.0f;
@@ -99,7 +99,7 @@ void Video::resize(int _xres, int _yres)
 
 	glViewport( 0.0f, 0.0f, xres, yres );
 
-	//! \todo  Should we really set to 3D here?
+	//! \todo	Should we really set to 3D here?
 	this->set3D();
 }
 
@@ -139,7 +139,7 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
 
 	glViewport( 0.0f, 0.0f, xres, yres );
 
-	//! \todo  Should we really set to 3D here?
+	//! \todo	Should we really set to 3D here?
 	this->set3D();
 
 	// hmmm...
@@ -247,7 +247,7 @@ void CheckForGLError( const std::string& pLocation )
 		 		LogError << "OpenGL: (at " << pLocation << "): GL_TABLE_TOO_LARGE" << std::endl;
 		 		break;
 		 	case GL_NO_ERROR:
-			//! \todo  Add the missing ones.
+			//! \todo	Add the missing ones.
 		 	default:
 		 		LogError << "OpenGL: (at " << pLocation << "): GL_NO_ERROR (wat?)" << std::endl;
  		}
@@ -261,18 +261,18 @@ void CheckForGLError( const std::string& pLocation )
 
 #pragma pack(push,1)
 struct TGAHeader {
-   char  idlength;
-   char  colourmaptype;
-   char  datatypecode;
-   short int colourmaporigin;
-   short int colourmaplength;
-   char  colourmapdepth;
-   short int x_origin;
-   short int y_origin;
-   short width;
-   short height;
-   char  bitsperpixel;
-   char  imagedescriptor;
+	 char	idlength;
+	 char	colourmaptype;
+	 char	datatypecode;
+	 short int colourmaporigin;
+	 short int colourmaplength;
+	 char	colourmapdepth;
+	 short int x_origin;
+	 short int y_origin;
+	 short width;
+	 short height;
+	 char	bitsperpixel;
+	 char	imagedescriptor;
 };
 #pragma pack(pop)
 
@@ -319,7 +319,7 @@ GLuint loadTGA(const char *filename, bool mipmaps)
 		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, bppformat, h.width, h.height, 0, format, GL_UNSIGNED_BYTE, buf2);
 	}
-    delete[] buf;
+		delete[] buf;
 	//delete[] buf2;
 	return t;
 }*/

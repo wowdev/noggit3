@@ -2,6 +2,7 @@
 #define __CHECKBOXUI_H
 
 #include "frame.h"
+#include "FreeType.h" // fonts.
 
 class textureUI;
 class textUI;

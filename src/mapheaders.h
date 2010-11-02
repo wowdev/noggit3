@@ -5,14 +5,14 @@
 
 enum eMCNKFlags
 {
-  FLAG_SHADOW = 0x1,
-  FLAG_IMPASS	= 0x2,
-  FLAG_LQ_RIVER	= 0x4,
-  FLAG_LQ_OCEAN	= 0x8,
-  FLAG_LQ_MAGMA	= 0x10,
-  FLAG_LQ_SLIME	= 0x20,
-  FLAG_MCCV = 0x40,
-  FLAG_TBC = 0x8000
+	FLAG_SHADOW = 0x1,
+	FLAG_IMPASS	= 0x2,
+	FLAG_LQ_RIVER	= 0x4,
+	FLAG_LQ_OCEAN	= 0x8,
+	FLAG_LQ_MAGMA	= 0x10,
+	FLAG_LQ_SLIME	= 0x20,
+	FLAG_MCCV = 0x40,
+	FLAG_TBC = 0x8000
 };
 
 static const float TILESIZE = 533.33333f;
@@ -23,22 +23,22 @@ static const float ZEROPOINT = (32.0f * (TILESIZE));
 
 struct MHDR
 {
- /*000h*/  uint32_t flags;        // &1: MFBO, &2: unknown. in some Northrend ones.
- /*004h*/  uint32_t mcin;	//Positions of MCNK's
- /*008h*/  uint32_t mtex;	//List of all the textures used
- /*00Ch*/  uint32_t mmdx;	//List of all the md2's used
- /*010h*/  uint32_t mmid;	//Offsets into MMDX list for what each ID is
- /*014h*/  uint32_t mwmo;	//list of all the WMO's used
- /*018h*/  uint32_t mwid;	//Offsets into MWMO list for what each ID is
- /*01Ch*/  uint32_t mddf;	//Doodad Information
- /*020h*/  uint32_t modf;	//WMO Positioning Information
- /*024h*/  uint32_t mfbo;	// tbc, wotlk; only when flags&1
- /*028h*/  uint32_t mh2o;  // wotlk
- /*02Ch*/  uint32_t mtfx;	// wotlk
- /*030h*/  uint32_t pad4;		
- /*034h*/  uint32_t pad5;		
- /*038h*/  uint32_t pad6;		
- /*03Ch*/  uint32_t pad7;	
+ /*000h*/	uint32_t flags;				// &1: MFBO, &2: unknown. in some Northrend ones.
+ /*004h*/	uint32_t mcin;	//Positions of MCNK's
+ /*008h*/	uint32_t mtex;	//List of all the textures used
+ /*00Ch*/	uint32_t mmdx;	//List of all the md2's used
+ /*010h*/	uint32_t mmid;	//Offsets into MMDX list for what each ID is
+ /*014h*/	uint32_t mwmo;	//list of all the WMO's used
+ /*018h*/	uint32_t mwid;	//Offsets into MWMO list for what each ID is
+ /*01Ch*/	uint32_t mddf;	//Doodad Information
+ /*020h*/	uint32_t modf;	//WMO Positioning Information
+ /*024h*/	uint32_t mfbo;	// tbc, wotlk; only when flags&1
+ /*028h*/	uint32_t mh2o;	// wotlk
+ /*02Ch*/	uint32_t mtfx;	// wotlk
+ /*030h*/	uint32_t pad4;		
+ /*034h*/	uint32_t pad5;		
+ /*038h*/	uint32_t pad6;		
+ /*03Ch*/	uint32_t pad7;	
  /*040h*/
 };
 
@@ -108,9 +108,9 @@ struct MapChunkHeader {
 	uint32_t nSndEmitters;
 	uint32_t ofsLiquid;
 	uint32_t sizeLiquid;
-	float  zpos;
-	float  xpos;
-	float  ypos;
+	float	zpos;
+	float	xpos;
+	float	ypos;
 	uint32_t ofsMCCV;
 	uint32_t unused1;
 	uint32_t unused2;

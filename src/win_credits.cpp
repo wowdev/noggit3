@@ -10,7 +10,7 @@
 
 winCredits::winCredits( ) : closeWindowUI( ((float)video.xres/2) - (winWidth/2),((float)video.yres/2) - (winHeight/2),winWidth,winHeight,"")
 {
-  mustresize = true;
+	mustresize = true;
 	addChild( new textureUI( 20.0f, 20.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Potion_83.blp" ) );
 	addChild( new textUI( 73.0f, 24.0f, APP_TITLE, &skurri32, eJustifyLeft ) );
 	addChild( new textUI( 165.0f, 55.0f, APP_SUBTITLE, &fritz16, eJustifyLeft ) );
@@ -22,7 +22,7 @@ winCredits::winCredits( ) : closeWindowUI( ((float)video.xres/2) - (winWidth/2),
 
 void winCredits::resize()
 {
-  using std::max;
+	using std::max;
 	this->x = max( ( (float)video.xres / 2.0f ) - ( winWidth / 2.0f ), 0.0f );
 	this->y = max( ( (float)video.yres / 2.0f ) - ( winHeight / 2.0f ), 0.0f );
 	

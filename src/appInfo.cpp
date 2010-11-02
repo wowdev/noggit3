@@ -24,7 +24,7 @@ appInfo::appInfo(float xPos, float yPos, float w, float h, Gui *setGui) : window
 
 appInfo::~appInfo()
 {
-  ModelManager::delbyname( mModelToLoad );
+	ModelManager::delbyname( mModelToLoad );
 }
 
 void appInfo::setText( const std::string& t )

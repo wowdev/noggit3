@@ -107,17 +107,17 @@ void Liquid::initGeometry(MPQFile &f)
 			size_t p = j*(xtiles+1)+i;
 			float h = map[p].h;
 			if (h > 100000) h = pos.y;
-            lVertices[p] = Vec3D(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
+						lVertices[p] = Vec3D(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
 			//color[p]= map[p].c[0];
-//! \todo  if map[p].c[1] != 0, overwrite the type from the flags.
+//! \todo	if map[p].c[1] != 0, overwrite the type from the flags.
 //			gLog( "%i, {%i, %i, %i, %i}: %s\n", flags[p], map[p].c[0], map[p].c[1], map[p].c[2], map[p].c[3], gLiquidTypeDB.getByID( map[p].c[1] != 0 ? map[p].c[1] : pType ).getString( LiquidTypeDB::Name ) );
 		}
 	}
 
 	mDrawList = new OpenGL::CallList();
-  mDrawList->startRecording();
+	mDrawList->startRecording();
 
-	//! \todo  handle light/dark liquid colors
+	//! \todo	handle light/dark liquid colors
 	glNormal3f(0, 1, 0);
 	glBegin(GL_QUADS);
 	// draw tiles
@@ -225,12 +225,12 @@ void Liquid::initGeometry(MPQFile &f)
 	glEnd();
 	glEnable(GL_TEXTURE_2D);*/
 
-  mDrawList->endRecording();
-  if(lVertices)
-  {
-    delete[] lVertices;
-    lVertices = NULL;
-  }
+	mDrawList->endRecording();
+	if(lVertices)
+	{
+		delete[] lVertices;
+		lVertices = NULL;
+	}
 }
 
 void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, MH2O_Render *render )
@@ -247,7 +247,7 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 		mShaderType = lLiquidTypeRow.getInt( LiquidTypeDB::ShaderType );
 				mLiquidType = 0;
 		mShaderType = 1;
-		//! \todo  Get texRepeats too.
+		//! \todo	Get texRepeats too.
 	}
 	catch( ... )
 	{
@@ -261,7 +261,7 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 	mTransparency = mShaderType & 1;
 	
 	// generate vertices
-	//! \todo  Store them somehow else. Maybe an extensible array[][] over the whole ADT?
+	//! \todo	Store them somehow else. Maybe an extensible array[][] over the whole ADT?
 	Vec3D *lVertices = new Vec3D[info->width * info->height];
 	for( int j = 0; j < info->height; j++ ) 
 		for( int i = 0; i < info->width; ++i ) 
@@ -317,11 +317,11 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 	glEnd();
 
 	mDrawList->endRecording();
-  if(lVertices)
-  {
-    delete[] lVertices;
-    lVertices = NULL;
-  }
+	if(lVertices)
+	{
+		delete[] lVertices;
+		lVertices = NULL;
+	}
 }
 
 void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
@@ -339,7 +339,7 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 		mShaderType = lLiquidTypeRow.getInt( LiquidTypeDB::ShaderType );
 				mLiquidType = 0;
 		mShaderType = 1;
-		//! \todo  Get texRepeats too.
+		//! \todo	Get texRepeats too.
 	}
 	catch( ... )
 	{
@@ -357,7 +357,7 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	for( int j = 0; j < 9; j++ )
 		for( int i = 0; i < 9; ++i ) 
 			lVertices[j][i] = Vec3D( pos.x + tilesize * i, pTileInformation.mHeightmap[j][i], pos.z + ydir * tilesize * j );
-  
+	
 	mDrawList = new OpenGL::CallList();
 	mDrawList->startRecording();
 
@@ -547,7 +547,7 @@ void Liquid::draw()
 		if (type==2) 
 		{
 			// dynamic color lookup! ^_^
-			col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]; //! \todo  add variable water color
+			col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]; //! \todo	add variable water color
 			col2 = gWorld->skies->colorSet[WATER_COLOR_DARK];
 		}
 		glColor4f(col.x, col.y, col.z, tcol);
@@ -555,7 +555,7 @@ void Liquid::draw()
 #ifdef USEBLSFILES
 		glSecondaryColor3f(col2.x,col2.y,col2.z);
 #endif
-		//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); //! \todo  check if ARB_texture_env_add is supported? :(
+		//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); //! \todo	check if ARB_texture_env_add is supported? :(
 	}
 
 	glActiveTexture(GL_TEXTURE0);
@@ -565,10 +565,10 @@ void Liquid::draw()
 	glEnable(GL_TEXTURE_2D);
 
 
-  if( mDrawList )
-  {
-    mDrawList->render();
-  }
+	if( mDrawList )
+	{
+		mDrawList->render();
+	}
 
 
 	glActiveTexture(GL_TEXTURE1);
@@ -601,11 +601,11 @@ void Liquid::initTextures( const std::string& pFilename )
 
 Liquid::~Liquid()
 {
-  if( mDrawList )
-  {
-    delete mDrawList;
-    mDrawList = NULL;
-  }
+	if( mDrawList )
+	{
+		delete mDrawList;
+		mDrawList = NULL;
+	}
 	for( size_t i=0; i<textures.size(); ++i ) 
 	{
 		TextureManager::del( textures[i] );

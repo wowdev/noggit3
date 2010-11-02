@@ -42,11 +42,11 @@ void DBCFile::open()
 
 DBCFile::~DBCFile()
 {
-  if( data )
-  {
-    delete[] data;
-    data = NULL;
-  }
+	if( data )
+	{
+		delete[] data;
+		data = NULL;
+	}
 }
 
 

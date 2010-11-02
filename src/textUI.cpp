@@ -10,7 +10,7 @@ textUI::textUI( float pX, float pY, const std::string& pText, freetype::font_dat
 	font = pFont;
 
 	twidth = freetype::width( *font, mText.c_str() );
-  
+	
 	width = twidth;
 	height = font->h;
 }
@@ -24,7 +24,7 @@ textUI::textUI( float pX, float pY, freetype::font_data *pFont, int pJustify ) :
 	font = pFont;
 	
 	twidth = freetype::width( *font, mText.c_str() );
-  
+	
 	width = twidth;
 	height = font->h;
 }
@@ -84,13 +84,13 @@ void textUI::render() const
 	switch( justify )
 	{
 	case eJustifyLeft:
-		freetype::shprint( *font, x, y, mText );		
+		freetype::shprint( *font, x, y, mText.c_str() );		
 		break;
 	case eJustifyCenter:
-		freetype::shprint( *font, x - twidth / 2.0f, y, mText );
+		freetype::shprint( *font, x - twidth / 2.0f, y, mText.c_str() );
 		break;
 	case eJustifyRight:
-		freetype::shprint( *font, x - twidth, y, mText );
+		freetype::shprint( *font, x - twidth, y, mText.c_str() );
 		break;
 	}
 }

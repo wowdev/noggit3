@@ -35,7 +35,7 @@ public:
 	float weight;
 	bool global;
 
-    bool operator<(const Sky& s) const
+		bool operator<(const Sky& s) const
 	{
 		if (global) return false;
 		else if (s.global) return true;
@@ -107,7 +107,7 @@ struct OutdoorLightStats {
 
 	void interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r);
 	void setupLighting();
-    // void setupFog(); //! \todo  add fog maybe?
+		// void setupFog(); //! \todo	add fog maybe?
 
 };
 

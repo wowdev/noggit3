@@ -17,18 +17,18 @@ public:
 
 	Matrix(const Matrix& p)
 	{
-        for (size_t j=0; j<4; j++) {
-        	for (size_t i=0; i<4; ++i) {
-        		m[j][i] = p.m[j][i];
+				for (size_t j=0; j<4; j++) {
+					for (size_t i=0; i<4; ++i) {
+						m[j][i] = p.m[j][i];
 			}
 		}
 	}
 
 	Matrix& operator= (const Matrix& p)
 	{
-        for (size_t j=0; j<4; j++) {
-        	for (size_t i=0; i<4; ++i) {
-        		m[j][i] = p.m[j][i];
+				for (size_t j=0; j<4; j++) {
+					for (size_t i=0; i<4; ++i) {
+						m[j][i] = p.m[j][i];
 			}
 		}
 		return *this;
@@ -37,9 +37,9 @@ public:
 
 	void zero()
 	{
-        for (size_t j=0; j<4; j++) {
-        	for (size_t i=0; i<4; ++i) {
-        		m[j][i] = 0;
+				for (size_t j=0; j<4; j++) {
+					for (size_t i=0; i<4; ++i) {
+						m[j][i] = 0;
 			}
 		}
 	}
@@ -47,7 +47,7 @@ public:
 	void unit()
 	{
 		zero();
-        m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0f;
+				m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0f;
 	}
 
 	void translation(const Vec3D& tr)
@@ -178,7 +178,7 @@ public:
 		o.x = m[0][0]*v.x + m[0][1]*v.y + m[0][2]*v.z + m[0][3];
 		o.y = m[1][0]*v.x + m[1][1]*v.y + m[1][2]*v.z + m[1][3];
 		o.z = m[2][0]*v.x + m[2][1]*v.y + m[2][2]*v.z + m[2][3];
-        return o;
+				return o;
 	}
 
 	Matrix operator* (const Matrix& p) const
@@ -250,8 +250,8 @@ public:
 	{
 		Matrix adj = this->adjoint();
 		float invdet = 1.0f / this->determinant();
-        for (size_t j=0; j<4; j++) {
-        	for (size_t i=0; i<4; ++i) {
+				for (size_t j=0; j<4; j++) {
+					for (size_t i=0; i<4; ++i) {
 				m[j][i] = adj.m[j][i] * invdet;
 			}
 		}
@@ -259,8 +259,8 @@ public:
 
 	void transpose()
 	{
-        for (size_t j=1; j<4; j++) {
-        	for (size_t i=0; i<j; ++i) {
+				for (size_t j=1; j<4; j++) {
+					for (size_t i=0; i<j; ++i) {
 				float f = m[j][i];
 				m[j][i] = m[i][j];
 				m[i][j] = f;

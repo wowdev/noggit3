@@ -22,15 +22,15 @@
 #include "Toolbar.h" // Toolbar
 #include "buttonUI.h" // buttonUI
 
-//! \todo  Get this whole thing in a seperate class.
+//! \todo	Get this whole thing in a seperate class.
 
-//! \todo  Get this via singleton.
+//! \todo	Get this via singleton.
 Gui				*textGui;
 
 int pal_rows;
 int pal_cols;
 
-//! \todo  Maybe get this out?
+//! \todo	Maybe get this out?
 bool gFilenameFiltersInited = false;
 
 extern std::list<std::string> gListfile;
@@ -77,9 +77,9 @@ textUI			*chunkTextureEffectID[4];
 void LoadTextureNames()
 {
 	if( textureNames.size() )
-  {
+	{
 		return;
-  }
+	}
 
 	bool tilesetsfound = false;
 	for( std::list<std::string>::iterator it = gListfile.begin(); it != gListfile.end(); ++it )
@@ -88,17 +88,17 @@ void LoadTextureNames()
 		{
 			tilesetsfound = true;
 			if( it->find( "_s.blp" ) == std::string::npos )
-      {
+			{
 				textureNames.push_back( *it );
-      }
+			}
 		}
 		else
 		{
 			if( tilesetsfound )
-      {
-        // we don't need the rest of this vector as it is sorted.
+			{
+				// we don't need the rest of this vector as it is sorted.
 				break;
-      }
+			}
 		}
 	}
 
@@ -107,7 +107,7 @@ void LoadTextureNames()
 		std::string tString = it->substr( it->find_first_of( "\\/" ) + 1, it->find_last_of( "\\/" ) - it->find_first_of( "\\/" ) - 1 );
 		tilesetDirectories.push_back( tString );
 	}
-  
+	
 	std::sort( tilesetDirectories.begin(), tilesetDirectories.end() );
 	tilesetDirectories.resize( std::unique( tilesetDirectories.begin(), tilesetDirectories.end() ) - tilesetDirectories.begin() );
 }
@@ -115,9 +115,9 @@ void LoadTextureNames()
 bool TextureInPalette( const std::string& pFName )
 {
 	if( pFName.find( "tileset" ) == std::string::npos )
-  {
+	{
 		return false;
-  }
+	}
 
 	if( gActiveFilenameFilters.size() )
 	{
@@ -130,18 +130,18 @@ bool TextureInPalette( const std::string& pFName )
 		}
 		return false;
 	}
-  
+	
 	if( gActiveDirectoryFilters.size() )
 	{
-    for( std::vector<std::string>::iterator lFilter = gActiveDirectoryFilters.begin(); lFilter != gActiveDirectoryFilters.end(); lFilter++ )
-    {
-      if( pFName.find( *lFilter ) != std::string::npos )
-      {
-        return true;
-      }
-    }
-    return false;
-  }
+		for( std::vector<std::string>::iterator lFilter = gActiveDirectoryFilters.begin(); lFilter != gActiveDirectoryFilters.end(); lFilter++ )
+		{
+			if( pFName.find( *lFilter ) != std::string::npos )
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	return true;
 }
@@ -153,26 +153,26 @@ void showPage( int pPage )
 	GLuint lSelectedTexture = 0;
 
 	if( selectedTexture )
-  {
+	{
 		for( std::map<GLuint, Texture*>::iterator i = TextureManager::items.begin(); i != TextureManager::items.end(); ++i )
-    {
+		{
 			if( i->second->name == selectedTexture->name )
-      {
+			{
 				lSelectedTexture = i->first;
-      }
-    }
-  }
-  
-  if( gPageNumber )
-  {
-    std::stringstream pagenumber;
-    pagenumber << (pPage+1) << " / " << int( gTexturesInList.size() / ( pal_cols * pal_rows ) + 1 );
-    gPageNumber->setText( pagenumber.str() );
-  }
+			}
+		}
+	}
+	
+	if( gPageNumber )
+	{
+		std::stringstream pagenumber;
+		pagenumber << (pPage+1) << " / " << int( gTexturesInList.size() / ( pal_cols * pal_rows ) + 1 );
+		gPageNumber->setText( pagenumber.str() );
+	}
 
 	int i = 0;
 	const unsigned int lIndex = pal_cols * pal_rows * pPage;
-  
+	
 	for( std::vector<GLuint>::iterator lPageStart = gTexturesInList.begin() + ( lIndex > gTexturesInList.size() ? 0 : lIndex ); lPageStart != gTexturesInList.end(); lPageStart++ )
 	{
 		curTextures[i]->hidden = false;
@@ -181,9 +181,9 @@ void showPage( int pPage )
 		gTexturesInPage[i] = *lPageStart;
 
 		if( ++i >= ( pal_cols * pal_rows ) )
-    {
+		{
 			return;
-    }
+		}
 	}
 
 	while( i < ( pal_cols * pal_rows ) )
@@ -195,24 +195,24 @@ void showPage( int pPage )
 
 void updateTextures()
 {
-  gTexturesInList.clear();
+	gTexturesInList.clear();
 	for( std::map<GLuint, Texture*>::iterator t = TextureManager::items.begin(); t != TextureManager::items.end(); t++ )
-  {
+	{
 		if( TextureInPalette( t->second->name ) )
-    {
+		{
 			gTexturesInList.push_back( t->first );
-    }
-  }
+		}
+	}
 	showPage( gCurrentPage );
 }
 
 void changePage( frame*, int direction )
 {
-  using std::min;
-  using std::max;
-  gCurrentPage = max( gCurrentPage + direction, 0 );
-  gCurrentPage = min( gCurrentPage, int( gTexturesInList.size() / ( pal_cols * pal_rows ) ) );
-  showPage( gCurrentPage );
+	using std::min;
+	using std::max;
+	gCurrentPage = max( gCurrentPage + direction, 0 );
+	gCurrentPage = min( gCurrentPage, int( gTexturesInList.size() / ( pal_cols * pal_rows ) ) );
+	showPage( gCurrentPage );
 }
 
 void texturePaletteClick( frame *f, int id )
@@ -220,22 +220,22 @@ void texturePaletteClick( frame *f, int id )
 	if( curTextures[id]->hidden )
 		return;
 	
-  selectedTexture = (Texture*)TextureManager::items.find( gTexturesInPage[id] )->second;
-  
+	selectedTexture = (Texture*)TextureManager::items.find( gTexturesInPage[id] )->second;
+	
 	if( selectedTexture )
-  {
-    if( textureSelected )
-      textureSelected->setTexture( selectedTexture->name );
-    if( textSelectedTexture )
-      textSelectedTexture->setText( selectedTexture->name );
-    if( textGui )
-      textGui->guiToolbar->current_texture->setTexture( selectedTexture->name );
-  }
+	{
+		if( textureSelected )
+			textureSelected->setTexture( selectedTexture->name );
+		if( textSelectedTexture )
+			textSelectedTexture->setText( selectedTexture->name );
+		if( textGui )
+			textGui->guiToolbar->current_texture->setTexture( selectedTexture->name );
+	}
 
 	for( int i = 0; i < ( pal_cols * pal_rows ); ++i )
-  {
+	{
 		curTextures[i]->setHighlight( i == id );
-  }
+	}
 }
 
 // --- List stuff ------------------------
@@ -245,9 +245,9 @@ void LoadTileset( frame *button, int id )
 	for( std::vector<std::string>::iterator it = textureNames.begin(); it != textureNames.end(); ++it )
 	{
 		if( it->find( tilesetDirectories[id] ) != std::string::npos )
-    {
+		{
 			TextureManager::add( *it );
-    }
+		}
 	}
 	updateTextures();
 }
@@ -258,9 +258,9 @@ void InitFilenameFilterList()
 {
 	if( gFilenameFiltersInited )
 		return;
-  
+	
 	gFilenameFiltersInited = true;
-  
+	
 	gFilenameFilters.insert( std::pair<int,std::string>( 0, "Base" ) );
 	gFilenameFilters.insert( std::pair<int,std::string>( 1, "Brick" ) );
 	gFilenameFilters.insert( std::pair<int,std::string>( 2, "Brush" ) );
@@ -307,17 +307,17 @@ void clickFilterTexture(bool value,int id)
 		gActiveDirectoryFilters.push_back( tilesetDirectories[id] );
 	}
 	else
-  {
+	{
 		for( std::vector<std::string>::iterator it = gActiveDirectoryFilters.begin(); it != gActiveDirectoryFilters.end(); ++it )
-    {
+		{
 			if( *it == tilesetDirectories[id] )
 			{
 				gActiveDirectoryFilters.erase( it );
 				break;
 			}
-    }
-  }
-  
+		}
+	}
+	
 	updateTextures();
 }
 
@@ -329,22 +329,22 @@ void clickFileFilterTexture(bool value,int id)
 		gActiveFilenameFilters.push_back( gFilenameFilters[id] );
 	}
 	else
-  {
+	{
 		for( std::vector<std::string>::iterator it = gActiveFilenameFilters.begin(); it != gActiveFilenameFilters.end(); ++it )
-    {
+		{
 			if( *it == gFilenameFilters[id] )
 			{
 				gActiveFilenameFilters.erase( it );
 				break;
 			}
-    }
-  }
-  
+		}
+	}
+	
 	updateTextures();
 }
 
 
-//! \todo  Make this cleaner.
+//! \todo	Make this cleaner.
 frame* TexturingUI::createTexturePalette( int rows, int cols, Gui *setgui )
 {
 	gCurrentPage = 0;
@@ -360,17 +360,17 @@ frame* TexturingUI::createTexturePalette( int rows, int cols, Gui *setgui )
 		curTextures[i]->setClickFunc(texturePaletteClick,i);
 		windowTexturePalette->addChild(curTextures[i]);
 	}
-  
-  gPageNumber = NULL;
-  textSelectedTexture = NULL;
+	
+	gPageNumber = NULL;
+	textSelectedTexture = NULL;
 	
 	updateTextures();
 	texturePaletteClick( 0, 0 );
 
-  windowTexturePalette->addChild( gPageNumber = new textUI( 44.0f, 4.0f, "1 / 1", &arialn13, eJustifyLeft ) );
+	windowTexturePalette->addChild( gPageNumber = new textUI( 44.0f, 4.0f, "1 / 1", &arialn13, eJustifyLeft ) );
 	windowTexturePalette->addChild( new buttonUI( 20.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Down.blp", changePage, +1 ) );
 	windowTexturePalette->addChild( new buttonUI( 2.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Down.blp", changePage, -1 ) );
-  
+	
 	windowTexturePalette->addChild( new buttonUI( 145.0f, windowTexturePalette->height - 24.0f, 132.0f, 28.0f, "Load Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureLoader, 0 ) );
 	windowTexturePalette->addChild( new buttonUI( 7.0f, windowTexturePalette->height - 24.0f, 132.0f, 28.0f, "Filter Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureFilter, 0 ) );
 
@@ -417,7 +417,7 @@ frame* TexturingUI::createTilesetLoader()
 			23.0f + 21.0f * ( i % columns ),
 			150.0f,
 			28.0f,
-      "Interface\\Buttons\\UI-DialogBox-Button-Up.blp",
+			"Interface\\Buttons\\UI-DialogBox-Button-Up.blp",
 			"Interface\\Buttons\\UI-DialogBox-Button-Down.blp"
 		);
 		name->setText( tilesetDirectories[i] );
@@ -432,7 +432,7 @@ frame* TexturingUI::createTilesetLoader()
 frame* TexturingUI::createTextureFilter()
 {	
 	InitFilenameFilterList();
-  
+	
 	LoadTextureNames();
 	windowTextureFilter = new closeWindowUI( video.xres / 2.0f - 308.0f, video.yres / 2.0f - 314.5f, 616.0f, 630.0f, "Texture Filtering", true );
 	windowTextureFilter->hidden = true;
@@ -441,9 +441,9 @@ frame* TexturingUI::createTextureFilter()
 	windowTextureFilter->addChild( new textUI( 308.0f, 26.0f, "Filename Filters", &arial14, eJustifyCenter ) );
 
 	for( std::map<int,std::string>::iterator it = gFilenameFilters.begin(); it != gFilenameFilters.end(); ++it )
-  {
+	{
 		windowTextureFilter->addChild( new checkboxUI( 5.0f + 152.0f * ( it->first / 6 ), 43.0f + 30.0f * ( it->first % 6 ), it->second, clickFileFilterTexture, it->first ) );
-  }
+	}
 
 	windowTextureFilter->addChild( new checkboxUI( 240.0f, 43.0f + 30.0f * 6.0f, "Misc (Everything Else)", clickFileFilterTexture, 24 ) );
 
@@ -451,9 +451,9 @@ frame* TexturingUI::createTextureFilter()
 	windowTextureFilter->addChild( new textUI( 308.0f, 254.0f, "Tileset Filters", &arial14, eJustifyCenter ) );
 
 	for( unsigned int i = 0; i < tilesetDirectories.size(); ++i )
-  {
+	{
 		windowTextureFilter->addChild( new checkboxUI( 5.0f + 152.0f * ( i / 12 ), 267.0f + 30.0f * ( i % 12 ), tilesetDirectories[i], clickFilterTexture, i ) );
-  }
+	}
 
 	return windowTextureFilter;
 }
@@ -514,7 +514,7 @@ frame* TexturingUI::createMapChunkWindow()
 	
 	float yPos = 11.0f;
 
-    for(int i=1;i<4;++i)
+		for(int i=1;i<4;++i)
 	{
 		chunkEffectModels[i]=new textUI(8.0f,chunkEffectModels[i-1]->y+20.0f,"Effect Doodad", &arial14, eJustifyLeft);
 		chunkEffectWindow->addChild(chunkEffectModels[i]);
@@ -582,16 +582,16 @@ void TexturingUI::setChunkWindow(MapChunk *chunk)
 
 	sprintf(Temp,"Num Effects: %d",chunk->header.nEffectDoodad);
 	chunkNumEffects->setText(Temp);///
-    
+		
 	int pl=0;
 	for(pl=0;pl<(chunk->nTextures);pl++)
 	{
-    chunkTexture[pl]->hidden=false;
+		chunkTexture[pl]->hidden=false;
 	chunkTextureNames[pl]->hidden=false;
-    chunkTextureFlags[pl]->hidden=false;
+		chunkTextureFlags[pl]->hidden=false;
 	chunkTextureEffectID[pl]->hidden=false;
 
-    sprintf(Temp,"Flags- %d",chunk->texFlags[pl]);
+		sprintf(Temp,"Flags- %d",chunk->texFlags[pl]);
 	chunkTextureFlags[pl]->setText(Temp);
 
 	sprintf(Temp,"EffectID- %d",chunk->effectID[pl]);
@@ -604,7 +604,7 @@ void TexturingUI::setChunkWindow(MapChunk *chunk)
 	for(;pl<4;pl++)
 	{
 		chunkTexture[pl]->hidden=true;
-	    chunkTextureNames[pl]->hidden=true;
+			chunkTextureNames[pl]->hidden=true;
 		chunkTextureFlags[pl]->hidden=true;
 		chunkTextureEffectID[pl]->hidden=true;
 	}

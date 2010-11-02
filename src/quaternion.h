@@ -15,7 +15,7 @@ public:
 	Vec4D(const Vec3D& v, const float w0) : x(v.x), y(v.y), z(v.z), w(w0) {}
 
 	Vec4D& operator= (const Vec4D &v) {
-        x = v.x;
+				x = v.x;
 		y = v.y;
 		z = v.z;
 		w = v.w;
@@ -25,7 +25,7 @@ public:
 	const Vec4D operator+ (const Vec4D &v) const
 	{
 		Vec4D r(x+v.x,y+v.y,z+v.z,w+v.w);
-        return r;
+				return r;
 	}
 
 	const Vec4D operator- (const Vec4D &v) const
@@ -37,7 +37,7 @@ public:
 	const Vec4D operator* (float d) const
 	{
 		Vec4D r(x*d,y*d,z*d,w*d);
-        return r;
+				return r;
 	}
 
 	friend Vec4D operator* (float d, const Vec4D& v)
@@ -74,7 +74,7 @@ public:
 
 	float operator* (const Vec4D &v) const
 	{
-        return x*v.x + y*v.y + z*v.z + w*v.w;
+				return x*v.x + y*v.y + z*v.z + w*v.w;
 	}
 
 	float lengthSquared() const
@@ -84,7 +84,7 @@ public:
 
 	float length() const
 	{
-        return sqrt(x*x+y*y+z*z+w*w);
+				return sqrt(x*x+y*y+z*z+w*w);
 	}
 
 	Vec4D& normalize()

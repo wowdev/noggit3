@@ -5,6 +5,8 @@
 #include "mpq.h"
 #include "video.h"
 
+#include <cstdint>
+
 #pragma pack(push,1)
 struct BLPHeader 
 {
@@ -21,12 +23,12 @@ struct BLPHeader
 };
 #pragma pack(pop)
 
-template <class IDTYPE,class MANAGEDITEM> std::map<std::string, GLuint> Manager<GLuint, Texture>::names;
-template <class IDTYPE,class MANAGEDITEM> std::map<GLuint, Texture*> Manager<GLuint,Texture>::items;
+template <> std::map<std::string, GLuint> Manager<GLuint, Texture>::names;
+template <> std::map<GLuint, Texture*> Manager<GLuint,Texture>::items;
 
 GLuint TextureManager::get(const std::string& name)
 {
-  std::string name_ = name;
+	std::string name_ = name;
 	std::transform (name_.begin(), name_.end(), name_.begin(), ::tolower );
 	return names[name_];
 }
@@ -34,7 +36,7 @@ GLuint TextureManager::get(const std::string& name)
 GLuint TextureManager::add(const std::string& name)
 {
 	GLuint id;
-  std::string name_ = name;
+	std::string name_ = name;
 	std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
 	if( names.find( name_ ) != names.end() ) 
 	{
@@ -118,16 +120,16 @@ bool TextureManager::LoadBLP(GLuint id, Texture *tex)
 							k = ((k&0x00FF0000)>>16) | ((k&0x0000FF00)) | ((k& 0x000000FF)<<16);
 							int alpha = 0xFF;
 							if (hasalpha) 
-              {
+							{
 								if (alphabits == 8) 
-                {
+								{
 									alpha = (*a++);
 								} 
-                else if (alphabits == 1)
-                {
+								else if (alphabits == 1)
+								{
 									alpha = (*a & (1 << cnt++)) ? 0xff : 0;
 									if (cnt == 8) 
-                  {
+									{
 										cnt = 0;
 										a++;
 									}
@@ -155,9 +157,9 @@ bool TextureManager::LoadBLP(GLuint id, Texture *tex)
 		{
 			// compressed
 
-			//                         0 (0000) & 3 == 0                1 (0001) & 3 == 1                    7 (0111) & 3 == 3
+			//												 0 (0000) & 3 == 0								1 (0001) & 3 == 1										7 (0111) & 3 == 3
 			const int alphatypes[] = { GL_COMPRESSED_RGB_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT };
-			const int blocksizes[] = { 8,                               16,                               0, 16 };
+			const int blocksizes[] = { 8,															 16,															 0, 16 };
 			
 			int lTempAlphatype = lHeader->attr_2_alphatype & 3;
 			GLint format = alphatypes[lTempAlphatype];

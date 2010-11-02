@@ -16,8 +16,8 @@ public:
 
 private:
 	Settings();
-    ~Settings() {}
-    static Settings* instance;
+		~Settings() {}
+		static Settings* instance;
 
 	// The settings vars
 

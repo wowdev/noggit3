@@ -36,11 +36,11 @@ void statusBar::render() const
 			( *child )->render();
 
 	glColor3f( 0.7f, 0.7f, 0.7f );
-  
-  Texture::setActiveTexture();
-  Texture::enableTexture();
-  
-  texture->render();
+	
+	Texture::setActiveTexture();
+	Texture::enableTexture();
+	
+	texture->render();
 
 	//Draw Top Side
 	glBegin( GL_TRIANGLE_STRIP );	
@@ -53,9 +53,9 @@ void statusBar::render() const
 	glTexCoord2f( 0.25f, 0.0f );
 	glVertex2f( width, -3.0f );
 	glEnd();
-  
-  Texture::disableTexture();
-  
+	
+	Texture::disableTexture();
+	
 	glPopMatrix();
 }
 

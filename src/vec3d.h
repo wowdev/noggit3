@@ -12,7 +12,7 @@ public:
 	Vec3D(const Vec3D& v) : x(v.x), y(v.y), z(v.z) {}
 
 	Vec3D& operator= (const Vec3D &v) {
-        x = v.x;
+				x = v.x;
 		y = v.y;
 		z = v.z;
 		return *this;
@@ -21,7 +21,7 @@ public:
 	Vec3D operator+ (const Vec3D &v) const
 	{
 		Vec3D r(x+v.x,y+v.y,z+v.z);
-        return r;
+				return r;
 	}
 
 	Vec3D operator- (const Vec3D &v) const
@@ -32,13 +32,13 @@ public:
 
 	float operator* (const Vec3D &v) const
 	{
-        return x*v.x + y*v.y + z*v.z;
+				return x*v.x + y*v.y + z*v.z;
 	}
 
 	Vec3D operator* (float d) const
 	{
 		Vec3D r(x*d,y*d,z*d);
-        return r;
+				return r;
 	}
 
 	friend Vec3D operator* (float d, const Vec3D& v)
@@ -48,7 +48,7 @@ public:
 
 	Vec3D operator% (const Vec3D &v) const
 	{
-        Vec3D r(y*v.z-z*v.y, z*v.x-x*v.z, x*v.y-y*v.x);
+				Vec3D r(y*v.z-z*v.y, z*v.x-x*v.z, x*v.y-y*v.x);
 		return r;
 	}
 
@@ -83,7 +83,7 @@ public:
 
 	float length() const
 	{
-        return sqrt(x*x+y*y+z*z);
+				return sqrt(x*x+y*y+z*z);
 	}
 
 	Vec3D& normalize()
@@ -95,7 +95,7 @@ public:
 	Vec3D operator~ () const
 	{
 		Vec3D r(*this);
-        r.normalize();
+				r.normalize();
 		return r;
 	}
 
@@ -120,7 +120,7 @@ public:
 	Vec2D(const Vec2D& v) : x(v.x), y(v.y) {}
 
 	Vec2D& operator= (const Vec2D &v) {
-        x = v.x;
+				x = v.x;
 		y = v.y;
 		return *this;
 	}
@@ -128,7 +128,7 @@ public:
 	Vec2D operator+ (const Vec2D &v) const
 	{
 		Vec2D r(x+v.x,y+v.y);
-        return r;
+				return r;
 	}
 
 	Vec2D operator- (const Vec2D &v) const
@@ -139,13 +139,13 @@ public:
 
 	float operator* (const Vec2D &v) const
 	{
-        return x*v.x + y*v.y;
+				return x*v.x + y*v.y;
 	}
 
 	Vec2D operator* (float d) const
 	{
 		Vec2D r(x*d,y*d);
-        return r;
+				return r;
 	}
 
 	friend Vec2D operator* (float d, const Vec2D& v)
@@ -181,7 +181,7 @@ public:
 
 	float length() const
 	{
-        return sqrt(x*x+y*y);
+				return sqrt(x*x+y*y);
 	}
 
 	Vec2D& normalize()
@@ -193,7 +193,7 @@ public:
 	Vec2D operator~ () const
 	{
 		Vec2D r(*this);
-        r.normalize();
+				r.normalize();
 		return r;
 	}
 

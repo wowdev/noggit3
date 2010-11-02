@@ -5,7 +5,7 @@
 using std::string;
 
 ConfigFile::ConfigFile( string filename, string delimiter,
-                        string comment, string sentry )
+												string comment, string sentry )
 	: myDelimiter(delimiter), myComment(comment), mySentry(sentry)
 {
 	// Construct a ConfigFile, getting keys and values from given file
@@ -55,7 +55,7 @@ std::ostream& operator<<( std::ostream& os, const ConfigFile& cf )
 {
 	// Save a ConfigFile to os
 	for( ConfigFile::mapci p = cf.myContents.begin();
-	     p != cf.myContents.end();
+			 p != cf.myContents.end();
 		 ++p )
 	{
 		os << p->first << " " << cf.myDelimiter << " ";
@@ -70,12 +70,12 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 	// Load a ConfigFile from is
 	// Read in keys and values, keeping internal whitespace
 	typedef string::size_type pos;
-	const string& delim  = cf.myDelimiter;  // separator
-	const string& comm   = cf.myComment;    // comment
-	const string& sentry = cf.mySentry;     // end of file sentry
-	const pos skip = delim.length();        // length of separator
+	const string& delim	= cf.myDelimiter;	// separator
+	const string& comm	 = cf.myComment;		// comment
+	const string& sentry = cf.mySentry;		 // end of file sentry
+	const pos skip = delim.length();				// length of separator
 	
-	string nextline = "";  // might need to read ahead to see where value ends
+	string nextline = "";	// might need to read ahead to see where value ends
 	
 	while( is || nextline.length() > 0 )
 	{
@@ -83,7 +83,7 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 		string line;
 		if( nextline.length() > 0 )
 		{
-			line = nextline;  // we read ahead; use it now
+			line = nextline;	// we read ahead; use it now
 			nextline = "";
 		}
 		else
@@ -134,7 +134,7 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 			// Store key and value
 			ConfigFile::trim(key);
 			ConfigFile::trim(line);
-			cf.myContents[key] = line;  // overwrites if key is repeated
+			cf.myContents[key] = line;	// overwrites if key is repeated
 		}
 	}
 	

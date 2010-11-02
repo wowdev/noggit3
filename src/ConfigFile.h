@@ -1,6 +1,6 @@
 // ConfigFile.h
 // Class for reading named values from configuration files
-// Richard J. Wagner  v2.1  24 May 2004  wagnerr@umich.edu
+// Richard J. Wagner	v2.1	24 May 2004	wagnerr@umich.edu
 
 // Copyright (c) 2004 Richard J. Wagner
 // 
@@ -26,17 +26,17 @@
 // -------------
 // 
 // Given a configuration file "settings.inp":
-//   atoms  = 25
-//   length = 8.0  # nanometers
-//   name = Reece Surcher
+//	 atoms	= 25
+//	 length = 8.0	# nanometers
+//	 name = Reece Surcher
 // 
 // Named values are read in various ways, with or without default values:
-//   ConfigFile config( "settings.inp" );
-//   int atoms = config.read<int>( "atoms" );
-//   double length = config.read( "length", 10.0 );
-//   string author, title;
-//   config.readInto( author, "name" );
-//   config.readInto( title, "title", string("Untitled") );
+//	 ConfigFile config( "settings.inp" );
+//	 int atoms = config.read<int>( "atoms" );
+//	 double length = config.read( "length", 10.0 );
+//	 string author, title;
+//	 config.readInto( author, "name" );
+//	 config.readInto( title, "title", string("Untitled") );
 // 
 // See file example.cpp for more examples.
 
@@ -54,10 +54,10 @@ using std::string;
 class ConfigFile {
 // Data
 protected:
-	string myDelimiter;  // separator between key and value
-	string myComment;    // separator between value and comments
-	string mySentry;     // optional string to signal end of file
-	std::map<string,string> myContents;  // extracted keys and values
+	string myDelimiter;	// separator between key and value
+	string myComment;		// separator between value and comments
+	string mySentry;		 // optional string to signal end of file
+	std::map<string,string> myContents;	// extracted keys and values
 	
 	typedef std::map<string,string>::iterator mapi;
 	typedef std::map<string,string>::const_iterator mapci;
@@ -65,13 +65,13 @@ protected:
 // Methods
 public:
 	ConfigFile( string filename,
-	            string delimiter = "=",
-	            string comment = "#",
+							string delimiter = "=",
+							string comment = "#",
 				string sentry = "EndConfigFile" );
 	ConfigFile();
 	
 	// Search for key and read value or optional default value
-	template<class T> T read( const string& key ) const;  // call as read<T>
+	template<class T> T read( const string& key ) const;	// call as read<T>
 	template<class T> T read( const string& key, const T& value ) const;
 	template<class T> bool readInto( T& var, const string& key ) const;
 	template<class T>
@@ -89,9 +89,9 @@ public:
 	string getComment() const { return myComment; }
 	string getSentry() const { return mySentry; }
 	string setDelimiter( const string& s )
-		{ string old = myDelimiter;  myDelimiter = s;  return old; }  
+		{ string old = myDelimiter;	myDelimiter = s;	return old; }	
 	string setComment( const string& s )
-		{ string old = myComment;  myComment = s;  return old; }
+		{ string old = myComment;	myComment = s;	return old; }
 	
 	// Write or read configuration
 	friend std::ostream& operator<<( std::ostream& os, const ConfigFile& cf );
@@ -109,7 +109,7 @@ public:
 		string filename;
 		file_not_found( const string& filename_ = string() )
 			: filename(filename_) {} };
-	struct key_not_found {  // thrown only by T read(key) variant of read()
+	struct key_not_found {	// thrown only by T read(key) variant of read()
 		string key;
 		key_not_found( const string& key_ = string() )
 			: key(key_) {} };
@@ -161,10 +161,10 @@ inline bool ConfigFile::string_as_T<bool>( const string& s )
 	bool b = true;
 	string sup = s;
 	for( string::iterator p = sup.begin(); p != sup.end(); ++p )
-		*p = toupper(*p);  // make string all caps
+		*p = toupper(*p);	// make string all caps
 	if( sup==string("FALSE") || sup==string("F") ||
-	    sup==string("NO") || sup==string("N") ||
-	    sup==string("0") || sup==string("NONE") )
+			sup==string("NO") || sup==string("N") ||
+			sup==string("0") || sup==string("NONE") )
 		b = false;
 	return b;
 }
@@ -231,23 +231,23 @@ void ConfigFile::add( string key, const T& value )
 	return;
 }
 
-#endif  // CONFIGFILE_H
+#endif	// CONFIGFILE_H
 
 // Release notes:
-// v1.0  21 May 1999
-//   + First release
-//   + Template read() access only through non-member readConfigFile()
-//   + ConfigurationFileBool is only built-in helper class
+// v1.0	21 May 1999
+//	 + First release
+//	 + Template read() access only through non-member readConfigFile()
+//	 + ConfigurationFileBool is only built-in helper class
 // 
-// v2.0  3 May 2002
-//   + Shortened name from ConfigurationFile to ConfigFile
-//   + Implemented template member functions
-//   + Changed default comment separator from % to #
-//   + Enabled reading of multiple-line values
+// v2.0	3 May 2002
+//	 + Shortened name from ConfigurationFile to ConfigFile
+//	 + Implemented template member functions
+//	 + Changed default comment separator from % to #
+//	 + Enabled reading of multiple-line values
 // 
-// v2.1  24 May 2004
-//   + Made template specializations inline to avoid compiler-dependent linkage
-//   + Allowed comments within multiple-line values
-//   + Enabled blank line termination for multiple-line values
-//   + Added optional sentry to detect end of configuration file
-//   + Rewrote messy trimWhitespace() function as elegant trim()
+// v2.1	24 May 2004
+//	 + Made template specializations inline to avoid compiler-dependent linkage
+//	 + Allowed comments within multiple-line values
+//	 + Enabled blank line termination for multiple-line values
+//	 + Added optional sentry to detect end of configuration file
+//	 + Rewrote messy trimWhitespace() function as elegant trim()

@@ -2,7 +2,7 @@
 #include "video.h" // gl*
 #include "TextureManager.h" // TextureManager, Texture
 
-Icon::Icon(float xPos,float yPos,float w, float h, const std::string& tex,  const std::string& texd)
+Icon::Icon(float xPos,float yPos,float w, float h, const std::string& tex,	const std::string& texd)
 {
 	x=xPos;
 	y=yPos;
@@ -18,11 +18,11 @@ Icon::Icon(float xPos,float yPos,float w, float h, const std::string& tex,  cons
 void Icon::render() const
 {
 	glColor3f(1.0f,1.0f,1.0f);
-  
-  Texture::setActiveTexture();
-  Texture::enableTexture();
-  
-  texture->render();
+	
+	Texture::setActiveTexture();
+	Texture::enableTexture();
+	
+	texture->render();
 
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(0.0f,0.0f);
@@ -35,15 +35,15 @@ void Icon::render() const
 	glVertex2f(x+width,y+height);
 	glEnd();
 
-  Texture::disableTexture();
-  
+	Texture::disableTexture();
+	
 	if(this->selected)
 	{
 		static const int sizer = 18;
-    
-    Texture::enableTexture();
-    
-    textureSelected->render();
+		
+		Texture::enableTexture();
+		
+		textureSelected->render();
 
 		glBegin(GL_TRIANGLE_STRIP);
 		glTexCoord2f(0.0f,0.0f);
@@ -55,8 +55,8 @@ void Icon::render() const
 		glTexCoord2f(1.0f,1.0f);
 		glVertex2f(x+width+sizer,y+height+sizer);
 		glEnd();
-    
-    Texture::disableTexture();
+		
+		Texture::disableTexture();
 	}
 
 	glPushMatrix();

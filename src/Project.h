@@ -11,8 +11,8 @@ public:
 	std::string getPath();
 private:
 	Project();
-    ~Project() {}
-    static Project* instance;
+		~Project() {}
+		static Project* instance;
 	std::string path;
 };
 

@@ -9,7 +9,7 @@ class textureUI;
 class SDL_KeyboardEvent;
 class Texture;
 
-//! \todo  Combine and get it working.
+//! \todo	Combine and get it working.
 class textboxUI:public frame
 {
 protected:

@@ -8,7 +8,7 @@ window::window( float xPos, float yPos, float w, float h ) : frame( xPos, yPos, 
 
 window::window( float xPos, float yPos, float w, float h, const std::string& pTexture ) : frame( xPos, yPos, w, h ), texture( TextureManager::newTexture( pTexture ) )
 {
-  //! \todo save pTexture to release it in the desctructor.
+	//! \todo save pTexture to release it in the desctructor.
 }
 
 frame* window::processLeftClick( float mx, float my )
@@ -28,7 +28,7 @@ frame* window::processLeftClick( float mx, float my )
 
 void window::render() const
 {
-	//! \todo  Get this to work. Its supposed to cut elements outside of width and height.
+	//! \todo	Get this to work. Its supposed to cut elements outside of width and height.
 	/*
 	glClear( GL_STENCIL_BUFFER_BIT );
 	glColorMask( false, false, false, false );
@@ -90,11 +90,11 @@ void window::render() const
 			( *child )->render();
 
 	glColor3f( 1.0f, 1.0f, 1.0f );
-  
-  Texture::setActiveTexture();
-  Texture::enableTexture();
-  
-  texture->render();
+	
+	Texture::setActiveTexture();
+	Texture::enableTexture();
+	
+	texture->render();
 
 	//Draw Bottom left Corner First
 	glBegin( GL_TRIANGLE_STRIP );	
@@ -192,8 +192,8 @@ void window::render() const
 	glTexCoord2f( 0.25f, 0.0f );
 	glVertex2f( width - 13.0f, -3.0f );
 	glEnd();
-  
-  Texture::disableTexture();
-  
+	
+	Texture::disableTexture();
+	
 	glPopMatrix();
 }

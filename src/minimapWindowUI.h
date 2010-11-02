@@ -8,8 +8,8 @@ class Menu;
 class minimapWindowUI : public window
 {
 private:
-  static const float tilesize = 12.0f;
-  Menu* mMenuLink;
+	static const float tilesize;
+	Menu* mMenuLink;
 public:
 	minimapWindowUI( Menu* menuLink, float x, float y);
 	frame *processLeftClick( float mx, float my );

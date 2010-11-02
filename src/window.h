@@ -2,6 +2,7 @@
 #define __WINDOW_H
 
 #include "frame.h"
+#include "FreeType.h" // fonts.
 
 class Texture;
 

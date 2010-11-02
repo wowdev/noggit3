@@ -7,7 +7,7 @@
 
 #include "noggit.h" // arial12
 
-TreeViewButton::TreeViewButton( float _x, float _y, TreeView* pTreeView ) : buttonUI(  _x, _y, 12.0f, 12.0f, "Interface\\Buttons\\UI-PlusButton-Up.blp", "Interface\\Buttons\\UI-PlusButton-Down.blp" ), mTreeView( pTreeView )
+TreeViewButton::TreeViewButton( float _x, float _y, TreeView* pTreeView ) : buttonUI(	_x, _y, 12.0f, 12.0f, "Interface\\Buttons\\UI-PlusButton-Up.blp", "Interface\\Buttons\\UI-PlusButton-Down.blp" ), mTreeView( pTreeView )
 {
 }
 
@@ -62,7 +62,7 @@ bool TreeView::Expanded()
 
 std::string TreeView::GetDirectoryName()
 {
-  return mMyDir->mName;
+	return mMyDir->mName;
 }
 
 void TreeView::Move( int pEntries, TreeView * pFrom )

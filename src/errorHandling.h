@@ -3,8 +3,8 @@
  *
  * Description: Simple implementation of signal handlers. Include this and call RegisterErrorHandlers(); in main() once.
  *
- *  Created on: Apr 26, 2010
- *      Author: loerwald
+ *	Created on: Apr 26, 2010
+ *			Author: loerwald
  */
 
 #ifndef ERRORHANDLING_H_
@@ -51,7 +51,7 @@ void leave(int sig)
 			break;
 		case SIGTERM:
 			sign = "SIGTERM";
-			description =  "Termination request made to the program. (Terminate.)";
+			description =	"Termination request made to the program. (Terminate.)";
 			break;
 		default:
 			sign = "SIGUNK";
@@ -60,11 +60,11 @@ void leave(int sig)
 	}
 	
 	printf("\n\n"
-         "There was an exception of type \"%s\".\n"
-         "\"%s\".\n"
-         "Please excuse the inconvenience. You may want to report this error including the log to the developers.\n",
-         sign,
-         description );
+				 "There was an exception of type \"%s\".\n"
+				 "\"%s\".\n"
+				 "Please excuse the inconvenience. You may want to report this error including the log to the developers.\n",
+				 sign,
+				 description );
 	
 	printStacktrace();
 	
@@ -73,12 +73,12 @@ void leave(int sig)
 
 void RegisterErrorHandlers()
 {
-  (void) signal( SIGABRT, leave );
-  (void) signal( SIGFPE, leave );
-  (void) signal( SIGILL, leave );
-  (void) signal( SIGINT, leave );
-  (void) signal( SIGSEGV, leave );
-  (void) signal( SIGTERM, leave );
+	(void) signal( SIGABRT, leave );
+	(void) signal( SIGFPE, leave );
+	(void) signal( SIGILL, leave );
+	(void) signal( SIGINT, leave );
+	(void) signal( SIGSEGV, leave );
+	(void) signal( SIGTERM, leave );
 }
 
 #ifndef WIN32
@@ -111,12 +111,12 @@ void printStacktrace()
 
 void printStacktrace()
 {	
-  /*!
-   \todo This is not compiling, yes. This is on purpose. You need to add windows specific code here.
-   The function CaptureStackBackTrace (see http://msdn.microsoft.com/en-us/library/bb204633(VS.85).aspx ) should help here.
-  */
+	/*!
+	 \todo This is not compiling, yes. This is on purpose. You need to add windows specific code here.
+	 The function CaptureStackBackTrace (see http://msdn.microsoft.com/en-us/library/bb204633(VS.85).aspx ) should help here.
+	*/
 	
-  "compiler error" = true = "because you need to implement this. read the comment above.";
+//	"compiler error" = true = "because you need to implement this. read the comment above.";
 }
 
 #endif

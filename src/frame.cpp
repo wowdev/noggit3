@@ -1,6 +1,11 @@
 #include "frame.h"
 #include "video.h" // gl*
 
+#include <algorithm>
+
+
+
+
 void frame::render() const
 {
 	if( hidden )
@@ -24,11 +29,11 @@ void frame::addChild( frame *c )
 
 void frame::removeChild( frame* c )
 {
-  std::vector<frame*>::iterator it = std::find( children.begin(), children.end(), c );
-  if( it != children.end() )
-  {
-    children.erase( it );
-  }
+	std::vector<frame*>::iterator it = std::find( children.begin(), children.end(), c );
+	if( it != children.end() )
+	{
+		children.erase( it );
+	}
 }
 
 frame * frame::processLeftClick( float mx, float my )
