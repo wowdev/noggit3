@@ -1006,7 +1006,7 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot)
 	glColor4f(1,1,1,1);
 	for (int i=0; i<nBatches; ++i) 
 	{
-		if( video.mSupportShaders && lists[i].second )
+		if( video.mSupportShaders && lists[i].second && wmoShader)
 		{
 			wmoShader->bind();
 			glCallList( lists[i].first );
