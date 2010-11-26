@@ -498,7 +498,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	tool_settings_y = 38;
 	
 	// Raisen/Lower
-	setting_ground=new window(tool_settings_x,tool_settings_y,180.0f,125.0f);
+	setting_ground=new window(tool_settings_x,tool_settings_y,180.0f,160.0f);
 	setting_ground->movable=true;
 	tileFrames->addChild(setting_ground);
 
@@ -508,15 +508,18 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	setting_ground->addChild( new checkboxUI( 6.0f, 15.0f, "Flat", gGroundToggleGroup, 0 ) );
 	setting_ground->addChild( new checkboxUI( 80.0f, 15.0f, "Linear", gGroundToggleGroup, 1 ) );
 	setting_ground->addChild( new checkboxUI( 6.0f, 40.0f, "Smooth", gGroundToggleGroup, 2 ) );
+	setting_ground->addChild( new checkboxUI( 80.0f, 40.0f, "Polynomial", gGroundToggleGroup, 3 ) );
+	setting_ground->addChild( new checkboxUI( 6.0f, 75.0f, "Trigonometric", gGroundToggleGroup, 4 ) );
+	setting_ground->addChild( new checkboxUI( 80.0f, 75.0f, "Quadratic", gGroundToggleGroup, 5 ) );
 	gGroundToggleGroup->Activate( 2 );
 
-	ground_brush_radius=new slider(6.0f,85.0f,167.0f,1000.0f,0.00001f);
+	ground_brush_radius=new slider(6.0f,120.0f,167.0f,1000.0f,0.00001f);
 	ground_brush_radius->setFunc(setGroundBrushRadius);
 	ground_brush_radius->setValue(groundBrushRadius/1000);
 	ground_brush_radius->setText("Brush radius: %.2f");
 	setting_ground->addChild(ground_brush_radius);
 
-	ground_brush_speed=new slider(6.0f,110.0f,167.0f,10.0f,0.00001f);
+	ground_brush_speed=new slider(6.0f,145.0f,167.0f,10.0f,0.00001f);
 	ground_brush_speed->setFunc(setGroundBrushSpeed);
 	ground_brush_speed->setValue(groundBrushSpeed/10);
 	ground_brush_speed->setText("Brush Speed: %.2f");
@@ -1879,7 +1882,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			{
 			case 0:
 				groundBrushType++;
-				groundBrushType = groundBrushType % 3;
+				groundBrushType = groundBrushType % 6;
 				gGroundToggleGroup->Activate( groundBrushType );
 				break;
 
