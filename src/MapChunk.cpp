@@ -1368,18 +1368,28 @@ void MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 	{
 		xdiff=mVertices[i].x-x;
 		zdiff=mVertices[i].z-z;
-
-		dist=sqrt(xdiff*xdiff+zdiff*zdiff);
-
-		if(dist<radius)
-		{
-			if(BrushType==0)//Flat
+		if(BrushType == 5){
+			if((abs(xdiff) < abs(radius/2)) && (abs(zdiff) < abs(radius/2))){
 				mVertices[i].y+=change;
-			else if(BrushType==1)//Linear
-				mVertices[i].y+=change*(1.0f-dist/radius);
-			else if(BrushType==2)//Smooth
-				mVertices[i].y+=change/(1.0f+dist/radius);
-			Changed=true;
+				Changed=true;
+			}
+		}
+		else{
+			dist=sqrt(xdiff*xdiff+zdiff*zdiff);
+			if(dist<radius)
+			{
+				if(BrushType==0)//Flat
+					mVertices[i].y+=change;
+				else if(BrushType==1)//Linear
+					mVertices[i].y+=change*(1.0f-dist/radius);
+				else if(BrushType==2)//Smooth
+					mVertices[i].y+=change/(1.0f+dist/radius);
+				else if (BrushType == 3) //x^2
+					mVertices[i].y +=change*((dist/radius)*(dist/radius)+dist/radius+1.0f);
+				else if (BrushType == 4) //cos				
+					mVertices[i].y+=change*cos(dist/radius);
+				Changed=true;
+			}
 		}
 		
 		if (mVertices[i].y < vmin.y) vmin.y = mVertices[i].y;
@@ -1391,6 +1401,7 @@ void MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 		glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mVertices, GL_STATIC_DRAW);
 	}
 }
+
 
 void MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
 {
