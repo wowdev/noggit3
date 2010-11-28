@@ -7,6 +7,7 @@
 #include "quaternion.h" // Vec4D
 #include "MapTile.h" // MapTile
 
+
 class MPQFile;
 class Vec4D;
 class brush;

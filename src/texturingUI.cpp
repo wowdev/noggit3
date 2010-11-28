@@ -152,11 +152,11 @@ void showPage( int pPage )
 {
 	GLuint lSelectedTexture = 0;
 
-	if( selectedTexture )
+	if( TexturingUI::getSelectedTexture() )
 	{
 		for( std::map<GLuint, Texture*>::iterator i = TextureManager::items.begin(); i != TextureManager::items.end(); ++i )
 		{
-			if( i->second->name == selectedTexture->name )
+			if( i->second->name == TexturingUI::getSelectedTexture()->name )
 			{
 				lSelectedTexture = i->first;
 			}
@@ -220,16 +220,20 @@ void texturePaletteClick( frame *f, int id )
 	if( curTextures[id]->hidden )
 		return;
 	
-	selectedTexture = (Texture*)TextureManager::items.find( gTexturesInPage[id] )->second;
+	TexturingUI::setSelectedTexture((Texture*)TextureManager::items.find( gTexturesInPage[id] )->second);
 	
-	if( selectedTexture )
+	if( TexturingUI::getSelectedTexture() )
 	{
+		Log << TexturingUI::getSelectedTexture();
 		if( textureSelected )
-			textureSelected->setTexture( selectedTexture->name );
+			textureSelected->setTexture( TexturingUI::getSelectedTexture()->name );
 		if( textSelectedTexture )
-			textSelectedTexture->setText( selectedTexture->name );
+			textSelectedTexture->setText( TexturingUI::getSelectedTexture()->name );
 		if( textGui )
-			textGui->guiToolbar->current_texture->setTexture( selectedTexture->name );
+			textGui->guiToolbar->current_texture->setTexture( TexturingUI::getSelectedTexture()->name );
+	}
+	else{
+		Log << "Somehow getting the texture failed oO";
 	}
 
 	for( int i = 0; i < ( pal_cols * pal_rows ); ++i )
@@ -610,3 +614,10 @@ void TexturingUI::setChunkWindow(MapChunk *chunk)
 	}
 }
 
+Texture* TexturingUI::getSelectedTexture(){
+	return selectedTexture;
+}
+
+void TexturingUI::setSelectedTexture(Texture * t){
+	selectedTexture = t;
+}

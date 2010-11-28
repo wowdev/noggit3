@@ -1506,7 +1506,8 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 {
 	const int newX = (int)(x / TILESIZE);
 	const int newZ = (int)(z / TILESIZE);
-
+	
+	Log << "Painting Textures at " << x << " and " << z;
 	bool succ = false;
 	
 	for( int j = newZ - 1; j < newZ + 1; ++j )
@@ -1532,7 +1533,7 @@ void World::eraseTextures(float x, float z)
 {
 	const int newX = (int)(x / TILESIZE);
 	const int newZ = (int)(z / TILESIZE);
-	
+	Log << "Erasing Textures at " << x << " and " << z;
 	for( int j = newZ - 1; j < newZ + 1; ++j )
 	{
 		for( int i = newX - 1; i < newX + 1; ++i )
