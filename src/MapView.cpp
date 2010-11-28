@@ -846,17 +846,20 @@ void MapView::tick( float t, float dt )
 					break;
 					
 				case 2:
-					if( Environment::getInstance()->ShiftDown ) // 3D Paint
+					if( Environment::getInstance()->ShiftDown ){ // 3D Paint
 						if( Environment::getInstance()->CtrlDown ) // clear chunk texture
 							gWorld->eraseTextures(xPos, zPos);
-						else if( selectedTexture )
-						{
+						else if( TexturingUI::getSelectedTexture() ){
 							if( textureBrush.needUpdate() )
 								textureBrush.GenerateTexture();
 							
-							if( !gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( selectedTexture->name ) ) )
+							if( !gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture()->name ) ) )
 								LogError << "paintTexture failed ._. " << std::endl;
 						}
+						else{
+							Log <<"Texture Pointer: "<< TexturingUI::getSelectedTexture(); //oO
+						}
+					}
 						
 					break;
 					
@@ -899,7 +902,7 @@ void MapView::tick( float t, float dt )
 			using std::max;
 			gWorld->zoom = min( max( gWorld->zoom, 0.1f ), 2.0f );
 
-			if( leftMouse && !LastClicked && selectedTexture )
+			if( leftMouse && !LastClicked && TexturingUI::getSelectedTexture() )
 			{
 				// Da bin ich überfragt, keine Ahnung, was der Code macht :) Dann bin ich ja nicht alleine :)
 				// Aber grundsätzlich wird hier die Mouseposition errechnet. Auf mir unbekannte Art und weise.
@@ -915,7 +918,7 @@ void MapView::tick( float t, float dt )
 					if( textureBrush.needUpdate() )
 						textureBrush.GenerateTexture();
 					
-					gWorld->paintTexture( mX, mY, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( selectedTexture->name ) );
+					gWorld->paintTexture( mX, mY, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture() ->name ) );
 				}
 			}
 
