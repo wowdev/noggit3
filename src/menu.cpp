@@ -278,7 +278,7 @@ void Menu::buildMenuBar()
 	
 	mGUImenuBar = new menuBar();
 	mGUImenuBar->AddMenu( "File" );
-	mGUImenuBar->GetMenu( "File" )->AddMenuItemSwitch( "exit																	ESC", &gPop, true );
+	mGUImenuBar->GetMenu( "File" )->AddMenuItemSwitch( "exit ESC", &gPop, true );
 	mGUIFrame->addChild( mGUImenuBar );
 	
 	static const char* typeToName[3] = { "Continent", "Dungeons", "Raid" };
