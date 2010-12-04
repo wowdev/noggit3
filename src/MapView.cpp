@@ -314,7 +314,6 @@ void InsertObject( frame *button, int id )
 	// Test if there is an selection
 	if( !gWorld->HasSelection() )
 		return;
-
 	// the list of the models to import
 	std::vector<std::string> m2s_to_add;
 	std::vector<std::string> wmos_to_add;
@@ -324,19 +323,24 @@ void InsertObject( frame *button, int id )
 
 	// MODELINSERT FROM TEXTFILE
 	// is a source file set in config file?
-	if( FileExists( "noggIt.conf" ) )
-	{
-		ConfigFile config( "noggIt.conf" );
-		config.readInto( importFile, "ImportFile" );
-	}
+	
 		
 		// insert from modelviewer if file set and hit the right menu pount.
-		if(id==0 && importFile=="")
-			return; // path not set. Return ro editor.
-		else if (id==2)
+		if(id==0)
+			if( FileExists( "noggIt.conf" ) )
+			{
+				ConfigFile config( "noggIt.conf" );
+				config.readInto( importFile, "ImportFile" );
+			}
+		// insert from import.txt if file exists and hit the right menu pount.
+		if (id==1)
+		{
 			importFile="Import.txt"; //	use import.txt in noggit folder!
-
+		}
 	
+		if(importFile=="")
+			return;
+
 	size_t foundString;
 	std::string line;
 	std::string findThis;
@@ -362,7 +366,7 @@ void InsertObject( frame *button, int id )
 			else if(line.find(".wmo")!= std::string::npos || line.find(".WMO")!= std::string::npos )
 			{
 				// WMO inside line
-				findThis = "Loading WMO ";
+				findThis = "Loading WMOModel ";
 				foundString = line.find(findThis);
 				// is it the modelviewer log then cut the log messages out
 				if(foundString != std::string::npos)
@@ -378,7 +382,6 @@ void InsertObject( frame *button, int id )
 	else 
 	{
 		// file not exist, no rights ore other error
-		LogError << "Faild to open file for import models"<<std::endl;
 		LogError << importFile << std::endl;
 	}
 	
@@ -398,18 +401,20 @@ void InsertObject( frame *button, int id )
 
 	for( std::vector<std::string>::iterator it = wmos_to_add.begin(); it != wmos_to_add.end(); ++it )
 	{
-		if( MPQFile::exists(*it) )
+		
+		if( !MPQFile::exists(*it) )
 		{
 			LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
 			continue;
 		}
-
+		
 		gWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
 	}
 
 	for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
 	{
-		if( MPQFile::exists(*it) )
+
+		if( !MPQFile::exists(*it) )
 		{
 			LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
 			continue;
@@ -506,11 +511,11 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	
 	gGroundToggleGroup = new ToggleGroup( &groundBrushType );
 	setting_ground->addChild( new checkboxUI( 6.0f, 15.0f, "Flat", gGroundToggleGroup, 0 ) );
-	setting_ground->addChild( new checkboxUI( 80.0f, 15.0f, "Linear", gGroundToggleGroup, 1 ) );
+	setting_ground->addChild( new checkboxUI( 85.0f, 15.0f, "Linear", gGroundToggleGroup, 1 ) );
 	setting_ground->addChild( new checkboxUI( 6.0f, 40.0f, "Smooth", gGroundToggleGroup, 2 ) );
-	setting_ground->addChild( new checkboxUI( 80.0f, 40.0f, "Polynomial", gGroundToggleGroup, 3 ) );
-	setting_ground->addChild( new checkboxUI( 6.0f, 75.0f, "Trigonometric", gGroundToggleGroup, 4 ) );
-	setting_ground->addChild( new checkboxUI( 80.0f, 75.0f, "Quadratic", gGroundToggleGroup, 5 ) );
+	setting_ground->addChild( new checkboxUI( 85.0f, 40.0f, "Polynomial", gGroundToggleGroup, 3 ) );
+	setting_ground->addChild( new checkboxUI( 6.0f, 65.0f, "Trigonom", gGroundToggleGroup, 4 ) );
+	setting_ground->addChild( new checkboxUI( 85.0f, 65.0f, "Quadratic", gGroundToggleGroup, 5 ) );
 	gGroundToggleGroup->Activate( 2 );
 
 	ground_brush_radius=new slider(6.0f,120.0f,167.0f,1000.0f,0.00001f);
@@ -606,16 +611,16 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->AddMenu( "Assist" );
 	mbar->AddMenu( "Help" );
 
-	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + S	 Save current tile", SaveOrReload, 0 );
-	mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT + J	Reload current tile", SaveOrReload, 1 );
-	mbar->GetMenu( "File" )->AddMenuItemButton( "ESC				Exit", exit_tilemode, 0 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + S Save current tile", SaveOrReload, 0 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT + J Reload current tile", SaveOrReload, 1 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "ESC Exit", exit_tilemode, 0 );
 
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "selected object" );
-	mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + C	 copy", CopySelectedObject, 0	);
-	mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + V	 past", PasteSelectedObject, 0	);
-	mbar->GetMenu( "Edit" )->AddMenuItemButton( "DEL	 delete", DeleteSelectedObject, 0	);
-	mbar->GetMenu( "Edit" )->AddMenuItemButton( "CTRL + R	 reset rotation", ResetSelectedObjectRotation, 0 );
-	mbar->GetMenu( "Edit" )->AddMenuItemButton( "PAGE DOWN	set to ground", SnapSelectedObjectToGround, 0 );
+	mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + C copy", CopySelectedObject, 0	);
+	mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + V past", PasteSelectedObject, 0	);
+	mbar->GetMenu( "Edit" )->AddMenuItemButton( "DEL delete", DeleteSelectedObject, 0	);
+	mbar->GetMenu( "Edit" )->AddMenuItemButton( "CTRL + R reset rotation", ResetSelectedObjectRotation, 0 );
+	mbar->GetMenu( "Edit" )->AddMenuItemButton( "PAGE DOWN set to ground", SnapSelectedObjectToGround, 0 );
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "m2 copy options" );
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "copy random rotation", &Settings::getInstance()->copy_rot, false	);
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "copy random tile", &Settings::getInstance()->copy_tile, false	);
@@ -626,10 +631,9 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
 	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Import model from" );
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "ModelViewer", InsertObject, 0	);
-	mbar->GetMenu( "Assist" )->AddMenuItemButton( "File set", InsertObject, 1	);
-	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Import file", InsertObject, 2	);
-	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Set" );
-	mbar->GetMenu( "Assist" )->AddMenuItemToggle( "Area ID", &set_areaid, true	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Text File", InsertObject, 1	);
+	//mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Set" );
+	//mbar->GetMenu( "Assist" )->AddMenuItemToggle( "Area ID", &set_areaid, true	);
 
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );
@@ -638,15 +642,15 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	//mbar->GetMenu( "View" )->AddMenuItemToggle( "Map chunk settings", &MapChunkWindow->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", &TexturePalette->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Toggle" );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F1	M2s", &gWorld->drawmodels );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F2	WMO doodadsets", &gWorld->drawdoodads );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F3	Terrain", &gWorld->drawterrain );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F4	Water", &gWorld->drawwater );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F6	WMOs", &gWorld->drawwmo );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F7	Lines", &gWorld->drawlines );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F8	Detail infos", &mainGui->guidetailInfos->hidden, true );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F9	Map contour infos", &DrawMapContour );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "F	 Fog", &gWorld->drawfog );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F1 M2s", &gWorld->drawmodels );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F2 WMO doodadsets", &gWorld->drawdoodads );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F3 Terrain", &gWorld->drawterrain );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F4 Water", &gWorld->drawwater );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F6 WMOs", &gWorld->drawwmo );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F7 Lines", &gWorld->drawlines );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F8 Detail infos", &mainGui->guidetailInfos->hidden, true );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F9 Map contour infos", &DrawMapContour );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "F Fog", &gWorld->drawfog );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Holelines always on", &Settings::getInstance()->holelinesOn, false );
 
 	mbar->GetMenu( "Help" )->AddMenuItemButton( "Key Bindings", openHelp, 0 );
@@ -1556,10 +1560,10 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			setChunk(Selection->data.mapchunk);
 		}*/
 
-		//! \todo Deletion kills noggit.
+		// \todo Deletion kills noggit.
 		// delete object
-	//	if( e->keysym.sym == SDLK_DELETE )
-	//		DeleteSelectedObject( 0, 0 );
+		if( e->keysym.sym == SDLK_DELETE )
+			DeleteSelectedObject( 0, 0 );
 
 		// open chunk settings window or copy & paste
 		if( e->keysym.sym == SDLK_c)

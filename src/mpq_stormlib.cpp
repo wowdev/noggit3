@@ -207,11 +207,13 @@ MPQFile::~MPQFile()
 
 bool MPQFile::exists( const std::string& filename )
 {
+
 	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
 	{
-		HANDLE &mpq_a = *i->second;
 
-		if( SFileHasFile( mpq_a, filename.c_str() ) )
+		HANDLE &mpq_a = *i->second;
+		
+		if( SFileHasFile( mpq_a,filename.c_str()) )
 			return true;
 	}
 
