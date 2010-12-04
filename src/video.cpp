@@ -2,6 +2,7 @@
 
 #include "video.h"
 #include "Log.h"
+#include "Settings.h"
 
 //0 - GL_ALPHA_TEST
 //1 - GL_BLEND
@@ -187,7 +188,7 @@ void Video::set3D() const
 {
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
-	gluPerspective( 45.0f, this->ratio, 1.0f, 1024.0f );
+	gluPerspective( 45.0f, this->ratio, 1.0f, (float)Settings::getInstance()->FarZ );
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 }

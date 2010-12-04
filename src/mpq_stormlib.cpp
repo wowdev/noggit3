@@ -230,7 +230,6 @@ bool MPQFile::exists( const std::string& filename )
 
 	if(fd!=NULL)
 	{
-		Log << "The file %s exists on the disk!\n" << diskpath << std::endl;
 		fclose(fd);
 		return true;
 	}
