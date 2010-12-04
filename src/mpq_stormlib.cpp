@@ -217,6 +217,24 @@ bool MPQFile::exists( const std::string& filename )
 			return true;
 	}
 
+	std::string diskpath = Project::getInstance()->getPath().append(filename);
+	
+	size_t found = diskpath.find( "\\" );
+	while( found != std::string::npos )
+	{
+		diskpath.replace( found, 1, "/" );
+		found = diskpath.find( "\\" );
+	}
+	
+	FILE* fd = fopen( diskpath.c_str(), "rb" );
+
+	if(fd!=NULL)
+	{
+		Log << "The file %s exists on the disk!\n" << diskpath << std::endl;
+		fclose(fd);
+		return true;
+	}
+
 	return false;
 }
 
