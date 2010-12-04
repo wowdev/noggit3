@@ -158,14 +158,14 @@ int main( int argc, char *argv[] )
 {
 	RegisterErrorHandlers();
 	setApplicationDirectory( argv[0] );
-	
+
+	// Set up log.
+	InitLogging();
+
 	Settings::getInstance();
 	Project::getInstance();
 	Environment::getInstance();
-	
-	// Set up log.
-	InitLogging();
-	
+
 	Log << APP_TITLE << " " << APP_VERSION << std::endl;
 	
 	// Why should we load anything when there are missing files? ...
