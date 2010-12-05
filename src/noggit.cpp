@@ -185,8 +185,8 @@ int main( int argc, char *argv[] )
 	
 	srand( time( 0 ) );
 	
-	int xres = 1100;
-	int yres = 900;
+	int xres = 1280;
+	int yres = 720;
 	
 	
 	bool useConfig = false;
@@ -220,6 +220,10 @@ int main( int argc, char *argv[] )
 		else if (!strcmp(argv[i],"-1280x960")) {
 			xres = 1280;
 			yres = 960;
+		}
+		else if (!strcmp(argv[i],"-1280x720")) {
+			xres = 1280;
+			yres = 720;
 		}
 		else if (!strcmp(argv[i],"-1400") || !strcmp(argv[i],"-1400x1050")) {
 			xres = 1400;
