@@ -908,9 +908,6 @@ void MapView::tick( float t, float dt )
 
 			if( leftMouse && !LastClicked && TexturingUI::getSelectedTexture() )
 			{
-				// Da bin ich überfragt, keine Ahnung, was der Code macht :) Dann bin ich ja nicht alleine :)
-				// Aber grundsätzlich wird hier die Mouseposition errechnet. Auf mir unbekannte Art und weise.
-				// Mal was schauen, momen
 				float mX, mY;
 				mX = CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x;
 				mY = CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z;
