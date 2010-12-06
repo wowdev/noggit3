@@ -994,86 +994,80 @@ void MapView::displayViewMode_Help( float t, float dt )
 	glDisable(GL_TEXTURE_2D);
 	
 
-	freetype::shprint( morpheus40, (video.xres / 2) - freetype::width( morpheus40, "NoggIt shortcuts" )/2.0f, 44.0f, "NoggIt shortcuts" );
-	freetype::shprint( arial16, (video.xres / 2) - freetype::width( arial16, "Right click close the help." )/2.0f, 87.0f, "Right click close the help." );
+	freetype::shprint( arial16, 60.0f, 40.0f, 
+	"Basic controles\n\n"					
+		"Left mouse button moves the camera\n"
+		"I - invert mouse up and down\n"
+		"Q,E - move up,down\n"
+		"A,D,W,S - move left,right,forward,backward\n"
+		"R - turn camera 180 degres\n"
+		"M - show minimap\n"
+		"U - 2d texture editor\n"
+		"C - chunk settings\n"
+		"H - help\n"
+		"Mouse left click - select chunk or object\n"
+		"Shift + F4 - change to auto select mode\n"
+		"Esc - exit to main menu\n"
+		"\n"
+	"Toggles\n"	
+		"\n"
+		"F1 - toggle M2s\n"
+		"F2 - toggle WMO doodads set\n" 
+		"F3 - toggle ground\n"
+		"F4 - toggle GUI\n"
+		"F6 - toggle WMOs\n"
+		"F7 - toggle chunk (red) and ADT (green) lines\n"
+		"F8 - toggle detailed infotext\n"
+		"F9 - toggle map contour\n"
+		"F - toggle fog\n"
+		"TAB - toggle UI view"
+		"\n"
+	"Adjust"
+		"\n"
+		"+,- - adjust fog distance\n"
+		"O,P - slower/faster movement\n"
+		"B,N - slower/faster time\n"
+	);
 	
-	freetype::shprint( arial24, 74.0f, 120.0f, "Basic controles" );
-	freetype::shprint( arial16, 74.0f, 160.0f, 
-						"Left mouse button moves the camera\n"
-			"I - invert mouse up and down\n"
-			"Q,E - move up,down\n"
-			"A,D,W,S - move left,right,forward,backward\n"
-			"R - turn camera 180 degres\n"
-			"M - show minimap\n"
-			"U - 2d texture editor\n"
-			"C - chunk settings\n"
-			"H - help\n"
-			"Mouse left click - select chunk or object\n"
-			"Shift + F4 - change to auto select mode\n"
-			"Esc - exit to main menu"
+	freetype::shprint( arial16, video.xres - 400.0f, 40.0f, 
+	"Edit ground\n"
+		"\n"
+		"Shift + F1 - toggle ground edit mode\n"
+		"T - change terrain mode\n"
+		"Y - changes brush type\n"	
+		"ALT + left mouse + mouse move - change brush size\n"
+		"Terrain mode - raise/lower\n"
+		"Left mouse click + Shift - raise terrain\n"
+		"Left mouse click + Alt - lower terrain\n"
+		"Terrain mode - flatten/blur\n"
+		"Left mouse click + Shift - flatten terrain\n"
+		"Left mouse	click + Alt - blur terrain\n"	
+		"\n"
+	"Edit objects\n"
+		"\n"
+		"An object must be selected by mouse left click\n"
+		"Hold middle mouse - move object\n"
+		"Hold middle mouse + Alt - scale M2\n"
+		"Hold left mouse + Shift, Ctrl or Alt - rotate object\n"
+		"0-9 - change doodads set of selected WMO\n"
+		"Ctrl+R - Reset Rotation\n"
+		"PageDown - Set Object to Groundlevel\n"
+		"\n"
+	"Edit texture\n"
+		"\n"
+		"Hold CTRL + Shift - draw texture in 3D mode\n"
+		"Z - chunk texture replace\n"
+		"\n"
+	"Files\n"
+		"\n"
+		"F5 - save bookmark\n"
+		"F10 - reload BLP\n"
+		"F11 - reload M2s\n"
+		"F12 - reload wmo\n"
+		"Shift + J - reload ADT tile\n"
+		"NUM 0 - SAVE current ADT tile\n"
 	);
 
-	freetype::shprint( arial24, 74.0f, 380.0f, "Toggles" );
-	freetype::shprint( arial16, 74.0f, 420.0f, 
-			"F1 - toggle M2s\n"
-			"F2 - toggle WMO doodads set\n" 
-			"F3 - toggle ground\n"
-			"F4 - toggle GUI\n"
-			"F6 - toggle WMOs\n"
-			"F7 - toggle chunk (red) and ADT (green) lines\n"
-			"F8 - toggle detailed infotext\n"
-			"F9 - toggle map contour\n"
-			"F	- toggle fog\n"
-			"TAB - toggle UI view"
-	);		
-		
-	freetype::shprint( arial24, 74.0f, 620.0f, "Adjust" );
-	freetype::shprint( arial16, 74.0f, 660.0f, 		
-			"+,- - adjust fog distance\n"
-			"O,P - slower/faster movement\n"
-			"B,N - slower/faster time\n"
-	);		
-	
-
-	freetype::shprint( arial24, video.xres - 400.0f, 130.0f, "Edit ground" );
-	freetype::shprint( arial16, video.xres - 400.0f, 170.0f, 
-			"Shift + F1 - toggle ground edit mode\n"
-			"T - change terrain mode\n"
-			"Y - changes brush type\n"
-			"ALT + left mouse + mouse move - change brush size\n"
-			"Terrain mode - raise/lower\n"
-			"	Left mouse click + Shift - raise terrain\n"
-			"	Left mouse click + Alt	 - lower terrain\n"
-			"Terrain mode - flatten/blur\n"
-			"	Left mouse click + Shift - flatten terrain\n"
-			"	Left mouse	click + Alt	 - blur terrain\n"			
-	);
-
-	freetype::shprint( arial24, video.xres - 400.0f, 360.0f, "Edit objects" );
-	freetype::shprint( arial16, video.xres - 400.0f, 400.0f,
-			"An object must be selected by mouse left click\n"
-			"Hold middle mouse - move object\n"
-			"Hold middle mouse + Alt - scale M2\n"
-			"Hold left mouse + Shift, Ctrl or Alt - rotate object\n"
-			"0-9 - change doodads set of selected WMO\n"
-			"Ctrl+R - Reset Rotation\n"
-			"PageDown - Set Object to Groundlevel\n"
-	);	
-	freetype::shprint( arial24, video.xres - 400.0f, 525.0f, "Edit texture" );
-	freetype::shprint( arial16, video.xres - 400.0f, 550.0f,
-			"Hold CTRL + Shift - draw texture in 3D mode\n"
-			"Z - chunk texture replace"
-	);
-
-	freetype::shprint( arial24, video.xres - 400.0f, 590.0f, "Files" );
-	freetype::shprint( arial16, video.xres - 400.0f, 630.0f,
-			"F5	- save bookmark\n"
-			"F10 - reload BLP\n"
-			"F11 - reload M2s\n"
-			"F12 - reload wmo\n"
-			"Shift + J - reload ADT tile\n"
-			"NUM 0 - SAVE current ADT tile\n"
-	);
 }
 
 void MapView::displayViewMode_Minimap( float t, float dt )
@@ -1237,7 +1231,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 		int time = int( gWorld->time ) % 2880;
 
 		std::stringstream timestrs; timestrs << "Time: " << (time/120) << ":" << (time%120);
-		freetype::shprint( arial16, video.xres - 100.0f, 5.0f, "Time:	%02d:%02d", time / 120, (time % 120) / 2 );
+		freetype::shprint( arial16, video.xres - 100.0f, 5.0f, "Time: %02d:%02d", time / 120, (time % 120) / 2 );
 		
 		if( mainGui->guiappInfo->hidden == false )
 		{	
@@ -1583,25 +1577,8 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 		if( e->keysym.sym == SDLK_x )
 		{
-				/*if(Environment::getInstance()->CtrlDown)
-				{
-					// copy selected object to clipboard and delete selected object.
-					// TODO
-					if( Selection )
-					{
-						Environment::getInstance()->set_clipboard(Selection);
-						if( Selection->type == eEntry_Model )
-						{
-							gWorld->deleteModelInstance( Selection->data.model );
-						}
-						else if( Selection->type == eEntry_WMO )
-						{
-							gWorld->deleteWMOInstance( Selection->data.wmo );
-						}
-						Selection = 0;
-					}
-				}
-				*/
+			// toggle texture window
+			view_texture_palette( 0, 0 );
 		}
 
 		// invert mouse
