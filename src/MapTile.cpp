@@ -574,8 +574,8 @@ void MapTile::drawTextures()
 	float xOffset,yOffset;
 
 	glPushMatrix();
-	xOffset=xbase/CHUNKSIZE;
-	yOffset=zbase/CHUNKSIZE;
+	xOffset=zbase/CHUNKSIZE;
+	yOffset=xbase/CHUNKSIZE;
 	glTranslatef(xOffset,yOffset,0);
 	
 	//glTranslatef(-8,-8,0);
