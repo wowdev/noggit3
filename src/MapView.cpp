@@ -323,68 +323,118 @@ void InsertObject( frame *button, int id )
 
 	// MODELINSERT FROM TEXTFILE
 	// is a source file set in config file?
-	
-		
-		// insert from modelviewer if file set and hit the right menu pount.
-		if(id==0)
-			if( FileExists( "noggIt.conf" ) )
-			{
-				ConfigFile config( "noggIt.conf" );
-				config.readInto( importFile, "ImportFile" );
-			}
-		// insert from import.txt if file exists and hit the right menu pount.
-		if (id==1)
+	switch(id)
 		{
-			importFile="Import.txt"; //	use import.txt in noggit folder!
-		}
-	
-		if(importFile=="")
-			return;
+			 case 0:
+				if( FileExists( "noggIt.conf" ) )
+				{
+					ConfigFile config( "noggIt.conf" );
+					config.readInto( importFile, "ImportFile" );
+				}
+			 break;
+ 
+			 case 1:
+				importFile="Import.txt"; //	use import.txt in noggit folder!
+			 break;
+ 
+			 case 2:
+				m2s_to_add.push_back( "World\\Scale\\humanmalescale.m2" );
+			 break;
 
-	size_t foundString;
-	std::string line;
-	std::string findThis;
-	std::ifstream fileReader(importFile.c_str());
-	if (fileReader.is_open())
-	{
-		while (! fileReader.eof() )
-		{
-			getline (fileReader,line);
-			if(line.find(".m2")!= std::string::npos || line.find(".M2")!= std::string::npos )
-			{
-				// M2 inside line
-				// is it the modelviewer log then cut the log messages out
-				findThis = 	"Loading model: ";
-				foundString = line.find(findThis);
-				if(foundString!= std::string::npos)
-				{
-					// cut path
-					line = line.substr( foundString+findThis.size() );
-				}
-				m2s_to_add.push_back( line );
-			}
-			else if(line.find(".wmo")!= std::string::npos || line.find(".WMO")!= std::string::npos )
-			{
-				// WMO inside line
-				findThis = "Loading WMOModel ";
-				foundString = line.find(findThis);
-				// is it the modelviewer log then cut the log messages out
-				if(foundString != std::string::npos)
-				{
-					// cut path
-					line = line.substr( foundString+findThis.size() );
-				}
-				wmos_to_add.push_back(line);
-			}
-		}
-		fileReader.close();
-	}
-	else 
-	{
-		// file not exist, no rights ore other error
-		LogError << importFile << std::endl;
-	}
+			 case 3:
+				m2s_to_add.push_back( "World\\Scale\\50x50.m2" );
+			 break;
+
+			 case 4:
+				m2s_to_add.push_back( "World\\Scale\\100x100.m2" );
+			 break;
+
+			 case 5:
+				m2s_to_add.push_back( "World\\Scale\\250x250.m2" );
+			 break;
+
+			 case 6:
+				m2s_to_add.push_back( "World\\Scale\\500x500.m2" );
+			 break;
+
+			 case 7:
+				m2s_to_add.push_back( "World\\Scale\\1000x1000.m2" );
+			 break;
+
+			 case 8:
+				m2s_to_add.push_back( "World\\Scale\\50yardradiusdisc.m2" );
+			 break;
+
+			 case 9:
+				m2s_to_add.push_back( "World\\Scale\\200yardradiusdisc.m2" );
+			 break;
+			 
+			 case 10:
+				m2s_to_add.push_back( "World\\Scale\\777yardradiusdisc.m2" );
+			 break;
+
+			 case 11:
+				m2s_to_add.push_back( "World\\Scale\\50yardradiussphere.m2" );
+			 break;
+
+			 case 12:
+				m2s_to_add.push_back( "World\\Scale\\200yardradiussphere.m2" );
+			 break;
+
+			 case 13:
+				m2s_to_add.push_back( "World\\Scale\\777yardradiussphere.m2" );
+			 break;
+		} 
+
 	
+	if(importFile!="")
+	{
+		size_t foundString;
+		std::string line;
+		std::string findThis;
+		std::ifstream fileReader(importFile.c_str());
+		if (fileReader.is_open())
+		{
+			while (! fileReader.eof() )
+			{
+				getline (fileReader,line);
+				if(line.find(".m2")!= std::string::npos || line.find(".M2")!= std::string::npos )
+				{
+					// M2 inside line
+					// is it the modelviewer log then cut the log messages out
+					findThis = 	"Loading model: ";
+					foundString = line.find(findThis);
+					if(foundString!= std::string::npos)
+					{
+						// cut path
+						line = line.substr( foundString+findThis.size() );
+					}
+					m2s_to_add.push_back( line );
+				}
+				else if(line.find(".wmo")!= std::string::npos || line.find(".WMO")!= std::string::npos )
+				{
+					// WMO inside line
+					findThis = "Loading WMOModel ";
+					foundString = line.find(findThis);
+					// is it the modelviewer log then cut the log messages out
+					if(foundString != std::string::npos)
+					{
+						// cut path
+						line = line.substr( foundString+findThis.size() );
+					}
+					wmos_to_add.push_back(line);
+				}
+			}
+			fileReader.close();
+		}
+		else 
+		{
+			// file not exist, no rights ore other error
+			LogError << importFile << std::endl;
+		}
+	}
+
+
 	Vec3D selectionPosition;
 	switch( gWorld->GetCurrentSelection()->type )
 	{
@@ -629,9 +679,21 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Options" );
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Auto select mode", &Settings::getInstance()->AutoSelectingMode, false );
 
-	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Import model from" );
-	mbar->GetMenu( "Assist" )->AddMenuItemButton( "ModelViewer", InsertObject, 0	);
-	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Text File", InsertObject, 1	);
+	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Add model" );
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "from ModelViewer", InsertObject, 0	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "from Text File", InsertObject, 1	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Human scale", InsertObject, 2	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Cube 50", InsertObject, 3	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Cube 100", InsertObject, 4	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Cube 250", InsertObject, 5	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Cube 500", InsertObject, 6	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Cube 1000", InsertObject, 7	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Disc 50", InsertObject, 8	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Disc 200", InsertObject, 9	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Disc 777", InsertObject, 10	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Sphere 50", InsertObject, 11	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Sphere 200", InsertObject, 12	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Sphere 777", InsertObject, 13	);
 	//mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Set" );
 	//mbar->GetMenu( "Assist" )->AddMenuItemToggle( "Area ID", &set_areaid, true	);
 
