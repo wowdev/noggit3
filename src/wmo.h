@@ -50,7 +50,7 @@ public:
 	void init(WMO *wmo, MPQFile &f, int num, char *names);
 	void initDisplayList();
 	void initLighting(int nLR, short *useLights);
-	void draw(const Vec3D& ofs, const float rot);
+	void draw(const Vec3D& ofs, const float rot,bool selection);
 	void drawLiquid();
 	void drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float rot);
 	void drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const float rot);

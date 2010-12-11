@@ -262,7 +262,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 
 	for (unsigned int i=0; i<nGroups; ++i) 
 	{
-		groups[i].draw(ofs, rot);
+		groups[i].draw(ofs, rot,false);
 			
 		if ( gWorld->drawdoodads)
 		{
@@ -514,7 +514,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot) const
 {
 	for (unsigned int i=0; i<nGroups; ++i) {
-		groups[i].draw(ofs, rot);
+		groups[i].draw(ofs, rot,true);
 		
 		if (gWorld->drawdoodads) {
 			groups[i].drawDoodadsSelect(doodadset, ofs, rot);
@@ -971,17 +971,19 @@ void WMOGroup::initLighting(int nLR, short *useLights)
 	}
 }
 
-void WMOGroup::draw(const Vec3D& ofs, const float rot)
+void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
 {
-	visible = false;
-	// view frustum culling
-	Vec3D pos = center + ofs;
-	rotate(ofs.x,ofs.z,&pos.x,&pos.z,rot*PI/180.0f);
-	if (!gWorld->frustum.intersectsSphere(pos,rad)) return;
-	float dist = (pos - gWorld->camera).length() - rad;
-	if (dist >= gWorld->culldistance) return;
-	visible = true;
-	
+
+		visible = false;
+		// view frustum culling
+		Vec3D pos = center + ofs;
+		rotate(ofs.x,ofs.z,&pos.x,&pos.z,rot*PI/180.0f);
+		if (!gWorld->frustum.intersectsSphere(pos,rad)) return;
+		float dist = (pos - gWorld->camera).length() - rad;
+		if (dist >= gWorld->culldistance) return;
+		visible = true;
+
+
 	if (hascv) {
 		glDisable(GL_LIGHTING);
 		gWorld->outdoorLights(false);
@@ -999,7 +1001,7 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot)
 			}
 		} else glDisable(GL_LIGHTING);
 	}
-	setupFog();
+	//setupFog();
 
 	//glCallList(dl);
 	glDisable(GL_BLEND);
@@ -1021,12 +1023,10 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot)
 	glColor4f(1,1,1,1);
 	glEnable(GL_CULL_FACE);
 
-	if (hascv) {
-		if (gWorld->lighting) {
+	if (hascv && !selection && gWorld->lighting)
 			glEnable(GL_LIGHTING);
-			//glCallList(dl_light);
-		}
-	}
+
+
 }
 
 void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float rot)
