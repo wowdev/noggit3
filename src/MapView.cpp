@@ -1319,34 +1319,26 @@ void MapView::displayViewMode_3D( float t, float dt )
 				switch( lSelection->type ) 
 				{
 				case eEntry_Model:
-						s << "TYPE: " << lSelection->type << std::endl;
+					s << "TYPE: " << lSelection->type << std::endl;
 					s << "NAME: " << lSelection->returnName()<< std::endl;
 					s << "FILENAME: " << lSelection->data.model->model->filename << std::endl;
 
 					s << "UID-D1: " << lSelection->data.model->d1 << std::endl;
-//					s << "modelID: " << lSelection->data.model->modelID << std::endl;
 					s << "nameID: " << lSelection->data.model->nameID << std::endl << std::endl;
-					s << "Pos X: " << lSelection->data.model->pos.x << std::endl;
-					s << "Pos Y: " << lSelection->data.model->pos.y << std::endl;
-					s << "Pos Z: " << lSelection->data.model->pos.z << std::endl;
-					//s << "UniqueID: " << lSelection->Name << endl;
-					//s << "UniqueID: " << lSelection->Name << endl;
-					//freetype::shprint( arial16, 10, 83, "UniqueID: %d", lSelection->data.model->d1 );
-					//s <<	"Pos: (" <<	lSelection->data.model->pos.x << "," << lSelection->data.model->pos.y << "," << lSelection->data.model->pos.z << ")" << endl;					
-					//freetype::shprint( arial16, 10, 103, "Pos: (%.2f, %.2f, %.2f)", lSelection->data.model->pos.x, lSelection->data.model->pos.y, lSelection->data.model->pos.z );
-					//s << "Rot: (" << lSelection->data.model->dir.x << "," << lSelection->data.model->dir.y << "" << lSelection->data.model->dir.z << ")" << endl;					
-					//freetype::shprint( arial16, 10, 123, "Rot: (%.2f, %.2f, %.2f)", lSelection->data.model->dir.x, lSelection->data.model->dir.y, lSelection->data.model->dir.z );
-					//s << "Scale: " <<	lSelection->data.model->sc << endl;					
-					//freteype::shprint( arial16, 10, 143, "Scale: %.2f", lSelection->data.model->sc );
-					//s << "Textures Used: " << lSelection->data.model->model->header.nTextures << endl;					
-					//freetype::shprint( arial16, 10, 163, "Textures Used: %d", lSelection->data.model->model->header.nTextures );
-				
+					s << "Pos X/Y/Z: " << lSelection->data.model->pos.x << " - " << "Pos Y: " << lSelection->data.model->pos.y << " - " << lSelection->data.model->pos.z << std::endl;
+					s << "Rot X/Y/Z: " << lSelection->data.model->dir.x << " - " << lSelection->data.model->dir.y << " - " << lSelection->data.model->dir.z << std::endl;
+					s << "Scale: " <<	lSelection->data.model->sc <<  std::endl;					
+					s << "Textures Used: " << lSelection->data.model->model->header.nTextures << std::endl;					
 
-				//	for( unsigned int j = 0; j < lSelection->data.model->model->header.nTextures; j++ )
-				//	{
-						//s << j << ", " << lSelection->data.model->model->textures[j] << " - " << TextureManager::items[lSelection->data.model->model->textures[j]]->name << endl;WHY DID THIS CRASH!!!
-						//freetype::shprint( arial16, 15, 183 + 20 * j, "%d - %s", j, TextureManager::items[lSelection->data.model->model->textures[j]]->name );
-				//	}
+					/*
+					for( int j = 0; j < (lSelection->data.model->model->header.nTextures-1); j++ )
+					{
+
+						s << j << "-" ;
+						if(lSelection->data.model->model->textures[j]) s << lSelection->data.model->model->textures[j] ;
+						s << std::endl;
+						//<< ", " << lSelection->data.model->model->textures[j] << " - " << TextureManager::items[lSelection->data.model->model->textures[j]]->name << std::endl;
+					}*/
 					mainGui->guidetailInfos->setText(s.str() );
 				break;
 				case eEntry_WMO:
