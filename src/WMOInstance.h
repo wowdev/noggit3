@@ -32,7 +32,7 @@ public:
 	~WMOInstance();
 
 	void draw() const;
-	void drawSelect() const;
+	void drawSelect();
 
 	void resetDirection();
 };
