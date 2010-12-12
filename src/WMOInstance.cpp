@@ -45,7 +45,7 @@ void WMOInstance::draw() const
 	glPopMatrix();
 }
 
-void WMOInstance::drawSelect() const
+void WMOInstance::drawSelect()
 {
 	glPushMatrix();
 	
@@ -57,6 +57,7 @@ void WMOInstance::drawSelect() const
 	glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
 	glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
 
+	mSelectionID = SelectionNames.add( this );
 	glPushName( mSelectionID );
 	
 	wmo->drawSelect( doodadset, pos, -roty );
