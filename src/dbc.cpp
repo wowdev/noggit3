@@ -28,6 +28,13 @@ void OpenDBs()
 	gLiquidTypeDB.open();
 }
 
+void find_and_replace( std::string &source, const std::string find, std::string replace ) 
+{
+	int found = source.rfind( find );
+	if( found != std::string::npos )
+		source.replace( found, find.length(), replace );
+}
+
 std::string AreaDB::getAreaName( int pAreaID )
 {
 	if( !pAreaID )
@@ -56,6 +63,15 @@ std::string AreaDB::getAreaName( int pAreaID )
 			areaName = "Unknown location";
 		}
 	}
+
+	find_and_replace(areaName,"ä","ae");
+	find_and_replace(areaName,"ö","oe");
+	find_and_replace(areaName,"ü","ue");
+	find_and_replace(areaName,"ß","ss");
+	find_and_replace(areaName,"Ä","Ae");
+	find_and_replace(areaName,"Ö","Oe");
+	find_and_replace(areaName,"�oe","Ue");
+
 	return areaName;
 }
 

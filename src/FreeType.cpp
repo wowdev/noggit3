@@ -394,6 +394,8 @@ void print(const font_data &ft_font, float x, float y, const char *fmt, ...)	{
 	//pop_projection_matrix();
 }
 
+
+
 void shprint(const font_data &ft_font, float x, float y, const char *fmt, ...)	{	
 	char		text[10000];								// Holds Our String
 	va_list		ap;										// Pointer To List Of Arguments
