@@ -253,13 +253,12 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
 
 void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight) const
 {
-	if (highlight && false)
-	{
-		//WIP STEFF
-		// hightlight the wmo
-		WMOHighlight( Vec4D( 0.1f, 0.1f, 0.1f, 0.1f ) );
-	}
-
+	
+	if( gWorld && gWorld->drawfog ) 
+		glEnable( GL_FOG );	
+	else
+		glDisable( GL_FOG );
+		
 	for (unsigned int i=0; i<nGroups; ++i) 
 	{
 		groups[i].draw(ofs, rot,false);
@@ -271,19 +270,9 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 		
 		groups[i].drawLiquid();
 	}
-
-	if(highlight && false)
-	{
-		//WIP STEFF
-		// If highlight
-		WMOUnhighlight();
-	}
 	
 	if( boundingbox )
 	{
-		if( gWorld && gWorld->drawfog ) 
-			glDisable( GL_FOG );
-
 		glDisable( GL_LIGHTING );
 
 		glDisable( GL_COLOR_MATERIAL );
@@ -322,8 +311,6 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 		
 		glEnable( GL_LIGHTING );
 
-		if( gWorld && gWorld->drawfog ) 
-			glEnable( GL_FOG );
 	}
 
 /*	{
@@ -974,15 +961,15 @@ void WMOGroup::initLighting(int nLR, short *useLights)
 void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
 {
 
-		visible = false;
-		// view frustum culling
-		Vec3D pos = center + ofs;
-		rotate(ofs.x,ofs.z,&pos.x,&pos.z,rot*PI/180.0f);
-		if (!gWorld->frustum.intersectsSphere(pos,rad)) return;
-		float dist = (pos - gWorld->camera).length() - rad;
-		if (dist >= gWorld->culldistance) return;
-		visible = true;
-
+	visible = false;
+	// view frustum culling
+	Vec3D pos = center + ofs;
+	rotate(ofs.x,ofs.z,&pos.x,&pos.z,rot*PI/180.0f);
+	if (!gWorld->frustum.intersectsSphere(pos,rad)) return;
+	float dist = (pos - gWorld->camera).length() - rad;
+	if (dist >= gWorld->culldistance) return;
+	visible = true;
+	setupFog();
 
 	if (hascv) {
 		glDisable(GL_LIGHTING);
@@ -1001,7 +988,7 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
 			}
 		} else glDisable(GL_LIGHTING);
 	}
-	//setupFog();
+
 
 	//glCallList(dl);
 	glDisable(GL_BLEND);
@@ -1031,6 +1018,7 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
 
 void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float rot)
 {
+
 	if (!visible) return;
 	if (nDoodads==0) return;
 
@@ -1073,6 +1061,7 @@ void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const
 {
 	if (!visible) return;
 	if (nDoodads==0) return;
+	
 
 	gWorld->outdoorLights(outdoorLights);
 	setupFog();
@@ -1180,7 +1169,7 @@ void WMOFog::init(MPQFile &f)
 
 void WMOFog::setup()
 {
-	if (gWorld->drawfog) {
+	/*if (gWorld->drawfog) {
 		glFogfv(GL_FOG_COLOR, color);
 		glFogf(GL_FOG_START, fogstart);
 		glFogf(GL_FOG_END, fogend);
@@ -1188,7 +1177,8 @@ void WMOFog::setup()
 		glEnable(GL_FOG);
 	} else {
 		glDisable(GL_FOG);
-	}
+	}*/
+		glDisable(GL_FOG);
 }
 
 int WMOManager::baseid = 0;

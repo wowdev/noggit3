@@ -1373,52 +1373,42 @@ void MapView::displayViewMode_3D( float t, float dt )
 
 					break;
 				case eEntry_MapChunk:
-					/* crash noggit in the moment???
-					int TextOffset = 0;
-					s << "Mapchunk " << lSelection->data.mapchunk->px << ", " << lSelection->data.mapchunk->py << " (" << lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px << ") of tile (" << lSelection->data.mapchunk->mt->x << "_" << lSelection->data.mapchunk->mt->z << ")" << endl;
-					//freetype::shprint( arial16, 5, 63, "Mapchunk %d, %d (%d) of tile (%d_%d)", lSelection->data.mapchunk->px, lSelection->data.mapchunk->py, lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px, lSelection->data.mapchunk->mt->x, lSelection->data.mapchunk->mt->z );
-					s << "Flags: " << lSelection->data.mapchunk->Flags << endl;
-					//freetype::shprint( arial16, 10, 83, "Flags %x", lSelection->data.mapchunk->Flags );
-
+					
+					s << "Mapchunk " << lSelection->data.mapchunk->px << ", " << lSelection->data.mapchunk->py << " (" << lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px << ") of tile (" << lSelection->data.mapchunk->mt->mPositionX << "_" << lSelection->data.mapchunk->mt->mPositionZ << ")" << std::endl;;
+					s << "Flags: " << lSelection->data.mapchunk->Flags << std::endl;
+					
 					if( lSelection->data.mapchunk->Flags & FLAG_SHADOW )
 					{
-						s << "Shadows Enabled" << endl;
-						//freetype::shprint( arial16, 15, 103 + TextOffset, "Shadows Enabled" );
-						TextOffset += 20;
+						s << "Shadows Enabled" << std::endl;
 					}
+					
 					if( lSelection->data.mapchunk->Flags & FLAG_IMPASS )
 					{
-						s << "Impassible Chunk" << endl;
-						//freetype::shprint( arial16, 15, 103 + TextOffset, "Impassible Chunk" );
-						TextOffset += 20;
+						s << "Impassible Chunk" << std::endl;
 					}
 					if( lSelection->data.mapchunk->Flags & FLAG_LQ_RIVER )
 					{
-						s << "River Enabled" << endl;
-						//freetype::shprint( arial16, 15, 103 + TextOffset, "River Enabled" );
-						TextOffset += 20;
+						s << "River Enabled" << std::endl;
 					}
 					if( lSelection->data.mapchunk->Flags & FLAG_LQ_OCEAN )
 					{
-						s << "Ocean Enabled" << endl;
-						//freetype::shprint( arial16, 15, 103 + TextOffset, "Ocean Enabled" );
-						TextOffset += 20;
+						s << "Ocean Enabled" << std::endl;
 					}
 					if( lSelection->data.mapchunk->Flags & FLAG_LQ_MAGMA )
 					{
-						s << "Lava Enabled" << endl;
-						//freetype::shprint( arial16, 15, 103 + TextOffset, "Lava Enabled" );
-						TextOffset += 20;
+						s << "Lava Enabled" << std::endl;
 					}
+					
+					s << "Textures: " << lSelection->data.mapchunk->nTextures << std::endl;
 
-					s << "Textures: " << lSelection->data.mapchunk->nTextures << endl;
-					//freetype::shprint( arial16, 10, 103 + TextOffset, "Textures %d", lSelection->data.mapchunk->nTextures );
-					TextOffset += 20;
+				/*
 					for( int q = 0; q < lSelection->data.mapchunk->nTextures; q++ )
 					{
-						//s << q << "- " << TextureManager::items[lSelection->data.mapchunk->textures[q]]->name << "	Flags - " << lSelection->data.mapchunk->texFlags[q] << " Effect ID - " << lSelection->data.mapchunk->effectID[q] << endl; WHY DID THIS CRASH!!!
+						//s << q << "- " << TextureManager::items[lSelection->data.mapchunk->textures[q]]->name;
+						//s << " ";
+						//s "	Flags - " << lSelection->data.mapchunk->texFlags[q] << " Effect ID - " << lSelection->data.mapchunk->effectID[q] << std::endl;
 						//freetype::shprint( arial16, 20, 103 + TextOffset, "%d - %s	Flags - %x Effect ID - %d", q, TextureManager::items[lSelection->data.mapchunk->textures[q]]->name, lSelection->data.mapchunk->texFlags[q], lSelection->data.mapchunk->effectID[q] );
-						TextOffset += 20;
+						
 						if( lSelection->data.mapchunk->effectID[q] != 0 )
 							for( int r = 0; r < 4; r++ )
 							{
@@ -1430,11 +1420,11 @@ void MapView::displayViewMode_3D( float t, float dt )
 										TextOffset += 20;
 								}
 							}
-						TextOffset+=5;
+							
 					}
-					
-					
-					mainGui->guidetailInfos->setText( s.str() );*/
+					*/
+			
+					mainGui->guidetailInfos->setText( s.str() );
 					break;
 				}
 			}
