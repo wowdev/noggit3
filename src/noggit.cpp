@@ -267,7 +267,7 @@ int main( int argc, char *argv[] )
 	CreateStrips();
 	
 	gAsyncLoader = new AsyncLoader();
-	gAsyncLoader->start(1); //! \todo get the number of threads from the number of available cores.
+	gAsyncLoader->start(4); //! \todo get the number of threads from the number of available cores.
 	
 	std::vector<MPQArchive*> archives;
 	std::vector<std::string> archiveNames;

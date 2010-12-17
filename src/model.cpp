@@ -392,7 +392,7 @@ void Model::initCommon(MPQFile &f)
 			enum RenderFlags
 			{
 				RENDERFLAGS_UNLIT = 1,
-				RENDERFLAGS_UNFOGGED = 2,
+				RENDERFLAGS_UNsGED = 2,
 				RENDERFLAGS_TWOSIDED = 4,
 				RENDERFLAGS_BILLBOARD = 8,
 				RENDERFLAGS_ZBUFFERED = 16,
@@ -755,8 +755,6 @@ bool ModelRenderPass::init(Model *m)
 		
 		if (unlit) {
 			glDisable(GL_LIGHTING);
-			// unfogged = unlit?
-			glDisable(GL_FOG);
 		}
 		
 		// Environmental mapping, material, and effects
@@ -822,7 +820,6 @@ void ModelRenderPass::deinit()
 	}
 	if (unlit) {
 		glEnable(GL_LIGHTING);
-		if (gWorld && gWorld->drawfog) glEnable(GL_FOG);
 	}
 	if (useenvmap) {
 		glDisable(GL_TEXTURE_GEN_S);
@@ -1147,6 +1144,12 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 
 void Model::draw()
 {
+
+	if( gWorld && gWorld->drawfog ) 
+		glEnable( GL_FOG );	
+	else
+		glDisable( GL_FOG );
+
 	if( !animated ) 
 	{
 		glCallList( ModelDrawList );
@@ -1163,9 +1166,6 @@ void Model::draw()
 				drawModel( /*false*/ );
 		lightsOff( GL_LIGHT4 );
 
-		// effects are unfogged..?
-		if( gWorld && gWorld->drawfog ) 
-			glDisable( GL_FOG );
 
 		// draw particle systems & ribbons
 		for( size_t i = 0; i < header.nParticleEmitters; ++i ) 
@@ -1173,9 +1173,6 @@ void Model::draw()
 
 		for( size_t i = 0; i < header.nRibbonEmitters; ++i ) 
 			ribbons[i].draw();
-
-		if( gWorld && gWorld->drawfog ) 
-			glEnable( GL_FOG );
 	}
 }
 
@@ -1191,21 +1188,17 @@ void Model::drawSelect()
 				animcalc = true;
 			}
 		
-				drawModelSelect();
-		
-		// effects are unfogged..?
-		glDisable( GL_FOG );
+		drawModelSelect();
 
+		//QUESTION: Do we need to drow this stuff for selectio??
 		// draw particle systems
-		for( size_t i = 0; i < header.nParticleEmitters; ++i )
-			particleSystems[i].draw();
+		 for( size_t i = 0; i < header.nParticleEmitters; ++i )
+			 particleSystems[i].draw();
 		
+		 //QUESTION: Do we need to drow this stuff for selectio??		
 		// draw ribbons
-		for( size_t i = 0; i < header.nRibbonEmitters; ++i )
-			ribbons[i].draw();
-		
-		if( gWorld && gWorld->drawfog ) 
-			glEnable(GL_FOG);
+		 for( size_t i = 0; i < header.nRibbonEmitters; ++i )
+			 ribbons[i].draw();
 	}
 }
 

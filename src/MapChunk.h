@@ -16,8 +16,9 @@ static const int mapbufsize = 9*9 + 8*8;
 
 class MapChunk
 {
-	MapTile *mt;
+
 public:
+	MapTile *mt;
 	Vec3D vmin, vmax, vcenter;
 	int px, py;
 	
