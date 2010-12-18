@@ -2096,49 +2096,75 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 	{
 		switch( e->button )
 		{
-		case SDL_BUTTON_LEFT:
-			LastClicked = tileFrames->processLeftClick( float( MouseX ), float( MouseY ) );
-			leftMouse = true;	
-
-			if( mViewMode == eViewMode_3D && !LastClicked )
-				doSelection( 1 );
-
+			case SDL_BUTTON_LEFT:
+				leftMouse = true;	
 			break;
 
-		case SDL_BUTTON_RIGHT:
-			rightMouse = true;
+			case SDL_BUTTON_RIGHT:
+				rightMouse = true;
+			break;
+
+			case SDL_BUTTON_MIDDLE:
+				if( gWorld->HasSelection() )
+					MoveObj = true;
+			break;
+		}
+
+		 if (leftMouse && rightMouse)
+		 {
+			 // Both buttons
+			 moving = 1.0f;
+		 }
+		 else if (leftMouse)
+		 {
+			// Only left
+			LastClicked = tileFrames->processLeftClick( float( MouseX ), float( MouseY ) );	
+			if( mViewMode == eViewMode_3D && !LastClicked )
+				doSelection( 1 );
+		 }
+		 else if (rightMouse)
+		 {
+			// Only right
 			if( mViewMode == eViewMode_Help )
 				mViewMode = eViewMode_3D; // Steff: exit help window when open
 			look = true;
-			break;
-
-		case SDL_BUTTON_MIDDLE:
-			if( gWorld->HasSelection() )
-				MoveObj = true;
-			break;
-		}
+		 }
 	} 
 	else if( e->type == SDL_MOUSEBUTTONUP ) 
 	{
 		switch( e->button )
 		{
-		case SDL_BUTTON_LEFT:
-			leftMouse = false;
+			case SDL_BUTTON_LEFT:
+				leftMouse = false;
+			break;
+
+			case SDL_BUTTON_RIGHT:
+				rightMouse = false;
+			break;
+
+			case SDL_BUTTON_MIDDLE:
+				MoveObj = false;
+			break;
+		}
+
+		 if (!leftMouse)
+		 {
+			// Only left
 			if( LastClicked )
 				LastClicked->processUnclick();
 			if( !gWorld->HasSelection() || ( !gWorld->IsSelection( eEntry_Model ) && !gWorld->IsSelection( eEntry_WMO ) ) ) 
 				Environment::getInstance()->AutoSelecting = true;
-			break;
-
-		case SDL_BUTTON_RIGHT:
-			rightMouse = false;
+			moving = 0.0f;
+		 }
+		 
+		 if (!rightMouse)
+		 {
+			// Only right
+			if( mViewMode == eViewMode_Help )
+				mViewMode = eViewMode_3D; // Steff: exit help window when open
 			look = false;
-			break;
-
-		case SDL_BUTTON_MIDDLE:
-			MoveObj = false;
-			break;
-		}
+			moving = 0.0f;
+		 }
 	}
 
 	// check menu settings and switch hole mode
