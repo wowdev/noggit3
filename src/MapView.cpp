@@ -1010,29 +1010,33 @@ void MapView::tick( float t, float dt )
 
 void MapView::doSelection( int selTyp )
 {
-	gWorld->drawSelection( MouseX, MouseY, TestSelection );
-	gWorld->getSelection( eSelectionMode_General );
-	
-	if( gWorld->GetCurrentSelection() )
+	// no selection during movement
+	if(this->moving==0.0f)
 	{
-		if( gWorld->IsSelection( eEntry_MapChunk ) )
+		gWorld->drawSelection( MouseX, MouseY, TestSelection );
+		gWorld->getSelection( eSelectionMode_General );
+	
+		if( gWorld->GetCurrentSelection() )
 		{
-			gWorld->drawSelectionChunk( MouseX, MouseY );
-			gWorld->getSelection( eSelectionMode_Triangle );
+			if( gWorld->IsSelection( eEntry_MapChunk ) )
+			{
+				gWorld->drawSelectionChunk( MouseX, MouseY );
+				gWorld->getSelection( eSelectionMode_Triangle );
 
+				Environment::getInstance()->AutoSelecting = true;
+			}
+			else if( selTyp == 1 )
+			{
+				Environment::getInstance()->AutoSelecting = false;
+			}
+			else if( Environment::getInstance()->AutoSelecting )
+			{
+				gWorld->ResetSelection();
+			}
+		}
+		else
 			Environment::getInstance()->AutoSelecting = true;
-		}
-		else if( selTyp == 1 )
-		{
-			Environment::getInstance()->AutoSelecting = false;
-		}
-		else if( Environment::getInstance()->AutoSelecting )
-		{
-			gWorld->ResetSelection();
-		}
 	}
-	else
-		Environment::getInstance()->AutoSelecting = true;
 }
 
 void MapView::displayViewMode_Help( float t, float dt )
@@ -1534,10 +1538,12 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 		// movement
 		if( e->keysym.sym == SDLK_w )
+		{
+			key_w = true;
 			moving = 1.0f;
-		
-		// saving or movement
-		//! \todo	Write ctrl-s in the help. Also get these idiots up to date so they dont complain about it not saving again.
+		}
+
+		// save
 		if( e->keysym.sym == SDLK_s )
 			if( !Environment::getInstance()->CtrlDown )
 				moving = -1.0f;
@@ -1959,8 +1965,12 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			Environment::getInstance()->CtrlDown = false;
 
 		// movement
-		if( e->keysym.sym == SDLK_w && moving > 0.0f ) 
-			moving = 0.0f;
+		if( e->keysym.sym == SDLK_w) 
+		{
+			key_w = false;
+			if(!leftMouse && !rightMouse && moving > 0.0f) moving = 0.0f;
+		}
+
 
 		if( e->keysym.sym == SDLK_s && moving < 0.0f ) 
 			moving = 0.0f;
@@ -2042,7 +2052,7 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 	if( leftMouse && Environment::getInstance()->AltDown )
 	{
 		switch( terrainMode )
-		{// das ist zum umstellen der brush größe
+		{	// das ist zum umstellen der brush größe
 		case 0:
 			groundBrushRadius += e->xrel / XSENS;
 			if( groundBrushRadius > 1000.0f )
@@ -2154,7 +2164,7 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 				LastClicked->processUnclick();
 			if( !gWorld->HasSelection() || ( !gWorld->IsSelection( eEntry_Model ) && !gWorld->IsSelection( eEntry_WMO ) ) ) 
 				Environment::getInstance()->AutoSelecting = true;
-			moving = 0.0f;
+			if(!key_w && moving > 0.0f )moving = 0.0f;
 		 }
 		 
 		 if (!rightMouse)
@@ -2163,7 +2173,7 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 			if( mViewMode == eViewMode_Help )
 				mViewMode = eViewMode_3D; // Steff: exit help window when open
 			look = false;
-			moving = 0.0f;
+			if(!key_w && moving > 0.0f )moving = 0.0f;
 		 }
 	}
 
