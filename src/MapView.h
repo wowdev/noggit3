@@ -18,6 +18,7 @@ enum eViewMode
 class MapView :public AppState
 {
 	float ah,av,moving,strafing,updown,mousedir,movespd;
+	bool key_w;
 	bool look;
 	bool hud;
 	bool set_areaid;
