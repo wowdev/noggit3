@@ -781,6 +781,13 @@ void MapView::tick( float t, float dt )
 
 		if( Selection )
 		{
+			// Set move scale and rotat for numpad keys
+			if(Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown) moveratio=0.05f;
+			else if(Environment::getInstance()->ShiftDown) moveratio=0.2f;
+			else if(Environment::getInstance()->CtrlDown) moveratio=0.3f;
+			else moveratio=0.1f;
+
+
 			if( keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0) 
 			{
 				// Move scale and rotat with numpad keys
@@ -1063,15 +1070,16 @@ void MapView::displayViewMode_Help( float t, float dt )
 	freetype::shprint( arial16, 60.0f, 40.0f, 
 	"Basic controles\n\n"					
 		"Left mouse button moves the camera\n"
+		"Mouse left click - select chunk or object\n"
+		"Both mouse buttons - move forward\n"
 		"I - invert mouse up and down\n"
 		"Q,E - move up,down\n"
 		"A,D,W,S - move left,right,forward,backward\n"
-		"R - turn camera 180 degres\n"
 		"M - show minimap\n"
 		"U - 2d texture editor\n"
-		"C - chunk settings\n"
+		//"C - chunk settings\n" //! tofo: C chunk settings must get fixed first. Then turn on this again
 		"H - help\n"
-		"Mouse left click - select chunk or object\n"
+		"Shift + R - turn camera 180 degres\n"
 		"Shift + F4 - change to auto select mode\n"
 		"Esc - exit to main menu\n"
 		"\n"
@@ -1086,18 +1094,21 @@ void MapView::displayViewMode_Help( float t, float dt )
 		"F8 - toggle detailed infotext\n"
 		"F9 - toggle map contour\n"
 		"F - toggle fog\n"
-		"TAB - toggle UI view"
+		"TAB - toggle UI view\n"
+		"x - texture palette\n"
+		"R/T - Move true the editing modes\n"
 		"\n"
-	"Adjust"
-		"\n"
-		"+,- - adjust fog distance\n"
-		"O,P - slower/faster movement\n"
-		"B,N - slower/faster time\n"
+		"Files:\n"
+		"F5 - save bookmark\n"
+		"F10 - reload BLP\n"
+		"F11 - reload M2s\n"
+		"F12 - reload wmo\n"
+		"Shift + J - reload ADT tile\n"
+		"CTRL + S - SAVE current ADT tile\n"
 	);
 	
 	freetype::shprint( arial16, video.xres - 400.0f, 40.0f, 
-	"Edit ground\n"
-		"\n"
+		"Edit ground:\n"
 		"Shift + F1 - toggle ground edit mode\n"
 		"T - change terrain mode\n"
 		"Y - changes brush type\n"	
@@ -1108,30 +1119,31 @@ void MapView::displayViewMode_Help( float t, float dt )
 		"Terrain mode - flatten/blur\n"
 		"Left mouse click + Shift - flatten terrain\n"
 		"Left mouse	click + Alt - blur terrain\n"	
+		"Z - change the mode in the option window\n"
 		"\n"
-	"Edit objects\n"
-		"\n"
-		"An object must be selected by mouse left click\n"
+		"Edit objects if a model is selected with left click:\n"
 		"Hold middle mouse - move object\n"
 		"Hold middle mouse + Alt - scale M2\n"
 		"Hold left mouse + Shift, Ctrl or Alt - rotate object\n"
 		"0-9 - change doodads set of selected WMO\n"
 		"Ctrl+R - Reset Rotation\n"
 		"PageDown - Set Object to Groundlevel\n"
+		"-/+ - scale M2\n"
+		"7/9 - rotate object\n"
+		"4/8/6/2 - vertical position\n"
+		"1/3 -  move up/dow\n"
+		"With Shift double speed \n" 
+		"With CTRL triple speed \n"
+		"With Shift and CTRL together half speed \n"
 		"\n"
-	"Edit texture\n"
+		"Edit texture:\n"
+		"Hold CTRL + Shift - clear all textures on chunk\n"
+		"Hold CTRL - draw texture or fills if chunk is empty\n"
 		"\n"
-		"Hold CTRL + Shift - draw texture in 3D mode\n"
-		"Z - chunk texture replace\n"
-		"\n"
-	"Files\n"
-		"\n"
-		"F5 - save bookmark\n"
-		"F10 - reload BLP\n"
-		"F11 - reload M2s\n"
-		"F12 - reload wmo\n"
-		"Shift + J - reload ADT tile\n"
-		"NUM 0 - SAVE current ADT tile\n"
+		"Adjust:\n"
+		"O,P - slower/faster movement\n"
+		"B,N - slower/faster time\n"
+		"Shift -/+ - fog distance when no model is selected\n"
 	);
 
 }
@@ -1587,13 +1599,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_KP9 ) 
 			keyr = -1;
 
-		if( e->keysym.sym == SDLK_KP5 ) 
-		{	
-			 if (moveratio == 0.01f) moveratio=0.1f;			 
-			 else if (moveratio == 0.1f) moveratio=0.2f;
-			 else if (moveratio == 0.2f) moveratio=0.3f;
-			 else if (moveratio == 0.3f) moveratio=0.01f;
-		}
 
 		// This was Bekets function to replace chunk textures. Redo.
 	/*	if ((e->keysym.sym == SDLK_z)&&(Selection!=0)&&(Selection->type==eEntry_MapChunk)) 
@@ -1647,11 +1652,31 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		
 		// turn around or reset object orientation
 		if( e->keysym.sym == SDLK_r )
+		{
 			if( Environment::getInstance()->CtrlDown )
 				ResetSelectedObjectRotation( 0, 0 );
-			else
+			else if( Environment::getInstance()->ShiftDown )
 				ah += 180.0f;
+			else
+			{
+			terrainMode++;
+			terrainMode = terrainMode % 4;
+
+			// Set the right icon in toolbar
+			Toolbar_SelectIcon( 0, terrainMode + 1 );				
+			}
+		}		
 		
+		// toggle editing mode
+		if( e->keysym.sym == SDLK_t ) 
+		{
+			terrainMode--;
+			terrainMode = ( terrainMode + 4 ) % 4;
+
+			// Set the right icon in toolbar
+			Toolbar_SelectIcon( 0, terrainMode + 1 );
+		}
+
 		// clip object to ground
 		if( e->keysym.sym == SDLK_PAGEDOWN )
 			SnapSelectedObjectToGround( 0, 0 );
@@ -1663,23 +1688,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_b )
 			this->mTimespeed -= 90.0f;
 		
-		// toggle editing mode
-		if( e->keysym.sym == SDLK_t ) 
-		{
-			terrainMode++;
-			terrainMode = terrainMode % 4;
 
-			// Set the right icon in toolbar
-			Toolbar_SelectIcon( 0, terrainMode + 1 );
-		}
-		if( e->keysym.sym == SDLK_r ) 
-		{
-			terrainMode--;
-			terrainMode = ( terrainMode + 4 ) % 4;
-
-			// Set the right icon in toolbar
-			Toolbar_SelectIcon( 0, terrainMode + 1 );
-		}
 
 		// toggle lightning
 		if( e->keysym.sym == SDLK_l ) 
@@ -1853,11 +1862,11 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 					break;
 				}
 			}
-			else if( Environment::getInstance()->ShiftDown )
-				gWorld->fogdistance += 60.0f;
+			else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() == true && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
+				gWorld->fogdistance += 60.0f;// fog change only when no model is selected!
 			else
 			{
-				//change selected model sizesize
+				//change selected model size
 				keys=1;
 			}
 
@@ -1892,8 +1901,8 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 					break;
 				}
 			}
-			else if( Environment::getInstance()->ShiftDown )
-				gWorld->fogdistance -= 60.0f;
+			else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() == true && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
+				gWorld->fogdistance -= 60.0f; // fog change only when no model is selected!
 			else
 			{
 				//change selected model sizesize
