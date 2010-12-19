@@ -3,6 +3,7 @@
 #include <list>
 #include <sstream>
 
+#include "misc.h"
 #include "noggit.h" // arial14, arialn13
 #include "log.h"
 #include "video.h"
@@ -424,7 +425,13 @@ frame* TexturingUI::createTilesetLoader()
 			"Interface\\Buttons\\UI-DialogBox-Button-Up.blp",
 			"Interface\\Buttons\\UI-DialogBox-Button-Down.blp"
 		);
-		name->setText( tilesetDirectories[i] );
+
+		std::string setname;
+		setname = tilesetDirectories[i];
+		misc::find_and_replace(setname,"expansion01\\","");
+		misc::find_and_replace(setname,"expansion02\\","");
+
+		name->setText( setname );
 		name->setClickFunc( LoadTileset, i );
 		windowTilesetLoader->addChild( name );
 	}
@@ -438,25 +445,29 @@ frame* TexturingUI::createTextureFilter()
 	InitFilenameFilterList();
 	
 	LoadTextureNames();
-	windowTextureFilter = new closeWindowUI( video.xres / 2.0f - 308.0f, video.yres / 2.0f - 314.5f, 616.0f, 630.0f, "Texture Filtering", true );
+	windowTextureFilter = new closeWindowUI( video.xres / 2.0f - 450.0f, video.yres / 2.0f - 200.0f, 900.0f, 610.0f, "Texture Filtering", true );
 	windowTextureFilter->hidden = true;
 
 	//Filename Filters
-	windowTextureFilter->addChild( new textUI( 308.0f, 26.0f, "Filename Filters", &arial14, eJustifyCenter ) );
+	windowTextureFilter->addChild( new textUI( 60.0f, 23.0f, "Filename Filters", &arial14, eJustifyCenter ) );
 
 	for( std::map<int,std::string>::iterator it = gFilenameFilters.begin(); it != gFilenameFilters.end(); ++it )
 	{
-		windowTextureFilter->addChild( new checkboxUI( 5.0f + 152.0f * ( it->first / 6 ), 43.0f + 30.0f * ( it->first % 6 ), it->second, clickFileFilterTexture, it->first ) );
+		windowTextureFilter->addChild( new checkboxUI( 5.0f + 152.0f * ( it->first / 4 ), 43.0f + 30.0f * ( it->first % 4 ), it->second, clickFileFilterTexture, it->first ) );
 	}
 
-	windowTextureFilter->addChild( new checkboxUI( 240.0f, 43.0f + 30.0f * 6.0f, "Misc (Everything Else)", clickFileFilterTexture, 24 ) );
+	windowTextureFilter->addChild( new checkboxUI( 350.0f, 45.0f + 30.0f * 4.0f, "Misc (Everything Else)", clickFileFilterTexture, 24 ) );
 
 	//Tileset Filters
-	windowTextureFilter->addChild( new textUI( 308.0f, 254.0f, "Tileset Filters", &arial14, eJustifyCenter ) );
+	windowTextureFilter->addChild( new textUI( 55.0f, 190.0f, "Tileset Filters", &arial14, eJustifyCenter ) );
 
 	for( unsigned int i = 0; i < tilesetDirectories.size(); ++i )
 	{
-		windowTextureFilter->addChild( new checkboxUI( 5.0f + 152.0f * ( i / 12 ), 267.0f + 30.0f * ( i % 12 ), tilesetDirectories[i], clickFilterTexture, i ) );
+		std::string name;
+		name = tilesetDirectories[i];
+		misc::find_and_replace(name,"expansion01\\","");
+		misc::find_and_replace(name,"expansion02\\","");
+		windowTextureFilter->addChild( new checkboxUI( 5.0f + 152.0f * ( i / 13 ), 210.0f + 30.0f * ( i % 13 ), name, clickFilterTexture, i ) );
 	}
 
 	return windowTextureFilter;
@@ -538,7 +549,7 @@ frame* TexturingUI::createMapChunkWindow()
 
 		yPos+=64.0f+8.0f;
 	}
-
+	
 	return windowMapChunk;
 }
 
@@ -549,7 +560,7 @@ void TexturingUI::setChunkWindow(MapChunk *chunk)
 	sprintf(Temp,"Chunk %d, %d at (%.2f, %.2f, %.2f)",chunk->px,chunk->py,chunk->xbase,chunk->ybase,chunk->zbase);
 	chunkLocation->setText(Temp);///
 
-	
+
 	std::string areaName;
 	try
 	{
@@ -559,7 +570,7 @@ void TexturingUI::setChunkWindow(MapChunk *chunk)
 	catch(...)
 	{
 		areaName = "";
-	}
+	}	
 	sprintf(Temp,"AreaID: %s (%d)",areaName.c_str(),chunk->areaID);
 	chunkAreaID->setText(Temp);///
 	
@@ -586,7 +597,9 @@ void TexturingUI::setChunkWindow(MapChunk *chunk)
 
 	sprintf(Temp,"Num Effects: %d",chunk->header.nEffectDoodad);
 	chunkNumEffects->setText(Temp);///
-		
+	
+	//! /todo rework texture reading
+	/*
 	int pl=0;
 	for(pl=0;pl<(chunk->nTextures);pl++)
 	{
@@ -611,7 +624,8 @@ void TexturingUI::setChunkWindow(MapChunk *chunk)
 			chunkTextureNames[pl]->hidden=true;
 		chunkTextureFlags[pl]->hidden=true;
 		chunkTextureEffectID[pl]->hidden=true;
-	}
+	}*/
+	
 }
 
 Texture* TexturingUI::getSelectedTexture(){
@@ -621,3 +635,17 @@ Texture* TexturingUI::getSelectedTexture(){
 void TexturingUI::setSelectedTexture(Texture * t){
 	selectedTexture = t;
 }
+
+/* //! /todo rework!
+void setChunk(MapChunk *chunk)//I dont remember, but is is maybe mine ground texture changing function
+{   
+	int i;
+for(i=0;i<4;i++)
+   {
+	   if((chunk->textures[i]==textureChunkSelected->texture)&&(selectedTexture!=0))
+	   {
+		chunk->textures[i]=video.textures.add(selectedTexture->name.c_str());
+	   }
+   };
+}
+*/
