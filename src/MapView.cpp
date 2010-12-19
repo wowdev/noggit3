@@ -1126,12 +1126,14 @@ void MapView::displayViewMode_Help( float t, float dt )
 		"Hold middle mouse + Alt - scale M2\n"
 		"Hold left mouse + Shift, Ctrl or Alt - rotate object\n"
 		"0-9 - change doodads set of selected WMO\n"
-		"Ctrl+R - Reset Rotation\n"
-		"PageDown - Set Object to Groundlevel\n"
+		"Ctrl+R - Reset rotation\n"
+		"PageDown - Set object to Groundlevel\n"
+		"CTRL + C - Copy object to clipboard\n"
+		"CTRL + V - Paste object on mouse position\n"
 		"-/+ - scale M2\n"
-		"7/9 - rotate object\n"
-		"4/8/6/2 - vertical position\n"
-		"1/3 -  move up/dow\n"
+		"Numpad 7/9 - rotate object\n"
+		"Numpad 4/8/6/2 - vertical position\n"
+		"Numpad 1/3 -  move up/dow\n"
 		"With Shift double speed \n" 
 		"With CTRL triple speed \n"
 		"With Shift and CTRL together half speed \n"
@@ -1318,16 +1320,19 @@ void MapView::displayViewMode_3D( float t, float dt )
 			mainGui->guiappInfo->setText( s.str() );
 		}
 
+		if( !MapChunkWindow->hidden )
+		{
+			if( gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type== eEntry_MapChunk)
+				TexturingUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
+		}
+					
+
 		//! \todo	Get this into a window. As Steff is already doing.
 		if( !mainGui->guidetailInfos->hidden )
 		{
 			nameEntry * lSelection = gWorld->GetCurrentSelection();
 			if( lSelection )
 			{
-				if( !MapChunkWindow->hidden )
-					TexturingUI::setChunkWindow( lSelection->data.mapchunk );
-
-				//! \todo	Only do this if lSelection == Selection? ..
 				mainGui->guiStatusbar->setRightInfo( lSelection->returnName() );
 
 				s.str("");
@@ -1601,12 +1606,11 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 
 		// This was Bekets function to replace chunk textures. Redo.
-	/*	if ((e->keysym.sym == SDLK_z)&&(Selection!=0)&&(Selection->type==eEntry_MapChunk)) 
+		if (e->keysym.sym == SDLK_z && gWorld->IsSelection( eEntry_MapChunk) ) 
 		{
-			setChunk(Selection->data.mapchunk);
-		}*/
+			//setChunk(Selection->data.mapchunk);
+		}
 
-		// \todo Deletion kills noggit.
 		// delete object
 		if( e->keysym.sym == SDLK_DELETE )
 			DeleteSelectedObject( 0, 0 );
@@ -1614,18 +1618,13 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		// open chunk settings window or copy & paste
 		if( e->keysym.sym == SDLK_c)
 		{	
-			if( mViewMode == eViewMode_2D )
+			if( Environment::getInstance()->CtrlDown )
+				CopySelectedObject( 0, 0 );
+			/*else if( gWorld->IsSelection( eEntry_MapChunk ) )
 			{
-				if( gWorld->IsSelection( eEntry_MapChunk ) )
-				{
-					tileFrames->addChild( TexturingUI::createMapChunkWindow() );
-					TexturingUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
-					MapChunkWindow->hidden = false;
-				}
-			}
-			else
-				if( Environment::getInstance()->CtrlDown )
-					CopySelectedObject( 0, 0 );
+				TexturingUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
+				MapChunkWindow->hidden = false;
+			}*/
 		}
 		if( e->keysym.sym == SDLK_v && Environment::getInstance()->CtrlDown )
 			PasteSelectedObject( 0, 0 );
@@ -1945,11 +1944,12 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 				mViewMode = eViewMode_3D;
 			else
 				mViewMode = eViewMode_2D;
-			gWorld->ResetSelection();
+			//gWorld->ResetSelection();
 		}
 
 				// doodads set
 		//! \todo	Does anyone use these?
+		//! Yes to change the doodadset of houses i use it . Steff :)
 		if( e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9 && gWorld->IsSelection( eEntry_WMO ) )
 			gWorld->GetCurrentSelection()->data.wmo->doodadset = e->keysym.sym - SDLK_0;
 		
