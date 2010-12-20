@@ -781,7 +781,7 @@ void MapView::tick( float t, float dt )
 
 		if( Selection )
 		{
-			// Set move scale and rotat for numpad keys
+			// Set move scale and rotate for numpad keys
 			if(Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown) moveratio=0.05f;
 			else if(Environment::getInstance()->ShiftDown) moveratio=0.2f;
 			else if(Environment::getInstance()->CtrlDown) moveratio=0.3f;
@@ -1364,21 +1364,18 @@ void MapView::displayViewMode_3D( float t, float dt )
 				break;
 				case eEntry_WMO:
 					s << lSelection->data.wmo->wmo->filename << std::endl;
-					//freetype::shprint( arial16, 5, 63, lSelection->data.wmo->wmo->filename );
 					s << "UniqueID: " << lSelection->data.wmo->mUniqueID << std::endl;
-					//freetype::shprint( arial16, 10, 83, "UniqueID: %d", lSelection->data.wmo->id );
 					s <<	"Pos: (" <<	lSelection->data.wmo->pos.x << "," << lSelection->data.wmo->pos.y << "," << lSelection->data.wmo->pos.z << ")" << std::endl;					
-					//freetype::shprint( arial16, 10, 103, "Pos: (%.2f, %.2f, %.2f)", lSelection->data.wmo->pos.x, lSelection->data.wmo->pos.y, lSelection->data.wmo->pos.z );
 					s << "Rot: (" << lSelection->data.wmo->dir.x << "," << lSelection->data.wmo->dir.y << "" << lSelection->data.wmo->dir.z << ")" << std::endl;					
-					//freetype::shprint( arial16, 10, 123, "Rot: (%.2f, %.2f, %.2f)", lSelection->data.wmo->dir.x, lSelection->data.wmo->dir.y, lSelection->data.wmo->dir.z );
 					s << "Textures Used: " << lSelection->data.wmo->wmo->nTextures << std::endl;
-					//freetype::shprint( arial16, 10, 143, "Textures Used: %d", lSelection->data.model->model->header.nTextures );
 
-				/*	for( unsigned int j = 0; j < lSelection->data.wmo->wmo->nTextures; j++ )
+					for( unsigned int j = 0; j < lSelection->data.wmo->wmo->nTextures ; j++ )
 					{
 						if( j < 25 )
 						{
-							//s << j << " - " << lSelection->data.wmo->wmo->textures[j] << endl; WHY DID THIS CRASH!!!
+							s << j;
+							s << lSelection->data.wmo->wmo->textures[j];
+							s << std::endl;
 							//freetype::shprint( arial16, 15, 163 + 20 * j, "%d - %s", j, lSelection->data.wmo->wmo->textures[j] );
 						}
 						else if( j < 50 )
@@ -1386,9 +1383,8 @@ void MapView::displayViewMode_3D( float t, float dt )
 							//s << j << " - " << lSelection->data.wmo->wmo->textures[j] << endl; WHY DID THIS CRASH!!!
 							//freetype::shprint( arial16, ( video.xres - 15 ) / 2, 163 + 20 * (j-25), "%d - %s", j, lSelection->data.wmo->wmo->textures[j] );
 						}
-					}*/
+					}/**/
 					s << "Doodads set: " << lSelection->data.wmo->doodadset << std::endl;
-					//freetype::shprint( arial16, 10, 143, "Doodads set: %d", lSelection->data.wmo->doodadset );
 
 					mainGui->guidetailInfos->setText( s.str() );
 

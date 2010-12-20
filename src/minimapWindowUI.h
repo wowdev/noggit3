@@ -8,11 +8,13 @@ class Menu;
 class minimapWindowUI : public window
 {
 private:
-	static const float tilesize;
+	float tilesize;
+	float borderwidth;
 	Menu* mMenuLink;
 public:
-	minimapWindowUI( Menu* menuLink, float x, float y);
+	minimapWindowUI( Menu* menuLink );
 	frame *processLeftClick( float mx, float my );
+	void resize();
 	void render() const;
 };
 

@@ -4,22 +4,43 @@
 #include "world.h"
 #include "menu.h"
 
-const float minimapWindowUI::tilesize = 12.0f;
 
-minimapWindowUI::minimapWindowUI( Menu* menuLink, float px, float py ) : window( px, py, tilesize * 66, tilesize * 66 ), mMenuLink( menuLink )
+
+minimapWindowUI::minimapWindowUI( Menu* menuLink ) : window( 10, 10, 100, 100 ), mMenuLink( menuLink )
 {
+	this->mustresize = true;
+	this->borderwidth = 5.0f;
+	
+	this->tilesize = (video.yres - 70.0f - this->borderwidth * 2) / 64;
+
+	this->width  =	this->borderwidth * 2 + this->tilesize * 64;
+	this->height =	this->width;
+	this->x		 =	video.xres / 2 - this->width / 2;
+	this->y		 =	video.yres / 2 - this->height / 2;
+
 }
 
 frame* minimapWindowUI::processLeftClick( float mx, float my )
 {
 	if( !mMenuLink ||
-			mx < tilesize || mx > this->height - tilesize ||
-			my < tilesize || mx > this->height - tilesize )
+			mx < this->borderwidth || mx > this->height - this->borderwidth ||
+			my < this->borderwidth || my > this->height - this->borderwidth )
 		return NULL;
 	
-	mMenuLink->enterMapAt( Vec3D( ( ( mx - 12.0f ) / 12.0f ) * TILESIZE, 0.0f, ( ( my - 12.0f ) / 12.0f ) * TILESIZE ) );
+	mMenuLink->enterMapAt( Vec3D( ( ( mx - this->borderwidth ) / this->tilesize ) * TILESIZE, 0.0f, ( ( my - this->borderwidth ) / this->tilesize ) * TILESIZE ) );
 	
 	return this;
+}
+
+
+void minimapWindowUI::resize()
+{
+	this->tilesize = (video.yres - 70.0f - this->borderwidth * 2) / 64;
+
+	this->width  =	this->borderwidth * 2 + this->tilesize * 64;
+	this->height =	this->width;
+	this->x		 =	video.xres / 2 - this->width / 2;
+	this->y		 =	video.yres / 2 - this->height / 2;
 }
 
 void minimapWindowUI::render() const
@@ -27,7 +48,7 @@ void minimapWindowUI::render() const
 	window::render();
 	
 	glPushMatrix();
-	glTranslatef( x + tilesize, y + tilesize, 0.0f );
+	glTranslatef( x + this->borderwidth, y + this->borderwidth, 0.0f );
 	
 	if( gWorld->minimap ) 
 	{
@@ -38,11 +59,11 @@ void minimapWindowUI::render() const
 		glTexCoord2f( 0.0f, 0.0f );
 		glVertex2i( 0.0f, 0.0f );
 		glTexCoord2f( 1.0f, 0.0f );
-		glVertex2i( tilesize * 64.0f, 0.0f );
+		glVertex2i( this->tilesize * 64.0f, 0.0f );
 		glTexCoord2f( 1.0f, 1.0f );
-		glVertex2i( tilesize * 64.0f, tilesize * 64.0f );
+		glVertex2i( this->tilesize * 64.0f, this->tilesize * 64.0f );
 		glTexCoord2f( 0.0f, 1.0f );
-		glVertex2i( 0.0f, tilesize * 64.0f );
+		glVertex2i( 0.0f, this->tilesize * 64.0f );
 		glEnd();
 		
 		Texture::disableTexture();
@@ -67,10 +88,10 @@ void minimapWindowUI::render() const
 			}
 			
 			glBegin( GL_QUADS );
-			glVertex2i( 0.0f + i * tilesize, 0.0f + j * tilesize );
-			glVertex2i( (0.0f + ( i + 1 ) * tilesize) - 1, 0.0f + j * tilesize );
-			glVertex2i( (0.0f + ( i + 1 ) * tilesize) - 1, (0.0f + ( j + 1 ) * tilesize) -1 );
-			glVertex2i( 0.0f + i * tilesize, (0.0f + ( j + 1 ) * tilesize) -1 );
+			glVertex2i( 0.0f + i * this->tilesize, 0.0f + j * this->tilesize );
+			glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) - 1, 0.0f + j * this->tilesize );
+			glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) - 1, (0.0f + ( j + 1 ) * this->tilesize) -1 );
+			glVertex2i( 0.0f + i * this->tilesize, (0.0f + ( j + 1 ) * this->tilesize) -1 );
 			glEnd();
 		}
 	}

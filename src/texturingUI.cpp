@@ -445,7 +445,7 @@ frame* TexturingUI::createTextureFilter()
 	InitFilenameFilterList();
 	
 	LoadTextureNames();
-	windowTextureFilter = new closeWindowUI( video.xres / 2.0f - 450.0f, video.yres / 2.0f - 200.0f, 900.0f, 610.0f, "Texture Filtering", true );
+	windowTextureFilter = new closeWindowUI( video.xres / 2.0f - 450.0f, video.yres / 2.0f - 300.0f, 900.0f, 610.0f, "Texture Filtering", true );
 	windowTextureFilter->hidden = true;
 
 	//Filename Filters
