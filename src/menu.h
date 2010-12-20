@@ -57,6 +57,7 @@ private:
 	void resizewindow();
 
 public:
+
 	Menu();
 	~Menu();
 

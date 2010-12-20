@@ -489,6 +489,7 @@ int main( int argc, char *argv[] )
 		{
 			gPop = false;
 			gStates.pop_back();
+			gStates[gStates.size()-1]->resizewindow();
 			delete as;
 			as = NULL;
 		}

@@ -54,7 +54,7 @@ Menu::Menu() : mGUIFrame( NULL ), mGUIStatusbar( NULL ), mGUICreditsWindow( NULL
 
 	mGUIFrame = new frame( 0.0f, 0.0f, video.xres, video.yres );
 
-	mGUIMinimapWindow = new minimapWindowUI( this, 300, 70 );
+	mGUIMinimapWindow = new minimapWindowUI( this  );
 	mGUIFrame->addChild( mGUIMinimapWindow );
 
 	mGUICreditsWindow = new winCredits();
@@ -143,7 +143,6 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
 	gWorld->enterTile( int( tile.x ), int( tile.y ) );
 	
 	gStates.push_back( new MapView(  ah, av ) ); // on gPop, MapView is deleted.
-	
 	randBackground();
 }
 
@@ -162,7 +161,6 @@ void Menu::tick( float t, float dt )
 void Menu::display(float t, float dt)
 {
 	// 3D: Background.
-	
 	video.clearScreen();
 	glDisable( GL_FOG );
 	
