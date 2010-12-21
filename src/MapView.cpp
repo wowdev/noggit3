@@ -1096,6 +1096,7 @@ void MapView::displayViewMode_Help( float t, float dt )
 		"F - toggle fog\n"
 		"TAB - toggle UI view\n"
 		"x - texture palette\n"
+		"CTRL + x - detail window\n"
 		"R/T - Move true the editing modes\n"
 		"\n"
 		"Files:\n"
@@ -1627,8 +1628,18 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 		if( e->keysym.sym == SDLK_x )
 		{
-			// toggle texture window
-			view_texture_palette( 0, 0 );
+			if( Environment::getInstance()->CtrlDown )
+			{
+				// toggle detail window
+				mainGui->guidetailInfos->hidden = !mainGui->guidetailInfos->hidden;
+			}
+			else
+			{
+				// toggle texture window
+				view_texture_palette( 0, 0 );
+			}
+
+
 		}
 
 		// invert mouse

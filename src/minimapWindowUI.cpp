@@ -3,7 +3,7 @@
 #include "TextureManager.h"
 #include "world.h"
 #include "menu.h"
-
+#include "log.h"
 
 
 minimapWindowUI::minimapWindowUI( Menu* menuLink ) : window( 10, 10, 100, 100 ), mMenuLink( menuLink )
@@ -22,11 +22,19 @@ minimapWindowUI::minimapWindowUI( Menu* menuLink ) : window( 10, 10, 100, 100 ),
 
 frame* minimapWindowUI::processLeftClick( float mx, float my )
 {
+	// no click outside the adt block
 	if( !mMenuLink ||
 			mx < this->borderwidth || mx > this->height - this->borderwidth ||
 			my < this->borderwidth || my > this->height - this->borderwidth )
 		return NULL;
-	
+
+	// is there a tile?
+	int i =  (int)( mx - this->borderwidth ) / this->tilesize;
+	int j =  (int)( my - this->borderwidth ) / this->tilesize;
+	LogError << "Cords:" << j << " - " << i << std::endl;
+	if( !gWorld->hasTile(j,i) ) 
+		return NULL;		
+
 	mMenuLink->enterMapAt( Vec3D( ( ( mx - this->borderwidth ) / this->tilesize ) * TILESIZE, 0.0f, ( ( my - this->borderwidth ) / this->tilesize ) * TILESIZE ) );
 	
 	return this;

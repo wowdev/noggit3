@@ -187,10 +187,18 @@ int main( int argc, char *argv[] )
 	
 	int xres = 1280;
 	int yres = 720;
-	
-	
-	bool useConfig = false;
-	
+	bool useConfig;
+
+	if( FileExists( "NoggIt.conf" ) )
+	{
+		useConfig= true;
+		Log << "Use config file!" << std::endl;
+	}
+	else
+	{
+		useConfig = false;
+	}
+
 	int gowto = -1;
 	
 	// handle starting parameters
@@ -198,13 +206,9 @@ int main( int argc, char *argv[] )
 	{
 		if( !strcmp( argv[i], "-f" ) || !strcmp( argv[i], "-fullscreen" ) ) 
 			fullscreen = true;
-		else if( !strcmp( argv[i], "-c" ) || !strcmp( argv[i], "-config" ) ) 
-			useConfig = true;
+
 		else if( !strcmp( argv[i], "-g" ) || !strcmp( argv[i], "-goto" ) ) 
 			gowto = i + 1;
-		
-		else if( !strcmp( argv[i], "-w" ) || !strcmp( argv[i], "-windowed" ) ) 
-			fullscreen = false;
 		else if (!strcmp(argv[i],"-1024") || !strcmp(argv[i],"-1024x768")) {
 			xres = 1024;
 			yres = 768;
