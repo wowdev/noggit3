@@ -384,9 +384,19 @@ void InsertObject( frame *button, int id )
 			 case 13:
 				m2s_to_add.push_back( "World\\Scale\\777yardradiussphere.m2" );
 			 break;
-		} 
 
-	
+			 case 14:
+				 if( FileExists( "noggIt.conf" ) )
+				 {
+					 ConfigFile config( "noggIt.conf" );
+					 config.readInto( importFile, "ImportFile" );
+				 }
+	} 
+
+
+	std::string lastModel;
+	int lastTyp =0;
+
 	if(importFile!="")
 	{
 		size_t foundString;
@@ -410,6 +420,8 @@ void InsertObject( frame *button, int id )
 						line = line.substr( foundString+findThis.size() );
 					}
 					m2s_to_add.push_back( line );
+					lastModel = line;
+					lastTyp=1;
 				}
 				else if(line.find(".wmo")!= std::string::npos || line.find(".WMO")!= std::string::npos )
 				{
@@ -423,6 +435,8 @@ void InsertObject( frame *button, int id )
 						line = line.substr( foundString+findThis.size() );
 					}
 					wmos_to_add.push_back(line);
+					lastModel = line;
+					lastTyp=2;
 				}
 			}
 			fileReader.close();
@@ -449,30 +463,56 @@ void InsertObject( frame *button, int id )
 			break;
 	}
 
-	for( std::vector<std::string>::iterator it = wmos_to_add.begin(); it != wmos_to_add.end(); ++it )
+	if(id==14)
 	{
-		
-		if( !MPQFile::exists(*it) )
-		{
-			LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
-			continue;
-		}
-		
-		gWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
-	}
+		LogError << "IMPORT FROM VIEWR LAST:1" << std::endl;
 
-	for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
+		// import only last model from viewer
+		if(lastTyp==1)
+		{
+			LogError << "IMPORT FROM VIEWR LAST:2 ITS MW" << std::endl;
+			//m2
+			if( !MPQFile::exists(lastModel) )
+				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
+			else
+				gWorld->addM2( reinterpret_cast<Model*>(ModelManager::items[ModelManager::add(lastModel)]), selectionPosition );
+		}
+		else if(lastTyp==2)
+		{
+			LogError << "IMPORT FROM VIEWR LAST:2 ITS WMO" << std::endl;
+			//wmo	
+			if( !MPQFile::exists(lastModel) )
+				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
+			else
+				gWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(lastModel)]), selectionPosition );
+		}
+	}
+	else
 	{
-
-		if( !MPQFile::exists(*it) )
+		for( std::vector<std::string>::iterator it = wmos_to_add.begin(); it != wmos_to_add.end(); ++it )
 		{
-			LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
-			continue;
+		
+			if( !MPQFile::exists(*it) )
+			{
+				LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
+				continue;
+			}
+		
+			gWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
 		}
 
-		gWorld->addM2( reinterpret_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
+		for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
+		{
+
+			if( !MPQFile::exists(*it) )
+			{
+				LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
+				continue;
+			}
+
+			gWorld->addM2( reinterpret_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
+		}
 	}
-	
 	//! \todo Memoryleak: These models will never get deleted.
 }
 
@@ -680,7 +720,8 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Auto select mode", &Settings::getInstance()->AutoSelectingMode, false );
 
 	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Add model" );
-	mbar->GetMenu( "Assist" )->AddMenuItemButton( "from ModelViewer", InsertObject, 0	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "all from ModelViewer", InsertObject, 0	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "last from ModelViewer", InsertObject, 14	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "from Text File", InsertObject, 1	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Human scale", InsertObject, 2	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Cube 50", InsertObject, 3	);
@@ -1984,7 +2025,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_w) 
 		{
 			key_w = false;
-			if(!leftMouse && !rightMouse && moving > 0.0f) moving = 0.0f;
+			if( !(leftMouse && rightMouse) && moving > 0.0f) moving = 0.0f;
 		}
 
 
@@ -2103,10 +2144,6 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 	{
 		if( !Environment::getInstance()->AutoSelecting )
 			doSelection( 1 );
-//		if( gWorld->IsSelection( eEntry_Model ) )
-//			CurSelection = gWorld->GetCurrentSelection();
-//		else 
-//			CurSelection = 0;
 	}	
 	
 	MouseX = e->x;
@@ -2175,7 +2212,7 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 
 		 if (!leftMouse)
 		 {
-			// Only left
+			//  left
 			if( LastClicked )
 				LastClicked->processUnclick();
 			if( !gWorld->HasSelection() || ( !gWorld->IsSelection( eEntry_Model ) && !gWorld->IsSelection( eEntry_WMO ) ) ) 
@@ -2185,7 +2222,7 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 		 
 		 if (!rightMouse)
 		 {
-			// Only right
+			//  right
 			if( mViewMode == eViewMode_Help )
 				mViewMode = eViewMode_3D; // Steff: exit help window when open
 			look = false;
