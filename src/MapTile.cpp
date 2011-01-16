@@ -574,8 +574,8 @@ void MapTile::drawTextures()
 	float xOffset,yOffset;
 
 	glPushMatrix();
-	xOffset=zbase/CHUNKSIZE;
-	yOffset=xbase/CHUNKSIZE;
+	yOffset=zbase/CHUNKSIZE;
+	xOffset=xbase/CHUNKSIZE;
 	glTranslatef(xOffset,yOffset,0);
 	
 	//glTranslatef(-8,-8,0);
@@ -653,6 +653,7 @@ void minmax( Vec3D &a, Vec3D &b )
 
 bool checkInside( Vec3D extentA[2], Vec3D extentB[2] )
 {
+	
 	minmax( extentA[0], extentA[1] );
 	minmax( extentB[0], extentB[1] );
 
@@ -776,7 +777,10 @@ void MapTile::saveTile()
 	for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
 		if( checkInside( lTileExtents, it->second.extents ) )
 			lObjectInstances.insert( std::pair<int, WMOInstance>( it->first, it->second ) );
-	
+
+	//LogError << "ADT From X:" << lTileExtents[0].x << " - Z:" << lTileExtents[0].z << std::endl;
+	//LogError << "ADT From X:" << lTileExtents[1].x << " - Z:" << lTileExtents[1].z << std::endl;
+
 	for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
 	{
 		Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
@@ -785,8 +789,16 @@ void MapTile::saveTile()
 		lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
 		lModelExtentsV2[1] = it->second.model->header.VertexBoxMax + it->second.pos;
 		
+		//LogError << "BoundingBox From X:" << lModelExtentsV1[0].x << " - Z:" << lModelExtentsV1[0].z << std::endl;
+		//LogError << "BoundingBox From X:" << lModelExtentsV1[1].x << " - Z:" << lModelExtentsV1[1].z << std::endl;
+
+		//LogError << "VertexBoxMin From X:" << lModelExtentsV2[0].x << " - Z:" << lModelExtentsV2[0].z << std::endl;
+		//LogError << "VertexBoxMin From X:" << lModelExtentsV2[1].x << " - Z:" << lModelExtentsV2[1].z << std::endl;
+
 		if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
+		{
 			lModelInstances.insert( std::pair<int, ModelInstance>( it->first, it->second ) );
+		}
 	}
 
 	std::map<std::string, int*> lModels;
@@ -804,7 +816,9 @@ void MapTile::saveTile()
 		}
 
 		if( lModels.find( lTemp ) == lModels.end() )
+		{
 			lModels.insert( std::pair<std::string, int*>( lTemp, new int[2] ) ); 
+		}
 	}
 	
 	lID = 0;

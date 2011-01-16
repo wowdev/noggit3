@@ -616,9 +616,9 @@ World::~World()
 	LogDebug << "Unloaded world \"" << basename << "\"." << std::endl;
 }
 
-inline bool oktile( int i, int j )
+inline bool oktile( int z, int x )
 {
-	return !( i < 0 || j < 0 || i > 64 || j > 64 );
+	return !( z < 0 || x < 0 || z > 64 || x > 64 );
 }
 
 bool World::hasTile( int pZ, int pX )
@@ -649,7 +649,7 @@ void World::enterTile( int x, int z )
 		}
 	}
 
-	if( autoheight && tileLoaded( cx, cz ) ) 
+	if( autoheight && tileLoaded( cz, cx ) ) //ZX STEFF HERE SWAP!
 	{
 		float maxHeight = mTiles[cz][cx].tile->getMaxHeight();
 		using std::max ;
@@ -709,9 +709,10 @@ MapTile* World::loadTile(int z, int x)
 		return NULL;
 	}
 
-	mTiles[z][x].tile = new MapTile( z, x, filename.str(), mBigAlpha );
+	mTiles[z][x].tile = new MapTile( x, z, filename.str(), mBigAlpha );// XZ STEFF Swap MapTile( z, x, file
 	return mTiles[z][x].tile;
 }
+
 
 
 void lightingDefaults()
