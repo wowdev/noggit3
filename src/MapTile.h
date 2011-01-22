@@ -26,6 +26,8 @@ public:
 	int mPositionZ;
 	float xbase, zbase;
 	
+	bool changed;
+
 	void draw();
 	void drawSelect();
 	void drawLines();

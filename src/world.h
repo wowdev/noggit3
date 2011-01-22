@@ -89,6 +89,8 @@ class World
 	bool tileLoaded(int x, int z);
 	MapTile *loadTile(int x, int z);
 	
+
+
 	void outdoorLighting();
 	void outdoorLighting2();
 	
@@ -184,7 +186,10 @@ public:
 	void addWMO( WMO *wmo, Vec3D newPos );
 	void removeHole( float x, float z );
 	void saveMap();
-	
+
+	void tileChange(float x, float z);
+	bool tileChanged(int x, int z);
+
 	void deleteModelInstance( int pUniqueID );
 	void deleteWMOInstance( int pUniqueID );
 	

@@ -17,3 +17,10 @@ void misc::find_and_replace( std::string &source, const std::string find, std::s
 	if( found != std::string::npos )
 		source.replace( found, find.length(), replace );
 }
+
+
+//dirty hack
+int misc::FtoIround(float d)
+{
+	return d<0 ? d-.5f : d+.5f;
+}

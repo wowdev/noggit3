@@ -15,7 +15,7 @@
 #include "MapChunk.h"
 #include "ConfigFile.h"
 #include "appInfo.h" // appInfo
-
+#include "misc.h"
 #include "FreeType.h" // freetype::
 
 #include "Settings.h"
@@ -43,7 +43,7 @@
 #include "statusBar.h" // statusBar
 #include "detailInfos.h" // detailInfos
 #include "menuBar.h" // menuBar, menu items, ..
-
+#include "minimapWindowUI.h"
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -408,7 +408,7 @@ void InsertObject( frame *button, int id )
 			while (! fileReader.eof() )
 			{
 				getline (fileReader,line);
-				if(line.find(".m2")!= std::string::npos || line.find(".M2")!= std::string::npos )
+				if(line.find(".m2")!= std::string::npos || line.find(".M2")!= std::string::npos || line.find(".MDX")!= std::string::npos || line.find(".mdx")!= std::string::npos )
 				{
 					// M2 inside line
 					// is it the modelviewer log then cut the log messages out
@@ -419,6 +419,15 @@ void InsertObject( frame *button, int id )
 						// cut path
 						line = line.substr( foundString+findThis.size() );
 					}
+
+					// swap mdx to m2
+					size_t found = line.rfind( ".mdx" );
+					if( found != std::string::npos )
+						line.replace( found, 4, ".m2" );
+					found = line.rfind( ".MDX" );
+					if( found != std::string::npos )
+						line.replace( found, 4, ".m2" );
+
 					m2s_to_add.push_back( line );
 					lastModel = line;
 					lastTyp=1;
@@ -465,12 +474,10 @@ void InsertObject( frame *button, int id )
 
 	if(id==14)
 	{
-		LogError << "IMPORT FROM VIEWR LAST:1" << std::endl;
 
 		// import only last model from viewer
 		if(lastTyp==1)
 		{
-			LogError << "IMPORT FROM VIEWR LAST:2 ITS MW" << std::endl;
 			//m2
 			if( !MPQFile::exists(lastModel) )
 				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
@@ -479,7 +486,6 @@ void InsertObject( frame *button, int id )
 		}
 		else if(lastTyp==2)
 		{
-			LogError << "IMPORT FROM VIEWR LAST:2 ITS WMO" << std::endl;
 			//wmo	
 			if( !MPQFile::exists(lastModel) )
 				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
@@ -541,11 +547,8 @@ void exit_tilemode( frame *button, int id )
 
 
 
-//dirty hack
-int round(float d)
-{
-	return d<0 ? d-.5f : d+.5f;
-}
+
+
 MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 {
 	LastClicked=0;
@@ -569,6 +572,8 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	// create main gui opject that holds all other gui elements for access
 	mainGui = new Gui();
 
+	mainGui->minimapWindow = new minimapWindowUI(gWorld);
+	mainGui->minimapWindow->hidden = true;
 	//register toolbar event functions
 	for( int i = 0; i < 10; ++i )
 		if( mainGui->guiToolbar->mToolbarIcons[i] )
@@ -586,8 +591,8 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	// register DetailInfo Window	
 	tileFrames->addChild(mainGui->guiappInfo);
 
-	// Scroll test window
-	//tileFrames->addChild(mainGui->scrollPan);
+	// minimap
+	tileFrames->addChild(mainGui->minimapWindow);
 
 	tool_settings_x = video.xres-186;
 	tool_settings_y = 38;
@@ -942,9 +947,17 @@ void MapView::tick( float t, float dt )
 				{
 				case 0:
 					if( Environment::getInstance()->ShiftDown )
+					{						
+						// Move ground up
 						gWorld->changeTerrain( xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+						gWorld->tileChange(xPos,zPos);
+					}
 					else if( Environment::getInstance()->CtrlDown )
+					{
+						// Move ground down
 						gWorld->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+						gWorld->tileChange(xPos,zPos);
+					}
 						
 					break;
 					
@@ -1055,6 +1068,8 @@ void MapView::tick( float t, float dt )
 	
 	gWorld->tick(dt);
 }
+
+
 
 void MapView::doSelection( int selTyp )
 {
@@ -1194,6 +1209,8 @@ void MapView::displayViewMode_Help( float t, float dt )
 
 void MapView::displayViewMode_Minimap( float t, float dt )
 {
+	// not used now. !!!
+	// swap with minimapWindow. Delete if minimpa window run 100 %
 		//! \todo	try to use a real map from WoW? either the large map or the minimap would be nice
 	video.clearScreen();
 	video.set2D();
@@ -1217,12 +1234,12 @@ void MapView::displayViewMode_Minimap( float t, float dt )
 		glEnd();
 	glDisable(GL_TEXTURE_2D);
 	glBegin(GL_LINES);
-		float fx, fz;
-		fx = basex + gWorld->camera.x / TILESIZE * 12.0f;
-		fz = basey + gWorld->camera.z / TILESIZE * 12.0f;
-		glVertex2f(fx, fz);
-		glColor4f(1.0f,1.0f,1.0f,0.0f);
-		glVertex2f(fx + 10.0f*cosf(ah/180.0f*PI), fz + 10.0f*sinf(ah/180.0f*PI));
+	float fx, fz;
+	fx = basex + gWorld->camera.x / TILESIZE * 12.0f;
+	fz = basey + gWorld->camera.z / TILESIZE * 12.0f;
+	glVertex2f(fx, fz);
+	glColor4f(1.0f,1.0f,1.0f,0.0f);
+	glVertex2f(fx + 10.0f*cosf(ah/180.0f*PI), fz + 10.0f*sinf(ah/180.0f*PI));
 	glEnd();
 
 	//! \todo	Something is wrong there.
@@ -1310,14 +1327,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 	
 	video.set3D();
 
-	//glActiveTexture(GL_TEXTURE1);
-	//glDisable(GL_TEXTURE_2D);
-	//glActiveTexture(GL_TEXTURE0);
-	//glEnable(GL_TEXTURE_2D);
-
 	gWorld->draw();
-
-
 	
 	if( hud ) 
 	{
@@ -1346,7 +1356,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 				
 		std::ostringstream s;
 		s << "Server cords(x:" << -(gWorld->camera.x - ZEROPOINT) << " y:" << -(gWorld->camera.z - ZEROPOINT) << " z:" << gWorld->camera.y
-				<< ") Tile " << round((gWorld->camera.x-(TILESIZE/2))/TILESIZE) << " " << round((gWorld->camera.z-(TILESIZE/2))/TILESIZE)
+				<< ") Tile " << misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE) << " " <<  misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE)
 				<< " Client cords(x:" << gWorld->camera.x<<" y:" << gWorld->camera.z << " z:"<<gWorld->camera.y << ") ";
 		mainGui->guiStatusbar->setLeftInfo( s.str() );
 		
@@ -1735,8 +1745,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_b )
 			this->mTimespeed -= 90.0f;
 		
-
-
 		// toggle lightning
 		if( e->keysym.sym == SDLK_l ) 
 			gWorld->lighting = !gWorld->lighting;
@@ -1794,7 +1802,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			Settings::getInstance()->AutoSelectingMode = !Settings::getInstance()->AutoSelectingMode;
 		}			
 		
-		// toggle better selection mode
+		// toggle draw water
 		if( e->keysym.sym == SDLK_F4 && !Environment::getInstance()->ShiftDown )
 				gWorld->drawwater = !gWorld->drawwater;
 
@@ -1958,10 +1966,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 		// minimap
 		if( e->keysym.sym == SDLK_m )
-			if( mViewMode == eViewMode_Minimap )
-				mViewMode = eViewMode_3D;
-			else
-				mViewMode = eViewMode_Minimap;
+			mainGui->minimapWindow->hidden = !mainGui->minimapWindow->hidden;
 
 		// toogle between smooth / flat / linear
 		if( e->keysym.sym == SDLK_y )
@@ -2087,6 +2092,8 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 			av = -80.0f;
 		else if ( av > 80.0f ) 
 			av = 80.0f;
+
+		mainGui->minimapWindow->changePlayerLookAt(ah);
 	}
 	
 	if( MoveObj )

@@ -57,6 +57,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	mPositionX = pX;
 	mPositionZ = pZ;
 	
+	this->changed = false;
 	xbase = mPositionX * TILESIZE;
 	zbase = mPositionZ * TILESIZE;
 

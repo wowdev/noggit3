@@ -5,6 +5,7 @@ class Toolbar;
 class statusBar;
 class detailInfos;
 class appInfo;
+class minimapWindowUI;
 
 class Gui
 {
@@ -15,6 +16,7 @@ public:
 
 
 	// UI elements
+	minimapWindowUI *minimapWindow;
 	Toolbar *guiToolbar;
 	statusBar *guiStatusbar;
 	detailInfos *guidetailInfos;
