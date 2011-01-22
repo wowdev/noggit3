@@ -161,6 +161,7 @@ Model::~Model()
 
 bool Model::isAnimated(MPQFile &f)
 {
+	
 	// see if we have any animated bones
 	ModelBoneDef *bo = (ModelBoneDef*)(f.getBuffer() + header.ofsBones);
 

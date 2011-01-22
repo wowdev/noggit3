@@ -16,6 +16,7 @@
 #include "Log.h"
 #include "MapChunk.h"
 #include "MapTile.h"
+#include "misc.h"
 
 #include "WMOInstance.h" // WMOInstance
 #include "ModelManager.h" // ModelManager
@@ -1748,4 +1749,20 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
 	newWMOis.pos = newPos;
 	newWMOis.mUniqueID = lMaxUID;
 	mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
+}
+
+void World::tileChange(float x, float z)
+{
+	// change the changed flag of the map tile
+	int row =  misc::FtoIround((x-(TILESIZE/2))/TILESIZE);
+	int colum =  misc::FtoIround((z-(TILESIZE/2))/TILESIZE);
+	LogError << "Changed ADT on Pos: " << row << " - " << colum << std::endl;
+	mTiles[colum][row].tile->changed = true;
+}
+
+bool World::tileChanged(int x, int z)
+{
+	if(mTiles[x][z].tile != NULL)
+		return mTiles[x][z].tile->changed;
+	else return false;
 }

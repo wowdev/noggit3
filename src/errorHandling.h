@@ -109,9 +109,41 @@ void printStacktrace()
 
 #else
 
+#include "StackWalker.h"
+
 void printStacktrace()
 {	
-	/*!
+	
+
+	StackWalker sw; 
+	sw.ShowCallstack(); 
+	/*
+	typedef USHORT (WINAPI *CaptureStackBackTraceType)(__in ULONG, __in ULONG, __out PVOID*, __out_opt PULONG);    
+	CaptureStackBackTraceType func = (CaptureStackBackTraceType)(GetProcAddress(LoadLibrary("kernel32.dll"), "RtlCaptureStackBackTrace"));     
+	if(func == NULL)        
+		return; 
+	
+	FILE *myFile = fopen("StackDump.log", "w+t"); 
+	// WOE 29.SEP.2010     
+	// Quote from Microsoft Documentation:    
+	// ## Windows Server 2003 and Windows XP:      
+	// ## The sum of the FramesToSkip and FramesToCapture parameters must be less than 63.    
+	
+	const int kMaxCallers = 62;      
+	void* callers[kMaxCallers];    
+	int count = (func)(0, kMaxCallers, callers, NULL);    
+	
+	for(int i = 0; i < count; i++)       
+		fprintf(myFile, "*** %d called from %016I64LX\n", i, callers[i]); 
+	
+		/*
+		RtlCaptureStackBackTrace(
+		__in DWORD FramesToSkip,
+		__in DWORD FramesToCapture,
+		__out_ecount(FramesToCapture) PVOID *BackTrace,
+		__out_opt PDWORD BackTraceHash
+		)
+		/*!
 	 \todo This is not compiling, yes. This is on purpose. You need to add windows specific code here.
 	 The function CaptureStackBackTrace (see http://msdn.microsoft.com/en-us/library/bb204633(VS.85).aspx ) should help here.
 	*/

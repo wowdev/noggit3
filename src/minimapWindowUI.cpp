@@ -8,9 +8,25 @@
 
 minimapWindowUI::minimapWindowUI( Menu* menuLink ) : window( 10, 10, 100, 100 ), mMenuLink( menuLink )
 {
+	this->map = NULL;
 	this->mustresize = true;
 	this->borderwidth = 5.0f;
 	
+	this->tilesize = (video.yres - 70.0f - this->borderwidth * 2) / 64;
+
+	this->width  =	this->borderwidth * 2 + this->tilesize * 64;
+	this->height =	this->width;
+	this->x		 =	video.xres / 2 - this->width / 2;
+	this->y		 =	video.yres / 2 - this->height / 2;
+
+}
+
+minimapWindowUI::minimapWindowUI( World *setMap) : window( 10, 10, 100, 100 )
+{
+	this->map = setMap;
+	this->mustresize = true;
+	this->borderwidth = 5.0f;
+
 	this->tilesize = (video.yres - 70.0f - this->borderwidth * 2) / 64;
 
 	this->width  =	this->borderwidth * 2 + this->tilesize * 64;
@@ -51,6 +67,11 @@ void minimapWindowUI::resize()
 	this->y		 =	video.yres / 2 - this->height / 2;
 }
 
+void minimapWindowUI::changePlayerLookAt(float ah)
+{
+	this->lookAt = ah;
+}
+
 void minimapWindowUI::render() const
 {
 	window::render();
@@ -87,13 +108,9 @@ void minimapWindowUI::render() const
 		for( int i = 0; i < 64; ++i ) 
 		{
 			if( gWorld->hasTile(j,i) ) 
-			{
 				glColor4f( 0.8f, 0.8f, 0.8f, 0.4f );
-			}
 			else
-			{
 				glColor4f( 1.0f, 1.0f, 1.0f, 0.05f );
-			}
 			
 			glBegin( GL_QUADS );
 			glVertex2i( 0.0f + i * this->tilesize, 0.0f + j * this->tilesize );
@@ -101,8 +118,39 @@ void minimapWindowUI::render() const
 			glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) - 1, (0.0f + ( j + 1 ) * this->tilesize) -1 );
 			glVertex2i( 0.0f + i * this->tilesize, (0.0f + ( j + 1 ) * this->tilesize) -1 );
 			glEnd();
+
+			if(this->map != NULL)
+				if(this->map->tileChanged(j,i))
+				{
+					glColor4f( 1.0f, 1.0f, 1.0f, 0.6f );
+					glBegin( GL_LINES );
+					glVertex2i( 0.0f + i * this->tilesize, 0.0f + j * this->tilesize );
+					glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) , 0.0f + j * this->tilesize );
+					glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) , 0.0f + j * this->tilesize );
+					glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) , (0.0f + ( j + 1 ) * this->tilesize) -1 );
+					glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) , (0.0f + ( j + 1 ) * this->tilesize) -1 );
+					glVertex2i( 0.0f + i * this->tilesize, (0.0f + ( j + 1 ) * this->tilesize) -1 );
+					glVertex2i( 0.0f + i * this->tilesize, (0.0f + ( j + 1 ) * this->tilesize) -1 );
+					glVertex2i( 0.0f + i * this->tilesize, 0.0f + j * this->tilesize );
+					glEnd();
+
+				}
+
 		}
 	}
 	
+	// draw the arrow if shown inside a map
+	if(this->map != NULL)
+	{
+		glBegin(GL_LINES);
+		float fx, fz;
+		fx = map->camera.x / TILESIZE * this->tilesize;
+		fz = map->camera.z / TILESIZE * this->tilesize;
+		glVertex2f(fx, fz);
+		glColor4f(1.0f,1.0f,1.0f,0.0f);
+		glVertex2f(fx + 10.0f*cosf(this->lookAt/180.0f*PI), fz + 10.0f*sinf(this->lookAt/180.0f*PI));
+		glEnd();
+
+	}
 	glPopMatrix();
 }

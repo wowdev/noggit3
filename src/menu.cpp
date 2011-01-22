@@ -136,7 +136,7 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
 	
 	gWorld->autoheight = autoHeight;
 	
-	gWorld->camera = Vec3D( pos.x, pos.y +400.0f, pos.z );
+	gWorld->camera = Vec3D( pos.x, pos.y, pos.z );
 	gWorld->lookat = Vec3D( pos.x, pos.y, pos.z - 1.0f );
 	
 	gWorld->initDisplay();
