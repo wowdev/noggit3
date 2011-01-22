@@ -187,8 +187,9 @@ public:
 	void removeHole( float x, float z );
 	void saveMap();
 
-	void tileChange(float x, float z);
-	bool tileChanged(int x, int z);
+	void setChanged(float x, float z);
+	void setChanged(int x, int z);
+	bool getChanged(int x, int z);
 
 	void deleteModelInstance( int pUniqueID );
 	void deleteWMOInstance( int pUniqueID );

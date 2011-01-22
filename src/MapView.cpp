@@ -950,13 +950,11 @@ void MapView::tick( float t, float dt )
 					{						
 						// Move ground up
 						gWorld->changeTerrain( xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
-						gWorld->tileChange(xPos,zPos);
 					}
 					else if( Environment::getInstance()->CtrlDown )
 					{
 						// Move ground down
 						gWorld->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
-						gWorld->tileChange(xPos,zPos);
 					}
 						
 					break;

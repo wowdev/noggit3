@@ -120,7 +120,7 @@ void minimapWindowUI::render() const
 			glEnd();
 
 			if(this->map != NULL)
-				if(this->map->tileChanged(j,i))
+				if(this->map->getChanged(j,i))
 				{
 					glColor4f( 1.0f, 1.0f, 1.0f, 0.6f );
 					glBegin( GL_LINES );

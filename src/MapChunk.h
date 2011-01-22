@@ -91,9 +91,9 @@ public:
 
 	Vec3D GetSelectionPosition();
 
-	void changeTerrain(float x, float z, float change, float radius, int BrushType);
-	void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
-	void blurTerrain(float x, float z, float remain, float radius, int BrushType);
+	bool changeTerrain(float x, float z, float change, float radius, int BrushType);
+	bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
+	bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
 	bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, unsigned int texture);
 	int addTexture(GLuint texture);
