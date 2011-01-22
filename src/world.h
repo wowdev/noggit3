@@ -153,6 +153,7 @@ public:
 	void enterTile(int x, int z);
 	void reloadTile(int x, int z);
 	void saveTile(int x, int z);
+	void saveChanged();
 	void tick(float dt);
 	void draw();
 	
@@ -189,6 +190,7 @@ public:
 
 	void setChanged(float x, float z);
 	void setChanged(int x, int z);
+	void unsetChanged(int x, int z);
 	bool getChanged(int x, int z);
 
 	void deleteModelInstance( int pUniqueID );
