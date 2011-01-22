@@ -1396,6 +1396,7 @@ bool World::GetVertex(float x,float z, Vec3D *V)
 
 void World::changeTerrain(float x, float z, float change, float radius, int BrushType)
 {
+
 	for( int j = 0; j < 64; ++j )
 	{
 		for( int i = 0; i < 64; ++i )
@@ -1406,7 +1407,8 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
 				{
 					for( int tx = 0; tx < 16; ++tx )
 					{
-						mTiles[j][i].tile->getChunk(ty,tx)->changeTerrain(x,z,change,radius,BrushType);
+						if(mTiles[j][i].tile->getChunk(ty,tx)->changeTerrain(x,z,change,radius,BrushType))
+							this->setChanged(i,j);
 					}
 				}
 			}
@@ -1432,6 +1434,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
 }
 void World::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
 {
+
 	for( int j = 0; j < 64; ++j )
 	{
 		for( int i = 0; i < 64; ++i )
@@ -1442,7 +1445,8 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
 				{
 					for( int tx = 0; tx < 16; ++tx )
 					{
-						mTiles[j][i].tile->getChunk(ty,tx)->flattenTerrain(x,z,h,remain,radius,BrushType);
+						if(mTiles[j][i].tile->getChunk(ty,tx)->flattenTerrain(x,z,h,remain,radius,BrushType))
+							this->setChanged(i,j);
 					}
 				}
 			}
@@ -1469,6 +1473,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
 
 void World::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
+
 	for( int j = 0; j < 64; ++j )
 	{
 		for( int i = 0; i < 64; ++i )
@@ -1479,7 +1484,8 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
 				{
 					for( int tx = 0; tx < 16; ++tx )
 					{
-						mTiles[j][i].tile->getChunk(ty,tx)->blurTerrain(x, z, remain, radius, BrushType);
+						if(mTiles[j][i].tile->getChunk(ty,tx)->blurTerrain(x, z, remain, radius, BrushType))
+							this->setChanged(i,j);
 					}
 				}
 			}
@@ -1508,8 +1514,8 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 {
 	const int newX = (int)(x / TILESIZE);
 	const int newZ = (int)(z / TILESIZE);
-	
-	Log << "Painting Textures at " << x << " and " << z;
+
+	//Log << "Painting Textures at " << x << " and " << z;
 	bool succ = false;
 	
 	for( int j = newZ - 1; j < newZ + 1; ++j )
@@ -1522,7 +1528,11 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 				{
 					for( int tx = 0; tx < 16; ++tx )
 					{
-						succ = mTiles[j][i].tile->getChunk(ty,tx)->paintTexture(x, z, Brush, strength, pressure, texture) || succ;
+						if(mTiles[j][i].tile->getChunk(ty,tx)->paintTexture(x, z, Brush, strength, pressure, texture))
+						{
+							succ = true || succ;
+							this->setChanged(i,j);
+						}
 					}
 				}
 			}
@@ -1533,6 +1543,7 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 
 void World::eraseTextures(float x, float z)
 {
+	this->setChanged(x,z);
 	const int newX = (int)(x / TILESIZE);
 	const int newZ = (int)(z / TILESIZE);
 	Log << "Erasing Textures at " << x << " and " << z;
@@ -1560,6 +1571,7 @@ void World::eraseTextures(float x, float z)
 
 void World::addHole( float x, float z )
 {
+	this->setChanged(x,z);
 	const int newX = (int)(x / TILESIZE);
 	const int newZ = (int)(z / TILESIZE);
 	
@@ -1589,6 +1601,7 @@ void World::addHole( float x, float z )
 
 void World::removeHole( float x, float z )
 {
+	this->setChanged(x,z);
 	const int newX = (int)(x / TILESIZE);
 	const int newZ = (int)(z / TILESIZE);
 	
@@ -1751,16 +1764,21 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
 	mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
 }
 
-void World::tileChange(float x, float z)
+void World::setChanged(float x, float z)
 {
 	// change the changed flag of the map tile
 	int row =  misc::FtoIround((x-(TILESIZE/2))/TILESIZE);
 	int colum =  misc::FtoIround((z-(TILESIZE/2))/TILESIZE);
-	LogError << "Changed ADT on Pos: " << row << " - " << colum << std::endl;
 	mTiles[colum][row].tile->changed = true;
 }
 
-bool World::tileChanged(int x, int z)
+void World::setChanged(int x, int z)
+{
+	// change the changed flag of the map tile
+	mTiles[z][x].tile->changed = true;
+}
+
+bool World::getChanged(int x, int z)
 {
 	if(mTiles[x][z].tile != NULL)
 		return mTiles[x][z].tile->changed;

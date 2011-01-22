@@ -1350,7 +1350,7 @@ void MapChunk::recalcNorms()
 	glBufferData(GL_ARRAY_BUFFER, mapbufsize*4*sizeof(float), mFakeShadows, GL_STATIC_DRAW);
 }
 
-void MapChunk::changeTerrain(float x, float z, float change, float radius, int BrushType)
+bool MapChunk::changeTerrain(float x, float z, float change, float radius, int BrushType)
 {
 	float dist,xdiff,zdiff;
 	
@@ -1361,7 +1361,7 @@ void MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 	dist=sqrt(xdiff*xdiff+zdiff*zdiff);
 
 	if(dist>(radius+MAPCHUNK_RADIUS))
-		return;
+		return Changed;
 	vmin.y =	9999999.0f;
 	vmax.y = -9999999.0f;
 	for(int i=0;i<mapbufsize;++i)
@@ -1400,10 +1400,11 @@ void MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 		glBindBuffer(GL_ARRAY_BUFFER, vertices);
 		glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mVertices, GL_STATIC_DRAW);
 	}
+	return Changed;
 }
 
 
-void MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
+bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
 {
 	float dist,xdiff,zdiff,nremain;
 	Changed=false;
@@ -1413,7 +1414,7 @@ void MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 	dist=sqrt(xdiff*xdiff+zdiff*zdiff);
 
 	if(dist>(radius+MAPCHUNK_RADIUS))
-		return;
+		return Changed;
 
 	vmin.y =	9999999.0f;
 	vmax.y = -9999999.0f;
@@ -1453,9 +1454,10 @@ void MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 		glBindBuffer(GL_ARRAY_BUFFER, vertices);
 		glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mVertices, GL_STATIC_DRAW);
 	}
+	return Changed;
 }
 
-void MapChunk::blurTerrain(float x, float z, float remain, float radius, int BrushType)
+bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
 	float dist,dist2,xdiff,zdiff,nremain;
 	Changed=false;
@@ -1465,7 +1467,7 @@ void MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 	dist=sqrt(xdiff*xdiff+zdiff*zdiff);
 
 	if(dist>(radius+MAPCHUNK_RADIUS))
-		return;
+		return Changed;
 
 	vmin.y =	9999999.0f;
 	vmax.y = -9999999.0f;
@@ -1534,6 +1536,7 @@ void MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 		glBindBuffer(GL_ARRAY_BUFFER, vertices);
 		glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mVertices, GL_STATIC_DRAW);
 	}
+	return Changed;
 }
 
 /* The correct way to do everything
@@ -1621,6 +1624,7 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 
 	if((texLevel==-1)&&(nTextures==4))
 	{
+		// Implement here auto texture slot freeing :)
 		LogDebug << "paintTexture: No free texture slot" << std::endl;
 		return false;
 	}
