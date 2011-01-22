@@ -178,10 +178,12 @@ void setTextureBrushLevel(float f)
 
 void SaveOrReload( frame*, int pMode )
 {
-	if( pMode )
+	if( pMode == 1 )
 		gWorld->reloadTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
-	else
+	else if( pMode == 0 )
 		gWorld->saveTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
+	else if( pMode == 2 )
+		gWorld->saveChanged();
 }
 
 void change_settings_window(int oldid, int newid)
@@ -242,9 +244,15 @@ void closeHelp( frame *button, int id )
 void ResetSelectedObjectRotation( frame *button, int id )
 {
 	if( gWorld->IsSelection( eEntry_WMO ) )
+	{
 		gWorld->GetCurrentSelection()->data.wmo->resetDirection();
+		gWorld->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
+	}
 	else if( gWorld->IsSelection( eEntry_Model ) )
+	{
 		gWorld->GetCurrentSelection()->data.model->resetDirection();
+		gWorld->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
+	}
 }
 
 void SnapSelectedObjectToGround( frame *button, int id )
@@ -254,12 +262,15 @@ void SnapSelectedObjectToGround( frame *button, int id )
 		Vec3D t = Vec3D( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, 0 );
 		gWorld->GetVertex( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, &t );
 		gWorld->GetCurrentSelection()->data.wmo->pos = t;
+		gWorld->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
+
 	}
 	else if( gWorld->IsSelection( eEntry_Model ) )
 	{
 		Vec3D t = Vec3D( gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, 0 );
 		gWorld->GetVertex( gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, &t );
-		gWorld->GetCurrentSelection()->data.model->pos = t;				
+		gWorld->GetCurrentSelection()->data.model->pos = t;		
+		gWorld->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
 	}
 }
 
@@ -435,7 +446,7 @@ void InsertObject( frame *button, int id )
 				else if(line.find(".wmo")!= std::string::npos || line.find(".WMO")!= std::string::npos )
 				{
 					// WMO inside line
-					findThis = "Loading WMOModel ";
+					findThis = "Loading WMO ";
 					foundString = line.find(findThis);
 					// is it the modelviewer log then cut the log messages out
 					if(foundString != std::string::npos)
@@ -706,7 +717,8 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->AddMenu( "Assist" );
 	mbar->AddMenu( "Help" );
 
-	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + S Save current tile", SaveOrReload, 0 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + SHIFT + S Save current tile", SaveOrReload, 0 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + S Save all", SaveOrReload, 2 );
 	mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT + J Reload current tile", SaveOrReload, 1 );
 	mbar->GetMenu( "File" )->AddMenuItemButton( "ESC Exit", exit_tilemode, 0 );
 
@@ -836,22 +848,26 @@ void MapView::tick( float t, float dt )
 
 			if( keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0) 
 			{
-				// Move scale and rotat with numpad keys
+				// Move scale and rotate with numpad keys
 				if( Selection->type == eEntry_WMO )
 				{	
+					gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
 					Selection->data.wmo->pos.x += keyx * moveratio;
 					Selection->data.wmo->pos.y += keyy * moveratio;
 					Selection->data.wmo->pos.z += keyz * moveratio;
 					Selection->data.wmo->dir.y += keyr * moveratio * 2;
+					gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
 				}
 
 				if( Selection->type == eEntry_Model )
 				{
+					gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
 					Selection->data.model->pos.x += keyx * moveratio;
 					Selection->data.model->pos.y += keyy * moveratio;
 					Selection->data.model->pos.z += keyz * moveratio;
 					Selection->data.model->dir.y += keyr * moveratio * 2;
 					Selection->data.model->sc += keys * moveratio / 50;
+					gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
 				}
 			}
 
@@ -869,15 +885,18 @@ void MapView::tick( float t, float dt )
 			if( MoveObj )
 				if( Selection->type == eEntry_WMO )
 				{
+					 gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // before move
 					 ObjPos.x = 80.0f;
 					 Selection->data.wmo->pos+=mv * dirUp * ObjPos.x;
 					 Selection->data.wmo->pos-=mh * dirRight * ObjPos.x;
 					 Selection->data.wmo->extents[0] = Selection->data.wmo->pos - Vec3D(1,1,1);
 					 Selection->data.wmo->extents[1] = Selection->data.wmo->pos + Vec3D(1,1,1);
+					 gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // after move. If moved to another ADT
 				}
 				else if( Selection->type == eEntry_Model )
 					if( Environment::getInstance()->AltDown )
 					{
+						gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
 						float ScaleAmount;
 						ScaleAmount = pow( 2.0f, mv * 4.0f );
 						Selection->data.model->sc *= ScaleAmount;
@@ -888,9 +907,11 @@ void MapView::tick( float t, float dt )
 					}
 					else
 					{
+						gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // before move
 						ObjPos.x = 80.0f;
 						Selection->data.model->pos += mv * dirUp * ObjPos.x;
 						Selection->data.model->pos -= mh * dirRight * ObjPos.x;
+						gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // after move. If moved to another ADT
 					}
 		
 
@@ -902,6 +923,7 @@ void MapView::tick( float t, float dt )
 				
 				if( Selection->type == eEntry_Model )
 				{
+					gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
 					lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
 					if( Environment::getInstance()->ShiftDown )
 						lTarget = &Selection->data.model->dir.y;
@@ -912,6 +934,7 @@ void MapView::tick( float t, float dt )
 				}
 				else if( Selection->type == eEntry_WMO )
 				{
+					gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
 					lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
 					if( Environment::getInstance()->ShiftDown )
 						lTarget = &Selection->data.wmo->dir.y;
@@ -1159,7 +1182,8 @@ void MapView::displayViewMode_Help( float t, float dt )
 		"F11 - reload M2s\n"
 		"F12 - reload wmo\n"
 		"Shift + J - reload ADT tile\n"
-		"CTRL + S - SAVE current ADT tile\n"
+		"CTRL + S -  Save all changed ADT tiles\n"
+		"CTRL + SHIFT + S - Save ADT tiles camera position\n"
 	);
 	
 	freetype::shprint( arial16, video.xres - 400.0f, 40.0f, 
@@ -1608,10 +1632,12 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 		// save
 		if( e->keysym.sym == SDLK_s )
-			if( !Environment::getInstance()->CtrlDown )
-				moving = -1.0f;
-			else
+			if( Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown )
 				gWorld->saveTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
+			else if( Environment::getInstance()->CtrlDown)
+				gWorld->saveChanged();
+			else
+				moving = -1.0f;
 		
 		if( e->keysym.sym == SDLK_a )
 			strafing = -1.0f;

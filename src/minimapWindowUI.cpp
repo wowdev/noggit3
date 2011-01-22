@@ -140,17 +140,18 @@ void minimapWindowUI::render() const
 	}
 	
 	// draw the arrow if shown inside a map
+	//!TODO: Change it from a simple line to an arrow
 	if(this->map != NULL)
 	{
+		glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 		glBegin(GL_LINES);
 		float fx, fz;
 		fx = map->camera.x / TILESIZE * this->tilesize;
 		fz = map->camera.z / TILESIZE * this->tilesize;
 		glVertex2f(fx, fz);
-		glColor4f(1.0f,1.0f,1.0f,0.0f);
+		glColor4f(1.0f,1.0f,1.0f,1.0f);
 		glVertex2f(fx + 10.0f*cosf(this->lookAt/180.0f*PI), fz + 10.0f*sinf(this->lookAt/180.0f*PI));
 		glEnd();
-
 	}
 	glPopMatrix();
 }

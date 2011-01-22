@@ -678,10 +678,31 @@ void World::reloadTile(int x, int z)
 
 void World::saveTile(int x, int z)
 {
+	// save goven tile
 	if( tileLoaded( z, x ) )
 	{
 		mTiles[z][x].tile->saveTile();
 	}
+}
+
+void World::saveChanged()
+{
+	// save all changed tiles
+	for( int j = 0; j < 64; ++j ) 
+	{
+		for( int i = 0; i < 64; ++i ) 
+		{
+			if( tileLoaded( j, i ) )
+			{
+				if(this->getChanged(j,i))
+				{
+					mTiles[j][i].tile->saveTile();
+					this->unsetChanged(j,i);
+				}
+			}
+		}
+	}
+
 }
 
 inline bool World::tileLoaded(int z, int x)
@@ -1408,7 +1429,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
 					for( int tx = 0; tx < 16; ++tx )
 					{
 						if(mTiles[j][i].tile->getChunk(ty,tx)->changeTerrain(x,z,change,radius,BrushType))
-							this->setChanged(i,j);
+							this->setChanged(j,i);
 					}
 				}
 			}
@@ -1446,7 +1467,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
 					for( int tx = 0; tx < 16; ++tx )
 					{
 						if(mTiles[j][i].tile->getChunk(ty,tx)->flattenTerrain(x,z,h,remain,radius,BrushType))
-							this->setChanged(i,j);
+							this->setChanged(j,i);
 					}
 				}
 			}
@@ -1485,7 +1506,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
 					for( int tx = 0; tx < 16; ++tx )
 					{
 						if(mTiles[j][i].tile->getChunk(ty,tx)->blurTerrain(x, z, remain, radius, BrushType))
-							this->setChanged(i,j);
+							this->setChanged(j,i);
 					}
 				}
 			}
@@ -1531,7 +1552,7 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 						if(mTiles[j][i].tile->getChunk(ty,tx)->paintTexture(x, z, Brush, strength, pressure, texture))
 						{
 							succ = true || succ;
-							this->setChanged(i,j);
+							this->setChanged(j,i);
 						}
 					}
 				}
@@ -1686,46 +1707,51 @@ void World::saveMap()
 
 void World::deleteModelInstance( int pUniqueID )
 {
-	mModelInstances.erase( mModelInstances.find( pUniqueID ) );
+	for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
+	{
+		if ( it->first == pUniqueID )
+		{
+			this->setChanged(it->second.pos.x,it->second.pos.z);
+			mModelInstances.erase(it);
+		}
+	}
 	ResetSelection();
 }
 
 void World::deleteWMOInstance( int pUniqueID )
 {
-	mWMOInstances.erase( mWMOInstances.find( pUniqueID ) );
+	for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
+	{
+		 if ( it->first == pUniqueID )
+		 {
+			 this->setChanged(it->second.pos.x,it->second.pos.z);
+			 mWMOInstances.erase(it);
+		 }
+	}
 	ResetSelection();
 }
 
 void World::addModel( nameEntry entry, Vec3D newPos )
 {	
 	if( entry.type == eEntry_Model )
-	{
-		Log << "Try to add M2...";
 		this->addM2( entry.data.model->model, newPos );
-	}
 	else if( entry.type == eEntry_WMO )
-	{
 		this->addWMO( entry.data.wmo->wmo, newPos );
-	}
 }
 
 void World::addM2( Model *model, Vec3D newPos )
 {
-	Log << "Get MaxId...";
 	using std::max;
 	int temp = 0;
 	if  (mModelInstances.empty()) {
-		Log << "this is 0";
 		temp = 0;
 	}
 	else{
-		Log << "last+1";
 		temp = mModelInstances.rbegin()->first + 1;
 	}
 	const int lMaxUID = temp;
 //	( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
 //													 ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
-	Log << "Trying to add M2";
 	ModelInstance newModelis = ModelInstance();
 	newModelis.model = model;
 	newModelis.nameID = -1;
@@ -1747,9 +1773,9 @@ void World::addM2( Model *model, Vec3D newPos )
 	if(Settings::getInstance()->copy_size)
 	{
 		newModelis.sc = newModelis.sc * (( float( rand() ) / float( RAND_MAX ) * 0.2 ) + 0.90);
-	}
-	Log << "Insert M2 into array...";	
+	}	
 	mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
+	this->setChanged(newPos.x,newPos.z);
 }
 
 void World::addWMO( WMO *wmo, Vec3D newPos )
@@ -1762,6 +1788,7 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
 	newWMOis.pos = newPos;
 	newWMOis.mUniqueID = lMaxUID;
 	mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
+	this->setChanged(newPos.x,newPos.z);
 }
 
 void World::setChanged(float x, float z)
@@ -1775,7 +1802,13 @@ void World::setChanged(float x, float z)
 void World::setChanged(int x, int z)
 {
 	// change the changed flag of the map tile
-	mTiles[z][x].tile->changed = true;
+	mTiles[x][z].tile->changed = true;
+}
+
+void World::unsetChanged(int x, int z)
+{
+	// change the changed flag of the map tile
+	mTiles[x][z].tile->changed = false;
 }
 
 bool World::getChanged(int x, int z)

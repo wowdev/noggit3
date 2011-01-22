@@ -27,7 +27,7 @@ MPQArchive::MPQArchive(const std::string& filename,bool doListfile)
 		//gLog("Error opening archive %s\n", filename);
 		return;
 	}
-	Log << "Opening archive:" << filename << std::endl;
+	//Log << "Opening archive:" << filename << std::endl;
 	gOpenArchives.push_back( make_pair( filename, &mpq_a ) );
 
 	if( doListfile )
@@ -36,7 +36,7 @@ MPQArchive::MPQArchive(const std::string& filename,bool doListfile)
 
 		if( !SFileOpenFileEx( mpq_a, "(listfile)", 0, &fh ) )
 		{
-			LogError << "No listfile in archive \"" << filename << "\"." << std::endl;	
+			//LogError << "No listfile in archive \"" << filename << "\"." << std::endl;	
 			SFileCloseArchive(&mpq_a);
 			return;
 		}
@@ -100,14 +100,14 @@ void MPQFile::SaveFile()
 	FILE* fd;
 	
 	std::string lFilename = fname;
-	LogDebug << fname << std::endl;
+	//LogDebug << fname << std::endl;
 	size_t found = lFilename.find( "\\" );
 	while( found != std::string::npos )
 	{
 		lFilename.replace( found, 1, "/" );
 		found = lFilename.find( "\\" );
 	}
-	LogDebug << lFilename << std::endl;	
+	//LogDebug << lFilename << std::endl;	
 	std::string lDirectoryName = lFilename;	
 
 	found = lDirectoryName.find_last_of("/\\");
@@ -115,7 +115,7 @@ void MPQFile::SaveFile()
 		CreatePath( lDirectoryName.substr( 0, found + 1 ) );
 	else
 		LogError << "Is \"" << lDirectoryName << "\" really a location I can write to? Please report this line." << std::endl;
-		LogDebug << lDirectoryName << std::endl;	
+		//LogDebug << lDirectoryName << std::endl;	
 	
 
 	fd = fopen( lFilename.c_str(), "wb" );
@@ -162,7 +162,7 @@ MPQFile::MPQFile( const std::string& filename ):
 		fread( buffer, 1, size, fd );
 		fclose( fd );
 		External = true;
-		Log << "Opening file \"" << filename << "\" from disk." << std::endl;
+		//Log << "Opening file \"" << filename << "\" from disk." << std::endl;
 		std::transform( fname.begin(), fname.end(), fname.begin(), ::tolower );
 		return;
 	}
