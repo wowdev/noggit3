@@ -1320,6 +1320,32 @@ unsigned int World::getAreaID()
 	return curChunk->areaID;
 }
 
+void World::setAreaID(int id, int x, int z)
+{
+	// set the Area ID on a tile x,z on all chunks
+	for (int j=0; j<16; ++j) 
+	{
+		for (int i=0; i<16; ++i) 
+		{
+			this->setAreaID(id, x, z, j, i);
+		}
+	}
+}
+
+void World::setAreaID(int id, int x, int z , float cx, float cz)
+{
+	// set the Area ID on a tile x,z on the chunk cx,cz
+	MapTile *curTile;
+
+	curTile = mTiles[z][x].tile;
+	if(curTile == 0) return;
+
+	MapChunk *curChunk = curTile->getChunk(cx, cz);
+
+	if(curChunk == 0) return;
+
+	curChunk->areaID = id;
+}
 
 void World::drawTileMode(float ah)
 {
@@ -1707,27 +1733,17 @@ void World::saveMap()
 
 void World::deleteModelInstance( int pUniqueID )
 {
-	for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
-	{
-		if ( it->first == pUniqueID )
-		{
-			this->setChanged(it->second.pos.x,it->second.pos.z);
-			mModelInstances.erase(it);
-		}
-	}
+	std::map<int, ModelInstance>::iterator it = mModelInstances.find( pUniqueID );
+	this->setChanged( it->second.pos.x, it->second.pos.z );
+	mModelInstances.erase( it ); 
 	ResetSelection();
 }
 
 void World::deleteWMOInstance( int pUniqueID )
 {
-	for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-	{
-		 if ( it->first == pUniqueID )
-		 {
-			 this->setChanged(it->second.pos.x,it->second.pos.z);
-			 mWMOInstances.erase(it);
-		 }
-	}
+	std::map<int, WMOInstance>::iterator it = mWMOInstances.find( pUniqueID );
+	this->setChanged( it->second.pos.x, it->second.pos.z );
+	mWMOInstances.erase( it ); 
 	ResetSelection();
 }
 
