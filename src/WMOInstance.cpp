@@ -2,6 +2,7 @@
 
 #include "wmo.h" // WMO
 #include "world.h" // gWorld
+#include "Log.h"
 
 WMOInstance::WMOInstance( WMO* _wmo, MPQFile& _file ) : wmo( _wmo ), mSelectionID( SelectionNames.add( this ) )
 {

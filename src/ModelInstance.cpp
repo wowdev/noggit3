@@ -1,6 +1,7 @@
 #include "ModelInstance.h"
 #include "model.h" // Model, etc.
 #include "world.h" // gWorld
+#include "Log.h"
 
 Vec3D TransformCoordsForModel( Vec3D pIn )
 {
@@ -231,6 +232,7 @@ ModelInstance::~ModelInstance()
 {
 	if( nameID != 0xFFFFFFFF )
 	{
+		//Log << "Destroying Selection " << nameID << "\n";
 		SelectionNames.del( nameID );
 		nameID = 0xFFFFFFFF;
 	}

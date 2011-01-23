@@ -18,6 +18,24 @@ static const int HEIGHT_SHALLOW = -100;
 static const int HEIGHT_DEEP = -250;
 static const double MAPCHUNK_RADIUS	= 47.140452079103168293389624140323;
 
+bool DrawMapContour=false;
+bool drawFlags=false;
+
+GLuint	Contour=0;
+float			CoordGen[4];
+static const int CONTOUR_WIDTH = 128;
+
+static const float texDetail = 8.0f;
+
+
+static const float TEX_RANGE = 62.0f/64.0f;
+
+unsigned short OddStrips[8*18];
+unsigned short EvenStrips[8*18];
+unsigned short LineStrip[32];
+unsigned short HoleStrip[128];
+
+
 /*
  White	1.00	1.00	1.00
  Brown	0.75	0.50	0.00
@@ -80,12 +98,7 @@ void HeightColor(float height, Vec3D *Color)
 }
 
 
-bool DrawMapContour=false;
-bool drawFlags=false;
 
-GLuint	Contour=0;
-float			CoordGen[4];
-static const int CONTOUR_WIDTH = 128;
 void GenerateContourMap()
 {
 	unsigned char	CTexture[CONTOUR_WIDTH*4];
@@ -529,7 +542,7 @@ void MapChunk::loadTextures()
 		textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
 }
 
-static const float texDetail = 8.0f;
+
 
 void SetAnim(int anim)
 {
@@ -560,7 +573,6 @@ void RemoveAnim(int anim)
 	}
 }
 
-static const float TEX_RANGE = 62.0f/64.0f;
 
 void MapChunk::drawTextures()
 {
@@ -706,6 +718,7 @@ MapChunk::~MapChunk()
 
 	if( nameID != -1 )
 	{
+		Log << "Destroy Selection "<< nameID <<"\n";
 		SelectionNames.del( nameID );
 		nameID = -1;
 	}
@@ -728,10 +741,6 @@ bool MapChunk::GetVertex(float x,float z, Vec3D *V)
 	return true;
 }
 
-unsigned short OddStrips[8*18];
-unsigned short EvenStrips[8*18];
-unsigned short LineStrip[32];
-unsigned short HoleStrip[128];
 
 void CreateStrips()
 {
@@ -1732,4 +1741,8 @@ void MapChunk::removeHole( int i, int j )
 void MapChunk::setAreaID( int ID )
 {
 	areaID = ID;
+}
+
+int MapChunk::getAreaID(){
+	return areaID;
 }

@@ -218,13 +218,13 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 		
 		size_t nextpos = theFile.getPos() + size;
 
-		if ( fourcc == 'MH2O' && false ) // Do not even try to render water, it will be a fuckup anyway. ._. 
+		if ( fourcc == 'MH2O' /*&& false*/ ) // Do not even try to render water, it will be a fuckup anyway. ._. 
 		{
 			// water data
 			uint8_t * lMH2O_Chunk = theFile.getPointer();
 
 			MH2O_Header * lHeader = reinterpret_cast<MH2O_Header*>( lMH2O_Chunk );
-			
+			/*
 			for( int py = 0; py < 16; py++ )
 				for( int px = 0; px < 16; px++ )
 					for( unsigned int lLayer = 0; lLayer < lHeader[py * 16 + px].nLayers; lLayer++ )
@@ -278,13 +278,14 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 									for( int j = 0; j < 8; j++ )
 										lTile.mRender[i][j] = lRenderBlock[k++];
 							}
-							else
+							else{
 								// --Slartibartfast 00:41, 30 October 2008 (CEST): "If the block is omitted, the whole thing is rendered"
 								for( int i = 0; i < 8; ++i )
 									for( int j = 0; j < 8; j++ )
 										lTile.mRender[i][j] = true;
+							}
 
-						/*	if( lInfoBlock->ofsInfoMask )
+							if( lInfoBlock->ofsInfoMask )
 							{
 								for( int i = 0; i < 8; ++i )
 									for( int j = 0; j < 8; j++ )
@@ -294,10 +295,10 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 								unsigned char * lMaskInfo2 = reinterpret_cast<unsigned char*>( lMH2O_Chunk + lInfoBlock->ofsInfoMask );
 								int k = 0;
 
-								string dbg = "";
+								std::string dbg = "";
 								for( int i = lInfoBlock->yOffset; i < lInfoBlock->yOffset + lInfoBlock->height; ++i )
 								{
-									gLog( "\t\t\tx%2x (%c)\n", lMaskInfo2[i], lMaskInfo2[i] );
+									Log<< "\t\t\tx%2x (%c)\n", lMaskInfo2[i], lMaskInfo2[i] ;
 									for( int j = lInfoBlock->xOffset; j < lInfoBlock->xOffset + lInfoBlock->width; j++ )
 									{
 										dbg.append( lMaskInfo[k] ? "#" : " " );
@@ -308,7 +309,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 
 								LogDebug << dbg << std::endl;
 							}
-							else*/
+							else
 							{
 								for( int i = 0; i < 8; ++i )
 									for( int j = 0; j < 8; j++ )
@@ -323,7 +324,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 							lq->initFromMH2O( lTile );
 							mLiquids.push_back( lq );
 						}
-					}
+					}*/
 		}
 
 		theFile.seek((int)nextpos);
