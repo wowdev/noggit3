@@ -1277,7 +1277,6 @@ Vec3D MapChunk::GetSelectionPosition()
 
 void MapChunk::recalcNorms()
 {
-	//! \todo This seems to be bad. Try clicking once in a Blizzard map and you will see a difference
 	
 	Vec3D P1,P2,P3,P4;
 	Vec3D Norm,N1,N2,N3,N4,D;
