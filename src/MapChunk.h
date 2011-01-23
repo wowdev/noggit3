@@ -103,6 +103,7 @@ public:
 	void addHole(int i,int j);
 	void removeHole(int i,int j);
 
+	int getAreaID();
 	void setAreaID(int ID);
 
 	bool GetVertex(float x,float z, Vec3D *V);

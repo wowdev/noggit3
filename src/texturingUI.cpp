@@ -225,7 +225,6 @@ void texturePaletteClick( frame *f, int id )
 	
 	if( TexturingUI::getSelectedTexture() )
 	{
-		Log << TexturingUI::getSelectedTexture();
 		if( textureSelected )
 			textureSelected->setTexture( TexturingUI::getSelectedTexture()->name );
 		if( textSelectedTexture )
