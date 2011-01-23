@@ -43,7 +43,7 @@ public:
 
 
 	int				tex[4];
-	GLuint		textures[4];
+	GLuint			textures[4];
 	unsigned int	texFlags[4];
 	unsigned int	effectID[4];
 	unsigned int	MCALoffset[4];

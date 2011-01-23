@@ -556,9 +556,10 @@ void exit_tilemode( frame *button, int id )
 	gPop = true;
 }
 
-
-
-
+void setAreaID( frame *button, int id )
+{
+	gWorld->setAreaID(5000,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+}
 
 MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 {
@@ -732,9 +733,12 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "copy random rotation", &Settings::getInstance()->copy_rot, false	);
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "copy random tile", &Settings::getInstance()->copy_tile, false	);
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "copy random size", &Settings::getInstance()->copy_size, false	);
-	
+
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Options" );
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Auto select mode", &Settings::getInstance()->AutoSelectingMode, false );
+
+	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Modify current ADT" );
+	mbar->GetMenu( "Edit" )->AddMenuItemButton( "Set Area ID", setAreaID, 0 );
 
 	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Add model" );
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "all from ModelViewer", InsertObject, 0	);
@@ -1466,6 +1470,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 				case eEntry_MapChunk:
 					
 					s << "Mapchunk " << lSelection->data.mapchunk->px << ", " << lSelection->data.mapchunk->py << " (" << lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px << ") of tile (" << lSelection->data.mapchunk->mt->mPositionX << "_" << lSelection->data.mapchunk->mt->mPositionZ << ")" << std::endl;;
+					s << "Area ID: " << lSelection->data.mapchunk->areaID << " Name:" << gAreaDB.getAreaName( lSelection->data.mapchunk->areaID ).c_str() << std::endl;
 					s << "Flags: " << lSelection->data.mapchunk->Flags << std::endl;
 					
 					if( lSelection->data.mapchunk->Flags & FLAG_SHADOW )
