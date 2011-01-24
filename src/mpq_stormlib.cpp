@@ -167,7 +167,7 @@ MPQFile::MPQFile( const std::string& filename ):
 		return;
 	}
 	
-	for(ArchiveSet::iterator i=--gOpenArchives.end(); i!=--gOpenArchives.begin(); --i)
+	for(ArchiveSet::reverse_iterator i=gOpenArchives.rbegin(); i!=gOpenArchives.rend(); ++i)
 	{
 		HANDLE &mpq_a = *i->second;
 		
