@@ -363,6 +363,35 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 		}
 	}
 	
+	// - MTFX ----------------------------------------------
+	/*
+	//! \todo Implement this or just use Terrain Cube maps?
+	Log << "MTFX offs: " << Header.mtfx << std::endl;
+	if(Header.mtfx != 0){
+		Log << "Try to load MTFX" << std::endl;
+		theFile.seek( Header.mtfx + 0x14 );
+		
+		theFile.read( &fourcc, 4 );
+		theFile.read( &size, 4 );
+		
+		assert( fourcc == 'MTFX' );
+		
+	
+		{
+			char* lCurPos = reinterpret_cast<char*>( theFile.getPointer() );
+			char* lEnd = lCurPos + size;
+			int tCount = 0;
+			while( lCurPos < lEnd ) {
+				int temp = 0;
+				theFile.read(&temp, 4);
+				Log << "Adding to " << mTextureFilenames[tCount].first << " texture effect: " << temp << std::endl;
+				mTextureFilenames[tCount++].second = temp;
+				lCurPos += 4;
+			}
+		}
+
+	}*/
+
 	// - Done. ---------------------------------------------
 	
 	// - Load textures -------------------------------------
@@ -839,16 +868,32 @@ void MapTile::saveTile()
 
 	// Check which textures are on this ADT.
 	std::map<std::string, int> lTextures;
-
+	//used to store texteffectinfo
+	std::vector<int> mTextureEffects;
+	 
 	for( int i = 0; i < 16; ++i )
 		for( int j = 0; j < 16; ++j )
 			for( int tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
-				if( lTextures.find( TextureManager::items[mChunks[i][j]->textures[tex]]->name ) == lTextures.end() )
-					lTextures.insert( std::pair<std::string, int>( TextureManager::items[mChunks[i][j]->textures[tex]]->name, -1 ) ); 
+				if( lTextures.find( TextureManager::items[mChunks[i][j]->textures[tex]]->name ) == lTextures.end() ) {
+					lTextures.insert( std::pair<std::string, int>(TextureManager::items[mChunks[i][j]->textures[tex]]->name , -1 ) );
+				}
 	
 	lID = 0;
 	for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
 		it->second = lID++;
+
+	
+	std::string cmpCubeMaps = std::string("terrain cube maps");
+	for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it ){
+		//if texture is in folder terrain cube maps, it needs to get handled different by wow
+		if(it->first.compare(8, 17, cmpCubeMaps) == 0){
+			Log<<it->second <<": "<< it->first << std::endl;
+			mTextureEffects.push_back(1);
+		}
+		else
+			mTextureEffects.push_back(0);
+	}
+
 
 	// Now write the file.
 	
@@ -1447,7 +1492,24 @@ void MapTile::saveTile()
 	}
 
 	//! \todo	MH2O
-	//! \todo	MTFX
+
+	//MTFX 
+	if(!mTextureEffects.empty()) {
+		//! \todo check if nTexEffects == nTextures, correct order etc.
+		lADTFile.Extend( 8 + 4*mTextureEffects.size());
+		SetChunkHeader( lADTFile, lCurrentPosition, 'MTFX', 4*mTextureEffects.size() );
+		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mtfx = lCurrentPosition - 0x14;
+
+		int* lMTFX_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
+		
+		lID = 0;
+		//they should be in the correct order...
+		for(std::vector<int>::iterator it = mTextureEffects.begin(); it!= mTextureEffects.end(); ++it) {
+			lMTFX_Data[lID] = *it;
+			++lID;
+		}
+		lCurrentPosition += 8 +  4*mTextureEffects.size();
+	}
 	
 	MPQFile f( mFilename );
 	f.setBuffer( lADTFile.GetPointer<uint8_t>(), lADTFile.mSize );
