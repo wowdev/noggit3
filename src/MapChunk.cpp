@@ -1046,17 +1046,9 @@ void MapChunk::draw()
 	glDisable(GL_LIGHTING);
 
 	drawContour();
-	//drawAreaID();
-	//drawBlock();
-	//drawColor();
 
 	if(drawFlags)
 	{
-		if(Flags&0x02)
-		{
-			glColor4f(1,0,0,0.2f);
-			drawPass(0);
-		}
 
 		if(Flags&0x04)
 		{
@@ -1074,7 +1066,22 @@ void MapChunk::draw()
 			glColor4f(1,0.5f,0,0.2f);
 			drawPass(0);
 		}
+		if(Flags&0x05)
+		{
+			glColor4f(1,1,1,1.0f);
+			drawPass(0);
+		}
 	}
+
+	if(terrainMode==5)
+	{
+		if(Flags&0x02)
+		{
+			glColor4f(1,1,1,0.6f);
+			drawPass(0);
+		}
+	}
+
 	if( gWorld->IsSelection( eEntry_MapChunk ) && gWorld->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3 )
 	{
 		int poly = gWorld->GetCurrentSelectedTriangle();
@@ -1743,4 +1750,19 @@ void MapChunk::setAreaID( int ID )
 
 int MapChunk::getAreaID(){
 	return areaID;
+}
+
+bool MapChunk::getInpass()
+{
+	if(this->Flags & FLAG_IMPASS) 
+		return true;
+	else return false;
+}
+
+void MapChunk::setInpass( bool changeto )
+{
+	if(changeto) 
+		this->Flags = this->Flags | FLAG_IMPASS;
+	else 
+		this->Flags = this->Flags & ~FLAG_IMPASS;
 }

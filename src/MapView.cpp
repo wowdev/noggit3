@@ -538,13 +538,15 @@ void view_texture_palette( frame *button, int id )
 	TexturePalette->hidden = !TexturePalette->hidden;
 }
 
+
+
 void Toolbar_SelectIcon( frame * pButton, int pId )
 {
-	const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "Not used", "Not used", "Not used", "Not used", "Not used", "Not used" };
-	change_settings_window( mainGui->guiToolbar->selectedIcon, pId > 3 ? 0 : pId );
+	const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "Area ID", "Impassible", "Not used", "Not used", "Not used", "Not used" };
+	change_settings_window( mainGui->guiToolbar->selectedIcon, pId > 5 ? 0 : pId );
 	mainGui->guiToolbar->IconSelect( pId - 1 );
 	mainGui->guiToolbar->text->setText( Names[pId-1] );
-	terrainMode = (pId - 1) & 3;
+	terrainMode = (pId - 1);
 	if (terrainMode == 3)
 		Environment::getInstance()->view_holelines = true;
 	else
@@ -556,9 +558,10 @@ void exit_tilemode( frame *button, int id )
 	gPop = true;
 }
 
-void setAreaID( frame *button, int id )
+void test_menu_action( frame *button, int id )
 {
-	gWorld->setAreaID(5000,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+	if(id == 1)
+		gWorld->setAreaID(5000,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
 MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
@@ -721,7 +724,10 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + SHIFT + S Save current tile", SaveOrReload, 0 );
 	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + S Save all", SaveOrReload, 2 );
 	mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT + J Reload current tile", SaveOrReload, 1 );
-	mbar->GetMenu( "File" )->AddMenuItemButton( "ESC Exit", exit_tilemode, 0 );
+	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Test" );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "InpassFlagTrue", test_menu_action, 2 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "InpassFlagFalse", test_menu_action, 3 );
 
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "selected object" );
 	mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + C copy", CopySelectedObject, 0	);
@@ -738,7 +744,6 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Auto select mode", &Settings::getInstance()->AutoSelectingMode, false );
 
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Modify current ADT" );
-	mbar->GetMenu( "Edit" )->AddMenuItemButton( "Set Area ID", setAreaID, 0 );
 
 	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Add model" );
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "all from ModelViewer", InsertObject, 0	);
@@ -1013,7 +1018,7 @@ void MapView::tick( float t, float dt )
 						}
 					}
 						
-					break;
+				break;
 					
 				case 3:
 					if( Environment::getInstance()->ShiftDown	)
@@ -1022,6 +1027,12 @@ void MapView::tick( float t, float dt )
 						gWorld->addHole( xPos, zPos );
 						
 					break;
+				case 5:
+					if( Environment::getInstance()->ShiftDown	)
+						gWorld->setInpass( true, xPos, zPos );
+					else if( Environment::getInstance()->CtrlDown )
+						gWorld->setInpass( false, xPos, zPos );
+				break;
 				}
 			}
 		}
@@ -1381,7 +1392,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 		freetype::shprint( arial16, video.xres - 200, 5, "%.2f fps", gFPS );
 				
 		std::ostringstream s;
-		s << "Server cords(x:" << -(gWorld->camera.x - ZEROPOINT) << " y:" << -(gWorld->camera.z - ZEROPOINT) << " z:" << gWorld->camera.y
+		s << terrainMode << "Server cords(x:" << -(gWorld->camera.x - ZEROPOINT) << " y:" << -(gWorld->camera.z - ZEROPOINT) << " z:" << gWorld->camera.y
 				<< ") Tile " << misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE) << " " <<  misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE)
 				<< " Client cords(x:" << gWorld->camera.x<<" y:" << gWorld->camera.z << " z:"<<gWorld->camera.y << ") ";
 		mainGui->guiStatusbar->setLeftInfo( s.str() );
@@ -1472,7 +1483,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 					s << "Mapchunk " << lSelection->data.mapchunk->px << ", " << lSelection->data.mapchunk->py << " (" << lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px << ") of tile (" << lSelection->data.mapchunk->mt->mPositionX << "_" << lSelection->data.mapchunk->mt->mPositionZ << ")" << std::endl;;
 					s << "Area ID: " << lSelection->data.mapchunk->areaID << " Name:" << gAreaDB.getAreaName( lSelection->data.mapchunk->areaID ).c_str() << std::endl;
 					s << "Flags: " << lSelection->data.mapchunk->Flags << std::endl;
-					
+
 					if( lSelection->data.mapchunk->Flags & FLAG_SHADOW )
 					{
 						s << "Shadows Enabled" << std::endl;
@@ -1746,7 +1757,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			else
 			{
 			terrainMode++;
-			terrainMode = terrainMode % 4;
+			if(terrainMode==6 )terrainMode=0;
 
 			// Set the right icon in toolbar
 			Toolbar_SelectIcon( 0, terrainMode + 1 );				
@@ -1757,7 +1768,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_t ) 
 		{
 			terrainMode--;
-			terrainMode = ( terrainMode + 4 ) % 4;
+			if(terrainMode==0 )terrainMode=4;
 
 			// Set the right icon in toolbar
 			Toolbar_SelectIcon( 0, terrainMode + 1 );

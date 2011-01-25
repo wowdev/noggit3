@@ -1833,3 +1833,37 @@ bool World::getChanged(int x, int z)
 		return mTiles[x][z].tile->changed;
 	else return false;
 }
+
+void World::setInpass( bool to, float x, float z)
+{
+	// set the inpass flag to selected chunk
+	this->setChanged(x,z);
+	const int newX = (int)(x / TILESIZE);
+	const int newZ = (int)(z / TILESIZE);
+	
+	LogError << "SetImpass - Tile" << newX << "_"  << newZ << std::endl;
+
+	for( int j = newZ - 1; j < newZ + 1; ++j )
+	{
+		for( int i = newX - 1; i < newX + 1; ++i )
+		{
+			if( tileLoaded( j, i ) )
+			{
+				for( int ty = 0; ty < 16; ++ty )
+				{
+					for( int tx = 0; tx < 16; ++tx )
+					{
+						MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
+						if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
+						{
+							int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
+							int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
+
+							chunk->setInpass(to);
+						}
+					}
+				}
+			}
+		}
+	}
+}
