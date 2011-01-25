@@ -15,6 +15,21 @@ enum eMCNKFlags
 	FLAG_TBC = 0x8000
 };
 
+enum eMCLYFlags
+{
+	FLAG_ANIMATE_45 = 0x1,
+	FLAG_ANIMATE_90 = 0x2,
+	FLAG_ANIMATE_180 = 0x4,
+	FLAG_ANIM_FAST = 0x8,
+	FLAG_ANIM_FASTER = 0x10,
+	FLAG_ANIM_FASTEST = 0x20,
+	FLAG_ANIMATE = 0x40,
+	FLAG_GLOW = 0x80,
+	FLAG_USE_ALPHA = 0x100, //should be set for every layer except the first
+	FLAG_ALPHA_COMPRESSED = 0x200, //we do not compress, so ignore this
+	FLAG_REFLECTION = 0x400
+};
+
 static const float TILESIZE = 533.33333f;
 static const float CHUNKSIZE = ((TILESIZE) / 16.0f);
 static const float UNITSIZE = (CHUNKSIZE / 8.0f);

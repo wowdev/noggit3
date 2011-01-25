@@ -5,7 +5,7 @@
 #include "liquid.h"
 #include "brush.h"
 #include "TextureManager.h" // TextureManager, Texture
-
+#include "mapheaders.h"
 #include "quaternion.h"
 
 extern int terrainMode;
@@ -189,9 +189,9 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 	Flags = header.flags;
 	areaID = header.areaid;
 	
-		zbase = header.zpos;
-		xbase = header.xpos;
-		ybase = header.ypos;
+	zbase = header.zpos;
+	xbase = header.xpos;
+	ybase = header.ypos;
 
 	px = header.ix;
 	py = header.iy;
@@ -231,7 +231,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 			// normal vectors
 			char nor[3];
 			Vec3D *ttn = mNormals;
-			for (int j=0; j<17; j++) {
+			for (int j=0; j<17; ++j) {
 				for (int i=0; i<((j%2)?8:9); ++i) {
 					f.read(nor,3);
 					// order X,Z,Y 
@@ -244,8 +244,8 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 			Vec3D *ttv = mVertices;
 
 			// vertices
-			for (int j=0; j<17; j++) {
-				for (int i=0; i<((j%2)?8:9); ++i) {
+			for (int j=0; j < 17; ++j) {
+				for (int i=0; i < ((j % 2) ? 8 : 9); ++i) {
 					float h,xpos,zpos;
 					f.read(&h,4);
 					xpos = i * UNITSIZE;
@@ -277,8 +277,8 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 				f.read(&MCALoffset[i], 4);
 				f.read(&effectID[i], 4);
 
-				if (texFlags[i] & 0x80) {
-										animated[i] = texFlags[i];
+				if (texFlags[i] & FLAG_ANIMATE) {
+					animated[i] = texFlags[i];
 				} else {
 					animated[i] = 0;
 				}
@@ -293,10 +293,10 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 
 			unsigned char sbuf[64*64], *p, c[8];
 			p = sbuf;
-			for (int j=0; j<64; j++) {
+			for (int j=0; j<64; ++j) {
 				f.read(c,8);
 				for (int i=0; i<8; ++i) {
-					for (int b=0x01; b!=0x100; b<<=1) {
+					for (int b = 0x01; b != 0x100; b <<= 1) {
 						*p++ = (c[i] & b) ? 85 : 0;
 					}
 				}
@@ -313,7 +313,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 		else if ( fourcc == 'MCAL' ) 
 		{
 			unsigned int MCALbase = f.getPos();
-			for( unsigned int layer = 0; layer < header.nLayers; layer++ )
+			for( unsigned int layer = 0; layer < header.nLayers; ++layer )
 			{
 				if( texFlags[layer] & 0x100 )
 				{
@@ -336,7 +336,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 							bool fill = buffIn[offI] & 0x80;
 							unsigned n = buffIn[offI] & 0x7F;
 							offI++;
-							for( unsigned k = 0; k < n; k++ )
+							for( unsigned k = 0; k < n; ++k )
 							{
 							if (offO == 4096) break;
 							buffOut[offO] = buffIn[offI];
@@ -359,7 +359,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 						unsigned char *p;
 						uint8_t *abuf = f.getPointer();
 						p = amap[layer-1];
-						for (int j=0; j<64; j++) {
+						for (int j=0; j<64; ++j) {
 							for (int i=0; i<64; ++i) {
 								*p++ = *abuf++;
 							}
@@ -380,7 +380,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 						unsigned char *p;
 						uint8_t *abuf = f.getPointer();
 						p = amap[layer-1];
-						for (int j=0; j<63; j++) {
+						for (int j=0; j<63; ++j) {
 							for (int i=0; i<32; ++i) {
 								unsigned char c = *abuf++;
 								if(i!=31)
@@ -390,8 +390,8 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 								}
 								else
 								{
-									*p++ = (unsigned char)((255*((int)(c & 0x0f)))/0x0f);
-									*p++ = (unsigned char)((255*((int)(c & 0x0f)))/0x0f);
+									*p++ = (unsigned char) ( (255*((int)(c & 0x0f))) / 0x0f);
+									*p++ = (unsigned char) ( (255*((int)(c & 0x0f))) / 0x0f);
 								}
 							}
 
@@ -474,16 +474,16 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 	Vec3D *ttv = mMinimap;
 
 	// vertices
-	for (int j=0; j<17; j++) {
-		for (int i=0; i<((j%2)?8:9); ++i) {
+	for (int j=0; j<17; ++j) {
+		for (int i=0; i < ((j % 2) ? 8 : 9); ++i) {
 			float xpos,zpos;
 				//f.read(&h,4);
 			xpos = i * 0.125f;
 			zpos = j * 0.5f * 0.125f;
-			if (j%2) {
+			if (j % 2) {
 								 xpos += 0.125f*0.5f;
 			}
-			Vec3D v = Vec3D(xpos+px, zpos+py,-1);
+			Vec3D v = Vec3D(xpos+px, zpos+py, -1);
 			*ttv++ = v;
 		}
 	}
@@ -496,7 +496,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 			mShadowMap[i] = 0;
 
 		unsigned char sbuf[64*64];
-		for( size_t j = 0; j < 4096; j++ ) 
+		for( size_t j = 0; j < 4096; ++j ) 
 			sbuf[j] = 0;
 
 		glGenTextures( 1, &shadow );
@@ -509,7 +509,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 	}
 
 	float ShadowAmount;
-	for (int j=0; j<mapbufsize;j++)
+	for (int j=0; j<mapbufsize;++j)
 	{
 		//tm[j].z=tv[j].y;
 		ShadowAmount=1.0f-(-mNormals[j].x+mNormals[j].y-mNormals[j].z);
@@ -538,7 +538,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 void MapChunk::loadTextures()
 {
 	return;
-	for(int i=0;i<nTextures;++i)
+	for(int i=0; i < nTextures; ++i)
 		textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
 }
 
@@ -560,14 +560,14 @@ void SetAnim(int anim)
 
 		int animspd = (int)(200.0f * 8.0f);
 		float f = ( ((int)(gWorld->animtime*(spd/15.0f))) % animspd) / (float)animspd;
-		glTranslatef(f*fdx,f*fdy,0);
+		glTranslatef(f*fdx, f*fdy, 0);
 	}
 }
 
 void RemoveAnim(int anim)
 {
 	if (anim) {
-				glPopMatrix();
+			glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 		glActiveTexture(GL_TEXTURE1);
 	}
@@ -578,7 +578,7 @@ void MapChunk::drawTextures()
 {
 	glColor4f(1.0f,1.0f,1.0f,1.0f);
 
-	if(nTextures>0)
+	if(nTextures > 0)
 	{
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
@@ -601,21 +601,21 @@ void MapChunk::drawTextures()
 	SetAnim(animated[0]);
 	glBegin(GL_TRIANGLE_STRIP);	
 	glTexCoord2f(0.0f,texDetail);
-	glVertex3f((float)px,py+1.0f,-2.0f);	
-	glTexCoord2f(0.0f,0.0f);
-	glVertex3f((float)px,(float)py,-2.0f);
-	glTexCoord2f(texDetail,texDetail);
-	glVertex3f((float)px+1.0f,(float)py+1.0f,-2.0f);	
-	glTexCoord2f(texDetail,0.0f);
-	glVertex3f((float)px+1.0f,(float)py,-2.0f);	
+	glVertex3f((float)px, py+1.0f, -2.0f);	
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f((float)px, (float)py, -2.0f);
+	glTexCoord2f(texDetail, texDetail);
+	glVertex3f((float)px+1.0f, (float)py+1.0f, -2.0f);	
+	glTexCoord2f(texDetail, 0.0f);
+	glVertex3f((float)px+1.0f, (float)py, -2.0f);	
 	glEnd();
 	RemoveAnim(animated[0]);
 
-	if (nTextures>1) {
+	if (nTextures > 1) {
 		//glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
 		//glDepthMask(GL_FALSE);
 	}
-	for(int i=1;i<nTextures;++i)
+	for(int i=1; i < nTextures; ++i)
 	{
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
@@ -632,18 +632,18 @@ void MapChunk::drawTextures()
 		SetAnim(animated[i]);
 
 		glBegin(GL_TRIANGLE_STRIP);	
-		glMultiTexCoord2f(GL_TEXTURE0,texDetail,0.0f);
-		glMultiTexCoord2f(GL_TEXTURE1,TEX_RANGE,0.0f);
-		glVertex3f(px+1.0f,(float)py,-2.0f);
-		glMultiTexCoord2f(GL_TEXTURE0,0.0f,0.0f);
-		glMultiTexCoord2f(GL_TEXTURE1,0.0f,0.0f);
-		glVertex3f((float)px,(float)py,-2.0f);		
-		glMultiTexCoord2f(GL_TEXTURE0,texDetail,texDetail);
-		glMultiTexCoord2f(GL_TEXTURE1,TEX_RANGE,TEX_RANGE);
-		glVertex3f(px+1.0f,py+1.0f,-2.0f);	
-		glMultiTexCoord2f(GL_TEXTURE0,0.0f,texDetail);
-		glMultiTexCoord2f(GL_TEXTURE1,0.0f,TEX_RANGE);
-		glVertex3f((float)px,py+1.0f,-2.0f);	
+		glMultiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
+		glMultiTexCoord2f(GL_TEXTURE1, TEX_RANGE, 0.0f);
+		glVertex3f(px+1.0f, (float)py, -2.0f);
+		glMultiTexCoord2f(GL_TEXTURE0, 0.0f, 0.0f);
+		glMultiTexCoord2f(GL_TEXTURE1, 0.0f, 0.0f);
+		glVertex3f((float)px, (float)py, -2.0f);		
+		glMultiTexCoord2f(GL_TEXTURE0, texDetail, texDetail);
+		glMultiTexCoord2f(GL_TEXTURE1, TEX_RANGE, TEX_RANGE);
+		glVertex3f(px+1.0f, py+1.0f, -2.0f);	
+		glMultiTexCoord2f(GL_TEXTURE0, 0.0f, texDetail);
+		glMultiTexCoord2f(GL_TEXTURE1, 0.0f, TEX_RANGE);
+		glVertex3f((float)px, py+1.0f, -2.0f);	
 		glEnd();
 
 		RemoveAnim(animated[i]);
@@ -675,22 +675,22 @@ void MapChunk::initStrip()
 	strip = new short[256]; //! \todo	figure out exact length of strip needed
 	short *s = strip;
 	bool first = true;
-	for (int y=0; y<4; y++) {
-		for (int x=0; x<4; x++) {
+	for (int y=0; y < 4; ++y) {
+		for (int x=0; x < 4; ++x) {
 			if (!isHole(x, y)) {
 				// draw tile here
 				// this is ugly but sort of works
 				int i = x*2;
 				int j = y*4;
-				for (int k=0; k<2; k++) {
+				for (int k=0; k < 2; ++k) {
 					if (!first) {
-						*s++ = indexMapBuf(i,j+k*2);
+						*s++ = indexMapBuf(i, j + k*2);
 					} else first = false;
-					for (int l=0; l<3; l++) {
-						*s++ = indexMapBuf(i+l,j+k*2);
-						*s++ = indexMapBuf(i+l,j+k*2+2);
+					for (int l=0; l < 3; ++l) {
+						*s++ = indexMapBuf(i+l, j+ k*2);
+						*s++ = indexMapBuf(i+l, j+ k*2 + 2);
 					}
-					*s++ = indexMapBuf(i+2,j+k*2+2);
+					*s++ = indexMapBuf(i+2, j + k*2 + 2);
 				}
 			}
 		}
@@ -727,16 +727,16 @@ bool MapChunk::GetVertex(float x,float z, Vec3D *V)
 {
 	float xdiff,zdiff;
 
-	xdiff=x-xbase;
-	zdiff=z-zbase;
+	xdiff = x - xbase;
+	zdiff = z - zbase;
 	
 	int row, column;
-	row=int(zdiff/(UNITSIZE*0.5)+0.5);
-	column=int((xdiff-UNITSIZE*0.5*(row%2))/UNITSIZE+0.5);
-	if((row<0)||(column<0)||(row>16)||(column>((row%2)?8:9)))
+	row = int( zdiff/(UNITSIZE*0.5) + 0.5);
+	column = int( (xdiff - UNITSIZE*0.5*(row % 2))/UNITSIZE + 0.5);
+	if( (row < 0) || (column < 0) || (row > 16) || (column > ((row % 2) ? 8 : 9)))
 		return false;
 
-	*V=mVertices[17*(row/2)+((row%2)?9:0)+column];
+	*V=mVertices[17*(row/2) + ((row % 2) ? 9 : 0) + column];
 	return true;
 }
 
@@ -746,43 +746,43 @@ void CreateStrips()
 	unsigned short Temp[18];
 	int j;
 
-	for(int i=0;i<8;++i)
+	for(int i=0; i < 8; ++i)
 	{
-		OddStrips[i*18+0]=i*17+17;
-		for(j=0;j<8;j++)
+		OddStrips[i*18+0] = i*17 + 17;
+		for(j=0; j < 8; j++)
 		{
-			OddStrips[i*18+2*j+1]=i*17+j;
-			OddStrips[i*18+2*j+2]=i*17+j+9;
-			EvenStrips[i*18+2*j]=i*17+17+j;
-			EvenStrips[i*18+2*j+1]=i*17+9+j;			
+			OddStrips[i*18 + 2*j + 1] = i*17 + j;
+			OddStrips[i*18 + 2*j + 2] = i*17 + j + 9;
+			EvenStrips[i*18 + 2*j] = i*17 + 17 + j;
+			EvenStrips[i*18 + 2*j + 1] = i*17 + 9 + j;			
 		}
-		OddStrips[i*18+17]=i*17+8;
-		EvenStrips[i*18+16]=i*17+17+8;
-		EvenStrips[i*18+17]=i*17+8;
+		OddStrips[i*18 + 17] = i*17 + 8;
+		EvenStrips[i*18 + 16] = i*17 + 17 + 8;
+		EvenStrips[i*18 + 17] = i*17 + 8;
 	}
 
 	//Reverse the order whoops
-	for(int i=0;i<8;++i)
+	for(int i=0; i < 8; ++i)
 	{
-		for(j=0;j<18;j++)
-			Temp[17-j]=OddStrips[i*18+j];
-		memcpy(&OddStrips[i*18],Temp,sizeof(unsigned short)*18);
-		for(j=0;j<18;j++)
-			Temp[17-j]=EvenStrips[i*18+j];
-		memcpy(&EvenStrips[i*18],Temp,sizeof(unsigned short)*18);
+		for(j=0; j < 18; ++j)
+			Temp[17-j] = OddStrips[i*18 + j];
+		memcpy(&OddStrips[i*18], Temp, sizeof(unsigned short)*18);
+		for(j=0; j < 18; ++j)
+			Temp[17-j] = EvenStrips[i*18 + j];
+		memcpy(&EvenStrips[i*18], Temp, sizeof(unsigned short)*18);
 
 	}
 
-	for(int i=0;i<32;++i)
+	for(int i=0; i < 32; ++i)
 	{
-		if(i<9)
-			LineStrip[i]=i;
-		else if(i<17)
-			LineStrip[i]=8+(i-8)*17;
-		else if(i<25)
-			LineStrip[i]=145-(i-15);
+		if(i < 9)
+			LineStrip[i] = i;
+		else if(i < 17)
+			LineStrip[i] = 8 + (i-8)*17;
+		else if(i < 25)
+			LineStrip[i] = 145 - (i-15);
 		else
-			LineStrip[i]=(32-i)*17;
+			LineStrip[i] = (32-i)*17;
 	}
 
 	int iferget = 0;
@@ -809,9 +809,14 @@ void CreateStrips()
 void MapChunk::drawColor()
 {
 	
-	if (!gWorld->frustum.intersects(vmin,vmax)) return;
+	if (!gWorld->frustum.intersects(vmin,vmax))
+		return;
+
 	float mydist = (gWorld->camera - vcenter).length() - r;
-	if (mydist > (mapdrawdistance * mapdrawdistance)) return;
+
+	if (mydist > (mapdrawdistance * mapdrawdistance)) 
+		return;
+
 	if (mydist > gWorld->culldistance) {
 		if (gWorld->uselowlod) this->drawNoDetail();
 		return;
@@ -826,9 +831,9 @@ void MapChunk::drawColor()
 
 	Vec3D Color;
 	glBegin(GL_TRIANGLE_STRIP);
-	for(int i=0;i<striplen;++i)
+	for(int i=0; i < striplen; ++i)
 	{
-		HeightColor(mVertices[strip[i]].y,&Color);
+		HeightColor( mVertices[strip[i]].y, &Color);
 		glColor3fv(&Color.x);
 		glNormal3fv(&mNormals[strip[i]].x);
 		glVertex3fv(&mVertices[strip[i]].x);
@@ -863,7 +868,7 @@ void MapChunk::drawPass(int anim)
 
 	if (anim) 
 	{
-				glPopMatrix();
+		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 		glActiveTexture(GL_TEXTURE1);
 	}
@@ -871,9 +876,13 @@ void MapChunk::drawPass(int anim)
 
 void MapChunk::drawLines()
 {
-	if (!gWorld->frustum.intersects(vmin,vmax))		return;
+	if (!gWorld->frustum.intersects(vmin,vmax))	
+		return;
+
 	float mydist = (gWorld->camera - vcenter).length() - r;
-	if (mydist > (mapdrawdistance * mapdrawdistance)) return;
+
+	if (mydist > (mapdrawdistance * mapdrawdistance))
+		return;
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
 	glVertexPointer(3, GL_FLOAT, 0, 0);
@@ -888,11 +897,11 @@ void MapChunk::drawLines()
 	glLineWidth(1.5);
 	glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-	if((px!=15)&&(py!=0))
+	if( (px != 15) && (py != 0))
 	{
 		glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
 	}
-	else if((px==15)&&(py==0))
+	else if( (px==15) && (py==0) )
 	{
 		glColor4f(0.0,1.0,0.0f,0.5f);
 		glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
@@ -938,7 +947,7 @@ void MapChunk::drawContour()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_ALPHA_TEST);
-	if(Contour==0)
+	if(Contour == 0)
 		GenerateContourMap();
 	glBindTexture(GL_TEXTURE_2D, Contour);
 	
@@ -964,9 +973,13 @@ void MapChunk::drawBlock()
 
 void MapChunk::draw()
 {
-	if (!gWorld->frustum.intersects(vmin,vmax))		return;
+	if (!gWorld->frustum.intersects( vmin, vmax ))
+		return;
+
 	float mydist = (gWorld->camera - vcenter).length() - r;
-	if (mydist > (mapdrawdistance * mapdrawdistance)) return;
+
+	if (mydist > (mapdrawdistance * mapdrawdistance))
+		return;
 
 	// setup vertex buffers
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
@@ -986,7 +999,7 @@ void MapChunk::draw()
 //		nameID = SelectionNames.add( this );
 //	glPushName(nameID);
 
-	if (nTextures==0)
+	if (nTextures == 0)
 	{
 		glActiveTexture(GL_TEXTURE0);
 		glDisable(GL_TEXTURE_2D);
@@ -1002,13 +1015,13 @@ void MapChunk::draw()
 	drawPass(animated[0]);
 //	glPopName();
 
-	if (nTextures>1) {
+	if (nTextures > 1) {
 		//glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
 		glDepthMask(GL_FALSE);
 	}
 
 	// additional passes: if required
-	for (int i=0; i<nTextures-1; ++i) {
+	for (int i=0; i < nTextures-1; ++i) {
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, textures[i+1]);
@@ -1021,7 +1034,7 @@ void MapChunk::draw()
 		drawPass(animated[i+1]);
 	}
 
-	if (nTextures>1) {
+	if (nTextures > 1) {
 		//glDepthFunc(GL_LEQUAL);
 		glDepthMask(GL_TRUE);
 	}
@@ -1052,24 +1065,24 @@ void MapChunk::draw()
 
 	if(drawFlags)
 	{
-		if(Flags&0x02)
+		if(Flags & 0x02)
 		{
 			glColor4f(1,0,0,0.2f);
 			drawPass(0);
 		}
 
-		if(Flags&0x04)
+		if(Flags & 0x04)
 		{
 			glColor4f(0,0.5f,1,0.2f);
 			drawPass(0);
 		}
 
-		if(Flags&0x08)
+		if(Flags & 0x08)
 		{
 			glColor4f(0,0,0.8f,0.2f);
 			drawPass(0);
 		}
-		if(Flags&0x10)
+		if(Flags & 0x10)
 		{
 			glColor4f(1,0.5f,0,0.2f);
 			drawPass(0);
@@ -1234,7 +1247,7 @@ void MapChunk::drawSelect2()
 	{
 		glPushName( i );
 		glBegin( GL_TRIANGLES );
-		glVertex3fv( mVertices[gWorld->mapstrip2[i + 0]] );
+		glVertex3fv( mVertices[gWorld->mapstrip2[i]] );
 		glVertex3fv( mVertices[gWorld->mapstrip2[i + 1]] );
 		glVertex3fv( mVertices[gWorld->mapstrip2[i + 2]] );
 		glEnd();
@@ -1296,48 +1309,48 @@ void MapChunk::recalcNorms()
 
 	for(int i=0;i<mapbufsize;++i)
 	{
-		if(!gWorld->GetVertex(mVertices[i].x-UNITSIZE*0.5f,mVertices[i].z-UNITSIZE*0.5f,&P1))
+		if(!gWorld->GetVertex( mVertices[i].x - UNITSIZE*0.5f, mVertices[i].z - UNITSIZE*0.5f, &P1 ))
 		{
-			P1.x=mVertices[i].x-UNITSIZE*0.5f;
-			P1.y=mVertices[i].y;
-			P1.z=mVertices[i].z-UNITSIZE*0.5f;
+			P1.x = mVertices[i].x - UNITSIZE*0.5f;
+			P1.y = mVertices[i].y;
+			P1.z = mVertices[i].z - UNITSIZE*0.5f;
 		}
 
-		if(!gWorld->GetVertex(mVertices[i].x+UNITSIZE*0.5f,mVertices[i].z-UNITSIZE*0.5f,&P2))
+		if(!gWorld->GetVertex( mVertices[i].x + UNITSIZE*0.5f, mVertices[i].z - UNITSIZE*0.5f, &P2 ))
 		{
-			P2.x=mVertices[i].x+UNITSIZE*0.5f;
-			P2.y=mVertices[i].y;
-			P2.z=mVertices[i].z-UNITSIZE*0.5f;
+			P2.x = mVertices[i].x + UNITSIZE*0.5f;
+			P2.y = mVertices[i].y;
+			P2.z = mVertices[i].z - UNITSIZE*0.5f;
 		}
 
-		if(!gWorld->GetVertex(mVertices[i].x+UNITSIZE*0.5f,mVertices[i].z+UNITSIZE*0.5f,&P3))
+		if(!gWorld->GetVertex( mVertices[i].x + UNITSIZE*0.5f, mVertices[i].z + UNITSIZE*0.5f, &P3 ))
 		{
-			P3.x=mVertices[i].x+UNITSIZE*0.5f;
-			P3.y=mVertices[i].y;
-			P3.z=mVertices[i].z+UNITSIZE*0.5f;
+			P3.x = mVertices[i].x + UNITSIZE*0.5f;
+			P3.y = mVertices[i].y;
+			P3.z = mVertices[i].z + UNITSIZE*0.5f;
 		}
 
-		if(!gWorld->GetVertex(mVertices[i].x-UNITSIZE*0.5f,mVertices[i].z+UNITSIZE*0.5f,&P4))
+		if(!gWorld->GetVertex( mVertices[i].x - UNITSIZE*0.5f, mVertices[i].z + UNITSIZE*0.5f, &P4 ))
 		{
-			P4.x=mVertices[i].x-UNITSIZE*0.5f;
-			P4.y=mVertices[i].y;
-			P4.z=mVertices[i].z+UNITSIZE*0.5f;
+			P4.x = mVertices[i].x - UNITSIZE*0.5f;
+			P4.y = mVertices[i].y;
+			P4.z = mVertices[i].z + UNITSIZE*0.5f;
 		}
 
-		N1=(P2-mVertices[i])%(P1-mVertices[i]);
-		N2=(P3-mVertices[i])%(P2-mVertices[i]);
-		N3=(P4-mVertices[i])%(P3-mVertices[i]);
-		N4=(P1-mVertices[i])%(P4-mVertices[i]);
+		N1 = (P2 - mVertices[i]) % (P1 - mVertices[i]);
+		N2 = (P3 - mVertices[i]) % (P2 - mVertices[i]);
+		N3 = (P4 - mVertices[i]) % (P3 - mVertices[i]);
+		N4 = (P1 - mVertices[i]) % (P4 - mVertices[i]);
 
-		Norm=N1+N2+N3+N4;
+		Norm = N1 + N2 + N3 + N4;
 		Norm.normalize();
-		mNormals[i]=Norm;
+		mNormals[i] = Norm;
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, normals);
 	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), mNormals, GL_STATIC_DRAW);
 
 	float ShadowAmount;
-	for (int j=0; j<mapbufsize;j++)
+	for (int j=0; j<mapbufsize;++j)
 	{
 		//tm[j].z=tv[j].y;
 		ShadowAmount=1.0f-(-mNormals[j].x+mNormals[j].y-mNormals[j].z);
