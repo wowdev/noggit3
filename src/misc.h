@@ -10,6 +10,7 @@ public:
 	~misc(void);
 	static void find_and_replace( std::string &source, const std::string find, std::string replace ) ;
 	static int FtoIround(float d);
+	static char roundc(float a);
 };
 
 #endif
