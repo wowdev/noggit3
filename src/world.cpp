@@ -1361,10 +1361,10 @@ void World::drawTileMode(float ah)
 	glPushMatrix();
 	glTranslatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
 
-	minX=camera.x/CHUNKSIZE-2.0f*video.ratio/zoom;
-	maxX=camera.x/CHUNKSIZE+2.0f*video.ratio/zoom;
-	minY=camera.z/CHUNKSIZE-2.0f/zoom;
-	maxY=camera.z/CHUNKSIZE+2.0f/zoom;
+	minX = camera.x/CHUNKSIZE - 2.0f*video.ratio/zoom;
+	maxX = camera.x/CHUNKSIZE + 2.0f*video.ratio/zoom;
+	minY = camera.z/CHUNKSIZE - 2.0f/zoom;
+	maxY = camera.z/CHUNKSIZE + 2.0f/zoom;
 	
 	glEnableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
@@ -1392,7 +1392,7 @@ void World::drawTileMode(float ah)
 
 	glPopMatrix();
 	if (drawlines) {
-		glTranslatef(fmod(-camera.x/CHUNKSIZE,16),fmod(-camera.z/CHUNKSIZE,16),0);
+		glTranslatef(fmod(-camera.x/CHUNKSIZE,16), fmod(-camera.z/CHUNKSIZE,16),0);
 	/*	for(int x=-32;x<=48;x++)
 		{
 			if(x%16==0)
@@ -1407,9 +1407,9 @@ void World::drawTileMode(float ah)
 			glEnd();
 		}*/
 		
-		for(float x=-32.0f;x<=48.0f;x+=1.0f)
+		for(float x = -32.0f; x <= 48.0f; x += 1.0f)
 		{
-			if(int(x)%16==0)
+			if( int(x)%16 == 0 )
 				glColor4f(0.0f,1.0f,0.0f,0.5f);
 			else
 				glColor4f(1.0f,0.0f,0.0f,0.5f);
