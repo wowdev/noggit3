@@ -11,6 +11,7 @@
 #include "liquid.h"
 #include "ModelManager.h" // ModelManager
 #include "TextureManager.h" // TextureManager, Texture
+#include "misc.h"
 
 void renderCylinder(float x1, float y1, float z1, float x2,float y2, float z2, float radius,int subdivisions,GLUquadricObj *quadric)
 {
@@ -642,19 +643,6 @@ bool MapTile::GetVertex( float x, float z, Vec3D *V )
 
 /// --- Only saving related below this line. --------------------------
 
-char roundc( float a )
-{
-	if( a < 0 )
-		a -= 0.5f;
-	if( a > 0 )
-		a += 0.5f;
-	if( a < -127 )
-		a = -127;
-	else if( a > 127 )
-		a = 127;
-	return char( a );
-}
-
 bool pointInside( Vec3D point, Vec3D extents[2] )
 {
 	return point.x >= extents[0].x && point.z >= extents[0].z && point.x <= extents[1].x && point.z <= extents[1].z;
@@ -1228,9 +1216,9 @@ void MapTile::saveTile()
 					mChunks[y][x]->recalcNorms();
 					for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
 					{
-						lNormals[i*3+0] = roundc( -mChunks[y][x]->mNormals[i].z * 127 );
-						lNormals[i*3+1] = roundc( -mChunks[y][x]->mNormals[i].x * 127 );
-						lNormals[i*3+2] = roundc(	mChunks[y][x]->mNormals[i].y * 127 );
+						lNormals[i*3+0] = misc::roundc( -mChunks[y][x]->mNormals[i].z * 127 );
+						lNormals[i*3+1] = misc::roundc( -mChunks[y][x]->mNormals[i].x * 127 );
+						lNormals[i*3+2] = misc::roundc(	mChunks[y][x]->mNormals[i].y * 127 );
 					}
 					
 					lCurrentPosition += 8 + lMCNR_Size;

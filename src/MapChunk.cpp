@@ -255,8 +255,8 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 					}
 					Vec3D v = Vec3D(xbase+xpos, ybase+h, zbase+zpos);
 					*ttv++ = v;
-					if (v.y < vmin.y) vmin.y = v.y;
-					if (v.y > vmax.y) vmax.y = v.y;
+					vmin.y = min(vmin.y, v.y);
+					vmax.y = max(vmax.y, v.y);
 				}
 			}
 
@@ -1275,9 +1275,9 @@ Vec3D MapChunk::GetSelectionPosition()
 	}
 
 	Vec3D lPosition;
-	lPosition	= Vec3D( mVertices[gWorld->mapstrip2[Poly + 0]].x, mVertices[gWorld->mapstrip2[Poly + 0]].y, mVertices[gWorld->mapstrip2[Poly + 0]].z );
-	lPosition += Vec3D( mVertices[gWorld->mapstrip2[Poly + 1]].x, mVertices[gWorld->mapstrip2[Poly + 1]].y, mVertices[gWorld->mapstrip2[Poly + 1]].z );
-	lPosition += Vec3D( mVertices[gWorld->mapstrip2[Poly + 2]].x, mVertices[gWorld->mapstrip2[Poly + 2]].y, mVertices[gWorld->mapstrip2[Poly + 2]].z );
+	lPosition	= Vec3D( mVertices[gWorld->mapstrip2[Poly + 0]] );
+	lPosition += Vec3D( mVertices[gWorld->mapstrip2[Poly + 1]] );
+	lPosition += Vec3D( mVertices[gWorld->mapstrip2[Poly + 2]] );
 	lPosition *= 0.3333333f;
 
 	return lPosition;
@@ -1363,44 +1363,49 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 	
 	Changed=false;
 
-	xdiff=xbase-x+CHUNKSIZE/2;
-	zdiff=zbase-z+CHUNKSIZE/2;
-	dist=sqrt(xdiff*xdiff+zdiff*zdiff);
+	xdiff = xbase - x + CHUNKSIZE/2;
+	zdiff = zbase - z + CHUNKSIZE/2;
+	dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
-	if(dist>(radius+MAPCHUNK_RADIUS))
+	if(dist > (radius + MAPCHUNK_RADIUS))
 		return Changed;
-	vmin.y =	9999999.0f;
+	vmin.y = 9999999.0f;
 	vmax.y = -9999999.0f;
-	for(int i=0;i<mapbufsize;++i)
+	for(int i=0; i < mapbufsize; ++i)
 	{
-		xdiff=mVertices[i].x-x;
-		zdiff=mVertices[i].z-z;
+		xdiff = mVertices[i].x - x;
+		zdiff = mVertices[i].z - z;
 		if(BrushType == 5){
 			if((abs(xdiff) < abs(radius/2)) && (abs(zdiff) < abs(radius/2))){
-				mVertices[i].y+=change;
+				mVertices[i].y += change;
 				Changed=true;
 			}
 		}
 		else{
-			dist=sqrt(xdiff*xdiff+zdiff*zdiff);
-			if(dist<radius)
+			dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+			if(dist < radius)
 			{
+				
 				if(BrushType==0)//Flat
-					mVertices[i].y+=change;
+					mVertices[i].y += change;
+				
 				else if(BrushType==1)//Linear
-					mVertices[i].y+=change*(1.0f-dist/radius);
+					mVertices[i].y += change*(1.0f - dist/radius);
+				
 				else if(BrushType==2)//Smooth
-					mVertices[i].y+=change/(1.0f+dist/radius);
+					mVertices[i].y += change/(1.0f + dist/radius);
+				
 				else if (BrushType == 3) //x^2
-					mVertices[i].y +=change*((dist/radius)*(dist/radius)+dist/radius+1.0f);
+					mVertices[i].y += change*( (dist/radius)*(dist/radius) + dist/radius + 1.0f);
+				
 				else if (BrushType == 4) //cos				
-					mVertices[i].y+=change*cos(dist/radius);
+					mVertices[i].y += change*cos(dist/radius);
 				Changed=true;
 			}
 		}
 		
-		if (mVertices[i].y < vmin.y) vmin.y = mVertices[i].y;
-		if (mVertices[i].y > vmax.y) vmax.y = mVertices[i].y;
+		vmin.y = min(vmin.y, mVertices[i].y);
+		vmax.y = max(vmax.y, mVertices[i].y);
 	}
 	if(Changed)
 	{
@@ -1416,45 +1421,45 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 	float dist,xdiff,zdiff,nremain;
 	Changed=false;
 
-	xdiff=xbase-x+CHUNKSIZE/2;
-	zdiff=zbase-z+CHUNKSIZE/2;
-	dist=sqrt(xdiff*xdiff+zdiff*zdiff);
+	xdiff= xbase - x + CHUNKSIZE/2;
+	zdiff= zbase - z + CHUNKSIZE/2;
+	dist= sqrt(xdiff*xdiff + zdiff*zdiff);
 
-	if(dist>(radius+MAPCHUNK_RADIUS))
+	if(dist > (radius + MAPCHUNK_RADIUS))
 		return Changed;
 
-	vmin.y =	9999999.0f;
+	vmin.y = 9999999.0f;
 	vmax.y = -9999999.0f;
 
-	for(int i=0;i<mapbufsize;++i)
+	for(int i=0; i < mapbufsize; ++i)
 	{
-		xdiff=mVertices[i].x-x;
-		zdiff=mVertices[i].z-z;
+		xdiff = mVertices[i].x - x;
+		zdiff = mVertices[i].z - z;
 
-		dist=sqrt(xdiff*xdiff+zdiff*zdiff);
+		dist=sqrt(xdiff*xdiff + zdiff*zdiff);
 
-		if(dist<radius)
+		if(dist < radius)
 		{
 			if(BrushType==0)//Flat
 			{
-				mVertices[i].y=remain*mVertices[i].y+(1-remain)*h;
+				mVertices[i].y = remain*mVertices[i].y + (1 - remain)*h;
 			}
 			else if(BrushType==1)//Linear
 			{
-				nremain=1-(1-remain)*(1-dist/radius);
-				mVertices[i].y=nremain*mVertices[i].y+(1-nremain)*h;
+				nremain = 1 - (1 - remain) * (1 - dist/radius);
+				mVertices[i].y = nremain*mVertices[i].y + (1-nremain)*h;
 			}
 			else if(BrushType==2)//Smooth
 			{
-				nremain=1.0f-pow(1.0f-remain,(1.0f+dist/radius));
-				mVertices[i].y=nremain*mVertices[i].y+(1-nremain)*h;
+				nremain = 1.0f - pow(1.0f - remain, (1.0f + dist/radius));
+				mVertices[i].y = nremain*mVertices[i].y + (1 - nremain)*h;
 			}
 
 			Changed=true;
 		}
 		
-		if (mVertices[i].y < vmin.y) vmin.y = mVertices[i].y;
-		if (mVertices[i].y > vmax.y) vmax.y = mVertices[i].y;
+		vmin.y = min(vmin.y, mVertices[i].y);
+		vmax.y = max(vmax.y, mVertices[i].y);
 	}
 	if(Changed)
 	{
@@ -1467,26 +1472,26 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
 	float dist,dist2,xdiff,zdiff,nremain;
-	Changed=false;
+	Changed = false;
 
-	xdiff=xbase-x+CHUNKSIZE/2;
-	zdiff=zbase-z+CHUNKSIZE/2;
-	dist=sqrt(xdiff*xdiff+zdiff*zdiff);
+	xdiff = xbase - x + CHUNKSIZE/2;
+	zdiff = zbase - z + CHUNKSIZE/2;
+	dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
-	if(dist>(radius+MAPCHUNK_RADIUS))
+	if(dist > (radius + MAPCHUNK_RADIUS) )
 		return Changed;
 
-	vmin.y =	9999999.0f;
+	vmin.y = 9999999.0f;
 	vmax.y = -9999999.0f;
 
-	for(int i=0;i<mapbufsize;++i)
+	for(int i=0; i < mapbufsize; ++i)
 	{
-		xdiff=mVertices[i].x-x;
-		zdiff=mVertices[i].z-z;
+		xdiff= mVertices[i].x - x;
+		zdiff= mVertices[i].z - z;
 
-		dist=sqrt(xdiff*xdiff+zdiff*zdiff);
+		dist= sqrt(xdiff*xdiff + zdiff*zdiff);
 
-		if(dist<radius)
+		if(dist < radius)
 		{
 			float TotalHeight;
 			float TotalWeight;
@@ -1498,20 +1503,20 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 
 			TotalHeight=0;
 			TotalWeight=0;
-			for(int j=-Rad*2;j<=Rad*2;j++)
+			for(int j= -Rad*2; j <= Rad*2; ++j)
 			{
-				tz=z+j*UNITSIZE/2;
-				for(int k=-Rad;k<=Rad;k++)
+				tz= z + j * UNITSIZE/2;
+				for(int k=-Rad; k <= Rad; ++k)
 				{
-					tx=x+k*UNITSIZE+(j%2)*UNITSIZE/2.0f;
-					xdiff=tx-mVertices[i].x;
-					zdiff=tz-mVertices[i].z;
-					dist2=sqrt(xdiff*xdiff+zdiff*zdiff);
-					if(dist2>radius)
+					tx= x + k*UNITSIZE + (j%2) * UNITSIZE/2.0f;
+					xdiff= tx - mVertices[i].x;
+					zdiff= tz - mVertices[i].z;
+					dist2= sqrt(xdiff*xdiff + zdiff*zdiff);
+					if(dist2 > radius)
 						continue;
 					gWorld->GetVertex(tx,tz,&TempVec);
-					TotalHeight+=(1.0f-dist2/radius)*TempVec.y;
-					TotalWeight+=(1.0f-dist2/radius);
+					TotalHeight += (1.0f - dist2/radius) * TempVec.y;
+					TotalWeight += (1.0f - dist2/radius);
 				}
 			}
 
@@ -1519,24 +1524,24 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 
 			if(BrushType==0)//Flat
 			{
-				mVertices[i].y=remain*mVertices[i].y+(1-remain)*h;
+				mVertices[i].y= remain * mVertices[i].y + (1 - remain) * h;
 			}
 			else if(BrushType==1)//Linear
 			{
-				nremain=1-(1-remain)*(1-dist/radius);
-				mVertices[i].y=nremain*mVertices[i].y+(1-nremain)*h;
+				nremain= 1 - (1 - remain) * (1 - dist/radius);
+				mVertices[i].y= nremain * mVertices[i].y + ( 1 - nremain) * h;
 			}
 			else if(BrushType==2)//Smooth
 			{
-				nremain=1.0f-pow(1.0f-remain,(1.0f+dist/radius));
-				mVertices[i].y=nremain*mVertices[i].y+(1-nremain)*h;
+				nremain= 1.0f - pow( 1.0f - remain , (1.0f + dist/radius) );
+				mVertices[i].y= nremain*mVertices[i].y + (1-nremain)*h;
 			}
 
 			Changed=true;
 		}
 		
-		if (mVertices[i].y < vmin.y) vmin.y = mVertices[i].y;
-		if (mVertices[i].y > vmax.y) vmax.y = mVertices[i].y;
+		vmin.y = min(vmin.y, mVertices[i].y);
+		vmax.y = max(vmax.y, mVertices[i].y);
 	}
 	if(Changed)
 	{
@@ -1616,11 +1621,11 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 
 	radius=Brush->getRadius();
 
-	xdiff=xbase-x+CHUNKSIZE/2;
-	zdiff=zbase-z+CHUNKSIZE/2;
-	dist=sqrt(xdiff*xdiff+zdiff*zdiff);
+	xdiff= xbase - x + CHUNKSIZE/2;
+	zdiff= zbase - z + CHUNKSIZE/2;
+	dist= sqrt( xdiff*xdiff + zdiff*zdiff );
 
-	if(dist>(radius+MAPCHUNK_RADIUS))
+	if( dist > (radius+MAPCHUNK_RADIUS) )
 		return false;
 
 	//First Lets find out do we have the texture already
@@ -1629,7 +1634,7 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 			texLevel=i;
 
 
-	if((texLevel==-1)&&(nTextures==4))
+	if( (texLevel==-1) && (nTextures==4) )
 	{
 		// Implement here auto texture slot freeing :)
 		LogDebug << "paintTexture: No free texture slot" << std::endl;
@@ -1637,7 +1642,7 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 	}
 	
 	//Only 1 layer and its that layer
-	if((texLevel!=-1)&&(nTextures==1))
+	if( (texLevel!=-1) && (nTextures==1) )
 		return true;
 
 	
@@ -1649,14 +1654,14 @@ bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, floa
 	texAbove=nTextures-texLevel-1;
 
 
-	for(int j=0;j<63;j++)
+	for(int j=0; j < 63 ; j++)
 	{
 		xPos=xbase;
-		for(int i=0;i<63;++i)
+		for(int i=0; i < 63; ++i)
 		{
 			xdiff=xPos-x;
 			zdiff=zPos-z;
-			dist=abs(sqrt(xdiff*xdiff+zdiff*zdiff));
+			dist=abs(sqrt( xdiff*xdiff + zdiff*zdiff ));
 			
 			if(dist>radius)
 			{
