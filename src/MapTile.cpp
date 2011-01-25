@@ -225,107 +225,8 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 			uint8_t * lMH2O_Chunk = theFile.getPointer();
 
 			MH2O_Header * lHeader = reinterpret_cast<MH2O_Header*>( lMH2O_Chunk );
-			/*
-			for( int py = 0; py < 16; py++ )
-				for( int px = 0; px < 16; px++ )
-					for( unsigned int lLayer = 0; lLayer < lHeader[py * 16 + px].nLayers; lLayer++ )
-					{
-						MH2O_Tile lTile;
-						if( lHeader[py * 16 + px].ofsInformation )
-						{
-							MH2O_Information * lInfoBlock = reinterpret_cast<MH2O_Information*>( lMH2O_Chunk + lHeader[py * 16 + px].ofsInformation + lLayer * 0x18 );
-
-							lTile.mLiquidType = lInfoBlock->LiquidType;
-							lTile.mFlags = lInfoBlock->Flags;
-							lTile.mMinimum = lInfoBlock->minHeight;
-							lTile.mMaximum = lInfoBlock->maxHeight;
-							
-							char * lDepthInfo;
-							float * lHeightInfo = reinterpret_cast<float*>( lMH2O_Chunk + lInfoBlock->ofsHeightMap );
-							if( lTile.mFlags & 2 )
-								lDepthInfo = reinterpret_cast<char*>( lMH2O_Chunk + lInfoBlock->ofsHeightMap );
-							else
-								lDepthInfo = reinterpret_cast<char*>( lMH2O_Chunk + lInfoBlock->ofsHeightMap + sizeof( float ) * ( lInfoBlock->width + 1 ) * ( lInfoBlock->height + 1 ) );
-
-							if( lInfoBlock->ofsHeightMap )
-								for( int i = lInfoBlock->yOffset; i < lInfoBlock->yOffset + lInfoBlock->height + 1; ++i )
-									for( int j = lInfoBlock->xOffset; j < lInfoBlock->xOffset + lInfoBlock->width + 1; j++ )
-									{
-										if( lTile.mFlags & 2 )
-											lTile.mHeightmap[i][j] = lTile.mMinimum;
-										else
-											lTile.mHeightmap[i][j] = lHeightInfo[( i - lInfoBlock->yOffset ) * lInfoBlock->width + j];
-										lTile.mDepth[i][j] = lDepthInfo[( i - lInfoBlock->yOffset ) * lInfoBlock->width + j]/255.0f;
-									}
-							else
-								for( int i = 0; i < 9; ++i )
-									for( int j = 0; j < 9; j++ ){
-										lTile.mHeightmap[i][j] = lTile.mMinimum;
-										lTile.mDepth[i][j] = 0.0f;
-									}
-
-							for( int i = 0; i < 9; ++i )
-								for( int j = 0; j < 9; j++ )
-									lTile.mHeightmap[i][j] = lTile.mHeightmap[i][j] < lTile.mMinimum ? lTile.mMinimum-10 : lTile.mHeightmap[i][j] > lTile.mMaximum ? lTile.mMaximum+10 : lTile.mHeightmap[i][j];
-
-							
-							//! \todo	This is wrong?
-							if( lHeader[py * 16 + px].ofsRenderMask )
-							{
-								bool * lRenderBlock = reinterpret_cast<bool*>( lMH2O_Chunk + lHeader[py * 16 + px].ofsRenderMask + lLayer * 8 );
-
-								int k = 0;
-								for( int i = 0; i < 8; ++i )
-									for( int j = 0; j < 8; j++ )
-										lTile.mRender[i][j] = lRenderBlock[k++];
-							}
-							else{
-								// --Slartibartfast 00:41, 30 October 2008 (CEST): "If the block is omitted, the whole thing is rendered"
-								for( int i = 0; i < 8; ++i )
-									for( int j = 0; j < 8; j++ )
-										lTile.mRender[i][j] = true;
-							}
-
-							if( lInfoBlock->ofsInfoMask )
-							{
-								for( int i = 0; i < 8; ++i )
-									for( int j = 0; j < 8; j++ )
-										lTile.mRender[i][j] = false;
-
-								bool * lMaskInfo = reinterpret_cast<bool*>( lMH2O_Chunk + lInfoBlock->ofsInfoMask );
-								unsigned char * lMaskInfo2 = reinterpret_cast<unsigned char*>( lMH2O_Chunk + lInfoBlock->ofsInfoMask );
-								int k = 0;
-
-								std::string dbg = "";
-								for( int i = lInfoBlock->yOffset; i < lInfoBlock->yOffset + lInfoBlock->height; ++i )
-								{
-									Log<< "\t\t\tx%2x (%c)\n", lMaskInfo2[i], lMaskInfo2[i] ;
-									for( int j = lInfoBlock->xOffset; j < lInfoBlock->xOffset + lInfoBlock->width; j++ )
-									{
-										dbg.append( lMaskInfo[k] ? "#" : " " );
-										lTile.mRender[i][j] = lMaskInfo[k++];
-									}
-									dbg.append( "\n" );
-								}
-
-								LogDebug << dbg << std::endl;
-							}
-							else
-							{
-								for( int i = 0; i < 8; ++i )
-									for( int j = 0; j < 8; j++ )
-										lTile.mRender[i][j] = false;
-
-								for( int i = lInfoBlock->yOffset; i < lInfoBlock->yOffset + lInfoBlock->height; ++i )
-									for( int j = lInfoBlock->xOffset; j < lInfoBlock->xOffset + lInfoBlock->width; j++ )
-										lTile.mRender[i][j] = true;
-							}
-
-							Liquid * lq = new Liquid( lInfoBlock->width, lInfoBlock->height, Vec3D( xbase + CHUNKSIZE * px, lTile.mMinimum, zbase + CHUNKSIZE * py ) );
-							lq->initFromMH2O( lTile );
-							mLiquids.push_back( lq );
-						}
-					}*/
+			
+			
 		}
 
 		theFile.seek((int)nextpos);
@@ -1253,7 +1154,7 @@ void MapTile::saveTile()
 						lLayer->flags = mChunks[y][x]->texFlags[j];
 						
 						// if not first, have alpha layer, if first, have not. never have compression.
-						lLayer->flags = ( j > 0 ? lLayer->flags | 0x100 : lLayer->flags & ( ~0x100 ) ) & ( ~0x200 );
+						lLayer->flags = ( j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & ( ~FLAG_USE_ALPHA ) ) & ( ~FLAG_ALPHA_COMPRESSED );
 
 						lLayer->ofsAlpha = ( j == 0 ? 0 : ( mBigAlpha ? 64 * 64 * ( j - 1 ) : 32 * 64 * ( j - 1 ) ) );
 						lLayer->effectID = mChunks[y][x]->effectID[j];
