@@ -5,7 +5,7 @@
 #include "mpq.h"
 #include "video.h"
 
-#include <cstdint>
+#include <stdint.h>
 
 #pragma pack(push,1)
 struct BLPHeader 
@@ -23,8 +23,13 @@ struct BLPHeader
 };
 #pragma pack(pop)
 
+#ifdef WIN32
 template <> std::map<std::string, GLuint> Manager<GLuint, Texture>::names;
 template <> std::map<GLuint, Texture*> Manager<GLuint,Texture>::items;
+#else
+template <class IDTYPE,class MANAGEDITEM> std::map<std::string, GLuint> Manager<GLuint, Texture>::names;
+template <class IDTYPE,class MANAGEDITEM> std::map<GLuint, Texture*> Manager<GLuint,Texture>::items;
+#endif
 
 GLuint TextureManager::get(const std::string& name)
 {

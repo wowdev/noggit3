@@ -52,7 +52,7 @@ void TextBox::render() const
 	glPopMatrix();
 }
 
-frame *TextBox::processLeftClick( float mx, float my )
+frame *TextBox::processLeftClick( float /*mx*/, float /*my*/ )
 {
 	mFocus = !mFocus;
 	return this;
@@ -66,11 +66,11 @@ textboxUI::textboxUI(float xpos, float ypos, float w)
 	height=32;
 	background=new textureUI(0,0,w,32,"Interface\\Common\\Common-Input-Border.blp");
 }
-frame *textboxUI::processLeftClick(float mx,float my)
+frame *textboxUI::processLeftClick(float /*mx*/,float /*my*/)
 {
 	return this;
 }
-bool textboxUI::processKey(char key, bool shift, bool alt, bool ctrl)
+bool textboxUI::processKey(char key, bool /*shift*/, bool /*alt*/, bool /*ctrl*/)
 {
 	text[length]=key;text[length+1]=0;length++;return true;
 }

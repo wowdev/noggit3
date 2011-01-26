@@ -232,17 +232,17 @@ void change_settings_window(int oldid, int newid)
 }
 
 //! \todo	Do this nicer?
-void openHelp( frame *button, int id )
+void openHelp( frame* /*button*/, int /*id*/ )
 {
 	reinterpret_cast<MapView*>( gStates.back() )->ViewHelp();
 }
 
-void closeHelp( frame *button, int id )
+void closeHelp( frame* /*button*/, int /*id*/ )
 {
 	reinterpret_cast<MapView*>( gStates.back() )->View3D();
 }
 
-void ResetSelectedObjectRotation( frame *button, int id )
+void ResetSelectedObjectRotation( frame* /*button*/, int /*id*/ )
 {
 	if( gWorld->IsSelection( eEntry_WMO ) )
 	{
@@ -256,7 +256,7 @@ void ResetSelectedObjectRotation( frame *button, int id )
 	}
 }
 
-void SnapSelectedObjectToGround( frame *button, int id )
+void SnapSelectedObjectToGround( frame* /*button*/, int /*id*/ )
 {
 	if( gWorld->IsSelection( eEntry_WMO ) )
 	{
@@ -275,7 +275,7 @@ void SnapSelectedObjectToGround( frame *button, int id )
 	}
 }
 
-void CopySelectedObject( frame *button, int id )
+void CopySelectedObject( frame* /*button*/, int /*id*/ )
 {
 	//! \todo	copy selected object path to clipboard
 	if( gWorld->HasSelection() )
@@ -284,7 +284,7 @@ void CopySelectedObject( frame *button, int id )
 	}
 }
 
-void PasteSelectedObject( frame *button, int id )
+void PasteSelectedObject( frame* /*button*/, int /*id*/ )
 {
 	// MODELCOPY
 	// paste object
@@ -310,7 +310,7 @@ void PasteSelectedObject( frame *button, int id )
 	}
 }
 
-void DeleteSelectedObject( frame *button, int id )
+void DeleteSelectedObject( frame* /*button*/, int /*id*/ )
 {
 	if( gWorld->IsSelection( eEntry_WMO ) )
 		gWorld->deleteWMOInstance( gWorld->GetCurrentSelection()->data.wmo->mUniqueID );
@@ -318,8 +318,10 @@ void DeleteSelectedObject( frame *button, int id )
 		gWorld->deleteModelInstance( gWorld->GetCurrentSelection()->data.model->d1 );
 }
 
-void InsertObject( frame *button, int id )
+void InsertObject( frame* /*button*/, int id )
 {
+  //! \todo Beautify.
+  
 	// ID switch the import way
 
 
@@ -332,12 +334,16 @@ void InsertObject( frame *button, int id )
 
 	// the import file
 	std::string importFile;
+	
+	const char* filesToAdd[15] = {"","","World\\Scale\\humanmalescale.m2","World\\Scale\\50x50.m2","World\\Scale\\100x100.m2","World\\Scale\\250x250.m2","World\\Scale\\500x500.m2","World\\Scale\\1000x1000.m2","World\\Scale\\50yardradiusdisc.m2","World\\Scale\\200yardradiusdisc.m2","World\\Scale\\777yardradiusdisc.m2","World\\Scale\\50yardradiussphere.m2","World\\Scale\\200yardradiussphere.m2","World\\Scale\\777yardradiussphere.m2",""};
 
 	// MODELINSERT FROM TEXTFILE
 	// is a source file set in config file?
+	
 	switch(id)
 		{
 			 case 0:
+			 case 14:
 				if( FileExists( "noggIt.conf" ) )
 				{
 					ConfigFile config( "noggIt.conf" );
@@ -348,61 +354,10 @@ void InsertObject( frame *button, int id )
 			 case 1:
 				importFile="Import.txt"; //	use import.txt in noggit folder!
 			 break;
- 
-			 case 2:
-				m2s_to_add.push_back( "World\\Scale\\humanmalescale.m2" );
-			 break;
-
-			 case 3:
-				m2s_to_add.push_back( "World\\Scale\\50x50.m2" );
-			 break;
-
-			 case 4:
-				m2s_to_add.push_back( "World\\Scale\\100x100.m2" );
-			 break;
-
-			 case 5:
-				m2s_to_add.push_back( "World\\Scale\\250x250.m2" );
-			 break;
-
-			 case 6:
-				m2s_to_add.push_back( "World\\Scale\\500x500.m2" );
-			 break;
-
-			 case 7:
-				m2s_to_add.push_back( "World\\Scale\\1000x1000.m2" );
-			 break;
-
-			 case 8:
-				m2s_to_add.push_back( "World\\Scale\\50yardradiusdisc.m2" );
-			 break;
-
-			 case 9:
-				m2s_to_add.push_back( "World\\Scale\\200yardradiusdisc.m2" );
-			 break;
 			 
-			 case 10:
-				m2s_to_add.push_back( "World\\Scale\\777yardradiusdisc.m2" );
-			 break;
-
-			 case 11:
-				m2s_to_add.push_back( "World\\Scale\\50yardradiussphere.m2" );
-			 break;
-
-			 case 12:
-				m2s_to_add.push_back( "World\\Scale\\200yardradiussphere.m2" );
-			 break;
-
-			 case 13:
-				m2s_to_add.push_back( "World\\Scale\\777yardradiussphere.m2" );
-			 break;
-
-			 case 14:
-				 if( FileExists( "noggIt.conf" ) )
-				 {
-					 ConfigFile config( "noggIt.conf" );
-					 config.readInto( importFile, "ImportFile" );
-				 }
+			 default:
+				m2s_to_add.push_back( filesToAdd[id] );
+				break;
 	} 
 
 
@@ -486,7 +441,6 @@ void InsertObject( frame *button, int id )
 
 	if(id==14)
 	{
-
 		// import only last model from viewer
 		if(lastTyp==1)
 		{
@@ -534,13 +488,13 @@ void InsertObject( frame *button, int id )
 	//! \todo Memoryleak: These models will never get deleted.
 }
 
-void view_texture_palette( frame *button, int id )
+void view_texture_palette( frame* /*button*/, int /*id*/ )
 {
 	TexturePalette->hidden = !TexturePalette->hidden;
 }
 
 
-void Toolbar_SelectIcon( frame * pButton, int pId )
+void Toolbar_SelectIcon( frame* /*pButton*/, int pId )
 {
 	const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "Not used", "Flag Paint", "Not used", "Not used", "Not used", "Not used" };
 	change_settings_window( mainGui->guiToolbar->selectedIcon, pId > 6 ? 0 : pId );
@@ -553,12 +507,12 @@ void Toolbar_SelectIcon( frame * pButton, int pId )
 		Environment::getInstance()->view_holelines = false;
 }
 
-void exit_tilemode( frame *button, int id )
+void exit_tilemode(  frame* /*button*/, int /*id*/ )
 {
 	gPop = true;
 }
 
-void test_menu_action( frame *button, int id )
+void test_menu_action(  frame* /*button*/, int id )
 {
 	if(id == 1)
 		gWorld->setAreaID(5000,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
@@ -1138,7 +1092,7 @@ void MapView::doSelection( int selTyp )
 	}
 }
 
-void MapView::displayViewMode_Help( float t, float dt )
+void MapView::displayViewMode_Help( float /*t*/, float /*dt*/ )
 {
 	//! \todo	Make this a window instead of a view. Why should you do it as a view? ._.
 	video.clearScreen();
@@ -1169,7 +1123,7 @@ void MapView::displayViewMode_Help( float t, float dt )
 		"A,D,W,S - move left,right,forward,backward\n"
 		"M - show minimap\n"
 		"U - 2d texture editor\n"
-		//"C - chunk settings\n" //! tofo: C chunk settings must get fixed first. Then turn on this again
+		//"C - chunk settings\n" //! \todo: C chunk settings must get fixed first. Then turn on this again
 		"H - help\n"
 		"Shift + R - turn camera 180 degres\n"
 		"Shift + F4 - change to auto select mode\n"
@@ -1244,7 +1198,7 @@ void MapView::displayViewMode_Help( float t, float dt )
 
 }
 
-void MapView::displayViewMode_Minimap( float t, float dt )
+void MapView::displayViewMode_Minimap( float /*t*/, float /*dt*/ )
 {
 	// not used now. !!!
 	// swap with minimapWindow. Delete if minimpa window run 100 %
@@ -1283,7 +1237,7 @@ void MapView::displayViewMode_Minimap( float t, float dt )
 	//gWorld->skies->drawSky(Vec3D(0.0f,0.0f,0.0f));
 }
 
-void MapView::displayViewMode_2D( float t, float dt )
+void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 {
 	video.setTileMode();
 	gWorld->drawTileMode(ah);
@@ -1310,7 +1264,7 @@ void MapView::displayViewMode_2D( float t, float dt )
 		glEnable(GL_TEXTURE_2D);
 
 		glBindTexture(GL_TEXTURE_2D, textureBrush.getTexture());
-		tRadius=textureBrush.getRadius()/CHUNKSIZE;//*gWorld->zoom;
+		tRadius=textureBrush.getRadius()/CHUNKSIZE;// *gWorld->zoom;
 		glBegin(GL_QUADS);
 			glTexCoord2f(0.0f,0.0f);
 			glVertex3f(mX-tRadius,mY+tRadius,0);
@@ -1355,7 +1309,7 @@ void MapView::displayViewMode_2D( float t, float dt )
 		freetype::shprint( arial16, video.xres / 2 - freetype::width( arial16, gWorld->noadt ? "No ADT at this Point" : "Loading..." ) / 2, 30.0f, ( gWorld->noadt ? "No ADT at this Point" : "Loading..." ) );
 }
 
-void MapView::displayViewMode_3D( float t, float dt )
+void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
 {
 	video.set3D();
 

@@ -51,7 +51,7 @@ frame * frame::processLeftClick( float mx, float my )
 	return 0;
 }
 
-bool frame::processLeftDrag( float mx, float my, float xDrag, float yDrag )
+bool frame::processLeftDrag( float /*mx*/, float /*my*/, float xDrag, float yDrag )
 {
 	if( movable )
 	{
@@ -84,7 +84,7 @@ void frame::getOffset( float &xOff, float &yOff )
 	yOff = ty + y;
 }
 
-bool frame::processKey( char key, bool shift, bool alt, bool ctrl )
+bool frame::processKey( char /*key*/, bool /*shift*/, bool /*alt*/, bool /*ctrl*/ )
 {
 	return false;
 }

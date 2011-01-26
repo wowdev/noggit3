@@ -75,6 +75,8 @@ textUI			*chunkTextureNames[4];
 textUI			*chunkTextureFlags[4];
 textUI			*chunkTextureEffectID[4];
 
+Texture* TexturingUI::selectedTexture = NULL;
+
 void LoadTextureNames()
 {
 	if( textureNames.size() )
@@ -216,7 +218,7 @@ void changePage( frame*, int direction )
 	showPage( gCurrentPage );
 }
 
-void texturePaletteClick( frame *f, int id )
+void texturePaletteClick( frame* /*f*/, int id )
 {
 	if( curTextures[id]->hidden )
 		return;
@@ -244,7 +246,7 @@ void texturePaletteClick( frame *f, int id )
 
 // --- List stuff ------------------------
 
-void LoadTileset( frame *button, int id )
+void LoadTileset( frame* /*button*/, int id )
 {
 	for( std::vector<std::string>::iterator it = textureNames.begin(); it != textureNames.end(); ++it )
 	{
@@ -293,12 +295,12 @@ void InitFilenameFilterList()
 
 // -----------------------------------------------
 
-void showTextureLoader( frame *button, int id )
+void showTextureLoader( frame* /*button*/, int /*id*/ )
 {
 	windowTilesetLoader->hidden = !windowTilesetLoader->hidden;
 }
 
-void showTextureFilter( frame *button, int id )
+void showTextureFilter( frame* /*button*/, int /*id*/ )
 {
 	windowTextureFilter->hidden = !windowTextureFilter->hidden;
 }
@@ -385,7 +387,7 @@ frame* TexturingUI::createSelectedTexture()
 {
 	windowSelectedTexture = new closeWindowUI( video.xres - 148.0f - 128.0f, video.yres - 320.0f, 274.0f, 288.0f, "Current Texture", true );
 
-	std::string lTexture = selectedTexture ? selectedTexture->name : "tileset\\generic\\black.blp";
+	std::string lTexture = TexturingUI::selectedTexture ? selectedTexture->name : "tileset\\generic\\black.blp";
 
 	textureSelected = new textureUI( 9.0f, 24.0f, 256.0f, 256.0f, lTexture );
 	windowSelectedTexture->addChild( textureSelected );
@@ -628,11 +630,11 @@ void TexturingUI::setChunkWindow(MapChunk *chunk)
 }
 
 Texture* TexturingUI::getSelectedTexture(){
-	return selectedTexture;
+	return TexturingUI::selectedTexture;
 }
 
 void TexturingUI::setSelectedTexture(Texture * t){
-	selectedTexture = t;
+	TexturingUI::selectedTexture = t;
 }
 
 /* //! /todo rework!

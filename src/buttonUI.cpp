@@ -98,7 +98,7 @@ void buttonUI::render() const
 	glPopMatrix();
 }
 
-frame *buttonUI::processLeftClick( float mx, float my )
+frame *buttonUI::processLeftClick( float /*mx*/, float /*my*/ )
 {
 	clicked = true;
 	if( clickFunc )

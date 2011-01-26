@@ -822,7 +822,7 @@ void World::outdoorLighting()
 	glLightfv(GL_LIGHT1, GL_AMBIENT, black);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, col);
 	glLightfv(GL_LIGHT1, GL_POSITION, pos);
-	*//*
+	*/ /*
 }*/
 
 
@@ -1332,7 +1332,7 @@ void World::setAreaID(int id, int x, int z)
 	}
 }
 
-void World::setAreaID(int id, int x, int z , float cx, float cz)
+void World::setAreaID(int id, int x, int z , float _cx, float _cz)
 {
 	// set the Area ID on a tile x,z on the chunk cx,cz
 	MapTile *curTile;
@@ -1340,14 +1340,14 @@ void World::setAreaID(int id, int x, int z , float cx, float cz)
 	curTile = mTiles[z][x].tile;
 	if(curTile == 0) return;
 
-	MapChunk *curChunk = curTile->getChunk(cx, cz);
+	MapChunk *curChunk = curTile->getChunk(_cx, _cz);
 
 	if(curChunk == 0) return;
 
 	curChunk->areaID = id;
 }
 
-void World::drawTileMode(float ah)
+void World::drawTileMode(float /*ah*/)
 {
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT); 
 	glEnable(GL_BLEND);
@@ -1854,9 +1854,6 @@ void World::setFlag( bool to, float x, float z)
 						MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
 						if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
 						{
-							int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
-							int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
-
 							chunk->setFlag(to);
 						}
 					}

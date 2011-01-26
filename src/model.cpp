@@ -584,7 +584,7 @@ void Model::calcBones(int _anim, int time)
 	}
 }
 
-void Model::animate(int _anim)
+void Model::animate(int /*_anim*/) //! \todo Is this _anim, not anim down there?
 {
 	ModelAnimation &a = anims[anim];
 	int t = globalTime; //(int)(gWorld->animtime /* / a.playSpeed*/);
@@ -1094,16 +1094,14 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 		m.translation(pivot);
 		
 		if (trans.uses(anim)) {
-			Vec3D tr = trans.getValue(anim, time);
-			m *= Matrix::newTranslation(tr);
+			m *= Matrix::newTranslation(trans.getValue(anim, time));
 		}
 		if (rot.uses(anim)) {
 			q = rot.getValue(anim, time);
 			m *= Matrix::newQuatRotate(q);
 		}
 		if (scale.uses(anim)) {
-			Vec3D sc = scale.getValue(anim, time);
-			m *= Matrix::newScale(sc);
+			m *= Matrix::newScale(scale.getValue(anim, time));
 		}
 		if (billboard) {
 			float modelview[16];
