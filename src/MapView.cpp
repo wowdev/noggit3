@@ -960,15 +960,12 @@ void MapView::tick( float t, float dt )
 					if( Environment::getInstance()->ShiftDown ){ // 3D Paint
 						if( Environment::getInstance()->CtrlDown ) // clear chunk texture
 							gWorld->eraseTextures(xPos, zPos);
-						else if( TexturingUI::getSelectedTexture() ){
+						else if( TexturingUI::getSelectedTexture() )
+						{
 							if( textureBrush.needUpdate() )
 								textureBrush.GenerateTexture();
 							
-							if( !gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture()->name ) ) )
-								LogError << "paintTexture failed ._. " << std::endl;
-						}
-						else{
-							Log <<"Texture Pointer: "<< TexturingUI::getSelectedTexture(); //oO
+							gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture()->name ) );
 						}
 					}
 						
@@ -1837,47 +1834,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		// reload a map tile
 		if( e->keysym.sym == SDLK_j && Environment::getInstance()->ShiftDown )
 			gWorld->reloadTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
-
-#ifdef DEBUG
-		// Check for layers we have too much. this should filter out those that are completely covered.
-		//! \todo	Get this function to work.
-		if( e->keysym.sym == SDLK_k ) 
-		{
-			if((Selection!=0)&&(Selection->type==eEntry_MapChunk))
-			{
-				gLog( "This chunk has %i textures.\n", Selection->data.mapchunk->nTextures ); 
-				for( int layer = 1; layer < Selection->data.mapchunk->nTextures; layer++ )
-				{
-					gLog( "\tTesting layer %i:\n", layer );
-					bool used = false;
-					for( int j = 0; j < 63 && !used; j++ )
-						for( int i = 0; i < 63 && !used; ++i )
-							if( Selection->data.mapchunk->amap[layer][i + j * 64] != 255.0f )
-							{
-								gLog( "\t\tValue at %i,%i (%i) is %f (!= 255.0f)\n", i, j, i + j * 64, Selection->data.mapchunk->amap[layer][i + j * 64] );
-								used = true;
-							}
-
-					gLog( "\t\t%s\n", used?"has something painted on it.":"should be somewhere below and has nothing on it." ) ;
-					if( !used )
-					{
-						int l = layer;
-						while( Selection->data.mapchunk->nTextures > l + 1 )
-						{
-							Selection->data.mapchunk->textures[l] = Selection->data.mapchunk->textures[l + 1];
-							Selection->data.mapchunk->animated[l] = Selection->data.mapchunk->animated[l + 1];
-							Selection->data.mapchunk->texFlags[l] = Selection->data.mapchunk->texFlags[l + 1];
-							Selection->data.mapchunk->effectID[l] = Selection->data.mapchunk->effectID[l + 1];
-							memcpy( Selection->data.mapchunk->amap[l], Selection->data.mapchunk->amap[l + 1], 64 * 64 );
-							l++;
-						}
-						layer--;
-						Selection->data.mapchunk->nTextures--;
-					}
-				}
-			}
-		}
-#endif
 		
 		// fog distance or brush radius
 		if( e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS ) 

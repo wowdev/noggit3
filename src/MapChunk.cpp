@@ -16,7 +16,7 @@ static const int HEIGHT_LOW = 300;
 static const int HEIGHT_ZERO = 0;
 static const int HEIGHT_SHALLOW = -100;
 static const int HEIGHT_DEEP = -250;
-static const double MAPCHUNK_RADIUS	= 47.140452079103168293389624140323;
+static const double MAPCHUNK_DIAMETER	= 47.140452079103168293389624140323;
 
 bool drawFlags=false;
 
@@ -1379,7 +1379,7 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 	zdiff = zbase - z + CHUNKSIZE/2;
 	dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
-	if(dist > (radius + MAPCHUNK_RADIUS))
+	if(dist > (radius + MAPCHUNK_DIAMETER))
 		return Changed;
 	vmin.y = 9999999.0f;
 	vmax.y = -9999999.0f;
@@ -1439,7 +1439,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 	zdiff= zbase - z + CHUNKSIZE/2;
 	dist= sqrt(xdiff*xdiff + zdiff*zdiff);
 
-	if(dist > (radius + MAPCHUNK_RADIUS))
+	if(dist > (radius + MAPCHUNK_DIAMETER))
 		return Changed;
 
 	vmin.y = 9999999.0f;
@@ -1494,7 +1494,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 	zdiff = zbase - z + CHUNKSIZE/2;
 	dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
-	if(dist > (radius + MAPCHUNK_RADIUS) )
+	if(dist > (radius + MAPCHUNK_DIAMETER) )
 		return Changed;
 
 	vmin.y = 9999999.0f;
@@ -1631,114 +1631,123 @@ int MapChunk::addTexture( GLuint texture )
 	return texLevel;
 }
 
-bool MapChunk::paintTexture(float x, float z, brush *Brush, float strength, float pressure, unsigned int texture)
+bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, float pressure, unsigned int texture )
 {
-	float zPos,xPos,change,xdiff,zdiff,dist, radius;
+	const float radius = Brush->getRadius();
 
-	int texLevel=-1;
+  // Are we really painting on this chunk?
+  const float xdiff = xbase + CHUNKSIZE / 2 - x;
+  const float zdiff = zbase + CHUNKSIZE / 2 - z;
+  
 
-	radius=Brush->getRadius();
+  if( ( xdiff * xdiff + zdiff * zdiff ) > ( MAPCHUNK_DIAMETER / 2 + radius ) * ( MAPCHUNK_DIAMETER / 2 + radius ) )
+    return false;
+  
+  // Search for empty layer.
+	int texLevel = -1;
 
-	xdiff= xbase - x + CHUNKSIZE/2;
-	zdiff= zbase - z + CHUNKSIZE/2;
-	dist= sqrt( xdiff*xdiff + zdiff*zdiff );
-
-	if( dist > (radius+MAPCHUNK_RADIUS) )
-		return false;
-
-	//First Lets find out do we have the texture already
-	for(int i=0;i<nTextures;++i)
-		if(textures[i]==texture)
-			texLevel=i;
-
-
-	if( (texLevel==-1) && (nTextures==4) )
-	{
-		// Implement here auto texture slot freeing :)
-		LogDebug << "paintTexture: No free texture slot" << std::endl;
-		return false;
-	}
-	
-	//Only 1 layer and its that layer
-	if( (texLevel!=-1) && (nTextures==1) )
-		return true;
-
-	
-	change=CHUNKSIZE/62.0f;
-	zPos=zbase;
-
-	int texAbove;
-	float target,tarAbove, tPressure;
-	texAbove=nTextures-texLevel-1;
-
-
-	for(int j=0; j < 63 ; j++)
-	{
-		xPos=xbase;
-		for(int i=0; i < 63; ++i)
+	for( size_t i = 0; i < size_t( nTextures ); ++i )
+  {
+		if( textures[i] == texture )
 		{
-			xdiff=xPos-x;
-			zdiff=zPos-z;
-			dist=abs(sqrt( xdiff*xdiff + zdiff*zdiff ));
-			
-			if(dist>radius)
-			{
-				xPos+=change;
-				continue;
-			}
-
-			if(texLevel==-1)
-			{
-				texLevel=addTexture(texture);
-				if(texLevel==0)
-					return true;
-				if(texLevel==-1)
-				{
-					LogDebug << "paintTexture: Unable to add texture." << std::endl;
-					return false;
-				}
-			}
-			
-			target=strength;
-			tarAbove=1-target;
-			
-			tPressure=pressure*Brush->getValue(dist);
-			
-			using std::min;
-			using std::max;
-			
-			if(texLevel>0)
-				amap[texLevel-1][i+j*64]=(unsigned char)max( min( (1-tPressure)*( (float)amap[texLevel-1][i+j*64] ) + tPressure*target + 0.5f ,255.0f) , 0.0f);
-			for(int k=texLevel;k<nTextures-1;k++)
-				amap[k][i+j*64]=(unsigned char)max( min( (1-tPressure)*( (float)amap[k][i+j*64] ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f);
-			xPos+=change;
+			texLevel = i;
 		}
-		zPos+=change;
-	}
+  }
 
 	if( texLevel == -1 )
 	{
-		LogDebug << "Somehow no texture got painted." << std::endl;
-		return false;
+    if( nTextures == 4 )
+    {
+		  MapChunk* selectedChunk = gWorld->GetCurrentSelection()->data.mapchunk;
+		  
+		  LogDebug << "This chunk has " << nTextures << " textures.\n";
+		
+		  for( size_t layer = 0; layer < size_t( nTextures ); ++layer )
+		  {
+		    unsigned char map[64*64];
+		    if( layer )
+		      memcpy( map, amap[layer-1], 64*64 );
+		    else
+		      memset( map, 255, 64*64 );
+		      
+		    for( size_t layerAbove = layer + 1; layerAbove < size_t( nTextures ); ++layerAbove )
+		    {
+		      unsigned char* above = amap[layerAbove-1];
+		      for( size_t i = 0; i < 64 * 64; ++i )
+		      {
+		        using std::max;
+		        map[i] = max( 0, map[i] - above[i] );
+		      }
+		    }
+		    
+		    size_t sum = 0;
+		    for( size_t i = 0; i < 64 * 64; ++i )
+		    {
+		      sum += map[i];
+        }
+        
+        if( !sum )
+        {
+          for( size_t i = layer; i < size_t( nTextures ) - 1; ++i )
+          {
+            textures[i] = textures[i+1];
+            animated[i] = animated[i+1];
+            texFlags[i] = texFlags[i+1];
+            effectID[i] = effectID[i+1];
+            if( i )
+              memcpy( amap[i-1], amap[i], 64*64 );
+          }
+        	for( size_t j = layer; j < size_t( nTextures ); j++ )
+        	{
+        		glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
+        		glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
+        	}
+        	nTextures--;
+        }
+		  }
+      
+      if( nTextures == 4 )
+  		  return false;
+    }
+  	
+  	texLevel = addTexture( texture );
+    if( texLevel == 0 )
+      return true;
 	}
+  else
+  {
+    if( nTextures == 1 )
+      return true;
+  }
+  
+  // We now have a texture at texLevel > 0.
+	static const float change = CHUNKSIZE / 62.0f; //! \todo 64? 63? 62? Wtf?
 	
-	for( int j = texLevel; j < nTextures - 1; j++ )
+	for( size_t j = 0; j < 64; ++j )
 	{
-		if( j > 2 )
+		for( size_t i = 0; i < 64; ++i )
 		{
-			LogError << "WTF how did you get here??? Get a cookie." << std::endl;
-			continue;
+			const float xdiff = xbase + change * i - x;
+			const float zdiff = zbase + change * j - z;
+			const float dist = sqrtf( xdiff * xdiff + zdiff * zdiff );
+			
+			if( dist <= radius )
+			{
+  			using std::min;
+  			using std::max;
+  			
+  			amap[texLevel - 1][i + j * 64] = (unsigned char)( max( min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
+			}
 		}
-		glBindTexture( GL_TEXTURE_2D, alphamaps[j] );
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j] );
 	}
 	
-	if( texLevel )
+	// Redraw changed layers.
+	for( size_t j = texLevel; j < size_t( nTextures ); j++ )
 	{
-		glBindTexture( GL_TEXTURE_2D, alphamaps[texLevel - 1] );
-		glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[texLevel - 1] );
+		glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
 	}
-	
+
 	return true;
 }
 
