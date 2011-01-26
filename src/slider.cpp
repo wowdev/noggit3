@@ -44,7 +44,7 @@ void slider::setText(const char *t)
 	strcpy(text,t);
 }
 
-frame *slider::processLeftClick(float mx,float my)
+frame *slider::processLeftClick(float mx,float /*my*/)
 {
 	/*if((mx>(width*value-16))&&(mx<(width*value+16)))
 				return this;
@@ -60,8 +60,9 @@ frame *slider::processLeftClick(float mx,float my)
 	return this;
 }
 
-bool slider::processLeftDrag(float mx,float my, float xChange, float yChange)
+bool slider::processLeftDrag(float mx,float my, float /*xChange*/, float /*yChange*/)
 {
+  //! \todo use change?
 	float tx,ty;
 
 	parent->getOffset(tx,ty);

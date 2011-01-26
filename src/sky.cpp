@@ -109,7 +109,7 @@ Vec3D Sky::colorFor(int r, int t) const
 		t += 2880;
 	}
 	else {
-		for (size_t i=last; i>=0; i--) {
+		for (size_t i=last; i>=0; i--) { //! \todo iterator this.
 			if (colorRows[r][i].time <= t) {
 				c1 = colorRows[r][i].color;
 				t1 = colorRows[r][i].time;

@@ -11,7 +11,7 @@
 #include <sstream>
 #include <algorithm>
 
-#include <cstdint>
+#include <stdint.h>
 
 typedef std::vector< std::pair< std::string, HANDLE* > > ArchiveSet;
 ArchiveSet gOpenArchives;
@@ -237,14 +237,9 @@ bool MPQFile::exists( const std::string& filename )
 	return false;
 }
 
-void MPQFile::save(const char* filename)
+void MPQFile::save(const char* /*filename*/)
 {
-/*
-	wxFile f;
-	f.Open(wxString(filename, wxConvUTF8), wxFile::write);
-	f.Write(buffer, size);
-	f.Close();
-*/
+  //! \todo Implement save to MPQ.
 }
 
 size_t MPQFile::read(void* dest, size_t bytes)

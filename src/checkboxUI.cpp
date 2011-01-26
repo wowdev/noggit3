@@ -89,7 +89,7 @@ bool checkboxUI::getState()
 	return checked;
 }
 
-frame *checkboxUI::processLeftClick( float mx, float my )
+frame *checkboxUI::processLeftClick( float /*mx*/, float /*my*/ )
 {
 	checked = !checked;
 	check->hidden = !checked;

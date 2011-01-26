@@ -64,7 +64,7 @@ void Icon::render() const
 	glPopMatrix();
 }
 
-frame *Icon::processLeftClick(float mx,float my)
+frame *Icon::processLeftClick(float /*mx*/,float /*my*/)
 {
 	if(clickFunc)
 		clickFunc(this,id);

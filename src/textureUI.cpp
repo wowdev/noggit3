@@ -62,7 +62,7 @@ void textureUI::render() const
 	}
 }
 
-frame *textureUI::processLeftClick( float mx, float my )
+frame *textureUI::processLeftClick( float /*mx*/, float /*my*/ )
 {
 	if( clickFunc )
 	{

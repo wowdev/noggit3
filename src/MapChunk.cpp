@@ -236,7 +236,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 				for (int i=0; i<((j%2)?8:9); ++i) {
 					f.read(nor,3);
 					// order X,Z,Y 
-					//*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
+					// *ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
 					*ttn++ = Vec3D(-(float)nor[1]/127.0f, (float)nor[2]/127.0f, -(float)nor[0]/127.0f);
 				}
 			}
@@ -256,6 +256,8 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 					}
 					Vec3D v = Vec3D(xbase+xpos, ybase+h, zbase+zpos);
 					*ttv++ = v;
+					using std::min;
+					using std::max;
 					vmin.y = min(vmin.y, v.y);
 					vmax.y = max(vmax.y, v.y);
 				}
@@ -1414,6 +1416,8 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 			}
 		}
 		
+		using std::min;
+		using std::max;
 		vmin.y = min(vmin.y, mVertices[i].y);
 		vmax.y = max(vmax.y, mVertices[i].y);
 	}
@@ -1468,6 +1472,8 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 			Changed=true;
 		}
 		
+		using std::min;
+		using std::max;
 		vmin.y = min(vmin.y, mVertices[i].y);
 		vmax.y = max(vmax.y, mVertices[i].y);
 	}
@@ -1550,6 +1556,8 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 			Changed=true;
 		}
 		
+		using std::min;
+		using std::max;
 		vmin.y = min(vmin.y, mVertices[i].y);
 		vmax.y = max(vmax.y, mVertices[i].y);
 	}

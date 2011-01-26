@@ -21,9 +21,8 @@ public:
 	static Texture* getSelectedTexture();
 	static void setChunk(MapChunk *chunk);
 	static void setChunkWindow(MapChunk *chunk);
-
+	
+	static Texture* selectedTexture;
 };
-
-static Texture* selectedTexture;
 
 #endif

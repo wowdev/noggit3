@@ -609,7 +609,7 @@ void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
 			SpreadMat.m[i][j]*=Size;
 }
 
-Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2)
+Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float /*spr2*/)
 {
 	// Model Flags - *shrug* gotta write this down somewhere.
 	// 0x1 =

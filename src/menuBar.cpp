@@ -105,7 +105,7 @@ MenuButton::MenuButton( MenuPane * pPane, float pX, float pY, const std::string&
 	mPane = pPane;
 }
 
-frame* MenuButton::processLeftClick( float pX, float pY )
+frame* MenuButton::processLeftClick( float /*pX*/, float /*pY*/ )
 {
 	clicked = true;
 	mPane->Open();
@@ -128,7 +128,7 @@ MenuItemButton::MenuItemButton( MenuPane * pParent, float pX, float pY, const st
 	this->setClickFunc( pClickFunc, pClickFuncID );
 }
 
-frame* MenuItemButton::processLeftClick( float pX, float pY )
+frame* MenuItemButton::processLeftClick( float /*pX*/, float /*pY*/ )
 {
 	clicked = true;
 	if( this->clickFunc )
@@ -154,7 +154,7 @@ MenuItemToggle::MenuItemToggle( MenuPane * pParent, float pX, float pY, const st
 	mMyCheckbox->setState( *mMyState );
 }
 
-frame* MenuItemToggle::processLeftClick( float pX, float pY )
+frame* MenuItemToggle::processLeftClick( float /*pX*/, float /*pY*/ )
 {
 	clicked = true;
 	*mMyState = !( *mMyState );
@@ -215,7 +215,7 @@ MenuItemSwitch::MenuItemSwitch( MenuPane * pParent, float pX, float pY, const st
 	mInvert = pInvert;
 }
 
-frame* MenuItemSwitch::processLeftClick( float pX, float pY )
+frame* MenuItemSwitch::processLeftClick( float /*pX*/, float /*pY*/ )
 {
 	clicked = true;
 	*mMyState = mInvert;
@@ -234,7 +234,7 @@ MenuItemSet::MenuItemSet( MenuPane * pParent, float pX, float pY, const std::str
 	mSet = pSet;
 }
 
-frame* MenuItemSet::processLeftClick( float pX, float pY )
+frame* MenuItemSet::processLeftClick( float /*pX*/, float /*pY*/ )
 {
 	clicked = true;
 	*mMyState = mSet;
@@ -248,9 +248,9 @@ MenuItemSeperator::MenuItemSeperator( MenuPane * pParent, float pX, float pY, co
 	this->setText( pText );
 }
 
-frame* MenuItemSeperator::processLeftClick( float pX, float pY )
+frame* MenuItemSeperator::processLeftClick( float /*pX*/, float /*pY*/ )
 {
-	return 0;
+	return NULL;
 }
 
 MenuPane::MenuPane( menuBar * pMenuBar, float pX, float pY ) : window( pX, pY, 180.0f, 1.0f )

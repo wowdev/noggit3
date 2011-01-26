@@ -251,7 +251,7 @@ WMO::~WMO()
 // model.cpp
 void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
 
-void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight) const
+void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool /*highlight*/) const
 {
 	
 	if( gWorld && gWorld->drawfog ) 
@@ -925,7 +925,7 @@ void WMOGroup::initDisplayList()
 }
 
 
-void WMOGroup::initLighting(int nLR, short *useLights)
+void WMOGroup::initLighting(int /*nLR*/, short* /*useLights*/)
 {
 	//dl_light = 0;
 	// "real" lighting?
@@ -1183,8 +1183,13 @@ void WMOFog::setup()
 
 int WMOManager::baseid = 0;
 
+#ifdef WIN32
 template <> std::map<std::string, WMOIDTYPE> Manager<WMOIDTYPE,WMO>::names;
 template <> std::map<WMOIDTYPE, WMO*> Manager<WMOIDTYPE,WMO>::items;
+#else
+template <class IDTYPE,class MANAGEDITEM> std::map<std::string, WMOIDTYPE> Manager<WMOIDTYPE,WMO>::names;
+template <class IDTYPE,class MANAGEDITEM> std::map<WMOIDTYPE, WMO*> Manager<WMOIDTYPE,WMO>::items;
+#endif
 
 WMOIDTYPE WMOManager::add(const std::string& name)
 {

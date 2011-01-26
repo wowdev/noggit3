@@ -5,11 +5,13 @@
 
 int ModelManager::baseid = 0;
 
-template <> 
-std::map<std::string, MODELIDTYPE> Manager<MODELIDTYPE,Model>::names;
-
-template <> 
-std::map<MODELIDTYPE, Model*> Manager<MODELIDTYPE,Model>::items;
+#ifdef WIN32
+template <> std::map<std::string, MODELIDTYPE> Manager<MODELIDTYPE,Model>::names;
+template <> std::map<MODELIDTYPE, Model*> Manager<MODELIDTYPE,Model>::items;
+#else
+template <class IDTYPE,class MANAGEDITEM> std::map<std::string, MODELIDTYPE> Manager<MODELIDTYPE,Model>::names;
+template <class IDTYPE,class MANAGEDITEM> std::map<MODELIDTYPE, Model*> Manager<MODELIDTYPE,Model>::items;
+#endif
 
 MODELIDTYPE ModelManager::add( const std::string& name )
 {

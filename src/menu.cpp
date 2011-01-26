@@ -146,7 +146,7 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
 	randBackground();
 }
 
-void Menu::tick( float t, float dt )
+void Menu::tick( float t, float /*dt*/ )
 {
 	globalTime = int( t );
 	
@@ -158,7 +158,7 @@ void Menu::tick( float t, float dt )
 	mGUIMinimapWindow->hidden = !gWorld;
 }
 
-void Menu::display(float t, float dt)
+void Menu::display(float /*t*/, float /*dt*/)
 {
 	// 3D: Background.
 	video.clearScreen();
