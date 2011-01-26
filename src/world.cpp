@@ -1559,15 +1559,15 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
 
 bool World::paintTexture(float x, float z, brush *Brush, float strength, float pressure, int texture)
 {
-	const int newX = (int)(x / TILESIZE);
-	const int newZ = (int)(z / TILESIZE);
+	//const int newX = (int)(x / TILESIZE);
+	//const int newZ = (int)(z / TILESIZE);
 
 	//Log << "Painting Textures at " << x << " and " << z;
 	bool succ = false;
 	
-	for( int j = newZ - 1; j < newZ + 1; ++j )
+	for( int j = 0; j < 64; ++j )
 	{
-		for( int i = newX - 1; i < newX + 1; ++i )
+		for( int i = 0; i < 64; ++i )
 		{
 			if( tileLoaded( j, i ) )
 			{
@@ -1575,10 +1575,10 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 				{
 					for( int tx = 0; tx < 16; ++tx )
 					{
-						if(mTiles[j][i].tile->getChunk(ty,tx)->paintTexture(x, z, Brush, strength, pressure, texture))
+						if( mTiles[j][i].tile->getChunk( ty, tx )->paintTexture( x, z, Brush, strength, pressure, texture ) )
 						{
-							succ = true || succ;
-							this->setChanged(j,i);
+							succ |= true;
+							this->setChanged( j, i );
 						}
 					}
 				}
