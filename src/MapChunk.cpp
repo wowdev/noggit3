@@ -18,8 +18,9 @@ static const int HEIGHT_SHALLOW = -100;
 static const int HEIGHT_DEEP = -250;
 static const double MAPCHUNK_RADIUS	= 47.140452079103168293389624140323;
 
-bool DrawMapContour=false;
 bool drawFlags=false;
+
+bool DrawMapContour=false;
 
 GLuint	Contour=0;
 float			CoordGen[4];
@@ -1060,37 +1061,26 @@ void MapChunk::draw()
 
 	drawContour();
 
-	if(drawFlags)
+
+
+	if(terrainMode==5)
 	{
 
-		if(Flags & 0x04)
+		if((Environment::getInstance()->flagPaintMode) == FLAG_IMPASS && Flags & FLAG_IMPASS)
 		{
-			glColor4f(0,0.5f,1,0.2f);
+			glColor4f(1,1,1,0.6f);
 			drawPass(0);
 		}
 
-		if(Flags & 0x08)
-		{
-			glColor4f(0,0,0.8f,0.2f);
-			drawPass(0);
-		}
-		if(Flags & 0x10)
+		if((Environment::getInstance()->flagPaintMode) == FLAG_LQ_MAGMA && Flags & FLAG_LQ_MAGMA)
 		{
 			glColor4f(1,0.5f,0,0.2f);
 			drawPass(0);
 		}
-		if(Flags&0x05)
-		{
-			glColor4f(1,1,1,1.0f);
-			drawPass(0);
-		}
-	}
 
-	if(terrainMode==5)
-	{
-		if(Flags&0x02)
+		if((Environment::getInstance()->flagPaintMode) == FLAG_LQ_SLIME && Flags & FLAG_LQ_SLIME)
 		{
-			glColor4f(1,1,1,0.6f);
+			glColor4f(0,1.0f,0,0.2f);
 			drawPass(0);
 		}
 	}
@@ -1770,17 +1760,11 @@ int MapChunk::getAreaID(){
 	return areaID;
 }
 
-bool MapChunk::getInpass()
-{
-	if(this->Flags & FLAG_IMPASS) 
-		return true;
-	else return false;
-}
 
-void MapChunk::setInpass( bool changeto )
+void MapChunk::setFlag( bool changeto )
 {
 	if(changeto) 
-		this->Flags = this->Flags | FLAG_IMPASS;
+		this->Flags = this->Flags | (Environment::getInstance()->flagPaintMode);
 	else 
-		this->Flags = this->Flags & ~FLAG_IMPASS;
+		this->Flags = this->Flags & ~(Environment::getInstance()->flagPaintMode);
 }

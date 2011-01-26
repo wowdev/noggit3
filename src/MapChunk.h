@@ -103,9 +103,8 @@ public:
 	void addHole(int i,int j);
 	void removeHole(int i,int j);
 
-	bool getInpass();
-	void setInpass(bool value);
-
+	void setFlag(bool value);
+	
 	int getAreaID();
 	void setAreaID(int ID);
 
