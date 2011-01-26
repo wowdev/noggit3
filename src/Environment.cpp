@@ -1,4 +1,5 @@
 #include "Environment.h"
+#include "mapheaders.h"
 
 Environment::Environment()
 {
@@ -8,6 +9,7 @@ Environment::Environment()
 	this->CtrlDown = false;
 	this->AutoSelecting = true;
 	this->clipboard = nameEntry();
+	this->flagPaintMode = FLAG_IMPASS;
 }
 
 Environment* Environment::instance = 0;

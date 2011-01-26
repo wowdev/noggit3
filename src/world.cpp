@@ -1834,14 +1834,12 @@ bool World::getChanged(int x, int z)
 	else return false;
 }
 
-void World::setInpass( bool to, float x, float z)
+void World::setFlag( bool to, float x, float z)
 {
 	// set the inpass flag to selected chunk
 	this->setChanged(x,z);
 	const int newX = (int)(x / TILESIZE);
 	const int newZ = (int)(z / TILESIZE);
-	
-	LogError << "SetImpass - Tile" << newX << "_"  << newZ << std::endl;
 
 	for( int j = newZ - 1; j < newZ + 1; ++j )
 	{
@@ -1859,7 +1857,7 @@ void World::setInpass( bool to, float x, float z)
 							int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
 							int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
 
-							chunk->setInpass(to);
+							chunk->setFlag(to);
 						}
 					}
 				}

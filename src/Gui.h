@@ -6,6 +6,7 @@ class statusBar;
 class detailInfos;
 class appInfo;
 class minimapWindowUI;
+class frame; 
 
 class Gui
 {
@@ -21,6 +22,7 @@ public:
 	statusBar *guiStatusbar;
 	detailInfos *guidetailInfos;
 	appInfo *guiappInfo;
+	frame *settingsFlagPaint;
 
 	Gui();
 };

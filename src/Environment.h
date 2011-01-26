@@ -18,6 +18,7 @@ public:
 	bool ShiftDown;
 	bool AltDown;
 	bool CtrlDown;
+	int flagPaintMode; 
 	
 	bool AutoSelecting;		// If true the auto selection is active
 

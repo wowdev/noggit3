@@ -162,7 +162,7 @@ public:
 	unsigned int getAreaID();
 	void setAreaID(int id, int x, int z);
 	void setAreaID(int id, int x, int z , float cx, float cz);
-	void setInpass(bool to, float x, float z);
+	void setFlag(bool to, float x, float z);
 
 	void drawSelection(int cursorX,int cursorY, bool pOnlyMap = false );
 	void drawSelectionChunk(int cursorX,int cursorY);

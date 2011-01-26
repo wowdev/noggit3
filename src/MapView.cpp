@@ -133,6 +133,7 @@ frame	*fakeframe;
 
 ToggleGroup * gBlurToggleGroup;
 ToggleGroup * gGroundToggleGroup;
+ToggleGroup * gFlagsToggleGroup;
 
 window *setting_ground;
 window *setting_blur;
@@ -191,7 +192,7 @@ void change_settings_window(int oldid, int newid)
 	setting_ground->hidden=true;
 	setting_blur->hidden=true;
 	settings_paint->hidden=true;
-
+	mainGui->settingsFlagPaint->hidden=true;
 	// fetch old win position
 	switch(oldid)
 	{
@@ -207,6 +208,10 @@ void change_settings_window(int oldid, int newid)
 		tool_settings_x=settings_paint->x;
 		tool_settings_y=settings_paint->y;
 	break;
+	case 6:
+		tool_settings_x=mainGui->settingsFlagPaint->x;
+		tool_settings_y=mainGui->settingsFlagPaint->y;
+		break;
 	}
 	// set new win pos and make visible
 	switch(newid)
@@ -226,7 +231,13 @@ void change_settings_window(int oldid, int newid)
 		settings_paint->y=tool_settings_y;
 		settings_paint->hidden=false;
 	break;
+	case 6:
+		mainGui->settingsFlagPaint->x=tool_settings_x;
+		mainGui->settingsFlagPaint->y=tool_settings_y;
+		mainGui->settingsFlagPaint->hidden=false;
+	break;
 	}
+	LogError << "TOOLBAR:" << oldid << "-" << newid << std::endl;
 
 }
 
@@ -539,11 +550,10 @@ void view_texture_palette( frame *button, int id )
 }
 
 
-
 void Toolbar_SelectIcon( frame * pButton, int pId )
 {
-	const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "Area ID", "Impassible", "Not used", "Not used", "Not used", "Not used" };
-	change_settings_window( mainGui->guiToolbar->selectedIcon, pId > 5 ? 0 : pId );
+	const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "Not used", "Flag Paint", "Not used", "Not used", "Not used", "Not used" };
+	change_settings_window( mainGui->guiToolbar->selectedIcon, pId > 6 ? 0 : pId );
 	mainGui->guiToolbar->IconSelect( pId - 1 );
 	mainGui->guiToolbar->text->setText( Names[pId-1] );
 	terrainMode = (pId - 1);
@@ -589,6 +599,8 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
 	mainGui->minimapWindow = new minimapWindowUI(gWorld);
 	mainGui->minimapWindow->hidden = true;
+
+
 	//register toolbar event functions
 	for( int i = 0; i < 10; ++i )
 		if( mainGui->guiToolbar->mToolbarIcons[i] )
@@ -711,7 +723,21 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	tileFrames->addChild(TexturingUI::createTextureFilter());
 	tileFrames->addChild(MapChunkWindow = TexturingUI::createMapChunkWindow());
 	MapChunkWindow->hidden=true;
+	
+	// flags window
+	mainGui->settingsFlagPaint = new window(tool_settings_x,tool_settings_y,180.0f,110.0f);
+	mainGui->settingsFlagPaint->movable=true;
+	mainGui->settingsFlagPaint->hidden = true;
 
+	mainGui->settingsFlagPaint->addChild( new textUI( 50.0f, 4.0f, "Flag Paint", &arial14, eJustifyCenter ) );
+
+	gFlagsToggleGroup = new ToggleGroup( &Environment::getInstance()->flagPaintMode );
+	mainGui->settingsFlagPaint->addChild( new checkboxUI( 6.0f, 25.0f, "Impassible", gFlagsToggleGroup, FLAG_IMPASS ) );
+	mainGui->settingsFlagPaint->addChild( new checkboxUI( 6.0f, 50.0f, "Magma", gFlagsToggleGroup, FLAG_LQ_MAGMA ) );
+	mainGui->settingsFlagPaint->addChild( new checkboxUI( 6.0f, 75.0f, "Slime", gFlagsToggleGroup, FLAG_LQ_SLIME ) );
+	gFlagsToggleGroup->Activate( FLAG_IMPASS );
+
+	tileFrames->addChild(mainGui->settingsFlagPaint);
 	// create the menu
 	menuBar * mbar = new menuBar();
 
@@ -726,8 +752,6 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT + J Reload current tile", SaveOrReload, 1 );
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Test" );
 	mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
-	mbar->GetMenu( "File" )->AddMenuItemButton( "InpassFlagTrue", test_menu_action, 2 );
-	mbar->GetMenu( "File" )->AddMenuItemButton( "InpassFlagFalse", test_menu_action, 3 );
 
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "selected object" );
 	mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + C copy", CopySelectedObject, 0	);
@@ -1029,9 +1053,9 @@ void MapView::tick( float t, float dt )
 					break;
 				case 5:
 					if( Environment::getInstance()->ShiftDown	)
-						gWorld->setInpass( true, xPos, zPos );
+						gWorld->setFlag( true, xPos, zPos );
 					else if( Environment::getInstance()->CtrlDown )
-						gWorld->setInpass( false, xPos, zPos );
+						gWorld->setFlag( false, xPos, zPos );
 				break;
 				}
 			}
@@ -1392,7 +1416,7 @@ void MapView::displayViewMode_3D( float t, float dt )
 		freetype::shprint( arial16, video.xres - 200, 5, "%.2f fps", gFPS );
 				
 		std::ostringstream s;
-		s << terrainMode << "Server cords(x:" << -(gWorld->camera.x - ZEROPOINT) << " y:" << -(gWorld->camera.z - ZEROPOINT) << " z:" << gWorld->camera.y
+		s << "Server cords(x:" << -(gWorld->camera.x - ZEROPOINT) << " y:" << -(gWorld->camera.z - ZEROPOINT) << " z:" << gWorld->camera.y
 				<< ") Tile " << misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE) << " " <<  misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE)
 				<< " Client cords(x:" << gWorld->camera.x<<" y:" << gWorld->camera.z << " z:"<<gWorld->camera.y << ") ";
 		mainGui->guiStatusbar->setLeftInfo( s.str() );
@@ -1768,7 +1792,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_t ) 
 		{
 			terrainMode--;
-			if(terrainMode==0 )terrainMode=4;
+			if(terrainMode==-1 )terrainMode=5;
 
 			// Set the right icon in toolbar
 			Toolbar_SelectIcon( 0, terrainMode + 1 );
@@ -2284,6 +2308,7 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 			Environment::getInstance()->view_holelines = true;
 		else Environment::getInstance()->view_holelines = false;
 	}
+
 }
 
 
