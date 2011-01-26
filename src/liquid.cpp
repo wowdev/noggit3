@@ -354,7 +354,7 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	
 	// generate vertices
 	Vec3D lVertices[9][9];
-	for( int j = 0; j < 9; j++ )
+	for( int j = 0; j < 9; ++j )
 		for( int i = 0; i < 9; ++i ) 
 			lVertices[j][i] = Vec3D( pos.x + tilesize * i, pTileInformation.mHeightmap[j][i], pos.z + ydir * tilesize * j );
 	
@@ -366,7 +366,7 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	glNormal3f( 0.0f, 1.0f, 0.0f );
 
 	// draw tiles
-	for( int j = 0; j < 8; j++ ) 
+	for( int j = 0; j < 8; ++j ) 
 		for( int i = 0; i < 8; ++i ) 
 			if( pTileInformation.mRender[j][i] )
 			{
