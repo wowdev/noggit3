@@ -22,7 +22,6 @@ public:
 	statusBar *guiStatusbar;
 	detailInfos *guidetailInfos;
 	appInfo *guiappInfo;
-	frame *settingsFlagPaint;
 
 	Gui();
 };

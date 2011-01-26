@@ -192,7 +192,6 @@ void change_settings_window(int oldid, int newid)
 	setting_ground->hidden=true;
 	setting_blur->hidden=true;
 	settings_paint->hidden=true;
-	mainGui->settingsFlagPaint->hidden=true;
 	// fetch old win position
 	switch(oldid)
 	{
@@ -208,10 +207,6 @@ void change_settings_window(int oldid, int newid)
 		tool_settings_x=settings_paint->x;
 		tool_settings_y=settings_paint->y;
 	break;
-	case 6:
-		tool_settings_x=mainGui->settingsFlagPaint->x;
-		tool_settings_y=mainGui->settingsFlagPaint->y;
-		break;
 	}
 	// set new win pos and make visible
 	switch(newid)
@@ -230,11 +225,6 @@ void change_settings_window(int oldid, int newid)
 		settings_paint->x=tool_settings_x;
 		settings_paint->y=tool_settings_y;
 		settings_paint->hidden=false;
-	break;
-	case 6:
-		mainGui->settingsFlagPaint->x=tool_settings_x;
-		mainGui->settingsFlagPaint->y=tool_settings_y;
-		mainGui->settingsFlagPaint->hidden=false;
 	break;
 	}
 	LogError << "TOOLBAR:" << oldid << "-" << newid << std::endl;
@@ -724,20 +714,6 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	tileFrames->addChild(MapChunkWindow = TexturingUI::createMapChunkWindow());
 	MapChunkWindow->hidden=true;
 	
-	// flags window
-	mainGui->settingsFlagPaint = new window(tool_settings_x,tool_settings_y,180.0f,110.0f);
-	mainGui->settingsFlagPaint->movable=true;
-	mainGui->settingsFlagPaint->hidden = true;
-
-	mainGui->settingsFlagPaint->addChild( new textUI( 50.0f, 4.0f, "Flag Paint", &arial14, eJustifyCenter ) );
-
-	gFlagsToggleGroup = new ToggleGroup( &Environment::getInstance()->flagPaintMode );
-	mainGui->settingsFlagPaint->addChild( new checkboxUI( 6.0f, 25.0f, "Impassible", gFlagsToggleGroup, FLAG_IMPASS ) );
-	mainGui->settingsFlagPaint->addChild( new checkboxUI( 6.0f, 50.0f, "Magma", gFlagsToggleGroup, FLAG_LQ_MAGMA ) );
-	mainGui->settingsFlagPaint->addChild( new checkboxUI( 6.0f, 75.0f, "Slime", gFlagsToggleGroup, FLAG_LQ_SLIME ) );
-	gFlagsToggleGroup->Activate( FLAG_IMPASS );
-
-	tileFrames->addChild(mainGui->settingsFlagPaint);
 	// create the menu
 	menuBar * mbar = new menuBar();
 
