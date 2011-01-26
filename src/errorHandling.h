@@ -20,7 +20,6 @@ void leave(int sig)
 	signal(SIGABRT, SIG_DFL);
 	signal(SIGFPE, SIG_DFL);
 	signal(SIGILL, SIG_DFL);
-	signal(SIGINT, SIG_DFL);
 	signal(SIGSEGV, SIG_DFL);
 	signal(SIGTERM, SIG_DFL);
 	
