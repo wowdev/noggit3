@@ -244,8 +244,8 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 
 				if(info.ofsHeightMap != 0 && !(lTile.mFlags & 2)){
 					theFile.seek(ofsW + info.ofsHeightMap);
-					for (int w = info.xOffset; w < info.xOffset + info.width + 1; ++w){
-						for(int h=info.yOffset; h < info.yOffset + info.height + 1; ++h){
+					for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w){
+						for(int h=info.xOffset; h < info.xOffset + info.width + 1; ++h){
 							float tmp;
 							theFile.read(&tmp, sizeof(float));
 							lTile.mHeightmap[w][h] = tmp;
@@ -264,7 +264,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 					theFile.read(&render, 8*sizeof(char));
 					for(int k=0 ; k < 8; ++k){
 						for(int m=0; m < 8; ++m){
-							lTile.mRender[k][m] |= render[k] & (1 << m);
+							lTile.mRender[k][m] = render[k] & (1 << m);
 						}	
 					}
 				}

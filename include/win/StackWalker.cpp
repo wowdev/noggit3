@@ -1214,7 +1214,7 @@ void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUser
 #endif
 }
 
-#include "Log.h"
+#include "../../src/Log.h"
 
 void StackWalker::OnOutput(LPCSTR buffer)
 {
