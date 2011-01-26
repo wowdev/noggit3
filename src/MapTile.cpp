@@ -212,25 +212,80 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	
 	//! \todo	Parse all chunks in the new style!
 
-	while( !theFile.isEof() ) 
-	{
+	if(Header.mh2o != 0){
+		theFile.seek( Header.mh2o + 0x14 );
 		theFile.read( &fourcc, 4 );
 		theFile.read( &size, 4 );
-		
-		size_t nextpos = theFile.getPos() + size;
 
-		if ( fourcc == 'MH2O' /*&& false*/ ) // Do not even try to render water, it will be a fuckup anyway. ._. 
-		{
-			// water data
-			uint8_t * lMH2O_Chunk = theFile.getPointer();
+		int ofsW = Header.mh2o + 0x14 + 0x8;
+		assert( fourcc == 'MH2O' );
+		MH2O_Header lHeader[256];
+		theFile.read(lHeader, 256*sizeof(MH2O_Header));
+		for(int i=0; i< 16; ++i){
+			for(int j=0; j< 16; ++j){
+				//! \todo Implement more than just one layer...
+				if(lHeader[i*16 + j].nLayers < 1)
+					continue;
+				MH2O_Tile lTile;
+				MH2O_Information info;
+				theFile.seek(ofsW + lHeader[i*16 + j].ofsInformation);
+				theFile.read(&info, sizeof(MH2O_Information));
+				lTile.mLiquidType = info.LiquidType;
+				lTile.mMaximum = info.maxHeight;
+				lTile.mMinimum = info.minHeight;
+				lTile.mFlags = info.Flags;
 
-			MH2O_Header * lHeader = reinterpret_cast<MH2O_Header*>( lMH2O_Chunk );
-			
-			
+				for( int x = 0; x < 9; ++x ){
+					for( int y = 0; y < 9; y++ ){
+						lTile.mHeightmap[x][y] = lTile.mMinimum;
+						lTile.mDepth[x][y] = 0.0f;
+					}
+				}
+
+				if(info.ofsHeightMap != 0 && !(lTile.mFlags & 2)){
+					theFile.seek(ofsW + info.ofsHeightMap);
+					for (int w = info.xOffset; w < info.xOffset + info.width + 1; ++w){
+						for(int h=info.yOffset; h < info.yOffset + info.height + 1; ++h){
+							float tmp;
+							theFile.read(&tmp, sizeof(float));
+							lTile.mHeightmap[w][h] = tmp;
+
+							//! \todo raise Max/Min instead?
+							if(lTile.mHeightmap[w][h] < lTile.mMinimum)
+								lTile.mHeightmap[w][h] = lTile.mMinimum;
+							if(lTile.mHeightmap[w][h] > lTile.mMaximum)
+								lTile.mHeightmap[w][h] = lTile.mMaximum;
+						}
+					}
+				}
+				if(lHeader[i*16 + j].ofsRenderMask!=0){
+					char render[8];
+					theFile.seek(ofsW + lHeader[i*16 + j].ofsRenderMask);
+					theFile.read(&render, 8*sizeof(char));
+					for(int k=0 ; k < 8; ++k){
+						for(int m=0; m < 8; ++m){
+							lTile.mRender[k][m] |= render[k] & (1 << m);
+						}	
+					}
+				}
+				else{
+					for(int k=0 ; k < 8; ++k){
+						for(int m=0; m < 8; ++m){
+							lTile.mRender[k][m] = true;
+						}	
+					}
+				}
+				
+
+				Liquid * lq = new Liquid( info.width, info.height, Vec3D( xbase + CHUNKSIZE * j, lTile.mMinimum, zbase + CHUNKSIZE * i ) );
+				lq->initFromMH2O( lTile );
+				mLiquids.push_back( lq );
+			}
 		}
 
-		theFile.seek((int)nextpos);
 	}
+		
+	
 	
 	// - MFBO ----------------------------------------------
 	
@@ -1121,6 +1176,8 @@ void MapTile::saveTile()
 						lNormals[i*3+1] = misc::roundc( -mChunks[y][x]->mNormals[i].x * 127 );
 						lNormals[i*3+2] = misc::roundc(	mChunks[y][x]->mNormals[i].y * 127 );
 					}
+
+
 					
 					lCurrentPosition += 8 + lMCNR_Size;
 					lMCNK_Size += 8 + lMCNR_Size;
