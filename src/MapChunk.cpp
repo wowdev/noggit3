@@ -1630,7 +1630,6 @@ int MapChunk::addTexture( GLuint texture )
 	}
 	return texLevel;
 }
-
 bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, float pressure, unsigned int texture )
 {
 	const float radius = Brush->getRadius();
@@ -1684,7 +1683,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 		    for( size_t i = 0; i < 64 * 64; ++i )
 		    {
 		      sum += map[i];
-        }
+			}
         
         if( !sum )
         {
