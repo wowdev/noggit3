@@ -1657,10 +1657,6 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 	{
     if( nTextures == 4 )
     {
-		  MapChunk* selectedChunk = gWorld->GetCurrentSelection()->data.mapchunk;
-		  
-		  LogDebug << "This chunk has " << nTextures << " textures.\n";
-		
 		  for( size_t layer = 0; layer < size_t( nTextures ); ++layer )
 		  {
 		    unsigned char map[64*64];
