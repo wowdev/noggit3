@@ -17,6 +17,7 @@
 #include <list>
 
 #include "noggit.h"
+#include "revision.h"
 
 #include "appstate.h"
 #include "menu.h"
@@ -166,7 +167,7 @@ int main( int argc, char *argv[] )
 	Project::getInstance();
 	Environment::getInstance();
 
-	Log << APP_TITLE << " " << APP_VERSION << std::endl;
+	Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 	
 	// Why should we load anything when there are missing files? ...
 	
@@ -257,7 +258,7 @@ int main( int argc, char *argv[] )
 		return -1;
 	}
 	
-	SDL_WM_SetCaption( APP_TITLE, "noggit.bmp" );
+	SDL_WM_SetCaption( "Noggit Studio - " STRPRODUCTVER, "" );
 	
 	getGamePath( useConfig );
 	
@@ -504,9 +505,6 @@ int main( int argc, char *argv[] )
 		if (ft >= 1000) 
 		{
 			gFPS = (float)fcount / (float)ft * 1000.0f;
-			//	char buf[32];
-			//	sprintf(buf, APP_TITLE " - %.2f fps",fps);
-			//	SDL_WM_SetCaption(buf,NULL);
 			ft = 0;
 			fcount = 0;
 		}

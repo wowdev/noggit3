@@ -6,7 +6,7 @@ MinimizeButton::MinimizeButton( float pWidth, frame * pParent ) : buttonUI( pWid
 	mParent = pParent;
 }
 
-frame *MinimizeButton::processLeftClick(float mx,float my)
+frame *MinimizeButton::processLeftClick(float /*mx*/,float /*my*/)
 {
 	clicked = true;
 	if( mParent )

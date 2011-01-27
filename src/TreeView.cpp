@@ -11,7 +11,7 @@ TreeViewButton::TreeViewButton( float _x, float _y, TreeView* pTreeView ) : butt
 {
 }
 
-frame * TreeViewButton::processLeftClick(float mx,float my)
+frame * TreeViewButton::processLeftClick( float /*mx*/, float /*my*/ )
 {
 	SetClicked( true );
 	mTreeView->Toggle();
