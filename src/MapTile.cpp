@@ -212,7 +212,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	
 	//! \todo	Parse all chunks in the new style!
 
-	if(Header.mh2o != 0){
+	if(Header.mh2o != 0) {
 		theFile.seek( Header.mh2o + 0x14 );
 		theFile.read( &fourcc, 4 );
 		theFile.read( &size, 4 );
@@ -221,8 +221,8 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 		assert( fourcc == 'MH2O' );
 		MH2O_Header lHeader[256];
 		theFile.read(lHeader, 256*sizeof(MH2O_Header));
-		for(int i=0; i< 16; ++i){
-			for(int j=0; j< 16; ++j){
+		for(int i=0; i < 16; ++i) {
+			for(int j=0; j < 16; ++j) {
 				//! \todo Implement more than just one layer...
 				if(lHeader[i*16 + j].nLayers < 1)
 					continue;
@@ -235,17 +235,17 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 				lTile.mMinimum = info.minHeight;
 				lTile.mFlags = info.Flags;
 
-				for( int x = 0; x < 9; ++x ){
-					for( int y = 0; y < 9; y++ ){
+				for( int x = 0; x < 9; ++x ) {
+					for( int y = 0; y < 9; y++ ) {
 						lTile.mHeightmap[x][y] = lTile.mMinimum;
 						lTile.mDepth[x][y] = 0.0f;
 					}
 				}
 
-				if(info.ofsHeightMap != 0 && !(lTile.mFlags & 2)){
+				if(info.ofsHeightMap != 0 && !(lTile.mFlags & 2)) {
 					theFile.seek(ofsW + info.ofsHeightMap);
-					for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w){
-						for(int h=info.xOffset; h < info.xOffset + info.width + 1; ++h){
+					for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w) {
+						for(int h=info.xOffset; h < info.xOffset + info.width + 1; ++h) {
 							float tmp;
 							theFile.read(&tmp, sizeof(float));
 							lTile.mHeightmap[w][h] = tmp;
@@ -258,7 +258,29 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 						}
 					}
 				}
-				if(lHeader[i*16 + j].ofsRenderMask!=0){
+
+				if(info.ofsInfoMask != 0 && !(lTile.mFlags & 2)) {
+					theFile.seek(ofsW + info.ofsInfoMask);
+					int h = 0;
+					int w = 0;
+					int shft = 0;
+					char tmp;
+					theFile.read(&tmp, sizeof(char));
+					while(h < info.height) {
+						if(shft == 8){
+							shft = 0;
+							theFile.read(&tmp, sizeof(char));
+						}
+						if(w >= info.width) {
+							++h;
+							w = 0;
+						}
+						lTile.mRender[info.yOffset+h][info.xOffset+w] = tmp & (1 << shft);
+						++w;
+						++shft;
+					}
+				}
+				else if(lHeader[i*16 + j].ofsRenderMask!=0) {
 					char render[8];
 					theFile.seek(ofsW + lHeader[i*16 + j].ofsRenderMask);
 					theFile.read(&render, 8*sizeof(char));
@@ -268,9 +290,9 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 						}	
 					}
 				}
-				else{
-					for(int k=0 ; k < 8; ++k){
-						for(int m=0; m < 8; ++m){
+				else {
+					for(int k=0 ; k < 8; ++k) {
+						for(int m=0; m < 8; ++m) {
 							lTile.mRender[k][m] = true;
 						}	
 					}
