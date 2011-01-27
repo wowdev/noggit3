@@ -1279,7 +1279,7 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 	{
 		freetype::shprint( arial16, 410.0f, 4.0f, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
 		std::stringstream fps; fps << gFPS << " fps";
-		freetype::shprint( arial16, video.xres - 200.0f, 5, "%.2f fps", gFPS );
+		freetype::shprint( arial16, video.xres - 200.0f, 5, fps.str() );
 	}
 
 	if (gWorld->loading) 
@@ -1331,7 +1331,7 @@ void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
 		int time = int( gWorld->time ) % 2880;
 
 		std::stringstream timestrs; timestrs << "Time: " << (time/120) << ":" << (time%120);
-		freetype::shprint( arial16, video.xres - 100.0f, 5.0f, "Time: %02d:%02d", time / 120, (time % 120) / 2 );
+		freetype::shprint( arial16, video.xres - 100.0f, 5.0f, timestrs.str() );
 		
 		if( mainGui->guiappInfo->hidden == false )
 		{	
