@@ -5,11 +5,6 @@
 
 //! \todo this really needs to be refactored into a singleton class
 
-#define APP_TITLE "Noggit3 Studio"
-#define APP_SUBTITLE "a wow map editor"
-#define APP_VERSION "Rev: 120" 
-#define APP_DATE __DATE__ ", " __TIME__
-
 class AppState;
 extern std::vector<AppState*> gStates;
 extern bool gPop;

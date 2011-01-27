@@ -84,10 +84,10 @@ IF( NOGGIT_ALL_WARNINGS )
   ENDIF( WIN32 )
 ENDIF( NOGGIT_ALL_WARNINGS )
 
-# No console window shown on launch.
-#IF ( WIN32 )
-#  SET_TARGET_PROPERTIES( noggit PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS" )
-#ENDIF( WIN32 )
+
+# Find revision ID and hash of the sourcetree
+include( "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake" )
+SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp" )
 
 # And do the job.
 INCLUDE_DIRECTORIES( ${IncludeDirectories} )
@@ -98,6 +98,8 @@ IF( APPLE )
 	SET_SOURCE_FILES_PROPERTIES( "${CMAKE_SOURCE_DIR}/media/noggit.icns" PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
 ELSE( APPLE )
 	ADD_EXECUTABLE( noggit	${HeaderFiles} ${SourceFiles} )
+  # No console window shown on launch.
+  SET_TARGET_PROPERTIES( noggit PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS" )
 ENDIF( APPLE )
 TARGET_LINK_LIBRARIES( noggit ${ZLIB_LIBRARIES} ${OPENGL_LIBRARIES} ${FREETYPE_LIBRARIES} ${SDL_LIBRARY} ${STORMLIB_LIBRARIES} ${Boost_LIBRARIES} ${GLEW_LIBRARY} )
 
