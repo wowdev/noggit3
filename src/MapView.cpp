@@ -38,7 +38,7 @@
 #include "gradient.h" // gradient
 #include "checkboxUI.h" // checkboxUI
 #include "Toolbar.h" // Toolbar
-#include "Icon.h" // Icon
+#include "ToolbarIcon.h" // ToolbarIcon
 #include "textureUI.h" // textureUI
 #include "statusBar.h" // statusBar
 #include "detailInfos.h" // detailInfos
@@ -189,6 +189,8 @@ void SaveOrReload( frame*, int pMode )
 
 void change_settings_window(int oldid, int newid)
 {
+  if(!setting_ground || !setting_blur || !settings_paint)
+    return;
 	setting_ground->hidden=true;
 	setting_blur->hidden=true;
 	settings_paint->hidden=true;
@@ -227,8 +229,6 @@ void change_settings_window(int oldid, int newid)
 		settings_paint->hidden=false;
 	break;
 	}
-	LogError << "TOOLBAR:" << oldid << "-" << newid << std::endl;
-
 }
 
 //! \todo	Do this nicer?
@@ -493,20 +493,6 @@ void view_texture_palette( frame* /*button*/, int /*id*/ )
 	TexturePalette->hidden = !TexturePalette->hidden;
 }
 
-
-void Toolbar_SelectIcon( frame* /*pButton*/, int pId )
-{
-	const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "Not used", "Flag Paint", "Not used", "Not used", "Not used", "Not used" };
-	change_settings_window( mainGui->guiToolbar->selectedIcon, pId > 6 ? 0 : pId );
-	mainGui->guiToolbar->IconSelect( pId - 1 );
-	mainGui->guiToolbar->text->setText( Names[pId-1] );
-	terrainMode = (pId - 1);
-	if (terrainMode == 3)
-		Environment::getInstance()->view_holelines = true;
-	else
-		Environment::getInstance()->view_holelines = false;
-}
-
 void exit_tilemode(  frame* /*button*/, int /*id*/ )
 {
 	gPop = true;
@@ -544,12 +530,6 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mainGui->minimapWindow = new minimapWindowUI(gWorld);
 	mainGui->minimapWindow->hidden = true;
 
-
-	//register toolbar event functions
-	for( int i = 0; i < 10; ++i )
-		if( mainGui->guiToolbar->mToolbarIcons[i] )
-			mainGui->guiToolbar->mToolbarIcons[i]->setClickFunc( Toolbar_SelectIcon, i+1 );
-
 	mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
 	tileFrames->addChild(mainGui->guiToolbar);
 
@@ -568,7 +548,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	tool_settings_x = video.xres-186;
 	tool_settings_y = 38;
 	
-	// Raisen/Lower
+	// Raise/Lower
 	setting_ground=new window(tool_settings_x,tool_settings_y,180.0f,160.0f);
 	setting_ground->movable=true;
 	tileFrames->addChild(setting_ground);
@@ -1707,22 +1687,20 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 				ah += 180.0f;
 			else
 			{
-			terrainMode++;
-			if(terrainMode==6 )terrainMode=0;
-
-			// Set the right icon in toolbar
-			Toolbar_SelectIcon( 0, terrainMode + 1 );				
+		    terrainMode = ( terrainMode + 1 ) % 6;
+		    
+			  // Set the right icon in toolbar
+			  mainGui->guiToolbar->IconSelect( terrainMode );				
 			}
 		}		
 		
 		// toggle editing mode
 		if( e->keysym.sym == SDLK_t ) 
 		{
-			terrainMode--;
-			if(terrainMode==-1 )terrainMode=5;
+		  terrainMode = ( terrainMode - 1 ) % 6;
 
 			// Set the right icon in toolbar
-			Toolbar_SelectIcon( 0, terrainMode + 1 );
+			mainGui->guiToolbar->IconSelect( terrainMode );
 		}
 
 		// clip object to ground
