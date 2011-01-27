@@ -2,7 +2,7 @@
 #include "video.h" // gl*
 #include "TextureManager.h" // TextureManager, Texture
 
-ToolbarIcon::ToolbarIcon( float xPos, float yPos, float w, float h, const std::string& tex, const std::string& texd, const int& id, EventHandlerType _eventHandler, UIEventListener* _listener ) : frame( xPos, yPos, w, h ), UIEventSender(reinterpret_cast<UIEventSender::EventHandlerType>(_eventHandler), _listener), iconId( id ), selected( false )
+ToolbarIcon::ToolbarIcon( float xPos, float yPos, float w, float h, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments ) : frame( xPos, yPos, w, h ), UIEventClassConstructorSuperCall(), iconId( id ), selected( false )
 {
 	texture = TextureManager::newTexture( tex );
 	textureSelected = TextureManager::newTexture( texd );
@@ -10,9 +10,8 @@ ToolbarIcon::ToolbarIcon( float xPos, float yPos, float w, float h, const std::s
 
 frame *ToolbarIcon::processLeftClick(float /*mx*/,float /*my*/)
 {
-  EventHandlerType eventHandlerInt = reinterpret_cast<ToolbarIcon::EventHandlerType>(eventHandler);
-  (listener->*eventHandlerInt)(iconId);
-	
+  UIEventEventHandlerCall(iconId);
+  
 	return this;
 }
 

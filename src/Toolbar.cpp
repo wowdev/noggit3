@@ -3,12 +3,12 @@
 #include "MinimizeButton.h"
 
 #include "Gui.h"
-#include "ToolbarIcon.h"
 #include "textUI.h"
 #include "textureUI.h"
 #include "TextureManager.h" // TextureManager, Texture
 #include "MapView.h" // MapView
 #include "Environment.h" // Environment
+#include "ToolbarIcon.h"
 
 Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window( xPos, yPos, w, h, "interface\\tooltips\\ui-tooltip-border.blp" ), mainGui( setGui )
 {
@@ -49,7 +49,7 @@ Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window
 
 void Toolbar::SetIcon( int pIcon, const std::string& pIconFile )
 {
-	mToolbarIcons[pIcon] = new ToolbarIcon( ( pIcon % 2 ) * 50.0f + 5.0f, ( pIcon / 2 ) * 50.0f + 30.0f, 45.0f, 45.0f, pIconFile, std::string( "Interface\\BUTTONS\\CheckButtonGlow.blp" ), pIcon, reinterpret_cast<ToolbarIcon::EventHandlerType>(&Toolbar::IconSelect), this );
+	mToolbarIcons[pIcon] = new ToolbarIcon( ( pIcon % 2 ) * 50.0f + 5.0f, ( pIcon / 2 ) * 50.0f + 30.0f, 45.0f, 45.0f, pIconFile, std::string( "Interface\\BUTTONS\\CheckButtonGlow.blp" ), pIcon, UIEventConstructorArgument(ToolbarIcon, this, Toolbar::IconSelect) );
 	this->addChild( mToolbarIcons[pIcon] );	
 }
 
