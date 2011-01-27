@@ -332,13 +332,13 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	try
 	{
 		DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID( pTileInformation.mLiquidType );
-		//initTextures<1,30>( lLiquidTypeRow.getString( LiquidTypeDB::TextureFilenames - 1 ) );
-		initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
+		initTextures<1,30>( lLiquidTypeRow.getString( LiquidTypeDB::TextureFilenames - 1 ) );
+		//initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
 		
 		mLiquidType = lLiquidTypeRow.getInt( LiquidTypeDB::Type );
 		mShaderType = lLiquidTypeRow.getInt( LiquidTypeDB::ShaderType );
-				mLiquidType = 0;
-		mShaderType = 1;
+		//mLiquidType = 0;
+		//mShaderType = 1;
 		//! \todo	Get texRepeats too.
 	}
 	catch( ... )
