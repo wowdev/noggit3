@@ -50,9 +50,6 @@ Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window
 
 void Toolbar::SetIcon( int pIcon, const std::string& pIconFile )
 {
-	char tmp1[100]; sprintf(tmp1,"n: %p\n", this);	
-	
-	LogDebug << " Toolbar-Listener:" << tmp1 << std::endl;
 	mToolbarIcons[pIcon] = new ToolbarIcon( ( pIcon % 2 ) * 50.0f + 5.0f, ( pIcon / 2 ) * 50.0f + 30.0f, 45.0f, 45.0f, pIconFile, std::string( "Interface\\BUTTONS\\CheckButtonGlow.blp" ), pIcon, UIEventConstructorArgument(ToolbarIcon, this, Toolbar::IconSelect) );
 	this->addChild( mToolbarIcons[pIcon] );	
 }
