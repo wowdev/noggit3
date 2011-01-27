@@ -3,10 +3,12 @@
 #include "MinimizeButton.h"
 
 #include "Gui.h"
-#include "Icon.h"
+#include "ToolbarIcon.h"
 #include "textUI.h"
 #include "textureUI.h"
 #include "TextureManager.h" // TextureManager, Texture
+#include "MapView.h" // MapView
+#include "Environment.h" // Environment
 
 Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window( xPos, yPos, w, h, "interface\\tooltips\\ui-tooltip-border.blp" ), mainGui( setGui )
 {
@@ -47,18 +49,34 @@ Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window
 
 void Toolbar::SetIcon( int pIcon, const std::string& pIconFile )
 {
-	mToolbarIcons[pIcon] = new Icon( ( pIcon % 2 ) * 50.0f + 5.0f, ( pIcon / 2 ) * 50.0f + 30.0f, 45.0f, 45.0f, pIconFile, "Interface\\BUTTONS\\CheckButtonGlow.blp" );
+	mToolbarIcons[pIcon] = new ToolbarIcon( ( pIcon % 2 ) * 50.0f + 5.0f, ( pIcon / 2 ) * 50.0f + 30.0f, 45.0f, 45.0f, pIconFile, std::string( "Interface\\BUTTONS\\CheckButtonGlow.blp" ), pIcon, reinterpret_cast<ToolbarIcon::EventHandlerType>(&Toolbar::IconSelect), this );
 	this->addChild( mToolbarIcons[pIcon] );	
 }
 
+// MapView.cpp
+void change_settings_window(int oldid, int newid);
+extern int terrainMode;
+
+#include "Log.h"
+
 void Toolbar::IconSelect( int pIcon )
 {
-	for( int j = 0; j < 10; j++ )
-		if( this->mToolbarIcons[j] )
-			this->mToolbarIcons[j]->selected = false;
+	change_settings_window( selectedIcon, pIcon + 1 > 6 ? 0 : pIcon + 1 );
+
+	const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "Not used", "Impassable Flag", "Not used", "Not used", "Not used", "Not used" };
+	text->setText( Names[pIcon] );
 	
-	if( !this->mToolbarIcons[pIcon] )
+	terrainMode = pIcon;
+
+  Environment::getInstance()->view_holelines = ( pIcon == 3 );
+
+	for( int j = 0; j < 10; j++ )
+		if( mToolbarIcons[j] )
+			mToolbarIcons[j]->selected = false;
+	
+	if( !mToolbarIcons[pIcon] )
 		return;
-	this->selectedIcon = pIcon;
-	this->mToolbarIcons[pIcon]->selected = true;
+	
+	selectedIcon = pIcon;
+	mToolbarIcons[pIcon]->selected = true;
 }

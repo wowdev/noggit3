@@ -3,18 +3,20 @@
 
 #include "window.h"
 #include "FreeType.h" // fonts.
+#include "UIEventClasses.h"
 
 class Gui;
 class textUI;
-class Icon;
+class ToolbarIcon;
 class textureUI;
 
-class Toolbar:public window
+class Toolbar : public window, public UIEventListener
 {
 private:
 	Gui *mainGui;
+	void SetIcon( int pIcon, const std::string& pIconFile );
 public:
-	Icon *mToolbarIcons[10];
+	ToolbarIcon *mToolbarIcons[10];
 	textUI	*text;
 	// current selected Icon
 	int selectedIcon;
@@ -22,7 +24,7 @@ public:
 	// current active texture
 	textureUI *current_texture;
 	Toolbar(float x, float y, float width, float height, Gui *setGui);
-	void SetIcon( int pIcon, const std::string& pIconFile );
 	void IconSelect(int i);
 };
 #endif
+  
