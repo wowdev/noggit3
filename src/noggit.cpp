@@ -45,12 +45,8 @@
 
 #include "AsyncLoader.h"
 
-bool fullscreen = false;
-
 std::vector<AppState*> gStates;
 bool gPop = false;
-
-std::string wowpath;
 
 extern std::list<std::string> gListfile;
 
@@ -60,56 +56,38 @@ freetype::font_data arialn13,arial12,arial14,arial16,arial24,arial32,morpheus40,
 
 AsyncLoader* gAsyncLoader;
 
-void getGamePath()
+std::string getGamePath()
 {
 	if( !FileExists( "NoggIt.conf" ) )
 	{
 	#ifdef _WIN32
-  	char temp[1024];
     HKEY key;
-    DWORD t,s;
-    LONG l;
-    s = 1024;
+    DWORD t;
+    const DWORD s = 1024;
+  	char temp[s];
     memset(temp,0,s);
-    l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta",0,KEY_QUERY_VALUE,&key);
+    LONG l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta",0,KEY_QUERY_VALUE,&key);
     if (l != ERROR_SUCCESS)
       l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
     if (l != ERROR_SUCCESS)
       l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
-    if (l == ERROR_SUCCESS) 
-    {
-      l = RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,&s);
-      RegCloseKey(key);
-      wowpath = std::string( temp );
-    }
+    if (l == ERROR_SUCCESS && RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,&s) == ERROR_SUCCESS) 
+      return temp;
+    else
+      return "";
+    RegCloseKey(key);
   #else
-    wowpath = "/Applications/World of Warcraft/";
+    return "/Applications/World of Warcraft/";
   #endif
 	}
 	else
 	{
 		Log << "Using config file." << std::endl;
-		ConfigFile config( "NoggIt.conf" );
-		config.readInto( wowpath, "Path" );
+		return ConfigFile( "NoggIt.conf" ).read<std::string>( "Path" );
 	}
 }
 
 void CreateStrips();
-
-float frand()
-{
-		return rand()/(float)RAND_MAX;
-}
-
-float randfloat(float lower, float upper)
-{
-	return lower + (upper-lower)*(rand()/(float)RAND_MAX);
-}
-
-int randint(int lower, int upper)
-{
-		return lower + (int)((upper+1-lower)*frand());
-}
 
 void setApplicationDirectory( const std::string& argv_0 )
 {
@@ -178,10 +156,11 @@ int main( int argc, char *argv[] )
 		return -1;
 	}
 	
-	srand( time( 0 ) );
+	srand( time( NULL ) );
 	
 	int xres = 1280;
 	int yres = 720;
+	bool fullscreen = false;
 	
 	// handle starting parameters
 	for( int i = 1; i < argc; ++i ) 
@@ -238,7 +217,12 @@ int main( int argc, char *argv[] )
 	
 	SDL_WM_SetCaption( "Noggit Studio - " STRPRODUCTVER, "" );
 	
-	getGamePath();
+	std::string wowpath = getGamePath();
+	if( wowpath == "" )
+	{
+    LogError << "Unable to find game path. Use the config file." << std::endl;
+    return -1;
+	}
 	
 	Log << "Game path: " << wowpath << std::endl;
 	
@@ -457,7 +441,7 @@ int main( int argc, char *argv[] )
 			{
 				// reset the resolution in video object
 				video.resize(event.resize.w,event.resize.h);
-				// message to the aktive gui element
+				// message to the active gui element
 				if(SDL_GetAppState())
 					as->resizewindow();
 			}
@@ -472,8 +456,6 @@ int main( int argc, char *argv[] )
 		{
 			gPop = false;
 			gStates.pop_back();
-			if(gStates.size())
-			  gStates[gStates.size()-1]->resizewindow();
 			delete as;
 			as = NULL;
 		}
