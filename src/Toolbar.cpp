@@ -64,7 +64,7 @@ void Toolbar::IconSelect( int pIcon )
 {
 	change_settings_window( selectedIcon, pIcon + 1 > 6 ? 0 : pIcon + 1 );
 
-	const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "Not used", "Impassable Flag", "Not used", "Not used", "Not used", "Not used" };
+	const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "AreaID Paint", "Impassible Flag", "Not used", "Not used", "Not used", "Not used" };
 	text->setText( Names[pIcon] );
 	
 	terrainMode = pIcon;
