@@ -73,12 +73,11 @@ void leave(int sig)
 
 void RegisterErrorHandlers()
 {
-	(void) signal( SIGABRT, leave );
-	(void) signal( SIGFPE, leave );
-	(void) signal( SIGILL, leave );
-	(void) signal( SIGINT, leave );
-	(void) signal( SIGSEGV, leave );
-	(void) signal( SIGTERM, leave );
+	signal( SIGABRT, leave );
+	signal( SIGFPE, leave );
+	signal( SIGILL, leave );
+	signal( SIGSEGV, leave );
+	signal( SIGTERM, leave );
 }
 
 #ifndef WIN32

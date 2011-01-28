@@ -1,21 +1,30 @@
 #ifndef MPQ_H
 #define MPQ_H
 
-#include "StormLib.h"
+#include <StormLib.h>
 
-// C++ files
 #include <string>
 #include <set>
 #include <vector>
 
-class MPQArchive
+#include "AsyncObject.h"
+
+class MPQArchive;
+class MPQFile;
+extern std::vector<MPQArchive*> gOpenArchives;
+
+class MPQArchive : public AsyncObject
 {
 	HANDLE mpq_a;
 public:
 	MPQArchive(const std::string& filename, bool doListfile = false );
 	~MPQArchive();
-
-	void close();
+	
+	void finishLoading();
+	
+	static bool allFinishedLoading();
+	
+	friend class MPQFile;
 };
 
 
@@ -66,6 +75,8 @@ public:
 	
 	static bool exists( const std::string& filename );
 	static int getSize( const std::string& filename ); // Used to do a quick check to see if a file is corrupted
+	
+	friend class MPQArchive;
 };
 
 #endif

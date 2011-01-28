@@ -85,6 +85,9 @@ void LoadTextureNames()
 	}
 
 	bool tilesetsfound = false;
+	
+	while(!MPQArchive::allFinishedLoading()); // wait for listfiles.
+	
 	for( std::list<std::string>::iterator it = gListfile.begin(); it != gListfile.end(); ++it )
 	{
 		if( it->find( "tileset" ) != std::string::npos )

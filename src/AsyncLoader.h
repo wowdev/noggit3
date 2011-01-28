@@ -17,6 +17,7 @@ public:
 	void addObject(AsyncObject* _pObject);
 	
 	void start(int _numThreads = 1);
+	void stop();
 	
 	void join();
 private:
