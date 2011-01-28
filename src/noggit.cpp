@@ -60,43 +60,37 @@ freetype::font_data arialn13,arial12,arial14,arial16,arial24,arial32,morpheus40,
 
 AsyncLoader* gAsyncLoader;
 
-void getGamePath(bool pLoadFromConfig = false)
+void getGamePath()
 {
-	// temp to store path from registry
-	char temp[1024];
-
-	// no use of configuration file
-	if( !pLoadFromConfig )
+	if( !FileExists( "NoggIt.conf" ) )
 	{
-		#ifdef _WIN32
-			HKEY key;
-			DWORD t,s;
-			LONG l;
-			s = 1024;
-			memset(temp,0,s);
-			l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta",0,KEY_QUERY_VALUE,&key);
-			if (l != ERROR_SUCCESS)
-				l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
-			if (l != ERROR_SUCCESS)
-				l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
-			if (l == ERROR_SUCCESS) 
-			{
-				l = RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,&s);
-				RegCloseKey(key);
-				wowpath = std::string( temp );
-			}
-		#else
-			pLoadFromConfig=true;
-			wowpath = "/Applications/World of Warcraft/";
-		#endif
+	#ifdef _WIN32
+  	char temp[1024];
+    HKEY key;
+    DWORD t,s;
+    LONG l;
+    s = 1024;
+    memset(temp,0,s);
+    l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta",0,KEY_QUERY_VALUE,&key);
+    if (l != ERROR_SUCCESS)
+      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
+    if (l != ERROR_SUCCESS)
+      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
+    if (l == ERROR_SUCCESS) 
+    {
+      l = RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,&s);
+      RegCloseKey(key);
+      wowpath = std::string( temp );
+    }
+  #else
+    wowpath = "/Applications/World of Warcraft/";
+  #endif
 	}
-	if( temp[0] == 0	|| pLoadFromConfig )
+	else
 	{
-		if( FileExists( "NoggIt.conf" ) )
-		{
-			ConfigFile config( "NoggIt.conf" );
-			config.readInto( wowpath, "Path" );
-		}
+		Log << "Using config file." << std::endl;
+		ConfigFile config( "NoggIt.conf" );
+		config.readInto( wowpath, "Path" );
 	}
 }
 
@@ -180,7 +174,7 @@ int main( int argc, char *argv[] )
 	bool lFontLocal = FileExists( "fonts/arial.ttf" );
 	if( !lFontWindows && !lFontLocal )
 	{
-		Log << "Can not find arial.ttf. This is really weird if you have windows. Add the file to the noggit directory then!" << std::endl;
+		LogError << "Can not find arial.ttf. This is really weird if you have windows. Add the file to the noggit directory then!" << std::endl;
 		return -1;
 	}
 	
@@ -188,28 +182,12 @@ int main( int argc, char *argv[] )
 	
 	int xres = 1280;
 	int yres = 720;
-	bool useConfig;
-
-	if( FileExists( "NoggIt.conf" ) )
-	{
-		useConfig= true;
-		Log << "Use config file!" << std::endl;
-	}
-	else
-	{
-		useConfig = false;
-	}
-
-	int gowto = -1;
 	
 	// handle starting parameters
 	for( int i = 1; i < argc; ++i ) 
 	{
 		if( !strcmp( argv[i], "-f" ) || !strcmp( argv[i], "-fullscreen" ) ) 
 			fullscreen = true;
-
-		else if( !strcmp( argv[i], "-g" ) || !strcmp( argv[i], "-goto" ) ) 
-			gowto = i + 1;
 		else if (!strcmp(argv[i],"-1024") || !strcmp(argv[i],"-1024x768")) {
 			xres = 1024;
 			yres = 768;
@@ -260,7 +238,7 @@ int main( int argc, char *argv[] )
 	
 	SDL_WM_SetCaption( "Noggit Studio - " STRPRODUCTVER, "" );
 	
-	getGamePath( useConfig );
+	getGamePath();
 	
 	Log << "Game path: " << wowpath << std::endl;
 	
