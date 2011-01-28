@@ -12,7 +12,7 @@ void AsyncLoader::process()
 		}
 		else
 		{
-			boost::this_thread::sleep(boost::posix_time::seconds(1));
+			boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 		}
 	}
 }
@@ -46,6 +46,7 @@ AsyncObject* AsyncLoader::nextObjectToLoad()
 
 void AsyncLoader::addObject(AsyncObject* _pObject)
 {
+	boost::mutex::scoped_lock lock(m_loadingMutex);
 	m_objects.push_back(_pObject);
 }
 
@@ -55,6 +56,11 @@ void AsyncLoader::start(int _numThreads)
 	{
 		m_threads.add_thread(new boost::thread(&AsyncLoader::process, this));
 	}
+}
+
+void AsyncLoader::stop()
+{
+  m_threads.interrupt_all();
 }
 
 void AsyncLoader::join()
