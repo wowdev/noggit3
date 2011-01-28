@@ -1,22 +1,21 @@
 #include <fstream>
+#include <ctime>
 
 #include "Log.h"
-
-
 
 std::ofstream gLogStream;
 
 std::ostream& _LogError( const char * pFile, int pLine )
 {
-	return std::cerr << "(" << ((strrchr(pFile, '/') ? strrchr(pFile, '/') : ( strrchr(pFile, '\\') ? strrchr(pFile, '\\') : pFile - 1 ) ) + 1) << ":" << pLine << "): [Error] ";
+	return std::cerr << clock() * 1000 / CLOCKS_PER_SEC << " - (" << ((strrchr(pFile, '/') ? strrchr(pFile, '/') : ( strrchr(pFile, '\\') ? strrchr(pFile, '\\') : pFile - 1 ) ) + 1) << ":" << pLine << "): [Error] ";
 }
 std::ostream& _LogDebug( const char * pFile, int pLine )
 {
-	return std::clog << "(" << ((strrchr(pFile, '/') ? strrchr(pFile, '/') : ( strrchr(pFile, '\\') ? strrchr(pFile, '\\') : pFile - 1 ) ) + 1) << ":" << pLine << "): [Debug] ";
+	return std::clog << clock() * 1000 / CLOCKS_PER_SEC << " - (" << ((strrchr(pFile, '/') ? strrchr(pFile, '/') : ( strrchr(pFile, '\\') ? strrchr(pFile, '\\') : pFile - 1 ) ) + 1) << ":" << pLine << "): [Debug] ";
 }
 std::ostream& _Log( const char * pFile, int pLine )
 {
-	return std::cout << "(" << ((strrchr(pFile, '/') ? strrchr(pFile, '/') : ( strrchr(pFile, '\\') ? strrchr(pFile, '\\') : pFile - 1 ) ) + 1) << ":" << pLine << "): ";
+	return std::cout << clock() * 1000 / CLOCKS_PER_SEC << " - (" << ((strrchr(pFile, '/') ? strrchr(pFile, '/') : ( strrchr(pFile, '\\') ? strrchr(pFile, '\\') : pFile - 1 ) ) + 1) << ":" << pLine << "): ";
 }
 
 void InitLogging()

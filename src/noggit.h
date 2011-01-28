@@ -14,10 +14,6 @@ extern freetype::font_data arialn13,arial12,arial14,arial16,arial24,arial32,morp
 
 extern float gFPS;
 
-float frand();
-float randfloat(float lower, float upper);
-int randint(int lower, int upper);
-
 class AreaDB;
 extern AreaDB gAreaDB;
 

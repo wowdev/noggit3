@@ -704,6 +704,16 @@ void MapChunk::initStrip()
 
 MapChunk::~MapChunk()
 {
+  //! \todo random crash here.
+  /*
+    3   ???                                 0x0000000101930340 0x0 + 4321379136
+    4   noggit                              0x00000001000298b8 _ZN8MapChunkD1Ev + 196
+    5   noggit                              0x0000000100032ce4 _ZN7MapTileD1Ev + 266
+    6   noggit                              0x00000001000bbadd _ZN5WorldD1Ev + 247
+    7   noggit                              0x0000000100044500 _ZN7MapViewD0Ev + 106
+    8   noggit                              0x000000010007cc66 SDL_main + 8004
+   */
+  
 	// unload alpha maps
 	glDeleteTextures( 3, alphamaps );
 	// shadow maps, too
