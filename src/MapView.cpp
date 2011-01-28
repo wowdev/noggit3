@@ -1320,7 +1320,7 @@ void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
 
 		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
 		std::stringstream fps; fps << gFPS << " fps";
-		freetype::shprint( arial16, video.xres - 200, 5, "%.2f fps", gFPS );
+		freetype::shprint( arial16, video.xres - 200, 5, fps.str() );
 				
 		std::ostringstream s;
 		s << "Server cords(x:" << -(gWorld->camera.x - ZEROPOINT) << " y:" << -(gWorld->camera.z - ZEROPOINT) << " z:" << gWorld->camera.y

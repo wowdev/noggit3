@@ -236,7 +236,6 @@ int main( int argc, char *argv[] )
 	gAsyncLoader = new AsyncLoader();
 	gAsyncLoader->start(4); //! \todo get the number of threads from the number of available cores.
 	
-	std::vector<MPQArchive*> archives;
 	std::vector<std::string> archiveNames;
 	archiveNames.push_back( "common.MPQ" );
 	archiveNames.push_back( "common-2.MPQ" ); 
@@ -306,7 +305,7 @@ int main( int argc, char *argv[] )
 				sprintf( temp, "%i", j );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
-					archives.push_back( new MPQArchive( path, true ) );
+					gAsyncLoader->addObject( new MPQArchive( path, true ) );
 			}
 		}
 		else if( path.find( "{character}" ) != std::string::npos	)
@@ -319,17 +318,15 @@ int main( int argc, char *argv[] )
 				sprintf( temp, "%c", c );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
-					archives.push_back( new MPQArchive( path, true ) );
+					gAsyncLoader->addObject( new MPQArchive( path, true ) );
 			}
 		}
 		else
 			if( FileExists( path ) )
-				archives.push_back( new MPQArchive( path, true ) );
+				gAsyncLoader->addObject( new MPQArchive( path, true ) );
 	}
 	
-	// sort listfiles.
-	gListfile.sort();
-	gListfile.unique();
+	// listfiles are not available straight away! They are async! Do not rely on anything at this point!
 	
 	//! \todo	Get this out?
 	//gFileList = new Directory( "root" );
@@ -475,10 +472,14 @@ int main( int argc, char *argv[] )
 	
 	video.close();
 	
-	for( std::vector<MPQArchive*>::iterator it = archives.begin(); it != archives.end(); ++it )
-		(*it)->close();
+	gAsyncLoader->stop();
+	gAsyncLoader->join();
 	
-	archives.clear();
+	for(std::vector<MPQArchive*>::iterator it=gOpenArchives.begin(); it!=gOpenArchives.end();++it)
+	{
+    delete *it;
+	}
+	gOpenArchives.clear();
 	
 	LogDebug << "Exited" << std::endl;
 	
