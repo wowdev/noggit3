@@ -21,13 +21,6 @@ inline int next_p2 ( int a )
 	return rval;
 }
 
-#ifndef min
-inline int min( int a, int b )
-{
-	return a < b ? a : b;
-}
-#endif
-
 ///Create a display list coresponding to the give character.
 int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int fontsize ) {
 
@@ -305,26 +298,13 @@ inline void pop_projection_matrix() {
 
 ///Much like Nehe's glPrint function, but modified to work
 ///with freetype fonts.
-void print(const font_data &ft_font, float x, float y, const char *fmt, ...)	{
+void print(const font_data &ft_font, float x, float y, const std::string& text)	{
 	
 	// We want a coordinate system where things coresponding to window pixels.
 	//pushScreenCoordinateMatrix();					
 	
 	GLuint font=ft_font.list_base;
 	float h=ft_font.h/.90f;						//We make the height about 1.5* that of
-	
-	char		text[10000];								// Holds Our String
-	va_list		ap;										// Pointer To List Of Arguments
-
-	if (fmt == NULL)									// If There's No Text
-		*text=0;											// Do Nothing
-
-	else {
-	va_start(ap, fmt);									// Parses The String For Variables
-			vsprintf(text, fmt, ap);						// And Converts Symbols To Actual Numbers
-	va_end(ap);											// Results Are Stored In Text
-	}
-
 
 	//Here is some code to split the text that we have been
 	//given into a set of lines.	
@@ -333,9 +313,10 @@ void print(const font_data &ft_font, float x, float y, const char *fmt, ...)	{
 	//boost.org (I've only done it out by hand to avoid complicating
 	//this tutorial with unnecessary library dependencies).
 	
-	const char *start_line=text;
+	//! \todo std::string.find ...
+	const char *start_line=text.c_str();
 	vector<string> lines;
-	const char *c=text;
+	const char *c=text.c_str();
 	for(;*c;c++) {
 		if(*c=='\n') {
 			string line;
@@ -394,81 +375,24 @@ void print(const font_data &ft_font, float x, float y, const char *fmt, ...)	{
 	//pop_projection_matrix();
 }
 
-
-
-void shprint(const font_data &ft_font, float x, float y, const char *fmt, ...)	{	
-	char		text[10000];								// Holds Our String
-	va_list		ap;										// Pointer To List Of Arguments
-
-	if (fmt == NULL)									// If There's No Text
-		*text=0;											// Do Nothing
-
-	else {
-	va_start(ap, fmt);									// Parses The String For Variables
-			vsprintf(text, fmt, ap);						// And Converts Symbols To Actual Numbers
-	va_end(ap);											// Results Are Stored In Text
-	}
-
-	//glTranslatef(2.0f,2.0f,0.0f);
-
+void shprint(const font_data &ft_font, float x, float y, const std::string& text, float colorR, float colorG, float colorB)	{	
 	glColor3f(0.0f,0.0f,0.0f);
 	print(ft_font, x+2.0f, y+2.0f, text);
-	//glTranslatef(-2.0f,-2.0f,0.0f);
-	glColor3f(1.0f,1.0f,1.0f);
+	glColor3f(colorR,colorG,colorB);
 	print(ft_font, x, y, text);
-
 }
 
-void shprinty(const font_data &ft_font, float x, float y, const char *fmt, ...)	{	
-	char		text[10000];								// Holds Our String
-	va_list		ap;										// Pointer To List Of Arguments
-
-	if (fmt == NULL)									// If There's No Text
-		*text=0;											// Do Nothing
-
-	else {
-	va_start(ap, fmt);									// Parses The String For Variables
-			vsprintf(text, fmt, ap);						// And Converts Symbols To Actual Numbers
-	va_end(ap);											// Results Are Stored In Text
-	}
-
-	//glTranslatef(2.0f,2.0f,0.0f);
-
-	glColor3f(0.0f,0.0f,0.0f);
-	print(ft_font, x+2.0f, y+2.0f, text);
-	//glTranslatef(-2.0f,-2.0f,0.0f);
-	glColor3f(0.0f,1.0f,1.0f);
-	print(ft_font, x, y, text);
-
-}
-
-int width(const font_data &ft_font, const char *fmt, ...)	
+int width(const font_data &ft_font, const std::string& text)	
 {
-	//GLuint font=ft_font.list_base;
-	//float h=ft_font.h/.63f;						//We make the height about 1.5* that of
-	
-	char		text[256];								// Holds Our String
-	va_list		ap;										// Pointer To List Of Arguments
-
-	if (fmt == NULL)									// If There's No Text
-		*text=0;											// Do Nothing
-
-	else {
-	va_start(ap, fmt);									// Parses The String For Variables
-			vsprintf(text, fmt, ap);						// And Converts Symbols To Actual Numbers
-	va_end(ap);											// Results Are Stored In Text
-	}
-
-
 	//Here is some code to split the text that we have been
 	//given into a set of lines.	
 	//This could be made much neater by using
 	//a regular expression library such as the one avliable from
 	//boost.org (I've only done it out by hand to avoid complicating
 	//this tutorial with unnecessary library dependencies).
-	const char *start_line=text;
+	const char *start_line=text.c_str();
 	vector<string> lines;
-	const char *c=text;
+	const char *c=text.c_str();
 	for(;*c;c++) {
 		if(*c=='\n') {
 			string line;

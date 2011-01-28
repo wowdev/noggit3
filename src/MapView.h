@@ -24,7 +24,7 @@ class MapView : public AppState
 	bool set_areaid;
 
 
-	frame* tileFrames;
+
 
 	float lastBrushUpdate;
 

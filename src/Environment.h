@@ -2,8 +2,10 @@
 #define __ENVIRONMENT_H
 
 #include <string>
+#include <map>
 
 #include "selection.h"
+#include "vec3d.h"
 
 class Environment
 {
@@ -13,13 +15,15 @@ public:
 	void set_clipboard(nameEntry* entry);
 
 	bool view_holelines;
-	std::vector<int> areaIDs; // List of all area IDs to draw them with different colors
+	// values for areaID painting
+	int selectedAreaID;
+	std::map<int,Vec3D> areaIDColors; // List of all area IDs to draw them with different colors
 	// hold keys
 	bool ShiftDown;
 	bool AltDown;
 	bool CtrlDown;
 	int flagPaintMode; 
-	
+
 	bool AutoSelecting;		// If true the auto selection is active
 
 private:

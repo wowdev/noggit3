@@ -23,7 +23,7 @@ textUI::textUI( float pX, float pY, freetype::font_data *pFont, int pJustify ) :
 	justify = pJustify;
 	font = pFont;
 	
-	twidth = freetype::width( *font, mText.c_str() );
+	twidth = freetype::width( *font, mText );
 	
 	width = twidth;
 	height = font->h;
@@ -33,7 +33,7 @@ textUI::textUI( float pX, float pY, freetype::font_data *pFont, int pJustify ) :
 void textUI::setText( const std::string& pText )
 {
 	mText = pText;
-	twidth = freetype::width( *font, mText.c_str() );
+	twidth = freetype::width( *font, mText );
 	width = twidth;
 	height = font->h;
 }
@@ -46,7 +46,7 @@ void textUI::setJustify(int j)
 void textUI::setFont( freetype::font_data *f )
 {
 	font = f;
-	twidth = freetype::width( *font, mText.c_str() );
+	twidth = freetype::width( *font, mText );
 	width = twidth;
 	height = font->h;
 }

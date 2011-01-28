@@ -522,28 +522,9 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	set_areaid = false;
 	mViewMode = eViewMode_3D;
 
-	tileFrames = new frame( 0.0f, 0.0f, video.xres, video.yres );
-
-	// create main gui opject that holds all other gui elements for access
-	mainGui = new Gui();
-
-	mainGui->minimapWindow = new minimapWindowUI(gWorld);
-	mainGui->minimapWindow->hidden = true;
-
+	// create main gui object that holds all other gui elements for access ( in the future ;) )
+	mainGui = new Gui(this);
 	mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
-	tileFrames->addChild(mainGui->guiToolbar);
-
-	// register statusbar
-	tileFrames->addChild(mainGui->guiStatusbar);
-
-	// register DetailInfo Window	
-	tileFrames->addChild(mainGui->guidetailInfos);
-
-	// register DetailInfo Window	
-	tileFrames->addChild(mainGui->guiappInfo);
-
-	// minimap
-	tileFrames->addChild(mainGui->minimapWindow);
 
 	tool_settings_x = video.xres-186;
 	tool_settings_y = 38;
@@ -551,7 +532,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	// Raise/Lower
 	setting_ground=new window(tool_settings_x,tool_settings_y,180.0f,160.0f);
 	setting_ground->movable=true;
-	tileFrames->addChild(setting_ground);
+	mainGui->tileFrames->addChild(setting_ground);
 
 	setting_ground->addChild( new textUI( 78.5f, 2.0f, "Raise / Lower", &arial14, eJustifyCenter ) );
 	
@@ -580,7 +561,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	setting_blur=new window(tool_settings_x,tool_settings_y,180.0f,100.0f);
 	setting_blur->movable=true;
 	setting_blur->hidden=true;
-	tileFrames->addChild(setting_blur);
+	mainGui->tileFrames->addChild(setting_blur);
 
 	setting_blur->addChild( new textUI( 78.5f, 2.0f, "Flatten / Blur", &arial14, eJustifyCenter ) );
 
@@ -601,7 +582,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	settings_paint->hidden=true;
 	settings_paint->movable=true;
 
-	tileFrames->addChild(settings_paint);
+	mainGui->tileFrames->addChild(settings_paint);
 
 	settings_paint->addChild( new textUI( 78.5f, 2.0f, "3D Paint", &arial14, eJustifyCenter ) );
 	
@@ -639,13 +620,13 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	S1->setText("Pressure: %.2f");
 	settings_paint->addChild(S1);
 
-	tileFrames->addChild(TexturePalette = TexturingUI::createTexturePalette(4,8,mainGui));
+	mainGui->tileFrames->addChild(TexturePalette = TexturingUI::createTexturePalette(4,8,mainGui));
 	TexturePalette->hidden=true;
-	tileFrames->addChild(SelectedTexture = TexturingUI::createSelectedTexture());
+	mainGui->tileFrames->addChild(SelectedTexture = TexturingUI::createSelectedTexture());
 	SelectedTexture->hidden=true;
-	tileFrames->addChild(TexturingUI::createTilesetLoader());
-	tileFrames->addChild(TexturingUI::createTextureFilter());
-	tileFrames->addChild(MapChunkWindow = TexturingUI::createMapChunkWindow());
+	mainGui->tileFrames->addChild(TexturingUI::createTilesetLoader());
+	mainGui->tileFrames->addChild(TexturingUI::createTextureFilter());
+	mainGui->tileFrames->addChild(MapChunkWindow = TexturingUI::createMapChunkWindow());
 	MapChunkWindow->hidden=true;
 	
 	// create the menu
@@ -719,7 +700,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Help" )->AddMenuItemButton( "Key Bindings", openHelp, 0 );
 	mbar->GetMenu( "Help" )->AddMenuItemToggle( "Infos", &mainGui->guiappInfo->hidden, true );
 
-	tileFrames->addChild( mbar );
+	mainGui->tileFrames->addChild( mbar );
 }
 
 MapView::~MapView()
@@ -734,10 +715,10 @@ MapView::~MapView()
 		delete gWorld;
 		gWorld = NULL;
 	}
-	if( tileFrames )
+	if( mainGui->tileFrames )
 	{
-		delete tileFrames;
-		tileFrames = NULL;
+		delete mainGui->tileFrames;
+		mainGui->tileFrames = NULL;
 	}
 }
 
@@ -957,7 +938,28 @@ void MapView::tick( float t, float dt )
 					else if( Environment::getInstance()->CtrlDown )
 						gWorld->addHole( xPos, zPos );
 						
-					break;
+				break;
+
+				case 4:
+					if( Environment::getInstance()->ShiftDown	)
+					{
+						// draw the selected AreaId on current selected chunk
+						nameEntry * lSelection = gWorld->GetCurrentSelection();
+						int mtx,mtz,mcx,mcy;
+						mtx = lSelection->data.mapchunk->mt->mPositionX;
+						mtz = lSelection->data.mapchunk->mt->mPositionZ ;
+						mcx = lSelection->data.mapchunk->px;
+						mcy = lSelection->data.mapchunk->py;
+						gWorld->setAreaID( Environment::getInstance()->selectedAreaID, mtx,mtz, mcx, mcy );
+					}
+					else if( Environment::getInstance()->CtrlDown )
+					{
+						// pick areaID from chunk
+						Environment::getInstance()->selectedAreaID = gWorld->GetCurrentSelection()->data.mapchunk->areaID;
+					}
+
+				break;
+
 				case 5:
 					if( Environment::getInstance()->ShiftDown	)
 						gWorld->setFlag( true, xPos, zPos );
@@ -1269,7 +1271,7 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 	glColor4f(1.0f,1.0f,1.0f,1.0f);
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
-	tileFrames->render();
+	mainGui->tileFrames->render();
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 	
@@ -1279,7 +1281,7 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 	{
 		freetype::shprint( arial16, 410.0f, 4.0f, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
 		std::stringstream fps; fps << gFPS << " fps";
-		freetype::shprint( arial16, video.xres - 200.0f, 5, "%.2f fps", gFPS );
+		freetype::shprint( arial16, video.xres - 200.0f, 5, fps.str() );
 	}
 
 	if (gWorld->loading) 
@@ -1314,13 +1316,13 @@ void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
 		
 		glActiveTexture(GL_TEXTURE0);
 		glDisable(GL_TEXTURE_2D);
-		tileFrames->render();
+		mainGui->tileFrames->render();
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 
 		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
 		std::stringstream fps; fps << gFPS << " fps";
-		freetype::shprint( arial16, video.xres - 200, 5, "%.2f fps", gFPS );
+		freetype::shprint( arial16, video.xres - 200, 5, fps.str() );
 				
 		std::ostringstream s;
 		s << "Server cords(x:" << -(gWorld->camera.x - ZEROPOINT) << " y:" << -(gWorld->camera.z - ZEROPOINT) << " z:" << gWorld->camera.y
@@ -1331,7 +1333,7 @@ void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
 		int time = int( gWorld->time ) % 2880;
 
 		std::stringstream timestrs; timestrs << "Time: " << (time/120) << ":" << (time%120);
-		freetype::shprint( arial16, video.xres - 100.0f, 5.0f, "Time: %02d:%02d", time / 120, (time % 120) / 2 );
+		freetype::shprint( arial16, video.xres - 100.0f, 5.0f, timestrs.str() );
 		
 		if( mainGui->guiappInfo->hidden == false )
 		{	
@@ -1410,7 +1412,6 @@ void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
 
 					break;
 				case eEntry_MapChunk:
-					
 					s << "Mapchunk " << lSelection->data.mapchunk->px << ", " << lSelection->data.mapchunk->py << " (" << lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px << ") of tile (" << lSelection->data.mapchunk->mt->mPositionX << "_" << lSelection->data.mapchunk->mt->mPositionZ << ")" << std::endl;;
 					s << "Area ID: " << lSelection->data.mapchunk->areaID << " Name:" << gAreaDB.getAreaName( lSelection->data.mapchunk->areaID ).c_str() << std::endl;
 					s << "Flags: " << lSelection->data.mapchunk->Flags << std::endl;
@@ -1535,7 +1536,7 @@ void MapView::display( float t, float dt )
 
 void MapView::resizewindow()
 {
-	for( std::vector<frame*>::iterator child = tileFrames->children.begin(); child != tileFrames->children.end(); ++child )
+	for( std::vector<frame*>::iterator child = mainGui->tileFrames->children.begin(); child != mainGui->tileFrames->children.end(); ++child )
 		if( (*child)->mustresize )
 			(*child)->resize();
 }
@@ -1697,8 +1698,8 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		// toggle editing mode
 		if( e->keysym.sym == SDLK_t ) 
 		{
-		  terrainMode = ( terrainMode - 1 ) % 6;
-
+		  terrainMode =  terrainMode - 1;
+		  if(terrainMode<0) terrainMode = 5;
 			// Set the right icon in toolbar
 			mainGui->guiToolbar->IconSelect( terrainMode );
 		}
@@ -2116,7 +2117,7 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 		 else if (leftMouse)
 		 {
 			// Only left
-			LastClicked = tileFrames->processLeftClick( float( MouseX ), float( MouseY ) );	
+			LastClicked = mainGui->tileFrames->processLeftClick( float( MouseX ), float( MouseY ) );	
 			if( mViewMode == eViewMode_3D && !LastClicked )
 				doSelection( 1 );
 		 }

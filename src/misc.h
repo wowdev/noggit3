@@ -1,16 +1,17 @@
 #ifndef MISC_H
 #define MISC_H
 
-// class for static helper functions.
+// namespace for static helper functions.
 
-class misc
+namespace misc
 {
-public:
-	misc(void);
-	~misc(void);
-	static void find_and_replace( std::string &source, const std::string find, std::string replace ) ;
-	static int FtoIround(float d);
-	static char roundc(float a);
+	void find_and_replace( std::string& source, const std::string& find, const std::string& replace );
+	int FtoIround(float d);
+	char roundc(float a);
+  float frand();
+  float randfloat(float lower, float upper);
+  int randint(int lower, int upper);
 };
+
 
 #endif

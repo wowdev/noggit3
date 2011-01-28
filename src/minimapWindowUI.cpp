@@ -39,7 +39,7 @@ minimapWindowUI::minimapWindowUI( World *setMap) : window( 10, 10, 100, 100 )
 frame* minimapWindowUI::processLeftClick( float mx, float my )
 {
 	// no click outside the adt block
-	if( !mMenuLink ||
+	if( !gWorld || !mMenuLink ||
 			mx < this->borderwidth || mx > this->height - this->borderwidth ||
 			my < this->borderwidth || my > this->height - this->borderwidth )
 		return NULL;
@@ -47,7 +47,6 @@ frame* minimapWindowUI::processLeftClick( float mx, float my )
 	// is there a tile?
 	int i =  (int)( mx - this->borderwidth ) / this->tilesize;
 	int j =  (int)( my - this->borderwidth ) / this->tilesize;
-	LogError << "Cords:" << j << " - " << i << std::endl;
 	if( !gWorld->hasTile(j,i) ) 
 		return NULL;		
 

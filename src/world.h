@@ -161,7 +161,7 @@ public:
 	//! \brief Get the area ID of the tile on which the camera currently is on.
 	unsigned int getAreaID();
 	void setAreaID(int id, int x, int z);
-	void setAreaID(int id, int x, int z , float cx, float cz);
+	void setAreaID(int id, int x, int z , int cx, int cz);
 	void setFlag(bool to, float x, float z);
 
 	void drawSelection(int cursorX,int cursorY, bool pOnlyMap = false );

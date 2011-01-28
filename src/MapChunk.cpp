@@ -7,6 +7,11 @@
 #include "TextureManager.h" // TextureManager, Texture
 #include "mapheaders.h"
 #include "quaternion.h"
+#include "misc.h"
+#include "vec3d.h"
+#include <map>
+#include <iostream>
+
 
 extern int terrainMode;
 
@@ -190,6 +195,14 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 	Flags = header.flags;
 	areaID = header.areaid;
 	
+	if( Environment::getInstance()->areaIDColors.find(areaID) == Environment::getInstance()->areaIDColors.end() )
+	{
+		Vec3D newColor = Vec3D( misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) );
+		Environment::getInstance()->areaIDColors.insert( std::pair<int,Vec3D>(areaID, newColor) );
+	}
+
+	Environment::getInstance()->selectedAreaID = areaID; //The last loaded is selected on start.
+
 	zbase = header.zpos;
 	xbase = header.xpos;
 	ybase = header.ypos;
@@ -704,6 +717,16 @@ void MapChunk::initStrip()
 
 MapChunk::~MapChunk()
 {
+  //! \todo random crash here.
+  /*
+    3   ???                                 0x0000000101930340 0x0 + 4321379136
+    4   noggit                              0x00000001000298b8 _ZN8MapChunkD1Ev + 196
+    5   noggit                              0x0000000100032ce4 _ZN7MapTileD1Ev + 266
+    6   noggit                              0x00000001000bbadd _ZN5WorldD1Ev + 247
+    7   noggit                              0x0000000100044500 _ZN7MapViewD0Ev + 106
+    8   noggit                              0x000000010007cc66 SDL_main + 8004
+   */
+  
 	// unload alpha maps
 	glDeleteTextures( 3, alphamaps );
 	// shadow maps, too
@@ -1063,26 +1086,23 @@ void MapChunk::draw()
 
 	drawContour();
 
-
-
 	if(terrainMode==5)
 	{
-
-		if((Environment::getInstance()->flagPaintMode) == FLAG_IMPASS && Flags & FLAG_IMPASS)
+		// draw chunk white if impassible flag is set 
+		if(Flags & FLAG_IMPASS)
 		{
 			glColor4f(1,1,1,0.6f);
 			drawPass(0);
 		}
+	}
 
-		if((Environment::getInstance()->flagPaintMode) == FLAG_LQ_MAGMA && Flags & FLAG_LQ_MAGMA)
-		{
-			glColor4f(1,0.5f,0,0.2f);
-			drawPass(0);
-		}
-
-		if((Environment::getInstance()->flagPaintMode) == FLAG_LQ_SLIME && Flags & FLAG_LQ_SLIME)
-		{
-			glColor4f(0,1.0f,0,0.2f);
+	if(terrainMode==4)
+	{
+		// draw chunks in color depending on AreaID and list color from environment
+		if(Environment::getInstance()->areaIDColors.find(areaID) != Environment::getInstance()->areaIDColors.end() )
+		{	
+			Vec3D colorValues = Environment::getInstance()->areaIDColors.find(areaID)->second;
+			glColor4f(colorValues.x,colorValues.y,colorValues.z,0.7f);
 			drawPass(0);
 		}
 	}

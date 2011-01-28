@@ -16,6 +16,7 @@
 #include "world.h"
 #include "TextureManager.h" // TextureManager, Texture
 #include "noggit.h" // fonts, APP_*
+#include "misc.h"
 
 #include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
 #include "ModelManager.h" // ModelManager
@@ -110,7 +111,7 @@ void Menu::randBackground()
 	int randnum;
 	do
 	{
-		randnum = randint( 0, ui.size() - 1 );
+		randnum = misc::randint( 0, ui.size() - 1 );
 	}
 	while( randnum == mLastBackgroundId );
 

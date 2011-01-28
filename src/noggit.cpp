@@ -17,6 +17,7 @@
 #include <list>
 
 #include "noggit.h"
+#include "revision.h"
 
 #include "appstate.h"
 #include "menu.h"
@@ -44,12 +45,8 @@
 
 #include "AsyncLoader.h"
 
-bool fullscreen = false;
-
 std::vector<AppState*> gStates;
 bool gPop = false;
-
-std::string wowpath;
 
 extern std::list<std::string> gListfile;
 
@@ -59,62 +56,38 @@ freetype::font_data arialn13,arial12,arial14,arial16,arial24,arial32,morpheus40,
 
 AsyncLoader* gAsyncLoader;
 
-void getGamePath(bool pLoadFromConfig = false)
+std::string getGamePath()
 {
-	// temp to store path from registry
-	char temp[1024];
-
-	// no use of configuration file
-	if( !pLoadFromConfig )
+	if( !FileExists( "NoggIt.conf" ) )
 	{
-		#ifdef _WIN32
-			HKEY key;
-			DWORD t,s;
-			LONG l;
-			s = 1024;
-			memset(temp,0,s);
-			l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta",0,KEY_QUERY_VALUE,&key);
-			if (l != ERROR_SUCCESS)
-				l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
-			if (l != ERROR_SUCCESS)
-				l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
-			if (l == ERROR_SUCCESS) 
-			{
-				l = RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,&s);
-				RegCloseKey(key);
-				wowpath = std::string( temp );
-			}
-		#else
-			pLoadFromConfig=true;
-			wowpath = "/Applications/World of Warcraft/";
-		#endif
+	#ifdef _WIN32
+    HKEY key;
+    DWORD t;
+    const DWORD s = 1024;
+  	char temp[s];
+    memset(temp,0,s);
+    LONG l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta",0,KEY_QUERY_VALUE,&key);
+    if (l != ERROR_SUCCESS)
+      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
+    if (l != ERROR_SUCCESS)
+      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
+    if (l == ERROR_SUCCESS && RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,(LPDWORD)&s) == ERROR_SUCCESS) 
+      return temp;
+    else
+      return "";
+    RegCloseKey(key);
+  #else
+    return "/Applications/World of Warcraft/";
+  #endif
 	}
-	if( temp[0] == 0	|| pLoadFromConfig )
+	else
 	{
-		if( FileExists( "NoggIt.conf" ) )
-		{
-			ConfigFile config( "NoggIt.conf" );
-			config.readInto( wowpath, "Path" );
-		}
+		Log << "Using config file." << std::endl;
+		return ConfigFile( "NoggIt.conf" ).read<std::string>( "Path" );
 	}
 }
 
 void CreateStrips();
-
-float frand()
-{
-		return rand()/(float)RAND_MAX;
-}
-
-float randfloat(float lower, float upper)
-{
-	return lower + (upper-lower)*(rand()/(float)RAND_MAX);
-}
-
-int randint(int lower, int upper)
-{
-		return lower + (int)((upper+1-lower)*frand());
-}
 
 void setApplicationDirectory( const std::string& argv_0 )
 {
@@ -166,7 +139,7 @@ int main( int argc, char *argv[] )
 	Project::getInstance();
 	Environment::getInstance();
 
-	Log << APP_TITLE << " " << APP_VERSION << std::endl;
+	Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 	
 	// Why should we load anything when there are missing files? ...
 	
@@ -179,36 +152,21 @@ int main( int argc, char *argv[] )
 	bool lFontLocal = FileExists( "fonts/arial.ttf" );
 	if( !lFontWindows && !lFontLocal )
 	{
-		Log << "Can not find arial.ttf. This is really weird if you have windows. Add the file to the noggit directory then!" << std::endl;
+		LogError << "Can not find arial.ttf. This is really weird if you have windows. Add the file to the noggit directory then!" << std::endl;
 		return -1;
 	}
 	
-	srand( time( 0 ) );
+	srand( time( NULL ) );
 	
 	int xres = 1280;
 	int yres = 720;
-	bool useConfig;
-
-	if( FileExists( "NoggIt.conf" ) )
-	{
-		useConfig= true;
-		Log << "Use config file!" << std::endl;
-	}
-	else
-	{
-		useConfig = false;
-	}
-
-	int gowto = -1;
+	bool fullscreen = false;
 	
 	// handle starting parameters
 	for( int i = 1; i < argc; ++i ) 
 	{
 		if( !strcmp( argv[i], "-f" ) || !strcmp( argv[i], "-fullscreen" ) ) 
 			fullscreen = true;
-
-		else if( !strcmp( argv[i], "-g" ) || !strcmp( argv[i], "-goto" ) ) 
-			gowto = i + 1;
 		else if (!strcmp(argv[i],"-1024") || !strcmp(argv[i],"-1024x768")) {
 			xres = 1024;
 			yres = 768;
@@ -257,9 +215,14 @@ int main( int argc, char *argv[] )
 		return -1;
 	}
 	
-	SDL_WM_SetCaption( APP_TITLE, "noggit.bmp" );
+	SDL_WM_SetCaption( "Noggit Studio - " STRPRODUCTVER, "" );
 	
-	getGamePath( useConfig );
+	std::string wowpath = getGamePath();
+	if( wowpath == "" )
+	{
+    LogError << "Unable to find game path. Use the config file." << std::endl;
+    return -1;
+	}
 	
 	Log << "Game path: " << wowpath << std::endl;
 	
@@ -273,7 +236,6 @@ int main( int argc, char *argv[] )
 	gAsyncLoader = new AsyncLoader();
 	gAsyncLoader->start(4); //! \todo get the number of threads from the number of available cores.
 	
-	std::vector<MPQArchive*> archives;
 	std::vector<std::string> archiveNames;
 	archiveNames.push_back( "common.MPQ" );
 	archiveNames.push_back( "common-2.MPQ" ); 
@@ -343,7 +305,7 @@ int main( int argc, char *argv[] )
 				sprintf( temp, "%i", j );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
-					archives.push_back( new MPQArchive( path, true ) );
+					gAsyncLoader->addObject( new MPQArchive( path, true ) );
 			}
 		}
 		else if( path.find( "{character}" ) != std::string::npos	)
@@ -356,17 +318,15 @@ int main( int argc, char *argv[] )
 				sprintf( temp, "%c", c );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
-					archives.push_back( new MPQArchive( path, true ) );
+					gAsyncLoader->addObject( new MPQArchive( path, true ) );
 			}
 		}
 		else
 			if( FileExists( path ) )
-				archives.push_back( new MPQArchive( path, true ) );
+				gAsyncLoader->addObject( new MPQArchive( path, true ) );
 	}
 	
-	// sort listfiles.
-	gListfile.sort();
-	gListfile.unique();
+	// listfiles are not available straight away! They are async! Do not rely on anything at this point!
 	
 	//! \todo	Get this out?
 	//gFileList = new Directory( "root" );
@@ -478,7 +438,7 @@ int main( int argc, char *argv[] )
 			{
 				// reset the resolution in video object
 				video.resize(event.resize.w,event.resize.h);
-				// message to the aktive gui element
+				// message to the active gui element
 				if(SDL_GetAppState())
 					as->resizewindow();
 			}
@@ -493,7 +453,6 @@ int main( int argc, char *argv[] )
 		{
 			gPop = false;
 			gStates.pop_back();
-			gStates[gStates.size()-1]->resizewindow();
 			delete as;
 			as = NULL;
 		}
@@ -504,9 +463,6 @@ int main( int argc, char *argv[] )
 		if (ft >= 1000) 
 		{
 			gFPS = (float)fcount / (float)ft * 1000.0f;
-			//	char buf[32];
-			//	sprintf(buf, APP_TITLE " - %.2f fps",fps);
-			//	SDL_WM_SetCaption(buf,NULL);
 			ft = 0;
 			fcount = 0;
 		}
@@ -516,10 +472,14 @@ int main( int argc, char *argv[] )
 	
 	video.close();
 	
-	for( std::vector<MPQArchive*>::iterator it = archives.begin(); it != archives.end(); ++it )
-		(*it)->close();
+	gAsyncLoader->stop();
+	gAsyncLoader->join();
 	
-	archives.clear();
+	for(std::vector<MPQArchive*>::iterator it=gOpenArchives.begin(); it!=gOpenArchives.end();++it)
+	{
+    delete *it;
+	}
+	gOpenArchives.clear();
 	
 	LogDebug << "Exited" << std::endl;
 	

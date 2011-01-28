@@ -11,124 +11,81 @@
 #include <sstream>
 #include <algorithm>
 
+#include <boost/thread.hpp>
 #include <stdint.h>
 
-typedef std::vector< std::pair< std::string, HANDLE* > > ArchiveSet;
-ArchiveSet gOpenArchives;
+std::vector<MPQArchive*> gOpenArchives;
 
 std::list<std::string> gListfile;
+boost::mutex gListfileLoadingMutex;
 
-MPQArchive::MPQArchive(const std::string& filename,bool doListfile)
+MPQArchive::MPQArchive(const std::string& filename, bool doListfile)
 {
-
-	bool result = SFileOpenArchive( filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE, &mpq_a );
-
-	if(!result) {
-		//gLog("Error opening archive %s\n", filename);
+  if(!SFileOpenArchive( filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE, &mpq_a ))
+  {
+		LogError << "Error opening archive: " << filename << "\n";
 		return;
 	}
-	//Log << "Opening archive:" << filename << std::endl;
-	gOpenArchives.push_back( make_pair( filename, &mpq_a ) );
+	
+	LogDebug << "Opened archive: " << filename << "\n";
+	
+	gOpenArchives.push_back( this );
 
-	if( doListfile )
+  finished = !doListfile;
+}
+
+void MPQArchive::finishLoading()
+{
+  boost::mutex::scoped_lock lock(gListfileLoadingMutex);
+  
+  if(finished)
+    return;
+    
+	HANDLE fh;
+
+	if( SFileOpenFileEx( mpq_a, "(listfile)", 0, &fh ) )
 	{
-		HANDLE fh;
-
-		if( !SFileOpenFileEx( mpq_a, "(listfile)", 0, &fh ) )
-		{
-			//LogError << "No listfile in archive \"" << filename << "\"." << std::endl;	
-			SFileCloseArchive(&mpq_a);
-			return;
-		}
-
-		// Found!
-		DWORD filesize = SFileGetFileSize( fh );
-
-		// HACK: in patch.mpq some files don't want to open and give 1 for filesize
-		// TODO STEFF test if this is alos in StormLib version the case.
-		if (filesize<=1) {
-			return;
-		}
-
-		unsigned char *readbuffer = new unsigned char[filesize];
-		SFileReadFile( fh, readbuffer, filesize );
-		SFileCloseFile( fh );
-
-		char*file=strtok((char *)readbuffer,"\r\n");
-		while (file) 
-		{
-			std::string line = file;
-			std::transform( line.begin(), line.end(), line.begin(), ::tolower );
-			gListfile.push_back( line );
-				
-			file = (char*)strtok(NULL, "\r\n");
-		}
-		free(readbuffer);
+  	size_t filesize = SFileGetFileSize( fh );
+  
+  	unsigned char *readbuffer = new unsigned char[filesize];
+  	SFileReadFile( fh, readbuffer, filesize );
+  	SFileCloseFile( fh );
+  
+  	char*file=strtok((char *)readbuffer,"\r\n");
+  	while (file) 
+  	{
+      std::string line = file;
+  		std::transform( line.begin(), line.end(), line.begin(), ::tolower );
+  		gListfile.push_back( line );
+  				
+  		file = (char*)strtok(NULL, "\r\n");
+  	}
+  	free(readbuffer);
+	}
+	
+	finished = true;
+	
+	if(MPQArchive::allFinishedLoading())
+	{
+    gListfile.sort();
+    gListfile.unique();
+    LogDebug << "Completed listfile loading.\n";
 	}
 }
 
 MPQArchive::~MPQArchive()
 {
-	/*
-	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
-	{
-		mpq_archive &mpq_a = **i;
-		
-		free(mpq_a.header);
-	}
-	*/
-	//gOpenArchives.erase(gOpenArchives.begin(), gOpenArchives.end());
-}
-
-void MPQArchive::close()
-{
 	SFileCloseArchive(mpq_a);
-	for(ArchiveSet::iterator it=gOpenArchives.begin(); it!=gOpenArchives.end();++it)
-	{
-		HANDLE &mpq_b = *it->second;
-		if (&mpq_b == &mpq_a) {
-			gOpenArchives.erase(it);
-			//delete (*it);
-			return;
-		}
-	}
-	
 }
 
-void MPQFile::SaveFile()
-{	
-	FILE* fd;
-	
-	std::string lFilename = fname;
-	//LogDebug << fname << std::endl;
-	size_t found = lFilename.find( "\\" );
-	while( found != std::string::npos )
+bool MPQArchive::allFinishedLoading()
+{
+  bool allFinished = true;
+  for(std::vector<MPQArchive*>::const_iterator it = gOpenArchives.begin(); it != gOpenArchives.end(); ++it)
 	{
-		lFilename.replace( found, 1, "/" );
-		found = lFilename.find( "\\" );
+    allFinished = allFinished && (*it)->finishedLoading();
 	}
-	//LogDebug << lFilename << std::endl;	
-	std::string lDirectoryName = lFilename;	
-
-	found = lDirectoryName.find_last_of("/\\");
-	if( found != std::string::npos )
-		CreatePath( lDirectoryName.substr( 0, found + 1 ) );
-	else
-		LogError << "Is \"" << lDirectoryName << "\" really a location I can write to? Please report this line." << std::endl;
-		//LogDebug << lDirectoryName << std::endl;	
-	
-
-	fd = fopen( lFilename.c_str(), "wb" );
-
-	if( fd )
-	{
-		Log << "Saving file \"" << lFilename << "\"." << std::endl;
-		fseek(fd,0,SEEK_SET);
-		fwrite(buffer,1,size,fd);
-		fclose(fd);
-		External=true;
-		return;
-	}
+	return allFinished;
 }
 
 MPQFile::MPQFile( const std::string& filename ):
@@ -167,13 +124,11 @@ MPQFile::MPQFile( const std::string& filename ):
 		return;
 	}
 	
-	for(ArchiveSet::reverse_iterator i=gOpenArchives.rbegin(); i!=gOpenArchives.rend(); ++i)
+	for(std::vector<MPQArchive*>::reverse_iterator i = gOpenArchives.rbegin(); i!=gOpenArchives.rend(); ++i)
 	{
-		HANDLE &mpq_a = *i->second;
-		
 		HANDLE fh;
 		
-		if( !SFileOpenFileEx( mpq_a, filename.c_str(), 0, &fh ) )
+		if( !SFileOpenFileEx( (*i)->mpq_a, filename.c_str(), 0, &fh ) )
 			continue;
 		
 		// Found!
@@ -207,15 +162,9 @@ MPQFile::~MPQFile()
 
 bool MPQFile::exists( const std::string& filename )
 {
-
-	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
-	{
-
-		HANDLE &mpq_a = *i->second;
-		
-		if( SFileHasFile( mpq_a,filename.c_str()) )
-			return true;
-	}
+	for(std::vector<MPQArchive*>::iterator it=gOpenArchives.begin(); it!=gOpenArchives.end();++it)
+    if( SFileHasFile( (*it)->mpq_a, filename.c_str() ) )
+      return true;
 
 	std::string diskpath = Project::getInstance()->getPath().append(filename);
 	
@@ -306,15 +255,14 @@ void FixFilePath( std::string & pFilename )
 
 int MPQFile::getSize( const std::string& filename )
 {
-	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
+	for(std::vector<MPQArchive*>::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
 	{
-		HANDLE &mpq_a = *i->second;
 		HANDLE fh;
 		
-		if( !SFileOpenFileEx( mpq_a, filename.c_str(), 0, &fh ) )
+		if( !SFileOpenFileEx( (*i)->mpq_a, filename.c_str(), 0, &fh ) )
 			continue;
 
-		DWORD filesize = SFileGetFileSize( fh );
+		size_t filesize = SFileGetFileSize( fh );
 		SFileCloseFile( fh );
 		return filesize;
 	}
@@ -336,3 +284,41 @@ unsigned char* MPQFile::getPointer() const
 {
 	return buffer + pointer;
 }
+
+void MPQFile::SaveFile()
+{	
+	FILE* fd;
+	
+	std::string lFilename = fname;
+	//LogDebug << fname << std::endl;
+	size_t found = lFilename.find( "\\" );
+	while( found != std::string::npos )
+	{
+		lFilename.replace( found, 1, "/" );
+		found = lFilename.find( "\\" );
+	}
+	//LogDebug << lFilename << std::endl;	
+	std::string lDirectoryName = lFilename;	
+
+	found = lDirectoryName.find_last_of("/\\");
+	if( found != std::string::npos )
+		CreatePath( lDirectoryName.substr( 0, found + 1 ) );
+	else
+		LogError << "Is \"" << lDirectoryName << "\" really a location I can write to? Please report this line." << std::endl;
+		//LogDebug << lDirectoryName << std::endl;	
+	
+
+	fd = fopen( lFilename.c_str(), "wb" );
+
+	if( fd )
+	{
+		Log << "Saving file \"" << lFilename << "\"." << std::endl;
+		fseek(fd,0,SEEK_SET);
+		fwrite(buffer,1,size,fd);
+		fclose(fd);
+		External=true;
+		return;
+	}
+}
+
+
