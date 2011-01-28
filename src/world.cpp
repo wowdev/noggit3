@@ -1332,14 +1332,13 @@ void World::setAreaID(int id, int x, int z)
 	}
 }
 
-void World::setAreaID(int id, int x, int z , float _cx, float _cz)
+void World::setAreaID(int id, int x, int z , int _cx, int _cz)
 {
 	// set the Area ID on a tile x,z on the chunk cx,cz
 	MapTile *curTile;
-
 	curTile = mTiles[z][x].tile;
 	if(curTile == 0) return;
-
+	this->setChanged(z,x);
 	MapChunk *curChunk = curTile->getChunk(_cx, _cz);
 
 	if(curChunk == 0) return;
@@ -1862,3 +1861,4 @@ void World::setFlag( bool to, float x, float z)
 		}
 	}
 }
+
