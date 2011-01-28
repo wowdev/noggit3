@@ -71,7 +71,7 @@ std::string getGamePath()
       l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
     if (l != ERROR_SUCCESS)
       l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
-    if (l == ERROR_SUCCESS && RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,&s) == ERROR_SUCCESS) 
+    if (l == ERROR_SUCCESS && RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,(LPDWORD)&s) == ERROR_SUCCESS) 
       return temp;
     else
       return "";
