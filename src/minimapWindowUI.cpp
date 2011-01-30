@@ -1,10 +1,12 @@
+#include <vector>
+
 #include "minimapWindowUI.h"
 #include "video.h"
 #include "TextureManager.h"
 #include "world.h"
 #include "menu.h"
 #include "log.h"
-
+#include "sky.h"
 
 minimapWindowUI::minimapWindowUI( Menu* menuLink ) : window( 10, 10, 100, 100 ), mMenuLink( menuLink )
 {
@@ -151,6 +153,23 @@ void minimapWindowUI::render() const
 		glColor4f(1.0f,1.0f,1.0f,1.0f);
 		glVertex2f(fx + 10.0f*cosf(this->lookAt/180.0f*PI), fz + 10.0f*sinf(this->lookAt/180.0f*PI));
 		glEnd();
+
+		int skycount = this->map->skies->skies.size();
+
+		
+		for (int j=0; j < skycount; j++)
+		{
+			glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+			float x = this->map->skies->skies[j].pos.x/ TILESIZE * this->tilesize;
+			float z = this->map->skies->skies[j].pos.z/ TILESIZE * this->tilesize;
+			glBegin( GL_QUADS );
+			glVertex2i( 0.0f + x,	0.0f + z );
+			glVertex2i( 0.0f + x+3,	0.0f + z );
+			glVertex2i( 0.0f + x+3,	0.0f + z+3 );
+			glVertex2i( 0.0f + x,	0.0f + z+3 );
+			glEnd();
+		}
 	}
+
 	glPopMatrix();
 }

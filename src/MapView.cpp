@@ -33,6 +33,7 @@
 // ui classes
 #include "slider.h" // slider
 #include "Gui.h" // Gui
+#include "ui_ZoneIdBrowser.h" // Gui
 #include "ToggleGroup.h" // ToggleGroup
 #include "textUI.h" // textUI
 #include "gradient.h" // gradient
@@ -99,6 +100,7 @@ bool	alloff_detailselect = false;
 bool	alloff_fog = false;
 bool	alloff_terrain = false;
 
+Gui *mainGuiPointer;
 slider *ground_brush_radius;
 float groundBrushRadius=15.0f;
 slider *ground_brush_speed;
@@ -194,6 +196,7 @@ void change_settings_window(int oldid, int newid)
 	setting_ground->hidden=true;
 	setting_blur->hidden=true;
 	settings_paint->hidden=true;
+	mainGuiPointer->ZoneIDBrowser->hidden = true;
 	// fetch old win position
 	switch(oldid)
 	{
@@ -227,6 +230,9 @@ void change_settings_window(int oldid, int newid)
 		settings_paint->x=tool_settings_x;
 		settings_paint->y=tool_settings_y;
 		settings_paint->hidden=false;
+	break;
+	case 5:
+		mainGuiPointer->ZoneIDBrowser->hidden=false;
 	break;
 	}
 }
@@ -524,6 +530,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
 	// create main gui object that holds all other gui elements for access ( in the future ;) )
 	mainGui = new Gui(this);
+	mainGuiPointer = mainGui;
 	mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
 
 	tool_settings_x = video.xres-186;
@@ -2074,7 +2081,9 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 	}
 
 	if( leftMouse && LastClicked )
+	{
 		LastClicked->processLeftDrag( e->x - 4, e->y - 4, e->xrel, e->yrel );
+	}
 
 	if( mViewMode == eViewMode_3D && TestSelection )
 	{

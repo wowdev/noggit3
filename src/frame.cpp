@@ -3,9 +3,6 @@
 
 #include <algorithm>
 
-
-
-
 void frame::render() const
 {
 	if( hidden )
