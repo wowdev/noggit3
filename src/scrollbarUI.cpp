@@ -1,6 +1,8 @@
 #include "scrollbarUI.h"
 #include "buttonUI.h"
 #include "textureUI.h"
+#include "log.h"
+#include "misc.h"
 
 void scrollbarProcessClick(frame *f,int id)
 {
@@ -22,11 +24,43 @@ scrollbarUI::scrollbarUI(float xpos, float ypos, float h, int n)
 	ScrollDown->setClickFunc(scrollbarProcessClick,1);
 	addChild(ScrollDown);
 	ScrollKnob=new textureUI(-6.0f,10.0f,32.0f,32.0f,"Interface\\Buttons\\UI-ScrollBar-Knob.blp");
-	ScrollKnob->setClickFunc(scrollbarProcessClick,2);
 	addChild(ScrollKnob);
 	value=0;
 	num=n;
 	changeFunc=0;
+}
+
+bool scrollbarUI::processLeftDrag(float mx,float my, float /*xChange*/, float /*yChange*/)
+{
+	
+	float tx,ty;
+	this->getOffset(tx,ty);
+	my-=ty;
+	value=misc::FtoIround(num*my/height);
+
+	if(value<0)
+		value=0;
+	else if(value>num-1)
+		value=num-1;
+
+	if(num>0)
+		ScrollKnob->y=10.0f+(height-48.0f)*value/num;
+	return true;
+}
+
+frame *scrollbarUI::processLeftClick(float mx,float my)
+{
+	frame * lTemp;
+	for( std::vector<frame*>::reverse_iterator child = children.rbegin(); child != children.rend(); child++ )
+	{
+		if( !( *child )->hidden && ( *child )->IsHit( mx, my ) )
+		{
+			lTemp = ( *child )->processLeftClick( mx - ( *child )->x, my - ( *child )->y );
+			if( lTemp )
+				return lTemp;
+		}
+	}
+	return this;
 }
 
 void scrollbarUI::clickReturn(int id)
@@ -43,10 +77,13 @@ void scrollbarUI::clickReturn(int id)
 	}
 	else//ScrollKnob
 	{
+		// handeld with processLeftClick and processLeftDrag
 	}
+	
 	//Update ScrollKnob Position
 	if(num>0)
-		ScrollKnob->y=10.0f+(height-40.0f)*value/num;
+		ScrollKnob->y=10.0f+(height-48.0f)*value/num;
+	// call changeFunc if set
 	if(changeFunc)
 		changeFunc(value);
 }
@@ -68,7 +105,7 @@ void scrollbarUI::setValue(int i)
 	if(value<0)
 		value=0;
 	if(num>0)
-		ScrollKnob->y=14.0f+(height-48.0f)*value/num;
+		ScrollKnob->y=10.0f+(height-48.0f)*value/num;
 }
 void scrollbarUI::setNum(int i)
 {

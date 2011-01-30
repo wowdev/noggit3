@@ -25,7 +25,7 @@ Gui::Gui(MapView *setMapview)
 	this->tileFrames->addChild(this->guiToolbar);
 	
 	// Statusbar
-	this->guiStatusbar = new statusBar( 0.0f, video.yres - 30.0f, video.xres, 30.0f );
+	this->guiStatusbar =	new statusBar( 0.0f, video.yres - 30.0f, video.xres, 30.0f );
 	this->tileFrames->addChild(this->guiStatusbar);
 
 	// DetailInfoWindow
@@ -35,7 +35,7 @@ Gui::Gui(MapView *setMapview)
 	this->tileFrames->addChild(this->guidetailInfos);
 
 	// ZoneIDBrowser
-	this->ZoneIDBrowser = new ui_ZoneIdBrowser(100, 100, 400, 300, this);
+	this->ZoneIDBrowser = new ui_ZoneIdBrowser(200, 200, 400, 300, this);
 	this->ZoneIDBrowser->movable = true;
 	this->ZoneIDBrowser->hidden = true;
 	this->tileFrames->addChild(this->ZoneIDBrowser);

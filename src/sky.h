@@ -65,14 +65,14 @@ enum SkyColorNames {
 };
 
 class Skies {
-	std::vector<Sky> skies;
+
 	int numSkies;
 	int cs;
 	Model *stars;
 	char skyname[128];
 
 public:
-
+	std::vector<Sky> skies;
 	Vec3D colorSet[18];
 
 	Skies( unsigned int mapid );
