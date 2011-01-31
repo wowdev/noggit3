@@ -16,6 +16,7 @@ ui_ListView::ui_ListView(float xPos, float yPos, float w, float h, int elementHe
 	this->scrollbar->setChangeFunc(changeValue);
 	this->addChild(scrollbar);
 	this->elements_rows = (int)( h / elementHeight);
+	
 }
 
 ui_ListView::~ui_ListView(void)
@@ -24,6 +25,8 @@ ui_ListView::~ui_ListView(void)
 
 void ui_ListView::addElement( frame *element )
 {
+	element->x = 4;
+	element->y = 0;
 	element->height = this->elements_height;
 	element->width = this->width-20;
 	this->addChild(element);
