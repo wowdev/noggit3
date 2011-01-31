@@ -212,6 +212,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	
 	//! \todo	Parse all chunks in the new style!
 
+	// - MH2O ----------------------------------------------
 	if(Header.mh2o != 0) {
 		theFile.seek( Header.mh2o + 0x14 );
 		theFile.read( &fourcc, 4 );
@@ -258,8 +259,8 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 						}
 					}
 				}
-
-				if(info.ofsInfoMask != 0 && !(lTile.mFlags & 2)) {
+				//! \todo investigate flags...
+				if(info.ofsInfoMask != 0 /*&& !(lTile.mFlags & 2)*/) {
 					theFile.seek(ofsW + info.ofsInfoMask);
 					int h = 0;
 					int w = 0;
@@ -278,15 +279,23 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 						lTile.mRender[info.yOffset+h][info.xOffset+w] = tmp & (1 << shft);
 						++w;
 						++shft;
+					}				
+				}
+				else/* if (info.Flags == 0)*/{
+					for(int h=info.yOffset ; h < info.yOffset+info.height; ++h) {
+						for(int w=info.xOffset; w < info.xOffset+info.width; ++w) {
+							lTile.mRender[h][w] = true;
+						}	
 					}
 				}
-				else if(lHeader[i*16 + j].ofsRenderMask!=0) {
+				//! \todo ...and check, if we can omit this, or what this really is.
+				/*else if(lHeader[i*16 + j].ofsRenderMask!=0) {
 					char render[8];
 					theFile.seek(ofsW + lHeader[i*16 + j].ofsRenderMask);
 					theFile.read(&render, 8*sizeof(char));
 					for(int k=0 ; k < 8; ++k){
 						for(int m=0; m < 8; ++m){
-							lTile.mRender[k][m] = render[k] & (1 << m);
+							lTile.mRender[k][m] |= render[k] & (1 << m);
 						}	
 					}
 				}
@@ -296,7 +305,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 							lTile.mRender[k][m] = true;
 						}	
 					}
-				}
+				}*/
 				
 
 				Liquid * lq = new Liquid( info.width, info.height, Vec3D( xbase + CHUNKSIZE * j, lTile.mMinimum, zbase + CHUNKSIZE * i ) );
