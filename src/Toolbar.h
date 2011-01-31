@@ -26,5 +26,5 @@ public:
 	Toolbar(float x, float y, float width, float height, Gui *setGui);
 	void IconSelect(int i);
 };
-#endif
+#endif 
   
