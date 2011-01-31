@@ -1862,3 +1862,8 @@ void World::setFlag( bool to, float x, float z)
 	}
 }
 
+unsigned int World::getMapID()
+{
+	return this->mMapId;
+}
+

@@ -533,6 +533,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mainGuiPointer = mainGui;
 	mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
 
+	mainGui->ZoneIDBrowser->setMapID((int)gWorld->getMapID());
 	tool_settings_x = video.xres-186;
 	tool_settings_y = 38;
 	

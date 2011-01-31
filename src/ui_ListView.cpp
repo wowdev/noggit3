@@ -30,7 +30,7 @@ void ui_ListView::addElement( frame *element )
 	element->height = this->elements_height;
 	element->width = this->width-20;
 	this->addChild(element);
-	this->scrollbar->setNum(this->children.size()-1);
+	this->scrollbar->setNum(this->children.size()-this->elements_rows);
 	recalcElements(1);
 }
 

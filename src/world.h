@@ -83,6 +83,8 @@ class World
 	float l_linear;
 	float l_quadratic;
 	
+
+
 	void initMinimap();
 	void initLowresTerrain();
 	
@@ -93,6 +95,7 @@ class World
 	void outdoorLighting2();
 	
 public:
+	unsigned int getMapID();
 	// Do we draw *? Should be moved somewhere else, these are not World related.
 	bool drawdoodads;
 	bool drawfog;
