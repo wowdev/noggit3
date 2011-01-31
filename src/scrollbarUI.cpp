@@ -30,7 +30,7 @@ scrollbarUI::scrollbarUI(float xpos, float ypos, float h, int n)
 	changeFunc=0;
 }
 
-bool scrollbarUI::processLeftDrag(float mx,float my, float /*xChange*/, float /*yChange*/)
+bool scrollbarUI::processLeftDrag(float mx,float my, float xChange, float yChange)
 {
 	
 	float tx,ty;
@@ -45,6 +45,9 @@ bool scrollbarUI::processLeftDrag(float mx,float my, float /*xChange*/, float /*
 
 	if(num>0)
 		ScrollKnob->y=10.0f+(height-48.0f)*value/num;
+
+	if(changeFunc)
+		changeFunc(this,value);
 	return true;
 }
 
@@ -85,10 +88,10 @@ void scrollbarUI::clickReturn(int id)
 		ScrollKnob->y=10.0f+(height-48.0f)*value/num;
 	// call changeFunc if set
 	if(changeFunc)
-		changeFunc(value);
+		changeFunc(this,value);
 }
 
-void scrollbarUI::setChangeFunc(void (*f)(int))
+void scrollbarUI::setChangeFunc( void (*f)( frame *, int ))
 {
 	changeFunc=f;
 }
