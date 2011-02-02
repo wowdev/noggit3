@@ -2,6 +2,7 @@
 #define MAPTILE_H
 
 #include <vector>
+#include <map>
 
 #include "mapheaders.h"
 #include "video.h" // GLfloat, GLshort, ...
@@ -58,7 +59,7 @@ private:
 	std::string mFilename;
 
 	MapChunk * mChunks[16][16];
-	std::vector<Liquid*> mLiquids;
+	std::map<int,Liquid*> mLiquids;
 	
 	friend class MapChunk;
 };
