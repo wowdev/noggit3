@@ -226,10 +226,6 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 			for(int j=0; j < 16; ++j) {
 				//! \todo Implement more than just one layer...
 				if(lHeader[i*16 + j].nLayers < 1){ //if it has no layers, insert a dummy liquid tile for later use
-					MH2O_Tile lTile;
-					Liquid * lq = new Liquid( 0, 0, Vec3D( xbase + CHUNKSIZE * j, 0, zbase + CHUNKSIZE * i ) );
-					lq->setMH2OData( lTile );
-					mLiquids.insert(std::pair<int,Liquid*>(i*16+j, lq) );
 					continue;
 				}
 				MH2O_Tile lTile;
@@ -323,7 +319,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 				Liquid * lq = new Liquid( info.width, info.height, Vec3D( xbase + CHUNKSIZE * j, lTile.mMinimum, zbase + CHUNKSIZE * i ) );
 				lq->setMH2OData( lTile );
 				LogDebug << "Inserted Data to MH2O: "<<i*16+j << std::endl;
-				mLiquids.insert(std::pair<int,Liquid*>(i*16+j, lq ));
+				mLiquids.push_back( lq );
 			}
 		}
 
@@ -486,12 +482,12 @@ MapTile::~MapTile()
 	}
 	mModelFilenames.clear();
 	
-	for( std::map<int,Liquid*>::iterator it = mLiquids.begin(); it != mLiquids.end(); ++it )
+	for( std::vector<Liquid*>::iterator it = mLiquids.begin(); it != mLiquids.end(); ++it )
 	{
-		if( (*it).second )
+		if( *it )
 		{
-			delete (*it).second ;
-			(*it).second  = NULL;
+			delete *it;
+			*it  = NULL;
 		}
 	}
 	
@@ -593,8 +589,8 @@ void MapTile::drawWater()
 	glDisable(GL_COLOR_MATERIAL);
 	glDisable(GL_LIGHTING);
 	
-	for( std::map<int,Liquid*>::iterator liq = mLiquids.begin(); liq != mLiquids.end(); liq++ )
-		(*liq).second->draw();
+	for( std::vector<Liquid*>::iterator liq = mLiquids.begin(); liq != mLiquids.end(); liq++ )
+		(*liq)->draw();
 	
 	glEnable(GL_LIGHTING);
 	glEnable(GL_COLOR_MATERIAL);
@@ -1126,7 +1122,7 @@ void MapTile::saveTile()
 //	}
 
 	//MH2O
-	{
+	if(false){
 		int lMH2O_size = 256*sizeof(MH2O_Header);
 		MH2O_Header lHeader[256];
 		MH2O_Information lInfo[256];
@@ -1134,44 +1130,45 @@ void MapTile::saveTile()
 		char depthMask[256][9][9];
 		char lRender[256][8];
 		char lMask[256][8];
+		Liquid* lLiquids[256];
+		//! \todo implement finding the correct liquids...
 		//prev work for writing MH2O, setting offsets etc.
-		for(int i=0; i< 16;++i){
-			for(int j=0; j< 16; ++j){
-				Liquid* tmpLiqu = mLiquids[i*16+j];
+		for(int i=0; i< 256;++i){
+				Liquid* tmpLiqu = lLiquids[i];//mLiquids[i];
 				if(tmpLiqu && tmpLiqu->isNotEmpty()){
 					MH2O_Tile tTile = tmpLiqu->getMH2OData();
 					//! \todo implement more than just one layer...
-					lHeader[i*16+j].nLayers  = 1;
-					lHeader[i*16+j].ofsInformation = lMH2O_size;
+					lHeader[i].nLayers  = 1;
+					lHeader[i].ofsInformation = lMH2O_size;
 
 					lMH2O_size += sizeof(MH2O_Information);
-					lInfo[i*16+j].Flags = tTile.mFlags;
-					lInfo[i*16+j].LiquidType = tTile.mLiquidType;
-					lInfo[i*16+j].maxHeight = tTile.mMaximum;
-					lInfo[i*16+j].minHeight = tTile.mMinimum;
-					lInfo[i*16+j].width = tmpLiqu->getWidth();
-					lInfo[i*16+j].height = tmpLiqu->getHeight();
-					lInfo[i*16+j].xOffset = tmpLiqu->getXOffset();
-					lInfo[i*16+j].yOffset = tmpLiqu->getYOffset();
+					lInfo[i].Flags = tTile.mFlags;
+					lInfo[i].LiquidType = tTile.mLiquidType;
+					lInfo[i].maxHeight = tTile.mMaximum;
+					lInfo[i].minHeight = tTile.mMinimum;
+					lInfo[i].width = tmpLiqu->getWidth();
+					lInfo[i].height = tmpLiqu->getHeight();
+					lInfo[i].xOffset = tmpLiqu->getXOffset();
+					lInfo[i].yOffset = tmpLiqu->getYOffset();
 					//LogDebug << "TileInfo "<< i << " " << j << " Width: "<<lInfo[i*16+j].width << " Height: "<<lInfo[i*16+j].height;
 
 					//! put the data instead after all info?
 
-					lInfo[i*16+j].ofsHeightMap = lMH2O_size;	
+					lInfo[i].ofsHeightMap = lMH2O_size;	
 					//raising size for the heightmask
-					lMH2O_size += (lInfo[i*16+j].height+1)*(lInfo[i*16+j].width+1)*(sizeof(float)+sizeof(char));
-					for(int w = lInfo[i*16+j].yOffset; w < lInfo[i*16+j].yOffset+lInfo[i*16+j].width + 1; ++w){
-						for(int h = lInfo[i*16+j].xOffset; h < lInfo[i*16+j].xOffset+lInfo[i*16+j].height + 1; ++h){
-							heightMask[i*16+j][w][h] =  tTile.mHeightmap[w][h];
-							depthMask[i*16+j][w][h] = char(255*tTile.mDepth[w][h]);
+					lMH2O_size += (lInfo[i].height+1)*(lInfo[i].width+1)*(sizeof(float)+sizeof(char));
+					for(int w = lInfo[i].yOffset; w < lInfo[i].yOffset+lInfo[i].width + 1; ++w){
+						for(int h = lInfo[i].xOffset; h < lInfo[i].xOffset+lInfo[i].height + 1; ++h){
+							heightMask[i][w][h] =  tTile.mHeightmap[w][h];
+							depthMask[i][w][h] = char(255*tTile.mDepth[w][h]);
 						}
 					}
 
-					lInfo[i*16+j].ofsInfoMask = lMH2O_size;
+					lInfo[i].ofsInfoMask = lMH2O_size;
 					//raising size for the infomask
-					lMH2O_size += lInfo[i*16+j].height*sizeof(char); //this is false?
+					lMH2O_size += lInfo[i].height*sizeof(char); //this is false?
 					//! \todo check for flags
-					lHeader[i*16+j].ofsRenderMask = lMH2O_size;
+					lHeader[i].ofsRenderMask = lMH2O_size;
 					lMH2O_size += 8*sizeof(char); //rendermask
 					for(int w = 0; w < 8; ++w) {
 						char tmp = 0;
@@ -1180,65 +1177,62 @@ void MapTile::saveTile()
 								tmp |= 1 << h;
 							}
 						}
-						lRender[i*16+j][w] = tmp;
+						lRender[i][w] = tmp;
 					}
 					int tc = 0;
 					int shft = 0;
 					char tmp = 0;
-					for(int w = 0; w < lInfo[i*16+j].width; ++w){
-						for(int h = 0; h < lInfo[i*16+j].height; ++h){
+					for(int w = 0; w < lInfo[i].width; ++w){
+						for(int h = 0; h < lInfo[i].height; ++h){
 							tmp += 1 << shft;
 							++shft;
 							if(shft == 8){
-								lMask[i*16+j][tc++] = tmp;
+								lMask[i][tc++] = tmp;
 								shft = 0;
 								tmp = 0;
 							}
 						}
 					}
 					if(shft != 0)
-						lMask[i*16+j][tc++] = tmp;
+						lMask[i][tc++] = tmp;
 				}
 				else{
-					lHeader[i*16+j].nLayers  = 0;
-					lHeader[i*16+j].ofsInformation = 0;
-					lHeader[i*16+j].ofsRenderMask = 0;
+					lHeader[i].nLayers  = 0;
+					lHeader[i].ofsInformation = 0;
+					lHeader[i].ofsRenderMask = 0;
 				}
-			}
 		}
 
 		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mh2o = lCurrentPosition - 0x14;
 		lADTFile.Extend(8 + lMH2O_size);
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MH2O', lMH2O_size );
 		
-		for(int i=0; i<16; ++i){
-			for(int j=0; j<16; ++j){
-				MH2O_Header * tmpHeader = lADTFile.GetPointer<MH2O_Header>(lCurrentPosition + 8 + (i*16+j)*sizeof(MH2O_Header));
-				memcpy(tmpHeader, &lHeader[i*16+j], sizeof(MH2O_Header));
+		for(int i=0; i<256; ++i){
+				MH2O_Header * tmpHeader = lADTFile.GetPointer<MH2O_Header>(lCurrentPosition + 8 + i*sizeof(MH2O_Header));
+				memcpy(tmpHeader, &lHeader[i], sizeof(MH2O_Header));
 				if(tmpHeader->nLayers != 0){
 					MH2O_Information* tmpInfo = lADTFile.GetPointer<MH2O_Information>(lCurrentPosition + 8 + tmpHeader->ofsInformation);
-					memcpy(tmpInfo, &lInfo[i*16+j], sizeof(MH2O_Information));
+					memcpy(tmpInfo, &lInfo[i], sizeof(MH2O_Information));
 
 					float * tmpHeight = lADTFile.GetPointer<float>(lCurrentPosition + 8 + tmpInfo->ofsHeightMap);
 					char * tmpDepth = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpInfo->ofsHeightMap + (tmpInfo->width+1)*(tmpInfo->height+1)*sizeof(float));
 					int c = 0;
 					for(int w = tmpInfo->yOffset; w < tmpInfo->yOffset+tmpInfo->width + 1; ++w){
 						for(int h = tmpInfo->xOffset; h < tmpInfo->xOffset+tmpInfo->height + 1; ++h){
-							tmpHeight[c] = heightMask[i*16+j][w][h];
-							tmpDepth[c] = depthMask[i*16+j][w][h];
+							tmpHeight[c] = heightMask[i][w][h];
+							tmpDepth[c] = depthMask[i][w][h];
 							++c;
 						}
 					}
 					char* tmpMask = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpInfo->ofsInfoMask);
 					char * tmpRender = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpHeader->ofsRenderMask);
 					for(int w = 0; w < 8; ++w){
-							tmpRender[w] = lRender[i*16+j][w];
+							tmpRender[w] = lRender[i][w];
 					}
 					for(int h =0; h < tmpInfo->height; ++h){
-						tmpMask[h] = lMask[i*16+j][h];
+						tmpMask[h] = lMask[i][h];
 					}
 				}
-			}
 		}
 		LogDebug << "Wrote MH2O!" << std::endl;
 		lCurrentPosition += 8 + lMH2O_size;
