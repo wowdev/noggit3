@@ -59,7 +59,7 @@ private:
 	std::string mFilename;
 
 	MapChunk * mChunks[16][16];
-	std::map<int,Liquid*> mLiquids;
+	std::vector<Liquid*> mLiquids;
 	
 	friend class MapChunk;
 };
