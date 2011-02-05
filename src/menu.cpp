@@ -334,7 +334,7 @@ void Menu::createMapList()
 		e.areaType = i->getUInt( MapDB::AreaType );
 		if( e.areaType < 0 || e.areaType > 2 || !World::IsEditableWorld( e.mapID ) )
 			continue;
-		
+
 		mMaps.push_back( e );
 	}
 }

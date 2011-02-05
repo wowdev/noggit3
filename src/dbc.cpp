@@ -60,13 +60,7 @@ std::string AreaDB::getAreaName( int pAreaID )
 		}
 	}
 	
-	misc::find_and_replace(areaName,"ä","ae");
-	misc::find_and_replace(areaName,"ö","oe");
-	misc::find_and_replace(areaName,"ü","ue");
-	misc::find_and_replace(areaName,"ß","ss");
-	misc::find_and_replace(areaName,"Ä","Ae");
-	misc::find_and_replace(areaName,"Ö","Oe");
-	misc::find_and_replace(areaName,"�oe","Ue");
+	areaName = misc::replaceSpezialChars(areaName);
 
 	return areaName;
 }
