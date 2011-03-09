@@ -215,7 +215,8 @@ static void CustomApplicationMain (int argc, char **argv)
 #endif /* SDL_USE_CPS */
 
     /* Set up the menubar */
-    [NSApp setMainMenu:[[NSMenu alloc] init]];
+    NSMenu* menu = [[NSMenu alloc] init];
+    [NSApp setMainMenu: menu];
     setApplicationMenu();
     setupWindowMenu();
 
@@ -228,6 +229,7 @@ static void CustomApplicationMain (int argc, char **argv)
     
     [sdlMain release];
     [pool release];
+    [menu release];
 }
 
 #endif

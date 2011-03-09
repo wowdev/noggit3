@@ -449,7 +449,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 
 				this->mt->mLiquids.insert(std::pair<int,Liquid*>( 0, lq) );
 
-				/*
+				
 				// let's output some debug info! ( '-')b
 				string lq = "";
 				if (flags & 4) lq.append(" river");

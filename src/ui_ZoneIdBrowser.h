@@ -21,7 +21,7 @@ private:
 	ui_ListView *ZoneIdList;
 	int heightExpanded;
 	int mapID;
-	int zoneID;
+	unsigned int zoneID;
 	int subZoneID;
 	int selectedAreaID;
 	void buildAreaList();
