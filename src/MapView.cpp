@@ -117,6 +117,7 @@ float brushPressure=0.9f;
 float brushLevel=255.0f;
 
 int terrainMode=0;
+int saveterrainMode = 0;
 
 brush textureBrush;
 
@@ -510,6 +511,16 @@ void test_menu_action(  frame* /*button*/, int id )
 		gWorld->setAreaID(5000,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
+void changeZoneIDValue(frame *f,int set)
+{
+	Environment::getInstance()->selectedAreaID = set;
+	if( Environment::getInstance()->areaIDColors.find(set) == Environment::getInstance()->areaIDColors.end() )
+	{
+		Vec3D newColor = Vec3D( misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) );
+		Environment::getInstance()->areaIDColors.insert( std::pair<int,Vec3D>(set, newColor) );
+	}
+}
+
 MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 {
 	LastClicked=0;
@@ -533,6 +544,8 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mainGuiPointer = mainGui;
 	mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
 
+	mainGui->ZoneIDBrowser->setMapID((int)gWorld->getMapID());
+	mainGui->ZoneIDBrowser->setChangeFunc(changeZoneIDValue);
 	tool_settings_x = video.xres-186;
 	tool_settings_y = 38;
 	
@@ -962,7 +975,9 @@ void MapView::tick( float t, float dt )
 					else if( Environment::getInstance()->CtrlDown )
 					{
 						// pick areaID from chunk
-						Environment::getInstance()->selectedAreaID = gWorld->GetCurrentSelection()->data.mapchunk->areaID;
+						int newID = gWorld->GetCurrentSelection()->data.mapchunk->areaID;
+						Environment::getInstance()->selectedAreaID = newID;
+						mainGui->ZoneIDBrowser->setZoneID(newID);
 					}
 
 				break;
@@ -1007,9 +1022,10 @@ void MapView::tick( float t, float dt )
 
 			if( leftMouse && !LastClicked && TexturingUI::getSelectedTexture() )
 			{
-				float mX, mY;
-				mX = CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x;
-				mY = CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z;
+				
+					float mX, mY;
+					mX = CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x;
+					mY = CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z;
 
 				if( Environment::getInstance()->CtrlDown )
 					gWorld->eraseTextures( mX, mY );
@@ -1020,10 +1036,11 @@ void MapView::tick( float t, float dt )
 						textureBrush.GenerateTexture();
 					}
 					
-					gWorld->paintTexture( mX, mY, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture() ->name ) );
+					if( Environment::getInstance()->ShiftDown )
+						gWorld->paintTexture( mX, mY, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture() ->name ) );
 				}
+			
 			}
-
 		}
 	}
 	else
@@ -1934,10 +1951,21 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_u )
 		{
 			if( mViewMode == eViewMode_2D )
+			{
 				mViewMode = eViewMode_3D;
+				terrainMode = saveterrainMode;
+				// Set the right icon in toolbar
+				mainGui->guiToolbar->IconSelect( terrainMode );	
+			}
 			else
+			{
 				mViewMode = eViewMode_2D;
-			//gWorld->ResetSelection();
+				saveterrainMode = terrainMode;
+				terrainMode = 2;
+				// Set the right icon in toolbar
+				mainGui->guiToolbar->IconSelect( terrainMode );	
+			}
+
 		}
 
 				// doodads set
@@ -2097,6 +2125,17 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 		}
 	}	
 	
+	if( mViewMode == eViewMode_2D && leftMouse && !( Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown || Environment::getInstance()->AltDown )  )
+	{
+		strafing = ((e->xrel / XSENS) / -1) * 5.0f;
+		moving = (e->yrel / YSENS) * 5.0f;
+	}	
+
+	if( mViewMode == eViewMode_2D && rightMouse && !( Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown || Environment::getInstance()->AltDown )  )
+	{
+		updown = (e->yrel / YSENS);
+	}
+
 	MouseX = e->x;
 	MouseY = e->y;
 }
@@ -2171,6 +2210,12 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 			if( !gWorld->HasSelection() || ( !gWorld->IsSelection( eEntry_Model ) && !gWorld->IsSelection( eEntry_WMO ) ) ) 
 				Environment::getInstance()->AutoSelecting = true;
 			if(!key_w && moving > 0.0f )moving = 0.0f;
+			
+			if( mViewMode == eViewMode_2D )
+			{
+				strafing = 0;
+				moving = 0;
+			}
 		 }
 		 
 		 if (!rightMouse)
@@ -2180,6 +2225,11 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 				mViewMode = eViewMode_3D; // Steff: exit help window when open
 			look = false;
 			if(!key_w && moving > 0.0f )moving = 0.0f;
+
+			if( mViewMode == eViewMode_2D )
+			{
+				updown = 0;
+			}
 		 }
 	}
 

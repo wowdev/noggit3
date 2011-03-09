@@ -430,6 +430,9 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 				haswater = false;
 			}
 			else {
+				//! \todo this is just commented out, till initFromTerrain is reimplemented for saving with MH2O!
+				haswater = false;
+			/*
 				haswater = true;
 				f.seekRelative(-4);
 				float waterlevel[2];
@@ -444,7 +447,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 				//lq->init(f);
 				lq->initFromTerrain(f, header.flags);
 
-				this->mt->mLiquids.push_back( lq );
+				this->mt->mLiquids.insert(std::pair<int,Liquid*>( 0, lq) );
 
 				/*
 				// let's output some debug info! ( '-')b
@@ -455,7 +458,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 				if (flags & 32) lq.append(" slime?");
 				LogDebug << "LQ" << lq << " (base:" << waterlevel << ")" << std::endl;
 				*/
-
+				
 			}
 			// we're done here!
 			break;

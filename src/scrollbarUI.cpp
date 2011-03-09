@@ -35,8 +35,8 @@ bool scrollbarUI::processLeftDrag(float /*mx*/,float my, float /*xChange*/, floa
 	
 	float tx,ty;
 	this->getOffset(tx,ty);
-	my-=ty;
-	value=misc::FtoIround(num*my/height);
+	my-=(ty+32);
+	value=misc::FtoIround(num*my/(height-64));
 
 	if(value<0)
 		value=0;
@@ -44,7 +44,7 @@ bool scrollbarUI::processLeftDrag(float /*mx*/,float my, float /*xChange*/, floa
 		value=num-1;
 
 	if(num>0)
-		ScrollKnob->y=10.0f+(height-48.0f)*value/num;
+		ScrollKnob->y=10.0f+(height-52.0f)*value/num;
 
 	if(changeFunc)
 		changeFunc(this,value);
@@ -85,7 +85,7 @@ void scrollbarUI::clickReturn(int id)
 	
 	//Update ScrollKnob Position
 	if(num>0)
-		ScrollKnob->y=10.0f+(height-48.0f)*value/num;
+		ScrollKnob->y=10.0f+(height-52.0f)*value/num;
 	// call changeFunc if set
 	if(changeFunc)
 		changeFunc(this,value);
@@ -108,7 +108,7 @@ void scrollbarUI::setValue(int i)
 	if(value<0)
 		value=0;
 	if(num>0)
-		ScrollKnob->y=10.0f+(height-48.0f)*value/num;
+		ScrollKnob->y=10.0f+(height-52.0f)*value/num;
 }
 void scrollbarUI::setNum(int i)
 {

@@ -2,6 +2,7 @@
 #define MAPTILE_H
 
 #include <vector>
+#include <map>
 
 #include "mapheaders.h"
 #include "video.h" // GLfloat, GLshort, ...

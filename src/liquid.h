@@ -13,7 +13,11 @@ class Liquid;
 #include "maptile.h"
 #include "wmo.h"
 
+//#include "Log.h"
+
 class OpenGL::CallList;
+
+//static int lCount = 0;
 
 void loadWaterShader();
 
@@ -80,12 +84,19 @@ class Liquid
 	unsigned char	*color;
 	unsigned char	*waterFlags;
 
+	//int number;
+
+private:
+	MH2O_Tile mTileData;
+
 public:
 
 
 	Liquid(int x, int y, Vec3D base, float ptilesize = LQ_DEFAULT_TILESIZE):
 		xtiles(x), ytiles(y), pos(base), tilesize(ptilesize)
 	{
+	//	number = ++lCount;
+	//	LogDebug << "Created Liquid of Number: " << number << std::endl;
 		ydir = 1.0f;
 		mDrawList = NULL;
 	}
@@ -96,9 +107,26 @@ public:
 	void initFromTerrain(MPQFile &f, int flags);
 	void initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor);
 	void initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, MH2O_Render *render );
-	void initFromMH2O( MH2O_Tile pTileInformation );
+	void initFromMH2O();
+
+	MH2O_Tile getMH2OData();
+	void setMH2OData(MH2O_Tile pTileInfo);
+
+	int getWidth();
+	int getHeight();
+	int getXOffset();
+	int getYOffset();
+
+	bool isNotEmpty();
+
+	bool isRendered(int i, int j);
+	void setRender(int i, int j);
+	void unsetRender(int i, int j);
 
 	void draw();
+
+private:
+	void recalcSize();
 
 
 };

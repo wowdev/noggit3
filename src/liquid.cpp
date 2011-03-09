@@ -5,6 +5,7 @@
 #include "Log.h"
 #include "TextureManager.h" // TextureManager, Texture
 
+
 struct LiquidVertex {
 	unsigned char c[4];
 	float h;
@@ -324,14 +325,14 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 	}
 }
 
-void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
+void Liquid::initFromMH2O()
 {
 	texRepeats = 4.0f;
 	ydir = 1.0f;
 
 	try
 	{
-		DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID( pTileInformation.mLiquidType );
+		DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID( mTileData.mLiquidType );
 		initTextures<1,30>( lLiquidTypeRow.getString( LiquidTypeDB::TextureFilenames - 1 ) );
 		//initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
 		
@@ -356,7 +357,7 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	Vec3D lVertices[9][9];
 	for( int j = 0; j < 9; ++j )
 		for( int i = 0; i < 9; ++i ) 
-			lVertices[j][i] = Vec3D( pos.x + tilesize * i, pTileInformation.mHeightmap[j][i], pos.z + ydir * tilesize * j );
+			lVertices[j][i] = Vec3D( pos.x + tilesize * i, mTileData.mHeightmap[j][i], pos.z + ydir * tilesize * j );
 	
 	mDrawList = new OpenGL::CallList();
 	mDrawList->startRecording();
@@ -368,25 +369,25 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	// draw tiles
 	for( int j = 0; j < 8; ++j ) 
 		for( int i = 0; i < 8; ++i ) 
-			if( pTileInformation.mRender[j][i] )
+			if( mTileData.mRender[j][i] )
 			{
 				float c;
-				c = pTileInformation.mDepth[j][i];// / 255.0f;
+				c = mTileData.mDepth[j][i];// / 255.0f;
 				glMultiTexCoord2f( GL_TEXTURE1, c, c );
 				glTexCoord2f( i / texRepeats, j / texRepeats);
 				glVertex3fv( lVertices[j][i] );
 
-				c = pTileInformation.mDepth[j][i + 1];// / 255.0f;
+				c = mTileData.mDepth[j][i + 1];// / 255.0f;
 				glMultiTexCoord2f( GL_TEXTURE1, c, c );
 				glTexCoord2f( ( i + 1 ) / texRepeats, j / texRepeats);
 				glVertex3fv( lVertices[j][i + 1] );
 				
-				c = pTileInformation.mDepth[j + 1][i + 1];// / 255.0f;
+				c = mTileData.mDepth[j + 1][i + 1];// / 255.0f;
 				glMultiTexCoord2f( GL_TEXTURE1, c, c );
 				glTexCoord2f( ( i + 1 ) / texRepeats, ( j + 1 ) / texRepeats);
 				glVertex3fv( lVertices[j + 1][i + 1] );
 				
-				c = pTileInformation.mDepth[j + 1][i];// / 255.0f;
+				c = mTileData.mDepth[j + 1][i];// / 255.0f;
 				glMultiTexCoord2f( GL_TEXTURE1, c, c );
 				glTexCoord2f( i / texRepeats, ( j + 1 ) / texRepeats);
 				glVertex3fv( lVertices[j + 1][i] );
@@ -395,6 +396,93 @@ void Liquid::initFromMH2O( MH2O_Tile pTileInformation )
 	glEnd();
 
 	mDrawList->endRecording();
+}
+
+void Liquid::setMH2OData(MH2O_Tile pTileInfo){
+	//LogDebug << "Set Data to "<< number << std::endl;
+	mTileData = pTileInfo;
+	initFromMH2O();
+}
+
+MH2O_Tile Liquid::getMH2OData(){ 
+	//LogDebug << "Get Data of "<< number << std::endl;
+	return mTileData;
+}
+
+int Liquid::getWidth(){
+	return xtiles;
+}
+
+int Liquid::getHeight(){
+	return ytiles;
+}
+
+int Liquid::getXOffset(){
+	int ret = 8;
+	for(int i=0; i < 8; ++i) {
+		for(int j=0; j < 8; ++j) {
+			if(mTileData.mRender[i][j] && (j < ret)) {
+				ret = j;
+			}
+		}
+	}
+	return ret;
+}
+
+int Liquid::getYOffset() {
+	int ret = 8;
+	for(int i=0; i < 8; ++i) {
+		for(int j=0; j < 8; ++j) {
+			if(mTileData.mRender[i][j] && (i < ret)) {
+				ret = i;
+			}
+		}
+	}
+	return ret;
+}
+
+bool Liquid::isNotEmpty() {
+	bool ret = false;
+	for(int i=0; i < 8; ++i) {
+		for(int j=0; j < 8; ++j) {
+			ret |= mTileData.mRender[i][j];
+		}
+	}
+	return ret;
+}
+
+bool Liquid::isRendered(int i, int j) {
+	return mTileData.mRender[i][j];
+}
+
+void Liquid::setRender(int i, int j) {
+	mTileData.mRender[i][j] = true;
+	recalcSize();
+}
+
+void Liquid::unsetRender(int i, int j) {
+	mTileData.mRender[i][j] = false;
+	recalcSize();
+}
+
+void Liquid::recalcSize() {
+	int h = 0;
+	int w = 0;
+	for(int i=0; i < 8; ++i) {
+		bool hRaised = false;
+		int wTmp = 0;
+		for(int j=0; j < 8; ++j) {
+			if(mTileData.mRender[i][j]){
+				hRaised = true;
+				++wTmp;
+			}
+		}
+		w = max(w,wTmp);
+		if(hRaised)
+			++h;
+	}
+	xtiles = w;
+	ytiles = h;
 }
 
 #ifdef USEBLSFILES

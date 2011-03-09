@@ -16,11 +16,20 @@ ui_ListView::ui_ListView(float xPos, float yPos, float w, float h, int elementHe
 	this->scrollbar->setChangeFunc(changeValue);
 	this->addChild(scrollbar);
 	this->elements_rows = (int)( h / elementHeight);
-	
 }
 
 ui_ListView::~ui_ListView(void)
 {
+}
+
+void ui_ListView::clear()
+{
+	// clear all elements except the first (scroll pan)
+	for( std::vector<frame*>::iterator child = children.begin(); child != children.end(); child++ )
+	{
+		if(this->children.size()!=1)
+			this->children.erase( child );
+	}
 }
 
 void ui_ListView::addElement( frame *element )
@@ -30,7 +39,7 @@ void ui_ListView::addElement( frame *element )
 	element->height = this->elements_height;
 	element->width = this->width-20;
 	this->addChild(element);
-	this->scrollbar->setNum(this->children.size()-1);
+	this->scrollbar->setNum(this->children.size()-this->elements_rows);
 	recalcElements(1);
 }
 
@@ -39,12 +48,7 @@ int ui_ListView::getElementsCount()
 	return this->children.size();
 }
 
-void ui_ListView::delElement( int /*num*/ )
-{
-	//recalcElements();
-}
-
-void ui_ListView::recalcElements( unsigned int value )
+void ui_ListView::recalcElements(int value)
 {
 	this->elements_start = value;
 	// recalculate the position and the hide value off all child.
