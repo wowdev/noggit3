@@ -22,6 +22,16 @@ ui_ListView::~ui_ListView(void)
 {
 }
 
+void ui_ListView::clear()
+{
+	// clear all elements except the first (scroll pan)
+	for( std::vector<frame*>::iterator child = children.begin(); child != children.end(); child++ )
+	{
+		if(this->children.size()!=1)
+			this->children.erase( child );
+	}
+}
+
 void ui_ListView::addElement( frame *element )
 {
 	element->x = 4;

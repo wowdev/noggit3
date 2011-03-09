@@ -13,6 +13,7 @@ public:
 	void setElementsHeight(int h);
 	int	 getElementsCount();
 	void recalcElements(int value);
+	void clear();
 private:
 	int elements_height;
 	int elements_start;
