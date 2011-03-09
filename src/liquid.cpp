@@ -477,6 +477,7 @@ void Liquid::recalcSize() {
 				++wTmp;
 			}
 		}
+        using std::max;
 		w = max(w,wTmp);
 		if(hRaised)
 			++h;
