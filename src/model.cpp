@@ -473,7 +473,7 @@ void Model::initStatic( MPQFile &f )
 }
 
 void Model::initAnimated(MPQFile &f)
-{	
+{ 
 	origVertices = new ModelVertex[header.nVertices];
 	memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
 	
@@ -860,7 +860,7 @@ void ModelUnhighlight()
 }
 
 void Model::drawModel( /*bool unlit*/ )
-{	
+{
 	// assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
 
 	if( animated ) 
@@ -1032,7 +1032,7 @@ void ModelLight::init(MPQFile &f, ModelLightDef &mld, int *global)
 }
 
 void ModelLight::setup(int time, GLuint l)
-{
+{ 
 	Vec4D ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
 	Vec4D diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
 	Vec4D p;
@@ -1143,7 +1143,9 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 
 void Model::draw()
 {
-
+  if(!finishedLoading())
+    return;
+    
 	if( gWorld && gWorld->drawfog ) 
 		glEnable( GL_FOG );	
 	else

@@ -75,7 +75,7 @@ textUI			*chunkTextureNames[4];
 textUI			*chunkTextureFlags[4];
 textUI			*chunkTextureEffectID[4];
 
-Texture* TexturingUI::selectedTexture = NULL;
+OpenGL::Texture* TexturingUI::selectedTexture = NULL;
 
 void LoadTextureNames()
 {
@@ -86,7 +86,7 @@ void LoadTextureNames()
 
 	bool tilesetsfound = false;
 	
-	while(!MPQArchive::allFinishedLoading()); // wait for listfiles.
+	while(!MPQArchive::allFinishedLoading()) MPQArchive::allFinishLoading(); // wait for listfiles.
 	
 	for( std::list<std::string>::iterator it = gListfile.begin(); it != gListfile.end(); ++it )
 	{
@@ -160,7 +160,7 @@ void showPage( int pPage )
 
 	if( TexturingUI::getSelectedTexture() )
 	{
-		for( std::map<GLuint, Texture*>::iterator i = TextureManager::items.begin(); i != TextureManager::items.end(); ++i )
+		for( std::map<GLuint, OpenGL::Texture*>::iterator i = TextureManager::items.begin(); i != TextureManager::items.end(); ++i )
 		{
 			if( i->second->name == TexturingUI::getSelectedTexture()->name )
 			{
@@ -202,7 +202,7 @@ void showPage( int pPage )
 void updateTextures()
 {
 	gTexturesInList.clear();
-	for( std::map<GLuint, Texture*>::iterator t = TextureManager::items.begin(); t != TextureManager::items.end(); t++ )
+	for( std::map<GLuint, OpenGL::Texture*>::iterator t = TextureManager::items.begin(); t != TextureManager::items.end(); t++ )
 	{
 		if( TextureInPalette( t->second->name ) )
 		{
@@ -226,7 +226,7 @@ void texturePaletteClick( frame* /*f*/, int id )
 	if( curTextures[id]->hidden )
 		return;
 	
-	TexturingUI::setSelectedTexture((Texture*)TextureManager::items.find( gTexturesInPage[id] )->second);
+	TexturingUI::setSelectedTexture((OpenGL::Texture*)TextureManager::items.find( gTexturesInPage[id] )->second);
 	
 	if( TexturingUI::getSelectedTexture() )
 	{
@@ -632,11 +632,11 @@ void TexturingUI::setChunkWindow(MapChunk *chunk)
 	
 }
 
-Texture* TexturingUI::getSelectedTexture(){
+OpenGL::Texture* TexturingUI::getSelectedTexture(){
 	return TexturingUI::selectedTexture;
 }
 
-void TexturingUI::setSelectedTexture(Texture * t){
+void TexturingUI::setSelectedTexture(OpenGL::Texture * t){
 	TexturingUI::selectedTexture = t;
 }
 

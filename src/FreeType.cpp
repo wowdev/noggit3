@@ -9,6 +9,7 @@
 #include "FreeType.h"
 #include "mpq.h"
 #include "Log.h"
+#include "video.h"
 
 namespace freetype {
 
@@ -22,8 +23,12 @@ inline int next_p2 ( int a )
 }
 
 ///Create a display list coresponding to the give character.
-int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int fontsize ) {
-
+int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int fontsize )
+{
+  int width, height;
+  GLubyte* expanded_data;
+  FT_BitmapGlyph bitmap_glyph;
+  
 	//The first thing we do is get FreeType to render our character
 	//into a bitmap.	This actually requires a couple of FreeType commands:
 
@@ -45,7 +50,7 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 
 	//Convert the glyph to a bitmap.
 	FT_Glyph_To_Bitmap( &glyph, FT_RENDER_MODE_NORMAL, 0, 1 );
-	FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
+	bitmap_glyph = (FT_BitmapGlyph)glyph;
 
 	//This reference will make accessing the bitmap easier
 	FT_Bitmap& bitmap=bitmap_glyph->bitmap;
@@ -53,11 +58,11 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 	//Use our helper function to get the widths of
 	//the bitmap data that we will need in order to create
 	//our texture.
-	int width = next_p2( bitmap.width+1);
-	int height = next_p2( bitmap.rows+1);
+	width = next_p2( bitmap.width+1);
+	height = next_p2( bitmap.rows+1);
 
 	//Allocate memory for the texture data.
-	GLubyte* expanded_data = new GLubyte[width * height*2];
+	expanded_data = new GLubyte[width * height*2];
 
 	//Here we fill in the data for the expanded bitmap.
 	//Notice that we are using two channel bitmap (one for
@@ -156,13 +161,10 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 
 
 
-void font_data::init(const char * fname, unsigned int _h) {
-	//Allocate some memory to store the texture ids.
-	textures = new GLuint[128];
-
+void font_data::init(const char * fname, unsigned int _h, bool fromMPQ)
+{
 	this->h=_h;
 
-	//Create and initilize a freetype font library.
 	FT_Library library;
 	if (FT_Init_FreeType( &library )) 
 	{
@@ -170,18 +172,25 @@ void font_data::init(const char * fname, unsigned int _h) {
 		throw std::runtime_error("FT_Init_FreeType failed");
 	}
 
-	//The object in which Freetype holds information on a given
-	//font is called a "face".
 	FT_Face face;
 
-	//This is where we load in the font information from the file.
-	//Of all the places where the code might die, this is the most likely,
-	//as FT_New_Face will die if the font file does not exist or is somehow broken.
-	if (FT_New_Face( library, fname, 0, &face )) 
-	{
-		LogError << "FT_New_Face failed (there is probably a problem with your font file)" << std::endl;
-		throw std::runtime_error("FT_New_Face failed (there is probably a problem with your font file)");
-	}
+  bool failed;
+  MPQFile* f;
+  if(fromMPQ)
+  {
+    f = new MPQFile(fname);
+    failed = FT_New_Memory_Face( library, (FT_Byte *)f->getBuffer(), f->getSize(), 0, &face );
+  }
+  else
+  {
+  	failed = FT_New_Face( library, fname, 0, &face );
+  }
+  
+  if(failed)
+  {
+  	LogError << "FT_New_Face failed (there is probably a problem with your font file)" << std::endl;
+  	throw std::runtime_error("FT_New_Face failed (there is probably a problem with your font file)");
+  }
 
 	//For some twisted reason, Freetype measures font size
 	//in terms of 1/64ths of pixels.	Thus, to make a font
@@ -189,78 +198,21 @@ void font_data::init(const char * fname, unsigned int _h) {
 	//(h << 6 is just a prettier way of writting h*64)
 	FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72);
 
-	//Here we ask opengl to allocate resources for
-	//all the textures and displays lists which we
-	//are about to create.	
-	list_base=glGenLists(128);
-	glGenTextures( 128, textures );
+  list_base = glGenLists(128); //! \todo more for unicode!
+  textures = new GLuint[128];
+  glGenTextures( 128, textures );
+  
+  for(unsigned char i=0;i<128;++i)
+    charWidths[i] = make_dlist(face,i,list_base,textures,h);
 
-	//This is where we actually create each of the fonts display lists.
-	for(unsigned char i=0;i<128;++i)
-		charWidths[i]=make_dlist(face,i,list_base,textures,h);
-
-	//We don't need the face information now that the display
-	//lists have been created, so we free the assosiated resources.
 	FT_Done_Face(face);
-
-	//Ditto for the library.
 	FT_Done_FreeType(library);
-}
-
-void font_data::initMPQ(const char * fname, unsigned int _h) {
-	//Allocate some memory to store the texture ids.
-	textures = new GLuint[128];
-
-	this->h=_h;
-
-	//Create and initilize a freetype font library.
-	FT_Library library;
-	if (FT_Init_FreeType( &library )) 
+	
+	if(fromMPQ)
 	{
-		LogError << "FT_Init_FreeType failed" << std::endl;
-		throw std::runtime_error("FT_Init_FreeType failed");
+    f->close();
+    delete f;
 	}
-
-	//The object in which Freetype holds information on a given
-	//font is called a "face".
-	FT_Face face;
-
-	//This is where we load in the font information from the file.
-	//Of all the places where the code might die, this is the most likely,
-	//as FT_New_Face will die if the font file does not exist or is somehow broken.
-	MPQFile	f(fname);
-
-
-	if (FT_New_Memory_Face( library, (FT_Byte *)f.getBuffer(), f.getSize(), 0, &face )) 
-	{
-		LogError << "FT_New_Face failed (there is probably a problem with your font file)" << std::endl;
-		throw std::runtime_error("FT_New_Memory_Face failed (there is probably a problem with your font file)");
-	}
-
-
-	//For some twisted reason, Freetype measures font size
-	//in terms of 1/64ths of pixels.	Thus, to make a font
-	//h pixels high, we need to request a size of h*64.
-	//(h << 6 is just a prettier way of writting h*64)
-	FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72);
-
-	//Here we ask opengl to allocate resources for
-	//all the textures and displays lists which we
-	//are about to create.	
-	list_base=glGenLists(128);
-	glGenTextures( 128, textures );
-
-	//This is where we actually create each of the fonts display lists.
-	for(unsigned char i=0;i<128;++i)
-		charWidths[i]=make_dlist(face,i,list_base,textures,h);
-
-	//We don't need the face information now that the display
-	//lists have been created, so we free the assosiated resources.
-	FT_Done_Face(face);
-
-	//Ditto for the library.
-	FT_Done_FreeType(library);
-	f.close();
 }
 
 void font_data::clean() {
@@ -273,33 +225,10 @@ void font_data::clean() {
 	}
 }
 
-/// A fairly straight forward function that pushes
-/// a projection matrix that will make object world 
-/// coordinates identical to window coordinates.
-inline void pushScreenCoordinateMatrix() {
-	glPushAttrib(GL_TRANSFORM_BIT);
-	GLint	viewport[4];
-	glGetIntegerv(GL_VIEWPORT, viewport);
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	gluOrtho2D(viewport[0],viewport[2],viewport[1],viewport[3]);
-	glPopAttrib();
-}
-
-/// Pops the projection matrix without changing the current
-/// MatrixMode.
-inline void pop_projection_matrix() {
-	glPushAttrib(GL_TRANSFORM_BIT);
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glPopAttrib();
-}
-
 ///Much like Nehe's glPrint function, but modified to work
 ///with freetype fonts.
-void print(const font_data &ft_font, float x, float y, const std::string& text)	{
-	
+void print(const font_data &ft_font, float x, float y, const std::string& text, float r, float g, float b)	{
+  
 	// We want a coordinate system where things coresponding to window pixels.
 	//pushScreenCoordinateMatrix();					
 	
@@ -330,7 +259,9 @@ void print(const font_data &ft_font, float x, float y, const std::string& text)	
 		for(const char *n=start_line;n<c;n++) line.append(1,*n);
 		lines.push_back(line);
 	}
-
+  
+	glColor3f(r,g,b);
+  
 	glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT	| GL_ENABLE_BIT | GL_TRANSFORM_BIT);	
 	glMatrixMode(GL_MODELVIEW);
 	glDisable(GL_LIGHTING);
@@ -375,11 +306,9 @@ void print(const font_data &ft_font, float x, float y, const std::string& text)	
 	//pop_projection_matrix();
 }
 
-void shprint(const font_data &ft_font, float x, float y, const std::string& text, float colorR, float colorG, float colorB)	{	
-	glColor3f(0.0f,0.0f,0.0f);
-	print(ft_font, x+2.0f, y+2.0f, text);
-	glColor3f(colorR,colorG,colorB);
-	print(ft_font, x, y, text);
+void shprint(const font_data &ft_font, float x, float y, const std::string& text, float colorR, float colorG, float colorB)	{
+	print(ft_font, x+2.0f, y+2.0f, text,0.0f,0.0f,0.0f);
+	print(ft_font, x, y, text,colorR,colorG,colorB);
 }
 
 int width(const font_data &ft_font, const std::string& text)	

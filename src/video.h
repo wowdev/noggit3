@@ -45,34 +45,36 @@ public:
 	bool mSupportCompression;
 };
 
+#include "manager.h" // ManagedItem
+
 namespace OpenGL
-{
+{  
 	class CallList
 	{
 		GLuint list;
 	public:
-		inline CallList()
-		{
-			list = glGenLists( 1 );
-		}
-		inline ~CallList()
-		{
-			glDeleteLists( list, 1 );
-		}
+		CallList();
+		~CallList();
 
-		inline void startRecording(GLuint mode = GL_COMPILE)
-		{
-			glNewList( list, mode );
-		}
-		inline void endRecording()
-		{
-			glEndList();
-		}
-		inline void render()
-		{
-			glCallList( list );
-		}
+		void startRecording(GLuint mode = GL_COMPILE);
+		void endRecording();
+		void render();
 	};
+	
+	class Texture : public ManagedItem
+  {
+  public: //! \todo make private again and fix friends.
+  	int w,h;
+  	GLuint id;
+  	
+  	Texture(const std::string& pname);
+  	const GLuint getId() const;
+  	void render() const;
+  	
+  	static void enableTexture();
+  	static void disableTexture();
+  	static void setActiveTexture( size_t num = 0 );
+  };
 }
 
 extern Video video;

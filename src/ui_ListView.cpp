@@ -39,12 +39,12 @@ int ui_ListView::getElementsCount()
 	return this->children.size();
 }
 
-void ui_ListView::delElement( int num )
+void ui_ListView::delElement( int /*num*/ )
 {
 	//recalcElements();
 }
 
-void ui_ListView::recalcElements(int value)
+void ui_ListView::recalcElements( unsigned int value )
 {
 	this->elements_start = value;
 	// recalculate the position and the hide value off all child.

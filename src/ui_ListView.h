@@ -13,7 +13,7 @@ public:
 	void delElement(int num);
 	void setElementsHeight(int h);
 	int	 getElementsCount();
-	void recalcElements(int value);
+	void recalcElements(unsigned int value);
 private:
 	int elements_height;
 	int elements_start;

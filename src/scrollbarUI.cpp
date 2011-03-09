@@ -30,7 +30,7 @@ scrollbarUI::scrollbarUI(float xpos, float ypos, float h, int n)
 	changeFunc=0;
 }
 
-bool scrollbarUI::processLeftDrag(float mx,float my, float xChange, float yChange)
+bool scrollbarUI::processLeftDrag(float /*mx*/,float my, float /*xChange*/, float /*yChange*/)
 {
 	
 	float tx,ty;

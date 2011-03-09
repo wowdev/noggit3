@@ -31,14 +31,14 @@ void statusBar::render() const
 	glVertex2f( width, height );
 	glEnd();
 
-	for( std::vector<frame*>::const_iterator child = children.begin(); child != children.end(); child++ )
+	for( std::vector<frame*>::const_iterator child = children.begin(); child != children.end(); ++child )
 		if( !( *child )->hidden )
 			( *child )->render();
 
 	glColor3f( 0.7f, 0.7f, 0.7f );
 	
-	Texture::setActiveTexture();
-	Texture::enableTexture();
+	OpenGL::Texture::setActiveTexture();
+	OpenGL::Texture::enableTexture();
 	
 	texture->render();
 
@@ -54,7 +54,7 @@ void statusBar::render() const
 	glVertex2f( width, -3.0f );
 	glEnd();
 	
-	Texture::disableTexture();
+	OpenGL::Texture::disableTexture();
 	
 	glPopMatrix();
 }

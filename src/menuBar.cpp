@@ -25,15 +25,14 @@ void menuBar::render() const
 	glVertex2f(video.xres,30.0f);
 	glEnd();
 
-
-	for(unsigned int i=0;i<children.size();++i)
-		if(!children[i]->hidden)
-			children[i]->render();
+	for( std::vector<frame*>::const_iterator child = children.begin(); child != children.end(); ++child )
+		if( !( *child )->hidden )
+			( *child )->render();
 
 	glColor3f(1.0f,1.0f,1.0f);
 
-	Texture::setActiveTexture();
-	Texture::enableTexture();
+	OpenGL::Texture::setActiveTexture();
+	OpenGL::Texture::enableTexture();
 	
 	texture->render();
 
@@ -49,7 +48,7 @@ void menuBar::render() const
 		glVertex2f(video.xres,17.0f);
 	glEnd();
 	
-	Texture::disableTexture();
+	OpenGL::Texture::disableTexture();
 }
 
 void menuBar::resize()
@@ -178,8 +177,8 @@ void MenuItemToggle::render() const
 	glPushMatrix();
 	glTranslatef( x, y, 0.0f );
 	
-	Texture::setActiveTexture();
-	Texture::enableTexture();
+	OpenGL::Texture::setActiveTexture();
+	OpenGL::Texture::enableTexture();
 	
 	if( !clicked )
 		texture->render();
@@ -197,7 +196,7 @@ void MenuItemToggle::render() const
 	glVertex2f( width, height );
 	glEnd();
 	
-	Texture::disableTexture();
+	OpenGL::Texture::disableTexture();
 	
 	text->render();
 	mMyCheckbox->render();

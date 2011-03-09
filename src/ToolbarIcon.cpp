@@ -19,8 +19,8 @@ void ToolbarIcon::render() const
 {
 	glColor3f(1.0f,1.0f,1.0f);
 	
-	Texture::setActiveTexture();
-	Texture::enableTexture();
+	OpenGL::Texture::setActiveTexture();
+	OpenGL::Texture::enableTexture();
 	
 	texture->render();
 
@@ -35,13 +35,13 @@ void ToolbarIcon::render() const
 	glVertex2f(x+width,y+height);
 	glEnd();
 
-	Texture::disableTexture();
+	OpenGL::Texture::disableTexture();
 	
 	if(selected)
 	{
 		static const int sizer = 18;
 		
-		Texture::enableTexture();
+		OpenGL::Texture::enableTexture();
 		
 		textureSelected->render();
 
@@ -56,7 +56,7 @@ void ToolbarIcon::render() const
 		glVertex2f(x+width+sizer,y+height+sizer);
 		glEnd();
 		
-		Texture::disableTexture();
+		OpenGL::Texture::disableTexture();
 	}
 
 	glPushMatrix();

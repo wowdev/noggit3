@@ -4,15 +4,15 @@
 #include "frame.h"
 #include "UIEventClasses.h"
 
-class Texture;
+namespace OpenGL { class Texture; };
 
 class ToolbarIcon : public frame, public UIEventSender
 {
 public:
   UIEventEventHandlerDefinition(int);
 protected:
-	Texture* texture;
-	Texture* textureSelected;
+	OpenGL::Texture* texture;
+	OpenGL::Texture* textureSelected;
 	int iconId;
 
 public:

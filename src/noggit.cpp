@@ -234,7 +234,7 @@ int main( int argc, char *argv[] )
 	CreateStrips();
 	
 	gAsyncLoader = new AsyncLoader();
-	gAsyncLoader->start(4); //! \todo get the number of threads from the number of available cores.
+	gAsyncLoader->start(1); //! \todo get the number of threads from the number of available cores.
 	
 	std::vector<std::string> archiveNames;
 	archiveNames.push_back( "common.MPQ" );
@@ -362,26 +362,17 @@ int main( int argc, char *argv[] )
 	OpenDBs();
 	
 	// Initializing Fonts
-	skurri32.initMPQ( "fonts\\SKURRI.TTF", 32 );
-	fritz16.initMPQ( "fonts\\FRIZQT__.TTF", 16 );
-	morpheus40.initMPQ( "fonts\\MORPHEUS.TTF", 40 );
-	arialn13.initMPQ( "fonts\\arialn.TTF", 13 );
-	if( lFontWindows )
-	{
-		arial12.init( "C:\\windows\\fonts\\arial.ttf", 12 );
-		arial14.init( "C:\\windows\\fonts\\arial.ttf", 14 );
-		arial16.init( "C:\\windows\\fonts\\arial.ttf", 16 );
-		arial24.init( "C:\\windows\\fonts\\arial.ttf", 24 );
-		arial32.init( "C:\\windows\\fonts\\arial.ttf", 32 );
-	}
-	else
-	{
-		arial12.init( "fonts/arial.ttf", 12 );
-		arial14.init( "fonts/arial.ttf", 14 );
-		arial16.init( "fonts/arial.ttf", 16 );
-		arial24.init( "fonts/arial.ttf", 24 );
-		arial32.init( "fonts/arial.ttf", 32 );
-	}
+	skurri32.init( "fonts\\SKURRI.TTF", 32, true );
+	fritz16.init( "fonts\\FRIZQT__.TTF", 16, true );
+	morpheus40.init( "fonts\\MORPHEUS.TTF", 40, true );
+	arialn13.init( "fonts\\arialn.TTF", 13, true );
+	
+	const char* arialname = lFontWindows ? "C:\\windows\\fonts\\arial.ttf" : "fonts/arial.ttf";
+  arial12.init( arialname, 12, false );
+  arial14.init( arialname, 14, false );
+  arial16.init( arialname, 16, false );
+  arial24.init( arialname, 24, false );
+  arial32.init( arialname, 32, false );
 	
 	float ftime;
 	Uint32 t, last_t, frames = 0, time = 0, fcount = 0, ft = 0;

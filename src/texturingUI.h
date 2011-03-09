@@ -6,7 +6,7 @@
 class MapChunk;
 class frame;
 class Gui;
-class Texture;
+namespace OpenGL { class Texture; };
 
 class TexturingUI
 {
@@ -17,12 +17,12 @@ public:
 	static frame* createTilesetLoader();
 	static frame* createTextureFilter();
 	static frame* createMapChunkWindow();
-	static void setSelectedTexture(Texture* t);
-	static Texture* getSelectedTexture();
+	static void setSelectedTexture(OpenGL::Texture* t);
+	static OpenGL::Texture* getSelectedTexture();
 	static void setChunk(MapChunk *chunk);
 	static void setChunkWindow(MapChunk *chunk);
 	
-	static Texture* selectedTexture;
+	static OpenGL::Texture* selectedTexture;
 };
 
 #endif

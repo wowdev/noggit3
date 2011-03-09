@@ -101,7 +101,7 @@ World::World( const std::string& name ) : cx( -1 ), cz( -1 ), ex( -1 ), ez( -1 )
 	
 	MPQFile theFile(filename.str());
 	uint32_t fourcc;
-	uint32_t size;
+	//uint32_t size;
 	
 	// - MVER ----------------------------------------------
 	
@@ -910,7 +910,7 @@ void World::draw()
 	//outdoorLightStats = ol->getLightStats(daytime);
 	skies->initSky(camera, daytime);
 
-	if (!hadSky) 
+	if (!hadSky)
 		hadSky = skies->drawSky(camera);
 
 	// clearing the depth buffer only - color buffer is/has been overwritten anyway

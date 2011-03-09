@@ -9,7 +9,7 @@ void brush::init()
 	iradius = hardness * radius;
 	oradius = radius - iradius;
 	glGenTextures( 1, &texID );
-	GenerateTexture();
+  GenerateTexture();
 }
 
 void brush::GenerateTexture()

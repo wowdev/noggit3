@@ -311,7 +311,7 @@ bool Skies::drawSky(const Vec3D &pos)
 		glScalef(sc,sc,sc);
 		glEnable(GL_TEXTURE_2D);
 		stars->trans = ni;
-				stars->draw();
+    stars->draw();
 	}
 
 	glPopMatrix();

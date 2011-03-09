@@ -110,8 +110,8 @@ void slider::render() const
 	
 	glPushMatrix();
 	
-	Texture::setActiveTexture();
-	Texture::enableTexture();
+	OpenGL::Texture::setActiveTexture();
+	OpenGL::Texture::enableTexture();
 	
 	texture->render();
 	
@@ -233,7 +233,7 @@ void slider::render() const
 	glVertex2f(width*value+16.0f,height/2+16.0f);
 	glEnd();
 	
-	Texture::disableTexture();
+	OpenGL::Texture::disableTexture();
 
 
 	glPopMatrix();
