@@ -553,7 +553,7 @@ void MapTile::drawSelect()
 }
 
 void MapTile::drawLines()//draw red lines around the square of a chunk
-{
+{  
 	glDisable(GL_COLOR_MATERIAL);
 	
 	for (int j=0; j<16; ++j)

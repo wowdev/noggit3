@@ -72,8 +72,8 @@ void buttonUI::render() const
 
 	glColor3f( 1.0f, 1.0f, 1.0f );
 	
-	Texture::setActiveTexture();
-	Texture::enableTexture();
+	OpenGL::Texture::setActiveTexture();
+	OpenGL::Texture::enableTexture();
 
 	if( !clicked )
 		texture->render();
@@ -91,7 +91,7 @@ void buttonUI::render() const
 		glVertex2f( width, height );
 	glEnd();
 	
-	Texture::disableTexture();
+	OpenGL::Texture::disableTexture();
 	
 	text->render();
 

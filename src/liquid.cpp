@@ -114,7 +114,7 @@ void Liquid::initGeometry(MPQFile &f)
 //			gLog( "%i, {%i, %i, %i, %i}: %s\n", flags[p], map[p].c[0], map[p].c[1], map[p].c[2], map[p].c[3], gLiquidTypeDB.getByID( map[p].c[1] != 0 ? map[p].c[1] : pType ).getString( LiquidTypeDB::Name ) );
 		}
 	}
-
+	
 	mDrawList = new OpenGL::CallList();
 	mDrawList->startRecording();
 
@@ -595,8 +595,6 @@ void enableWaterShader()
 
 void Liquid::draw()
 {
-	CheckForGLError( "before Liquid:draw" );
-
 	glEnable(GL_FRAGMENT_PROGRAM_ARB);
 
 #ifdef USEBLSFILES
@@ -612,8 +610,6 @@ void Liquid::draw()
 	glDisable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);
 	size_t texidx = (size_t)(gWorld->animtime / 60.0f) % textures.size();
-	
-
 
 	//glActiveTexture(GL_TEXTURE0);
 	//glDisable(GL_TEXTURE_2D);
@@ -651,11 +647,12 @@ void Liquid::draw()
 	glBindTexture(GL_TEXTURE_2D, textures[texidx]);
 	glActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
-
-
+	
 	if( mDrawList )
 	{
-		mDrawList->render();
+	  //! \todo THIS LINE THROWS GL_INVALID_OPERATION!
+		//mDrawList->render();
+	  //CheckForGLError( "Liquid::draw::586" );
 	}
 
 
@@ -670,9 +667,6 @@ void Liquid::draw()
 		glDisable(GL_BLEND);
 	}
 	glDisable(GL_FRAGMENT_PROGRAM_ARB);
-	
-
-	CheckForGLError( "after Liquid:draw" );
 }
 
 template<int pFirst, int pLast>

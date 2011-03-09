@@ -88,6 +88,14 @@ bool MPQArchive::allFinishedLoading()
 	return allFinished;
 }
 
+void MPQArchive::allFinishLoading()
+{
+  for(std::vector<MPQArchive*>::const_iterator it = gOpenArchives.begin(); it != gOpenArchives.end(); ++it)
+	{
+    (*it)->finishLoading();
+	}
+}
+
 MPQFile::MPQFile( const std::string& filename ):
 	eof(false),
 	buffer(NULL),

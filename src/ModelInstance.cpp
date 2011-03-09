@@ -178,7 +178,7 @@ void ModelInstance::draw()
 {
 	if(CheckUniques(d1)) 
 		return;
-
+		
 	glPushMatrix();
 
 	glTranslatef(pos.x/CHUNKSIZE, pos.z/CHUNKSIZE, pos.y);

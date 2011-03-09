@@ -9,7 +9,7 @@
 class textureUI : public frame
 {
 protected:
-	Texture* texture;
+	OpenGL::Texture* texture;
 	bool highlight;
 	void (*clickFunc)(frame *,int);
 	int id;

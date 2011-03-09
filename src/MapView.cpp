@@ -725,6 +725,11 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
 MapView::~MapView()
 {
+	if( mainGui->tileFrames )
+	{
+		delete mainGui->tileFrames;
+		mainGui->tileFrames = NULL;
+	}
 	if( mainGui )
 	{
 		delete mainGui;
@@ -734,11 +739,6 @@ MapView::~MapView()
 	{
 		delete gWorld;
 		gWorld = NULL;
-	}
-	if( mainGui->tileFrames )
-	{
-		delete mainGui->tileFrames;
-		mainGui->tileFrames = NULL;
 	}
 }
 
@@ -771,7 +771,6 @@ void MapView::tick( float t, float dt )
 			rotate( 0.0f, 0.0f, &dirRight.x, &dirRight.y, av * PI / 180.0f );
 			rotate( 0.0f, 0.0f, &dirUp.x, &dirUp.z, ah * PI / 180.0f );
 			rotate( 0.0f, 0.0f, &dirRight.x, &dirRight.z, ah * PI / 180.0f );
-			
 		}
 		else
 		{
@@ -788,7 +787,6 @@ void MapView::tick( float t, float dt )
 			else if(Environment::getInstance()->ShiftDown) moveratio=0.2f;
 			else if(Environment::getInstance()->CtrlDown) moveratio=0.3f;
 			else moveratio=0.1f;
-
 
 			if( keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0) 
 			{
@@ -944,7 +942,9 @@ void MapView::tick( float t, float dt )
 						else if( TexturingUI::getSelectedTexture() )
 						{
 							if( textureBrush.needUpdate() )
-								textureBrush.GenerateTexture();
+    					{
+    						textureBrush.GenerateTexture();
+    					}
 							
 							gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture()->name ) );
 						}
@@ -1030,9 +1030,11 @@ void MapView::tick( float t, float dt )
 				if( Environment::getInstance()->CtrlDown )
 					gWorld->eraseTextures( mX, mY );
 				else
-				{		
+				{
 					if( textureBrush.needUpdate() )
+					{
 						textureBrush.GenerateTexture();
+					}
 					
 					if( Environment::getInstance()->ShiftDown )
 						gWorld->paintTexture( mX, mY, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture() ->name ) );
@@ -1053,7 +1055,9 @@ void MapView::tick( float t, float dt )
 	}
 
 	if( ( t - lastBrushUpdate ) > 0.1f && textureBrush.needUpdate() )
-		textureBrush.GenerateTexture();
+	{
+    textureBrush.GenerateTexture();
+	}
 
 	gWorld->time += this->mTimespeed * dt;
 	gWorld->animtime += dt * 1000.0f;
@@ -1254,7 +1258,7 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 
 	mX=mX/CHUNKSIZE;
 	mY=mY/CHUNKSIZE;
-
+  
 	// draw brush
 	glPushMatrix();
 		glScalef(gWorld->zoom,gWorld->zoom,1.0f);
@@ -1314,10 +1318,8 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 
 void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
 {
-	video.set3D();
-
 	if( Environment::getInstance()->AutoSelecting && Settings::getInstance()->AutoSelectingMode )
-		doSelection(0);
+		doSelection( 0 );
 	
 	video.set3D();
 
@@ -1340,11 +1342,13 @@ void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
 		
 		glActiveTexture(GL_TEXTURE0);
 		glDisable(GL_TEXTURE_2D);
+		
 		mainGui->tileFrames->render();
+		
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
 
-		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
+		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
 		std::stringstream fps; fps << gFPS << " fps";
 		freetype::shprint( arial16, video.xres - 200, 5, fps.str() );
 				
@@ -2116,7 +2120,9 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 	if( mViewMode == eViewMode_3D && TestSelection )
 	{
 		if( !Environment::getInstance()->AutoSelecting )
+		{
 			doSelection( 1 );
+		}
 	}	
 	
 	if( mViewMode == eViewMode_2D && leftMouse && !( Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown || Environment::getInstance()->AltDown )  )
@@ -2167,15 +2173,17 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 			// Only left
 			LastClicked = mainGui->tileFrames->processLeftClick( float( MouseX ), float( MouseY ) );	
 			if( mViewMode == eViewMode_3D && !LastClicked )
-				doSelection( 1 );
-		 }
-		 else if (rightMouse)
-		 {
-			// Only right
-			if( mViewMode == eViewMode_Help )
-				mViewMode = eViewMode_3D; // Steff: exit help window when open
-			look = true;
-		 }
+  		{
+  			doSelection( 1 );
+  		}
+    }
+    else if (rightMouse)
+    {
+      // Only right
+      if( mViewMode == eViewMode_Help )
+      	mViewMode = eViewMode_3D; // Steff: exit help window when open
+      look = true;
+    }
 	} 
 	else if( e->type == SDL_MOUSEBUTTONUP ) 
 	{

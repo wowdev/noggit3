@@ -25,8 +25,8 @@ void TextBox::render() const
 {
 	glColor3f(1.0f,1.0f,1.0f);
 	
-	Texture::setActiveTexture();
-	Texture::enableTexture();
+	OpenGL::Texture::setActiveTexture();
+	OpenGL::Texture::enableTexture();
 	
 	if( !mFocus )
 		texture->render();
@@ -44,7 +44,7 @@ void TextBox::render() const
 	glVertex2f(x+width,y+height);
 	glEnd();
 	
-	Texture::disableTexture();
+	OpenGL::Texture::disableTexture();
 	
 	glPushMatrix();
 	glTranslatef(x,y,0.0f);

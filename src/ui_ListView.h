@@ -12,7 +12,7 @@ public:
 	void addElement(frame *element);
 	void setElementsHeight(int h);
 	int	 getElementsCount();
-	void recalcElements(int value);
+	void recalcElements(unsigned int value);
 	void clear();
 private:
 	int elements_height;

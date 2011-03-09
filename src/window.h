@@ -4,12 +4,12 @@
 #include "frame.h"
 #include "FreeType.h" // fonts.
 
-class Texture;
+namespace OpenGL { class Texture; };
 
 class window : public frame
 {
 protected:
-	Texture* texture;
+	OpenGL::Texture* texture;
 
 public:
 	window( float xPos, float yPos, float w, float h );

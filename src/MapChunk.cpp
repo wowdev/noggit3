@@ -517,7 +517,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 		unsigned char sbuf[64*64];
 		for( size_t j = 0; j < 4096; ++j ) 
 			sbuf[j] = 0;
-
+  
 		glGenTextures( 1, &shadow );
 		glBindTexture( GL_TEXTURE_2D, shadow );
 		glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf );
@@ -543,7 +543,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile &f,bool bigAlpha)
 		mFakeShadows[j].z=0;
 		mFakeShadows[j].w=ShadowAmount;
 	}
-
+  
 	glGenBuffers(1,&minimap);
 	glGenBuffers(1,&minishadows);
 	
@@ -565,7 +565,7 @@ void MapChunk::loadTextures()
 
 void SetAnim(int anim)
 {
-	if (anim) {
+	if (anim) {  
 		glActiveTexture(GL_TEXTURE0);
 		glMatrixMode(GL_TEXTURE);
 		glPushMatrix();
@@ -586,7 +586,7 @@ void SetAnim(int anim)
 void RemoveAnim(int anim)
 {
 	if (anim) {
-			glPopMatrix();
+		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 		glActiveTexture(GL_TEXTURE1);
 	}
@@ -850,7 +850,7 @@ void MapChunk::drawColor()
 		if (gWorld->uselowlod) this->drawNoDetail();
 		return;
 	}
-
+  
 	glActiveTexture(GL_TEXTURE1);
 	glDisable(GL_TEXTURE_2D);
 
@@ -912,7 +912,7 @@ void MapChunk::drawLines()
 
 	if (mydist > (mapdrawdistance * mapdrawdistance))
 		return;
-
+		
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
 	glVertexPointer(3, GL_FLOAT, 0, 0);
 
@@ -1247,7 +1247,6 @@ void MapChunk::drawSelect()
 	if (mydist > (mapdrawdistance * mapdrawdistance)) return;
 	if (mydist > gWorld->culldistance)
 		return;
-
 
 	if( nameID == -1 )
 		nameID = SelectionNames.add( this );
@@ -1702,7 +1701,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 		    for( size_t i = 0; i < 64 * 64; ++i )
 		    {
 		      sum += map[i];
-			}
+		    }
         
         if( !sum )
         {
@@ -1745,9 +1744,9 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 	{
 		for( size_t i = 0; i < 64; ++i )
 		{
-			const float xdiff = xbase + change * i - x;
-			const float zdiff = zbase + change * j - z;
-			const float dist = sqrtf( xdiff * xdiff + zdiff * zdiff );
+			const float xdiff_ = xbase + change * i - x;
+			const float zdiff_ = zbase + change * j - z;
+			const float dist = sqrtf( xdiff_ * xdiff_ + zdiff_ * zdiff_ );
 			
 			if( dist <= radius )
 			{

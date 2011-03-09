@@ -82,7 +82,7 @@ void minimapWindowUI::render() const
 	
 	if( gWorld->minimap ) 
 	{
-		Texture::enableTexture();
+		OpenGL::Texture::enableTexture();
 		glBindTexture( GL_TEXTURE_2D, gWorld->minimap );
 		
 		glBegin( GL_QUADS );
@@ -96,7 +96,7 @@ void minimapWindowUI::render() const
 		glVertex2i( 0.0f, this->tilesize * 64.0f );
 		glEnd();
 		
-		Texture::disableTexture();
+		OpenGL::Texture::disableTexture();
 	}
 	
 	// draw the ADTs that are existing in the WDT with
@@ -141,7 +141,7 @@ void minimapWindowUI::render() const
 	}
 	
 	// draw the arrow if shown inside a map
-	//!TODO: Change it from a simple line to an arrow
+	//! \todo Change it from a simple line to an arrow
 	if(this->map != NULL)
 	{
 		glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -160,13 +160,13 @@ void minimapWindowUI::render() const
 		for (int j=0; j < skycount; j++)
 		{
 			glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-			float x = this->map->skies->skies[j].pos.x/ TILESIZE * this->tilesize;
-			float z = this->map->skies->skies[j].pos.z/ TILESIZE * this->tilesize;
+			float x_ = this->map->skies->skies[j].pos.x/ TILESIZE * this->tilesize;
+			float z_ = this->map->skies->skies[j].pos.z/ TILESIZE * this->tilesize;
 			glBegin( GL_QUADS );
-			glVertex2i( 0.0f + x,	0.0f + z );
-			glVertex2i( 0.0f + x+3,	0.0f + z );
-			glVertex2i( 0.0f + x+3,	0.0f + z+3 );
-			glVertex2i( 0.0f + x,	0.0f + z+3 );
+			glVertex2i( 0.0f + x_,	0.0f + z_ );
+			glVertex2i( 0.0f + x_+3,	0.0f + z_ );
+			glVertex2i( 0.0f + x_+3,	0.0f + z_+3 );
+			glVertex2i( 0.0f + x_,	0.0f + z_+3 );
 			glEnd();
 		}
 	}

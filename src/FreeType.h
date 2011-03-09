@@ -54,8 +54,7 @@ struct font_data {
 
 	//The init function will create a font of
 	//of the height h from the file fname.
-	void init(const char * fname, unsigned int h);
-	void initMPQ(const char * fname, unsigned int h);
+	void init(const char * fname, unsigned int h, bool fromMPQ);
 
 	//Free all the resources assosiated with the font.
 	void clean();
@@ -64,7 +63,7 @@ struct font_data {
 //The flagship function of the library - this thing will print
 //out text at window coordinates x,y, using the font ft_font.
 //The current modelview matrix will also be applied to the text. 
-void print(const font_data &ft_font, float x, float y, const std::string& text) ;
+void print(const font_data &ft_font, float x, float y, const std::string& text, float colorR = 1.0f, float colorG = 1.0f, float colorB = 1.0f) ;
 void shprint(const font_data &ft_font, float x, float y, const std::string& text, float colorR = 1.0f, float colorG = 1.0f, float colorB = 1.0f );
 int width(const font_data &ft_font, const std::string& text) ;
 
