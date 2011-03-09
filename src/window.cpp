@@ -85,14 +85,14 @@ void window::render() const
 	glVertex2f( width, height );
 	glEnd();
 
-	for( std::vector<frame*>::const_iterator child = children.begin(); child != children.end(); child++ )
+	for( std::vector<frame*>::const_iterator child = children.begin(); child != children.end(); ++child )
 		if( !( *child )->hidden )
 			( *child )->render();
 
 	glColor3f( 1.0f, 1.0f, 1.0f );
 	
-	Texture::setActiveTexture();
-	Texture::enableTexture();
+	OpenGL::Texture::setActiveTexture();
+	OpenGL::Texture::enableTexture();
 	
 	texture->render();
 
@@ -193,7 +193,7 @@ void window::render() const
 	glVertex2f( width - 13.0f, -3.0f );
 	glEnd();
 	
-	Texture::disableTexture();
+	OpenGL::Texture::disableTexture();
 	
 	glPopMatrix();
 }

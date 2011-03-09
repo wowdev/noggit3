@@ -117,14 +117,16 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
 	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
 	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
 	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-#ifdef _WIN32
+//#ifdef _WIN32
 	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 32 );
 	primary = SDL_SetVideoMode( _xres, _yres, 32, flags );
+/*
 #else
 	//nvidia dont support 32bpp on my linux :(
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	primary = SDL_SetVideoMode(_xres, _yres, 24, flags);
 #endif
+*/
 	if( !primary ) 
 	{
 		LogError << "SDL: " << SDL_GetError() << std::endl;
@@ -141,7 +143,7 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
 	glViewport( 0.0f, 0.0f, xres, yres );
 
 	//! \todo	Should we really set to 3D here?
-	this->set3D();
+	//this->set3D();
 
 	// hmmm...
 	glEnableClientState( GL_VERTEX_ARRAY );
@@ -254,6 +256,60 @@ void CheckForGLError( const std::string& pLocation )
  		}
 
 		ErrorNum = glGetError();
+	}
+}
+
+
+#include <boost/thread.hpp>
+
+namespace OpenGL
+{
+  CallList::CallList()
+	{
+		list = glGenLists( 1 );
+	}
+	CallList::~CallList()
+	{
+		glDeleteLists( list, 1 );
+	}
+
+	void CallList::startRecording(GLuint mode)
+	{
+		glNewList( list, mode );
+	}
+	void CallList::endRecording()
+	{
+		glEndList();
+	}
+	void CallList::render()
+	{
+		glCallList( list );
+	}
+  	
+	Texture::Texture(const std::string& pname): ManagedItem(pname), w(0), h(0)
+	{
+	}
+	
+	const GLuint Texture::getId() const
+	{
+		return id;
+	}
+	void Texture::render() const
+	{
+		glBindTexture( GL_TEXTURE_2D, id );
+	}
+	
+	void Texture::enableTexture()
+	{
+		glEnable( GL_TEXTURE_2D );
+	}
+	void Texture::disableTexture()
+	{
+		glDisable( GL_TEXTURE_2D );
+	}
+	void Texture::setActiveTexture( size_t num )
+	{
+		glActiveTexture( GL_TEXTURE0 + num );
 	}
 }
 

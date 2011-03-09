@@ -3,13 +3,13 @@
 
 #include "frame.h"
 
-class Texture;
+namespace OpenGL { class Texture; }
 
 class slider:public frame
 {
 protected:
-	Texture* texture;
-	Texture* sliderTexture;
+	OpenGL::Texture* texture;
+	OpenGL::Texture* sliderTexture;
 	float	scale;
 	float	offset;
 	void (*func)(float);

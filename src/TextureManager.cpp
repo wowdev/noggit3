@@ -24,11 +24,11 @@ struct BLPHeader
 #pragma pack(pop)
 
 #ifdef WIN32
-template <> std::map<std::string, GLuint> Manager<GLuint, Texture>::names;
-template <> std::map<GLuint, Texture*> Manager<GLuint,Texture>::items;
+template <> std::map<std::string, GLuint> Manager<GLuint, OpenGL::Texture>::names;
+template <> std::map<GLuint, OpenGL::Texture*> Manager<GLuint,OpenGL::Texture>::items;
 #else
-template <class IDTYPE,class MANAGEDITEM> std::map<std::string, GLuint> Manager<GLuint, Texture>::names;
-template <class IDTYPE,class MANAGEDITEM> std::map<GLuint, Texture*> Manager<GLuint,Texture>::items;
+template <class IDTYPE,class MANAGEDITEM> std::map<std::string, GLuint> Manager<GLuint, OpenGL::Texture>::names;
+template <class IDTYPE,class MANAGEDITEM> std::map<GLuint, OpenGL::Texture*> Manager<GLuint,OpenGL::Texture>::items;
 #endif
 
 GLuint TextureManager::get(const std::string& name)
@@ -49,10 +49,10 @@ GLuint TextureManager::add(const std::string& name)
 		items[id]->addref();
 		return id;
 	}
-		
-	glGenTextures( 1, &id );
+	
+  glGenTextures( 1, &id );
 
-	Texture *tex = new Texture( name_ );
+	OpenGL::Texture *tex = new OpenGL::Texture( name_ );
 	tex->id = id;
 	
 	LoadBLP(id, tex);
@@ -67,12 +67,12 @@ void TextureManager::reload()
 	LogDebug << "Reloading textures.." << std::endl;
 	for( std::map<std::string, GLuint>::iterator it = names.begin(); it != names.end(); ++it )
 	{
-		LoadBLP( it->second, (Texture*)items[it->second] );
+		LoadBLP( it->second, (OpenGL::Texture*)items[it->second] );
 	}
 	Log << "Finished reloading textures." << std::endl;
 }
 
-bool TextureManager::LoadBLP(GLuint id, Texture *tex)
+bool TextureManager::LoadBLP(GLuint id, OpenGL::Texture *tex)
 {
 	BLPHeader * lHeader;
 	int w, h;

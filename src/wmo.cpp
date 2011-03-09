@@ -253,7 +253,6 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
 
 void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool /*highlight*/) const
 {
-	
 	if( gWorld && gWorld->drawfog ) 
 		glEnable( GL_FOG );	
 	else
@@ -960,7 +959,6 @@ void WMOGroup::initLighting(int /*nLR*/, short* /*useLights*/)
 
 void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
 {
-
 	visible = false;
 	// view frustum culling
 	Vec3D pos = center + ofs;
@@ -1136,7 +1134,7 @@ void WMOGroup::setupFog()
 
 
 WMOGroup::~WMOGroup()
-{
+{  
 	//if (dl) glDeleteLists(dl, 1);
 	//if (dl_light) glDeleteLists(dl_light, 1);
 	if (nBatches && lists.size()) glDeleteLists(lists[0].first, nBatches);

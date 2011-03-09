@@ -23,6 +23,7 @@ public:
 	void finishLoading();
 	
 	static bool allFinishedLoading();
+	static void allFinishLoading();
 	
 	friend class MPQFile;
 };

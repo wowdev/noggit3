@@ -3,15 +3,15 @@
 
 #include "frame.h"
 
-class Texture;
+namespace OpenGL { class Texture; };
 class textUI;
 namespace freetype { class font_data; };
 	
 class buttonUI : public frame
 {
 protected:
-	Texture* texture;
-	Texture* textureDown;
+	OpenGL::Texture* texture;
+	OpenGL::Texture* textureDown;
 	void ( *clickFunc )( frame *, int );
 	int	id;
 

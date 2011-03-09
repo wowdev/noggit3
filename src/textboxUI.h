@@ -7,7 +7,7 @@
 class textUI;
 class textureUI;
 class SDL_KeyboardEvent;
-class Texture;
+namespace OpenGL { class Texture; };
 
 //! \todo	Combine and get it working.
 class textboxUI:public frame
@@ -27,8 +27,8 @@ public:
 class TextBox : public frame
 {
 private:
-	Texture* texture;
-	Texture* textureDown;
+	OpenGL::Texture* texture;
+	OpenGL::Texture* textureDown;
 
 	bool	mFocus;
 	textUI	*mText;

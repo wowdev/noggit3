@@ -1,5 +1,6 @@
 #include "textUI.h"
 #include "FreeType.h"
+#include "video.h"
 
 textUI::textUI( float pX, float pY, const std::string& pText, freetype::font_data *pFont, int pJustify ) : background( false )
 {
@@ -80,17 +81,17 @@ void textUI::render() const
 		}
 		glEnd();
 	}
-
+  
 	switch( justify )
 	{
 	case eJustifyLeft:
-		freetype::shprint( *font, x, y, mText.c_str() );		
+		freetype::shprint( *font, x, y, mText );		
 		break;
 	case eJustifyCenter:
-		freetype::shprint( *font, x - twidth / 2.0f, y, mText.c_str() );
+		freetype::shprint( *font, x - twidth / 2.0f, y, mText );
 		break;
 	case eJustifyRight:
-		freetype::shprint( *font, x - twidth, y, mText.c_str() );
+		freetype::shprint( *font, x - twidth, y, mText );
 		break;
 	}
 }
