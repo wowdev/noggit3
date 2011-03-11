@@ -553,7 +553,7 @@ void World::initDisplay()
 	if( mHasAGlobalWMO )
 	{
 		WMOManager::add( mWmoFilename );
-		WMOInstance inst( reinterpret_cast<WMO*>( WMOManager::items[ WMOManager::get( mWmoFilename ) ] ), &mWmoEntry );
+		WMOInstance inst( static_cast<WMO*>( WMOManager::items[ WMOManager::get( mWmoFilename ) ] ), &mWmoEntry );
 		
 		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( mWmoEntry.uniqueID, inst ) );
 		camera = inst.pos;

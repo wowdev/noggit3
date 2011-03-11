@@ -418,7 +418,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	
 	for( std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it )
 	{
-		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::get(mWMOFilenames[it->nameID])]), &(*it) ) ) );
+		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( static_cast<WMO*>(WMOManager::items[WMOManager::get(mWMOFilenames[it->nameID])]), &(*it) ) ) );
 	}
 	
 	// - Load M2s ------------------------------------------
@@ -430,7 +430,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	
 	for( std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
 	{
-		gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( reinterpret_cast<Model*>(ModelManager::items[ModelManager::get(mModelFilenames[it->nameID])]), &(*it) ) ) );
+		gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( static_cast<Model*>(ModelManager::items[ModelManager::get(mModelFilenames[it->nameID])]), &(*it) ) ) );
 	}
 	
 	// - Load chunks ---------------------------------------
@@ -687,14 +687,14 @@ public:
 	bool Allocate( int pSize )
 	{
 		mSize = pSize;
-		mData = reinterpret_cast<char*>( realloc( mData, mSize ) );
+		mData = static_cast<char*>( realloc( mData, mSize ) );
 		memset( mData, 0, mSize );
 		return( mData != NULL );
 	}
 	bool Extend( int pAddition )
 	{
 		mSize = mSize + pAddition;
-		mData = reinterpret_cast<char*>( realloc( mData, mSize ) );
+		mData = static_cast<char*>( realloc( mData, mSize ) );
 		memset( mData + mSize - pAddition, 0, pAddition );
 		return( mData != NULL );
 	}
@@ -702,7 +702,7 @@ public:
 	{
 		const int lPostSize = mSize - pPosition;
 
-		char * lPost = reinterpret_cast<char*>( malloc( lPostSize ) );
+		char * lPost = static_cast<char*>( malloc( lPostSize ) );
 		memcpy( lPost, mData + pPosition, lPostSize );
 
 		if( !Extend( pAddition ) )
@@ -712,11 +712,11 @@ public:
 		memset( mData + pPosition, 0, pAddition );
 		return true;
 	}
-	bool Insert( int pPosition, int pAddition, char * pAdditionalData )
+	bool Insert( int pPosition, int pAddition, const char * pAdditionalData )
 	{
 		const int lPostSize = mSize - pPosition;
 
-		char * lPost = reinterpret_cast<char*>( malloc( lPostSize ) );
+		char * lPost = static_cast<char*>( malloc( lPostSize ) );
 		memcpy( lPost, mData + pPosition, lPostSize );
 
 		if( !Extend( pAddition ) )
@@ -743,7 +743,7 @@ public:
 		mSize = 0;
 		mData = NULL;
 	}
-	sExtendableArray( int pSize, char * pData )
+	sExtendableArray( int pSize, const char * pData )
 	{
 		if( Allocate( pSize ) )
 			memcpy( mData, pData, pSize );
@@ -931,7 +931,7 @@ void MapTile::saveTile()
 		// MTEX data
 		for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
 		{
-			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, const_cast<char*>( it->first.c_str() ) );
+			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
 			lCurrentPosition += it->first.size() + 1;
 			lADTFile.GetPointer<sChunkHeader>( lMTEX_Position )->mSize += it->first.size() + 1;
 			LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
@@ -951,7 +951,7 @@ void MapTile::saveTile()
 		for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); ++it )
 		{
 			it->second[1] = lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize;
-			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, const_cast<char*>( it->first.c_str() ) );
+			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
 			lCurrentPosition += it->first.size() + 1;
 			lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize += it->first.size() + 1;
 			LogDebug << "Added model \"" << it->first << "\"." << std::endl;
@@ -988,7 +988,7 @@ void MapTile::saveTile()
 		for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
 		{
 			it->second[1] = lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize;
-			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, const_cast<char*>( it->first.c_str() ) );
+			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
 			lCurrentPosition += it->first.size() + 1;
 			lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize += it->first.size() + 1;
 			LogDebug << "Added object \"" << it->first << "\"." << std::endl;
