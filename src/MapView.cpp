@@ -241,12 +241,12 @@ void change_settings_window(int oldid, int newid)
 //! \todo	Do this nicer?
 void openHelp( frame* /*button*/, int /*id*/ )
 {
-	reinterpret_cast<MapView*>( gStates.back() )->ViewHelp();
+	static_cast<MapView*>( gStates.back() )->ViewHelp();
 }
 
 void closeHelp( frame* /*button*/, int /*id*/ )
 {
-	reinterpret_cast<MapView*>( gStates.back() )->View3D();
+	static_cast<MapView*>( gStates.back() )->View3D();
 }
 
 void ResetSelectedObjectRotation( frame* /*button*/, int /*id*/ )
@@ -455,7 +455,7 @@ void InsertObject( frame* /*button*/, int id )
 			if( !MPQFile::exists(lastModel) )
 				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
 			else
-				gWorld->addM2( reinterpret_cast<Model*>(ModelManager::items[ModelManager::add(lastModel)]), selectionPosition );
+				gWorld->addM2( static_cast<Model*>(ModelManager::items[ModelManager::add(lastModel)]), selectionPosition );
 		}
 		else if(lastTyp==2)
 		{
@@ -463,7 +463,7 @@ void InsertObject( frame* /*button*/, int id )
 			if( !MPQFile::exists(lastModel) )
 				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
 			else
-				gWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(lastModel)]), selectionPosition );
+				gWorld->addWMO( static_cast<WMO*>(WMOManager::items[WMOManager::add(lastModel)]), selectionPosition );
 		}
 	}
 	else
@@ -477,7 +477,7 @@ void InsertObject( frame* /*button*/, int id )
 				continue;
 			}
 		
-			gWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
+			gWorld->addWMO( static_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
 		}
 
 		for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
@@ -489,7 +489,7 @@ void InsertObject( frame* /*button*/, int id )
 				continue;
 			}
 
-			gWorld->addM2( reinterpret_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
+			gWorld->addM2( static_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
 		}
 	}
 	//! \todo Memoryleak: These models will never get deleted.

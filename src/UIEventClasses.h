@@ -24,7 +24,7 @@ class UIEventListener {
 #define UIEventClassConstructorArguments EventHandlerType _eventHandler, UIEventListener* _listener
 #define UIEventClassConstructorSuperCall() UIEventSender(reinterpret_cast<UIEventSender::EventHandlerType>(_eventHandler), _listener)
 #define UIEventEventHandlerCall(...) { EventHandlerType eventHandlerCasted = reinterpret_cast<EventHandlerType>(eventHandler); (listener->*eventHandlerCasted)(__VA_ARGS__); }
-#define UIEventConstructorArgument(SenderClass,ListenerObject,ListenerMethod) reinterpret_cast<SenderClass::EventHandlerType>(&ListenerMethod), reinterpret_cast<UIEventListener*>(ListenerObject)
+#define UIEventConstructorArgument(SenderClass,ListenerObject,ListenerMethod) static_cast<SenderClass::EventHandlerType>(&ListenerMethod), static_cast<UIEventListener*>(ListenerObject)
 
 /*! 
 
