@@ -70,17 +70,17 @@ void Gui::render( bool tilemode )
   this->tileFrames->render();
   
   //! \todo Make these some textUIs.
-	freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
+	freetype::shprint( *arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
 	
 	std::stringstream fps; fps << gFPS << " fps";
-	freetype::shprint( arial16, video.xres - 200, 5, fps.str() );
+	freetype::shprint( *arial16, video.xres - 200, 5, fps.str() );
 	
 	int time = static_cast<int>( gWorld->time ) % 2880;
 	std::stringstream timestrs; timestrs << "Time: " << ( time / 120 ) << ":" << ( time % 120 );
-	freetype::shprint( arial16, video.xres - 100.0f, 5.0f, timestrs.str() );
+	freetype::shprint( *arial16, video.xres - 100.0f, 5.0f, timestrs.str() );
 	
 	if ( gWorld->loading ) 
-		freetype::shprint( arial16, video.xres/2 - freetype::width( arial16, gWorld->noadt ? "No ADT at this Point" : "Loading..." ) / 2, 30, ( gWorld->noadt ? "No ADT at this Point" : "Loading..." ) );
+		freetype::shprint( *arial16, video.xres/2 - freetype::width( *arial16, gWorld->noadt ? "No ADT at this Point" : "Loading..." ) / 2, 30, ( gWorld->noadt ? "No ADT at this Point" : "Loading..." ) );
 		
 		
 	std::ostringstream statusbarInfo;

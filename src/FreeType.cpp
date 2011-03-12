@@ -161,63 +161,59 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 
 
 
-void font_data::init(const char * fname, unsigned int _h, bool fromMPQ)
+font_data::font_data( const std::string& fname, unsigned int _h, bool fromMPQ ) : h ( _h )
 {
-	this->h=_h;
-
 	FT_Library library;
-	if (FT_Init_FreeType( &library )) 
+	if( FT_Init_FreeType( &library ) ) 
 	{
 		LogError << "FT_Init_FreeType failed" << std::endl;
-		throw std::runtime_error("FT_Init_FreeType failed");
+		throw std::runtime_error( "FT_Init_FreeType failed" );
 	}
 
 	FT_Face face;
 
   bool failed;
   MPQFile* f;
-  if(fromMPQ)
+  if( fromMPQ )
   {
-    f = new MPQFile(fname);
-    failed = FT_New_Memory_Face( library, (FT_Byte *)f->getBuffer(), f->getSize(), 0, &face );
+    f = new MPQFile( fname );
+    failed = FT_New_Memory_Face( library, reinterpret_cast<FT_Byte*>( f->getBuffer() ), f->getSize(), 0, &face );
   }
   else
   {
-  	failed = FT_New_Face( library, fname, 0, &face );
+  	failed = FT_New_Face( library, fname.c_str(), 0, &face );
   }
   
-  if(failed)
+  if( failed )
   {
   	LogError << "FT_New_Face failed (there is probably a problem with your font file)" << std::endl;
-  	throw std::runtime_error("FT_New_Face failed (there is probably a problem with your font file)");
+  	throw std::runtime_error( "FT_New_Face failed (there is probably a problem with your font file)" );
   }
 
-	//For some twisted reason, Freetype measures font size
-	//in terms of 1/64ths of pixels.	Thus, to make a font
-	//h pixels high, we need to request a size of h*64.
-	//(h << 6 is just a prettier way of writting h*64)
-	FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72);
+	// For some twisted reason, Freetype measures font size in terms of 1/64ths of pixels.	Thus, to make a font h pixels high, we need to request a size of h*64. (h << 6 is just a prettier way of writting h*64)
+	FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72 );
 
-  list_base = glGenLists(128); //! \todo more for unicode!
+  list_base = glGenLists( 128 ); //! \todo more for unicode!
   textures = new GLuint[128];
   glGenTextures( 128, textures );
   
-  for(unsigned char i=0;i<128;++i)
-    charWidths[i] = make_dlist(face,i,list_base,textures,h);
+  for( unsigned char i = 0; i < 128; ++i )
+    charWidths[i] = make_dlist( face, i, list_base, textures, h );
 
-	FT_Done_Face(face);
-	FT_Done_FreeType(library);
+	FT_Done_Face( face );
+	FT_Done_FreeType( library );
 	
-	if(fromMPQ)
+	if( fromMPQ )
 	{
     f->close();
     delete f;
 	}
 }
 
-void font_data::clean() {
-	glDeleteLists(list_base,128);
-	glDeleteTextures(128,textures);
+font_data::~font_data()
+{
+	glDeleteLists( list_base, 128 );
+	glDeleteTextures( 128, textures );
 	if( textures )
 	{
 		delete [] textures;
@@ -244,18 +240,18 @@ void print(const font_data &ft_font, float x, float y, const std::string& text, 
 	
 	//! \todo std::string.find ...
 	const char *start_line=text.c_str();
-	vector<string> lines;
+	std::vector<std::string> lines;
 	const char *c=text.c_str();
 	for(;*c;c++) {
 		if(*c=='\n') {
-			string line;
+			std::string line;
 			for(const char *n=start_line;n<c;n++) line.append(1,*n);
 			lines.push_back(line);
 			start_line=c+1;
 		}
 	}
 	if(start_line) {
-		string line;
+		std::string line;
 		for(const char *n=start_line;n<c;n++) line.append(1,*n);
 		lines.push_back(line);
 	}
@@ -320,18 +316,18 @@ int width(const font_data &ft_font, const std::string& text)
 	//boost.org (I've only done it out by hand to avoid complicating
 	//this tutorial with unnecessary library dependencies).
 	const char *start_line=text.c_str();
-	vector<string> lines;
+	std::vector<std::string> lines;
 	const char *c=text.c_str();
 	for(;*c;c++) {
 		if(*c=='\n') {
-			string line;
+			std::string line;
 			for(const char *n=start_line;n<c;n++) line.append(1,*n);
 			lines.push_back(line);
 			start_line=c+1;
 		}
 	}
 	if(start_line) {
-		string line;
+		std::string line;
 		for(const char *n=start_line;n<c;n++) line.append(1,*n);
 		lines.push_back(line);
 	}

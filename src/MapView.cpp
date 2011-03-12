@@ -554,7 +554,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	setting_ground->movable = true;
 	mainGui->tileFrames->addChild( setting_ground );
 
-	setting_ground->addChild( new textUI( 78.5f, 2.0f, "Raise / Lower", &arial14, eJustifyCenter ) );
+	setting_ground->addChild( new textUI( 78.5f, 2.0f, "Raise / Lower", arial14, eJustifyCenter ) );
 	
 	gGroundToggleGroup = new ToggleGroup( &groundBrushType );
 	setting_ground->addChild( new checkboxUI( 6.0f, 15.0f, "Flat", gGroundToggleGroup, 0 ) );
@@ -583,7 +583,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	setting_blur->hidden=true;
 	mainGui->tileFrames->addChild(setting_blur);
 
-	setting_blur->addChild( new textUI( 78.5f, 2.0f, "Flatten / Blur", &arial14, eJustifyCenter ) );
+	setting_blur->addChild( new textUI( 78.5f, 2.0f, "Flatten / Blur", arial14, eJustifyCenter ) );
 
 	gBlurToggleGroup = new ToggleGroup( &blurBrushType );
 	setting_blur->addChild( new checkboxUI( 6.0f, 15.0f, "Flat", gBlurToggleGroup, 0 ) );
@@ -604,7 +604,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
 	mainGui->tileFrames->addChild(settings_paint);
 
-	settings_paint->addChild( new textUI( 78.5f, 2.0f, "3D Paint", &arial14, eJustifyCenter ) );
+	settings_paint->addChild( new textUI( 78.5f, 2.0f, "3D Paint", arial14, eJustifyCenter ) );
 	
 	gradient *G1;
 	G1=new gradient;	
@@ -1117,7 +1117,7 @@ void MapView::displayViewMode_Help( float /*t*/, float /*dt*/ )
 	glDisable(GL_TEXTURE_2D);
 	
 
-	freetype::shprint( arial16, 60.0f, 40.0f, 
+	freetype::shprint( *arial16, 60.0f, 40.0f, 
 	"Basic controles\n\n"					
 		"Left mouse button moves the camera\n"
 		"Mouse left click - select chunk or object\n"
@@ -1159,7 +1159,7 @@ void MapView::displayViewMode_Help( float /*t*/, float /*dt*/ )
 		"CTRL + SHIFT + S - Save ADT tiles camera position\n"
 	);
 	
-	freetype::shprint( arial16, video.xres - 400.0f, 40.0f, 
+	freetype::shprint( *arial16, video.xres - 400.0f, 40.0f, 
 		"Edit ground:\n"
 		"Shift + F1 - toggle ground edit mode\n"
 		"T - change terrain mode\n"

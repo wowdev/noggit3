@@ -16,7 +16,7 @@ Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window
 	this->movable = true;
 
 	// set title
-	text = new textUI( 8, 7, "Raise/Lower", &arialn13, eJustifyLeft );
+	text = new textUI( 8, 7, "Raise/Lower", arialn13, eJustifyLeft );
 	this->addChild( text );
 
 	//close button
