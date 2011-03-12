@@ -1383,9 +1383,7 @@ void MapView::display( float t, float dt )
 
 void MapView::resizewindow()
 {
-	for( std::vector<frame*>::iterator child = mainGui->tileFrames->children.begin(); child != mainGui->tileFrames->children.end(); ++child )
-		if( (*child)->mustresize )
-			(*child)->resize();
+  mainGui->resize();
 }
 
 void MapView::keypressed( SDL_KeyboardEvent *e )

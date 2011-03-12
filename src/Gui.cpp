@@ -65,6 +65,12 @@ Gui::~Gui()
   delete tileFrames;
 }
 
+void Gui::resize()
+{
+	for( std::vector<frame*>::iterator child = tileFrames->children.begin(); child != tileFrames->children.end(); ++child )
+		(*child)->resize();
+}
+
 void Gui::render( bool tilemode )
 {
   this->tileFrames->render();

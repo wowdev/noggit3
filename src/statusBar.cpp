@@ -7,8 +7,6 @@
 
 statusBar::statusBar( float xPos, float yPos, float w, float h ) : window(xPos, yPos, w, h)
 {
-	mustresize = true;
-
 	// create leftInfo text element
 	leftInfo = new textUI( 8.0f, 7.0f, "", arial16, eJustifyLeft );
 	addChild( leftInfo );
