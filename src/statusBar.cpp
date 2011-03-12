@@ -10,11 +10,11 @@ statusBar::statusBar( float xPos, float yPos, float w, float h ) : window(xPos, 
 	mustresize = true;
 
 	// create leftInfo text element
-	leftInfo = new textUI( 8.0f, 7.0f, "", &arial16, eJustifyLeft );
+	leftInfo = new textUI( 8.0f, 7.0f, "", arial16, eJustifyLeft );
 	addChild( leftInfo );
 
 	// create rightInfo text element
-	rightInfo = new textUI( this->width - 8.0f, 7.0f, "", &arial16, eJustifyRight );
+	rightInfo = new textUI( this->width - 8.0f, 7.0f, "", arial16, eJustifyRight );
 	addChild( rightInfo );
 }
 

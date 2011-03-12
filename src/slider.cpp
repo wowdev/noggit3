@@ -104,8 +104,8 @@ void slider::render() const
 	{
 		int twidth;
 		sprintf(Temp,text,value*scale+offset);
-		twidth=freetype::width(arial12,Temp);
-		freetype::shprint(arial12,width/2-twidth/2,-16,Temp);	
+		twidth=freetype::width(*arial12,Temp);
+		freetype::shprint(*arial12,width/2-twidth/2,-16,Temp);	
 	}
 	
 	glPushMatrix();

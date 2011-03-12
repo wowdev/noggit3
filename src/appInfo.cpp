@@ -14,7 +14,7 @@ appInfo::appInfo(float xPos, float yPos, float w, float h, Gui *setGui) : window
 
 	this->addChild( new MinimizeButton( w, this ) );
 
-	this->theInfos = new textUI( 8.0f, 7.0f, &arial14, eJustifyLeft );
+	this->theInfos = new textUI( 8.0f, 7.0f, arial14, eJustifyLeft );
 	this->addChild( this->theInfos );
 
 	modelUI* myTestmodel = new modelUI( 10.0f, 0.0f, w, h );
