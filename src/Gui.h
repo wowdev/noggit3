@@ -10,6 +10,7 @@ class ui_ZoneIdBrowser;
 class MapView;
 class frame;
 
+//! \todo Give better name.
 class Gui
 {
 public:
@@ -28,5 +29,9 @@ public:
 	ui_ZoneIdBrowser *ZoneIDBrowser;
 
 	Gui(MapView *setMapview);
+	~Gui();
+	
+	void render(bool tilemode);
 };
+
 #endif
