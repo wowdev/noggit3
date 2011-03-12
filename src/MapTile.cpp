@@ -769,6 +769,12 @@ void SetChunkHeader( sExtendableArray pArray, int pPosition, int pMagix, int pSi
 	Header->mMagic = pMagix;
 	Header->mSize = pSize;
 }
+	
+struct filenameOffsetThing
+{
+  int nameID;
+  int filenamePosition;
+};
 
 void MapTile::saveTile()
 {
@@ -815,8 +821,10 @@ void MapTile::saveTile()
 			lModelInstances.insert( std::pair<int, ModelInstance>( it->first, it->second ) );
 		}
 	}
+	
+	filenameOffsetThing nullyThing = { 0, 0 };
 
-	std::map<std::string, int*> lModels;
+	std::map<std::string, filenameOffsetThing> lModels;
 
 	for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
 	{
@@ -832,23 +840,23 @@ void MapTile::saveTile()
 
 		if( lModels.find( lTemp ) == lModels.end() )
 		{
-			lModels.insert( std::pair<std::string, int*>( lTemp, new int[2] ) ); 
+			lModels.insert( std::pair<std::string, filenameOffsetThing>( lTemp, nullyThing ) ); 
 		}
 	}
 	
 	lID = 0;
-	for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); ++it )
-		it->second[0] = lID++;
+	for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
+		it->second.nameID = lID++;
 
-	std::map<std::string, int*> lObjects;
+	std::map<std::string, filenameOffsetThing> lObjects;
 
 	for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
 		if( lObjects.find( it->second.wmo->filename ) == lObjects.end() )
-			lObjects.insert( std::pair<std::string, int*>( ( it->second.wmo->filename ), new int[2] ) ); 
+			lObjects.insert( std::pair<std::string, filenameOffsetThing>( ( it->second.wmo->filename ), nullyThing ) ); 
 	
 	lID = 0;
-	for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
-		it->second[0] = lID++;
+	for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
+		it->second.nameID = lID++;
 
 	// Check which textures are on this ADT.
 	std::map<std::string, int> lTextures;
@@ -866,7 +874,8 @@ void MapTile::saveTile()
 	for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
 		it->second = lID++;
 
-	
+
+  //! \todo actually, the folder is completely independant of this. Handle this differently. Bullshit here.	
 	std::string cmpCubeMaps = std::string("terrain cube maps");
 	for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it ){
 		//if texture is in folder terrain cube maps, it needs to get handled different by wow
@@ -948,9 +957,9 @@ void MapTile::saveTile()
 		lCurrentPosition += 8 + 0;
 
 		// MMDX data
-		for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); ++it )
+		for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
 		{
-			it->second[1] = lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize;
+			it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize;
 			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
 			lCurrentPosition += it->first.size() + 1;
 			lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize += it->first.size() + 1;
@@ -969,8 +978,8 @@ void MapTile::saveTile()
 		int * lMMID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
 		
 		lID = 0;
-		for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); ++it )
-			lMMID_Data[lID++] = it->second[1];
+		for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
+			lMMID_Data[lID++] = it->second.filenamePosition;
 
 		lCurrentPosition += 8 + lMMID_Size;
 //	}
@@ -985,9 +994,9 @@ void MapTile::saveTile()
 		lCurrentPosition += 8 + 0;
 
 		// MWMO data
-		for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
+		for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
 		{
-			it->second[1] = lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize;
+			it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize;
 			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
 			lCurrentPosition += it->first.size() + 1;
 			lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize += it->first.size() + 1;
@@ -1006,8 +1015,8 @@ void MapTile::saveTile()
 		int * lMWID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
 		
 		lID = 0;
-		for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
-			lMWID_Data[lID++] = it->second[1];
+		for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
+			lMWID_Data[lID++] = it->second.filenamePosition;
 
 		lCurrentPosition += 8 + lMWID_Size;
 //	}
@@ -1035,7 +1044,7 @@ void MapTile::saveTile()
 				lTemp.replace( found, 3, ".md" );
 				lTemp.append( "x" );
 			}
-			std::map<std::string, int*>::iterator lMyFilenameThingey = lModels.find( lTemp );
+			std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lModels.find( lTemp );
 			if( lMyFilenameThingey == lModels.end() )
 			{
 				LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -1050,7 +1059,7 @@ void MapTile::saveTile()
 			
 			int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 1 * 1000;
 
-			lMDDF_Data[lID].nameID = lMyFilenameThingey->second[0];
+			lMDDF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
 			lMDDF_Data[lID].uniqueID = lNewUID;
 			lMDDF_Data[lID].pos[0] = it->second.pos.x;
 			lMDDF_Data[lID].pos[1] = it->second.pos.y;
@@ -1081,7 +1090,7 @@ void MapTile::saveTile()
 		lID = 0;
 		for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
 		{
-			std::map<std::string, int*>::iterator lMyFilenameThingey = lObjects.find( it->second.wmo->filename );
+			std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lObjects.find( it->second.wmo->filename );
 			if( lMyFilenameThingey == lObjects.end() )
 			{
 				LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -1096,7 +1105,7 @@ void MapTile::saveTile()
 			
 			int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 2 * 1000;
 
-			lMODF_Data[lID].nameID = lMyFilenameThingey->second[0];
+			lMODF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
 			lMODF_Data[lID].uniqueID = lNewUID;
 			lMODF_Data[lID].pos[0] = it->second.pos.x;
 			lMODF_Data[lID].pos[1] = it->second.pos.y;
