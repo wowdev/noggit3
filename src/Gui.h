@@ -32,6 +32,7 @@ public:
 	~Gui();
 	
 	void render(bool tilemode);
+	void resize();
 };
 
 #endif

@@ -11,7 +11,6 @@
 
 winCredits::winCredits( ) : closeWindowUI( ((float)video.xres/2) - (winWidth/2),((float)video.yres/2) - (winHeight/2),winWidth,winHeight,"")
 {
-	mustresize = true;
 	addChild( new textureUI( 20.0f, 20.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Potion_83.blp" ) );
 	addChild( new textUI( 73.0f, 24.0f, "Noggit Studio", skurri32, eJustifyLeft ) );
 	addChild( new textUI( 165.0f, 55.0f, "a wow map editor", fritz16, eJustifyLeft ) );

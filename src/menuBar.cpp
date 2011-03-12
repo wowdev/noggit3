@@ -11,7 +11,6 @@ menuBar::menuBar() : window( 0.0f, 0.0f, video.xres, video.yres )
 {
 	texture = TextureManager::newTexture( "interface\\tooltips\\ui-tooltip-border.blp" );
 
-	mustresize = true;
 	mNumMenus = 0;
 }
 
