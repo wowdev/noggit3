@@ -1726,6 +1726,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		// toggle editing mode
 		if( e->keysym.sym == SDLK_t ) 
 		{
+		  //! \todo Modulo.
 		  terrainMode =  terrainMode - 1;
 		  if(terrainMode<0) terrainMode = 5;
 			// Set the right icon in toolbar
@@ -1874,7 +1875,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 					break;
 				}
 			}
-			else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() == true && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
+			else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
 				gWorld->fogdistance += 60.0f;// fog change only when no model is selected!
 			else
 			{
@@ -1913,7 +1914,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 					break;
 				}
 			}
-			else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() == true && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
+			else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
 				gWorld->fogdistance -= 60.0f; // fog change only when no model is selected!
 			else
 			{
@@ -2234,13 +2235,9 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 	}
 
 	// check menu settings and switch hole mode
+	//! \todo why the hell is this here?
 	if(terrainMode!=3)
 	{
-		if(Settings::getInstance()->holelinesOn) 
-			Environment::getInstance()->view_holelines = true;
-		else Environment::getInstance()->view_holelines = false;
+		Environment::getInstance()->view_holelines = Settings::getInstance()->holelinesOn;
 	}
-
 }
-
-
