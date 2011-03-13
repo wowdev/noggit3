@@ -1,4 +1,4 @@
-#include "mpq_stormlib.h"
+#include "MPQ.h"
 #include "Log.h"
 #include "directory.h"
 #include "Project.h"
