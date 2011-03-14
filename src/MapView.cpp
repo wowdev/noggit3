@@ -730,6 +730,7 @@ MapView::~MapView()
 	{
 		delete mainGui;
 		mainGui = NULL;
+		mainGuiPointer = NULL;
 	}
 	if( gWorld )
 	{
