@@ -1,61 +1,63 @@
 #include "AsyncLoader.h"
 #include "AsyncObject.h"
 
+bool isFinished( AsyncObject* object )
+{
+  return object->finishedLoading();
+}
+
 void AsyncLoader::process()
 {
-	while(true)
-	{
-		AsyncObject* object = nextObjectToLoad();
-		if(object)
-		{
-			object->finishLoading();
-		}
-		else
-		{
-			boost::this_thread::sleep(boost::posix_time::milliseconds(10));
-		}
-	}
+  while( true )
+  {
+    AsyncObject* object = nextObjectToLoad();
+    if( object )
+    {
+      object->finishLoading();
+    }
+    else
+    {
+      boost::this_thread::sleep( boost::posix_time::milliseconds( 10 ) );
+    }
+  }
 }
 
 AsyncObject* AsyncLoader::nextObjectToLoad()
 {
-	boost::mutex::scoped_lock lock(m_loadingMutex);
-	std::list<AsyncObject*>::iterator it;
-	do
-	{
-		it = m_objects.begin();
-		if(it != m_objects.end() && (*it)->finishedLoading())
-		{
-			m_objects.erase(it);
-		}
-		else
-		{
-			break;
-		}
-	}
-	while(it != m_objects.end());
-	if(it == m_objects.end())
-	{
-		return NULL;
-	}
-	else
-	{
-		return *it;
-	}
+  boost::mutex::scoped_lock lock( m_loadingMutex );
+  
+  m_objects.remove_if( isFinished );
+  
+  std::list<AsyncObject*>::iterator it = m_objects.begin();
+  
+  if( it == m_objects.end() )
+  {
+    return NULL;
+  }
+  else
+  {
+    return *it;
+  }
 }
 
-void AsyncLoader::addObject(AsyncObject* _pObject)
+void AsyncLoader::addObject( AsyncObject* _pObject )
 {
-	boost::mutex::scoped_lock lock(m_loadingMutex);
-	m_objects.push_back(_pObject);
+  boost::mutex::scoped_lock lock( m_loadingMutex );
+  m_objects.push_back( _pObject );
 }
 
-void AsyncLoader::start(int _numThreads)
+void AsyncLoader::removeObject( AsyncObject* _pObject )
 {
-	for(int i = 0; i < _numThreads; ++i)
-	{
-		m_threads.add_thread(new boost::thread(&AsyncLoader::process, this));
-	}
+  boost::mutex::scoped_lock lock( m_loadingMutex );
+  m_objects.remove( _pObject );
+}
+
+void AsyncLoader::start( int _numThreads )
+{
+  for( int i = 0; i < _numThreads; ++i )
+  {
+    m_threads.add_thread( new boost::thread( &AsyncLoader::process, this ) );
+  }
 }
 
 void AsyncLoader::stop()
@@ -65,5 +67,5 @@ void AsyncLoader::stop()
 
 void AsyncLoader::join()
 {
-	m_threads.join_all();
+  m_threads.join_all();
 }
