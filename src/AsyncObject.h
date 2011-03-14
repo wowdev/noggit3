@@ -6,7 +6,7 @@ class AsyncObject
 protected:
 	bool finished;
 public:
-	virtual bool finishedLoading()
+	virtual bool finishedLoading() const
 	{
 		return finished;
 	}

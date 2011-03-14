@@ -15,6 +15,7 @@ public:
 	AsyncObject* nextObjectToLoad();
 	
 	void addObject(AsyncObject* _pObject);
+	void removeObject(AsyncObject* _pObject);
 	
 	void start(int _numThreads = 1);
 	void stop();
