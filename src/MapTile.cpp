@@ -799,9 +799,6 @@ void MapTile::saveTile()
 		if( checkInside( lTileExtents, it->second.extents ) )
 			lObjectInstances.insert( std::pair<int, WMOInstance>( it->first, it->second ) );
 
-	//LogError << "ADT From X:" << lTileExtents[0].x << " - Z:" << lTileExtents[0].z << std::endl;
-	//LogError << "ADT From X:" << lTileExtents[1].x << " - Z:" << lTileExtents[1].z << std::endl;
-
 	for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
 	{
 		Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
@@ -809,12 +806,6 @@ void MapTile::saveTile()
 		lModelExtentsV1[1] = it->second.model->header.BoundingBoxMax + it->second.pos;
 		lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
 		lModelExtentsV2[1] = it->second.model->header.VertexBoxMax + it->second.pos;
-		
-		//LogError << "BoundingBox From X:" << lModelExtentsV1[0].x << " - Z:" << lModelExtentsV1[0].z << std::endl;
-		//LogError << "BoundingBox From X:" << lModelExtentsV1[1].x << " - Z:" << lModelExtentsV1[1].z << std::endl;
-
-		//LogError << "VertexBoxMin From X:" << lModelExtentsV2[0].x << " - Z:" << lModelExtentsV2[0].z << std::endl;
-		//LogError << "VertexBoxMin From X:" << lModelExtentsV2[1].x << " - Z:" << lModelExtentsV2[1].z << std::endl;
 
 		if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
 		{
@@ -860,21 +851,22 @@ void MapTile::saveTile()
 
 	// Check which textures are on this ADT.
 	std::map<std::string, int> lTextures;
+#if 0
 	//used to store texteffectinfo
 	std::vector<int> mTextureEffects;
+#endif
 	 
 	for( int i = 0; i < 16; ++i )
 		for( int j = 0; j < 16; ++j )
 			for( int tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
-				if( lTextures.find( TextureManager::items[mChunks[i][j]->textures[tex]]->name ) == lTextures.end() ) {
+				if( lTextures.find( TextureManager::items[mChunks[i][j]->textures[tex]]->name ) == lTextures.end() )
 					lTextures.insert( std::pair<std::string, int>(TextureManager::items[mChunks[i][j]->textures[tex]]->name , -1 ) );
-				}
 	
 	lID = 0;
 	for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
 		it->second = lID++;
 
-
+#if 0
   //! \todo actually, the folder is completely independant of this. Handle this differently. Bullshit here.	
 	std::string cmpCubeMaps = std::string("terrain cube maps");
 	for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it ){
@@ -886,7 +878,7 @@ void MapTile::saveTile()
 		else
 			mTextureEffects.push_back(0);
 	}
-
+#endif
 
 	// Now write the file.
 	
@@ -1051,6 +1043,8 @@ void MapTile::saveTile()
 				return;
 			}
 			
+			//! \todo Do not fuck things up via UIDs here! Stop calculating them. Or somewhere else. Or idk. This is shit. Pure shit.
+			
 			// XXZZTNNN
 			//				1
 			//		 1000
@@ -1097,6 +1091,8 @@ void MapTile::saveTile()
 				return;
 			}
 			
+			//! \todo Do not fuck things up via UIDs here! Stop calculating them. Or somewhere else. Or idk. This is shit. Pure shit.
+			
 			// XXZZTNNN
 			//				1
 			//		 1000
@@ -1130,6 +1126,8 @@ void MapTile::saveTile()
 		lCurrentPosition += 8 + lMODF_Size;
 //	}
 
+#if 0
+  //! \todo Move to correct position. Actually do it correctly.
 	//MH2O
 	if(false){
 		int lMH2O_size = 256*sizeof(MH2O_Header);
@@ -1246,9 +1244,9 @@ void MapTile::saveTile()
 		LogDebug << "Wrote MH2O!" << std::endl;
 		lCurrentPosition += 8 + lMH2O_size;
 	}
+#endif
 
 	// MCNK
-	//! \todo	MCNK
 //	{
 		for( int y = 0; y < 16; ++y )
 		{
@@ -1285,6 +1283,7 @@ void MapTile::saveTile()
 				lMCNK_header->nSndEmitters = 0;
 
 				lMCNK_header->ofsLiquid = 0;
+				//! \todo Is this still 8 if no chunk is present? Or did they correct that?
 				lMCNK_header->sizeLiquid = 8;
 
 				//! \todo	MCCV sub-chunk
@@ -1322,7 +1321,6 @@ void MapTile::saveTile()
 					lMCNK_Size += 8 + lMCVT_Size;
 //				}
 
-				
 				// MCNR
 //				{
 					int lMCNR_Size = ( 9 * 9 + 8 * 8 ) * 3;
@@ -1343,8 +1341,6 @@ void MapTile::saveTile()
 						lNormals[i*3+2] = misc::roundc(	mChunks[y][x]->mNormals[i].y * 127 );
 					}
 
-
-					
 					lCurrentPosition += 8 + lMCNR_Size;
 					lMCNK_Size += 8 + lMCNR_Size;
 //				}
@@ -1526,34 +1522,7 @@ void MapTile::saveTile()
 					lMCNK_Size += 8 + lMCAL_Size;
 //				}
 
-				// MCLQ
-//				{
-					//! Don't write anything MCLQ related anymore...
-					/* 
-					int lMCLQ_Size = 0;
-					lADTFile.Extend( 8 + lMCLQ_Size );
-					SetChunkHeader( lADTFile, lCurrentPosition, 'MCLQ', lMCLQ_Size );
-					*/
-					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsLiquid = 0;//lCurrentPosition - lMCNK_Position;
-					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->sizeLiquid = 0;//( lMCLQ_Size == 0 ? 8 : lMCLQ_Size );
-
-					// if ( data ) do write
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																				
-					/*
-					if(ChunkHeader[i].ofsLiquid!=0&&ChunkHeader[i].sizeLiquid!=0&&ChunkHeader[i].sizeLiquid!=8){
-					Temp=ChunkHeader[i].sizeLiquid;
-					memcpy(Buffer+Change+MCINs[i].offset+ChunkHeader[i].ofsLiquid+lChange,f.getBuffer()+MCINs[i].offset+ChunkHeader[i].ofsLiquid,Temp);
-					ChunkHeader[i].ofsLiquid+=lChange;
-					}
-					else{
-						ChunkHeader[i].ofsLiquid=0;
-						ChunkHeader[i].sizeLiquid=0;
-					}
-					*/
-
-					//lCurrentPosition += 8 + lMCLQ_Size;
-					//lMCNK_Size += 8 + lMCLQ_Size;
-//				}
+			  //! Don't write anything MCLQ related anymore...
 
 				// MCSE
 //				{
@@ -1589,7 +1558,7 @@ void MapTile::saveTile()
 	// MFBO
 	if( this->mFlags & 1 )
 	{
-		lADTFile.Extend( 8 + 36 );	// We don't yet know how big this will be.
+		lADTFile.Extend( 8 + 36 );
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MFBO', 36 );
 		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mfbo = lCurrentPosition - 0x14;
 
@@ -1605,9 +1574,8 @@ void MapTile::saveTile()
 		lCurrentPosition += 8 + 36;
 	}
 
-	//! \todo	MH2O
-
-	//MTFX 
+	// \! todo Do not do bullshit here in MTFX. 
+#if 0
 	if(!mTextureEffects.empty()) {
 		//! \todo check if nTexEffects == nTextures, correct order etc.
 		lADTFile.Extend( 8 + 4*mTextureEffects.size());
@@ -1624,6 +1592,7 @@ void MapTile::saveTile()
 		}
 		lCurrentPosition += 8 +  4*mTextureEffects.size();
 	}
+#endif
 	
 	MPQFile f( mFilename );
 	f.setBuffer( lADTFile.GetPointer<uint8_t>(), lADTFile.mSize );
