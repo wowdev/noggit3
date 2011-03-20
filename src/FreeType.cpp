@@ -294,9 +294,9 @@ void print(const font_data &ft_font, float x, float y, const std::string& text, 
 	//down by h. This is because when each character is
 	//draw it modifies the current matrix so that the next character
 	//will be drawn immediatly after it.	
-	glPushMatrix();
-	glTranslatef(x,y,0.0f);
 	for(unsigned int i=0;i<lines.size();++i) {
+	glPushMatrix();
+	glTranslatef(x,y+h*i,0.0f);
 		//glLoadIdentity();
 		//glMultMatrixf(modelview_matrix);
 
@@ -310,9 +310,9 @@ void print(const font_data &ft_font, float x, float y, const std::string& text, 
 	//	glGetFloatv(GL_CURRENT_RASTER_POSITION ,rpos);
 	//	float len=x-rpos[0];
 
-		glTranslatef(0.0f,h*i,0.0f);
-	}
+		//glTranslatef(0.0f,h*i,0.0f);
 	glPopMatrix();
+	}
 
 	glPopAttrib();		
 
