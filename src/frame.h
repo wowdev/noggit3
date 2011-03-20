@@ -16,9 +16,8 @@ public:
 	bool movable;
 	bool hidden;
 	bool clickable;
-	bool mustresize;
 
-	frame() : parent( 0 ), movable( false ), hidden( false ), clickable( false ), mustresize( false )
+	frame() : parent( 0 ), movable( false ), hidden( false ), clickable( false )
 	{
 		x = 0.0f;
 		y = 0.0f;
@@ -26,7 +25,7 @@ public:
 		height = 0.0f;
 	}
 
-	frame( float pX, float pY, float w, float h ) : parent( 0 ), movable( false ), hidden( false ), clickable( false ), mustresize( false )
+	frame( float pX, float pY, float w, float h ) : parent( 0 ), movable( false ), hidden( false ), clickable( false )
 	{
 		x = pX;
 		y = pY;
@@ -57,8 +56,7 @@ public:
 	virtual void resize()
 	{
 		for( std::vector<frame*>::iterator it = children.begin(); it != children.end(); ++it )
-			if( (*it)->mustresize )
-				(*it)->resize();
+			(*it)->resize();
 	}
 	void getOffset( float &xOff, float &yOff );
 

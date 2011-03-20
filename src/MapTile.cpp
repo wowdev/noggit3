@@ -419,7 +419,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	
 	for( std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it )
 	{
-		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::get(mWMOFilenames[it->nameID])]), &(*it) ) ) );
+		gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( static_cast<WMO*>(WMOManager::items[WMOManager::get(mWMOFilenames[it->nameID])]), &(*it) ) ) );
 	}
 	
 	// - Load M2s ------------------------------------------
@@ -431,7 +431,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	
 	for( std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
 	{
-		gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( reinterpret_cast<Model*>(ModelManager::items[ModelManager::get(mModelFilenames[it->nameID])]), &(*it) ) ) );
+		gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( static_cast<Model*>(ModelManager::items[ModelManager::get(mModelFilenames[it->nameID])]), &(*it) ) ) );
 	}
 	
 	// - Load chunks ---------------------------------------
@@ -692,14 +692,14 @@ public:
 	bool Allocate( int pSize )
 	{
 		mSize = pSize;
-		mData = reinterpret_cast<char*>( realloc( mData, mSize ) );
+		mData = static_cast<char*>( realloc( mData, mSize ) );
 		memset( mData, 0, mSize );
 		return( mData != NULL );
 	}
 	bool Extend( int pAddition )
 	{
 		mSize = mSize + pAddition;
-		mData = reinterpret_cast<char*>( realloc( mData, mSize ) );
+		mData = static_cast<char*>( realloc( mData, mSize ) );
 		memset( mData + mSize - pAddition, 0, pAddition );
 		return( mData != NULL );
 	}
@@ -707,7 +707,7 @@ public:
 	{
 		const int lPostSize = mSize - pPosition;
 
-		char * lPost = reinterpret_cast<char*>( malloc( lPostSize ) );
+		char * lPost = static_cast<char*>( malloc( lPostSize ) );
 		memcpy( lPost, mData + pPosition, lPostSize );
 
 		if( !Extend( pAddition ) )
@@ -717,11 +717,11 @@ public:
 		memset( mData + pPosition, 0, pAddition );
 		return true;
 	}
-	bool Insert( int pPosition, int pAddition, char * pAdditionalData )
+	bool Insert( int pPosition, int pAddition, const char * pAdditionalData )
 	{
 		const int lPostSize = mSize - pPosition;
 
-		char * lPost = reinterpret_cast<char*>( malloc( lPostSize ) );
+		char * lPost = static_cast<char*>( malloc( lPostSize ) );
 		memcpy( lPost, mData + pPosition, lPostSize );
 
 		if( !Extend( pAddition ) )
@@ -748,7 +748,7 @@ public:
 		mSize = 0;
 		mData = NULL;
 	}
-	sExtendableArray( int pSize, char * pData )
+	sExtendableArray( int pSize, const char * pData )
 	{
 		if( Allocate( pSize ) )
 			memcpy( mData, pData, pSize );
@@ -774,6 +774,12 @@ void SetChunkHeader( sExtendableArray pArray, int pPosition, int pMagix, int pSi
 	Header->mMagic = pMagix;
 	Header->mSize = pSize;
 }
+	
+struct filenameOffsetThing
+{
+  int nameID;
+  int filenamePosition;
+};
 
 void MapTile::saveTile()
 {
@@ -798,9 +804,6 @@ void MapTile::saveTile()
 		if( checkInside( lTileExtents, it->second.extents ) )
 			lObjectInstances.insert( std::pair<int, WMOInstance>( it->first, it->second ) );
 
-	//LogError << "ADT From X:" << lTileExtents[0].x << " - Z:" << lTileExtents[0].z << std::endl;
-	//LogError << "ADT From X:" << lTileExtents[1].x << " - Z:" << lTileExtents[1].z << std::endl;
-
 	for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
 	{
 		Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
@@ -808,20 +811,16 @@ void MapTile::saveTile()
 		lModelExtentsV1[1] = it->second.model->header.BoundingBoxMax + it->second.pos;
 		lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
 		lModelExtentsV2[1] = it->second.model->header.VertexBoxMax + it->second.pos;
-		
-		//LogError << "BoundingBox From X:" << lModelExtentsV1[0].x << " - Z:" << lModelExtentsV1[0].z << std::endl;
-		//LogError << "BoundingBox From X:" << lModelExtentsV1[1].x << " - Z:" << lModelExtentsV1[1].z << std::endl;
-
-		//LogError << "VertexBoxMin From X:" << lModelExtentsV2[0].x << " - Z:" << lModelExtentsV2[0].z << std::endl;
-		//LogError << "VertexBoxMin From X:" << lModelExtentsV2[1].x << " - Z:" << lModelExtentsV2[1].z << std::endl;
 
 		if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
 		{
 			lModelInstances.insert( std::pair<int, ModelInstance>( it->first, it->second ) );
 		}
 	}
+	
+	filenameOffsetThing nullyThing = { 0, 0 };
 
-	std::map<std::string, int*> lModels;
+	std::map<std::string, filenameOffsetThing> lModels;
 
 	for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
 	{
@@ -837,41 +836,43 @@ void MapTile::saveTile()
 
 		if( lModels.find( lTemp ) == lModels.end() )
 		{
-			lModels.insert( std::pair<std::string, int*>( lTemp, new int[2] ) ); 
+			lModels.insert( std::pair<std::string, filenameOffsetThing>( lTemp, nullyThing ) ); 
 		}
 	}
 	
 	lID = 0;
-	for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); ++it )
-		it->second[0] = lID++;
+	for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
+		it->second.nameID = lID++;
 
-	std::map<std::string, int*> lObjects;
+	std::map<std::string, filenameOffsetThing> lObjects;
 
 	for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
 		if( lObjects.find( it->second.wmo->filename ) == lObjects.end() )
-			lObjects.insert( std::pair<std::string, int*>( ( it->second.wmo->filename ), new int[2] ) ); 
+			lObjects.insert( std::pair<std::string, filenameOffsetThing>( ( it->second.wmo->filename ), nullyThing ) ); 
 	
 	lID = 0;
-	for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
-		it->second[0] = lID++;
+	for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
+		it->second.nameID = lID++;
 
 	// Check which textures are on this ADT.
 	std::map<std::string, int> lTextures;
+#if 0
 	//used to store texteffectinfo
 	std::vector<int> mTextureEffects;
+#endif
 	 
 	for( int i = 0; i < 16; ++i )
 		for( int j = 0; j < 16; ++j )
 			for( int tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
-				if( lTextures.find( TextureManager::items[mChunks[i][j]->textures[tex]]->name ) == lTextures.end() ) {
+				if( lTextures.find( TextureManager::items[mChunks[i][j]->textures[tex]]->name ) == lTextures.end() )
 					lTextures.insert( std::pair<std::string, int>(TextureManager::items[mChunks[i][j]->textures[tex]]->name , -1 ) );
-				}
 	
 	lID = 0;
 	for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
 		it->second = lID++;
 
-	
+#if 0
+  //! \todo actually, the folder is completely independant of this. Handle this differently. Bullshit here.	
 	std::string cmpCubeMaps = std::string("terrain cube maps");
 	for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it ){
 		//if texture is in folder terrain cube maps, it needs to get handled different by wow
@@ -882,7 +883,7 @@ void MapTile::saveTile()
 		else
 			mTextureEffects.push_back(0);
 	}
-
+#endif
 
 	// Now write the file.
 	
@@ -936,7 +937,7 @@ void MapTile::saveTile()
 		// MTEX data
 		for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
 		{
-			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, const_cast<char*>( it->first.c_str() ) );
+			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
 			lCurrentPosition += it->first.size() + 1;
 			lADTFile.GetPointer<sChunkHeader>( lMTEX_Position )->mSize += it->first.size() + 1;
 			LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
@@ -953,10 +954,10 @@ void MapTile::saveTile()
 		lCurrentPosition += 8 + 0;
 
 		// MMDX data
-		for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); ++it )
+		for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
 		{
-			it->second[1] = lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize;
-			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, const_cast<char*>( it->first.c_str() ) );
+			it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize;
+			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
 			lCurrentPosition += it->first.size() + 1;
 			lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize += it->first.size() + 1;
 			LogDebug << "Added model \"" << it->first << "\"." << std::endl;
@@ -974,8 +975,8 @@ void MapTile::saveTile()
 		int * lMMID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
 		
 		lID = 0;
-		for( std::map<std::string, int*>::iterator it = lModels.begin(); it != lModels.end(); ++it )
-			lMMID_Data[lID++] = it->second[1];
+		for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
+			lMMID_Data[lID++] = it->second.filenamePosition;
 
 		lCurrentPosition += 8 + lMMID_Size;
 //	}
@@ -990,10 +991,10 @@ void MapTile::saveTile()
 		lCurrentPosition += 8 + 0;
 
 		// MWMO data
-		for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
+		for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
 		{
-			it->second[1] = lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize;
-			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, const_cast<char*>( it->first.c_str() ) );
+			it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize;
+			lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
 			lCurrentPosition += it->first.size() + 1;
 			lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize += it->first.size() + 1;
 			LogDebug << "Added object \"" << it->first << "\"." << std::endl;
@@ -1011,8 +1012,8 @@ void MapTile::saveTile()
 		int * lMWID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
 		
 		lID = 0;
-		for( std::map<std::string, int*>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
-			lMWID_Data[lID++] = it->second[1];
+		for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
+			lMWID_Data[lID++] = it->second.filenamePosition;
 
 		lCurrentPosition += 8 + lMWID_Size;
 //	}
@@ -1040,12 +1041,14 @@ void MapTile::saveTile()
 				lTemp.replace( found, 3, ".md" );
 				lTemp.append( "x" );
 			}
-			std::map<std::string, int*>::iterator lMyFilenameThingey = lModels.find( lTemp );
+			std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lModels.find( lTemp );
 			if( lMyFilenameThingey == lModels.end() )
 			{
 				LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
 				return;
 			}
+			
+			//! \todo Do not fuck things up via UIDs here! Stop calculating them. Or somewhere else. Or idk. This is shit. Pure shit.
 			
 			// XXZZTNNN
 			//				1
@@ -1055,7 +1058,7 @@ void MapTile::saveTile()
 			
 			int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 1 * 1000;
 
-			lMDDF_Data[lID].nameID = lMyFilenameThingey->second[0];
+			lMDDF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
 			lMDDF_Data[lID].uniqueID = lNewUID;
 			lMDDF_Data[lID].pos[0] = it->second.pos.x;
 			lMDDF_Data[lID].pos[1] = it->second.pos.y;
@@ -1086,12 +1089,14 @@ void MapTile::saveTile()
 		lID = 0;
 		for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
 		{
-			std::map<std::string, int*>::iterator lMyFilenameThingey = lObjects.find( it->second.wmo->filename );
+			std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lObjects.find( it->second.wmo->filename );
 			if( lMyFilenameThingey == lObjects.end() )
 			{
 				LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
 				return;
 			}
+			
+			//! \todo Do not fuck things up via UIDs here! Stop calculating them. Or somewhere else. Or idk. This is shit. Pure shit.
 			
 			// XXZZTNNN
 			//				1
@@ -1101,7 +1106,7 @@ void MapTile::saveTile()
 			
 			int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 2 * 1000;
 
-			lMODF_Data[lID].nameID = lMyFilenameThingey->second[0];
+			lMODF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
 			lMODF_Data[lID].uniqueID = lNewUID;
 			lMODF_Data[lID].pos[0] = it->second.pos.x;
 			lMODF_Data[lID].pos[1] = it->second.pos.y;
@@ -1126,6 +1131,8 @@ void MapTile::saveTile()
 		lCurrentPosition += 8 + lMODF_Size;
 //	}
 
+#if 0
+  //! \todo Move to correct position. Actually do it correctly.
 	//MH2O
 	if(false){
 		int lMH2O_size = 256*sizeof(MH2O_Header);
@@ -1242,9 +1249,9 @@ void MapTile::saveTile()
 		LogDebug << "Wrote MH2O!" << std::endl;
 		lCurrentPosition += 8 + lMH2O_size;
 	}
+#endif
 
 	// MCNK
-	//! \todo	MCNK
 //	{
 		for( int y = 0; y < 16; ++y )
 		{
@@ -1281,6 +1288,7 @@ void MapTile::saveTile()
 				lMCNK_header->nSndEmitters = 0;
 
 				lMCNK_header->ofsLiquid = 0;
+				//! \todo Is this still 8 if no chunk is present? Or did they correct that?
 				lMCNK_header->sizeLiquid = 8;
 
 				//! \todo	MCCV sub-chunk
@@ -1318,7 +1326,6 @@ void MapTile::saveTile()
 					lMCNK_Size += 8 + lMCVT_Size;
 //				}
 
-				
 				// MCNR
 //				{
 					int lMCNR_Size = ( 9 * 9 + 8 * 8 ) * 3;
@@ -1339,8 +1346,6 @@ void MapTile::saveTile()
 						lNormals[i*3+2] = misc::roundc(	mChunks[y][x]->mNormals[i].y * 127 );
 					}
 
-
-					
 					lCurrentPosition += 8 + lMCNR_Size;
 					lMCNK_Size += 8 + lMCNR_Size;
 //				}
@@ -1522,34 +1527,7 @@ void MapTile::saveTile()
 					lMCNK_Size += 8 + lMCAL_Size;
 //				}
 
-				// MCLQ
-//				{
-					//! Don't write anything MCLQ related anymore...
-					/* 
-					int lMCLQ_Size = 0;
-					lADTFile.Extend( 8 + lMCLQ_Size );
-					SetChunkHeader( lADTFile, lCurrentPosition, 'MCLQ', lMCLQ_Size );
-					*/
-					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsLiquid = 0;//lCurrentPosition - lMCNK_Position;
-					lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->sizeLiquid = 0;//( lMCLQ_Size == 0 ? 8 : lMCLQ_Size );
-
-					// if ( data ) do write
-																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																				
-					/*
-					if(ChunkHeader[i].ofsLiquid!=0&&ChunkHeader[i].sizeLiquid!=0&&ChunkHeader[i].sizeLiquid!=8){
-					Temp=ChunkHeader[i].sizeLiquid;
-					memcpy(Buffer+Change+MCINs[i].offset+ChunkHeader[i].ofsLiquid+lChange,f.getBuffer()+MCINs[i].offset+ChunkHeader[i].ofsLiquid,Temp);
-					ChunkHeader[i].ofsLiquid+=lChange;
-					}
-					else{
-						ChunkHeader[i].ofsLiquid=0;
-						ChunkHeader[i].sizeLiquid=0;
-					}
-					*/
-
-					//lCurrentPosition += 8 + lMCLQ_Size;
-					//lMCNK_Size += 8 + lMCLQ_Size;
-//				}
+			  //! Don't write anything MCLQ related anymore...
 
 				// MCSE
 //				{
@@ -1585,7 +1563,7 @@ void MapTile::saveTile()
 	// MFBO
 	if( this->mFlags & 1 )
 	{
-		lADTFile.Extend( 8 + 36 );	// We don't yet know how big this will be.
+		lADTFile.Extend( 8 + 36 );
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MFBO', 36 );
 		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mfbo = lCurrentPosition - 0x14;
 
@@ -1601,9 +1579,8 @@ void MapTile::saveTile()
 		lCurrentPosition += 8 + 36;
 	}
 
-	//! \todo	MH2O
-
-	//MTFX 
+	// \! todo Do not do bullshit here in MTFX. 
+#if 0
 	if(!mTextureEffects.empty()) {
 		//! \todo check if nTexEffects == nTextures, correct order etc.
 		lADTFile.Extend( 8 + 4*mTextureEffects.size());
@@ -1620,6 +1597,7 @@ void MapTile::saveTile()
 		}
 		lCurrentPosition += 8 +  4*mTextureEffects.size();
 	}
+#endif
 	
 	MPQFile f( mFilename );
 	f.setBuffer( lADTFile.GetPointer<uint8_t>(), lADTFile.mSize );

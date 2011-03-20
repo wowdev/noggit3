@@ -16,11 +16,11 @@ Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window
 	this->movable = true;
 
 	// set title
-	text = new textUI( 8, 7, "Raise/Lower", &arialn13, eJustifyLeft );
+	text = new textUI( 8, 7, "Raise/Lower", arialn13, eJustifyLeft );
 	this->addChild( text );
 
 	//close button
-	this->addChild( reinterpret_cast<frame*>( new MinimizeButton( w, this ) ) );
+	this->addChild( static_cast<frame*>( new MinimizeButton( w, this ) ) );
 
 	// ground edit
 	SetIcon( 0, "Interface\\ICONS\\INV_Elemental_Mote_Earth01.blp" );

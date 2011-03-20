@@ -1,22 +1,14 @@
 #ifndef FREE_TYPE_H
 #define FREE_TYPE_H
 
-//FreeType Headers
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 #include FT_OUTLINE_H
 #include FT_TRIGONOMETRY_H 
 
-/*#include <freetype/freetype.h>
-#include <freetype/ftglyph.h>
-#include <freetype/ftoutln.h>
-#include <freetype/fttrigon.h>*/
-
-//OpenGL Headers 
 #include <GL/glew.h>
 
-//Some STL headers
 #include <vector>
 #include <string>
 #include "mpq.h"
@@ -37,32 +29,20 @@
 ///overlapping with anyone else's code.
 namespace freetype {
 
-//Inside of this namespace, give ourselves the ability
-//to write just "vector" instead of "std::vector"
-using std::vector;
-
-//Ditto for string.
-using std::string;
-
-//This holds all of the information related to any
-//freetype font that we want to create.	
-struct font_data {
+class font_data {
+public:
 	float h;			///< Holds the height of the font.
 	GLuint * textures;	///< Holds the texture id's 
 	GLuint list_base;	///< Holds the first display list id
 	int		charWidths[128];
 
-	//The init function will create a font of
-	//of the height h from the file fname.
-	void init(const char * fname, unsigned int h, bool fromMPQ);
+	font_data() {}
+	font_data( const std::string& fname, unsigned int h, bool fromMPQ );
 
-	//Free all the resources assosiated with the font.
-	void clean();
+	~font_data();
 };
 
-//The flagship function of the library - this thing will print
-//out text at window coordinates x,y, using the font ft_font.
-//The current modelview matrix will also be applied to the text. 
+// The flagship function of the library - this thing will print out text at window coordinates x,y, using the font ft_font. The current modelview matrix will also be applied to the text. 
 void print(const font_data &ft_font, float x, float y, const std::string& text, float colorR = 1.0f, float colorG = 1.0f, float colorB = 1.0f) ;
 void shprint(const font_data &ft_font, float x, float y, const std::string& text, float colorR = 1.0f, float colorG = 1.0f, float colorB = 1.0f );
 int width(const font_data &ft_font, const std::string& text) ;

@@ -8,9 +8,9 @@ detailInfos::detailInfos( float xPos, float yPos, float w, float h, Gui *setGui 
 {
 	this->mainGui = setGui;
 
-	this->addChild( reinterpret_cast<frame*>( new MinimizeButton( w, this ) ) );
+	this->addChild( static_cast<frame*>( new MinimizeButton( w, this ) ) );
 
-	this->theInfos = new textUI( 8.0f, 7.0f, "", &arial14, eJustifyLeft );
+	this->theInfos = new textUI( 8.0f, 7.0f, "", arial14, eJustifyLeft );
 	this->addChild( this->theInfos );
 }
 

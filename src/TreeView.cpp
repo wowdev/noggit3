@@ -26,7 +26,7 @@ void TreeViewButton::SetClicked( bool pClicked )
 TreeView::TreeView( float pX, float pY, Directory * pDirectory, TreeView * pParent, void (*pSelectFunction)( const std::string& ) ) : frame( pX, pY, 0.0f, 0.0f ), mParent( pParent ), mMyDir( pDirectory ), mSelectFunction( pSelectFunction ), mExpanded( false )
 {
 	mMyButton = new TreeViewButton( 0, 0, this );
-	mMyText = new textUI( 13, 0, mMyDir->mName, &arial12, eJustifyLeft );
+	mMyText = new textUI( 13, 0, mMyDir->mName, arial12, eJustifyLeft );
 
 	float lY = 13.0f;
 
@@ -39,7 +39,7 @@ TreeView::TreeView( float pX, float pY, Directory * pDirectory, TreeView * pPare
 	std::vector<File*>::iterator itfile;
 	for( itfile = mMyDir->mSubfiles.begin(); itfile != mMyDir->mSubfiles.end(); ++itfile )
 	{
-		textUI * temp = new textUI( 13.0f, lY, (*itfile)->mName, &arial12, eJustifyLeft );
+		textUI * temp = new textUI( 13.0f, lY, (*itfile)->mName, arial12, eJustifyLeft );
 		mFiles.push_back( temp );
 		lY = lY + 13.0f;
 	}

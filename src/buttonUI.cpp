@@ -16,7 +16,7 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pTe
 	clickFunc = NULL;
 	id = 0;
 	clicked = false;
-	text = new textUI( w / 2.0f, 2.0f, &arial12, eJustifyCenter );
+	text = new textUI( w / 2.0f, 2.0f, arial12, eJustifyCenter );
 	addChild( text );
 }
 
@@ -31,7 +31,7 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pTe
 	clickFunc = NULL;
 	id = 0;
 	clicked = false;
-	text = new textUI( w / 2.0f, 2.0f, pText, &arial12, eJustifyCenter );
+	text = new textUI( w / 2.0f, 2.0f, pText, arial12, eJustifyCenter );
 	addChild( text );
 }
 
@@ -46,7 +46,7 @@ buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pTe
 	clickFunc = pFunc;
 	id = pFuncParam;
 	clicked = false;
-	text = new textUI( w / 2.0f, 2.0f, pText, &arial12, eJustifyCenter );
+	text = new textUI( w / 2.0f, 2.0f, pText, arial12, eJustifyCenter );
 	addChild( text );
 }
 

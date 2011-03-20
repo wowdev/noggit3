@@ -11,7 +11,6 @@
 minimapWindowUI::minimapWindowUI( Menu* menuLink ) : window( 10, 10, 100, 100 ), mMenuLink( menuLink )
 {
 	this->map = NULL;
-	this->mustresize = true;
 	this->borderwidth = 5.0f;
 	
 	this->tilesize = (video.yres - 70.0f - this->borderwidth * 2) / 64;
@@ -26,7 +25,6 @@ minimapWindowUI::minimapWindowUI( Menu* menuLink ) : window( 10, 10, 100, 100 ),
 minimapWindowUI::minimapWindowUI( World *setMap) : window( 10, 10, 100, 100 )
 {
 	this->map = setMap;
-	this->mustresize = true;
 	this->borderwidth = 5.0f;
 
 	this->tilesize = (video.yres - 70.0f - this->borderwidth * 2) / 64;

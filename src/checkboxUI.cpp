@@ -17,7 +17,7 @@ checkboxUI::checkboxUI( float xPos, float yPos, const std::string& pText )
 	check = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Check.blp" );
 	check->hidden = true;
 	addChild( check );
-	text = new textUI( 32.0f, 8.0f, pText, &arialn13, eJustifyLeft );
+	text = new textUI( 32.0f, 8.0f, pText, arialn13, eJustifyLeft );
 	addChild( text );
 	
 	clickFunc = 0;
@@ -36,7 +36,7 @@ checkboxUI::checkboxUI( float xPos, float yPos, const std::string& pText, void (
 	check = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Check.blp" );
 	check->hidden = true;
 	addChild( check );
-	text = new textUI( 32.0f, 8.0f, pText, &arialn13, eJustifyLeft );
+	text = new textUI( 32.0f, 8.0f, pText, arialn13, eJustifyLeft );
 	addChild( text );
 	
 	clickFunc = pClickFunc;
@@ -56,7 +56,7 @@ checkboxUI::checkboxUI( float pX, float pY, const std::string& pText, ToggleGrou
 	check = new textureUI( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Check.blp" );
 	check->hidden = true;
 	addChild( check );
-	text = new textUI( 32.0f, 8.0f, pText, &arialn13, eJustifyLeft );
+	text = new textUI( 32.0f, 8.0f, pText, arialn13, eJustifyLeft );
 	addChild( text );
 	
 	clickFunc = 0;

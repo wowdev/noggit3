@@ -241,12 +241,12 @@ void change_settings_window(int oldid, int newid)
 //! \todo	Do this nicer?
 void openHelp( frame* /*button*/, int /*id*/ )
 {
-	reinterpret_cast<MapView*>( gStates.back() )->ViewHelp();
+	static_cast<MapView*>( gStates.back() )->ViewHelp();
 }
 
 void closeHelp( frame* /*button*/, int /*id*/ )
 {
-	reinterpret_cast<MapView*>( gStates.back() )->View3D();
+	static_cast<MapView*>( gStates.back() )->View3D();
 }
 
 void ResetSelectedObjectRotation( frame* /*button*/, int /*id*/ )
@@ -455,7 +455,7 @@ void InsertObject( frame* /*button*/, int id )
 			if( !MPQFile::exists(lastModel) )
 				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
 			else
-				gWorld->addM2( reinterpret_cast<Model*>(ModelManager::items[ModelManager::add(lastModel)]), selectionPosition );
+				gWorld->addM2( static_cast<Model*>(ModelManager::items[ModelManager::add(lastModel)]), selectionPosition );
 		}
 		else if(lastTyp==2)
 		{
@@ -463,7 +463,7 @@ void InsertObject( frame* /*button*/, int id )
 			if( !MPQFile::exists(lastModel) )
 				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
 			else
-				gWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(lastModel)]), selectionPosition );
+				gWorld->addWMO( static_cast<WMO*>(WMOManager::items[WMOManager::add(lastModel)]), selectionPosition );
 		}
 	}
 	else
@@ -477,7 +477,7 @@ void InsertObject( frame* /*button*/, int id )
 				continue;
 			}
 		
-			gWorld->addWMO( reinterpret_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
+			gWorld->addWMO( static_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
 		}
 
 		for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
@@ -489,7 +489,7 @@ void InsertObject( frame* /*button*/, int id )
 				continue;
 			}
 
-			gWorld->addM2( reinterpret_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
+			gWorld->addM2( static_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
 		}
 	}
 	//! \todo Memoryleak: These models will never get deleted.
@@ -525,7 +525,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 {
 	LastClicked=0;
 
-	moving = strafing = updown = 0;
+	moving = strafing = updown = 0.0f;
 
 	mousedir = -1.0f;
 
@@ -540,21 +540,21 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mViewMode = eViewMode_3D;
 
 	// create main gui object that holds all other gui elements for access ( in the future ;) )
-	mainGui = new Gui(this);
+	mainGui = new Gui( this );
 	mainGuiPointer = mainGui;
 	mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
 
-	mainGui->ZoneIDBrowser->setMapID((int)gWorld->getMapID());
-	mainGui->ZoneIDBrowser->setChangeFunc(changeZoneIDValue);
-	tool_settings_x = video.xres-186;
+	mainGui->ZoneIDBrowser->setMapID( gWorld->getMapID() );
+	mainGui->ZoneIDBrowser->setChangeFunc( changeZoneIDValue );
+	tool_settings_x = video.xres - 186;
 	tool_settings_y = 38;
 	
 	// Raise/Lower
-	setting_ground=new window(tool_settings_x,tool_settings_y,180.0f,160.0f);
-	setting_ground->movable=true;
-	mainGui->tileFrames->addChild(setting_ground);
+	setting_ground=new window( tool_settings_x, tool_settings_y, 180.0f, 160.0f );
+	setting_ground->movable = true;
+	mainGui->tileFrames->addChild( setting_ground );
 
-	setting_ground->addChild( new textUI( 78.5f, 2.0f, "Raise / Lower", &arial14, eJustifyCenter ) );
+	setting_ground->addChild( new textUI( 78.5f, 2.0f, "Raise / Lower", arial14, eJustifyCenter ) );
 	
 	gGroundToggleGroup = new ToggleGroup( &groundBrushType );
 	setting_ground->addChild( new checkboxUI( 6.0f, 15.0f, "Flat", gGroundToggleGroup, 0 ) );
@@ -583,7 +583,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	setting_blur->hidden=true;
 	mainGui->tileFrames->addChild(setting_blur);
 
-	setting_blur->addChild( new textUI( 78.5f, 2.0f, "Flatten / Blur", &arial14, eJustifyCenter ) );
+	setting_blur->addChild( new textUI( 78.5f, 2.0f, "Flatten / Blur", arial14, eJustifyCenter ) );
 
 	gBlurToggleGroup = new ToggleGroup( &blurBrushType );
 	setting_blur->addChild( new checkboxUI( 6.0f, 15.0f, "Flat", gBlurToggleGroup, 0 ) );
@@ -604,7 +604,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
 	mainGui->tileFrames->addChild(settings_paint);
 
-	settings_paint->addChild( new textUI( 78.5f, 2.0f, "3D Paint", &arial14, eJustifyCenter ) );
+	settings_paint->addChild( new textUI( 78.5f, 2.0f, "3D Paint", arial14, eJustifyCenter ) );
 	
 	gradient *G1;
 	G1=new gradient;	
@@ -661,8 +661,9 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + SHIFT + S Save current tile", SaveOrReload, 0 );
 	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + S Save all", SaveOrReload, 2 );
 	mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT + J Reload current tile", SaveOrReload, 1 );
-	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Test" );
-	mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
+	
+	//mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
+	//mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
 
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "selected object" );
 	mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + C copy", CopySelectedObject, 0	);
@@ -678,7 +679,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Options" );
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Auto select mode", &Settings::getInstance()->AutoSelectingMode, false );
 
-	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Modify current ADT" );
+	//mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Modify current ADT" );
 
 	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Add model" );
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "all from ModelViewer", InsertObject, 0	);
@@ -721,15 +722,14 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Help" )->AddMenuItemToggle( "Infos", &mainGui->guiappInfo->hidden, true );
 
 	mainGui->tileFrames->addChild( mbar );
+	
+  addHotkey( SDLK_ESCAPE, MOD_none,   static_cast<AppState::Function>( &MapView::quit ) );
+  addHotkey( SDLK_s,      MOD_ctrl,   static_cast<AppState::Function>( &MapView::save ) );
+  addHotkey( SDLK_s,      MOD_meta,   static_cast<AppState::Function>( &MapView::save ) );
 }
 
 MapView::~MapView()
 {
-	if( mainGui->tileFrames )
-	{
-		delete mainGui->tileFrames;
-		mainGui->tileFrames = NULL;
-	}
 	if( mainGui )
 	{
 		delete mainGui;
@@ -743,11 +743,9 @@ MapView::~MapView()
 }
 
 void MapView::tick( float t, float dt )
-{
-	Vec3D ObjPos;
-	
-	if( dt > 1.0f )
-		dt = 1.0f;
+{	
+  using std::min;
+  dt = min( dt, 1.0f );
 		
 	if( SDL_GetAppState() & SDL_APPINPUTFOCUS )
 	{
@@ -813,6 +811,7 @@ void MapView::tick( float t, float dt )
 				}
 			}
 
+	    Vec3D ObjPos;
 			if( gWorld->IsSelection( eEntry_Model ) )
 			{
 				//! \todo	Tell me what this is.
@@ -1060,42 +1059,44 @@ void MapView::tick( float t, float dt )
 
 	gWorld->time += this->mTimespeed * dt;
 	gWorld->animtime += dt * 1000.0f;
-	globalTime = (int)gWorld->animtime;
+	globalTime = static_cast<int>( gWorld->animtime );
 	
 	gWorld->tick(dt);
+
+	if( !MapChunkWindow->hidden )
+	{
+		if( gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk )
+	    TexturingUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
+	}
 }
 
 
 
 void MapView::doSelection( int selTyp )
 {
-	// no selection during movement
-	if(this->moving==0.0f)
-	{
-		gWorld->drawSelection( MouseX, MouseY, TestSelection );
-		gWorld->getSelection( eSelectionMode_General );
-	
-		if( gWorld->GetCurrentSelection() )
-		{
-			if( gWorld->IsSelection( eEntry_MapChunk ) )
-			{
-				gWorld->drawSelectionChunk( MouseX, MouseY );
-				gWorld->getSelection( eSelectionMode_Triangle );
+	gWorld->drawSelection( MouseX, MouseY, TestSelection );
+	gWorld->getSelection( eSelectionMode_General );
 
-				Environment::getInstance()->AutoSelecting = true;
-			}
-			else if( selTyp == 1 )
-			{
-				Environment::getInstance()->AutoSelecting = false;
-			}
-			else if( Environment::getInstance()->AutoSelecting )
-			{
-				gWorld->ResetSelection();
-			}
-		}
-		else
+	if( gWorld->GetCurrentSelection() )
+	{
+		if( gWorld->IsSelection( eEntry_MapChunk ) )
+		{
+			gWorld->drawSelectionChunk( MouseX, MouseY );
+			gWorld->getSelection( eSelectionMode_Triangle );
+
 			Environment::getInstance()->AutoSelecting = true;
+		}
+		else if( selTyp == 1 )
+		{
+			Environment::getInstance()->AutoSelecting = false;
+		}
+		else if( Environment::getInstance()->AutoSelecting )
+		{
+			gWorld->ResetSelection();
+		}
 	}
+	else
+		Environment::getInstance()->AutoSelecting = true;
 }
 
 void MapView::displayViewMode_Help( float /*t*/, float /*dt*/ )
@@ -1119,7 +1120,7 @@ void MapView::displayViewMode_Help( float /*t*/, float /*dt*/ )
 	glDisable(GL_TEXTURE_2D);
 	
 
-	freetype::shprint( arial16, 60.0f, 40.0f, 
+	freetype::shprint( *arial16, 60.0f, 40.0f, 
 	"Basic controles\n\n"					
 		"Left mouse button moves the camera\n"
 		"Mouse left click - select chunk or object\n"
@@ -1161,7 +1162,7 @@ void MapView::displayViewMode_Help( float /*t*/, float /*dt*/ )
 		"CTRL + SHIFT + S - Save ADT tiles camera position\n"
 	);
 	
-	freetype::shprint( arial16, video.xres - 400.0f, 40.0f, 
+	freetype::shprint( *arial16, video.xres - 400.0f, 40.0f, 
 		"Edit ground:\n"
 		"Shift + F1 - toggle ground edit mode\n"
 		"T - change terrain mode\n"
@@ -1283,36 +1284,29 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 		glEnd();
 	glPopMatrix();
 
-	video.set2D();
-	
-	glEnable(GL_BLEND);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glActiveTexture(GL_TEXTURE1);
-	glDisable(GL_TEXTURE_2D);
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
-	glDisable(GL_LIGHTING);
-	glColor4f(1.0f,1.0f,1.0f,1.0f);
-	glActiveTexture(GL_TEXTURE0);
-	glDisable(GL_TEXTURE_2D);
-	mainGui->tileFrames->render();
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
-	
-	glColor4f(1.0f,1.0f,1.0f,1.0f);
-
-	if (hud) 
-	{
-		freetype::shprint( arial16, 410.0f, 4.0f, gAreaDB.getAreaName( gWorld->getAreaID() ).c_str() );
-		std::stringstream fps; fps << gFPS << " fps";
-		freetype::shprint( arial16, video.xres - 200.0f, 5, fps.str() );
-	}
-
-	if (gWorld->loading) 
-		freetype::shprint( arial16, video.xres / 2 - freetype::width( arial16, gWorld->noadt ? "No ADT at this Point" : "Loading..." ) / 2, 30.0f, ( gWorld->noadt ? "No ADT at this Point" : "Loading..." ) );
+  if( hud )
+  {
+  	video.set2D();
+  	
+  	glEnable(GL_BLEND);
+  	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  
+  	glActiveTexture(GL_TEXTURE1);
+  	glDisable(GL_TEXTURE_2D);
+  	glActiveTexture(GL_TEXTURE0);
+  	glEnable(GL_TEXTURE_2D);
+  	glDisable(GL_DEPTH_TEST);
+  	glDisable(GL_CULL_FACE);
+  	glDisable(GL_LIGHTING);
+  	glColor4f(1.0f,1.0f,1.0f,1.0f);
+  	glActiveTexture(GL_TEXTURE0);
+  	glDisable(GL_TEXTURE_2D);
+  	
+  	mainGui->render( true );
+  	
+  	glActiveTexture(GL_TEXTURE0);
+  	glEnable(GL_TEXTURE_2D);
+  }
 }
 
 void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
@@ -1342,181 +1336,10 @@ void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
 		glActiveTexture(GL_TEXTURE0);
 		glDisable(GL_TEXTURE_2D);
 		
-		mainGui->tileFrames->render();
+		mainGui->render( false );
 		
 		glActiveTexture(GL_TEXTURE0);
 		glEnable(GL_TEXTURE_2D);
-
-		freetype::shprint( arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
-		std::stringstream fps; fps << gFPS << " fps";
-		freetype::shprint( arial16, video.xres - 200, 5, fps.str() );
-				
-		std::ostringstream s;
-		s << "Server cords(x:" << -(gWorld->camera.x - ZEROPOINT) << " y:" << -(gWorld->camera.z - ZEROPOINT) << " z:" << gWorld->camera.y
-				<< ") Tile " << misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE) << " " <<  misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE)
-				<< " Client cords(x:" << gWorld->camera.x<<" y:" << gWorld->camera.z << " z:"<<gWorld->camera.y << ") ";
-		mainGui->guiStatusbar->setLeftInfo( s.str() );
-		
-		int time = int( gWorld->time ) % 2880;
-
-		std::stringstream timestrs; timestrs << "Time: " << (time/120) << ":" << (time%120);
-		freetype::shprint( arial16, video.xres - 100.0f, 5.0f, timestrs.str() );
-		
-		if( mainGui->guiappInfo->hidden == false )
-		{	
-			s.str("");
-			s << "Project Path: " << Project::getInstance()->getPath() << std::endl;
-			mainGui->guiappInfo->setText( s.str() );
-		}
-
-		if( !MapChunkWindow->hidden )
-		{
-			if( gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type== eEntry_MapChunk)
-				TexturingUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
-		}
-					
-
-		//! \todo	Get this into a window. As Steff is already doing.
-		if( !mainGui->guidetailInfos->hidden )
-		{
-			nameEntry * lSelection = gWorld->GetCurrentSelection();
-			if( lSelection )
-			{
-				mainGui->guiStatusbar->setRightInfo( lSelection->returnName() );
-
-				s.str("");
-
-				switch( lSelection->type ) 
-				{
-				case eEntry_Model:
-					s << "TYPE: " << lSelection->type << std::endl;
-					s << "NAME: " << lSelection->returnName()<< std::endl;
-					s << "FILENAME: " << lSelection->data.model->model->filename << std::endl;
-
-					s << "UID-D1: " << lSelection->data.model->d1 << std::endl;
-					s << "nameID: " << lSelection->data.model->nameID << std::endl << std::endl;
-					s << "Pos X/Y/Z: " << lSelection->data.model->pos.x << " - " << "Pos Y: " << lSelection->data.model->pos.y << " - " << lSelection->data.model->pos.z << std::endl;
-					s << "Rot X/Y/Z: " << lSelection->data.model->dir.x << " - " << lSelection->data.model->dir.y << " - " << lSelection->data.model->dir.z << std::endl;
-					s << "Scale: " <<	lSelection->data.model->sc <<  std::endl;					
-					s << "Textures Used: " << lSelection->data.model->model->header.nTextures << std::endl;					
-
-					/*
-					for( int j = 0; j < (lSelection->data.model->model->header.nTextures-1); j++ )
-					{
-
-						s << j << "-" ;
-						if(lSelection->data.model->model->textures[j]) s << lSelection->data.model->model->textures[j] ;
-						s << std::endl;
-						//<< ", " << lSelection->data.model->model->textures[j] << " - " << TextureManager::items[lSelection->data.model->model->textures[j]]->name << std::endl;
-					}*/
-					mainGui->guidetailInfos->setText(s.str() );
-				break;
-				case eEntry_WMO:
-					s << lSelection->data.wmo->wmo->filename << std::endl;
-					s << "UniqueID: " << lSelection->data.wmo->mUniqueID << std::endl;
-					s <<	"Pos: (" <<	lSelection->data.wmo->pos.x << "," << lSelection->data.wmo->pos.y << "," << lSelection->data.wmo->pos.z << ")" << std::endl;					
-					s << "Rot: (" << lSelection->data.wmo->dir.x << "," << lSelection->data.wmo->dir.y << "" << lSelection->data.wmo->dir.z << ")" << std::endl;					
-					s << "Textures Used: " << lSelection->data.wmo->wmo->nTextures << std::endl;
-
-					for( unsigned int j = 0; j < lSelection->data.wmo->wmo->nTextures ; j++ )
-					{
-						if( j < 25 )
-						{
-							s << j;
-							s << lSelection->data.wmo->wmo->textures[j];
-							s << std::endl;
-							//freetype::shprint( arial16, 15, 163 + 20 * j, "%d - %s", j, lSelection->data.wmo->wmo->textures[j] );
-						}
-						else if( j < 50 )
-						{
-							//s << j << " - " << lSelection->data.wmo->wmo->textures[j] << endl; WHY DID THIS CRASH!!!
-							//freetype::shprint( arial16, ( video.xres - 15 ) / 2, 163 + 20 * (j-25), "%d - %s", j, lSelection->data.wmo->wmo->textures[j] );
-						}
-					}/**/
-					s << "Doodads set: " << lSelection->data.wmo->doodadset << std::endl;
-
-					mainGui->guidetailInfos->setText( s.str() );
-
-					break;
-				case eEntry_MapChunk:
-					s << "Mapchunk " << lSelection->data.mapchunk->px << ", " << lSelection->data.mapchunk->py << " (" << lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px << ") of tile (" << lSelection->data.mapchunk->mt->mPositionX << "_" << lSelection->data.mapchunk->mt->mPositionZ << ")" << std::endl;;
-					s << "Area ID: " << lSelection->data.mapchunk->areaID << " Name:" << gAreaDB.getAreaName( lSelection->data.mapchunk->areaID ).c_str() << std::endl;
-					s << "Flags: " << lSelection->data.mapchunk->Flags << std::endl;
-
-					if( lSelection->data.mapchunk->Flags & FLAG_SHADOW )
-					{
-						s << "Shadows Enabled" << std::endl;
-					}
-					
-					if( lSelection->data.mapchunk->Flags & FLAG_IMPASS )
-					{
-						s << "Impassible Chunk" << std::endl;
-					}
-					if( lSelection->data.mapchunk->Flags & FLAG_LQ_RIVER )
-					{
-						s << "River Enabled" << std::endl;
-					}
-					if( lSelection->data.mapchunk->Flags & FLAG_LQ_OCEAN )
-					{
-						s << "Ocean Enabled" << std::endl;
-					}
-					if( lSelection->data.mapchunk->Flags & FLAG_LQ_MAGMA )
-					{
-						s << "Lava Enabled" << std::endl;
-					}
-					
-					s << "Textures: " << lSelection->data.mapchunk->nTextures << std::endl;
-
-				/*
-					for( int q = 0; q < lSelection->data.mapchunk->nTextures; q++ )
-					{
-						//s << q << "- " << TextureManager::items[lSelection->data.mapchunk->textures[q]]->name;
-						//s << " ";
-						//s "	Flags - " << lSelection->data.mapchunk->texFlags[q] << " Effect ID - " << lSelection->data.mapchunk->effectID[q] << std::endl;
-						//freetype::shprint( arial16, 20, 103 + TextOffset, "%d - %s	Flags - %x Effect ID - %d", q, TextureManager::items[lSelection->data.mapchunk->textures[q]]->name, lSelection->data.mapchunk->texFlags[q], lSelection->data.mapchunk->effectID[q] );
-						
-						if( lSelection->data.mapchunk->effectID[q] != 0 )
-							for( int r = 0; r < 4; r++ )
-							{
-								const char *EffectModel = getGroundEffectDoodad( lSelection->data.mapchunk->effectID[q], r );
-								if( EffectModel )
-								{
-										s << r << " - World\\NoDXT\\" << EffectModel << endl;	
-										//freetype::shprint( arial16, 30, 103 + TextOffset, "%d - World\\NoDXT\\%s", r, EffectModel );
-										TextOffset += 20;
-								}
-							}
-							
-					}
-					*/
-			
-					mainGui->guidetailInfos->setText( s.str() );
-					break;
-				}
-			}
-			else 
-			{
-				mainGui->guidetailInfos->setText( "" );
-			}
-		}
-	}
-
-	if ( gWorld->loading ) 
-	{
-		video.set2D();
-		glEnable(GL_BLEND);
-		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		glActiveTexture(GL_TEXTURE1);
-		glDisable(GL_TEXTURE_2D);
-		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_LIGHTING);
-		glColor4f(1,1,1,1);
-
-		freetype::shprint( arial16, video.xres/2 - freetype::width( arial16, gWorld->noadt ? "No ADT at this Point" : "Loading..." ) / 2, 30, ( gWorld->noadt ? "No ADT at this Point" : "Loading..." ) );
 	}
 }
 
@@ -1559,13 +1382,21 @@ void MapView::display( float t, float dt )
 
 }
 
-
+void MapView::save()
+{
+  gWorld->saveChanged();
+}
+void MapView::quit()
+{
+  if( mViewMode == eViewMode_Help )
+		mViewMode = eViewMode_3D;
+	else
+		gPop = true;
+}
 
 void MapView::resizewindow()
 {
-	for( std::vector<frame*>::iterator child = mainGui->tileFrames->children.begin(); child != mainGui->tileFrames->children.end(); ++child )
-		if( (*child)->mustresize )
-			(*child)->resize();
+  mainGui->resize();
 }
 
 void MapView::keypressed( SDL_KeyboardEvent *e )
@@ -1579,6 +1410,9 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 	{
 		if((LastClicked)&&(LastClicked->processKey(e->keysym.sym,(e->keysym.mod&KMOD_SHIFT)!=0,(e->keysym.mod&KMOD_CTRL)!=0,(e->keysym.mod&KMOD_ALT)!=0)))
 			return;
+		
+    if( handleHotkeys( e ) )
+      return;
 
 		// key DOWN
 		
@@ -1591,13 +1425,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_LCTRL || e->keysym.sym == SDLK_RCTRL )
 			Environment::getInstance()->CtrlDown = true;
 
-		// quit or leave help window
-		if( e->keysym.sym == SDLK_ESCAPE )
-			if( mViewMode == eViewMode_Help )
-				mViewMode = eViewMode_3D;
-			else
-				gPop = true;
-
 		// movement
 		if( e->keysym.sym == SDLK_w )
 		{
@@ -1609,8 +1436,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_s )
 			if( Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown )
 				gWorld->saveTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
-			else if( Environment::getInstance()->CtrlDown)
-				gWorld->saveChanged();
 			else
 				moving = -1.0f;
 		
@@ -1864,7 +1689,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 					break;
 				}
 			}
-			else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() == true && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
+			else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
 				gWorld->fogdistance += 60.0f;// fog change only when no model is selected!
 			else
 			{
@@ -1903,7 +1728,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 					break;
 				}
 			}
-			else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() == true && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
+			else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
 				gWorld->fogdistance -= 60.0f; // fog change only when no model is selected!
 			else
 			{
@@ -2224,11 +2049,10 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 	}
 
 	// check menu settings and switch hole mode
+	//! \todo why the hell is this here?
 	if(terrainMode!=3)
 	{
-		if(Settings::getInstance()->holelinesOn) 
-			Environment::getInstance()->view_holelines = true;
-		else Environment::getInstance()->view_holelines = false;
+		Environment::getInstance()->view_holelines = Settings::getInstance()->holelinesOn;
 	}
 
 }

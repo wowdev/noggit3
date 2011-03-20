@@ -122,12 +122,19 @@ Model::~Model()
 	if( globalSequences )
 		delete[] globalSequences;
 
+	if(showGeosets)
+    delete[] showGeosets;
+		
 	if (animated) {
 		// unload all sorts of crap
 		//delete[] vertices;
 		//delete[] normals;
-		if(indices)
-			delete[] indices;
+  	if (colors) 
+  		delete[] colors;
+  	if (transparency) 
+  		delete[] transparency;
+  	if(indices)
+  		delete[] indices;
 		if(anims)
 			delete[] anims;
 		if(origVertices)
@@ -142,10 +149,6 @@ Model::~Model()
 
 		if (animTextures && texanims) 
 			delete[] texanims;
-		if (colors) 
-			delete[] colors;
-		if (transparency) 
-			delete[] transparency;
 		if (lights) 
 			delete[] lights;
 

@@ -376,7 +376,7 @@ frame* TexturingUI::createTexturePalette( int rows, int cols, Gui *setgui )
 	updateTextures();
 	texturePaletteClick( 0, 0 );
 
-	windowTexturePalette->addChild( gPageNumber = new textUI( 44.0f, 4.0f, "1 / 1", &arialn13, eJustifyLeft ) );
+	windowTexturePalette->addChild( gPageNumber = new textUI( 44.0f, 4.0f, "1 / 1", arialn13, eJustifyLeft ) );
 	windowTexturePalette->addChild( new buttonUI( 20.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Down.blp", changePage, +1 ) );
 	windowTexturePalette->addChild( new buttonUI( 2.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Down.blp", changePage, -1 ) );
 	
@@ -395,7 +395,7 @@ frame* TexturingUI::createSelectedTexture()
 	textureSelected = new textureUI( 9.0f, 24.0f, 256.0f, 256.0f, lTexture );
 	windowSelectedTexture->addChild( textureSelected );
 
-	textSelectedTexture = new textUI( 137.0f, 264.0f, lTexture, &arialn13, eJustifyCenter );
+	textSelectedTexture = new textUI( 137.0f, 264.0f, lTexture, arialn13, eJustifyCenter );
 	textSelectedTexture->setBackground( 0.0f, 0.0f, 0.0f, 0.5f );
 	windowSelectedTexture->addChild( textSelectedTexture );
 
@@ -453,7 +453,7 @@ frame* TexturingUI::createTextureFilter()
 	windowTextureFilter->hidden = true;
 
 	//Filename Filters
-	windowTextureFilter->addChild( new textUI( 60.0f, 23.0f, "Filename Filters", &arial14, eJustifyCenter ) );
+	windowTextureFilter->addChild( new textUI( 60.0f, 23.0f, "Filename Filters", arial14, eJustifyCenter ) );
 
 	for( std::map<int,std::string>::iterator it = gFilenameFilters.begin(); it != gFilenameFilters.end(); ++it )
 	{
@@ -463,7 +463,7 @@ frame* TexturingUI::createTextureFilter()
 	windowTextureFilter->addChild( new checkboxUI( 350.0f, 45.0f + 30.0f * 4.0f, "Misc (Everything Else)", clickFileFilterTexture, 24 ) );
 
 	//Tileset Filters
-	windowTextureFilter->addChild( new textUI( 55.0f, 190.0f, "Tileset Filters", &arial14, eJustifyCenter ) );
+	windowTextureFilter->addChild( new textUI( 55.0f, 190.0f, "Tileset Filters", arial14, eJustifyCenter ) );
 
 	for( unsigned int i = 0; i < tilesetDirectories.size(); ++i )
 	{
@@ -486,13 +486,13 @@ frame* TexturingUI::createMapChunkWindow()
 	chunkSettingsWindow=new window(11.0f,26.0f,300.0f,300.0f);
 	windowMapChunk->addChild(chunkSettingsWindow);
 
-	chunkLocation=new textUI(5.0f,4.0f,"Chunk x, y of Tile x, y at (x, y, z)", &arial14, eJustifyLeft);
+	chunkLocation=new textUI(5.0f,4.0f,"Chunk x, y of Tile x, y at (x, y, z)", arial14, eJustifyLeft);
 	chunkSettingsWindow->addChild(chunkLocation);
 
-	chunkAreaID=new textUI(5.0,chunkLocation->y+25.0f,"AreaID:", &arial14, eJustifyLeft);
+	chunkAreaID=new textUI(5.0,chunkLocation->y+25.0f,"AreaID:", arial14, eJustifyLeft);
 	chunkSettingsWindow->addChild(chunkAreaID);
 
-	chunkFlags=new textUI(5.0,chunkAreaID->y+25.0f,"Flags:", &arial14, eJustifyLeft);
+	chunkFlags=new textUI(5.0,chunkAreaID->y+25.0f,"Flags:", arial14, eJustifyLeft);
 	chunkSettingsWindow->addChild(chunkFlags);
 
 
@@ -513,10 +513,10 @@ frame* TexturingUI::createMapChunkWindow()
 	chunkSettingsWindow->addChild(chunkFlagChecks[4]);
 
 
-	chunkEffectID=new textUI(5.0f,chunkFlagChecks[4]->y+35.0f,"EffectID:", &arial14, eJustifyLeft);
+	chunkEffectID=new textUI(5.0f,chunkFlagChecks[4]->y+35.0f,"EffectID:", arial14, eJustifyLeft);
 	chunkSettingsWindow->addChild(chunkEffectID);
 	chunkEffectID->hidden=true;
-	chunkNumEffects=new textUI(150.0f,chunkEffectID->y,"Num Effects:", &arial14, eJustifyLeft);
+	chunkNumEffects=new textUI(150.0f,chunkEffectID->y,"Num Effects:", arial14, eJustifyLeft);
 	chunkSettingsWindow->addChild(chunkNumEffects);
 	chunkNumEffects->hidden=true;
 
@@ -524,7 +524,7 @@ frame* TexturingUI::createMapChunkWindow()
 	chunkSettingsWindow->addChild(chunkEffectWindow);
 	chunkEffectWindow->hidden=true;
 	
-	chunkEffectModels[0]=new textUI(8.0f,8.0f,"Effect Doodad", &arial14, eJustifyLeft);
+	chunkEffectModels[0]=new textUI(8.0f,8.0f,"Effect Doodad", arial14, eJustifyLeft);
 	chunkEffectWindow->addChild(chunkEffectModels[0]);
 	chunkEffectModels[0]->hidden=true;
 	
@@ -535,20 +535,20 @@ frame* TexturingUI::createMapChunkWindow()
 
 		for(int i=1;i<4;++i)
 	{
-		chunkEffectModels[i]=new textUI(8.0f,chunkEffectModels[i-1]->y+20.0f,"Effect Doodad", &arial14, eJustifyLeft);
+		chunkEffectModels[i]=new textUI(8.0f,chunkEffectModels[i-1]->y+20.0f,"Effect Doodad", arial14, eJustifyLeft);
 		chunkEffectWindow->addChild(chunkEffectModels[i]);
 		chunkEffectModels[i]->hidden=true;
 
 		chunkTexture[i]=new textureUI( 10.0f, yPos, 64.0f, 64.0f, "tileset\\generic\\black.blp" );
 		chunkTextureWindow->addChild(chunkTexture[i]);
 		
-		chunkTextureNames[i]=new textUI(83.0f,yPos+5.0f,"Texture Name", &arial14, eJustifyLeft);
+		chunkTextureNames[i]=new textUI(83.0f,yPos+5.0f,"Texture Name", arial14, eJustifyLeft);
 		chunkTextureWindow->addChild(chunkTextureNames[i]);
 
-		chunkTextureFlags[i]=new textUI(83.0f,yPos+30.0f,"Flags -", &arial14, eJustifyLeft);
+		chunkTextureFlags[i]=new textUI(83.0f,yPos+30.0f,"Flags -", arial14, eJustifyLeft);
 		chunkTextureWindow->addChild(chunkTextureFlags[i]);
 
-		chunkTextureEffectID[i]=new textUI(184.0f,yPos+30.0f,"EffectID -", &arial14, eJustifyLeft);
+		chunkTextureEffectID[i]=new textUI(184.0f,yPos+30.0f,"EffectID -", arial14, eJustifyLeft);
 		chunkTextureWindow->addChild(chunkTextureEffectID[i]);
 
 		yPos+=64.0f+8.0f;

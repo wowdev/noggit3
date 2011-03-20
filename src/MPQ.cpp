@@ -1,4 +1,4 @@
-#include "mpq_stormlib.h"
+#include "MPQ.h"
 #include "Log.h"
 #include "directory.h"
 #include "Project.h"
@@ -18,6 +18,7 @@ std::vector<MPQArchive*> gOpenArchives;
 
 std::list<std::string> gListfile;
 boost::mutex gListfileLoadingMutex;
+boost::mutex gMPQFileMutex;
 
 MPQArchive::MPQArchive(const std::string& filename, bool doListfile)
 {
@@ -37,6 +38,7 @@ MPQArchive::MPQArchive(const std::string& filename, bool doListfile)
 void MPQArchive::finishLoading()
 {
   boost::mutex::scoped_lock lock(gListfileLoadingMutex);
+  boost::mutex::scoped_lock lock2(gMPQFileMutex);
   
   if(finished)
     return;
@@ -103,6 +105,7 @@ MPQFile::MPQFile( const std::string& filename ):
 	size(0),
 	External(false)
 {
+  boost::mutex::scoped_lock lock(gMPQFileMutex);
 	std::string diskpath = Project::getInstance()->getPath().append(filename);
 	
 	size_t found = diskpath.find( "\\" );
@@ -170,6 +173,7 @@ MPQFile::~MPQFile()
 
 bool MPQFile::exists( const std::string& filename )
 {
+  boost::mutex::scoped_lock lock(gMPQFileMutex);
 	for(std::vector<MPQArchive*>::iterator it=gOpenArchives.begin(); it!=gOpenArchives.end();++it)
     if( SFileHasFile( (*it)->mpq_a, filename.c_str() ) )
       return true;

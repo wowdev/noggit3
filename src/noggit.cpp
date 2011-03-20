@@ -52,7 +52,7 @@ extern std::list<std::string> gListfile;
 
 float gFPS;
 
-freetype::font_data arialn13,arial12,arial14,arial16,arial24,arial32,morpheus40,skurri32,fritz16;	
+freetype::font_data *arialn13, *arial12, *arial14, *arial16, *arial24, *arial32, *morpheus40, *skurri32, *fritz16;	
 
 AsyncLoader* gAsyncLoader;
 
@@ -362,17 +362,17 @@ int main( int argc, char *argv[] )
 	OpenDBs();
 	
 	// Initializing Fonts
-	skurri32.init( "fonts\\SKURRI.TTF", 32, true );
-	fritz16.init( "fonts\\FRIZQT__.TTF", 16, true );
-	morpheus40.init( "fonts\\MORPHEUS.TTF", 40, true );
-	arialn13.init( "fonts\\arialn.TTF", 13, true );
+	skurri32 = new freetype::font_data( "fonts\\SKURRI.TTF", 32, true );
+	fritz16 = new freetype::font_data( "fonts\\FRIZQT__.TTF", 16, true );
+	morpheus40 = new freetype::font_data( "fonts\\MORPHEUS.TTF", 40, true );
+	arialn13 = new freetype::font_data( "fonts\\arialn.TTF", 13, true );
 	
 	const char* arialname = lFontWindows ? "C:\\windows\\fonts\\arial.ttf" : "fonts/arial.ttf";
-  arial12.init( arialname, 12, false );
-  arial14.init( arialname, 14, false );
-  arial16.init( arialname, 16, false );
-  arial24.init( arialname, 24, false );
-  arial32.init( arialname, 32, false );
+  arial12 = new freetype::font_data( arialname, 12, false );
+  arial14 = new freetype::font_data( arialname, 14, false );
+  arial16 = new freetype::font_data( arialname, 16, false );
+  arial24 = new freetype::font_data( arialname, 24, false );
+  arial32 = new freetype::font_data( arialname, 32, false );
 	
 	float ftime;
 	Uint32 t, last_t, frames = 0, time = 0, fcount = 0, ft = 0;
@@ -471,6 +471,16 @@ int main( int argc, char *argv[] )
     delete *it;
 	}
 	gOpenArchives.clear();
+	
+	delete arialn13;
+	delete arial12;
+	delete arial14;
+	delete arial16;
+	delete arial24;
+	delete arial32;
+	delete morpheus40;
+	delete skurri32;
+	delete fritz16;	
 	
 	LogDebug << "Exited" << std::endl;
 	

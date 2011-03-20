@@ -15,7 +15,7 @@ enum eViewMode
 	eViewMode_3D
 };
  
-class MapView : public AppState
+class MapView : public AppState, public HotKeyReceiver
 {
 	float ah,av,moving,strafing,updown,mousedir,movespd;
 	bool key_w;
@@ -23,8 +23,8 @@ class MapView : public AppState
 	bool hud;
 	bool set_areaid;
 
-
-
+  void save();
+  void quit();
 
 	float lastBrushUpdate;
 

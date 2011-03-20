@@ -37,11 +37,11 @@ MODELIDTYPE ModelManager::add( const std::string& name )
 void ModelManager::resetAnim()
 {
 	for( std::map<std::string, MODELIDTYPE>::iterator it = names.begin( ); it != names.end( ); ++it )
-		reinterpret_cast<Model*>( items[it->second] )->animcalc = false;
+		static_cast<Model*>( items[it->second] )->animcalc = false;
 }
 
 void ModelManager::updateEmitters( float dt )
 {
 	for( std::map<std::string, MODELIDTYPE>::iterator it = names.begin( ); it != names.end( ); ++it )
-		reinterpret_cast<Model*>( items[it->second] )->updateEmitters( dt );
+		static_cast<Model*>( items[it->second] )->updateEmitters( dt );
 }

@@ -109,18 +109,18 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 
 	glBindTexture(GL_TEXTURE_2D,tex_base[ch]);
 
-	glPushMatrix();
+//	glPushMatrix();
 	
 
 	//first we need to move over a little so that
 	//the character has the right amount of space
 	//between it and the one before it.
-	glTranslatef(bitmap_glyph->left,0,0);
+//	glTranslatef(bitmap_glyph->left,0,0);
 
 	//Now we move down a little in the case that the
 	//bitmap extends past the bottom of the line 
 	//(this is only true for characters like 'g' or 'y'.
-	glTranslatef(0,fontsize-bitmap_glyph->top,0);
+//	glTranslatef(0,fontsize-bitmap_glyph->top,0);
 
 	//Now we need to account for the fact that many of
 	//our textures are filled with empty padding space.
@@ -137,13 +137,17 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 	//oriented quite like we would like it to be,
 	//so we need to link the texture to the quad
 	//so that the result will be properly aligned.
-	glBegin(GL_QUADS);
-	glTexCoord2f(0,0); glVertex2f(0,0);
-	glTexCoord2f(0,1); glVertex2f(0,height);
-	glTexCoord2f(1,1); glVertex2f(width,height);
-	glTexCoord2f(1,0); glVertex2f(width,0);
+	const float xl = bitmap_glyph->left;
+	const float xh = bitmap_glyph->left + width;
+ 	const float yl = fontsize - bitmap_glyph->top;
+	const float yh = fontsize - bitmap_glyph->top + height;
+	glBegin(GL_TRIANGLE_STRIP);
+	glTexCoord2f(0,0); glVertex2f(xl,yl);
+	glTexCoord2f(0,1); glVertex2f(xl,yh);
+	glTexCoord2f(1,0); glVertex2f(xh,yl);
+	glTexCoord2f(1,1); glVertex2f(xh,yh);
 	glEnd();
-	glPopMatrix();
+//	glPopMatrix();
 	glTranslatef(face->glyph->advance.x >> 6 ,0,0);
 
 
@@ -161,63 +165,59 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 
 
 
-void font_data::init(const char * fname, unsigned int _h, bool fromMPQ)
+font_data::font_data( const std::string& fname, unsigned int _h, bool fromMPQ ) : h ( _h )
 {
-	this->h=_h;
-
 	FT_Library library;
-	if (FT_Init_FreeType( &library )) 
+	if( FT_Init_FreeType( &library ) ) 
 	{
 		LogError << "FT_Init_FreeType failed" << std::endl;
-		throw std::runtime_error("FT_Init_FreeType failed");
+		throw std::runtime_error( "FT_Init_FreeType failed" );
 	}
 
 	FT_Face face;
 
   bool failed;
   MPQFile* f;
-  if(fromMPQ)
+  if( fromMPQ )
   {
-    f = new MPQFile(fname);
-    failed = FT_New_Memory_Face( library, (FT_Byte *)f->getBuffer(), f->getSize(), 0, &face );
+    f = new MPQFile( fname );
+    failed = FT_New_Memory_Face( library, reinterpret_cast<FT_Byte*>( f->getBuffer() ), f->getSize(), 0, &face );
   }
   else
   {
-  	failed = FT_New_Face( library, fname, 0, &face );
+  	failed = FT_New_Face( library, fname.c_str(), 0, &face );
   }
   
-  if(failed)
+  if( failed )
   {
   	LogError << "FT_New_Face failed (there is probably a problem with your font file)" << std::endl;
-  	throw std::runtime_error("FT_New_Face failed (there is probably a problem with your font file)");
+  	throw std::runtime_error( "FT_New_Face failed (there is probably a problem with your font file)" );
   }
 
-	//For some twisted reason, Freetype measures font size
-	//in terms of 1/64ths of pixels.	Thus, to make a font
-	//h pixels high, we need to request a size of h*64.
-	//(h << 6 is just a prettier way of writting h*64)
-	FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72);
+	// For some twisted reason, Freetype measures font size in terms of 1/64ths of pixels.	Thus, to make a font h pixels high, we need to request a size of h*64. (h << 6 is just a prettier way of writting h*64)
+	FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72 );
 
-  list_base = glGenLists(128); //! \todo more for unicode!
+  list_base = glGenLists( 128 ); //! \todo more for unicode!
   textures = new GLuint[128];
   glGenTextures( 128, textures );
   
-  for(unsigned char i=0;i<128;++i)
-    charWidths[i] = make_dlist(face,i,list_base,textures,h);
+  for( unsigned char i = 0; i < 128; ++i )
+    charWidths[i] = make_dlist( face, i, list_base, textures, h );
 
-	FT_Done_Face(face);
-	FT_Done_FreeType(library);
+	FT_Done_Face( face );
+	FT_Done_FreeType( library );
 	
-	if(fromMPQ)
+	if( fromMPQ )
 	{
     f->close();
     delete f;
 	}
 }
 
-void font_data::clean() {
-	glDeleteLists(list_base,128);
-	glDeleteTextures(128,textures);
+font_data::~font_data()
+{
+	glDeleteLists( list_base, 128 );
+	glDeleteTextures( 128, textures );
 	if( textures )
 	{
 		delete [] textures;
@@ -243,22 +243,34 @@ void print(const font_data &ft_font, float x, float y, const std::string& text, 
 	//this tutorial with unnecessary library dependencies).
 	
 	//! \todo std::string.find ...
+	
+	std::vector<std::string> lines;
+	const char* s = text.c_str();
+  const char* e = s;
+  while (*e != 0) {
+    e = s;
+    while (*e != 0 && strchr("\n", *e) == 0) ++e;
+    if (e - s > 0) {
+      lines.push_back(std::string(s,e - s));
+    }
+    s = e + 1;
+  }
+	/*
 	const char *start_line=text.c_str();
-	vector<string> lines;
 	const char *c=text.c_str();
 	for(;*c;c++) {
 		if(*c=='\n') {
-			string line;
+			std::string line;
 			for(const char *n=start_line;n<c;n++) line.append(1,*n);
 			lines.push_back(line);
 			start_line=c+1;
 		}
 	}
 	if(start_line) {
-		string line;
+		std::string line;
 		for(const char *n=start_line;n<c;n++) line.append(1,*n);
 		lines.push_back(line);
-	}
+	}*/
   
 	glColor3f(r,g,b);
   
@@ -282,10 +294,10 @@ void print(const font_data &ft_font, float x, float y, const std::string& text, 
 	//down by h. This is because when each character is
 	//draw it modifies the current matrix so that the next character
 	//will be drawn immediatly after it.	
+	glPushMatrix();
+	glTranslatef(x,y,0.0f);
 	for(unsigned int i=0;i<lines.size();++i) {
-		glPushMatrix();
 		//glLoadIdentity();
-		glTranslatef(x,y+h*i,0);
 		//glMultMatrixf(modelview_matrix);
 
 	//	The commented out raster position stuff can be useful if you need to
@@ -298,8 +310,9 @@ void print(const font_data &ft_font, float x, float y, const std::string& text, 
 	//	glGetFloatv(GL_CURRENT_RASTER_POSITION ,rpos);
 	//	float len=x-rpos[0];
 
-		glPopMatrix();
+		glTranslatef(0.0f,h*i,0.0f);
 	}
+	glPopMatrix();
 
 	glPopAttrib();		
 
@@ -320,18 +333,18 @@ int width(const font_data &ft_font, const std::string& text)
 	//boost.org (I've only done it out by hand to avoid complicating
 	//this tutorial with unnecessary library dependencies).
 	const char *start_line=text.c_str();
-	vector<string> lines;
+	std::vector<std::string> lines;
 	const char *c=text.c_str();
 	for(;*c;c++) {
 		if(*c=='\n') {
-			string line;
+			std::string line;
 			for(const char *n=start_line;n<c;n++) line.append(1,*n);
 			lines.push_back(line);
 			start_line=c+1;
 		}
 	}
 	if(start_line) {
-		string line;
+		std::string line;
 		for(const char *n=start_line;n<c;n++) line.append(1,*n);
 		lines.push_back(line);
 	}

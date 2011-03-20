@@ -18,7 +18,7 @@ TextBox::TextBox(float xPos,float yPos,float w, float h, const std::string& tex,
 	texture = TextureManager::newTexture( tex );
 	textureDown = TextureManager::newTexture( texd );
 	mFocus = false;
-	mText = new textUI( w / 2.0f, 2.0f, &arial12, eJustifyCenter );
+	mText = new textUI( w / 2.0f, 2.0f, arial12, eJustifyCenter );
 }
 
 void TextBox::render() const
