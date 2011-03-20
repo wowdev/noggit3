@@ -55,14 +55,15 @@ int indexMapBuf(int x, int y)
 
 MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 {
-	mPositionX = pX;
-	mPositionZ = pZ;
+	this->modelCount = 0;
+	this->mPositionX = pX;
+	this->mPositionZ = pZ;
 	
 	this->changed = false;
-	xbase = mPositionX * TILESIZE;
-	zbase = mPositionZ * TILESIZE;
+	this->xbase = mPositionX * TILESIZE;
+	this->zbase = mPositionZ * TILESIZE;
 
-	mBigAlpha = pBigAlpha;
+	this->mBigAlpha = pBigAlpha;
 	
 	for( int i = 0; i < 16; ++i )
 	{
@@ -612,9 +613,13 @@ void MapTile::drawTextures()
 		for (int i=0; i<16; ++i) {
 			if(((i+1+xOffset)>gWorld->minX)&&((j+1+yOffset)>gWorld->minY)&&((i+xOffset)<gWorld->maxX)&&((j+yOffset)<gWorld->maxY))
 				mChunks[j][i]->drawTextures();
+
+
 		}
 	}
 	glPopMatrix();
+
+
 }
 
 MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )
@@ -1042,19 +1047,9 @@ void MapTile::saveTile()
 				LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
 				return;
 			}
-			
-			//! \todo Do not fuck things up via UIDs here! Stop calculating them. Or somewhere else. Or idk. This is shit. Pure shit.
-			
-			// XXZZTNNN
-			//				1
-			//		 1000
-			//		10000
-			//	1000000
-			
-			int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 1 * 1000;
 
 			lMDDF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
-			lMDDF_Data[lID].uniqueID = lNewUID;
+			lMDDF_Data[lID].uniqueID = it->first;
 			lMDDF_Data[lID].pos[0] = it->second.pos.x;
 			lMDDF_Data[lID].pos[1] = it->second.pos.y;
 			lMDDF_Data[lID].pos[2] = it->second.pos.z;

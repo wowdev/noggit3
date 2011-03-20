@@ -595,6 +595,7 @@ void RemoveAnim(int anim)
 
 void MapChunk::drawTextures()
 {
+
 	glColor4f(1.0f,1.0f,1.0f,1.0f);
 
 	if(nTextures > 0)
@@ -685,7 +686,7 @@ void MapChunk::drawTextures()
 	glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, gWorld->mapstrip2);
 
 
-	
+
 }
 
 
@@ -990,15 +991,7 @@ void MapChunk::drawContour()
 	glDisable(GL_TEXTURE_GEN_S);
 }
 
-void MapChunk::drawAreaID()
-{
-	//
-}
 
-void MapChunk::drawBlock()
-{
-	//
-}
 
 void MapChunk::draw()
 {
