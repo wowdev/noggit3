@@ -722,6 +722,10 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Help" )->AddMenuItemToggle( "Infos", &mainGui->guiappInfo->hidden, true );
 
 	mainGui->tileFrames->addChild( mbar );
+	
+  addHotkey( SDLK_ESCAPE, MOD_none,   static_cast<AppState::Function>( &MapView::quit ) );
+  addHotkey( SDLK_s,      MOD_ctrl,   static_cast<AppState::Function>( &MapView::save ) );
+  addHotkey( SDLK_s,      MOD_meta,   static_cast<AppState::Function>( &MapView::save ) );
 }
 
 MapView::~MapView()
@@ -730,7 +734,6 @@ MapView::~MapView()
 	{
 		delete mainGui;
 		mainGui = NULL;
-		mainGuiPointer = NULL;
 	}
 	if( gWorld )
 	{
@@ -1380,7 +1383,17 @@ void MapView::display( float t, float dt )
 
 }
 
-
+void MapView::save()
+{
+  gWorld->saveChanged();
+}
+void MapView::quit()
+{
+  if( mViewMode == eViewMode_Help )
+		mViewMode = eViewMode_3D;
+	else
+		gPop = true;
+}
 
 void MapView::resizewindow()
 {
@@ -1398,6 +1411,9 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 	{
 		if((LastClicked)&&(LastClicked->processKey(e->keysym.sym,(e->keysym.mod&KMOD_SHIFT)!=0,(e->keysym.mod&KMOD_CTRL)!=0,(e->keysym.mod&KMOD_ALT)!=0)))
 			return;
+		
+    if( handleHotkeys( e ) )
+      return;
 
 		// key DOWN
 		
@@ -1410,13 +1426,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_LCTRL || e->keysym.sym == SDLK_RCTRL )
 			Environment::getInstance()->CtrlDown = true;
 
-		// quit or leave help window
-		if( e->keysym.sym == SDLK_ESCAPE )
-			if( mViewMode == eViewMode_Help )
-				mViewMode = eViewMode_3D;
-			else
-				gPop = true;
-
 		// movement
 		if( e->keysym.sym == SDLK_w )
 		{
@@ -1428,8 +1437,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_s )
 			if( Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown )
 				gWorld->saveTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
-			else if( Environment::getInstance()->CtrlDown)
-				gWorld->saveChanged();
 			else
 				moving = -1.0f;
 		
