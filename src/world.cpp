@@ -1115,12 +1115,11 @@ void World::draw()
 
 	glDisable(GL_BLEND);
 	glDisable(GL_ALPHA_TEST);
-	//glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHTING);
 
 	// gosh darn alpha blended evil
 
 	LoadGLSettings();
-	// TODO Steff: Liquid generates GL_OUT_OF_MEMORY
 	setupFog();
 	
 	for( int j = 0; j < 64; ++j )
@@ -1156,7 +1155,7 @@ void World::draw()
 	glEnd();
 	*/
 
-	glColor4f(1,1,1,1);
+	//glColor4f(1,1,1,1);
 	glDisable(GL_COLOR_MATERIAL);
 	
 	

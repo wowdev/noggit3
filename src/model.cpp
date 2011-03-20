@@ -1165,7 +1165,8 @@ void Model::draw()
 			animate( 0 );
 			animcalc = true;
 		}
-
+		
+		
 		lightsOn( GL_LIGHT4 );
 				drawModel( /*false*/ );
 		lightsOff( GL_LIGHT4 );

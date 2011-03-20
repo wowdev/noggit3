@@ -913,55 +913,72 @@ void MapView::tick( float t, float dt )
 					if( Environment::getInstance()->ShiftDown )
 					{						
 						// Move ground up
-						gWorld->changeTerrain( xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+						if( mViewMode == eViewMode_3D ) gWorld->changeTerrain( xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
 					}
 					else if( Environment::getInstance()->CtrlDown )
 					{
 						// Move ground down
-						gWorld->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+						if( mViewMode == eViewMode_3D ) gWorld->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
 					}
 						
 					break;
 					
 				case 1:
 					if( Environment::getInstance()->ShiftDown )
-						gWorld->flattenTerrain( xPos, zPos, yPos, pow( 0.2f, dt ), blurBrushRadius, blurBrushType );
+						if( mViewMode == eViewMode_3D ) gWorld->flattenTerrain( xPos, zPos, yPos, pow( 0.2f, dt ), blurBrushRadius, blurBrushType );
 					else if( Environment::getInstance()->CtrlDown )
 					{
 						using std::min;
-						gWorld->blurTerrain( xPos, zPos, pow( 0.2f, dt ), min( blurBrushRadius, 30.0f ), blurBrushType );
+						if( mViewMode == eViewMode_3D ) gWorld->blurTerrain( xPos, zPos, pow( 0.2f, dt ), min( blurBrushRadius, 30.0f ), blurBrushType );
 					}
 					
 					break;
 					
 				case 2:
-					if( Environment::getInstance()->ShiftDown ){ // 3D Paint
-						if( Environment::getInstance()->CtrlDown ) // clear chunk texture
-							gWorld->eraseTextures(xPos, zPos);
-						else if( TexturingUI::getSelectedTexture() )
+					if( Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown)
+					{
+						// clear chunk texture
+						if( mViewMode == eViewMode_3D ) gWorld->eraseTextures(xPos, zPos);
+						else if( mViewMode == eViewMode_2D ) gWorld->eraseTextures( CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+					}
+					else if( Environment::getInstance()->CtrlDown ) 
+					{
+						// Pick texture
+					}
+					else  if( Environment::getInstance()->ShiftDown)
+					{
+						// Paint
+						if( TexturingUI::getSelectedTexture() )
 						{
 							if( textureBrush.needUpdate() )
-    					{
-    						textureBrush.GenerateTexture();
-    					}
-							
-							gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture()->name ) );
+							{
+								textureBrush.GenerateTexture();
+							}
+
+							if( mViewMode == eViewMode_3D ) gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture()->name ) );
+							else if( mViewMode == eViewMode_2D ) gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture() ->name ) );
 						}
-					}
-						
+					}					
 				break;
 					
 				case 3:
 					if( Environment::getInstance()->ShiftDown	)
-						gWorld->removeHole( xPos, zPos );
+					{
+						if( mViewMode == eViewMode_3D )			gWorld->removeHole( xPos, zPos );
+						//else if( mViewMode == eViewMode_2D )	gWorld->removeHole( CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+					}
 					else if( Environment::getInstance()->CtrlDown )
-						gWorld->addHole( xPos, zPos );
-						
+					{	
+						if( mViewMode == eViewMode_3D )			gWorld->addHole( xPos, zPos );
+						//else if( mViewMode == eViewMode_2D )	gWorld->addHole( CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+					}
 				break;
 
 				case 4:
 					if( Environment::getInstance()->ShiftDown	)
 					{
+						if( mViewMode == eViewMode_3D ) 
+						{
 						// draw the selected AreaId on current selected chunk
 						nameEntry * lSelection = gWorld->GetCurrentSelection();
 						int mtx,mtz,mcx,mcy;
@@ -970,22 +987,26 @@ void MapView::tick( float t, float dt )
 						mcx = lSelection->data.mapchunk->px;
 						mcy = lSelection->data.mapchunk->py;
 						gWorld->setAreaID( Environment::getInstance()->selectedAreaID, mtx,mtz, mcx, mcy );
+						}
 					}
 					else if( Environment::getInstance()->CtrlDown )
 					{
+						if( mViewMode == eViewMode_3D ) 
+						{
 						// pick areaID from chunk
 						int newID = gWorld->GetCurrentSelection()->data.mapchunk->areaID;
 						Environment::getInstance()->selectedAreaID = newID;
 						mainGui->ZoneIDBrowser->setZoneID(newID);
+						}
 					}
 
 				break;
 
 				case 5:
 					if( Environment::getInstance()->ShiftDown	)
-						gWorld->setFlag( true, xPos, zPos );
+						if( mViewMode == eViewMode_3D ) gWorld->setFlag( true, xPos, zPos );
 					else if( Environment::getInstance()->CtrlDown )
-						gWorld->setFlag( false, xPos, zPos );
+						if( mViewMode == eViewMode_3D ) gWorld->setFlag( false, xPos, zPos );
 				break;
 				}
 			}
@@ -1018,28 +1039,6 @@ void MapView::tick( float t, float dt )
 			using std::min;
 			using std::max;
 			gWorld->zoom = min( max( gWorld->zoom, 0.1f ), 2.0f );
-
-			if( leftMouse && !LastClicked && TexturingUI::getSelectedTexture() )
-			{
-				
-					float mX, mY;
-					mX = CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x;
-					mY = CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z;
-
-				if( Environment::getInstance()->CtrlDown )
-					gWorld->eraseTextures( mX, mY );
-				else
-				{
-					if( textureBrush.needUpdate() )
-					{
-						textureBrush.GenerateTexture();
-					}
-					
-					if( Environment::getInstance()->ShiftDown )
-						gWorld->paintTexture( mX, mY, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture() ->name ) );
-				}
-			
-			}
 		}
 	}
 	else
@@ -1452,7 +1451,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_q )
 			updown = 1.0f;
 		
-		// position correction with numpad
+		// position correction with num pad
 		if( e->keysym.sym == SDLK_KP8 ) 
 			keyx = -1;
 
@@ -1502,6 +1501,8 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		if( e->keysym.sym == SDLK_v && Environment::getInstance()->CtrlDown )
 			PasteSelectedObject( 0, 0 );
 
+		// with shift toggle detail window
+		// without toggle the settings of the current edit mode.
 		if( e->keysym.sym == SDLK_x )
 		{
 			if( Environment::getInstance()->CtrlDown )
@@ -1537,25 +1538,13 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		{
 			if( Environment::getInstance()->CtrlDown )
 				ResetSelectedObjectRotation( 0, 0 );
-			else if( Environment::getInstance()->ShiftDown )
-				ah += 180.0f;
-			else
-			{
-		    terrainMode = ( terrainMode + 1 ) % 6;
-		    
-			  // Set the right icon in toolbar
-			  mainGui->guiToolbar->IconSelect( terrainMode );				
-			}
+			else ah += 180.0f;
 		}		
 		
-		// toggle editing mode
+		// Free for use
 		if( e->keysym.sym == SDLK_t ) 
 		{
-		  //! \todo Modulo.
-		  terrainMode =  terrainMode - 1;
-		  if(terrainMode<0) terrainMode = 5;
-			// Set the right icon in toolbar
-			mainGui->guiToolbar->IconSelect( terrainMode );
+		 
 		}
 
 		// clip object to ground
@@ -2065,4 +2054,7 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 	{
 		Environment::getInstance()->view_holelines = Settings::getInstance()->holelinesOn;
 	}
+
 }
+
+

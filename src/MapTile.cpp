@@ -55,14 +55,15 @@ int indexMapBuf(int x, int y)
 
 MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 {
-	mPositionX = pX;
-	mPositionZ = pZ;
+	this->modelCount = 0;
+	this->mPositionX = pX;
+	this->mPositionZ = pZ;
 	
 	this->changed = false;
-	xbase = mPositionX * TILESIZE;
-	zbase = mPositionZ * TILESIZE;
+	this->xbase = mPositionX * TILESIZE;
+	this->zbase = mPositionZ * TILESIZE;
 
-	mBigAlpha = pBigAlpha;
+	this->mBigAlpha = pBigAlpha;
 	
 	for( int i = 0; i < 16; ++i )
 	{
@@ -612,9 +613,13 @@ void MapTile::drawTextures()
 		for (int i=0; i<16; ++i) {
 			if(((i+1+xOffset)>gWorld->minX)&&((j+1+yOffset)>gWorld->minY)&&((i+xOffset)<gWorld->maxX)&&((j+yOffset)<gWorld->maxY))
 				mChunks[j][i]->drawTextures();
+
+
 		}
 	}
 	glPopMatrix();
+
+
 }
 
 MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )
