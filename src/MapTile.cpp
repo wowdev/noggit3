@@ -1047,19 +1047,9 @@ void MapTile::saveTile()
 				LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
 				return;
 			}
-			
-			//! \todo Do not fuck things up via UIDs here! Stop calculating them. Or somewhere else. Or idk. This is shit. Pure shit.
-			
-			// XXZZTNNN
-			//				1
-			//		 1000
-			//		10000
-			//	1000000
-			
-			int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 1 * 1000;
 
 			lMDDF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
-			lMDDF_Data[lID].uniqueID = lNewUID;
+			lMDDF_Data[lID].uniqueID = it->first;
 			lMDDF_Data[lID].pos[0] = it->second.pos.x;
 			lMDDF_Data[lID].pos[1] = it->second.pos.y;
 			lMDDF_Data[lID].pos[2] = it->second.pos.z;
