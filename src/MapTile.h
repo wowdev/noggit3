@@ -23,6 +23,7 @@ public:
 	//! \brief Get chunk for sub offset x,z.
 	MapChunk* getChunk( unsigned int x, unsigned int z );
 	
+	int modelCount;
 	int mPositionX;
 	int mPositionZ;
 	float xbase, zbase;
