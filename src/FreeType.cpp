@@ -109,18 +109,18 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 
 	glBindTexture(GL_TEXTURE_2D,tex_base[ch]);
 
-	glPushMatrix();
+//	glPushMatrix();
 	
 
 	//first we need to move over a little so that
 	//the character has the right amount of space
 	//between it and the one before it.
-	glTranslatef(bitmap_glyph->left,0,0);
+//	glTranslatef(bitmap_glyph->left,0,0);
 
 	//Now we move down a little in the case that the
 	//bitmap extends past the bottom of the line 
 	//(this is only true for characters like 'g' or 'y'.
-	glTranslatef(0,fontsize-bitmap_glyph->top,0);
+//	glTranslatef(0,fontsize-bitmap_glyph->top,0);
 
 	//Now we need to account for the fact that many of
 	//our textures are filled with empty padding space.
@@ -137,13 +137,17 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 	//oriented quite like we would like it to be,
 	//so we need to link the texture to the quad
 	//so that the result will be properly aligned.
-	glBegin(GL_QUADS);
-	glTexCoord2f(0,0); glVertex2f(0,0);
-	glTexCoord2f(0,1); glVertex2f(0,height);
-	glTexCoord2f(1,1); glVertex2f(width,height);
-	glTexCoord2f(1,0); glVertex2f(width,0);
+	const float xl = bitmap_glyph->left;
+	const float xh = bitmap_glyph->left + width;
+ 	const float yl = fontsize - bitmap_glyph->top;
+	const float yh = fontsize - bitmap_glyph->top + height;
+	glBegin(GL_TRIANGLE_STRIP);
+	glTexCoord2f(0,0); glVertex2f(xl,yl);
+	glTexCoord2f(0,1); glVertex2f(xl,yh);
+	glTexCoord2f(1,0); glVertex2f(xh,yl);
+	glTexCoord2f(1,1); glVertex2f(xh,yh);
 	glEnd();
-	glPopMatrix();
+//	glPopMatrix();
 	glTranslatef(face->glyph->advance.x >> 6 ,0,0);
 
 
@@ -239,8 +243,20 @@ void print(const font_data &ft_font, float x, float y, const std::string& text, 
 	//this tutorial with unnecessary library dependencies).
 	
 	//! \todo std::string.find ...
-	const char *start_line=text.c_str();
+	
 	std::vector<std::string> lines;
+	const char* s = text.c_str();
+  const char* e = s;
+  while (*e != 0) {
+    e = s;
+    while (*e != 0 && strchr("\n", *e) == 0) ++e;
+    if (e - s > 0) {
+      lines.push_back(std::string(s,e - s));
+    }
+    s = e + 1;
+  }
+	/*
+	const char *start_line=text.c_str();
 	const char *c=text.c_str();
 	for(;*c;c++) {
 		if(*c=='\n') {
@@ -254,7 +270,7 @@ void print(const font_data &ft_font, float x, float y, const std::string& text, 
 		std::string line;
 		for(const char *n=start_line;n<c;n++) line.append(1,*n);
 		lines.push_back(line);
-	}
+	}*/
   
 	glColor3f(r,g,b);
   
@@ -278,10 +294,10 @@ void print(const font_data &ft_font, float x, float y, const std::string& text, 
 	//down by h. This is because when each character is
 	//draw it modifies the current matrix so that the next character
 	//will be drawn immediatly after it.	
+	glPushMatrix();
+	glTranslatef(x,y,0.0f);
 	for(unsigned int i=0;i<lines.size();++i) {
-		glPushMatrix();
 		//glLoadIdentity();
-		glTranslatef(x,y+h*i,0);
 		//glMultMatrixf(modelview_matrix);
 
 	//	The commented out raster position stuff can be useful if you need to
@@ -294,8 +310,9 @@ void print(const font_data &ft_font, float x, float y, const std::string& text, 
 	//	glGetFloatv(GL_CURRENT_RASTER_POSITION ,rpos);
 	//	float len=x-rpos[0];
 
-		glPopMatrix();
+		glTranslatef(0.0f,h*i,0.0f);
 	}
+	glPopMatrix();
 
 	glPopAttrib();		
 
