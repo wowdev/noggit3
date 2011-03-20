@@ -507,8 +507,13 @@ void exit_tilemode(  frame* /*button*/, int /*id*/ )
 
 void test_menu_action(  frame* /*button*/, int id )
 {
-	if(id == 1)
-		gWorld->setAreaID(5000,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+}
+
+void adtSetAreaID( frame* /*button*/, int id )
+{
+	// set areaid on all chunks of the current ADT
+	if(Environment::getInstance()->selectedAreaID)
+		gWorld->setAreaID(Environment::getInstance()->selectedAreaID ,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
 void changeZoneIDValue(frame *f,int set)
@@ -679,9 +684,8 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Options" );
 	mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Auto select mode", &Settings::getInstance()->AutoSelectingMode, false );
 
-	//mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Modify current ADT" );
 
-	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Add model" );
+	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Model" );
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "all from ModelViewer", InsertObject, 0	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "last from ModelViewer", InsertObject, 14	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "from Text File", InsertObject, 1	);
@@ -697,8 +701,8 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Sphere 50", InsertObject, 11	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Sphere 200", InsertObject, 12	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Sphere 777", InsertObject, 13	);
-	//mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Set" );
-	//mbar->GetMenu( "Assist" )->AddMenuItemToggle( "Area ID", &set_areaid, true	);
+	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "ADT" );
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Set Area ID", adtSetAreaID, 0	);
 
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );
@@ -723,9 +727,9 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
 	mainGui->tileFrames->addChild( mbar );
 	
-  addHotkey( SDLK_ESCAPE, MOD_none,   static_cast<AppState::Function>( &MapView::quit ) );
-  addHotkey( SDLK_s,      MOD_ctrl,   static_cast<AppState::Function>( &MapView::save ) );
-  addHotkey( SDLK_s,      MOD_meta,   static_cast<AppState::Function>( &MapView::save ) );
+	addHotkey( SDLK_ESCAPE, MOD_none,   static_cast<AppState::Function>( &MapView::quit ) );
+	addHotkey( SDLK_s,      MOD_ctrl,   static_cast<AppState::Function>( &MapView::save ) );
+	addHotkey( SDLK_s,      MOD_meta,   static_cast<AppState::Function>( &MapView::save ) );
 }
 
 MapView::~MapView()

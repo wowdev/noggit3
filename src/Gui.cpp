@@ -39,7 +39,7 @@ Gui::Gui(MapView *setMapview) : theMapview( setMapview )
   this->tileFrames->addChild(this->guiStatusbar);
 
   // DetailInfoWindow
-  this->guidetailInfos = new detailInfos( 1.0f, video.yres - 282.0f, 530.0f, 250.0f, this );
+  this->guidetailInfos = new detailInfos( 1.0f, video.yres - 282.0f, 600.0f, 250.0f, this );
   this->guidetailInfos->movable = true;
   this->guidetailInfos->hidden = true;
   this->tileFrames->addChild(this->guidetailInfos);
