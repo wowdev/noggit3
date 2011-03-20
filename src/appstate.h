@@ -2,6 +2,12 @@
 #define APPSTATE_H
 
 #include <SDL/SDL.h>
+#include <list>
+
+class HotKeyReceiver
+{
+public:
+};
 
 /*!
 	\class AppState
@@ -10,6 +16,58 @@
 */
 class AppState
 {
+protected:
+  typedef void (AppState::* Function)();
+  
+  enum Modifier
+  {
+    MOD_shift = 0x01,
+    MOD_ctrl  = 0x02,
+    MOD_alt   = 0x04,
+    MOD_meta  = 0x08,
+    MOD_num   = 0x10,
+    MOD_caps  = 0x20,
+    MOD_mode  = 0x40,
+    MOD_none  = 0x80,
+  };
+  struct HotKey
+  {
+    SDLKey key;
+    size_t modifiers;
+    AppState::Function function;
+  };
+  
+  std::list<HotKey> hotkeys;
+  
+  void addHotkey(SDLKey key, size_t modifiers, AppState::Function function)
+  {
+    HotKey h = { key, modifiers, function };
+    hotkeys.push_back( h );
+  }
+  
+  bool handleHotkeys(SDL_KeyboardEvent* e)
+  {
+    SDLMod mod = e->keysym.mod;
+		size_t modifier = ( mod == KMOD_NONE ) ? ( MOD_none ) : (
+		  ( ( mod & KMOD_SHIFT ) ? MOD_shift : 0 ) |
+		  ( ( mod & KMOD_CTRL  ) ? MOD_ctrl  : 0 ) |
+		  ( ( mod & KMOD_ALT   ) ? MOD_alt   : 0 ) |
+		  ( ( mod & KMOD_META  ) ? MOD_meta  : 0 ) |
+		  ( ( mod & KMOD_NUM   ) ? MOD_num   : 0 ) |
+		  ( ( mod & KMOD_CAPS  ) ? MOD_caps  : 0 ) |
+		  ( ( mod & KMOD_MODE  ) ? MOD_mode  : 0 ) );
+		
+		for( std::list<HotKey>::iterator it = hotkeys.begin(); it != hotkeys.end(); ++it )
+		{
+		  if( e->keysym.sym == it->key && modifier == it->modifiers )
+		  {
+		    (this->*(it->function))();
+		    return true;
+		  }
+		}
+		return false;
+  }
+
 public:
 	AppState() {};
 	virtual ~AppState() {};
