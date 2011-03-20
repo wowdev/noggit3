@@ -257,7 +257,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 		glEnable( GL_FOG );	
 	else
 		glDisable( GL_FOG );
-		
+
 	for (unsigned int i=0; i<nGroups; ++i) 
 	{
 		groups[i].draw(ofs, rot,false);
@@ -269,7 +269,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 		
 		groups[i].drawLiquid();
 	}
-	
+
 	if( boundingbox )
 	{
 		glDisable( GL_LIGHTING );
