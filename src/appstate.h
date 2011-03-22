@@ -3,6 +3,7 @@
 
 #include <SDL/SDL.h>
 #include <list>
+#include "log.h"
 
 class HotKeyReceiver
 {
@@ -28,7 +29,7 @@ protected:
     MOD_num   = 0x10,
     MOD_caps  = 0x20,
     MOD_mode  = 0x40,
-    MOD_none  = 0x80,
+    MOD_none  = 0x00,
   };
   struct HotKey
   {
@@ -48,15 +49,31 @@ protected:
   bool handleHotkeys(SDL_KeyboardEvent* e)
   {
     SDLMod mod = e->keysym.mod;
+	/* 
+	if( mod & KMOD_NUM ) LogError << "NUMLOCK " << std::endl;
+	  if( mod & KMOD_CAPS ) LogError << "CAPSLOCK " << std::endl;
+	  if( mod & KMOD_MODE ) LogError << "MODE " << std::endl;
+	  if( mod & KMOD_LCTRL ) LogError << "LCTRL " << std::endl;
+	  if( mod & KMOD_RCTRL ) LogError << "RCTRL " << std::endl;
+	  if( mod & KMOD_LSHIFT ) LogError << "LSHIFT " << std::endl;
+	  if( mod & KMOD_RSHIFT ) LogError << "RSHIFT " << std::endl;
+	  if( mod & KMOD_LALT ) LogError << "LALT " << std::endl;
+	  if( mod & KMOD_RALT ) LogError << "RALT " << std::endl;
+	  if( mod & KMOD_LMETA ) LogError << "LMETA " << std::endl;
+	  if( mod & KMOD_RMETA )LogError << "RMETA " << std::endl;
+	 */
+
 		size_t modifier = ( mod == KMOD_NONE ) ? ( MOD_none ) : (
 		  ( ( mod & KMOD_SHIFT ) ? MOD_shift : 0 ) |
 		  ( ( mod & KMOD_CTRL  ) ? MOD_ctrl  : 0 ) |
 		  ( ( mod & KMOD_ALT   ) ? MOD_alt   : 0 ) |
 		  ( ( mod & KMOD_META  ) ? MOD_meta  : 0 ) |
-		  ( ( mod & KMOD_NUM   ) ? MOD_num   : 0 ) |
+		  //( ( mod & KMOD_NUM   ) ? MOD_num   : 0 ) |
 		  ( ( mod & KMOD_CAPS  ) ? MOD_caps  : 0 ) |
 		  ( ( mod & KMOD_MODE  ) ? MOD_mode  : 0 ) );
 		
+		//LogError << modifier<< std::endl;
+
 		for( std::list<HotKey>::iterator it = hotkeys.begin(); it != hotkeys.end(); ++it )
 		{
 		  if( e->keysym.sym == it->key && modifier == it->modifiers )

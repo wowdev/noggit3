@@ -24,7 +24,7 @@ class MapView : public AppState, public HotKeyReceiver
 	bool set_areaid;
 
   void save();
-  void quit();
+
 
 	float lastBrushUpdate;
 
@@ -40,7 +40,7 @@ class MapView : public AppState, public HotKeyReceiver
 	float mTimespeed;
 
 public:
-
+  void quit();
 	MapView(float ah0 = -90.0f, float av0 = -30.0f);
 	~MapView();
 

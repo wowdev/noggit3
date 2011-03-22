@@ -188,6 +188,9 @@ void SaveOrReload( frame*, int pMode )
 		gWorld->saveTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
 	else if( pMode == 2 )
 		gWorld->saveChanged();
+	else if( pMode == 3 )
+			static_cast<MapView*>( gStates.back() )->quit();
+		
 }
 
 void change_settings_window(int oldid, int newid)
@@ -660,7 +663,8 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + SHIFT + S Save current tile", SaveOrReload, 0 );
 	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + S Save all", SaveOrReload, 2 );
 	mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT + J Reload current tile", SaveOrReload, 1 );
-	
+	mbar->GetMenu( "File" )->AddMenuItemButton( "ESC Exit", SaveOrReload, 3 );
+
 	//mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
 	//mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
 
