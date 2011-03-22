@@ -45,7 +45,7 @@ Gui::Gui(MapView *setMapview) : theMapview( setMapview )
   this->tileFrames->addChild(this->guidetailInfos);
 
   // ZoneIDBrowser
-  this->ZoneIDBrowser = new ui_ZoneIdBrowser(200, 200, 700, 400, this);
+  this->ZoneIDBrowser = new ui_ZoneIdBrowser(200, 200, 435, 400, this);
   this->ZoneIDBrowser->movable = true;
   this->ZoneIDBrowser->hidden = true;
   this->tileFrames->addChild(this->ZoneIDBrowser);

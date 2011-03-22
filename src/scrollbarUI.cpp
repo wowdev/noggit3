@@ -1,6 +1,8 @@
 #include "scrollbarUI.h"
 #include "buttonUI.h"
 #include "textureUI.h"
+#include <iostream>
+#include <sstream>
 #include "log.h"
 #include "misc.h"
 
@@ -32,7 +34,7 @@ scrollbarUI::scrollbarUI(float xpos, float ypos, float h, int n)
 
 bool scrollbarUI::processLeftDrag(float /*mx*/,float my, float /*xChange*/, float /*yChange*/)
 {
-	
+	if(num<0) false;
 	float tx,ty;
 	this->getOffset(tx,ty);
 	my-=(ty+32);
@@ -44,7 +46,7 @@ bool scrollbarUI::processLeftDrag(float /*mx*/,float my, float /*xChange*/, floa
 		value=num-1;
 
 	if(num>0)
-		ScrollKnob->y=10.0f+(height-52.0f)*value/num;
+		setScrollNoob();
 
 	if(changeFunc)
 		changeFunc(this,value);
@@ -53,6 +55,7 @@ bool scrollbarUI::processLeftDrag(float /*mx*/,float my, float /*xChange*/, floa
 
 frame *scrollbarUI::processLeftClick(float mx,float my)
 {
+	if(num<0) this;
 	frame * lTemp;
 	for( std::vector<frame*>::reverse_iterator child = children.rbegin(); child != children.rend(); child++ )
 	{
@@ -68,6 +71,7 @@ frame *scrollbarUI::processLeftClick(float mx,float my)
 
 void scrollbarUI::clickReturn(int id)
 {
+	if(num<0) return;
 	if(id==0)//Scroll Up
 	{
 		if(value!=0)
@@ -84,8 +88,8 @@ void scrollbarUI::clickReturn(int id)
 	}
 	
 	//Update ScrollKnob Position
-	if(num>0)
-		ScrollKnob->y=10.0f+(height-52.0f)*value/num;
+	setScrollNoob();
+
 	// call changeFunc if set
 	if(changeFunc)
 		changeFunc(this,value);
@@ -100,19 +104,25 @@ int	 scrollbarUI::getValue() const
 {
 	return value;
 }
+
 void scrollbarUI::setValue(int i)
 {
+	if(i>-1 && i < num)
 	value=i;
-	if(value>=num)
-		value=num-1;
-	if(value<0)
-		value=0;
-	if(num>0)
-		ScrollKnob->y=10.0f+(height-52.0f)*value/num;
+	setScrollNoob();
 }
+
 void scrollbarUI::setNum(int i)
 {
 	num=i;
-	if(value>=num)
-		value=num-1;
+	value=0;
+	setScrollNoob();
+}
+
+void scrollbarUI::setScrollNoob( )
+{
+	if(num)
+	{
+		ScrollKnob->y=  11.0f + ( (this->height - 54.0f) / (num-1) ) *value;
+	}
 }

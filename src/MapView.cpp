@@ -198,6 +198,7 @@ void change_settings_window(int oldid, int newid)
 	setting_blur->hidden=true;
 	settings_paint->hidden=true;
 	mainGuiPointer->ZoneIDBrowser->hidden = true;
+	TexturePalette->hidden = true;
 	// fetch old win position
 	switch(oldid)
 	{
@@ -231,9 +232,6 @@ void change_settings_window(int oldid, int newid)
 		settings_paint->x=tool_settings_x;
 		settings_paint->y=tool_settings_y;
 		settings_paint->hidden=false;
-	break;
-	case 5:
-		mainGuiPointer->ZoneIDBrowser->hidden=false;
 	break;
 	}
 }
@@ -493,7 +491,7 @@ void InsertObject( frame* /*button*/, int id )
 
 void view_texture_palette( frame* /*button*/, int /*id*/ )
 {
-	TexturePalette->hidden = !TexturePalette->hidden;
+		TexturePalette->hidden = !TexturePalette->hidden;
 }
 
 void exit_tilemode(  frame* /*button*/, int /*id*/ )
@@ -1005,9 +1003,13 @@ void MapView::tick( float t, float dt )
 
 				case 5:
 					if( Environment::getInstance()->ShiftDown	)
+					{
 						if( mViewMode == eViewMode_3D ) gWorld->setFlag( true, xPos, zPos );
+					}
 					else if( Environment::getInstance()->CtrlDown )
+					{
 						if( mViewMode == eViewMode_3D ) gWorld->setFlag( false, xPos, zPos );
+					}
 				break;
 				}
 			}
@@ -1387,6 +1389,7 @@ void MapView::save()
 {
   gWorld->saveChanged();
 }
+
 void MapView::quit()
 {
   if( mViewMode == eViewMode_Help )
@@ -1513,11 +1516,12 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			}
 			else
 			{
-				// toggle texture window
-				view_texture_palette( 0, 0 );
+				// toggle terrainMode window
+				if(terrainMode==2)
+					view_texture_palette( 0, 0 );
+				else if(terrainMode==4)
+					mainGui->ZoneIDBrowser->hidden = !mainGui->ZoneIDBrowser->hidden;
 			}
-
-
 		}
 
 		// invert mouse
@@ -1817,7 +1821,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 			if( !(leftMouse && rightMouse) && moving > 0.0f) moving = 0.0f;
 		}
 
-
 		if( e->keysym.sym == SDLK_s && moving < 0.0f ) 
 			moving = 0.0f;
 
@@ -1859,7 +1862,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 		if( e->keysym.sym == SDLK_KP_MINUS || e->keysym.sym == SDLK_MINUS || e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS) 
 			keys = 0;
-
 	}
 }
 

@@ -13,7 +13,7 @@ public:
 	void setMapID(int id);
 	void setZoneID( int id );
 	void ButtonMapPressed( int id );
-
+	void refreshMapPath();
 	void setChangeFunc( void (*f)( frame *, int ));
 private:
 	void ( *changeFunc )( frame *, int );
@@ -27,9 +27,11 @@ private:
 	void buildAreaList();
 	void expandList();
 	void collapseList();
-	buttonUI *MapName;
-	buttonUI *ZoneName;
-	buttonUI *SubZoneName;
+	std::string MapName;
+	std::string ZoneName;
+	std::string SubZoneName;
+	buttonUI *backZone;
+	textUI *ZoneIDPath;
 };
 
 #endif
