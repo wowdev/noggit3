@@ -30,6 +30,7 @@ void ui_ListView::clear()
 		if(this->children.size()!=1)
 			this->children.erase( child );
 	}
+	this->scrollbar->setNum(0);
 }
 
 void ui_ListView::addElement( frame *element )

@@ -27,12 +27,12 @@ ui_ZoneIdBrowser::ui_ZoneIdBrowser(int xPos,int yPos, int w, int h, Gui *setGui)
 {
 	changeFunc=0;
 	this->mainGui = setGui;
-	this->MapName = new buttonUI( 4.0f, 4.0f, 160.0f, 28.0f, "no map selected", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", theButtonMapPressed, 0 );
-	this->addChild(this->MapName);
-	this->ZoneName = new buttonUI( 174.0f, 4.0f, 200.0f, 28.0f, "no zone selected", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", theButtonMapPressed, 1 );
-	this->addChild(this->ZoneName);
-	this->SubZoneName = new buttonUI( 384.0f, 4.0f, 310.0f, 28.0f, "no sub zone selected", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", theButtonMapPressed, 2 );
-	this->addChild(this->SubZoneName);
+	this->ZoneIDPath = new textUI( 10.0f, 6.0f, "TEST", arial12, eJustifyLeft);
+	this->addChild(this->ZoneIDPath);
+
+	this->backZone = new buttonUI( 407.0f, 2.0f, 24.0f, 24.0f, "", "Interface\\BUTTONS\\UI-RotationLeft-Button-Up.blp", "Interface\\BUTTONS\\UI-RotationLeft-Button-Down.blp", theButtonMapPressed, 0 );
+	this->addChild(this->backZone);
+
 }
  
 void ui_ZoneIdBrowser::setMapID( int id )
@@ -43,9 +43,10 @@ void ui_ZoneIdBrowser::setMapID( int id )
 	for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i ) 
 	{
 		if( i->getInt( MapDB::MapID ) == id)
-			this->MapName->setText( i->getString( MapDB::InternalName ) );
+			this->MapName = i->getString( MapDB::InternalName );
 	}
 	this->buildAreaList();
+	this->refreshMapPath();
 }
 
 void ui_ZoneIdBrowser::setZoneID( int id )
@@ -56,53 +57,48 @@ void ui_ZoneIdBrowser::setZoneID( int id )
 		{
 			if(i->getUInt( AreaDB::Region ) == 0)
 			{
-				this->ZoneName->setText(gAreaDB.getAreaName(i->getInt(AreaDB::AreaID)));
+				this->ZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
 				this->zoneID = id;
 				this->subZoneID = 0;
-				this->SubZoneName->setText("no sub zone selected");
+				this->SubZoneName = "";;
 				if(changeFunc)
 					changeFunc(this,id);
-				//this->collapseList();
 			}
 			else
 			{
-				this->SubZoneName->setText(gAreaDB.getAreaName(i->getInt(AreaDB::AreaID)));
+				this->SubZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
 				this->subZoneID = id;
 				if(changeFunc)
 					changeFunc(this,id);
-				//this->collapseList();
 			}
 		}
 	}
-	buildAreaList();
+	this->buildAreaList();
+	this->refreshMapPath();
 }
 
 void ui_ZoneIdBrowser::ButtonMapPressed( int id )
 {
-	if(id==1)
+	if(id==0)
 	{
-		if(this->zoneID != 0)
+		if(this->subZoneID)
 		{
-			this->SubZoneName->setText("no sub zone selected");
-			this->subZoneID = 0;
-			this->ZoneName->setText("no zone selected");
-			this->zoneID = 0;
+			// clear subzone
+			this->subZoneID=0;
+			this->SubZoneName="";
+			if(changeFunc)
+				changeFunc(this,this->zoneID);
+		}
+		else
+		{
+			// clear zone
+			this->zoneID=0;
+			this->ZoneName="";
 			if(changeFunc)
 				changeFunc(this,0);
-			buildAreaList();
-			//this->expandList();
 		}
-	} 
-	else if(id==2)
-	{
-		if(this->subZoneID != 0)
-		{
-				this->SubZoneName->setText("no sub zone selected");
-				this->subZoneID = 0;
-				if(changeFunc)
-					changeFunc(this,this->zoneID);
-			//this->expandList();
-		}
+		this->refreshMapPath();
+		buildAreaList();
 	}
 }
 
@@ -125,7 +121,7 @@ void ui_ZoneIdBrowser::buildAreaList()
 						frame *curFrame = new frame(1,1,1,1); 
 						std::stringstream ss;
 						ss << i->getInt(AreaDB::AreaID) << "-" << misc::replaceSpezialChars(gAreaDB.getAreaName(i->getInt(AreaDB::AreaID)));
-						buttonUI *tempButton = new buttonUI(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
+						buttonUI *tempButton = new buttonUI(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
 						tempButton->setLeft();
 						curFrame->addChild(tempButton);
 						this->ZoneIdList->addElement(curFrame);
@@ -138,7 +134,7 @@ void ui_ZoneIdBrowser::buildAreaList()
 						frame *curFrame = new frame(1,1,1,1); 
 						std::stringstream ss;
 						ss << i->getInt(AreaDB::AreaID) << "-" << misc::replaceSpezialChars(gAreaDB.getAreaName(i->getInt(AreaDB::AreaID)));
-						buttonUI *tempButton = new buttonUI(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
+						buttonUI *tempButton = new buttonUI(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
 						tempButton->setLeft();
 						curFrame->addChild(tempButton);
 						this->ZoneIdList->addElement(curFrame);
@@ -150,21 +146,17 @@ void ui_ZoneIdBrowser::buildAreaList()
 		this->ZoneIdList->recalcElements(1);
 }
 
+void ui_ZoneIdBrowser::refreshMapPath()
+{
+	std::stringstream AreaPath;
+	if(this->SubZoneName!="")
+		AreaPath << this->MapName << " < " << this->SubZoneName;
+	else
+		AreaPath << this->MapName << " < " << this->ZoneName ;
+	this->ZoneIDPath->setText( AreaPath.str() );
+}
+
 void ui_ZoneIdBrowser::setChangeFunc( void (*f)( frame *, int ))
 {
 	changeFunc=f;
-}
-
-void ui_ZoneIdBrowser::expandList()
-{
-	//this->height = this->heightExpanded;
-	this->ZoneIdList->hidden = false;
-}
-
-
-void ui_ZoneIdBrowser::collapseList()
-{
-	//this->heightExpanded = this->height;
-	//this->height=30;
-	this->ZoneIdList->hidden = true;
 }
