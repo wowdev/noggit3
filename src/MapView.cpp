@@ -351,6 +351,7 @@ void InsertObject( frame* /*button*/, int id )
 		{
 			 case 0:
 			 case 14:
+			 case 15:
 				if( FileExists( "noggIt.conf" ) )
 				{
 					ConfigFile config( "noggIt.conf" );
@@ -367,9 +368,8 @@ void InsertObject( frame* /*button*/, int id )
 				break;
 	} 
 
-
 	std::string lastModel;
-	int lastTyp =0;
+	std::string lastWMO;
 
 	if(importFile!="")
 	{
@@ -404,7 +404,6 @@ void InsertObject( frame* /*button*/, int id )
 
 					m2s_to_add.push_back( line );
 					lastModel = line;
-					lastTyp=1;
 				}
 				else if(line.find(".wmo")!= std::string::npos || line.find(".WMO")!= std::string::npos )
 				{
@@ -418,8 +417,7 @@ void InsertObject( frame* /*button*/, int id )
 						line = line.substr( foundString+findThis.size() );
 					}
 					wmos_to_add.push_back(line);
-					lastModel = line;
-					lastTyp=2;
+					lastWMO = line;
 				}
 			}
 			fileReader.close();
@@ -446,25 +444,23 @@ void InsertObject( frame* /*button*/, int id )
 			break;
 	}
 
+	LogError << "M2 Problem:" << lastModel << " - " << id << std::endl;
+
 	if(id==14)
 	{
-		// import only last model from viewer
-		if(lastTyp==1)
-		{
-			//m2
+		if(lastModel!="")	
 			if( !MPQFile::exists(lastModel) )
 				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
 			else
 				gWorld->addM2( static_cast<Model*>(ModelManager::items[ModelManager::add(lastModel)]), selectionPosition );
-		}
-		else if(lastTyp==2)
-		{
-			//wmo	
-			if( !MPQFile::exists(lastModel) )
-				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
+	}
+	else if(id==15)
+	{	
+		if(lastWMO!="")	
+			if( !MPQFile::exists(lastWMO) )
+				LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
 			else
-				gWorld->addWMO( static_cast<WMO*>(WMOManager::items[WMOManager::add(lastModel)]), selectionPosition );
-		}
+				gWorld->addWMO( static_cast<WMO*>(WMOManager::items[WMOManager::add(lastWMO)]), selectionPosition );
 	}
 	else
 	{
@@ -686,8 +682,9 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
 
 	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Model" );
-	mbar->GetMenu( "Assist" )->AddMenuItemButton( "all from ModelViewer", InsertObject, 0	);
-	mbar->GetMenu( "Assist" )->AddMenuItemButton( "last from ModelViewer", InsertObject, 14	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "all from MV", InsertObject, 0	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "last M2 from MV", InsertObject, 14	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "last WMO from MV", InsertObject, 15	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "from Text File", InsertObject, 1	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Human scale", InsertObject, 2	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Cube 50", InsertObject, 3	);
