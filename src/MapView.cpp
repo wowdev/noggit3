@@ -506,6 +506,14 @@ void test_menu_action(  frame* /*button*/, int id )
 {
 }
 
+void clearHeightmap(  frame* /*button*/, int id )
+{
+	// set areaid on all chunks of the current ADT
+	if(Environment::getInstance()->selectedAreaID)
+		gWorld->clearHeight(Environment::getInstance()->selectedAreaID ,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+
+}
+
 void adtSetAreaID( frame* /*button*/, int id )
 {
 	// set areaid on all chunks of the current ADT
@@ -702,6 +710,9 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Sphere 777", InsertObject, 13	);
 	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "ADT" );
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Set Area ID", adtSetAreaID, 0	);
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear height map", clearHeightmap, 0	);
+	
+	//mbar->GetMenu( "Assist" )->AddMenuItemButton( "test", test_menu_action, 0	);
 
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );
