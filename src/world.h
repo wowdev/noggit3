@@ -203,6 +203,8 @@ public:
 	bool hasTile( int pX, int pZ );
 	
 	static bool IsEditableWorld( int pMapId );
+	void clearHeight(int id, int x, int z);
+	void clearHeight(int id, int x, int z , int _cx, int _cz);
 };
 
 extern World *gWorld;
