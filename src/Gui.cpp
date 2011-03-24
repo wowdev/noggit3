@@ -4,7 +4,8 @@
 #include "statusBar.h" // statusBar
 #include "detailInfos.h" // detailInfos
 #include "appInfo.h" // appInfo
-#include "ui_ZoneIdBrowser.h" // appInfo
+#include "ui_ZoneIdBrowser.h" // 
+#include "uiTexturePicker.h" // 
 #include "video.h" // video
 #include "MapView.h"
 #include "minimapWindowUI.h"
@@ -58,6 +59,12 @@ Gui::Gui(MapView *setMapview) : theMapview( setMapview )
   appinfoText << "Project Path: " << Project::getInstance()->getPath() << std::endl;
 	this->guiappInfo->setText( appinfoText.str() );
   this->tileFrames->addChild(this->guiappInfo);
+
+  this->TexturePicker = new uiTexturePicker(video.xres / 2 - 100.0f,video.yres / 2 - 100.0f,490.0f,150.0f,this);
+  this->TexturePicker->hidden = true;
+  this->TexturePicker->movable = true;
+  this->tileFrames->addChild( this->TexturePicker);
+
 }
 
 Gui::~Gui()

@@ -9,6 +9,7 @@ class minimapWindowUI;
 class ui_ZoneIdBrowser;
 class MapView;
 class frame;
+class uiTexturePicker;
 
 //! \todo Give better name.
 class Gui
@@ -27,7 +28,7 @@ public:
 	detailInfos *guidetailInfos;
 	appInfo *guiappInfo;
 	ui_ZoneIdBrowser *ZoneIDBrowser;
-
+	uiTexturePicker *TexturePicker;
 	Gui(MapView *setMapview);
 	~Gui();
 	

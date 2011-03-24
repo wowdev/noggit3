@@ -11,6 +11,7 @@
 #include "Log.h"
 #include "dbc.h"
 #include "texturingui.h"
+#include "uiTexturePicker.h"
 #include "world.h"
 #include "MapChunk.h"
 #include "ConfigFile.h"
@@ -711,7 +712,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "ADT" );
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Set Area ID", adtSetAreaID, 0	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear height map", clearHeightmap, 0	);
-	
+	//mbar->GetMenu( "Assist" )->AddMenuItemButton( "Move to position", moveHeightmap, 0	);	
 	//mbar->GetMenu( "Assist" )->AddMenuItemButton( "test", test_menu_action, 0	);
 
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
@@ -958,6 +959,7 @@ void MapView::tick( float t, float dt )
 					else if( Environment::getInstance()->CtrlDown ) 
 					{
 						// Pick texture
+						mainGui->TexturePicker->hidden = false;
 					}
 					else  if( Environment::getInstance()->ShiftDown)
 					{
