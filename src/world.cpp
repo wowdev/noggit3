@@ -1596,7 +1596,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
 			}
 		}
 	}
-	
+
 	for( int j = 0; j < 64; ++j )
 	{
 		for( int i = 0; i < 64; ++i )
@@ -1926,3 +1926,73 @@ unsigned int World::getMapID()
 	return this->mMapId;
 }
 
+
+void World::moveHeight(int id, int x, int z)
+{
+
+	// set the Area ID on a tile x,z on all chunks
+	for (int j=0; j<16; ++j) 
+	{
+		for (int i=0; i<16; ++i) 
+		{
+			this->moveHeight(id, x, z, j, i);
+		}
+	}
+
+	for (int j=0; j<16; ++j) 
+	{
+		for (int i=0; i<16; ++i) 
+		{
+			// set the Area ID on a tile x,z on the chunk cx,cz
+			MapTile *curTile;
+			curTile = mTiles[z][x].tile;
+			if(curTile == 0) return;
+			this->setChanged(z,x);
+			MapChunk *curChunk = curTile->getChunk(j, i);
+			curChunk->recalcNorms();
+		}
+	}
+
+}
+
+void World::moveHeight(int id, int x, int z , int _cx, int _cz)
+{
+	// set the Area ID on a tile x,z on the chunk cx,cz
+	MapTile *curTile;
+	curTile = mTiles[z][x].tile;
+	if(curTile == 0) return;
+	this->setChanged(z,x);
+	MapChunk *curChunk = curTile->getChunk(_cx, _cz);
+	if(curChunk == 0) return;
+
+	curChunk->vmin.y = 9999999.0f;
+	curChunk->vmax.y = -9999999.0f;
+	curChunk->Changed=true;
+
+	float heightDelta;
+	nameEntry *selection = gWorld->GetCurrentSelection();
+
+	if(selection)
+		if(selection->type == eEntry_MapChunk)
+		{
+			// chunk selected
+			heightDelta = gWorld->camera.y - selection->data.mapchunk->py;
+		}
+
+	if(heightDelta==0.0f) return;
+
+	for(int i=0; i < mapbufsize; ++i)
+	{
+		curChunk->mVertices[i].y = curChunk->mVertices[i].y + heightDelta;
+
+		using std::min;
+		using std::max;
+		curChunk->vmin.y = min(curChunk->vmin.y,curChunk-> mVertices[i].y);
+		curChunk->vmax.y = max(curChunk->vmax.y, curChunk->mVertices[i].y);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
+	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), curChunk->mVertices, GL_STATIC_DRAW);
+
+
+}

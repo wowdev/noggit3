@@ -84,7 +84,6 @@ class World
 	float l_quadratic;
 	
 
-
 	void initMinimap();
 	void initLowresTerrain();
 	
@@ -167,6 +166,8 @@ public:
 	void setAreaID(int id, int x, int z , int cx, int cz);
 	void setFlag(bool to, float x, float z);
 
+	void moveADT();
+
 	void drawSelection(int cursorX,int cursorY, bool pOnlyMap = false );
 	void drawSelectionChunk(int cursorX,int cursorY);
 	void drawTileMode(float ah);
@@ -205,6 +206,8 @@ public:
 	static bool IsEditableWorld( int pMapId );
 	void clearHeight(int id, int x, int z);
 	void clearHeight(int id, int x, int z , int _cx, int _cz);
+	void moveHeight(int id, int x, int z);
+	void moveHeight(int id, int x, int z , int _cx, int _cz);
 };
 
 extern World *gWorld;
