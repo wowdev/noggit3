@@ -4,18 +4,21 @@
 #include "window.h"
 #include "buttonUI.h"
 #include "textureUI.h"
+#include "selection.h"
 class Gui;
 
 class uiTexturePicker : public window
 {
 public:
 	uiTexturePicker(int xPos,int yPos, int w, int h, Gui *setGui);
-
+	void setTextures(nameEntry *lSelection);
+	Gui *mainGUI;
 private:
 	textureUI *tex1;
 	textureUI *tex2;
 	textureUI *tex3;
 	textureUI *tex4;
+
 };
 
 #endif

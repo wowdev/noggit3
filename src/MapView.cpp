@@ -959,7 +959,7 @@ void MapView::tick( float t, float dt )
 					else if( Environment::getInstance()->CtrlDown ) 
 					{
 						// Pick texture
-						mainGui->TexturePicker->hidden = false;
+						mainGui->TexturePicker->setTextures( gWorld->GetCurrentSelection());
 					}
 					else  if( Environment::getInstance()->ShiftDown)
 					{
