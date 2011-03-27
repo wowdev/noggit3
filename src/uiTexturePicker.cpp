@@ -11,10 +11,13 @@
 #include "selection.h"
 #include "Toolbar.h"
 #include "textureUI.h"
+#include "texturingUI.h"
+#include "Log.h"
 
 void textureClick( frame* f,int id )
 {
-	// Implement texture set.
+	// redirect to sender object.
+	((uiTexturePicker *)(f->parent))->setTexture(id);
 }
 
 uiTexturePicker::uiTexturePicker( int xPos,int yPos, int w, int h, Gui *setGui ) : window(xPos,yPos,w,h)
@@ -42,7 +45,7 @@ uiTexturePicker::uiTexturePicker( int xPos,int yPos, int w, int h, Gui *setGui )
 
 }
 
-void uiTexturePicker::setTextures(nameEntry *lSelection)
+void uiTexturePicker::getTextures(nameEntry *lSelection)
 {
 	this->hidden = false;
 	if( lSelection )
@@ -75,3 +78,32 @@ void uiTexturePicker::setTextures(nameEntry *lSelection)
 		}
 }
 
+void uiTexturePicker::setTexture(int id)
+{
+	OpenGL::Texture* curTex;
+
+	switch (id)
+	{
+	case 0:
+		curTex = this->tex1->getTexture();	
+	break;
+	case 1:
+		curTex = this->tex2->getTexture();	
+	break;
+	case 2:
+		curTex = this->tex3->getTexture();	
+	break;
+	case 3:
+		curTex = this->tex4->getTexture();	
+	break;
+	}
+
+	if(curTex)
+	{
+		TexturingUI::setSelectedTexture(curTex);	
+		if( TexturingUI::getSelectedTexture() )
+		{
+			TexturingUI::updateSelectedTexture();
+		}
+	}
+}

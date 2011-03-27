@@ -131,8 +131,8 @@ frame *LastClicked;
 Gui *mainGui;
 
 frame	*MapChunkWindow;
-frame	*TexturePalette;
-frame	*SelectedTexture;
+
+
 frame	*fakeframe;
 
 ToggleGroup * gBlurToggleGroup;
@@ -202,7 +202,7 @@ void change_settings_window(int oldid, int newid)
 	setting_blur->hidden=true;
 	settings_paint->hidden=true;
 	mainGuiPointer->ZoneIDBrowser->hidden = true;
-	TexturePalette->hidden = true;
+	mainGui->TexturePalette->hidden = true;
 	// fetch old win position
 	switch(oldid)
 	{
@@ -495,7 +495,7 @@ void InsertObject( frame* /*button*/, int id )
 
 void view_texture_palette( frame* /*button*/, int /*id*/ )
 {
-		TexturePalette->hidden = !TexturePalette->hidden;
+		mainGui->TexturePalette->hidden = !mainGui->TexturePalette->hidden;
 }
 
 void exit_tilemode(  frame* /*button*/, int /*id*/ )
@@ -658,10 +658,10 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	S1->setText("Pressure: %.2f");
 	settings_paint->addChild(S1);
 
-	mainGui->tileFrames->addChild(TexturePalette = TexturingUI::createTexturePalette(4,8,mainGui));
-	TexturePalette->hidden=true;
-	mainGui->tileFrames->addChild(SelectedTexture = TexturingUI::createSelectedTexture());
-	SelectedTexture->hidden=true;
+	mainGui->tileFrames->addChild(mainGui->TexturePalette = TexturingUI::createTexturePalette(4,8,mainGui));
+	mainGui->TexturePalette->hidden=true;
+	mainGui->tileFrames->addChild(mainGui->SelectedTexture = TexturingUI::createSelectedTexture());
+	mainGui->SelectedTexture->hidden=true;
 	mainGui->tileFrames->addChild(TexturingUI::createTilesetLoader());
 	mainGui->tileFrames->addChild(TexturingUI::createTextureFilter());
 	mainGui->tileFrames->addChild(MapChunkWindow = TexturingUI::createMapChunkWindow());
@@ -723,10 +723,10 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "Current texture", &SelectedTexture->hidden, true );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "Current texture", &mainGui->SelectedTexture->hidden, true );
 	// Hide till its reimplemented.
 	//mbar->GetMenu( "View" )->AddMenuItemToggle( "Map chunk settings", &MapChunkWindow->hidden, true );
-	mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", &TexturePalette->hidden, true );
+	mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", &mainGui->TexturePalette->hidden, true );
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Toggle" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "F1 M2s", &gWorld->drawmodels );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "F2 WMO doodadsets", &gWorld->drawdoodads );
@@ -965,7 +965,7 @@ void MapView::tick( float t, float dt )
 					else if( Environment::getInstance()->CtrlDown ) 
 					{
 						// Pick texture
-						mainGui->TexturePicker->setTextures( gWorld->GetCurrentSelection());
+						mainGui->TexturePicker->getTextures( gWorld->GetCurrentSelection());
 					}
 					else  if( Environment::getInstance()->ShiftDown)
 					{
@@ -1094,7 +1094,7 @@ void MapView::tick( float t, float dt )
 		if( gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk )
 	    TexturingUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
 	}
-}
+}                                             
 
 
 

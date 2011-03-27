@@ -17,6 +17,12 @@ textureUI::textureUI( float xPos, float yPos, float w, float h, const std::strin
 	id = 0;
 }
 
+void textureUI::setTexture( OpenGL::Texture* tex )
+{
+	//! \todo Free current texture.
+	texture = tex;
+}
+
 void textureUI::setTexture( GLuint tex )
 {
 	//! \todo Free current texture.
@@ -26,6 +32,11 @@ void textureUI::setTexture( GLuint tex )
 void textureUI::setTexture( const std::string& tex )
 {
 	texture = TextureManager::newTexture( tex );
+}
+
+OpenGL::Texture* textureUI::getTexture( )
+{
+	return texture;
 }
 
 void textureUI::render() const

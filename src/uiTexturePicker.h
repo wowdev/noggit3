@@ -11,7 +11,8 @@ class uiTexturePicker : public window
 {
 public:
 	uiTexturePicker(int xPos,int yPos, int w, int h, Gui *setGui);
-	void setTextures(nameEntry *lSelection);
+	void getTextures(nameEntry *lSelection);
+	void setTexture(int id);
 	Gui *mainGUI;
 private:
 	textureUI *tex1;

@@ -19,6 +19,7 @@ public:
 	textureUI( float x, float y, float width, float height, const std::string& tex );
 	void setTexture( GLuint tex );
 	void setTexture( const std::string& tex );
+	void setTexture( OpenGL::Texture* tex );
 	void render() const;
 	
 	frame *processLeftClick( float mx, float my );
@@ -27,6 +28,7 @@ public:
 	{
 		highlight = h;
 	}
+	OpenGL::Texture* getTexture( );
 };
 
 #endif
