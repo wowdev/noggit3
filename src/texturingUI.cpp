@@ -221,6 +221,16 @@ void changePage( frame*, int direction )
 	showPage( gCurrentPage );
 }
 
+void TexturingUI::updateSelectedTexture()
+{
+	if( textureSelected )
+		textureSelected->setTexture( TexturingUI::getSelectedTexture()->name );
+	if( textSelectedTexture )
+		textSelectedTexture->setText( TexturingUI::getSelectedTexture()->name );
+	if( textGui )
+		textGui->guiToolbar->current_texture->setTexture( TexturingUI::getSelectedTexture()->name );
+}
+
 void texturePaletteClick( frame* /*f*/, int id )
 {
 	if( curTextures[id]->hidden )
@@ -230,12 +240,7 @@ void texturePaletteClick( frame* /*f*/, int id )
 	
 	if( TexturingUI::getSelectedTexture() )
 	{
-		if( textureSelected )
-			textureSelected->setTexture( TexturingUI::getSelectedTexture()->name );
-		if( textSelectedTexture )
-			textSelectedTexture->setText( TexturingUI::getSelectedTexture()->name );
-		if( textGui )
-			textGui->guiToolbar->current_texture->setTexture( TexturingUI::getSelectedTexture()->name );
+		TexturingUI::updateSelectedTexture();
 	}
 	else{
 		Log << "Somehow getting the texture failed oO";

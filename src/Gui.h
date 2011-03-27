@@ -22,6 +22,8 @@ public:
 
 	MapView *theMapview;
 	// UI elements
+	frame	*TexturePalette;
+	frame	*SelectedTexture;
 	minimapWindowUI *minimapWindow;
 	Toolbar *guiToolbar;
 	statusBar *guiStatusbar;

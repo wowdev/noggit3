@@ -21,7 +21,7 @@ public:
 	static OpenGL::Texture* getSelectedTexture();
 	static void setChunk(MapChunk *chunk);
 	static void setChunkWindow(MapChunk *chunk);
-	
+	static void updateSelectedTexture();
 	static OpenGL::Texture* selectedTexture;
 };
 
