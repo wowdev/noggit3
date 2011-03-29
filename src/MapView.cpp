@@ -539,6 +539,28 @@ void changeZoneIDValue(frame *f,int set)
 	}
 }
 
+#include <IL/il.h>
+
+void exportPNG(frame *f,int set)
+{
+	GLfloat* data = new GLfloat[272*272*3];
+
+	ilInit();
+
+	ILuint ImageName; // The image name.
+	ilGenImages(1, &ImageName); // Grab a new image name.
+	ilBindImage(ImageName); // bind it
+	ilTexImage(272,272,1,3,IL_RGB,IL_UNSIGNED_BYTE,NULL);
+	ilSetData(data);
+	ilEnable(IL_FILE_OVERWRITE);
+	ilSave(IL_PNG, "monkey.png");
+}
+
+void importPNG(frame *f,int set)
+{
+
+}
+
 MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 {
 	LastClicked=0;
@@ -676,9 +698,13 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->AddMenu( "Assist" );
 	mbar->AddMenu( "Help" );
 
-	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + SHIFT + S Save current tile", SaveOrReload, 0 );
-	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL + S Save all", SaveOrReload, 2 );
-	mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT + J Reload current tile", SaveOrReload, 1 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", SaveOrReload, 0 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+S Save all", SaveOrReload, 2 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", SaveOrReload, 1 );
+	mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "Export heightmap", exportPNG, 1 );
+	mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
+	mbar->GetMenu( "File" )->AddMenuItemSeperator( " " );
 	mbar->GetMenu( "File" )->AddMenuItemButton( "ESC Exit", SaveOrReload, 3 );
 
 	//mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
@@ -720,6 +746,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Set Area ID", adtSetAreaID, 0	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear height map", clearHeightmap, 0	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Move to position", moveHeightmap, 0	);	
+
 
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );
@@ -941,19 +968,17 @@ void MapView::tick( float t, float dt )
 						// Move ground down
 						if( mViewMode == eViewMode_3D ) gWorld->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
 					}
-						
-					break;
+				break;
 					
 				case 1:
 					if( Environment::getInstance()->ShiftDown )
 						if( mViewMode == eViewMode_3D ) gWorld->flattenTerrain( xPos, zPos, yPos, pow( 0.2f, dt ), blurBrushRadius, blurBrushType );
-					else if( Environment::getInstance()->CtrlDown )
+					if( Environment::getInstance()->CtrlDown )
 					{
 						using std::min;
 						if( mViewMode == eViewMode_3D ) gWorld->blurTerrain( xPos, zPos, pow( 0.2f, dt ), min( blurBrushRadius, 30.0f ), blurBrushType );
 					}
-					
-					break;
+				break;
 					
 				case 2:
 					if( Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown)
