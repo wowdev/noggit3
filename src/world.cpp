@@ -1815,6 +1815,7 @@ void World::addModel( nameEntry entry, Vec3D newPos )
 
 void World::addM2( Model *model, Vec3D newPos )
 {
+	LogError << "M2:start:" << std::endl;
 	using std::max;
 	int temp = 0;
 	if  (mModelInstances.empty()) {
@@ -1823,16 +1824,21 @@ void World::addM2( Model *model, Vec3D newPos )
 	else{
 		temp = mModelInstances.rbegin()->first + 1;
 	}
+			LogError << "M2:after temp:" << std::endl;
 	const int lMaxUID = temp;
 //	( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
 //													 ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
+
+			LogError << "M2:before new:" << std::endl;
 	ModelInstance newModelis = ModelInstance();
+			LogError << "M2:New" << std::endl;
 	newModelis.model = model;
+				LogError << "M2:model" << std::endl;
 	newModelis.nameID = -1;
 	newModelis.d1 = lMaxUID;
 	newModelis.pos = newPos;
 	newModelis.sc = 1;
-	
+				LogError << "M2:done" << std::endl;
 	if(Settings::getInstance()->copy_rot)
 	{
 		newModelis.dir.y += (rand() % 360 + 1);
@@ -1848,6 +1854,7 @@ void World::addM2( Model *model, Vec3D newPos )
 	{
 		newModelis.sc = newModelis.sc * (( float( rand() ) / float( RAND_MAX ) * 0.2 ) + 0.90);
 	}	
+
 	mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
 	this->setChanged(newPos.x,newPos.z);
 }

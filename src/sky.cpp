@@ -69,26 +69,26 @@ Sky::Sky( DBCFile::Iterator data )
 		}
 	}
 
+ 
+
 	/*
-		try
-		{
-			DBCFile::Record rec = gLightParamsDB.getByID( data->getInt( LightDB::DataIDs ) );
-			int skybox = rec.getInt( LightParamsDB::skybox);
+			unsigned int SKYFOG = data->getInt( LightDB::DataIDs );
+			unsigned int ID = data->getInt( LightDB::ID );
+			DBCFile::Record rec = gLightParamsDB.getByID( SKYFOG );
+			unsigned int skybox = rec.getInt( LightParamsDB::skybox);
 			
 
 			if ( skybox == 0 ) 
 				alt_sky=NULL;
 			else{
-				DBCFile::Record rec = gLightSkyboxDB.getByID(LightSkyboxDB::filename);
-				std::string skyname= rec.getString(skybox);
+				DBCFile::Record rec = gLightSkyboxDB.getByID(skybox);
+				std::string skyname= rec.getString(LightSkyboxDB::filename);
 				alt_sky=new Model(skyname); // if this is ever uncommented, use ModelManager::
 				Log << "Loaded sky " << skyname << std::endl;
 			}
-		}
-		catch(...)
-		{
-		}
+
 		*/
+
 }
 
 Vec3D Sky::colorFor(int r, int t) const

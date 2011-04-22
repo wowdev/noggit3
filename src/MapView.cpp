@@ -1,3 +1,5 @@
+#undef _UNICODE
+
 #include <cmath>
 #include <string>
 #include <map>
@@ -5,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 
+#include <IL/il.h>
 #include "MapView.h"
 //#include "trace.h"
 #include "noggit.h" // gStates, gPop, gFPS, arial14, morpheus40, arial...
@@ -284,22 +287,24 @@ void SnapSelectedObjectToGround( frame* /*button*/, int /*id*/ )
 	}
 }
 
+/*!
+	\brief Copy selected model to clipboard
+	Copy the selected m2 or WMO with getInstance()->set_clipboard() 
+*/
 void CopySelectedObject( frame* /*button*/, int /*id*/ )
 {
-	//! \todo	copy selected object path to clipboard
 	if( gWorld->HasSelection() )
 	{
 		Environment::getInstance()->set_clipboard( gWorld->GetCurrentSelection() );
 	}
 }
 
+/*!
+	\brief Paste a model
+	Paste the current model stored in Environment::getInstance()->get_clipboard() at the cords of the selected model or chunk.
+*/
 void PasteSelectedObject( frame* /*button*/, int /*id*/ )
 {
-	// MODELCOPY
-	// paste object
-	// if selection then insert on selection cords
-	// else on current chunk cords
-	// TODO
 	if( gWorld->HasSelection() )
 	{	
 		nameEntry lClipboard = Environment::getInstance()->get_clipboard();
@@ -319,6 +324,9 @@ void PasteSelectedObject( frame* /*button*/, int /*id*/ )
 	}
 }
 
+/*!
+	\brief Delete the current selected model
+*/
 void DeleteSelectedObject( frame* /*button*/, int /*id*/ )
 {
 	if( gWorld->IsSelection( eEntry_WMO ) )
@@ -327,13 +335,15 @@ void DeleteSelectedObject( frame* /*button*/, int /*id*/ )
 		gWorld->deleteModelInstance( gWorld->GetCurrentSelection()->data.model->d1 );
 }
 
+/*!
+	\brief Import a new model form a text file or a hard coded one.
+	Imports a model from the import.txt, the wowModelViewer log or just insert some hard coded testing models.
+	\param id the id switch the import kind
+*/
 void InsertObject( frame* /*button*/, int id )
 {
   //! \todo Beautify.
   
-	// ID switch the import way
-
-
 	// Test if there is an selection
 	if( !gWorld->HasSelection() )
 		return;
@@ -446,10 +456,10 @@ void InsertObject( frame* /*button*/, int id )
 			break;
 	}
 
-	LogError << "M2 Problem:" << lastModel << " - " << id << std::endl;
 
 	if(id==14)
 	{
+		LogError << "M2 Problem 14:" << lastModel << " - " << id << std::endl;
 		if(lastModel!="")	
 			if( !MPQFile::exists(lastModel) )
 				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
@@ -458,6 +468,7 @@ void InsertObject( frame* /*button*/, int id )
 	}
 	else if(id==15)
 	{	
+			LogError << "M2 Problem 15:" << lastModel << " - " << id << std::endl;
 		if(lastWMO!="")	
 			if( !MPQFile::exists(lastWMO) )
 				LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
@@ -466,9 +477,10 @@ void InsertObject( frame* /*button*/, int id )
 	}
 	else
 	{
+	
 		for( std::vector<std::string>::iterator it = wmos_to_add.begin(); it != wmos_to_add.end(); ++it )
 		{
-		
+
 			if( !MPQFile::exists(*it) )
 			{
 				LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
@@ -483,10 +495,11 @@ void InsertObject( frame* /*button*/, int id )
 
 			if( !MPQFile::exists(*it) )
 			{
+
 				LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
 				continue;
 			}
-
+			
 			gWorld->addM2( static_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
 		}
 	}
@@ -539,25 +552,84 @@ void changeZoneIDValue(frame *f,int set)
 	}
 }
 
-#include <IL/il.h>
+std::string getCurrentHeightmapPath()
+{
+	// get MapName
+	std::string mapName;
+	int id = gWorld->getMapID();
+	for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i ) 
+	{
+		if( i->getInt( MapDB::MapID ) == id)
+			mapName = i->getString( MapDB::InternalName );
+	}
+
+	// build the path and filename string.
+	std::stringstream png_filename;
+	png_filename << Project::getInstance()->getPath() << "world\\maps\\" << mapName << "\\H_" << mapName
+		<< "_" << misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE) << "_" << misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE) << ".png" ;
+	return png_filename.str();
+
+}
 
 void exportPNG(frame *f,int set)
 {
+	// create the image and write to disc.
 	GLfloat* data = new GLfloat[272*272*3];
 
 	ilInit();
+	
+	int width  = 272 ;
+	int height = 272 ;
+	int bytesToUsePerPixel = 1 ;  // RGB without alpha
+	int sizeOfByte = sizeof( unsigned char ) ;
+	int theSize = width * height * sizeOfByte * bytesToUsePerPixel ;
+
+	unsigned char * imData =(unsigned char*)malloc( theSize ) ;
+
+	// write the height data to the image array
+	for( int i = 0 ; i < theSize ; i++ )
+	{
+		imData[ i ] = 0 ;
+	}
+
 
 	ILuint ImageName; // The image name.
 	ilGenImages(1, &ImageName); // Grab a new image name.
 	ilBindImage(ImageName); // bind it
-	ilTexImage(272,272,1,3,IL_RGB,IL_UNSIGNED_BYTE,NULL);
-	ilSetData(data);
+	ilTexImage(width,height,1,bytesToUsePerPixel,IL_RGB,IL_UNSIGNED_BYTE,NULL);
+	ilSetData(imData);
 	ilEnable(IL_FILE_OVERWRITE);
-	ilSave(IL_PNG, "monkey.png");
+	ilSave(IL_PNG, getCurrentHeightmapPath().c_str());
 }
 
 void importPNG(frame *f,int set)
 {
+
+	//ILboolean loadImage = ilLoadImage( getCurrentHeightmapPath().c_str() ) ;
+	ILboolean loadImage = ilLoadImage( "F:\WoWModding\Client335_Noggit\world\maps\Meberian\H_Meberian_36_30.png" ) ;
+	
+	std::stringstream MessageText;
+	if(loadImage)
+	{
+
+		LogDebug << "Image loaded: " << getCurrentHeightmapPath() << "\n";
+		MessageText << "ImageSize: " << ilGetInteger( IL_IMAGE_SIZE_OF_DATA ) << "\n";
+		MessageText << "BPP: " << ilGetInteger( IL_IMAGE_BITS_PER_PIXEL ) << "\n";
+		MessageText << "Format: " << ilGetInteger( IL_IMAGE_FORMAT ) << "\n";
+		MessageText << "SizeofData: " << ilGetInteger( IL_IMAGE_SIZE_OF_DATA ) << "\n";
+		LogDebug << MessageText.str();
+		
+	}
+	else 
+	{
+		LogDebug << "Cant load Image: " << getCurrentHeightmapPath() << "\n";
+		ILenum err = ilGetError() ;
+
+		MessageText << err << "\n";
+		//MessageText << ilGetString(ilGetError()) << "\n";
+		LogDebug << MessageText.str();
+	}
+
 
 }
 
