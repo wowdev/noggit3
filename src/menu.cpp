@@ -100,7 +100,7 @@ void Menu::randBackground()
 	//ui.push_back( "BloodElf" );		// No
 	//ui.push_back( "Deathknight" );	// No
 	//ui.push_back( "Draenei" );		// No
-	ui.push_back( "Dwarf" );				// Yes
+	ui.push_back( "Dwarf" );			// Yes
 	//ui.push_back( "Human" );			// No
 	ui.push_back( "MainMenu" );			// Yes
 	//ui.push_back( "NightElf" );		// No

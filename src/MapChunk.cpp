@@ -1647,92 +1647,96 @@ int MapChunk::addTexture( GLuint texture )
 }
 bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, float pressure, unsigned int texture )
 {
-	const float radius = Brush->getRadius();
+  const float radius = Brush->getRadius();
 
   // Are we really painting on this chunk?
   const float xdiff = xbase + CHUNKSIZE / 2 - x;
   const float zdiff = zbase + CHUNKSIZE / 2 - z;
   
-
   if( ( xdiff * xdiff + zdiff * zdiff ) > ( MAPCHUNK_DIAMETER / 2 + radius ) * ( MAPCHUNK_DIAMETER / 2 + radius ) )
     return false;
-  
+
+
   // Search for empty layer.
 	int texLevel = -1;
 
 	for( size_t i = 0; i < size_t( nTextures ); ++i )
-  {
+	{
 		if( textures[i] == texture )
 		{
 			texLevel = i;
 		}
-  }
+	 }
 
 	if( texLevel == -1 )
 	{
-    if( nTextures == 4 )
-    {
-		  for( size_t layer = 0; layer < size_t( nTextures ); ++layer )
-		  {
-		    unsigned char map[64*64];
-		    if( layer )
-		      memcpy( map, amap[layer-1], 64*64 );
-		    else
-		      memset( map, 255, 64*64 );
+		
+		if( nTextures == 4 )
+		{
+			for( size_t layer = 0; layer < size_t( nTextures ); ++layer )
+			{
+				unsigned char map[64*64];
+				if( layer )
+					memcpy( map, amap[layer-1], 64*64 );
+				else
+					memset( map, 255, 64*64 );
 		      
-		    for( size_t layerAbove = layer + 1; layerAbove < size_t( nTextures ); ++layerAbove )
-		    {
-		      unsigned char* above = amap[layerAbove-1];
-		      for( size_t i = 0; i < 64 * 64; ++i )
-		      {
-		        using std::max;
-		        map[i] = max( 0, map[i] - above[i] );
-		      }
-		    }
+				for( size_t layerAbove = layer + 1; layerAbove < size_t( nTextures ); ++layerAbove )
+				{
+					unsigned char* above = amap[layerAbove-1];
+					for( size_t i = 0; i < 64 * 64; ++i )
+					{
+						using std::max;
+						map[i] = max( 0, map[i] - above[i] );
+					}
+				}
 		    
-		    size_t sum = 0;
-		    for( size_t i = 0; i < 64 * 64; ++i )
-		    {
-		      sum += map[i];
-		    }
+				size_t sum = 0;
+				for( size_t i = 0; i < 64 * 64; ++i )
+				{
+				  sum += map[i];
+				}
         
-        if( !sum )
-        {
-          for( size_t i = layer; i < size_t( nTextures ) - 1; ++i )
-          {
-            textures[i] = textures[i+1];
-            animated[i] = animated[i+1];
-            texFlags[i] = texFlags[i+1];
-            effectID[i] = effectID[i+1];
-            if( i )
-              memcpy( amap[i-1], amap[i], 64*64 );
-          }
-        	for( size_t j = layer; j < size_t( nTextures ); j++ )
-        	{
-        		glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
-        		glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
-        	}
-        	nTextures--;
-        }
-		  }
-      
-      if( nTextures == 4 )
-  		  return false;
-    }
-  	
-  	texLevel = addTexture( texture );
-    if( texLevel == 0 )
-      return true;
+				if( !sum )
+				{
+					for( size_t i = layer; i < size_t( nTextures ) - 1; ++i )
+					{
+						textures[i] = textures[i+1];
+						animated[i] = animated[i+1];
+					texFlags[i] = texFlags[i+1];
+					effectID[i] = effectID[i+1];
+					if( i )
+						memcpy( amap[i-1], amap[i], 64*64 );
+					}
+        			
+					for( size_t j = layer; j < size_t( nTextures ); j++ )
+        			{
+        				glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
+        				glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
+        			}
+        			nTextures--;
+				}
+			}
+		}
+  		
+		if( nTextures == 4 )
+		return false;
+
+  		texLevel = addTexture( texture );
+
 	}
-  else
-  {
-    if( nTextures == 1 )
-      return true;
-  }
-  
+	else
+	{
+		if( nTextures == 1 )
+			return true;
+	}
+	LogDebug << "TexLevel: " << texLevel << " -  NTextures: " << nTextures << "\n"; 
   // We now have a texture at texLevel > 0.
 	static const float change = CHUNKSIZE / 62.0f; //! \todo 64? 63? 62? Wtf?
-	
+
+	if( texLevel == 0 )
+		return true;
+
 	for( size_t j = 0; j < 64; ++j )
 	{
 		for( size_t i = 0; i < 64; ++i )
@@ -1743,15 +1747,17 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 			
 			if( dist <= radius )
 			{
-  			using std::min;
-  			using std::max;
+  				using std::min;
+  				using std::max;
   			
-  			amap[texLevel - 1][i + j * 64] = (unsigned char)( max( min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
+  				amap[texLevel - 1][i + j * 64] = (unsigned char)( max( min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
 			}
 		}
 	}
+
 	
 	// Redraw changed layers.
+	
 	for( size_t j = texLevel; j < size_t( nTextures ); j++ )
 	{
 		glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );

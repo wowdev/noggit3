@@ -932,13 +932,77 @@ void Model::drawModel( /*bool unlit*/ )
 void Model::drawModelSelect()
 {
 	// assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
+	
+	if( animated ) 
+	{
+		if( animGeometry ) 
+		{
+			glBindBuffer( GL_ARRAY_BUFFER, vbuf );
+			glVertexPointer( 3, GL_FLOAT, 0, 0 );
+			glNormalPointer( GL_FLOAT, 0, ((char *)(0) + (vbufsize)) );
+		} 
+		else 
+		{
+			glBindBuffer( GL_ARRAY_BUFFER, vbuf );
+			glVertexPointer( 3, GL_FLOAT, 0, 0 );
+			glBindBuffer( GL_ARRAY_BUFFER, nbuf );
+			glNormalPointer( GL_FLOAT, 0, 0 );
+		}
 
+		glBindBuffer( GL_ARRAY_BUFFER, tbuf );
+		glTexCoordPointer( 2, GL_FLOAT, 0, 0 );
+	}
+	
+	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	glAlphaFunc( GL_GREATER, 0.3f );
+
+	for (size_t i=0; i<passes.size(); ++i) {
+		ModelRenderPass &p = passes[i];
+
+		if (p.init(this)) {
+			// we don't want to render completely transparent parts
+
+			// render
+			if (animated) {
+				//glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+				// a GDC OpenGL Performace Tuning paper recommended glDrawRangeElements over glDrawElements
+				// I can't notice a difference but I guess it can't hurt
+				glDrawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+
+			} else {
+				glBegin(GL_TRIANGLES);
+				for (size_t k = 0, b=p.indexStart; k<p.indexCount; ++k,++b) {
+					uint16_t a = indices[b];
+					glNormal3fv(normals[a]);
+					glTexCoord2fv(origVertices[a].texcoords);
+					glVertex3fv(vertices[a]);
+				}
+				glEnd();
+			}
+
+			p.deinit();
+		}
+
+	}
+	// done with all render ops
+	
+	glAlphaFunc (GL_GREATER, 0.0f);
+	glDisable (GL_ALPHA_TEST);
+
+	GLfloat czero[4] = {0,0,0,1};
+	glMaterialfv(GL_FRONT, GL_EMISSION, czero);
+	glColor4f(1,1,1,1);
+	glDepthMask(GL_TRUE);
+	
+	// assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
+	/*
 	for( size_t i = 0; i < passes.size(); ++i ) 
 	{
 		ModelRenderPass &p = passes[i];
 
-//		glPushName( p.texture );
+		//glPushName( p.texture );
 		glBegin( GL_TRIANGLES );
+		
 		for( size_t k = 0, b = p.indexStart; k < p.indexCount; ++k, ++b ) 
 		{
 			uint16_t a = indices[b];
@@ -947,6 +1011,7 @@ void Model::drawModelSelect()
 		glEnd();
 //		glPopName();
 	}
+	*/
 }
 
 void TextureAnim::calc(int anim, int time)
@@ -1197,13 +1262,13 @@ void Model::drawSelect()
 
 		//QUESTION: Do we need to drow this stuff for selectio??
 		// draw particle systems
-		 for( size_t i = 0; i < header.nParticleEmitters; ++i )
-			 particleSystems[i].draw();
+		// for( size_t i = 0; i < header.nParticleEmitters; ++i )
+			// particleSystems[i].draw();
 		
 		 //QUESTION: Do we need to drow this stuff for selectio??		
 		// draw ribbons
-		 for( size_t i = 0; i < header.nRibbonEmitters; ++i )
-			 ribbons[i].draw();
+		// for( size_t i = 0; i < header.nRibbonEmitters; ++i )
+			 //ribbons[i].draw();
 	}
 }
 

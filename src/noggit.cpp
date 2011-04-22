@@ -220,8 +220,8 @@ int main( int argc, char *argv[] )
 	std::string wowpath = getGamePath();
 	if( wowpath == "" )
 	{
-    LogError << "Unable to find game path. Use the config file." << std::endl;
-    return -1;
+		LogError << "Unable to find game path. Use the config file." << std::endl;
+		return -1;
 	}
 	
 	Log << "Game path: " << wowpath << std::endl;
