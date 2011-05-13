@@ -10,6 +10,7 @@ Environment::Environment()
 	this->AutoSelecting = true;
 	this->clipboard = nameEntry();
 	this->flagPaintMode = FLAG_IMPASS;
+	this->paintMode = true;
 }
 
 Environment* Environment::instance = 0;

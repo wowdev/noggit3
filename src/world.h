@@ -165,6 +165,7 @@ public:
 	void setAreaID(int id, int x, int z);
 	void setAreaID(int id, int x, int z , int cx, int cz);
 	void setFlag(bool to, float x, float z);
+	void setBaseTexture(int x, int z );
 
 	void moveADT();
 
