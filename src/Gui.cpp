@@ -13,7 +13,7 @@
 #include "dbc.h"
 #include "world.h"
 #include "Project.h"
-
+#include "Environment.h"
 // Detail window. Move there?
 #include "MapChunk.h"
 #include "WMOInstance.h"
@@ -99,7 +99,8 @@ void Gui::render( bool tilemode )
 	std::ostringstream statusbarInfo;
 	statusbarInfo << "tile: " << std::floor( gWorld->camera.x / TILESIZE ) << " " <<  std::floor( gWorld->camera.z / TILESIZE )
 	   << "; coordinates: client (x: " << gWorld->camera.x << ", y: " << gWorld->camera.z << ", z: "<<gWorld->camera.y
-	   << "), server (x: " << ( ZEROPOINT - gWorld->camera.x ) << ", y:" << ( ZEROPOINT - gWorld->camera.z ) << ", z:" << ( ZEROPOINT - gWorld->camera.y ) << ")";
+	   << "), server (x: " << ( ZEROPOINT - gWorld->camera.x ) << ", y:" << ( ZEROPOINT - gWorld->camera.z ) << ", z:" << ( ZEROPOINT - gWorld->camera.y ) << ")" ;
+	if(Environment::getInstance()->paintMode) statusbarInfo << "PM:1";else statusbarInfo << "PM:2";
 	this->guiStatusbar->setLeftInfo( statusbarInfo.str() );
 	
 	this->guiStatusbar->setRightInfo( "" );

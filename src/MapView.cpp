@@ -571,58 +571,70 @@ std::string getCurrentHeightmapPath()
 
 }
 
+void clearTexture(frame *f,int set)
+{
+	// set areaid on all chunks of the current ADT
+	gWorld->setBaseTexture(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+}
+
 void exportPNG(frame *f,int set)
 {
 	// create the image and write to disc.
-	GLfloat* data = new GLfloat[272*272*3];
+	GLfloat* data = new GLfloat[272*272];
 
 	ilInit();
-	
+
 	int width  = 272 ;
 	int height = 272 ;
-	int bytesToUsePerPixel = 1 ;  // RGB without alpha
+	int bytesToUsePerPixel = 32;  // 16 bit per channel
 	int sizeOfByte = sizeof( unsigned char ) ;
 	int theSize = width * height * sizeOfByte * bytesToUsePerPixel ;
 
 	unsigned char * imData =(unsigned char*)malloc( theSize ) ;
 
+	int colors = 0;
 	// write the height data to the image array
 	for( int i = 0 ; i < theSize ; i++ )
 	{
-		imData[ i ] = 0 ;
+		imData[ i ] = colors ;
+		if(i==100)colors = 200;
+		if(i==200)colors = 4000;
 	}
 
 
 	ILuint ImageName; // The image name.
 	ilGenImages(1, &ImageName); // Grab a new image name.
 	ilBindImage(ImageName); // bind it
-	ilTexImage(width,height,1,bytesToUsePerPixel,IL_RGB,IL_UNSIGNED_BYTE,NULL);
+	ilTexImage(width,height,1,bytesToUsePerPixel,GL_LUMINANCE,IL_UNSIGNED_BYTE,NULL);
 	ilSetData(imData);
 	ilEnable(IL_FILE_OVERWRITE);
-	ilSave(IL_PNG, getCurrentHeightmapPath().c_str());
+	//ilSave(IL_PNG, getCurrentHeightmapPath().c_str());
+	ilSave(IL_PNG, "test2.png");
+	free(imData);
 }
 
 void importPNG(frame *f,int set)
 {
+	ilInit();
 
 	//ILboolean loadImage = ilLoadImage( getCurrentHeightmapPath().c_str() ) ;
-	ILboolean loadImage = ilLoadImage( "F:\WoWModding\Client335_Noggit\world\maps\Meberian\H_Meberian_36_30.png" ) ;
+	const char *image = "test.png";
+	ILboolean loadImage = ilLoadImage( image ) ;
 	
 	std::stringstream MessageText;
 	if(loadImage)
 	{
 
-		LogDebug << "Image loaded: " << getCurrentHeightmapPath() << "\n";
-		MessageText << "ImageSize: " << ilGetInteger( IL_IMAGE_SIZE_OF_DATA ) << "\n";
-		MessageText << "BPP: " << ilGetInteger( IL_IMAGE_BITS_PER_PIXEL ) << "\n";
-		MessageText << "Format: " << ilGetInteger( IL_IMAGE_FORMAT ) << "\n";
-		MessageText << "SizeofData: " << ilGetInteger( IL_IMAGE_SIZE_OF_DATA ) << "\n";
-		LogDebug << MessageText.str();
+		LogDebug << "Image loaded: " << image << "\n";
+		LogDebug <<  "ImageSize: " << ilGetInteger( IL_IMAGE_SIZE_OF_DATA ) << "\n";
+		LogDebug <<  "BPP: " << ilGetInteger( IL_IMAGE_BITS_PER_PIXEL ) << "\n";
+		LogDebug <<  "Format: " << ilGetInteger( IL_IMAGE_FORMAT ) << "\n";
+		LogDebug <<  "SizeofData: " << ilGetInteger( IL_IMAGE_SIZE_OF_DATA ) << "\n";
 		
 	}
 	else 
 	{
-		LogDebug << "Cant load Image: " << getCurrentHeightmapPath() << "\n";
+		LogDebug << "Cant load Image: " << image << "\n";
 		ILenum err = ilGetError() ;
 
 		MessageText << err << "\n";
@@ -818,7 +830,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Set Area ID", adtSetAreaID, 0	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear height map", clearHeightmap, 0	);
 	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Move to position", moveHeightmap, 0	);	
-
+	mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear texture", clearTexture, 0	);	
 
 	mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
 	mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );
@@ -1552,8 +1564,8 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		// movement
 		if( e->keysym.sym == SDLK_w )
 		{
-			key_w = true;
-			moving = 1.0f;
+				key_w = true;
+				moving = 1.0f;
 		}
 
 		// save
@@ -1646,8 +1658,19 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 		// invert mouse
 		if( e->keysym.sym == SDLK_i )
-			mousedir *= -1.0f;
-		
+		{
+			if( Environment::getInstance()->CtrlDown  )
+			{
+				// temp till fixe draw texture.
+				if(Environment::getInstance()->paintMode) Environment::getInstance()->paintMode = false;
+					else Environment::getInstance()->paintMode = true;
+			}
+			else
+			{
+				mousedir *= -1.0f;
+			}
+
+		}
 		// move speed or raw saving (?)
 		if( e->keysym.sym == SDLK_p )
 			if( Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown )

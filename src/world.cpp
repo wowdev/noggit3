@@ -11,6 +11,8 @@
 #include "Settings.h"
 #include "Project.h"
 #include "Environment.h"
+#include "TexturingUI.h"
+#include "TextureManager.h"
 
 #include "video.h"
 #include "Log.h"
@@ -1377,9 +1379,10 @@ void World::clearHeight(int id, int x, int z , int _cx, int _cz)
 
 }
 
+
+
 void World::setAreaID(int id, int x,int z)
 {
-
 	// set the Area ID on a tile x,z on all chunks
 	for (int j=0; j<16; ++j) 
 	{
@@ -2002,4 +2005,23 @@ void World::moveHeight(int id, int x, int z , int _cx, int _cz)
 	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), curChunk->mVertices, GL_STATIC_DRAW);
 
 
+}
+
+void World::setBaseTexture( int x, int z )
+{
+	if( !TexturingUI::getSelectedTexture() ) return;
+	MapTile *curTile;
+	curTile = mTiles[z][x].tile;
+	if(curTile == 0) return;
+
+	// clear all textures on the adt and set selected texture as base texture
+	for (int j=0; j<16; ++j) 
+	{
+		for (int i=0; i<16; ++i) 
+		{
+			MapChunk *curChunk = curTile->getChunk(j, i);
+			curChunk->eraseTextures();
+			curChunk->addTexture( TextureManager::add( TexturingUI::getSelectedTexture()->name ) );
+		}
+	}
 }
