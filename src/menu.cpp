@@ -242,21 +242,19 @@ void Menu::resizewindow()
 
 void Menu::loadMap( int mapID )
 {
-	for( std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it )
-	{
-		if ( it->mapID == mapID ) 
-		{
-			if( gWorld )
-			{
-				delete gWorld;
-				gWorld = NULL;
-			}
-			
-			gWorld = new World( it->name );
-			
-			break;
-		}
-	}
+  delete gWorld;
+  gWorld = NULL;
+  
+  for( DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it )
+  {
+    if( it->getInt( MapDB::MapID ) == mapID )
+    {
+      gWorld = new World( it->getString( MapDB::InternalName ) );
+      return;
+    }
+  }
+  
+  LogError << "Map with ID " << mapID << " not found. Failed loading." << std::endl;
 }
 
 void Menu::loadBookmark( int bookmarkID )
@@ -330,7 +328,7 @@ void Menu::createMapList()
 	{
 		MapEntry e;
 		e.mapID = i->getInt( MapDB::MapID );
-		e.name = i->getString( MapDB::InternalName );
+		e.name = i->getLocalizedString( MapDB::Name );
 		e.areaType = i->getUInt( MapDB::AreaType );
 		if( e.areaType < 0 || e.areaType > 2 || !World::IsEditableWorld( e.mapID ) )
 			continue;

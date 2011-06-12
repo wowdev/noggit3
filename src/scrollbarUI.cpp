@@ -37,7 +37,7 @@ scrollbarUI::scrollbarUI(float xpos, float ypos, float h, int n)
 
 bool scrollbarUI::processLeftDrag(float /*mx*/,float my, float /*xChange*/, float /*yChange*/)
 {
-	if(num<0) false;
+	if(num<0) return false;
 	float tx,ty;
 	this->getOffset(&tx,&ty);
 	my-=(ty+32);
@@ -58,7 +58,7 @@ bool scrollbarUI::processLeftDrag(float /*mx*/,float my, float /*xChange*/, floa
 
 frame *scrollbarUI::processLeftClick(float mx,float my)
 {
-	if(num<0) this;
+	if(num<0) return this;
 	frame * lTemp;
 	for( std::vector<frame*>::reverse_iterator child = children.rbegin(); child != children.rend(); child++ )
 	{
