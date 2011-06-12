@@ -1,6 +1,8 @@
 #ifndef AREADB_H
 #define AREADB_H
 
+#include <string>
+
 #include "dbcfile.h"
 
 class AreaDB: public DBCFile

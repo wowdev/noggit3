@@ -1,13 +1,14 @@
+#include "textboxUI.h"
+
 #include <SDL/SDL.h>
 #include <sstream>
+#include <string>
 
-#include "textboxUI.h"
 #include "noggit.h" // arial12
-
-#include "video.h"
-#include "textureUI.h"
 #include "textUI.h"
 #include "TextureManager.h" // TextureManager, Texture
+#include "textureUI.h"
+#include "video.h"
 
 TextBox::TextBox(float xPos,float yPos,float w, float h, const std::string& tex, const std::string& texd)
 {
@@ -101,7 +102,7 @@ bool TextBox::KeyBoardEvent( SDL_KeyboardEvent *e )
 			mFocus = false;
 		else
 			if( e->keysym.sym < 127 && e->keysym.sym > 31 )
-				mValue += char( e->keysym.sym );
+				mValue += static_cast<char>( e->keysym.sym );
 			else
 			{
 				std::stringstream ss; ss << "\\x" << e->keysym.sym;

@@ -17,18 +17,18 @@ public:
 	Vec3D	extents[2];
 	Vec3D	dir;
 	int mUniqueID;
-	short mFlags;
-	short mUnknown;
-	short mNameset;
-	short doodadset;
+	uint16_t mFlags;
+	uint16_t mUnknown;
+	uint16_t mNameset;
+	uint16_t doodadset;
 	
 private:
 	unsigned int mSelectionID;
 	
 public:
-	WMOInstance( WMO* _wmo, MPQFile& _file );
+	WMOInstance( WMO* _wmo, MPQFile* _file );
 	WMOInstance( WMO* _wmo, ENTRY_MODF* d );
-	WMOInstance( WMO* _wmo );
+	explicit WMOInstance( WMO* _wmo );
 	~WMOInstance();
 
 	void draw() const;

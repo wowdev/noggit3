@@ -141,7 +141,7 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
 	gWorld->lookat = Vec3D( pos.x, pos.y, pos.z - 1.0f );
 	
 	gWorld->initDisplay();
-	gWorld->enterTile( int( tile.x ), int( tile.y ) );
+	gWorld->enterTile( tile.x, tile.y );
 	
 	gStates.push_back( new MapView(  ah, av ) ); // on gPop, MapView is deleted.
 	randBackground();
@@ -149,7 +149,7 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
 
 void Menu::tick( float t, float /*dt*/ )
 {
-	globalTime = int( t );
+	globalTime = t;
 	
 	if( mBackgroundModel )
 	{
@@ -231,7 +231,7 @@ void Menu::mouseclick( SDL_MouseButtonEvent* e )
 	
 	if( e->type == SDL_MOUSEBUTTONDOWN && e->button == SDL_BUTTON_LEFT )
 	{
-		mGUIFrame->processLeftClick( float( e->x ), float( e->y ) );
+		mGUIFrame->processLeftClick( e->x, e->y );
 	}
 }
 

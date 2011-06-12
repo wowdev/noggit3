@@ -63,7 +63,7 @@ void gradient::setClickColor(float r,float g, float b,float a)
 	ClickColor=Vec4D(r,g,b,a);
 }
 
-void gradient::setClickFunc(void (*f)(float))
+void gradient::setClickFunc(void (*f)(float val))
 {
 	value=0.0f;
 	clickFunc=f;
@@ -92,7 +92,7 @@ frame *gradient::processLeftClick(float mx,float my)
 bool gradient::processLeftDrag(float mx,float my, float xDrag, float yDrag)
 {
 	float tx,ty;
-	parent->getOffset(tx,ty);
+	parent->getOffset(&tx,&ty);
 	mx-=tx;
 	my-=ty;
 	if(clickable)

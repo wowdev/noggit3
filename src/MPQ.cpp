@@ -53,14 +53,15 @@ void MPQArchive::finishLoading()
   	SFileReadFile( fh, readbuffer, filesize );
   	SFileCloseFile( fh );
   
-  	char*file=strtok((char *)readbuffer,"\r\n");
+    char* last = NULL;
+  	char * file = strtok_r(reinterpret_cast<char*>(readbuffer), "\r\n", &last);
   	while (file) 
   	{
       std::string line = file;
   		std::transform( line.begin(), line.end(), line.begin(), ::tolower );
   		gListfile.push_back( line );
   				
-  		file = (char*)strtok(NULL, "\r\n");
+  		file = strtok_r(NULL, "\r\n", &last);
   	}
   	free(readbuffer);
 	}

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <string>
 
 #include "mapheaders.h"
 #include "video.h" // GLfloat, GLshort, ...

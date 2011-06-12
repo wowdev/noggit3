@@ -101,7 +101,7 @@ public:
 
 	operator float*()
 	{
-		return (float*)this;
+		return reinterpret_cast<float*>(this);
 	}
 
 	bool IsInsideOf( Vec3D pA, Vec3D pB )
@@ -199,7 +199,7 @@ public:
 
 	operator float*()
 	{
-		return (float*)this;
+		return reinterpret_cast<float*>(this);
 	}
 
 };

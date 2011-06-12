@@ -2,6 +2,7 @@
 #define MODEL_H
 
 #include <vector>
+#include <string>
 
 class Model;
 class Bone;
@@ -38,7 +39,7 @@ public:
 
 	bool calc;
 	void calcMatrix(Bone* allbones, int anim, int time);
-	void init(MPQFile &f, ModelBoneDef &b, int *global, MPQFile **animfiles);
+	void init(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **animfiles);
 
 };
 
@@ -50,7 +51,7 @@ public:
 	Vec3D tval, rval, sval;
 
 	void calc(int anim, int time);
-	void init(MPQFile &f, ModelTexAnimDef &mta, int *global);
+	void init(const MPQFile& f, const ModelTexAnimDef &mta, int *global);
 	void setup(int anim);
 };
 
@@ -58,13 +59,13 @@ struct ModelColor {
 	Animated<Vec3D> color;
 	AnimatedShort opacity;
 
-	void init(MPQFile &f, ModelColorDef &mcd, int *global);
+	void init(const MPQFile& f, const ModelColorDef &mcd, int *global);
 };
 
 struct ModelTransparency {
 	AnimatedShort trans;
 
-	void init(MPQFile &f, ModelTransDef &mtd, int *global);
+	void init(const MPQFile& f, const ModelTransDef &mtd, int *global);
 };
 
 // copied from the .mdl docs? this might be completely wrong
@@ -116,7 +117,7 @@ struct ModelCamera {
 	Animated<Vec3D> tPos, tTarget;
 	Animated<float> rot;
 
-	void init(MPQFile &f, ModelCameraDef &mcd, int *global);
+	void init(const MPQFile& f, const ModelCameraDef &mcd, int *global);
 	void setup(int time=0);
 
 	ModelCamera():ok(false) {}
@@ -130,7 +131,7 @@ struct ModelLight {
 	//Animated<float> attStart,attEnd;
 	//Animated<bool> Enabled;
 
-	void init(MPQFile &f, ModelLightDef &mld, int *global);
+	void init(const MPQFile&  f, const ModelLightDef &mld, int *global);
 	void setup(int time, GLuint l);
 };
 
@@ -147,7 +148,7 @@ class Model: public ManagedItem, public AsyncObject {
 	bool forceAnim;
 	MPQFile **animfiles;
 
-	void init(MPQFile &f);
+	void init(const MPQFile& f);
 
 
 	TextureAnim *texanims;
@@ -162,10 +163,10 @@ class Model: public ManagedItem, public AsyncObject {
 	void drawModel( /*bool unlit*/ );
 	void drawModelSelect();
 	
-	void initCommon(MPQFile &f);
-	bool isAnimated(MPQFile &f);
-	void initAnimated(MPQFile &f);
-	void initStatic(MPQFile &f);
+	void initCommon(const MPQFile& f);
+	bool isAnimated(const MPQFile& f);
+	void initAnimated(const MPQFile& f);
+	void initStatic(const MPQFile& f);
 
 	ModelVertex *origVertices;
 	Vec3D *vertices, *normals;

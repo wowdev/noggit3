@@ -1,10 +1,10 @@
-#include "noggit.h" // arial16
-
 #include "closeWindowUI.h"
 
-#include "MinimizeButton.h"
-#include "textUI.h"
+#include <string>
 
+#include "MinimizeButton.h"
+#include "noggit.h" // arial16
+#include "textUI.h"
 
 closeWindowUI::closeWindowUI( float px, float py, float w, float h, const std::string& pTitle, bool pMoveable ) : window( px, py, w, h )
 {

@@ -1,4 +1,7 @@
 #include "textureUI.h"
+
+#include <string>
+
 #include "TextureManager.h" // TextureManager, Texture
 
 /*textureUI::textureUI( float xPos, float yPos, float w, float h, GLuint tex ) : frame( xPos, yPos, w, h )

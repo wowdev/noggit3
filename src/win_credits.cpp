@@ -1,7 +1,9 @@
+#include "win_credits.h"
+
+#include <algorithm>
+
 #include "noggit.h" // fonts
 #include "revision.h"
-
-#include "win_credits.h"
 
 #include "MinimizeButton.h"
 #include "textureUI.h"
@@ -9,7 +11,7 @@
 
 #include "video.h" // video
 
-winCredits::winCredits( ) : closeWindowUI( ((float)video.xres/2) - (winWidth/2),((float)video.yres/2) - (winHeight/2),winWidth,winHeight,"")
+winCredits::winCredits( ) : closeWindowUI( video.xres / 2.0f - winWidth / 2.0f, video.yres / 2.0f - winHeight / 2.0f, winWidth, winHeight, "" )
 {
 	addChild( new textureUI( 20.0f, 20.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Potion_83.blp" ) );
 	addChild( new textUI( 73.0f, 24.0f, "Noggit Studio", skurri32, eJustifyLeft ) );
@@ -23,6 +25,6 @@ winCredits::winCredits( ) : closeWindowUI( ((float)video.xres/2) - (winWidth/2),
 void winCredits::resize()
 {
 	using std::max;
-	this->x = max( ( (float)video.xres / 2.0f ) - ( winWidth / 2.0f ), 0.0f );
-	this->y = max( ( (float)video.yres / 2.0f ) - ( winHeight / 2.0f ), 0.0f );
+	this->x = max( ( video.xres / 2.0f ) - ( winWidth / 2.0f ), 0.0f );
+	this->y = max( ( video.yres / 2.0f ) - ( winHeight / 2.0f ), 0.0f );
 }

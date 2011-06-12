@@ -2,6 +2,7 @@
 #define ASYNCLOADER_H
 
 #include <boost/thread.hpp>
+#include <list>
 
 class AsyncObject;
 

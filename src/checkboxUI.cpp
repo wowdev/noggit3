@@ -1,8 +1,10 @@
 #include "checkboxUI.h"
-//#include "video.h"
+
+#include <string>
+
 #include "noggit.h" // arialn13
-#include "textureUI.h"
 #include "textUI.h"
+#include "textureUI.h"
 #include "ToggleGroup.h"
 
 checkboxUI::checkboxUI( float xPos, float yPos, const std::string& pText )

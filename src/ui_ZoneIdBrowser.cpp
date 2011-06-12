@@ -1,26 +1,28 @@
+#include "ui_ZoneIdBrowser.h"
+
 #include <iostream>
 #include <sstream>
+#include <string>
 
-#include "ui_ZoneIdBrowser.h"
-#include "ui_ListView.h"
-#include "Gui.h"
-#include "scrollbarUI.h"
-#include "textUI.h" // textUI
-#include "noggit.h" // arial14, arialn13
-#include "dbc.h"
-#include "log.h"
 #include "buttonUI.h"
 #include "dbc.h"
+#include "dbc.h"
+#include "Gui.h"
+#include "log.h"
 #include "misc.h"
+#include "noggit.h" // arial14, arialn13
+#include "scrollbarUI.h"
+#include "textUI.h" // textUI
+#include "ui_ListView.h"
 
 void theButtonMapPressed(frame *f,int id)
 {
-	((ui_ZoneIdBrowser *)(f->parent))->ButtonMapPressed(id);
+	(reinterpret_cast<ui_ZoneIdBrowser*>(f->parent))->ButtonMapPressed(id);
 }
 
 void changeZoneValue(frame *f,int id)
 {
-	((ui_ZoneIdBrowser *)(f->parent->parent->parent))->setZoneID(id);
+	(reinterpret_cast<ui_ZoneIdBrowser*>(f->parent->parent->parent))->setZoneID(id);
 }
 
 ui_ZoneIdBrowser::ui_ZoneIdBrowser(int xPos,int yPos, int w, int h, Gui *setGui) : window(xPos,yPos,w,h)
@@ -120,7 +122,7 @@ void ui_ZoneIdBrowser::buildAreaList()
 					{
 						frame *curFrame = new frame(1,1,1,1); 
 						std::stringstream ss;
-						ss << i->getInt(AreaDB::AreaID) << "-" << misc::replaceSpezialChars(gAreaDB.getAreaName(i->getInt(AreaDB::AreaID)));
+						ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
 						buttonUI *tempButton = new buttonUI(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
 						tempButton->setLeft();
 						curFrame->addChild(tempButton);
@@ -133,7 +135,7 @@ void ui_ZoneIdBrowser::buildAreaList()
 					{
 						frame *curFrame = new frame(1,1,1,1); 
 						std::stringstream ss;
-						ss << i->getInt(AreaDB::AreaID) << "-" << misc::replaceSpezialChars(gAreaDB.getAreaName(i->getInt(AreaDB::AreaID)));
+						ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
 						buttonUI *tempButton = new buttonUI(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
 						tempButton->setLeft();
 						curFrame->addChild(tempButton);

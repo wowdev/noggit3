@@ -7,10 +7,11 @@
 #include "quaternion.h" // Vec4D
 #include "MapTile.h" // MapTile
 
-
 class MPQFile;
 class Vec4D;
 class brush;
+
+typedef unsigned short StripType;
 
 static const int mapbufsize = 9*9 + 8*8;
 
@@ -41,12 +42,11 @@ public:
 
 	int holes;
 
-
-	int				tex[4];
-	GLuint			textures[4];
-	unsigned int	texFlags[4];
-	unsigned int	effectID[4];
-	unsigned int	MCALoffset[4];
+	int tex[4];
+	GLuint textures[4];
+	unsigned int texFlags[4];
+	unsigned int effectID[4];
+	unsigned int MCALoffset[4];
 	unsigned char amap[3][64*64];
 	unsigned char mShadowMap[8*64];
 	GLuint alphamaps[3];
@@ -56,10 +56,10 @@ public:
 
 	GLuint vertices, normals, minimap, minishadows;
 
-	short *strip;
+	StripType *strip;
 	int striplen;
 
-	MapChunk(MapTile* mt, MPQFile &f,bool bigAlpha);
+	MapChunk(MapTile* mt, MPQFile* f,bool bigAlpha);
 	~MapChunk();
 
 	void destroy();

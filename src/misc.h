@@ -1,6 +1,8 @@
 #ifndef MISC_H
 #define MISC_H
 
+#include <string>
+
 // namespace for static helper functions.
 
 namespace misc
@@ -11,7 +13,7 @@ namespace misc
 	float frand();
 	float randfloat(float lower, float upper);
 	int randint(int lower, int upper);
-	std::string replaceSpezialChars(std::string text);
+	std::string replaceSpecialChars(const std::string& text);
 	int getADTCord(float cord);
 };
 

@@ -1,11 +1,13 @@
 #include "appInfo.h"
 
-#include "MinimizeButton.h" // MinimizeButton
-#include "noggit.h" // arial14
-#include "modelUI.h" // modelUI
-#include "model.h" // Model
-#include "ModelManager.h" // ModelManager
+#include <string>
+
 #include "Gui.h" // Gui
+#include "MinimizeButton.h" // MinimizeButton
+#include "ModelManager.h" // ModelManager
+#include "model.h" // Model
+#include "modelUI.h" // modelUI
+#include "noggit.h" // arial14
 #include "textUI.h" // textUI
 
 appInfo::appInfo(float xPos, float yPos, float w, float h, Gui *setGui) : window(xPos, yPos, w, h), mModelToLoad("World\\AZEROTH\\ELWYNN\\PASSIVEDOODADS\\Trees\\CanopylessTree01.m2")

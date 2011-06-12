@@ -11,7 +11,7 @@ private:
 	int * mTarget;
 	std::map<int,checkboxUI*> mFrames;
 public:
-	ToggleGroup( int * pTarget );
+	explicit ToggleGroup( int * pTarget );
 
 	void Add( checkboxUI * pFrame, int pValue );
 

@@ -12,11 +12,11 @@ protected:
 	OpenGL::Texture* sliderTexture;
 	float	scale;
 	float	offset;
-	void (*func)(float);
-	char	text[255];
+	void (*func)(float value);
+	char text[512];
 public:
 	float	value;
-	void	setFunc(void (*f)(float));
+	void	setFunc(void (*f)(float value));
 	void	setValue(float f);
 	void	setText(const char *);
 	slider(float x, float y, float width, float s,float o);

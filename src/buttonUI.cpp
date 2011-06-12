@@ -1,8 +1,10 @@
 #include "buttonUI.h"
-#include "noggit.h" // arial12
-//#include "video.h"
-#include "textUI.h"
+
+#include <string>
+
 #include "FreeType.h"
+#include "noggit.h" // arial12
+#include "textUI.h"
 #include "TextureManager.h" // TextureManager, Texture
 
 buttonUI::buttonUI( float pX, float pY, float w, float h, const std::string& pTexNormal, const std::string& pTexDown )

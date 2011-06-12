@@ -1,49 +1,42 @@
+#include "noggit.h"
+
 #ifdef _WIN32
-#pragma comment(lib,"OpenGL32.lib")
-#pragma comment(lib,"glu32.lib")
-
+//#pragma comment(lib,"OpenGL32.lib")
+//#pragma comment(lib,"glu32.lib")
 #include <direct.h> 
-
-#define NOMINMAX
+//#define NOMINMAX
 #include <windows.h>
 #include <winerror.h>
 #endif
 
-#include <ctime>
-#include <cstdlib>
-#include <fstream>
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
+#include <fstream>
 #include <iostream>
 #include <list>
-
-#include "noggit.h"
-#include "revision.h"
+#include <string>
+#include <vector>
 
 #include "appstate.h"
-#include "menu.h"
-#include "MapView.h"
-
-#include "mpq.h"
-#include "video.h"
-#include "directory.h"
-#include "dbc.h"
-#include "model.h"
-
-//#include "shaders.h"
-#include "liquid.h"
-
-#include "ConfigFile.h"
-#include "Log.h"
-
-#include "FreeType.h" // fonts.
-
-#include "Settings.h"		// In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
-#include "Project.h"		// This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
-#include "Environment.h"	// This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
-
-#include "errorhandling.h"
-
 #include "AsyncLoader.h"
+#include "ConfigFile.h"
+#include "dbc.h"
+#include "directory.h"
+#include "Environment.h"	// This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
+#include "errorhandling.h"
+#include "FreeType.h" // fonts.
+#include "liquid.h"
+#include "Log.h"
+#include "MapView.h"
+#include "menu.h"
+#include "model.h"
+#include "mpq.h"
+#include "Project.h"		// This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
+#include "revision.h"
+#include "Settings.h"		// In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
+#include "video.h"
+//#include "shaders.h"
 
 std::vector<AppState*> gStates;
 bool gPop = false;
@@ -302,7 +295,7 @@ int main( int argc, char *argv[] )
 			path.replace( location, 8, " " );
 			for( int j = 2; j < 10; j++ )
 			{
-				sprintf( temp, "%i", j );
+				snprintf( temp, sizeof(temp), "%i", j );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
 					gAsyncLoader->addObject( new MPQArchive( path, true ) );
@@ -315,7 +308,7 @@ int main( int argc, char *argv[] )
 			path.replace( location, 11, " " );
 			for( char c = 'a'; c <= 'z'; c++ )
 			{
-				sprintf( temp, "%c", c );
+				snprintf( temp, sizeof(temp), "%c", c );
 				path.replace( location, 1, std::string( temp ) );
 				if( FileExists( path ) )
 					gAsyncLoader->addObject( new MPQArchive( path, true ) );
@@ -453,7 +446,7 @@ int main( int argc, char *argv[] )
 		ft += dt;
 		if (ft >= 1000) 
 		{
-			gFPS = (float)fcount / (float)ft * 1000.0f;
+			gFPS = static_cast<float>(fcount) / static_cast<float>(ft) * 1000.0f;
 			ft = 0;
 			fcount = 0;
 		}

@@ -1,8 +1,9 @@
 #ifndef __CHECKBOXUI_H
 #define __CHECKBOXUI_H
 
+#include <string>
+
 #include "frame.h"
-#include "FreeType.h" // fonts.
 
 class textureUI;
 class textUI;

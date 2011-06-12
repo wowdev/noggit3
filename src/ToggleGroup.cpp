@@ -1,4 +1,7 @@
 #include "ToggleGroup.h"
+
+#include <map>
+
 #include "checkboxUI.h"
 
 ToggleGroup::ToggleGroup( int * pTarget ) : mTarget( pTarget )

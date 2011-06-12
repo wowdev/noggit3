@@ -37,9 +37,9 @@ public:
 		MapChunk		*mapchunk;
 	} data;
 
-	nameEntry( ModelInstance *model );
-	nameEntry( WMOInstance *wmo );
-	nameEntry( MapChunk *chunk );
+	explicit nameEntry( ModelInstance *model );
+	explicit nameEntry( WMOInstance *wmo );
+	explicit nameEntry( MapChunk *chunk );
 	nameEntry();
 	
 	const std::string& returnName();

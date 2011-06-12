@@ -1,8 +1,9 @@
 #ifndef __CLOSEWINDOWUI_H
 #define __CLOSEWINDOWUI_H
 
+#include <string>
+
 #include "window.h"
-#include "FreeType.h" // fonts.
 
 class closeWindowUI : public window
 {

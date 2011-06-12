@@ -1,29 +1,29 @@
 #include "world.h"
-#include "dbc.h"
-#include <string>
-#include <sstream>
-#include <cassert>
+
 #include <algorithm>
+#include <cassert>
 #include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <time.h>
 
-#include "time.h"
-
-#include "Settings.h"
-#include "Project.h"
+#include "dbc.h"
 #include "Environment.h"
-#include "TexturingUI.h"
-#include "TextureManager.h"
-
-#include "video.h"
 #include "Log.h"
 #include "MapChunk.h"
 #include "MapTile.h"
 #include "misc.h"
-
-#include "WMOInstance.h" // WMOInstance
 #include "ModelManager.h" // ModelManager
+#include "Project.h"
+#include "Settings.h"
+#include "TextureManager.h"
+#include "TexturingUI.h"
+#include "video.h"
+#include "WMOInstance.h" // WMOInstance
 
-World *gWorld=0;
+World *gWorld = NULL;
 
 static const int BUFSIZE = 8192;
 unsigned int	SelectBuffer[BUFSIZE];
@@ -248,7 +248,7 @@ void World::initMinimap()
 			memset(texbuf,0,512*512*4);
 
 			// as alpha is unused, maybe I should try 24bpp? :(
-			short tilebuf[17*17];
+			int16_t tilebuf[17*17];
 
 			for (int j=0; j<64; ++j) {
 				for (int i=0; i<64; ++i) {
@@ -274,7 +274,7 @@ void World::initMinimap()
 						// for a 512x512 minimap texture, and 64x64 tiles, one tile is 8x8 pixels
 						for (int z=0; z<8; z++) {
 							for (int x=0; x<8; x++) {
-								short hval = tilebuf[(z*2)*17+x*2]; // for now
+								int16_t hval = tilebuf[(z*2)*17+x*2]; // for now
 
 								// make rgb from height value
 								unsigned char r,g,b;
@@ -365,7 +365,7 @@ Its an array of 16 shorts. Each short is a bitmask. If the bit is not set, there
 			fcc[4] = 0;
 			gLog("minimap %s [%d].\n", fcc, size);
 		} */
-		f.seek((int)nextpos);
+		f.seek(nextpos);
 	}
 
 	f.close();
@@ -377,15 +377,15 @@ void World::initLowresTerrain()
 	std::stringstream filename; 
 	filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
 	
-	short tilebuf[17*17];
-	short tilebuf2[16*16];
+	int16_t tilebuf[17*17];
+	int16_t tilebuf2[16*16];
 	Vec3D lowres[17][17];
 	Vec3D lowsub[16][16];
-	int ofsbuf[64][64];
+	int32_t ofsbuf[64][64];
 
 	MPQFile f(filename.str());
 
-	int fourcc;
+	int32_t fourcc;
 	size_t size;
 
 	while (!f.isEof()) 
@@ -402,9 +402,9 @@ void World::initLowresTerrain()
 		{
 			f.read(ofsbuf,64*64*4);
 
-			for (int j=0; j<64; ++j) 
+			for (size_t j=0; j<64; ++j) 
 			{
-				for (int i=0; i<64; ++i) 
+				for (size_t i=0; i<64; ++i) 
 				{
 					if (ofsbuf[j][i]) 
 					{
@@ -412,16 +412,16 @@ void World::initLowresTerrain()
 						f.read(tilebuf,17*17*2);
 						f.read(tilebuf2,16*16*2);
 					
-						for (int y=0; y<17; y++) 
+						for (size_t y=0; y<17; y++) 
 						{
-							for (int x=0; x<17; x++) 
+							for (size_t x=0; x<17; x++) 
 							{
 								lowres[y][x] = Vec3D(TILESIZE*(i+x/16.0f), tilebuf[y*17+x], TILESIZE*(j+y/16.0f));
 							}
 						}
-						for (int y=0; y<16; y++) 
+						for (size_t y=0; y<16; y++) 
 						{
-							for (int x=0; x<16; x++) 
+							for (size_t x=0; x<16; x++) 
 							{
 								lowsub[y][x] = Vec3D(TILESIZE*(i+(x+0.5f)/16.0f), tilebuf2[y*16+x], TILESIZE*(j+(y+0.5f)/16.0f));
 							}
@@ -475,16 +475,16 @@ void World::initLowresTerrain()
 			f.close();
 			return;
 		}
-		f.seek((int)nextpos);
+		f.seek(nextpos);
 	}
 
 	LogError << "Error in reading low res terrain. MAOF not found." << std::endl;
 	f.close();
 }
 
-void initGlobalVBOs( GLuint &pDetailTexCoords, GLuint &pAlphaTexCoords )
+void initGlobalVBOs( GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords )
 {
-	if( !pDetailTexCoords && !pAlphaTexCoords )
+	if( !*pDetailTexCoords && !*pAlphaTexCoords )
 	{
 		Vec2D temp[mapbufsize], *vt;
 		float tx,ty;
@@ -504,9 +504,9 @@ void initGlobalVBOs( GLuint &pDetailTexCoords, GLuint &pAlphaTexCoords )
 			}
 		}
 
-		glGenBuffers(1, &pDetailTexCoords);
-		glBindBuffer(GL_ARRAY_BUFFER, pDetailTexCoords);
-		glBufferData(GL_ARRAY_BUFFER, mapbufsize*2*sizeof(float), temp, GL_STATIC_DRAW);
+		glGenBuffers(1, pDetailTexCoords);
+		glBindBuffer(GL_ARRAY_BUFFER, *pDetailTexCoords);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
 
 		// init texture coordinates for alpha map:
 		vt = temp;
@@ -524,9 +524,9 @@ void initGlobalVBOs( GLuint &pDetailTexCoords, GLuint &pAlphaTexCoords )
 			}
 		}
 
-		glGenBuffers(1, &pAlphaTexCoords);
-		glBindBuffer(GL_ARRAY_BUFFER, pAlphaTexCoords);
-		glBufferData(GL_ARRAY_BUFFER, mapbufsize*2*sizeof(float), temp, GL_STATIC_DRAW);
+		glGenBuffers(1, pAlphaTexCoords);
+		glBindBuffer(GL_ARRAY_BUFFER, *pAlphaTexCoords);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
@@ -536,19 +536,19 @@ void initGlobalVBOs( GLuint &pDetailTexCoords, GLuint &pAlphaTexCoords )
 void World::initDisplay()
 {
 	// default strip indices
-	short *defstrip = new short[stripsize];
+	StripType *defstrip = new StripType[stripsize];
 	for (int i=0; i<stripsize; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
-	mapstrip = new short[stripsize];
-	stripify<short>(defstrip, mapstrip);
+	mapstrip = new StripType[stripsize];
+	stripify<StripType>(defstrip, mapstrip);
 	delete[] defstrip;
 
-	defstrip = new short[stripsize2];
+	defstrip = new StripType[stripsize2];
 	for (int i=0; i<stripsize2; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
-	mapstrip2 = new short[stripsize2];
-	stripify2<short>(defstrip, mapstrip2);
+	mapstrip2 = new StripType[stripsize2];
+	stripify2<StripType>(defstrip, mapstrip2);
 	delete[] defstrip;
 
-	initGlobalVBOs( detailtexcoords, alphatexcoords );
+	initGlobalVBOs( &detailtexcoords, &alphatexcoords );
 
 	noadt = false;
 	
@@ -908,7 +908,7 @@ void World::draw()
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_FOG);
 
-	int daytime = ((int)time) % 2880;
+	int daytime = static_cast<int>(time) % 2880;
 	//outdoorLightStats = ol->getLightStats(daytime);
 	skies->initSky(camera, daytime);
 
@@ -1172,8 +1172,8 @@ void World::draw()
 		}
 	}
 	
-	ex = (int)(camera.x / TILESIZE);
-	ez = (int)(camera.z / TILESIZE);
+	ex = camera.x / TILESIZE;
+	ez = camera.z / TILESIZE;
 }
 
 void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
@@ -1301,22 +1301,21 @@ void World::tick(float dt)
 
 unsigned int World::getAreaID()
 {
-	MapTile *curTile;
+	const int mtx = camera.x / TILESIZE;
+	const int mtz = camera.z / TILESIZE;
+	const int mcx = fmod(camera.x, TILESIZE) / CHUNKSIZE;
+	const int mcz = fmod(camera.z, TILESIZE) / CHUNKSIZE;
 
-	int mtx,mtz,mcx,mcz;
-	mtx = (int) (camera.x / TILESIZE);
-	mtz = (int) (camera.z / TILESIZE);
-	mcx = (int) (fmod(camera.x, TILESIZE) / CHUNKSIZE);
-	mcz = (int) (fmod(camera.z, TILESIZE) / CHUNKSIZE);
-
-	if ((mtx<cx-1) || (mtx>cx+1) || (mtz<cz-1) || (mtz>cz+1)) return 0;
+	if((mtx<cx-1) || (mtx>cx+1) || (mtz<cz-1) || (mtz>cz+1))
+    return 0;
 	
-	curTile = mTiles[mtz][mtx].tile;
-	if(curTile == 0) return 0;
+	MapTile* curTile = mTiles[mtz][mtx].tile;
+	if(!curTile)
+    return 0;
 
 	MapChunk *curChunk = curTile->getChunk(mcx, mcz);
-
-	if(curChunk == 0) return 0;
+	if(!curChunk)
+    return 0;
 
 	return curChunk->areaID;
 }
@@ -1374,9 +1373,7 @@ void World::clearHeight(int id, int x, int z , int _cx, int _cz)
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
-	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), curChunk->mVertices, GL_STATIC_DRAW);
-	
-
+	glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
 }
 
 
@@ -1412,7 +1409,6 @@ void World::drawTileMode(float /*ah*/)
 {
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT); 
 	glEnable(GL_BLEND);
-	
 	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -1470,10 +1466,10 @@ void World::drawTileMode(float /*ah*/)
 		
 		for(float x = -32.0f; x <= 48.0f; x += 1.0f)
 		{
-			if( int(x)%16 == 0 )
-				glColor4f(0.0f,1.0f,0.0f,0.5f);
-			else
+			if( static_cast<int>(x) % 16 )
 				glColor4f(1.0f,0.0f,0.0f,0.5f);
+			else
+				glColor4f(0.0f,1.0f,0.0f,0.5f);
 			glBegin(GL_LINES);
 			glVertex3f(-32.0f,x,-1);
 			glVertex3f(48.0f,x,-1);
@@ -1485,53 +1481,52 @@ void World::drawTileMode(float /*ah*/)
 	
 	glPopMatrix();
 	
-	ex = (int)(camera.x / TILESIZE);
-	ez = (int)(camera.z / TILESIZE);
+	ex = camera.x / TILESIZE;
+	ez = camera.z / TILESIZE;
 }
 
 bool World::GetVertex(float x,float z, Vec3D *V)
 {
-	const int newX = (int)(x / TILESIZE);
-	const int newZ = (int)(z / TILESIZE);
+	const int newX = x / TILESIZE;
+	const int newZ = z / TILESIZE;
 	
 	if( !tileLoaded( newZ, newX ) ) 
 	{
 		return false;
 	}
 	
-	return mTiles[newZ][newX].tile->GetVertex(x,z,V);
+	return mTiles[newZ][newX].tile->GetVertex(x, z, V);
 }
 
 void World::changeTerrain(float x, float z, float change, float radius, int BrushType)
 {
-
 	for( int j = 0; j < 64; ++j )
 	{
 		for( int i = 0; i < 64; ++i )
 		{
 			if( tileLoaded( j, i ) )
 			{
-				for( int ty = 0; ty < 16; ++ty )
+				for( size_t ty = 0; ty < 16; ++ty )
 				{
-					for( int tx = 0; tx < 16; ++tx )
+					for( size_t tx = 0; tx < 16; ++tx )
 					{
-						if(mTiles[j][i].tile->getChunk(ty,tx)->changeTerrain(x,z,change,radius,BrushType))
-							this->setChanged(j,i);
+						if( mTiles[j][i].tile->getChunk(ty,tx)->changeTerrain(x,z,change,radius,BrushType) )
+							this->setChanged( j, i );
 					}
 				}
 			}
 		}
 	}
 	
-	for( int j = 0; j < 64; ++j )
+	for( size_t j = 0; j < 64; ++j )
 	{
-		for( int i = 0; i < 64; ++i )
+		for( size_t i = 0; i < 64; ++i )
 		{
 			if( tileLoaded( j, i ) )
 			{
-				for( int ty = 0; ty < 16; ++ty )
+				for( size_t ty = 0; ty < 16; ++ty )
 				{
-					for( int tx = 0; tx < 16; ++tx )
+					for( size_t tx = 0; tx < 16; ++tx )
 					{
 						mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
 					}
@@ -1540,20 +1535,20 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
 		}
 	}
 }
+
 void World::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
 {
-
 	for( int j = 0; j < 64; ++j )
 	{
 		for( int i = 0; i < 64; ++i )
 		{
 			if( tileLoaded( j, i ) )
 			{
-				for( int ty = 0; ty < 16; ++ty )
+				for( size_t ty = 0; ty < 16; ++ty )
 				{
-					for( int tx = 0; tx < 16; ++tx )
+					for( size_t tx = 0; tx < 16; ++tx )
 					{
-						if(mTiles[j][i].tile->getChunk(ty,tx)->flattenTerrain(x,z,h,remain,radius,BrushType))
+						if( mTiles[j][i].tile->getChunk(ty,tx)->flattenTerrain(x,z,h,remain,radius,BrushType) )
 							this->setChanged(j,i);
 					}
 				}
@@ -1561,15 +1556,15 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
 		}
 	}
 	
-	for( int j = 0; j < 64; ++j )
+	for( size_t j = 0; j < 64; ++j )
 	{
-		for( int i = 0; i < 64; ++i )
+		for( size_t i = 0; i < 64; ++i )
 		{
 			if( tileLoaded( j, i ) )
 			{
-				for( int ty = 0; ty < 16; ++ty )
+				for( size_t ty = 0; ty < 16; ++ty )
 				{
-					for( int tx = 0; tx < 16; ++tx )
+					for( size_t tx = 0; tx < 16; ++tx )
 					{
 						mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
 					}
@@ -1581,18 +1576,17 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
 
 void World::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
-
 	for( int j = 0; j < 64; ++j )
 	{
 		for( int i = 0; i < 64; ++i )
 		{
 			if( tileLoaded( j, i ) )
 			{
-				for( int ty = 0; ty < 16; ++ty )
+				for( size_t ty = 0; ty < 16; ++ty )
 				{
-					for( int tx = 0; tx < 16; ++tx )
+					for( size_t tx = 0; tx < 16; ++tx )
 					{
-						if(mTiles[j][i].tile->getChunk(ty,tx)->blurTerrain(x, z, remain, radius, BrushType))
+						if( mTiles[j][i].tile->getChunk(ty,tx)->blurTerrain(x, z, remain, radius, BrushType) )
 							this->setChanged(j,i);
 					}
 				}
@@ -1600,15 +1594,15 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
 		}
 	}
 
-	for( int j = 0; j < 64; ++j )
+	for( size_t j = 0; j < 64; ++j )
 	{
-		for( int i = 0; i < 64; ++i )
+		for( size_t i = 0; i < 64; ++i )
 		{
 			if( tileLoaded( j, i ) )
 			{
-				for( int ty = 0; ty < 16; ++ty )
+				for( size_t ty = 0; ty < 16; ++ty )
 				{
-					for( int tx = 0; tx < 16; ++tx )
+					for( size_t tx = 0; tx < 16; ++tx )
 					{
 						mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
 					}
@@ -1632,9 +1626,9 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 		{
 			if( tileLoaded( j, i ) )
 			{
-				for( int ty = 0; ty < 16; ++ty )
+				for( size_t ty = 0; ty < 16; ++ty )
 				{
-					for( int tx = 0; tx < 16; ++tx )
+					for( size_t tx = 0; tx < 16; ++tx )
 					{
 						if( mTiles[j][i].tile->getChunk( ty, tx )->paintTexture( x, z, Brush, strength, pressure, texture ) )
 						{
@@ -1652,18 +1646,18 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 void World::eraseTextures(float x, float z)
 {
 	this->setChanged(x,z);
-	const int newX = (int)(x / TILESIZE);
-	const int newZ = (int)(z / TILESIZE);
+	const int newX = x / TILESIZE;
+	const int newZ = z / TILESIZE;
 	Log << "Erasing Textures at " << x << " and " << z;
-	for( int j = newZ - 1; j < newZ + 1; ++j )
+	for( size_t j = newZ - 1; j < newZ + 1; ++j )
 	{
-		for( int i = newX - 1; i < newX + 1; ++i )
+		for( size_t i = newX - 1; i < newX + 1; ++i )
 		{
 			if( tileLoaded( j, i ) )
 			{
-				for( int ty = 0; ty < 16; ++ty )
+				for( size_t ty = 0; ty < 16; ++ty )
 				{
-					for( int tx = 0; tx < 16; ++tx )
+					for( size_t tx = 0; tx < 16; ++tx )
 					{
 						MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
 						if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
@@ -1679,19 +1673,19 @@ void World::eraseTextures(float x, float z)
 
 void World::addHole( float x, float z )
 {
-	this->setChanged(x,z);
-	const int newX = (int)(x / TILESIZE);
-	const int newZ = (int)(z / TILESIZE);
+	this->setChanged(x, z);
+	const int newX = x / TILESIZE;
+	const int newZ = z / TILESIZE;
 	
-	for( int j = newZ - 1; j < newZ + 1; ++j )
+	for( size_t j = newZ - 1; j < newZ + 1; ++j )
 	{
-		for( int i = newX - 1; i < newX + 1; ++i )
+		for( size_t i = newX - 1; i < newX + 1; ++i )
 		{
 			if( tileLoaded( j, i ) )
 			{
-				for( int ty = 0; ty < 16; ++ty )
+				for( size_t ty = 0; ty < 16; ++ty )
 				{
-					for( int tx = 0; tx < 16; ++tx )
+					for( size_t tx = 0; tx < 16; ++tx )
 					{
 						MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
 						if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
@@ -1709,19 +1703,19 @@ void World::addHole( float x, float z )
 
 void World::removeHole( float x, float z )
 {
-	this->setChanged(x,z);
-	const int newX = (int)(x / TILESIZE);
-	const int newZ = (int)(z / TILESIZE);
+	this->setChanged(x, z);
+	const int newX = x / TILESIZE;
+	const int newZ = z / TILESIZE;
 	
-	for( int j = newZ - 1; j < newZ + 1; ++j )
+	for( size_t j = newZ - 1; j < newZ + 1; ++j )
 	{
-		for( int i = newX - 1; i < newX + 1; ++i )
+		for( size_t i = newX - 1; i < newX + 1; ++i )
 		{
 			if( tileLoaded( j, i ) )
 			{
-				for( int ty = 0; ty < 16; ++ty )
+				for( size_t ty = 0; ty < 16; ++ty )
 				{
-					for( int tx = 0; tx < 16; ++tx )
+					for( size_t tx = 0; tx < 16; ++tx )
 					{
 						MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
 						if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
@@ -1773,13 +1767,13 @@ void World::saveMap()
 			glScalef(0.08333333f,0.08333333f,1.0f);
 
 			//glTranslatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
-			glTranslatef((float)-x*16-8,(float)-y*16-8,0);
+			glTranslatef( x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f );
 	
 			ATile->drawTextures();
 			glPopMatrix();
 			glReadPixels(video.xres/2-128,video.yres/2-128,256,256,GL_RGB,GL_UNSIGNED_BYTE,image);
 			video.flip();
-			sprintf(tfname,"%s_map_%d_%d.raw",basename.c_str(),x,y);
+			snprintf(tfname, sizeof(tfname),"%s_map_%d_%d.raw",basename.c_str(),x,y);
 			fid=fopen(tfname,"wb");
 			fwrite(image,256*3,256,fid);
 			fclose(fid);
@@ -1855,7 +1849,7 @@ void World::addM2( Model *model, Vec3D newPos )
 
 	if(Settings::getInstance()->copy_size)
 	{
-		newModelis.sc = newModelis.sc * (( float( rand() ) / float( RAND_MAX ) * 0.2 ) + 0.90);
+		newModelis.sc *= misc::randfloat( 0.9f, 1.1f );
 	}	
 
 	mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
@@ -1905,9 +1899,9 @@ bool World::getChanged(int x, int z)
 void World::setFlag( bool to, float x, float z)
 {
 	// set the inpass flag to selected chunk
-	this->setChanged(x,z);
-	const int newX = (int)(x / TILESIZE);
-	const int newZ = (int)(z / TILESIZE);
+	this->setChanged(x, z);
+	const int newX = x / TILESIZE;
+	const int newZ = z / TILESIZE;
 
 	for( int j = newZ - 1; j < newZ + 1; ++j )
 	{
@@ -2002,7 +1996,7 @@ void World::moveHeight(int id, int x, int z , int _cx, int _cz)
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
-	glBufferData(GL_ARRAY_BUFFER, mapbufsize*3*sizeof(float), curChunk->mVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
 
 
 }

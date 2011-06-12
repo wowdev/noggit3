@@ -1,6 +1,9 @@
 #ifndef __TREEVIEW_H
 #define __TREEVIEW_H
 
+#include <string>
+#include <vector>
+
 #include "frame.h"
 #include "buttonUI.h"
 

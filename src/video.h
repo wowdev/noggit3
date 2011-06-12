@@ -67,7 +67,7 @@ namespace OpenGL
   	int w,h;
   	GLuint id;
   	
-  	Texture(const std::string& pname);
+  	explicit Texture(const std::string& pname);
   	const GLuint getId() const;
   	void render() const;
   	

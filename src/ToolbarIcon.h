@@ -1,6 +1,8 @@
 #ifndef __ICON_H
 #define __ICON_H
 
+#include <string>
+
 #include "frame.h"
 #include "UIEventClasses.h"
 

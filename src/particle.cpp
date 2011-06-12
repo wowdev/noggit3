@@ -1,4 +1,7 @@
 #include "particle.h"
+
+#include <list>
+
 #include "misc.h"
 
 static const unsigned int MAX_PARTICLES = 10000;
@@ -28,7 +31,7 @@ T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
 }
 
 
-void ParticleSystem::init(MPQFile &f, ModelParticleEmitterDef &mta, int *globals)
+void ParticleSystem::init(const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals)
 {
 	speed.init	 (mta.EmissionSpeed, f, globals);
 	variation.init(mta.SpeedVariation, f, globals);
@@ -45,9 +48,9 @@ void ParticleSystem::init(MPQFile &f, ModelParticleEmitterDef &mta, int *globals
 	Vec3D colors2[3];
 	memcpy(colors2, f.getBuffer()+mta.p.colors.ofsKeys, sizeof(Vec3D)*3);
 	for (size_t i=0; i<3; ++i) {
-		float opacity = *(short*)(f.getBuffer()+mta.p.opacity.ofsKeys+i*2);
+		float opacity = *reinterpret_cast<int16_t*>(f.getBuffer()+mta.p.opacity.ofsKeys+i*2);
 		colors[i] = Vec4D(colors2[i].x/255.0f, colors2[i].y/255.0f, colors2[i].z/255.0f, opacity/32767.0f);
-		sizes[i] = (*(float*)(f.getBuffer()+mta.p.sizes.ofsKeys+i*4))*mta.p.scales[i];
+		sizes[i] = (*reinterpret_cast<float*>(f.getBuffer()+mta.p.sizes.ofsKeys+i*4))*mta.p.scales[i];
 	}
 	mid = 0.5;
 	slowdown = mta.p.slowdown;
@@ -129,12 +132,12 @@ void ParticleSystem::update(float dt)
 			if (rem<0) 
 				rem = 0;
 		} else {
-			int tospawn = (int)ftospawn;
+			int tospawn = ftospawn;
 			
 			if ((tospawn + particles.size()) > MAX_PARTICLES) // Error check to prevent the program from trying to load insane amounts of particles.
-				tospawn = (int)particles.size() - MAX_PARTICLES;
+				tospawn = particles.size() - MAX_PARTICLES;
 			
-			rem = ftospawn - (float)tospawn;
+			rem = ftospawn - static_cast<float>(tospawn);
 			
 			
 			float w = areal.getValue(manim, mtime) * 0.5f;
@@ -661,7 +664,7 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
 	if (sys->flags == 1041) { // Trans Halo
 		p.pos = sys->parent->mat * (sys->pos + Vec3D(misc::randfloat(-l,l), 0, misc::randfloat(-w,w)));
 		
-		const float t = misc::randfloat(0.0f, float(2*PI));
+		const float t = misc::randfloat(0.0f, 2.0f * PI);
 		
 		p.pos = Vec3D(0.0f, sys->pos.y + 0.15f, sys->pos.z) + Vec3D(cos(t)/8, 0.0f, sin(t)/8); // Need to manually correct for the halo - why?
 		
@@ -732,9 +735,9 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 	// Spread should never be zero for sphere particles ?
 	float t = 0;
 	if (spr == 0)
-		t = misc::randfloat((float)-PI,(float)PI);
+		t = misc::randfloat(-PI, PI);
 	else
-		t = misc::randfloat(-spr,spr);
+		t = misc::randfloat(-spr, spr);
 	
 	//Spread Calculation
 	Matrix mrot;
@@ -795,13 +798,14 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 		//p.pos = sys->parent->mat * p.pos;
 		
 		
-		if ((bdir.lengthSquared()==0) && ((sys->flags&0x100)!=0x100))
+		if (!bdir.lengthSquared() && !(sys->flags & 0x100))
 		{
 			p.speed = Vec3D(0,0,0);
 			dir = sys->parent->mrot * Vec3D(0,1,0);
 		}
-		else {
-			if(sys->flags&0x100)
+		else
+		{
+			if(sys->flags & 0x100)
 				dir = sys->parent->mrot * Vec3D(0,1,0);
 			else
 				dir = bdir.normalize();
@@ -822,10 +826,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 	return p;
 }
 
-
-
-
-void RibbonEmitter::init(MPQFile &f, ModelRibbonEmitterDef &mta, int *globals)
+void RibbonEmitter::init(const MPQFile &f, ModelRibbonEmitterDef &mta, int *globals)
 {
 	color.init(mta.color, f, globals);
 	opacity.init(mta.opacity, f, globals);
@@ -833,7 +834,7 @@ void RibbonEmitter::init(MPQFile &f, ModelRibbonEmitterDef &mta, int *globals)
 	below.init(mta.below, f, globals);
 
 	parent = model->bones + mta.bone;
-	int *texlist = (int*)(f.getBuffer() + mta.ofsTextures);
+	uint32_t *texlist = reinterpret_cast<uint32_t*>(f.getBuffer() + mta.ofsTextures);
 	// just use the first texture for now; most models I've checked only had one
 	texture = model->textures[texlist[0]];
 
@@ -842,7 +843,7 @@ void RibbonEmitter::init(MPQFile &f, ModelRibbonEmitterDef &mta, int *globals)
 	//! \todo	figure out actual correct way to calculate length
 	// in BFD, res is 60 and len is 0.6, the trails are very short (too long here)
 	// in CoT, res and len are like 10 but the trails are supposed to be much longer (too short here)
-	numsegs = (int)mta.res;
+	numsegs = mta.res;
 	seglen = mta.length;
 	length = mta.res * seglen;
 

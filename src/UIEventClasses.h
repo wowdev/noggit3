@@ -47,7 +47,7 @@ protected:
 	EventHandlerType eventHandler;
 	UIEventListener* listener;
 public:
-	UIEventSender(UIEventClassConstructorArguments) : eventHandler(_eventHandler), listener(_listener) {
+	explicit UIEventSender(UIEventClassConstructorArguments) : eventHandler(_eventHandler), listener(_listener) {
 		assert( eventHandler && listener );
 	}
 	//UIEventSender() : eventHandler(NULL), listener(NULL) { }

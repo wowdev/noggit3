@@ -1,4 +1,7 @@
 #include "ToolbarIcon.h"
+
+#include <string>
+
 #include "video.h" // gl*
 #include "TextureManager.h" // TextureManager, Texture
 
@@ -8,7 +11,7 @@ ToolbarIcon::ToolbarIcon( float xPos, float yPos, float w, float h, const std::s
 	textureSelected = TextureManager::newTexture( texd );
 }
 
-frame *ToolbarIcon::processLeftClick(float /*mx*/,float /*my*/)
+frame* ToolbarIcon::processLeftClick(float /*mx*/,float /*my*/)
 {
   UIEventEventHandlerCall(iconId);
   

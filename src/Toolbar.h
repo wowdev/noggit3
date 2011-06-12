@@ -1,8 +1,9 @@
 #ifndef __TOOLBAR_H
 #define __TOOLBAR_H
 
+#include <string>
+
 #include "window.h"
-#include "FreeType.h" // fonts.
 #include "UIEventClasses.h"
 
 class Gui;

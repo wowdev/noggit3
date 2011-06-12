@@ -7,9 +7,15 @@
 
 //Include our header file.
 #include "FreeType.h"
+
+#include <algorithm>
+#include <string>
+#include <vector>
+
 #include "mpq.h"
 #include "Log.h"
 #include "video.h"
+
 
 namespace freetype {
 
@@ -80,7 +86,7 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 		for(int i=0; i < width; ++i){
 			expanded_data[2*(i+j*width)]=expanded_data[2*(i+j*width)+1]= 
 				(i>=bitmap.width || j>=bitmap.rows) ?
-				0 : (unsigned char)min((float)(bitmap.buffer[i + bitmap.width*j])*1.5f,255.0f);
+				0 : static_cast<unsigned char>(min(static_cast<float>(bitmap.buffer[i + bitmap.width*j])*1.5f,255.0f));
 		}
 	}
 

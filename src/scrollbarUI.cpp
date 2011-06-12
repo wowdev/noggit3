@@ -1,14 +1,17 @@
 #include "scrollbarUI.h"
-#include "buttonUI.h"
-#include "textureUI.h"
+
 #include <iostream>
 #include <sstream>
+#include <vector>
+
+#include "buttonUI.h"
+#include "textureUI.h"
 #include "log.h"
 #include "misc.h"
 
 void scrollbarProcessClick(frame *f,int id)
 {
-	((scrollbarUI *)(f->parent))->clickReturn(id);
+  (reinterpret_cast<scrollbarUI*>(f->parent))->clickReturn(id);
 }
 
 scrollbarUI::scrollbarUI(float xpos, float ypos, float h, int n)
@@ -36,7 +39,7 @@ bool scrollbarUI::processLeftDrag(float /*mx*/,float my, float /*xChange*/, floa
 {
 	if(num<0) false;
 	float tx,ty;
-	this->getOffset(tx,ty);
+	this->getOffset(&tx,&ty);
 	my-=(ty+32);
 	value=misc::FtoIround(num*my/(height-64));
 

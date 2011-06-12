@@ -1,11 +1,13 @@
-#include <algorithm>
-
 #include "TextureManager.h"
+
+#include <algorithm>
+#include <map>
+#include <string>
+#include <stdint.h>
+
 #include "Log.h"
 #include "mpq.h"
 #include "video.h"
-
-#include <stdint.h>
 
 #pragma pack(push,1)
 struct BLPHeader 
@@ -122,7 +124,7 @@ bool TextureManager::LoadBLP(GLuint id, OpenGL::Texture *tex)
 					for (int y=0; y<h; y++) {
 						for (int x=0; x<w; x++) {
 							unsigned int k = pal[*c++];
-							k = ((k&0x00FF0000)>>16) | ((k&0x0000FF00)) | ((k& 0x000000FF)<<16);
+							k = ( ( k & 0x00FF0000 ) >> 16 ) | ( ( k & 0x0000FF00 ) ) | ( ( k & 0x000000FF ) << 16 );
 							int alpha = 0xFF;
 							if (hasalpha) 
 							{
@@ -148,7 +150,9 @@ bool TextureManager::LoadBLP(GLuint id, OpenGL::Texture *tex)
 
 					glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf2);
 
-				} else break;
+				}
+				else
+				  break;
 				w >>= 1;
 				h >>= 1;
 			}

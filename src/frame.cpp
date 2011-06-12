@@ -1,7 +1,9 @@
 #include "frame.h"
-#include "video.h" // gl*
 
 #include <algorithm>
+#include <vector>
+
+#include "video.h" // gl*
 
 void frame::render() const
 {
@@ -71,15 +73,15 @@ bool frame::processRightClick( float mx, float my )
 	return false;
 }
 
-void frame::getOffset( float &xOff, float &yOff )
+void frame::getOffset( float* xOff, float* yOff )
 {
 	float tx = 0.0f, ty = 0.0f;
 
 	if( parent )
-		parent->getOffset( tx, ty );
+		parent->getOffset( &tx, &ty );
 
-	xOff = tx + x;
-	yOff = ty + y;
+	*xOff = tx + x;
+	*yOff = ty + y;
 }
 
 bool frame::processKey( char /*key*/, bool /*shift*/, bool /*alt*/, bool /*ctrl*/ )

@@ -1,6 +1,8 @@
 #ifndef __STATUSBAR_H
 #define __STATUSBAR_H
 
+#include <string>
+
 #include "window.h"
 #include "FreeType.h" // fonts.
 

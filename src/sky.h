@@ -2,6 +2,7 @@
 #define SKY_H
 
 #include <vector>
+#include <string>
 
 #include "mpq.h"
 #include "DBCFile.h"
@@ -23,7 +24,7 @@ public:
 	Vec3D pos;
 	float r1, r2;
 
-	Sky( DBCFile::Iterator data );
+	explicit Sky( DBCFile::Iterator data );
 
 	std::vector<SkyColor> colorRows[36];
 	int mmin[36];
@@ -75,7 +76,7 @@ public:
 	std::vector<Sky> skies;
 	Vec3D colorSet[18];
 
-	Skies( unsigned int mapid );
+	explicit Skies( unsigned int mapid );
 	~Skies();
 
 	void findSkyWeights(Vec3D pos);
@@ -103,7 +104,7 @@ struct OutdoorLightStats {
 	float dayIntensity, nightIntensity, ambientIntensity, fogIntensity, fogDepth;
 	Vec3D dayColor, nightColor, ambientColor, fogColor, dayDir, nightDir;
 
-	void init(MPQFile &f);
+	void init(MPQFile* f);
 
 	void interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r);
 	void setupLighting();
@@ -117,7 +118,7 @@ class OutdoorLighting {
 	std::vector<OutdoorLightStats> lightStats;
 
 public:
-	OutdoorLighting( const std::string& fname );
+	explicit OutdoorLighting( const std::string& fname );
 
 	OutdoorLightStats getLightStats(int time);
 

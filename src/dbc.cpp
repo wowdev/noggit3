@@ -1,6 +1,9 @@
 #include "dbc.h"
-#include "Log.h"
+
+#include <string>
+
 #include "misc.h"
+#include "Log.h"
 
 AreaDB gAreaDB;
 MapDB gMapDB;
@@ -60,7 +63,7 @@ std::string AreaDB::getAreaName( int pAreaID )
 		}
 	}
 	
-	areaName = misc::replaceSpezialChars(areaName);
+	areaName = misc::replaceSpecialChars( areaName );
 
 	return areaName;
 }

@@ -2,6 +2,8 @@
 
 #include "ConfigFile.h"
 
+#include <string>
+
 using std::string;
 
 ConfigFile::ConfigFile( string filename, string delimiter,
@@ -42,12 +44,12 @@ bool ConfigFile::keyExists( const string& key ) const
 
 
 /* static */
-void ConfigFile::trim( string& s )
+void ConfigFile::trim( string* s )
 {
 	// Remove leading and trailing whitespace
 	static const char whitespace[] = " \n\t\v\r\f";
-	s.erase( 0, s.find_first_not_of(whitespace) );
-	s.erase( s.find_last_not_of(whitespace) + 1U );
+	s->erase( 0, s->find_first_not_of(whitespace) );
+	s->erase( s->find_last_not_of(whitespace) + 1U );
 }
 
 
@@ -115,7 +117,7 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 				terminate = true;
 				
 				string nlcopy = nextline;
-				ConfigFile::trim(nlcopy);
+				ConfigFile::trim(&nlcopy);
 				if( nlcopy == "" ) continue;
 				
 				nextline = nextline.substr( 0, nextline.find(comm) );
@@ -125,15 +127,15 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 					continue;
 				
 				nlcopy = nextline;
-				ConfigFile::trim(nlcopy);
+				ConfigFile::trim(&nlcopy);
 				if( nlcopy != "" ) line += "\n";
 				line += nextline;
 				terminate = false;
 			}
 			
 			// Store key and value
-			ConfigFile::trim(key);
-			ConfigFile::trim(line);
+			ConfigFile::trim(&key);
+			ConfigFile::trim(&line);
 			cf.myContents[key] = line;	// overwrites if key is repeated
 		}
 	}

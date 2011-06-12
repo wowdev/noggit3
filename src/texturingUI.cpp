@@ -1,27 +1,27 @@
-#include <algorithm>
-#include <map>
-#include <list>
-#include <sstream>
-
-#include "misc.h"
-#include "noggit.h" // arial14, arialn13
-#include "log.h"
-#include "video.h"
-#include "MapChunk.h"
-//#include "ui.h"
-#include "dbc.h"
-#include "mpq.h"
 #include "texturingUI.h"
-#include "TextureManager.h" // TextureManager, Texture
 
-// ui classes
-#include "closeWindowUI.h" // closeWindowUI
-#include "textureUI.h" // textureUI
-#include "textUI.h" // textUI
-#include "checkboxUI.h" // checkboxUI
-#include "Gui.h" // Gui
-#include "Toolbar.h" // Toolbar
+#include <algorithm>
+#include <list>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "buttonUI.h" // buttonUI
+#include "checkboxUI.h" // checkboxUI
+#include "closeWindowUI.h" // closeWindowUI
+#include "dbc.h"
+#include "Gui.h" // Gui
+#include "log.h"
+#include "MapChunk.h"
+#include "misc.h"
+#include "mpq.h"
+#include "noggit.h" // arial14, arialn13
+#include "textUI.h" // textUI
+#include "TextureManager.h" // TextureManager, Texture
+#include "textureUI.h" // textureUI
+#include "Toolbar.h" // Toolbar
+#include "video.h"
 
 //! \todo	Get this whole thing in a seperate class.
 
@@ -172,7 +172,7 @@ void showPage( int pPage )
 	if( gPageNumber )
 	{
 		std::stringstream pagenumber;
-		pagenumber << (pPage+1) << " / " << int( gTexturesInList.size() / ( pal_cols * pal_rows ) + 1 );
+		pagenumber << (pPage+1) << " / " << static_cast<int>( gTexturesInList.size() / ( pal_cols * pal_rows ) + 1 );
 		gPageNumber->setText( pagenumber.str() );
 	}
 
@@ -217,7 +217,7 @@ void changePage( frame*, int direction )
 	using std::min;
 	using std::max;
 	gCurrentPage = max( gCurrentPage + direction, 0 );
-	gCurrentPage = min( gCurrentPage, int( gTexturesInList.size() / ( pal_cols * pal_rows ) ) );
+	gCurrentPage = min( gCurrentPage, static_cast<int>( gTexturesInList.size() / ( pal_cols * pal_rows ) ) );
 	showPage( gCurrentPage );
 }
 
@@ -566,7 +566,7 @@ void TexturingUI::setChunkWindow(MapChunk *chunk)
 {
 	char Temp[255];
 
-	sprintf(Temp,"Chunk %d, %d at (%.2f, %.2f, %.2f)",chunk->px,chunk->py,chunk->xbase,chunk->ybase,chunk->zbase);
+	snprintf(Temp, sizeof(Temp),"Chunk %d, %d at (%.2f, %.2f, %.2f)",chunk->px,chunk->py,chunk->xbase,chunk->ybase,chunk->zbase);
 	chunkLocation->setText(Temp);///
 
 
@@ -580,31 +580,31 @@ void TexturingUI::setChunkWindow(MapChunk *chunk)
 	{
 		areaName = "";
 	}	
-	sprintf(Temp,"AreaID: %s (%d)",areaName.c_str(),chunk->areaID);
+	snprintf(Temp, sizeof(Temp),"AreaID: %s (%d)",areaName.c_str(),chunk->areaID);
 	chunkAreaID->setText(Temp);///
 	
-	sprintf(Temp,"Flags: %d",chunk->Flags);
+	snprintf(Temp, sizeof(Temp),"Flags: %d",chunk->Flags);
 	chunkFlags->setText(Temp);///
 
 	for(int ch=0;ch<5;ch++)
 		chunkFlagChecks[ch]->setState(false);
 
 
-	if(chunk->Flags&FLAG_SHADOW)
+	if(chunk->Flags & FLAG_SHADOW)
 		chunkFlagChecks[0]->setState(true);
-	if(chunk->Flags&FLAG_IMPASS)
+	if(chunk->Flags & FLAG_IMPASS)
 		chunkFlagChecks[1]->setState(true);
-	if(chunk->Flags&FLAG_LQ_RIVER)
+	if(chunk->Flags & FLAG_LQ_RIVER)
 		chunkFlagChecks[2]->setState(true);
-	if(chunk->Flags&FLAG_LQ_OCEAN)
+	if(chunk->Flags & FLAG_LQ_OCEAN)
 		chunkFlagChecks[3]->setState(true);
-	if(chunk->Flags&FLAG_LQ_MAGMA)
+	if(chunk->Flags & FLAG_LQ_MAGMA)
 		chunkFlagChecks[4]->setState(true);
 
 	//sprintf(Temp,"EffectID: %d",chunk->header.effectId);
 	//chunkEffectID->setText(Temp);///
 
-	sprintf(Temp,"Num Effects: %d",chunk->header.nEffectDoodad);
+	snprintf(Temp, sizeof(Temp),"Num Effects: %d",chunk->header.nEffectDoodad);
 	chunkNumEffects->setText(Temp);///
 	
 	//! /todo rework texture reading

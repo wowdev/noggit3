@@ -1,4 +1,7 @@
 #include "shaders.h"
+
+#include <string>
+
 #include "Log.h"
 
 #ifdef USEBLSSHADER

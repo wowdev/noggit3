@@ -1,4 +1,4 @@
-﻿#include <string>
+#include <string>
 #include "misc.h"
 #include <vector>
 #include <map>
@@ -28,26 +28,27 @@ namespace misc
 			a = -127;
 		else if( a > 127 )
 			a = 127;
-		return char( a );
+		return static_cast<char>( a );
 	}
 
 	float frand()
 	{
-			return rand()/(float)RAND_MAX;
+    return rand() / static_cast<float>( RAND_MAX );
 	}
 
 	float randfloat(float lower, float upper)
 	{
-		return lower + (upper-lower)*(rand()/(float)RAND_MAX);
+		return lower + ( upper - lower ) * frand();
 	}
 
 	int randint(int lower, int upper)
 	{
-			return lower + (int)((upper+1-lower)*frand());
+    return lower + static_cast<int>( ( upper + 1 - lower ) * frand() );
 	}
 
-	std::string replaceSpezialChars(std::string text)
+	std::string replaceSpecialChars(const std::string& input)
 	{
+    std::string text = input;
 		find_and_replace(text,"Ã´","o");	//ô
 		find_and_replace(text,"Å¡3","s");	//š
 		find_and_replace(text,"Ã¶","o");	//ö
@@ -133,7 +134,6 @@ namespace misc
 
 	int getADTCord(float cord)
 	{
-		return (int)cord/533.33333;
+    return cord / 533.33333f;
 	}
-
 }

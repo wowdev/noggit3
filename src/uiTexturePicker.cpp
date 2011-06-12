@@ -17,7 +17,7 @@
 void textureClick( frame* f,int id )
 {
 	// redirect to sender object.
-	((uiTexturePicker *)(f->parent))->setTexture(id);
+	(reinterpret_cast<uiTexturePicker *>(f->parent))->setTexture(id);
 }
 
 uiTexturePicker::uiTexturePicker( int xPos,int yPos, int w, int h, Gui *setGui ) : window(xPos,yPos,w,h)

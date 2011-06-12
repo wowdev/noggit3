@@ -6,8 +6,12 @@
 #include <stdlib.h>
 #include <fstream>
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
+#ifdef __FILESAREMISSING
 #include <IL/il.h>
+#endif
 #include "MapView.h"
 //#include "trace.h"
 #include "noggit.h" // gStates, gPop, gFPS, arial14, morpheus40, arial...
@@ -187,9 +191,9 @@ void setTextureBrushLevel(float f)
 void SaveOrReload( frame*, int pMode )
 {
 	if( pMode == 1 )
-		gWorld->reloadTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
+		gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
 	else if( pMode == 0 )
-		gWorld->saveTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
+		gWorld->saveTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
 	else if( pMode == 2 )
 		gWorld->saveChanged();
 	else if( pMode == 3 )
@@ -577,8 +581,10 @@ void clearTexture(frame *f,int set)
 	gWorld->setBaseTexture(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
+#ifdef __FILESAREMISSING
 void exportPNG(frame *f,int set)
 {
+  
 	// create the image and write to disc.
 	GLfloat* data = new GLfloat[272*272];
 
@@ -641,9 +647,11 @@ void importPNG(frame *f,int set)
 		//MessageText << ilGetString(ilGetError()) << "\n";
 		LogDebug << MessageText.str();
 	}
-
-
 }
+#else
+void exportPNG(frame*, int) {}
+void importPNG(frame*, int) {}
+#endif
 
 MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 {
@@ -1068,8 +1076,10 @@ void MapView::tick( float t, float dt )
 					if( Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown)
 					{
 						// clear chunk texture
-						if( mViewMode == eViewMode_3D ) gWorld->eraseTextures(xPos, zPos);
-						else if( mViewMode == eViewMode_2D ) gWorld->eraseTextures( CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+						if( mViewMode == eViewMode_3D )
+						  gWorld->eraseTextures(xPos, zPos);
+						else if( mViewMode == eViewMode_2D )
+						  gWorld->eraseTextures( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
 					}
 					else if( Environment::getInstance()->CtrlDown ) 
 					{
@@ -1086,8 +1096,10 @@ void MapView::tick( float t, float dt )
 								textureBrush.GenerateTexture();
 							}
 
-							if( mViewMode == eViewMode_3D ) gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture()->name ) );
-							else if( mViewMode == eViewMode_2D ) gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture() ->name ) );
+							if( mViewMode == eViewMode_3D )
+							  gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture()->name ) );
+							else if( mViewMode == eViewMode_2D )
+							  gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture() ->name ) );
 						}
 					}					
 				break;
@@ -1385,11 +1397,11 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 	gWorld->drawTileMode(ah);
 	
 	float mX,mY,tRadius;
-	mX=4.0f*video.ratio*((float)MouseX/(float)video.xres-0.5f);
-	mY=4.0f*((float)MouseY/(float)video.yres-0.5f);
+	mX=4.0f*video.ratio*(static_cast<float>(MouseX)/static_cast<float>(video.xres)-0.5f);
+	mY=4.0f*(static_cast<float>(MouseY)/static_cast<float>(video.yres)-0.5f);
 
-	mX=CHUNKSIZE*4.0f*video.ratio*((float)MouseX/(float)video.xres-0.5f)/gWorld->zoom+gWorld->camera.x;
-	mY=CHUNKSIZE*4.0f*((float)MouseY/(float)video.yres-0.5f)/gWorld->zoom+gWorld->camera.z;
+	mX=CHUNKSIZE*4.0f*video.ratio*(static_cast<float>(MouseX)/static_cast<float>(video.xres)-0.5f)/gWorld->zoom+gWorld->camera.x;
+	mY=CHUNKSIZE*4.0f*(static_cast<float>(MouseY)/static_cast<float>(video.yres)-0.5f)/gWorld->zoom+gWorld->camera.z;
 
 	mX=mX/CHUNKSIZE;
 	mY=mY/CHUNKSIZE;
@@ -1544,7 +1556,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 	if( e->type == SDL_KEYDOWN ) 
 	{
-		if((LastClicked)&&(LastClicked->processKey(e->keysym.sym,(e->keysym.mod&KMOD_SHIFT)!=0,(e->keysym.mod&KMOD_CTRL)!=0,(e->keysym.mod&KMOD_ALT)!=0)))
+		if( LastClicked && LastClicked->processKey( e->keysym.sym, e->keysym.mod & KMOD_SHIFT, e->keysym.mod & KMOD_CTRL, e->keysym.mod & KMOD_ALT ) )
 			return;
 		
     if( handleHotkeys( e ) )
@@ -1571,7 +1583,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 		// save
 		if( e->keysym.sym == SDLK_s )
 			if( Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown )
-				gWorld->saveTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
+				gWorld->saveTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
 			else
 				moving = -1.0f;
 		
@@ -1803,7 +1815,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 		// reload a map tile
 		if( e->keysym.sym == SDLK_j && Environment::getInstance()->ShiftDown )
-			gWorld->reloadTile( int( gWorld->camera.x ) / TILESIZE, int( gWorld->camera.z ) / TILESIZE );
+			gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
 		
 		// fog distance or brush radius
 		if( e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS ) 
@@ -2027,8 +2039,8 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 	
 	if( MoveObj )
 	{
-		mh = -video.ratio*e->xrel / float( video.xres );
-		mv = -e->yrel / float( video.yres );
+		mh = -video.ratio*e->xrel / static_cast<float>( video.xres );
+		mv = -e->yrel / static_cast<float>( video.yres );
 	}
 	else
 	{
@@ -2045,7 +2057,7 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 	if( leftMouse && Environment::getInstance()->AltDown )
 	{
 		switch( terrainMode )
-		{	// das ist zum umstellen der brush größe
+		{
 		case 0:
 			groundBrushRadius += e->xrel / XSENS;
 			if( groundBrushRadius > 1000.0f )
@@ -2132,7 +2144,7 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 		 else if (leftMouse)
 		 {
 			// Only left
-			LastClicked = mainGui->tileFrames->processLeftClick( float( MouseX ), float( MouseY ) );	
+			LastClicked = mainGui->tileFrames->processLeftClick( static_cast<float>( MouseX ), static_cast<float>( MouseY ) );	
 			if( mViewMode == eViewMode_3D && !LastClicked )
   		{
   			doSelection( 1 );

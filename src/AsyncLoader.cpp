@@ -1,4 +1,7 @@
 #include "AsyncLoader.h"
+
+#include <list>
+
 #include "AsyncObject.h"
 
 bool isFinished( AsyncObject* object )

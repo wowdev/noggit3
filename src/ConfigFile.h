@@ -100,7 +100,7 @@ public:
 protected:
 	template<class T> static string T_as_string( const T& t );
 	template<class T> static T string_as_T( const string& s );
-	static void trim( string& s );
+	static void trim( string* s );
 
 
 // Exception types
@@ -225,8 +225,8 @@ void ConfigFile::add( string key, const T& value )
 {
 	// Add a key with given value
 	string v = T_as_string( value );
-	trim(key);
-	trim(v);
+	trim(&key);
+	trim(&v);
 	myContents[key] = v;
 	return;
 }
