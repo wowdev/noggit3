@@ -21,6 +21,8 @@
 #include "TextureManager.h"
 
 #include <sstream>
+#include <algorithm>
+#include <vector>
 
 Gui::Gui(MapView *setMapview) : theMapview( setMapview )
 {

@@ -211,10 +211,10 @@ struct MH2O_Render{
 	MH2O_Render(){
 		
 	}
-	MH2O_Render(uint64_t Mask){
+	explicit MH2O_Render(uint64_t Mask){
 		for(int i=0; i < 64; ++i){
 			uint8_t t = Mask << i;
-			mRender[i] = ( (t&0x1) == 1);
+			mRender[i] = t & 0x1;
 		}
 	}
 };

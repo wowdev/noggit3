@@ -45,8 +45,8 @@ frame* minimapWindowUI::processLeftClick( float mx, float my )
 		return NULL;
 
 	// is there a tile?
-	int i =  (int)( mx - this->borderwidth ) / this->tilesize;
-	int j =  (int)( my - this->borderwidth ) / this->tilesize;
+	int i = static_cast<int>( mx - this->borderwidth ) / this->tilesize;
+	int j = static_cast<int>( my - this->borderwidth ) / this->tilesize;
 	if( !gWorld->hasTile(j,i) ) 
 		return NULL;		
 

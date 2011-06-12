@@ -1,6 +1,8 @@
 #ifndef __BUTTONUI_H
 #define __BUTTONUI_H
 
+#include <string>
+
 #include "frame.h"
 
 namespace OpenGL { class Texture; };

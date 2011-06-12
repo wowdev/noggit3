@@ -58,7 +58,7 @@ public:
 		for( std::vector<frame*>::iterator it = children.begin(); it != children.end(); ++it )
 			(*it)->resize();
 	}
-	void getOffset( float &xOff, float &yOff );
+	void getOffset( float* xOff, float* yOff );
 
 	bool IsHit( float pX, float pY )
 	{

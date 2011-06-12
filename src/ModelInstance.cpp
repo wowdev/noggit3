@@ -53,17 +53,17 @@ ModelInstance::ModelInstance(Model *m) : model (m)
 {
 }
 
-ModelInstance::ModelInstance(Model *m, MPQFile &f) : model (m)
+ModelInstance::ModelInstance(Model *m, MPQFile* f) : model (m)
 {
 	float ff[3];
 	
-		f.read(&d1, 4);
-	f.read(ff,12);
+  f->read(&d1, 4);
+	f->read(ff,12);
 	pos = Vec3D(ff[0],ff[1],ff[2]);
-	f.read(ff,12);
+	f->read(ff,12);
 	dir = Vec3D(ff[0],ff[1],ff[2]);
-	short scale;
-	f.read( &scale, 2 );
+	int16_t scale;
+	f->read( &scale, 2 );
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	sc = scale / 1024.0f;
 	nameID=0xFFFFFFFF;
@@ -79,27 +79,24 @@ ModelInstance::ModelInstance(Model *m, ENTRY_MDDF *d) : model (m)
 	nameID=0xFFFFFFFF;
 }
 
-
-
-void ModelInstance::init2(Model *m, MPQFile &f)
+void ModelInstance::init2(Model *m, MPQFile* f)
 {
 	nameID=0xFFFFFFFF;
 	model = m;
 	nameID = SelectionNames.add( this );
 	float ff[3],temp;
-	f.read(ff,12);
+	f->read(ff,12);
 	pos = Vec3D(ff[0],ff[1],ff[2]);
 	temp = pos.z;
 	pos.z = -pos.y;
 	pos.y = temp;
-	f.read(&w,4);
-	f.read(ff,12);
+	f->read(&w,4);
+	f->read(ff,12);
 	dir = Vec3D(ff[0],ff[1],ff[2]);
-	f.read(&sc,4);
-	f.read(&d1,4);
-	lcol = Vec3D(((d1&0xff0000)>>16) / 255.0f, ((d1&0x00ff00)>>8) / 255.0f, (d1&0x0000ff) / 255.0f);
+	f->read(&sc,4);
+	f->read(&d1,4);
+	lcol = Vec3D( ( ( d1 & 0xff0000 ) >> 16 ) / 255.0f, ( ( d1 & 0x00ff00 ) >> 8 ) / 255.0f, ( d1 & 0x0000ff ) / 255.0f);
 }
-
 
 void ModelInstance::draw()
 {

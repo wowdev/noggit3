@@ -26,10 +26,10 @@ public:
 
 	~ModelInstance();
 	ModelInstance();
-	ModelInstance( Model *m );
-	ModelInstance( Model *m, MPQFile &f );
-	ModelInstance( Model *m, ENTRY_MDDF *d );
-		void init2( Model *m, MPQFile &f );
+	explicit ModelInstance( Model *m );
+	explicit ModelInstance( Model *m, MPQFile* f );
+	explicit ModelInstance( Model *m, ENTRY_MDDF *d );
+  void init2( Model *m, MPQFile* f );
 	void draw();
 	void drawMapTile();
 //	void drawHighlight();

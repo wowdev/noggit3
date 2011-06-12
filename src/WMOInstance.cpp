@@ -4,17 +4,17 @@
 #include "world.h" // gWorld
 #include "Log.h"
 
-WMOInstance::WMOInstance( WMO* _wmo, MPQFile& _file ) : wmo( _wmo ), mSelectionID( SelectionNames.add( this ) )
+WMOInstance::WMOInstance( WMO* _wmo, MPQFile* _file ) : wmo( _wmo ), mSelectionID( SelectionNames.add( this ) )
 {
-	_file.read( &mUniqueID, 4 );
-	_file.read( (float*)pos, 12 );
-	_file.read( (float*)dir, 12 );
-	_file.read( (float*)extents[0], 12 );
-	_file.read( (float*)extents[1], 12 );
-	_file.read( &mFlags, 2 );
-	_file.read( &doodadset, 2 );
-	_file.read( &mNameset, 2 );
-	_file.read( &mUnknown, 2 );
+	_file->read( &mUniqueID, 4 );
+	_file->read( &pos, 12 );
+	_file->read( &dir, 12 );
+	_file->read( &extents[0], 12 );
+	_file->read( &extents[1], 12 );
+	_file->read( &mFlags, 2 );
+	_file->read( &doodadset, 2 );
+	_file->read( &mNameset, 2 );
+	_file->read( &mUnknown, 2 );
 }
 
 WMOInstance::WMOInstance( WMO* _wmo, ENTRY_MODF* d ) : wmo( _wmo ), pos( Vec3D( d->pos[0], d->pos[1], d->pos[2] ) ), dir( Vec3D( d->rot[0], d->rot[1], d->rot[2] ) ), mUniqueID( d->uniqueID ), mFlags( d->flags ), mUnknown( d->unknown ), mNameset( d->nameSet ), doodadset( d->doodadSet ), mSelectionID( SelectionNames.add( this ) )

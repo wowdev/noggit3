@@ -1,6 +1,8 @@
-
 #ifndef PARTICLE_H
 #define PARTICLE_H
+
+#include <list>
+#include <vector>
 
 class ParticleSystem;
 class RibbonEmitter;
@@ -8,8 +10,6 @@ class RibbonEmitter;
 #include "model.h"
 #include "animated.h"
 #include "video.h" // GLuint
-
-#include <list>
 
 struct Particle {
 	Vec3D pos, speed, down, origin, dir;
@@ -26,19 +26,19 @@ class ParticleEmitter {
 protected:
 	ParticleSystem *sys;
 public:
-	ParticleEmitter(ParticleSystem *psys): sys(psys) {}
+	explicit ParticleEmitter(ParticleSystem *psys): sys(psys) {}
 	virtual Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2) = 0;
 };
 
 class PlaneParticleEmitter: public ParticleEmitter {
 public:
-	PlaneParticleEmitter(ParticleSystem *_sys): ParticleEmitter(_sys) {}
+	explicit PlaneParticleEmitter(ParticleSystem *_sys): ParticleEmitter(_sys) {}
 	Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
 class SphereParticleEmitter: public ParticleEmitter {
 public:
-	SphereParticleEmitter(ParticleSystem *_sys): ParticleEmitter(_sys) {}
+	explicit SphereParticleEmitter(ParticleSystem *_sys): ParticleEmitter(_sys) {}
 	Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
@@ -95,7 +95,7 @@ public:
 	}
 	~ParticleSystem() { if( emitter ) { delete emitter; emitter = NULL; } }
 
-	void init(MPQFile &f, ModelParticleEmitterDef &mta, int *globals);
+	void init(const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals);
 	void update(float dt);
 
 	void setup(int anim, int time);
@@ -137,7 +137,7 @@ class RibbonEmitter {
 public:
 	Model *model;
 
-	void init(MPQFile &f, ModelRibbonEmitterDef &mta, int *globals);
+	void init(const MPQFile &f, ModelRibbonEmitterDef &mta, int *globals);
 	void setup(int anim, int time);
 	void draw();
 };

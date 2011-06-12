@@ -1,11 +1,14 @@
-#include <algorithm>
-
 #include "TreeView.h"
-#include "video.h"
-#include "textUI.h"
-#include "directory.h"
 
+#include <algorithm>
+#include <map>
+#include <string>
+#include <vector>
+
+#include "directory.h"
 #include "noggit.h" // arial12
+#include "textUI.h"
+#include "video.h"
 
 TreeViewButton::TreeViewButton( float _x, float _y, TreeView* pTreeView ) : buttonUI(	_x, _y, 12.0f, 12.0f, "Interface\\Buttons\\UI-PlusButton-Up.blp", "Interface\\Buttons\\UI-PlusButton-Down.blp" ), mTreeView( pTreeView )
 {
@@ -101,7 +104,7 @@ void TreeView::Toggle()
 	
 	if( mParent )
 		if( !mExpanded )
-			mParent->Move( -int( ( mOthers.size() + mFiles.size() ) ), this );
+			mParent->Move( -static_cast<int>( ( mOthers.size() + mFiles.size() ) ), this );
 		else
 			mParent->Move( ( mOthers.size() + mFiles.size() ), this );
 }

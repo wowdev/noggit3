@@ -1,15 +1,18 @@
 #include "Toolbar.h"
-#include "noggit.h" // arialn13
-#include "MinimizeButton.h"
 
-#include "Gui.h"
-#include "textUI.h"
-#include "textureUI.h"
-#include "TextureManager.h" // TextureManager, Texture
-#include "MapView.h" // MapView
+#include <string>
+
 #include "Environment.h" // Environment
+#include "FreeType.h" // fonts.
+#include "Gui.h"
+#include "MapView.h" // MapView
+#include "MinimizeButton.h"
+#include "TextureManager.h" // TextureManager, Texture
 #include "ToolbarIcon.h"
 #include "log.h"
+#include "noggit.h" // arialn13
+#include "textUI.h"
+#include "textureUI.h"
 
 Toolbar::Toolbar(float xPos, float yPos, float w, float h, Gui *setGui) : window( xPos, yPos, w, h, "interface\\tooltips\\ui-tooltip-border.blp" ), mainGui( setGui )
 {

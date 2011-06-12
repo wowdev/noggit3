@@ -12,7 +12,7 @@ struct File
 {
 	std::string mName;
 
-	File( const std::string& pName );
+	explicit File( const std::string& pName );
 };
 
 struct Directory
@@ -22,7 +22,7 @@ struct Directory
 
 	std::string mName;
 	
-	Directory( const std::string& pName );
+	explicit Directory( const std::string& pName );
 	void PrintDirectory( const int pIndent );
 
 	Directory * AddSubDirectory( const std::string& pName );

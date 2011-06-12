@@ -1,14 +1,13 @@
-#include <cassert>
 #include <algorithm>
+#include <cassert>
 #include <map>
-#include <string>
 #include <sstream>
+#include <string>
 
-#include "model.h"
-#include "world.h"
 #include "Log.h"
+#include "model.h"
 #include "TextureManager.h" // TextureManager, Texture
-
+#include "world.h"
 
 int globalTime = 0;
 
@@ -162,23 +161,22 @@ Model::~Model()
 }
 
 
-bool Model::isAnimated(MPQFile &f)
+bool Model::isAnimated(const MPQFile& f)
 {
-	
 	// see if we have any animated bones
-	ModelBoneDef *bo = (ModelBoneDef*)(f.getBuffer() + header.ofsBones);
+	ModelBoneDef *bo = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
 
 	animGeometry = false;
 	animBones = false;
 	mPerInstanceAnimation = false;
 
-	ModelVertex *verts = (ModelVertex*)(f.getBuffer() + header.ofsVertices);
+	ModelVertex *verts = reinterpret_cast<ModelVertex*>(f.getBuffer() + header.ofsVertices);
 	for (size_t i=0; i<header.nVertices && !animGeometry; ++i) {
 		for (size_t b=0; b<4; b++) {
 			if (verts[i].weights[b]>0) {
-				ModelBoneDef &bb = bo[verts[i].bones[b]];
-				if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags&8)) {
-					if (bb.flags&8) {
+				ModelBoneDef& bb = bo[verts[i].bones[b]];
+				if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & 8)) {
+					if (bb.flags & 8) {
 						// if we have billboarding, the model will need per-instance animation
 						mPerInstanceAnimation = true;
 					}
@@ -211,7 +209,7 @@ bool Model::isAnimated(MPQFile &f)
 
 	// animated colors
 	if (header.nColors) {
-		ModelColorDef *cols = (ModelColorDef*)(f.getBuffer() + header.ofsColors);
+		ModelColorDef *cols = reinterpret_cast<ModelColorDef*>(f.getBuffer() + header.ofsColors);
 		for (size_t i=0; i<header.nColors; ++i) {
 			if (cols[i].color.type!=0 || cols[i].opacity.type!=0) {
 				animMisc = true;
@@ -222,7 +220,7 @@ bool Model::isAnimated(MPQFile &f)
 
 	// animated opacity
 	if (header.nTransparency && !animMisc) {
-		ModelTransDef *trs = (ModelTransDef*)(f.getBuffer() + header.ofsTransparency);
+		ModelTransDef *trs = reinterpret_cast<ModelTransDef*>(f.getBuffer() + header.ofsTransparency);
 		for (size_t i=0; i<header.nTransparency; ++i) {
 			if (trs[i].trans.type!=0) {
 				animMisc = true;
@@ -252,7 +250,7 @@ Quaternion fixCoordSystemQuat(Quaternion v)
 }
 
 
-void Model::initCommon(MPQFile &f)
+void Model::initCommon(const MPQFile& f)
 {
 	// assume: origVertices already set
 	if (!animGeometry) {
@@ -278,7 +276,7 @@ void Model::initCommon(MPQFile &f)
 	rad = sqrtf(rad);
 
 	// textures
-	ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + header.ofsTextures);
+	ModelTextureDef *texdef = reinterpret_cast<ModelTextureDef*>(f.getBuffer() + header.ofsTextures);
 	if (header.nTextures) {
 		textures = new GLuint[header.nTextures];
 		char texname[256];
@@ -290,7 +288,7 @@ void Model::initCommon(MPQFile &f)
 			}
 			
 			if (texdef[i].type == 0) {
-				strncpy(texname, (const char*)(f.getBuffer() + texdef[i].nameOfs), texdef[i].nameLen);
+				strncpy(texname, reinterpret_cast<const char*>(f.getBuffer() + texdef[i].nameOfs), texdef[i].nameLen);
 				texname[texdef[i].nameLen] = 0;
 				textures[i] = TextureManager::add(texname);
 			} else {
@@ -312,14 +310,14 @@ void Model::initCommon(MPQFile &f)
 	// init colors
 	if (header.nColors) {
 		colors = new ModelColor[header.nColors];
-		ModelColorDef *colorDefs = (ModelColorDef*)(f.getBuffer() + header.ofsColors);
+		ModelColorDef *colorDefs = reinterpret_cast<ModelColorDef*>(f.getBuffer() + header.ofsColors);
 		for (size_t i=0; i<header.nColors; ++i) colors[i].init(f, colorDefs[i], globalSequences);
 	}
 	// init transparency
-	int16_t *transLookup = (int16_t*)(f.getBuffer() + header.ofsTransparencyLookup);
+	int16_t *transLookup = reinterpret_cast<int16_t*>(f.getBuffer() + header.ofsTransparencyLookup);
 	if (header.nTransparency) {
 		transparency = new ModelTransparency[header.nTransparency];
-		ModelTransDef *trDefs = (ModelTransDef*)(f.getBuffer() + header.ofsTransparency);
+		ModelTransDef *trDefs = reinterpret_cast<ModelTransDef*>(f.getBuffer() + header.ofsTransparency);
 		for (size_t i=0; i<header.nTransparency; ++i) transparency[i].init(f, trDefs[i], globalSequences);
 	}
 
@@ -336,10 +334,10 @@ void Model::initCommon(MPQFile &f)
 			g.close();
 			return;
 		}
-		ModelView *view = (ModelView*)(g.getBuffer());
+		ModelView *view = reinterpret_cast<ModelView*>(g.getBuffer());
 		
-		uint16_t *indexLookup = (uint16_t*)(g.getBuffer() + view->ofsIndex);
-		uint16_t *triangles = (uint16_t*)(g.getBuffer() + view->ofsTris);
+		uint16_t *indexLookup = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsIndex);
+		uint16_t *triangles = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsTris);
 		nIndices = view->nTris;
 		indices = new uint16_t[nIndices];
 		for (size_t i = 0; i<nIndices; ++i) {
@@ -347,12 +345,12 @@ void Model::initCommon(MPQFile &f)
 		}
 		
 		// render ops
-		ModelGeoset *ops = (ModelGeoset*)(g.getBuffer() + view->ofsSub);
-		ModelTexUnit *tex = (ModelTexUnit*)(g.getBuffer() + view->ofsTex);
-		ModelRenderFlags *renderFlags = (ModelRenderFlags*)(f.getBuffer() + header.ofsTexFlags);
-		uint16_t *texlookup = (uint16_t*)(f.getBuffer() + header.ofsTexLookup);
-		uint16_t *texanimlookup = (uint16_t*)(f.getBuffer() + header.ofsTexAnimLookup);
-		int16_t *texunitlookup = (int16_t*)(f.getBuffer() + header.ofsTexUnitLookup);
+		ModelGeoset *ops = reinterpret_cast<ModelGeoset*>(g.getBuffer() + view->ofsSub);
+		ModelTexUnit *tex = reinterpret_cast<ModelTexUnit*>(g.getBuffer() + view->ofsTex);
+		ModelRenderFlags *renderFlags = reinterpret_cast<ModelRenderFlags*>(f.getBuffer() + header.ofsTexFlags);
+		uint16_t *texlookup = reinterpret_cast<uint16_t*>(f.getBuffer() + header.ofsTexLookup);
+		uint16_t *texanimlookup = reinterpret_cast<uint16_t*>(f.getBuffer() + header.ofsTexAnimLookup);
+		int16_t *texunitlookup = reinterpret_cast<int16_t*>(f.getBuffer() + header.ofsTexUnitLookup);
 		
 		showGeosets = new bool[view->nSub];
 		for (size_t i=0; i<view->nSub; ++i) {
@@ -372,7 +370,7 @@ void Model::initCommon(MPQFile &f)
 			
 			size_t geoset = tex[j].op;
 			
-			pass.geoset = (int)geoset;
+			pass.geoset = geoset;
 			
 			pass.indexStart = ops[geoset].istart;
 			pass.indexCount = ops[geoset].icount;
@@ -446,7 +444,7 @@ void Model::initCommon(MPQFile &f)
 	// zomg done
 }
 
-void Model::initStatic( MPQFile &f )
+void Model::initStatic( const MPQFile& f )
 {
 	origVertices = ( ModelVertex* )( f.getBuffer() + header.ofsVertices );
 	
@@ -475,7 +473,7 @@ void Model::initStatic( MPQFile &f )
 		delete[] transparency;
 }
 
-void Model::initAnimated(MPQFile &f)
+void Model::initAnimated(const MPQFile& f)
 { 
 	origVertices = new ModelVertex[header.nVertices];
 	memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
@@ -492,10 +490,10 @@ void Model::initAnimated(MPQFile &f)
 		memcpy(anims, f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
 		
 		animfiles = new MPQFile*[header.nAnimations];
-		char tempname[256];
+		char tempname[1024];
 		for(size_t i=0; i<header.nAnimations; ++i) {
 			std::string lodname = filename.substr(0, filename.length()-3);
-			sprintf(tempname, "%s%04d-%02d.anim", lodname.c_str(), anims[i].animID, anims[i].subAnimID);
+			snprintf(tempname, sizeof(tempname), "%s%04d-%02d.anim", lodname.c_str(), anims[i].animID, anims[i].subAnimID);
 			if (MPQFile::getSize(tempname) > 0) {
 				animfiles[i] = new MPQFile(tempname);
 			}
@@ -509,7 +507,7 @@ void Model::initAnimated(MPQFile &f)
 	if (animBones) {
 		// init bones...
 		bones = new Bone[header.nBones];
-		ModelBoneDef *mb = (ModelBoneDef*)(f.getBuffer() + header.ofsBones);
+		ModelBoneDef *mb = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
 		for (size_t i=0; i<header.nBones; ++i) {
 			bones[i].init(f, mb[i], globalSequences, animfiles);
 		}
@@ -533,7 +531,7 @@ void Model::initAnimated(MPQFile &f)
 	
 	if (animTextures) {
 		texanims = new TextureAnim[header.nTexAnims];
-		ModelTexAnimDef *ta = (ModelTexAnimDef*)(f.getBuffer() + header.ofsTexAnims);
+		ModelTexAnimDef *ta = reinterpret_cast<ModelTexAnimDef*>(f.getBuffer() + header.ofsTexAnims);
 		for (size_t i=0; i<header.nTexAnims; ++i) {
 			texanims[i].init(f, ta[i], globalSequences);
 		}
@@ -541,7 +539,7 @@ void Model::initAnimated(MPQFile &f)
 	
 	// particle systems
 	if (header.nParticleEmitters) {
-		ModelParticleEmitterDef *pdefs = (ModelParticleEmitterDef *)(f.getBuffer() + header.ofsParticleEmitters);
+		ModelParticleEmitterDef *pdefs = reinterpret_cast<ModelParticleEmitterDef*>(f.getBuffer() + header.ofsParticleEmitters);
 		particleSystems = new ParticleSystem[header.nParticleEmitters];
 		for (size_t i=0; i<header.nParticleEmitters; ++i) {
 			particleSystems[i].model = this;
@@ -551,7 +549,7 @@ void Model::initAnimated(MPQFile &f)
 	
 	// ribbons
 	if (header.nRibbonEmitters) {
-		ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(f.getBuffer() + header.ofsRibbonEmitters);
+		ModelRibbonEmitterDef *rdefs = reinterpret_cast<ModelRibbonEmitterDef*>(f.getBuffer() + header.ofsRibbonEmitters);
 		ribbons = new RibbonEmitter[header.nRibbonEmitters];
 		for (size_t i=0; i<header.nRibbonEmitters; ++i) {
 			ribbons[i].model = this;
@@ -561,14 +559,14 @@ void Model::initAnimated(MPQFile &f)
 	
 	// just use the first camera, meh
 	if (header.nCameras>0) {
-		ModelCameraDef *camDefs = (ModelCameraDef*)(f.getBuffer() + header.ofsCameras);
+		ModelCameraDef *camDefs = reinterpret_cast<ModelCameraDef*>(f.getBuffer() + header.ofsCameras);
 		cam.init(f, camDefs[0], globalSequences);
 	}
 	
 	// init lights
 	if (header.nLights) {
 		lights = new ModelLight[header.nLights];
-		ModelLightDef *lDefs = (ModelLightDef*)(f.getBuffer() + header.ofsLights);
+		ModelLightDef *lDefs = reinterpret_cast<ModelLightDef*>(f.getBuffer() + header.ofsLights);
 		for (size_t i=0; i<header.nLights; ++i) 
 			lights[i].init(f, lDefs[i], globalSequences);
 	}
@@ -604,7 +602,7 @@ void Model::animate(int /*_anim*/) //! \todo Is this _anim, not anim down there?
 		
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
 		glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2*vbufsize, NULL, GL_STREAM_DRAW_ARB);
-		vertices = (Vec3D*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
+		vertices = reinterpret_cast<Vec3D*>(glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
 		
 		// transform vertices
 		ModelVertex *ov = origVertices;
@@ -615,8 +613,8 @@ void Model::animate(int /*_anim*/) //! \todo Is this _anim, not anim down there?
 				if (ov->weights[b]>0) {
 					Vec3D tv = bones[ov->bones[b]].mat * ov->pos;
 					Vec3D tn = bones[ov->bones[b]].mrot * ov->normal;
-					v += tv * ((float)ov->weights[b] / 255.0f);
-					n += tn * ((float)ov->weights[b] / 255.0f);
+					v += tv * (static_cast<float>(ov->weights[b]) / 255.0f);
+					n += tn * (static_cast<float>(ov->weights[b]) / 255.0f);
 				}
 			}
 			
@@ -641,7 +639,7 @@ void Model::animate(int /*_anim*/) //! \todo Is this _anim, not anim down there?
 	
 	for (size_t i=0; i<header.nParticleEmitters; ++i) {
 		// random time distribution for teh win ..?
-		int pt = (t + (int)(tmax*particleSystems[i].tofs)) % tmax;
+		int pt = (t + static_cast<int>(tmax*particleSystems[i].tofs)) % tmax;
 		particleSystems[i].setup(anim, pt);
 	}
 	
@@ -872,7 +870,7 @@ void Model::drawModel( /*bool unlit*/ )
 		{
 			glBindBuffer( GL_ARRAY_BUFFER, vbuf );
 			glVertexPointer( 3, GL_FLOAT, 0, 0 );
-			glNormalPointer( GL_FLOAT, 0, ((char *)(0) + (vbufsize)) );
+			glNormalPointer( GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize) );
 		} 
 		else 
 		{
@@ -939,7 +937,7 @@ void Model::drawModelSelect()
 		{
 			glBindBuffer( GL_ARRAY_BUFFER, vbuf );
 			glVertexPointer( 3, GL_FLOAT, 0, 0 );
-			glNormalPointer( GL_FLOAT, 0, ((char *)(0) + (vbufsize)) );
+			glNormalPointer( GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize) );
 		} 
 		else 
 		{
@@ -1041,7 +1039,7 @@ void TextureAnim::setup(int anim)
 	}
 }
 
-void ModelCamera::init(MPQFile &f, ModelCameraDef &mcd, int *global)
+void ModelCamera::init(const MPQFile& f, const ModelCameraDef &mcd, int *global)
 {
 	ok = true;
 		nearclip = mcd.nearclip;
@@ -1076,18 +1074,18 @@ void ModelCamera::setup(int time)
 	//glRotatef(roll, 0, 0, 1);
 }
 
-void ModelColor::init(MPQFile &f, ModelColorDef &mcd, int *global)
+void ModelColor::init(const MPQFile& f, const ModelColorDef &mcd, int *global)
 {
 	color.init(mcd.color, f, global);
 	opacity.init(mcd.opacity, f, global);
 }
 
-void ModelTransparency::init(MPQFile &f, ModelTransDef &mcd, int *global)
+void ModelTransparency::init(const MPQFile& f, const ModelTransDef &mcd, int *global)
 {
 	trans.init(mcd.trans, f, global);
 }
 
-void ModelLight::init(MPQFile &f, ModelLightDef &mld, int *global)
+void ModelLight::init(const MPQFile& f, const ModelLightDef &mld, int *global)
 {
 	tpos = pos = fixCoordSystem(mld.pos);
 	tdir = dir = Vec3D(0,1,0); // no idea
@@ -1127,14 +1125,14 @@ void ModelLight::setup(int time, GLuint l)
 	glEnable(l);
 }
 
-void TextureAnim::init(MPQFile &f, ModelTexAnimDef &mta, int *global)
+void TextureAnim::init(const MPQFile& f, const ModelTexAnimDef &mta, int *global)
 {
 	trans.init(mta.trans, f, global);
 	rot.init(mta.rot, f, global);
 	scale.init(mta.scale, f, global);
 }
 
-void Bone::init(MPQFile &f, ModelBoneDef &b, int *global, MPQFile **animfiles)
+void Bone::init(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **animfiles)
 {
 	parent = b.parent;
 	pivot = fixCoordSystem(b.pivot);

@@ -1,4 +1,7 @@
 #include "dbcfile.h"
+
+#include <string>
+
 #include "mpq.h"
 #include "Log.h"
 

@@ -16,7 +16,7 @@ private:
 	int mProgramType;
 	
 public: 
-	BLSShader( const std::string& pFilename );
+	explicit BLSShader( const std::string& pFilename );
 	
 	void EnableShader()
 	{

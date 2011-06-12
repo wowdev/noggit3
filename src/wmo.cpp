@@ -1,10 +1,16 @@
 #include "wmo.h"
-#include "world.h"
+
+#include <algorithm>
+#include <map>
+#include <string>
+#include <vector>
+
 #include "liquid.h"
-#include "shaders.h"
 #include "Log.h"
-#include "TextureManager.h" // TextureManager, Texture
 #include "ModelManager.h" // ModelManager
+#include "shaders.h"
+#include "TextureManager.h" // TextureManager, Texture
+#include "world.h"
 
 void WMOHighlight( Vec4D color )
 {
@@ -99,12 +105,12 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 			}
 		}
 		else if ( fourcc == 'MOGN' ) {
-			groupnames = (char*)f.getPointer();
+			groupnames = reinterpret_cast<char*>(f.getPointer());
 		}
 		else if ( fourcc == 'MOGI' ) {
 			// group info - important information! ^_^
 			for (unsigned int i=0; i<nGroups; ++i) {
-				groups[i].init(this, f, i, groupnames);
+				groups[i].init(this, &f, i, groupnames);
 
 			}
 		}
@@ -112,7 +118,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 			// Lights?
 			for (unsigned int i=0; i<nLights; ++i) {
 				WMOLight l;
-				l.init(f);
+				l.init(&f);
 				lights.push_back(l);
 			}
 		}
@@ -132,7 +138,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 					ModelManager::add(path);
 					models.push_back(path);
 				}
-				f.seekRelative((int)size);
+				f.seekRelative(size);
 			}
 		}
 		else if ( fourcc == 'MODS' ) {
@@ -143,13 +149,13 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 			}
 		}
 		else if ( fourcc == 'MODD' ) {
-			nModels = (int)size / 0x28;
+			nModels = size / 0x28;
 			for (unsigned int i=0; i<nModels; ++i) {
 				int ofs;
 				f.read(&ofs,4);
-				Model *m = (Model*)ModelManager::items[ModelManager::get(ddnames + ofs)];
+				Model *m = static_cast<Model*>(ModelManager::items[ModelManager::get(ddnames + ofs)]);
 				ModelInstance mi;
-				mi.init2(m,f);
+				mi.init2(m,&f);
 				modelis.push_back(mi);
 			}
 
@@ -165,7 +171,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 
 					if( MPQFile::exists( path ) )
 					{
-						skybox = (Model*)ModelManager::items[ModelManager::add(path)];
+						skybox = static_cast<Model*>(ModelManager::items[ModelManager::add(path)]);
 					}
 					else
 					{
@@ -189,22 +195,22 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 			}
 		}
 		else if ( fourcc == 'MOPR' ) {
-			int nn = (int)size / 8;
-			WMOPR *pr = (WMOPR*)f.getPointer();
+			int nn = size / 8;
+			WMOPR *pr = reinterpret_cast<WMOPR*>(f.getPointer());
 			for (int i=0; i<nn; ++i) {
 				prs.push_back(*pr++);
 			}
 		}
 		else if ( fourcc == 'MFOG' ) {
-			int nfogs = (int)size / 0x30;
+			int nfogs = size / 0x30;
 			for (int i=0; i<nfogs; ++i) {
 				WMOFog fog;
-				fog.init(f);
+				fog.init(&f);
 				fogs.push_back(fog);
 			}
 		}
 
-		f.seek((int)nextpos);
+		f.seek(nextpos);
 	}
 
 	f.close();
@@ -553,15 +559,15 @@ void WMO::drawPortals()
 }
 */
 
-void WMOLight::init(MPQFile &f)
+void WMOLight::init(MPQFile* f)
 {
 	char type[4];
-	f.read(&type,4);
-	f.read(&color,4);
-	f.read(pos, 12);
-	f.read(&intensity, 4);
-	f.read(unk, 4*5);
-	f.read(&r,4);
+	f->read(&type,4);
+	f->read(&color,4);
+	f->read(pos, 12);
+	f->read(&intensity, 4);
+	f->read(unk, 4*5);
+	f->read(&r,4);
 
 	pos = Vec3D(pos.x, pos.z, -pos.y);
 
@@ -617,20 +623,20 @@ void WMOLight::setupOnce(GLint light, Vec3D dir, Vec3D lcol)
 
 
 
-void WMOGroup::init(WMO *_wmo, MPQFile &f, int _num, char *names)
+void WMOGroup::init(WMO *_wmo, MPQFile* f, int _num, char *names)
 {
 	this->wmo = _wmo;
 	this->num = _num;
 
 	// extract group info from f
-	f.read(&flags,4);
+	f->read(&flags,4);
 	float ff[3];
-	f.read(ff,12);
+	f->read(ff,12);
 	VertexBoxMax = Vec3D(ff[0],ff[1],ff[2]);
-	f.read(ff,12);
+	f->read(ff,12);
 	VertexBoxMin = Vec3D(ff[0],ff[1],ff[2]);
 	int nameOfs;
-	f.read(&nameOfs,4);
+	f->read(&nameOfs,4);
 
 	//! \todo	get proper name from group header and/or dbc?
 	if (nameOfs > 0) {
@@ -646,8 +652,8 @@ void WMOGroup::init(WMO *_wmo, MPQFile &f, int _num, char *names)
 
 struct WMOBatch {
 	signed char bytes[12];
-	unsigned int indexStart;
-	unsigned short indexCount, vertexStart, vertexEnd;
+	uint32_t indexStart;
+	uint16_t indexCount, vertexStart, vertexEnd;
 	unsigned char flags, texture;
 };
 
@@ -671,10 +677,10 @@ Vec4D colorFromInt(unsigned int col) {
 	return Vec4D(r/255.0f, g/255.0f, b/255.0f, a/255.0f);
 }
 struct WMOGroupHeader {
-		int nameStart, nameStart2, flags;
+	uint32_t nameStart, nameStart2, flags;
 	float box1[3], box2[3];
-	short portalStart, portalCount;
-	short batches[4];
+	uint16_t portalStart, portalCount;
+	uint16_t batches[4];
 	uint8_t fogs[4];
 	int32_t unk1, id, unk2, unk3;
 };
@@ -684,24 +690,24 @@ void WMOGroup::initDisplayList()
 	Vec3D *vertices = NULL;
 	Vec3D *normals = NULL;
 	Vec2D *texcoords = NULL;
-	unsigned short *indices = NULL;
+	uint16_t *indices = NULL;
 	struct SMOPoly *materials = NULL;
 	WMOBatch *batches = NULL;
 
 	WMOGroupHeader gh;
 
-	short *useLights = 0;
+	uint16_t *useLights = 0;
 	int nLR = 0;
 
 	
 	//! \todo do this the std:: way. also: fixed sizes. arggh.
 	// open group file
 	char temp[256];
-	strcpy(temp, wmo->name.c_str());
+	strncpy(temp, wmo->name.c_str(), sizeof(temp));
 		temp[wmo->name.length()-4] = 0;
 	
 	char fname[256];
-	sprintf(fname,"%s_%03d.wmo",temp, num);
+	snprintf(fname, sizeof(fname),"%s_%03d.wmo",temp, num);
 
 	MPQFile gf(fname);
 	if (gf.isEof()) {
@@ -742,17 +748,17 @@ void WMOGroup::initDisplayList()
 		
 		if ( fourcc == 'MOPY' ) {
 			// materials per triangle
-			nTriangles = (int)size / 2;
-			materials = (struct SMOPoly*)gf.getPointer();
+			nTriangles = size / 2;
+			materials = reinterpret_cast<SMOPoly*>(gf.getPointer());
 		}
 		else if ( fourcc == 'MOVI' ) {
 			// indices
-			indices =	(unsigned short*)gf.getPointer();
+			indices =	reinterpret_cast<uint16_t*>(gf.getPointer());
 		}
 		else if ( fourcc == 'MOVT' ) {
-			nVertices = (int)size / 12;
+			nVertices = size / 12;
 			// let's hope it's padded to 12 bytes, not 16...
-			vertices =	(Vec3D*)gf.getPointer();
+			vertices = reinterpret_cast<Vec3D*>(gf.getPointer());
 			VertexBoxMin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
 			VertexBoxMax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
 			rad = 0;
@@ -769,28 +775,28 @@ void WMOGroup::initDisplayList()
 			rad = (VertexBoxMax-center).length();
 		}
 		else if ( fourcc == 'MONR' ) {
-			normals =	(Vec3D*)gf.getPointer();
+			normals =	reinterpret_cast<Vec3D*>(gf.getPointer());
 		}
 		else if ( fourcc == 'MOTV' ) {
-			texcoords =	(Vec2D*)gf.getPointer();
+			texcoords =	reinterpret_cast<Vec2D*>(gf.getPointer());
 		}
 		else if ( fourcc == 'MOLR' ) {
-			nLR = (int)size / 2;
-			useLights =	(short*)gf.getPointer();
+			nLR = size / 2;
+			useLights =	reinterpret_cast<uint16_t*>(gf.getPointer());
 		}
 		else if ( fourcc == 'MODR' ) {
-			nDoodads = (int)size / 2;
-			ddr = new short[nDoodads];
+			nDoodads = size / 2;
+			ddr = new int16_t[nDoodads];
 			gf.read(ddr,size);
 		}
 		else if ( fourcc == 'MOBA' ) {
-			nBatches = (int)size / 24;
-			batches = (WMOBatch*)gf.getPointer();
+			nBatches = size / 24;
+			batches = reinterpret_cast<WMOBatch*>(gf.getPointer());
 		}
 		else if ( fourcc == 'MOCV' ) {
 			//gLog("CV: %d\n", size);
 			hascv = true;
-			cv = (unsigned int*)gf.getPointer();
+			cv = reinterpret_cast<uint32_t*>(gf.getPointer());
 		}
 		else if ( fourcc == 'MLIQ' ) {
 			// liquids
@@ -806,12 +812,12 @@ void WMOGroup::initDisplayList()
 
 		//! \todo	figure out/use MFOG ?
 
- 		gf.seek((int)nextpos);
+ 		gf.seek(nextpos);
 	}
 
 	// ok, make a display list
 
-	indoor = (flags&8192)!=0;
+	indoor = flags & 8192;
 	//gLog("Lighting: %s %X\n\n", indoor?"Indoor":"Outdoor", flags);
 
 	initLighting(nLR,useLights);
@@ -924,11 +930,11 @@ void WMOGroup::initDisplayList()
 }
 
 
-void WMOGroup::initLighting(int /*nLR*/, short* /*useLights*/)
+void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 {
 	//dl_light = 0;
 	// "real" lighting?
-	if ((flags&0x2000) && hascv) {
+	if ((flags & 0x2000) && hascv) {
 
 		Vec3D dirmin(1,1,1);
 		float lenmin;
@@ -1034,7 +1040,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float
 	// draw doodads
 	glColor4f(1,1,1,1);
 	for (int i=0; i<nDoodads; ++i) {
-		short dd = ddr[i];
+		int16_t dd = ddr[i];
 		if( ! ( wmo->doodadsets.size() < doodadset ) )
 			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {
 
@@ -1075,7 +1081,7 @@ void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const
 	// draw doodads
 	glColor4f(1,1,1,1);
 	for (int i=0; i<nDoodads; ++i) {
-		short dd = ddr[i];
+		int16_t dd = ddr[i];
 		if( ! ( wmo->doodadsets.size() < doodadset ) )
 			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {
 
@@ -1152,9 +1158,9 @@ WMOGroup::~WMOGroup()
 }
 
 
-void WMOFog::init(MPQFile &f)
+void WMOFog::init(MPQFile* f)
 {
-	f.read(this, 0x30);
+	f->read(this, 0x30);
 	color = Vec4D( ((color1 & 0x00FF0000) >> 16)/255.0f, ((color1 & 0x0000FF00) >> 8)/255.0f,
 					(color1 & 0x000000FF)/255.0f, ((color1 & 0xFF000000) >> 24)/255.0f);
 	float temp;

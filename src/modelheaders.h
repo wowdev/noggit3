@@ -287,7 +287,7 @@ struct ModelParticleEmitterDef {
 	int32_t nModelFileName;
 	int32_t ofsModelFileName;
 	int32_t nParticleFileName;
-	int32_t ofsParticleFileName; // TODO
+	int32_t ofsParticleFileName;
 	int8_t blend;
 	int8_t EmitterType;
 	int16_t ParticleColor;

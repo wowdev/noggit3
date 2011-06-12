@@ -1,4 +1,8 @@
 #include "window.h"
+
+#include <vector>
+#include <string>
+
 #include "video.h"
 #include "TextureManager.h" // TextureManager, Texture
 

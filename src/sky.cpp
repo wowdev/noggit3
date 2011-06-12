@@ -1,11 +1,13 @@
-#include <algorithm>
-
 #include "sky.h"
-#include "world.h"
+
+#include <algorithm>
+#include <string>
+
 #include "dbc.h"
 #include "Log.h"
 #include "model.h" // Model
 #include "ModelManager.h" // ModelManager
+#include "world.h"
 
 const float skymul = 36.0f;
 
@@ -126,8 +128,8 @@ Vec3D Sky::colorFor(int r, int t) const
 		}
 	}
 
-	float tt = (float)(t - t1) / (float)(t2-t1);
-		return c1*(1.0f-tt) + c2*tt;
+	float tt = static_cast<float>(t - t1) / static_cast<float>(t2-t1);
+	return c1*(1.0f-tt) + c2*tt;
 }
 
 const float rad = 400.0f;
@@ -215,7 +217,7 @@ Skies::~Skies()
 
 void Skies::findSkyWeights(Vec3D pos)
 {
-	int maxsky = (int)skies.size()-1;
+	int maxsky = skies.size() - 1;
 	skies[maxsky].weight = 1.0f;
 	cs = maxsky;
 	for (int i=maxsky-1; i>=0; i--) {
@@ -272,8 +274,8 @@ void drawCircle(unsigned int *buf, int dim, float x, float y, float r, unsigned 
 	glBegin( GL_LINES );
 	for (int i=0; i<circ; ++i) {
 		float phi = 2*PI*i/circ;
-		int px = (int)(x + r * cosf(phi));
-		int py = (int)(y + r * sinf(phi));
+		int px = x + r * cosf(phi);
+		int py = y + r * sinf(phi);
 		if (px>=0 && px<dim && py>=0 && py<dim) {
 						buf[py*dim+px] = col;
 		}
@@ -321,71 +323,71 @@ bool Skies::drawSky(const Vec3D &pos)
 
 //! \todo	figure out what dnc.db is _really_ used for
 
-void OutdoorLightStats::init(MPQFile &f)
+void OutdoorLightStats::init(MPQFile* f)
 {
 	float h,m;
 
-	f.seekRelative(4);
-	f.read(&h,4);
-	f.seekRelative(4);
-	f.read(&m,4);
-	f.seekRelative(4);
-	f.read(&dayIntensity,4);
+	f->seekRelative(4);
+	f->read(&h,4);
+	f->seekRelative(4);
+	f->read(&m,4);
+	f->seekRelative(4);
+	f->read(&dayIntensity,4);
 	
-	f.seekRelative(4);
-	f.read(&dayColor.x,4);
-	f.seekRelative(4);
-	f.read(&dayColor.y,4);
-	f.seekRelative(4);
-	f.read(&dayColor.z,4);
+	f->seekRelative(4);
+	f->read(&dayColor.x,4);
+	f->seekRelative(4);
+	f->read(&dayColor.y,4);
+	f->seekRelative(4);
+	f->read(&dayColor.z,4);
 
-	f.seekRelative(4);
-	f.read(&dayDir.x,4);
-	f.seekRelative(4);
-	f.read(&dayDir.y,4);
-	f.seekRelative(4);
-	f.read(&dayDir.z,4);
+	f->seekRelative(4);
+	f->read(&dayDir.x,4);
+	f->seekRelative(4);
+	f->read(&dayDir.y,4);
+	f->seekRelative(4);
+	f->read(&dayDir.z,4);
 
-	f.seekRelative(4);
-	f.read(&nightIntensity, 4);
+	f->seekRelative(4);
+	f->read(&nightIntensity, 4);
 
-	f.seekRelative(4);
-	f.read(&nightColor.x,4);
-	f.seekRelative(4);
-	f.read(&nightColor.y,4);
-	f.seekRelative(4);
-	f.read(&nightColor.z,4);
+	f->seekRelative(4);
+	f->read(&nightColor.x,4);
+	f->seekRelative(4);
+	f->read(&nightColor.y,4);
+	f->seekRelative(4);
+	f->read(&nightColor.z,4);
 
-	f.seekRelative(4);
-	f.read(&nightDir.x,4);
-	f.seekRelative(4);
-	f.read(&nightDir.y,4);
-	f.seekRelative(4);
-	f.read(&nightDir.z,4);
+	f->seekRelative(4);
+	f->read(&nightDir.x,4);
+	f->seekRelative(4);
+	f->read(&nightDir.y,4);
+	f->seekRelative(4);
+	f->read(&nightDir.z,4);
 
-	f.seekRelative(4);
-	f.read(&ambientIntensity, 4);
+	f->seekRelative(4);
+	f->read(&ambientIntensity, 4);
 
-	f.seekRelative(4);
-	f.read(&ambientColor.x,4);
-	f.seekRelative(4);
-	f.read(&ambientColor.y,4);
-	f.seekRelative(4);
-	f.read(&ambientColor.z,4);
+	f->seekRelative(4);
+	f->read(&ambientColor.x,4);
+	f->seekRelative(4);
+	f->read(&ambientColor.y,4);
+	f->seekRelative(4);
+	f->read(&ambientColor.z,4);
 
-	f.seekRelative(4);
-	f.read(&fogDepth, 4);
-	f.seekRelative(4);
-	f.read(&fogIntensity, 4);
+	f->seekRelative(4);
+	f->read(&fogDepth, 4);
+	f->seekRelative(4);
+	f->read(&fogIntensity, 4);
 
-	f.seekRelative(4);
-	f.read(&fogColor.x,4);
-	f.seekRelative(4);
-	f.read(&fogColor.y,4);
-	f.seekRelative(4);
-	f.read(&fogColor.z,4);
+	f->seekRelative(4);
+	f->read(&fogColor.x,4);
+	f->seekRelative(4);
+	f->read(&fogColor.y,4);
+	f->seekRelative(4);
+	f->read(&fogColor.z,4);
 
-		time = (int)h * 60 * 2 + (int)m * 2;
+	time = ( h * 60 + m ) * 2;
 
 	// HACK: make day & night intensity exclusive; set day intensity to 1.0
 	if (dayIntensity > 0) {
@@ -491,7 +493,7 @@ OutdoorLighting::OutdoorLighting( const std::string& fname)
 
 	while (f.getPos() < d) {
 		OutdoorLightStats ols;
-		ols.init(f);
+		ols.init(&f);
 
 		lightStats.push_back(ols);
 	}

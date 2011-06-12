@@ -2,6 +2,7 @@
 #define __MENUBAR_H
 
 #include <map>
+#include <string>
 
 #include "buttonUI.h"
 #include "window.h"

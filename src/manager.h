@@ -14,7 +14,7 @@ public:
 	//! \todo make this private, create getName().
 	std::string name;
 
-	ManagedItem( const std::string& n ) : refcount( 0 )
+	explicit ManagedItem( const std::string& n ) : refcount( 0 )
 	{
 		name = n;
 		std::transform( name.begin(), name.end(), name.begin(), ::tolower );

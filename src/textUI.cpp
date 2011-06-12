@@ -1,4 +1,7 @@
 #include "textUI.h"
+
+#include <string>
+
 #include "FreeType.h"
 #include "video.h"
 

@@ -5,6 +5,9 @@
 
 class Liquid;
 
+#include <string>
+#include <vector>
+
 #include "video.h"
 #include "mpq.h"
 #ifdef USEBLSFILES
@@ -15,7 +18,10 @@ class Liquid;
 
 //#include "Log.h"
 
-class OpenGL::CallList;
+namespace OpenGL
+{
+  class CallList;
+};
 
 //static int lCount = 0;
 
@@ -70,7 +76,7 @@ class Liquid
 	float ydir;
 	float texRepeats;
 
-	void initGeometry(MPQFile &f);
+	void initGeometry(MPQFile* f);
 
 	template<int pFirst, int pLast>
 	void initTextures( const std::string& pFilename );
@@ -104,8 +110,8 @@ public:
 	
 
 	//void init(MPQFile &f);
-	void initFromTerrain(MPQFile &f, int flags);
-	void initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor);
+	void initFromTerrain(MPQFile* f, int flags);
+	void initFromWMO(MPQFile* f, const WMOMaterial &mat, bool indoor);
 	void initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, MH2O_Render *render );
 	void initFromMH2O();
 

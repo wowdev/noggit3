@@ -30,7 +30,7 @@ inline T interpolateHermite(const float r, const T &v1, const T &v2, const T &in
 	float h4 = r*r*r - r*r;
 
 	// interpolation
-	return v1*h1 + v2*h2 + in*h3 + out*h4;
+	return T(v1*h1 + v2*h2 + in*h3 + out*h4);
 }
 
 // "linear" interpolation for quaternions should be slerp by default
@@ -71,10 +71,10 @@ public:
 	static const Quaternion conv(const PACK_QUATERNION t)
 	{
 		return Quaternion(
-			float(t.x > 0? t.x - 32767 : t.x + 32767)/ 32767.0f, 
-			float(t.y > 0? t.y - 32767 : t.y + 32767)/ 32767.0f,
-			float(t.z > 0? t.z - 32767 : t.z + 32767)/ 32767.0f,
-			float(t.w > 0? t.w - 32767 : t.w + 32767)/ 32767.0f);
+			static_cast<float>((t.x > 0? t.x - 32767 : t.x + 32767)/ 32767.0f), 
+			static_cast<float>((t.y > 0? t.y - 32767 : t.y + 32767)/ 32767.0f),
+			static_cast<float>((t.z > 0? t.z - 32767 : t.z + 32767)/ 32767.0f),
+			static_cast<float>((t.w > 0? t.w - 32767 : t.w + 32767)/ 32767.0f));
 	}
 };
 
@@ -82,7 +82,7 @@ public:
 // I wonder why Blizzard decided to save 2 bytes by doing this
 class ShortToFloat {
 public:
-	static const float conv(const short t)
+	static const float conv(const int16_t t)
 	{
 		return t/32767.0f;
 	}
@@ -125,7 +125,6 @@ public:
 	{
 		// obtain a time value and a data range
 		if (seq>-1) {
-			// TODO
 			if (globals[seq]==0) 
 				time = 0;
 			else 
@@ -146,16 +145,15 @@ public:
 			}
 			t1 = times[anim][pos];
 			t2 = times[anim][pos+1];
-			float r = (time-t1)/(float)(t2-t1);
+			float r = (time-t1)/static_cast<float>(t2-t1);
 			
 			if (type == INTERPOLATION_LINEAR) 
 				return interpolate<T>(r,data[anim][pos],data[anim][pos+1]);
 			else if (type == INTERPOLATION_NONE) 
 				return data[anim][pos];
-			else {
+			else
 				// INTERPOLATION_HERMITE is only used in cameras afaik?
 				return interpolateHermite<T>(r,data[anim][pos],data[anim][pos+1],in[anim][pos],out[anim][pos]);
-			}
 		} else {
 			// default value
 			if (data[anim].size() == 0)
@@ -165,7 +163,7 @@ public:
 		}
 	}
 
-	void init(AnimationBlock &b, MPQFile &f, int *gs)
+	void init(const AnimationBlock &b, const MPQFile &f, int *gs)
 	{
 		globals = gs;
 		type = b.type;
@@ -182,18 +180,18 @@ public:
 			return;
 
 		for(size_t j=0; j < b.nTimes; j++) {
-			AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
+			AnimationBlockHeader* pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
 		
-			uint32_t *ptimes = (uint32_t*)(f.getBuffer() + pHeadTimes->ofsEntrys);
+			uint32_t *ptimes = reinterpret_cast<uint32_t*>(f.getBuffer() + pHeadTimes->ofsEntrys);
 			for (size_t i=0; i < pHeadTimes->nEntrys; ++i)
 				times[j].push_back(ptimes[i]);
 		}
 
 		// keyframes
 		for(size_t j=0; j < b.nKeys; j++) {
-			AnimationBlockHeader* pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
+			AnimationBlockHeader* pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
 
-			D *keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
+			D *keys = reinterpret_cast<D*>(f.getBuffer() + pHeadKeys->ofsEntrys);
 			switch (type) {
 				case INTERPOLATION_NONE:
 				case INTERPOLATION_LINEAR:
@@ -211,7 +209,7 @@ public:
 		}
 	}
 
-	void init(AnimationBlock &b, MPQFile &f, int *gs, MPQFile **animfiles)
+	void init(const AnimationBlock &b, const MPQFile &f, int *gs, MPQFile **animfiles)
 	{
 		globals = gs;
 		type = b.type;
@@ -227,25 +225,25 @@ public:
 			return;
 
 		for(size_t j=0; j < b.nTimes; j++) {
-			AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
+			AnimationBlockHeader* pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
 			uint32_t *ptimes;
 			if (animfiles[j] && animfiles[j]->getSize() > 0)
-				ptimes = (uint32_t*)(animfiles[j]->getBuffer() + pHeadTimes->ofsEntrys);
+				ptimes = reinterpret_cast<uint32_t*>(animfiles[j]->getBuffer() + pHeadTimes->ofsEntrys);
 			else
-				ptimes = (uint32_t*)(f.getBuffer() + pHeadTimes->ofsEntrys);
+				ptimes = reinterpret_cast<uint32_t*>(f.getBuffer() + pHeadTimes->ofsEntrys);
 			for (size_t i=0; i < pHeadTimes->nEntrys; ++i)
 				times[j].push_back(ptimes[i]);
 		}
 
 		// keyframes
 		for(size_t j=0; j < b.nKeys; j++) {
-			AnimationBlockHeader* pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
-			assert((D*)(f.getBuffer() + pHeadKeys->ofsEntrys));
+			AnimationBlockHeader* pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
+			assert(reinterpret_cast<D*>(f.getBuffer() + pHeadKeys->ofsEntrys));
 			D *keys;
 			if (animfiles[j] && animfiles[j]->getSize() > 0)
-				keys = (D*)(animfiles[j]->getBuffer() + pHeadKeys->ofsEntrys);
+				keys = reinterpret_cast<D*>(animfiles[j]->getBuffer() + pHeadKeys->ofsEntrys);
 			else 
-				keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
+				keys = reinterpret_cast<D*>(f.getBuffer() + pHeadKeys->ofsEntrys);
 			switch (type) {
 				case INTERPOLATION_NONE:
 				case INTERPOLATION_LINEAR:
@@ -288,6 +286,6 @@ public:
 
 };
 
-typedef Animated<float,short,ShortToFloat> AnimatedShort;
+typedef Animated<float,uint16_t,ShortToFloat> AnimatedShort;
 
 #endif

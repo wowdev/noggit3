@@ -1,15 +1,15 @@
-#include <sstream>
-
 #include "selection.h"
 
-#include "world.h" // gWorld
-#include "MapChunk.h" // MapChunk
-#include "WMOInstance.h" // WMOInstance
-#include "ModelInstance.h" // ModelInstance
+#include <sstream>
+#include <string>
+
 #include "Log.h"
+#include "MapChunk.h" // MapChunk
+#include "ModelInstance.h" // ModelInstance
+#include "WMOInstance.h" // WMOInstance
+#include "world.h" // gWorld
 
 nameEntryManager SelectionNames;
-
 
 /**
  ** nameEntry 

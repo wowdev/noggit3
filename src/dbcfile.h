@@ -7,7 +7,7 @@
 class DBCFile
 {
 public:
-	DBCFile(const std::string& filename);
+	explicit DBCFile(const std::string& filename);
 	virtual ~DBCFile();
 
 	// Open database. It must be openened before it can be used.
@@ -17,7 +17,7 @@ public:
 	class Exception
 	{
 	public:
-		Exception(const std::string& pmessage): message(pmessage)
+		explicit Exception(const std::string& pmessage): message(pmessage)
 		{ }
 		virtual ~Exception()
 		{ }
@@ -36,17 +36,17 @@ public:
 	class Record
 	{
 	public:
-		float getFloat(size_t field) const
+		const float& getFloat(size_t field) const
 		{
 			assert(field < file.fieldCount);
 			return *reinterpret_cast<float*>(offset+field*4);
 		}
-		unsigned int getUInt(size_t field) const
+		const unsigned int& getUInt(size_t field) const
 		{
 			assert(field < file.fieldCount);
 			return *reinterpret_cast<unsigned int*>(offset+field*4);
 		}
-		int getInt(size_t field) const
+		const int& getInt(size_t field) const
 		{
 			assert(field < file.fieldCount);
 			return *reinterpret_cast<int*>(offset+field*4);
@@ -78,8 +78,8 @@ public:
 			return reinterpret_cast<char*>( file.stringTable + stringOffset );
 		}
 	private:
-		Record(DBCFile &pfile, unsigned char *poffset): file(pfile), offset(poffset) {}
-		DBCFile &file;
+		Record(const DBCFile &pfile, unsigned char *poffset): file(pfile), offset(poffset) {}
+		const DBCFile &file;
 		unsigned char *offset;
 
 		friend class DBCFile;
@@ -90,7 +90,7 @@ public:
 	class Iterator
 	{
 	public:
-		Iterator(DBCFile &file, unsigned char *offset): 
+		Iterator(const DBCFile &file, unsigned char *offset): 
 			record(file, offset) {}
 		/// Advance (prefix only)
 		Iterator & operator++() { 

@@ -95,7 +95,7 @@ public:
 
 	operator float*()
 	{
-		return (float*)this;
+		return reinterpret_cast<float*>(this);
 	}
 
 	Vec3D xyz() const
@@ -108,7 +108,7 @@ class Quaternion: public Vec4D {
 public:
 	Quaternion(float x0=0.0f, float y0=0.0f, float z0=0.0f, float w0=1.0f): Vec4D(x0,y0,z0,w0) {}
 
-	Quaternion(const Vec4D& v) : Vec4D(v) {}
+	explicit Quaternion(const Vec4D& v) : Vec4D(v) {}
 
 	Quaternion(const Vec3D& v, const float w0) : Vec4D(v, w0) {}
 
@@ -123,15 +123,15 @@ public:
 		}
 
 		float a = acosf(dot) * r;
-		Quaternion q = (v2 - v1 * dot);
+		Quaternion q = Quaternion((v2 - v1 * dot));
 		q.normalize();
 
-		return v1 * cosf(a) + q * sinf(a);
+		return Quaternion(v1 * cosf(a) + q * sinf(a));
 	}
 
 	static const Quaternion lerp(const float r, const Quaternion &v1, const Quaternion &v2)
 	{
-		return v1*(1.0f-r) + v2*r;
+		return Quaternion(v1*(1.0f-r) + v2*r);
 	}
 
 };

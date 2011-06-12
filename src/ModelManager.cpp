@@ -1,5 +1,9 @@
 #include "ModelManager.h" // ModelManager
 
+#include <algorithm>
+#include <map>
+#include <string>
+
 #include "AsyncLoader.h"// AsyncLoader
 #include "noggit.h" // gAsyncLoader
 

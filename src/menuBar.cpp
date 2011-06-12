@@ -1,11 +1,15 @@
 #include "menuBar.h"
-#include "video.h"
-#include "textUI.h"
-#include "Gui.h"
-#include "checkboxUI.h"
-#include "TextureManager.h" // TextureManager, Texture
 
+#include <map>
+#include <string>
+#include <vector>
+
+#include "checkboxUI.h"
 #include "Environment.h" // CtrlDown
+#include "Gui.h"
+#include "textUI.h"
+#include "TextureManager.h" // TextureManager, Texture
+#include "video.h"
 
 menuBar::menuBar() : window( 0.0f, 0.0f, video.xres, video.yres )
 {

@@ -1,6 +1,8 @@
 #ifndef MODELMANAGER_H
 #define MODELMANAGER_H
 
+#include <string>
+
 #include "manager.h" // Manager
 #include "model.h" // Model
 

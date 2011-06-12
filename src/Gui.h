@@ -31,7 +31,7 @@ public:
 	appInfo *guiappInfo;
 	ui_ZoneIdBrowser *ZoneIDBrowser;
 	uiTexturePicker *TexturePicker;
-	Gui(MapView *setMapview);
+	explicit Gui(MapView *setMapview);
 	~Gui();
 	
 	void render(bool tilemode);

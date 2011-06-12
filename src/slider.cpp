@@ -23,7 +23,7 @@ slider::slider(float xPos, float yPos, float w,float s,float o)
 	sliderTexture = TextureManager::newTexture( "Interface\\Buttons\\UI-SliderBar-Button-Horizontal.blp" );
 }
 
-void slider::setFunc(void(*f)(float))
+void slider::setFunc(void(*f)(float val))
 {
 	func=f;
 }
@@ -41,7 +41,7 @@ void slider::setValue(float f)
 
 void slider::setText(const char *t)
 {
-	strcpy(text,t);
+	strncpy(text, t, sizeof(text));
 }
 
 frame *slider::processLeftClick(float mx,float /*my*/)
@@ -65,7 +65,7 @@ bool slider::processLeftDrag(float mx,float my, float /*xChange*/, float /*yChan
   //! \todo use change?
 	float tx,ty;
 
-	parent->getOffset(tx,ty);
+	parent->getOffset(&tx,&ty);
 	mx-=tx;
 	my-=ty;
 	value=mx/width;
@@ -103,7 +103,7 @@ void slider::render() const
 	if(text[0]!=0)
 	{
 		int twidth;
-		sprintf(Temp,text,value*scale+offset);
+		snprintf(Temp, sizeof(Temp),text,value*scale+offset);
 		twidth=freetype::width(*arial12,Temp);
 		freetype::shprint(*arial12,width/2-twidth/2,-16,Temp);	
 	}

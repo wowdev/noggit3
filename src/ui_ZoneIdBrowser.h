@@ -1,8 +1,11 @@
 #ifndef __ZONEIDBROWSER_H
 #define __ZONEIDBROWSER_H
 
+#include <string>
+
 #include "window.h"
 #include "buttonUI.h"
+
 class Gui;
 class ui_ListView;
 

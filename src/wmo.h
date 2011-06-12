@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <set>
+#include <utility>
+#include <string>
 
 #include "manager.h"
 #include "vec3d.h"
@@ -22,16 +24,16 @@ class Model;
 
 class WMOGroup {
 	WMO *wmo;
-	int flags;
+	uint32_t flags;
 	Vec3D v1,v2;
-	int nTriangles, nVertices;
+	uint32_t nTriangles, nVertices;
 	//GLuint dl,dl_light;
 	Vec3D center;
 	float rad;
-	int num;
-	int fog;
-	int nDoodads, nBatches;
-	short *ddr;
+	int32_t num;
+	int32_t fog;
+	int32_t nDoodads, nBatches;
+	int16_t *ddr;
 	Liquid *lq;
 	std::vector< std::pair<GLuint, int> > lists;
 public:
@@ -47,9 +49,9 @@ public:
 
 	WMOGroup():nBatches(0) {}
 	~WMOGroup();
-	void init(WMO *wmo, MPQFile &f, int num, char *names);
+	void init(WMO *wmo, MPQFile* f, int num, char *names);
 	void initDisplayList();
-	void initLighting(int nLR, short *useLights);
+	void initLighting(int nLR, uint16_t *useLights);
 	void draw(const Vec3D& ofs, const float rot,bool selection);
 	void drawLiquid();
 	void drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float rot);
@@ -58,26 +60,26 @@ public:
 };
 
 struct WMOMaterial {
-	int flags;
-	int specular;
-	int transparent; // Blending: 0 for opaque, 1 for transparent
-	int nameStart; // Start position for the first texture filename in the MOTX data block	
-	unsigned int col1; // color
-	int d3; // flag
-	int nameEnd; // Start position for the second texture filename in the MOTX data block
-	unsigned int col2; // color
-	int d4; // flag
-	unsigned int col3;
+	int32_t flags;
+	int32_t specular;
+	int32_t transparent; // Blending: 0 for opaque, 1 for transparent
+	int32_t nameStart; // Start position for the first texture filename in the MOTX data block	
+	uint32_t col1; // color
+	int32_t d3; // flag
+	int32_t nameEnd; // Start position for the second texture filename in the MOTX data block
+	uint32_t col2; // color
+	int32_t d4; // flag
+	uint32_t col3;
 	float f2;
 	float diffColor[3];
-	int texture1; // this is the first texture object. of course only in RAM. leave this alone. :D
-	int texture2; // this is the second texture object.
+	uint32_t texture1; // this is the first texture object. of course only in RAM. leave this alone. :D
+	uint32_t texture2; // this is the second texture object.
 	// read up to here -_-
 	GLuint tex;
 };
 
 struct WMOLight {
-	unsigned int flags, color;
+	uint32_t flags, color;
 	Vec3D pos;
 	float intensity;
 	float unk[5];
@@ -85,7 +87,7 @@ struct WMOLight {
 
 	Vec4D fcolor;
 
-	void init(MPQFile &f);
+	void init(MPQFile* f);
 	void setup(GLint light);
 
 	static void setupOnce(GLint light, Vec3D dir, Vec3D lcol);
@@ -96,20 +98,20 @@ struct WMOPV {
 };
 
 struct WMOPR {
-	short portal, group, dir, reserved;
+	int16_t portal, group, dir, reserved;
 };
 
 struct WMODoodadSet {
 	char name[0x14];
-	int start;
-	int size;
-	int unused;
+	int32_t start;
+	int32_t size;
+	int32_t unused;
 };
 
 struct WMOLiquidHeader {
-	int X, Y, A, B;
+	int32_t X, Y, A, B;
 	Vec3D pos;
-	short type;
+	int16_t type;
 };
 
 struct WMOFog {
@@ -122,7 +124,7 @@ struct WMOFog {
 	unsigned int color2;
 	// read to here (0x30 bytes)
 	Vec4D color;
-	void init(MPQFile &f);
+	void init(MPQFile* f);
 	void setup();
 };
 
@@ -151,7 +153,7 @@ public:
 	Model *skybox;
 	int sbid;
 
-	WMO(const std::string& name);
+	explicit WMO(const std::string& name);
 	~WMO();
 	void draw(int doodadset, const Vec3D& ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight) const;
 	void drawSelect(int doodadset, const Vec3D& ofs, const float rot) const;

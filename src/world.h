@@ -2,6 +2,7 @@
 #define WORLD_H
 
 #include <string>
+#include <map>
 
 #include "frustum.h" // Frustum
 #include "wmo.h" // WMOManager
@@ -9,7 +10,10 @@
 #include "selection.h" // nameEntryManager
 #include "sky.h" // Skies, OutdoorLighting, OutdoorLightStats
 
-class OpenGL::CallList;
+namespace OpenGL
+{
+  class CallList;
+};
 class brush;
 class MapTile;
 
@@ -20,6 +24,8 @@ static const float highresdistance = 384.0f;
 static const float mapdrawdistance = 998.0f;
 static const float modeldrawdistance = 384.0f;
 static const float doodaddrawdistance = 64.0f;
+
+typedef unsigned short StripType;
 
 enum eSelectionMode
 {
@@ -139,14 +145,14 @@ public:
 	
 	GLuint minimap;
 	
-	short *mapstrip;
-	short *mapstrip2;
+	StripType *mapstrip;
+	StripType *mapstrip2;
 	
 	Vec3D camera;
 	Vec3D lookat;
 	Frustum frustum;
 
-	World( const std::string& name);
+	explicit World( const std::string& name);
 	~World();
 
 	void initDisplay();

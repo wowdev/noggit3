@@ -1,18 +1,20 @@
 #include "liquid.h"
-#include "world.h"
-#include "shaders.h"
+
+#include <algorithm>
+#include <string>
+
 #include "dbc.h"
 #include "Log.h"
+#include "shaders.h"
 #include "TextureManager.h" // TextureManager, Texture
-
+#include "world.h"
 
 struct LiquidVertex {
 	unsigned char c[4];
 	float h;
 };
 
-
-void Liquid::initFromTerrain(MPQFile &f, int flags)
+void Liquid::initFromTerrain(MPQFile* f, int flags)
 {
 	texRepeats = 4.0f;
 	/*
@@ -50,7 +52,7 @@ void Liquid::initFromTerrain(MPQFile &f, int flags)
 	trans = false;
 }
 
-void Liquid::initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor)
+void Liquid::initFromWMO(MPQFile* f, const WMOMaterial &mat, bool indoor)
 {
 	texRepeats = 4.0f;
 	ydir = -1.0f;
@@ -79,7 +81,7 @@ void Liquid::initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor)
 		if (indoor) {
 			trans = true;
 			type = 1;
-			col = Vec3D( ((mat.col2&0xFF0000)>>16)/255.0f, ((mat.col2&0xFF00)>>8)/255.0f, (mat.col2&0xFF)/255.0f);
+			col = Vec3D( ( ( mat.col2 & 0xFF0000 ) >> 16 ) / 255.0f, ( ( mat.col2 & 0xFF00 ) >> 8 ) / 255.0f, ( mat.col2 & 0xFF ) / 255.0f);
 		} else {
 			trans = true;
 			type = 2; // outdoor water (...?)
@@ -90,12 +92,12 @@ void Liquid::initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor)
 }
 
 
-void Liquid::initGeometry(MPQFile &f)
+void Liquid::initGeometry(MPQFile* f)
 {
 	// assume: f is at the appropriate starting position
 
-	LiquidVertex *map = (LiquidVertex*) f.getPointer();
-	unsigned char *flags = (unsigned char*) (f.getPointer() + (xtiles+1)*(ytiles+1)*sizeof(LiquidVertex));
+	LiquidVertex *map = reinterpret_cast<LiquidVertex*>(f->getPointer());
+	unsigned char *flags = reinterpret_cast<unsigned char*>(f->getPointer() + (xtiles+1)*(ytiles+1)*sizeof(LiquidVertex));
 	
 	//waterFlags=new unsigned char[(xtiles+1)*(ytiles+1)];
 	//memcpy(waterFlags,flags,(xtiles+1)*(ytiles+1));
@@ -125,7 +127,8 @@ void Liquid::initGeometry(MPQFile &f)
 	for (int j=0; j<ytiles; j++) {
 		for (int i=0; i<xtiles; ++i) {
 			unsigned char flag = flags[j*xtiles+i];
-			if ((flag&8)==0) {
+			if ( !( flag & 8 ) )
+			{
 				tmpflag = flag;
 				// 15 seems to be "don't draw"
 				size_t p = j*(xtiles+1)+i;
@@ -133,42 +136,42 @@ void Liquid::initGeometry(MPQFile &f)
 				float c;
 		
 #ifdef USEBLSFILES
-				c=type==2?(float)map[p].c[0]/255.0f:1.0f;
+				c=type==2?static_cast<float>(map[p].c[0])/255.0f:1.0f;
 				glMultiTexCoord2f(GL_TEXTURE1,c,c);
 				glTexCoord2f(i / texRepeats, j / texRepeats);
 				glVertex3fv(lVertices[p]);
 				
-				c=type==2?(float)map[p+1].c[0]/255.0f:1.0f;
+				c=type==2?static_cast<float>(map[p+1].c[0])/255.0f:1.0f;
 				glMultiTexCoord2f(GL_TEXTURE1,c,c);
 				glTexCoord2f((i+1) / texRepeats, j / texRepeats);
 				glVertex3fv(lVertices[p+1]);
 				
-				c=type==2?(float)map[p+xtiles+1+1].c[0]/255.0f:1.0f;
+				c=type==2?static_cast<float>(map[p+xtiles+1+1].c[0])/255.0f:1.0f;
 				glMultiTexCoord2f(GL_TEXTURE1,c,c);
 				glTexCoord2f((i+1) / texRepeats, (j+1) / texRepeats);
 				glVertex3fv(lVertices[p+xtiles+1+1]);
 				
-				c=type==2?(float)map[p+xtiles+1].c[0]/255.0f:1.0f;
+				c=type==2?static_cast<float>(map[p+xtiles+1].c[0])/255.0f:1.0f;
 				glMultiTexCoord2f(GL_TEXTURE1,c,c);
 				glTexCoord2f(i / texRepeats, (j+1) / texRepeats);
 				glVertex3fv(lVertices[p+xtiles+1]);
 #else
-				c=(float)map[p].c[0]/255.0f;
+				c=static_cast<float>(map[p].c[0])/255.0f;
 				glMultiTexCoord2f(GL_TEXTURE1,c,c);
 				glTexCoord2f(i / texRepeats, j / texRepeats);
 				glVertex3fv(lVertices[p]);
 				
-				c=(float)map[p+1].c[0]/255.0f;
+				c=static_cast<float>(map[p+1].c[0])/255.0f;
 				glMultiTexCoord2f(GL_TEXTURE1,c,c);
 				glTexCoord2f((i+1) / texRepeats, j / texRepeats);
 				glVertex3fv(lVertices[p+1]);
 				
-				c=(float)map[p+xtiles+1+1].c[0]/255.0f;
+				c=static_cast<float>(map[p+xtiles+1+1].c[0])/255.0f;
 				glMultiTexCoord2f(GL_TEXTURE1,c,c);
 				glTexCoord2f((i+1) / texRepeats, (j+1) / texRepeats);
 				glVertex3fv(lVertices[p+xtiles+1+1]);
 				
-				c=(float)map[p+xtiles+1].c[0]/255.0f;
+				c=static_cast<float>(map[p+xtiles+1].c[0])/255.0f;
 				glMultiTexCoord2f(GL_TEXTURE1,c,c);
 				glTexCoord2f(i / texRepeats, (j+1) / texRepeats);
 				glVertex3fv(lVertices[p+xtiles+1]);
@@ -189,7 +192,7 @@ void Liquid::initGeometry(MPQFile &f)
 		for (int i=0; i<xtiles+1; ++i) {
 			size_t p = j*(xtiles+1)+i;
 			Vec3D v = verts[p];
-			//short s = *( (short*) (f.getPointer() + p*8) );
+			//short s = *( (short*) (f->getPointer() + p*8) );
 			//float f = s / 255.0f;
 			//glColor4f(f,(1.0f-f),0,1);
 			unsigned char c[4];
@@ -284,7 +287,7 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 				size_t p = j * info->width + i;
 				float c;
 
-				c = (float)HeightMap->mTransparency[j][i]/255.0f;
+				c = static_cast<float>(HeightMap->mTransparency[j][i])/255.0f;
 				glMultiTexCoord2f(GL_TEXTURE1,c,c);
 				glTexCoord2f(i / texRepeats, j / texRepeats);
 				glVertex3fv(lVertices[p]);
@@ -525,11 +528,9 @@ void loadWaterShader()
 			if( !(errorPos==-1)&&(isNative==1) )
 			{
 				int i, j;
-				const GLubyte *stringy;
 				char localbuffer[256];
 				LogError << "Water Shader \"shaders\\water.ps\" Fragment program failed to load \nReason:\n";
-				stringy=glGetString(GL_PROGRAM_ERROR_STRING_ARB);	//This is only available in ARB
-				LogError << (char *)stringy << std::endl;
+				LogError << reinterpret_cast<const char*>(glGetString(GL_PROGRAM_ERROR_STRING_ARB)) << std::endl;
 				for(i=errorPos, j=0; (i<length)&&(j<128); ++i, j++)
 				{
 					localbuffer[j]=buffer[i];
@@ -568,8 +569,7 @@ void loadWaterShader()
 				const GLubyte *stringy;
 				char localbuffer[256];
 				LogError << "Water Shader \"shaders/waterfog.ps\" Fragment program failed to load \nReason:\n";
-				stringy=glGetString(GL_PROGRAM_ERROR_STRING_ARB);	//This is only available in ARB
-				LogError << (char *)stringy << std::endl;
+				LogError << reinterpret_cast<const char*>(glGetString(GL_PROGRAM_ERROR_STRING_ARB)) << std::endl;
 				for(i=errorPos, j=0; (i<length)&&(j<128); ++i, j++)
 				{
 					localbuffer[j]=buffer[i];
@@ -676,7 +676,7 @@ void Liquid::initTextures( const std::string& pFilename )
 	char buf[1024];
 	for( int i = pFirst; i <= pLast; ++i ) 
 	{
-		sprintf( buf, pFilename.c_str(), i );
+		snprintf( buf, sizeof(buf), pFilename.c_str(), i );
 		textures.push_back( TextureManager::add( buf )) ;
 	}
 }

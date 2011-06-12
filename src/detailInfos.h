@@ -1,6 +1,8 @@
 #ifndef __DETAILINFOS_H
 #define __DETAILINFOS_H
 
+#include <string>
+
 #include "window.h"
 
 class detailInfos;

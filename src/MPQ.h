@@ -44,7 +44,7 @@ class MPQFile
 
 public:
 	MPQFile():eof(false),buffer(0),pointer(0),size(0) {}
-	MPQFile(const std::string& filename);	// filenames are not case sensitive
+	explicit MPQFile(const std::string& filename);	// filenames are not case sensitive
 	~MPQFile();
 	size_t read(void* dest, size_t bytes);
 	size_t getSize() const;

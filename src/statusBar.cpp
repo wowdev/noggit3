@@ -1,9 +1,12 @@
 #include "statusBar.h"
-#include "video.h"
-#include "noggit.h" // arial16
 
+#include <vector>
+#include <string>
+
+#include "noggit.h" // arial16
 #include "textUI.h"
 #include "TextureManager.h" // TextureManager, Texture
+#include "video.h"
 
 statusBar::statusBar( float xPos, float yPos, float w, float h ) : window(xPos, yPos, w, h)
 {

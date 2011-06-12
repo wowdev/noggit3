@@ -1,6 +1,8 @@
 #ifndef __WINDOW_H
 #define __WINDOW_H
 
+#include <string>
+
 #include "frame.h"
 #include "FreeType.h" // fonts.
 

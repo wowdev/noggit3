@@ -1,7 +1,10 @@
 #include "detailInfos.h"
+
+#include <string>
+
+#include "Gui.h"
 #include "MinimizeButton.h"
 #include "noggit.h" // arial14
-#include "Gui.h"
 #include "textUI.h"
 
 detailInfos::detailInfos( float xPos, float yPos, float w, float h, Gui *setGui ) : window( xPos, yPos, w, h )

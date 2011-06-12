@@ -1,8 +1,10 @@
-#include <SDL/SDL.h>
-
 #include "video.h"
-#include "Log.h"
+
+#include <SDL/SDL.h>
+#include <string>
+
 #include "Settings.h"
+#include "Log.h"
 
 //0 - GL_ALPHA_TEST
 //1 - GL_BLEND
@@ -84,7 +86,7 @@ void Video::resize(int _xres, int _yres)
 
 	this->xres = _xres;
 	this->yres = _yres;
-	this->ratio = float( xres ) / float( yres );
+	this->ratio = static_cast<float>( xres ) / static_cast<float>( yres );
 	
 	// I shouldn't be changing these according to the documentation but it works
 	primary->w = xres;
@@ -138,7 +140,7 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
 
 	this->xres = _xres;
 	this->yres = _yres;
-	this->ratio = float( xres ) / float( yres );
+	this->ratio = static_cast<float>( xres ) / static_cast<float>( yres );
 
 	glViewport( 0.0f, 0.0f, xres, yres );
 
@@ -190,7 +192,7 @@ void Video::set3D() const
 {
 	glMatrixMode( GL_PROJECTION );
 	glLoadIdentity();
-	gluPerspective( 45.0f, this->ratio, 1.0f, (float)Settings::getInstance()->FarZ );
+	gluPerspective( 45.0f, this->ratio, 1.0f, Settings::getInstance()->FarZ );
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
 }

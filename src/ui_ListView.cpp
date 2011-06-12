@@ -1,11 +1,14 @@
 #include "ui_ListView.h"
+
+#include <vector>
+
 #include "scrollbarUI.h"
 #include "log.h"
 #include "misc.h"
 
 void changeValue(frame *f,int set)
 {
-	((ui_ListView *)(f->parent))->recalcElements(set+1);
+	(reinterpret_cast<ui_ListView *>(f->parent))->recalcElements(set+1);
 }
 
 ui_ListView::ui_ListView(float xPos, float yPos, float w, float h, int elementHeight) : frame(xPos,yPos,w,h)
@@ -15,7 +18,7 @@ ui_ListView::ui_ListView(float xPos, float yPos, float w, float h, int elementHe
 	this->scrollbar->clickable = true;
 	this->scrollbar->setChangeFunc(changeValue);
 	this->addChild(scrollbar);
-	this->elements_rows = (int)( h / elementHeight);
+	this->elements_rows = h / elementHeight;
 }
 
 ui_ListView::~ui_ListView(void)

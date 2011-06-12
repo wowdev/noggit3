@@ -1,4 +1,7 @@
 #include "Project.h"
+
+#include <string>
+
 #include "ConfigFile.h"
 #include "directory.h"
 

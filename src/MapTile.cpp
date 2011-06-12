@@ -1,17 +1,22 @@
-#include <cassert>
-#include <algorithm>
-#include <string>
-
 #include "MapTile.h"
-#include "MapChunk.h"
+
+#include <algorithm>
+#include <cassert>
+#include <list>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "Log.h"
-#include "world.h"
+#include "MapChunk.h"
 #include "ModelInstance.h" // ModelInstance
-#include "WMOInstance.h" // WMOInstance
-#include "liquid.h"
 #include "ModelManager.h" // ModelManager
 #include "TextureManager.h" // TextureManager, Texture
+#include "WMOInstance.h" // WMOInstance
+#include "liquid.h"
 #include "misc.h"
+#include "world.h"
 
 void renderCylinder(float x1, float y1, float z1, float x2,float y2, float z2, float radius,int subdivisions,GLUquadricObj *quadric)
 {
@@ -250,7 +255,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 					for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w) {
 						for(int h=info.xOffset; h < info.xOffset + info.width + 1; ++h) {
 							float tmp;
-							theFile.read(&tmp, sizeof(float));
+							theFile.read(&tmp, sizeof(tmp));
 							lTile.mHeightmap[w][h] = tmp;
 
 							//! \todo raise Max/Min instead?
@@ -263,7 +268,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 					for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w) {
 						for(int h=info.xOffset; h < info.xOffset + info.width + 1; ++h) {
 							char tmp;
-							theFile.read(&tmp, sizeof(char));
+							theFile.read(&tmp, sizeof(tmp));
 							lTile.mDepth[w][h] = tmp/255.0f; //! \todo get this correct done
 						}
 					}
@@ -275,11 +280,11 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 					int w = 0;
 					int shft = 0;
 					char tmp;
-					theFile.read(&tmp, sizeof(char));
+					theFile.read(&tmp, sizeof(tmp));
 					while(h < info.height) {
 						if(shft == 8){
 							shft = 0;
-							theFile.read(&tmp, sizeof(char));
+							theFile.read(&tmp, sizeof(tmp));
 						}
 						if(w >= info.width) {
 							++h;
@@ -290,7 +295,9 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 						++shft;
 					}				
 				}
-				else/* if (info.Flags == 0)*/{
+				else
+				/* if (info.Flags == 0)*/
+				{
 					for(int h=info.yOffset ; h < info.yOffset+info.height; ++h) {
 						for(int w=info.xOffset; w < info.xOffset+info.width; ++w) {
 							lTile.mRender[h][w] = true;
@@ -338,9 +345,9 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 		
 		assert( fourcc == 'MFBO' );
 		
-		short mMaximum[9], mMinimum[9];
-		theFile.read( mMaximum, sizeof( short[9] ) );
-		theFile.read( mMinimum, sizeof( short[9] ) );
+		int16_t mMaximum[9], mMinimum[9];
+		theFile.read( mMaximum, sizeof( mMaximum ) );
+		theFile.read( mMinimum, sizeof( mMinimum ) );
 			
 		static const float xPositions[] = { this->xbase, this->xbase + 266.0f, this->xbase + 533.0f };
 		static const float yPositions[] = { this->zbase, this->zbase + 266.0f, this->zbase + 533.0f };
@@ -350,13 +357,13 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 			for( int x = 0; x < 3; x++ )
 			{
 				int pos = x + y * 3;
-				mMinimumValues[pos*3 + 0] = xPositions[x];
-				mMinimumValues[pos*3 + 1] = mMinimum[pos];
-				mMinimumValues[pos*3 + 2] = yPositions[y];
+				mMinimumValues[pos * 3 + 0] = xPositions[x];
+				mMinimumValues[pos * 3 + 1] = mMinimum[pos];
+				mMinimumValues[pos * 3 + 2] = yPositions[y];
 				
-				mMaximumValues[pos*3 + 0] = xPositions[x];
-				mMaximumValues[pos*3 + 1] = mMaximum[pos];
-				mMaximumValues[pos*3 + 2] = yPositions[y];
+				mMaximumValues[pos * 3 + 0] = xPositions[x];
+				mMaximumValues[pos * 3 + 1] = mMaximum[pos];
+				mMaximumValues[pos * 3 + 2] = yPositions[y];
 			}
 		}
 	}
@@ -439,7 +446,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 	for( int nextChunk = 0; nextChunk < 256; ++nextChunk ) 
 	{
 		theFile.seek( lMCNKOffsets[nextChunk] );
-		mChunks[nextChunk / 16][nextChunk % 16] = new MapChunk( this, theFile, mBigAlpha );
+		mChunks[nextChunk / 16][nextChunk % 16] = new MapChunk( this, &theFile, mBigAlpha );
 	}
 	
 	theFile.close();
@@ -636,8 +643,8 @@ MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )
 
 bool MapTile::GetVertex( float x, float z, Vec3D *V )
 {
-	int xcol = int( ( x - xbase ) / CHUNKSIZE );
-	int ycol = int( ( z - zbase ) / CHUNKSIZE );
+	int xcol = ( x - xbase ) / CHUNKSIZE;
+	int ycol = ( z - zbase ) / CHUNKSIZE;
 	
 	return xcol >= 0 && xcol <= 15 && ycol >= 0 && ycol <= 15 && mChunks[ycol][xcol]->GetVertex( x, z, V );
 }
@@ -649,33 +656,33 @@ bool pointInside( Vec3D point, Vec3D extents[2] )
 	return point.x >= extents[0].x && point.z >= extents[0].z && point.x <= extents[1].x && point.z <= extents[1].z;
 }
 
-void minmax( Vec3D &a, Vec3D &b )
+void minmax( Vec3D* a, Vec3D* b )
 {
-	if( a.x > b.x )
+	if( a->x > b->x )
 	{
-		float t = b.x;
-		b.x = a.x;
-		a.x = t;
+		float t = b->x;
+		b->x = a->x;
+		a->x = t;
 	}
-	if( a.y > b.y )
+	if( a->y > b->y )
 	{
-		float t = b.y;
-		b.y = a.y;
-		a.y = t;
+		float t = b->y;
+		b->y = a->y;
+		a->y = t;
 	}
-	if( a.z > b.z )
+	if( a->z > b->z )
 	{
-		float t = b.z;
-		b.z = a.z;
-		a.z = t;
+		float t = b->z;
+		b->z = a->z;
+		a->z = t;
 	}
 }
 
 bool checkInside( Vec3D extentA[2], Vec3D extentB[2] )
 {
 	
-	minmax( extentA[0], extentA[1] );
-	minmax( extentB[0], extentB[1] );
+	minmax( &extentA[0], &extentA[1] );
+	minmax( &extentB[0], &extentB[1] );
 
 	return pointInside( extentA[0], extentB ) || 
 				 pointInside( extentA[1], extentB ) || 
@@ -1506,8 +1513,8 @@ void MapTile::saveTile()
 							unsigned char upperNibble, lowerNibble;
 							for( int k = 0; k < lDimensions; k++ )
 							{
-								lowerNibble = (unsigned char)max(min( ( (float)mChunks[y][x]->amap[j][k * 2 + 0] ) * 0.05882f + 0.5f , 15.0f),0.0f);
-								upperNibble = (unsigned char)max(min( ( (float)mChunks[y][x]->amap[j][k * 2 + 1] ) * 0.05882f + 0.5f , 15.0f),0.0f);
+								lowerNibble = static_cast<unsigned char>(max(min( ( static_cast<float>(mChunks[y][x]->amap[j][k * 2 + 0]) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+								upperNibble = static_cast<unsigned char>(max(min( ( static_cast<float>(mChunks[y][x]->amap[j][k * 2 + 1]) ) * 0.05882f + 0.5f , 15.0f),0.0f));
 								lAlphaMaps[lDimensions * j + k] = ( upperNibble << 4 ) + lowerNibble;
 							}
 						}
@@ -1557,7 +1564,7 @@ void MapTile::saveTile()
 		SetChunkHeader( lADTFile, lCurrentPosition, 'MFBO', 36 );
 		lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mfbo = lCurrentPosition - 0x14;
 
-		short * lMFBO_Data = lADTFile.GetPointer<short>( lCurrentPosition + 8 );
+		int16_t * lMFBO_Data = lADTFile.GetPointer<int16_t>( lCurrentPosition + 8 );
 		
 		lID = 0;
 		for( int i = 0; i < 9; ++i )
