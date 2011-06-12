@@ -3,22 +3,21 @@
 
 #include <string>
 
-#include "window.h"
-#include "FreeType.h" // fonts.
+#include "closeWindowUI.h"
 
 class Gui;
 class textUI;
 
-class appInfo:public window
+class appInfo : public closeWindowUI
 {
 private:
-	Gui *mainGui;
-	textUI *theInfos;
-	std::string mModelToLoad;
+  Gui* mainGui;
+  textUI* theInfos;
+  std::string mModelToLoad;
 
 public:
-	appInfo(float x, float y, float width, float height, Gui *setGui);
-	~appInfo();
-	void setText( const std::string& t );
+  appInfo( float x, float y, float width, float height, Gui* setGui );
+  ~appInfo();
+  void setText( const std::string& t );
 };
 #endif
