@@ -9,15 +9,15 @@
 
 detailInfos::detailInfos( float xPos, float yPos, float w, float h, Gui *setGui ) : window( xPos, yPos, w, h )
 {
-	this->mainGui = setGui;
+  this->mainGui = setGui;
 
-	this->addChild( static_cast<frame*>( new MinimizeButton( w, this ) ) );
+  this->addChild( static_cast<frame*>( new MinimizeButton( w, this ) ) );
 
-	this->theInfos = new textUI( 8.0f, 7.0f, "", arial14, eJustifyLeft );
-	this->addChild( this->theInfos );
+  this->theInfos = new textUI( 8.0f, 7.0f, "", arial14, eJustifyLeft );
+  this->addChild( this->theInfos );
 }
 
 void detailInfos::setText( const std::string& t )
 {
-	this->theInfos->setText( t );
+  this->theInfos->setText( t );
 }

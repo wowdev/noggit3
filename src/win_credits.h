@@ -6,11 +6,11 @@
 class winCredits : public closeWindowUI
 {
 private:
-	static const int winWidth	= 400;
-	static const int winHeight = 200;
+  static const int winWidth  = 400;
+  static const int winHeight = 200;
 public:
-	winCredits();
-	void resize();
+  winCredits();
+  void resize();
 };
 
 #endif

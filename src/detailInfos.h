@@ -12,11 +12,11 @@ class textUI;
 class detailInfos : public window
 {
 private:
-	Gui *mainGui;
-	textUI *theInfos;
+  Gui *mainGui;
+  textUI *theInfos;
 
 public:
-	detailInfos( float x, float y, float width, float height, Gui *setGui );
-	void setText( const std::string& t );
+  detailInfos( float x, float y, float width, float height, Gui *setGui );
+  void setText( const std::string& t );
 };
 #endif

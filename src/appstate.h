@@ -1,9 +1,8 @@
 #ifndef APPSTATE_H
 #define APPSTATE_H
 
-#include <SDL/SDL.h>
 #include <list>
-#include "log.h"
+#include <SDL/SDL.h>
 
 class HotKeyReceiver
 {
@@ -11,9 +10,9 @@ public:
 };
 
 /*!
-	\class AppState
-	\brief This class is a base for the two different states of our application, the menu and the 3D view.
-	\see Menu, MapView
+  \class AppState
+  \brief This class is a base for the two different states of our application, the menu and the 3D view.
+  \see Menu, MapView
 */
 class AppState
 {
@@ -49,82 +48,82 @@ protected:
   bool handleHotkeys(SDL_KeyboardEvent* e)
   {
     SDLMod mod = e->keysym.mod;
-	/* 
-	if( mod & KMOD_NUM ) LogError << "NUMLOCK " << std::endl;
-	  if( mod & KMOD_CAPS ) LogError << "CAPSLOCK " << std::endl;
-	  if( mod & KMOD_MODE ) LogError << "MODE " << std::endl;
-	  if( mod & KMOD_LCTRL ) LogError << "LCTRL " << std::endl;
-	  if( mod & KMOD_RCTRL ) LogError << "RCTRL " << std::endl;
-	  if( mod & KMOD_LSHIFT ) LogError << "LSHIFT " << std::endl;
-	  if( mod & KMOD_RSHIFT ) LogError << "RSHIFT " << std::endl;
-	  if( mod & KMOD_LALT ) LogError << "LALT " << std::endl;
-	  if( mod & KMOD_RALT ) LogError << "RALT " << std::endl;
-	  if( mod & KMOD_LMETA ) LogError << "LMETA " << std::endl;
-	  if( mod & KMOD_RMETA )LogError << "RMETA " << std::endl;
-	 */
+  /* 
+  if( mod & KMOD_NUM ) LogError << "NUMLOCK " << std::endl;
+    if( mod & KMOD_CAPS ) LogError << "CAPSLOCK " << std::endl;
+    if( mod & KMOD_MODE ) LogError << "MODE " << std::endl;
+    if( mod & KMOD_LCTRL ) LogError << "LCTRL " << std::endl;
+    if( mod & KMOD_RCTRL ) LogError << "RCTRL " << std::endl;
+    if( mod & KMOD_LSHIFT ) LogError << "LSHIFT " << std::endl;
+    if( mod & KMOD_RSHIFT ) LogError << "RSHIFT " << std::endl;
+    if( mod & KMOD_LALT ) LogError << "LALT " << std::endl;
+    if( mod & KMOD_RALT ) LogError << "RALT " << std::endl;
+    if( mod & KMOD_LMETA ) LogError << "LMETA " << std::endl;
+    if( mod & KMOD_RMETA )LogError << "RMETA " << std::endl;
+   */
 
-		size_t modifier = ( mod == KMOD_NONE ) ? ( MOD_none ) : (
-		  ( ( mod & KMOD_SHIFT ) ? MOD_shift : 0 ) |
-		  ( ( mod & KMOD_CTRL  ) ? MOD_ctrl  : 0 ) |
-		  ( ( mod & KMOD_ALT   ) ? MOD_alt   : 0 ) |
-		  ( ( mod & KMOD_META  ) ? MOD_meta  : 0 ) |
-		  //( ( mod & KMOD_NUM   ) ? MOD_num   : 0 ) |
-		  ( ( mod & KMOD_CAPS  ) ? MOD_caps  : 0 ) |
-		  ( ( mod & KMOD_MODE  ) ? MOD_mode  : 0 ) );
-		
-		//LogError << modifier<< std::endl;
+    size_t modifier = ( mod == KMOD_NONE ) ? ( MOD_none ) : (
+      ( ( mod & KMOD_SHIFT ) ? MOD_shift : 0 ) |
+      ( ( mod & KMOD_CTRL  ) ? MOD_ctrl  : 0 ) |
+      ( ( mod & KMOD_ALT   ) ? MOD_alt   : 0 ) |
+      ( ( mod & KMOD_META  ) ? MOD_meta  : 0 ) |
+      //( ( mod & KMOD_NUM   ) ? MOD_num   : 0 ) |
+      ( ( mod & KMOD_CAPS  ) ? MOD_caps  : 0 ) |
+      ( ( mod & KMOD_MODE  ) ? MOD_mode  : 0 ) );
+    
+    //LogError << modifier<< std::endl;
 
-		for( std::list<HotKey>::iterator it = hotkeys.begin(); it != hotkeys.end(); ++it )
-		{
-		  if( e->keysym.sym == it->key && modifier == it->modifiers )
-		  {
-		    (this->*(it->function))();
-		    return true;
-		  }
-		}
-		return false;
+    for( std::list<HotKey>::iterator it = hotkeys.begin(); it != hotkeys.end(); ++it )
+    {
+      if( e->keysym.sym == it->key && modifier == it->modifiers )
+      {
+        (this->*(it->function))();
+        return true;
+      }
+    }
+    return false;
   }
 
 public:
-	AppState() {}
-	virtual ~AppState() {}
+  AppState() {}
+  virtual ~AppState() {}
 
-	/*!
-		\brief This method gets called every tick to do calculations. It will be called right before display().
-		\param t The absolute running time.
-		\param dt The time difference since the last call.
-	*/
-	virtual void tick(float /*t*/, float /*dt*/) { }
-	
-	/*!
-		\brief This method gets called every tick to do display your AppState. It will be called right after tick().
-		\param t The absolute running time.
-		\param dt The time difference since the last call.
-	*/
-	virtual void display(float /*t*/, float /*dt*/) { }
+  /*!
+    \brief This method gets called every tick to do calculations. It will be called right before display().
+    \param t The absolute running time.
+    \param dt The time difference since the last call.
+  */
+  virtual void tick(float /*t*/, float /*dt*/) { }
+  
+  /*!
+    \brief This method gets called every tick to do display your AppState. It will be called right after tick().
+    \param t The absolute running time.
+    \param dt The time difference since the last call.
+  */
+  virtual void display(float /*t*/, float /*dt*/) { }
 
-	/*!
-		\brief This method gets called upon mouse movement.
-		\param e The event given by SDL containing information about the mouse motion.
-	*/
-	virtual void mousemove(SDL_MouseMotionEvent* /*e*/) { }
-	
-	/*!
-	 \brief This method gets called upon a mouse click.
-	 \param e The event given by SDL containing information about the mouse click.
-	 */
-	virtual void mouseclick(SDL_MouseButtonEvent* /*e*/) { }
-	
-	/*!
-	 \brief This method gets called when a key is pressed or released.
-	 \param e The event given by SDL containing information about the key stroke.
-	 */
-	virtual void keypressed(SDL_KeyboardEvent* /*e*/) { }
-	
-	/*!
-	 \brief This is called when the window is getting resized.
-	 */
-	virtual void resizewindow() {}
+  /*!
+    \brief This method gets called upon mouse movement.
+    \param e The event given by SDL containing information about the mouse motion.
+  */
+  virtual void mousemove(SDL_MouseMotionEvent* /*e*/) { }
+  
+  /*!
+   \brief This method gets called upon a mouse click.
+   \param e The event given by SDL containing information about the mouse click.
+   */
+  virtual void mouseclick(SDL_MouseButtonEvent* /*e*/) { }
+  
+  /*!
+   \brief This method gets called when a key is pressed or released.
+   \param e The event given by SDL containing information about the key stroke.
+   */
+  virtual void keypressed(SDL_KeyboardEvent* /*e*/) { }
+  
+  /*!
+   \brief This is called when the window is getting resized.
+   */
+  virtual void resizewindow() {}
 };
 
 #endif

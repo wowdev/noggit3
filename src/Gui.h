@@ -15,27 +15,27 @@ class uiTexturePicker;
 class Gui
 {
 public:
-	// Editor paramter
-	int ground_edit_mode;
-	int selection_view_mode;
-	frame* tileFrames;
+  // Editor paramter
+  int ground_edit_mode;
+  int selection_view_mode;
+  frame* tileFrames;
 
-	MapView *theMapview;
-	// UI elements
-	frame	*TexturePalette;
-	frame	*SelectedTexture;
-	minimapWindowUI *minimapWindow;
-	Toolbar *guiToolbar;
-	statusBar *guiStatusbar;
-	detailInfos *guidetailInfos;
-	appInfo *guiappInfo;
-	ui_ZoneIdBrowser *ZoneIDBrowser;
-	uiTexturePicker *TexturePicker;
-	explicit Gui(MapView *setMapview);
-	~Gui();
-	
-	void render(bool tilemode);
-	void resize();
+  MapView *theMapview;
+  // UI elements
+  frame  *TexturePalette;
+  frame  *SelectedTexture;
+  minimapWindowUI *minimapWindow;
+  Toolbar *guiToolbar;
+  statusBar *guiStatusbar;
+  detailInfos *guidetailInfos;
+  appInfo *guiappInfo;
+  ui_ZoneIdBrowser *ZoneIDBrowser;
+  uiTexturePicker *TexturePicker;
+  explicit Gui(MapView *setMapview);
+  ~Gui();
+  
+  void render(bool tilemode);
+  void resize();
 };
 
 #endif

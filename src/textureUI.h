@@ -9,26 +9,26 @@
 class textureUI : public frame
 {
 protected:
-	OpenGL::Texture* texture;
-	bool highlight;
-	void (*clickFunc)(frame *,int);
-	int id;
+  OpenGL::Texture* texture;
+  bool highlight;
+  void (*clickFunc)(frame *,int);
+  int id;
 
 public:
-	//textureUI( float x, float y, float width, float height, GLuint tex );
-	textureUI( float x, float y, float width, float height, const std::string& tex );
-	void setTexture( GLuint tex );
-	void setTexture( const std::string& tex );
-	void setTexture( OpenGL::Texture* tex );
-	void render() const;
-	
-	frame *processLeftClick( float mx, float my );
-	void setClickFunc( void (*f)( frame *,int ), int num );
-	void setHighlight( bool h )
-	{
-		highlight = h;
-	}
-	OpenGL::Texture* getTexture( );
+  //textureUI( float x, float y, float width, float height, GLuint tex );
+  textureUI( float x, float y, float width, float height, const std::string& tex );
+  void setTexture( GLuint tex );
+  void setTexture( const std::string& tex );
+  void setTexture( OpenGL::Texture* tex );
+  void render() const;
+  
+  frame *processLeftClick( float mx, float my );
+  void setClickFunc( void (*f)( frame *,int ), int num );
+  void setHighlight( bool h )
+  {
+    highlight = h;
+  }
+  OpenGL::Texture* getTexture( );
 };
 
 #endif

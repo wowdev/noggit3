@@ -8,10 +8,10 @@ class frame;
 class MinimizeButton : public buttonUI
 {
 private:
-	frame * mParent;
+  frame * mParent;
 public:
-	MinimizeButton( float pWidth, frame * pParent );
+  MinimizeButton( float pWidth, frame * pParent );
 
-	frame *processLeftClick( float mx, float my );
+  frame *processLeftClick( float mx, float my );
 };
 #endif

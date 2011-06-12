@@ -9,18 +9,18 @@ class World;
 class minimapWindowUI : public window
 {
 private:
-	float tilesize;
-	float borderwidth;
-	float lookAt;
-	Menu* mMenuLink;
-	World* map;
+  float tilesize;
+  float borderwidth;
+  float lookAt;
+  Menu* mMenuLink;
+  World* map;
 public:
-	explicit minimapWindowUI( Menu* menuLink );
-	explicit minimapWindowUI( World *setMap );
-	frame *processLeftClick( float mx, float my );
-	void resize();
-	void render() const;
-	void changePlayerLookAt(float ah);
+  explicit minimapWindowUI( Menu* menuLink );
+  explicit minimapWindowUI( World *setMap );
+  frame *processLeftClick( float mx, float my );
+  void resize();
+  void render() const;
+  void changePlayerLookAt(float ah);
 };
 
 #endif
