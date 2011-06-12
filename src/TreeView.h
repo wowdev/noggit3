@@ -14,50 +14,50 @@ class TreeViewButton;
 
 class TreeView : public frame
 {
-	TreeView * mParent;
+  TreeView * mParent;
 public:
-	std::vector<TreeView*> mOthers;
+  std::vector<TreeView*> mOthers;
 private:
-	std::vector<textUI*> mFiles;
-	Directory * mMyDir;
-	TreeViewButton * mMyButton;
-	textUI * mMyText;
+  std::vector<textUI*> mFiles;
+  Directory * mMyDir;
+  TreeViewButton * mMyButton;
+  textUI * mMyText;
 
-	void (*mSelectFunction)( const std::string& );	
+  void (*mSelectFunction)( const std::string& );  
 
-	bool mExpanded;
+  bool mExpanded;
 
 public:
-	TreeView( float pX, float pY, Directory * pDirectory, TreeView * pParent, void (*pSelectFunction)( const std::string& ) );
+  TreeView( float pX, float pY, Directory * pDirectory, TreeView * pParent, void (*pSelectFunction)( const std::string& ) );
 
-	void Expand();
-	void Minimize();
-	bool Expanded();
-	void Toggle();
+  void Expand();
+  void Minimize();
+  bool Expanded();
+  void Toggle();
 
-	void SetSelectFunction( void (*pSelectFunction)( const std::string& ) );
-	std::string GetDirectoryName();
-	TreeView * GetParent()
-	{
-		return mParent;
-	}
+  void SetSelectFunction( void (*pSelectFunction)( const std::string& ) );
+  std::string GetDirectoryName();
+  TreeView * GetParent()
+  {
+    return mParent;
+  }
 
-	void Move( int pEntries, TreeView * pFrom );
+  void Move( int pEntries, TreeView * pFrom );
 
-	void render() const;
-	
-	frame * processLeftClick( float mx,float my );
+  void render() const;
+  
+  frame * processLeftClick( float mx,float my );
 };
 
 class TreeViewButton : public buttonUI
 {
 private:
-	TreeView * mTreeView;
+  TreeView * mTreeView;
 public:
-	TreeViewButton( float x, float y, TreeView* pTreeView );
+  TreeViewButton( float x, float y, TreeView* pTreeView );
 
-	frame * processLeftClick(float mx,float my);
+  frame * processLeftClick(float mx,float my);
 
-	void SetClicked( bool pClicked );
+  void SetClicked( bool pClicked );
 };
 #endif

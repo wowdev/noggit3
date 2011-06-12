@@ -10,15 +10,15 @@ class Gui;
 class uiTexturePicker : public window
 {
 public:
-	uiTexturePicker(int xPos,int yPos, int w, int h, Gui *setGui);
-	void getTextures(nameEntry *lSelection);
-	void setTexture(int id);
-	Gui *mainGUI;
+  uiTexturePicker(int xPos,int yPos, int w, int h, Gui *setGui);
+  void getTextures(nameEntry *lSelection);
+  void setTexture(int id);
+  Gui *mainGUI;
 private:
-	textureUI *tex1;
-	textureUI *tex2;
-	textureUI *tex3;
-	textureUI *tex4;
+  textureUI *tex1;
+  textureUI *tex2;
+  textureUI *tex3;
+  textureUI *tex4;
 
 };
 

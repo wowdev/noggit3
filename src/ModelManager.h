@@ -11,16 +11,16 @@ typedef unsigned int MODELIDTYPE;
 class ModelManager: public Manager<MODELIDTYPE,Model>
 {
 private:
-	static int baseid;
+  static int baseid;
 public:
-	static MODELIDTYPE add(const std::string& name);
-	
-	static void resetAnim();
-	static void updateEmitters(float dt);
-	static int nextID()
-	{
-		return baseid++;
-	}
+  static MODELIDTYPE add(const std::string& name);
+  
+  static void resetAnim();
+  static void updateEmitters(float dt);
+  static int nextID()
+  {
+    return baseid++;
+  }
 };
 
 #endif// MODELMANAGER_H

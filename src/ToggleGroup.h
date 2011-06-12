@@ -8,14 +8,14 @@ class checkboxUI;
 class ToggleGroup
 {
 private:
-	int * mTarget;
-	std::map<int,checkboxUI*> mFrames;
+  int * mTarget;
+  std::map<int,checkboxUI*> mFrames;
 public:
-	explicit ToggleGroup( int * pTarget );
+  explicit ToggleGroup( int * pTarget );
 
-	void Add( checkboxUI * pFrame, int pValue );
+  void Add( checkboxUI * pFrame, int pValue );
 
-	void Activate( checkboxUI * pFrame );
-	void Activate( int pID );
+  void Activate( checkboxUI * pFrame );
+  void Activate( int pID );
 };
 #endif

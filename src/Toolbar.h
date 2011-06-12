@@ -14,18 +14,18 @@ class textureUI;
 class Toolbar : public window, public UIEventListener
 {
 private:
-	Gui *mainGui;
-	void SetIcon( int pIcon, const std::string& pIconFile );
+  Gui *mainGui;
+  void SetIcon( int pIcon, const std::string& pIconFile );
 public:
-	ToolbarIcon *mToolbarIcons[10];
-	textUI	*text;
-	// current selected Icon
-	int selectedIcon;
+  ToolbarIcon *mToolbarIcons[10];
+  textUI  *text;
+  // current selected Icon
+  int selectedIcon;
 
-	// current active texture
-	textureUI *current_texture;
-	Toolbar(float x, float y, float width, float height, Gui *setGui);
-	void IconSelect(int i);
+  // current active texture
+  textureUI *current_texture;
+  Toolbar(float x, float y, float width, float height, Gui *setGui);
+  void IconSelect(int i);
 };
 #endif 
   

@@ -23,119 +23,119 @@ class checkboxUI;
 class MenuButton : public buttonUI
 {
 private:
-	MenuPane * mPane;
+  MenuPane * mPane;
 public:
-	MenuButton( MenuPane * pPane, float pX, float pY, const std::string& pText );
+  MenuButton( MenuPane * pPane, float pX, float pY, const std::string& pText );
 
-	frame* processLeftClick( float pX, float pY );
+  frame* processLeftClick( float pX, float pY );
 };
 
 class MenuItem : public buttonUI 
 {
 protected:
-	MenuPane * mParent;
+  MenuPane * mParent;
 
 public:
-	MenuItem( MenuPane * pParent, float pX, float pY, float pHeight, const std::string& pText, const std::string& pNormal, const std::string& pDown );
+  MenuItem( MenuPane * pParent, float pX, float pY, float pHeight, const std::string& pText, const std::string& pNormal, const std::string& pDown );
 };
 
 class MenuItemButton : public MenuItem 
 {
 public:
-	MenuItemButton( MenuPane * pParent, float pX, float pY, const std::string& pText, void ( *pClickFunc )( frame *, int ), int pClickFuncID );
+  MenuItemButton( MenuPane * pParent, float pX, float pY, const std::string& pText, void ( *pClickFunc )( frame *, int ), int pClickFuncID );
 
-	frame* processLeftClick( float pX, float pY );
+  frame* processLeftClick( float pX, float pY );
 };
 
 class MenuItemToggle : public MenuItem 
 {
 private:
-	checkboxUI * mMyCheckbox;
-	bool * mMyState;
-	bool mInvert;
+  checkboxUI * mMyCheckbox;
+  bool * mMyState;
+  bool mInvert;
 
 public:
-	MenuItemToggle( MenuPane * pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert = false );
+  MenuItemToggle( MenuPane * pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert = false );
 
-	frame* processLeftClick( float pX, float pY );
+  frame* processLeftClick( float pX, float pY );
 
-	void render() const;
+  void render() const;
 };
 
 class MenuItemSwitch : public MenuItem 
 {
 private:
-	bool * mMyState;
-	bool mInvert;
+  bool * mMyState;
+  bool mInvert;
 
 public:
-	MenuItemSwitch( MenuPane * pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert = 1 );
+  MenuItemSwitch( MenuPane * pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert = 1 );
 
-	frame* processLeftClick( float pX, float pY );
+  frame* processLeftClick( float pX, float pY );
 };
 
 
 class MenuItemSet : public MenuItem 
 {
 private:
-	int mSet;
-	int * mMyState;
+  int mSet;
+  int * mMyState;
 
 public:
-	MenuItemSet( MenuPane * pParent, float pX, float pY, const std::string& pText, int * pMyState, int pSet = 1 );
+  MenuItemSet( MenuPane * pParent, float pX, float pY, const std::string& pText, int * pMyState, int pSet = 1 );
 
-	frame* processLeftClick( float pX, float pY );
+  frame* processLeftClick( float pX, float pY );
 };
 
 class MenuItemSeperator : public MenuItem
 {
 public:
-	MenuItemSeperator( MenuPane * pParent, float pX, float pY, const std::string& pText );
+  MenuItemSeperator( MenuPane * pParent, float pX, float pY, const std::string& pText );
 
-	frame* processLeftClick( float pX, float pY );
+  frame* processLeftClick( float pX, float pY );
 };
 
 class MenuPane : public window
 {
 private:
-	int mNumItems;
-	menuBar * mMenuBar;
+  int mNumItems;
+  menuBar * mMenuBar;
 
 public: 
-	MenuPane( menuBar * pMenuBar, float pX, float pY );
+  MenuPane( menuBar * pMenuBar, float pX, float pY );
 
-	void Close();
-	void Open();
-	
-	void AddMenuItemButton( const std::string& pName, void ( *pClickFunc )( frame *, int ), int pClickFuncID );
-	void AddMenuItemToggle( const std::string& pName, bool * pMyState, bool pInvert = false );
-	void AddMenuItemSwitch( const std::string& pName, bool * pMyState, bool pInvert = false );
-	void AddMenuItemSet( const std::string& pName, int * pMyIntState, int pSet = 1 );
+  void Close();
+  void Open();
+  
+  void AddMenuItemButton( const std::string& pName, void ( *pClickFunc )( frame *, int ), int pClickFuncID );
+  void AddMenuItemToggle( const std::string& pName, bool * pMyState, bool pInvert = false );
+  void AddMenuItemSwitch( const std::string& pName, bool * pMyState, bool pInvert = false );
+  void AddMenuItemSet( const std::string& pName, int * pMyIntState, int pSet = 1 );
 
-	void AddMenuItemSeperator( const std::string& pName );
+  void AddMenuItemSeperator( const std::string& pName );
 };
 
 
 class menuBar : public window
 {
 private:
-	std::map<std::string,MenuPane*> mMenuPanes;
+  std::map<std::string,MenuPane*> mMenuPanes;
 
-	int mNumMenus;
+  int mNumMenus;
 
 public:
-	bool mustResize;
+  bool mustResize;
 
-	menuBar();
-	void render() const;	
-	void resize();
+  menuBar();
+  void render() const;  
+  void resize();
 
-	void CloseAll();
-	void ClearAll();
-	void AddMenu( const std::string& pName );
+  void CloseAll();
+  void ClearAll();
+  void AddMenu( const std::string& pName );
 
-	MenuPane * GetMenu( const std::string& pName );
+  MenuPane * GetMenu( const std::string& pName );
 
-	frame * processLeftClick(float mx,float my);
+  frame * processLeftClick(float mx,float my);
 };
 #endif

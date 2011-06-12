@@ -11,13 +11,13 @@ namespace OpenGL { class Texture; };
 class window : public frame
 {
 protected:
-	OpenGL::Texture* texture;
+  OpenGL::Texture* texture;
 
 public:
-	window( float xPos, float yPos, float w, float h );
-	window( float xPos, float yPos, float w, float h, const std::string& pTexture );
-	frame *processLeftClick( float mx, float my );
-	void render() const;
+  window( float xPos, float yPos, float w, float h );
+  window( float xPos, float yPos, float w, float h, const std::string& pTexture );
+  frame *processLeftClick( float mx, float my );
+  void render() const;
 };
 
 #endif

@@ -13,16 +13,16 @@ class ToolbarIcon : public frame, public UIEventSender
 public:
   UIEventEventHandlerDefinition(int);
 protected:
-	OpenGL::Texture* texture;
-	OpenGL::Texture* textureSelected;
-	int iconId;
+  OpenGL::Texture* texture;
+  OpenGL::Texture* textureSelected;
+  int iconId;
 
 public:
-	ToolbarIcon( float x, float y, float width, float height, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments );
+  ToolbarIcon( float x, float y, float width, float height, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments );
 
-	void render() const;
-	frame *processLeftClick(float mx,float my);
-	
-	bool selected;
+  void render() const;
+  frame *processLeftClick(float mx,float my);
+  
+  bool selected;
 };
 #endif

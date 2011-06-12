@@ -32,25 +32,25 @@ class UIEventListener {
   
   class SenderClass : public UIEventSender {
   public:
-	  UIEventEventHandlerDefinition(int);
-	  SenderClass(UIEventClassConstructorArguments) : UIEventClassConstructorSuperCall() {
-	    UIEventEventHandlerCall(1);
-	  }
+    UIEventEventHandlerDefinition(int);
+    SenderClass(UIEventClassConstructorArguments) : UIEventClassConstructorSuperCall() {
+      UIEventEventHandlerCall(1);
+    }
   };
 
  */
 
 class UIEventSender {
 public:
-	UIEventEventHandlerDefinition();
+  UIEventEventHandlerDefinition();
 protected:
-	EventHandlerType eventHandler;
-	UIEventListener* listener;
+  EventHandlerType eventHandler;
+  UIEventListener* listener;
 public:
-	explicit UIEventSender(UIEventClassConstructorArguments) : eventHandler(_eventHandler), listener(_listener) {
-		assert( eventHandler && listener );
-	}
-	//UIEventSender() : eventHandler(NULL), listener(NULL) { }
+  explicit UIEventSender(UIEventClassConstructorArguments) : eventHandler(_eventHandler), listener(_listener) {
+    assert( eventHandler && listener );
+  }
+  //UIEventSender() : eventHandler(NULL), listener(NULL) { }
 };
 
 #endif //UIEVENTCLASSES_H

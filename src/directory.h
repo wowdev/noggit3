@@ -10,28 +10,28 @@ bool FileExists( const std::string& filename );
 
 struct File
 {
-	std::string mName;
+  std::string mName;
 
-	explicit File( const std::string& pName );
+  explicit File( const std::string& pName );
 };
 
 struct Directory
 {
-	std::map<std::string,Directory*> mSubdirectories;
-	std::vector<File*> mSubfiles;
+  std::map<std::string,Directory*> mSubdirectories;
+  std::vector<File*> mSubfiles;
 
-	std::string mName;
-	
-	explicit Directory( const std::string& pName );
-	void PrintDirectory( const int pIndent );
+  std::string mName;
+  
+  explicit Directory( const std::string& pName );
+  void PrintDirectory( const int pIndent );
 
-	Directory * AddSubDirectory( const std::string& pName );
-	Directory * AddSubDirectory( Directory * pDirectory );
+  Directory * AddSubDirectory( const std::string& pName );
+  Directory * AddSubDirectory( Directory * pDirectory );
 
-	File * AddFile( const std::string& pName );
-	File * AddFile( File * pFile );
-	
-	Directory * operator[]( const std::string& pName );
-	Directory * operator[]( char * pName );
+  File * AddFile( const std::string& pName );
+  File * AddFile( File * pFile );
+  
+  Directory * operator[]( const std::string& pName );
+  Directory * operator[]( char * pName );
 };
 #endif

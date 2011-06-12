@@ -3,10 +3,10 @@
 
 enum eSelectionEntryTypes
 {
-	eEntry_Fake,
-	eEntry_Model,
-	eEntry_WMO,
-	eEntry_MapChunk
+  eEntry_Fake,
+  eEntry_Model,
+  eEntry_WMO,
+  eEntry_MapChunk
 };
 
 #include <string>
@@ -27,22 +27,22 @@ class MapChunk;
 class nameEntry
 {
 private:
-	std::string	Name;
+  std::string  Name;
 public:
-	int	type;
-	union
-	{
-		ModelInstance	*model;
-		WMOInstance		*wmo;
-		MapChunk		*mapchunk;
-	} data;
+  int  type;
+  union
+  {
+    ModelInstance  *model;
+    WMOInstance    *wmo;
+    MapChunk    *mapchunk;
+  } data;
 
-	explicit nameEntry( ModelInstance *model );
-	explicit nameEntry( WMOInstance *wmo );
-	explicit nameEntry( MapChunk *chunk );
-	nameEntry();
-	
-	const std::string& returnName();
+  explicit nameEntry( ModelInstance *model );
+  explicit nameEntry( WMOInstance *wmo );
+  explicit nameEntry( MapChunk *chunk );
+  nameEntry();
+  
+  const std::string& returnName();
 };
 
 /**
@@ -55,18 +55,18 @@ public:
 class nameEntryManager
 {
 private:
-	unsigned int NextName;
-	std::vector<nameEntry*> items;
+  unsigned int NextName;
+  std::vector<nameEntry*> items;
 public:
-	nameEntryManager();
-	
-	unsigned int add( ModelInstance *mod );
-	unsigned int add( WMOInstance *wmo );
-	unsigned int add( MapChunk *chunk );
-	
-	void del( unsigned int Ref );
-	
-	nameEntry *findEntry( unsigned int ref ) const;
+  nameEntryManager();
+  
+  unsigned int add( ModelInstance *mod );
+  unsigned int add( WMOInstance *wmo );
+  unsigned int add( MapChunk *chunk );
+  
+  void del( unsigned int Ref );
+  
+  nameEntry *findEntry( unsigned int ref ) const;
 };
 
 #endif

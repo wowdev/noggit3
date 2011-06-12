@@ -12,17 +12,17 @@ class TexturingUI
 {
 
 public:
-	static frame* createSelectedTexture();
-	static frame* createTexturePalette(int rows, int cols,Gui* setgui);
-	static frame* createTilesetLoader();
-	static frame* createTextureFilter();
-	static frame* createMapChunkWindow();
-	static void setSelectedTexture(OpenGL::Texture* t);
-	static OpenGL::Texture* getSelectedTexture();
-	static void setChunk(MapChunk *chunk);
-	static void setChunkWindow(MapChunk *chunk);
-	static void updateSelectedTexture();
-	static OpenGL::Texture* selectedTexture;
+  static frame* createSelectedTexture();
+  static frame* createTexturePalette(int rows, int cols,Gui* setgui);
+  static frame* createTilesetLoader();
+  static frame* createTextureFilter();
+  static frame* createMapChunkWindow();
+  static void setSelectedTexture(OpenGL::Texture* t);
+  static OpenGL::Texture* getSelectedTexture();
+  static void setChunk(MapChunk *chunk);
+  static void setChunkWindow(MapChunk *chunk);
+  static void updateSelectedTexture();
+  static OpenGL::Texture* selectedTexture;
 };
 
 #endif

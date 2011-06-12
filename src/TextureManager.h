@@ -13,17 +13,17 @@ class TextureManager;
 class TextureManager : public Manager<GLuint,OpenGL::Texture>
 {
 private:
-	static bool LoadBLP(GLuint id, OpenGL::Texture *tex);
+  static bool LoadBLP(GLuint id, OpenGL::Texture *tex);
 public:
-	static void reload();
-	static GLuint add(const std::string& name);
-	static void doDelete(GLuint id);
-	static GLuint get(const std::string& name);
-	
-	static OpenGL::Texture* newTexture(const std::string& name)
-	{
-		return (OpenGL::Texture*)TextureManager::items[TextureManager::add( name )];
-	}
+  static void reload();
+  static GLuint add(const std::string& name);
+  static void doDelete(GLuint id);
+  static GLuint get(const std::string& name);
+  
+  static OpenGL::Texture* newTexture(const std::string& name)
+  {
+    return (OpenGL::Texture*)TextureManager::items[TextureManager::add( name )];
+  }
 };
 
 #endif

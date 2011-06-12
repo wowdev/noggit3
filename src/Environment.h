@@ -10,28 +10,28 @@
 class Environment
 {
 public:
-	static Environment* getInstance();
-	nameEntry get_clipboard();
-	void set_clipboard(nameEntry* entry);
+  static Environment* getInstance();
+  nameEntry get_clipboard();
+  void set_clipboard(nameEntry* entry);
 
-	bool view_holelines;
-	// values for areaID painting
-	int selectedAreaID;
-	std::map<int,Vec3D> areaIDColors; // List of all area IDs to draw them with different colors
-	// hold keys
-	bool ShiftDown;
-	bool AltDown;
-	bool CtrlDown;
-	bool paintMode;
-	int flagPaintMode; 
+  bool view_holelines;
+  // values for areaID painting
+  int selectedAreaID;
+  std::map<int,Vec3D> areaIDColors; // List of all area IDs to draw them with different colors
+  // hold keys
+  bool ShiftDown;
+  bool AltDown;
+  bool CtrlDown;
+  bool paintMode;
+  int flagPaintMode; 
 
-	bool AutoSelecting;		// If true the auto selection is active
+  bool AutoSelecting;    // If true the auto selection is active
 
 private:
-	Environment();
-	static Environment* instance;
+  Environment();
+  static Environment* instance;
 
-	nameEntry clipboard;
+  nameEntry clipboard;
 };
 
 #endif

@@ -31,15 +31,15 @@ namespace freetype {
 
 class font_data {
 public:
-	float h;			///< Holds the height of the font.
-	GLuint * textures;	///< Holds the texture id's 
-	GLuint list_base;	///< Holds the first display list id
-	int		charWidths[128];
+  float h;      ///< Holds the height of the font.
+  GLuint * textures;  ///< Holds the texture id's 
+  GLuint list_base;  ///< Holds the first display list id
+  int    charWidths[128];
 
-	font_data() {}
-	font_data( const std::string& fname, unsigned int h, bool fromMPQ );
+  font_data() {}
+  font_data( const std::string& fname, unsigned int h, bool fromMPQ );
 
-	~font_data();
+  ~font_data();
 };
 
 // The flagship function of the library - this thing will print out text at window coordinates x,y, using the font ft_font. The current modelview matrix will also be applied to the text. 
