@@ -4,6 +4,7 @@
 
 UIModel::UIModel( float xPos, float yPos, float w, float h )
 : UIFrame( xPos, yPos, w, h )
+, model( NULL )
 {
 }
 
@@ -58,7 +59,7 @@ void UIModel::render() const
   glPopMatrix();
 }
 
-void UIModel::setModel(Model* _setModel)
+void UIModel::setModel( Model* _setModel )
 {
   model = _setModel;  
 }

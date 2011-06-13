@@ -5,34 +5,25 @@
 #include "FreeType.h"
 #include "Video.h"
 
-UIText::UIText( float pX, float pY, const std::string& pText, freetype::font_data *pFont, int pJustify ) : background( false )
+UIText::UIText( float pX, float pY, const std::string& pText, freetype::font_data *pFont, int pJustify )
+: UIFrame( pX, pY, freetype::width( *font, pText ), pFont->h )
+, twidth( freetype::width( *font, pText ) )
+, font( pFont )
+, mText( pText )
+, justify( pJustify )
+, background( false )
 {
-	x = pX;
-	y = pY;
-	mText = pText;
-	justify = pJustify;
-	font = pFont;
-
-	twidth = freetype::width( *font, mText.c_str() );
-	
-	width = twidth;
-	height = font->h;
 }
 
-UIText::UIText( float pX, float pY, freetype::font_data *pFont, int pJustify ) : background( false )
+UIText::UIText( float pX, float pY, freetype::font_data *pFont, int pJustify )
+: UIFrame( pX, pY, freetype::width( *font, "" ), pFont->h )
+, twidth( freetype::width( *font, "" ) )
+, font( pFont )
+, mText( "" )
+, justify( pJustify )
+, background( false )
 {
-	x = pX;
-	y = pY;
-	mText = "";
-	justify = pJustify;
-	font = pFont;
-	
-	twidth = freetype::width( *font, mText );
-	
-	width = twidth;
-	height = font->h;
 }
-
 
 void UIText::setText( const std::string& pText )
 {
@@ -42,12 +33,12 @@ void UIText::setText( const std::string& pText )
 	height = font->h;
 }
 
-void UIText::setJustify(int j)
+void UIText::setJustify( int j )
 {
 	justify = j;
 }
 
-void UIText::setFont( freetype::font_data *f )
+void UIText::setFont( freetype::font_data* f )
 {
 	font = f;
 	twidth = freetype::width( *font, mText );

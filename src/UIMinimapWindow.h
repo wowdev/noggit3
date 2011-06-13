@@ -9,11 +9,12 @@ class World;
 class UIMinimapWindow : public UIWindow
 {
 private:
-  float tilesize;
   float borderwidth;
+  float tilesize;
   float lookAt;
   Menu* mMenuLink;
   World* map;
+  
 public:
   explicit UIMinimapWindow( Menu* menuLink );
   explicit UIMinimapWindow( World* setMap );

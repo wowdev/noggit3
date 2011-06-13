@@ -32,12 +32,11 @@ UITreeView::UITreeView( float pX, float pY, Directory * pDirectory, UITreeView *
 : UIFrame( pX, pY, 0.0f, 0.0f )
 , mParent( pParent )
 , mMyDir( pDirectory )
+, mMyButton( new UITreeViewButton( 0, 0, this ) )
+, mMyText( new UIText( 13, 0, mMyDir->mName, arial12, eJustifyLeft ) )
 , mSelectFunction( pSelectFunction )
 , mExpanded( false )
 {
-  mMyButton = new UITreeViewButton( 0, 0, this );
-  mMyText = new UIText( 13, 0, mMyDir->mName, arial12, eJustifyLeft );
-
   float lY = 13.0f;
 
   std::map<std::string,Directory*>::iterator it;

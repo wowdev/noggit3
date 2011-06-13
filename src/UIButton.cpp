@@ -8,47 +8,38 @@
 #include "UIText.h"
 
 UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTexNormal, const std::string& pTexDown )
+: UIFrame( pX, pY, w, h )
+, texture( TextureManager::newTexture( pTexNormal ) )
+, textureDown( TextureManager::newTexture( pTexDown ) )
+, clickFunc( NULL )
+, id( 0 )
+, clicked( false )
+, text( new UIText( w / 2.0f, 2.0f, arial12, eJustifyCenter ) )
 {
-  x = pX;
-  y = pY;
-  width = w;
-  height = h;
-  texture = TextureManager::newTexture( pTexNormal );
-  textureDown = TextureManager::newTexture( pTexDown );
-  clickFunc = NULL;
-  id = 0;
-  clicked = false;
-  text = new UIText( w / 2.0f, 2.0f, arial12, eJustifyCenter );
   addChild( text );
 }
 
 UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown )
+: UIFrame( pX, pY, w, h )
+, texture( TextureManager::newTexture( pTexNormal ) )
+, textureDown( TextureManager::newTexture( pTexDown ) )
+, clickFunc( NULL )
+, id( 0 )
+, clicked( false )
+, text( new UIText( w / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
 {
-  x = pX;
-  y = pY;
-  width = w;
-  height = h;
-  texture = TextureManager::newTexture( pTexNormal );
-  textureDown = TextureManager::newTexture( pTexDown );
-  clickFunc = NULL;
-  id = 0;
-  clicked = false;
-  text = new UIText( w / 2.0f, 2.0f, pText, arial12, eJustifyCenter );
   addChild( text );
 }
 
 UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, void (*pFunc)( UIFrame *, int ), int pFuncParam )
+: UIFrame( pX, pY, w, h )
+, texture( TextureManager::newTexture( pTexNormal ) )
+, textureDown( TextureManager::newTexture( pTexDown ) )
+, clickFunc( pFunc )
+, id( pFuncParam )
+, clicked( false )
+, text( new UIText( w / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
 {
-  x = pX;
-  y = pY;
-  width = w;
-  height = h;
-  texture = TextureManager::newTexture( pTexNormal );
-  textureDown = TextureManager::newTexture( pTexDown );
-  clickFunc = pFunc;
-  id = pFuncParam;
-  clicked = false;
-  text = new UIText( w / 2.0f, 2.0f, pText, arial12, eJustifyCenter );
   addChild( text );
 }
 
@@ -100,7 +91,7 @@ void UIButton::render() const
   glPopMatrix();
 }
 
-UIFrame *UIButton::processLeftClick( float /*mx*/, float /*my*/ )
+UIFrame* UIButton::processLeftClick( float /*mx*/, float /*my*/ )
 {
   clicked = true;
   if( clickFunc )

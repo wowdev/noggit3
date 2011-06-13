@@ -123,8 +123,6 @@ private:
   int mNumMenus;
 
 public:
-  bool mustResize;
-
   UIMenuBar();
   void render() const;  
   void resize();
@@ -133,8 +131,8 @@ public:
   void ClearAll();
   void AddMenu( const std::string& pName );
 
-  MenuPane * GetMenu( const std::string& pName );
+  MenuPane* GetMenu( const std::string& pName );
 
-  UIFrame * processLeftClick(float mx,float my);
+  UIFrame* processLeftClick( float mx, float my );
 };
 #endif

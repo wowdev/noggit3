@@ -6,20 +6,20 @@
 
 /*UITexture::UITexture( float xPos, float yPos, float w, float h, GLuint tex )
 : UIFrame( xPos, yPos, w, h )
+, texture( tex )
+, highlight( false )
+, clickFunc( NULL )
+, id( 0 )
 {
-  texture = tex;
-  highlight = false;
-  clickFunc = 0;
-  id = 0;
 }*/
 
 UITexture::UITexture( float xPos, float yPos, float w, float h, const std::string& tex )
 : UIFrame( xPos, yPos, w, h )
+, texture( TextureManager::newTexture( tex ) )
+, highlight( false )
+, clickFunc( NULL )
+, id( 0 )
 {
-  texture = TextureManager::newTexture( tex );
-  highlight = false;
-  clickFunc = 0;
-  id = 0;
 }
 
 void UITexture::setTexture( OpenGL::Texture* tex )

@@ -9,6 +9,7 @@ class UIModel : public UIFrame
 {
 protected:
   Model* model;
+  
 public:
   UIModel( float x, float y, float width, float height );
   void render() const;

@@ -19,6 +19,7 @@ protected:
   void (*clickFunc)( bool, int );
 
   UIToggleGroup* mToggleGroup;
+  
 public:
   UICheckBox( float, float, const std::string& );
   UICheckBox( float, float, const std::string&, UIToggleGroup *, int );

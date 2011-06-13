@@ -26,15 +26,21 @@ void changeZoneValue(UIFrame *f,int id)
 
 UIZoneIDBrowser::UIZoneIDBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *setGui)
 : UIWindow(xPos,yPos,w,h)
+, changeFunc( NULL )
+, mainGui( setGui )
+, ZoneIdList( NULL )
+, mapID( -1 )
+, zoneID( -1 )
+, subZoneID( -1 )
+, selectedAreaID( -1 )
+, MapName( "" )
+, ZoneName( "" )
+, SubZoneName( "" )
+, backZone( new UIButton( 407.0f, 2.0f, 24.0f, 24.0f, "", "Interface\\BUTTONS\\UI-RotationLeft-Button-Up.blp", "Interface\\BUTTONS\\UI-RotationLeft-Button-Down.blp", theButtonMapPressed, 0 ) )
+, ZoneIDPath( new UIText( 10.0f, 6.0f, "", arial12, eJustifyLeft) )
 {
-  changeFunc = NULL;
-  this->mainGui = setGui;
-  this->ZoneIDPath = new UIText( 10.0f, 6.0f, "TEST", arial12, eJustifyLeft);
   this->addChild(this->ZoneIDPath);
-
-  this->backZone = new UIButton( 407.0f, 2.0f, 24.0f, 24.0f, "", "Interface\\BUTTONS\\UI-RotationLeft-Button-Up.blp", "Interface\\BUTTONS\\UI-RotationLeft-Button-Down.blp", theButtonMapPressed, 0 );
   this->addChild(this->backZone);
-
 }
  
 void UIZoneIDBrowser::setMapID( int id )
@@ -106,7 +112,7 @@ void UIZoneIDBrowser::ButtonMapPressed( int id )
 
 void UIZoneIDBrowser::buildAreaList()
 {
-  this->removeChild(this->ZoneIdList);
+  this->removeChild( this->ZoneIdList );
   this->ZoneIdList = NULL;
   this->ZoneIdList = new UIListView(4,24,this->width - 8,this->height - 28,20);
   this->ZoneIdList->clickable = true;

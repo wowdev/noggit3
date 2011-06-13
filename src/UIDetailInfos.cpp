@@ -9,12 +9,10 @@
 
 UIDetailInfos::UIDetailInfos( float xPos, float yPos, float w, float h, UIMapViewGUI *setGui )
 : UIWindow( xPos, yPos, w, h )
+, mainGui( setGui )
+, theInfos( new UIText( 8.0f, 7.0f, "", arial14, eJustifyLeft ) )
 {
-  this->mainGui = setGui;
-
-  this->addChild( static_cast<UIFrame*>( new UIMinimizeButton( w, this ) ) );
-
-  this->theInfos = new UIText( 8.0f, 7.0f, "", arial14, eJustifyLeft );
+  this->addChild( new UIMinimizeButton( w, this ) );
   this->addChild( this->theInfos );
 }
 

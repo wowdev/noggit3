@@ -11,6 +11,24 @@ class UIListView;
 
 class UIZoneIDBrowser : public UIWindow
 {
+private:
+  void ( *changeFunc )( UIFrame *, int );
+  UIMapViewGUI *mainGui;
+  UIListView* ZoneIdList;
+  int mapID;
+  unsigned int zoneID;
+  int subZoneID;
+  int selectedAreaID;
+  std::string MapName;
+  std::string ZoneName;
+  std::string SubZoneName;
+  UIButton* backZone;
+  UIText* ZoneIDPath;
+  
+  void buildAreaList();
+  void expandList();
+  void collapseList();
+  
 public:
   UIZoneIDBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *setGui);
   void setMapID(int id);
@@ -18,23 +36,6 @@ public:
   void ButtonMapPressed( int id );
   void refreshMapPath();
   void setChangeFunc( void (*f)( UIFrame *, int ));
-private:
-  void ( *changeFunc )( UIFrame *, int );
-  UIMapViewGUI *mainGui;
-  UIListView* ZoneIdList;
-  int heightExpanded;
-  int mapID;
-  unsigned int zoneID;
-  int subZoneID;
-  int selectedAreaID;
-  void buildAreaList();
-  void expandList();
-  void collapseList();
-  std::string MapName;
-  std::string ZoneName;
-  std::string SubZoneName;
-  UIButton* backZone;
-  UIText* ZoneIDPath;
 };
 
 #endif

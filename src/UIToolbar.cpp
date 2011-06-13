@@ -17,14 +17,12 @@
 UIToolbar::UIToolbar(float xPos, float yPos, float w, float h, UIMapViewGUI *setGui)
 : UIWindow( xPos, yPos, w, h, "interface\\tooltips\\ui-tooltip-border.blp" )
 , mainGui( setGui )
+, text( new UIText( 8, 7, "Raise/Lower", arialn13, eJustifyLeft ) )
+, selectedIcon( -1 )
+, current_texture( new UITexture( 0, 0, 92.0f, 92.0f, "tileset\\generic\\black.blp" ) )
 {
   this->movable = true;
-
-  // set title
-  text = new UIText( 8, 7, "Raise/Lower", arialn13, eJustifyLeft );
   this->addChild( text );
-
-  //close button
   this->addChild( static_cast<UIFrame*>( new UIMinimizeButton( w, this ) ) );
 
   // ground edit
@@ -43,8 +41,6 @@ UIToolbar::UIToolbar(float xPos, float yPos, float w, float h, UIMapViewGUI *set
   SetIcon( 9, "Interface\\Icons\\Spell_Shaman_TidalWaves.blp" );
 
   IconSelect( 0 );
-
-  current_texture = new UITexture( 0, 0, 92.0f, 92.0f, "tileset\\generic\\black.blp" );
   
   UIWindow* texture_border = new UIWindow( 5, 280, 95.0f, 95.0f );
   texture_border->addChild( current_texture );
@@ -62,8 +58,6 @@ void UIToolbar::SetIcon( int pIcon, const std::string& pIconFile )
 // MapView.cpp
 void change_settings_window(int oldid, int newid);
 extern int terrainMode;
-
-#include "Log.h"
 
 void UIToolbar::IconSelect( int pIcon )
 {

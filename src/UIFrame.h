@@ -42,7 +42,7 @@ public:
   
   virtual ~UIFrame()
   {
-    for(std::vector<UIFrame*>::iterator it = children.begin(); it != children.end(); ++it)
+    for( std::vector<UIFrame*>::iterator it = children.begin(); it != children.end(); ++it )
     {
       if( *it )
       {

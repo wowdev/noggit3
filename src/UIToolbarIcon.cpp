@@ -8,11 +8,11 @@
 UIToolbarIcon::UIToolbarIcon( float xPos, float yPos, float w, float h, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments )
 : UIFrame( xPos, yPos, w, h )
 , UIEventClassConstructorSuperCall()
+, texture( TextureManager::newTexture( tex ) )
+, textureSelected( TextureManager::newTexture( texd ) )
 , iconId( id )
 , selected( false )
 {
-  texture = TextureManager::newTexture( tex );
-  textureSelected = TextureManager::newTexture( texd );
 }
 
 UIFrame* UIToolbarIcon::processLeftClick( float /*mx*/, float /*my*/ )
