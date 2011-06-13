@@ -10,6 +10,7 @@ class UIToggleGroup
 private:
   int* mTarget;
   std::map<int,UICheckBox*> mFrames;
+
 public:
   explicit UIToggleGroup( int * pTarget );
 

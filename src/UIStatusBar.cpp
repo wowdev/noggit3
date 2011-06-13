@@ -9,14 +9,11 @@
 #include "Video.h"
 
 UIStatusBar::UIStatusBar( float xPos, float yPos, float w, float h )
-: UIWindow(xPos, yPos, w, h)
+: UIWindow( xPos, yPos, w, h )
+, leftInfo( new UIText( 8.0f, 7.0f, "", arial16, eJustifyLeft ) )
+, rightInfo( new UIText( this->width - 8.0f, 7.0f, "", arial16, eJustifyRight ) )
 {
-  // create leftInfo text element
-  leftInfo = new UIText( 8.0f, 7.0f, "", arial16, eJustifyLeft );
   addChild( leftInfo );
-
-  // create rightInfo text element
-  rightInfo = new UIText( this->width - 8.0f, 7.0f, "", arial16, eJustifyRight );
   addChild( rightInfo );
 }
 

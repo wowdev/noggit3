@@ -4,7 +4,8 @@
 
 #include "UICheckBox.h"
 
-UIToggleGroup::UIToggleGroup( int * pTarget ) : mTarget( pTarget )
+UIToggleGroup::UIToggleGroup( int * pTarget )
+: mTarget( pTarget )
 {
 }
 

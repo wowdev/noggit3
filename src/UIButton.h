@@ -18,7 +18,7 @@ protected:
   int id;
 
   bool clicked;
-  UIText *text;
+  UIText* text;
 
 public:
   UIButton( float x, float y, float width, float height, const std::string& pTexNormal, const std::string& pTexDown );
@@ -31,7 +31,7 @@ public:
   void setText( const std::string& pText );
   void setFont( freetype::font_data *font );
 
-  UIFrame *processLeftClick( float mx, float my );
+  UIFrame* processLeftClick( float mx, float my );
   void setClickFunc( void (*f)( UIFrame *, int ), int num );
   void processUnclick();
 };

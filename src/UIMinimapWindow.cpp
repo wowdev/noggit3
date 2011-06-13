@@ -9,14 +9,13 @@
 #include "World.h"
 
 UIMinimapWindow::UIMinimapWindow( Menu* menuLink )
-: UIWindow( 10, 10, 100, 100 )
+: UIWindow( 10.0f, 10.0f, 100.0f, 100.0f )
+, borderwidth( 5.0f )
+, tilesize( ( video.yres - 70.0f - this->borderwidth * 2.0f ) / 64.0f )
+, lookAt( 0.0f )
 , mMenuLink( menuLink )
+, map( NULL )
 {
-  this->map = NULL;
-  this->borderwidth = 5.0f;
-  
-  this->tilesize = ( video.yres - 70.0f - this->borderwidth * 2 ) / 64;
-
   this->width = this->borderwidth * 2 + this->tilesize * 64;
   this->height = this->width;
   this->x = video.xres / 2 - this->width / 2;
@@ -24,13 +23,13 @@ UIMinimapWindow::UIMinimapWindow( Menu* menuLink )
 }
 
 UIMinimapWindow::UIMinimapWindow( World* setMap )
-: UIWindow( 10, 10, 100, 100 )
+: UIWindow( 10.0f, 10.0f, 100.0f, 100.0f )
+, borderwidth( 5.0f )
+, tilesize( ( video.yres - 70.0f - this->borderwidth * 2.0f ) / 64.0f )
+, lookAt( 0.0f )
+, mMenuLink( NULL )
+, map( setMap )
 {
-  this->map = setMap;
-  this->borderwidth = 5.0f;
-
-  this->tilesize = ( video.yres - 70.0f - this->borderwidth * 2 ) / 64;
-
   this->width = this->borderwidth * 2 + this->tilesize * 64;
   this->height = this->width;
   this->x = video.xres / 2 - this->width / 2;

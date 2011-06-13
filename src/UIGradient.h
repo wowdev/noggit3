@@ -12,6 +12,7 @@ protected:
   Vec4D  ClickColor;
   float  value;
   void (*clickFunc)(float val);
+  
 public:
   bool  horiz;
 
