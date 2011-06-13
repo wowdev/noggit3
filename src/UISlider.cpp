@@ -9,24 +9,19 @@
 #include "Video.h"
 
 UISlider::UISlider( float xPos, float yPos, float w, float s, float o )
+: UIFrame( xPos, yPos, w, 10.0f )
+, texture( TextureManager::newTexture( "Interface\\Buttons\\UI-SliderBar-Border.blp" ) )
+, sliderTexture( TextureManager::newTexture( "Interface\\Buttons\\UI-SliderBar-Button-Horizontal.blp" ) )
+, scale( s )
+, offset( o )
+, func( NULL )
+, text( "" )
+, value( 0.5f )
 {
-  movable = false;
-  hidden = false;
   clickable = true;
-  x = xPos;
-  y = yPos;
-  width = w;
-  height = 10.0f;
-  value = 0.5f;
-  func = NULL;
-  scale = s;
-  offset = o;
-  text = "";
-  texture = TextureManager::newTexture( "Interface\\Buttons\\UI-SliderBar-Border.blp" );
-  sliderTexture = TextureManager::newTexture( "Interface\\Buttons\\UI-SliderBar-Button-Horizontal.blp" );
 }
 
-void UISlider::setFunc( void(*f )( float val ) )
+void UISlider::setFunc( void( *f )( float val ) )
 {
   func = f;
 }

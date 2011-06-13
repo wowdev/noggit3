@@ -17,27 +17,27 @@ public:
   bool clickable;
 
   UIFrame()
-  : parent( 0 )
+  : x( 0.0f )
+  , y( 0.0f )
+  , width( 0.0f )
+  , height( 0.0f )
+  , parent( 0 )
   , movable( false )
   , hidden( false )
   , clickable( false )
   {
-    x = 0.0f;
-    y = 0.0f;
-    width = 0.0f;
-    height = 0.0f;
   }
 
   UIFrame( float pX, float pY, float w, float h )
-  : parent( 0 )
+  : x( pX )
+  , y( pY )
+  , width( w )
+  , height( h )
+  , parent( 0 )
   , movable( false )
   , hidden( false )
   , clickable( false )
   {
-    x = pX;
-    y = pY;
-    width = w;
-    height = h;
   }
   
   virtual ~UIFrame()

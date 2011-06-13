@@ -19,7 +19,7 @@ protected:
   
 public:
   float value;
-  void setFunc( void (*f)( float value ) );
+  void setFunc( void ( *f )( float value ) );
   void setValue( float f );
   void setText( const std::string& text );
   UISlider( float x, float y, float width, float s, float o );
