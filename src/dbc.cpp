@@ -1,8 +1,8 @@
-#include "dbc.h"
+#include "DBC.h"
 
 #include <string>
 
-#include "misc.h"
+#include "Misc.h"
 #include "Log.h"
 
 AreaDB gAreaDB;

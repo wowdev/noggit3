@@ -1,14 +1,14 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include <string>
 #include <map>
+#include <string>
 
-#include "frustum.h" // Frustum
-#include "wmo.h" // WMOManager
-#include "model.h" // ModelManager
-#include "selection.h" // nameEntryManager
-#include "sky.h" // Skies, OutdoorLighting, OutdoorLightStats
+#include "Frustum.h" // Frustum
+#include "Model.h" // ModelManager
+#include "Selection.h" // nameEntryManager
+#include "Sky.h" // Skies, OutdoorLighting, OutdoorLightStats
+#include "WMO.h" // WMOManager
 
 namespace OpenGL
 {

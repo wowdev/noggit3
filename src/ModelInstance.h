@@ -1,9 +1,9 @@
 #ifndef MODELINSTANCE_H
 #define MODELINSTANCE_H
 
-#include "vec3d.h" // Vec3D
-#include "mpq.h" // MPQFile
-#include "mapheaders.h" // ENTRY_MDDF
+#include "Vec3D.h" // Vec3D
+#include "MPQ.h" // MPQFile
+#include "MapHeaders.h" // ENTRY_MDDF
 
 class Model;
 

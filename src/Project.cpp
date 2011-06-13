@@ -3,7 +3,7 @@
 #include <string>
 
 #include "ConfigFile.h"
-#include "directory.h"
+#include "Directory.h"
 
 Project::Project()
 {

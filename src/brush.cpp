@@ -1,6 +1,6 @@
 #include <cmath>
 
-#include "brush.h"
+#include "Brush.h"
 
 void brush::init()
 {

@@ -5,8 +5,8 @@
 #include <map>
 #include <string>
 
-#include "mapheaders.h"
-#include "video.h" // GLfloat, GLshort, ...
+#include "MapHeaders.h"
+#include "Video.h" // GLfloat, GLshort, ...
 
 class Vec3D;
 class Liquid;

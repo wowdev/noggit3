@@ -2,7 +2,8 @@
 #define QUATERNION_H
 
 #include <cmath>
-#include "vec3d.h"
+
+#include "Vec3D.h"
 
 class Vec4D {
 public:

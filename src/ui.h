@@ -1,6 +1,8 @@
 #ifndef __UI_H
 #define __UI_H
 
+#error FAIL
+
 // basic UI elements
 #include "frame.h"
 #include "window.h"

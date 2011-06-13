@@ -4,8 +4,8 @@
 #include <string>
 #include <map>
 
-#include "selection.h"
-#include "vec3d.h"
+#include "Selection.h"
+#include "Vec3D.h"
 
 class Environment
 {

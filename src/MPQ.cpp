@@ -1,18 +1,18 @@
 #include "MPQ.h"
-#include "Log.h"
-#include "directory.h"
-#include "Project.h"
 
-#include <vector>
-#include <list>
+#include <algorithm>
+#include <boost/thread.hpp>
 #include <cstdio>
 #include <cstring>
-#include <string>
+#include <list>
 #include <sstream>
-#include <algorithm>
-
-#include <boost/thread.hpp>
 #include <stdint.h>
+#include <string>
+#include <vector>
+
+#include "Directory.h"
+#include "Log.h"
+#include "Project.h"
 
 std::vector<MPQArchive*> gOpenArchives;
 

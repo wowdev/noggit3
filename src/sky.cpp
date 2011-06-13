@@ -1,13 +1,13 @@
-#include "sky.h"
+#include "Sky.h"
 
 #include <algorithm>
 #include <string>
 
-#include "dbc.h"
+#include "DBC.h"
 #include "Log.h"
-#include "model.h" // Model
+#include "Model.h" // Model
 #include "ModelManager.h" // ModelManager
-#include "world.h"
+#include "World.h"
 
 const float skymul = 36.0f;
 

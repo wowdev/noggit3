@@ -5,9 +5,9 @@
 #include <string>
 
 #include "Log.h"
-#include "model.h"
+#include "Model.h"
 #include "TextureManager.h" // TextureManager, Texture
-#include "world.h"
+#include "World.h"
 
 int globalTime = 0;
 

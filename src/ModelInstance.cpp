@@ -1,7 +1,8 @@
 #include "ModelInstance.h"
-#include "model.h" // Model, etc.
-#include "world.h" // gWorld
+
 #include "Log.h"
+#include "Model.h" // Model, etc.
+#include "World.h" // gWorld
 
 Vec3D TransformCoordsForModel( Vec3D pIn )
 {

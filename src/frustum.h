@@ -1,7 +1,7 @@
 #ifndef FRUSTUM_H
 #define FRUSTUM_H
 
-#include "vec3d.h"
+#include "Vec3D.h"
 
 struct Plane {
   float a,b,c,d;

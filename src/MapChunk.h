@@ -1,11 +1,9 @@
 #ifndef MAPCHUNK_H
 #define MAPCHUNK_H
 
-#include "mapheaders.h"
-
-#include "video.h" // GLuint
-#include "quaternion.h" // Vec4D
 #include "MapTile.h" // MapTile
+#include "Quaternion.h" // Vec4D
+#include "Video.h" // GLuint
 
 class MPQFile;
 class Vec4D;

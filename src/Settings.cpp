@@ -1,8 +1,8 @@
-#include "directory.h" // FileExists
-#include "Log.h"
 #include "Settings.h"
-#include "ConfigFile.h"
 
+#include "ConfigFile.h"
+#include "Directory.h" // FileExists
+#include "Log.h"
 
 Settings::Settings()
 {

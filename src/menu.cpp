@@ -1,36 +1,34 @@
+#include "Menu.h"
+
+#include <cstdlib> 
+#include <ctime> 
 #include <fstream>
+#include <iostream>
+#include <list>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <list>
-#include <ctime> 
-#include <cstdlib> 
-#include <iostream>
 
-#include "menu.h"
-#include "mpq.h"
-#include "MapView.h"
-#include "dbcfile.h"
-#include "dbc.h"
+#include "DBC.h"
+#include "DBCFile.h"
 #include "Log.h"
-#include "world.h"
-#include "TextureManager.h" // TextureManager, Texture
-#include "noggit.h" // fonts, APP_*
-#include "misc.h"
-
-#include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
+#include "MapView.h"
+#include "Misc.h"
 #include "ModelManager.h" // ModelManager
-
-// ui classes
-#include "frame.h" // frame
-#include "statusBar.h" // statusBar
-#include "menuBar.h" // menuBar, menu items, ..
-#include "win_credits.h" // winCredits
-#include "minimapWindowUI.h" // minimapWindowUI
+#include "MPQ.h"
+#include "Noggit.h" // fonts, APP_*
+#include "TextureManager.h" // TextureManager, Texture
+#include "UIAbout.h" // UIAbout
+#include "UIFrame.h" // UIFrame
+#include "UIMenuBar.h" // UIMenuBar, menu items, ..
+#include "UIMinimapWindow.h" // UIMinimapWindow
+#include "UIStatusBar.h" // UIStatusBar
+#include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
+#include "World.h"
 
 Menu* theMenu = NULL;
 
-void showMap( frame *, int mapID )
+void showMap( UIFrame *, int mapID )
 {
   if( theMenu )
   {
@@ -38,7 +36,7 @@ void showMap( frame *, int mapID )
   }
 }
 
-void showBookmark( frame *, int bookmarkID )
+void showBookmark( UIFrame *, int bookmarkID )
 {
   if( theMenu )
   {
@@ -48,21 +46,28 @@ void showBookmark( frame *, int bookmarkID )
 
 extern std::list<std::string> gListfile;
 
-Menu::Menu() : mGUIFrame( NULL ), mGUIStatusbar( NULL ), mGUICreditsWindow( NULL ), mGUIMinimapWindow( NULL ), mGUImenuBar( NULL ), mBackgroundModel( NULL ), mLastBackgroundId( -1 )
+Menu::Menu()
+: mGUIFrame( NULL )
+, mGUIStatusbar( NULL )
+, mGUICreditsWindow( NULL )
+, mGUIMinimapWindow( NULL )
+, mGUImenuBar( NULL )
+, mBackgroundModel( NULL )
+, mLastBackgroundId( -1 )
 {
   gWorld = NULL;
   theMenu = this;
 
-  mGUIFrame = new frame( 0.0f, 0.0f, video.xres, video.yres );
+  mGUIFrame = new UIFrame( 0.0f, 0.0f, video.xres, video.yres );
 
-  mGUIMinimapWindow = new minimapWindowUI( this  );
+  mGUIMinimapWindow = new UIMinimapWindow( this  );
   mGUIFrame->addChild( mGUIMinimapWindow );
 
-  mGUICreditsWindow = new winCredits();
+  mGUICreditsWindow = new UIAbout();
   mGUIFrame->addChild( mGUICreditsWindow );
   
   //! \todo Use?
-  mGUIStatusbar = new statusBar( 0.0f, video.yres - 30.0f, video.xres, 30.0f );
+  mGUIStatusbar = new UIStatusBar( 0.0f, video.yres - 30.0f, video.xres, 30.0f );
   mGUIFrame->addChild( mGUIStatusbar );
   
   createMapList();
@@ -74,21 +79,14 @@ Menu::Menu() : mGUIFrame( NULL ), mGUIStatusbar( NULL ), mGUICreditsWindow( NULL
 
 Menu::~Menu()
 {
-  if( mGUIFrame )
-  {
-    delete mGUIFrame;
-    mGUIFrame = NULL;
-  }
-  if( gWorld )
-  {
-    delete gWorld;
-    gWorld = NULL;
-  }
-  if( mBackgroundModel )
-  {
-    ModelManager::delbyname( mBackgroundModel->name );
-    mBackgroundModel = NULL;
-  }
+  delete mGUIFrame;
+  mGUIFrame = NULL;
+  
+  delete gWorld;
+  gWorld = NULL;
+  
+  ModelManager::delbyname( mBackgroundModel->name );
+  mBackgroundModel = NULL;
 }
 
 void Menu::randBackground()
@@ -273,7 +271,7 @@ void Menu::buildMenuBar()
     mGUImenuBar = NULL;
   }
   
-  mGUImenuBar = new menuBar();
+  mGUImenuBar = new UIMenuBar();
   mGUImenuBar->AddMenu( "File" );
   mGUImenuBar->GetMenu( "File" )->AddMenuItemSwitch( "exit ESC", &gPop, true );
   mGUIFrame->addChild( mGUImenuBar );

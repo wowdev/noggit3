@@ -5,7 +5,7 @@
 #include <string>
 
 #include "AsyncLoader.h"// AsyncLoader
-#include "noggit.h" // gAsyncLoader
+#include "Noggit.h" // gAsyncLoader
 
 int ModelManager::baseid = 0;
 

@@ -1,33 +1,35 @@
+#include "UITexturePicker.h"
+
 #include <iostream>
 #include <sstream>
 
-#include "uiTexturePicker.h"
-#include "Gui.h"
-#include "window.h"
-#include "textUI.h" // textUI
-#include "noggit.h" // arial14, arialn13
-#include "MinimizeButton.h"
-#include "MapChunk.h"
-#include "selection.h"
-#include "Toolbar.h"
-#include "textureUI.h"
-#include "texturingUI.h"
 #include "Log.h"
+#include "MapChunk.h"
+#include "Noggit.h" // arial14, arialn13
+#include "Selection.h"
+#include "UIMapViewGUI.h"
+#include "UIMinimizeButton.h"
+#include "UIText.h" // UIText
+#include "UITexture.h"
+#include "UITexturingGUI.h"
+#include "UIToolbar.h"
+#include "UIWindow.h"
 
-void textureClick( frame* f,int id )
+void textureClick( UIFrame* f,int id )
 {
   // redirect to sender object.
-  (reinterpret_cast<uiTexturePicker *>(f->parent))->setTexture(id);
+  (reinterpret_cast<UITexturePicker *>(f->parent))->setTexture(id);
 }
 
-uiTexturePicker::uiTexturePicker( int xPos,int yPos, int w, int h, Gui *setGui ) : window(xPos,yPos,w,h)
+UITexturePicker::UITexturePicker( int xPos, int yPos, int w, int h, UIMapViewGUI *setGui )
+: UIWindow( xPos, yPos, w, h )
 {
   this->mainGUI = setGui;
 
-  this->tex1 = new textureUI(10,30,110,110,"tileset\\generic\\black.blp");
-  this->tex2 = new textureUI(130,30,110,110,"tileset\\generic\\black.blp");
-  this->tex3 = new textureUI(250,30,110,110,"tileset\\generic\\black.blp");
-  this->tex4 = new textureUI(370,30,110,110,"tileset\\generic\\black.blp");
+  this->tex1 = new UITexture(10,30,110,110,"tileset\\generic\\black.blp");
+  this->tex2 = new UITexture(130,30,110,110,"tileset\\generic\\black.blp");
+  this->tex3 = new UITexture(250,30,110,110,"tileset\\generic\\black.blp");
+  this->tex4 = new UITexture(370,30,110,110,"tileset\\generic\\black.blp");
 
   this->tex1->setClickFunc(textureClick,0);
   this->tex2->setClickFunc(textureClick,1);
@@ -38,14 +40,14 @@ uiTexturePicker::uiTexturePicker( int xPos,int yPos, int w, int h, Gui *setGui )
   this->addChild(this->tex2);
   this->addChild(this->tex3);
   this->addChild(this->tex4);
-  this->addChild(new textUI( 10.0f, 9.0f, "Pick one of the textures.", arial14, eJustifyLeft ) );
+  this->addChild(new UIText( 10.0f, 9.0f, "Pick one of the textures.", arial14, eJustifyLeft ) );
 
   //close button
-  this->addChild( new MinimizeButton( w, this ) );
+  this->addChild( new UIMinimizeButton( w, this ) );
 
 }
 
-void uiTexturePicker::getTextures(nameEntry *lSelection)
+void UITexturePicker::getTextures(nameEntry *lSelection)
 {
   this->hidden = false;
   if( lSelection )
@@ -78,7 +80,7 @@ void uiTexturePicker::getTextures(nameEntry *lSelection)
     }
 }
 
-void uiTexturePicker::setTexture(int id)
+void UITexturePicker::setTexture(int id)
 {
   OpenGL::Texture* curTex;
 
@@ -100,10 +102,10 @@ void uiTexturePicker::setTexture(int id)
 
   if(curTex)
   {
-    TexturingUI::setSelectedTexture(curTex);  
-    if( TexturingUI::getSelectedTexture() )
+    UITexturingGUI::setSelectedTexture(curTex);  
+    if( UITexturingGUI::getSelectedTexture() )
     {
-      TexturingUI::updateSelectedTexture();
+      UITexturingGUI::updateSelectedTexture();
     }
   }
 }

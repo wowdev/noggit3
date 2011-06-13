@@ -1,18 +1,19 @@
 #include "MapChunk.h"
-#include "Log.h"
-#include "world.h"
-#include "Environment.h"
-#include "liquid.h"
-#include "brush.h"
-#include "TextureManager.h" // TextureManager, Texture
-#include "mapheaders.h"
-#include "quaternion.h"
-#include "misc.h"
-#include "vec3d.h"
 
-#include <map>
-#include <iostream>
 #include <algorithm>
+#include <iostream>
+#include <map>
+
+#include "Brush.h"
+#include "Environment.h"
+#include "Liquid.h"
+#include "Log.h"
+#include "MapHeaders.h"
+#include "Misc.h"
+#include "Quaternion.h"
+#include "TextureManager.h" // TextureManager, Texture
+#include "Vec3D.h"
+#include "World.h"
 
 extern int terrainMode;
 

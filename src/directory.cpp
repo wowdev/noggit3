@@ -10,7 +10,7 @@
 #include <fstream>
 #include <string>
 
-#include "directory.h"
+#include "Directory.h"
 
 bool FileExists( const std::string& filename )
 {

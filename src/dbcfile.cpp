@@ -1,8 +1,8 @@
-#include "dbcfile.h"
+#include "DBCFile.h"
 
 #include <string>
 
-#include "mpq.h"
+#include "MPQ.h"
 #include "Log.h"
 
 DBCFile::DBCFile(const std::string& _filename):

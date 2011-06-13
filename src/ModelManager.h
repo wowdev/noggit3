@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "manager.h" // Manager
-#include "model.h" // Model
+#include "Manager.h" // Manager
+#include "Model.h" // Model
 
 typedef unsigned int MODELIDTYPE;
 

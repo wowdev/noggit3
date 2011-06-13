@@ -8,15 +8,15 @@
 #include <utility>
 #include <vector>
 
+#include "Liquid.h"
 #include "Log.h"
 #include "MapChunk.h"
+#include "Misc.h"
 #include "ModelInstance.h" // ModelInstance
 #include "ModelManager.h" // ModelManager
 #include "TextureManager.h" // TextureManager, Texture
 #include "WMOInstance.h" // WMOInstance
-#include "liquid.h"
-#include "misc.h"
-#include "world.h"
+#include "World.h"
 
 void renderCylinder(float x1, float y1, float z1, float x2,float y2, float z2, float radius,int subdivisions,GLUquadricObj *quadric)
 {

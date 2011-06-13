@@ -1,4 +1,4 @@
-#include "noggit.h"
+#include "Noggit.h"
 
 #ifdef _WIN32
 //#pragma comment(lib,"OpenGL32.lib")
@@ -18,24 +18,24 @@
 #include <string>
 #include <vector>
 
-#include "appstate.h"
+#include "AppState.h"
 #include "AsyncLoader.h"
 #include "ConfigFile.h"
-#include "dbc.h"
-#include "directory.h"
+#include "DBC.h"
+#include "Directory.h"
 #include "Environment.h"  // This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
-#include "errorhandling.h"
+#include "ErrorHandling.h"
 #include "FreeType.h" // fonts.
-#include "liquid.h"
+#include "Liquid.h"
 #include "Log.h"
 #include "MapView.h"
-#include "menu.h"
-#include "model.h"
-#include "mpq.h"
+#include "Menu.h"
+#include "Model.h"
+#include "MPQ.h"
 #include "Project.h"    // This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
-#include "revision.h"
+#include "Revision.h"
 #include "Settings.h"    // In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
-#include "video.h"
+#include "Video.h"
 //#include "shaders.h"
 
 std::vector<AppState*> gStates;

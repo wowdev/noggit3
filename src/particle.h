@@ -7,9 +7,9 @@
 class ParticleSystem;
 class RibbonEmitter;
 
-#include "model.h"
-#include "animated.h"
-#include "video.h" // GLuint
+#include "Animated.h"
+#include "Model.h"
+#include "Video.h" // GLuint
 
 struct Particle {
   Vec3D pos, speed, down, origin, dir;
