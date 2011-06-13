@@ -102,17 +102,17 @@ bool  alloff_detailselect = false;
 bool  alloff_fog = false;
 bool  alloff_terrain = false;
 
-UISlider *ground_brush_radius;
+UISlider* ground_brush_radius;
 float groundBrushRadius=15.0f;
-UISlider *ground_brush_speed;
+UISlider* ground_brush_speed;
 float groundBrushSpeed=1.0f;
 int    groundBrushType=2;
 
-UISlider *blur_brush;
+UISlider* blur_brush;
 float blurBrushRadius=10.0f;
 int    blurBrushType=2;
 
-UISlider *paint_brush;
+UISlider* paint_brush;
 
 float brushPressure=0.9f;
 float brushLevel=255.0f;
@@ -124,16 +124,16 @@ brush textureBrush;
 
 bool Saving=false;
 
-UIFrame *LastClicked;
+UIFrame* LastClicked;
 
 
 // main GUI object
-UIMapViewGUI *mainGui;
+UIMapViewGUI* mainGui;
 
-UIFrame  *MapChunkWindow;
+UIFrame* MapChunkWindow;
 
 
-UIFrame  *fakeframe;
+UIFrame* fakeframe;
 
 UIToggleGroup * gBlurToggleGroup;
 UIToggleGroup * gGroundToggleGroup;
@@ -691,13 +691,13 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   ground_brush_radius=new UISlider(6.0f,120.0f,167.0f,1000.0f,0.00001f);
   ground_brush_radius->setFunc(setGroundBrushRadius);
   ground_brush_radius->setValue(groundBrushRadius/1000);
-  ground_brush_radius->setText("Brush radius: %.2f");
+  ground_brush_radius->setText( "Brush radius: " );
   setting_ground->addChild(ground_brush_radius);
 
   ground_brush_speed=new UISlider(6.0f,145.0f,167.0f,10.0f,0.00001f);
   ground_brush_speed->setFunc(setGroundBrushSpeed);
   ground_brush_speed->setValue(groundBrushSpeed/10);
-  ground_brush_speed->setText("Brush Speed: %.2f");
+  ground_brush_speed->setText( "Brush Speed: " );
   setting_ground->addChild(ground_brush_speed);
 
   // flatten/blur
@@ -717,7 +717,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   blur_brush=new UISlider(6.0f,85.0f,167.0f,1000.0f,0.00001f);
   blur_brush->setFunc(setBlurBrushRadius);
   blur_brush->setValue(blurBrushRadius/1000);
-  blur_brush->setText("Brush radius: %.2f");
+  blur_brush->setText( "Brush radius: " );
   setting_blur->addChild(blur_brush);
 
   //3D Paint settings UIWindow
@@ -744,23 +744,23 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   
   settings_paint->addChild(G1);
 
-  UISlider  *S1;
+  UISlider* S1;
   S1=new UISlider(6.0f,33.0f,145.0f,1.0f,0.0f);
   S1->setFunc(setTextureBrushHardness);
   S1->setValue(textureBrush.getHardness());
-  S1->setText("Hardness: %.2f");
+  S1->setText("Hardness: ");
   settings_paint->addChild(S1);
 
   paint_brush=new UISlider(6.0f,59.0f,145.0f,100.0f,0.00001);
   paint_brush->setFunc(setTextureBrushRadius);
   paint_brush->setValue(textureBrush.getRadius() / 100 );
-  paint_brush->setText("Radius: %.1f");
+  paint_brush->setText("Radius: ");
   settings_paint->addChild(paint_brush);
 
   S1=new UISlider(6.0f,85.0f,145.0f,0.99f,0.01f);
   S1->setFunc(setTextureBrushPressure);
   S1->setValue(brushPressure);
-  S1->setText("Pressure: %.2f");
+  S1->setText("Pressure: ");
   settings_paint->addChild(S1);
 
   mainGui->tileFrames->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(4,8,mainGui));
