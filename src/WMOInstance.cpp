@@ -1,8 +1,9 @@
 #include "WMOInstance.h"
 
-#include "wmo.h" // WMO
-#include "world.h" // gWorld
 #include "Log.h"
+#include "MapHeaders.h"
+#include "WMO.h" // WMO
+#include "World.h" // gWorld
 
 WMOInstance::WMOInstance( WMO* _wmo, MPQFile* _file ) : wmo( _wmo ), mSelectionID( SelectionNames.add( this ) )
 {

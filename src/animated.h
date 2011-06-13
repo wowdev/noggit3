@@ -6,9 +6,10 @@
 #include <utility>
 #include <vector>
 
-#include "modelheaders.h"
-#include "quaternion.h"
-#include "vec3d.h"
+#include "ModelHeaders.h"
+#include "MPQ.h"
+#include "Quaternion.h"
+#include "Vec3d.h"
 
 // interpolation functions
 template<class T>

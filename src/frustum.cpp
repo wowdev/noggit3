@@ -1,5 +1,6 @@
-#include "frustum.h"
-#include "video.h"
+#include "Frustum.h"
+
+#include "Video.h"
 
 void Plane::normalize()
 {

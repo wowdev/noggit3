@@ -2,8 +2,8 @@
 #define MATRIX_H
 
 #include <cmath>
-#include "vec3d.h"
-#include "quaternion.h"
+#include "Vec3D.h"
+#include "Quaternion.h"
 
 static double PI = 3.14159265358;
 

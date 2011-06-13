@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "dbcfile.h"
+#include "DBCFile.h"
 
 class AreaDB: public DBCFile
 {

@@ -1,16 +1,16 @@
-#include "wmo.h"
+#include "WMO.h"
 
 #include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
 
-#include "liquid.h"
+#include "Liquid.h"
 #include "Log.h"
 #include "ModelManager.h" // ModelManager
-#include "shaders.h"
+#include "Shaders.h"
 #include "TextureManager.h" // TextureManager, Texture
-#include "world.h"
+#include "World.h"
 
 void WMOHighlight( Vec4D color )
 {

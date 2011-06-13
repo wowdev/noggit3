@@ -1,10 +1,9 @@
 #ifndef MPQ_H
 #define MPQ_H
 
-#include <StormLib.h>
-
-#include <string>
 #include <set>
+#include <StormLib.h>
+#include <string>
 #include <vector>
 
 #include "AsyncObject.h"

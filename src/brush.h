@@ -1,7 +1,7 @@
 #ifndef __BRUSH_H
 #define __BRUSH_H
 
-#include "video.h" // GLuint
+#include "Video.h" // GLuint
 
 class brush
 {

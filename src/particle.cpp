@@ -1,8 +1,8 @@
-#include "particle.h"
+#include "Particle.h"
 
 #include <list>
 
-#include "misc.h"
+#include "Misc.h"
 
 static const unsigned int MAX_PARTICLES = 10000;
 

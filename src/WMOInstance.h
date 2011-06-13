@@ -3,11 +3,11 @@
 
 #include <set>
 
-#include "vec3d.h" // Vec3D
-#include "mpq.h" // MPQFile
-#include "mapheaders.h" // ENTRY_MODF
+#include "Vec3D.h" // Vec3D
 
 class WMO;
+class MPQFile;
+struct ENTRY_MODF;
 
 class WMOInstance
 {

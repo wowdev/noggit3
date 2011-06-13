@@ -7,20 +7,16 @@
 class Model;
 class Bone;
 
-#include "mpq.h"
-
-#include "animated.h"
-#include "particle.h"
-
-#include "quaternion.h"
-#include "matrix.h"
-#include "vec3d.h"
-
-#include "modelheaders.h"
-
-#include "video.h" // GLuint
-#include "manager.h" // ManagedItem
+#include "Animated.h"
 #include "AsyncObject.h" // AsyncObject
+#include "Manager.h" // ManagedItem
+#include "Matrix.h"
+#include "ModelHeaders.h"
+#include "MPQ.h"
+#include "Particle.h"
+#include "Quaternion.h"
+#include "Vec3D.h"
+#include "Video.h" // GLuint
 
 Vec3D fixCoordSystem(Vec3D v);
 

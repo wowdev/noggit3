@@ -6,8 +6,8 @@
 #include <stdint.h>
 
 #include "Log.h"
-#include "mpq.h"
-#include "video.h"
+#include "MPQ.h"
+#include "Video.h"
 
 #pragma pack(push,1)
 struct BLPHeader 

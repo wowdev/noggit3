@@ -1,10 +1,9 @@
 #ifndef TEST_H
 #define TEST_H
 
-#include "appstate.h"
+#include "AppState.h"
 
-class frame;
-
+class UIFrame;
 class World;
 
 enum eViewMode
@@ -24,7 +23,6 @@ class MapView : public AppState, public HotKeyReceiver
   bool set_areaid;
 
   void save();
-
 
   float lastBrushUpdate;
 

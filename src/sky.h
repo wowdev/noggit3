@@ -4,8 +4,8 @@
 #include <vector>
 #include <string>
 
-#include "mpq.h"
 #include "DBCFile.h"
+#include "MPQ.h"
 #include "Vec3D.h"
 
 class Model;

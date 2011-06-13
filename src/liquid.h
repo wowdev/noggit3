@@ -8,13 +8,13 @@ class Liquid;
 #include <string>
 #include <vector>
 
-#include "video.h"
-#include "mpq.h"
+#include "Video.h"
+#include "MPQ.h"
 #ifdef USEBLSFILES
-  #include "shaders.h"
+  #include "Shaders.h"
 #endif
-#include "maptile.h"
-#include "wmo.h"
+#include "MapTile.h"
+#include "WMO.h"
 
 //#include "Log.h"
 

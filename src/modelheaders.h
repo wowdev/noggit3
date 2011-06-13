@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "vec3d.h"
+#include "Vec3D.h"
 
 #pragma pack(push,1)
 

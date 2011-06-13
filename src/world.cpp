@@ -1,4 +1,4 @@
-#include "world.h"
+#include "World.h"
 
 #include <algorithm>
 #include <cassert>
@@ -9,18 +9,18 @@
 #include <utility>
 #include <time.h>
 
-#include "dbc.h"
+#include "DBC.h"
 #include "Environment.h"
 #include "Log.h"
 #include "MapChunk.h"
 #include "MapTile.h"
-#include "misc.h"
+#include "Misc.h"
 #include "ModelManager.h" // ModelManager
 #include "Project.h"
 #include "Settings.h"
 #include "TextureManager.h"
-#include "TexturingUI.h"
-#include "video.h"
+#include "UITexturingGUI.h"
+#include "Video.h"
 #include "WMOInstance.h" // WMOInstance
 
 World *gWorld = NULL;
@@ -1971,7 +1971,7 @@ void World::moveHeight(int id, int x, int z , int _cx, int _cz)
 
   curChunk->vmin.y = 9999999.0f;
   curChunk->vmax.y = -9999999.0f;
-  curChunk->Changed=true;
+  curChunk->Changed = true;
 
   float heightDelta;
   nameEntry *selection = gWorld->GetCurrentSelection();
@@ -2003,7 +2003,7 @@ void World::moveHeight(int id, int x, int z , int _cx, int _cz)
 
 void World::setBaseTexture( int x, int z )
 {
-  if( !TexturingUI::getSelectedTexture() ) return;
+  if( !UITexturingGUI::getSelectedTexture() ) return;
   MapTile *curTile;
   curTile = mTiles[z][x].tile;
   if(curTile == 0) return;
@@ -2015,7 +2015,7 @@ void World::setBaseTexture( int x, int z )
     {
       MapChunk *curChunk = curTile->getChunk(j, i);
       curChunk->eraseTextures();
-      curChunk->addTexture( TextureManager::add( TexturingUI::getSelectedTexture()->name ) );
+      curChunk->addTexture( TextureManager::add( UITexturingGUI::getSelectedTexture()->name ) );
     }
   }
 }

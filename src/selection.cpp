@@ -1,4 +1,4 @@
-#include "selection.h"
+#include "Selection.h"
 
 #include <sstream>
 #include <string>
@@ -7,7 +7,7 @@
 #include "MapChunk.h" // MapChunk
 #include "ModelInstance.h" // ModelInstance
 #include "WMOInstance.h" // WMOInstance
-#include "world.h" // gWorld
+#include "World.h" // gWorld
 
 nameEntryManager SelectionNames;
 

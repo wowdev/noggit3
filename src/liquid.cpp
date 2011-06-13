@@ -1,13 +1,13 @@
-#include "liquid.h"
+#include "Liquid.h"
 
 #include <algorithm>
 #include <string>
 
-#include "dbc.h"
+#include "DBC.h"
 #include "Log.h"
-#include "shaders.h"
+#include "Shaders.h"
 #include "TextureManager.h" // TextureManager, Texture
-#include "world.h"
+#include "World.h"
 
 struct LiquidVertex {
   unsigned char c[4];

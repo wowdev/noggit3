@@ -3,9 +3,9 @@
 
 #include <string>
 
-#include "video.h"
+#include "Video.h"
 
-#include "mpq.h"
+#include "MPQ.h"
 
 #ifdef USEBLSSHADER
 class BLSShader

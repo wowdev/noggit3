@@ -12,9 +12,9 @@
 #include <string>
 #include <vector>
 
-#include "mpq.h"
+#include "MPQ.h"
 #include "Log.h"
-#include "video.h"
+#include "Video.h"
 
 
 namespace freetype {

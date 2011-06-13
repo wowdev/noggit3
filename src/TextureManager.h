@@ -3,12 +3,12 @@
 
 class TextureManager;
 
+#include <GL/glew.h>
 #include <map>
 #include <string>
-#include <GL/glew.h>
 
-#include "manager.h" // ManagedItem
-#include "video.h"
+#include "Manager.h" // ManagedItem
+#include "Video.h"
 
 class TextureManager : public Manager<GLuint,OpenGL::Texture>
 {

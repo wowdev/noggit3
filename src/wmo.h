@@ -1,18 +1,17 @@
 #ifndef WMO_H
 #define WMO_H
 
-#include <vector>
 #include <set>
-#include <utility>
 #include <string>
+#include <utility>
+#include <vector>
 
-#include "manager.h"
-#include "vec3d.h"
-#include "mpq.h"
-#include "quaternion.h"
-#include "video.h"
-
+#include "Manager.h"
 #include "ModelInstance.h" // ModelInstance
+#include "MPQ.h"
+#include "Quaternion.h"
+#include "Vec3D.h"
+#include "Video.h"
 
 class WMO;
 class WMOGroup;
@@ -20,7 +19,6 @@ class WMOInstance;
 class WMOManager;
 class Liquid;
 class Model;
-
 
 class WMOGroup {
   WMO *wmo;

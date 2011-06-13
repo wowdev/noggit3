@@ -4,15 +4,15 @@
 #include <string>
 #include <vector>
 
-#include "appstate.h"
-#include "vec3d.h"
+#include "AppState.h"
+#include "Vec3D.h"
 
 // ui classes
-class frame;
-class statusBar;
-class winCredits;
-class minimapWindowUI;
-class menuBar;
+class UIFrame;
+class UIStatusBar;
+class UIAbout;
+class UIMinimapWindow;
+class UIMenuBar;
 
 class World;
 class Model;
@@ -37,11 +37,11 @@ struct BookmarkEntry
 class Menu : public AppState
 {
 private:
-  frame* mGUIFrame;
-  statusBar* mGUIStatusbar;
-  winCredits* mGUICreditsWindow;
-  minimapWindowUI* mGUIMinimapWindow;
-  menuBar* mGUImenuBar;
+  UIFrame* mGUIFrame;
+  UIStatusBar* mGUIStatusbar;
+  UIAbout* mGUICreditsWindow;
+  UIMinimapWindow* mGUIMinimapWindow;
+  UIMenuBar* mGUImenuBar;
 
   std::vector<MapEntry> mMaps;
   std::vector<BookmarkEntry> mBookmarks;

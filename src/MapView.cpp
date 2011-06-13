@@ -1,58 +1,52 @@
 #undef _UNICODE
 
+#include <algorithm>
 #include <cmath>
-#include <string>
-#include <map>
-#include <stdlib.h>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <stdlib.h>
+#include <string>
 #include <vector>
-#include <algorithm>
 
 #ifdef __FILESAREMISSING
 #include <IL/il.h>
 #endif
-#include "MapView.h"
-//#include "trace.h"
-#include "noggit.h" // gStates, gPop, gFPS, arial14, morpheus40, arial...
-#include "Log.h"
-#include "dbc.h"
-#include "texturingui.h"
-#include "uiTexturePicker.h"
-#include "world.h"
-#include "MapChunk.h"
+
+#include "Brush.h" // brush
 #include "ConfigFile.h"
-#include "appInfo.h" // appInfo
-#include "misc.h"
-#include "FreeType.h" // freetype::
-
-#include "Settings.h"
-#include "Project.h"
+#include "DBC.h"
+#include "Directory.h" // FileExists
 #include "Environment.h"
-
-#include "brush.h" // brush
-
-#include "WMOInstance.h" // WMOInstance
-#include "TextureManager.h" // TextureManager, Texture
+#include "FreeType.h" // freetype::
+#include "Log.h"
+#include "MapChunk.h"
+#include "MapView.h"
+#include "Misc.h"
 #include "ModelManager.h" // ModelManager
-
-#include "directory.h" // FileExists
-
-// ui classes
-#include "slider.h" // slider
-#include "Gui.h" // Gui
-#include "ui_ZoneIdBrowser.h" // Gui
-#include "ToggleGroup.h" // ToggleGroup
-#include "textUI.h" // textUI
-#include "gradient.h" // gradient
-#include "checkboxUI.h" // checkboxUI
-#include "Toolbar.h" // Toolbar
-#include "ToolbarIcon.h" // ToolbarIcon
-#include "textureUI.h" // textureUI
-#include "statusBar.h" // statusBar
-#include "detailInfos.h" // detailInfos
-#include "menuBar.h" // menuBar, menu items, ..
-#include "minimapWindowUI.h"
+#include "Noggit.h" // gStates, gPop, gFPS, arial14, morpheus40, arial...
+#include "Project.h"
+#include "Settings.h"
+#include "TextureManager.h" // TextureManager, Texture
+#include "UIAppInfo.h" // appInfo
+#include "UICheckBox.h" // UICheckBox
+#include "UIDetailInfos.h" // detailInfos
+#include "UIGradient.h" // UIGradient
+#include "UIMapViewGUI.h" // UIMapViewGUI
+#include "UIMenuBar.h" // UIMenuBar, menu items, ..
+#include "UIMinimapWindow.h" // UIMinimapWindow
+#include "UISlider.h" // UISlider
+#include "UIStatusBar.h" // statusBar
+#include "UIText.h" // UIText
+#include "UITexture.h" // textureUI
+#include "UITexturePicker.h"
+#include "UITexturingGUI.h"
+#include "UIToggleGroup.h" // UIToggleGroup
+#include "UIToolbar.h" // UIToolbar
+#include "UIToolbarIcon.h" // ToolbarIcon
+#include "UIZoneIDBrowser.h"
+#include "WMOInstance.h" // WMOInstance
+#include "World.h"
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -108,18 +102,17 @@ bool  alloff_detailselect = false;
 bool  alloff_fog = false;
 bool  alloff_terrain = false;
 
-Gui *mainGuiPointer;
-slider *ground_brush_radius;
+UISlider *ground_brush_radius;
 float groundBrushRadius=15.0f;
-slider *ground_brush_speed;
+UISlider *ground_brush_speed;
 float groundBrushSpeed=1.0f;
 int    groundBrushType=2;
 
-slider *blur_brush;
+UISlider *blur_brush;
 float blurBrushRadius=10.0f;
 int    blurBrushType=2;
 
-slider *paint_brush;
+UISlider *paint_brush;
 
 float brushPressure=0.9f;
 float brushLevel=255.0f;
@@ -131,24 +124,24 @@ brush textureBrush;
 
 bool Saving=false;
 
-frame *LastClicked;
+UIFrame *LastClicked;
 
 
 // main GUI object
-Gui *mainGui;
+UIMapViewGUI *mainGui;
 
-frame  *MapChunkWindow;
+UIFrame  *MapChunkWindow;
 
 
-frame  *fakeframe;
+UIFrame  *fakeframe;
 
-ToggleGroup * gBlurToggleGroup;
-ToggleGroup * gGroundToggleGroup;
-ToggleGroup * gFlagsToggleGroup;
+UIToggleGroup * gBlurToggleGroup;
+UIToggleGroup * gGroundToggleGroup;
+UIToggleGroup * gFlagsToggleGroup;
 
-window *setting_ground;
-window *setting_blur;
-window *settings_paint;
+UIWindow *setting_ground;
+UIWindow *setting_blur;
+UIWindow *settings_paint;
 
 
 //TextBox * textbox;
@@ -188,7 +181,7 @@ void setTextureBrushLevel(float f)
   brushLevel=(1.0f-f)*255.0f;
 }
 
-void SaveOrReload( frame*, int pMode )
+void SaveOrReload( UIFrame*, int pMode )
 {
   if( pMode == 1 )
     gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
@@ -208,7 +201,6 @@ void change_settings_window(int oldid, int newid)
   setting_ground->hidden=true;
   setting_blur->hidden=true;
   settings_paint->hidden=true;
-  mainGuiPointer->ZoneIDBrowser->hidden = true;
   mainGui->TexturePalette->hidden = true;
   // fetch old win position
   switch(oldid)
@@ -248,17 +240,17 @@ void change_settings_window(int oldid, int newid)
 }
 
 //! \todo  Do this nicer?
-void openHelp( frame* /*button*/, int /*id*/ )
+void openHelp( UIFrame* /*button*/, int /*id*/ )
 {
   static_cast<MapView*>( gStates.back() )->ViewHelp();
 }
 
-void closeHelp( frame* /*button*/, int /*id*/ )
+void closeHelp( UIFrame* /*button*/, int /*id*/ )
 {
   static_cast<MapView*>( gStates.back() )->View3D();
 }
 
-void ResetSelectedObjectRotation( frame* /*button*/, int /*id*/ )
+void ResetSelectedObjectRotation( UIFrame* /*button*/, int /*id*/ )
 {
   if( gWorld->IsSelection( eEntry_WMO ) )
   {
@@ -272,7 +264,7 @@ void ResetSelectedObjectRotation( frame* /*button*/, int /*id*/ )
   }
 }
 
-void SnapSelectedObjectToGround( frame* /*button*/, int /*id*/ )
+void SnapSelectedObjectToGround( UIFrame* /*button*/, int /*id*/ )
 {
   if( gWorld->IsSelection( eEntry_WMO ) )
   {
@@ -295,7 +287,7 @@ void SnapSelectedObjectToGround( frame* /*button*/, int /*id*/ )
   \brief Copy selected model to clipboard
   Copy the selected m2 or WMO with getInstance()->set_clipboard() 
 */
-void CopySelectedObject( frame* /*button*/, int /*id*/ )
+void CopySelectedObject( UIFrame* /*button*/, int /*id*/ )
 {
   if( gWorld->HasSelection() )
   {
@@ -307,7 +299,7 @@ void CopySelectedObject( frame* /*button*/, int /*id*/ )
   \brief Paste a model
   Paste the current model stored in Environment::getInstance()->get_clipboard() at the cords of the selected model or chunk.
 */
-void PasteSelectedObject( frame* /*button*/, int /*id*/ )
+void PasteSelectedObject( UIFrame* /*button*/, int /*id*/ )
 {
   if( gWorld->HasSelection() )
   {  
@@ -331,7 +323,7 @@ void PasteSelectedObject( frame* /*button*/, int /*id*/ )
 /*!
   \brief Delete the current selected model
 */
-void DeleteSelectedObject( frame* /*button*/, int /*id*/ )
+void DeleteSelectedObject( UIFrame* /*button*/, int /*id*/ )
 {
   if( gWorld->IsSelection( eEntry_WMO ) )
     gWorld->deleteWMOInstance( gWorld->GetCurrentSelection()->data.wmo->mUniqueID );
@@ -344,7 +336,7 @@ void DeleteSelectedObject( frame* /*button*/, int /*id*/ )
   Imports a model from the import.txt, the wowModelViewer log or just insert some hard coded testing models.
   \param id the id switch the import kind
 */
-void InsertObject( frame* /*button*/, int id )
+void InsertObject( UIFrame* /*button*/, int id )
 {
   //! \todo Beautify.
   
@@ -510,28 +502,28 @@ void InsertObject( frame* /*button*/, int id )
   //! \todo Memoryleak: These models will never get deleted.
 }
 
-void view_texture_palette( frame* /*button*/, int /*id*/ )
+void view_texture_palette( UIFrame* /*button*/, int /*id*/ )
 {
     mainGui->TexturePalette->hidden = !mainGui->TexturePalette->hidden;
 }
 
-void exit_tilemode(  frame* /*button*/, int /*id*/ )
+void exit_tilemode(  UIFrame* /*button*/, int /*id*/ )
 {
   gPop = true;
 }
 
-void test_menu_action(  frame* /*button*/, int id )
+void test_menu_action(  UIFrame* /*button*/, int id )
 {
 }
 
-void moveHeightmap(  frame* /*button*/, int id )
+void moveHeightmap(  UIFrame* /*button*/, int id )
 {
   // set areaid on all chunks of the current ADT
   if(Environment::getInstance()->selectedAreaID)
     gWorld->moveHeight(Environment::getInstance()->selectedAreaID ,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
-void clearHeightmap(  frame* /*button*/, int id )
+void clearHeightmap(  UIFrame* /*button*/, int id )
 {
   // set areaid on all chunks of the current ADT
   if(Environment::getInstance()->selectedAreaID)
@@ -539,14 +531,14 @@ void clearHeightmap(  frame* /*button*/, int id )
 
 }
 
-void adtSetAreaID( frame* /*button*/, int id )
+void adtSetAreaID( UIFrame* /*button*/, int id )
 {
   // set areaid on all chunks of the current ADT
   if(Environment::getInstance()->selectedAreaID)
     gWorld->setAreaID(Environment::getInstance()->selectedAreaID ,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
-void changeZoneIDValue(frame *f,int set)
+void changeZoneIDValue(UIFrame *f,int set)
 {
   Environment::getInstance()->selectedAreaID = set;
   if( Environment::getInstance()->areaIDColors.find(set) == Environment::getInstance()->areaIDColors.end() )
@@ -575,14 +567,14 @@ std::string getCurrentHeightmapPath()
 
 }
 
-void clearTexture(frame *f,int set)
+void clearTexture(UIFrame *f,int set)
 {
   // set areaid on all chunks of the current ADT
   gWorld->setBaseTexture(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
 #ifdef __FILESAREMISSING
-void exportPNG(frame *f,int set)
+void exportPNG(UIFrame *f,int set)
 {
   
   // create the image and write to disc.
@@ -619,7 +611,7 @@ void exportPNG(frame *f,int set)
   free(imData);
 }
 
-void importPNG(frame *f,int set)
+void importPNG(UIFrame *f,int set)
 {
   ilInit();
 
@@ -649,8 +641,8 @@ void importPNG(frame *f,int set)
   }
 }
 #else
-void exportPNG(frame*, int) {}
-void importPNG(frame*, int) {}
+void exportPNG(UIFrame*, int) {}
+void importPNG(UIFrame*, int) {}
 #endif
 
 MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
@@ -672,8 +664,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   mViewMode = eViewMode_3D;
 
   // create main gui object that holds all other gui elements for access ( in the future ;) )
-  mainGui = new Gui( this );
-  mainGuiPointer = mainGui;
+  mainGui = new UIMapViewGUI( this );
   mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
 
   mainGui->ZoneIDBrowser->setMapID( gWorld->getMapID() );
@@ -682,64 +673,64 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   tool_settings_y = 38;
   
   // Raise/Lower
-  setting_ground=new window( tool_settings_x, tool_settings_y, 180.0f, 160.0f );
+  setting_ground=new UIWindow( tool_settings_x, tool_settings_y, 180.0f, 160.0f );
   setting_ground->movable = true;
   mainGui->tileFrames->addChild( setting_ground );
 
-  setting_ground->addChild( new textUI( 78.5f, 2.0f, "Raise / Lower", arial14, eJustifyCenter ) );
+  setting_ground->addChild( new UIText( 78.5f, 2.0f, "Raise / Lower", arial14, eJustifyCenter ) );
   
-  gGroundToggleGroup = new ToggleGroup( &groundBrushType );
-  setting_ground->addChild( new checkboxUI( 6.0f, 15.0f, "Flat", gGroundToggleGroup, 0 ) );
-  setting_ground->addChild( new checkboxUI( 85.0f, 15.0f, "Linear", gGroundToggleGroup, 1 ) );
-  setting_ground->addChild( new checkboxUI( 6.0f, 40.0f, "Smooth", gGroundToggleGroup, 2 ) );
-  setting_ground->addChild( new checkboxUI( 85.0f, 40.0f, "Polynomial", gGroundToggleGroup, 3 ) );
-  setting_ground->addChild( new checkboxUI( 6.0f, 65.0f, "Trigonom", gGroundToggleGroup, 4 ) );
-  setting_ground->addChild( new checkboxUI( 85.0f, 65.0f, "Quadratic", gGroundToggleGroup, 5 ) );
+  gGroundToggleGroup = new UIToggleGroup( &groundBrushType );
+  setting_ground->addChild( new UICheckBox( 6.0f, 15.0f, "Flat", gGroundToggleGroup, 0 ) );
+  setting_ground->addChild( new UICheckBox( 85.0f, 15.0f, "Linear", gGroundToggleGroup, 1 ) );
+  setting_ground->addChild( new UICheckBox( 6.0f, 40.0f, "Smooth", gGroundToggleGroup, 2 ) );
+  setting_ground->addChild( new UICheckBox( 85.0f, 40.0f, "Polynomial", gGroundToggleGroup, 3 ) );
+  setting_ground->addChild( new UICheckBox( 6.0f, 65.0f, "Trigonom", gGroundToggleGroup, 4 ) );
+  setting_ground->addChild( new UICheckBox( 85.0f, 65.0f, "Quadratic", gGroundToggleGroup, 5 ) );
   gGroundToggleGroup->Activate( 2 );
 
-  ground_brush_radius=new slider(6.0f,120.0f,167.0f,1000.0f,0.00001f);
+  ground_brush_radius=new UISlider(6.0f,120.0f,167.0f,1000.0f,0.00001f);
   ground_brush_radius->setFunc(setGroundBrushRadius);
   ground_brush_radius->setValue(groundBrushRadius/1000);
   ground_brush_radius->setText("Brush radius: %.2f");
   setting_ground->addChild(ground_brush_radius);
 
-  ground_brush_speed=new slider(6.0f,145.0f,167.0f,10.0f,0.00001f);
+  ground_brush_speed=new UISlider(6.0f,145.0f,167.0f,10.0f,0.00001f);
   ground_brush_speed->setFunc(setGroundBrushSpeed);
   ground_brush_speed->setValue(groundBrushSpeed/10);
   ground_brush_speed->setText("Brush Speed: %.2f");
   setting_ground->addChild(ground_brush_speed);
 
   // flatten/blur
-  setting_blur=new window(tool_settings_x,tool_settings_y,180.0f,100.0f);
+  setting_blur=new UIWindow(tool_settings_x,tool_settings_y,180.0f,100.0f);
   setting_blur->movable=true;
   setting_blur->hidden=true;
   mainGui->tileFrames->addChild(setting_blur);
 
-  setting_blur->addChild( new textUI( 78.5f, 2.0f, "Flatten / Blur", arial14, eJustifyCenter ) );
+  setting_blur->addChild( new UIText( 78.5f, 2.0f, "Flatten / Blur", arial14, eJustifyCenter ) );
 
-  gBlurToggleGroup = new ToggleGroup( &blurBrushType );
-  setting_blur->addChild( new checkboxUI( 6.0f, 15.0f, "Flat", gBlurToggleGroup, 0 ) );
-  setting_blur->addChild( new checkboxUI( 80.0f, 15.0f, "Linear", gBlurToggleGroup, 1 ) );
-  setting_blur->addChild( new checkboxUI( 6.0f, 40.0f, "Smooth", gBlurToggleGroup, 2 ) );
+  gBlurToggleGroup = new UIToggleGroup( &blurBrushType );
+  setting_blur->addChild( new UICheckBox( 6.0f, 15.0f, "Flat", gBlurToggleGroup, 0 ) );
+  setting_blur->addChild( new UICheckBox( 80.0f, 15.0f, "Linear", gBlurToggleGroup, 1 ) );
+  setting_blur->addChild( new UICheckBox( 6.0f, 40.0f, "Smooth", gBlurToggleGroup, 2 ) );
   gBlurToggleGroup->Activate( 2 );
 
-  blur_brush=new slider(6.0f,85.0f,167.0f,1000.0f,0.00001f);
+  blur_brush=new UISlider(6.0f,85.0f,167.0f,1000.0f,0.00001f);
   blur_brush->setFunc(setBlurBrushRadius);
   blur_brush->setValue(blurBrushRadius/1000);
   blur_brush->setText("Brush radius: %.2f");
   setting_blur->addChild(blur_brush);
 
-  //3D Paint settings window
-  settings_paint=new window(tool_settings_x,tool_settings_y,180.0f,100.0f);
+  //3D Paint settings UIWindow
+  settings_paint=new UIWindow(tool_settings_x,tool_settings_y,180.0f,100.0f);
   settings_paint->hidden=true;
   settings_paint->movable=true;
 
   mainGui->tileFrames->addChild(settings_paint);
 
-  settings_paint->addChild( new textUI( 78.5f, 2.0f, "3D Paint", arial14, eJustifyCenter ) );
+  settings_paint->addChild( new UIText( 78.5f, 2.0f, "3D Paint", arial14, eJustifyCenter ) );
   
-  gradient *G1;
-  G1=new gradient;  
+  UIGradient *G1;
+  G1=new UIGradient;  
   G1->width=20.0f;
   G1->x=settings_paint->width-4-G1->width;
   G1->y=4.0f;
@@ -753,36 +744,36 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   
   settings_paint->addChild(G1);
 
-  slider  *S1;
-  S1=new slider(6.0f,33.0f,145.0f,1.0f,0.0f);
+  UISlider  *S1;
+  S1=new UISlider(6.0f,33.0f,145.0f,1.0f,0.0f);
   S1->setFunc(setTextureBrushHardness);
   S1->setValue(textureBrush.getHardness());
   S1->setText("Hardness: %.2f");
   settings_paint->addChild(S1);
 
-  paint_brush=new slider(6.0f,59.0f,145.0f,100.0f,0.00001);
+  paint_brush=new UISlider(6.0f,59.0f,145.0f,100.0f,0.00001);
   paint_brush->setFunc(setTextureBrushRadius);
   paint_brush->setValue(textureBrush.getRadius() / 100 );
   paint_brush->setText("Radius: %.1f");
   settings_paint->addChild(paint_brush);
 
-  S1=new slider(6.0f,85.0f,145.0f,0.99f,0.01f);
+  S1=new UISlider(6.0f,85.0f,145.0f,0.99f,0.01f);
   S1->setFunc(setTextureBrushPressure);
   S1->setValue(brushPressure);
   S1->setText("Pressure: %.2f");
   settings_paint->addChild(S1);
 
-  mainGui->tileFrames->addChild(mainGui->TexturePalette = TexturingUI::createTexturePalette(4,8,mainGui));
+  mainGui->tileFrames->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(4,8,mainGui));
   mainGui->TexturePalette->hidden=true;
-  mainGui->tileFrames->addChild(mainGui->SelectedTexture = TexturingUI::createSelectedTexture());
+  mainGui->tileFrames->addChild(mainGui->SelectedTexture = UITexturingGUI::createSelectedTexture());
   mainGui->SelectedTexture->hidden=true;
-  mainGui->tileFrames->addChild(TexturingUI::createTilesetLoader());
-  mainGui->tileFrames->addChild(TexturingUI::createTextureFilter());
-  mainGui->tileFrames->addChild(MapChunkWindow = TexturingUI::createMapChunkWindow());
+  mainGui->tileFrames->addChild(UITexturingGUI::createTilesetLoader());
+  mainGui->tileFrames->addChild(UITexturingGUI::createTextureFilter());
+  mainGui->tileFrames->addChild(MapChunkWindow = UITexturingGUI::createMapChunkWindow());
   MapChunkWindow->hidden=true;
   
   // create the menu
-  menuBar * mbar = new menuBar();
+  UIMenuBar * mbar = new UIMenuBar();
 
   mbar->AddMenu( "File" );
   mbar->AddMenu( "Edit" );
@@ -870,16 +861,11 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
 MapView::~MapView()
 {
-  if( mainGui )
-  {
-    delete mainGui;
-    mainGui = NULL;
-  }
-  if( gWorld )
-  {
-    delete gWorld;
-    gWorld = NULL;
-  }
+  delete mainGui;
+  mainGui = NULL;
+  
+  delete gWorld;
+  gWorld = NULL;
 }
 
 void MapView::tick( float t, float dt )
@@ -1089,7 +1075,7 @@ void MapView::tick( float t, float dt )
           else  if( Environment::getInstance()->ShiftDown)
           {
             // Paint
-            if( TexturingUI::getSelectedTexture() )
+            if( UITexturingGUI::getSelectedTexture() )
             {
               if( textureBrush.needUpdate() )
               {
@@ -1097,9 +1083,9 @@ void MapView::tick( float t, float dt )
               }
 
               if( mViewMode == eViewMode_3D )
-                gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture()->name ) );
+                gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( UITexturingGUI::getSelectedTexture()->name ) );
               else if( mViewMode == eViewMode_2D )
-                gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( TexturingUI::getSelectedTexture() ->name ) );
+                gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( UITexturingGUI::getSelectedTexture() ->name ) );
             }
           }          
         break;
@@ -1213,7 +1199,7 @@ void MapView::tick( float t, float dt )
   if( !MapChunkWindow->hidden )
   {
     if( gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk )
-      TexturingUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
+      UITexturingGUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
   }
 }                                             
 
@@ -1642,7 +1628,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
         CopySelectedObject( 0, 0 );
       /*else if( gWorld->IsSelection( eEntry_MapChunk ) )
       {
-        TexturingUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
+        UITexturingGUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
         MapChunkWindow->hidden = false;
       }*/
     }
