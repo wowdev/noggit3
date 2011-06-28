@@ -82,7 +82,7 @@ void UITexturePicker::getTextures(nameEntry *lSelection)
 
 void UITexturePicker::setTexture(int id)
 {
-  OpenGL::Texture* curTex;
+  OpenGL::Texture* curTex = NULL;
 
   switch (id)
   {

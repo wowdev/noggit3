@@ -57,7 +57,7 @@ bool UISlider::processLeftDrag( float mx, float my, float /*xChange*/, float /*y
   float tx,ty;
   parent->getOffset( &tx, &ty );
   mx -= tx;
-  my -= ty;
+  //my -= ty;
   
   value = std::min( 1.0f, std::max( 0.0f, mx / width ) );
   if( func )

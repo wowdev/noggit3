@@ -1682,9 +1682,8 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
     change=CHUNKSIZE/62.0f;
     zPos=zbase;
 
-    int texAbove;
     float target,tarAbove, tPressure;
-    texAbove=nTextures-texLevel-1;
+    //int texAbove=nTextures-texLevel-1;
 
 
     for(int j=0; j < 63 ; j++)

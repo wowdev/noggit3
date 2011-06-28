@@ -1011,7 +1011,7 @@ void MapView::tick( float t, float dt )
             lTarget = &Selection->data.wmo->dir.z;
         }
         
-        if( lModify )
+        if( lModify && lTarget )
         {
           *lTarget = *lTarget + rh + rv;
 
@@ -1380,17 +1380,10 @@ void MapView::displayViewMode_Minimap( float /*t*/, float /*dt*/ )
 void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 {
   video.setTileMode();
-  gWorld->drawTileMode(ah);
+  gWorld->drawTileMode( ah );
   
-  float mX,mY,tRadius;
-  mX=4.0f*video.ratio*(static_cast<float>(MouseX)/static_cast<float>(video.xres)-0.5f);
-  mY=4.0f*(static_cast<float>(MouseY)/static_cast<float>(video.yres)-0.5f);
-
-  mX=CHUNKSIZE*4.0f*video.ratio*(static_cast<float>(MouseX)/static_cast<float>(video.xres)-0.5f)/gWorld->zoom+gWorld->camera.x;
-  mY=CHUNKSIZE*4.0f*(static_cast<float>(MouseY)/static_cast<float>(video.yres)-0.5f)/gWorld->zoom+gWorld->camera.z;
-
-  mX=mX/CHUNKSIZE;
-  mY=mY/CHUNKSIZE;
+  const float mX = ( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom + gWorld->camera.x ) / CHUNKSIZE;
+  const float mY = ( CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f ) / gWorld->zoom + gWorld->camera.z ) / CHUNKSIZE;
   
   // draw brush
   glPushMatrix();
@@ -1404,7 +1397,7 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
     glEnable(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, textureBrush.getTexture());
-    tRadius=textureBrush.getRadius()/CHUNKSIZE;// *gWorld->zoom;
+    const float tRadius = textureBrush.getRadius()/CHUNKSIZE;// *gWorld->zoom;
     glBegin(GL_QUADS);
       glTexCoord2f(0.0f,0.0f);
       glVertex3f(mX-tRadius,mY+tRadius,0);

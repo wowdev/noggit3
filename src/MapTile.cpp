@@ -1035,7 +1035,6 @@ void MapTile::saveTile()
     // MDDF data
     ENTRY_MDDF * lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>( lCurrentPosition + 8 );
   
-    int model_counter = 1;
     lID = 0;
     for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
     {
@@ -1081,8 +1080,6 @@ void MapTile::saveTile()
     // MODF data
     ENTRY_MODF * lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>( lCurrentPosition + 8 );
 
-    // reset model counter
-    model_counter = 1;
     lID = 0;
     for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
     {
@@ -1560,11 +1557,12 @@ void MapTile::saveTile()
   // MFBO
   if( this->mFlags & 1 )
   {
-    lADTFile.Extend( 8 + 36 );
-    SetChunkHeader( lADTFile, lCurrentPosition, 'MFBO', 36 );
+    size_t chunkSize = sizeof( int16_t ) * 9 * 2;
+    lADTFile.Extend( 8 + chunkSize );
+    SetChunkHeader( lADTFile, lCurrentPosition, 'MFBO', chunkSize );
     lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mfbo = lCurrentPosition - 0x14;
 
-    int16_t * lMFBO_Data = lADTFile.GetPointer<int16_t>( lCurrentPosition + 8 );
+    int16_t* lMFBO_Data = lADTFile.GetPointer<int16_t>( lCurrentPosition + 8 );
     
     lID = 0;
     for( int i = 0; i < 9; ++i )
@@ -1573,7 +1571,7 @@ void MapTile::saveTile()
     for( int i = 0; i < 9; ++i )
       lMFBO_Data[lID++] = mMaximumValues[i * 3 + 1];
 
-    lCurrentPosition += 8 + 36;
+    lCurrentPosition += 8 + chunkSize;
   }
 
   // \! todo Do not do bullshit here in MTFX. 
@@ -1584,7 +1582,7 @@ void MapTile::saveTile()
     SetChunkHeader( lADTFile, lCurrentPosition, 'MTFX', 4*mTextureEffects.size() );
     lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mtfx = lCurrentPosition - 0x14;
 
-    int* lMTFX_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
+    uint32_t* lMTFX_Data = lADTFile.GetPointer<uint32_t>( lCurrentPosition + 8 );
     
     lID = 0;
     //they should be in the correct order...
@@ -1592,7 +1590,7 @@ void MapTile::saveTile()
       lMTFX_Data[lID] = *it;
       ++lID;
     }
-    lCurrentPosition += 8 +  4*mTextureEffects.size();
+    lCurrentPosition += 8 + sizeof( uint32_t ) * mTextureEffects.size();
   }
 #endif
   
