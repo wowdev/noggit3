@@ -585,14 +585,14 @@ void Model::calcBones(int _anim, int time)
   }
 }
 
-void Model::animate(int /*_anim*/) //! \todo Is this _anim, not anim down there?
+void Model::animate(int _anim)
 {
+  this->anim = _anim;
   ModelAnimation &a = anims[anim];
   int t = globalTime; //(int)(gWorld->animtime /* / a.playSpeed*/);
   int tmax = a.length;
   t %= tmax;
   animtime = t;
-  this->anim = anim;
   
   if (animBones) {
     calcBones(anim, t);

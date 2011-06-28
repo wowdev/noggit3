@@ -777,26 +777,25 @@ void World::outdoorLighting()
   Vec4D ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
 
-  float di = outdoorLightStats.dayIntensity, ni = outdoorLightStats.nightIntensity;
-  di = 1;
-  ni = 0;
-
-  //Vec3D dd = outdoorLightStats.dayDir;
+  float di = outdoorLightStats.dayIntensity;
+  //float ni = outdoorLightStats.nightIntensity;
+  
+  Vec3D dd = outdoorLightStats.dayDir;
   // HACK: let's just keep the light source in place for now
-  Vec4D pos(-1, 1, -1, 0);
-  Vec4D col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1); 
+  //Vec4D pos(-1, 1, -1, 0);
+  Vec4D pos(-dd.x, -dd.z, dd.y, 0.0f);
+  Vec4D col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1.0f); 
   glLightfv(GL_LIGHT0, GL_AMBIENT, black);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
   glLightfv(GL_LIGHT0, GL_POSITION, pos);
   
   /*
-  Vec3D dd = outdoorLightStats.nightDir;
-  Vec4D pos(-dd.x, -dd.z, dd.y, 0);
-  Vec4D col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * ni, 1); 
+  dd = outdoorLightStats.nightDir;
+  pos(-dd.x, -dd.z, dd.y, 0.0f);
+  col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * ni, 1.0f); 
   glLightfv(GL_LIGHT1, GL_AMBIENT, black);
   glLightfv(GL_LIGHT1, GL_DIFFUSE, col);
-  glLightfv(GL_LIGHT1, GL_POSITION, pos);
-  */
+  glLightfv(GL_LIGHT1, GL_POSITION, pos);*/
 }
 
 /*void World::outdoorLighting2()
@@ -830,9 +829,8 @@ void World::outdoorLighting()
 
 void World::outdoorLights(bool on)
 {
-  float di = outdoorLightStats.dayIntensity, ni = outdoorLightStats.nightIntensity;
-  di = 1;
-  ni = 0;
+  float di = outdoorLightStats.dayIntensity;
+  float ni = outdoorLightStats.nightIntensity;
 
   if (on) {
     Vec4D ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
@@ -1973,7 +1971,7 @@ void World::moveHeight(int id, int x, int z , int _cx, int _cz)
   curChunk->vmax.y = -9999999.0f;
   curChunk->Changed = true;
 
-  float heightDelta;
+  float heightDelta = 0.0f;
   nameEntry *selection = gWorld->GetCurrentSelection();
 
   if(selection)
@@ -1983,7 +1981,7 @@ void World::moveHeight(int id, int x, int z , int _cx, int _cz)
       heightDelta = gWorld->camera.y - selection->data.mapchunk->py;
     }
 
-  if(heightDelta==0.0f) return;
+  if( heightDelta * heightDelta <= 0.1f ) return;
 
   for(int i=0; i < mapbufsize; ++i)
   {
