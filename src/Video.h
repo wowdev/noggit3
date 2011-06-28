@@ -45,7 +45,7 @@ public:
   bool mSupportCompression;
 };
 
-#include "manager.h" // ManagedItem
+#include "Manager.h" // ManagedItem
 
 namespace OpenGL
 {  

@@ -47,7 +47,6 @@ protected:
   
   bool handleHotkeys(SDL_KeyboardEvent* e)
   {
-    SDLMod mod = e->keysym.mod;
   /* 
   if( mod & KMOD_NUM ) LogError << "NUMLOCK " << std::endl;
     if( mod & KMOD_CAPS ) LogError << "CAPSLOCK " << std::endl;
@@ -62,14 +61,14 @@ protected:
     if( mod & KMOD_RMETA )LogError << "RMETA " << std::endl;
    */
 
-    size_t modifier = ( mod == KMOD_NONE ) ? ( MOD_none ) : (
-      ( ( mod & KMOD_SHIFT ) ? MOD_shift : 0 ) |
-      ( ( mod & KMOD_CTRL  ) ? MOD_ctrl  : 0 ) |
-      ( ( mod & KMOD_ALT   ) ? MOD_alt   : 0 ) |
-      ( ( mod & KMOD_META  ) ? MOD_meta  : 0 ) |
-      //( ( mod & KMOD_NUM   ) ? MOD_num   : 0 ) |
-      ( ( mod & KMOD_CAPS  ) ? MOD_caps  : 0 ) |
-      ( ( mod & KMOD_MODE  ) ? MOD_mode  : 0 ) );
+    size_t modifier = ( e->keysym.mod == KMOD_NONE ) ? ( MOD_none ) : (
+      ( ( e->keysym.mod & KMOD_SHIFT ) ? MOD_shift : 0 ) |
+      ( ( e->keysym.mod & KMOD_CTRL  ) ? MOD_ctrl  : 0 ) |
+      ( ( e->keysym.mod & KMOD_ALT   ) ? MOD_alt   : 0 ) |
+      ( ( e->keysym.mod & KMOD_META  ) ? MOD_meta  : 0 ) |
+      //( ( e->keysym.mod & KMOD_NUM   ) ? MOD_num   : 0 ) |
+      ( ( e->keysym.mod & KMOD_CAPS  ) ? MOD_caps  : 0 ) |
+      ( ( e->keysym.mod & KMOD_MODE  ) ? MOD_mode  : 0 ) );
     
     //LogError << modifier<< std::endl;
 

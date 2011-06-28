@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "Noggit.h" // fonts
-#include "Revision.h"
+#include "revision.h"
 #include "UIMinimizeButton.h"
 #include "UIText.h"
 #include "UITexture.h"

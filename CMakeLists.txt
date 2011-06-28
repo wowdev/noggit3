@@ -13,7 +13,7 @@ endif( WIN32 )
 # Our own FindModule.cmake scripts.
 SET( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" )
 
-FIND_PACKAGE( zlib REQUIRED )
+FIND_PACKAGE( ZLIB REQUIRED )
 FIND_PACKAGE( Freetype REQUIRED )
 FIND_PACKAGE( OpenGL REQUIRED )
 
@@ -62,8 +62,8 @@ ENDIF( WIN32 )
 
 # If we are on OSX, we need additional files for SDL to work.
 IF( APPLE )
-  MESSAGE( STATUS "Also using osx/SDLmain.m" )
-  SET( SourceFiles ${SourceFiles} "${CMAKE_SOURCE_DIR}/include/osx/SDLmain.m" )
+  MESSAGE( STATUS "Also using osx/SDLMain.m" )
+  SET( SourceFiles ${SourceFiles} "${CMAKE_SOURCE_DIR}/include/osx/SDLMain.m" )
 ENDIF( APPLE )
 
 # Log to console for easier debugging.

@@ -24,7 +24,7 @@
 #include "DBC.h"
 #include "Directory.h"
 #include "Environment.h"  // This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
-#include "ErrorHandling.h"
+#include "errorHandling.h"
 #include "FreeType.h" // fonts.
 #include "Liquid.h"
 #include "Log.h"
@@ -33,7 +33,7 @@
 #include "Model.h"
 #include "MPQ.h"
 #include "Project.h"    // This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
-#include "Revision.h"
+#include "revision.h"
 #include "Settings.h"    // In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
 #include "Video.h"
 //#include "shaders.h"
