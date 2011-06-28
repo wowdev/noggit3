@@ -1,4 +1,4 @@
-#include "UIScrollbar.h"
+#include "UIScrollBar.h"
 
 #include <iostream>
 #include <sstream>

@@ -1,5 +1,5 @@
-#ifndef TEST_H
-#define TEST_H
+#ifndef MAPVIEW_H
+#define MAPVIEW_H
 
 #include "AppState.h"
 
