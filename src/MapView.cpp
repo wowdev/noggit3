@@ -512,18 +512,18 @@ void exit_tilemode(  UIFrame* /*button*/, int /*id*/ )
   gPop = true;
 }
 
-void test_menu_action(  UIFrame* /*button*/, int id )
+void test_menu_action(  UIFrame* /*button*/, int /*id*/ )
 {
 }
 
-void moveHeightmap(  UIFrame* /*button*/, int id )
+void moveHeightmap(  UIFrame* /*button*/, int /*id*/ )
 {
   // set areaid on all chunks of the current ADT
   if(Environment::getInstance()->selectedAreaID)
     gWorld->moveHeight(Environment::getInstance()->selectedAreaID ,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
-void clearHeightmap(  UIFrame* /*button*/, int id )
+void clearHeightmap(  UIFrame* /*button*/, int /*id*/ )
 {
   // set areaid on all chunks of the current ADT
   if(Environment::getInstance()->selectedAreaID)
@@ -531,14 +531,14 @@ void clearHeightmap(  UIFrame* /*button*/, int id )
 
 }
 
-void adtSetAreaID( UIFrame* /*button*/, int id )
+void adtSetAreaID( UIFrame* /*button*/, int /*id*/ )
 {
   // set areaid on all chunks of the current ADT
   if(Environment::getInstance()->selectedAreaID)
     gWorld->setAreaID(Environment::getInstance()->selectedAreaID ,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
-void changeZoneIDValue(UIFrame *f,int set)
+void changeZoneIDValue(UIFrame */*f*/,int set)
 {
   Environment::getInstance()->selectedAreaID = set;
   if( Environment::getInstance()->areaIDColors.find(set) == Environment::getInstance()->areaIDColors.end() )
@@ -567,7 +567,7 @@ std::string getCurrentHeightmapPath()
 
 }
 
-void clearTexture(UIFrame *f,int set)
+void clearTexture(UIFrame */*f*/,int /*set*/)
 {
   // set areaid on all chunks of the current ADT
   gWorld->setBaseTexture(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));

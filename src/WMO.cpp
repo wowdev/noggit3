@@ -762,7 +762,7 @@ void WMOGroup::initDisplayList()
       VertexBoxMin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
       VertexBoxMax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
       rad = 0;
-      for (int i=0; i<nVertices; ++i) {
+      for (size_t i=0; i<nVertices; ++i) {
         Vec3D v(vertices[i].x, vertices[i].z, -vertices[i].y);
         if (v.x < VertexBoxMin.x) VertexBoxMin.x = v.x;
         if (v.y < VertexBoxMin.y) VertexBoxMin.y = v.y;

@@ -1346,7 +1346,7 @@ void World::clearHeight(int id, int x, int z)
 
 }
 
-void World::clearHeight(int id, int x, int z , int _cx, int _cz)
+void World::clearHeight(int /*id*/, int x, int z , int _cx, int _cz)
 {
   // set the Area ID on a tile x,z on the chunk cx,cz
   MapTile *curTile;
@@ -1644,8 +1644,8 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 void World::eraseTextures(float x, float z)
 {
   this->setChanged(x,z);
-  const int newX = x / TILESIZE;
-  const int newZ = z / TILESIZE;
+  const size_t newX = x / TILESIZE;
+  const size_t newZ = z / TILESIZE;
   Log << "Erasing Textures at " << x << " and " << z;
   for( size_t j = newZ - 1; j < newZ + 1; ++j )
   {
@@ -1672,8 +1672,8 @@ void World::eraseTextures(float x, float z)
 void World::addHole( float x, float z )
 {
   this->setChanged(x, z);
-  const int newX = x / TILESIZE;
-  const int newZ = z / TILESIZE;
+  const size_t newX = x / TILESIZE;
+  const size_t newZ = z / TILESIZE;
   
   for( size_t j = newZ - 1; j < newZ + 1; ++j )
   {
@@ -1702,8 +1702,8 @@ void World::addHole( float x, float z )
 void World::removeHole( float x, float z )
 {
   this->setChanged(x, z);
-  const int newX = x / TILESIZE;
-  const int newZ = z / TILESIZE;
+  const size_t newX = x / TILESIZE;
+  const size_t newZ = z / TILESIZE;
   
   for( size_t j = newZ - 1; j < newZ + 1; ++j )
   {
@@ -1957,7 +1957,7 @@ void World::moveHeight(int id, int x, int z)
 
 }
 
-void World::moveHeight(int id, int x, int z , int _cx, int _cz)
+void World::moveHeight(int /*id*/, int x, int z , int _cx, int _cz)
 {
   // set the Area ID on a tile x,z on the chunk cx,cz
   MapTile *curTile;
