@@ -2,7 +2,7 @@
 #define APPSTATE_H
 
 #include <list>
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 class HotKeyReceiver
 {

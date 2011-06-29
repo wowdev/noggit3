@@ -18,6 +18,8 @@
 #include <string>
 #include <vector>
 
+#include <SDL.h>
+
 #include "AppState.h"
 #include "AsyncLoader.h"
 #include "ConfigFile.h"

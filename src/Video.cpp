@@ -68,9 +68,6 @@ void LoadGLSettings()
   compareSetting(GL_TEXTURE_GEN_T,GLSettings[12]);
 }
 
-
-
-
 Video video;
 
 void Video::resize(int _xres, int _yres)
@@ -108,49 +105,37 @@ void Video::resize(int _xres, int _yres)
 
 bool Video::init( int _xres, int _yres, bool fullscreen_ )
 {
-  SDL_Init( SDL_INIT_TIMER | SDL_INIT_VIDEO );
+  fullscreen = fullscreen_;
+  xres = origX = _xres;
+  yres = origY = _yres;
+  ratio = xres / static_cast<float>( yres );
+  
+  if( SDL_Init( SDL_INIT_TIMER | SDL_INIT_VIDEO ) )
+  {
+    LogError << "SDL: " << SDL_GetError() << std::endl;
+    exit( 1 );
+  }
+  
   flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
   if( fullscreen_ )
+  {
     flags |= SDL_FULLSCREEN;
+  }
 
-  fullscreen = fullscreen_;
-
-  // 32 bits ffs
+  SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+  SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
   SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
   SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
   SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-//#ifdef _WIN32
-  SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 32 );
-  primary = SDL_SetVideoMode( _xres, _yres, 32, flags );
-/*
-#else
-  //nvidia dont support 32bpp on my linux :(
-  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-  primary = SDL_SetVideoMode(_xres, _yres, 24, flags);
-#endif
-*/
+  SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
+  
+  primary = SDL_SetVideoMode( xres, yres, 0, flags );
+
   if( !primary ) 
   {
     LogError << "SDL: " << SDL_GetError() << std::endl;
     exit( 1 );
   }
-
-  origX = _xres;
-  origY = _yres;
-
-  this->xres = _xres;
-  this->yres = _yres;
-  this->ratio = static_cast<float>( xres ) / static_cast<float>( yres );
-
-  glViewport( 0.0f, 0.0f, xres, yres );
-
-  //! \todo  Should we really set to 3D here?
-  //this->set3D();
-
-  // hmmm...
-  glEnableClientState( GL_VERTEX_ARRAY );
-  glEnableClientState( GL_NORMAL_ARRAY );
-  glEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
   GLenum err = glewInit();
   if( GLEW_OK != err )
@@ -158,6 +143,15 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
     LogError << "GLEW: " << glewGetErrorString( err ) << std::endl;
     return false;
   }
+
+  glViewport( 0.0f, 0.0f, xres, yres );
+
+  //! \todo  Should we really set to 3D here?
+  //this->set3D();
+
+  glEnableClientState( GL_VERTEX_ARRAY );
+  glEnableClientState( GL_NORMAL_ARRAY );
+  glEnableClientState( GL_TEXTURE_COORD_ARRAY );
 
   mSupportCompression = GLEW_ARB_texture_compression;
   mSupportShaders = GLEW_ARB_vertex_program && GLEW_ARB_fragment_program;

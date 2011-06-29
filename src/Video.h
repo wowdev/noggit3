@@ -17,7 +17,7 @@ void LoadGLSettings();
 class Video
 {
   int status;
-  int  flags;
+  int flags;
 
   SDL_Surface *primary;
 

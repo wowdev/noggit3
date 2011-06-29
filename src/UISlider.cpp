@@ -51,7 +51,7 @@ UIFrame *UISlider::processLeftClick( float mx, float /*my*/ )
   return this;
 }
 
-bool UISlider::processLeftDrag( float mx, float my, float /*xChange*/, float /*yChange*/ )
+bool UISlider::processLeftDrag( float mx, float /*my*/, float /*xChange*/, float /*yChange*/ )
 {
   //! \todo use change?
   float tx,ty;
