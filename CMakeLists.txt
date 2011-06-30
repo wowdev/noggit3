@@ -50,8 +50,68 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS( SDL DEFAULT_MSG SDL_LIBRARY SDL_INCLUDE_DIR )
 SET( IncludeDirectories ${ZLIB_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${SDL_INCLUDE_DIR} ${STORMLIB_INCLUDES} ${Boost_INCLUDE_DIRS}  ${GLEW_INCLUDE_DIRS})
 
 # Gather source files.
-FILE( GLOB_RECURSE HeaderFiles "src/*.h" )
-FILE( GLOB_RECURSE SourceFiles "src/*.cpp" )
+SET( SourceFiles
+  src/AsyncLoader.cpp
+  src/Brush.cpp
+  src/ConfigFile.cpp
+  src/DBC.cpp
+  src/DBCFile.cpp
+  src/Directory.cpp
+  src/Environment.cpp
+  src/FreeType.cpp
+  src/Frustum.cpp
+  src/Liquid.cpp
+  src/Log.cpp
+  src/MPQ.cpp
+  src/MapChunk.cpp
+  src/MapTile.cpp
+  src/MapView.cpp
+  src/Menu.cpp
+  src/Misc.cpp
+  src/Model.cpp
+  src/ModelInstance.cpp
+  src/ModelManager.cpp
+  src/Noggit.cpp
+  src/Particle.cpp
+  src/Project.cpp
+  src/Selection.cpp
+  src/Settings.cpp
+  src/Shaders.cpp
+  src/Sky.cpp
+  src/TextureManager.cpp
+  src/UIAbout.cpp
+  src/UIAppInfo.cpp
+  src/UIButton.cpp
+  src/UICheckBox.cpp
+  src/UICloseWindow.cpp
+  src/UIDetailInfos.cpp
+  src/UIFrame.cpp
+  src/UIGradient.cpp
+  src/UIListView.cpp
+  src/UIMapViewGUI.cpp
+  src/UIMenuBar.cpp
+  src/UIMinimapWindow.cpp
+  src/UIMinimizeButton.cpp
+  src/UIModel.cpp
+  src/UIScrollBar.cpp
+  src/UISlider.cpp
+  src/UIStatusBar.cpp
+  src/UIText.cpp
+  src/UITextBox.cpp
+  src/UITexture.cpp
+  src/UITexturePicker.cpp
+  src/UITexturingGUI.cpp
+  src/UIToggleGroup.cpp
+  src/UIToolbar.cpp
+  src/UIToolbarIcon.cpp
+  src/UITreeView.cpp
+  src/UIWindow.cpp
+  src/UIZoneIDBrowser.cpp
+  src/Video.cpp
+  src/WMO.cpp
+  src/WMOInstance.cpp
+  src/World.cpp
+)
 
 # Search for stdint.h, present on unix, missing on windows.
 IF( WIN32 )
@@ -85,7 +145,6 @@ IF( NOGGIT_ALL_WARNINGS )
   ENDIF( WIN32 )
 ENDIF( NOGGIT_ALL_WARNINGS )
 
-
 # Find revision ID and hash of the sourcetree
 include( "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake" )
 SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp" )
@@ -93,16 +152,16 @@ SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_CURRENT_BINARY_DIR}${CMAK
 # And do the job.
 INCLUDE_DIRECTORIES( ${IncludeDirectories} )
 IF( APPLE )
-  ADD_EXECUTABLE( noggit MACOSX_BUNDLE  ${HeaderFiles} ${SourceFiles} "${CMAKE_SOURCE_DIR}/bin/fonts/arial.ttf" "${CMAKE_SOURCE_DIR}/media/noggit.icns" )
+  ADD_EXECUTABLE( noggit MACOSX_BUNDLE ${SourceFiles} "${CMAKE_SOURCE_DIR}/bin/fonts/arial.ttf" "${CMAKE_SOURCE_DIR}/media/noggit.icns" )
   SET_TARGET_PROPERTIES( noggit PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/media/Info.plist" )
   SET_SOURCE_FILES_PROPERTIES( "${CMAKE_SOURCE_DIR}/bin/fonts/arial.ttf" PROPERTIES MACOSX_PACKAGE_LOCATION MacOS/fonts )
   SET_SOURCE_FILES_PROPERTIES( "${CMAKE_SOURCE_DIR}/media/noggit.icns" PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
 ELSE( APPLE )
-  ADD_EXECUTABLE( noggit  ${HeaderFiles} ${SourceFiles} )
+  ADD_EXECUTABLE( noggit ${SourceFiles} )
   # No console window shown on launch.
   SET_TARGET_PROPERTIES( noggit PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS" )
 ENDIF( APPLE )
 TARGET_LINK_LIBRARIES( noggit ${ZLIB_LIBRARIES} ${OPENGL_LIBRARIES} ${FREETYPE_LIBRARIES} ${SDL_LIBRARY} ${STORMLIB_LIBRARIES} ${Boost_LIBRARIES} ${GLEW_LIBRARY} )
 
 # Copy the binary to bin/.
-INSTALL( PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/noggit" DESTINATION "${CMAKE_SOURCE_DIR}/bin/" )
+#INSTALL( PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/noggit" DESTINATION "${CMAKE_SOURCE_DIR}/bin/" )
