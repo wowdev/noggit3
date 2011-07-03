@@ -6,8 +6,8 @@
 #include "Video.h"
 
 UIText::UIText( float pX, float pY, const std::string& pText, freetype::font_data *pFont, int pJustify )
-: UIFrame( pX, pY, freetype::width( *font, pText ), pFont->h )
-, twidth( freetype::width( *font, pText ) )
+: UIFrame( pX, pY, freetype::width( *pFont, pText ), pFont->h )
+, twidth( freetype::width( *pFont, pText ) )
 , font( pFont )
 , mText( pText )
 , justify( pJustify )
@@ -16,8 +16,8 @@ UIText::UIText( float pX, float pY, const std::string& pText, freetype::font_dat
 }
 
 UIText::UIText( float pX, float pY, freetype::font_data *pFont, int pJustify )
-: UIFrame( pX, pY, freetype::width( *font, "" ), pFont->h )
-, twidth( freetype::width( *font, "" ) )
+: UIFrame( pX, pY, freetype::width( *pFont, "" ), pFont->h )
+, twidth( freetype::width( *pFont, "" ) )
 , font( pFont )
 , mText( "" )
 , justify( pJustify )

@@ -229,8 +229,10 @@ int main( int argc, char *argv[] )
   CreateStrips();
   
   gAsyncLoader = new AsyncLoader();
-  gAsyncLoader->start(1); //! \todo get the number of threads from the number of available cores.
-  
+  int threadCount = boost::thread::hardware_concurrency();
+  Log << "Using " << threadCount << " thread(s)." << std::endl;
+  gAsyncLoader->start(threadCount);
+
   std::vector<std::string> archiveNames;
   archiveNames.push_back( "common.MPQ" );
   archiveNames.push_back( "common-2.MPQ" ); 
@@ -378,7 +380,8 @@ int main( int argc, char *argv[] )
   
   Menu *m = new Menu();
   as = m;
-  
+
+
   gStates.push_back( as );
   
   if( video.mSupportShaders )

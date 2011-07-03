@@ -55,25 +55,22 @@ Menu::Menu()
 , mBackgroundModel( NULL )
 , mLastBackgroundId( -1 )
 {
+
+
   gWorld = NULL;
   theMenu = this;
 
   mGUIFrame = new UIFrame( 0.0f, 0.0f, video.xres, video.yres );
-
   mGUIMinimapWindow = new UIMinimapWindow( this  );
   mGUIFrame->addChild( mGUIMinimapWindow );
-
   mGUICreditsWindow = new UIAbout();
   mGUIFrame->addChild( mGUICreditsWindow );
-  
-  //! \todo Use?
+  //! \todo Use? Yes - later i will show here the adt cords where you enter and some otehr infos
   mGUIStatusbar = new UIStatusBar( 0.0f, video.yres - 30.0f, video.xres, 30.0f );
   mGUIFrame->addChild( mGUIStatusbar );
-  
   createMapList();
   createBookmarkList();
   buildMenuBar();
-  
   randBackground();
 }
 
