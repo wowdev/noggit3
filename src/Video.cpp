@@ -1,6 +1,6 @@
 #include "Video.h"
 
-#include <SDL/SDL.h>
+#include <SDL.h>
 #include <string>
 
 #include "Settings.h"

@@ -538,7 +538,7 @@ void adtSetAreaID( UIFrame* /*button*/, int /*id*/ )
     gWorld->setAreaID(Environment::getInstance()->selectedAreaID ,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
-void changeZoneIDValue(UIFrame */*f*/,int set)
+void changeZoneIDValue(UIFrame* /*f*/,int set)
 {
   Environment::getInstance()->selectedAreaID = set;
   if( Environment::getInstance()->areaIDColors.find(set) == Environment::getInstance()->areaIDColors.end() )
@@ -567,7 +567,7 @@ std::string getCurrentHeightmapPath()
 
 }
 
-void clearTexture(UIFrame */*f*/,int /*set*/)
+void clearTexture(UIFrame* /*f*/,int /*set*/)
 {
   // set areaid on all chunks of the current ADT
   gWorld->setBaseTexture(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));

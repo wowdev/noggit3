@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <boost/thread.hpp>
+#include <boost/algorithm/string.hpp> 
 #include <cstdio>
 #include <cstring>
 #include <list>
@@ -53,16 +54,17 @@ void MPQArchive::finishLoading()
     SFileReadFile( fh, readbuffer, filesize );
     SFileCloseFile( fh );
   
-    char* last = NULL;
-    char * file = strtok_r(reinterpret_cast<char*>(readbuffer), "\r\n", &last);
-    while (file) 
-    {
-      std::string line = file;
-      std::transform( line.begin(), line.end(), line.begin(), ::tolower );
-      gListfile.push_back( line );
-          
-      file = strtok_r(NULL, "\r\n", &last);
-    }
+   
+	std::string list = std::string(reinterpret_cast<const char*>(readbuffer));
+	
+	boost::algorithm::to_lower( list ); 
+	boost::algorithm::replace_all( list, "\r\n", "\n" ); 
+	
+	std::vector<std::string> temp; 
+	boost::algorithm::split( temp, list, boost::algorithm::is_any_of("\n") ); 
+	gListfile.insert(gListfile.end(), temp.begin(), temp.end());
+	
+
     free(readbuffer);
   }
   

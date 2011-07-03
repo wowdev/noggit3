@@ -564,10 +564,10 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
 
 void UITexturingGUI::setChunkWindow(MapChunk *chunk)
 {
-  char Temp[255];
+  std::stringstream Temp;
+  Temp << "Chunk " << chunk->px << ", " << chunk->py << " at (" << chunk->xbase << ", " << chunk->ybase<< ", " << chunk->zbase << ")";
+  chunkLocation->setText(Temp.str().c_str());///
 
-  snprintf(Temp, sizeof(Temp),"Chunk %d, %d at (%.2f, %.2f, %.2f)",chunk->px,chunk->py,chunk->xbase,chunk->ybase,chunk->zbase);
-  chunkLocation->setText(Temp);///
 
 
   std::string areaName;
@@ -580,11 +580,13 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
   {
     areaName = "";
   }  
-  snprintf(Temp, sizeof(Temp),"AreaID: %s (%d)",areaName.c_str(),chunk->areaID);
-  chunkAreaID->setText(Temp);///
+  Temp.clear();
+  Temp << "AreaID: " << areaName.c_str() << " (" << chunk->areaID << ")" ;
+  chunkAreaID->setText(Temp.str().c_str());///
   
-  snprintf(Temp, sizeof(Temp),"Flags: %d",chunk->Flags);
-  chunkFlags->setText(Temp);///
+  Temp.clear();
+  Temp << "Flags: " << chunk->Flags;
+  chunkFlags->setText(Temp.str().c_str());///
 
   for(int ch=0;ch<5;ch++)
     chunkFlagChecks[ch]->setState(false);
@@ -604,8 +606,9 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
   //sprintf(Temp,"EffectID: %d",chunk->header.effectId);
   //chunkEffectID->setText(Temp);///
 
-  snprintf(Temp, sizeof(Temp),"Num Effects: %d",chunk->header.nEffectDoodad);
-  chunkNumEffects->setText(Temp);///
+  std::stringstream ss;
+  ss << "Num Effects: " << chunk->header.nEffectDoodad;
+  chunkNumEffects->setText(ss.str().c_str());///
   
   //! /todo rework texture reading
   /*

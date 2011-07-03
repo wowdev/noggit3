@@ -4,7 +4,7 @@
 //#pragma comment(lib,"OpenGL32.lib")
 //#pragma comment(lib,"glu32.lib")
 #include <direct.h> 
-//#define NOMINMAX
+
 #include <windows.h>
 #include <winerror.h>
 #endif
@@ -292,26 +292,26 @@ int main( int argc, char *argv[] )
     
     if( path.find( "{number}" ) != std::string::npos )
     {
-      char temp[10];
+	  std::stringstream temp;
       location = path.find( "{number}" );
       path.replace( location, 8, " " );
       for( int j = 2; j < 10; j++ )
       {
-        snprintf( temp, sizeof(temp), "%i", j );
-        path.replace( location, 1, std::string( temp ) );
+		temp << j;
+        path.replace( location, 1, temp.str() );
         if( FileExists( path ) )
           gAsyncLoader->addObject( new MPQArchive( path, true ) );
       }
     }
     else if( path.find( "{character}" ) != std::string::npos  )
     {
-      char temp[10];
+	  std::stringstream temp;
       location = path.find( "{character}" );
       path.replace( location, 11, " " );
       for( char c = 'a'; c <= 'z'; c++ )
       {
-        snprintf( temp, sizeof(temp), "%c", c );
-        path.replace( location, 1, std::string( temp ) );
+		temp << c;
+        path.replace( location, 1, temp.str() );
         if( FileExists( path ) )
           gAsyncLoader->addObject( new MPQArchive( path, true ) );
       }
