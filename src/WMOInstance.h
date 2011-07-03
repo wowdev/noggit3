@@ -2,6 +2,7 @@
 #define WMOINSTANCE_H
 
 #include <set>
+#include <stdint.h>
 
 #include "Vec3D.h" // Vec3D
 

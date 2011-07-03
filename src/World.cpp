@@ -1771,8 +1771,9 @@ void World::saveMap()
       glPopMatrix();
       glReadPixels(video.xres/2-128,video.yres/2-128,256,256,GL_RGB,GL_UNSIGNED_BYTE,image);
       video.flip();
-      snprintf(tfname, sizeof(tfname),"%s_map_%d_%d.raw",basename.c_str(),x,y);
-      fid=fopen(tfname,"wb");
+	  std::stringstream ss;
+	  ss << basename.c_str() << "_map_" << x << "_" << y << ".raw";
+	  fid=fopen(ss.str().c_str(),"wb");
       fwrite(image,256*3,256,fid);
       fclose(fid);
     }

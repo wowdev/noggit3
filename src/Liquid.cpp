@@ -673,11 +673,9 @@ void Liquid::draw()
 template<int pFirst, int pLast>
 void Liquid::initTextures( const std::string& pFilename )
 {
-  char buf[1024];
   for( int i = pFirst; i <= pLast; ++i ) 
   {
-    snprintf( buf, sizeof(buf), pFilename.c_str(), i );
-    textures.push_back( TextureManager::add( buf )) ;
+    textures.push_back( TextureManager::add( pFilename )) ;
   }
 }
 

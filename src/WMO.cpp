@@ -5,6 +5,10 @@
 #include <string>
 #include <vector>
 
+#include <sstream> 
+#include <iomanip> 
+#include <iostream> 
+
 #include "Liquid.h"
 #include "Log.h"
 #include "ModelManager.h" // ModelManager
@@ -700,14 +704,14 @@ void WMOGroup::initDisplayList()
   int nLR = 0;
 
   
-  //! \todo do this the std:: way. also: fixed sizes. arggh.
   // open group file
-  char temp[256];
-  strncpy(temp, wmo->name.c_str(), sizeof(temp));
-    temp[wmo->name.length()-4] = 0;
   
-  char fname[256];
-  snprintf(fname, sizeof(fname),"%s_%03d.wmo",temp, num);
+	std::stringstream curNum;
+	curNum << std::setw(3) << std::setfill('0') << num << std::setw(7) << ".wmo";
+
+	std::string fname = wmo->name; 
+	fname.insert( fname.find( ".wmo" ), curNum.str() );
+
 
   MPQFile gf(fname);
   if (gf.isEof()) {

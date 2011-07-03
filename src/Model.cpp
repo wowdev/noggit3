@@ -490,12 +490,14 @@ void Model::initAnimated(const MPQFile& f)
     memcpy(anims, f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
     
     animfiles = new MPQFile*[header.nAnimations];
-    char tempname[1024];
+
+	std::stringstream tempname;
     for(size_t i=0; i<header.nAnimations; ++i) {
       std::string lodname = filename.substr(0, filename.length()-3);
-      snprintf(tempname, sizeof(tempname), "%s%04d-%02d.anim", lodname.c_str(), anims[i].animID, anims[i].subAnimID);
-      if (MPQFile::getSize(tempname) > 0) {
-        animfiles[i] = new MPQFile(tempname);
+	  tempname << lodname.c_str() << anims[i].animID << "-" << anims[i].subAnimID;
+	  if (MPQFile::getSize(tempname.str().c_str()) > 0) 
+	  {
+		animfiles[i] = new MPQFile(tempname.str().c_str());
       }
       else
       {
