@@ -995,13 +995,14 @@ void MapChunk::drawContour()
 
 void MapChunk::draw()
 {
+
   if (!gWorld->frustum.intersects( vmin, vmax ))
     return;
-
+  
   float mydist = (gWorld->camera - vcenter).length() - r;
 
   if (mydist > (mapdrawdistance * mapdrawdistance))
-    return;
+	  return;
 
   // setup vertex buffers
   glBindBuffer(GL_ARRAY_BUFFER, vertices);
@@ -1016,6 +1017,9 @@ void MapChunk::draw()
   glBindTexture(GL_TEXTURE_2D, textures[0]);
   glActiveTexture(GL_TEXTURE1);
   glDisable(GL_TEXTURE_2D);
+
+  
+
 
 //  if( nameID == -1 )
 //    nameID = SelectionNames.add( this );
@@ -1037,6 +1041,9 @@ void MapChunk::draw()
   drawPass(animated[0]);
 //  glPopName();
 
+  
+
+
   if (nTextures > 1) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
     glDepthMask(GL_FALSE);
@@ -1056,10 +1063,13 @@ void MapChunk::draw()
     drawPass(animated[i+1]);
   }
 
+
+
   if (nTextures > 1) {
     //glDepthFunc(GL_LEQUAL);
     glDepthMask(GL_TRUE);
   }
+  
   
   // shadow map
   glActiveTexture(GL_TEXTURE0);
@@ -1200,6 +1210,7 @@ void MapChunk::draw()
   glPopMatrix();*/
   
   
+
 }
 
 void MapChunk::drawNoDetail()
