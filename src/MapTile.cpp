@@ -547,10 +547,11 @@ void MapTile::draw()
 
   }*/
   glColor4f(1,1,1,1);
-
+  
   for (int j=0; j<16; ++j)
     for (int i=0; i<16; ++i)
       mChunks[j][i]->draw();
+	  
 }
 
 void MapTile::drawSelect()
@@ -1101,7 +1102,7 @@ void MapTile::saveTile()
       int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 2 * 1000;
 
       lMODF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
-      lMODF_Data[lID].uniqueID = lNewUID;
+      lMODF_Data[lID].uniqueID = it->first;
       lMODF_Data[lID].pos[0] = it->second.pos.x;
       lMODF_Data[lID].pos[1] = it->second.pos.y;
       lMODF_Data[lID].pos[2] = it->second.pos.z;

@@ -124,6 +124,11 @@ void setApplicationDirectory( const std::string& argv_0 )
 
 int main( int argc, char *argv[] )
 {
+  #ifdef _WIN32
+	// hide the console window on windows
+	HWND hWnd = GetConsoleWindow();
+    ShowWindow( hWnd, SW_HIDE );
+  #endif
   RegisterErrorHandlers();
   setApplicationDirectory( argv[0] );
 
@@ -223,7 +228,6 @@ int main( int argc, char *argv[] )
   
   if( Project::getInstance()->getPath() == "" )
     Project::getInstance()->setPath( wowpath );
-  
   Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
   
   CreateStrips();

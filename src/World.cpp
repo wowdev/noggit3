@@ -999,6 +999,7 @@ void World::draw()
   
   glPushMatrix();
 
+  
   if( drawterrain )
   {
     for( int j = 0; j < 64; ++j )
@@ -1122,6 +1123,7 @@ void World::draw()
   LoadGLSettings();
   setupFog();
   
+
   for( int j = 0; j < 64; ++j )
   {
     for( int i = 0; i < 64; ++i )
@@ -1132,7 +1134,9 @@ void World::draw()
       }
     }
   }
-  
+
+
+
   glColor4f(1,1,1,1);
   glEnable(GL_BLEND);
 
