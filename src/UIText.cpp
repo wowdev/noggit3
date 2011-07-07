@@ -4,6 +4,7 @@
 
 #include "FreeType.h"
 #include "Video.h"
+#include "Log.h"
 
 UIText::UIText( float pX, float pY, const std::string& pText, freetype::font_data *pFont, int pJustify )
 : UIFrame( pX, pY, freetype::width( *pFont, pText ), pFont->h )
@@ -27,7 +28,7 @@ UIText::UIText( float pX, float pY, freetype::font_data *pFont, int pJustify )
 
 void UIText::setText( const std::string& pText )
 {
-	mText = pText;
+	mText = pText; 
 	twidth = freetype::width( *font, mText );
 	width = twidth;
 	height = font->h;

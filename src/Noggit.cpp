@@ -220,7 +220,6 @@ int main( int argc, char *argv[] )
   std::string wowpath = getGamePath();
   if( wowpath == "" )
   {
-    LogError << "Unable to find game path. Use the config file." << std::endl;
     return -1;
   }
   
@@ -232,10 +231,7 @@ int main( int argc, char *argv[] )
   
   CreateStrips();
   
-  gAsyncLoader = new AsyncLoader();
-  int threadCount = boost::thread::hardware_concurrency();
-  Log << "Using " << threadCount << " thread(s)." << std::endl;
-  gAsyncLoader->start(threadCount);
+  gAsyncLoader->start(1); 
 
   std::vector<std::string> archiveNames;
   archiveNames.push_back( "common.MPQ" );
