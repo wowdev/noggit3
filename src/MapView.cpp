@@ -1207,6 +1207,9 @@ void MapView::tick( float t, float dt )
 
 void MapView::doSelection( int selTyp )
 {
+  // auto selection draw only ground - TestSelection = true.
+  if(selTyp==0) TestSelection = true;
+  else TestSelection = false;
   gWorld->drawSelection( MouseX, MouseY, TestSelection );
   gWorld->getSelection( eSelectionMode_General );
 
@@ -2069,14 +2072,6 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
     LastClicked->processLeftDrag( e->x - 4, e->y - 4, e->xrel, e->yrel );
   }
 
-  if( mViewMode == eViewMode_3D && TestSelection )
-  {
-    if( !Environment::getInstance()->AutoSelecting )
-    {
-      doSelection( 1 );
-    }
-  }  
-  
   if( mViewMode == eViewMode_2D && leftMouse && !( Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown || Environment::getInstance()->AltDown )  )
   {
     strafing = ((e->xrel / XSENS) / -1) * 5.0f;
