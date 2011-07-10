@@ -705,15 +705,14 @@ void WMOGroup::initDisplayList()
 
   
   // open group file
-  
+
 	std::stringstream curNum;
-	curNum << std::setw(3) << std::setfill('0') << num << std::setw(7) << ".wmo";
-
+	curNum << "_" << std::setw(3) << std::setfill('0') << num;
+	
 	std::string fname = wmo->name; 
-	//fname.insert( fname.find( ".wmo" ), curNum.str() );
-
-
-  MPQFile gf(fname);
+	fname.insert( fname.find( ".wmo" ), curNum.str() );
+ 
+	MPQFile gf(fname);
   if (gf.isEof()) {
     LogError << "Error loading WMO \"" << fname << "\"." << std::endl;
     return;
