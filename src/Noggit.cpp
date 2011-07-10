@@ -230,9 +230,14 @@ int main( int argc, char *argv[] )
   Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
   
   CreateStrips();
-  
-  gAsyncLoader->start(1); 
+  Log << "CreateStrips" << std::endl;
 
+
+
+  gAsyncLoader = new AsyncLoader();
+  gAsyncLoader->start(1);
+
+  Log << "gAsyncLoader" << std::endl;
   std::vector<std::string> archiveNames;
   archiveNames.push_back( "common.MPQ" );
   archiveNames.push_back( "common-2.MPQ" ); 
@@ -274,7 +279,7 @@ int main( int argc, char *argv[] )
     LogError << "Could not find locale directory. Be sure, that there is one containing the file \"realmlist.wtf\"." << std::endl;
     return -1;
   }
-  
+   Log << "Collect MPQs" << std::endl; 
   //! \todo  This may be done faster. Maybe.
   for( size_t i = 0; i < archiveNames.size(); ++i )
   {
@@ -322,7 +327,7 @@ int main( int argc, char *argv[] )
       if( FileExists( path ) )
         gAsyncLoader->addObject( new MPQArchive( path, true ) );
   }
-  
+     Log << "Loaded MPQs" << std::endl; 
   // listfiles are not available straight away! They are async! Do not rely on anything at this point!
   
   //! \todo  Get this out?

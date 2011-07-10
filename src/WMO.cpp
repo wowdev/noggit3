@@ -263,7 +263,7 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
 
 void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool /*highlight*/) const
 {
-  if( gWorld && gWorld->drawfog ) 
+	if( gWorld && gWorld->drawfog ) 
     glEnable( GL_FOG );  
   else
     glDisable( GL_FOG );
@@ -279,7 +279,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
     
     groups[i].drawLiquid();
   }
-
+  
   if( boundingbox )
   {
     glDisable( GL_LIGHTING );
@@ -710,7 +710,7 @@ void WMOGroup::initDisplayList()
 	curNum << std::setw(3) << std::setfill('0') << num << std::setw(7) << ".wmo";
 
 	std::string fname = wmo->name; 
-	fname.insert( fname.find( ".wmo" ), curNum.str() );
+	//fname.insert( fname.find( ".wmo" ), curNum.str() );
 
 
   MPQFile gf(fname);

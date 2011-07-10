@@ -30,6 +30,7 @@ WMOInstance::WMOInstance( WMO* _wmo ) : wmo( _wmo ), pos( Vec3D( 0.0f, 0.0f, 0.0
 
 void WMOInstance::draw() const
 {
+
   glPushMatrix();
   glTranslatef( pos.x, pos.y, pos.z );
   

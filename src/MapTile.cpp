@@ -326,7 +326,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 
         Liquid * lq = new Liquid( info.width, info.height, Vec3D( xbase + CHUNKSIZE * j, lTile.mMinimum, zbase + CHUNKSIZE * i ) );
         lq->setMH2OData( lTile );
-        LogDebug << "Inserted Data to MH2O: "<<i*16+j << std::endl;
+        //LogDebug << "Inserted Data to MH2O: "<<i*16+j << std::endl;
         mLiquids.push_back( lq );
       }
     }
