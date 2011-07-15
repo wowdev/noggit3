@@ -514,6 +514,7 @@ void exit_tilemode(  UIFrame* /*button*/, int /*id*/ )
 
 void test_menu_action(  UIFrame* /*button*/, int /*id*/ )
 {
+	gWorld->saveWDT();
 }
 
 void moveHeightmap(  UIFrame* /*button*/, int /*id*/ )
@@ -790,8 +791,8 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   mbar->GetMenu( "File" )->AddMenuItemSeperator( " " );
   mbar->GetMenu( "File" )->AddMenuItemButton( "ESC Exit", SaveOrReload, 3 );
 
-  //mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
-  //mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
+  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
+  mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
 
   mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "selected object" );
   mbar->GetMenu( "Edit" )->AddMenuItemButton( "STRG + C copy", CopySelectedObject, 0  );

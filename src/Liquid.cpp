@@ -651,11 +651,10 @@ void Liquid::draw()
   
   if( mDrawList )
   {
-    //! \todo THIS LINE THROWS GL_INVALID_OPERATION!
-    //mDrawList->render();
-    //CheckForGLError( "Liquid::draw::586" );
+    //! \todo THIS LINE THROWS GL_INVALID_OPERATION! Steff. It donwt do in anymore now. Perhaps because water rendering was called double in maptile::draw()
+    mDrawList->render();
+    CheckForGLError( "Liquid::draw::586" );
   }
-
 
   glActiveTexture(GL_TEXTURE1);
   glDisable(GL_TEXTURE_2D);

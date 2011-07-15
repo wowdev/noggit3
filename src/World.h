@@ -215,6 +215,8 @@ public:
   void clearHeight(int id, int x, int z , int _cx, int _cz);
   void moveHeight(int id, int x, int z);
   void moveHeight(int id, int x, int z , int _cx, int _cz);
+
+  void saveWDT();
 };
 
 extern World *gWorld;
