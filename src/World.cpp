@@ -22,7 +22,7 @@
 #include "UITexturingGUI.h"
 #include "Video.h"
 #include "WMOInstance.h" // WMOInstance
-
+#include "MapTile.h"
 World *gWorld = NULL;
 
 static const int BUFSIZE = 8192;
@@ -75,7 +75,7 @@ bool World::IsEditableWorld( int pMapId )
   return false;
 }
 
-World::World( const std::string& name ) : cx( -1 ), cz( -1 ), ex( -1 ), ez( -1 ), mCurrentSelection( NULL ), mCurrentSelectedTriangle( 0 ), SelectionMode( false ), mBigAlpha( false ), mWmoFilename( "" ), mWmoEntry( ENTRY_MODF() ), detailtexcoords( 0 ), alphatexcoords( 0 ), mMapId( 0xFFFFFFFF ), ol( NULL ), l_const( 0.0f ), l_linear( 0.7f ), l_quadratic( 0.03f ), drawdoodads( true ), drawfog( true ), drawlines( false ), drawmodels( true ), drawterrain( true ), drawwater( true ), drawwmo( true ), lighting( true ), uselowlod( drawfog ), animtime( 0 ), time( 1450 ), basename( name ), fogdistance( 777.0f ), culldistance( fogdistance ), autoheight( false ), minX( 0.0f ), maxX( 0.0f ), minY( 0.0f ), maxY( 0.0f ), zoom( 0.25f ), skies( NULL ), mHasAGlobalWMO( false ), loading( false ), noadt( false ), hadSky( false ), outdoorLightStats( OutdoorLightStats() ), minimap( 0 ), mapstrip( NULL ), mapstrip2( NULL ), camera( Vec3D( 0.0f, 0.0f, 0.0f ) ), lookat( Vec3D( 0.0f, 0.0f, 0.0f ) ), frustum( Frustum() )
+World::World( const std::string& name ) : cx( -1 ), cz( -1 ), ex( -1 ), ez( -1 ), mCurrentSelection( NULL ), mCurrentSelectedTriangle( 0 ), SelectionMode( false ), mBigAlpha( false ), mWmoFilename( "" ), mWmoEntry( ENTRY_MODF() ), detailtexcoords( 0 ), alphatexcoords( 0 ), mMapId( 0xFFFFFFFF ), ol( NULL ), l_const( 0.0f ), l_linear( 0.7f ), l_quadratic( 0.03f ), drawdoodads( true ), drawfog( true ), drawlines( false ), drawmodels( true ), drawterrain( true ), drawwater( false ), drawwmo( true ), lighting( true ), uselowlod( drawfog ), animtime( 0 ), time( 1450 ), basename( name ), fogdistance( 777.0f ), culldistance( fogdistance ), autoheight( false ), minX( 0.0f ), maxX( 0.0f ), minY( 0.0f ), maxY( 0.0f ), zoom( 0.25f ), skies( NULL ), mHasAGlobalWMO( false ), loading( false ), noadt( false ), hadSky( false ), outdoorLightStats( OutdoorLightStats() ), minimap( 0 ), mapstrip( NULL ), mapstrip2( NULL ), camera( Vec3D( 0.0f, 0.0f, 0.0f ) ), lookat( Vec3D( 0.0f, 0.0f, 0.0f ) ), frustum( Frustum() )
 {
   for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
   {
@@ -1123,7 +1123,7 @@ void World::draw()
   LoadGLSettings();
   setupFog();
   
-
+  /*
   for( int j = 0; j < 64; ++j )
   {
     for( int i = 0; i < 64; ++i )
@@ -1134,7 +1134,7 @@ void World::draw()
       }
     }
   }
-
+  */
 
 
   glColor4f(1,1,1,1);
@@ -1162,17 +1162,20 @@ void World::draw()
   //glColor4f(1,1,1,1);
   glDisable(GL_COLOR_MATERIAL);
   
-  
-  for( int j = 0; j < 64; ++j )
+  if(this->drawwater)
   {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        mTiles[j][i].tile->drawWater();
-      }
-    }
+	  for( int j = 0; j < 64; ++j )
+	  {
+		  for( int i = 0; i < 64; ++i )
+		  {
+			  if( tileLoaded( j, i ) )
+			  {
+				  mTiles[j][i].tile->drawWater();
+			  }
+		  }
+	  }
   }
+
   
   ex = camera.x / TILESIZE;
   ez = camera.z / TILESIZE;
@@ -2021,4 +2024,18 @@ void World::setBaseTexture( int x, int z )
       curChunk->addTexture( TextureManager::add( UITexturingGUI::getSelectedTexture()->name ) );
     }
   }
+}
+
+
+void World::saveWDT()
+{
+	 // int lCurrentPosition = 0;
+	  //sExtendableArray lWDTFile = sExtendableArray();
+	 // lWDTFile.Extend( 8 + 0x4 );
+	 // SetChunkHeader( lWDTFile, lCurrentPosition, 'MPHD', 4 );
+	 
+	 // MPQFile f( "test.WDT" );
+	 // f.setBuffer( lWDTFile.GetPointer<uint8_t>(), lWDTFile.mSize );
+	 // f.SaveFile();
+	 // f.close();
 }
