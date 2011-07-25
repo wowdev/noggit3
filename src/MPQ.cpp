@@ -20,6 +20,8 @@ std::vector<MPQArchive*> gOpenArchives;
 std::list<std::string> gListfile;
 boost::mutex gListfileLoadingMutex;
 boost::mutex gMPQFileMutex;
+std::string modmpqpath="";//this will be the path to modders archive (with 'myworld' file inside)
+HANDLE fh;
 
 MPQArchive::MPQArchive(const std::string& filename, bool doListfile)
 {
@@ -28,9 +30,13 @@ MPQArchive::MPQArchive(const std::string& filename, bool doListfile)
     LogError << "Error opening archive: " << filename << "\n";
     return;
   }
-  
-  LogDebug << "Opened archive: " << filename << "\n";
-  
+  mpqname = filename;						   //let we know pathes to all loaded MPQs
+  if(SFileOpenFileEx(mpq_a, "myworld", 0, &fh))//let we know what archive is modder's (it must contain file with random data and with name "myworld")
+  {
+	  SFileCloseFile(fh);
+	  modmpqpath=filename;
+  }
+
   gOpenArchives.push_back( this );
 
   finished = !doListfile;
@@ -201,9 +207,38 @@ bool MPQFile::exists( const std::string& filename )
   return false;
 }
 
-void MPQFile::save(const char* /*filename*/)
+void MPQFile::save(const char* filename)
 {
   //! \todo Implement save to MPQ.
+	if(modmpqpath=="")//checking for users mods mpq
+	{
+		LogError << "Your modders file cant be found! Please create file with name 'myworld' and non empty (but random) data inside and insert it in your patch-XX-yy.MPQ to show that this is your modders mpq. \n";
+		return;
+	}
+	for(std::vector<MPQArchive*>::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i) //we need to unload our patch-XX-xx.MPQ from application to get write access to it!!
+  {																							  
+	  if((*i)->mpqname==modmpqpath) //closing our modders archive
+	  {
+		  SFileCloseArchive((*i)->mpq_a);
+		  gOpenArchives.erase(i);
+		  break;
+	  }
+  }
+  HANDLE mpq_a;
+  SFileOpenArchive(modmpqpath.c_str(), 0, 0, &mpq_a );
+  SFileSetLocale(0);
+  std::string fname=filename;
+  fname.erase(0,strlen(Project::getInstance()->getPath().c_str()));
+  size_t found = fname.find( "/" );
+  while( found != std::string::npos )//fixing path to file
+  {
+    fname.replace( found, 1, "\\" );
+    found = fname.find( "/" );
+  }
+  if(SFileAddFileEx(mpq_a,filename,fname.c_str(),MPQ_FILE_COMPRESS|MPQ_FILE_ENCRYPTED|MPQ_FILE_REPLACEEXISTING,MPQ_COMPRESSION_ZLIB))
+  {LogDebug << "Added file "<<fname.c_str()<<" to archive \n";} else LogDebug << "Error "<<GetLastError()<< " on adding file to archive! Report this message \n";
+  SFileCompactArchive(mpq_a);//recompact our archive to avoid fragmentation
+  SFileCloseArchive(mpq_a);
 }
 
 size_t MPQFile::read(void* dest, size_t bytes)
@@ -313,7 +348,7 @@ void MPQFile::SaveFile()
     found = lFilename.find( "\\" );
   }
   //LogDebug << lFilename << std::endl;  
-  std::string lDirectoryName = lFilename;  
+   std::string lDirectoryName = lFilename;  
 
   found = lDirectoryName.find_last_of("/\\");
   if( found != std::string::npos )
@@ -332,6 +367,7 @@ void MPQFile::SaveFile()
     fwrite(buffer,1,size,fd);
     fclose(fd);
     External=true;
+	save(lFilename.c_str());
     return;
   }
 }

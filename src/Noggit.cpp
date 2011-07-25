@@ -308,6 +308,7 @@ int main( int argc, char *argv[] )
         path.replace( location, 1, temp.str() );
         if( FileExists( path ) )
           gAsyncLoader->addObject( new MPQArchive( path, true ) );
+		temp.str("");//need to clear stringstream to load patches with different numbers correctly
       }
     }
     else if( path.find( "{character}" ) != std::string::npos  )
@@ -321,6 +322,7 @@ int main( int argc, char *argv[] )
         path.replace( location, 1, temp.str() );
         if( FileExists( path ) )
           gAsyncLoader->addObject( new MPQArchive( path, true ) );
+		temp.str("");//need to clear stringstream to load patches with different characters correctly
       }
     }
     else
@@ -473,7 +475,8 @@ int main( int argc, char *argv[] )
   {
     delete *it;
   }
-  gOpenArchives.clear();
+  gOpenArchives.clear();//unload MPQs
+  gListfile.clear();//also unload listfiles
   
   delete arialn13;
   delete arial12;
