@@ -18,9 +18,9 @@ class MPQArchive : public AsyncObject
 public:
   MPQArchive(const std::string& filename, bool doListfile = false );
   ~MPQArchive();
-  
+  std::string mpqname;
+
   void finishLoading();
-  
   static bool allFinishedLoading();
   static void allFinishLoading();
   
