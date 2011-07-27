@@ -207,15 +207,20 @@ bool MPQFile::exists( const std::string& filename )
   return false;
 }
 
-void MPQFile::save(const char* filename)
+void MPQFile::save(const char* filename)  //save to MPQ
 {
-  //! \todo Implement save to MPQ.
-	if(modmpqpath=="")//checking for users mods mpq
+	HANDLE mpq_a;
+	if(modmpqpath=="")//create new user's mods MPQ
 	{
-		LogError << "Your modders file cant be found! Please create file with name 'myworld' and non empty (but random) data inside and insert it in your patch-XX-yy.MPQ to show that this is your modders mpq. \n";
-		return;
-	}
-	for(std::vector<MPQArchive*>::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i) //we need to unload our patch-XX-xx.MPQ from application to get write access to it!!
+		std::string newmodmpq=Project::getInstance()->getPath().append("Data\\patch-9.MPQ");
+		SFileCreateArchive(newmodmpq.c_str(),MPQ_CREATE_ARCHIVE_V2 | MPQ_CREATE_ATTRIBUTES,0x40,&mpq_a);
+		SFileSetFileLocale(mpq_a,LOCALE_NEUTRAL);
+		SFileAddFileEx(mpq_a,"shaders\\terrain1.fs","myworld",MPQ_FILE_COMPRESS,MPQ_COMPRESSION_ZLIB);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld" 
+		SFileCompactArchive(mpq_a);
+		SFileCloseArchive(mpq_a);
+		modmpqpath=newmodmpq;
+	}else
+	for(std::vector<MPQArchive*>::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i) //we need to unload our patch-xx.MPQ from application to get write access to it!!
   {																							  
 	  if((*i)->mpqname==modmpqpath) //closing our modders archive
 	  {
@@ -224,7 +229,6 @@ void MPQFile::save(const char* filename)
 		  break;
 	  }
   }
-  HANDLE mpq_a;
   SFileOpenArchive(modmpqpath.c_str(), 0, 0, &mpq_a );
   SFileSetLocale(0);
   std::string fname=filename;
@@ -239,6 +243,7 @@ void MPQFile::save(const char* filename)
   {LogDebug << "Added file "<<fname.c_str()<<" to archive \n";} else LogDebug << "Error "<<GetLastError()<< " on adding file to archive! Report this message \n";
   SFileCompactArchive(mpq_a);//recompact our archive to avoid fragmentation
   SFileCloseArchive(mpq_a);
+  MPQArchive *mp=new MPQArchive(modmpqpath,true);
 }
 
 size_t MPQFile::read(void* dest, size_t bytes)
