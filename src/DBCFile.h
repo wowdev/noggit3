@@ -64,7 +64,7 @@ public:
       if( locale == -1 )
       {
         assert(field < file.fieldCount -  8 );
-        for( loc = 0; loc < 8; loc++ )
+        for( loc = 0; loc < 9; loc++ )
         {
           size_t stringOffset = getUInt(field + loc);
           if( stringOffset != 0 )

@@ -278,10 +278,15 @@ void Menu::buildMenuBar()
   mGUImenuBar->AddMenu( typeToName[0] );
   mGUImenuBar->AddMenu( typeToName[1] );
   mGUImenuBar->AddMenu( typeToName[2] );
-
+  int maxContinentLength=0;
+  int maxDungeonLength=0;
+  int maxRaidLength=0;
   for( std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it )
   {
 	  mGUImenuBar->GetMenu( typeToName[it->areaType] )->AddMenuItemButton( it->name, &showMap, it->mapID );
+	  if(it->areaType==0 && maxContinentLength<it->name.length())maxContinentLength=it->name.length();//need to know max length of map's name to set menu width
+	  if(it->areaType==1 && maxDungeonLength<it->name.length())maxDungeonLength=it->name.length();
+	  if(it->areaType==2 && maxRaidLength<it->name.length())maxRaidLength=it->name.length();
   }
   
   static const size_t nBookmarksPerMenu = 20;
@@ -314,6 +319,16 @@ void Menu::buildMenuBar()
     }
     
     mGUImenuBar->GetMenu( name.str() )->AddMenuItemButton( it->name, &showBookmark, n );
+	int maxBookmarksLength=0;
+	for(int i=0;i<mBookmarks.size();i++)
+	{
+		if(maxBookmarksLength<mBookmarks[i].name.length())maxBookmarksLength=mBookmarks[i].name.length();	//	little trick to set special menu width
+	}
+	
+	mGUImenuBar->GetMenu( typeToName[0] )->width=maxContinentLength*7.0f;//setting popup menu width
+	mGUImenuBar->GetMenu( typeToName[1] )->width=maxDungeonLength*7.0f;
+	mGUImenuBar->GetMenu( typeToName[2] )->width=maxRaidLength*7.0f;
+	mGUImenuBar->GetMenu( name.str() )->width=maxBookmarksLength*7.0f;
   }
 }
 
@@ -323,7 +338,7 @@ void Menu::createMapList()
   {
     MapEntry e;
     e.mapID = i->getInt( MapDB::MapID );
-    e.name = i->getLocalizedString( MapDB::InternalName );//now map's name snown correctly! in ruRU client there was corrupted symbols
+    e.name = misc::replaceSpecialChars(i->getLocalizedString( MapDB::Name ));//now map's name snown correctly! in ruRU client there was corrupted symbols
     e.areaType = i->getUInt( MapDB::AreaType );
     if( e.areaType < 0 || e.areaType > 2 || !World::IsEditableWorld( e.mapID ) )
       continue;
