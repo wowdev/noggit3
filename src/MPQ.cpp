@@ -243,7 +243,7 @@ void MPQFile::save(const char* filename)  //save to MPQ
   {LogDebug << "Added file "<<fname.c_str()<<" to archive \n";} else LogDebug << "Error "<<GetLastError()<< " on adding file to archive! Report this message \n";
   SFileCompactArchive(mpq_a);//recompact our archive to avoid fragmentation
   SFileCloseArchive(mpq_a);
-  MPQArchive *mp=new MPQArchive(modmpqpath,true);
+  MPQArchive *mp=new MPQArchive(modmpqpath,true);//now load edited archive to memory again
 }
 
 size_t MPQFile::read(void* dest, size_t bytes)
