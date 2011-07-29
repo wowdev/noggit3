@@ -281,7 +281,7 @@ void Menu::buildMenuBar()
 
   for( std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it )
   {
-    mGUImenuBar->GetMenu( typeToName[it->areaType] )->AddMenuItemButton( it->name, &showMap, it->mapID );
+	  mGUImenuBar->GetMenu( typeToName[it->areaType] )->AddMenuItemButton( it->name, &showMap, it->mapID );
   }
   
   static const size_t nBookmarksPerMenu = 20;
@@ -323,7 +323,7 @@ void Menu::createMapList()
   {
     MapEntry e;
     e.mapID = i->getInt( MapDB::MapID );
-    e.name = i->getLocalizedString( MapDB::Name );
+    e.name = i->getLocalizedString( MapDB::InternalName );//now map's name snown correctly! in ruRU client there was corrupted symbols
     e.areaType = i->getUInt( MapDB::AreaType );
     if( e.areaType < 0 || e.areaType > 2 || !World::IsEditableWorld( e.mapID ) )
       continue;

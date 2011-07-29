@@ -8,9 +8,12 @@ namespace misc
 {
   void find_and_replace( std::string& source, const std::string& find, const std::string& replace ) 
   {
-    size_t found = source.rfind( find );
-    if( found != std::string::npos )
-      source.replace( found, find.length(), replace );
+	size_t found = source.rfind( find );
+	while(found!=std::string::npos) //fixed unknown letters replace. Now it works correctly and replace all found symbold instead of only one at previous versions
+	{
+		source.replace( found, find.length(), replace );
+		found = source.rfind( find );
+	}
   }
 
   //dirty hack
@@ -129,6 +132,72 @@ namespace misc
     find_and_replace(text,"Ã„","Ae");  //Ä
     find_and_replace(text,"Ã–","Oe");  //Ö
     find_and_replace(text,"Ãoe","Ue");  //Ü
+	find_and_replace(text,"А","A"); //manually set english version of russian letters to fix encoding troubles
+	find_and_replace(text,"Б","B"); //now Noggit shows readable symbols in ruRU client!
+	find_and_replace(text,"В","V"); //
+	find_and_replace(text,"Г","G"); //
+	find_and_replace(text,"Д","D"); //
+	find_and_replace(text,"Е","E"); //
+	find_and_replace(text,"Ё","E"); //
+	find_and_replace(text,"Ж","J"); //
+	find_and_replace(text,"З","Z"); //
+	find_and_replace(text,"И","I"); //
+	find_and_replace(text,"Й","Y"); //
+	find_and_replace(text,"К","K"); //
+	find_and_replace(text,"Л","L"); //
+	find_and_replace(text,"М","M"); //
+	find_and_replace(text,"Н","N"); //
+	find_and_replace(text,"О","O"); //
+	find_and_replace(text,"П","P"); //
+	find_and_replace(text,"Р","R"); //
+	find_and_replace(text,"С","S"); //
+	find_and_replace(text,"Т","T"); //
+	find_and_replace(text,"У","U"); //
+	find_and_replace(text,"Ф","F"); //
+	find_and_replace(text,"Х","H"); //
+	find_and_replace(text,"Ц","C"); //
+	find_and_replace(text,"Ч","Ch"); //
+	find_and_replace(text,"Ш","Sh"); //
+	find_and_replace(text,"Щ","Sch"); //
+	find_and_replace(text,"Ъ","'"); //
+	find_and_replace(text,"Ы","Y"); //
+	find_and_replace(text,"Ь",""); //
+	find_and_replace(text,"Э","E"); //
+	find_and_replace(text,"Ю","Ju"); //
+	find_and_replace(text,"Я","Ja"); //
+	find_and_replace(text,"а","a"); //
+	find_and_replace(text,"б","b"); //
+	find_and_replace(text,"в","v"); //
+	find_and_replace(text,"г","g"); //
+	find_and_replace(text,"д","d"); //
+	find_and_replace(text,"е","e"); //
+	find_and_replace(text,"ё","e"); //
+	find_and_replace(text,"ж","j"); //
+	find_and_replace(text,"з","z"); //
+	find_and_replace(text,"и","i"); //
+	find_and_replace(text,"й","y"); //
+	find_and_replace(text,"к","k"); //
+	find_and_replace(text,"л","l"); //
+	find_and_replace(text,"м","m"); //
+	find_and_replace(text,"н","n"); //
+	find_and_replace(text,"о","o"); //
+	find_and_replace(text,"п","p"); //
+	find_and_replace(text,"р","r"); //
+	find_and_replace(text,"с","s"); //
+	find_and_replace(text,"т","t"); //
+	find_and_replace(text,"у","u"); //
+	find_and_replace(text,"ф","f"); //
+	find_and_replace(text,"х","h"); //
+	find_and_replace(text,"ц","c"); //
+	find_and_replace(text,"ч","ch"); //
+	find_and_replace(text,"ш","sh"); //
+	find_and_replace(text,"щ","sch"); //
+	find_and_replace(text,"ъ","'"); //
+	find_and_replace(text,"ы","i"); //
+	find_and_replace(text,"ь",""); //
+	find_and_replace(text,"э","e"); //
+	find_and_replace(text,"ю","ju"); //
+	find_and_replace(text,"я","ja"); //
 
     return text;
   }
