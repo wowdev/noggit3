@@ -2,7 +2,6 @@
 
 #ifdef _WIN32
 #include <direct.h>
-#define NOMINMAX 1
 #include <windows.h>
 #include <winerror.h>
 #endif
@@ -121,14 +120,7 @@ void setApplicationDirectory( const std::string& argv_0 )
 }
 
 int main( int argc, char *argv[] )
-{
-  //! \todo This should be done via compiler flags!
-  #ifdef _WIN32
-	// hide the console window on windows
-	HWND hWnd = GetConsoleWindow();
-  ShowWindow( hWnd, SW_HIDE );
-  #endif
-  
+{  
   RegisterErrorHandlers();
   setApplicationDirectory( argv[0] );
 
