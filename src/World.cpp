@@ -555,7 +555,7 @@ void World::initDisplay()
   if( mHasAGlobalWMO )
   {
     WMOManager::add( mWmoFilename );
-    WMOInstance inst( static_cast<WMO*>( WMOManager::items[ WMOManager::get( mWmoFilename ) ] ), &mWmoEntry );
+    WMOInstance inst( WMOManager::item( mWmoFilename ), &mWmoEntry );
     
     gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( mWmoEntry.uniqueID, inst ) );
     camera = inst.pos;
@@ -2020,7 +2020,7 @@ void World::setBaseTexture( int x, int z )
     {
       MapChunk *curChunk = curTile->getChunk(j, i);
       curChunk->eraseTextures();
-      curChunk->addTexture( TextureManager::add( UITexturingGUI::getSelectedTexture()->name ) );
+      curChunk->addTexture( TextureManager::add( UITexturingGUI::getSelectedTexture()->name() ) );
     }
   }
 }

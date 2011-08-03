@@ -88,8 +88,8 @@ bool TextureManager::LoadBLP(GLuint id, OpenGL::Texture *tex)
 
   glBindTexture( GL_TEXTURE_2D, id );
   
-  MPQFile f( tex->name );
-  if ( f.isEof() ) 
+  MPQFile f( tex->name() );
+  if( f.isEof() ) 
   {
     tex->id = 0;
     return false;

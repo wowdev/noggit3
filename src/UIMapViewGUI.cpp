@@ -118,7 +118,7 @@ void UIMapViewGUI::render( bool tilemode )
       switch( lSelection->type ) 
       {
       case eEntry_Model:
-        detailInfo << "filename: " << lSelection->data.model->model->filename
+        detailInfo << "filename: " << lSelection->data.model->model->_filename
           << "\nunique ID: " << lSelection->data.model->d1
           << "\nposition X/Y/Z: " << lSelection->data.model->pos.x << " / " << lSelection->data.model->pos.y << " / " << lSelection->data.model->pos.z
           << "\nrotation X/Y/Z: " << lSelection->data.model->dir.x << " / " << lSelection->data.model->dir.y << " / " << lSelection->data.model->dir.z
@@ -128,7 +128,7 @@ void UIMapViewGUI::render( bool tilemode )
         using std::min;
         for( unsigned int j = 0; j < min( lSelection->data.model->model->header.nTextures, 6U ); j++ )
         {
-          detailInfo << "\n " << ( j + 1 ) << ": " << TextureManager::items[lSelection->data.model->model->textures[j]]->name;
+          detailInfo << "\n " << ( j + 1 ) << ": " << TextureManager::item( lSelection->data.model->model->textures[j] )->name();
         }
         if( lSelection->data.model->model->header.nTextures > 25 )
         {
@@ -139,7 +139,7 @@ void UIMapViewGUI::render( bool tilemode )
         break;
         
       case eEntry_WMO:
-        detailInfo << "filename: " << lSelection->data.wmo->wmo->filename
+        detailInfo << "filename: " << lSelection->data.wmo->wmo->_filename
           << "\nunique ID: " << lSelection->data.wmo->mUniqueID
           << "\nposition X/Y/Z: " << lSelection->data.wmo->pos.x << " / " << lSelection->data.wmo->pos.y << " / " << lSelection->data.wmo->pos.z
           << "\nrotation X/Y/Z: " << lSelection->data.wmo->dir.x << " / " << lSelection->data.wmo->dir.y << " / " << lSelection->data.wmo->dir.z

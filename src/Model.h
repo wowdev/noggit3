@@ -177,7 +177,7 @@ class Model: public ManagedItem, public AsyncObject {
   void lightsOff(GLuint lbase);
 
 public:
-  std::string filename; //! \todo ManagedItem already has a name. Use that?
+  std::string _filename; //! \todo ManagedItem already has a name. Use that?
   ModelCamera cam;
   Bone *bones;
   ModelHeader header;

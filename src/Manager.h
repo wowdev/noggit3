@@ -9,35 +9,48 @@
 
 class ManagedItem 
 {
-  int refcount;
+private:
+  int _referenceCount;
+  std::string _name;
+  
 public:
-  //! \todo make this private, create getName().
-  std::string name;
-
-  explicit ManagedItem( const std::string& n ) : refcount( 0 )
+  explicit ManagedItem( const std::string& n )
+  : _referenceCount( 0 )
+  , _name( n )
   {
-    name = n;
-    std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+    std::transform( _name.begin(), _name.end(), _name.begin(), ::tolower );
   }
-  virtual ~ManagedItem() { }
+  
+  virtual ~ManagedItem()
+  {
+  }
 
   void addref()
   {
-    ++refcount;
+    ++_referenceCount;
   }
 
   bool delref()
   {
-    return --refcount == 0;
+    return --_referenceCount == 0;
+  }
+  
+  const std::string& name() const
+  {
+    return _name;
+  }
+  void name(const std::string& value)
+  {
+    _name = value;
   }
 };
 
 template <class IDTYPE,class MANAGEDITEM>
 class Manager
 {
+  typedef std::map<IDTYPE, MANAGEDITEM*> itemsMapType;
 public:
   static std::map<std::string, IDTYPE> names;
-  static std::map<IDTYPE, MANAGEDITEM*> items;
 
   static IDTYPE add( const std::string& name );
   
@@ -54,7 +67,7 @@ public:
   {
     if( items[id]->delref() )
     {
-      names.erase( names.find( items[id]->name ) );
+      names.erase( names.find( items[id]->name() ) );
       
       doDelete( id );
       
@@ -85,8 +98,33 @@ public:
     
     return names[name_];
   }
+  
+  static MANAGEDITEM* item( std::string name )
+  {
+    std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+    return items[names[name]];
+  }
+  static MANAGEDITEM* item( IDTYPE id )
+  {
+    return items[id];
+  }
+  
+  static typename itemsMapType::iterator begin()
+  {
+    return items.begin();
+  }
+  static typename itemsMapType::iterator end()
+  {
+    return items.end();
+  }
+  static typename itemsMapType::iterator find( IDTYPE searchFor )
+  {
+    return items.find( searchFor );
+  }
 
 protected:
+  static itemsMapType items;
+  
   static void do_add( const std::string& name, IDTYPE id, MANAGEDITEM* item )
   {
     std::string name_ = name;
@@ -94,7 +132,7 @@ protected:
     
     names[name_] = id;
     item->addref();
-    item->name = name_;
+    item->name(name_);
     items[id] = item;
   }
 };

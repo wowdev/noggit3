@@ -11,23 +11,24 @@
 
 int globalTime = 0;
 
-Model::Model(const std::string& _name, bool _forceAnim) : ManagedItem(_name), forceAnim(_forceAnim)
-{
-  filename = _name;
-  
-  transform( filename.begin(), filename.end(), filename.begin(), ::tolower );
-  size_t found = filename.rfind( ".mdx" );
+Model::Model(const std::string& filename, bool _forceAnim)
+: ManagedItem( filename )
+, forceAnim(_forceAnim)
+, _filename( filename )
+{  
+  transform( _filename.begin(), _filename.end(), _filename.begin(), ::tolower );
+  size_t found = _filename.rfind( ".mdx" );
   if( found != std::string::npos )
-    filename.replace( found, 4, ".m2" );
+    _filename.replace( found, 4, ".m2" );
   
-  found = filename.rfind( ".mdl" );
+  found = _filename.rfind( ".mdl" );
   if( found != std::string::npos )
-    filename.replace( found, 4, ".m2" );
+    _filename.replace( found, 4, ".m2" );
     
-  found = filename.rfind( ".m2" );
+  found = _filename.rfind( ".m2" );
   if( found == std::string::npos )
   {
-    LogError << "I can't use the model \"" << filename << "\" as I can't get its ending to .m2." << std::endl;
+    LogError << "I can't use the model \"" << _filename << "\" as I can't get its ending to .m2." << std::endl;
     return;
   }
   
@@ -58,16 +59,16 @@ Model::Model(const std::string& _name, bool _forceAnim) : ManagedItem(_name), fo
 
 void Model::finishLoading()
 {
-  MPQFile f( filename );
+  MPQFile f( _filename );
   
   if( f.isEof() ) 
   {
-      LogError << "Error loading file \"" << filename << "\". Aborting to load model." << std::endl;
+      LogError << "Error loading file \"" << _filename << "\". Aborting to load model." << std::endl;
        finished = true;
       return;
   }
   
-  //LogDebug << "Loading model \"" << filename << "\"." << std::endl;
+  //LogDebug << "Loading model \"" << _filename << "\"." << std::endl;
   
   memcpy( &header, f.getBuffer(), sizeof( ModelHeader ) );
   
@@ -106,7 +107,7 @@ void Model::finishLoading()
 
 Model::~Model()
 {
-  LogDebug << "Unloading model \"" << filename << "\"." << std::endl;
+  LogDebug << "Unloading model \"" << _filename << "\"." << std::endl;
     
   if (header.nTextures && textures) {
     for (size_t i=0; i<header.nTextures; ++i) {
@@ -326,7 +327,7 @@ void Model::initCommon(const MPQFile& f)
   
   if (header.nViews > 0) {
     // indices - allocate space, too
-    std::string lodname = filename.substr(0, filename.length()-3);
+    std::string lodname = _filename.substr(0, _filename.length()-3);
     lodname.append("00.skin");
     MPQFile g(lodname.c_str());
     if (g.isEof()) {
@@ -493,7 +494,7 @@ void Model::initAnimated(const MPQFile& f)
 
 	std::stringstream tempname;
     for(size_t i=0; i<header.nAnimations; ++i) {
-      std::string lodname = filename.substr(0, filename.length()-3);
+      std::string lodname = _filename.substr(0, _filename.length()-3);
 	  tempname << lodname.c_str() << anims[i].animID << "-" << anims[i].subAnimID;
 	  if (MPQFile::getSize(tempname.str().c_str()) > 0) 
 	  {

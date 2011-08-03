@@ -126,12 +126,13 @@ struct WMOFog {
   void setup();
 };
 
-class WMO: public ManagedItem {
+class WMO : public ManagedItem
+{
 public:
   bool draw_group_boundingboxes;
 
-  std::string    WMOName;
-  std::string filename;
+  std::string WMOName;
+  std::string _filename;
   WMOGroup *groups;
   unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
   WMOMaterial *mat;

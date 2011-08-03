@@ -460,7 +460,7 @@ void InsertObject( UIFrame* /*button*/, int id )
       if( !MPQFile::exists(lastModel) )
         LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
       else
-        gWorld->addM2( static_cast<Model*>(ModelManager::items[ModelManager::add(lastModel)]), selectionPosition );
+        gWorld->addM2( ModelManager::item( ModelManager::add( lastModel ) ), selectionPosition );
   }
   else if(id==15)
   {  
@@ -469,7 +469,7 @@ void InsertObject( UIFrame* /*button*/, int id )
       if( !MPQFile::exists(lastWMO) )
         LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
       else
-        gWorld->addWMO( static_cast<WMO*>(WMOManager::items[WMOManager::add(lastWMO)]), selectionPosition );
+        gWorld->addWMO( WMOManager::item( WMOManager::add( lastWMO ) ), selectionPosition );
   }
   else
   {
@@ -483,7 +483,7 @@ void InsertObject( UIFrame* /*button*/, int id )
         continue;
       }
     
-      gWorld->addWMO( static_cast<WMO*>(WMOManager::items[WMOManager::add(*it)]), selectionPosition );
+      gWorld->addWMO( WMOManager::item( WMOManager::add( *it ) ), selectionPosition );
     }
 
     for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
@@ -496,7 +496,7 @@ void InsertObject( UIFrame* /*button*/, int id )
         continue;
       }
       
-      gWorld->addM2( static_cast<Model*>(ModelManager::items[ModelManager::add(*it)]), selectionPosition );
+      gWorld->addM2( ModelManager::item( ModelManager::add( *it ) ), selectionPosition );
     }
   }
   //! \todo Memoryleak: These models will never get deleted.
@@ -1084,9 +1084,9 @@ void MapView::tick( float t, float dt )
               }
 
               if( mViewMode == eViewMode_3D )
-                gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( UITexturingGUI::getSelectedTexture()->name ) );
+                gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( UITexturingGUI::getSelectedTexture()->name() ) );
               else if( mViewMode == eViewMode_2D )
-                gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( UITexturingGUI::getSelectedTexture() ->name ) );
+                gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( UITexturingGUI::getSelectedTexture()->name() ) );
             }
           }          
         break;

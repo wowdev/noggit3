@@ -55,8 +55,6 @@ Menu::Menu()
 , mBackgroundModel( NULL )
 , mLastBackgroundId( -1 )
 {
-
-
   gWorld = NULL;
   theMenu = this;
 
@@ -82,7 +80,7 @@ Menu::~Menu()
   delete gWorld;
   gWorld = NULL;
   
-  ModelManager::delbyname( mBackgroundModel->name );
+  ModelManager::delbyname( mBackgroundModel->name() );
   mBackgroundModel = NULL;
 }
 
@@ -117,11 +115,11 @@ void Menu::randBackground()
   
   if( mBackgroundModel )
   {
-    ModelManager::delbyname( mBackgroundModel->name );
+    ModelManager::delbyname( mBackgroundModel->name() );
     mBackgroundModel = NULL;
   }
   
-  mBackgroundModel = ModelManager::items[ModelManager::add( filename.str() )];
+  mBackgroundModel = ModelManager::item( ModelManager::add( filename.str() ) );
   mBackgroundModel->mPerInstanceAnimation = true;
 }
 
