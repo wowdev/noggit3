@@ -268,10 +268,8 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
           }
           Vec3D v = Vec3D(xbase+xpos, ybase+h, zbase+zpos);
           *ttv++ = v;
-          using std::min;
-          using std::max;
-          vmin.y = min(vmin.y, v.y);
-          vmax.y = max(vmax.y, v.y);
+          vmin.y = std::min(vmin.y, v.y);
+          vmax.y = std::max(vmax.y, v.y);
         }
       }
 
@@ -1443,10 +1441,8 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
       }
     }
     
-    using std::min;
-    using std::max;
-    vmin.y = min(vmin.y, mVertices[i].y);
-    vmax.y = max(vmax.y, mVertices[i].y);
+    vmin.y = std::min(vmin.y, mVertices[i].y);
+    vmax.y = std::max(vmax.y, mVertices[i].y);
   }
   if(Changed)
   {
@@ -1499,10 +1495,8 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
       Changed=true;
     }
     
-    using std::min;
-    using std::max;
-    vmin.y = min(vmin.y, mVertices[i].y);
-    vmax.y = max(vmax.y, mVertices[i].y);
+    vmin.y = std::min(vmin.y, mVertices[i].y);
+    vmax.y = std::max(vmax.y, mVertices[i].y);
   }
   if(Changed)
   {
@@ -1581,10 +1575,8 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
       Changed=true;
     }
     
-    using std::min;
-    using std::max;
-    vmin.y = min(vmin.y, mVertices[i].y);
-    vmax.y = max(vmax.y, mVertices[i].y);
+    vmin.y = std::min(vmin.y, mVertices[i].y);
+    vmax.y = std::max(vmax.y, mVertices[i].y);
   }
   if(Changed)
   {
@@ -1729,13 +1721,10 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 
         tPressure=pressure*Brush->getValue(dist);
 
-        using std::min;
-        using std::max;
-
         if(texLevel>0)
-          amap[texLevel-1][i+j*64]=static_cast<unsigned char>(max( min( (1.0f-tPressure)*( static_cast<float>(amap[texLevel-1][i+j*64]) ) + tPressure*target + 0.5f ,255.0f) , 0.0f));
+          amap[texLevel-1][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[texLevel-1][i+j*64]) ) + tPressure*target + 0.5f ,255.0f) , 0.0f));
         for(int k=texLevel;k<nTextures-1;k++)
-          amap[k][i+j*64]=static_cast<unsigned char>(max( min( (1.0f-tPressure)*( static_cast<float>(amap[k][i+j*64]) ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f));
+          amap[k][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[k][i+j*64]) ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f));
         xPos+=change;
       }
       zPos+=change;
@@ -1808,8 +1797,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
               unsigned char* above = amap[layerAbove-1];
               for( size_t i = 0; i < 64 * 64; ++i )
               {
-                using std::max;
-                map[i] = max( 0, map[i] - above[i] );
+                map[i] = std::max( 0, map[i] - above[i] );
               }
             }
         
@@ -1869,10 +1857,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
       
           if( dist <= radius )
           {
-              using std::min;
-              using std::max;
-        
-              amap[texLevel - 1][i + j * 64] = (unsigned char)( max( min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
+              amap[texLevel - 1][i + j * 64] = (unsigned char)( std::max( std::min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
           }
         }
       }

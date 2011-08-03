@@ -125,8 +125,7 @@ void UIMapViewGUI::render( bool tilemode )
           << "\nscale: " <<  lSelection->data.model->sc
           << "\ntextures Used: " << lSelection->data.model->model->header.nTextures;
         
-        using std::min;
-        for( unsigned int j = 0; j < min( lSelection->data.model->model->header.nTextures, 6U ); j++ )
+        for( unsigned int j = 0; j < std::min( lSelection->data.model->model->header.nTextures, 6U ); j++ )
         {
           detailInfo << "\n " << ( j + 1 ) << ": " << TextureManager::item( lSelection->data.model->model->textures[j] )->name();
         }
@@ -146,8 +145,7 @@ void UIMapViewGUI::render( bool tilemode )
           << "\ndoodad set: " << lSelection->data.wmo->doodadset
           << "\ntextures used: " << lSelection->data.wmo->wmo->nTextures;
 
-        using std::min;
-        for( unsigned int j = 0; j < min( lSelection->data.wmo->wmo->nTextures, 8U ); j++ )
+        for( unsigned int j = 0; j < std::min( lSelection->data.wmo->wmo->nTextures, 8U ); j++ )
         {
           detailInfo << "\n " << ( j + 1 ) << ": " << lSelection->data.wmo->wmo->textures[j];
         }
