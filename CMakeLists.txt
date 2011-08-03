@@ -117,7 +117,7 @@ SET( SourceFiles
 IF( WIN32 )
   SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/win/" )
   SET( SourceFiles ${SourceFiles} "${CMAKE_SOURCE_DIR}/include/win/StackWalker.cpp" )
-  ADD_DEFINITIONS( /vmg )
+  ADD_DEFINITIONS( /vmg /D NOMINMAX )
 ENDIF( WIN32 )
 
 # If we are on OSX, we need additional files for SDL to work.
@@ -159,7 +159,7 @@ IF( APPLE )
 ELSE( APPLE )
   ADD_EXECUTABLE( noggit ${SourceFiles} )
   # No console window shown on launch.
-  SET_TARGET_PROPERTIES( noggit PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS" )
+  SET_TARGET_PROPERTIES( noggit PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup" )
 ENDIF( APPLE )
 TARGET_LINK_LIBRARIES( noggit ${ZLIB_LIBRARIES} ${OPENGL_LIBRARIES} ${FREETYPE_LIBRARIES} ${SDL_LIBRARY} ${STORMLIB_LIBRARIES} ${Boost_LIBRARIES} ${GLEW_LIBRARY} )
 
