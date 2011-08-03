@@ -42,9 +42,10 @@ void WMOUnhighlight()
   glDepthMask( GL_TRUE );
 }
 
-WMO::WMO(const std::string& _name): ManagedItem(_name)
+WMO::WMO(const std::string& filename)
+: ManagedItem( filename )
+, _filename( filename )
 {
-  filename = _name;
   MPQFile f(filename);
   if (f.isEof()) {
     LogError << "Error loading WMO \"" << filename << "\"." << std::endl;
@@ -157,7 +158,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
       for (unsigned int i=0; i<nModels; ++i) {
         int ofs;
         f.read(&ofs,4);
-        Model *m = static_cast<Model*>(ModelManager::items[ModelManager::get(ddnames + ofs)]);
+        Model *m = ModelManager::item( ddnames + ofs );
         ModelInstance mi;
         mi.init2(m,&f);
         modelis.push_back(mi);
@@ -175,7 +176,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 
           if( MPQFile::exists( path ) )
           {
-            skybox = static_cast<Model*>(ModelManager::items[ModelManager::add(path)]);
+            skybox = ModelManager::item( path );
           }
           else
           {
@@ -230,7 +231,7 @@ WMO::WMO(const std::string& _name): ManagedItem(_name)
 
 WMO::~WMO()
 {
-  LogDebug << "Unloading WMO \"" << name << "\"." << std::endl;
+  LogDebug << "Unloading WMO \"" << name() << "\"." << std::endl;
   if(groups)
   {
     delete[] groups;
@@ -709,7 +710,7 @@ void WMOGroup::initDisplayList()
 	std::stringstream curNum;
 	curNum << "_" << std::setw(3) << std::setfill('0') << num;
 	
-	std::string fname = wmo->name; 
+	std::string fname = wmo->name(); 
 	fname.insert( fname.find( ".wmo" ), curNum.str() );
  
 	MPQFile gf(fname);

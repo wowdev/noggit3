@@ -31,7 +31,7 @@ void UITexture::setTexture( OpenGL::Texture* tex )
 void UITexture::setTexture( GLuint tex )
 {
   //! \todo Free current texture.
-  texture = (OpenGL::Texture*)TextureManager::items[tex];
+  texture = TextureManager::item( tex );
 }
 
 void UITexture::setTexture( const std::string& tex )

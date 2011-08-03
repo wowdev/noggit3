@@ -160,9 +160,9 @@ void showPage( int pPage )
 
   if( UITexturingGUI::getSelectedTexture() )
   {
-    for( std::map<GLuint, OpenGL::Texture*>::iterator i = TextureManager::items.begin(); i != TextureManager::items.end(); ++i )
+    for( std::map<GLuint, OpenGL::Texture*>::iterator i = TextureManager::begin(); i != TextureManager::end(); ++i )
     {
-      if( i->second->name == UITexturingGUI::getSelectedTexture()->name )
+      if( i->second->name() == UITexturingGUI::getSelectedTexture()->name() )
       {
         lSelectedTexture = i->first;
       }
@@ -202,9 +202,9 @@ void showPage( int pPage )
 void updateTextures()
 {
   gTexturesInList.clear();
-  for( std::map<GLuint, OpenGL::Texture*>::iterator t = TextureManager::items.begin(); t != TextureManager::items.end(); t++ )
+  for( std::map<GLuint, OpenGL::Texture*>::iterator t = TextureManager::begin(); t != TextureManager::end(); t++ )
   {
-    if( TextureInPalette( t->second->name ) )
+    if( TextureInPalette( t->second->name() ) )
     {
       gTexturesInList.push_back( t->first );
     }
@@ -224,11 +224,11 @@ void changePage( UIFrame*, int direction )
 void UITexturingGUI::updateSelectedTexture()
 {
   if( textureSelected )
-    textureSelected->setTexture( UITexturingGUI::getSelectedTexture()->name );
+    textureSelected->setTexture( UITexturingGUI::getSelectedTexture()->name() );
   if( textSelectedTexture )
-    textSelectedTexture->setText( UITexturingGUI::getSelectedTexture()->name );
+    textSelectedTexture->setText( UITexturingGUI::getSelectedTexture()->name() );
   if( textGui )
-    textGui->guiToolbar->current_texture->setTexture( UITexturingGUI::getSelectedTexture()->name );
+    textGui->guiToolbar->current_texture->setTexture( UITexturingGUI::getSelectedTexture()->name() );
 }
 
 void texturePaletteClick( UIFrame* /*f*/, int id )
@@ -236,7 +236,7 @@ void texturePaletteClick( UIFrame* /*f*/, int id )
   if( curTextures[id]->hidden )
     return;
   
-  UITexturingGUI::setSelectedTexture((OpenGL::Texture*)TextureManager::items.find( gTexturesInPage[id] )->second);
+  UITexturingGUI::setSelectedTexture( TextureManager::find( gTexturesInPage[id] )->second );
   
   if( UITexturingGUI::getSelectedTexture() )
   {
@@ -395,7 +395,7 @@ UIFrame* UITexturingGUI::createSelectedTexture()
 {
   windowSelectedTexture = new UICloseWindow( video.xres - 148.0f - 128.0f, video.yres - 320.0f, 274.0f, 288.0f, "Current Texture", true );
 
-  std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->name : "tileset\\generic\\black.blp";
+  std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->name() : "tileset\\generic\\black.blp";
 
   textureSelected = new UITexture( 9.0f, 24.0f, 256.0f, 256.0f, lTexture );
   windowSelectedTexture->addChild( textureSelected );

@@ -426,7 +426,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
   
   for( std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it )
   {
-    gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( static_cast<WMO*>(WMOManager::items[WMOManager::get(mWMOFilenames[it->nameID])]), &(*it) ) ) );
+    gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( WMOManager::item( mWMOFilenames[it->nameID] ), &(*it) ) ) );
   }
   
   // - Load M2s ------------------------------------------
@@ -438,7 +438,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
   
   for( std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
   {
-    gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( static_cast<Model*>(ModelManager::items[ModelManager::get(mModelFilenames[it->nameID])]), &(*it) ) ) );
+    gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( ModelManager::item( mModelFilenames[it->nameID] ), &(*it) ) ) );
   }
   
   // - Load chunks ---------------------------------------
@@ -833,7 +833,7 @@ void MapTile::saveTile()
   for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
   {
     //! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
-    std::string lTemp = it->second.model->filename;
+    std::string lTemp = it->second.model->_filename;
     transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
     size_t found = lTemp.rfind( ".m2" );
     if( found != std::string::npos )
@@ -855,8 +855,8 @@ void MapTile::saveTile()
   std::map<std::string, filenameOffsetThing> lObjects;
 
   for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
-    if( lObjects.find( it->second.wmo->filename ) == lObjects.end() )
-      lObjects.insert( std::pair<std::string, filenameOffsetThing>( ( it->second.wmo->filename ), nullyThing ) ); 
+    if( lObjects.find( it->second.wmo->_filename ) == lObjects.end() )
+      lObjects.insert( std::pair<std::string, filenameOffsetThing>( ( it->second.wmo->_filename ), nullyThing ) ); 
   
   lID = 0;
   for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
@@ -872,8 +872,8 @@ void MapTile::saveTile()
   for( int i = 0; i < 16; ++i )
     for( int j = 0; j < 16; ++j )
       for( int tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
-        if( lTextures.find( TextureManager::items[mChunks[i][j]->textures[tex]]->name ) == lTextures.end() )
-          lTextures.insert( std::pair<std::string, int>(TextureManager::items[mChunks[i][j]->textures[tex]]->name , -1 ) );
+        if( lTextures.find( TextureManager::item( mChunks[i][j]->textures[tex] )->name() ) == lTextures.end() )
+          lTextures.insert( std::pair<std::string, int>( TextureManager::item( mChunks[i][j]->textures[tex] )->name(), -1 ) );
   
   lID = 0;
   for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
@@ -1040,7 +1040,7 @@ void MapTile::saveTile()
     for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
     {
       //! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
-      std::string lTemp = it->second.model->filename;
+      std::string lTemp = it->second.model->_filename;
       transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
       size_t found = lTemp.rfind( ".m2" );
       if( found != std::string::npos )
@@ -1084,7 +1084,7 @@ void MapTile::saveTile()
     lID = 0;
     for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
     {
-      std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lObjects.find( it->second.wmo->filename );
+      std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lObjects.find( it->second.wmo->_filename );
       if( lMyFilenameThingey == lObjects.end() )
       {
         LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -1368,7 +1368,7 @@ void MapTile::saveTile()
           {
             ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>( lCurrentPosition + 8 + 0x10 * j );
 
-            lLayer->textureID = lTextures.find( TextureManager::items[mChunks[y][x]->textures[j]]->name )->second;
+            lLayer->textureID = lTextures.find( TextureManager::item( mChunks[y][x]->textures[j] )->name() )->second;
 
             lLayer->flags = mChunks[y][x]->texFlags[j];
             
