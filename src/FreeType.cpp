@@ -78,15 +78,13 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
   //We use the ?: operator so that value which we use
   //will be 0 if we are in the padding zone, and whatever
   //is the the Freetype bitmap otherwise.
-  
-  using std::min;
-  
+    
   memset(expanded_data,0,width*height*2);
   for(int j=0; j <height;j++) {
     for(int i=0; i < width; ++i){
       expanded_data[2*(i+j*width)]=expanded_data[2*(i+j*width)+1]= 
         (i>=bitmap.width || j>=bitmap.rows) ?
-        0 : static_cast<unsigned char>(min(static_cast<float>(bitmap.buffer[i + bitmap.width*j])*1.5f,255.0f));
+        0 : static_cast<unsigned char>(std::min(static_cast<float>(bitmap.buffer[i + bitmap.width*j])*1.5f,255.0f));
     }
   }
 

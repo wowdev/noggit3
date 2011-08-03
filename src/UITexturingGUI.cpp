@@ -214,10 +214,8 @@ void updateTextures()
 
 void changePage( UIFrame*, int direction )
 {
-  using std::min;
-  using std::max;
-  gCurrentPage = max( gCurrentPage + direction, 0 );
-  gCurrentPage = min( gCurrentPage, static_cast<int>( gTexturesInList.size() / ( pal_cols * pal_rows ) ) );
+  gCurrentPage = std::max( gCurrentPage + direction, 0 );
+  gCurrentPage = std::min( gCurrentPage, static_cast<int>( gTexturesInList.size() / ( pal_cols * pal_rows ) ) );
   showPage( gCurrentPage );
 }
 

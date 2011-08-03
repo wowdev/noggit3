@@ -638,15 +638,12 @@ void World::enterTile( int x, int z )
   }
   
   noadt = false;
-
-  using std::min;
-  using std::max;
   
   cx = x;
   cz = z;
-  for( int i = max(cz - 2, 0); i < min(cz + 2, 64); ++i )
+  for( int i = std::max(cz - 2, 0); i < std::min(cz + 2, 64); ++i )
   {
-    for( int j = max(cx - 2, 0); j < min(cx + 2, 64); ++j )
+    for( int j = std::max(cx - 2, 0); j < std::min(cx + 2, 64); ++j )
     {
       mTiles[i][j].tile = loadTile( i, j );
     }
@@ -655,8 +652,7 @@ void World::enterTile( int x, int z )
   if( autoheight && tileLoaded( cz, cx ) ) //ZX STEFF HERE SWAP!
   {
     float maxHeight = mTiles[cz][cx].tile->getMaxHeight();
-    using std::max ;
-    maxHeight = max( maxHeight, 0.0f );
+    maxHeight = std::max( maxHeight, 0.0f );
     camera.y = maxHeight + 50.0f;
 
     autoheight = false;
@@ -1371,10 +1367,8 @@ void World::clearHeight(int /*id*/, int x, int z , int _cx, int _cz)
   {
     curChunk->mVertices[i].y = 0.0f;
 
-    using std::min;
-    using std::max;
-    curChunk->vmin.y = min(curChunk->vmin.y,curChunk-> mVertices[i].y);
-    curChunk->vmax.y = max(curChunk->vmax.y, curChunk->mVertices[i].y);
+    curChunk->vmin.y = std::min(curChunk->vmin.y,curChunk-> mVertices[i].y);
+    curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
   }
 
   glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
@@ -1818,7 +1812,6 @@ void World::addModel( nameEntry entry, Vec3D newPos )
 void World::addM2( Model *model, Vec3D newPos )
 {
   LogError << "M2:start:" << std::endl;
-  using std::max;
   int temp = 0;
   if  (mModelInstances.empty()) {
     temp = 0;
@@ -1863,8 +1856,7 @@ void World::addM2( Model *model, Vec3D newPos )
 
 void World::addWMO( WMO *wmo, Vec3D newPos )
 {
-  using std::max;
-  const int lMaxUID = max( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
+  const int lMaxUID = std::max( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
                            ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
   
   WMOInstance newWMOis(wmo);
@@ -1994,10 +1986,8 @@ void World::moveHeight(int /*id*/, int x, int z , int _cx, int _cz)
   {
     curChunk->mVertices[i].y = curChunk->mVertices[i].y + heightDelta;
 
-    using std::min;
-    using std::max;
-    curChunk->vmin.y = min(curChunk->vmin.y,curChunk-> mVertices[i].y);
-    curChunk->vmax.y = max(curChunk->vmax.y, curChunk->mVertices[i].y);
+    curChunk->vmin.y = std::min(curChunk->vmin.y,curChunk-> mVertices[i].y);
+    curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
   }
 
   glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);

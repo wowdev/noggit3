@@ -870,10 +870,9 @@ MapView::~MapView()
 }
 
 void MapView::tick( float t, float dt )
-{  
-  using std::min;
-  dt = min( dt, 1.0f );
-    
+{
+  dt = std::min( dt, 1.0f );
+
   if( SDL_GetAppState() & SDL_APPINPUTFOCUS )
   {
     Vec3D dir( 1.0f, 0.0f, 0.0f );
@@ -1054,8 +1053,7 @@ void MapView::tick( float t, float dt )
             if( mViewMode == eViewMode_3D ) gWorld->flattenTerrain( xPos, zPos, yPos, pow( 0.2f, dt ), blurBrushRadius, blurBrushType );
           if( Environment::getInstance()->CtrlDown )
           {
-            using std::min;
-            if( mViewMode == eViewMode_3D ) gWorld->blurTerrain( xPos, zPos, pow( 0.2f, dt ), min( blurBrushRadius, 30.0f ), blurBrushType );
+            if( mViewMode == eViewMode_3D ) gWorld->blurTerrain( xPos, zPos, pow( 0.2f, dt ), std::min( blurBrushRadius, 30.0f ), blurBrushType );
           }
         break;
           
@@ -1170,9 +1168,7 @@ void MapView::tick( float t, float dt )
       if( updown ) 
         gWorld->zoom *= pow( 2.0f, dt * updown * 4.0f );
       
-      using std::min;
-      using std::max;
-      gWorld->zoom = min( max( gWorld->zoom, 0.1f ), 2.0f );
+      gWorld->zoom = std::min( std::max( gWorld->zoom, 0.1f ), 2.0f );
     }
   }
   else

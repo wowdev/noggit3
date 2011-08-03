@@ -25,7 +25,6 @@ UIAbout::UIAbout( )
 
 void UIAbout::resize()
 {
-  using std::max;
-  this->x = max( ( video.xres / 2.0f ) - ( winWidth / 2.0f ), 0.0f );
-  this->y = max( ( video.yres / 2.0f ) - ( winHeight / 2.0f ), 0.0f );
+  this->x = std::max( ( video.xres / 2.0f ) - ( winWidth / 2.0f ), 0.0f );
+  this->y = std::max( ( video.yres / 2.0f ) - ( winHeight / 2.0f ), 0.0f );
 }
