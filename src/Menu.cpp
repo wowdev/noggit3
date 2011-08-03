@@ -278,15 +278,20 @@ void Menu::buildMenuBar()
   mGUImenuBar->AddMenu( typeToName[0] );
   mGUImenuBar->AddMenu( typeToName[1] );
   mGUImenuBar->AddMenu( typeToName[2] );
-  int maxContinentLength=0;
-  int maxDungeonLength=0;
-  int maxRaidLength=0;
+  
+  size_t entryStringLengths[sizeof( typeToName ) / sizeof( const char*)];
+  
   for( std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it )
   {
 	  mGUImenuBar->GetMenu( typeToName[it->areaType] )->AddMenuItemButton( it->name, &showMap, it->mapID );
-	  if(it->areaType==0 && maxContinentLength<it->name.length())maxContinentLength=it->name.length();//need to know max length of map's name to set menu width
-	  if(it->areaType==1 && maxDungeonLength<it->name.length())maxDungeonLength=it->name.length();
-	  if(it->areaType==2 && maxRaidLength<it->name.length())maxRaidLength=it->name.length();
+    entryStringLengths[it->areaType] = std::max( entryStringLengths[it->areaType], it->name.length() );
+  }
+  
+  const float menuWidthPerCharacterFactor = 7.0f;
+
+  for( size_t i = 0; i < sizeof( entryStringLengths ) / sizeof( size_t ); ++i )
+  {
+    mGUImenuBar->GetMenu( typeToName[i] )->width = menuWidthPerCharacterFactor * entryStringLengths[i];
   }
   
   static const size_t nBookmarksPerMenu = 20;
@@ -318,17 +323,10 @@ void Menu::buildMenuBar()
       name << "Bookmarks";
     }
     
-    mGUImenuBar->GetMenu( name.str() )->AddMenuItemButton( it->name, &showBookmark, n );
-	int maxBookmarksLength=0;
-	for(int i=0;i<mBookmarks.size();i++)
-	{
-		if(maxBookmarksLength<mBookmarks[i].name.length())maxBookmarksLength=mBookmarks[i].name.length();	//	little trick to set special menu width
-	}
-	
-	mGUImenuBar->GetMenu( typeToName[0] )->width=maxContinentLength*7.0f;//setting popup menu width
-	mGUImenuBar->GetMenu( typeToName[1] )->width=maxDungeonLength*7.0f;
-	mGUImenuBar->GetMenu( typeToName[2] )->width=maxRaidLength*7.0f;
-	mGUImenuBar->GetMenu( name.str() )->width=maxBookmarksLength*7.0f;
+    
+    MenuPane* pane = mGUImenuBar->GetMenu( name.str() );
+    pane->AddMenuItemButton( it->name, &showBookmark, n );
+    pane->width = std::max( pane->width, menuWidthPerCharacterFactor * it->name.length() );
   }
 }
 

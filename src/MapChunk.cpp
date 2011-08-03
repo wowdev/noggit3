@@ -342,7 +342,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
             // 21-10-2008 by Flow
             unsigned offI = 0; //offset IN buffer
             unsigned offO = 0; //offset OUT buffer
-            uint8_t* buffIn = f->getPointer(); // pointer to data in adt file
+            char* buffIn = f->getPointer(); // pointer to data in adt file
             char buffOut[4096]; // the resulting alpha map
 
             while( offO < 4096 )
@@ -372,7 +372,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
             // not compressed
             glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
             unsigned char *p;
-            uint8_t *abuf = f->getPointer();
+            char *abuf = f->getPointer();
             p = amap[layer-1];
             for (int j=0; j<64; ++j) {
               for (int i=0; i<64; ++i) {
@@ -393,7 +393,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
             // not compressed
             glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
             unsigned char *p;
-            uint8_t *abuf = f->getPointer();
+            char *abuf = f->getPointer();
             p = amap[layer-1];
             for (int j=0; j<63; ++j) {
               for (int i=0; i<32; ++i) {

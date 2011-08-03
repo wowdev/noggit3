@@ -1740,7 +1740,6 @@ void World::saveMap()
 {
   //! \todo  Output as BLP.
   unsigned char image[256*256*3];
-  char tfname[255];
   MapTile *ATile;
   FILE *fid;
   glEnable(GL_BLEND);

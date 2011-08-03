@@ -20,10 +20,7 @@ public:
   static void doDelete(GLuint id);
   static GLuint get(const std::string& name);
   
-  static OpenGL::Texture* newTexture(const std::string& name)
-  {
-    return (OpenGL::Texture*)TextureManager::items[TextureManager::add( name )];
-  }
+  static OpenGL::Texture* newTexture(const std::string& name);
 };
 
 #endif
