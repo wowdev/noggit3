@@ -119,6 +119,13 @@ void setApplicationDirectory( const std::string& argv_0 )
 #endif
 }
 
+#ifdef _WIN32
+int WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
+{
+  return main( __argc, __argv );
+}
+#endif
+
 int main( int argc, char *argv[] )
 {  
   RegisterErrorHandlers();
