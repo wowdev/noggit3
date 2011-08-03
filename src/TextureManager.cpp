@@ -9,6 +9,7 @@
 #include "MPQ.h"
 #include "Video.h"
 
+//! \todo Cross-platform syntax for packed structs.
 #pragma pack(push,1)
 struct BLPHeader 
 {
@@ -32,6 +33,11 @@ template <> std::map<GLuint, OpenGL::Texture*> Manager<GLuint,OpenGL::Texture>::
 template <class IDTYPE,class MANAGEDITEM> std::map<std::string, GLuint> Manager<GLuint, OpenGL::Texture>::names;
 template <class IDTYPE,class MANAGEDITEM> std::map<GLuint, OpenGL::Texture*> Manager<GLuint,OpenGL::Texture>::items;
 #endif
+
+OpenGL::Texture* TextureManager::newTexture(const std::string& name)
+{
+  return (OpenGL::Texture*)TextureManager::items[TextureManager::add( name )];
+}
 
 GLuint TextureManager::get(const std::string& name)
 {
@@ -78,7 +84,7 @@ bool TextureManager::LoadBLP(GLuint id, OpenGL::Texture *tex)
 {
   BLPHeader * lHeader;
   int w, h;
-  uint8_t * lData;
+  char * lData;
 
   glBindTexture( GL_TEXTURE_2D, id );
   

@@ -1099,7 +1099,7 @@ void MapTile::saveTile()
       //    10000
       //  1000000
       
-      int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 2 * 1000;
+      //int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 2 * 1000;
 
       lMODF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
       lMODF_Data[lID].uniqueID = it->first;
@@ -1596,7 +1596,7 @@ void MapTile::saveTile()
 #endif
   
   MPQFile f( mFilename );
-  f.setBuffer( lADTFile.GetPointer<uint8_t>(), lADTFile.mSize );
+  f.setBuffer( lADTFile.GetPointer<char>(), lADTFile.mSize );
   f.SaveFile();
   f.close();
 }

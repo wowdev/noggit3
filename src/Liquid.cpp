@@ -566,7 +566,7 @@ void loadWaterShader()
       if( !(errorPos==-1)&&(isNative==1) )
       {
         int i, j;
-        const GLubyte *stringy;
+        //const GLubyte *stringy;
         char localbuffer[256];
         LogError << "Water Shader \"shaders/waterfog.ps\" Fragment program failed to load \nReason:\n";
         LogError << reinterpret_cast<const char*>(glGetString(GL_PROGRAM_ERROR_STRING_ARB)) << std::endl;

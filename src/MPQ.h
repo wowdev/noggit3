@@ -31,7 +31,7 @@ public:
 class MPQFile
 {
   bool eof;
-  unsigned char *buffer;
+  char* buffer;
   size_t pointer, size;
 
   // disable copying
@@ -42,14 +42,13 @@ class MPQFile
   std::string fname;
 
 public:
-  MPQFile():eof(false),buffer(0),pointer(0),size(0) {}
   explicit MPQFile(const std::string& filename);  // filenames are not case sensitive
   ~MPQFile();
   size_t read(void* dest, size_t bytes);
   size_t getSize() const;
   size_t getPos() const;
-  unsigned char* getBuffer() const;
-  unsigned char* getPointer() const;
+  char* getBuffer() const;
+  char* getPointer() const;
   bool isEof() const;
   void seek(int offset);
   void seekRelative(int offset);
@@ -60,7 +59,7 @@ public:
     return External;
   }
 
-  void setBuffer(unsigned char *Buf, unsigned int Size)
+  void setBuffer(char *Buf, unsigned int Size)
   {
     if(buffer)
     {

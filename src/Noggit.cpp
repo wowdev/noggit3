@@ -1,8 +1,6 @@
 #include "Noggit.h"
 
 #ifdef _WIN32
-//#pragma comment(lib,"OpenGL32.lib")
-//#pragma comment(lib,"glu32.lib")
 #include <direct.h> 
 
 #include <windows.h>
@@ -124,11 +122,13 @@ void setApplicationDirectory( const std::string& argv_0 )
 
 int main( int argc, char *argv[] )
 {
+  //! \todo This should be done via compiler flags!
   #ifdef _WIN32
 	// hide the console window on windows
 	HWND hWnd = GetConsoleWindow();
-    ShowWindow( hWnd, SW_HIDE );
+  ShowWindow( hWnd, SW_HIDE );
   #endif
+  
   RegisterErrorHandlers();
   setApplicationDirectory( argv[0] );
 
@@ -230,14 +230,10 @@ int main( int argc, char *argv[] )
   Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
   
   CreateStrips();
-  Log << "CreateStrips" << std::endl;
-
-
 
   gAsyncLoader = new AsyncLoader();
   gAsyncLoader->start(1);
 
-  Log << "gAsyncLoader" << std::endl;
   std::vector<std::string> archiveNames;
   archiveNames.push_back( "common.MPQ" );
   archiveNames.push_back( "common-2.MPQ" ); 
@@ -279,7 +275,7 @@ int main( int argc, char *argv[] )
     LogError << "Could not find locale directory. Be sure, that there is one containing the file \"realmlist.wtf\"." << std::endl;
     return -1;
   }
-   Log << "Collect MPQs" << std::endl; 
+  
   //! \todo  This may be done faster. Maybe.
   for( size_t i = 0; i < archiveNames.size(); ++i )
   {
@@ -299,37 +295,30 @@ int main( int argc, char *argv[] )
     
     if( path.find( "{number}" ) != std::string::npos )
     {
-	  std::stringstream temp;
       location = path.find( "{number}" );
       path.replace( location, 8, " " );
-      for( int j = 2; j < 10; j++ )
+      for( char j = '2'; j <= '9'; j++ )
       {
-		temp << j;
-        path.replace( location, 1, temp.str() );
+        path.replace( location, 1, std::string( &j, 1 ) );
         if( FileExists( path ) )
           gAsyncLoader->addObject( new MPQArchive( path, true ) );
-		temp.str("");//need to clear stringstream to load patches with different numbers correctly
       }
     }
     else if( path.find( "{character}" ) != std::string::npos  )
     {
-	  std::stringstream temp;
       location = path.find( "{character}" );
       path.replace( location, 11, " " );
       for( char c = 'a'; c <= 'z'; c++ )
       {
-		temp << c;
-        path.replace( location, 1, temp.str() );
+        path.replace( location, 1, std::string( &c, 1 ) );
         if( FileExists( path ) )
           gAsyncLoader->addObject( new MPQArchive( path, true ) );
-		temp.str("");//need to clear stringstream to load patches with different characters correctly
       }
     }
     else
       if( FileExists( path ) )
         gAsyncLoader->addObject( new MPQArchive( path, true ) );
   }
-     Log << "Loaded MPQs" << std::endl; 
   // listfiles are not available straight away! They are async! Do not rely on anything at this point!
   
   //! \todo  Get this out?
@@ -387,7 +376,6 @@ int main( int argc, char *argv[] )
   
   Menu *m = new Menu();
   as = m;
-
 
   gStates.push_back( as );
   
