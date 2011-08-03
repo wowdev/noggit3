@@ -1199,15 +1199,14 @@ template <class IDTYPE,class MANAGEDITEM> std::map<std::string, WMOIDTYPE> Manag
 template <class IDTYPE,class MANAGEDITEM> std::map<WMOIDTYPE, WMO*> Manager<WMOIDTYPE,WMO>::items;
 #endif
 
-WMOIDTYPE WMOManager::add(const std::string& name)
+WMOIDTYPE WMOManager::add( std::string name )
 {
   int id;
-  std::string name_ = name;
-  std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
-  if( names.find( name_ ) != names.end() ) 
+  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+  if( names.find( name ) != names.end() ) 
   {
-    id = names[name_];
-    items[id]->addref();
+    id = names[name];
+    items[id]->addReference();
     return id;
   }
 

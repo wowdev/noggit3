@@ -13,7 +13,7 @@ class ModelManager: public Manager<MODELIDTYPE,Model>
 private:
   static int baseid;
 public:
-  static MODELIDTYPE add(const std::string& name);
+  static MODELIDTYPE add(std::string name);
   
   static void resetAnim();
   static void updateEmitters(float dt);

@@ -46,26 +46,25 @@ GLuint TextureManager::get(const std::string& name)
   return names[name_];
 }
 
-GLuint TextureManager::add(const std::string& name)
+GLuint TextureManager::add( std::string name )
 {
   GLuint id;
-  std::string name_ = name;
-  std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
-  if( names.find( name_ ) != names.end() ) 
+  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+  if( names.find( name ) != names.end() ) 
   {
-    id = names[name_];
-    items[id]->addref();
+    id = names[name];
+    items[id]->addReference();
     return id;
   }
   
   glGenTextures( 1, &id );
 
-  OpenGL::Texture *tex = new OpenGL::Texture( name_ );
+  OpenGL::Texture *tex = new OpenGL::Texture( name );
   tex->id = id;
   
   LoadBLP(id, tex);
 
-  do_add(name_, id, tex);
+  do_add(name, id, tex);
 
   return id;
 }

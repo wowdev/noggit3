@@ -17,15 +17,14 @@ template <class IDTYPE,class MANAGEDITEM> std::map<std::string, MODELIDTYPE> Man
 template <class IDTYPE,class MANAGEDITEM> std::map<MODELIDTYPE, Model*> Manager<MODELIDTYPE,Model>::items;
 #endif
 
-MODELIDTYPE ModelManager::add( const std::string& name )
+MODELIDTYPE ModelManager::add( std::string name )
 {
   int id;
-  std::string name_ = name;
-  std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
-  if( names.find( name_ ) != names.end() ) 
+  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+  if( names.find( name ) != names.end() )
   {
-    id = names[name_];
-    items[id]->addref();
+    id = names[name];
+    items[id]->addReference();
     return id;
   }
   
