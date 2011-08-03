@@ -282,7 +282,8 @@ void Menu::buildMenuBar()
   for( std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it )
   {
 	  mGUImenuBar->GetMenu( typeToName[it->areaType] )->AddMenuItemButton( it->name, &showMap, it->mapID );
-    entryStringLengths[it->areaType] = std::max( entryStringLengths[it->areaType], it->name.length() );
+    using std::max;
+    entryStringLengths[it->areaType] = max( entryStringLengths[it->areaType], it->name.length() );
   }
   
   const float menuWidthPerCharacterFactor = 7.0f;
@@ -324,7 +325,8 @@ void Menu::buildMenuBar()
     
     MenuPane* pane = mGUImenuBar->GetMenu( name.str() );
     pane->AddMenuItemButton( it->name, &showBookmark, n );
-    pane->width = std::max( pane->width, menuWidthPerCharacterFactor * it->name.length() );
+    using std::max;
+    pane->width = max( pane->width, menuWidthPerCharacterFactor * it->name.length() );
   }
 }
 

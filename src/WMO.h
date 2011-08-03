@@ -158,8 +158,6 @@ public:
   void drawSelect(int doodadset, const Vec3D& ofs, const float rot) const;
   //void drawPortals();
   void drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const;
-
-
 };
 
 typedef unsigned int WMOIDTYPE;
@@ -169,7 +167,7 @@ class WMOManager: public Manager<WMOIDTYPE,WMO>
 private:
   static int baseid;
 public:
-  static WMOIDTYPE add(const std::string& name);
+  static WMOIDTYPE add(std::string name);
   
   static int nextID()
   {

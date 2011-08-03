@@ -25,7 +25,7 @@ public:
   {
   }
 
-  void addref()
+  void addReference()
   {
     ++_referenceCount;
   }
@@ -49,9 +49,8 @@ template <class IDTYPE,class MANAGEDITEM>
 class Manager
 {
   typedef std::map<IDTYPE, MANAGEDITEM*> itemsMapType;
+  typedef std::map<std::string, IDTYPE> nameMapType;
 public:
-  static std::map<std::string, IDTYPE> names;
-
   static IDTYPE add( const std::string& name );
   
   static void doDelete( IDTYPE id )
@@ -84,21 +83,16 @@ public:
       del( get( name_ ) );
     }
   }
-  static bool has( const std::string& name )
+  static bool has( std::string name )
   {
-    std::string name_ = name;
-    std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
-    
-    return( names.find( name_ ) != names.end() );
+    std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+    return( names.find( name ) != names.end() );
   }
-  static IDTYPE get( const std::string& name )
+  static IDTYPE get( std::string name )
   {
-    std::string name_ = name;
-    std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
-    
-    return names[name_];
+    std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+    return names[name];
   }
-  
   static MANAGEDITEM* item( std::string name )
   {
     std::transform( name.begin(), name.end(), name.begin(), ::tolower );
@@ -121,18 +115,18 @@ public:
   {
     return items.find( searchFor );
   }
-
+  
 protected:
   static itemsMapType items;
+  static nameMapType names;
   
-  static void do_add( const std::string& name, IDTYPE id, MANAGEDITEM* item )
+  static void do_add( std::string name, IDTYPE id, MANAGEDITEM* item )
   {
-    std::string name_ = name;
-    std::transform( name_.begin(), name_.end(), name_.begin(), ::tolower );
+    std::transform( name.begin(), name.end(), name.begin(), ::tolower );
     
-    names[name_] = id;
-    item->addref();
-    item->name(name_);
+    names[name] = id;
+    item->addReference();
+    item->name(name);
     items[id] = item;
   }
 };

@@ -16,7 +16,7 @@ private:
   static bool LoadBLP(GLuint id, OpenGL::Texture *tex);
 public:
   static void reload();
-  static GLuint add(const std::string& name);
+  static GLuint add(std::string name);
   static void doDelete(GLuint id);
   static GLuint get(const std::string& name);
   
