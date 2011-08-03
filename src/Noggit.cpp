@@ -1,8 +1,8 @@
 #include "Noggit.h"
 
 #ifdef _WIN32
-#include <direct.h> 
-
+#include <direct.h>
+#define NOMINMAX 1
 #include <windows.h>
 #include <winerror.h>
 #endif
