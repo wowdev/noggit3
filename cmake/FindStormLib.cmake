@@ -4,6 +4,7 @@
 # STORMLIB_INCLUDES, 
 
 find_path(STORMLIB_INCLUDE_DIR StormLib.h StormPort.h )
+find_path(STORMLIB_LIBRARY_DIR StormLibRAD.lib )
 find_library(STORMLIB_LIBRARY StormLib)
 
 if(STORMLIB_INCLUDE_DIR AND STORMLIB_LIBRARY)
