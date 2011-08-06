@@ -1,7 +1,10 @@
 #ifndef __BRUSH_H
 #define __BRUSH_H
 
-#include "Video.h" // GLuint
+namespace OpenGL
+{
+  class Texture;
+}
 
 class brush
 {
@@ -10,7 +13,7 @@ private:
   float iradius;
   float oradius;
   float radius;
-  GLuint texID;
+  OpenGL::Texture* _texture;
   char tex[256*256];
   bool update;
 
@@ -21,7 +24,7 @@ public:
   float getHardness();
   float getRadius();
   float getValue( float dist );
-  GLuint getTexture();
+  OpenGL::Texture* getTexture();
   bool needUpdate();
   void init();
 };

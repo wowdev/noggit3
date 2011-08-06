@@ -30,9 +30,9 @@ void UITextBox2::render() const
   OpenGL::Texture::enableTexture();
   
   if( !mFocus )
-    texture->render();
+    texture->bind();
   else
-    textureDown->render();
+    textureDown->bind();
 
   glBegin(GL_TRIANGLE_STRIP);
   glTexCoord2f(0.0f,0.0f);

@@ -4,8 +4,9 @@
 
 #include "FreeType.h"
 #include "Noggit.h" // arial12
-#include "TextureManager.h" // TextureManager, Texture
+#include "TextureManager.h" // TextureManager
 #include "UIText.h"
+#include "Video.h" // Texture
 
 UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTexNormal, const std::string& pTexDown )
 : UIFrame( pX, pY, w, h )
@@ -69,9 +70,9 @@ void UIButton::render() const
   OpenGL::Texture::enableTexture();
 
   if( !clicked )
-    texture->render();
+    texture->bind();
   else
-    textureDown->render();
+    textureDown->bind();
   
   glBegin( GL_TRIANGLE_STRIP );
     glTexCoord2f( 0.0f, 0.0f );

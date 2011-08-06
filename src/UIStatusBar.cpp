@@ -39,7 +39,7 @@ void UIStatusBar::render() const
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
   
-  texture->render();
+  texture->bind();
 
   //Draw Top Side
   glBegin( GL_TRIANGLE_STRIP );  

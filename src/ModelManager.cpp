@@ -1,50 +1,63 @@
 #include "ModelManager.h" // ModelManager
 
 #include <algorithm>
-#include <map>
-#include <string>
 
 #include "AsyncLoader.h"// AsyncLoader
 #include "Noggit.h" // gAsyncLoader
+#include "Model.h" // Model
+#include "Log.h" // LogDebug
 
-int ModelManager::baseid = 0;
+ModelManager::mapType ModelManager::items;
 
-#ifdef WIN32
-template <> std::map<std::string, MODELIDTYPE> Manager<MODELIDTYPE,Model>::names;
-template <> std::map<MODELIDTYPE, Model*> Manager<MODELIDTYPE,Model>::items;
-#else
-template <class IDTYPE,class MANAGEDITEM> std::map<std::string, MODELIDTYPE> Manager<MODELIDTYPE,Model>::names;
-template <class IDTYPE,class MANAGEDITEM> std::map<MODELIDTYPE, Model*> Manager<MODELIDTYPE,Model>::items;
-#endif
-
-MODELIDTYPE ModelManager::add( std::string name )
+void ModelManager::report()
 {
-  int id;
-  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-  if( names.find( name ) != names.end() )
+  std::string output = "Still in the model manager:\n";
+  for( mapType::iterator t = items.begin(); t != items.end(); ++t )
   {
-    id = names[name];
-    items[id]->addReference();
-    return id;
+    output += "- " + t->first + "\n";
   }
-  
-  id = nextID();
-  Model *model = new Model( name );
-  model->finishLoading();
-  
-  gAsyncLoader->addObject( model );
-  
-  do_add( name, id, model );
-  return id;
+  LogDebug << output;
 }
+
+Model* ModelManager::add( std::string name )
+{
+  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+  
+  if( items.find( name ) == items.end() )
+  {
+    items[name] = new Model( name );
+    items[name]->finishLoading();
+    gAsyncLoader->addObject( items[name] );
+  }
+
+  items[name]->addReference();
+  return items[name];
+}
+
+void ModelManager::delbyname( std::string name )
+{
+  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+  
+  if( items.find( name ) != items.end() )
+  {
+    items[name]->removeReference();
+    
+    if( items[name]->hasNoReferences() )
+    {
+      delete items[name];
+      items.erase( items.find( name ) );
+    }
+  }
+}
+
 void ModelManager::resetAnim()
 {
-  for( std::map<std::string, MODELIDTYPE>::iterator it = names.begin( ); it != names.end( ); ++it )
-    static_cast<Model*>( items[it->second] )->animcalc = false;
+  for( ModelManager::mapType::iterator it = items.begin( ); it != items.end( ); ++it )
+    it->second->animcalc = false;
 }
 
 void ModelManager::updateEmitters( float dt )
 {
-  for( std::map<std::string, MODELIDTYPE>::iterator it = names.begin( ); it != names.end( ); ++it )
-    static_cast<Model*>( items[it->second] )->updateEmitters( dt );
+  for( ModelManager::mapType::iterator it = items.begin( ); it != items.end( ); ++it )
+    it->second->updateEmitters( dt );
 }

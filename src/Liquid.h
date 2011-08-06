@@ -21,6 +21,7 @@ class Liquid;
 namespace OpenGL
 {
   class CallList;
+  class Texture;
 };
 
 //static int lCount = 0;
@@ -82,7 +83,8 @@ class Liquid
   void initTextures( const std::string& pFilename );
 
   int type;
-  std::vector<GLuint> textures;
+  std::vector<OpenGL::Texture*> _textures;
+  std::vector<std::string> _textureFilenames;
   Vec3D col;
   int tmpflag;
   bool trans;

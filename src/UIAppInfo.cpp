@@ -19,7 +19,7 @@ UIAppInfo::UIAppInfo( float xPos, float yPos, float w, float h, UIMapViewGUI* se
   this->addChild( this->theInfos );
 
   UIModel* myTestmodel = new UIModel( 10.0f, 0.0f, w, h );
-  myTestmodel->setModel( ModelManager::item( ModelManager::add( mModelToLoad ) ) );
+  myTestmodel->setModel( ModelManager::add( mModelToLoad ) );
   this->addChild( myTestmodel );
 }
 

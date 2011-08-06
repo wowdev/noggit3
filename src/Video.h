@@ -47,39 +47,63 @@ public:
 
 #include "Manager.h" // ManagedItem
 
+struct BLPHeader;
+
 namespace OpenGL
 {  
   class CallList
   {
-    GLuint list;
   public:
     CallList();
     ~CallList();
+    
+    typedef GLuint ModeEnum;
 
-    void startRecording(GLuint mode = GL_COMPILE);
+    void startRecording(ModeEnum mode = GL_COMPILE);
     void endRecording();
     void render();
+    
+  private:
+    typedef GLuint InternalRepresentation;
+    
+    InternalRepresentation list;
   };
   
   class Texture : public ManagedItem
   {
-  public: //! \todo make private again and fix friends.
-    int w,h;
-    GLuint id;
+  public:
+    typedef GLuint InternalRepresentation;
     
-    explicit Texture(const std::string& pname);
-    const GLuint getId() const;
-    void render() const;
+    Texture();
+    ~Texture();
+    
+    void invalidate();
+    
+    void loadFromBLP( const std::string& filename );
+    void loadFromUncompressedData( BLPHeader* lHeader, char* lData );
+    void loadFromCompressedData( BLPHeader* lHeader, char* lData );
+    
+    void bind() const;
     
     static void enableTexture();
     static void disableTexture();
     static void setActiveTexture( size_t num = 0 );
+    
+    const std::string& filename();
+    
+  private:
+    int _width;
+    int _height;
+    InternalRepresentation _id;
+    std::string _filename;
   };
+  
+  typedef GLuint Shader;
+  typedef GLuint Light;
 }
 
 extern Video video;
 
-//GLuint loadTGA(const char *filename, bool mipmaps);
 bool isExtensionSupported(const char *search);
 void CheckForGLError( const std::string& pLocation );
 

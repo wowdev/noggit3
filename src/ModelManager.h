@@ -2,25 +2,24 @@
 #define MODELMANAGER_H
 
 #include <string>
+#include <map>
 
-#include "Manager.h" // Manager
-#include "Model.h" // Model
+class Model;
 
-typedef unsigned int MODELIDTYPE;
-
-class ModelManager: public Manager<MODELIDTYPE,Model>
+class ModelManager
 {
-private:
-  static int baseid;
 public:
-  static MODELIDTYPE add(std::string name);
+  static void delbyname( std::string name );
+  static Model* add(std::string name);
   
   static void resetAnim();
   static void updateEmitters(float dt);
-  static int nextID()
-  {
-    return baseid++;
-  }
+  
+  static void report();
+
+private:
+  typedef std::map<std::string, Model*> mapType;
+  static mapType items;
 };
 
 #endif// MODELMANAGER_H

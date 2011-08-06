@@ -41,7 +41,7 @@ public:
   int holes;
 
   int tex[4];
-  GLuint textures[4];
+  OpenGL::Texture* _textures[4];
   unsigned int texFlags[4];
   unsigned int effectID[4];
   unsigned int MCALoffset[4];
@@ -93,8 +93,8 @@ public:
   bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
-  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, unsigned int texture);
-  int addTexture(GLuint texture);
+  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture);
+  int addTexture(OpenGL::Texture* texture);
   void eraseTextures();
 
   bool isHole(int i,int j);

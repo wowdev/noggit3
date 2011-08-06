@@ -16,7 +16,6 @@ protected:
 
 public:
   UITexture( float x, float y, float width, float height, const std::string& tex );
-  void setTexture( GLuint tex );
   void setTexture( const std::string& tex );
   void setTexture( OpenGL::Texture* tex );
   void render() const;

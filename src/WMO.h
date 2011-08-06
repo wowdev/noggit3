@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <map>
 
 #include "Manager.h"
 #include "ModelInstance.h" // ModelInstance
@@ -25,7 +26,6 @@ class WMOGroup {
   uint32_t flags;
   Vec3D v1,v2;
   uint32_t nTriangles, nVertices;
-  //GLuint dl,dl_light;
   Vec3D center;
   float rad;
   int32_t num;
@@ -33,7 +33,7 @@ class WMOGroup {
   int32_t nDoodads, nBatches;
   int16_t *ddr;
   Liquid *lq;
-  std::vector< std::pair<GLuint, int> > lists;
+  std::vector< std::pair<OpenGL::CallList*, bool> > _lists;
 public:
   Vec3D BoundingBoxMin;
   Vec3D BoundingBoxMax;
@@ -73,7 +73,7 @@ struct WMOMaterial {
   uint32_t texture1; // this is the first texture object. of course only in RAM. leave this alone. :D
   uint32_t texture2; // this is the second texture object.
   // read up to here -_-
-  GLuint tex;
+  OpenGL::Texture* _texture;
 };
 
 struct WMOLight {
@@ -130,8 +130,10 @@ class WMO : public ManagedItem
 {
 public:
   bool draw_group_boundingboxes;
+  
+  const std::string& filename() const;
 
-  std::string WMOName;
+  //std::string WMOName;
   std::string _filename;
   WMOGroup *groups;
   unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
@@ -150,7 +152,7 @@ public:
   std::vector<WMODoodadSet> doodadsets;
 
   Model *skybox;
-  int sbid;
+  std::string skyboxFilename;
 
   explicit WMO(const std::string& name);
   ~WMO();
@@ -160,19 +162,17 @@ public:
   void drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const;
 };
 
-typedef unsigned int WMOIDTYPE;
-
-class WMOManager: public Manager<WMOIDTYPE,WMO>
+class WMOManager
 {
-private:
-  static int baseid;
 public:
-  static WMOIDTYPE add(std::string name);
+  static void delbyname( std::string name );
+  static WMO* add(std::string name);
   
-  static int nextID()
-  {
-    return baseid++;
-  }
+  static void report();
+
+private:
+  typedef std::map<std::string, WMO*> mapType;
+  static mapType items;
 };
 
 

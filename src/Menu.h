@@ -36,6 +36,23 @@ struct BookmarkEntry
 
 class Menu : public AppState
 {
+public:
+  Menu();
+  ~Menu();
+
+  void tick( float t, float dt );
+  void display( float t, float dt );
+
+  void keypressed( SDL_KeyboardEvent *e );
+  void mouseclick( SDL_MouseButtonEvent *e );
+  
+  //! \todo Make private when new buttons are implemented.
+  void loadMap( int mapID );
+  void loadBookmark( int bookmarkID );
+  
+  //! \brief Enter the the map on the given location.
+  void enterMapAt( Vec3D pos, bool autoHeight = true, float av = -30.0f, float ah = -90.0f );
+  
 private:
   UIFrame* mGUIFrame;
   UIStatusBar* mGUIStatusbar;
@@ -55,24 +72,6 @@ private:
   void randBackground();
   
   void resizewindow();
-
-public:
-
-  Menu();
-  ~Menu();
-
-  void tick( float t, float dt );
-  void display( float t, float dt );
-
-  void keypressed( SDL_KeyboardEvent *e );
-  void mouseclick( SDL_MouseButtonEvent *e );
-  
-  //! \todo Make private when new buttons are implemented.
-  void loadMap( int mapID );
-  void loadBookmark( int bookmarkID );
-  
-  //! \brief Enter the the map on the given location.
-  void enterMapAt( Vec3D pos, bool autoHeight = true, float av = -30.0f, float ah = -90.0f );
 };
 
 #endif

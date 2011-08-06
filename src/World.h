@@ -13,7 +13,9 @@
 namespace OpenGL
 {
   class CallList;
+  class Texture;
 };
+
 class brush;
 class MapTile;
 
@@ -191,7 +193,7 @@ public:
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);  
   void blurTerrain(float x, float z, float remain, float radius, int BrushType);
-  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, int texture);
+  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture);
   void eraseTextures(float x, float z);
   void addHole( float x, float z );
   void addModel( nameEntry entry, Vec3D newPos);

@@ -72,6 +72,17 @@ Menu::Menu()
   randBackground();
 }
 
+//! \todo Add TBC and WOTLK.
+//! \todo Use std::array / boost::array.
+const std::string uiModels[] = { "BloodElf", "Deathknight", "Draenei", "Dwarf", "Human", "MainMenu", "NightElf", "Orc", "Scourge", "Tauren" };
+
+std::string buildModelPath( size_t index )
+{
+  assert( index < sizeof( uiModels ) / sizeof( const std::string ) );
+  
+  return "Interface\\Glues\\Models\\UI_" + uiModels[index] + "\\UI_" + uiModels[index] + ".m2";
+}
+
 Menu::~Menu()
 {
   delete mGUIFrame;
@@ -80,46 +91,31 @@ Menu::~Menu()
   delete gWorld;
   gWorld = NULL;
   
-  ModelManager::delbyname( mBackgroundModel->name() );
-  mBackgroundModel = NULL;
+  if( mBackgroundModel )
+  {
+    ModelManager::delbyname( buildModelPath( mLastBackgroundId ) );
+    mBackgroundModel = NULL;
+  }
 }
 
 void Menu::randBackground()
 {
-  // STEFF:TODO first need to fix m2 bg loading.
-  // Noggit shows no ground if the deactivated gbs loaded
-  // Alphamapping?
-  std::vector<std::string> ui;
-  //ui.push_back( "BloodElf" );    // No
-  //ui.push_back( "Deathknight" );  // No
-  //ui.push_back( "Draenei" );    // No
-  ui.push_back( "Dwarf" );      // Yes
-  //ui.push_back( "Human" );      // No
-  ui.push_back( "MainMenu" );      // Yes
-  //ui.push_back( "NightElf" );    // No
-  //ui.push_back( "Orc" );      // No
-  //ui.push_back( "Scourge" );    // No
-  //ui.push_back( "Tauren" );      // No
+  if( mBackgroundModel )
+  {
+    ModelManager::delbyname( buildModelPath( mLastBackgroundId ) );
+    mBackgroundModel = NULL;
+  }
 
   int randnum;
   do
   {
-    randnum = misc::randint( 0, ui.size() - 1 );
+    randnum = misc::randint( 0, sizeof( uiModels ) / sizeof( const std::string ) - 1 );
   }
   while( randnum == mLastBackgroundId );
 
   mLastBackgroundId = randnum;
-
-  std::stringstream filename;
-  filename << "Interface\\Glues\\Models\\UI_" << ui[randnum] << "\\UI_" << ui[randnum] << ".m2";
   
-  if( mBackgroundModel )
-  {
-    ModelManager::delbyname( mBackgroundModel->name() );
-    mBackgroundModel = NULL;
-  }
-  
-  mBackgroundModel = ModelManager::item( ModelManager::add( filename.str() ) );
+  mBackgroundModel = ModelManager::add( buildModelPath( randnum ) );
   mBackgroundModel->mPerInstanceAnimation = true;
 }
 
@@ -168,9 +164,8 @@ void Menu::display(float /*t*/, float /*dt*/)
     glEnable( GL_COLOR_MATERIAL );
     glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
     glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-    for( int i = 0; i < 8; ++i ) 
+    for(OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light )
     {
-      GLuint light = GL_LIGHT0 + i;
       glLightf( light, GL_CONSTANT_ATTENUATION, 0.0f );
       glLightf( light, GL_LINEAR_ATTENUATION, 0.7f );
       glLightf( light, GL_QUADRATIC_ATTENUATION, 0.03f );

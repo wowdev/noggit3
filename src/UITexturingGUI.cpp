@@ -41,13 +41,13 @@ std::vector<std::string> gActiveFilenameFilters;
 std::vector<std::string> gActiveDirectoryFilters;
 std::vector<std::string> textureNames;
 std::vector<std::string> tilesetDirectories;
-std::vector<GLuint> gTexturesInList;
+std::vector<OpenGL::Texture*> gTexturesInList;
 
 //Texture Palette Window
 UICloseWindow  *windowTexturePalette;
 
 UITexture  *curTextures[64];
-GLuint gTexturesInPage[64];
+OpenGL::Texture* gTexturesInPage[64];
 UIText *gPageNumber;
 
 //Selected Texture Window
@@ -156,18 +156,7 @@ int gCurrentPage;
 
 void showPage( int pPage )
 {
-  GLuint lSelectedTexture = 0;
-
-  if( UITexturingGUI::getSelectedTexture() )
-  {
-    for( std::map<GLuint, OpenGL::Texture*>::iterator i = TextureManager::begin(); i != TextureManager::end(); ++i )
-    {
-      if( i->second->name() == UITexturingGUI::getSelectedTexture()->name() )
-      {
-        lSelectedTexture = i->first;
-      }
-    }
-  }
+  OpenGL::Texture* lSelectedTexture = UITexturingGUI::getSelectedTexture();
   
   if( gPageNumber )
   {
@@ -179,7 +168,7 @@ void showPage( int pPage )
   int i = 0;
   const unsigned int lIndex = pal_cols * pal_rows * pPage;
   
-  for( std::vector<GLuint>::iterator lPageStart = gTexturesInList.begin() + ( lIndex > gTexturesInList.size() ? 0 : lIndex ); lPageStart != gTexturesInList.end(); lPageStart++ )
+  for( std::vector<OpenGL::Texture*>::iterator lPageStart = gTexturesInList.begin() + ( lIndex > gTexturesInList.size() ? 0 : lIndex ); lPageStart != gTexturesInList.end(); lPageStart++ )
   {
     curTextures[i]->hidden = false;
     curTextures[i]->setTexture( *lPageStart );
@@ -202,13 +191,7 @@ void showPage( int pPage )
 void updateTextures()
 {
   gTexturesInList.clear();
-  for( std::map<GLuint, OpenGL::Texture*>::iterator t = TextureManager::begin(); t != TextureManager::end(); t++ )
-  {
-    if( TextureInPalette( t->second->name() ) )
-    {
-      gTexturesInList.push_back( t->first );
-    }
-  }
+  gTexturesInList = TextureManager::getAllTexturesMatching( TextureInPalette );
   showPage( gCurrentPage );
 }
 
@@ -222,11 +205,11 @@ void changePage( UIFrame*, int direction )
 void UITexturingGUI::updateSelectedTexture()
 {
   if( textureSelected )
-    textureSelected->setTexture( UITexturingGUI::getSelectedTexture()->name() );
+    textureSelected->setTexture( UITexturingGUI::getSelectedTexture() );
   if( textSelectedTexture )
-    textSelectedTexture->setText( UITexturingGUI::getSelectedTexture()->name() );
+    textSelectedTexture->setText( UITexturingGUI::getSelectedTexture()->filename() );
   if( textGui )
-    textGui->guiToolbar->current_texture->setTexture( UITexturingGUI::getSelectedTexture()->name() );
+    textGui->guiToolbar->current_texture->setTexture( UITexturingGUI::getSelectedTexture() );
 }
 
 void texturePaletteClick( UIFrame* /*f*/, int id )
@@ -234,7 +217,7 @@ void texturePaletteClick( UIFrame* /*f*/, int id )
   if( curTextures[id]->hidden )
     return;
   
-  UITexturingGUI::setSelectedTexture( TextureManager::find( gTexturesInPage[id] )->second );
+  UITexturingGUI::setSelectedTexture( gTexturesInPage[id] );
   
   if( UITexturingGUI::getSelectedTexture() )
   {
@@ -258,7 +241,8 @@ void LoadTileset( UIFrame* /*button*/, int id )
   {
     if( it->find( tilesetDirectories[id] ) != std::string::npos )
     {
-      TextureManager::add( *it );
+      //! \todo Actually save the texture returned here and do no longer iterate over all cached textures.
+      TextureManager::newTexture( *it );
     }
   }
   updateTextures();
@@ -393,7 +377,7 @@ UIFrame* UITexturingGUI::createSelectedTexture()
 {
   windowSelectedTexture = new UICloseWindow( video.xres - 148.0f - 128.0f, video.yres - 320.0f, 274.0f, 288.0f, "Current Texture", true );
 
-  std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->name() : "tileset\\generic\\black.blp";
+  std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->filename() : "tileset\\generic\\black.blp";
 
   textureSelected = new UITexture( 9.0f, 24.0f, 256.0f, 256.0f, lTexture );
   windowSelectedTexture->addChild( textureSelected );

@@ -9,7 +9,7 @@ class RibbonEmitter;
 
 #include "Animated.h"
 #include "Model.h"
-#include "Video.h" // GLuint
+#include "Video.h"
 
 struct Particle {
   Vec3D pos, speed, down, origin, dir;
@@ -54,7 +54,7 @@ class ParticleSystem {
   ParticleEmitter *emitter;
   float mid, slowdown, rotation;
   Vec3D pos;
-  GLuint texture;
+  OpenGL::Texture* _texture;
   ParticleList particles;
   int blend,order,type;
   int manim,mtime;
@@ -87,7 +87,7 @@ public:
     
     model = 0;
     parent = 0;
-    texture = 0;
+    _texture = NULL;
     
     slowdown = 0;
     rotation = 0;
@@ -130,7 +130,7 @@ class RibbonEmitter {
   Vec4D tcolor;
   float tabove, tbelow;
 
-  GLuint texture;
+  OpenGL::Texture* _texture;
 
   std::list<RibbonSegment> segs;
 

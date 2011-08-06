@@ -460,7 +460,7 @@ void InsertObject( UIFrame* /*button*/, int id )
       if( !MPQFile::exists(lastModel) )
         LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
       else
-        gWorld->addM2( ModelManager::item( ModelManager::add( lastModel ) ), selectionPosition );
+        gWorld->addM2( ModelManager::add( lastModel ), selectionPosition );
   }
   else if(id==15)
   {  
@@ -469,7 +469,7 @@ void InsertObject( UIFrame* /*button*/, int id )
       if( !MPQFile::exists(lastWMO) )
         LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
       else
-        gWorld->addWMO( WMOManager::item( WMOManager::add( lastWMO ) ), selectionPosition );
+        gWorld->addWMO( WMOManager::add( lastWMO ), selectionPosition );
   }
   else
   {
@@ -483,7 +483,7 @@ void InsertObject( UIFrame* /*button*/, int id )
         continue;
       }
     
-      gWorld->addWMO( WMOManager::item( WMOManager::add( *it ) ), selectionPosition );
+      gWorld->addWMO( WMOManager::add( *it ), selectionPosition );
     }
 
     for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
@@ -496,7 +496,7 @@ void InsertObject( UIFrame* /*button*/, int id )
         continue;
       }
       
-      gWorld->addM2( ModelManager::item( ModelManager::add( *it ) ), selectionPosition );
+      gWorld->addM2( ModelManager::add( *it ), selectionPosition );
     }
   }
   //! \todo Memoryleak: These models will never get deleted.
@@ -1082,9 +1082,9 @@ void MapView::tick( float t, float dt )
               }
 
               if( mViewMode == eViewMode_3D )
-                gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( UITexturingGUI::getSelectedTexture()->name() ) );
+                gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
               else if( mViewMode == eViewMode_2D )
-                gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), TextureManager::add( UITexturingGUI::getSelectedTexture()->name() ) );
+                gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
             }
           }          
         break;
@@ -1237,22 +1237,30 @@ void MapView::displayViewMode_Help( float /*t*/, float /*dt*/ )
   //! \todo  Make this a window instead of a view. Why should you do it as a view? ._.
   video.clearScreen();
   video.set2D();
-  glEnable(GL_TEXTURE_2D);
-    glColor4f(0.7f,0.7f,0.7f,0.7f);
-    glBindTexture(GL_TEXTURE_2D,TextureManager::add("DUNGEONS\\TEXTURES\\BRIAN\\CLASSICALELFRUINS\\AZR_WINDOW01.BLP") );
-    glBegin(GL_QUADS);    
-      glTexCoord2f(0.0f,0.0f);
-      glVertex2i(0.0f,0.0f);
-      glTexCoord2f(1.0f,0.0f);
-      glVertex2i(video.xres,0.0f);
-      glTexCoord2f(1.0f,1.0f);
-      glVertex2i(video.xres,video.yres);
-      glTexCoord2f(0.0f,1.0f);
-      glVertex2i(0.0f,video.yres);
-    glEnd();
-  glDisable(GL_TEXTURE_2D);
   
+  OpenGL::Texture::enableTexture();
 
+  glColor4f(0.7f,0.7f,0.7f,0.7f);
+
+  //! \todo Do not allocate the texture again and again all the time..
+  OpenGL::Texture* background = TextureManager::newTexture( "DUNGEONS\\TEXTURES\\BRIAN\\CLASSICALELFRUINS\\AZR_WINDOW01.BLP" );
+  background->bind();
+  
+  glBegin( GL_QUADS );    
+  glTexCoord2f( 0.0f, 0.0f );
+  glVertex2i( 0.0f, 0.0f );
+  glTexCoord2f( 1.0f, 0.0f );
+  glVertex2i( video.xres, 0.0f );
+  glTexCoord2f( 1.0f, 1.0f );
+  glVertex2i( video.xres, video.yres );
+  glTexCoord2f( 0.0f, 1.0f );
+  glVertex2i( 0.0f, video.yres );
+  glEnd();
+  
+  delete background;
+  
+  OpenGL::Texture::disableTexture();
+  
   freetype::shprint( *arial16, 60.0f, 40.0f, 
   "Basic controles\n\n"          
     "Left mouse button moves the camera\n"
@@ -1396,7 +1404,8 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
     glActiveTexture(GL_TEXTURE0);
     glEnable(GL_TEXTURE_2D);
 
-    glBindTexture(GL_TEXTURE_2D, textureBrush.getTexture());
+    textureBrush.getTexture()->bind();
+    
     const float tRadius = textureBrush.getRadius()/CHUNKSIZE;// *gWorld->zoom;
     glBegin(GL_QUADS);
       glTexCoord2f(0.0f,0.0f);

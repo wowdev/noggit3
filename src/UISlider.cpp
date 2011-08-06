@@ -90,7 +90,7 @@ void UISlider::render() const
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
   
-  texture->render();
+  texture->bind();
   
   const float height_plus = height + 4.0f;
   const float height_minus = height - 4.0f;
@@ -201,7 +201,7 @@ void UISlider::render() const
 
   glPopMatrix();
   
-  sliderTexture->render();
+  sliderTexture->bind();
   
   const float sliderpos_x = width * value;
   const float sliderpos_y = height / 2.0f;

@@ -11,7 +11,7 @@
 class BLSShader
 {
 private:
-  GLuint mShader;
+  OpenGL::Shader mShader;
   bool mOkay;
   int mProgramType;
   
@@ -34,7 +34,7 @@ void initShaders();
 void reloadShaders();
 
 class Shader {
-  GLuint id;
+  OpenGL::Shader id;
   GLenum target;
 public:
   bool ok;
