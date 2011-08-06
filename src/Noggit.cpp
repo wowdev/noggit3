@@ -244,7 +244,6 @@ int main( int argc, char *argv[] )
   archiveNames.push_back( "patch.MPQ" );
   archiveNames.push_back( "patch-{number}.MPQ" );
   archiveNames.push_back( "patch-{character}.MPQ" );
-  archiveNames.push_back( "development.MPQ" );
   
   //archiveNames.push_back( "{locale}/backup-{locale}.MPQ" );  
   //archiveNames.push_back( "{locale}/base-{locale}.MPQ" );
@@ -257,6 +256,8 @@ int main( int argc, char *argv[] )
   archiveNames.push_back( "{locale}/patch-{locale}.MPQ" );
   archiveNames.push_back( "{locale}/patch-{locale}-{number}.MPQ" );
   archiveNames.push_back( "{locale}/patch-{locale}-{character}.MPQ" );
+  
+  archiveNames.push_back( "development.MPQ" );
   
   const char * locales[] = { "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "zhTW", "esES", "esMX", "ruRU" };
   const char * locale = "****";

@@ -40,6 +40,10 @@ MPQArchive::MPQArchive( const std::string& filename, bool doListfile )
     LogError << "Error opening archive: " << filename << "\n";
     return;
   }
+  else
+  {
+    LogDebug << "Opened archive " << filename << "\n";
+  }
 
   finished = !doListfile;
 }
