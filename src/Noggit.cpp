@@ -35,6 +35,9 @@
 #include "revision.h"
 #include "Settings.h"    // In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
 #include "Video.h"
+#include "TextureManager.h" // TextureManager::report()
+#include "WMO.h" // WMOManager::report()
+#include "ModelManager.h" // ModelManager::report()
 //#include "shaders.h"
 
 std::vector<AppState*> gStates;
@@ -241,6 +244,7 @@ int main( int argc, char *argv[] )
   archiveNames.push_back( "patch.MPQ" );
   archiveNames.push_back( "patch-{number}.MPQ" );
   archiveNames.push_back( "patch-{character}.MPQ" );
+  archiveNames.push_back( "development.MPQ" );
   
   //archiveNames.push_back( "{locale}/backup-{locale}.MPQ" );  
   //archiveNames.push_back( "{locale}/base-{locale}.MPQ" );
@@ -300,7 +304,7 @@ int main( int argc, char *argv[] )
       {
         path.replace( location, 1, std::string( &j, 1 ) );
         if( FileExists( path ) )
-          gAsyncLoader->addObject( new MPQArchive( path, true ) );
+          MPQArchive::loadMPQ( path, true );
       }
     }
     else if( path.find( "{character}" ) != std::string::npos  )
@@ -311,12 +315,12 @@ int main( int argc, char *argv[] )
       {
         path.replace( location, 1, std::string( &c, 1 ) );
         if( FileExists( path ) )
-          gAsyncLoader->addObject( new MPQArchive( path, true ) );
+          MPQArchive::loadMPQ( path, true );
       }
     }
     else
       if( FileExists( path ) )
-        gAsyncLoader->addObject( new MPQArchive( path, true ) );
+        MPQArchive::loadMPQ( path, true );
   }
   // listfiles are not available straight away! They are async! Do not rely on anything at this point!
   
@@ -455,14 +459,14 @@ int main( int argc, char *argv[] )
   
   video.close();
   
+  TextureManager::report();
+  ModelManager::report();
+  WMOManager::report();
+  
   gAsyncLoader->stop();
   gAsyncLoader->join();
   
-  for(std::vector<MPQArchive*>::iterator it=gOpenArchives.begin(); it!=gOpenArchives.end();++it)
-  {
-    delete *it;
-  }
-  gOpenArchives.clear();//unload MPQs
+  MPQArchive::unloadAllMPQs();
   gListfile.clear();//also unload listfiles
   
   delete arialn13;

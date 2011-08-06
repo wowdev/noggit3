@@ -102,7 +102,7 @@ void UIWindow::render() const
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
   
-  texture->render();
+  texture->bind();
 
   //Draw Bottom left Corner First
   glBegin( GL_TRIANGLE_STRIP );  

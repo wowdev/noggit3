@@ -203,7 +203,7 @@ Skies::Skies( unsigned int mapid )
   // smaller skies will have precedence when calculating weights to achieve smooth transitions etc.
   std::sort( skies.begin(), skies.end() );
   
-  stars = ModelManager::item( ModelManager::add( "Environments\\Stars\\Stars.mdx" ) );
+  stars = ModelManager::add( "Environments\\Stars\\Stars.mdx" );
 }
 
 Skies::~Skies()

@@ -1,6 +1,8 @@
+#include "Brush.h"
+
 #include <cmath>
 
-#include "Brush.h"
+#include "Video.h" // OpenGL::Texture
 
 void brush::init()
 {
@@ -8,7 +10,7 @@ void brush::init()
   hardness = 0.5f;
   iradius = hardness * radius;
   oradius = radius - iradius;
-  glGenTextures( 1, &texID );
+  _texture = new OpenGL::Texture( );
   GenerateTexture();
 }
 
@@ -37,7 +39,7 @@ void brush::GenerateTexture()
     }
     y += change;
   }
-  glBindTexture( GL_TEXTURE_2D, texID );
+  _texture->bind();
   glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 256, 256, 0, GL_ALPHA, GL_UNSIGNED_BYTE, tex );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -74,9 +76,9 @@ float brush::getValue( float dist )
     return 1.0f;  
   return( 1.0f - ( dist - iradius ) / oradius );
 }
-GLuint brush::getTexture()
+OpenGL::Texture* brush::getTexture()
 { 
-  return texID; 
+  return _texture; 
 }
 bool brush::needUpdate()
 { 

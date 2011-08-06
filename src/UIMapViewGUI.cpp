@@ -61,7 +61,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview) : theMapview( setMapview )
   this->guiappInfo->setText( appinfoText.str() );
   this->tileFrames->addChild(this->guiappInfo);
 
-  this->TexturePicker = new UITexturePicker(video.xres / 2 - 100.0f,video.yres / 2 - 100.0f,490.0f,150.0f,this);
+  this->TexturePicker = new UITexturePicker(video.xres / 2 - 100.0f, video.yres / 2 - 100.0f,490.0f, 150.0f );
   this->TexturePicker->hidden = true;
   this->TexturePicker->movable = true;
   this->tileFrames->addChild( this->TexturePicker);
@@ -127,7 +127,7 @@ void UIMapViewGUI::render( bool tilemode )
         
         for( unsigned int j = 0; j < std::min( lSelection->data.model->model->header.nTextures, 6U ); j++ )
         {
-          detailInfo << "\n " << ( j + 1 ) << ": " << TextureManager::item( lSelection->data.model->model->textures[j] )->name();
+          detailInfo << "\n " << ( j + 1 ) << ": " << lSelection->data.model->model->_textures[j]->filename();
         }
         if( lSelection->data.model->model->header.nTextures > 25 )
         {

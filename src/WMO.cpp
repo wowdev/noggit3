@@ -10,7 +10,7 @@
 #include <iostream> 
 
 #include "Liquid.h"
-#include "Log.h"
+#include "Log.h" // LogDebug
 #include "ModelManager.h" // ModelManager
 #include "Shaders.h"
 #include "TextureManager.h" // TextureManager, Texture
@@ -19,7 +19,7 @@
 void WMOHighlight( Vec4D color )
 {
   glDisable( GL_ALPHA_TEST );
-   glEnable( GL_BLEND );
+  glEnable( GL_BLEND );
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glDisable( GL_CULL_FACE );
   glActiveTexture( GL_TEXTURE0 );
@@ -42,13 +42,18 @@ void WMOUnhighlight()
   glDepthMask( GL_TRUE );
 }
 
-WMO::WMO(const std::string& filename)
-: ManagedItem( filename )
-, _filename( filename )
+const std::string& WMO::filename() const
 {
-  MPQFile f(filename);
+  return _filename;
+}
+
+WMO::WMO( const std::string& filenameArg )
+: ManagedItem( )
+, _filename( filenameArg )
+{
+  MPQFile f( _filename );
   if (f.isEof()) {
-    LogError << "Error loading WMO \"" << filename << "\"." << std::endl;
+    LogError << "Error loading WMO \"" << _filename << "\"." << std::endl;
     return;
   }
 
@@ -105,7 +110,7 @@ WMO::WMO(const std::string& filename)
 
         std::string texpath(texbuf+m->nameStart);
 
-        m->tex = TextureManager::add(texpath);
+        m->_texture = TextureManager::newTexture(texpath);
         textures.push_back(texpath);
       }
     }
@@ -134,15 +139,6 @@ WMO::WMO(const std::string& filename)
 
         ddnames = reinterpret_cast<char*>( f.getPointer() );
 
-        char *p=ddnames,*end=p+size;
-        while (p<end) {
-          std::string path(p);
-          p+=strlen(p)+1;
-          while ((p<end) && (*p==0)) p++;
-
-          ModelManager::add(path);
-          models.push_back(path);
-        }
         f.seekRelative(size);
       }
     }
@@ -158,7 +154,7 @@ WMO::WMO(const std::string& filename)
       for (unsigned int i=0; i<nModels; ++i) {
         int ofs;
         f.read(&ofs,4);
-        Model *m = ModelManager::item( ddnames + ofs );
+        Model *m = ModelManager::add( ddnames + ofs );
         ModelInstance mi;
         mi.init2(m,&f);
         modelis.push_back(mi);
@@ -176,7 +172,8 @@ WMO::WMO(const std::string& filename)
 
           if( MPQFile::exists( path ) )
           {
-            skybox = ModelManager::item( path );
+            skybox = ModelManager::add( path );
+            skyboxFilename = path;
           }
           else
           {
@@ -231,7 +228,7 @@ WMO::WMO(const std::string& filename)
 
 WMO::~WMO()
 {
-  LogDebug << "Unloading WMO \"" << name() << "\"." << std::endl;
+  LogDebug << "Unloading WMO \"" << filename() << "\"." << std::endl;
   if(groups)
   {
     delete[] groups;
@@ -242,10 +239,6 @@ WMO::~WMO()
     TextureManager::delbyname(*it);
   }
 
-  for (std::vector<std::string>::iterator it = models.begin(); it != models.end(); ++it) {
-    ModelManager::delbyname(*it);
-  }
-
   if( mat )
   {
     delete[] mat;
@@ -254,7 +247,7 @@ WMO::~WMO()
   
   if (skybox) {
     //delete skybox;
-    ModelManager::del(sbid);
+    ModelManager::delbyname(skyboxFilename);
     skybox = NULL;
   }
 }
@@ -710,7 +703,7 @@ void WMOGroup::initDisplayList()
 	std::stringstream curNum;
 	curNum << "_" << std::setw(3) << std::setfill('0') << num;
 	
-	std::string fname = wmo->name(); 
+	std::string fname = wmo->filename(); 
 	fname.insert( fname.find( ".wmo" ), curNum.str() );
  
 	MPQFile gf(fname);
@@ -831,9 +824,6 @@ void WMOGroup::initDisplayList()
   //glDisable(GL_BLEND);
   //glColor4f(1,1,1,1);
 
-  // generate lists for each batch individually instead
-  GLuint listbase = glGenLists(nBatches);
-
   /*
   float xr=0,xg=0,xb=0;
   if (flags & 0x0040) xr = 1;
@@ -842,26 +832,25 @@ void WMOGroup::initDisplayList()
   glColor4f(xr,xg,xb,1);
   */
 
+  // generate lists for each batch individually instead
+  _lists.resize( nBatches );
+
   // assume that texturing is on, for unit 1
 
-  for (int b=0; b<nBatches; b++) {
-
-    GLuint list = listbase + b;
-
+  for (int b=0; b<nBatches; b++)
+  {
     WMOBatch *batch = &batches[b];
     WMOMaterial *mat = &wmo->mat[batch->texture];
 
     bool overbright = ((mat->flags & 0x10) && !hascv);
     bool spec_shader = (mat->specular && !hascv && !overbright);
+    
+    _lists[b].first = new OpenGL::CallList();
+    _lists[b].second = spec_shader;
+    
+    _lists[b].first->startRecording( GL_COMPILE );
 
-    std::pair<GLuint, int> currentList;
-    currentList.first = list;
-    currentList.second = spec_shader ? 1 : 0;
-
-    glNewList(list, GL_COMPILE);
-
-        // setup texture
-    glBindTexture(GL_TEXTURE_2D, mat->tex);
+    mat->_texture->bind();
 
     bool atest = (mat->transparent) != 0;
 
@@ -882,14 +871,6 @@ void WMOGroup::initDisplayList()
       Vec4D nospec(0,0,0,1);
       glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
     }
-
-    /*
-    float fr,fg,fb;
-    fr = rand()/(float)RAND_MAX;
-    fg = rand()/(float)RAND_MAX;
-    fb = rand()/(float)RAND_MAX;
-    glColor4f(fr,fg,fb,1);
-    */
 
     if (overbright) {
       //! \todo  use emissive color from the WMO Material instead of 1,1,1,1
@@ -919,17 +900,9 @@ void WMOGroup::initDisplayList()
       glDisable(GL_ALPHA_TEST);
     }
 
-    glEndList();
-    lists.push_back(currentList);
+    _lists[b].first->endRecording();
   }
-
-  //glColor4f(1,1,1,1);
-  //glEnable(GL_CULL_FACE);
-
-  //glEndList();
-
-  gf.close();
-  // hmm
+  
   indoor = false;
 }
 
@@ -1003,15 +976,15 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
   glColor4f(1,1,1,1);
   for (int i=0; i<nBatches; ++i) 
   {
-    if( video.mSupportShaders && lists[i].second && wmoShader)
+    if( video.mSupportShaders && _lists[i].second && wmoShader)
     {
       wmoShader->bind();
-      glCallList( lists[i].first );
+      _lists[i].first->render();
       wmoShader->unbind();
     }
     else
     {
-      glCallList( lists[i].first );
+      _lists[i].first->render();
     }
   }
 
@@ -1147,7 +1120,11 @@ WMOGroup::~WMOGroup()
 {  
   //if (dl) glDeleteLists(dl, 1);
   //if (dl_light) glDeleteLists(dl_light, 1);
-  if (nBatches && lists.size()) glDeleteLists(lists[0].first, nBatches);
+  for( std::vector< std::pair<OpenGL::CallList*, bool> >::iterator it = _lists.begin(); it != _lists.end(); ++it )
+  {
+    delete it->first;
+  }
+  _lists.clear();
 
   if (nDoodads)
   {
@@ -1189,30 +1166,47 @@ void WMOFog::setup()
     glDisable(GL_FOG);
 }
 
-int WMOManager::baseid = 0;
+WMOManager::mapType WMOManager::items;
 
-#ifdef WIN32
-template <> std::map<std::string, WMOIDTYPE> Manager<WMOIDTYPE,WMO>::names;
-template <> std::map<WMOIDTYPE, WMO*> Manager<WMOIDTYPE,WMO>::items;
-#else
-template <class IDTYPE,class MANAGEDITEM> std::map<std::string, WMOIDTYPE> Manager<WMOIDTYPE,WMO>::names;
-template <class IDTYPE,class MANAGEDITEM> std::map<WMOIDTYPE, WMO*> Manager<WMOIDTYPE,WMO>::items;
-#endif
-
-WMOIDTYPE WMOManager::add( std::string name )
+void WMOManager::report()
 {
-  int id;
-  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-  if( names.find( name ) != names.end() ) 
+  std::string output = "Still in the WMO manager:\n";
+  for( mapType::iterator t = items.begin(); t != items.end(); ++t )
   {
-    id = names[name];
-    items[id]->addReference();
-    return id;
+    output += "- " + t->first + "\n";
+  }
+  LogDebug << output;
+}
+
+WMO* WMOManager::add( std::string name )
+{
+  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+  
+  if( items.find( name ) == items.end() )
+  {
+    items[name] = new WMO( name );
+    //! \todo Uncomment this, if loading is threaded.
+    //items[name]->finishLoading();
+    //gAsyncLoader->addObject( items[name] );
   }
 
-  // load new
-  WMO *wmo = new WMO(name);
-  id = nextID();
-    do_add(name, id, wmo);
-    return id;
+  items[name]->addReference();
+  return items[name];
 }
+
+void WMOManager::delbyname( std::string name )
+{
+  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+  
+  if( items.find( name ) != items.end() )
+  {
+    items[name]->removeReference();
+    
+    if( items[name]->hasNoReferences() )
+    {
+      delete items[name];
+      items.erase( items.find( name ) );
+    }
+  }
+}
+

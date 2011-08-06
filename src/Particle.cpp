@@ -56,7 +56,7 @@ void ParticleSystem::init(const MPQFile& f, const ModelParticleEmitterDef &mta, 
   slowdown = mta.p.slowdown;
   rotation = mta.p.rotation;
   pos = fixCoordSystem(mta.pos);
-  texture = model->textures[mta.texture];
+  _texture = model->_textures[mta.texture];
   blend = mta.blend;
   rows = mta.rows;
   cols = mta.cols;
@@ -255,7 +255,7 @@ void ParticleSystem::draw()
   //glDepthMask(GL_FALSE);
 
 //  glPushName(texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
+  _texture->bind();
 
   /*
    if (supportPointSprites && rows==1 && cols==1) {
@@ -472,7 +472,7 @@ void ParticleSystem::drawHighlight()
   glDepthMask(GL_FALSE);
 
 //  glPushName(texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
+  _texture->bind();
 
   Matrix mbb;
   mbb.unit();
@@ -836,7 +836,7 @@ void RibbonEmitter::init(const MPQFile &f, ModelRibbonEmitterDef &mta, int *glob
   parent = model->bones + mta.bone;
   uint32_t *texlist = reinterpret_cast<uint32_t*>(f.getBuffer() + mta.ofsTextures);
   // just use the first texture for now; most models I've checked only had one
-  texture = model->textures[texlist[0]];
+  _texture = model->_textures[texlist[0]];
 
   tpos = pos = fixCoordSystem(mta.pos);
 
@@ -922,7 +922,7 @@ void RibbonEmitter::draw()
   */                              
 
 //  glPushName(texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
+  _texture->bind();
   glEnable(GL_BLEND);
   glDisable(GL_LIGHTING);
   glDisable(GL_ALPHA_TEST);

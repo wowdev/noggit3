@@ -2,16 +2,8 @@
 
 #include <string>
 
-#include "TextureManager.h" // TextureManager, Texture
-
-/*UITexture::UITexture( float xPos, float yPos, float w, float h, GLuint tex )
-: UIFrame( xPos, yPos, w, h )
-, texture( tex )
-, highlight( false )
-, clickFunc( NULL )
-, id( 0 )
-{
-}*/
+#include "TextureManager.h" // TextureManager
+#include "Video.h" // Texture
 
 UITexture::UITexture( float xPos, float yPos, float w, float h, const std::string& tex )
 : UIFrame( xPos, yPos, w, h )
@@ -25,13 +17,8 @@ UITexture::UITexture( float xPos, float yPos, float w, float h, const std::strin
 void UITexture::setTexture( OpenGL::Texture* tex )
 {
   //! \todo Free current texture.
+  //! \todo New reference?
   texture = tex;
-}
-
-void UITexture::setTexture( GLuint tex )
-{
-  //! \todo Free current texture.
-  texture = TextureManager::item( tex );
 }
 
 void UITexture::setTexture( const std::string& tex )
@@ -51,7 +38,7 @@ void UITexture::render() const
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
   
-  texture->render();
+  texture->bind();
 
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.0f, 0.0f );

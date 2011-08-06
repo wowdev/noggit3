@@ -14,7 +14,6 @@
 #include "Misc.h"
 #include "ModelInstance.h" // ModelInstance
 #include "ModelManager.h" // ModelManager
-#include "TextureManager.h" // TextureManager, Texture
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
 
@@ -401,44 +400,20 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
   
   // - Load textures -------------------------------------
   
-  for( std::vector<std::string>::iterator it = mTextureFilenames.begin(); it != mTextureFilenames.end(); ++it )
-  {
-    std::string lTexture = *it;
-    //! \todo  Find a different way to do this.
-    /*
-     if( video.mSupportShaders )
-     {
-     std::string lTemp = lTexture;
-     lTemp.insert( lTemp.length() - 4, "_s" );
-     if( MPQFile::exists( lTemp ) )
-     lTexture = lTemp;
-     }
-     */
-    TextureManager::add( lTexture );
-  }
+  //! \note We no longer pre load textures but the chunks themselves do.
   
   // - Load WMOs -----------------------------------------
   
-  for( std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); ++it )
-  {
-    WMOManager::add( *it );
-  }
-  
   for( std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it )
   {
-    gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( WMOManager::item( mWMOFilenames[it->nameID] ), &(*it) ) ) );
+    gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( WMOManager::add( mWMOFilenames[it->nameID] ), &(*it) ) ) );
   }
   
   // - Load M2s ------------------------------------------
   
-  for( std::vector<std::string>::iterator it = mModelFilenames.begin(); it != mModelFilenames.end(); ++it )
-  {
-    ModelManager::add( *it );
-  }
-  
   for( std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
   {
-    gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( ModelManager::item( mModelFilenames[it->nameID] ), &(*it) ) ) );
+    gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( ModelManager::add( mModelFilenames[it->nameID] ), &(*it) ) ) );
   }
   
   // - Load chunks ---------------------------------------
@@ -472,10 +447,6 @@ MapTile::~MapTile()
     }
   }
 
-  for( std::vector<std::string>::iterator it = mTextureFilenames.begin(); it != mTextureFilenames.end(); ++it )
-  {
-    TextureManager::delbyname( *it );
-  }
   mTextureFilenames.clear();
 
   for( std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); ++it ) 
@@ -868,8 +839,8 @@ void MapTile::saveTile()
   for( int i = 0; i < 16; ++i )
     for( int j = 0; j < 16; ++j )
       for( int tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
-        if( lTextures.find( TextureManager::item( mChunks[i][j]->textures[tex] )->name() ) == lTextures.end() )
-          lTextures.insert( std::pair<std::string, int>( TextureManager::item( mChunks[i][j]->textures[tex] )->name(), -1 ) );
+        if( lTextures.find( mChunks[i][j]->_textures[tex]->filename() ) == lTextures.end() )
+          lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->_textures[tex]->filename(), -1 ) );
   
   lID = 0;
   for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
@@ -1364,7 +1335,7 @@ void MapTile::saveTile()
           {
             ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>( lCurrentPosition + 8 + 0x10 * j );
 
-            lLayer->textureID = lTextures.find( TextureManager::item( mChunks[y][x]->textures[j] )->name() )->second;
+            lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename() )->second;
 
             lLayer->flags = mChunks[y][x]->texFlags[j];
             

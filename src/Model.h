@@ -77,7 +77,6 @@ enum BlendModes {
 
 struct ModelRenderPass {
   uint16_t indexStart, indexCount, vertexStart, vertexEnd;
-  //GLuint texture, texture2;
   int tex;
   bool usetex2, useenvmap, cull, trans, unlit, nozwrite, billboard;
   float p;
@@ -128,7 +127,7 @@ struct ModelLight {
   //Animated<bool> Enabled;
 
   void init(const MPQFile&  f, const ModelLightDef &mld, int *global);
-  void setup(int time, GLuint l);
+  void setup(int time, OpenGL::Light l);
 };
 
 class Model: public ManagedItem, public AsyncObject {
@@ -173,8 +172,8 @@ class Model: public ManagedItem, public AsyncObject {
   void animate(int anim);
   void calcBones(int anim, int time);
 
-  void lightsOn(GLuint lbase);
-  void lightsOff(GLuint lbase);
+  void lightsOn(OpenGL::Light lbase);
+  void lightsOff(OpenGL::Light lbase);
 
 public:
   std::string _filename; //! \todo ManagedItem already has a name. Use that?
@@ -189,12 +188,11 @@ public:
   // ===============================
   // Texture data
   // ===============================
-  GLuint *textures;
-  #define  TEXTURE_MAX  100
-  //! \todo vectors.
-  int specialTextures[TEXTURE_MAX];
-  GLuint replaceTextures[TEXTURE_MAX];
-  bool useReplaceTextures[TEXTURE_MAX];
+  std::vector<OpenGL::Texture*> _textures;
+  std::vector<std::string> _textureFilenames;
+  std::vector<OpenGL::Texture*> _replaceTextures;
+  std::vector<int> _specialTextures;
+  std::vector<bool> _useReplaceTextures;
 
   float rad;
   float trans;

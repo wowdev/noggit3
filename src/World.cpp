@@ -554,8 +554,7 @@ void World::initDisplay()
   
   if( mHasAGlobalWMO )
   {
-    WMOManager::add( mWmoFilename );
-    WMOInstance inst( WMOManager::item( mWmoFilename ), &mWmoEntry );
+    WMOInstance inst( WMOManager::add( mWmoFilename ), &mWmoEntry );
     
     gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( mWmoEntry.uniqueID, inst ) );
     camera = inst.pos;
@@ -1066,8 +1065,8 @@ void World::draw()
   glDisable(GL_ALPHA_TEST);
 
   // TEMP: for fucking around with lighting
-  for (int i=0; i<8; ++i) {
-    GLuint light = GL_LIGHT0 + i;
+  for(OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light )
+  {
     glLightf(light, GL_CONSTANT_ATTENUATION, l_const);
     glLightf(light, GL_LINEAR_ATTENUATION, l_linear);
     glLightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
@@ -1611,7 +1610,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
   }
 }
 
-bool World::paintTexture(float x, float z, brush *Brush, float strength, float pressure, int texture)
+bool World::paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture)
 {
   //const int newX = (int)(x / TILESIZE);
   //const int newZ = (int)(z / TILESIZE);
@@ -2010,7 +2009,8 @@ void World::setBaseTexture( int x, int z )
     {
       MapChunk *curChunk = curTile->getChunk(j, i);
       curChunk->eraseTextures();
-      curChunk->addTexture( TextureManager::add( UITexturingGUI::getSelectedTexture()->name() ) );
+      curChunk->addTexture( UITexturingGUI::getSelectedTexture() );
+      UITexturingGUI::getSelectedTexture()->addReference();
     }
   }
 }

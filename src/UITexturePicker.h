@@ -1,26 +1,21 @@
 #ifndef __TEXTUREPICKER_H
 #define __TEXTUREPICKER_H
 
-#include "Selection.h"
-#include "UIButton.h"
-#include "UITexture.h"
-#include "UIWindow.h"
+#include "UICloseWindow.h"
 
-class UIMapViewGUI;
+class nameEntry;
+class UITexture;
 
-class UITexturePicker : public UIWindow
+class UITexturePicker : public UICloseWindow
 {
 public:
-  UITexturePicker(int xPos,int yPos, int w, int h, UIMapViewGUI *setGui);
-  void getTextures(nameEntry *lSelection);
-  void setTexture(int id);
-  UIMapViewGUI *mainGUI;
+  UITexturePicker( float x, float y, float w, float h );
+  
+  void getTextures( nameEntry* lSelection );
+  void setTexture( size_t id );
   
 private:
-  UITexture* tex1;
-  UITexture* tex2;
-  UITexture* tex3;
-  UITexture* tex4;
+  UITexture* _textures[4];
 };
 
 #endif

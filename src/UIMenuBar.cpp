@@ -36,7 +36,7 @@ void UIMenuBar::render() const
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
   
-  texture->render();
+  texture->bind();
 
   //Draw Top Side
   glBegin(GL_TRIANGLE_STRIP);  
@@ -185,9 +185,9 @@ void MenuItemToggle::render() const
   OpenGL::Texture::enableTexture();
   
   if( !clicked )
-    texture->render();
+    texture->bind();
   else
-    textureDown->render();
+    textureDown->bind();
 
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.0f, 0.0f );

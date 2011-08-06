@@ -295,7 +295,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
         } else {
           animated[i] = 0;
         }
-        textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
+        _textures[i] = TextureManager::newTexture( mt->mTextureFilenames[tex[i]] );
       }
     }
     else if ( fourcc == 'MCSH' ) {
@@ -553,9 +553,10 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
 
 void MapChunk::loadTextures()
 {
+  //! \todo Use this kind of preloading again?
   return;
-  for(int i=0; i < nTextures; ++i)
-    textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
+/*  for(int i=0; i < nTextures; ++i)
+    _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);*/
 }
 
 
@@ -596,22 +597,24 @@ void MapChunk::drawTextures()
 
   if(nTextures > 0)
   {
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, textures[0]);
+    OpenGL::Texture::setActiveTexture( 0 );
+    OpenGL::Texture::enableTexture();
+    
+    _textures[0]->bind();
+    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
+    OpenGL::Texture::setActiveTexture( 1 );
+    OpenGL::Texture::disableTexture();
   }
   else
   {
-    glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
+    OpenGL::Texture::setActiveTexture( 0 );
+    OpenGL::Texture::disableTexture();
 
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
+    OpenGL::Texture::setActiveTexture( 1 );
+    OpenGL::Texture::disableTexture();
   }
 
   SetAnim(animated[0]);
@@ -633,15 +636,19 @@ void MapChunk::drawTextures()
   }
   for(int i=1; i < nTextures; ++i)
   {
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, textures[i]);
+    OpenGL::Texture::setActiveTexture( 0 );
+    OpenGL::Texture::enableTexture();
+    
+    _textures[i]->bind();
+    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glActiveTexture(GL_TEXTURE1);
-    glEnable(GL_TEXTURE_2D);
+    OpenGL::Texture::setActiveTexture( 1 );
+    OpenGL::Texture::enableTexture();
+    
     glBindTexture(GL_TEXTURE_2D, alphamaps[i-1]);
+    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -663,26 +670,21 @@ void MapChunk::drawTextures()
     glEnd();
 
     RemoveAnim(animated[i]);
-
   }
   
-  glActiveTexture(GL_TEXTURE0);
-  glDisable(GL_TEXTURE_2D);
-
-  glActiveTexture(GL_TEXTURE1);
-  glDisable(GL_TEXTURE_2D);
-
+  OpenGL::Texture::setActiveTexture( 0 );
+  OpenGL::Texture::disableTexture();
+  
+  OpenGL::Texture::setActiveTexture( 1 );
+  OpenGL::Texture::disableTexture();
 
   glBindBuffer(GL_ARRAY_BUFFER, minimap);
   glVertexPointer(3, GL_FLOAT, 0, 0);
+  
   glBindBuffer(GL_ARRAY_BUFFER, minishadows);
   glColorPointer(4, GL_FLOAT, 0, 0);
   
-  
   glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, gWorld->mapstrip2);
-
-
-
 }
 
 void MapChunk::initStrip()
@@ -1010,14 +1012,13 @@ void MapChunk::draw()
   // ASSUME: texture coordinates set up already
 
   // first pass: base texture
-  glActiveTexture(GL_TEXTURE0);
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, textures[0]);
-  glActiveTexture(GL_TEXTURE1);
-  glDisable(GL_TEXTURE_2D);
-
+  OpenGL::Texture::setActiveTexture( 0 );
+  OpenGL::Texture::enableTexture();
   
-
+  _textures[0]->bind();
+  
+  OpenGL::Texture::setActiveTexture( 1 );
+  OpenGL::Texture::disableTexture();
 
 //  if( nameID == -1 )
 //    nameID = SelectionNames.add( this );
@@ -1025,11 +1026,11 @@ void MapChunk::draw()
 
   if (nTextures == 0)
   {
-    glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
+    OpenGL::Texture::setActiveTexture( 0 );
+    OpenGL::Texture::disableTexture();
 
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
+    OpenGL::Texture::setActiveTexture( 1 );
+    OpenGL::Texture::disableTexture();
 
     glColor3f(1.0f,1.0f,1.0f);
   //  glDisable(GL_LIGHTING);
@@ -1039,36 +1040,33 @@ void MapChunk::draw()
   drawPass(animated[0]);
 //  glPopName();
 
-  
-
-
   if (nTextures > 1) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
     glDepthMask(GL_FALSE);
   }
 
   // additional passes: if required
-  for (int i=0; i < nTextures-1; ++i) {
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, textures[i+1]);
+  for (int i=0; i < nTextures-1; ++i)
+  {
+    OpenGL::Texture::setActiveTexture( 0 );
+    OpenGL::Texture::enableTexture();
+    
+    _textures[i+1]->bind();
 
     // this time, use blending:
-    glActiveTexture(GL_TEXTURE1);
-    glEnable(GL_TEXTURE_2D);
+    OpenGL::Texture::setActiveTexture( 1 );
+    OpenGL::Texture::enableTexture();
+    
     glBindTexture(GL_TEXTURE_2D, alphamaps[i]);
 
     drawPass(animated[i+1]);
   }
 
-
-
   if (nTextures > 1) {
     //glDepthFunc(GL_LEQUAL);
     glDepthMask(GL_TRUE);
   }
-  
-  
+
   // shadow map
   glActiveTexture(GL_TEXTURE0);
   glDisable(GL_TEXTURE_2D);
@@ -1617,14 +1615,14 @@ void MapChunk::eraseTextures()
   nTextures = 0;
 }
 
-int MapChunk::addTexture( GLuint texture )
+int MapChunk::addTexture( OpenGL::Texture* texture )
 {
   int texLevel = -1;
   if( nTextures < 4 )
   {
     texLevel = nTextures;
     nTextures++;
-    textures[texLevel] = texture;
+    _textures[texLevel] = texture;
     animated[texLevel] = 0;
     texFlags[texLevel] = 0;
     effectID[texLevel] = 0;
@@ -1647,7 +1645,7 @@ int MapChunk::addTexture( GLuint texture )
   }
   return texLevel;
 }
-bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, float pressure, unsigned int texture )
+bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, float pressure, OpenGL::Texture* texture )
 {
   if( Environment::getInstance()->paintMode == true)
   {
@@ -1666,7 +1664,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 
     //First Lets find out do we have the texture already
     for(int i=0;i<nTextures;++i)
-      if(textures[i]==texture)
+      if(_textures[i]==texture)
         texLevel=i;
 
 
@@ -1773,7 +1771,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 
       for( size_t i = 0; i < size_t( nTextures ); ++i )
       {
-        if( textures[i] == texture )
+        if( _textures[i] == texture )
         {
           texLevel = i;
         }
@@ -1811,12 +1809,12 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
             {
               for( size_t i = layer; i < size_t( nTextures ) - 1; ++i )
               {
-                textures[i] = textures[i+1];
+                _textures[i] = _textures[i+1];
                 animated[i] = animated[i+1];
-              texFlags[i] = texFlags[i+1];
-              effectID[i] = effectID[i+1];
-              if( i )
-                memcpy( amap[i-1], amap[i], 64*64 );
+                texFlags[i] = texFlags[i+1];
+                effectID[i] = effectID[i+1];
+                if( i )
+                  memcpy( amap[i-1], amap[i], 64*64 );
               }
               
               for( size_t j = layer; j < size_t( nTextures ); j++ )

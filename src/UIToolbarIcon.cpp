@@ -29,7 +29,7 @@ void UIToolbarIcon::render() const
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
   
-  texture->render();
+  texture->bind();
 
   glBegin(GL_TRIANGLE_STRIP);
   glTexCoord2f(0.0f,0.0f);
@@ -46,11 +46,11 @@ void UIToolbarIcon::render() const
   
   if(selected)
   {
-    static const int sizer = 18;
+    static const float sizer = 18.0f;
     
     OpenGL::Texture::enableTexture();
     
-    textureSelected->render();
+    textureSelected->bind();
 
     glBegin(GL_TRIANGLE_STRIP);
     glTexCoord2f(0.0f,0.0f);

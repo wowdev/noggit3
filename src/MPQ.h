@@ -10,19 +10,28 @@
 
 class MPQArchive;
 class MPQFile;
-extern std::vector<MPQArchive*> gOpenArchives;
 
 class MPQArchive : public AsyncObject
 {
-  HANDLE mpq_a;
+  HANDLE _archiveHandle;
+  
+  MPQArchive( const std::string& filename, bool doListfile );
+  
 public:
-  MPQArchive(const std::string& filename, bool doListfile = false );
   ~MPQArchive();
   std::string mpqname;
+  
+  bool hasFile( const std::string& filename ) const;
+  bool openFile( const std::string& filename, HANDLE* fileHandle ) const;
 
   void finishLoading();
+  
   static bool allFinishedLoading();
   static void allFinishLoading();
+  
+  static void loadMPQ( const std::string& filename, bool doListfile = false );
+  static void unloadAllMPQs();
+  static void unloadMPQ( const std::string& filename );
   
   friend class MPQFile;
 };
@@ -73,7 +82,6 @@ public:
   void SaveFile();
   
   static bool exists( const std::string& filename );
-  static int getSize( const std::string& filename ); // Used to do a quick check to see if a file is corrupted
   
   friend class MPQArchive;
 };

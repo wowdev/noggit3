@@ -12,7 +12,7 @@
 int globalTime = 0;
 
 Model::Model(const std::string& filename, bool _forceAnim)
-: ManagedItem( filename )
+: ManagedItem( )
 , forceAnim(_forceAnim)
 , _filename( filename )
 {  
@@ -34,7 +34,6 @@ Model::Model(const std::string& filename, bool _forceAnim)
   
   memset( &header, 0, sizeof( ModelHeader ) );
   
-  textures = NULL;
   globalSequences = NULL;
   indices = NULL;
   anims = NULL;
@@ -48,11 +47,6 @@ Model::Model(const std::string& filename, bool _forceAnim)
   ribbons = NULL;
 
   showGeosets = NULL;
-  for (int i=0; i<TEXTURE_MAX; ++i) {
-    specialTextures[i] = -1;
-    replaceTextures[i] = 0;
-    useReplaceTextures[i] = false;
-  }
   
   finished = false;
 }
@@ -108,16 +102,13 @@ void Model::finishLoading()
 Model::~Model()
 {
   LogDebug << "Unloading model \"" << _filename << "\"." << std::endl;
-    
-  if (header.nTextures && textures) {
-    for (size_t i=0; i<header.nTextures; ++i) {
-      if (textures[i]!=0) {
-        //Texture *tex = (Texture*)TextureManager::items[textures[i]];
-        TextureManager::del(textures[i]);
-      }
-    }
-    delete[] textures;
+   
+  for(std::vector<std::string>::iterator it = _textureFilenames.begin(); it != _textureFilenames.end(); ++it )
+  {
+    TextureManager::delbyname( *it );
   }
+  _textures.clear();
+  _textureFilenames.clear();
 
   if( globalSequences )
     delete[] globalSequences;
@@ -277,33 +268,36 @@ void Model::initCommon(const MPQFile& f)
   rad = sqrtf(rad);
 
   // textures
-  ModelTextureDef *texdef = reinterpret_cast<ModelTextureDef*>(f.getBuffer() + header.ofsTextures);
-  if (header.nTextures) {
-    textures = new GLuint[header.nTextures];
-    char texname[256];
-    for (size_t i=0; i<header.nTextures; ++i) {
-      // Error check
-      if (i > TEXTURE_MAX-1) {
-        LogError << "Model Texture " << header.nTextures << " over " << TEXTURE_MAX << std::endl;
-        break;
-      }
+  ModelTextureDef* texdef = reinterpret_cast<ModelTextureDef*>( f.getBuffer() + header.ofsTextures );
+  _textures.resize( header.nTextures );
+  _replaceTextures.resize( header.nTextures );
+  _textureFilenames.resize( header.nTextures );
+  _specialTextures.resize( header.nTextures );
+  _useReplaceTextures.resize( header.nTextures );
+  
+  for( size_t i = 0; i < header.nTextures; ++i )
+  { 
+    if( texdef[i].type == 0 )
+    {
+      _specialTextures[i] = -1;
+      _useReplaceTextures[i] = false;
+      _textureFilenames[i] = std::string( f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen );
+      _textures[i] = TextureManager::newTexture( _textureFilenames[i] );
+    }
+    else
+    {
+      //! \note special texture - only on characters and such... Noggit should not even render these.
+      //! \todo Check if this is actually correct. Or just remove it.
+      _textures[i] = NULL;
+      _specialTextures[i] = texdef[i].type;
       
-      if (texdef[i].type == 0) {
-        strncpy(texname, reinterpret_cast<const char*>(f.getBuffer() + texdef[i].nameOfs), texdef[i].nameLen);
-        texname[texdef[i].nameLen] = 0;
-        textures[i] = TextureManager::add(texname);
-      } else {
-        // special texture - only on characters and such...
-        textures[i] = 0;
-        specialTextures[i] = texdef[i].type;
-        
-        if (texdef[i].type < TEXTURE_MAX)
-          useReplaceTextures[texdef[i].type] = true;
-        
-        if (texdef[i].type == 3) {
-          // a fix for weapons with type-3 textures.
-          replaceTextures[texdef[i].type] = TextureManager::add("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP");
-        }
+      _useReplaceTextures[texdef[i].type] = true;
+      
+      if (texdef[i].type == 3)
+      {
+        _textureFilenames[i] = "Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP";
+        // a fix for weapons with type-3 textures.
+        _replaceTextures[texdef[i].type] = TextureManager::newTexture( _textureFilenames[i] );
       }
     }
   }
@@ -496,9 +490,9 @@ void Model::initAnimated(const MPQFile& f)
     for(size_t i=0; i<header.nAnimations; ++i) {
       std::string lodname = _filename.substr(0, _filename.length()-3);
 	  tempname << lodname.c_str() << anims[i].animID << "-" << anims[i].subAnimID;
-	  if (MPQFile::getSize(tempname.str().c_str()) > 0) 
+	  if (MPQFile::exists(tempname.str()) > 0) 
 	  {
-		animfiles[i] = new MPQFile(tempname.str().c_str());
+		animfiles[i] = new MPQFile(tempname.str());
       }
       else
       {
@@ -699,15 +693,10 @@ bool ModelRenderPass::init(Model *m)
       return false;
     
     // TEXTURE
-    // bind to our texture
-    GLuint bindtex = 0;
-    if (m->specialTextures[tex]==-1) 
-      bindtex = m->textures[tex];
+    if( m->_specialTextures[tex] == -1 ) 
+      m->_textures[tex]->bind();
     else 
-      bindtex = m->replaceTextures[m->specialTextures[tex]];
-    
-    glBindTexture(GL_TEXTURE_2D, bindtex);
-    // --
+      m->_replaceTextures[m->_specialTextures[tex]]->bind();
     
     // TODO: Add proper support for multi-texturing.
     
@@ -1084,7 +1073,7 @@ void ModelLight::init(const MPQFile& f, const ModelLightDef &mld, int *global)
   diffIntensity.init(mld.intensity, f, global);
 }
 
-void ModelLight::setup(int time, GLuint l)
+void ModelLight::setup(int time, OpenGL::Light l)
 { 
   Vec4D ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
   Vec4D diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
@@ -1257,13 +1246,13 @@ void Model::drawSelect()
   }
 }
 
-void Model::lightsOn(GLuint lbase)
+void Model::lightsOn(OpenGL::Light lbase)
 {
   // setup lights
   for (unsigned int i=0, l=lbase; i<header.nLights; ++i) lights[i].setup(animtime, l++);
 }
 
-void Model::lightsOff(GLuint lbase)
+void Model::lightsOff(OpenGL::Light lbase)
 {
   for (unsigned int i=0, l=lbase; i<header.nLights; ++i) glDisable(l++);
 }

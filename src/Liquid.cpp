@@ -492,8 +492,8 @@ void Liquid::recalcSize() {
   BLSShader * mWaterShader;
   BLSShader * mMagmaShader;
 #else
-  GLuint  waterShader;
-  GLuint  waterFogShader;
+  OpenGL::Shader  waterShader;
+  OpenGL::Shader  waterFogShader;
 #endif
 
 void loadWaterShader()
@@ -609,7 +609,7 @@ void Liquid::draw()
   Vec3D col2;
   glDisable(GL_CULL_FACE);
   glDepthFunc(GL_LESS);
-  size_t texidx = (size_t)(gWorld->animtime / 60.0f) % textures.size();
+  size_t texidx = (size_t)(gWorld->animtime / 60.0f) % _textures.size();
 
   //glActiveTexture(GL_TEXTURE0);
   //glDisable(GL_TEXTURE_2D);
@@ -642,22 +642,24 @@ void Liquid::draw()
     //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); //! \todo  check if ARB_texture_env_add is supported? :(
   }
 
-  glActiveTexture(GL_TEXTURE0);
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, textures[texidx]);
-  glActiveTexture(GL_TEXTURE1);
-  glEnable(GL_TEXTURE_2D);
+  OpenGL::Texture::setActiveTexture(0);
+  OpenGL::Texture::enableTexture();
+  
+  _textures[texidx]->bind();
+  
+  OpenGL::Texture::setActiveTexture(1);
+  OpenGL::Texture::enableTexture();
   
   if( mDrawList )
   {
     //! \todo THIS LINE THROWS GL_INVALID_OPERATION! Steff. It donwt do in anymore now. Perhaps because water rendering was called double in maptile::draw()
     mDrawList->render();
-    CheckForGLError( "Liquid::draw::586" );
+    CheckForGLError( "Liquid::draw:: after the draw list" );
   }
 
-  glActiveTexture(GL_TEXTURE1);
-  glDisable(GL_TEXTURE_2D);
-  glActiveTexture(GL_TEXTURE0);
+  OpenGL::Texture::setActiveTexture(1);
+  OpenGL::Texture::disableTexture();
+  OpenGL::Texture::setActiveTexture(0);
   
   glColor4f(1,1,1,0.4f);
   if( mTransparency ) 
@@ -673,7 +675,8 @@ void Liquid::initTextures( const std::string& pFilename )
 {
   for( int i = pFirst; i <= pLast; ++i ) 
   {
-    textures.push_back( TextureManager::add( pFilename )) ;
+    _textureFilenames.push_back( pFilename );
+    _textures.push_back( TextureManager::newTexture( pFilename )) ;
   }
 }
 
@@ -685,8 +688,9 @@ Liquid::~Liquid()
     delete mDrawList;
     mDrawList = NULL;
   }
-  for( size_t i=0; i<textures.size(); ++i ) 
+  
+  for( std::vector<std::string>::iterator filename = _textureFilenames.begin(); filename != _textureFilenames.end(); ++filename )
   {
-    TextureManager::del( textures[i] );
+    TextureManager::delbyname( *filename );
   }
 }

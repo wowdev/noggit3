@@ -15,50 +15,46 @@
 #include "Directory.h"
 #include "Log.h"
 #include "Project.h"
+#include "AsyncLoader.h" // AsyncLoader
+#include "Noggit.h" // gAsyncLoader
 
-std::vector<MPQArchive*> gOpenArchives;
+typedef std::map<std::string, MPQArchive*> ArchivesMap;
+ArchivesMap _openArchives;
 
 std::list<std::string> gListfile;
 boost::mutex gListfileLoadingMutex;
 boost::mutex gMPQFileMutex;
 std::string modmpqpath="";//this will be the path to modders archive (with 'myworld' file inside)
 
-MPQArchive::MPQArchive(const std::string& filename, bool doListfile)
+void MPQArchive::loadMPQ( const std::string& filename, bool doListfile )
 {
-  if(!SFileOpenArchive( filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE, &mpq_a ))
+  _openArchives[filename] = new MPQArchive( filename, doListfile );
+  gAsyncLoader->addObject( _openArchives[filename] );
+}
+
+MPQArchive::MPQArchive( const std::string& filename, bool doListfile )
+: _archiveHandle( NULL )
+{
+  if(!SFileOpenArchive( filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE, &_archiveHandle ))
   {
     LogError << "Error opening archive: " << filename << "\n";
     return;
   }
-  else
-  {
-    LogDebug << "Opened archive: " << filename << "\n";
-  }
-  
-  HANDLE fh;
-  mpqname = filename;						   //let we know pathes to all loaded MPQs
-  if(SFileOpenFileEx(mpq_a, "myworld", 0, &fh))//let we know what archive is modder's (it must contain file with random data and with name "myworld")
-  {
-	  SFileCloseFile(fh);
-	  modmpqpath=filename;
-  }
-
-  gOpenArchives.push_back( this );
 
   finished = !doListfile;
 }
 
 void MPQArchive::finishLoading()
 {
-  boost::mutex::scoped_lock lock(gListfileLoadingMutex);
-  boost::mutex::scoped_lock lock2(gMPQFileMutex);
-  
-  if(finished)
+  if( finished )
     return;
     
   HANDLE fh;
+  
+  boost::mutex::scoped_lock lock2(gMPQFileMutex);
+  boost::mutex::scoped_lock lock(gListfileLoadingMutex);
 
-  if( SFileOpenFileEx( mpq_a, "(listfile)", 0, &fh ) )
+  if( SFileOpenFileEx( _archiveHandle, "(listfile)", 0, &fh ) )
   {
     size_t filesize = SFileGetFileSize( fh );
   
@@ -66,15 +62,15 @@ void MPQArchive::finishLoading()
     SFileReadFile( fh, readbuffer, filesize );
     SFileCloseFile( fh );
    
-	std::string list( readbuffer );
-	
-	boost::algorithm::to_lower( list ); 
-	boost::algorithm::replace_all( list, "\r\n", "\n" ); 
-	
-	std::vector<std::string> temp; 
-	boost::algorithm::split( temp, list, boost::algorithm::is_any_of( "\n" ) ); 
-	gListfile.insert( gListfile.end(), temp.begin(), temp.end() );
-	
+  	std::string list( readbuffer );
+  	
+  	boost::algorithm::to_lower( list ); 
+  	boost::algorithm::replace_all( list, "\r\n", "\n" ); 
+  	
+  	std::vector<std::string> temp; 
+  	boost::algorithm::split( temp, list, boost::algorithm::is_any_of( "\n" ) ); 
+  	gListfile.insert( gListfile.end(), temp.begin(), temp.end() );
+  	
     delete[] readbuffer;
   }
   
@@ -90,26 +86,52 @@ void MPQArchive::finishLoading()
 
 MPQArchive::~MPQArchive()
 {
-  SFileCloseArchive( mpq_a );
-  gOpenArchives.erase( std::remove( gOpenArchives.begin(), gOpenArchives.end(), this ), gOpenArchives.end() );
+  if( _archiveHandle )
+    SFileCloseArchive( _archiveHandle );
 }
 
 bool MPQArchive::allFinishedLoading()
 {
   bool allFinished = true;
-  for(std::vector<MPQArchive*>::const_iterator it = gOpenArchives.begin(); it != gOpenArchives.end(); ++it)
+  for( ArchivesMap::const_iterator it = _openArchives.begin(); it != _openArchives.end(); ++it )
   {
-    allFinished = allFinished && (*it)->finishedLoading();
+    allFinished = allFinished && it->second->finishedLoading();
   }
   return allFinished;
 }
 
 void MPQArchive::allFinishLoading()
 {
-  for(std::vector<MPQArchive*>::const_iterator it = gOpenArchives.begin(); it != gOpenArchives.end(); ++it)
+  for( ArchivesMap::iterator it = _openArchives.begin(); it != _openArchives.end(); ++it )
   {
-    (*it)->finishLoading();
+    it->second->finishLoading();
   }
+}
+
+void MPQArchive::unloadAllMPQs()
+{
+  for( ArchivesMap::iterator it = _openArchives.begin(); it != _openArchives.end(); ++it )
+  {
+    delete it->second;
+  }
+  _openArchives.clear();
+}
+
+bool MPQArchive::hasFile( const std::string& filename ) const
+{
+  return SFileHasFile( _archiveHandle, filename.c_str() );
+}
+
+void MPQArchive::unloadMPQ( const std::string& filename )
+{
+  delete _openArchives[filename];
+  _openArchives.erase( filename );
+}
+
+bool MPQArchive::openFile( const std::string& filename, HANDLE* fileHandle ) const
+{
+  assert( fileHandle );
+  return SFileOpenFileEx( _archiveHandle, filename.c_str(), 0, fileHandle );
 }
 
 MPQFile::MPQFile( const std::string& filename )
@@ -150,19 +172,19 @@ MPQFile::MPQFile( const std::string& filename )
     return;
   }
   
-  for( std::vector<MPQArchive*>::reverse_iterator i = gOpenArchives.rbegin(); i != gOpenArchives.rend(); ++i )
+  for( ArchivesMap::reverse_iterator i = _openArchives.rbegin(); i != _openArchives.rend(); ++i )
   {
-    HANDLE fh;
+    HANDLE fileHandle;
 
-    if( !SFileOpenFileEx( (*i)->mpq_a, filename.c_str(), 0, &fh ) )
+    if( !i->second->openFile( filename, &fileHandle ) )
       continue;
 
-    size = SFileGetFileSize( fh );
+    size = SFileGetFileSize( fileHandle );
 
     eof = false;
     buffer = new char[size];
-    SFileReadFile( fh, buffer, size );
-    SFileCloseFile( fh );
+    SFileReadFile( fileHandle, buffer, size );
+    SFileCloseFile( fileHandle );
 
     return;
   }
@@ -176,8 +198,8 @@ MPQFile::~MPQFile()
 bool MPQFile::exists( const std::string& filename )
 {
   boost::mutex::scoped_lock lock(gMPQFileMutex);
-  for(std::vector<MPQArchive*>::iterator it=gOpenArchives.begin(); it!=gOpenArchives.end();++it)
-    if( SFileHasFile( (*it)->mpq_a, filename.c_str() ) )
+  for( ArchivesMap::iterator it = _openArchives.begin(); it != _openArchives.end(); ++it )
+    if( it->second->hasFile( filename ) )
       return true;
 
   std::string diskpath = Project::getInstance()->getPath().append(filename);
@@ -191,9 +213,9 @@ bool MPQFile::exists( const std::string& filename )
   
   FILE* fd = fopen( diskpath.c_str(), "rb" );
 
-  if(fd!=NULL)
+  if( fd )
   {
-    fclose(fd);
+    fclose( fd );
     return true;
   }
 
@@ -218,27 +240,21 @@ void MPQFile::save(const char* filename)  //save to MPQ
 		SFileCompactArchive(mpq_a);
 		SFileCloseArchive(mpq_a);
 		modmpqpath=newmodmpq;
-	}else
-	for(std::vector<MPQArchive*>::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i) //we need to unload our patch-xx.MPQ from application to get write access to it!!
-  {																							  
-	  if((*i)->mpqname==modmpqpath) //closing our modders archive
-	  {
-		  SFileCloseArchive((*i)->mpq_a);
-		  gOpenArchives.erase(i);
-		  break;
 	}
-  }
+	else
+	  MPQArchive::unloadMPQ( modmpqpath );
+	  
   SFileOpenArchive(modmpqpath.c_str(), 0, 0, &mpq_a );
   SFileSetLocale(0);
-  std::string fname=filename;
-  fname.erase(0,strlen(Project::getInstance()->getPath().c_str()));
-  size_t found = fname.find( "/" );
+  std::string nameInMPQ = filename;
+  nameInMPQ.erase(0,strlen(Project::getInstance()->getPath().c_str()));
+  size_t found = nameInMPQ.find( "/" );
   while( found != std::string::npos )//fixing path to file
   {
-    fname.replace( found, 1, "\\" );
-    found = fname.find( "/" );
+    nameInMPQ.replace( found, 1, "\\" );
+    found = nameInMPQ.find( "/" );
   }
-  if(SFileAddFileEx(mpq_a,filename,fname.c_str(),MPQ_FILE_COMPRESS|MPQ_FILE_ENCRYPTED|MPQ_FILE_REPLACEEXISTING,MPQ_COMPRESSION_ZLIB))
+  if(SFileAddFileEx(mpq_a,filename,nameInMPQ.c_str(),MPQ_FILE_COMPRESS|MPQ_FILE_ENCRYPTED|MPQ_FILE_REPLACEEXISTING,MPQ_COMPRESSION_ZLIB))
   {LogDebug << "Added file "<<fname.c_str()<<" to archive \n";} else LogDebug << "Error "<<GetLastError()<< " on adding file to archive! Report this message \n";
   SFileCompactArchive(mpq_a);//recompact our archive to avoid fragmentation
   SFileCloseArchive(mpq_a);
@@ -305,23 +321,6 @@ void FixFilePath( std::string& pFilename )
     pFilename.replace( found, 1, "\\" );
     found = pFilename.find( "/" );
   }
-}
-
-int MPQFile::getSize( const std::string& filename )
-{
-  for(std::vector<MPQArchive*>::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
-  {
-    HANDLE fh;
-    
-    if( !SFileOpenFileEx( (*i)->mpq_a, filename.c_str(), 0, &fh ) )
-      continue;
-
-    size_t filesize = SFileGetFileSize( fh );
-    SFileCloseFile( fh );
-    return filesize;
-  }
-
-  return 0;
 }
 
 size_t MPQFile::getPos() const
