@@ -44,8 +44,6 @@ void showBookmark( UIFrame *, int bookmarkID )
   }
 }
 
-extern std::list<std::string> gListfile;
-
 Menu::Menu()
 : mGUIFrame( NULL )
 , mGUIStatusbar( NULL )

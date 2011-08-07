@@ -12,6 +12,8 @@ UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTe
 : UIFrame( pX, pY, w, h )
 , texture( TextureManager::newTexture( pTexNormal ) )
 , textureDown( TextureManager::newTexture( pTexDown ) )
+, _textureFilename( pTexNormal )
+, _textureDownFilename( pTexDown )
 , clickFunc( NULL )
 , id( 0 )
 , clicked( false )
@@ -24,6 +26,8 @@ UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTe
 : UIFrame( pX, pY, w, h )
 , texture( TextureManager::newTexture( pTexNormal ) )
 , textureDown( TextureManager::newTexture( pTexDown ) )
+, _textureFilename( pTexNormal )
+, _textureDownFilename( pTexDown )
 , clickFunc( NULL )
 , id( 0 )
 , clicked( false )
@@ -36,12 +40,20 @@ UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTe
 : UIFrame( pX, pY, w, h )
 , texture( TextureManager::newTexture( pTexNormal ) )
 , textureDown( TextureManager::newTexture( pTexDown ) )
+, _textureFilename( pTexNormal )
+, _textureDownFilename( pTexDown )
 , clickFunc( pFunc )
 , id( pFuncParam )
 , clicked( false )
 , text( new UIText( w / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
 {
   addChild( text );
+}
+
+UIButton::~UIButton()
+{
+  TextureManager::delbyname( _textureFilename );
+  TextureManager::delbyname( _textureDownFilename );
 }
 
 void UIButton::setLeft()

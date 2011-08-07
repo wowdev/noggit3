@@ -3,7 +3,6 @@
 #include "Log.h"
 #include "Menu.h"
 #include "Sky.h"
-#include "TextureManager.h"
 #include "UIMinimapWindow.h"
 #include "Video.h"
 #include "World.h"

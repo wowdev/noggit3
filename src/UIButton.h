@@ -14,6 +14,9 @@ class UIButton : public UIFrame
 protected:
   OpenGL::Texture* texture;
   OpenGL::Texture* textureDown;
+  std::string _textureFilename;
+  std::string _textureDownFilename;
+  
   void ( *clickFunc )( UIFrame *, int );
   int id;
 
@@ -24,6 +27,7 @@ public:
   UIButton( float x, float y, float width, float height, const std::string& pTexNormal, const std::string& pTexDown );
   UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
   UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, void (*pFunc)( UIFrame *, int ), int pFuncParam );
+  ~UIButton();
   
   void render() const;
 

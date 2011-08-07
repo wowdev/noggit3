@@ -15,10 +15,15 @@ public:
 protected:
   OpenGL::Texture* texture;
   OpenGL::Texture* textureSelected;
+  
+  std::string _textureFilename;
+  std::string _textureSelectedFilename;
+  
   int iconId;
 
 public:
   UIToolbarIcon( float x, float y, float width, float height, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments );
+  ~UIToolbarIcon();
 
   void render() const;
   UIFrame *processLeftClick(float mx,float my);

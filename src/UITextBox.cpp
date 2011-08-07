@@ -10,16 +10,22 @@
 #include "UITexture.h"
 #include "Video.h"
 
-UITextBox2::UITextBox2(float xPos,float yPos,float w, float h, const std::string& tex, const std::string& texd)
+UITextBox2::UITextBox2( float xPos, float yPos, float w, float h, const std::string& tex, const std::string& texd )
+: UIFrame( xPos, yPos, w, h )
+, texture( TextureManager::newTexture( tex ) )
+, textureDown( TextureManager::newTexture( texd ) )
+, _textureFilename( tex )
+, _textureDownFilename( texd )
+, mFocus( false )
+, mText( new UIText( w / 2.0f, 2.0f, arial12, eJustifyCenter ) )
+, mValue( "" )
 {
-  x=xPos;
-  y=yPos;
-  width=w;
-  height=h;
-  texture = TextureManager::newTexture( tex );
-  textureDown = TextureManager::newTexture( texd );
-  mFocus = false;
-  mText = new UIText( w / 2.0f, 2.0f, arial12, eJustifyCenter );
+}
+
+UITextBox2::~UITextBox2()
+{
+  TextureManager::delbyname( _textureFilename );
+  TextureManager::delbyname( _textureDownFilename );
 }
 
 void UITextBox2::render() const

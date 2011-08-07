@@ -10,9 +10,17 @@ UIToolbarIcon::UIToolbarIcon( float xPos, float yPos, float w, float h, const st
 , UIEventClassConstructorSuperCall()
 , texture( TextureManager::newTexture( tex ) )
 , textureSelected( TextureManager::newTexture( texd ) )
+, _textureFilename( tex )
+, _textureSelectedFilename( texd )
 , iconId( id )
 , selected( false )
 {
+}
+
+UIToolbarIcon::~UIToolbarIcon()
+{
+  TextureManager::delbyname( _textureFilename );
+  TextureManager::delbyname( _textureSelectedFilename );
 }
 
 UIFrame* UIToolbarIcon::processLeftClick( float /*mx*/, float /*my*/ )

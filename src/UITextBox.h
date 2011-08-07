@@ -30,12 +30,15 @@ class UITextBox2 : public UIFrame
 private:
   OpenGL::Texture* texture;
   OpenGL::Texture* textureDown;
+  std::string _textureFilename;
+  std::string _textureDownFilename;
 
   bool  mFocus;
   UIText  *mText;
   std::string mValue;
 public:
   UITextBox2(float xPos,float yPos,float w, float h,const std::string& tex, const std::string& texd);
+  ~UITextBox2();
   void render() const;
 
   void setValue( const std::string& pText );

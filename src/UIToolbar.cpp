@@ -7,7 +7,6 @@
 #include "Log.h"
 #include "MapView.h" // MapView
 #include "Noggit.h" // arialn13
-#include "TextureManager.h" // TextureManager, Texture
 #include "UIMapViewGUI.h"
 #include "UIMinimizeButton.h"
 #include "UIText.h"
