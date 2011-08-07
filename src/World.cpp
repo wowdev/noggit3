@@ -1669,6 +1669,34 @@ void World::eraseTextures(float x, float z)
   }
 }
 
+void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
+{ 
+  this->setChanged(x,z);
+  const size_t newX = x / TILESIZE;
+  const size_t newZ = z / TILESIZE;
+  Log << "Switching Textures at " << x << " and " << z;
+  for( size_t j = newZ - 1; j < newZ + 1; ++j )
+  {
+    for( size_t i = newX - 1; i < newX + 1; ++i )
+    {
+      if( tileLoaded( j, i ) )
+      {
+        for( size_t ty = 0; ty < 16; ++ty )
+        {
+          for( size_t tx = 0; tx < 16; ++tx )
+          {
+            MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
+            if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
+            {
+              chunk->switchTexture(oldTexture, newTexture);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 void World::addHole( float x, float z )
 {
   this->setChanged(x, z);

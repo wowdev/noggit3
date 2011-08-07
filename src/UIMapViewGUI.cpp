@@ -15,6 +15,7 @@
 #include "UIMinimapWindow.h"
 #include "UIStatusBar.h" // UIStatusBar
 #include "UITexturePicker.h" // 
+#include "UITextureSwitcher.h"
 #include "UITexturingGUI.h"
 #include "UIToolbar.h" // UIToolbar
 #include "UIZoneIDBrowser.h" // 
@@ -65,6 +66,10 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview) : theMapview( setMapview )
   this->TexturePicker->movable = true;
   this->tileFrames->addChild( this->TexturePicker);
 
+  this->TextureSwitcher = new UITextureSwitcher(video.xres / 2 - 100.0f, video.yres / 2 - 100.0f,490.0f, 150.0f );
+  this->TextureSwitcher->hidden = true;
+  this->TextureSwitcher->movable = true;
+  this->tileFrames->addChild( this->TextureSwitcher);
 }
 
 UIMapViewGUI::~UIMapViewGUI()
