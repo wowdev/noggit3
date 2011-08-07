@@ -295,7 +295,6 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
         } else {
           animated[i] = 0;
         }
-        LogDebug << "loaded texture for layer " << i << std::endl;
         _textures[i] = TextureManager::newTexture( mt->mTextureFilenames[tex[i]] );
       }
     }
