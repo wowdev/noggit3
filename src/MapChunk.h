@@ -95,6 +95,7 @@ public:
 
   bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture);
   int addTexture(OpenGL::Texture* texture);
+  void switchTexture( OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture );
   void eraseTextures();
 
   bool isHole(int i,int j);

@@ -10,6 +10,7 @@ class UIZoneIDBrowser;
 class MapView;
 class UIFrame;
 class UITexturePicker;
+class UITextureSwitcher;
 
 //! \todo Give better name.
 class UIMapViewGUI
@@ -31,6 +32,8 @@ public:
   UIAppInfo* guiappInfo;
   UIZoneIDBrowser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
+  UITextureSwitcher* TextureSwitcher;
+
   explicit UIMapViewGUI( MapView* setMapview );
   ~UIMapViewGUI();
   

@@ -40,6 +40,7 @@
 #include "UIText.h" // UIText
 #include "UITexture.h" // textureUI
 #include "UITexturePicker.h"
+#include "UITextureSwitcher.h"
 #include "UITexturingGUI.h"
 #include "UIToggleGroup.h" // UIToggleGroup
 #include "UIToolbar.h" // UIToolbar
@@ -574,6 +575,12 @@ void clearTexture(UIFrame* /*f*/,int /*set*/)
   gWorld->setBaseTexture(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
+void showTextureSwitcher(UIFrame* /*f*/, int /*set*/)
+{
+  mainGui->TextureSwitcher->getTextures(gWorld->GetCurrentSelection());
+  //mainGui->TextureSwitcher->hidden = false;
+}
+
 #ifdef __FILESAREMISSING
 void exportPNG(UIFrame *f,int set)
 {
@@ -831,6 +838,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear height map", clearHeightmap, 0  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Move to position", moveHeightmap, 0  );  
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear texture", clearTexture, 0  );  
+  mbar->GetMenu( "Assist" )->AddMenuItemButton( "Switch texture", showTextureSwitcher, 0  );  
 
   mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );

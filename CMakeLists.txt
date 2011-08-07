@@ -100,6 +100,7 @@ SET( SourceFiles
   src/UITextBox.cpp
   src/UITexture.cpp
   src/UITexturePicker.cpp
+  src/UITextureSwitcher.cpp
   src/UITexturingGUI.cpp
   src/UIToggleGroup.cpp
   src/UIToolbar.cpp

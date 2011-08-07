@@ -1642,6 +1642,18 @@ int MapChunk::addTexture( OpenGL::Texture* texture )
   }
   return texLevel;
 }
+void MapChunk::switchTexture( OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture )
+{
+  int texLevel = -1;
+  for(int i=0;i<nTextures;++i)
+    if(_textures[i]==oldTexture)
+      texLevel=i;
+
+  if(texLevel != -1)
+  {
+	_textures[texLevel] = newTexture;
+  }
+}
 bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, float pressure, OpenGL::Texture* texture )
 {
   if( Environment::getInstance()->paintMode == true)
