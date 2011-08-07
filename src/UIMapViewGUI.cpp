@@ -10,7 +10,6 @@
 #include "MapView.h"
 #include "Noggit.h" // gStates, gPop, gFPS, arial14, morpheus40, arial...
 #include "Project.h"
-#include "TextureManager.h"
 #include "UIAppInfo.h" // UIAppInfo
 #include "UIDetailInfos.h" // UIDetailInfos
 #include "UIMinimapWindow.h"
@@ -176,10 +175,8 @@ void UIMapViewGUI::render( bool tilemode )
         /*
         for( int q = 0; q < lSelection->data.mapchunk->nTextures; q++ )
         {
-          //s << q << "- " << TextureManager::items[lSelection->data.mapchunk->textures[q]]->name;
           //s << " ";
           //s "  Flags - " << lSelection->data.mapchunk->texFlags[q] << " Effect ID - " << lSelection->data.mapchunk->effectID[q] << std::endl;
-          //freetype::shprint( arial16, 20, 103 + TextOffset, "%d - %s  Flags - %x Effect ID - %d", q, TextureManager::items[lSelection->data.mapchunk->textures[q]]->name, lSelection->data.mapchunk->texFlags[q], lSelection->data.mapchunk->effectID[q] );
           
           if( lSelection->data.mapchunk->effectID[q] != 0 )
             for( int r = 0; r < 4; r++ )

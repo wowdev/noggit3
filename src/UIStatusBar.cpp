@@ -4,7 +4,6 @@
 #include <string>
 
 #include "Noggit.h" // arial16
-#include "TextureManager.h" // TextureManager, Texture
 #include "UIText.h"
 #include "Video.h"
 

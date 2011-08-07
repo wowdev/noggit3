@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "Environment.h" // CtrlDown
-#include "TextureManager.h" // TextureManager, Texture
 #include "UICheckBox.h"
 #include "UIText.h"
 #include "Video.h"
@@ -14,7 +13,6 @@ UIMenuBar::UIMenuBar()
 : UIWindow( 0.0f, 0.0f, video.xres, video.yres )
 , mNumMenus( 0 )
 {
-  texture = TextureManager::newTexture( "interface\\tooltips\\ui-tooltip-border.blp" );
 }
 
 void UIMenuBar::render() const

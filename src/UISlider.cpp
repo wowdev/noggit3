@@ -25,6 +25,12 @@ UISlider::UISlider( float xPos, float yPos, float w, float s, float o )
   clickable = true;
 }
 
+UISlider::~UISlider()
+{
+  TextureManager::delbyname( "Interface\\Buttons\\UI-SliderBar-Border.blp" );
+  TextureManager::delbyname( "Interface\\Buttons\\UI-SliderBar-Button-Horizontal.blp" );
+}
+
 void UISlider::setFunc( void( *f )( float val ) )
 {
   func = f;

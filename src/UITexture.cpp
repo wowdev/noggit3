@@ -8,10 +8,20 @@
 UITexture::UITexture( float xPos, float yPos, float w, float h, const std::string& tex )
 : UIFrame( xPos, yPos, w, h )
 , texture( TextureManager::newTexture( tex ) )
+, _textureFilename( tex )
 , highlight( false )
 , clickFunc( NULL )
 , id( 0 )
 {
+}
+
+UITexture::~UITexture()
+{
+  if( texture )
+  {
+    TextureManager::delbyname( _textureFilename );
+    texture = NULL;
+  }
 }
 
 void UITexture::setTexture( OpenGL::Texture* tex )
@@ -21,9 +31,15 @@ void UITexture::setTexture( OpenGL::Texture* tex )
   texture = tex;
 }
 
-void UITexture::setTexture( const std::string& tex )
+void UITexture::setTexture( const std::string& textureFilename )
 {
-  texture = TextureManager::newTexture( tex );
+  if( texture )
+  {
+    TextureManager::delbyname( _textureFilename );
+    texture = NULL;
+  }
+  _textureFilename = textureFilename;
+  texture = TextureManager::newTexture( textureFilename );
 }
 
 OpenGL::Texture* UITexture::getTexture( )
