@@ -295,6 +295,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
         } else {
           animated[i] = 0;
         }
+        LogDebug << "loaded texture for layer " << i << std::endl;
         _textures[i] = TextureManager::newTexture( mt->mTextureFilenames[tex[i]] );
       }
     }
@@ -1011,19 +1012,8 @@ void MapChunk::draw()
   glNormalPointer(GL_FLOAT, 0, 0);
   // ASSUME: texture coordinates set up already
 
+
   // first pass: base texture
-  OpenGL::Texture::setActiveTexture( 0 );
-  OpenGL::Texture::enableTexture();
-  
-  _textures[0]->bind();
-  
-  OpenGL::Texture::setActiveTexture( 1 );
-  OpenGL::Texture::disableTexture();
-
-//  if( nameID == -1 )
-//    nameID = SelectionNames.add( this );
-//  glPushName(nameID);
-
   if (nTextures == 0)
   {
     OpenGL::Texture::setActiveTexture( 0 );
@@ -1033,12 +1023,20 @@ void MapChunk::draw()
     OpenGL::Texture::disableTexture();
 
     glColor3f(1.0f,1.0f,1.0f);
-  //  glDisable(GL_LIGHTING);
+  }
+  else
+  {
+    OpenGL::Texture::setActiveTexture( 0 );
+    OpenGL::Texture::enableTexture();
+    
+    _textures[0]->bind();
+    
+    OpenGL::Texture::setActiveTexture( 1 );
+    OpenGL::Texture::disableTexture();
   }
 
   glEnable(GL_LIGHTING);
   drawPass(animated[0]);
-//  glPopName();
 
   if (nTextures > 1) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
