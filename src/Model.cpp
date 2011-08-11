@@ -467,6 +467,11 @@ void Model::initAnimated(const MPQFile& f)
   if (header.nAnimations > 0) {
     anims = new ModelAnimation[header.nAnimations];
     memcpy(anims, f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
+    for( size_t i = 0; i < header.nAnimations; ++i )
+    {
+      //! \note Fix for world\kalimdor\diremaul\activedoodads\crystalcorrupter\corruptedcrystalshard.m2 having a zero length for its stand animation.
+      anims[i].length = std::max( anims[i].length, 1U );
+    }
     
     animfiles = new MPQFile*[header.nAnimations];
 
