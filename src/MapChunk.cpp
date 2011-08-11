@@ -849,7 +849,7 @@ void MapChunk::drawColor()
     return;
 
   if (mydist > gWorld->culldistance) {
-    if (gWorld->uselowlod) this->drawNoDetail();
+    if (gWorld->drawfog) this->drawNoDetail();
     return;
   }
   
@@ -1248,19 +1248,10 @@ void MapChunk::drawSelect()
   if( nameID == -1 )
     nameID = SelectionNames.add( this );
 
-  glDisable( GL_CULL_FACE );
+  //! \todo Use backface culling again? Maybe this adds problems. Idk.
+  //glDisable( GL_CULL_FACE );
   glPushName( nameID );
-  glBegin( GL_TRIANGLE_STRIP );
-  for( int i = 0; i < stripsize2; ++i )
-    glVertex3fv( mVertices[gWorld->mapstrip2[i]] );
-  glEnd();
-  glPopName();
-  glEnable( GL_CULL_FACE );  
-}
-
-void MapChunk::drawSelect2()
-{
-  glDisable( GL_CULL_FACE );
+  
   for( int i = 0; i < stripsize2 - 2; ++i )
   {
     glPushName( i );
@@ -1269,9 +1260,11 @@ void MapChunk::drawSelect2()
     glVertex3fv( mVertices[gWorld->mapstrip2[i + 1]] );
     glVertex3fv( mVertices[gWorld->mapstrip2[i + 2]] );
     glEnd();
-    glPopName();  
+    glPopName();
   }
-  glEnable( GL_CULL_FACE );  
+  
+  glPopName();
+  //glEnable( GL_CULL_FACE );  
 }
 
 void MapChunk::getSelectionCoord( float *x, float *z )

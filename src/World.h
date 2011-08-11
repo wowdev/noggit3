@@ -29,12 +29,6 @@ static const float doodaddrawdistance = 64.0f;
 
 typedef unsigned short StripType;
 
-enum eSelectionMode
-{
-  eSelectionMode_General,
-  eSelectionMode_Triangle
-};
-
 /*!
  \brief This class is only a holder to have easier access to MapTiles and their flags for easier WDT parsing. This is private and for the class World only.
  */
@@ -112,7 +106,6 @@ public:
   bool drawwater;
   bool drawwmo;
   bool lighting;
-  bool uselowlod;
   
   // Time of the day.
   float animtime;
@@ -182,7 +175,9 @@ public:
   void drawTileMode(float ah);
   
   // Selection related methods.
-  void getSelection( int pSelectionMode );
+private:
+  void getSelection( );
+public:
   bool HasSelection() { return mCurrentSelection; }
   bool IsSelection( int pSelectionType ) { return HasSelection() && mCurrentSelection->type == pSelectionType; }
   nameEntry * GetCurrentSelection() { return mCurrentSelection; }

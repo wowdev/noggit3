@@ -25,7 +25,7 @@
 
 UIMapViewGUI::UIMapViewGUI(MapView *setMapview) : theMapview( setMapview )
 {
-  this->tileFrames = new UIFrame( 0.0f, 0.0f, video.xres, video.yres );
+  this->tileFrames = new UIFrame( 0.0f, 0.0f, video.xres(), video.yres() );
   
   // Minimap window
   this->minimapWindow = new UIMinimapWindow(gWorld);
@@ -37,11 +37,11 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview) : theMapview( setMapview )
   this->tileFrames->addChild(this->guiToolbar);
   
   // Statusbar
-  this->guiStatusbar = new UIStatusBar( 0.0f, video.yres - 30.0f, video.xres, 30.0f );
+  this->guiStatusbar = new UIStatusBar( 0.0f, video.yres() - 30.0f, video.xres(), 30.0f );
   this->tileFrames->addChild(this->guiStatusbar);
 
   // DetailInfoWindow
-  this->guidetailInfos = new UIDetailInfos( 1.0f, video.yres - 282.0f, 600.0f, 250.0f, this );
+  this->guidetailInfos = new UIDetailInfos( 1.0f, video.yres() - 282.0f, 600.0f, 250.0f, this );
   this->guidetailInfos->movable = true;
   this->guidetailInfos->hidden = true;
   this->tileFrames->addChild(this->guidetailInfos);
@@ -53,7 +53,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview) : theMapview( setMapview )
   this->tileFrames->addChild(this->ZoneIDBrowser);
 
   // AppInfosWindow
-  this->guiappInfo = new UIAppInfo( 1.0f, video.yres - 440.0f, 420.0f, 410.0f, this );
+  this->guiappInfo = new UIAppInfo( 1.0f, video.yres() - 440.0f, 420.0f, 410.0f, this );
   this->guiappInfo->movable = true;
   this->guiappInfo->hidden = true;
   std::stringstream appinfoText;
@@ -61,12 +61,12 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview) : theMapview( setMapview )
   this->guiappInfo->setText( appinfoText.str() );
   this->tileFrames->addChild(this->guiappInfo);
 
-  this->TexturePicker = new UITexturePicker(video.xres / 2 - 100.0f, video.yres / 2 - 100.0f,490.0f, 150.0f );
+  this->TexturePicker = new UITexturePicker(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );
   this->TexturePicker->hidden = true;
   this->TexturePicker->movable = true;
   this->tileFrames->addChild( this->TexturePicker);
 
-  this->TextureSwitcher = new UITextureSwitcher(video.xres / 2 - 100.0f, video.yres / 2 - 100.0f,490.0f, 150.0f );
+  this->TextureSwitcher = new UITextureSwitcher(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );
   this->TextureSwitcher->hidden = true;
   this->TextureSwitcher->movable = true;
   this->tileFrames->addChild( this->TextureSwitcher);
@@ -91,14 +91,14 @@ void UIMapViewGUI::render( bool tilemode )
   freetype::shprint( *arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
   
   std::stringstream fps; fps << gFPS << " fps";
-  freetype::shprint( *arial16, video.xres - 200, 5, fps.str() );
+  freetype::shprint( *arial16, video.xres() - 200, 5, fps.str() );
   
   int time = static_cast<int>( gWorld->time ) % 2880;
   std::stringstream timestrs; timestrs << "Time: " << ( time / 120 ) << ":" << ( time % 120 );
-  freetype::shprint( *arial16, video.xres - 100.0f, 5.0f, timestrs.str() );
+  freetype::shprint( *arial16, video.xres() - 100.0f, 5.0f, timestrs.str() );
   
   if ( gWorld->loading ) 
-    freetype::shprint( *arial16, video.xres/2 - freetype::width( *arial16, gWorld->noadt ? "No ADT at this Point" : "Loading..." ) / 2, 30, ( gWorld->noadt ? "No ADT at this Point" : "Loading..." ) );
+    freetype::shprint( *arial16, video.xres() / 2.0f - freetype::width( *arial16, gWorld->noadt ? "No ADT at this Point" : "Loading..." ) / 2.0f, 30.0f, ( gWorld->noadt ? "No ADT at this Point" : "Loading..." ) );
     
     
   std::ostringstream statusbarInfo;

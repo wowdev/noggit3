@@ -11,13 +11,13 @@ UIModel::UIModel( float xPos, float yPos, float w, float h )
 void UIModel::render() const
 {
   glMatrixMode(GL_PROJECTION);
-  gluPerspective(45.0f, (GLfloat)video.xres/(GLfloat)video.yres, 1.0f, 1024.0f);
+  gluPerspective(45.0f, (GLfloat)video.xres()/(GLfloat)video.yres(), 1.0f, 1024.0f);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
   //glMatrixMode(GL_PROJECTION);
   //glLoadIdentity();
-  //glOrtho(0, xres, yres, 0, -1.0, 1.0);
+  //glOrtho(0, xres(), yres(), 0, -1.0, 1.0);
   //glMatrixMode(GL_MODELVIEW);
   //glLoadIdentity();
 

@@ -375,7 +375,7 @@ UIFrame* UITexturingGUI::createTexturePalette( int rows, int cols, UIMapViewGUI 
 
 UIFrame* UITexturingGUI::createSelectedTexture()
 {
-  windowSelectedTexture = new UICloseWindow( video.xres - 148.0f - 128.0f, video.yres - 320.0f, 274.0f, 288.0f, "Current Texture", true );
+  windowSelectedTexture = new UICloseWindow( video.xres() - 148.0f - 128.0f, video.yres() - 320.0f, 274.0f, 288.0f, "Current Texture", true );
 
   std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->filename() : "tileset\\generic\\black.blp";
 
@@ -399,8 +399,8 @@ UIFrame* UITexturingGUI::createTilesetLoader()
 
   UIButton * name;
   windowTilesetLoader = new UICloseWindow(
-    video.xres / 2.0f - 308.0f,
-    video.yres / 2.0f - 139.0f,
+    video.xres() / 2.0f - 308.0f,
+    video.yres() / 2.0f - 139.0f,
     616.0f,
     22.0f + 21.0f * columns + 5.0f,
     "Tileset Loading" );
@@ -436,7 +436,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
   InitFilenameFilterList();
   
   LoadTextureNames();
-  windowTextureFilter = new UICloseWindow( video.xres / 2.0f - 450.0f, video.yres / 2.0f - 300.0f, 900.0f, 610.0f, "Texture Filtering", true );
+  windowTextureFilter = new UICloseWindow( video.xres() / 2.0f - 450.0f, video.yres() / 2.0f - 300.0f, 900.0f, 610.0f, "Texture Filtering", true );
   windowTextureFilter->hidden = true;
 
   //Filename Filters
@@ -467,7 +467,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
 UIFrame* UITexturingGUI::createMapChunkWindow()
 {
   UIWindow *chunkSettingsWindow,*chunkTextureWindow,*chunkEffectWindow;
-  windowMapChunk=new UICloseWindow(video.xres/2.0f-316.0f,video.yres-369.0f,634.0f,337.0f,"Map Chunk Settings");
+  windowMapChunk=new UICloseWindow(video.xres()/2.0f-316.0f,video.yres()-369.0f,634.0f,337.0f,"Map Chunk Settings");
   windowMapChunk->movable=true;
   
   chunkSettingsWindow=new UIWindow(11.0f,26.0f,300.0f,300.0f);
