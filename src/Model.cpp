@@ -15,23 +15,7 @@ Model::Model(const std::string& filename, bool _forceAnim)
 : ManagedItem( )
 , forceAnim(_forceAnim)
 , _filename( filename )
-{  
-  transform( _filename.begin(), _filename.end(), _filename.begin(), ::tolower );
-  size_t found = _filename.rfind( ".mdx" );
-  if( found != std::string::npos )
-    _filename.replace( found, 4, ".m2" );
-  
-  found = _filename.rfind( ".mdl" );
-  if( found != std::string::npos )
-    _filename.replace( found, 4, ".m2" );
-    
-  found = _filename.rfind( ".m2" );
-  if( found == std::string::npos )
-  {
-    LogError << "I can't use the model \"" << _filename << "\" as I can't get its ending to .m2." << std::endl;
-    return;
-  }
-  
+{
   memset( &header, 0, sizeof( ModelHeader ) );
   
   globalSequences = NULL;
@@ -1030,24 +1014,22 @@ void ModelCamera::init(const MPQFile& f, const ModelCameraDef &mcd, int *global)
   tTarget.fix(fixCoordSystem);
 }
 
-void ModelCamera::setup(int time)
+void ModelCamera::setup( int time )
 {
-  if (!ok) return;
+  if( !ok )
+  {
+    return;
+  }
+    
+  video.fov( fov * 34.5f );
+  video.nearclip( nearclip );
+  video.farclip( farclip );
+  video.updateProjectionMatrix();
 
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(fov * 34.5f, (GLfloat)video.xres/(GLfloat)video.yres, nearclip, farclip);
-
-  Vec3D p = pos + tPos.getValue(0, time);
-  Vec3D t = target + tTarget.getValue(0, time);
-
-  Vec3D u(0,1,0);
-  //float roll = rot.getValue(0, time) / PI * 180.0f;
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  gluLookAt(p.x, p.y, p.z, t.x, t.y, t.z, u.x, u.y, u.z);
-  //glRotatef(roll, 0, 0, 1);
+  Vec3D p = pos + tPos.getValue( 0, time );
+  Vec3D t = target + tTarget.getValue( 0, time );
+  Vec3D u( 0.0f, 1.0f, 0.0f );
+  gluLookAt( p.x, p.y, p.z, t.x, t.y, t.z, u.x, u.y, u.z );
 }
 
 void ModelColor::init(const MPQFile& f, const ModelColorDef &mcd, int *global)

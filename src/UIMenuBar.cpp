@@ -10,7 +10,7 @@
 #include "Video.h"
 
 UIMenuBar::UIMenuBar()
-: UIWindow( 0.0f, 0.0f, video.xres, video.yres )
+: UIWindow( 0.0f, 0.0f, video.xres(), video.yres() )
 , mNumMenus( 0 )
 {
 }
@@ -20,9 +20,9 @@ void UIMenuBar::render() const
   glColor4f(0.2f,0.2f,0.2f,0.5f);
   glBegin(GL_TRIANGLE_STRIP);
   glVertex2f(0.0f,0.0f);
-  glVertex2f(video.xres,0.0f);
+  glVertex2f(video.xres(),0.0f);
   glVertex2f(0.0f,30.0f);
-  glVertex2f(video.xres,30.0f);
+  glVertex2f(video.xres(),30.0f);
   glEnd();
 
   for( std::vector<UIFrame*>::const_iterator child = children.begin(); child != children.end(); ++child )
@@ -41,11 +41,11 @@ void UIMenuBar::render() const
     glTexCoord2f(0.5f,1.0f);
     glVertex2f(0.0f,33.0f);  
     glTexCoord2f(0.5f,0.0f);
-    glVertex2f(video.xres,30.0f+3);  
+    glVertex2f(video.xres(),30.0f+3);  
     glTexCoord2f(0.375f,1.0f);
     glVertex2f(0.0f,17.0f);
     glTexCoord2f(0.375f,0.0f);
-    glVertex2f(video.xres,17.0f);
+    glVertex2f(video.xres(),17.0f);
   glEnd();
   
   OpenGL::Texture::disableTexture();
@@ -53,7 +53,7 @@ void UIMenuBar::render() const
 
 void UIMenuBar::resize()
 {
-  this->width=video.xres;
+  this->width=video.xres();
 }
 
 void UIMenuBar::CloseAll()

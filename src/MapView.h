@@ -16,6 +16,7 @@ enum eViewMode
  
 class MapView : public AppState, public HotKeyReceiver
 {
+private:
   float ah,av,moving,strafing,updown,mousedir,movespd;
   bool key_w;
   bool look;
@@ -26,7 +27,7 @@ class MapView : public AppState, public HotKeyReceiver
 
   float lastBrushUpdate;
 
-  void doSelection(int selTyp);
+  void doSelection( bool selectTerrainOnly );
 
   int mViewMode;
 

@@ -7,7 +7,6 @@ Environment::Environment()
   this->ShiftDown = false;
   this->AltDown = false;
   this->CtrlDown = false;
-  this->AutoSelecting = true;
   this->clipboard = nameEntry();
   this->flagPaintMode = FLAG_IMPASS;
   this->paintMode = true;

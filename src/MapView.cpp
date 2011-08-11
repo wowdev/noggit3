@@ -677,7 +677,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
 
   mainGui->ZoneIDBrowser->setMapID( gWorld->getMapID() );
   mainGui->ZoneIDBrowser->setChangeFunc( changeZoneIDValue );
-  tool_settings_x = video.xres - 186;
+  tool_settings_x = video.xres() - 186;
   tool_settings_y = 38;
   
   // Raise/Lower
@@ -1072,7 +1072,7 @@ void MapView::tick( float t, float dt )
             if( mViewMode == eViewMode_3D )
               gWorld->eraseTextures(xPos, zPos);
             else if( mViewMode == eViewMode_2D )
-              gWorld->eraseTextures( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+              gWorld->eraseTextures( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
           }
           else if( Environment::getInstance()->CtrlDown ) 
           {
@@ -1092,7 +1092,7 @@ void MapView::tick( float t, float dt )
               if( mViewMode == eViewMode_3D )
                 gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
               else if( mViewMode == eViewMode_2D )
-                gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
+                gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
             }
           }          
         break;
@@ -1101,12 +1101,12 @@ void MapView::tick( float t, float dt )
           if( Environment::getInstance()->ShiftDown  )
           {
             if( mViewMode == eViewMode_3D )      gWorld->removeHole( xPos, zPos );
-            //else if( mViewMode == eViewMode_2D )  gWorld->removeHole( CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+            //else if( mViewMode == eViewMode_2D )  gWorld->removeHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
           }
           else if( Environment::getInstance()->CtrlDown )
           {  
             if( mViewMode == eViewMode_3D )      gWorld->addHole( xPos, zPos );
-            //else if( mViewMode == eViewMode_2D )  gWorld->addHole( CHUNKSIZE * 4.0f * video.ratio * ( float( MouseX ) / float( video.xres ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+            //else if( mViewMode == eViewMode_2D )  gWorld->addHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
           }
         break;
 
@@ -1210,34 +1210,9 @@ void MapView::tick( float t, float dt )
 
 
 
-void MapView::doSelection( int selTyp )
+void MapView::doSelection( bool selectTerrainOnly )
 {
-  // auto selection draw only ground - TestSelection = true.
-  if(selTyp==0) TestSelection = true;
-  else TestSelection = false;
-  gWorld->drawSelection( MouseX, MouseY, TestSelection );
-  gWorld->getSelection( eSelectionMode_General );
-
-  if( gWorld->GetCurrentSelection() )
-  {
-    if( gWorld->IsSelection( eEntry_MapChunk ) )
-    {
-      gWorld->drawSelectionChunk( MouseX, MouseY );
-      gWorld->getSelection( eSelectionMode_Triangle );
-
-      Environment::getInstance()->AutoSelecting = true;
-    }
-    else if( selTyp == 1 )
-    {
-      Environment::getInstance()->AutoSelecting = false;
-    }
-    else if( Environment::getInstance()->AutoSelecting )
-    {
-      gWorld->ResetSelection();
-    }
-  }
-  else
-    Environment::getInstance()->AutoSelecting = true;
+  gWorld->drawSelection( MouseX, MouseY, selectTerrainOnly );
 }
 
 void MapView::displayViewMode_Help( float /*t*/, float /*dt*/ )
@@ -1258,11 +1233,11 @@ void MapView::displayViewMode_Help( float /*t*/, float /*dt*/ )
   glTexCoord2f( 0.0f, 0.0f );
   glVertex2i( 0.0f, 0.0f );
   glTexCoord2f( 1.0f, 0.0f );
-  glVertex2i( video.xres, 0.0f );
+  glVertex2i( video.xres(), 0.0f );
   glTexCoord2f( 1.0f, 1.0f );
-  glVertex2i( video.xres, video.yres );
+  glVertex2i( video.xres(), video.yres() );
   glTexCoord2f( 0.0f, 1.0f );
-  glVertex2i( 0.0f, video.yres );
+  glVertex2i( 0.0f, video.yres() );
   glEnd();
   
   delete background;
@@ -1311,7 +1286,7 @@ void MapView::displayViewMode_Help( float /*t*/, float /*dt*/ )
     "CTRL + SHIFT + S - Save ADT tiles camera position\n"
   );
   
-  freetype::shprint( *arial16, video.xres - 400.0f, 40.0f, 
+  freetype::shprint( *arial16, video.xres() - 400.0f, 40.0f, 
     "Edit ground:\n"
     "Shift + F1 - toggle ground edit mode\n"
     "T - change terrain mode\n"
@@ -1398,8 +1373,8 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
   video.setTileMode();
   gWorld->drawTileMode( ah );
   
-  const float mX = ( CHUNKSIZE * 4.0f * video.ratio * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres ) - 0.5f ) / gWorld->zoom + gWorld->camera.x ) / CHUNKSIZE;
-  const float mY = ( CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres ) - 0.5f ) / gWorld->zoom + gWorld->camera.z ) / CHUNKSIZE;
+  const float mX = ( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom + gWorld->camera.x ) / CHUNKSIZE;
+  const float mY = ( CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f ) / gWorld->zoom + gWorld->camera.z ) / CHUNKSIZE;
   
   // draw brush
   glPushMatrix();
@@ -1454,8 +1429,9 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 
 void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
 {
-  if( Environment::getInstance()->AutoSelecting && Settings::getInstance()->AutoSelectingMode )
-    doSelection( 0 );
+  //! \note Select terrain below mouse, if no item selected or the item is map.
+  if( !gWorld->IsSelection( eEntry_Model ) && !gWorld->IsSelection( eEntry_WMO ) && Settings::getInstance()->AutoSelectingMode )
+    doSelection( true );
   
   video.set3D();
 
@@ -2021,7 +1997,7 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
   if( !( SDL_GetAppState() & SDL_APPINPUTFOCUS ) )
     return;                  // finally stop getting keys from chatting ..
 
-  if ( ( look && !( Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown || Environment::getInstance()->AltDown ) ) || video.fullscreen ) 
+  if ( ( look && !( Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown || Environment::getInstance()->AltDown ) ) || video.fullscreen() ) 
   {
     ah += e->xrel / XSENS;
     av += mousedir * e->yrel / YSENS;
@@ -2035,8 +2011,8 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
   
   if( MoveObj )
   {
-    mh = -video.ratio*e->xrel / static_cast<float>( video.xres );
-    mv = -e->yrel / static_cast<float>( video.yres );
+    mh = -video.ratio()*e->xrel / static_cast<float>( video.xres() );
+    mv = -e->yrel / static_cast<float>( video.yres() );
   }
   else
   {
@@ -2131,11 +2107,10 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
      }
      else if (leftMouse)
      {
-      // Only left
       LastClicked = mainGui->tileFrames->processLeftClick( static_cast<float>( MouseX ), static_cast<float>( MouseY ) );  
       if( mViewMode == eViewMode_3D && !LastClicked )
       {
-        doSelection( 1 );
+        doSelection( false );
       }
     }
     else if (rightMouse)
@@ -2152,46 +2127,40 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
     {
       case SDL_BUTTON_LEFT:
         leftMouse = false;
+        
+        if( LastClicked )
+          LastClicked->processUnclick();
+          
+        if(!key_w && moving > 0.0f )
+          moving = 0.0f;
+        
+        if( mViewMode == eViewMode_2D )
+        {
+          strafing = 0;
+          moving = 0;
+        }
       break;
 
       case SDL_BUTTON_RIGHT:
         rightMouse = false;
+        
+        if( mViewMode == eViewMode_Help )
+          mViewMode = eViewMode_3D; // Steff: exit help window when open
+          
+        look = false;
+        
+        if(!key_w && moving > 0.0f )moving = 0.0f;
+  
+        if( mViewMode == eViewMode_2D )
+        {
+          updown = 0;
+        }
       break;
 
       case SDL_BUTTON_MIDDLE:
         MoveObj = false;
       break;
     }
-
-     if (!leftMouse)
-     {
-      //  left
-      if( LastClicked )
-        LastClicked->processUnclick();
-      if( !gWorld->HasSelection() || ( !gWorld->IsSelection( eEntry_Model ) && !gWorld->IsSelection( eEntry_WMO ) ) ) 
-        Environment::getInstance()->AutoSelecting = true;
-      if(!key_w && moving > 0.0f )moving = 0.0f;
-      
-      if( mViewMode == eViewMode_2D )
-      {
-        strafing = 0;
-        moving = 0;
-      }
-     }
-     
-     if (!rightMouse)
-     {
-      //  right
-      if( mViewMode == eViewMode_Help )
-        mViewMode = eViewMode_3D; // Steff: exit help window when open
-      look = false;
-      if(!key_w && moving > 0.0f )moving = 0.0f;
-
-      if( mViewMode == eViewMode_2D )
-      {
-        updown = 0;
-      }
-     }
   }
 
   // check menu settings and switch hole mode

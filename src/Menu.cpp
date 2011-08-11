@@ -56,13 +56,13 @@ Menu::Menu()
   gWorld = NULL;
   theMenu = this;
 
-  mGUIFrame = new UIFrame( 0.0f, 0.0f, video.xres, video.yres );
+  mGUIFrame = new UIFrame( 0.0f, 0.0f, video.xres(), video.yres() );
   mGUIMinimapWindow = new UIMinimapWindow( this  );
   mGUIFrame->addChild( mGUIMinimapWindow );
   mGUICreditsWindow = new UIAbout();
   mGUIFrame->addChild( mGUICreditsWindow );
   //! \todo Use? Yes - later i will show here the adt cords where you enter and some otehr infos
-  mGUIStatusbar = new UIStatusBar( 0.0f, video.yres - 30.0f, video.xres, 30.0f );
+  mGUIStatusbar = new UIStatusBar( 0.0f, video.yres() - 30.0f, video.xres(), 30.0f );
   mGUIFrame->addChild( mGUIStatusbar );
   createMapList();
   createBookmarkList();
@@ -130,7 +130,7 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
   gWorld->initDisplay();
   gWorld->enterTile( tile.x, tile.y );
   
-  gStates.push_back( new MapView(  ah, av ) ); // on gPop, MapView is deleted.
+  gStates.push_back( new MapView( ah, av ) ); // on gPop, MapView is deleted.
   randBackground();
 }
 

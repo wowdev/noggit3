@@ -23,6 +23,14 @@ Model* ModelManager::add( std::string name )
 {
   std::transform( name.begin(), name.end(), name.begin(), ::tolower );
   
+  size_t found = name.rfind( ".mdx" );
+  if( found != std::string::npos )
+    name.replace( found, 4, ".m2" );
+  
+  found = name.rfind( ".mdl" );
+  if( found != std::string::npos )
+    name.replace( found, 4, ".m2" );
+  
   if( items.find( name ) == items.end() )
   {
     items[name] = new Model( name );
@@ -37,6 +45,14 @@ Model* ModelManager::add( std::string name )
 void ModelManager::delbyname( std::string name )
 {
   std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+  
+  size_t found = name.rfind( ".mdx" );
+  if( found != std::string::npos )
+    name.replace( found, 4, ".m2" );
+  
+  found = name.rfind( ".mdl" );
+  if( found != std::string::npos )
+    name.replace( found, 4, ".m2" );
   
   if( items.find( name ) != items.end() )
   {

@@ -12,7 +12,7 @@
 #include "Log.h"
 
 UIAbout::UIAbout( )
-: UICloseWindow( video.xres / 2.0f - winWidth / 2.0f, video.yres / 2.0f - winHeight / 2.0f, winWidth, winHeight, "" )
+: UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "" )
 {
   this->addChild( new UITexture( 20.0f, 20.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Potion_83.blp" ) );
   this->addChild( new UIText( 73.0f, 24.0f, "Noggit Studio", skurri32, eJustifyLeft ) );
@@ -25,6 +25,6 @@ UIAbout::UIAbout( )
 
 void UIAbout::resize()
 {
-  this->x = std::max( ( video.xres / 2.0f ) - ( winWidth / 2.0f ), 0.0f );
-  this->y = std::max( ( video.yres / 2.0f ) - ( winHeight / 2.0f ), 0.0f );
+  this->x = std::max( ( video.xres() / 2.0f ) - ( winWidth / 2.0f ), 0.0f );
+  this->y = std::max( ( video.yres() / 2.0f ) - ( winHeight / 2.0f ), 0.0f );
 }

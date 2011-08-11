@@ -70,45 +70,84 @@ void LoadGLSettings()
 
 Video video;
 
-void Video::resize(int _xres, int _yres)
+
+int Video::xres() const
 {
-  //! \todo  Implement some minimum size.
-  //if(xres < 800.0 || yres<600.0f)
-  //{
-  //  if(xres < 800.0f) xres = 800.0f;
-  //  if(yres < 600.0f) yres = 600.0f;
-  //  init(xres, yres, false);
-  //  primary = SDL_SetVideoMode(xres, yres, 32, flags);
-  //}
-
-  this->xres = _xres;
-  this->yres = _yres;
-  this->ratio = static_cast<float>( xres ) / static_cast<float>( yres );
-  
-  // I shouldn't be changing these according to the documentation but it works
-  primary->w = xres;
-  primary->h = yres;
-
-  SDL_Rect Rect;
-
-  Rect.h = yres;
-  Rect.w = xres;
-  Rect.x = 0;
-  Rect.y = 0;
-  SDL_SetClipRect( primary, &Rect );
-
-  glViewport( 0.0f, 0.0f, xres, yres );
-
-  //! \todo  Should we really set to 3D here?
-  this->set3D();
+  return _xres;
+}
+int Video::yres() const
+{
+  return _yres;
+}
+float Video::ratio() const
+{
+  return _ratio;
+}
+bool Video::fullscreen() const
+{
+  return _fullscreen;
+}
+float Video::fov() const
+{
+  return _fov;
+}
+float Video::nearclip() const
+{
+  return _nearclip;
+}
+float Video::farclip() const
+{
+  return _farclip;
 }
 
-bool Video::init( int _xres, int _yres, bool fullscreen_ )
+void Video::fov( float fov_ )
 {
-  fullscreen = fullscreen_;
-  xres = origX = _xres;
-  yres = origY = _yres;
-  ratio = xres / static_cast<float>( yres );
+  _fov = fov_;
+}
+void Video::nearclip( float nearclip_ )
+{
+  _nearclip = nearclip_;
+}
+void Video::farclip( float farclip_ )
+{
+  _farclip = farclip_;
+}
+
+void Video::updateProjectionMatrix()
+{
+  glMatrixMode( GL_PROJECTION );
+  glLoadIdentity();
+  glViewport( 0.0f, 0.0f, xres(), yres() );
+  gluPerspective( fov(), ratio(), nearclip(), farclip() );
+  glMatrixMode( GL_MODELVIEW );
+  glLoadIdentity();
+}
+
+void Video::resize( int xres_, int yres_ )
+{
+  _xres = xres_;
+  _yres = yres_;
+  _ratio = static_cast<float>( xres() ) / static_cast<float>( yres() );
+  
+  LogDebug << "resize(" << xres() << ", " << yres() << ");" << std::endl;
+
+  SDL_Rect rect = { 0, 0, xres(), yres() };
+  SDL_SetClipRect( _primary, &rect );
+
+  updateProjectionMatrix();
+}
+
+bool Video::init( int xres_, int yres_, bool fullscreen_ )
+{
+  _xres = xres_;
+  _yres = yres_;
+  _ratio = static_cast<float>( xres() ) / static_cast<float>( yres() );
+  
+  _fov = 45.0f;
+  _nearclip = 1.0f;
+  _farclip = Settings::getInstance()->FarZ;
+  
+  _fullscreen = fullscreen_;
   
   if( SDL_Init( SDL_INIT_TIMER | SDL_INIT_VIDEO ) )
   {
@@ -116,8 +155,8 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
     exit( 1 );
   }
   
-  flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
-  if( fullscreen_ )
+  int flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
+  if( fullscreen() )
   {
     flags |= SDL_FULLSCREEN;
   }
@@ -129,9 +168,9 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
   SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
   SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
   
-  primary = SDL_SetVideoMode( xres, yres, 0, flags );
+  _primary = SDL_SetVideoMode( _xres, _yres, 0, flags );
 
-  if( !primary ) 
+  if( !_primary ) 
   {
     LogError << "SDL: " << SDL_GetError() << std::endl;
     exit( 1 );
@@ -144,10 +183,7 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
     return false;
   }
 
-  glViewport( 0.0f, 0.0f, xres, yres );
-
-  //! \todo  Should we really set to 3D here?
-  //this->set3D();
+  glViewport( 0.0f, 0.0f, xres(), yres() );
 
   glEnableClientState( GL_VERTEX_ARRAY );
   glEnableClientState( GL_NORMAL_ARRAY );
@@ -165,9 +201,7 @@ bool Video::init( int _xres, int _yres, bool fullscreen_ )
 
 void Video::close()
 {
-  //Crashes if I don't do this, so prolly why they say don't change those
-  primary->w = origX;
-  primary->h = origY;
+  SDL_FreeSurface( _primary );
   SDL_Quit();
 }
 
@@ -186,7 +220,7 @@ void Video::set3D() const
 {
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
-  gluPerspective( 45.0f, this->ratio, 1.0f, Settings::getInstance()->FarZ );
+  gluPerspective( fov(), ratio(), nearclip(), farclip() );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
 }
@@ -194,7 +228,7 @@ void Video::set3D() const
 void Video::set3D_select() const
 {
   glMatrixMode( GL_PROJECTION );
-  gluPerspective( 45.0f, this->ratio, 1.0f, 1024.0f );
+  gluPerspective( fov(), ratio(), nearclip(), farclip() );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
 }
@@ -203,7 +237,7 @@ void Video::set2D() const
 {
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
-  glOrtho( 0.0f, xres, yres, 0.0f, -1.0f, 1.0f );
+  glOrtho( 0.0f, xres(), yres(), 0.0f, -1.0f, 1.0f );
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 }
@@ -212,7 +246,7 @@ void Video::setTileMode() const
 {
   glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
-  glOrtho( -2.0f * this->ratio, 2.0f * this->ratio, 2.0f, -2.0f, -100.0f, 300.0f );
+  glOrtho( -2.0f * ratio(), 2.0f * ratio(), 2.0f, -2.0f, -100.0f, 300.0f );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
 }

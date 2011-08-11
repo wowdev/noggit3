@@ -10,29 +10,29 @@
 UIMinimapWindow::UIMinimapWindow( Menu* menuLink )
 : UIWindow( 10.0f, 10.0f, 100.0f, 100.0f )
 , borderwidth( 5.0f )
-, tilesize( ( video.yres - 70.0f - this->borderwidth * 2.0f ) / 64.0f )
+, tilesize( ( video.yres() - 70.0f - this->borderwidth * 2.0f ) / 64.0f )
 , lookAt( 0.0f )
 , mMenuLink( menuLink )
 , map( NULL )
 {
   this->width = this->borderwidth * 2 + this->tilesize * 64;
   this->height = this->width;
-  this->x = video.xres / 2 - this->width / 2;
-  this->y = video.yres / 2 - this->height / 2;
+  this->x = video.xres() / 2 - this->width / 2;
+  this->y = video.yres() / 2 - this->height / 2;
 }
 
 UIMinimapWindow::UIMinimapWindow( World* setMap )
 : UIWindow( 10.0f, 10.0f, 100.0f, 100.0f )
 , borderwidth( 5.0f )
-, tilesize( ( video.yres - 70.0f - this->borderwidth * 2.0f ) / 64.0f )
+, tilesize( ( video.yres() - 70.0f - this->borderwidth * 2.0f ) / 64.0f )
 , lookAt( 0.0f )
 , mMenuLink( NULL )
 , map( setMap )
 {
   this->width = this->borderwidth * 2 + this->tilesize * 64;
   this->height = this->width;
-  this->x = video.xres / 2 - this->width / 2;
-  this->y = video.yres / 2 - this->height / 2;
+  this->x = video.xres() / 2 - this->width / 2;
+  this->y = video.yres() / 2 - this->height / 2;
 }
 
 UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
@@ -57,12 +57,12 @@ UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
 
 void UIMinimapWindow::resize()
 {
-  this->tilesize = (video.yres - 70.0f - this->borderwidth * 2) / 64;
+  this->tilesize = (video.yres() - 70.0f - this->borderwidth * 2) / 64;
 
   this->width = this->borderwidth * 2 + this->tilesize * 64;
   this->height = this->width;
-  this->x = video.xres / 2 - this->width / 2;
-  this->y = video.yres / 2 - this->height / 2;
+  this->x = video.xres() / 2 - this->width / 2;
+  this->y = video.yres() / 2 - this->height / 2;
 }
 
 void UIMinimapWindow::changePlayerLookAt(float ah)

@@ -23,11 +23,10 @@
 #include "Video.h"
 #include "WMOInstance.h" // WMOInstance
 #include "MapTile.h"
+
 World *gWorld = NULL;
 
-static const int BUFSIZE = 8192;
-unsigned int  SelectBuffer[BUFSIZE];
-
+GLuint selectionBuffer[8192];
 
 bool World::IsEditableWorld( int pMapId )
 {
@@ -75,7 +74,55 @@ bool World::IsEditableWorld( int pMapId )
   return false;
 }
 
-World::World( const std::string& name ) : cx( -1 ), cz( -1 ), ex( -1 ), ez( -1 ), mCurrentSelection( NULL ), mCurrentSelectedTriangle( 0 ), SelectionMode( false ), mBigAlpha( false ), mWmoFilename( "" ), mWmoEntry( ENTRY_MODF() ), detailtexcoords( 0 ), alphatexcoords( 0 ), mMapId( 0xFFFFFFFF ), ol( NULL ), l_const( 0.0f ), l_linear( 0.7f ), l_quadratic( 0.03f ), drawdoodads( true ), drawfog( true ), drawlines( false ), drawmodels( true ), drawterrain( true ), drawwater( false ), drawwmo( true ), lighting( true ), uselowlod( drawfog ), animtime( 0 ), time( 1450 ), basename( name ), fogdistance( 777.0f ), culldistance( fogdistance ), autoheight( false ), minX( 0.0f ), maxX( 0.0f ), minY( 0.0f ), maxY( 0.0f ), zoom( 0.25f ), skies( NULL ), mHasAGlobalWMO( false ), loading( false ), noadt( false ), hadSky( false ), outdoorLightStats( OutdoorLightStats() ), minimap( 0 ), mapstrip( NULL ), mapstrip2( NULL ), camera( Vec3D( 0.0f, 0.0f, 0.0f ) ), lookat( Vec3D( 0.0f, 0.0f, 0.0f ) ), frustum( Frustum() )
+World::World( const std::string& name )
+: cx( -1 )
+, cz( -1 )
+, ex( -1 )
+, ez( -1 )
+, mCurrentSelection( NULL )
+, mCurrentSelectedTriangle( 0 )
+, SelectionMode( false )
+, mBigAlpha( false )
+, mWmoFilename( "" )
+, mWmoEntry( ENTRY_MODF() )
+, detailtexcoords( 0 )
+, alphatexcoords( 0 )
+, mMapId( 0xFFFFFFFF )
+, ol( NULL )
+, l_const( 0.0f )
+, l_linear( 0.7f )
+, l_quadratic( 0.03f )
+, drawdoodads( true )
+, drawfog( true )
+, drawlines( false )
+, drawmodels( true )
+, drawterrain( true )
+, drawwater( false )
+, drawwmo( true )
+, lighting( true )
+, animtime( 0 )
+, time( 1450 )
+, basename( name )
+, fogdistance( 777.0f )
+, culldistance( fogdistance )
+, autoheight( false )
+, minX( 0.0f )
+, maxX( 0.0f )
+, minY( 0.0f )
+, maxY( 0.0f )
+, zoom( 0.25f )
+, skies( NULL )
+, mHasAGlobalWMO( false )
+, loading( false )
+, noadt( false )
+, hadSky( false )
+, outdoorLightStats( OutdoorLightStats() )
+, minimap( 0 )
+, mapstrip( NULL )
+, mapstrip2( NULL )
+, camera( Vec3D( 0.0f, 0.0f, 0.0f ) )
+, lookat( Vec3D( 0.0f, 0.0f, 0.0f ) )
+, frustum( Frustum() )
 {
   for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
   {
@@ -876,14 +923,10 @@ void World::setupFog()
 
 void World::draw()
 {
-  ModelManager::resetAnim();
-
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  // setup camera
   gluLookAt(camera.x,camera.y,camera.z, lookat.x,lookat.y,lookat.z, 0, 1, 0);
 
-  // camera is set up
   frustum.retrieve();
 
   ///glDisable(GL_LIGHTING);
@@ -893,7 +936,6 @@ void World::draw()
   if( drawwmo || mHasAGlobalWMO )
     for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); !hadSky && it != mWMOInstances.end(); ++it )
       it->second.wmo->drawSkybox( this->camera, it->second.extents[0], it->second.extents[1] );
-
 
   glEnable(GL_CULL_FACE);
   glDisable(GL_BLEND);
@@ -916,7 +958,6 @@ void World::draw()
 
   glDisable(GL_TEXTURE_2D);
   
-
   outdoorLighting();
   outdoorLights(true);
   
@@ -954,7 +995,6 @@ void World::draw()
   glDepthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
   glEnable(GL_LIGHTING);
 
-
   glEnable(GL_COLOR_MATERIAL);
   //glColorMaterial(GL_FRONT, GL_DIFFUSE);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
@@ -984,16 +1024,10 @@ void World::draw()
   glClientActiveTexture(GL_TEXTURE0);
   SaveGLSettings();
 
-
-  glInitNames();
-  
-  uselowlod = drawfog;
-
   // height map w/ a zillion texture passes
   //! \todo  Do we need to push the matrix here?
   
   glPushMatrix();
-
   
   if( drawterrain )
   {
@@ -1011,7 +1045,6 @@ void World::draw()
   
   glPopMatrix();
 
-  
   if (drawlines)
   {
     glDisable(GL_COLOR_MATERIAL);
@@ -1022,7 +1055,6 @@ void World::draw()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-
     setupFog();
     for( int j = 0; j < 64; ++j )
     {
@@ -1036,13 +1068,11 @@ void World::draw()
       }
     }
   }
-  
 
   glActiveTexture(GL_TEXTURE1);
   glDisable(GL_TEXTURE_2D);
   glActiveTexture(GL_TEXTURE0);
   glEnable(GL_TEXTURE_2D);
-
 
   glColor4f(1,1,1,1);
   glEnable(GL_BLEND);
@@ -1053,11 +1083,8 @@ void World::draw()
     glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
   }
   
-
-
   // unbind hardware buffers
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 
   glEnable(GL_CULL_FACE);
 
@@ -1072,6 +1099,18 @@ void World::draw()
     glLightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
   }
 
+  // M2s / models  
+  if( drawmodels)
+  {
+    ModelManager::resetAnim();
+    
+    glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
+    for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
+      it->second.draw();
+
+    //drawModelList();
+  }
+  
   // WMOs / map objects
   if( drawwmo || mHasAGlobalWMO )
     if (video.mSupportShaders) 
@@ -1097,16 +1136,6 @@ void World::draw()
   setupFog();
 
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-
-  // M2s / models  
-  if( drawmodels)
-  {
-    glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
-    for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
-      it->second.draw();
-
-    //drawModelList();
-  }
   glDisable(GL_CULL_FACE);
 
   glDisable(GL_BLEND);
@@ -1176,38 +1205,36 @@ void World::draw()
   ez = camera.z / TILESIZE;
 }
 
-void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
-{
-  GLint viewport[4];
-  glSelectBuffer(BUFSIZE,SelectBuffer);
-  glRenderMode(GL_SELECT);
+static const GLuint MapObjName = 1;
+static const GLuint DoodadName = 2;
+static const GLuint MapTileName = 3;
 
-  glMatrixMode(GL_PROJECTION);
+void World::drawSelection( int cursorX, int cursorY, bool pOnlyMap )
+{
+  glSelectBuffer( sizeof( selectionBuffer ) / sizeof( GLuint ), selectionBuffer );
+  glRenderMode( GL_SELECT );
+
+  glMatrixMode( GL_PROJECTION );
   glLoadIdentity();
 
-  glGetIntegerv(GL_VIEWPORT,viewport);
-  gluPickMatrix(cursorX,viewport[3]-cursorY, 7,7,viewport);
+  GLint viewport[4];
+  glGetIntegerv( GL_VIEWPORT, viewport );
+  gluPickMatrix( cursorX, viewport[3] - cursorY, 7, 7, viewport );
+  
   video.set3D_select();
 
-  if( !pOnlyMap )
-  {
-    if( drawmodels )
-      ModelManager::resetAnim();
-  }
+  glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  gluLookAt( camera.x, camera.y, camera.z, lookat.x, lookat.y, lookat.z, 0, 1, 0 );
 
-  gluLookAt(camera.x,camera.y,camera.z, lookat.x,lookat.y,lookat.z, 0, 1, 0);
-
-  // camera is set up
   frustum.retrieve();
 
-  glClear(GL_DEPTH_BUFFER_BIT); 
+  glClear( GL_DEPTH_BUFFER_BIT );
+  
   glInitNames();
 
-  // height map w/ a zillion texture passes
-  uselowlod = drawfog;
-  if (drawterrain) 
+  glPushName( MapTileName );
+  if( drawterrain ) 
   {
     for( int j = 0; j < 64; ++j )
     {
@@ -1220,72 +1247,100 @@ void World::drawSelection(int cursorX,int cursorY, bool pOnlyMap )
       }
     }
   }
+  glPopName();
   
-  if( pOnlyMap )
-    return;
-
-  if( drawwmo )
-    // WMOs / map objects
-    for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-      it->second.drawSelect();
-
-  if( drawmodels )
-    // M2s / models
-    for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
-      it->second.drawSelect();
-}
-
-void World::drawSelectionChunk(int cursorX,int cursorY)
-{
-  if( !IsSelection( eEntry_MapChunk ) )
-    return;
-
-  GLint viewport[4];
-  glSelectBuffer(BUFSIZE,SelectBuffer);
-  glRenderMode(GL_SELECT);
-
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-
-  glGetIntegerv(GL_VIEWPORT,viewport);
-  gluPickMatrix(cursorX,viewport[3]-cursorY,12,12,viewport);
-  video.set3D_select();
-
-  ModelManager::resetAnim();
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  gluLookAt(camera.x,camera.y,camera.z, lookat.x,lookat.y,lookat.z, 0, 1, 0);
-
-  // camera is set up
-  frustum.retrieve();
-
-  glClear(GL_DEPTH_BUFFER_BIT); 
-  glInitNames();
-  gWorld->GetCurrentSelection()->data.mapchunk->drawSelect2();
-}
-
-void World::getSelection( int pSelectionMode )
-{
-  unsigned int lMinDist = 0xFFFFFFFF, lOffset = 0, lMinimumName = 0, lHits = glRenderMode( GL_RENDER );
-
-  while( lHits-- > 0 )
+  if( !pOnlyMap )
   {
-    unsigned int lEntries = SelectBuffer[lOffset];
-
-    if( SelectBuffer[lOffset + 1] < lMinDist )
-    {      
-      lMinDist = SelectBuffer[lOffset + 1];
-      lMinimumName = SelectBuffer[lOffset + 3];
+    // WMOs / map objects
+    if( drawwmo )
+    {
+      glPushName( MapObjName );
+      glPushName( 0 );
+      for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
+      {
+        it->second.drawSelect();
+      }
+      glPopName();
+      glPopName();
     }
-
-    lOffset = lOffset + 3 + lEntries;
+  
+    // M2s / models
+    if( drawmodels )
+    {
+      ModelManager::resetAnim();
+      
+      glPushName( DoodadName );
+      glPushName( 0 );
+      for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
+      {
+        it->second.drawSelect();
+      }
+      glPopName();
+      glPopName();
+    }
   }
   
-  if( pSelectionMode == eSelectionMode_General )
-    mCurrentSelection = SelectionNames.findEntry( lMinimumName );
-  else if( pSelectionMode == eSelectionMode_Triangle )
-    mCurrentSelectedTriangle = lMinimumName;
+  getSelection();
+}
+
+struct GLNameEntry
+{
+  GLuint stackSize;
+  GLuint nearZ;
+  GLuint farZ;
+  struct
+  {
+    GLuint type;
+    union
+    {
+      GLuint dummy;
+      GLuint chunk;
+    };
+    union
+    {
+      GLuint uniqueId;
+      GLuint triangle;
+    };
+  } stack;
+};
+
+void World::getSelection()
+{
+  GLuint minDist = 0xFFFFFFFF;
+  GLNameEntry* minEntry = NULL;
+  GLuint hits = glRenderMode( GL_RENDER );
+
+  size_t offset = 0;
+
+  //! \todo Isn't the closest one always the first? Iterating would be worthless then.
+  while( hits-- > 0U )
+  {
+    GLNameEntry* entry = reinterpret_cast<GLNameEntry*>( &selectionBuffer[offset] );
+    
+    // We always push { MapObjName | DoodadName | MapTileName }, { 0, 0, MapTile }, { UID, UID, triangle }
+    assert( entry->stackSize == 3 );
+    
+    if( entry->nearZ < minDist )
+    {
+      minDist = entry->nearZ;
+      minEntry = entry;
+    }
+    
+    offset += sizeof( GLNameEntry ) / sizeof( GLuint );
+  }
+  
+  if( minEntry )
+  {
+    if( minEntry->stack.type == MapObjName || minEntry->stack.type == DoodadName )
+    {
+      mCurrentSelection = SelectionNames.findEntry( minEntry->stack.uniqueId );
+    }
+    else if( minEntry->stack.type == MapTileName )
+    {
+      mCurrentSelection = SelectionNames.findEntry( minEntry->stack.chunk );
+      mCurrentSelectedTriangle = minEntry->stack.triangle;
+    }
+  }
 }
 
 void World::tick(float dt)
@@ -1416,8 +1471,8 @@ void World::drawTileMode(float /*ah*/)
   glPushMatrix();
   glTranslatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
 
-  minX = camera.x/CHUNKSIZE - 2.0f*video.ratio/zoom;
-  maxX = camera.x/CHUNKSIZE + 2.0f*video.ratio/zoom;
+  minX = camera.x/CHUNKSIZE - 2.0f*video.ratio()/zoom;
+  maxX = camera.x/CHUNKSIZE + 2.0f*video.ratio()/zoom;
   minY = camera.z/CHUNKSIZE - 2.0f/zoom;
   maxY = camera.z/CHUNKSIZE + 2.0f/zoom;
   
@@ -1796,7 +1851,7 @@ void World::saveMap()
   
       ATile->drawTextures();
       glPopMatrix();
-      glReadPixels(video.xres/2-128,video.yres/2-128,256,256,GL_RGB,GL_UNSIGNED_BYTE,image);
+      glReadPixels(video.xres()/2-128,video.yres()/2-128,256,256,GL_RGB,GL_UNSIGNED_BYTE,image);
       video.flip();
 	  std::stringstream ss;
 	  ss << basename.c_str() << "_map_" << x << "_" << y << ".raw";

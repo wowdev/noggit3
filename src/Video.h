@@ -16,14 +16,7 @@ void LoadGLSettings();
 
 class Video
 {
-  int status;
-  int flags;
-
-  SDL_Surface *primary;
-
 public:
-  bool fullscreen;
-
   bool init(int xres, int yres, bool fullscreen);
 
   void close();
@@ -35,14 +28,40 @@ public:
   void set2D() const;
   void setTileMode() const;
   void resize(int w, int h);
-    
-  int xres, yres;
-  int origX, origY;
-  float ratio;
+  
+  int xres() const;
+  int yres() const;
+  float ratio() const;
+  bool fullscreen() const;
+  
+  float fov() const;
+  float nearclip() const;
+  float farclip() const;
+  
+  void fov( float fov_ );
+  void nearclip( float nearclip_ );
+  void farclip( float farclip_ );
 
+  void updateProjectionMatrix();
+  
   /// is * supported:
   bool mSupportShaders;
   bool mSupportCompression;
+
+private:
+  int _xres;
+  int _yres;
+  float _ratio;
+  
+  float _fov;
+  float _nearclip;
+  float _farclip;
+  
+  bool _fullscreen;
+  
+  int _status;
+
+  SDL_Surface* _primary;
 };
 
 #include "Manager.h" // ManagedItem

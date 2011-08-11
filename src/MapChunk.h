@@ -69,7 +69,6 @@ public:
   void drawBlock();
   void drawColor();
   void drawSelect();
-  void drawSelect2();
   void drawNoDetail();
   void drawPass(int anim);
   void drawLines();
