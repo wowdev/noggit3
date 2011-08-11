@@ -202,6 +202,8 @@ void change_settings_window(int oldid, int newid)
   setting_ground->hidden=true;
   setting_blur->hidden=true;
   settings_paint->hidden=true;
+  if(!mainGui || !mainGui->TexturePalette)
+    return;
   mainGui->TexturePalette->hidden = true;
   // fetch old win position
   switch(oldid)
