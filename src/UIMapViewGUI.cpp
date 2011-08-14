@@ -8,7 +8,7 @@
 #include "Environment.h"
 #include "MapChunk.h"
 #include "MapView.h"
-#include "Noggit.h" // gStates, gPop, gFPS, arial14, morpheus40, arial...
+#include "Noggit.h" // gStates, gPop, arial14, morpheus40, arial...
 #include "Project.h"
 #include "UIAppInfo.h" // UIAppInfo
 #include "UIDetailInfos.h" // UIDetailInfos
@@ -89,9 +89,6 @@ void UIMapViewGUI::render( bool tilemode )
   
   //! \todo Make these some textUIs.
   freetype::shprint( *arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
-  
-  std::stringstream fps; fps << gFPS << " fps";
-  freetype::shprint( *arial16, video.xres() - 200, 5, fps.str() );
   
   int time = static_cast<int>( gWorld->time ) % 2880;
   std::stringstream timestrs; timestrs << "Time: " << ( time / 120 ) << ":" << ( time % 120 );

@@ -176,11 +176,20 @@ MPQFile::MPQFile( const std::string& filename )
     return;
   }
   
+  std::string filename_corrected = filename;
+  
+  found = filename_corrected.find( "/" );
+  while( found != std::string::npos )
+  {
+    filename_corrected.replace( found, 1, "\\" );
+    found = filename_corrected.find( "/" );
+  }
+  
   for( ArchivesMap::reverse_iterator i = _openArchives.rbegin(); i != _openArchives.rend(); ++i )
   {
     HANDLE fileHandle;
 
-    if( !i->second->openFile( filename, &fileHandle ) )
+    if( !i->second->openFile( filename_corrected, &fileHandle ) )
       continue;
 
     size = SFileGetFileSize( fileHandle );
@@ -288,13 +297,13 @@ bool MPQFile::isEof() const
     return eof;
 }
 
-void MPQFile::seek(int offset)
+void MPQFile::seek(size_t offset)
 {
   pointer = offset;
   eof = (pointer >= size);
 }
 
-void MPQFile::seekRelative(int offset)
+void MPQFile::seekRelative(size_t offset)
 {
   pointer += offset;
   eof = (pointer >= size);
@@ -302,11 +311,9 @@ void MPQFile::seekRelative(int offset)
 
 void MPQFile::close()
 {
-  if (buffer)
-  {
-    delete[] buffer;
-    buffer = NULL;
-  }
+  delete[] buffer;
+  buffer = NULL;
+  
   eof = true;
 }
 
