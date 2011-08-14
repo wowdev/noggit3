@@ -41,7 +41,8 @@ class MPQFile
 {
   bool eof;
   char* buffer;
-  size_t pointer, size;
+  size_t pointer;
+  size_t size;
 
   // disable copying
   MPQFile(const MPQFile& /*f*/) { }
@@ -59,8 +60,8 @@ public:
   char* getBuffer() const;
   char* getPointer() const;
   bool isEof() const;
-  void seek(int offset);
-  void seekRelative(int offset);
+  void seek(size_t offset);
+  void seekRelative(size_t offset);
   void close();
   void save(const char* filename);
   bool isExternal() const
@@ -68,7 +69,7 @@ public:
     return External;
   }
 
-  void setBuffer(char *Buf, unsigned int Size)
+  void setBuffer(char *Buf, size_t Size)
   {
     if(buffer)
     {

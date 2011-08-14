@@ -169,7 +169,8 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
 
 
 
-font_data::font_data( const std::string& fname, unsigned int _h, bool fromMPQ ) : h ( _h )
+font_data::font_data( const std::string& fname, unsigned int _h, bool fromMPQ )
+: h ( _h )
 {
   FT_Library library;
   if( FT_Init_FreeType( &library ) ) 
@@ -181,7 +182,7 @@ font_data::font_data( const std::string& fname, unsigned int _h, bool fromMPQ ) 
   FT_Face face;
 
   bool failed;
-  MPQFile* f;
+  MPQFile* f = NULL;
   if( fromMPQ )
   {
     f = new MPQFile( fname );
@@ -198,7 +199,7 @@ font_data::font_data( const std::string& fname, unsigned int _h, bool fromMPQ ) 
     throw std::runtime_error( "FT_New_Face failed (there is probably a problem with your font file)" );
   }
 
-  // For some twisted reason, Freetype measures font size in terms of 1/64ths of pixels.  Thus, to make a font h pixels high, we need to request a size of h*64. (h << 6 is just a prettier way of writting h*64)
+  // For some twisted reason, Freetype measures font size in terms of 1/64ths of pixels. Thus, to make a font h pixels high, we need to request a size of h*64. (h << 6 is just a prettier way of writting h*64)
   FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72 );
 
   list_base = glGenLists( 128 ); //! \todo more for unicode!
@@ -211,7 +212,7 @@ font_data::font_data( const std::string& fname, unsigned int _h, bool fromMPQ ) 
   FT_Done_Face( face );
   FT_Done_FreeType( library );
   
-  if( fromMPQ )
+  if( fromMPQ && f )
   {
     f->close();
     delete f;

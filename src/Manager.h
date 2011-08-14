@@ -1,9 +1,6 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
-#include <string> // std::string
-#include <algorithm> // std::transform()
-
 // base class for manager objects
 
 //! \todo Proxy objects / handles holding the name and the object.
@@ -11,7 +8,7 @@
 class ManagedItem 
 {
 private:
-  int _referenceCount;
+  size_t _referenceCount;
   
 public:
   explicit ManagedItem( )

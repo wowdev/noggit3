@@ -38,16 +38,21 @@
 #include "TextureManager.h" // TextureManager::report()
 #include "WMO.h" // WMOManager::report()
 #include "ModelManager.h" // ModelManager::report()
-//#include "shaders.h"
 
 std::vector<AppState*> gStates;
 bool gPop = false;
 
 extern std::list<std::string> gListfile;
 
-float gFPS;
-
-freetype::font_data *arialn13, *arial12, *arial14, *arial16, *arial24, *arial32, *morpheus40, *skurri32, *fritz16;  
+freetype::font_data* arialn13;
+freetype::font_data* arial12;
+freetype::font_data* arial14;
+freetype::font_data* arial16;
+freetype::font_data* arial24;
+freetype::font_data* arial32;
+freetype::font_data* morpheus40;
+freetype::font_data* skurri32;
+freetype::font_data* fritz16;  
 
 AsyncLoader* gAsyncLoader;
 
@@ -359,100 +364,95 @@ int main( int argc, char *argv[] )
   OpenDBs();
   
   // Initializing Fonts
-  skurri32 = new freetype::font_data( "fonts\\SKURRI.TTF", 32, true );
-  fritz16 = new freetype::font_data( "fonts\\FRIZQT__.TTF", 16, true );
-  morpheus40 = new freetype::font_data( "fonts\\MORPHEUS.TTF", 40, true );
-  arialn13 = new freetype::font_data( "fonts\\arialn.TTF", 13, true );
+  skurri32 = new freetype::font_data( "fonts/skurri.ttf", 32, true );
+  fritz16 = new freetype::font_data( "fonts/frizqt__.ttf", 16, true );
+  morpheus40 = new freetype::font_data( "fonts/morpheus.ttf", 40, true );
+  arialn13 = new freetype::font_data( "fonts/arialn.ttf", 13, true );
   
-  const char* arialname = lFontWindows ? "C:\\windows\\fonts\\arial.ttf" : "fonts/arial.ttf";
+  const std::string arialname = lFontWindows ? "C:\\windows\\fonts\\arial.ttf" : "fonts/arial.ttf";
   arial12 = new freetype::font_data( arialname, 12, false );
   arial14 = new freetype::font_data( arialname, 14, false );
   arial16 = new freetype::font_data( arialname, 16, false );
   arial24 = new freetype::font_data( arialname, 24, false );
   arial32 = new freetype::font_data( arialname, 32, false );
   
-  float ftime;
-  Uint32 t, last_t, frames = 0, time = 0, fcount = 0, ft = 0;
-  AppState *as;
-  gFPS = 0;
-  
-  LogDebug << "Creating Menu" << std::endl;
-  
-  Menu *m = new Menu();
-  as = m;
-
-  gStates.push_back( as );
-  
   if( video.mSupportShaders )
     loadWaterShader();
   else
     LogError << "Your GPU does not support ARB vertex programs (shaders). Sorry." << std::endl;
   
-  bool done = false;
-  t = SDL_GetTicks();
+  LogDebug << "Creating Menu" << std::endl;
+  
+  gStates.push_back( new Menu() );
   
   LogDebug << "Entering Main Loop" << std::endl;
   
-  while(gStates.size()>0 && !done) {
-    last_t = t;
-    t = SDL_GetTicks();
-    Uint32 dt = t - last_t;
-    time += dt;
-    ftime = time / 1000.0f;
+  bool done = false;
+  Uint32 ticks = SDL_GetTicks();
+  AppState* activeAppState = NULL;
+  Uint32 time = 0;
+  
+  while( !gStates.empty() && !done )
+  {
+    Uint32 lastTicks = ticks;
+    ticks = SDL_GetTicks();
+    Uint32 tickDelta = ticks - lastTicks;
+    time += tickDelta;
     
-    as = gStates[gStates.size()-1];
+    activeAppState = gStates[gStates.size() - 1];
+    
+    Uint8 appState = SDL_GetAppState();
+    bool isActiveApplication = appState & SDL_APPACTIVE;
+    bool hasInputFocus = appState & SDL_APPINPUTFOCUS;
+    bool hasMouseFocus = appState & SDL_APPMOUSEFOCUS;
     
     SDL_Event event;
-    while ( SDL_PollEvent(&event) ) {
-      if ( event.type == SDL_QUIT ) {
+    while( SDL_PollEvent( &event ) )
+    {
+      if( event.type == SDL_QUIT )
+      {
         done = true;
       }
-      else if ( event.type == SDL_MOUSEMOTION) {
-        if(SDL_GetAppState()&SDL_APPMOUSEFOCUS)
-          as->mousemove(&event.motion);
-      }
-      else if ( (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)&&(SDL_GetAppState()&SDL_APPINPUTFOCUS)) {
-        
-        if(event.button.type == SDL_MOUSEBUTTONUP)
-          as->mouseclick(&event.button);
-        else if(SDL_GetAppState()&SDL_APPMOUSEFOCUS)
-          as->mouseclick(&event.button);
-      }
-      else if ( (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)) {
-        if(SDL_GetAppState()&SDL_APPINPUTFOCUS)
-          as->keypressed(&event.key);
-      }
-      else if( event.type == SDL_VIDEORESIZE)
+      else if( event.type == SDL_MOUSEMOTION && hasMouseFocus )
       {
-        // reset the resolution in video object
-        video.resize(event.resize.w,event.resize.h);
-        // message to the active gui element
-        if(SDL_GetAppState())
-          as->resizewindow();
+        activeAppState->mousemove( &event.motion );
       }
-    }
-    if(SDL_GetAppState()&SDL_APPACTIVE)
-    {
-      as->tick(ftime, dt/1000.0f);
-      as->display(ftime, dt/1000.0f);
+      else if( ( event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP ) && hasInputFocus && hasMouseFocus )
+      {  
+        if( event.button.type == SDL_MOUSEBUTTONUP )
+        {
+          activeAppState->mouseclick( &event.button );
+        }
+        else if( hasMouseFocus )
+        {
+          activeAppState->mouseclick( &event.button );
+        }
+      }
+      else if( ( event.type == SDL_KEYDOWN || event.type == SDL_KEYUP ) && hasInputFocus )
+      {
+        activeAppState->keypressed( &event.key );
+      }
+      else if( event.type == SDL_VIDEORESIZE )
+      {
+        video.resize( event.resize.w, event.resize.h );
+        activeAppState->resizewindow();
+      }
     }
     
-    if (gPop) 
+    if( isActiveApplication )
+    {
+      const float ftime = time / 1000.0f;
+      const float ftickDelta = tickDelta / 1000.0f;
+      activeAppState->tick( ftime, ftickDelta );
+      activeAppState->display( ftime, ftickDelta );
+    }
+    
+    if( gPop ) 
     {
       gPop = false;
       gStates.pop_back();
-      delete as;
-      as = NULL;
-    }
-    
-    frames++;
-    fcount++;
-    ft += dt;
-    if (ft >= 1000) 
-    {
-      gFPS = static_cast<float>(fcount) / static_cast<float>(ft) * 1000.0f;
-      ft = 0;
-      fcount = 0;
+      delete activeAppState;
+      activeAppState = NULL;
     }
     
     video.flip();
