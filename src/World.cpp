@@ -1022,7 +1022,8 @@ void World::draw()
   glTexCoordPointer(2, GL_FLOAT, 0, 0);
 
   glClientActiveTexture(GL_TEXTURE0);
-  SaveGLSettings();
+  
+  OpenGL::SettingsSaver::save();
 
   // height map w/ a zillion texture passes
   //! \todo  Do we need to push the matrix here?
@@ -1144,7 +1145,7 @@ void World::draw()
 
   // gosh darn alpha blended evil
 
-  LoadGLSettings();
+  OpenGL::SettingsSaver::restore();
   setupFog();
   
   /*

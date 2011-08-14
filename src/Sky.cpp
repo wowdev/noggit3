@@ -95,14 +95,16 @@ Sky::Sky( DBCFile::Iterator data )
 
 Vec3D Sky::colorFor(int r, int t) const
 {
-  if (mmin[r]<0) {
+  if (mmin[r]<0)
+  {
     return Vec3D(0,0,0);
   }
   Vec3D c1,c2;
   int t1,t2;
   size_t last = colorRows[r].size()-1;
 
-  if (t<mmin[r]) {
+  if (t<mmin[r])
+  {
     // reverse interpolate
     c1 = colorRows[r][last].color;
     c2 = colorRows[r][0].color;
@@ -110,16 +112,22 @@ Vec3D Sky::colorFor(int r, int t) const
     t2 = colorRows[r][0].time + 2880;
     t += 2880;
   }
-  else {
-    for (size_t i = last; true; i--) { //! \todo iterator this.
-      if (colorRows[r][i].time <= t) {
+  else
+  {
+    for (size_t i = last; true; i--)
+    { //! \todo iterator this.
+      if (colorRows[r][i].time <= t)
+      {
         c1 = colorRows[r][i].color;
         t1 = colorRows[r][i].time;
 
-        if (i==last) {
+        if (i==last)
+        {
           c2 = colorRows[r][0].color;
           t2 = colorRows[r][0].time + 2880;
-        } else {
+        }
+        else
+        {
           c2 = colorRows[r][i+1].color;
           t2 = colorRows[r][i+1].time;
         }

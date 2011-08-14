@@ -8,7 +8,6 @@
 #include "ModelHeaders.h"
 #include "MPQ.h"
 #include "Quaternion.h"
-#include "Vec3D.h"
 
 //! \todo Pass this in somehow and don't define as extern.
 // global time for global sequences
