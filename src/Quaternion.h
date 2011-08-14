@@ -2,6 +2,7 @@
 #define QUATERNION_H
 
 #include <cmath>
+#include <stdint.h> // int16_t
 
 #include "Vec3D.h"
 
@@ -137,6 +138,15 @@ public:
 
 };
 
+
+//! \note In WoW 2.0+ Blizzard is now storing rotation data in 16bit values instead of 32bit. I don't really understand why as its only a very minor saving in model sizes and adds extra overhead in processing the models. Need this structure to read the data into.
+struct PackedQuaternion
+{
+  int16_t x;
+  int16_t y;
+  int16_t z;
+  int16_t w;
+};
 
 #endif
 

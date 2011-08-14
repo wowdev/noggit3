@@ -7,7 +7,7 @@
 class ParticleSystem;
 class RibbonEmitter;
 
-#include "Animated.h"
+#include "Animated.h" // Animation::M2Value
 #include "Model.h"
 #include "Video.h"
 
@@ -47,8 +47,8 @@ struct TexCoordSet {
 };
 
 class ParticleSystem {
-  Animated<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw, deacceleration;
-  Animated<uint8_t> enabled;
+  Animation::M2Value<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw, deacceleration;
+  Animation::M2Value<uint8_t> enabled;
   Vec4D colors[3];
   float sizes[3];
   ParticleEmitter *emitter;
@@ -113,9 +113,9 @@ struct RibbonSegment {
 };
 
 class RibbonEmitter {
-  Animated<Vec3D> color;
-  AnimatedShort opacity;
-  Animated<float> above, below;
+  Animation::M2Value<Vec3D> color;
+  Animation::M2Value<float,int16_t> opacity;
+  Animation::M2Value<float> above, below;
 
   Bone *parent;
   float f1, f2;

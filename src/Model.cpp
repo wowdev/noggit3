@@ -1015,8 +1015,8 @@ void ModelCamera::init(const MPQFile& f, const ModelCameraDef &mcd, int *global)
   tPos.init(mcd.transPos, f, global);
   tTarget.init(mcd.transTarget, f, global);
   rot.init(mcd.rot, f, global);
-  tPos.fix(fixCoordSystem);
-  tTarget.fix(fixCoordSystem);
+  tPos.apply(fixCoordSystem);
+  tTarget.apply(fixCoordSystem);
 }
 
 void ModelCamera::setup( int time )
@@ -1107,9 +1107,9 @@ void Bone::init(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **
   trans.init(b.translation, f, global, animfiles);
   rot.init(b.rotation, f, global, animfiles);
   scale.init(b.scaling, f, global, animfiles);
-  trans.fix(fixCoordSystem);
-  rot.fix(fixCoordSystemQuat);
-  scale.fix(fixCoordSystem2);
+  trans.apply(fixCoordSystem);
+  rot.apply(fixCoordSystemQuat);
+  scale.apply(fixCoordSystem2);
 }
 
 void Bone::calcMatrix(Bone *allbones, int anim, int time)
