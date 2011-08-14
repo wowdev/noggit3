@@ -7,7 +7,7 @@
 class Model;
 class Bone;
 
-#include "Animated.h"
+#include "Animated.h" // Animation::M2Value
 #include "AsyncObject.h" // AsyncObject
 #include "Manager.h" // ManagedItem
 #include "Matrix.h"
@@ -21,9 +21,9 @@ class Bone;
 Vec3D fixCoordSystem(Vec3D v);
 
 class Bone {
-  Animated<Vec3D> trans;
-  Animated<Quaternion, PACK_QUATERNION, Quat16ToQuat32> rot;
-  Animated<Vec3D> scale;
+  Animation::M2Value<Vec3D> trans;
+  Animation::M2Value<Quaternion, PackedQuaternion> rot;
+  Animation::M2Value<Vec3D> scale;
 
 public:
   Vec3D pivot, transPivot;
@@ -41,7 +41,7 @@ public:
 
 
 class TextureAnim {
-  Animated<Vec3D> trans, rot, scale;
+  Animation::M2Value<Vec3D> trans, rot, scale;
 
 public:
   Vec3D tval, rval, sval;
@@ -52,14 +52,14 @@ public:
 };
 
 struct ModelColor {
-  Animated<Vec3D> color;
-  AnimatedShort opacity;
+  Animation::M2Value<Vec3D> color;
+  Animation::M2Value<float,int16_t> opacity;
 
   void init(const MPQFile& f, const ModelColorDef &mcd, int *global);
 };
 
 struct ModelTransparency {
-  AnimatedShort trans;
+  Animation::M2Value<float,int16_t> trans;
 
   void init(const MPQFile& f, const ModelTransDef &mtd, int *global);
 };
@@ -109,8 +109,8 @@ struct ModelCamera {
 
   Vec3D pos, target;
   float nearclip, farclip, fov;
-  Animated<Vec3D> tPos, tTarget;
-  Animated<float> rot;
+  Animation::M2Value<Vec3D> tPos, tTarget;
+  Animation::M2Value<float> rot;
 
   void init(const MPQFile& f, const ModelCameraDef &mcd, int *global);
   void setup(int time=0);
@@ -121,10 +121,10 @@ struct ModelCamera {
 struct ModelLight {
   int type, parent;
   Vec3D pos, tpos, dir, tdir;
-  Animated<Vec3D> diffColor, ambColor;
-  Animated<float> diffIntensity, ambIntensity;
-  //Animated<float> attStart,attEnd;
-  //Animated<bool> Enabled;
+  Animation::M2Value<Vec3D> diffColor, ambColor;
+  Animation::M2Value<float> diffIntensity, ambIntensity;
+  //Animation::M2Value<float> attStart,attEnd;
+  //Animation::M2Value<bool> Enabled;
 
   void init(const MPQFile&  f, const ModelLightDef &mld, int *global);
   void setup(int time, OpenGL::Light l);

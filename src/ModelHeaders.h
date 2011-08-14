@@ -141,8 +141,8 @@ struct FakeAnimationBlock {
 };
 
 struct AnimationBlockHeader {
-  uint32_t nEntrys;
-  uint32_t ofsEntrys;
+  uint32_t nEntries;
+  uint32_t ofsEntries;
 };
 
 struct AnimSubStructure {

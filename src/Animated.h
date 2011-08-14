@@ -3,7 +3,6 @@
 
 #include <cassert>
 #include <map>
-#include <utility>
 #include <vector>
 
 #include "ModelHeaders.h"
@@ -11,282 +10,293 @@
 #include "Quaternion.h"
 #include "Vec3D.h"
 
-// interpolation functions
-template<class T>
-inline T interpolate(const float r, const T &v1, const T &v2)
-{
-  return v1*(1.0f - r) + v2*r;
-}
-
-template<class T>
-inline T interpolateHermite(const float r, const T &v1, const T &v2, const T &in, const T &out)
-{
-  // dummy
-  //return interpolate<T>(r,v1,v2);
-
-  // basis functions
-  float h1 = 2.0f*r*r*r - 3.0f*r*r + 1.0f;
-  float h2 = -2.0f*r*r*r + 3.0f*r*r;
-  float h3 = r*r*r - 2.0f*r*r + r;
-  float h4 = r*r*r - r*r;
-
-  // interpolation
-  return T(v1*h1 + v2*h2 + in*h3 + out*h4);
-}
-
-// "linear" interpolation for quaternions should be slerp by default
-template<>
-inline Quaternion interpolate<Quaternion>(const float r, const Quaternion &v1, const Quaternion &v2)
-{
-  return Quaternion::slerp(r, v1, v2);
-}
-
-
-typedef std::pair<size_t, size_t> AnimRange;
-
+//! \todo Pass this in somehow and don't define as extern.
 // global time for global sequences
 extern int globalTime;
 
-enum Interpolations {
-  INTERPOLATION_NONE,
-  INTERPOLATION_LINEAR,
-  INTERPOLATION_HERMITE
-};
-
-template <class T>
-class Identity {
-public:
-  static const T& conv(const T& t)
+namespace Animation
+{
+  namespace Interpolation
   {
-    return t;
-  }
-};
-
-// In WoW 2.0+ Blizzard are now storing rotation data in 16bit values instead of 32bit.
-// I don't really understand why as its only a very minor saving in model sizes and adds extra overhead in
-// processing the models.  Need this structure to read the data into.
-struct PACK_QUATERNION {int16_t x,y,z,w;  }; 
-
-class Quat16ToQuat32 {
-public:
-  static const Quaternion conv(const PACK_QUATERNION t)
-  {
-    return Quaternion(
-      static_cast<float>((t.x > 0? t.x - 32767 : t.x + 32767)/ 32767.0f), 
-      static_cast<float>((t.y > 0? t.y - 32767 : t.y + 32767)/ 32767.0f),
-      static_cast<float>((t.z > 0? t.z - 32767 : t.z + 32767)/ 32767.0f),
-      static_cast<float>((t.w > 0? t.w - 32767 : t.w + 32767)/ 32767.0f));
-  }
-};
-
-// Convert opacity values stored as shorts to floating point
-// I wonder why Blizzard decided to save 2 bytes by doing this
-class ShortToFloat {
-public:
-  static float conv( const int16_t t )
-  {
-    return t / 32767.0f;
-  }
-};
-
-/*
-  Generic animated value class:
-
-  T is the data type to animate
-  D is the data type stored in the file (by default this is the same as T)
-  Conv is a conversion object that defines T conv(D) to convert from D to T
-    (by default this is an identity function)
-  (there might be a nicer way to do this? meh meh)
-*/
-
-template <class T, class D=T, class Conv=Identity<T> >
-class Animated {
-public:
-
-  int type, seq;
-  int *globals;
-
-  std::map<int, std::vector<unsigned int> > times;
-  std::map<int, std::vector<T> > data;
-  // for nonlinear interpolations:
-  std::map<int, std::vector<T> > in, out;
-  size_t size; // for fix function
-  
-  bool uses(unsigned int anim)
-  {
-    if (seq>-1)
+    //! \todo C++0x: Change namespace to "enum class Type : int16_t", remove typedef.
+    namespace Type
     {
-      anim = 0;
+      typedef int16_t Type_t;
+      enum
+      {
+        NONE,
+        LINEAR,
+        HERMITE
+      };
     }
-    
-    return (data[anim].size() > 0);
-  }
 
-  T getValue(unsigned int anim, unsigned int time)
-  {
-    // obtain a time value and a data range
-    if (seq>-1) {
-      if (globals[seq]==0) 
-        time = 0;
-      else 
-        time = globalTime % globals[seq];
-      anim = 0;
-    }
-    if (data[anim].size()>1 && times[anim].size()>1) {
-      size_t t1, t2;
-      size_t pos=0;
-      int max_time = times[anim][times[anim].size()-1];
-      if (max_time > 0)
-        time %= max_time; // I think this might not be necessary?
-      for (size_t i=0; i<times[anim].size()-1; ++i) {
-        if (time >= times[anim][i] && time < times[anim][i+1]) {
-          pos = i;
-          break;
-        }
+    struct Linear
+    {
+      template<class AnimatedType>
+      inline AnimatedType operator()( const float& percentage, const AnimatedType& start, const AnimatedType& end )
+      {
+        return start * ( 1.0f - percentage ) + end * percentage;
       }
-      t1 = times[anim][pos];
-      t2 = times[anim][pos+1];
-      float r = (time-t1)/static_cast<float>(t2-t1);
+    };
+
+    //! \note "linear" interpolation for quaternions should be slerp by default.
+    template<>
+    inline Quaternion Linear::operator()( const float& percentage, const Quaternion& start, const Quaternion& end )
+    {
+      return Quaternion::slerp( percentage, start, end );
+    }
+
+    struct Hermite
+    {
+      template<class AnimatedType>
+      inline AnimatedType operator()( const float& percentage, const AnimatedType& start, const AnimatedType& end, const AnimatedType& in, const AnimatedType& out )
+      {
+        const float percentage_2 = percentage * percentage;
+        const float percentage_3 = percentage_2 * percentage;
+        const float _2_percentage_3 = 2.0f * percentage_3;
+        const float _3_percentage_2 = 3.0f * percentage_2;
+
+        const float h1 = _2_percentage_3 - _3_percentage_2 + 1.0f;
+        const float h2 = _3_percentage_2 - _2_percentage_3;
+        const float h3 = percentage_3 - 2.0f * percentage_2 + percentage;
+        const float h4 = percentage_3 - percentage_2;
+
+        return AnimatedType( start * h1 + end * h2 + in * h3 + out * h4 );
+      }
+    };
+  };
+  
+  template<class FROM, class TO>
+  struct Conversion
+  {
+    inline TO operator()( const FROM& value )
+    {
+      return TO( value );
+    }
+  };
+  
+  template<>
+  inline Quaternion Conversion<PackedQuaternion, Quaternion>::operator()( const PackedQuaternion& value )
+  {
+    //! \todo Check if this is really correct.
+    return Quaternion(
+      static_cast<float>( ( value.x > 0 ? value.x - 32767 : value.x + 32767 ) / 32767.0f ), 
+      static_cast<float>( ( value.y > 0 ? value.y - 32767 : value.y + 32767 ) / 32767.0f ),
+      static_cast<float>( ( value.z > 0 ? value.z - 32767 : value.z + 32767 ) / 32767.0f ),
+      static_cast<float>( ( value.w > 0 ? value.w - 32767 : value.w + 32767 ) / 32767.0f ) );
+  }
+  
+  template<>
+  inline float Conversion<int16_t, float>::operator()( const int16_t& value )
+  {
+    return value / 32767.0f;
+  }
+  
+  //! \note AnimatedType is the type of data getting animated.
+  //! \note DataType is the type of data stored.
+  //! \note The conversion from DataType to AnimatedType is done via Animation::Conversion.
+  template<class AnimatedType, class DataType = AnimatedType>
+  class M2Value
+  {
+  private:
+    typedef uint32_t TimestampType;
+    typedef uint32_t AnimationIdType;
+  
+    typedef std::vector<AnimatedType> AnimatedTypeVectorType;
+    typedef std::vector<TimestampType> TimestampTypeVectorType;
+    
+    Animation::Conversion<DataType, AnimatedType> _conversion;
+  
+    static const int32_t NO_GLOBAL_SEQUENCE = -1;
+    int32_t _globalSequenceID;
+    int32_t* _globalSequences;
+  
+    Animation::Interpolation::Type::Type_t _interpolationType;
+  
+    std::map<AnimationIdType, TimestampTypeVectorType> times;
+    std::map<AnimationIdType, AnimatedTypeVectorType> data;
+  
+    // for nonlinear interpolations:
+    std::map<AnimationIdType, AnimatedTypeVectorType> in;
+    std::map<AnimationIdType, AnimatedTypeVectorType> out;
+  
+  public:
+    bool uses( AnimationIdType anim )
+    {
+      if( _globalSequenceID != NO_GLOBAL_SEQUENCE )
+      {
+        anim = AnimationIdType();
+      }
+  
+      return !data[anim].empty();
+    }
+  
+    AnimatedType getValue( AnimationIdType anim, TimestampType time )
+    {
+      if( _globalSequenceID != NO_GLOBAL_SEQUENCE )
+      {
+        if( _globalSequences[_globalSequenceID] )
+        {
+          time = globalTime % _globalSequences[_globalSequenceID];
+        }
+        else
+        {
+          time = TimestampType();
+        }
+        anim = AnimationIdType();
+      }
       
-      if (type == INTERPOLATION_LINEAR) 
-        return interpolate<T>(r,data[anim][pos],data[anim][pos+1]);
-      else if (type == INTERPOLATION_NONE) 
-        return data[anim][pos];
-      else
-        // INTERPOLATION_HERMITE is only used in cameras afaik?
-        return interpolateHermite<T>(r,data[anim][pos],data[anim][pos+1],in[anim][pos],out[anim][pos]);
-    } else {
-      // default value
-      if (data[anim].size() == 0)
-        return T();
-      else
-        return data[anim][0];
-    }
-  }
-
-  void init(const AnimationBlock &b, const MPQFile &f, int *gs)
-  {
-    globals = gs;
-    type = b.type;
-    seq = b.seq;
-    if (seq!=-1) {
-      assert(gs);
-    }
-
-
-    // times
-    assert(b.nTimes == b.nKeys);
-    size = b.nTimes;
-    if( b.nTimes == 0 )
-      return;
-
-    for(size_t j=0; j < b.nTimes; j++) {
-      AnimationBlockHeader* pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
-    
-      uint32_t *ptimes = reinterpret_cast<uint32_t*>(f.getBuffer() + pHeadTimes->ofsEntrys);
-      for (size_t i=0; i < pHeadTimes->nEntrys; ++i)
-        times[j].push_back(ptimes[i]);
-    }
-
-    // keyframes
-    for(size_t j=0; j < b.nKeys; j++) {
-      AnimationBlockHeader* pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
-
-      D *keys = reinterpret_cast<D*>(f.getBuffer() + pHeadKeys->ofsEntrys);
-      switch (type) {
-        case INTERPOLATION_NONE:
-        case INTERPOLATION_LINEAR:
-          for (size_t i = 0; i < pHeadKeys->nEntrys; ++i) 
-            data[j].push_back(Conv::conv(keys[i]));
+      TimestampTypeVectorType& timestampVector = times[anim];
+      AnimatedTypeVectorType& dataVector = data[anim];
+      AnimatedTypeVectorType& inVector = in[anim];
+      AnimatedTypeVectorType& outVector = out[anim];
+  
+      if( dataVector.empty() )
+      {
+        return AnimatedType();
+      }
+  
+      AnimatedType result = dataVector[0];
+  
+      if( !timestampVector.empty() )
+      {
+        TimestampType max_time = timestampVector.back();
+        if( max_time > 0 )
+        {
+          time %= max_time;
+        }
+        else
+        {
+          time = TimestampType();
+        }
+  
+        size_t pos = 0;
+        for( size_t i = 0; i < timestampVector.size() - 1; ++i )
+        {
+          if( time >= timestampVector[i] && time < timestampVector[i+1] )
+          {
+            pos = i;
+            break;
+          }
+        }
+  
+        TimestampType t1 = timestampVector[pos];
+        TimestampType t2 = timestampVector[pos + 1];
+        const float percentage = ( time - t1 ) / static_cast<float>( t2 - t1 );
+  
+        switch( _interpolationType )
+        {
+          case Animation::Interpolation::Type::NONE:
+          {
+            result = dataVector[pos];
+          }
           break;
-        case INTERPOLATION_HERMITE:
-          for (size_t i = 0; i < pHeadKeys->nEntrys; ++i) {
-            data[j].push_back(Conv::conv(keys[i*3]));
-            in[j].push_back(Conv::conv(keys[i*3+1]));
-            out[j].push_back(Conv::conv(keys[i*3+2]));
+  
+          case Animation::Interpolation::Type::LINEAR:
+          {
+            Animation::Interpolation::Linear interpolation;
+            result = interpolation( percentage, dataVector[pos], dataVector[pos + 1] );
+          }
+          break;
+  
+          case Animation::Interpolation::Type::HERMITE:
+          {
+            Animation::Interpolation::Hermite interpolation;
+            result = interpolation( percentage, dataVector[pos], dataVector[pos + 1], inVector[pos], outVector[pos] );
+          }
+          break;
+        }
+      }
+  
+      return result;
+    }
+  
+    //! \todo Use a vector of MPQFile& for the anim files instead for safety.
+    void init(const AnimationBlock& animationBlock, const MPQFile& file, int32_t* globalSequences, MPQFile** animfiles = NULL )
+    {
+      assert( animationBlock.nTimes == animationBlock.nKeys );
+      
+      _interpolationType = animationBlock.type;
+      
+      _globalSequences = globalSequences;
+      _globalSequenceID = animationBlock.seq;
+      if( _globalSequenceID != NO_GLOBAL_SEQUENCE )
+      {
+        assert( _globalSequences && "Animation said to have global sequence, but pointer to global sequence data is NULL" );
+      }
+  
+      const AnimationBlockHeader* timestampHeaders = file.get<AnimationBlockHeader>( animationBlock.ofsTimes );
+      const AnimationBlockHeader* keyHeaders = file.get<AnimationBlockHeader>( animationBlock.ofsKeys );
+  
+      for( size_t j = 0; j < animationBlock.nTimes; ++j )
+      {
+        const TimestampType* timestamps = animfiles && animfiles[j] ?
+                                            animfiles[j]->get<TimestampType>( timestampHeaders[j].ofsEntries ) :
+                                            file.get<TimestampType>( timestampHeaders[j].ofsEntries );
+  
+        for( size_t i = 0; i < timestampHeaders[j].nEntries; ++i )
+        {
+          times[j].push_back( timestamps[i] );
+        }
+      }
+  
+      for( size_t j = 0; j < animationBlock.nKeys; ++j )
+      {
+        const DataType* keys = animfiles && animfiles[j] ?
+                                  animfiles[j]->get<DataType>( keyHeaders[j].ofsEntries ) :
+                                  file.get<DataType>( keyHeaders[j].ofsEntries );
+        
+        switch( _interpolationType )
+        {
+          case Animation::Interpolation::Type::NONE:
+          case Animation::Interpolation::Type::LINEAR:
+            for( size_t i = 0; i < keyHeaders[j].nEntries; ++i )
+            {
+              data[j].push_back( _conversion( keys[i] ) );
+            }
+            break;
+            
+          case Animation::Interpolation::Type::HERMITE:
+            for( size_t i = 0; i < keyHeaders[j].nEntries; ++i )
+            {
+              data[j].push_back( _conversion( keys[i * 3] ) );
+              in[j].push_back( _conversion( keys[i * 3 + 1] ) );
+              out[j].push_back( _conversion( keys[i * 3 + 2] ) );
+            }
+            break;
+        }
+      }
+    }
+  
+    void apply( AnimatedType function( const AnimatedType ) )
+    {
+      switch( _interpolationType )
+      {
+        case Animation::Interpolation::Type::NONE:
+        case Animation::Interpolation::Type::LINEAR:
+          for( size_t i = 0; i < data.size(); ++i )
+          {
+            for( size_t j = 0; j < data[i].size(); ++j )
+            {
+              data[i][j] = function( data[i][j] );
+            }
+          }
+          break;
+  
+        case Animation::Interpolation::Type::HERMITE:
+          for( size_t i = 0; i < data.size(); ++i )
+          {
+            for( size_t j = 0; j < data[i].size(); ++j )
+            {
+              data[i][j] = function( data[i][j] );
+              in[i][j] = function( in[i][j] );
+              out[i][j] = function( out[i][j] );
+            }
           }
           break;
       }
     }
-  }
-
-  void init(const AnimationBlock &b, const MPQFile &f, int *gs, MPQFile **animfiles)
-  {
-    globals = gs;
-    type = b.type;
-    seq = b.seq;
-    if (seq!=-1) {
-      assert(gs);
-    }
-
-    // times
-    assert(b.nTimes == b.nKeys);
-    size = b.nTimes;
-    if( b.nTimes == 0 )
-      return;
-
-    for(size_t j=0; j < b.nTimes; j++) {
-      AnimationBlockHeader* pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
-      uint32_t *ptimes;
-      if (animfiles[j] && animfiles[j]->getSize() > 0)
-        ptimes = reinterpret_cast<uint32_t*>(animfiles[j]->getBuffer() + pHeadTimes->ofsEntrys);
-      else
-        ptimes = reinterpret_cast<uint32_t*>(f.getBuffer() + pHeadTimes->ofsEntrys);
-      for (size_t i=0; i < pHeadTimes->nEntrys; ++i)
-        times[j].push_back(ptimes[i]);
-    }
-
-    // keyframes
-    for(size_t j=0; j < b.nKeys; j++) {
-      AnimationBlockHeader* pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
-      assert(reinterpret_cast<D*>(f.getBuffer() + pHeadKeys->ofsEntrys));
-      D *keys;
-      if (animfiles[j] && animfiles[j]->getSize() > 0)
-        keys = reinterpret_cast<D*>(animfiles[j]->getBuffer() + pHeadKeys->ofsEntrys);
-      else 
-        keys = reinterpret_cast<D*>(f.getBuffer() + pHeadKeys->ofsEntrys);
-      switch (type) {
-        case INTERPOLATION_NONE:
-        case INTERPOLATION_LINEAR:
-          for (size_t i = 0; i < pHeadKeys->nEntrys; ++i) 
-            data[j].push_back(Conv::conv(keys[i]));
-          break;
-        case INTERPOLATION_HERMITE:
-          for (size_t i = 0; i < pHeadKeys->nEntrys; ++i) {
-            data[j].push_back(Conv::conv(keys[i*3]));
-            in[j].push_back(Conv::conv(keys[i*3+1]));
-            out[j].push_back(Conv::conv(keys[i*3+2]));
-          }
-          break;
-      }
-    }
-  }
-
-  void fix(T fixfunc(const T))
-  {
-    switch (type) {
-      case INTERPOLATION_NONE:
-      case INTERPOLATION_LINEAR:
-        for (size_t i=0; i<size; ++i) {
-          for (size_t j=0; j<data[i].size(); j++) {
-            data[i][j] = fixfunc(data[i][j]);
-          }
-        }
-        break;
-      case INTERPOLATION_HERMITE:
-        for (size_t i=0; i<size; ++i) {
-          for (size_t j=0; j<data[i].size(); j++) {
-            data[i][j] = fixfunc(data[i][j]);
-            in[i][j] = fixfunc(in[i][j]);
-            out[i][j] = fixfunc(out[i][j]);
-          }
-        }
-        break;
-    }
-  }
-
+  };
 };
-
-typedef Animated<float,uint16_t,ShortToFloat> AnimatedShort;
 
 #endif

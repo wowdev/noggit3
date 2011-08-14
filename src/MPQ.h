@@ -68,6 +68,12 @@ public:
   {
     return External;
   }
+  
+  template<typename T>
+  const T* get( size_t offset ) const
+  {
+    return reinterpret_cast<T*>( buffer + offset );
+  }
 
   void setBuffer(char *Buf, size_t Size)
   {

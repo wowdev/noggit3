@@ -1,8 +1,8 @@
 #ifndef __GRADIENT_H
 #define __GRADIENT_H
 
-#include "Quaternion.h"
-#include "UIFrame.h"
+#include "Quaternion.h" // Vec4D
+#include "UIFrame.h" // UIFrame
 
 class UIGradient : public UIFrame
 {
