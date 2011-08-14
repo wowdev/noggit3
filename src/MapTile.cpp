@@ -838,7 +838,7 @@ void MapTile::saveTile()
    
   for( int i = 0; i < 16; ++i )
     for( int j = 0; j < 16; ++j )
-      for( int tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
+      for( size_t tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
         if( lTextures.find( mChunks[i][j]->_textures[tex]->filename() ) == lTextures.end() )
           lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->_textures[tex]->filename(), -1 ) );
   
@@ -1322,7 +1322,7 @@ void MapTile::saveTile()
 
         // MCLY
 //        {
-          int lMCLY_Size = mChunks[y][x]->nTextures * 0x10;
+          size_t lMCLY_Size = mChunks[y][x]->nTextures * 0x10;
 
           lADTFile.Extend( 8 + lMCLY_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCLY', lMCLY_Size );
@@ -1331,7 +1331,7 @@ void MapTile::saveTile()
           lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nLayers = mChunks[y][x]->nTextures;
       
           // MCLY data
-          for( int j = 0; j < mChunks[y][x]->nTextures; ++j )
+          for( size_t j = 0; j < mChunks[y][x]->nTextures; ++j )
           {
             ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>( lCurrentPosition + 8 + 0x10 * j );
 
@@ -1454,8 +1454,7 @@ void MapTile::saveTile()
 //        {
           int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
 
-          int lMaps = mChunks[y][x]->nTextures - 1;
-          lMaps = lMaps >= 0 ? lMaps : 0;
+          size_t lMaps = mChunks[y][x]->nTextures ? mChunks[y][x]->nTextures - 1U : 0U;
 
           int lMCAL_Size = lDimensions * lMaps;
           
@@ -1467,7 +1466,7 @@ void MapTile::saveTile()
 
           char * lAlphaMaps = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
 
-          for( int j = 0; j < lMaps; j++ )
+          for( size_t j = 0; j < lMaps; j++ )
           {
             //First thing we have to do is downsample the alpha maps before we can write them
             if( mBigAlpha )

@@ -9,7 +9,7 @@ class Video;
 #include <GL/glew.h>
 //#include <SDL/SDL.h>
 
-class SDL_Surface;
+struct SDL_Surface;
 
 void SaveGLSettings();
 void LoadGLSettings();

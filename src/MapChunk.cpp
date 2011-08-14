@@ -282,9 +282,9 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
     }
     else if ( fourcc == 'MCLY' ) {
       // texture info
-      nTextures = size / 16;
+      nTextures = size / 16U;
       //gLog("=\n");
-      for (int i=0; i<nTextures; ++i) {
+      for (size_t i=0; i<nTextures; ++i) {
         f->read(&tex[i],4);
         f->read(&texFlags[i], 4);
         f->read(&MCALoffset[i], 4);
@@ -595,7 +595,7 @@ void MapChunk::drawTextures()
 
   glColor4f(1.0f,1.0f,1.0f,1.0f);
 
-  if(nTextures > 0)
+  if(nTextures > 0U)
   {
     OpenGL::Texture::setActiveTexture( 0 );
     OpenGL::Texture::enableTexture();
@@ -630,11 +630,11 @@ void MapChunk::drawTextures()
   glEnd();
   RemoveAnim(animated[0]);
 
-  if (nTextures > 1) {
+  if (nTextures > 1U) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
     //glDepthMask(GL_FALSE);
   }
-  for(int i=1; i < nTextures; ++i)
+  for(size_t i=1; i < nTextures; ++i)
   {
     OpenGL::Texture::setActiveTexture( 0 );
     OpenGL::Texture::enableTexture();
@@ -1013,7 +1013,7 @@ void MapChunk::draw()
 
 
   // first pass: base texture
-  if (nTextures == 0)
+  if (nTextures == 0U)
   {
     OpenGL::Texture::setActiveTexture( 0 );
     OpenGL::Texture::disableTexture();
@@ -1037,13 +1037,13 @@ void MapChunk::draw()
   glEnable(GL_LIGHTING);
   drawPass(animated[0]);
 
-  if (nTextures > 1) {
+  if (nTextures > 1U) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
     glDepthMask(GL_FALSE);
   }
 
   // additional passes: if required
-  for (int i=0; i < nTextures-1; ++i)
+  for (size_t i=0; i < nTextures-1; ++i)
   {
     OpenGL::Texture::setActiveTexture( 0 );
     OpenGL::Texture::enableTexture();
@@ -1059,7 +1059,7 @@ void MapChunk::draw()
     drawPass(animated[i+1]);
   }
 
-  if (nTextures > 1) {
+  if (nTextures > 1U) {
     //glDepthFunc(GL_LEQUAL);
     glDepthMask(GL_TRUE);
   }
@@ -1602,13 +1602,13 @@ w=sqrt(L*z/(u*y))
 */
 void MapChunk::eraseTextures()
 {
-  nTextures = 0;
+  nTextures = 0U;
 }
 
 int MapChunk::addTexture( OpenGL::Texture* texture )
 {
   int texLevel = -1;
-  if( nTextures < 4 )
+  if( nTextures < 4U )
   {
     texLevel = nTextures;
     nTextures++;
@@ -1638,7 +1638,7 @@ int MapChunk::addTexture( OpenGL::Texture* texture )
 void MapChunk::switchTexture( OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture )
 {
   int texLevel = -1;
-  for(int i=0;i<nTextures;++i)
+  for(size_t i=0;i<nTextures;++i)
     if(_textures[i]==oldTexture)
       texLevel=i;
 
@@ -1665,7 +1665,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
       return false;
 
     //First Lets find out do we have the texture already
-    for(int i=0;i<nTextures;++i)
+    for(size_t i=0;i<nTextures;++i)
       if(_textures[i]==texture)
         texLevel=i;
 
@@ -1723,7 +1723,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 
         if(texLevel>0)
           amap[texLevel-1][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[texLevel-1][i+j*64]) ) + tPressure*target + 0.5f ,255.0f) , 0.0f));
-        for(int k=texLevel;k<nTextures-1;k++)
+        for(size_t k=texLevel;k<nTextures-1;k++)
           amap[k][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[k][i+j*64]) ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f));
         xPos+=change;
       }
@@ -1736,7 +1736,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
       return false;
     }
 
-    for( int j = texLevel; j < nTextures - 1; j++ )
+    for( size_t j = texLevel; j < nTextures - 1; j++ )
     {
       if( j > 2 )
       {
@@ -1771,7 +1771,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
       // Search for empty layer.
       int texLevel = -1;
 
-      for( size_t i = 0; i < size_t( nTextures ); ++i )
+      for( size_t i = 0; i < nTextures; ++i )
       {
         if( _textures[i] == texture )
         {
@@ -1784,7 +1784,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
     
         if( nTextures == 4 )
         {
-          for( size_t layer = 0; layer < size_t( nTextures ); ++layer )
+          for( size_t layer = 0; layer < nTextures; ++layer )
           {
             unsigned char map[64*64];
             if( layer )
@@ -1792,7 +1792,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
             else
               memset( map, 255, 64*64 );
           
-            for( size_t layerAbove = layer + 1; layerAbove < size_t( nTextures ); ++layerAbove )
+            for( size_t layerAbove = layer + 1; layerAbove < nTextures; ++layerAbove )
             {
               unsigned char* above = amap[layerAbove-1];
               for( size_t i = 0; i < 64 * 64; ++i )
@@ -1809,7 +1809,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
         
             if( !sum )
             {
-              for( size_t i = layer; i < size_t( nTextures ) - 1; ++i )
+              for( size_t i = layer; i < nTextures - 1; ++i )
               {
                 _textures[i] = _textures[i+1];
                 animated[i] = animated[i+1];
@@ -1819,7 +1819,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
                   memcpy( amap[i-1], amap[i], 64*64 );
               }
               
-              for( size_t j = layer; j < size_t( nTextures ); j++ )
+              for( size_t j = layer; j < nTextures; j++ )
                   {
                     glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
                     glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
@@ -1865,7 +1865,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
   
       // Redraw changed layers.
   
-      for( size_t j = texLevel; j < size_t( nTextures ); j++ )
+      for( size_t j = texLevel; j < nTextures; j++ )
       {
         glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
         glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );

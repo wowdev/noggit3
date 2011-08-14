@@ -7,7 +7,7 @@
 
 class UIText;
 class UITexture;
-class SDL_KeyboardEvent;
+struct SDL_KeyboardEvent;
 namespace OpenGL { class Texture; };
 
 //! \todo  Combine and get it working.

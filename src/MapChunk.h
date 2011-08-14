@@ -23,7 +23,7 @@ public:
   
   MapChunkHeader header;
   bool Changed;
-  int nTextures;
+  size_t nTextures;
 
   float xbase, ybase, zbase;
   float r;

@@ -212,7 +212,7 @@ public:
     #undef SUB
   }
 
-  const float minor(size_t x, size_t y) const
+  float minor(size_t x, size_t y) const
   {
     float s[3][3];
     for (size_t j=0, v=0; j<4; j++) {
