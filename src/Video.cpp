@@ -1,75 +1,68 @@
 #include "Video.h"
 
+#include <cassert>
 #include <SDL.h>
 #include <string>
 
 #include "Settings.h"
 #include "Log.h"
 
-//0 - GL_ALPHA_TEST
-//1 - GL_BLEND
-//2 - GL_COLOR_MATERIAL
-//3 - GL_CULL_FACE
-//4 - GL_DEPTH_TEST
-//5 - GL_FOG
-//6 - GL_FRAGMENT_PROGRAM_ARB
-//7 - GL_LIGHTING
-//8 - GL_LINE_SMOOTH
-//9/10 - GL_TEXTURE_2D
-//11 - GL_TEXTURE_GEN_S
-//12 - GL_TEXTURE_GEN_T
-GLboolean  GLSettings[13];
-void SaveGLSettings()
+namespace OpenGL
 {
-  GLSettings[0]=glIsEnabled(GL_ALPHA_TEST);
-  GLSettings[1]=glIsEnabled(GL_BLEND);
-  GLSettings[2]=glIsEnabled(GL_COLOR_MATERIAL);
-  GLSettings[3]=glIsEnabled(GL_CULL_FACE);
-  GLSettings[4]=glIsEnabled(GL_DEPTH_TEST);
-  GLSettings[5]=glIsEnabled(GL_FOG);
-  GLSettings[6]=glIsEnabled(GL_FRAGMENT_PROGRAM_ARB);
-  GLSettings[7]=glIsEnabled(GL_LIGHTING);
-  GLSettings[8]=glIsEnabled(GL_LINE_SMOOTH);
-  glActiveTexture(GL_TEXTURE1);
-  GLSettings[10]=glIsEnabled(GL_TEXTURE_2D);
-  glActiveTexture(GL_TEXTURE0);
-  GLSettings[9]=glIsEnabled(GL_TEXTURE_2D);
-  GLSettings[11]=glIsEnabled(GL_TEXTURE_GEN_S);
-  GLSettings[12]=glIsEnabled(GL_TEXTURE_GEN_T);
-}
-
-void compareSetting(GLenum Setting, GLboolean Cur)
-{
-  if(glIsEnabled(Setting)!=Cur)
+  std::stack<SettingsSaver::GLSettings> SettingsSaver::_savedSettings;
+  
+  void SettingsSaver::save()
   {
-    if(Cur==GL_TRUE)
-      glEnable(Setting);
-    else
-      glDisable(Setting);
-  }
-}
+    GLSettings settings;
 
-void LoadGLSettings()
-{
-  compareSetting(GL_ALPHA_TEST,GLSettings[0]);
-  compareSetting(GL_BLEND,GLSettings[1]);
-  compareSetting(GL_COLOR_MATERIAL,GLSettings[2]);
-  compareSetting(GL_CULL_FACE,GLSettings[3]);
-  compareSetting(GL_DEPTH_TEST,GLSettings[4]);
-  compareSetting(GL_FOG,GLSettings[5]);
-  compareSetting(GL_FRAGMENT_PROGRAM_ARB,GLSettings[6]);
-  compareSetting(GL_LIGHTING,GLSettings[7]);
-  compareSetting(GL_LINE_SMOOTH,GLSettings[8]);
-  glActiveTexture(GL_TEXTURE1);
-  compareSetting(GL_TEXTURE_2D,GLSettings[10]);
-  glActiveTexture(GL_TEXTURE0);
-  compareSetting(GL_TEXTURE_2D,GLSettings[9]);
-  compareSetting(GL_TEXTURE_GEN_S,GLSettings[11]);
-  compareSetting(GL_TEXTURE_GEN_T,GLSettings[12]);
-}
+#define SAVE( NAME, VARNAME ) settings.VARNAME = glIsEnabled( NAME )
+    SAVE( GL_ALPHA_TEST, alphaTesting );
+    SAVE( GL_BLEND, blend );
+    SAVE( GL_COLOR_MATERIAL, colorMaterial );
+    SAVE( GL_CULL_FACE, cullFace );
+    SAVE( GL_DEPTH_TEST, depthTest );
+    SAVE( GL_FOG, fog );
+    SAVE( GL_FRAGMENT_PROGRAM_ARB, fragmentProgram );
+    SAVE( GL_LIGHTING, lighting );
+    SAVE( GL_LINE_SMOOTH, lineSmooth );
+    Texture::setActiveTexture( 0 );
+    SAVE( GL_TEXTURE_2D, texture0 );
+    Texture::setActiveTexture( 1 );
+    SAVE( GL_TEXTURE_2D, texture1 );
+    SAVE( GL_TEXTURE_GEN_S, textureGenS );
+    SAVE( GL_TEXTURE_GEN_T, textureGenT );
+#undef SAVE
+
+    _savedSettings.push( settings );
+  }
+
+  void SettingsSaver::restore()
+  {
+    assert( !_savedSettings.empty() );
+    GLSettings settings = _savedSettings.top();
+    _savedSettings.pop();
+    
+#define LOAD( NAME, VARNAME ) if( glIsEnabled( NAME ) != settings.VARNAME ) { if( settings.VARNAME == GL_TRUE ) { glEnable( NAME ); } else { glDisable( NAME ); } }
+    LOAD( GL_ALPHA_TEST, alphaTesting );
+    LOAD( GL_BLEND, blend );
+    LOAD( GL_COLOR_MATERIAL, colorMaterial );
+    LOAD( GL_CULL_FACE, cullFace );
+    LOAD( GL_DEPTH_TEST, depthTest );
+    LOAD( GL_FOG, fog );
+    LOAD( GL_FRAGMENT_PROGRAM_ARB, fragmentProgram );
+    LOAD( GL_LIGHTING, lighting );
+    LOAD( GL_LINE_SMOOTH, lineSmooth );
+    Texture::setActiveTexture( 0 );
+    LOAD( GL_TEXTURE_2D, texture0 );
+    Texture::setActiveTexture( 1 );
+    LOAD( GL_TEXTURE_2D, texture1 );
+    LOAD( GL_TEXTURE_GEN_S, textureGenS );
+    LOAD( GL_TEXTURE_GEN_T, textureGenT );
+#undef LOAD
+  }
+};
 
 Video video;
-
 
 int Video::xres() const
 {
