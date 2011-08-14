@@ -335,7 +335,6 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
     
           if( texFlags[layer] & 0x200 )
           {  // compressed
-            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
 
             // 21-10-2008 by Flow
             unsigned offI = 0; //offset IN buffer
@@ -360,6 +359,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
               if( fill ) offI++;
             }
 
+            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, buffOut);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -368,7 +368,6 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
           }
           else if(mBigAlpha){
             // not compressed
-            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
             unsigned char *p;
             char *abuf = f->getPointer();
             p = amap[layer-1];
@@ -379,6 +378,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
 
             }
             memcpy(amap[layer-1]+63*64,amap[layer-1]+62*64,64);
+            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[layer-1]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -389,7 +389,6 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
           else
           {  
             // not compressed
-            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
             unsigned char *p;
             char *abuf = f->getPointer();
             p = amap[layer-1];
@@ -409,6 +408,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
 
             }
             memcpy(amap[layer-1]+63*64,amap[layer-1]+62*64,64);
+            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[layer-1]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1043,20 +1043,20 @@ void MapChunk::draw()
   }
 
   // additional passes: if required
-  for (size_t i=0; i < nTextures-1; ++i)
+  for( size_t i = 1; i < nTextures; ++i )
   {
     OpenGL::Texture::setActiveTexture( 0 );
     OpenGL::Texture::enableTexture();
     
-    _textures[i+1]->bind();
+    _textures[i]->bind();
 
     // this time, use blending:
     OpenGL::Texture::setActiveTexture( 1 );
     OpenGL::Texture::enableTexture();
     
-    glBindTexture(GL_TEXTURE_2D, alphamaps[i]);
+    glBindTexture( GL_TEXTURE_2D, alphamaps[i - 1] );
 
-    drawPass(animated[i+1]);
+    drawPass(animated[i]);
   }
 
   if (nTextures > 1U) {
