@@ -8,7 +8,7 @@
 #include "UIFrame.h"
 
 class UIText;
-class Directory;
+struct Directory;
 
 class UITreeViewButton;
 

@@ -5,7 +5,7 @@
 #include "UITexture.h"
 #include "UITexturingGUI.h"
 
-void textureClick( UIFrame* f,int id )
+void texturePickerClick( UIFrame* f,int id )
 {
   // redirect to sender object.
   ( reinterpret_cast<UITexturePicker *>( f->parent ) )->setTexture( id );
@@ -22,7 +22,7 @@ UITexturePicker::UITexturePicker( float x, float y, float w, float h )
   for( size_t i = 0; i < 4; ++i )
   {
     _textures[i] = new UITexture( startingX + ( textureSize + paddingX ) * i, positionY, textureSize, textureSize, "tileset\\generic\\black.blp" );
-    _textures[i]->setClickFunc( textureClick, i );
+    _textures[i]->setClickFunc( texturePickerClick, i );
     addChild( _textures[i] );
   }
 }

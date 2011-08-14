@@ -83,9 +83,9 @@ public:
 // I wonder why Blizzard decided to save 2 bytes by doing this
 class ShortToFloat {
 public:
-  static const float conv(const int16_t t)
+  static float conv( const int16_t t )
   {
-    return t/32767.0f;
+    return t / 32767.0f;
   }
 };
 

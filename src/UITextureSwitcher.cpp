@@ -6,7 +6,7 @@
 #include "UITexture.h"
 #include "UITexturingGUI.h"
 
-void _textureClick( UIFrame* f,int id )
+void textureSwitcherClick( UIFrame* f,int id )
 {
   // redirect to sender object.
   ( reinterpret_cast<UITextureSwitcher *>( f->parent ) )->setTexture( id );
@@ -23,7 +23,7 @@ UITextureSwitcher::UITextureSwitcher( float x, float y, float w, float h )
   for( size_t i = 0; i < 4; ++i )
   {
     _textures[i] = new UITexture( startingX + ( textureSize + paddingX ) * i, positionY, textureSize, textureSize, "tileset\\generic\\black.blp" );
-    _textures[i]->setClickFunc( _textureClick, i );
+    _textures[i]->setClickFunc( textureSwitcherClick, i );
     addChild( _textures[i] );
   }
 }

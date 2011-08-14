@@ -89,7 +89,8 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
   }
 
   //Now we just setup some texture paramaters.
-  glBindTexture( GL_TEXTURE_2D, tex_base[ch]);
+  size_t index = ch & 0x7F;
+  glBindTexture( GL_TEXTURE_2D, tex_base[index]);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -102,16 +103,14 @@ int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int 
       0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data );
 
   //With the texture created, we don't need to expanded data anymore
-  if( expanded_data )
-  {
-    delete [] expanded_data;
-    expanded_data = NULL;
-  }
+
+  delete[] expanded_data;
+  expanded_data = NULL;
 
   //So now we can create the display list
   glNewList(list_base+ch,GL_COMPILE);
 
-  glBindTexture(GL_TEXTURE_2D,tex_base[ch]);
+  glBindTexture(GL_TEXTURE_2D,tex_base[index]);
 
 //  glPushMatrix();
   
@@ -207,7 +206,10 @@ font_data::font_data( const std::string& fname, unsigned int _h, bool fromMPQ )
   glGenTextures( 128, textures );
   
   for( unsigned char i = 0; i < 128; ++i )
+  {
     charWidths[i] = make_dlist( face, i, list_base, textures, h );
+  }  
+  
 
   FT_Done_Face( face );
   FT_Done_FreeType( library );
