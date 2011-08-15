@@ -86,6 +86,7 @@ SET( SourceFiles
   src/UIDetailInfos.cpp
   src/UIFrame.cpp
   src/UIGradient.cpp
+  src/UIHelp.cpp
   src/UIListView.cpp
   src/UIMapViewGUI.cpp
   src/UIMenuBar.cpp

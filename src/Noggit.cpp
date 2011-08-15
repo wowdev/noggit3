@@ -402,9 +402,9 @@ int main( int argc, char *argv[] )
     activeAppState = gStates[gStates.size() - 1];
     
     Uint8 appState = SDL_GetAppState();
-    bool isActiveApplication = appState & SDL_APPACTIVE;
-    bool hasInputFocus = appState & SDL_APPINPUTFOCUS;
-    bool hasMouseFocus = appState & SDL_APPMOUSEFOCUS;
+    const bool isActiveApplication = appState & SDL_APPACTIVE;
+    const bool hasInputFocus = appState & SDL_APPINPUTFOCUS;
+    const bool hasMouseFocus = appState & SDL_APPMOUSEFOCUS;
     
     SDL_Event event;
     while( SDL_PollEvent( &event ) )
@@ -413,29 +413,28 @@ int main( int argc, char *argv[] )
       {
         done = true;
       }
-      else if( event.type == SDL_MOUSEMOTION && hasMouseFocus )
-      {
-        activeAppState->mousemove( &event.motion );
-      }
-      else if( ( event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP ) && hasInputFocus && hasMouseFocus )
-      {  
-        if( event.button.type == SDL_MOUSEBUTTONUP )
-        {
-          activeAppState->mouseclick( &event.button );
-        }
-        else if( hasMouseFocus )
-        {
-          activeAppState->mouseclick( &event.button );
-        }
-      }
-      else if( ( event.type == SDL_KEYDOWN || event.type == SDL_KEYUP ) && hasInputFocus )
-      {
-        activeAppState->keypressed( &event.key );
-      }
       else if( event.type == SDL_VIDEORESIZE )
       {
         video.resize( event.resize.w, event.resize.h );
         activeAppState->resizewindow();
+      }
+      else if( hasInputFocus )
+      {
+        if( ( event.type == SDL_KEYDOWN || event.type == SDL_KEYUP ) )
+        {
+          activeAppState->keypressed( &event.key );
+        }
+        else if( hasMouseFocus )
+        {
+          if( event.type == SDL_MOUSEMOTION )
+          {
+            activeAppState->mousemove( &event.motion );
+          }
+          else if( event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP )
+          {
+            activeAppState->mouseclick( &event.button );
+          }
+        }
       }
     }
     

@@ -133,9 +133,6 @@ UIMapViewGUI* mainGui;
 
 UIFrame* MapChunkWindow;
 
-
-UIFrame* fakeframe;
-
 UIToggleGroup * gBlurToggleGroup;
 UIToggleGroup * gGroundToggleGroup;
 UIToggleGroup * gFlagsToggleGroup;
@@ -242,15 +239,9 @@ void change_settings_window(int oldid, int newid)
   }
 }
 
-//! \todo  Do this nicer?
-void openHelp( UIFrame* /*button*/, int /*id*/ )
+void openHelp( UIFrame*, int )
 {
-  static_cast<MapView*>( gStates.back() )->ViewHelp();
-}
-
-void closeHelp( UIFrame* /*button*/, int /*id*/ )
-{
-  static_cast<MapView*>( gStates.back() )->View3D();
+  mainGui->showHelp();
 }
 
 void ResetSelectedObjectRotation( UIFrame* /*button*/, int /*id*/ )
@@ -655,24 +646,8 @@ void exportPNG(UIFrame*, int) {}
 void importPNG(UIFrame*, int) {}
 #endif
 
-MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
+void MapView::createGUI()
 {
-  LastClicked=0;
-
-  moving = strafing = updown = 0.0f;
-
-  mousedir = -1.0f;
-
-  movespd = SPEED;
-
-  lastBrushUpdate = 0;
-  textureBrush.init();
-
-  look = false;
-  hud = true;
-  set_areaid = false;
-  mViewMode = eViewMode_3D;
-
   // create main gui object that holds all other gui elements for access ( in the future ;) )
   mainGui = new UIMapViewGUI( this );
   mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
@@ -685,7 +660,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   // Raise/Lower
   setting_ground=new UIWindow( tool_settings_x, tool_settings_y, 180.0f, 160.0f );
   setting_ground->movable = true;
-  mainGui->tileFrames->addChild( setting_ground );
+  mainGui->addChild( setting_ground );
 
   setting_ground->addChild( new UIText( 78.5f, 2.0f, "Raise / Lower", arial14, eJustifyCenter ) );
   
@@ -714,7 +689,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   setting_blur=new UIWindow(tool_settings_x,tool_settings_y,180.0f,100.0f);
   setting_blur->movable=true;
   setting_blur->hidden=true;
-  mainGui->tileFrames->addChild(setting_blur);
+  mainGui->addChild(setting_blur);
 
   setting_blur->addChild( new UIText( 78.5f, 2.0f, "Flatten / Blur", arial14, eJustifyCenter ) );
 
@@ -735,7 +710,7 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   settings_paint->hidden=true;
   settings_paint->movable=true;
 
-  mainGui->tileFrames->addChild(settings_paint);
+  mainGui->addChild(settings_paint);
 
   settings_paint->addChild( new UIText( 78.5f, 2.0f, "3D Paint", arial14, eJustifyCenter ) );
   
@@ -773,13 +748,13 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   S1->setText("Pressure: ");
   settings_paint->addChild(S1);
 
-  mainGui->tileFrames->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(4,8,mainGui));
+  mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(4,8,mainGui));
   mainGui->TexturePalette->hidden=true;
-  mainGui->tileFrames->addChild(mainGui->SelectedTexture = UITexturingGUI::createSelectedTexture());
+  mainGui->addChild(mainGui->SelectedTexture = UITexturingGUI::createSelectedTexture());
   mainGui->SelectedTexture->hidden=true;
-  mainGui->tileFrames->addChild(UITexturingGUI::createTilesetLoader());
-  mainGui->tileFrames->addChild(UITexturingGUI::createTextureFilter());
-  mainGui->tileFrames->addChild(MapChunkWindow = UITexturingGUI::createMapChunkWindow());
+  mainGui->addChild(UITexturingGUI::createTilesetLoader());
+  mainGui->addChild(UITexturingGUI::createTextureFilter());
+  mainGui->addChild(MapChunkWindow = UITexturingGUI::createMapChunkWindow());
   MapChunkWindow->hidden=true;
   
   // create the menu
@@ -863,11 +838,34 @@ MapView::MapView(float ah0, float av0): ah(ah0), av(av0), mTimespeed( 0.0f )
   mbar->GetMenu( "Help" )->AddMenuItemButton( "Key Bindings", openHelp, 0 );
   mbar->GetMenu( "Help" )->AddMenuItemToggle( "Infos", &mainGui->guiappInfo->hidden, true );
 
-  mainGui->tileFrames->addChild( mbar );
+  mainGui->addChild( mbar );
   
   addHotkey( SDLK_ESCAPE, MOD_none,   static_cast<AppState::Function>( &MapView::quit ) );
   addHotkey( SDLK_s,      MOD_ctrl,   static_cast<AppState::Function>( &MapView::save ) );
   addHotkey( SDLK_s,      MOD_meta,   static_cast<AppState::Function>( &MapView::save ) );
+}
+
+MapView::MapView( float ah0, float av0 )
+: ah( ah0 )
+, av( av0 )
+, _GUIDisplayingEnabled( true )
+, mTimespeed( 0.0f )
+{
+  LastClicked=0;
+
+  moving = strafing = updown = 0.0f;
+
+  mousedir = -1.0f;
+
+  movespd = SPEED;
+
+  lastBrushUpdate = 0;
+  textureBrush.init();
+
+  look = false;
+  mViewMode = eViewMode_3D;
+  
+  createGUI();
 }
 
 MapView::~MapView()
@@ -1203,132 +1201,15 @@ void MapView::tick( float t, float dt )
   
   gWorld->tick(dt);
 
-  if( !MapChunkWindow->hidden )
+  if( !MapChunkWindow->hidden && gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk )
   {
-    if( gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk )
-      UITexturingGUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
+    UITexturingGUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
   }
 }                                             
-
-
 
 void MapView::doSelection( bool selectTerrainOnly )
 {
   gWorld->drawSelection( MouseX, MouseY, selectTerrainOnly );
-}
-
-void MapView::displayViewMode_Help( float /*t*/, float /*dt*/ )
-{
-  //! \todo  Make this a window instead of a view. Why should you do it as a view? ._.
-  video.clearScreen();
-  video.set2D();
-  
-  OpenGL::Texture::enableTexture();
-
-  glColor4f(0.7f,0.7f,0.7f,0.7f);
-
-  //! \todo Do not allocate the texture again and again all the time..
-  OpenGL::Texture* background = TextureManager::newTexture( "DUNGEONS\\TEXTURES\\BRIAN\\CLASSICALELFRUINS\\AZR_WINDOW01.BLP" );
-  background->bind();
-  
-  glBegin( GL_QUADS );    
-  glTexCoord2f( 0.0f, 0.0f );
-  glVertex2i( 0.0f, 0.0f );
-  glTexCoord2f( 1.0f, 0.0f );
-  glVertex2i( video.xres(), 0.0f );
-  glTexCoord2f( 1.0f, 1.0f );
-  glVertex2i( video.xres(), video.yres() );
-  glTexCoord2f( 0.0f, 1.0f );
-  glVertex2i( 0.0f, video.yres() );
-  glEnd();
-  
-  delete background;
-  
-  OpenGL::Texture::disableTexture();
-  
-  freetype::shprint( *arial16, 60.0f, 40.0f, 
-  "Basic controles\n\n"          
-    "Left mouse button moves the camera\n"
-    "Mouse left click - select chunk or object\n"
-    "Both mouse buttons - move forward\n"
-    "I - invert mouse up and down\n"
-    "Q,E - move up,down\n"
-    "A,D,W,S - move left,right,forward,backward\n"
-    "M - show minimap\n"
-    "U - 2d texture editor\n"
-    //"C - chunk settings\n" //! \todo: C chunk settings must get fixed first. Then turn on this again
-    "H - help\n"
-    "Shift + R - turn camera 180 degres\n"
-    "Shift + F4 - change to auto select mode\n"
-    "Esc - exit to main menu\n"
-    "\n"
-  "Toggles\n"  
-    "\n"
-    "F1 - toggle M2s\n"
-    "F2 - toggle WMO doodads set\n" 
-    "F3 - toggle ground\n"
-    "F4 - toggle GUI\n"
-    "F6 - toggle WMOs\n"
-    "F7 - toggle chunk (red) and ADT (green) lines\n"
-    "F8 - toggle detailed infotext\n"
-    "F9 - toggle map contour\n"
-    "F - toggle fog\n"
-    "TAB - toggle UI view\n"
-    "x - texture palette\n"
-    "CTRL + x - detail window\n"
-    "R/T - Move true the editing modes\n"
-    "\n"
-    "Files:\n"
-    "F5 - save bookmark\n"
-    "F10 - reload BLP\n"
-    "F11 - reload M2s\n"
-    "F12 - reload wmo\n"
-    "Shift + J - reload ADT tile\n"
-    "CTRL + S -  Save all changed ADT tiles\n"
-    "CTRL + SHIFT + S - Save ADT tiles camera position\n"
-  );
-  
-  freetype::shprint( *arial16, video.xres() - 400.0f, 40.0f, 
-    "Edit ground:\n"
-    "Shift + F1 - toggle ground edit mode\n"
-    "T - change terrain mode\n"
-    "Y - changes brush type\n"  
-    "ALT + left mouse + mouse move - change brush size\n"
-    "Terrain mode - raise/lower\n"
-    "Left mouse click + Shift - raise terrain\n"
-    "Left mouse click + Alt - lower terrain\n"
-    "Terrain mode - flatten/blur\n"
-    "Left mouse click + Shift - flatten terrain\n"
-    "Left mouse  click + Alt - blur terrain\n"  
-    "Z - change the mode in the option window\n"
-    "\n"
-    "Edit objects if a model is selected with left click:\n"
-    "Hold middle mouse - move object\n"
-    "Hold middle mouse + Alt - scale M2\n"
-    "Hold left mouse + Shift, Ctrl or Alt - rotate object\n"
-    "0-9 - change doodads set of selected WMO\n"
-    "Ctrl+R - Reset rotation\n"
-    "PageDown - Set object to Groundlevel\n"
-    "CTRL + C - Copy object to clipboard\n"
-    "CTRL + V - Paste object on mouse position\n"
-    "-/+ - scale M2\n"
-    "Numpad 7/9 - rotate object\n"
-    "Numpad 4/8/6/2 - vertical position\n"
-    "Numpad 1/3 -  move up/dow\n"
-    "With Shift double speed \n" 
-    "With CTRL triple speed \n"
-    "With Shift and CTRL together half speed \n"
-    "\n"
-    "Edit texture:\n"
-    "Hold CTRL + Shift - clear all textures on chunk\n"
-    "Hold CTRL - draw texture or fills if chunk is empty\n"
-    "\n"
-    "Adjust:\n"
-    "O,P - slower/faster movement\n"
-    "B,N - slower/faster time\n"
-    "Shift -/+ - fog distance when no model is selected\n"
-  );
-
 }
 
 void MapView::displayViewMode_Minimap( float /*t*/, float /*dt*/ )
@@ -1370,6 +1251,32 @@ void MapView::displayViewMode_Minimap( float /*t*/, float /*dt*/ )
   //gWorld->skies->drawSky(Vec3D(0.0f,0.0f,0.0f));
 }
 
+void MapView::displayGUIIfEnabled()
+{
+  if( _GUIDisplayingEnabled )
+  {
+    video.set2D();
+    
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+  
+    OpenGL::Texture::disableTexture( 1 );
+    OpenGL::Texture::enableTexture( 0 );
+    
+    glDisable( GL_DEPTH_TEST );
+    glDisable( GL_CULL_FACE );
+    glDisable( GL_LIGHTING );
+    glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+    
+    OpenGL::Texture::disableTexture( 0 );
+    
+    mainGui->setTilemode( mViewMode != eViewMode_3D );
+    mainGui->render();
+    
+    OpenGL::Texture::enableTexture( 0 );
+  }
+}
+
 void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 {
   video.setTileMode();
@@ -1403,68 +1310,24 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
       glVertex3f(mX-tRadius,mY-tRadius,0);
     glEnd();
   glPopMatrix();
-
-  if( hud )
-  {
-    video.set2D();
-    
-    glEnable(GL_BLEND);
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_LIGHTING);
-    glColor4f(1.0f,1.0f,1.0f,1.0f);
-    glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
-    
-    mainGui->render( true );
-    
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
-  }
+  displayGUIIfEnabled();
 }
 
 void MapView::displayViewMode_3D( float /*t*/, float /*dt*/ )
 {
   //! \note Select terrain below mouse, if no item selected or the item is map.
   if( !gWorld->IsSelection( eEntry_Model ) && !gWorld->IsSelection( eEntry_WMO ) && Settings::getInstance()->AutoSelectingMode )
+  {
     doSelection( true );
+  }
   
   video.set3D();
 
   gWorld->draw();
   
-  if( hud ) 
-  {
-    video.set2D();
-    glEnable(GL_BLEND);
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_LIGHTING);
-    glColor4f(1,1,1,1);
-    
-    glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
-    
-    mainGui->render( false );
-    
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
-  }
+  displayGUIIfEnabled();
 }
-
-
 
 void MapView::display( float t, float dt )
 {
@@ -1476,31 +1339,20 @@ void MapView::display( float t, float dt )
     Saving=false;
   }
 
-  if(set_areaid)
-  {
-    // reset Area ID
-  
-  }
-
-
   switch( mViewMode )
-  {
-  case eViewMode_Help:
-    displayViewMode_Help( t, dt );
-    break;
+  {    
   case eViewMode_Minimap:
     displayViewMode_Minimap( t, dt );
     break;
+    
   case eViewMode_2D:
     displayViewMode_2D( t, dt );
     break;
+    
   case eViewMode_3D:
     displayViewMode_3D( t, dt );
-
     break;
   }
-      //CheckForGLError( "MapView::display(), after displayViewMode_3D" );
-
 }
 
 void MapView::save()
@@ -1510,10 +1362,7 @@ void MapView::save()
 
 void MapView::quit()
 {
-  if( mViewMode == eViewMode_Help )
-    mViewMode = eViewMode_3D;
-  else
-    gPop = true;
+  gPop = true;
 }
 
 void MapView::resizewindow()
@@ -1523,9 +1372,6 @@ void MapView::resizewindow()
 
 void MapView::keypressed( SDL_KeyboardEvent *e )
 {
-  if( !( SDL_GetAppState() & SDL_APPINPUTFOCUS ) )
-    return;                  // finally stop getting keys from chatting ..
-
   //if( textbox->KeyBoardEvent( e ) ) return;
 
   if( e->type == SDL_KEYDOWN ) 
@@ -1698,7 +1544,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
     // toggle interface
     if( e->keysym.sym == SDLK_TAB )
-      hud = !hud;  
+      _GUIDisplayingEnabled = !_GUIDisplayingEnabled;  
 
     // toggle "terrain texturing mode" / draw models
     if( e->keysym.sym == SDLK_F1 )
@@ -1776,12 +1622,10 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_F9 ) 
       DrawMapContour = !DrawMapContour;
 
-    // help
     if( e->keysym.sym == SDLK_h )
-      if( mViewMode == eViewMode_Help )
-        mViewMode = eViewMode_3D;
-      else
-        mViewMode = eViewMode_Help;
+    {
+      mainGui->toggleHelp();
+    }
 
     // draw fog
     if( e->keysym.sym == SDLK_f ) 
@@ -1996,9 +1840,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
 void MapView::mousemove( SDL_MouseMotionEvent *e )
 {
-  if( !( SDL_GetAppState() & SDL_APPINPUTFOCUS ) )
-    return;                  // finally stop getting keys from chatting ..
-
   if ( ( look && !( Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown || Environment::getInstance()->AltDown ) ) || video.fullscreen() ) 
   {
     ah += e->xrel / XSENS;
@@ -2081,9 +1922,6 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 
 void MapView::mouseclick( SDL_MouseButtonEvent *e )
 {
-  if( !( SDL_GetAppState() & SDL_APPINPUTFOCUS ) )
-    return;                  // finally stop getting keys from chatting ..
-
   if( e->type == SDL_MOUSEBUTTONDOWN ) 
   {
     switch( e->button )
@@ -2109,7 +1947,7 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
      }
      else if (leftMouse)
      {
-      LastClicked = mainGui->tileFrames->processLeftClick( static_cast<float>( MouseX ), static_cast<float>( MouseY ) );  
+      LastClicked = mainGui->processLeftClick( static_cast<float>( MouseX ), static_cast<float>( MouseY ) );  
       if( mViewMode == eViewMode_3D && !LastClicked )
       {
         doSelection( false );
@@ -2117,9 +1955,6 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
     }
     else if (rightMouse)
     {
-      // Only right
-      if( mViewMode == eViewMode_Help )
-        mViewMode = eViewMode_3D; // Steff: exit help window when open
       look = true;
     }
   } 
@@ -2146,9 +1981,6 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
       case SDL_BUTTON_RIGHT:
         rightMouse = false;
         
-        if( mViewMode == eViewMode_Help )
-          mViewMode = eViewMode_3D; // Steff: exit help window when open
-          
         look = false;
         
         if(!key_w && moving > 0.0f )moving = 0.0f;
@@ -2171,7 +2003,4 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
   {
     Environment::getInstance()->view_holelines = Settings::getInstance()->holelinesOn;
   }
-
 }
-
-

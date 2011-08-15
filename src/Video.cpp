@@ -359,9 +359,19 @@ namespace OpenGL
   {
     glEnable( GL_TEXTURE_2D );
   }
+  void Texture::enableTexture( size_t num )
+  {
+    setActiveTexture( num );
+    enableTexture();
+  }
   void Texture::disableTexture()
   {
     glDisable( GL_TEXTURE_2D );
+  }
+  void Texture::disableTexture( size_t num )
+  {
+    setActiveTexture( num );
+    disableTexture();
   }
   void Texture::setActiveTexture( size_t num )
   {

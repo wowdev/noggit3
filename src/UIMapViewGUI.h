@@ -11,15 +11,21 @@ class MapView;
 class UIFrame;
 class UITexturePicker;
 class UITextureSwitcher;
+class UIHelp;
+
+#include "UIFrame.h"
 
 //! \todo Give better name.
-class UIMapViewGUI
+class UIMapViewGUI : public UIFrame
 {
+private:
+  bool _tilemode;
+  UIHelp* _help;
+  
 public:
   // Editor paramter
   int ground_edit_mode;
   int selection_view_mode;
-  UIFrame* tileFrames;
 
   MapView* theMapview;
   // UI elements
@@ -35,10 +41,13 @@ public:
   UITextureSwitcher* TextureSwitcher;
 
   explicit UIMapViewGUI( MapView* setMapview );
-  ~UIMapViewGUI();
   
-  void render( bool tilemode );
-  void resize();
+  void setTilemode( bool enabled );
+  virtual void render() const;
+  
+  void showHelp();
+  void hideHelp();
+  void toggleHelp();
 };
 
 #endif
