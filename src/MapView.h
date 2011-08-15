@@ -8,7 +8,6 @@ class World;
 
 enum eViewMode
 {
-  eViewMode_Help,
   eViewMode_Minimap,
   eViewMode_2D,
   eViewMode_3D
@@ -20,8 +19,7 @@ private:
   float ah,av,moving,strafing,updown,mousedir,movespd;
   bool key_w;
   bool look;
-  bool hud;
-  bool set_areaid;
+  bool _GUIDisplayingEnabled;
 
   void save();
 
@@ -31,10 +29,13 @@ private:
 
   int mViewMode;
 
-  void displayViewMode_Help( float t, float dt );
   void displayViewMode_Minimap( float t, float dt );
   void displayViewMode_2D( float t, float dt );
   void displayViewMode_3D( float t, float dt );
+  
+  void displayGUIIfEnabled();
+  
+  void createGUI();
 
   float mTimespeed;
 
@@ -50,17 +51,6 @@ public:
   void mousemove(SDL_MouseMotionEvent *e);
   void mouseclick(SDL_MouseButtonEvent *e);
   void resizewindow();
-
-  //! \todo  Remove when help is a window.
-  void ViewHelp()
-  {
-    mViewMode = eViewMode_Help;
-  }
-  void View3D()
-  {
-    mViewMode = eViewMode_3D;
-  }
-
 };
 
 

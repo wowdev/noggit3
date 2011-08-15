@@ -88,3 +88,16 @@ bool UIFrame::processKey( char /*key*/, bool /*shift*/, bool /*alt*/, bool /*ctr
 {
   return false;
 }
+  
+void UIFrame::hide()
+{
+  hidden = true;
+}
+void UIFrame::show()
+{
+  hidden = false;
+}
+void UIFrame::toggleVisibility()
+{
+  hidden = !hidden;
+}

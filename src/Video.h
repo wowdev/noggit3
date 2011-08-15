@@ -130,7 +130,9 @@ namespace OpenGL
     void bind() const;
     
     static void enableTexture();
+    static void enableTexture( size_t num );
     static void disableTexture();
+    static void disableTexture( size_t num );
     static void setActiveTexture( size_t num = 0 );
     
     const std::string& filename();

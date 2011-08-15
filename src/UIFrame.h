@@ -71,6 +71,10 @@ public:
   {
     return this->x < pX && this->x + this->width > pX && this->y < pY && this->y + this->height > pY;
   }
+  
+  void hide();
+  void show();
+  void toggleVisibility();
 };
 
 #endif

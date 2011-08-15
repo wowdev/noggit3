@@ -12,6 +12,7 @@
 #include "Project.h"
 #include "UIAppInfo.h" // UIAppInfo
 #include "UIDetailInfos.h" // UIDetailInfos
+#include "UIHelp.h"
 #include "UIMinimapWindow.h"
 #include "UIStatusBar.h" // UIStatusBar
 #include "UITexturePicker.h" // 
@@ -23,69 +24,80 @@
 #include "WMOInstance.h"
 #include "World.h"
 
-UIMapViewGUI::UIMapViewGUI(MapView *setMapview) : theMapview( setMapview )
+UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
+: UIFrame( 0.0f, 0.0f, video.xres(), video.yres() )
+, theMapview( setMapview )
 {
-  this->tileFrames = new UIFrame( 0.0f, 0.0f, video.xres(), video.yres() );
-  
   // Minimap window
-  this->minimapWindow = new UIMinimapWindow(gWorld);
-  this->minimapWindow->hidden = true;
-  this->tileFrames->addChild(this->minimapWindow);
+  minimapWindow = new UIMinimapWindow(gWorld);
+  minimapWindow->hidden = true;
+  addChild(minimapWindow);
 
   // UIToolbar
-  this->guiToolbar = new UIToolbar( 6.0f, 38.0f, 105.0f, 600.0f, this );
-  this->tileFrames->addChild(this->guiToolbar);
+  guiToolbar = new UIToolbar( 6.0f, 38.0f, 105.0f, 600.0f, this );
+  addChild(guiToolbar);
   
   // Statusbar
-  this->guiStatusbar = new UIStatusBar( 0.0f, video.yres() - 30.0f, video.xres(), 30.0f );
-  this->tileFrames->addChild(this->guiStatusbar);
+  guiStatusbar = new UIStatusBar( 0.0f, video.yres() - 30.0f, video.xres(), 30.0f );
+  addChild(guiStatusbar);
 
   // DetailInfoWindow
-  this->guidetailInfos = new UIDetailInfos( 1.0f, video.yres() - 282.0f, 600.0f, 250.0f, this );
-  this->guidetailInfos->movable = true;
-  this->guidetailInfos->hidden = true;
-  this->tileFrames->addChild(this->guidetailInfos);
+  guidetailInfos = new UIDetailInfos( 1.0f, video.yres() - 282.0f, 600.0f, 250.0f, this );
+  guidetailInfos->movable = true;
+  guidetailInfos->hidden = true;
+  addChild(guidetailInfos);
 
   // ZoneIDBrowser
-  this->ZoneIDBrowser = new UIZoneIDBrowser(200, 200, 435, 400, this);
-  this->ZoneIDBrowser->movable = true;
-  this->ZoneIDBrowser->hidden = true;
-  this->tileFrames->addChild(this->ZoneIDBrowser);
+  ZoneIDBrowser = new UIZoneIDBrowser(200, 200, 435, 400, this);
+  ZoneIDBrowser->movable = true;
+  ZoneIDBrowser->hidden = true;
+  addChild(ZoneIDBrowser);
 
   // AppInfosWindow
-  this->guiappInfo = new UIAppInfo( 1.0f, video.yres() - 440.0f, 420.0f, 410.0f, this );
-  this->guiappInfo->movable = true;
-  this->guiappInfo->hidden = true;
+  guiappInfo = new UIAppInfo( 1.0f, video.yres() - 440.0f, 420.0f, 410.0f, this );
+  guiappInfo->movable = true;
+  guiappInfo->hidden = true;
   std::stringstream appinfoText;
   appinfoText << "Project Path: " << Project::getInstance()->getPath() << std::endl;
-  this->guiappInfo->setText( appinfoText.str() );
-  this->tileFrames->addChild(this->guiappInfo);
+  guiappInfo->setText( appinfoText.str() );
+  addChild(guiappInfo);
 
-  this->TexturePicker = new UITexturePicker(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );
-  this->TexturePicker->hidden = true;
-  this->TexturePicker->movable = true;
-  this->tileFrames->addChild( this->TexturePicker);
+  TexturePicker = new UITexturePicker(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );
+  TexturePicker->hidden = true;
+  TexturePicker->movable = true;
+  addChild( TexturePicker);
 
-  this->TextureSwitcher = new UITextureSwitcher(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );
-  this->TextureSwitcher->hidden = true;
-  this->TextureSwitcher->movable = true;
-  this->tileFrames->addChild( this->TextureSwitcher);
+  TextureSwitcher = new UITextureSwitcher(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );
+  TextureSwitcher->hidden = true;
+  TextureSwitcher->movable = true;
+  addChild( TextureSwitcher);
+  
+  _help = new UIHelp();
+  _help->hide();
+  addChild( _help );
 }
 
-UIMapViewGUI::~UIMapViewGUI()
+void UIMapViewGUI::showHelp()
 {
-  delete tileFrames;
+  _help->show();
+}
+void UIMapViewGUI::hideHelp()
+{
+  _help->hide();
+}
+void UIMapViewGUI::toggleHelp()
+{
+  _help->toggleVisibility();
 }
 
-void UIMapViewGUI::resize()
+void UIMapViewGUI::setTilemode( bool enabled )
 {
-  for( std::vector<UIFrame*>::iterator child = tileFrames->children.begin(); child != tileFrames->children.end(); ++child )
-    (*child)->resize();
+  _tilemode = enabled;
 }
 
-void UIMapViewGUI::render( bool tilemode )
+void UIMapViewGUI::render( ) const
 {
-  this->tileFrames->render();
+  UIFrame::render();
   
   //! \todo Make these some textUIs.
   freetype::shprint( *arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
@@ -96,23 +108,22 @@ void UIMapViewGUI::render( bool tilemode )
   
   if ( gWorld->loading ) 
     freetype::shprint( *arial16, video.xres() / 2.0f - freetype::width( *arial16, gWorld->noadt ? "No ADT at this Point" : "Loading..." ) / 2.0f, 30.0f, ( gWorld->noadt ? "No ADT at this Point" : "Loading..." ) );
-    
-    
+
   std::ostringstream statusbarInfo;
   statusbarInfo << "tile: " << std::floor( gWorld->camera.x / TILESIZE ) << " " <<  std::floor( gWorld->camera.z / TILESIZE )
      << "; coordinates: client (x: " << gWorld->camera.x << ", y: " << gWorld->camera.z << ", z: "<<gWorld->camera.y
      << "), server (x: " << ( ZEROPOINT - gWorld->camera.x ) << ", y:" << ( ZEROPOINT - gWorld->camera.z ) << ", z:" << ( ZEROPOINT - gWorld->camera.y ) << ")" ;
   if(Environment::getInstance()->paintMode) statusbarInfo << "PM:1";else statusbarInfo << "PM:2";
-  this->guiStatusbar->setLeftInfo( statusbarInfo.str() );
+  guiStatusbar->setLeftInfo( statusbarInfo.str() );
   
-  this->guiStatusbar->setRightInfo( "" );
+  guiStatusbar->setRightInfo( "" );
  
-  if( !tilemode && !this->guidetailInfos->hidden )
+  if( !_tilemode && !guidetailInfos->hidden )
   {
     nameEntry * lSelection = gWorld->GetCurrentSelection();
     if( lSelection )
     {
-      this->guiStatusbar->setRightInfo( lSelection->returnName() );
+      guiStatusbar->setRightInfo( lSelection->returnName() );
       
       std::stringstream detailInfo;
 
@@ -199,11 +210,11 @@ void UIMapViewGUI::render( bool tilemode )
     
         break;
       }
-      this->guidetailInfos->setText( detailInfo.str() );
+      guidetailInfos->setText( detailInfo.str() );
     }
     else 
     {
-      this->guidetailInfos->setText( "" );
+      guidetailInfos->setText( "" );
     }
   }
 }
