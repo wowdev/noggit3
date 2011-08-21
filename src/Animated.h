@@ -178,32 +178,33 @@ namespace Animation
             break;
           }
         }
-  
-        TimestampType t1 = timestampVector[pos];
-        TimestampType t2 = timestampVector[pos + 1];
-        const float percentage = ( time - t1 ) / static_cast<float>( t2 - t1 );
-  
-        switch( _interpolationType )
+        
+        if( pos == timestampVector.size() - 1 || _interpolationType == Animation::Interpolation::Type::NONE )
         {
-          case Animation::Interpolation::Type::NONE:
-          {
-            result = dataVector[pos];
-          }
-          break;
+          result = dataVector[pos];
+        }
+        else
+        {
+          TimestampType t1 = timestampVector[pos];
+          TimestampType t2 = timestampVector[pos + 1];
+          const float percentage = ( time - t1 ) / static_cast<float>( t2 - t1 );
   
-          case Animation::Interpolation::Type::LINEAR:
+          switch( _interpolationType )
           {
-            Animation::Interpolation::Linear interpolation;
-            result = interpolation( percentage, dataVector[pos], dataVector[pos + 1] );
-          }
-          break;
+            case Animation::Interpolation::Type::LINEAR:
+            {
+              Animation::Interpolation::Linear interpolation;
+              result = interpolation( percentage, dataVector[pos], dataVector[pos + 1] );
+            }
+            break;
   
-          case Animation::Interpolation::Type::HERMITE:
-          {
-            Animation::Interpolation::Hermite interpolation;
-            result = interpolation( percentage, dataVector[pos], dataVector[pos + 1], inVector[pos], outVector[pos] );
+            case Animation::Interpolation::Type::HERMITE:
+            {
+              Animation::Interpolation::Hermite interpolation;
+              result = interpolation( percentage, dataVector[pos], dataVector[pos + 1], inVector[pos], outVector[pos] );
+            }
+            break;
           }
-          break;
         }
       }
   
