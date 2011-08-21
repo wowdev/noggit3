@@ -625,7 +625,7 @@ void Liquid::draw()
   }
 
   if (type==0) 
-    glColor4f(0,0,0,0.8);
+    glColor4f(0.0f,0.0f,0.0f,0.8f);
   else 
   {
     if (type==2) 
