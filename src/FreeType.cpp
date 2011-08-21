@@ -1,373 +1,223 @@
-/*
-  A quick and simple opengl font library that uses GNU freetype2, written
-  and distributed as part of a tutorial for nehe.gamedev.net.
-  Sven Olsen, 2003
-*/
-
-
-//Include our header file.
 #include "FreeType.h"
+
+#include FT_GLYPH_H
+#include FT_OUTLINE_H
+#include FT_TRIGONOMETRY_H 
 
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <boost/algorithm/string.hpp>
 
 #include "MPQ.h"
 #include "Log.h"
 #include "Video.h"
 
-
-namespace freetype {
-
-///This function gets the first power of 2 >= the
-///int that we pass it.
-inline int next_p2 ( int a )
+namespace freetype
 {
-  int rval=1;
-  while(rval<a) rval<<=1;
-  return rval;
-}
-
-///Create a display list coresponding to the give character.
-int make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base,int fontsize )
-{
-  int width, height;
-  GLubyte* expanded_data;
-  FT_BitmapGlyph bitmap_glyph;
+  inline int next_p2( int a )
+  {
+    int rval( 1 );
+    while( rval < a )
+    {
+      rval <<= 1;
+    }
+    return rval;
+  }
   
-  //The first thing we do is get FreeType to render our character
-  //into a bitmap.  This actually requires a couple of FreeType commands:
-
-  //Load the Glyph for our character.
-  if(FT_Load_Glyph( face, FT_Get_Char_Index( face, ch ), FT_LOAD_DEFAULT ))
+  void font_data::createGlyph( CharacterCode charCode ) const
   {
-    LogError << "FT_Load_Glyph failed" << std::endl;
-    throw std::runtime_error("FT_Load_Glyph failed");
-  }
-
-  //Move the face's glyph into a Glyph object.
-  FT_Glyph glyph;
-  if(FT_Get_Glyph( face->glyph, &glyph ))
-  {
-    LogError << "FT_Get_Glyph failed" << std::endl;
-    throw std::runtime_error("FT_Get_Glyph failed");
-  }
-
-
-  //Convert the glyph to a bitmap.
-  FT_Glyph_To_Bitmap( &glyph, FT_RENDER_MODE_NORMAL, 0, 1 );
-  bitmap_glyph = (FT_BitmapGlyph)glyph;
-
-  //This reference will make accessing the bitmap easier
-  FT_Bitmap& bitmap=bitmap_glyph->bitmap;
-
-  //Use our helper function to get the widths of
-  //the bitmap data that we will need in order to create
-  //our texture.
-  width = next_p2( bitmap.width+1);
-  height = next_p2( bitmap.rows+1);
-
-  //Allocate memory for the texture data.
-  expanded_data = new GLubyte[width * height*2];
-
-  //Here we fill in the data for the expanded bitmap.
-  //Notice that we are using two channel bitmap (one for
-  //luminocity and one for alpha), but we assign
-  //both luminocity and alpha to the value that we
-  //find in the FreeType bitmap. 
-  //We use the ?: operator so that value which we use
-  //will be 0 if we are in the padding zone, and whatever
-  //is the the Freetype bitmap otherwise.
+    if( FT_Load_Glyph( _face, FT_Get_Char_Index( _face, charCode ), FT_LOAD_DEFAULT ) )
+    {
+      LogError << "FT_Load_Glyph failed" << std::endl;
+      throw std::runtime_error("FT_Load_Glyph failed");
+    }
+  
+    FT_Glyph glyph;
+    if( FT_Get_Glyph( _face->glyph, &glyph ) )
+    {
+      LogError << "FT_Get_Glyph failed" << std::endl;
+      throw std::runtime_error("FT_Get_Glyph failed");
+    }
+  
+    FT_Glyph_To_Bitmap( &glyph, FT_RENDER_MODE_NORMAL, 0, 1 );
+    FT_BitmapGlyph bitmap_glyph( reinterpret_cast<FT_BitmapGlyph>( glyph ) );
+  
+    const FT_Bitmap& bitmap = bitmap_glyph->bitmap;
+  
+    const int width( next_p2( bitmap.width + 1 ) );
+    const int height( next_p2( bitmap.rows + 1 ) );
+  
+    GLubyte expanded_data[width * height * 2];
+    memset( expanded_data, 0, sizeof( expanded_data ) );
     
-  memset(expanded_data,0,width*height*2);
-  for(int j=0; j <height;j++) {
-    for(int i=0; i < width; ++i){
-      expanded_data[2*(i+j*width)]=expanded_data[2*(i+j*width)+1]= 
-        (i>=bitmap.width || j>=bitmap.rows) ?
-        0 : static_cast<unsigned char>(std::min(static_cast<float>(bitmap.buffer[i + bitmap.width*j])*1.5f,255.0f));
+    for( int j( 0 ); j < height; ++j )
+    {
+      for( int i( 0 ); i < width; ++i )
+      {
+        expanded_data[ 2 * ( i + j * width ) ] = expanded_data[ 2 * ( i + j * width ) + 1 ] = 
+          ( i >= bitmap.width || j >= bitmap.rows ) ?
+          0 : static_cast<GLubyte>( std::min( static_cast<float>( bitmap.buffer[ i + bitmap.width * j ] ) * 1.5f, 255.0f ) );
+      }
     }
-  }
+    
+    GlyphData glyphData;
+    glyphData._width = _face->glyph->advance.x >> 6;
+    
+    glyphData._texture = new OpenGL::Texture();
+    glyphData._texture->bind();
+    
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data );
 
-  //Now we just setup some texture paramaters.
-  size_t index = ch & 0x7F;
-  glBindTexture( GL_TEXTURE_2D, tex_base[index]);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-  //Here we actually create the texture itself, notice
-  //that we are using GL_LUMINANCE_ALPHA to indicate that
-  //we are using 2 channel data.
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width, height,
-      0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data );
-
-  //With the texture created, we don't need to expanded data anymore
-
-  delete[] expanded_data;
-  expanded_data = NULL;
-
-  //So now we can create the display list
-  glNewList(list_base+ch,GL_COMPILE);
-
-  glBindTexture(GL_TEXTURE_2D,tex_base[index]);
-
-//  glPushMatrix();
+    glyphData._callList = new OpenGL::CallList();
+    glyphData._callList->startRecording();
   
+    glyphData._texture->bind();
+  
+    const float xl( bitmap_glyph->left );
+    const float xh( xl + width );
+    const float yl( h - bitmap_glyph->top );
+    const float yh( yl + height );
+    
+    glBegin( GL_TRIANGLE_STRIP );
+    glTexCoord2f( 0.0f, 0.0f );
+    glVertex2f( xl, yl );
+    glTexCoord2f( 0.0f, 1.0f );
+    glVertex2f( xl, yh );
+    glTexCoord2f( 1.0f, 0.0f );
+    glVertex2f( xh, yl );
+    glTexCoord2f( 1.0f, 1.0f );
+    glVertex2f( xh, yh );
+    glEnd();
+    
+    glTranslatef( static_cast<float>( glyphData._width ), 0.0f, 0.0f );
 
-  //first we need to move over a little so that
-  //the character has the right amount of space
-  //between it and the one before it.
-//  glTranslatef(bitmap_glyph->left,0,0);
+    glyphData._callList->endRecording();
 
-  //Now we move down a little in the case that the
-  //bitmap extends past the bottom of the line 
-  //(this is only true for characters like 'g' or 'y'.
-//  glTranslatef(0,fontsize-bitmap_glyph->top,0);
-
-  //Now we need to account for the fact that many of
-  //our textures are filled with empty padding space.
-  //We figure what portion of the texture is used by 
-  //the actual character and store that information in 
-  //the x and y variables, then when we draw the
-  //quad, we will only reference the parts of the texture
-  //that we contain the character itself.
-  //float  x=((float)bitmap.width+1) / (float)width,
-  //    y=((float)bitmap.rows+1) / (float)height;
-
-  //Here we draw the texturemaped quads.
-  //The bitmap that we got from FreeType was not 
-  //oriented quite like we would like it to be,
-  //so we need to link the texture to the quad
-  //so that the result will be properly aligned.
-  const float xl = bitmap_glyph->left;
-  const float xh = bitmap_glyph->left + width;
-   const float yl = fontsize - bitmap_glyph->top;
-  const float yh = fontsize - bitmap_glyph->top + height;
-  glBegin(GL_TRIANGLE_STRIP);
-  glTexCoord2f(0,0); glVertex2f(xl,yl);
-  glTexCoord2f(0,1); glVertex2f(xl,yh);
-  glTexCoord2f(1,0); glVertex2f(xh,yl);
-  glTexCoord2f(1,1); glVertex2f(xh,yh);
-  glEnd();
-//  glPopMatrix();
-  glTranslatef(face->glyph->advance.x >> 6 ,0,0);
-
-
-  //increment the raster position as if we were a bitmap font.
-  //(only needed if you want to calculate text length)
-  //expanded_data = new GLubyte[bitmap.width * bitmap.rows];
-  //memcpy(expanded_data,bitmap.buffer,bitmap.width * bitmap.rows);
-  //glBitmap(bitmap.width,bitmap.rows,0,0,face->glyph->advance.x >> 6,0,expanded_data);
-
-  //Finnish the display list
-  glEndList();
-
-  return face->glyph->advance.x >> 6;
-}
-
-
-
-font_data::font_data( const std::string& fname, unsigned int _h, bool fromMPQ )
-: h ( _h )
-{
-  FT_Library library;
-  if( FT_Init_FreeType( &library ) ) 
-  {
-    LogError << "FT_Init_FreeType failed" << std::endl;
-    throw std::runtime_error( "FT_Init_FreeType failed" );
-  }
-
-  FT_Face face;
-
-  bool failed;
-  MPQFile* f = NULL;
-  if( fromMPQ )
-  {
-    f = new MPQFile( fname );
-    failed = FT_New_Memory_Face( library, reinterpret_cast<FT_Byte*>( f->getBuffer() ), f->getSize(), 0, &face );
-  }
-  else
-  {
-    failed = FT_New_Face( library, fname.c_str(), 0, &face );
+    _cachedGlyphs[charCode] = glyphData;
   }
   
-  if( failed )
+  void font_data::init( const std::string& fname, unsigned int _h, bool fromMPQ )
   {
-    LogError << "FT_New_Face failed (there is probably a problem with your font file)" << std::endl;
-    throw std::runtime_error( "FT_New_Face failed (there is probably a problem with your font file)" );
-  }
-
-  // For some twisted reason, Freetype measures font size in terms of 1/64ths of pixels. Thus, to make a font h pixels high, we need to request a size of h*64. (h << 6 is just a prettier way of writting h*64)
-  FT_Set_Char_Size( face, _h << 6, _h << 6, 72, 72 );
-
-  list_base = glGenLists( 128 ); //! \todo more for unicode!
-  textures = new GLuint[128];
-  glGenTextures( 128, textures );
-  
-  for( unsigned char i = 0; i < 128; ++i )
-  {
-    charWidths[i] = make_dlist( face, i, list_base, textures, h );
-  }  
-  
-
-  FT_Done_Face( face );
-  FT_Done_FreeType( library );
-  
-  if( fromMPQ && f )
-  {
-    f->close();
-    delete f;
-  }
-}
-
-font_data::~font_data()
-{
-  glDeleteLists( list_base, 128 );
-  glDeleteTextures( 128, textures );
-  if( textures )
-  {
-    delete [] textures;
-    textures = NULL;
-  }
-}
-
-///Much like Nehe's glPrint function, but modified to work
-///with freetype fonts.
-void print(const font_data &ft_font, float x, float y, const std::string& text, float r, float g, float b)  {
-  
-  // We want a coordinate system where things coresponding to window pixels.
-  //pushScreenCoordinateMatrix();          
-  
-  GLuint font=ft_font.list_base;
-  float h=ft_font.h/.90f;            //We make the height about 1.5* that of
-
-  //Here is some code to split the text that we have been
-  //given into a set of lines.  
-  //This could be made much neater by using
-  //a regular expression library such as the one avliable from
-  //boost.org (I've only done it out by hand to avoid complicating
-  //this tutorial with unnecessary library dependencies).
-  
-  //! \todo std::string.find ...
-  
-  std::vector<std::string> lines;
-  const char* s = text.c_str();
-  const char* e = s;
-  while (*e != 0) {
-    e = s;
-    while (*e != 0 && strchr("\n", *e) == 0) ++e;
-    if (e - s > 0) {
-      lines.push_back(std::string(s,e - s));
+    h = _h;
+    
+    if( FT_Init_FreeType( &_library ) ) 
+    {
+      LogError << "FT_Init_FreeType failed" << std::endl;
+      throw std::runtime_error( "FT_Init_FreeType failed" );
     }
-    s = e + 1;
-  }
-  /*
-  const char *start_line=text.c_str();
-  const char *c=text.c_str();
-  for(;*c;c++) {
-    if(*c=='\n') {
-      std::string line;
-      for(const char *n=start_line;n<c;n++) line.append(1,*n);
-      lines.push_back(line);
-      start_line=c+1;
+  
+    bool failed;
+    if( fromMPQ )
+    {
+      _mpqFile = new MPQFile( fname );
+      failed = FT_New_Memory_Face( _library, _mpqFile->get<FT_Byte>( 0 ), _mpqFile->getSize(), 0, &_face );
     }
-  }
-  if(start_line) {
-    std::string line;
-    for(const char *n=start_line;n<c;n++) line.append(1,*n);
-    lines.push_back(line);
-  }*/
-  
-  glColor3f(r,g,b);
-  
-  glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT  | GL_ENABLE_BIT | GL_TRANSFORM_BIT);  
-  glMatrixMode(GL_MODELVIEW);
-  glDisable(GL_LIGHTING);
-  glEnable(GL_TEXTURE_2D);
-  glDisable(GL_DEPTH_TEST);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
-
-  glListBase(font);
-
-  //float modelview_matrix[16];  
-  //glGetFloatv(GL_MODELVIEW_MATRIX, modelview_matrix);
-
-  //This is where the text display actually happens.
-  //For each line of text we reset the modelview matrix
-  //so that the line's text will start in the correct position.
-  //Notice that we need to reset the matrix, rather than just translating
-  //down by h. This is because when each character is
-  //draw it modifies the current matrix so that the next character
-  //will be drawn immediatly after it.  
-  for(unsigned int i=0;i<lines.size();++i) {
-  glPushMatrix();
-  glTranslatef(x,y+h*i,0.0f);
-    //glLoadIdentity();
-    //glMultMatrixf(modelview_matrix);
-
-  //  The commented out raster position stuff can be useful if you need to
-  //  know the length of the text that you are creating.
-  //  If you decide to use it make sure to also uncomment the glBitmap command
-  //  in make_dlist().
-  //  glRasterPos2f(0,0);
-    glCallLists(lines[i].length(), GL_UNSIGNED_BYTE, lines[i].c_str());
-  //  float rpos[4];
-  //  glGetFloatv(GL_CURRENT_RASTER_POSITION ,rpos);
-  //  float len=x-rpos[0];
-
-    //glTranslatef(0.0f,h*i,0.0f);
-  glPopMatrix();
-  }
-
-  glPopAttrib();    
-
-  //pop_projection_matrix();
-}
-
-void shprint(const font_data &ft_font, float x, float y, const std::string& text, float colorR, float colorG, float colorB)  {
-  print(ft_font, x+2.0f, y+2.0f, text,0.0f,0.0f,0.0f);
-  print(ft_font, x, y, text,colorR,colorG,colorB);
-}
-
-int width(const font_data &ft_font, const std::string& text)  
-{
-  //Here is some code to split the text that we have been
-  //given into a set of lines.  
-  //This could be made much neater by using
-  //a regular expression library such as the one avliable from
-  //boost.org (I've only done it out by hand to avoid complicating
-  //this tutorial with unnecessary library dependencies).
-  const char *start_line=text.c_str();
-  std::vector<std::string> lines;
-  const char *c=text.c_str();
-  for(;*c;c++) {
-    if(*c=='\n') {
-      std::string line;
-      for(const char *n=start_line;n<c;n++) line.append(1,*n);
-      lines.push_back(line);
-      start_line=c+1;
+    else
+    {
+      failed = FT_New_Face( _library, fname.c_str(), 0, &_face );
     }
-  }
-  if(start_line) {
-    std::string line;
-    for(const char *n=start_line;n<c;n++) line.append(1,*n);
-    lines.push_back(line);
-  }
-
-
-  int maxWidth=0;
+    
+    if( failed )
+    {
+      LogError << "FT_New_Face failed (there is probably a problem with your font file)" << std::endl;
+      throw std::runtime_error( "FT_New_Face failed (there is probably a problem with your font file)" );
+    }
   
-  for(unsigned int i=0;i<lines.size();++i)
+    // For some twisted reason, Freetype measures font size in terms of 1/64ths of pixels.
+    FT_Set_Char_Size( _face, h << 6, h << 6, 72, 72 );
+  }
+  
+  font_data::~font_data()
   {
-    int  curWidth=0;
-    for(unsigned int j=0;j<lines[i].size();j++)
-      curWidth+=ft_font.charWidths[size_t(lines[i].c_str()[j])];
-    if(curWidth>maxWidth)
-      maxWidth=curWidth;
-  }
-  return maxWidth;
-}
+    FT_Done_Face( _face );
+    FT_Done_FreeType( _library );
 
+    delete _mpqFile;
+
+    //! \todo Delete cached glyphs!
+  }
+  
+  const GlyphData& font_data::getGlyphData( CharacterCode charCode ) const
+  {
+    if( !_cachedGlyphs.count( charCode ) )
+    {
+      createGlyph( charCode );
+    }
+    return _cachedGlyphs[ charCode ];
+  }
+  
+  void font_data::print( float x, float y, const std::string& text, float colorR, float colorG, float colorB ) const
+  {
+    float height( h / 0.90f );
+    
+    typedef std::vector<std::string> linesType;
+    linesType lines;
+        
+    boost::split( lines, text, boost::is_any_of( "\n\r" ) );
+    
+    glColor3f( colorR, colorG, colorB );
+    
+    glPushAttrib( GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT );
+    glMatrixMode( GL_MODELVIEW );
+    glDisable( GL_LIGHTING );
+    glEnable( GL_TEXTURE_2D );
+    glDisable( GL_DEPTH_TEST );
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    
+    int verticalPosition( y );
+    
+    for( linesType::const_iterator line( lines.begin() ), end( lines.end() ); line != end; ++line )
+    {
+      glPushMatrix();
+      glTranslatef( x, verticalPosition, 0.0f );
+      
+      const char* lineString( line->c_str() );
+      
+      for( size_t i( 0 ), length( line->length() ); i < length; ++i )
+      {
+        getGlyphData( CharacterCode( lineString[i] ) ).render();
+      }
+      
+      verticalPosition += height;
+      glPopMatrix();
+    }
+  
+    glPopAttrib();
+  }
+  
+  void font_data::shprint( float x, float y, const std::string& text, float colorR, float colorG, float colorB ) const
+  {
+    print( x + 2.0f, y + 2.0f, text, 0.0f, 0.0f, 0.0f );
+    print( x, y, text, colorR, colorG, colorB );
+  }
+  
+  int font_data::width( const std::string& text ) const
+  {
+    typedef std::vector<std::string> linesType;
+    linesType lines;
+    
+    boost::split( lines, text, boost::is_any_of( "\n\r" ) );
+  
+    int maximumWidth( 0 );
+    
+    for( linesType::const_iterator line( lines.begin() ), end( lines.end() ); line != end; ++line )
+    {
+      int currentWidth( 0 );
+      const char* lineString( line->c_str() );
+      
+      for( size_t pos( 0 ), lineSize( line->size() ); pos < lineSize; ++pos )
+      {
+        currentWidth += getGlyphData( CharacterCode( lineString[pos] ) ).width();
+      }
+      maximumWidth = std::max( maximumWidth, currentWidth );
+    }
+    
+    return maximumWidth;
+  }
 }

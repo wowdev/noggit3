@@ -44,15 +44,15 @@ bool gPop = false;
 
 extern std::list<std::string> gListfile;
 
-freetype::font_data* arialn13;
-freetype::font_data* arial12;
-freetype::font_data* arial14;
-freetype::font_data* arial16;
-freetype::font_data* arial24;
-freetype::font_data* arial32;
-freetype::font_data* morpheus40;
-freetype::font_data* skurri32;
-freetype::font_data* fritz16;  
+freetype::font_data arialn13;
+freetype::font_data arial12;
+freetype::font_data arial14;
+freetype::font_data arial16;
+freetype::font_data arial24;
+freetype::font_data arial32;
+freetype::font_data morpheus40;
+freetype::font_data skurri32;
+freetype::font_data fritz16;  
 
 AsyncLoader* gAsyncLoader;
 
@@ -364,17 +364,17 @@ int main( int argc, char *argv[] )
   OpenDBs();
   
   // Initializing Fonts
-  skurri32 = new freetype::font_data( "fonts/skurri.ttf", 32, true );
-  fritz16 = new freetype::font_data( "fonts/frizqt__.ttf", 16, true );
-  morpheus40 = new freetype::font_data( "fonts/morpheus.ttf", 40, true );
-  arialn13 = new freetype::font_data( "fonts/arialn.ttf", 13, true );
+  skurri32.init( "fonts/skurri.ttf", 32, true );
+  fritz16.init( "fonts/frizqt__.ttf", 16, true );
+  morpheus40.init( "fonts/morpheus.ttf", 40, true );
+  arialn13.init( "fonts/arialn.ttf", 13, true );
   
   const std::string arialname = lFontWindows ? "C:\\windows\\fonts\\arial.ttf" : "fonts/arial.ttf";
-  arial12 = new freetype::font_data( arialname, 12, false );
-  arial14 = new freetype::font_data( arialname, 14, false );
-  arial16 = new freetype::font_data( arialname, 16, false );
-  arial24 = new freetype::font_data( arialname, 24, false );
-  arial32 = new freetype::font_data( arialname, 32, false );
+  arial12.init( arialname, 12, false );
+  arial14.init( arialname, 14, false );
+  arial16.init( arialname, 16, false );
+  arial24.init( arialname, 24, false );
+  arial32.init( arialname, 32, false );
   
   if( video.mSupportShaders )
     loadWaterShader();
@@ -467,17 +467,7 @@ int main( int argc, char *argv[] )
   gAsyncLoader->join();
   
   MPQArchive::unloadAllMPQs();
-  gListfile.clear();//also unload listfiles
-  
-  delete arialn13;
-  delete arial12;
-  delete arial14;
-  delete arial16;
-  delete arial24;
-  delete arial32;
-  delete morpheus40;
-  delete skurri32;
-  delete fritz16;  
+  gListfile.clear();
   
   LogDebug << "Exited" << std::endl;
   

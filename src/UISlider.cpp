@@ -88,8 +88,8 @@ void UISlider::render() const
   
   std::stringstream temp;
   temp << text << std::fixed << std::setprecision( 2 ) << ( value * scale + offset );
-  const int twidth = freetype::width( *arial12, temp.str() );
-  freetype::shprint( *arial12, width / 2.0f - twidth / 2.0f, -16.0f, temp.str() );
+  const std::string tempStr = temp.str();
+  arial12.shprint( width / 2.0f - arial12.width( tempStr ) / 2.0f, -16.0f, tempStr );
   
   glPushMatrix();
   
