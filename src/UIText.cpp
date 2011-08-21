@@ -6,9 +6,8 @@
 #include "Video.h"
 #include "Log.h"
 
-UIText::UIText( float pX, float pY, const std::string& pText, freetype::font_data *pFont, int pJustify )
-: UIFrame( pX, pY, freetype::width( *pFont, pText ), pFont->h )
-, twidth( freetype::width( *pFont, pText ) )
+UIText::UIText( float pX, float pY, const std::string& pText, const freetype::font_data& pFont, eJustify pJustify )
+: UIFrame( pX, pY, pFont.width( pText ), pFont.h )
 , font( pFont )
 , mText( pText )
 , justify( pJustify )
@@ -16,9 +15,8 @@ UIText::UIText( float pX, float pY, const std::string& pText, freetype::font_dat
 {
 }
 
-UIText::UIText( float pX, float pY, freetype::font_data *pFont, int pJustify )
-: UIFrame( pX, pY, freetype::width( *pFont, "" ), pFont->h )
-, twidth( freetype::width( *pFont, "" ) )
+UIText::UIText( float pX, float pY, const freetype::font_data& pFont, eJustify pJustify )
+: UIFrame( pX, pY, 0, pFont.h )
 , font( pFont )
 , mText( "" )
 , justify( pJustify )
@@ -29,22 +27,12 @@ UIText::UIText( float pX, float pY, freetype::font_data *pFont, int pJustify )
 void UIText::setText( const std::string& pText )
 {
 	mText = pText; 
-	twidth = freetype::width( *font, mText );
-	width = twidth;
-	height = font->h;
+	width = font.width( mText );
 }
 
-void UIText::setJustify( int j )
+void UIText::setJustify( eJustify j )
 {
 	justify = j;
-}
-
-void UIText::setFont( freetype::font_data* f )
-{
-	font = f;
-	twidth = freetype::width( *font, mText );
-	width = twidth;
-	height = font->h;
 }
 
 void UIText::render() const
@@ -57,21 +45,21 @@ void UIText::render() const
 		{
 		case eJustifyLeft:
 			glVertex2f( x - 2.0f, y - 1.0f);
-			glVertex2f( x + 2.0f + twidth, y - 1.0f );
-			glVertex2f( x - 2.0f, y + font->h + 3.0f );
-			glVertex2f( x + 2.0f + twidth, y + font->h + 3.0f );
+			glVertex2f( x + 2.0f + width, y - 1.0f );
+			glVertex2f( x - 2.0f, y + font.h + 3.0f );
+			glVertex2f( x + 2.0f + width, y + font.h + 3.0f );
 			break;
 		case eJustifyCenter:
-			glVertex2f( x - 2.0f - twidth / 2.0f, y - 1.0f );
-			glVertex2f( x + 2.0f + twidth / 2.0f, y - 1.0f );
-			glVertex2f( x - 2.0f - twidth / 2.0f, y + font->h + 3.0f );
-			glVertex2f( x + 2.0f + twidth / 2.0f, y + font->h + 3.0f );	
+			glVertex2f( x - 2.0f - width / 2.0f, y - 1.0f );
+			glVertex2f( x + 2.0f + width / 2.0f, y - 1.0f );
+			glVertex2f( x - 2.0f - width / 2.0f, y + font.h + 3.0f );
+			glVertex2f( x + 2.0f + width / 2.0f, y + font.h + 3.0f );	
 			break;
 		case eJustifyRight:
-			glVertex2f( x - 2.0f - twidth, y - 1.0f );
+			glVertex2f( x - 2.0f - width, y - 1.0f );
 			glVertex2f( x + 2.0f, y - 1.0f );
-			glVertex2f( x - 2.0f - twidth,y + font->h + 3.0f);
-			glVertex2f( x + 2.0f, y + font->h + 3.0f);	
+			glVertex2f( x - 2.0f - width,y + font.h + 3.0f);
+			glVertex2f( x + 2.0f, y + font.h + 3.0f);	
 			break;
 		}
 		glEnd();
@@ -80,13 +68,13 @@ void UIText::render() const
 	switch( justify )
 	{
 	case eJustifyLeft:
-		freetype::shprint( *font, x, y, mText );		
+		font.shprint( x, y, mText );		
 		break;
 	case eJustifyCenter:
-		freetype::shprint( *font, x - twidth / 2.0f, y, mText );
+		font.shprint( x - width / 2.0f, y, mText );
 		break;
 	case eJustifyRight:
-		freetype::shprint( *font, x - twidth, y, mText );
+		font.shprint( x - width, y, mText );
 		break;
 	}
 }

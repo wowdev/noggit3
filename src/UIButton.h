@@ -33,7 +33,6 @@ public:
 
   void setLeft();
   void setText( const std::string& pText );
-  void setFont( freetype::font_data *font );
 
   UIFrame* processLeftClick( float mx, float my );
   void setClickFunc( void (*f)( UIFrame *, int ), int num );

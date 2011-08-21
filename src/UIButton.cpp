@@ -67,10 +67,6 @@ void UIButton::setText( const std::string& pText )
   text->setText( pText );
 }
 
-void UIButton::setFont( freetype::font_data *font )
-{
-  text->setFont( font );
-}
 void UIButton::render() const
 {
   glPushMatrix();

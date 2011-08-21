@@ -100,14 +100,17 @@ void UIMapViewGUI::render( ) const
   UIFrame::render();
   
   //! \todo Make these some textUIs.
-  freetype::shprint( *arial16, 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
+  arial16.shprint( 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
   
   int time = static_cast<int>( gWorld->time ) % 2880;
   std::stringstream timestrs; timestrs << "Time: " << ( time / 120 ) << ":" << ( time % 120 );
-  freetype::shprint( *arial16, video.xres() - 100.0f, 5.0f, timestrs.str() );
+  arial16.shprint( video.xres() - 100.0f, 5.0f, timestrs.str() );
   
-  if ( gWorld->loading ) 
-    freetype::shprint( *arial16, video.xres() / 2.0f - freetype::width( *arial16, gWorld->noadt ? "No ADT at this Point" : "Loading..." ) / 2.0f, 30.0f, ( gWorld->noadt ? "No ADT at this Point" : "Loading..." ) );
+  if ( gWorld->loading )
+  {
+    std::string toDisplay( gWorld->noadt ? "No ADT at this Point" : "Loading..." );
+    arial16.shprint( video.xres() / 2.0f - arial16.width( toDisplay ) / 2.0f, 30.0f, toDisplay );
+  }
 
   std::ostringstream statusbarInfo;
   statusbarInfo << "tile: " << std::floor( gWorld->camera.x / TILESIZE ) << " " <<  std::floor( gWorld->camera.z / TILESIZE )
