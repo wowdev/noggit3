@@ -211,6 +211,7 @@ struct MH2O_Render{
   MH2O_Render(){
     
   }
+  //! Todo: this most likely is wrong!
   explicit MH2O_Render(uint64_t Mask){
     for(int i=0; i < 64; ++i){
       uint8_t t = Mask << i;
