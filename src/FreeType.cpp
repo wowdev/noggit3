@@ -29,11 +29,6 @@ namespace freetype
   
   void font_data::createGlyph( CharacterCode charCode ) const
   {
-    if( !FT_Get_Char_Index( _face, charCode ) )
-    {
-      LogError << "unable to get char index for " << charCode << std::endl;
-      throw std::runtime_error("");
-    }
     if( FT_Load_Glyph( _face, FT_Get_Char_Index( _face, charCode ), FT_LOAD_DEFAULT ) )
     {
       LogError << "FT_Load_Glyph failed" << std::endl;
@@ -55,8 +50,9 @@ namespace freetype
     const int width( next_p2( bitmap.width + 1 ) );
     const int height( next_p2( bitmap.rows + 1 ) );
   
-    GLubyte expanded_data[width * height * 2];
-    memset( expanded_data, 0, sizeof( expanded_data ) );
+    const size_t expanded_size( width * height* 2 );
+    GLubyte* expanded_data = new GLubyte[expanded_size];
+    memset( expanded_data, 0, expanded_size );
     
     for( int j( 0 ); j < height; ++j )
     {
@@ -79,6 +75,9 @@ namespace freetype
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
     glTexImage2D( GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data );
+    
+    delete[] expanded_data;
+    expanded_data = NULL;
 
     glyphData._callList = new OpenGL::CallList();
     glyphData._callList->startRecording();

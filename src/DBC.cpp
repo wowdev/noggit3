@@ -38,6 +38,7 @@ std::string AreaDB::getAreaName( int pAreaID )
 {
   if( !pAreaID )
     return "Unknown location";
+    
   unsigned int regionID = 0;
   std::string areaName = "";
   try 
@@ -55,15 +56,13 @@ std::string AreaDB::getAreaName( int pAreaID )
     try 
     {
       AreaDB::Record rec = gAreaDB.getByID( regionID );
-      areaName = std::string(rec.getLocalizedString( AreaDB::Name )) + std::string(": ") + areaName;
+      areaName = std::string( rec.getLocalizedString( AreaDB::Name ) ) + std::string(": ") + areaName;
     } 
     catch(AreaDB::NotFound)
     {
       areaName = "Unknown location";
     }
   }
-  
-  areaName = misc::replaceSpecialChars( areaName );
 
   return areaName;
 }

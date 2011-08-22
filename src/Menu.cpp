@@ -327,7 +327,7 @@ void Menu::createMapList()
   {
     MapEntry e;
     e.mapID = i->getInt( MapDB::MapID );
-    e.name = misc::replaceSpecialChars(i->getLocalizedString( MapDB::Name ));//now map's name snown correctly! in ruRU client there was corrupted symbols
+    e.name = i->getLocalizedString( MapDB::Name );
     e.areaType = i->getUInt( MapDB::AreaType );
     if( e.areaType < 0 || e.areaType > 2 || !World::IsEditableWorld( e.mapID ) )
       continue;
