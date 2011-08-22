@@ -13,7 +13,6 @@ namespace misc
   float frand();
   float randfloat(float lower, float upper);
   int randint(int lower, int upper);
-  std::string replaceSpecialChars(const std::string& text);
   int getADTCord(float cord);
 };
 
