@@ -114,6 +114,8 @@ SET( SourceFiles
   src/World.cpp
 )
 
+SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/" )
+
 # Search for stdint.h, present on unix, missing on windows.
 IF( WIN32 )
   SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/win/" )
