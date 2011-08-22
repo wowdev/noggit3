@@ -9,6 +9,8 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 
+#include <utf8.h>
+
 #include "MPQ.h"
 #include "Log.h"
 #include "Video.h"
@@ -27,6 +29,11 @@ namespace freetype
   
   void font_data::createGlyph( CharacterCode charCode ) const
   {
+    if( !FT_Get_Char_Index( _face, charCode ) )
+    {
+      LogError << "unable to get char index for " << charCode << std::endl;
+      throw std::runtime_error("");
+    }
     if( FT_Load_Glyph( _face, FT_Get_Char_Index( _face, charCode ), FT_LOAD_DEFAULT ) )
     {
       LogError << "FT_Load_Glyph failed" << std::endl;
@@ -138,8 +145,15 @@ namespace freetype
     FT_Done_FreeType( _library );
 
     delete _mpqFile;
+    
+     typedef std::map<CharacterCode, GlyphData> GlyphListType;
 
-    //! \todo Delete cached glyphs!
+    for( GlyphListType::iterator it( _cachedGlyphs.begin() ), end( _cachedGlyphs.end() ); it != end; ++it )
+    {
+      delete it->second._callList;
+      delete it->second._texture;
+    }
+    _cachedGlyphs.clear();
   }
   
   const GlyphData& font_data::getGlyphData( CharacterCode charCode ) const
@@ -177,11 +191,12 @@ namespace freetype
       glPushMatrix();
       glTranslatef( x, verticalPosition, 0.0f );
       
-      const char* lineString( line->c_str() );
+      const char* lineBegin = line->c_str();
+      const char* lineEnd = lineBegin + line->length();
       
-      for( size_t i( 0 ), length( line->length() ); i < length; ++i )
+      for( utf8::iterator<const char*> itr( lineBegin, lineBegin, lineEnd ), itrEnd( lineEnd, lineBegin, lineEnd ); itr != itrEnd; ++itr )
       {
-        getGlyphData( CharacterCode( lineString[i] ) ).render();
+        getGlyphData( *itr ).render();
       }
       
       verticalPosition += height;
@@ -209,12 +224,15 @@ namespace freetype
     for( linesType::const_iterator line( lines.begin() ), end( lines.end() ); line != end; ++line )
     {
       int currentWidth( 0 );
-      const char* lineString( line->c_str() );
       
-      for( size_t pos( 0 ), lineSize( line->size() ); pos < lineSize; ++pos )
+      const char* lineBegin = line->c_str();
+      const char* lineEnd = lineBegin + line->length();
+      
+      for( utf8::iterator<const char*> itr( lineBegin, lineBegin, lineEnd ), itrEnd( lineEnd, lineBegin, lineEnd ); itr != itrEnd; ++itr )
       {
-        currentWidth += getGlyphData( CharacterCode( lineString[pos] ) ).width();
+        currentWidth += getGlyphData( *itr ).width();
       }
+      
       maximumWidth = std::max( maximumWidth, currentWidth );
     }
     
