@@ -350,25 +350,14 @@ void Menu::createBookmarkList()
   std::string basename;
   int areaID;
   BookmarkEntry b;
-  while ( f >> basename >> b.pos.x >> b.pos.y >> b.pos.z >> b.ah >> b.av >> areaID ) 
+  int mapID = -1;
+  while ( f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.ah >> b.av >> areaID ) 
   {
-    int mapID = -1;
-
-    // check for the basename
-    for( std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it )
-    {
-      if ( it->name == basename ) 
-      {
-        mapID = it->mapID;
-        break;
-      }
-    }
-
     if( mapID == -1 )
       continue;
 
     std::stringstream temp;
-    temp << basename << ": " << AreaDB::getAreaName( areaID );
+    temp << MapDB::getMapName(mapID) << ": " << AreaDB::getAreaName( areaID );
     b.name = temp.str();
     b.mapID = mapID;
     mBookmarks.push_back( b );

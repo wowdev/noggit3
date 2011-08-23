@@ -67,6 +67,23 @@ std::string AreaDB::getAreaName( int pAreaID )
   return areaName;
 }
 
+std::string MapDB::getMapName( int pMapID )
+{    
+  if(pMapID<0) return "Unknown map";
+  std::string mapName = "";
+  try 
+  {
+    MapDB::Record rec = gMapDB.getByID( pMapID );
+    mapName = std::string(rec.getLocalizedString( MapDB::Name ));
+  } 
+  catch(MapDB::NotFound)
+  {
+    mapName = "Unknown map";
+  }
+
+  return mapName;
+}
+
 const char * getGroundEffectDoodad( unsigned int effectID, int DoodadNum )
 {
   try 
