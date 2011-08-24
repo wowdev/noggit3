@@ -1955,24 +1955,27 @@ void World::setChanged(float x, float z)
   int row =  misc::FtoIround((x-(TILESIZE/2))/TILESIZE);
   int column =  misc::FtoIround((z-(TILESIZE/2))/TILESIZE);
   if( row >= 0 && row <= 64 && column >= 0 && column <= 64 )
-    mTiles[column][row].tile->changed = true;
+    if( mTiles[column][row].tile )
+      mTiles[column][row].tile->changed = true;
 }
 
 void World::setChanged(int x, int z)
 {
   // change the changed flag of the map tile
-  mTiles[x][z].tile->changed = true;
+  if( mTiles[x][z].tile )
+    mTiles[x][z].tile->changed = true;
 }
 
 void World::unsetChanged(int x, int z)
 {
   // change the changed flag of the map tile
-  mTiles[x][z].tile->changed = false;
+  if( mTiles[x][z].tile )
+    mTiles[x][z].tile->changed = false;
 }
 
 bool World::getChanged(int x, int z)
 {
-  if(mTiles[x][z].tile != NULL)
+  if(mTiles[x][z].tile)
     return mTiles[x][z].tile->changed;
   else return false;
 }
