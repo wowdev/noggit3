@@ -1953,8 +1953,9 @@ void World::setChanged(float x, float z)
 {
   // change the changed flag of the map tile
   int row =  misc::FtoIround((x-(TILESIZE/2))/TILESIZE);
-  int colum =  misc::FtoIround((z-(TILESIZE/2))/TILESIZE);
-  mTiles[colum][row].tile->changed = true;
+  int column =  misc::FtoIround((z-(TILESIZE/2))/TILESIZE);
+  if( row >= 0 && row <= 64 && column >= 0 && column <= 64 )
+    mTiles[column][row].tile->changed = true;
 }
 
 void World::setChanged(int x, int z)
