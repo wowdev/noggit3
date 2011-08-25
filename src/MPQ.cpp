@@ -1,8 +1,6 @@
 #include "MPQ.h"
 
 #include <algorithm>
-#include <boost/thread.hpp>
-#include <boost/algorithm/string.hpp> 
 #include <cstdio>
 #include <cstring>
 #include <list>
@@ -12,7 +10,10 @@
 #include <vector>
 #include <fstream>
 
-#include "Directory.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
+
 #include "Log.h"
 #include "Project.h"
 #include "AsyncLoader.h" // AsyncLoader
@@ -363,11 +364,7 @@ void MPQFile::SaveFile()
   std::string lDirectoryName = lFilename;  
 
   found = lDirectoryName.find_last_of("/\\");
-  if( found != std::string::npos )
-  {
-    CreatePath( lDirectoryName.substr( 0, found + 1 ) );
-  }
-  else
+  if( found == std::string::npos || !boost::filesystem::create_directories( lDirectoryName.substr( 0, found + 1 ) ) )
   {
     LogError << "Is \"" << lDirectoryName << "\" really a location I can write to? Saving failed." << std::endl;
   }

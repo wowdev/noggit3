@@ -1,93 +1,54 @@
-//! \todo  Use boost::filesystem.
-#ifdef _WIN32
-#include <direct.h>
-#else
-#include <sys/types.h>
-#include <sys/stat.h>
-#endif
-
-#include <sstream>
-#include <fstream>
-#include <string>
-
 #include "Directory.h"
 
-bool FileExists( const std::string& filename )
+Directory::Directory()
+: _directories()
+, _files()
 {
-  std::fstream foo;
-  foo.open( filename.c_str() );
-  if( foo.is_open() )
-  {
-    foo.close();
-    return true;
-  }
-  return false;
 }
 
-void CreatePath( const std::string& filename )
+Directory::Ptr Directory::addDirectory( std::string name )
 {
-  size_t found = filename.substr( 0, filename.length() - 1 ).find_last_of("/\\");
-  if( found != std::string::npos )
-    CreatePath( filename.substr( 0, found + 1 ) );
-  
-#ifdef _WIN32
-  mkdir( filename.c_str() );
-#else
-  mkdir( filename.c_str(), 0777 );
-#endif
-}
-
-
-File::File( const std::string& pName )
-{
-  mName = pName;
-}
-
-Directory::Directory( const std::string& pName )
-{
-  mName = pName;
-}
-
-Directory * Directory::AddSubDirectory( const std::string& pName )
-{
-  std::string name = pName;
-  
-  Directory * lCurrentDir = this;
+  Directory::Ptr lCurrentDir = shared_from_this();
   size_t found;
   found = name.find_last_of( "/\\" );
   while( found != std::string::npos )
   {
-    lCurrentDir = lCurrentDir->AddSubDirectory( name.substr( 0, found ) );
+    lCurrentDir = lCurrentDir->addDirectory( name.substr( 0, found ) );
     name = name.substr( found + 1 );
     found = name.find_last_of( "/\\" );
   }
-  if( ! lCurrentDir->mSubdirectories[name] )
-    lCurrentDir->mSubdirectories[name] = new Directory( name );
-  return lCurrentDir->mSubdirectories[name];
-}
-Directory * Directory::AddSubDirectory( Directory * pDirectory )
-{
-  mSubdirectories[pDirectory->mName] = pDirectory;
-  return mSubdirectories[pDirectory->mName];
+  if( ! lCurrentDir->_directories[name] )
+    lCurrentDir->_directories[name] = Directory::Ptr(new Directory());
+  return lCurrentDir->_directories[name];
 }
 
-File * Directory::AddFile( const std::string& pName )
+void Directory::addFile( const std::string& name )
 {
-  File * lNewFile = new File( pName );
-  mSubfiles.push_back( lNewFile );
-  return lNewFile;
-}
-File * Directory::AddFile( File * pFile )
-{
-  mSubfiles.push_back( pFile );
-  return pFile;
+  _files.push_back( name );
 }
 
-Directory * Directory::operator[]( const std::string& pName )
+Directory::Ptr Directory::operator[]( const std::string& name )
 {
-  return mSubdirectories[pName];
+  if( _directories.find(name) != _directories.end() )
+    return _directories[name];
+  else
+    return Directory::Ptr();
 }
-Directory * Directory::operator[]( char * pName )
+
+Directory::Directories::const_iterator Directory::directoriesBegin() const
 {
-  return mSubdirectories[std::string( pName )];
+  return _directories.begin();
+}
+Directory::Directories::const_iterator Directory::directoriesEnd() const
+{
+  return _directories.end();
+}
+
+Directory::Files::const_iterator Directory::filesBegin() const
+{
+  return _files.begin();
+}
+Directory::Files::const_iterator Directory::filesEnd() const
+{
+  return _files.end();
 }

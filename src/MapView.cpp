@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/filesystem.hpp>
+
 #ifdef __FILESAREMISSING
 #include <IL/il.h>
 #endif
@@ -16,7 +18,6 @@
 #include "Brush.h" // brush
 #include "ConfigFile.h"
 #include "DBC.h"
-#include "Directory.h" // FileExists
 #include "Environment.h"
 #include "FreeType.h" // freetype::
 #include "Log.h"
@@ -354,7 +355,7 @@ void InsertObject( UIFrame* /*button*/, int id )
        case 0:
        case 14:
        case 15:
-        if( FileExists( "noggIt.conf" ) )
+        if( boost::filesystem::exists( "noggIt.conf" ) )
         {
           ConfigFile config( "noggIt.conf" );
           config.readInto( importFile, "ImportFile" );

@@ -1,7 +1,8 @@
 #include "Settings.h"
 
+#include <boost/filesystem.hpp>
+
 #include "ConfigFile.h"
-#include "Directory.h" // FileExists
 #include "Log.h"
 
 Settings::Settings()
@@ -14,7 +15,7 @@ Settings::Settings()
   this->holelinesOn=false;
   this->FarZ = 1024;
 
-  if( FileExists( "noggIt.conf" ) )
+  if( boost::filesystem::exists( "noggIt.conf" ) )
   {
     ConfigFile config( "noggIt.conf" );
     config.readInto( this->FarZ, "FarZ" );

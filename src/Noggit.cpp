@@ -15,13 +15,14 @@
 #include <string>
 #include <vector>
 
+#include <boost/filesystem.hpp>
+
 #include <SDL.h>
 
 #include "AppState.h"
 #include "AsyncLoader.h"
 #include "ConfigFile.h"
 #include "DBC.h"
-#include "Directory.h"
 #include "Environment.h"  // This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
 #include "errorHandling.h"
 #include "FreeType.h" // fonts.
@@ -58,7 +59,7 @@ AsyncLoader* gAsyncLoader;
 
 std::string getGamePath()
 {
-  if( !FileExists( "NoggIt.conf" ) )
+  if( !boost::filesystem::exists( "NoggIt.conf" ) )
   {
   #ifdef _WIN32
     HKEY key;
@@ -148,19 +149,26 @@ int main( int argc, char *argv[] )
 
   Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
   
-  // Why should we load anything when there are missing files? ...
-  
-  //! \todo  Get this file from %WINDOWS%
+  std::string arialFilename = "<PLEASE GET SOME FONT FOR YOUR OS>";
 #ifdef _WIN32
-  bool lFontWindows = FileExists( "C:\\windows\\fonts\\arial.ttf" );
-#else
-  bool lFontWindows = false;
+  //! \todo This might not work on windows 7 or something. Please fix.
+  arialFilename = "C:\\windows\\fonts\\arial.ttf";
 #endif
-  bool lFontLocal = FileExists( "fonts/arial.ttf" );
-  if( !lFontWindows && !lFontLocal )
+#ifdef __APPLE__
+  arialFilename = "/Library/Fonts/Arial.ttf";
+#endif
+  if( !boost::filesystem::exists( arialFilename ) )
   {
-    LogError << "Can not find arial.ttf. This is really weird if you have windows. Add the file to the noggit directory then!" << std::endl;
-    return -1;
+    arialFilename = "arial.ttf";
+    if( !boost::filesystem::exists( arialFilename ) )
+    {
+      arialFilename = "fonts/arial.ttf";
+      if( !boost::filesystem::exists( arialFilename ) )
+      {
+        LogError << "Can not find arial.ttf." << std::endl;
+        return -1;
+      }
+    }
   }
   
   srand( time( NULL ) );
@@ -272,7 +280,7 @@ int main( int argc, char *argv[] )
   {
     std::string path = wowpath;
     path.append( "Data/" ).append( locales[i] ).append( "/realmlist.wtf" );
-    if( FileExists( path ) )
+    if( boost::filesystem::exists( path ) )
     {
       locale = locales[i];
       Log << "Locale: " << locale << std::endl;
@@ -309,7 +317,7 @@ int main( int argc, char *argv[] )
       for( char j = '2'; j <= '9'; j++ )
       {
         path.replace( location, 1, std::string( &j, 1 ) );
-        if( FileExists( path ) )
+        if( boost::filesystem::exists( path ) )
           MPQArchive::loadMPQ( path, true );
       }
     }
@@ -320,12 +328,12 @@ int main( int argc, char *argv[] )
       for( char c = 'a'; c <= 'z'; c++ )
       {
         path.replace( location, 1, std::string( &c, 1 ) );
-        if( FileExists( path ) )
+        if( boost::filesystem::exists( path ) )
           MPQArchive::loadMPQ( path, true );
       }
     }
     else
-      if( FileExists( path ) )
+      if( boost::filesystem::exists( path ) )
         MPQArchive::loadMPQ( path, true );
   }
   // listfiles are not available straight away! They are async! Do not rely on anything at this point!
@@ -369,12 +377,11 @@ int main( int argc, char *argv[] )
   morpheus40.init( "fonts/morpheus.ttf", 40, true );
   arialn13.init( "fonts/arialn.ttf", 13, true );
   
-  const std::string arialname = lFontWindows ? "C:\\windows\\fonts\\arial.ttf" : "fonts/arial.ttf";
-  arial12.init( arialname, 12, false );
-  arial14.init( arialname, 14, false );
-  arial16.init( arialname, 16, false );
-  arial24.init( arialname, 24, false );
-  arial32.init( arialname, 32, false );
+  arial12.init( arialFilename, 12, false );
+  arial14.init( arialFilename, 14, false );
+  arial16.init( arialFilename, 16, false );
+  arial24.init( arialFilename, 24, false );
+  arial32.init( arialFilename, 32, false );
   
   if( video.mSupportShaders )
     loadWaterShader();

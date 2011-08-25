@@ -10,7 +10,7 @@
 #include "UIText.h"
 #include "Video.h"
 
-UITreeViewButton::UITreeViewButton( float _x, float _y, UITreeView* pTreeView )
+UITreeViewButton::UITreeViewButton( float _x, float _y, UITreeView::Ptr pTreeView )
 : UIButton(  _x, _y, 12.0f, 12.0f, "Interface\\Buttons\\UI-PlusButton-Up.blp", "Interface\\Buttons\\UI-PlusButton-Down.blp" )
 , mTreeView( pTreeView )
 {
@@ -28,28 +28,32 @@ void UITreeViewButton::SetClicked( bool pClicked )
   clicked = pClicked;
 }
 
-UITreeView::UITreeView( float pX, float pY, Directory * pDirectory, UITreeView * pParent, void (*pSelectFunction)( const std::string& ) )
+UITreeView::UITreeView( float pX, float pY, const std::string& directoryName, Directory::Ptr pDirectory, UITreeView::Ptr pParent, void (*pSelectFunction)( const std::string& ) )
 : UIFrame( pX, pY, 0.0f, 0.0f )
 , mParent( pParent )
 , mMyDir( pDirectory )
-, mMyButton( new UITreeViewButton( 0, 0, this ) )
-, mMyText( new UIText( 13, 0, mMyDir->mName, arial12, eJustifyLeft ) )
+, mMyButton( new UITreeViewButton( 0, 0, shared_from_this() ) )
+, mMyText( new UIText( 13, 0, directoryName, arial12, eJustifyLeft ) )
+, _directoryName( directoryName )
 , mSelectFunction( pSelectFunction )
 , mExpanded( false )
 {
   float lY = 13.0f;
 
-  std::map<std::string,Directory*>::iterator it;
-  for( it = mMyDir->mSubdirectories.begin(); it != mMyDir->mSubdirectories.end(); ++it )
+  for( Directory::Directories::const_iterator it( mMyDir->directoriesBegin() ), end( mMyDir->directoriesEnd() )
+     ; it != end
+     ; ++it
+     )
   {
-    mOthers.push_back( new UITreeView( 13.0f, lY, it->second, this, pSelectFunction ) );
+    _others.push_back( UITreeView::Ptr( new UITreeView( 13.0f, lY, it->first, it->second, shared_from_this(), pSelectFunction ) ) );
     lY = lY + 13.0f;
   }
-  std::vector<File*>::iterator itfile;
-  for( itfile = mMyDir->mSubfiles.begin(); itfile != mMyDir->mSubfiles.end(); ++itfile )
+  for( Directory::Files::const_iterator it( mMyDir->filesBegin() ), end( mMyDir->filesEnd() )
+     ; it != end
+     ; ++it
+     )
   {
-    UIText * temp = new UIText( 13.0f, lY, (*itfile)->mName, arial12, eJustifyLeft );
-    mFiles.push_back( temp );
+    mFiles.push_back( new UIText( 13.0f, lY, *it, arial12, eJustifyLeft ) );
     lY = lY + 13.0f;
   }
 }
@@ -69,16 +73,16 @@ bool UITreeView::Expanded()
   return mExpanded;
 }
 
-std::string UITreeView::GetDirectoryName()
+const std::string& UITreeView::GetDirectoryName()
 {
-  return mMyDir->mName;
+  return _directoryName;
 }
 
-void UITreeView::Move( int pEntries, UITreeView * pFrom )
+void UITreeView::Move( int pEntries, UITreeView::Ptr pFrom )
 {
-  std::vector<UITreeView*>::iterator trees = std::find( mOthers.begin(), mOthers.end(), pFrom );
+  Others::iterator trees = std::find( _others.begin(), _others.end(), pFrom );
   trees++;
-  while( trees != mOthers.end() )
+  while( trees != _others.end() )
   {
     (*trees)->y = (*trees)->y + pEntries * 13;
     trees++;
@@ -92,7 +96,7 @@ void UITreeView::Move( int pEntries, UITreeView * pFrom )
 
   if( mParent )
   {
-    mParent->Move( pEntries, this );
+    mParent->Move( pEntries, shared_from_this() );
   }
 }
 
@@ -101,8 +105,8 @@ void UITreeView::Toggle()
   mExpanded = !mExpanded;
   mMyButton->SetClicked( mExpanded );
 
-  std::vector<UITreeView*>::iterator childtreeviews;
-  for( childtreeviews = mOthers.begin(); childtreeviews != mOthers.end(); ++childtreeviews )
+  Others::iterator childtreeviews;
+  for( childtreeviews = _others.begin(); childtreeviews != _others.end(); ++childtreeviews )
   {
     if( (*childtreeviews)->Expanded() )
       (*childtreeviews)->Toggle();
@@ -110,9 +114,9 @@ void UITreeView::Toggle()
   
   if( mParent )
     if( !mExpanded )
-      mParent->Move( -static_cast<int>( ( mOthers.size() + mFiles.size() ) ), this );
+      mParent->Move( -static_cast<int>( ( _others.size() + mFiles.size() ) ), shared_from_this() );
     else
-      mParent->Move( ( mOthers.size() + mFiles.size() ), this );
+      mParent->Move( ( _others.size() + mFiles.size() ), shared_from_this() );
 }
 
 void UITreeView::render() const
@@ -127,8 +131,8 @@ void UITreeView::render() const
 
   if( mExpanded )
   {
-    std::vector<UITreeView*>::const_iterator childtreeviews;
-    for( childtreeviews = mOthers.begin(); childtreeviews != mOthers.end(); ++childtreeviews )
+    Others::const_iterator childtreeviews;
+    for( childtreeviews = _others.begin(); childtreeviews != _others.end(); ++childtreeviews )
     {
       (*childtreeviews)->render();
     }
@@ -164,7 +168,7 @@ UIFrame * UITreeView::processLeftClick( float mx, float my )
       if( (!(*childfiles)->hidden)&&((*childfiles)->x<mx)&&((*childfiles)->x+(*childfiles)->width>mx)&&((*childfiles)->y<my)&&((*childfiles)->y+(*childfiles)->height>my) )
       {
         std::string lPath;
-        UITreeView * lParent = this;
+        UITreeView::Ptr lParent = shared_from_this();
         while( lParent )
         {
           lPath.insert( 0, std::string( lParent->GetDirectoryName() + "/" ) );
@@ -177,8 +181,8 @@ UIFrame * UITreeView::processLeftClick( float mx, float my )
 
   if( mExpanded )
   {
-    std::vector<UITreeView*>::iterator childtreeviews;
-    for( childtreeviews = mOthers.begin(); childtreeviews != mOthers.end(); ++childtreeviews )
+    Others::iterator childtreeviews;
+    for( childtreeviews = _others.begin(); childtreeviews != _others.end(); ++childtreeviews )
     {
       (*childtreeviews)->processLeftClick(mx,my);
     }

@@ -5,33 +5,33 @@
 #include <map>
 #include <vector>
 
-void CreatePath( const std::string& filename );
-bool FileExists( const std::string& filename );
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
-struct File
+class Directory : public boost::enable_shared_from_this<Directory>
 {
-  std::string mName;
-
-  explicit File( const std::string& pName );
-};
-
-struct Directory
-{
-  std::map<std::string,Directory*> mSubdirectories;
-  std::vector<File*> mSubfiles;
-
-  std::string mName;
+public:
+  typedef std::string File;
+  typedef boost::shared_ptr<Directory> Ptr;
+  typedef std::map<std::string, Directory::Ptr > Directories;
+  typedef std::vector<File> Files;
   
-  explicit Directory( const std::string& pName );
-  void PrintDirectory( const int pIndent );
-
-  Directory * AddSubDirectory( const std::string& pName );
-  Directory * AddSubDirectory( Directory * pDirectory );
-
-  File * AddFile( const std::string& pName );
-  File * AddFile( File * pFile );
+private:
+  Directories _directories;
+  Files _files;
+ 
+public:
+  Directory();
   
-  Directory * operator[]( const std::string& pName );
-  Directory * operator[]( char * pName );
+  Directory::Ptr addDirectory( std::string name );
+  void addFile( const std::string& name );
+  
+  Directory::Ptr operator[]( const std::string& name );
+  
+  Directories::const_iterator directoriesBegin() const;
+  Directories::const_iterator directoriesEnd() const;
+  
+  Files::const_iterator filesBegin() const;
+  Files::const_iterator filesEnd() const;
 };
 #endif
