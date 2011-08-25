@@ -1,15 +1,15 @@
 #include "Project.h"
 
 #include <string>
+#include <boost/filesystem.hpp>
 
 #include "ConfigFile.h"
-#include "Directory.h"
 
 Project::Project()
 {
   // Read out config and set path in project if exists.
   // will later come direct from the project file.
-  if( FileExists( "NoggIt.conf" ) )
+  if( boost::filesystem::exists( "NoggIt.conf" ) )
   {
     ConfigFile config( "NoggIt.conf" );
     if(  config.keyExists("ProjectPath"))
