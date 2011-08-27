@@ -24,9 +24,10 @@ protected:
   UIText* text;
 
 public:
-  UIButton( float x, float y, float width, float height, const std::string& pTexNormal, const std::string& pTexDown );
-  UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
-  UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, void (*pFunc)( UIFrame *, int ), int pFuncParam );
+  explicit UIButton( float x, float y, float width, float height, const std::string& pTexNormal, const std::string& pTexDown );
+  explicit UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
+  explicit UIButton( float x, float y, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
+  explicit UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, void (*pFunc)( UIFrame *, int ), int pFuncParam );
   ~UIButton();
   
   void render() const;

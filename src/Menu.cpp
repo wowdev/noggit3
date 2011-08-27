@@ -269,27 +269,16 @@ void Menu::buildMenuBar()
   mGUImenuBar->AddMenu( typeToName[0] );
   mGUImenuBar->AddMenu( typeToName[1] );
   mGUImenuBar->AddMenu( typeToName[2] );
-  
-  size_t entryStringLengths[sizeof( typeToName ) / sizeof( const char*)];
-  for(int i=0;i<3;i++) entryStringLengths[i]=0;//clear memory before executing
 
   for( std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it )
   {
 	  mGUImenuBar->GetMenu( typeToName[it->areaType] )->AddMenuItemButton( it->name, &showMap, it->mapID );
-    entryStringLengths[it->areaType] = std::max( entryStringLengths[it->areaType], it->name.length() );
-  }
-  
-  const float menuWidthPerCharacterFactor = 7.0f;
-
-  for( size_t i = 0; i < sizeof( entryStringLengths ) / sizeof( size_t ); ++i )
-  {
-    mGUImenuBar->GetMenu( typeToName[i] )->width = menuWidthPerCharacterFactor * entryStringLengths[i];
   }
   
   static const size_t nBookmarksPerMenu = 20;
   const size_t nBookmarkMenus = ( mBookmarks.size() / nBookmarksPerMenu ) + 1;
   
-  if( nBookmarkMenus )
+  if( mBookmarks.size() )
   {
     mGUImenuBar->AddMenu( "Bookmarks" );
   }
@@ -314,11 +303,8 @@ void Menu::buildMenuBar()
     {
       name << "Bookmarks";
     }
-    
-    
-    MenuPane* pane = mGUImenuBar->GetMenu( name.str() );
-    pane->AddMenuItemButton( it->name, &showBookmark, n );
-    pane->width = std::max( pane->width, menuWidthPerCharacterFactor * it->name.length() );
+
+    mGUImenuBar->GetMenu( name.str() )->AddMenuItemButton( it->name, &showBookmark, n );
   }
 }
 
