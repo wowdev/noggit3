@@ -42,54 +42,31 @@ UIFrame* UIWindow::processLeftClick( float mx, float my )
 
 void UIWindow::render() const
 {
-  //! \todo  Get this to work. Its supposed to cut elements outside of width and height.
-  /*
-  glClear( GL_STENCIL_BUFFER_BIT );
-  glColorMask( false, false, false, false );
-  glEnable(GL_STENCIL_TEST);
-
-    glStencilFunc( GL_ALWAYS, 1, 1 );
-    glStencilOp( GL_KEEP, GL_ZERO, GL_REPLACE );
-
-    glColor4f(1.0f,0.2f,0.2f,0.8f);
-    glBegin(GL_TRIANGLE_STRIP);
-      glVertex2f(0,0);
-      glVertex2f(width,0);
-      glVertex2f(0,height);
-      glVertex2f(width,height);
-    glEnd();
-
-    glColorMask( true, true, true, true );
-
-    glStencilFunc( GL_NOTEQUAL, 1, 1 );
-    glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
-    
-    glColor4f(1.0f,0.2f,0.2f,0.8f);
-    glBegin(GL_TRIANGLE_STRIP);
-      glVertex2f(0,0);
-      glVertex2f(width,0);
-      glVertex2f(0,height);
-      glVertex2f(width,height);
-    glEnd();
-
-    glColor4f(0.0f,1.0f,0.0f,1.0f);
-
-    glBegin(GL_TRIANGLE_STRIP);
-      glTexCoord2f(0.0f,0.0f);
-      glVertex2f(width-100,height-100);
-      glTexCoord2f(1.0f,0.0f);
-      glVertex2f(width+100,height-100);
-      glTexCoord2f(0.0f,1.0f);
-      glVertex2f(width-100,height+100);
-      glTexCoord2f(1.0f,1.0f);
-      glVertex2f(width+100,height+100);
-    glEnd();
-
-
-  glDisable( GL_STENCIL_TEST );*/
-
   glPushMatrix();
   glTranslatef( x, y, 0.0f );
+
+  glClearStencil( 0 );
+  glClear( GL_STENCIL_BUFFER_BIT );
+  
+  glColorMask( false, false, false, false );
+  
+  glEnable( GL_STENCIL_TEST );
+
+  glStencilFunc( GL_ALWAYS, 1, 1 );
+  glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
+  
+  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+  glBegin( GL_TRIANGLE_STRIP );
+  glVertex2f( 0.0f, 0.0f );
+  glVertex2f( width, 0.0f );
+  glVertex2f( 0.0f, height );
+  glVertex2f( width, height );
+  glEnd();
+  
+  glColorMask( true, true, true, true );
+  
+  glStencilFunc( GL_EQUAL, 1, 1 );
+  glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
 
   glColor4f( 0.2f, 0.2f, 0.2f, 0.8f );
   glBegin( GL_TRIANGLE_STRIP );
@@ -98,10 +75,10 @@ void UIWindow::render() const
   glVertex2f( 0.0f, height );
   glVertex2f( width, height );
   glEnd();
-
-  for( std::vector<UIFrame*>::const_iterator child = children.begin(); child != children.end(); ++child )
-    if( !( *child )->hidden )
-      ( *child )->render();
+  
+  renderChildren();
+  
+  glDisable( GL_STENCIL_TEST );
 
   glColor3f( 1.0f, 1.0f, 1.0f );
   
