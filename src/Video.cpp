@@ -155,6 +155,7 @@ bool Video::init( int xres_, int yres_, bool fullscreen_ )
   }
 
   SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+  SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 1 );
   SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
   SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
   SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );

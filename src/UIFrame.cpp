@@ -12,12 +12,17 @@ void UIFrame::render() const
 
   glPushMatrix();
   glTranslatef( x, y, 0.0f );
+  
+  renderChildren();
+  
+  glPopMatrix();
+}
 
+void UIFrame::renderChildren() const
+{
   for( std::vector<UIFrame*>::const_iterator child = children.begin(); child != children.end(); child++ )
     if( !( *child )->hidden )
       ( *child )->render();
-
-  glPopMatrix();
 }
 
 void UIFrame::addChild( UIFrame *c )

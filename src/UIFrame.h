@@ -54,6 +54,9 @@ public:
 
   void addChild( UIFrame * );
   void removeChild( UIFrame* );
+  
+  void renderChildren() const;
+  
   virtual void render() const;
   virtual UIFrame *processLeftClick( float mx, float my );
   virtual bool processLeftDrag( float mx, float my, float xChange, float yChange );
