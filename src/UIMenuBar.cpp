@@ -114,12 +114,10 @@ UIFrame* MenuButton::processLeftClick( float /*pX*/, float /*pY*/ )
 }
 
 MenuItem::MenuItem( MenuPane * pParent, float pX, float pY, float pHeight, const std::string& pText, const std::string& pNormal, const std::string& pDown )
-: UIButton( pX, pY, 170.0f, 30.0f, pText, pNormal, pDown )
+: UIButton( pX, pY, pHeight, pText, pNormal, pDown )
+, mParent( pParent )
 {
-  this->height = pHeight;
   this->setLeft();
-
-  mParent = pParent;
 }
 
 MenuItemButton::MenuItemButton( MenuPane * pParent, float pX, float pY, const std::string& pText, void ( *pClickFunc )( UIFrame *, int ), int pClickFuncID )
@@ -274,28 +272,40 @@ void MenuPane::Open()
   this->hidden = false;
 }
 
+void MenuPane::fixSizes()
+{
+  height = 6.0f + mNumItems * 25.0f;
+  
+  width = std::max( (*children.rbegin())->width + 5.0f, width );
+  const float buttonWidth = width - 5.0f;
+  for( std::vector<UIFrame*>::iterator it( children.begin() ), end( children.end() ); it != end; ++it )
+  {
+    (*it)->width = buttonWidth;
+  }
+}
+
 void MenuPane::AddMenuItemButton( const std::string& pName, void ( *pClickFunc )( UIFrame *, int ), int pClickFuncID )
 {
   this->addChild( new MenuItemButton( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pClickFunc, pClickFuncID ) );
-  this->height = 6.0f + mNumItems * 25.0f;
+  fixSizes();
 }
 void MenuPane::AddMenuItemToggle( const std::string& pName, bool * pMyState, bool pInvert )
 {
   this->addChild( new MenuItemToggle( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pInvert ) );
-  this->height = 6.0f + mNumItems * 25.0f;
+  fixSizes();
 }
 void MenuPane::AddMenuItemSwitch( const std::string& pName, bool * pMyState, bool pInvert )
 {
   this->addChild( new MenuItemSwitch( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pInvert ) );
-  this->height = 6.0f + mNumItems * 25.0f;
+  fixSizes();
 }
 void MenuPane::AddMenuItemSet( const std::string& pName, int * pMyState, int pSet )
 {
   this->addChild( new MenuItemSet( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pSet ) );
-  this->height = 6.0f + mNumItems * 25.0f;
+  fixSizes();
 }
 void MenuPane::AddMenuItemSeperator( const std::string& pName )
 {
   this->addChild( new MenuItemSeperator( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName ) );
-  this->height = 6.0f + mNumItems * 25.0f;
+  fixSizes();
 }

@@ -106,6 +106,8 @@ public:
   void Close();
   void Open();
   
+  void fixSizes();
+  
   void AddMenuItemButton( const std::string& pName, void ( *pClickFunc )( UIFrame *, int ), int pClickFuncID );
   void AddMenuItemToggle( const std::string& pName, bool * pMyState, bool pInvert = false );
   void AddMenuItemSwitch( const std::string& pName, bool * pMyState, bool pInvert = false );
