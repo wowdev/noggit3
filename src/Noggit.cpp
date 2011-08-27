@@ -294,6 +294,7 @@ int main( int argc, char *argv[] )
   }
   
   //! \todo  This may be done faster. Maybe.
+  char index = 'a';
   for( size_t i = 0; i < archiveNames.size(); ++i )
   {
     std::string path = wowpath;
@@ -318,7 +319,7 @@ int main( int argc, char *argv[] )
       {
         path.replace( location, 1, std::string( &j, 1 ) );
         if( boost::filesystem::exists( path ) )
-          MPQArchive::loadMPQ( path, true );
+		{MPQArchive::loadMPQ( index+path, true );index++;}
       }
     }
     else if( path.find( "{character}" ) != std::string::npos  )
@@ -329,12 +330,12 @@ int main( int argc, char *argv[] )
       {
         path.replace( location, 1, std::string( &c, 1 ) );
         if( boost::filesystem::exists( path ) )
-          MPQArchive::loadMPQ( path, true );
+		{MPQArchive::loadMPQ( index+path, true );index++;}
       }
     }
     else
       if( boost::filesystem::exists( path ) )
-        MPQArchive::loadMPQ( path, true );
+	  {MPQArchive::loadMPQ( index+path, true );index++;}
   }
   // listfiles are not available straight away! They are async! Do not rely on anything at this point!
   
