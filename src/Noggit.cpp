@@ -136,10 +136,10 @@ int WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int 
 #endif
 
 int main( int argc, char *argv[] )
-{  
+{
   RegisterErrorHandlers();
   setApplicationDirectory( argv[0] );
-
+  
   // Set up log.
   InitLogging();
 
@@ -413,6 +413,14 @@ int main( int argc, char *argv[] )
     const bool hasInputFocus = appState & SDL_APPINPUTFOCUS;
     const bool hasMouseFocus = appState & SDL_APPMOUSEFOCUS;
     
+    if( isActiveApplication )
+    {
+      const float ftime = time / 1000.0f;
+      const float ftickDelta = tickDelta / 1000.0f;
+      activeAppState->tick( ftime, ftickDelta );
+      activeAppState->display( ftime, ftickDelta );
+    }
+    
     SDL_Event event;
     while( SDL_PollEvent( &event ) )
     {
@@ -443,14 +451,6 @@ int main( int argc, char *argv[] )
           }
         }
       }
-    }
-    
-    if( isActiveApplication )
-    {
-      const float ftime = time / 1000.0f;
-      const float ftickDelta = tickDelta / 1000.0f;
-      activeAppState->tick( ftime, ftickDelta );
-      activeAppState->display( ftime, ftickDelta );
     }
     
     if( gPop ) 
