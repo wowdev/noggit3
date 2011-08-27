@@ -271,7 +271,8 @@ void Menu::buildMenuBar()
   mGUImenuBar->AddMenu( typeToName[2] );
   
   size_t entryStringLengths[sizeof( typeToName ) / sizeof( const char*)];
-  
+  for(int i=0;i<3;i++) entryStringLengths[i]=0;//clear memory before executing
+
   for( std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it )
   {
 	  mGUImenuBar->GetMenu( typeToName[it->areaType] )->AddMenuItemButton( it->name, &showMap, it->mapID );
