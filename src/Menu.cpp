@@ -131,7 +131,12 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
   gWorld->enterTile( tile.x, tile.y );
   
   gStates.push_back( new MapView( ah, av ) ); // on gPop, MapView is deleted.
-  randBackground();
+  
+  if( mBackgroundModel )
+  {
+    ModelManager::delbyname( buildModelPath( mLastBackgroundId ) );
+    mBackgroundModel = NULL;
+  }
 }
 
 void Menu::tick( float t, float /*dt*/ )
@@ -142,48 +147,50 @@ void Menu::tick( float t, float /*dt*/ )
   {
     mBackgroundModel->updateEmitters( t );
   }
+  else
+  {
+    randBackground();
+  }
 
   mGUIMinimapWindow->hidden = !gWorld;
 }
 
-void Menu::display(float /*t*/, float /*dt*/)
+void Menu::display( float /*t*/, float /*dt*/ )
 {
   // 3D: Background.
   video.clearScreen();
+  
   glDisable( GL_FOG );
   
-  if( mBackgroundModel )
+  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+  
+  Vec4D la( 0.1f, 0.1f, 0.1f, 1.0f );
+  glLightModelfv( GL_LIGHT_MODEL_AMBIENT, la );
+  
+  glEnable( GL_COLOR_MATERIAL );
+  glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+  for(OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light )
   {
-    glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-    
-    Vec4D la( 0.1f, 0.1f, 0.1f, 1.0f );
-    glLightModelfv( GL_LIGHT_MODEL_AMBIENT, la );
-    
-    glEnable( GL_COLOR_MATERIAL );
-    glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
-    glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-    for(OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light )
-    {
-      glLightf( light, GL_CONSTANT_ATTENUATION, 0.0f );
-      glLightf( light, GL_LINEAR_ATTENUATION, 0.7f );
-      glLightf( light, GL_QUADRATIC_ATTENUATION, 0.03f );
-      glDisable( light );
-    }
-    
-    glEnable( GL_CULL_FACE );
-    glEnable( GL_DEPTH_TEST );
-    glDepthFunc( GL_LEQUAL );
-    glEnable( GL_LIGHTING );
-    glEnable( GL_TEXTURE_2D );
-    
-    mBackgroundModel->cam.setup( globalTime );
-    mBackgroundModel->draw();
-    
-    glDisable(GL_TEXTURE_2D);
-    glDisable( GL_LIGHTING );
-    glDisable( GL_DEPTH_TEST );
-    glDisable( GL_CULL_FACE );
+    glLightf( light, GL_CONSTANT_ATTENUATION, 0.0f );
+    glLightf( light, GL_LINEAR_ATTENUATION, 0.7f );
+    glLightf( light, GL_QUADRATIC_ATTENUATION, 0.03f );
+    glDisable( light );
   }
+  
+  glEnable( GL_CULL_FACE );
+  glEnable( GL_DEPTH_TEST );
+  glDepthFunc( GL_LEQUAL );
+  glEnable( GL_LIGHTING );
+  glEnable( GL_TEXTURE_2D );
+  
+  mBackgroundModel->cam.setup( globalTime );
+  mBackgroundModel->draw();
+  
+  glDisable( GL_TEXTURE_2D );
+  glDisable( GL_LIGHTING );
+  glDisable( GL_DEPTH_TEST );
+  glDisable( GL_CULL_FACE );
   
   // 2D: UI.
   
