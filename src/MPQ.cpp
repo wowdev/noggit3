@@ -19,7 +19,8 @@
 #include "AsyncLoader.h" // AsyncLoader
 #include "Noggit.h" // gAsyncLoader
 
-typedef std::map<std::string, MPQArchive*> ArchivesMap;
+typedef std::pair<std::string, MPQArchive*> ArchiveEntry;
+typedef std::list<ArchiveEntry> ArchivesMap;
 ArchivesMap _openArchives;
 
 std::list<std::string> gListfile;
@@ -29,8 +30,8 @@ std::string modmpqpath="";//this will be the path to modders archive (with 'mywo
 
 void MPQArchive::loadMPQ( const std::string& filename, bool doListfile )
 {
-  _openArchives[filename] = new MPQArchive( filename, doListfile );
-  gAsyncLoader->addObject( _openArchives[filename] );
+  _openArchives.push_back( ArchiveEntry( filename, new MPQArchive( filename, doListfile ) ) );
+  gAsyncLoader->addObject( _openArchives.back().second );
 }
 
 MPQArchive::MPQArchive( const std::string& filename, bool doListfile )
@@ -129,8 +130,14 @@ bool MPQArchive::hasFile( const std::string& filename ) const
 
 void MPQArchive::unloadMPQ( const std::string& filename )
 {
-  delete _openArchives[filename];
-  _openArchives.erase( filename );
+  for( ArchivesMap::iterator it = _openArchives.begin(); it != _openArchives.end(); ++it )
+  {
+    if( it->first == filename )
+    {
+      delete it->second;
+      _openArchives.erase( it );
+    }
+  }
 }
 
 bool MPQArchive::openFile( const std::string& filename, HANDLE* fileHandle ) const
