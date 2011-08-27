@@ -29,7 +29,9 @@ std::string modmpqpath="";//this will be the path to modders archive (with 'mywo
 
 void MPQArchive::loadMPQ( const std::string& filename, bool doListfile )
 {
-  _openArchives[filename] = new MPQArchive( filename, doListfile );
+	std::string realFileName=filename;
+	realFileName=realFileName.erase(0,1);
+	_openArchives[filename] = new MPQArchive( realFileName, doListfile );//I need to do it because this shit helps me to avoid fake map's order...
   gAsyncLoader->addObject( _openArchives[filename] );
 }
 
