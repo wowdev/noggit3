@@ -6,71 +6,69 @@
 #include "Misc.h"
 #include "UIScrollBar.h"
 
-void changeValue( UIFrame* f, int set )
+void changeValue( UIFrame::Ptr f, int set )
 {
-  ( reinterpret_cast<UIListView *>( f->parent ) )->recalcElements( set + 1 );
+  ( static_cast<UIListView::Ptr>( f->parent() ) )->recalcElements( set + 1 );
 }
 
-UIListView::UIListView(float xPos, float yPos, float w, float h, int elementHeight)
+UIListView::UIListView( float xPos, float yPos, float w, float h, int elementHeight )
 : UIFrame( xPos, yPos, w, h )
 , elements_height( elementHeight )
 , elements_start( 0 )
-, elements_rows( h / elementHeight )
-, scrollbar( new UIScrollBar( w - 22.0f, 5.0f, h - 10.0f, 0.0f ) )
+, elements_rows( height() / elementHeight )
+, scrollbar( new UIScrollBar( width() - 22.0f, 5.0f, height() - 10.0f, 0.0f ) )
 {
-  this->scrollbar->clickable = true;
-  this->scrollbar->setChangeFunc(changeValue);
-  this->addChild(scrollbar);
-}
-
-UIListView::~UIListView( )
-{
+  scrollbar->clickable( true );
+  scrollbar->setChangeFunc( changeValue );
+  addChild( scrollbar );
 }
 
 void UIListView::clear()
 {
-  // clear all elements except the first (scroll pan)
-  for( std::vector<UIFrame*>::iterator child = children.begin(); child != children.end(); child++ )
+  _children.erase( _children.begin(), _children.end() - 1 );
+  /*
+  for( Children::iterator child( children.begin() ), end( children.end() )
+     ; child != end && children.size() != 1; ++child )
   {
-    if( this->children.size() != 1 )
-      this->children.erase( child );
+    children.erase( child );
   }
-  this->scrollbar->setNum( 0 );
+  */
+  scrollbar->setNum( 0 );
 }
 
-void UIListView::addElement( UIFrame* element )
+void UIListView::addElement( UIFrame::Ptr element )
 {
-  element->x = 4.0f;
-  element->y = 0.0f;
-  element->height = this->elements_height;
-  element->width = this->width - 20.0f;
-  this->addChild( element );
-  this->scrollbar->setNum( this->children.size() - this->elements_rows );
+  element->x( 4.0f );
+  element->y( 0.0f );
+  element->height( elements_height );
+  element->width( width() - 20.0f );
+  addChild( element );
+  scrollbar->setNum( children().size() - elements_rows );
   recalcElements( 1 );
 }
 
 int UIListView::getElementsCount()
 {
-  return this->children.size();
+  return children().size();
 }
 
 void UIListView::recalcElements( unsigned int value )
 {
-  this->elements_start = value;
+  elements_start = value;
   // recalculate the position and the hide value off all child.
-  int rowCount = 0;
-  for( size_t i = 1; i < children.size(); ++i )
+  int rowCount( 0 );
+  for( size_t i( 1 ); i < _children.size(); ++i )
   {
-    if( i >= value && i < value + this->elements_rows )
+    if( i >= value && i < value + elements_rows )
     {
       // elements in the view block
-      children[i]->y = rowCount * this->elements_height;
-      children[i]->hidden = false;
+      _children[i]->y( rowCount * elements_height );
+      _children[i]->show();
       rowCount++;
     }
     else
     {
-      children[i]->hidden = true;
+      _children[i]->hide();
     }
   }
 }

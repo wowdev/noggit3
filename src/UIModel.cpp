@@ -25,7 +25,7 @@ void UIModel::render() const
 
   static const float rot = 45.0f;
 
-  glTranslatef( x + width / 2.0f, y + height / 2.0f, 0.0f );
+  glTranslatef( x() + width() / 2.0f, y() + height() / 2.0f, 0.0f );
   glRotatef( rot, 0.0f, 1.0f, 0.0f );
   glRotatef( 180, 1.0f, 0.0f, 0.0f );
   glScalef( 5.0f, 5.0f, 5.0f );

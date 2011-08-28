@@ -22,7 +22,7 @@ UISlider::UISlider( float xPos, float yPos, float w, float s, float o )
 , text( "" )
 , value( 0.5f )
 {
-  clickable = true;
+  clickable( true );
 }
 
 UISlider::~UISlider()
@@ -54,7 +54,7 @@ UIFrame *UISlider::processLeftClick( float mx, float /*my*/ )
         return this;
   return 0;*/
   
-  value = std::min( 1.0f, std::max( 0.0f, mx / width ) );
+  value = std::min( 1.0f, std::max( 0.0f, mx / width() ) );
   if( func )
     func( value * scale + offset );
     
@@ -65,11 +65,11 @@ bool UISlider::processLeftDrag( float mx, float /*my*/, float /*xChange*/, float
 {
   //! \todo use change?
   float tx,ty;
-  parent->getOffset( &tx, &ty );
+  parent()->getOffset( &tx, &ty );
   mx -= tx;
   //my -= ty;
   
-  value = std::min( 1.0f, std::max( 0.0f, mx / width ) );
+  value = std::min( 1.0f, std::max( 0.0f, mx / width() ) );
   if( func )
     func( value * scale + offset );
     
@@ -78,18 +78,18 @@ bool UISlider::processLeftDrag( float mx, float /*my*/, float /*xChange*/, float
 
 void UISlider::render() const
 {
-  if( hidden )
+  if( hidden() )
     return;
   
   glPushMatrix();
-  glTranslatef( x, y, 0.0f );
+  glTranslatef( x(), y(), 0.0f );
 
   glColor3f( 1.0f, 1.0f, 1.0f );
   
   std::stringstream temp;
   temp << text << std::fixed << std::setprecision( 2 ) << ( value * scale + offset );
   const std::string tempStr = temp.str();
-  arial12.shprint( width / 2.0f - arial12.width( tempStr ) / 2.0f, -16.0f, tempStr );
+  arial12.shprint( width() / 2.0f - arial12.width( tempStr ) / 2.0f, -16.0f, tempStr );
   
   glPushMatrix();
   
@@ -98,10 +98,10 @@ void UISlider::render() const
   
   texture->bind();
   
-  const float height_plus = height + 4.0f;
-  const float height_minus = height - 4.0f;
-  const float width_plus = width + 1.0f;
-  const float width_minus = width - 7.0f;
+  const float height_plus = height() + 4.0f;
+  const float height_minus = height() - 4.0f;
+  const float width_plus = width() + 1.0f;
+  const float width_minus = width() - 7.0f;
   
   //Draw Bottom left Corner First
   glBegin( GL_TRIANGLE_STRIP );
@@ -120,11 +120,11 @@ void UISlider::render() const
   glTexCoord2f( 0.875f, 1.0f );
   glVertex2f( width_minus, height_plus );  
   glTexCoord2f( 1.0f, 1.0f );
-  glVertex2f( width + 1.0f, height_plus );
+  glVertex2f( width_plus, height_plus );
   glTexCoord2f( 0.875f, 0.0f );
   glVertex2f( width_minus, height_minus );
   glTexCoord2f( 1.0f, 0.0f );
-  glVertex2f( width + 1.0f, height_minus );
+  glVertex2f( width_plus, height_minus );
   glEnd();
 
   //Draw Top Left Corner
@@ -151,7 +151,7 @@ void UISlider::render() const
   glVertex2f( width_plus, -4.0f );
   glEnd();
 
-  if( height > 8.0f )
+  if( height() > 8.0f )
   {
     //Draw Left Side
     glBegin( GL_TRIANGLE_STRIP );  
@@ -178,7 +178,7 @@ void UISlider::render() const
     glEnd();
   }
 
-  if( width > 14.0f )
+  if( width() > 14.0f )
   {
     //Draw Top Side
     glBegin( GL_TRIANGLE_STRIP );
@@ -209,8 +209,8 @@ void UISlider::render() const
   
   sliderTexture->bind();
   
-  const float sliderpos_x = width * value;
-  const float sliderpos_y = height / 2.0f;
+  const float sliderpos_x = width() * value;
+  const float sliderpos_y = height() / 2.0f;
   
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.0f, 0.0f );

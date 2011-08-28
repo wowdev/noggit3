@@ -49,6 +49,9 @@ OpenGL::Texture* UITexture::getTexture( )
 
 void UITexture::render() const
 {
+  glPushMatrix();
+  glTranslatef( x(), y(), 0.0f );
+  
   glColor3f( 1.0f, 1.0f, 1.0f );
 
   OpenGL::Texture::setActiveTexture();
@@ -58,13 +61,13 @@ void UITexture::render() const
 
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.0f, 0.0f );
-  glVertex2f( x, y );
+  glVertex2f( 0.0f, 0.0f );
   glTexCoord2f( 1.0f, 0.0f );
-  glVertex2f( x + width, y );
+  glVertex2f( width(), 0.0f );
   glTexCoord2f( 0.0f, 1.0f );
-  glVertex2f( x, y + height );
+  glVertex2f( 0.0f, height() );
   glTexCoord2f( 1.0f, 1.0f );
-  glVertex2f( x + width, y + height );
+  glVertex2f( width(), height() );
   glEnd();
   
   OpenGL::Texture::disableTexture();
@@ -73,12 +76,14 @@ void UITexture::render() const
   {
     glColor3f( 1.0f, 0.0f, 0.0f );
     glBegin( GL_LINE_LOOP );
-    glVertex2f( x - 1.0f, y );
-    glVertex2f( x + width, y );
-    glVertex2f( x + width, y + height );
-    glVertex2f( x - 1.0f, y + height );
+    glVertex2f( -1.0f, 0.0f );
+    glVertex2f( width(), 0.0f );
+    glVertex2f( width(), height() );
+    glVertex2f( -1.0f, height() );
     glEnd();
   }
+  
+  glPopMatrix();
 }
 
 UIFrame *UITexture::processLeftClick( float /*mx*/, float /*my*/ )

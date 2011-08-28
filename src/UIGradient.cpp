@@ -4,128 +4,121 @@
 
 void UIGradient::render() const
 {
-  if(hidden)
+  if( hidden() )
+  {
     return;
+  }
+    
+  glPushMatrix();
+  glTranslatef( x(), y(), 0.0f );
+  
   if(horiz)
   {
-    glBegin(GL_TRIANGLE_STRIP);
-    glColor4fv(&MinColor.x);
-    glVertex2f(x,y);    
-    glVertex2f(x,y+height);
-    glColor4fv(&MaxColor.x);
-    glVertex2f(x+width,y);
-    glVertex2f(x+width,y+height);
+    glBegin( GL_TRIANGLE_STRIP );
+    glColor4fv( &MinColor.x );
+    glVertex2f( 0.0f, 0.0f );    
+    glVertex2f( 0.0f, height() );
+    glColor4fv( &MaxColor.x );
+    glVertex2f( width(), 0.0f );
+    glVertex2f( width(), height() );
     glEnd();
-    if(clickable)
+    
+    if( clickable() )
     {
-      glColor4fv(&ClickColor.x);
-      glBegin(GL_LINE);
-      glVertex2f(x+width*value,y);
-      glVertex2f(x+width*value,y+height);
+      glColor4fv( &ClickColor.x );
+      glBegin( GL_LINE );
+      glVertex2f( width() * value, 0.0f );
+      glVertex2f( width() * value, height() );
       glEnd();
     }
   }
   else
   {
-    glBegin(GL_TRIANGLE_STRIP);
-    glColor4fv(&MaxColor.x);    
-    glVertex2f(x+width,y);    
-    glVertex2f(x,y);
-    glColor4fv(&MinColor.x);
-    glVertex2f(x+width,y+height);
-    glVertex2f(x,y+height);
+    glBegin( GL_TRIANGLE_STRIP );
+    glColor4fv( &MinColor.x );
+    glVertex2f( width(), 0.0f );
+    glVertex2f( 0.0f, 0.0f );
+    glColor4fv( &MinColor.x );
+    glVertex2f( width(), height() );
+    glVertex2f( 0.0f, height() );
     glEnd();
 
-    if(clickable)
+    if( clickable() )
     {
-      glColor4fv(&ClickColor.x);
-      glBegin(GL_TRIANGLE_STRIP);
-      glVertex2f(x,y+height*value-1);
-      glVertex2f(x+width,y+height*value-1);
-      glVertex2f(x,y+height*value+1);
-      glVertex2f(x+width,y+height*value+1);
+      glColor4fv( &ClickColor.x );
+      glBegin( GL_LINE );
+      glVertex2f( 0.0f, height() * value );
+      glVertex2f( width(), height() * value );
       glEnd();
     }
   }
+  
+  glPopMatrix();
 }
 
-void UIGradient::setMaxColor(float r,float g, float b,float a)
+void UIGradient::setMaxColor( float r, float g, float b, float a )
 {
-  MaxColor=Vec4D(r,g,b,a);
+  MaxColor = Vec4D( r, g, b, a );
 }
 
-void UIGradient::setMinColor(float r,float g, float b,float a)
+void UIGradient::setMinColor( float r, float g, float b, float a )
 {
-  MinColor=Vec4D(r,g,b,a);
+  MinColor = Vec4D( r, g, b, a );
 }
 
-void UIGradient::setClickColor(float r,float g, float b,float a)
+void UIGradient::setClickColor( float r, float g, float b, float a )
 {
-  ClickColor=Vec4D(r,g,b,a);
+  ClickColor = Vec4D( r, g, b, a );
 }
 
-void UIGradient::setClickFunc(void (*f)(float val))
+void UIGradient::setClickFunc( void (*f)( float val ) )
 {
-  value=0.0f;
-  clickFunc=f;
-  clickable=true;
+  value = 0.0f;
+  clickFunc = f;
+  clickable( true );
 }
 
-UIFrame *UIGradient::processLeftClick(float mx,float my)
+UIFrame::Ptr UIGradient::processLeftClick( float mx, float my )
 {
-  if(clickable)
+  if( clickable() )
   {
-    if(horiz)
-      value=mx/width;
+    if( horiz )
+      value = mx / width();
     else
-      value=my/height;
-    if(value<0.0f)
-      value=0.0f;
-    else if(value>1.0f)
-      value=1.0f;
-    clickFunc(value);
+      value = my / height();
+    
+    value = std::min( std::max( value, 0.0f ), 1.0f );
+    
+    clickFunc( value );
     return this;
   }
-  else
-    return 0;
+  
+  return NULL;
 }
 
-bool UIGradient::processLeftDrag(float mx,float my, float xDrag, float yDrag)
+bool UIGradient::processLeftDrag( float mx, float my, float xDrag, float yDrag )
 {
-  float tx,ty;
-  parent->getOffset(&tx,&ty);
-  mx-=tx;
-  my-=ty;
-  if(clickable)
+  float tx( 0.0f );
+  float ty( 0.0f );
+  
+  parent()->getOffset( &tx, &ty );
+  
+  mx -= tx;
+  my -= ty;
+  
+  if( processLeftClick( mx, my ) )
   {
-    if(horiz)
-      value=mx/width;
-    else
-      value=my/height;
-    if(value<0.0f)
-      value=0.0f;
-    else if(value>1.0f)
-      value=1.0f;
-    clickFunc(value);
     return true;
   }
 
-  if(movable)
-  {
-    x+=xDrag;
-    y+=yDrag;
-    return true;
-  }
-
-  return false;
+  return UIFrame::processLeftDrag( mx, my, xDrag, yDrag );
 }
 
-void UIGradient::setValue(float f)
+void UIGradient::setValue( float f )
 {
-  value=f;
-  if(value<0.0f)
-    value=0.0f;
-  else if(value>1.0f)
-    value=1.0f;
-  clickFunc(value);
+  value = std::min( std::max( f, 0.0f ), 1.0f );
+  if( clickFunc )
+  {
+    clickFunc( value );
+  }
 }

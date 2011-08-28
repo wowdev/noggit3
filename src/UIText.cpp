@@ -27,7 +27,7 @@ UIText::UIText( float pX, float pY, const freetype::font_data& pFont, eJustify p
 void UIText::setText( const std::string& pText )
 {
 	mText = pText; 
-	width = font.width( mText );
+	width( font.width( mText ) );
 }
 
 void UIText::setJustify( eJustify j )
@@ -44,22 +44,22 @@ void UIText::render() const
 		switch( justify )
 		{
 		case eJustifyLeft:
-			glVertex2f( x - 2.0f, y - 1.0f);
-			glVertex2f( x + 2.0f + width, y - 1.0f );
-			glVertex2f( x - 2.0f, y + font.h + 3.0f );
-			glVertex2f( x + 2.0f + width, y + font.h + 3.0f );
+			glVertex2f( x() - 2.0f, y() - 1.0f);
+			glVertex2f( x() + 2.0f + width(), y() - 1.0f );
+			glVertex2f( x() - 2.0f, y() + font.h + 3.0f );
+			glVertex2f( x() + 2.0f + width(), y() + font.h + 3.0f );
 			break;
 		case eJustifyCenter:
-			glVertex2f( x - 2.0f - width / 2.0f, y - 1.0f );
-			glVertex2f( x + 2.0f + width / 2.0f, y - 1.0f );
-			glVertex2f( x - 2.0f - width / 2.0f, y + font.h + 3.0f );
-			glVertex2f( x + 2.0f + width / 2.0f, y + font.h + 3.0f );	
+			glVertex2f( x() - 2.0f - width() / 2.0f, y() - 1.0f );
+			glVertex2f( x() + 2.0f + width() / 2.0f, y() - 1.0f );
+			glVertex2f( x() - 2.0f - width() / 2.0f, y() + font.h + 3.0f );
+			glVertex2f( x() + 2.0f + width() / 2.0f, y() + font.h + 3.0f );	
 			break;
 		case eJustifyRight:
-			glVertex2f( x - 2.0f - width, y - 1.0f );
-			glVertex2f( x + 2.0f, y - 1.0f );
-			glVertex2f( x - 2.0f - width,y + font.h + 3.0f);
-			glVertex2f( x + 2.0f, y + font.h + 3.0f);	
+			glVertex2f( x() - 2.0f - width(), y() - 1.0f );
+			glVertex2f( x() + 2.0f, y() - 1.0f );
+			glVertex2f( x() - 2.0f - width(),y() + font.h + 3.0f);
+			glVertex2f( x() + 2.0f, y() + font.h + 3.0f);	
 			break;
 		}
 		glEnd();
@@ -68,13 +68,13 @@ void UIText::render() const
 	switch( justify )
 	{
 	case eJustifyLeft:
-		font.shprint( x, y, mText );		
+		font.shprint( x(), y(), mText );
 		break;
 	case eJustifyCenter:
-		font.shprint( x - width / 2.0f, y, mText );
+		font.shprint( x() - width() / 2.0f, y(), mText );
 		break;
 	case eJustifyRight:
-		font.shprint( x - width, y, mText );
+		font.shprint( x() - width(), y(), mText );
 		break;
 	}
 }

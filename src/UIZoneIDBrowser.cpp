@@ -16,12 +16,13 @@
 
 void theButtonMapPressed(UIFrame *f,int id)
 {
-  (reinterpret_cast<UIZoneIDBrowser*>(f->parent))->ButtonMapPressed(id);
+  ( static_cast<UIZoneIDBrowser::Ptr>( f->parent() ) )->ButtonMapPressed( id );
 }
 
 void changeZoneValue(UIFrame *f,int id)
 {
-  (reinterpret_cast<UIZoneIDBrowser*>(f->parent->parent->parent))->setZoneID(id);
+  //! \todo WAT?
+  ( static_cast<UIZoneIDBrowser::Ptr>( f->parent()->parent()->parent() ) )->setZoneID( id );
 }
 
 UIZoneIDBrowser::UIZoneIDBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *setGui)
@@ -39,22 +40,22 @@ UIZoneIDBrowser::UIZoneIDBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *
 , backZone( new UIButton( 407.0f, 2.0f, 24.0f, 24.0f, "", "Interface\\BUTTONS\\UI-RotationLeft-Button-Up.blp", "Interface\\BUTTONS\\UI-RotationLeft-Button-Down.blp", theButtonMapPressed, 0 ) )
 , ZoneIDPath( new UIText( 10.0f, 6.0f, "", arial12, eJustifyLeft) )
 {
-  this->addChild(this->ZoneIDPath);
-  this->addChild(this->backZone);
+  addChild(ZoneIDPath);
+  addChild(backZone);
 }
  
 void UIZoneIDBrowser::setMapID( int id )
 {
-  this->mapID = id;
-  this->zoneID = 0;
-  this->subZoneID = 0;
+  mapID = id;
+  zoneID = 0;
+  subZoneID = 0;
   for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i ) 
   {
     if( i->getInt( MapDB::MapID ) == id)
-      this->MapName = i->getString( MapDB::InternalName );
+      MapName = i->getString( MapDB::InternalName );
   }
-  this->buildAreaList();
-  this->refreshMapPath();
+  buildAreaList();
+  refreshMapPath();
 }
 
 void UIZoneIDBrowser::setZoneID( int id )
@@ -65,64 +66,63 @@ void UIZoneIDBrowser::setZoneID( int id )
     {
       if(i->getUInt( AreaDB::Region ) == 0)
       {
-        this->ZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
-        this->zoneID = id;
-        this->subZoneID = 0;
-        this->SubZoneName = "";;
+        ZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
+        zoneID = id;
+        subZoneID = 0;
+        SubZoneName = "";;
         if(changeFunc)
           changeFunc(this,id);
       }
       else
       {
-        this->SubZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
-        this->subZoneID = id;
+        SubZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
+        subZoneID = id;
         if(changeFunc)
           changeFunc(this,id);
       }
     }
   }
-  this->buildAreaList();
-  this->refreshMapPath();
+  buildAreaList();
+  refreshMapPath();
 }
 
 void UIZoneIDBrowser::ButtonMapPressed( int id )
 {
   if( id == 0 )
   {
-    if(this->subZoneID)
+    if(subZoneID)
     {
       // clear subzone
-      this->subZoneID = 0;
-      this->SubZoneName = "";
+      subZoneID = 0;
+      SubZoneName = "";
       if(changeFunc)
-        changeFunc(this,this->zoneID);
+        changeFunc(this,zoneID);
     }
     else
     {
       // clear zone
-      this->zoneID=0;
-      this->ZoneName="";
+      zoneID=0;
+      ZoneName="";
       if(changeFunc)
         changeFunc(this,0);
     }
-    this->refreshMapPath();
+    refreshMapPath();
     buildAreaList();
   }
 }
 
 void UIZoneIDBrowser::buildAreaList()
 {
-  this->removeChild( this->ZoneIdList );
-  this->ZoneIdList = NULL;
-  this->ZoneIdList = new UIListView(4,24,this->width - 8,this->height - 28,20);
-  this->ZoneIdList->clickable = true;
-  this->addChild(ZoneIdList);
+  removeChild( ZoneIdList );
+  ZoneIdList = new UIListView(4,24,width() - 8,height() - 28,20);
+  ZoneIdList->clickable( true );
+  addChild(ZoneIdList);
     //  Read out Area List.
     for( DBCFile::Iterator i = gAreaDB.begin(); i != gAreaDB.end(); ++i ) 
     {
-      if( i->getInt(AreaDB::Continent) == this->mapID )
+      if( i->getInt(AreaDB::Continent) == mapID )
       {
-        if(  this->zoneID == 0)
+        if(  zoneID == 0)
         {
           if(i->getUInt( AreaDB::Region ) == 0)
           {
@@ -132,12 +132,12 @@ void UIZoneIDBrowser::buildAreaList()
             UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
             tempButton->setLeft();
             curFrame->addChild(tempButton);
-            this->ZoneIdList->addElement(curFrame);
+            ZoneIdList->addElement(curFrame);
           }
         }
-        else if(  this->zoneID > 0)
+        else if(  zoneID > 0)
         {
-          if(i->getUInt( AreaDB::Region ) == this->zoneID)
+          if(i->getUInt( AreaDB::Region ) == zoneID)
           {
             UIFrame *curFrame = new UIFrame(1,1,1,1); 
             std::stringstream ss;
@@ -145,23 +145,23 @@ void UIZoneIDBrowser::buildAreaList()
             UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
             tempButton->setLeft();
             curFrame->addChild(tempButton);
-            this->ZoneIdList->addElement(curFrame);
+            ZoneIdList->addElement(curFrame);
           }
         }
       }
 
     }
-    this->ZoneIdList->recalcElements(1);
+    ZoneIdList->recalcElements(1);
 }
 
 void UIZoneIDBrowser::refreshMapPath()
 {
   std::stringstream AreaPath;
-  if(this->SubZoneName!="")
-    AreaPath << this->MapName << " < " << this->SubZoneName;
+  if(SubZoneName!="")
+    AreaPath << MapName << " < " << SubZoneName;
   else
-    AreaPath << this->MapName << " < " << this->ZoneName ;
-  this->ZoneIDPath->setText( AreaPath.str() );
+    AreaPath << MapName << " < " << ZoneName ;
+  ZoneIDPath->setText( AreaPath.str() );
 }
 
 void UIZoneIDBrowser::setChangeFunc( void (*f)( UIFrame *, int ))

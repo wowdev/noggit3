@@ -6,7 +6,6 @@
 #include "ModelManager.h" // ModelManager
 #include "Noggit.h" // arial14
 #include "UIMapViewGUI.h" // UIMapViewGUI
-#include "UIMinimizeButton.h" // UIMinimizeButton
 #include "UIModel.h" // UIModel
 #include "UIText.h" // UIText
 

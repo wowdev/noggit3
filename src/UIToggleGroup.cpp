@@ -9,32 +9,40 @@ UIToggleGroup::UIToggleGroup( int * pTarget )
 {
 }
 
-void UIToggleGroup::Add( UICheckBox * pFrame, int pValue )
+void UIToggleGroup::Add( UICheckBox::Ptr pFrame, int pValue )
 {
   mFrames[pValue] = pFrame;
 }
 
-void UIToggleGroup::Activate( UICheckBox * pFrame )
+void UIToggleGroup::Activate( UICheckBox::Ptr pFrame )
 {
-  std::map<int, UICheckBox*>::iterator pFrameIterator;
-  for( pFrameIterator = mFrames.begin(); pFrameIterator != mFrames.end(); pFrameIterator++ )
-    pFrameIterator->second->setState( false );
+  Frames::iterator pFrameIterator;
+  for( Frames::iterator it( mFrames.begin() ), end( mFrames.end() ); it != end
+     ; ++it )
+  {
+    it->second->setState( false );
+  }
 
-  for( pFrameIterator = mFrames.begin(); pFrameIterator != mFrames.end(); pFrameIterator++ )
-    if( pFrameIterator->second == pFrame )
+  for( Frames::iterator it( mFrames.begin() ), end( mFrames.end() ); it != end
+     ; ++it )
+  {
+    if( it->second == pFrame )
     {
-      *mTarget = pFrameIterator->first;
-      pFrameIterator->second->setState( true );
+      *mTarget = it->first;
+      it->second->setState( true );
     }
+  }
 }
 void UIToggleGroup::Activate( int pID )
 {
-  std::map<int, UICheckBox*>::iterator pFrameIterator, pFrame;
-  pFrame = mFrames.find( pID );
+  Frames::iterator pFrame = mFrames.find( pID );
   if( pFrame != mFrames.end() )
   {
-    for( pFrameIterator = mFrames.begin(); pFrameIterator != mFrames.end(); pFrameIterator++ )
-      pFrameIterator->second->setState( false );
+    for( Frames::iterator it( mFrames.begin() ), end( mFrames.end() ); it != end
+       ; ++it )
+    {
+      it->second->setState( false );
+    }
 
     pFrame->second->setState( true );
   }

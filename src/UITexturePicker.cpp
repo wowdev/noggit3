@@ -8,7 +8,7 @@
 void texturePickerClick( UIFrame* f,int id )
 {
   // redirect to sender object.
-  ( reinterpret_cast<UITexturePicker *>( f->parent ) )->setTexture( id );
+  ( static_cast<UITexturePicker *>( f->parent() ) )->setTexture( id );
 }
 
 UITexturePicker::UITexturePicker( float x, float y, float w, float h )
@@ -31,8 +31,8 @@ void UITexturePicker::getTextures( nameEntry* lSelection )
 {
   assert( lSelection );
   
-  this->hidden = false;
-  
+  show();
+    
   if( lSelection->type == eEntry_MapChunk )
   {
     MapChunk* chunk = lSelection->data.mapchunk;
@@ -42,12 +42,12 @@ void UITexturePicker::getTextures( nameEntry* lSelection )
     for( ; index < 4U && chunk->nTextures > index; ++index )
     {
       _textures[index]->setTexture( chunk->_textures[index] );
-      _textures[index]->hidden = false;
+      _textures[index]->show();
     }
     
     for( ; index < 4U; ++index )
     {
-      _textures[index]->hidden = true;
+      _textures[index]->hide();
     }
   }
 }

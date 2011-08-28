@@ -197,45 +197,45 @@ void change_settings_window(int oldid, int newid)
 {
   if(!setting_ground || !setting_blur || !settings_paint)
     return;
-  setting_ground->hidden=true;
-  setting_blur->hidden=true;
-  settings_paint->hidden=true;
+  setting_ground->hide();
+  setting_blur->hide();
+  settings_paint->hide();
   if(!mainGui || !mainGui->TexturePalette)
     return;
-  mainGui->TexturePalette->hidden = true;
+  mainGui->TexturePalette->hide();
   // fetch old win position
   switch(oldid)
   {
   case 1:
-    tool_settings_x=setting_ground->x;
-    tool_settings_y=setting_ground->y;
+    tool_settings_x=setting_ground->x();
+    tool_settings_y=setting_ground->y();
   break;
   case 2:
-    tool_settings_x=setting_blur->x;
-    tool_settings_y=setting_blur->y;
+    tool_settings_x=setting_blur->x();
+    tool_settings_y=setting_blur->y();
   break;
   case 3:
-    tool_settings_x=settings_paint->x;
-    tool_settings_y=settings_paint->y;
+    tool_settings_x=settings_paint->x();
+    tool_settings_y=settings_paint->y();
   break;
   }
   // set new win pos and make visible
   switch(newid)
   {
   case 1:
-    setting_ground->x=tool_settings_x;
-    setting_ground->y=tool_settings_y;
-    setting_ground->hidden=false;
+    setting_ground->x( tool_settings_x );
+    setting_ground->y( tool_settings_y );
+    setting_ground->show();
   break;
   case 2:
-    setting_blur->x=tool_settings_x;
-    setting_blur->y=tool_settings_y;
-    setting_blur->hidden=false;
+    setting_blur->x( tool_settings_x );
+    setting_blur->y( tool_settings_y );
+    setting_blur->show();
   break;
   case 3:
-    settings_paint->x=tool_settings_x;
-    settings_paint->y=tool_settings_y;
-    settings_paint->hidden=false;
+    settings_paint->x( tool_settings_x );
+    settings_paint->y( tool_settings_y );
+    settings_paint->show();
   break;
   }
 }
@@ -499,7 +499,7 @@ void InsertObject( UIFrame* /*button*/, int id )
 
 void view_texture_palette( UIFrame* /*button*/, int /*id*/ )
 {
-    mainGui->TexturePalette->hidden = !mainGui->TexturePalette->hidden;
+  mainGui->TexturePalette->toggleVisibility();
 }
 
 void exit_tilemode(  UIFrame* /*button*/, int /*id*/ )
@@ -572,7 +572,7 @@ void clearTexture(UIFrame* /*f*/,int /*set*/)
 void showTextureSwitcher(UIFrame* /*f*/, int /*set*/)
 {
   mainGui->TextureSwitcher->getTextures(gWorld->GetCurrentSelection());
-  //mainGui->TextureSwitcher->hidden = false;
+  //mainGui->TextureSwitcher->show();
 }
 
 #ifdef __FILESAREMISSING
@@ -660,7 +660,7 @@ void MapView::createGUI()
   
   // Raise/Lower
   setting_ground=new UIWindow( tool_settings_x, tool_settings_y, 180.0f, 160.0f );
-  setting_ground->movable = true;
+  setting_ground->movable( true );
   mainGui->addChild( setting_ground );
 
   setting_ground->addChild( new UIText( 78.5f, 2.0f, "Raise / Lower", arial14, eJustifyCenter ) );
@@ -688,8 +688,8 @@ void MapView::createGUI()
 
   // flatten/blur
   setting_blur=new UIWindow(tool_settings_x,tool_settings_y,180.0f,100.0f);
-  setting_blur->movable=true;
-  setting_blur->hidden=true;
+  setting_blur->movable( true );
+  setting_blur->hide();
   mainGui->addChild(setting_blur);
 
   setting_blur->addChild( new UIText( 78.5f, 2.0f, "Flatten / Blur", arial14, eJustifyCenter ) );
@@ -708,8 +708,8 @@ void MapView::createGUI()
 
   //3D Paint settings UIWindow
   settings_paint=new UIWindow(tool_settings_x,tool_settings_y,180.0f,100.0f);
-  settings_paint->hidden=true;
-  settings_paint->movable=true;
+  settings_paint->hide();
+  settings_paint->movable( true );
 
   mainGui->addChild(settings_paint);
 
@@ -717,10 +717,10 @@ void MapView::createGUI()
   
   UIGradient *G1;
   G1=new UIGradient;  
-  G1->width=20.0f;
-  G1->x=settings_paint->width-4-G1->width;
-  G1->y=4.0f;
-  G1->height=92.0f;
+  G1->width( 20.0f );
+  G1->x( settings_paint->width() - 4.0f - G1->width() );
+  G1->y( 4.0f );
+  G1->height( 92.0f );
   G1->setMaxColor(1.0f,1.0f,1.0f,1.0f);
   G1->setMinColor(0.0f,0.0f,0.0f,1.0f);
   G1->horiz=false;
@@ -750,13 +750,13 @@ void MapView::createGUI()
   settings_paint->addChild(S1);
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(4,8,mainGui));
-  mainGui->TexturePalette->hidden=true;
+  mainGui->TexturePalette->hide();
   mainGui->addChild(mainGui->SelectedTexture = UITexturingGUI::createSelectedTexture());
-  mainGui->SelectedTexture->hidden=true;
+  mainGui->SelectedTexture->hide();
   mainGui->addChild(UITexturingGUI::createTilesetLoader());
   mainGui->addChild(UITexturingGUI::createTextureFilter());
   mainGui->addChild(MapChunkWindow = UITexturingGUI::createMapChunkWindow());
-  MapChunkWindow->hidden=true;
+  MapChunkWindow->hide();
   
   // create the menu
   UIMenuBar * mbar = new UIMenuBar();
@@ -819,11 +819,11 @@ void MapView::createGUI()
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Switch texture", showTextureSwitcher, 0  );  
 
   mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
-  mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", &mainGui->guiToolbar->hidden, true );
-  mbar->GetMenu( "View" )->AddMenuItemToggle( "Current texture", &mainGui->SelectedTexture->hidden, true );
+  mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", mainGui->guiToolbar->hidden_evil(), true );
+  mbar->GetMenu( "View" )->AddMenuItemToggle( "Current texture", mainGui->SelectedTexture->hidden_evil(), true );
   // Hide till its reimplemented.
-  //mbar->GetMenu( "View" )->AddMenuItemToggle( "Map chunk settings", &MapChunkWindow->hidden, true );
-  mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", &mainGui->TexturePalette->hidden, true );
+  //mbar->GetMenu( "View" )->AddMenuItemToggle( "Map chunk settings", MapChunkWindow->hidden_evil(), true );
+  mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", mainGui->TexturePalette->hidden_evil(), true );
   mbar->GetMenu( "View" )->AddMenuItemSeperator( "Toggle" );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F1 M2s", &gWorld->drawmodels );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F2 WMO doodadsets", &gWorld->drawdoodads );
@@ -831,13 +831,13 @@ void MapView::createGUI()
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F4 Water", &gWorld->drawwater );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F6 WMOs", &gWorld->drawwmo );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F7 Lines", &gWorld->drawlines );
-  mbar->GetMenu( "View" )->AddMenuItemToggle( "F8 Detail infos", &mainGui->guidetailInfos->hidden, true );
+  mbar->GetMenu( "View" )->AddMenuItemToggle( "F8 Detail infos", mainGui->guidetailInfos->hidden_evil(), true );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F9 Map contour infos", &DrawMapContour );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F Fog", &gWorld->drawfog );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "Holelines always on", &Settings::getInstance()->holelinesOn, false );
 
   mbar->GetMenu( "Help" )->AddMenuItemButton( "Key Bindings", openHelp, 0 );
-  mbar->GetMenu( "Help" )->AddMenuItemToggle( "Infos", &mainGui->guiappInfo->hidden, true );
+  mbar->GetMenu( "Help" )->AddMenuItemToggle( "Infos", mainGui->guiappInfo->hidden_evil(), true );
 
   mainGui->addChild( mbar );
   
@@ -1202,7 +1202,7 @@ void MapView::tick( float t, float dt )
   
   gWorld->tick(dt);
 
-  if( !MapChunkWindow->hidden && gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk )
+  if( !MapChunkWindow->hidden() && gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk )
   {
     UITexturingGUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
   }
@@ -1464,7 +1464,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
       /*else if( gWorld->IsSelection( eEntry_MapChunk ) )
       {
         UITexturingGUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
-        MapChunkWindow->hidden = false;
+        MapChunkWindow->show();
       }*/
     }
     if( e->keysym.sym == SDLK_v && Environment::getInstance()->CtrlDown )
@@ -1477,7 +1477,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
       if( Environment::getInstance()->CtrlDown )
       {
         // toggle detail window
-        mainGui->guidetailInfos->hidden = !mainGui->guidetailInfos->hidden;
+        mainGui->guidetailInfos->toggleVisibility();
       }
       else
       {
@@ -1485,7 +1485,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
         if(terrainMode==2)
           view_texture_palette( 0, 0 );
         else if(terrainMode==4)
-          mainGui->ZoneIDBrowser->hidden = !mainGui->ZoneIDBrowser->hidden;
+          mainGui->ZoneIDBrowser->toggleVisibility();
       }
     }
 
@@ -1616,7 +1616,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     // toggle showing a lot of information about selected item
     if( e->keysym.sym == SDLK_F8 ) 
     {
-      mainGui->guidetailInfos->hidden = !mainGui->guidetailInfos->hidden;
+      mainGui->guidetailInfos->toggleVisibility();
     }
 
     // toggle height contours on terrain
@@ -1717,7 +1717,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
     // minimap
     if( e->keysym.sym == SDLK_m )
-      mainGui->minimapWindow->hidden = !mainGui->minimapWindow->hidden;
+      mainGui->minimapWindow->toggleVisibility();
 
     // toogle between smooth / flat / linear
     if( e->keysym.sym == SDLK_y )

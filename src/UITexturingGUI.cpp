@@ -170,7 +170,7 @@ void showPage( int pPage )
   
   for( std::vector<OpenGL::Texture*>::iterator lPageStart = gTexturesInList.begin() + ( lIndex > gTexturesInList.size() ? 0 : lIndex ); lPageStart != gTexturesInList.end(); lPageStart++ )
   {
-    curTextures[i]->hidden = false;
+    curTextures[i]->show();
     curTextures[i]->setTexture( *lPageStart );
     curTextures[i]->setHighlight( *lPageStart == lSelectedTexture );
     gTexturesInPage[i] = *lPageStart;
@@ -183,7 +183,7 @@ void showPage( int pPage )
 
   while( i < ( pal_cols * pal_rows ) )
   {
-    curTextures[i]->hidden = true;
+    curTextures[i]->hide();
     ++i;
   }
 }
@@ -214,7 +214,7 @@ void UITexturingGUI::updateSelectedTexture()
 
 void texturePaletteClick( UIFrame* /*f*/, int id )
 {
-  if( curTextures[id]->hidden )
+  if( curTextures[id]->hidden() )
     return;
   
   UITexturingGUI::setSelectedTexture( gTexturesInPage[id] );
@@ -287,12 +287,12 @@ void InitFilenameFilterList()
 
 void showTextureLoader( UIFrame* /*button*/, int /*id*/ )
 {
-  windowTilesetLoader->hidden = !windowTilesetLoader->hidden;
+  windowTilesetLoader->toggleVisibility();
 }
 
 void showTextureFilter( UIFrame* /*button*/, int /*id*/ )
 {
-  windowTextureFilter->hidden = !windowTextureFilter->hidden;
+  windowTextureFilter->toggleVisibility();
 }
 
 void clickFilterTexture(bool value,int id)
@@ -367,8 +367,8 @@ UIFrame* UITexturingGUI::createTexturePalette( int rows, int cols, UIMapViewGUI 
   windowTexturePalette->addChild( new UIButton( 20.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Down.blp", changePage, +1 ) );
   windowTexturePalette->addChild( new UIButton( 2.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Down.blp", changePage, -1 ) );
   
-  windowTexturePalette->addChild( new UIButton( 145.0f, windowTexturePalette->height - 24.0f, 132.0f, 28.0f, "Load Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureLoader, 0 ) );
-  windowTexturePalette->addChild( new UIButton( 7.0f, windowTexturePalette->height - 24.0f, 132.0f, 28.0f, "Filter Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureFilter, 0 ) );
+  windowTexturePalette->addChild( new UIButton( 145.0f, windowTexturePalette->height() - 24.0f, 132.0f, 28.0f, "Load Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureLoader, 0 ) );
+  windowTexturePalette->addChild( new UIButton( 7.0f, windowTexturePalette->height() - 24.0f, 132.0f, 28.0f, "Filter Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureFilter, 0 ) );
 
   return windowTexturePalette;
 }
@@ -404,7 +404,7 @@ UIFrame* UITexturingGUI::createTilesetLoader()
     616.0f,
     22.0f + 21.0f * columns + 5.0f,
     "Tileset Loading" );
-  windowTilesetLoader->movable=true;
+  windowTilesetLoader->movable( true );
 
   for( unsigned int i = 0; i < tilesetDirectories.size(); ++i )
   {
@@ -426,7 +426,7 @@ UIFrame* UITexturingGUI::createTilesetLoader()
     name->setClickFunc( LoadTileset, i );
     windowTilesetLoader->addChild( name );
   }
-  windowTilesetLoader->hidden = true;
+  windowTilesetLoader->hide();
 
   return windowTilesetLoader;
 }
@@ -437,7 +437,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
   
   LoadTextureNames();
   windowTextureFilter = new UICloseWindow( video.xres() / 2.0f - 450.0f, video.yres() / 2.0f - 300.0f, 900.0f, 610.0f, "Texture Filtering", true );
-  windowTextureFilter->hidden = true;
+  windowTextureFilter->hide();
 
   //Filename Filters
   windowTextureFilter->addChild( new UIText( 60.0f, 23.0f, "Filename Filters", arial14, eJustifyCenter ) );
@@ -468,7 +468,7 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
 {
   UIWindow *chunkSettingsWindow,*chunkTextureWindow,*chunkEffectWindow;
   windowMapChunk=new UICloseWindow(video.xres()/2.0f-316.0f,video.yres()-369.0f,634.0f,337.0f,"Map Chunk Settings");
-  windowMapChunk->movable=true;
+  windowMapChunk->movable( true );
   
   chunkSettingsWindow=new UIWindow(11.0f,26.0f,300.0f,300.0f);
   windowMapChunk->addChild(chunkSettingsWindow);
@@ -476,44 +476,44 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
   chunkLocation=new UIText(5.0f,4.0f,"Chunk x, y of Tile x, y at (x, y, z)", arial14, eJustifyLeft);
   chunkSettingsWindow->addChild(chunkLocation);
 
-  chunkAreaID=new UIText(5.0,chunkLocation->y+25.0f,"AreaID:", arial14, eJustifyLeft);
+  chunkAreaID=new UIText(5.0,chunkLocation->y()+25.0f,"AreaID:", arial14, eJustifyLeft);
   chunkSettingsWindow->addChild(chunkAreaID);
 
-  chunkFlags=new UIText(5.0,chunkAreaID->y+25.0f,"Flags:", arial14, eJustifyLeft);
+  chunkFlags=new UIText(5.0,chunkAreaID->y()+25.0f,"Flags:", arial14, eJustifyLeft);
   chunkSettingsWindow->addChild(chunkFlags);
 
 
-  chunkFlagChecks[0]=new UICheckBox(6,chunkFlags->y+22.0f,"Shadow");
+  chunkFlagChecks[0]=new UICheckBox(6,chunkFlags->y()+22.0f,"Shadow");
   chunkSettingsWindow->addChild(chunkFlagChecks[0]);
 
 
-  chunkFlagChecks[1]=new UICheckBox(150,chunkFlags->y+22.0f,"Impassible");
+  chunkFlagChecks[1]=new UICheckBox(150,chunkFlags->y()+22.0f,"Impassible");
   chunkSettingsWindow->addChild(chunkFlagChecks[1]);
 
-  chunkFlagChecks[2]=new UICheckBox(chunkFlagChecks[0]->x,chunkFlagChecks[0]->y+30.0f,"River");
+  chunkFlagChecks[2]=new UICheckBox(chunkFlagChecks[0]->x(),chunkFlagChecks[0]->y()+30.0f,"River");
   chunkSettingsWindow->addChild(chunkFlagChecks[2]);
 
-  chunkFlagChecks[3]=new UICheckBox(chunkFlagChecks[1]->x,chunkFlagChecks[1]->y+30.0f,"Ocean");
+  chunkFlagChecks[3]=new UICheckBox(chunkFlagChecks[1]->x(),chunkFlagChecks[1]->y()+30.0f,"Ocean");
   chunkSettingsWindow->addChild(chunkFlagChecks[3]);
 
-  chunkFlagChecks[4]=new UICheckBox(chunkFlagChecks[2]->x,chunkFlagChecks[2]->y+30.0f,"Magma");
+  chunkFlagChecks[4]=new UICheckBox(chunkFlagChecks[2]->x(),chunkFlagChecks[2]->y()+30.0f,"Magma");
   chunkSettingsWindow->addChild(chunkFlagChecks[4]);
 
 
-  chunkEffectID=new UIText(5.0f,chunkFlagChecks[4]->y+35.0f,"EffectID:", arial14, eJustifyLeft);
+  chunkEffectID=new UIText(5.0f,chunkFlagChecks[4]->y()+35.0f,"EffectID:", arial14, eJustifyLeft);
   chunkSettingsWindow->addChild(chunkEffectID);
-  chunkEffectID->hidden=true;
-  chunkNumEffects=new UIText(150.0f,chunkEffectID->y,"Num Effects:", arial14, eJustifyLeft);
+  chunkEffectID->hide();
+  chunkNumEffects=new UIText(150.0f,chunkEffectID->y(),"Num Effects:", arial14, eJustifyLeft);
   chunkSettingsWindow->addChild(chunkNumEffects);
-  chunkNumEffects->hidden=true;
+  chunkNumEffects->hide();
 
-  chunkEffectWindow=new UIWindow(8.0f,chunkEffectID->y+23.0f,284.0f,300.0f-(chunkEffectID->y+23.0f+8.0f));
+  chunkEffectWindow=new UIWindow(8.0f,chunkEffectID->y()+23.0f,284.0f,300.0f-(chunkEffectID->y()+23.0f+8.0f));
   chunkSettingsWindow->addChild(chunkEffectWindow);
-  chunkEffectWindow->hidden=true;
+  chunkEffectWindow->hide();
   
   chunkEffectModels[0]=new UIText(8.0f,8.0f,"Effect Doodad", arial14, eJustifyLeft);
   chunkEffectWindow->addChild(chunkEffectModels[0]);
-  chunkEffectModels[0]->hidden=true;
+  chunkEffectModels[0]->hide();
   
   chunkTextureWindow=new UIWindow(324.0f,26.0f,300.0f,300.0f);
   windowMapChunk->addChild(chunkTextureWindow);
@@ -522,9 +522,9 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
 
     for(int i=1;i<4;++i)
   {
-    chunkEffectModels[i]=new UIText(8.0f,chunkEffectModels[i-1]->y+20.0f,"Effect Doodad", arial14, eJustifyLeft);
+    chunkEffectModels[i]=new UIText(8.0f,chunkEffectModels[i-1]->y()+20.0f,"Effect Doodad", arial14, eJustifyLeft);
     chunkEffectWindow->addChild(chunkEffectModels[i]);
-    chunkEffectModels[i]->hidden=true;
+    chunkEffectModels[i]->hide();
 
     chunkTexture[i]=new UITexture( 10.0f, yPos, 64.0f, 64.0f, "tileset\\generic\\black.blp" );
     chunkTextureWindow->addChild(chunkTexture[i]);
@@ -597,10 +597,10 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
   int pl=0;
   for(pl=0;pl<(chunk->nTextures);pl++)
   {
-    chunkTexture[pl]->hidden=false;
-  chunkTextureNames[pl]->hidden=false;
-    chunkTextureFlags[pl]->hidden=false;
-  chunkTextureEffectID[pl]->hidden=false;
+    chunkTexture[pl]->show();
+  chunkTextureNames[pl]->show();
+    chunkTextureFlags[pl]->show();
+  chunkTextureEffectID[pl]->show();
 
     sprintf(Temp,"Flags- %d",chunk->texFlags[pl]);
   chunkTextureFlags[pl]->setText(Temp);
@@ -614,10 +614,10 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
   }
   for(;pl<4;pl++)
   {
-    chunkTexture[pl]->hidden=true;
-      chunkTextureNames[pl]->hidden=true;
-    chunkTextureFlags[pl]->hidden=true;
-    chunkTextureEffectID[pl]->hidden=true;
+    chunkTexture[pl]->hide();
+      chunkTextureNames[pl]->hide();
+    chunkTextureFlags[pl]->hide();
+    chunkTextureEffectID[pl]->hide();
   }*/
   
 }

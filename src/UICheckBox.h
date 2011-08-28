@@ -5,20 +5,23 @@
 
 #include "UIFrame.h"
 
-class UITexture;
-class UIText;
-class UIToggleGroup;
+#include "UITexture.h"
+#include "UIText.h"
+#include "UIToggleGroup.h"
 
 class UICheckBox : public UIFrame
 {
+public:
+  typedef UICheckBox* Ptr;
+  
 protected:
-  UITexture* check;
-  UIText* text;
+  UITexture::Ptr check;
+  UIText::Ptr text;
   bool checked;
   int id;
   void (*clickFunc)( bool, int );
 
-  UIToggleGroup* mToggleGroup;
+  UIToggleGroup::Ptr mToggleGroup;
   
 public:
   UICheckBox( float, float, const std::string& );

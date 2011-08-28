@@ -17,7 +17,7 @@ UITextBox2::UITextBox2( float xPos, float yPos, float w, float h, const std::str
 , _textureFilename( tex )
 , _textureDownFilename( texd )
 , mFocus( false )
-, mText( new UIText( w / 2.0f, 2.0f, arial12, eJustifyCenter ) )
+, mText( new UIText( width() / 2.0f, 2.0f, arial12, eJustifyCenter ) )
 , mValue( "" )
 {
 }
@@ -30,7 +30,10 @@ UITextBox2::~UITextBox2()
 
 void UITextBox2::render() const
 {
-  glColor3f(1.0f,1.0f,1.0f);
+  glPushMatrix();
+  glTranslatef( x(), y(), 0.0f );
+  
+  glColor3f( 1.0f, 1.0f, 1.0f );
   
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
@@ -39,23 +42,22 @@ void UITextBox2::render() const
     texture->bind();
   else
     textureDown->bind();
-
-  glBegin(GL_TRIANGLE_STRIP);
-  glTexCoord2f(0.0f,0.0f);
-  glVertex2f(x,y);
-  glTexCoord2f(1.0f,0.0f);
-  glVertex2f(x+width,y);
-  glTexCoord2f(0.0f,1.0f);
-  glVertex2f(x,y+height);
-  glTexCoord2f(1.0f,1.0f);
-  glVertex2f(x+width,y+height);
+  
+  glBegin( GL_TRIANGLE_STRIP );
+  glTexCoord2f( 0.0f, 0.0f );
+  glVertex2f( 0.0f, 0.0f );
+  glTexCoord2f( 1.0f, 0.0f );
+  glVertex2f( width(), 0.0f );
+  glTexCoord2f( 0.0f, 1.0f );
+  glVertex2f( 0.0f, height() );
+  glTexCoord2f( 1.0f, 1.0f );
+  glVertex2f( width(), height() );
   glEnd();
   
   OpenGL::Texture::disableTexture();
   
-  glPushMatrix();
-  glTranslatef(x,y,0.0f);
   mText->render();
+  
   glPopMatrix();
 }
 
@@ -66,12 +68,9 @@ UIFrame *UITextBox2::processLeftClick( float /*mx*/, float /*my*/ )
 }
 
 UITextBox::UITextBox(float xpos, float ypos, float w)
+: UIFrame( xpos, ypos, w, 32.0f )
 {
-  x=xpos;
-  y=ypos;
-  width=w;
-  height=32;
-  background=new UITexture(0,0,w,32,"Interface\\Common\\Common-Input-Border.blp");
+  background = new UITexture( 0.0f, 0.0f, width(), height(), "Interface\\Common\\Common-Input-Border.blp" );
 }
 UIFrame *UITextBox::processLeftClick(float /*mx*/,float /*my*/)
 {

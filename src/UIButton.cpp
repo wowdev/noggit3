@@ -17,7 +17,7 @@ UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTe
 , clickFunc( NULL )
 , id( 0 )
 , clicked( false )
-, text( new UIText( w / 2.0f, 2.0f, arial12, eJustifyCenter ) )
+, text( new UIText( width() / 2.0f, 2.0f, arial12, eJustifyCenter ) )
 {
   addChild( text );
 }
@@ -31,7 +31,7 @@ UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTe
 , clickFunc( NULL )
 , id( 0 )
 , clicked( false )
-, text( new UIText( w / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
+, text( new UIText( width() / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
 {
   addChild( text );
 }
@@ -45,7 +45,7 @@ UIButton::UIButton( float pX, float pY, float h, const std::string& pText, const
 , clickFunc( NULL )
 , id( 0 )
 , clicked( false )
-, text( new UIText( width / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
+, text( new UIText( width() / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
 {
   addChild( text );
 }
@@ -59,7 +59,7 @@ UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTe
 , clickFunc( pFunc )
 , id( pFuncParam )
 , clicked( false )
-, text( new UIText( w / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
+, text( new UIText( width() / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
 {
   addChild( text );
 }
@@ -73,7 +73,7 @@ UIButton::~UIButton()
 void UIButton::setLeft()
 {
   text->setJustify( eJustifyLeft );
-  text->x = 10.0f;
+  text->x( 10.0f );
 }
 
 void UIButton::setText( const std::string& pText )
@@ -84,7 +84,7 @@ void UIButton::setText( const std::string& pText )
 void UIButton::render() const
 {
   glPushMatrix();
-  glTranslatef( x, y, 0.0f );
+  glTranslatef( x(), y(), 0.0f );
 
   glColor3f( 1.0f, 1.0f, 1.0f );
   
@@ -100,11 +100,11 @@ void UIButton::render() const
     glTexCoord2f( 0.0f, 0.0f );
     glVertex2f( 0.0f, 0.0f );
     glTexCoord2f( 1.0f, 0.0f );
-    glVertex2f( width, 0.0f );
+    glVertex2f( width(), 0.0f );
     glTexCoord2f( 0.0f, 1.0f );
-    glVertex2f( 0.0f, height );
+    glVertex2f( 0.0f, height() );
     glTexCoord2f( 1.0f, 1.0f );
-    glVertex2f( width, height );
+    glVertex2f( width(), height() );
   glEnd();
   
   OpenGL::Texture::disableTexture();

@@ -57,13 +57,15 @@ Menu::Menu()
   theMenu = this;
 
   mGUIFrame = new UIFrame( 0.0f, 0.0f, video.xres(), video.yres() );
-  mGUIMinimapWindow = new UIMinimapWindow( this  );
+  mGUIMinimapWindow = new UIMinimapWindow( this );
+  mGUIMinimapWindow->hide();
   mGUIFrame->addChild( mGUIMinimapWindow );
   mGUICreditsWindow = new UIAbout();
   mGUIFrame->addChild( mGUICreditsWindow );
   //! \todo Use? Yes - later i will show here the adt cords where you enter and some otehr infos
   mGUIStatusbar = new UIStatusBar( 0.0f, video.yres() - 30.0f, video.xres(), 30.0f );
   mGUIFrame->addChild( mGUIStatusbar );
+  
   createMapList();
   createBookmarkList();
   buildMenuBar();
@@ -132,6 +134,8 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
   
   gStates.push_back( new MapView( ah, av ) ); // on gPop, MapView is deleted.
   
+  mGUIMinimapWindow->hide();
+  
   if( mBackgroundModel )
   {
     ModelManager::delbyname( buildModelPath( mLastBackgroundId ) );
@@ -151,8 +155,6 @@ void Menu::tick( float t, float /*dt*/ )
   {
     randBackground();
   }
-
-  mGUIMinimapWindow->hidden = !gWorld;
 }
 
 void Menu::display( float /*t*/, float /*dt*/ )
@@ -207,7 +209,7 @@ void Menu::keypressed( SDL_KeyboardEvent* e )
   {
     if( gWorld )
     {
-      mGUIMinimapWindow->hidden = true;
+      mGUIMinimapWindow->hide();
       delete gWorld;
       gWorld = NULL;
     }
@@ -218,13 +220,32 @@ void Menu::keypressed( SDL_KeyboardEvent* e )
   }
 }
 
+UIFrame::Ptr LastClickedMenu = NULL;
+
 void Menu::mouseclick( SDL_MouseButtonEvent* e )
 {
-  mGUICreditsWindow->hidden = true;
+  mGUICreditsWindow->hide();
   
-  if( e->type == SDL_MOUSEBUTTONDOWN && e->button == SDL_BUTTON_LEFT )
+  if( e->button != SDL_BUTTON_LEFT )
   {
-    mGUIFrame->processLeftClick( e->x, e->y );
+    return;
+  }
+  
+  if( e->type == SDL_MOUSEBUTTONDOWN )
+  {
+    LastClickedMenu = mGUIFrame->processLeftClick( e->x, e->y );
+  }
+  else
+  {
+    LastClickedMenu = NULL;
+  }
+}
+
+void Menu::mousemove( SDL_MouseMotionEvent *e )
+{
+  if( LastClickedMenu )
+  {
+    LastClickedMenu->processLeftDrag( e->x - 4, e->y - 4, e->xrel, e->yrel );
   }
 }
 
@@ -243,6 +264,7 @@ void Menu::loadMap( int mapID )
     if( it->getInt( MapDB::MapID ) == mapID )
     {
       gWorld = new World( it->getString( MapDB::InternalName ) );
+      mGUIMinimapWindow->show();
       return;
     }
   }
