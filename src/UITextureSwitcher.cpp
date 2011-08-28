@@ -9,7 +9,7 @@
 void textureSwitcherClick( UIFrame* f,int id )
 {
   // redirect to sender object.
-  ( reinterpret_cast<UITextureSwitcher *>( f->parent ) )->setTexture( id );
+  ( static_cast<UITextureSwitcher *>( f->parent() ) )->setTexture( id );
 }
 
 UITextureSwitcher::UITextureSwitcher( float x, float y, float w, float h )
@@ -32,7 +32,7 @@ void UITextureSwitcher::getTextures( nameEntry* lSelection )
 {
   assert( lSelection );
   
-  this->hidden = false;
+  show();
   
   if( lSelection->type == eEntry_MapChunk )
   {
@@ -44,12 +44,12 @@ void UITextureSwitcher::getTextures( nameEntry* lSelection )
     for( ; index < 4U && chunk->nTextures > index; ++index )
     {
       _textures[index]->setTexture( chunk->_textures[index] );
-      _textures[index]->hidden = false;
+      _textures[index]->show();
     }
     
     for( ; index < 4U; ++index )
     {
-      _textures[index]->hidden = true;
+      _textures[index]->hide();
     }
   }
 }

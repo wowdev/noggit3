@@ -17,7 +17,7 @@ UICheckBox::UICheckBox( float xPos, float yPos, const std::string& pText )
 , mToggleGroup( NULL )
 {
   addChild( new UITexture( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Up.blp" ) );
-  check->hidden = true;
+  check->hide();
   addChild( check );
   addChild( text );
 }
@@ -32,7 +32,7 @@ UICheckBox::UICheckBox( float xPos, float yPos, const std::string& pText, void (
 , mToggleGroup( NULL )
 {
   addChild( new UITexture( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Up.blp" ) );
-  check->hidden = true;
+  check->hide();
   addChild( check );
   addChild( text );
 }
@@ -47,7 +47,7 @@ UICheckBox::UICheckBox( float xPos, float yPos, const std::string& pText, UITogg
 , mToggleGroup( pToggleGroup )
 {
   addChild( new UITexture( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Up.blp" ) );
-  check->hidden = true;
+  check->hide();
   addChild( check );
   addChild( text );
   
@@ -70,7 +70,7 @@ void UICheckBox::setText( const std::string& pText )
 void UICheckBox::setState( bool c )
 {
   checked = c;
-  check->hidden= !checked;
+  check->hidden( !checked );
 }
 
 bool UICheckBox::getState()
@@ -81,7 +81,7 @@ bool UICheckBox::getState()
 UIFrame* UICheckBox::processLeftClick( float /*mx*/, float /*my*/ )
 {
   checked = !checked;
-  check->hidden = !checked;
+  check->hidden( !checked );
 
   if( mToggleGroup )
     mToggleGroup->Activate( this );

@@ -12,11 +12,11 @@ UIDetailInfos::UIDetailInfos( float xPos, float yPos, float w, float h, UIMapVie
 , mainGui( setGui )
 , theInfos( new UIText( 8.0f, 7.0f, "", arial14, eJustifyLeft ) )
 {
-  this->addChild( new UIMinimizeButton( w, this ) );
-  this->addChild( this->theInfos );
+  addChild( new UIMinimizeButton( width() ) );
+  addChild( theInfos );
 }
 
 void UIDetailInfos::setText( const std::string& t )
 {
-  this->theInfos->setText( t );
+  theInfos->setText( t );
 }

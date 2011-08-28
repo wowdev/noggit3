@@ -16,6 +16,9 @@ enum eJustify
 
 class UIText : public UIFrame
 {
+public:
+  typedef UIText* Ptr;
+
 protected:
   const freetype::font_data& font;
   std::string mText;

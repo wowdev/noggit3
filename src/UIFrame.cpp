@@ -7,11 +7,11 @@
 
 void UIFrame::render() const
 {
-  if( hidden )
+  if( hidden() )
     return;
 
   glPushMatrix();
-  glTranslatef( x, y, 0.0f );
+  glTranslatef( x(), y(), 0.0f );
   
   renderChildren();
   
@@ -20,48 +20,55 @@ void UIFrame::render() const
 
 void UIFrame::renderChildren() const
 {
-  for( std::vector<UIFrame*>::const_iterator child = children.begin(); child != children.end(); child++ )
-    if( !( *child )->hidden )
-      ( *child )->render();
-}
-
-void UIFrame::addChild( UIFrame *c )
-{
-  children.push_back( c );
-  c->parent = this;
-}
-
-void UIFrame::removeChild( UIFrame* c )
-{
-  std::vector<UIFrame*>::iterator it = std::find( children.begin(), children.end(), c );
-  if( it != children.end() )
+  for( Children::const_iterator child( children().begin() ), end( children().end() )
+    ; child != end; ++child )
   {
-    children.erase( it );
+    if( !( *child )->hidden() )
+    {
+      ( *child )->render();
+    }
+  }
+}
+
+void UIFrame::addChild( UIFrame::Ptr c )
+{
+  _children.push_back( c );
+  c->parent( this );
+}
+
+void UIFrame::removeChild( UIFrame::Ptr c )
+{
+  Children::iterator end( _children.end() );
+  Children::iterator it( std::find( _children.begin(), end, c ) );
+  if( it != end )
+  {
+    _children.erase( it );
   }
 }
 
 
-UIFrame * UIFrame::processLeftClick( float mx, float my )
+UIFrame::Ptr UIFrame::processLeftClick( float mx, float my )
 {
-  UIFrame * lTemp;
-  for( std::vector<UIFrame*>::reverse_iterator child = children.rbegin(); child != children.rend(); child++ )
+  UIFrame::Ptr lTemp;
+  for( Children::reverse_iterator child( _children.rbegin()), end( _children.rend() )
+     ; child != end; ++child )
   {
-    if( !( *child )->hidden && ( *child )->IsHit( mx, my ) )
+    if( !( *child )->hidden() && ( *child )->IsHit( mx, my ) )
     {
-      lTemp = ( *child )->processLeftClick( mx - ( *child )->x, my - ( *child )->y );
+      lTemp = ( *child )->processLeftClick( mx - ( *child )->x(), my - ( *child )->y() );
       if( lTemp )
         return lTemp;
     }
   }
-  return 0;
+  return NULL;
 }
 
 bool UIFrame::processLeftDrag( float /*mx*/, float /*my*/, float xDrag, float yDrag )
 {
-  if( movable )
+  if( movable() )
   {
-    x += xDrag;
-    y += yDrag;
+    _x += xDrag;
+    _y += yDrag;
     return true;
   }
 
@@ -70,39 +77,36 @@ bool UIFrame::processLeftDrag( float /*mx*/, float /*my*/, float xDrag, float yD
 
 bool UIFrame::processRightClick( float mx, float my )
 {
-  for( std::vector<UIFrame*>::iterator child = children.begin(); child != children.end(); child++ )
-    if( !( *child )->hidden && ( *child )->IsHit( mx, my ) )
-      if( ( *child )->processRightClick( mx - ( *child )->x, my - ( *child )->y ) )
+  for( Children::iterator child( _children.begin()), end( _children.end() )
+     ; child != end; ++child )
+  {
+    if( !( *child )->hidden() && ( *child )->IsHit( mx, my ) )
+    {
+      if( ( *child )->processRightClick( mx - ( *child )->x(), my - ( *child )->y() ) )
+      {
         return true;
+      }
+    }
+  }
 
   return false;
 }
 
 void UIFrame::getOffset( float* xOff, float* yOff )
 {
-  float tx = 0.0f, ty = 0.0f;
+  float tx( 0.0f );
+  float ty( 0.0f );
 
-  if( parent )
-    parent->getOffset( &tx, &ty );
+  if( parent() )
+  {
+    parent()->getOffset( &tx, &ty );
+  }
 
-  *xOff = tx + x;
-  *yOff = ty + y;
+  *xOff = tx + x();
+  *yOff = ty + y();
 }
 
 bool UIFrame::processKey( char /*key*/, bool /*shift*/, bool /*alt*/, bool /*ctrl*/ )
 {
   return false;
-}
-  
-void UIFrame::hide()
-{
-  hidden = true;
-}
-void UIFrame::show()
-{
-  hidden = false;
-}
-void UIFrame::toggleVisibility()
-{
-  hidden = !hidden;
 }

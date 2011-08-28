@@ -13,16 +13,16 @@
 #include "UITexture.h"
 #include "UIToolbarIcon.h"
 
-UIToolbar::UIToolbar(float xPos, float yPos, float w, float h, UIMapViewGUI *setGui)
-: UIWindow( xPos, yPos, w, h, "interface\\tooltips\\ui-tooltip-border.blp" )
+UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
+: UIWindow( xPos, yPos, 105.0f, 380.0f, "interface\\tooltips\\ui-tooltip-border.blp" )
 , mainGui( setGui )
 , text( new UIText( 8, 7, "Raise/Lower", arialn13, eJustifyLeft ) )
 , selectedIcon( -1 )
 , current_texture( new UITexture( 0, 0, 92.0f, 92.0f, "tileset\\generic\\black.blp" ) )
 {
-  this->movable = true;
-  this->addChild( text );
-  this->addChild( static_cast<UIFrame*>( new UIMinimizeButton( w, this ) ) );
+  movable( true );
+  addChild( text );
+  addChild( new UIMinimizeButton( width() ) );
 
   // ground edit
   SetIcon( 0, "Interface\\ICONS\\INV_Elemental_Mote_Earth01.blp" );
@@ -43,15 +43,13 @@ UIToolbar::UIToolbar(float xPos, float yPos, float w, float h, UIMapViewGUI *set
   
   UIWindow* texture_border = new UIWindow( 5, 280, 95.0f, 95.0f );
   texture_border->addChild( current_texture );
-  this->addChild( texture_border );
-  this->height = 380;
-
+  addChild( texture_border );
 }
 
 void UIToolbar::SetIcon( int pIcon, const std::string& pIconFile )
 {
-  mToolbarIcons[pIcon] = new UIToolbarIcon( ( pIcon % 2 ) * 50.0f + 5.0f, ( pIcon / 2 ) * 50.0f + 30.0f, 45.0f, 45.0f, pIconFile, std::string( "Interface\\BUTTONS\\CheckButtonGlow.blp" ), pIcon, UIEventConstructorArgument(UIToolbarIcon, this, UIToolbar::IconSelect) );
-  this->addChild( mToolbarIcons[pIcon] );  
+  mToolbarIcons[pIcon] = new UIToolbarIcon( ( pIcon % 2 ) * 50.0f + 5.0f, ( pIcon / 2 ) * 50.0f + 30.0f, pIconFile, std::string( "Interface\\BUTTONS\\CheckButtonGlow.blp" ), pIcon, UIEventConstructorArgument(UIToolbarIcon, this, UIToolbar::IconSelect) );
+  addChild( mToolbarIcons[pIcon] );  
 }
 
 // MapView.cpp

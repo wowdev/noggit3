@@ -3,13 +3,13 @@
 
 #include "UIButton.h"
 
-class UIFrame;
-
 class UIMinimizeButton : public UIButton
 {
 public:
-  UIMinimizeButton( float pWidth, UIFrame * pParent );
+  typedef UIMinimizeButton* Ptr;
 
-  UIFrame *processLeftClick( float mx, float my );
+  UIMinimizeButton( float pWidth );
+
+  UIFrame::Ptr processLeftClick( float mx, float my );
 };
 #endif

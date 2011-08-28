@@ -22,7 +22,7 @@ protected:
   int iconId;
 
 public:
-  UIToolbarIcon( float x, float y, float width, float height, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments );
+  UIToolbarIcon( float x, float y, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments );
   ~UIToolbarIcon();
 
   void render() const;

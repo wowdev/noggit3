@@ -2,20 +2,21 @@
 #define __UILISTVIEW_H
 
 #include "UIFrame.h"
-
-class UIScrollBar;
+#include "UIScrollBar.h"
 
 class UIListView : public UIFrame
 {
+public:
+  typedef UIListView* Ptr;
+  
 private:
   int elements_height;
   int elements_start;
   int elements_rows;
-  UIScrollBar* scrollbar;
+  UIScrollBar::Ptr scrollbar;
   
 public:
   UIListView( float xPos, float yPos, float w, float h, int elementHeight );
-  ~UIListView();
   void addElement( UIFrame* element );
   void setElementsHeight( int h );
   int getElementsCount();

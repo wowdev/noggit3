@@ -93,6 +93,7 @@ SET( SourceFiles
   src/UIMinimapWindow.cpp
   src/UIMinimizeButton.cpp
   src/UIModel.cpp
+  src/UIScrollableFrame.cpp
   src/UIScrollBar.cpp
   src/UISlider.cpp
   src/UIStatusBar.cpp

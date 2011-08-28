@@ -11,6 +11,9 @@ class UIListView;
 
 class UIZoneIDBrowser : public UIWindow
 {
+public:
+  typedef UIZoneIDBrowser* Ptr;
+
 private:
   void ( *changeFunc )( UIFrame *, int );
   UIMapViewGUI *mainGui;

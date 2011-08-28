@@ -8,48 +8,42 @@
 #include "World.h"
 
 UIMinimapWindow::UIMinimapWindow( Menu* menuLink )
-: UIWindow( 10.0f, 10.0f, 100.0f, 100.0f )
+: UIWindow( 0.0f, 0.0f, 0.0f, 0.0f )
 , borderwidth( 5.0f )
-, tilesize( ( video.yres() - 70.0f - this->borderwidth * 2.0f ) / 64.0f )
+, tilesize( 0.0f )
 , lookAt( 0.0f )
 , mMenuLink( menuLink )
 , map( NULL )
 {
-  this->width = this->borderwidth * 2 + this->tilesize * 64;
-  this->height = this->width;
-  this->x = video.xres() / 2 - this->width / 2;
-  this->y = video.yres() / 2 - this->height / 2;
+  resize();
 }
 
 UIMinimapWindow::UIMinimapWindow( World* setMap )
-: UIWindow( 10.0f, 10.0f, 100.0f, 100.0f )
+: UIWindow( 0.0f, 0.0f, 0.0f, 0.0f )
 , borderwidth( 5.0f )
-, tilesize( ( video.yres() - 70.0f - this->borderwidth * 2.0f ) / 64.0f )
+, tilesize( 0.0f )
 , lookAt( 0.0f )
 , mMenuLink( NULL )
 , map( setMap )
 {
-  this->width = this->borderwidth * 2 + this->tilesize * 64;
-  this->height = this->width;
-  this->x = video.xres() / 2 - this->width / 2;
-  this->y = video.yres() / 2 - this->height / 2;
+  resize();
 }
 
 UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
 {
   // no click outside the adt block
   if( !gWorld || !mMenuLink ||
-      mx < this->borderwidth || mx > this->height - this->borderwidth ||
-      my < this->borderwidth || my > this->height - this->borderwidth )
+      mx < borderwidth || mx > height() - borderwidth ||
+      my < borderwidth || my > height() - borderwidth )
     return NULL;
 
   // is there a tile?
-  int i = static_cast<int>( mx - this->borderwidth ) / this->tilesize;
-  int j = static_cast<int>( my - this->borderwidth ) / this->tilesize;
-  if( !gWorld->hasTile(j,i) ) 
+  int i = static_cast<int>( mx - borderwidth ) / tilesize;
+  int j = static_cast<int>( my - borderwidth ) / tilesize;
+  if( !gWorld->hasTile( j, i ) ) 
     return NULL;    
 
-  mMenuLink->enterMapAt( Vec3D( ( ( mx - this->borderwidth ) / this->tilesize ) * TILESIZE, 0.0f, ( ( my - this->borderwidth ) / this->tilesize ) * TILESIZE ) );
+  mMenuLink->enterMapAt( Vec3D( ( ( mx - borderwidth ) / tilesize ) * TILESIZE, 0.0f, ( ( my - borderwidth ) / tilesize ) * TILESIZE ) );
   
   return this;
 }
@@ -57,25 +51,30 @@ UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
 
 void UIMinimapWindow::resize()
 {
-  this->tilesize = (video.yres() - 70.0f - this->borderwidth * 2) / 64;
+  tilesize = ( video.yres() - 70.0f - borderwidth * 2.0f ) / 64.0f;
 
-  this->width = this->borderwidth * 2 + this->tilesize * 64;
-  this->height = this->width;
-  this->x = video.xres() / 2 - this->width / 2;
-  this->y = video.yres() / 2 - this->height / 2;
+  width( borderwidth * 2.0f + tilesize * 64.0f );
+  height( width() );
+  x( video.xres() / 2.0f - width() / 2.0f );
+  y( video.yres() / 2.0f - height() / 2.0f );
 }
 
 void UIMinimapWindow::changePlayerLookAt(float ah)
 {
-  this->lookAt = ah;
+  lookAt = ah;
 }
 
 void UIMinimapWindow::render() const
 {
+  if( hidden() )
+  {
+    return;
+  }
+  
   UIWindow::render();
   
   glPushMatrix();
-  glTranslatef( x + this->borderwidth, y + this->borderwidth, 0.0f );
+  glTranslatef( x() + borderwidth, y() + borderwidth, 0.0f );
   
   if( gWorld->minimap ) 
   {
@@ -86,11 +85,11 @@ void UIMinimapWindow::render() const
     glTexCoord2f( 0.0f, 0.0f );
     glVertex2i( 0.0f, 0.0f );
     glTexCoord2f( 1.0f, 0.0f );
-    glVertex2i( this->tilesize * 64.0f, 0.0f );
+    glVertex2i( tilesize * 64.0f, 0.0f );
     glTexCoord2f( 1.0f, 1.0f );
-    glVertex2i( this->tilesize * 64.0f, this->tilesize * 64.0f );
+    glVertex2i( tilesize * 64.0f, tilesize * 64.0f );
     glTexCoord2f( 0.0f, 1.0f );
-    glVertex2i( 0.0f, this->tilesize * 64.0f );
+    glVertex2i( 0.0f, tilesize * 64.0f );
     glEnd();
     
     OpenGL::Texture::disableTexture();
@@ -105,65 +104,65 @@ void UIMinimapWindow::render() const
   {
     for( int i = 0; i < 64; ++i ) 
     {
-      if( gWorld->hasTile(j,i) ) 
+      if( gWorld->hasTile( j, i ) ) 
         glColor4f( 0.8f, 0.8f, 0.8f, 0.4f );
       else
         glColor4f( 1.0f, 1.0f, 1.0f, 0.05f );
       
       glBegin( GL_QUADS );
-      glVertex2i( 0.0f + i * this->tilesize, 0.0f + j * this->tilesize );
-      glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) - 1, 0.0f + j * this->tilesize );
-      glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) - 1, (0.0f + ( j + 1 ) * this->tilesize) -1 );
-      glVertex2i( 0.0f + i * this->tilesize, (0.0f + ( j + 1 ) * this->tilesize) -1 );
+      glVertex2i( i * tilesize, j * tilesize );
+      glVertex2i( (( i + 1 ) * tilesize) - 1, j * tilesize );
+      glVertex2i( (( i + 1 ) * tilesize) - 1, (( j + 1 ) * tilesize) -1 );
+      glVertex2i( i * tilesize, (( j + 1 ) * tilesize) -1 );
       glEnd();
 
-      if( this->map )
-        if( this->map->getChanged(j,i) )
+      if( map )
+      {
+        if( map->getChanged(j,i) )
         {
           glColor4f( 1.0f, 1.0f, 1.0f, 0.6f );
           glBegin( GL_LINES );
-          glVertex2i( 0.0f + i * this->tilesize, 0.0f + j * this->tilesize );
-          glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) , 0.0f + j * this->tilesize );
-          glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) , 0.0f + j * this->tilesize );
-          glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) , (0.0f + ( j + 1 ) * this->tilesize) -1 );
-          glVertex2i( (0.0f + ( i + 1 ) * this->tilesize) , (0.0f + ( j + 1 ) * this->tilesize) -1 );
-          glVertex2i( 0.0f + i * this->tilesize, (0.0f + ( j + 1 ) * this->tilesize) -1 );
-          glVertex2i( 0.0f + i * this->tilesize, (0.0f + ( j + 1 ) * this->tilesize) -1 );
-          glVertex2i( 0.0f + i * this->tilesize, 0.0f + j * this->tilesize );
+          glVertex2i( i * tilesize, j * tilesize );
+          glVertex2i( (( i + 1 ) * tilesize) , j * tilesize );
+          glVertex2i( (( i + 1 ) * tilesize) , j * tilesize );
+          glVertex2i( (( i + 1 ) * tilesize) , (( j + 1 ) * tilesize) -1 );
+          glVertex2i( (( i + 1 ) * tilesize) , (( j + 1 ) * tilesize) -1 );
+          glVertex2i( i * tilesize, (( j + 1 ) * tilesize) -1 );
+          glVertex2i( i * tilesize, (( j + 1 ) * tilesize) -1 );
+          glVertex2i( i * tilesize, j * tilesize );
           glEnd();
 
         }
-
+      }
     }
   }
   
   // draw the arrow if shown inside a map
   //! \todo Change it from a simple line to an arrow
-  if( this->map )
+  if( map )
   {
     glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-    glBegin(GL_LINES);
-    float fx, fz;
-    fx = map->camera.x / TILESIZE * this->tilesize;
-    fz = map->camera.z / TILESIZE * this->tilesize;
-    glVertex2f(fx, fz);
-    glColor4f(1.0f,1.0f,1.0f,1.0f);
-    glVertex2f(fx + 10.0f*cosf(this->lookAt/180.0f*PI), fz + 10.0f*sinf(this->lookAt/180.0f*PI));
+    glBegin( GL_LINES );
+    const float fx( map->camera.x / TILESIZE * tilesize );
+    const float fz( map->camera.z / TILESIZE * tilesize );
+    glVertex2f( fx, fz );
+    glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+    glVertex2f( fx + 10.0f * cosf( lookAt / 180.0f * PI ), fz + 10.0f * sinf( lookAt / 180.0f * PI ) );
     glEnd();
 
-    int skycount = this->map->skies->skies.size();
+    int skycount = map->skies->skies.size();
 
     
     for( int j = 0; j < skycount; j++ )
     {
       glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-      float x_ = this->map->skies->skies[j].pos.x/ TILESIZE * this->tilesize;
-      float z_ = this->map->skies->skies[j].pos.z/ TILESIZE * this->tilesize;
+      float x_ = map->skies->skies[j].pos.x/ TILESIZE * tilesize;
+      float z_ = map->skies->skies[j].pos.z/ TILESIZE * tilesize;
       glBegin( GL_QUADS );
-      glVertex2i( 0.0f + x_,  0.0f + z_ );
-      glVertex2i( 0.0f + x_+3,  0.0f + z_ );
-      glVertex2i( 0.0f + x_+3,  0.0f + z_+3 );
-      glVertex2i( 0.0f + x_,  0.0f + z_+3 );
+      glVertex2i( x_,  z_ );
+      glVertex2i( x_+3,  z_ );
+      glVertex2i( x_+3,  z_+3 );
+      glVertex2i( x_,  z_+3 );
       glEnd();
     }
   }

@@ -30,11 +30,11 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 {
   // Minimap window
   minimapWindow = new UIMinimapWindow(gWorld);
-  minimapWindow->hidden = true;
+  minimapWindow->hide();
   addChild(minimapWindow);
 
   // UIToolbar
-  guiToolbar = new UIToolbar( 6.0f, 38.0f, 105.0f, 600.0f, this );
+  guiToolbar = new UIToolbar( 6.0f, 38.0f, this );
   addChild(guiToolbar);
   
   // Statusbar
@@ -43,33 +43,33 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 
   // DetailInfoWindow
   guidetailInfos = new UIDetailInfos( 1.0f, video.yres() - 282.0f, 600.0f, 250.0f, this );
-  guidetailInfos->movable = true;
-  guidetailInfos->hidden = true;
+  guidetailInfos->movable( true );
+  guidetailInfos->hide();
   addChild(guidetailInfos);
 
   // ZoneIDBrowser
   ZoneIDBrowser = new UIZoneIDBrowser(200, 200, 435, 400, this);
-  ZoneIDBrowser->movable = true;
-  ZoneIDBrowser->hidden = true;
+  ZoneIDBrowser->movable( true );
+  ZoneIDBrowser->hide();
   addChild(ZoneIDBrowser);
 
   // AppInfosWindow
   guiappInfo = new UIAppInfo( 1.0f, video.yres() - 440.0f, 420.0f, 410.0f, this );
-  guiappInfo->movable = true;
-  guiappInfo->hidden = true;
+  guiappInfo->movable( true );
+  guiappInfo->hide();
   std::stringstream appinfoText;
   appinfoText << "Project Path: " << Project::getInstance()->getPath() << std::endl;
   guiappInfo->setText( appinfoText.str() );
   addChild(guiappInfo);
 
   TexturePicker = new UITexturePicker(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );
-  TexturePicker->hidden = true;
-  TexturePicker->movable = true;
+  TexturePicker->hide();
+  TexturePicker->movable( true );
   addChild( TexturePicker);
 
   TextureSwitcher = new UITextureSwitcher(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );
-  TextureSwitcher->hidden = true;
-  TextureSwitcher->movable = true;
+  TextureSwitcher->hide();
+  TextureSwitcher->movable( true );
   addChild( TextureSwitcher);
   
   _help = new UIHelp();
@@ -121,7 +121,7 @@ void UIMapViewGUI::render( ) const
   
   guiStatusbar->setRightInfo( "" );
  
-  if( !_tilemode && !guidetailInfos->hidden )
+  if( !_tilemode && !guidetailInfos->hidden() )
   {
     nameEntry * lSelection = gWorld->GetCurrentSelection();
     if( lSelection )

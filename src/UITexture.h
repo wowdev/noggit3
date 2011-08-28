@@ -12,6 +12,9 @@ namespace OpenGL
 
 class UITexture : public UIFrame
 {
+public:
+  typedef UITexture* Ptr;
+
 protected:
   OpenGL::Texture* texture;
   std::string _textureFilename;

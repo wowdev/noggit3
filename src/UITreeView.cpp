@@ -16,7 +16,7 @@ UITreeViewButton::UITreeViewButton( float _x, float _y, UITreeView::Ptr pTreeVie
 {
 }
 
-UIFrame * UITreeViewButton::processLeftClick( float /*mx*/, float /*my*/ )
+UIFrame::Ptr UITreeViewButton::processLeftClick( float /*mx*/, float /*my*/ )
 {
   SetClicked( true );
   mTreeView->Toggle();
@@ -81,17 +81,17 @@ const std::string& UITreeView::GetDirectoryName()
 void UITreeView::Move( int pEntries, UITreeView::Ptr pFrom )
 {
   Others::iterator trees = std::find( _others.begin(), _others.end(), pFrom );
-  trees++;
+  ++trees;
   while( trees != _others.end() )
   {
-    (*trees)->y = (*trees)->y + pEntries * 13;
-    trees++;
+    (*trees)->y( (*trees)->y() + pEntries * 13.0f );
+    ++trees;
   }
 
   std::vector<UIText*>::iterator childfiles;
   for( childfiles = mFiles.begin(); childfiles != mFiles.end(); ++childfiles )
   {
-    (*childfiles)->y = (*childfiles)->y + pEntries * 13;
+    (*childfiles)->y( (*childfiles)->y() + pEntries * 13.0f );
   }
 
   if( mParent )
@@ -121,11 +121,11 @@ void UITreeView::Toggle()
 
 void UITreeView::render() const
 {
-  if( hidden )
+  if( hidden() )
     return;
 
   glPushMatrix();
-  glTranslatef( x, y, 0 );
+  glTranslatef( x(), y(), 0 );
   mMyButton->render();
   mMyText->render();
 
@@ -151,21 +151,23 @@ void UITreeView::SetSelectFunction( void (*pSelectFunction)( const std::string& 
   mSelectFunction = pSelectFunction;
 }
 
-UIFrame * UITreeView::processLeftClick( float mx, float my )
+UIFrame::Ptr UITreeView::processLeftClick( float mx, float my )
 {
-  if( hidden )
-    return 0;
+  if( hidden() )
+    return NULL;
 
-  mx -= x;
-  my -= y;
-  if((!mMyButton->hidden)&&(mMyButton->x<mx)&&(mMyButton->x+mMyButton->width>mx)&&(mMyButton->y<my)&&(mMyButton->y+mMyButton->height>my))
-    return mMyButton->processLeftClick(mx-mMyButton->x,my-mMyButton->y);
+  mx -= x();
+  my -= y();
+  
+  if( !mMyButton->hidden() && mMyButton->IsHit( mx, my ) )
+    return mMyButton->processLeftClick( mx - mMyButton->x(), my - mMyButton->y() );
 
   std::vector<UIText*>::iterator childfiles;
   if( mSelectFunction )
+  {
     for( childfiles = mFiles.begin(); childfiles != mFiles.end(); ++childfiles )
     {
-      if( (!(*childfiles)->hidden)&&((*childfiles)->x<mx)&&((*childfiles)->x+(*childfiles)->width>mx)&&((*childfiles)->y<my)&&((*childfiles)->y+(*childfiles)->height>my) )
+      if( !(*childfiles)->hidden() && (*childfiles)->IsHit( mx, my ) )
       {
         std::string lPath;
         UITreeView::Ptr lParent = shared_from_this();
@@ -178,6 +180,7 @@ UIFrame * UITreeView::processLeftClick( float mx, float my )
         return *childfiles;
       }
     }
+  }
 
   if( mExpanded )
   {

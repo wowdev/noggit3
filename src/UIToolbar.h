@@ -25,7 +25,7 @@ public:
 
   // current active texture
   UITexture* current_texture;
-  UIToolbar(float x, float y, float width, float height, UIMapViewGUI *setGui);
+  UIToolbar(float x, float y, UIMapViewGUI *setGui);
   void IconSelect(int i);
 };
 #endif 
