@@ -3,56 +3,64 @@
 
 #include <cmath>
 
-class Vec3D {
+class Vec3D
+{
 public:
-  float x,y,z;
+  float x;
+  float y;
+  float z;
 
-  Vec3D(float x0 = 0.0f, float y0 = 0.0f, float z0 = 0.0f) : x(x0), y(y0), z(z0) {}
+  Vec3D(float x0 = 0.0f, float y0 = 0.0f, float z0 = 0.0f)
+  : x(x0)
+  , y(y0)
+  , z(z0)
+  {}
 
-  Vec3D(const Vec3D& v) : x(v.x), y(v.y), z(v.z) {}
+  Vec3D(const Vec3D& v)
+  : x(v.x)
+  , y(v.y)
+  , z(v.z)
+  {}
 
-  Vec3D& operator= (const Vec3D &v) {
-        x = v.x;
+  inline Vec3D& operator= (const Vec3D &v)
+  {
+    x = v.x;
     y = v.y;
     z = v.z;
     return *this;
   }
 
-  Vec3D operator+ (const Vec3D &v) const
+  inline Vec3D operator+ (const Vec3D &v) const
   {
-    Vec3D r(x+v.x,y+v.y,z+v.z);
-        return r;
+    return Vec3D(x + v.x, y + v.y, z + v.z);
   }
 
-  Vec3D operator- (const Vec3D &v) const
+  inline Vec3D operator- (const Vec3D &v) const
   {
-    Vec3D r(x-v.x,y-v.y,z-v.z);
-    return r;
+    return Vec3D(x - v.x, y - v.y, z - v.z);
   }
 
-  float operator* (const Vec3D &v) const
+  inline float operator* (const Vec3D &v) const
   {
-        return x*v.x + y*v.y + z*v.z;
+    return x * v.x + y * v.y + z * v.z;
   }
 
-  Vec3D operator* (float d) const
+  inline Vec3D operator* (const float& d) const
   {
-    Vec3D r(x*d,y*d,z*d);
-        return r;
+    return Vec3D(x * d, y * d, z * d);
   }
 
-  friend Vec3D operator* (float d, const Vec3D& v)
+  friend Vec3D operator* (const float& d, const Vec3D& v)
   {
     return v * d;
   }
 
-  Vec3D operator% (const Vec3D &v) const
+  inline Vec3D operator% (const Vec3D& v) const
   {
-        Vec3D r(y*v.z-z*v.y, z*v.x-x*v.z, x*v.y-y*v.x);
-    return r;
+    return Vec3D(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
   }
 
-  Vec3D& operator+= (const Vec3D &v)
+  inline Vec3D& operator+= (const Vec3D& v)
   {
     x += v.x;
     y += v.y;
@@ -60,7 +68,7 @@ public:
     return *this;
   }
 
-  Vec3D& operator-= (const Vec3D &v)
+  inline Vec3D& operator-= (const Vec3D& v)
   {
     x -= v.x;
     y -= v.y;
@@ -68,7 +76,7 @@ public:
     return *this;
   }
 
-  Vec3D& operator*= (float d)
+  inline Vec3D& operator*= (float d)
   {
     x *= d;
     y *= d;
@@ -76,35 +84,38 @@ public:
     return *this;
   }
 
-  float lengthSquared() const
+  inline float lengthSquared() const
   {
-    return x*x+y*y+z*z;
+    return x * x + y * y + z * z;
   }
 
-  float length() const
+  inline float length() const
   {
-        return sqrt(x*x+y*y+z*z);
+    return sqrt(lengthSquared());
   }
 
-  Vec3D& normalize()
+  inline Vec3D& normalize()
   {
-    this->operator*= (1.0f/length());
+    const float repri (1.0f / length());
+    x /= repri;
+    y /= repri;
+    z /= repri;
     return *this;
   }
 
-  Vec3D operator~ () const
+  inline Vec3D operator~ () const
   {
     Vec3D r(*this);
-        r.normalize();
+    r.normalize();
     return r;
   }
 
-  operator float*()
+  inline operator float*()
   {
     return reinterpret_cast<float*>(this);
   }
 
-  bool IsInsideOf( Vec3D pA, Vec3D pB )
+  inline bool IsInsideOf( Vec3D pA, Vec3D pB ) const
   {
     return( pA.x < this->x && pB.x > this->x && pA.y < this->y && pB.y > this->y && pA.z < this->z && pB.z > this->z );
   }
@@ -113,39 +124,44 @@ public:
 
 class Vec2D {
 public:
-  float x,y;
+  float x;
+  float y;
   
-  Vec2D(float x0 = 0.0f, float y0 = 0.0f) : x(x0), y(y0) {}
+  Vec2D(float x0 = 0.0f, float y0 = 0.0f)
+  : x(x0)
+  , y(y0)
+  {}
 
-  Vec2D(const Vec2D& v) : x(v.x), y(v.y) {}
+  Vec2D(const Vec2D& v)
+  : x(v.x)
+  , y(v.y)
+  {}
 
-  Vec2D& operator= (const Vec2D &v) {
-        x = v.x;
+  inline Vec2D& operator= (const Vec2D &v)
+  {
+    x = v.x;
     y = v.y;
     return *this;
   }
 
-  Vec2D operator+ (const Vec2D &v) const
+  inline Vec2D operator+ (const Vec2D &v) const
   {
-    Vec2D r(x+v.x,y+v.y);
-        return r;
+    return Vec2D(x + v.x, y + v.y);
   }
 
-  Vec2D operator- (const Vec2D &v) const
+  inline Vec2D operator- (const Vec2D &v) const
   {
-    Vec2D r(x-v.x,y-v.y);
-    return r;
+    return Vec2D(x - v.x, y - v.y);
   }
 
-  float operator* (const Vec2D &v) const
+  inline float operator* (const Vec2D &v) const
   {
-        return x*v.x + y*v.y;
+    return x*v.x + y*v.y;
   }
 
-  Vec2D operator* (float d) const
+  inline Vec2D operator* (float d) const
   {
-    Vec2D r(x*d,y*d);
-        return r;
+    return Vec2D(x * d, y * d);
   }
 
   friend Vec2D operator* (float d, const Vec2D& v)
@@ -153,51 +169,53 @@ public:
     return v * d;
   }
 
-  Vec2D& operator+= (const Vec2D &v)
+  inline Vec2D& operator+= (const Vec2D &v)
   {
     x += v.x;
     y += v.y;
     return *this;
   }
 
-  Vec2D& operator-= (const Vec2D &v)
+  inline Vec2D& operator-= (const Vec2D &v)
   {
     x -= v.x;
     y -= v.y;
     return *this;
   }
 
-  Vec2D& operator*= (float d)
+  inline Vec2D& operator*= (float d)
   {
     x *= d;
     y *= d;
     return *this;
   }
 
-  float lengthSquared() const
+  inline float lengthSquared() const
   {
-    return x*x+y*y;
+    return x * x + y * y;
   }
 
-  float length() const
+  inline float length() const
   {
-        return sqrt(x*x+y*y);
+    return sqrt(lengthSquared());
   }
 
-  Vec2D& normalize()
+  inline Vec2D& normalize()
   {
-    this->operator*= (1.0f/length());
+    const float repri (1.0f / length());
+    x /= repri;
+    y /= repri;
     return *this;
   }
 
-  Vec2D operator~ () const
+  inline Vec2D operator~ () const
   {
     Vec2D r(*this);
-        r.normalize();
+    r.normalize();
     return r;
   }
 
-  operator float*()
+  inline operator float*()
   {
     return reinterpret_cast<float*>(this);
   }
@@ -208,8 +226,8 @@ public:
 inline void rotate(float x0, float y0, float *x, float *y, float angle)
 {
   float xa = *x - x0, ya = *y - y0;
-  *x = xa*cosf(angle) - ya*sinf(angle) + x0;
-  *y = xa*sinf(angle) + ya*cosf(angle) + y0;
+  *x = xa * cosf(angle) - ya * sinf(angle) + x0;
+  *y = xa * sinf(angle) + ya * cosf(angle) + y0;
 }
 
 

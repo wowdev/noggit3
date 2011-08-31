@@ -26,19 +26,18 @@ public:
     return *this;
   }
 
-
-  void zero()
+  inline void zero()
   {
     memset( &m[0][0], 0, sizeof( m ) );
   }
 
-  void unit()
+  inline void unit()
   {
     zero();
     m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0f;
   }
 
-  void translation(const Vec3D& tr)
+  inline void translation(const Vec3D& tr)
   {
     /*
       100#
@@ -52,14 +51,14 @@ public:
     m[2][3]=tr.z;
   }
 
-  static const Matrix newTranslation(const Vec3D& tr)
+  static inline const Matrix newTranslation(const Vec3D& tr)
   {
     Matrix t;
     t.translation(tr);
     return t;
   }
 
-  void scale(const Vec3D& sc)
+  inline void scale(const Vec3D& sc)
   {
     /*
       #000
@@ -74,14 +73,14 @@ public:
     m[3][3]=1.0f;
   }
 
-  static const Matrix newScale(const Vec3D& sc)
+  static inline const Matrix newScale(const Vec3D& sc)
   {
     Matrix t;
     t.scale(sc);
     return t;
   }
 
-  void quaternionRotate(const Quaternion& q)
+  inline void quaternionRotate(const Quaternion& q)
   {
     /*
       ###0
@@ -102,7 +101,7 @@ public:
     m[3][3] = 1.0f;
   }
 
-  void rotate(const Vec3D& r)
+  inline void rotate(const Vec3D& r)
   {
     /*
       ###0
@@ -146,31 +145,30 @@ public:
     this->operator*=(rot);
   }
 
-  static const Matrix newQuatRotate( const Quaternion& qr )
+  static inline const Matrix newQuatRotate( const Quaternion& qr )
   {
     Matrix t;
     t.quaternionRotate( qr );
     return t;
   }
 
-  static const Matrix newRotate( const Vec3D& r )
+  static inline const Matrix newRotate( const Vec3D& r )
   {
     Matrix t;
     t.rotate( r );
     return t;
   }
 
-  Vec3D operator*( const Vec3D& v ) const
+  inline Vec3D operator*( const Vec3D& v ) const
   {
-    Vec3D o;
     const float x = v.x, y = v.y, z = v.z;
-    o.x = m[0][0] * x + m[0][1] * y + m[0][2] * z + m[0][3];
-    o.y = m[1][0] * x + m[1][1] * y + m[1][2] * z + m[1][3];
-    o.z = m[2][0] * x + m[2][1] * y + m[2][2] * z + m[2][3];
-    return o;
+    const float x_ = m[0][0] * x + m[0][1] * y + m[0][2] * z + m[0][3];
+    const float y_ = m[1][0] * x + m[1][1] * y + m[1][2] * z + m[1][3];
+    const float z_ = m[2][0] * x + m[2][1] * y + m[2][2] * z + m[2][3];
+    return Vec3D(x_, y_, z_);
   }
 
-  Matrix operator*( const Matrix& p ) const
+  inline Matrix operator*( const Matrix& p ) const
   {
     Matrix o;
     const float m00 = m[0][0], m01 = m[0][1], m02 = m[0][2], m03 = m[0][3];
@@ -201,7 +199,7 @@ public:
     return o;
   }
 
-  float determinant() const
+  inline float determinant() const
   {
     #define SUB(a,b) (m[2][a]*m[3][b] - m[3][a]*m[2][b])
     return
@@ -212,7 +210,7 @@ public:
     #undef SUB
   }
 
-  float minor(size_t x, size_t y) const
+  inline float minor(size_t x, size_t y) const
   {
     float s[3][3];
     for (size_t j=0, v=0; j<4; j++) {
@@ -229,7 +227,7 @@ public:
     #undef SUB
   }
   
-  const Matrix adjoint() const
+  inline const Matrix adjoint() const
   {
     Matrix a;
     for (size_t j=0; j<4; j++) {
@@ -240,7 +238,7 @@ public:
     return a;
   }
   
-  void invert()
+  inline void invert()
   {
     Matrix adj = this->adjoint();
     float invdet = 1.0f / this->determinant();
@@ -251,7 +249,7 @@ public:
     }
   }
 
-  void transpose()
+  inline void transpose()
   {
    for (size_t j=1; j<4; j++) {
      for (size_t i=0; i<j; ++i) {
@@ -262,16 +260,15 @@ public:
     }
   }
 
-  Matrix& operator*= (const Matrix& p)
+  inline Matrix& operator*= (const Matrix& p)
   {
     return *this = this->operator*(p);
   }
 
-  operator float*()
+  inline operator float*()
   {
     return &m[0][0];
   }
-
 };
 
 
