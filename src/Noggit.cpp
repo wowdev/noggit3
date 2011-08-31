@@ -101,11 +101,26 @@ int WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int 
 int main( int argc, char *argv[] )
 {
   RegisterErrorHandlers();
-  boost::filesystem::current_path( boost::filesystem::current_path() 
-                       / boost::filesystem::path( argv[0] ).remove_filename() );
-  
-  // Set up log.
   InitLogging();
+
+  try
+  {
+    boost::filesystem::path startupPath( argv[0] );
+    startupPath.remove_filename();
+    
+    if( startupPath.is_relative() )
+    {
+      boost::filesystem::current_path( boost::filesystem::current_path() / startupPath );
+    }
+    else
+    {
+      boost::filesystem::current_path( startupPath );
+    }
+  }
+  catch( const boost::filesystem::filesystem_error& ex )
+  {
+    LogError << ex.what() << std::endl;
+  }
 
   Settings::getInstance();
   Project::getInstance();
