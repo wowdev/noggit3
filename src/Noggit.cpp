@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
+#include <boost/thread/thread.hpp>
 
 #include <SDL.h>
 
@@ -64,7 +65,7 @@ std::string getGamePath()
   #ifdef _WIN32
     HKEY key;
     DWORD t;
-    const DWORD s = 1024;
+    const DWORD s( 1024 );
     char temp[s];
     memset(temp,0,s);
     LONG l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta",0,KEY_QUERY_VALUE,&key);
@@ -90,44 +91,6 @@ std::string getGamePath()
 
 void CreateStrips();
 
-void setApplicationDirectory( const std::string& argv_0 )
-{
-  std::string fullpath = "";
-  if( argv_0.at( 0 ) == '/' || ( argv_0.at( 1 ) == ':' && argv_0.at( 2 ) == '/' ) )
-  {
-    fullpath = argv_0;
-  }
-  else
-  {
-#ifdef _WIN32  
-    fullpath = std::string( _getcwd( NULL, 0 ) ) + "/" + argv_0;
-#else
-    fullpath = std::string( getcwd( NULL, 0 ) ) + "/" + argv_0;
-#endif 
-
-  }
-  
-  fullpath = fullpath.substr( 0, fullpath.find_last_of("/\\") + 1 );
-  size_t found = fullpath.find( "/./" );
-  while( found != std::string::npos )
-  {
-    fullpath.replace( found, 3, "/" );
-    found = fullpath.find( "/./" );
-  }
-  found = fullpath.find( "/../" );
-  while( found != std::string::npos )
-  {
-    size_t pos_prev = fullpath.rfind( '/', found - 1 );
-    fullpath.replace( pos_prev, found - pos_prev + 4, "/" );
-    found = fullpath.find( "/../" );
-  }
-#ifdef _WIN32  
-  _chdir( fullpath.c_str() );
-#else
-  chdir( fullpath.c_str() );
-#endif
-}
-
 #ifdef _WIN32
 int WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
 {
@@ -138,7 +101,8 @@ int WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int 
 int main( int argc, char *argv[] )
 {
   RegisterErrorHandlers();
-  setApplicationDirectory( argv[0] );
+  boost::filesystem::current_path( boost::filesystem::current_path() 
+                       / boost::filesystem::path( argv[0] ).remove_filename() );
   
   // Set up log.
   InitLogging();
@@ -149,7 +113,7 @@ int main( int argc, char *argv[] )
 
   Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
   
-  std::string arialFilename = "<PLEASE GET SOME FONT FOR YOUR OS>";
+  std::string arialFilename( "<PLEASE GET SOME FONT FOR YOUR OS>" );
 #ifdef _WIN32
   //! \todo This might not work on windows 7 or something. Please fix.
   arialFilename = "C:\\windows\\fonts\\arial.ttf";
@@ -173,12 +137,12 @@ int main( int argc, char *argv[] )
   
   srand( time( NULL ) );
   
-  int xres = 1280;
-  int yres = 720;
-  bool fullscreen = false;
+  int xres( 1280 );
+  int yres( 720 );
+  bool fullscreen( false );
   
   // handle starting parameters
-  for( int i = 1; i < argc; ++i ) 
+  for( int i( 1 ); i < argc; ++i ) 
   {
     if( !strcmp( argv[i], "-f" ) || !strcmp( argv[i], "-fullscreen" ) ) 
       fullscreen = true;
@@ -232,7 +196,7 @@ int main( int argc, char *argv[] )
   
   SDL_WM_SetCaption( "Noggit Studio - " STRPRODUCTVER, "" );
   
-  std::string wowpath = getGamePath();
+  std::string wowpath( getGamePath() );
   if( wowpath == "" )
   {
     return -1;
@@ -247,7 +211,7 @@ int main( int argc, char *argv[] )
   CreateStrips();
 
   gAsyncLoader = new AsyncLoader();
-  gAsyncLoader->start(1);
+  gAsyncLoader->start( 1 );
 
   std::vector<std::string> archiveNames;
   archiveNames.push_back( "common.MPQ" );
@@ -273,12 +237,12 @@ int main( int argc, char *argv[] )
   archiveNames.push_back( "development.MPQ" );
   
   const char * locales[] = { "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "zhTW", "esES", "esMX", "ruRU" };
-  const char * locale = "****";
+  const char * locale( "****" );
   
   // Find locale, take first one.
-  for( int i = 0; i < 10; ++i )
+  for( int i( 0 ); i < 10; ++i )
   {
-    std::string path = wowpath;
+    std::string path( wowpath );
     path.append( "Data/" ).append( locales[i] ).append( "/realmlist.wtf" );
     if( boost::filesystem::exists( path ) )
     {
@@ -294,11 +258,11 @@ int main( int argc, char *argv[] )
   }
   
   //! \todo  This may be done faster. Maybe.
-  for( size_t i = 0; i < archiveNames.size(); ++i )
+  for( size_t i( 0 ); i < archiveNames.size(); ++i )
   {
-    std::string path = wowpath;
+    std::string path( wowpath );
     path.append( "Data/" ).append( archiveNames[i] );
-    std::string::size_type location = std::string::npos;
+    std::string::size_type location( std::string::npos );
     
     do
     {
@@ -394,34 +358,41 @@ int main( int argc, char *argv[] )
   
   LogDebug << "Entering Main Loop" << std::endl;
   
-  bool done = false;
-  Uint32 ticks = SDL_GetTicks();
-  AppState* activeAppState = NULL;
-  Uint32 time = 0;
-  
+  bool done( false );
+  Uint32 ticks( SDL_GetTicks() );
+  AppState* activeAppState( NULL );
+  Uint32 time( 0 );
+
+  SDL_Event event;
+
   while( !gStates.empty() && !done )
   {
-    Uint32 lastTicks = ticks;
+    Uint32 lastTicks( ticks );
     ticks = SDL_GetTicks();
-    Uint32 tickDelta = ticks - lastTicks;
+    Uint32 tickDelta( ticks - lastTicks );
     time += tickDelta;
     
     activeAppState = gStates[gStates.size() - 1];
     
-    Uint8 appState = SDL_GetAppState();
-    const bool isActiveApplication = appState & SDL_APPACTIVE;
-    const bool hasInputFocus = appState & SDL_APPINPUTFOCUS;
-    const bool hasMouseFocus = appState & SDL_APPMOUSEFOCUS;
+    const Uint8 appState( SDL_GetAppState() );
+    const bool isActiveApplication( appState & SDL_APPACTIVE );
+    const bool hasInputFocus( appState & SDL_APPINPUTFOCUS );
+    const bool hasMouseFocus( appState & SDL_APPMOUSEFOCUS );
     
     if( isActiveApplication )
     {
-      const float ftime = time / 1000.0f;
-      const float ftickDelta = tickDelta / 1000.0f;
+      const float ftime( time / 1000.0f );
+      const float ftickDelta( tickDelta / 1000.0f );
       activeAppState->tick( ftime, ftickDelta );
       activeAppState->display( ftime, ftickDelta );
+      
+      video.flip();
+    }
+    else
+    {
+      boost::this_thread::sleep( boost::posix_time::milliseconds( 200 ) );
     }
     
-    SDL_Event event;
     while( SDL_PollEvent( &event ) )
     {
       if( event.type == SDL_QUIT )
@@ -460,8 +431,6 @@ int main( int argc, char *argv[] )
       delete activeAppState;
       activeAppState = NULL;
     }
-    
-    video.flip();
   }
   
   video.close();
