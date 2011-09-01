@@ -7,7 +7,7 @@ class UIAbout : public UICloseWindow
 {
 private:
   static const int winWidth = 400;
-  static const int winHeight = 200;
+  static const int winHeight = 230;
   
 public:
   UIAbout();
