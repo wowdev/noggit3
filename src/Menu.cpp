@@ -25,6 +25,7 @@
 #include "UIStatusBar.h" // UIStatusBar
 #include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
 #include "World.h"
+#include "Settings.h"
 
 Menu* theMenu = NULL;
 
@@ -74,7 +75,10 @@ Menu::Menu()
 
 //! \todo Add TBC and WOTLK.
 //! \todo Use std::array / boost::array.
-const std::string uiModels[] = { "BloodElf", "Deathknight", "Draenei", "Dwarf", "Human", "MainMenu", "NightElf", "Orc", "Scourge", "Tauren" };
+//const std::string uiModels[] = { "BloodElf", "Deathknight", "Draenei", "Dwarf", "Human", "MainMenu", "NightElf", "Orc", "Scourge", "Tauren" };
+//Steff: Turn of the ugly once
+const std::string uiModels[] = { "Deathknight", "Draenei", "Dwarf",  "MainMenu", "NightElf", "Orc" };
+
 
 std::string buildModelPath( size_t index )
 {
@@ -122,6 +126,7 @@ void Menu::randBackground()
 
 void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
 {
+  video.farclip( Settings::getInstance()->FarZ );
   Vec2D tile( pos.x / TILESIZE, pos.y / TILESIZE );
   
   gWorld->autoheight = autoHeight;
@@ -145,7 +150,9 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
 
 void Menu::tick( float t, float /*dt*/ )
 {
-  globalTime = t;
+  //Steff: Why do this not work. If i use the given tick time to set globalTime the menu models are not animated?
+  //globalTime = t;
+  globalTime++;
   
   if( mBackgroundModel )
   {
