@@ -1,13 +1,15 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+cmake_policy(SET CMP0015 OLD)
+
 # Project name for .vcproj etc.
 PROJECT( Noggit )
 
 # Additional search paths for find_package.
 if( WIN32 )
   # Set this to more paths you windows guys need.
-  SET( CMAKE_INCLUDE_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include/" "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/include/" )
-  SET( CMAKE_LIBRARY_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/" "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/lib/" )
+  SET( CMAKE_INCLUDE_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include/" "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/include/" "C:/Program Files (x86)/SDL-1.2.14/include/SDL/" "C:/Program Files (x86)/glew-1.5.7/include/" "C:/Program Files (x86)/StormLib/src/")
+  SET( CMAKE_LIBRARY_PATH "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/" "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/lib/" "C:/Program Files (x86)/StormLib/bin/" )
 endif( WIN32 )
 
 # Our own FindModule.cmake scripts.
@@ -16,8 +18,10 @@ SET( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/" )
 FIND_PACKAGE( Freetype REQUIRED )
 FIND_PACKAGE( OpenGL REQUIRED )
 
+if( APPLE )
 # Hack as at least my FindOpenGL does not do this itself.
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( OpenGL DEFAULT_MSG OPENGL_LIBRARIES OPENGL_INCLUDE_DIR )
+endif( APPLE )
 
 # Hacky boost finding.
 SET( Boost_USE_STATIC_LIBS ON )
@@ -46,7 +50,7 @@ MARK_AS_ADVANCED( SDL_LIBRARY SDL_INCLUDE_DIR )
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( SDL DEFAULT_MSG SDL_LIBRARY SDL_INCLUDE_DIR )
 
 # Add the found include directories to our include list.
-SET( IncludeDirectories ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${SDL_INCLUDE_DIR} ${STORMLIB_INCLUDES} ${Boost_INCLUDE_DIRS}  ${GLEW_INCLUDE_DIRS})
+SET( IncludeDirectories ${GLEW_INCLUDE_PATH} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${SDL_INCLUDE_DIR} ${STORMLIB_INCLUDES} ${Boost_INCLUDE_DIRS} )
 
 # Gather source files.
 SET( SourceFiles
