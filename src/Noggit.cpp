@@ -419,7 +419,7 @@ int main( int argc, char *argv[] )
     {
       boost::this_thread::sleep( boost::posix_time::milliseconds( 200 ) );
     }
-    
+    SDL_EnableUNICODE(true);
     while( SDL_PollEvent( &event ) )
     {
       if( event.type == SDL_QUIT )
@@ -450,7 +450,7 @@ int main( int argc, char *argv[] )
         }
       }
     }
-    
+    SDL_EnableUNICODE(false);
     if( gPop ) 
     {
       gPop = false;

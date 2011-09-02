@@ -88,6 +88,7 @@ SET( SourceFiles
   src/UICheckBox.cpp
   src/UICloseWindow.cpp
   src/UIDetailInfos.cpp
+  src/UIDoodadSpawner.cpp
   src/UIFrame.cpp
   src/UIGradient.cpp
   src/UIHelp.cpp

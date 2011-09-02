@@ -12,6 +12,7 @@
 #include "Project.h"
 #include "UIAppInfo.h" // UIAppInfo
 #include "UIDetailInfos.h" // UIDetailInfos
+#include "UIDoodadSpawner.h"
 #include "UIHelp.h"
 #include "UIMinimapWindow.h"
 #include "UIStatusBar.h" // UIStatusBar
@@ -75,6 +76,10 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   _help = new UIHelp();
   _help->hide();
   addChild( _help );
+
+  _test = new UIDoodadSpawner();
+  _test->hide();
+  addChild( _test );
 }
 
 void UIMapViewGUI::showHelp()
@@ -88,6 +93,19 @@ void UIMapViewGUI::hideHelp()
 void UIMapViewGUI::toggleHelp()
 {
   _help->toggleVisibility();
+}
+
+void UIMapViewGUI::showTest()
+{
+  _test->show();
+}
+void UIMapViewGUI::hideTest()
+{
+  _test->hide();
+}
+void UIMapViewGUI::toggleTest()
+{
+  _test->toggleVisibility();
 }
 
 void UIMapViewGUI::setTilemode( bool enabled )

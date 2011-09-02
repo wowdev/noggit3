@@ -1,5 +1,6 @@
 #include "UIFrame.h"
 
+#include <SDL.h>
 #include <algorithm>
 #include <vector>
 
@@ -106,7 +107,7 @@ void UIFrame::getOffset( float* xOff, float* yOff )
   *yOff = ty + y();
 }
 
-bool UIFrame::processKey( char /*key*/, bool /*shift*/, bool /*alt*/, bool /*ctrl*/ )
+bool UIFrame::KeyBoardEvent( SDL_KeyboardEvent *e )
 {
   return false;
 }
