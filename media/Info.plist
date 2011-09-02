@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>${EXECUTABLE_NAME}</string>
+	<string>noggit</string>
 	<key>CFBundleIconFile</key>
 	<string>noggit</string>
 	<key>CFBundleIdentifier</key>
