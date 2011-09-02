@@ -15,7 +15,7 @@ struct SDL_Surface;
 class Video
 {
 public:
-  bool init(int xres, int yres, bool fullscreen);
+  bool init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_);
 
   void close();
 
@@ -27,18 +27,21 @@ public:
   void setTileMode() const;
   void resize(int w, int h);
   
-  int xres() const;
-  int yres() const;
-  float ratio() const;
-  bool fullscreen() const;
+  inline const int& xres() const;
+  inline const int& yres() const;
+  inline const float& ratio() const;
+  inline const bool& fullscreen() const;
+  inline const bool& doAntiAliasing() const;
   
-  float fov() const;
-  float nearclip() const;
-  float farclip() const;
+  inline void doAntiAliasing( const bool& doAntiAliasing_ );
   
-  void fov( float fov_ );
-  void nearclip( float nearclip_ );
-  void farclip( float farclip_ );
+  inline const float& fov() const;
+  inline const float& nearclip() const;
+  inline const float& farclip() const;
+  
+  void fov( const float& fov_ );
+   void nearclip( const float& nearclip_ );
+   void farclip( const float& farclip_ );
 
   void updateProjectionMatrix();
   
@@ -56,6 +59,7 @@ private:
   float _farclip;
   
   bool _fullscreen;
+  bool _doAntiAliasing;
   
   int _status;
 

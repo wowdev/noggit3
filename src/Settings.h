@@ -16,13 +16,13 @@ public:
   bool AutoSelectingMode;  // true activates auto selection when you deselect a model. False not.
   bool holelinesOn;    // If true show the blue subchunk lines always. Not only in holemode is on.
 
+  const bool& noAntiAliasing() const;
+
 private:
+  bool _noAntiAliasing;
+
   Settings();
-    ~Settings() {}
-    static Settings* instance;
-
-  // The settings vars
-
+  static Settings* instance;
 };
 
 #endif
