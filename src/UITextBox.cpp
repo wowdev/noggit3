@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <sstream>
 #include <string>
+#include <utf8.h>
 
 #include "Noggit.h" // arial12
 #include "TextureManager.h" // TextureManager, Texture
@@ -10,25 +11,28 @@
 #include "UITexture.h"
 #include "Video.h"
 
-UITextBox2::UITextBox2( float xPos, float yPos, float w, float h, const std::string& tex, const std::string& texd )
+// TODO : Handle Selection, Handle Clipboard ( CTRL + C / CTRL + V / CTRL + X ), Handle the Backspace staying down. Details, but better like that.
+
+UITextBox::UITextBox( float xPos, float yPos, float w, float h, const std::string& tex, const std::string& texd )
 : UIFrame( xPos, yPos, w, h )
 , texture( TextureManager::newTexture( tex ) )
 , textureDown( TextureManager::newTexture( texd ) )
 , _textureFilename( tex )
 , _textureDownFilename( texd )
 , mFocus( false )
-, mText( new UIText( width() / 2.0f, 2.0f, arial12, eJustifyCenter ) )
+, mText( new UIText( 8.0f, 2.5f, arial16, eJustifyLeft ) )
 , mValue( "" )
 {
+
 }
 
-UITextBox2::~UITextBox2()
+UITextBox::~UITextBox()
 {
   TextureManager::delbyname( _textureFilename );
   TextureManager::delbyname( _textureDownFilename );
 }
 
-void UITextBox2::render() const
+void UITextBox::render() const
 {
   glPushMatrix();
   glTranslatef( x(), y(), 0.0f );
@@ -55,65 +59,62 @@ void UITextBox2::render() const
   glEnd();
   
   OpenGL::Texture::disableTexture();
-  
   mText->render();
-  
+
   glPopMatrix();
 }
 
-UIFrame *UITextBox2::processLeftClick( float /*mx*/, float /*my*/ )
+UIFrame *UITextBox::processLeftClick( float /*mx*/, float /*my*/ )
 {
   mFocus = !mFocus;
   return this;
 }
 
-UITextBox::UITextBox(float xpos, float ypos, float w)
-: UIFrame( xpos, ypos, w, 32.0f )
-{
-  background = new UITexture( 0.0f, 0.0f, width(), height(), "Interface\\Common\\Common-Input-Border.blp" );
-}
-UIFrame *UITextBox::processLeftClick(float /*mx*/,float /*my*/)
-{
-  return this;
-}
-bool UITextBox::processKey(char key, bool /*shift*/, bool /*alt*/, bool /*ctrl*/)
-{
-  text[length]=key;text[length+1]=0;length++;return true;
-}
-
-void UITextBox2::setValue( const std::string& pText )
+void UITextBox::setValue( const std::string& pText )
 {
   mValue = pText;
   mText->setText( mValue );
 }
-std::string UITextBox2::getValue()
+
+std::string UITextBox::getValue()
 {
   return mValue;
 }
-  
-bool UITextBox2::KeyBoardEvent( SDL_KeyboardEvent *e )
+
+bool UITextBox::KeyBoardEvent( SDL_KeyboardEvent *e )
 {
-  // The input is fixed to be ascii. its not really "working" with other keyboard layouts. maybe do this somehow else .. but how? ._. stupid SDL.
-    
   if( !mFocus )
     return false;
+
   if( e->type != SDL_KEYDOWN )
     return false;
   
-  if( e->keysym.sym == 8 )
-    mValue = mValue.substr( 0, mValue.size() - 1 );
+  if( e->keysym.sym == SDLK_BACKSPACE && !mValue.empty()) // Backspace
+  {
+    const char* firstBeforeEnd( mValue.c_str() + mValue.length() ); 
+    utf8::prior( firstBeforeEnd, mValue.c_str() ); 
+    mValue.erase( firstBeforeEnd - mValue.c_str() );
+  }
   else
-    if( e->keysym.sym == 13 )
-      mFocus = false;
+  {
+    if( e->keysym.sym == SDLK_RETURN ) // Enter
+	  {
+        mFocus = false;
+	  }
     else
-      if( e->keysym.sym < 127 && e->keysym.sym > 31 )
-        mValue += static_cast<char>( e->keysym.sym );
-      else
-      {
-        std::stringstream ss; ss << "\\x" << e->keysym.sym;
-        mValue += ss.str();
-      }
+	  {
+      if( e->keysym.unicode > 31 )
+	    {
+        utf8::append( e->keysym.unicode, std::back_inserter( mValue ) );
+	    }
+	  }
+  }
   
   setValue( mValue );
   return true;
+}
+
+void UITextBox::Clear()
+{
+	setValue("");
 }

@@ -1373,12 +1373,10 @@ void MapView::resizewindow()
 
 void MapView::keypressed( SDL_KeyboardEvent *e )
 {
-  //if( textbox->KeyBoardEvent( e ) ) return;
+  if( LastClicked && LastClicked->KeyBoardEvent( e ) ) return;
 
   if( e->type == SDL_KEYDOWN ) 
   {
-    if( LastClicked && LastClicked->processKey( e->keysym.sym, e->keysym.mod & KMOD_SHIFT, e->keysym.mod & KMOD_CTRL, e->keysym.mod & KMOD_ALT ) )
-      return;
     
     if( handleHotkeys( e ) )
       return;
@@ -1522,10 +1520,10 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
       else ah += 180.0f;
     }    
     
-    // Free for use
+    // Test windows
     if( e->keysym.sym == SDLK_t ) 
     {
-     
+      mainGui->toggleTest();
     }
 
     // clip object to ground
@@ -1623,6 +1621,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_F9 ) 
       DrawMapContour = !DrawMapContour;
 
+    // toggle help window
     if( e->keysym.sym == SDLK_h )
     {
       mainGui->toggleHelp();
