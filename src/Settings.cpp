@@ -14,12 +14,19 @@ Settings::Settings()
   this->AutoSelectingMode=true;
   this->holelinesOn=false;
   this->FarZ = 1024;
+  _noAntiAliasing = false;
 
   if( boost::filesystem::exists( "noggIt.conf" ) )
   {
     ConfigFile config( "noggIt.conf" );
     config.readInto( this->FarZ, "FarZ" );
+    _noAntiAliasing = config.readInto( _noAntiAliasing, "noAntiAliasing" );
   }
+}
+
+const bool& Settings::noAntiAliasing() const
+{
+  return _noAntiAliasing;
 }
 
 Settings* Settings::instance = 0;

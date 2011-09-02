@@ -64,44 +64,52 @@ namespace OpenGL
 
 Video video;
 
-int Video::xres() const
+inline const int& Video::xres() const
 {
   return _xres;
 }
-int Video::yres() const
+inline const int& Video::yres() const
 {
   return _yres;
 }
-float Video::ratio() const
+inline const float& Video::ratio() const
 {
   return _ratio;
 }
-bool Video::fullscreen() const
+inline const bool& Video::fullscreen() const
 {
   return _fullscreen;
 }
-float Video::fov() const
+inline const bool& Video::doAntiAliasing() const
+{
+  return _doAntiAliasing;
+}
+inline const float& Video::fov() const
 {
   return _fov;
 }
-float Video::nearclip() const
+inline const float& Video::nearclip() const
 {
   return _nearclip;
 }
-float Video::farclip() const
+inline const float& Video::farclip() const
 {
   return _farclip;
 }
 
-void Video::fov( float fov_ )
+inline void Video::doAntiAliasing(const bool& doAntiAliasing_)
+{
+  _doAntiAliasing = doAntiAliasing_;
+}
+ void Video::fov( const float& fov_ )
 {
   _fov = fov_;
 }
-void Video::nearclip( float nearclip_ )
+ void Video::nearclip( const float& nearclip_ )
 {
   _nearclip = nearclip_;
 }
-void Video::farclip( float farclip_ )
+ void Video::farclip( const float& farclip_ )
 {
   _farclip = farclip_;
 }
@@ -130,7 +138,7 @@ void Video::resize( int xres_, int yres_ )
   updateProjectionMatrix();
 }
 
-bool Video::init( int xres_, int yres_, bool fullscreen_ )
+bool Video::init( int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_ )
 {
   _xres = xres_;
   _yres = yres_;
@@ -141,6 +149,7 @@ bool Video::init( int xres_, int yres_, bool fullscreen_ )
   _farclip = Settings::getInstance()->FarZ;
   
   _fullscreen = fullscreen_;
+  _doAntiAliasing = doAntiAliasing_;
   
   if( SDL_Init( SDL_INIT_TIMER | SDL_INIT_VIDEO ) )
   {
@@ -161,6 +170,12 @@ bool Video::init( int xres_, int yres_, bool fullscreen_ )
   SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
   SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
   SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
+  if( doAntiAliasing() )
+  {
+    SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
+    //! \todo Make sample count configurable.
+    SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 4 );
+  }
   
   _primary = SDL_SetVideoMode( _xres, _yres, 0, flags );
 
@@ -217,6 +232,8 @@ void Video::set3D() const
   gluPerspective( fov(), ratio(), nearclip(), farclip() );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
+  if( doAntiAliasing() )
+    glEnable( GL_MULTISAMPLE );
 }
 
 void Video::set3D_select() const
@@ -225,6 +242,8 @@ void Video::set3D_select() const
   gluPerspective( fov(), ratio(), nearclip(), farclip() );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
+  if( doAntiAliasing() )
+    glDisable( GL_MULTISAMPLE );
 }
 
 void Video::set2D() const
@@ -234,6 +253,8 @@ void Video::set2D() const
   glOrtho( 0.0f, xres(), yres(), 0.0f, -1.0f, 1.0f );
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+  if( doAntiAliasing() )
+    glDisable( GL_MULTISAMPLE );
 }
 
 void Video::setTileMode() const
@@ -243,6 +264,8 @@ void Video::setTileMode() const
   glOrtho( -2.0f * ratio(), 2.0f * ratio(), 2.0f, -2.0f, -100.0f, 300.0f );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
+  if( doAntiAliasing() )
+    glEnable( GL_MULTISAMPLE );
 }
 
 void CheckForGLError( const std::string& pLocation )

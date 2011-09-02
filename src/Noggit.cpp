@@ -155,12 +155,19 @@ int main( int argc, char *argv[] )
   int xres( 1280 );
   int yres( 720 );
   bool fullscreen( false );
+  bool doAntiAliasing( true );
   
   // handle starting parameters
   for( int i( 1 ); i < argc; ++i ) 
   {
-    if( !strcmp( argv[i], "-f" ) || !strcmp( argv[i], "-fullscreen" ) ) 
+    if( !strcmp( argv[i], "-f" ) || !strcmp( argv[i], "-fullscreen" ) )
+    {
       fullscreen = true;
+    }
+    else if( !strcmp( argv[i], "-na" ) || !strcmp( argv[i], "-noAntiAliasing" ) )
+    {
+      doAntiAliasing = false;
+    }
     else if (!strcmp(argv[i],"-1024") || !strcmp(argv[i],"-1024x768")) {
       xres = 1024;
       yres = 768;
@@ -203,7 +210,12 @@ int main( int argc, char *argv[] )
     }
   }
   
-  if( !video.init( xres, yres, fullscreen ) )
+  if( Settings::getInstance()->noAntiAliasing() )
+  {
+    doAntiAliasing = false;
+  }
+  
+  if( !video.init( xres, yres, fullscreen, doAntiAliasing ) )
   {
     LogError << "Initializing video failed." << std::endl;
     return -1;

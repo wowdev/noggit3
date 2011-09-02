@@ -169,6 +169,8 @@ void Menu::display( float /*t*/, float /*dt*/ )
   // 3D: Background.
   video.clearScreen();
   
+  video.set3D();
+  
   glDisable( GL_FOG );
   
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
