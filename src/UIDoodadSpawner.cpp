@@ -16,7 +16,7 @@
 static const float winWidth( 500.0f );
 static const float winHeight( 100.0f );
 
-void AddM2Click( UITextBox::Ptr textBox, const std::string& value )
+void UIDoodadSpawner__TextBoxEnter( UITextBox::Ptr textBox, const std::string& value )
 {
   ( static_cast<UIDoodadSpawner *>( textBox->parent() ) )->AddM2( value );
 }
@@ -30,7 +30,7 @@ void AddM2Click( UIFrame* f, int i )
 UIDoodadSpawner::UIDoodadSpawner( )
 : UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Test", true )
 , _button( new UIButton( 145.0f, winHeight - 24.0f, 132.0f, 28.0f, "Test", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", AddM2Click, 0 ) )
-, _tbox( new UITextBox( 30.0f, 30.0f, 400.0f, 40.0f ) )
+, _tbox( new UITextBox( 30.0f, 30.0f, 400.0f, 40.0f, UIDoodadSpawner__TextBoxEnter ) )
 {
   addChild( _button );
   addChild( _tbox );

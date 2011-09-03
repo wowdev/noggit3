@@ -24,10 +24,11 @@ UITextBox::UITextBox( float xPos, float yPos, float w, float h )
 , _uiText( new UIText( 8.0f, 2.5f, arial16, eJustifyLeft ) )
 , _value( "" )
 , _enterFunction( NULL )
+, _updateFunction( NULL )
 {
 }
 
-UITextBox::UITextBox( float xPos, float yPos, float w, float h, EnterFunction enterFunction )
+UITextBox::UITextBox( float xPos, float yPos, float w, float h, TriggerFunction enterFunction )
 : UIFrame( xPos, yPos, w, h )
 , _texture( TextureManager::newTexture( texture ) )
 , _textureFocused( TextureManager::newTexture( textureFocused ) )
@@ -35,6 +36,7 @@ UITextBox::UITextBox( float xPos, float yPos, float w, float h, EnterFunction en
 , _uiText( new UIText( 8.0f, 2.5f, arial16, eJustifyLeft ) )
 , _value( "" )
 , _enterFunction( enterFunction )
+, _updateFunction( NULL )
 {
 }
 

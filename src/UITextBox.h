@@ -29,7 +29,7 @@ private:
 
 public:
   UITextBox( float xPos, float yPos, float w, float h );
-  UITextBox( float xPos, float yPos, float w, float h, EnterFunction enterFunction );
+  UITextBox( float xPos, float yPos, float w, float h, TriggerFunction enterFunction );
   virtual ~UITextBox();
 
   void render() const;
