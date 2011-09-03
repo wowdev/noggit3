@@ -4,35 +4,43 @@
 #include <string>
 
 #include "UIFrame.h"
+#include "UIText.h"
 
-class UIText;
-class UITexture;
 struct SDL_KeyboardEvent;
 namespace OpenGL { class Texture; };
 
 class UITextBox : public UIFrame
 {
-private:
-  OpenGL::Texture* texture;
-  OpenGL::Texture* textureDown;
-  std::string _textureFilename;
-  std::string _textureDownFilename;
-
-  bool  mFocus;
-  UIText  *mText;
-  std::string mValue;
 public:
-  UITextBox(float xPos,float yPos,float w, float h,const std::string& tex, const std::string& texd);
-  ~UITextBox();
+  typedef UITextBox* Ptr;
+  typedef void ( *TriggerFunction )( UITextBox::Ptr, const std::string& value );
+
+private:
+  OpenGL::Texture* _texture;
+  OpenGL::Texture* _textureFocused;
+
+  UIText::Ptr _uiText;
+  std::string _value;
+
+  bool _focus;
+  
+  TriggerFunction _enterFunction;
+  TriggerFunction _updateFunction;
+
+public:
+  UITextBox( float xPos, float yPos, float w, float h );
+  UITextBox( float xPos, float yPos, float w, float h, EnterFunction enterFunction );
+  virtual ~UITextBox();
+
   void render() const;
-
-  void setValue( const std::string& pText );
-  void Clear();
-  std::string  getValue();
-
+  
+  UIFrame::Ptr processLeftClick( float mx, float my );
+  
   bool KeyBoardEvent( SDL_KeyboardEvent *e );
+  
+  void value( const std::string& pText );
+  const std::string& value() const;
 
-  UIFrame *processLeftClick( float mx, float my );
-  void processUnclick() { }
+  void clear();
 };
 #endif
