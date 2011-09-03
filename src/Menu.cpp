@@ -310,7 +310,7 @@ void Menu::buildMenuBar()
 
   for( std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it )
   {
-	  mGUImenuBar->GetMenu( typeToName[it->areaType] )->AddMenuItemButton( it->name, &showMap, it->mapID );
+    mGUImenuBar->GetMenu( typeToName[it->areaType] )->AddMenuItemButton( it->name, &showMap, it->mapID );
   }
 
   static const size_t nBookmarksPerMenu = 20;

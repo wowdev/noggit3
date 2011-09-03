@@ -36,7 +36,7 @@ void UITextureSwitcher::getTextures( nameEntry* lSelection )
 
   if( lSelection->type == eEntry_MapChunk )
   {
-	lSelection->data.mapchunk->getSelectionCoord(&this->xPos, &this->zPos);
+  lSelection->data.mapchunk->getSelectionCoord(&this->xPos, &this->zPos);
     MapChunk* chunk = lSelection->data.mapchunk;
 
     size_t index = 0;

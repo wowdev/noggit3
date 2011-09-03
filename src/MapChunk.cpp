@@ -1002,7 +1002,7 @@ void MapChunk::draw()
   float mydist = (gWorld->camera - vcenter).length() - r;
 
   if (mydist > (mapdrawdistance * mapdrawdistance))
-	  return;
+    return;
 
   // setup vertex buffers
   glBindBuffer(GL_ARRAY_BUFFER, vertices);
@@ -1644,7 +1644,7 @@ void MapChunk::switchTexture( OpenGL::Texture* oldTexture, OpenGL::Texture* newT
 
   if(texLevel != -1)
   {
-	_textures[texLevel] = newTexture;
+  _textures[texLevel] = newTexture;
   }
 }
 bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, float pressure, OpenGL::Texture* texture )

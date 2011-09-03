@@ -509,7 +509,7 @@ void exit_tilemode(  UIFrame* /*button*/, int /*id*/ )
 
 void test_menu_action(  UIFrame* /*button*/, int /*id*/ )
 {
-	gWorld->saveWDT();
+  gWorld->saveWDT();
 }
 
 void moveHeightmap(  UIFrame* /*button*/, int /*id*/ )
@@ -1771,7 +1771,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_F5 )
     {
       std::ofstream f( "bookmarks.txt", std::ios_base::app );
-	  f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << ah << " " << av << " " << gWorld->getAreaID() << std::endl;
+    f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << ah << " " << av << " " << gWorld->getAreaID() << std::endl;
       f.close();
     }
   }

@@ -98,16 +98,16 @@ bool UITextBox::KeyBoardEvent( SDL_KeyboardEvent *e )
   else
   {
     if( e->keysym.sym == SDLK_RETURN ) // Enter
-	  {
+    {
         mFocus = false;
-	  }
+    }
     else
-	  {
+    {
       if( e->keysym.unicode > 31 )
-	    {
+      {
         utf8::append( e->keysym.unicode, std::back_inserter( mValue ) );
-	    }
-	  }
+      }
+    }
   }
 
   setValue( mValue );
@@ -116,5 +116,5 @@ bool UITextBox::KeyBoardEvent( SDL_KeyboardEvent *e )
 
 void UITextBox::Clear()
 {
-	setValue("");
+  setValue("");
 }
