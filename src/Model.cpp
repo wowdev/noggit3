@@ -475,14 +475,14 @@ void Model::initAnimated(const MPQFile& f)
 
     animfiles = new MPQFile*[header.nAnimations];
 
-	  std::stringstream tempname;
+    std::stringstream tempname;
     for(size_t i=0; i<header.nAnimations; ++i)
     {
       std::string lodname = _filename.substr(0, _filename.length()-3);
-	    tempname << lodname << anims[i].animID << "-" << anims[i].subAnimID;
-	    if(MPQFile::exists(tempname.str()))
-	    {
-		    animfiles[i] = new MPQFile(tempname.str());
+      tempname << lodname << anims[i].animID << "-" << anims[i].subAnimID;
+      if(MPQFile::exists(tempname.str()))
+      {
+        animfiles[i] = new MPQFile(tempname.str());
       }
       else
       {
@@ -949,16 +949,16 @@ void Model::drawModelSelect()
         glDrawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
 
       }
-	  else
-	  {
+    else
+    {
         glBegin(GL_TRIANGLES);
-		for (size_t k = 0, b=p.indexStart; k<p.indexCount; ++k,++b)
-		{
-			uint16_t a = indices[b];
-			glNormal3fv(normals[a]);
-			glTexCoord2fv(origVertices[a].texcoords);
-			glVertex3fv(vertices[a]);
-		}
+    for (size_t k = 0, b=p.indexStart; k<p.indexCount; ++k,++b)
+    {
+      uint16_t a = indices[b];
+      glNormal3fv(normals[a]);
+      glTexCoord2fv(origVertices[a].texcoords);
+      glVertex3fv(vertices[a]);
+    }
         glEnd();
       }
 

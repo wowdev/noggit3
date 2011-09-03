@@ -8,12 +8,12 @@ namespace misc
 {
   void find_and_replace( std::string& source, const std::string& find, const std::string& replace )
   {
-	size_t found = source.rfind( find );
-	while(found!=std::string::npos) //fixed unknown letters replace. Now it works correctly and replace all found symbold instead of only one at previous versions
-	{
-		source.replace( found, find.length(), replace );
-		found = source.rfind( find );
-	}
+  size_t found = source.rfind( find );
+  while(found!=std::string::npos) //fixed unknown letters replace. Now it works correctly and replace all found symbold instead of only one at previous versions
+  {
+    source.replace( found, find.length(), replace );
+    found = source.rfind( find );
+  }
   }
 
   //dirty hack

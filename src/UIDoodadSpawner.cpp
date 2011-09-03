@@ -49,15 +49,15 @@ void UIDoodadSpawner::AddM2()
 
   if( MPQFile::exists(_tbox->getValue()) )
   {
-	  std::string ext = boost::filesystem::extension( _tbox->getValue() );
-	  std::transform(ext.begin(), ext.end(),ext.begin(), ::toupper);
-	  if(ext == ".M2")
-	  {
+    std::string ext = boost::filesystem::extension( _tbox->getValue() );
+    std::transform(ext.begin(), ext.end(),ext.begin(), ::toupper);
+    if(ext == ".M2")
+    {
       gWorld->addM2( ModelManager::add( _tbox->getValue() ), selectionPosition );
-	  }
-	  if(ext == ".WMO")
-	  {
+    }
+    if(ext == ".WMO")
+    {
       gWorld->addWMO( WMOManager::add( _tbox->getValue() ), selectionPosition );
-	  }
+    }
   }
  }

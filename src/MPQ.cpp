@@ -68,14 +68,14 @@ void MPQArchive::finishLoading()
     SFileReadFile( fh, readbuffer, filesize );
     SFileCloseFile( fh );
 
-  	std::string list( readbuffer );
+    std::string list( readbuffer );
 
-  	boost::algorithm::to_lower( list );
-  	boost::algorithm::replace_all( list, "\r\n", "\n" );
+    boost::algorithm::to_lower( list );
+    boost::algorithm::replace_all( list, "\r\n", "\n" );
 
-  	std::vector<std::string> temp;
-  	boost::algorithm::split( temp, list, boost::algorithm::is_any_of( "\n" ) );
-  	gListfile.insert( gListfile.end(), temp.begin(), temp.end() );
+    std::vector<std::string> temp;
+    boost::algorithm::split( temp, list, boost::algorithm::is_any_of( "\n" ) );
+    gListfile.insert( gListfile.end(), temp.begin(), temp.end() );
 
     delete[] readbuffer;
   }
@@ -250,20 +250,20 @@ void MPQFile::save(const char* filename)  //save to MPQ
   //! \todo Create MPQ nicer, if not existing.
   //! \todo Use a pointer to the archive instead of searching it by filename.
   //! \todo Format this code properly.
-	HANDLE mpq_a;
-	if(modmpqpath=="")//create new user's mods MPQ
-	{
-		std::string newmodmpq=Project::getInstance()->getPath().append("Data\\patch-9.MPQ");
-		SFileCreateArchive(newmodmpq.c_str(),MPQ_CREATE_ARCHIVE_V2 | MPQ_CREATE_ATTRIBUTES,0x40,&mpq_a);
+  HANDLE mpq_a;
+  if(modmpqpath=="")//create new user's mods MPQ
+  {
+    std::string newmodmpq=Project::getInstance()->getPath().append("Data\\patch-9.MPQ");
+    SFileCreateArchive(newmodmpq.c_str(),MPQ_CREATE_ARCHIVE_V2 | MPQ_CREATE_ATTRIBUTES,0x40,&mpq_a);
     //! \note Is locale setting needed? LOCALE_NEUTRAL is windows only.
-		SFileSetFileLocale(mpq_a,0); // 0 = LOCALE_NEUTRAL.
-		SFileAddFileEx(mpq_a,"shaders\\terrain1.fs","myworld",MPQ_FILE_COMPRESS,MPQ_COMPRESSION_ZLIB);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld"
-		SFileCompactArchive(mpq_a);
-		SFileCloseArchive(mpq_a);
-		modmpqpath=newmodmpq;
-	}
-	else
-	  MPQArchive::unloadMPQ( modmpqpath );
+    SFileSetFileLocale(mpq_a,0); // 0 = LOCALE_NEUTRAL.
+    SFileAddFileEx(mpq_a,"shaders\\terrain1.fs","myworld",MPQ_FILE_COMPRESS,MPQ_COMPRESSION_ZLIB);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld"
+    SFileCompactArchive(mpq_a);
+    SFileCloseArchive(mpq_a);
+    modmpqpath=newmodmpq;
+  }
+  else
+    MPQArchive::unloadMPQ( modmpqpath );
 
   SFileOpenArchive(modmpqpath.c_str(), 0, 0, &mpq_a );
   SFileSetLocale(0);

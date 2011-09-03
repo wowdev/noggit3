@@ -257,7 +257,7 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
 
 void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool /*highlight*/) const
 {
-	if( gWorld && gWorld->drawfog )
+  if( gWorld && gWorld->drawfog )
     glEnable( GL_FOG );
   else
     glDisable( GL_FOG );
@@ -700,13 +700,13 @@ void WMOGroup::initDisplayList()
 
   // open group file
 
-	std::stringstream curNum;
-	curNum << "_" << std::setw(3) << std::setfill('0') << num;
+  std::stringstream curNum;
+  curNum << "_" << std::setw(3) << std::setfill('0') << num;
 
-	std::string fname = wmo->filename();
-	fname.insert( fname.find( ".wmo" ), curNum.str() );
+  std::string fname = wmo->filename();
+  fname.insert( fname.find( ".wmo" ), curNum.str() );
 
-	MPQFile gf(fname);
+  MPQFile gf(fname);
   if (gf.isEof()) {
     LogError << "Error loading WMO \"" << fname << "\"." << std::endl;
     return;

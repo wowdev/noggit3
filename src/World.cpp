@@ -1189,16 +1189,16 @@ void World::draw()
 
   if(this->drawwater)
   {
-	  for( int j = 0; j < 64; ++j )
-	  {
-		  for( int i = 0; i < 64; ++i )
-		  {
-			  if( tileLoaded( j, i ) )
-			  {
-				  mTiles[j][i].tile->drawWater();
-			  }
-		  }
-	  }
+    for( int j = 0; j < 64; ++j )
+    {
+      for( int i = 0; i < 64; ++i )
+      {
+        if( tileLoaded( j, i ) )
+        {
+          mTiles[j][i].tile->drawWater();
+        }
+      }
+    }
   }
 
 
@@ -1854,9 +1854,9 @@ void World::saveMap()
       glPopMatrix();
       glReadPixels(video.xres()/2-128,video.yres()/2-128,256,256,GL_RGB,GL_UNSIGNED_BYTE,image);
       video.flip();
-	  std::stringstream ss;
-	  ss << basename.c_str() << "_map_" << x << "_" << y << ".raw";
-	  fid=fopen(ss.str().c_str(),"wb");
+    std::stringstream ss;
+    ss << basename.c_str() << "_map_" << x << "_" << y << ".raw";
+    fid=fopen(ss.str().c_str(),"wb");
       fwrite(image,256*3,256,fid);
       fclose(fid);
     }
@@ -2106,13 +2106,13 @@ void World::setBaseTexture( int x, int z )
 
 void World::saveWDT()
 {
-	 // int lCurrentPosition = 0;
-	  //sExtendableArray lWDTFile = sExtendableArray();
-	 // lWDTFile.Extend( 8 + 0x4 );
-	 // SetChunkHeader( lWDTFile, lCurrentPosition, 'MPHD', 4 );
+   // int lCurrentPosition = 0;
+    //sExtendableArray lWDTFile = sExtendableArray();
+   // lWDTFile.Extend( 8 + 0x4 );
+   // SetChunkHeader( lWDTFile, lCurrentPosition, 'MPHD', 4 );
 
-	 // MPQFile f( "test.WDT" );
-	 // f.setBuffer( lWDTFile.GetPointer<uint8_t>(), lWDTFile.mSize );
-	 // f.SaveFile();
-	 // f.close();
+   // MPQFile f( "test.WDT" );
+   // f.setBuffer( lWDTFile.GetPointer<uint8_t>(), lWDTFile.mSize );
+   // f.SaveFile();
+   // f.close();
 }
