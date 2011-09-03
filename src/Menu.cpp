@@ -150,9 +150,7 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
 
 void Menu::tick( float t, float /*dt*/ )
 {
-  //Steff: Why do this not work. If i use the given tick time to set globalTime the menu models are not animated?
-  //globalTime = t;
-  globalTime++;
+  globalTime = t * 1000.0f;
 
   if( mBackgroundModel )
   {
