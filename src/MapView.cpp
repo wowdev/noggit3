@@ -1443,32 +1443,19 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_KP9 )
       keyr = -1;
 
-
-    // This was Bekets function to replace chunk textures. Redo.
-    if (e->keysym.sym == SDLK_z && gWorld->IsSelection( eEntry_MapChunk) )
-    {
-      //setChunk(Selection->data.mapchunk);
-    }
-
     // delete object
     if( e->keysym.sym == SDLK_DELETE )
       DeleteSelectedObject( 0, 0 );
 
-    // open chunk settings window or copy & paste
-    if( e->keysym.sym == SDLK_c)
-    {
-      if( Environment::getInstance()->CtrlDown )
-        CopySelectedObject( 0, 0 );
-      /*else if( gWorld->IsSelection( eEntry_MapChunk ) )
-      {
-        UITexturingGUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
-        MapChunkWindow->show();
-      }*/
-    }
+    // copy model to clipboard
+    if( e->keysym.sym == SDLK_c && Environment::getInstance()->CtrlDown )
+      CopySelectedObject( 0, 0 );
+
+    // paste model
     if( e->keysym.sym == SDLK_v && Environment::getInstance()->CtrlDown )
       PasteSelectedObject( 0, 0 );
 
-    // with shift toggle detail window
+    // with ctrl toggle detail window
     // without toggle the settings of the current edit mode.
     if( e->keysym.sym == SDLK_x )
     {
@@ -1487,7 +1474,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
       }
     }
 
-    // invert mouse
+    // invert mouse or swap paint modes
     if( e->keysym.sym == SDLK_i )
     {
       if( Environment::getInstance()->CtrlDown  )
@@ -1502,7 +1489,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
       }
 
     }
-    // move speed or raw saving (?)
+    // move speed doubling or raw saving
     if( e->keysym.sym == SDLK_p )
       if( Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown )
         Saving = true;
@@ -1758,14 +1745,43 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
         // Set the right icon in toolbar
         mainGui->guiToolbar->IconSelect( terrainMode );
       }
-
     }
 
-        // doodads set
+    // doodads set
     //! \todo  Does anyone use these?
     //! Yes to change the doodadset of houses i use it . Steff :)
-    if( e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9 && gWorld->IsSelection( eEntry_WMO ) )
-      gWorld->GetCurrentSelection()->data.wmo->doodadset = e->keysym.sym - SDLK_0;
+    if( e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9 )
+    {
+      if( gWorld->IsSelection( eEntry_WMO ) )
+      {
+        gWorld->GetCurrentSelection()->data.wmo->doodadset = e->keysym.sym - SDLK_0;
+      }
+      else if( Environment::getInstance()->ShiftDown )
+      {
+        switch( e->keysym.sym )
+        {
+          case SDLK_1:
+            movespd = 15.0f;
+            break;
+
+          case SDLK_2:
+            movespd = 50.0f;
+            break;
+
+          case SDLK_3:
+            movespd = 300.0f;
+            break;
+
+          case SDLK_4:
+            movespd = 1000.0f;
+            break;
+        }
+      }
+      else if( e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_6 )
+      {
+        terrainMode = e->keysym.sym - SDLK_1;
+      }
+    }
 
     // add a new bookmark
     if( e->keysym.sym == SDLK_F5 )
