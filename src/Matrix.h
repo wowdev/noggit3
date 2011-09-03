@@ -112,7 +112,7 @@ public:
     Matrix rot;
     float cosV,sinV;
 
-    //Rotate around the Y axis by B-90 
+    //Rotate around the Y axis by B-90
     rot.unit();
     cosV=cosf((r.y-90.0f)*PI/180.0f);
     sinV=sinf((r.y-90.0f)*PI/180.0f);
@@ -122,8 +122,8 @@ public:
     rot.m[2][0]=-sinV;
     rot.m[2][2]=cosV;
     this->operator*=(rot);
-    
-    //Rotate around the Z axis by -A 
+
+    //Rotate around the Z axis by -A
     rot.unit();
     cosV=cosf(-r.x*PI/180.0f);
     sinV=sinf(-r.x*PI/180.0f);
@@ -179,7 +179,7 @@ public:
     const float pm10 = p.m[1][0], pm11 = p.m[1][1], pm12 = p.m[1][2], pm13 = p.m[1][3];
     const float pm20 = p.m[2][0], pm21 = p.m[2][1], pm22 = p.m[2][2], pm23 = p.m[2][3];
     const float pm30 = p.m[3][0], pm31 = p.m[3][1], pm32 = p.m[3][2], pm33 = p.m[3][3];
-    
+
     o.m[0][0] = m00 * pm00 + m01 * pm10 + m02 * pm20 + m03 * pm30;
     o.m[0][1] = m00 * pm01 + m01 * pm11 + m02 * pm21 + m03 * pm31;
     o.m[0][2] = m00 * pm02 + m01 * pm12 + m02 * pm22 + m03 * pm32;
@@ -226,7 +226,7 @@ public:
     return s[0][0] * SUB(1,2) - s[0][1] * SUB(0,2) + s[0][2] * SUB(0,1);
     #undef SUB
   }
-  
+
   inline const Matrix adjoint() const
   {
     Matrix a;
@@ -237,7 +237,7 @@ public:
     }
     return a;
   }
-  
+
   inline void invert()
   {
     Matrix adj = this->adjoint();

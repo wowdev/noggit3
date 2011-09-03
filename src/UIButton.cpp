@@ -87,7 +87,7 @@ void UIButton::render() const
   glTranslatef( x(), y(), 0.0f );
 
   glColor3f( 1.0f, 1.0f, 1.0f );
-  
+
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
 
@@ -95,7 +95,7 @@ void UIButton::render() const
     texture->bind();
   else
     textureDown->bind();
-  
+
   glBegin( GL_TRIANGLE_STRIP );
     glTexCoord2f( 0.0f, 0.0f );
     glVertex2f( 0.0f, 0.0f );
@@ -106,9 +106,9 @@ void UIButton::render() const
     glTexCoord2f( 1.0f, 1.0f );
     glVertex2f( width(), height() );
   glEnd();
-  
+
   OpenGL::Texture::disableTexture();
-  
+
   text->render();
 
   glPopMatrix();

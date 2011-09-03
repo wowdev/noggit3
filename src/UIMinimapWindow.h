@@ -14,7 +14,7 @@ private:
   float lookAt;
   Menu* mMenuLink;
   World* map;
-  
+
 public:
   explicit UIMinimapWindow( Menu* menuLink );
   explicit UIMinimapWindow( World* setMap );

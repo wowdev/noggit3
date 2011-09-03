@@ -27,11 +27,11 @@ private:
   std::string SubZoneName;
   UIButton* backZone;
   UIText* ZoneIDPath;
-  
+
   void buildAreaList();
   void expandList();
   void collapseList();
-  
+
 public:
   UIZoneIDBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *setGui);
   void setMapID(int id);

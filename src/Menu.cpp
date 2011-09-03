@@ -1,7 +1,7 @@
 #include "Menu.h"
 
-#include <cstdlib> 
-#include <ctime> 
+#include <cstdlib>
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <list>
@@ -66,7 +66,7 @@ Menu::Menu()
   //! \todo Use? Yes - later i will show here the adt cords where you enter and some otehr infos
   mGUIStatusbar = new UIStatusBar( 0.0f, video.yres() - 30.0f, video.xres(), 30.0f );
   mGUIFrame->addChild( mGUIStatusbar );
-  
+
   createMapList();
   createBookmarkList();
   buildMenuBar();
@@ -83,7 +83,7 @@ const std::string uiModels[] = { "Deathknight", "Draenei", "Dwarf",  "MainMenu",
 std::string buildModelPath( size_t index )
 {
   assert( index < sizeof( uiModels ) / sizeof( const std::string ) );
-  
+
   return "Interface\\Glues\\Models\\UI_" + uiModels[index] + "\\UI_" + uiModels[index] + ".m2";
 }
 
@@ -91,10 +91,10 @@ Menu::~Menu()
 {
   delete mGUIFrame;
   mGUIFrame = NULL;
-  
+
   delete gWorld;
   gWorld = NULL;
-  
+
   if( mBackgroundModel )
   {
     ModelManager::delbyname( buildModelPath( mLastBackgroundId ) );
@@ -118,7 +118,7 @@ void Menu::randBackground()
   while( randnum == mLastBackgroundId );
 
   mLastBackgroundId = randnum;
-  
+
   mBackgroundModel = ModelManager::add( buildModelPath( randnum ) );
   mBackgroundModel->mPerInstanceAnimation = true;
 }
@@ -128,19 +128,19 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
 {
   video.farclip( Settings::getInstance()->FarZ );
   Vec2D tile( pos.x / TILESIZE, pos.y / TILESIZE );
-  
+
   gWorld->autoheight = autoHeight;
-  
+
   gWorld->camera = Vec3D( pos.x, pos.y, pos.z );
   gWorld->lookat = Vec3D( pos.x, pos.y, pos.z - 1.0f );
-  
+
   gWorld->initDisplay();
   gWorld->enterTile( tile.x, tile.y );
-  
+
   gStates.push_back( new MapView( ah, av ) ); // on gPop, MapView is deleted.
-  
+
   mGUIMinimapWindow->hide();
-  
+
   if( mBackgroundModel )
   {
     ModelManager::delbyname( buildModelPath( mLastBackgroundId ) );
@@ -153,7 +153,7 @@ void Menu::tick( float t, float /*dt*/ )
   //Steff: Why do this not work. If i use the given tick time to set globalTime the menu models are not animated?
   //globalTime = t;
   globalTime++;
-  
+
   if( mBackgroundModel )
   {
     mBackgroundModel->updateEmitters( t );
@@ -168,16 +168,16 @@ void Menu::display( float /*t*/, float /*dt*/ )
 {
   // 3D: Background.
   video.clearScreen();
-  
+
   video.set3D();
-  
+
   glDisable( GL_FOG );
-  
+
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-  
+
   Vec4D la( 0.1f, 0.1f, 0.1f, 1.0f );
   glLightModelfv( GL_LIGHT_MODEL_AMBIENT, la );
-  
+
   glEnable( GL_COLOR_MATERIAL );
   glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -188,33 +188,33 @@ void Menu::display( float /*t*/, float /*dt*/ )
     glLightf( light, GL_QUADRATIC_ATTENUATION, 0.03f );
     glDisable( light );
   }
-  
+
   glEnable( GL_CULL_FACE );
   glEnable( GL_DEPTH_TEST );
   glDepthFunc( GL_LEQUAL );
   glEnable( GL_LIGHTING );
   glEnable( GL_TEXTURE_2D );
-  
+
   mBackgroundModel->cam.setup( globalTime );
   mBackgroundModel->draw();
-  
+
   glDisable( GL_TEXTURE_2D );
   glDisable( GL_LIGHTING );
   glDisable( GL_DEPTH_TEST );
   glDisable( GL_CULL_FACE );
-  
+
   // 2D: UI.
-  
+
   video.set2D();
   glEnable( GL_BLEND );
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-      
+
   mGUIFrame->render();
 }
 
 void Menu::keypressed( SDL_KeyboardEvent* e )
 {
-  if( e->type == SDL_KEYDOWN && e->keysym.sym == SDLK_ESCAPE ) 
+  if( e->type == SDL_KEYDOWN && e->keysym.sym == SDLK_ESCAPE )
   {
     if( gWorld )
     {
@@ -234,12 +234,12 @@ UIFrame::Ptr LastClickedMenu = NULL;
 void Menu::mouseclick( SDL_MouseButtonEvent* e )
 {
   mGUICreditsWindow->hide();
-  
+
   if( e->button != SDL_BUTTON_LEFT )
   {
     return;
   }
-  
+
   if( e->type == SDL_MOUSEBUTTONDOWN )
   {
     LastClickedMenu = mGUIFrame->processLeftClick( e->x, e->y );
@@ -267,7 +267,7 @@ void Menu::loadMap( int mapID )
 {
   delete gWorld;
   gWorld = NULL;
-  
+
   for( DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it )
   {
     if( it->getInt( MapDB::MapID ) == mapID )
@@ -277,7 +277,7 @@ void Menu::loadMap( int mapID )
       return;
     }
   }
-  
+
   LogError << "Map with ID " << mapID << " not found. Failed loading." << std::endl;
 }
 
@@ -296,14 +296,14 @@ void Menu::buildMenuBar()
     delete mGUImenuBar;
     mGUImenuBar = NULL;
   }
-  
+
   mGUImenuBar = new UIMenuBar();
   mGUImenuBar->AddMenu( "File" );
   mGUImenuBar->GetMenu( "File" )->AddMenuItemSwitch( "exit ESC", &gPop, true );
   mGUIFrame->addChild( mGUImenuBar );
-  
+
   static const char* typeToName[3] = { "Continent", "Dungeons", "Raid" };
-  
+
   mGUImenuBar->AddMenu( typeToName[0] );
   mGUImenuBar->AddMenu( typeToName[1] );
   mGUImenuBar->AddMenu( typeToName[2] );
@@ -312,22 +312,22 @@ void Menu::buildMenuBar()
   {
 	  mGUImenuBar->GetMenu( typeToName[it->areaType] )->AddMenuItemButton( it->name, &showMap, it->mapID );
   }
-  
+
   static const size_t nBookmarksPerMenu = 20;
   const size_t nBookmarkMenus = ( mBookmarks.size() / nBookmarksPerMenu ) + 1;
-  
+
   if( mBookmarks.size() )
   {
     mGUImenuBar->AddMenu( "Bookmarks" );
   }
-  
+
   for( size_t i = 1; i < nBookmarkMenus; ++i )
   {
     std::stringstream name;
     name << "Bookmarks (" << ( i + 1 ) << ")";
     mGUImenuBar->AddMenu( name.str() );
   }
-  
+
   int n = -1;
   for( std::vector<BookmarkEntry>::const_iterator it = mBookmarks.begin(); it != mBookmarks.end(); ++it )
   {
@@ -348,7 +348,7 @@ void Menu::buildMenuBar()
 
 void Menu::createMapList()
 {
-  for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i ) 
+  for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
   {
     MapEntry e;
     e.mapID = i->getInt( MapDB::MapID );
@@ -364,19 +364,19 @@ void Menu::createMapList()
 void Menu::createBookmarkList()
 {
   mBookmarks.clear();
-  
+
   std::ifstream f( "bookmarks.txt" );
   if( !f.is_open() )
   {
     LogDebug << "No bookmarks file." << std::endl;
     return;
   }
-  
+
   std::string basename;
   int areaID;
   BookmarkEntry b;
   int mapID = -1;
-  while ( f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.ah >> b.av >> areaID ) 
+  while ( f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.ah >> b.av >> areaID )
   {
     if( mapID == -1 )
       continue;

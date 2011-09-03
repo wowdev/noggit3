@@ -11,10 +11,10 @@ class ModelManager
 public:
   static void delbyname( std::string name );
   static Model* add(std::string name);
-  
+
   static void resetAnim();
   static void updateEmitters(float dt);
-  
+
   static void report();
 
 private:

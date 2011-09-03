@@ -12,23 +12,23 @@ class Vec3D;
 class Liquid;
 class MapChunk;
 
-class MapTile 
+class MapTile
 {
 public:
   MapTile( int x0, int z0, const std::string& pFilename, bool pBigAlpha );
   ~MapTile();
-  
+
   //! \brief Get the maximum height of terrain on this map tile.
   float getMaxHeight();
-  
+
   //! \brief Get chunk for sub offset x,z.
   MapChunk* getChunk( unsigned int x, unsigned int z );
-  
+
   int modelCount;
   int mPositionX;
   int mPositionZ;
   float xbase, zbase;
-  
+
   bool changed;
 
   void draw();
@@ -37,13 +37,13 @@ public:
   void drawWater();
   void drawTextures();
   void drawMFBO();
-  
+
   bool GetVertex( float x, float z, Vec3D *V );
-  
+
   void saveTile();
-  
+
   bool isTile( int pX, int pZ );
-  
+
 private:
   // MFBO:
   GLfloat mMinimumValues[3*3*3];
@@ -62,7 +62,7 @@ private:
 
   MapChunk * mChunks[16][16];
   std::vector<Liquid*> mLiquids;
-  
+
   friend class MapChunk;
 };
 
@@ -93,7 +93,7 @@ const int stripsize2 = 16*18 + 7*2 + 8*2;
 template <class V>
 void stripify2(V *in, V *out)
 {
-  for (int row=0; row<8; row++) { 
+  for (int row=0; row<8; row++) {
     V *thisrow = &in[indexMapBuf(0,row*2)];
     V *nextrow = &in[indexMapBuf(0,row*2+1)];
     V *overrow = &in[indexMapBuf(0,(row+1)*2)];

@@ -17,10 +17,10 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth )
   glEnable( GL_LINE_SMOOTH );
   glLineWidth( pLineWidth );
   glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-  
+
   glColor4fv( pColor );
-  
-  glBegin( GL_LINE_STRIP );  
+
+  glBegin( GL_LINE_STRIP );
   glVertex3f( pMin.x, pMax.y, pMin.z );
   glVertex3f( pMin.x, pMin.y, pMin.z );
   glVertex3f( pMax.x, pMin.y, pMin.z );
@@ -57,7 +57,7 @@ ModelInstance::ModelInstance(Model *m) : model (m)
 ModelInstance::ModelInstance(Model *m, MPQFile* f) : model (m)
 {
   float ff[3];
-  
+
   f->read(&d1, 4);
   f->read(ff,12);
   pos = Vec3D(ff[0],ff[1],ff[2]);
@@ -103,12 +103,12 @@ void ModelInstance::draw()
 {
 /*  float dist = ( pos - gWorld->camera ).length() - model->rad;
 
-  if( dist > 2.0f * gWorld->modeldrawdistance ) 
+  if( dist > 2.0f * gWorld->modeldrawdistance )
     return;
-  if( CheckUniques( d1 ) ) 
+  if( CheckUniques( d1 ) )
     return;*/
 
-  if( !gWorld->frustum.intersectsSphere( pos, model->rad * sc ) ) 
+  if( !gWorld->frustum.intersectsSphere( pos, model->rad * sc ) )
     return;
 
   glPushMatrix();
@@ -123,7 +123,7 @@ void ModelInstance::draw()
 
   if( gWorld->IsSelection( eEntry_Model ) && gWorld->GetCurrentSelection()->data.model->d1 == d1 )
   {
-    if( gWorld && gWorld->drawfog ) 
+    if( gWorld && gWorld->drawfog )
       glDisable( GL_FOG );
 
     glDisable( GL_LIGHTING );
@@ -135,7 +135,7 @@ void ModelInstance::draw()
     glDisable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    
+
     DrawABox( TransformCoordsForModel( model->header.VertexBoxMin ), TransformCoordsForModel( model->header.VertexBoxMax ), Vec4D( 1.0f, 1.0f, 1.0f, 1.0f ), 1.0f );
     DrawABox( TransformCoordsForModel( model->header.BoundingBoxMin ), TransformCoordsForModel( model->header.BoundingBoxMax ), Vec4D( 1.0f, 1.0f, 0.0f, 1.0f ), 1.0f );
 
@@ -161,10 +161,10 @@ void ModelInstance::draw()
     glDisable( GL_TEXTURE_2D );
     glActiveTexture( GL_TEXTURE0 );
     glEnable( GL_TEXTURE_2D );
-    
+
     glEnable( GL_LIGHTING );
 
-    if( gWorld && gWorld->drawfog ) 
+    if( gWorld && gWorld->drawfog )
       glEnable( GL_FOG );
   }
 
@@ -174,9 +174,9 @@ void ModelInstance::draw()
 //! \todo  Get this drawn on the 2D view.
 /*void ModelInstance::drawMapTile()
 {
-  if(CheckUniques(d1)) 
+  if(CheckUniques(d1))
     return;
-    
+
   glPushMatrix();
 
   glTranslatef(pos.x/CHUNKSIZE, pos.z/CHUNKSIZE, pos.y);
@@ -196,12 +196,12 @@ void ModelInstance::drawSelect()
 {
   /*float dist = ( pos - gWorld->camera ).length() - model->rad;
 
-  if( dist > 2.0f * gWorld->modeldrawdistance ) 
+  if( dist > 2.0f * gWorld->modeldrawdistance )
     return;
-  if( CheckUniques( d1 ) ) 
+  if( CheckUniques( d1 ) )
     return;*/
 
-  if( !gWorld->frustum.intersectsSphere( pos, model->rad * sc ) ) 
+  if( !gWorld->frustum.intersectsSphere( pos, model->rad * sc ) )
     return;
 
   glPushMatrix();

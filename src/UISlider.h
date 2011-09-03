@@ -16,7 +16,7 @@ protected:
   float offset;
   void (*func)(float value);
   std::string text;
-  
+
 public:
   float value;
   void setFunc( void ( *f )( float value ) );
@@ -26,6 +26,6 @@ public:
   ~UISlider();
   UIFrame* processLeftClick( float mx, float my );
   bool processLeftDrag( float mx, float my, float xChange, float yChange );
-  void render() const;  
+  void render() const;
 };
 #endif

@@ -20,11 +20,11 @@ void TextureManager::report()
 void TextureManager::delbyname( std::string name )
 {
   std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-  
+
   if( items.find( name ) != items.end() )
   {
     items[name]->removeReference();
-    
+
     if( items[name]->hasNoReferences() )
     {
       delete items[name];
@@ -36,15 +36,15 @@ void TextureManager::delbyname( std::string name )
 OpenGL::Texture* TextureManager::newTexture( std::string name )
 {
   std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-  
+
   if( items.find( name ) == items.end() )
   {
     items[name] = new OpenGL::Texture( );
     items[name]->loadFromBLP( name );
   }
-  
+
   items[name]->addReference();
-  
+
   return items[name];
 }
 

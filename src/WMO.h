@@ -61,7 +61,7 @@ struct WMOMaterial {
   int32_t flags;
   int32_t specular;
   int32_t transparent; // Blending: 0 for opaque, 1 for transparent
-  int32_t nameStart; // Start position for the first texture filename in the MOTX data block  
+  int32_t nameStart; // Start position for the first texture filename in the MOTX data block
   uint32_t col1; // color
   int32_t d3; // flag
   int32_t nameEnd; // Start position for the second texture filename in the MOTX data block
@@ -130,7 +130,7 @@ class WMO : public ManagedItem
 {
 public:
   bool draw_group_boundingboxes;
-  
+
   const std::string& filename() const;
 
   //std::string WMOName;
@@ -167,7 +167,7 @@ class WMOManager
 public:
   static void delbyname( std::string name );
   static WMO* add(std::string name);
-  
+
   static void report();
 
 private:

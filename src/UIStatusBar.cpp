@@ -32,16 +32,16 @@ void UIStatusBar::render() const
   UIFrame::renderChildren();
 
   glColor3f( 0.7f, 0.7f, 0.7f );
-  
+
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
-  
+
   texture->bind();
 
   //Draw Top Side
-  glBegin( GL_TRIANGLE_STRIP );  
+  glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.375f, 1.0f );
-  glVertex2f( 0.0f, 13.0f );  
+  glVertex2f( 0.0f, 13.0f );
   glTexCoord2f( 0.375f, 0.0f );
   glVertex2f( width(), 13.0f );
   glTexCoord2f( 0.25f, 1.0f );
@@ -49,9 +49,9 @@ void UIStatusBar::render() const
   glTexCoord2f( 0.25f, 0.0f );
   glVertex2f( width(), -3.0f );
   glEnd();
-  
+
   OpenGL::Texture::disableTexture();
-  
+
   glPopMatrix();
 }
 

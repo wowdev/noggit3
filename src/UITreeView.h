@@ -29,7 +29,7 @@ private:
   UIText * mMyText;
   const std::string& _directoryName;
 
-  void (*mSelectFunction)( const std::string& );  
+  void (*mSelectFunction)( const std::string& );
 
   bool mExpanded;
 
@@ -51,7 +51,7 @@ public:
   void Move( int pEntries, UITreeView::Ptr pFrom );
 
   void render() const;
-  
+
   UIFrame * processLeftClick( float mx,float my );
 };
 

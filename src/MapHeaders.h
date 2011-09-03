@@ -50,10 +50,10 @@ struct MHDR
  /*024h*/  uint32_t mfbo;  // tbc, wotlk; only when flags&1
  /*028h*/  uint32_t mh2o;  // wotlk
  /*02Ch*/  uint32_t mtfx;  // wotlk
- /*030h*/  uint32_t pad4;    
- /*034h*/  uint32_t pad5;    
- /*038h*/  uint32_t pad6;    
- /*03Ch*/  uint32_t pad7;  
+ /*030h*/  uint32_t pad4;
+ /*034h*/  uint32_t pad5;
+ /*038h*/  uint32_t pad6;
+ /*03Ch*/  uint32_t pad7;
  /*040h*/
 };
 
@@ -73,7 +73,7 @@ struct MCIN
 struct ENTRY_MDDF
 {
   uint32_t  nameID;
-  uint32_t  uniqueID;  
+  uint32_t  uniqueID;
   float  pos[3];
   float  rot[3];
   //uint16_t  flags;
@@ -84,7 +84,7 @@ struct ENTRY_MDDF
 struct ENTRY_MODF
 {
   uint32_t  nameID;
-  uint32_t  uniqueID;  
+  uint32_t  uniqueID;
   float  pos[3];
   float  rot[3];
   float  extents[2][3];
@@ -209,7 +209,7 @@ struct MH2O_HeightMask{
 struct MH2O_Render{
   bool mRender[64];
   MH2O_Render(){
-    
+
   }
   //! Todo: this most likely is wrong!
   explicit MH2O_Render(uint64_t Mask){

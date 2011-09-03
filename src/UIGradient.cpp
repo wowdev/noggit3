@@ -8,21 +8,21 @@ void UIGradient::render() const
   {
     return;
   }
-    
+
   glPushMatrix();
   glTranslatef( x(), y(), 0.0f );
-  
+
   if(horiz)
   {
     glBegin( GL_TRIANGLE_STRIP );
     glColor4fv( &MinColor.x );
-    glVertex2f( 0.0f, 0.0f );    
+    glVertex2f( 0.0f, 0.0f );
     glVertex2f( 0.0f, height() );
     glColor4fv( &MaxColor.x );
     glVertex2f( width(), 0.0f );
     glVertex2f( width(), height() );
     glEnd();
-    
+
     if( clickable() )
     {
       glColor4fv( &ClickColor.x );
@@ -52,7 +52,7 @@ void UIGradient::render() const
       glEnd();
     }
   }
-  
+
   glPopMatrix();
 }
 
@@ -86,13 +86,13 @@ UIFrame::Ptr UIGradient::processLeftClick( float mx, float my )
       value = mx / width();
     else
       value = my / height();
-    
+
     value = std::min( std::max( value, 0.0f ), 1.0f );
-    
+
     clickFunc( value );
     return this;
   }
-  
+
   return NULL;
 }
 
@@ -100,12 +100,12 @@ bool UIGradient::processLeftDrag( float mx, float my, float xDrag, float yDrag )
 {
   float tx( 0.0f );
   float ty( 0.0f );
-  
+
   parent()->getOffset( &tx, &ty );
-  
+
   mx -= tx;
   my -= ty;
-  
+
   if( processLeftClick( mx, my ) )
   {
     return true;

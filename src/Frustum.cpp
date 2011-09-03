@@ -16,18 +16,18 @@ void Plane::normalize()
 void Frustum::retrieve()
 {
   float mat[16];
-  
+
   glGetFloatv(GL_MODELVIEW_MATRIX, mat);
   glMatrixMode(GL_PROJECTION);
-  
+
   glPushMatrix();
-  
+
   glMultMatrixf(mat);
   glGetFloatv(GL_PROJECTION_MATRIX, mat);
-  
+
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
-  
+
   planes[RIGHT].a = mat[ 3] - mat[ 0];
   planes[RIGHT].b = mat[ 7] - mat[ 4];
   planes[RIGHT].c = mat[11] - mat[ 8];
@@ -88,7 +88,7 @@ bool Frustum::intersects(const Vec3D &v1, const Vec3D &v2) const
   points[6] = Vec3D(v2.x,v2.y,v1.z);
   points[7] = Vec3D(v2.x,v2.y,v2.z);
 
-  
+
    for (int i=0; i<6; ++i) {
     int numIn = 0;
 

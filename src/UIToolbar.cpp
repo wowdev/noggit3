@@ -40,7 +40,7 @@ UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
   SetIcon( 9, "Interface\\Icons\\Spell_Shaman_TidalWaves.blp" );
 
   IconSelect( 0 );
-  
+
   UIWindow* texture_border = new UIWindow( 5, 280, 95.0f, 95.0f );
   texture_border->addChild( current_texture );
   addChild( texture_border );
@@ -49,7 +49,7 @@ UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
 void UIToolbar::SetIcon( int pIcon, const std::string& pIconFile )
 {
   mToolbarIcons[pIcon] = new UIToolbarIcon( ( pIcon % 2 ) * 50.0f + 5.0f, ( pIcon / 2 ) * 50.0f + 30.0f, pIconFile, std::string( "Interface\\BUTTONS\\CheckButtonGlow.blp" ), pIcon, UIEventConstructorArgument(UIToolbarIcon, this, UIToolbar::IconSelect) );
-  addChild( mToolbarIcons[pIcon] );  
+  addChild( mToolbarIcons[pIcon] );
 }
 
 // MapView.cpp
@@ -62,7 +62,7 @@ void UIToolbar::IconSelect( int pIcon )
 
   const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "AreaID Paint", "Impassible Flag", "Not used", "Not used", "Not used", "Not used" };
   text->setText( Names[pIcon] );
-  
+
   terrainMode = pIcon;
 
   Environment::getInstance()->view_holelines = ( pIcon == 3 );
@@ -70,10 +70,10 @@ void UIToolbar::IconSelect( int pIcon )
   for( int j = 0; j < 10; j++ )
     if( mToolbarIcons[j] )
       mToolbarIcons[j]->selected = false;
-  
+
   if( !mToolbarIcons[pIcon] )
     return;
-  
+
   selectedIcon = pIcon;
   mToolbarIcons[pIcon]->selected = true;
 }

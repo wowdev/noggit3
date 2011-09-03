@@ -73,14 +73,14 @@ float brush::getValue( float dist )
   if( dist > radius )
     return 0.0f;
   if( dist < iradius )
-    return 1.0f;  
+    return 1.0f;
   return( 1.0f - ( dist - iradius ) / oradius );
 }
 OpenGL::Texture* brush::getTexture()
-{ 
-  return _texture; 
+{
+  return _texture;
 }
 bool brush::needUpdate()
-{ 
-  return update; 
+{
+  return update;
 }

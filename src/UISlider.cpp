@@ -1,5 +1,5 @@
 #ifdef _WIN32
-#define NOMINMAX 
+#define NOMINMAX
 #endif // win32
 
 #include "UISlider.h"
@@ -53,11 +53,11 @@ UIFrame *UISlider::processLeftClick( float mx, float /*my*/ )
   /*if((mx>(width*value-16))&&(mx<(width*value+16)))
         return this;
   return 0;*/
-  
+
   value = std::min( 1.0f, std::max( 0.0f, mx / width() ) );
   if( func )
     func( value * scale + offset );
-    
+
   return this;
 }
 
@@ -68,11 +68,11 @@ bool UISlider::processLeftDrag( float mx, float /*my*/, float /*xChange*/, float
   parent()->getOffset( &tx, &ty );
   mx -= tx;
   //my -= ty;
-  
+
   value = std::min( 1.0f, std::max( 0.0f, mx / width() ) );
   if( func )
     func( value * scale + offset );
-    
+
   return true;
 }
 
@@ -80,33 +80,33 @@ void UISlider::render() const
 {
   if( hidden() )
     return;
-  
+
   glPushMatrix();
   glTranslatef( x(), y(), 0.0f );
 
   glColor3f( 1.0f, 1.0f, 1.0f );
-  
+
   std::stringstream temp;
   temp << text << std::fixed << std::setprecision( 2 ) << ( value * scale + offset );
   const std::string tempStr = temp.str();
   arial12.shprint( width() / 2.0f - arial12.width( tempStr ) / 2.0f, -16.0f, tempStr );
-  
+
   glPushMatrix();
-  
+
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
-  
+
   texture->bind();
-  
+
   const float height_plus = height() + 4.0f;
   const float height_minus = height() - 4.0f;
   const float width_plus = width() + 1.0f;
   const float width_minus = width() - 7.0f;
-  
+
   //Draw Bottom left Corner First
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.75f, 1.0f );
-  glVertex2f( -1.0f, height_plus );  
+  glVertex2f( -1.0f, height_plus );
   glTexCoord2f( 0.875f, 1.0f );
   glVertex2f( 7.0f, height_plus );
   glTexCoord2f( 0.75f, 0.0f );
@@ -118,7 +118,7 @@ void UISlider::render() const
   //Draw Bottom Right Corner
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.875f, 1.0f );
-  glVertex2f( width_minus, height_plus );  
+  glVertex2f( width_minus, height_plus );
   glTexCoord2f( 1.0f, 1.0f );
   glVertex2f( width_plus, height_plus );
   glTexCoord2f( 0.875f, 0.0f );
@@ -130,7 +130,7 @@ void UISlider::render() const
   //Draw Top Left Corner
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.5f, 1.0f );
-  glVertex2f( -1.0f, 4.0f );  
+  glVertex2f( -1.0f, 4.0f );
   glTexCoord2f( 0.625f, 1.0f );
   glVertex2f( 7.0f, 4.0f );
   glTexCoord2f( 0.5f, 0.0f );
@@ -140,9 +140,9 @@ void UISlider::render() const
   glEnd();
 
   //Draw Top Right Corner
-  glBegin( GL_TRIANGLE_STRIP ); 
+  glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.625f, 1.0f );
-  glVertex2f( width_minus, 4.0f );  
+  glVertex2f( width_minus, 4.0f );
   glTexCoord2f( 0.75f, 1.0f );
   glVertex2f( width_plus, 4.0f );
   glTexCoord2f( 0.625f, 0.0f );
@@ -154,9 +154,9 @@ void UISlider::render() const
   if( height() > 8.0f )
   {
     //Draw Left Side
-    glBegin( GL_TRIANGLE_STRIP );  
+    glBegin( GL_TRIANGLE_STRIP );
     glTexCoord2f( 0.0f, 1.0f );
-    glVertex2f( -1.0f, height_minus );  
+    glVertex2f( -1.0f, height_minus );
     glTexCoord2f( 0.125f, 1.0f );
     glVertex2f( 7.0f, height_minus );
     glTexCoord2f( 0.0f, 0.0f );
@@ -166,9 +166,9 @@ void UISlider::render() const
     glEnd();
 
     //Draw Right Side
-    glBegin( GL_TRIANGLE_STRIP );  
+    glBegin( GL_TRIANGLE_STRIP );
     glTexCoord2f( 0.125f, 1.0f );
-    glVertex2f( width_minus, height_minus );  
+    glVertex2f( width_minus, height_minus );
     glTexCoord2f( 0.25f, 1.0f );
     glVertex2f( width_plus, height_minus );
     glTexCoord2f( 0.125f, 0.0f );
@@ -183,9 +183,9 @@ void UISlider::render() const
     //Draw Top Side
     glBegin( GL_TRIANGLE_STRIP );
     glTexCoord2f( 0.5f, 1.0f );
-    glVertex2f( 7.0f, height_plus );  
+    glVertex2f( 7.0f, height_plus );
     glTexCoord2f( 0.5f, 0.0f );
-    glVertex2f( width_minus, height_plus );  
+    glVertex2f( width_minus, height_plus );
     glTexCoord2f( 0.375f, 1.0f );
     glVertex2f( 7.0f, height_minus );
     glTexCoord2f( 0.375f, 0.0f );
@@ -195,7 +195,7 @@ void UISlider::render() const
     //Draw Bottom Side
     glBegin( GL_TRIANGLE_STRIP );
     glTexCoord2f( 0.375f, 1.0f );
-    glVertex2f( 7.0f, 4.0f );  
+    glVertex2f( 7.0f, 4.0f );
     glTexCoord2f( 0.375f, 0.0f );
     glVertex2f( width_minus, 4.0f );
     glTexCoord2f( 0.25f, 1.0f );
@@ -206,12 +206,12 @@ void UISlider::render() const
   }
 
   glPopMatrix();
-  
+
   sliderTexture->bind();
-  
+
   const float sliderpos_x = width() * value;
   const float sliderpos_y = height() / 2.0f;
-  
+
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.0f, 0.0f );
   glVertex2f( sliderpos_x - 16.0f, sliderpos_y - 16.0f );
@@ -222,7 +222,7 @@ void UISlider::render() const
   glTexCoord2f( 1.0f, 1.0f );
   glVertex2f( sliderpos_x + 16.0f, sliderpos_y + 16.0f );
   glEnd();
-  
+
   OpenGL::Texture::disableTexture();
 
 

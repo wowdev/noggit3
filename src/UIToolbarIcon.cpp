@@ -26,7 +26,7 @@ UIToolbarIcon::~UIToolbarIcon()
 UIFrame* UIToolbarIcon::processLeftClick( float /*mx*/, float /*my*/ )
 {
   UIEventEventHandlerCall(iconId);
-  
+
   return this;
 }
 
@@ -34,12 +34,12 @@ void UIToolbarIcon::render() const
 {
   glPushMatrix();
   glTranslatef( x(), y(), 0.0f );
-  
+
   glColor3f( 1.0f, 1.0f, 1.0f );
-  
+
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
-  
+
   texture->bind();
 
   glBegin( GL_TRIANGLE_STRIP );
@@ -54,13 +54,13 @@ void UIToolbarIcon::render() const
   glEnd();
 
   OpenGL::Texture::disableTexture();
-  
+
   if( selected )
   {
     static const float sizer = 18.0f;
-    
+
     OpenGL::Texture::enableTexture();
-    
+
     textureSelected->bind();
 
     glBegin( GL_TRIANGLE_STRIP );
@@ -73,7 +73,7 @@ void UIToolbarIcon::render() const
     glTexCoord2f( 1.0f, 1.0f );
     glVertex2f( width() + sizer, height() + sizer );
     glEnd();
-    
+
     OpenGL::Texture::disableTexture();
   }
 

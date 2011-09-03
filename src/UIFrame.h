@@ -10,12 +10,12 @@ class UIFrame
 public:
   typedef UIFrame* Ptr;
   typedef std::vector<UIFrame::Ptr> Children;
-  
+
 protected:
   UIFrame::Ptr _parent;
-  
+
   Children _children;
-  
+
   float _x;
   float _y;
   float _width;
@@ -24,7 +24,7 @@ protected:
   bool _movable;
   bool _hidden;
   bool _clickable;
-  
+
 #define getter(var, type) inline const type& var() const { return _ ## var; }
 #define setter(var, type) inline void var(const type& var) { _ ## var = var; }
 #define boolsetter(var, enabled, disabled, toggle) inline void enabled() { _ ## var = true; } \
@@ -35,30 +35,30 @@ protected:
 public:
   getter(width, float)
   setter(width, float)
-  
+
   getter(height, float)
   setter(height, float)
-  
+
   getter(x, float)
   setter(x, float)
-  
+
   getter(y, float)
   setter(y, float)
-  
+
   getter(children, Children)
   setter(children, Children)
-  
+
   getter(parent, UIFrame::Ptr)
   setter(parent, UIFrame::Ptr)
-  
+
   getter(movable, bool)
   setter(movable, bool)
-  
+
   getter(hidden, bool)
   setter(hidden, bool)
   boolsetter(hidden, hide, show, toggleVisibility)
   evilgetter(hidden, bool)
-  
+
   getter(clickable, bool)
   setter(clickable, bool)
 #undef getter
@@ -91,7 +91,7 @@ public:
   , _clickable( false )
   {
   }
-  
+
   virtual ~UIFrame()
   {
     for( Children::iterator it( _children.begin() ), end( _children.end() )
@@ -108,9 +108,9 @@ public:
 
   void addChild( UIFrame::Ptr );
   void removeChild( UIFrame::Ptr );
-  
+
   void renderChildren() const;
-  
+
   virtual void render() const;
   virtual UIFrame::Ptr processLeftClick( float mx, float my );
   virtual bool processLeftDrag( float mx, float my, float xChange, float yChange );

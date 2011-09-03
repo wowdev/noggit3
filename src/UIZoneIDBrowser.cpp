@@ -43,13 +43,13 @@ UIZoneIDBrowser::UIZoneIDBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *
   addChild(ZoneIDPath);
   addChild(backZone);
 }
- 
+
 void UIZoneIDBrowser::setMapID( int id )
 {
   mapID = id;
   zoneID = 0;
   subZoneID = 0;
-  for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i ) 
+  for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
   {
     if( i->getInt( MapDB::MapID ) == id)
       MapName = i->getString( MapDB::InternalName );
@@ -60,7 +60,7 @@ void UIZoneIDBrowser::setMapID( int id )
 
 void UIZoneIDBrowser::setZoneID( int id )
 {
-  for( DBCFile::Iterator i = gAreaDB.begin(); i != gAreaDB.end(); ++i ) 
+  for( DBCFile::Iterator i = gAreaDB.begin(); i != gAreaDB.end(); ++i )
   {
     if(i->getInt(AreaDB::AreaID) == id)
     {
@@ -118,7 +118,7 @@ void UIZoneIDBrowser::buildAreaList()
   ZoneIdList->clickable( true );
   addChild(ZoneIdList);
     //  Read out Area List.
-    for( DBCFile::Iterator i = gAreaDB.begin(); i != gAreaDB.end(); ++i ) 
+    for( DBCFile::Iterator i = gAreaDB.begin(); i != gAreaDB.end(); ++i )
     {
       if( i->getInt(AreaDB::Continent) == mapID )
       {
@@ -126,7 +126,7 @@ void UIZoneIDBrowser::buildAreaList()
         {
           if(i->getUInt( AreaDB::Region ) == 0)
           {
-            UIFrame *curFrame = new UIFrame(1,1,1,1); 
+            UIFrame *curFrame = new UIFrame(1,1,1,1);
             std::stringstream ss;
             ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
             UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
@@ -139,7 +139,7 @@ void UIZoneIDBrowser::buildAreaList()
         {
           if(i->getUInt( AreaDB::Region ) == zoneID)
           {
-            UIFrame *curFrame = new UIFrame(1,1,1,1); 
+            UIFrame *curFrame = new UIFrame(1,1,1,1);
             std::stringstream ss;
             ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
             UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );

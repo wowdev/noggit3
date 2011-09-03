@@ -10,7 +10,7 @@
 namespace OpenGL
 {
   std::stack<SettingsSaver::GLSettings> SettingsSaver::_savedSettings;
-  
+
   void SettingsSaver::save()
   {
     GLSettings settings;
@@ -41,7 +41,7 @@ namespace OpenGL
     assert( !_savedSettings.empty() );
     GLSettings settings = _savedSettings.top();
     _savedSettings.pop();
-    
+
 #define LOAD( NAME, VARNAME ) if( glIsEnabled( NAME ) != settings.VARNAME ) { if( settings.VARNAME == GL_TRUE ) { glEnable( NAME ); } else { glDisable( NAME ); } }
     LOAD( GL_ALPHA_TEST, alphaTesting );
     LOAD( GL_BLEND, blend );
@@ -129,7 +129,7 @@ void Video::resize( int xres_, int yres_ )
   _xres = xres_;
   _yres = yres_;
   _ratio = static_cast<float>( xres() ) / static_cast<float>( yres() );
-  
+
   LogDebug << "resize(" << xres() << ", " << yres() << ");" << std::endl;
 
   SDL_Rect rect = { 0, 0, xres(), yres() };
@@ -143,20 +143,20 @@ bool Video::init( int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_ )
   _xres = xres_;
   _yres = yres_;
   _ratio = static_cast<float>( xres() ) / static_cast<float>( yres() );
-  
+
   _fov = 45.0f;
   _nearclip = 1.0f;
   _farclip = Settings::getInstance()->FarZ;
-  
+
   _fullscreen = fullscreen_;
   _doAntiAliasing = doAntiAliasing_;
-  
+
   if( SDL_Init( SDL_INIT_TIMER | SDL_INIT_VIDEO ) )
   {
     LogError << "SDL: " << SDL_GetError() << std::endl;
     exit( 1 );
   }
-  
+
   int flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
   if( fullscreen() )
   {
@@ -176,10 +176,10 @@ bool Video::init( int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_ )
     //! \todo Make sample count configurable.
     SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 4 );
   }
-  
+
   _primary = SDL_SetVideoMode( _xres, _yres, 0, flags );
 
-  if( !_primary ) 
+  if( !_primary )
   {
     LogError << "SDL: " << SDL_GetError() << std::endl;
     exit( 1 );
@@ -204,7 +204,7 @@ bool Video::init( int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_ )
   LogDebug << "GL: Version: " << glGetString( GL_VERSION ) << std::endl;
   LogDebug << "GL: Vendor: " << glGetString( GL_VENDOR ) << std::endl;
   LogDebug << "GL: Renderer: " << glGetString( GL_RENDERER ) << std::endl;
-  
+
   return mSupportCompression;
 }
 
@@ -311,7 +311,7 @@ void CheckForGLError( const std::string& pLocation )
 #include <stdint.h>
 //! \todo Cross-platform syntax for packed structs.
 #pragma pack(push,1)
-struct BLPHeader 
+struct BLPHeader
 {
   int32_t magix;
   int32_t version;
@@ -352,7 +352,7 @@ namespace OpenGL
   {
     glCallList( list );
   }
-    
+
   Texture::Texture()
   : ManagedItem( )
   , _width( 0 )
@@ -362,23 +362,23 @@ namespace OpenGL
   {
     glGenTextures( 1, &_id );
   }
-  
+
   Texture::~Texture()
   {
     invalidate();
   }
-  
+
   void Texture::invalidate()
   {
     glDeleteTextures( 1, &_id );
     _id = 0;
   }
-  
+
   void Texture::bind() const
   {
     glBindTexture( GL_TEXTURE_2D, _id );
   }
-  
+
   void Texture::enableTexture()
   {
     glEnable( GL_TEXTURE_2D );
@@ -401,28 +401,28 @@ namespace OpenGL
   {
     glActiveTexture( GL_TEXTURE0 + num );
   }
-  
+
   void Texture::loadFromUncompressedData( BLPHeader* lHeader, char* lData )
   {
     unsigned int * pal = reinterpret_cast<unsigned int*>( lData + sizeof( BLPHeader ) );
-  
+
     unsigned char *buf;
     unsigned int *buf2 = new unsigned int[_width*_height];
     unsigned int *p;
     unsigned char *c, *a;
-  
+
     int alphabits = lHeader->attr_1_alphadepth;
     bool hasalpha = alphabits != 0;
-  
+
     for (int i=0; i<16; ++i)
     {
       _width = std::max( 1, _width );
       _height = std::max( 1, _height );
-      
+
       if (lHeader->offsets[i] && lHeader->sizes[i])
       {
         buf = reinterpret_cast<unsigned char*>( &lData[lHeader->offsets[i]] );
-  
+
         int cnt = 0;
         p = buf2;
         c = buf;
@@ -434,67 +434,67 @@ namespace OpenGL
             unsigned int k = pal[*c++];
             k = ( ( k & 0x00FF0000 ) >> 16 ) | ( ( k & 0x0000FF00 ) ) | ( ( k & 0x000000FF ) << 16 );
             int alpha = 0xFF;
-            if (hasalpha) 
+            if (hasalpha)
             {
-              if (alphabits == 8) 
+              if (alphabits == 8)
               {
                 alpha = (*a++);
-              } 
+              }
               else if (alphabits == 1)
               {
                 alpha = (*a & (1 << cnt++)) ? 0xff : 0;
-                if (cnt == 8) 
+                if (cnt == 8)
                 {
                   cnt = 0;
                   a++;
                 }
               }
             }
-  
+
             k |= alpha << 24;
             *p++ = k;
           }
         }
-  
+
         glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA8, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf2);
-  
+
       }
       else
       {
         return;
       }
-      
+
       _width >>= 1;
       _height >>= 1;
     }
-  
+
     delete[] buf2;
     delete[] buf;
   }
-  
+
   void Texture::loadFromCompressedData( BLPHeader* lHeader, char* lData )
   {
     //                         0 (0000) & 3 == 0                1 (0001) & 3 == 1                    7 (0111) & 3 == 3
     const int alphatypes[] = { GL_COMPRESSED_RGB_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT };
     const int blocksizes[] = { 8,                               16,                               0, 16 };
-    
+
     int lTempAlphatype = lHeader->attr_2_alphatype & 3;
     GLint format = alphatypes[lTempAlphatype];
     int blocksize = blocksizes[lTempAlphatype];
     format = format == GL_COMPRESSED_RGB_S3TC_DXT1_EXT ? ( lHeader->attr_1_alphadepth == 1 ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : GL_COMPRESSED_RGB_S3TC_DXT1_EXT ) : format;
 
     // do every mipmap level
-    for( int i = 0; i < 16; ++i ) 
+    for( int i = 0; i < 16; ++i )
     {
       _width = std::max( 1, _width );
       _height = std::max( 1, _height );
 
-      if( lHeader->offsets[i] && lHeader->sizes[i] ) 
+      if( lHeader->offsets[i] && lHeader->sizes[i] )
       {
         glCompressedTexImage2D( GL_TEXTURE_2D, i, format, _width, _height, 0, ( (_width + 3) / 4) * ( (_height + 3 ) / 4 ) * blocksize, reinterpret_cast<char*>( lData + lHeader->offsets[i] ) );
       }
       else
-      { 
+      {
         return;
       }
 
@@ -502,31 +502,31 @@ namespace OpenGL
       _height >>= 1;
     }
   }
-  
+
   const std::string& Texture::filename()
   {
     return _filename;
   }
-  
+
   void Texture::loadFromBLP( const std::string& filenameArg )
   {
     //! \todo Unload if there already is a model loaded?
     _filename = filenameArg;
-    
+
     bind();
-    
+
     MPQFile f( _filename );
-    if( f.isEof() ) 
+    if( f.isEof() )
     {
       invalidate();
       return;
     }
-  
+
     char* lData = f.getPointer();
     BLPHeader* lHeader = reinterpret_cast<BLPHeader*>( lData );
     _width = lHeader->resx;
     _height = lHeader->resy;
-  
+
     if( lHeader->attr_0_compression == 1 )
     {
       loadFromUncompressedData( lHeader, lData );
@@ -535,9 +535,9 @@ namespace OpenGL
     {
       loadFromCompressedData( lHeader, lData );
     }
-  
+
     f.close();
-  
+
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
   }

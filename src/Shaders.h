@@ -14,16 +14,16 @@ private:
   OpenGL::Shader mShader;
   bool mOkay;
   int mProgramType;
-  
-public: 
+
+public:
   explicit BLSShader( const std::string& pFilename );
-  
+
   void EnableShader()
   {
     if( IsOkay() )
       glBindProgramARB( mProgramType, mShader );
   }
-  
+
   bool IsOkay() { return mOkay; }
 };
 #endif

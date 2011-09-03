@@ -15,10 +15,10 @@ public:
 protected:
   OpenGL::Texture* texture;
   OpenGL::Texture* textureSelected;
-  
+
   std::string _textureFilename;
   std::string _textureSelectedFilename;
-  
+
   int iconId;
 
 public:
@@ -27,7 +27,7 @@ public:
 
   void render() const;
   UIFrame *processLeftClick(float mx,float my);
-  
+
   bool selected;
 };
 #endif

@@ -37,14 +37,14 @@ class MapTileEntry
 private:
   uint32_t flags;
   MapTile* tile;
-  
+
   MapTileEntry() : flags( 0 ), tile( NULL ) {}
-  
+
   friend class World;
 };
 
 //! \todo Split this. There should be a seperate class for WDTs.
-class World 
+class World
 {
   // Which tile are we over / entering?
   int cx;
@@ -54,47 +54,47 @@ class World
 
   // Holding all MapTiles there can be in a World.
   MapTileEntry mTiles[64][64];
-  
+
   // Information about the currently selected model / WMO / triangle.
   nameEntry* mCurrentSelection;
   int mCurrentSelectedTriangle;
   bool SelectionMode;
-  
+
   // Is the WDT telling us to use a different alphamap structure.
   bool mBigAlpha;
-  
+
   // Call lists for the low resolution heightmaps.
   OpenGL::CallList* lowrestiles[64][64];
 
   // Temporary variables for loading a WMO, if we have a global WMO.
   std::string mWmoFilename;
   ENTRY_MODF mWmoEntry;
-  
+
   // Vertex Buffer Objects for coordinates used for drawing.
   GLuint detailtexcoords;
   GLuint alphatexcoords;
 
   // Map ID of this World.
   unsigned int mMapId;
-  
+
   // The lighting used.
   OutdoorLighting *ol;
-  
+
   // Light attenuation related parameters.
   float l_const;
   float l_linear;
   float l_quadratic;
-  
+
 
   void initMinimap();
   void initLowresTerrain();
-  
+
   bool tileLoaded(int x, int z);
   MapTile *loadTile(int x, int z);
-  
+
   void outdoorLighting();
   void outdoorLighting2();
-  
+
 public:
   unsigned int getMapID();
   // Do we draw *? Should be moved somewhere else, these are not World related.
@@ -106,43 +106,43 @@ public:
   bool drawwater;
   bool drawwmo;
   bool lighting;
-  
+
   // Time of the day.
   float animtime;
   float time;
-  
+
   //! \brief Name of this map.
   std::string basename;
-  
+
   // Dynamic distances for rendering. Actually, these should be the same..
   float fogdistance;
   float culldistance;
-  
+
   bool autoheight;
-  
+
   float minX;
   float maxX;
   float minY;
   float maxY;
   float zoom;
-  
+
   Skies *skies;
   bool mHasAGlobalWMO;
   bool loading;
   bool noadt;
   bool hadSky;
-  
+
   //! \todo  Get these managed? ._.
   std::map<int, ModelInstance> mModelInstances;
   std::map<int, WMOInstance> mWMOInstances;
-  
+
   OutdoorLightStats outdoorLightStats;
-  
+
   GLuint minimap;
-  
+
   StripType *mapstrip;
   StripType *mapstrip2;
-  
+
   Vec3D camera;
   Vec3D lookat;
   Frustum frustum;
@@ -157,10 +157,10 @@ public:
   void saveChanged();
   void tick(float dt);
   void draw();
-  
+
   void outdoorLights(bool on);
   void setupFog();
-  
+
   //! \brief Get the area ID of the tile on which the camera currently is on.
   unsigned int getAreaID();
   void setAreaID(int id, int x, int z);
@@ -173,7 +173,7 @@ public:
   void drawSelection(int cursorX,int cursorY, bool pOnlyMap = false );
   void drawSelectionChunk(int cursorX,int cursorY);
   void drawTileMode(float ah);
-  
+
   // Selection related methods.
 private:
   void getSelection( );
@@ -183,10 +183,10 @@ public:
   nameEntry * GetCurrentSelection() { return mCurrentSelection; }
   void ResetSelection() { mCurrentSelection = NULL; }
   GLuint GetCurrentSelectedTriangle() { return mCurrentSelectedTriangle; }
-  
+
   bool GetVertex(float x,float z, Vec3D *V);
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
-  void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);  
+  void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   void blurTerrain(float x, float z, float remain, float radius, int BrushType);
   bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture);
   void eraseTextures(float x, float z);
@@ -205,9 +205,9 @@ public:
 
   void deleteModelInstance( int pUniqueID );
   void deleteWMOInstance( int pUniqueID );
-  
+
   bool hasTile( int pX, int pZ );
-  
+
   static bool IsEditableWorld( int pMapId );
   void clearHeight(int id, int x, int z);
   void clearHeight(int id, int x, int z , int _cx, int _cz);

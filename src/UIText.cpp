@@ -26,7 +26,7 @@ UIText::UIText( float pX, float pY, const freetype::font_data& pFont, eJustify p
 
 void UIText::setText( const std::string& pText )
 {
-	mText = pText; 
+	mText = pText;
 	width( font.width( mText ) );
 }
 
@@ -53,18 +53,18 @@ void UIText::render() const
 			glVertex2f( x() - 2.0f - width() / 2.0f, y() - 1.0f );
 			glVertex2f( x() + 2.0f + width() / 2.0f, y() - 1.0f );
 			glVertex2f( x() - 2.0f - width() / 2.0f, y() + font.h + 3.0f );
-			glVertex2f( x() + 2.0f + width() / 2.0f, y() + font.h + 3.0f );	
+			glVertex2f( x() + 2.0f + width() / 2.0f, y() + font.h + 3.0f );
 			break;
 		case eJustifyRight:
 			glVertex2f( x() - 2.0f - width(), y() - 1.0f );
 			glVertex2f( x() + 2.0f, y() - 1.0f );
 			glVertex2f( x() - 2.0f - width(),y() + font.h + 3.0f);
-			glVertex2f( x() + 2.0f, y() + font.h + 3.0f);	
+			glVertex2f( x() + 2.0f, y() + font.h + 3.0f);
 			break;
 		}
 		glEnd();
 	}
-  
+
 	switch( justify )
 	{
 	case eJustifyLeft:

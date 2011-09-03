@@ -8,13 +8,13 @@ class UIListView : public UIFrame
 {
 public:
   typedef UIListView* Ptr;
-  
+
 private:
   int elements_height;
   int elements_start;
   int elements_rows;
   UIScrollBar::Ptr scrollbar;
-  
+
 public:
   UIListView( float xPos, float yPos, float w, float h, int elementHeight );
   void addElement( UIFrame* element );

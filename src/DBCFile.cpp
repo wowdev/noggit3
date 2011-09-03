@@ -13,14 +13,14 @@ DBCFile::DBCFile(const std::string& _filename):
 void DBCFile::open()
 {
   MPQFile f( filename );
-  
+
   if( f.isEof() )
   {
     LogError << "The DBC file \"" << filename << "\" could not be opened. This application may crash soon as the file is most likely needed." << std::endl;
     return;
   }
   LogDebug << "Opening DBC \"" << filename << "\"" << std::endl;
-  
+
   char header[4];
   unsigned int na,nb,es,ss;
 
@@ -30,7 +30,7 @@ void DBCFile::open()
   f.read(&nb,4); // Number of fields
   f.read(&es,4); // Size of a record
   f.read(&ss,4); // String size
-  
+
   recordSize = es;
   recordCount = na;
   fieldCount = nb;

@@ -16,11 +16,11 @@
 #include "UIHelp.h"
 #include "UIMinimapWindow.h"
 #include "UIStatusBar.h" // UIStatusBar
-#include "UITexturePicker.h" // 
+#include "UITexturePicker.h" //
 #include "UITextureSwitcher.h"
 #include "UITexturingGUI.h"
 #include "UIToolbar.h" // UIToolbar
-#include "UIZoneIDBrowser.h" // 
+#include "UIZoneIDBrowser.h" //
 #include "Video.h" // video
 #include "WMOInstance.h"
 #include "World.h"
@@ -37,7 +37,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   // UIToolbar
   guiToolbar = new UIToolbar( 6.0f, 38.0f, this );
   addChild(guiToolbar);
-  
+
   // Statusbar
   guiStatusbar = new UIStatusBar( 0.0f, video.yres() - 30.0f, video.xres(), 30.0f );
   addChild(guiStatusbar);
@@ -72,7 +72,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   TextureSwitcher->hide();
   TextureSwitcher->movable( true );
   addChild( TextureSwitcher);
-  
+
   _help = new UIHelp();
   _help->hide();
   addChild( _help );
@@ -116,14 +116,14 @@ void UIMapViewGUI::setTilemode( bool enabled )
 void UIMapViewGUI::render( ) const
 {
   UIFrame::render();
-  
+
   //! \todo Make these some textUIs.
   arial16.shprint( 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
-  
+
   int time = static_cast<int>( gWorld->time ) % 2880;
   std::stringstream timestrs; timestrs << "Time: " << ( time / 120 ) << ":" << ( time % 120 );
   arial16.shprint( video.xres() - 100.0f, 5.0f, timestrs.str() );
-  
+
   if ( gWorld->loading )
   {
     std::string toDisplay( gWorld->noadt ? "No ADT at this Point" : "Loading..." );
@@ -136,19 +136,19 @@ void UIMapViewGUI::render( ) const
      << "), server (x: " << ( ZEROPOINT - gWorld->camera.x ) << ", y:" << ( ZEROPOINT - gWorld->camera.z ) << ", z:" << ( ZEROPOINT - gWorld->camera.y ) << ")" ;
   if(Environment::getInstance()->paintMode) statusbarInfo << "PM:1";else statusbarInfo << "PM:2";
   guiStatusbar->setLeftInfo( statusbarInfo.str() );
-  
+
   guiStatusbar->setRightInfo( "" );
- 
+
   if( !_tilemode && !guidetailInfos->hidden() )
   {
     nameEntry * lSelection = gWorld->GetCurrentSelection();
     if( lSelection )
     {
       guiStatusbar->setRightInfo( lSelection->returnName() );
-      
+
       std::stringstream detailInfo;
 
-      switch( lSelection->type ) 
+      switch( lSelection->type )
       {
       case eEntry_Model:
         detailInfo << "filename: " << lSelection->data.model->model->_filename
@@ -157,7 +157,7 @@ void UIMapViewGUI::render( ) const
           << "\nrotation X/Y/Z: " << lSelection->data.model->dir.x << " / " << lSelection->data.model->dir.y << " / " << lSelection->data.model->dir.z
           << "\nscale: " <<  lSelection->data.model->sc
           << "\ntextures Used: " << lSelection->data.model->model->header.nTextures;
-        
+
         for( unsigned int j = 0; j < std::min( lSelection->data.model->model->header.nTextures, 6U ); j++ )
         {
           detailInfo << "\n " << ( j + 1 ) << ": " << lSelection->data.model->model->_textures[j]->filename();
@@ -166,10 +166,10 @@ void UIMapViewGUI::render( ) const
         {
           detailInfo << "\n and more.";
         }
-        
+
         detailInfo << "\n";
         break;
-        
+
       case eEntry_WMO:
         detailInfo << "filename: " << lSelection->data.wmo->wmo->_filename
           << "\nunique ID: " << lSelection->data.wmo->mUniqueID
@@ -186,14 +186,14 @@ void UIMapViewGUI::render( ) const
         {
           detailInfo << "\n and more.";
         }
-        
+
         detailInfo << "\n";
         break;
-        
+
       case eEntry_MapChunk:
-        
+
         int flags = lSelection->data.mapchunk->Flags;
-      
+
         detailInfo << "MCNK " << lSelection->data.mapchunk->px << ", " << lSelection->data.mapchunk->py << " (" << lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px
           << ") of tile (" << lSelection->data.mapchunk->mt->mPositionX << " " << lSelection->data.mapchunk->mt->mPositionZ << ")"
           << "\narea ID: " << lSelection->data.mapchunk->areaID << " (\"" << gAreaDB.getAreaName( lSelection->data.mapchunk->areaID ) << "\")"
@@ -204,36 +204,36 @@ void UIMapViewGUI::render( ) const
           << ( flags & FLAG_LQ_OCEAN ? "ocean " : "" )
           << ( flags & FLAG_LQ_MAGMA ? "lava" : "" )
           << "\ntextures used: " << lSelection->data.mapchunk->nTextures;
-          
+
         //! \todo get a list of textures and their flags as well as detail doodads.
         /*
         for( int q = 0; q < lSelection->data.mapchunk->nTextures; q++ )
         {
           //s << " ";
           //s "  Flags - " << lSelection->data.mapchunk->texFlags[q] << " Effect ID - " << lSelection->data.mapchunk->effectID[q] << std::endl;
-          
+
           if( lSelection->data.mapchunk->effectID[q] != 0 )
             for( int r = 0; r < 4; r++ )
             {
               const char *EffectModel = getGroundEffectDoodad( lSelection->data.mapchunk->effectID[q], r );
               if( EffectModel )
               {
-                  s << r << " - World\\NoDXT\\" << EffectModel << endl;  
+                  s << r << " - World\\NoDXT\\" << EffectModel << endl;
                   //freetype::shprint( arial16, 30, 103 + TextOffset, "%d - World\\NoDXT\\%s", r, EffectModel );
                   TextOffset += 20;
               }
             }
-            
+
         }
         */
-        
+
         detailInfo << "\n";
-    
+
         break;
       }
       guidetailInfos->setText( detailInfo.str() );
     }
-    else 
+    else
     {
       guidetailInfos->setText( "" );
     }

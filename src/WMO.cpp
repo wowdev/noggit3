@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#include <sstream> 
-#include <iomanip> 
-#include <iostream> 
+#include <sstream>
+#include <iomanip>
+#include <iostream>
 
 #include "Liquid.h"
 #include "Log.h" // LogDebug
@@ -161,12 +161,12 @@ WMO::WMO( const std::string& filenameArg )
       }
 
     }
-    else if ( fourcc == 'MOSB' ) 
+    else if ( fourcc == 'MOSB' )
     {
-      if (size>4) 
+      if (size>4)
       {
         std::string path = std::string( reinterpret_cast<char*>( f.getPointer() ) );
-        if (path.length()) 
+        if (path.length())
         {
           LogDebug << "SKYBOX:" << std::endl;
 
@@ -222,7 +222,7 @@ WMO::WMO( const std::string& filenameArg )
     texbuf = NULL;
   }
 
-  for (unsigned int i=0; i<nGroups; ++i) 
+  for (unsigned int i=0; i<nGroups; ++i)
     groups[i].initDisplayList();
 }
 
@@ -244,7 +244,7 @@ WMO::~WMO()
     delete[] mat;
     mat = NULL;
   }
-  
+
   if (skybox) {
     //delete skybox;
     ModelManager::delbyname(skyboxFilename);
@@ -257,23 +257,23 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
 
 void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool /*highlight*/) const
 {
-	if( gWorld && gWorld->drawfog ) 
-    glEnable( GL_FOG );  
+	if( gWorld && gWorld->drawfog )
+    glEnable( GL_FOG );
   else
     glDisable( GL_FOG );
 
-  for (unsigned int i=0; i<nGroups; ++i) 
+  for (unsigned int i=0; i<nGroups; ++i)
   {
     groups[i].draw(ofs, rot,false);
-      
+
     if ( gWorld->drawdoodads)
     {
       groups[i].drawDoodads(doodadset, ofs, rot);
     }
-    
+
     groups[i].drawLiquid();
   }
-  
+
   if( boundingbox )
   {
     glDisable( GL_LIGHTING );
@@ -285,7 +285,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
     glDisable( GL_TEXTURE_2D );
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    
+
     for( unsigned int i = 0; i < nGroups; ++i )
       DrawABox( groups[i].BoundingBoxMin, groups[i].BoundingBoxMax, Vec4D( 1.0f, 1.0f, 1.0f, 1.0f ), 1.0f );
 
@@ -311,15 +311,15 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
     glDisable( GL_TEXTURE_2D );
     glActiveTexture( GL_TEXTURE0 );
     glEnable( GL_TEXTURE_2D );
-    
+
     glEnable( GL_LIGHTING );
 
   }
 
 /*  {
     // draw boundingboxe and axis
-    // Turn light off and highlight the following    
-    glDisable(GL_LIGHTING);  
+    // Turn light off and highlight the following
+    glDisable(GL_LIGHTING);
     glDisable(GL_COLOR_MATERIAL);
     glActiveTexture(GL_TEXTURE0);
     glDisable(GL_TEXTURE_2D);
@@ -327,7 +327,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable (GL_LINE_SMOOTH);  
+    glEnable (GL_LINE_SMOOTH);
     glLineWidth(1.0);
     glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
@@ -335,12 +335,12 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 
     glLineWidth(1.0);
     glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-    for (int i=0; i<nGroups; ++i) 
+    for (int i=0; i<nGroups; ++i)
     {
       WMOGroup &header = groups[i];
       /// Bounding box
       glColor4f( 1, 1, 1, 1 );
-      glBegin( GL_LINE_STRIP );  
+      glBegin( GL_LINE_STRIP );
         glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
         glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
         glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
@@ -350,7 +350,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
         glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
         glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
         glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
-        glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );    
+        glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
       glEnd();
 
       glBegin( GL_LINES );
@@ -365,7 +365,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
         glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
         glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
       glEnd();
-      
+
       // draw axis
       glColor4fv( Vec4D( 1, 0, 0, 1 ) );
       glBegin( GL_LINES );
@@ -373,7 +373,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
         glVertex3f( header.BoundingBoxMax.x + 6, 0, 0 );
       glEnd();
 
-      
+
       glColor4fv( Vec4D( 0, 1, 0, 1 ) );
       glBegin( GL_LINES );
         glVertex3f( 0, 0, 0 );
@@ -401,8 +401,8 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
   {
     //WIP STEFF
     // draw group boundingboxes
-    // Turn light off and highlight the following    
-    glDisable(GL_LIGHTING);  
+    // Turn light off and highlight the following
+    glDisable(GL_LIGHTING);
     glDisable(GL_COLOR_MATERIAL);
     glActiveTexture(GL_TEXTURE0);
     glDisable(GL_TEXTURE_2D);
@@ -410,7 +410,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable (GL_LINE_SMOOTH);  
+    glEnable (GL_LINE_SMOOTH);
     glLineWidth(1.0);
     glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
@@ -418,19 +418,19 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 
     glLineWidth(1.0);
     glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-    for (unsigned int i=0; i<nGroups; ++i) 
+    for (unsigned int i=0; i<nGroups; ++i)
     {
       WMOGroup &header = groups[i];
-      glBegin( GL_LINE_STRIP );  
-      //A 
+      glBegin( GL_LINE_STRIP );
+      //A
         glVertex3f( header.VertexBoxMin.x, header.VertexBoxMax.y, header.VertexBoxMin.z );
-      //C  
+      //C
         glVertex3f( header.VertexBoxMin.x, header.VertexBoxMin.y, header.VertexBoxMin.z );
-      //D    
+      //D
         glVertex3f( header.VertexBoxMax.x, header.VertexBoxMin.y, header.VertexBoxMin.z );
-      //G    
+      //G
         glVertex3f( header.VertexBoxMax.x, header.VertexBoxMin.y, header.VertexBoxMax.z );
-      //H    
+      //H
         glVertex3f( header.VertexBoxMax.x, header.VertexBoxMax.y, header.VertexBoxMax.z );
       //B
         glVertex3f( header.VertexBoxMax.x, header.VertexBoxMax.y, header.VertexBoxMin.z );
@@ -443,7 +443,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
       //C
         glVertex3f( header.VertexBoxMin.x, header.VertexBoxMin.y, header.VertexBoxMin.z );
       glEnd();
-      
+
       glBegin( GL_LINES );
       // F G
         glVertex3f( header.VertexBoxMin.x, header.VertexBoxMin.y, header.VertexBoxMax.z );
@@ -505,18 +505,18 @@ void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot) const
 {
   for (unsigned int i=0; i<nGroups; ++i) {
     groups[i].draw(ofs, rot,true);
-    
+
     if (gWorld->drawdoodads) {
       groups[i].drawDoodadsSelect(doodadset, ofs, rot);
     }
-    
+
     groups[i].drawLiquid();
   }
 }
 
 void WMO::drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const
 {
-  if( skybox && pCamera.IsInsideOf( pLower, pUpper ) ) 
+  if( skybox && pCamera.IsInsideOf( pLower, pUpper ) )
   {
     //! \todo  only draw sky if we are "inside" the WMO... ?
 
@@ -615,7 +615,7 @@ void WMOLight::setupOnce(GLint light, Vec3D dir, Vec3D lcol)
   glLightfv(light, GL_AMBIENT, ambient);
   glLightfv(light, GL_DIFFUSE, diffuse);
   glLightfv(light, GL_POSITION,position);
-  
+
   glEnable(light);
 }
 
@@ -697,21 +697,21 @@ void WMOGroup::initDisplayList()
   uint16_t *useLights = 0;
   int nLR = 0;
 
-  
+
   // open group file
 
 	std::stringstream curNum;
 	curNum << "_" << std::setw(3) << std::setfill('0') << num;
-	
-	std::string fname = wmo->filename(); 
+
+	std::string fname = wmo->filename();
 	fname.insert( fname.find( ".wmo" ), curNum.str() );
- 
+
 	MPQFile gf(fname);
   if (gf.isEof()) {
     LogError << "Error loading WMO \"" << fname << "\"." << std::endl;
     return;
   }
-  
+
   /*if(!gf.isExternal())
     gLog("    Loading WMO from MPQ %s\n", fname);
   else
@@ -742,7 +742,7 @@ void WMOGroup::initDisplayList()
     size_t nextpos = gf.getPos() + size;
 
     // why copy stuff when I can just map it from memory ^_^
-    
+
     if ( fourcc == 'MOPY' ) {
       // materials per triangle
       nTriangles = size / 2;
@@ -844,10 +844,10 @@ void WMOGroup::initDisplayList()
 
     bool overbright = ((mat->flags & 0x10) && !hascv);
     bool spec_shader = (mat->specular && !hascv && !overbright);
-    
+
     _lists[b].first = new OpenGL::CallList();
     _lists[b].second = spec_shader;
-    
+
     _lists[b].first->startRecording( GL_COMPILE );
 
     mat->_texture->bind();
@@ -877,7 +877,7 @@ void WMOGroup::initDisplayList()
       GLfloat em[4] = {1,1,1,1};
       glMaterialfv(GL_FRONT, GL_EMISSION, em);
     }
-    
+
     // render
     glBegin(GL_TRIANGLES);
     for (int t=0, i=batch->indexStart; t<batch->indexCount; t++,++i) {
@@ -902,7 +902,7 @@ void WMOGroup::initDisplayList()
 
     _lists[b].first->endRecording();
   }
-  
+
   indoor = false;
 }
 
@@ -974,7 +974,7 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
   //glCallList(dl);
   glDisable(GL_BLEND);
   glColor4f(1,1,1,1);
-  for (int i=0; i<nBatches; ++i) 
+  for (int i=0; i<nBatches; ++i)
   {
     if( video.mSupportShaders && _lists[i].second && wmoShader)
     {
@@ -1042,7 +1042,7 @@ void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const
 {
   if (!visible) return;
   if (nDoodads==0) return;
-  
+
 
   gWorld->outdoorLights(outdoorLights);
   setupFog();
@@ -1117,7 +1117,7 @@ void WMOGroup::setupFog()
 
 
 WMOGroup::~WMOGroup()
-{  
+{
   //if (dl) glDeleteLists(dl, 1);
   //if (dl_light) glDeleteLists(dl_light, 1);
   for( std::vector< std::pair<OpenGL::CallList*, bool> >::iterator it = _lists.begin(); it != _lists.end(); ++it )
@@ -1181,7 +1181,7 @@ void WMOManager::report()
 WMO* WMOManager::add( std::string name )
 {
   std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-  
+
   if( items.find( name ) == items.end() )
   {
     items[name] = new WMO( name );
@@ -1197,11 +1197,11 @@ WMO* WMOManager::add( std::string name )
 void WMOManager::delbyname( std::string name )
 {
   std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-  
+
   if( items.find( name ) != items.end() )
   {
     items[name]->removeReference();
-    
+
     if( items[name]->hasNoReferences() )
     {
       delete items[name];

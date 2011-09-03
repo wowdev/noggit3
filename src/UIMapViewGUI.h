@@ -43,10 +43,10 @@ public:
   UITextureSwitcher* TextureSwitcher;
 
   explicit UIMapViewGUI( MapView* setMapview );
-  
+
   void setTilemode( bool enabled );
   virtual void render() const;
-  
+
   void showHelp();
   void hideHelp();
   void toggleHelp();

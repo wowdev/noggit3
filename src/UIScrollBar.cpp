@@ -30,7 +30,7 @@ UIScrollBar::UIScrollBar( float xpos, float ypos, float h, int n, Orientation or
 {
   UIButton::Ptr ScrollUp( NULL );
   UIButton::Ptr ScrollDown( NULL );
-  
+
   if( _orientation == Vertical )
   {
     width( UIScrollBar::WIDTH );
@@ -48,11 +48,11 @@ UIScrollBar::UIScrollBar( float xpos, float ypos, float h, int n, Orientation or
     ScrollDown = new UIButton( width() - 24.0f, -6.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-ScrollBar-ScrollDownButton-Up.blp", "Interface\\Buttons\\UI-ScrollBar-ScrollDownButton-Down.blp" );
     ScrollKnob = new UITexture( 10.0f, -6.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-ScrollBar-Knob.blp" );
   }
-  
+
   addChild( ScrollUp );
   addChild( ScrollDown );
   addChild( ScrollKnob );
-  
+
   ScrollUp->setClickFunc( scrollbarProcessClick, -1 );
   ScrollKnob->setClickFunc( scrollbarProcessClick, 0 );
   ScrollDown->setClickFunc( scrollbarProcessClick, 1 );
@@ -62,13 +62,13 @@ bool UIScrollBar::processLeftDrag( float mx, float my, float /*xChange*/, float 
 {
   if( num < 0 )
     return false;
-  
+
   float tx( 0.0f );
   float ty( 0.0f );
   getOffset( &tx, &ty );
   mx -= tx + 32.0f;
   my -= ty + 32.0f;
-  
+
   if( _orientation == Vertical )
     value = std::min( num - 1, std::max( 0, misc::FtoIround( num * my / ( height() - 64.0f ) ) ) );
   else
@@ -80,7 +80,7 @@ bool UIScrollBar::processLeftDrag( float mx, float my, float /*xChange*/, float 
   {
     changeFunc( this, value );
   }
-  
+
   return true;
 }
 
@@ -100,9 +100,9 @@ void UIScrollBar::clickReturn( int id )
   if( id != 0 )
   {
     value = std::min( num - 1, std::max( 0, value + id ) );
-    
+
     setScrollNoob();
-  
+
     if( changeFunc )
     {
       changeFunc( this, value );

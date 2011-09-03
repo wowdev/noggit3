@@ -20,7 +20,7 @@ public:
   MapTile *mt;
   Vec3D vmin, vmax, vcenter;
   int px, py;
-  
+
   MapChunkHeader header;
   bool Changed;
   size_t nTextures;
@@ -33,7 +33,7 @@ public:
   int nameID;
 
   unsigned int Flags;
-  
+
   unsigned int areaID;
 
   bool haswater;
@@ -102,7 +102,7 @@ public:
   void removeHole(int i,int j);
 
   void setFlag(bool value);
-  
+
   int getAreaID();
   void setAreaID(int ID);
 

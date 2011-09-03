@@ -27,10 +27,10 @@ UIScrollableFrame::UIScrollableFrame( float x, float y, float w, float h
   addChild( _scrollbarHorizontal );
   addChild( _scrollbarVertical );
   addChild( _content );
-  
+
   _scrollbarHorizontal->setChangeFunc( UIScrollableFrame_Func_Hor );
   _scrollbarVertical->setChangeFunc( UIScrollableFrame_Func_Vert );
-  
+
   contentUpdated();
 }
 
@@ -38,7 +38,7 @@ void UIScrollableFrame::contentUpdated()
 {
   _scrollbarHorizontal->setNum( _content->width() - width() - UIScrollBar::WIDTH );
   _scrollbarVertical->setNum( _content->height() - height() - UIScrollBar::WIDTH );
-  
+
   if( _content->width() == width() - UIScrollBar::WIDTH )
     _scrollbarHorizontal->hide();
   if( _content->height() == height() - UIScrollBar::WIDTH )
@@ -63,17 +63,17 @@ void UIScrollableFrame::render() const
 
   glPushMatrix();
   glTranslatef( x(), y(), 0.0f );
-  
+
   glClearStencil( 0 );
   glClear( GL_STENCIL_BUFFER_BIT );
-  
+
   glColorMask( false, false, false, false );
-  
+
   glEnable( GL_STENCIL_TEST );
 
   glStencilFunc( GL_ALWAYS, 1, 1 );
   glStencilOp( GL_REPLACE, GL_REPLACE, GL_REPLACE );
-  
+
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
   glBegin( GL_TRIANGLE_STRIP );
   glVertex2f( 0.0f, 0.0f );
@@ -81,23 +81,23 @@ void UIScrollableFrame::render() const
   glVertex2f( 0.0f, height() - _scrollbarHorizontal->height() );
   glVertex2f( width() - _scrollbarVertical->width(), height() - _scrollbarHorizontal->height() );
   glEnd();
-  
+
   glColorMask( true, true, true, true );
-  
+
   glStencilFunc( GL_EQUAL, 1, 1 );
   glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
-  
+
   glPushMatrix();
   glTranslatef( -_scrollPositionX, -_scrollPositionY, 0.0f );
-  
+
   _content->render();
-  
+
   glPopMatrix();
 
   glDisable( GL_STENCIL_TEST );
-  
+
   _scrollbarHorizontal->render();
   _scrollbarVertical->render();
-  
+
   glPopMatrix();
 }
