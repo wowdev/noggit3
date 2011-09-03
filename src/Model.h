@@ -80,18 +80,18 @@ struct ModelRenderPass {
   int tex;
   bool usetex2, useenvmap, cull, trans, unlit, nozwrite, billboard;
   float p;
-  
+
   int16_t texanim, color, opacity, blendmode, order;
 
   // Geoset ID
   int geoset;
-  
+
   // texture wrapping
   bool swrap, twrap;
-  
+
   // colours
   Vec4D ocol, ecol;
-  
+
   bool init(Model *m);
   void deinit();
 
@@ -157,7 +157,7 @@ class Model: public ManagedItem, public AsyncObject {
 
   void drawModel( /*bool unlit*/ );
   void drawModelSelect();
-  
+
   void initCommon(const MPQFile& f);
   bool isAnimated(const MPQFile& f);
   void initAnimated(const MPQFile& f);
@@ -180,11 +180,11 @@ public:
   ModelCamera cam;
   Bone *bones;
   ModelHeader header;
-  
+
   // ===============================
   // Toggles
   bool *showGeosets;
-  
+
   // ===============================
   // Texture data
   // ===============================
@@ -200,7 +200,7 @@ public:
   bool mPerInstanceAnimation;
   int anim, animtime;
 
-  Model(const std::string& name, bool forceAnim=false);  
+  Model(const std::string& name, bool forceAnim=false);
   ~Model();
   void draw();
   void drawTileMode();
@@ -208,7 +208,7 @@ public:
   void updateEmitters(float dt);
 
   friend struct ModelRenderPass;
-  
+
   virtual void finishLoading();
 };
 

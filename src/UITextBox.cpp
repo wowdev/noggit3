@@ -36,17 +36,17 @@ void UITextBox::render() const
 {
   glPushMatrix();
   glTranslatef( x(), y(), 0.0f );
-  
+
   glColor3f( 1.0f, 1.0f, 1.0f );
-  
+
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
-  
+
   if( !mFocus )
     texture->bind();
   else
     textureDown->bind();
-  
+
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.0f, 0.0f );
   glVertex2f( 0.0f, 0.0f );
@@ -57,7 +57,7 @@ void UITextBox::render() const
   glTexCoord2f( 1.0f, 1.0f );
   glVertex2f( width(), height() );
   glEnd();
-  
+
   OpenGL::Texture::disableTexture();
   mText->render();
 
@@ -88,11 +88,11 @@ bool UITextBox::KeyBoardEvent( SDL_KeyboardEvent *e )
 
   if( e->type != SDL_KEYDOWN )
     return false;
-  
+
   if( e->keysym.sym == SDLK_BACKSPACE && !mValue.empty()) // Backspace
   {
-    const char* firstBeforeEnd( mValue.c_str() + mValue.length() ); 
-    utf8::prior( firstBeforeEnd, mValue.c_str() ); 
+    const char* firstBeforeEnd( mValue.c_str() + mValue.length() );
+    utf8::prior( firstBeforeEnd, mValue.c_str() );
     mValue.erase( firstBeforeEnd - mValue.c_str() );
   }
   else
@@ -109,7 +109,7 @@ bool UITextBox::KeyBoardEvent( SDL_KeyboardEvent *e )
 	    }
 	  }
   }
-  
+
   setValue( mValue );
   return true;
 }

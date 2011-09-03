@@ -14,18 +14,18 @@ class MenuPane : public UIWindow
 {
 public:
   typedef MenuPane* Ptr;
-  
+
 private:
   int mNumItems;
 
-public: 
+public:
   MenuPane( float pX, float pY );
 
   void Close();
   void Open();
-  
+
   void fixSizes();
-  
+
   void AddMenuItemButton( const std::string& pName, void ( *pClickFunc )( UIFrame::Ptr, int ), int pClickFuncID );
   void AddMenuItemToggle( const std::string& pName, bool * pMyState, bool pInvert = false );
   void AddMenuItemSwitch( const std::string& pName, bool * pMyState, bool pInvert = false );
@@ -38,7 +38,7 @@ class UIMenuBar : public UIWindow
 {
 public:
   typedef UIMenuBar* Ptr;
-  
+
 private:
   typedef std::map<std::string, MenuPane::Ptr> MenuPanes;
   MenuPanes mMenuPanes;
@@ -47,7 +47,7 @@ private:
 
 public:
   UIMenuBar();
-  void render() const;  
+  void render() const;
   void resize();
 
   void CloseAll();
@@ -63,21 +63,21 @@ class MenuButton : public UIButton
 {
 public:
   typedef MenuButton* Ptr;
-  
+
 private:
   MenuPane::Ptr mPane;
-  
+
 public:
   MenuButton( MenuPane::Ptr pPane, float pX, float pY, const std::string& pText );
 
   UIFrame::Ptr processLeftClick( float pX, float pY );
 };
 
-class MenuItem : public UIButton 
+class MenuItem : public UIButton
 {
 public:
   typedef MenuItem* Ptr;
-  
+
 protected:
   MenuPane::Ptr mParent;
 
@@ -85,21 +85,21 @@ public:
   MenuItem( MenuPane::Ptr pParent, float pX, float pY, float pHeight, const std::string& pText, const std::string& pNormal, const std::string& pDown );
 };
 
-class MenuItemButton : public MenuItem 
+class MenuItemButton : public MenuItem
 {
 public:
   typedef MenuItemButton* Ptr;
-  
+
   MenuItemButton( MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, void ( *pClickFunc )( UIFrame::Ptr, int ), int pClickFuncID );
 
   UIFrame::Ptr processLeftClick( float pX, float pY );
 };
 
-class MenuItemToggle : public MenuItem 
+class MenuItemToggle : public MenuItem
 {
 public:
   typedef MenuItemToggle* Ptr;
-  
+
 private:
   UICheckBox::Ptr mMyCheckbox;
   bool * mMyState;
@@ -113,11 +113,11 @@ public:
   void render() const;
 };
 
-class MenuItemSwitch : public MenuItem 
+class MenuItemSwitch : public MenuItem
 {
 public:
   typedef MenuItemSwitch* Ptr;
-  
+
 private:
   bool * mMyState;
   bool mInvert;
@@ -129,11 +129,11 @@ public:
 };
 
 
-class MenuItemSet : public MenuItem 
+class MenuItemSet : public MenuItem
 {
 public:
   typedef MenuItemSet* Ptr;
-  
+
 private:
   int mSet;
   int * mMyState;
@@ -148,7 +148,7 @@ class MenuItemSeperator : public MenuItem
 {
 public:
   typedef MenuItemSeperator* Ptr;
-  
+
   MenuItemSeperator( MenuPane::Ptr pParent, float pX, float pY, const std::string& pText );
 
   UIFrame::Ptr processLeftClick( float pX, float pY );

@@ -31,7 +31,7 @@ public:
   std::string  getValue();
 
   bool KeyBoardEvent( SDL_KeyboardEvent *e );
-  
+
   UIFrame *processLeftClick( float mx, float my );
   void processUnclick() { }
 };

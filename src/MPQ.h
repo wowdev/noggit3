@@ -14,25 +14,25 @@ class MPQFile;
 class MPQArchive : public AsyncObject
 {
   HANDLE _archiveHandle;
-  
+
   MPQArchive( const std::string& filename, bool doListfile );
-  
+
 public:
   ~MPQArchive();
   std::string mpqname;
-  
+
   bool hasFile( const std::string& filename ) const;
   bool openFile( const std::string& filename, HANDLE* fileHandle ) const;
 
   void finishLoading();
-  
+
   static bool allFinishedLoading();
   static void allFinishLoading();
-  
+
   static void loadMPQ( const std::string& filename, bool doListfile = false );
   static void unloadAllMPQs();
   static void unloadMPQ( const std::string& filename );
-  
+
   friend class MPQFile;
 };
 
@@ -68,7 +68,7 @@ public:
   {
     return External;
   }
-  
+
   template<typename T>
   const T* get( size_t offset ) const
   {
@@ -85,11 +85,11 @@ public:
     buffer=Buf;
     size=Size;
   };
-  
+
   void SaveFile();
-  
+
   static bool exists( const std::string& filename );
-  
+
   friend class MPQArchive;
 };
 

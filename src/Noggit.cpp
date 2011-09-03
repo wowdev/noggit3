@@ -54,7 +54,7 @@ freetype::font_data arial24;
 freetype::font_data arial32;
 freetype::font_data morpheus40;
 freetype::font_data skurri32;
-freetype::font_data fritz16;  
+freetype::font_data fritz16;
 
 AsyncLoader* gAsyncLoader;
 
@@ -73,7 +73,7 @@ std::string getGamePath()
       l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
     if (l != ERROR_SUCCESS)
       l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
-    if (l == ERROR_SUCCESS && RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,(LPDWORD)&s) == ERROR_SUCCESS) 
+    if (l == ERROR_SUCCESS && RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,(LPDWORD)&s) == ERROR_SUCCESS)
       return temp;
     else
       return "";
@@ -107,7 +107,7 @@ int main( int argc, char *argv[] )
   {
     boost::filesystem::path startupPath( argv[0] );
     startupPath.remove_filename();
-    
+
     if( startupPath.is_relative() )
     {
       boost::filesystem::current_path( boost::filesystem::current_path() / startupPath );
@@ -127,7 +127,7 @@ int main( int argc, char *argv[] )
   Environment::getInstance();
 
   Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
-  
+
   std::string arialFilename( "<PLEASE GET SOME FONT FOR YOUR OS>" );
 #ifdef _WIN32
   //! \todo This might not work on windows 7 or something. Please fix.
@@ -149,16 +149,16 @@ int main( int argc, char *argv[] )
       }
     }
   }
-  
+
   srand( time( NULL ) );
-  
+
   int xres( 1280 );
   int yres( 720 );
   bool fullscreen( false );
   bool doAntiAliasing( true );
-  
+
   // handle starting parameters
-  for( int i( 1 ); i < argc; ++i ) 
+  for( int i( 1 ); i < argc; ++i )
   {
     if( !strcmp( argv[i], "-f" ) || !strcmp( argv[i], "-fullscreen" ) )
     {
@@ -209,32 +209,32 @@ int main( int argc, char *argv[] )
       yres = 1536;
     }
   }
-  
+
   if( Settings::getInstance()->noAntiAliasing() )
   {
     doAntiAliasing = false;
   }
-  
+
   if( !video.init( xres, yres, fullscreen, doAntiAliasing ) )
   {
     LogError << "Initializing video failed." << std::endl;
     return -1;
   }
-  
+
   SDL_WM_SetCaption( "Noggit Studio - " STRPRODUCTVER, "" );
-  
+
   std::string wowpath( getGamePath() );
   if( wowpath == "" )
   {
     return -1;
   }
-  
+
   Log << "Game path: " << wowpath << std::endl;
-  
+
   if( Project::getInstance()->getPath() == "" )
     Project::getInstance()->setPath( wowpath );
   Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
-  
+
   CreateStrips();
 
   gAsyncLoader = new AsyncLoader();
@@ -242,14 +242,14 @@ int main( int argc, char *argv[] )
 
   std::vector<std::string> archiveNames;
   archiveNames.push_back( "common.MPQ" );
-  archiveNames.push_back( "common-2.MPQ" ); 
+  archiveNames.push_back( "common-2.MPQ" );
   archiveNames.push_back( "expansion.MPQ" );
   archiveNames.push_back( "lichking.MPQ" );
   archiveNames.push_back( "patch.MPQ" );
   archiveNames.push_back( "patch-{number}.MPQ" );
   archiveNames.push_back( "patch-{character}.MPQ" );
-  
-  //archiveNames.push_back( "{locale}/backup-{locale}.MPQ" );  
+
+  //archiveNames.push_back( "{locale}/backup-{locale}.MPQ" );
   //archiveNames.push_back( "{locale}/base-{locale}.MPQ" );
   archiveNames.push_back( "{locale}/locale-{locale}.MPQ" );
   //archiveNames.push_back( "{locale}/speech-{locale}.MPQ" );
@@ -260,12 +260,12 @@ int main( int argc, char *argv[] )
   archiveNames.push_back( "{locale}/patch-{locale}.MPQ" );
   archiveNames.push_back( "{locale}/patch-{locale}-{number}.MPQ" );
   archiveNames.push_back( "{locale}/patch-{locale}-{character}.MPQ" );
-  
+
   archiveNames.push_back( "development.MPQ" );
-  
+
   const char * locales[] = { "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "zhTW", "esES", "esMX", "ruRU" };
   const char * locale( "****" );
-  
+
   // Find locale, take first one.
   for( int i( 0 ); i < 10; ++i )
   {
@@ -283,14 +283,14 @@ int main( int argc, char *argv[] )
     LogError << "Could not find locale directory. Be sure, that there is one containing the file \"realmlist.wtf\"." << std::endl;
     return -1;
   }
-  
+
   //! \todo  This may be done faster. Maybe.
   for( size_t i( 0 ); i < archiveNames.size(); ++i )
   {
     std::string path( wowpath );
     path.append( "Data/" ).append( archiveNames[i] );
     std::string::size_type location( std::string::npos );
-    
+
     do
     {
       location = path.find( "{locale}" );
@@ -298,9 +298,9 @@ int main( int argc, char *argv[] )
       {
         path.replace( location, 8, locale );
       }
-    } 
+    }
     while( location != std::string::npos );
-    
+
     if( path.find( "{number}" ) != std::string::npos )
     {
       location = path.find( "{number}" );
@@ -328,7 +328,7 @@ int main( int argc, char *argv[] )
         MPQArchive::loadMPQ( path, true );
   }
   // listfiles are not available straight away! They are async! Do not rely on anything at this point!
-  
+
   //! \todo  Get this out?
   //gFileList = new Directory( "root" );
   //size_t found;
@@ -358,38 +358,38 @@ int main( int argc, char *argv[] )
    gFileList->AddFile( *it );
    }
    */
-  
+
   // Opening DBCs
   OpenDBs();
-  
+
   // Initializing Fonts
   skurri32.init( "fonts/skurri.ttf", 32, true );
   fritz16.init( "fonts/frizqt__.ttf", 16, true );
   morpheus40.init( "fonts/morpheus.ttf", 40, true );
   arialn13.init( "fonts/arialn.ttf", 13, true );
-  
+
   arial12.init( arialFilename, 12, false );
   arial14.init( arialFilename, 14, false );
   arial16.init( arialFilename, 16, false );
   arial24.init( arialFilename, 24, false );
   arial32.init( arialFilename, 32, false );
-  
+
   if( video.mSupportShaders )
     loadWaterShader();
   else
     LogError << "Your GPU does not support ARB vertex programs (shaders). Sorry." << std::endl;
-  
+
   LogDebug << "Creating Menu" << std::endl;
-  
+
   gStates.push_back( new Menu() );
-  
+
   LogDebug << "Entering Main Loop" << std::endl;
-  
+
   bool done( false );
   Uint32 ticks( SDL_GetTicks() );
   AppState* activeAppState( NULL );
   Uint32 time( 0 );
-  
+
   SDL_EnableUNICODE( true );
 
   SDL_Event event;
@@ -400,28 +400,28 @@ int main( int argc, char *argv[] )
     ticks = SDL_GetTicks();
     Uint32 tickDelta( ticks - lastTicks );
     time += tickDelta;
-    
+
     activeAppState = gStates[gStates.size() - 1];
-    
+
     const Uint8 appState( SDL_GetAppState() );
     const bool isActiveApplication( appState & SDL_APPACTIVE );
     const bool hasInputFocus( appState & SDL_APPINPUTFOCUS );
     const bool hasMouseFocus( appState & SDL_APPMOUSEFOCUS );
-    
+
     if( isActiveApplication )
     {
       const float ftime( time / 1000.0f );
       const float ftickDelta( tickDelta / 1000.0f );
       activeAppState->tick( ftime, ftickDelta );
       activeAppState->display( ftime, ftickDelta );
-      
+
       video.flip();
     }
     else
     {
       boost::this_thread::sleep( boost::posix_time::milliseconds( 200 ) );
     }
-    
+
     while( SDL_PollEvent( &event ) )
     {
       if( event.type == SDL_QUIT )
@@ -453,7 +453,7 @@ int main( int argc, char *argv[] )
       }
     }
 
-    if( gPop ) 
+    if( gPop )
     {
       gPop = false;
       gStates.pop_back();
@@ -461,20 +461,20 @@ int main( int argc, char *argv[] )
       activeAppState = NULL;
     }
   }
-  
+
   video.close();
-  
+
   TextureManager::report();
   ModelManager::report();
   WMOManager::report();
-  
+
   gAsyncLoader->stop();
   gAsyncLoader->join();
-  
+
   MPQArchive::unloadAllMPQs();
   gListfile.clear();
-  
+
   LogDebug << "Exited" << std::endl;
-  
+
   return 0;
 }

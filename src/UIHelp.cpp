@@ -6,13 +6,13 @@
 
 const int winWidth = 765;
 const int winHeight = 600;
-  
+
 UIHelp::UIHelp( )
 : UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Keybindings", true )
 {
-  addChild( new UIText( 30.0f, 30.0f, 
+  addChild( new UIText( 30.0f, 30.0f,
     "Basic controls:\n"
-    "\n"          
+    "\n"
     "  Left mouse dragged - rotate camera\n"
     "  Left mouse - select chunk or object\n"
     "  Both mouse buttons - move forward\n"
@@ -27,10 +27,10 @@ UIHelp::UIHelp( )
     "  SHIFT + F4 - change to auto select mode\n"
     "  ESC - exit to main menu\n"
     "\n"
-    "Toggles:\n"  
+    "Toggles:\n"
     "\n"
     "  F1 - toggle M2s\n"
-    "  F2 - toggle WMO doodads set\n" 
+    "  F2 - toggle WMO doodads set\n"
     "  F3 - toggle ground\n"
     "  F4 - toggle GUI\n"
     "  F6 - toggle WMOs\n"
@@ -53,19 +53,19 @@ UIHelp::UIHelp( )
     "  CTRL + SHIFT + S - Save ADT tiles camera position\n"
     , arial14, eJustifyLeft )
   );
-  
-  addChild( new UIText( 370.0f, 30.0f, 
+
+  addChild( new UIText( 370.0f, 30.0f,
     "Edit ground:\n"
     "  SHIFT + F1 - toggle ground edit mode\n"
     "  T - change terrain mode\n"
-    "  Y - changes brush type\n"  
+    "  Y - changes brush type\n"
     "  ALT + left mouse + mouse move - change brush size\n"
     "Terrain mode \"raise / lower\":\n"
     "  SHIFT + Left mouse - raise terrain\n"
     "  ALT + Left mouse - lower terrain\n"
     "Terrain mode \"flatten / blur\"\n"
     "  SHIFT + Left mouse click - flatten terrain\n"
-    "  ALT + Left mouse  click - blur terrain\n"  
+    "  ALT + Left mouse  click - blur terrain\n"
     "  Z - change the mode in the option window\n"
     "\n"
     "Edit objects if a model is selected with left click:\n"
@@ -81,7 +81,7 @@ UIHelp::UIHelp( )
     "  Numpad 7 / 9 - rotate object\n"
     "  Numpad 4 / 8 / 6 / 2 - vertical position\n"
     "  Numpad 1 / 3 -  move up/dow\n"
-    "    holding SHIFT: double speed \n" 
+    "    holding SHIFT: double speed \n"
     "    holding CTRL: triple speed \n"
     "    holding SHIFT and CTRL together: half speed \n"
     "\n"

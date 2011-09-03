@@ -40,7 +40,7 @@ void UIModel::render() const
   glDisable(GL_CULL_FACE);
   glEnable(GL_TEXTURE_2D);
   glEnable(GL_LIGHTING);
-  
+
   model->cam.setup( 0 );
   model->draw();
 
@@ -61,5 +61,5 @@ void UIModel::render() const
 
 void UIModel::setModel( Model* _setModel )
 {
-  model = _setModel;  
+  model = _setModel;
 }

@@ -54,7 +54,7 @@ StripType HoleStrip[128];
 void HeightColor(float height, Vec3D *Color)
 {
   float Amount;
-  
+
   if(height>HEIGHT_TOP)
   {
     Color->x=1.0;
@@ -78,7 +78,7 @@ void HeightColor(float height, Vec3D *Color)
   else if(height>HEIGHT_ZERO)
   {
     Amount=(height-HEIGHT_ZERO)/(HEIGHT_LOW-HEIGHT_ZERO);
-    
+
     Color->x=1.0f-Amount;
     Color->y=1.0f;
     Color->z=0.0f;
@@ -99,7 +99,7 @@ void HeightColor(float height, Vec3D *Color)
   }
   else
     (*Color)*=0.0f;
-  
+
 }
 
 
@@ -107,93 +107,93 @@ void HeightColor(float height, Vec3D *Color)
 void GenerateContourMap()
 {
   unsigned char  CTexture[CONTOUR_WIDTH*4];
-  
+
   CoordGen[0]=0.0f;
   CoordGen[1]=0.25f;
   CoordGen[2]=0.0f;
   CoordGen[3]=0.0f;
-  
-  
+
+
   for(int i=0;i<(CONTOUR_WIDTH*4);++i)
     CTexture[i]=0;
   CTexture[3+CONTOUR_WIDTH/2]=0xff;
   CTexture[7+CONTOUR_WIDTH/2]=0xff;
   CTexture[11+CONTOUR_WIDTH/2]=0xff;
-  
+
   glGenTextures(1, &Contour);
   glBindTexture(GL_TEXTURE_2D, Contour);
-  
-  
+
+
   gluBuild2DMipmaps(GL_TEXTURE_2D,4,CONTOUR_WIDTH,1,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
   /*glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,CONTOUR_WIDTH,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-   
+
    for(int i=0;i<(CONTOUR_WIDTH*4)/2;++i)
    CTexture[i]=0;
    CTexture[3]=0xff;
-   
+
    glTexImage1D(GL_TEXTURE_1D,1,GL_RGBA,CONTOUR_WIDTH/2,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-   
+
    for(int i=0;i<(CONTOUR_WIDTH*4)/4;++i)
    CTexture[i]=0;
    CTexture[3]=0x80;
-   
+
    glTexImage1D(GL_TEXTURE_1D,2,GL_RGBA,CONTOUR_WIDTH/4,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-   
+
    for(int i=0;i<(CONTOUR_WIDTH*4)/8;++i)
    CTexture[i]=0;
    CTexture[3]=0x40;
-   
+
    glTexImage1D(GL_TEXTURE_1D,3,GL_RGBA,CONTOUR_WIDTH/8,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-   
+
    for(int i=0;i<(CONTOUR_WIDTH*4)/16;++i)
    CTexture[i]=0;
    CTexture[3]=0x20;
-   
+
    glTexImage1D(GL_TEXTURE_1D,4,GL_RGBA,CONTOUR_WIDTH/16,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-   
+
    for(int i=0;i<(CONTOUR_WIDTH*4)/32;++i)
    CTexture[i]=0;
    CTexture[3]=0x10;
-   
+
    glTexImage1D(GL_TEXTURE_1D,5,GL_RGBA,CONTOUR_WIDTH/32,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-   
+
    for(int i=0;i<(CONTOUR_WIDTH*4)/64;++i)
    CTexture[i]=0;
    CTexture[3]=0x08;
-   
+
    glTexImage1D(GL_TEXTURE_1D,6,GL_RGBA,CONTOUR_WIDTH/64,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);*/
-  
-  
+
+
   glEnable(GL_TEXTURE_GEN_S);
   glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
   glTexGenfv(GL_S,GL_OBJECT_PLANE,CoordGen);
-  
+
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 }
 
 
-MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha) 
-{  
+MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
+{
   mt=maintile;
   mBigAlpha=bigAlpha;
 
   uint32_t fourcc;
   uint32_t size;
-  
+
   f->read(&fourcc, 4);
   f->read(&size, 4);
 
   assert( fourcc == 'MCNK' );
-  
+
   size_t lastpos = f->getPos() + size;
 
   f->read(&header, 0x80);
 
   Flags = header.flags;
   areaID = header.areaid;
-  
+
   if( Environment::getInstance()->areaIDColors.find(areaID) == Environment::getInstance()->areaIDColors.end() )
   {
     Vec3D newColor = Vec3D( misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) );
@@ -232,7 +232,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
   vmin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
   vmax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
   glGenTextures(3, alphamaps);
-  
+
   while (f->getPos() < lastpos) {
     f->read(&fourcc,4);
     f->read(&size, 4);
@@ -247,7 +247,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
       for (int j=0; j<17; ++j) {
         for (int i=0; i<((j%2)?8:9); ++i) {
           f->read(nor,3);
-          // order X,Z,Y 
+          // order X,Z,Y
           // *ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
           *ttn++ = Vec3D(-nor[1]/127.0f, nor[2]/127.0f, -nor[0]/127.0f);
         }
@@ -323,7 +323,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     }
-    else if ( fourcc == 'MCAL' ) 
+    else if ( fourcc == 'MCAL' )
     {
       unsigned int MCALbase = f->getPos();
       for( unsigned int layer = 0; layer < header.nLayers; ++layer )
@@ -332,7 +332,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
         {
 
           f->seek( MCALbase + MCALoffset[layer] );
-    
+
           if( texFlags[layer] & 0x200 )
           {  // compressed
 
@@ -387,7 +387,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
             f->seekRelative(0x1000);
           }
           else
-          {  
+          {
             // not compressed
             unsigned char *p;
             char *abuf = f->getPointer();
@@ -446,7 +446,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
 
         this->mt->mLiquids.insert(std::pair<int,Liquid*>( 0, lq) );
 
-        
+
         // let's output some debug info! ( '-')b
         string lq = "";
         if (flags & 4) lq.append(" river");
@@ -455,7 +455,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
         if (flags & 32) lq.append(" slime?");
         LogDebug << "LQ" << lq << " (base:" << waterlevel << ")" << std::endl;
         */
-        
+
       }
       // we're done here!
       break;
@@ -503,7 +503,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
       *ttv++ = v;
     }
   }
-  
+
   if( ( Flags & 1 ) == 0 )
   {
     /** We have no shadow map (MCSH), so we got no shadows at all!  **
@@ -512,9 +512,9 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
       mShadowMap[i] = 0;
 
     unsigned char sbuf[64*64];
-    for( size_t j = 0; j < 4096; ++j ) 
+    for( size_t j = 0; j < 4096; ++j )
       sbuf[j] = 0;
-  
+
     glGenTextures( 1, &shadow );
     glBindTexture( GL_TEXTURE_2D, shadow );
     glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf );
@@ -540,10 +540,10 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
     mFakeShadows[j].z=0;
     mFakeShadows[j].w=ShadowAmount;
   }
-  
+
   glGenBuffers(1,&minimap);
   glGenBuffers(1,&minishadows);
-  
+
   glBindBuffer(GL_ARRAY_BUFFER, minimap);
   glBufferData(GL_ARRAY_BUFFER, sizeof(mMinimap), mMinimap, GL_STATIC_DRAW);
 
@@ -563,7 +563,7 @@ void MapChunk::loadTextures()
 
 void SetAnim(int anim)
 {
-  if (anim) {  
+  if (anim) {
     glActiveTexture(GL_TEXTURE0);
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
@@ -599,9 +599,9 @@ void MapChunk::drawTextures()
   {
     OpenGL::Texture::setActiveTexture( 0 );
     OpenGL::Texture::enableTexture();
-    
+
     _textures[0]->bind();
-    
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -618,15 +618,15 @@ void MapChunk::drawTextures()
   }
 
   SetAnim(animated[0]);
-  glBegin(GL_TRIANGLE_STRIP);  
+  glBegin(GL_TRIANGLE_STRIP);
   glTexCoord2f(0.0f,texDetail);
-  glVertex3f(static_cast<float>(px), py+1.0f, -2.0f);  
+  glVertex3f(static_cast<float>(px), py+1.0f, -2.0f);
   glTexCoord2f(0.0f, 0.0f);
   glVertex3f(static_cast<float>(px), static_cast<float>(py), -2.0f);
   glTexCoord2f(texDetail, texDetail);
-  glVertex3f(px+1.0f, py+1.0f, -2.0f);  
+  glVertex3f(px+1.0f, py+1.0f, -2.0f);
   glTexCoord2f(texDetail, 0.0f);
-  glVertex3f(px+1.0f, static_cast<float>(py), -2.0f);  
+  glVertex3f(px+1.0f, static_cast<float>(py), -2.0f);
   glEnd();
   RemoveAnim(animated[0]);
 
@@ -638,52 +638,52 @@ void MapChunk::drawTextures()
   {
     OpenGL::Texture::setActiveTexture( 0 );
     OpenGL::Texture::enableTexture();
-    
+
     _textures[i]->bind();
-    
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     OpenGL::Texture::setActiveTexture( 1 );
     OpenGL::Texture::enableTexture();
-    
+
     glBindTexture(GL_TEXTURE_2D, alphamaps[i-1]);
-    
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     SetAnim(animated[i]);
 
-    glBegin(GL_TRIANGLE_STRIP);  
+    glBegin(GL_TRIANGLE_STRIP);
     glMultiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
     glMultiTexCoord2f(GL_TEXTURE1, TEX_RANGE, 0.0f);
     glVertex3f(px+1.0f, static_cast<float>(py), -2.0f);
     glMultiTexCoord2f(GL_TEXTURE0, 0.0f, 0.0f);
     glMultiTexCoord2f(GL_TEXTURE1, 0.0f, 0.0f);
-    glVertex3f(static_cast<float>(px), static_cast<float>(py), -2.0f);    
+    glVertex3f(static_cast<float>(px), static_cast<float>(py), -2.0f);
     glMultiTexCoord2f(GL_TEXTURE0, texDetail, texDetail);
     glMultiTexCoord2f(GL_TEXTURE1, TEX_RANGE, TEX_RANGE);
-    glVertex3f(px+1.0f, py+1.0f, -2.0f);  
+    glVertex3f(px+1.0f, py+1.0f, -2.0f);
     glMultiTexCoord2f(GL_TEXTURE0, 0.0f, texDetail);
     glMultiTexCoord2f(GL_TEXTURE1, 0.0f, TEX_RANGE);
-    glVertex3f(static_cast<float>(px), py+1.0f, -2.0f);  
+    glVertex3f(static_cast<float>(px), py+1.0f, -2.0f);
     glEnd();
 
     RemoveAnim(animated[i]);
   }
-  
+
   OpenGL::Texture::setActiveTexture( 0 );
   OpenGL::Texture::disableTexture();
-  
+
   OpenGL::Texture::setActiveTexture( 1 );
   OpenGL::Texture::disableTexture();
 
   glBindBuffer(GL_ARRAY_BUFFER, minimap);
   glVertexPointer(3, GL_FLOAT, 0, 0);
-  
+
   glBindBuffer(GL_ARRAY_BUFFER, minishadows);
   glColorPointer(4, GL_FLOAT, 0, 0);
-  
+
   glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, gWorld->mapstrip2);
 }
 
@@ -732,7 +732,7 @@ MapChunk::~MapChunk()
     7   noggit                              0x0000000100044500 _ZN7MapViewD0Ev + 106
     8   noggit                              0x000000010007cc66 SDL_main + 8004
    */
-  
+
   // unload alpha maps
   glDeleteTextures( 3, alphamaps );
   // shadow maps, too
@@ -761,7 +761,7 @@ bool MapChunk::GetVertex(float x,float z, Vec3D *V)
 
   xdiff = x - xbase;
   zdiff = z - zbase;
-  
+
   const int row = static_cast<int>( zdiff / (UNITSIZE * 0.5f ) + 0.5f );
   const int column = static_cast<int>( ( xdiff - UNITSIZE * 0.5f * (row % 2) ) / UNITSIZE + 0.5f );
   if( (row < 0) || (column < 0) || (row > 16) || (column > ((row % 2) ? 8 : 9)))
@@ -785,7 +785,7 @@ void CreateStrips()
       OddStrips[i*18 + 2*j + 1] = i*17 + j;
       OddStrips[i*18 + 2*j + 2] = i*17 + j + 9;
       EvenStrips[i*18 + 2*j] = i*17 + 17 + j;
-      EvenStrips[i*18 + 2*j + 1] = i*17 + 9 + j;      
+      EvenStrips[i*18 + 2*j + 1] = i*17 + 9 + j;
     }
     OddStrips[i*18 + 17] = i*17 + 8;
     EvenStrips[i*18 + 16] = i*17 + 17 + 8;
@@ -817,42 +817,42 @@ void CreateStrips()
   }
 
   int iferget = 0;
-  
+
   for( size_t i = 34; i < 43; ++i )
      HoleStrip[iferget++] = i;
-  
+
   for( size_t i = 68; i < 77; ++i )
     HoleStrip[iferget++] = i;
 
   for( size_t i = 102; i < 111; ++i )
      HoleStrip[iferget++] = i;
-  
+
   for( size_t i = 2; i < 139; i += 17 )
     HoleStrip[iferget++] = i;
-  
+
   for( size_t i = 4; i < 141; i += 17 )
     HoleStrip[iferget++] = i;
-  
+
   for( size_t i = 6; i < 143; i += 17 )
     HoleStrip[iferget++] = i;
 }
 
 void MapChunk::drawColor()
 {
-  
+
   if (!gWorld->frustum.intersects(vmin,vmax))
     return;
 
   float mydist = (gWorld->camera - vcenter).length() - r;
 
-  if (mydist > (mapdrawdistance * mapdrawdistance)) 
+  if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
 
   if (mydist > gWorld->culldistance) {
     if (gWorld->drawfog) this->drawNoDetail();
     return;
   }
-  
+
   glActiveTexture(GL_TEXTURE1);
   glDisable(GL_TEXTURE_2D);
 
@@ -876,7 +876,7 @@ void MapChunk::drawColor()
 
 void MapChunk::drawPass(int anim)
 {
-  if (anim) 
+  if (anim)
   {
     glActiveTexture(GL_TEXTURE0);
     glMatrixMode(GL_TEXTURE);
@@ -892,11 +892,11 @@ void MapChunk::drawPass(int anim)
     float f = ( (static_cast<int>(gWorld->animtime*(spd/15.0f))) % animspd) / static_cast<float>(animspd);
     glTranslatef(f*fdx,f*fdy,0);
   }
-  
-  glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
-  
 
-  if (anim) 
+  glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
+
+
+  if (anim)
   {
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
@@ -906,24 +906,24 @@ void MapChunk::drawPass(int anim)
 
 void MapChunk::drawLines()
 {
-  if (!gWorld->frustum.intersects(vmin,vmax))  
+  if (!gWorld->frustum.intersects(vmin,vmax))
     return;
 
   float mydist = (gWorld->camera - vcenter).length() - r;
 
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
-    
+
   glBindBuffer(GL_ARRAY_BUFFER, vertices);
   glVertexPointer(3, GL_FLOAT, 0, 0);
 
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_LIGHTING);
-  
+
   glPushMatrix();
   glColor4f(1.0,0.0,0.0f,0.5f);
   glTranslatef(0.0f,0.05f,0.0f);
-  glEnable (GL_LINE_SMOOTH);  
+  glEnable (GL_LINE_SMOOTH);
   glLineWidth(1.5);
   glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
@@ -949,14 +949,14 @@ void MapChunk::drawLines()
     glColor4f(1.0,0.0,0.0f,0.5f);
     glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
   }
-    
+
   if(Environment::getInstance()->view_holelines)
-  {  
+  {
     // Draw hole lines if view_subchunk_lines is true
     glColor4f(0.0,0.0,1.0f,0.5f);
     glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, HoleStrip);
     glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[9]);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[18]);    
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[18]);
     glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[27]);
     glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[36]);
     glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);
@@ -980,11 +980,11 @@ void MapChunk::drawContour()
   if(Contour == 0)
     GenerateContourMap();
   glBindTexture(GL_TEXTURE_2D, Contour);
-  
+
   glEnable(GL_TEXTURE_GEN_S);
   glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
   glTexGenfv(GL_S,GL_OBJECT_PLANE,CoordGen);
-  
+
 
   drawPass(0);
   glDisable(GL_TEXTURE_2D);
@@ -998,7 +998,7 @@ void MapChunk::draw()
 
   if (!gWorld->frustum.intersects( vmin, vmax ))
     return;
-  
+
   float mydist = (gWorld->camera - vcenter).length() - r;
 
   if (mydist > (mapdrawdistance * mapdrawdistance))
@@ -1027,9 +1027,9 @@ void MapChunk::draw()
   {
     OpenGL::Texture::setActiveTexture( 0 );
     OpenGL::Texture::enableTexture();
-    
+
     _textures[0]->bind();
-    
+
     OpenGL::Texture::setActiveTexture( 1 );
     OpenGL::Texture::disableTexture();
   }
@@ -1047,13 +1047,13 @@ void MapChunk::draw()
   {
     OpenGL::Texture::setActiveTexture( 0 );
     OpenGL::Texture::enableTexture();
-    
+
     _textures[i]->bind();
 
     // this time, use blending:
     OpenGL::Texture::setActiveTexture( 1 );
     OpenGL::Texture::enableTexture();
-    
+
     glBindTexture( GL_TEXTURE_2D, alphamaps[i - 1] );
 
     drawPass(animated[i]);
@@ -1087,7 +1087,7 @@ void MapChunk::draw()
 
   if(terrainMode==5)
   {
-    // draw chunk white if impassible flag is set 
+    // draw chunk white if impassible flag is set
     if(Flags & FLAG_IMPASS)
     {
       glColor4f(1,1,1,0.6f);
@@ -1099,7 +1099,7 @@ void MapChunk::draw()
   {
     // draw chunks in color depending on AreaID and list color from environment
     if(Environment::getInstance()->areaIDColors.find(areaID) != Environment::getInstance()->areaIDColors.end() )
-    {  
+    {
       Vec3D colorValues = Environment::getInstance()->areaIDColors.find(areaID)->second;
       glColor4f(colorValues.x,colorValues.y,colorValues.z,0.7f);
       drawPass(0);
@@ -1134,7 +1134,7 @@ void MapChunk::draw()
     glDisable(GL_STENCIL_TEST );    */
 
   /*  glColor4f(1,0.3f,0.3f,0.2f);
-    
+
     float x = ( Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly]].x + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+1]].x + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+2]].x ) / 3;
     float y = ( Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly]].y + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+1]].y + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+2]].y ) / 3;
     float z = ( Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly]].z + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+1]].z + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+2]].z ) / 3;
@@ -1145,7 +1145,7 @@ void MapChunk::draw()
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(true);*/
-    
+
     //glColor4f(1.0f,0.3f,0.3f,0.2f);
     glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
 
@@ -1158,16 +1158,16 @@ void MapChunk::draw()
     glVertex3fv( mVertices[gWorld->mapstrip2[poly + 0]] );
     glVertex3fv( mVertices[gWorld->mapstrip2[poly + 1]] );
     glVertex3fv( mVertices[gWorld->mapstrip2[poly + 2]] );
-    glEnd();    
+    glEnd();
     glEnable( GL_CULL_FACE );
     glEnable( GL_DEPTH_TEST );
     glDepthMask( true );
 
     glPopMatrix();
   }
-  
+
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-  
+
   glEnable( GL_LIGHTING );
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 
@@ -1201,8 +1201,8 @@ void MapChunk::draw()
   glEnable(GL_CULL_FACE);
   glColor4f(1,1,1,1);
   glPopMatrix();*/
-  
-  
+
+
 
 }
 
@@ -1237,7 +1237,7 @@ void MapChunk::drawNoDetail()
 
 void MapChunk::drawSelect()
 {
-  if( !gWorld->frustum.intersects( vmin, vmax ) ) 
+  if( !gWorld->frustum.intersects( vmin, vmax ) )
     return;
 
   float mydist = (gWorld->camera - vcenter).length() - r;
@@ -1251,7 +1251,7 @@ void MapChunk::drawSelect()
   //! \todo Use backface culling again? Maybe this adds problems. Idk.
   //glDisable( GL_CULL_FACE );
   glPushName( nameID );
-  
+
   for( int i = 0; i < stripsize2 - 2; ++i )
   {
     glPushName( i );
@@ -1262,9 +1262,9 @@ void MapChunk::drawSelect()
     glEnd();
     glPopName();
   }
-  
+
   glPopName();
-  //glEnable( GL_CULL_FACE );  
+  //glEnable( GL_CULL_FACE );
 }
 
 void MapChunk::getSelectionCoord( float *x, float *z )
@@ -1309,7 +1309,7 @@ Vec3D MapChunk::GetSelectionPosition()
 
 void MapChunk::recalcNorms()
 {
-  
+
   Vec3D P1,P2,P3,P4;
   Vec3D Norm,N1,N2,N3,N4,D;
 
@@ -1384,7 +1384,7 @@ void MapChunk::recalcNorms()
 bool MapChunk::changeTerrain(float x, float z, float change, float radius, int BrushType)
 {
   float dist,xdiff,zdiff;
-  
+
   Changed=false;
 
   xdiff = xbase - x + CHUNKSIZE/2;
@@ -1410,25 +1410,25 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
       dist = sqrt(xdiff*xdiff + zdiff*zdiff);
       if(dist < radius)
       {
-        
+
         if(BrushType==0)//Flat
           mVertices[i].y += change;
-        
+
         else if(BrushType==1)//Linear
           mVertices[i].y += change*(1.0f - dist/radius);
-        
+
         else if(BrushType==2)//Smooth
           mVertices[i].y += change/(1.0f + dist/radius);
-        
+
         else if (BrushType == 3) //x^2
           mVertices[i].y += change*( (dist/radius)*(dist/radius) + dist/radius + 1.0f);
-        
-        else if (BrushType == 4) //cos        
+
+        else if (BrushType == 4) //cos
           mVertices[i].y += change*cos(dist/radius);
         Changed=true;
       }
     }
-    
+
     vmin.y = std::min(vmin.y, mVertices[i].y);
     vmax.y = std::max(vmax.y, mVertices[i].y);
   }
@@ -1482,7 +1482,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 
       Changed=true;
     }
-    
+
     vmin.y = std::min(vmin.y, mVertices[i].y);
     vmax.y = std::max(vmax.y, mVertices[i].y);
   }
@@ -1562,7 +1562,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 
       Changed=true;
     }
-    
+
     vmin.y = std::min(vmin.y, mVertices[i].y);
     vmax.y = std::max(vmax.y, mVertices[i].y);
   }
@@ -1582,7 +1582,7 @@ Objective is Visibility = level
 if (not bottom texture)
   New Alpha = Pressure*Level+(1-Pressure)*Alpha;
   New Alpha Above = (1-Pressure)*Alpha Above;
-else Bottom Texture 
+else Bottom Texture
   New Alpha Above = Pressure*(1-Level)+(1-Pressure)*Alpha Above
 
 For bottom texture with multiple above textures
@@ -1763,7 +1763,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
       // Are we really painting on this chunk?
       const float xdiff = xbase + CHUNKSIZE / 2 - x;
       const float zdiff = zbase + CHUNKSIZE / 2 - z;
-  
+
       if( ( xdiff * xdiff + zdiff * zdiff ) > ( MAPCHUNK_DIAMETER / 2 + radius ) * ( MAPCHUNK_DIAMETER / 2 + radius ) )
       return false;
 
@@ -1781,7 +1781,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 
       if( texLevel == -1 )
       {
-    
+
         if( nTextures == 4 )
         {
           for( size_t layer = 0; layer < nTextures; ++layer )
@@ -1791,7 +1791,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
               memcpy( map, amap[layer-1], 64*64 );
             else
               memset( map, 255, 64*64 );
-          
+
             for( size_t layerAbove = layer + 1; layerAbove < nTextures; ++layerAbove )
             {
               unsigned char* above = amap[layerAbove-1];
@@ -1800,13 +1800,13 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
                 map[i] = std::max( 0, map[i] - above[i] );
               }
             }
-        
+
             size_t sum = 0;
             for( size_t i = 0; i < 64 * 64; ++i )
             {
               sum += map[i];
             }
-        
+
             if( !sum )
             {
               for( size_t i = layer; i < nTextures - 1; ++i )
@@ -1818,7 +1818,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
                 if( i )
                   memcpy( amap[i-1], amap[i], 64*64 );
               }
-              
+
               for( size_t j = layer; j < nTextures; j++ )
                   {
                     glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
@@ -1828,7 +1828,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
             }
           }
         }
-      
+
         if( nTextures == 4 )
         return false;
 
@@ -1840,7 +1840,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
         if( nTextures == 1 )
           return true;
       }
-      LogDebug << "TexLevel: " << texLevel << " -  NTextures: " << nTextures << "\n"; 
+      LogDebug << "TexLevel: " << texLevel << " -  NTextures: " << nTextures << "\n";
       // We now have a texture at texLevel > 0.
       static const float change = CHUNKSIZE / 62.0f; //! \todo 64? 63? 62? Wtf?
 
@@ -1854,7 +1854,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
           const float xdiff_ = xbase + change * i - x;
           const float zdiff_ = zbase + change * j - z;
           const float dist = sqrtf( xdiff_ * xdiff_ + zdiff_ * zdiff_ );
-      
+
           if( dist <= radius )
           {
               amap[texLevel - 1][i + j * 64] = (unsigned char)( std::max( std::min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
@@ -1862,9 +1862,9 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
         }
       }
 
-  
+
       // Redraw changed layers.
-  
+
       for( size_t j = texLevel; j < nTextures; j++ )
       {
         glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
@@ -1905,8 +1905,8 @@ int MapChunk::getAreaID(){
 
 void MapChunk::setFlag( bool changeto )
 {
-  if(changeto) 
+  if(changeto)
     this->Flags = this->Flags | (Environment::getInstance()->flagPaintMode);
-  else 
+  else
     this->Flags = this->Flags & ~(Environment::getInstance()->flagPaintMode);
 }

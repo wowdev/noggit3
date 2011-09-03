@@ -13,9 +13,9 @@ void UIFrame::render() const
 
   glPushMatrix();
   glTranslatef( x(), y(), 0.0f );
-  
+
   renderChildren();
-  
+
   glPopMatrix();
 }
 

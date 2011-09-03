@@ -47,20 +47,20 @@ void UIWindow::render() const
   glVertex2f( 0.0f, height() );
   glVertex2f( width(), height() );
   glEnd();
-  
+
   renderChildren();
 
   glColor3f( 1.0f, 1.0f, 1.0f );
-  
+
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
-  
+
   texture->bind();
 
   //Draw Bottom left Corner First
-  glBegin( GL_TRIANGLE_STRIP );  
+  glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.75f, 1.0f );
-  glVertex2f( -3.0f, height() + 3.0f );  
+  glVertex2f( -3.0f, height() + 3.0f );
   glTexCoord2f( 0.875f, 1.0f );
   glVertex2f( 13.0f, height() + 3.0f );
   glTexCoord2f( 0.75f, 0.0f );
@@ -70,9 +70,9 @@ void UIWindow::render() const
   glEnd();
 
   //Draw Bottom Right Corner
-  glBegin( GL_TRIANGLE_STRIP );  
+  glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.875f, 1.0f );
-  glVertex2f( width() - 13.0f, height() + 3.0f );  
+  glVertex2f( width() - 13.0f, height() + 3.0f );
   glTexCoord2f( 1.0f, 1.0f );
   glVertex2f( width() + 3.0f, height() + 3.0f );
   glTexCoord2f( 0.875f, 0.0f );
@@ -85,7 +85,7 @@ void UIWindow::render() const
 
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.5f, 1.0f );
-  glVertex2f( -3.0f, 13.0f );  
+  glVertex2f( -3.0f, 13.0f );
   glTexCoord2f( 0.625f, 1.0f );
   glVertex2f( 13.0f, 13.0f );
   glTexCoord2f( 0.5f, 0.0f );
@@ -97,7 +97,7 @@ void UIWindow::render() const
   //Draw Top Right Corner
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.625f, 1.0f );
-  glVertex2f( width() - 13.0f, 13.0f );  
+  glVertex2f( width() - 13.0f, 13.0f );
   glTexCoord2f( 0.75f, 1.0f );
   glVertex2f( width() + 3.0f, 13.0f );
   glTexCoord2f( 0.625f, 0.0f );
@@ -109,7 +109,7 @@ void UIWindow::render() const
   //Draw Left Side
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.0f, 1.0f );
-  glVertex2f( -3.0f, height() - 13.0f );  
+  glVertex2f( -3.0f, height() - 13.0f );
   glTexCoord2f( 0.125f, 1.0f );
   glVertex2f( 13.0f, height() - 13.0f );
   glTexCoord2f( 0.0f, 0.0f );
@@ -121,7 +121,7 @@ void UIWindow::render() const
   //Draw Right Side
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.125f, 1.0f );
-  glVertex2f( width() - 13.0f, height() - 13.0f );  
+  glVertex2f( width() - 13.0f, height() - 13.0f );
   glTexCoord2f( 0.25f, 1.0f );
   glVertex2f( width() + 3.0f, height() - 13.0f );
   glTexCoord2f( 0.125f, 0.0f );
@@ -133,9 +133,9 @@ void UIWindow::render() const
   //Draw Top Side
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.5f, 1.0f );
-  glVertex2f( 13.0f, height() + 3.0f );  
+  glVertex2f( 13.0f, height() + 3.0f );
   glTexCoord2f( 0.5f, 0.0f );
-  glVertex2f( width() - 13.0f, height() + 3.0f );  
+  glVertex2f( width() - 13.0f, height() + 3.0f );
   glTexCoord2f( 0.375f, 1.0f );
   glVertex2f( 13, height() - 13.0f );
   glTexCoord2f( 0.375f, 0.0f );
@@ -145,7 +145,7 @@ void UIWindow::render() const
   //Draw Bottom Side
   glBegin( GL_TRIANGLE_STRIP );
   glTexCoord2f( 0.375f, 1.0f );
-  glVertex2f( 13.0f, 13.0f );  
+  glVertex2f( 13.0f, 13.0f );
   glTexCoord2f( 0.375f, 0.0f );
   glVertex2f( width() - 13.0f, 13.0f );
   glTexCoord2f( 0.25f, 1.0f );
@@ -153,8 +153,8 @@ void UIWindow::render() const
   glTexCoord2f( 0.25f, 0.0f );
   glVertex2f( width() - 13.0f, -3.0f );
   glEnd();
-  
+
   OpenGL::Texture::disableTexture();
-  
+
   glPopMatrix();
 }

@@ -25,26 +25,26 @@ Sky::Sky( DBCFile::Iterator data )
   r1 = data->getFloat( LightDB::RadiusInner ) / skymul;
   r2 = data->getFloat( LightDB::RadiusOuter ) / skymul;
 
-  for (int i=0; i<36; ++i) 
+  for (int i=0; i<36; ++i)
     mmin[i] = -2;
 
   global = ( pos.x == 0.0f && pos.y == 0.0f && pos.z == 0.0f );
 
   int FirstId = data->getInt( LightDB::DataIDs ) * 18;
 
-  for( int i = 0; i < 18; ++i ) 
+  for( int i = 0; i < 18; ++i )
   {
     try
     {
       DBCFile::Record rec = gLightIntBandDB.getByID( FirstId + i );
       int entries = rec.getInt( LightIntBandDB::Entries );
 
-      if ( entries == 0 ) 
+      if ( entries == 0 )
         mmin[i] = -1;
-      else 
+      else
       {
         mmin[i] = rec.getInt( LightIntBandDB::Times );
-        for( int l = 0; l < entries; l++ ) 
+        for( int l = 0; l < entries; l++ )
         {
           SkyColor sc( rec.getInt( LightIntBandDB::Times + l ), rec.getInt( LightIntBandDB::Values + l ) );
           colorRows[i].push_back( sc );
@@ -53,16 +53,16 @@ Sky::Sky( DBCFile::Iterator data )
     }
     catch(...)
     {
-      LogError << "When trying to intialize sky " << data->getInt( LightDB::ID ) << ", there was an error with getting an entry in a DBC (" << i << "). Sorry." << std::endl; 
+      LogError << "When trying to intialize sky " << data->getInt( LightDB::ID ) << ", there was an error with getting an entry in a DBC (" << i << "). Sorry." << std::endl;
       DBCFile::Record rec = gLightIntBandDB.getByID( i );
       int entries = rec.getInt( LightIntBandDB::Entries );
 
-      if ( entries == 0 ) 
+      if ( entries == 0 )
         mmin[i] = -1;
-      else 
+      else
       {
         mmin[i] = rec.getInt( LightIntBandDB::Times );
-        for( int l = 0; l < entries; l++ ) 
+        for( int l = 0; l < entries; l++ )
         {
           SkyColor sc( rec.getInt( LightIntBandDB::Times + l ), rec.getInt( LightIntBandDB::Values + l ) );
           colorRows[i].push_back( sc );
@@ -71,16 +71,16 @@ Sky::Sky( DBCFile::Iterator data )
     }
   }
 
- 
+
 
   /*
       unsigned int SKYFOG = data->getInt( LightDB::DataIDs );
       unsigned int ID = data->getInt( LightDB::ID );
       DBCFile::Record rec = gLightParamsDB.getByID( SKYFOG );
       unsigned int skybox = rec.getInt( LightParamsDB::skybox);
-      
 
-      if ( skybox == 0 ) 
+
+      if ( skybox == 0 )
         alt_sky=NULL;
       else{
         DBCFile::Record rec = gLightSkyboxDB.getByID(skybox);
@@ -210,7 +210,7 @@ Skies::Skies( unsigned int mapid )
   // sort skies from smallest to largest; global last.
   // smaller skies will have precedence when calculating weights to achieve smooth transitions etc.
   std::sort( skies.begin(), skies.end() );
-  
+
   stars = ModelManager::add( "Environments\\Stars\\Stars.mdx" );
 }
 
@@ -270,7 +270,7 @@ void Skies::initSky(Vec3D pos, int t)
       }
     }
   }
-  for (int i=0; i<18; ++i) 
+  for (int i=0; i<18; ++i)
   {
     colorSet[i] -= Vec3D( 1, 1, 1 );
   }
@@ -341,7 +341,7 @@ void OutdoorLightStats::init(MPQFile* f)
   f->read(&m,4);
   f->seekRelative(4);
   f->read(&dayIntensity,4);
-  
+
   f->seekRelative(4);
   f->read(&dayColor.x,4);
   f->seekRelative(4);
@@ -433,7 +433,7 @@ void OutdoorLightStats::setupLighting()
   lp[3] = 0.0f; // directional lights plz
 
   la[0] = la[1] = la[2] = 0.0f;
-  
+
   if (dayIntensity > 0) {
     ld[0] = dayColor.x * dayIntensity;
     ld[1] = dayColor.y * dayIntensity;
@@ -441,7 +441,7 @@ void OutdoorLightStats::setupLighting()
     lp[0] = dayDir.x;
     lp[1] = dayDir.z;
     lp[2] = -dayDir.y;
-  
+
     glLightfv(GL_LIGHT0, GL_AMBIENT, la);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, ld);
     glLightfv(GL_LIGHT0, GL_POSITION,lp);

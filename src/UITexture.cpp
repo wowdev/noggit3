@@ -51,12 +51,12 @@ void UITexture::render() const
 {
   glPushMatrix();
   glTranslatef( x(), y(), 0.0f );
-  
+
   glColor3f( 1.0f, 1.0f, 1.0f );
 
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
-  
+
   texture->bind();
 
   glBegin( GL_TRIANGLE_STRIP );
@@ -69,7 +69,7 @@ void UITexture::render() const
   glTexCoord2f( 1.0f, 1.0f );
   glVertex2f( width(), height() );
   glEnd();
-  
+
   OpenGL::Texture::disableTexture();
 
   if( highlight )
@@ -82,7 +82,7 @@ void UITexture::render() const
     glVertex2f( -1.0f, height() );
     glEnd();
   }
-  
+
   glPopMatrix();
 }
 

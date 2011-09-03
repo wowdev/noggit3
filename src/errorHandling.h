@@ -22,10 +22,10 @@ void leave(int sig)
   signal(SIGILL, SIG_DFL);
   signal(SIGSEGV, SIG_DFL);
   signal(SIGTERM, SIG_DFL);
-  
+
   const char* description = NULL;
   const char* sign = NULL;
-  
+
   switch(sig)
   {
     case SIGABRT:
@@ -57,7 +57,7 @@ void leave(int sig)
       description = "Unknown Exception!";
       break;
   }
-  
+
   //! \todo Is this printing to the log file?
   printf("\n\n"
          "There was an exception of type \"%s\".\n"
@@ -65,9 +65,9 @@ void leave(int sig)
          "Please excuse the inconvenience. You may want to report this error including the log to the developers.\n",
          sign,
          description );
-  
+
   printStacktrace();
-  
+
   exit(sig);
 }
 
@@ -85,24 +85,24 @@ void RegisterErrorHandlers()
 #include <execinfo.h>
 
 void printStacktrace()
-{  
+{
   static const int nframes = 20;
-  
+
   void *array[nframes];
   size_t size;
   char **strings;
   size_t i;
-  
+
   size = backtrace (array, nframes);
   strings = backtrace_symbols (array, size);
-  
+
   printf ("Obtained %zd stack frames.\n", size);
-  
+
   for (i = 0; i < size; ++i)
     printf ("%s\n", strings[i]);
-  
+
   printf("\n");
-  
+
   free (strings);
 }
 
@@ -111,9 +111,9 @@ void printStacktrace()
 #include "StackWalker.h"
 
 void printStacktrace()
-{  
-  StackWalker sw; 
-  sw.ShowCallstack(); 
+{
+  StackWalker sw;
+  sw.ShowCallstack();
 }
 
 #endif

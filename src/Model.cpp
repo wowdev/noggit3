@@ -17,7 +17,7 @@ Model::Model(const std::string& filename, bool _forceAnim)
 , _filename( filename )
 {
   memset( &header, 0, sizeof( ModelHeader ) );
-  
+
   globalSequences = NULL;
   indices = NULL;
   anims = NULL;
@@ -31,31 +31,31 @@ Model::Model(const std::string& filename, bool _forceAnim)
   ribbons = NULL;
 
   showGeosets = NULL;
-  
+
   finished = false;
 }
 
 void Model::finishLoading()
 {
   MPQFile f( _filename );
-  
-  if( f.isEof() ) 
+
+  if( f.isEof() )
   {
       LogError << "Error loading file \"" << _filename << "\". Aborting to load model." << std::endl;
        finished = true;
       return;
   }
-  
+
   //LogDebug << "Loading model \"" << _filename << "\"." << std::endl;
-  
+
   memcpy( &header, f.getBuffer(), sizeof( ModelHeader ) );
-  
+
   animated = isAnimated( f ) || forceAnim;  // isAnimated will set animGeometry and animTextures
-  
+
   trans = 1.0f;
-  
+
   vbuf = nbuf = tbuf = 0;
-  
+
   globalSequences = 0;
   animtime = 0;
   anim = 0;
@@ -66,27 +66,27 @@ void Model::finishLoading()
   header.nParticleEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   header.nRibbonEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   ribbons = 0;
-  if (header.nGlobalSequences) 
+  if (header.nGlobalSequences)
   {
     globalSequences = new int[header.nGlobalSequences];
     memcpy(globalSequences, (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
   }
-  
+
   //! \todo  This takes a biiiiiit long. Have a look at this.
   if( animated )
     initAnimated( f );
-  else 
+  else
     initStatic( f );
-  
+
   f.close();
-  
+
   finished = true;
 }
 
 Model::~Model()
 {
   LogDebug << "Unloading model \"" << _filename << "\"." << std::endl;
-   
+
   for(std::vector<std::string>::iterator it = _textureFilenames.begin(); it != _textureFilenames.end(); ++it )
   {
     TextureManager::delbyname( *it );
@@ -99,14 +99,14 @@ Model::~Model()
 
   if(showGeosets)
     delete[] showGeosets;
-    
+
   if (animated) {
     // unload all sorts of crap
     //delete[] vertices;
     //delete[] normals;
-    if (colors) 
+    if (colors)
       delete[] colors;
-    if (transparency) 
+    if (transparency)
       delete[] transparency;
     if(indices)
       delete[] indices;
@@ -114,7 +114,7 @@ Model::~Model()
       delete[] anims;
     if(origVertices)
       delete[] origVertices;
-    if(bones) 
+    if(bones)
       delete[] bones;
     if (!animGeometry) {
       glDeleteBuffers(1, &nbuf);
@@ -122,14 +122,14 @@ Model::~Model()
     glDeleteBuffers(1, &vbuf);
     glDeleteBuffers(1, &tbuf);
 
-    if (animTextures && texanims) 
+    if (animTextures && texanims)
       delete[] texanims;
-    if (lights) 
+    if (lights)
       delete[] lights;
 
-    if (particleSystems) 
+    if (particleSystems)
       delete[] particleSystems;
-    if (ribbons) 
+    if (ribbons)
       delete[] ribbons;
   } else {
     glDeleteLists(ModelDrawList, 1);
@@ -245,7 +245,7 @@ void Model::initCommon(const MPQFile& f)
     }
 
     float len = origVertices[i].pos.lengthSquared();
-    if (len > rad){ 
+    if (len > rad){
       rad = len;
     }
   }
@@ -258,9 +258,9 @@ void Model::initCommon(const MPQFile& f)
   _textureFilenames.resize( header.nTextures );
   _specialTextures.resize( header.nTextures );
   _useReplaceTextures.resize( header.nTextures );
-  
+
   for( size_t i = 0; i < header.nTextures; ++i )
-  { 
+  {
     if( texdef[i].type == 0 )
     {
       _specialTextures[i] = -1;
@@ -274,9 +274,9 @@ void Model::initCommon(const MPQFile& f)
       //! \todo Check if this is actually correct. Or just remove it.
       _textures[i] = NULL;
       _specialTextures[i] = texdef[i].type;
-      
+
       _useReplaceTextures[texdef[i].type] = true;
-      
+
       if (texdef[i].type == 3)
       {
         _textureFilenames[i] = "Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP";
@@ -300,9 +300,9 @@ void Model::initCommon(const MPQFile& f)
     for (size_t i=0; i<header.nTransparency; ++i) transparency[i].init(f, trDefs[i], globalSequences);
   }
 
-  
+
   // just use the first LOD/view
-  
+
   if (header.nViews > 0) {
     // indices - allocate space, too
     std::string lodname = _filename.substr(0, _filename.length()-3);
@@ -314,7 +314,7 @@ void Model::initCommon(const MPQFile& f)
       return;
     }
     ModelView *view = reinterpret_cast<ModelView*>(g.getBuffer());
-    
+
     uint16_t *indexLookup = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsIndex);
     uint16_t *triangles = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsTris);
     nIndices = view->nTris;
@@ -322,7 +322,7 @@ void Model::initCommon(const MPQFile& f)
     for (size_t i = 0; i<nIndices; ++i) {
       indices[i] = indexLookup[triangles[i]];
     }
-    
+
     // render ops
     ModelGeoset *ops = reinterpret_cast<ModelGeoset*>(g.getBuffer() + view->ofsSub);
     ModelTexUnit *tex = reinterpret_cast<ModelTexUnit*>(g.getBuffer() + view->ofsTex);
@@ -330,15 +330,15 @@ void Model::initCommon(const MPQFile& f)
     uint16_t *texlookup = reinterpret_cast<uint16_t*>(f.getBuffer() + header.ofsTexLookup);
     uint16_t *texanimlookup = reinterpret_cast<uint16_t*>(f.getBuffer() + header.ofsTexAnimLookup);
     int16_t *texunitlookup = reinterpret_cast<int16_t*>(f.getBuffer() + header.ofsTexUnitLookup);
-    
+
     showGeosets = new bool[view->nSub];
     for (size_t i=0; i<view->nSub; ++i) {
       showGeosets[i] = true;
     }
-    
+
     for (size_t j = 0; j<view->nTex; j++) {
       ModelRenderPass pass;
-      
+
       pass.usetex2 = false;
       pass.useenvmap = false;
       pass.cull = false;
@@ -346,30 +346,30 @@ void Model::initCommon(const MPQFile& f)
       pass.unlit = false;
       pass.nozwrite = false;
       pass.billboard = false;
-      
+
       size_t geoset = tex[j].op;
-      
+
       pass.geoset = geoset;
-      
+
       pass.indexStart = ops[geoset].istart;
       pass.indexCount = ops[geoset].icount;
       pass.vertexStart = ops[geoset].vstart;
       pass.vertexEnd = pass.vertexStart + ops[geoset].vcount;
-      
+
       pass.order = tex[j].shading;
-      
+
       //TextureID texid = textures[texlookup[tex[j].textureid]];
       //pass.texture = texid;
       pass.tex = texlookup[tex[j].textureid];
-      
+
       // TODO: figure out these flags properly -_-
       ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
-      
-      
+
+
       pass.blendmode = rf.blend;
       pass.color = tex[j].colorIndex;
       pass.opacity = transLookup[tex[j].transid];
-      
+
       enum RenderFlags
       {
         RENDERFLAGS_UNLIT = 1,
@@ -378,31 +378,31 @@ void Model::initCommon(const MPQFile& f)
         RENDERFLAGS_BILLBOARD = 8,
         RENDERFLAGS_ZBUFFERED = 16,
       };
-      
+
       pass.unlit = (rf.flags & RENDERFLAGS_UNLIT)!=0;
       pass.cull = (rf.flags & RENDERFLAGS_TWOSIDED)==0 && rf.blend==0;
-      
+
       pass.billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
-      
+
       pass.useenvmap = (texunitlookup[tex[j].texunit] == -1) && pass.billboard && rf.blend>2;
       pass.nozwrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
-      
+
       // ToDo: Work out the correct way to get the true/false of transparency
       pass.trans = (pass.blendmode>0) && (pass.opacity>0);  // Transparency - not the correct way to get transparency
-      
+
       pass.p = ops[geoset].BoundingBox[0].x;
-      
+
       // Texture flags
       enum TextureFlags {
         TEXTURE_WRAPX=1,
         TEXTURE_WRAPY
       };
-      
+
       pass.swrap = (texdef[pass.tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
       pass.twrap = (texdef[pass.tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
-      
+
       static const int TEXTUREUNIT_STATIC = 16;
-      
+
       if (animTextures) {
         if (tex[j].flags & TEXTUREUNIT_STATIC) {
           pass.texanim = -1; // no texture animation
@@ -412,23 +412,23 @@ void Model::initCommon(const MPQFile& f)
       } else {
         pass.texanim = -1; // no texture animation
       }
-      
+
       passes.push_back(pass);
     }
     g.close();
     // transparent parts come later
     std::sort(passes.begin(), passes.end());
   }
-  
+
   // zomg done
 }
 
 void Model::initStatic( const MPQFile& f )
 {
   origVertices = ( ModelVertex* )( f.getBuffer() + header.ofsVertices );
-  
+
   initCommon( f );
-  
+
   ModelDrawList = glGenLists( 1 );
   glNewList( ModelDrawList, GL_COMPILE );
     drawModel( /*false*/ );
@@ -446,24 +446,24 @@ void Model::initStatic( const MPQFile& f )
     delete[] normals;
   if( indices )
     delete[] indices;
-  if( colors ) 
+  if( colors )
     delete[] colors;
-  if( transparency ) 
+  if( transparency )
     delete[] transparency;
 }
 
 void Model::initAnimated(const MPQFile& f)
-{ 
+{
   origVertices = new ModelVertex[header.nVertices];
   memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
-  
+
   glGenBuffersARB(1,&vbuf);
   glGenBuffersARB(1,&tbuf);
   const size_t size = header.nVertices * sizeof(float);
   vbufsize = 3 * size;
-  
+
   initCommon(f);
-  
+
   if (header.nAnimations > 0) {
     anims = new ModelAnimation[header.nAnimations];
     memcpy(anims, f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
@@ -472,7 +472,7 @@ void Model::initAnimated(const MPQFile& f)
       //! \note Fix for world\kalimdor\diremaul\activedoodads\crystalcorrupter\corruptedcrystalshard.m2 having a zero length for its stand animation.
       anims[i].length = std::max( anims[i].length, 1U );
     }
-    
+
     animfiles = new MPQFile*[header.nAnimations];
 
 	  std::stringstream tempname;
@@ -480,7 +480,7 @@ void Model::initAnimated(const MPQFile& f)
     {
       std::string lodname = _filename.substr(0, _filename.length()-3);
 	    tempname << lodname << anims[i].animID << "-" << anims[i].subAnimID;
-	    if(MPQFile::exists(tempname.str())) 
+	    if(MPQFile::exists(tempname.str()))
 	    {
 		    animfiles[i] = new MPQFile(tempname.str());
       }
@@ -490,7 +490,7 @@ void Model::initAnimated(const MPQFile& f)
       }
     }
   }
-  
+
   if (animBones) {
     // init bones...
     bones = new Bone[header.nBones];
@@ -499,7 +499,7 @@ void Model::initAnimated(const MPQFile& f)
       bones[i].init(f, mb[i], globalSequences, animfiles);
     }
   }
-  
+
   if (!animGeometry) {
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
     glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
@@ -510,12 +510,12 @@ void Model::initAnimated(const MPQFile& f)
     delete[] normals;
   }
   Vec2D *texcoords = new Vec2D[header.nVertices];
-  for (size_t i=0; i<header.nVertices; ++i) 
+  for (size_t i=0; i<header.nVertices; ++i)
     texcoords[i] = origVertices[i].texcoords;
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
   glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2*size, texcoords, GL_STATIC_DRAW_ARB);
   delete[] texcoords;
-  
+
   if (animTextures) {
     texanims = new TextureAnim[header.nTexAnims];
     ModelTexAnimDef *ta = reinterpret_cast<ModelTexAnimDef*>(f.getBuffer() + header.ofsTexAnims);
@@ -523,7 +523,7 @@ void Model::initAnimated(const MPQFile& f)
       texanims[i].init(f, ta[i], globalSequences);
     }
   }
-  
+
   // particle systems
   if (header.nParticleEmitters) {
     ModelParticleEmitterDef *pdefs = reinterpret_cast<ModelParticleEmitterDef*>(f.getBuffer() + header.ofsParticleEmitters);
@@ -533,7 +533,7 @@ void Model::initAnimated(const MPQFile& f)
       particleSystems[i].init(f, pdefs[i], globalSequences);
     }
   }
-  
+
   // ribbons
   if (header.nRibbonEmitters) {
     ModelRibbonEmitterDef *rdefs = reinterpret_cast<ModelRibbonEmitterDef*>(f.getBuffer() + header.ofsRibbonEmitters);
@@ -543,21 +543,21 @@ void Model::initAnimated(const MPQFile& f)
       ribbons[i].init(f, rdefs[i], globalSequences);
     }
   }
-  
+
   // just use the first camera, meh
   if (header.nCameras>0) {
     ModelCameraDef *camDefs = reinterpret_cast<ModelCameraDef*>(f.getBuffer() + header.ofsCameras);
     cam.init(f, camDefs[0], globalSequences);
   }
-  
+
   // init lights
   if (header.nLights) {
     lights = new ModelLight[header.nLights];
     ModelLightDef *lDefs = reinterpret_cast<ModelLightDef*>(f.getBuffer() + header.ofsLights);
-    for (size_t i=0; i<header.nLights; ++i) 
+    for (size_t i=0; i<header.nLights; ++i)
       lights[i].init(f, lDefs[i], globalSequences);
   }
-  
+
   animcalc = false;
 }
 
@@ -580,22 +580,22 @@ void Model::animate(int _anim)
   int tmax = a.length;
   t %= tmax;
   animtime = t;
-  
+
   if (animBones) {
     calcBones(anim, t);
   }
-  
+
   if (animGeometry) {
-    
+
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
     glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2*vbufsize, NULL, GL_STREAM_DRAW_ARB);
     vertices = reinterpret_cast<Vec3D*>(glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
-    
+
     // transform vertices
     ModelVertex *ov = origVertices;
     for (size_t i=0; i<header.nVertices; ++i,++ov) {
       Vec3D v(0,0,0), n(0,0,0);
-      
+
       for (size_t b=0; b<4; ++b) {
         if (ov->weights[b]>0) {
           Vec3D tv = bones[ov->bones[b]].mat * ov->pos;
@@ -604,7 +604,7 @@ void Model::animate(int _anim)
           n += tn * (static_cast<float>(ov->weights[b]) / 255.0f);
         }
       }
-      
+
       /*
        vertices[i] = v;
        normals[i] = n;
@@ -612,28 +612,28 @@ void Model::animate(int _anim)
       vertices[i] = v;
       vertices[header.nVertices + i] = n.normalize(); // shouldn't these be normal by default?
     }
-    
+
     glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
-    
+
   }
-  
+
   for (size_t i=0; i<header.nLights; ++i) {
     if (lights[i].parent>=0) {
       lights[i].tpos = bones[lights[i].parent].mat * lights[i].pos;
       lights[i].tdir = bones[lights[i].parent].mrot * lights[i].dir;
     }
   }
-  
+
   for (size_t i=0; i<header.nParticleEmitters; ++i) {
     // random time distribution for teh win ..?
     int pt = (t + static_cast<int>(tmax*particleSystems[i].tofs)) % tmax;
     particleSystems[i].setup(anim, pt);
   }
-  
+
   for (size_t i=0; i<header.nRibbonEmitters; ++i) {
     ribbons[i].setup(anim, t);
   }
-  
+
   if (animTextures) {
     for (size_t i=0; i<header.nTexAnims; ++i) {
       texanims[i].calc(anim, t);
@@ -645,15 +645,15 @@ bool ModelRenderPass::init(Model *m)
 {
   // May aswell check that we're going to render the geoset before doing all this crap.
   if (m->showGeosets[geoset]) {
-    
+
     // COLOUR
     // Get the colour and transparency and check that we should even render
     ocol = Vec4D(1.0f, 1.0f, 1.0f, m->trans);
     ecol = Vec4D(0.0f, 0.0f, 0.0f, 0.0f);
-    
+
     //if (m->trans == 1.0f)
     //  return false;
-    
+
     // emissive colors
     if (color!=-1 && m->colors[color].color.uses(0)) {
       Vec3D c = m->colors[color].color.getValue(0,m->animtime);
@@ -661,35 +661,35 @@ bool ModelRenderPass::init(Model *m)
         float o = m->colors[color].opacity.getValue(m->anim,m->animtime);
         ocol.w = o;
       }
-      
+
       if (unlit) {
         ocol.x = c.x; ocol.y = c.y; ocol.z = c.z;
       } else {
         ocol.x = ocol.y = ocol.z = 0;
       }
-      
+
       ecol = Vec4D(c, ocol.w);
       glMaterialfv(GL_FRONT, GL_EMISSION, ecol);
     }
-    
+
     // opacity
     if (opacity!=-1) {
       if (m->transparency[opacity].trans.uses(0))
         ocol.w *= m->transparency[opacity].trans.getValue(0, m->animtime);
     }
-    
+
     // exit and return false before affecting the opengl render state
     if (!((ocol.w > 0) && (color==-1 || ecol.w > 0)))
       return false;
-    
+
     // TEXTURE
-    if( m->_specialTextures[tex] == -1 ) 
+    if( m->_specialTextures[tex] == -1 )
       m->_textures[tex]->bind();
-    else 
+    else
       m->_replaceTextures[m->_specialTextures[tex]]->bind();
-    
+
     // TODO: Add proper support for multi-texturing.
-    
+
     // blend mode
     switch (blendmode) {
       case BM_OPAQUE:  // 0
@@ -716,69 +716,69 @@ bool ModelRenderPass::init(Model *m)
         break;
       case BM_MODULATE2: // 6
         glEnable(GL_BLEND);
-        glBlendFunc(GL_DST_COLOR,GL_SRC_COLOR); 
+        glBlendFunc(GL_DST_COLOR,GL_SRC_COLOR);
         break;
       default:
         LogError << "Unknown blendmode: " << blendmode << std::endl;
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
-    
+
     //if (cull)
     //  glEnable(GL_CULL_FACE);
-    
+
     // Texture wrapping around the geometry
     if (swrap)
       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
     if (twrap)
       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-    
+
     // no writing to the depth buffer.
     if (nozwrite)
       glDepthMask(GL_FALSE);
-    
+
     if (unlit) {
       glDisable(GL_LIGHTING);
     }
-    
+
     // Environmental mapping, material, and effects
     if (useenvmap) {
       // Turn on the 'reflection' shine, using 18.0f as that is what WoW uses based on the reverse engineering
       // This is now set in InitGL(); - no need to call it every render.
       glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
-      
+
       // env mapping
       glEnable(GL_TEXTURE_GEN_S);
       glEnable(GL_TEXTURE_GEN_T);
-      
+
       const GLint maptype = GL_SPHERE_MAP;
       //const GLint maptype = GL_REFLECTION_MAP_ARB;
-      
+
       glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, maptype);
       glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
     }
-    
+
     if (texanim!=-1) {
       glMatrixMode(GL_TEXTURE);
       glPushMatrix();
-      
+
       m->texanims[texanim].setup(texanim);
     }
-    
+
     // color
     glColor4fv(ocol);
     //glMaterialfv(GL_FRONT, GL_SPECULAR, ocol);
-    
+
     // don't use lighting on the surface
     if (unlit)
       glDisable(GL_LIGHTING);
-    
+
     if (blendmode<=1 && ocol.w<1.0f)
       glEnable(GL_BLEND);
-    
+
     return true;
   }
-  
+
   return false;
 }
 
@@ -846,15 +846,15 @@ void Model::drawModel( /*bool unlit*/ )
 {
   // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
 
-  if( animated ) 
+  if( animated )
   {
-    if( animGeometry ) 
+    if( animGeometry )
     {
       glBindBuffer( GL_ARRAY_BUFFER, vbuf );
       glVertexPointer( 3, GL_FLOAT, 0, 0 );
       glNormalPointer( GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize) );
-    } 
-    else 
+    }
+    else
     {
       glBindBuffer( GL_ARRAY_BUFFER, vbuf );
       glVertexPointer( 3, GL_FLOAT, 0, 0 );
@@ -868,13 +868,13 @@ void Model::drawModel( /*bool unlit*/ )
 
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glAlphaFunc( GL_GREATER, 0.3f );
-  
+
   for (size_t i=0; i<passes.size(); ++i) {
     ModelRenderPass &p = passes[i];
-    
+
     if (p.init(this)) {
       // we don't want to render completely transparent parts
-      
+
       // render
       if (animated) {
         //glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
@@ -892,16 +892,16 @@ void Model::drawModel( /*bool unlit*/ )
         }
         glEnd();
       }
-      
+
       p.deinit();
     }
-    
+
   }
   // done with all render ops
-  
+
   glAlphaFunc (GL_GREATER, 0.0f);
   glDisable (GL_ALPHA_TEST);
-  
+
   GLfloat czero[4] = {0,0,0,1};
   glMaterialfv(GL_FRONT, GL_EMISSION, czero);
   glColor4f(1,1,1,1);
@@ -911,16 +911,16 @@ void Model::drawModel( /*bool unlit*/ )
 void Model::drawModelSelect()
 {
   // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
-  
-  if( animated ) 
+
+  if( animated )
   {
-    if( animGeometry ) 
+    if( animGeometry )
     {
       glBindBuffer( GL_ARRAY_BUFFER, vbuf );
       glVertexPointer( 3, GL_FLOAT, 0, 0 );
       glNormalPointer( GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize) );
-    } 
-    else 
+    }
+    else
     {
       glBindBuffer( GL_ARRAY_BUFFER, vbuf );
       glVertexPointer( 3, GL_FLOAT, 0, 0 );
@@ -931,7 +931,7 @@ void Model::drawModelSelect()
     glBindBuffer( GL_ARRAY_BUFFER, tbuf );
     glTexCoordPointer( 2, GL_FLOAT, 0, 0 );
   }
-  
+
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glAlphaFunc( GL_GREATER, 0.3f );
 
@@ -948,11 +948,11 @@ void Model::drawModelSelect()
         // I can't notice a difference but I guess it can't hurt
         glDrawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
 
-      } 
-	  else 
+      }
+	  else
 	  {
         glBegin(GL_TRIANGLES);
-		for (size_t k = 0, b=p.indexStart; k<p.indexCount; ++k,++b) 
+		for (size_t k = 0, b=p.indexStart; k<p.indexCount; ++k,++b)
 		{
 			uint16_t a = indices[b];
 			glNormal3fv(normals[a]);
@@ -967,7 +967,7 @@ void Model::drawModelSelect()
 
   }
   // done with all render ops
-  
+
   glAlphaFunc (GL_GREATER, 0.0f);
   glDisable (GL_ALPHA_TEST);
 
@@ -975,7 +975,7 @@ void Model::drawModelSelect()
   glMaterialfv(GL_FRONT, GL_EMISSION, czero);
   glColor4f(1,1,1,1);
   glDepthMask(GL_TRUE);
-  
+
 }
 
 void TextureAnim::calc(int anim, int time)
@@ -1026,7 +1026,7 @@ void ModelCamera::setup( int time )
   {
     return;
   }
-    
+
   video.fov( fov * 34.5f );
   video.nearclip( nearclip );
   video.farclip( farclip );
@@ -1062,16 +1062,16 @@ void ModelLight::init(const MPQFile& f, const ModelLightDef &mld, int *global)
 }
 
 void ModelLight::setup(int time, OpenGL::Light l)
-{ 
+{
   Vec4D ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
   Vec4D diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
   Vec4D p;
-  
+
   enum ModelLightTypes {
     MODELLIGHT_DIRECTIONAL=0,
     MODELLIGHT_POINT
   };
-  
+
   if (type==MODELLIGHT_DIRECTIONAL) {
     // directional
     p = Vec4D(tdir, 0.0f);
@@ -1100,11 +1100,11 @@ void Bone::init(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **
 {
   parent = b.parent;
   pivot = fixCoordSystem(b.pivot);
-  
+
   static const int MODELBONE_BILLBOARD = 8;
-  
+
   billboard = (b.flags & MODELBONE_BILLBOARD) != 0;
-  
+
   trans.init(b.translation, f, global, animfiles);
   rot.init(b.rotation, f, global, animfiles);
   scale.init(b.scaling, f, global, animfiles);
@@ -1118,11 +1118,11 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
   if (calc) return;
   Matrix m;
   Quaternion q;
-  
+
   bool tr = rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard;
   if (tr) {
     m.translation(pivot);
-    
+
     if (trans.uses(anim)) {
       m *= Matrix::newTranslation(trans.getValue(anim, time));
     }
@@ -1136,7 +1136,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
     if (billboard) {
       float modelview[16];
       glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
-      
+
       Vec3D vRight = Vec3D(modelview[0], modelview[4], modelview[8]);
       Vec3D vUp = Vec3D(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
       //Vec3D vUp = Vec3D(0,1,0); // Cylindrical billboarding
@@ -1148,25 +1148,25 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
       m.m[1][1] = vUp.y;
       m.m[2][1] = vUp.z;
     }
-    
+
     m *= Matrix::newTranslation(pivot*-1.0f);
-    
+
   } else m.unit();
-  
+
   if (parent>=0) {
     allbones[parent].calcMatrix(allbones, anim, time);
     mat = allbones[parent].mat * m;
   } else mat = m;
-  
+
   // transform matrix for normal vectors ... ??
   if (rot.uses(anim)) {
     if (parent>=0) {
       mrot = allbones[parent].mrot * Matrix::newQuatRotate(q);
     } else mrot = Matrix::newQuatRotate(q);
   } else mrot.unit();
-  
+
   transPivot = mat * pivot;
-  
+
   calc = true;
 }
 
@@ -1175,35 +1175,35 @@ void Model::draw()
 {
   if(!finishedLoading())
     return;
-    
-  if( gWorld && gWorld->drawfog ) 
-    glEnable( GL_FOG );  
+
+  if( gWorld && gWorld->drawfog )
+    glEnable( GL_FOG );
   else
     glDisable( GL_FOG );
 
-  if( !animated ) 
+  if( !animated )
   {
     glCallList( ModelDrawList );
-  } 
-  else 
+  }
+  else
   {
-    if( !animcalc || mPerInstanceAnimation ) 
+    if( !animcalc || mPerInstanceAnimation )
     {
       animate( 0 );
       animcalc = true;
     }
-    
-    
+
+
     lightsOn( GL_LIGHT4 );
         drawModel( /*false*/ );
     lightsOff( GL_LIGHT4 );
 
 
     // draw particle systems & ribbons
-    for( size_t i = 0; i < header.nParticleEmitters; ++i ) 
+    for( size_t i = 0; i < header.nParticleEmitters; ++i )
       particleSystems[i].draw();
 
-    for( size_t i = 0; i < header.nRibbonEmitters; ++i ) 
+    for( size_t i = 0; i < header.nRibbonEmitters; ++i )
       ribbons[i].draw();
   }
 }
@@ -1212,22 +1212,22 @@ void Model::drawSelect()
 {
   if( !animated )
     glCallList(SelectModelDrawList);
-  else 
+  else
   {
       if( !animcalc || mPerInstanceAnimation )
       {
         animate( 0 );
         animcalc = true;
       }
-    
+
     drawModelSelect();
 
     //QUESTION: Do we need to drow this stuff for selectio??
     // draw particle systems
     // for( size_t i = 0; i < header.nParticleEmitters; ++i )
       // particleSystems[i].draw();
-    
-     //QUESTION: Do we need to drow this stuff for selectio??    
+
+     //QUESTION: Do we need to drow this stuff for selectio??
     // draw ribbons
     // for( size_t i = 0; i < header.nRibbonEmitters; ++i )
        //ribbons[i].draw();

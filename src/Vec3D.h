@@ -126,7 +126,7 @@ class Vec2D {
 public:
   float x;
   float y;
-  
+
   Vec2D(float x0 = 0.0f, float y0 = 0.0f)
   : x(x0)
   , y(y0)

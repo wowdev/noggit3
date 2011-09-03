@@ -54,34 +54,34 @@ void MPQArchive::finishLoading()
 {
   if( finished )
     return;
-    
+
   HANDLE fh;
-  
+
   boost::mutex::scoped_lock lock2(gMPQFileMutex);
   boost::mutex::scoped_lock lock(gListfileLoadingMutex);
 
   if( SFileOpenFileEx( _archiveHandle, "(listfile)", 0, &fh ) )
   {
     size_t filesize = SFileGetFileSize( fh );
-  
+
     char* readbuffer = new char[filesize];
     SFileReadFile( fh, readbuffer, filesize );
     SFileCloseFile( fh );
-   
+
   	std::string list( readbuffer );
-  	
-  	boost::algorithm::to_lower( list ); 
-  	boost::algorithm::replace_all( list, "\r\n", "\n" ); 
-  	
-  	std::vector<std::string> temp; 
-  	boost::algorithm::split( temp, list, boost::algorithm::is_any_of( "\n" ) ); 
+
+  	boost::algorithm::to_lower( list );
+  	boost::algorithm::replace_all( list, "\r\n", "\n" );
+
+  	std::vector<std::string> temp;
+  	boost::algorithm::split( temp, list, boost::algorithm::is_any_of( "\n" ) );
   	gListfile.insert( gListfile.end(), temp.begin(), temp.end() );
-  	
+
     delete[] readbuffer;
   }
-  
+
   finished = true;
-  
+
   if( MPQArchive::allFinishedLoading() )
   {
     gListfile.sort();
@@ -156,17 +156,17 @@ MPQFile::MPQFile( const std::string& filename )
   boost::mutex::scoped_lock lock(gMPQFileMutex);
 
   std::string diskpath = Project::getInstance()->getPath().append(filename);
-  
+
   size_t found = diskpath.find( "\\" );
   while( found != std::string::npos )
   {
     diskpath.replace( found, 1, "/" );
     found = diskpath.find( "\\" );
   }
-  
+
   fname = diskpath;
   std::transform( fname.begin(), fname.end(), fname.begin(), ::tolower );
-  
+
   std::ifstream input( diskpath.c_str(), std::ios_base::binary | std::ios_base::in );
   if( input.is_open() )
   {
@@ -183,16 +183,16 @@ MPQFile::MPQFile( const std::string& filename )
     input.close();
     return;
   }
-  
+
   std::string filename_corrected = filename;
-  
+
   found = filename_corrected.find( "/" );
   while( found != std::string::npos )
   {
     filename_corrected.replace( found, 1, "\\" );
     found = filename_corrected.find( "/" );
   }
-  
+
   for( ArchivesMap::reverse_iterator i = _openArchives.rbegin(); i != _openArchives.rend(); ++i )
   {
     HANDLE fileHandle;
@@ -224,14 +224,14 @@ bool MPQFile::exists( const std::string& filename )
       return true;
 
   std::string diskpath = Project::getInstance()->getPath().append(filename);
-  
+
   size_t found = diskpath.find( "\\" );
   while( found != std::string::npos )
   {
     diskpath.replace( found, 1, "/" );
     found = diskpath.find( "\\" );
   }
-  
+
   FILE* fd = fopen( diskpath.c_str(), "rb" );
 
   if( fd )
@@ -245,7 +245,7 @@ bool MPQFile::exists( const std::string& filename )
 
 void MPQFile::save(const char* filename)  //save to MPQ
 {
-  //! \todo Use const std::string& as parameter. 
+  //! \todo Use const std::string& as parameter.
   //! \todo Get MPQ to save to via dialog or use development.MPQ.
   //! \todo Create MPQ nicer, if not existing.
   //! \todo Use a pointer to the archive instead of searching it by filename.
@@ -257,14 +257,14 @@ void MPQFile::save(const char* filename)  //save to MPQ
 		SFileCreateArchive(newmodmpq.c_str(),MPQ_CREATE_ARCHIVE_V2 | MPQ_CREATE_ATTRIBUTES,0x40,&mpq_a);
     //! \note Is locale setting needed? LOCALE_NEUTRAL is windows only.
 		SFileSetFileLocale(mpq_a,0); // 0 = LOCALE_NEUTRAL.
-		SFileAddFileEx(mpq_a,"shaders\\terrain1.fs","myworld",MPQ_FILE_COMPRESS,MPQ_COMPRESSION_ZLIB);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld" 
+		SFileAddFileEx(mpq_a,"shaders\\terrain1.fs","myworld",MPQ_FILE_COMPRESS,MPQ_COMPRESSION_ZLIB);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld"
 		SFileCompactArchive(mpq_a);
 		SFileCloseArchive(mpq_a);
 		modmpqpath=newmodmpq;
 	}
 	else
 	  MPQArchive::unloadMPQ( modmpqpath );
-	  
+
   SFileOpenArchive(modmpqpath.c_str(), 0, 0, &mpq_a );
   SFileSetLocale(0);
   std::string nameInMPQ = filename;
@@ -284,7 +284,7 @@ void MPQFile::save(const char* filename)  //save to MPQ
 
 size_t MPQFile::read(void* dest, size_t bytes)
 {
-  if (eof) 
+  if (eof)
     return 0;
 
   size_t rpos = pointer + bytes;
@@ -321,7 +321,7 @@ void MPQFile::close()
 {
   delete[] buffer;
   buffer = NULL;
-  
+
   eof = true;
 }
 
@@ -333,7 +333,7 @@ size_t MPQFile::getSize() const
 void FixFilePath( std::string& pFilename )
 {
   //std::transform( pFilename.begin(), pFilename.end(), pFilename.begin(), ::tolower );
-  
+
   size_t found = pFilename.find( "/" );
   while( found != std::string::npos )
   {
@@ -360,7 +360,7 @@ char* MPQFile::getPointer() const
 void MPQFile::SaveFile()
 {
   std::string lFilename = fname;
-  
+
   size_t found = lFilename.find( "\\" );
   while( found != std::string::npos )
   {
@@ -368,24 +368,24 @@ void MPQFile::SaveFile()
     found = lFilename.find( "\\" );
   }
 
-  std::string lDirectoryName = lFilename;  
+  std::string lDirectoryName = lFilename;
 
   found = lDirectoryName.find_last_of("/\\");
   if( found == std::string::npos || !boost::filesystem::create_directories( lDirectoryName.substr( 0, found + 1 ) ) )
   {
     LogError << "Is \"" << lDirectoryName << "\" really a location I can write to? Saving failed." << std::endl;
   }
-  
+
   std::ofstream output( lFilename.c_str(), std::ios_base::binary | std::ios_base::out );
   if( output.is_open() )
   {
     Log << "Saving file \"" << lFilename << "\"." << std::endl;
-    
+
     output.write( buffer, size );
     output.close();
-    
+
     External = true;
-    
+
     save(lFilename.c_str());
   }
 }

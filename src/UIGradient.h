@@ -6,13 +6,13 @@
 
 class UIGradient : public UIFrame
 {
-protected:  
+protected:
   Vec4D  MinColor;
   Vec4D  MaxColor;
   Vec4D  ClickColor;
   float  value;
   void (*clickFunc)(float val);
-  
+
 public:
   bool  horiz;
 

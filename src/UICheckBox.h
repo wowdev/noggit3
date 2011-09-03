@@ -13,7 +13,7 @@ class UICheckBox : public UIFrame
 {
 public:
   typedef UICheckBox* Ptr;
-  
+
 protected:
   UITexture::Ptr check;
   UIText::Ptr text;
@@ -22,7 +22,7 @@ protected:
   void (*clickFunc)( bool, int );
 
   UIToggleGroup::Ptr mToggleGroup;
-  
+
 public:
   UICheckBox( float, float, const std::string& );
   UICheckBox( float, float, const std::string&, UIToggleGroup *, int );

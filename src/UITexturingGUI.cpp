@@ -85,9 +85,9 @@ void LoadTextureNames()
   }
 
   bool tilesetsfound = false;
-  
+
   while(!MPQArchive::allFinishedLoading()) MPQArchive::allFinishLoading(); // wait for listfiles.
-  
+
   for( std::list<std::string>::iterator it = gListfile.begin(); it != gListfile.end(); ++it )
   {
     if( it->find( "tileset" ) != std::string::npos )
@@ -113,7 +113,7 @@ void LoadTextureNames()
     std::string tString = it->substr( it->find_first_of( "\\/" ) + 1, it->find_last_of( "\\/" ) - it->find_first_of( "\\/" ) - 1 );
     tilesetDirectories.push_back( tString );
   }
-  
+
   std::sort( tilesetDirectories.begin(), tilesetDirectories.end() );
   tilesetDirectories.resize( std::unique( tilesetDirectories.begin(), tilesetDirectories.end() ) - tilesetDirectories.begin() );
 }
@@ -136,7 +136,7 @@ bool TextureInPalette( const std::string& pFName )
     }
     return false;
   }
-  
+
   if( gActiveDirectoryFilters.size() )
   {
     for( std::vector<std::string>::iterator lFilter = gActiveDirectoryFilters.begin(); lFilter != gActiveDirectoryFilters.end(); lFilter++ )
@@ -148,7 +148,7 @@ bool TextureInPalette( const std::string& pFName )
     }
     return false;
   }
-  
+
   return true;
 }
 
@@ -157,7 +157,7 @@ int gCurrentPage;
 void showPage( int pPage )
 {
   OpenGL::Texture* lSelectedTexture = UITexturingGUI::getSelectedTexture();
-  
+
   if( gPageNumber )
   {
     std::stringstream pagenumber;
@@ -167,7 +167,7 @@ void showPage( int pPage )
 
   int i = 0;
   const unsigned int lIndex = pal_cols * pal_rows * pPage;
-  
+
   for( std::vector<OpenGL::Texture*>::iterator lPageStart = gTexturesInList.begin() + ( lIndex > gTexturesInList.size() ? 0 : lIndex ); lPageStart != gTexturesInList.end(); lPageStart++ )
   {
     curTextures[i]->show();
@@ -216,9 +216,9 @@ void texturePaletteClick( UIFrame* /*f*/, int id )
 {
   if( curTextures[id]->hidden() )
     return;
-  
+
   UITexturingGUI::setSelectedTexture( gTexturesInPage[id] );
-  
+
   if( UITexturingGUI::getSelectedTexture() )
   {
     UITexturingGUI::updateSelectedTexture();
@@ -254,9 +254,9 @@ void InitFilenameFilterList()
 {
   if( gFilenameFiltersInited )
     return;
-  
+
   gFilenameFiltersInited = true;
-  
+
   gFilenameFilters.insert( std::pair<int,std::string>( 0, "Base" ) );
   gFilenameFilters.insert( std::pair<int,std::string>( 1, "Brick" ) );
   gFilenameFilters.insert( std::pair<int,std::string>( 2, "Brush" ) );
@@ -313,7 +313,7 @@ void clickFilterTexture(bool value,int id)
       }
     }
   }
-  
+
   updateTextures();
 }
 
@@ -335,7 +335,7 @@ void clickFileFilterTexture(bool value,int id)
       }
     }
   }
-  
+
   updateTextures();
 }
 
@@ -356,17 +356,17 @@ UIFrame* UITexturingGUI::createTexturePalette( int rows, int cols, UIMapViewGUI 
     curTextures[i]->setClickFunc(texturePaletteClick,i);
     windowTexturePalette->addChild(curTextures[i]);
   }
-  
+
   gPageNumber = NULL;
   textSelectedTexture = NULL;
-  
+
   updateTextures();
   texturePaletteClick( 0, 0 );
 
   windowTexturePalette->addChild( gPageNumber = new UIText( 44.0f, 4.0f, "1 / 1", arialn13, eJustifyLeft ) );
   windowTexturePalette->addChild( new UIButton( 20.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Down.blp", changePage, +1 ) );
   windowTexturePalette->addChild( new UIButton( 2.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Down.blp", changePage, -1 ) );
-  
+
   windowTexturePalette->addChild( new UIButton( 145.0f, windowTexturePalette->height() - 24.0f, 132.0f, 28.0f, "Load Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureLoader, 0 ) );
   windowTexturePalette->addChild( new UIButton( 7.0f, windowTexturePalette->height() - 24.0f, 132.0f, 28.0f, "Filter Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureFilter, 0 ) );
 
@@ -390,7 +390,7 @@ UIFrame* UITexturingGUI::createSelectedTexture()
 }
 
 UIFrame* UITexturingGUI::createTilesetLoader()
-{  
+{
   LoadTextureNames();
 
   int columns = tilesetDirectories.size() / 4;
@@ -432,9 +432,9 @@ UIFrame* UITexturingGUI::createTilesetLoader()
 }
 
 UIFrame* UITexturingGUI::createTextureFilter()
-{  
+{
   InitFilenameFilterList();
-  
+
   LoadTextureNames();
   windowTextureFilter = new UICloseWindow( video.xres() / 2.0f - 450.0f, video.yres() / 2.0f - 300.0f, 900.0f, 610.0f, "Texture Filtering", true );
   windowTextureFilter->hide();
@@ -469,7 +469,7 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
   UIWindow *chunkSettingsWindow,*chunkTextureWindow,*chunkEffectWindow;
   windowMapChunk=new UICloseWindow(video.xres()/2.0f-316.0f,video.yres()-369.0f,634.0f,337.0f,"Map Chunk Settings");
   windowMapChunk->movable( true );
-  
+
   chunkSettingsWindow=new UIWindow(11.0f,26.0f,300.0f,300.0f);
   windowMapChunk->addChild(chunkSettingsWindow);
 
@@ -510,14 +510,14 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
   chunkEffectWindow=new UIWindow(8.0f,chunkEffectID->y()+23.0f,284.0f,300.0f-(chunkEffectID->y()+23.0f+8.0f));
   chunkSettingsWindow->addChild(chunkEffectWindow);
   chunkEffectWindow->hide();
-  
+
   chunkEffectModels[0]=new UIText(8.0f,8.0f,"Effect Doodad", arial14, eJustifyLeft);
   chunkEffectWindow->addChild(chunkEffectModels[0]);
   chunkEffectModels[0]->hide();
-  
+
   chunkTextureWindow=new UIWindow(324.0f,26.0f,300.0f,300.0f);
   windowMapChunk->addChild(chunkTextureWindow);
-  
+
   float yPos = 11.0f;
 
     for(int i=1;i<4;++i)
@@ -528,7 +528,7 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
 
     chunkTexture[i]=new UITexture( 10.0f, yPos, 64.0f, 64.0f, "tileset\\generic\\black.blp" );
     chunkTextureWindow->addChild(chunkTexture[i]);
-    
+
     chunkTextureNames[i]=new UIText(83.0f,yPos+5.0f,"Texture Name", arial14, eJustifyLeft);
     chunkTextureWindow->addChild(chunkTextureNames[i]);
 
@@ -540,7 +540,7 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
 
     yPos+=64.0f+8.0f;
   }
-  
+
   return windowMapChunk;
 }
 
@@ -561,11 +561,11 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
   catch(...)
   {
     areaName = "";
-  }  
+  }
   Temp.clear();
   Temp << "AreaID: " << areaName.c_str() << " (" << chunk->areaID << ")" ;
   chunkAreaID->setText(Temp.str().c_str());///
-  
+
   Temp.clear();
   Temp << "Flags: " << chunk->Flags;
   chunkFlags->setText(Temp.str().c_str());///
@@ -591,7 +591,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
   std::stringstream ss;
   ss << "Num Effects: " << chunk->header.nEffectDoodad;
   chunkNumEffects->setText(ss.str().c_str());///
-  
+
   //! /todo rework texture reading
   /*
   int pl=0;
@@ -619,7 +619,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
     chunkTextureFlags[pl]->hide();
     chunkTextureEffectID[pl]->hide();
   }*/
-  
+
 }
 
 OpenGL::Texture* UITexturingGUI::getSelectedTexture(){
@@ -632,7 +632,7 @@ void UITexturingGUI::setSelectedTexture(OpenGL::Texture * t){
 
 /* //! /todo rework!
 void setChunk(MapChunk *chunk)//I dont remember, but is is maybe mine ground texture changing function
-{   
+{
   int i;
 for(i=0;i<4;i++)
    {

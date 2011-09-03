@@ -28,11 +28,11 @@ void AsyncLoader::process()
 AsyncObject* AsyncLoader::nextObjectToLoad()
 {
   boost::mutex::scoped_lock lock( m_loadingMutex );
-  
+
   m_objects.remove_if( isFinished );
-  
+
   std::list<AsyncObject*>::iterator it = m_objects.begin();
-  
+
   if( it == m_objects.end() )
   {
     return NULL;

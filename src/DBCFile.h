@@ -71,7 +71,7 @@ public:
             break;
         }
       }
-      
+
       assert( field + loc < file.fieldCount );
       size_t stringOffset = getUInt( field + loc );
       assert( stringOffset < file.stringSize );
@@ -90,13 +90,13 @@ public:
   class Iterator
   {
   public:
-    Iterator(const DBCFile &file, unsigned char *offset): 
+    Iterator(const DBCFile &file, unsigned char *offset):
       record(file, offset) {}
     /// Advance (prefix only)
-    Iterator & operator++() { 
+    Iterator & operator++() {
       record.offset += record.file.recordSize;
-      return *this; 
-    }  
+      return *this;
+    }
     /// Return address of current instance
     Record const & operator*() const { return record; }
     const Record* operator->() const {
@@ -114,13 +114,13 @@ public:
   private:
     Record record;
   };
-  
+
   inline Record getRecord(size_t id)
   {
     //  assert(data);
     return Record(*this, data + id*recordSize);
   }
-  
+
   inline Iterator begin()
   {
     //  assert(data);
@@ -134,7 +134,7 @@ public:
   /// Trivial
   inline size_t getRecordCount() const { return recordCount;}
   inline size_t getFieldCount() const { return fieldCount; }
-  inline Record getByID( unsigned int id, size_t field = 0 ) 
+  inline Record getByID( unsigned int id, size_t field = 0 )
   {
     for( Iterator i = begin(); i!=end(); ++i )
     {

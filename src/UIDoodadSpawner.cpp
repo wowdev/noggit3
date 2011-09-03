@@ -46,14 +46,14 @@ void UIDoodadSpawner::AddM2()
       selectionPosition = gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition();
     break;
   }
-  
+
   if( MPQFile::exists(_tbox->getValue()) )
   {
 	  std::string ext = boost::filesystem::extension( _tbox->getValue() );
 	  std::transform(ext.begin(), ext.end(),ext.begin(), ::toupper);
 	  if(ext == ".M2")
 	  {
-      gWorld->addM2( ModelManager::add( _tbox->getValue() ), selectionPosition );  
+      gWorld->addM2( ModelManager::add( _tbox->getValue() ), selectionPosition );
 	  }
 	  if(ext == ".WMO")
 	  {

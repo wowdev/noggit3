@@ -5,17 +5,17 @@
 
 //! \todo Proxy objects / handles holding the name and the object.
 
-class ManagedItem 
+class ManagedItem
 {
 private:
   size_t _referenceCount;
-  
+
 public:
   explicit ManagedItem( )
   : _referenceCount( 0 )
   {
   }
-  
+
   virtual ~ManagedItem()
   {
   }
@@ -29,7 +29,7 @@ public:
   {
     --_referenceCount;
   }
-  
+
   inline bool hasNoReferences()
   {
     return _referenceCount == 0;

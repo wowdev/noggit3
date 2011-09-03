@@ -31,21 +31,21 @@ void UIMenuBar::render() const
 
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
-  
+
   texture->bind();
 
   //Draw Top Side
   glBegin( GL_TRIANGLE_STRIP );
     glTexCoord2f( 0.5f, 1.0f );
-    glVertex2f( 0.0f, 33.0f );  
+    glVertex2f( 0.0f, 33.0f );
     glTexCoord2f( 0.5f, 0.0f );
-    glVertex2f( static_cast<float>( video.xres() ), 33.0f );  
+    glVertex2f( static_cast<float>( video.xres() ), 33.0f );
     glTexCoord2f( 0.375f, 1.0f );
     glVertex2f( 0.0f, 17.0f );
     glTexCoord2f( 0.375f, 0.0f );
     glVertex2f( static_cast<float>(video.xres() ), 17.0f );
   glEnd();
-  
+
   OpenGL::Texture::disableTexture();
 }
 
@@ -88,7 +88,7 @@ UIFrame::Ptr UIMenuBar::processLeftClick(float mx,float my)
   {
     return tmp;
   }
-  
+
   CloseAll();
   return NULL;
 }
@@ -127,7 +127,7 @@ UIFrame* MenuItemButton::processLeftClick( float /*pX*/, float /*pY*/ )
   if( clickFunc )
     clickFunc( this, id );
 
-  if(!Environment::getInstance()->CtrlDown) 
+  if(!Environment::getInstance()->CtrlDown)
     mParent->Close();
 
   return this;
@@ -170,10 +170,10 @@ void MenuItemToggle::render() const
 
   glPushMatrix();
   glTranslatef( x(), y(), 0.0f );
-  
+
   OpenGL::Texture::setActiveTexture();
   OpenGL::Texture::enableTexture();
-  
+
   if( !clicked )
     texture->bind();
   else
@@ -189,12 +189,12 @@ void MenuItemToggle::render() const
   glTexCoord2f( 1.0f, 1.0f );
   glVertex2f( width(), height() );
   glEnd();
-  
+
   OpenGL::Texture::disableTexture();
-  
+
   text->render();
   mMyCheckbox->render();
-  
+
   glPopMatrix();
 }
 
@@ -249,7 +249,7 @@ MenuPane::MenuPane( float pX, float pY )
 {
   movable( false );
   hide();
-  
+
   mNumItems = 0;
 }
 
@@ -267,7 +267,7 @@ void MenuPane::Open()
 void MenuPane::fixSizes()
 {
   height( 6.0f + mNumItems * 25.0f );
-  
+
   width( std::max( ( *_children.rbegin() )->width() + 5.0f, width() ) );
   const float buttonWidth = width() - 5.0f;
   for( Children::iterator it( _children.begin() ), end( _children.end() )

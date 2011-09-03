@@ -33,9 +33,9 @@ void WMOInstance::draw() const
 
   glPushMatrix();
   glTranslatef( pos.x, pos.y, pos.z );
-  
+
   const float roty = dir.y - 90.0f;
-  
+
   glRotatef( roty, 0.0f, 1.0f, 0.0f );
   glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
   glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
@@ -51,9 +51,9 @@ void WMOInstance::draw() const
 void WMOInstance::drawSelect()
 {
   glPushMatrix();
-  
+
   glTranslatef( pos.x, pos.y, pos.z );
-  
+
   const float roty = dir.y - 90.0f;
 
   glRotatef( roty, 0.0f, 1.0f, 0.0f );
@@ -62,9 +62,9 @@ void WMOInstance::drawSelect()
 
   mSelectionID = SelectionNames.add( this );
   glPushName( mSelectionID );
-  
+
   wmo->drawSelect( doodadset, pos, -roty );
-  
+
   glPopName();
 
   glPopMatrix();
@@ -73,17 +73,17 @@ void WMOInstance::drawSelect()
 /*void WMOInstance::drawPortals()
 {
   glPushMatrix();
- 
+
   glTranslatef( pos.x, pos.y, pos.z );
 
   const float roty = dir.y - 90.0f;
- 
+
   glRotatef( roty, 0.0f, 1.0f, 0.0f );
   glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
   glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
 
   wmo->drawPortals();
- 
+
   glPopMatrix();
 }*/
 

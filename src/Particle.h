@@ -84,11 +84,11 @@ public:
     mtime = 0;
     rows = 0;
     cols = 0;
-    
+
     model = 0;
     parent = 0;
     _texture = NULL;
-    
+
     slowdown = 0;
     rotation = 0;
     tofs = 0;
@@ -125,7 +125,7 @@ class RibbonEmitter {
   int manim, mtime;
   float length, seglen;
   int numsegs;
-  
+
   Vec3D tpos;
   Vec4D tcolor;
   float tabove, tbelow;

@@ -50,7 +50,7 @@ UICheckBox::UICheckBox( float xPos, float yPos, const std::string& pText, UITogg
   check->hide();
   addChild( check );
   addChild( text );
-  
+
   mToggleGroup->Add( this, pToggleID );
 }
 

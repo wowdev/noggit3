@@ -12,7 +12,7 @@ enum eViewMode
   eViewMode_2D,
   eViewMode_3D
 };
- 
+
 class MapView : public AppState, public HotKeyReceiver
 {
 private:
@@ -32,9 +32,9 @@ private:
   void displayViewMode_Minimap( float t, float dt );
   void displayViewMode_2D( float t, float dt );
   void displayViewMode_3D( float t, float dt );
-  
+
   void displayGUIIfEnabled();
-  
+
   void createGUI();
 
   float mTimespeed;

@@ -10,7 +10,7 @@ class UIDoodadSpawner : public UICloseWindow
 {
 public:
   UIDoodadSpawner();
-  
+
   void AddM2();
 
   UITextBox* _tbox;

@@ -8,7 +8,7 @@
 
 namespace OpenGL { class Texture; };
 namespace freetype { class font_data; };
-  
+
 class UIButton : public UIFrame
 {
 public:
@@ -19,7 +19,7 @@ protected:
   OpenGL::Texture* textureDown;
   std::string _textureFilename;
   std::string _textureDownFilename;
-  
+
   typedef void ( *ClickFunction )( UIFrame::Ptr, int );
   ClickFunction clickFunc;
   int id;
@@ -33,7 +33,7 @@ public:
   explicit UIButton( float x, float y, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
   explicit UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, ClickFunction pFunc, int pFuncParam );
   ~UIButton();
-  
+
   void render() const;
 
   void setLeft();

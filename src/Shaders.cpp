@@ -24,13 +24,13 @@ BLSShader::BLSShader( const std::string& pFilename )
   lShader.read( &length, sizeof( int ) );
   length--;
   buffer = new char[length];
-  lShader.read( buffer, length );  
+  lShader.read( buffer, length );
 
   for( ; buffer[length] <= 0; length-- ) { }
 
   lShader.seek( 0x1C );
   buffer = new char[length];
-  lShader.read( buffer, length );  
+  lShader.read( buffer, length );
 
   mProgramType = magix == 'GXPS' ? GL_FRAGMENT_PROGRAM_ARB : ( 'GXVS' ? GL_VERTEX_PROGRAM_ARB : -1 );
 
@@ -53,12 +53,12 @@ BLSShader::BLSShader( const std::string& pFilename )
       LogError << "Shader program \"" << pFilename << "\" failed to load. Reason:" << std::endl;
       if( isNative == 0 )
         LogError << "\t\"This fragment program exceeded the limit.\"" << std::endl;
-      
+
       const GLubyte *stringy;
       stringy = glGetString(GL_PROGRAM_ERROR_STRING_ARB);      //This is only available in ARB
       if( stringy )
         LogError << "\t\"" << reinterpret_cast<const char*>( stringy ) << "\"" << std::endl;
-      
+
       int j = 0;
       char localbuffer[256];
       for( int i = errorPos; i < length && j < 128 ; ++i, j++ )
@@ -82,9 +82,9 @@ void initShaders()
 {
   if( video.mSupportShaders )
     reloadShaders();
-  
+
   LogDebug << "Shaders are " << ( video.mSupportShaders ? "enabled." : "disabled." ) << std::endl;
-} 
+}
 
 void reloadShaders()
 {
@@ -196,7 +196,7 @@ ShaderPair::ShaderPair(const char *vprog, const char *fprog, bool fromFile)
 
 void ShaderPair::bind()
 {
-  if (vertex) 
+  if (vertex)
   {
     vertex->bind();
   } else {

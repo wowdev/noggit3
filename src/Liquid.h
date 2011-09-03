@@ -49,7 +49,7 @@ struct MH2O_Tile
     for( int i = 0; i < 8; ++i )
       for( int j = 0; j < 8; j++ )
         mRender[i][j] = false;
-    
+
     for( int i = 0; i < 9; ++i )
       for( int j = 0; j < 9; j++ )
       {
@@ -60,7 +60,7 @@ struct MH2O_Tile
 };
 
 // handle liquids like oceans, lakes, rivers, slime, magma
-class Liquid 
+class Liquid
 {
   int pType;
 
@@ -88,7 +88,7 @@ class Liquid
   Vec3D col;
   int tmpflag;
   bool trans;
-  
+
   unsigned char  *color;
   unsigned char  *waterFlags;
 
@@ -109,7 +109,7 @@ public:
     mDrawList = NULL;
   }
   ~Liquid();
-  
+
 
   //void init(MPQFile &f);
   void initFromTerrain(MPQFile* f, int flags);

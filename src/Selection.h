@@ -18,8 +18,8 @@ class WMOInstance;
 class MapChunk;
 
 /**
- ** nameEntry 
- ** 
+ ** nameEntry
+ **
  ** This is used for selectable objects.
  **
  **/
@@ -41,17 +41,17 @@ public:
   explicit nameEntry( WMOInstance *wmo );
   explicit nameEntry( MapChunk *chunk );
   nameEntry();
-  
+
   const std::string& returnName();
 };
 
 /**
  ** nameEntryManager
- ** 
+ **
  ** This is used for managing those selectable objects.
  **
  **/
- 
+
 class nameEntryManager
 {
 private:
@@ -59,13 +59,13 @@ private:
   std::vector<nameEntry*> items;
 public:
   nameEntryManager();
-  
+
   unsigned int add( ModelInstance *mod );
   unsigned int add( WMOInstance *wmo );
   unsigned int add( MapChunk *chunk );
-  
+
   void del( unsigned int Ref );
-  
+
   nameEntry *findEntry( unsigned int ref ) const;
 };
 

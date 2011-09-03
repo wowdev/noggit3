@@ -111,7 +111,7 @@ void UITreeView::Toggle()
     if( (*childtreeviews)->Expanded() )
       (*childtreeviews)->Toggle();
   }
-  
+
   if( mParent )
     if( !mExpanded )
       mParent->Move( -static_cast<int>( ( _others.size() + mFiles.size() ) ), shared_from_this() );
@@ -158,7 +158,7 @@ UIFrame::Ptr UITreeView::processLeftClick( float mx, float my )
 
   mx -= x();
   my -= y();
-  
+
   if( !mMyButton->hidden() && mMyButton->IsHit( mx, my ) )
     return mMyButton->processLeftClick( mx - mMyButton->x(), my - mMyButton->y() );
 

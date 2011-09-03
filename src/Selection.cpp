@@ -12,8 +12,8 @@
 nameEntryManager SelectionNames;
 
 /**
- ** nameEntry 
- ** 
+ ** nameEntry
+ **
  ** This is used for selectable objects.
  **
  **/
@@ -31,7 +31,7 @@ nameEntry::nameEntry( WMOInstance *wmo )
 {
   type = eEntry_WMO;
   data.wmo = wmo;
-  std::stringstream temp; 
+  std::stringstream temp;
   temp << "Object: " << wmo->mUniqueID << " (WMO)";
   Name = temp.str();
 }
@@ -40,7 +40,7 @@ nameEntry::nameEntry( MapChunk *chunk )
 {
   type = eEntry_MapChunk;
   data.mapchunk = chunk;
-  std::stringstream temp; 
+  std::stringstream temp;
   temp << "Mapchunk: " << chunk->px << ", " << chunk->py;
   Name = temp.str();
 }
@@ -58,11 +58,11 @@ const std::string& nameEntry::returnName()
 
 /**
  ** nameEntryManager
- ** 
+ **
  ** This is used for managing those selectable objects.
  **
  **/
- 
+
 unsigned int nameEntryManager::add( ModelInstance *mod )
 {
   items.push_back( new nameEntry( mod ) );
