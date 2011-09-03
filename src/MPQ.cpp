@@ -386,7 +386,8 @@ void MPQFile::SaveFile()
 
     External = true;
 
-    save(lFilename.c_str());
+    //! \todo Enable again. After fixing it.
+    //save(lFilename.c_str());
   }
 }
 
