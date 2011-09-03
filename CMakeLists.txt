@@ -179,7 +179,7 @@ TARGET_LINK_LIBRARIES( noggit ${OPENGL_LIBRARIES} ${FREETYPE_LIBRARIES} ${SDL_LI
 
 IF(APPLE)
   # Copy the binary to bin/.
-  INSTALL(TARGETS noggit 
+  INSTALL(TARGETS noggit
     BUNDLE DESTINATION ${CMAKE_CURRENT_BINARY_DIR} COMPONENT Runtime
     RUNTIME DESTINATION bin COMPONENT Runtime
     )
@@ -187,13 +187,13 @@ IF(APPLE)
   INCLUDE(InstallRequiredSystemLibraries)
 
   SET(APPS "${CMAKE_CURRENT_BINARY_DIR}/noggit.app")
-  
+
   SET(DIRS ${OPENGL_LIBRARY_DIR} ${FREETYPE_LIBRARY_DIR} ${SDL_LIBRARY_DIR} ${STORMLIB_LIBRARY_DIR} ${Boost_LIBRARY_DIR} ${GLEW_LIBRARY_DIR})
   INSTALL(CODE "
    include(BundleUtilities)
    fixup_bundle(\"${APPS}\"   \"\"   \"${DIRS}\")
    " COMPONENT Runtime)
-   
+
   SET(CPACK_BUNDLE_NAME "Noggit 3")
   SET(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/media/Info.plist")
   SET(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/media/noggit.icns")
