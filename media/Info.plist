@@ -2,23 +2,23 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>noggit</string>
-	<key>CFBundleIconFile</key>
-	<string>noggit</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.noggit.noggit</string>
-	<key>CFBundleName</key>
-	<string>Noggit 3 Studio</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleVersion</key>
-	<string>3</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+    <key>CFBundleExecutable</key>
+    <string>noggit</string>
+    <key>CFBundleIconFile</key>
+    <string>noggit</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.noggit.noggit</string>
+    <key>CFBundleName</key>
+    <string>Noggit 3 Studio</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleVersion</key>
+    <string>3</string>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
 </dict>
 </plist>

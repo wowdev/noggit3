@@ -117,15 +117,15 @@ namespace internal
     inline bool is_overlong_sequence(uint32_t cp, octet_difference_type length)
     {
         if (cp < 0x80) {
-            if (length != 1) 
+            if (length != 1)
                 return true;
         }
         else if (cp < 0x800) {
-            if (length != 2) 
+            if (length != 2)
                 return true;
         }
         else if (cp < 0x10000) {
-            if (length != 3) 
+            if (length != 3)
                 return true;
         }
 
@@ -190,7 +190,7 @@ namespace internal
                                 *code_point = cp;
                             ret_code = UTF8_OK;
                         }
-                        else 
+                        else
                             ret_code = INCOMPLETE_SEQUENCE;
                     }
                     else
@@ -239,7 +239,7 @@ namespace internal
                     else
                         ret_code = NOT_ENOUGH_ROOM;
                 }
-                else 
+                else
                     ret_code = INCOMPLETE_SEQUENCE;
             }
             else
@@ -293,7 +293,7 @@ namespace internal
                 else
                     err = OVERLONG_SEQUENCE;
             }
-            else 
+            else
                 err = INVALID_CODE_POINT;
         }
 
@@ -341,8 +341,8 @@ namespace internal
             ((it != end) && (internal::mask8(*it))   == bom[2])
            );
     }
-	
-	//Deprecated in release 2.3 
+
+    //Deprecated in release 2.3
     template <typename octet_iterator>
     inline bool is_bom (octet_iterator it)
     {
