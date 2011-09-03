@@ -13,24 +13,30 @@
 
 // TODO : Add TreeView. Add ScrollBar. Add ModelPreview
 
-const int winWidth = 500;
-const int winHeight = 100;
+static const float winWidth( 500.0f );
+static const float winHeight( 100.0f );
+
+void AddM2Click( UITextBox::Ptr textBox, const std::string& value )
+{
+  ( static_cast<UIDoodadSpawner *>( textBox->parent() ) )->AddM2( value );
+}
 
 void AddM2Click( UIFrame* f, int i )
 {
-  ( static_cast<UIDoodadSpawner *>( f->parent() ) )->AddM2();
+  UITextBox::Ptr textBox( static_cast<UITextBox::Ptr>( f ) );
+  ( static_cast<UIDoodadSpawner *>( textBox->parent() ) )->AddM2( textBox->value() );
 }
 
 UIDoodadSpawner::UIDoodadSpawner( )
 : UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Test", true )
-, _button(new UIButton( 145.0f, winHeight - 24.0f, 132.0f, 28.0f, "Test", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", AddM2Click, 0 ))
-, _tbox(new UITextBox( 30.0f, 30.0f, 400.0f, 40.0f, "Interface\\Common\\Common-Input-Border.blp", "Interface\\Common\\Common-Input-Border.blp") )
+, _button( new UIButton( 145.0f, winHeight - 24.0f, 132.0f, 28.0f, "Test", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", AddM2Click, 0 ) )
+, _tbox( new UITextBox( 30.0f, 30.0f, 400.0f, 40.0f ) )
 {
   addChild( _button );
   addChild( _tbox );
 }
 
-void UIDoodadSpawner::AddM2()
+void UIDoodadSpawner::AddM2( const std::string& filename )
 {
   Vec3D selectionPosition;
 
@@ -38,26 +44,26 @@ void UIDoodadSpawner::AddM2()
   {
     case eEntry_Model:
       selectionPosition = gWorld->GetCurrentSelection()->data.model->pos;
-    break;
+      break;
     case eEntry_WMO:
       selectionPosition = gWorld->GetCurrentSelection()->data.wmo->pos;
-    break;
+      break;
     case eEntry_MapChunk:
       selectionPosition = gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition();
-    break;
+      break;
   }
 
-  if( MPQFile::exists(_tbox->getValue()) )
+  if( MPQFile::exists( filename ) )
   {
-    std::string ext = boost::filesystem::extension( _tbox->getValue() );
-    std::transform(ext.begin(), ext.end(),ext.begin(), ::toupper);
+    std::string ext( boost::filesystem::extension( filename ) );
+    std::transform( ext.begin(), ext.end(), ext.begin(), ::toupper );
     if(ext == ".M2")
     {
-      gWorld->addM2( ModelManager::add( _tbox->getValue() ), selectionPosition );
+      gWorld->addM2( ModelManager::add( filename ), selectionPosition );
     }
     if(ext == ".WMO")
     {
-      gWorld->addWMO( WMOManager::add( _tbox->getValue() ), selectionPosition );
+      gWorld->addWMO( WMOManager::add( filename ), selectionPosition );
     }
   }
  }
