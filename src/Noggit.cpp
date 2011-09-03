@@ -389,6 +389,8 @@ int main( int argc, char *argv[] )
   Uint32 ticks( SDL_GetTicks() );
   AppState* activeAppState( NULL );
   Uint32 time( 0 );
+  
+  SDL_EnableUNICODE( true );
 
   SDL_Event event;
 
@@ -419,7 +421,7 @@ int main( int argc, char *argv[] )
     {
       boost::this_thread::sleep( boost::posix_time::milliseconds( 200 ) );
     }
-    SDL_EnableUNICODE(true);
+    
     while( SDL_PollEvent( &event ) )
     {
       if( event.type == SDL_QUIT )
@@ -450,7 +452,7 @@ int main( int argc, char *argv[] )
         }
       }
     }
-    SDL_EnableUNICODE(false);
+
     if( gPop ) 
     {
       gPop = false;
