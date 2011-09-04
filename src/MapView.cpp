@@ -534,6 +534,12 @@ void adtSetAreaID( UIFrame* /*button*/, int /*id*/ )
     gWorld->setAreaID(Environment::getInstance()->selectedAreaID ,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
+void clearAllModels( UIFrame* /*button*/, int /*id*/ )
+{
+  // call the clearAllModelsOnADT method to clear them all on current ADT
+    gWorld->clearAllModelsOnADT(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+}
+
 void changeZoneIDValue(UIFrame* /*f*/,int set)
 {
   Environment::getInstance()->selectedAreaID = set;
@@ -816,6 +822,7 @@ void MapView::createGUI()
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear height map", clearHeightmap, 0  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Move to position", moveHeightmap, 0  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear texture", clearTexture, 0  );
+  mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear models", clearAllModels, 0  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Switch texture", showTextureSwitcher, 0  );
 
   mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
@@ -1780,6 +1787,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
       else if( e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_6 )
       {
         terrainMode = e->keysym.sym - SDLK_1;
+        mainGui->guiToolbar->IconSelect( terrainMode );
       }
     }
 

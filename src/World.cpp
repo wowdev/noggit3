@@ -1430,7 +1430,14 @@ void World::clearHeight(int /*id*/, int x, int z , int _cx, int _cz)
   glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
 }
 
-
+void World::clearAllModelsOnADT(int x,int z)
+{
+  // get the adt
+  MapTile *curTile;
+  curTile = mTiles[z][x].tile;
+  if(curTile == 0) return;
+  curTile->clearAllModels();
+}
 
 void World::setAreaID(int id, int x,int z)
 {
