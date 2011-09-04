@@ -43,6 +43,7 @@ public:
   void saveTile();
 
   bool isTile( int pX, int pZ );
+  void clearAllModels();
 
 private:
   // MFBO:

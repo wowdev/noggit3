@@ -215,6 +215,7 @@ public:
   void moveHeight(int id, int x, int z , int _cx, int _cz);
 
   void saveWDT();
+  void clearAllModelsOnADT(int x,int z);
 };
 
 extern World *gWorld;

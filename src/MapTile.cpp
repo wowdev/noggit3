@@ -759,6 +759,41 @@ struct filenameOffsetThing
   int filenamePosition;
 };
 
+void MapTile::clearAllModels()
+{
+  Log << "Clear all models from ADT \"" << mFilename << "\"." << std::endl;
+
+  int lID;  // This is a global counting variable. Do not store something in here you need later.
+
+  // Collect some information we need later.
+
+  // Check which doodads and WMOs are on this ADT.
+  Vec3D lTileExtents[2];
+  lTileExtents[0] = Vec3D( this->xbase, 0.0f, this->zbase );
+  lTileExtents[1] = Vec3D( this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE );
+
+  std::map<int, WMOInstance> lObjectInstances;
+  std::map<int, ModelInstance> lModelInstances;
+
+  for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
+    if( checkInside( lTileExtents, it->second.extents ) )
+          gWorld->deleteWMOInstance( it->second.mUniqueID );
+
+  for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
+  {
+    Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
+    lModelExtentsV1[0] = it->second.model->header.BoundingBoxMin + it->second.pos;
+    lModelExtentsV1[1] = it->second.model->header.BoundingBoxMax + it->second.pos;
+    lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
+    lModelExtentsV2[1] = it->second.model->header.VertexBoxMax + it->second.pos;
+
+    if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
+    {
+      gWorld->deleteModelInstance( it->second.d1 );
+    }
+  }
+
+}
 void MapTile::saveTile()
 {
   Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
