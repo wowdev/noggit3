@@ -29,7 +29,6 @@ private:
 
   int mViewMode;
 
-  void displayViewMode_Minimap( float t, float dt );
   void displayViewMode_2D( float t, float dt );
   void displayViewMode_3D( float t, float dt );
 

@@ -1089,19 +1089,26 @@ void MapView::tick( float t, float dt )
           }
           else  if( Environment::getInstance()->ShiftDown)
           {
-            // Paint
+            // Paint 3d if shift down.
             if( UITexturingGUI::getSelectedTexture() )
             {
               if( textureBrush.needUpdate() )
               {
                 textureBrush.GenerateTexture();
               }
-
               if( mViewMode == eViewMode_3D )
                 gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
-              else if( mViewMode == eViewMode_2D )
-                gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
             }
+          }
+          else
+          {
+            // paint 2d if nothing is pressed.
+            if( textureBrush.needUpdate() )
+            {
+              textureBrush.GenerateTexture();
+            }
+            if( mViewMode == eViewMode_2D && !(Environment::getInstance()->ShiftDown) )
+              gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
           }
         break;
 
@@ -1220,44 +1227,6 @@ void MapView::doSelection( bool selectTerrainOnly )
   gWorld->drawSelection( MouseX, MouseY, selectTerrainOnly );
 }
 
-void MapView::displayViewMode_Minimap( float /*t*/, float /*dt*/ )
-{
-  // not used now. !!!
-  // swap with minimapWindow. Delete if minimpa window run 100 %
-    //! \todo  try to use a real map from WoW? either the large map or the minimap would be nice
-  video.clearScreen();
-  video.set2D();
-
-  const int len = 768;
-  const int basex = 200;
-  const int basey = 0;
-
-  glColor4f(1.0f,1.0f,1.0f,1.0f);
-  glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, gWorld->minimap);
-    glBegin(GL_QUADS);
-      glTexCoord2f(0.0f,0.0f);
-      glVertex2i(basex,basey);
-      glTexCoord2f(1.0f,0.0f);
-      glVertex2i(basex+len,basey);
-      glTexCoord2f(1.0f,1.0f);
-      glVertex2i(basex+len,basey+len);
-      glTexCoord2f(0.0f,1.0f);
-      glVertex2i(basex,basey+len);
-    glEnd();
-  glDisable(GL_TEXTURE_2D);
-  glBegin(GL_LINES);
-  float fx, fz;
-  fx = basex + gWorld->camera.x / TILESIZE * 12.0f;
-  fz = basey + gWorld->camera.z / TILESIZE * 12.0f;
-  glVertex2f(fx, fz);
-  glColor4f(1.0f,1.0f,1.0f,0.0f);
-  glVertex2f(fx + 10.0f*cosf(ah/180.0f*PI), fz + 10.0f*sinf(ah/180.0f*PI));
-  glEnd();
-
-  //! \todo  Something is wrong there.
-  //gWorld->skies->drawSky(Vec3D(0.0f,0.0f,0.0f));
-}
 
 void MapView::displayGUIIfEnabled()
 {
@@ -1349,10 +1318,6 @@ void MapView::display( float t, float dt )
 
   switch( mViewMode )
   {
-  case eViewMode_Minimap:
-    displayViewMode_Minimap( t, dt );
-    break;
-
   case eViewMode_2D:
     displayViewMode_2D( t, dt );
     break;
@@ -1929,13 +1894,13 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
     LastClicked->processLeftDrag( e->x - 4, e->y - 4, e->xrel, e->yrel );
   }
 
-  if( mViewMode == eViewMode_2D && leftMouse && !( Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown || Environment::getInstance()->AltDown )  )
+  if( mViewMode == eViewMode_2D && leftMouse &&  Environment::getInstance()->ShiftDown  )
   {
     strafing = ((e->xrel / XSENS) / -1) * 5.0f;
     moving = (e->yrel / YSENS) * 5.0f;
   }
 
-  if( mViewMode == eViewMode_2D && rightMouse && !( Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown || Environment::getInstance()->AltDown )  )
+  if( mViewMode == eViewMode_2D && rightMouse && Environment::getInstance()->ShiftDown  )
   {
     updown = (e->yrel / YSENS);
   }
