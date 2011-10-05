@@ -114,6 +114,8 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 
   theFile.read( &Header, sizeof( MHDR ) );
 
+  mFlags = Header.flags;
+
   // - MCIN ----------------------------------------------
 
   theFile.seek( Header.mcin + 0x14 );
@@ -336,7 +338,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 
   // - MFBO ----------------------------------------------
 
-  if( Header.flags & 1 )
+  if( mFlags & 1 )
   {
     theFile.seek( Header.mfbo + 0x14 );
     theFile.read( &fourcc, 4 );
@@ -1557,7 +1559,7 @@ void MapTile::saveTile()
 //  }
 
   // MFBO
-  if( this->mFlags & 1 )
+  if( mFlags & 1 )
   {
     size_t chunkSize = sizeof( int16_t ) * 9 * 2;
     lADTFile.Extend( 8 + chunkSize );
