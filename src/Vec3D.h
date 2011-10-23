@@ -97,9 +97,9 @@ public:
   inline Vec3D& normalize()
   {
     const float repri (1.0f / length());
-    x /= repri;
-    y /= repri;
-    z /= repri;
+    x *= repri;
+    y *= repri;
+    z *= repri;
     return *this;
   }
 
@@ -203,8 +203,8 @@ public:
   inline Vec2D& normalize()
   {
     const float repri (1.0f / length());
-    x /= repri;
-    y /= repri;
+    x *= repri;
+    y *= repri;
     return *this;
   }
 
