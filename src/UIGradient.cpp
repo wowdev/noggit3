@@ -6,7 +6,7 @@ void UIGradient::render() const
 {
   if( hidden() )
   {
-    return;
+   // return;
   }
 
   glPushMatrix();
@@ -38,17 +38,21 @@ void UIGradient::render() const
     glColor4fv( &MinColor.x );
     glVertex2f( width(), 0.0f );
     glVertex2f( 0.0f, 0.0f );
-    glColor4fv( &MinColor.x );
+    glColor4fv( &MaxColor.x );
     glVertex2f( width(), height() );
     glVertex2f( 0.0f, height() );
     glEnd();
 
+
+
     if( clickable() )
     {
+      glBegin( GL_TRIANGLE_STRIP );
       glColor4fv( &ClickColor.x );
-      glBegin( GL_LINE );
-      glVertex2f( 0.0f, height() * value );
-      glVertex2f( width(), height() * value );
+      glVertex2f( width(), (height() * value) );
+      glVertex2f( 0.0f, (height() * value) );
+      glVertex2f( width(), (height() * value-1.5f) );
+      glVertex2f( 0.0f, (height() * value-1.5f) );
       glEnd();
     }
   }

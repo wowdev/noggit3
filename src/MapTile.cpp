@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include "Environment.h"
 #include "Liquid.h"
 #include "Log.h"
 #include "MapChunk.h"
@@ -17,40 +18,6 @@
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
 
-void renderCylinder(float x1, float y1, float z1, float x2,float y2, float z2, float radius,int subdivisions,GLUquadricObj *quadric)
-{
-  float vx = x2-x1;
-  float vy = y2-y1;
-  float vz = z2-z1;
-
-  //handle the degenerate case of z1 == z2 with an approximation
-  if( vz == 0.0f )
-      vz = .0001f;
-
-  float v = sqrt( vx*vx + vy*vy + vz*vz );
-  float ax = 57.2957795f*acos( vz/v );
-  if ( vz < 0.0f )
-      ax = -ax;
-  float rx = -vy*vz;
-  float ry = vx*vz;
-  glPushMatrix();
-
-  //draw the cylinder body
-  glTranslatef( x1,y1,z1 );
-  glRotatef(ax, rx, ry, 0.0);
-  gluQuadricOrientation(quadric,GLU_OUTSIDE);
-  gluCylinder(quadric, radius, radius, v, subdivisions, 1);
-
-  glPopMatrix();
-}
-void renderCylinder_convenient(float x, float y, float z, float radius,int subdivisions)
-{
-  //the same quadric can be re-used for drawing many cylinders
-  GLUquadricObj *quadric=gluNewQuadric();
-  gluQuadricNormals(quadric, GLU_SMOOTH);
-  renderCylinder(x,y-10,z,x,y+10,z,radius,subdivisions,quadric);
-  gluDeleteQuadric(quadric);
-}
 
 int indexMapBuf(int x, int y)
 {
@@ -490,34 +457,17 @@ float MapTile::getMaxHeight()
   return maxHeight;
 }
 
-//extern float groundBrushRadius;
+extern float groundBrushRadius;
+extern float blurBrushRadius;
+extern int terrainMode;
+extern brush textureBrush;
+
+
 
 void MapTile::draw()
 {
-  /* Selection circle
-  if( false && gWorld->IsSelection( eEntry_MapChunk ) && terrainMode != 3 )
-  {
-    int poly = gWorld->GetCurrentSelectedTriangle();
 
-    glColor4f( 1.0f, 0.3f, 0.3f, 1.0f );
 
-    nameEntry * Selection = gWorld->GetCurrentSelection();
-
-    if( !Selection->data.mapchunk->strip )
-      Selection->data.mapchunk->initStrip();
-
-    float x = ( Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly]].x + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+1]].x + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+2]].x ) / 3;
-    float y = ( Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly]].y + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+1]].y + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+2]].y ) / 3;
-    float z = ( Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly]].z + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+1]].z + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+2]].z ) / 3;
-    glDisable(GL_CULL_FACE);
-    glDepthMask(false);
-    //glDisable(GL_DEPTH_TEST);
-    renderCylinder_convenient( x, y, z, groundBrushRadius, 100 );
-    glEnable(GL_CULL_FACE);
-    //glEnable(GL_DEPTH_TEST);
-    glDepthMask(true);
-
-  }*/
   glColor4f(1,1,1,1);
 
   for (int j=0; j<16; ++j)
