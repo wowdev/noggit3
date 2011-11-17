@@ -1106,47 +1106,11 @@ void MapChunk::draw()
     }
   }
 
+  /* Draw NOT the triangle
   if( gWorld->IsSelection( eEntry_MapChunk ) && gWorld->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3 )
   {
     int poly = gWorld->GetCurrentSelectedTriangle();
 
-    //glClear( /*GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT |*/ GL_STENCIL_BUFFER_BIT );
-    /*glColorMask( false, false, false, false );
-    glEnable(GL_STENCIL_TEST);
-      glStencilFunc(GL_ALWAYS, 1, 1);
-      glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-      glDisable(GL_DEPTH_TEST);
-        glDisable(GL_TEXTURE_2D);
-          glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
-          glStencilFunc(GL_EQUAL, 1, 1);
-          glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
-          glDisable(GL_CULL_FACE);
-            renderCylinder_convenient(tv[strip[poly]].x, tv[strip[poly]].y-10, tv[strip[poly]].z, tv[strip[poly]].x,tv[strip[poly]].y+10, tv[strip[poly]].z, 10.0f,100);
-          glEnable(GL_CULL_FACE);
-        glEnable(GL_TEXTURE_2D);
-      glEnable(GL_DEPTH_TEST);
-      glColorMask(true, true, true, true);
-      glStencilFunc(GL_EQUAL, 1, 1);
-      glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-      glDisable(GL_CULL_FACE);
-        renderCylinder_convenient(tv[strip[poly]].x, tv[strip[poly]].y-10, tv[strip[poly]].z, tv[strip[poly]].x,tv[strip[poly]].y+10, tv[strip[poly]].z, 10.0f,100);
-      glEnable(GL_CULL_FACE);
-    glDisable(GL_STENCIL_TEST );    */
-
-  /*  glColor4f(1,0.3f,0.3f,0.2f);
-
-    float x = ( Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly]].x + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+1]].x + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+2]].x ) / 3;
-    float y = ( Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly]].y + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+1]].y + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+2]].y ) / 3;
-    float z = ( Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly]].z + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+1]].z + Selection->data.mapchunk->tv[Selection->data.mapchunk->strip[poly+2]].z ) / 3;
-    glDisable(GL_CULL_FACE);
-    glDepthMask(false);
-    glDisable(GL_DEPTH_TEST);
-    renderCylinder_convenient( x, y, z, groundBrushRadius, 100 );
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    glDepthMask(true);*/
-
-    //glColor4f(1.0f,0.3f,0.3f,0.2f);
     glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
 
     glPushMatrix();
@@ -1165,6 +1129,7 @@ void MapChunk::draw()
 
     glPopMatrix();
   }
+  */
 
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 

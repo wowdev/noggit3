@@ -678,7 +678,7 @@ void MapView::createGUI()
   setting_ground->addChild( new UICheckBox( 85.0f, 40.0f, "Polynomial", gGroundToggleGroup, 3 ) );
   setting_ground->addChild( new UICheckBox( 6.0f, 65.0f, "Trigonom", gGroundToggleGroup, 4 ) );
   setting_ground->addChild( new UICheckBox( 85.0f, 65.0f, "Quadratic", gGroundToggleGroup, 5 ) );
-  gGroundToggleGroup->Activate( 2 );
+  gGroundToggleGroup->Activate( 1 );
 
   ground_brush_radius=new UISlider(6.0f,120.0f,167.0f,1000.0f,0.00001f);
   ground_brush_radius->setFunc(setGroundBrushRadius);
@@ -704,7 +704,7 @@ void MapView::createGUI()
   setting_blur->addChild( new UICheckBox( 6.0f, 15.0f, "Flat", gBlurToggleGroup, 0 ) );
   setting_blur->addChild( new UICheckBox( 80.0f, 15.0f, "Linear", gBlurToggleGroup, 1 ) );
   setting_blur->addChild( new UICheckBox( 6.0f, 40.0f, "Smooth", gBlurToggleGroup, 2 ) );
-  gBlurToggleGroup->Activate( 2 );
+  gBlurToggleGroup->Activate( 1 );
 
   blur_brush=new UISlider(6.0f,85.0f,167.0f,1000.0f,0.00001f);
   blur_brush->setFunc(setBlurBrushRadius);
@@ -1043,11 +1043,16 @@ void MapView::tick( float t, float dt )
       rh = 0;
       rv = 0;
 
+
       if( leftMouse && Selection->type==eEntry_MapChunk )
       {
         float xPos, yPos, zPos;
-        Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
-        yPos = Selection->data.mapchunk->getSelectionHeight();
+
+
+
+        xPos = Environment::getInstance()->Pos3DX;
+        yPos = Environment::getInstance()->Pos3DY;
+        zPos = Environment::getInstance()->Pos3DZ;
 
         switch( terrainMode )
         {
@@ -1115,6 +1120,9 @@ void MapView::tick( float t, float dt )
         case 3:
           if( Environment::getInstance()->ShiftDown  )
           {
+		    // if there is no terain the projection mothod dont work. So get the cords by selection.
+			Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
+			yPos = Selection->data.mapchunk->getSelectionHeight();
             if( mViewMode == eViewMode_3D )      gWorld->removeHole( xPos, zPos );
             //else if( mViewMode == eViewMode_2D )  gWorld->removeHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
           }
@@ -1905,8 +1913,10 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
     updown = (e->yrel / YSENS);
   }
 
-  MouseX = e->x;
-  MouseY = e->y;
+
+  
+  Environment::getInstance()->screenX = MouseX = e->x;
+  Environment::getInstance()->screenY = MouseY = e->y;
 }
 
 void MapView::mouseclick( SDL_MouseButtonEvent *e )

@@ -23,10 +23,54 @@
 #include "Video.h"
 #include "WMOInstance.h" // WMOInstance
 #include "MapTile.h"
+#include "Brush.h" // brush
 
 World *gWorld = NULL;
 
 GLuint selectionBuffer[8192];
+
+
+void renderSphere(float x1, float y1, float z1, float x2,float y2, float z2, float radius,int subdivisions,GLUquadricObj *quadric)
+{
+  float vx = x2-x1;
+  float vy = y2-y1;
+  float vz = z2-z1;
+
+  //handle the degenerate case of z1 == z2 with an approximation
+  if( vz == 0.0f )
+    vz = .0001f;
+
+  float v = sqrt( vx*vx + vy*vy + vz*vz );
+  float ax = 57.2957795f*acos( vz/v );
+  if ( vz < 0.0f )
+    ax = -ax;
+  float rx = -vy*vz;
+  float ry = vx*vz;
+  glPushMatrix();
+
+  //draw the quadric
+  glTranslatef( x1,y1,z1 );
+  glRotatef(ax, rx, ry, 0.0);
+
+  gluQuadricOrientation(quadric,GLU_OUTSIDE);
+
+  gluSphere(quadric, radius, subdivisions , subdivisions );
+
+  glPopMatrix();
+}
+void renderSphere_convenient(float x, float y, float z, float radius,int subdivisions)
+{
+  //the same quadric can be re-used for drawing many objects
+  glDisable(GL_LIGHTING);
+  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+  GLUquadricObj *quadric=gluNewQuadric();
+  gluQuadricNormals(quadric, GLU_SMOOTH);
+  renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
+  gluDeleteQuadric(quadric);
+  glEnable( GL_LIGHTING );
+}
+
+
 
 bool World::IsEditableWorld( int pMapId )
 {
@@ -921,6 +965,11 @@ void World::setupFog()
   }
 }
 
+extern float groundBrushRadius;
+extern float blurBrushRadius;
+extern int terrainMode;
+extern brush textureBrush;
+
 void World::draw()
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1046,6 +1095,61 @@ void World::draw()
 
   glPopMatrix();
 
+  // Selection circle
+  if( this->IsSelection( eEntry_MapChunk )  )
+  {
+    //int poly = this->GetCurrentSelectedTriangle();
+
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+
+    //nameEntry * Selection = gWorld->GetCurrentSelection();
+
+    //if( !Selection->data.mapchunk->strip )
+    // Selection->data.mapchunk->initStrip();
+
+
+    GLint viewport[4];
+    GLdouble modelview[16];
+    GLdouble projection[16];
+    GLfloat winX, winY, winZ;
+    GLdouble posX, posY, posZ;
+
+    glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+    glGetDoublev( GL_PROJECTION_MATRIX, projection );
+    glGetIntegerv( GL_VIEWPORT, viewport );
+
+
+    winX = (float)Environment::getInstance()->screenX;
+    winY = (float)viewport[3] - (float)Environment::getInstance()->screenY;
+
+    glReadPixels( Environment::getInstance()->screenX, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
+    gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+
+    Environment::getInstance()->Pos3DX = posX;
+    Environment::getInstance()->Pos3DY = posY;
+    Environment::getInstance()->Pos3DZ = posZ;
+
+    glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+    glDisable(GL_CULL_FACE);
+    //glDepthMask(false);
+    //glDisable(GL_DEPTH_TEST);
+    if(terrainMode == 0)
+      renderSphere_convenient( posX, posY, posZ, groundBrushRadius , 15 );
+    else if(terrainMode == 1)
+      renderSphere_convenient( posX, posY, posZ, blurBrushRadius, 15 );
+    else if(terrainMode == 2)
+      renderSphere_convenient( posX, posY, posZ, textureBrush.getRadius(), 15 );
+    else 
+      renderSphere_convenient( posX, posY, posZ, 3, 15 );
+
+    glEnable(GL_CULL_FACE);
+    //glEnable(GL_DEPTH_TEST);
+    //glDepthMask(true);
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+  }
+
+
   if (drawlines)
   {
     glDisable(GL_COLOR_MATERIAL);
@@ -1064,7 +1168,7 @@ void World::draw()
         if( tileLoaded( j, i ) )
         {
           mTiles[j][i].tile->drawLines();
-          mTiles[j][i].tile->drawMFBO();
+         // mTiles[j][i].tile->drawMFBO();
         }
       }
     }
@@ -1087,6 +1191,9 @@ void World::draw()
   // unbind hardware buffers
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+
+
+
   glEnable(GL_CULL_FACE);
 
   glDisable(GL_BLEND);
@@ -1100,6 +1207,10 @@ void World::draw()
     glLightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
   }
 
+
+
+
+
   // M2s / models
   if( drawmodels)
   {
@@ -1111,6 +1222,9 @@ void World::draw()
 
     //drawModelList();
   }
+
+
+
 
   // WMOs / map objects
   if( drawwmo || mHasAGlobalWMO )

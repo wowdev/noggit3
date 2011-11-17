@@ -24,6 +24,12 @@ public:
   bool CtrlDown;
   bool paintMode;
   int flagPaintMode;
+  int screenX;
+  int screenY;
+
+  float Pos3DX;
+  float Pos3DY;
+  float Pos3DZ;
 
 private:
   Environment();
