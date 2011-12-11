@@ -5,14 +5,13 @@
 #include "Video.h" // video
 
 const int winWidth = 765;
-const int winHeight = 600;
+const int winHeight = 800;
 
 UIHelp::UIHelp( )
 : UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Keybindings", true )
 {
-  addChild( new UIText( 30.0f, 30.0f,
+  addChild( new UIText( 20.0f, 30.0f,
     "Basic controls:\n"
-    "\n"
     "  Left mouse dragged - rotate camera\n"
     "  Left mouse - select chunk or object\n"
     "  Both mouse buttons - move forward\n"
@@ -28,7 +27,6 @@ UIHelp::UIHelp( )
     "  ESC - exit to main menu\n"
     "\n"
     "Toggles:\n"
-    "\n"
     "  F1 - toggle M2s\n"
     "  F2 - toggle WMO doodads set\n"
     "  F3 - toggle ground\n"
@@ -39,7 +37,7 @@ UIHelp::UIHelp( )
     "  F9 - toggle map contour\n"
     "  F - toggle fog\n"
     "  TAB - toggle UI view\n"
-    "  X - texture palette\n"
+	"  X - texture palette(only in Paint Mode)\n"
     "  CTRL + X - detail window\n"
     "  R/T - Move trough the editing modes\n"
     "\n"
@@ -51,6 +49,12 @@ UIHelp::UIHelp( )
     "  SHIFT + J - reload ADT tile\n"
     "  CTRL + S -  Save all changed ADT tiles\n"
     "  CTRL + SHIFT + S - Save ADT tiles camera position\n"
+	"\n"
+	"Adjust:\n"
+    "  O / P - slower/faster movement\n"
+    "  B / N - slower/faster time\n"
+	"  SHIFT + +/-: fog distance when no model is selected\n"
+	"\n"
     , arial14, eJustifyLeft )
   );
 
@@ -89,10 +93,19 @@ UIHelp::UIHelp( )
     "  CTRL + SHIFT + left mouse - clear all textures on chunk\n"
     "  CTRL + left mouse - draw texture or fills if chunk is empty\n"
     "\n"
-    "Adjust:\n"
-    "  O / P - slower/faster movement\n"
-    "  B / N - slower/faster time\n"
-    "  SHIFT + - / + - fog distance when no model is selected\n"
+	"Holes:\n"
+	"  SHIFT + Left mouse - Add texture\n"
+	"  CTRL + Left mouse  - Remove texture\n"
+	"\n"
+	"AreaID:\n"
+	"  X - Show browser with existing AreaID in AreaTable.dbc\n"
+	"      Click show sub-zones\n"
+	"  CTRL + Left mouse  - Pick existing AreaID\n"
+	"  SHIFT + Left mouse - Paint selected AreaID\n"
+	"\n"
+	"Impassible Flags:\n"
+	"  SHIFT + Left mouse - Paint flag\n"
+	"  CTRL + Left mouse  - Clear flag\n"
     , arial14, eJustifyLeft )
   );
 }
