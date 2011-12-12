@@ -13,6 +13,7 @@
 #include "UIMapViewGUI.h"
 #include "UIScrollBar.h"
 #include "UIText.h" // UIText
+#include "UICloseWindow.h" // UICloseWindow
 
 void theButtonMapPressed(UIFrame *f,int id)
 {
@@ -26,7 +27,7 @@ void changeZoneValue(UIFrame *f,int id)
 }
 
 UIZoneIDBrowser::UIZoneIDBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *setGui)
-: UIWindow(xPos,yPos,w,h)
+: UICloseWindow(xPos,yPos,w,h, "", true)
 , changeFunc( NULL )
 , mainGui( setGui )
 , ZoneIdList( NULL )
@@ -37,7 +38,7 @@ UIZoneIDBrowser::UIZoneIDBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *
 , MapName( "" )
 , ZoneName( "" )
 , SubZoneName( "" )
-, backZone( new UIButton( 407.0f, 2.0f, 24.0f, 24.0f, "", "Interface\\BUTTONS\\UI-RotationLeft-Button-Up.blp", "Interface\\BUTTONS\\UI-RotationLeft-Button-Down.blp", theButtonMapPressed, 0 ) )
+, backZone( new UIButton( 387.5f, 4.0f, 24.0f, 24.0f, "", "Interface\\BUTTONS\\UI-RotationLeft-Button-Up.blp", "Interface\\BUTTONS\\UI-RotationLeft-Button-Down.blp", theButtonMapPressed, 0 ) )
 , ZoneIDPath( new UIText( 10.0f, 6.0f, "", arial12, eJustifyLeft) )
 {
   addChild(ZoneIDPath);

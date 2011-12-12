@@ -5,11 +5,12 @@
 
 #include "UIButton.h"
 #include "UIWindow.h"
+#include "UICloseWindow.h"
 
 class UIMapViewGUI;
 class UIListView;
 
-class UIZoneIDBrowser : public UIWindow
+class UIZoneIDBrowser : public UICloseWindow
 {
 public:
   typedef UIZoneIDBrowser* Ptr;
@@ -26,6 +27,7 @@ private:
   std::string ZoneName;
   std::string SubZoneName;
   UIButton* backZone;
+  UIButton* closeBrowser;
   UIText* ZoneIDPath;
 
   void buildAreaList();
