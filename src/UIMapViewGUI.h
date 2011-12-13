@@ -13,6 +13,7 @@ class UIFrame;
 class UITexturePicker;
 class UITextureSwitcher;
 class UIHelp;
+class UICursorSwitcher;
 
 #include "UIFrame.h"
 
@@ -21,6 +22,7 @@ class UIMapViewGUI : public UIFrame
 {
 private:
   bool _tilemode;
+  UICursorSwitcher* CursorSwitcher;
   UIHelp* _help;
   UIDoodadSpawner* _test;
 
@@ -46,6 +48,10 @@ public:
 
   void setTilemode( bool enabled );
   virtual void render() const;
+
+  void showCursorSwitcher();
+  void hideCursorSwitcher();
+  void toggleCursorSwitcher();
 
   void showHelp();
   void hideHelp();

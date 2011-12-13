@@ -31,6 +31,7 @@
 #include "TextureManager.h" // TextureManager, Texture
 #include "UIAppInfo.h" // appInfo
 #include "UICheckBox.h" // UICheckBox
+#include "UICursorSwitcher.h" // UICursorSwitcher
 #include "UIDetailInfos.h" // detailInfos
 #include "UIGradient.h" // UIGradient
 #include "UIMapViewGUI.h" // UIMapViewGUI
@@ -581,6 +582,11 @@ void showTextureSwitcher(UIFrame* /*f*/, int /*set*/)
   //mainGui->TextureSwitcher->show();
 }
 
+void showCursorSwitcher(UIFrame* /*f*/, int /*set*/)
+{
+	mainGui->showCursorSwitcher();
+}
+
 #ifdef __FILESAREMISSING
 void exportPNG(UIFrame *f,int set)
 {
@@ -678,7 +684,7 @@ void MapView::createGUI()
   setting_ground->addChild( new UICheckBox( 85.0f, 40.0f, "Polynomial", gGroundToggleGroup, 3 ) );
   setting_ground->addChild( new UICheckBox( 6.0f, 65.0f, "Trigonom", gGroundToggleGroup, 4 ) );
   setting_ground->addChild( new UICheckBox( 85.0f, 65.0f, "Quadratic", gGroundToggleGroup, 5 ) );
-  gGroundToggleGroup->Activate( 1 );
+  gGroundToggleGroup->Activate(1);
 
   ground_brush_radius=new UISlider(6.0f,120.0f,167.0f,1000.0f,0.00001f);
   ground_brush_radius->setFunc(setGroundBrushRadius);
@@ -831,6 +837,8 @@ void MapView::createGUI()
   // Hide till its reimplemented.
   //mbar->GetMenu( "View" )->AddMenuItemToggle( "Map chunk settings", MapChunkWindow->hidden_evil(), true );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", mainGui->TexturePalette->hidden_evil(), true );
+  // Cursor
+  mbar->GetMenu( "View" )->AddMenuItemButton( "Switch cursor", showCursorSwitcher, 0);
   mbar->GetMenu( "View" )->AddMenuItemSeperator( "Toggle" );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F1 M2s", &gWorld->drawmodels );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F2 WMO doodadsets", &gWorld->drawdoodads );
