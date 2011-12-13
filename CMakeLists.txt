@@ -88,6 +88,7 @@ SET( SourceFiles
   src/UIButton.cpp
   src/UICheckBox.cpp
   src/UICloseWindow.cpp
+  src/UICursorSwitcher.cpp
   src/UIDetailInfos.cpp
   src/UIDoodadSpawner.cpp
   src/UIFrame.cpp
@@ -201,6 +202,8 @@ SET( SourceFiles
   src/UICheckBox.h
   src/UICloseWindow.cpp
   src/UICloseWindow.h
+  src/UICursorSwitcher.cpp
+  src/UICursorSwitcher.h
   src/UIDetailInfos.cpp
   src/UIDetailInfos.h
   src/UIDoodadSpawner.cpp
