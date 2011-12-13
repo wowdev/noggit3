@@ -11,6 +11,7 @@
 #include "Noggit.h" // gStates, gPop, arial14, morpheus40, arial...
 #include "Project.h"
 #include "UIAppInfo.h" // UIAppInfo
+#include "UICursorSwitcher.h" // UICursorSwitcher
 #include "UIDetailInfos.h" // UIDetailInfos
 #include "UIDoodadSpawner.h"
 #include "UIHelp.h"
@@ -73,6 +74,12 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   TextureSwitcher->movable( true );
   addChild( TextureSwitcher);
 
+  // Cursor Switcher
+  CursorSwitcher = new UICursorSwitcher();
+  CursorSwitcher->hide();
+  CursorSwitcher->movable(true);
+  addChild(CursorSwitcher);
+
   _help = new UIHelp();
   _help->hide();
   addChild( _help );
@@ -80,6 +87,21 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   _test = new UIDoodadSpawner();
   _test->hide();
   addChild( _test );
+}
+
+void UIMapViewGUI::showCursorSwitcher()
+{
+	CursorSwitcher->show();
+}
+
+void UIMapViewGUI::hideCursorSwitcher()
+{
+	CursorSwitcher->hide();
+}
+
+void UIMapViewGUI::toggleCursorSwitcher()
+{
+	CursorSwitcher->toggleVisibility();
 }
 
 void UIMapViewGUI::showHelp()
