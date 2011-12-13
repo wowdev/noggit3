@@ -29,8 +29,7 @@ World *gWorld = NULL;
 
 GLuint selectionBuffer[8192];
 
-
-void renderSphere(float x1, float y1, float z1, float x2,float y2, float z2, float radius,int subdivisions,GLUquadricObj *quadric)
+void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
 {
   float vx = x2-x1;
   float vy = y2-y1;
@@ -53,12 +52,12 @@ void renderSphere(float x1, float y1, float z1, float x2,float y2, float z2, flo
   glRotatef(ax, rx, ry, 0.0);
 
   gluQuadricOrientation(quadric,GLU_OUTSIDE);
-
   gluSphere(quadric, radius, subdivisions , subdivisions );
 
   glPopMatrix();
 }
-void renderSphere_convenient(float x, float y, float z, float radius,int subdivisions)
+
+void renderSphere_convenient(float x, float y, float z, float radius, int subdivisions)
 {
   //the same quadric can be re-used for drawing many objects
   glDisable(GL_LIGHTING);
@@ -67,9 +66,53 @@ void renderSphere_convenient(float x, float y, float z, float radius,int subdivi
   gluQuadricNormals(quadric, GLU_SMOOTH);
   renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
   gluDeleteQuadric(quadric);
-  glEnable( GL_LIGHTING );
+  glEnable(GL_LIGHTING);
 }
 
+void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
+{
+  float vx = x2 - x1;
+  float vy = y2 - y1;
+  float vz = z2 - z1;
+
+  //handle the degenerate case of z1 == z2 with an approximation
+  if( vz == 0.0f )
+    vz = .0001f;
+
+  float v = sqrt( vx*vx + vy*vy + vz*vz );
+  float ax = 57.2957795f*acos( vz/v );
+  if(vz < 0.0f)
+    ax = -ax;
+
+  float rx = -vy * vz;
+  float ry = vx * vz;
+
+  glPushMatrix();
+
+  //draw the quadric
+  glTranslatef(x1, y1, z1);
+  glRotatef(ax, rx, ry, 0.0f);
+  glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+  glColor4f(0.0f, 0.8f, 0.0f, 0.8f);
+
+  gluQuadricOrientation(quadric, GLU_OUTSIDE);
+  gluDisk(quadric, radius - 0.25f, radius + 5.0f, subdivisions, 2);
+
+  //glColor4f(0.0f, 0.8f, 0.1f, 0.9f);
+  //gluDisk(quadric, (radius * 1.5) - 2, (radius * 1.5) + 2, 0, 1);
+
+  glPopMatrix();
+}
+
+void renderDisk_convenient(float x, float y, float z, float radius, int subdivisions)
+{
+  GLUquadricObj *quadric = gluNewQuadric();
+  gluQuadricDrawStyle(quadric, GLU_LINE);
+  gluQuadricNormals(quadric, GLU_SMOOTH);
+  gluQuadricTexture(quadric, GL_TRUE);
+  renderDisk(x, y, z, x, y, z, radius, subdivisions, quadric);
+  gluDeleteQuadric(quadric);
+}
 
 
 bool World::IsEditableWorld( int pMapId )
@@ -970,6 +1013,9 @@ extern float blurBrushRadius;
 extern int terrainMode;
 extern brush textureBrush;
 
+bool cursorDisk = true;
+bool cursorSphere = false;
+
 void World::draw()
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1134,13 +1180,34 @@ void World::draw()
     //glDepthMask(false);
     //glDisable(GL_DEPTH_TEST);
     if(terrainMode == 0)
-      renderSphere_convenient( posX, posY, posZ, groundBrushRadius , 15 );
+	{
+	  if(cursorDisk == true)
+		renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 16);
+	  else if(cursorSphere == true)
+	    renderSphere_convenient(posX, posY, posZ, groundBrushRadius, 15);
+	  else
+	    renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 0);
+	}
     else if(terrainMode == 1)
-      renderSphere_convenient( posX, posY, posZ, blurBrushRadius, 15 );
+	{
+	  if(cursorDisk == true)
+		renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 16);
+	  else if(cursorSphere == true)
+	    renderSphere_convenient(posX, posY, posZ, blurBrushRadius, 15);
+	  else
+	    renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 16);
+	}
     else if(terrainMode == 2)
-      renderSphere_convenient( posX, posY, posZ, textureBrush.getRadius(), 15 );
-    else 
-      renderSphere_convenient( posX, posY, posZ, 3, 15 );
+	{
+	  if(cursorDisk == true)
+		renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 16);
+	  else if(cursorSphere == true)
+	    renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
+	  else
+	    renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 16);
+	}
+    else
+	    renderDisk_convenient(posX, posY, posZ, 0.24f, 16);
 
     glEnable(GL_CULL_FACE);
     //glEnable(GL_DEPTH_TEST);
