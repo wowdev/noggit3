@@ -11,22 +11,25 @@
 #define ERRORHANDLING_H_
 
 #include <csignal>
+#include <string>
+
+#include "Log.h"
 
 void printStacktrace();
 
-void leave(int sig)
+void leave (int sig)
 {
   // Reset to defaults.
-  signal(SIGABRT, SIG_DFL);
-  signal(SIGFPE, SIG_DFL);
-  signal(SIGILL, SIG_DFL);
-  signal(SIGSEGV, SIG_DFL);
-  signal(SIGTERM, SIG_DFL);
+  signal (SIGABRT, SIG_DFL);
+  signal (SIGFPE, SIG_DFL);
+  signal (SIGILL, SIG_DFL);
+  signal (SIGSEGV, SIG_DFL);
+  signal (SIGTERM, SIG_DFL);
 
-  const char* description = NULL;
-  const char* sign = NULL;
+  std::string description;
+  std::string sign;
 
-  switch(sig)
+  switch (sig)
   {
     case SIGABRT:
       sign = "SIGABRT";
@@ -58,26 +61,25 @@ void leave(int sig)
       break;
   }
 
-  //! \todo Is this printing to the log file?
-  printf("\n\n"
-         "There was an exception of type \"%s\".\n"
-         "\"%s\".\n"
-         "Please excuse the inconvenience. You may want to report this error including the log to the developers.\n",
-         sign,
-         description );
+  LogError << "There was an exception of type \""
+           << sign
+           << "\"\n\""
+           << description
+           << "\".\nPlease excuse the inconvenience. You may want to report this error including the log to the developers.\n"
+           << std::endl;
 
   printStacktrace();
 
-  exit(sig);
+  exit (sig);
 }
 
 void RegisterErrorHandlers()
 {
-  signal( SIGABRT, leave );
-  signal( SIGFPE, leave );
-  signal( SIGILL, leave );
-  signal( SIGSEGV, leave );
-  signal( SIGTERM, leave );
+  signal (SIGABRT, leave);
+  signal (SIGFPE, leave);
+  signal (SIGILL, leave);
+  signal (SIGSEGV, leave);
+  signal (SIGTERM, leave);
 }
 
 #ifndef WIN32
@@ -86,22 +88,17 @@ void RegisterErrorHandlers()
 
 void printStacktrace()
 {
-  static const int nframes = 20;
+  static const int nframes (30);
 
-  void *array[nframes];
-  size_t size;
-  char **strings;
-  size_t i;
+  void* array[nframes];
 
-  size = backtrace (array, nframes);
-  strings = backtrace_symbols (array, size);
+  const size_t size (backtrace (array, nframes));
+  char** strings (backtrace_symbols (array, size));
 
-  printf ("Obtained %zd stack frames.\n", size);
+  LogError << "Obtained " << size << " stack frames." << std::endl;
 
-  for (i = 0; i < size; ++i)
-    printf ("%s\n", strings[i]);
-
-  printf("\n");
+  for (size_t i (0); i < size; ++i)
+    LogError << "- " << strings[i] << std::endl;
 
   free (strings);
 }
