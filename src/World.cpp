@@ -8,6 +8,8 @@
 #include <string>
 #include <utility>
 #include <time.h>
+#include <boost/filesystem.hpp>
+#include <boost/thread/thread.hpp>
 
 #include "DBC.h"
 #include "Environment.h"
@@ -24,10 +26,165 @@
 #include "WMOInstance.h" // WMOInstance
 #include "MapTile.h"
 #include "Brush.h" // brush
+#include "ConfigFile.h"
 
 World *gWorld = NULL;
 
 GLuint selectionBuffer[8192];
+
+float CRedColor, CGreenColor, CBlueColor, CAlphaColor;
+
+float RedColor()
+{
+	if(CRedColor == NULL)
+	{
+		Log << "CRedColor is NULL" << std::endl;
+
+		if(!boost::filesystem::exists("NoggIt.conf"))
+		{
+			Log << "CRedColor is NULL + NoggIt.conf doesn't exists" << std::endl;
+
+			return 1.0f;
+		}
+		else
+		{
+			std::stringstream ss(ConfigFile("NoggIt.conf").read<float>("RedColor"));
+
+			Log << "CRedColor isn't NULL" << std::endl;
+
+			if(!ss)
+			{
+				Log << "CRedColor isn't NULL, but haven't mention about RedColor" << std::endl;
+
+				return 1.0f;
+			}
+			else
+			{
+				Log << "CRedColor isn't NULL and have mention about RedColor" << std::endl;
+
+				return ConfigFile("NoggIt.conf").read<float>("RedColor");
+			}
+		}
+	}
+	else
+		return CRedColor;
+
+	return 1.0f;
+}
+
+float GreenColor()
+{
+	if(CGreenColor == NULL)
+	{
+		Log << "CGreenColor is NULL" << std::endl;
+
+		if(!boost::filesystem::exists("NoggIt.conf"))
+		{
+			Log << "CGreenColor is NULL + NoggIt.conf doesn't exists" << std::endl;
+
+			return 1.0f;
+		}
+		else
+		{
+			std::stringstream ss(ConfigFile("NoggIt.conf").read<float>("GreenColor"));
+
+			Log << "CGreenColor isn't NULL" << std::endl;
+
+			if(!ss)
+			{
+				Log << "CGreenColor isn't NULL, but haven't mention about GreenColor" << std::endl;
+
+				return 1.0f;
+			}
+			else
+			{
+				Log << "CGreenColor isn't NULL and have mention about GreenColor" << std::endl;
+
+				return ConfigFile("NoggIt.conf").read<float>("GreenColor");
+			}
+		}
+	}
+	else
+		return CGreenColor;
+
+	return 1.0f;
+}
+
+float BlueColor()
+{
+	if(CBlueColor == NULL)
+	{
+		Log << "CBlueColor is NULL" << std::endl;
+
+		if(!boost::filesystem::exists("NoggIt.conf"))
+		{
+			Log << "CBlueColor is NULL + NoggIt.conf doesn't exists" << std::endl;
+
+			return 1.0f;
+		}
+		else
+		{
+			std::stringstream ss(ConfigFile("NoggIt.conf").read<float>("BlueColor"));
+
+			Log << "CBlueColor isn't NULL" << std::endl;
+
+			if(!ss)
+			{
+				Log << "CBlueColor isn't NULL, but haven't mention about BlueColor" << std::endl;
+
+				return 1.0f;
+			}
+			else
+			{
+				Log << "CBlueColor isn't NULL and have mention about BlueColor" << std::endl;
+
+				return ConfigFile("NoggIt.conf").read<float>("BlueColor");
+			}
+		}
+	}
+	else
+		return CBlueColor;
+
+	return 1.0f;
+}
+
+float AlphaColor()
+{
+	if(CAlphaColor == NULL)
+	{
+		Log << "CAlphaColor is NULL" << std::endl;
+
+		if(!boost::filesystem::exists("NoggIt.conf"))
+		{
+			Log << "CAlphaColor is NULL + NoggIt.conf doesn't exists" << std::endl;
+
+			return 1.0f;
+		}
+		else
+		{
+			std::stringstream ss(ConfigFile("NoggIt.conf").read<float>("AlphaColor"));
+
+			Log << "CAlphaColor isn't NULL" << std::endl;
+
+			if(!ss)
+			{
+				Log << "CAlphaColor isn't NULL, but haven't mention about AlphaColor" << std::endl;
+
+				return 1.0f;
+			}
+			else
+			{
+				Log << "CAlphaColor isn't NULL and have mention about AlphaColor" << std::endl;
+
+				return ConfigFile("NoggIt.conf").read<float>("AlphaColor");
+			}
+		}
+	}
+	else
+		return CAlphaColor;
+
+	return 1.0f;
+}
 
 void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
 {
@@ -61,7 +218,11 @@ void renderSphere_convenient(float x, float y, float z, float radius, int subdiv
 {
   //the same quadric can be re-used for drawing many objects
   glDisable(GL_LIGHTING);
-  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+  CRedColor = RedColor();
+  CGreenColor = GreenColor();
+  CBlueColor = BlueColor();
+  CAlphaColor = AlphaColor();
+  glColor4f( CRedColor, CGreenColor, CBlueColor, CAlphaColor );
   GLUquadricObj *quadric=gluNewQuadric();
   gluQuadricNormals(quadric, GLU_SMOOTH);
   renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
@@ -88,12 +249,21 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
   float ry = vx * vz;
 
   glPushMatrix();
+  glClear(GL_DEPTH_BUFFER_BIT);
+  //glLoadIdentity(); This delete gluDisk :(
+  glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+  glEnable(GL_COLOR_MATERIAL);
+
+  CRedColor = RedColor();
+  CGreenColor = GreenColor();
+  CBlueColor = BlueColor();
+  CAlphaColor = AlphaColor();
 
   //draw the quadric
   glTranslatef(x1, y1, z1);
   glRotatef(ax, rx, ry, 0.0f);
   glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-  glColor4f(0.0f, 0.8f, 0.0f, 0.8f);
+  glColor4f(CRedColor, CGreenColor, CBlueColor, CAlphaColor);
 
   gluQuadricOrientation(quadric, GLU_OUTSIDE);
   gluDisk(quadric, radius - 0.25f, radius + 5.0f, subdivisions, 2);
@@ -106,12 +276,13 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
 
 void renderDisk_convenient(float x, float y, float z, float radius, int subdivisions)
 {
+  glDisable(GL_LIGHTING);
   GLUquadricObj *quadric = gluNewQuadric();
   gluQuadricDrawStyle(quadric, GLU_LINE);
   gluQuadricNormals(quadric, GLU_SMOOTH);
-  gluQuadricTexture(quadric, GL_TRUE);
   renderDisk(x, y, z, x, y, z, radius, subdivisions, quadric);
   gluDeleteQuadric(quadric);
+  glEnable(GL_LIGHTING);
 }
 
 
@@ -1025,7 +1196,7 @@ void World::draw()
   frustum.retrieve();
 
   ///glDisable(GL_LIGHTING);
-  ///glColor4f(1,1,1,1);
+  ///glColor4f(1,1,1,1);World::draw()
 
   hadSky = false;
   if( drawwmo || mHasAGlobalWMO )

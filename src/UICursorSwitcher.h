@@ -6,8 +6,9 @@
 class UICursorSwitcher : public UICloseWindow
 {
 public:
-	//UICursorSwitcher(float x, float y, float w, float h);
 	UICursorSwitcher();
+
+	void changeCursor(int Type);
 };
 
 #endif
