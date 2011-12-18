@@ -315,10 +315,10 @@ struct BLPHeader
 {
   int32_t magix;
   int32_t version;
-  char attr_0_compression;
-  char attr_1_alphadepth;
-  char attr_2_alphatype;
-  char attr_3_mipmaplevels;
+  uint8_t attr_0_compression;
+  uint8_t attr_1_alphadepth;
+  uint8_t attr_2_alphatype;
+  uint8_t attr_3_mipmaplevels;
   int32_t resx;
   int32_t resy;
   int32_t offsets[16];
