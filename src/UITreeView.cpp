@@ -32,7 +32,7 @@ UITreeView::UITreeView( float pX, float pY, const std::string& directoryName, Di
 : UIFrame( pX, pY, 0.0f, 0.0f )
 , mParent( pParent )
 , mMyDir( pDirectory )
-, mMyButton( new UITreeViewButton( 0, 0, shared_from_this() ) )
+, mMyButton( new UITreeViewButton( 0, 0, UITreeView::Ptr( this ) ) )
 , mMyText( new UIText( 13, 0, directoryName, arial12, eJustifyLeft ) )
 , _directoryName( directoryName )
 , mSelectFunction( pSelectFunction )
@@ -45,7 +45,7 @@ UITreeView::UITreeView( float pX, float pY, const std::string& directoryName, Di
      ; ++it
      )
   {
-    _others.push_back( UITreeView::Ptr( new UITreeView( 13.0f, lY, it->first, it->second, shared_from_this(), pSelectFunction ) ) );
+    _others.push_back( UITreeView::Ptr( new UITreeView( 13.0f, lY, it->first, it->second, UITreeView::Ptr( this ), pSelectFunction ) ) );
     lY = lY + 13.0f;
   }
   for( Directory::Files::const_iterator it( mMyDir->filesBegin() ), end( mMyDir->filesEnd() )

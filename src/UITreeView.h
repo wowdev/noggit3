@@ -62,7 +62,7 @@ private:
 public:
   UITreeViewButton( float x, float y, UITreeView::Ptr pTreeView );
 
-  UIFrame* processLeftClick( float mx, float my );
+  UIFrame::Ptr processLeftClick( float mx, float my );
 
   void SetClicked( bool pClicked );
 };
