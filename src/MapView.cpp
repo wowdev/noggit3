@@ -125,6 +125,10 @@ int saveterrainMode = 0;
 
 brush textureBrush;
 
+int cursorMode = 0;
+int cursorType = 2;
+UICursorSwitcher* CursorSwitcher;
+
 bool Saving=false;
 
 UIFrame* LastClicked;
@@ -1051,6 +1055,16 @@ void MapView::tick( float t, float dt )
       rh = 0;
       rv = 0;
 
+	  switch(cursorMode)
+	  {
+		case 0:
+			CursorSwitcher->changeCursor(cursorType);
+			break;
+
+		case 1:
+			CursorSwitcher->changeCursor(cursorType);
+			break;
+	  }
 
       if( leftMouse && Selection->type==eEntry_MapChunk )
       {
@@ -1221,7 +1235,7 @@ void MapView::tick( float t, float dt )
     updown = 0;
   }
 
-  if( ( t - lastBrushUpdate ) > 0.1f && textureBrush.needUpdate() )
+  if( ( t - lastBrushUpdate ) > 0.1f && textureBrush.needUpdate() ) 
   {
     textureBrush.GenerateTexture();
   }
@@ -1347,6 +1361,10 @@ void MapView::display( float t, float dt )
 void MapView::save()
 {
   gWorld->saveChanged();
+  //ConfigFile::add("RedColor", RedColor);
+  //ConfigFile::add("GreenColor", GreenColor);
+  //ConfigFile::add("BlueColor", BlueColor);
+  //ConfigFile::add("AlphaColor", AlphaColor);
 }
 
 void MapView::quit()
