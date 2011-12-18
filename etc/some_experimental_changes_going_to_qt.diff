@@ -1,0 +1,984 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -19,7 +19,7 @@
+ FIND_PACKAGE( ZLIB REQUIRED )
+ FIND_PACKAGE( Freetype REQUIRED )
+ FIND_PACKAGE( OpenGL REQUIRED )
+-FIND_PACKAGE( Qt4 4.4.3 COMPONENTS QtCore QtGui QtOpenGL REQUIRED )
++FIND_PACKAGE( Qt4 4.4.3 COMPONENTS QtCore QtGui QtOpenGL Qt3d REQUIRED )
+ 
+ INCLUDE( ${QT_USE_FILE} )
+ 
+diff --git a/src/MPQ.cpp b/src/MPQ.cpp
+--- a/src/MPQ.cpp
++++ b/src/MPQ.cpp
+@@ -23,15 +23,15 @@
+ boost::mutex gListfileLoadingMutex;
+ boost::mutex gMPQFileMutex;
+ 
+-MPQArchive::MPQArchive(const std::string& filename, bool doListfile)
++MPQArchive::MPQArchive( const QString& filename, bool doListfile )
+ {
+-  if(!SFileOpenArchive( filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE, &mpq_a ))
++  if( !SFileOpenArchive( qPrintable( filename ), 0, MPQ_OPEN_NO_LISTFILE, &mpq_a ) )
+   {
+-    LogError << "Error opening archive: " << filename << "\n";
++    LogError << "Error opening archive: " << qPrintable( filename ) << std::endl;
+     return;
+   }
+   
+-  LogDebug << "Opened archive: " << filename << "\n";
++  LogDebug << "Opened archive: " << qPrintable( filename ) << std::endl;
+   
+   gOpenArchives.push_back( this );
+ 
+diff --git a/src/MPQ.h b/src/MPQ.h
+--- a/src/MPQ.h
++++ b/src/MPQ.h
+@@ -1,11 +1,11 @@
+ #ifndef MPQ_H
+ #define MPQ_H
+-
+-#include <set>
++
+ #include <StormLib.h>
+-#include <string>
+ #include <vector>
+ 
++#include <QString>
++
+ #include "AsyncObject.h"
+ 
+ class MPQArchive;
+@@ -16,7 +16,7 @@
+ {
+   HANDLE mpq_a;
+ public:
+-  MPQArchive(const std::string& filename, bool doListfile = false );
++  MPQArchive( const QString& filename, bool doListfile = false );
+   ~MPQArchive();
+   
+   void finishLoading();
+diff --git a/src/Menu.cpp b/src/Menu.cpp
+--- a/src/Menu.cpp
++++ b/src/Menu.cpp
+@@ -191,7 +191,7 @@
+     mBackgroundModel->cam.setup( globalTime );
+     mBackgroundModel->draw();
+     
+-    glDisable(GL_TEXTURE_2D);
++    glDisable( GL_TEXTURE_2D );
+     glDisable( GL_LIGHTING );
+     glDisable( GL_DEPTH_TEST );
+     glDisable( GL_CULL_FACE );
+diff --git a/src/Noggit.cpp b/src/Noggit.cpp
+--- a/src/Noggit.cpp
++++ b/src/Noggit.cpp
+@@ -1,145 +1,165 @@
+-#include "Noggit.h"
+-
+-#include <SDL.h>
+-
+-#include <QApplication>
+-
+-#include <vector>
++#include "Noggit.h"
++
++#include <QApplication>
++
++#include <vector>
+ #include <list>
+ 
+-#include "AppState.h"
+-#include "AsyncLoader.h"
+-#include "DBC.h"
+-#include "errorHandling.h"
+-#include "Liquid.h"
+-#include "Log.h"
+-#include "Menu.h"
+-#include "revision.h"
++#include "AppState.h"
++#include "AsyncLoader.h"
++#include "DBC.h"
++#include "errorHandling.h"
++#include "Liquid.h"
++#include "Log.h"
++#include "Menu.h"
++#include "revision.h"
+ #include "Video.h"
+ 
+ std::vector<AppState*> gStates;
+ bool gPop = false;
+ float gFPS;
+ 
+-freetype::font_data *arialn13, *arial12, *arial14, *arial16, *arial24, *arial32, *morpheus40, *skurri32, *fritz16;  
+-
++freetype::font_data *arialn13, *arial12, *arial14, *arial16, *arial24, *arial32, *morpheus40, *skurri32, *fritz16;  
++
+ #include <QMouseEvent>
+-
+-GLWidget::GLWidget(QWidget *parent)
+-     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
+- {
+- }
+-
+- GLWidget::~GLWidget()
+- {
+- }
+-
+- QSize GLWidget::minimumSizeHint() const
+- {
+-     return QSize(50, 50);
+- }
+-
+- QSize GLWidget::sizeHint() const
+- {
+-     return QSize(400, 400);
+- }
+-  
+-void GLWidget::initializeGL()
+- {
+-     qglClearColor(Qt::darkBlue);
+-
+-     glEnable(GL_DEPTH_TEST);
+-     glEnable(GL_CULL_FACE);
+-     glShadeModel(GL_SMOOTH);
+-     glEnable(GL_LIGHTING);
+-     glEnable(GL_LIGHT0);
+-     glEnable(GL_MULTISAMPLE);
+-     static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
+-     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+- }
+-
+- void GLWidget::paintGL()
+- {
+-     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+-     glLoadIdentity();
+-     glTranslatef(0.0, 0.0, -10.0);
+-     qreal xRot = 1.0, yRot = 20.0, zRot = -1.0;
+-     glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
+-     glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
+-     glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
+- }
+-
+- void GLWidget::resizeGL(int width, int height)
+- {
+-     int side = qMin(width, height);
+-     glViewport((width - side) / 2, (height - side) / 2, side, side);
+-
+-     glMatrixMode(GL_PROJECTION);
+-     glLoadIdentity();
+- #ifdef QT_OPENGL_ES_1
+-     glOrthof(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
+- #else
+-     glOrtho(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
+- #endif
+-     glMatrixMode(GL_MODELVIEW);
+- }
+-void GLWidget::mousePressEvent(QMouseEvent *event)
+- {
+-     lastPos = event->pos();
+- }
+-
+- void GLWidget::mouseMoveEvent(QMouseEvent *event)
+- {
+-     int dx = event->x() - lastPos.x();
+-     int dy = event->y() - lastPos.y();
+-
+-     if (event->buttons() & Qt::LeftButton) {
+-         //setXRotation(xRot + 8 * dy);
+-         //setYRotation(yRot + 8 * dx);
+-     } else if (event->buttons() & Qt::RightButton) {
+-         //setXRotation(xRot + 8 * dy);
+-         //setZRotation(zRot + 8 * dx);
+-     }
+-     lastPos = event->pos();
+- }
+- 
+-#include <QDir>
+-#include <QRegExp>
+-#include <QSettings>
+-
+-static NoggitApplication* _noggit = NULL;
+-
+-NoggitApplication& noggit()
+-{
+-  return *_noggit;
+-}
+-
+-NoggitApplication::NoggitApplication( int& argc, char** argv )
+-: QApplication( argc, argv )
+-, _settings( NULL )
+-, _asyncLoader()
+-{  Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
+-  
+-  QCoreApplication::setOrganizationDomain( "modcraft.tk" );
+-  QCoreApplication::setApplicationName( "noggit" );
+-  
+-  _settings = new QSettings( this );
+-  
+-  //! \todo Get the number of threads from the number of available cores.
+-  _asyncLoader.start( 1 );
+-  
+-  setWorkingDirectoryToApplicationPath();
+-  initializeVideo();
+-  getGamePath();
+-  getProjectPath();
+-  getLocale();
+-  openMPQs();
+-}
+-
+-NoggitApplication::~NoggitApplication()
++
++GLWidget::GLWidget(QWidget *parent)
++     : QGLWidget(QGLFormat(), parent)
++ {
++  m = NULL;
++ }
++
++ GLWidget::~GLWidget()
++ {
++  delete m;
++ }
++
++ QSize GLWidget::minimumSizeHint() const
++ {
++     return QSize(50, 50);
++ }
++
++ QSize GLWidget::sizeHint() const
++ {
++     return QSize(400, 400);
++ }
++  
++void GLWidget::initializeGL()
++ {
++     qglClearColor(Qt::darkBlue);
++
++    /* glEnable(GL_DEPTH_TEST);
++     glEnable(GL_CULL_FACE);
++     glShadeModel(GL_SMOOTH);
++     glEnable(GL_LIGHTING);
++     glEnable(GL_LIGHT0);
++     glEnable(GL_MULTISAMPLE);
++     static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
++     glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);*/
++     
++       GLenum err = glewInit();
++  if( GLEW_OK != err )
++  {
++    LogError << "GLEW: " << glewGetErrorString( err ) << std::endl;
++    return;
++  }
++  
++  
++  // Initializing Fonts -- to be removed again!
++  skurri32 = new freetype::font_data( "fonts\\SKURRI.TTF", 32, true );
++  fritz16 = new freetype::font_data( "fonts\\FRIZQT__.TTF", 16, true );
++  morpheus40 = new freetype::font_data( "fonts\\MORPHEUS.TTF", 40, true );
++  arialn13 = new freetype::font_data( "fonts\\arialn.TTF", 13, true );
++  arial12 = new freetype::font_data( "fonts\\arialn.TTF", 12, true );
++  arial14 = new freetype::font_data( "fonts\\arialn.TTF", 14, true );
++  arial16 = new freetype::font_data( "fonts\\arialn.TTF", 16, true );
++  arial24 = new freetype::font_data( "fonts\\arialn.TTF", 24, true );
++  arial32 = new freetype::font_data( "fonts\\arialn.TTF", 32, true );
++  
++       glEnableClientState( GL_VERTEX_ARRAY );
++  glEnableClientState( GL_NORMAL_ARRAY );
++  glEnableClientState( GL_TEXTURE_COORD_ARRAY );
++  
++  if(!m)
++  m = new Menu();
++ }
++
++ void GLWidget::paintGL()
++ {
++  m->tick(0.0f, 0.0f);
++  m->display(0.0f, 0.0f);
++ }
++
++ void GLWidget::resizeGL(int width, int height)
++ {
++     int side = qMin(width, height);
++     glViewport((width - side) / 2, (height - side) / 2, side, side);
++
++     glMatrixMode(GL_PROJECTION);
++     glLoadIdentity();
++ #ifdef QT_OPENGL_ES_1
++     glOrthof(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
++ #else
++     glOrtho(-0.5, +0.5, -0.5, +0.5, 4.0, 15.0);
++ #endif
++     glMatrixMode(GL_MODELVIEW);
++ }
++void GLWidget::mousePressEvent(QMouseEvent *event)
++ {
++     lastPos = event->pos();
++ }
++
++ void GLWidget::mouseMoveEvent(QMouseEvent *event)
++ {
++     int dx = event->x() - lastPos.x();
++     int dy = event->y() - lastPos.y();
++
++     if (event->buttons() & Qt::LeftButton) {
++         //setXRotation(xRot + 8 * dy);
++         //setYRotation(yRot + 8 * dx);
++     } else if (event->buttons() & Qt::RightButton) {
++         //setXRotation(xRot + 8 * dy);
++         //setZRotation(zRot + 8 * dx);
++     }
++     lastPos = event->pos();
++ }
++ 
++#include <QDir>
++#include <QRegExp>
++#include <QSettings>
++
++static NoggitApplication* _noggit = NULL;
++
++NoggitApplication& noggit()
+ {
+-  video.close();
++  return *_noggit;
++}
++
++NoggitApplication::NoggitApplication( int& argc, char** argv )
++: QApplication( argc, argv )
++, _settings( NULL )
++, _asyncLoader()
++{
++  Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
+   
++  QCoreApplication::setOrganizationDomain( "modcraft.tk" );
++  QCoreApplication::setApplicationName( "noggit" );
++  
++  _settings = new QSettings( this );
++  
++  //! \todo Get the number of threads from the number of available cores.
++  _asyncLoader.start( 1 );
++  
++  setWorkingDirectoryToApplicationPath();
++  parseCommandLine();
++  getGamePath();
++  getProjectPath();
++  getLocale();
++  openMPQs();
++}
++
++NoggitApplication::~NoggitApplication()
++{
+   _asyncLoader.stop();
+   _asyncLoader.join();
+   
+@@ -147,129 +167,118 @@
+   {
+     delete *it;
+   }
+-  gOpenArchives.clear();
+-}
+-
+-void NoggitApplication::setWorkingDirectoryToApplicationPath()
+-{
+-  QString appPath = QCoreApplication::applicationDirPath();
+-  const QString appInternal = "/Contents/MacOS";
+-  if( appPath.endsWith( appInternal ) )
+-  {
+-    appPath.remove( appPath.lastIndexOf( appInternal ), appInternal.size() );
+-    appPath = appPath.left( appPath.lastIndexOf( '/' ) );
+-  }
+-  QDir::setCurrent( appPath );
+-}
+-
+-void NoggitApplication::initializeVideo()
+-{
+-  int xResolution = _settings->value( "resolution/x", 1024 ).toInt();
+-  int yResolution = _settings->value( "resolution/y", 768 ).toInt();
+-  bool inFullscreen = _settings->value( "fullscreen", false ).toBool();
+-  
+-  foreach( const QString& argument, QCoreApplication::arguments() )
+-  {
+-    if( argument == "-f" || argument == "--fullscreen" )
+-    {
+-      inFullscreen = true;
+-    }
+-    else
+-    {
+-      QRegExp resolution( "-(-resolution=)?(\\d+)(x(\\d+))*" );
+-      if( !resolution.indexIn( argument ) )
+-      {
+-        const QStringList matched = resolution.capturedTexts();
+-        xResolution = matched.at( 2 ).toInt();
+-        yResolution = matched.at( 4 ).size() > 0 ? matched.at( 4 ).toInt() : xResolution * 3 / 4;
+-      }
+-    }
+-  }
+-  
+-  _settings->setValue( "resolution/x", xResolution );
+-  _settings->setValue( "resolution/y", yResolution );
+-  _settings->setValue( "fullscreen", inFullscreen );
+-  _settings->sync();
++  gOpenArchives.clear();
++}
++
++void NoggitApplication::setWorkingDirectoryToApplicationPath()
++{
++  QString appPath = QCoreApplication::applicationDirPath();
++  const QString appInternal = "/Contents/MacOS";
++  if( appPath.endsWith( appInternal ) )
++  {
++    appPath.remove( appPath.lastIndexOf( appInternal ), appInternal.size() );
++    appPath = appPath.left( appPath.lastIndexOf( '/' ) );
++  }
++  QDir::setCurrent( appPath );
++}
++
++void NoggitApplication::parseCommandLine()
++{
++  int xResolution = _settings->value( "resolution/x", 1024 ).toInt();
++  int yResolution = _settings->value( "resolution/y", 768 ).toInt();
++  bool inFullscreen = _settings->value( "fullscreen", false ).toBool();
+   
+-  if( !video.init( xResolution, yResolution, inFullscreen ) )
++  foreach( const QString& argument, QCoreApplication::arguments() )
+   {
+-    LogError << "Initializing video failed." << std::endl;
+-    exit( -1 );
+-  }
++    if( argument == "-f" || argument == "--fullscreen" )
++    {
++      inFullscreen = true;
++    }
++    else
++    {
++      QRegExp resolution( "-(-resolution=)?(\\d+)(x(\\d+))*" );
++      if( !resolution.indexIn( argument ) )
++      {
++        const QStringList matched = resolution.capturedTexts();
++        xResolution = matched.at( 2 ).toInt();
++        yResolution = matched.at( 4 ).size() > 0 ? matched.at( 4 ).toInt() : xResolution * 3 / 4;
++      }
++    }
++  }
+   
+-  if( video.mSupportShaders )
+-    loadWaterShader();
++  _settings->setValue( "resolution/x", xResolution );
++  _settings->setValue( "resolution/y", yResolution );
++  _settings->setValue( "fullscreen", inFullscreen );
++  _settings->sync();
++}
++
++void NoggitApplication::getGamePath()
++{
++  QVariant gamePathVariant = _settings->value( "paths/game" );
++  
++  if( gamePathVariant.isValid() )
++  {
++    _gamePath = gamePathVariant.toString();
++  }
+   else
+-    LogError << "Your GPU does not support ARB vertex programs (shaders). Sorry." << std::endl;
+-}
+-
+-void NoggitApplication::getGamePath()
+-{
+-  QVariant gamePathVariant = _settings->value( "paths/game" );
+-  
+-  if( gamePathVariant.isValid() )
+-  {
+-    _gamePath = gamePathVariant.toString();
+-  }
+-  else
+-  {
+-    // Try to find the path automatically.
+-    
+-#ifdef Q_WS_WIN
+-
+-    //! \todo What's that path on Windows 7? 
+-    QString wowDefaultRegistryPath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Blizzard Entertainment\\World of Warcraft";
+-    
+-    QSettings registry( wowDefaultRegistryPath, QSettings::NativeFormat );
+-    
+-    QVariant path = registry.value( "InstallPath" );
+-    
+-    if( !path.isValid() )
+-      path = registry.value( "Beta\\InstallPath" );
+-    
+-    if( !path.isValid() )
+-      path = registry.value( "PTR\\InstallPath" );
+-    
+-    if( !path.isValid() )
+-    {
++  {
++    // Try to find the path automatically.
++    
++#ifdef Q_WS_WIN
++
++    //! \todo What's that path on Windows 7? 
++    QString wowDefaultRegistryPath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Blizzard Entertainment\\World of Warcraft";
++    
++    QSettings registry( wowDefaultRegistryPath, QSettings::NativeFormat );
++    
++    QVariant path = registry.value( "InstallPath" );
++    
++    if( !path.isValid() )
++      path = registry.value( "Beta\\InstallPath" );
++    
++    if( !path.isValid() )
++      path = registry.value( "PTR\\InstallPath" );
++    
++    if( !path.isValid() )
++    {
+       //! \todo Configuration dialog or hint at the registry entry.
+       LogError << "Unable to find game path." << std::endl;
+       return -1;
+-    }
+-    
+-    _gamePath = path.toString();
++    }
+     
+-#else
+-
++    _gamePath = path.toString();
++    
++#else
++
+     //! \todo Linux?
+-    _gamePath = "/Applications/World of Warcraft/";
++    _gamePath = "/Applications/World of Warcraft/";
+     
+-#endif
+-
+-  }
+-  
+-  _settings->setValue( "paths/game", _gamePath );
+-  _settings->sync();
++#endif
++
++  }
+   
+-  Log << "Game path: " << _gamePath.toStdString() << std::endl;
+-}
+-
+-void NoggitApplication::getProjectPath()
+-{
+-  QString def = _gamePath;
+-  def.append( "Noggit/" );
+-  _projectPath = _settings->value( "paths/project", def ).toString();
+-  _settings->setValue( "paths/project", _projectPath );
+-  _settings->sync();
++  _settings->setValue( "paths/game", _gamePath );
++  _settings->sync();
+   
+-  Log << "Project path: " << _projectPath.toStdString() << std::endl;
+-}
+-
+-void NoggitApplication::getLocale()
+-{
+-  _locale = _settings->value( "locale", "****" ).toString();
+-  
+-  if( _locale == "****" )
++  Log << "Game path: " << _gamePath.toStdString() << std::endl;
++}
++
++void NoggitApplication::getProjectPath()
++{
++  QString def = _gamePath;
++  def.append( "Noggit/" );
++  _projectPath = _settings->value( "paths/project", def ).toString();
++  _settings->setValue( "paths/project", _projectPath );
++  _settings->sync();
++  
++  Log << "Project path: " << _projectPath.toStdString() << std::endl;
++}
++
++void NoggitApplication::getLocale()
++{
++  _locale = _settings->value( "locale", "****" ).toString();
++  
++  if( _locale == "****" )
+   {
+     const QString locales[] = { "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "zhTW", "esES", "esMX", "ruRU" };
+     
+@@ -283,25 +292,25 @@
+         _locale = locales[i];
+         break;
+       }
+-    }
+-  }
++    }
++  }
+   
+   if( _locale == "****" )
+   {
+     LogError << "Could not find locale directory. Be sure, that there is one containing the file \"realmlist.wtf\"." << std::endl;
+     exit( -1 );
+-  }
+-  
+-  _settings->setValue( "locale", _locale );
+-  _settings->sync();
+-}
+-
+-void NoggitApplication::openMPQs()
+-{
++  }
++  
++  _settings->setValue( "locale", _locale );
++  _settings->sync();
++}
++
++void NoggitApplication::openMPQs()
++{
+   QStringList archiveNames;
+-  archiveNames 
+-     << "common.MPQ" 
+-     << "common-2.MPQ" 
++  archiveNames 
++     << "common.MPQ" 
++     << "common-2.MPQ" 
+      << "expansion.MPQ"
+      << "lichking.MPQ"
+      << "patch.MPQ"
+@@ -317,163 +326,69 @@
+   // << "{locale}/lichking-speech-{locale}.MPQ"
+      << "{locale}/patch-{locale}.MPQ"
+      << "{locale}/patch-{locale}-{number}.MPQ"
+-     << "{locale}/patch-{locale}-{character}.MPQ"
++     << "{locale}/patch-{locale}-{character}.MPQ"
+   ;
+   
+-  const QString localePattern = "{locale}";
+-  const QString numberPattern = "{number}";
++  const QString localePattern = "{locale}";
++  const QString numberPattern = "{number}";
+   const QString characterPattern = "{character}";
+-  
++  
+   foreach( const QString& archiveName, archiveNames )
+   {
+     QString path = _gamePath;
+     path.append( "Data/" ).append( archiveName );
+-    
+-    path.replace( localePattern, _locale );
+-    
+-    int location = -1;
+-    if( ( location = path.indexOf( numberPattern ) ) != -1 )
+-    {
+-      path.replace( location, numberPattern.size(), QChar( ' ' ) );
++    
++    path.replace( localePattern, _locale );
++    
++    int location = -1;
++    if( ( location = path.indexOf( numberPattern ) ) != -1 )
++    {
++      path.replace( location, numberPattern.size(), QChar( ' ' ) );
+       for( char j = '2'; j <= '9'; ++j )
+-      {
++      {
+         path[location] = j;
+-        if( QFile::exists( path ) )
++        if( QFile::exists( path ) )
+         {
+-          _asyncLoader.addObject( new MPQArchive( path.toStdString(), true ) );
++          _asyncLoader.addObject( new MPQArchive( path, true ) );
+         }
+-      }
+-    }
+-    else if( ( location = path.indexOf( characterPattern ) ) != -1 )
+-    {
+-      path.replace( location, characterPattern.size(), QChar( ' ' ) );
++      }
++    }
++    else if( ( location = path.indexOf( characterPattern ) ) != -1 )
++    {
++      path.replace( location, characterPattern.size(), QChar( ' ' ) );
+       for( char j = 'a'; j <= 'z'; ++j )
+-      {
++      {
+         path[location] = j;
+-        if( QFile::exists( path ) )
++        if( QFile::exists( path ) )
+         {
+-          _asyncLoader.addObject( new MPQArchive( path.toStdString(), true ) );
++          _asyncLoader.addObject( new MPQArchive( path, true ) );
+         }
+-      }
++      }
+     }
+-    else
++    else
+     {
+-      if( QFile::exists( path ) )
++      if( QFile::exists( path ) )
+       {
+-        _asyncLoader.addObject( new MPQArchive( path.toStdString(), true ) );
+-      }
++        _asyncLoader.addObject( new MPQArchive( path, true ) );
++      }
+     }
+-  }
+-}
++  }
++}
+ 
+ int main( int argc, char *argv[] )
+ {
+-  RegisterErrorHandlers();
+-  InitLogging();
++  RegisterErrorHandlers();
++  InitLogging();
+   
+-  srand( time( NULL ) );
+-
+-  NoggitApplication noggit( argc, argv );
+-  _noggit = &noggit;
+-  
+-  // Initializing Fonts -- to be removed again!
+-  skurri32 = new freetype::font_data( "fonts\\SKURRI.TTF", 32, true );
+-  fritz16 = new freetype::font_data( "fonts\\FRIZQT__.TTF", 16, true );
+-  morpheus40 = new freetype::font_data( "fonts\\MORPHEUS.TTF", 40, true );
+-  arialn13 = new freetype::font_data( "fonts\\arialn.TTF", 13, true );
+-  arial12 = new freetype::font_data( "fonts\\arialn.TTF", 12, true );
+-  arial14 = new freetype::font_data( "fonts\\arialn.TTF", 14, true );
+-  arial16 = new freetype::font_data( "fonts\\arialn.TTF", 16, true );
+-  arial24 = new freetype::font_data( "fonts\\arialn.TTF", 24, true );
+-  arial32 = new freetype::font_data( "fonts\\arialn.TTF", 32, true );
++  srand( time( NULL ) );
++
++  NoggitApplication noggit( argc, argv );
++  _noggit = &noggit;
+   
+   OpenDBs();
+   
+-  AppState *as;
+-  Menu *m = new Menu();
+-  as = m;
+-  gStates.push_back( as );
+-  
+-  /*
+-  GLWidget wid;
+-  wid.show();
+-  */
+-  
+-  /// -------------------
+-  
+-  float ftime;
+-  Uint32 t, last_t, frames = 0, time = 0, fcount = 0, ft = 0;
+-  gFPS = 0;
+-  
+-  bool done = false;
+-  t = SDL_GetTicks();
+-  
+-  while(gStates.size()>0 && !done) {
+-    last_t = t;
+-    t = SDL_GetTicks();
+-    Uint32 dt = t - last_t;
+-    time += dt;
+-    ftime = time / 1000.0f;
+-    
+-    as = gStates[gStates.size()-1];
+-    
+-    SDL_Event event;
+-    while ( SDL_PollEvent(&event) ) {
+-      if ( event.type == SDL_QUIT ) {
+-        done = true;
+-      }
+-      else if ( event.type == SDL_MOUSEMOTION) {
+-        if(SDL_GetAppState()&SDL_APPMOUSEFOCUS)
+-          as->mousemove(&event.motion);
+-      }
+-      else if ( (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)&&(SDL_GetAppState()&SDL_APPINPUTFOCUS)) {
+-        
+-        if(event.button.type == SDL_MOUSEBUTTONUP)
+-          as->mouseclick(&event.button);
+-        else if(SDL_GetAppState()&SDL_APPMOUSEFOCUS)
+-          as->mouseclick(&event.button);
+-      }
+-      else if ( (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)) {
+-        if(SDL_GetAppState()&SDL_APPINPUTFOCUS)
+-          as->keypressed(&event.key);
+-      }
+-      else if( event.type == SDL_VIDEORESIZE)
+-      {
+-        // reset the resolution in video object
+-        video.resize(event.resize.w,event.resize.h);
+-        // message to the active gui element
+-        if(SDL_GetAppState())
+-          as->resizewindow();
+-      }
+-    }
+-    if(SDL_GetAppState()&SDL_APPACTIVE)
+-    {
+-      as->tick(ftime, dt/1000.0f);
+-      as->display(ftime, dt/1000.0f);
+-    }
+-    
+-    if (gPop) 
+-    {
+-      gPop = false;
+-      gStates.pop_back();
+-      delete as;
+-      as = NULL;
+-    }
+-    
+-    frames++;
+-    fcount++;
+-    ft += dt;
+-    if (ft >= 1000) 
+-    {
+-      gFPS = fcount / static_cast<float>(ft) * 1000.0f;
+-      ft = 0;
+-      fcount = 0;
+-    }
+-    
+-    video.flip();
+-  }
+-  
+-  //// -----------
++  GLWidget wid;
++  wid.show();
+   
+   return noggit.exec();
+ }
+diff --git a/src/Noggit.h b/src/Noggit.h
+--- a/src/Noggit.h
++++ b/src/Noggit.h
+@@ -31,7 +31,7 @@
+   ~NoggitApplication();
+   
+   void setWorkingDirectoryToApplicationPath();
+-  void initializeVideo();
++  void parseCommandLine();
+   void getGamePath();
+   void getProjectPath();
+   void getLocale();
+@@ -56,6 +56,7 @@
+ #include <QObject>
+ #include <QGLWidget>
+ 
++class Menu;
+ class QWidget;
+ class QMouseEvent;
+ 
+@@ -78,6 +79,8 @@
+  void mouseMoveEvent(QMouseEvent *event);
+  
+ private:
++
++  Menu *m;
+   QPointF lastPos;
+ };
+ 
+diff --git a/src/Video.cpp b/src/Video.cpp
+--- a/src/Video.cpp
++++ b/src/Video.cpp
+@@ -1,6 +1,6 @@
+ #include "Video.h"
+-
+-#include <SDL/SDL.h>
++
++#include <SDL/SDL.h>
+ #include <string>
+ 
+ #include "Settings.h"
+@@ -67,7 +67,7 @@
+   compareSetting(GL_TEXTURE_GEN_S,GLSettings[11]);
+   compareSetting(GL_TEXTURE_GEN_T,GLSettings[12]);
+ }
+-
++
+ Video video;
+ 
+ void Video::resize(int _xres, int _yres)
+@@ -108,34 +108,8 @@
+   fullscreen = fullscreen_;
+   xres = origX = _xres;
+   yres = origY = _yres;
+-  ratio = xres / static_cast<float>( yres );
++  ratio = xres / static_cast<float>( yres );
+   
+-  if( SDL_Init( SDL_INIT_TIMER | SDL_INIT_VIDEO ) )
+-  {
+-    LogError << "SDL: " << SDL_GetError() << std::endl;
+-    exit( 1 );
+-  }
+-  
+-  flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
+-  if( fullscreen_ )
+-  {
+-    flags |= SDL_FULLSCREEN;
+-  }
+-
+-  SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+-  SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
+-  SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
+-  SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
+-  SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
+-  SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
+-  
+-  primary = SDL_SetVideoMode( xres, yres, 0, flags );
+-
+-  if( !primary ) 
+-  {
+-    LogError << "SDL: " << SDL_GetError() << std::endl;
+-    exit( 1 );
+-  }
+ 
+   GLenum err = glewInit();
+   if( GLEW_OK != err )
+@@ -163,14 +137,6 @@
+   return mSupportCompression;
+ }
+ 
+-void Video::close()
+-{
+-  //Crashes if I don't do this, so prolly why they say don't change those
+-  primary->w = origX;
+-  primary->h = origY;
+-  SDL_Quit();
+-}
+-
+ void Video::flip() const
+ {
+   SDL_GL_SwapBuffers();
+@@ -254,12 +220,12 @@
+     ErrorNum = glGetError();
+   }
+ }
+-
+-
+-#include <boost/thread.hpp>
++
++
++#include <boost/thread.hpp>
+ 
+ namespace OpenGL
+-{
++{
+   CallList::CallList()
+   {
+     list = glGenLists( 1 );
+@@ -282,9 +248,9 @@
+     glCallList( list );
+   }
+     
+-  Texture::Texture(const std::string& pname): ManagedItem(pname), w(0), h(0)
+-  {
+-  }
++  Texture::Texture(const std::string& pname): ManagedItem(pname), w(0), h(0)
++  {
++  }
+   
+   const GLuint Texture::getId() const
+   {
+@@ -307,7 +273,7 @@
+   {
+     glActiveTexture( GL_TEXTURE0 + num );
+   }
+-}
++}
+ 
+ /*
+ 
