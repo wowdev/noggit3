@@ -394,6 +394,8 @@ int main( int argc, char *argv[] )
 
   SDL_Event event;
 
+  try {
+
   while( !gStates.empty() && !done )
   {
     Uint32 lastTicks( ticks );
@@ -461,6 +463,12 @@ int main( int argc, char *argv[] )
       activeAppState = NULL;
     }
   }
+
+  }
+  catch( const std::exception& e )
+{
+  LogError << "expection: " << e.what() << std::endl;
+}
 
   video.close();
 
