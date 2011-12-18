@@ -193,9 +193,16 @@ namespace freetype
       const char* lineBegin = line->c_str();
       const char* lineEnd = lineBegin + line->length();
 
-      for( utf8::iterator<const char*> itr( lineBegin, lineBegin, lineEnd ), itrEnd( lineEnd, lineBegin, lineEnd ); itr != itrEnd; ++itr )
+      try
       {
-        getGlyphData( *itr ).render();
+        for( utf8::iterator<const char*> itr( lineBegin, lineBegin, lineEnd ), itrEnd( lineEnd, lineBegin, lineEnd ); itr != itrEnd; ++itr )
+        {
+          getGlyphData( *itr ).render();
+        }
+      }
+      catch( const utf8::invalid_utf8& e )
+      {
+        LogError << "Invalid UTF8 in string \"" << *line << "\"" << std::endl;
       }
 
       verticalPosition += height;
@@ -227,9 +234,16 @@ namespace freetype
       const char* lineBegin = line->c_str();
       const char* lineEnd = lineBegin + line->length();
 
-      for( utf8::iterator<const char*> itr( lineBegin, lineBegin, lineEnd ), itrEnd( lineEnd, lineBegin, lineEnd ); itr != itrEnd; ++itr )
+      try
       {
-        currentWidth += getGlyphData( *itr ).width();
+        for( utf8::iterator<const char*> itr( lineBegin, lineBegin, lineEnd ), itrEnd( lineEnd, lineBegin, lineEnd ); itr != itrEnd; ++itr )
+        {
+          currentWidth += getGlyphData( *itr ).width();
+        }
+      }
+      catch( const utf8::invalid_utf8& e )
+      {
+        LogError << "Invalid UTF8 in string \"" << *line << "\"" << std::endl;
       }
 
       maximumWidth = std::max( maximumWidth, currentWidth );
