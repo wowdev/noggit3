@@ -610,74 +610,6 @@ private:
       if (pSLM(hProcess, 0, szImg, szMod, baseAddr, size) == 0)
         result = GetLastError();
     }
-    ULONGLONG fileVersion = 0;
-    if ( (m_parent != NULL) && (szImg != NULL) )
-    {
-      // try to retrive the file-version:
-      if ( (this->m_parent->m_options & StackWalker::RetrieveFileVersion) != 0)
-      {
-        VS_FIXEDFILEINFO *fInfo = NULL;
-        DWORD dwHandle;
-        DWORD dwSize = GetFileVersionInfoSizeA(szImg, &dwHandle);
-        if (dwSize > 0)
-        {
-          LPVOID vData = malloc(dwSize);
-          if (vData != NULL)
-          {
-            if (GetFileVersionInfoA(szImg, dwHandle, dwSize, vData) != 0)
-            {
-              UINT len;
-              TCHAR szSubBlock[] = _T("\\");
-              if (VerQueryValue(vData, szSubBlock, (LPVOID*) &fInfo, &len) == 0)
-                fInfo = NULL;
-              else
-              {
-                fileVersion = ((ULONGLONG)fInfo->dwFileVersionLS) + ((ULONGLONG)fInfo->dwFileVersionMS << 32);
-              }
-            }
-            free(vData);
-          }
-        }
-      }
-
-      // Retrive some additional-infos about the module
-      IMAGEHLP_MODULE64_V2 Module;
-      const char *szSymType = "-unknown-";
-      if (this->GetModuleInfo(hProcess, baseAddr, &Module) != FALSE)
-      {
-        switch(Module.SymType)
-        {
-          case SymNone:
-            szSymType = "-nosymbols-";
-            break;
-          case SymCoff:
-            szSymType = "COFF";
-            break;
-          case SymCv:
-            szSymType = "CV";
-            break;
-          case SymPdb:
-            szSymType = "PDB";
-            break;
-          case SymExport:
-            szSymType = "-exported-";
-            break;
-          case SymDeferred:
-            szSymType = "-deferred-";
-            break;
-          case SymSym:
-            szSymType = "SYM";
-            break;
-          case 8: //SymVirtual:
-            szSymType = "Virtual";
-            break;
-          case 9: // SymDia:
-            szSymType = "DIA";
-            break;
-        }
-      }
-      this->m_parent->OnLoadModule(img, mod, baseAddr, size, result, szSymType, Module.LoadedImageName, fileVersion);
-    }
     if (szImg != NULL) free(szImg);
     if (szMod != NULL) free(szMod);
     return result;
@@ -1137,22 +1069,6 @@ BOOL __stdcall StackWalker::myReadProcMem(
   }
 }
 
-void StackWalker::OnLoadModule(LPCSTR img, LPCSTR mod, DWORD64 baseAddr, DWORD size, DWORD result, LPCSTR symType, LPCSTR pdbName, ULONGLONG fileVersion)
-{
-  CHAR buffer[STACKWALK_MAX_NAMELEN];
-  if (fileVersion == 0)
-    _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s:%s (%p), size: %d (result: %d), SymType: '%s', PDB: '%s'\n", img, mod, (LPVOID) baseAddr, size, result, symType, pdbName);
-  else
-  {
-    DWORD v4 = (DWORD) fileVersion & 0xFFFF;
-    DWORD v3 = (DWORD) (fileVersion>>16) & 0xFFFF;
-    DWORD v2 = (DWORD) (fileVersion>>32) & 0xFFFF;
-    DWORD v1 = (DWORD) (fileVersion>>48) & 0xFFFF;
-    _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s:%s (%p), size: %d (result: %d), SymType: '%s', PDB: '%s', fileVersion: %d.%d.%d.%d\n", img, mod, (LPVOID) baseAddr, size, result, symType, pdbName, v1, v2, v3, v4);
-  }
-  OnOutput(buffer);
-}
-
 void StackWalker::OnCallstackEntry(CallstackEntryType eType, CallstackEntry &entry)
 {
   CHAR buffer[STACKWALK_MAX_NAMELEN];
@@ -1179,16 +1095,11 @@ void StackWalker::OnCallstackEntry(CallstackEntryType eType, CallstackEntry &ent
 
 void StackWalker::OnDbgHelpErr(LPCSTR szFuncName, DWORD gle, DWORD64 addr)
 {
-  CHAR buffer[STACKWALK_MAX_NAMELEN];
-  _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "ERROR: %s, GetLastError: %d (Address: %p)\n", szFuncName, gle, (LPVOID) addr);
-  OnOutput(buffer);
 }
 
 void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUserName)
 {
   CHAR buffer[STACKWALK_MAX_NAMELEN];
-  _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "SymInit: Symbol-SearchPath: '%s', symOptions: %d, UserName: '%s'\n", szSearchPath, symOptions, szUserName);
-  OnOutput(buffer);
   // Also display the OS-version
 #if _MSC_VER <= 1200
   OSVERSIONINFOA ver;
@@ -1219,5 +1130,5 @@ void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUser
 
 void StackWalker::OnOutput(LPCSTR buffer)
 {
-  Log << "Stacktrace:" << buffer;
+  LogError << buffer;
 }
