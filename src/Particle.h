@@ -27,18 +27,21 @@ protected:
   ParticleSystem *sys;
 public:
   explicit ParticleEmitter(ParticleSystem *psys): sys(psys) {}
+  virtual ~ParticleEmitter() {}
   virtual Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2) = 0;
 };
 
 class PlaneParticleEmitter: public ParticleEmitter {
 public:
   explicit PlaneParticleEmitter(ParticleSystem *_sys): ParticleEmitter(_sys) {}
+  virtual ~PlaneParticleEmitter() {}
   Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
 class SphereParticleEmitter: public ParticleEmitter {
 public:
   explicit SphereParticleEmitter(ParticleSystem *_sys): ParticleEmitter(_sys) {}
+  virtual ~SphereParticleEmitter() {}
   Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
@@ -93,7 +96,7 @@ public:
     rotation = 0;
     tofs = 0;
   }
-  ~ParticleSystem() { if( emitter ) { delete emitter; emitter = NULL; } }
+  virtual ~ParticleSystem() { if( emitter ) { delete emitter; emitter = NULL; } }
 
   void init(const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals);
   void update(float dt);
