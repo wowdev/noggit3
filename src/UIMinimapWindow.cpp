@@ -32,7 +32,7 @@ UIMinimapWindow::UIMinimapWindow( World* setMap )
 UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
 {
   // no click outside the adt block
-  if( !gWorld || !mMenuLink ||
+  if( !gWorld ||
       mx < borderwidth || mx > height() - borderwidth ||
       my < borderwidth || my > height() - borderwidth )
     return NULL;
@@ -43,7 +43,10 @@ UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
   if( !gWorld->hasTile( j, i ) )
     return NULL;
 
-  mMenuLink->enterMapAt( Vec3D( ( ( mx - borderwidth ) / tilesize ) * TILESIZE, 0.0f, ( ( my - borderwidth ) / tilesize ) * TILESIZE ) );
+  if(mMenuLink)
+	mMenuLink->enterMapAt( Vec3D( ( ( mx - borderwidth ) / tilesize ) * TILESIZE, 0.0f, ( ( my - borderwidth ) / tilesize ) * TILESIZE ) );
+  else if(map)
+	map->jumpToCords(  Vec3D( ( ( mx - borderwidth ) / tilesize ) * TILESIZE, 50.0f, ( ( my - borderwidth ) / tilesize ) * TILESIZE ) );
 
   return this;
 }
