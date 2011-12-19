@@ -92,7 +92,8 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
   float ry = vx * vz;
 
   glPushMatrix();
-  glClear(GL_DEPTH_BUFFER_BIT);
+  //glClear(GL_DEPTH_BUFFER_BIT);
+  glDisable(GL_DEPTH_TEST);
   //glLoadIdentity(); This delete gluDisk :(
   glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
   glEnable(GL_COLOR_MATERIAL);
@@ -108,7 +109,7 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
 
   //glColor4f(0.0f, 0.8f, 0.1f, 0.9f);
   //gluDisk(quadric, (radius * 1.5) - 2, (radius * 1.5) + 2, 0, 1);
-
+  glEnable(GL_DEPTH_TEST);
   glPopMatrix();
 }
 
