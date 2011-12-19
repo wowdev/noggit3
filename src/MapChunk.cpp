@@ -25,7 +25,6 @@ static const int HEIGHT_SHALLOW = -100;
 static const int HEIGHT_DEEP = -250;
 static const double MAPCHUNK_DIAMETER  = 47.140452079103168293389624140323;
 
-bool drawFlags = false;
 bool DrawMapContour = false;
 
 GLuint Contour = 0;
