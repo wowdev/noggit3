@@ -1,6 +1,5 @@
 #include "UIFrame.h"
 
-#include <SDL.h>
 #include <algorithm>
 #include <vector>
 
@@ -105,9 +104,4 @@ void UIFrame::getOffset( float* xOff, float* yOff )
 
   *xOff = tx + x();
   *yOff = ty + y();
-}
-
-bool UIFrame::KeyBoardEvent( SDL_KeyboardEvent *e )
-{
-  return false;
 }
