@@ -196,6 +196,7 @@ public:
   void addM2( Model *model, Vec3D newPos );
   void addWMO( WMO *wmo, Vec3D newPos );
   void removeHole( float x, float z );
+  void jumpToCords(Vec3D pos);
   void saveMap();
 
   void setChanged(float x, float z);
@@ -215,7 +216,7 @@ public:
   void moveHeight(int id, int x, int z , int _cx, int _cz);
 
   void saveWDT();
-  void clearAllModelsOnADT(int x,int z);
+  void clearAllModelsOnADT(int x, int z);
 };
 
 extern World *gWorld;

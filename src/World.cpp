@@ -2008,6 +2008,11 @@ void World::removeHole( float x, float z )
   }
 }
 
+void World::jumpToCords(Vec3D pos)
+{
+	this->camera = pos;
+}
+
 void World::saveMap()
 {
   //! \todo  Output as BLP.
