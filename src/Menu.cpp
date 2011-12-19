@@ -244,7 +244,12 @@ void Menu::mouseclick( SDL_MouseButtonEvent* e )
   }
   else
   {
-    LastClickedMenu = NULL;
+	if (LastClickedMenu)
+    {
+      LastClickedMenu->processUnclick();
+    }
+    
+	LastClickedMenu = NULL;
   }
 }
 
