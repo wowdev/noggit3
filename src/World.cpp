@@ -113,8 +113,10 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
   glPopMatrix();
 }
 
-void renderDisk_convenient(float x, float y, float z, float radius, int subdivisions)
+void renderDisk_convenient(float x, float y, float z, float radius)
 {
+  int subdivisions =(int)radius * 1.5;
+  if( subdivisions < 15 ) subdivisions=15;
   glDisable(GL_LIGHTING);
   GLUquadricObj *quadric = gluNewQuadric();
   gluQuadricDrawStyle(quadric, GLU_LINE);
@@ -1191,14 +1193,14 @@ void World::draw()
     if(terrainMode == 0)
 	{
 	  if(Environment::getInstance()->cursorType == 0)
-		  renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 24);
+		  renderDisk_convenient(posX, posY, posZ, groundBrushRadius);
 	  else
 	    renderSphere_convenient(posX, posY, posZ, groundBrushRadius, 15);
 	}
     else if(terrainMode == 1)
 	{
 	  if(Environment::getInstance()->cursorType == 0)
-		  renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 24);
+		  renderDisk_convenient(posX, posY, posZ, blurBrushRadius);
     else
 	    renderSphere_convenient(posX, posY, posZ, blurBrushRadius, 15);
 
@@ -1206,13 +1208,13 @@ void World::draw()
     else if(terrainMode == 2)
 	{
 	  if(Environment::getInstance()->cursorType == 0)
-		  renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 24);
+		  renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius());
 	  else
 	    renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
 
 	}
     else
-	    renderDisk_convenient(posX, posY, posZ, 0.24f, 16);
+	    renderDisk_convenient(posX, posY, posZ, 0.24f);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
