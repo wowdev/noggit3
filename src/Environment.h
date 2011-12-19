@@ -31,6 +31,11 @@ public:
   float Pos3DY;
   float Pos3DZ;
 
+  float cursorColorR;
+  float cursorColorG;
+  float cursorColorB;
+  float cursorColorA;
+  int cursorType;
 private:
   Environment();
   static Environment* instance;

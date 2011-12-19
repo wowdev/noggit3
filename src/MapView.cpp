@@ -125,8 +125,7 @@ int saveterrainMode = 0;
 
 brush textureBrush;
 
-int cursorMode = 0;
-int cursorType = 2;
+
 UICursorSwitcher* CursorSwitcher;
 
 bool Saving=false;
@@ -842,7 +841,7 @@ void MapView::createGUI()
   //mbar->GetMenu( "View" )->AddMenuItemToggle( "Map chunk settings", MapChunkWindow->hidden_evil(), true );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", mainGui->TexturePalette->hidden_evil(), true );
   // Cursor
-  mbar->GetMenu( "View" )->AddMenuItemButton( "Switch cursor", showCursorSwitcher, 0);
+  mbar->GetMenu( "View" )->AddMenuItemButton( "Cursor options", showCursorSwitcher, 0);
   mbar->GetMenu( "View" )->AddMenuItemSeperator( "Toggle" );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F1 M2s", &gWorld->drawmodels );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F2 WMO doodadsets", &gWorld->drawdoodads );
@@ -853,7 +852,7 @@ void MapView::createGUI()
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F8 Detail infos", mainGui->guidetailInfos->hidden_evil(), true );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F9 Map contour infos", &DrawMapContour );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F Fog", &gWorld->drawfog );
-  mbar->GetMenu( "View" )->AddMenuItemToggle( "Holelines always on", &Settings::getInstance()->holelinesOn, false );
+  mbar->GetMenu( "View" )->AddMenuItemToggle( "Hole lines always on", &Settings::getInstance()->holelinesOn, false );
 
   mbar->GetMenu( "Help" )->AddMenuItemButton( "Key Bindings", openHelp, 0 );
   mbar->GetMenu( "Help" )->AddMenuItemToggle( "Infos", mainGui->guiappInfo->hidden_evil(), true );
@@ -900,7 +899,13 @@ MapView::~MapView()
 void MapView::tick( float t, float dt )
 {
   dt = std::min( dt, 1.0f );
-
+  
+  // write some stuff into infos window for debuging
+  std::stringstream appinfoText;
+  appinfoText << "Project Path: " << Project::getInstance()->getPath() << std::endl;
+  appinfoText << "Current cursor: " << Environment::getInstance()->cursorType << std::endl;
+  mainGui->guiappInfo->setText( appinfoText.str() );
+  
   if( SDL_GetAppState() & SDL_APPINPUTFOCUS )
   {
     Vec3D dir( 1.0f, 0.0f, 0.0f );
@@ -1055,16 +1060,6 @@ void MapView::tick( float t, float dt )
       rh = 0;
       rv = 0;
 
-	  switch(cursorMode)
-	  {
-		case 0:
-			CursorSwitcher->changeCursor(cursorType);
-			break;
-
-		case 1:
-			CursorSwitcher->changeCursor(cursorType);
-			break;
-	  }
 
       if( leftMouse && Selection->type==eEntry_MapChunk )
       {

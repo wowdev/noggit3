@@ -1,7 +1,7 @@
 #include "UICursorSwitcher.h"
 #include "UICheckBox.h"
 #include "UISlider.h"
-#include "UIToggleGroup.h"
+#include "Environment.h"
 
 #include "World.h"
 
@@ -12,53 +12,66 @@ UISlider* AlphaColorSlider;
 
 UIToggleGroup* Toggle;
 
-float SliderWidth = 200.0f;
 
-extern bool cursorDisk;
-extern bool cursorSphere;
-extern int cursorType;
-
-void UICursorSwitcher::changeCursor(int Type)
+void setRed(float f)
 {
-	if(Type == 0)
-	{
-		cursorSphere = false;
-		cursorDisk = true;
-	}
-	else if(Type == 1)
-	{
-		cursorDisk = false;
-		cursorSphere = true;
-	}
+  Environment::getInstance()->cursorColorR = f;
 }
 
-float Wwidth = 480;
-float Wheight = 320;
-
-UICursorSwitcher::UICursorSwitcher() : UICloseWindow((float)video.xres() / 2.0f - Wwidth / 2.0f, (float)video.yres() / 2.0f - Wheight / 2.0f, Wwidth, Wheight, "Select the cursror you want to switch.", true)
+void setGreen(float f)
 {
-	Toggle = new UIToggleGroup(&cursorType);
-	addChild(new UICheckBox(30.0f, 30.0f, "Cursor - Disk", Toggle, 0));
-	addChild(new UICheckBox(150.0f, 30.0f, "Cursor - Sphere", Toggle, 1));
-	Toggle->Activate(0);
+  Environment::getInstance()->cursorColorG = f;
+}
 
-	RedColorSlider = new UISlider(30.0f, 80.0f, SliderWidth, 1.0f, 0.00001f);
+void setBlue(float f)
+{
+  Environment::getInstance()->cursorColorB = f;
+}
+
+void setAlpha(float f)
+{
+  Environment::getInstance()->cursorColorA = f;
+}
+void UICursorSwitcher::changeCursor(int Type)
+{
+  Environment::getInstance()->cursorType = Type;
+  Toggle->Activate(Type);
+}
+
+float Wwidth = 280;
+float Wheight = 220;
+
+UICursorSwitcher::UICursorSwitcher() : UICloseWindow((float)video.xres() / 2.0f - Wwidth / 2.0f, (float)video.yres() / 2.0f - Wheight / 2.0f, Wwidth, Wheight, "Cursor options", true)
+{
+  float leftMargin = 10.0f;
+  float SliderWidth = Wwidth - (leftMargin *2);
+
+	Toggle = new UIToggleGroup( &Environment::getInstance()->cursorType );
+	addChild(new UICheckBox(leftMargin, 30.0f, "Cursor - Disk", Toggle, 0));
+	addChild(new UICheckBox(leftMargin + 155.0f, 30.0f, "Cursor - Sphere", Toggle, 1));
+	Toggle->Activate(Environment::getInstance()->cursorType);
+
+	RedColorSlider = new UISlider(leftMargin, 80.0f, SliderWidth, 1.0f, 0.00001f);
 	RedColorSlider->setText("Red Channel: ");
-	RedColorSlider->setValue(RedColor());
+	RedColorSlider->setValue(Environment::getInstance()->cursorColorR);
+  RedColorSlider->setFunc(setRed);
 
-	GreenColorSlider = new UISlider(30.0f, 120.0f, SliderWidth, 1.0f, 0.00001f);
+	GreenColorSlider = new UISlider(leftMargin, 120.0f, SliderWidth, 1.0f, 0.00001f);
 	GreenColorSlider->setText("Green Channel: ");
-	GreenColorSlider->setValue(GreenColor());
-
-	BlueColorSlider = new UISlider(30.0f, 160.0f, SliderWidth, 1.0f, 0.00001f);
+	GreenColorSlider->setValue(Environment::getInstance()->cursorColorG);
+  GreenColorSlider->setFunc(setGreen);
+	
+  BlueColorSlider = new UISlider(leftMargin, 160.0f, SliderWidth, 1.0f, 0.00001f);
 	BlueColorSlider->setText("Blue Channel: ");
-	BlueColorSlider->setValue(BlueColor());
+	BlueColorSlider->setValue(Environment::getInstance()->cursorColorB);
+  BlueColorSlider->setFunc(setBlue);
 
-	AlphaColorSlider = new UISlider(30.0f, 200.0f, SliderWidth, 1.0f, 0.00001f);
+	AlphaColorSlider = new UISlider(leftMargin, 200.0f, SliderWidth, 1.0f, 0.00001f);
 	AlphaColorSlider->setText("Alpha Channel: ");
-	AlphaColorSlider->setValue(AlphaColor());
-
-	addChild(RedColorSlider);
+	AlphaColorSlider->setValue(Environment::getInstance()->cursorColorA);
+  AlphaColorSlider->setFunc(setAlpha);
+	
+  addChild(RedColorSlider);
 	addChild(GreenColorSlider);
 	addChild(BlueColorSlider);
 	addChild(AlphaColorSlider);
