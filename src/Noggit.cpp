@@ -169,6 +169,9 @@ int main( int argc, char *argv[] )
       Environment::getInstance()->cursorColorB = myConfigfile.read<float>( "BlueColor" );
       Environment::getInstance()->cursorColorA = myConfigfile.read<float>( "AlphaColor" );    
     }
+
+	if( myConfigfile.keyExists("CursorType"))
+		Environment::getInstance()->cursorType = myConfigfile.read<int>( "CursorType" );
   }
 
 
