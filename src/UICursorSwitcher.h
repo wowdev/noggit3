@@ -2,6 +2,7 @@
 #define CURSORSWITCHER_H
 
 #include "UICloseWindow.h"
+#include "UIToggleGroup.h"
 
 class UICursorSwitcher : public UICloseWindow
 {

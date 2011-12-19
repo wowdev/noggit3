@@ -68,7 +68,7 @@ std::string getGamePath()
     const DWORD s( 1024 );
     char temp[s];
     memset(temp,0,s);
-    LONG l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta",0,KEY_QUERY_VALUE,&key);
+    LONG l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
     if (l != ERROR_SUCCESS)
       l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
     if (l != ERROR_SUCCESS)
@@ -88,6 +88,7 @@ std::string getGamePath()
     return ConfigFile( "NoggIt.conf" ).read<std::string>( "Path" );
   }
 }
+
 
 void CreateStrips();
 
@@ -149,6 +150,27 @@ int main( int argc, char *argv[] )
       }
     }
   }
+
+  // init
+  Environment::getInstance()->cursorColorR = 1.0f;
+  Environment::getInstance()->cursorColorG = 1.0f;
+  Environment::getInstance()->cursorColorB = 1.0f;
+  Environment::getInstance()->cursorColorA = 1.0f;
+  Environment::getInstance()->cursorType = 0;
+
+  // load cursor settings
+  if(boost::filesystem::exists("NoggIt.conf"))
+  {
+    ConfigFile myConfigfile = ConfigFile( "NoggIt.conf" );
+    if( myConfigfile.keyExists("RedColor") && myConfigfile.keyExists("GreenColor")  &&  myConfigfile.keyExists("BlueColor") &&  myConfigfile.keyExists("AlphaColor") )
+    {
+      Environment::getInstance()->cursorColorR = myConfigfile.read<float>( "RedColor" );
+      Environment::getInstance()->cursorColorG = myConfigfile.read<float>( "GreenColor" );
+      Environment::getInstance()->cursorColorB = myConfigfile.read<float>( "BlueColor" );
+      Environment::getInstance()->cursorColorA = myConfigfile.read<float>( "AlphaColor" );    
+    }
+  }
+
 
   srand( time( NULL ) );
 

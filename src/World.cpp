@@ -32,159 +32,6 @@ World *gWorld = NULL;
 
 GLuint selectionBuffer[8192];
 
-float CRedColor, CGreenColor, CBlueColor, CAlphaColor;
-
-float RedColor()
-{
-	if(CRedColor == NULL)
-	{
-		Log << "CRedColor is NULL" << std::endl;
-
-		if(!boost::filesystem::exists("NoggIt.conf"))
-		{
-			Log << "CRedColor is NULL + NoggIt.conf doesn't exists" << std::endl;
-
-			return 1.0f;
-		}
-		else
-		{
-			std::stringstream ss(ConfigFile("NoggIt.conf").read<float>("RedColor"));
-
-			Log << "CRedColor isn't NULL" << std::endl;
-
-			if(!ss)
-			{
-				Log << "CRedColor isn't NULL, but haven't mention about RedColor" << std::endl;
-
-				return 1.0f;
-			}
-			else
-			{
-				Log << "CRedColor isn't NULL and have mention about RedColor" << std::endl;
-
-				return ConfigFile("NoggIt.conf").read<float>("RedColor");
-			}
-		}
-	}
-	else
-		return CRedColor;
-
-	return 1.0f;
-}
-
-float GreenColor()
-{
-	if(CGreenColor == NULL)
-	{
-		Log << "CGreenColor is NULL" << std::endl;
-
-		if(!boost::filesystem::exists("NoggIt.conf"))
-		{
-			Log << "CGreenColor is NULL + NoggIt.conf doesn't exists" << std::endl;
-
-			return 1.0f;
-		}
-		else
-		{
-			std::stringstream ss(ConfigFile("NoggIt.conf").read<float>("GreenColor"));
-
-			Log << "CGreenColor isn't NULL" << std::endl;
-
-			if(!ss)
-			{
-				Log << "CGreenColor isn't NULL, but haven't mention about GreenColor" << std::endl;
-
-				return 1.0f;
-			}
-			else
-			{
-				Log << "CGreenColor isn't NULL and have mention about GreenColor" << std::endl;
-
-				return ConfigFile("NoggIt.conf").read<float>("GreenColor");
-			}
-		}
-	}
-	else
-		return CGreenColor;
-
-	return 1.0f;
-}
-
-float BlueColor()
-{
-	if(CBlueColor == NULL)
-	{
-		Log << "CBlueColor is NULL" << std::endl;
-
-		if(!boost::filesystem::exists("NoggIt.conf"))
-		{
-			Log << "CBlueColor is NULL + NoggIt.conf doesn't exists" << std::endl;
-
-			return 1.0f;
-		}
-		else
-		{
-			std::stringstream ss(ConfigFile("NoggIt.conf").read<float>("BlueColor"));
-
-			Log << "CBlueColor isn't NULL" << std::endl;
-
-			if(!ss)
-			{
-				Log << "CBlueColor isn't NULL, but haven't mention about BlueColor" << std::endl;
-
-				return 1.0f;
-			}
-			else
-			{
-				Log << "CBlueColor isn't NULL and have mention about BlueColor" << std::endl;
-
-				return ConfigFile("NoggIt.conf").read<float>("BlueColor");
-			}
-		}
-	}
-	else
-		return CBlueColor;
-
-	return 1.0f;
-}
-
-float AlphaColor()
-{
-	if(CAlphaColor == NULL)
-	{
-		Log << "CAlphaColor is NULL" << std::endl;
-
-		if(!boost::filesystem::exists("NoggIt.conf"))
-		{
-			Log << "CAlphaColor is NULL + NoggIt.conf doesn't exists" << std::endl;
-
-			return 1.0f;
-		}
-		else
-		{
-			std::stringstream ss(ConfigFile("NoggIt.conf").read<float>("AlphaColor"));
-
-			Log << "CAlphaColor isn't NULL" << std::endl;
-
-			if(!ss)
-			{
-				Log << "CAlphaColor isn't NULL, but haven't mention about AlphaColor" << std::endl;
-
-				return 1.0f;
-			}
-			else
-			{
-				Log << "CAlphaColor isn't NULL and have mention about AlphaColor" << std::endl;
-
-				return ConfigFile("NoggIt.conf").read<float>("AlphaColor");
-			}
-		}
-	}
-	else
-		return CAlphaColor;
-
-	return 1.0f;
-}
 
 void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
 {
@@ -218,11 +65,7 @@ void renderSphere_convenient(float x, float y, float z, float radius, int subdiv
 {
   //the same quadric can be re-used for drawing many objects
   glDisable(GL_LIGHTING);
-  CRedColor = RedColor();
-  CGreenColor = GreenColor();
-  CBlueColor = BlueColor();
-  CAlphaColor = AlphaColor();
-  glColor4f( CRedColor, CGreenColor, CBlueColor, CAlphaColor );
+  glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA );
   GLUquadricObj *quadric=gluNewQuadric();
   gluQuadricNormals(quadric, GLU_SMOOTH);
   renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
@@ -254,16 +97,11 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
   glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
   glEnable(GL_COLOR_MATERIAL);
 
-  CRedColor = RedColor();
-  CGreenColor = GreenColor();
-  CBlueColor = BlueColor();
-  CAlphaColor = AlphaColor();
-
   //draw the quadric
   glTranslatef(x1, y1, z1);
   glRotatef(ax, rx, ry, 0.0f);
   glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-  glColor4f(CRedColor, CGreenColor, CBlueColor, CAlphaColor);
+  glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA);
 
   gluQuadricOrientation(quadric, GLU_OUTSIDE);
   gluDisk(quadric, radius - 0.25f, radius + 5.0f, subdivisions, 2);
@@ -1184,8 +1022,6 @@ extern float blurBrushRadius;
 extern int terrainMode;
 extern brush textureBrush;
 
-bool cursorDisk = true;
-bool cursorSphere = false;
 
 void World::draw()
 {
@@ -1350,39 +1186,36 @@ void World::draw()
     glDisable(GL_CULL_FACE);
     //glDepthMask(false);
     //glDisable(GL_DEPTH_TEST);
+
     if(terrainMode == 0)
 	{
-	  if(cursorDisk == true)
-		renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 16);
-	  else if(cursorSphere == true)
-	    renderSphere_convenient(posX, posY, posZ, groundBrushRadius, 15);
+	  if(Environment::getInstance()->cursorType == 0)
+		  renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 24);
 	  else
-	    renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 0);
+	    renderSphere_convenient(posX, posY, posZ, groundBrushRadius, 15);
 	}
     else if(terrainMode == 1)
 	{
-	  if(cursorDisk == true)
-		renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 16);
-	  else if(cursorSphere == true)
+	  if(Environment::getInstance()->cursorType == 0)
+		  renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 24);
+    else
 	    renderSphere_convenient(posX, posY, posZ, blurBrushRadius, 15);
-	  else
-	    renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 16);
+
 	}
     else if(terrainMode == 2)
 	{
-	  if(cursorDisk == true)
-		renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 16);
-	  else if(cursorSphere == true)
-	    renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
+	  if(Environment::getInstance()->cursorType == 0)
+		  renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 24);
 	  else
-	    renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 16);
+	    renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
+
 	}
     else
 	    renderDisk_convenient(posX, posY, posZ, 0.24f, 16);
 
     glEnable(GL_CULL_FACE);
-    //glEnable(GL_DEPTH_TEST);
-    //glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
+    //GlDepthMask(true);
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
   }
