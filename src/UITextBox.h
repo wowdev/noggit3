@@ -6,7 +6,6 @@
 #include "UIFrame.h"
 #include "UIText.h"
 
-struct SDL_KeyboardEvent;
 namespace OpenGL { class Texture; };
 
 class UITextBox : public UIFrame
@@ -23,7 +22,7 @@ private:
   std::string _value;
 
   bool _focus;
-  
+
   TriggerFunction _enterFunction;
   TriggerFunction _updateFunction;
 
@@ -33,11 +32,9 @@ public:
   virtual ~UITextBox();
 
   void render() const;
-  
+
   UIFrame::Ptr processLeftClick( float mx, float my );
-  
-  bool KeyBoardEvent( SDL_KeyboardEvent *e );
-  
+
   void value( const std::string& pText );
   const std::string& value() const;
 
