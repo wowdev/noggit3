@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 
+#include <QImage>
+
 #include "Frustum.h" // Frustum
 #include "Model.h" // ModelManager
 #include "Selection.h" // nameEntryManager
@@ -46,6 +48,13 @@ private:
 //! \todo Split this. There should be a seperate class for WDTs.
 class World
 {
+public:
+  const QImage& minimap() const { return _minimap; }
+
+private:
+  QImage _minimap;
+
+
   // Which tile are we over / entering?
   int cx;
   int cz;
@@ -138,8 +147,6 @@ public:
 
   OutdoorLightStats outdoorLightStats;
 
-  GLuint minimap;
-
   StripType *mapstrip;
   StripType *mapstrip2;
 
@@ -201,12 +208,12 @@ public:
   void setChanged(float x, float z);
   void setChanged(int x, int z);
   void unsetChanged(int x, int z);
-  bool getChanged(int x, int z);
+  bool getChanged(int x, int z) const;
 
   void deleteModelInstance( int pUniqueID );
   void deleteWMOInstance( int pUniqueID );
 
-  bool hasTile( int pX, int pZ );
+  bool hasTile( int pX, int pZ ) const;
 
   static bool IsEditableWorld( int pMapId );
   void clearHeight(int id, int x, int z);
