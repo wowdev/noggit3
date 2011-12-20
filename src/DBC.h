@@ -1,7 +1,7 @@
 #ifndef AREADB_H
 #define AREADB_H
 
-#include <string>
+#include <QString>
 
 #include "DBCFile.h"
 
@@ -19,7 +19,7 @@ public:
   static const size_t Flags = 4;    // bit field
   static const size_t Name = 11;    // localisation string
 
-  static std::string getAreaName( int pAreaID );
+  static QString getAreaName( int pAreaID );
 };
 
 class MapDB: public DBCFile
@@ -37,7 +37,8 @@ public:
   static const size_t Name = 4;        // loc
 
   static const size_t LoadingScreen = 57;    // uint [LoadingScreen]
-  static std::string getMapName( int pMapID );
+
+  static QString getMapName( int pMapID );
 };
 
 class LoadingScreensDB: public DBCFile
