@@ -1,171 +1,142 @@
-#include <vector>
+#include "UIMinimapWindow.h"
+
+#include <QPaintEvent>
+#include <QPainter>
 
 #include "Log.h"
 #include "Menu.h"
 #include "Sky.h"
-#include "UIMinimapWindow.h"
 #include "Video.h"
 #include "World.h"
 
-UIMinimapWindow::UIMinimapWindow( Menu* menuLink )
-: UIWindow( 0.0f, 0.0f, 0.0f, 0.0f )
-, borderwidth( 5.0f )
-, tilesize( 0.0f )
-, lookAt( 0.0f )
-, mMenuLink( menuLink )
-, map( NULL )
+minimap_widget::minimap_widget (QWidget* parent)
+  : QWidget (parent)
+  , _world (NULL)
+  , _draw_skies (false)
+  , _draw_camera (false)
 {
-  resize();
+  setSizePolicy (QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 }
 
-UIMinimapWindow::UIMinimapWindow( World* setMap )
-: UIWindow( 0.0f, 0.0f, 0.0f, 0.0f )
-, borderwidth( 5.0f )
-, tilesize( 0.0f )
-, lookAt( 0.0f )
-, mMenuLink( NULL )
-, map( setMap )
+QSize minimap_widget::sizeHint() const
 {
-  resize();
+  return QSize (512, 512);
 }
 
-UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
+//! \todo Only redraw stuff as told in event.
+void minimap_widget::paintEvent (QPaintEvent*)
 {
-  // no click outside the adt block
-  if( !gWorld || !mMenuLink ||
-      mx < borderwidth || mx > height() - borderwidth ||
-      my < borderwidth || my > height() - borderwidth )
-    return NULL;
+  //! \note Only take multiples of 1.0 pixels per tile.
+  const int smaller_side ((qMin (rect().width(), rect().height()) / 64) * 64);
+  const QRect drawing_rect (0, 0, smaller_side, smaller_side);
 
-  // is there a tile?
-  int i = static_cast<int>( mx - borderwidth ) / tilesize;
-  int j = static_cast<int>( my - borderwidth ) / tilesize;
-  if( !gWorld->hasTile( j, i ) )
-    return NULL;
+  const int tile_size (smaller_side / 64);
+  const qreal scale_factor (tile_size / TILESIZE);
 
-  mMenuLink->enterMapAt( Vec3D( ( ( mx - borderwidth ) / tilesize ) * TILESIZE, 0.0f, ( ( my - borderwidth ) / tilesize ) * TILESIZE ) );
+  QPainter painter (this);
+  painter.setRenderHints (QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
 
-  return this;
-}
-
-
-void UIMinimapWindow::resize()
-{
-  tilesize = ( video.yres() - 70.0f - borderwidth * 2.0f ) / 64.0f;
-
-  width( borderwidth * 2.0f + tilesize * 64.0f );
-  height( width() );
-  x( video.xres() / 2.0f - width() / 2.0f );
-  y( video.yres() / 2.0f - height() / 2.0f );
-}
-
-void UIMinimapWindow::changePlayerLookAt(float ah)
-{
-  lookAt = ah;
-}
-
-void UIMinimapWindow::render() const
-{
-  if( hidden() )
+  if (world())
   {
-    return;
-  }
+    painter.drawImage (drawing_rect, world()->minimap());
 
-  UIWindow::render();
-
-  glPushMatrix();
-  glTranslatef( x() + borderwidth, y() + borderwidth, 0.0f );
-
-  if( gWorld->minimap )
-  {
-    OpenGL::Texture::enableTexture();
-    glBindTexture( GL_TEXTURE_2D, gWorld->minimap );
-
-    glBegin( GL_QUADS );
-    glTexCoord2f( 0.0f, 0.0f );
-    glVertex2i( 0.0f, 0.0f );
-    glTexCoord2f( 1.0f, 0.0f );
-    glVertex2i( tilesize * 64.0f, 0.0f );
-    glTexCoord2f( 1.0f, 1.0f );
-    glVertex2i( tilesize * 64.0f, tilesize * 64.0f );
-    glTexCoord2f( 0.0f, 1.0f );
-    glVertex2i( 0.0f, tilesize * 64.0f );
-    glEnd();
-
-    OpenGL::Texture::disableTexture();
-  }
-
-  // draw the ADTs that are existing in the WDT with
-  // a transparent 11x11 box. 12x12 is the full size
-  // so we get a small border. Draw all not existing adts with
-  // a lighter box to have all 64x64 possible adts on screen.
-  // Later we can create adts over this view ore move them.
-  for( int j = 0; j < 64; j++ )
-  {
-    for( int i = 0; i < 64; ++i )
+    if (draw_boundaries())
     {
-      if( gWorld->hasTile( j, i ) )
-        glColor4f( 0.8f, 0.8f, 0.8f, 0.4f );
-      else
-        glColor4f( 1.0f, 1.0f, 1.0f, 0.05f );
+      painter.setPen (QColor (255, 255, 0));
 
-      glBegin( GL_QUADS );
-      glVertex2i( i * tilesize, j * tilesize );
-      glVertex2i( (( i + 1 ) * tilesize) - 1, j * tilesize );
-      glVertex2i( (( i + 1 ) * tilesize) - 1, (( j + 1 ) * tilesize) -1 );
-      glVertex2i( i * tilesize, (( j + 1 ) * tilesize) -1 );
-      glEnd();
-
-      if( map )
+      for (size_t i (0); i < 64; ++i)
       {
-        if( map->getChanged(j,i) )
+        for (size_t j (0); j < 64; ++j)
         {
-          glColor4f( 1.0f, 1.0f, 1.0f, 0.6f );
-          glBegin( GL_LINES );
-          glVertex2i( i * tilesize, j * tilesize );
-          glVertex2i( (( i + 1 ) * tilesize) , j * tilesize );
-          glVertex2i( (( i + 1 ) * tilesize) , j * tilesize );
-          glVertex2i( (( i + 1 ) * tilesize) , (( j + 1 ) * tilesize) -1 );
-          glVertex2i( (( i + 1 ) * tilesize) , (( j + 1 ) * tilesize) -1 );
-          glVertex2i( i * tilesize, (( j + 1 ) * tilesize) -1 );
-          glVertex2i( i * tilesize, (( j + 1 ) * tilesize) -1 );
-          glVertex2i( i * tilesize, j * tilesize );
-          glEnd();
+          //! \todo Check, if correct order!
+          if (world()->getChanged (j, i))
+          {
+            painter.drawLine (tile_size * i, tile_size * j, tile_size * (i + 1) - 1, tile_size * j);
+            painter.drawLine (tile_size * i, tile_size * j, tile_size * i, tile_size * (j + 1) - 1);
+          }
+        }
+      }
 
+      //! \todo Draw non-existing tiles aswell?
+      painter.setPen (QColor (0, 0, 0, 0));
+      painter.setBrush (QColor (255, 255, 255, 30));
+      for (size_t i (0); i < 64; ++i)
+      {
+        for (size_t j (0); j < 64; ++j)
+        {
+          if (world()->hasTile (j, i))
+          {
+            painter.drawRect (QRect (tile_size * i + 1, tile_size * j + 1, tile_size - 2, tile_size - 2));
+          }
         }
       }
     }
-  }
 
-  // draw the arrow if shown inside a map
-  //! \todo Change it from a simple line to an arrow
-  if( map )
-  {
-    glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-    glBegin( GL_LINES );
-    const float fx( map->camera.x / TILESIZE * tilesize );
-    const float fz( map->camera.z / TILESIZE * tilesize );
-    glVertex2f( fx, fz );
-    glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-    glVertex2f( fx + 10.0f * cosf( lookAt / 180.0f * PI ), fz + 10.0f * sinf( lookAt / 180.0f * PI ) );
-    glEnd();
-
-    int skycount = map->skies->skies.size();
-
-
-    for( int j = 0; j < skycount; j++ )
+    if (draw_skies())
     {
-      glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-      float x_ = map->skies->skies[j].pos.x/ TILESIZE * tilesize;
-      float z_ = map->skies->skies[j].pos.z/ TILESIZE * tilesize;
-      glBegin( GL_QUADS );
-      glVertex2i( x_,  z_ );
-      glVertex2i( x_+3,  z_ );
-      glVertex2i( x_+3,  z_+3 );
-      glVertex2i( x_,  z_+3 );
-      glEnd();
+      foreach (Sky sky, world()->skies->skies)
+      {
+        //! \todo Get actual color from sky.
+        //! \todo Get actual radius.
+        //! \todo Inner and outer radius?
+        painter.setPen (Qt::blue);
+
+        painter.drawEllipse ( QPointF ( sky.pos.x * scale_factor
+                                      , sky.pos.z * scale_factor
+                                      )
+                            , 10.0 // radius
+                            , 10.0
+                            );
+      }
+    }
+
+    if (draw_camera())
+    {
+      painter.setPen (Qt::red);
+
+      QLineF camera_vector ( QPointF ( world()->camera.x * scale_factor
+                                     , world()->camera.z * scale_factor
+                                     )
+                           , QPointF ( world()->lookat.x * scale_factor
+                                     , world()->lookat.z * scale_factor
+                                     )
+                           );
+      camera_vector.setLength (15.0);
+
+      painter.drawLine (camera_vector);
     }
   }
+  else
+  {
+    //! \todo Draw something so user realizes this will become the minimap.
+    painter.setPen (Qt::black);
+    painter.setFont (QFont ("Arial", 30));
+    painter.drawText (drawing_rect, Qt::AlignCenter, tr ("Select a map on the left side."));
+  }
+}
 
-  glPopMatrix();
+void minimap_widget::mouseDoubleClickEvent (QMouseEvent* event)
+{
+  if (event->button() != Qt::LeftButton)
+  {
+    event->ignore();
+    return;
+  }
+
+  const int smaller_side ((qMin (rect().width(), rect().height()) / 64) * 64);
+  const int tile_size (smaller_side / 64);
+  //! \note event->pos() / tile_size seems to be using floating point arithmetic, therefore getting wrong results.
+  const QPoint tile (event->pos().x() / tile_size, event->pos().y() / tile_size);
+
+  emit tile_clicked (tile);
+
+  if (!world()->hasTile (tile.y(), tile.x()))
+  {
+    event->ignore();
+    return;
+  }
+
+  event->accept();
+
+  emit map_clicked (Vec3D (tile.x() * TILESIZE, 0.0f, tile.y() * TILESIZE));
 }
