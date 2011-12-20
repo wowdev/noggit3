@@ -1,389 +1,152 @@
 #include "Menu.h"
 
-#include <cstdlib>
-#include <ctime>
-#include <fstream>
-#include <iostream>
-#include <list>
-#include <sstream>
-#include <string>
-#include <vector>
-
+#include "Vec3D.h"
+#include "World.h"
 #include "DBC.h"
-#include "DBCFile.h"
 #include "Log.h"
 #include "MapView.h"
-#include "Misc.h"
-#include "ModelManager.h" // ModelManager
-#include "MPQ.h"
-#include "Noggit.h" // fonts, APP_*
-#include "TextureManager.h" // TextureManager, Texture
-#include "UIAbout.h" // UIAbout
-#include "UIFrame.h" // UIFrame
-#include "UIMenuBar.h" // UIMenuBar, menu items, ..
-#include "UIMinimapWindow.h" // UIMinimapWindow
-#include "UIStatusBar.h" // UIStatusBar
-#include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
-#include "World.h"
-#include "Settings.h"
+#include "UIMinimapWindow.h"
 
-Menu* theMenu = NULL;
+#include <QMetaType>
+#include <QListWidget>
+#include <QTabWidget>
+#include <QSettings>
+#include <QHBoxLayout>
 
-void showMap( UIFrame *, int mapID )
+struct bookmark_entry
 {
-  if( theMenu )
+  int map_id;
+  Vec3D position;
+  float rotation;
+  float tilt;
+};
+
+// for storing in QVariant
+Q_DECLARE_METATYPE (bookmark_entry);
+Q_DECLARE_METATYPE (Vec3D);
+
+Menu::Menu (QWidget* parent)
+  : QWidget (parent)
+  , _minimap (NULL)
+  , _world (NULL)
+{
+  QListWidget* continents_table (new QListWidget (NULL));
+  QListWidget* dungeons_table (new QListWidget (NULL));
+  QListWidget* raids_table (new QListWidget (NULL));
+
+  connect (continents_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
+  connect (dungeons_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
+  connect (raids_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
+
+  QListWidget* tables[3] = { continents_table, dungeons_table, raids_table };
+
+  for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
   {
-    theMenu->loadMap( mapID );
-  }
-}
+    const int mapID (i->getInt (MapDB::MapID));
+    const int areaType (i->getUInt (MapDB::AreaType));
+    if (areaType < 0 || areaType > 2 || !World::IsEditableWorld (mapID))
+      continue;
 
-void showBookmark( UIFrame *, int bookmarkID )
-{
-  if( theMenu )
+    QListWidgetItem* item (new QListWidgetItem (QString::fromUtf8 (i->getLocalizedString(MapDB::Name)), tables[areaType]));
+    item->setData (Qt::UserRole, QVariant (mapID));
+  }
+
+  QListWidget* bookmarks_table (new QListWidget (NULL));
+
+  connect (bookmarks_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_bookmark_list_item (QListWidgetItem*)));
+  connect (bookmarks_table, SIGNAL (itemDoubleClicked (QListWidgetItem*)), SLOT (open_bookmark_list_item (QListWidgetItem*)));
+
+  //! \todo The list needs to be refreshed upon adding a bookmark.
+  QSettings settings;
+
+  int bookmarks (settings.beginReadArray ("bookmarks"));
+  for (int i (0); i < bookmarks; ++i)
   {
-    theMenu->loadBookmark( bookmarkID );
+    settings.setArrayIndex (i);
+    bookmark_entry b;
+    b.map_id = settings.value ("map_id").toInt();
+    b.position = settings.value ("camera/position").value<Vec3D>();
+    b.rotation = settings.value ("camera/rotation").toFloat();
+    b.tilt = settings.value ("camera/tilt").toFloat();
+
+    const int area_id (settings.value ("area_id").toInt());
+
+    QListWidgetItem* item (new QListWidgetItem (QString ("%1: %2").arg (MapDB::getMapName (b.map_id)).arg (AreaDB::getAreaName (area_id)), bookmarks_table));
+    item->setData (Qt::UserRole, QVariant::fromValue (b));
   }
-}
+  settings.endArray();
 
-Menu::Menu()
-: mGUIFrame( NULL )
-, mGUIStatusbar( NULL )
-, mGUICreditsWindow( NULL )
-, mGUIMinimapWindow( NULL )
-, mGUImenuBar( NULL )
-, mBackgroundModel( NULL )
-, mLastBackgroundId( -1 )
-{
-  gWorld = NULL;
-  theMenu = this;
+  QHBoxLayout* menu_layout (new QHBoxLayout (this));
 
-  mGUIFrame = new UIFrame( 0.0f, 0.0f, video.xres(), video.yres() );
-  mGUIMinimapWindow = new UIMinimapWindow( this );
-  mGUIMinimapWindow->hide();
-  mGUIFrame->addChild( mGUIMinimapWindow );
-  mGUICreditsWindow = new UIAbout();
-  mGUIFrame->addChild( mGUICreditsWindow );
-  //! \todo Use? Yes - later i will show here the adt cords where you enter and some otehr infos
-  mGUIStatusbar = new UIStatusBar( 0.0f, video.yres() - 30.0f, video.xres(), 30.0f );
-  mGUIFrame->addChild( mGUIStatusbar );
+  QTabWidget* entry_points_tabs (new QTabWidget (NULL));
+  entry_points_tabs->addTab (continents_table, tr ("Continents"));
+  entry_points_tabs->addTab (dungeons_table, tr ("Dungeons"));
+  entry_points_tabs->addTab (raids_table, tr ("Raids"));
+  entry_points_tabs->addTab (bookmarks_table, tr ("Bookmarks"));
 
-  createMapList();
-  createBookmarkList();
-  buildMenuBar();
-  randBackground();
-}
+  _minimap = new minimap_widget (NULL);
+  _minimap->draw_boundaries (true);
+  connect (_minimap, SIGNAL (map_clicked (Vec3D)), SLOT (minimap_clicked (Vec3D)));
 
-//! \todo Add TBC and WOTLK.
-//! \todo Use std::array / boost::array.
-//const std::string uiModels[] = { "BloodElf", "Deathknight", "Draenei", "Dwarf", "Human", "MainMenu", "NightElf", "Orc", "Scourge", "Tauren" };
-//Steff: Turn of the ugly once
-const std::string uiModels[] = { "Deathknight", "Draenei", "Dwarf",  "MainMenu", "NightElf", "Orc" };
-
-
-std::string buildModelPath( size_t index )
-{
-  assert( index < sizeof( uiModels ) / sizeof( const std::string ) );
-
-  return "Interface\\Glues\\Models\\UI_" + uiModels[index] + "\\UI_" + uiModels[index] + ".m2";
+  menu_layout->addWidget (entry_points_tabs);
+  menu_layout->addWidget (_minimap);
 }
 
 Menu::~Menu()
 {
-  delete mGUIFrame;
-  mGUIFrame = NULL;
-
-  delete gWorld;
-  gWorld = NULL;
-
-  if( mBackgroundModel )
-  {
-    ModelManager::delbyname( buildModelPath( mLastBackgroundId ) );
-    mBackgroundModel = NULL;
-  }
+  delete _world;
+  _world = NULL;
 }
 
-void Menu::randBackground()
+void Menu::enter_world_at (const Vec3D& pos, bool autoHeight, float av, float ah )
 {
-  if( mBackgroundModel )
-  {
-    ModelManager::delbyname( buildModelPath( mLastBackgroundId ) );
-    mBackgroundModel = NULL;
-  }
+  prepare_world (pos, ah, av, autoHeight);
 
-  int randnum;
-  do
-  {
-    randnum = misc::randint( 0, sizeof( uiModels ) / sizeof( const std::string ) - 1 );
-  }
-  while( randnum == mLastBackgroundId );
+  _world->initDisplay();
+  _world->enterTile (pos.x / TILESIZE, pos.y / TILESIZE);
 
-  mLastBackgroundId = randnum;
-
-  mBackgroundModel = ModelManager::add( buildModelPath( randnum ) );
-  mBackgroundModel->mPerInstanceAnimation = true;
+  emit create_world_view_request (_world);
 }
 
-
-void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
+void Menu::load_map (int map_id)
 {
-  video.farclip( Settings::getInstance()->FarZ );
-  Vec2D tile( pos.x / TILESIZE, pos.y / TILESIZE );
+  delete _world;
 
-  gWorld->autoheight = autoHeight;
+  _world = new World (gMapDB.getByID (map_id, MapDB::MapID).getString (MapDB::InternalName));
 
-  gWorld->camera = Vec3D( pos.x, pos.y, pos.z );
-  gWorld->lookat = Vec3D( pos.x, pos.y, pos.z - 1.0f );
-
-  gWorld->initDisplay();
-  gWorld->enterTile( tile.x, tile.y );
-
-  gStates.push_back( new MapView( ah, av ) ); // on gPop, MapView is deleted.
-
-  mGUIMinimapWindow->hide();
-
-  if( mBackgroundModel )
-  {
-    ModelManager::delbyname( buildModelPath( mLastBackgroundId ) );
-    mBackgroundModel = NULL;
-  }
+  _minimap->world (_world);
 }
 
-void Menu::tick( float t, float /*dt*/ )
+void Menu::minimap_clicked (const Vec3D& position)
 {
-  globalTime = t * 1000.0f;
-
-  if( mBackgroundModel )
-  {
-    mBackgroundModel->updateEmitters( t );
-  }
-  else
-  {
-    randBackground();
-  }
+  enter_world_at (position, true, 0.0, 0.0);
 }
 
-void Menu::display( float /*t*/, float /*dt*/ )
+void Menu::prepare_world (const Vec3D& pos, float rotation, float tilt, bool auto_height)
 {
-  // 3D: Background.
-  video.clearScreen();
-
-  video.set3D();
-
-  glDisable( GL_FOG );
-
-  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-
-  Vec4D la( 0.1f, 0.1f, 0.1f, 1.0f );
-  glLightModelfv( GL_LIGHT_MODEL_AMBIENT, la );
-
-  glEnable( GL_COLOR_MATERIAL );
-  glColorMaterial( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
-  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-  for(OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light )
-  {
-    glLightf( light, GL_CONSTANT_ATTENUATION, 0.0f );
-    glLightf( light, GL_LINEAR_ATTENUATION, 0.7f );
-    glLightf( light, GL_QUADRATIC_ATTENUATION, 0.03f );
-    glDisable( light );
-  }
-
-  glEnable( GL_CULL_FACE );
-  glEnable( GL_DEPTH_TEST );
-  glDepthFunc( GL_LEQUAL );
-  glEnable( GL_LIGHTING );
-  glEnable( GL_TEXTURE_2D );
-
-  mBackgroundModel->cam.setup( globalTime );
-  mBackgroundModel->draw();
-
-  glDisable( GL_TEXTURE_2D );
-  glDisable( GL_LIGHTING );
-  glDisable( GL_DEPTH_TEST );
-  glDisable( GL_CULL_FACE );
-
-  // 2D: UI.
-
-  video.set2D();
-  glEnable( GL_BLEND );
-  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-  mGUIFrame->render();
+  _world->autoheight = auto_height;
+  _world->camera = Vec3D (pos.x, pos.y, pos.z);
+  //! \todo actually set lookat!
+  _world->lookat = Vec3D (pos.x - 1.0f, pos.y - 1.0f, pos.z - 1.0f); // ah = rotation
 }
 
-void Menu::keypressed( SDL_KeyboardEvent* e )
+void Menu::show_map_list_item (QListWidgetItem* item)
 {
-  if( e->type == SDL_KEYDOWN && e->keysym.sym == SDLK_ESCAPE )
-  {
-    if( gWorld )
-    {
-      mGUIMinimapWindow->hide();
-      delete gWorld;
-      gWorld = NULL;
-    }
-    else
-    {
-      gPop = true;
-    }
-  }
+  load_map (item->data (Qt::UserRole).toInt());
+  _minimap->draw_camera (false);
 }
 
-UIFrame::Ptr LastClickedMenu = NULL;
-
-void Menu::mouseclick( SDL_MouseButtonEvent* e )
+void Menu::show_bookmark_list_item (QListWidgetItem* item)
 {
-  mGUICreditsWindow->hide();
-
-  if( e->button != SDL_BUTTON_LEFT )
-  {
-    return;
-  }
-
-  if( e->type == SDL_MOUSEBUTTONDOWN )
-  {
-    LastClickedMenu = mGUIFrame->processLeftClick( e->x, e->y );
-  }
-  else
-  {
-    LastClickedMenu = NULL;
-  }
+  const bookmark_entry e (item->data (Qt::UserRole).value<bookmark_entry>());
+  load_map (e.map_id);
+  prepare_world (e.position, e.rotation, e.tilt, false);
+  _minimap->draw_camera (true);
 }
 
-void Menu::mousemove( SDL_MouseMotionEvent *e )
+void Menu::open_bookmark_list_item (QListWidgetItem* item)
 {
-  if( LastClickedMenu )
-  {
-    LastClickedMenu->processLeftDrag( e->x - 4, e->y - 4, e->xrel, e->yrel );
-  }
-}
-
-void Menu::resizewindow()
-{
-  mGUIFrame->resize();
-}
-
-void Menu::loadMap( int mapID )
-{
-  delete gWorld;
-  gWorld = NULL;
-
-  for( DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it )
-  {
-    if( it->getInt( MapDB::MapID ) == mapID )
-    {
-      gWorld = new World( it->getString( MapDB::InternalName ) );
-      mGUIMinimapWindow->show();
-      return;
-    }
-  }
-
-  LogError << "Map with ID " << mapID << " not found. Failed loading." << std::endl;
-}
-
-void Menu::loadBookmark( int bookmarkID )
-{
-  BookmarkEntry e = mBookmarks.at( bookmarkID );
-  loadMap( e.mapID );
-  enterMapAt( e.pos, false, e.av, e.ah );
-}
-
-void Menu::buildMenuBar()
-{
-  if( mGUImenuBar )
-  {
-    mGUIFrame->removeChild( mGUImenuBar );
-    delete mGUImenuBar;
-    mGUImenuBar = NULL;
-  }
-
-  mGUImenuBar = new UIMenuBar();
-  mGUImenuBar->AddMenu( "File" );
-  mGUImenuBar->GetMenu( "File" )->AddMenuItemSwitch( "exit ESC", &gPop, true );
-  mGUIFrame->addChild( mGUImenuBar );
-
-  static const char* typeToName[3] = { "Continent", "Dungeons", "Raid" };
-
-  mGUImenuBar->AddMenu( typeToName[0] );
-  mGUImenuBar->AddMenu( typeToName[1] );
-  mGUImenuBar->AddMenu( typeToName[2] );
-
-  for( std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it )
-  {
-    mGUImenuBar->GetMenu( typeToName[it->areaType] )->AddMenuItemButton( it->name, &showMap, it->mapID );
-  }
-
-  static const size_t nBookmarksPerMenu = 20;
-  const size_t nBookmarkMenus = ( mBookmarks.size() / nBookmarksPerMenu ) + 1;
-
-  if( mBookmarks.size() )
-  {
-    mGUImenuBar->AddMenu( "Bookmarks" );
-  }
-
-  for( size_t i = 1; i < nBookmarkMenus; ++i )
-  {
-    std::stringstream name;
-    name << "Bookmarks (" << ( i + 1 ) << ")";
-    mGUImenuBar->AddMenu( name.str() );
-  }
-
-  int n = -1;
-  for( std::vector<BookmarkEntry>::const_iterator it = mBookmarks.begin(); it != mBookmarks.end(); ++it )
-  {
-    std::stringstream name;
-    const int page = ( ++n / nBookmarksPerMenu );
-    if( page )
-    {
-      name << "Bookmarks (" << ( page + 1 ) << ")";
-    }
-    else
-    {
-      name << "Bookmarks";
-    }
-
-    mGUImenuBar->GetMenu( name.str() )->AddMenuItemButton( it->name, &showBookmark, n );
-  }
-}
-
-void Menu::createMapList()
-{
-  for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
-  {
-    MapEntry e;
-    e.mapID = i->getInt( MapDB::MapID );
-    e.name = i->getLocalizedString( MapDB::Name );
-    e.areaType = i->getUInt( MapDB::AreaType );
-    if( e.areaType < 0 || e.areaType > 2 || !World::IsEditableWorld( e.mapID ) )
-      continue;
-
-    mMaps.push_back( e );
-  }
-}
-
-void Menu::createBookmarkList()
-{
-  mBookmarks.clear();
-
-  std::ifstream f( "bookmarks.txt" );
-  if( !f.is_open() )
-  {
-    LogDebug << "No bookmarks file." << std::endl;
-    return;
-  }
-
-  std::string basename;
-  int areaID;
-  BookmarkEntry b;
-  int mapID = -1;
-  while ( f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.ah >> b.av >> areaID )
-  {
-    if( mapID == -1 )
-      continue;
-
-    std::stringstream temp;
-    temp << MapDB::getMapName(mapID) << ": " << AreaDB::getAreaName( areaID );
-    b.name = temp.str();
-    b.mapID = mapID;
-    mBookmarks.push_back( b );
-  }
-  f.close();
+  const bookmark_entry e (item->data (Qt::UserRole).value<bookmark_entry>());
+  load_map (e.map_id);
+  enter_world_at (e.position, false, e.tilt, e.rotation);
 }
