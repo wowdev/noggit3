@@ -204,7 +204,6 @@ World::World( const std::string& name )
 , noadt( false )
 , hadSky( false )
 , outdoorLightStats( OutdoorLightStats() )
-, minimap( 0 )
 , mapstrip( NULL )
 , mapstrip2( NULL )
 , camera( Vec3D( 0.0f, 0.0f, 0.0f ) )
@@ -332,288 +331,291 @@ World::World( const std::string& name )
   //initDisplay();
 }
 
+static inline QRgb color_for_height (int16_t height)
+{
+  struct ranged_color
+  {
+    const QRgb color;
+    const int16_t start;
+    const int16_t stop;
+
+    ranged_color (const QRgb& color, const int16_t& start, const int16_t& stop)
+    : color (color), start (start), stop (stop) {}
+  };
+
+  static const ranged_color colors[] =
+    { ranged_color (qRgb (20, 149, 7), 0, 600)
+    , ranged_color (qRgb (137, 84, 21), 600, 1200)
+    , ranged_color (qRgb (96, 96, 96), 1200, 1600)
+    , ranged_color (qRgb (255, 255, 255), 1600, 0x7FFF)
+    };
+  static const size_t num_colors (sizeof (colors) / sizeof (ranged_color));
+
+  if (height < colors[0].start)
+  {
+    return qRgb (0, 0, 255 + qMax (height / 2.0, -255.0));
+  }
+  else if (height >= colors[num_colors - 1].stop)
+  {
+    return colors[num_colors].color;
+  }
+
+  qreal t (1.0);
+  size_t correct_color (num_colors - 1);
+
+  for (size_t i (0); i < num_colors - 1; ++i)
+  {
+    if (height >= colors[i].start && height < colors[i].stop)
+    {
+      t = (height - colors[i].start) / qreal (colors[i].stop - colors[i].start);
+      correct_color = i;
+      break;
+    }
+  }
+
+  return qRgb ( qRed (colors[correct_color + 1].color) * t + qRed (colors[correct_color].color) * (1.0 - t)
+              , qGreen (colors[correct_color + 1].color) * t + qGreen (colors[correct_color].color) * (1.0 - t)
+              , qBlue (colors[correct_color + 1].color) * t + qBlue (colors[correct_color].color) * (1.0 - t)
+              );
+}
+
 
 void World::initMinimap()
 {
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
 
-  MPQFile f(filename.str());
-  if (f.isEof()) {
+  MPQFile wdl_file (filename.str());
+  if (wdl_file.isEof())
+  {
     LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
     return;
   }
 
-  int ofsbuf[64][64];
-  memset(ofsbuf, 0, 64*64*4);
+  uint32_t fourcc;
+  uint32_t size;
 
-  int fourcc;
-  size_t size;
+  // - MVER ----------------------------------------------
 
-  while (!f.isEof()) {
-    f.read(&fourcc,4);
-    f.read(&size, 4);
+  uint32_t version;
 
-    if (size == 0)
-      continue;
+  wdl_file.read (&fourcc, 4);
+  wdl_file.read (&size, 4);
+  wdl_file.read (&version, 4);
 
-    size_t nextpos = f.getPos() + size;
+  assert (fourcc == 'MVER' && size == 4 && version == 18);
 
-  /*  if( fourcc == 'MVER' ) {
-    }
-    else if( fourcc == 'MWMO' ) {
-      // Filenames for WMO that appear in the low resolution map. Zero terminated strings.
-    }
-    else if( fourcc == 'MWID' ) {
-      // List of indexes into the MWMO chunk.
-    }
-    else if( fourcc == 'MODF' ) {
-      // Placement information for the WMO. Appears to be the same 64 byte structure used in the WDT and ADT MODF chunks.
-    }
-    else*/ if( fourcc == 'MAOF' ) {
-      f.read(ofsbuf,64*64*4);
-    }
-    else if( fourcc == 'MARE' ) {
-      glGenTextures(1, &minimap);
+  // - MWMO ----------------------------------------------
 
-      // zomg, data on the stack!!1
-      //int texbuf[512][512];
-      unsigned int *texbuf = new unsigned int[512*512];
-      memset(texbuf,0,512*512*4);
+  wdl_file.read (&fourcc, 4);
+  wdl_file.read (&size, 4);
 
-      // as alpha is unused, maybe I should try 24bpp? :(
-      int16_t tilebuf[17*17];
+  assert (fourcc == 'MWMO');
+  // Filenames for WMO that appear in the low resolution map. Zero terminated strings.
 
-      for (int j=0; j<64; ++j) {
-        for (int i=0; i<64; ++i) {
-          if (ofsbuf[j][i]) {
-            f.seek(ofsbuf[j][i]+8);
-            // read height values ^_^
+  wdl_file.seekRelative (size);
 
-            /*
-            short *sp = tilebuf;
-            for (int z=0; z<33; z++) {
-              f.read(sp, 2 * ( (z%2) ? 16 : 17 ));
-              sp += 17;
-            }*/
-            /*
-            fucking win. in the .adt files, height maps are stored in 9-8-9-8-... interleaved order.
-            here, apparently, a 17x17 map is stored followed by a 16x16 map.
-            yay for consistency.
-            I'm only using the 17x17 map here.
-            */
-            f.read(tilebuf,17*17*2);
+  // - MWID ----------------------------------------------
 
-            // make minimap
-            // for a 512x512 minimap texture, and 64x64 tiles, one tile is 8x8 pixels
-            for (int z=0; z<8; z++) {
-              for (int x=0; x<8; x++) {
-                int16_t hval = tilebuf[(z*2)*17+x*2]; // for now
+  wdl_file.read (&fourcc, 4);
+  wdl_file.read (&size, 4);
 
-                // make rgb from height value
-                unsigned char r,g,b;
-                if (hval < 0) {
-                  // water = blue
-                  if (hval < -511) hval = -511;
-                  hval /= -2;
-                  r = g = 0;
-                  b = 255 - hval;
-                } else {
-                  // above water = should apply a palette :(
-                  /*
-                  float fh = hval / 1600.0f;
-                  if (fh > 1.0f) fh = 1.0f;
-                  unsigned char c = (unsigned char) (fh * 255.0f);
-                  r = g = b = c;
-                  */
+  assert (fourcc == 'MWID');
+  // List of indexes into the MWMO chunk.
 
-                  // green: 20,149,7    0-600
-                  // brown: 137, 84, 21  600-1200
-                  // gray: 96, 96, 96    1200-1600
-                  // white: 255, 255, 255
-                  unsigned char r1,r2,g1,g2,b1,b2;
-                  float t;
+  wdl_file.seekRelative (size);
 
-                  if (hval < 600) {
-                    r1 = 20;
-                    r2 = 137;
-                    g1 = 149;
-                    g2 = 84;
-                    b1 = 7;
-                    b2 = 21;
-                    t = hval / 600.0f;
-                  }
-                  else if (hval < 1200) {
-                    r2 = 96;
-                    r1 = 137;
-                    g2 = 96;
-                    g1 = 84;
-                    b2 = 96;
-                    b1 = 21;
-                    t = (hval-600) / 600.0f;
-                  }
-                  else /*if (hval < 1600)*/ {
-                    r1 = 96;
-                    r2 = 255;
-                    g1 = 96;
-                    g2 = 255;
-                    b1 = 96;
-                    b2 = 255;
-                    if (hval >= 1600) hval = 1599;
-                    t = (hval-1200) / 600.0f;
-                  }
+  // - MODF ----------------------------------------------
 
-                  //! \todo  add a regular palette here
+  wdl_file.read (&fourcc, 4);
+  wdl_file.read (&size, 4);
 
-                  r = (unsigned char)(r2*t + r1*(1.0f-t));
-                  g = (unsigned char)(g2*t + g1*(1.0f-t));
-                  b = (unsigned char)(b2*t + b1*(1.0f-t));
-                }
+  assert (fourcc == 'MODF');
+  // Placement information for the WMO. Appears to be the same 64 byte structure used in the WDT and ADT MODF chunks.
 
-                texbuf[(j*8+z)*512 + i*8+x] = (r) | (g<<8) | (b<<16) | (255 << 24);
-              }
-            }
+  wdl_file.seekRelative (size);
+
+  // - MAOF ----------------------------------------------
+
+  wdl_file.read (&fourcc, 4);
+  wdl_file.read (&size, 4);
+
+  assert (fourcc == 'MAOF' && size == 64 * 64 * sizeof (uint32_t));
+
+  uint32_t mare_offsets[64][64];
+  wdl_file.read (mare_offsets, 64 * 64 * sizeof (uint32_t));
+
+  // - MARE and MAHO by offset ---------------------------
+
+  _minimap = QImage (17 * 64, 17 * 64, QImage::Format_RGB32);
+  _minimap.fill (Qt::transparent);
+
+  for (size_t y (0); y < 64; ++y)
+  {
+    for (size_t x (0); x < 64; ++x)
+    {
+      if (mare_offsets[y][x])
+      {
+        const uint32_t* magic (wdl_file.get<uint32_t> (mare_offsets[y][x]));
+        const uint32_t* size (wdl_file.get<uint32_t> (mare_offsets[y][x] + 4));
+
+        assert (*magic == 'MARE' && *size == 0x442);
+
+        //! \todo There also is a second heightmap appended which has additional 16*16 pixels.
+        //! \todo There also is MAHO giving holes into this heightmap.
+
+        const int16_t* data (wdl_file.get<int16_t> (mare_offsets[y][x] + 8));
+
+        for (size_t j (0); j < 17; ++j)
+        {
+          for (size_t i (0); i < 17; ++i)
+          {
+            _minimap.setPixel (x * 17 + i, y * 17 + j, color_for_height (data[j * 17 + i]));
           }
         }
       }
-
-      glBindTexture(GL_TEXTURE_2D, minimap);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, texbuf);
-      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-
-      delete[] texbuf;
-      f.close();
-      return;
     }
-    else if( fourcc == 'MAHO' ) {
-/*
-After each MARE chunk there follows a MAHO (MapAreaHOles) chunk. It may be left out if the data is supposed to be 0 all the time.
-Its an array of 16 shorts. Each short is a bitmask. If the bit is not set, there is a hole at this position.
-*/
-    }
-  /*  else  {
-      char fcc[5];
-      f.seekRelative(-8);
-      f.read(fcc,4);
-      fcc[4] = 0;
-      gLog("minimap %s [%d].\n", fcc, size);
-    } */
-    f.seek(nextpos);
   }
-
-  f.close();
 }
-
 
 void World::initLowresTerrain()
 {
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
 
-  int16_t tilebuf[17*17];
-  int16_t tilebuf2[16*16];
-  Vec3D lowres[17][17];
-  Vec3D lowsub[16][16];
-  int32_t ofsbuf[64][64];
-
-  MPQFile f(filename.str());
-
-  int32_t fourcc;
-  size_t size;
-
-  while (!f.isEof())
+  MPQFile wdl_file (filename.str());
+  if (wdl_file.isEof())
   {
-    f.read(&fourcc,4);
-    f.read(&size, 4);
-
-    if (size == 0)
-      continue;
-
-    size_t nextpos = f.getPos() + size;
-
-    if( fourcc == 'MAOF' )
-    {
-      f.read(ofsbuf,64*64*4);
-
-      for (size_t j=0; j<64; ++j)
-      {
-        for (size_t i=0; i<64; ++i)
-        {
-          if (ofsbuf[j][i])
-          {
-            f.seek(ofsbuf[j][i]+8);
-            f.read(tilebuf,17*17*2);
-            f.read(tilebuf2,16*16*2);
-
-            for (size_t y=0; y<17; y++)
-            {
-              for (size_t x=0; x<17; x++)
-              {
-                lowres[y][x] = Vec3D(TILESIZE*(i+x/16.0f), tilebuf[y*17+x], TILESIZE*(j+y/16.0f));
-              }
-            }
-            for (size_t y=0; y<16; y++)
-            {
-              for (size_t x=0; x<16; x++)
-              {
-                lowsub[y][x] = Vec3D(TILESIZE*(i+(x+0.5f)/16.0f), tilebuf2[y*16+x], TILESIZE*(j+(y+0.5f)/16.0f));
-              }
-            }
-
-            lowrestiles[j][i] = new OpenGL::CallList();
-            lowrestiles[j][i]->startRecording();
-
-            glBegin( GL_TRIANGLES );
-            for( size_t y = 0; y < 16; y++ )
-            {
-              for( size_t x = 0; x < 16; x++ )
-              {
-                glVertex3fv( lowres[y][x] );
-                glVertex3fv( lowsub[y][x] );
-                glVertex3fv( lowres[y][x+1] );
-                glVertex3fv( lowres[y][x+1] );
-                glVertex3fv( lowsub[y][x] );
-                glVertex3fv( lowres[y+1][x+1] );
-                glVertex3fv( lowres[y+1][x+1] );
-                glVertex3fv( lowsub[y][x]) ;
-                glVertex3fv( lowres[y+1][x] );
-                glVertex3fv( lowres[y+1][x] );
-                glVertex3fv( lowsub[y][x] );
-                glVertex3fv( lowres[y][x] );
-              }
-            }
-            glEnd();
-
-            lowrestiles[j][i]->endRecording();
-
-            /* OLD:
-             // draw tiles 16x16?
-             glBegin(GL_TRIANGLE_STRIP);
-             for (int y=0; y<16; y++) {
-             // end jump
-             if (y>0) glVertex3fv(lowres[y][0]);
-             for (int x=0; x<17; x++) {
-             glVertex3fv(lowres[y][x]);
-             glVertex3fv(lowres[y+1][x]);
-             }
-             // start jump
-             if (y<15) glVertex3fv(lowres[y+1][16]);
-             }
-             glEnd();
-             */
-            // draw tiles 17*17+16*16
-          }
-        }
-      }
-      f.close();
-      return;
-    }
-    f.seek(nextpos);
+    LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
+    return;
   }
 
-  LogError << "Error in reading low res terrain. MAOF not found." << std::endl;
-  f.close();
+  uint32_t fourcc;
+  uint32_t size;
+
+  // - MVER ----------------------------------------------
+
+  uint32_t version;
+
+  wdl_file.read (&fourcc, 4);
+  wdl_file.read (&size, 4);
+  wdl_file.read (&version, 4);
+
+  assert (fourcc == 'MVER' && size == 4 && version == 18);
+
+  // - MWMO ----------------------------------------------
+
+  wdl_file.read (&fourcc, 4);
+  wdl_file.read (&size, 4);
+
+  assert (fourcc == 'MWMO');
+  // Filenames for WMO that appear in the low resolution map. Zero terminated strings.
+
+  wdl_file.seekRelative (size);
+
+  // - MWID ----------------------------------------------
+
+  wdl_file.read (&fourcc, 4);
+  wdl_file.read (&size, 4);
+
+  assert (fourcc == 'MWID');
+  // List of indexes into the MWMO chunk.
+
+  wdl_file.seekRelative (size);
+
+  // - MODF ----------------------------------------------
+
+  wdl_file.read (&fourcc, 4);
+  wdl_file.read (&size, 4);
+
+  assert (fourcc == 'MODF');
+  // Placement information for the WMO. Appears to be the same 64 byte structure used in the WDT and ADT MODF chunks.
+
+  wdl_file.seekRelative (size);
+
+  // - MAOF ----------------------------------------------
+
+  wdl_file.read (&fourcc, 4);
+  wdl_file.read (&size, 4);
+
+  assert (fourcc == 'MAOF' && size == 64 * 64 * sizeof (uint32_t));
+
+  uint32_t mare_offsets[64][64];
+  wdl_file.read (mare_offsets, 64 * 64 * sizeof (uint32_t));
+
+  // - MARE and MAHO by offset ---------------------------
+
+  for (size_t y (0); y < 64; ++y)
+  {
+    for (size_t x (0); x < 64; ++x)
+    {
+      if (mare_offsets[y][x])
+      {
+        const uint32_t* magic (wdl_file.get<uint32_t> (mare_offsets[y][x]));
+        const uint32_t* size (wdl_file.get<uint32_t> (mare_offsets[y][x] + 4));
+
+        assert (*magic == 'MARE' && *size == 0x442);
+
+        Vec3D vertices_17[17][17];
+        Vec3D vertices_16[16][16];
+
+        const int16_t* data_17 (wdl_file.get<int16_t> (mare_offsets[y][x] + 8));
+
+        for (size_t j (0); j < 17; ++j)
+        {
+          for (size_t i (0); i < 17; ++i)
+          {
+            vertices_17[j][i] = Vec3D ( TILESIZE * (x + i / 16.0f)
+                                      , data_17[j * 17 + i]
+                                      , TILESIZE * (y + j / 16.0f)
+                                      );
+          }
+        }
+
+        const int16_t* data_16 (wdl_file.get<int16_t> (mare_offsets[y][x] + 8 + 17 * 17 * sizeof (int16_t)));
+
+        for (size_t j (0); j < 16; ++j)
+        {
+          for (size_t i (0); i < 16; ++i)
+          {
+            vertices_16[j][i] = Vec3D ( TILESIZE * (x + (i + 0.5f) / 16.0f)
+                                      , data_16[j * 16 + i]
+                                      , TILESIZE * (y + (j + 0.5f) / 16.0f)
+                                      );
+          }
+        }
+
+        lowrestiles[y][x] = new OpenGL::CallList();
+        lowrestiles[y][x]->startRecording();
+
+        //! \todo Make a strip out of this.
+        glBegin (GL_TRIANGLES);
+        for (size_t j (0); j < 16; ++j )
+        {
+          for (size_t i (0); i < 16; ++i )
+          {
+            glVertex3fv (vertices_17[j][i]);
+            glVertex3fv (vertices_16[j][i]);
+            glVertex3fv (vertices_17[j][i + 1]);
+            glVertex3fv (vertices_17[j][i + 1]);
+            glVertex3fv (vertices_16[j][i]);
+            glVertex3fv (vertices_17[j + 1][i + 1]);
+            glVertex3fv (vertices_17[j + 1][i + 1]);
+            glVertex3fv (vertices_16[j][i]);
+            glVertex3fv (vertices_17[j + 1][i]);
+            glVertex3fv (vertices_17[j + 1][i]);
+            glVertex3fv (vertices_16[j][i]);
+            glVertex3fv (vertices_17[j][i]);
+          }
+        }
+        glEnd();
+
+        lowrestiles[y][x]->endRecording();
+
+        //! \todo There also is MAHO giving holes into this heightmap.
+      }
+    }
+  }
 }
 
 void initGlobalVBOs( GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords )
@@ -721,12 +723,6 @@ World::~World()
     }
   }
 
-  if (minimap)
-  {
-    glDeleteTextures(1, &minimap);
-    minimap = 0;
-  }
-
   if (skies)
   {
     delete skies;
@@ -757,7 +753,7 @@ inline bool oktile( int z, int x )
   return !( z < 0 || x < 0 || z > 64 || x > 64 );
 }
 
-bool World::hasTile( int pZ, int pX )
+bool World::hasTile( int pZ, int pX ) const
 {
   return oktile( pZ, pX ) && ( mTiles[pZ][pX].flags & 1 );
 }
@@ -1180,34 +1176,34 @@ void World::draw()
     //glDepthMask(false);
     //glDisable(GL_DEPTH_TEST);
     if(terrainMode == 0)
-	{
-	  if(cursorDisk == true)
-		renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 16);
-	  else if(cursorSphere == true)
-	    renderSphere_convenient(posX, posY, posZ, groundBrushRadius, 15);
-	  else
-	    renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 0);
-	}
-    else if(terrainMode == 1)
-	{
-	  if(cursorDisk == true)
-		renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 16);
-	  else if(cursorSphere == true)
-	    renderSphere_convenient(posX, posY, posZ, blurBrushRadius, 15);
-	  else
-	    renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 16);
-	}
-    else if(terrainMode == 2)
-	{
-	  if(cursorDisk == true)
-		renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 16);
-	  else if(cursorSphere == true)
-	    renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
-	  else
-	    renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 16);
-	}
+  {
+    if(cursorDisk == true)
+    renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 16);
+    else if(cursorSphere == true)
+      renderSphere_convenient(posX, posY, posZ, groundBrushRadius, 15);
     else
-	    renderDisk_convenient(posX, posY, posZ, 0.24f, 16);
+      renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 0);
+  }
+    else if(terrainMode == 1)
+  {
+    if(cursorDisk == true)
+    renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 16);
+    else if(cursorSphere == true)
+      renderSphere_convenient(posX, posY, posZ, blurBrushRadius, 15);
+    else
+      renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 16);
+  }
+    else if(terrainMode == 2)
+  {
+    if(cursorDisk == true)
+    renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 16);
+    else if(cursorSphere == true)
+      renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
+    else
+      renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 16);
+  }
+    else
+      renderDisk_convenient(posX, posY, posZ, 0.24f, 16);
 
     glEnable(GL_CULL_FACE);
     //glEnable(GL_DEPTH_TEST);
@@ -2155,7 +2151,7 @@ void World::unsetChanged(int x, int z)
     mTiles[x][z].tile->changed = false;
 }
 
-bool World::getChanged(int x, int z)
+bool World::getChanged(int x, int z) const
 {
   if(mTiles[x][z].tile)
     return mTiles[x][z].tile->changed;
