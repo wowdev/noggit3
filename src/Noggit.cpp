@@ -21,6 +21,8 @@
 
 //! \todo Remove.
 #include "FreeType.h" // fonts.
+#include "Environment.h"
+#include "ConfigFile.h"
 
 AsyncLoader* gAsyncLoader;
 
@@ -346,9 +348,9 @@ int main( int argc, char *argv[] )
   Environment::getInstance()->cursorType = 0;
 
   // load cursor settings
-  if(boost::filesystem::exists("NoggIt.conf"))
+  if (QFile::exists ("NoggIt.conf"))
   {
-    ConfigFile myConfigfile = ConfigFile( "NoggIt.conf" );
+    ConfigFile myConfigfile ( "NoggIt.conf" );
     if( myConfigfile.keyExists("RedColor") && myConfigfile.keyExists("GreenColor")  &&  myConfigfile.keyExists("BlueColor") &&  myConfigfile.keyExists("AlphaColor") )
     {
       Environment::getInstance()->cursorColorR = myConfigfile.read<float>( "RedColor" );
