@@ -6,7 +6,7 @@ class UIStatusBar;
 class UIDetailInfos;
 class UIDoodadSpawner;
 class UIAppInfo;
-class UIMinimapWindow;
+class minimap_widget;
 class UIZoneIDBrowser;
 class MapView;
 class UIFrame;
@@ -35,7 +35,7 @@ public:
   // UI elements
   UIFrame* TexturePalette;
   UIFrame* SelectedTexture;
-  UIMinimapWindow* minimapWindow;
+  minimap_widget* minimapWindow;
   UIToolbar* guiToolbar;
   UIStatusBar* guiStatusbar;
   UIDetailInfos* guidetailInfos;
