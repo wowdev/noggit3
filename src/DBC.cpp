@@ -1,6 +1,6 @@
 #include "DBC.h"
 
-#include <string>
+#include <QObject> // QObject::tr
 
 #include "Misc.h"
 #include "Log.h"
@@ -34,51 +34,51 @@ void OpenDBs()
 
 
 
-std::string AreaDB::getAreaName( int pAreaID )
+QString AreaDB::getAreaName( int pAreaID )
 {
-  if( !pAreaID )
-    return "Unknown location";
+  if( pAreaID <= 0 )
+    return QObject::tr ("Unknown location");
 
-  unsigned int regionID = 0;
-  std::string areaName = "";
+  unsigned int regionID (0);
+  QString areaName;
   try
   {
-    AreaDB::Record rec = gAreaDB.getByID( pAreaID );
-    areaName = rec.getLocalizedString( AreaDB::Name );
-    regionID = rec.getUInt( AreaDB::Region );
+    AreaDB::Record rec (gAreaDB.getByID (pAreaID));
+    areaName = QString::fromUtf8 (rec.getLocalizedString (AreaDB::Name));
+    regionID = rec.getUInt (AreaDB::Region);
   }
   catch(AreaDB::NotFound)
   {
-    areaName = "Unknown location";
+    areaName = QObject::tr ("Unknown location");
   }
   if (regionID != 0)
   {
     try
     {
-      AreaDB::Record rec = gAreaDB.getByID( regionID );
-      areaName = std::string( rec.getLocalizedString( AreaDB::Name ) ) + std::string(": ") + areaName;
+      areaName = QString::fromUtf8 (gAreaDB.getByID (regionID).getLocalizedString (AreaDB::Name)) + ": " + areaName;
     }
     catch(AreaDB::NotFound)
     {
-      areaName = "Unknown location";
+      areaName = QObject::tr ("Unknown location");
     }
   }
 
   return areaName;
 }
 
-std::string MapDB::getMapName( int pMapID )
+QString MapDB::getMapName( int pMapID )
 {
-  if(pMapID<0) return "Unknown map";
-  std::string mapName = "";
+  if( pMapID <= 0 )
+    return QObject::tr ("Unknown map");
+
+  QString mapName;
   try
   {
-    MapDB::Record rec = gMapDB.getByID( pMapID );
-    mapName = std::string(rec.getLocalizedString( MapDB::Name ));
+    mapName = QString::fromUtf8 (gMapDB.getByID (pMapID).getLocalizedString (MapDB::Name));
   }
   catch(MapDB::NotFound)
   {
-    mapName = "Unknown map";
+    mapName = QObject::tr ("Unknown map");
   }
 
   return mapName;

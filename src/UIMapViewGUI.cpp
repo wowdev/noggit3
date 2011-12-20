@@ -31,9 +31,13 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 , theMapview( setMapview )
 {
   // Minimap window
-  minimapWindow = new UIMinimapWindow(gWorld);
+  minimapWindow = new minimap_widget (NULL);
+  minimapWindow->world (gWorld);
+  minimapWindow->draw_skies (true);
+  minimapWindow->draw_camera (true);
+  minimapWindow->draw_boundaries (true);
   minimapWindow->hide();
-  addChild(minimapWindow);
+  minimapWindow->update();
 
   // UIToolbar
   guiToolbar = new UIToolbar( 6.0f, 38.0f, this );
@@ -91,17 +95,17 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 
 void UIMapViewGUI::showCursorSwitcher()
 {
-	CursorSwitcher->show();
+  CursorSwitcher->show();
 }
 
 void UIMapViewGUI::hideCursorSwitcher()
 {
-	CursorSwitcher->hide();
+  CursorSwitcher->hide();
 }
 
 void UIMapViewGUI::toggleCursorSwitcher()
 {
-	CursorSwitcher->toggleVisibility();
+  CursorSwitcher->toggleVisibility();
 }
 
 void UIMapViewGUI::showHelp()
@@ -140,7 +144,7 @@ void UIMapViewGUI::render( ) const
   UIFrame::render();
 
   //! \todo Make these some textUIs.
-  arial16.shprint( 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
+  arial16.shprint( 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ).toStdString() );
 
   int time = static_cast<int>( gWorld->time ) % 2880;
   std::stringstream timestrs; timestrs << "Time: " << ( time / 120 ) << ":" << ( time % 120 );
@@ -218,7 +222,7 @@ void UIMapViewGUI::render( ) const
 
         detailInfo << "MCNK " << lSelection->data.mapchunk->px << ", " << lSelection->data.mapchunk->py << " (" << lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px
           << ") of tile (" << lSelection->data.mapchunk->mt->mPositionX << " " << lSelection->data.mapchunk->mt->mPositionZ << ")"
-          << "\narea ID: " << lSelection->data.mapchunk->areaID << " (\"" << gAreaDB.getAreaName( lSelection->data.mapchunk->areaID ) << "\")"
+          << "\narea ID: " << lSelection->data.mapchunk->areaID << " (\"" << gAreaDB.getAreaName( lSelection->data.mapchunk->areaID ).toStdString() << "\")"
           << "\nflags: "
           << ( flags & FLAG_SHADOW ? "shadows " : "" )
           << ( flags & FLAG_IMPASS ? "impassable " : "" )

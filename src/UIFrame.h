@@ -3,8 +3,6 @@
 
 #include <vector>
 
-struct SDL_KeyboardEvent;
-
 class UIFrame
 {
 public:
@@ -116,7 +114,6 @@ public:
   virtual bool processLeftDrag( float mx, float my, float xChange, float yChange );
   virtual void processUnclick() { }
   virtual bool processRightClick( float mx, float my );
-  virtual bool KeyBoardEvent( SDL_KeyboardEvent *e );
   virtual void resize()
   {
     for( Children::iterator it( _children.begin() ), end( _children.end() )

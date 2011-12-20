@@ -1,78 +1,41 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include <string>
-#include <vector>
+#include <QWidget>
 
-#include "AppState.h"
-#include "Vec3D.h"
+class QKeyEvent;
+class QMouseEvent;
+class QListWidgetItem;
 
-// ui classes
-class UIFrame;
-class UIStatusBar;
-class UIAbout;
-class UIMinimapWindow;
-class UIMenuBar;
-
+class minimap_widget;
+class Vec3D;
 class World;
-class Model;
-class MapView;
 
-struct MapEntry
+class Menu : public QWidget
 {
-  int mapID;
-  std::string name;
-  int areaType;
-};
+Q_OBJECT
 
-struct BookmarkEntry
-{
-  int mapID;
-  std::string name;
-  Vec3D pos;
-  float ah;
-  float av;
-};
-
-class Menu : public AppState
-{
 public:
-  Menu();
-  ~Menu();
+  Menu (QWidget* parent = NULL);
+  virtual ~Menu();
 
-  void tick( float t, float dt );
-  void display( float t, float dt );
+private slots:
+  void show_map_list_item (QListWidgetItem* item);
+  void show_bookmark_list_item (QListWidgetItem* item);
+  void open_bookmark_list_item (QListWidgetItem* item);
 
-  void keypressed( SDL_KeyboardEvent* e );
-  void mouseclick( SDL_MouseButtonEvent* e );
-  void mousemove( SDL_MouseMotionEvent* e );
+  void minimap_clicked (const Vec3D&);
 
-  //! \todo Make private when new buttons are implemented.
-  void loadMap( int mapID );
-  void loadBookmark( int bookmarkID );
-
-  //! \brief Enter the the map on the given location.
-  void enterMapAt( Vec3D pos, bool autoHeight = true, float av = -30.0f, float ah = -90.0f );
+signals:
+  void create_world_view_request (World*);
 
 private:
-  UIFrame* mGUIFrame;
-  UIStatusBar* mGUIStatusbar;
-  UIAbout* mGUICreditsWindow;
-  UIMinimapWindow* mGUIMinimapWindow;
-  UIMenuBar* mGUImenuBar;
+  void load_map (int mapID);
+  void prepare_world (const Vec3D& pos, float rotation, float tilt, bool auto_height);
+  void enter_world_at (const Vec3D& pos, bool autoHeight = true, float av = -30.0f, float ah = -90.0f);
 
-  std::vector<MapEntry> mMaps;
-  std::vector<BookmarkEntry> mBookmarks;
-
-  Model* mBackgroundModel;
-  int mLastBackgroundId;
-
-  void createBookmarkList();
-  void createMapList();
-  void buildMenuBar();
-  void randBackground();
-
-  void resizewindow();
+  minimap_widget* _minimap;
+  World* _world;
 };
 
 #endif

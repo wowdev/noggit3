@@ -67,7 +67,7 @@ void UIZoneIDBrowser::setZoneID( int id )
     {
       if(i->getUInt( AreaDB::Region ) == 0)
       {
-        ZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
+        ZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID)).toStdString();
         zoneID = id;
         subZoneID = 0;
         SubZoneName = "";;
@@ -76,7 +76,7 @@ void UIZoneIDBrowser::setZoneID( int id )
       }
       else
       {
-        SubZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
+        SubZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID)).toStdString();
         subZoneID = id;
         if(changeFunc)
           changeFunc(this,id);
@@ -129,7 +129,7 @@ void UIZoneIDBrowser::buildAreaList()
           {
             UIFrame *curFrame = new UIFrame(1,1,1,1);
             std::stringstream ss;
-            ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
+            ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID)).toStdString();
             UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
             tempButton->setLeft();
             curFrame->addChild(tempButton);
@@ -142,7 +142,7 @@ void UIZoneIDBrowser::buildAreaList()
           {
             UIFrame *curFrame = new UIFrame(1,1,1,1);
             std::stringstream ss;
-            ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
+            ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID)).toStdString();
             UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
             tempButton->setLeft();
             curFrame->addChild(tempButton);

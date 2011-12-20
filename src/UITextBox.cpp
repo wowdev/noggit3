@@ -1,6 +1,5 @@
 #include "UITextBox.h"
 
-#include <SDL.h>
 #include <utf8.h>
 
 #include <string>
@@ -73,7 +72,7 @@ void UITextBox::render() const
   glEnd();
 
   OpenGL::Texture::disableTexture();
-  
+
   _uiText->render();
 
   glPopMatrix();
@@ -100,6 +99,7 @@ const std::string& UITextBox::value() const
   return _value;
 }
 
+/*
 bool UITextBox::KeyBoardEvent( SDL_KeyboardEvent* e )
 {
   if( !_focus || e->type != SDL_KEYDOWN )
@@ -129,11 +129,12 @@ bool UITextBox::KeyBoardEvent( SDL_KeyboardEvent* e )
   {
     _focus = false;
   }
-  
+
   _uiText->setText( _value );
 
   return true;
 }
+*/
 
 void UITextBox::clear()
 {

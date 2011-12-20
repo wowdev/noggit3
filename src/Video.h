@@ -6,20 +6,16 @@
 
 class Video;
 
-#define GL_GLEXT_PROTOTYPES 1
-#include <GL/glew.h>
-//#include <SDL/SDL.h>
-
-struct SDL_Surface;
+#include <gl/glew.h>
 
 class Video
 {
 public:
-  bool init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_);
+  bool init(int xres_, int yres_);
 
   void close();
 
-  void flip() const;
+  void flip() const {}
   void clearScreen() const;
   void set3D() const;
   void set3D_select() const;
@@ -27,21 +23,43 @@ public:
   void setTileMode() const;
   void resize(int w, int h);
 
-  inline const int& xres() const;
-  inline const int& yres() const;
-  inline const float& ratio() const;
-  inline const bool& fullscreen() const;
-  inline const bool& doAntiAliasing() const;
+  inline const int& xres() const
+  {
+    return _xres;
+  }
+  inline const int& yres() const
+  {
+    return _yres;
+  }
+  inline const float& ratio() const
+  {
+    return _ratio;
+  }
+  inline const float& fov() const
+  {
+    return _fov;
+  }
+  inline const float& nearclip() const
+  {
+    return _nearclip;
+  }
+  inline const float& farclip() const
+  {
+    return _farclip;
+  }
 
-  inline void doAntiAliasing( const bool& doAntiAliasing_ );
-
-  inline const float& fov() const;
-  inline const float& nearclip() const;
-  inline const float& farclip() const;
-
-  void fov( const float& fov_ );
-   void nearclip( const float& nearclip_ );
-   void farclip( const float& farclip_ );
+  void fov( const float& fov_ )
+  {
+    _fov = fov_;
+  }
+   void nearclip( const float& nearclip_ )
+  {
+    _nearclip = nearclip_;
+  }
+   void farclip( const float& farclip_ )
+  {
+    _farclip = farclip_;
+  }
 
   void updateProjectionMatrix();
 
@@ -57,13 +75,6 @@ private:
   float _fov;
   float _nearclip;
   float _farclip;
-
-  bool _fullscreen;
-  bool _doAntiAliasing;
-
-  int _status;
-
-  SDL_Surface* _primary;
 };
 
 #include "Manager.h" // ManagedItem

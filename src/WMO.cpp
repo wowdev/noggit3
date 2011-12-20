@@ -955,14 +955,14 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
   if (hascv) {
     glDisable(GL_LIGHTING);
     gWorld->outdoorLights(false);
-  } else 
+  } else
   {
 
-    if (gWorld->skies->hasSkies()) 
-	{
-		gWorld->outdoorLights(true);
-	} 
-	else glDisable(GL_LIGHTING);
+    if (gWorld->skies->hasSkies())
+  {
+    gWorld->outdoorLights(true);
+  }
+  else glDisable(GL_LIGHTING);
   }
 
 
