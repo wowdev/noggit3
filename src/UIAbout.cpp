@@ -15,9 +15,9 @@ UIAbout::UIAbout( )
 {
   addChild( new UITexture( 20.0f, 20.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Potion_83.blp" ) );
   addChild( new UIText( 73.0f, 24.0f, "Noggit Studio", skurri32, eJustifyLeft ) );
-  addChild( new UIText( 165.0f, 55.0f, "a wow map editor", fritz16, eJustifyLeft ) );
+  addChild( new UIText( 155.0f, 57.0f, "a wow map editor for 3.3.5a", fritz16, eJustifyLeft ) );
   addChild( new UIText( 20.0f, 100.0f, "Ufoz [...],   Cryect,   Beket,   Schlumpf,   Tigurius", fritz16, eJustifyLeft ) );
-  addChild( new UIText( 120.0f, 120.0f, " Steff,  Garthog,   .......", fritz16, eJustifyLeft ) );
+  addChild( new UIText( 100.0f, 120.0f, " Steff,  Garthog & Glararan", fritz16, eJustifyLeft ) );
   addChild( new UIText( 20.0f, 160.0f, "World of Warcraft is (C) Blizzard Entertainment", fritz16, eJustifyLeft ) );
   addChild( new UIText( 20.0f, 190.0f, STRPRODUCTVER , fritz16, eJustifyLeft ) );
   addChild( new UIText( 375.0f, 190.0f, __DATE__ ", " __TIME__, fritz16, eJustifyRight ) );
