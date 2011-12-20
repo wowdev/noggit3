@@ -1,8 +1,9 @@
 #include "Video.h"
 
 #include <cassert>
-#include <SDL.h>
 #include <string>
+
+#include <gl/glew.h>
 
 #include "Settings.h"
 #include "Log.h"
@@ -64,56 +65,6 @@ namespace OpenGL
 
 Video video;
 
-inline const int& Video::xres() const
-{
-  return _xres;
-}
-inline const int& Video::yres() const
-{
-  return _yres;
-}
-inline const float& Video::ratio() const
-{
-  return _ratio;
-}
-inline const bool& Video::fullscreen() const
-{
-  return _fullscreen;
-}
-inline const bool& Video::doAntiAliasing() const
-{
-  return _doAntiAliasing;
-}
-inline const float& Video::fov() const
-{
-  return _fov;
-}
-inline const float& Video::nearclip() const
-{
-  return _nearclip;
-}
-inline const float& Video::farclip() const
-{
-  return _farclip;
-}
-
-inline void Video::doAntiAliasing(const bool& doAntiAliasing_)
-{
-  _doAntiAliasing = doAntiAliasing_;
-}
- void Video::fov( const float& fov_ )
-{
-  _fov = fov_;
-}
- void Video::nearclip( const float& nearclip_ )
-{
-  _nearclip = nearclip_;
-}
- void Video::farclip( const float& farclip_ )
-{
-  _farclip = farclip_;
-}
-
 void Video::updateProjectionMatrix()
 {
   glMatrixMode( GL_PROJECTION );
@@ -124,21 +75,7 @@ void Video::updateProjectionMatrix()
   glLoadIdentity();
 }
 
-void Video::resize( int xres_, int yres_ )
-{
-  _xres = xres_;
-  _yres = yres_;
-  _ratio = static_cast<float>( xres() ) / static_cast<float>( yres() );
-
-  LogDebug << "resize(" << xres() << ", " << yres() << ");" << std::endl;
-
-  SDL_Rect rect = { 0, 0, xres(), yres() };
-  SDL_SetClipRect( _primary, &rect );
-
-  updateProjectionMatrix();
-}
-
-bool Video::init( int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_ )
+bool Video::init (int xres_, int yres_)
 {
   _xres = xres_;
   _yres = yres_;
@@ -147,50 +84,6 @@ bool Video::init( int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_ )
   _fov = 45.0f;
   _nearclip = 1.0f;
   _farclip = Settings::getInstance()->FarZ;
-
-  _fullscreen = fullscreen_;
-  _doAntiAliasing = doAntiAliasing_;
-
-  if( SDL_Init( SDL_INIT_TIMER | SDL_INIT_VIDEO ) )
-  {
-    LogError << "SDL: " << SDL_GetError() << std::endl;
-    exit( 1 );
-  }
-
-  int flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
-  if( fullscreen() )
-  {
-    flags |= SDL_FULLSCREEN;
-  }
-
-  SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-  SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 1 );
-  SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
-  SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
-  SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
-  SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
-  SDL_GL_SetAttribute( SDL_GL_ALPHA_SIZE, 8 );
-  if( doAntiAliasing() )
-  {
-    SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
-    //! \todo Make sample count configurable.
-    SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 4 );
-  }
-
-  _primary = SDL_SetVideoMode( _xres, _yres, 0, flags );
-
-  if( !_primary )
-  {
-    LogError << "SDL: " << SDL_GetError() << std::endl;
-    exit( 1 );
-  }
-
-  GLenum err = glewInit();
-  if( GLEW_OK != err )
-  {
-    LogError << "GLEW: " << glewGetErrorString( err ) << std::endl;
-    return false;
-  }
 
   glViewport( 0.0f, 0.0f, xres(), yres() );
 
@@ -201,28 +94,7 @@ bool Video::init( int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_ )
   mSupportCompression = GLEW_ARB_texture_compression;
   mSupportShaders = GLEW_ARB_vertex_program && GLEW_ARB_fragment_program;
 
-  LogDebug << "GL: Version: " << glGetString( GL_VERSION ) << std::endl;
-  LogDebug << "GL: Vendor: " << glGetString( GL_VENDOR ) << std::endl;
-  LogDebug << "GL: Renderer: " << glGetString( GL_RENDERER ) << std::endl;
-
   return mSupportCompression;
-}
-
-void Video::close()
-{
-  SDL_FreeSurface( _primary );
-  SDL_Quit();
-}
-
-void Video::flip() const
-{
-  SDL_GL_SwapBuffers();
-}
-
-void Video::clearScreen() const
-{
-  glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
 
 void Video::set3D() const
@@ -232,8 +104,6 @@ void Video::set3D() const
   gluPerspective( fov(), ratio(), nearclip(), farclip() );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
-  if( doAntiAliasing() )
-    glEnable( GL_MULTISAMPLE );
 }
 
 void Video::set3D_select() const
@@ -242,8 +112,6 @@ void Video::set3D_select() const
   gluPerspective( fov(), ratio(), nearclip(), farclip() );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
-  if( doAntiAliasing() )
-    glDisable( GL_MULTISAMPLE );
 }
 
 void Video::set2D() const
@@ -253,8 +121,6 @@ void Video::set2D() const
   glOrtho( 0.0f, xres(), yres(), 0.0f, -1.0f, 1.0f );
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  if( doAntiAliasing() )
-    glDisable( GL_MULTISAMPLE );
 }
 
 void Video::setTileMode() const
@@ -264,8 +130,6 @@ void Video::setTileMode() const
   glOrtho( -2.0f * ratio(), 2.0f * ratio(), 2.0f, -2.0f, -100.0f, 300.0f );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
-  if( doAntiAliasing() )
-    glEnable( GL_MULTISAMPLE );
 }
 
 void CheckForGLError( const std::string& pLocation )
@@ -475,8 +339,8 @@ namespace OpenGL
   void Texture::loadFromCompressedData( BLPHeader* lHeader, char* lData )
   {
     //                         0 (0000) & 3 == 0                1 (0001) & 3 == 1                    7 (0111) & 3 == 3
-    const int alphatypes[] = { GL_COMPRESSED_RGB_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT };
-    const int blocksizes[] = { 8,                               16,                               0, 16 };
+    static const int alphatypes[] = { GL_COMPRESSED_RGB_S3TC_DXT1_EXT, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT };
+    static const int blocksizes[] = { 8,                               16,                               0, 16 };
 
     int lTempAlphatype = lHeader->attr_2_alphatype & 3;
     GLint format = alphatypes[lTempAlphatype];
@@ -510,9 +374,8 @@ namespace OpenGL
 
   void Texture::loadFromBLP( const std::string& filenameArg )
   {
-    //! \todo Unload if there already is a model loaded?
+    //! \todo Unload if there already is a texture loaded?
     _filename = filenameArg;
-
     bind();
 
     MPQFile f( _filename );
@@ -526,7 +389,6 @@ namespace OpenGL
     BLPHeader* lHeader = reinterpret_cast<BLPHeader*>( lData );
     _width = lHeader->resx;
     _height = lHeader->resy;
-
     if( lHeader->attr_0_compression == 1 )
     {
       loadFromUncompressedData( lHeader, lData );
