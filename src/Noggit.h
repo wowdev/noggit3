@@ -1,23 +1,44 @@
 #ifndef NOGGIT_H
 #define NOGGIT_H
 
-#include <vector>
+#include <QApplication>
 
-//! \todo this really needs to be refactored into a singleton class
-
-class AppState;
-extern std::vector<AppState*> gStates;
-extern bool gPop;
-
-namespace freetype { class font_data; }
-extern freetype::font_data arialn13, arial12, arial14, arial16, arial24, arial32, morpheus40, skurri32, fritz16;
-
-extern float gFPS;
-
-class AreaDB;
-extern AreaDB gAreaDB;
+class QSettings;
+class QGLWidget;
 
 class AsyncLoader;
+class World;
+
+class Noggit : public QApplication
+{
+  Q_OBJECT
+
+public:
+  Noggit (int& argc, char** argv);
+  ~Noggit();
+
+public slots:
+  void create_world_view (World*);
+
+private:
+  void set_working_directory_to_application_path();
+  void parse_command_line_and_set_defaults();
+  void initialize_video();
+  void get_game_path();
+  void open_mpqs();
+
+  QSettings* _settings;
+  AsyncLoader* _async_loader;
+  QString _game_path;
+  QString _project_path;
+  QString _locale;
+
+  QGLWidget* _dummy_gl_widget;
+};
+
+//! \todo remove below.
+namespace freetype { class font_data; }
+extern freetype::font_data arialn13, arial12, arial14, arial16, arial24, arial32, morpheus40, skurri32, fritz16;
 extern AsyncLoader* gAsyncLoader;
 
 #endif
