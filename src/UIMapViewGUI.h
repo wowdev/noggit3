@@ -26,6 +26,7 @@ private:
   UIHelp* _help;
   UIDoodadSpawner* _test;
 
+
 public:
   // Editor paramter
   int ground_edit_mode;

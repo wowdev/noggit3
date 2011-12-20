@@ -338,6 +338,29 @@ int main( int argc, char *argv[] )
   arial24.init( arialFilename, 24, false );
   arial32.init( arialFilename, 32, false );
 
+  // init
+  Environment::getInstance()->cursorColorR = 1.0f;
+  Environment::getInstance()->cursorColorG = 1.0f;
+  Environment::getInstance()->cursorColorB = 1.0f;
+  Environment::getInstance()->cursorColorA = 1.0f;
+  Environment::getInstance()->cursorType = 0;
+
+  // load cursor settings
+  if(boost::filesystem::exists("NoggIt.conf"))
+  {
+    ConfigFile myConfigfile = ConfigFile( "NoggIt.conf" );
+    if( myConfigfile.keyExists("RedColor") && myConfigfile.keyExists("GreenColor")  &&  myConfigfile.keyExists("BlueColor") &&  myConfigfile.keyExists("AlphaColor") )
+    {
+      Environment::getInstance()->cursorColorR = myConfigfile.read<float>( "RedColor" );
+      Environment::getInstance()->cursorColorG = myConfigfile.read<float>( "GreenColor" );
+      Environment::getInstance()->cursorColorB = myConfigfile.read<float>( "BlueColor" );
+      Environment::getInstance()->cursorColorA = myConfigfile.read<float>( "AlphaColor" );
+    }
+
+  if( myConfigfile.keyExists("CursorType"))
+    Environment::getInstance()->cursorType = myConfigfile.read<int>( "CursorType" );
+  }
+
 //! \todo remove ^^
 
   return application.exec();

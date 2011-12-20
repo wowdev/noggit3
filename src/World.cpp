@@ -8,6 +8,8 @@
 #include <string>
 #include <utility>
 #include <time.h>
+#include <boost/filesystem.hpp>
+#include <boost/thread/thread.hpp>
 
 #include "DBC.h"
 #include "Environment.h"
@@ -24,6 +26,7 @@
 #include "WMOInstance.h" // WMOInstance
 #include "MapTile.h"
 #include "Brush.h" // brush
+#include "ConfigFile.h"
 
 World *gWorld = NULL;
 
@@ -61,7 +64,7 @@ void renderSphere_convenient(float x, float y, float z, float radius, int subdiv
 {
   //the same quadric can be re-used for drawing many objects
   glDisable(GL_LIGHTING);
-  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+  glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA );
   GLUquadricObj *quadric=gluNewQuadric();
   gluQuadricNormals(quadric, GLU_SMOOTH);
   renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
@@ -88,30 +91,38 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
   float ry = vx * vz;
 
   glPushMatrix();
+  //glClear(GL_DEPTH_BUFFER_BIT);
+  glDisable(GL_DEPTH_TEST);
+  //glLoadIdentity(); This delete gluDisk :(
+  glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+  glEnable(GL_COLOR_MATERIAL);
 
   //draw the quadric
   glTranslatef(x1, y1, z1);
   glRotatef(ax, rx, ry, 0.0f);
   glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-  glColor4f(0.0f, 0.8f, 0.0f, 0.8f);
+  glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA);
 
   gluQuadricOrientation(quadric, GLU_OUTSIDE);
   gluDisk(quadric, radius - 0.25f, radius + 5.0f, subdivisions, 2);
 
   //glColor4f(0.0f, 0.8f, 0.1f, 0.9f);
   //gluDisk(quadric, (radius * 1.5) - 2, (radius * 1.5) + 2, 0, 1);
-
+  glEnable(GL_DEPTH_TEST);
   glPopMatrix();
 }
 
-void renderDisk_convenient(float x, float y, float z, float radius, int subdivisions)
+void renderDisk_convenient(float x, float y, float z, float radius)
 {
+  int subdivisions =(int)radius * 1.5;
+  if( subdivisions < 15 ) subdivisions=15;
+  glDisable(GL_LIGHTING);
   GLUquadricObj *quadric = gluNewQuadric();
   gluQuadricDrawStyle(quadric, GLU_LINE);
   gluQuadricNormals(quadric, GLU_SMOOTH);
-  gluQuadricTexture(quadric, GL_TRUE);
   renderDisk(x, y, z, x, y, z, radius, subdivisions, quadric);
   gluDeleteQuadric(quadric);
+  glEnable(GL_LIGHTING);
 }
 
 
@@ -411,7 +422,7 @@ void World::initMinimap()
   wdl_file.read (&size, 4);
 
   assert (fourcc == 'MWMO');
-  // Filenames for WMO that appear in the low resolution map. Zero terminated strings.
+      // Filenames for WMO that appear in the low resolution map. Zero terminated strings.
 
   wdl_file.seekRelative (size);
 
@@ -421,7 +432,7 @@ void World::initMinimap()
   wdl_file.read (&size, 4);
 
   assert (fourcc == 'MWID');
-  // List of indexes into the MWMO chunk.
+      // List of indexes into the MWMO chunk.
 
   wdl_file.seekRelative (size);
 
@@ -431,7 +442,7 @@ void World::initMinimap()
   wdl_file.read (&size, 4);
 
   assert (fourcc == 'MODF');
-  // Placement information for the WMO. Appears to be the same 64 byte structure used in the WDT and ADT MODF chunks.
+      // Placement information for the WMO. Appears to be the same 64 byte structure used in the WDT and ADT MODF chunks.
 
   wdl_file.seekRelative (size);
 
@@ -471,11 +482,11 @@ void World::initMinimap()
           for (size_t i (0); i < 17; ++i)
           {
             _minimap.setPixel (x * 17 + i, y * 17 + j, color_for_height (data[j * 17 + i]));
+              }
+            }
           }
         }
       }
-    }
-  }
 }
 
 void World::initLowresTerrain()
@@ -487,8 +498,8 @@ void World::initLowresTerrain()
   if (wdl_file.isEof())
   {
     LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
-    return;
-  }
+      return;
+    }
 
   uint32_t fourcc;
   uint32_t size;
@@ -546,11 +557,11 @@ void World::initLowresTerrain()
   // - MARE and MAHO by offset ---------------------------
 
   for (size_t y (0); y < 64; ++y)
-  {
-    for (size_t x (0); x < 64; ++x)
-    {
-      if (mare_offsets[y][x])
       {
+    for (size_t x (0); x < 64; ++x)
+        {
+      if (mare_offsets[y][x])
+          {
         const uint32_t* magic (wdl_file.get<uint32_t> (mare_offsets[y][x]));
         const uint32_t* size (wdl_file.get<uint32_t> (mare_offsets[y][x] + 4));
 
@@ -562,38 +573,38 @@ void World::initLowresTerrain()
         const int16_t* data_17 (wdl_file.get<int16_t> (mare_offsets[y][x] + 8));
 
         for (size_t j (0); j < 17; ++j)
-        {
+            {
           for (size_t i (0); i < 17; ++i)
-          {
+              {
             vertices_17[j][i] = Vec3D ( TILESIZE * (x + i / 16.0f)
                                       , data_17[j * 17 + i]
                                       , TILESIZE * (y + j / 16.0f)
                                       );
-          }
-        }
+              }
+            }
 
         const int16_t* data_16 (wdl_file.get<int16_t> (mare_offsets[y][x] + 8 + 17 * 17 * sizeof (int16_t)));
 
         for (size_t j (0); j < 16; ++j)
-        {
+            {
           for (size_t i (0); i < 16; ++i)
-          {
+              {
             vertices_16[j][i] = Vec3D ( TILESIZE * (x + (i + 0.5f) / 16.0f)
                                       , data_16[j * 16 + i]
                                       , TILESIZE * (y + (j + 0.5f) / 16.0f)
                                       );
-          }
-        }
+              }
+            }
 
         lowrestiles[y][x] = new OpenGL::CallList();
         lowrestiles[y][x]->startRecording();
 
         //! \todo Make a strip out of this.
-        glBegin (GL_TRIANGLES);
+            glBegin( GL_TRIANGLES );
         for (size_t j (0); j < 16; ++j )
-        {
+            {
           for (size_t i (0); i < 16; ++i )
-          {
+              {
             glVertex3fv (vertices_17[j][i]);
             glVertex3fv (vertices_16[j][i]);
             glVertex3fv (vertices_17[j][i + 1]);
@@ -606,17 +617,17 @@ void World::initLowresTerrain()
             glVertex3fv (vertices_17[j + 1][i]);
             glVertex3fv (vertices_16[j][i]);
             glVertex3fv (vertices_17[j][i]);
-          }
-        }
-        glEnd();
+              }
+            }
+            glEnd();
 
         lowrestiles[y][x]->endRecording();
 
         //! \todo There also is MAHO giving holes into this heightmap.
-      }
-    }
-  }
-}
+             }
+             }
+          }
+        }
 
 void initGlobalVBOs( GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords )
 {
@@ -1009,8 +1020,6 @@ extern float blurBrushRadius;
 extern int terrainMode;
 extern brush textureBrush;
 
-bool cursorDisk = true;
-bool cursorSphere = false;
 
 void World::draw()
 {
@@ -1177,37 +1186,33 @@ void World::draw()
     //glDisable(GL_DEPTH_TEST);
     if(terrainMode == 0)
   {
-    if(cursorDisk == true)
-    renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 16);
-    else if(cursorSphere == true)
-      renderSphere_convenient(posX, posY, posZ, groundBrushRadius, 15);
+    if(Environment::getInstance()->cursorType == 0)
+      renderDisk_convenient(posX, posY, posZ, groundBrushRadius);
     else
-      renderDisk_convenient(posX, posY, posZ, groundBrushRadius, 0);
+      renderSphere_convenient(posX, posY, posZ, groundBrushRadius, 15);
   }
     else if(terrainMode == 1)
   {
-    if(cursorDisk == true)
-    renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 16);
-    else if(cursorSphere == true)
-      renderSphere_convenient(posX, posY, posZ, blurBrushRadius, 15);
+    if(Environment::getInstance()->cursorType == 0)
+      renderDisk_convenient(posX, posY, posZ, blurBrushRadius);
     else
-      renderDisk_convenient(posX, posY, posZ, blurBrushRadius, 16);
+      renderSphere_convenient(posX, posY, posZ, blurBrushRadius, 15);
+
   }
     else if(terrainMode == 2)
   {
-    if(cursorDisk == true)
-    renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 16);
-    else if(cursorSphere == true)
-      renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
+    if(Environment::getInstance()->cursorType == 0)
+      renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius());
     else
-      renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius(), 16);
+      renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
+
   }
     else
-      renderDisk_convenient(posX, posY, posZ, 0.24f, 16);
+      renderDisk_convenient(posX, posY, posZ, 0.24f);
 
     glEnable(GL_CULL_FACE);
-    //glEnable(GL_DEPTH_TEST);
-    //glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
+    //GlDepthMask(true);
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
   }

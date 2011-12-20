@@ -955,19 +955,14 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
   if (hascv) {
     glDisable(GL_LIGHTING);
     gWorld->outdoorLights(false);
-  } else {
-    if (gWorld->lighting) {
-      if (gWorld->skies->hasSkies()) {
-        gWorld->outdoorLights(true);
-      } else {
-        // set up some kind of default outdoor light... ?
-        glEnable(GL_LIGHT0);
-        glDisable(GL_LIGHT1);
-        glLightfv(GL_LIGHT0, GL_AMBIENT, Vec4D(0.4f,0.4f,0.4f,1));
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, Vec4D(0.8f,0.8f,0.8f,1));
-        glLightfv(GL_LIGHT0, GL_POSITION, Vec4D(1,1,1,0));
-      }
-    } else glDisable(GL_LIGHTING);
+  } else
+  {
+
+    if (gWorld->skies->hasSkies())
+  {
+    gWorld->outdoorLights(true);
+  }
+  else glDisable(GL_LIGHTING);
   }
 
 

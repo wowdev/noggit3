@@ -129,6 +129,9 @@ int saveterrainMode = 0;
 
 brush textureBrush;
 
+
+UICursorSwitcher* CursorSwitcher;
+
 bool Saving=false;
 
 UIFrame* LastClicked;

@@ -33,6 +33,7 @@ void UIToggleGroup::Activate( UICheckBox::Ptr pFrame )
     }
   }
 }
+
 void UIToggleGroup::Activate( int pID )
 {
   Frames::iterator pFrame = mFrames.find( pID );
