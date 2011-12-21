@@ -305,9 +305,9 @@ void Model::initCommon(const MPQFile& f)
 
   if (header.nViews > 0) {
     // indices - allocate space, too
-    std::string lodname = _filename.substr(0, _filename.length()-3);
+    std::string lodname (_filename.substr (0, _filename.length() - 3));
     lodname.append("00.skin");
-    MPQFile g(lodname.c_str());
+    MPQFile g(lodname);
     if (g.isEof()) {
       LogError << "loading skinfile " << lodname << std::endl;
       g.close();
