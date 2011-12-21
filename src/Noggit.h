@@ -26,6 +26,7 @@ private:
   void initialize_video();
   void get_game_path();
   void open_mpqs();
+  void add_font_from_mpq (const QString& filename) const;
 
   QSettings* _settings;
   AsyncLoader* _async_loader;

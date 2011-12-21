@@ -29,7 +29,7 @@ namespace ui
     QLabel* date (new QLabel (tr ("%1, %2").arg (__DATE__).arg (__TIME__), this));
 
     static QFont skurri32 ("Skurri", 32);
-    static QFont fritz16 ("Fritz", 16);
+    static QFont friz16 ("Friz Quadrata TT", 16);
 
     icon->setPixmap (helper::blp_to_pixmap ("Interface\\ICONS\\INV_Potion_83.blp", 64, 64));
     icon->setGeometry (20, 20, 64, 64);
@@ -38,11 +38,11 @@ namespace ui
     title->setFont (skurri32);
     title->setPalette (p);
     description->move (155, 57);
-    description->setFont (fritz16);
+    description->setFont (friz16);
     description->setPalette (p);
     authors->move (20, 100);
     authors->setWordWrap (true);
-    authors->setFont (fritz16);
+    authors->setFont (friz16);
     authors->setPalette (p);
 
     copyright->move (20, 170);
