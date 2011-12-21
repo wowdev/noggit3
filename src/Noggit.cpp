@@ -7,6 +7,7 @@
 #include <QTime>
 #include <QGLWidget>
 #include <QGLFormat>
+#include <QFontDatabase>
 
 #include "revision.h"
 
@@ -62,6 +63,11 @@ Noggit::Noggit (int& argc, char** argv)
   parse_command_line_and_set_defaults();
   get_game_path();
   open_mpqs();
+
+  add_font_from_mpq ("fonts/skurri.ttf");
+  add_font_from_mpq ("fonts/frizqt__.ttf");
+  add_font_from_mpq ("fonts/morpheus.ttf");
+  add_font_from_mpq ("fonts/arialn.ttf");
 
   CreateStrips();
   OpenDBs();
@@ -319,6 +325,16 @@ void Noggit::create_world_view (World* world)
     map_view->show();
     map_view->resize (xResolution, yResolution);
   }
+}
+
+void Noggit::add_font_from_mpq (const QString& filename) const
+{
+  const MPQFile file (filename);
+
+  QFontDatabase::addApplicationFontFromData ( QByteArray::fromRawData ( file.getBuffer()
+                                                                      , file.getSize()
+                                                                      )
+                                            );
 }
 
 int main( int argc, char *argv[] )
