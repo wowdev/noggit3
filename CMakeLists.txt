@@ -81,7 +81,7 @@ SET( SourceFiles
   src/Shaders.cpp
   src/Sky.cpp
   src/TextureManager.cpp
-  src/UIAbout.cpp
+  src/ui/about_widget.cpp
   src/UIAppInfo.cpp
   src/UIButton.cpp
   src/UICheckBox.cpp
@@ -156,7 +156,7 @@ SET( AllHeaders
   src/Shaders.h
   src/Sky.h
   src/TextureManager.h
-  src/UIAbout.h
+  src/ui/about_widget.h
   src/UIAppInfo.h
   src/UIButton.h
   src/UICheckBox.h
@@ -202,7 +202,7 @@ SET( HeadersToMoc
   src/Noggit.h
   src/Menu.h
   src/MapView.h
-  src/UIAbout.h
+  src/ui/about_widget.h
   src/UIMinimapWindow.h
 )
 
@@ -244,7 +244,7 @@ include( "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake" )
 SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp" )
 
 # And do the job.
-INCLUDE_DIRECTORIES( ${IncludeDirectories} )
+INCLUDE_DIRECTORIES( ${IncludeDirectories} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 IF( APPLE )
   SET( ResourceFiles "${CMAKE_SOURCE_DIR}/media/noggit.icns" )
   SET_SOURCE_FILES_PROPERTIES( ${ResourceFiles} PROPERTIES MACOSX_PACKAGE_LOCATION Resources )

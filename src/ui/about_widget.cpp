@@ -1,9 +1,9 @@
-#include "UIAbout.h"
+#include <ui/about_widget.h>
 
 #include <QLabel>
 
-#include "revision.h" // STRPRODUCTVER
-#include "Video.h" // helper::blp_to_pixmap
+#include <revision.h> // STRPRODUCTVER
+#include <Video.h> // helper::blp_to_pixmap
 
 namespace ui
 {
