@@ -10,6 +10,8 @@
 #include <vector>
 #include <fstream>
 
+#include <QString>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
@@ -146,12 +148,28 @@ bool MPQArchive::openFile( const std::string& filename, HANDLE* fileHandle ) con
   return SFileOpenFileEx( _archiveHandle, filename.c_str(), 0, fileHandle );
 }
 
+
+MPQFile::MPQFile (const QString& filename)
+  : eof (true)
+  , buffer (NULL)
+  , pointer (0)
+  , size (0)
+  , External (false)
+{
+  open_file (filename.toStdString());
+}
+
 MPQFile::MPQFile( const std::string& filename )
 : eof(true)
 , buffer(NULL)
 , pointer(0)
 , size(0)
 , External(false)
+{
+  open_file (filename);
+}
+
+void MPQFile::open_file (const std::string& filename)
 {
   boost::mutex::scoped_lock lock(gMPQFileMutex);
 
