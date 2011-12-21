@@ -3,6 +3,8 @@
 #include <cassert>
 #include <string>
 
+#include <QString>
+
 #include <gl/glew.h>
 
 #include "Settings.h"
@@ -372,6 +374,11 @@ namespace OpenGL
     return _filename;
   }
 
+  void Texture::loadFromBLP (const QString& filename)
+  {
+    loadFromBLP (filename.toStdString());
+  }
+
   void Texture::loadFromBLP( const std::string& filenameArg )
   {
     //! \todo Unload if there already is a texture loaded?
@@ -402,5 +409,74 @@ namespace OpenGL
 
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+  }
+}
+
+#include <QGLWidget>
+
+namespace helper
+{
+  namespace detail
+  {
+    class helper_widget : public QGLWidget
+    {
+    //  Q_OBJECT
+
+    public:
+      helper_widget (const QString& blp_filename)
+        : _texture (NULL)
+        , _blp_filename (blp_filename)
+      { }
+
+      ~helper_widget()
+      {
+        delete _texture;
+      }
+
+    protected:
+      virtual void initializeGL()
+      {
+        _texture = new OpenGL::Texture;
+        _texture->loadFromBLP (_blp_filename);
+      }
+
+      virtual void resizeGL (int width, int height)
+      {
+        resize (width, height);
+        glViewport (0.0f, 0.0f, width, height);
+        glMatrixMode (GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho (0.0f, width, height, 0.0f, 1.0f, -1.0f);
+        glMatrixMode (GL_MODELVIEW);
+        glLoadIdentity();
+      }
+
+      virtual void paintGL()
+      {
+        _texture->enableTexture (0);
+        _texture->bind();
+
+        glBegin (GL_TRIANGLE_FAN);
+        glTexCoord2f (0.0f, 0.0f);
+        glVertex2f (0.0f, 0.0f);
+        glTexCoord2f (1.0f, 0.0f);
+        glVertex2f (rect().width(), 0.0f);
+        glTexCoord2f (1.0f, 1.0f);
+        glVertex2f (rect().width(), rect().height());
+        glTexCoord2f (0.0f, 1.0f);
+        glVertex2f (0.0f, rect().height());
+        glEnd();
+        _texture->disableTexture (0);
+      }
+
+    private:
+      OpenGL::Texture* _texture;
+      const QString& _blp_filename;
+    };
+  }
+
+  QPixmap blp_to_pixmap (const QString& blp_filename, const int& width, const int& height)
+  {
+    return detail::helper_widget (blp_filename).renderPixmap (width, height, false);
   }
 }
