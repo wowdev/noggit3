@@ -202,6 +202,7 @@ SET( HeadersToMoc
   src/Noggit.h
   src/Menu.h
   src/MapView.h
+  src/UIAbout.h
   src/UIMinimapWindow.h
 )
 
