@@ -1,30 +1,56 @@
 #include "UIAbout.h"
 
-#include <algorithm>
+#include <QLabel>
 
-#include "Noggit.h" // fonts
-#include "revision.h"
-#include "UIText.h"
-#include "UITexture.h"
-#include "Video.h" // video
+#include "revision.h" // STRPRODUCTVER
+#include "Video.h" // helper::blp_to_pixmap
 
-#include "Log.h"
-
-UIAbout::UIAbout( )
-: UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "" )
+namespace ui
 {
-  addChild( new UITexture( 20.0f, 20.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Potion_83.blp" ) );
-  addChild( new UIText( 73.0f, 24.0f, "Noggit Studio", skurri32, eJustifyLeft ) );
-  addChild( new UIText( 155.0f, 57.0f, "a wow map editor for 3.3.5a", fritz16, eJustifyLeft ) );
-  addChild( new UIText( 20.0f, 100.0f, "Ufoz [...],   Cryect,   Beket,   Schlumpf,   Tigurius", fritz16, eJustifyLeft ) );
-  addChild( new UIText( 100.0f, 120.0f, " Steff,  Garthog & Glararan", fritz16, eJustifyLeft ) );
-  addChild( new UIText( 20.0f, 160.0f, "World of Warcraft is (C) Blizzard Entertainment", fritz16, eJustifyLeft ) );
-  addChild( new UIText( 20.0f, 190.0f, STRPRODUCTVER , fritz16, eJustifyLeft ) );
-  addChild( new UIText( 375.0f, 190.0f, __DATE__ ", " __TIME__, fritz16, eJustifyRight ) );
-}
+  about_widget::about_widget (QWidget* parent)
+    : QWidget (parent)
+  {
+    setMinimumSize (400, 230);
+    setMaximumSize (400, 230);
 
-void UIAbout::resize()
-{
-  x( std::max( ( video.xres() / 2.0f ) - ( winWidth / 2.0f ), 0.0f ) );
-  y( std::max( ( video.yres() / 2.0f ) - ( winHeight / 2.0f ), 0.0f ) );
+    setWindowTitle (tr ("About Noggit"));
+
+    QPalette p (palette());
+    p.setColor (QPalette::Background, QColor ("#002020"));
+    p.setColor (QPalette::WindowText, Qt::white);
+    setPalette (p);
+
+    QLabel* icon (new QLabel (this));
+    QLabel* title (new QLabel (tr ("Noggit Studio"), this));
+    QLabel* description (new QLabel (tr ("a WoW map editor for 3.3.5a"), this));
+    QLabel* authors (new QLabel (tr ("Maintained by %1").arg ("Ufoz, [...], Cryect, Beket, Schlumpf, Tigurius, Steff, Garthog, Glararan"), this));
+    QLabel* copyright (new QLabel (trUtf8 ("World of Warcraft © Blizzard Entertainment"), this));
+    QLabel* product_version (new QLabel (STRPRODUCTVER, this));
+    QLabel* date (new QLabel (tr ("%1, %2").arg (__DATE__).arg (__TIME__), this));
+
+    static QFont skurri32 ("Skurri", 32);
+    static QFont fritz16 ("Fritz", 16);
+
+    icon->setPixmap (helper::blp_to_pixmap ("Interface\\ICONS\\INV_Potion_83.blp", 64, 64));
+    icon->setGeometry (20, 20, 64, 64);
+    icon->setPalette (p);
+    title->move (73, 24);
+    title->setFont (skurri32);
+    title->setPalette (p);
+    description->move (155, 57);
+    description->setFont (fritz16);
+    description->setPalette (p);
+    authors->move (20, 100);
+    authors->setWordWrap (true);
+    authors->setFont (fritz16);
+    authors->setPalette (p);
+
+    copyright->move (20, 170);
+    copyright->setPalette (p);
+    product_version->move (20, 190);
+    product_version->setPalette (p);
+    date->setGeometry (0, 190, 375, 16);
+    date->setAlignment (Qt::AlignRight | Qt::AlignBottom);
+    date->setPalette (p);
+  }
 }

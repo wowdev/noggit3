@@ -1,17 +1,17 @@
 #ifndef __WIN_CREDITS_H
 #define __WIN_CREDITS_H
 
-#include "UICloseWindow.h"
+#include <QWidget>
 
-class UIAbout : public UICloseWindow
+namespace ui
 {
-private:
-  static const int winWidth = 400;
-  static const int winHeight = 230;
+  class about_widget : public QWidget
+  {
+    Q_OBJECT
 
-public:
-  UIAbout();
-  void resize();
-};
+  public:
+    about_widget (QWidget* parent = NULL);
+  };
+}
 
 #endif
