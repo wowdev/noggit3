@@ -4,7 +4,8 @@
 #include <string>
 #include <stack>
 
-class Video;
+class QString;
+#include <QPixmap>
 
 #include <gl/glew.h>
 
@@ -138,9 +139,8 @@ namespace OpenGL
 
     void invalidate();
 
+    void loadFromBLP (const QString& filename);
     void loadFromBLP( const std::string& filename );
-    void loadFromUncompressedData( BLPHeader* lHeader, char* lData );
-    void loadFromCompressedData( BLPHeader* lHeader, char* lData );
 
     void bind() const;
 
@@ -153,6 +153,9 @@ namespace OpenGL
     const std::string& filename();
 
   private:
+    void loadFromUncompressedData( BLPHeader* lHeader, char* lData );
+    void loadFromCompressedData( BLPHeader* lHeader, char* lData );
+
     int _width;
     int _height;
     InternalRepresentation _id;
@@ -161,6 +164,11 @@ namespace OpenGL
 
   typedef GLuint Shader;
   typedef GLuint Light;
+}
+
+namespace helper
+{
+  QPixmap blp_to_pixmap (const QString& blp_filename, const int& width, const int& height);
 }
 
 extern Video video;
