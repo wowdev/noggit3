@@ -8,6 +8,8 @@
 
 #include "AsyncObject.h"
 
+class QString;
+
 class MPQArchive;
 class MPQFile;
 
@@ -52,6 +54,7 @@ class MPQFile
   std::string fname;
 
 public:
+  explicit MPQFile (const QString& filename);
   explicit MPQFile(const std::string& filename);  // filenames are not case sensitive
   ~MPQFile();
   size_t read(void* dest, size_t bytes);
@@ -89,6 +92,9 @@ public:
   void SaveFile();
 
   static bool exists( const std::string& filename );
+
+private:
+  void open_file (const std::string& filename);
 
   friend class MPQArchive;
 };
