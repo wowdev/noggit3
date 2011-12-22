@@ -68,6 +68,7 @@ void renderSphere_convenient(float x, float y, float z, float radius, int subdiv
   glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA );
   GLUquadricObj *quadric=gluNewQuadric();
   gluQuadricNormals(quadric, GLU_SMOOTH);
+  renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
   renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
   gluDeleteQuadric(quadric);
   glEnable(GL_LIGHTING);
@@ -120,23 +121,10 @@ void renderDisk_convenient(float x, float y, float z, float radius)
   gluQuadricDrawStyle(quadric, GLU_LINE);
   gluQuadricNormals(quadric, GLU_SMOOTH);
   renderDisk(x, y, z, x, y, z, radius, subdivisions, quadric);
+  renderSphere(x,y,z,x,y,z,0.3,15,quadric);
   gluDeleteQuadric(quadric);
   glEnable(GL_LIGHTING);
 }
-
-void renderNone()
-{
-	glPushMatrix();
-	glDisable(GL_LIGHTING);
-	glDisable(GL_DEPTH_TEST);
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-	glEnable(GL_COLOR_MATERIAL);
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
-	glPopMatrix();
-}
-
 
 bool World::IsEditableWorld( int pMapId )
 {
@@ -1203,33 +1191,27 @@ void World::draw()
 
     if(terrainMode == 0)
 	{
-	  if(Environment::getInstance()->cursorType == 0)
-		renderNone();
-	  else if(Environment::getInstance()->cursorType == 1)
+	  if(Environment::getInstance()->cursorType == 1)
 		renderDisk_convenient(posX, posY, posZ, groundBrushRadius);
 	  else if(Environment::getInstance()->cursorType == 2)
 	    renderSphere_convenient(posX, posY, posZ, groundBrushRadius, 15);
 	}
     else if(terrainMode == 1)
 	{
-	  if(Environment::getInstance()->cursorType == 0)
-		  renderNone();
-	  else if(Environment::getInstance()->cursorType == 1)
+
+	  if(Environment::getInstance()->cursorType == 1)
 		  renderDisk_convenient(posX, posY, posZ, blurBrushRadius);
 	  else if(Environment::getInstance()->cursorType == 2)
 	    renderSphere_convenient(posX, posY, posZ, blurBrushRadius, 15);
 	}
     else if(terrainMode == 2)
 	{
-	  if(Environment::getInstance()->cursorType == 0)
-		renderNone();
-	  else if(Environment::getInstance()->cursorType == 1)
+	  if(Environment::getInstance()->cursorType == 1)
 		renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius());
 	  else if(Environment::getInstance()->cursorType == 2)
 		renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
 	}
-    else
-	    renderNone();
+	else renderSphere_convenient(posX, posY, posZ, 0.3f, 15);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);

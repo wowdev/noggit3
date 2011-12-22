@@ -1106,7 +1106,8 @@ void MapChunk::draw()
     }
   }
 
-  /* Draw NOT the triangle
+if(Environment::getInstance()->cursorType == 3)
+{
   if( gWorld->IsSelection( eEntry_MapChunk ) && gWorld->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3 )
   {
     int poly = gWorld->GetCurrentSelectedTriangle();
@@ -1129,7 +1130,8 @@ void MapChunk::draw()
 
     glPopMatrix();
   }
-  */
+}
+
 
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 
