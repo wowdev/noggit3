@@ -115,6 +115,11 @@ public:
     return reinterpret_cast<float*>(this);
   }
 
+  inline operator const float*() const
+  {
+    return reinterpret_cast<const float*>(this);
+  }
+
   inline bool IsInsideOf( Vec3D pA, Vec3D pB ) const
   {
     return( pA.x < this->x && pB.x > this->x && pA.y < this->y && pB.y > this->y && pA.z < this->z && pB.z > this->z );
