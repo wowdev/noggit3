@@ -49,7 +49,7 @@ UICursorSwitcher::UICursorSwitcher() : UICloseWindow((float)video.xres() / 2.0f 
 	Toggle = new UIToggleGroup( &Environment::getInstance()->cursorType );
 	addChild(new UICheckBox(leftMargin, 30.0f, "Cursor - Disk", Toggle, 1));
 	addChild(new UICheckBox(leftMargin + 150.0f, 30.0f, "Cursor - Sphere", Toggle, 2));
-	addChild(new UICheckBox(leftMargin, 60.0f, "Cursor - triangle", Toggle, 3));
+	addChild(new UICheckBox(leftMargin, 60.0f, "Cursor - Triangle", Toggle, 3));
 	addChild(new UICheckBox(leftMargin + 150.0f, 60.0f, "Cursor - None", Toggle, 0));
 	Toggle->Activate(Environment::getInstance()->cursorType);
 
