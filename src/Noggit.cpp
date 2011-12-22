@@ -361,7 +361,7 @@ int main( int argc, char *argv[] )
   Environment::getInstance()->cursorColorG = 1.0f;
   Environment::getInstance()->cursorColorB = 1.0f;
   Environment::getInstance()->cursorColorA = 1.0f;
-  Environment::getInstance()->cursorType = 0;
+  Environment::getInstance()->cursorType = 1;
 
   // load cursor settings
   if (QFile::exists ("NoggIt.conf"))

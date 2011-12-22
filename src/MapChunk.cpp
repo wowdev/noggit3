@@ -1106,30 +1106,32 @@ void MapChunk::draw()
     }
   }
 
-  /* Draw NOT the triangle
-  if( _world->IsSelection( eEntry_MapChunk ) && _world->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3 )
+  if (Environment::getInstance()->cursorType == 3)
   {
-    int poly = _world->GetCurrentSelectedTriangle();
+    if (_world->IsSelection (eEntry_MapChunk) && _world->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3)
+    {
+      const int poly (_world->GetCurrentSelectedTriangle());
 
-    glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
+      glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
 
-    glPushMatrix();
+      glPushMatrix();
 
-    glDisable( GL_CULL_FACE );
-    glDepthMask( false );
-    glDisable( GL_DEPTH_TEST );
-    glBegin( GL_TRIANGLES );
-    glVertex3fv( mVertices[_world->mapstrip2[poly + 0]] );
-    glVertex3fv( mVertices[_world->mapstrip2[poly + 1]] );
-    glVertex3fv( mVertices[_world->mapstrip2[poly + 2]] );
-    glEnd();
-    glEnable( GL_CULL_FACE );
-    glEnable( GL_DEPTH_TEST );
-    glDepthMask( true );
+      glDisable( GL_CULL_FACE );
+      glDepthMask( false );
+      glDisable( GL_DEPTH_TEST );
+      glBegin( GL_TRIANGLES );
+      glVertex3fv( mVertices[_world->mapstrip2[poly + 0]] );
+      glVertex3fv( mVertices[_world->mapstrip2[poly + 1]] );
+      glVertex3fv( mVertices[_world->mapstrip2[poly + 2]] );
+      glEnd();
+      glEnable( GL_CULL_FACE );
+      glEnable( GL_DEPTH_TEST );
+      glDepthMask( true );
 
-    glPopMatrix();
+      glPopMatrix();
+    }
   }
-  */
+
 
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 

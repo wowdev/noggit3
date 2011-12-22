@@ -33,6 +33,7 @@
 #include "Noggit.h" // gStates, gPop, gFPS, arial14, morpheus40, arial...
 #include "Project.h"
 #include "Settings.h"
+#include "Environment.h"
 #include "TextureManager.h" // TextureManager, Texture
 #include "UIAppInfo.h" // appInfo
 #include "UICheckBox.h" // UICheckBox
@@ -234,6 +235,13 @@ void change_settings_window(int oldid, int newid)
     settings_paint->show();
   break;
   }
+}
+
+void openSwapper( UIFrame*, int )
+{
+  mainGui->TextureSwitcher->setPosition(settings_paint->x() , settings_paint->y()) ;
+  mainGui->TextureSwitcher->show();
+  settings_paint->hide();
 }
 
 void MapView::open_help()
@@ -636,7 +644,7 @@ void MapView::createGUI()
   setting_blur->addChild(blur_brush);
 
   //3D Paint settings UIWindow
-  settings_paint=new UIWindow(tool_settings_x,tool_settings_y,180.0f,100.0f);
+  settings_paint=new UIWindow(tool_settings_x,tool_settings_y,180.0f,140.0f);
   settings_paint->hide();
   settings_paint->movable( true );
 
@@ -677,6 +685,11 @@ void MapView::createGUI()
   S1->setValue(brushPressure);
   S1->setText("Pressure: ");
   settings_paint->addChild(S1);
+
+
+  UIButton* B1;
+  B1=new UIButton( 6.0f, 111.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1 ) ;
+  settings_paint->addChild(B1);
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(4,8,mainGui));
   mainGui->TexturePalette->hide();
@@ -1524,6 +1537,8 @@ void MapView::keyPressEvent (QKeyEvent* event)
 //  NEW_TOGGLE_ACTION (rotation_randomization, tr ("Randomized rotation when copying"), SLOT (toggle_copy_rotation_randomization (bool)), 0, false);
 
 
+  if (event->key() == Qt::Key_C)
+    Environment::getInstance()->cursorType = (Environment::getInstance()->cursorType + 1) % 4;
 
   if (event->key() == Qt::Key_U)
     toggle_tile_mode();
@@ -1537,7 +1552,6 @@ void MapView::keyPressEvent (QKeyEvent* event)
 
   if (event->key() == Qt::Key_F1 && event->modifiers() & Qt::ShiftModifier)
     toggle_terrain_texturing_mode();
-
 
   // fog distance or brush radius
   if (event->key() == Qt::Key_Plus)
