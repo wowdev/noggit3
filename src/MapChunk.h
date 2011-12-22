@@ -8,6 +8,7 @@
 class MPQFile;
 class Vec4D;
 class brush;
+class World;
 
 typedef unsigned short StripType;
 
@@ -57,7 +58,7 @@ public:
   StripType *strip;
   int striplen;
 
-  MapChunk(MapTile* mt, MPQFile* f,bool bigAlpha);
+  MapChunk(World* world, MapTile* mt, MPQFile* f,bool bigAlpha);
   ~MapChunk();
 
   void destroy();
@@ -113,6 +114,12 @@ public:
 
 
   //float getTerrainHeight(float x, float z);
+
+  void SetAnim (int anim, const float& anim_time) const;
+  void RemoveAnim (int anim) const;
+
+private:
+  World* _world;
 };
 
 #endif // MAPCHUNK_H

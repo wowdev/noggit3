@@ -173,7 +173,8 @@ void GenerateContourMap()
 }
 
 
-MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
+MapChunk::MapChunk(World* world, MapTile* maintile, MPQFile* f,bool bigAlpha)
+  : _world (world)
 {
   mt=maintile;
   mBigAlpha=bigAlpha;
@@ -482,7 +483,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
 
   vcenter = (vmin + vmax) * 0.5f;
 
-  nameID = SelectionNames.add( this );
+  nameID = _world->selection_names().add( this );
 
 
 
@@ -560,7 +561,7 @@ void MapChunk::loadTextures()
 
 
 
-void SetAnim(int anim)
+void MapChunk::SetAnim (int anim, const float& anim_time) const
 {
   if (anim) {
     glActiveTexture(GL_TEXTURE0);
@@ -574,12 +575,12 @@ void SetAnim(int anim)
     const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
     const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
 
-    const float f = ( static_cast<int>( gWorld->animtime * (spd/15.0f) ) % 1600) / 1600.0f;
+    const float f = ( static_cast<int>( anim_time * (spd/15.0f) ) % 1600) / 1600.0f;
     glTranslatef(f*fdx, f*fdy, 0);
   }
 }
 
-void RemoveAnim(int anim)
+void MapChunk::RemoveAnim (int anim) const
 {
   if (anim) {
     glPopMatrix();
@@ -616,7 +617,7 @@ void MapChunk::drawTextures()
     OpenGL::Texture::disableTexture();
   }
 
-  SetAnim(animated[0]);
+  SetAnim(animated[0], _world->animtime);
   glBegin(GL_TRIANGLE_STRIP);
   glTexCoord2f(0.0f,texDetail);
   glVertex3f(static_cast<float>(px), py+1.0f, -2.0f);
@@ -651,7 +652,7 @@ void MapChunk::drawTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    SetAnim(animated[i]);
+    SetAnim(animated[i], _world->animtime);
 
     glBegin(GL_TRIANGLE_STRIP);
     glMultiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
@@ -683,7 +684,7 @@ void MapChunk::drawTextures()
   glBindBuffer(GL_ARRAY_BUFFER, minishadows);
   glColorPointer(4, GL_FLOAT, 0, 0);
 
-  glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, gWorld->mapstrip2);
+  glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, _world->mapstrip2);
 }
 
 void MapChunk::initStrip()
@@ -749,7 +750,7 @@ MapChunk::~MapChunk()
 
   if( nameID != -1 )
   {
-    SelectionNames.del( nameID );
+    _world->selection_names().del( nameID );
     nameID = -1;
   }
 }
@@ -839,16 +840,16 @@ void CreateStrips()
 void MapChunk::drawColor()
 {
 
-  if (!gWorld->frustum.intersects(vmin,vmax))
+  if (!_world->frustum.intersects(vmin,vmax))
     return;
 
-  float mydist = (gWorld->camera - vcenter).length() - r;
+  float mydist = (_world->camera - vcenter).length() - r;
 
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
 
-  if (mydist > gWorld->culldistance) {
-    if (gWorld->drawfog) this->drawNoDetail();
+  if (mydist > _world->culldistance) {
+    if (_world->drawfog) this->drawNoDetail();
     return;
   }
 
@@ -888,7 +889,7 @@ void MapChunk::drawPass(int anim)
     const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
     const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
     const int animspd = 200 * detail_size;
-    float f = ( (static_cast<int>(gWorld->animtime*(spd/15.0f))) % animspd) / static_cast<float>(animspd);
+    float f = ( (static_cast<int>(_world->animtime*(spd/15.0f))) % animspd) / static_cast<float>(animspd);
     glTranslatef(f*fdx,f*fdy,0);
   }
 
@@ -905,10 +906,10 @@ void MapChunk::drawPass(int anim)
 
 void MapChunk::drawLines()
 {
-  if (!gWorld->frustum.intersects(vmin,vmax))
+  if (!_world->frustum.intersects(vmin,vmax))
     return;
 
-  float mydist = (gWorld->camera - vcenter).length() - r;
+  float mydist = (_world->camera - vcenter).length() - r;
 
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
@@ -995,10 +996,10 @@ void MapChunk::drawContour()
 void MapChunk::draw()
 {
 
-  if (!gWorld->frustum.intersects( vmin, vmax ))
+  if (!_world->frustum.intersects( vmin, vmax ))
     return;
 
-  float mydist = (gWorld->camera - vcenter).length() - r;
+  float mydist = (_world->camera - vcenter).length() - r;
 
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
@@ -1068,7 +1069,7 @@ void MapChunk::draw()
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_LIGHTING);
 
-  Vec3D shc = gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.3f;
+  Vec3D shc = _world->skies->colorSet[WATER_COLOR_DARK] * 0.3f;
   glColor4f(shc.x,shc.y,shc.z,1);
 
   //glColor4f(1,1,1,1);
@@ -1106,9 +1107,9 @@ void MapChunk::draw()
   }
 
   /* Draw NOT the triangle
-  if( gWorld->IsSelection( eEntry_MapChunk ) && gWorld->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3 )
+  if( _world->IsSelection( eEntry_MapChunk ) && _world->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3 )
   {
-    int poly = gWorld->GetCurrentSelectedTriangle();
+    int poly = _world->GetCurrentSelectedTriangle();
 
     glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
 
@@ -1118,9 +1119,9 @@ void MapChunk::draw()
     glDepthMask( false );
     glDisable( GL_DEPTH_TEST );
     glBegin( GL_TRIANGLES );
-    glVertex3fv( mVertices[gWorld->mapstrip2[poly + 0]] );
-    glVertex3fv( mVertices[gWorld->mapstrip2[poly + 1]] );
-    glVertex3fv( mVertices[gWorld->mapstrip2[poly + 2]] );
+    glVertex3fv( mVertices[_world->mapstrip2[poly + 0]] );
+    glVertex3fv( mVertices[_world->mapstrip2[poly + 1]] );
+    glVertex3fv( mVertices[_world->mapstrip2[poly + 2]] );
     glEnd();
     glEnable( GL_CULL_FACE );
     glEnable( GL_DEPTH_TEST );
@@ -1178,7 +1179,7 @@ void MapChunk::drawNoDetail()
   glDisable( GL_TEXTURE_2D );
   glDisable( GL_LIGHTING );
 
-  //glColor3fv(gWorld->skies->colorSet[FOG_COLOR]);
+  //glColor3fv(_world->skies->colorSet[FOG_COLOR]);
   //glColor3f(1,0,0);
   //glDisable(GL_FOG);
 
@@ -1186,7 +1187,7 @@ void MapChunk::drawNoDetail()
   glBindBuffer( GL_ARRAY_BUFFER, vertices );
   glVertexPointer( 3, GL_FLOAT, 0, 0 );
   glDisableClientState( GL_NORMAL_ARRAY );
-  glDrawElements( GL_TRIANGLE_STRIP, stripsize, GL_UNSIGNED_SHORT, gWorld->mapstrip );
+  glDrawElements( GL_TRIANGLE_STRIP, stripsize, GL_UNSIGNED_SHORT, _world->mapstrip );
   glEnableClientState( GL_NORMAL_ARRAY );
 
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -1201,16 +1202,16 @@ void MapChunk::drawNoDetail()
 
 void MapChunk::drawSelect()
 {
-  if( !gWorld->frustum.intersects( vmin, vmax ) )
+  if( !_world->frustum.intersects( vmin, vmax ) )
     return;
 
-  float mydist = (gWorld->camera - vcenter).length() - r;
+  float mydist = (_world->camera - vcenter).length() - r;
   if (mydist > (mapdrawdistance * mapdrawdistance)) return;
-  if (mydist > gWorld->culldistance)
+  if (mydist > _world->culldistance)
     return;
 
   if( nameID == -1 )
-    nameID = SelectionNames.add( this );
+    nameID = _world->selection_names().add( this );
 
   //! \todo Use backface culling again? Maybe this adds problems. Idk.
   //glDisable( GL_CULL_FACE );
@@ -1220,9 +1221,9 @@ void MapChunk::drawSelect()
   {
     glPushName( i );
     glBegin( GL_TRIANGLES );
-    glVertex3fv( mVertices[gWorld->mapstrip2[i]] );
-    glVertex3fv( mVertices[gWorld->mapstrip2[i + 1]] );
-    glVertex3fv( mVertices[gWorld->mapstrip2[i + 2]] );
+    glVertex3fv( mVertices[_world->mapstrip2[i]] );
+    glVertex3fv( mVertices[_world->mapstrip2[i + 1]] );
+    glVertex3fv( mVertices[_world->mapstrip2[i + 2]] );
     glEnd();
     glPopName();
   }
@@ -1233,29 +1234,29 @@ void MapChunk::drawSelect()
 
 void MapChunk::getSelectionCoord( float *x, float *z )
 {
-  int Poly = gWorld->GetCurrentSelectedTriangle();
+  int Poly = _world->GetCurrentSelectedTriangle();
   if( Poly + 2 > stripsize2 )
   {
     *x = -1000000.0f;
     *z = -1000000.0f;
     return;
   }
-  *x = ( mVertices[gWorld->mapstrip2[Poly + 0]].x + mVertices[gWorld->mapstrip2[Poly + 1]].x + mVertices[gWorld->mapstrip2[Poly + 2]].x ) / 3;
-  *z = ( mVertices[gWorld->mapstrip2[Poly + 0]].z + mVertices[gWorld->mapstrip2[Poly + 1]].z + mVertices[gWorld->mapstrip2[Poly + 2]].z ) / 3;
+  *x = ( mVertices[_world->mapstrip2[Poly + 0]].x + mVertices[_world->mapstrip2[Poly + 1]].x + mVertices[_world->mapstrip2[Poly + 2]].x ) / 3;
+  *z = ( mVertices[_world->mapstrip2[Poly + 0]].z + mVertices[_world->mapstrip2[Poly + 1]].z + mVertices[_world->mapstrip2[Poly + 2]].z ) / 3;
 }
 
 float MapChunk::getSelectionHeight()
 {
-  int Poly = gWorld->GetCurrentSelectedTriangle();
+  int Poly = _world->GetCurrentSelectedTriangle();
   if( Poly + 2 < stripsize2 )
-    return ( mVertices[gWorld->mapstrip2[Poly + 0]].y + mVertices[gWorld->mapstrip2[Poly + 1]].y + mVertices[gWorld->mapstrip2[Poly + 2]].y ) / 3;
+    return ( mVertices[_world->mapstrip2[Poly + 0]].y + mVertices[_world->mapstrip2[Poly + 1]].y + mVertices[_world->mapstrip2[Poly + 2]].y ) / 3;
   LogError << "Getting selection height fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
   return 0.0f;
 }
 
 Vec3D MapChunk::GetSelectionPosition()
 {
-  int Poly = gWorld->GetCurrentSelectedTriangle();
+  int Poly = _world->GetCurrentSelectedTriangle();
   if( Poly + 2 > stripsize2 )
   {
     LogError << "Getting selection position fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
@@ -1263,9 +1264,9 @@ Vec3D MapChunk::GetSelectionPosition()
   }
 
   Vec3D lPosition;
-  lPosition  = Vec3D( mVertices[gWorld->mapstrip2[Poly + 0]] );
-  lPosition += Vec3D( mVertices[gWorld->mapstrip2[Poly + 1]] );
-  lPosition += Vec3D( mVertices[gWorld->mapstrip2[Poly + 2]] );
+  lPosition  = Vec3D( mVertices[_world->mapstrip2[Poly + 0]] );
+  lPosition += Vec3D( mVertices[_world->mapstrip2[Poly + 1]] );
+  lPosition += Vec3D( mVertices[_world->mapstrip2[Poly + 2]] );
   lPosition *= 0.3333333f;
 
   return lPosition;
@@ -1284,28 +1285,28 @@ void MapChunk::recalcNorms()
 
   for(int i=0;i<mapbufsize;++i)
   {
-    if(!gWorld->GetVertex( mVertices[i].x - UNITSIZE*0.5f, mVertices[i].z - UNITSIZE*0.5f, &P1 ))
+    if(!_world->GetVertex( mVertices[i].x - UNITSIZE*0.5f, mVertices[i].z - UNITSIZE*0.5f, &P1 ))
     {
       P1.x = mVertices[i].x - UNITSIZE*0.5f;
       P1.y = mVertices[i].y;
       P1.z = mVertices[i].z - UNITSIZE*0.5f;
     }
 
-    if(!gWorld->GetVertex( mVertices[i].x + UNITSIZE*0.5f, mVertices[i].z - UNITSIZE*0.5f, &P2 ))
+    if(!_world->GetVertex( mVertices[i].x + UNITSIZE*0.5f, mVertices[i].z - UNITSIZE*0.5f, &P2 ))
     {
       P2.x = mVertices[i].x + UNITSIZE*0.5f;
       P2.y = mVertices[i].y;
       P2.z = mVertices[i].z - UNITSIZE*0.5f;
     }
 
-    if(!gWorld->GetVertex( mVertices[i].x + UNITSIZE*0.5f, mVertices[i].z + UNITSIZE*0.5f, &P3 ))
+    if(!_world->GetVertex( mVertices[i].x + UNITSIZE*0.5f, mVertices[i].z + UNITSIZE*0.5f, &P3 ))
     {
       P3.x = mVertices[i].x + UNITSIZE*0.5f;
       P3.y = mVertices[i].y;
       P3.z = mVertices[i].z + UNITSIZE*0.5f;
     }
 
-    if(!gWorld->GetVertex( mVertices[i].x - UNITSIZE*0.5f, mVertices[i].z + UNITSIZE*0.5f, &P4 ))
+    if(!_world->GetVertex( mVertices[i].x - UNITSIZE*0.5f, mVertices[i].z + UNITSIZE*0.5f, &P4 ))
     {
       P4.x = mVertices[i].x - UNITSIZE*0.5f;
       P4.y = mVertices[i].y;
@@ -1501,7 +1502,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
           dist2= sqrt(xdiff*xdiff + zdiff*zdiff);
           if(dist2 > radius)
             continue;
-          gWorld->GetVertex(tx,tz,&TempVec);
+          _world->GetVertex(tx,tz,&TempVec);
           TotalHeight += (1.0f - dist2/radius) * TempVec.y;
           TotalWeight += (1.0f - dist2/radius);
         }

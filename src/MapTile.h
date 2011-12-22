@@ -10,12 +10,13 @@
 
 class Vec3D;
 class Liquid;
+class World;
 class MapChunk;
 
 class MapTile
 {
 public:
-  MapTile( int x0, int z0, const std::string& pFilename, bool pBigAlpha );
+  MapTile( World*, int x0, int z0, const std::string& pFilename, bool pBigAlpha );
   ~MapTile();
 
   //! \brief Get the maximum height of terrain on this map tile.
@@ -63,6 +64,8 @@ private:
 
   MapChunk * mChunks[16][16];
   std::vector<Liquid*> mLiquids;
+
+  World* _world;
 
   friend class MapChunk;
 };

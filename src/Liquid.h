@@ -18,6 +18,8 @@ class Liquid;
 
 //#include "Log.h"
 
+class Skies;
+
 namespace OpenGL
 {
   class CallList;
@@ -100,8 +102,11 @@ private:
 public:
 
 
-  Liquid(int x, int y, Vec3D base, float ptilesize = LQ_DEFAULT_TILESIZE):
-    xtiles(x), ytiles(y), pos(base), tilesize(ptilesize)
+  Liquid (int x, int y, Vec3D base, float ptilesize = LQ_DEFAULT_TILESIZE)
+    : xtiles (x)
+    , ytiles (y)
+    , pos (base)
+    , tilesize (ptilesize)
   {
   //  number = ++lCount;
   //  LogDebug << "Created Liquid of Number: " << number << std::endl;
@@ -131,12 +136,10 @@ public:
   void setRender(int i, int j);
   void unsetRender(int i, int j);
 
-  void draw();
+  void draw (const float&, const Skies* = NULL) const;
 
 private:
   void recalcSize();
-
-
 };
 
 #endif

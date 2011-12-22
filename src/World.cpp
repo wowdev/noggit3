@@ -28,8 +28,6 @@
 #include "Brush.h" // brush
 #include "ConfigFile.h"
 
-World *gWorld = NULL;
-
 GLuint selectionBuffer[8192];
 
 void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
@@ -173,53 +171,53 @@ bool World::IsEditableWorld( int pMapId )
 }
 
 World::World( const std::string& name )
-: cx( -1 )
-, cz( -1 )
-, ex( -1 )
-, ez( -1 )
-, mCurrentSelection( NULL )
-, mCurrentSelectedTriangle( 0 )
-, SelectionMode( false )
-, mBigAlpha( false )
-, mWmoFilename( "" )
-, mWmoEntry( ENTRY_MODF() )
-, detailtexcoords( 0 )
-, alphatexcoords( 0 )
-, mMapId( 0xFFFFFFFF )
-, ol( NULL )
-, l_const( 0.0f )
-, l_linear( 0.7f )
-, l_quadratic( 0.03f )
-, drawdoodads( true )
-, drawfog( true )
-, drawlines( false )
-, drawmodels( true )
-, drawterrain( true )
-, drawwater( false )
-, drawwmo( true )
-, lighting( true )
-, animtime( 0 )
-, time( 1450 )
-, basename( name )
-, fogdistance( 777.0f )
-, culldistance( fogdistance )
-, autoheight( false )
-, minX( 0.0f )
-, maxX( 0.0f )
-, minY( 0.0f )
-, maxY( 0.0f )
-, zoom( 0.25f )
-, skies( NULL )
-, mHasAGlobalWMO( false )
-, loading( false )
-, noadt( false )
-, hadSky( false )
-, outdoorLightStats( OutdoorLightStats() )
-, mapstrip( NULL )
-, mapstrip2( NULL )
-, camera( Vec3D( 0.0f, 0.0f, 0.0f ) )
-, lookat( Vec3D( 0.0f, 0.0f, 0.0f ) )
-, frustum( Frustum() )
+  : cx( -1 )
+  , cz( -1 )
+  , ex( -1 )
+  , ez( -1 )
+  , mCurrentSelection( NULL )
+  , mCurrentSelectedTriangle( 0 )
+  , SelectionMode( false )
+  , mBigAlpha( false )
+  , mWmoFilename( "" )
+  , mWmoEntry( ENTRY_MODF() )
+  , detailtexcoords( 0 )
+  , alphatexcoords( 0 )
+  , mMapId( 0xFFFFFFFF )
+  , ol( NULL )
+  , l_const( 0.0f )
+  , l_linear( 0.7f )
+  , l_quadratic( 0.03f )
+  , drawdoodads( true )
+  , drawfog( true )
+  , drawlines( false )
+  , drawmodels( true )
+  , drawterrain( true )
+  , drawwater( false )
+  , drawwmo( true )
+  , lighting( true )
+  , animtime( 0 )
+  , time( 1450 )
+  , basename( name )
+  , fogdistance( 777.0f )
+  , culldistance( fogdistance )
+  , autoheight( false )
+  , minX( 0.0f )
+  , maxX( 0.0f )
+  , minY( 0.0f )
+  , maxY( 0.0f )
+  , zoom( 0.25f )
+  , skies( NULL )
+  , mHasAGlobalWMO( false )
+  , loading( false )
+  , noadt( false )
+  , outdoorLightStats( OutdoorLightStats() )
+  , mapstrip( NULL )
+  , mapstrip2( NULL )
+  , camera( Vec3D( 0.0f, 0.0f, 0.0f ) )
+  , lookat( Vec3D( 0.0f, 0.0f, 0.0f ) )
+  , frustum( Frustum() )
+  , _selection_names (this)
 {
   for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
   {
@@ -701,9 +699,9 @@ void World::initDisplay()
 
   if( mHasAGlobalWMO )
   {
-    WMOInstance inst( WMOManager::add( mWmoFilename ), &mWmoEntry );
+    WMOInstance inst( this, WMOManager::add( this, mWmoFilename ), &mWmoEntry );
 
-    gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( mWmoEntry.uniqueID, inst ) );
+    mWMOInstances.insert( std::pair<int,WMOInstance>( mWmoEntry.uniqueID, inst ) );
     camera = inst.pos;
   }
 
@@ -809,7 +807,7 @@ void World::reloadTile(int x, int z)
     std::stringstream filename;
     filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
 
-    mTiles[z][x].tile = new MapTile( x, z, filename.str(), mBigAlpha );
+    mTiles[z][x].tile = new MapTile( this, x, z, filename.str(), mBigAlpha );
     enterTile( cx, cz );
   }
 }
@@ -869,7 +867,7 @@ MapTile* World::loadTile(int z, int x)
     return NULL;
   }
 
-  mTiles[z][x].tile = new MapTile( x, z, filename.str(), mBigAlpha );// XZ STEFF Swap MapTile( z, x, file
+  mTiles[z][x].tile = new MapTile( this, x, z, filename.str(), mBigAlpha );// XZ STEFF Swap MapTile( z, x, file
   return mTiles[z][x].tile;
 }
 
@@ -1032,10 +1030,10 @@ void World::draw()
   ///glDisable(GL_LIGHTING);
   ///glColor4f(1,1,1,1);
 
-  hadSky = false;
+  bool hadSky (false);
   if( drawwmo || mHasAGlobalWMO )
     for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); !hadSky && it != mWMOInstances.end(); ++it )
-      it->second.wmo->drawSkybox( this->camera, it->second.extents[0], it->second.extents[1] );
+      hadSky = hadSky || it->second.wmo->drawSkybox (this, camera, it->second.extents[0], it->second.extents[1]);
 
   glEnable(GL_CULL_FACE);
   glDisable(GL_BLEND);
@@ -1048,7 +1046,7 @@ void World::draw()
   skies->initSky(camera, daytime);
 
   if (!hadSky)
-    hadSky = skies->drawSky(camera);
+    hadSky = skies->drawSky(this, camera);
 
   // clearing the depth buffer only - color buffer is/has been overwritten anyway
   // unless there is no sky OR skybox
@@ -1153,7 +1151,7 @@ void World::draw()
 
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
-    //nameEntry * Selection = gWorld->GetCurrentSelection();
+    //nameEntry * Selection = GetCurrentSelection();
 
     //if( !Selection->data.mapchunk->strip )
     // Selection->data.mapchunk->initStrip();
@@ -1516,11 +1514,11 @@ void World::getSelection()
   {
     if( minEntry->stack.type == MapObjName || minEntry->stack.type == DoodadName )
     {
-      mCurrentSelection = SelectionNames.findEntry( minEntry->stack.uniqueId );
+      mCurrentSelection = selection_names().findEntry( minEntry->stack.uniqueId );
     }
     else if( minEntry->stack.type == MapTileName )
     {
-      mCurrentSelection = SelectionNames.findEntry( minEntry->stack.chunk );
+      mCurrentSelection = selection_names().findEntry( minEntry->stack.chunk );
       mCurrentSelectedTriangle = minEntry->stack.triangle;
     }
   }
@@ -2094,8 +2092,7 @@ void World::addM2( Model *model, Vec3D newPos )
 //  ( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
 //                           ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 
-  ModelInstance newModelis = ModelInstance();
-  newModelis.model = model;
+  ModelInstance newModelis (this, model);
   newModelis.nameID = -1;
   newModelis.d1 = lMaxUID;
   newModelis.pos = newPos;
@@ -2125,7 +2122,7 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
   const int lMaxUID = std::max( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
                            ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 
-  WMOInstance newWMOis(wmo);
+  WMOInstance newWMOis(this, wmo);
   newWMOis.pos = newPos;
   newWMOis.mUniqueID = lMaxUID;
   mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
@@ -2241,13 +2238,13 @@ void World::moveHeight(int /*id*/, int x, int z , int _cx, int _cz)
   curChunk->Changed = true;
 
   float heightDelta = 0.0f;
-  nameEntry *selection = gWorld->GetCurrentSelection();
+  nameEntry *selection = GetCurrentSelection();
 
   if(selection)
     if(selection->type == eEntry_MapChunk)
     {
       // chunk selected
-      heightDelta = gWorld->camera.y - selection->data.mapchunk->py;
+      heightDelta = camera.y - selection->data.mapchunk->py;
     }
 
   if( heightDelta * heightDelta <= 0.1f ) return;

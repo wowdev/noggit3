@@ -50,11 +50,11 @@ public:
   void init(WMO *wmo, MPQFile* f, int num, char *names);
   void initDisplayList();
   void initLighting(int nLR, uint16_t *useLights);
-  void draw(const Vec3D& ofs, const float rot,bool selection);
-  void drawLiquid();
-  void drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float rot);
-  void drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const float rot);
-  void setupFog();
+  void draw(World* world, const Vec3D& ofs, const float rot,bool selection);
+  void drawLiquid(World* world);
+  void drawDoodads(World* world, unsigned int doodadset, const Vec3D& ofs, const float rot);
+  void drawDoodadsSelect(World* world, unsigned int doodadset, const Vec3D& ofs, const float rot);
+  void setupFog(World* world);
 };
 
 struct WMOMaterial {
@@ -154,19 +154,21 @@ public:
   Model *skybox;
   std::string skyboxFilename;
 
-  explicit WMO(const std::string& name);
+  //! \todo This only has World* for wmo-doodads. ._.
+  explicit WMO(World* world, const std::string& name);
   ~WMO();
-  void draw(int doodadset, const Vec3D& ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight) const;
-  void drawSelect(int doodadset, const Vec3D& ofs, const float rot) const;
+  void draw(World* world, int doodadset, const Vec3D& ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight) const;
+  void drawSelect(World* world, int doodadset, const Vec3D& ofs, const float rot) const;
   //void drawPortals();
-  void drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const;
+  bool drawSkybox(World* world, Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const;
 };
 
 class WMOManager
 {
 public:
   static void delbyname( std::string name );
-  static WMO* add(std::string name);
+  //! \todo This only has World* for wmo-doodads. ._.
+  static WMO* add(World* world, std::string name);
 
   static void report();
 

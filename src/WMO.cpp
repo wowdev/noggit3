@@ -47,7 +47,7 @@ const std::string& WMO::filename() const
   return _filename;
 }
 
-WMO::WMO( const std::string& filenameArg )
+WMO::WMO( World* world, const std::string& filenameArg )
 : ManagedItem( )
 , _filename( filenameArg )
 {
@@ -155,7 +155,7 @@ WMO::WMO( const std::string& filenameArg )
         int ofs;
         f.read(&ofs,4);
         Model *m = ModelManager::add( ddnames + ofs );
-        ModelInstance mi;
+        ModelInstance mi (world);
         mi.init2(m,&f);
         modelis.push_back(mi);
       }
@@ -255,23 +255,23 @@ WMO::~WMO()
 // model.cpp
 void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
 
-void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool /*highlight*/) const
+void WMO::draw(World* world, int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool /*highlight*/) const
 {
-  if( gWorld && gWorld->drawfog )
+  if( world && world->drawfog )
     glEnable( GL_FOG );
   else
     glDisable( GL_FOG );
 
   for (unsigned int i=0; i<nGroups; ++i)
   {
-    groups[i].draw(ofs, rot,false);
+    groups[i].draw(world, ofs, rot,false);
 
-    if ( gWorld->drawdoodads)
+    if ( world->drawdoodads)
     {
-      groups[i].drawDoodads(doodadset, ofs, rot);
+      groups[i].drawDoodads(world, doodadset, ofs, rot);
     }
 
-    groups[i].drawLiquid();
+    groups[i].drawLiquid(world);
   }
 
   if( boundingbox )
@@ -501,20 +501,20 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
   */
 }
 
-void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot) const
+void WMO::drawSelect(World* world, int doodadset, const Vec3D &ofs, const float rot) const
 {
   for (unsigned int i=0; i<nGroups; ++i) {
-    groups[i].draw(ofs, rot,true);
+    groups[i].draw(world, ofs, rot, true);
 
-    if (gWorld->drawdoodads) {
-      groups[i].drawDoodadsSelect(doodadset, ofs, rot);
+    if (world->drawdoodads) {
+      groups[i].drawDoodadsSelect(world, doodadset, ofs, rot);
     }
 
-    groups[i].drawLiquid();
+    groups[i].drawLiquid(world);
   }
 }
 
-void WMO::drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const
+bool WMO::drawSkybox(World* world, Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const
 {
   if( skybox && pCamera.IsInsideOf( pLower, pUpper ) )
   {
@@ -531,15 +531,17 @@ void WMO::drawSkybox( Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glPushMatrix();
-    Vec3D o = gWorld->camera;
-    glTranslatef(o.x, o.y, o.z);
+    glTranslatef(pCamera.x, pCamera.y, pCamera.z);
     const float sc = 2.0f;
     glScalef(sc,sc,sc);
-        skybox->draw();
+    skybox->draw (world);
     glPopMatrix();
-    gWorld->hadSky = true;
     glEnable(GL_DEPTH_TEST);
+
+    return true;
   }
+
+  return false;
 }
 
 /*
@@ -940,27 +942,27 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
   }
 }
 
-void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
+void WMOGroup::draw(World* world, const Vec3D& ofs, const float rot,bool selection)
 {
   visible = false;
   // view frustum culling
   Vec3D pos = center + ofs;
   rotate(ofs.x,ofs.z,&pos.x,&pos.z,rot*PI/180.0f);
-  if (!gWorld->frustum.intersectsSphere(pos,rad)) return;
-  float dist = (pos - gWorld->camera).length() - rad;
-  if (dist >= gWorld->culldistance) return;
+  if (!world->frustum.intersectsSphere(pos,rad)) return;
+  float dist = (pos - world->camera).length() - rad;
+  if (dist >= world->culldistance) return;
   visible = true;
-  setupFog();
+  setupFog(world);
 
   if (hascv) {
     glDisable(GL_LIGHTING);
-    gWorld->outdoorLights(false);
+    world->outdoorLights(false);
   } else
   {
 
-    if (gWorld->skies->hasSkies())
+    if (world->skies->hasSkies())
   {
-    gWorld->outdoorLights(true);
+    world->outdoorLights(true);
   }
   else glDisable(GL_LIGHTING);
   }
@@ -986,20 +988,20 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
   glColor4f(1,1,1,1);
   glEnable(GL_CULL_FACE);
 
-  if (hascv && !selection && gWorld->lighting)
+  if (hascv && !selection && world->lighting)
       glEnable(GL_LIGHTING);
 
 
 }
 
-void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float rot)
+void WMOGroup::drawDoodads(World* world, unsigned int doodadset, const Vec3D& ofs, const float rot)
 {
 
   if (!visible) return;
   if (nDoodads==0) return;
 
-  gWorld->outdoorLights(outdoorLights);
-  setupFog();
+  world->outdoorLights(outdoorLights);
+  setupFog(world);
 
   /*
   float xr=0,xg=0,xb=0;
@@ -1021,8 +1023,8 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float
         if (!outdoorLights) {
           WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
         }
-        setupFog();
-        wmo->modelis[dd].draw2(ofs,rot);
+        setupFog(world);
+        wmo->modelis[dd].draw2 (ofs, rot);
       }
   }
 
@@ -1033,14 +1035,14 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float
 }
 
 
-void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const float rot)
+void WMOGroup::drawDoodadsSelect(World* world, unsigned int doodadset, const Vec3D& ofs, const float rot)
 {
   if (!visible) return;
   if (nDoodads==0) return;
 
 
-  gWorld->outdoorLights(outdoorLights);
-  setupFog();
+  world->outdoorLights(outdoorLights);
+  setupFog(world);
 
   /*
   float xr=0,xg=0,xb=0;
@@ -1063,7 +1065,7 @@ void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const
           WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
         }
 
-        wmo->modelis[dd].draw2Select(ofs,rot);
+        wmo->modelis[dd].draw2Select (ofs, rot);
       }
   }
 
@@ -1073,19 +1075,19 @@ void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const
 
 }
 
-void WMOGroup::drawLiquid()
+void WMOGroup::drawLiquid (World* world)
 {
   if (!visible) return;
 
   // draw liquid
   //! \todo  culling for liquid boundingbox or something
   if (lq) {
-    setupFog();
+    setupFog(world);
     if (outdoorLights) {
-      gWorld->outdoorLights(true);
+      world->outdoorLights(true);
     } else {
       //! \todo  setup some kind of indoor lighting... ?
-      gWorld->outdoorLights(false);
+      world->outdoorLights(false);
       glEnable(GL_LIGHT2);
       glLightfv(GL_LIGHT2, GL_AMBIENT, Vec4D(0.1f,0.1f,0.1f,1));
       glLightfv(GL_LIGHT2, GL_DIFFUSE, Vec4D(0.8f,0.8f,0.8f,1));
@@ -1095,15 +1097,15 @@ void WMOGroup::drawLiquid()
     glDisable(GL_ALPHA_TEST);
     glDepthMask(GL_TRUE);
     glColor4f(1,1,1,1);
-    lq->draw();
+    lq->draw (world->animtime);
     glDisable(GL_LIGHT2);
   }
 }
 
-void WMOGroup::setupFog()
+void WMOGroup::setupFog (World* world)
 {
   if (outdoorLights || fog==-1) {
-    gWorld->setupFog();
+    world->setupFog();
   } else {
     wmo->fogs[fog].setup();
   }
@@ -1149,7 +1151,7 @@ void WMOFog::init(MPQFile* f)
 
 void WMOFog::setup()
 {
-  /*if (gWorld->drawfog) {
+  /*if (world->drawfog) {
     glFogfv(GL_FOG_COLOR, color);
     glFogf(GL_FOG_START, fogstart);
     glFogf(GL_FOG_END, fogend);
@@ -1173,13 +1175,13 @@ void WMOManager::report()
   LogDebug << output;
 }
 
-WMO* WMOManager::add( std::string name )
+WMO* WMOManager::add( World* world, std::string name )
 {
   std::transform( name.begin(), name.end(), name.begin(), ::tolower );
 
   if( items.find( name ) == items.end() )
   {
-    items[name] = new WMO( name );
+    items[name] = new WMO( world, name );
     //! \todo Uncomment this, if loading is threaded.
     //items[name]->finishLoading();
     //gAsyncLoader->addObject( items[name] );

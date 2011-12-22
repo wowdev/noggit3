@@ -12,8 +12,9 @@ void textureSwitcherClick( UIFrame* f,int id )
   ( static_cast<UITextureSwitcher *>( f->parent() ) )->setTexture( id );
 }
 
-UITextureSwitcher::UITextureSwitcher( float x, float y, float w, float h )
-: UICloseWindow( x, y, w, h, "Select the texture you want to switch with the one currently selected.", true )
+UITextureSwitcher::UITextureSwitcher( World* world, float x, float y, float w, float h )
+  : UICloseWindow( x, y, w, h, "Select the texture you want to switch with the one currently selected.", true )
+  , _world (world)
 {
   const int textureSize = 110;
   const int startingX = 10;
@@ -57,5 +58,5 @@ void UITextureSwitcher::getTextures( nameEntry* lSelection )
 void UITextureSwitcher::setTexture( size_t id )
 {
   assert( id < 4 );
-  gWorld->overwriteTextureAtCurrentChunk( this->xPos, this->zPos, _textures[id]->getTexture(), UITexturingGUI::getSelectedTexture());
+  _world->overwriteTextureAtCurrentChunk( this->xPos, this->zPos, _textures[id]->getTexture(), UITexturingGUI::getSelectedTexture());
 }

@@ -6,17 +6,21 @@
 #include "UIButton.h"
 #include "UITreeView.h"
 
+class World;
+
 class UIDoodadSpawner : public UICloseWindow
 {
+public:
+  UIDoodadSpawner (World*);
+
+  void AddM2( const std::string& filename );
+
 private:
   UITextBox::Ptr _tbox;
   UIButton::Ptr _button;
   UITreeView::Ptr _treeView;
 
-public:
-  UIDoodadSpawner();
-
-  void AddM2( const std::string& filename );
+  World* _world;
 };
 
 #endif
