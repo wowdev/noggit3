@@ -23,7 +23,6 @@ struct bookmark_entry
 
 // for storing in QVariant
 Q_DECLARE_METATYPE (bookmark_entry);
-Q_DECLARE_METATYPE (Vec3D);
 
 Menu::Menu (QWidget* parent)
   : QWidget (parent)
@@ -65,7 +64,9 @@ Menu::Menu (QWidget* parent)
     settings.setArrayIndex (i);
     bookmark_entry b;
     b.map_id = settings.value ("map_id").toInt();
-    b.position = settings.value ("camera/position").value<Vec3D>();
+    b.position.x = settings.value ("camera/position/x").toFloat();
+    b.position.y = settings.value ("camera/position/y").toFloat();
+    b.position.z = settings.value ("camera/position/z").toFloat();
     b.rotation = settings.value ("camera/rotation").toFloat();
     b.tilt = settings.value ("camera/tilt").toFloat();
 
@@ -101,8 +102,6 @@ Menu::~Menu()
 void Menu::enter_world_at (const Vec3D& pos, bool autoHeight, float av, float ah )
 {
   prepare_world (pos, ah, av, autoHeight);
-
-  _world->initDisplay();
   _world->enterTile (pos.x / TILESIZE, pos.y / TILESIZE);
 
   emit create_world_view_request (_world);
@@ -127,7 +126,9 @@ void Menu::prepare_world (const Vec3D& pos, float rotation, float tilt, bool aut
   _world->autoheight = auto_height;
   _world->camera = Vec3D (pos.x, pos.y, pos.z);
   //! \todo actually set lookat!
-  _world->lookat = Vec3D (pos.x - 1.0f, pos.y - 1.0f, pos.z - 1.0f); // ah = rotation
+  _world->lookat = Vec3D (pos.x + 10.0f, pos.y + 10.0f, pos.z + 10.0f); // ah = rotation
+
+  _world->initDisplay();
 }
 
 void Menu::show_map_list_item (QListWidgetItem* item)
