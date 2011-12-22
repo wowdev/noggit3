@@ -72,7 +72,7 @@ void minimap_widget::paintEvent (QPaintEvent*)
       }
     }
 
-    if (draw_skies())
+    if (draw_skies() && world()->skies)
     {
       foreach (Sky sky, world()->skies->skies)
       {
