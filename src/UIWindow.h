@@ -17,6 +17,7 @@ protected:
   OpenGL::Texture* texture;
   std::string _textureFilename;
 
+
 public:
   UIWindow( float xPos, float yPos, float w, float h );
   UIWindow( float xPos, float yPos, float w, float h, const std::string& pTexture );

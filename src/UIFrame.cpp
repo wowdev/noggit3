@@ -111,3 +111,23 @@ bool UIFrame::KeyBoardEvent( SDL_KeyboardEvent *e )
 {
   return false;
 }
+
+int UIFrame::getX()
+{
+	return this->_x;
+}
+
+int UIFrame::getY()
+{
+	return this->_y;
+}
+
+void UIFrame::setX(int setX)
+{
+	this->_x = setX;
+}
+
+void UIFrame::setY(int setY)
+{
+	this->_y = setY;
+}

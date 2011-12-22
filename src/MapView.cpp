@@ -247,6 +247,7 @@ void change_settings_window(int oldid, int newid)
 
 void openSwapper( UIFrame*, int )
 {
+	mainGui->TextureSwitcher->setPosition(settings_paint->getX() , settings_paint->getY()) ;
 	mainGui->TextureSwitcher->show();
     settings_paint->hide();
 }

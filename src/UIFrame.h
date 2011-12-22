@@ -33,6 +33,13 @@ protected:
 #define evilgetter(var, type) inline type* var ## _evil() { return &_ ## var; }
 
 public:
+
+  int getX();
+  int getY();
+
+  void setX(int setX);
+  void setY(int setY);
+
   getter(width, float)
   setter(width, float)
 
@@ -53,6 +60,8 @@ public:
 
   getter(movable, bool)
   setter(movable, bool)
+
+
 
   getter(hidden, bool)
   setter(hidden, bool)

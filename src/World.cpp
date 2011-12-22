@@ -63,15 +63,18 @@ void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, fl
 
 void renderSphere_convenient(float x, float y, float z, float radius, int subdivisions)
 {
-  //the same quadric can be re-used for drawing many objects
-  glDisable(GL_LIGHTING);
-  glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA );
-  GLUquadricObj *quadric=gluNewQuadric();
-  gluQuadricNormals(quadric, GLU_SMOOTH);
-  renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
-  renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
-  gluDeleteQuadric(quadric);
-  glEnable(GL_LIGHTING);
+	if(Environment::getInstance()->screenX>0 && Environment::getInstance()->screenY>0)
+	{
+	  //the same quadric can be re-used for drawing many objects
+	  glDisable(GL_LIGHTING);
+	  glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA );
+	  GLUquadricObj *quadric=gluNewQuadric();
+	  gluQuadricNormals(quadric, GLU_SMOOTH);
+	  renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
+	  renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
+	  gluDeleteQuadric(quadric);
+	  glEnable(GL_LIGHTING);
+	}
 }
 
 void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
