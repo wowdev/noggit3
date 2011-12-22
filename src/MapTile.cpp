@@ -325,8 +325,8 @@ MapTile::MapTile( World* world, int pX, int pZ, const std::string& pFilename, bo
     theFile.read( mMaximum, sizeof( mMaximum ) );
     theFile.read( mMinimum, sizeof( mMinimum ) );
 
-    static const float xPositions[] = { xbase, xbase + 266.0f, xbase + 533.0f };
-    static const float yPositions[] = { zbase, zbase + 266.0f, zbase + 533.0f };
+    const float xPositions[] = { xbase, xbase + 266.0f, xbase + 533.0f };
+    const float yPositions[] = { zbase, zbase + 266.0f, zbase + 533.0f };
 
     for( int y = 0; y < 3; y++ )
     {
