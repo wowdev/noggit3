@@ -16,6 +16,7 @@ enum eSelectionEntryTypes
 class ModelInstance;
 class WMOInstance;
 class MapChunk;
+class World;
 
 /**
  ** nameEntry
@@ -54,11 +55,8 @@ public:
 
 class nameEntryManager
 {
-private:
-  unsigned int NextName;
-  std::vector<nameEntry*> items;
 public:
-  nameEntryManager();
+  nameEntryManager (World*);
 
   unsigned int add( ModelInstance *mod );
   unsigned int add( WMOInstance *wmo );
@@ -67,6 +65,12 @@ public:
   void del( unsigned int Ref );
 
   nameEntry *findEntry( unsigned int ref ) const;
+
+private:
+  unsigned int NextName;
+  std::vector<nameEntry*> items;
+
+  World* _world;
 };
 
 #endif

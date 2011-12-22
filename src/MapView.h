@@ -11,6 +11,8 @@ class QMenu;
 
 class UIFrame;
 class World;
+class minimap_widget;
+class UIDoodadSpawner;
 
 enum eViewMode
 {
@@ -88,13 +90,19 @@ private slots:
   void toggle_terrain_drawing (bool);
   void toggle_terrain_mode_window();
   void toggle_terrain_texturing_mode();
-  void toggle_test_window();
+  void toggle_doodad_spawner();
   void toggle_tile_mode();
   void toggle_toolbar_visibility (bool);
   void toggle_water_drawing (bool);
   void toggle_wmo_doodad_drawing (bool);
   void toggle_wmo_drawing (bool);
   void turn_around();
+  void clear_heightmap();
+  void move_heightmap();
+  void set_area_id();
+  void clear_all_models();
+  void clear_texture();
+  void show_texture_switcher();
 
   void TEST_save_wdt();
 
@@ -125,8 +133,13 @@ private:
 
   float mTimespeed;
 
+  World* _world;
+
   QPoint _last_drag_position;
   UIFrame* _last_clicked_item;
+
+  minimap_widget* _minimap;
+  UIDoodadSpawner* _doodad_spawner;
 };
 
 

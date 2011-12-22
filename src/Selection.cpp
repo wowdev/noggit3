@@ -7,9 +7,7 @@
 #include "MapChunk.h" // MapChunk
 #include "ModelInstance.h" // ModelInstance
 #include "WMOInstance.h" // WMOInstance
-#include "World.h" // gWorld
-
-nameEntryManager SelectionNames;
+#include "World.h"
 
 /**
  ** nameEntry
@@ -84,19 +82,21 @@ nameEntry *nameEntryManager::findEntry( unsigned int ref ) const
   return items[ref];
 }
 
-nameEntryManager::nameEntryManager()
+nameEntryManager::nameEntryManager (World* world)
+  : _world (world)
 {
   items.push_back( new nameEntry() );
   NextName = 1;
 }
 
-void nameEntryManager::del( unsigned int Ref )
+void nameEntryManager::del (unsigned int Ref)
 {
-  if( items[Ref] )
+  if (items[Ref])
   {
-    if( gWorld->GetCurrentSelection() == items[Ref] )
-      gWorld->ResetSelection();
-    delete( items[Ref] );
+    if (_world->GetCurrentSelection() == items[Ref])
+      _world->ResetSelection();
+
+    delete items[Ref];
     items[Ref] = 0;
   }
 }

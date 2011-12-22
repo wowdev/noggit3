@@ -5,11 +5,12 @@
 
 class nameEntry;
 class UITexture;
+class World;
 
 class UITextureSwitcher : public UICloseWindow
 {
 public:
-  UITextureSwitcher( float x, float y, float w, float h );
+  UITextureSwitcher( World*, float x, float y, float w, float h );
 
   void getTextures( nameEntry* lSelection );
   void setTexture( size_t id );
@@ -17,6 +18,8 @@ public:
 private:
   UITexture* _textures[4];
   float xPos, zPos;
+
+  World* _world;
 };
 
 #endif

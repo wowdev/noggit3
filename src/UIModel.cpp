@@ -42,7 +42,8 @@ void UIModel::render() const
   glEnable(GL_LIGHTING);
 
   model->cam.setup( 0 );
-  model->draw();
+  //! \todo This will crash instantly. This would need passing stuff from inside World into model, not passing world.
+  model->draw (NULL);
 
   video.set2D();
   glEnable(GL_BLEND);

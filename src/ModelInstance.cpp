@@ -2,7 +2,7 @@
 
 #include "Log.h"
 #include "Model.h" // Model, etc.
-#include "World.h" // gWorld
+#include "World.h"
 
 Vec3D TransformCoordsForModel( Vec3D pIn )
 {
@@ -46,15 +46,20 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth )
   glEnd();
 }
 
-ModelInstance::ModelInstance()
+ModelInstance::ModelInstance (World* world)
+  : _world (world)
 {
 }
 
-ModelInstance::ModelInstance(Model *m) : model (m)
+ModelInstance::ModelInstance (World* world, Model *m)
+  : model (m)
+  , _world (world)
 {
 }
 
-ModelInstance::ModelInstance(Model *m, MPQFile* f) : model (m)
+ModelInstance::ModelInstance (World* world, Model *m, MPQFile* f)
+  : model (m)
+  , _world (world)
 {
   float ff[3];
 
@@ -70,7 +75,9 @@ ModelInstance::ModelInstance(Model *m, MPQFile* f) : model (m)
   nameID=0xFFFFFFFF;
 }
 
-ModelInstance::ModelInstance(Model *m, ENTRY_MDDF *d) : model (m)
+ModelInstance::ModelInstance(World* world, Model *m, ENTRY_MDDF *d)
+  : model (m)
+  , _world (world)
 {
   d1 = d->uniqueID;
   pos = Vec3D(d->pos[0],d->pos[1],d->pos[2]);
@@ -84,7 +91,7 @@ void ModelInstance::init2(Model *m, MPQFile* f)
 {
   nameID=0xFFFFFFFF;
   model = m;
-  nameID = SelectionNames.add( this );
+  nameID = _world->selection_names().add( this );
   float ff[3],temp;
   f->read(ff,12);
   pos = Vec3D(ff[0],ff[1],ff[2]);
@@ -99,16 +106,16 @@ void ModelInstance::init2(Model *m, MPQFile* f)
   lcol = Vec3D( ( ( d1 & 0xff0000 ) >> 16 ) / 255.0f, ( ( d1 & 0x00ff00 ) >> 8 ) / 255.0f, ( d1 & 0x0000ff ) / 255.0f);
 }
 
-void ModelInstance::draw()
+void ModelInstance::draw ()
 {
-/*  float dist = ( pos - gWorld->camera ).length() - model->rad;
+/*  float dist = ( pos - _world->camera ).length() - model->rad;
 
-  if( dist > 2.0f * gWorld->modeldrawdistance )
+  if( dist > 2.0f * _world->modeldrawdistance )
     return;
   if( CheckUniques( d1 ) )
     return;*/
 
-  if( !gWorld->frustum.intersectsSphere( pos, model->rad * sc ) )
+  if( !_world->frustum.intersectsSphere( pos, model->rad * sc ) )
     return;
 
   glPushMatrix();
@@ -119,11 +126,11 @@ void ModelInstance::draw()
   glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
   glScalef( sc, sc, sc );
 
-  model->draw();
+  model->draw (_world);
 
-  if( gWorld->IsSelection( eEntry_Model ) && gWorld->GetCurrentSelection()->data.model->d1 == d1 )
+  if( _world->IsSelection( eEntry_Model ) && _world->GetCurrentSelection()->data.model->d1 == d1 )
   {
-    if( gWorld && gWorld->drawfog )
+    if( _world && _world->drawfog )
       glDisable( GL_FOG );
 
     glDisable( GL_LIGHTING );
@@ -164,7 +171,7 @@ void ModelInstance::draw()
 
     glEnable( GL_LIGHTING );
 
-    if( gWorld && gWorld->drawfog )
+    if( _world && _world->drawfog )
       glEnable( GL_FOG );
   }
 
@@ -172,7 +179,7 @@ void ModelInstance::draw()
 }
 
 //! \todo  Get this drawn on the 2D view.
-/*void ModelInstance::drawMapTile()
+/*void ModelInstance::drawMapTile ()
 {
   if(CheckUniques(d1))
     return;
@@ -187,21 +194,21 @@ void ModelInstance::draw()
   glScalef(1/CHUNKSIZE,1/CHUNKSIZE,1/CHUNKSIZE);
   glScalef(sc,sc,sc);
 
-  model->draw();
+  model->draw ();
 
   glPopMatrix();
 }*/
 
-void ModelInstance::drawSelect()
+void ModelInstance::drawSelect ()
 {
-  /*float dist = ( pos - gWorld->camera ).length() - model->rad;
+  /*float dist = ( pos - _world->camera ).length() - model->rad;
 
-  if( dist > 2.0f * gWorld->modeldrawdistance )
+  if( dist > 2.0f * _world->modeldrawdistance )
     return;
   if( CheckUniques( d1 ) )
     return;*/
 
-  if( !gWorld->frustum.intersectsSphere( pos, model->rad * sc ) )
+  if( !_world->frustum.intersectsSphere( pos, model->rad * sc ) )
     return;
 
   glPushMatrix();
@@ -213,7 +220,7 @@ void ModelInstance::drawSelect()
   glScalef( sc, sc, sc );
 
   if( nameID == 0xFFFFFFFF )
-    nameID = SelectionNames.add( this );
+    nameID = _world->selection_names().add( this );
 
   glPushName( nameID );
 
@@ -231,7 +238,7 @@ ModelInstance::~ModelInstance()
   if( nameID != 0xFFFFFFFF )
   {
     //Log << "Destroying Selection " << nameID << "\n";
-    SelectionNames.del( nameID );
+    _world->selection_names().del( nameID );
     nameID = 0xFFFFFFFF;
   }
 }
@@ -244,12 +251,12 @@ void glQuaternionRotate(const Vec3D& vdir, float w)
   glMultMatrixf(m);
 }
 
-void ModelInstance::draw2(const Vec3D& ofs, const float rot)
+void ModelInstance::draw2 (const Vec3D& ofs, const float rot)
 {
   Vec3D tpos(ofs + pos);
   rotate(ofs.x,ofs.z,&tpos.x,&tpos.z,rot*PI/180.0f);
-  //if ( (tpos - gWorld->camera).lengthSquared() > (gWorld->doodaddrawdistance2*model->rad*sc) ) return;
-  if (!gWorld->frustum.intersectsSphere(tpos, model->rad*sc)) return;
+  //if ( (tpos - _world->camera).lengthSquared() > (_world->doodaddrawdistance2*model->rad*sc) ) return;
+  if (!_world->frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
   glPushMatrix();
 
@@ -258,16 +265,16 @@ void ModelInstance::draw2(const Vec3D& ofs, const float rot)
   glQuaternionRotate(vdir,w);
   glScalef(sc,-sc,-sc);
 
-  model->draw();
+  model->draw (_world);
   glPopMatrix();
 }
 
-void ModelInstance::draw2Select(const Vec3D& ofs, const float rot)
+void ModelInstance::draw2Select (const Vec3D& ofs, const float rot)
 {
   Vec3D tpos(ofs + pos);
   rotate(ofs.x,ofs.z,&tpos.x,&tpos.z,rot*PI/180.0f);
-  if ( (tpos - gWorld->camera).lengthSquared() > ((doodaddrawdistance*doodaddrawdistance)*model->rad*sc) ) return;
-  if (!gWorld->frustum.intersectsSphere(tpos, model->rad*sc)) return;
+  if ( (tpos - _world->camera).lengthSquared() > ((doodaddrawdistance*doodaddrawdistance)*model->rad*sc) ) return;
+  if (!_world->frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
   glPushMatrix();
 

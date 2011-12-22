@@ -38,6 +38,7 @@
 #include "UICheckBox.h" // UICheckBox
 #include "UICursorSwitcher.h" // UICursorSwitcher
 #include "UIDetailInfos.h" // detailInfos
+#include <UIDoodadSpawner.h>
 #include "UIGradient.h" // UIGradient
 #include "UIMapViewGUI.h" // UIMapViewGUI
 #include "UIMenuBar.h" // UIMenuBar, menu items, ..
@@ -240,98 +241,18 @@ void MapView::open_help()
   mainGui->showHelp();
 }
 
-void ResetSelectedObjectRotation( UIFrame* /*button*/, int /*id*/ )
-{
-  if( gWorld->IsSelection( eEntry_WMO ) )
-  {
-    gWorld->GetCurrentSelection()->data.wmo->resetDirection();
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
-  }
-  else if( gWorld->IsSelection( eEntry_Model ) )
-  {
-    gWorld->GetCurrentSelection()->data.model->resetDirection();
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
-  }
-}
-
-void SnapSelectedObjectToGround( UIFrame* /*button*/, int /*id*/ )
-{
-  if( gWorld->IsSelection( eEntry_WMO ) )
-  {
-    Vec3D t = Vec3D( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, 0 );
-    gWorld->GetVertex( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, &t );
-    gWorld->GetCurrentSelection()->data.wmo->pos = t;
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
-
-  }
-  else if( gWorld->IsSelection( eEntry_Model ) )
-  {
-    Vec3D t = Vec3D( gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, 0 );
-    gWorld->GetVertex( gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, &t );
-    gWorld->GetCurrentSelection()->data.model->pos = t;
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
-  }
-}
-
-/*!
-  \brief Copy selected model to clipboard
-  Copy the selected m2 or WMO with getInstance()->set_clipboard()
-*/
-void CopySelectedObject( UIFrame* /*button*/, int /*id*/ )
-{
-  if( gWorld->HasSelection() )
-  {
-    Environment::getInstance()->set_clipboard( gWorld->GetCurrentSelection() );
-  }
-}
-
-/*!
-  \brief Paste a model
-  Paste the current model stored in Environment::getInstance()->get_clipboard() at the cords of the selected model or chunk.
-*/
-void PasteSelectedObject( UIFrame* /*button*/, int /*id*/ )
-{
-  if( gWorld->HasSelection() )
-  {
-    nameEntry lClipboard = Environment::getInstance()->get_clipboard();
-    switch( gWorld->GetCurrentSelection()->type )
-     {
-      case eEntry_Model:
-        gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.model->pos );
-        break;
-      case eEntry_WMO:
-        gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.wmo->pos);
-        break;
-      case eEntry_MapChunk:
-        gWorld->addModel( lClipboard, gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition() );
-        break;
-      default: break;
-    }
-  }
-}
-
-/*!
-  \brief Delete the current selected model
-*/
-void DeleteSelectedObject( UIFrame* /*button*/, int /*id*/ )
-{
-  if( gWorld->IsSelection( eEntry_WMO ) )
-    gWorld->deleteWMOInstance( gWorld->GetCurrentSelection()->data.wmo->mUniqueID );
-  else if( gWorld->IsSelection( eEntry_Model ) )
-    gWorld->deleteModelInstance( gWorld->GetCurrentSelection()->data.model->d1 );
-}
-
+//! \todo Make this a member of MapView. Also correctly add the actions below again.
 /*!
   \brief Import a new model form a text file or a hard coded one.
   Imports a model from the import.txt, the wowModelViewer log or just insert some hard coded testing models.
   \param id the id switch the import kind
 */
-void InsertObject( UIFrame* /*button*/, int id )
+/*void InsertObject( UIFrame* button, int id )
 {
   //! \todo Beautify.
 
   // Test if there is an selection
-  if( !gWorld->HasSelection() )
+  if( !_world->HasSelection() )
     return;
   // the list of the models to import
   std::vector<std::string> m2s_to_add;
@@ -429,16 +350,16 @@ void InsertObject( UIFrame* /*button*/, int id )
 
 
   Vec3D selectionPosition;
-  switch( gWorld->GetCurrentSelection()->type )
+  switch( _world->GetCurrentSelection()->type )
   {
     case eEntry_Model:
-      selectionPosition = gWorld->GetCurrentSelection()->data.model->pos;
+      selectionPosition = _world->GetCurrentSelection()->data.model->pos;
       break;
     case eEntry_WMO:
-      selectionPosition = gWorld->GetCurrentSelection()->data.wmo->pos;
+      selectionPosition = _world->GetCurrentSelection()->data.wmo->pos;
       break;
     case eEntry_MapChunk:
-      selectionPosition = gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition();
+      selectionPosition = _world->GetCurrentSelection()->data.mapchunk->GetSelectionPosition();
       break;
   }
 
@@ -450,7 +371,7 @@ void InsertObject( UIFrame* /*button*/, int id )
       if( !MPQFile::exists(lastModel) )
         LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
       else
-        gWorld->addM2( ModelManager::add( lastModel ), selectionPosition );
+        _world->addM2( ModelManager::add( lastModel ), selectionPosition );
   }
   else if(id==15)
   {
@@ -459,7 +380,7 @@ void InsertObject( UIFrame* /*button*/, int id )
       if( !MPQFile::exists(lastWMO) )
         LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
       else
-        gWorld->addWMO( WMOManager::add( lastWMO ), selectionPosition );
+        _world->addWMO( WMOManager::add( lastWMO ), selectionPosition );
   }
   else
   {
@@ -473,7 +394,7 @@ void InsertObject( UIFrame* /*button*/, int id )
         continue;
       }
 
-      gWorld->addWMO( WMOManager::add( *it ), selectionPosition );
+      _world->addWMO( WMOManager::add( *it ), selectionPosition );
     }
 
     for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
@@ -486,11 +407,12 @@ void InsertObject( UIFrame* /*button*/, int id )
         continue;
       }
 
-      gWorld->addM2( ModelManager::add( *it ), selectionPosition );
+      _world->addM2( ModelManager::add( *it ), selectionPosition );
     }
   }
   //! \todo Memoryleak: These models will never get deleted.
 }
+*/
 
 void view_texture_palette( UIFrame* /*button*/, int /*id*/ )
 {
@@ -499,35 +421,34 @@ void view_texture_palette( UIFrame* /*button*/, int /*id*/ )
 
 void MapView::TEST_save_wdt()
 {
-  gWorld->saveWDT();
+  _world->saveWDT();
 }
 
-void moveHeightmap(  UIFrame* /*button*/, int /*id*/ )
+void MapView::move_heightmap()
 {
   // set areaid on all chunks of the current ADT
   if(Environment::getInstance()->selectedAreaID)
-    gWorld->moveHeight(Environment::getInstance()->selectedAreaID ,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+    _world->moveHeight(Environment::getInstance()->selectedAreaID ,misc::FtoIround((_world->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((_world->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
-void clearHeightmap(  UIFrame* /*button*/, int /*id*/ )
+void MapView::clear_heightmap()
 {
   // set areaid on all chunks of the current ADT
   if(Environment::getInstance()->selectedAreaID)
-    gWorld->clearHeight(Environment::getInstance()->selectedAreaID ,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
-
+    _world->clearHeight(Environment::getInstance()->selectedAreaID ,misc::FtoIround((_world->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((_world->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
-void adtSetAreaID( UIFrame* /*button*/, int /*id*/ )
+void MapView::set_area_id()
 {
   // set areaid on all chunks of the current ADT
   if(Environment::getInstance()->selectedAreaID)
-    gWorld->setAreaID(Environment::getInstance()->selectedAreaID ,misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+    _world->setAreaID(Environment::getInstance()->selectedAreaID ,misc::FtoIround((_world->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((_world->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
-void clearAllModels( UIFrame* /*button*/, int /*id*/ )
+void MapView::clear_all_models()
 {
   // call the clearAllModelsOnADT method to clear them all on current ADT
-    gWorld->clearAllModelsOnADT(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+    _world->clearAllModelsOnADT(misc::FtoIround((_world->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((_world->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
 void changeZoneIDValue(UIFrame* /*f*/,int set)
@@ -540,34 +461,15 @@ void changeZoneIDValue(UIFrame* /*f*/,int set)
   }
 }
 
-std::string getCurrentHeightmapPath()
-{
-  // get MapName
-  std::string mapName;
-  int id = gWorld->getMapID();
-  for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
-  {
-    if( i->getInt( MapDB::MapID ) == id)
-      mapName = i->getString( MapDB::InternalName );
-  }
-
-  // build the path and filename string.
-  std::stringstream png_filename;
-  png_filename << Project::getInstance()->getPath() << "world\\maps\\" << mapName << "\\H_" << mapName
-    << "_" << misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE) << "_" << misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE) << ".png" ;
-  return png_filename.str();
-
-}
-
-void clearTexture(UIFrame* /*f*/,int /*set*/)
+void MapView::clear_texture()
 {
   // set areaid on all chunks of the current ADT
-  gWorld->setBaseTexture(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+  _world->setBaseTexture(misc::FtoIround((_world->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((_world->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
-void showTextureSwitcher(UIFrame* /*f*/, int /*set*/)
+void MapView::show_texture_switcher()
 {
-  mainGui->TextureSwitcher->getTextures(gWorld->GetCurrentSelection());
+  mainGui->TextureSwitcher->getTextures(_world->GetCurrentSelection());
   //mainGui->TextureSwitcher->show();
 }
 
@@ -577,6 +479,27 @@ void MapView::show_cursor_switcher()
 }
 
 #ifdef __FILESAREMISSING
+
+//! \todo make this a member of MapView.
+std::string getCurrentHeightmapPath()
+{
+  // get MapName
+  std::string mapName;
+  int id = _world->getMapID();
+  for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
+  {
+    if( i->getInt( MapDB::MapID ) == id)
+      mapName = i->getString( MapDB::InternalName );
+  }
+
+  // build the path and filename string.
+  std::stringstream png_filename;
+  png_filename << Project::getInstance()->getPath() << "world\\maps\\" << mapName << "\\H_" << mapName
+    << "_" << misc::FtoIround((_world->camera.x-(TILESIZE/2))/TILESIZE) << "_" << misc::FtoIround((_world->camera.z-(TILESIZE/2))/TILESIZE) << ".png" ;
+  return png_filename.str();
+
+}
+
 void MapView::export_heightmap()
 {
 
@@ -651,11 +574,16 @@ void MapView::export_heightmap() { }
 void MapView::createGUI()
 {
   // create main gui object that holds all other gui elements for access ( in the future ;) )
-  mainGui = new UIMapViewGUI( this );
+  mainGui = new UIMapViewGUI (_world, this);
   mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
 
-  mainGui->ZoneIDBrowser->setMapID( gWorld->getMapID() );
+  mainGui->ZoneIDBrowser->setMapID( _world->getMapID() );
   mainGui->ZoneIDBrowser->setChangeFunc( changeZoneIDValue );
+
+  _doodad_spawner = new UIDoodadSpawner (_world);
+  _doodad_spawner->hide();
+  mainGui->addChild (_doodad_spawner);
+
   tool_settings_x = video.xres() - 186;
   tool_settings_y = 38;
 
@@ -825,7 +753,7 @@ void MapView::createGUI()
 
   NEW_ACTION (save_wdt, tr ("Save WDT"), SLOT (TEST_save_wdt()), 0);
   NEW_ACTION (save_minimap, tr ("Save minimap as raw files"), SLOT (save_minimap()), Qt::Key_P + Qt::SHIFT + Qt::CTRL);
-  NEW_ACTION (toggle_test_window, tr ("toggle_test_window"), SLOT (toggle_test_window()), Qt::Key_T);
+  NEW_ACTION (toggle_doodad_spawner, tr ("toggle_doodad_spawner"), SLOT (toggle_doodad_spawner()), Qt::Key_T);
 
 #undef NEW_ACTION
 #undef NEW_TOGGLE_ACTION
@@ -873,12 +801,12 @@ void MapView::createGUI()
   insertion_menu->addAction (tr ("Sphere 200", InsertObject, 12  );
   insertion_menu->addAction (tr ("Sphere 777", InsertObject, 13  );
   assist_menu->addSeparator();
-  assist_menu->addAction (tr ("Set Area ID", adtSetAreaID, 0  );
-  assist_menu->addAction (tr ("Clear height map", clearHeightmap, 0  );
-  assist_menu->addAction (tr ("Move to position", moveHeightmap, 0  );
-  assist_menu->addAction (tr ("Clear texture", clearTexture, 0  );
-  assist_menu->addAction (tr ("Clear models", clearAllModels, 0  );
-  assist_menu->addAction (tr ("Switch texture", showTextureSwitcher, 0  );
+  assist_menu->addAction (tr ("Set Area ID", set_area_id, 0  );
+  assist_menu->addAction (tr ("Clear height map", clear_heightmap, 0  );
+  assist_menu->addAction (tr ("Move to position", move_heightmap, 0  );
+  assist_menu->addAction (tr ("Clear texture", clear_texture, 0  );
+  assist_menu->addAction (tr ("Clear models", clear_all_models, 0  );
+  assist_menu->addAction (tr ("Switch texture", show_texture_switcher, 0  );
 */
   QMenu* view_menu (menu_bar->addMenu (tr ("View")));
   view_menu->addAction (toolbar);
@@ -920,11 +848,19 @@ void MapView::createGUI()
 
   QMenu* debug_menu (menu_bar->addMenu (tr ("Testing and Debugging")));
   debug_menu->addAction (save_wdt);
-  debug_menu->addAction (toggle_test_window);
+  debug_menu->addAction (toggle_doodad_spawner);
   debug_menu->addAction (save_minimap);
 
   QMenu* useless_menu (debug_menu->addMenu (tr ("Stuff that should only be on keys")));
   useless_menu->addAction (turn_around);
+
+  // Minimap window
+  _minimap = new minimap_widget (NULL);
+  _minimap->world (_world);
+  _minimap->draw_skies (true);
+  _minimap->draw_camera (true);
+  _minimap->draw_boundaries (true);
+  _minimap->hide();
 }
 
 QAction* MapView::new_action (const QString& text, const char* slot, const QKeySequence& shortcut)
@@ -990,12 +926,10 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _last_update (0.0)
   , ah( ah0 )
   , av( av0 )
+  , _world (world)
   , _GUIDisplayingEnabled( true )
   , mTimespeed( 0.0f )
 {
-  //! \todo Only have this internally, not global!
-  gWorld = world;
-
   LastClicked=0;
 
   moving = strafing = updown = 0.0f;
@@ -1064,8 +998,8 @@ MapView::~MapView()
   delete mainGui;
   mainGui = NULL;
 
-  delete gWorld;
-  gWorld = NULL;
+  delete _world;
+  _world = NULL;
 }
 
 void MapView::tick( float t, float dt )
@@ -1099,7 +1033,7 @@ void MapView::tick( float t, float dt )
     rotate( 0.0f, 0.0f, &dirRight.x, &dirRight.z, ah * PI / 180.0f );
   }
 
-  nameEntry * Selection = gWorld->GetCurrentSelection();
+  nameEntry * Selection = _world->GetCurrentSelection();
 
   if( Selection )
   {
@@ -1114,31 +1048,31 @@ void MapView::tick( float t, float dt )
       // Move scale and rotate with numpad keys
       if( Selection->type == eEntry_WMO )
       {
-        gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
+        _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
         Selection->data.wmo->pos.x += keyx * moveratio;
         Selection->data.wmo->pos.y += keyy * moveratio;
         Selection->data.wmo->pos.z += keyz * moveratio;
         Selection->data.wmo->dir.y += keyr * moveratio * 2;
-        gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
+        _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
       }
 
       if( Selection->type == eEntry_Model )
       {
-        gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+        _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
         Selection->data.model->pos.x += keyx * moveratio;
         Selection->data.model->pos.y += keyy * moveratio;
         Selection->data.model->pos.z += keyz * moveratio;
         Selection->data.model->dir.y += keyr * moveratio * 2;
         Selection->data.model->sc += keys * moveratio / 50;
-        gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+        _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
       }
     }
 
     Vec3D ObjPos;
-    if( gWorld->IsSelection( eEntry_Model ) )
+    if( _world->IsSelection( eEntry_Model ) )
     {
       //! \todo  Tell me what this is.
-      ObjPos = Selection->data.model->pos - gWorld->camera;
+      ObjPos = Selection->data.model->pos - _world->camera;
       rotate( 0.0f, 0.0f, &ObjPos.x, &ObjPos.y, av * PI / 180.0f );
       rotate( 0.0f, 0.0f, &ObjPos.x, &ObjPos.z, ah * PI / 180.0f );
       ObjPos.x = abs( ObjPos.x );
@@ -1149,18 +1083,18 @@ void MapView::tick( float t, float dt )
     if( MoveObj )
       if( Selection->type == eEntry_WMO )
       {
-         gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // before move
+         _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // before move
          ObjPos.x = 80.0f;
          Selection->data.wmo->pos+=mv * dirUp * ObjPos.x;
          Selection->data.wmo->pos-=mh * dirRight * ObjPos.x;
          Selection->data.wmo->extents[0] = Selection->data.wmo->pos - Vec3D(1,1,1);
          Selection->data.wmo->extents[1] = Selection->data.wmo->pos + Vec3D(1,1,1);
-         gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // after move. If moved to another ADT
+         _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // after move. If moved to another ADT
       }
       else if( Selection->type == eEntry_Model )
         if( Environment::getInstance()->AltDown )
         {
-          gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+          _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
           float ScaleAmount;
           ScaleAmount = pow( 2.0f, mv * 4.0f );
           Selection->data.model->sc *= ScaleAmount;
@@ -1171,11 +1105,11 @@ void MapView::tick( float t, float dt )
         }
         else
         {
-          gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // before move
+          _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // before move
           ObjPos.x = 80.0f;
           Selection->data.model->pos += mv * dirUp * ObjPos.x;
           Selection->data.model->pos -= mh * dirRight * ObjPos.x;
-          gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // after move. If moved to another ADT
+          _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // after move. If moved to another ADT
         }
 
 
@@ -1187,7 +1121,7 @@ void MapView::tick( float t, float dt )
 
       if( Selection->type == eEntry_Model )
       {
-        gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+        _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
         lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
         if( Environment::getInstance()->ShiftDown )
           lTarget = &Selection->data.model->dir.y;
@@ -1198,7 +1132,7 @@ void MapView::tick( float t, float dt )
       }
       else if( Selection->type == eEntry_WMO )
       {
-        gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
+        _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
         lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
         if( Environment::getInstance()->ShiftDown )
           lTarget = &Selection->data.wmo->dir.y;
@@ -1241,21 +1175,21 @@ void MapView::tick( float t, float dt )
         if( Environment::getInstance()->ShiftDown )
         {
           // Move ground up
-          if( mViewMode == eViewMode_3D ) gWorld->changeTerrain( xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+          if( mViewMode == eViewMode_3D ) _world->changeTerrain( xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
         }
         else if( Environment::getInstance()->CtrlDown )
         {
           // Move ground down
-          if( mViewMode == eViewMode_3D ) gWorld->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+          if( mViewMode == eViewMode_3D ) _world->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
         }
       break;
 
       case 1:
         if( Environment::getInstance()->ShiftDown )
-          if( mViewMode == eViewMode_3D ) gWorld->flattenTerrain( xPos, zPos, yPos, pow( 0.2f, dt ), blurBrushRadius, blurBrushType );
+          if( mViewMode == eViewMode_3D ) _world->flattenTerrain( xPos, zPos, yPos, pow( 0.2f, dt ), blurBrushRadius, blurBrushType );
         if( Environment::getInstance()->CtrlDown )
         {
-          if( mViewMode == eViewMode_3D ) gWorld->blurTerrain( xPos, zPos, pow( 0.2f, dt ), std::min( blurBrushRadius, 30.0f ), blurBrushType );
+          if( mViewMode == eViewMode_3D ) _world->blurTerrain( xPos, zPos, pow( 0.2f, dt ), std::min( blurBrushRadius, 30.0f ), blurBrushType );
         }
       break;
 
@@ -1264,14 +1198,14 @@ void MapView::tick( float t, float dt )
         {
           // clear chunk texture
           if( mViewMode == eViewMode_3D )
-            gWorld->eraseTextures(xPos, zPos);
+            _world->eraseTextures(xPos, zPos);
           else if( mViewMode == eViewMode_2D )
-            gWorld->eraseTextures( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+            _world->eraseTextures( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
         }
         else if( Environment::getInstance()->CtrlDown )
         {
           // Pick texture
-          mainGui->TexturePicker->getTextures( gWorld->GetCurrentSelection());
+          mainGui->TexturePicker->getTextures( _world->GetCurrentSelection());
         }
         else  if( Environment::getInstance()->ShiftDown)
         {
@@ -1283,7 +1217,7 @@ void MapView::tick( float t, float dt )
               textureBrush.GenerateTexture();
             }
             if( mViewMode == eViewMode_3D )
-              gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
+              _world->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
           }
         }
         else
@@ -1294,7 +1228,7 @@ void MapView::tick( float t, float dt )
             textureBrush.GenerateTexture();
           }
           if( mViewMode == eViewMode_2D && !(Environment::getInstance()->ShiftDown) )
-            gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
+            _world->paintTexture( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
         }
       break;
 
@@ -1304,13 +1238,13 @@ void MapView::tick( float t, float dt )
       // if there is no terain the projection mothod dont work. So get the cords by selection.
     Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
     yPos = Selection->data.mapchunk->getSelectionHeight();
-          if( mViewMode == eViewMode_3D )      gWorld->removeHole( xPos, zPos );
-          //else if( mViewMode == eViewMode_2D )  gWorld->removeHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+          if( mViewMode == eViewMode_3D )      _world->removeHole( xPos, zPos );
+          //else if( mViewMode == eViewMode_2D )  _world->removeHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
         }
         else if( Environment::getInstance()->CtrlDown )
         {
-          if( mViewMode == eViewMode_3D )      gWorld->addHole( xPos, zPos );
-          //else if( mViewMode == eViewMode_2D )  gWorld->addHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+          if( mViewMode == eViewMode_3D )      _world->addHole( xPos, zPos );
+          //else if( mViewMode == eViewMode_2D )  _world->addHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
         }
       break;
 
@@ -1320,13 +1254,13 @@ void MapView::tick( float t, float dt )
           if( mViewMode == eViewMode_3D )
           {
           // draw the selected AreaId on current selected chunk
-          nameEntry * lSelection = gWorld->GetCurrentSelection();
+          nameEntry * lSelection = _world->GetCurrentSelection();
           int mtx,mtz,mcx,mcy;
           mtx = lSelection->data.mapchunk->mt->mPositionX;
           mtz = lSelection->data.mapchunk->mt->mPositionZ ;
           mcx = lSelection->data.mapchunk->px;
           mcy = lSelection->data.mapchunk->py;
-          gWorld->setAreaID( Environment::getInstance()->selectedAreaID, mtx,mtz, mcx, mcy );
+          _world->setAreaID( Environment::getInstance()->selectedAreaID, mtx,mtz, mcx, mcy );
           }
         }
         else if( Environment::getInstance()->CtrlDown )
@@ -1334,7 +1268,7 @@ void MapView::tick( float t, float dt )
           if( mViewMode == eViewMode_3D )
           {
           // pick areaID from chunk
-          int newID = gWorld->GetCurrentSelection()->data.mapchunk->areaID;
+          int newID = _world->GetCurrentSelection()->data.mapchunk->areaID;
           Environment::getInstance()->selectedAreaID = newID;
           mainGui->ZoneIDBrowser->setZoneID(newID);
           }
@@ -1345,11 +1279,11 @@ void MapView::tick( float t, float dt )
       case 5:
         if( Environment::getInstance()->ShiftDown  )
         {
-          if( mViewMode == eViewMode_3D ) gWorld->setFlag( true, xPos, zPos );
+          if( mViewMode == eViewMode_3D ) _world->setFlag( true, xPos, zPos );
         }
         else if( Environment::getInstance()->CtrlDown )
         {
-          if( mViewMode == eViewMode_3D ) gWorld->setFlag( false, xPos, zPos );
+          if( mViewMode == eViewMode_3D ) _world->setFlag( false, xPos, zPos );
         }
       break;
       }
@@ -1359,28 +1293,28 @@ void MapView::tick( float t, float dt )
   if( mViewMode != eViewMode_2D )
   {
     if( moving )
-      gWorld->camera += dir * dt * movespd * moving;
+      _world->camera += dir * dt * movespd * moving;
     if( strafing )
     {
       Vec3D right = dir % Vec3D( 0.0f, 1.0f ,0.0f );
       right.normalize();
-      gWorld->camera += right * dt * movespd * strafing;
+      _world->camera += right * dt * movespd * strafing;
     }
     if( updown )
-      gWorld->camera += Vec3D( 0.0f, dt * movespd * updown, 0.0f );
+      _world->camera += Vec3D( 0.0f, dt * movespd * updown, 0.0f );
 
-    gWorld->lookat = gWorld->camera + dir;
+    _world->lookat = _world->camera + dir;
   }
   else
   {
     if( moving )
-      gWorld->camera.z -= dt * movespd * moving / ( gWorld->zoom * 1.5f );
+      _world->camera.z -= dt * movespd * moving / ( _world->zoom * 1.5f );
     if( strafing )
-      gWorld->camera.x += dt * movespd * strafing / ( gWorld->zoom * 1.5f );
+      _world->camera.x += dt * movespd * strafing / ( _world->zoom * 1.5f );
     if( updown )
-      gWorld->zoom *= pow( 2.0f, dt * updown * 4.0f );
+      _world->zoom *= pow( 2.0f, dt * updown * 4.0f );
 
-    gWorld->zoom = std::min( std::max( gWorld->zoom, 0.1f ), 2.0f );
+    _world->zoom = std::min( std::max( _world->zoom, 0.1f ), 2.0f );
   }
 
 
@@ -1389,21 +1323,21 @@ void MapView::tick( float t, float dt )
     textureBrush.GenerateTexture();
   }
 
-  gWorld->time += this->mTimespeed * dt;
-  gWorld->animtime += dt * 1000.0f;
-  globalTime = static_cast<int>( gWorld->animtime );
+  _world->time += this->mTimespeed * dt;
+  _world->animtime += dt * 1000.0f;
+  globalTime = static_cast<int>( _world->animtime );
 
-  gWorld->tick(dt);
+  _world->tick(dt);
 
-  if( !MapChunkWindow->hidden() && gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk )
+  if( !MapChunkWindow->hidden() && _world->GetCurrentSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk )
   {
-    UITexturingGUI::setChunkWindow( gWorld->GetCurrentSelection()->data.mapchunk );
+    UITexturingGUI::setChunkWindow( _world->GetCurrentSelection()->data.mapchunk );
   }
 }
 
 void MapView::doSelection( bool selectTerrainOnly )
 {
-  gWorld->drawSelection( MouseX, MouseY, selectTerrainOnly );
+  _world->drawSelection( MouseX, MouseY, selectTerrainOnly );
 }
 
 
@@ -1433,21 +1367,21 @@ void MapView::displayGUIIfEnabled()
   }
 
   //! \todo This should only be done when actually needed. (on movement and camera changes as well as modifying an adt)
-  mainGui->minimapWindow->update();
+  _minimap->update();
 }
 
 void MapView::displayViewMode_2D()
 {
   video.setTileMode();
-  gWorld->drawTileMode( ah );
+  _world->drawTileMode( ah );
 
-  const float mX = ( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom + gWorld->camera.x ) / CHUNKSIZE;
-  const float mY = ( CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f ) / gWorld->zoom + gWorld->camera.z ) / CHUNKSIZE;
+  const float mX = ( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom + _world->camera.x ) / CHUNKSIZE;
+  const float mY = ( CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f ) / _world->zoom + _world->camera.z ) / CHUNKSIZE;
 
   // draw brush
   glPushMatrix();
-    glScalef(gWorld->zoom,gWorld->zoom,1.0f);
-    glTranslatef(-gWorld->camera.x/CHUNKSIZE,-gWorld->camera.z/CHUNKSIZE,0);
+    glScalef(_world->zoom,_world->zoom,1.0f);
+    glTranslatef(-_world->camera.x/CHUNKSIZE,-_world->camera.z/CHUNKSIZE,0);
 
     glColor4f(1.0f,1.0f,1.0f,0.5f);
     glActiveTexture(GL_TEXTURE1);
@@ -1457,7 +1391,7 @@ void MapView::displayViewMode_2D()
 
     textureBrush.getTexture()->bind();
 
-    const float tRadius = textureBrush.getRadius()/CHUNKSIZE;// *gWorld->zoom;
+    const float tRadius = textureBrush.getRadius()/CHUNKSIZE;// *_world->zoom;
     glBegin(GL_QUADS);
       glTexCoord2f(0.0f,0.0f);
       glVertex3f(mX-tRadius,mY+tRadius,0);
@@ -1476,14 +1410,14 @@ void MapView::displayViewMode_2D()
 void MapView::displayViewMode_3D()
 {
   //! \note Select terrain below mouse, if no item selected or the item is map.
-  if( !gWorld->IsSelection( eEntry_Model ) && !gWorld->IsSelection( eEntry_WMO ) && Settings::getInstance()->AutoSelectingMode )
+  if( !_world->IsSelection( eEntry_Model ) && !_world->IsSelection( eEntry_WMO ) && Settings::getInstance()->AutoSelectingMode )
   {
     doSelection( true );
   }
 
   video.set3D();
 
-  gWorld->draw();
+  _world->draw();
 
   displayGUIIfEnabled();
 }
@@ -1494,7 +1428,7 @@ void MapView::display()
   if( Saving )
   {
     video.setTileMode();
-    gWorld->saveMap();
+    _world->saveMap();
     Saving=false;
   }
 
@@ -1611,8 +1545,8 @@ void MapView::keyPressEvent (QKeyEvent* event)
     {
       increase_brush_size();
     }
-    else if( event->modifiers() & Qt::ShiftModifier && ( !gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
-      gWorld->fogdistance += 60.0f;// fog change only when no model is selected!
+    else if( event->modifiers() & Qt::ShiftModifier && ( !_world->HasSelection() || ( _world->HasSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk) )  )
+      _world->fogdistance += 60.0f;// fog change only when no model is selected!
     else
     {
       //change selected model size
@@ -1624,8 +1558,8 @@ void MapView::keyPressEvent (QKeyEvent* event)
     {
       decrease_brush_size();
     }
-    else if( event->modifiers() & Qt::ShiftModifier && ( !gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
-      gWorld->fogdistance -= 60.0f; // fog change only when no model is selected!
+    else if( event->modifiers() & Qt::ShiftModifier && ( !_world->HasSelection() || ( _world->HasSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk) )  )
+      _world->fogdistance -= 60.0f; // fog change only when no model is selected!
     else
     {
       //change selected model sizesize
@@ -1635,9 +1569,9 @@ void MapView::keyPressEvent (QKeyEvent* event)
   // doodads set
   if( event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9 )
   {
-    if( gWorld->IsSelection( eEntry_WMO ) )
+    if( _world->IsSelection( eEntry_WMO ) )
     {
-      gWorld->GetCurrentSelection()->data.wmo->doodadset = event->key() - Qt::Key_0;
+      _world->GetCurrentSelection()->data.wmo->doodadset = event->key() - Qt::Key_0;
     }
     else if (event->modifiers() & Qt::ShiftModifier)
     {
@@ -1691,19 +1625,52 @@ void MapView::invert_mouse_y_axis (bool value)
   mousedir = value ? 1.0f : -1.0f;
 }
 
+/*!
+  \brief Delete the current selected model
+*/
 void MapView::delete_selected_object()
 {
-  DeleteSelectedObject( 0, 0 );
+  if( _world->IsSelection( eEntry_WMO ) )
+    _world->deleteWMOInstance( _world->GetCurrentSelection()->data.wmo->mUniqueID );
+  else if( _world->IsSelection( eEntry_Model ) )
+    _world->deleteModelInstance( _world->GetCurrentSelection()->data.model->d1 );
 }
 
+/*!
+  \brief Paste a model
+  Paste the current model stored in Environment::getInstance()->get_clipboard() at the cords of the selected model or chunk.
+*/
 void MapView::paste_object()
 {
-  PasteSelectedObject( 0, 0 );
+  if( _world->HasSelection() )
+  {
+    nameEntry lClipboard = Environment::getInstance()->get_clipboard();
+    switch( _world->GetCurrentSelection()->type )
+     {
+      case eEntry_Model:
+        _world->addModel( lClipboard, _world->GetCurrentSelection()->data.model->pos );
+        break;
+      case eEntry_WMO:
+        _world->addModel( lClipboard, _world->GetCurrentSelection()->data.wmo->pos);
+        break;
+      case eEntry_MapChunk:
+        _world->addModel( lClipboard, _world->GetCurrentSelection()->data.mapchunk->GetSelectionPosition() );
+        break;
+      default: break;
+    }
+  }
 }
 
+/*!
+  \brief Copy selected model to clipboard
+  Copy the selected m2 or WMO with getInstance()->set_clipboard()
+*/
 void MapView::copy_selected_object()
 {
-  CopySelectedObject( 0, 0 );
+  if( _world->HasSelection() )
+  {
+    Environment::getInstance()->set_clipboard( _world->GetCurrentSelection() );
+  }
 }
 
 void MapView::increase_moving_speed()
@@ -1729,22 +1696,45 @@ void MapView::turn_around()
 
 void MapView::reset_selected_object_rotation()
 {
-  ResetSelectedObjectRotation( 0, 0 );
+  if( _world->IsSelection( eEntry_WMO ) )
+  {
+    _world->GetCurrentSelection()->data.wmo->resetDirection();
+    _world->setChanged(_world->GetCurrentSelection()->data.wmo->pos.x, _world->GetCurrentSelection()->data.wmo->pos.z);
+  }
+  else if( _world->IsSelection( eEntry_Model ) )
+  {
+    _world->GetCurrentSelection()->data.model->resetDirection();
+    _world->setChanged(_world->GetCurrentSelection()->data.model->pos.x, _world->GetCurrentSelection()->data.model->pos.z);
+  }
 }
 
 void MapView::snap_selected_object_to_ground()
 {
-  SnapSelectedObjectToGround( 0, 0 );
+  if( _world->IsSelection( eEntry_WMO ) )
+  {
+    Vec3D t = Vec3D( _world->GetCurrentSelection()->data.wmo->pos.x, _world->GetCurrentSelection()->data.wmo->pos.z, 0 );
+    _world->GetVertex( _world->GetCurrentSelection()->data.wmo->pos.x, _world->GetCurrentSelection()->data.wmo->pos.z, &t );
+    _world->GetCurrentSelection()->data.wmo->pos = t;
+    _world->setChanged(_world->GetCurrentSelection()->data.wmo->pos.x, _world->GetCurrentSelection()->data.wmo->pos.z);
+
+  }
+  else if( _world->IsSelection( eEntry_Model ) )
+  {
+    Vec3D t = Vec3D( _world->GetCurrentSelection()->data.model->pos.x, _world->GetCurrentSelection()->data.model->pos.z, 0 );
+    _world->GetVertex( _world->GetCurrentSelection()->data.model->pos.x, _world->GetCurrentSelection()->data.model->pos.z, &t );
+    _world->GetCurrentSelection()->data.model->pos = t;
+    _world->setChanged(_world->GetCurrentSelection()->data.model->pos.x, _world->GetCurrentSelection()->data.model->pos.z);
+  }
 }
 
-void MapView::toggle_test_window()
+void MapView::toggle_doodad_spawner()
 {
-  mainGui->toggleTest();
+  _doodad_spawner->hidden (!_doodad_spawner->hidden());
 }
 
 void MapView::toggle_lighting (bool value)
 {
-  gWorld->lighting = value;
+  _world->lighting = value;
 }
 
 void MapView::toggle_interface()
@@ -1765,35 +1755,35 @@ void MapView::toggle_terrain_texturing_mode()
 {
   if( alloff )
   {
-    alloff_models = gWorld->drawmodels;
-    alloff_doodads = gWorld->drawdoodads;
+    alloff_models = _world->drawmodels;
+    alloff_doodads = _world->drawdoodads;
     alloff_contour = DrawMapContour;
-    alloff_wmo = gWorld->drawwmo;
-    alloff_fog = gWorld->drawfog;
-    alloff_terrain = gWorld->drawterrain;
+    alloff_wmo = _world->drawwmo;
+    alloff_fog = _world->drawfog;
+    alloff_terrain = _world->drawterrain;
 
-    gWorld->drawmodels = false;
-    gWorld->drawdoodads = false;
+    _world->drawmodels = false;
+    _world->drawdoodads = false;
     DrawMapContour = true;
-    gWorld->drawwmo = false;
-    gWorld->drawterrain = true;
-    gWorld->drawfog = false;
+    _world->drawwmo = false;
+    _world->drawterrain = true;
+    _world->drawfog = false;
   }
   else
   {
-    gWorld->drawmodels = alloff_models;
-    gWorld->drawdoodads = alloff_doodads;
+    _world->drawmodels = alloff_models;
+    _world->drawdoodads = alloff_doodads;
     DrawMapContour = alloff_contour;
-    gWorld->drawwmo = alloff_wmo;
-    gWorld->drawterrain = alloff_terrain;
-    gWorld->drawfog = alloff_fog;
+    _world->drawwmo = alloff_wmo;
+    _world->drawterrain = alloff_terrain;
+    _world->drawfog = alloff_fog;
   }
   alloff = !alloff;
 }
 
 void MapView::toggle_doodad_drawing (bool value)
 {
-  gWorld->drawmodels = value;
+  _world->drawmodels = value;
 }
 
 void MapView::toggle_auto_selecting (bool value)
@@ -1803,17 +1793,17 @@ void MapView::toggle_auto_selecting (bool value)
 
 void MapView::toggle_water_drawing (bool value)
 {
-  gWorld->drawwater = value;
+  _world->drawwater = value;
 }
 
 void MapView::toggle_terrain_drawing (bool value)
 {
-  gWorld->drawterrain = value;
+  _world->drawterrain = value;
 }
 
 void MapView::toggle_wmo_doodad_drawing (bool value)
 {
-  gWorld->drawdoodads = value;
+  _world->drawdoodads = value;
 }
 
 //! \todo these should be symetrical, so maybe combine.
@@ -1862,32 +1852,32 @@ void MapView::toggle_hole_line_drawing (bool value)
 
 void MapView::toggle_line_drawing (bool value)
 {
-  gWorld->drawlines = value;
+  _world->drawlines = value;
 }
 
 void MapView::toggle_wmo_drawing (bool value)
 {
-  gWorld->drawwmo = value;
+  _world->drawwmo = value;
 }
 
 void MapView::toggle_minimap (bool value)
 {
-  mainGui->minimapWindow->setVisible (value);
+  _minimap->setVisible (value);
 }
 
 void MapView::save_all()
 {
-  gWorld->saveChanged();
+  _world->saveChanged();
 }
 
 void MapView::save()
 {
-  gWorld->saveTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
+  _world->saveTile( static_cast<int>( _world->camera.x ) / TILESIZE, static_cast<int>( _world->camera.z ) / TILESIZE );
 }
 
 void MapView::reload_current_tile()
 {
-  gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
+  _world->reloadTile( static_cast<int>( _world->camera.x ) / TILESIZE, static_cast<int>( _world->camera.z ) / TILESIZE );
 }
 
 void MapView::exit_to_menu()
@@ -1921,7 +1911,7 @@ void MapView::toggle_contour_drawing (bool value)
 
 void MapView::toggle_fog_drawing (bool value)
 {
-  gWorld->drawfog = value;
+  _world->drawfog = value;
 }
 
 void MapView::toggle_tile_mode()
@@ -1977,9 +1967,9 @@ void MapView::add_bookmark()
   settings.endArray();
 
   BookmarkEntry new_bookmark;
-  new_bookmark.map_id = gWorld->getMapID();
-  new_bookmark.area_id = gWorld->getAreaID();
-  new_bookmark.position = Vec3D (gWorld->camera.x, gWorld->camera.y, gWorld->camera.z);
+  new_bookmark.map_id = _world->getMapID();
+  new_bookmark.area_id = _world->getAreaID();
+  new_bookmark.position = Vec3D (_world->camera.x, _world->camera.y, _world->camera.z);
   new_bookmark.rotation = ah;
   new_bookmark.tilt = av;
 
@@ -2085,7 +2075,7 @@ void MapView::mousePressEvent (QMouseEvent* event)
   }
   if (event->button() == Qt::MidButton)
   {
-    if (gWorld->HasSelection())
+    if (_world->HasSelection())
     {
       MoveObj = true;
     }

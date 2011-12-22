@@ -11,6 +11,7 @@
 #include "Selection.h" // nameEntryManager
 #include "Sky.h" // Skies, OutdoorLighting, OutdoorLightStats
 #include "WMO.h" // WMOManager
+#include <MapHeaders.h> // ENTRY_MODF
 
 namespace OpenGL
 {
@@ -20,8 +21,6 @@ namespace OpenGL
 
 class brush;
 class MapTile;
-
-extern nameEntryManager SelectionNames;
 
 static const float detail_size = 8.0f;
 static const float highresdistance = 384.0f;
@@ -139,7 +138,6 @@ public:
   bool mHasAGlobalWMO;
   bool loading;
   bool noadt;
-  bool hadSky;
 
   //! \todo  Get these managed? ._.
   std::map<int, ModelInstance> mModelInstances;
@@ -224,9 +222,15 @@ public:
 
   void saveWDT();
   void clearAllModelsOnADT(int x, int z);
-};
 
-extern World *gWorld;
+  nameEntryManager& selection_names()
+  {
+    return _selection_names;
+  }
+
+private:
+  nameEntryManager _selection_names;
+};
 
 void lightingDefaults();
 void myFakeLighting();

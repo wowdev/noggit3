@@ -3,9 +3,12 @@
 #include "Log.h"
 #include "MapHeaders.h"
 #include "WMO.h" // WMO
-#include "World.h" // gWorld
+#include "World.h"
 
-WMOInstance::WMOInstance( WMO* _wmo, MPQFile* _file ) : wmo( _wmo ), mSelectionID( SelectionNames.add( this ) )
+WMOInstance::WMOInstance(World* world, WMO* _wmo, MPQFile* _file )
+  : wmo( _wmo )
+  , mSelectionID( world->selection_names().add( this ) )
+  , _world (world)
 {
   _file->read( &mUniqueID, 4 );
   _file->read( &pos, 12 );
@@ -18,19 +21,38 @@ WMOInstance::WMOInstance( WMO* _wmo, MPQFile* _file ) : wmo( _wmo ), mSelectionI
   _file->read( &mUnknown, 2 );
 }
 
-WMOInstance::WMOInstance( WMO* _wmo, ENTRY_MODF* d ) : wmo( _wmo ), pos( Vec3D( d->pos[0], d->pos[1], d->pos[2] ) ), dir( Vec3D( d->rot[0], d->rot[1], d->rot[2] ) ), mUniqueID( d->uniqueID ), mFlags( d->flags ), mUnknown( d->unknown ), mNameset( d->nameSet ), doodadset( d->doodadSet ), mSelectionID( SelectionNames.add( this ) )
+WMOInstance::WMOInstance( World* world, WMO* _wmo, ENTRY_MODF* d )
+  : wmo( _wmo )
+  , pos( Vec3D( d->pos[0], d->pos[1], d->pos[2] ) )
+  , dir( Vec3D( d->rot[0], d->rot[1], d->rot[2] ) )
+  , mUniqueID( d->uniqueID )
+  , mFlags( d->flags )
+  , mUnknown( d->unknown )
+  , mNameset( d->nameSet )
+  , doodadset( d->doodadSet )
+  , mSelectionID( world->selection_names().add( this ) )
+  , _world (world)
 {
   extents[0] = Vec3D( d->extents[0][0], d->extents[0][1], d->extents[0][2] );
   extents[1] = Vec3D( d->extents[1][0], d->extents[1][1], d->extents[1][2] );
 }
 
-WMOInstance::WMOInstance( WMO* _wmo ) : wmo( _wmo ), pos( Vec3D( 0.0f, 0.0f, 0.0f ) ), dir( Vec3D( 0.0f, 0.0f, 0.0f ) ), mUniqueID( 0 ), mFlags( 0 ), mUnknown( 0 ), mNameset( 0 ), doodadset( 0 ), mSelectionID( SelectionNames.add( this ) )
+WMOInstance::WMOInstance( World* world, WMO* _wmo )
+  : wmo( _wmo )
+  , pos( Vec3D( 0.0f, 0.0f, 0.0f ) )
+  , dir( Vec3D( 0.0f, 0.0f, 0.0f ) )
+  , mUniqueID( 0 )
+  , mFlags( 0 )
+  , mUnknown( 0 )
+  , mNameset( 0 )
+  , doodadset( 0 )
+  , mSelectionID( world->selection_names().add( this ) )
+  , _world (world)
 {
 }
 
 void WMOInstance::draw() const
 {
-
   glPushMatrix();
   glTranslatef( pos.x, pos.y, pos.z );
 
@@ -40,15 +62,15 @@ void WMOInstance::draw() const
   glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
   glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
 
-  if( gWorld->IsSelection( eEntry_WMO ) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID )
-    wmo->draw( doodadset, pos, roty, true, true, true );
+  if( _world->IsSelection( eEntry_WMO ) && _world->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID )
+    wmo->draw( _world, doodadset, pos, roty, true, true, true );
   else
-    wmo->draw( doodadset, pos, roty, false, false, false );
+    wmo->draw( _world, doodadset, pos, roty, false, false, false );
 
   glPopMatrix();
 }
 
-void WMOInstance::drawSelect()
+void WMOInstance::drawSelect ()
 {
   glPushMatrix();
 
@@ -60,10 +82,10 @@ void WMOInstance::drawSelect()
   glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
   glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
 
-  mSelectionID = SelectionNames.add( this );
+  mSelectionID = _world->selection_names().add( this );
   glPushName( mSelectionID );
 
-  wmo->drawSelect( doodadset, pos, -roty );
+  wmo->drawSelect( _world, doodadset, pos, -roty );
 
   glPopName();
 
@@ -94,5 +116,5 @@ void WMOInstance::resetDirection()
 
 WMOInstance::~WMOInstance()
 {
-  SelectionNames.del( mSelectionID );
+  _world->selection_names().del( mSelectionID );
 }

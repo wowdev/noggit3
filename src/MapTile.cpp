@@ -24,7 +24,8 @@ int indexMapBuf(int x, int y)
   return ((y+1)/2)*9 + (y/2)*8 + x;
 }
 
-MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
+MapTile::MapTile( World* world, int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
+  : _world (world)
 {
   this->modelCount = 0;
   this->mPositionX = pX;
@@ -292,10 +293,17 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
         }*/
 
 
-        Liquid * lq = new Liquid( info.width, info.height, Vec3D( xbase + CHUNKSIZE * j, lTile.mMinimum, zbase + CHUNKSIZE * i ) );
-        lq->setMH2OData( lTile );
+        Liquid* lq ( new Liquid ( info.width
+                                , info.height
+                                , Vec3D ( xbase + CHUNKSIZE * j
+                                        , lTile.mMinimum
+                                        , zbase + CHUNKSIZE * i
+                                        )
+                                )
+                   );
+        lq->setMH2OData (lTile);
         //LogDebug << "Inserted Data to MH2O: "<<i*16+j << std::endl;
-        mLiquids.push_back( lq );
+        mLiquids.push_back (lq);
       }
     }
 
@@ -375,14 +383,14 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 
   for( std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it )
   {
-    gWorld->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( WMOManager::add( mWMOFilenames[it->nameID] ), &(*it) ) ) );
+    _world->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( _world, WMOManager::add( _world, mWMOFilenames[it->nameID] ), &(*it) ) ) );
   }
 
   // - Load M2s ------------------------------------------
 
   for( std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
   {
-    gWorld->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( ModelManager::add( mModelFilenames[it->nameID] ), &(*it) ) ) );
+    _world->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( _world, ModelManager::add( mModelFilenames[it->nameID] ), &(*it) ) ) );
   }
 
   // - Load chunks ---------------------------------------
@@ -390,7 +398,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
   for( int nextChunk = 0; nextChunk < 256; ++nextChunk )
   {
     theFile.seek( lMCNKOffsets[nextChunk] );
-    mChunks[nextChunk / 16][nextChunk % 16] = new MapChunk( this, &theFile, mBigAlpha );
+    mChunks[nextChunk / 16][nextChunk % 16] = new MapChunk( _world, this, &theFile, mBigAlpha );
   }
 
   theFile.close();
@@ -520,8 +528,12 @@ void MapTile::drawWater()
   glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_LIGHTING);
 
-  for( std::vector<Liquid*>::iterator liq = mLiquids.begin(); liq != mLiquids.end(); liq++ )
-    (*liq)->draw();
+  foreach (const Liquid* liquid, mLiquids)
+  {
+    liquid->draw (_world->animtime, _world->skies);
+  }
+  //for( std::vector<Liquid*>::iterator liq = mLiquids.begin(); liq != mLiquids.end(); liq++ )
+  //  (*liq)->draw (_world);
 
   glEnable(GL_LIGHTING);
   glEnable(GL_COLOR_MATERIAL);
@@ -541,7 +553,7 @@ void MapTile::drawTextures()
 
   for (int j=0; j<16; ++j) {
     for (int i=0; i<16; ++i) {
-      if(((i+1+xOffset)>gWorld->minX)&&((j+1+yOffset)>gWorld->minY)&&((i+xOffset)<gWorld->maxX)&&((j+yOffset)<gWorld->maxY))
+      if(((i+1+xOffset)>_world->minX)&&((j+1+yOffset)>_world->minY)&&((i+xOffset)<_world->maxX)&&((j+yOffset)<_world->maxY))
         mChunks[j][i]->drawTextures();
 
 
@@ -727,11 +739,11 @@ void MapTile::clearAllModels()
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
 
-  for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
+  for( std::map<int, WMOInstance>::iterator it = _world->mWMOInstances.begin(); it != _world->mWMOInstances.end(); ++it )
     if( checkInside( lTileExtents, it->second.extents ) )
-          gWorld->deleteWMOInstance( it->second.mUniqueID );
+          _world->deleteWMOInstance( it->second.mUniqueID );
 
-  for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
+  for( std::map<int, ModelInstance>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
   {
     Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
     lModelExtentsV1[0] = it->second.model->header.BoundingBoxMin + it->second.pos;
@@ -741,7 +753,7 @@ void MapTile::clearAllModels()
 
     if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
     {
-      gWorld->deleteModelInstance( it->second.d1 );
+      _world->deleteModelInstance( it->second.d1 );
     }
   }
 
@@ -762,11 +774,11 @@ void MapTile::saveTile()
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
 
-  for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
+  for( std::map<int, WMOInstance>::iterator it = _world->mWMOInstances.begin(); it != _world->mWMOInstances.end(); ++it )
     if( checkInside( lTileExtents, it->second.extents ) )
       lObjectInstances.insert( std::pair<int, WMOInstance>( it->first, it->second ) );
 
-  for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
+  for( std::map<int, ModelInstance>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
   {
     Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
     lModelExtentsV1[0] = it->second.model->header.BoundingBoxMin + it->second.pos;

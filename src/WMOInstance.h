@@ -8,6 +8,7 @@
 
 class WMO;
 class MPQFile;
+class World;
 struct ENTRY_MODF;
 
 class WMOInstance
@@ -27,15 +28,18 @@ private:
   unsigned int mSelectionID;
 
 public:
-  WMOInstance( WMO* _wmo, MPQFile* _file );
-  WMOInstance( WMO* _wmo, ENTRY_MODF* d );
-  explicit WMOInstance( WMO* _wmo );
+  WMOInstance( World*, WMO* _wmo, MPQFile* _file );
+  WMOInstance( World*, WMO* _wmo, ENTRY_MODF* d );
+  explicit WMOInstance( World*, WMO* _wmo );
   ~WMOInstance();
 
   void draw() const;
   void drawSelect();
 
   void resetDirection();
+
+private:
+  World* _world;
 };
 
 

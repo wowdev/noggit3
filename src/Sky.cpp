@@ -150,7 +150,7 @@ const int cnum = 7;
 
 const int hseg = 32;
 
-void Skies::draw()
+void Skies::draw() const
 {
   // draw sky sphere?
   //! \todo  do this as a vertex array and use glColorPointer? :|
@@ -304,7 +304,7 @@ void Skies::debugDraw(unsigned int *buf, int dim)
   }
 }
 
-bool Skies::drawSky(const Vec3D &pos)
+bool Skies::drawSky (World* world, const Vec3D &pos) const
 {
   if (numSkies==0) return false;
 
@@ -315,13 +315,14 @@ bool Skies::drawSky(const Vec3D &pos)
   draw();
 
   // if it's night, draw the stars
-  float ni = gWorld->outdoorLightStats.nightIntensity;
-  if (ni > 0) {
-    const float sc = 0.1f;
-    glScalef(sc,sc,sc);
-    glEnable(GL_TEXTURE_2D);
+  const float ni (world->outdoorLightStats.nightIntensity);
+  if (ni > 0)
+  {
+    glScalef (0.1f, 0.1f, 0.1f);
+    //! \todo Also disable it again?
+    glEnable (GL_TEXTURE_2D);
     stars->trans = ni;
-    stars->draw();
+    stars->draw (world);
   }
 
   glPopMatrix();

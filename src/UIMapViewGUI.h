@@ -4,7 +4,6 @@
 class UIToolbar;
 class UIStatusBar;
 class UIDetailInfos;
-class UIDoodadSpawner;
 class UIAppInfo;
 class minimap_widget;
 class UIZoneIDBrowser;
@@ -14,20 +13,15 @@ class UITexturePicker;
 class UITextureSwitcher;
 class UIHelp;
 class UICursorSwitcher;
+class World;
 
 #include "UIFrame.h"
 
 //! \todo Give better name.
 class UIMapViewGUI : public UIFrame
 {
-private:
-  bool _tilemode;
-  UICursorSwitcher* CursorSwitcher;
-  UIHelp* _help;
-  UIDoodadSpawner* _test;
-
-
 public:
+  explicit UIMapViewGUI( World* world, MapView* setMapview );
   // Editor paramter
   int ground_edit_mode;
   int selection_view_mode;
@@ -36,7 +30,6 @@ public:
   // UI elements
   UIFrame* TexturePalette;
   UIFrame* SelectedTexture;
-  minimap_widget* minimapWindow;
   UIToolbar* guiToolbar;
   UIStatusBar* guiStatusbar;
   UIDetailInfos* guidetailInfos;
@@ -44,8 +37,6 @@ public:
   UIZoneIDBrowser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
   UITextureSwitcher* TextureSwitcher;
-
-  explicit UIMapViewGUI( MapView* setMapview );
 
   void setTilemode( bool enabled );
   virtual void render() const;
@@ -58,9 +49,11 @@ public:
   void hideHelp();
   void toggleHelp();
 
-  void showTest();
-  void hideTest();
-  void toggleTest();
+private:
+  bool _tilemode;
+  UICursorSwitcher* CursorSwitcher;
+  UIHelp* _help;
+  World* _world;
 };
 
 #endif

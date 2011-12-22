@@ -593,7 +593,7 @@ void enableWaterShader()
 }
 #endif
 
-void Liquid::draw()
+void Liquid::draw (const float& animation_time, const Skies* skies) const
 {
   glEnable(GL_FRAGMENT_PROGRAM_ARB);
 
@@ -609,7 +609,7 @@ void Liquid::draw()
   Vec3D col2;
   glDisable(GL_CULL_FACE);
   glDepthFunc(GL_LESS);
-  size_t texidx = (size_t)(gWorld->animtime / 60.0f) % _textures.size();
+  size_t texidx = (size_t)(animation_time / 60.0f) % _textures.size();
 
   //glActiveTexture(GL_TEXTURE0);
   //glDisable(GL_TEXTURE_2D);
@@ -628,13 +628,15 @@ void Liquid::draw()
     glColor4f(0.0f,0.0f,0.0f,0.8f);
   else
   {
+    Vec3D color (col);
     if (type==2)
     {
       // dynamic color lookup! ^_^
-      col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]; //! \todo  add variable water color
-      col2 = gWorld->skies->colorSet[WATER_COLOR_DARK];
+      //! \todo  add variable water color
+      color = skies->colorSet[WATER_COLOR_LIGHT];
+      col2 = skies->colorSet[WATER_COLOR_DARK];
     }
-    glColor4f(col.x, col.y, col.z, tcol);
+    glColor4f(color.x, color.y, color.z, tcol);
     glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB,0,col2.x,col2.y,col2.z,tcol);
 #ifdef USEBLSFILES
     glSecondaryColor3f(col2.x,col2.y,col2.z);

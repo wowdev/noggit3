@@ -21,24 +21,16 @@
 #include "UITextureSwitcher.h"
 #include "UITexturingGUI.h"
 #include "UIToolbar.h" // UIToolbar
-#include "UIZoneIDBrowser.h" //
+#include "UIZoneIDBrowser.h"
 #include "Video.h" // video
 #include "WMOInstance.h"
 #include "World.h"
 
-UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
-: UIFrame( 0.0f, 0.0f, video.xres(), video.yres() )
-, theMapview( setMapview )
+UIMapViewGUI::UIMapViewGUI (World* world, MapView *setMapview)
+  : UIFrame( 0.0f, 0.0f, video.xres(), video.yres() )
+  , theMapview( setMapview )
+  , _world (world)
 {
-  // Minimap window
-  minimapWindow = new minimap_widget (NULL);
-  minimapWindow->world (gWorld);
-  minimapWindow->draw_skies (true);
-  minimapWindow->draw_camera (true);
-  minimapWindow->draw_boundaries (true);
-  minimapWindow->hide();
-  minimapWindow->update();
-
   // UIToolbar
   guiToolbar = new UIToolbar( 6.0f, 38.0f, this );
   addChild(guiToolbar);
@@ -73,7 +65,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   TexturePicker->movable( true );
   addChild( TexturePicker);
 
-  TextureSwitcher = new UITextureSwitcher(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );
+  TextureSwitcher = new UITextureSwitcher(_world, video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );
   TextureSwitcher->hide();
   TextureSwitcher->movable( true );
   addChild( TextureSwitcher);
@@ -87,10 +79,6 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   _help = new UIHelp();
   _help->hide();
   addChild( _help );
-
-  _test = new UIDoodadSpawner();
-  _test->hide();
-  addChild( _test );
 }
 
 void UIMapViewGUI::showCursorSwitcher()
@@ -121,19 +109,6 @@ void UIMapViewGUI::toggleHelp()
   _help->toggleVisibility();
 }
 
-void UIMapViewGUI::showTest()
-{
-  _test->show();
-}
-void UIMapViewGUI::hideTest()
-{
-  _test->hide();
-}
-void UIMapViewGUI::toggleTest()
-{
-  _test->toggleVisibility();
-}
-
 void UIMapViewGUI::setTilemode( bool enabled )
 {
   _tilemode = enabled;
@@ -144,22 +119,22 @@ void UIMapViewGUI::render( ) const
   UIFrame::render();
 
   //! \todo Make these some textUIs.
-  arial16.shprint( 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ).toStdString() );
+  arial16.shprint( 510, 4, gAreaDB.getAreaName( _world->getAreaID() ).toStdString() );
 
-  int time = static_cast<int>( gWorld->time ) % 2880;
+  int time = static_cast<int>( _world->time ) % 2880;
   std::stringstream timestrs; timestrs << "Time: " << ( time / 120 ) << ":" << ( time % 120 );
   arial16.shprint( video.xres() - 100.0f, 5.0f, timestrs.str() );
 
-  if ( gWorld->loading )
+  if ( _world->loading )
   {
-    std::string toDisplay( gWorld->noadt ? "No ADT at this Point" : "Loading..." );
+    std::string toDisplay( _world->noadt ? "No ADT at this Point" : "Loading..." );
     arial16.shprint( video.xres() / 2.0f - arial16.width( toDisplay ) / 2.0f, 30.0f, toDisplay );
   }
 
   std::ostringstream statusbarInfo;
-  statusbarInfo << "tile: " << std::floor( gWorld->camera.x / TILESIZE ) << " " <<  std::floor( gWorld->camera.z / TILESIZE )
-     << "; coordinates: client (x: " << gWorld->camera.x << ", y: " << gWorld->camera.z << ", z: "<<gWorld->camera.y
-     << "), server (x: " << ( ZEROPOINT - gWorld->camera.x ) << ", y:" << ( ZEROPOINT - gWorld->camera.z ) << ", z:" << ( ZEROPOINT - gWorld->camera.y ) << ")" ;
+  statusbarInfo << "tile: " << std::floor( _world->camera.x / TILESIZE ) << " " <<  std::floor( _world->camera.z / TILESIZE )
+     << "; coordinates: client (x: " << _world->camera.x << ", y: " << _world->camera.z << ", z: "<<_world->camera.y
+     << "), server (x: " << ( ZEROPOINT - _world->camera.x ) << ", y:" << ( ZEROPOINT - _world->camera.z ) << ", z:" << ( ZEROPOINT - _world->camera.y ) << ")" ;
   if(Environment::getInstance()->paintMode) statusbarInfo << "PM:1";else statusbarInfo << "PM:2";
   guiStatusbar->setLeftInfo( statusbarInfo.str() );
 
@@ -167,7 +142,7 @@ void UIMapViewGUI::render( ) const
 
   if( !_tilemode && !guidetailInfos->hidden() )
   {
-    nameEntry * lSelection = gWorld->GetCurrentSelection();
+    nameEntry * lSelection = _world->GetCurrentSelection();
     if( lSelection )
     {
       guiStatusbar->setRightInfo( lSelection->returnName() );

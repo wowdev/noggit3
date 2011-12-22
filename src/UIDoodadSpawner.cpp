@@ -38,11 +38,12 @@ void AddM2Click( UIFrame* f, int i )
 
 extern std::list<std::string> gListfile;
 
-UIDoodadSpawner::UIDoodadSpawner( )
-: UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Test", true )
-, _button( new UIButton( 145.0f, winHeight - 24.0f, 132.0f, 28.0f, "Test", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", AddM2Click, 0 ) )
-, _tbox( new UITextBox( 30.0f, 30.0f, 400.0f, 40.0f, UIDoodadSpawner__TextBoxEnter ) )
-, _treeView( UITreeView::Ptr() )
+UIDoodadSpawner::UIDoodadSpawner (World* world)
+  : UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Test", true )
+  , _button( new UIButton( 145.0f, winHeight - 24.0f, 132.0f, 28.0f, "Test", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", AddM2Click, 0 ) )
+  , _tbox( new UITextBox( 30.0f, 30.0f, 400.0f, 40.0f, UIDoodadSpawner__TextBoxEnter ) )
+  , _treeView( UITreeView::Ptr() )
+  , _world (world)
 {
   global_doodadSpawner_evil = this;
 
@@ -72,16 +73,16 @@ void UIDoodadSpawner::AddM2( const std::string& filename )
 {
   Vec3D selectionPosition;
 
-  switch( gWorld->GetCurrentSelection()->type )
+  switch( _world->GetCurrentSelection()->type )
   {
     case eEntry_Model:
-      selectionPosition = gWorld->GetCurrentSelection()->data.model->pos;
+      selectionPosition = _world->GetCurrentSelection()->data.model->pos;
       break;
     case eEntry_WMO:
-      selectionPosition = gWorld->GetCurrentSelection()->data.wmo->pos;
+      selectionPosition = _world->GetCurrentSelection()->data.wmo->pos;
       break;
     case eEntry_MapChunk:
-      selectionPosition = gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition();
+      selectionPosition = _world->GetCurrentSelection()->data.mapchunk->GetSelectionPosition();
       break;
   }
 
@@ -91,11 +92,11 @@ void UIDoodadSpawner::AddM2( const std::string& filename )
     std::transform( ext.begin(), ext.end(), ext.begin(), ::toupper );
     if(ext == ".M2")
     {
-      gWorld->addM2( ModelManager::add( filename ), selectionPosition );
+      _world->addM2( ModelManager::add( filename ), selectionPosition );
     }
-    if(ext == ".WMO")
+    else if(ext == ".WMO")
     {
-      gWorld->addWMO( WMOManager::add( filename ), selectionPosition );
+      _world->addWMO( WMOManager::add( _world, filename ), selectionPosition );
     }
   }
  }

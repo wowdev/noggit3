@@ -9,6 +9,7 @@
 #include "Vec3D.h"
 
 class Model;
+class World;
 
 struct SkyColor {
   Vec3D color;
@@ -82,9 +83,9 @@ public:
   void findSkyWeights(Vec3D pos);
   void initSky(Vec3D pos, int t);
 
-  void draw();
+  void draw() const;
 
-  bool drawSky(const Vec3D &pos);
+  bool drawSky (World* world, const Vec3D &pos) const;
   bool hasSkies() { return numSkies > 0; }
 
   void setupLighting();
