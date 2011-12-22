@@ -60,14 +60,18 @@ void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, fl
 
 void renderSphere_convenient(float x, float y, float z, float radius, int subdivisions)
 {
-  //the same quadric can be re-used for drawing many objects
-  glDisable(GL_LIGHTING);
-  glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA );
-  GLUquadricObj *quadric=gluNewQuadric();
-  gluQuadricNormals(quadric, GLU_SMOOTH);
-  renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
-  gluDeleteQuadric(quadric);
-  glEnable(GL_LIGHTING);
+  if(Environment::getInstance()->screenX>0 && Environment::getInstance()->screenY>0)
+  {
+    //the same quadric can be re-used for drawing many objects
+    glDisable(GL_LIGHTING);
+    glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA );
+    GLUquadricObj *quadric=gluNewQuadric();
+    gluQuadricNormals(quadric, GLU_SMOOTH);
+    renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
+    renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
+    gluDeleteQuadric(quadric);
+    glEnable(GL_LIGHTING);
+  }
 }
 
 void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
@@ -89,9 +93,7 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
   float ry = vx * vz;
 
   glPushMatrix();
-  //glClear(GL_DEPTH_BUFFER_BIT);
   glDisable(GL_DEPTH_TEST);
-  //glLoadIdentity(); This delete gluDisk :(
   glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
   glEnable(GL_COLOR_MATERIAL);
 
@@ -119,10 +121,10 @@ void renderDisk_convenient(float x, float y, float z, float radius)
   gluQuadricDrawStyle(quadric, GLU_LINE);
   gluQuadricNormals(quadric, GLU_SMOOTH);
   renderDisk(x, y, z, x, y, z, radius, subdivisions, quadric);
+  renderSphere(x,y,z,x,y,z,0.3,15,quadric);
   gluDeleteQuadric(quadric);
   glEnable(GL_LIGHTING);
 }
-
 
 bool World::IsEditableWorld( int pMapId )
 {
@@ -171,52 +173,52 @@ bool World::IsEditableWorld( int pMapId )
 }
 
 World::World( const std::string& name )
-  : cx( -1 )
-  , cz( -1 )
-  , ex( -1 )
-  , ez( -1 )
-  , mCurrentSelection( NULL )
-  , mCurrentSelectedTriangle( 0 )
-  , SelectionMode( false )
-  , mBigAlpha( false )
-  , mWmoFilename( "" )
-  , mWmoEntry( ENTRY_MODF() )
-  , detailtexcoords( 0 )
-  , alphatexcoords( 0 )
-  , mMapId( 0xFFFFFFFF )
-  , ol( NULL )
-  , l_const( 0.0f )
-  , l_linear( 0.7f )
-  , l_quadratic( 0.03f )
-  , drawdoodads( true )
-  , drawfog( true )
-  , drawlines( false )
-  , drawmodels( true )
-  , drawterrain( true )
-  , drawwater( false )
-  , drawwmo( true )
-  , lighting( true )
-  , animtime( 0 )
-  , time( 1450 )
-  , basename( name )
-  , fogdistance( 777.0f )
-  , culldistance( fogdistance )
-  , autoheight( false )
-  , minX( 0.0f )
-  , maxX( 0.0f )
-  , minY( 0.0f )
-  , maxY( 0.0f )
-  , zoom( 0.25f )
-  , skies( NULL )
-  , mHasAGlobalWMO( false )
-  , loading( false )
-  , noadt( false )
-  , outdoorLightStats( OutdoorLightStats() )
-  , mapstrip( NULL )
-  , mapstrip2( NULL )
-  , camera( Vec3D( 0.0f, 0.0f, 0.0f ) )
-  , lookat( Vec3D( 0.0f, 0.0f, 0.0f ) )
-  , frustum( Frustum() )
+: cx( -1 )
+, cz( -1 )
+, ex( -1 )
+, ez( -1 )
+, mCurrentSelection( NULL )
+, mCurrentSelectedTriangle( 0 )
+, SelectionMode( false )
+, mBigAlpha( false )
+, mWmoFilename( "" )
+, mWmoEntry( ENTRY_MODF() )
+, detailtexcoords( 0 )
+, alphatexcoords( 0 )
+, mMapId( 0xFFFFFFFF )
+, ol( NULL )
+, l_const( 0.0f )
+, l_linear( 0.7f )
+, l_quadratic( 0.03f )
+, drawdoodads( true )
+, drawfog( true )
+, drawlines( false )
+, drawmodels( true )
+, drawterrain( true )
+, drawwater( false )
+, drawwmo( true )
+, lighting( true )
+, animtime( 0 )
+, time( 1450 )
+, basename( name )
+, fogdistance( 777.0f )
+, culldistance( fogdistance )
+, autoheight( false )
+, minX( 0.0f )
+, maxX( 0.0f )
+, minY( 0.0f )
+, maxY( 0.0f )
+, zoom( 0.25f )
+, skies( NULL )
+, mHasAGlobalWMO( false )
+, loading( false )
+, noadt( false )
+, outdoorLightStats( OutdoorLightStats() )
+, mapstrip( NULL )
+, mapstrip2( NULL )
+, camera( Vec3D( 0.0f, 0.0f, 0.0f ) )
+, lookat( Vec3D( 0.0f, 0.0f, 0.0f ) )
+, frustum( Frustum() )
   , _selection_names (this)
 {
   for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
@@ -1184,29 +1186,28 @@ void World::draw()
     //glDisable(GL_DEPTH_TEST);
     if(terrainMode == 0)
   {
-    if(Environment::getInstance()->cursorType == 0)
-      renderDisk_convenient(posX, posY, posZ, groundBrushRadius);
-    else
+    if(Environment::getInstance()->cursorType == 1)
+    renderDisk_convenient(posX, posY, posZ, groundBrushRadius);
+    else if(Environment::getInstance()->cursorType == 2)
       renderSphere_convenient(posX, posY, posZ, groundBrushRadius, 15);
   }
     else if(terrainMode == 1)
   {
-    if(Environment::getInstance()->cursorType == 0)
+
+    if(Environment::getInstance()->cursorType == 1)
       renderDisk_convenient(posX, posY, posZ, blurBrushRadius);
-    else
+    else if(Environment::getInstance()->cursorType == 2)
       renderSphere_convenient(posX, posY, posZ, blurBrushRadius, 15);
 
   }
     else if(terrainMode == 2)
   {
-    if(Environment::getInstance()->cursorType == 0)
-      renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius());
-    else
-      renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
-
+    if(Environment::getInstance()->cursorType == 1)
+    renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius());
+    else if(Environment::getInstance()->cursorType == 2)
+    renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
   }
-    else
-      renderDisk_convenient(posX, posY, posZ, 0.24f);
+  else renderSphere_convenient(posX, posY, posZ, 0.3f, 15);
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
