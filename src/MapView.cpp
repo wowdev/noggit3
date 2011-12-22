@@ -1951,10 +1951,6 @@ struct BookmarkEntry
   float tilt;
 };
 
-// for storing in QVariant
-Q_DECLARE_METATYPE (BookmarkEntry);
-Q_DECLARE_METATYPE (Vec3D);
-
 void MapView::add_bookmark()
 {
   QSettings settings;
@@ -1969,7 +1965,9 @@ void MapView::add_bookmark()
 
     BookmarkEntry b;
     b.map_id = settings.value ("map_id").toInt();
-    b.position = settings.value ("camera/position").value<Vec3D>();
+    b.position.x = settings.value ("camera/position/x").toFloat();
+    b.position.y = settings.value ("camera/position/y").toFloat();
+    b.position.z = settings.value ("camera/position/z").toFloat();
     b.rotation = settings.value ("camera/rotation").toFloat();
     b.tilt = settings.value ("camera/tilt").toFloat();
     b.area_id = settings.value ("area_id").toInt();
@@ -1993,7 +1991,9 @@ void MapView::add_bookmark()
     settings.setArrayIndex (i);
 
     settings.setValue ("map_id", bookmarks[i].map_id);
-    settings.setValue ("camera/position", QVariant::fromValue<Vec3D> (bookmarks[i].position));
+    settings.setValue ("camera/position/x", bookmarks[i].position.x);
+    settings.setValue ("camera/position/y", bookmarks[i].position.y);
+    settings.setValue ("camera/position/z", bookmarks[i].position.z);
     settings.setValue ("camera/rotation", bookmarks[i].rotation);
     settings.setValue ("camera/tilt", bookmarks[i].tilt);
     settings.setValue ("area_id", bookmarks[i].area_id);
