@@ -9,13 +9,14 @@ class UITexture;
 class UITextureSwitcher : public UICloseWindow
 {
 public:
-  UITextureSwitcher( float x, float y, float w, float h );
+  UITextureSwitcher(  int x, int y );
 
   void getTextures( nameEntry* lSelection );
   void setTexture( size_t id );
+  void setPosition( int x, int y );
 
 private:
-  UITexture* _textures[4];
+  UITexture* _textures;
   float xPos, zPos;
 };
 

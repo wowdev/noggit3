@@ -35,6 +35,8 @@ UIFrame::Ptr UIWindow::processLeftClick( float mx, float my )
   return this;
 }
 
+
+
 void UIWindow::render() const
 {
   glPushMatrix();
