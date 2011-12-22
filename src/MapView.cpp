@@ -28,6 +28,7 @@
 #include "Noggit.h" // gStates, gPop, gFPS, arial14, morpheus40, arial...
 #include "Project.h"
 #include "Settings.h"
+#include "Environment.h"
 #include "TextureManager.h" // TextureManager, Texture
 #include "UIAppInfo.h" // appInfo
 #include "UICheckBox.h" // UICheckBox
@@ -242,6 +243,12 @@ void change_settings_window(int oldid, int newid)
     settings_paint->show();
   break;
   }
+}
+
+void openSwapper( UIFrame*, int )
+{
+	mainGui->TextureSwitcher->show();
+    settings_paint->hide();
 }
 
 void openHelp( UIFrame*, int )
@@ -722,7 +729,7 @@ void MapView::createGUI()
   setting_blur->addChild(blur_brush);
 
   //3D Paint settings UIWindow
-  settings_paint=new UIWindow(tool_settings_x,tool_settings_y,180.0f,100.0f);
+  settings_paint=new UIWindow(tool_settings_x,tool_settings_y,180.0f,140.0f);
   settings_paint->hide();
   settings_paint->movable( true );
 
@@ -764,6 +771,11 @@ void MapView::createGUI()
   S1->setText("Pressure: ");
   settings_paint->addChild(S1);
 
+  
+  UIButton* B1;
+  B1=new UIButton( 6.0f, 111.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1 ) ;
+  settings_paint->addChild(B1);
+ 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(4,8,mainGui));
   mainGui->TexturePalette->hide();
   mainGui->addChild(mainGui->SelectedTexture = UITexturingGUI::createSelectedTexture());
@@ -1449,9 +1461,14 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
       DeleteSelectedObject( 0, 0 );
 
     // copy model to clipboard
-    if( e->keysym.sym == SDLK_c && Environment::getInstance()->CtrlDown )
-      CopySelectedObject( 0, 0 );
-
+    if( e->keysym.sym == SDLK_c )
+	  if(Environment::getInstance()->CtrlDown )
+        CopySelectedObject( 0, 0 );
+	  else
+	  {
+		  Environment::getInstance()->cursorType ++;
+			  if (Environment::getInstance()->cursorType>3) Environment::getInstance()->cursorType = 0;
+	  }
     // paste model
     if( e->keysym.sym == SDLK_v && Environment::getInstance()->CtrlDown )
       PasteSelectedObject( 0, 0 );
