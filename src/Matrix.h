@@ -121,7 +121,7 @@ public:
     rot.m[0][2]=sinV;
     rot.m[2][0]=-sinV;
     rot.m[2][2]=cosV;
-    this->operator*=(rot);
+    operator*=(rot);
 
     //Rotate around the Z axis by -A
     rot.unit();
@@ -132,7 +132,7 @@ public:
     rot.m[0][1]=sinV;
     rot.m[1][0]=-sinV;
     rot.m[1][1]=cosV;
-    this->operator*=(rot);
+    operator*=(rot);
 
     //Rotate around the X axis by C
     cosV=cosf(r.z*PI/180.0f);
@@ -142,7 +142,7 @@ public:
     rot.m[1][2]=sinV;
     rot.m[2][1]=-sinV;
     rot.m[2][2]=cosV;
-    this->operator*=(rot);
+    operator*=(rot);
   }
 
   static inline const Matrix newQuatRotate( const Quaternion& qr )
@@ -240,8 +240,8 @@ public:
 
   inline void invert()
   {
-    Matrix adj = this->adjoint();
-    float invdet = 1.0f / this->determinant();
+    Matrix adj = adjoint();
+    float invdet = 1.0f / determinant();
         for (size_t j=0; j<4; j++) {
           for (size_t i=0; i<4; ++i) {
         m[j][i] = adj.m[j][i] * invdet;
@@ -262,7 +262,7 @@ public:
 
   inline Matrix& operator*= (const Matrix& p)
   {
-    return *this = this->operator*(p);
+    return *this = operator*(p);
   }
 
   inline operator float*()

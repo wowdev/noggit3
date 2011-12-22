@@ -444,7 +444,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, MPQFile* f,bool bigAlpha)
         //lq->init(f);
         lq->initFromTerrain(f, header.flags);
 
-        this->mt->mLiquids.insert(std::pair<int,Liquid*>( 0, lq) );
+        mt->mLiquids.insert(std::pair<int,Liquid*>( 0, lq) );
 
 
         // let's output some debug info! ( '-')b
@@ -478,8 +478,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, MPQFile* f,bool bigAlpha)
   glBufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
   initStrip();
-
-  this->mt = mt;
 
   vcenter = (vmin + vmax) * 0.5f;
 
@@ -849,7 +847,7 @@ void MapChunk::drawColor()
     return;
 
   if (mydist > _world->culldistance) {
-    if (_world->drawfog) this->drawNoDetail();
+    if (_world->drawfog) drawNoDetail();
     return;
   }
 
@@ -1873,7 +1871,7 @@ int MapChunk::getAreaID(){
 void MapChunk::setFlag( bool changeto )
 {
   if(changeto)
-    this->Flags = this->Flags | (Environment::getInstance()->flagPaintMode);
+    Flags = Flags | (Environment::getInstance()->flagPaintMode);
   else
-    this->Flags = this->Flags & ~(Environment::getInstance()->flagPaintMode);
+    Flags = Flags & ~(Environment::getInstance()->flagPaintMode);
 }

@@ -574,7 +574,7 @@ void Model::calcBones(int _anim, int time)
 
 void Model::animate(int _anim)
 {
-  this->anim = _anim;
+  anim = _anim;
   ModelAnimation &a = anims[anim];
   int t = globalTime; //(int)(gWorld->animtime /* / a.playSpeed*/);
   int tmax = a.length;

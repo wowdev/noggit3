@@ -832,10 +832,10 @@ void World::saveChanged()
     {
       if( tileLoaded( j, i ) )
       {
-        if(this->getChanged(j,i))
+        if(getChanged(j,i))
         {
           mTiles[j][i].tile->saveTile();
-          this->unsetChanged(j,i);
+          unsetChanged(j,i);
         }
       }
     }
@@ -1069,7 +1069,7 @@ void World::draw()
     glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
-    glColor3fv(this->skies->colorSet[FOG_COLOR]);
+    glColor3fv(skies->colorSet[FOG_COLOR]);
     //glColor3f(0,1,0);
     //glDisable(GL_FOG);
     const int lrr = 2;
@@ -1147,9 +1147,9 @@ void World::draw()
   glPopMatrix();
 
   // Selection circle
-  if( this->IsSelection( eEntry_MapChunk )  )
+  if( IsSelection( eEntry_MapChunk )  )
   {
-    //int poly = this->GetCurrentSelectedTriangle();
+    //int poly = GetCurrentSelectedTriangle();
 
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
@@ -1368,7 +1368,7 @@ void World::draw()
   //glColor4f(1,1,1,1);
   glDisable(GL_COLOR_MATERIAL);
 
-  if(this->drawwater)
+  if(drawwater)
   {
     for( int j = 0; j < 64; ++j )
     {
@@ -1565,7 +1565,7 @@ void World::clearHeight(int id, int x, int z)
   {
     for (int i=0; i<16; ++i)
     {
-      this->clearHeight(id, x, z, j, i);
+      clearHeight(id, x, z, j, i);
     }
   }
 
@@ -1577,7 +1577,7 @@ void World::clearHeight(int id, int x, int z)
       MapTile *curTile;
       curTile = mTiles[z][x].tile;
       if(curTile == 0) return;
-      this->setChanged(z,x);
+      setChanged(z,x);
       MapChunk *curChunk = curTile->getChunk(j, i);
       curChunk->recalcNorms();
     }
@@ -1591,7 +1591,7 @@ void World::clearHeight(int /*id*/, int x, int z , int _cx, int _cz)
   MapTile *curTile;
   curTile = mTiles[z][x].tile;
   if(curTile == 0) return;
-  this->setChanged(z,x);
+  setChanged(z,x);
   MapChunk *curChunk = curTile->getChunk(_cx, _cz);
   if(curChunk == 0) return;
 
@@ -1627,7 +1627,7 @@ void World::setAreaID(int id, int x,int z)
   {
     for (int i=0; i<16; ++i)
     {
-      this->setAreaID(id, x, z, j, i);
+      setAreaID(id, x, z, j, i);
     }
   }
 }
@@ -1639,7 +1639,7 @@ void World::setAreaID(int id, int x, int z , int _cx, int _cz)
   MapTile *curTile;
   curTile = mTiles[z][x].tile;
   if(curTile == 0) return;
-  this->setChanged(z,x);
+  setChanged(z,x);
   MapChunk *curChunk = curTile->getChunk(_cx, _cz);
 
   if(curChunk == 0) return;
@@ -1753,7 +1753,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
           for( size_t tx = 0; tx < 16; ++tx )
           {
             if( mTiles[j][i].tile->getChunk(ty,tx)->changeTerrain(x,z,change,radius,BrushType) )
-              this->setChanged( j, i );
+              setChanged( j, i );
           }
         }
       }
@@ -1791,7 +1791,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
           for( size_t tx = 0; tx < 16; ++tx )
           {
             if( mTiles[j][i].tile->getChunk(ty,tx)->flattenTerrain(x,z,h,remain,radius,BrushType) )
-              this->setChanged(j,i);
+              setChanged(j,i);
           }
         }
       }
@@ -1829,7 +1829,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
           for( size_t tx = 0; tx < 16; ++tx )
           {
             if( mTiles[j][i].tile->getChunk(ty,tx)->blurTerrain(x, z, remain, radius, BrushType) )
-              this->setChanged(j,i);
+              setChanged(j,i);
           }
         }
       }
@@ -1875,7 +1875,7 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
             if( mTiles[j][i].tile->getChunk( ty, tx )->paintTexture( x, z, Brush, strength, pressure, texture ) )
             {
               succ |= true;
-              this->setChanged( j, i );
+              setChanged( j, i );
             }
           }
         }
@@ -1887,7 +1887,7 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
 
 void World::eraseTextures(float x, float z)
 {
-  this->setChanged(x,z);
+  setChanged(x,z);
   const size_t newX = x / TILESIZE;
   const size_t newZ = z / TILESIZE;
   Log << "Erasing Textures at " << x << " and " << z;
@@ -1915,7 +1915,7 @@ void World::eraseTextures(float x, float z)
 
 void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
 {
-  this->setChanged(x,z);
+  setChanged(x,z);
   const size_t newX = x / TILESIZE;
   const size_t newZ = z / TILESIZE;
   Log << "Switching Textures at " << x << " and " << z;
@@ -1943,7 +1943,7 @@ void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* ol
 
 void World::addHole( float x, float z )
 {
-  this->setChanged(x, z);
+  setChanged(x, z);
   const size_t newX = x / TILESIZE;
   const size_t newZ = z / TILESIZE;
 
@@ -1973,7 +1973,7 @@ void World::addHole( float x, float z )
 
 void World::removeHole( float x, float z )
 {
-  this->setChanged(x, z);
+  setChanged(x, z);
   const size_t newX = x / TILESIZE;
   const size_t newZ = z / TILESIZE;
 
@@ -2059,7 +2059,7 @@ void World::saveMap()
 void World::deleteModelInstance( int pUniqueID )
 {
   std::map<int, ModelInstance>::iterator it = mModelInstances.find( pUniqueID );
-  this->setChanged( it->second.pos.x, it->second.pos.z );
+  setChanged( it->second.pos.x, it->second.pos.z );
   mModelInstances.erase( it );
   ResetSelection();
 }
@@ -2067,7 +2067,7 @@ void World::deleteModelInstance( int pUniqueID )
 void World::deleteWMOInstance( int pUniqueID )
 {
   std::map<int, WMOInstance>::iterator it = mWMOInstances.find( pUniqueID );
-  this->setChanged( it->second.pos.x, it->second.pos.z );
+  setChanged( it->second.pos.x, it->second.pos.z );
   mWMOInstances.erase( it );
   ResetSelection();
 }
@@ -2075,9 +2075,9 @@ void World::deleteWMOInstance( int pUniqueID )
 void World::addModel( nameEntry entry, Vec3D newPos )
 {
   if( entry.type == eEntry_Model )
-    this->addM2( entry.data.model->model, newPos );
+    addM2( entry.data.model->model, newPos );
   else if( entry.type == eEntry_WMO )
-    this->addWMO( entry.data.wmo->wmo, newPos );
+    addWMO( entry.data.wmo->wmo, newPos );
 }
 
 void World::addM2( Model *model, Vec3D newPos )
@@ -2115,7 +2115,7 @@ void World::addM2( Model *model, Vec3D newPos )
   }
 
   mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
-  this->setChanged(newPos.x,newPos.z);
+  setChanged(newPos.x,newPos.z);
 }
 
 void World::addWMO( WMO *wmo, Vec3D newPos )
@@ -2127,7 +2127,7 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
   newWMOis.pos = newPos;
   newWMOis.mUniqueID = lMaxUID;
   mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
-  this->setChanged(newPos.x,newPos.z);
+  setChanged(newPos.x,newPos.z);
 }
 
 void World::setChanged(float x, float z)
@@ -2164,7 +2164,7 @@ bool World::getChanged(int x, int z) const
 void World::setFlag( bool to, float x, float z)
 {
   // set the inpass flag to selected chunk
-  this->setChanged(x, z);
+  setChanged(x, z);
   const int newX = x / TILESIZE;
   const int newZ = z / TILESIZE;
 
@@ -2192,7 +2192,7 @@ void World::setFlag( bool to, float x, float z)
 
 unsigned int World::getMapID()
 {
-  return this->mMapId;
+  return mMapId;
 }
 
 
@@ -2204,7 +2204,7 @@ void World::moveHeight(int id, int x, int z)
   {
     for (int i=0; i<16; ++i)
     {
-      this->moveHeight(id, x, z, j, i);
+      moveHeight(id, x, z, j, i);
     }
   }
 
@@ -2216,7 +2216,7 @@ void World::moveHeight(int id, int x, int z)
       MapTile *curTile;
       curTile = mTiles[z][x].tile;
       if(curTile == 0) return;
-      this->setChanged(z,x);
+      setChanged(z,x);
       MapChunk *curChunk = curTile->getChunk(j, i);
       curChunk->recalcNorms();
     }
@@ -2230,7 +2230,7 @@ void World::moveHeight(int /*id*/, int x, int z , int _cx, int _cz)
   MapTile *curTile;
   curTile = mTiles[z][x].tile;
   if(curTile == 0) return;
-  this->setChanged(z,x);
+  setChanged(z,x);
   MapChunk *curChunk = curTile->getChunk(_cx, _cz);
   if(curChunk == 0) return;
 

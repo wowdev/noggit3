@@ -1336,7 +1336,7 @@ void MapView::tick( float t, float dt )
     textureBrush.GenerateTexture();
   }
 
-  _world->time += this->mTimespeed * dt;
+  _world->time += mTimespeed * dt;
   _world->animtime += dt * 1000.0f;
   globalTime = static_cast<int>( _world->animtime );
 
