@@ -91,7 +91,7 @@ public:
 
   Vec4D& normalize()
   {
-    this->operator*= (1.0f/length());
+    operator*= (1.0f/length());
     return *this;
   }
 

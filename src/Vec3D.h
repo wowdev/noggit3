@@ -122,7 +122,7 @@ public:
 
   inline bool IsInsideOf( Vec3D pA, Vec3D pB ) const
   {
-    return( pA.x < this->x && pB.x > this->x && pA.y < this->y && pB.y > this->y && pA.z < this->z && pB.z > this->z );
+    return( pA.x < x && pB.x > x && pA.y < y && pB.y > y && pA.z < z && pB.z > z );
   }
 };
 

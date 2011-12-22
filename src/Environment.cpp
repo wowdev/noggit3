@@ -3,13 +3,13 @@
 
 Environment::Environment()
 {
-  this->view_holelines = false;
-  this->ShiftDown = false;
-  this->AltDown = false;
-  this->CtrlDown = false;
-  this->clipboard = nameEntry();
-  this->flagPaintMode = FLAG_IMPASS;
-  this->paintMode = true;
+  view_holelines = false;
+  ShiftDown = false;
+  AltDown = false;
+  CtrlDown = false;
+  clipboard = nameEntry();
+  flagPaintMode = FLAG_IMPASS;
+  paintMode = true;
 }
 
 Environment* Environment::instance = 0;

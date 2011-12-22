@@ -62,7 +62,7 @@ void WMOInstance::draw() const
   glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
   glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
 
-  if( _world->IsSelection( eEntry_WMO ) && _world->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID )
+  if( _world->IsSelection( eEntry_WMO ) && _world->GetCurrentSelection()->data.wmo->mUniqueID == mUniqueID )
     wmo->draw( _world, doodadset, pos, roty, true, true, true );
   else
     wmo->draw( _world, doodadset, pos, roty, false, false, false );

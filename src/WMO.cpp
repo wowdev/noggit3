@@ -292,7 +292,7 @@ void WMO::draw(World* world, int doodadset, const Vec3D &ofs, const float rot, b
     /*glColor4fv( Vec4D( 1.0f, 0.0f, 0.0f, 1.0f ) );
     glBegin( GL_LINES );
       glVertex3f( 0.0f, 0.0f, 0.0f );
-      glVertex3f( this->header.BoundingBoxMax.x + header.BoundingBoxMax.x / 5.0f, 0.0f, 0.0f );
+      glVertex3f( header.BoundingBoxMax.x + header.BoundingBoxMax.x / 5.0f, 0.0f, 0.0f );
     glEnd();
 
     glColor4fv( Vec4D( 0.0f, 1.0f, 0.0f, 1.0f ) );
@@ -625,8 +625,8 @@ void WMOLight::setupOnce(GLint light, Vec3D dir, Vec3D lcol)
 
 void WMOGroup::init(WMO *_wmo, MPQFile* f, int _num, char *names)
 {
-  this->wmo = _wmo;
-  this->num = _num;
+  wmo = _wmo;
+  num = _num;
 
   // extract group info from f
   f->read(&flags,4);

@@ -27,15 +27,15 @@ int indexMapBuf(int x, int y)
 MapTile::MapTile( World* world, int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
   : _world (world)
 {
-  this->modelCount = 0;
-  this->mPositionX = pX;
-  this->mPositionZ = pZ;
+  modelCount = 0;
+  mPositionX = pX;
+  mPositionZ = pZ;
 
-  this->changed = false;
-  this->xbase = mPositionX * TILESIZE;
-  this->zbase = mPositionZ * TILESIZE;
+  changed = false;
+  xbase = mPositionX * TILESIZE;
+  zbase = mPositionZ * TILESIZE;
 
-  this->mBigAlpha = pBigAlpha;
+  mBigAlpha = pBigAlpha;
 
   for( int i = 0; i < 16; ++i )
   {
@@ -325,8 +325,8 @@ MapTile::MapTile( World* world, int pX, int pZ, const std::string& pFilename, bo
     theFile.read( mMaximum, sizeof( mMaximum ) );
     theFile.read( mMinimum, sizeof( mMinimum ) );
 
-    static const float xPositions[] = { this->xbase, this->xbase + 266.0f, this->xbase + 533.0f };
-    static const float yPositions[] = { this->zbase, this->zbase + 266.0f, this->zbase + 533.0f };
+    static const float xPositions[] = { xbase, xbase + 266.0f, xbase + 533.0f };
+    static const float yPositions[] = { zbase, zbase + 266.0f, zbase + 533.0f };
 
     for( int y = 0; y < 3; y++ )
     {
@@ -733,8 +733,8 @@ void MapTile::clearAllModels()
 
   // Check which doodads and WMOs are on this ADT.
   Vec3D lTileExtents[2];
-  lTileExtents[0] = Vec3D( this->xbase, 0.0f, this->zbase );
-  lTileExtents[1] = Vec3D( this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE );
+  lTileExtents[0] = Vec3D( xbase, 0.0f, zbase );
+  lTileExtents[1] = Vec3D( xbase + TILESIZE, 0.0f, zbase + TILESIZE );
 
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
@@ -768,8 +768,8 @@ void MapTile::saveTile()
 
   // Check which doodads and WMOs are on this ADT.
   Vec3D lTileExtents[2];
-  lTileExtents[0] = Vec3D( this->xbase, 0.0f, this->zbase );
-  lTileExtents[1] = Vec3D( this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE );
+  lTileExtents[0] = Vec3D( xbase, 0.0f, zbase );
+  lTileExtents[1] = Vec3D( xbase + TILESIZE, 0.0f, zbase + TILESIZE );
 
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
@@ -1225,7 +1225,7 @@ void MapTile::saveTile()
         lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 )->mEntries[y*16+x].offset = lCurrentPosition;
 
         // MCNK data
-        lADTFile.Insert( lCurrentPosition + 8, 0x80, reinterpret_cast<char*>( &( this->mChunks[y][x]->header ) ) );
+        lADTFile.Insert( lCurrentPosition + 8, 0x80, reinterpret_cast<char*>( &( mChunks[y][x]->header ) ) );
         MapChunkHeader * lMCNK_header = lADTFile.GetPointer<MapChunkHeader>( lCurrentPosition + 8 );
 
         lMCNK_header->flags = mChunks[y][x]->Flags;
