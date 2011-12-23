@@ -11,6 +11,8 @@
 
 class QAction;
 class QMenu;
+class QButtonGroup;
+class QSlider;
 
 class UIFrame;
 class World;
@@ -46,6 +48,17 @@ public:
     hole_setting = 3,
     area_id_setting = 4,
     impassable_flag_setting = 5,
+  };
+
+  enum shaping_formula_type
+  {
+    flat = 0,
+    linear = 1,
+    smooth = 2,
+    polynomial = 3,
+    trigonometric = 4,
+    square = 5,
+    shaping_formula_types,
   };
 
   MapView (World* world, float ah0 = -90.0f, float av0 = -30.0f, QGLWidget* shared = NULL, QWidget* parent = NULL);
@@ -125,6 +138,12 @@ private slots:
   void clear_all_models();
   void clear_texture();
   void show_texture_switcher();
+  void shaping_formula (int);
+  void shaping_formula (shaping_formula_type);
+  void shaping_radius (int);
+  void shaping_speed (int);
+  void shaping_radius (qreal);
+  void shaping_speed (qreal);
 
   void TEST_save_wdt();
 
@@ -132,6 +151,12 @@ private:
   QAction* new_toggleable_action (const QString& text, const char* slot, bool default_value, const QKeySequence& shortcut = 0);
   QAction* new_action (const QString& text, const char* slot, const QKeySequence& shortcut = 0);
   QAction* new_action (const QString& text, QObject* receiver, const char* slot, const QKeySequence& shortcut = 0);
+
+  QWidget* create_shaping_settings_widget();
+
+  const qreal& shaping_radius() const;
+  const qreal& shaping_speed() const;
+  const shaping_formula_type& shaping_formula() const;
 
   QTime _startup_time;
   qreal _last_update;
@@ -179,6 +204,16 @@ private:
   bool _save_to_minimap_on_next_drawing;
 
   UIFrame* _last_clicked_ui_frame;
+
+  UIFrame* _map_chunk_properties_window;
+
+  qreal _shaping_radius;
+  qreal _shaping_speed;
+  shaping_formula_type _shaping_formula;
+
+  QButtonGroup* _shaping_formula_radio_group;
+  QSlider* _shaping_radius_slider;
+  QSlider* _shaping_speed_slider;
 };
 
 
