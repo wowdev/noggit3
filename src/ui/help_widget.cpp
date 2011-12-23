@@ -35,6 +35,7 @@ namespace ui
             % __ ("U", "2D texture editor")
     //! \todo: C chunk settings must get fixed first. Then turn on this again
     //      % __ ("C", "Chunk settings")
+            % __ ("Alt + C", "Show cursor switcher")
             % __ ("H", "Help")
             % __ ("Shift + R", "Turn camera 180°")
             % __ ("Shift + F4", "Toggle automatic selection")
