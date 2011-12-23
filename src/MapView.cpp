@@ -1463,13 +1463,17 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
     // copy model to clipboard
     if( e->keysym.sym == SDLK_c )
+	{
 	  if(Environment::getInstance()->CtrlDown )
         CopySelectedObject( 0, 0 );
+	  else if(Environment::getInstance()->AltDown)
+		  mainGui->toggleCursorSwitcher();
 	  else
 	  {
-		  Environment::getInstance()->cursorType ++;
+		  Environment::getInstance()->cursorType++;
 			  if (Environment::getInstance()->cursorType>3) Environment::getInstance()->cursorType = 0;
 	  }
+	}
     // paste model
     if( e->keysym.sym == SDLK_v && Environment::getInstance()->CtrlDown )
       PasteSelectedObject( 0, 0 );
