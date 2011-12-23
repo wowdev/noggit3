@@ -4,7 +4,7 @@
 #include "Noggit.h" // arial14
 #include "Video.h" // video
 
-const int winWidth = 765;
+const int winWidth = 775;
 const int winHeight = 800;
 
 UIHelp::UIHelp( )
@@ -18,10 +18,12 @@ UIHelp::UIHelp( )
     "  I - invert mouse up and down\n"
     "  Q, E - move vertically up, down\n"
     "  A, D, W, S - move left, right, forward, backward\n"
+	"  C - Switch cursor\n"
     "  M - show minimap\n"
     "  U - 2D texture editor\n"
     //"C - chunk settings\n" //! \todo: C chunk settings must get fixed first. Then turn on this again
     "  H - help\n"
+	"  ALT + C - Show/Close CursorSwitcher\n"
     "  SHIFT + R - turn camera 180 degres\n"
     "  SHIFT + F4 - change to auto select mode\n"
     "  ESC - exit to main menu\n"
@@ -58,7 +60,7 @@ UIHelp::UIHelp( )
     , arial14, eJustifyLeft )
   );
 
-  addChild( new UIText( 370.0f, 30.0f,
+  addChild( new UIText( 380.0f, 30.0f,
     "Edit ground:\n"
     "  SHIFT + F1 - toggle ground edit mode\n"
     "  T - change terrain mode\n"
