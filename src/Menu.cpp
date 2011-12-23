@@ -1,17 +1,17 @@
-#include "Menu.h"
+#include <Menu.h>
 
-#include "Vec3D.h"
-#include "World.h"
-#include "DBC.h"
-#include "Log.h"
-#include "MapView.h"
-#include "UIMinimapWindow.h"
-
+#include <QHBoxLayout>
 #include <QMetaType>
 #include <QListWidget>
-#include <QTabWidget>
 #include <QSettings>
-#include <QHBoxLayout>
+#include <QTabWidget>
+
+#include <DBC.h>
+#include <Log.h>
+#include <MapView.h>
+#include <Vec3D.h>
+#include <World.h>
+#include <ui/minimap_widget.h>
 
 struct bookmark_entry
 {
@@ -85,7 +85,7 @@ Menu::Menu (QWidget* parent)
   entry_points_tabs->addTab (raids_table, tr ("Raids"));
   entry_points_tabs->addTab (bookmarks_table, tr ("Bookmarks"));
 
-  _minimap = new minimap_widget (NULL);
+  _minimap = new ui::minimap_widget (NULL);
   _minimap->draw_boundaries (true);
   connect (_minimap, SIGNAL (map_clicked (Vec3D)), SLOT (minimap_clicked (Vec3D)));
 

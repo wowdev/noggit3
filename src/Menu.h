@@ -1,5 +1,5 @@
-#ifndef MENU_H
-#define MENU_H
+#ifndef __MENU_H
+#define __MENU_H
 
 #include <QWidget>
 
@@ -7,7 +7,10 @@ class QKeyEvent;
 class QMouseEvent;
 class QListWidgetItem;
 
-class minimap_widget;
+namespace ui
+{
+  class minimap_widget;
+}
 class Vec3D;
 class World;
 
@@ -34,7 +37,7 @@ private:
   void prepare_world (const Vec3D& pos, float rotation, float tilt, bool auto_height);
   void enter_world_at (const Vec3D& pos, bool autoHeight = true, float av = -30.0f, float ah = -90.0f);
 
-  minimap_widget* _minimap;
+  ui::minimap_widget* _minimap;
   World* _world;
 };
 
