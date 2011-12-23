@@ -50,15 +50,30 @@ public:
     impassable_flag_setting = 5,
   };
 
-  enum shaping_formula_type
+  //! \todo enum class with C++0x
+  struct shaping_formula_type
   {
-    flat = 0,
-    linear = 1,
-    smooth = 2,
-    polynomial = 3,
-    trigonometric = 4,
-    square = 5,
-    shaping_formula_types,
+    enum formula
+    {
+      flat = 0,
+      linear = 1,
+      smooth = 2,
+      polynomial = 3,
+      trigonometric = 4,
+      square = 5,
+      shaping_formula_types,
+    };
+  };
+
+  struct smoothing_formula_type
+  {
+    enum formula
+    {
+      flat = 0,
+      linear = 1,
+      smooth = 2,
+      smoothing_formula_types,
+    };
   };
 
   MapView (World* world, float ah0 = -90.0f, float av0 = -30.0f, QGLWidget* shared = NULL, QWidget* parent = NULL);
@@ -139,11 +154,17 @@ private slots:
   void clear_texture();
   void show_texture_switcher();
   void shaping_formula (int);
-  void shaping_formula (shaping_formula_type);
+  void shaping_formula (shaping_formula_type::formula);
   void shaping_radius (int);
   void shaping_speed (int);
   void shaping_radius (qreal);
   void shaping_speed (qreal);
+  void smoothing_formula (int);
+  void smoothing_formula (smoothing_formula_type::formula);
+  void smoothing_radius (int);
+  void smoothing_speed (int);
+  void smoothing_radius (qreal);
+  void smoothing_speed (qreal);
 
   void TEST_save_wdt();
 
@@ -152,11 +173,16 @@ private:
   QAction* new_action (const QString& text, const char* slot, const QKeySequence& shortcut = 0);
   QAction* new_action (const QString& text, QObject* receiver, const char* slot, const QKeySequence& shortcut = 0);
 
-  QWidget* create_shaping_settings_widget();
+  void create_shaping_settings_widget();
+  void create_smoothing_settings_widget();
 
   const qreal& shaping_radius() const;
   const qreal& shaping_speed() const;
-  const shaping_formula_type& shaping_formula() const;
+  const shaping_formula_type::formula& shaping_formula() const;
+
+  const qreal& smoothing_radius() const;
+  const qreal& smoothing_speed() const;
+  const smoothing_formula_type::formula& smoothing_formula() const;
 
   QTime _startup_time;
   qreal _last_update;
@@ -207,13 +233,26 @@ private:
 
   UIFrame* _map_chunk_properties_window;
 
+  //! \todo Use the brush class for these? Or simplify that somehow?
   qreal _shaping_radius;
   qreal _shaping_speed;
-  shaping_formula_type _shaping_formula;
+  shaping_formula_type::formula _shaping_formula;
 
   QButtonGroup* _shaping_formula_radio_group;
   QSlider* _shaping_radius_slider;
   QSlider* _shaping_speed_slider;
+
+  QWidget* _shaping_settings_widget;
+
+  qreal _smoothing_radius;
+  qreal _smoothing_speed;
+  smoothing_formula_type::formula _smoothing_formula;
+
+  QButtonGroup* _smoothing_formula_radio_group;
+  QSlider* _smoothing_radius_slider;
+  QSlider* _smoothing_speed_slider;
+
+  QWidget* _smoothing_settings_widget;
 };
 
 
