@@ -60,30 +60,12 @@
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
 
-static const float XSENS = 15.0f;
-static const float YSENS = 15.0f;
-static const float SPEED = 66.6f;
-
-int MouseX;
-int MouseY;
 float mh,mv,rh,rv;
 
-float moveratio = 0.1f;
-float rotratio = 0.2f;
 float keyx,keyy,keyz,keyr,keys;
 
 int tool_settings_x;
 int tool_settings_y;
-
-bool MoveObj;
-
-Vec3D ObjMove;
-Vec3D ObjRot;
-
-
-bool TestSelection=false;
-
-extern bool DrawMapContour;
 
 extern nameEntryManager SelectionNames;
 
@@ -955,6 +937,8 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , mTimespeed( 0.0f )
   , _help_widget (new ui::help_widget (NULL))
   , _about_widget (new ui::about_widget (NULL))
+  , _is_currently_moving_object (false)
+  , _draw_terrain_height_contour (false)
 {
   LastClicked=0;
 
@@ -962,7 +946,8 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
 
   mousedir = -1.0f;
 
-  movespd = SPEED;
+  static const float default_moving_speed (66.6f);
+  movespd = default_moving_speed;
 
   lastBrushUpdate = 0;
   textureBrush.init();
@@ -1063,11 +1048,11 @@ void MapView::tick( float t, float dt )
 
   if( Selection )
   {
+    qreal keypad_object_move_ratio (0.1);
     // Set move scale and rotate for numpad keys
-    if(Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown) moveratio=0.05f;
-    else if(Environment::getInstance()->ShiftDown) moveratio=0.2f;
-    else if(Environment::getInstance()->CtrlDown) moveratio=0.3f;
-    else moveratio=0.1f;
+    if(Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown) keypad_object_move_ratio = 0.05;
+    else if(Environment::getInstance()->ShiftDown) keypad_object_move_ratio=0.2;
+    else if(Environment::getInstance()->CtrlDown) keypad_object_move_ratio=0.3;
 
     if( keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0)
     {
@@ -1075,21 +1060,21 @@ void MapView::tick( float t, float dt )
       if( Selection->type == eEntry_WMO )
       {
         _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
-        Selection->data.wmo->pos.x += keyx * moveratio;
-        Selection->data.wmo->pos.y += keyy * moveratio;
-        Selection->data.wmo->pos.z += keyz * moveratio;
-        Selection->data.wmo->dir.y += keyr * moveratio * 2;
+        Selection->data.wmo->pos.x += keyx * keypad_object_move_ratio;
+        Selection->data.wmo->pos.y += keyy * keypad_object_move_ratio;
+        Selection->data.wmo->pos.z += keyz * keypad_object_move_ratio;
+        Selection->data.wmo->dir.y += keyr * keypad_object_move_ratio * 2.0;
         _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
       }
 
       if( Selection->type == eEntry_Model )
       {
         _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
-        Selection->data.model->pos.x += keyx * moveratio;
-        Selection->data.model->pos.y += keyy * moveratio;
-        Selection->data.model->pos.z += keyz * moveratio;
-        Selection->data.model->dir.y += keyr * moveratio * 2;
-        Selection->data.model->sc += keys * moveratio / 50;
+        Selection->data.model->pos.x += keyx * keypad_object_move_ratio;
+        Selection->data.model->pos.y += keyy * keypad_object_move_ratio;
+        Selection->data.model->pos.z += keyz * keypad_object_move_ratio;
+        Selection->data.model->dir.y += keyr * keypad_object_move_ratio * 2.0;
+        Selection->data.model->sc += keys * keypad_object_move_ratio / 50.0;
         _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
       }
     }
@@ -1106,7 +1091,7 @@ void MapView::tick( float t, float dt )
 
     // moving and scaling objects
     //! \todo  Alternatively automatically align it to the terrain. Also try to move it where the mouse points.
-    if( MoveObj )
+    if( _is_currently_moving_object )
       if( Selection->type == eEntry_WMO )
       {
          _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // before move
@@ -1226,7 +1211,7 @@ void MapView::tick( float t, float dt )
           if( mViewMode == eViewMode_3D )
             _world->eraseTextures(xPos, zPos);
           else if( mViewMode == eViewMode_2D )
-            _world->eraseTextures( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
+            _world->eraseTextures( CHUNKSIZE * 4.0f * video.ratio() * ( _mouse_position.x() / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / static_cast<float>( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
         }
         else if( Environment::getInstance()->CtrlDown )
         {
@@ -1254,7 +1239,7 @@ void MapView::tick( float t, float dt )
             textureBrush.GenerateTexture();
           }
           if( mViewMode == eViewMode_2D && !(Environment::getInstance()->ShiftDown) )
-            _world->paintTexture( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
+            _world->paintTexture( CHUNKSIZE * 4.0f * video.ratio() * ( _mouse_position.x() / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / static_cast<float>( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
         }
       break;
 
@@ -1265,12 +1250,12 @@ void MapView::tick( float t, float dt )
     Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
     yPos = Selection->data.mapchunk->getSelectionHeight();
           if( mViewMode == eViewMode_3D )      _world->removeHole( xPos, zPos );
-          //else if( mViewMode == eViewMode_2D )  _world->removeHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
+          //else if( mViewMode == eViewMode_2D )  _world->removeHole( CHUNKSIZE * 4.0f * video.ratio() * ( _mouse_position.x() / float( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
         }
         else if( Environment::getInstance()->CtrlDown )
         {
           if( mViewMode == eViewMode_3D )      _world->addHole( xPos, zPos );
-          //else if( mViewMode == eViewMode_2D )  _world->addHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
+          //else if( mViewMode == eViewMode_2D )  _world->addHole( CHUNKSIZE * 4.0f * video.ratio() * ( _mouse_position.x() / float( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
         }
       break;
 
@@ -1363,7 +1348,7 @@ void MapView::tick( float t, float dt )
 
 void MapView::doSelection( bool selectTerrainOnly )
 {
-  _world->drawSelection( MouseX, MouseY, selectTerrainOnly );
+  _world->drawSelection( _mouse_position.x(), _mouse_position.y(), selectTerrainOnly );
 }
 
 
@@ -1401,8 +1386,8 @@ void MapView::displayViewMode_2D()
   video.setTileMode();
   _world->drawTileMode( ah );
 
-  const float mX = ( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom + _world->camera.x ) / CHUNKSIZE;
-  const float mY = ( CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f ) / _world->zoom + _world->camera.z ) / CHUNKSIZE;
+  const float mX = ( CHUNKSIZE * 4.0f * video.ratio() * ( _mouse_position.x() / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom + _world->camera.x ) / CHUNKSIZE;
+  const float mY = ( CHUNKSIZE * 4.0f * ( _mouse_position.y() / static_cast<float>( video.yres() ) - 0.5f ) / _world->zoom + _world->camera.z ) / CHUNKSIZE;
 
   // draw brush
   glPushMatrix();
@@ -1443,7 +1428,7 @@ void MapView::displayViewMode_3D()
 
   video.set3D();
 
-  _world->draw();
+  _world->draw (_draw_terrain_height_contour);
 
   displayGUIIfEnabled();
 }
@@ -1784,14 +1769,14 @@ void MapView::toggle_terrain_texturing_mode()
   {
     alloff_models = _world->drawmodels;
     alloff_doodads = _world->drawdoodads;
-    alloff_contour = DrawMapContour;
+    alloff_contour = _draw_terrain_height_contour;
     alloff_wmo = _world->drawwmo;
     alloff_fog = _world->drawfog;
     alloff_terrain = _world->drawterrain;
 
     _world->drawmodels = false;
     _world->drawdoodads = false;
-    DrawMapContour = true;
+    _draw_terrain_height_contour = true;
     _world->drawwmo = false;
     _world->drawterrain = true;
     _world->drawfog = false;
@@ -1800,7 +1785,7 @@ void MapView::toggle_terrain_texturing_mode()
   {
     _world->drawmodels = alloff_models;
     _world->drawdoodads = alloff_doodads;
-    DrawMapContour = alloff_contour;
+    _draw_terrain_height_contour = alloff_contour;
     _world->drawwmo = alloff_wmo;
     _world->drawterrain = alloff_terrain;
     _world->drawfog = alloff_fog;
@@ -1933,7 +1918,7 @@ void MapView::cycle_brush_type()
 
 void MapView::toggle_contour_drawing (bool value)
 {
-  DrawMapContour = value;
+  _draw_terrain_height_contour = value;
 }
 
 void MapView::toggle_fog_drawing (bool value)
@@ -2104,7 +2089,7 @@ void MapView::mousePressEvent (QMouseEvent* event)
   {
     if (_world->HasSelection())
     {
-      MoveObj = true;
+      _is_currently_moving_object = true;
     }
   }
 
@@ -2160,12 +2145,15 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
   }
   if (event->button() == Qt::MidButton)
   {
-    MoveObj = false;
+    _is_currently_moving_object = false;
   }
 }
 
 void MapView::mouseMoveEvent (QMouseEvent* event)
 {
+  static const float XSENS (15.0f);
+  static const float YSENS (15.0f);
+
   const QPoint relative_move (event->pos() - _last_drag_position);
 
   if (look && event->modifiers() == Qt::NoModifier)
@@ -2176,7 +2164,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     av = qBound (-80.0f, av, 80.0f);
   }
 
-  if( MoveObj )
+  if( _is_currently_moving_object )
   {
     mh = -video.ratio() * relative_move.x() / static_cast<float>( video.xres() );
     mv = -relative_move.y() / static_cast<float>( video.yres() );
@@ -2240,8 +2228,10 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     updown = (relative_move.y() / YSENS);
   }
 
-  Environment::getInstance()->screenX = MouseX = event->x();
-  Environment::getInstance()->screenY = MouseY = event->y();
+  _mouse_position = event->pos();
+
+  Environment::getInstance()->screenX = event->x();
+  Environment::getInstance()->screenY = event->y();
 
   _last_drag_position = event->pos();
 }

@@ -472,15 +472,13 @@ extern brush textureBrush;
 
 
 
-void MapTile::draw()
+void MapTile::draw (bool draw_terrain_height_contour)
 {
-
-
   glColor4f(1,1,1,1);
 
   for (int j=0; j<16; ++j)
     for (int i=0; i<16; ++i)
-      mChunks[j][i]->draw();
+      mChunks[j][i]->draw (draw_terrain_height_contour);
 
 }
 

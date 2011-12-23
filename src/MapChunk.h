@@ -64,7 +64,7 @@ public:
   void destroy();
   void initStrip();
 
-  void draw();
+  void draw (bool draw_terrain_height_contour);
   void drawContour();
   void drawAreaID();
   void drawBlock();

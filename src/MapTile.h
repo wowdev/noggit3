@@ -32,7 +32,7 @@ public:
 
   bool changed;
 
-  void draw();
+  void draw (bool draw_terrain_height_contour);
   void drawSelect();
   void drawLines();
   void drawWater();
