@@ -1021,7 +1021,7 @@ extern int terrainMode;
 extern brush textureBrush;
 
 
-void World::draw()
+void World::draw (bool draw_terrain_height_contour)
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -1138,7 +1138,7 @@ void World::draw()
       {
         if( tileLoaded( j, i ) )
         {
-          mTiles[j][i].tile->draw();
+          mTiles[j][i].tile->draw (draw_terrain_height_contour);
         }
       }
     }

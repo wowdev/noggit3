@@ -25,8 +25,6 @@ static const int HEIGHT_SHALLOW = -100;
 static const int HEIGHT_DEEP = -250;
 static const double MAPCHUNK_DIAMETER  = 47.140452079103168293389624140323;
 
-bool DrawMapContour = false;
-
 GLuint Contour = 0;
 float CoordGen[4];
 static const int CONTOUR_WIDTH = 128;
@@ -967,8 +965,6 @@ void MapChunk::drawLines()
 
 void MapChunk::drawContour()
 {
-  if(!DrawMapContour)
-    return;
   glColor4f(1,1,1,1);
   glActiveTexture(GL_TEXTURE0);
   glEnable(GL_TEXTURE_2D);
@@ -983,7 +979,6 @@ void MapChunk::drawContour()
   glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
   glTexGenfv(GL_S,GL_OBJECT_PLANE,CoordGen);
 
-
   drawPass(0);
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_TEXTURE_GEN_S);
@@ -991,7 +986,7 @@ void MapChunk::drawContour()
 
 
 
-void MapChunk::draw()
+void MapChunk::draw (bool draw_terrain_height_contour)
 {
 
   if (!_world->frustum.intersects( vmin, vmax ))
@@ -1081,7 +1076,8 @@ void MapChunk::draw()
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_LIGHTING);
 
-  drawContour();
+  if (draw_terrain_height_contour)
+    drawContour();
 
   if(terrainMode==5)
   {

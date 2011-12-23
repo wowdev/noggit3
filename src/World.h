@@ -161,7 +161,7 @@ public:
   void saveTile(int x, int z);
   void saveChanged();
   void tick(float dt);
-  void draw();
+  void draw (bool draw_terrain_height_contour);
 
   void outdoorLights(bool on);
   void setupFog();

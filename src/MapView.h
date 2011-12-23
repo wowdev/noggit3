@@ -148,6 +148,10 @@ private:
   UIDoodadSpawner* _doodad_spawner;
   ui::help_widget* _help_widget;
   ui::about_widget* _about_widget;
+
+  QPointF _mouse_position;
+  bool _is_currently_moving_object;
+  bool _draw_terrain_height_contour;
 };
 
 
