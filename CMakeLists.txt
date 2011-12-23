@@ -94,7 +94,6 @@ SET( SourceFiles
   src/UIHelp.cpp
   src/UIListView.cpp
   src/UIMapViewGUI.cpp
-  src/UIMenuBar.cpp
   src/UIMinimapWindow.cpp
   src/UIMinimizeButton.cpp
   src/UIModel.cpp
@@ -170,7 +169,6 @@ SET( AllHeaders
   src/UIHelp.h
   src/UIListView.h
   src/UIMapViewGUI.h
-  src/UIMenuBar.h
   src/UIMinimapWindow.h
   src/UIMinimizeButton.h
   src/UIModel.h

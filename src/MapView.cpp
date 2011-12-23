@@ -42,7 +42,6 @@
 #include <UIDoodadSpawner.h>
 #include "UIGradient.h" // UIGradient
 #include "UIMapViewGUI.h" // UIMapViewGUI
-#include "UIMenuBar.h" // UIMenuBar, menu items, ..
 #include "UIMinimapWindow.h" // UIMinimapWindow
 #include "UISlider.h" // UISlider
 #include "UIStatusBar.h" // statusBar
