@@ -1539,6 +1539,9 @@ void MapView::keyPressEvent (QKeyEvent* event)
 //  NEW_TOGGLE_ACTION (rotation_randomization, tr ("Randomized rotation when copying"), SLOT (toggle_copy_rotation_randomization (bool)), 0, false);
 
 
+  if (event->key() == Qt::Key_C && event->modifiers() & Qt::AltModifier)
+    mainGui->toggleCursorSwitcher();
+  else
   if (event->key() == Qt::Key_C)
     Environment::getInstance()->cursorType = (Environment::getInstance()->cursorType + 1) % 4;
 
