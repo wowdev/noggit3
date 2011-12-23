@@ -81,7 +81,6 @@ SET( SourceFiles
   src/Shaders.cpp
   src/Sky.cpp
   src/TextureManager.cpp
-  src/ui/about_widget.cpp
   src/UIAppInfo.cpp
   src/UIButton.cpp
   src/UICheckBox.cpp
@@ -91,7 +90,6 @@ SET( SourceFiles
   src/UIDoodadSpawner.cpp
   src/UIFrame.cpp
   src/UIGradient.cpp
-  src/UIHelp.cpp
   src/UIListView.cpp
   src/UIMapViewGUI.cpp
   src/UIMinimapWindow.cpp
@@ -117,6 +115,9 @@ SET( SourceFiles
   src/WMO.cpp
   src/WMOInstance.cpp
   src/World.cpp
+
+  src/ui/about_widget.cpp
+  src/ui/help_widget.cpp
 )
 
 SET( AllHeaders
@@ -155,7 +156,6 @@ SET( AllHeaders
   src/Shaders.h
   src/Sky.h
   src/TextureManager.h
-  src/ui/about_widget.h
   src/UIAppInfo.h
   src/UIButton.h
   src/UICheckBox.h
@@ -166,7 +166,6 @@ SET( AllHeaders
   src/UIEventClasses.h
   src/UIFrame.h
   src/UIGradient.h
-  src/UIHelp.h
   src/UIListView.h
   src/UIMapViewGUI.h
   src/UIMinimapWindow.h
@@ -194,14 +193,19 @@ SET( AllHeaders
   src/WMOInstance.h
   src/World.h
   src/errorHandling.h
+
+  src/ui/about_widget.h
+  src/ui/help_widget.h
 )
 
 SET( HeadersToMoc
   src/Noggit.h
   src/Menu.h
   src/MapView.h
-  src/ui/about_widget.h
   src/UIMinimapWindow.h
+
+  src/ui/about_widget.h
+  src/ui/help_widget.h
 )
 
 SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/" )
