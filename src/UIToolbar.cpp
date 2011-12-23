@@ -52,13 +52,8 @@ void UIToolbar::SetIcon( int pIcon, const std::string& pIconFile )
   addChild( mToolbarIcons[pIcon] );
 }
 
-// MapView.cpp
-void change_settings_window(int oldid, int newid);
-
 void UIToolbar::IconSelect( int pIcon )
 {
-  change_settings_window( selectedIcon, pIcon + 1 > 6 ? 0 : pIcon + 1);
-
   const char * Names[] = { "Raise / Lower"
                          , "Flatten / Blur"
                          , "3D Paint"
