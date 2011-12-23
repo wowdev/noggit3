@@ -17,6 +17,7 @@ class UIDoodadSpawner;
 namespace ui
 {
   class help_widget;
+  class about_widget;
 }
 
 enum eViewMode
@@ -146,6 +147,7 @@ private:
   minimap_widget* _minimap;
   UIDoodadSpawner* _doodad_spawner;
   ui::help_widget* _help_widget;
+  ui::about_widget* _about_widget;
 };
 
 

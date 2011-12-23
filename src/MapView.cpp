@@ -16,6 +16,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <ui/about_widget.h>
 #include <ui/help_widget.h>
 
 #ifdef __FILESAREMISSING
@@ -759,7 +760,7 @@ void MapView::createGUI()
 
   NEW_ACTION_OTHER (key_bindings, tr ("Key bindings"), _help_widget, SLOT (show()), Qt::Key_H);
   NEW_TOGGLE_ACTION (application_infos, tr ("Show application infos"), SLOT (toggle_app_info (bool)), 0, false);
-
+  NEW_ACTION_OTHER (about_noggit, tr ("About Noggit"), _about_widget, SLOT (show()), 0);
 
   NEW_ACTION (save_wdt, tr ("Save WDT"), SLOT (TEST_save_wdt()), 0);
   NEW_ACTION (save_minimap, tr ("Save minimap as raw files"), SLOT (save_minimap()), Qt::Key_P + Qt::SHIFT + Qt::CTRL);
@@ -856,6 +857,7 @@ void MapView::createGUI()
   QMenu* help_menu (menu_bar->addMenu (tr ("Help")));
   help_menu->addAction (key_bindings);
   help_menu->addAction (application_infos);
+  help_menu->addAction (about_noggit);
 
   QMenu* debug_menu (menu_bar->addMenu (tr ("Testing and Debugging")));
   debug_menu->addAction (save_wdt);
@@ -952,6 +954,7 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _GUIDisplayingEnabled( true )
   , mTimespeed( 0.0f )
   , _help_widget (new ui::help_widget (NULL))
+  , _about_widget (new ui::about_widget (NULL))
 {
   LastClicked=0;
 
