@@ -9,6 +9,8 @@
 #include <ui/minimap_widget.h>
 #include <ui/help_widget.h>
 
+#include <signal_blocker.h>
+
 #include <Brush.h>
 #include <Environment.h>
 #include <MapChunk.h>
@@ -56,12 +58,6 @@ bool  alloff_detailselect = false;
 bool  alloff_fog = false;
 bool  alloff_terrain = false;
 
-UISlider* ground_brush_radius;
-float groundBrushRadius=15.0f;
-UISlider* ground_brush_speed;
-float groundBrushSpeed=1.0f;
-int    groundBrushType=2;
-
 UISlider* blur_brush;
 float blurBrushRadius=10.0f;
 int    blurBrushType=2;
@@ -73,11 +69,7 @@ float brushLevel=255.0f;
 
 brush textureBrush;
 
-
-// main GUI object
 UIMapViewGUI* mainGui;
-
-UIFrame* MapChunkWindow;
 
 UIToggleGroup * gBlurToggleGroup;
 UIToggleGroup * gGroundToggleGroup;
@@ -86,18 +78,6 @@ UIToggleGroup * gFlagsToggleGroup;
 UIWindow *setting_ground;
 UIWindow *setting_blur;
 UIWindow *settings_paint;
-
-
-//TextBox * textbox;
-
-void setGroundBrushRadius(float f)
-{
-  groundBrushRadius = f;
-}
-void setGroundBrushSpeed(float f)
-{
-  groundBrushSpeed =f;
-}
 
 void setBlurBrushRadius(float f)
 {
@@ -509,6 +489,140 @@ void MapView::import_heightmap() { }
 void MapView::export_heightmap() { }
 #endif
 
+#include <QButtonGroup>
+#include <QVBoxLayout>
+#include <QRadioButton>
+#include <QSlider>
+#include <QLabel>
+
+void MapView::shaping_formula (int id)
+{
+  shaping_formula (shaping_formula_type (id));
+}
+void MapView::shaping_formula (shaping_formula_type id)
+{
+  _shaping_formula = id;
+
+  signal_blocker block (_shaping_formula_radio_group);
+  _shaping_formula_radio_group->button (id)->click();
+}
+const MapView::shaping_formula_type& MapView::shaping_formula() const
+{
+  return _shaping_formula;
+}
+
+static const qreal shaping_radius_minimum (1.0);
+static const qreal shaping_radius_maximum (534.0);
+static const qreal shaping_radius_scale (100.0);
+static const qreal shaping_speed_minimum (0.0);
+static const qreal shaping_speed_maximum (10.0);
+static const qreal shaping_speed_scale (10.0);
+
+void MapView::shaping_radius (int value)
+{
+  shaping_radius (value / shaping_radius_scale);
+}
+
+void MapView::shaping_speed (int value)
+{
+  shaping_speed (value / shaping_speed_scale);
+}
+
+void MapView::shaping_radius (qreal value)
+{
+  _shaping_radius = qBound ( shaping_radius_minimum
+                           , value
+                           , shaping_radius_maximum
+                           );
+
+  signal_blocker block (_shaping_radius_slider);
+  _shaping_radius_slider->setValue (shaping_radius() * shaping_radius_scale);
+}
+
+void MapView::shaping_speed (qreal value)
+{
+  _shaping_speed = qBound ( shaping_speed_minimum
+                          , value
+                          , shaping_speed_maximum
+                          );
+
+  signal_blocker block (_shaping_speed_slider);
+  _shaping_speed_slider->setValue (shaping_speed() * shaping_speed_scale);
+}
+
+const qreal& MapView::shaping_radius() const
+{
+  return _shaping_radius;
+}
+const qreal& MapView::shaping_speed() const
+{
+  return _shaping_speed;
+}
+
+QWidget* MapView::create_shaping_settings_widget()
+{
+  QWidget* widget (new QWidget (NULL));
+  QVBoxLayout* widget_layout (new QVBoxLayout (widget));
+
+  QWidget* button_holder (new QWidget (widget));
+  widget_layout->addWidget (button_holder);
+
+  QGridLayout* button_layout (new QGridLayout (button_holder));
+
+  _shaping_formula_radio_group = new QButtonGroup (this);
+
+  QRadioButton* flat_checkbox (new QRadioButton (tr ("Flat"), NULL));
+  QRadioButton* linear_checkbox (new QRadioButton (tr ("Linear"), NULL));
+  QRadioButton* smooth_checkbox (new QRadioButton (tr ("Smooth"), NULL));
+  QRadioButton* polynomial_checkbox (new QRadioButton (tr ("Polynomial"), NULL));
+  QRadioButton* trigonometric_checkbox (new QRadioButton (tr ("Trigonometric"), NULL));
+  QRadioButton* square_checkbox (new QRadioButton (tr ("Square"), NULL));
+
+  _shaping_formula_radio_group->addButton (flat_checkbox, flat);
+  _shaping_formula_radio_group->addButton (linear_checkbox, linear);
+  _shaping_formula_radio_group->addButton (smooth_checkbox, smooth);
+  _shaping_formula_radio_group->addButton (polynomial_checkbox, polynomial);
+  _shaping_formula_radio_group->addButton (trigonometric_checkbox, trigonometric);
+  _shaping_formula_radio_group->addButton (square_checkbox, square);
+
+  connect (_shaping_formula_radio_group, SIGNAL (buttonClicked (int)), SLOT (shaping_formula (int)));
+
+  button_layout->addWidget (flat_checkbox, 0, 0);
+  button_layout->addWidget (linear_checkbox, 1, 0);
+  button_layout->addWidget (smooth_checkbox, 2, 0);
+  button_layout->addWidget (polynomial_checkbox, 0, 1);
+  button_layout->addWidget (trigonometric_checkbox, 1, 1);
+  button_layout->addWidget (square_checkbox, 2, 1);
+
+  _shaping_radius_slider = new QSlider (Qt::Horizontal, widget);
+  _shaping_radius_slider->setMinimum (shaping_radius_minimum * shaping_radius_scale);
+  _shaping_radius_slider->setMaximum (shaping_radius_maximum * shaping_radius_scale);
+  connect (_shaping_radius_slider, SIGNAL (valueChanged (int)), SLOT (shaping_radius (int)));
+
+  _shaping_speed_slider = new QSlider (Qt::Horizontal, widget);
+  _shaping_speed_slider->setMinimum (shaping_speed_minimum * shaping_speed_scale);
+  _shaping_speed_slider->setMaximum (shaping_speed_maximum * shaping_speed_scale);
+  connect (_shaping_speed_slider, SIGNAL (valueChanged (int)), SLOT (shaping_speed (int)));
+
+  QLabel* radius_label (new QLabel (tr ("Brush &radius"), widget));
+  QLabel* speed_label (new QLabel (tr ("Shaping &speed"), widget));
+
+  radius_label->setBuddy (_shaping_radius_slider);
+  speed_label->setBuddy (_shaping_speed_slider);
+
+  widget_layout->addWidget (radius_label);
+  widget_layout->addWidget (_shaping_radius_slider);
+  widget_layout->addWidget (speed_label);
+  widget_layout->addWidget (_shaping_speed_slider);
+
+  //! \note Looks funny, but sets the UI to the default position.
+  shaping_radius (shaping_radius());
+  shaping_speed (shaping_speed());
+  shaping_formula (shaping_formula());
+
+  return widget;
+}
+
 void MapView::createGUI()
 {
   // create main gui object that holds all other gui elements for access ( in the future ;) )
@@ -525,33 +639,7 @@ void MapView::createGUI()
   tool_settings_x = video.xres() - 186;
   tool_settings_y = 38;
 
-  // Raise/Lower
-  setting_ground=new UIWindow( tool_settings_x, tool_settings_y, 180.0f, 160.0f );
-  setting_ground->movable( true );
-  mainGui->addChild( setting_ground );
-
-  setting_ground->addChild( new UIText( 78.5f, 2.0f, "Raise / Lower", arial14, eJustifyCenter ) );
-
-  gGroundToggleGroup = new UIToggleGroup( &groundBrushType );
-  setting_ground->addChild( new UICheckBox( 6.0f, 15.0f, "Flat", gGroundToggleGroup, 0 ) );
-  setting_ground->addChild( new UICheckBox( 85.0f, 15.0f, "Linear", gGroundToggleGroup, 1 ) );
-  setting_ground->addChild( new UICheckBox( 6.0f, 40.0f, "Smooth", gGroundToggleGroup, 2 ) );
-  setting_ground->addChild( new UICheckBox( 85.0f, 40.0f, "Polynomial", gGroundToggleGroup, 3 ) );
-  setting_ground->addChild( new UICheckBox( 6.0f, 65.0f, "Trigonom", gGroundToggleGroup, 4 ) );
-  setting_ground->addChild( new UICheckBox( 85.0f, 65.0f, "Quadratic", gGroundToggleGroup, 5 ) );
-  gGroundToggleGroup->Activate(1);
-
-  ground_brush_radius=new UISlider(6.0f,120.0f,167.0f,1000.0f,0.00001f);
-  ground_brush_radius->setFunc(setGroundBrushRadius);
-  ground_brush_radius->setValue(groundBrushRadius/1000);
-  ground_brush_radius->setText( "Brush radius: " );
-  setting_ground->addChild(ground_brush_radius);
-
-  ground_brush_speed=new UISlider(6.0f,145.0f,167.0f,10.0f,0.00001f);
-  ground_brush_speed->setFunc(setGroundBrushSpeed);
-  ground_brush_speed->setValue(groundBrushSpeed/10);
-  ground_brush_speed->setText( "Brush Speed: " );
-  setting_ground->addChild(ground_brush_speed);
+  create_shaping_settings_widget()->show();
 
   // flatten/blur
   setting_blur=new UIWindow(tool_settings_x,tool_settings_y,180.0f,100.0f);
@@ -627,8 +715,8 @@ void MapView::createGUI()
   mainGui->SelectedTexture->hide();
   mainGui->addChild(UITexturingGUI::createTilesetLoader());
   mainGui->addChild(UITexturingGUI::createTextureFilter());
-  mainGui->addChild(MapChunkWindow = UITexturingGUI::createMapChunkWindow());
-  MapChunkWindow->hide();
+  mainGui->addChild(_map_chunk_properties_window = UITexturingGUI::createMapChunkWindow());
+  _map_chunk_properties_window->hide();
 
 #define NEW_ACTION(__NAME__, __TEXT, __SLOT, __KEYS) QAction* __NAME__ (new_action (__TEXT, __SLOT, __KEYS));
 #define NEW_ACTION_OTHER(__NAME__, __TEXT, __RECEIVER, __SLOT, __KEYS) QAction* __NAME__ (new_action (__TEXT, __RECEIVER, __SLOT, __KEYS));
@@ -846,7 +934,7 @@ QAction* MapView::new_toggleable_action (const QString& text, const char* slot, 
 
 void MapView::show_map_chunk_settings (bool value)
 {
-  MapChunkWindow->hidden (!value);
+  _map_chunk_properties_window->hidden (!value);
 }
 
 void MapView::toggle_toolbar_visibility (bool value)
@@ -896,6 +984,13 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _terrain_editing_mode_before_2d (_current_terrain_editing_mode)
   , _save_to_minimap_on_next_drawing (false)
   , _last_clicked_ui_frame (NULL)
+  , _map_chunk_properties_window (NULL)
+  , _shaping_radius (15.0)
+  , _shaping_speed (1.0)
+  , _shaping_formula (smooth)
+  , _shaping_formula_radio_group (NULL)
+  , _shaping_radius_slider (NULL)
+  , _shaping_speed_slider (NULL)
 {
   moving = strafing = updown = 0.0f;
 
@@ -1141,12 +1236,12 @@ void MapView::tick( float t, float dt )
         if( Environment::getInstance()->ShiftDown )
         {
           // Move ground up
-          if( mViewMode == eViewMode_3D ) _world->changeTerrain( xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+          if( mViewMode == eViewMode_3D ) _world->changeTerrain( xPos, zPos, 7.5f * dt * shaping_speed(), shaping_radius(), shaping_formula() );
         }
         else if( Environment::getInstance()->CtrlDown )
         {
           // Move ground down
-          if( mViewMode == eViewMode_3D ) _world->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+          if( mViewMode == eViewMode_3D ) _world->changeTerrain( xPos, zPos, -7.5f * dt * shaping_speed(), shaping_radius(), shaping_formula() );
         }
       break;
 
@@ -1295,7 +1390,7 @@ void MapView::tick( float t, float dt )
 
   _world->tick(dt);
 
-  if( !MapChunkWindow->hidden() && _world->GetCurrentSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk )
+  if( !_map_chunk_properties_window->hidden() && _world->GetCurrentSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk )
   {
     UITexturingGUI::setChunkWindow( _world->GetCurrentSelection()->data.mapchunk );
   }
@@ -1386,7 +1481,7 @@ void MapView::displayViewMode_3D()
   float brush_radius (0.3f);
 
   if (_current_terrain_editing_mode == shaping)
-    brush_radius = groundBrushRadius;
+    brush_radius = shaping_radius();
   else if (_current_terrain_editing_mode == smoothing)
     brush_radius = blurBrushRadius;
   else if (_current_terrain_editing_mode == texturing)
@@ -1798,8 +1893,7 @@ void MapView::increase_brush_size()
   switch( _current_terrain_editing_mode )
   {
   case shaping:
-    groundBrushRadius = qBound (0.0005f, groundBrushRadius + 0.01f, 1000.0f);
-    ground_brush_radius->setValue( groundBrushRadius / 1000 );
+    shaping_radius (shaping_radius() + 0.01);
     break;
   case smoothing:
     blurBrushRadius = qBound (0.01f, blurBrushRadius + 0.01f, 1000.0f);
@@ -1819,8 +1913,7 @@ void MapView::decrease_brush_size()
   switch( _current_terrain_editing_mode )
   {
   case shaping:
-    groundBrushRadius = qBound (0.0005f, groundBrushRadius - 0.01f, 1000.0f);
-    ground_brush_radius->setValue( groundBrushRadius / 1000 );
+    shaping_radius (shaping_radius() - 0.01f);
     break;
   case smoothing:
     blurBrushRadius = qBound (0.01f, blurBrushRadius - 0.01f, 1000.0f);
@@ -1881,9 +1974,7 @@ void MapView::cycle_brush_type()
   switch( _current_terrain_editing_mode )
   {
   case shaping:
-    groundBrushType++;
-    groundBrushType = groundBrushType % 6;
-    gGroundToggleGroup->Activate( groundBrushType );
+    shaping_formula ((shaping_formula() + 1) % shaping_formula_types);
     break;
 
   case smoothing:
@@ -2164,13 +2255,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     switch( _current_terrain_editing_mode )
     {
     case shaping:
-      groundBrushRadius += relative_move.x() / XSENS;
-      if( groundBrushRadius > 1000.0f )
-        groundBrushRadius = 1000.0f;
-      else if( groundBrushRadius < 0.01f )
-        groundBrushRadius = 0.01f;
-      ground_brush_radius->setValue( groundBrushRadius / 1000 );
+      shaping_radius (shaping_radius() + relative_move.x() / XSENS);
       break;
+
     case smoothing:
       blurBrushRadius += relative_move.x() / XSENS;
       if( blurBrushRadius > 1000.0f )
@@ -2219,6 +2306,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 void MapView::set_terrain_editing_mode (const terrain_editing_modes& mode)
 {
   _current_terrain_editing_mode = mode;
-  mainGui->guiToolbar->IconSelect( _current_terrain_editing_mode );
+  if (mainGui && mainGui->guiToolbar)
+    mainGui->guiToolbar->IconSelect (_current_terrain_editing_mode);
   Environment::getInstance()->view_holelines = mode == hole_setting;
 }
