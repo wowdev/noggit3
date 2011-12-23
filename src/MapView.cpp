@@ -1,64 +1,39 @@
-#undef _UNICODE
+#include <MapView.h>
 
-#include <algorithm>
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <map>
-#include <stdlib.h>
-#include <string>
-#include <vector>
-
-#include <QMouseEvent>
-#include <QKeyEvent>
+#include <QMenu>
 #include <QMenuBar>
+#include <QKeyEvent>
 #include <QSettings>
 
-#include <boost/filesystem.hpp>
-
 #include <ui/about_widget.h>
+#include <ui/minimap_widget.h>
 #include <ui/help_widget.h>
+
+#include <Brush.h>
+#include <Environment.h>
+#include <MapChunk.h>
+#include <Misc.h>
+#include <Noggit.h>
+#include <Settings.h>
+#include <UIAppInfo.h>
+#include <UICheckBox.h>
+#include <UIDetailInfos.h>
+#include <UIDoodadSpawner.h>
+#include <UIFrame.h>
+#include <UIGradient.h>
+#include <UIMapViewGUI.h>
+#include <UISlider.h>
+#include <UITexturePicker.h>
+#include <UITextureSwitcher.h>
+#include <UITexturingGUI.h>
+#include <UIToolbar.h>
+#include <UIZoneIDBrowser.h>
+#include <WMOInstance.h>
+#include <World.h>
 
 #ifdef __FILESAREMISSING
 #include <IL/il.h>
 #endif
-
-#include "Brush.h" // brush
-#include "ConfigFile.h"
-#include "DBC.h"
-#include "Environment.h"
-#include "FreeType.h" // freetype::
-#include "Log.h"
-#include "MapChunk.h"
-#include "MapView.h"
-#include "Misc.h"
-#include "ModelManager.h" // ModelManager
-#include "Noggit.h" // gStates, gPop, gFPS, arial14, morpheus40, arial...
-#include "Project.h"
-#include "Settings.h"
-#include "Environment.h"
-#include "TextureManager.h" // TextureManager, Texture
-#include "UIAppInfo.h" // appInfo
-#include "UICheckBox.h" // UICheckBox
-#include "UICursorSwitcher.h" // UICursorSwitcher
-#include "UIDetailInfos.h" // detailInfos
-#include <UIDoodadSpawner.h>
-#include "UIGradient.h" // UIGradient
-#include "UIMapViewGUI.h" // UIMapViewGUI
-#include "UIMinimapWindow.h" // UIMinimapWindow
-#include "UISlider.h" // UISlider
-#include "UIStatusBar.h" // statusBar
-#include "UIText.h" // UIText
-#include "UITexture.h" // textureUI
-#include "UITexturePicker.h"
-#include "UITextureSwitcher.h"
-#include "UITexturingGUI.h"
-#include "UIToggleGroup.h" // UIToggleGroup
-#include "UIToolbar.h" // UIToolbar
-#include "UIToolbarIcon.h" // ToolbarIcon
-#include "UIZoneIDBrowser.h"
-#include "WMOInstance.h" // WMOInstance
-#include "World.h"
 
 float mh,mv,rh,rv;
 
@@ -96,16 +71,7 @@ UISlider* paint_brush;
 float brushPressure=0.9f;
 float brushLevel=255.0f;
 
-int saveterrainMode = 0;
-
 brush textureBrush;
-
-
-UICursorSwitcher* CursorSwitcher;
-
-bool Saving=false;
-
-UIFrame* LastClicked;
 
 
 // main GUI object
@@ -835,7 +801,7 @@ void MapView::createGUI()
   useless_menu->addAction (turn_around);
 
   // Minimap window
-  _minimap = new minimap_widget (NULL);
+  _minimap = new ui::minimap_widget (NULL);
   _minimap->world (_world);
   _minimap->draw_skies (true);
   _minimap->draw_camera (true);
@@ -928,9 +894,9 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _holding_right_mouse_button (false)
   , _current_terrain_editing_mode (shaping)
   , _terrain_editing_mode_before_2d (_current_terrain_editing_mode)
+  , _save_to_minimap_on_next_drawing (false)
+  , _last_clicked_ui_frame (NULL)
 {
-  LastClicked=0;
-
   moving = strafing = updown = 0.0f;
 
   mousedir = -1.0f;
@@ -1440,11 +1406,11 @@ void MapView::displayViewMode_3D()
 void MapView::display()
 {
   //! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
-  if( Saving )
+  if (_save_to_minimap_on_next_drawing)
   {
     video.setTileMode();
     _world->saveMap();
-    Saving=false;
+    _save_to_minimap_on_next_drawing = false;
   }
 
   switch( mViewMode )
@@ -1467,7 +1433,7 @@ void MapView::resizewindow()
 void MapView::keyPressEvent (QKeyEvent* event)
 {
   //! \todo Implement GUI stuff again?
-//  if( LastClicked && LastClicked->keyPressEvent( event ) )
+//  if( _last_clicked_ui_frame && _last_clicked_ui_frame->keyPressEvent( event ) )
 //    return;
 
   if (event->key() == Qt::Key_Shift)
@@ -1705,7 +1671,7 @@ void MapView::decrease_moving_speed()
 void MapView::save_minimap()
 {
   //! \todo This needs to be actually done here, not deferred to next display().
-  Saving = true;
+  _save_to_minimap_on_next_drawing = true;
 }
 
 void MapView::turn_around()
@@ -2112,8 +2078,8 @@ void MapView::mousePressEvent (QMouseEvent* event)
   }
   else if (_holding_left_mouse_button)
   {
-    LastClicked = mainGui->processLeftClick (event->x(), event->y());
-    if (mViewMode == eViewMode_3D && !LastClicked)
+    _last_clicked_ui_frame = mainGui->processLeftClick (event->x(), event->y());
+    if (mViewMode == eViewMode_3D && !_last_clicked_ui_frame)
     {
       doSelection (false);
     }
@@ -2130,8 +2096,8 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
   {
     _holding_left_mouse_button = false;
 
-    if( LastClicked )
-      LastClicked->processUnclick();
+    if( _last_clicked_ui_frame )
+      _last_clicked_ui_frame->processUnclick();
 
     if(!key_w && moving > 0.0f )
       moving = 0.0f;
@@ -2226,9 +2192,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     }
   }
 
-  if (event->buttons() & Qt::LeftButton && LastClicked)
+  if (event->buttons() & Qt::LeftButton && _last_clicked_ui_frame)
   {
-    LastClicked->processLeftDrag( event->x() - 4, event->y() - 4, relative_move.x(), relative_move.y() );
+    _last_clicked_ui_frame->processLeftDrag( event->x() - 4, event->y() - 4, relative_move.x(), relative_move.y() );
   }
 
   if( mViewMode == eViewMode_2D && event->buttons() & Qt::LeftButton && event->modifiers() & Qt::ShiftModifier)

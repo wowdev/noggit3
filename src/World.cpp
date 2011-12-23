@@ -1015,11 +1015,6 @@ void World::setupFog()
   }
 }
 
-extern float groundBrushRadius;
-extern float blurBrushRadius;
-extern brush textureBrush;
-
-
 void World::draw ( bool draw_terrain_height_contour
                  , bool mark_impassable_chunks
                  , bool draw_area_id_overlay

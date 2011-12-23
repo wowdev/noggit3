@@ -14,7 +14,6 @@
 #include "UICursorSwitcher.h" // UICursorSwitcher
 #include "UIDetailInfos.h" // UIDetailInfos
 #include "UIDoodadSpawner.h"
-#include "UIMinimapWindow.h"
 #include "UIStatusBar.h" // UIStatusBar
 #include "UITexturePicker.h" //
 #include "UITextureSwitcher.h"

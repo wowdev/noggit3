@@ -145,8 +145,6 @@ void Noggit::parse_command_line_and_set_defaults()
   _settings->sync();
 }
 
-extern World* gWorld;
-
 class dummy_gl_widget : public QGLWidget
 {
 public:

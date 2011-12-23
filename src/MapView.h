@@ -1,6 +1,9 @@
 #ifndef MAPVIEW_H
 #define MAPVIEW_H
 
+// GL needs to be included before GLWidget.
+#include <Video.h>
+
 #include <QPoint>
 #include <QGLWidget>
 #include <QKeySequence>
@@ -11,7 +14,10 @@ class QMenu;
 
 class UIFrame;
 class World;
-class minimap_widget;
+namespace ui
+{
+  class minimap_widget;
+}
 class UIDoodadSpawner;
 
 namespace ui
@@ -155,7 +161,7 @@ private:
   QPoint _last_drag_position;
   UIFrame* _last_clicked_item;
 
-  minimap_widget* _minimap;
+  ui::minimap_widget* _minimap;
   UIDoodadSpawner* _doodad_spawner;
   ui::help_widget* _help_widget;
   ui::about_widget* _about_widget;
@@ -169,6 +175,10 @@ private:
 
   terrain_editing_modes _current_terrain_editing_mode;
   terrain_editing_modes _terrain_editing_mode_before_2d;
+
+  bool _save_to_minimap_on_next_drawing;
+
+  UIFrame* _last_clicked_ui_frame;
 };
 
 

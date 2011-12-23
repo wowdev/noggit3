@@ -92,7 +92,6 @@ SET( SourceFiles
   src/UIGradient.cpp
   src/UIListView.cpp
   src/UIMapViewGUI.cpp
-  src/UIMinimapWindow.cpp
   src/UIMinimizeButton.cpp
   src/UIModel.cpp
   src/UIScrollBar.cpp
@@ -118,6 +117,7 @@ SET( SourceFiles
 
   src/ui/about_widget.cpp
   src/ui/help_widget.cpp
+  src/ui/minimap_widget.cpp
 )
 
 SET( AllHeaders
@@ -168,7 +168,6 @@ SET( AllHeaders
   src/UIGradient.h
   src/UIListView.h
   src/UIMapViewGUI.h
-  src/UIMinimapWindow.h
   src/UIMinimizeButton.h
   src/UIModel.h
   src/UIScrollBar.h
@@ -196,16 +195,17 @@ SET( AllHeaders
 
   src/ui/about_widget.h
   src/ui/help_widget.h
+  src/ui/minimap_widget.h
 )
 
 SET( HeadersToMoc
   src/Noggit.h
   src/Menu.h
   src/MapView.h
-  src/UIMinimapWindow.h
 
   src/ui/about_widget.h
   src/ui/help_widget.h
+  src/ui/minimap_widget.h
 )
 
 SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/" )
@@ -246,7 +246,7 @@ include( "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake" )
 SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp" )
 
 # And do the job.
-INCLUDE_DIRECTORIES( ${IncludeDirectories} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src  ${IncludeDirectories} )
 IF( APPLE )
   SET( ResourceFiles "${CMAKE_SOURCE_DIR}/media/noggit.icns" )
   SET_SOURCE_FILES_PROPERTIES( ${ResourceFiles} PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
