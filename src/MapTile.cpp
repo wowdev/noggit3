@@ -467,18 +467,25 @@ float MapTile::getMaxHeight()
 
 extern float groundBrushRadius;
 extern float blurBrushRadius;
-extern int terrainMode;
 extern brush textureBrush;
 
 
 
-void MapTile::draw (bool draw_terrain_height_contour)
+void MapTile::draw ( bool draw_terrain_height_contour
+                   , bool mark_impassable_chunks
+                   , bool draw_area_id_overlay
+                   , bool dont_draw_cursor
+                   )
 {
   glColor4f(1,1,1,1);
 
   for (int j=0; j<16; ++j)
     for (int i=0; i<16; ++i)
-      mChunks[j][i]->draw (draw_terrain_height_contour);
+      mChunks[j][i]->draw ( draw_terrain_height_contour
+                          , mark_impassable_chunks
+                          , draw_area_id_overlay
+                          , dont_draw_cursor
+                          );
 
 }
 

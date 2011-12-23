@@ -15,8 +15,6 @@
 #include "Vec3D.h"
 #include "World.h"
 
-extern int terrainMode;
-
 static const int HEIGHT_TOP = 1000;
 static const int HEIGHT_MID = 600;
 static const int HEIGHT_LOW = 300;
@@ -986,7 +984,11 @@ void MapChunk::drawContour()
 
 
 
-void MapChunk::draw (bool draw_terrain_height_contour)
+void MapChunk::draw ( bool draw_terrain_height_contour
+                    , bool mark_impassable_chunks
+                    , bool draw_area_id_overlay
+                    , bool dont_draw_cursor
+                    )
 {
 
   if (!_world->frustum.intersects( vmin, vmax ))
@@ -1071,25 +1073,23 @@ void MapChunk::draw (bool draw_terrain_height_contour)
   glBindTexture(GL_TEXTURE_2D, shadow);
   glEnable(GL_TEXTURE_2D);
 
-  drawPass(0);
+  drawPass (0);
 
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_LIGHTING);
 
   if (draw_terrain_height_contour)
-    drawContour();
-
-  if(terrainMode==5)
   {
-    // draw chunk white if impassible flag is set
-    if(Flags & FLAG_IMPASS)
-    {
-      glColor4f(1,1,1,0.6f);
-      drawPass(0);
-    }
+    drawContour();
   }
 
-  if(terrainMode==4)
+  if (mark_impassable_chunks && Flags & FLAG_IMPASS)
+  {
+    glColor4f (1.0f, 1.0f, 1.0f, 0.6f);
+    drawPass (0);
+  }
+
+  if (draw_area_id_overlay)
   {
     // draw chunks in color depending on AreaID and list color from environment
     if(Environment::getInstance()->areaIDColors.find(areaID) != Environment::getInstance()->areaIDColors.end() )
@@ -1100,30 +1100,31 @@ void MapChunk::draw (bool draw_terrain_height_contour)
     }
   }
 
-  if (Environment::getInstance()->cursorType == 3)
+  if ( Environment::getInstance()->cursorType == 3
+    && _world->IsSelection (eEntry_MapChunk)
+    && _world->GetCurrentSelection()->data.mapchunk == this
+    && !dont_draw_cursor
+     )
   {
-    if (_world->IsSelection (eEntry_MapChunk) && _world->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3)
-    {
-      const int poly (_world->GetCurrentSelectedTriangle());
+    const int poly (_world->GetCurrentSelectedTriangle());
 
-      glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
+    glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
 
-      glPushMatrix();
+    glPushMatrix();
 
-      glDisable( GL_CULL_FACE );
-      glDepthMask( false );
-      glDisable( GL_DEPTH_TEST );
-      glBegin( GL_TRIANGLES );
-      glVertex3fv( mVertices[_world->mapstrip2[poly + 0]] );
-      glVertex3fv( mVertices[_world->mapstrip2[poly + 1]] );
-      glVertex3fv( mVertices[_world->mapstrip2[poly + 2]] );
-      glEnd();
-      glEnable( GL_CULL_FACE );
-      glEnable( GL_DEPTH_TEST );
-      glDepthMask( true );
+    glDisable( GL_CULL_FACE );
+    glDepthMask( false );
+    glDisable( GL_DEPTH_TEST );
+    glBegin( GL_TRIANGLES );
+    glVertex3fv( mVertices[_world->mapstrip2[poly + 0]] );
+    glVertex3fv( mVertices[_world->mapstrip2[poly + 1]] );
+    glVertex3fv( mVertices[_world->mapstrip2[poly + 2]] );
+    glEnd();
+    glEnable( GL_CULL_FACE );
+    glEnable( GL_DEPTH_TEST );
+    glDepthMask( true );
 
-      glPopMatrix();
-    }
+    glPopMatrix();
   }
 
 

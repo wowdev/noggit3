@@ -32,6 +32,16 @@ class MapView : public QGLWidget
   Q_OBJECT
 
 public:
+  enum terrain_editing_modes
+  {
+    shaping = 0,
+    smoothing = 1,
+    texturing = 2,
+    hole_setting = 3,
+    area_id_setting = 4,
+    impassable_flag_setting = 5,
+  };
+
   MapView (World* world, float ah0 = -90.0f, float av0 = -30.0f, QGLWidget* shared = NULL, QWidget* parent = NULL);
   virtual ~MapView();
 
@@ -51,6 +61,7 @@ protected:
 
 public slots:
   void resizewindow();
+  void set_terrain_editing_mode (const terrain_editing_modes&);
 
 private slots:
   void add_bookmark();
@@ -152,6 +163,12 @@ private:
   QPointF _mouse_position;
   bool _is_currently_moving_object;
   bool _draw_terrain_height_contour;
+
+  bool _holding_left_mouse_button;
+  bool _holding_right_mouse_button;
+
+  terrain_editing_modes _current_terrain_editing_mode;
+  terrain_editing_modes _terrain_editing_mode_before_2d;
 };
 
 
