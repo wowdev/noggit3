@@ -11,7 +11,6 @@ class MapView;
 class UIFrame;
 class UITexturePicker;
 class UITextureSwitcher;
-class UIHelp;
 class UICursorSwitcher;
 class World;
 
@@ -45,14 +44,9 @@ public:
   void hideCursorSwitcher();
   void toggleCursorSwitcher();
 
-  void showHelp();
-  void hideHelp();
-  void toggleHelp();
-
 private:
   bool _tilemode;
   UICursorSwitcher* CursorSwitcher;
-  UIHelp* _help;
   World* _world;
 };
 

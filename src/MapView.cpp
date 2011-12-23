@@ -16,6 +16,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <ui/help_widget.h>
+
 #ifdef __FILESAREMISSING
 #include <IL/il.h>
 #endif
@@ -241,11 +243,6 @@ void openSwapper( UIFrame*, int )
   mainGui->TextureSwitcher->setPosition(settings_paint->x() , settings_paint->y()) ;
   mainGui->TextureSwitcher->show();
   settings_paint->hide();
-}
-
-void MapView::open_help()
-{
-  mainGui->showHelp();
 }
 
 //! \todo Make this a member of MapView. Also correctly add the actions below again.
@@ -700,6 +697,7 @@ void MapView::createGUI()
   MapChunkWindow->hide();
 
 #define NEW_ACTION(__NAME__, __TEXT, __SLOT, __KEYS) QAction* __NAME__ (new_action (__TEXT, __SLOT, __KEYS));
+#define NEW_ACTION_OTHER(__NAME__, __TEXT, __RECEIVER, __SLOT, __KEYS) QAction* __NAME__ (new_action (__TEXT, __RECEIVER, __SLOT, __KEYS));
 #define NEW_TOGGLE_ACTION(__NAME__, __TEXT, __SLOT, __KEYS, __DEFAULT) QAction* __NAME__ (new_toggleable_action (__TEXT, __SLOT, __DEFAULT, __KEYS));
 
   NEW_ACTION (save_current_tile, tr ("Save current tile"), SLOT (save()), Qt::CTRL + Qt::SHIFT + Qt::Key_S);
@@ -759,7 +757,7 @@ void MapView::createGUI()
   NEW_ACTION (increase_moving_speed, tr ("Increase movement speed"), SLOT (increase_moving_speed()), Qt::Key_P);
 
 
-  NEW_ACTION (key_bindings, tr ("Key bindings"), SLOT (open_help()), Qt::Key_H);
+  NEW_ACTION_OTHER (key_bindings, tr ("Key bindings"), _help_widget, SLOT (show()), Qt::Key_H);
   NEW_TOGGLE_ACTION (application_infos, tr ("Show application infos"), SLOT (toggle_app_info (bool)), 0, false);
 
 
@@ -768,6 +766,7 @@ void MapView::createGUI()
   NEW_ACTION (toggle_doodad_spawner, tr ("toggle_doodad_spawner"), SLOT (toggle_doodad_spawner()), Qt::Key_T);
 
 #undef NEW_ACTION
+#undef NEW_ACTION_OTHER
 #undef NEW_TOGGLE_ACTION
 
   QMenuBar* menu_bar (new QMenuBar (NULL));
@@ -886,6 +885,17 @@ QAction* MapView::new_action (const QString& text, const char* slot, const QKeyS
   return action;
 }
 
+QAction* MapView::new_action (const QString& text, QObject* receiver, const char* slot, const QKeySequence& shortcut)
+{
+  QAction* action (new QAction (text, this));
+  receiver->connect (action, SIGNAL (triggered()), slot);
+  if (shortcut != QKeySequence (0))
+  {
+    action->setShortcuts (QList<QKeySequence>() << shortcut);
+  }
+  return action;
+}
+
 QAction* MapView::new_toggleable_action (const QString& text, const char* slot, bool default_value, const QKeySequence& shortcut)
 {
   QAction* action (new QAction (text, this));
@@ -941,6 +951,7 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _world (world)
   , _GUIDisplayingEnabled( true )
   , mTimespeed( 0.0f )
+  , _help_widget (new ui::help_widget (NULL))
 {
   LastClicked=0;
 

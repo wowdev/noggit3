@@ -14,7 +14,6 @@
 #include "UICursorSwitcher.h" // UICursorSwitcher
 #include "UIDetailInfos.h" // UIDetailInfos
 #include "UIDoodadSpawner.h"
-#include "UIHelp.h"
 #include "UIMinimapWindow.h"
 #include "UIStatusBar.h" // UIStatusBar
 #include "UITexturePicker.h" //
@@ -75,10 +74,6 @@ UIMapViewGUI::UIMapViewGUI (World* world, MapView *setMapview)
   CursorSwitcher->hide();
   CursorSwitcher->movable(true);
   addChild(CursorSwitcher);
-
-  _help = new UIHelp();
-  _help->hide();
-  addChild( _help );
 }
 
 void UIMapViewGUI::showCursorSwitcher()
@@ -94,19 +89,6 @@ void UIMapViewGUI::hideCursorSwitcher()
 void UIMapViewGUI::toggleCursorSwitcher()
 {
   CursorSwitcher->toggleVisibility();
-}
-
-void UIMapViewGUI::showHelp()
-{
-  _help->show();
-}
-void UIMapViewGUI::hideHelp()
-{
-  _help->hide();
-}
-void UIMapViewGUI::toggleHelp()
-{
-  _help->toggleVisibility();
 }
 
 void UIMapViewGUI::setTilemode( bool enabled )

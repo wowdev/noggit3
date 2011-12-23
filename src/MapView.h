@@ -14,6 +14,11 @@ class World;
 class minimap_widget;
 class UIDoodadSpawner;
 
+namespace ui
+{
+  class help_widget;
+}
+
 enum eViewMode
 {
   eViewMode_Minimap,
@@ -61,7 +66,6 @@ private slots:
   void increase_moving_speed();
   void increase_time_speed();
   void invert_mouse_y_axis (bool);
-  void open_help();
   void paste_object();
   void reload_current_tile();
   void reset_selected_object_rotation();
@@ -109,6 +113,7 @@ private slots:
 private:
   QAction* new_toggleable_action (const QString& text, const char* slot, bool default_value, const QKeySequence& shortcut = 0);
   QAction* new_action (const QString& text, const char* slot, const QKeySequence& shortcut = 0);
+  QAction* new_action (const QString& text, QObject* receiver, const char* slot, const QKeySequence& shortcut = 0);
 
   QTime _startup_time;
   qreal _last_update;
@@ -140,6 +145,7 @@ private:
 
   minimap_widget* _minimap;
   UIDoodadSpawner* _doodad_spawner;
+  ui::help_widget* _help_widget;
 };
 
 
