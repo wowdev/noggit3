@@ -1017,11 +1017,16 @@ void World::setupFog()
 
 extern float groundBrushRadius;
 extern float blurBrushRadius;
-extern int terrainMode;
 extern brush textureBrush;
 
 
-void World::draw (bool draw_terrain_height_contour)
+void World::draw ( bool draw_terrain_height_contour
+                 , bool mark_impassable_chunks
+                 , bool draw_area_id_overlay
+                 , bool dont_draw_cursor
+                 , float inner_cursor_radius
+                 , float outer_cursor_radius
+                 )
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -1138,7 +1143,11 @@ void World::draw (bool draw_terrain_height_contour)
       {
         if( tileLoaded( j, i ) )
         {
-          mTiles[j][i].tile->draw (draw_terrain_height_contour);
+          mTiles[j][i].tile->draw ( draw_terrain_height_contour
+                                  , mark_impassable_chunks
+                                  , draw_area_id_overlay
+                                  , dont_draw_cursor
+                                  );
         }
       }
     }
@@ -1184,30 +1193,14 @@ void World::draw (bool draw_terrain_height_contour)
     glDisable(GL_CULL_FACE);
     //glDepthMask(false);
     //glDisable(GL_DEPTH_TEST);
-    if(terrainMode == 0)
-  {
-    if(Environment::getInstance()->cursorType == 1)
-    renderDisk_convenient(posX, posY, posZ, groundBrushRadius);
-    else if(Environment::getInstance()->cursorType == 2)
-      renderSphere_convenient(posX, posY, posZ, groundBrushRadius, 15);
-  }
-    else if(terrainMode == 1)
-  {
 
-    if(Environment::getInstance()->cursorType == 1)
-      renderDisk_convenient(posX, posY, posZ, blurBrushRadius);
-    else if(Environment::getInstance()->cursorType == 2)
-      renderSphere_convenient(posX, posY, posZ, blurBrushRadius, 15);
-
-  }
-    else if(terrainMode == 2)
-  {
-    if(Environment::getInstance()->cursorType == 1)
-    renderDisk_convenient(posX, posY, posZ, textureBrush.getRadius());
-    else if(Environment::getInstance()->cursorType == 2)
-    renderSphere_convenient(posX, posY, posZ, textureBrush.getRadius(), 15);
-  }
-  else renderSphere_convenient(posX, posY, posZ, 0.3f, 15);
+    if (!dont_draw_cursor)
+    {
+      if(Environment::getInstance()->cursorType == 1)
+        renderDisk_convenient(posX, posY, posZ, outer_cursor_radius);
+      else if(Environment::getInstance()->cursorType == 2)
+        renderSphere_convenient(posX, posY, posZ, outer_cursor_radius, 15);
+    }
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);

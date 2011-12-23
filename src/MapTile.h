@@ -32,7 +32,11 @@ public:
 
   bool changed;
 
-  void draw (bool draw_terrain_height_contour);
+  void draw ( bool draw_terrain_height_contour
+            , bool mark_impassable_chunks
+            , bool draw_area_id_overlay
+            , bool dont_draw_cursor
+            );
   void drawSelect();
   void drawLines();
   void drawWater();

@@ -67,20 +67,6 @@ float keyx,keyy,keyz,keyr,keys;
 int tool_settings_x;
 int tool_settings_y;
 
-extern nameEntryManager SelectionNames;
-
-// extern row and col form Palette UI
-
-
-// This variables store the current status of the
-// Shift, Alt and CTRL keys
-
-
-bool  leftMouse=false;
-bool  leftClicked=false;
-bool  rightMouse=false;
-bool  painting=false;
-
 // Vars for the ground editing toggle mode
 // store the status of some view settings when
 // the ground editing mode is switched on
@@ -110,7 +96,6 @@ UISlider* paint_brush;
 float brushPressure=0.9f;
 float brushLevel=255.0f;
 
-int terrainMode=0;
 int saveterrainMode = 0;
 
 brush textureBrush;
@@ -939,6 +924,10 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _about_widget (new ui::about_widget (NULL))
   , _is_currently_moving_object (false)
   , _draw_terrain_height_contour (false)
+  , _holding_left_mouse_button (false)
+  , _holding_right_mouse_button (false)
+  , _current_terrain_editing_mode (shaping)
+  , _terrain_editing_mode_before_2d (_current_terrain_editing_mode)
 {
   LastClicked=0;
 
@@ -1170,7 +1159,7 @@ void MapView::tick( float t, float dt )
     rv = 0;
 
 
-    if( leftMouse && Selection->type==eEntry_MapChunk )
+    if( _holding_left_mouse_button && Selection->type==eEntry_MapChunk )
     {
       float xPos, yPos, zPos;
 
@@ -1180,9 +1169,9 @@ void MapView::tick( float t, float dt )
       yPos = Environment::getInstance()->Pos3DY;
       zPos = Environment::getInstance()->Pos3DZ;
 
-      switch( terrainMode )
+      switch( _current_terrain_editing_mode )
       {
-      case 0:
+      case shaping:
         if( Environment::getInstance()->ShiftDown )
         {
           // Move ground up
@@ -1195,7 +1184,7 @@ void MapView::tick( float t, float dt )
         }
       break;
 
-      case 1:
+      case smoothing:
         if( Environment::getInstance()->ShiftDown )
           if( mViewMode == eViewMode_3D ) _world->flattenTerrain( xPos, zPos, yPos, pow( 0.2f, dt ), blurBrushRadius, blurBrushType );
         if( Environment::getInstance()->CtrlDown )
@@ -1204,7 +1193,7 @@ void MapView::tick( float t, float dt )
         }
       break;
 
-      case 2:
+      case texturing:
         if( Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown)
         {
           // clear chunk texture
@@ -1243,7 +1232,7 @@ void MapView::tick( float t, float dt )
         }
       break;
 
-      case 3:
+      case hole_setting:
         if( Environment::getInstance()->ShiftDown  )
         {
       // if there is no terain the projection mothod dont work. So get the cords by selection.
@@ -1259,7 +1248,7 @@ void MapView::tick( float t, float dt )
         }
       break;
 
-      case 4:
+      case area_id_setting:
         if( Environment::getInstance()->ShiftDown  )
         {
           if( mViewMode == eViewMode_3D )
@@ -1287,7 +1276,7 @@ void MapView::tick( float t, float dt )
 
       break;
 
-      case 5:
+      case impassable_flag_setting:
         if( Environment::getInstance()->ShiftDown  )
         {
           if( mViewMode == eViewMode_3D ) _world->setFlag( true, xPos, zPos );
@@ -1428,7 +1417,22 @@ void MapView::displayViewMode_3D()
 
   video.set3D();
 
-  _world->draw (_draw_terrain_height_contour);
+  float brush_radius (0.3f);
+
+  if (_current_terrain_editing_mode == shaping)
+    brush_radius = groundBrushRadius;
+  else if (_current_terrain_editing_mode == smoothing)
+    brush_radius = blurBrushRadius;
+  else if (_current_terrain_editing_mode == texturing)
+    brush_radius = textureBrush.getRadius();
+
+  _world->draw ( _draw_terrain_height_contour
+               , _current_terrain_editing_mode == impassable_flag_setting
+               , _current_terrain_editing_mode == area_id_setting
+               , _current_terrain_editing_mode == hole_setting
+               , brush_radius
+               , brush_radius
+               );
 
   displayGUIIfEnabled();
 }
@@ -1608,8 +1612,8 @@ void MapView::keyPressEvent (QKeyEvent* event)
     }
     else if (event->key() >= Qt::Key_1 && event->key() <= Qt::Key_6)
     {
-      terrainMode = event->key() - Qt::Key_1;
-      mainGui->guiToolbar->IconSelect( terrainMode );
+      set_terrain_editing_mode
+        (terrain_editing_modes (event->key() - Qt::Key_1));
     }
   }
 }
@@ -1621,9 +1625,9 @@ void MapView::toggle_detail_info_window (bool value)
 
 void MapView::toggle_terrain_mode_window()
 {
-  if(terrainMode==2)
+  if(_current_terrain_editing_mode == texturing)
     view_texture_palette( 0, 0 );
-  else if(terrainMode==4)
+  else if(_current_terrain_editing_mode == area_id_setting)
     mainGui->ZoneIDBrowser->toggleVisibility();
 }
 
@@ -1818,41 +1822,46 @@ void MapView::toggle_wmo_doodad_drawing (bool value)
   _world->drawdoodads = value;
 }
 
+
 //! \todo these should be symetrical, so maybe combine.
 void MapView::increase_brush_size()
 {
-  switch( terrainMode )
+  switch( _current_terrain_editing_mode )
   {
-  case 0:
+  case shaping:
     groundBrushRadius = qBound (0.0005f, groundBrushRadius + 0.01f, 1000.0f);
     ground_brush_radius->setValue( groundBrushRadius / 1000 );
     break;
-  case 1:
+  case smoothing:
     blurBrushRadius = qBound (0.01f, blurBrushRadius + 0.01f, 1000.0f);
     blur_brush->setValue( blurBrushRadius / 1000 );
     break;
-  case 2:
+  case texturing:
     textureBrush.setRadius (qBound (0.1f, textureBrush.getRadius() + 0.1f, 100.0f));
     paint_brush->setValue( textureBrush.getRadius() / 100 );
+    break;
+  default:
     break;
   }
 }
 
 void MapView::decrease_brush_size()
 {
-  switch( terrainMode )
+  switch( _current_terrain_editing_mode )
   {
-  case 0:
+  case shaping:
     groundBrushRadius = qBound (0.0005f, groundBrushRadius - 0.01f, 1000.0f);
     ground_brush_radius->setValue( groundBrushRadius / 1000 );
     break;
-  case 1:
+  case smoothing:
     blurBrushRadius = qBound (0.01f, blurBrushRadius - 0.01f, 1000.0f);
     blur_brush->setValue( blurBrushRadius / 1000 );
     break;
-  case 2:
+  case texturing:
     textureBrush.setRadius (qBound (0.1f, textureBrush.getRadius() - 0.1f, 100.0f));
     paint_brush->setValue( textureBrush.getRadius() / 100 );
+    break;
+  default:
     break;
   }
 }
@@ -1900,18 +1909,21 @@ void MapView::exit_to_menu()
 void MapView::cycle_brush_type()
 {
   // toogle between smooth / flat / linear
-  switch( terrainMode )
+  switch( _current_terrain_editing_mode )
   {
-  case 0:
+  case shaping:
     groundBrushType++;
     groundBrushType = groundBrushType % 6;
     gGroundToggleGroup->Activate( groundBrushType );
     break;
 
-  case 1:
+  case smoothing:
     blurBrushType++;
     blurBrushType = blurBrushType % 3;
     gBlurToggleGroup->Activate( blurBrushType );
+    break;
+
+  default:
     break;
   }
 }
@@ -1931,17 +1943,14 @@ void MapView::toggle_tile_mode()
   if( mViewMode == eViewMode_2D )
   {
     mViewMode = eViewMode_3D;
-    terrainMode = saveterrainMode;
+    set_terrain_editing_mode (_terrain_editing_mode_before_2d);
   }
   else
   {
     mViewMode = eViewMode_2D;
-    saveterrainMode = terrainMode;
-    terrainMode = 2;
+    _terrain_editing_mode_before_2d = _current_terrain_editing_mode;
+    set_terrain_editing_mode (texturing);
   }
-
-  // Set the right icon in toolbar
-  mainGui->guiToolbar->IconSelect( terrainMode );
 }
 
 struct BookmarkEntry
@@ -2026,7 +2035,7 @@ void MapView::keyReleaseEvent (QKeyEvent* event)
   if (event->key() == Qt::Key_W)
   {
     key_w = false;
-    if( !(leftMouse && rightMouse) && moving > 0.0f) moving = 0.0f;
+    if( !(_holding_left_mouse_button && _holding_right_mouse_button) && moving > 0.0f) moving = 0.0f;
   }
 
   if (event->key() == Qt::Key_S && moving < 0.0f )
@@ -2079,11 +2088,11 @@ void MapView::mousePressEvent (QMouseEvent* event)
 {
   if (event->button() == Qt::LeftButton)
   {
-    leftMouse = true;
+    _holding_left_mouse_button = true;
   }
   if (event->button() == Qt::RightButton)
   {
-    rightMouse = true;
+    _holding_right_mouse_button = true;
   }
   if (event->button() == Qt::MidButton)
   {
@@ -2093,12 +2102,12 @@ void MapView::mousePressEvent (QMouseEvent* event)
     }
   }
 
-  if (leftMouse && rightMouse)
+  if (_holding_left_mouse_button && _holding_right_mouse_button)
   {
    // Both buttons
    moving = 1.0f;
   }
-  else if (leftMouse)
+  else if (_holding_left_mouse_button)
   {
     LastClicked = mainGui->processLeftClick (event->x(), event->y());
     if (mViewMode == eViewMode_3D && !LastClicked)
@@ -2106,7 +2115,7 @@ void MapView::mousePressEvent (QMouseEvent* event)
       doSelection (false);
     }
   }
-  else if (rightMouse)
+  else if (_holding_right_mouse_button)
   {
     look = true;
   }
@@ -2116,7 +2125,7 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
 {
   if (event->button() == Qt::LeftButton)
   {
-    leftMouse = false;
+    _holding_left_mouse_button = false;
 
     if( LastClicked )
       LastClicked->processUnclick();
@@ -2132,7 +2141,7 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
   }
   if (event->button() == Qt::RightButton)
   {
-    rightMouse = false;
+    _holding_right_mouse_button = false;
 
     look = false;
 
@@ -2183,9 +2192,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 
   if (event->buttons() & Qt::LeftButton && event->modifiers() & Qt::AltModifier)
   {
-    switch( terrainMode )
+    switch( _current_terrain_editing_mode )
     {
-    case 0:
+    case shaping:
       groundBrushRadius += relative_move.x() / XSENS;
       if( groundBrushRadius > 1000.0f )
         groundBrushRadius = 1000.0f;
@@ -2193,7 +2202,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
         groundBrushRadius = 0.01f;
       ground_brush_radius->setValue( groundBrushRadius / 1000 );
       break;
-    case 1:
+    case smoothing:
       blurBrushRadius += relative_move.x() / XSENS;
       if( blurBrushRadius > 1000.0f )
         blurBrushRadius = 1000.0f;
@@ -2201,7 +2210,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
         blurBrushRadius = 0.01f;
       blur_brush->setValue( blurBrushRadius / 1000 );
       break;
-    case 2:
+    case texturing:
       textureBrush.setRadius( textureBrush.getRadius() + relative_move.x() / XSENS );
       if( textureBrush.getRadius() > 100.0f )
         textureBrush.setRadius(100.0f);
@@ -2209,6 +2218,8 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
         textureBrush.setRadius(0.1f);
       paint_brush->setValue( textureBrush.getRadius() / 100.0f );
       break;
+  default:
+    break;
     }
   }
 
@@ -2234,4 +2245,11 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   Environment::getInstance()->screenY = event->y();
 
   _last_drag_position = event->pos();
+}
+
+void MapView::set_terrain_editing_mode (const terrain_editing_modes& mode)
+{
+  _current_terrain_editing_mode = mode;
+  mainGui->guiToolbar->IconSelect( _current_terrain_editing_mode );
+  Environment::getInstance()->view_holelines = mode == hole_setting;
 }

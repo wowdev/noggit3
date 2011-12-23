@@ -54,18 +54,25 @@ void UIToolbar::SetIcon( int pIcon, const std::string& pIconFile )
 
 // MapView.cpp
 void change_settings_window(int oldid, int newid);
-extern int terrainMode;
 
 void UIToolbar::IconSelect( int pIcon )
 {
   change_settings_window( selectedIcon, pIcon + 1 > 6 ? 0 : pIcon + 1);
 
-  const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "AreaID Paint", "Impassible Flag", "Not used", "Not used", "Not used", "Not used" };
+  const char * Names[] = { "Raise / Lower"
+                         , "Flatten / Blur"
+                         , "3D Paint"
+                         , "Holes"
+                         , "AreaID Paint"
+                         , "Impassible Flag"
+                         , "Not used"
+                         , "Not used"
+                         , "Not used"
+                         , "Not used"
+                         };
   text->setText( Names[pIcon] );
 
-  terrainMode = pIcon;
-
-  Environment::getInstance()->view_holelines = ( pIcon == 3 );
+  mainGui->theMapview->set_terrain_editing_mode (MapView::terrain_editing_modes (pIcon));
 
   for( int j = 0; j < 10; j++ )
     if( mToolbarIcons[j] )
