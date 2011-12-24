@@ -347,7 +347,7 @@ void Noggit::add_font_from_mpq (const QString& filename) const
 
 int main (int argc, char *argv[]);
 
-#ifdef _WIN32
+#ifdef Q_WS_WIN
 int WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
  return main (__argc, __argv);
@@ -360,10 +360,10 @@ int main (int argc, char *argv[])
 
 //! \todo remove vv
 
-#ifdef _WIN32
-  const std::string arialFilename ("/Library/Fonts/arial.ttf");
-#else
+#ifdef Q_WS_WIN
   const std::string arialFilename ("C:/Windows/Fonts/arial.ttf");
+#else
+  const std::string arialFilename ("/Library/Fonts/arial.ttf");
 #endif
 
   // Initializing Fonts
