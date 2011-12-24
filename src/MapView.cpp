@@ -688,30 +688,13 @@ void MapView::create_smoothing_settings_widget()
 
 void MapView::createGUI()
 {
-  // create main gui object that holds all other gui elements for access ( in the future ;) )
-  mainGui = new UIMapViewGUI (_world, this);
-  mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
-
-  mainGui->ZoneIDBrowser->setMapID( _world->getMapID() );
-  mainGui->ZoneIDBrowser->setChangeFunc( changeZoneIDValue );
-
-  _doodad_spawner = new UIDoodadSpawner (_world);
-  _doodad_spawner->hide();
-  mainGui->addChild (_doodad_spawner);
-
   create_shaping_settings_widget();
   create_smoothing_settings_widget();
-
-  _shaping_settings_widget->show();
-  _smoothing_settings_widget->show();
-
 
   //3D Paint settings UIWindow
   settings_paint=new UIWindow(0.0f,0.0f,180.0f,140.0f);
   settings_paint->hide();
   settings_paint->movable( true );
-
-  mainGui->addChild(settings_paint);
 
   settings_paint->addChild( new UIText( 78.5f, 2.0f, "3D Paint", arial14, eJustifyCenter ) );
 
@@ -753,6 +736,20 @@ void MapView::createGUI()
   UIButton* B1;
   B1=new UIButton( 6.0f, 111.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1 ) ;
   settings_paint->addChild(B1);
+
+  // create main gui object that holds all other gui elements for access ( in the future ;) )
+  mainGui = new UIMapViewGUI (_world, this);
+
+  mainGui->addChild(settings_paint);
+
+  mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
+
+  mainGui->ZoneIDBrowser->setMapID( _world->getMapID() );
+  mainGui->ZoneIDBrowser->setChangeFunc( changeZoneIDValue );
+
+  _doodad_spawner = new UIDoodadSpawner (_world);
+  _doodad_spawner->hide();
+  mainGui->addChild (_doodad_spawner);
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(4,8,mainGui));
   mainGui->TexturePalette->hide();
