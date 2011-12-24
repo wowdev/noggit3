@@ -570,9 +570,7 @@ void MapView::create_shaping_settings_widget()
   delete _shaping_settings_widget;
 
   _shaping_settings_widget = new QWidget (NULL);
-  _shaping_settings_widget->setWindowTitle (tr("Terrain"));
-  _shaping_settings_widget->setMinimumSize(215, 200);
-  _shaping_settings_widget->setMaximumSize(215, 200);
+  _shaping_settings_widget->setWindowTitle (tr ("Shaping settings"));
 
   QVBoxLayout* widget_layout (new QVBoxLayout (_shaping_settings_widget));
 
@@ -617,7 +615,7 @@ void MapView::create_shaping_settings_widget()
   connect (_shaping_speed_slider, SIGNAL (valueChanged (int)), SLOT (shaping_speed (int)));
 
   QLabel* radius_label (new QLabel (tr ("Brush &radius"), _shaping_settings_widget));
-  QLabel* speed_label (new QLabel (tr ("Brush &speed"), _shaping_settings_widget));
+  QLabel* speed_label (new QLabel (tr ("Shaping &speed"), _shaping_settings_widget));
 
   radius_label->setBuddy (_shaping_radius_slider);
   speed_label->setBuddy (_shaping_speed_slider);
@@ -672,7 +670,7 @@ void MapView::create_smoothing_settings_widget()
   connect (_smoothing_speed_slider, SIGNAL (valueChanged (int)), SLOT (smoothing_speed (int)));
 
   QLabel* radius_label (new QLabel (tr ("Brush &radius"), _smoothing_settings_widget));
-  QLabel* speed_label (new QLabel (tr ("Brush &speed"), _smoothing_settings_widget));
+  QLabel* speed_label (new QLabel (tr ("Shaping &speed"), _smoothing_settings_widget));
 
   radius_label->setBuddy (_smoothing_radius_slider);
   speed_label->setBuddy (_smoothing_speed_slider);

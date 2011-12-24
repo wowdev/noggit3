@@ -46,10 +46,9 @@ Noggit::Noggit (int& argc, char** argv)
   InitLogging();
   Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 
-  setOrganizationDomain (tr("modcraft.tk"));
-  setOrganizationName (tr("Modcraft"));
-  setApplicationName (tr("Noggit"));
-  setApplicationVersion (tr(STRPRODUCTVER));
+  setOrganizationDomain ("modcraft.tk");
+  setOrganizationName ("Modcraft");
+  setApplicationName ("Noggit");
   _settings = new QSettings (this);
 
   qsrand (QTime::currentTime().msec());
