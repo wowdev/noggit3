@@ -37,8 +37,6 @@ freetype::font_data morpheus40;
 freetype::font_data skurri32;
 freetype::font_data fritz16;
 
-void CreateStrips();
-
 Noggit::Noggit (int& argc, char** argv)
   : QApplication (argc, argv)
   , _settings (NULL)
@@ -69,7 +67,6 @@ Noggit::Noggit (int& argc, char** argv)
   add_font_from_mpq ("fonts/morpheus.ttf");
   add_font_from_mpq ("fonts/arialn.ttf");
 
-  CreateStrips();
   OpenDBs();
 
   initialize_video();
