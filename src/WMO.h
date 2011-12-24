@@ -50,11 +50,25 @@ public:
   void init(WMO *wmo, MPQFile* f, int num, char *names);
   void initDisplayList();
   void initLighting(int nLR, uint16_t *useLights);
-  void draw(World* world, const Vec3D& ofs, const float rot,bool selection);
-  void drawLiquid(World* world);
-  void drawDoodads(World* world, unsigned int doodadset, const Vec3D& ofs, const float rot);
-  void drawDoodadsSelect(World* world, unsigned int doodadset, const Vec3D& ofs, const float rot);
-  void setupFog(World* world);
+  void draw ( World* world
+            , const Vec3D& ofs
+            , const float rot
+            , bool selection
+            , bool draw_fog
+            );
+  void drawLiquid (World* world, bool draw_fog);
+  void drawDoodads ( World* world
+                   , unsigned int doodadset
+                   , const Vec3D& ofs
+                   , const float rot
+                   , bool draw_fog
+                   );
+  void drawDoodadsSelect ( World* world
+                         , unsigned int doodadset
+                         , const Vec3D& ofs
+                         , const float rot
+                         );
+  void setupFog (World* world, bool draw_fog);
 };
 
 struct WMOMaterial {
@@ -165,6 +179,7 @@ public:
             , bool groupboxes
             , bool highlight
             , bool draw_doodads
+            , bool draw_fog
             ) const;
   void drawSelect ( World* world
                   , int doodadset

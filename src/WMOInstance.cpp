@@ -51,7 +51,7 @@ WMOInstance::WMOInstance( World* world, WMO* _wmo )
 {
 }
 
-void WMOInstance::draw (bool draw_doodads) const
+void WMOInstance::draw (bool draw_doodads, bool draw_fog) const
 {
   glPushMatrix();
   glTranslatef( pos.x, pos.y, pos.z );
@@ -63,9 +63,9 @@ void WMOInstance::draw (bool draw_doodads) const
   glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
 
   if( _world->IsSelection( eEntry_WMO ) && _world->GetCurrentSelection()->data.wmo->mUniqueID == mUniqueID )
-    wmo->draw( _world, doodadset, pos, roty, true, true, true, draw_doodads );
+    wmo->draw( _world, doodadset, pos, roty, true, true, true, draw_doodads, draw_fog );
   else
-    wmo->draw( _world, doodadset, pos, roty, false, false, false, draw_doodads );
+    wmo->draw( _world, doodadset, pos, roty, false, false, false, draw_doodads, draw_fog );
 
   glPopMatrix();
 }
