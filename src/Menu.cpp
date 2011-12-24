@@ -29,6 +29,9 @@ Menu::Menu (QWidget* parent)
   , _minimap (NULL)
   , _world (NULL)
 {
+	setWindowTitle(tr("NoggIt"));
+	setMinimumSize(1024, 768);
+
   QListWidget* continents_table (new QListWidget (NULL));
   QListWidget* dungeons_table (new QListWidget (NULL));
   QListWidget* raids_table (new QListWidget (NULL));
