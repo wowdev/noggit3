@@ -106,7 +106,6 @@ private:
 public:
   unsigned int getMapID();
   // Do we draw *? Should be moved somewhere else, these are not World related.
-  bool drawdoodads;
   bool drawfog;
   bool drawlines;
   bool drawmodels;
@@ -164,6 +163,7 @@ public:
             , bool dont_draw_cursor
             , float inner_cursor_radius
             , float outer_cursor_radius
+            , bool draw_wmo_doodads
             );
 
   void outdoorLights(bool on);
@@ -178,7 +178,11 @@ public:
 
   void moveADT();
 
-  void drawSelection(int cursorX,int cursorY, bool pOnlyMap = false );
+  void drawSelection ( int cursorX
+                     , int cursorY
+                     , bool pOnlyMap
+                     , bool draw_wmo_doodads
+                     );
   void drawSelectionChunk(int cursorX,int cursorY);
   void drawTileMode(float ah);
 

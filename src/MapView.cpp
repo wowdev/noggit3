@@ -1020,6 +1020,7 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _about_widget (new ui::about_widget (NULL))
   , _is_currently_moving_object (false)
   , _draw_terrain_height_contour (false)
+  , _draw_wmo_doodads (true)
   , _holding_left_mouse_button (false)
   , _holding_right_mouse_button (false)
   , _current_terrain_editing_mode (shaping)
@@ -1475,7 +1476,11 @@ void MapView::tick( float t, float dt )
 
 void MapView::doSelection( bool selectTerrainOnly )
 {
-  _world->drawSelection( _mouse_position.x(), _mouse_position.y(), selectTerrainOnly );
+  _world->drawSelection ( _mouse_position.x()
+                        , _mouse_position.y()
+                        , selectTerrainOnly
+                        , _draw_wmo_doodads
+                        );
 }
 
 
@@ -1570,6 +1575,7 @@ void MapView::displayViewMode_3D()
                , _current_terrain_editing_mode == hole_setting
                , brush_radius
                , brush_radius
+               , _draw_wmo_doodads
                );
 
   displayGUIIfEnabled();
@@ -1913,14 +1919,14 @@ void MapView::toggle_terrain_texturing_mode()
   if( alloff )
   {
     alloff_models = _world->drawmodels;
-    alloff_doodads = _world->drawdoodads;
+    alloff_doodads = _draw_wmo_doodads;
     alloff_contour = _draw_terrain_height_contour;
     alloff_wmo = _world->drawwmo;
     alloff_fog = _world->drawfog;
     alloff_terrain = _world->drawterrain;
 
     _world->drawmodels = false;
-    _world->drawdoodads = false;
+    _draw_wmo_doodads = false;
     _draw_terrain_height_contour = true;
     _world->drawwmo = false;
     _world->drawterrain = true;
@@ -1929,7 +1935,7 @@ void MapView::toggle_terrain_texturing_mode()
   else
   {
     _world->drawmodels = alloff_models;
-    _world->drawdoodads = alloff_doodads;
+    _draw_wmo_doodads = alloff_doodads;
     _draw_terrain_height_contour = alloff_contour;
     _world->drawwmo = alloff_wmo;
     _world->drawterrain = alloff_terrain;
@@ -1960,7 +1966,7 @@ void MapView::toggle_terrain_drawing (bool value)
 
 void MapView::toggle_wmo_doodad_drawing (bool value)
 {
-  _world->drawdoodads = value;
+  _draw_wmo_doodads = value;
 }
 
 

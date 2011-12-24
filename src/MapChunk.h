@@ -75,10 +75,10 @@ public:
   void drawColor();
   void drawSelect();
   void drawNoDetail();
-  void drawPass(int anim);
+  void drawPass(int anim, int animation_time = 0);
   void drawLines();
 
-  void drawTextures();
+  void drawTextures (int animation_time);
 
   void recalcNorms();
 

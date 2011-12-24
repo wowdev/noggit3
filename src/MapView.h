@@ -219,7 +219,9 @@ private:
 
   QPointF _mouse_position;
   bool _is_currently_moving_object;
+
   bool _draw_terrain_height_contour;
+  bool _draw_wmo_doodads;
 
   bool _holding_left_mouse_button;
   bool _holding_right_mouse_button;

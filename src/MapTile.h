@@ -40,7 +40,7 @@ public:
   void drawSelect();
   void drawLines();
   void drawWater();
-  void drawTextures();
+  void drawTextures (int animation_time);
   void drawMFBO();
 
   bool GetVertex( float x, float z, Vec3D *V );

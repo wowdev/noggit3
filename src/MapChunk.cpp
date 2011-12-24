@@ -652,9 +652,8 @@ void MapChunk::RemoveAnim (int anim) const
 }
 
 
-void MapChunk::drawTextures()
+void MapChunk::drawTextures (int animation_time)
 {
-
   glColor4f(1.0f,1.0f,1.0f,1.0f);
 
   if(nTextures > 0U)
@@ -679,7 +678,7 @@ void MapChunk::drawTextures()
     OpenGL::Texture::disableTexture();
   }
 
-  SetAnim(animated[0], _world->animtime);
+  SetAnim(animated[0], animation_time);
   glBegin(GL_TRIANGLE_STRIP);
   glTexCoord2f(0.0f,texDetail);
   glVertex3f(static_cast<float>(px), py+1.0f, -2.0f);
@@ -714,7 +713,7 @@ void MapChunk::drawTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    SetAnim(animated[i], _world->animtime);
+    SetAnim(animated[i], animation_time);
 
     glBegin(GL_TRIANGLE_STRIP);
     glMultiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
@@ -935,7 +934,7 @@ void MapChunk::drawColor()
 }
 
 
-void MapChunk::drawPass(int anim)
+void MapChunk::drawPass (int anim, int animation_time)
 {
   if (anim)
   {
@@ -950,7 +949,7 @@ void MapChunk::drawPass(int anim)
     const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
     const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
     const int animspd = 200 * detail_size;
-    float f = ( (static_cast<int>(_world->animtime*(spd/15.0f))) % animspd) / static_cast<float>(animspd);
+    float f = ( (static_cast<int>(animation_time*(spd/15.0f))) % animspd) / static_cast<float>(animspd);
     glTranslatef(f*fdx,f*fdy,0);
   }
 
@@ -1097,7 +1096,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   }
 
   glEnable(GL_LIGHTING);
-  drawPass(animated[0]);
+  drawPass(animated[0], _world->animtime);
 
   if (nTextures > 1U) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
@@ -1118,7 +1117,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
     glBindTexture( GL_TEXTURE_2D, alphamaps[i - 1] );
 
-    drawPass(animated[i]);
+    drawPass(animated[i], _world->animtime);
   }
 
   if (nTextures > 1U) {
