@@ -335,13 +335,27 @@ void Noggit::add_font_from_mpq (const QString& filename) const
                                             );
 }
 
-int main( int argc, char *argv[] )
+int main (int argc, char *argv[]);
+
+#ifdef _WIN32
+int WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+ return main (__argc, __argv);
+}
+#endif
+
+int main (int argc, char *argv[])
 {
   Noggit application (argc, argv);
 
 //! \todo remove vv
 
+#ifdef _WIN32
   const std::string arialFilename ("/Library/Fonts/arial.ttf");
+#else
+  const std::string arialFilename ("C:/Windows/Fonts/arial.ttf");
+#endif
+
   // Initializing Fonts
   skurri32.init( "fonts/skurri.ttf", 32, true );
   fritz16.init( "fonts/frizqt__.ttf", 16, true );
