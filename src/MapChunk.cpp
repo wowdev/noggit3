@@ -26,6 +26,80 @@ static const int CONTOUR_WIDTH = 128;
 static const float texDetail = 8.0f;
 static const float TEX_RANGE = 62.0f / 64.0f;
 
+
+const int stripsize = 8*18 + 7*2;
+
+StripType *mapstrip;
+StripType *mapstrip2;
+
+int indexMapBuf (int x, int y)
+{
+  return ((y+1)/2)*9 + (y/2)*8 + x;
+}
+
+// 8x8x2 version with triangle strips, size = 8*18 + 7*2
+template <class V>
+void stripify(V *in, V *out)
+{
+  for (int row=0; row<8; row++) {
+    V *thisrow = &in[indexMapBuf(0,row*2)];
+    V *nextrow = &in[indexMapBuf(0,(row+1)*2)];
+
+    if (row>0) *out++ = thisrow[0];
+    for (int col=0; col<9; col++) {
+      *out++ = thisrow[col];
+      *out++ = nextrow[col];
+    }
+    if (row<7) *out++ = nextrow[8];
+  }
+}
+
+// high res version, size = 16*18 + 7*2 + 8*2
+const int stripsize2 = 16*18 + 7*2 + 8*2;
+template <class V>
+void stripify2(V *in, V *out)
+{
+  for (int row=0; row<8; row++) {
+    V *thisrow = &in[indexMapBuf(0,row*2)];
+    V *nextrow = &in[indexMapBuf(0,row*2+1)];
+    V *overrow = &in[indexMapBuf(0,(row+1)*2)];
+
+    if (row>0) *out++ = thisrow[0];// jump end
+    for (int col=0; col<8; col++) {
+      *out++ = thisrow[col];
+      *out++ = nextrow[col];
+    }
+    *out++ = thisrow[8];
+    *out++ = overrow[8];
+    *out++ = overrow[8];// jump start
+    *out++ = thisrow[0];// jump end
+    *out++ = thisrow[0];
+    for (int col=0; col<8; col++) {
+      *out++ = overrow[col];
+      *out++ = nextrow[col];
+    }
+    if (row<8) *out++ = overrow[8];
+    if (row<7) *out++ = overrow[8];// jump start
+  }
+}
+
+void init_map_strip()
+{
+  // default strip indices
+  StripType *defstrip = new StripType[stripsize];
+  for (int i=0; i<stripsize; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
+  mapstrip = new StripType[stripsize];
+  stripify<StripType>(defstrip, mapstrip);
+  delete[] defstrip;
+
+  defstrip = new StripType[stripsize2];
+  for (int i=0; i<stripsize2; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
+  mapstrip2 = new StripType[stripsize2];
+  stripify2<StripType>(defstrip, mapstrip2);
+  delete[] defstrip;
+}
+
+
 /*
  White  1.00  1.00  1.00
  Brown  0.75  0.50  0.00
@@ -164,6 +238,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, MPQFile* f,bool bigAlpha)
   , _contour_texture (0)
 {
   CreateStrips();
+  init_map_strip();
 
   mt=maintile;
   mBigAlpha=bigAlpha;
@@ -671,7 +746,7 @@ void MapChunk::drawTextures()
   glBindBuffer(GL_ARRAY_BUFFER, minishadows);
   glColorPointer(4, GL_FLOAT, 0, 0);
 
-  glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, _world->mapstrip2);
+  glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, mapstrip2);
 }
 
 void MapChunk::initStrip()
@@ -1108,9 +1183,9 @@ void MapChunk::draw ( bool draw_terrain_height_contour
     glDepthMask( false );
     glDisable( GL_DEPTH_TEST );
     glBegin( GL_TRIANGLES );
-    glVertex3fv( mVertices[_world->mapstrip2[poly + 0]] );
-    glVertex3fv( mVertices[_world->mapstrip2[poly + 1]] );
-    glVertex3fv( mVertices[_world->mapstrip2[poly + 2]] );
+    glVertex3fv( mVertices[mapstrip2[poly + 0]] );
+    glVertex3fv( mVertices[mapstrip2[poly + 1]] );
+    glVertex3fv( mVertices[mapstrip2[poly + 2]] );
     glEnd();
     glEnable( GL_CULL_FACE );
     glEnable( GL_DEPTH_TEST );
@@ -1176,7 +1251,7 @@ void MapChunk::drawNoDetail()
   glBindBuffer( GL_ARRAY_BUFFER, vertices );
   glVertexPointer( 3, GL_FLOAT, 0, 0 );
   glDisableClientState( GL_NORMAL_ARRAY );
-  glDrawElements( GL_TRIANGLE_STRIP, stripsize, GL_UNSIGNED_SHORT, _world->mapstrip );
+  glDrawElements( GL_TRIANGLE_STRIP, stripsize, GL_UNSIGNED_SHORT, mapstrip );
   glEnableClientState( GL_NORMAL_ARRAY );
 
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -1210,9 +1285,9 @@ void MapChunk::drawSelect()
   {
     glPushName( i );
     glBegin( GL_TRIANGLES );
-    glVertex3fv( mVertices[_world->mapstrip2[i]] );
-    glVertex3fv( mVertices[_world->mapstrip2[i + 1]] );
-    glVertex3fv( mVertices[_world->mapstrip2[i + 2]] );
+    glVertex3fv( mVertices[mapstrip2[i]] );
+    glVertex3fv( mVertices[mapstrip2[i + 1]] );
+    glVertex3fv( mVertices[mapstrip2[i + 2]] );
     glEnd();
     glPopName();
   }
@@ -1230,15 +1305,15 @@ void MapChunk::getSelectionCoord( float *x, float *z )
     *z = -1000000.0f;
     return;
   }
-  *x = ( mVertices[_world->mapstrip2[Poly + 0]].x + mVertices[_world->mapstrip2[Poly + 1]].x + mVertices[_world->mapstrip2[Poly + 2]].x ) / 3;
-  *z = ( mVertices[_world->mapstrip2[Poly + 0]].z + mVertices[_world->mapstrip2[Poly + 1]].z + mVertices[_world->mapstrip2[Poly + 2]].z ) / 3;
+  *x = ( mVertices[mapstrip2[Poly + 0]].x + mVertices[mapstrip2[Poly + 1]].x + mVertices[mapstrip2[Poly + 2]].x ) / 3;
+  *z = ( mVertices[mapstrip2[Poly + 0]].z + mVertices[mapstrip2[Poly + 1]].z + mVertices[mapstrip2[Poly + 2]].z ) / 3;
 }
 
 float MapChunk::getSelectionHeight()
 {
   int Poly = _world->GetCurrentSelectedTriangle();
   if( Poly + 2 < stripsize2 )
-    return ( mVertices[_world->mapstrip2[Poly + 0]].y + mVertices[_world->mapstrip2[Poly + 1]].y + mVertices[_world->mapstrip2[Poly + 2]].y ) / 3;
+    return ( mVertices[mapstrip2[Poly + 0]].y + mVertices[mapstrip2[Poly + 1]].y + mVertices[mapstrip2[Poly + 2]].y ) / 3;
   LogError << "Getting selection height fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
   return 0.0f;
 }
@@ -1253,9 +1328,9 @@ Vec3D MapChunk::GetSelectionPosition()
   }
 
   Vec3D lPosition;
-  lPosition  = Vec3D( mVertices[_world->mapstrip2[Poly + 0]] );
-  lPosition += Vec3D( mVertices[_world->mapstrip2[Poly + 1]] );
-  lPosition += Vec3D( mVertices[_world->mapstrip2[Poly + 2]] );
+  lPosition  = Vec3D( mVertices[mapstrip2[Poly + 0]] );
+  lPosition += Vec3D( mVertices[mapstrip2[Poly + 1]] );
+  lPosition += Vec3D( mVertices[mapstrip2[Poly + 2]] );
   lPosition *= 0.3333333f;
 
   return lPosition;

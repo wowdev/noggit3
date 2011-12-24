@@ -18,25 +18,23 @@
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
 
-
-int indexMapBuf(int x, int y)
+MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
+  : modelCount (0)
+  , mPositionX (pX)
+  , mPositionZ (pZ)
+//! \todo Actually, this is defined inside the ADT.
+  , xbase (mPositionX * TILESIZE)
+  , zbase (mPositionZ * TILESIZE)
+  , changed (false)
+  , mFlags (0)
+  , mBigAlpha (pBigAlpha)
+  , mTextureFilenames (0)
+  , mModelFilenames (0)
+  , mWMOFilenames (0)
+  , mFilename (pFilename)
+  , mLiquids (0)
+  , _world (world)
 {
-  return ((y+1)/2)*9 + (y/2)*8 + x;
-}
-
-MapTile::MapTile( World* world, int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
-  : _world (world)
-{
-  modelCount = 0;
-  mPositionX = pX;
-  mPositionZ = pZ;
-
-  changed = false;
-  xbase = mPositionX * TILESIZE;
-  zbase = mPositionZ * TILESIZE;
-
-  mBigAlpha = pBigAlpha;
-
   for( int i = 0; i < 16; ++i )
   {
     for( int j = 0; j < 16; j++ )
@@ -44,8 +42,6 @@ MapTile::MapTile( World* world, int pX, int pZ, const std::string& pFilename, bo
       mChunks[i][j] = NULL;
     }
   }
-
-  mFilename = pFilename;
 
   MPQFile theFile( mFilename );
 
