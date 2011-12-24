@@ -22,19 +22,9 @@ static const int HEIGHT_ZERO = 0;
 static const int HEIGHT_SHALLOW = -100;
 static const int HEIGHT_DEEP = -250;
 static const double MAPCHUNK_DIAMETER  = 47.140452079103168293389624140323;
-
-GLuint Contour = 0;
-float CoordGen[4];
 static const int CONTOUR_WIDTH = 128;
-
 static const float texDetail = 8.0f;
-
 static const float TEX_RANGE = 62.0f / 64.0f;
-
-StripType OddStrips[8*18];
-StripType EvenStrips[8*18];
-StripType LineStrip[32];
-StripType HoleStrip[128];
 
 /*
  White  1.00  1.00  1.00
@@ -99,14 +89,14 @@ void HeightColor(float height, Vec3D *Color)
 
 
 
-void GenerateContourMap()
+void MapChunk::GenerateContourMap()
 {
   unsigned char  CTexture[CONTOUR_WIDTH*4];
 
-  CoordGen[0]=0.0f;
-  CoordGen[1]=0.25f;
-  CoordGen[2]=0.0f;
-  CoordGen[3]=0.0f;
+  _contour_coord_gen[0]=0.0f;
+  _contour_coord_gen[1]=0.25f;
+  _contour_coord_gen[2]=0.0f;
+  _contour_coord_gen[3]=0.0f;
 
 
   for(int i=0;i<(CONTOUR_WIDTH*4);++i)
@@ -115,8 +105,8 @@ void GenerateContourMap()
   CTexture[7+CONTOUR_WIDTH/2]=0xff;
   CTexture[11+CONTOUR_WIDTH/2]=0xff;
 
-  glGenTextures(1, &Contour);
-  glBindTexture(GL_TEXTURE_2D, Contour);
+  glGenTextures(1, &_contour_texture);
+  glBindTexture(GL_TEXTURE_2D, _contour_texture);
 
 
   gluBuild2DMipmaps(GL_TEXTURE_2D,4,CONTOUR_WIDTH,1,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
@@ -161,7 +151,7 @@ void GenerateContourMap()
 
   glEnable(GL_TEXTURE_GEN_S);
   glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-  glTexGenfv(GL_S,GL_OBJECT_PLANE,CoordGen);
+  glTexGenfv(GL_S,GL_OBJECT_PLANE,_contour_coord_gen);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -171,7 +161,10 @@ void GenerateContourMap()
 
 MapChunk::MapChunk(World* world, MapTile* maintile, MPQFile* f,bool bigAlpha)
   : _world (world)
+  , _contour_texture (0)
 {
+  CreateStrips();
+
   mt=maintile;
   mBigAlpha=bigAlpha;
 
@@ -766,69 +759,68 @@ bool MapChunk::GetVertex(float x,float z, Vec3D *V)
 }
 
 
-void CreateStrips()
+void MapChunk::CreateStrips()
 {
   StripType Temp[18];
-  int j;
 
   for(int i=0; i < 8; ++i)
   {
-    OddStrips[i*18+0] = i*17 + 17;
-    for(j=0; j < 8; j++)
+    _odd_strips[i*18+0] = i*17 + 17;
+    for(int j=0; j < 8; j++)
     {
-      OddStrips[i*18 + 2*j + 1] = i*17 + j;
-      OddStrips[i*18 + 2*j + 2] = i*17 + j + 9;
-      EvenStrips[i*18 + 2*j] = i*17 + 17 + j;
-      EvenStrips[i*18 + 2*j + 1] = i*17 + 9 + j;
+      _odd_strips[i*18 + 2*j + 1] = i*17 + j;
+      _odd_strips[i*18 + 2*j + 2] = i*17 + j + 9;
+      _even_strips[i*18 + 2*j] = i*17 + 17 + j;
+      _even_strips[i*18 + 2*j + 1] = i*17 + 9 + j;
     }
-    OddStrips[i*18 + 17] = i*17 + 8;
-    EvenStrips[i*18 + 16] = i*17 + 17 + 8;
-    EvenStrips[i*18 + 17] = i*17 + 8;
+    _odd_strips[i*18 + 17] = i*17 + 8;
+    _even_strips[i*18 + 16] = i*17 + 17 + 8;
+    _even_strips[i*18 + 17] = i*17 + 8;
   }
 
   //Reverse the order whoops
   for(int i=0; i < 8; ++i)
   {
-    for(j=0; j < 18; ++j)
-      Temp[17-j] = OddStrips[i*18 + j];
-    memcpy(&OddStrips[i*18], Temp, sizeof(Temp));
-    for(j=0; j < 18; ++j)
-      Temp[17-j] = EvenStrips[i*18 + j];
-    memcpy(&EvenStrips[i*18], Temp, sizeof(Temp));
+    for(int j=0; j < 18; ++j)
+      Temp[17-j] = _odd_strips[i*18 + j];
+    memcpy(&_odd_strips[i*18], Temp, sizeof(Temp));
+    for(int j=0; j < 18; ++j)
+      Temp[17-j] = _even_strips[i*18 + j];
+    memcpy(&_even_strips[i*18], Temp, sizeof(Temp));
 
   }
 
   for(int i=0; i < 32; ++i)
   {
     if(i < 9)
-      LineStrip[i] = i;
+      _line_strip[i] = i;
     else if(i < 17)
-      LineStrip[i] = 8 + (i-8)*17;
+      _line_strip[i] = 8 + (i-8)*17;
     else if(i < 25)
-      LineStrip[i] = 145 - (i-15);
+      _line_strip[i] = 145 - (i-15);
     else
-      LineStrip[i] = (32-i)*17;
+      _line_strip[i] = (32-i)*17;
   }
 
   int iferget = 0;
 
   for( size_t i = 34; i < 43; ++i )
-     HoleStrip[iferget++] = i;
+     _hole_strip[iferget++] = i;
 
   for( size_t i = 68; i < 77; ++i )
-    HoleStrip[iferget++] = i;
+    _hole_strip[iferget++] = i;
 
   for( size_t i = 102; i < 111; ++i )
-     HoleStrip[iferget++] = i;
+     _hole_strip[iferget++] = i;
 
   for( size_t i = 2; i < 139; i += 17 )
-    HoleStrip[iferget++] = i;
+    _hole_strip[iferget++] = i;
 
   for( size_t i = 4; i < 141; i += 17 )
-    HoleStrip[iferget++] = i;
+    _hole_strip[iferget++] = i;
 
   for( size_t i = 6; i < 143; i += 17 )
-    HoleStrip[iferget++] = i;
+    _hole_strip[iferget++] = i;
 }
 
 void MapChunk::drawColor()
@@ -923,37 +915,37 @@ void MapChunk::drawLines()
 
   if( (px != 15) && (py != 0))
   {
-    glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
+    glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, _line_strip);
   }
   else if( (px==15) && (py==0) )
   {
     glColor4f(0.0,1.0,0.0f,0.5f);
-    glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
+    glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, _line_strip);
   }
   else if(px==15)
   {
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, _line_strip);
     glColor4f(0.0,1.0,0.0f,0.5f);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &_line_strip[8]);
   }
   else if(py==0)
   {
     glColor4f(0.0,1.0,0.0f,0.5f);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, _line_strip);
     glColor4f(1.0,0.0,0.0f,0.5f);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &_line_strip[8]);
   }
 
   if(Environment::getInstance()->view_holelines)
   {
     // Draw hole lines if view_subchunk_lines is true
     glColor4f(0.0,0.0,1.0f,0.5f);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, HoleStrip);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[9]);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[18]);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[27]);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[36]);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, _hole_strip);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &_hole_strip[9]);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &_hole_strip[18]);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &_hole_strip[27]);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &_hole_strip[36]);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &_hole_strip[45]);
   }
 
   glPopMatrix();
@@ -969,13 +961,13 @@ void MapChunk::drawContour()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDisable(GL_ALPHA_TEST);
-  if(Contour == 0)
+  if(_contour_texture == 0)
     GenerateContourMap();
-  glBindTexture(GL_TEXTURE_2D, Contour);
+  glBindTexture(GL_TEXTURE_2D, _contour_texture);
 
   glEnable(GL_TEXTURE_GEN_S);
   glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-  glTexGenfv(GL_S,GL_OBJECT_PLANE,CoordGen);
+  glTexGenfv(GL_S,GL_OBJECT_PLANE,_contour_coord_gen);
 
   drawPass(0);
   glDisable(GL_TEXTURE_2D);
