@@ -106,7 +106,6 @@ private:
 public:
   unsigned int getMapID();
   // Do we draw *? Should be moved somewhere else, these are not World related.
-  bool drawfog;
   bool drawlines;
   bool drawmodels;
   bool drawterrain;
@@ -164,10 +163,11 @@ public:
             , float inner_cursor_radius
             , float outer_cursor_radius
             , bool draw_wmo_doodads
+            , bool draw_fog
             );
 
   void outdoorLights(bool on);
-  void setupFog();
+  void setupFog (bool draw_fog);
 
   //! \brief Get the area ID of the tile on which the camera currently is on.
   unsigned int getAreaID();

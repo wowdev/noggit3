@@ -897,7 +897,7 @@ void MapChunk::CreateStrips()
     _hole_strip[iferget++] = i;
 }
 
-void MapChunk::drawColor()
+void MapChunk::drawColor (bool draw_fog)
 {
 
   if (!_world->frustum.intersects(vmin,vmax))
@@ -908,8 +908,10 @@ void MapChunk::drawColor()
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
 
-  if (mydist > _world->culldistance) {
-    if (_world->drawfog) drawNoDetail();
+  if (mydist > _world->culldistance)
+  {
+    if (draw_fog)
+      drawNoDetail();
     return;
   }
 

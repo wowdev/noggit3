@@ -72,7 +72,7 @@ public:
   void drawContour();
   void drawAreaID();
   void drawBlock();
-  void drawColor();
+  void drawColor (bool draw_fog);
   void drawSelect();
   void drawNoDetail();
   void drawPass(int anim, int animation_time = 0);

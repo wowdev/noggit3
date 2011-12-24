@@ -1171,12 +1171,12 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 }
 
 
-void Model::draw (World* world)
+void Model::draw (bool draw_fog)
 {
   if(!finishedLoading())
     return;
 
-  if( world && world->drawfog )
+  if (draw_fog)
     glEnable( GL_FOG );
   else
     glDisable( GL_FOG );

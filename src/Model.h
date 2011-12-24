@@ -6,7 +6,6 @@
 
 class Model;
 class Bone;
-class World;
 
 #include "Animated.h" // Animation::M2Value
 #include "AsyncObject.h" // AsyncObject
@@ -203,7 +202,7 @@ public:
 
   Model(const std::string& name, bool forceAnim=false);
   ~Model();
-  void draw (World* world);
+  void draw (bool draw_fog);
   void drawTileMode();
   void drawSelect();
   void updateEmitters(float dt);

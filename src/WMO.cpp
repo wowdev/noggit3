@@ -263,23 +263,24 @@ void WMO::draw ( World* world
                , bool groupboxes
                , bool /*highlight*/
                , bool draw_doodads
+               , bool draw_fog
                ) const
 {
-  if( world && world->drawfog )
+  if (draw_fog)
     glEnable( GL_FOG );
   else
     glDisable( GL_FOG );
 
   for (unsigned int i=0; i<nGroups; ++i)
   {
-    groups[i].draw(world, ofs, rot,false);
+    groups[i].draw(world, ofs, rot, false, draw_fog);
 
     if (draw_doodads)
     {
-      groups[i].drawDoodads(world, doodadset, ofs, rot);
+      groups[i].drawDoodads(world, doodadset, ofs, rot, draw_fog);
     }
 
-    groups[i].drawLiquid(world);
+    groups[i].drawLiquid (world, draw_fog);
   }
 
   if( boundingbox )
@@ -518,14 +519,14 @@ void WMO::drawSelect ( World* world
 {
   for (unsigned int i=0; i<nGroups; ++i)
   {
-    groups[i].draw(world, ofs, rot, true);
+    groups[i].draw (world, ofs, rot, true, false);
 
     if (draw_doodads)
     {
       groups[i].drawDoodadsSelect(world, doodadset, ofs, rot);
     }
 
-    groups[i].drawLiquid(world);
+    groups[i].drawLiquid (world, false);
   }
 }
 
@@ -957,7 +958,12 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
   }
 }
 
-void WMOGroup::draw(World* world, const Vec3D& ofs, const float rot,bool selection)
+void WMOGroup::draw ( World* world
+                    , const Vec3D& ofs
+                    , const float rot
+                    , bool selection
+                    , bool draw_fog
+                    )
 {
   visible = false;
   // view frustum culling
@@ -967,7 +973,7 @@ void WMOGroup::draw(World* world, const Vec3D& ofs, const float rot,bool selecti
   float dist = (pos - world->camera).length() - rad;
   if (dist >= world->culldistance) return;
   visible = true;
-  setupFog(world);
+  setupFog(world, draw_fog);
 
   if (hascv) {
     glDisable(GL_LIGHTING);
@@ -1009,14 +1015,19 @@ void WMOGroup::draw(World* world, const Vec3D& ofs, const float rot,bool selecti
 
 }
 
-void WMOGroup::drawDoodads(World* world, unsigned int doodadset, const Vec3D& ofs, const float rot)
+void WMOGroup::drawDoodads ( World* world
+                           , unsigned int doodadset
+                           , const Vec3D& ofs
+                           , const float rot
+                           , bool draw_fog
+                           )
 {
 
   if (!visible) return;
   if (nDoodads==0) return;
 
   world->outdoorLights(outdoorLights);
-  setupFog(world);
+  setupFog(world, draw_fog);
 
   /*
   float xr=0,xg=0,xb=0;
@@ -1038,7 +1049,7 @@ void WMOGroup::drawDoodads(World* world, unsigned int doodadset, const Vec3D& of
         if (!outdoorLights) {
           WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
         }
-        setupFog(world);
+        setupFog(world, draw_fog);
         wmo->modelis[dd].draw2 (ofs, rot);
       }
   }
@@ -1050,14 +1061,18 @@ void WMOGroup::drawDoodads(World* world, unsigned int doodadset, const Vec3D& of
 }
 
 
-void WMOGroup::drawDoodadsSelect(World* world, unsigned int doodadset, const Vec3D& ofs, const float rot)
+void WMOGroup::drawDoodadsSelect ( World* world
+                                 , unsigned int doodadset
+                                 , const Vec3D& ofs
+                                 , const float rot
+                                 )
 {
   if (!visible) return;
   if (nDoodads==0) return;
 
-
+  //! \todo Why do we do this? Oo This should all not need any light stuff at all.
   world->outdoorLights(outdoorLights);
-  setupFog(world);
+  setupFog(world, false);
 
   /*
   float xr=0,xg=0,xb=0;
@@ -1090,14 +1105,14 @@ void WMOGroup::drawDoodadsSelect(World* world, unsigned int doodadset, const Vec
 
 }
 
-void WMOGroup::drawLiquid (World* world)
+void WMOGroup::drawLiquid (World* world, bool draw_fog)
 {
   if (!visible) return;
 
   // draw liquid
   //! \todo  culling for liquid boundingbox or something
   if (lq) {
-    setupFog(world);
+    setupFog (world, draw_fog);
     if (outdoorLights) {
       world->outdoorLights(true);
     } else {
@@ -1117,10 +1132,11 @@ void WMOGroup::drawLiquid (World* world)
   }
 }
 
-void WMOGroup::setupFog (World* world)
+void WMOGroup::setupFog (World* world, bool draw_fog)
 {
-  if (outdoorLights || fog==-1) {
-    world->setupFog();
+  if (outdoorLights || fog==-1)
+  {
+    world->setupFog (draw_fog);
   } else {
     wmo->fogs[fog].setup();
   }

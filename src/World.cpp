@@ -190,7 +190,6 @@ World::World( const std::string& name )
   , l_const( 0.0f )
   , l_linear( 0.7f )
   , l_quadratic( 0.03f )
-  , drawfog( true )
   , drawlines( false )
   , drawmodels( true )
   , drawterrain( true )
@@ -962,9 +961,10 @@ void World::outdoorLights(bool on)
   }
 }
 
-void World::setupFog()
+void World::setupFog (bool draw_fog)
 {
-  if (drawfog) {
+  if (draw_fog)
+  {
 
     //float fogdist = 357.0f; // minimum draw distance in wow
     //float fogdist = 777.0f; // maximum draw distance in wow
@@ -982,7 +982,9 @@ void World::setupFog()
     glFogf(GL_FOG_START, fogdist * fogstart);
 
     glEnable(GL_FOG);
-  } else {
+  }
+  else
+  {
     glDisable(GL_FOG);
     culldistance = mapdrawdistance;
   }
@@ -995,6 +997,7 @@ void World::draw ( bool draw_terrain_height_contour
                  , float inner_cursor_radius
                  , float outer_cursor_radius
                  , bool draw_wmo_doodads
+                 , bool draw_fog
                  )
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1036,10 +1039,10 @@ void World::draw ( bool draw_terrain_height_contour
   outdoorLights(true);
 
   glFogi(GL_FOG_MODE, GL_LINEAR);
-  setupFog();
+  setupFog (draw_fog);
 
   // Draw verylowres heightmap
-  if (drawfog && drawterrain) {
+  if (draw_fog && drawterrain) {
     glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
@@ -1189,7 +1192,7 @@ void World::draw ( bool draw_terrain_height_contour
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    setupFog();
+    setupFog (draw_fog);
     for( int j = 0; j < 64; ++j )
     {
       for( int i = 0; i < 64; ++i )
@@ -1247,7 +1250,7 @@ void World::draw ( bool draw_terrain_height_contour
 
     glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
     for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
-      it->second.draw();
+      it->second.draw (draw_fog);
 
     //drawModelList();
   }
@@ -1266,7 +1269,7 @@ void World::draw ( bool draw_terrain_height_contour
       glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
 
       for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-        it->second.draw (draw_wmo_doodads);
+        it->second.draw (draw_wmo_doodads, draw_fog);
 
       spec_color = Vec4D( 0.0f, 0.0f, 0.0f, 1.0f );
       glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
@@ -1274,10 +1277,10 @@ void World::draw ( bool draw_terrain_height_contour
     }
     else
       for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-        it->second.draw (draw_wmo_doodads);
+        it->second.draw (draw_wmo_doodads, draw_fog);
 
   outdoorLights( true );
-  setupFog();
+  setupFog (draw_fog);
 
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
   glDisable(GL_CULL_FACE);
@@ -1289,7 +1292,7 @@ void World::draw ( bool draw_terrain_height_contour
   // gosh darn alpha blended evil
 
   OpenGL::SettingsSaver::restore();
-  setupFog();
+  setupFog (draw_fog);
 
   /*
   for( int j = 0; j < 64; ++j )

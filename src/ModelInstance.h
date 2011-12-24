@@ -31,8 +31,8 @@ public:
   explicit ModelInstance( World*, Model *m, MPQFile* f );
   explicit ModelInstance( World*, Model *m, ENTRY_MDDF *d );
   void init2( Model *m, MPQFile* f );
-  void draw ();
-  void drawMapTile ();
+  void draw (bool draw_fog);
+  void drawMapTile();
 //  void drawHighlight();
   void drawSelect ();
   void draw2 (const Vec3D& ofs, const float rot );

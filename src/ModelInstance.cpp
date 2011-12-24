@@ -106,7 +106,7 @@ void ModelInstance::init2(Model *m, MPQFile* f)
   lcol = Vec3D( ( ( d1 & 0xff0000 ) >> 16 ) / 255.0f, ( ( d1 & 0x00ff00 ) >> 8 ) / 255.0f, ( d1 & 0x0000ff ) / 255.0f);
 }
 
-void ModelInstance::draw ()
+void ModelInstance::draw (bool draw_fog)
 {
 /*  float dist = ( pos - _world->camera ).length() - model->rad;
 
@@ -126,11 +126,11 @@ void ModelInstance::draw ()
   glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
   glScalef( sc, sc, sc );
 
-  model->draw (_world);
+  model->draw (draw_fog);
 
   if( _world->IsSelection( eEntry_Model ) && _world->GetCurrentSelection()->data.model->d1 == d1 )
   {
-    if( _world && _world->drawfog )
+    if (draw_fog)
       glDisable( GL_FOG );
 
     glDisable( GL_LIGHTING );
@@ -171,7 +171,7 @@ void ModelInstance::draw ()
 
     glEnable( GL_LIGHTING );
 
-    if( _world && _world->drawfog )
+    if (draw_fog)
       glEnable( GL_FOG );
   }
 

@@ -1021,6 +1021,7 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _is_currently_moving_object (false)
   , _draw_terrain_height_contour (false)
   , _draw_wmo_doodads (true)
+  , _draw_fog (true)
   , _holding_left_mouse_button (false)
   , _holding_right_mouse_button (false)
   , _current_terrain_editing_mode (shaping)
@@ -1576,6 +1577,7 @@ void MapView::displayViewMode_3D()
                , brush_radius
                , brush_radius
                , _draw_wmo_doodads
+               , _draw_fog
                );
 
   displayGUIIfEnabled();
@@ -1922,7 +1924,7 @@ void MapView::toggle_terrain_texturing_mode()
     alloff_doodads = _draw_wmo_doodads;
     alloff_contour = _draw_terrain_height_contour;
     alloff_wmo = _world->drawwmo;
-    alloff_fog = _world->drawfog;
+    alloff_fog = _draw_fog;
     alloff_terrain = _world->drawterrain;
 
     _world->drawmodels = false;
@@ -1930,7 +1932,7 @@ void MapView::toggle_terrain_texturing_mode()
     _draw_terrain_height_contour = true;
     _world->drawwmo = false;
     _world->drawterrain = true;
-    _world->drawfog = false;
+    _draw_fog = false;
   }
   else
   {
@@ -1939,7 +1941,7 @@ void MapView::toggle_terrain_texturing_mode()
     _draw_terrain_height_contour = alloff_contour;
     _world->drawwmo = alloff_wmo;
     _world->drawterrain = alloff_terrain;
-    _world->drawfog = alloff_fog;
+    _draw_fog = alloff_fog;
   }
   alloff = !alloff;
 }
@@ -2074,7 +2076,7 @@ void MapView::toggle_contour_drawing (bool value)
 
 void MapView::toggle_fog_drawing (bool value)
 {
-  _world->drawfog = value;
+  _draw_fog = value;
 }
 
 void MapView::toggle_tile_mode()
