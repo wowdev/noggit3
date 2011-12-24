@@ -145,9 +145,6 @@ public:
 
   OutdoorLightStats outdoorLightStats;
 
-  StripType *mapstrip;
-  StripType *mapstrip2;
-
   Vec3D camera;
   Vec3D lookat;
   Frustum frustum;

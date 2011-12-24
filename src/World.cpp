@@ -214,8 +214,6 @@ World::World( const std::string& name )
 , loading( false )
 , noadt( false )
 , outdoorLightStats( OutdoorLightStats() )
-, mapstrip( NULL )
-, mapstrip2( NULL )
 , camera( Vec3D( 0.0f, 0.0f, 0.0f ) )
 , lookat( Vec3D( 0.0f, 0.0f, 0.0f ) )
 , frustum( Frustum() )
@@ -682,19 +680,6 @@ void initGlobalVBOs( GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords )
 
 void World::initDisplay()
 {
-  // default strip indices
-  StripType *defstrip = new StripType[stripsize];
-  for (int i=0; i<stripsize; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
-  mapstrip = new StripType[stripsize];
-  stripify<StripType>(defstrip, mapstrip);
-  delete[] defstrip;
-
-  defstrip = new StripType[stripsize2];
-  for (int i=0; i<stripsize2; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
-  mapstrip2 = new StripType[stripsize2];
-  stripify2<StripType>(defstrip, mapstrip2);
-  delete[] defstrip;
-
   initGlobalVBOs( &detailtexcoords, &alphatexcoords );
 
   noadt = false;
@@ -743,17 +728,6 @@ World::~World()
   {
     delete ol;
     ol = NULL;
-  }
-
-  if (mapstrip)
-  {
-    delete[] mapstrip;
-    mapstrip = NULL;
-  }
-  if (mapstrip2)
-  {
-    delete[] mapstrip2;
-    mapstrip2 = NULL;
   }
 
   LogDebug << "Unloaded world \"" << basename << "\"." << std::endl;
