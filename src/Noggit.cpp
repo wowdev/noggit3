@@ -49,6 +49,8 @@ Noggit::Noggit (int& argc, char** argv)
   setOrganizationDomain ("modcraft.tk");
   setOrganizationName ("Modcraft");
   setApplicationName ("Noggit");
+  setApplicationVersion (STRPRODUCTVER);
+
   _settings = new QSettings (this);
 
   qsrand (QTime::currentTime().msec());
