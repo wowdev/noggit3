@@ -535,7 +535,7 @@ void MapTile::drawWater()
 }
 
 // This is for the 2D mode only.
-void MapTile::drawTextures()
+void MapTile::drawTextures (int animation_time)
 {
   float xOffset,yOffset;
 
@@ -549,7 +549,7 @@ void MapTile::drawTextures()
   for (int j=0; j<16; ++j) {
     for (int i=0; i<16; ++i) {
       if(((i+1+xOffset)>_world->minX)&&((j+1+yOffset)>_world->minY)&&((i+xOffset)<_world->maxX)&&((j+yOffset)<_world->maxY))
-        mChunks[j][i]->drawTextures();
+        mChunks[j][i]->drawTextures (animation_time);
 
 
     }

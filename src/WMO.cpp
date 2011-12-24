@@ -255,7 +255,15 @@ WMO::~WMO()
 // model.cpp
 void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
 
-void WMO::draw(World* world, int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool /*highlight*/) const
+void WMO::draw ( World* world
+               , int doodadset
+               , const Vec3D &ofs
+               , const float rot
+               , bool boundingbox
+               , bool groupboxes
+               , bool /*highlight*/
+               , bool draw_doodads
+               ) const
 {
   if( world && world->drawfog )
     glEnable( GL_FOG );
@@ -266,7 +274,7 @@ void WMO::draw(World* world, int doodadset, const Vec3D &ofs, const float rot, b
   {
     groups[i].draw(world, ofs, rot,false);
 
-    if ( world->drawdoodads)
+    if (draw_doodads)
     {
       groups[i].drawDoodads(world, doodadset, ofs, rot);
     }
@@ -501,12 +509,19 @@ void WMO::draw(World* world, int doodadset, const Vec3D &ofs, const float rot, b
   */
 }
 
-void WMO::drawSelect(World* world, int doodadset, const Vec3D &ofs, const float rot) const
+void WMO::drawSelect ( World* world
+                     , int doodadset
+                     , const Vec3D &ofs
+                     , const float rot
+                     , bool draw_doodads
+                     ) const
 {
-  for (unsigned int i=0; i<nGroups; ++i) {
+  for (unsigned int i=0; i<nGroups; ++i)
+  {
     groups[i].draw(world, ofs, rot, true);
 
-    if (world->drawdoodads) {
+    if (draw_doodads)
+    {
       groups[i].drawDoodadsSelect(world, doodadset, ofs, rot);
     }
 

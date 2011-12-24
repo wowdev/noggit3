@@ -157,8 +157,21 @@ public:
   //! \todo This only has World* for wmo-doodads. ._.
   explicit WMO(World* world, const std::string& name);
   ~WMO();
-  void draw(World* world, int doodadset, const Vec3D& ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight) const;
-  void drawSelect(World* world, int doodadset, const Vec3D& ofs, const float rot) const;
+  void draw ( World* world
+            , int doodadset
+            , const Vec3D& ofs
+            , const float rot
+            , bool boundingbox
+            , bool groupboxes
+            , bool highlight
+            , bool draw_doodads
+            ) const;
+  void drawSelect ( World* world
+                  , int doodadset
+                  , const Vec3D& ofs
+                  , const float rot
+                  , bool draw_doodads
+                  ) const;
   //void drawPortals();
   bool drawSkybox(World* world, Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const;
 };

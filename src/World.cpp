@@ -173,50 +173,49 @@ bool World::IsEditableWorld( int pMapId )
 }
 
 World::World( const std::string& name )
-: cx( -1 )
-, cz( -1 )
-, ex( -1 )
-, ez( -1 )
-, mCurrentSelection( NULL )
-, mCurrentSelectedTriangle( 0 )
-, SelectionMode( false )
-, mBigAlpha( false )
-, mWmoFilename( "" )
-, mWmoEntry( ENTRY_MODF() )
-, detailtexcoords( 0 )
-, alphatexcoords( 0 )
-, mMapId( 0xFFFFFFFF )
-, ol( NULL )
-, l_const( 0.0f )
-, l_linear( 0.7f )
-, l_quadratic( 0.03f )
-, drawdoodads( true )
-, drawfog( true )
-, drawlines( false )
-, drawmodels( true )
-, drawterrain( true )
-, drawwater( false )
-, drawwmo( true )
-, lighting( true )
-, animtime( 0 )
-, time( 1450 )
-, basename( name )
-, fogdistance( 777.0f )
-, culldistance( fogdistance )
-, autoheight( false )
-, minX( 0.0f )
-, maxX( 0.0f )
-, minY( 0.0f )
-, maxY( 0.0f )
-, zoom( 0.25f )
-, skies( NULL )
-, mHasAGlobalWMO( false )
-, loading( false )
-, noadt( false )
-, outdoorLightStats( OutdoorLightStats() )
-, camera( Vec3D( 0.0f, 0.0f, 0.0f ) )
-, lookat( Vec3D( 0.0f, 0.0f, 0.0f ) )
-, frustum( Frustum() )
+  : cx( -1 )
+  , cz( -1 )
+  , ex( -1 )
+  , ez( -1 )
+  , mCurrentSelection( NULL )
+  , mCurrentSelectedTriangle( 0 )
+  , SelectionMode( false )
+  , mBigAlpha( false )
+  , mWmoFilename( "" )
+  , mWmoEntry( ENTRY_MODF() )
+  , detailtexcoords( 0 )
+  , alphatexcoords( 0 )
+  , mMapId( 0xFFFFFFFF )
+  , ol( NULL )
+  , l_const( 0.0f )
+  , l_linear( 0.7f )
+  , l_quadratic( 0.03f )
+  , drawfog( true )
+  , drawlines( false )
+  , drawmodels( true )
+  , drawterrain( true )
+  , drawwater( false )
+  , drawwmo( true )
+  , lighting( true )
+  , animtime( 0 )
+  , time( 1450 )
+  , basename( name )
+  , fogdistance( 777.0f )
+  , culldistance( fogdistance )
+  , autoheight( false )
+  , minX( 0.0f )
+  , maxX( 0.0f )
+  , minY( 0.0f )
+  , maxY( 0.0f )
+  , zoom( 0.25f )
+  , skies( NULL )
+  , mHasAGlobalWMO( false )
+  , loading( false )
+  , noadt( false )
+  , outdoorLightStats( OutdoorLightStats() )
+  , camera( Vec3D( 0.0f, 0.0f, 0.0f ) )
+  , lookat( Vec3D( 0.0f, 0.0f, 0.0f ) )
+  , frustum( Frustum() )
   , _selection_names (this)
 {
   for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
@@ -995,6 +994,7 @@ void World::draw ( bool draw_terrain_height_contour
                  , bool dont_draw_cursor
                  , float inner_cursor_radius
                  , float outer_cursor_radius
+                 , bool draw_wmo_doodads
                  )
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1266,7 +1266,7 @@ void World::draw ( bool draw_terrain_height_contour
       glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
 
       for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-        it->second.draw();
+        it->second.draw (draw_wmo_doodads);
 
       spec_color = Vec4D( 0.0f, 0.0f, 0.0f, 1.0f );
       glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
@@ -1274,7 +1274,7 @@ void World::draw ( bool draw_terrain_height_contour
     }
     else
       for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-        it->second.draw();
+        it->second.draw (draw_wmo_doodads);
 
   outdoorLights( true );
   setupFog();
@@ -1353,7 +1353,11 @@ static const GLuint MapObjName = 1;
 static const GLuint DoodadName = 2;
 static const GLuint MapTileName = 3;
 
-void World::drawSelection( int cursorX, int cursorY, bool pOnlyMap )
+void World::drawSelection ( int cursorX
+                          , int cursorY
+                          , bool pOnlyMap
+                          , bool draw_wmo_doodads
+                          )
 {
   glSelectBuffer( sizeof( selectionBuffer ) / sizeof( GLuint ), selectionBuffer );
   glRenderMode( GL_SELECT );
@@ -1402,7 +1406,7 @@ void World::drawSelection( int cursorX, int cursorY, bool pOnlyMap )
       glPushName( 0 );
       for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
       {
-        it->second.drawSelect();
+        it->second.drawSelect (draw_wmo_doodads);
       }
       glPopName();
       glPopName();
@@ -1639,7 +1643,7 @@ void World::drawTileMode(float /*ah*/)
     {
       if( tileLoaded( j, i ) )
       {
-        mTiles[j][i].tile->drawTextures();
+        mTiles[j][i].tile->drawTextures (animtime);
       }
     }
   }
@@ -2000,7 +2004,7 @@ void World::saveMap()
       //glTranslatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
       glTranslatef( x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f );
 
-      ATile->drawTextures();
+      ATile->drawTextures (animtime);
       glPopMatrix();
       glReadPixels(video.xres()/2-128,video.yres()/2-128,256,256,GL_RGB,GL_UNSIGNED_BYTE,image);
       video.flip();

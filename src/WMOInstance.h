@@ -33,8 +33,8 @@ public:
   explicit WMOInstance( World*, WMO* _wmo );
   ~WMOInstance();
 
-  void draw() const;
-  void drawSelect();
+  void draw (bool draw_doodads) const;
+  void drawSelect (bool draw_doodads);
 
   void resetDirection();
 
