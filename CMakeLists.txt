@@ -28,6 +28,11 @@ find_package (GLEW REQUIRED)
 find_package (StormLib REQUIRED)
 find_package (Qt4 4.8 COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
 
+if (APPLE)
+  # Also link against libz for static's sake.
+  set (FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES} z)
+endif (APPLE)
+
 # Hacky boost finding.
 set (Boost_USE_STATIC_LIBS ON)
 
@@ -46,10 +51,10 @@ if (WIN32)
            Boost_STRIPPED_LIB_DIR
            "${Boost_THREAD_LIBRARY_DEBUG}"
          )
-  link_directories (${Boost_STRIPPED_LIB_DIR})
+  link_directories ( ${Boost_STRIPPED_LIB_DIR}
+                     ${STORMLIB_LIBRARY_DIR}
+                   )
 endif (WIN32)
-
-link_directories (${STORMLIB_LIBRARY_DIR})
 
 # Qt setup
 include (${QT_USE_FILE})
@@ -135,6 +140,10 @@ set ( SourceFiles
       src/noggit/ui/help_widget.cpp
       src/noggit/ui/minimap_widget.cpp
     )
+
+if (WIN32)
+  set (SourceFiles ${SourceFiles} src/windows/StackWalker.cpp)
+endif (WIN32)
 
 set ( AllHeaders
       src/noggit/Animated.h
@@ -233,93 +242,116 @@ set ( FILES_TO_TRANSLATE
       ${SourceFiles}
     )
 
-# Log to console for easier debugging.
-OPTION( NOGGIT_LOGTOCONSOLE "Log to console instead of log.txt?" OFF )
 
-IF( NOGGIT_LOGTOCONSOLE )
-  MESSAGE( STATUS "And writing log to console instead of log.txt" )
-  ADD_DEFINITIONS( -DDEBUG__LOGGINGTOCONSOLE )
-ENDIF( NOGGIT_LOGTOCONSOLE )
+option (NOGGIT_LOGTOCONSOLE "Log to console instead of log.txt?" OFF)
+option (NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
 
-OPTION( NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF )
+if (NOGGIT_LOGTOCONSOLE)
+  message (STATUS "And writing log to console instead of log.txt")
+  add_definitions (-DDEBUG__LOGGINGTOCONSOLE)
+endif (NOGGIT_LOGTOCONSOLE)
 
-IF( NOGGIT_ALL_WARNINGS )
-  MESSAGE( STATUS "Spilling out mass warnings." )
-  IF( WIN32 )
-    ADD_DEFINITIONS( /W4 /Wall /Wp64 )
-  ELSE( WIN32 )
-    ADD_DEFINITIONS( -W -Wall -Wshadow )
-  ENDIF( WIN32 )
-ENDIF( NOGGIT_ALL_WARNINGS )
+if (NOGGIT_ALL_WARNINGS)
+  message (STATUS "Spilling out mass warnings.")
+  if (WIN32)
+    add_definitions (/W4 /Wall /Wp64)
+  else (WIN32)
+    add_definitions (-W -Wall -Wshadow)
+  endif (WIN32)
+endif (NOGGIT_ALL_WARNINGS)
 
 # MSVC++ specific defines.
 if (WIN32)
     add_definitions (/vmg /D NOMINMAX)
 endif (WIN32)
 
+# Find revision ID and hash of the sourcetree
+include ("${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake")
+include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
+
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR}
+                      ${CMAKE_CURRENT_SOURCE_DIR}/src
+                    )
+
+# Moc, translate, ressource.
+qt4_wrap_cpp (moced ${HeadersToMoc} ${HeadersToMoc})
+qt4_automoc (${moced})
+
+qt4_create_translation (QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS})
+qt4_add_translation (QM ${TRANSLATIONS})
+#qt4_add_resources (rccsc ${foo})
+
+if (APPLE)
+  set (ResourceFiles "${CMAKE_SOURCE_DIR}/media/noggit.icns")
+  set_source_files_properties ( ${ResourceFiles}
+                                PROPERTIES
+                                MACOSX_PACKAGE_LOCATION
+                                Resources
+                              )
+endif (APPLE)
+
 if (WIN32)
+  add_executable ( noggit
+                   WIN32
+                   ${SourceFiles}
+                   ${AllHeaders}
+                   ${moced}
+                   ${rccsc}
+                   ${QM}
+                 )
+else (WIN32)
+  add_executable ( noggit
+                   MACOSX_BUNDLE
+                   ${SourceFiles}
+                   ${ResourceFiles}
+                   ${moced}
+                   ${rccsc}
+                   ${QM}
+                 )
 endif (WIN32)
 
-# Find revision ID and hash of the sourcetree
-include( "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake" )
-SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp" )
+target_link_libraries ( noggit
+                        ${OPENGL_LIBRARIES}
+                        ${FREETYPE_LIBRARIES}
+                        ${STORMLIB_LIBRARIES}
+                        ${Boost_LIBRARIES}
+                        ${GLEW_LIBRARY}
+                        ${QT_LIBRARIES}
+                      )
 
-# And do the job.
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src  ${IncludeDirectories} )
-IF( APPLE )
-  SET( ResourceFiles "${CMAKE_SOURCE_DIR}/media/noggit.icns" )
-  SET_SOURCE_FILES_PROPERTIES( ${ResourceFiles} PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
-  SET( SourceFiles ${SourceFiles} ${ResourceFiles} )
-
-  # Also link against libz for static's sake.
-  SET( FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES} z )
-ENDIF( APPLE )
-
-QT4_WRAP_CPP( moced ${HeadersToMoc} ${HeadersToMoc})
-QT4_AUTOMOC( ${moced} )
-
-QT4_CREATE_TRANSLATION (QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS})
-QT4_ADD_TRANSLATION (QM ${TRANSLATIONS})
-#QT4_ADD_RESOURCES( rccsc ${rccs} )
-
-IF( WIN32 )
-  add_library (stackwalker src/windows/StackWalker.cpp)
-  ADD_EXECUTABLE( noggit WIN32 MACOSX_BUNDLE ${SourceFiles} ${AllHeaders} ${moced} ${rccsc} ${QM} )
-
-TARGET_LINK_LIBRARIES( noggit ${OPENGL_LIBRARIES} ${FREETYPE_LIBRARIES} ${STORMLIB_LIBRARIES} ${Boost_LIBRARIES} ${GLEW_LIBRARY} ${QT_LIBRARIES} stackwalker)
-ELSE( WIN32 )
-  ADD_EXECUTABLE( noggit WIN32 MACOSX_BUNDLE ${SourceFiles} ${moced} ${rccsc} ${QM} )
-
-TARGET_LINK_LIBRARIES( noggit ${OPENGL_LIBRARIES} ${FREETYPE_LIBRARIES} ${STORMLIB_LIBRARIES} ${Boost_LIBRARIES} ${GLEW_LIBRARY} ${QT_LIBRARIES})
-ENDIF( WIN32 )
-
-
-IF(APPLE)
-  SET_TARGET_PROPERTIES( noggit PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/media/Info.plist" )
+if (APPLE)
+  set_target_properties ( noggit
+                          PROPERTIES
+                          MACOSX_BUNDLE_INFO_PLIST
+                          "${CMAKE_SOURCE_DIR}/media/Info.plist"
+                        )
 
   # Copy the binary to bin/.
-  INSTALL(TARGETS noggit
+  install(TARGETS noggit
     BUNDLE DESTINATION ${CMAKE_CURRENT_BINARY_DIR} COMPONENT Runtime
     RUNTIME DESTINATION bin COMPONENT Runtime
     )
 
-  INCLUDE(InstallRequiredSystemLibraries)
+  include (InstallRequiredSystemLibraries)
 
-  SET(APPS "${CMAKE_CURRENT_BINARY_DIR}/noggit.app")
+  set (APPS "${CMAKE_CURRENT_BINARY_DIR}/noggit.app")
 
-  SET(DIRS ${OPENGL_LIBRARY_DIR} ${FREETYPE_LIBRARY_DIR} ${STORMLIB_LIBRARY_DIR} ${Boost_LIBRARY_DIR} ${GLEW_LIBRARY_DIR})
-  INSTALL(CODE "
-   include(BundleUtilities)
-   fixup_bundle(\"${APPS}\"   \"\"   \"${DIRS}\")
-   " COMPONENT Runtime)
+  set ( DIRS
+      ${OPENGL_LIBRARY_DIR}
+      ${FREETYPE_LIBRARY_DIR}
+      ${STORMLIB_LIBRARY_DIR}
+      ${Boost_LIBRARY_DIR}
+      ${GLEW_LIBRARY_DIR}
+      )
 
-  SET(CPACK_BUNDLE_NAME "Noggit 3")
-  SET(CPACK_BUNDLE_PLIST "${CMAKE_SOURCE_DIR}/media/Info.plist")
-  SET(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/media/noggit.icns")
-  SET(CPACK_DMG_VOLUME_NAME "Noggit 3")
-  SET(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/media/noggit.png")
-  SET(CPACK_GENERATOR "DragNDrop")
-  SET(CPACK_PACKAGE_FILE_NAME "Noggit 3")
-  SET(CPACK_PACKAGE_VERSION "3.262")
-  INCLUDE(CPack)
-ENDIF(APPLE)
+  install ( CODE
+            " include (BundleUtilities)
+              fixup_bundle ( \"${APPS}\"
+                             \"\"
+                             \"${DIRS}\"
+                           )
+            "
+            COMPONENT
+            Runtime
+          )
+endif (APPLE)
