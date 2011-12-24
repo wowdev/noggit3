@@ -205,10 +205,20 @@ void Noggit::get_game_path()
 #ifdef Q_WS_WIN
     static const QString default_registry_path
       ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Blizzard Entertainment\\World of Warcraft");
+    static const QString win7_registry_path
+      ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft");
 
-    QSettings registry (default_registry_path, QSettings::NativeFormat | QSettings::Registry32Format);
-
-    _game_path = registry.value ("InstallPath").toString();
+    //! \todo Test this. This was written on a mac with no testing at all!
+    QSettings registry (default_registry_path, QSettings::NativeFormat);
+    if (registry.value ("InstallPath").isValid())
+    {
+      _game_path = registry.value ("InstallPath").toString();
+    }
+    else
+    {
+      QSettings registry_win7 (win7_registry_path, QSettings::NativeFormat);
+      _game_path = registry_win7.value ("InstallPath").toString();
+    }
 #else
 #ifdef Q_WS_MAC
     _game_path = "/Applications/World of Warcraft/";
