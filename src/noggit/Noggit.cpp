@@ -8,6 +8,9 @@
 #include <QGLWidget>
 #include <QGLFormat>
 #include <QFontDatabase>
+#include <QTranslator>
+#include <QLocale>
+#include <QLibraryInfo>
 
 #include <revision.h>
 
@@ -52,6 +55,14 @@ Noggit::Noggit (int& argc, char** argv)
   setApplicationVersion (STRPRODUCTVER);
 
   _settings = new QSettings (this);
+
+  QTranslator* qtTranslator (new QTranslator (this));
+  qtTranslator->load ("qt_" + QLocale::system().name(), QLibraryInfo::location (QLibraryInfo::TranslationsPath));
+  installTranslator (qtTranslator);
+
+  QTranslator* appTranslator (new QTranslator (this));
+  appTranslator->load ("noggit_" + QLocale::system().name());
+  installTranslator (appTranslator);
 
   qsrand (QTime::currentTime().msec());
 
