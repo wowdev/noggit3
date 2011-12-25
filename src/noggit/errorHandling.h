@@ -105,7 +105,7 @@ void printStacktrace()
 
 #else
 
-#include "../windows/StackWalker.h"
+#include <windows/StackWalker.h>
 
 void printStacktrace()
 {
