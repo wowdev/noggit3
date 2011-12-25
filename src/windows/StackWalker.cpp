@@ -1126,7 +1126,7 @@ void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUser
 #endif
 }
 
-#include "../../src/Log.h"
+#include "../noggit/Log.h"
 
 void StackWalker::OnOutput(LPCSTR buffer)
 {
