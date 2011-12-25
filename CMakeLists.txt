@@ -233,9 +233,7 @@ set ( HeadersToMoc
       src/noggit/ui/minimap_widget.h
     )
 
-set ( TRANSLATIONS
-      translations/noggit_de.ts
-    )
+file (GLOB TRANSLATIONS translations/noggit_*.ts)
 
 set ( FILES_TO_TRANSLATE
       ${AllHeaders}
