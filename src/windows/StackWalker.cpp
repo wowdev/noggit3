@@ -29,7 +29,7 @@
 #include <stdio.h>
 #pragma comment(lib, "version.lib")  // for "VerQueryValue"
 
-#include "StackWalker.h"
+#include <windows/StackWalker.h>
 
 
 // If VC7 and later, then use the shipped 'dbghelp.h'-file
@@ -1126,7 +1126,7 @@ void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUser
 #endif
 }
 
-#include "../noggit/Log.h"
+#include <noggit/Log.h>
 
 void StackWalker::OnOutput(LPCSTR buffer)
 {
