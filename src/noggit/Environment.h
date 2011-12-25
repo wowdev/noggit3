@@ -7,6 +7,8 @@
 #include <noggit/Selection.h>
 #include <noggit/Vec3D.h>
 
+class QSettings;
+
 class Environment
 {
 public:
@@ -39,6 +41,8 @@ public:
 private:
   Environment();
   static Environment* instance;
+
+  QSettings* _settings;
 
   nameEntry clipboard;
 };

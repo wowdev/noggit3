@@ -1,7 +1,10 @@
 #include <noggit/Environment.h>
 #include <noggit/MapHeaders.h>
 
+#include <QSettings>
+
 Environment::Environment()
+  : _settings (new QSettings)
 {
   view_holelines = false;
   ShiftDown = false;
@@ -10,6 +13,12 @@ Environment::Environment()
   clipboard = nameEntry();
   flagPaintMode = FLAG_IMPASS;
   paintMode = true;
+
+  cursorColorR = _settings->value ("cursor/red", 1.0f).toFloat();
+  cursorColorG = _settings->value ("cursor/green", 1.0f).toFloat();
+  cursorColorB = _settings->value ("cursor/blue", 1.0f).toFloat();
+  cursorColorA = _settings->value ("cursor/alpha", 1.0f).toFloat();
+  cursorType = _settings->value ("cursor/type", 1.0f).toInt();
 }
 
 Environment* Environment::instance = 0;

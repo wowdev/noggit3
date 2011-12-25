@@ -25,8 +25,6 @@
 
 //! \todo Remove.
 #include <noggit/FreeType.h> // fonts.
-#include <noggit/Environment.h>
-#include <noggit/ConfigFile.h>
 
 AsyncLoader* gAsyncLoader;
 
@@ -73,6 +71,8 @@ Noggit::Noggit (int& argc, char** argv)
   set_working_directory_to_application_path();
   parse_command_line_and_set_defaults();
   get_game_path();
+
+  MPQFile::disk_search_path (_project_path);
   open_mpqs();
 
   add_font_from_mpq ("fonts/skurri.ttf");
@@ -387,29 +387,6 @@ int main (int argc, char *argv[])
   arial16.init( arialFilename, 16, false );
   arial24.init( arialFilename, 24, false );
   arial32.init( arialFilename, 32, false );
-
-  // init
-  Environment::getInstance()->cursorColorR = 1.0f;
-  Environment::getInstance()->cursorColorG = 1.0f;
-  Environment::getInstance()->cursorColorB = 1.0f;
-  Environment::getInstance()->cursorColorA = 1.0f;
-  Environment::getInstance()->cursorType = 1;
-
-  // load cursor settings
-  if (QFile::exists ("NoggIt.conf"))
-  {
-    ConfigFile myConfigfile ( "NoggIt.conf" );
-    if( myConfigfile.keyExists("RedColor") && myConfigfile.keyExists("GreenColor")  &&  myConfigfile.keyExists("BlueColor") &&  myConfigfile.keyExists("AlphaColor") )
-    {
-      Environment::getInstance()->cursorColorR = myConfigfile.read<float>( "RedColor" );
-      Environment::getInstance()->cursorColorG = myConfigfile.read<float>( "GreenColor" );
-      Environment::getInstance()->cursorColorB = myConfigfile.read<float>( "BlueColor" );
-      Environment::getInstance()->cursorColorA = myConfigfile.read<float>( "AlphaColor" );
-    }
-
-  if( myConfigfile.keyExists("CursorType"))
-    Environment::getInstance()->cursorType = myConfigfile.read<int>( "CursorType" );
-  }
 
 //! \todo remove ^^
 

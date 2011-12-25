@@ -76,7 +76,6 @@ endif (WIN32)
 set ( SourceFiles
       src/noggit/AsyncLoader.cpp
       src/noggit/Brush.cpp
-      src/noggit/ConfigFile.cpp
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
       src/noggit/Directory.cpp
@@ -96,7 +95,6 @@ set ( SourceFiles
       src/noggit/ModelManager.cpp
       src/noggit/Noggit.cpp
       src/noggit/Particle.cpp
-      src/noggit/Project.cpp
       src/noggit/Selection.cpp
       src/noggit/Settings.cpp
       src/noggit/Shaders.cpp
@@ -150,7 +148,6 @@ set ( AllHeaders
       src/noggit/AsyncLoader.h
       src/noggit/AsyncObject.h
       src/noggit/Brush.h
-      src/noggit/ConfigFile.h
       src/noggit/DBC.h
       src/noggit/DBCFile.h
       src/noggit/Directory.h
@@ -174,7 +171,6 @@ set ( AllHeaders
       src/noggit/ModelManager.h
       src/noggit/Noggit.h
       src/noggit/Particle.h
-      src/noggit/Project.h
       src/noggit/Quaternion.h
       src/noggit/Selection.h
       src/noggit/Settings.h
