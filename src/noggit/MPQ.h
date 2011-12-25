@@ -93,8 +93,12 @@ public:
 
   static bool exists( const std::string& filename );
 
+  static void disk_search_path (const QString& path);
+
 private:
   void open_file (const std::string& filename);
+
+  static std::string _disk_search_path;
 
   friend class MPQArchive;
 };

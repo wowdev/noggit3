@@ -9,7 +9,6 @@
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
 #include <noggit/Noggit.h> // gStates, gPop, arial14, morpheus40, arial...
-#include <noggit/Project.h>
 #include <noggit/UIAppInfo.h> // UIAppInfo
 #include <noggit/UICursorSwitcher.h> // UICursorSwitcher
 #include <noggit/UIDetailInfos.h> // UIDetailInfos
@@ -53,9 +52,6 @@ UIMapViewGUI::UIMapViewGUI (World* world, MapView *setMapview)
   guiappInfo = new UIAppInfo( 1.0f, video.yres() - 440.0f, 420.0f, 410.0f, this );
   guiappInfo->movable( true );
   guiappInfo->hide();
-  std::stringstream appinfoText;
-  appinfoText << "Project Path: " << Project::getInstance()->getPath() << std::endl;
-  guiappInfo->setText( appinfoText.str() );
   addChild(guiappInfo);
 
   TexturePicker = new UITexturePicker(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );

@@ -17,7 +17,6 @@
 #include <boost/thread.hpp>
 
 #include <noggit/Log.h>
-#include <noggit/Project.h>
 #include <noggit/AsyncLoader.h> // AsyncLoader
 #include <noggit/Noggit.h> // gAsyncLoader
 
@@ -29,6 +28,8 @@ std::list<std::string> gListfile;
 boost::mutex gListfileLoadingMutex;
 boost::mutex gMPQFileMutex;
 std::string modmpqpath="";//this will be the path to modders archive (with 'myworld' file inside)
+
+std::string MPQFile::_disk_search_path;
 
 void MPQArchive::loadMPQ( const std::string& filename, bool doListfile )
 {
@@ -169,11 +170,16 @@ MPQFile::MPQFile( const std::string& filename )
   open_file (filename);
 }
 
+void MPQFile::disk_search_path (const QString& path)
+{
+  _disk_search_path = path.toStdString();
+}
+
 void MPQFile::open_file (const std::string& filename)
 {
   boost::mutex::scoped_lock lock(gMPQFileMutex);
 
-  std::string diskpath = Project::getInstance()->getPath().append(filename);
+  std::string diskpath = _disk_search_path.append(filename);
 
   size_t found = diskpath.find( "\\" );
   while( found != std::string::npos )
@@ -241,7 +247,7 @@ bool MPQFile::exists( const std::string& filename )
     if( it->second->hasFile( filename ) )
       return true;
 
-  std::string diskpath = Project::getInstance()->getPath().append(filename);
+  std::string diskpath = _disk_search_path.append(filename);
 
   size_t found = diskpath.find( "\\" );
   while( found != std::string::npos )
@@ -271,7 +277,7 @@ void MPQFile::save(const char* filename)  //save to MPQ
   HANDLE mpq_a;
   if(modmpqpath=="")//create new user's mods MPQ
   {
-    std::string newmodmpq=Project::getInstance()->getPath().append("Data\\patch-9.MPQ");
+    std::string newmodmpq = _disk_search_path.append("Data\\patch-9.MPQ");
     SFileCreateArchive(newmodmpq.c_str(),MPQ_CREATE_ARCHIVE_V2 | MPQ_CREATE_ATTRIBUTES,0x40,&mpq_a);
     //! \note Is locale setting needed? LOCALE_NEUTRAL is windows only.
     SFileSetFileLocale(mpq_a,0); // 0 = LOCALE_NEUTRAL.
@@ -286,7 +292,7 @@ void MPQFile::save(const char* filename)  //save to MPQ
   SFileOpenArchive(modmpqpath.c_str(), 0, 0, &mpq_a );
   SFileSetLocale(0);
   std::string nameInMPQ = filename;
-  nameInMPQ.erase(0,strlen(Project::getInstance()->getPath().c_str()));
+  nameInMPQ.erase(0,strlen(_disk_search_path.c_str()));
   size_t found = nameInMPQ.find( "/" );
   while( found != std::string::npos )//fixing path to file
   {

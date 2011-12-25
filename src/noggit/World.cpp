@@ -18,15 +18,12 @@
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/Project.h>
 #include <noggit/Settings.h>
 #include <noggit/TextureManager.h>
 #include <noggit/UITexturingGUI.h>
 #include <noggit/Video.h>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/MapTile.h>
-#include <noggit/Brush.h> // brush
-#include <noggit/ConfigFile.h>
 
 GLuint selectionBuffer[8192];
 

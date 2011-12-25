@@ -1,6 +1,8 @@
 #ifndef __SETTINGS_H
 #define __SETTINGS_H
 
+class QSettings;
+
 class Settings
 {
 public:
@@ -23,6 +25,8 @@ private:
 
   Settings();
   static Settings* instance;
+
+  QSettings* _settings;
 };
 
 #endif

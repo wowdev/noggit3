@@ -2,10 +2,12 @@
 
 #include <boost/filesystem.hpp>
 
-#include <noggit/ConfigFile.h>
 #include <noggit/Log.h>
 
+#include <QSettings>
+
 Settings::Settings()
+  : _settings (new QSettings)
 {
   // set hardcoded till settings get serialized
   copy_rot=false;
@@ -13,15 +15,10 @@ Settings::Settings()
   copy_tile=false;
   AutoSelectingMode=true;
   holelinesOn=false;
-  FarZ = 1024;
   _noAntiAliasing = false;
 
-  if( boost::filesystem::exists( "noggIt.conf" ) )
-  {
-    ConfigFile config( "noggIt.conf" );
-    config.readInto( FarZ, "FarZ" );
-    _noAntiAliasing = config.readInto( _noAntiAliasing, "noAntiAliasing" );
-  }
+  FarZ = _settings->value ("rendering/view_distance", 1024).toInt();
+  _noAntiAliasing = !_settings->value ("rendering/antialiasing").toBool();
 }
 
 const bool& Settings::noAntiAliasing() const
