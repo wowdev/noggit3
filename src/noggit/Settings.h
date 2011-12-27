@@ -16,7 +16,6 @@ public:
   int FarZ;        // the far clipping value
 
   bool AutoSelectingMode;  // true activates auto selection when you deselect a model. False not.
-  bool holelinesOn;    // If true show the blue subchunk lines always. Not only in holemode is on.
 
   const bool& noAntiAliasing() const;
 

@@ -14,7 +14,6 @@ Settings::Settings()
   copy_size=false;
   copy_tile=false;
   AutoSelectingMode=true;
-  holelinesOn=false;
   _noAntiAliasing = false;
 
   FarZ = _settings->value ("rendering/view_distance", 1024).toInt();
