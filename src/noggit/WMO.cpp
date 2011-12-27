@@ -1009,7 +1009,7 @@ void WMOGroup::draw ( World* world
   glColor4f(1,1,1,1);
   glEnable(GL_CULL_FACE);
 
-  if (hascv && !selection && world->lighting)
+  if (hascv && !selection)
       glEnable(GL_LIGHTING);
 
 
