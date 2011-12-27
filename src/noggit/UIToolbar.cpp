@@ -6,7 +6,7 @@
 #include <noggit/FreeType.h> // fonts.
 #include <noggit/Log.h>
 #include <noggit/MapView.h> // MapView
-#include <noggit/Noggit.h> // arialn13
+#include <noggit/application.h> // arialn13
 #include <noggit/UIMapViewGUI.h>
 #include <noggit/UIMinimizeButton.h>
 #include <noggit/UIText.h>

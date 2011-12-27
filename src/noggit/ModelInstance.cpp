@@ -3,6 +3,7 @@
 #include <noggit/Log.h>
 #include <noggit/Model.h> // Model, etc.
 #include <noggit/World.h>
+#include <noggit/mpq/file.h>
 
 Vec3D TransformCoordsForModel( Vec3D pIn )
 {
@@ -57,7 +58,7 @@ ModelInstance::ModelInstance (World* world, Model *m)
 {
 }
 
-ModelInstance::ModelInstance (World* world, Model *m, MPQFile* f)
+ModelInstance::ModelInstance (World* world, Model *m, noggit::mpq::file* f)
   : model (m)
   , _world (world)
 {
@@ -87,7 +88,7 @@ ModelInstance::ModelInstance(World* world, Model *m, ENTRY_MDDF *d)
   nameID=0xFFFFFFFF;
 }
 
-void ModelInstance::init2(Model *m, MPQFile* f)
+void ModelInstance::init2(Model *m, noggit::mpq::file* f)
 {
   nameID=0xFFFFFFFF;
   model = m;

@@ -9,7 +9,6 @@ class Liquid;
 #include <vector>
 
 #include <noggit/Video.h>
-#include <noggit/MPQ.h>
 #ifdef USEBLSFILES
   #include <noggit/Shaders.h>
 #endif
@@ -23,6 +22,14 @@ namespace OpenGL
   class CallList;
   class Texture;
 };
+
+namespace noggit
+{
+  namespace mpq
+  {
+    class file;
+  }
+}
 
 //static int lCount = 0;
 
@@ -77,7 +84,7 @@ class Liquid
   float ydir;
   float texRepeats;
 
-  void initGeometry(MPQFile* f);
+  void initGeometry(noggit::mpq::file* f);
 
   template<int pFirst, int pLast>
   void initTextures( const std::string& pFilename );
@@ -113,9 +120,9 @@ public:
   ~Liquid();
 
 
-  //void init(MPQFile &f);
-  void initFromTerrain(MPQFile* f, int flags);
-  void initFromWMO(MPQFile* f, const WMOMaterial &mat, bool indoor);
+  //void init(noggit::mpq::file &f);
+  void initFromTerrain(noggit::mpq::file* f, int flags);
+  void initFromWMO(noggit::mpq::file* f, const WMOMaterial &mat, bool indoor);
   void initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, MH2O_Render *render );
   void initFromMH2O();
 

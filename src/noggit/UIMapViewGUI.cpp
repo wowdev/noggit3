@@ -8,7 +8,7 @@
 #include <noggit/Environment.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
-#include <noggit/Noggit.h> // gStates, gPop, arial14, morpheus40, arial...
+#include <noggit/application.h> // gStates, gPop, arial14, morpheus40, arial...
 #include <noggit/UIAppInfo.h> // UIAppInfo
 #include <noggit/UICursorSwitcher.h> // UICursorSwitcher
 #include <noggit/UIDetailInfos.h> // UIDetailInfos

@@ -5,6 +5,8 @@
 #include <noggit/UITexture.h>
 #include <noggit/UITexturingGUI.h>
 
+#include <cassert>
+
 void texturePickerClick( UIFrame* f,int id )
 {
   // redirect to sender object.

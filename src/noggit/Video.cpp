@@ -193,7 +193,7 @@ struct BLPHeader
 #pragma pack(pop)
 
 #include <boost/thread.hpp>
-#include <noggit/MPQ.h>
+#include <noggit/mpq/file.h>
 
 namespace OpenGL
 {
@@ -230,11 +230,6 @@ namespace OpenGL
   }
 
   Texture::~Texture()
-  {
-    invalidate();
-  }
-
-  void Texture::invalidate()
   {
     glDeleteTextures( 1, &_id );
     _id = 0;
@@ -385,12 +380,7 @@ namespace OpenGL
     _filename = filenameArg;
     bind();
 
-    MPQFile f( _filename );
-    if( f.isEof() )
-    {
-      invalidate();
-      return;
-    }
+    noggit::mpq::file f( QString::fromStdString (_filename) );
 
     char* lData = f.getPointer();
     BLPHeader* lHeader = reinterpret_cast<BLPHeader*>( lData );

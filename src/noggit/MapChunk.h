@@ -5,7 +5,13 @@
 #include <noggit/Quaternion.h> // Vec4D
 #include <noggit/Video.h> // GLuint
 
-class MPQFile;
+namespace noggit
+{
+  namespace mpq
+  {
+    class file;
+  }
+}
 class Vec4D;
 class brush;
 class World;
@@ -58,7 +64,7 @@ public:
   StripType *strip;
   int striplen;
 
-  MapChunk(World* world, MapTile* mt, MPQFile* f,bool bigAlpha);
+  MapChunk(World* world, MapTile* mt, noggit::mpq::file* f,bool bigAlpha);
   ~MapChunk();
 
   void destroy();

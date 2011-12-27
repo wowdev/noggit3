@@ -17,6 +17,7 @@
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
+#include <noggit/mpq/file.h>
 
 MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
   : modelCount (0)
@@ -43,9 +44,9 @@ MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bo
     }
   }
 
-  MPQFile theFile( mFilename );
+  noggit::mpq::file theFile (QString::fromStdString (mFilename));
 
-  Log << "Opening tile " << mPositionX << ", " << mPositionZ << " (\"" << mFilename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
+  Log << "Opening tile " << mPositionX << ", " << mPositionZ << " (\"" << mFilename << "\") from " << (theFile.file_is_on_disk() ? "disk" : "MPQ") << "." << std::endl;
 
   // - Parsing the file itself. --------------------------
 
@@ -1562,8 +1563,8 @@ void MapTile::saveTile()
   }
 #endif
 
-  MPQFile f( mFilename );
+  noggit::mpq::file f (QString::fromStdString (mFilename));
   f.setBuffer( lADTFile.GetPointer<char>(), lADTFile.mSize );
-  f.SaveFile();
+  f.save_to_disk();
   f.close();
 }

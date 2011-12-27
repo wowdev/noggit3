@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include <noggit/AsyncLoader.h> // AsyncLoader
-#include <noggit/Noggit.h> // gAsyncLoader
+#include <noggit/application.h> // gAsyncLoader
 #include <noggit/Model.h> // Model
 #include <noggit/Log.h> // LogDebug
 

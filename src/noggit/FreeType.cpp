@@ -9,11 +9,13 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 
+#include <QString>
+
 #include <utf8.h>
 
-#include <noggit/MPQ.h>
 #include <noggit/Log.h>
 #include <noggit/Video.h>
+#include <noggit/mpq/file.h>
 
 namespace freetype
 {
@@ -120,8 +122,13 @@ namespace freetype
     bool failed;
     if( fromMPQ )
     {
-      _mpqFile = new MPQFile( fname );
-      failed = FT_New_Memory_Face( _library, _mpqFile->get<FT_Byte>( 0 ), _mpqFile->getSize(), 0, &_face );
+      _mpqFile = new noggit::mpq::file (QString::fromStdString (fname));
+      failed = FT_New_Memory_Face ( _library
+                                  , _mpqFile->get<FT_Byte>( 0 )
+                                  , _mpqFile->getSize()
+                                  , 0
+                                  , &_face
+                                  );
     }
     else
     {

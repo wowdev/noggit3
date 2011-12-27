@@ -8,7 +8,14 @@
 #include <string>
 
 #include <noggit/Video.h>
-#include <noggit/MPQ.h>
+
+namespace noggit
+{
+  namespace mpq
+  {
+    class file;
+  }
+}
 
 namespace freetype
 {
@@ -54,7 +61,7 @@ namespace freetype
     FT_Face _face;
     FT_Library _library;
 
-    MPQFile* _mpqFile;
+    noggit::mpq::file* _mpqFile;
 
     void createGlyph( CharacterCode charCode ) const;
     const GlyphData& getGlyphData( CharacterCode charCode ) const;

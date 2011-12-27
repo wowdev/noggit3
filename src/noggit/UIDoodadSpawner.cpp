@@ -4,12 +4,13 @@
 
 #include <noggit/MapChunk.h>
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/Noggit.h> // arial14
+#include <noggit/application.h> // arial14
 #include <noggit/UIButton.h>
 #include <noggit/UITextBox.h>
 #include <noggit/Video.h> // video
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
+#include <noggit/mpq/file.h>
 
 #include <noggit/Log.h>
 
@@ -36,8 +37,6 @@ void AddM2Click( UIFrame* f, int i )
   ( static_cast<UIDoodadSpawner *>( textBox->parent() ) )->AddM2( textBox->value() );
 }
 
-extern std::list<std::string> gListfile;
-
 UIDoodadSpawner::UIDoodadSpawner (World* world)
   : UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Test", true )
   , _button( new UIButton( 145.0f, winHeight - 24.0f, 132.0f, 28.0f, "Test", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", AddM2Click, 0 ) )
@@ -52,16 +51,28 @@ UIDoodadSpawner::UIDoodadSpawner (World* world)
 
   Directory::Ptr fileList( new Directory() );
 
-  size_t found( std::string::npos );
-  for( std::list<std::string>::const_iterator it( gListfile.begin() ), end( gListfile.end() ); it != end; ++it )
+  noggit::mpq::archive_manager& manager
+    (qobject_cast<noggit::application*> (qApp)->archive_manager());
+
+  while (!manager.all_finished_loading())
   {
-    if( it->find( "m2" ) != std::string::npos )
+    manager.all_finish_loading();
+  }
+
+  foreach (const QString& filename, manager.listfile())
+  {
+    if (filename.endsWith (".m2"))
     {
-      found = it->find_last_of("/\\");
-      if( found != std::string::npos )
-        fileList->addDirectory( it->substr( 0, found ) )->addFile( it->substr( found + 1 ) );
+      const int slash_pos (filename.lastIndexOf ("/"));
+      if( slash_pos != -1 )
+      {
+        fileList->addDirectory (filename.left (slash_pos).toStdString())
+                ->addFile (filename.mid (slash_pos).toStdString());
+      }
       else
-        fileList->addFile( *it );
+      {
+        fileList->addFile (filename.toStdString());
+      }
     }
   }
 
@@ -86,7 +97,7 @@ void UIDoodadSpawner::AddM2( const std::string& filename )
       break;
   }
 
-  if( MPQFile::exists( filename ) )
+  if( noggit::mpq::file::exists( QString::fromStdString (filename) ) )
   {
     std::string ext( boost::filesystem::extension( filename ) );
     std::transform( ext.begin(), ext.end(), ext.begin(), ::toupper );

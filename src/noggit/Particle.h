@@ -11,6 +11,14 @@ class RibbonEmitter;
 #include <noggit/Model.h>
 #include <noggit/Video.h>
 
+namespace noggit
+{
+  namespace mpq
+  {
+    class file;
+  }
+}
+
 struct Particle {
   Vec3D pos, speed, down, origin, dir;
   Vec3D  corners[4];
@@ -98,7 +106,7 @@ public:
   }
   virtual ~ParticleSystem() { if( emitter ) { delete emitter; emitter = NULL; } }
 
-  void init(const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals);
+  void init(const noggit::mpq::file& f, const ModelParticleEmitterDef &mta, int *globals);
   void update(float dt);
 
   void setup(int anim, int time);
@@ -140,7 +148,7 @@ class RibbonEmitter {
 public:
   Model *model;
 
-  void init(const MPQFile &f, ModelRibbonEmitterDef &mta, int *globals);
+  void init(const noggit::mpq::file &f, ModelRibbonEmitterDef &mta, int *globals);
   void setup(int anim, int time);
   void draw();
 };

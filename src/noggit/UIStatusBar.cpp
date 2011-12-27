@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#include <noggit/Noggit.h> // arial16
+#include <noggit/application.h> // arial16
 #include <noggit/UIText.h>
 #include <noggit/Video.h>
 

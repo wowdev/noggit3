@@ -2,6 +2,7 @@
 
 #include <list>
 
+#include <noggit/mpq/file.h>
 #include <noggit/Misc.h>
 
 static const unsigned int MAX_PARTICLES = 10000;
@@ -32,7 +33,7 @@ T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
 }
 
 
-void ParticleSystem::init(const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals)
+void ParticleSystem::init(const noggit::mpq::file& f, const ModelParticleEmitterDef &mta, int *globals)
 {
   speed.init   (mta.EmissionSpeed, f, globals);
   variation.init(mta.SpeedVariation, f, globals);
@@ -827,7 +828,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
   return p;
 }
 
-void RibbonEmitter::init(const MPQFile &f, ModelRibbonEmitterDef &mta, int *globals)
+void RibbonEmitter::init(const noggit::mpq::file &f, ModelRibbonEmitterDef &mta, int *globals)
 {
   color.init(mta.color, f, globals);
   opacity.init(mta.opacity, f, globals);

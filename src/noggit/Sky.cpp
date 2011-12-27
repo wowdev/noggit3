@@ -332,7 +332,7 @@ bool Skies::drawSky (World* world, const Vec3D &pos) const
 
 //! \todo  figure out what dnc.db is _really_ used for
 
-void OutdoorLightStats::init(MPQFile* f)
+void OutdoorLightStats::init(noggit::mpq::file* f)
 {
   float h,m;
 
@@ -490,7 +490,7 @@ void OutdoorLightStats::setupLighting()
 
 OutdoorLighting::OutdoorLighting( const std::string& fname)
 {
-  MPQFile f(fname);
+  noggit::mpq::file f(QString::fromStdString (fname));
   unsigned int n,d;
 
   f.seekRelative(4);

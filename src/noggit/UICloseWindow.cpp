@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <noggit/Noggit.h> // arial16
+#include <noggit/application.h> // arial16
 #include <noggit/UIMinimizeButton.h>
 #include <noggit/UIText.h>
 

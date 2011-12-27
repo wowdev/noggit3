@@ -24,6 +24,7 @@
 #include <noggit/Video.h>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/MapTile.h>
+#include <noggit/mpq/file.h>
 
 void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
 {
@@ -135,20 +136,18 @@ bool World::IsEditableWorld( int pMapId )
     return false;
   }
 
-  std::stringstream ssfilename;
-  ssfilename << "World\\Maps\\" << lMapName << "\\" << lMapName << ".wdt";
+  const QString filename
+    ( QString ("World\\Maps\\%1\\%1.wdt")
+      .arg (QString::fromStdString (lMapName))
+    );
 
-  if( !MPQFile::exists( ssfilename.str() ) )
+  if (!noggit::mpq::file::exists (filename))
   {
     Log << "World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
     return false;
   }
 
-  MPQFile mf( ssfilename.str() );
-
-  //sometimes, wdts don't open, so ignore them...
-  if(mf.isEof())
-    return false;
+  noggit::mpq::file mf (filename);
 
   const char * lPointer = reinterpret_cast<const char*>( mf.getPointer() );
 
@@ -226,10 +225,12 @@ World::World( const std::string& name )
     }
   }
 
-  std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
+  const QString filename
+    ( QString ("World\\Maps\\%1\\%1.wdt")
+      .arg (QString::fromStdString (basename))
+    );
 
-  MPQFile theFile(filename.str());
+  noggit::mpq::file theFile (filename);
   uint32_t fourcc;
   //uint32_t size;
 
@@ -279,7 +280,7 @@ World::World( const std::string& name )
     }
   }
 
-  if( !theFile.isEof() )
+  if( !theFile.is_at_end_of_file() )
   {
     //! \note We actually don't load WMO only worlds, so we just stop reading here, k?
     //! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
@@ -377,15 +378,12 @@ static inline QRgb color_for_height (int16_t height)
 
 void World::initMinimap()
 {
-  std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
+  const QString filename
+    ( QString ("World\\Maps\\%1\\%1.wdl")
+      .arg (QString::fromStdString (basename))
+    );
 
-  MPQFile wdl_file (filename.str());
-  if (wdl_file.isEof())
-  {
-    LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
-    return;
-  }
+  noggit::mpq::file wdl_file (filename);
 
   uint32_t fourcc;
   uint32_t size;
@@ -475,15 +473,12 @@ void World::initMinimap()
 
 void World::initLowresTerrain()
 {
-  std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
+  const QString filename
+    ( QString ("World\\Maps\\%1\\%1.wdl")
+      .arg (QString::fromStdString (basename))
+    );
 
-  MPQFile wdl_file (filename.str());
-  if (wdl_file.isEof())
-  {
-    LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
-      return;
-    }
+  noggit::mpq::file wdl_file (filename);
 
   uint32_t fourcc;
   uint32_t size;
@@ -820,16 +815,20 @@ MapTile* World::loadTile(int z, int x)
     return mTiles[z][x].tile;
   }
 
-  std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+  const QString filename
+    ( QString ("World\\Maps\\%1\\%1_%2_%3.adt")
+      .arg (QString::fromStdString (basename))
+      .arg (x)
+      .arg (z)
+    );
 
-  if( !MPQFile::exists( filename.str() ) )
+  if( !noggit::mpq::file::exists( filename ) )
   {
-    LogError << "The requested tile \"" << filename.str() << "\" does not exist! Oo" << std::endl;
+    LogError << "The requested tile \"" << qPrintable (filename) << "\" does not exist! Oo" << std::endl;
     return NULL;
   }
 
-  mTiles[z][x].tile = new MapTile( this, x, z, filename.str(), mBigAlpha );// XZ STEFF Swap MapTile( z, x, file
+  mTiles[z][x].tile = new MapTile( this, x, z, filename.toStdString(), mBigAlpha );
   return mTiles[z][x].tile;
 }
 
@@ -2260,7 +2259,7 @@ void World::saveWDT()
    // lWDTFile.Extend( 8 + 0x4 );
    // SetChunkHeader( lWDTFile, lCurrentPosition, 'MPHD', 4 );
 
-   // MPQFile f( "test.WDT" );
+   // noggit::mpq::file f( "test.WDT" );
    // f.setBuffer( lWDTFile.GetPointer<uint8_t>(), lWDTFile.mSize );
    // f.SaveFile();
    // f.close();

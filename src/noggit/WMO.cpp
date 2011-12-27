@@ -15,6 +15,7 @@
 #include <noggit/Shaders.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
+#include <noggit/mpq/file.h>
 
 void WMOHighlight( Vec4D color )
 {
@@ -48,14 +49,10 @@ const std::string& WMO::filename() const
 }
 
 WMO::WMO( World* world, const std::string& filenameArg )
-: ManagedItem( )
-, _filename( filenameArg )
+  : ManagedItem( )
+  , _filename( filenameArg )
 {
-  MPQFile f( _filename );
-  if (f.isEof()) {
-    LogError << "Error loading WMO \"" << _filename << "\"." << std::endl;
-    return;
-  }
+  noggit::mpq::file f (QString::fromStdString (_filename));
 
   uint32_t fourcc;
   uint32_t size;
@@ -68,7 +65,7 @@ WMO::WMO( World* world, const std::string& filenameArg )
 
   char *texbuf=0;
 
-  while (!f.isEof()) {
+  while (!f.is_at_end_of_file()) {
     f.read(&fourcc,4);
     f.read(&size, 4);
 
@@ -170,7 +167,7 @@ WMO::WMO( World* world, const std::string& filenameArg )
         {
           LogDebug << "SKYBOX:" << std::endl;
 
-          if( MPQFile::exists( path ) )
+          if( noggit::mpq::file::exists( QString::fromStdString (path) ) )
           {
             skybox = ModelManager::add( path );
             skyboxFilename = path;
@@ -575,7 +572,7 @@ void WMO::drawPortals()
 }
 */
 
-void WMOLight::init(MPQFile* f)
+void WMOLight::init(noggit::mpq::file* f)
 {
   char type[4];
   f->read(&type,4);
@@ -639,7 +636,7 @@ void WMOLight::setupOnce(GLint light, Vec3D dir, Vec3D lcol)
 
 
 
-void WMOGroup::init(WMO *_wmo, MPQFile* f, int _num, char *names)
+void WMOGroup::init(WMO *_wmo, noggit::mpq::file* f, int _num, char *names)
 {
   wmo = _wmo;
   num = _num;
@@ -724,11 +721,7 @@ void WMOGroup::initDisplayList()
   std::string fname = wmo->filename();
   fname.insert( fname.find( ".wmo" ), curNum.str() );
 
-  MPQFile gf(fname);
-  if (gf.isEof()) {
-    LogError << "Error loading WMO \"" << fname << "\"." << std::endl;
-    return;
-  }
+  noggit::mpq::file gf(QString::fromStdString (fname));
 
   /*if(!gf.isExternal())
     gLog("    Loading WMO from MPQ %s\n", fname);
@@ -753,7 +746,7 @@ void WMOGroup::initDisplayList()
   unsigned int *cv = NULL;
   hascv = false;
 
-  while (!gf.isEof()) {
+  while (!gf.is_at_end_of_file()) {
     gf.read(&fourcc,4);
     gf.read(&size, 4);
 
@@ -1167,7 +1160,7 @@ WMOGroup::~WMOGroup()
 }
 
 
-void WMOFog::init(MPQFile* f)
+void WMOFog::init(noggit::mpq::file* f)
 {
   f->read(this, 0x30);
   color = Vec4D( ((color1 & 0x00FF0000) >> 16)/255.0f, ((color1 & 0x0000FF00) >> 8)/255.0f,

@@ -37,14 +37,7 @@ Model::Model(const std::string& filename, bool _forceAnim)
 
 void Model::finishLoading()
 {
-  MPQFile f( _filename );
-
-  if( f.isEof() )
-  {
-      LogError << "Error loading file \"" << _filename << "\". Aborting to load model." << std::endl;
-       finished = true;
-      return;
-  }
+  noggit::mpq::file f (QString::fromStdString (_filename));
 
   //LogDebug << "Loading model \"" << _filename << "\"." << std::endl;
 
@@ -137,7 +130,7 @@ Model::~Model()
 }
 
 
-bool Model::isAnimated(const MPQFile& f)
+bool Model::isAnimated(const noggit::mpq::file& f)
 {
   // see if we have any animated bones
   ModelBoneDef *bo = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
@@ -226,7 +219,7 @@ Quaternion fixCoordSystemQuat(Quaternion v)
 }
 
 
-void Model::initCommon(const MPQFile& f)
+void Model::initCommon(const noggit::mpq::file& f)
 {
   // assume: origVertices already set
   if (!animGeometry) {
@@ -307,12 +300,8 @@ void Model::initCommon(const MPQFile& f)
     // indices - allocate space, too
     std::string lodname (_filename.substr (0, _filename.length() - 3));
     lodname.append("00.skin");
-    MPQFile g(lodname);
-    if (g.isEof()) {
-      LogError << "loading skinfile " << lodname << std::endl;
-      g.close();
-      return;
-    }
+    noggit::mpq::file g (QString::fromStdString (lodname));
+
     ModelView *view = reinterpret_cast<ModelView*>(g.getBuffer());
 
     uint16_t *indexLookup = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsIndex);
@@ -423,7 +412,7 @@ void Model::initCommon(const MPQFile& f)
   // zomg done
 }
 
-void Model::initStatic( const MPQFile& f )
+void Model::initStatic( const noggit::mpq::file& f )
 {
   origVertices = ( ModelVertex* )( f.getBuffer() + header.ofsVertices );
 
@@ -452,7 +441,7 @@ void Model::initStatic( const MPQFile& f )
     delete[] transparency;
 }
 
-void Model::initAnimated(const MPQFile& f)
+void Model::initAnimated(const noggit::mpq::file& f)
 {
   origVertices = new ModelVertex[header.nVertices];
   memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
@@ -473,16 +462,17 @@ void Model::initAnimated(const MPQFile& f)
       anims[i].length = std::max( anims[i].length, 1U );
     }
 
-    animfiles = new MPQFile*[header.nAnimations];
+    animfiles = new noggit::mpq::file*[header.nAnimations];
 
     std::stringstream tempname;
     for(size_t i=0; i<header.nAnimations; ++i)
     {
       std::string lodname = _filename.substr(0, _filename.length()-3);
       tempname << lodname << anims[i].animID << "-" << anims[i].subAnimID;
-      if(MPQFile::exists(tempname.str()))
+      const QString anim_filename (QString::fromStdString (tempname.str()));
+      if (noggit::mpq::file::exists (anim_filename))
       {
-        animfiles[i] = new MPQFile(tempname.str());
+        animfiles[i] = new noggit::mpq::file (anim_filename);
       }
       else
       {
@@ -1005,7 +995,7 @@ void TextureAnim::setup(int anim)
   }
 }
 
-void ModelCamera::init(const MPQFile& f, const ModelCameraDef &mcd, int *global)
+void ModelCamera::init(const noggit::mpq::file& f, const ModelCameraDef &mcd, int *global)
 {
   ok = true;
     nearclip = mcd.nearclip;
@@ -1038,18 +1028,18 @@ void ModelCamera::setup( int time )
   gluLookAt( p.x, p.y, p.z, t.x, t.y, t.z, u.x, u.y, u.z );
 }
 
-void ModelColor::init(const MPQFile& f, const ModelColorDef &mcd, int *global)
+void ModelColor::init(const noggit::mpq::file& f, const ModelColorDef &mcd, int *global)
 {
   color.init(mcd.color, f, global);
   opacity.init(mcd.opacity, f, global);
 }
 
-void ModelTransparency::init(const MPQFile& f, const ModelTransDef &mcd, int *global)
+void ModelTransparency::init(const noggit::mpq::file& f, const ModelTransDef &mcd, int *global)
 {
   trans.init(mcd.trans, f, global);
 }
 
-void ModelLight::init(const MPQFile& f, const ModelLightDef &mld, int *global)
+void ModelLight::init(const noggit::mpq::file& f, const ModelLightDef &mld, int *global)
 {
   tpos = pos = fixCoordSystem(mld.pos);
   tdir = dir = Vec3D(0,1,0); // no idea
@@ -1089,14 +1079,14 @@ void ModelLight::setup(int time, OpenGL::Light l)
   glEnable(l);
 }
 
-void TextureAnim::init(const MPQFile& f, const ModelTexAnimDef &mta, int *global)
+void TextureAnim::init(const noggit::mpq::file& f, const ModelTexAnimDef &mta, int *global)
 {
   trans.init(mta.trans, f, global);
   rot.init(mta.rot, f, global);
   scale.init(mta.scale, f, global);
 }
 
-void Bone::init(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **animfiles)
+void Bone::init(const noggit::mpq::file& f, const ModelBoneDef &b, int *global, noggit::mpq::file **animfiles)
 {
   parent = b.parent;
   pivot = fixCoordSystem(b.pivot);

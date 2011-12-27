@@ -6,7 +6,7 @@
 #include <vector>
 
 #include <noggit/Directory.h>
-#include <noggit/Noggit.h> // arial12
+#include <noggit/application.h> // arial12
 #include <noggit/UIText.h>
 #include <noggit/Video.h>
 

@@ -4,7 +4,7 @@
 
 #include <noggit/Model.h> // Model
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/Noggit.h> // arial14
+#include <noggit/application.h> // arial14
 #include <noggit/UIMapViewGUI.h> // UIMapViewGUI
 #include <noggit/UIModel.h> // UIModel
 #include <noggit/UIText.h> // UIText
