@@ -25,8 +25,6 @@
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/MapTile.h>
 
-GLuint selectionBuffer[8192];
-
 void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
 {
   float vx = x2-x1;
@@ -1361,7 +1359,7 @@ void World::drawSelection ( int cursorX
                           , bool draw_terrain
                           )
 {
-  glSelectBuffer( sizeof( selectionBuffer ) / sizeof( GLuint ), selectionBuffer );
+  glSelectBuffer( sizeof( _selection_buffer ) / sizeof( GLuint ), _selection_buffer );
   glRenderMode( GL_SELECT );
 
   glMatrixMode( GL_PROJECTION );
@@ -1465,7 +1463,7 @@ void World::getSelection()
   //! \todo Isn't the closest one always the first? Iterating would be worthless then.
   while( hits-- > 0U )
   {
-    GLNameEntry* entry = reinterpret_cast<GLNameEntry*>( &selectionBuffer[offset] );
+    GLNameEntry* entry = reinterpret_cast<GLNameEntry*>( &_selection_buffer[offset] );
 
     // We always push { MapObjName | DoodadName | MapTileName }, { 0, 0, MapTile }, { UID, UID, triangle }
     assert( entry->stackSize == 3 );
