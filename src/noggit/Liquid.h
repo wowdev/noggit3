@@ -89,7 +89,6 @@ class Liquid
   int tmpflag;
   bool trans;
 
-  unsigned char  *color;
   unsigned char  *waterFlags;
 
   //int number;

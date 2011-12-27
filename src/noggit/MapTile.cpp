@@ -731,8 +731,6 @@ void MapTile::clearAllModels()
 {
   Log << "Clear all models from ADT \"" << mFilename << "\"." << std::endl;
 
-  int lID;  // This is a global counting variable. Do not store something in here you need later.
-
   // Collect some information we need later.
 
   // Check which doodads and WMOs are on this ADT.
