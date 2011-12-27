@@ -10,7 +10,7 @@
 #include <QSlider>
 #include <QLabel>
 
-#include <noggit/signal_blocker.h>
+#include <helper/qt/signal_blocker.h>
 
 #include <noggit/Brush.h>
 #include <noggit/Environment.h>
@@ -453,7 +453,7 @@ void MapView::shaping_formula (shaping_formula_type::formula id)
 {
   _shaping_formula = id;
 
-  signal_blocker block (_shaping_formula_radio_group);
+  helper::qt::signal_blocker block (_shaping_formula_radio_group);
   _shaping_formula_radio_group->button (id)->click();
 }
 
@@ -479,7 +479,7 @@ void MapView::shaping_radius (qreal value)
                            , shaping_radius_maximum
                            );
 
-  signal_blocker block (_shaping_radius_slider);
+  helper::qt::signal_blocker block (_shaping_radius_slider);
   _shaping_radius_slider->setValue (shaping_radius() * shaping_radius_scale);
 }
 
@@ -490,7 +490,7 @@ void MapView::shaping_speed (qreal value)
                           , shaping_speed_maximum
                           );
 
-  signal_blocker block (_shaping_speed_slider);
+  helper::qt::signal_blocker block (_shaping_speed_slider);
   _shaping_speed_slider->setValue (shaping_speed() * shaping_speed_scale);
 }
 
@@ -513,7 +513,7 @@ void MapView::smoothing_formula (smoothing_formula_type::formula id)
 {
   _smoothing_formula = id;
 
-  signal_blocker block (_smoothing_formula_radio_group);
+  helper::qt::signal_blocker block (_smoothing_formula_radio_group);
   _smoothing_formula_radio_group->button (id)->click();
 }
 
@@ -539,7 +539,7 @@ void MapView::smoothing_radius (qreal value)
                             , smoothing_radius_maximum
                             );
 
-  signal_blocker block (_smoothing_radius_slider);
+  helper::qt::signal_blocker block (_smoothing_radius_slider);
   _smoothing_radius_slider->setValue (smoothing_radius() * smoothing_radius_scale);
 }
 
@@ -550,7 +550,7 @@ void MapView::smoothing_speed (qreal value)
                             , smoothing_speed_maximum
                             );
 
-  signal_blocker block (_smoothing_speed_slider);
+  helper::qt::signal_blocker block (_smoothing_speed_slider);
   _smoothing_speed_slider->setValue (smoothing_speed() * smoothing_speed_scale);
 }
 
