@@ -245,6 +245,8 @@ public:
 
 private:
   nameEntryManager _selection_names;
+
+  GLuint _selection_buffer[8192];
 };
 
 #endif
