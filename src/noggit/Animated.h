@@ -6,8 +6,8 @@
 #include <vector>
 
 #include <noggit/ModelHeaders.h>
-#include <noggit/MPQ.h>
 #include <noggit/Quaternion.h>
+#include <noggit/mpq/file.h>
 
 //! \todo Pass this in somehow and don't define as extern.
 // global time for global sequences
@@ -211,8 +211,8 @@ namespace Animation
       return result;
     }
 
-    //! \todo Use a vector of MPQFile& for the anim files instead for safety.
-    void init(const AnimationBlock& animationBlock, const MPQFile& file, int32_t* globalSequences, MPQFile** animfiles = NULL )
+    //! \todo Use a vector of mpq::file& for the anim files instead for safety.
+    void init(const AnimationBlock& animationBlock, const noggit::mpq::file& file, int32_t* globalSequences, noggit::mpq::file** animfiles = NULL )
     {
       assert( animationBlock.nTimes == animationBlock.nKeys );
 

@@ -137,8 +137,6 @@ namespace OpenGL
     Texture();
     ~Texture();
 
-    void invalidate();
-
     void loadFromBLP (const QString& filename);
     void loadFromBLP( const std::string& filename );
 

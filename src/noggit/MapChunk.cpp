@@ -14,6 +14,7 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/Vec3D.h>
 #include <noggit/World.h>
+#include <noggit/mpq/file.h>
 
 static const int HEIGHT_TOP = 1000;
 static const int HEIGHT_MID = 600;
@@ -233,7 +234,7 @@ void MapChunk::GenerateContourMap()
 }
 
 
-MapChunk::MapChunk(World* world, MapTile* maintile, MPQFile* f,bool bigAlpha)
+MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bigAlpha)
   : _world (world)
   , _contour_texture (0)
 {

@@ -6,7 +6,13 @@
 class Model;
 class World;
 struct ENTRY_MDDF;
-class MPQFile;
+namespace noggit
+{
+  namespace mpq
+  {
+    class file;
+  }
+}
 
 class ModelInstance
 {
@@ -28,9 +34,9 @@ public:
   ~ModelInstance();
   ModelInstance(World*);
   explicit ModelInstance( World*, Model *m );
-  explicit ModelInstance( World*, Model *m, MPQFile* f );
+  explicit ModelInstance( World*, Model *m, noggit::mpq::file* f );
   explicit ModelInstance( World*, Model *m, ENTRY_MDDF *d );
-  void init2( Model *m, MPQFile* f );
+  void init2( Model *m, noggit::mpq::file* f );
   void draw (bool draw_fog);
   void drawMapTile();
 //  void drawHighlight();

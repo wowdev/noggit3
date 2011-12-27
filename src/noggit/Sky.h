@@ -5,8 +5,15 @@
 #include <string>
 
 #include <noggit/DBCFile.h>
-#include <noggit/MPQ.h>
 #include <noggit/Vec3D.h>
+
+namespace noggit
+{
+  namespace mpq
+  {
+    class file;
+  }
+}
 
 class Model;
 class World;
@@ -105,7 +112,7 @@ struct OutdoorLightStats {
   float dayIntensity, nightIntensity, ambientIntensity, fogIntensity, fogDepth;
   Vec3D dayColor, nightColor, ambientColor, fogColor, dayDir, nightDir;
 
-  void init(MPQFile* f);
+  void init(noggit::mpq::file* f);
 
   void interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r);
   void setupLighting();

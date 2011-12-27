@@ -9,7 +9,6 @@
 
 #include <noggit/Manager.h>
 #include <noggit/ModelInstance.h> // ModelInstance
-#include <noggit/MPQ.h>
 #include <noggit/Quaternion.h>
 #include <noggit/Vec3D.h>
 #include <noggit/Video.h>
@@ -20,6 +19,13 @@ class WMOInstance;
 class WMOManager;
 class Liquid;
 class Model;
+namespace noggit
+{
+  namespace mpq
+  {
+    class file;
+  }
+}
 
 class WMOGroup {
   WMO *wmo;
@@ -47,7 +53,7 @@ public:
 
   WMOGroup():nBatches(0) {}
   ~WMOGroup();
-  void init(WMO *wmo, MPQFile* f, int num, char *names);
+  void init(WMO *wmo, noggit::mpq::file* f, int num, char *names);
   void initDisplayList();
   void initLighting(int nLR, uint16_t *useLights);
   void draw ( World* world
@@ -99,7 +105,7 @@ struct WMOLight {
 
   Vec4D fcolor;
 
-  void init(MPQFile* f);
+  void init(noggit::mpq::file* f);
   void setup(GLint light);
 
   static void setupOnce(GLint light, Vec3D dir, Vec3D lcol);
@@ -136,7 +142,7 @@ struct WMOFog {
   unsigned int color2;
   // read to here (0x30 bytes)
   Vec4D color;
-  void init(MPQFile* f);
+  void init(noggit::mpq::file* f);
   void setup();
 };
 

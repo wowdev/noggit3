@@ -8,13 +8,14 @@
 #include <noggit/Shaders.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
+#include <noggit/mpq/file.h>
 
 struct LiquidVertex {
   unsigned char c[4];
   float h;
 };
 
-void Liquid::initFromTerrain(MPQFile* f, int flags)
+void Liquid::initFromTerrain(noggit::mpq::file* f, int flags)
 {
   texRepeats = 4.0f;
   /*
@@ -52,7 +53,7 @@ void Liquid::initFromTerrain(MPQFile* f, int flags)
   trans = false;
 }
 
-void Liquid::initFromWMO(MPQFile* f, const WMOMaterial &mat, bool indoor)
+void Liquid::initFromWMO(noggit::mpq::file* f, const WMOMaterial &mat, bool indoor)
 {
   texRepeats = 4.0f;
   ydir = -1.0f;
@@ -92,7 +93,7 @@ void Liquid::initFromWMO(MPQFile* f, const WMOMaterial &mat, bool indoor)
 }
 
 
-void Liquid::initGeometry(MPQFile* f)
+void Liquid::initGeometry(noggit::mpq::file* f)
 {
   // assume: f is at the appropriate starting position
 

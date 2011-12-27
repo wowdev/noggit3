@@ -3,7 +3,7 @@
 #include <string>
 
 #include <noggit/FreeType.h>
-#include <noggit/Noggit.h> // arial12
+#include <noggit/application.h> // arial12
 #include <noggit/TextureManager.h> // TextureManager
 #include <noggit/UIText.h>
 #include <noggit/Video.h> // Texture

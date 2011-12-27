@@ -11,8 +11,8 @@
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
-#include <noggit/MPQ.h>
-#include <noggit/Noggit.h> // arial14, arialn13
+#include <noggit/mpq/archive_manager.h>
+#include <noggit/application.h> // arial14, arialn13
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/UIButton.h> // UIButton
 #include <noggit/UICheckBox.h> // UICheckBox
@@ -33,8 +33,6 @@ int pal_cols;
 
 //! \todo  Maybe get this out?
 bool gFilenameFiltersInited = false;
-
-extern std::list<std::string> gListfile;
 
 std::map<int,std::string> gFilenameFilters;
 std::vector<std::string> gActiveFilenameFilters;
@@ -86,25 +84,25 @@ void LoadTextureNames()
 
   bool tilesetsfound = false;
 
-  while(!MPQArchive::allFinishedLoading()) MPQArchive::allFinishLoading(); // wait for listfiles.
+  noggit::mpq::archive_manager& manager
+    (qobject_cast<noggit::application*> (qApp)->archive_manager());
 
-  for( std::list<std::string>::iterator it = gListfile.begin(); it != gListfile.end(); ++it )
+  while (!manager.all_finished_loading())
   {
-    if( it->find( "tileset" ) != std::string::npos )
+    manager.all_finish_loading();
+  }
+
+  foreach (const QString& filename, manager.listfile())
+  {
+    if (filename.startsWith ("tileset") && !filename.endsWith ("_s.blp"))
     {
       tilesetsfound = true;
-      if( it->find( "_s.blp" ) == std::string::npos )
-      {
-        textureNames.push_back( *it );
-      }
+      textureNames.push_back (filename.toStdString());
     }
-    else
+    else if (tilesetsfound)
     {
-      if( tilesetsfound )
-      {
-        // we don't need the rest of this vector as it is sorted.
-        break;
-      }
+      // we don't need the rest of the list as it is sorted.
+      break;
     }
   }
 

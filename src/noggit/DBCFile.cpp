@@ -2,44 +2,45 @@
 
 #include <string>
 
-#include <noggit/MPQ.h>
+#include <noggit/mpq/file.h>
 #include <noggit/Log.h>
 
-DBCFile::DBCFile(const std::string& _filename):
-  filename(_filename),
-  data( NULL )
+struct dbc_header
+{
+  uint32_t magic;
+  uint32_t recordCount;
+  uint32_t fieldCount;
+  uint32_t recordSize;
+  uint32_t stringSize;
+};
+
+DBCFile::DBCFile (const QString& filename)
+  : _filename (filename)
+  , data (NULL)
 {
 }
+
 void DBCFile::open()
 {
-  MPQFile f( filename );
+  noggit::mpq::file f (_filename);
 
-  if( f.isEof() )
-  {
-    LogError << "The DBC file \"" << filename << "\" could not be opened. This application may crash soon as the file is most likely needed." << std::endl;
-    return;
-  }
-  LogDebug << "Opening DBC \"" << filename << "\"" << std::endl;
+  LogDebug << "Opening DBC " << qPrintable (_filename) << std::endl;
 
-  char header[4];
-  unsigned int na,nb,es,ss;
+  dbc_header header;
+  f.read (&header, sizeof (header));
 
-  f.read(header,4); // Number of records
-  assert(header[0]=='W' && header[1]=='D' && header[2]=='B' && header[3] == 'C');
-  f.read(&na,4); // Number of records
-  f.read(&nb,4); // Number of fields
-  f.read(&es,4); // Size of a record
-  f.read(&ss,4); // String size
+  //! \note Yup, in these files, they store the magic as string, not uint32_t.
+  assert (header.magic == 'CBDW');
+  assert (fieldCount * 4 == recordSize);
 
-  recordSize = es;
-  recordCount = na;
-  fieldCount = nb;
-  stringSize = ss;
-  assert(fieldCount*4 == recordSize);
+  recordCount = header.recordCount;
+  fieldCount = header.fieldCount;
+  recordSize = header.recordSize;
+  stringSize = header.stringSize;
 
-  data = new unsigned char[recordSize*recordCount+stringSize];
-  stringTable = data + recordSize*recordCount;
-  f.read(data,recordSize*recordCount+stringSize);
+  data = new unsigned char[recordSize * recordCount + stringSize];
+  stringTable = data + recordSize * recordCount;
+  f.read (data, recordSize * recordCount + stringSize);
   f.close();
 }
 

@@ -12,11 +12,18 @@ class Bone;
 #include <noggit/Manager.h> // ManagedItem
 #include <noggit/Matrix.h>
 #include <noggit/ModelHeaders.h>
-#include <noggit/MPQ.h>
 #include <noggit/Particle.h>
 #include <noggit/Quaternion.h>
 #include <noggit/Vec3D.h>
 #include <noggit/Video.h> // GLuint
+
+namespace noggit
+{
+  namespace mpq
+  {
+    class file;
+  }
+}
 
 Vec3D fixCoordSystem(Vec3D v);
 
@@ -35,7 +42,7 @@ public:
 
   bool calc;
   void calcMatrix(Bone* allbones, int anim, int time);
-  void init(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **animfiles);
+  void init(const noggit::mpq::file& f, const ModelBoneDef &b, int *global, noggit::mpq::file **animfiles);
 
 };
 
@@ -47,7 +54,7 @@ public:
   Vec3D tval, rval, sval;
 
   void calc(int anim, int time);
-  void init(const MPQFile& f, const ModelTexAnimDef &mta, int *global);
+  void init(const noggit::mpq::file& f, const ModelTexAnimDef &mta, int *global);
   void setup(int anim);
 };
 
@@ -55,13 +62,13 @@ struct ModelColor {
   Animation::M2Value<Vec3D> color;
   Animation::M2Value<float,int16_t> opacity;
 
-  void init(const MPQFile& f, const ModelColorDef &mcd, int *global);
+  void init(const noggit::mpq::file& f, const ModelColorDef &mcd, int *global);
 };
 
 struct ModelTransparency {
   Animation::M2Value<float,int16_t> trans;
 
-  void init(const MPQFile& f, const ModelTransDef &mtd, int *global);
+  void init(const noggit::mpq::file& f, const ModelTransDef &mtd, int *global);
 };
 
 // copied from the .mdl docs? this might be completely wrong
@@ -112,7 +119,7 @@ struct ModelCamera {
   Animation::M2Value<Vec3D> tPos, tTarget;
   Animation::M2Value<float> rot;
 
-  void init(const MPQFile& f, const ModelCameraDef &mcd, int *global);
+  void init(const noggit::mpq::file& f, const ModelCameraDef &mcd, int *global);
   void setup(int time=0);
 
   ModelCamera():ok(false) {}
@@ -126,7 +133,7 @@ struct ModelLight {
   //Animation::M2Value<float> attStart,attEnd;
   //Animation::M2Value<bool> Enabled;
 
-  void init(const MPQFile&  f, const ModelLightDef &mld, int *global);
+  void init(const noggit::mpq::file&  f, const ModelLightDef &mld, int *global);
   void setup(int time, OpenGL::Light l);
 };
 
@@ -141,9 +148,9 @@ class Model: public ManagedItem, public AsyncObject {
   bool animated;
   bool animGeometry,animTextures,animBones;
   bool forceAnim;
-  MPQFile **animfiles;
+  noggit::mpq::file **animfiles;
 
-  void init(const MPQFile& f);
+  void init(const noggit::mpq::file& f);
 
 
   TextureAnim *texanims;
@@ -158,10 +165,10 @@ class Model: public ManagedItem, public AsyncObject {
   void drawModel( /*bool unlit*/ );
   void drawModelSelect();
 
-  void initCommon(const MPQFile& f);
-  bool isAnimated(const MPQFile& f);
-  void initAnimated(const MPQFile& f);
-  void initStatic(const MPQFile& f);
+  void initCommon(const noggit::mpq::file& f);
+  bool isAnimated(const noggit::mpq::file& f);
+  void initAnimated(const noggit::mpq::file& f);
+  void initStatic(const noggit::mpq::file& f);
 
   ModelVertex *origVertices;
   Vec3D *vertices, *normals;

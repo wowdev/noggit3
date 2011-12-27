@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <noggit/Noggit.h> // arialn13
+#include <noggit/application.h> // arialn13
 #include <noggit/UIText.h>
 #include <noggit/UITexture.h>
 #include <noggit/UIToggleGroup.h>

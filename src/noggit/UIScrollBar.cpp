@@ -6,7 +6,7 @@
 
 #include <noggit/Log.h>
 #include <noggit/Misc.h>
-#include <noggit/Noggit.h> // arial14, arialn13
+#include <noggit/application.h> // arial14, arialn13
 #include <noggit/UIButton.h>
 #include <noggit/UIText.h>
 #include <noggit/UITexture.h>

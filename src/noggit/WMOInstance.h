@@ -7,9 +7,16 @@
 #include <noggit/Vec3D.h> // Vec3D
 
 class WMO;
-class MPQFile;
 class World;
 struct ENTRY_MODF;
+
+namespace noggit
+{
+  namespace mpq
+  {
+    class file;
+  }
+}
 
 class WMOInstance
 {
@@ -28,7 +35,7 @@ private:
   unsigned int mSelectionID;
 
 public:
-  WMOInstance( World*, WMO* _wmo, MPQFile* _file );
+  WMOInstance( World*, WMO* _wmo, noggit::mpq::file* _file );
   WMOInstance( World*, WMO* _wmo, ENTRY_MODF* d );
   explicit WMOInstance( World*, WMO* _wmo );
   ~WMOInstance();

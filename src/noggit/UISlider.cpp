@@ -8,7 +8,7 @@
 #include <sstream>
 
 #include <noggit/FreeType.h> // freetype::
-#include <noggit/Noggit.h> // arial12
+#include <noggit/application.h> // arial12
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/Video.h>
 

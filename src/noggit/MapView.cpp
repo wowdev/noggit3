@@ -16,7 +16,7 @@
 #include <noggit/Environment.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
-#include <noggit/Noggit.h>
+#include <noggit/application.h>
 #include <noggit/Settings.h>
 #include <noggit/UIAppInfo.h>
 #include <noggit/UICheckBox.h>

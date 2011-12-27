@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include <noggit/Noggit.h> // arial12
+#include <noggit/application.h> // arial12
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/UIText.h>
 #include <noggit/UITexture.h>

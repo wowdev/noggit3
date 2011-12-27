@@ -2,12 +2,12 @@
 #define DBCFILE_H
 
 #include <cassert>
-#include <string>
+#include <QString>
 
 class DBCFile
 {
 public:
-  explicit DBCFile(const std::string& filename);
+  explicit DBCFile(const QString& filename);
   virtual ~DBCFile();
 
   // Open database. It must be openened before it can be used.
@@ -145,7 +145,7 @@ public:
   }
 
 private:
-  std::string filename;
+  QString _filename;
   size_t recordSize;
   size_t recordCount;
   size_t fieldCount;

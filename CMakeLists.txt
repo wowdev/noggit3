@@ -74,6 +74,8 @@ endif (WIN32)
 
 # Gather source files.
 set ( SourceFiles
+      src/noggit/application.cpp
+
       src/noggit/AsyncLoader.cpp
       src/noggit/Brush.cpp
       src/noggit/DBC.cpp
@@ -84,7 +86,6 @@ set ( SourceFiles
       src/noggit/Frustum.cpp
       src/noggit/Liquid.cpp
       src/noggit/Log.cpp
-      src/noggit/MPQ.cpp
       src/noggit/MapChunk.cpp
       src/noggit/MapTile.cpp
       src/noggit/MapView.cpp
@@ -93,7 +94,6 @@ set ( SourceFiles
       src/noggit/Model.cpp
       src/noggit/ModelInstance.cpp
       src/noggit/ModelManager.cpp
-      src/noggit/Noggit.cpp
       src/noggit/Particle.cpp
       src/noggit/Selection.cpp
       src/noggit/Settings.cpp
@@ -134,6 +134,10 @@ set ( SourceFiles
       src/noggit/WMOInstance.cpp
       src/noggit/World.cpp
 
+      src/noggit/mpq/archive_manager.cpp
+      src/noggit/mpq/archive.cpp
+      src/noggit/mpq/file.cpp
+
       src/noggit/ui/about_widget.cpp
       src/noggit/ui/help_widget.cpp
       src/noggit/ui/minimap_widget.cpp
@@ -144,6 +148,8 @@ if (WIN32)
 endif (WIN32)
 
 set ( AllHeaders
+      src/noggit/application.h
+
       src/noggit/Animated.h
       src/noggit/AsyncLoader.h
       src/noggit/AsyncObject.h
@@ -156,7 +162,6 @@ set ( AllHeaders
       src/noggit/Frustum.h
       src/noggit/Liquid.h
       src/noggit/Log.h
-      src/noggit/MPQ.h
       src/noggit/Manager.h
       src/noggit/MapChunk.h
       src/noggit/MapHeaders.h
@@ -169,7 +174,6 @@ set ( AllHeaders
       src/noggit/ModelHeaders.h
       src/noggit/ModelInstance.h
       src/noggit/ModelManager.h
-      src/noggit/Noggit.h
       src/noggit/Particle.h
       src/noggit/Quaternion.h
       src/noggit/Selection.h
@@ -214,13 +218,18 @@ set ( AllHeaders
       src/noggit/World.h
       src/noggit/errorHandling.h
 
+      src/noggit/mpq/archive_manager.h
+      src/noggit/mpq/archive.h
+      src/noggit/mpq/file.h
+
       src/noggit/ui/about_widget.h
       src/noggit/ui/help_widget.h
       src/noggit/ui/minimap_widget.h
     )
 
 set ( HeadersToMoc
-      src/noggit/Noggit.h
+      src/noggit/application.h
+
       src/noggit/Menu.h
       src/noggit/MapView.h
 

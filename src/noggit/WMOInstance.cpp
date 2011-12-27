@@ -4,8 +4,9 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/WMO.h> // WMO
 #include <noggit/World.h>
+#include <noggit/mpq/file.h>
 
-WMOInstance::WMOInstance(World* world, WMO* _wmo, MPQFile* _file )
+WMOInstance::WMOInstance(World* world, WMO* _wmo, noggit::mpq::file* _file )
   : wmo( _wmo )
   , mSelectionID( world->selection_names().add( this ) )
   , _world (world)
