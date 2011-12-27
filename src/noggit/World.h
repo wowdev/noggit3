@@ -105,8 +105,6 @@ private:
 
 public:
   unsigned int getMapID();
-  // Do we draw *? Should be moved somewhere else, these are not World related.
-  bool lighting;
 
   // Time of the day.
   float animtime;

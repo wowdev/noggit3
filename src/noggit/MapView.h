@@ -229,6 +229,7 @@ private:
   bool _draw_water;
   bool _draw_wmos;
   bool _draw_hole_lines;
+  bool _draw_lighting;
 
   bool _holding_left_mouse_button;
   bool _holding_right_mouse_button;

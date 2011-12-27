@@ -1027,6 +1027,7 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _draw_water (false)
   , _draw_wmos (true)
   , _draw_hole_lines (false)
+  , _draw_lighting (true)
   , _holding_left_mouse_button (false)
   , _holding_right_mouse_button (false)
   , _current_terrain_editing_mode (shaping)
@@ -1911,11 +1912,6 @@ void MapView::toggle_doodad_spawner()
   _doodad_spawner->hidden (!_doodad_spawner->hidden());
 }
 
-void MapView::toggle_lighting (bool value)
-{
-  _world->lighting = value;
-}
-
 void MapView::toggle_interface()
 {
   _GUIDisplayingEnabled = !_GUIDisplayingEnabled;
@@ -1994,6 +1990,10 @@ void MapView::toggle_wmo_drawing (bool value)
 void MapView::toggle_hole_line_drawing (bool value)
 {
   _draw_hole_lines = value;
+}
+void MapView::toggle_lighting (bool value)
+{
+  _draw_lighting = value;
 }
 
 
