@@ -966,7 +966,7 @@ void MapChunk::drawPass (int anim, int animation_time)
   }
 }
 
-void MapChunk::drawLines()
+void MapChunk::drawLines (bool draw_hole_lines)
 {
   if (!_world->frustum.intersects(vmin,vmax))
     return;
@@ -1012,9 +1012,8 @@ void MapChunk::drawLines()
     glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &_line_strip[8]);
   }
 
-  if(Environment::getInstance()->view_holelines)
+  if(draw_hole_lines)
   {
-    // Draw hole lines if view_subchunk_lines is true
     glColor4f(0.0,0.0,1.0f,0.5f);
     glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, _hole_strip);
     glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &_hole_strip[9]);

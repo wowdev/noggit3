@@ -16,7 +16,6 @@ public:
   nameEntry get_clipboard();
   void set_clipboard(nameEntry* entry);
 
-  bool view_holelines;
   // values for areaID painting
   int selectedAreaID;
   std::map<int,Vec3D> areaIDColors; // List of all area IDs to draw them with different colors

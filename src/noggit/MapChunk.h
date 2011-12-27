@@ -76,7 +76,8 @@ public:
   void drawSelect();
   void drawNoDetail();
   void drawPass(int anim, int animation_time = 0);
-  void drawLines();
+  // todo split into draw_lines and draw_hole_lines
+  void drawLines (bool draw_hole_lines);
 
   void drawTextures (int animation_time);
 
