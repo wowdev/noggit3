@@ -26,6 +26,7 @@ public:
   // current active texture
   UITexture* current_texture;
   UIToolbar(float x, float y, UIMapViewGUI *setGui);
+  void set_icon_visual (int i);
   void IconSelect(int i);
 };
 #endif

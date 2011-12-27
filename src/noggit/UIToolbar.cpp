@@ -52,7 +52,7 @@ void UIToolbar::SetIcon( int pIcon, const std::string& pIconFile )
   addChild( mToolbarIcons[pIcon] );
 }
 
-void UIToolbar::IconSelect( int pIcon )
+void UIToolbar::set_icon_visual( int pIcon )
 {
   const char * Names[] = { "Raise / Lower"
                          , "Flatten / Blur"
@@ -67,8 +67,6 @@ void UIToolbar::IconSelect( int pIcon )
                          };
   text->setText( Names[pIcon] );
 
-  mainGui->theMapview->set_terrain_editing_mode (MapView::terrain_editing_modes (pIcon));
-
   for( int j = 0; j < 10; j++ )
     if( mToolbarIcons[j] )
       mToolbarIcons[j]->selected = false;
@@ -78,4 +76,12 @@ void UIToolbar::IconSelect( int pIcon )
 
   selectedIcon = pIcon;
   mToolbarIcons[pIcon]->selected = true;
+}
+
+void UIToolbar::IconSelect( int pIcon )
+{
+  set_icon_visual (pIcon);
+
+  mainGui->theMapview->set_terrain_editing_mode
+    (MapView::terrain_editing_modes (pIcon));
 }
