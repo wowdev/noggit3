@@ -127,7 +127,6 @@ public:
 
   Skies *skies;
   bool mHasAGlobalWMO;
-  bool loading;
   bool noadt;
 
   //! \todo  Get these managed? ._.
@@ -247,8 +246,5 @@ public:
 private:
   nameEntryManager _selection_names;
 };
-
-void lightingDefaults();
-void myFakeLighting();
 
 #endif

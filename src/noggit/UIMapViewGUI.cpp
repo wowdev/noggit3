@@ -102,9 +102,9 @@ void UIMapViewGUI::render( ) const
   std::stringstream timestrs; timestrs << "Time: " << ( time / 120 ) << ":" << ( time % 120 );
   arial16.shprint( video.xres() - 100.0f, 5.0f, timestrs.str() );
 
-  if ( _world->loading )
+  if ( _world->noadt )
   {
-    std::string toDisplay( _world->noadt ? "No ADT at this Point" : "Loading..." );
+    std::string toDisplay( "No ADT at this Point" );
     arial16.shprint( video.xres() / 2.0f - arial16.width( toDisplay ) / 2.0f, 30.0f, toDisplay );
   }
 
