@@ -5,7 +5,7 @@
 
 class Model;
 class World;
-class ENTRY_MDDF;
+struct ENTRY_MDDF;
 class MPQFile;
 
 class ModelInstance
