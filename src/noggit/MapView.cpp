@@ -1021,6 +1021,12 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _draw_terrain_height_contour (false)
   , _draw_wmo_doodads (true)
   , _draw_fog (true)
+  , _draw_lines (false)
+  , _draw_doodads (true)
+  , _draw_terrain (true)
+  , _draw_water (false)
+  , _draw_wmos (true)
+  , _draw_hole_lines (false)
   , _holding_left_mouse_button (false)
   , _holding_right_mouse_button (false)
   , _current_terrain_editing_mode (shaping)
@@ -1480,6 +1486,9 @@ void MapView::doSelection( bool selectTerrainOnly )
                         , _mouse_position.y()
                         , selectTerrainOnly
                         , _draw_wmo_doodads
+                        , _draw_wmos
+                        , _draw_doodads
+                        , _draw_terrain
                         );
 }
 
@@ -1516,7 +1525,7 @@ void MapView::displayGUIIfEnabled()
 void MapView::displayViewMode_2D()
 {
   video.setTileMode();
-  _world->drawTileMode( ah );
+  _world->drawTileMode (ah, _draw_lines);
 
   const float mX = ( CHUNKSIZE * 4.0f * video.ratio() * ( _mouse_position.x() / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom + _world->camera.x ) / CHUNKSIZE;
   const float mY = ( CHUNKSIZE * 4.0f * ( _mouse_position.y() / static_cast<float>( video.yres() ) - 0.5f ) / _world->zoom + _world->camera.z ) / CHUNKSIZE;
@@ -1577,6 +1586,12 @@ void MapView::displayViewMode_3D()
                , brush_radius
                , _draw_wmo_doodads
                , _draw_fog
+               , _draw_wmos
+               , _draw_terrain
+               , _draw_doodads
+               , _draw_lines
+               , _draw_hole_lines
+               , _draw_water
                );
 
   displayGUIIfEnabled();
@@ -1919,35 +1934,30 @@ void MapView::toggle_terrain_texturing_mode()
 {
   if( alloff )
   {
-    alloff_models = _world->drawmodels;
+    alloff_models = _draw_doodads;
     alloff_doodads = _draw_wmo_doodads;
     alloff_contour = _draw_terrain_height_contour;
-    alloff_wmo = _world->drawwmo;
+    alloff_wmo = _draw_wmos;
     alloff_fog = _draw_fog;
-    alloff_terrain = _world->drawterrain;
+    alloff_terrain = _draw_terrain;
 
-    _world->drawmodels = false;
+    _draw_doodads = false;
     _draw_wmo_doodads = false;
     _draw_terrain_height_contour = true;
-    _world->drawwmo = false;
-    _world->drawterrain = true;
+    _draw_wmos = false;
+    _draw_terrain = true;
     _draw_fog = false;
   }
   else
   {
-    _world->drawmodels = alloff_models;
+    _draw_doodads = alloff_models;
     _draw_wmo_doodads = alloff_doodads;
     _draw_terrain_height_contour = alloff_contour;
-    _world->drawwmo = alloff_wmo;
-    _world->drawterrain = alloff_terrain;
+    _draw_wmos = alloff_wmo;
+    _draw_terrain = alloff_terrain;
     _draw_fog = alloff_fog;
   }
   alloff = !alloff;
-}
-
-void MapView::toggle_doodad_drawing (bool value)
-{
-  _world->drawmodels = value;
 }
 
 void MapView::toggle_auto_selecting (bool value)
@@ -1955,19 +1965,35 @@ void MapView::toggle_auto_selecting (bool value)
   Settings::getInstance()->AutoSelectingMode = value;
 }
 
+/// --- Drawing toggles --------------------------------------------------------
+
+void MapView::toggle_doodad_drawing (bool value)
+{
+  _draw_doodads = value;
+}
 void MapView::toggle_water_drawing (bool value)
 {
-  _world->drawwater = value;
+  _draw_water = value;
 }
-
 void MapView::toggle_terrain_drawing (bool value)
 {
-  _world->drawterrain = value;
+  _draw_terrain = value;
 }
-
 void MapView::toggle_wmo_doodad_drawing (bool value)
 {
   _draw_wmo_doodads = value;
+}
+void MapView::toggle_line_drawing (bool value)
+{
+  _draw_lines = value;
+}
+void MapView::toggle_wmo_drawing (bool value)
+{
+  _draw_wmos = value;
+}
+void MapView::toggle_hole_line_drawing (bool value)
+{
+  _draw_hole_lines = value;
 }
 
 
@@ -2008,21 +2034,6 @@ void MapView::decrease_brush_size()
   default:
     break;
   }
-}
-
-void MapView::toggle_hole_line_drawing (bool value)
-{
-  Environment::getInstance()->view_holelines = value;
-}
-
-void MapView::toggle_line_drawing (bool value)
-{
-  _world->drawlines = value;
-}
-
-void MapView::toggle_wmo_drawing (bool value)
-{
-  _world->drawwmo = value;
 }
 
 void MapView::toggle_minimap (bool value)
@@ -2383,7 +2394,7 @@ void MapView::set_terrain_editing_mode (const terrain_editing_modes& mode)
 {
   _current_terrain_editing_mode = mode;
 
-  Environment::getInstance()->view_holelines = mode == hole_setting;
+  _draw_hole_lines = mode == hole_setting;
 
   _shaping_settings_widget->hide();
   _smoothing_settings_widget->hide();

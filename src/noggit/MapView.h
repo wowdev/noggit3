@@ -223,6 +223,12 @@ private:
   bool _draw_terrain_height_contour;
   bool _draw_wmo_doodads;
   bool _draw_fog;
+  bool _draw_lines;
+  bool _draw_doodads;
+  bool _draw_terrain;
+  bool _draw_water;
+  bool _draw_wmos;
+  bool _draw_hole_lines;
 
   bool _holding_left_mouse_button;
   bool _holding_right_mouse_button;

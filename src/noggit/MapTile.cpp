@@ -467,34 +467,45 @@ void MapTile::draw ( bool draw_terrain_height_contour
                    , bool dont_draw_cursor
                    )
 {
-  glColor4f(1,1,1,1);
+  glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
 
-  for (int j=0; j<16; ++j)
-    for (int i=0; i<16; ++i)
+  for (size_t j (0); j < 16; ++j)
+  {
+    for (size_t i (0); i < 16; ++i)
+    {
       mChunks[j][i]->draw ( draw_terrain_height_contour
                           , mark_impassable_chunks
                           , draw_area_id_overlay
                           , dont_draw_cursor
                           );
-
+    }
+  }
 }
 
 void MapTile::drawSelect()
 {
-  for (int j=0; j<16; ++j)
-    for (int i=0; i<16; ++i)
+  for (size_t j (0); j < 16; ++j)
+  {
+    for (size_t i (0); i < 16; ++i)
+    {
       mChunks[j][i]->drawSelect();
+    }
+  }
 }
 
-void MapTile::drawLines()//draw red lines around the square of a chunk
+void MapTile::drawLines (bool draw_hole_lines)
 {
-  glDisable(GL_COLOR_MATERIAL);
+  glDisable (GL_COLOR_MATERIAL);
 
-  for (int j=0; j<16; ++j)
-    for (int i=0; i<16; ++i)
-      mChunks[j][i]->drawLines();
+  for (size_t j (0); j < 16; ++j)
+  {
+    for (size_t i (0); i < 16; ++i)
+    {
+      mChunks[j][i]->drawLines (draw_hole_lines);
+    }
+  }
 
-  glEnable(GL_COLOR_MATERIAL);
+  glEnable (GL_COLOR_MATERIAL);
 }
 
 void MapTile::drawMFBO()
@@ -520,18 +531,16 @@ void MapTile::drawMFBO()
 
 void MapTile::drawWater()
 {
-  glDisable(GL_COLOR_MATERIAL);
-  glDisable(GL_LIGHTING);
+  glDisable (GL_COLOR_MATERIAL);
+  glDisable (GL_LIGHTING);
 
   foreach (const Liquid* liquid, mLiquids)
   {
     liquid->draw (_world->animtime, _world->skies);
   }
-  //for( std::vector<Liquid*>::iterator liq = mLiquids.begin(); liq != mLiquids.end(); liq++ )
-  //  (*liq)->draw (_world);
 
-  glEnable(GL_LIGHTING);
-  glEnable(GL_COLOR_MATERIAL);
+  glEnable (GL_LIGHTING);
+  glEnable (GL_COLOR_MATERIAL);
 }
 
 // This is for the 2D mode only.

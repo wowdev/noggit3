@@ -187,11 +187,6 @@ World::World( const std::string& name )
   , l_const( 0.0f )
   , l_linear( 0.7f )
   , l_quadratic( 0.03f )
-  , drawlines( false )
-  , drawmodels( true )
-  , drawterrain( true )
-  , drawwater( false )
-  , drawwmo( true )
   , lighting( true )
   , animtime( 0 )
   , time( 1450 )
@@ -995,6 +990,12 @@ void World::draw ( bool draw_terrain_height_contour
                  , float outer_cursor_radius
                  , bool draw_wmo_doodads
                  , bool draw_fog
+                 , bool draw_wmos
+                 , bool draw_terrain
+                 , bool draw_doodads
+                 , bool draw_lines
+                 , bool draw_hole_lines
+                 , bool draw_water
                  )
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1006,10 +1007,23 @@ void World::draw ( bool draw_terrain_height_contour
   ///glDisable(GL_LIGHTING);
   ///glColor4f(1,1,1,1);
 
-  bool hadSky (false);
-  if( drawwmo || mHasAGlobalWMO )
-    for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); !hadSky && it != mWMOInstances.end(); ++it )
-      hadSky = hadSky || it->second.wmo->drawSkybox (this, camera, it->second.extents[0], it->second.extents[1]);
+  bool had_sky (false);
+  if (draw_wmos || mHasAGlobalWMO)
+  {
+    foreach (const wmo_instance_type& itr, mWMOInstances)
+    {
+      if ( itr.second.wmo->drawSkybox ( this
+                                      , camera
+                                      , itr.second.extents[0]
+                                      , itr.second.extents[1]
+                                      )
+         )
+      {
+        had_sky = true;
+        break;
+      }
+    }
+  }
 
   glEnable(GL_CULL_FACE);
   glDisable(GL_BLEND);
@@ -1021,13 +1035,13 @@ void World::draw ( bool draw_terrain_height_contour
   //outdoorLightStats = ol->getLightStats(daytime);
   skies->initSky(camera, daytime);
 
-  if (!hadSky)
-    hadSky = skies->drawSky(this, camera);
+  if (!had_sky)
+    had_sky = skies->drawSky(this, camera);
 
   // clearing the depth buffer only - color buffer is/has been overwritten anyway
   // unless there is no sky OR skybox
   GLbitfield clearmask = GL_DEPTH_BUFFER_BIT;
-  if (!hadSky)   clearmask |= GL_COLOR_BUFFER_BIT;
+  if (!had_sky)   clearmask |= GL_COLOR_BUFFER_BIT;
   glClear(clearmask);
 
   glDisable(GL_TEXTURE_2D);
@@ -1039,7 +1053,7 @@ void World::draw ( bool draw_terrain_height_contour
   setupFog (draw_fog);
 
   // Draw verylowres heightmap
-  if (draw_fog && drawterrain) {
+  if (draw_fog && draw_terrain) {
     glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
@@ -1104,7 +1118,7 @@ void World::draw ( bool draw_terrain_height_contour
 
   glPushMatrix();
 
-  if( drawterrain )
+  if( draw_terrain )
   {
     for( int j = 0; j < 64; ++j )
     {
@@ -1179,7 +1193,7 @@ void World::draw ( bool draw_terrain_height_contour
   }
 
 
-  if (drawlines)
+  if (draw_lines)
   {
     glDisable(GL_COLOR_MATERIAL);
     glActiveTexture(GL_TEXTURE0);
@@ -1196,7 +1210,7 @@ void World::draw ( bool draw_terrain_height_contour
       {
         if( tileLoaded( j, i ) )
         {
-          mTiles[j][i].tile->drawLines();
+          mTiles[j][i].tile->drawLines (draw_hole_lines);
          // mTiles[j][i].tile->drawMFBO();
         }
       }
@@ -1241,7 +1255,7 @@ void World::draw ( bool draw_terrain_height_contour
 
 
   // M2s / models
-  if( drawmodels)
+  if( draw_doodads)
   {
     ModelManager::resetAnim();
 
@@ -1256,7 +1270,7 @@ void World::draw ( bool draw_terrain_height_contour
 
 
   // WMOs / map objects
-  if( drawwmo || mHasAGlobalWMO )
+  if( draw_wmos || mHasAGlobalWMO )
     if (video.mSupportShaders)
     {
       Vec4D spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -1291,19 +1305,6 @@ void World::draw ( bool draw_terrain_height_contour
   OpenGL::SettingsSaver::restore();
   setupFog (draw_fog);
 
-  /*
-  for( int j = 0; j < 64; ++j )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        mTiles[j][i].tile->drawWater();
-      }
-    }
-  }
-  */
-
 
   glColor4f(1,1,1,1);
   glEnable(GL_BLEND);
@@ -1330,7 +1331,7 @@ void World::draw ( bool draw_terrain_height_contour
   //glColor4f(1,1,1,1);
   glDisable(GL_COLOR_MATERIAL);
 
-  if(drawwater)
+  if(draw_water)
   {
     for( int j = 0; j < 64; ++j )
     {
@@ -1357,6 +1358,9 @@ void World::drawSelection ( int cursorX
                           , int cursorY
                           , bool pOnlyMap
                           , bool draw_wmo_doodads
+                          , bool draw_wmos
+                          , bool draw_doodads
+                          , bool draw_terrain
                           )
 {
   glSelectBuffer( sizeof( selectionBuffer ) / sizeof( GLuint ), selectionBuffer );
@@ -1382,7 +1386,7 @@ void World::drawSelection ( int cursorX
   glInitNames();
 
   glPushName( MapTileName );
-  if( drawterrain )
+  if( draw_terrain )
   {
     for( int j = 0; j < 64; ++j )
     {
@@ -1400,7 +1404,7 @@ void World::drawSelection ( int cursorX
   if( !pOnlyMap )
   {
     // WMOs / map objects
-    if( drawwmo )
+    if( draw_wmos )
     {
       glPushName( MapObjName );
       glPushName( 0 );
@@ -1413,7 +1417,7 @@ void World::drawSelection ( int cursorX
     }
 
     // M2s / models
-    if( drawmodels )
+    if( draw_doodads )
     {
       ModelManager::resetAnim();
 
@@ -1613,7 +1617,9 @@ void World::setAreaID(int id, int x, int z , int _cx, int _cz)
   curChunk->areaID = id;
 }
 
-void World::drawTileMode(float /*ah*/)
+void World::drawTileMode ( float /*ah*/
+                         , bool draw_lines
+                         )
 {
   glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
   glEnable(GL_BLEND);
@@ -1656,7 +1662,7 @@ void World::drawTileMode(float /*ah*/)
 
 
   glPopMatrix();
-  if (drawlines) {
+  if (draw_lines) {
     glTranslatef(fmod(-camera.x/CHUNKSIZE,16), fmod(-camera.z/CHUNKSIZE,16),0);
   /*  for(int x=-32;x<=48;x++)
     {

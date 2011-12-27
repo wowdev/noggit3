@@ -6,7 +6,6 @@
 Environment::Environment()
   : _settings (new QSettings)
 {
-  view_holelines = false;
   ShiftDown = false;
   AltDown = false;
   CtrlDown = false;

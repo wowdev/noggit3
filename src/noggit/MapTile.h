@@ -38,7 +38,7 @@ public:
             , bool dont_draw_cursor
             );
   void drawSelect();
-  void drawLines();
+  void drawLines (bool draw_hole_lines);
   void drawWater();
   void drawTextures (int animation_time);
   void drawMFBO();

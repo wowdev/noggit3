@@ -106,11 +106,6 @@ private:
 public:
   unsigned int getMapID();
   // Do we draw *? Should be moved somewhere else, these are not World related.
-  bool drawlines;
-  bool drawmodels;
-  bool drawterrain;
-  bool drawwater;
-  bool drawwmo;
   bool lighting;
 
   // Time of the day.
@@ -138,8 +133,12 @@ public:
   bool noadt;
 
   //! \todo  Get these managed? ._.
-  std::map<int, ModelInstance> mModelInstances;
-  std::map<int, WMOInstance> mWMOInstances;
+  typedef std::pair<int, ModelInstance> model_instance_type;
+  typedef std::pair<int, WMOInstance> wmo_instance_type;
+  typedef std::map<int, ModelInstance> model_instances_type;
+  typedef std::map<int, WMOInstance> wmo_instances_type;
+  model_instances_type mModelInstances;
+  wmo_instances_type mWMOInstances;
 
   OutdoorLightStats outdoorLightStats;
 
@@ -156,6 +155,7 @@ public:
   void saveTile(int x, int z);
   void saveChanged();
   void tick(float dt);
+  //! \todo This seriously needs to be done via flags.
   void draw ( bool draw_terrain_height_contour
             , bool mark_impassable_chunks
             , bool draw_area_id_overlay
@@ -164,6 +164,12 @@ public:
             , float outer_cursor_radius
             , bool draw_wmo_doodads
             , bool draw_fog
+            , bool draw_wmos
+            , bool draw_terrain
+            , bool draw_doodads
+            , bool draw_lines
+            , bool draw_hole_lines
+            , bool draw_water
             );
 
   void outdoorLights(bool on);
@@ -182,9 +188,14 @@ public:
                      , int cursorY
                      , bool pOnlyMap
                      , bool draw_wmo_doodads
+                     , bool draw_wmos
+                     , bool draw_doodads
+                     , bool draw_terrain
                      );
   void drawSelectionChunk(int cursorX,int cursorY);
-  void drawTileMode(float ah);
+  void drawTileMode ( float ah
+                    , bool draw_lines
+                    );
 
   // Selection related methods.
 private:
