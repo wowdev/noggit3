@@ -2419,5 +2419,5 @@ void MapView::set_terrain_editing_mode (const terrain_editing_modes& mode)
   }
 
   if (mainGui && mainGui->guiToolbar)
-    mainGui->guiToolbar->IconSelect (_current_terrain_editing_mode);
+    mainGui->guiToolbar->set_icon_visual (_current_terrain_editing_mode);
 }
