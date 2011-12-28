@@ -1,6 +1,6 @@
 #include <noggit/DBCFile.h>
 
-#include <string>
+#include <stdint.h>
 
 #include <noggit/mpq/file.h>
 #include <noggit/Log.h>
