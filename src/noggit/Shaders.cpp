@@ -1,9 +1,8 @@
-#define _CRT_SECURE_NO_WARNINGS
-
 #include <noggit/Shaders.h>
-#include <noggit/Log.h>
 
 #include <string>
+
+#include <noggit/Log.h>
 
 #ifdef USEBLSSHADER
 BLSShader::BLSShader( const std::string& pFilename )
