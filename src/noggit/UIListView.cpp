@@ -40,7 +40,7 @@ void UIListView::addElement( UIFrame::Ptr element )
 {
   element->x( 4.0f );
   element->y( 0.0f );
-  element->height( (float)elements_height );
+  element->height( float (elements_height) );
   element->width( width() - 20.0f );
   addChild( element );
   scrollbar->setNum( children().size() - elements_rows );
@@ -62,7 +62,7 @@ void UIListView::recalcElements( unsigned int value )
     if( i >= value && i < value + elements_rows )
     {
       // elements in the view block
-      _children[i]->y( float(rowCount * elements_height) );
+      _children[i]->y( float (rowCount * elements_height) );
       _children[i]->show();
       rowCount++;
     }
