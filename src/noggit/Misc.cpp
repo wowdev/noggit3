@@ -19,7 +19,7 @@ namespace misc
   //dirty hack
   int FtoIround(float d)
   {
-    return d<0 ? d-.5f : d+.5f;
+    return int(d<0 ? d-.5f : d+.5f);
   }
 
   char roundc( float a )
@@ -52,6 +52,6 @@ namespace misc
 
   int getADTCord(float cord)
   {
-    return cord / 533.33333f;
+    return int(cord / 533.33333f);
   }
 }

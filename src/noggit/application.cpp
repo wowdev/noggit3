@@ -367,7 +367,7 @@ namespace noggit
 int main (int argc, char *argv[]);
 
 #ifdef Q_WS_WIN
-int WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int __stdcall WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
  return main (__argc, __argv);
 }

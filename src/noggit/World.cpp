@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <noggit/World.h>
 
 #include <algorithm>
@@ -117,7 +119,7 @@ void renderDisk_convenient(float x, float y, float z, float radius)
   gluQuadricDrawStyle(quadric, GLU_LINE);
   gluQuadricNormals(quadric, GLU_SMOOTH);
   renderDisk(x, y, z, x, y, z, radius, subdivisions, quadric);
-  renderSphere(x,y,z,x,y,z,0.3,15,quadric);
+  renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
   gluDeleteQuadric(quadric);
   glEnable(GL_LIGHTING);
 }
@@ -1084,7 +1086,7 @@ void World::draw ( bool draw_terrain_height_contour
   glColor4f(1,1,1,1);
   // if we're using shaders let's give it some specular
   if (video.mSupportShaders) {
-    Vec4D spec_color(0.1,0.1,0.1,0.1);
+    Vec4D spec_color(0.1f,0.1f,0.1f,0.1f);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
     glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 5);
 
