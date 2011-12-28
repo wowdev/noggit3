@@ -15,8 +15,8 @@ UIListView::UIListView( float xPos, float yPos, float w, float h, int elementHei
 : UIFrame( xPos, yPos, w, h )
 , elements_height( elementHeight )
 , elements_start( 0 )
-, elements_rows( height() / elementHeight )
-, scrollbar( new UIScrollBar( width() - 22.0f, 5.0f, height() - 10.0f, 0.0f ) )
+, elements_rows( int(height()) / elementHeight )
+, scrollbar( new UIScrollBar( width() - 22.0f, 5.0f, height() - 10.0f, 0 ) )
 {
   scrollbar->clickable( true );
   scrollbar->setChangeFunc( changeValue );
@@ -40,7 +40,7 @@ void UIListView::addElement( UIFrame::Ptr element )
 {
   element->x( 4.0f );
   element->y( 0.0f );
-  element->height( elements_height );
+  element->height( (float)elements_height );
   element->width( width() - 20.0f );
   addChild( element );
   scrollbar->setNum( children().size() - elements_rows );
@@ -62,7 +62,7 @@ void UIListView::recalcElements( unsigned int value )
     if( i >= value && i < value + elements_rows )
     {
       // elements in the view block
-      _children[i]->y( rowCount * elements_height );
+      _children[i]->y( float(rowCount * elements_height) );
       _children[i]->show();
       rowCount++;
     }

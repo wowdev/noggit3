@@ -719,7 +719,7 @@ void MapView::createGUI()
   S1->setText("Hardness: ");
   settings_paint->addChild(S1);
 
-  paint_brush=new UISlider(6.0f,59.0f,145.0f,100.0f,0.00001);
+  paint_brush=new UISlider(6.0f,59.0f,145.0f,100.0f,0.00001f);
   paint_brush->setFunc(setTextureBrushRadius);
   paint_brush->setValue(textureBrush.getRadius() / 100 );
   paint_brush->setText("Radius: ");
