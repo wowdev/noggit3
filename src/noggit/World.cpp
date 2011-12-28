@@ -18,7 +18,6 @@
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/Settings.h>
 #include <noggit/TextureManager.h>
 #include <noggit/UITexturingGUI.h>
 #include <noggit/Video.h>
@@ -2039,16 +2038,32 @@ void World::deleteWMOInstance( int pUniqueID )
   ResetSelection();
 }
 
-void World::addModel( nameEntry entry, Vec3D newPos )
+void World::addModel ( nameEntry entry
+                     , Vec3D newPos
+                     , bool size_randomization
+                     , bool position_randomization
+                     , bool rotation_randomization
+                     )
 {
   if( entry.type == eEntry_Model )
-    addM2( entry.data.model->model, newPos );
+    addM2 ( entry.data.model->model
+          , newPos
+          , size_randomization
+          , position_randomization
+          , rotation_randomization
+          );
   else if( entry.type == eEntry_WMO )
     addWMO( entry.data.wmo->wmo, newPos );
 }
 
-void World::addM2( Model *model, Vec3D newPos )
+void World::addM2 ( Model* model
+                  , Vec3D newPos
+                  , bool size_randomization
+                  , bool position_randomization
+                  , bool rotation_randomization
+                  )
 {
+  //! \todo This _will_ fuck up as you may hit a WMO uid.
   int temp = 0;
   if  (mModelInstances.empty()) {
     temp = 0;
@@ -2065,18 +2080,18 @@ void World::addM2( Model *model, Vec3D newPos )
   newModelis.d1 = lMaxUID;
   newModelis.pos = newPos;
   newModelis.sc = 1;
-  if(Settings::getInstance()->copy_rot)
+  if (rotation_randomization)
   {
     newModelis.dir.y += (rand() % 360 + 1);
   }
 
-  if(Settings::getInstance()->copy_tile)
+  if (position_randomization)
   {
-    newModelis.dir.x += (rand() % 5 + 1);
-    newModelis.dir.z += (rand() % 5 + 1);
+    newModelis.pos.x += (rand() % 5 - 3);
+    newModelis.pos.z += (rand() % 5 - 3);
   }
 
-  if(Settings::getInstance()->copy_size)
+  if (size_randomization)
   {
     newModelis.sc *= misc::randfloat( 0.9f, 1.1f );
   }

@@ -263,6 +263,11 @@ private:
   QSlider* _smoothing_speed_slider;
 
   QWidget* _smoothing_settings_widget;
+
+  bool _automatically_update_terrain_selection;
+  bool _copy_size_randomization;
+  bool _copy_position_randomization;
+  bool _copy_rotation_randomization;
 };
 
 

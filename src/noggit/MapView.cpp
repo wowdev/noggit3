@@ -12,12 +12,11 @@
 
 #include <helper/qt/signal_blocker.h>
 
+#include <noggit/application.h>
 #include <noggit/Brush.h>
 #include <noggit/Environment.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
-#include <noggit/application.h>
-#include <noggit/Settings.h>
 #include <noggit/UIAppInfo.h>
 #include <noggit/UICheckBox.h>
 #include <noggit/UIDetailInfos.h>
@@ -990,15 +989,15 @@ void MapView::toggle_current_texture_visiblity (bool value)
 
 void MapView::toggle_copy_size_randomization (bool value)
 {
-  Settings::getInstance()->copy_size = value;
+  _copy_size_randomization = value;
 }
 void MapView::toggle_copy_position_randomization (bool value)
 {
-  Settings::getInstance()->copy_tile = value;
+  _copy_position_randomization = value;
 }
 void MapView::toggle_copy_rotation_randomization (bool value)
 {
-  Settings::getInstance()->copy_rot = value;
+  _copy_rotation_randomization = value;
 }
 
 void MapView::toggle_app_info (bool visiblity)
@@ -1049,6 +1048,10 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _smoothing_radius_slider (NULL)
   , _smoothing_speed_slider (NULL)
   , _smoothing_settings_widget (NULL)
+  , _automatically_update_terrain_selection (true)
+  , _copy_size_randomization (false)
+  , _copy_position_randomization (false)
+  , _copy_rotation_randomization (false)
 {
   moving = strafing = updown = 0.0f;
 
@@ -1563,9 +1566,12 @@ void MapView::displayViewMode_2D()
 void MapView::displayViewMode_3D()
 {
   //! \note Select terrain below mouse, if no item selected or the item is map.
-  if( !_world->IsSelection( eEntry_Model ) && !_world->IsSelection( eEntry_WMO ) && Settings::getInstance()->AutoSelectingMode )
+  if ( !_world->IsSelection( eEntry_Model )
+    && !_world->IsSelection( eEntry_WMO )
+    && _automatically_update_terrain_selection
+     )
   {
-    doSelection( true );
+    doSelection (true);
   }
 
   video.set3D();
@@ -1825,19 +1831,28 @@ void MapView::paste_object()
   if( _world->HasSelection() )
   {
     nameEntry lClipboard = Environment::getInstance()->get_clipboard();
+    Vec3D position;
     switch( _world->GetCurrentSelection()->type )
      {
       case eEntry_Model:
-        _world->addModel( lClipboard, _world->GetCurrentSelection()->data.model->pos );
+        position = _world->GetCurrentSelection()->data.model->pos;
         break;
       case eEntry_WMO:
-        _world->addModel( lClipboard, _world->GetCurrentSelection()->data.wmo->pos);
+        position = _world->GetCurrentSelection()->data.wmo->pos;
         break;
       case eEntry_MapChunk:
-        _world->addModel( lClipboard, _world->GetCurrentSelection()->data.mapchunk->GetSelectionPosition() );
+        position = _world->GetCurrentSelection()->data.mapchunk->
+                           GetSelectionPosition();
         break;
-      default: break;
+      default:
+        break;
     }
+    _world->addModel ( lClipboard
+                     , position
+                     , _copy_size_randomization
+                     , _copy_position_randomization
+                     , _copy_rotation_randomization
+                     );
   }
 }
 
@@ -1958,7 +1973,7 @@ void MapView::toggle_terrain_texturing_mode()
 
 void MapView::toggle_auto_selecting (bool value)
 {
-  Settings::getInstance()->AutoSelectingMode = value;
+  _automatically_update_terrain_selection = value;
 }
 
 /// --- Drawing toggles --------------------------------------------------------

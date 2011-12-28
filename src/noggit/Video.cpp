@@ -7,7 +7,6 @@
 
 #include <gl/glew.h>
 
-#include <noggit/Settings.h>
 #include <noggit/Log.h>
 
 namespace OpenGL
@@ -85,7 +84,7 @@ bool Video::init (int xres_, int yres_)
 
   _fov = 45.0f;
   _nearclip = 1.0f;
-  _farclip = Settings::getInstance()->FarZ;
+  _farclip = 1.0f;
 
   glViewport( 0.0f, 0.0f, xres(), yres() );
 
