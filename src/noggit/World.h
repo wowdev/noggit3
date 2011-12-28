@@ -212,9 +212,21 @@ public:
   void eraseTextures(float x, float z);
   void overwriteTextureAtCurrentChunk( float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
   void addHole( float x, float z );
-  void addModel( nameEntry entry, Vec3D newPos);
-  void addM2( Model *model, Vec3D newPos );
+
+  void addModel ( nameEntry entry
+                , Vec3D newPos
+                , bool size_randomization
+                , bool position_randomization
+                , bool rotation_randomization
+                );
+  void addM2 ( Model *model
+             , Vec3D newPos
+             , bool size_randomization = false
+             , bool position_randomization = false
+             , bool rotation_randomization = false
+             );
   void addWMO( WMO *wmo, Vec3D newPos );
+
   void removeHole( float x, float z );
   void jumpToCords(Vec3D pos);
   void saveMap();

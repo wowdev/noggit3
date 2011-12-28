@@ -96,7 +96,6 @@ set ( SourceFiles
       src/noggit/ModelManager.cpp
       src/noggit/Particle.cpp
       src/noggit/Selection.cpp
-      src/noggit/Settings.cpp
       src/noggit/Shaders.cpp
       src/noggit/Sky.cpp
       src/noggit/TextureManager.cpp
@@ -177,7 +176,6 @@ set ( AllHeaders
       src/noggit/Particle.h
       src/noggit/Quaternion.h
       src/noggit/Selection.h
-      src/noggit/Settings.h
       src/noggit/Shaders.h
       src/noggit/Sky.h
       src/noggit/TextureManager.h
