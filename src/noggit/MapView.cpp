@@ -18,7 +18,6 @@
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
 #include <noggit/UICheckBox.h>
-#include <noggit/UIDetailInfos.h>
 #include <noggit/UIDoodadSpawner.h>
 #include <noggit/UIFrame.h>
 #include <noggit/UIGradient.h>
@@ -1868,7 +1867,7 @@ void MapView::keyPressEvent (QKeyEvent* event)
 
 void MapView::toggle_detail_info_window (bool value)
 {
-  mainGui->guidetailInfos->hidden (!value);
+  mainGui->guidetailInfos->setVisible (value);
 }
 
 void MapView::toggle_terrain_mode_window()

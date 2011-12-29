@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <vector>
 
+#include <QTextEdit>
+
 #include <noggit/blp_texture.h>
 #include <noggit/DBC.h>
 #include <noggit/Environment.h>
@@ -11,7 +13,6 @@
 #include <noggit/MapView.h>
 #include <noggit/application.h> // gStates, gPop, arial14, morpheus40, arial...
 #include <noggit/UICursorSwitcher.h> // UICursorSwitcher
-#include <noggit/UIDetailInfos.h> // UIDetailInfos
 #include <noggit/UIDoodadSpawner.h>
 #include <noggit/UIStatusBar.h> // UIStatusBar
 #include <noggit/UITexturePicker.h> //
@@ -21,6 +22,7 @@
 #include <noggit/UIZoneIDBrowser.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/World.h>
+#include <noggit/Log.h>
 
 UIMapViewGUI::UIMapViewGUI (World* world, MapView *map_view, float xres, float yres)
   : UIFrame( 0.0f, 0.0f, xres, yres )
@@ -36,10 +38,9 @@ UIMapViewGUI::UIMapViewGUI (World* world, MapView *map_view, float xres, float y
   addChild(guiStatusbar);
 
   // DetailInfoWindow
-  guidetailInfos = new UIDetailInfos( 1.0f, height() - 282.0f, 600.0f, 250.0f, this );
-  guidetailInfos->movable( true );
+  guidetailInfos = new QTextEdit (NULL);
+  guidetailInfos->resize (600, 250);
   guidetailInfos->hide();
-  addChild(guidetailInfos);
 
   // ZoneIDBrowser
   ZoneIDBrowser = new UIZoneIDBrowser(200, 200, 435, 400, this);
@@ -77,11 +78,6 @@ void UIMapViewGUI::toggleCursorSwitcher()
   CursorSwitcher->setVisible (CursorSwitcher->isVisible());
 }
 
-void UIMapViewGUI::setTilemode( bool enabled )
-{
-  _tilemode = enabled;
-}
-
 void UIMapViewGUI::render( ) const
 {
   UIFrame::render();
@@ -108,7 +104,7 @@ void UIMapViewGUI::render( ) const
 
   guiStatusbar->setRightInfo( "" );
 
-  if( !_tilemode && !guidetailInfos->hidden() )
+  if(guidetailInfos->isVisible() )
   {
     nameEntry * lSelection = _world->GetCurrentSelection();
     if( lSelection )
@@ -200,7 +196,7 @@ void UIMapViewGUI::render( ) const
 
         break;
       }
-      guidetailInfos->setText( detailInfo.str() );
+      guidetailInfos->setText( QString::fromStdString (detailInfo.str()) );
     }
     else
     {
