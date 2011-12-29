@@ -1064,6 +1064,7 @@ MapView::MapView ( World* world
   , _copy_position_randomization (false)
   , _copy_rotation_randomization (false)
   , _viewing_distance (viewing_distance)
+  , _tile_mode_zoom (0.25)
 {
   moving = strafing = updown = 0.0f;
 
@@ -1398,12 +1399,12 @@ void MapView::tick( float t, float dt )
     Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
     yPos = Selection->data.mapchunk->getSelectionHeight();
           if( mViewMode == eViewMode_3D )      _world->removeHole( xPos, zPos );
-          //else if( mViewMode == eViewMode_2D )  _world->removeHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _world->zoom+_world->camera.z );
+          //else if( mViewMode == eViewMode_2D )  _world->removeHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom + _world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom + _world->camera.z );
         }
         else if( Environment::getInstance()->CtrlDown )
         {
           if( mViewMode == eViewMode_3D )      _world->addHole( xPos, zPos );
-          //else if( mViewMode == eViewMode_2D )  _world->addHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _world->zoom+_world->camera.z );
+          //else if( mViewMode == eViewMode_2D )  _world->addHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom+_world->camera.z );
         }
       break;
 
@@ -1467,13 +1468,13 @@ void MapView::tick( float t, float dt )
   else
   {
     if( moving )
-      _world->camera.z -= dt * movespd * moving / ( _world->zoom * 1.5f );
+      _world->camera.z -= dt * movespd * moving / ( _tile_mode_zoom * 1.5f );
     if( strafing )
-      _world->camera.x += dt * movespd * strafing / ( _world->zoom * 1.5f );
+      _world->camera.x += dt * movespd * strafing / ( _tile_mode_zoom * 1.5f );
     if( updown )
-      _world->zoom *= pow( 2.0f, dt * updown * 4.0f );
+      _tile_mode_zoom *= pow( 2.0f, dt * updown * 4.0f );
 
-    _world->zoom = std::min( std::max( _world->zoom, 0.1f ), 2.0f );
+    _tile_mode_zoom = qBound (0.1, _tile_mode_zoom, 2.0);
   }
 
   _world->time += mTimespeed * dt;
@@ -1588,8 +1589,6 @@ void MapView::displayGUIIfEnabled()
 
 QPointF MapView::tile_mode_brush_position() const
 {
-  const qreal _tile_mode_zoom (_world->zoom);
-
   const QPointF mouse_pos ( _mouse_position.x() / qreal (width()) - 0.5
                           , _mouse_position.y() / qreal (height()) - 0.5
                           );
@@ -1608,7 +1607,6 @@ QPointF MapView::tile_mode_brush_position() const
 
 void MapView::draw_tile_mode_brush() const
 {
-  const qreal _tile_mode_zoom (_world->zoom);
   const qreal brush_radius (textureBrush.getRadius());
   const qreal brush_diameter (brush_radius * 2.0);
   const QPointF brush_position (tile_mode_brush_position());
@@ -1641,7 +1639,9 @@ void MapView::draw_tile_mode_brush() const
 void MapView::displayViewMode_2D()
 {
   setup_tile_mode_rendering();
-  _world->drawTileMode (ah, _draw_lines, width() / qreal (height()));
+  _world->drawTileMode ( _draw_lines, width() / qreal (height())
+                       , _tile_mode_zoom
+                       );
   draw_tile_mode_brush();
   displayGUIIfEnabled();
 }

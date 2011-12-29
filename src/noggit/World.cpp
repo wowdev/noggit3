@@ -196,7 +196,6 @@ World::World( const std::string& name )
   , maxX( 0.0f )
   , minY( 0.0f )
   , maxY( 0.0f )
-  , zoom( 0.25f )
   , skies( NULL )
   , mHasAGlobalWMO( false )
   , noadt( false )
@@ -1605,9 +1604,9 @@ void World::setAreaID(int id, int x, int z , int _cx, int _cz)
   curChunk->areaID = id;
 }
 
-void World::drawTileMode ( float /*ah*/
-                         , bool draw_lines
+void World::drawTileMode ( bool draw_lines
                          , float ratio
+                         , float zoom
                          )
 {
   glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);

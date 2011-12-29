@@ -281,6 +281,7 @@ private:
   bool _copy_rotation_randomization;
 
   qreal _viewing_distance;
+  qreal _tile_mode_zoom;
 };
 
 

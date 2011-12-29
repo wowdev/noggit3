@@ -126,7 +126,6 @@ public:
   float maxX;
   float minY;
   float maxY;
-  float zoom;
 
   Skies *skies;
   bool mHasAGlobalWMO;
@@ -192,9 +191,9 @@ public:
                      , bool draw_terrain
                      );
   void drawSelectionChunk(int cursorX,int cursorY);
-  void drawTileMode ( float ah
-                    , bool draw_lines
+  void drawTileMode ( bool draw_lines
                     , float ratio
+                    , float zoom
                     );
 
   // Selection related methods.
