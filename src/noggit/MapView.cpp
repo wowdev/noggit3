@@ -17,7 +17,6 @@
 #include <noggit/Environment.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
-#include <noggit/UIAppInfo.h>
 #include <noggit/UICheckBox.h>
 #include <noggit/UIDetailInfos.h>
 #include <noggit/UIDoodadSpawner.h>
@@ -1003,11 +1002,6 @@ void MapView::toggle_copy_position_randomization (bool value)
 void MapView::toggle_copy_rotation_randomization (bool value)
 {
   _copy_rotation_randomization = value;
-}
-
-void MapView::toggle_app_info (bool visiblity)
-{
-  mainGui->guiappInfo->hidden (!visiblity);
 }
 
 MapView::MapView ( World* world

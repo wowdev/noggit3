@@ -126,7 +126,6 @@ private slots:
   void show_cursor_switcher();
   void show_map_chunk_settings (bool);
   void snap_selected_object_to_ground();
-  void toggle_app_info (bool);
   void toggle_auto_selecting (bool);
   void toggle_contour_drawing (bool);
   void toggle_copy_position_randomization (bool);
