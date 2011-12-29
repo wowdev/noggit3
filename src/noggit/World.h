@@ -15,8 +15,11 @@
 
 namespace OpenGL
 {
-  class CallList;
   class Texture;
+};
+namespace opengl
+{
+  class call_list;
 };
 
 class brush;
@@ -72,7 +75,7 @@ private:
   bool mBigAlpha;
 
   // Call lists for the low resolution heightmaps.
-  OpenGL::CallList* lowrestiles[64][64];
+  opengl::call_list* lowrestiles[64][64];
 
   // Temporary variables for loading a WMO, if we have a global WMO.
   std::string mWmoFilename;
@@ -183,7 +186,6 @@ public:
 
   void drawSelection ( int cursorX
                      , int cursorY
-                     , bool pOnlyMap
                      , bool draw_wmo_doodads
                      , bool draw_wmos
                      , bool draw_doodads
@@ -192,6 +194,7 @@ public:
   void drawSelectionChunk(int cursorX,int cursorY);
   void drawTileMode ( float ah
                     , bool draw_lines
+                    , float ratio
                     );
 
   // Selection related methods.
@@ -208,9 +211,9 @@ public:
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   void blurTerrain(float x, float z, float remain, float radius, int BrushType);
-  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture);
+  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, noggit::blp_texture* texture);
   void eraseTextures(float x, float z);
-  void overwriteTextureAtCurrentChunk( float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
+  void overwriteTextureAtCurrentChunk( float x, float z, noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture);
   void addHole( float x, float z );
 
   void addModel ( nameEntry entry

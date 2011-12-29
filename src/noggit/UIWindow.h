@@ -6,7 +6,10 @@
 #include <noggit/FreeType.h> // fonts.
 #include <noggit/UIFrame.h>
 
-namespace OpenGL { class Texture; };
+namespace noggit
+{
+  class blp_texture;
+}
 
 class UIWindow : public UIFrame
 {
@@ -14,7 +17,7 @@ public:
   typedef UIWindow* Ptr;
 
 protected:
-  OpenGL::Texture* texture;
+  noggit::blp_texture* texture;
   std::string _textureFilename;
 
 public:

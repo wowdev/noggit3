@@ -11,6 +11,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread/thread.hpp>
 
+#include <opengl/call_list.h>
+#include <opengl/settings_saver.h>
+
+#include <noggit/blp_texture.h>
 #include <noggit/DBC.h>
 #include <noggit/Environment.h>
 #include <noggit/Log.h>
@@ -20,7 +24,6 @@
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/TextureManager.h>
 #include <noggit/UITexturingGUI.h>
-#include <noggit/Video.h>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/MapTile.h>
 #include <noggit/mpq/file.h>
@@ -535,11 +538,11 @@ void World::initLowresTerrain()
   // - MARE and MAHO by offset ---------------------------
 
   for (size_t y (0); y < 64; ++y)
-      {
+  {
     for (size_t x (0); x < 64; ++x)
-        {
+    {
       if (mare_offsets[y][x])
-          {
+      {
         const uint32_t* magic (wdl_file.get<uint32_t> (mare_offsets[y][x]));
         const uint32_t* size (wdl_file.get<uint32_t> (mare_offsets[y][x] + 4));
 
@@ -551,61 +554,61 @@ void World::initLowresTerrain()
         const int16_t* data_17 (wdl_file.get<int16_t> (mare_offsets[y][x] + 8));
 
         for (size_t j (0); j < 17; ++j)
-            {
+        {
           for (size_t i (0); i < 17; ++i)
-              {
+          {
             vertices_17[j][i] = Vec3D ( TILESIZE * (x + i / 16.0f)
                                       , data_17[j * 17 + i]
                                       , TILESIZE * (y + j / 16.0f)
                                       );
-              }
-            }
+          }
+        }
 
         const int16_t* data_16 (wdl_file.get<int16_t> (mare_offsets[y][x] + 8 + 17 * 17 * sizeof (int16_t)));
 
         for (size_t j (0); j < 16; ++j)
-            {
+        {
           for (size_t i (0); i < 16; ++i)
-              {
+          {
             vertices_16[j][i] = Vec3D ( TILESIZE * (x + (i + 0.5f) / 16.0f)
                                       , data_16[j * 16 + i]
                                       , TILESIZE * (y + (j + 0.5f) / 16.0f)
                                       );
-              }
-            }
-
-        lowrestiles[y][x] = new OpenGL::CallList();
-        lowrestiles[y][x]->startRecording();
-
-        //! \todo Make a strip out of this.
-            glBegin( GL_TRIANGLES );
-        for (size_t j (0); j < 16; ++j )
-            {
-          for (size_t i (0); i < 16; ++i )
-              {
-            glVertex3fv (vertices_17[j][i]);
-            glVertex3fv (vertices_16[j][i]);
-            glVertex3fv (vertices_17[j][i + 1]);
-            glVertex3fv (vertices_17[j][i + 1]);
-            glVertex3fv (vertices_16[j][i]);
-            glVertex3fv (vertices_17[j + 1][i + 1]);
-            glVertex3fv (vertices_17[j + 1][i + 1]);
-            glVertex3fv (vertices_16[j][i]);
-            glVertex3fv (vertices_17[j + 1][i]);
-            glVertex3fv (vertices_17[j + 1][i]);
-            glVertex3fv (vertices_16[j][i]);
-            glVertex3fv (vertices_17[j][i]);
-              }
-            }
-            glEnd();
-
-        lowrestiles[y][x]->endRecording();
-
-        //! \todo There also is MAHO giving holes into this heightmap.
-             }
-             }
           }
         }
+
+        lowrestiles[y][x] = new opengl::call_list;
+        lowrestiles[y][x]->start_recording();
+
+        //! \todo Make a strip out of this.
+        glBegin( GL_TRIANGLES );
+        for (size_t j (0); j < 16; ++j )
+        {
+          for (size_t i (0); i < 16; ++i )
+          {
+            glVertex3fv (vertices_17[j][i]);
+            glVertex3fv (vertices_16[j][i]);
+            glVertex3fv (vertices_17[j][i + 1]);
+            glVertex3fv (vertices_17[j][i + 1]);
+            glVertex3fv (vertices_16[j][i]);
+            glVertex3fv (vertices_17[j + 1][i + 1]);
+            glVertex3fv (vertices_17[j + 1][i + 1]);
+            glVertex3fv (vertices_16[j][i]);
+            glVertex3fv (vertices_17[j + 1][i]);
+            glVertex3fv (vertices_17[j + 1][i]);
+            glVertex3fv (vertices_16[j][i]);
+            glVertex3fv (vertices_17[j][i]);
+          }
+        }
+        glEnd();
+
+        lowrestiles[y][x]->end_recording();
+
+        //! \todo There also is MAHO giving holes into this heightmap.
+      }
+    }
+  }
+}
 
 void initGlobalVBOs( GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords )
 {
@@ -1081,8 +1084,12 @@ void World::draw ( bool draw_terrain_height_contour
   //glColorMaterial(GL_FRONT, GL_DIFFUSE);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
   glColor4f(1,1,1,1);
+
+  const bool enable_shaders
+    (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program);
+
   // if we're using shaders let's give it some specular
-  if (video.mSupportShaders) {
+  if (enable_shaders) {
     Vec4D spec_color(0.1f,0.1f,0.1f,0.1f);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
     glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 5);
@@ -1105,198 +1112,200 @@ void World::draw ( bool draw_terrain_height_contour
 
   glClientActiveTexture(GL_TEXTURE0);
 
-  OpenGL::SettingsSaver::save();
 
-  // height map w/ a zillion texture passes
-  //! \todo  Do we need to push the matrix here?
-
-  glPushMatrix();
-
-  if( draw_terrain )
+  // gosh darn alpha blended evil
+  //! \note THIS SCOPE IS NEEDED FOR THE SETTINGS SAVER!
   {
-    for( int j = 0; j < 64; ++j )
+    opengl::settings_saver saver;
+
+    // height map w/ a zillion texture passes
+    //! \todo  Do we need to push the matrix here?
+
+    glPushMatrix();
+
+    if( draw_terrain )
     {
-      for( int i = 0; i < 64; ++i )
+      for( int j = 0; j < 64; ++j )
       {
-        if( tileLoaded( j, i ) )
+        for( int i = 0; i < 64; ++i )
         {
-          mTiles[j][i].tile->draw ( draw_terrain_height_contour
-                                  , mark_impassable_chunks
-                                  , draw_area_id_overlay
-                                  , dont_draw_cursor
-                                  );
+          if( tileLoaded( j, i ) )
+          {
+            mTiles[j][i].tile->draw ( draw_terrain_height_contour
+                                    , mark_impassable_chunks
+                                    , draw_area_id_overlay
+                                    , dont_draw_cursor
+                                    );
+          }
         }
       }
     }
-  }
 
-  glPopMatrix();
+    glPopMatrix();
 
-  // Selection circle
-  if( IsSelection( eEntry_MapChunk )  )
-  {
-    //int poly = GetCurrentSelectedTriangle();
+    // Selection circle
+    if( IsSelection( eEntry_MapChunk )  )
+    {
+      //int poly = GetCurrentSelectedTriangle();
 
-    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+      glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
-    //nameEntry * Selection = GetCurrentSelection();
+      //nameEntry * Selection = GetCurrentSelection();
 
-    //if( !Selection->data.mapchunk->strip )
-    // Selection->data.mapchunk->initStrip();
-
-
-    GLint viewport[4];
-    GLdouble modelview[16];
-    GLdouble projection[16];
-    GLfloat winX, winY, winZ;
-    GLdouble posX, posY, posZ;
-
-    glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-    glGetDoublev( GL_PROJECTION_MATRIX, projection );
-    glGetIntegerv( GL_VIEWPORT, viewport );
+      //if( !Selection->data.mapchunk->strip )
+      // Selection->data.mapchunk->initStrip();
 
 
-    winX = (float)Environment::getInstance()->screenX;
-    winY = (float)viewport[3] - (float)Environment::getInstance()->screenY;
+      GLint viewport[4];
+      GLdouble modelview[16];
+      GLdouble projection[16];
+      GLfloat winX, winY, winZ;
+      GLdouble posX, posY, posZ;
 
-    glReadPixels( Environment::getInstance()->screenX, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
-    gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+      glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+      glGetDoublev( GL_PROJECTION_MATRIX, projection );
+      glGetIntegerv( GL_VIEWPORT, viewport );
 
-    Environment::getInstance()->Pos3DX = posX;
-    Environment::getInstance()->Pos3DY = posY;
-    Environment::getInstance()->Pos3DZ = posZ;
+
+      winX = (float)Environment::getInstance()->screenX;
+      winY = (float)viewport[3] - (float)Environment::getInstance()->screenY;
+
+      glReadPixels( Environment::getInstance()->screenX, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
+      gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+
+      Environment::getInstance()->Pos3DX = posX;
+      Environment::getInstance()->Pos3DY = posY;
+      Environment::getInstance()->Pos3DZ = posZ;
+
+      glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+      glDisable(GL_CULL_FACE);
+      //glDepthMask(false);
+      //glDisable(GL_DEPTH_TEST);
+
+      if (!dont_draw_cursor)
+      {
+        if(Environment::getInstance()->cursorType == 1)
+          renderDisk_convenient(posX, posY, posZ, outer_cursor_radius);
+        else if(Environment::getInstance()->cursorType == 2)
+          renderSphere_convenient(posX, posY, posZ, outer_cursor_radius, 15);
+      }
+
+      glEnable(GL_CULL_FACE);
+      glEnable(GL_DEPTH_TEST);
+      //GlDepthMask(true);
+      glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+    }
+
+
+    if (draw_lines)
+    {
+      glDisable(GL_COLOR_MATERIAL);
+      glActiveTexture(GL_TEXTURE0);
+      glDisable(GL_TEXTURE_2D);
+      glActiveTexture(GL_TEXTURE1);
+      glDisable(GL_TEXTURE_2D);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+      setupFog (draw_fog);
+      for( int j = 0; j < 64; ++j )
+      {
+        for( int i = 0; i < 64; ++i )
+        {
+          if( tileLoaded( j, i ) )
+          {
+            mTiles[j][i].tile->drawLines (draw_hole_lines);
+           // mTiles[j][i].tile->drawMFBO();
+          }
+        }
+      }
+    }
+
+    glActiveTexture(GL_TEXTURE1);
+    glDisable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_TEXTURE_2D);
+
+    glColor4f(1,1,1,1);
+    glEnable(GL_BLEND);
+
+    if (enable_shaders) {
+      Vec4D spec_color(0,0,0,1);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
+      glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
+    }
+
+    // unbind hardware buffers
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+
+
+
+    glEnable(GL_CULL_FACE);
+
+    glDisable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+
+    // TEMP: for fucking around with lighting
+    for(opengl::light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light )
+    {
+      glLightf(light, GL_CONSTANT_ATTENUATION, l_const);
+      glLightf(light, GL_LINEAR_ATTENUATION, l_linear);
+      glLightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
+    }
+
+
+
+
+
+    // M2s / models
+    if( draw_doodads)
+    {
+      ModelManager::resetAnim();
+
+      glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
+      for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
+        it->second.draw (draw_fog);
+
+      //drawModelList();
+    }
+
+
+
+
+    // WMOs / map objects
+    if( draw_wmos || mHasAGlobalWMO )
+      if (enable_shaders)
+      {
+        Vec4D spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
+        glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
+        glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 10 );
+
+        glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
+
+        for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
+          it->second.draw (draw_wmo_doodads, draw_fog);
+
+        spec_color = Vec4D( 0.0f, 0.0f, 0.0f, 1.0f );
+        glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
+        glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 0 );
+      }
+      else
+        for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
+          it->second.draw (draw_wmo_doodads, draw_fog);
+
+    outdoorLights( true );
+    setupFog (draw_fog);
 
     glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
     glDisable(GL_CULL_FACE);
-    //glDepthMask(false);
-    //glDisable(GL_DEPTH_TEST);
 
-    if (!dont_draw_cursor)
-    {
-      if(Environment::getInstance()->cursorType == 1)
-        renderDisk_convenient(posX, posY, posZ, outer_cursor_radius);
-      else if(Environment::getInstance()->cursorType == 2)
-        renderSphere_convenient(posX, posY, posZ, outer_cursor_radius, 15);
-    }
-
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    //GlDepthMask(true);
-    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
+    glDisable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glEnable(GL_LIGHTING);
   }
 
-
-  if (draw_lines)
-  {
-    glDisable(GL_COLOR_MATERIAL);
-    glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    setupFog (draw_fog);
-    for( int j = 0; j < 64; ++j )
-    {
-      for( int i = 0; i < 64; ++i )
-      {
-        if( tileLoaded( j, i ) )
-        {
-          mTiles[j][i].tile->drawLines (draw_hole_lines);
-         // mTiles[j][i].tile->drawMFBO();
-        }
-      }
-    }
-  }
-
-  glActiveTexture(GL_TEXTURE1);
-  glDisable(GL_TEXTURE_2D);
-  glActiveTexture(GL_TEXTURE0);
-  glEnable(GL_TEXTURE_2D);
-
-  glColor4f(1,1,1,1);
-  glEnable(GL_BLEND);
-
-  if (video.mSupportShaders) {
-    Vec4D spec_color(0,0,0,1);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
-  }
-
-  // unbind hardware buffers
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-
-
-
-  glEnable(GL_CULL_FACE);
-
-  glDisable(GL_BLEND);
-  glDisable(GL_ALPHA_TEST);
-
-  // TEMP: for fucking around with lighting
-  for(OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light )
-  {
-    glLightf(light, GL_CONSTANT_ATTENUATION, l_const);
-    glLightf(light, GL_LINEAR_ATTENUATION, l_linear);
-    glLightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
-  }
-
-
-
-
-
-  // M2s / models
-  if( draw_doodads)
-  {
-    ModelManager::resetAnim();
-
-    glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
-    for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
-      it->second.draw (draw_fog);
-
-    //drawModelList();
-  }
-
-
-
-
-  // WMOs / map objects
-  if( draw_wmos || mHasAGlobalWMO )
-    if (video.mSupportShaders)
-    {
-      Vec4D spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
-      glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
-      glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 10 );
-
-      glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
-
-      for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-        it->second.draw (draw_wmo_doodads, draw_fog);
-
-      spec_color = Vec4D( 0.0f, 0.0f, 0.0f, 1.0f );
-      glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
-      glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 0 );
-    }
-    else
-      for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-        it->second.draw (draw_wmo_doodads, draw_fog);
-
-  outdoorLights( true );
-  setupFog (draw_fog);
-
-  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-  glDisable(GL_CULL_FACE);
-
-  glDisable(GL_BLEND);
-  glDisable(GL_ALPHA_TEST);
-  glEnable(GL_LIGHTING);
-
-  // gosh darn alpha blended evil
-
-  OpenGL::SettingsSaver::restore();
   setupFog (draw_fog);
 
 
@@ -1350,7 +1359,6 @@ static const GLuint MapTileName = 3;
 
 void World::drawSelection ( int cursorX
                           , int cursorY
-                          , bool pOnlyMap
                           , bool draw_wmo_doodads
                           , bool draw_wmos
                           , bool draw_doodads
@@ -1359,15 +1367,6 @@ void World::drawSelection ( int cursorX
 {
   glSelectBuffer( sizeof( _selection_buffer ) / sizeof( GLuint ), _selection_buffer );
   glRenderMode( GL_SELECT );
-
-  glMatrixMode( GL_PROJECTION );
-  glLoadIdentity();
-
-  GLint viewport[4];
-  glGetIntegerv( GL_VIEWPORT, viewport );
-  gluPickMatrix( cursorX, viewport[3] - cursorY, 7, 7, viewport );
-
-  video.set3D_select();
 
   glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
@@ -1395,35 +1394,30 @@ void World::drawSelection ( int cursorX
   }
   glPopName();
 
-  if( !pOnlyMap )
+  if( draw_wmos )
   {
-    // WMOs / map objects
-    if( draw_wmos )
+    glPushName( MapObjName );
+    glPushName( 0 );
+    for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
     {
-      glPushName( MapObjName );
-      glPushName( 0 );
-      for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-      {
-        it->second.drawSelect (draw_wmo_doodads);
-      }
-      glPopName();
-      glPopName();
+      it->second.drawSelect (draw_wmo_doodads);
     }
+    glPopName();
+    glPopName();
+  }
 
-    // M2s / models
-    if( draw_doodads )
+  if( draw_doodads )
+  {
+    ModelManager::resetAnim();
+
+    glPushName( DoodadName );
+    glPushName( 0 );
+    for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
     {
-      ModelManager::resetAnim();
-
-      glPushName( DoodadName );
-      glPushName( 0 );
-      for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
-      {
-        it->second.drawSelect();
-      }
-      glPopName();
-      glPopName();
+      it->second.drawSelect();
     }
+    glPopName();
+    glPopName();
   }
 
   getSelection();
@@ -1613,6 +1607,7 @@ void World::setAreaID(int id, int x, int z , int _cx, int _cz)
 
 void World::drawTileMode ( float /*ah*/
                          , bool draw_lines
+                         , float ratio
                          )
 {
   glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
@@ -1626,8 +1621,8 @@ void World::drawTileMode ( float /*ah*/
   glPushMatrix();
   glTranslatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
 
-  minX = camera.x/CHUNKSIZE - 2.0f*video.ratio()/zoom;
-  maxX = camera.x/CHUNKSIZE + 2.0f*video.ratio()/zoom;
+  minX = camera.x/CHUNKSIZE - 2.0f*ratio/zoom;
+  maxX = camera.x/CHUNKSIZE + 2.0f*ratio/zoom;
   minY = camera.z/CHUNKSIZE - 2.0f/zoom;
   maxY = camera.z/CHUNKSIZE + 2.0f/zoom;
 
@@ -1820,7 +1815,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
   }
 }
 
-bool World::paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture)
+bool World::paintTexture(float x, float z, brush *Brush, float strength, float pressure, noggit::blp_texture* texture)
 {
   //const int newX = (int)(x / TILESIZE);
   //const int newZ = (int)(z / TILESIZE);
@@ -1879,7 +1874,7 @@ void World::eraseTextures(float x, float z)
   }
 }
 
-void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
+void World::overwriteTextureAtCurrentChunk(float x, float z, noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture)
 {
   setChanged(x,z);
   const size_t newX = x / TILESIZE;
@@ -1969,6 +1964,8 @@ void World::removeHole( float x, float z )
 
 void World::saveMap()
 {
+  assert (!"This is currently broken.");
+
   //! \todo  Output as BLP.
   unsigned char image[256*256*3];
   MapTile *ATile;
@@ -2006,8 +2003,11 @@ void World::saveMap()
 
       ATile->drawTextures (animtime);
       glPopMatrix();
-      glReadPixels(video.xres()/2-128,video.yres()/2-128,256,256,GL_RGB,GL_UNSIGNED_BYTE,image);
-      video.flip();
+
+  //! \todo Fix these two lines. THEY ARE VITAL!
+//    glReadPixels (video.xres()/2-128, video.yres()/2-128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
+//      swapBuffers();
+
     std::stringstream ss;
     ss << basename.c_str() << "_map_" << x << "_" << y << ".raw";
     fid=fopen(ss.str().c_str(),"wb");

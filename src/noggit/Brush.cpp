@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include <noggit/Video.h> // OpenGL::Texture
+#include <opengl/texture.h>
 
 void brush::init()
 {
@@ -10,7 +10,7 @@ void brush::init()
   hardness = 0.5f;
   iradius = hardness * radius;
   oradius = radius - iradius;
-  _texture = new OpenGL::Texture( );
+  _texture = new opengl::texture;
   GenerateTexture();
 }
 
@@ -76,7 +76,7 @@ float brush::getValue( float dist )
     return 1.0f;
   return( 1.0f - ( dist - iradius ) / oradius );
 }
-OpenGL::Texture* brush::getTexture()
+opengl::texture* brush::getTexture()
 {
   return _texture;
 }

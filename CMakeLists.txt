@@ -73,8 +73,9 @@ if (WIN32)
 endif (WIN32)
 
 # Gather source files.
-set ( SourceFiles
+set ( noggit_sources
       src/noggit/application.cpp
+      src/noggit/blp_texture.cpp
 
       src/noggit/AsyncLoader.cpp
       src/noggit/Brush.cpp
@@ -128,7 +129,6 @@ set ( SourceFiles
       src/noggit/UITreeView.cpp
       src/noggit/UIWindow.cpp
       src/noggit/UIZoneIDBrowser.cpp
-      src/noggit/Video.cpp
       src/noggit/WMO.cpp
       src/noggit/WMOInstance.cpp
       src/noggit/World.cpp
@@ -142,12 +142,9 @@ set ( SourceFiles
       src/noggit/ui/minimap_widget.cpp
     )
 
-if (WIN32)
-  set (SourceFiles ${SourceFiles} src/windows/StackWalker.cpp)
-endif (WIN32)
-
-set ( AllHeaders
+set ( noggit_headers
       src/noggit/application.h
+      src/noggit/blp_texture.h
 
       src/noggit/Animated.h
       src/noggit/AsyncLoader.h
@@ -210,7 +207,6 @@ set ( AllHeaders
       src/noggit/UIWindow.h
       src/noggit/UIZoneIDBrowser.h
       src/noggit/Vec3D.h
-      src/noggit/Video.h
       src/noggit/WMO.h
       src/noggit/WMOInstance.h
       src/noggit/World.h
@@ -225,7 +221,7 @@ set ( AllHeaders
       src/noggit/ui/minimap_widget.h
     )
 
-set ( HeadersToMoc
+set ( noggit_headers_to_moc
       src/noggit/application.h
 
       src/noggit/Menu.h
@@ -236,11 +232,38 @@ set ( HeadersToMoc
       src/noggit/ui/minimap_widget.h
     )
 
+set ( opengl_sources
+      src/opengl/call_list.cpp
+      src/opengl/settings_saver.cpp
+      src/opengl/texture.cpp
+    )
+
+set ( opengl_headers
+      src/opengl/call_list.h
+      src/opengl/settings_saver.h
+      src/opengl/texture.h
+      src/opengl/types.h
+    )
+
+set ( windows_sources
+      src/windows/StackWalker.cpp
+    )
+
+set ( windows_headers
+      src/windows/StackWalker.h
+    )
+
+
+set ( headers_to_moc
+      ${noggit_headers_to_moc}
+    )
+
+
 file (GLOB TRANSLATIONS translations/noggit_*.ts)
 
 set ( FILES_TO_TRANSLATE
-      ${AllHeaders}
-      ${SourceFiles}
+      ${noggit_headers}
+      ${noggit_sources}
     )
 
 
@@ -275,7 +298,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}
                     )
 
 # Moc, translate, ressource.
-qt4_wrap_cpp (moced ${HeadersToMoc} ${HeadersToMoc})
+qt4_wrap_cpp (moced ${headers_to_moc} ${headers_to_moc})
 qt4_automoc (${moced})
 
 qt4_create_translation (QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS})
@@ -294,8 +317,12 @@ endif (APPLE)
 if (WIN32)
   add_executable ( noggit
                    WIN32
-                   ${SourceFiles}
-                   ${AllHeaders}
+                   ${noggit_sources}
+                   ${opengl_sources}
+                   ${windows_sources}
+                   ${noggit_headers}
+                   ${opengl_headers}
+                   ${windows_headers}
                    ${moced}
                    ${rccsc}
                    ${QM}
@@ -303,7 +330,8 @@ if (WIN32)
 else (WIN32)
   add_executable ( noggit
                    MACOSX_BUNDLE
-                   ${SourceFiles}
+                   ${noggit_sources}
+                   ${opengl_sources}
                    ${ResourceFiles}
                    ${moced}
                    ${rccsc}

@@ -1,6 +1,6 @@
 #include <noggit/Frustum.h>
 
-#include <noggit/Video.h>
+#include <opengl/types.h>
 
 void Plane::normalize()
 {

@@ -1,6 +1,6 @@
 #include <noggit/UIGradient.h>
 
-#include <noggit/Video.h> // gl*
+#include <opengl/types.h>
 
 void UIGradient::render() const
 {

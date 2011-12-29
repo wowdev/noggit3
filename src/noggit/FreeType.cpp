@@ -14,8 +14,9 @@
 #include <utf8.h>
 
 #include <noggit/Log.h>
-#include <noggit/Video.h>
 #include <noggit/mpq/file.h>
+
+#include <opengl/texture.h>
 
 namespace freetype
 {
@@ -69,7 +70,7 @@ namespace freetype
     GlyphData glyphData;
     glyphData._width = _face->glyph->advance.x >> 6;
 
-    glyphData._texture = new OpenGL::Texture();
+    glyphData._texture = new opengl::texture;
     glyphData._texture->bind();
 
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
@@ -81,8 +82,8 @@ namespace freetype
     delete[] expanded_data;
     expanded_data = NULL;
 
-    glyphData._callList = new OpenGL::CallList();
-    glyphData._callList->startRecording();
+    glyphData._call_list = new opengl::call_list;
+    glyphData._call_list->start_recording();
 
     glyphData._texture->bind();
 
@@ -104,7 +105,7 @@ namespace freetype
 
     glTranslatef( static_cast<float>( glyphData._width ), 0.0f, 0.0f );
 
-    glyphData._callList->endRecording();
+    glyphData._call_list->end_recording();
 
     _cachedGlyphs[charCode] = glyphData;
   }
@@ -156,7 +157,7 @@ namespace freetype
 
     for( GlyphListType::iterator it( _cachedGlyphs.begin() ), end( _cachedGlyphs.end() ); it != end; ++it )
     {
-      delete it->second._callList;
+      delete it->second._call_list;
       delete it->second._texture;
     }
     _cachedGlyphs.clear();

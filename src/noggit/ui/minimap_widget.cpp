@@ -4,7 +4,6 @@
 #include <QPainter>
 
 #include <noggit/Sky.h>
-#include <noggit/Video.h>
 #include <noggit/World.h>
 
 namespace ui
@@ -34,7 +33,10 @@ namespace ui
     const qreal scale_factor (tile_size / TILESIZE);
 
     QPainter painter (this);
-    painter.setRenderHints (QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
+    painter.setRenderHints ( QPainter::Antialiasing
+                           | QPainter::TextAntialiasing
+                           | QPainter::SmoothPixmapTransform
+                           );
 
     if (world())
     {
@@ -51,8 +53,16 @@ namespace ui
             //! \todo Check, if correct order!
             if (world()->getChanged (j, i))
             {
-              painter.drawLine (tile_size * i, tile_size * j, tile_size * (i + 1) - 1, tile_size * j);
-              painter.drawLine (tile_size * i, tile_size * j, tile_size * i, tile_size * (j + 1) - 1);
+              painter.drawLine ( tile_size * i
+                               , tile_size * j
+                               , tile_size * (i + 1) - 1
+                               , tile_size * j
+                               );
+              painter.drawLine ( tile_size * i
+                               , tile_size * j
+                               , tile_size * i
+                               , tile_size * (j + 1) - 1
+                               );
             }
           }
         }
@@ -66,7 +76,12 @@ namespace ui
           {
             if (world()->hasTile (j, i))
             {
-              painter.drawRect (QRect (tile_size * i + 1, tile_size * j + 1, tile_size - 2, tile_size - 2));
+              painter.drawRect ( QRect ( tile_size * i + 1
+                                       , tile_size * j + 1
+                                       , tile_size - 2
+                                       , tile_size - 2
+                                       )
+                               );
             }
           }
         }
@@ -111,7 +126,10 @@ namespace ui
       //! \todo Draw something so user realizes this will become the minimap.
       painter.setPen (Qt::black);
       painter.setFont (QFont ("Arial", 30));
-      painter.drawText (drawing_rect, Qt::AlignCenter, tr ("Select a map on the left side."));
+      painter.drawText ( drawing_rect
+                       , Qt::AlignCenter
+                       , tr ("Select a map on the left side.")
+                       );
     }
   }
 
@@ -126,7 +144,9 @@ namespace ui
     const int smaller_side ((qMin (rect().width(), rect().height()) / 64) * 64);
     const int tile_size (smaller_side / 64);
     //! \note event->pos() / tile_size seems to be using floating point arithmetic, therefore getting wrong results.
-    const QPoint tile (event->pos().x() / tile_size, event->pos().y() / tile_size);
+    const QPoint tile ( event->pos().x() / tile_size
+                      , event->pos().y() / tile_size
+                      );
 
     emit tile_clicked (tile);
 

@@ -9,7 +9,11 @@ class RibbonEmitter;
 
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/Model.h>
-#include <noggit/Video.h>
+
+namespace opengl
+{
+  class texture;
+}
 
 namespace noggit
 {
@@ -65,7 +69,7 @@ class ParticleSystem {
   ParticleEmitter *emitter;
   float mid, slowdown, rotation;
   Vec3D pos;
-  OpenGL::Texture* _texture;
+  opengl::texture* _texture;
   ParticleList particles;
   int blend,order,type;
   int manim,mtime;
@@ -141,7 +145,7 @@ class RibbonEmitter {
   Vec4D tcolor;
   float tabove, tbelow;
 
-  OpenGL::Texture* _texture;
+  opengl::texture* _texture;
 
   std::list<RibbonSegment> segs;
 

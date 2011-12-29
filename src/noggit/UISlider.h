@@ -5,13 +5,16 @@
 
 #include <noggit/UIFrame.h>
 
-namespace OpenGL { class Texture; }
+namespace noggit
+{
+  class blp_texture;
+}
 
 class UISlider : public UIFrame
 {
 protected:
-  OpenGL::Texture* texture;
-  OpenGL::Texture* sliderTexture;
+  noggit::blp_texture* texture;
+  noggit::blp_texture* sliderTexture;
   float scale;
   float offset;
   void (*func)(float value);

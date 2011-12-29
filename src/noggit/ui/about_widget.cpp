@@ -3,7 +3,7 @@
 #include <QLabel>
 
 #include <revision.h> // STRPRODUCTVER
-#include <noggit/Video.h> // helper::blp_to_pixmap
+#include <noggit/blp_texture.h>
 
 namespace ui
 {
@@ -31,7 +31,7 @@ namespace ui
     static QFont skurri32 ("Skurri", 32);
     static QFont friz16 ("Friz Quadrata TT", 16);
 
-    icon->setPixmap (helper::blp_to_pixmap ("Interface\\ICONS\\INV_Potion_83.blp", 64, 64));
+    icon->setPixmap (noggit::render_blp_to_pixmap ("Interface\\ICONS\\INV_Potion_83.blp", 64, 64));
     icon->setGeometry (20, 20, 64, 64);
     icon->setPalette (p);
     title->move (73, 24);

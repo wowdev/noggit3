@@ -1,6 +1,7 @@
 #include <noggit/UIScrollableFrame.h>
 
-#include <noggit/Video.h>
+#include <opengl/types.h>
+
 #include <noggit/Log.h>
 
 void UIScrollableFrame_Func_Hor( UIFrame::Ptr sender, int value )

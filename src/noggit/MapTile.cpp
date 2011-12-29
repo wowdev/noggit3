@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include <noggit/blp_texture.h>
 #include <noggit/Environment.h>
 #include <noggit/Liquid.h>
 #include <noggit/Log.h>
@@ -841,8 +842,8 @@ void MapTile::saveTile()
   for( int i = 0; i < 16; ++i )
     for( int j = 0; j < 16; ++j )
       for( size_t tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
-        if( lTextures.find( mChunks[i][j]->_textures[tex]->filename() ) == lTextures.end() )
-          lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->_textures[tex]->filename(), -1 ) );
+        if( lTextures.find( mChunks[i][j]->_textures[tex]->filename().toStdString() ) == lTextures.end() )
+          lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->_textures[tex]->filename().toStdString(), -1 ) );
 
   lID = 0;
   for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
@@ -1337,7 +1338,7 @@ void MapTile::saveTile()
           {
             ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>( lCurrentPosition + 8 + 0x10 * j );
 
-            lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename() )->second;
+            lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename().toStdString() )->second;
 
             lLayer->flags = mChunks[y][x]->texFlags[j];
 

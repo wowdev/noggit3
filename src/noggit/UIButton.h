@@ -6,8 +6,14 @@
 #include <noggit/UIFrame.h>
 #include <noggit/UIText.h>
 
-namespace OpenGL { class Texture; };
-namespace freetype { class font_data; };
+namespace noggit
+{
+  class blp_texture;
+}
+namespace freetype
+{
+  class font_data;
+}
 
 class UIButton : public UIFrame
 {
@@ -15,8 +21,8 @@ public:
   typedef UIButton* Ptr;
 
 protected:
-  OpenGL::Texture* texture;
-  OpenGL::Texture* textureDown;
+  noggit::blp_texture* texture;
+  noggit::blp_texture* textureDown;
   std::string _textureFilename;
   std::string _textureDownFilename;
 

@@ -126,7 +126,7 @@ namespace noggit
     int yResolution (_settings->value ("resolution/y", 768).toInt());
     bool inFullscreen (_settings->value ("fullscreen", false).toBool());
     bool doAntiAliasing (_settings->value ("antialiasing", true).toBool());
-    int view_distance (_settings->value ("view_distance", 2048).toInt());
+    qreal view_distance (_settings->value ("view_distance", 2048.0).toReal());
 
     foreach (const QString& argument, arguments())
     {
@@ -198,15 +198,13 @@ namespace noggit
     format.setDepthBufferSize (16);
     format.setAlphaBufferSize (8);
 
-    if (false && _settings->value ("antialiasing").toBool())
+    if (_settings->value ("antialiasing").toBool())
     {
       format.setSampleBuffers (true);
       format.setSamples (4);
     }
 
     _dummy_gl_widget = new dummy_gl_widget (format);
-
-    video.farclip (_settings->value ("view_distance").toInt());
   }
 
   void application::get_game_path()
@@ -336,7 +334,14 @@ namespace noggit
 
   void application::create_world_view (World* world)
   {
-    MapView* map_view (new MapView (world, 0.0, 0.0, _dummy_gl_widget, NULL));
+    MapView* map_view ( new MapView ( world
+                                    , _settings->value ("view_distance").toReal()
+                                    , 0.0
+                                    , 0.0
+                                    , _dummy_gl_widget
+                                    , NULL
+                                    )
+                      );
 
     const bool inFullscreen (_settings->value ("fullscreen").toBool());
     if (inFullscreen)

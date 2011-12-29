@@ -1,9 +1,9 @@
 #ifndef __BRUSH_H
 #define __BRUSH_H
 
-namespace OpenGL
+namespace opengl
 {
-  class Texture;
+  class texture;
 }
 
 class brush
@@ -13,7 +13,7 @@ private:
   float iradius;
   float oradius;
   float radius;
-  OpenGL::Texture* _texture;
+  opengl::texture* _texture;
   char tex[256*256];
   bool update;
 
@@ -24,7 +24,7 @@ public:
   float getHardness();
   float getRadius();
   float getValue( float dist );
-  OpenGL::Texture* getTexture();
+  opengl::texture* getTexture();
   bool needUpdate();
   void init();
 };

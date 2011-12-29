@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <noggit/Video.h> // OpenGL::Texture
+#include <noggit/blp_texture.h>
 #include <noggit/Log.h> // LogDebug
 
 TextureManager::mapType TextureManager::items;
@@ -33,14 +33,13 @@ void TextureManager::delbyname( std::string name )
   }
 }
 
-OpenGL::Texture* TextureManager::newTexture( std::string name )
+noggit::blp_texture* TextureManager::newTexture( std::string name )
 {
   std::transform( name.begin(), name.end(), name.begin(), ::tolower );
 
   if( items.find( name ) == items.end() )
   {
-    items[name] = new OpenGL::Texture( );
-    items[name]->loadFromBLP( name );
+    items[name] = new noggit::blp_texture (QString::fromStdString (name));
   }
 
   items[name]->addReference();
@@ -48,9 +47,9 @@ OpenGL::Texture* TextureManager::newTexture( std::string name )
   return items[name];
 }
 
-std::vector<OpenGL::Texture*> TextureManager::getAllTexturesMatching(bool (*function)( const std::string& name ) )
+std::vector<noggit::blp_texture*> TextureManager::getAllTexturesMatching(bool (*function)( const std::string& name ) )
 {
-  std::vector<OpenGL::Texture*> returnVector;
+  std::vector<noggit::blp_texture*> returnVector;
   for( mapType::iterator t = items.begin(); t != items.end(); ++t )
   {
     if( function( t->first ) )

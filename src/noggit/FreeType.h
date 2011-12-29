@@ -7,7 +7,12 @@
 #include <map>
 #include <string>
 
-#include <noggit/Video.h>
+#include <opengl/call_list.h>
+
+namespace opengl
+{
+  class texture;
+}
 
 namespace noggit
 {
@@ -21,13 +26,13 @@ namespace freetype
 {
   struct GlyphData
   {
-    OpenGL::CallList* _callList;
-    OpenGL::Texture* _texture;
+    opengl::call_list* _call_list;
+    opengl::texture* _texture;
     int _width;
 
     inline void render() const
     {
-      _callList->render();
+      _call_list->render();
     }
     inline const int& width() const
     {

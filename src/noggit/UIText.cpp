@@ -3,7 +3,6 @@
 #include <string>
 
 #include <noggit/FreeType.h>
-#include <noggit/Video.h>
 #include <noggit/Log.h>
 
 UIText::UIText( float pX, float pY, const std::string& pText, const freetype::font_data& pFont, eJustify pJustify )

@@ -5,10 +5,11 @@
 #include <string>
 #include <vector>
 
+#include <opengl/types.h>
+
 #include <noggit/Directory.h>
 #include <noggit/application.h> // arial12
 #include <noggit/UIText.h>
-#include <noggit/Video.h>
 
 UITreeViewButton::UITreeViewButton( float _x, float _y, UITreeView::Ptr pTreeView )
 : UIButton(  _x, _y, 12.0f, 12.0f, "Interface\\Buttons\\UI-PlusButton-Up.blp", "Interface\\Buttons\\UI-PlusButton-Down.blp" )

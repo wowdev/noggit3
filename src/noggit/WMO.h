@@ -7,11 +7,18 @@
 #include <vector>
 #include <map>
 
+#include <opengl/types.h>
+
 #include <noggit/Manager.h>
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/Quaternion.h>
 #include <noggit/Vec3D.h>
-#include <noggit/Video.h>
+
+namespace opengl
+{
+  class call_list;
+  class texture;
+}
 
 class WMO;
 class WMOGroup;
@@ -39,7 +46,7 @@ class WMOGroup {
   int32_t nDoodads, nBatches;
   int16_t *ddr;
   Liquid *lq;
-  std::vector< std::pair<OpenGL::CallList*, bool> > _lists;
+  std::vector< std::pair<opengl::call_list*, bool> > _lists;
 public:
   Vec3D BoundingBoxMin;
   Vec3D BoundingBoxMax;
@@ -59,9 +66,12 @@ public:
   void draw ( World* world
             , const Vec3D& ofs
             , const float rot
-            , bool selection
             , bool draw_fog
             );
+  void draw_for_selection ( World* world
+                          , const Vec3D& ofs
+                          , const float rot
+                          );
   void drawLiquid (World* world, bool draw_fog);
   void drawDoodads ( World* world
                    , unsigned int doodadset
@@ -93,7 +103,7 @@ struct WMOMaterial {
   uint32_t texture1; // this is the first texture object. of course only in RAM. leave this alone. :D
   uint32_t texture2; // this is the second texture object.
   // read up to here -_-
-  OpenGL::Texture* _texture;
+  opengl::texture* _texture;
 };
 
 struct WMOLight {
@@ -106,9 +116,9 @@ struct WMOLight {
   Vec4D fcolor;
 
   void init(noggit::mpq::file* f);
-  void setup(GLint light);
+  void setup(opengl::light light);
 
-  static void setupOnce(GLint light, Vec3D dir, Vec3D lcol);
+  static void setupOnce(opengl::light light, Vec3D dir, Vec3D lcol);
 };
 
 struct WMOPV {

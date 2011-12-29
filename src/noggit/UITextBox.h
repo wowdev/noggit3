@@ -6,7 +6,10 @@
 #include <noggit/UIFrame.h>
 #include <noggit/UIText.h>
 
-namespace OpenGL { class Texture; };
+namespace noggit
+{
+  class blp_texture;
+}
 
 class UITextBox : public UIFrame
 {
@@ -15,8 +18,8 @@ public:
   typedef void ( *TriggerFunction )( UITextBox::Ptr, const std::string& value );
 
 private:
-  OpenGL::Texture* _texture;
-  OpenGL::Texture* _textureFocused;
+  noggit::blp_texture* _texture;
+  noggit::blp_texture* _textureFocused;
 
   UIText::Ptr _uiText;
   std::string _value;

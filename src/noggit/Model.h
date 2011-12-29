@@ -7,6 +7,8 @@
 class Model;
 class Bone;
 
+#include <opengl/types.h>
+
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/AsyncObject.h> // AsyncObject
 #include <noggit/Manager.h> // ManagedItem
@@ -15,10 +17,10 @@ class Bone;
 #include <noggit/Particle.h>
 #include <noggit/Quaternion.h>
 #include <noggit/Vec3D.h>
-#include <noggit/Video.h> // GLuint
 
 namespace noggit
 {
+  class blp_texture;
   namespace mpq
   {
     class file;
@@ -134,7 +136,7 @@ struct ModelLight {
   //Animation::M2Value<bool> Enabled;
 
   void init(const noggit::mpq::file&  f, const ModelLightDef &mld, int *global);
-  void setup(int time, OpenGL::Light l);
+  void setup(int time, opengl::light l);
 };
 
 class Model: public ManagedItem, public AsyncObject {
@@ -179,8 +181,8 @@ class Model: public ManagedItem, public AsyncObject {
   void animate(int anim);
   void calcBones(int anim, int time);
 
-  void lightsOn(OpenGL::Light lbase);
-  void lightsOff(OpenGL::Light lbase);
+  void lightsOn(opengl::light lbase);
+  void lightsOff(opengl::light lbase);
 
 public:
   std::string _filename; //! \todo ManagedItem already has a name. Use that?
@@ -195,9 +197,9 @@ public:
   // ===============================
   // Texture data
   // ===============================
-  std::vector<OpenGL::Texture*> _textures;
+  std::vector<noggit::blp_texture*> _textures;
   std::vector<std::string> _textureFilenames;
-  std::vector<OpenGL::Texture*> _replaceTextures;
+  std::vector<noggit::blp_texture*> _replaceTextures;
   std::vector<int> _specialTextures;
   std::vector<bool> _useReplaceTextures;
 

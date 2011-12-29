@@ -20,7 +20,7 @@ class World;
 class UIMapViewGUI : public UIFrame
 {
 public:
-  explicit UIMapViewGUI( World* world, MapView* setMapview );
+  explicit UIMapViewGUI( World* world, MapView* setMapview, float xres, float yres);
   // Editor paramter
   int ground_edit_mode;
   int selection_view_mode;

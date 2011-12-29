@@ -7,10 +7,10 @@
 #include <iomanip>
 #include <sstream>
 
+#include <noggit/blp_texture.h>
 #include <noggit/FreeType.h> // freetype::
 #include <noggit/application.h> // arial12
 #include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/Video.h>
 
 UISlider::UISlider( float xPos, float yPos, float w, float s, float o )
 : UIFrame( xPos, yPos, w, 10.0f )
@@ -93,8 +93,7 @@ void UISlider::render() const
 
   glPushMatrix();
 
-  OpenGL::Texture::setActiveTexture();
-  OpenGL::Texture::enableTexture();
+  opengl::texture::enable_texture (0);
 
   texture->bind();
 
@@ -223,8 +222,7 @@ void UISlider::render() const
   glVertex2f( sliderpos_x + 16.0f, sliderpos_y + 16.0f );
   glEnd();
 
-  OpenGL::Texture::disableTexture();
-
+  opengl::texture::disable_texture (0);
 
   glPopMatrix();
 }

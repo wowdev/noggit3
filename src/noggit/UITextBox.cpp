@@ -5,10 +5,10 @@
 #include <string>
 
 #include <noggit/application.h> // arial12
+#include <noggit/blp_texture.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/UIText.h>
 #include <noggit/UITexture.h>
-#include <noggit/Video.h>
 
 // TODO : Handle Selection, Handle Clipboard ( CTRL + C / CTRL + V / CTRL + X ), Handle the Backspace staying down. Details, but better like that.
 
@@ -52,8 +52,7 @@ void UITextBox::render() const
 
   glColor3f( 1.0f, 1.0f, 1.0f );
 
-  OpenGL::Texture::setActiveTexture();
-  OpenGL::Texture::enableTexture();
+  opengl::texture::enable_texture (0);
 
   if( _focus )
     _textureFocused->bind();
@@ -71,7 +70,7 @@ void UITextBox::render() const
   glVertex2f( width(), height() );
   glEnd();
 
-  OpenGL::Texture::disableTexture();
+  opengl::texture::disable_texture (0);
 
   _uiText->render();
 

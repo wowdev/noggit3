@@ -7,7 +7,6 @@
 #include <noggit/application.h> // arial14
 #include <noggit/UIButton.h>
 #include <noggit/UITextBox.h>
-#include <noggit/Video.h> // video
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
@@ -38,7 +37,7 @@ void AddM2Click( UIFrame* f, int i )
 }
 
 UIDoodadSpawner::UIDoodadSpawner (World* world)
-  : UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Test", true )
+  : UICloseWindow( 0.0f, 0.0f, winWidth, winHeight, "Test", true )
   , _button( new UIButton( 145.0f, winHeight - 24.0f, 132.0f, 28.0f, "Test", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", AddM2Click, 0 ) )
   , _tbox( new UITextBox( 30.0f, 30.0f, 400.0f, 40.0f, UIDoodadSpawner__TextBoxEnter ) )
   , _treeView( UITreeView::Ptr() )
