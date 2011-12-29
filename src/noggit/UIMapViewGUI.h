@@ -4,7 +4,6 @@
 class UIToolbar;
 class UIStatusBar;
 class UIDetailInfos;
-class UIAppInfo;
 class minimap_widget;
 class UIZoneIDBrowser;
 class MapView;
@@ -32,7 +31,6 @@ public:
   UIToolbar* guiToolbar;
   UIStatusBar* guiStatusbar;
   UIDetailInfos* guidetailInfos;
-  UIAppInfo* guiappInfo;
   UIZoneIDBrowser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
   UITextureSwitcher* TextureSwitcher;

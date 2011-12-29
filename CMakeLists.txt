@@ -76,7 +76,6 @@ set ( noggit_sources
       src/noggit/Shaders.cpp
       src/noggit/Sky.cpp
       src/noggit/TextureManager.cpp
-      src/noggit/UIAppInfo.cpp
       src/noggit/UIButton.cpp
       src/noggit/UICheckBox.cpp
       src/noggit/UICloseWindow.cpp
@@ -153,7 +152,6 @@ set ( noggit_headers
       src/noggit/Shaders.h
       src/noggit/Sky.h
       src/noggit/TextureManager.h
-      src/noggit/UIAppInfo.h
       src/noggit/UIButton.h
       src/noggit/UICheckBox.h
       src/noggit/UICloseWindow.h
@@ -207,6 +205,7 @@ set ( noggit_headers_to_moc
 
       src/noggit/Menu.h
       src/noggit/MapView.h
+      src/noggit/UICursorSwitcher.h
 
       src/noggit/async/loader.h
       src/noggit/async/loading_thread.h

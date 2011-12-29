@@ -10,7 +10,6 @@
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
 #include <noggit/application.h> // gStates, gPop, arial14, morpheus40, arial...
-#include <noggit/UIAppInfo.h> // UIAppInfo
 #include <noggit/UICursorSwitcher.h> // UICursorSwitcher
 #include <noggit/UIDetailInfos.h> // UIDetailInfos
 #include <noggit/UIDoodadSpawner.h>
@@ -48,11 +47,6 @@ UIMapViewGUI::UIMapViewGUI (World* world, MapView *map_view, float xres, float y
   ZoneIDBrowser->hide();
   addChild(ZoneIDBrowser);
 
-  // AppInfosWindow
-  guiappInfo = new UIAppInfo( 1.0f, height() - 440.0f, 420.0f, 410.0f, this );
-  guiappInfo->movable( true );
-  guiappInfo->hide();
-  addChild(guiappInfo);
 
   TexturePicker = new UITexturePicker(width() / 2 - 100.0f, height() / 2 - 100.0f,490.0f, 150.0f );
   TexturePicker->hide();
@@ -65,10 +59,7 @@ UIMapViewGUI::UIMapViewGUI (World* world, MapView *map_view, float xres, float y
   addChild( TextureSwitcher);
 
   // Cursor Switcher
-  CursorSwitcher = new UICursorSwitcher();
-  CursorSwitcher->hide();
-  CursorSwitcher->movable(true);
-  addChild(CursorSwitcher);
+  CursorSwitcher = new UICursorSwitcher (NULL);
 }
 
 void UIMapViewGUI::showCursorSwitcher()
@@ -83,7 +74,7 @@ void UIMapViewGUI::hideCursorSwitcher()
 
 void UIMapViewGUI::toggleCursorSwitcher()
 {
-  CursorSwitcher->toggleVisibility();
+  CursorSwitcher->setVisible (CursorSwitcher->isVisible());
 }
 
 void UIMapViewGUI::setTilemode( bool enabled )
