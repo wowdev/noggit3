@@ -147,7 +147,8 @@ void openSwapper( UIFrame*, int )
        case 0:
        case 14:
        case 15:
-        if( boost::filesystem::exists( "noggIt.conf" ) )
+       //! \todo do this somehow else or not at all.
+        if (false)
         {
           ConfigFile config( "noggIt.conf" );
           config.readInto( importFile, "ImportFile" );
