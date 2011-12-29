@@ -3,7 +3,7 @@
 
 #include <QString>
 
-#include <noggit/AsyncObject.h>
+#include <noggit/async/object.h>
 
 namespace noggit
 {
@@ -14,7 +14,7 @@ namespace noggit
 
     class archive_manager;
 
-    class archive : public AsyncObject
+    class archive : public async::object
     {
     public:
       ~archive();
@@ -25,7 +25,7 @@ namespace noggit
                      , char** buffer
                      ) const;
 
-      void finishLoading();
+      void finish_loading();
 
     private:
       archive (const QString& filename, bool process_list_file);

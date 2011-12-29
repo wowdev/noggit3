@@ -9,6 +9,9 @@
 #include <iomanip>
 #include <iostream>
 
+#include <noggit/async/loader.h>
+
+#include <noggit/application.h>
 #include <noggit/blp_texture.h>
 #include <noggit/Liquid.h>
 #include <noggit/Log.h> // LogDebug
@@ -1211,6 +1214,11 @@ void WMOFog::setup()
     glDisable(GL_FOG);
 }
 
+void WMO::finish_loading()
+{
+  _finished = true;
+}
+
 WMOManager::mapType WMOManager::items;
 
 void WMOManager::report()
@@ -1230,9 +1238,9 @@ WMO* WMOManager::add( World* world, std::string name )
   if( items.find( name ) == items.end() )
   {
     items[name] = new WMO( world, name );
-    //! \todo Uncomment this, if loading is threaded.
-    //items[name]->finishLoading();
-    //gAsyncLoader->addObject( items[name] );
+    //! \todo Remove this, when finally loading is threaded.
+    items[name]->finish_loading();
+    noggit::app().async_loader().add_object (items[name]);
   }
 
   items[name]->addReference();

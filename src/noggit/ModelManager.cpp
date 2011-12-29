@@ -2,8 +2,9 @@
 
 #include <algorithm>
 
-#include <noggit/AsyncLoader.h> // AsyncLoader
-#include <noggit/application.h> // gAsyncLoader
+#include <noggit/async/loader.h>
+
+#include <noggit/application.h>
 #include <noggit/Model.h> // Model
 #include <noggit/Log.h> // LogDebug
 
@@ -34,8 +35,9 @@ Model* ModelManager::add( std::string name )
   if( items.find( name ) == items.end() )
   {
     items[name] = new Model( name );
-    items[name]->finishLoading();
-    gAsyncLoader->addObject( items[name] );
+    //! \todo delete this, as it should actually be async, d'uh.
+    //items[name]->finish_loading();
+    noggit::app().async_loader().add_object( items[name] );
   }
 
   items[name]->addReference();

@@ -77,7 +77,6 @@ set ( noggit_sources
       src/noggit/application.cpp
       src/noggit/blp_texture.cpp
 
-      src/noggit/AsyncLoader.cpp
       src/noggit/Brush.cpp
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
@@ -133,6 +132,9 @@ set ( noggit_sources
       src/noggit/WMOInstance.cpp
       src/noggit/World.cpp
 
+      src/noggit/async/loader.cpp
+      src/noggit/async/loading_thread.cpp
+
       src/noggit/mpq/archive_manager.cpp
       src/noggit/mpq/archive.cpp
       src/noggit/mpq/file.cpp
@@ -147,8 +149,6 @@ set ( noggit_headers
       src/noggit/blp_texture.h
 
       src/noggit/Animated.h
-      src/noggit/AsyncLoader.h
-      src/noggit/AsyncObject.h
       src/noggit/Brush.h
       src/noggit/DBC.h
       src/noggit/DBCFile.h
@@ -212,6 +212,10 @@ set ( noggit_headers
       src/noggit/World.h
       src/noggit/errorHandling.h
 
+      src/noggit/async/loader.h
+      src/noggit/async/loading_thread.h
+      src/noggit/async/object.h
+
       src/noggit/mpq/archive_manager.h
       src/noggit/mpq/archive.h
       src/noggit/mpq/file.h
@@ -226,6 +230,9 @@ set ( noggit_headers_to_moc
 
       src/noggit/Menu.h
       src/noggit/MapView.h
+
+      src/noggit/async/loader.h
+      src/noggit/async/loading_thread.h
 
       src/noggit/ui/about_widget.h
       src/noggit/ui/help_widget.h

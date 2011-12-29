@@ -9,8 +9,9 @@ class Bone;
 
 #include <opengl/types.h>
 
+#include <noggit/async/object.h>
+
 #include <noggit/Animated.h> // Animation::M2Value
-#include <noggit/AsyncObject.h> // AsyncObject
 #include <noggit/Manager.h> // ManagedItem
 #include <noggit/Matrix.h>
 #include <noggit/ModelHeaders.h>
@@ -139,7 +140,8 @@ struct ModelLight {
   void setup(int time, opengl::light l);
 };
 
-class Model: public ManagedItem, public AsyncObject {
+class Model: public ManagedItem, public noggit::async::object
+{
 
   GLuint ModelDrawList;
   GLuint SelectModelDrawList;
@@ -218,7 +220,7 @@ public:
 
   friend struct ModelRenderPass;
 
-  virtual void finishLoading();
+  virtual void finish_loading();
 };
 
 #endif

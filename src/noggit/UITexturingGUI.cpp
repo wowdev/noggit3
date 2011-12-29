@@ -84,8 +84,7 @@ void LoadTextureNames()
 
   bool tilesetsfound = false;
 
-  noggit::mpq::archive_manager& manager
-    (qobject_cast<noggit::application*> (qApp)->archive_manager());
+  noggit::mpq::archive_manager& manager (noggit::app().archive_manager());
 
   while (!manager.all_finished_loading())
   {

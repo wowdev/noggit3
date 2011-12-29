@@ -1,6 +1,8 @@
 #include <noggit/application.h>
 
-#include <GL/glew.h>
+#include <stdexcept>
+
+#include <opengl/types.h>
 
 #include <QDir>
 #include <QSettings>
@@ -14,7 +16,6 @@
 
 #include <revision.h>
 
-#include <noggit/AsyncLoader.h>
 #include <noggit/DBC.h>
 #include <noggit/errorHandling.h>
 #include <noggit/Menu.h>
@@ -26,8 +27,6 @@
 
 //! \todo Remove.
 #include <noggit/FreeType.h> // fonts.
-
-AsyncLoader* gAsyncLoader;
 
 freetype::font_data arialn13;
 freetype::font_data arial12;
@@ -44,7 +43,7 @@ namespace noggit
   application::application (int& argc, char** argv)
     : QApplication (argc, argv)
     , _settings (NULL)
-    , _async_loader (new AsyncLoader())
+    , _async_loader (1)
     , _archive_manager (_async_loader)
   {
     RegisterErrorHandlers();
@@ -67,10 +66,6 @@ namespace noggit
     installTranslator (appTranslator);
 
     qsrand (QTime::currentTime().msec());
-
-    _async_loader->start( 1 );
-    //! \todo remove
-    gAsyncLoader = _async_loader;
 
     set_working_directory_to_application_path();
     parse_command_line_and_set_defaults();
@@ -95,9 +90,6 @@ namespace noggit
 
   application::~application()
   {
-    _async_loader->stop();
-    _async_loader->join();
-
     TextureManager::report();
     ModelManager::report();
     WMOManager::report();
@@ -106,6 +98,11 @@ namespace noggit
   mpq::archive_manager& application::archive_manager()
   {
     return _archive_manager;
+  }
+
+  async::loader& application::async_loader()
+  {
+    return _async_loader;
   }
 
   void application::set_working_directory_to_application_path()
@@ -318,7 +315,7 @@ namespace noggit
           const QString replaced (path.arg (i));
           if (QFile::exists (replaced))
           {
-            _archive_manager.load_mpq (replaced);
+            _archive_manager.load_mpq (replaced, true);
           }
         }
       }
@@ -326,7 +323,7 @@ namespace noggit
       {
         if (QFile::exists (path))
         {
-          _archive_manager.load_mpq  (path);
+          _archive_manager.load_mpq (path, true);
         }
       }
     }
@@ -366,6 +363,11 @@ namespace noggit
                                 , file.getSize()
                                 )
       );
+  }
+
+  application& app()
+  {
+    return *reinterpret_cast<application*> (qApp);
   }
 }
 
