@@ -191,10 +191,6 @@ World::World( const std::string& name )
   , basename( name )
   , fogdistance( 777.0f )
   , culldistance( fogdistance )
-  , minX( 0.0f )
-  , maxX( 0.0f )
-  , minY( 0.0f )
-  , maxY( 0.0f )
   , skies( NULL )
   , mHasAGlobalWMO( false )
   , noadt( false )
@@ -1609,63 +1605,62 @@ void World::drawTileMode ( bool draw_lines
                          , float zoom
                          )
 {
-  glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-  glEnable(GL_BLEND);
+  const QRectF drawing_rect ( camera.x / CHUNKSIZE - 2.0f * ratio / zoom
+                            , camera.z / CHUNKSIZE - 2.0f / zoom
+                            , 4.0f * ratio / zoom
+                            , 4.0f / zoom
+                            );
 
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  ex = camera.x / TILESIZE;
+  ez = camera.z / TILESIZE;
+
+  glClear (GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+  glEnable (GL_BLEND);
+
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  glEnableClientState (GL_COLOR_ARRAY);
+  glDisableClientState (GL_NORMAL_ARRAY);
+  glDisableClientState (GL_TEXTURE_COORD_ARRAY);
+  glDisable (GL_CULL_FACE);
+  glDepthMask (GL_FALSE);
 
   glPushMatrix();
-  glScalef(zoom,zoom,1.0f);
+  glScalef (zoom, zoom, 1.0f);
 
   glPushMatrix();
-  glTranslatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
+  glTranslatef (-camera.x / CHUNKSIZE, -camera.z / CHUNKSIZE, 0.0f);
 
-  minX = camera.x/CHUNKSIZE - 2.0f*ratio/zoom;
-  maxX = camera.x/CHUNKSIZE + 2.0f*ratio/zoom;
-  minY = camera.z/CHUNKSIZE - 2.0f/zoom;
-  maxY = camera.z/CHUNKSIZE + 2.0f/zoom;
-
-  glEnableClientState(GL_COLOR_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  glDisable(GL_CULL_FACE);
-  glDepthMask(GL_FALSE);
-
-  for( int j = 0; j < 64; ++j )
+  //! \todo Only iterate over those intersecting?
+  for (size_t j (0); j < 64; ++j)
   {
-    for( int i = 0; i < 64; ++i )
+    for (size_t i (0); i < 64; ++i)
     {
-      if( tileLoaded( j, i ) )
+      if (tileLoaded (j, i))
       {
-        mTiles[j][i].tile->drawTextures (animtime);
+        const MapTile* tile (mTiles[j][i].tile);
+        const QRectF map_rect ( tile->xbase / CHUNKSIZE
+                              , tile->zbase / CHUNKSIZE
+                              , TILESIZE / CHUNKSIZE
+                              , TILESIZE / CHUNKSIZE
+                              );
+
+        if (drawing_rect.intersects (map_rect))
+        {
+          tile->drawTextures ( drawing_rect.intersected (map_rect)
+                                           .translated (-map_rect.topLeft())
+                             , animtime
+                             );
+        }
       }
     }
   }
 
-  glDisableClientState(GL_COLOR_ARRAY);
-
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-
-
   glPopMatrix();
-  if (draw_lines) {
-    glTranslatef(fmod(-camera.x/CHUNKSIZE,16), fmod(-camera.z/CHUNKSIZE,16),0);
-  /*  for(int x=-32;x<=48;x++)
-    {
-      if(x%16==0)
-        glColor4f(0.0f,1.0f,0.0f,0.5f);
-      else
-        glColor4f(1.0f,0.0f,0.0f,0.5f);
-      glBegin(GL_LINES);
-      glVertex3f(-32.0f,(float)x,-1);
-      glVertex3f(48.0f,(float)x,-1);
-      glVertex3f((float)x,-32.0f,-1);
-      glVertex3f((float)x,48.0f,-1);
-      glEnd();
-    }*/
 
+  if (draw_lines)
+  {
+    glTranslatef(fmod(-camera.x/CHUNKSIZE,16), fmod(-camera.z/CHUNKSIZE,16),0);
     for(float x = -32.0f; x <= 48.0f; x += 1.0f)
     {
       if( static_cast<int>(x) % 16 )
@@ -1683,8 +1678,10 @@ void World::drawTileMode ( bool draw_lines
 
   glPopMatrix();
 
-  ex = camera.x / TILESIZE;
-  ez = camera.z / TILESIZE;
+  glDisableClientState (GL_COLOR_ARRAY);
+
+  glEnableClientState (GL_NORMAL_ARRAY);
+  glEnableClientState (GL_TEXTURE_COORD_ARRAY);
 }
 
 bool World::GetVertex(float x,float z, Vec3D *V)
@@ -1973,11 +1970,6 @@ void World::saveMap()
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glReadBuffer(GL_BACK);
 
-  minX=-64*16;
-  maxX=64*16;
-  minY=-64*16;
-  maxY=64*16;
-
   glEnableClientState(GL_COLOR_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -2000,7 +1992,7 @@ void World::saveMap()
       //glTranslatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
       glTranslatef( x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f );
 
-      ATile->drawTextures (animtime);
+      ATile->drawTextures (QRect (0, 0, 16, 16), animtime);
       glPopMatrix();
 
   //! \todo Fix these two lines. THEY ARE VITAL!

@@ -14,6 +14,8 @@ class Liquid;
 class World;
 class MapChunk;
 
+class QRectF;
+
 class MapTile
 {
 public:
@@ -41,7 +43,9 @@ public:
   void drawSelect();
   void drawLines (bool draw_hole_lines);
   void drawWater();
-  void drawTextures (int animation_time);
+  void drawTextures ( const QRectF& chunks_to_draw
+                    , int animation_time
+                    ) const;
   void drawMFBO();
 
   bool GetVertex( float x, float z, Vec3D *V );
