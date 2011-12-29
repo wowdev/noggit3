@@ -37,8 +37,8 @@ UIScrollableFrame::UIScrollableFrame( float x, float y, float w, float h
 
 void UIScrollableFrame::contentUpdated()
 {
-  _scrollbarHorizontal->setNum( _content->width() - width() - UIScrollBar::WIDTH );
-  _scrollbarVertical->setNum( _content->height() - height() - UIScrollBar::WIDTH );
+  _scrollbarHorizontal->setNum( int (_content->width() - width() - UIScrollBar::WIDTH) );
+  _scrollbarVertical->setNum( int (_content->height() - height() - UIScrollBar::WIDTH) );
 
   if( _content->width() == width() - UIScrollBar::WIDTH )
     _scrollbarHorizontal->hide();
