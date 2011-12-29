@@ -5,14 +5,11 @@
 #include <map>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-
-class Directory : public boost::enable_shared_from_this<Directory>
+class Directory
 {
 public:
   typedef std::string File;
-  typedef boost::shared_ptr<Directory> Ptr;
+  typedef Directory* Ptr;
   typedef std::map<std::string, Directory::Ptr > Directories;
   typedef std::vector<File> Files;
 

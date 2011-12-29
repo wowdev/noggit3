@@ -97,7 +97,7 @@ void UITreeView::Move( int pEntries, UITreeView::Ptr pFrom )
 
   if( mParent )
   {
-    mParent->Move( pEntries, shared_from_this() );
+    mParent->Move( pEntries, this );
   }
 }
 
@@ -115,9 +115,9 @@ void UITreeView::Toggle()
 
   if( mParent )
     if( !mExpanded )
-      mParent->Move( -static_cast<int>( ( _others.size() + mFiles.size() ) ), shared_from_this() );
+      mParent->Move( -static_cast<int>( ( _others.size() + mFiles.size() ) ), this);
     else
-      mParent->Move( ( _others.size() + mFiles.size() ), shared_from_this() );
+      mParent->Move( ( _others.size() + mFiles.size() ), this );
 }
 
 void UITreeView::render() const
@@ -171,7 +171,7 @@ UIFrame::Ptr UITreeView::processLeftClick( float mx, float my )
       if( !(*childfiles)->hidden() && (*childfiles)->IsHit( mx, my ) )
       {
         std::string lPath;
-        UITreeView::Ptr lParent = shared_from_this();
+        UITreeView::Ptr lParent = this;
         while( lParent )
         {
           lPath.insert( 0, std::string( lParent->GetDirectoryName() + "/" ) );

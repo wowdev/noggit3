@@ -1,6 +1,6 @@
 #include <noggit/UIDoodadSpawner.h>
 
-#include <boost/filesystem.hpp>
+#include <QFileInfo>
 
 #include <noggit/MapChunk.h>
 #include <noggit/ModelManager.h> // ModelManager
@@ -75,7 +75,7 @@ UIDoodadSpawner::UIDoodadSpawner (World* world)
   }
 
   _treeView = UITreeView::Ptr( new UITreeView( 30.0f, 80.0f, "Models", fileList, UITreeView::Ptr(), UIDoodadSpawner__TreeSelect ) );
-  addChild( _treeView.get() );
+  addChild( _treeView );
 }
 
 void UIDoodadSpawner::AddM2( const std::string& filename )
@@ -95,15 +95,16 @@ void UIDoodadSpawner::AddM2( const std::string& filename )
       break;
   }
 
-  if( noggit::mpq::file::exists( QString::fromStdString (filename) ) )
+  QString fname (QString::fromStdString (filename));
+
+  if( noggit::mpq::file::exists( fname ) )
   {
-    std::string ext( boost::filesystem::extension( filename ) );
-    std::transform( ext.begin(), ext.end(), ext.begin(), ::toupper );
-    if(ext == ".M2")
+    const QString ext (QFileInfo (fname).suffix().toUpper());
+    if(ext == "M2")
     {
       _world->addM2( ModelManager::add( filename ), selectionPosition );
     }
-    else if(ext == ".WMO")
+    else if(ext == "WMO")
     {
       _world->addWMO( WMOManager::add( _world, filename ), selectionPosition );
     }
