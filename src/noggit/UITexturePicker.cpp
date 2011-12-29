@@ -23,7 +23,7 @@ UITexturePicker::UITexturePicker( float x, float y, float w, float h )
 
   for( size_t i = 0; i < 4; ++i )
   {
-    _textures[i] = new UITexture( startingX + ( textureSize + paddingX ) * i, positionY, textureSize, textureSize, "tileset\\generic\\black.blp" );
+    _textures[i] = new UITexture( float (startingX + ( textureSize + paddingX ) * i), (float)positionY, (float)textureSize, (float)textureSize, "tileset\\generic\\black.blp" );
     _textures[i]->setClickFunc( texturePickerClick, i );
     addChild( _textures[i] );
   }

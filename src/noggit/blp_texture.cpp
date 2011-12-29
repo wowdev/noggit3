@@ -156,9 +156,9 @@ namespace noggit
         int alpha_bit_count (0);
         const unsigned char* alpha_pointer (color_pointer + width * height);
 
-        for (size_t y (0); y < height; ++y)
+        for (size_t y (0); y < (size_t)height; ++y)
         {
-          for (size_t x (0); x < width; ++x)
+          for (size_t x (0); x < (size_t)width; ++x)
           {
             unsigned int color_value (palette[*color_pointer++]);
 
@@ -190,9 +190,9 @@ namespace noggit
       }
       else
       {
-        for (size_t y (0); y < height; ++y)
+        for (size_t y (0); y < (size_t)height; ++y)
         {
-          for (size_t x (0); x < width; ++x)
+          for (size_t x (0); x < (size_t)width; ++x)
           {
             unsigned int color_value (palette[*color_pointer++]);
             *result_pointer++ = (color_value & 0x00FF0000) >> 16

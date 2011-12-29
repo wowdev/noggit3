@@ -6,7 +6,7 @@
 #include <noggit/Log.h>
 
 UIText::UIText( float pX, float pY, const std::string& pText, const freetype::font_data& pFont, eJustify pJustify )
-: UIFrame( pX, pY, pFont.width( pText ), pFont.h )
+: UIFrame( pX, pY, float (pFont.width( pText ) ), float (pFont.h) )
 , font( pFont )
 , mText( pText )
 , justify( pJustify )
@@ -15,7 +15,7 @@ UIText::UIText( float pX, float pY, const std::string& pText, const freetype::fo
 }
 
 UIText::UIText( float pX, float pY, const freetype::font_data& pFont, eJustify pJustify )
-: UIFrame( pX, pY, 0, pFont.h )
+: UIFrame( pX, pY, 0, float (pFont.h) )
 , font( pFont )
 , mText( "" )
 , justify( pJustify )
@@ -26,7 +26,7 @@ UIText::UIText( float pX, float pY, const freetype::font_data& pFont, eJustify p
 void UIText::setText( const std::string& pText )
 {
   mText = pText;
-  width( font.width( mText ) );
+  width( float (font.width( mText ) ) );
 }
 
 void UIText::setJustify( eJustify j )
