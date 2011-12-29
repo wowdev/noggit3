@@ -34,8 +34,8 @@ signals:
 
 private:
   void load_map (int mapID);
-  void prepare_world (const Vec3D& pos, float rotation, float tilt, bool auto_height);
-  void enter_world_at (const Vec3D& pos, bool autoHeight = true, float av = -30.0f, float ah = -90.0f);
+  void prepare_world (const Vec3D& pos, float rotation, float tilt);
+  void enter_world_at (const Vec3D& pos, bool auto_height = true, float av = -30.0f, float ah = -90.0f);
 
   ui::minimap_widget* _minimap;
   World* _world;

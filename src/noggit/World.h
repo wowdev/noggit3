@@ -120,7 +120,7 @@ public:
   float fogdistance;
   float culldistance;
 
-  bool autoheight;
+  void set_camera_above_terrain();
 
   float minX;
   float maxX;
