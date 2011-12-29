@@ -99,16 +99,26 @@ Menu::~Menu()
   _world = NULL;
 }
 
-void Menu::enter_world_at (const Vec3D& pos, bool autoHeight, float av, float ah )
+void Menu::enter_world_at (const Vec3D& pos, bool auto_height, float av, float ah )
 {
-  prepare_world (pos, ah, av, autoHeight);
+  prepare_world (pos, ah, av);
   _world->enterTile (pos.x / TILESIZE, pos.y / TILESIZE);
 
   emit create_world_view_request (_world);
+
+  if (auto_height)
+  {
+    _world->set_camera_above_terrain();
+  }
 }
 
 void Menu::load_map (int map_id)
 {
+  if (_world && _world->getMapID() == map_id)
+  {
+    return;
+  }
+
   delete _world;
 
   _world = new World (gMapDB.getByID (map_id, MapDB::MapID).getString (MapDB::InternalName));
@@ -121,9 +131,8 @@ void Menu::minimap_clicked (const Vec3D& position)
   enter_world_at (position, true, 0.0, 0.0);
 }
 
-void Menu::prepare_world (const Vec3D& pos, float rotation, float tilt, bool auto_height)
+void Menu::prepare_world (const Vec3D& pos, float rotation, float tilt)
 {
-  _world->autoheight = auto_height;
   _world->camera = Vec3D (pos.x, pos.y, pos.z);
   //! \todo actually set lookat!
   _world->lookat = Vec3D (pos.x + 10.0f, pos.y + 10.0f, pos.z + 10.0f); // ah = rotation
@@ -141,7 +150,7 @@ void Menu::show_bookmark_list_item (QListWidgetItem* item)
 {
   const bookmark_entry e (item->data (Qt::UserRole).value<bookmark_entry>());
   load_map (e.map_id);
-  prepare_world (e.position, e.rotation, e.tilt, false);
+  prepare_world (e.position, e.rotation, e.tilt);
   _minimap->draw_camera (true);
 }
 

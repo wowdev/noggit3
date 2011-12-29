@@ -191,7 +191,6 @@ World::World( const std::string& name )
   , basename( name )
   , fogdistance( 777.0f )
   , culldistance( fogdistance )
-  , autoheight( false )
   , minX( 0.0f )
   , maxX( 0.0f )
   , minY( 0.0f )
@@ -744,15 +743,16 @@ void World::enterTile( int x, int z )
       mTiles[i][j].tile = loadTile( i, j );
     }
   }
+}
 
-  if( autoheight && tileLoaded( cz, cx ) ) //ZX STEFF HERE SWAP!
+void World::set_camera_above_terrain()
+{
+  if (!tileLoaded (cz, cx))
   {
-    float maxHeight = mTiles[cz][cx].tile->getMaxHeight();
-    maxHeight = std::max( maxHeight, 0.0f );
-    camera.y = maxHeight + 50.0f;
-
-    autoheight = false;
+    return;
   }
+
+  camera.y = qMax (mTiles[cz][cx].tile->getMaxHeight(), 0.0f) + 50.0f;
 }
 
 void World::reloadTile(int x, int z)
