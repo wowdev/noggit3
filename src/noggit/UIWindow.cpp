@@ -3,8 +3,8 @@
 #include <vector>
 #include <string>
 
+#include <noggit/blp_texture.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/Video.h>
 
 UIWindow::UIWindow( float xPos, float yPos, float w, float h )
 : UIFrame( xPos, yPos, w, h )
@@ -52,8 +52,7 @@ void UIWindow::render() const
 
   glColor3f( 1.0f, 1.0f, 1.0f );
 
-  OpenGL::Texture::setActiveTexture();
-  OpenGL::Texture::enableTexture();
+  opengl::texture::enable_texture (0);
 
   texture->bind();
 
@@ -154,7 +153,7 @@ void UIWindow::render() const
   glVertex2f( width() - 13.0f, -3.0f );
   glEnd();
 
-  OpenGL::Texture::disableTexture();
+  opengl::texture::disable_texture (0);
 
   glPopMatrix();
 }

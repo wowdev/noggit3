@@ -3,9 +3,9 @@
 #include <vector>
 #include <string>
 
+#include <noggit/blp_texture.h>
 #include <noggit/application.h> // arial16
 #include <noggit/UIText.h>
-#include <noggit/Video.h>
 
 UIStatusBar::UIStatusBar( float xPos, float yPos, float w, float h )
 : UIWindow( xPos, yPos, w, h )
@@ -33,8 +33,7 @@ void UIStatusBar::render() const
 
   glColor3f( 0.7f, 0.7f, 0.7f );
 
-  OpenGL::Texture::setActiveTexture();
-  OpenGL::Texture::enableTexture();
+  opengl::texture::enable_texture (0);
 
   texture->bind();
 
@@ -50,16 +49,9 @@ void UIStatusBar::render() const
   glVertex2f( width(), -3.0f );
   glEnd();
 
-  OpenGL::Texture::disableTexture();
+  opengl::texture::disable_texture (0);
 
   glPopMatrix();
-}
-
-void UIStatusBar::resize()
-{
-  y( video.yres() - 30.0f );
-  width( video.xres() );
-  rightInfo->x( width() - 8.0f );
 }
 
 void UIStatusBar::setLeftInfo( const std::string& pText )

@@ -5,8 +5,9 @@
 #include <map>
 #include <string>
 
+#include <opengl/types.h>
+
 #include <noggit/MapHeaders.h>
-#include <noggit/Video.h> // GLfloat, GLshort, ...
 
 class Vec3D;
 class Liquid;

@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 
+#include <noggit/blp_texture.h>
 #include <noggit/Log.h>
 #include <noggit/Model.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
@@ -1016,7 +1017,8 @@ void ModelCamera::setup( int time )
   {
     return;
   }
-
+  //! \todo This really needs to be done differently.
+/*
   video.fov( fov * 34.5f );
   video.nearclip( nearclip );
   video.farclip( farclip );
@@ -1026,6 +1028,7 @@ void ModelCamera::setup( int time )
   Vec3D t = target + tTarget.getValue( 0, time );
   Vec3D u( 0.0f, 1.0f, 0.0f );
   gluLookAt( p.x, p.y, p.z, t.x, t.y, t.z, u.x, u.y, u.z );
+  */
 }
 
 void ModelColor::init(const noggit::mpq::file& f, const ModelColorDef &mcd, int *global)
@@ -1051,7 +1054,7 @@ void ModelLight::init(const noggit::mpq::file& f, const ModelLightDef &mld, int 
   diffIntensity.init(mld.intensity, f, global);
 }
 
-void ModelLight::setup(int time, OpenGL::Light l)
+void ModelLight::setup(int time, opengl::light l)
 {
   Vec4D ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
   Vec4D diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
@@ -1224,13 +1227,13 @@ void Model::drawSelect()
   }
 }
 
-void Model::lightsOn(OpenGL::Light lbase)
+void Model::lightsOn(opengl::light lbase)
 {
   // setup lights
   for (unsigned int i=0, l=lbase; i<header.nLights; ++i) lights[i].setup(animtime, l++);
 }
 
-void Model::lightsOff(OpenGL::Light lbase)
+void Model::lightsOff(opengl::light lbase)
 {
   for (unsigned int i=0, l=lbase; i<header.nLights; ++i) glDisable(l++);
 }

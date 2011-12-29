@@ -41,7 +41,8 @@ void UICursorSwitcher::changeCursor(int Type)
 float Wwidth = 290;
 float Wheight = 250;
 
-UICursorSwitcher::UICursorSwitcher() : UICloseWindow((float)video.xres() / 2.0f - Wwidth / 2.0f, (float)video.yres() / 2.0f - Wheight / 2.0f, Wwidth, Wheight, "Cursor options", true)
+UICursorSwitcher::UICursorSwitcher()
+  : UICloseWindow (0.0f, 0.0f, Wwidth, Wheight, "Cursor options", true)
 {
   float leftMargin = 10.0f;
   float SliderWidth = Wwidth - (leftMargin * 2);

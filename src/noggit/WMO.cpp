@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <iostream>
 
+#include <noggit/blp_texture.h>
 #include <noggit/Liquid.h>
 #include <noggit/Log.h> // LogDebug
 #include <noggit/ModelManager.h> // ModelManager
@@ -16,6 +17,8 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
+
+#include <opengl/call_list.h>
 
 void WMOHighlight( Vec4D color )
 {
@@ -270,7 +273,7 @@ void WMO::draw ( World* world
 
   for (unsigned int i=0; i<nGroups; ++i)
   {
-    groups[i].draw(world, ofs, rot, false, draw_fog);
+    groups[i].draw(world, ofs, rot, draw_fog);
 
     if (draw_doodads)
     {
@@ -516,7 +519,7 @@ void WMO::drawSelect ( World* world
 {
   for (unsigned int i=0; i<nGroups; ++i)
   {
-    groups[i].draw (world, ofs, rot, true, false);
+    groups[i].draw_for_selection (world, ofs, rot);
 
     if (draw_doodads)
     {
@@ -603,7 +606,7 @@ void WMOLight::init(noggit::mpq::file* f)
   */
 }
 
-void WMOLight::setup(GLint light)
+void WMOLight::setup(opengl::light light)
 {
   // not used right now -_-
 
@@ -617,7 +620,7 @@ void WMOLight::setup(GLint light)
   glEnable(light);
 }
 
-void WMOLight::setupOnce(GLint light, Vec3D dir, Vec3D lcol)
+void WMOLight::setupOnce(opengl::light light, Vec3D dir, Vec3D lcol)
 {
   Vec4D position(dir, 0);
   //Vec4D position(0,1,0,0);
@@ -856,10 +859,10 @@ void WMOGroup::initDisplayList()
     bool overbright = ((mat->flags & 0x10) && !hascv);
     bool spec_shader = (mat->specular && !hascv && !overbright);
 
-    _lists[b].first = new OpenGL::CallList();
+    _lists[b].first = new opengl::call_list();
     _lists[b].second = spec_shader;
 
-    _lists[b].first->startRecording( GL_COMPILE );
+    _lists[b].first->start_recording( GL_COMPILE );
 
     mat->_texture->bind();
 
@@ -911,7 +914,7 @@ void WMOGroup::initDisplayList()
       glDisable(GL_ALPHA_TEST);
     }
 
-    _lists[b].first->endRecording();
+    _lists[b].first->end_recording();
   }
 
   indoor = false;
@@ -954,7 +957,6 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 void WMOGroup::draw ( World* world
                     , const Vec3D& ofs
                     , const float rot
-                    , bool selection
                     , bool draw_fog
                     )
 {
@@ -987,7 +989,7 @@ void WMOGroup::draw ( World* world
   glColor4f(1,1,1,1);
   for (int i=0; i<nBatches; ++i)
   {
-    if( video.mSupportShaders && _lists[i].second && wmoShader)
+    if (wmoShader)
     {
       wmoShader->bind();
       _lists[i].first->render();
@@ -1002,10 +1004,32 @@ void WMOGroup::draw ( World* world
   glColor4f(1,1,1,1);
   glEnable(GL_CULL_FACE);
 
-  if (hascv && !selection)
+  if (hascv)
       glEnable(GL_LIGHTING);
 
 
+}
+
+void WMOGroup::draw_for_selection ( World* world
+                                  , const Vec3D& ofs
+                                  , const float rot
+                                  )
+{
+  visible = false;
+
+  Vec3D pos = center + ofs;
+  rotate (ofs.x, ofs.z, &pos.x, &pos.z, rot * PI / 180.0f);
+  if ( !world->frustum.intersectsSphere (pos, rad)
+    || ((pos - world->camera).length() - rad) >= world->culldistance
+     )
+    return;
+
+  visible = true;
+
+  for (int i=0; i<nBatches; ++i)
+  {
+    _lists[i].first->render();
+  }
 }
 
 void WMOGroup::drawDoodads ( World* world
@@ -1141,7 +1165,7 @@ WMOGroup::~WMOGroup()
 {
   //if (dl) glDeleteLists(dl, 1);
   //if (dl_light) glDeleteLists(dl_light, 1);
-  for( std::vector< std::pair<OpenGL::CallList*, bool> >::iterator it = _lists.begin(); it != _lists.end(); ++it )
+  for( std::vector< std::pair<opengl::call_list*, bool> >::iterator it = _lists.begin(); it != _lists.end(); ++it )
   {
     delete it->first;
   }

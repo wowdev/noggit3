@@ -2,6 +2,7 @@
 
 #include <list>
 
+#include <noggit/blp_texture.h>
 #include <noggit/mpq/file.h>
 #include <noggit/Misc.h>
 

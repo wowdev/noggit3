@@ -3,12 +3,16 @@
 #include <algorithm>
 #include <string>
 
+#include <noggit/blp_texture.h>
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/Shaders.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
+
+#include <opengl/call_list.h>
+#include <opengl/texture.h>
 
 struct LiquidVertex {
   unsigned char c[4];
@@ -118,8 +122,8 @@ void Liquid::initGeometry(noggit::mpq::file* f)
     }
   }
 
-  mDrawList = new OpenGL::CallList();
-  mDrawList->startRecording();
+  mDrawList = new opengl::call_list;
+  mDrawList->start_recording();
 
   //! \todo  handle light/dark liquid colors
   glNormal3f(0, 1, 0);
@@ -230,7 +234,7 @@ void Liquid::initGeometry(noggit::mpq::file* f)
   glEnd();
   glEnable(GL_TEXTURE_2D);*/
 
-  mDrawList->endRecording();
+  mDrawList->end_recording();
   if(lVertices)
   {
     delete[] lVertices;
@@ -273,8 +277,8 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
       if( render->mRender[j * info->width + i] )
         lVertices[j * info->width + i] = Vec3D( pos.x + tilesize * i, HeightMap->mHeightValues[j][i], pos.z + ydir * tilesize * j );
 
-  mDrawList = new OpenGL::CallList();
-  mDrawList->startRecording();
+  mDrawList = new opengl::call_list;
+  mDrawList->start_recording();
 
   glBegin( GL_QUADS );
 
@@ -321,7 +325,7 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 
   glEnd();
 
-  mDrawList->endRecording();
+  mDrawList->end_recording();
   if(lVertices)
   {
     delete[] lVertices;
@@ -363,8 +367,8 @@ void Liquid::initFromMH2O()
     for( int i = 0; i < 9; ++i )
       lVertices[j][i] = Vec3D( pos.x + tilesize * i, mTileData.mHeightmap[j][i], pos.z + ydir * tilesize * j );
 
-  mDrawList = new OpenGL::CallList();
-  mDrawList->startRecording();
+  mDrawList = new opengl::call_list;
+  mDrawList->start_recording();
 
   glBegin( GL_QUADS );
 
@@ -399,7 +403,7 @@ void Liquid::initFromMH2O()
 
   glEnd();
 
-  mDrawList->endRecording();
+  mDrawList->end_recording();
 }
 
 void Liquid::setMH2OData(MH2O_Tile pTileInfo){
@@ -493,8 +497,8 @@ void Liquid::recalcSize() {
   BLSShader * mWaterShader;
   BLSShader * mMagmaShader;
 #else
-  OpenGL::Shader  waterShader;
-  OpenGL::Shader  waterFogShader;
+  opengl::shader  waterShader;
+  opengl::shader  waterFogShader;
 #endif
 
 void loadWaterShader()
@@ -594,6 +598,44 @@ void enableWaterShader()
 }
 #endif
 
+void CheckForGLError( const std::string& pLocation )
+{
+  int ErrorNum = glGetError();
+  while( ErrorNum )
+  {
+    switch( ErrorNum )
+    {
+      case GL_INVALID_ENUM:
+         LogError << "OpenGL: (at " << pLocation << "): GL_INVALID_ENUM" << std::endl;
+         break;
+      case GL_INVALID_VALUE:
+         LogError << "OpenGL: (at " << pLocation << "): GL_INVALID_VALUE" << std::endl;
+         break;
+       case GL_INVALID_OPERATION:
+         LogError << "OpenGL: (at " << pLocation << "): GL_INVALID_OPERATION" << std::endl;
+         break;
+       case GL_STACK_OVERFLOW:
+         LogError << "OpenGL: (at " << pLocation << "): GL_STACK_OVERFLOW" << std::endl;
+         break;
+       case GL_STACK_UNDERFLOW:
+         LogError << "OpenGL: (at " << pLocation << "): GL_STACK_UNDERFLOW" << std::endl;
+         break;
+       case GL_OUT_OF_MEMORY:
+         LogError << "OpenGL: (at " << pLocation << "): GL_OUT_OF_MEMORY" << std::endl;
+         break;
+       case GL_TABLE_TOO_LARGE:
+         LogError << "OpenGL: (at " << pLocation << "): GL_TABLE_TOO_LARGE" << std::endl;
+         break;
+       case GL_NO_ERROR:
+      //! \todo  Add the missing ones.
+       default:
+         LogError << "OpenGL: (at " << pLocation << "): GL_NO_ERROR (wat?)" << std::endl;
+     }
+
+    ErrorNum = glGetError();
+  }
+}
+
 void Liquid::draw (const float& animation_time, const Skies* skies) const
 {
   glEnable(GL_FRAGMENT_PROGRAM_ARB);
@@ -645,24 +687,22 @@ void Liquid::draw (const float& animation_time, const Skies* skies) const
     //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); //! \todo  check if ARB_texture_env_add is supported? :(
   }
 
-  OpenGL::Texture::setActiveTexture(0);
-  OpenGL::Texture::enableTexture();
+  opengl::texture::enable_texture (0);
 
   _textures[texidx]->bind();
 
-  OpenGL::Texture::setActiveTexture(1);
-  OpenGL::Texture::enableTexture();
+  opengl::texture::enable_texture (1);
 
   if( mDrawList )
   {
     //! \todo THIS LINE THROWS GL_INVALID_OPERATION! Steff. It donwt do in anymore now. Perhaps because water rendering was called double in maptile::draw()
+    CheckForGLError( "Liquid::draw:: before the draw list" );
     mDrawList->render();
     CheckForGLError( "Liquid::draw:: after the draw list" );
   }
 
-  OpenGL::Texture::setActiveTexture(1);
-  OpenGL::Texture::disableTexture();
-  OpenGL::Texture::setActiveTexture(0);
+  opengl::texture::disable_texture (1);
+  opengl::texture::set_active_texture (0);
 
   glColor4f(1,1,1,0.4f);
   if( mTransparency )

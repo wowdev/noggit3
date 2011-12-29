@@ -3,10 +3,10 @@
 
 #include <noggit/MapTile.h> // MapTile
 #include <noggit/Quaternion.h> // Vec4D
-#include <noggit/Video.h> // GLuint
 
 namespace noggit
 {
+  class blp_texture;
   namespace mpq
   {
     class file;
@@ -48,7 +48,7 @@ public:
   int holes;
 
   int tex[4];
-  OpenGL::Texture* _textures[4];
+  noggit::blp_texture* _textures[4];
   unsigned int texFlags[4];
   unsigned int effectID[4];
   unsigned int MCALoffset[4];
@@ -104,9 +104,9 @@ public:
   bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
-  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture);
-  int addTexture(OpenGL::Texture* texture);
-  void switchTexture( OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture );
+  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, noggit::blp_texture* texture);
+  int addTexture(noggit::blp_texture* texture);
+  void switchTexture( noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture );
   void eraseTextures();
 
   bool isHole(int i,int j);

@@ -1,6 +1,8 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
+#include <cstdlib> // size_t
+
 // base class for manager objects
 
 //! \todo Proxy objects / handles holding the name and the object.

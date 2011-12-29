@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include <noggit/blp_texture.h>
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
@@ -21,7 +22,6 @@
 #include <noggit/UIText.h> // UIText
 #include <noggit/UITexture.h> // UITexture
 #include <noggit/UIToolbar.h> // Toolbar
-#include <noggit/Video.h>
 
 //! \todo  Get this whole thing in a seperate class.
 
@@ -39,13 +39,13 @@ std::vector<std::string> gActiveFilenameFilters;
 std::vector<std::string> gActiveDirectoryFilters;
 std::vector<std::string> textureNames;
 std::vector<std::string> tilesetDirectories;
-std::vector<OpenGL::Texture*> gTexturesInList;
+std::vector<noggit::blp_texture*> gTexturesInList;
 
 //Texture Palette Window
 UICloseWindow  *windowTexturePalette;
 
 UITexture  *curTextures[64];
-OpenGL::Texture* gTexturesInPage[64];
+noggit::blp_texture* gTexturesInPage[64];
 UIText *gPageNumber;
 
 //Selected Texture Window
@@ -73,7 +73,7 @@ UIText      *chunkTextureNames[4];
 UIText      *chunkTextureFlags[4];
 UIText      *chunkTextureEffectID[4];
 
-OpenGL::Texture* UITexturingGUI::selectedTexture = NULL;
+noggit::blp_texture* UITexturingGUI::selectedTexture = NULL;
 
 void LoadTextureNames()
 {
@@ -154,7 +154,7 @@ int gCurrentPage;
 
 void showPage( int pPage )
 {
-  OpenGL::Texture* lSelectedTexture = UITexturingGUI::getSelectedTexture();
+  noggit::blp_texture* lSelectedTexture = UITexturingGUI::getSelectedTexture();
 
   if( gPageNumber )
   {
@@ -166,7 +166,7 @@ void showPage( int pPage )
   int i = 0;
   const unsigned int lIndex = pal_cols * pal_rows * pPage;
 
-  for( std::vector<OpenGL::Texture*>::iterator lPageStart = gTexturesInList.begin() + ( lIndex > gTexturesInList.size() ? 0 : lIndex ); lPageStart != gTexturesInList.end(); lPageStart++ )
+  for( std::vector<noggit::blp_texture*>::iterator lPageStart = gTexturesInList.begin() + ( lIndex > gTexturesInList.size() ? 0 : lIndex ); lPageStart != gTexturesInList.end(); lPageStart++ )
   {
     curTextures[i]->show();
     curTextures[i]->setTexture( *lPageStart );
@@ -205,7 +205,7 @@ void UITexturingGUI::updateSelectedTexture()
   if( textureSelected )
     textureSelected->setTexture( UITexturingGUI::getSelectedTexture() );
   if( textSelectedTexture )
-    textSelectedTexture->setText( UITexturingGUI::getSelectedTexture()->filename() );
+    textSelectedTexture->setText( UITexturingGUI::getSelectedTexture()->filename().toStdString() );
   if( textGui )
     textGui->guiToolbar->current_texture->setTexture( UITexturingGUI::getSelectedTexture() );
 }
@@ -373,9 +373,9 @@ UIFrame* UITexturingGUI::createTexturePalette( int rows, int cols, UIMapViewGUI 
 
 UIFrame* UITexturingGUI::createSelectedTexture()
 {
-  windowSelectedTexture = new UICloseWindow( video.xres() - 148.0f - 128.0f, video.yres() - 320.0f, 274.0f, 288.0f, "Current Texture", true );
+  windowSelectedTexture = new UICloseWindow( 0.0f, 0.0f, 274.0f, 288.0f, "Current Texture", true );
 
-  std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->filename() : "tileset\\generic\\black.blp";
+  std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->filename().toStdString() : "tileset\\generic\\black.blp";
 
   textureSelected = new UITexture( 9.0f, 24.0f, 256.0f, 256.0f, lTexture );
   windowSelectedTexture->addChild( textureSelected );
@@ -397,8 +397,8 @@ UIFrame* UITexturingGUI::createTilesetLoader()
 
   UIButton * name;
   windowTilesetLoader = new UICloseWindow(
-    video.xres() / 2.0f - 308.0f,
-    video.yres() / 2.0f - 139.0f,
+    0.0f,
+    0.0f,
     616.0f,
     22.0f + 21.0f * columns + 5.0f,
     "Tileset Loading" );
@@ -434,7 +434,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
   InitFilenameFilterList();
 
   LoadTextureNames();
-  windowTextureFilter = new UICloseWindow( video.xres() / 2.0f - 450.0f, video.yres() / 2.0f - 300.0f, 900.0f, 610.0f, "Texture Filtering", true );
+  windowTextureFilter = new UICloseWindow( 0.0f, 0.0f, 900.0f, 610.0f, "Texture Filtering", true );
   windowTextureFilter->hide();
 
   //Filename Filters
@@ -465,7 +465,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
 UIFrame* UITexturingGUI::createMapChunkWindow()
 {
   UIWindow *chunkSettingsWindow,*chunkTextureWindow,*chunkEffectWindow;
-  windowMapChunk=new UICloseWindow(video.xres()/2.0f-316.0f,video.yres()-369.0f,634.0f,337.0f,"Map Chunk Settings");
+  windowMapChunk=new UICloseWindow(0.0f,0.0f,634.0f,337.0f,"Map Chunk Settings");
   windowMapChunk->movable( true );
 
   chunkSettingsWindow=new UIWindow(11.0f,26.0f,300.0f,300.0f);
@@ -620,11 +620,11 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
 
 }
 
-OpenGL::Texture* UITexturingGUI::getSelectedTexture(){
+noggit::blp_texture* UITexturingGUI::getSelectedTexture(){
   return UITexturingGUI::selectedTexture;
 }
 
-void UITexturingGUI::setSelectedTexture(OpenGL::Texture * t){
+void UITexturingGUI::setSelectedTexture(noggit::blp_texture * t){
   UITexturingGUI::selectedTexture = t;
 }
 

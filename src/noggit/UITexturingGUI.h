@@ -5,7 +5,10 @@ class MapChunk;
 class UIFrame;
 class UIMapViewGUI;
 
-namespace OpenGL { class Texture; };
+namespace noggit
+{
+  class blp_texture;
+}
 
 class UITexturingGUI
 {
@@ -15,12 +18,12 @@ public:
   static UIFrame* createTilesetLoader();
   static UIFrame* createTextureFilter();
   static UIFrame* createMapChunkWindow();
-  static void setSelectedTexture(OpenGL::Texture* t);
-  static OpenGL::Texture* getSelectedTexture();
+  static void setSelectedTexture(noggit::blp_texture* t);
+  static noggit::blp_texture* getSelectedTexture();
   static void setChunk(MapChunk *chunk);
   static void setChunkWindow(MapChunk *chunk);
   static void updateSelectedTexture();
-  static OpenGL::Texture* selectedTexture;
+  static noggit::blp_texture* selectedTexture;
 };
 
 #endif

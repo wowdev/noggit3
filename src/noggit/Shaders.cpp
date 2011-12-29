@@ -80,10 +80,17 @@ ShaderPair *terrainShaders[4]={NULL,NULL,NULL,NULL}, *wmoShader=NULL, *waterShad
 
 void initShaders()
 {
-  if( video.mSupportShaders )
-    reloadShaders();
+  const bool enable_shaders
+    (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program);
 
-  LogDebug << "Shaders are " << ( video.mSupportShaders ? "enabled." : "disabled." ) << std::endl;
+  if (enable_shaders)
+  {
+    reloadShaders();
+  }
+
+  LogDebug << "Shaders are "
+           << (enable_shaders ? "enabled." : "disabled.")
+           << std::endl;
 }
 
 void reloadShaders()

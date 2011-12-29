@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 
+#include <noggit/blp_texture.h>
 #include <noggit/DBC.h>
 #include <noggit/Environment.h>
 #include <noggit/MapChunk.h>
@@ -19,13 +20,12 @@
 #include <noggit/UITexturingGUI.h>
 #include <noggit/UIToolbar.h> // UIToolbar
 #include <noggit/UIZoneIDBrowser.h>
-#include <noggit/Video.h> // video
 #include <noggit/WMOInstance.h>
 #include <noggit/World.h>
 
-UIMapViewGUI::UIMapViewGUI (World* world, MapView *setMapview)
-  : UIFrame( 0.0f, 0.0f, video.xres(), video.yres() )
-  , theMapview( setMapview )
+UIMapViewGUI::UIMapViewGUI (World* world, MapView *map_view, float xres, float yres)
+  : UIFrame( 0.0f, 0.0f, xres, yres )
+  , theMapview( map_view )
   , _world (world)
 {
   // UIToolbar
@@ -33,11 +33,11 @@ UIMapViewGUI::UIMapViewGUI (World* world, MapView *setMapview)
   addChild(guiToolbar);
 
   // Statusbar
-  guiStatusbar = new UIStatusBar( 0.0f, video.yres() - 30.0f, video.xres(), 30.0f );
+  guiStatusbar = new UIStatusBar( 0.0f, height() - 30.0f, width(), 30.0f );
   addChild(guiStatusbar);
 
   // DetailInfoWindow
-  guidetailInfos = new UIDetailInfos( 1.0f, video.yres() - 282.0f, 600.0f, 250.0f, this );
+  guidetailInfos = new UIDetailInfos( 1.0f, height() - 282.0f, 600.0f, 250.0f, this );
   guidetailInfos->movable( true );
   guidetailInfos->hide();
   addChild(guidetailInfos);
@@ -49,17 +49,17 @@ UIMapViewGUI::UIMapViewGUI (World* world, MapView *setMapview)
   addChild(ZoneIDBrowser);
 
   // AppInfosWindow
-  guiappInfo = new UIAppInfo( 1.0f, video.yres() - 440.0f, 420.0f, 410.0f, this );
+  guiappInfo = new UIAppInfo( 1.0f, height() - 440.0f, 420.0f, 410.0f, this );
   guiappInfo->movable( true );
   guiappInfo->hide();
   addChild(guiappInfo);
 
-  TexturePicker = new UITexturePicker(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f,490.0f, 150.0f );
+  TexturePicker = new UITexturePicker(width() / 2 - 100.0f, height() / 2 - 100.0f,490.0f, 150.0f );
   TexturePicker->hide();
   TexturePicker->movable( true );
   addChild( TexturePicker);
 
-  TextureSwitcher = new UITextureSwitcher(_world, video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f);
+  TextureSwitcher = new UITextureSwitcher(_world, width() / 2 - 100.0f, height() / 2 - 100.0f);
   TextureSwitcher->hide();
   TextureSwitcher->movable( true );
   addChild( TextureSwitcher);
@@ -100,12 +100,12 @@ void UIMapViewGUI::render( ) const
 
   int time = static_cast<int>( _world->time ) % 2880;
   std::stringstream timestrs; timestrs << "Time: " << ( time / 120 ) << ":" << ( time % 120 );
-  arial16.shprint( video.xres() - 100.0f, 5.0f, timestrs.str() );
+  arial16.shprint( width() - 100.0f, 5.0f, timestrs.str() );
 
   if ( _world->noadt )
   {
     std::string toDisplay( "No ADT at this Point" );
-    arial16.shprint( video.xres() / 2.0f - arial16.width( toDisplay ) / 2.0f, 30.0f, toDisplay );
+    arial16.shprint( width() / 2.0f - arial16.width( toDisplay ) / 2.0f, 30.0f, toDisplay );
   }
 
   std::ostringstream statusbarInfo;
@@ -138,7 +138,7 @@ void UIMapViewGUI::render( ) const
 
         for( unsigned int j = 0; j < std::min( lSelection->data.model->model->header.nTextures, 6U ); j++ )
         {
-          detailInfo << "\n " << ( j + 1 ) << ": " << lSelection->data.model->model->_textures[j]->filename();
+          detailInfo << "\n " << ( j + 1 ) << ": " << lSelection->data.model->model->_textures[j]->filename().toStdString();
         }
         if( lSelection->data.model->model->header.nTextures > 25 )
         {

@@ -8,7 +8,6 @@ class Liquid;
 #include <string>
 #include <vector>
 
-#include <noggit/Video.h>
 #ifdef USEBLSFILES
   #include <noggit/Shaders.h>
 #endif
@@ -17,10 +16,10 @@ class Liquid;
 
 class Skies;
 
-namespace OpenGL
+namespace opengl
 {
-  class CallList;
-  class Texture;
+  class call_list;
+  class texture;
 };
 
 namespace noggit
@@ -76,7 +75,7 @@ class Liquid
   bool mTransparency;
 
   int xtiles, ytiles;
-  OpenGL::CallList* mDrawList;
+  opengl::call_list* mDrawList;
 
   Vec3D pos;
 
@@ -90,7 +89,7 @@ class Liquid
   void initTextures( const std::string& pFilename );
 
   int type;
-  std::vector<OpenGL::Texture*> _textures;
+  std::vector<opengl::texture*> _textures;
   std::vector<std::string> _textureFilenames;
   Vec3D col;
   int tmpflag;

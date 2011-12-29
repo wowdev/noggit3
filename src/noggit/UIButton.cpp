@@ -2,11 +2,11 @@
 
 #include <string>
 
+#include <noggit/blp_texture.h>
 #include <noggit/FreeType.h>
 #include <noggit/application.h> // arial12
 #include <noggit/TextureManager.h> // TextureManager
 #include <noggit/UIText.h>
-#include <noggit/Video.h> // Texture
 
 UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTexNormal, const std::string& pTexDown )
 : UIFrame( pX, pY, w, h )
@@ -88,8 +88,7 @@ void UIButton::render() const
 
   glColor3f( 1.0f, 1.0f, 1.0f );
 
-  OpenGL::Texture::setActiveTexture();
-  OpenGL::Texture::enableTexture();
+  opengl::texture::enable_texture (0);
 
   if( !clicked )
     texture->bind();
@@ -107,7 +106,7 @@ void UIButton::render() const
     glVertex2f( width(), height() );
   glEnd();
 
-  OpenGL::Texture::disableTexture();
+  opengl::texture::disable_texture (0);
 
   text->render();
 

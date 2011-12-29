@@ -2,8 +2,8 @@
 
 #include <string>
 
+#include <noggit/blp_texture.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/Video.h> // gl*
 
 UIToolbarIcon::UIToolbarIcon( float xPos, float yPos, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments )
 : UIFrame( xPos, yPos, 45.0f, 45.0f )
@@ -37,8 +37,7 @@ void UIToolbarIcon::render() const
 
   glColor3f( 1.0f, 1.0f, 1.0f );
 
-  OpenGL::Texture::setActiveTexture();
-  OpenGL::Texture::enableTexture();
+  opengl::texture::enable_texture (0);
 
   texture->bind();
 
@@ -53,13 +52,13 @@ void UIToolbarIcon::render() const
   glVertex2f( width(), height() );
   glEnd();
 
-  OpenGL::Texture::disableTexture();
+  opengl::texture::disable_texture (0);
 
   if( selected )
   {
     static const float sizer = 18.0f;
 
-    OpenGL::Texture::enableTexture();
+    opengl::texture::enable_texture (0);
 
     textureSelected->bind();
 
@@ -74,7 +73,7 @@ void UIToolbarIcon::render() const
     glVertex2f( width() + sizer, height() + sizer );
     glEnd();
 
-    OpenGL::Texture::disableTexture();
+    opengl::texture::disable_texture (0);
   }
 
   glPopMatrix();

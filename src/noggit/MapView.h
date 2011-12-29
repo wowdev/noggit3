@@ -2,7 +2,7 @@
 #define MAPVIEW_H
 
 // GL needs to be included before GLWidget.
-#include <noggit/Video.h>
+#include <opengl/types.h>
 
 #include <QPoint>
 #include <QGLWidget>
@@ -30,9 +30,8 @@ namespace ui
 
 enum eViewMode
 {
-  eViewMode_Minimap,
   eViewMode_2D,
-  eViewMode_3D
+  eViewMode_3D,
 };
 
 class MapView : public QGLWidget
@@ -76,7 +75,13 @@ public:
     };
   };
 
-  MapView (World* world, float ah0 = -90.0f, float av0 = -30.0f, QGLWidget* shared = NULL, QWidget* parent = NULL);
+  MapView ( World* world
+          , qreal viewing_distance
+          , float ah0 = -90.0f
+          , float av0 = -30.0f
+          , QGLWidget* shared = NULL
+          , QWidget* parent = NULL
+          );
   virtual ~MapView();
 
   virtual void tick( float t, float dt );
@@ -184,6 +189,9 @@ private:
   const qreal& smoothing_speed() const;
   const smoothing_formula_type::formula& smoothing_formula() const;
 
+  void draw_tile_mode_brush() const;
+  QPointF tile_mode_brush_position() const;
+
   QTime _startup_time;
   qreal _last_update;
 
@@ -191,8 +199,6 @@ private:
   bool key_w;
   bool look;
   bool _GUIDisplayingEnabled;
-
-  float lastBrushUpdate;
 
   void doSelection( bool selectTerrainOnly );
 
@@ -204,6 +210,11 @@ private:
   void displayGUIIfEnabled();
 
   void createGUI();
+
+  void setup_tile_mode_rendering() const;
+  void setup_3d_rendering() const;
+  void setup_3d_selection_rendering() const;
+  void setup_2d_rendering() const;
 
   float mTimespeed;
 
@@ -268,6 +279,8 @@ private:
   bool _copy_size_randomization;
   bool _copy_position_randomization;
   bool _copy_rotation_randomization;
+
+  qreal _viewing_distance;
 };
 
 

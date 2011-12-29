@@ -36,6 +36,10 @@
 #include <noggit/ui/minimap_widget.h>
 #include <noggit/ui/help_widget.h>
 
+#include <noggit/Log.h>
+
+#include <opengl/texture.h>
+
 #ifdef __FILESAREMISSING
 #include <IL/il.h>
 #endif
@@ -736,7 +740,7 @@ void MapView::createGUI()
   settings_paint->addChild(B1);
 
   // create main gui object that holds all other gui elements for access ( in the future ;) )
-  mainGui = new UIMapViewGUI (_world, this);
+  mainGui = new UIMapViewGUI (_world, this, width(), height());
 
   mainGui->addChild(settings_paint);
 
@@ -1005,7 +1009,13 @@ void MapView::toggle_app_info (bool visiblity)
   mainGui->guiappInfo->hidden (!visiblity);
 }
 
-MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget* parent)
+MapView::MapView ( World* world
+                 , qreal viewing_distance
+                 , float ah0
+                 , float av0
+                 , QGLWidget* shared
+                 , QWidget* parent
+                 )
   : QGLWidget (parent, shared)
   , _startup_time ()
   , _last_update (0.0)
@@ -1015,7 +1025,8 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _GUIDisplayingEnabled( true )
   , mTimespeed( 0.0f )
   , _help_widget (new ui::help_widget (NULL))
-  , _about_widget (new ui::about_widget (NULL))
+  , _about_widget (NULL)
+//  , _about_widget (new ui::about_widget (NULL))
   , _is_currently_moving_object (false)
   , _draw_terrain_height_contour (false)
   , _draw_wmo_doodads (true)
@@ -1052,6 +1063,7 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   , _copy_size_randomization (false)
   , _copy_position_randomization (false)
   , _copy_rotation_randomization (false)
+  , _viewing_distance (viewing_distance)
 {
   moving = strafing = updown = 0.0f;
 
@@ -1060,7 +1072,6 @@ MapView::MapView (World* world, float ah0, float av0, QGLWidget* shared, QWidget
   static const float default_moving_speed (66.6f);
   movespd = default_moving_speed;
 
-  lastBrushUpdate = 0;
   textureBrush.init();
 
   look = false;
@@ -1089,7 +1100,6 @@ void MapView::initializeGL()
 {
   qglClearColor (Qt::black);
 
-//! \todo remove these?
   glEnableClientState (GL_VERTEX_ARRAY);
   glEnableClientState (GL_NORMAL_ARRAY);
   glEnableClientState (GL_TEXTURE_COORD_ARRAY);
@@ -1112,7 +1122,7 @@ void MapView::paintGL()
 
 void MapView::resizeGL (int width, int height)
 {
-  video.init (width, height);
+  glViewport (0.0f, 0.0f, width, height);
 }
 
 MapView::~MapView()
@@ -1126,6 +1136,11 @@ MapView::~MapView()
 
 void MapView::tick( float t, float dt )
 {
+  if (textureBrush.needUpdate())
+  {
+    textureBrush.GenerateTexture();
+  }
+
   dt = std::min( dt, 1.0f );
 
   Vec3D dir( 1.0f, 0.0f, 0.0f );
@@ -1154,6 +1169,8 @@ void MapView::tick( float t, float dt )
     rotate( 0.0f, 0.0f, &dirUp.x, &dirUp.z, ah * PI / 180.0f );
     rotate( 0.0f, 0.0f, &dirRight.x, &dirRight.z, ah * PI / 180.0f );
   }
+
+  const qreal ratio (height() / qreal (width()));
 
   nameEntry * Selection = _world->GetCurrentSelection();
 
@@ -1280,16 +1297,11 @@ void MapView::tick( float t, float dt )
     rh = 0;
     rv = 0;
 
-
     if( _holding_left_mouse_button && Selection->type==eEntry_MapChunk )
     {
-      float xPos, yPos, zPos;
-
-
-
-      xPos = Environment::getInstance()->Pos3DX;
-      yPos = Environment::getInstance()->Pos3DY;
-      zPos = Environment::getInstance()->Pos3DZ;
+      float xPos = Environment::getInstance()->Pos3DX;
+      float yPos = Environment::getInstance()->Pos3DY;
+      float zPos = Environment::getInstance()->Pos3DZ;
 
       switch( _current_terrain_editing_mode )
       {
@@ -1343,57 +1355,55 @@ void MapView::tick( float t, float dt )
         break;
 
       case texturing:
-        if( Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown)
         {
-          // clear chunk texture
-          if( mViewMode == eViewMode_3D )
-            _world->eraseTextures(xPos, zPos);
-          else if( mViewMode == eViewMode_2D )
-            _world->eraseTextures( CHUNKSIZE * 4.0f * video.ratio() * ( _mouse_position.x() / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / static_cast<float>( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
-        }
-        else if( Environment::getInstance()->CtrlDown )
-        {
-          // Pick texture
-          mainGui->TexturePicker->getTextures( _world->GetCurrentSelection());
-        }
-        else  if( Environment::getInstance()->ShiftDown)
-        {
-          // Paint 3d if shift down.
-          if( UITexturingGUI::getSelectedTexture() )
+          const QPointF brush_position ( mViewMode == eViewMode_3D
+                                       ? QPointF (xPos, zPos)
+                                       : tile_mode_brush_position()
+                                       + QPointF ( _world->camera.x
+                                                 , _world->camera.z
+                                                 )
+                                       );
+
+          if ( Environment::getInstance()->ShiftDown
+            && Environment::getInstance()->CtrlDown
+             )
           {
-            if( textureBrush.needUpdate() )
-            {
-              textureBrush.GenerateTexture();
-            }
-            if( mViewMode == eViewMode_3D )
-              _world->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
+            _world->eraseTextures (brush_position.x(), brush_position.y());
           }
-        }
-        else
-        {
-          // paint 2d if nothing is pressed.
-          if( textureBrush.needUpdate() )
+          else if (Environment::getInstance()->CtrlDown)
           {
-            textureBrush.GenerateTexture();
+            mainGui->TexturePicker->getTextures (_world->GetCurrentSelection());
           }
-          if( mViewMode == eViewMode_2D && !(Environment::getInstance()->ShiftDown) )
-            _world->paintTexture( CHUNKSIZE * 4.0f * video.ratio() * ( _mouse_position.x() / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / static_cast<float>( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
+          else if ( Environment::getInstance()->ShiftDown
+                 && UITexturingGUI::getSelectedTexture()
+                  )
+          {
+            _world->paintTexture ( brush_position.x()
+                                 , brush_position.y()
+                                 , &textureBrush
+                                 , brushLevel
+                                 , 1.0f - pow ( 1.0f - brushPressure
+                                              , dt * 10.0f
+                                              )
+                                 , UITexturingGUI::getSelectedTexture()
+                                 );
+          }
         }
       break;
 
       case hole_setting:
-        if( Environment::getInstance()->ShiftDown  )
+        if (Environment::getInstance()->ShiftDown)
         {
       // if there is no terain the projection mothod dont work. So get the cords by selection.
     Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
     yPos = Selection->data.mapchunk->getSelectionHeight();
           if( mViewMode == eViewMode_3D )      _world->removeHole( xPos, zPos );
-          //else if( mViewMode == eViewMode_2D )  _world->removeHole( CHUNKSIZE * 4.0f * video.ratio() * ( _mouse_position.x() / float( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
+          //else if( mViewMode == eViewMode_2D )  _world->removeHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _world->zoom+_world->camera.z );
         }
         else if( Environment::getInstance()->CtrlDown )
         {
           if( mViewMode == eViewMode_3D )      _world->addHole( xPos, zPos );
-          //else if( mViewMode == eViewMode_2D )  _world->addHole( CHUNKSIZE * 4.0f * video.ratio() * ( _mouse_position.x() / float( video.xres() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( video.yres() ) - 0.5f) / _world->zoom+_world->camera.z );
+          //else if( mViewMode == eViewMode_2D )  _world->addHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _world->zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _world->zoom+_world->camera.z );
         }
       break;
 
@@ -1466,12 +1476,6 @@ void MapView::tick( float t, float dt )
     _world->zoom = std::min( std::max( _world->zoom, 0.1f ), 2.0f );
   }
 
-
-  if( ( t - lastBrushUpdate ) > 0.1f && textureBrush.needUpdate() )
-  {
-    textureBrush.GenerateTexture();
-  }
-
   _world->time += mTimespeed * dt;
   _world->animtime += dt * 1000.0f;
   globalTime = static_cast<int>( _world->animtime );
@@ -1484,82 +1488,161 @@ void MapView::tick( float t, float dt )
   }
 }
 
+void MapView::setup_tile_mode_rendering() const
+{
+  glMatrixMode (GL_PROJECTION);
+  glLoadIdentity();
+
+  const qreal ratio (width() / qreal (height()));
+  glOrtho (-2.0f * ratio, 2.0f * ratio, 2.0f, -2.0f, -100.0f, 300.0f );
+
+  glMatrixMode (GL_MODELVIEW);
+  glLoadIdentity();
+}
+
+void MapView::setup_2d_rendering() const
+{
+  glMatrixMode (GL_PROJECTION);
+  glLoadIdentity();
+
+  glOrtho (0.0f, width(), height(), 0.0f, -1.0f, 1.0f);
+
+  glMatrixMode (GL_MODELVIEW);
+  glLoadIdentity();
+}
+
+static const qreal nearclip (1.0);
+static const qreal fov (45.0);
+void MapView::setup_3d_rendering() const
+{
+  glMatrixMode (GL_PROJECTION);
+  glLoadIdentity();
+
+  const qreal ratio (width() / qreal (height()));
+  gluPerspective (fov, ratio, 1.0f, _viewing_distance);
+
+  glMatrixMode (GL_MODELVIEW);
+  glLoadIdentity();
+}
+
+void MapView::setup_3d_selection_rendering() const
+{
+  glMatrixMode (GL_PROJECTION);
+  glLoadIdentity();
+
+  GLint viewport[4] = {0, 0, width(), height()};
+  gluPickMatrix ( _mouse_position.x()
+                , height() - _mouse_position.y()
+                , 7
+                , 7
+                , viewport
+                );
+
+  const qreal ratio (width() / qreal (height()));
+  gluPerspective (fov, ratio, 1.0f, _viewing_distance);
+
+  glMatrixMode (GL_MODELVIEW);
+  glLoadIdentity();
+}
+
 void MapView::doSelection( bool selectTerrainOnly )
 {
+  setup_3d_selection_rendering();
+
   _world->drawSelection ( _mouse_position.x()
                         , _mouse_position.y()
-                        , selectTerrainOnly
                         , _draw_wmo_doodads
-                        , _draw_wmos
-                        , _draw_doodads
+                        , _draw_wmos && !selectTerrainOnly
+                        , _draw_doodads && !selectTerrainOnly
                         , _draw_terrain
                         );
 }
-
 
 void MapView::displayGUIIfEnabled()
 {
   if( _GUIDisplayingEnabled )
   {
-    video.set2D();
+    setup_2d_rendering();
 
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    OpenGL::Texture::disableTexture( 1 );
-    OpenGL::Texture::enableTexture( 0 );
+    opengl::texture::disable_texture (1);
+    opengl::texture::enable_texture (0);
 
     glDisable( GL_DEPTH_TEST );
     glDisable( GL_CULL_FACE );
     glDisable( GL_LIGHTING );
     glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 
-    OpenGL::Texture::disableTexture( 0 );
+    opengl::texture::disable_texture (0);
 
-    mainGui->setTilemode( mViewMode != eViewMode_3D );
     mainGui->render();
 
-    OpenGL::Texture::enableTexture( 0 );
+    opengl::texture::enable_texture (0);
   }
 
   //! \todo This should only be done when actually needed. (on movement and camera changes as well as modifying an adt)
   _minimap->update();
 }
 
+QPointF MapView::tile_mode_brush_position() const
+{
+  const qreal _tile_mode_zoom (_world->zoom);
+
+  const QPointF mouse_pos ( _mouse_position.x() / qreal (width()) - 0.5
+                          , _mouse_position.y() / qreal (height()) - 0.5
+                          );
+
+  static const qreal arbitrary_constant_due_to_viewport (CHUNKSIZE * 4.0);
+
+  return QPointF ( arbitrary_constant_due_to_viewport
+                 * width() / qreal (height())
+                 * mouse_pos.x()
+                 / _tile_mode_zoom
+                 , arbitrary_constant_due_to_viewport
+                 * mouse_pos.y()
+                 / _tile_mode_zoom
+                 );
+}
+
+void MapView::draw_tile_mode_brush() const
+{
+  const qreal _tile_mode_zoom (_world->zoom);
+  const qreal brush_radius (textureBrush.getRadius());
+  const qreal brush_diameter (brush_radius * 2.0);
+  const QPointF brush_position (tile_mode_brush_position());
+
+  glPushMatrix();
+
+  glColor4f (1.0f, 1.0f, 1.0f, 0.5f);
+  opengl::texture::enable_texture (0);
+  textureBrush.getTexture()->bind();
+
+  glScalef (_tile_mode_zoom / CHUNKSIZE, _tile_mode_zoom / CHUNKSIZE, 1.0f);
+  glTranslatef ( brush_position.x() - textureBrush.getRadius()
+               , brush_position.y() - textureBrush.getRadius()
+               , 0.0f
+               );
+
+  glBegin (GL_QUADS);
+  glTexCoord2f (0.0f, 0.0f);
+  glVertex3f (0.0f, brush_diameter, 0.0f);
+  glTexCoord2f (1.0f, 0.0f);
+  glVertex3f (brush_diameter, brush_diameter, 0.0f);
+  glTexCoord2f (1.0f, 1.0f);
+  glVertex3f (brush_diameter, 0.0f, 0.0f);
+  glTexCoord2f (0.0f, 1.0f);
+  glVertex3f (0.0f, 0.0f, 0.0f);
+  glEnd();
+  glPopMatrix();
+}
+
 void MapView::displayViewMode_2D()
 {
-  video.setTileMode();
-  _world->drawTileMode (ah, _draw_lines);
-
-  const float mX = ( CHUNKSIZE * 4.0f * video.ratio() * ( _mouse_position.x() / static_cast<float>( video.xres() ) - 0.5f ) / _world->zoom + _world->camera.x ) / CHUNKSIZE;
-  const float mY = ( CHUNKSIZE * 4.0f * ( _mouse_position.y() / static_cast<float>( video.yres() ) - 0.5f ) / _world->zoom + _world->camera.z ) / CHUNKSIZE;
-
-  // draw brush
-  glPushMatrix();
-    glScalef(_world->zoom,_world->zoom,1.0f);
-    glTranslatef(-_world->camera.x/CHUNKSIZE,-_world->camera.z/CHUNKSIZE,0);
-
-    glColor4f(1.0f,1.0f,1.0f,0.5f);
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
-
-    textureBrush.getTexture()->bind();
-
-    const float tRadius = textureBrush.getRadius()/CHUNKSIZE;// *_world->zoom;
-    glBegin(GL_QUADS);
-      glTexCoord2f(0.0f,0.0f);
-      glVertex3f(mX-tRadius,mY+tRadius,0);
-      glTexCoord2f(1.0f,0.0f);
-      glVertex3f(mX+tRadius,mY+tRadius,0);
-      glTexCoord2f(1.0f,1.0f);
-      glVertex3f(mX+tRadius,mY-tRadius,0);
-      glTexCoord2f(0.0f,1.0f);
-      glVertex3f(mX-tRadius,mY-tRadius,0);
-    glEnd();
-  glPopMatrix();
-
+  setup_tile_mode_rendering();
+  _world->drawTileMode (ah, _draw_lines, width() / qreal (height()));
+  draw_tile_mode_brush();
   displayGUIIfEnabled();
 }
 
@@ -1574,7 +1657,7 @@ void MapView::displayViewMode_3D()
     doSelection (true);
   }
 
-  video.set3D();
+  setup_3d_rendering();
 
   float brush_radius (0.3f);
 
@@ -1609,7 +1692,7 @@ void MapView::display()
   //! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
   if (_save_to_minimap_on_next_drawing)
   {
-    video.setTileMode();
+    setup_tile_mode_rendering();
     _world->saveMap();
     _save_to_minimap_on_next_drawing = false;
   }
@@ -2341,8 +2424,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 
   if( _is_currently_moving_object )
   {
-    mh = -video.ratio() * relative_move.x() / static_cast<float>( video.xres() );
-    mv = -relative_move.y() / static_cast<float>( video.yres() );
+    const qreal ratio (height() / qreal (width()));
+    mh = -ratio * relative_move.x() / qreal (width());
+    mv = -relative_move.y() / qreal (height());
   }
   else
   {
@@ -2386,13 +2470,19 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     _last_clicked_ui_frame->processLeftDrag( event->x() - 4, event->y() - 4, relative_move.x(), relative_move.y() );
   }
 
-  if( mViewMode == eViewMode_2D && event->buttons() & Qt::LeftButton && event->modifiers() & Qt::ShiftModifier)
+  if ( mViewMode == eViewMode_2D
+    && event->buttons() & Qt::LeftButton
+    && event->modifiers() == Qt::ControlModifier
+     )
   {
     strafing = ((relative_move.x() / XSENS) / -1.0f) * 5.0f;
     moving = (relative_move.y() / YSENS) * 5.0f;
   }
 
-  if( mViewMode == eViewMode_2D && event->buttons() & Qt::RightButton && event->modifiers() & Qt::ShiftModifier)
+  if ( mViewMode == eViewMode_2D
+    && event->buttons() & Qt::RightButton
+    && event->modifiers() == Qt::ControlModifier
+     )
   {
     updown = (relative_move.y() / YSENS);
   }

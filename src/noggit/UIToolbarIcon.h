@@ -6,15 +6,18 @@
 #include <noggit/UIEventClasses.h>
 #include <noggit/UIFrame.h>
 
-namespace OpenGL { class Texture; };
+namespace noggit
+{
+  class blp_texture;
+}
 
 class UIToolbarIcon : public UIFrame, public UIEventSender
 {
 public:
   UIEventEventHandlerDefinition(int);
 protected:
-  OpenGL::Texture* texture;
-  OpenGL::Texture* textureSelected;
+  noggit::blp_texture* texture;
+  noggit::blp_texture* textureSelected;
 
   std::string _textureFilename;
   std::string _textureSelectedFilename;

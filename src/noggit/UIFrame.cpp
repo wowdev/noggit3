@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <vector>
 
-#include <noggit/Video.h> // gl*
+#include <opengl/types.h>
 
 void UIFrame::render() const
 {

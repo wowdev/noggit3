@@ -3,13 +3,13 @@
 
 #include <string>
 
-#include <noggit/Video.h>
+#include <opengl/types.h>
 
 #ifdef USEBLSSHADER
 class BLSShader
 {
 private:
-  OpenGL::Shader mShader;
+  opengl::shader mShader;
   bool mOkay;
   int mProgramType;
 
@@ -32,7 +32,7 @@ void initShaders();
 void reloadShaders();
 
 class Shader {
-  OpenGL::Shader id;
+  opengl::shader id;
   GLenum target;
 public:
   bool ok;

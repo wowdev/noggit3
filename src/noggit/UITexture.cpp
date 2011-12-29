@@ -2,8 +2,8 @@
 
 #include <string>
 
+#include <noggit/blp_texture.h>
 #include <noggit/TextureManager.h> // TextureManager
-#include <noggit/Video.h> // Texture
 
 UITexture::UITexture( float xPos, float yPos, float w, float h, const std::string& tex )
 : UIFrame( xPos, yPos, w, h )
@@ -24,7 +24,7 @@ UITexture::~UITexture()
   }
 }
 
-void UITexture::setTexture( OpenGL::Texture* tex )
+void UITexture::setTexture( noggit::blp_texture* tex )
 {
   //! \todo Free current texture.
   //! \todo New reference?
@@ -42,7 +42,7 @@ void UITexture::setTexture( const std::string& textureFilename )
   texture = TextureManager::newTexture( textureFilename );
 }
 
-OpenGL::Texture* UITexture::getTexture( )
+noggit::blp_texture* UITexture::getTexture( )
 {
   return texture;
 }
@@ -54,8 +54,7 @@ void UITexture::render() const
 
   glColor3f( 1.0f, 1.0f, 1.0f );
 
-  OpenGL::Texture::setActiveTexture();
-  OpenGL::Texture::enableTexture();
+  opengl::texture::enable_texture (0);
 
   texture->bind();
 
@@ -70,7 +69,7 @@ void UITexture::render() const
   glVertex2f( width(), height() );
   glEnd();
 
-  OpenGL::Texture::disableTexture();
+  opengl::texture::disable_texture (0);
 
   if( highlight )
   {
