@@ -3,7 +3,7 @@
 
 class UIToolbar;
 class UIStatusBar;
-class UIDetailInfos;
+class QTextEdit;
 class minimap_widget;
 class UIZoneIDBrowser;
 class MapView;
@@ -30,7 +30,7 @@ public:
   UIFrame* SelectedTexture;
   UIToolbar* guiToolbar;
   UIStatusBar* guiStatusbar;
-  UIDetailInfos* guidetailInfos;
+  QTextEdit* guidetailInfos;
   UIZoneIDBrowser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
   UITextureSwitcher* TextureSwitcher;
@@ -43,7 +43,6 @@ public:
   void toggleCursorSwitcher();
 
 private:
-  bool _tilemode;
   UICursorSwitcher* CursorSwitcher;
   World* _world;
 };

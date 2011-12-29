@@ -80,7 +80,6 @@ set ( noggit_sources
       src/noggit/UICheckBox.cpp
       src/noggit/UICloseWindow.cpp
       src/noggit/UICursorSwitcher.cpp
-      src/noggit/UIDetailInfos.cpp
       src/noggit/UIDoodadSpawner.cpp
       src/noggit/UIFrame.cpp
       src/noggit/UIGradient.cpp
@@ -156,7 +155,6 @@ set ( noggit_headers
       src/noggit/UICheckBox.h
       src/noggit/UICloseWindow.h
       src/noggit/UICursorSwitcher.h
-      src/noggit/UIDetailInfos.h
       src/noggit/UIDoodadSpawner.h
       src/noggit/UIEventClasses.h
       src/noggit/UIFrame.h
