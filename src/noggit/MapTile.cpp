@@ -546,28 +546,23 @@ void MapTile::drawWater()
 }
 
 // This is for the 2D mode only.
-void MapTile::drawTextures (int animation_time)
+void MapTile::drawTextures ( const QRectF& chunks_to_draw
+                           , int animation_time
+                           ) const
 {
-  float xOffset,yOffset;
-
   glPushMatrix();
-  yOffset=zbase/CHUNKSIZE;
-  xOffset=xbase/CHUNKSIZE;
-  glTranslatef(xOffset,yOffset,0);
 
-  //glTranslatef(-8,-8,0);
+  glTranslatef (xbase / CHUNKSIZE, zbase / CHUNKSIZE, 0.0f);
 
-  for (int j=0; j<16; ++j) {
-    for (int i=0; i<16; ++i) {
-      if(((i+1+xOffset)>_world->minX)&&((j+1+yOffset)>_world->minY)&&((i+xOffset)<_world->maxX)&&((j+yOffset)<_world->maxY))
-        mChunks[j][i]->drawTextures (animation_time);
-
-
+  for (size_t j (chunks_to_draw.top()); j < chunks_to_draw.bottom(); ++j)
+  {
+    for (size_t i (chunks_to_draw.left()); i < chunks_to_draw.right(); ++i)
+    {
+      mChunks[j][i]->drawTextures (animation_time);
     }
   }
+
   glPopMatrix();
-
-
 }
 
 MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )

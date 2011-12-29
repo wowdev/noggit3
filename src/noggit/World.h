@@ -122,11 +122,6 @@ public:
 
   void set_camera_above_terrain();
 
-  float minX;
-  float maxX;
-  float minY;
-  float maxY;
-
   Skies *skies;
   bool mHasAGlobalWMO;
   bool noadt;
