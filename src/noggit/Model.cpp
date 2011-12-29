@@ -33,10 +33,10 @@ Model::Model(const std::string& filename, bool _forceAnim)
 
   showGeosets = NULL;
 
-  finished = false;
+  _finished = false;
 }
 
-void Model::finishLoading()
+void Model::finish_loading()
 {
   noggit::mpq::file f (QString::fromStdString (_filename));
 
@@ -74,7 +74,7 @@ void Model::finishLoading()
 
   f.close();
 
-  finished = true;
+  _finished = true;
 }
 
 Model::~Model()
@@ -1166,7 +1166,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 
 void Model::draw (bool draw_fog)
 {
-  if(!finishedLoading())
+  if(!finished_loading())
     return;
 
   if (draw_fog)
@@ -1203,6 +1203,11 @@ void Model::draw (bool draw_fog)
 
 void Model::drawSelect()
 {
+  if (!_finished)
+  {
+    return;
+  }
+
   if( !animated )
     glCallList(SelectModelDrawList);
   else

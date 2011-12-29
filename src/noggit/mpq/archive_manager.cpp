@@ -1,7 +1,6 @@
 #include <noggit/mpq/archive_manager.h>
 
-#include <noggit/AsyncLoader.h> // AsyncLoader
-#include <noggit/application.h> // gAsyncLoader
+#include <noggit/async/loader.h>
 #include <noggit/Log.h>
 #include <noggit/mpq/archive.h>
 
@@ -9,7 +8,7 @@ namespace noggit
 {
   namespace mpq
   {
-    archive_manager::archive_manager (AsyncLoader* async_loader)
+    archive_manager::archive_manager (async::loader& async_loader)
       : _open_archives()
       , _async_loader (async_loader)
       , _listfile()
@@ -44,15 +43,9 @@ namespace noggit
                                    , bool process_list_file
                                    )
     {
-      _open_archives.push_back
-        ( archive_entry_type ( filename
-                             , new archive ( filename
-                                           , process_list_file
-                                           )
-                             )
-        );
-
-      _async_loader->addObject (_open_archives.back().second);
+      archive* arch (new archive (filename, process_list_file));
+      _open_archives.push_back (archive_entry_type (filename, arch));
+      _async_loader.add_object (arch);
     }
 
     void archive_manager::unload_all_mpqs()
@@ -85,7 +78,7 @@ namespace noggit
       bool allFinished (true);
       foreach (const archive_entry_type& entry, _open_archives)
       {
-        allFinished = allFinished && entry.second->finishedLoading();
+        allFinished = allFinished && entry.second->finished_loading();
       }
       return allFinished;
     }
@@ -94,7 +87,7 @@ namespace noggit
     {
       foreach (const archive_entry_type& entry, _open_archives)
       {
-        entry.second->finishLoading();
+        entry.second->finish_loading();
       }
     }
 

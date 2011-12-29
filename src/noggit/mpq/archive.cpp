@@ -33,16 +33,16 @@ namespace noggit
         LogDebug << "Opened archive " << filename.toStdString() << "\n";
       }
 
-      finished = !process_list_file;
+      _finished = !process_list_file;
     }
 
-    void archive::finishLoading()
+    void archive::finish_loading()
     {
-      if (finished)
+      if (_finished)
         return;
 
       //! \note We set this before doing something, as archive_manager relies on it being set for sorting after the last one.
-      finished = true;
+      _finished = true;
 
       HANDLE file_handle;
 
@@ -54,7 +54,7 @@ namespace noggit
         SFileReadFile (file_handle, readbuffer, filesize);
         SFileCloseFile (file_handle);
 
-        qobject_cast<application*> (qApp)->archive_manager().add_to_listfile
+        app().archive_manager().add_to_listfile
           ( QString::fromAscii (readbuffer, filesize)
             .toLower()
             .split ( "\r\n"

@@ -50,8 +50,7 @@ UIDoodadSpawner::UIDoodadSpawner (World* world)
 
   Directory::Ptr fileList( new Directory() );
 
-  noggit::mpq::archive_manager& manager
-    (qobject_cast<noggit::application*> (qApp)->archive_manager());
+  noggit::mpq::archive_manager& manager (noggit::app().archive_manager());
 
   while (!manager.all_finished_loading())
   {

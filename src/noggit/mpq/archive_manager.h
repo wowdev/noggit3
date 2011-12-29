@@ -7,10 +7,13 @@
 #include <QMutex>
 #include <QStringList>
 
-class AsyncLoader;
-
 namespace noggit
 {
+  namespace async
+  {
+    class loader;
+  }
+
   namespace mpq
   {
     //! \note Instead of including StormLib.
@@ -21,7 +24,7 @@ namespace noggit
     class archive_manager
     {
     public:
-      archive_manager (AsyncLoader*);
+      archive_manager (async::loader&);
       ~archive_manager();
 
       void load_mpq (const QString& filename, bool process_list_file = false);
@@ -46,7 +49,7 @@ namespace noggit
       typedef QList<archive_entry_type> archives_type;
       archives_type _open_archives;
 
-      AsyncLoader* _async_loader;
+      async::loader& _async_loader;
 
       QStringList _listfile;
       QMutex _listfile_mutex;

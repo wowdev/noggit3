@@ -8,8 +8,6 @@
 #include <string>
 #include <utility>
 #include <time.h>
-#include <boost/filesystem.hpp>
-#include <boost/thread/thread.hpp>
 
 #include <opengl/call_list.h>
 #include <opengl/settings_saver.h>

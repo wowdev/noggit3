@@ -2,9 +2,9 @@
 
 #include <QDir>
 
-#include <StormLib.h>
+#include <stdexcept>
 
-#include <boost/thread.hpp>
+#include <StormLib.h>
 
 #include <noggit/Log.h>
 #include <noggit/mpq/archive_manager.h>
@@ -54,11 +54,10 @@ namespace noggit
         QString corrected_filename (filename);
         corrected_filename.replace ("/", "\\");
 
-        qobject_cast<application*> (qApp)->archive_manager()
-          .open_file_from_an_mpq ( corrected_filename
-                                 , &size
-                                 , &buffer
-                                 );
+        app().archive_manager().open_file_from_an_mpq ( corrected_filename
+                                                      , &size
+                                                      , &buffer
+                                                      );
       }
 
       _is_at_end_of_file = size == 0;
@@ -76,8 +75,7 @@ namespace noggit
 
     bool file::exists (const QString& filename)
     {
-      return qobject_cast<application*> (qApp)->archive_manager()
-             .file_exists_in_an_mpq (filename)
+      return app().archive_manager().file_exists_in_an_mpq (filename)
           || QFile::exists (_disk_search_path + filename);
     }
 

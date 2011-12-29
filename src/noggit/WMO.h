@@ -9,6 +9,8 @@
 
 #include <opengl/types.h>
 
+#include <noggit/async/object.h>
+
 #include <noggit/Manager.h>
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/Quaternion.h>
@@ -156,9 +158,11 @@ struct WMOFog {
   void setup();
 };
 
-class WMO : public ManagedItem
+class WMO : public ManagedItem, public noggit::async::object
 {
 public:
+  virtual void finish_loading();
+
   bool draw_group_boundingboxes;
 
   const std::string& filename() const;
