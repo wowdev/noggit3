@@ -8,7 +8,7 @@ Directory::Directory()
 
 Directory::Ptr Directory::addDirectory( std::string name )
 {
-  Directory::Ptr lCurrentDir = shared_from_this();
+  Directory::Ptr lCurrentDir = this;
   size_t found;
   found = name.find_last_of( "/\\" );
   while( found != std::string::npos )

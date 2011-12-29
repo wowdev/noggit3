@@ -4,9 +4,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-
 #include <noggit/UIButton.h>
 #include <noggit/UIFrame.h>
 #include <noggit/Directory.h>
@@ -14,10 +11,10 @@
 class UIText;
 class UITreeViewButton;
 
-class UITreeView : public UIFrame, public boost::enable_shared_from_this<UITreeView>
+class UITreeView : public UIFrame
 {
 public:
-  typedef boost::shared_ptr<UITreeView> Ptr;
+  typedef UITreeView* Ptr;
   typedef std::vector<UITreeView::Ptr> Others;
 
   Others _others;

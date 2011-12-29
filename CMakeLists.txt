@@ -33,29 +33,6 @@ if (APPLE)
   set (FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES} z)
 endif (APPLE)
 
-# Hacky boost finding.
-set (Boost_USE_STATIC_LIBS ON)
-
-if (WIN32)
-  set (Boost_FIND_QUIETLY ON)
-  find_package (Boost)
-  set (Boost_FIND_QUIETLY OFF)
-  set (BOOST_ROOT ${Boost_INCLUDE_DIR})
-endif (WIN32)
-
-find_package (Boost COMPONENTS thread filesystem system REQUIRED)
-
-if (WIN32)
-  string ( REGEX REPLACE "/[^/]*$"
-           ""
-           Boost_STRIPPED_LIB_DIR
-           "${Boost_THREAD_LIBRARY_DEBUG}"
-         )
-  link_directories ( ${Boost_STRIPPED_LIB_DIR}
-                     ${STORMLIB_LIBRARY_DIR}
-                   )
-endif (WIN32)
-
 # Qt setup
 include (${QT_USE_FILE})
 
@@ -350,7 +327,6 @@ target_link_libraries ( noggit
                         ${OPENGL_LIBRARIES}
                         ${FREETYPE_LIBRARIES}
                         ${STORMLIB_LIBRARIES}
-                        ${Boost_LIBRARIES}
                         ${GLEW_LIBRARY}
                         ${QT_LIBRARIES}
                       )
@@ -376,7 +352,6 @@ if (APPLE)
       ${OPENGL_LIBRARY_DIR}
       ${FREETYPE_LIBRARY_DIR}
       ${STORMLIB_LIBRARY_DIR}
-      ${Boost_LIBRARY_DIR}
       ${GLEW_LIBRARY_DIR}
       )
 

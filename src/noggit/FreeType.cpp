@@ -7,9 +7,9 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-#include <boost/algorithm/string.hpp>
 
 #include <QString>
+#include <QStringList>
 
 #include <utf8.h>
 
@@ -176,10 +176,8 @@ namespace freetype
   {
     float height( h / 0.90f );
 
-    typedef std::vector<std::string> linesType;
-    linesType lines;
-
-    boost::split( lines, text, boost::is_any_of( "\n\r" ) );
+    typedef QStringList linesType;
+    linesType lines (QString::fromStdString (text).split ("\n"));
 
     glColor3f( colorR, colorG, colorB );
 
@@ -198,7 +196,7 @@ namespace freetype
       glPushMatrix();
       glTranslatef( x, verticalPosition, 0.0f );
 
-      const char* lineBegin = line->c_str();
+      const char* lineBegin = line->toLatin1().data();
       const char* lineEnd = lineBegin + line->length();
 
       try
@@ -210,7 +208,7 @@ namespace freetype
       }
       catch( const utf8::invalid_utf8& e )
       {
-        LogError << "Invalid UTF8 in string \"" << *line << "\"" << std::endl;
+        LogError << "Invalid UTF8 in string \"" << qPrintable (*line) << "\"" << std::endl;
       }
 
       verticalPosition += height;
@@ -228,10 +226,8 @@ namespace freetype
 
   int font_data::width( const std::string& text ) const
   {
-    typedef std::vector<std::string> linesType;
-    linesType lines;
-
-    boost::split( lines, text, boost::is_any_of( "\n\r" ) );
+    typedef QStringList linesType;
+    linesType lines (QString::fromStdString (text).split ("\n"));
 
     int maximumWidth( 0 );
 
@@ -239,7 +235,7 @@ namespace freetype
     {
       int currentWidth( 0 );
 
-      const char* lineBegin = line->c_str();
+      const char* lineBegin = line->toLatin1().data();
       const char* lineEnd = lineBegin + line->length();
 
       try
@@ -251,7 +247,7 @@ namespace freetype
       }
       catch( const utf8::invalid_utf8& e )
       {
-        LogError << "Invalid UTF8 in string \"" << *line << "\"" << std::endl;
+        LogError << "Invalid UTF8 in string \"" << qPrintable (*line) << "\"" << std::endl;
       }
 
       maximumWidth = std::max( maximumWidth, currentWidth );
