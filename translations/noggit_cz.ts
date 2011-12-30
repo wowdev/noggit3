@@ -254,72 +254,71 @@
         <translation>Klávesové zkratky</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="821"/>
         <source>Show application infos</source>
-        <translation>Ukázat informace o aplikaci</translation>
+        <translation type="obsolete">Ukázat informace o aplikaci</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="822"/>
+        <location filename="../src/noggit/MapView.cpp" line="821"/>
         <source>About Noggit</source>
         <translation>O NoggItu</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="824"/>
+        <location filename="../src/noggit/MapView.cpp" line="823"/>
         <source>Save WDT</source>
         <translation>Uložit WDT</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="825"/>
+        <location filename="../src/noggit/MapView.cpp" line="824"/>
         <source>Save minimap as raw files</source>
         <translation>Uložit minimapu jako raw soubor</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="826"/>
+        <location filename="../src/noggit/MapView.cpp" line="825"/>
         <source>toggle_doodad_spawner</source>
         <translation>přepínač_doodad_vkládání</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="838"/>
+        <location filename="../src/noggit/MapView.cpp" line="837"/>
         <source>File</source>
         <translation>Soubor</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="850"/>
+        <location filename="../src/noggit/MapView.cpp" line="849"/>
         <source>Edit</source>
         <translation>Úpravy</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="858"/>
+        <location filename="../src/noggit/MapView.cpp" line="857"/>
         <source>Assist</source>
         <translation>Assistence</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="859"/>
+        <location filename="../src/noggit/MapView.cpp" line="858"/>
         <source>Insert helper model</source>
         <translation>Vložit pomocný model</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="886"/>
+        <location filename="../src/noggit/MapView.cpp" line="885"/>
         <source>View</source>
         <translation>Ukázat</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="905"/>
+        <location filename="../src/noggit/MapView.cpp" line="904"/>
         <source>Settings</source>
         <translation>Nastavení</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="920"/>
+        <location filename="../src/noggit/MapView.cpp" line="919"/>
         <source>Help</source>
         <translation>Nápověda</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="925"/>
+        <location filename="../src/noggit/MapView.cpp" line="923"/>
         <source>Testing and Debugging</source>
         <translation>Testování a Debugování</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="930"/>
+        <location filename="../src/noggit/MapView.cpp" line="928"/>
         <source>Stuff that should only be on keys</source>
         <translation>Funkce, které mohou být jenom na zkratkách</translation>
     </message>

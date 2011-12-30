@@ -918,7 +918,6 @@ void MapView::createGUI()
 
   QMenu* help_menu (menu_bar->addMenu (tr ("Help")));
   help_menu->addAction (key_bindings);
-  help_menu->addAction (application_infos);
   help_menu->addAction (about_noggit);
 
   QMenu* debug_menu (menu_bar->addMenu (tr ("Testing and Debugging")));
