@@ -2,6 +2,8 @@
 #include <noggit/async/loader.h>
 #include <noggit/async/object.h>
 
+#include <QTimerEvent>
+
 namespace noggit
 {
   namespace async
@@ -10,16 +12,24 @@ namespace noggit
       : QThread (async_loader)
       , _async_loader (async_loader)
     {
-      startTimer (5);
+      startTimer (20);
     }
 
-    void loading_thread::timerEvent (QTimerEvent*)
+    void loading_thread::timerEvent (QTimerEvent* event)
     {
-      object* obj (_async_loader->next_object_to_load());
-      if (obj)
+      killTimer (event->timerId());
+      forever
       {
-        obj->finish_loading();
+        if (object* obj = _async_loader->next_object_to_load())
+        {
+          obj->finish_loading();
+        }
+        else
+        {
+          break;
+        }
       }
+      startTimer (20);
     }
   }
 }
