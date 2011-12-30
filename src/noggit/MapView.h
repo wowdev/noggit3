@@ -16,16 +16,15 @@ class QSlider;
 
 class UIFrame;
 class World;
-namespace ui
-{
-  class minimap_widget;
-}
 class UIDoodadSpawner;
 
 namespace ui
 {
+  class minimap_widget;
+
   class help_widget;
   class about_widget;
+  class cursor_selector;
 }
 
 enum eViewMode
@@ -123,7 +122,6 @@ private slots:
   void save();
   void save_all();
   void save_minimap();
-  void show_cursor_switcher();
   void show_map_chunk_settings (bool);
   void snap_selected_object_to_ground();
   void toggle_auto_selecting (bool);
@@ -226,6 +224,7 @@ private:
   UIDoodadSpawner* _doodad_spawner;
   ui::help_widget* _help_widget;
   ui::about_widget* _about_widget;
+  ui::cursor_selector* _cursor_selector;
 
   QPointF _mouse_position;
   bool _is_currently_moving_object;

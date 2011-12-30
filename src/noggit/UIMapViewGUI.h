@@ -10,7 +10,6 @@ class MapView;
 class UIFrame;
 class UITexturePicker;
 class UITextureSwitcher;
-class UICursorSwitcher;
 class World;
 
 #include <noggit/UIFrame.h>
@@ -38,12 +37,7 @@ public:
   void setTilemode( bool enabled );
   virtual void render() const;
 
-  void showCursorSwitcher();
-  void hideCursorSwitcher();
-  void toggleCursorSwitcher();
-
 private:
-  UICursorSwitcher* CursorSwitcher;
   World* _world;
 };
 

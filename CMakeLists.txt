@@ -79,7 +79,6 @@ set ( noggit_sources
       src/noggit/UIButton.cpp
       src/noggit/UICheckBox.cpp
       src/noggit/UICloseWindow.cpp
-      src/noggit/UICursorSwitcher.cpp
       src/noggit/UIDoodadSpawner.cpp
       src/noggit/UIFrame.cpp
       src/noggit/UIGradient.cpp
@@ -117,6 +116,7 @@ set ( noggit_sources
       src/noggit/ui/about_widget.cpp
       src/noggit/ui/help_widget.cpp
       src/noggit/ui/minimap_widget.cpp
+      src/noggit/ui/cursor_selector.cpp
     )
 
 set ( noggit_headers
@@ -154,7 +154,6 @@ set ( noggit_headers
       src/noggit/UIButton.h
       src/noggit/UICheckBox.h
       src/noggit/UICloseWindow.h
-      src/noggit/UICursorSwitcher.h
       src/noggit/UIDoodadSpawner.h
       src/noggit/UIEventClasses.h
       src/noggit/UIFrame.h
@@ -194,6 +193,7 @@ set ( noggit_headers
       src/noggit/mpq/file.h
 
       src/noggit/ui/about_widget.h
+	  src/noggit/ui/cursor_selector.h
       src/noggit/ui/help_widget.h
       src/noggit/ui/minimap_widget.h
     )
@@ -203,12 +203,12 @@ set ( noggit_headers_to_moc
 
       src/noggit/Menu.h
       src/noggit/MapView.h
-      src/noggit/UICursorSwitcher.h
 
       src/noggit/async/loader.h
       src/noggit/async/loading_thread.h
 
       src/noggit/ui/about_widget.h
+	  src/noggit/ui/cursor_selector.h
       src/noggit/ui/help_widget.h
       src/noggit/ui/minimap_widget.h
     )
@@ -267,7 +267,7 @@ endif (NOGGIT_ALL_WARNINGS)
 
 # MSVC++ specific defines.
 if (WIN32)
-    add_definitions (/vmg /D NOMINMAX)
+    add_definitions (/vmg /D NOMINMAX /wd"4503" /wd"4996")
 endif (WIN32)
 
 # Find revision ID and hash of the sourcetree

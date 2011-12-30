@@ -12,7 +12,6 @@
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
 #include <noggit/application.h> // gStates, gPop, arial14, morpheus40, arial...
-#include <noggit/UICursorSwitcher.h> // UICursorSwitcher
 #include <noggit/UIDoodadSpawner.h>
 #include <noggit/UIStatusBar.h> // UIStatusBar
 #include <noggit/UITexturePicker.h> //
@@ -58,24 +57,6 @@ UIMapViewGUI::UIMapViewGUI (World* world, MapView *map_view, float xres, float y
   TextureSwitcher->hide();
   TextureSwitcher->movable( true );
   addChild( TextureSwitcher);
-
-  // Cursor Switcher
-  CursorSwitcher = new UICursorSwitcher (NULL);
-}
-
-void UIMapViewGUI::showCursorSwitcher()
-{
-  CursorSwitcher->show();
-}
-
-void UIMapViewGUI::hideCursorSwitcher()
-{
-  CursorSwitcher->hide();
-}
-
-void UIMapViewGUI::toggleCursorSwitcher()
-{
-  CursorSwitcher->setVisible (CursorSwitcher->isVisible());
 }
 
 void UIMapViewGUI::render( ) const
