@@ -18,9 +18,9 @@ namespace ui
 
     virtual QSize sizeHint() const;
 
-    inline const World* const world (World* const world_)
+    inline const World* world (World* const world_)
       { _world = world_; update(); return _world; }
-    inline const World* const world() const { return _world; }
+    inline const World* world() const { return _world; }
 
     inline const bool& draw_skies (const bool& draw_skies_)
       { _draw_skies = draw_skies_; update(); return _draw_skies; }

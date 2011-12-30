@@ -1015,9 +1015,9 @@ MapView::MapView ( World* world
   , _last_update (0.0)
   , ah( ah0 )
   , av( av0 )
-  , _world (world)
   , _GUIDisplayingEnabled( true )
   , mTimespeed( 0.0f )
+  , _world (world)
   , _help_widget (new ui::help_widget (NULL))
   , _about_widget (NULL)
 //  , _about_widget (new ui::about_widget (NULL))
@@ -1129,7 +1129,7 @@ MapView::~MapView()
   _world = NULL;
 }
 
-void MapView::tick( float t, float dt )
+void MapView::tick( float /*t*/, float dt )
 {
   if (textureBrush.needUpdate())
   {
@@ -1164,8 +1164,6 @@ void MapView::tick( float t, float dt )
     rotate( 0.0f, 0.0f, &dirUp.x, &dirUp.z, ah * PI / 180.0f );
     rotate( 0.0f, 0.0f, &dirRight.x, &dirRight.z, ah * PI / 180.0f );
   }
-
-  const qreal ratio (height() / qreal (width()));
 
   nameEntry * Selection = _world->GetCurrentSelection();
 
@@ -1544,9 +1542,7 @@ void MapView::doSelection( bool selectTerrainOnly )
 {
   setup_3d_selection_rendering();
 
-  _world->drawSelection ( _mouse_position.x()
-                        , _mouse_position.y()
-                        , _draw_wmo_doodads
+  _world->drawSelection ( _draw_wmo_doodads
                         , _draw_wmos && !selectTerrainOnly
                         , _draw_doodads && !selectTerrainOnly
                         , _draw_terrain
