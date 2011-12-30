@@ -199,127 +199,127 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="808"/>
+        <location filename="../src/noggit/MapView.cpp" line="806"/>
         <source>Choose selection cursor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="809"/>
+        <location filename="../src/noggit/MapView.cpp" line="807"/>
         <source>Invert mouse y-axis</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="810"/>
+        <location filename="../src/noggit/MapView.cpp" line="808"/>
         <source>Automatic selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="812"/>
+        <location filename="../src/noggit/MapView.cpp" line="810"/>
         <source>Randomized rotation when copying</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="813"/>
+        <location filename="../src/noggit/MapView.cpp" line="811"/>
         <source>Randomized position when copying</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="814"/>
+        <location filename="../src/noggit/MapView.cpp" line="812"/>
         <source>Randomized size when copying</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="816"/>
+        <location filename="../src/noggit/MapView.cpp" line="814"/>
         <source>Decrease time speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="817"/>
+        <location filename="../src/noggit/MapView.cpp" line="815"/>
         <source>Increase time speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="818"/>
+        <location filename="../src/noggit/MapView.cpp" line="816"/>
         <source>Decrease movement speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="819"/>
+        <location filename="../src/noggit/MapView.cpp" line="817"/>
         <source>Increase movement speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="822"/>
+        <location filename="../src/noggit/MapView.cpp" line="820"/>
         <source>Key bindings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="823"/>
+        <location filename="../src/noggit/MapView.cpp" line="821"/>
         <source>Show application infos</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="824"/>
+        <location filename="../src/noggit/MapView.cpp" line="822"/>
         <source>About Noggit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="826"/>
+        <location filename="../src/noggit/MapView.cpp" line="824"/>
         <source>Save WDT</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="827"/>
+        <location filename="../src/noggit/MapView.cpp" line="825"/>
         <source>Save minimap as raw files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="828"/>
+        <location filename="../src/noggit/MapView.cpp" line="826"/>
         <source>toggle_doodad_spawner</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="840"/>
+        <location filename="../src/noggit/MapView.cpp" line="838"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="852"/>
+        <location filename="../src/noggit/MapView.cpp" line="850"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="860"/>
+        <location filename="../src/noggit/MapView.cpp" line="858"/>
         <source>Assist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="861"/>
+        <location filename="../src/noggit/MapView.cpp" line="859"/>
         <source>Insert helper model</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="888"/>
+        <location filename="../src/noggit/MapView.cpp" line="886"/>
         <source>View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="907"/>
+        <location filename="../src/noggit/MapView.cpp" line="905"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="922"/>
+        <location filename="../src/noggit/MapView.cpp" line="920"/>
         <source>Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="927"/>
+        <location filename="../src/noggit/MapView.cpp" line="925"/>
         <source>Testing and Debugging</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="932"/>
+        <location filename="../src/noggit/MapView.cpp" line="930"/>
         <source>Stuff that should only be on keys</source>
         <translation type="unfinished"></translation>
     </message>
@@ -399,47 +399,47 @@
 <context>
     <name>cursor_selector</name>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="31"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="41"/>
         <source>Cursor options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="35"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="45"/>
         <source>Disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="36"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="46"/>
         <source>Sphere</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="37"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="47"/>
         <source>Triangle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="38"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="48"/>
         <source>None</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="49"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="59"/>
         <source>Red</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="51"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="61"/>
         <source>Green</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="53"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="63"/>
         <source>Blue</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="55"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="65"/>
         <source>Alpha</source>
         <translation type="unfinished"></translation>
     </message>
