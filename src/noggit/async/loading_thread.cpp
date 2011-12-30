@@ -18,16 +18,9 @@ namespace noggit
     void loading_thread::timerEvent (QTimerEvent* event)
     {
       killTimer (event->timerId());
-      forever
+      while (object* obj = _async_loader->next_object_to_load())
       {
-        if (object* obj = _async_loader->next_object_to_load())
-        {
-          obj->finish_loading();
-        }
-        else
-        {
-          break;
-        }
+        obj->finish_loading();
       }
       startTimer (20);
     }
