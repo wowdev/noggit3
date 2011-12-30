@@ -178,9 +178,7 @@ public:
 
   void moveADT();
 
-  void drawSelection ( int cursorX
-                     , int cursorY
-                     , bool draw_wmo_doodads
+  void drawSelection ( bool draw_wmo_doodads
                      , bool draw_wmos
                      , bool draw_doodads
                      , bool draw_terrain

@@ -329,8 +329,14 @@ static inline QRgb color_for_height (int16_t height)
     const int16_t start;
     const int16_t stop;
 
-    ranged_color (const QRgb& color, const int16_t& start, const int16_t& stop)
-    : color (color), start (start), stop (stop) {}
+    ranged_color ( const QRgb& color_
+                 , const int16_t& start_
+                 , const int16_t& stop_
+                 )
+    : color (color_)
+    , start (start_)
+    , stop (stop_)
+    { }
   };
 
   static const ranged_color colors[] =
@@ -443,10 +449,11 @@ void World::initMinimap()
     {
       if (mare_offsets[y][x])
       {
-        const uint32_t* magic (wdl_file.get<uint32_t> (mare_offsets[y][x]));
-        const uint32_t* size (wdl_file.get<uint32_t> (mare_offsets[y][x] + 4));
+        wdl_file.seek (mare_offsets[y][x]);
+        wdl_file.read (&fourcc, 4);
+        wdl_file.read (&size, 4);
 
-        assert (*magic == 'MARE' && *size == 0x442);
+        assert (fourcc == 'MARE' && size == 0x442);
 
         //! \todo There also is a second heightmap appended which has additional 16*16 pixels.
         //! \todo There also is MAHO giving holes into this heightmap.
@@ -458,11 +465,11 @@ void World::initMinimap()
           for (size_t i (0); i < 17; ++i)
           {
             _minimap.setPixel (x * 17 + i, y * 17 + j, color_for_height (data[j * 17 + i]));
-              }
-            }
           }
         }
       }
+    }
+  }
 }
 
 void World::initLowresTerrain()
@@ -535,10 +542,11 @@ void World::initLowresTerrain()
     {
       if (mare_offsets[y][x])
       {
-        const uint32_t* magic (wdl_file.get<uint32_t> (mare_offsets[y][x]));
-        const uint32_t* size (wdl_file.get<uint32_t> (mare_offsets[y][x] + 4));
+        wdl_file.seek (mare_offsets[y][x]);
+        wdl_file.read (&fourcc, 4);
+        wdl_file.read (&size, 4);
 
-        assert (*magic == 'MARE' && *size == 0x442);
+        assert (fourcc == 'MARE' && size == 0x442);
 
         Vec3D vertices_17[17][17];
         Vec3D vertices_16[16][16];
@@ -1350,9 +1358,7 @@ static const GLuint MapObjName = 1;
 static const GLuint DoodadName = 2;
 static const GLuint MapTileName = 3;
 
-void World::drawSelection ( int cursorX
-                          , int cursorY
-                          , bool draw_wmo_doodads
+void World::drawSelection ( bool draw_wmo_doodads
                           , bool draw_wmos
                           , bool draw_doodads
                           , bool draw_terrain

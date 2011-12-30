@@ -17,7 +17,7 @@ namespace noggit
     class archive : public async::object
     {
     public:
-      ~archive();
+      virtual ~archive();
 
       bool has_file (QString filename) const;
       bool open_file ( const QString& filename

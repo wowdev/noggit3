@@ -9,6 +9,7 @@ namespace noggit
   namespace async
   {
     loader::loader (size_t thread_count, QObject* parent)
+    : QObject (parent)
     {
       Log << tr ("Asynchronous loading with %1 threads.")
              .arg (thread_count)
