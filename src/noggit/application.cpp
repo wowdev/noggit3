@@ -46,7 +46,9 @@ namespace noggit
     , _async_loader (1)
     , _archive_manager (_async_loader)
   {
+#ifndef _DEBUG
     RegisterErrorHandlers();
+#endif
     InitLogging();
     Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 

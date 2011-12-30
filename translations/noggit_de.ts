@@ -4,277 +4,277 @@
 <context>
     <name>MapView</name>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="575"/>
+        <location filename="../src/noggit/MapView.cpp" line="570"/>
         <source>Shaping settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="586"/>
-        <location filename="../src/noggit/MapView.cpp" line="650"/>
+        <location filename="../src/noggit/MapView.cpp" line="581"/>
+        <location filename="../src/noggit/MapView.cpp" line="645"/>
         <source>Flat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="587"/>
-        <location filename="../src/noggit/MapView.cpp" line="651"/>
+        <location filename="../src/noggit/MapView.cpp" line="582"/>
+        <location filename="../src/noggit/MapView.cpp" line="646"/>
         <source>Linear</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="588"/>
-        <location filename="../src/noggit/MapView.cpp" line="652"/>
+        <location filename="../src/noggit/MapView.cpp" line="583"/>
+        <location filename="../src/noggit/MapView.cpp" line="647"/>
         <source>Smooth</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="589"/>
+        <location filename="../src/noggit/MapView.cpp" line="584"/>
         <source>Polynomial</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="590"/>
+        <location filename="../src/noggit/MapView.cpp" line="585"/>
         <source>Trigonometric</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="591"/>
+        <location filename="../src/noggit/MapView.cpp" line="586"/>
         <source>Square</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="619"/>
-        <location filename="../src/noggit/MapView.cpp" line="674"/>
+        <location filename="../src/noggit/MapView.cpp" line="614"/>
+        <location filename="../src/noggit/MapView.cpp" line="669"/>
         <source>Brush &amp;radius</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="620"/>
-        <location filename="../src/noggit/MapView.cpp" line="675"/>
+        <location filename="../src/noggit/MapView.cpp" line="615"/>
+        <location filename="../src/noggit/MapView.cpp" line="670"/>
         <source>Shaping &amp;speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="641"/>
+        <location filename="../src/noggit/MapView.cpp" line="636"/>
         <source>Smoothing settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="769"/>
+        <location filename="../src/noggit/MapView.cpp" line="764"/>
         <source>Save current tile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="770"/>
+        <location filename="../src/noggit/MapView.cpp" line="765"/>
         <source>Save all modified tiles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="771"/>
+        <location filename="../src/noggit/MapView.cpp" line="766"/>
         <source>Reload current tile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="773"/>
+        <location filename="../src/noggit/MapView.cpp" line="768"/>
         <source>Add bookmark for this location</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="775"/>
+        <location filename="../src/noggit/MapView.cpp" line="770"/>
         <source>Export heightmap</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="776"/>
+        <location filename="../src/noggit/MapView.cpp" line="771"/>
         <source>Import heightmap</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="778"/>
+        <location filename="../src/noggit/MapView.cpp" line="773"/>
         <source>Return to menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="781"/>
+        <location filename="../src/noggit/MapView.cpp" line="776"/>
         <source>Copy object</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="782"/>
+        <location filename="../src/noggit/MapView.cpp" line="777"/>
         <source>Paste object</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="783"/>
+        <location filename="../src/noggit/MapView.cpp" line="778"/>
         <source>Delete object</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="786"/>
+        <location filename="../src/noggit/MapView.cpp" line="781"/>
         <source>Reset object&apos;s rotation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="787"/>
+        <location filename="../src/noggit/MapView.cpp" line="782"/>
         <source>Snap object to ground</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="790"/>
+        <location filename="../src/noggit/MapView.cpp" line="785"/>
         <source>Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="791"/>
+        <location filename="../src/noggit/MapView.cpp" line="786"/>
         <source>Selected texture</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="792"/>
+        <location filename="../src/noggit/MapView.cpp" line="787"/>
         <source>Map chunk settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="793"/>
+        <location filename="../src/noggit/MapView.cpp" line="788"/>
         <source>Show minimap</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="794"/>
+        <location filename="../src/noggit/MapView.cpp" line="789"/>
         <source>Object information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="797"/>
+        <location filename="../src/noggit/MapView.cpp" line="792"/>
         <source>Draw doodads</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="798"/>
+        <location filename="../src/noggit/MapView.cpp" line="793"/>
         <source>Draw doodads inside of WMOs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="799"/>
+        <location filename="../src/noggit/MapView.cpp" line="794"/>
         <source>Draw terrain</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="800"/>
+        <location filename="../src/noggit/MapView.cpp" line="795"/>
         <source>Draw water</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="801"/>
+        <location filename="../src/noggit/MapView.cpp" line="796"/>
         <source>Draw WMOs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="802"/>
+        <location filename="../src/noggit/MapView.cpp" line="797"/>
         <source>Draw lines</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="803"/>
+        <location filename="../src/noggit/MapView.cpp" line="798"/>
         <source>Draw lines for holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="805"/>
+        <location filename="../src/noggit/MapView.cpp" line="800"/>
         <source>Draw contours</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="806"/>
+        <location filename="../src/noggit/MapView.cpp" line="801"/>
         <source>Draw fog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="807"/>
+        <location filename="../src/noggit/MapView.cpp" line="802"/>
         <source>Enable Lighting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="809"/>
+        <location filename="../src/noggit/MapView.cpp" line="804"/>
         <source>Turn camera 180 degrees</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="812"/>
+        <location filename="../src/noggit/MapView.cpp" line="808"/>
         <source>Choose selection cursor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="813"/>
+        <location filename="../src/noggit/MapView.cpp" line="809"/>
         <source>Invert mouse y-axis</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="814"/>
+        <location filename="../src/noggit/MapView.cpp" line="810"/>
         <source>Automatic selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="816"/>
+        <location filename="../src/noggit/MapView.cpp" line="812"/>
         <source>Randomized rotation when copying</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="817"/>
+        <location filename="../src/noggit/MapView.cpp" line="813"/>
         <source>Randomized position when copying</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="818"/>
+        <location filename="../src/noggit/MapView.cpp" line="814"/>
         <source>Randomized size when copying</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="820"/>
+        <location filename="../src/noggit/MapView.cpp" line="816"/>
         <source>Decrease time speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="821"/>
+        <location filename="../src/noggit/MapView.cpp" line="817"/>
         <source>Increase time speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="822"/>
+        <location filename="../src/noggit/MapView.cpp" line="818"/>
         <source>Decrease movement speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="823"/>
+        <location filename="../src/noggit/MapView.cpp" line="819"/>
         <source>Increase movement speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="826"/>
+        <location filename="../src/noggit/MapView.cpp" line="822"/>
         <source>Key bindings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="827"/>
+        <location filename="../src/noggit/MapView.cpp" line="823"/>
         <source>Show application infos</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="828"/>
+        <location filename="../src/noggit/MapView.cpp" line="824"/>
         <source>About Noggit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="830"/>
+        <location filename="../src/noggit/MapView.cpp" line="826"/>
         <source>Save WDT</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="831"/>
+        <location filename="../src/noggit/MapView.cpp" line="827"/>
         <source>Save minimap as raw files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="832"/>
+        <location filename="../src/noggit/MapView.cpp" line="828"/>
         <source>toggle_doodad_spawner</source>
         <translation type="unfinished"></translation>
     </message>
@@ -364,54 +364,6 @@
     </message>
 </context>
 <context>
-    <name>UICursorSwitcher</name>
-    <message>
-        <location filename="../src/noggit/UICursorSwitcher.cpp" line="44"/>
-        <source>Cursor options</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/UICursorSwitcher.cpp" line="48"/>
-        <source>Disk</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/UICursorSwitcher.cpp" line="49"/>
-        <source>Sphere</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/UICursorSwitcher.cpp" line="50"/>
-        <source>Triangle</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/UICursorSwitcher.cpp" line="51"/>
-        <source>None</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/UICursorSwitcher.cpp" line="62"/>
-        <source>Red</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/UICursorSwitcher.cpp" line="64"/>
-        <source>Green</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/UICursorSwitcher.cpp" line="66"/>
-        <source>Blue</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/UICursorSwitcher.cpp" line="68"/>
-        <source>Alpha</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>about_widget</name>
     <message>
         <location filename="../src/noggit/ui/about_widget.cpp" line="16"/>
@@ -441,6 +393,54 @@
     <message>
         <location filename="../src/noggit/ui/about_widget.cpp" line="29"/>
         <source>%1, %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>cursor_selector</name>
+    <message>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="31"/>
+        <source>Cursor options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="35"/>
+        <source>Disk</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="36"/>
+        <source>Sphere</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="37"/>
+        <source>Triangle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="38"/>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="49"/>
+        <source>Red</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="51"/>
+        <source>Green</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="53"/>
+        <source>Blue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="55"/>
+        <source>Alpha</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -475,7 +475,7 @@
 <context>
     <name>loader</name>
     <message>
-        <location filename="../src/noggit/async/loader.cpp" line="13"/>
+        <location filename="../src/noggit/async/loader.cpp" line="14"/>
         <source>Asynchronous loading with %1 threads.</source>
         <translation type="unfinished"></translation>
     </message>

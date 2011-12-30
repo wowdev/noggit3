@@ -174,6 +174,7 @@ namespace freetype
 
   void font_data::print( float x, float y, const std::string& text, float colorR, float colorG, float colorB ) const
   {
+      return; // remove this.
     float height( h / 0.90f );
 
     typedef QStringList linesType;
@@ -226,6 +227,7 @@ namespace freetype
 
   int font_data::width( const std::string& text ) const
   {
+    return 0; // remove this.
     typedef QStringList linesType;
     linesType lines (QString::fromStdString (text).split ("\n"));
 
