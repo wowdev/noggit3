@@ -354,7 +354,7 @@ void Liquid::initFromMH2O()
   {
     // Fallback, when there is no information.
     //initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" );
-    initTextures<1,30>("XTextures\\river\\lake_a.%d.blp"); // gut, also diese dateien existieren nicht.
+    initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
     mLiquidType = 0;
     mShaderType = 1;
   }
@@ -366,7 +366,7 @@ void Liquid::initFromMH2O()
   for( int j = 0; j < 9; ++j )
     for( int i = 0; i < 9; ++i )
       lVertices[j][i] = Vec3D( pos.x + tilesize * i, mTileData.mHeightmap[j][i], pos.z + ydir * tilesize * j );
-  
+
   mDrawList = new opengl::call_list;
   mDrawList->start_recording();
 
