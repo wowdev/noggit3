@@ -33,6 +33,7 @@
 #include <noggit/ui/about_widget.h>
 #include <noggit/ui/minimap_widget.h>
 #include <noggit/ui/help_widget.h>
+#include <noggit/ui/cursor_selector.h>
 
 #include <noggit/Log.h>
 
@@ -346,11 +347,6 @@ void MapView::show_texture_switcher()
 {
   mainGui->TextureSwitcher->getTextures(_world->GetCurrentSelection());
   //mainGui->TextureSwitcher->show();
-}
-
-void MapView::show_cursor_switcher()
-{
-  mainGui->showCursorSwitcher();
 }
 
 #ifdef __FILESAREMISSING
@@ -808,7 +804,7 @@ void MapView::createGUI()
   NEW_ACTION (turn_around, tr ("Turn camera 180 degrees"), SLOT (turn_around()), Qt::Key_R);
 
 
-  NEW_ACTION (cursor_selector, tr ("Choose selection cursor"), SLOT (show_cursor_switcher()), 0);
+  NEW_ACTION_OTHER (cursor_selector, tr ("Choose selection cursor"), _cursor_selector, SLOT (show()), Qt::Key_Alt & Qt::Key_C);
   NEW_TOGGLE_ACTION (invert_mouse_y_axis, tr ("Invert mouse y-axis"), SLOT (invert_mouse_y_axis (bool)), Qt::Key_I, false);
   NEW_TOGGLE_ACTION (auto_selection, tr ("Automatic selection"), SLOT (toggle_auto_selecting (bool)), Qt::SHIFT + Qt::Key_F4, false);
 
@@ -1779,9 +1775,6 @@ void MapView::keyPressEvent (QKeyEvent* event)
 //  NEW_TOGGLE_ACTION (rotation_randomization, tr ("Randomized rotation when copying"), SLOT (toggle_copy_rotation_randomization (bool)), 0, false);
 
 
-  if (event->key() == Qt::Key_C && event->modifiers() & Qt::AltModifier)
-    mainGui->toggleCursorSwitcher();
-  else
   if (event->key() == Qt::Key_C)
     Environment::getInstance()->cursorType = (Environment::getInstance()->cursorType + 1) % 4;
 
