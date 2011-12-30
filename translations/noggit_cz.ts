@@ -1,327 +1,327 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0">
+<TS version="2.0" language="cs_CZ">
 <context>
     <name>MapView</name>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="570"/>
         <source>Shaping settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Nastavení pro tvarování</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="581"/>
         <location filename="../src/noggit/MapView.cpp" line="645"/>
         <source>Flat</source>
-        <translation type="unfinished"></translation>
+        <translation>Rovný</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="582"/>
         <location filename="../src/noggit/MapView.cpp" line="646"/>
         <source>Linear</source>
-        <translation type="unfinished"></translation>
+        <translation>Lineární</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="583"/>
         <location filename="../src/noggit/MapView.cpp" line="647"/>
         <source>Smooth</source>
-        <translation type="unfinished"></translation>
+        <translation>Hladký</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="584"/>
         <source>Polynomial</source>
-        <translation type="unfinished"></translation>
+        <translation>Polynomický</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="585"/>
         <source>Trigonometric</source>
-        <translation type="unfinished"></translation>
+        <translation>Trigonomerický</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="586"/>
         <source>Square</source>
-        <translation type="unfinished"></translation>
+        <translation>Čtverec</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="614"/>
         <location filename="../src/noggit/MapView.cpp" line="669"/>
         <source>Brush &amp;radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Velikost &amp;štětce</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="615"/>
         <location filename="../src/noggit/MapView.cpp" line="670"/>
         <source>Shaping &amp;speed</source>
-        <translation type="unfinished"></translation>
+        <translation>Rychlost &amp;tvarování</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="636"/>
         <source>Smoothing settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Nastavení uhlazování</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="764"/>
         <source>Save current tile</source>
-        <translation type="unfinished"></translation>
+        <translation>Uložit tuto část</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="765"/>
         <source>Save all modified tiles</source>
-        <translation type="unfinished"></translation>
+        <translation>Uložit všechny části</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="766"/>
         <source>Reload current tile</source>
-        <translation type="unfinished"></translation>
+        <translation>Znovu načíst tuto část</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="768"/>
         <source>Add bookmark for this location</source>
-        <translation type="unfinished"></translation>
+        <translation>Přidat záložku pro tuto oblast</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="770"/>
         <source>Export heightmap</source>
-        <translation type="unfinished"></translation>
+        <translation>Exportovat výšku mapy</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="771"/>
         <source>Import heightmap</source>
-        <translation type="unfinished"></translation>
+        <translation>Importovat výšku mapy</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="773"/>
         <source>Return to menu</source>
-        <translation type="unfinished"></translation>
+        <translation>Zpět do menu</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="776"/>
         <source>Copy object</source>
-        <translation type="unfinished"></translation>
+        <translation>Kopírovat objekt</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="777"/>
         <source>Paste object</source>
-        <translation type="unfinished"></translation>
+        <translation>Vložit objekt</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="778"/>
         <source>Delete object</source>
-        <translation type="unfinished"></translation>
+        <translation>Smazat objekt</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="781"/>
         <source>Reset object&apos;s rotation</source>
-        <translation type="unfinished"></translation>
+        <translation>Resetovat rotaci objektu</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="782"/>
         <source>Snap object to ground</source>
-        <translation type="unfinished"></translation>
+        <translation>Položit objekt na zem</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="785"/>
         <source>Toolbar</source>
-        <translation type="unfinished"></translation>
+        <translation>Nástroje</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="786"/>
         <source>Selected texture</source>
-        <translation type="unfinished"></translation>
+        <translation>Vybraná textura</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="787"/>
         <source>Map chunk settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Nastavení kousku mapy</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="788"/>
         <source>Show minimap</source>
-        <translation type="unfinished"></translation>
+        <translation>Ukázat minimapu</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="789"/>
         <source>Object information</source>
-        <translation type="unfinished"></translation>
+        <translation>Informace o objektu</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="792"/>
         <source>Draw doodads</source>
-        <translation type="unfinished"></translation>
+        <translation>Vykreslit doodads</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="793"/>
         <source>Draw doodads inside of WMOs</source>
-        <translation type="unfinished"></translation>
+        <translation>Vykreslit doodads uvnitř WMO</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="794"/>
         <source>Draw terrain</source>
-        <translation type="unfinished"></translation>
+        <translation>Vykreslit terén</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="795"/>
         <source>Draw water</source>
-        <translation type="unfinished"></translation>
+        <translation>Vykreslit vodu</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="796"/>
         <source>Draw WMOs</source>
-        <translation type="unfinished"></translation>
+        <translation>Vykreslit WMO</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="797"/>
         <source>Draw lines</source>
-        <translation type="unfinished"></translation>
+        <translation>Vykreslit čáry</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="798"/>
         <source>Draw lines for holes</source>
-        <translation type="unfinished"></translation>
+        <translation>Vykreslit prázdné čáry</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="800"/>
         <source>Draw contours</source>
-        <translation type="unfinished"></translation>
+        <translation>Vykreslit kontůry</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="801"/>
         <source>Draw fog</source>
-        <translation type="unfinished"></translation>
+        <translation>Vykreslit mlhu</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="802"/>
         <source>Enable Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>Zapnout světlo</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="804"/>
         <source>Turn camera 180 degrees</source>
-        <translation type="unfinished"></translation>
+        <translation>Otočit kameru o 180 stupňů</translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="806"/>
+        <source>Choose selection cursor</source>
+        <translation>Změna kurzoru</translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="807"/>
+        <source>Invert mouse y-axis</source>
+        <translation>Obrátit osu-y u myši</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="808"/>
-        <source>Choose selection cursor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MapView.cpp" line="809"/>
-        <source>Invert mouse y-axis</source>
-        <translation type="unfinished"></translation>
+        <source>Automatic selection</source>
+        <translation>Automatický výběr</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="810"/>
-        <source>Automatic selection</source>
-        <translation type="unfinished"></translation>
+        <source>Randomized rotation when copying</source>
+        <translation>Náhodná rotace při kopírování</translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="811"/>
+        <source>Randomized position when copying</source>
+        <translation>Náhodná pozice při kopírování</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="812"/>
-        <source>Randomized rotation when copying</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MapView.cpp" line="813"/>
-        <source>Randomized position when copying</source>
-        <translation type="unfinished"></translation>
+        <source>Randomized size when copying</source>
+        <translation>Náhodná velikost při kopírování</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="814"/>
-        <source>Randomized size when copying</source>
-        <translation type="unfinished"></translation>
+        <source>Decrease time speed</source>
+        <translation>Snížit rychlost času</translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="815"/>
+        <source>Increase time speed</source>
+        <translation>Zvýšit rychlost času</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="816"/>
-        <source>Decrease time speed</source>
-        <translation type="unfinished"></translation>
+        <source>Decrease movement speed</source>
+        <translation>Snížit rychlost</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="817"/>
-        <source>Increase time speed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MapView.cpp" line="818"/>
-        <source>Decrease movement speed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MapView.cpp" line="819"/>
         <source>Increase movement speed</source>
-        <translation type="unfinished"></translation>
+        <translation>Zvýšit rychlost</translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="820"/>
+        <source>Key bindings</source>
+        <translation>Klávesové zkratky</translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="821"/>
+        <source>Show application infos</source>
+        <translation>Ukázat informace o aplikaci</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="822"/>
-        <source>Key bindings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MapView.cpp" line="823"/>
-        <source>Show application infos</source>
-        <translation type="unfinished"></translation>
+        <source>About Noggit</source>
+        <translation>O NoggItu</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="824"/>
-        <source>About Noggit</source>
-        <translation type="unfinished"></translation>
+        <source>Save WDT</source>
+        <translation>Uložit WDT</translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="825"/>
+        <source>Save minimap as raw files</source>
+        <translation>Uložit minimapu jako raw soubor</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="826"/>
-        <source>Save WDT</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MapView.cpp" line="827"/>
-        <source>Save minimap as raw files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MapView.cpp" line="828"/>
         <source>toggle_doodad_spawner</source>
-        <translation type="unfinished"></translation>
+        <translation>přepínač_doodad_vkládání</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="840"/>
+        <location filename="../src/noggit/MapView.cpp" line="838"/>
         <source>File</source>
-        <translation type="unfinished"></translation>
+        <translation>Soubor</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="852"/>
+        <location filename="../src/noggit/MapView.cpp" line="850"/>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>Úpravy</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="860"/>
+        <location filename="../src/noggit/MapView.cpp" line="858"/>
         <source>Assist</source>
-        <translation type="unfinished"></translation>
+        <translation>Assistence</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="861"/>
+        <location filename="../src/noggit/MapView.cpp" line="859"/>
         <source>Insert helper model</source>
-        <translation type="unfinished"></translation>
+        <translation>Vložit pomocný model</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="888"/>
+        <location filename="../src/noggit/MapView.cpp" line="886"/>
         <source>View</source>
-        <translation type="unfinished"></translation>
+        <translation>Ukázat</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="907"/>
+        <location filename="../src/noggit/MapView.cpp" line="905"/>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Nastavení</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="922"/>
+        <location filename="../src/noggit/MapView.cpp" line="920"/>
         <source>Help</source>
-        <translation type="unfinished"></translation>
+        <translation>Nápověda</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="927"/>
+        <location filename="../src/noggit/MapView.cpp" line="925"/>
         <source>Testing and Debugging</source>
-        <translation type="unfinished"></translation>
+        <translation>Testování a Debugování</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="932"/>
+        <location filename="../src/noggit/MapView.cpp" line="930"/>
         <source>Stuff that should only be on keys</source>
-        <translation type="unfinished"></translation>
+        <translation>Funkce, které mohou být jenom na zkratkách</translation>
     </message>
 </context>
 <context>
@@ -329,22 +329,22 @@
     <message>
         <location filename="../src/noggit/Menu.cpp" line="83"/>
         <source>Continents</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontinenty</translation>
     </message>
     <message>
         <location filename="../src/noggit/Menu.cpp" line="84"/>
         <source>Dungeons</source>
-        <translation type="unfinished"></translation>
+        <translation>Dungeony</translation>
     </message>
     <message>
         <location filename="../src/noggit/Menu.cpp" line="85"/>
         <source>Raids</source>
-        <translation type="unfinished"></translation>
+        <translation>Raidy</translation>
     </message>
     <message>
         <location filename="../src/noggit/Menu.cpp" line="86"/>
         <source>Bookmarks</source>
-        <translation type="unfinished"></translation>
+        <translation>Záložky</translation>
     </message>
 </context>
 <context>
@@ -354,13 +354,13 @@
         <location filename="../src/noggit/DBC.cpp" line="52"/>
         <location filename="../src/noggit/DBC.cpp" line="62"/>
         <source>Unknown location</source>
-        <translation type="unfinished"></translation>
+        <translation>Neznámá lokace</translation>
     </message>
     <message>
         <location filename="../src/noggit/DBC.cpp" line="72"/>
         <location filename="../src/noggit/DBC.cpp" line="81"/>
         <source>Unknown map</source>
-        <translation type="unfinished"></translation>
+        <translation>Neznámá mapa</translation>
     </message>
 </context>
 <context>
@@ -368,78 +368,78 @@
     <message>
         <location filename="../src/noggit/ui/about_widget.cpp" line="16"/>
         <source>About Noggit</source>
-        <translation type="unfinished"></translation>
+        <translation>O NoggItu</translation>
     </message>
     <message>
         <location filename="../src/noggit/ui/about_widget.cpp" line="24"/>
         <source>Noggit Studio</source>
-        <translation type="unfinished"></translation>
+        <translation>NoggIt Studio</translation>
     </message>
     <message>
         <location filename="../src/noggit/ui/about_widget.cpp" line="25"/>
         <source>a WoW map editor for 3.3.5a</source>
-        <translation type="unfinished"></translation>
+        <translation>WoW map editor pro 3.3.5a</translation>
     </message>
     <message>
         <location filename="../src/noggit/ui/about_widget.cpp" line="26"/>
         <source>Maintained by %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Vývojáří: %1</translation>
     </message>
     <message utf8="true">
         <location filename="../src/noggit/ui/about_widget.cpp" line="27"/>
         <source>World of Warcraft © Blizzard Entertainment</source>
-        <translation type="unfinished"></translation>
+        <translation>World of Warcraft © Blizzard Entertainment</translation>
     </message>
     <message>
         <location filename="../src/noggit/ui/about_widget.cpp" line="29"/>
         <source>%1, %2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1, %2</translation>
     </message>
 </context>
 <context>
     <name>cursor_selector</name>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="31"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="41"/>
         <source>Cursor options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="35"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="45"/>
         <source>Disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="36"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="46"/>
         <source>Sphere</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="37"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="47"/>
         <source>Triangle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="38"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="48"/>
         <source>None</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="49"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="59"/>
         <source>Red</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="51"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="61"/>
         <source>Green</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="53"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="63"/>
         <source>Blue</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/cursor_selector.cpp" line="55"/>
+        <location filename="../src/noggit/ui/cursor_selector.cpp" line="65"/>
         <source>Alpha</source>
         <translation type="unfinished"></translation>
     </message>
@@ -449,27 +449,27 @@
     <message>
         <location filename="../src/noggit/ui/help_widget.cpp" line="24"/>
         <source>Key bindings</source>
-        <translation type="unfinished"></translation>
+        <translation>Klávesové zkratky</translation>
     </message>
     <message>
         <location filename="../src/noggit/ui/help_widget.cpp" line="26"/>
         <source>Basic controls</source>
-        <translation type="unfinished"></translation>
+        <translation>Základní ovládání</translation>
     </message>
     <message>
         <location filename="../src/noggit/ui/help_widget.cpp" line="44"/>
         <source>Toggles</source>
-        <translation type="unfinished"></translation>
+        <translation>Přepínače</translation>
     </message>
     <message>
         <location filename="../src/noggit/ui/help_widget.cpp" line="61"/>
         <source>Files</source>
-        <translation type="unfinished"></translation>
+        <translation>Soubory</translation>
     </message>
     <message>
         <location filename="../src/noggit/ui/help_widget.cpp" line="71"/>
         <source>Adjust</source>
-        <translation type="unfinished"></translation>
+        <translation>Ostatní</translation>
     </message>
 </context>
 <context>
@@ -485,7 +485,7 @@
     <message>
         <location filename="../src/noggit/ui/minimap_widget.cpp" line="131"/>
         <source>Select a map on the left side.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vyberte si mapu nalevo</translation>
     </message>
 </context>
 </TS>

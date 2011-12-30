@@ -818,7 +818,6 @@ void MapView::createGUI()
 
 
   NEW_ACTION_OTHER (key_bindings, tr ("Key bindings"), _help_widget, SLOT (show()), Qt::Key_H);
-  NEW_TOGGLE_ACTION (application_infos, tr ("Show application infos"), SLOT (toggle_app_info (bool)), 0, false);
   NEW_ACTION_OTHER (about_noggit, tr ("About Noggit"), _about_widget, SLOT (show()), 0);
 
   NEW_ACTION (save_wdt, tr ("Save WDT"), SLOT (TEST_save_wdt()), 0);
