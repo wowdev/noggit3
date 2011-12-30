@@ -20,11 +20,10 @@ class UIDoodadSpawner;
 
 namespace ui
 {
-  class minimap_widget;
-
-  class help_widget;
   class about_widget;
   class cursor_selector;
+  class help_widget;
+  class minimap_widget;
 }
 
 enum eViewMode

@@ -803,8 +803,6 @@ void MapView::createGUI()
 
   NEW_ACTION (turn_around, tr ("Turn camera 180 degrees"), SLOT (turn_around()), Qt::Key_R);
 
-  // lukas letzte zeile. Yay. we:r )hätte das gedacht? ,_,
-  // VERDAMMTER VOLLIDIOT
   NEW_ACTION_OTHER (cursor_selector, tr ("Choose selection cursor"), _cursor_selector, SLOT (show()), Qt::Key_Alt & Qt::Key_C);
   NEW_TOGGLE_ACTION (invert_mouse_y_axis, tr ("Invert mouse y-axis"), SLOT (invert_mouse_y_axis (bool)), Qt::Key_I, false);
   NEW_TOGGLE_ACTION (auto_selection, tr ("Automatic selection"), SLOT (toggle_auto_selecting (bool)), Qt::SHIFT + Qt::Key_F4, false);

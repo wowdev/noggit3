@@ -193,7 +193,7 @@ set ( noggit_headers
       src/noggit/mpq/file.h
 
       src/noggit/ui/about_widget.h
-	  src/noggit/ui/cursor_selector.h
+      src/noggit/ui/cursor_selector.h
       src/noggit/ui/help_widget.h
       src/noggit/ui/minimap_widget.h
     )
@@ -208,7 +208,7 @@ set ( noggit_headers_to_moc
       src/noggit/async/loading_thread.h
 
       src/noggit/ui/about_widget.h
-	  src/noggit/ui/cursor_selector.h
+      src/noggit/ui/cursor_selector.h
       src/noggit/ui/help_widget.h
       src/noggit/ui/minimap_widget.h
     )
