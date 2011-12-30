@@ -803,7 +803,8 @@ void MapView::createGUI()
 
   NEW_ACTION (turn_around, tr ("Turn camera 180 degrees"), SLOT (turn_around()), Qt::Key_R);
 
-
+  // lukas letzte zeile. Yay. we:r )hätte das gedacht? ,_,
+  // VERDAMMTER VOLLIDIOT
   NEW_ACTION_OTHER (cursor_selector, tr ("Choose selection cursor"), _cursor_selector, SLOT (show()), Qt::Key_Alt & Qt::Key_C);
   NEW_TOGGLE_ACTION (invert_mouse_y_axis, tr ("Invert mouse y-axis"), SLOT (invert_mouse_y_axis (bool)), Qt::Key_I, false);
   NEW_TOGGLE_ACTION (auto_selection, tr ("Automatic selection"), SLOT (toggle_auto_selecting (bool)), Qt::SHIFT + Qt::Key_F4, false);
@@ -830,7 +831,11 @@ void MapView::createGUI()
 #undef NEW_ACTION_OTHER
 #undef NEW_TOGGLE_ACTION
 
+#ifdef Q_WS_MAC
   QMenuBar* menu_bar (new QMenuBar (NULL));
+#else
+  QMenuBar* menu_bar (new QMenuBar (this));
+#endif
 
   QMenu* file_menu (menu_bar->addMenu (tr ("File")));
   file_menu->addAction (save_current_tile);
@@ -1016,7 +1021,8 @@ MapView::MapView ( World* world
   , _world (world)
   , _help_widget (new ui::help_widget (NULL))
   , _about_widget (NULL)
-//  , _about_widget (new ui::about_widget (NULL))
+  //  , _about_widget (new ui::about_widget (NULL))
+  , _cursor_selector (new ui::cursor_selector (NULL))
   , _is_currently_moving_object (false)
   , _draw_terrain_height_contour (false)
   , _draw_wmo_doodads (true)
