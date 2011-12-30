@@ -138,8 +138,8 @@ namespace noggit
     // do every mipmap level
     for (size_t mipmap_level (0); mipmap_level < 16; ++mipmap_level)
     {
-      width = std::max (1UL, width);
-      height = std::max (1UL, height);
+      width = std::max<size_t> (1, width);
+      height = std::max<size_t> (1, height);
 
       if (!header->offsets[mipmap_level] || !header->sizes[mipmap_level])
       {
@@ -253,8 +253,8 @@ namespace noggit
 
     for (size_t mipmap_level (0); mipmap_level < 16; ++mipmap_level)
     {
-      width = std::max (1UL, width);
-      height = std::max (1UL, height);
+      width = std::max<size_t> (1, width);
+      height = std::max<size_t> (1, height);
 
       if (!header->offsets[mipmap_level] || !header->sizes[mipmap_level])
       {
