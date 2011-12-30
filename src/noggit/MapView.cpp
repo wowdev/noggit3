@@ -789,17 +789,17 @@ void MapView::createGUI()
   NEW_TOGGLE_ACTION (detail_infos, tr ("Object information"), SLOT (toggle_detail_info_window (bool)), Qt::Key_F8, false);
 
 
-  NEW_TOGGLE_ACTION (doodad_drawing, tr ("Draw doodads"), SLOT (toggle_doodad_drawing (bool)), Qt::Key_F1, true);
-  NEW_TOGGLE_ACTION (wmo_doodad_drawing, tr ("Draw doodads inside of WMOs"), SLOT (toggle_wmo_doodad_drawing (bool)), Qt::Key_F2, true);
-  NEW_TOGGLE_ACTION (terrain_drawing, tr ("Draw terrain"), SLOT (toggle_terrain_drawing (bool)), Qt::Key_F3, true);
-  NEW_TOGGLE_ACTION (water_drawing, tr ("Draw water"), SLOT (toggle_water_drawing (bool)), Qt::Key_F4, true);
-  NEW_TOGGLE_ACTION (wmo_drawing, tr ("Draw WMOs"), SLOT (toggle_wmo_drawing (bool)), Qt::Key_F6, true);
-  NEW_TOGGLE_ACTION (line_drawing, tr ("Draw lines"), SLOT (toggle_line_drawing (bool)), Qt::Key_F7, false);
-  NEW_TOGGLE_ACTION (hole_line_drawing, tr ("Draw lines for holes"), SLOT (toggle_hole_line_drawing (bool)), Qt::SHIFT + Qt::Key_F7, false);
+  NEW_TOGGLE_ACTION (doodad_drawing, tr ("Draw doodads"), SLOT (toggle_doodad_drawing (bool)), Qt::Key_F1, _draw_doodads);
+  NEW_TOGGLE_ACTION (wmo_doodad_drawing, tr ("Draw doodads inside of WMOs"), SLOT (toggle_wmo_doodad_drawing (bool)), Qt::Key_F2, _draw_wmo_doodads);
+  NEW_TOGGLE_ACTION (terrain_drawing, tr ("Draw terrain"), SLOT (toggle_terrain_drawing (bool)), Qt::Key_F3, _draw_terrain);
+  NEW_TOGGLE_ACTION (water_drawing, tr ("Draw water"), SLOT (toggle_water_drawing (bool)), Qt::Key_F4, _draw_water);
+  NEW_TOGGLE_ACTION (wmo_drawing, tr ("Draw WMOs"), SLOT (toggle_wmo_drawing (bool)), Qt::Key_F6, _draw_wmos);
+  NEW_TOGGLE_ACTION (line_drawing, tr ("Draw lines"), SLOT (toggle_line_drawing (bool)), Qt::Key_F7, _draw_lines);
+  NEW_TOGGLE_ACTION (hole_line_drawing, tr ("Draw lines for holes"), SLOT (toggle_hole_line_drawing (bool)), Qt::SHIFT + Qt::Key_F7, _draw_hole_lines);
   //! \todo on OSX this shows up as "8" in menu and does not react to the keybinding.
-  NEW_TOGGLE_ACTION (contour_drawing, tr ("Draw contours"), SLOT (toggle_contour_drawing (bool)), Qt::Key_F9, false);
-  NEW_TOGGLE_ACTION (fog_drawing, tr ("Draw fog"), SLOT (toggle_fog_drawing (bool)), Qt::Key_F, true);
-  NEW_TOGGLE_ACTION (toggle_lighting, tr ("Enable Lighting"), SLOT (toggle_lighting (bool)), Qt::Key_L, true);
+  NEW_TOGGLE_ACTION (contour_drawing, tr ("Draw contours"), SLOT (toggle_contour_drawing (bool)), Qt::Key_F9, _draw_terrain_height_contour);
+  NEW_TOGGLE_ACTION (fog_drawing, tr ("Draw fog"), SLOT (toggle_fog_drawing (bool)), Qt::Key_F, _draw_fog);
+  NEW_TOGGLE_ACTION (toggle_lighting, tr ("Enable Lighting"), SLOT (toggle_lighting (bool)), Qt::Key_L, _draw_lighting);
 
   NEW_ACTION (turn_around, tr ("Turn camera 180 degrees"), SLOT (turn_around()), Qt::Key_R);
 
