@@ -19,36 +19,36 @@ namespace ui
     //! \todo This should be automatically generated so there aren't that many errors.
 
     setHtml ( QString (
-		              "<html>"
-					   "<head>"
-						"<style>"
-			          )
+                      "<html>"
+                       "<head>"
+                        "<style>"
+                      )
                          % ".template {width: 825px; font-size: 11pt; font-family: Times new Roman, sans-serif;}"
                          % ".key {font-weight: bold;}"
-			             % ".title {text-decoration: underline;}"
-						 % ".left {}"
-						 % ".right {margin-left: 10px;}"
-						 % "h1 {font-size: 16px; font-family: Friz Quadrata TT, Helvetica, sans-serif;}"
-						 % "h2 {font-size: 14px; font-weight: bold;}"
-						 % "h3 {margin-left: 10px; font-variant: small-caps; font-size: 12px;}"
-						 % ".clear {clear: both;}"
+                         % ".title {text-decoration: underline;}"
+                         % ".left {}"
+                         % ".right {margin-left: 10px;}"
+                         % "h1 {font-size: 16px; font-family: Friz Quadrata TT, Helvetica, sans-serif;}"
+                         % "h2 {font-size: 14px; font-weight: bold;}"
+                         % "h3 {margin-left: 10px; font-variant: small-caps; font-size: 12px;}"
+                         % ".clear {clear: both;}"
                         % "</style>"
-			           % "</head>"
-			           % "<body class='template'>"
-					   %  "<center>"
-					   %   "<h1 class='title' align='center'>"
+                       % "</head>"
+                       % "<body class='template'>"
+                       %  "<center>"
+                       %   "<h1 class='title' align='center'>"
                        %    tr ("Key bindings")
                        %   "</h1>"
-					   %   "<br>"
-					   %   "<div class='wrapper'>"
-					   %    "<table width='100%' border='0'>"
-					   %     "<tr>"
-					   %      "<td width='50%'>"
-					   %       "<div class='left'>"
-			           %        "<h2>"
+                       %   "<br>"
+                       %   "<div class='wrapper'>"
+                       %    "<table width='100%' border='0'>"
+                       %     "<tr>"
+                       %      "<td width='50%'>"
+                       %       "<div class='left'>"
+                       %        "<h2>"
                        %         tr ("Basic controls")
                        %        "</h2>"
-			           %        "<ul>"
+                       %        "<ul>"
                        %         __ ("Right mouse dragged", "Rotate camera")
                        %         __ ("Left mouse", "Select chunk or object")
                        %         __ ("Both mouse buttons", "Move forward")
@@ -65,10 +65,10 @@ namespace ui
                        %         __ ("Shift + R", "Turn camera 180°")
                        %         __ ("Shift + F4", "Toggle automatic selection")
                        %        "</ul>"
-			           %        "<h2>"
+                       %        "<h2>"
                        %         tr ("Toggles")
                        %        "</h2>"
-			           %        "<ul>"
+                       %        "<ul>"
                        %         __ ("F1", "Models (M2s)")
                        %         __ ("F2", "Models in WMOs (doodad sets)")
                        %         __ ("F3", "Terrain")
@@ -84,10 +84,10 @@ namespace ui
                        %         __ ("Ctrl + X", "Detail window")
                        %         __ ("R, T", "Editing mode")
                        %        "</ul>"
-			           %         "<h2>"
+                       %         "<h2>"
                        %         tr ("Files")
                        %        "</h2>"
-			           %        "<ul>"
+                       %        "<ul>"
                        %         __ ("F5", "Save bookmark")
                        %         __ ("F10", "Reload textures (BLP)")
                        %         __ ("F11", "Reload models (M2)")
@@ -96,10 +96,10 @@ namespace ui
                        %         __ ("Ctrl + S", "Save all changed ADTs")
                        %         __ ("Ctrl + Shift + S", "Save the current ADT")
                        %        "</ul>"
-			           %        "<h2>"
+                       %        "<h2>"
                        %         tr ("Adjust")
                        %        "</h2>"
-			           %        "<ul>"
+                       %        "<ul>"
                        %         __ ("O, P", "Decrease, increase movement speed")
                        %         __ ("B, N", "Decrease, increase animation speed")
                        %         __ ("Shift + -, Shift + +", "Decrease, increase fog distance")
