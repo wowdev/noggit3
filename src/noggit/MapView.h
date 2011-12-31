@@ -13,10 +13,12 @@ class QAction;
 class QMenu;
 class QButtonGroup;
 class QSlider;
+class QSettings;
 
 class UIFrame;
 class World;
 class UIDoodadSpawner;
+class nameEntry;
 
 namespace ui
 {
@@ -137,7 +139,6 @@ private slots:
   void toggle_lighting (bool);
   void toggle_line_drawing (bool);
   void toggle_minimap (bool);
-  void toggle_painting_mode (bool);
   void toggle_terrain_drawing (bool);
   void toggle_terrain_mode_window();
   void toggle_terrain_texturing_mode();
@@ -279,6 +280,14 @@ private:
 
   qreal _viewing_distance;
   qreal _tile_mode_zoom;
+
+  bool _currently_holding_shift;
+  bool _currently_holding_alt;
+  bool _currently_holding_control;
+
+  QSettings* _settings;
+  nameEntry* _clipboard;
+  int _selected_area_id;
 };
 
 

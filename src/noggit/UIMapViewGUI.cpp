@@ -8,7 +8,6 @@
 
 #include <noggit/blp_texture.h>
 #include <noggit/DBC.h>
-#include <noggit/Environment.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
 #include <noggit/application.h> // gStates, gPop, arial14, morpheus40, arial...
@@ -80,7 +79,6 @@ void UIMapViewGUI::render( ) const
   statusbarInfo << "tile: " << std::floor( _world->camera.x / TILESIZE ) << " " <<  std::floor( _world->camera.z / TILESIZE )
      << "; coordinates: client (x: " << _world->camera.x << ", y: " << _world->camera.z << ", z: "<<_world->camera.y
      << "), server (x: " << ( ZEROPOINT - _world->camera.x ) << ", y:" << ( ZEROPOINT - _world->camera.z ) << ", z:" << ( ZEROPOINT - _world->camera.y ) << ")" ;
-  if(Environment::getInstance()->paintMode) statusbarInfo << "PM:1";else statusbarInfo << "PM:2";
   guiStatusbar->setLeftInfo( statusbarInfo.str() );
 
   guiStatusbar->setRightInfo( "" );

@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+class QSettings;
+
 enum cursor_type
 {
   none = 0,
@@ -25,6 +27,9 @@ namespace ui
     void set_green_color (int value);
     void set_blue_color (int value);
     void set_alpha (int value);
+
+  private:
+    QSettings* _settings;
   };
 }
 

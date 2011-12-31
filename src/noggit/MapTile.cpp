@@ -9,7 +9,6 @@
 #include <vector>
 
 #include <noggit/blp_texture.h>
-#include <noggit/Environment.h>
 #include <noggit/Liquid.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>

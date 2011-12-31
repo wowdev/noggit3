@@ -2,7 +2,6 @@
 
 #include <string>
 
-#include <noggit/Environment.h> // Environment
 #include <noggit/FreeType.h> // fonts.
 #include <noggit/Log.h>
 #include <noggit/MapView.h> // MapView

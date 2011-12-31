@@ -58,7 +58,6 @@ set ( noggit_sources
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
       src/noggit/Directory.cpp
-      src/noggit/Environment.cpp
       src/noggit/FreeType.cpp
       src/noggit/Frustum.cpp
       src/noggit/Liquid.cpp
@@ -128,7 +127,6 @@ set ( noggit_headers
       src/noggit/DBC.h
       src/noggit/DBCFile.h
       src/noggit/Directory.h
-      src/noggit/Environment.h
       src/noggit/FreeType.h
       src/noggit/Frustum.h
       src/noggit/Liquid.h

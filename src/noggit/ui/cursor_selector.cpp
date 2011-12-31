@@ -4,39 +4,44 @@
 #include <QRadioButton>
 #include <QLabel>
 #include <QSlider>
+#include <QSettings>
 #include <QVBoxLayout>
-
-#include <noggit/Environment.h>
 
 namespace ui
 {
   void cursor_selector::set_cursor_type (int value)
   {
-    Environment::getInstance()->cursorType = value;
+    _settings->setValue ("cursor/type", value);
+    _settings->sync();
   }
 
   void cursor_selector::set_red_color (int value)
   {
-    Environment::getInstance()->cursorColorR = value / 255.0;
+    _settings->setValue ("cursor/red", value / 255.0);
+    _settings->sync();
   }
 
   void cursor_selector::set_green_color (int value)
   {
-    Environment::getInstance()->cursorColorG = value / 255.0;
+    _settings->setValue ("cursor/green", value / 255.0);
+    _settings->sync();
   }
 
   void cursor_selector::set_blue_color (int value)
   {
-    Environment::getInstance()->cursorColorB = value / 255.0;
+    _settings->setValue ("cursor/blue", value / 255.0);
+    _settings->sync();
   }
 
   void cursor_selector::set_alpha (int value)
   {
-    Environment::getInstance()->cursorColorA = value / 255.0;
+    _settings->setValue ("cursor/alpha", value / 255.0);
+    _settings->sync();
   }
 
   cursor_selector::cursor_selector (QWidget* parent)
     : QWidget (parent)
+    , _settings (new QSettings (this))
   {
     setWindowTitle (tr ("Cursor options"));
 
@@ -52,7 +57,7 @@ namespace ui
     cursor_type_group->addButton (triangle_button, triangle);
     cursor_type_group->addButton (none_button, none);
 
-    cursor_type_group->button (Environment::getInstance()->cursorType)->click();
+    cursor_type_group->button (_settings->value ("cursor/type", disk).toInt())->click();
 
     connect (cursor_type_group, SIGNAL (buttonClicked (int)), SLOT (set_cursor_type (int)));
 
@@ -67,16 +72,16 @@ namespace ui
 
     red_slider->setMinimum (0);
     red_slider->setMaximum (255);
-    red_slider->setValue (Environment::getInstance()->cursorColorR * 255);
+    red_slider->setValue (_settings->value ("cursor/red", 1.0f).toFloat() * 255);
     green_slider->setMinimum (0);
     green_slider->setMaximum (255);
-    green_slider->setValue (Environment::getInstance()->cursorColorG * 255);
+    green_slider->setValue (_settings->value ("cursor/green", 1.0f).toFloat() * 255);
     blue_slider->setMinimum (0);
     blue_slider->setMaximum (255);
-    blue_slider->setValue (Environment::getInstance()->cursorColorB * 255);
+    blue_slider->setValue (_settings->value ("cursor/blue", 1.0f).toFloat() * 255);
     alpha_slider->setMinimum (0);
     alpha_slider->setMaximum (255);
-    alpha_slider->setValue (Environment::getInstance()->cursorColorA * 255);
+    alpha_slider->setValue (_settings->value ("cursor/alpha", 1.0f).toFloat() * 255);
 
     red_label->setBuddy (red_slider);
     green_label->setBuddy (green_slider);
