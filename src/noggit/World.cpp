@@ -9,12 +9,13 @@
 #include <utility>
 #include <time.h>
 
+#include <QSettings>
+
 #include <opengl/call_list.h>
 #include <opengl/settings_saver.h>
 
 #include <noggit/blp_texture.h>
 #include <noggit/DBC.h>
-#include <noggit/Environment.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
@@ -56,18 +57,23 @@ void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, fl
 
 void renderSphere_convenient(float x, float y, float z, float radius, int subdivisions)
 {
-  if(Environment::getInstance()->screenX>0 && Environment::getInstance()->screenY>0)
-  {
-    //the same quadric can be re-used for drawing many objects
-    glDisable(GL_LIGHTING);
-    glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA );
-    GLUquadricObj *quadric=gluNewQuadric();
-    gluQuadricNormals(quadric, GLU_SMOOTH);
-    renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
-    renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
-    gluDeleteQuadric(quadric);
-    glEnable(GL_LIGHTING);
-  }
+  //the same quadric can be re-used for drawing many objects
+  glDisable(GL_LIGHTING);
+
+  //! \todo This should be passed in!
+  QSettings settings;
+  glColor4f ( settings.value ("cursor/red", 1.0f).toFloat()
+            , settings.value ("cursor/green", 1.0f).toFloat()
+            , settings.value ("cursor/blue", 1.0f).toFloat()
+            , settings.value ("cursor/alpha", 1.0f).toFloat()
+            );
+
+  GLUquadricObj *quadric=gluNewQuadric();
+  gluQuadricNormals(quadric, GLU_SMOOTH);
+  renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
+  renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
+  gluDeleteQuadric(quadric);
+  glEnable(GL_LIGHTING);
 }
 
 void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
@@ -97,7 +103,14 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
   glTranslatef(x1, y1, z1);
   glRotatef(ax, rx, ry, 0.0f);
   glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-  glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA);
+
+  //! \todo This should be passed in!
+  QSettings settings;
+  glColor4f ( settings.value ("cursor/red", 1.0f).toFloat()
+            , settings.value ("cursor/green", 1.0f).toFloat()
+            , settings.value ("cursor/blue", 1.0f).toFloat()
+            , settings.value ("cursor/alpha", 1.0f).toFloat()
+            );
 
   gluQuadricOrientation(quadric, GLU_OUTSIDE);
   gluDisk(quadric, radius - 0.25f, radius + 5.0f, subdivisions, 2);
@@ -994,6 +1007,7 @@ void World::draw ( bool draw_terrain_height_contour
                  , bool draw_lines
                  , bool draw_hole_lines
                  , bool draw_water
+                 , const QPointF& mouse_position
                  )
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1168,15 +1182,13 @@ void World::draw ( bool draw_terrain_height_contour
       glGetIntegerv( GL_VIEWPORT, viewport );
 
 
-      winX = (float)Environment::getInstance()->screenX;
-      winY = (float)viewport[3] - (float)Environment::getInstance()->screenY;
+      winX = mouse_position.x();
+      winY = (float)viewport[3] - mouse_position.y();
 
-      glReadPixels( Environment::getInstance()->screenX, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
+      glReadPixels( winX, winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
       gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
 
-      Environment::getInstance()->Pos3DX = posX;
-      Environment::getInstance()->Pos3DY = posY;
-      Environment::getInstance()->Pos3DZ = posZ;
+      _exact_terrain_selection_position = Vec3D (posX, posY, posZ);
 
       glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
       glDisable(GL_CULL_FACE);
@@ -1185,9 +1197,12 @@ void World::draw ( bool draw_terrain_height_contour
 
       if (!dont_draw_cursor)
       {
-        if(Environment::getInstance()->cursorType == 1)
+        QSettings settings;
+        //! \todo This actually should be an enum. And should be passed into this method.
+        const int cursor_type (settings.value ("cursor/type", 1).toInt());
+        if(cursor_type == 1)
           renderDisk_convenient(posX, posY, posZ, outer_cursor_radius);
-        else if(Environment::getInstance()->cursorType == 2)
+        else if(cursor_type == 2)
           renderSphere_convenient(posX, posY, posZ, outer_cursor_radius, 15);
       }
 
@@ -1358,6 +1373,27 @@ static const GLuint MapObjName = 1;
 static const GLuint DoodadName = 2;
 static const GLuint MapTileName = 3;
 
+struct GLNameEntry
+{
+  GLuint stackSize;
+  GLuint nearZ;
+  GLuint farZ;
+  struct
+  {
+    GLuint type;
+    union
+    {
+      GLuint dummy;
+      GLuint chunk;
+    };
+    union
+    {
+      GLuint uniqueId;
+      GLuint triangle;
+    };
+  } stack;
+};
+
 void World::drawSelection ( bool draw_wmo_doodads
                           , bool draw_wmos
                           , bool draw_doodads
@@ -1419,32 +1455,6 @@ void World::drawSelection ( bool draw_wmo_doodads
     glPopName();
   }
 
-  getSelection();
-}
-
-struct GLNameEntry
-{
-  GLuint stackSize;
-  GLuint nearZ;
-  GLuint farZ;
-  struct
-  {
-    GLuint type;
-    union
-    {
-      GLuint dummy;
-      GLuint chunk;
-    };
-    union
-    {
-      GLuint uniqueId;
-      GLuint triangle;
-    };
-  } stack;
-};
-
-void World::getSelection()
-{
   GLuint minDist = 0xFFFFFFFF;
   GLNameEntry* minEntry = NULL;
   GLuint hits = glRenderMode( GL_RENDER );
@@ -1514,15 +1524,33 @@ unsigned int World::getAreaID()
   return curChunk->areaID;
 }
 
-void World::clearHeight(int id, int x, int z)
+void World::clearHeight(int x, int z)
 {
-
-  // set the Area ID on a tile x,z on all chunks
   for (int j=0; j<16; ++j)
   {
     for (int i=0; i<16; ++i)
     {
-      clearHeight(id, x, z, j, i);
+      MapTile *curTile;
+      curTile = mTiles[z][x].tile;
+      if(curTile == 0) continue;
+      setChanged(z,x);
+      MapChunk *curChunk = curTile->getChunk(j, i);
+      if(curChunk == 0) continue;
+
+      curChunk->vmin.y = 9999999.0f;
+      curChunk->vmax.y = -9999999.0f;
+      curChunk->Changed=true;
+
+      for(int i=0; i < mapbufsize; ++i)
+      {
+        curChunk->mVertices[i].y = 0.0f;
+
+        curChunk->vmin.y = std::min(curChunk->vmin.y,curChunk-> mVertices[i].y);
+        curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
+      }
+
+      glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
     }
   }
 
@@ -1530,42 +1558,14 @@ void World::clearHeight(int id, int x, int z)
   {
     for (int i=0; i<16; ++i)
     {
-      // set the Area ID on a tile x,z on the chunk cx,cz
       MapTile *curTile;
       curTile = mTiles[z][x].tile;
-      if(curTile == 0) return;
+      if(curTile == 0) continue;
       setChanged(z,x);
       MapChunk *curChunk = curTile->getChunk(j, i);
       curChunk->recalcNorms();
     }
   }
-
-}
-
-void World::clearHeight(int /*id*/, int x, int z , int _cx, int _cz)
-{
-  // set the Area ID on a tile x,z on the chunk cx,cz
-  MapTile *curTile;
-  curTile = mTiles[z][x].tile;
-  if(curTile == 0) return;
-  setChanged(z,x);
-  MapChunk *curChunk = curTile->getChunk(_cx, _cz);
-  if(curChunk == 0) return;
-
-  curChunk->vmin.y = 9999999.0f;
-  curChunk->vmax.y = -9999999.0f;
-  curChunk->Changed=true;
-
-  for(int i=0; i < mapbufsize; ++i)
-  {
-    curChunk->mVertices[i].y = 0.0f;
-
-    curChunk->vmin.y = std::min(curChunk->vmin.y,curChunk-> mVertices[i].y);
-    curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
-  }
-
-  glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
 }
 
 void World::clearAllModelsOnADT(int x,int z)
@@ -2158,7 +2158,7 @@ void World::setFlag( bool to, float x, float z)
             MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
             if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
             {
-              chunk->setFlag(to);
+              chunk->setFlag(to, FLAG_IMPASS);
             }
           }
         }
@@ -2173,71 +2173,58 @@ unsigned int World::getMapID()
 }
 
 
-void World::moveHeight(int id, int x, int z)
+void World::moveHeight(int x, int z)
 {
-
-  // set the Area ID on a tile x,z on all chunks
   for (int j=0; j<16; ++j)
   {
     for (int i=0; i<16; ++i)
     {
-      moveHeight(id, x, z, j, i);
-    }
-  }
-
-  for (int j=0; j<16; ++j)
-  {
-    for (int i=0; i<16; ++i)
-    {
-      // set the Area ID on a tile x,z on the chunk cx,cz
       MapTile *curTile;
       curTile = mTiles[z][x].tile;
-      if(curTile == 0) return;
+      if(curTile == 0) continue;
       setChanged(z,x);
       MapChunk *curChunk = curTile->getChunk(j, i);
-      curChunk->recalcNorms();
+      if(curChunk == 0) continue;
+
+      curChunk->vmin.y = 9999999.0f;
+      curChunk->vmax.y = -9999999.0f;
+      curChunk->Changed = true;
+
+      float heightDelta = 0.0f;
+      nameEntry *selection = GetCurrentSelection();
+
+      if(selection)
+        if(selection->type == eEntry_MapChunk)
+        {
+          // chunk selected
+          heightDelta = camera.y - selection->data.mapchunk->py;
+        }
+
+      if( heightDelta * heightDelta <= 0.1f ) continue;
+
+      for(int i=0; i < mapbufsize; ++i)
+      {
+        curChunk->mVertices[i].y = curChunk->mVertices[i].y + heightDelta;
+
+        curChunk->vmin.y = std::min(curChunk->vmin.y,curChunk-> mVertices[i].y);
+        curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
+      }
+
+      glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
     }
   }
 
-}
-
-void World::moveHeight(int /*id*/, int x, int z , int _cx, int _cz)
-{
-  // set the Area ID on a tile x,z on the chunk cx,cz
-  MapTile *curTile;
-  curTile = mTiles[z][x].tile;
-  if(curTile == 0) return;
-  setChanged(z,x);
-  MapChunk *curChunk = curTile->getChunk(_cx, _cz);
-  if(curChunk == 0) return;
-
-  curChunk->vmin.y = 9999999.0f;
-  curChunk->vmax.y = -9999999.0f;
-  curChunk->Changed = true;
-
-  float heightDelta = 0.0f;
-  nameEntry *selection = GetCurrentSelection();
-
-  if(selection)
-    if(selection->type == eEntry_MapChunk)
-    {
-      // chunk selected
-      heightDelta = camera.y - selection->data.mapchunk->py;
-    }
-
-  if( heightDelta * heightDelta <= 0.1f ) return;
-
-  for(int i=0; i < mapbufsize; ++i)
+  for (int j=0; j<16; ++j)
   {
-    curChunk->mVertices[i].y = curChunk->mVertices[i].y + heightDelta;
-
-    curChunk->vmin.y = std::min(curChunk->vmin.y,curChunk-> mVertices[i].y);
-    curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
+    for (int i=0; i<16; ++i)
+    {
+      MapTile *curTile = mTiles[z][x].tile;
+      if(curTile == 0) continue;
+      setChanged(z,x);
+      curTile->getChunk(j, i)->recalcNorms();
+    }
   }
-
-  glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
-
 
 }
 

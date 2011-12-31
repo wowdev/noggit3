@@ -4,9 +4,10 @@
 #include <iostream>
 #include <map>
 
+#include <QSettings>
+
 #include <noggit/blp_texture.h>
 #include <noggit/Brush.h>
-#include <noggit/Environment.h>
 #include <noggit/Liquid.h>
 #include <noggit/Log.h>
 #include <noggit/MapHeaders.h>
@@ -236,6 +237,8 @@ void MapChunk::GenerateContourMap()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 }
 
+//! \note I am aware of this being global state not even being inside a class BUT I DONT CARE AT ALL. THIS WHOLE THING IS BULLSHIT AND NOT WORTH A BIT AND COSTING ME TIME OF MY LIFE FOR JUST BEING BAD AS FUCK. REMOVEING ENVIRONMENT TOOK ME HOURS WHILE MOST VARIABLES HAD BEEN ONLY USED IN A SINGLE FUCKING CLASS,  DID NOT HAVE MEANINGFUL NAMES OR ANYTHING.
+std::map<int,Vec3D> areaIDColors;
 
 MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bigAlpha)
   : _world (world)
@@ -262,13 +265,11 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   Flags = header.flags;
   areaID = header.areaid;
 
-  if( Environment::getInstance()->areaIDColors.find(areaID) == Environment::getInstance()->areaIDColors.end() )
+  if( areaIDColors.find(areaID) == areaIDColors.end() )
   {
     Vec3D newColor = Vec3D( misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) );
-    Environment::getInstance()->areaIDColors.insert( std::pair<int,Vec3D>(areaID, newColor) );
+    areaIDColors.insert( std::pair<int,Vec3D>(areaID, newColor) );
   }
-
-  Environment::getInstance()->selectedAreaID = areaID; //The last loaded is selected on start.
 
   zbase = header.zpos;
   xbase = header.xpos;
@@ -1146,15 +1147,16 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   if (draw_area_id_overlay)
   {
     // draw chunks in color depending on AreaID and list color from environment
-    if(Environment::getInstance()->areaIDColors.find(areaID) != Environment::getInstance()->areaIDColors.end() )
+    if(areaIDColors.find(areaID) != areaIDColors.end() )
     {
-      Vec3D colorValues = Environment::getInstance()->areaIDColors.find(areaID)->second;
+      Vec3D colorValues = areaIDColors.find(areaID)->second;
       glColor4f(colorValues.x,colorValues.y,colorValues.z,0.7f);
       drawPass(0);
     }
   }
 
-  if ( Environment::getInstance()->cursorType == 3
+  //! \todo This actually should be an enum. And should be passed into this method.
+  if ( QSettings().value ("cursor/type", 1).toInt() == 3
     && _world->IsSelection (eEntry_MapChunk)
     && _world->GetCurrentSelection()->data.mapchunk == this
     && !dont_draw_cursor
@@ -1665,229 +1667,224 @@ void MapChunk::switchTexture( noggit::blp_texture* oldTexture, noggit::blp_textu
 }
 bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, float pressure, noggit::blp_texture* texture )
 {
-  if( Environment::getInstance()->paintMode == true)
+#if 1
+  float zPos,xPos,change,xdiff,zdiff,dist, radius;
+
+  int texLevel=-1;
+
+  radius=Brush->getRadius();
+
+  xdiff= xbase - x + CHUNKSIZE/2;
+  zdiff= zbase - z + CHUNKSIZE/2;
+  dist= sqrt( xdiff*xdiff + zdiff*zdiff );
+
+  if( dist > (radius+MAPCHUNK_DIAMETER) )
+    return false;
+
+  //First Lets find out do we have the texture already
+  for(size_t i=0;i<nTextures;++i)
+    if(_textures[i]==texture)
+      texLevel=i;
+
+
+  if( (texLevel==-1) && (nTextures==4) )
   {
-    float zPos,xPos,change,xdiff,zdiff,dist, radius;
+    // Implement here auto texture slot freeing :)
+    LogDebug << "paintTexture: No free texture slot" << std::endl;
+    return false;
+  }
 
-    int texLevel=-1;
-
-    radius=Brush->getRadius();
-
-    xdiff= xbase - x + CHUNKSIZE/2;
-    zdiff= zbase - z + CHUNKSIZE/2;
-    dist= sqrt( xdiff*xdiff + zdiff*zdiff );
-
-    if( dist > (radius+MAPCHUNK_DIAMETER) )
-      return false;
-
-    //First Lets find out do we have the texture already
-    for(size_t i=0;i<nTextures;++i)
-      if(_textures[i]==texture)
-        texLevel=i;
+  //Only 1 layer and its that layer
+  if( (texLevel!=-1) && (nTextures==1) )
+    return true;
 
 
-    if( (texLevel==-1) && (nTextures==4) )
+  change=CHUNKSIZE/62.0f;
+  zPos=zbase;
+
+  float target,tarAbove, tPressure;
+  //int texAbove=nTextures-texLevel-1;
+
+
+  for(int j=0; j < 63 ; j++)
+  {
+    xPos=xbase;
+    for(int i=0; i < 63; ++i)
     {
-      // Implement here auto texture slot freeing :)
-      LogDebug << "paintTexture: No free texture slot" << std::endl;
-      return false;
-    }
+      xdiff=xPos-x;
+      zdiff=zPos-z;
+      dist=abs(sqrt( xdiff*xdiff + zdiff*zdiff ));
 
-    //Only 1 layer and its that layer
-    if( (texLevel!=-1) && (nTextures==1) )
-      return true;
-
-
-    change=CHUNKSIZE/62.0f;
-    zPos=zbase;
-
-    float target,tarAbove, tPressure;
-    //int texAbove=nTextures-texLevel-1;
-
-
-    for(int j=0; j < 63 ; j++)
-    {
-      xPos=xbase;
-      for(int i=0; i < 63; ++i)
+      if(dist>radius)
       {
-        xdiff=xPos-x;
-        zdiff=zPos-z;
-        dist=abs(sqrt( xdiff*xdiff + zdiff*zdiff ));
+        xPos+=change;
+        continue;
+      }
 
-        if(dist>radius)
-        {
-          xPos+=change;
-          continue;
-        }
-
+      if(texLevel==-1)
+      {
+        texLevel=addTexture(texture);
+        if(texLevel==0)
+          return true;
         if(texLevel==-1)
         {
-          texLevel=addTexture(texture);
-          if(texLevel==0)
-            return true;
-          if(texLevel==-1)
+          LogDebug << "paintTexture: Unable to add texture." << std::endl;
+          return false;
+        }
+      }
+
+      target=strength;
+      tarAbove=1-target;
+
+      tPressure=pressure*Brush->getValue(dist);
+
+      if(texLevel>0)
+        amap[texLevel-1][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[texLevel-1][i+j*64]) ) + tPressure*target + 0.5f ,255.0f) , 0.0f));
+      for(size_t k=texLevel;k<nTextures-1;k++)
+        amap[k][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[k][i+j*64]) ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f));
+      xPos+=change;
+    }
+    zPos+=change;
+  }
+
+  if( texLevel == -1 )
+  {
+    LogDebug << "Somehow no texture got painted." << std::endl;
+    return false;
+  }
+
+  for( size_t j = texLevel; j < nTextures - 1; j++ )
+  {
+    if( j > 2 )
+    {
+      LogError << "WTF how did you get here??? Get a cookie." << std::endl;
+      continue;
+    }
+    glBindTexture( GL_TEXTURE_2D, alphamaps[j] );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j] );
+  }
+
+  if( texLevel )
+  {
+    glBindTexture( GL_TEXTURE_2D, alphamaps[texLevel - 1] );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[texLevel - 1] );
+  }
+#else
+  // new stuff from bernd.
+  // need to get rework. Add old code with switch that the guys out there can use paint.
+  const float radius = Brush->getRadius();
+
+  // Are we really painting on this chunk?
+  const float xdiff = xbase + CHUNKSIZE / 2 - x;
+  const float zdiff = zbase + CHUNKSIZE / 2 - z;
+
+  if( ( xdiff * xdiff + zdiff * zdiff ) > ( MAPCHUNK_DIAMETER / 2 + radius ) * ( MAPCHUNK_DIAMETER / 2 + radius ) )
+  return false;
+
+
+  // Search for empty layer.
+  int texLevel = -1;
+
+  for( size_t i = 0; i < nTextures; ++i )
+  {
+    if( _textures[i] == texture )
+    {
+      texLevel = i;
+    }
+   }
+
+  if( texLevel == -1 )
+  {
+
+    if( nTextures == 4 )
+    {
+      for( size_t layer = 0; layer < nTextures; ++layer )
+      {
+        unsigned char map[64*64];
+        if( layer )
+          memcpy( map, amap[layer-1], 64*64 );
+        else
+          memset( map, 255, 64*64 );
+
+        for( size_t layerAbove = layer + 1; layerAbove < nTextures; ++layerAbove )
+        {
+          unsigned char* above = amap[layerAbove-1];
+          for( size_t i = 0; i < 64 * 64; ++i )
           {
-            LogDebug << "paintTexture: Unable to add texture." << std::endl;
-            return false;
+            map[i] = std::max( 0, map[i] - above[i] );
           }
         }
 
-        target=strength;
-        tarAbove=1-target;
+        size_t sum = 0;
+        for( size_t i = 0; i < 64 * 64; ++i )
+        {
+          sum += map[i];
+        }
 
-        tPressure=pressure*Brush->getValue(dist);
+        if( !sum )
+        {
+          for( size_t i = layer; i < nTextures - 1; ++i )
+          {
+            _textures[i] = _textures[i+1];
+            animated[i] = animated[i+1];
+            texFlags[i] = texFlags[i+1];
+            effectID[i] = effectID[i+1];
+            if( i )
+              memcpy( amap[i-1], amap[i], 64*64 );
+          }
 
-        if(texLevel>0)
-          amap[texLevel-1][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[texLevel-1][i+j*64]) ) + tPressure*target + 0.5f ,255.0f) , 0.0f));
-        for(size_t k=texLevel;k<nTextures-1;k++)
-          amap[k][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[k][i+j*64]) ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f));
-        xPos+=change;
+          for( size_t j = layer; j < nTextures; j++ )
+              {
+                glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
+                glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
+              }
+              nTextures--;
+        }
       }
-      zPos+=change;
     }
 
-    if( texLevel == -1 )
-    {
-      LogDebug << "Somehow no texture got painted." << std::endl;
-      return false;
-    }
+    if( nTextures == 4 )
+    return false;
 
-    for( size_t j = texLevel; j < nTextures - 1; j++ )
-    {
-      if( j > 2 )
-      {
-        LogError << "WTF how did you get here??? Get a cookie." << std::endl;
-        continue;
-      }
-      glBindTexture( GL_TEXTURE_2D, alphamaps[j] );
-      glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j] );
-    }
-
-    if( texLevel )
-    {
-      glBindTexture( GL_TEXTURE_2D, alphamaps[texLevel - 1] );
-      glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[texLevel - 1] );
-    }
+      texLevel = addTexture( texture );
 
   }
   else
   {
-    // new stuff from bernd.
-    // need to get rework. Add old code with switch that the guys out there can use paint.
-      const float radius = Brush->getRadius();
-
-      // Are we really painting on this chunk?
-      const float xdiff = xbase + CHUNKSIZE / 2 - x;
-      const float zdiff = zbase + CHUNKSIZE / 2 - z;
-
-      if( ( xdiff * xdiff + zdiff * zdiff ) > ( MAPCHUNK_DIAMETER / 2 + radius ) * ( MAPCHUNK_DIAMETER / 2 + radius ) )
-      return false;
-
-
-      // Search for empty layer.
-      int texLevel = -1;
-
-      for( size_t i = 0; i < nTextures; ++i )
-      {
-        if( _textures[i] == texture )
-        {
-          texLevel = i;
-        }
-       }
-
-      if( texLevel == -1 )
-      {
-
-        if( nTextures == 4 )
-        {
-          for( size_t layer = 0; layer < nTextures; ++layer )
-          {
-            unsigned char map[64*64];
-            if( layer )
-              memcpy( map, amap[layer-1], 64*64 );
-            else
-              memset( map, 255, 64*64 );
-
-            for( size_t layerAbove = layer + 1; layerAbove < nTextures; ++layerAbove )
-            {
-              unsigned char* above = amap[layerAbove-1];
-              for( size_t i = 0; i < 64 * 64; ++i )
-              {
-                map[i] = std::max( 0, map[i] - above[i] );
-              }
-            }
-
-            size_t sum = 0;
-            for( size_t i = 0; i < 64 * 64; ++i )
-            {
-              sum += map[i];
-            }
-
-            if( !sum )
-            {
-              for( size_t i = layer; i < nTextures - 1; ++i )
-              {
-                _textures[i] = _textures[i+1];
-                animated[i] = animated[i+1];
-                texFlags[i] = texFlags[i+1];
-                effectID[i] = effectID[i+1];
-                if( i )
-                  memcpy( amap[i-1], amap[i], 64*64 );
-              }
-
-              for( size_t j = layer; j < nTextures; j++ )
-                  {
-                    glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
-                    glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
-                  }
-                  nTextures--;
-            }
-          }
-        }
-
-        if( nTextures == 4 )
-        return false;
-
-          texLevel = addTexture( texture );
-
-      }
-      else
-      {
-        if( nTextures == 1 )
-          return true;
-      }
-      LogDebug << "TexLevel: " << texLevel << " -  NTextures: " << nTextures << "\n";
-      // We now have a texture at texLevel > 0.
-      static const float change = CHUNKSIZE / 62.0f; //! \todo 64? 63? 62? Wtf?
-
-      if( texLevel == 0 )
-        return true;
-
-      for( size_t j = 0; j < 64; ++j )
-      {
-        for( size_t i = 0; i < 64; ++i )
-        {
-          const float xdiff_ = xbase + change * i - x;
-          const float zdiff_ = zbase + change * j - z;
-          const float dist = sqrtf( xdiff_ * xdiff_ + zdiff_ * zdiff_ );
-
-          if( dist <= radius )
-          {
-              amap[texLevel - 1][i + j * 64] = (unsigned char)( std::max( std::min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
-          }
-        }
-      }
-
-
-      // Redraw changed layers.
-
-      for( size_t j = texLevel; j < nTextures; j++ )
-      {
-        glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
-        glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
-      }
-
+    if( nTextures == 1 )
+      return true;
   }
+  LogDebug << "TexLevel: " << texLevel << " -  NTextures: " << nTextures << "\n";
+  // We now have a texture at texLevel > 0.
+  static const float change = CHUNKSIZE / 62.0f; //! \todo 64? 63? 62? Wtf?
+
+  if( texLevel == 0 )
+    return true;
+
+  for( size_t j = 0; j < 64; ++j )
+  {
+    for( size_t i = 0; i < 64; ++i )
+    {
+      const float xdiff_ = xbase + change * i - x;
+      const float zdiff_ = zbase + change * j - z;
+      const float dist = sqrtf( xdiff_ * xdiff_ + zdiff_ * zdiff_ );
+
+      if( dist <= radius )
+      {
+          amap[texLevel - 1][i + j * 64] = (unsigned char)( std::max( std::min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
+      }
+    }
+  }
+
+
+  // Redraw changed layers.
+
+  for( size_t j = texLevel; j < nTextures; j++ )
+  {
+    glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
+  }
+#endif
 
   return true;
 }
@@ -1919,10 +1916,10 @@ int MapChunk::getAreaID(){
 }
 
 
-void MapChunk::setFlag( bool changeto )
+void MapChunk::setFlag( bool on_or_off, int flag)
 {
-  if(changeto)
-    Flags = Flags | (Environment::getInstance()->flagPaintMode);
+  if(on_or_off)
+    Flags = Flags | flag;
   else
-    Flags = Flags & ~(Environment::getInstance()->flagPaintMode);
+    Flags = Flags & ~(flag);
 }

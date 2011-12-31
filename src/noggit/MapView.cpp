@@ -14,7 +14,6 @@
 
 #include <noggit/application.h>
 #include <noggit/Brush.h>
-#include <noggit/Environment.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
 #include <noggit/UICheckBox.h>
@@ -302,40 +301,50 @@ void MapView::TEST_save_wdt()
 
 void MapView::move_heightmap()
 {
-  // set areaid on all chunks of the current ADT
-  if(Environment::getInstance()->selectedAreaID)
-    _world->moveHeight(Environment::getInstance()->selectedAreaID ,misc::FtoIround((_world->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((_world->camera.z-(TILESIZE/2))/TILESIZE));
+  _world->moveHeight ( misc::FtoIround ( (_world->camera.x - (TILESIZE / 2)) / TILESIZE)
+                     , misc::FtoIround ( (_world->camera.z - (TILESIZE / 2)) / TILESIZE)
+                     );
 }
 
 void MapView::clear_heightmap()
 {
-  // set areaid on all chunks of the current ADT
-  if(Environment::getInstance()->selectedAreaID)
-    _world->clearHeight(Environment::getInstance()->selectedAreaID ,misc::FtoIround((_world->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((_world->camera.z-(TILESIZE/2))/TILESIZE));
+  _world->clearHeight ( misc::FtoIround ( (_world->camera.x - (TILESIZE / 2)) / TILESIZE)
+                      , misc::FtoIround ( (_world->camera.z - (TILESIZE / 2)) / TILESIZE)
+                      );
 }
 
 void MapView::set_area_id()
 {
-  // set areaid on all chunks of the current ADT
-  if(Environment::getInstance()->selectedAreaID)
-    _world->setAreaID(Environment::getInstance()->selectedAreaID ,misc::FtoIround((_world->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((_world->camera.z-(TILESIZE/2))/TILESIZE));
+  //! \todo This should not be called via menu requiring to have been set somewhere else prior to calling this. THIS IS UTTER BULLSHIT.
+  if (_selected_area_id)
+  {
+    _world->setAreaID ( _selected_area_id
+                      , misc::FtoIround ( (_world->camera.x - (TILESIZE / 2)) / TILESIZE)
+                      , misc::FtoIround ( (_world->camera.z - (TILESIZE / 2)) / TILESIZE)
+                      );
+  }
 }
 
 void MapView::clear_all_models()
 {
   // call the clearAllModelsOnADT method to clear them all on current ADT
-    _world->clearAllModelsOnADT(misc::FtoIround((_world->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((_world->camera.z-(TILESIZE/2))/TILESIZE));
+  _world->clearAllModelsOnADT ( misc::FtoIround ( (_world->camera.x- (TILESIZE / 2)) / TILESIZE)
+                              , misc::FtoIround ( (_world->camera.z - (TILESIZE / 2)) / TILESIZE)
+                              );
 }
 
-void changeZoneIDValue(UIFrame* /*f*/,int set)
+//! \todo Do this differently. This is shit.
+/*
+void changeZoneIDValue(UIFrame* f,int set)
 {
-  Environment::getInstance()->selectedAreaID = set;
+  _selected_area_id = set;
   if( Environment::getInstance()->areaIDColors.find(set) == Environment::getInstance()->areaIDColors.end() )
   {
     Vec3D newColor = Vec3D( misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) );
     Environment::getInstance()->areaIDColors.insert( std::pair<int,Vec3D>(set, newColor) );
   }
 }
+*/
 
 void MapView::clear_texture()
 {
@@ -742,7 +751,8 @@ void MapView::createGUI()
   mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
 
   mainGui->ZoneIDBrowser->setMapID( _world->getMapID() );
-  mainGui->ZoneIDBrowser->setChangeFunc( changeZoneIDValue );
+  //! \todo Do this differently. Thanks.
+  //mainGui->ZoneIDBrowser->setChangeFunc( changeZoneIDValue );
 
   _doodad_spawner = new UIDoodadSpawner (_world);
   _doodad_spawner->hide();
@@ -1057,6 +1067,11 @@ MapView::MapView ( World* world
   , _copy_rotation_randomization (false)
   , _viewing_distance (viewing_distance)
   , _tile_mode_zoom (0.25)
+  , _currently_holding_shift (false)
+  , _currently_holding_alt (false)
+  , _currently_holding_control (false)
+  , _settings (new QSettings (this))
+  , _clipboard (NULL)
 {
   moving = strafing = updown = 0.0f;
 
@@ -1142,13 +1157,13 @@ void MapView::tick( float /*t*/, float dt )
   rotate( 0.0f, 0.0f, &dir.x,&dir.y, av * PI / 180.0f );
   rotate( 0.0f, 0.0f, &dir.x,&dir.z, ah * PI / 180.0f );
 
-  if( Environment::getInstance()->ShiftDown )
+  if( _currently_holding_shift )
   {
     dirUp.x = 0.0f;
     dirUp.y = 1.0f;
     dirRight *= 0.0f; //! \todo  WAT?
   }
-  else if( Environment::getInstance()->CtrlDown )
+  else if( _currently_holding_control )
   {
     dirUp.x = 0.0f;
     dirUp.y = 1.0f;
@@ -1169,9 +1184,9 @@ void MapView::tick( float /*t*/, float dt )
   {
     qreal keypad_object_move_ratio (0.1);
     // Set move scale and rotate for numpad keys
-    if(Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown) keypad_object_move_ratio = 0.05;
-    else if(Environment::getInstance()->ShiftDown) keypad_object_move_ratio=0.2;
-    else if(Environment::getInstance()->CtrlDown) keypad_object_move_ratio=0.3;
+    if(_currently_holding_control && _currently_holding_shift) keypad_object_move_ratio = 0.05;
+    else if(_currently_holding_shift) keypad_object_move_ratio=0.2;
+    else if(_currently_holding_control) keypad_object_move_ratio=0.3;
 
     if( keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0)
     {
@@ -1222,7 +1237,7 @@ void MapView::tick( float /*t*/, float dt )
          _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // after move. If moved to another ADT
       }
       else if( Selection->type == eEntry_Model )
-        if( Environment::getInstance()->AltDown )
+        if( _currently_holding_alt )
         {
           _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
           float ScaleAmount;
@@ -1252,23 +1267,23 @@ void MapView::tick( float /*t*/, float dt )
       if( Selection->type == eEntry_Model )
       {
         _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
-        lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
-        if( Environment::getInstance()->ShiftDown )
+        lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
+        if( _currently_holding_shift )
           lTarget = &Selection->data.model->dir.y;
-        else if( Environment::getInstance()->CtrlDown )
+        else if( _currently_holding_control )
           lTarget = &Selection->data.model->dir.x;
-        else if(Environment::getInstance()->AltDown )
+        else if(_currently_holding_alt )
           lTarget = &Selection->data.model->dir.z;
       }
       else if( Selection->type == eEntry_WMO )
       {
         _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
-        lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
-        if( Environment::getInstance()->ShiftDown )
+        lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
+        if( _currently_holding_shift )
           lTarget = &Selection->data.wmo->dir.y;
-        else if( Environment::getInstance()->CtrlDown )
+        else if( _currently_holding_control )
           lTarget = &Selection->data.wmo->dir.x;
-        else if( Environment::getInstance()->AltDown )
+        else if( _currently_holding_alt )
           lTarget = &Selection->data.wmo->dir.z;
       }
 
@@ -1290,16 +1305,17 @@ void MapView::tick( float /*t*/, float dt )
 
     if( _holding_left_mouse_button && Selection->type==eEntry_MapChunk )
     {
-      float xPos = Environment::getInstance()->Pos3DX;
-      float yPos = Environment::getInstance()->Pos3DY;
-      float zPos = Environment::getInstance()->Pos3DZ;
+      const Vec3D& position (_world->_exact_terrain_selection_position);
+      float xPos = position.x;
+      float yPos = position.y;
+      float zPos = position.z;
 
       switch( _current_terrain_editing_mode )
       {
       case shaping:
         if( mViewMode == eViewMode_3D )
         {
-          if( Environment::getInstance()->ShiftDown )
+          if( _currently_holding_shift )
           {
             _world->changeTerrain ( xPos
                                   , zPos
@@ -1308,7 +1324,7 @@ void MapView::tick( float /*t*/, float dt )
                                   , shaping_formula()
                                   );
           }
-          else if( Environment::getInstance()->CtrlDown )
+          else if( _currently_holding_control )
           {
             _world->changeTerrain ( xPos
                                   , zPos
@@ -1323,7 +1339,7 @@ void MapView::tick( float /*t*/, float dt )
       case smoothing:
         if( mViewMode == eViewMode_3D )
         {
-          if( Environment::getInstance()->ShiftDown )
+          if( _currently_holding_shift )
           {
             _world->flattenTerrain ( xPos
                                    , zPos
@@ -1333,7 +1349,7 @@ void MapView::tick( float /*t*/, float dt )
                                    , smoothing_formula()
                                    );
           }
-          else if( Environment::getInstance()->CtrlDown )
+          else if( _currently_holding_control )
           {
             _world->blurTerrain ( xPos
                                 , zPos
@@ -1355,17 +1371,17 @@ void MapView::tick( float /*t*/, float dt )
                                                  )
                                        );
 
-          if ( Environment::getInstance()->ShiftDown
-            && Environment::getInstance()->CtrlDown
+          if ( _currently_holding_shift
+            && _currently_holding_control
              )
           {
             _world->eraseTextures (brush_position.x(), brush_position.y());
           }
-          else if (Environment::getInstance()->CtrlDown)
+          else if (_currently_holding_control)
           {
             mainGui->TexturePicker->getTextures (_world->GetCurrentSelection());
           }
-          else if ( Environment::getInstance()->ShiftDown
+          else if ( _currently_holding_shift
                  && UITexturingGUI::getSelectedTexture()
                   )
           {
@@ -1383,55 +1399,59 @@ void MapView::tick( float /*t*/, float dt )
       break;
 
       case hole_setting:
-        if (Environment::getInstance()->ShiftDown)
+        if (_currently_holding_shift)
         {
-      // if there is no terain the projection mothod dont work. So get the cords by selection.
-    Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
-    yPos = Selection->data.mapchunk->getSelectionHeight();
-          if( mViewMode == eViewMode_3D )      _world->removeHole( xPos, zPos );
-          //else if( mViewMode == eViewMode_2D )  _world->removeHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom + _world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom + _world->camera.z );
+          // if there is no terain the projection mothod dont work. So get the cords by selection.
+          Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
+          yPos = Selection->data.mapchunk->getSelectionHeight();
+
+          if( mViewMode == eViewMode_3D )
+            _world->removeHole( xPos, zPos );
+          //else if( mViewMode == eViewMode_2D )
+          //  _world->removeHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom + _world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom + _world->camera.z );
         }
-        else if( Environment::getInstance()->CtrlDown )
+        else if( _currently_holding_control )
         {
-          if( mViewMode == eViewMode_3D )      _world->addHole( xPos, zPos );
-          //else if( mViewMode == eViewMode_2D )  _world->addHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom+_world->camera.z );
+          if( mViewMode == eViewMode_3D )
+            _world->addHole( xPos, zPos );
+          //else if( mViewMode == eViewMode_2D )
+          //  _world->addHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom+_world->camera.z );
         }
       break;
 
       case area_id_setting:
-        if( Environment::getInstance()->ShiftDown  )
+        if( _currently_holding_shift  )
         {
           if( mViewMode == eViewMode_3D )
           {
-          // draw the selected AreaId on current selected chunk
-          nameEntry * lSelection = _world->GetCurrentSelection();
-          int mtx,mtz,mcx,mcy;
-          mtx = lSelection->data.mapchunk->mt->mPositionX;
-          mtz = lSelection->data.mapchunk->mt->mPositionZ ;
-          mcx = lSelection->data.mapchunk->px;
-          mcy = lSelection->data.mapchunk->py;
-          _world->setAreaID( Environment::getInstance()->selectedAreaID, mtx,mtz, mcx, mcy );
+            // draw the selected AreaId on current selected chunk
+            nameEntry * lSelection = _world->GetCurrentSelection();
+            int mtx,mtz,mcx,mcy;
+            mtx = lSelection->data.mapchunk->mt->mPositionX;
+            mtz = lSelection->data.mapchunk->mt->mPositionZ ;
+            mcx = lSelection->data.mapchunk->px;
+            mcy = lSelection->data.mapchunk->py;
+            _world->setAreaID( _selected_area_id, mtx,mtz, mcx, mcy );
           }
         }
-        else if( Environment::getInstance()->CtrlDown )
+        else if( _currently_holding_control )
         {
           if( mViewMode == eViewMode_3D )
           {
-          // pick areaID from chunk
-          int newID = _world->GetCurrentSelection()->data.mapchunk->areaID;
-          Environment::getInstance()->selectedAreaID = newID;
-          mainGui->ZoneIDBrowser->setZoneID(newID);
+            // pick areaID from chunk
+            _selected_area_id = _world->GetCurrentSelection()->data.mapchunk->areaID;
+            mainGui->ZoneIDBrowser->setZoneID(_selected_area_id);
           }
         }
 
       break;
 
       case impassable_flag_setting:
-        if( Environment::getInstance()->ShiftDown  )
+        if( _currently_holding_shift  )
         {
           if( mViewMode == eViewMode_3D ) _world->setFlag( true, xPos, zPos );
         }
-        else if( Environment::getInstance()->CtrlDown )
+        else if( _currently_holding_control )
         {
           if( mViewMode == eViewMode_3D ) _world->setFlag( false, xPos, zPos );
         }
@@ -1670,6 +1690,7 @@ void MapView::displayViewMode_3D()
                , _draw_lines
                , _draw_hole_lines
                , _draw_water
+               , _mouse_position
                );
 
   displayGUIIfEnabled();
@@ -1709,13 +1730,13 @@ void MapView::keyPressEvent (QKeyEvent* event)
 //    return;
 
   if (event->key() == Qt::Key_Shift)
-    Environment::getInstance()->ShiftDown = true;
+    _currently_holding_shift = true;
 
   if (event->key() == Qt::Key_Alt)
-    Environment::getInstance()->AltDown = true;
+    _currently_holding_alt = true;
 
   if (event->key() == Qt::Key_Control)
-    Environment::getInstance()->CtrlDown = true;
+    _currently_holding_control = true;
 
   // movement
   if (event->key() == Qt::Key_W)
@@ -1770,15 +1791,17 @@ void MapView::keyPressEvent (QKeyEvent* event)
   if (event->key() == Qt::Key_X)
     toggle_terrain_mode_window();
 
-  if (event->key() == Qt::Key_I && event->modifiers() & Qt::ControlModifier)
-    toggle_painting_mode (!Environment::getInstance()->paintMode);
-
 //  NEW_ACTION (snap_object_to_ground, tr ("Snap object to ground"), SLOT (snap_selected_object_to_ground()), Qt::Key_PageDown);
 //  NEW_TOGGLE_ACTION (rotation_randomization, tr ("Randomized rotation when copying"), SLOT (toggle_copy_rotation_randomization (bool)), 0, false);
 
 
   if (event->key() == Qt::Key_C)
-    Environment::getInstance()->cursorType = (Environment::getInstance()->cursorType + 1) % 4;
+  {
+    _settings->setValue ( "cursor/type"
+                        , (_settings->value ("cursor/type").toInt() + 1) % 4
+                        );
+    _settings->sync();
+  }
 
   if (event->key() == Qt::Key_U)
     toggle_tile_mode();
@@ -1869,11 +1892,6 @@ void MapView::toggle_terrain_mode_window()
     mainGui->ZoneIDBrowser->toggleVisibility();
 }
 
-void MapView::toggle_painting_mode (bool value)
-{
-  Environment::getInstance()->paintMode = value;
-}
-
 void MapView::invert_mouse_y_axis (bool value)
 {
   mousedir = value ? 1.0f : -1.0f;
@@ -1896,9 +1914,9 @@ void MapView::delete_selected_object()
 */
 void MapView::paste_object()
 {
-  if( _world->HasSelection() )
+  if( _world->HasSelection() && _clipboard )
   {
-    nameEntry lClipboard = Environment::getInstance()->get_clipboard();
+    nameEntry lClipboard (*_clipboard);
     Vec3D position;
     switch( _world->GetCurrentSelection()->type )
      {
@@ -1932,7 +1950,8 @@ void MapView::copy_selected_object()
 {
   if( _world->HasSelection() )
   {
-    Environment::getInstance()->set_clipboard( _world->GetCurrentSelection() );
+    _clipboard = new nameEntry;
+    *_clipboard = *_world->GetCurrentSelection();
   }
 }
 
@@ -2252,17 +2271,17 @@ void MapView::keyReleaseEvent (QKeyEvent* event)
 {
   if (event->key() == Qt::Key_Shift)
   {
-    Environment::getInstance()->ShiftDown = false;
+    _currently_holding_shift = false;
   }
 
   if (event->key() == Qt::Key_Alt)
   {
-    Environment::getInstance()->AltDown = false;
+    _currently_holding_alt = false;
   }
 
   if (event->key() == Qt::Key_Control)
   {
-    Environment::getInstance()->CtrlDown = false;
+    _currently_holding_control = false;
   }
 
   // movement
@@ -2473,9 +2492,6 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   }
 
   _mouse_position = event->pos();
-
-  Environment::getInstance()->screenX = event->x();
-  Environment::getInstance()->screenY = event->y();
 
   _last_drag_position = event->pos();
 }

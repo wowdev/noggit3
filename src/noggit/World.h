@@ -164,7 +164,19 @@ public:
             , bool draw_lines
             , bool draw_hole_lines
             , bool draw_water
+            , const QPointF& mouse_position
             );
+
+  void drawSelection ( bool draw_wmo_doodads
+                     , bool draw_wmos
+                     , bool draw_doodads
+                     , bool draw_terrain
+                     );
+  void drawSelectionChunk(int cursorX,int cursorY);
+  void drawTileMode ( bool draw_lines
+                    , float ratio
+                    , float zoom
+                    );
 
   void outdoorLights(bool on);
   void setupFog (bool draw_fog);
@@ -178,26 +190,13 @@ public:
 
   void moveADT();
 
-  void drawSelection ( bool draw_wmo_doodads
-                     , bool draw_wmos
-                     , bool draw_doodads
-                     , bool draw_terrain
-                     );
-  void drawSelectionChunk(int cursorX,int cursorY);
-  void drawTileMode ( bool draw_lines
-                    , float ratio
-                    , float zoom
-                    );
-
-  // Selection related methods.
-private:
-  void getSelection( );
-public:
   bool HasSelection() { return mCurrentSelection; }
   bool IsSelection( int pSelectionType ) { return HasSelection() && mCurrentSelection->type == pSelectionType; }
   nameEntry * GetCurrentSelection() { return mCurrentSelection; }
   void ResetSelection() { mCurrentSelection = NULL; }
   GLuint GetCurrentSelectedTriangle() { return mCurrentSelectedTriangle; }
+
+  Vec3D _exact_terrain_selection_position;
 
   bool GetVertex(float x,float z, Vec3D *V);
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
@@ -237,10 +236,8 @@ public:
   bool hasTile( int pX, int pZ ) const;
 
   static bool IsEditableWorld( int pMapId );
-  void clearHeight(int id, int x, int z);
-  void clearHeight(int id, int x, int z , int _cx, int _cz);
-  void moveHeight(int id, int x, int z);
-  void moveHeight(int id, int x, int z , int _cx, int _cz);
+  void clearHeight(int x, int z);
+  void moveHeight(int x, int z);
 
   void saveWDT();
   void clearAllModelsOnADT(int x, int z);

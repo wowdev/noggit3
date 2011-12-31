@@ -113,7 +113,7 @@ public:
   void addHole(int i,int j);
   void removeHole(int i,int j);
 
-  void setFlag(bool value);
+  void setFlag(bool on_or_off, int flag);
 
   int getAreaID();
   void setAreaID(int ID);
