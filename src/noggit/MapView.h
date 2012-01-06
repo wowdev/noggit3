@@ -26,6 +26,7 @@ namespace ui
   class cursor_selector;
   class help_widget;
   class minimap_widget;
+  class zoneid_widget;
 }
 
 enum eViewMode
@@ -225,6 +226,7 @@ private:
   ui::help_widget* _help_widget;
   ui::about_widget* _about_widget;
   ui::cursor_selector* _cursor_selector;
+  ui::zoneid_widget* _zoneid_widget;
 
   QPointF _mouse_position;
   bool _is_currently_moving_object;

@@ -33,6 +33,7 @@
 #include <noggit/ui/minimap_widget.h>
 #include <noggit/ui/help_widget.h>
 #include <noggit/ui/cursor_selector.h>
+#include <noggit/ui/zoneid_widget.h>
 
 #include <noggit/Log.h>
 
@@ -833,6 +834,7 @@ void MapView::createGUI()
   NEW_ACTION (save_wdt, tr ("Save WDT"), SLOT (TEST_save_wdt()), 0);
   NEW_ACTION (save_minimap, tr ("Save minimap as raw files"), SLOT (save_minimap()), Qt::Key_P + Qt::SHIFT + Qt::CTRL);
   NEW_ACTION (toggle_doodad_spawner, tr ("toggle_doodad_spawner"), SLOT (toggle_doodad_spawner()), Qt::Key_T);
+  NEW_ACTION_OTHER (area_id_browser, tr ("Area Id Browser"), _zoneid_widget, SLOT (show()), 0);
 
 #undef NEW_ACTION
 #undef NEW_ACTION_OTHER
@@ -934,6 +936,7 @@ void MapView::createGUI()
   debug_menu->addAction (save_wdt);
   debug_menu->addAction (toggle_doodad_spawner);
   debug_menu->addAction (save_minimap);
+  debug_menu->addAction (area_id_browser);
 
   QMenu* useless_menu (debug_menu->addMenu (tr ("Stuff that should only be on keys")));
   useless_menu->addAction (turn_around);
@@ -1029,6 +1032,7 @@ MapView::MapView ( World* world
   , _about_widget (NULL)
   //  , _about_widget (new ui::about_widget (NULL))
   , _cursor_selector (new ui::cursor_selector (NULL))
+  , _zoneid_widget( new ui::zoneid_widget (NULL))
   , _is_currently_moving_object (false)
   , _draw_terrain_height_contour (false)
   , _draw_wmo_doodads (true)
@@ -1441,6 +1445,7 @@ void MapView::tick( float /*t*/, float dt )
             // pick areaID from chunk
             _selected_area_id = _world->GetCurrentSelection()->data.mapchunk->areaID;
             mainGui->ZoneIDBrowser->setZoneID(_selected_area_id);
+            _zoneid_widget->setZoneID(int(_world->GetCurrentSelection()->data.mapchunk->areaID));
           }
         }
 
