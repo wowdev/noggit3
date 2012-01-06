@@ -116,6 +116,7 @@ set ( noggit_sources
       src/noggit/ui/help_widget.cpp
       src/noggit/ui/minimap_widget.cpp
       src/noggit/ui/cursor_selector.cpp
+      src/noggit/ui/zoneid_widget.cpp
     )
 
 set ( noggit_headers
@@ -194,6 +195,7 @@ set ( noggit_headers
       src/noggit/ui/cursor_selector.h
       src/noggit/ui/help_widget.h
       src/noggit/ui/minimap_widget.h
+      src/noggit/ui/zoneid_widget.h
     )
 
 set ( noggit_headers_to_moc
@@ -209,6 +211,7 @@ set ( noggit_headers_to_moc
       src/noggit/ui/cursor_selector.h
       src/noggit/ui/help_widget.h
       src/noggit/ui/minimap_widget.h
+      src/noggit/ui/zoneid_widget.h
     )
 
 set ( opengl_sources
