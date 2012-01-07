@@ -22,6 +22,7 @@ namespace noggit
 
     const QStringList& archive_manager::listfile() const
     {
+      const_cast<archive_manager*> (this)->all_finish_loading();
       return _listfile;
     }
     void archive_manager::add_to_listfile (const QStringList& other)
