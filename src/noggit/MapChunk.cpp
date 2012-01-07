@@ -1665,14 +1665,14 @@ void MapChunk::switchTexture( noggit::blp_texture* oldTexture, noggit::blp_textu
   _textures[texLevel] = newTexture;
   }
 }
-bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, float pressure, noggit::blp_texture* texture )
+bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture )
 {
 #if 1
   float zPos,xPos,change,xdiff,zdiff,dist, radius;
 
   int texLevel=-1;
 
-  radius=Brush->getRadius();
+  radius=Brush.getRadius();
 
   xdiff= xbase - x + CHUNKSIZE/2;
   zdiff= zbase - z + CHUNKSIZE/2;
@@ -1736,7 +1736,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
       target=strength;
       tarAbove=1-target;
 
-      tPressure=pressure*Brush->getValue(dist);
+      tPressure=pressure*Brush.getValue(dist);
 
       if(texLevel>0)
         amap[texLevel-1][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[texLevel-1][i+j*64]) ) + tPressure*target + 0.5f ,255.0f) , 0.0f));
@@ -1772,7 +1772,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 #else
   // new stuff from bernd.
   // need to get rework. Add old code with switch that the guys out there can use paint.
-  const float radius = Brush->getRadius();
+  const float radius = Brush.getRadius();
 
   // Are we really painting on this chunk?
   const float xdiff = xbase + CHUNKSIZE / 2 - x;
@@ -1871,7 +1871,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
 
       if( dist <= radius )
       {
-          amap[texLevel - 1][i + j * 64] = (unsigned char)( std::max( std::min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
+          amap[texLevel - 1][i + j * 64] = (unsigned char)( std::max( std::min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush.getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
       }
     }
   }
