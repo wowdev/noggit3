@@ -186,7 +186,7 @@ public:
   void setAreaID(int id, int x, int z);
   void setAreaID(int id, int x, int z , int cx, int cz);
   void setFlag(bool to, float x, float z);
-  void setBaseTexture(int x, int z );
+  void setBaseTexture(int x, int z, noggit::blp_texture* texture );
 
   void moveADT();
 
@@ -202,7 +202,7 @@ public:
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   void blurTerrain(float x, float z, float remain, float radius, int BrushType);
-  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, noggit::blp_texture* texture);
+  bool paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture);
   void eraseTextures(float x, float z);
   void overwriteTextureAtCurrentChunk( float x, float z, noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture);
   void addHole( float x, float z );

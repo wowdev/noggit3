@@ -21,12 +21,12 @@ public:
   void GenerateTexture();
   void setHardness( float H );
   void setRadius( float R );
-  float getHardness();
-  float getRadius();
-  float getValue( float dist );
+  float getHardness() const;
+  float getRadius() const;
+  float getValue( float dist ) const;
   opengl::texture* getTexture();
   bool needUpdate();
-  void init();
+  brush(float r = 15.0f, float h = 0.5f);
 };
 
 #endif

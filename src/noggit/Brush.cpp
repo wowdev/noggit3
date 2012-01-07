@@ -4,22 +4,17 @@
 
 #include <opengl/texture.h>
 
-void brush::init()
+brush::brush(float r, float h)
+  : _texture (new opengl::texture)
+  , radius (r)
 {
-  radius = 15;
-  hardness = 0.5f;
-  iradius = hardness * radius;
-  oradius = radius - iradius;
-  _texture = new opengl::texture;
-  GenerateTexture();
+  setHardness (h);
 }
 
 void brush::GenerateTexture()
 {
   float x, y, dist;
   float change = 2.0f / 256.0f;
-
-  update = false;
 
   y = -1;
   for( int j = 0; j < 256; j++ )
@@ -52,7 +47,8 @@ void brush::setHardness( float H )
   hardness = H;
   iradius = hardness * radius;
   oradius = radius - iradius;
-  update = true;
+
+  GenerateTexture();
 }
 void brush::setRadius( float R )
 {
@@ -60,15 +56,15 @@ void brush::setRadius( float R )
   iradius = hardness * radius;
   oradius = radius - iradius;
 }
-float brush::getHardness()
+float brush::getHardness() const
 {
   return hardness;
 }
-float brush::getRadius()
+float brush::getRadius() const
 {
   return radius;
 }
-float brush::getValue( float dist )
+float brush::getValue( float dist ) const
 {
   if( dist > radius )
     return 0.0f;
@@ -79,8 +75,4 @@ float brush::getValue( float dist )
 opengl::texture* brush::getTexture()
 {
   return _texture;
-}
-bool brush::needUpdate()
-{
-  return update;
 }

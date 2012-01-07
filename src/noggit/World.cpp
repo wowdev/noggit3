@@ -1815,7 +1815,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
   }
 }
 
-bool World::paintTexture(float x, float z, brush *Brush, float strength, float pressure, noggit::blp_texture* texture)
+bool World::paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture)
 {
   //const int newX = (int)(x / TILESIZE);
   //const int newZ = (int)(z / TILESIZE);
@@ -2228,22 +2228,23 @@ void World::moveHeight(int x, int z)
 
 }
 
-void World::setBaseTexture( int x, int z )
+void World::setBaseTexture( int x, int z, noggit::blp_texture* texture )
 {
-  if( !UITexturingGUI::getSelectedTexture() ) return;
   MapTile *curTile;
   curTile = mTiles[z][x].tile;
   if(curTile == 0) return;
 
-  // clear all textures on the adt and set selected texture as base texture
   for (int j=0; j<16; ++j)
   {
     for (int i=0; i<16; ++i)
     {
       MapChunk *curChunk = curTile->getChunk(j, i);
       curChunk->eraseTextures();
-      curChunk->addTexture( UITexturingGUI::getSelectedTexture() );
-      UITexturingGUI::getSelectedTexture()->addReference();
+      if (texture)
+      {
+        curChunk->addTexture( texture );
+        texture->addReference();
+      }
     }
   }
 }

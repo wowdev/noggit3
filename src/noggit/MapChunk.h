@@ -104,7 +104,7 @@ public:
   bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
-  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, noggit::blp_texture* texture);
+  bool paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture);
   int addTexture(noggit::blp_texture* texture);
   void switchTexture( noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture );
   void eraseTextures();
