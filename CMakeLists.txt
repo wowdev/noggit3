@@ -50,7 +50,6 @@ set ( noggit_sources
       src/noggit/Brush.cpp
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
-      src/noggit/Directory.cpp
       src/noggit/Frustum.cpp
       src/noggit/Liquid.cpp
       src/noggit/Log.cpp
@@ -93,7 +92,6 @@ set ( noggit_headers
       src/noggit/Brush.h
       src/noggit/DBC.h
       src/noggit/DBCFile.h
-      src/noggit/Directory.h
       src/noggit/Frustum.h
       src/noggit/Liquid.h
       src/noggit/Log.h
