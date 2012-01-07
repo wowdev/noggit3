@@ -47,7 +47,6 @@ namespace ui
     current_area->setText(0, "Current Area: " + areapath);
     current_area->setTextColor(0, Qt::green);
 
-    setMapID();
     setZoneID(_world->getAreaID());
 
 /*  FOR TEST
@@ -119,7 +118,7 @@ namespace ui
             QTreeWidgetItem* item_1 (new QTreeWidgetItem (this));
             item_1->setText(0, text);
 
-            QObject::connect(this, SIGNAL(clicked()), this, SLOT(setZoneID(i->getInt(AreaDB::AreaID))) );
+            QObject::connect(this, SIGNAL(clicked()), this, SLOT(static_cast<zoneid_widget::Ptr>(setZoneID(i->getInt(AreaDB::AreaID)))) );
           }
         }
         else if(ZoneID > 0)
@@ -135,7 +134,7 @@ namespace ui
             QTreeWidgetItem* sub_item_1 (new QTreeWidgetItem (item_1));
             sub_item_1->setText(1, text);
 
-            QObject::connect(this, SIGNAL(itemClicked(sub_item_1, 1)), this, SLOT(setZoneID(i->getInt(AreaDB::AreaID))));
+			QObject::connect(this, SIGNAL(itemClicked(sub_item_1, 1)), this, SLOT(static_cast<zoneid_widget::Ptr>(setZoneID(i->getInt(AreaDB::AreaID)))));
           }
         }
       }
