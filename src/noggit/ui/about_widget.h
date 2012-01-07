@@ -3,15 +3,18 @@
 
 #include <QWidget>
 
-namespace ui
+namespace noggit
 {
-  class about_widget : public QWidget
+  namespace ui
   {
-    Q_OBJECT
+    class about_widget : public QWidget
+    {
+      Q_OBJECT
 
-  public:
-    about_widget (QWidget* parent = NULL);
-  };
+    public:
+      about_widget (QWidget* parent = NULL);
+    };
+  }
 }
 
 #endif

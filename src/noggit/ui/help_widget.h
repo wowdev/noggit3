@@ -3,13 +3,16 @@
 
 #include <QTextBrowser>
 
-namespace ui
+namespace noggit
 {
-  class help_widget : public QTextBrowser
+  namespace ui
   {
-  public:
-    help_widget (QWidget* parent = NULL);
-  };
+    class help_widget : public QTextBrowser
+    {
+    public:
+      help_widget (QWidget* parent = NULL);
+    };
+  }
 }
 
 #endif

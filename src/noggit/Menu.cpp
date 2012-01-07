@@ -26,7 +26,7 @@ Q_DECLARE_METATYPE (bookmark_entry);
 
 Menu::Menu (QWidget* parent)
   : QWidget (parent)
-  , _minimap (NULL)
+  , _minimap (new noggit::ui::minimap_widget (NULL))
   , _world (NULL)
 {
   QListWidget* continents_table (new QListWidget (NULL));
@@ -85,7 +85,6 @@ Menu::Menu (QWidget* parent)
   entry_points_tabs->addTab (raids_table, tr ("Raids"));
   entry_points_tabs->addTab (bookmarks_table, tr ("Bookmarks"));
 
-  _minimap = new ui::minimap_widget (NULL);
   _minimap->draw_boundaries (true);
   connect (_minimap, SIGNAL (map_clicked (Vec3D)), SLOT (minimap_clicked (Vec3D)));
 

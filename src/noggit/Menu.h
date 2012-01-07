@@ -7,9 +7,12 @@ class QKeyEvent;
 class QMouseEvent;
 class QListWidgetItem;
 
-namespace ui
+namespace noggit
 {
-  class minimap_widget;
+  namespace ui
+  {
+    class minimap_widget;
+  }
 }
 class Vec3D;
 class World;
@@ -37,7 +40,7 @@ private:
   void prepare_world (const Vec3D& pos, float rotation, float tilt);
   void enter_world_at (const Vec3D& pos, bool auto_height = true, float av = -30.0f, float ah = -90.0f);
 
-  ui::minimap_widget* _minimap;
+  noggit::ui::minimap_widget* _minimap;
   World* _world;
 };
 
