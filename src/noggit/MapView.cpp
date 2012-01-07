@@ -15,12 +15,6 @@
 #include <noggit/Brush.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
-#include <noggit/UIMapViewGUI.h>
-#include <noggit/UITexturePicker.h>
-#include <noggit/UITextureSwitcher.h>
-#include <noggit/UITexturingGUI.h>
-#include <noggit/UIToolbar.h>
-#include <noggit/UIZoneIDBrowser.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/ModelManager.h>
 #include <noggit/World.h>
