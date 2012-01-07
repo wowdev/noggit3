@@ -22,16 +22,10 @@ endif( WIN32 )
 # Our own FindModule.cmake scripts.
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
-find_package (Freetype REQUIRED)
 find_package (OpenGL REQUIRED)
 find_package (GLEW REQUIRED)
-find_package (StormLib REQUIRED)
 find_package (Qt4 4.8 COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
-
-if (APPLE)
-  # Also link against libz for static's sake.
-  set (FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES} z)
-endif (APPLE)
+find_package (storm REQUIRED)
 
 # Qt setup
 include (${QT_USE_FILE})
@@ -39,8 +33,7 @@ include (${QT_USE_FILE})
 # include paths
 include_directories ( ${GLEW_INCLUDE_PATH}
                       ${GLUT_INCLUDE_DIRS}
-                      ${FREETYPE_INCLUDE_DIRS}
-                      ${STORMLIB_INCLUDES}
+                      ${STORM_INCLUDES}
                       ${Boost_INCLUDE_DIRS}
                       "${CMAKE_SOURCE_DIR}/include/"
                     )
@@ -58,7 +51,6 @@ set ( noggit_sources
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
       src/noggit/Directory.cpp
-      src/noggit/FreeType.cpp
       src/noggit/Frustum.cpp
       src/noggit/Liquid.cpp
       src/noggit/Log.cpp
@@ -75,32 +67,6 @@ set ( noggit_sources
       src/noggit/Shaders.cpp
       src/noggit/Sky.cpp
       src/noggit/TextureManager.cpp
-      src/noggit/UIButton.cpp
-      src/noggit/UICheckBox.cpp
-      src/noggit/UICloseWindow.cpp
-      src/noggit/UIDoodadSpawner.cpp
-      src/noggit/UIFrame.cpp
-      src/noggit/UIGradient.cpp
-      src/noggit/UIListView.cpp
-      src/noggit/UIMapViewGUI.cpp
-      src/noggit/UIMinimizeButton.cpp
-      src/noggit/UIModel.cpp
-      src/noggit/UIScrollBar.cpp
-      src/noggit/UIScrollableFrame.cpp
-      src/noggit/UISlider.cpp
-      src/noggit/UIStatusBar.cpp
-      src/noggit/UIText.cpp
-      src/noggit/UITextBox.cpp
-      src/noggit/UITexture.cpp
-      src/noggit/UITexturePicker.cpp
-      src/noggit/UITextureSwitcher.cpp
-      src/noggit/UITexturingGUI.cpp
-      src/noggit/UIToggleGroup.cpp
-      src/noggit/UIToolbar.cpp
-      src/noggit/UIToolbarIcon.cpp
-      src/noggit/UITreeView.cpp
-      src/noggit/UIWindow.cpp
-      src/noggit/UIZoneIDBrowser.cpp
       src/noggit/WMO.cpp
       src/noggit/WMOInstance.cpp
       src/noggit/World.cpp
@@ -114,6 +80,7 @@ set ( noggit_sources
 
       src/noggit/ui/about_widget.cpp
       src/noggit/ui/help_widget.cpp
+      src/noggit/ui/model_spawner.cpp
       src/noggit/ui/minimap_widget.cpp
       src/noggit/ui/cursor_selector.cpp
     )
@@ -127,7 +94,6 @@ set ( noggit_headers
       src/noggit/DBC.h
       src/noggit/DBCFile.h
       src/noggit/Directory.h
-      src/noggit/FreeType.h
       src/noggit/Frustum.h
       src/noggit/Liquid.h
       src/noggit/Log.h
@@ -149,33 +115,6 @@ set ( noggit_headers
       src/noggit/Shaders.h
       src/noggit/Sky.h
       src/noggit/TextureManager.h
-      src/noggit/UIButton.h
-      src/noggit/UICheckBox.h
-      src/noggit/UICloseWindow.h
-      src/noggit/UIDoodadSpawner.h
-      src/noggit/UIEventClasses.h
-      src/noggit/UIFrame.h
-      src/noggit/UIGradient.h
-      src/noggit/UIListView.h
-      src/noggit/UIMapViewGUI.h
-      src/noggit/UIMinimizeButton.h
-      src/noggit/UIModel.h
-      src/noggit/UIScrollBar.h
-      src/noggit/UIScrollableFrame.h
-      src/noggit/UISlider.h
-      src/noggit/UIStatusBar.h
-      src/noggit/UIText.h
-      src/noggit/UITextBox.h
-      src/noggit/UITexture.h
-      src/noggit/UITexturePicker.h
-      src/noggit/UITextureSwitcher.h
-      src/noggit/UITexturingGUI.h
-      src/noggit/UIToggleGroup.h
-      src/noggit/UIToolbar.h
-      src/noggit/UIToolbarIcon.h
-      src/noggit/UITreeView.h
-      src/noggit/UIWindow.h
-      src/noggit/UIZoneIDBrowser.h
       src/noggit/Vec3D.h
       src/noggit/WMO.h
       src/noggit/WMOInstance.h
@@ -193,6 +132,7 @@ set ( noggit_headers
       src/noggit/ui/about_widget.h
       src/noggit/ui/cursor_selector.h
       src/noggit/ui/help_widget.h
+      src/noggit/ui/model_spawner.h
       src/noggit/ui/minimap_widget.h
     )
 
@@ -208,6 +148,7 @@ set ( noggit_headers_to_moc
       src/noggit/ui/about_widget.h
       src/noggit/ui/cursor_selector.h
       src/noggit/ui/help_widget.h
+      src/noggit/ui/model_spawner.h
       src/noggit/ui/minimap_widget.h
     )
 
@@ -230,6 +171,15 @@ set ( windows_sources
 
 set ( windows_headers
       src/windows/StackWalker.h
+    )
+
+set ( helper_sources
+      src/helper/qt/non_recursive_filter_model.cpp
+    )
+
+set ( helper_headers
+      src/helper/qt/non_recursive_filter_model.h
+      src/helper/qt/signal_blocker.h
     )
 
 
@@ -270,7 +220,6 @@ endif (WIN32)
 
 # Find revision ID and hash of the sourcetree
 include ("${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake")
-include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}
                       ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -299,9 +248,11 @@ if (WIN32)
                    ${noggit_sources}
                    ${opengl_sources}
                    ${windows_sources}
+                   ${helper_sources}
                    ${noggit_headers}
                    ${opengl_headers}
                    ${windows_headers}
+                   ${helper_headers}
                    ${moced}
                    ${rccsc}
                    ${QM}
@@ -311,6 +262,7 @@ else (WIN32)
                    MACOSX_BUNDLE
                    ${noggit_sources}
                    ${opengl_sources}
+                   ${helper_sources}
                    ${ResourceFiles}
                    ${moced}
                    ${rccsc}
@@ -320,8 +272,7 @@ endif (WIN32)
 
 target_link_libraries ( noggit
                         ${OPENGL_LIBRARIES}
-                        ${FREETYPE_LIBRARIES}
-                        ${STORMLIB_LIBRARIES}
+                        ${STORM_LIBRARIES}
                         ${GLEW_LIBRARY}
                         ${QT_LIBRARIES}
                       )
@@ -345,8 +296,7 @@ if (APPLE)
 
   set ( DIRS
       ${OPENGL_LIBRARY_DIR}
-      ${FREETYPE_LIBRARY_DIR}
-      ${STORMLIB_LIBRARY_DIR}
+      ${STORM_LIBRARY_DIR}
       ${GLEW_LIBRARY_DIR}
       )
 

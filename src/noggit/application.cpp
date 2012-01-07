@@ -14,7 +14,7 @@
 #include <QLocale>
 #include <QLibraryInfo>
 
-#include <revision.h>
+#include <helper/repository.h>
 
 #include <noggit/DBC.h>
 #include <noggit/errorHandling.h>
@@ -24,19 +24,6 @@
 #include <noggit/WMO.h> // WMOManager::report()
 #include <noggit/ModelManager.h> // ModelManager::report()
 #include <noggit/mpq/file.h>
-
-//! \todo Remove.
-#include <noggit/FreeType.h> // fonts.
-
-freetype::font_data arialn13;
-freetype::font_data arial12;
-freetype::font_data arial14;
-freetype::font_data arial16;
-freetype::font_data arial24;
-freetype::font_data arial32;
-freetype::font_data morpheus40;
-freetype::font_data skurri32;
-freetype::font_data fritz16;
 
 namespace noggit
 {
@@ -50,12 +37,12 @@ namespace noggit
     RegisterErrorHandlers();
 #endif
     InitLogging();
-    Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
+    Log << "Noggit Studio - " << helper::repository::revision() << std::endl;
 
     setOrganizationDomain ("modcraft.tk");
     setOrganizationName ("Modcraft");
     setApplicationName ("Noggit");
-    setApplicationVersion (STRPRODUCTVER);
+    setApplicationVersion (helper::repository::revision_string());
 
     _settings = new QSettings (this);
 
@@ -178,6 +165,11 @@ namespace noggit
         LogError << "GLEW: " << glewGetErrorString (err) << std::endl;
         throw std::runtime_error ("unable to initialize glew.");
       }
+
+      //! \todo Fallback for old and bad platforms.
+      if (!glGenBuffers) glGenBuffers = glGenBuffersARB;
+      if (!glBindBuffer) glBindBuffer = glBindBufferARB;
+      if (!glBufferData) glBufferData = glBufferDataARB;
 
       LogDebug << "GL: Version: " << glGetString (GL_VERSION) << std::endl;
       LogDebug << "GL: Vendor: " << glGetString (GL_VENDOR) << std::endl;
@@ -384,29 +376,14 @@ int __stdcall WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmd
 
 int main (int argc, char *argv[])
 {
-  noggit::application application (argc, argv);
+  try
+  {
+    noggit::application application (argc, argv);
 
-//! \todo remove vv
-
-#ifdef Q_WS_WIN
-  const std::string arialFilename ("C:/Windows/Fonts/arial.ttf");
-#else
-  const std::string arialFilename ("/Library/Fonts/arial.ttf");
-#endif
-
-  // Initializing Fonts
-  skurri32.init( "fonts/skurri.ttf", 32, true );
-  fritz16.init( "fonts/frizqt__.ttf", 16, true );
-  morpheus40.init( "fonts/morpheus.ttf", 40, true );
-  arialn13.init( "fonts/arialn.ttf", 13, true );
-
-  arial12.init( arialFilename, 12, false );
-  arial14.init( arialFilename, 14, false );
-  arial16.init( arialFilename, 16, false );
-  arial24.init( arialFilename, 24, false );
-  arial32.init( arialFilename, 32, false );
-
-//! \todo remove ^^
-
-  return application.exec();
+    return application.exec();
+  }
+  catch (const std::exception& e)
+  {
+    LogError << "Unrecoverable error: " << e.what() << std::endl;
+  }
 }

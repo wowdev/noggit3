@@ -49,8 +49,4 @@ namespace noggit
   application& app();
 }
 
-//! \todo remove below.
-namespace freetype { class font_data; }
-extern freetype::font_data arialn13, arial12, arial14, arial16, arial24, arial32, morpheus40, skurri32, fritz16;
-
 #endif
