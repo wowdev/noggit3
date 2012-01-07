@@ -112,17 +112,17 @@ WMO::WMO( World* world, const std::string& filenameArg )
       texbuf = new char[size];
       f.read(texbuf, size);
     }
-    else if ( fourcc == 'MOMT' ) {
-      // materials
-      //WMOMaterialBlock bl;
+    else if ( fourcc == 'MOMT' )
+    {
+      const size_t num_materials (size / 0x40);
 
-      for (unsigned int i=0; i<nTextures; ++i) {
-        WMOMaterial *m = &mat[i];
-        f.read(m, 0x40);
+      for (size_t i (0); i < num_materials; ++i)
+      {
+        f.read (&mat[i], 0x40);
 
-        std::string texpath(texbuf+m->nameStart);
+        const std::string texpath(texbuf + mat[i].nameStart);
 
-        m->_texture = TextureManager::newTexture(texpath);
+        mat[i]._texture = TextureManager::newTexture(texpath);
         textures.push_back(texpath);
       }
     }
