@@ -106,20 +106,20 @@ WMO::WMO(const std::string& filenameArg)
 			texbuf = new char[size];
 			f.read(texbuf, size);
 		}
-		else if (fourcc == 'MOMT') {
-			// materials
-			//WMOMaterialBlock bl;
+    else if (fourcc == 'MOMT')
+    {
+      std::size_t const num_materials (size / 0x40);
 
-			for (unsigned int i = 0; i<nTextures; ++i) {
-				WMOMaterial *m = &mat[i];
-				f.read(m, 0x40);
+      for (std::size_t i (0); i < num_materials; ++i)
+      {
+        f.read (&mat[i], 0x40);
 
-				std::string texpath(texbuf + m->nameStart);
+        std::string const texpath (texbuf + mat[i].nameStart);
 
-				m->_texture = TextureManager::newTexture(texpath);
-				textures.push_back(texpath);
-			}
-		}
+        mat[i]._texture = TextureManager::newTexture (texpath);
+        textures.push_back (texpath);
+      }
+    }
 		else if (fourcc == 'MOGN') {
 			groupnames = reinterpret_cast<char*>(f.getPointer());
 		}
