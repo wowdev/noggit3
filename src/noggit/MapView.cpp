@@ -752,7 +752,6 @@ void MapView::createGUI()
   mainGui->guiToolbar->current_texture->setClickFunc( view_texture_palette, 0 );
 
   mainGui->ZoneIDBrowser->setMapID( _world->getMapID() );
-  _zoneid_widget->setMapID();
   //! \todo Do this differently. Thanks.
   //mainGui->ZoneIDBrowser->setChangeFunc( changeZoneIDValue );
 
@@ -1321,19 +1320,23 @@ void MapView::tick( float /*t*/, float dt )
         if( mViewMode == eViewMode_3D )
         {
           if( _currently_holding_shift )
+          {
             _world->changeTerrain ( xPos
                                   , zPos
                                   , 7.5f * dt * shaping_speed()
                                   , shaping_radius()
                                   , shaping_formula()
                                   );
+          }
           else if( _currently_holding_control )
+          {
             _world->changeTerrain ( xPos
                                   , zPos
                                   , -7.5f * dt * shaping_speed()
                                   , shaping_radius()
                                   , shaping_formula()
                                   );
+          }
         }
         break;
 
@@ -1375,12 +1378,17 @@ void MapView::tick( float /*t*/, float dt )
           if ( _currently_holding_shift
             && _currently_holding_control
              )
+          {
             _world->eraseTextures (brush_position.x(), brush_position.y());
+          }
           else if (_currently_holding_control)
+          {
             mainGui->TexturePicker->getTextures (_world->GetCurrentSelection());
+          }
           else if ( _currently_holding_shift
                  && UITexturingGUI::getSelectedTexture()
                   )
+          {
             _world->paintTexture ( brush_position.x()
                                  , brush_position.y()
                                  , &textureBrush
@@ -1390,6 +1398,7 @@ void MapView::tick( float /*t*/, float dt )
                                               )
                                  , UITexturingGUI::getSelectedTexture()
                                  );
+          }
         }
       break;
 
@@ -1415,9 +1424,9 @@ void MapView::tick( float /*t*/, float dt )
       break;
 
       case area_id_setting:
-        if( mViewMode == eViewMode_3D )
+        if( _currently_holding_shift  )
         {
-          if( _currently_holding_shift  )
+          if( mViewMode == eViewMode_3D )
           {
             // draw the selected AreaId on current selected chunk
             nameEntry * lSelection = _world->GetCurrentSelection();
@@ -1428,7 +1437,10 @@ void MapView::tick( float /*t*/, float dt )
             mcy = lSelection->data.mapchunk->py;
             _world->setAreaID( _selected_area_id, mtx,mtz, mcx, mcy );
           }
-          else if( _currently_holding_control )
+        }
+        else if( _currently_holding_control )
+        {
+          if( mViewMode == eViewMode_3D )
           {
             // pick areaID from chunk
             _selected_area_id = _world->GetCurrentSelection()->data.mapchunk->areaID;
@@ -1436,15 +1448,17 @@ void MapView::tick( float /*t*/, float dt )
             _zoneid_widget->setZoneID(int(_world->GetCurrentSelection()->data.mapchunk->areaID));
           }
         }
+
       break;
 
       case impassable_flag_setting:
-        if( mViewMode == eViewMode_3D)
+        if( _currently_holding_shift  )
         {
-          if( _currently_holding_shift )
-            _world->setFlag( true, xPos, zPos );
-          else if( _currently_holding_control )
-            _world->setFlag( false, xPos, zPos );
+          if( mViewMode == eViewMode_3D ) _world->setFlag( true, xPos, zPos );
+        }
+        else if( _currently_holding_control )
+        {
+          if( mViewMode == eViewMode_3D ) _world->setFlag( false, xPos, zPos );
         }
       break;
       }
