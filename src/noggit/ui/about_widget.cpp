@@ -2,7 +2,7 @@
 
 #include <QLabel>
 
-#include <revision.h> // STRPRODUCTVER
+#include <helper/repository.h>
 #include <noggit/blp_texture.h>
 
 namespace noggit
@@ -27,7 +27,7 @@ namespace noggit
       QLabel* description (new QLabel (tr ("a WoW map editor for 3.3.5a"), this));
       QLabel* authors (new QLabel (tr ("Maintained by %1").arg ("Ufoz, [...], Cryect, Beket, Schlumpf, Tigurius, Steff, Garthog, Glararan"), this));
       QLabel* copyright (new QLabel (trUtf8 ("World of Warcraft © Blizzard Entertainment"), this));
-      QLabel* product_version (new QLabel (STRPRODUCTVER, this));
+      QLabel* product_version (new QLabel (helper::repository::revision_string(), this));
       QLabel* date (new QLabel (tr ("%1, %2").arg (__DATE__).arg (__TIME__), this));
 
       static QFont skurri32 ("Skurri", 32);

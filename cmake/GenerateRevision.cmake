@@ -65,7 +65,7 @@ string(REPLACE "+" "" hg_rev_hash ${hg_rev_hash_str})
 
 # Create the actual revision.h file from the above params
 configure_file(
-  "${CMAKE_SOURCE_DIR}/cmake/revision.h.in.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp/revision.h"
+  "${CMAKE_SOURCE_DIR}/src/helper/repository.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/helper/repository.h"
   @ONLY
 )

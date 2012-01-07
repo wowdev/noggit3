@@ -1,0 +1,14 @@
+#ifndef __HELPER_REPOSITORY_H
+#define __HELPER_REPOSITORY_H
+
+namespace helper
+{
+  namespace repository
+  {
+    static const int revision() { return @hg_rev_id@; }
+    static const QString revision_string() { return "@hg_rev_id_str@"; }
+    static const QString hash() { return "@hg_rev_hash_str@"; }
+  }
+}
+
+#endif
