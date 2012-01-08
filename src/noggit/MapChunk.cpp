@@ -6,7 +6,7 @@
 #include <QMap>
 #include <QSettings>
 
-#include <helper/math/random.h>
+#include <math/random.h>
 
 #include <opengl/texture.h>
 
@@ -268,10 +268,9 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
 
   if (!areaIDColors.contains (areaID))
   {
-    using namespace helper::math;
-    areaIDColors[areaID] = Vec3D ( random::floating_point (0.0f, 1.0f)
-                                 , random::floating_point (0.0f, 1.0f)
-                                 , random::floating_point (0.0f, 1.0f)
+    areaIDColors[areaID] = Vec3D ( ::math::random::floating_point (0.0f, 1.0f)
+                                 , ::math::random::floating_point (0.0f, 1.0f)
+                                 , ::math::random::floating_point (0.0f, 1.0f)
                                  );
   }
 

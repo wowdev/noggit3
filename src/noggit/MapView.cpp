@@ -10,23 +10,23 @@
 #include <QSlider>
 #include <QLabel>
 
-#include <helper/math/bounded_nearest.h>
+#include <math/bounded_nearest.h>
+
 #include <helper/qt/signal_blocker.h>
+
+#include <opengl/texture.h>
 
 #include <noggit/Brush.h>
 #include <noggit/MapChunk.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/ModelManager.h>
 #include <noggit/World.h>
+#include <noggit/Log.h>
 #include <noggit/ui/about_widget.h>
 #include <noggit/ui/minimap_widget.h>
 #include <noggit/ui/help_widget.h>
 #include <noggit/ui/cursor_selector.h>
 #include <noggit/ui/model_spawner.h>
-
-#include <noggit/Log.h>
-
-#include <opengl/texture.h>
 
 //! \todo Replace all old gui elements with new classes / widgets.
 #undef __OBSOLETE_GUI_ELEMENTS
@@ -1804,7 +1804,7 @@ namespace noggit
 
   static int tile_below_camera (const float& position)
   {
-    return helper::math::bounded_nearest<int>
+    return ::math::bounded_nearest<int>
       ((position - (TILESIZE / 2)) / TILESIZE);
   }
 
