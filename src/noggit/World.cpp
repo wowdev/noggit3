@@ -11,6 +11,9 @@
 
 #include <QSettings>
 
+#include <helper/math/bounded_nearest.h>
+#include <helper/math/random.h>
+
 #include <opengl/call_list.h>
 #include <opengl/settings_saver.h>
 
@@ -19,7 +22,6 @@
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
-#include <noggit/Misc.h>
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/TextureManager.h>
 #include <noggit/UITexturingGUI.h>
@@ -2084,18 +2086,18 @@ void World::addM2 ( Model* model
   newModelis.sc = 1;
   if (rotation_randomization)
   {
-    newModelis.dir.y += (rand() % 360 + 1);
+    newModelis.dir.y += helper::math::random::floating_point (0.0f, 360.0f);
   }
 
   if (position_randomization)
   {
-    newModelis.pos.x += (rand() % 5 - 3);
-    newModelis.pos.z += (rand() % 5 - 3);
+    newModelis.pos.x += helper::math::random::floating_point (-2.0f, 2.0f);
+    newModelis.pos.z += helper::math::random::floating_point (-2.0f, 2.0f);
   }
 
   if (size_randomization)
   {
-    newModelis.sc *= misc::randfloat( 0.9f, 1.1f );
+    newModelis.sc *= helper::math::random::floating_point (0.9f, 1.1f);
   }
 
   mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
@@ -2114,11 +2116,17 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
   setChanged(newPos.x,newPos.z);
 }
 
+  static int tile_below_camera (const float& position)
+  {
+    return helper::math::bounded_nearest<int>
+      ((position - (TILESIZE / 2)) / TILESIZE);
+  }
+
 void World::setChanged(float x, float z)
 {
   // change the changed flag of the map tile
-  int row =  misc::FtoIround((x-(TILESIZE/2))/TILESIZE);
-  int column =  misc::FtoIround((z-(TILESIZE/2))/TILESIZE);
+  int row (tile_below_camera (x));
+  int column (tile_below_camera (z));
   if( row >= 0 && row <= 64 && column >= 0 && column <= 64 )
     if( mTiles[column][row].tile )
       mTiles[column][row].tile->changed = true;

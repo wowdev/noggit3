@@ -2,23 +2,24 @@
 
 #include <algorithm>
 #include <iostream>
-#include <map>
 
+#include <QMap>
 #include <QSettings>
+
+#include <helper/math/random.h>
+
+#include <opengl/texture.h>
 
 #include <noggit/blp_texture.h>
 #include <noggit/Brush.h>
 #include <noggit/Liquid.h>
 #include <noggit/Log.h>
 #include <noggit/MapHeaders.h>
-#include <noggit/Misc.h>
 #include <noggit/Quaternion.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/Vec3D.h>
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
-
-#include <opengl/texture.h>
 
 static const int HEIGHT_TOP = 1000;
 static const int HEIGHT_MID = 600;
@@ -238,7 +239,7 @@ void MapChunk::GenerateContourMap()
 }
 
 //! \note I am aware of this being global state not even being inside a class BUT I DONT CARE AT ALL. THIS WHOLE THING IS BULLSHIT AND NOT WORTH A BIT AND COSTING ME TIME OF MY LIFE FOR JUST BEING BAD AS FUCK. REMOVEING ENVIRONMENT TOOK ME HOURS WHILE MOST VARIABLES HAD BEEN ONLY USED IN A SINGLE FUCKING CLASS,  DID NOT HAVE MEANINGFUL NAMES OR ANYTHING.
-std::map<int,Vec3D> areaIDColors;
+QMap<int, Vec3D> areaIDColors;
 
 MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bigAlpha)
   : _world (world)
@@ -265,10 +266,13 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   Flags = header.flags;
   areaID = header.areaid;
 
-  if( areaIDColors.find(areaID) == areaIDColors.end() )
+  if (!areaIDColors.contains (areaID))
   {
-    Vec3D newColor = Vec3D( misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) );
-    areaIDColors.insert( std::pair<int,Vec3D>(areaID, newColor) );
+    using namespace helper::math;
+    areaIDColors[areaID] = Vec3D ( random::floating_point (0.0f, 1.0f)
+                                 , random::floating_point (0.0f, 1.0f)
+                                 , random::floating_point (0.0f, 1.0f)
+                                 );
   }
 
   zbase = header.zpos;
@@ -1146,13 +1150,12 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
   if (draw_area_id_overlay)
   {
-    // draw chunks in color depending on AreaID and list color from environment
-    if(areaIDColors.find(areaID) != areaIDColors.end() )
-    {
-      Vec3D colorValues = areaIDColors.find(areaID)->second;
-      glColor4f(colorValues.x,colorValues.y,colorValues.z,0.7f);
-      drawPass(0);
-    }
+    glColor4f ( areaIDColors[areaID].x
+              , areaIDColors[areaID].y
+              , areaIDColors[areaID].z
+              , 0.7f
+              );
+    drawPass (0);
   }
 
   //! \todo This actually should be an enum. And should be passed into this method.

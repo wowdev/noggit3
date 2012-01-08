@@ -57,7 +57,6 @@ set ( noggit_sources
       src/noggit/MapTile.cpp
       src/noggit/MapView.cpp
       src/noggit/Menu.cpp
-      src/noggit/Misc.cpp
       src/noggit/Model.cpp
       src/noggit/ModelInstance.cpp
       src/noggit/ModelManager.cpp
@@ -102,7 +101,6 @@ set ( noggit_headers
       src/noggit/MapView.h
       src/noggit/Matrix.h
       src/noggit/Menu.h
-      src/noggit/Misc.h
       src/noggit/Model.h
       src/noggit/ModelHeaders.h
       src/noggit/ModelInstance.h
@@ -150,6 +148,7 @@ set ( noggit_headers_to_moc
       src/noggit/ui/minimap_widget.h
     )
 
+
 set ( opengl_sources
       src/opengl/call_list.cpp
       src/opengl/settings_saver.cpp
@@ -163,6 +162,7 @@ set ( opengl_headers
       src/opengl/types.h
     )
 
+
 set ( windows_sources
       src/windows/StackWalker.cpp
     )
@@ -171,6 +171,7 @@ set ( windows_headers
       src/windows/StackWalker.h
     )
 
+
 set ( helper_sources
       src/helper/qt/non_recursive_filter_model.cpp
     )
@@ -178,6 +179,8 @@ set ( helper_sources
 set ( helper_headers
       src/helper/qt/non_recursive_filter_model.h
       src/helper/qt/signal_blocker.h
+      src/helper/math/bounded_nearest.h
+      src/helper/math/random.h
     )
 
 

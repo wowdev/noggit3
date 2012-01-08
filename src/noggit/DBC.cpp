@@ -2,7 +2,6 @@
 
 #include <QObject> // QObject::tr
 
-#include <noggit/Misc.h>
 #include <noggit/Log.h>
 
 AreaDB gAreaDB;

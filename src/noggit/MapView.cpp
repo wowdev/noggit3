@@ -10,11 +10,11 @@
 #include <QSlider>
 #include <QLabel>
 
+#include <helper/math/bounded_nearest.h>
 #include <helper/qt/signal_blocker.h>
 
 #include <noggit/Brush.h>
 #include <noggit/MapChunk.h>
-#include <noggit/Misc.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/ModelManager.h>
 #include <noggit/World.h>
@@ -1802,17 +1802,23 @@ namespace noggit
     _world->saveWDT();
   }
 
+  static int tile_below_camera (const float& position)
+  {
+    return helper::math::bounded_nearest<int>
+      ((position - (TILESIZE / 2)) / TILESIZE);
+  }
+
   void MapView::move_heightmap()
   {
-    _world->moveHeight ( misc::FtoIround ( (_world->camera.x - (TILESIZE / 2)) / TILESIZE)
-                       , misc::FtoIround ( (_world->camera.z - (TILESIZE / 2)) / TILESIZE)
+    _world->moveHeight ( tile_below_camera (_world->camera.x)
+                       , tile_below_camera (_world->camera.z)
                        );
   }
 
   void MapView::clear_heightmap()
   {
-    _world->clearHeight ( misc::FtoIround ( (_world->camera.x - (TILESIZE / 2)) / TILESIZE)
-                        , misc::FtoIround ( (_world->camera.z - (TILESIZE / 2)) / TILESIZE)
+    _world->clearHeight ( tile_below_camera (_world->camera.x)
+                        , tile_below_camera (_world->camera.z)
                         );
   }
 
@@ -1822,24 +1828,23 @@ namespace noggit
     if (_selected_area_id)
     {
       _world->setAreaID ( _selected_area_id
-                        , misc::FtoIround ( (_world->camera.x - (TILESIZE / 2)) / TILESIZE)
-                        , misc::FtoIround ( (_world->camera.z - (TILESIZE / 2)) / TILESIZE)
+                        , tile_below_camera (_world->camera.x)
+                        , tile_below_camera (_world->camera.z)
                         );
     }
   }
 
   void MapView::clear_all_models()
   {
-    // call the clearAllModelsOnADT method to clear them all on current ADT
-    _world->clearAllModelsOnADT ( misc::FtoIround ( (_world->camera.x- (TILESIZE / 2)) / TILESIZE)
-                                , misc::FtoIround ( (_world->camera.z - (TILESIZE / 2)) / TILESIZE)
+    _world->clearAllModelsOnADT ( tile_below_camera (_world->camera.x)
+                                , tile_below_camera (_world->camera.z)
                                 );
   }
 
   void MapView::clear_texture()
   {
-    _world->setBaseTexture ( misc::FtoIround((_world->camera.x-(TILESIZE/2))/TILESIZE)
-                           , misc::FtoIround((_world->camera.z-(TILESIZE/2))/TILESIZE)
+    _world->setBaseTexture ( tile_below_camera (_world->camera.x)
+                           , tile_below_camera (_world->camera.z)
                            , NULL
                            );
   }
@@ -2264,13 +2269,17 @@ namespace noggit
     mainGui->TexturePalette->show();
   }
 
-  void changeZoneIDValue(UIFrame* f,int set)
+  void change_selected_area_id (int area_id)
   {
-    _selected_area_id = set;
-    if( Environment::getInstance()->areaIDColors.find(set) == Environment::getInstance()->areaIDColors.end() )
+    _selected_area_id = area_id;
+
+    if (!areaIDColors.contains (area_id))
     {
-      Vec3D newColor = Vec3D( misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) , misc::randfloat(0.0f,1.0f) );
-      Environment::getInstance()->areaIDColors.insert( std::pair<int,Vec3D>(set, newColor) );
+      using namespace helper::math;
+      areaIDColors[area_id] = Vec3D ( random::floating_point (0.0f, 1.0f)
+                                    , random::floating_point (0.0f, 1.0f)
+                                    , random::floating_point (0.0f, 1.0f)
+                                    );
     }
   }
 #endif
