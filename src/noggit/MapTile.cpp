@@ -8,11 +8,12 @@
 #include <utility>
 #include <vector>
 
+#include <helper/math/bounded_nearest.h>
+
 #include <noggit/blp_texture.h>
 #include <noggit/Liquid.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
-#include <noggit/Misc.h>
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/WMOInstance.h> // WMOInstance
@@ -1294,15 +1295,17 @@ void MapTile::saveTile()
 
           lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsNormal = lCurrentPosition - lMCNK_Position;
 
-          char * lNormals = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
+          char* lNormals (lADTFile.GetPointer<char> (lCurrentPosition + 8));
 
-          // recalculate the normals
           mChunks[y][x]->recalcNorms();
-          for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
+          for (size_t i (0); i < (9 * 9 + 8 * 8); ++i)
           {
-            lNormals[i*3+0] = misc::roundc( -mChunks[y][x]->mNormals[i].z * 127 );
-            lNormals[i*3+1] = misc::roundc( -mChunks[y][x]->mNormals[i].x * 127 );
-            lNormals[i*3+2] = misc::roundc(  mChunks[y][x]->mNormals[i].y * 127 );
+            lNormals[i*3 + 0] = helper::math::bounded_nearest<char>
+                                  (-mChunks[y][x]->mNormals[i].z * 127.0f);
+            lNormals[i*3 + 1] = helper::math::bounded_nearest<char>
+                                  (-mChunks[y][x]->mNormals[i].x * 127.0f);
+            lNormals[i*3 + 2] = helper::math::bounded_nearest<char>
+                                  ( mChunks[y][x]->mNormals[i].y * 127.0f);
           }
 
           lCurrentPosition += 8 + lMCNR_Size;

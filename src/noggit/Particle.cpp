@@ -2,9 +2,10 @@
 
 #include <list>
 
+#include <helper/math/random.h>
+
 #include <noggit/blp_texture.h>
 #include <noggit/mpq/file.h>
-#include <noggit/Misc.h>
 
 static const unsigned int MAX_PARTICLES = 10000;
 
@@ -84,7 +85,7 @@ void ParticleSystem::init(const noggit::mpq::file& f, const ModelParticleEmitter
   manim = mtime = 0;
   rem = 0;
 
-  tofs = misc::frand();
+  tofs = helper::math::random::floating_point (0.0f, 1.0f);
 
   // init tiles
   for (int i=0; i<rows*cols; ++i) {
@@ -124,8 +125,9 @@ void ParticleSystem::update(float dt)
   float deaccel = deacceleration.getValue(manim, mtime);
 
   // spawn new particles
-  if (emitter) {
-    float frate = rate.getValue(manim, mtime);
+  if (emitter)
+  {
+    const float frate (rate.getValue (manim, mtime));
     float flife = 1.0f;
     flife = lifespan.getValue(manim, mtime);
 
@@ -142,24 +144,27 @@ void ParticleSystem::update(float dt)
 
       rem = ftospawn - static_cast<float>(tospawn);
 
+      const float w (areal.getValue (manim, mtime) * 0.5f);
+      const float l (areaw.getValue (manim, mtime) * 0.5f);
+      const float spd (speed.getValue (manim, mtime));
+      const float var (variation.getValue (manim, mtime));
+      const float spr (spread.getValue (manim, mtime));
+      const float spr2 (lat.getValue (manim, mtime));
 
-      float w = areal.getValue(manim, mtime) * 0.5f;
-      float l = areaw.getValue(manim, mtime) * 0.5f;
-      float spd = speed.getValue(manim, mtime);
-      float var = variation.getValue(manim, mtime);
-      float spr = spread.getValue(manim, mtime);
-      float spr2 = lat.getValue(manim, mtime);
-      bool en = true;
-      if (enabled.uses(manim))
-        en = enabled.getValue(manim, mtime)!=0;
-
-      //rem = 0;
-      if (en) {
-        for (int i=0; i<tospawn; ++i) {
-          Particle p = emitter->newParticle(manim, mtime, w, l, spd, var, spr, spr2);
-          // sanity check:
-          //if (particles.size() < MAX_PARTICLES) // No need to check this every loop iteration. Already checked above.
-          particles.push_back(p);
+      if (!enabled.uses (manim) || enabled.getValue (manim, mtime))
+      {
+        for (size_t i (tospawn); i; --i)
+        {
+          particles.push_back ( emitter->newParticle ( manim
+                                                     , mtime
+                                                     , w
+                                                     , l
+                                                     , spd
+                                                     , var
+                                                     , spr
+                                                     , spr2
+                                                     )
+                              );
         }
       }
     }
@@ -581,8 +586,8 @@ void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
 
   SpreadMat.unit();
 
-  a[0]=misc::randfloat(-Spread1,Spread1)/2.0f;
-  a[1]=misc::randfloat(-Spread2,Spread2)/2.0f;
+  a[0]=helper::math::random::floating_point(-Spread1,Spread1)/2.0f;
+  a[1]=helper::math::random::floating_point(-Spread2,Spread2)/2.0f;
 
   /*SpreadMat.m[0][0]*=l;
    SpreadMat.m[1][1]*=l;
@@ -665,9 +670,14 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
   mrot=sys->parent->mrot*SpreadMat;
 
   if (sys->flags == 1041) { // Trans Halo
-    p.pos = sys->parent->mat * (sys->pos + Vec3D(misc::randfloat(-l,l), 0, misc::randfloat(-w,w)));
+    p.pos = sys->parent->mat
+          * ( sys->pos + Vec3D ( helper::math::random::floating_point (-l, l)
+                               , 0.0f
+                               , helper::math::random::floating_point (-w, w)
+                               )
+            );
 
-    const float t = misc::randfloat(0.0f, 2.0f * PI);
+    const float t = helper::math::random::floating_point<float> (0.0f, 2.0f * PI);
 
     p.pos = Vec3D(0.0f, sys->pos.y + 0.15f, sys->pos.z) + Vec3D(cos(t)/8, 0.0f, sin(t)/8); // Need to manually correct for the halo - why?
 
@@ -677,26 +687,26 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
     Vec3D dir(0.0f, 1.0f, 0.0f);
     p.dir = dir;
 
-    p.speed = dir.normalize() * spd * misc::randfloat(0, var);
+    p.speed = dir.normalize() * spd * helper::math::random::floating_point (0.0f, var);
   } else if (sys->flags == 25 && sys->parent->parent<1) { // Weapon Flame
-    p.pos = sys->parent->pivot * (sys->pos + Vec3D(misc::randfloat(-l,l), misc::randfloat(-l,l), misc::randfloat(-w,w)));
+    p.pos = sys->parent->pivot * (sys->pos + Vec3D(helper::math::random::floating_point(-l,l), helper::math::random::floating_point(-l,l), helper::math::random::floating_point(-w,w)));
     Vec3D dir = mrot * Vec3D(0.0f, 1.0f, 0.0f);
     p.dir = dir.normalize();
     //Vec3D dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * Vec3D(0.0f, 1.0f, 0.0f);
     //p.speed = dir.normalize() * spd;
 
   } else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
-    p.pos = sys->parent->mat * (sys->pos + Vec3D(misc::randfloat(-l,l), misc::randfloat(-l,l), misc::randfloat(-w,w)));
+    p.pos = sys->parent->mat * (sys->pos + Vec3D(helper::math::random::floating_point(-l,l), helper::math::random::floating_point(-l,l), helper::math::random::floating_point(-w,w)));
     Vec3D dir = Vec3D(sys->parent->mat.m[1][0],sys->parent->mat.m[1][1], sys->parent->mat.m[1][2]) * Vec3D(0.0f, 1.0f, 0.0f);
-    p.speed = dir.normalize() * spd * misc::randfloat(0, var*2);
+    p.speed = dir.normalize() * spd * helper::math::random::floating_point(0.0f, var*2);
 
   } else if (sys->flags == 17 && sys->parent->parent<1) { // Weapon Glow
-    p.pos = sys->parent->pivot * (sys->pos + Vec3D(misc::randfloat(-l,l), misc::randfloat(-l,l), misc::randfloat(-w,w)));
+    p.pos = sys->parent->pivot * (sys->pos + Vec3D(helper::math::random::floating_point(-l,l), helper::math::random::floating_point(-l,l), helper::math::random::floating_point(-w,w)));
     Vec3D dir = mrot * Vec3D(0,1,0);
     p.dir = dir.normalize();
 
   } else {
-    p.pos = sys->pos + Vec3D(misc::randfloat(-l,l), 0, misc::randfloat(-w,w));
+    p.pos = sys->pos + Vec3D(helper::math::random::floating_point(-l,l), 0.0f, helper::math::random::floating_point(-w,w));
     p.pos = sys->parent->mat * p.pos;
 
     //Vec3D dir = mrot * Vec3D(0,1,0);
@@ -704,7 +714,7 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
 
     p.dir = dir;//.normalize();
     p.down = Vec3D(0,-1.0f,0); // dir * -1.0f;
-    p.speed = dir.normalize() * spd * (1.0f+misc::randfloat(-var,var));
+    p.speed = dir.normalize() * spd * (1.0f+helper::math::random::floating_point(-var,var));
   }
 
   if(!sys->billboard)  {
@@ -719,7 +729,7 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
 
   p.origin = p.pos;
 
-  p.tile = misc::randint(0, sys->rows*sys->cols-1);
+  p.tile = helper::math::random::integer (0, sys->rows * sys->cols - 1);
   return p;
 }
 
@@ -727,26 +737,18 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 {
   Particle p;
   Vec3D dir;
-  float radius;
+  const float radius (helper::math::random::floating_point (0.0f, 1.0f));
 
-  radius = misc::randfloat(0,1);
-
-  // Old method
-  //float t = misc::randfloat(0,2*PI);
-
-  // New
   // Spread should never be zero for sphere particles ?
-  float t = 0;
-  if (spr == 0)
-    t = misc::randfloat(-PI, PI);
-  else
-    t = misc::randfloat(-spr, spr);
+  if (spr == 0.0f)
+  {
+    spr = PI;
+  }
+  const float t (helper::math::random::floating_point (-spr, spr));
 
   //Spread Calculation
-  Matrix mrot;
-
-  CalcSpreadMatrix(spr*2,spr2*2,w,l);
-  mrot=sys->parent->mrot*SpreadMat;
+  CalcSpreadMatrix (spr * 2.0f, spr2 * 2.0f, w, l);
+  const Matrix mrot (sys->parent->mrot * SpreadMat);
 
   // New
   // Length should never technically be zero ?
@@ -764,11 +766,11 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 
 
    float theta_range = sys->spread.getValue(anim, time);
-   float theta = -0.5f* theta_range + misc::randfloat(0, theta_range);
+   float theta = -0.5f* theta_range + helper::math::random::floating_point(0, theta_range);
    Vec3D bdir(0, l*cosf(theta), w*sinf(theta));
 
    float phi_range = sys->lat.getValue(anim, time);
-   float phi = misc::randfloat(0, phi_range);
+   float phi = helper::math::random::floating_point(0, phi_range);
    rotate(0,0, &bdir.z, &bdir.x, phi);
    */
 
@@ -782,7 +784,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
       p.speed = Vec3D(0,0,0);
     else {
       dir = sys->parent->mrot * (bdir.normalize());//mrot * Vec3D(0, 1.0f,0);
-      p.speed = dir.normalize() * spd * (1.0f+misc::randfloat(-var,var));   // ?
+      p.speed = dir.normalize() * spd * (1.0f+helper::math::random::floating_point(-var,var));   // ?
     }
 
   } else {
@@ -813,7 +815,9 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
       else
         dir = bdir.normalize();
 
-      p.speed = dir.normalize() * spd * (1.0f+misc::randfloat(-var,var));   // ?
+      p.speed = dir.normalize()
+              * spd
+              * helper::math::random::floating_point ( 1.0f - var, 1.0f + var);
     }
   }
 
@@ -825,7 +829,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 
   p.origin = p.pos;
 
-  p.tile = misc::randint(0, sys->rows*sys->cols-1);
+  p.tile = helper::math::random::floating_point(0, sys->rows*sys->cols-1);
   return p;
 }
 
