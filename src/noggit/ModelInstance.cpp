@@ -1,19 +1,21 @@
 #include <noggit/ModelInstance.h>
 
+#include <math/matrix_4x4.h>
+
 #include <noggit/Log.h>
 #include <noggit/Model.h> // Model, etc.
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
-Vec3D TransformCoordsForModel( Vec3D pIn )
+::math::vector_3d TransformCoordsForModel (const ::math::vector_3d& pIn)
 {
-  Vec3D lTemp = pIn;
-  lTemp.y = pIn.z;
-  lTemp.z = -pIn.y;
+  ::math::vector_3d lTemp (pIn);
+  lTemp.y (pIn.z());
+  lTemp.z (-pIn.y());
   return lTemp;
 }
 
-void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth )
+void DrawABox( ::math::vector_3d pMin, ::math::vector_3d pMax, ::math::vector_4d pColor, float pLineWidth )
 {
   glEnable( GL_LINE_SMOOTH );
   glLineWidth( pLineWidth );
@@ -22,28 +24,28 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth )
   glColor4fv( pColor );
 
   glBegin( GL_LINE_STRIP );
-  glVertex3f( pMin.x, pMax.y, pMin.z );
-  glVertex3f( pMin.x, pMin.y, pMin.z );
-  glVertex3f( pMax.x, pMin.y, pMin.z );
-  glVertex3f( pMax.x, pMin.y, pMax.z );
-  glVertex3f( pMax.x, pMax.y, pMax.z );
-  glVertex3f( pMax.x, pMax.y, pMin.z );
-  glVertex3f( pMin.x, pMax.y, pMin.z );
-  glVertex3f( pMin.x, pMax.y, pMax.z );
-  glVertex3f( pMin.x, pMin.y, pMax.z );
-  glVertex3f( pMin.x, pMin.y, pMin.z );
+  glVertex3f( pMin.x(), pMax.y(), pMin.z() );
+  glVertex3f( pMin.x(), pMin.y(), pMin.z() );
+  glVertex3f( pMax.x(), pMin.y(), pMin.z() );
+  glVertex3f( pMax.x(), pMin.y(), pMax.z() );
+  glVertex3f( pMax.x(), pMax.y(), pMax.z() );
+  glVertex3f( pMax.x(), pMax.y(), pMin.z() );
+  glVertex3f( pMin.x(), pMax.y(), pMin.z() );
+  glVertex3f( pMin.x(), pMax.y(), pMax.z() );
+  glVertex3f( pMin.x(), pMin.y(), pMax.z() );
+  glVertex3f( pMin.x(), pMin.y(), pMin.z() );
   glEnd();
   glBegin( GL_LINES );
-  glVertex3f( pMin.x, pMin.y, pMax.z );
-  glVertex3f( pMax.x, pMin.y, pMax.z );
+  glVertex3f( pMin.x(), pMin.y(), pMax.z() );
+  glVertex3f( pMax.x(), pMin.y(), pMax.z() );
   glEnd();
   glBegin( GL_LINES );
-  glVertex3f( pMax.x, pMax.y, pMin.z );
-  glVertex3f( pMax.x, pMin.y, pMin.z );
+  glVertex3f( pMax.x(), pMax.y(), pMin.z() );
+  glVertex3f( pMax.x(), pMin.y(), pMin.z() );
   glEnd();
   glBegin( GL_LINES );
-  glVertex3f( pMin.x, pMax.y, pMax.z );
-  glVertex3f( pMax.x, pMax.y, pMax.z );
+  glVertex3f( pMin.x(), pMax.y(), pMax.z() );
+  glVertex3f( pMax.x(), pMax.y(), pMax.z() );
   glEnd();
 }
 
@@ -66,9 +68,9 @@ ModelInstance::ModelInstance (World* world, Model *m, noggit::mpq::file* f)
 
   f->read(&d1, 4);
   f->read(ff,12);
-  pos = Vec3D(ff[0],ff[1],ff[2]);
+  pos = ::math::vector_3d(ff[0],ff[1],ff[2]);
   f->read(ff,12);
-  dir = Vec3D(ff[0],ff[1],ff[2]);
+  dir = ::math::vector_3d(ff[0],ff[1],ff[2]);
   int16_t scale;
   f->read( &scale, 2 );
   // scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
@@ -81,8 +83,8 @@ ModelInstance::ModelInstance(World* world, Model *m, ENTRY_MDDF *d)
   , _world (world)
 {
   d1 = d->uniqueID;
-  pos = Vec3D(d->pos[0],d->pos[1],d->pos[2]);
-  dir = Vec3D(d->rot[0],d->rot[1],d->rot[2]);
+  pos = ::math::vector_3d(d->pos[0],d->pos[1],d->pos[2]);
+  dir = ::math::vector_3d(d->rot[0],d->rot[1],d->rot[2]);
   // scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
   sc = d->scale / 1024.0f;
   nameID=0xFFFFFFFF;
@@ -93,18 +95,18 @@ void ModelInstance::init2(Model *m, noggit::mpq::file* f)
   nameID=0xFFFFFFFF;
   model = m;
   nameID = _world->selection_names().add( this );
-  float ff[3],temp;
-  f->read(ff,12);
-  pos = Vec3D(ff[0],ff[1],ff[2]);
-  temp = pos.z;
-  pos.z = -pos.y;
-  pos.y = temp;
+  f->read(pos,12);
+  const float temp (pos.z());
+  pos.z (-pos.y());
+  pos.y (temp);
   f->read(&w,4);
-  f->read(ff,12);
-  dir = Vec3D(ff[0],ff[1],ff[2]);
+  f->read(dir,12);
   f->read(&sc,4);
   f->read(&d1,4);
-  lcol = Vec3D( ( ( d1 & 0xff0000 ) >> 16 ) / 255.0f, ( ( d1 & 0x00ff00 ) >> 8 ) / 255.0f, ( d1 & 0x0000ff ) / 255.0f);
+  lcol = ::math::vector_3d ( ( ( d1 & 0xff0000 ) >> 16 ) / 255.0f
+                           , ( ( d1 & 0x00ff00 ) >> 8 ) / 255.0f
+                           , ( d1 & 0x0000ff ) / 255.0f
+                           );
 }
 
 void ModelInstance::draw (bool draw_fog)
@@ -121,10 +123,10 @@ void ModelInstance::draw (bool draw_fog)
 
   glPushMatrix();
 
-  glTranslatef( pos.x, pos.y, pos.z );
-  glRotatef( dir.y - 90.0f, 0.0f, 1.0f, 0.0f );
-  glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
-  glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
+  glTranslatef( pos.x(), pos.y(), pos.z() );
+  glRotatef( dir.y() - 90.0f, 0.0f, 1.0f, 0.0f );
+  glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
+  glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
   glScalef( sc, sc, sc );
 
   model->draw (draw_fog);
@@ -144,25 +146,25 @@ void ModelInstance::draw (bool draw_fog)
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-    DrawABox( TransformCoordsForModel( model->header.VertexBoxMin ), TransformCoordsForModel( model->header.VertexBoxMax ), Vec4D( 1.0f, 1.0f, 1.0f, 1.0f ), 1.0f );
-    DrawABox( TransformCoordsForModel( model->header.BoundingBoxMin ), TransformCoordsForModel( model->header.BoundingBoxMax ), Vec4D( 1.0f, 1.0f, 0.0f, 1.0f ), 1.0f );
+    DrawABox( TransformCoordsForModel( model->header.VertexBoxMin ), TransformCoordsForModel( model->header.VertexBoxMax ), ::math::vector_4d( 1.0f, 1.0f, 1.0f, 1.0f ), 1.0f );
+    DrawABox( TransformCoordsForModel( model->header.BoundingBoxMin ), TransformCoordsForModel( model->header.BoundingBoxMax ), ::math::vector_4d( 1.0f, 1.0f, 0.0f, 1.0f ), 1.0f );
 
-    glColor4fv( Vec4D( 1.0f, 0.0f, 0.0f, 1.0f ) );
+    glColor4f( 1.0f, 0.0f, 0.0f, 1.0f );
     glBegin( GL_LINES );
       glVertex3f( 0.0f, 0.0f, 0.0f );
-      glVertex3f( model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f );
+      glVertex3f( model->header.VertexBoxMax.x() + model->header.VertexBoxMax.x() / 5.0f, 0.0f, 0.0f );
     glEnd();
 
-    glColor4fv( Vec4D( 0.0f, 1.0f, 0.0f, 1.0f ) );
+    glColor4f( 0.0f, 1.0f, 0.0f, 1.0f );
     glBegin( GL_LINES );
       glVertex3f( 0.0f, 0.0f, 0.0f );
-      glVertex3f( 0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f );
+      glVertex3f( 0.0f, model->header.VertexBoxMax.z() + model->header.VertexBoxMax.z() / 5.0f, 0.0f );
     glEnd();
 
-    glColor4fv( Vec4D( 0.0f, 0.0f, 1.0f, 1.0f ) );
+    glColor4f( 0.0f, 0.0f, 1.0f, 1.0f );
     glBegin( GL_LINES );
       glVertex3f( 0.0f, 0.0f, 0.0f );
-      glVertex3f( 0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f );
+      glVertex3f( 0.0f, 0.0f, model->header.VertexBoxMax.y() + model->header.VertexBoxMax.y() / 5.0f );
     glEnd();
 
     glActiveTexture( GL_TEXTURE1 );
@@ -214,10 +216,10 @@ void ModelInstance::drawSelect ()
 
   glPushMatrix();
 
-  glTranslatef( pos.x, pos.y, pos.z );
-  glRotatef( dir.y - 90.0f, 0.0f, 1.0f, 0.0f );
-  glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
-  glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
+  glTranslatef( pos.x(), pos.y(), pos.z() );
+  glRotatef( dir.y() - 90.0f, 0.0f, 1.0f, 0.0f );
+  glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
+  glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
   glScalef( sc, sc, sc );
 
   if( nameID == 0xFFFFFFFF )
@@ -244,25 +246,23 @@ ModelInstance::~ModelInstance()
   }
 }
 
-void glQuaternionRotate(const Vec3D& vdir, float w)
+void glQuaternionRotate(const ::math::vector_3d& vdir, float w)
 {
-  Matrix m;
-  Quaternion q(vdir, w);
-  m.quaternionRotate(q);
-  glMultMatrixf(m);
+  glMultMatrixf
+    (::math::matrix_4x4::new_rotation_matrix (::math::quaternion (vdir, w)));
 }
 
-void ModelInstance::draw2 (const Vec3D& ofs, const float rot)
+void ModelInstance::draw2 (const ::math::vector_3d& ofs, const float rot)
 {
-  Vec3D tpos(ofs + pos);
-  rotate(ofs.x,ofs.z,&tpos.x,&tpos.z,rot*PI/180.0f);
-  //if ( (tpos - _world->camera).lengthSquared() > (_world->doodaddrawdistance2*model->rad*sc) ) return;
+  ::math::vector_3d tpos(ofs + pos);
+  ::math::rotate (ofs.x(), ofs.z(), &tpos.x(), &tpos.z(), rot);
+  //if ( (tpos - _world->camera).length_squared() > (_world->doodaddrawdistance2*model->rad*sc) ) return;
   if (!_world->frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
   glPushMatrix();
 
-  glTranslatef(pos.x, pos.y, pos.z);
-  Vec3D vdir(-dir.z,dir.x,dir.y);
+  glTranslatef(pos.x(), pos.y(), pos.z());
+  ::math::vector_3d vdir(-dir.z(),dir.x(),dir.y());
   glQuaternionRotate(vdir,w);
   glScalef(sc,-sc,-sc);
 
@@ -270,17 +270,17 @@ void ModelInstance::draw2 (const Vec3D& ofs, const float rot)
   glPopMatrix();
 }
 
-void ModelInstance::draw2Select (const Vec3D& ofs, const float rot)
+void ModelInstance::draw2Select (const ::math::vector_3d& ofs, const float rot)
 {
-  Vec3D tpos(ofs + pos);
-  rotate(ofs.x,ofs.z,&tpos.x,&tpos.z,rot*PI/180.0f);
-  if ( (tpos - _world->camera).lengthSquared() > ((doodaddrawdistance*doodaddrawdistance)*model->rad*sc) ) return;
+  ::math::vector_3d tpos(ofs + pos);
+  ::math::rotate (ofs.x(), ofs.z(), &tpos.x(), &tpos.z(), rot);
+  if ( (tpos - _world->camera).length_squared() > ((doodaddrawdistance*doodaddrawdistance)*model->rad*sc) ) return;
   if (!_world->frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
   glPushMatrix();
 
-  glTranslatef(pos.x, pos.y, pos.z);
-  Vec3D vdir(-dir.z,dir.x,dir.y);
+  glTranslatef(pos.x(), pos.y(), pos.z());
+  ::math::vector_3d vdir(-dir.z(),dir.x(),dir.y());
   glQuaternionRotate(vdir,w);
   glScalef(sc,-sc,-sc);
 
@@ -289,8 +289,8 @@ void ModelInstance::draw2Select (const Vec3D& ofs, const float rot)
 }
 
 void ModelInstance::resetDirection(){
-  dir.x=0;
+  dir.x (0);
   //dir.y=0; only reset incline
-  dir.z=0;
+  dir.z (0);
 }
 

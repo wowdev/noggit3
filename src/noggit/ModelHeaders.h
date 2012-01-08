@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 
-#include <noggit/Vec3D.h>
+#include <math/vector_2d.h>
+#include <math/vector_3d.h>
 
 #pragma pack(push,1)
 
@@ -63,11 +64,11 @@ struct ModelHeader {
   uint32_t ofsTexAnimLookup;
 
   //not sure about these :/
-  Vec3D VertexBoxMin;//?
-  Vec3D VertexBoxMax;//?
+  ::math::vector_3d VertexBoxMin;//?
+  ::math::vector_3d VertexBoxMax;//?
   float VertexBoxRadius;
-  Vec3D BoundingBoxMin;//?
-  Vec3D BoundingBoxMax;//?
+  ::math::vector_3d BoundingBoxMin;//?
+  ::math::vector_3d BoundingBoxMax;//?
   float BoundingBoxRadius;
 
   uint32_t nBoundingTriangles;
@@ -117,7 +118,7 @@ struct ModelAnimation {
   uint32_t d2;
   uint32_t playSpeed; // note: this can't be play speed because it's 0 for some models
 
-  Vec3D boxA, boxB;
+  ::math::vector_3d boxA, boxB;
   float rad;
 
   int16_t NextAnimation;
@@ -155,11 +156,11 @@ struct ModelTexAnimDef {
 };
 
 struct ModelVertex {
-  Vec3D pos;
+  ::math::vector_3d pos;
   uint8_t weights[4];
   uint8_t bones[4];
-  Vec3D normal;
-  Vec2D texcoords;
+  ::math::vector_3d normal;
+  ::math::vector_2d texcoords;
   int unk1, unk2; // always 0,0 so this is probably unused
 };
 
@@ -185,7 +186,7 @@ struct ModelGeoset {
   uint16_t d4; // ? always 1 to 4
   uint16_t d5; // ?
   uint16_t d6; // root bone?
-  Vec3D BoundingBox[2];
+  ::math::vector_3d BoundingBox[2];
   float radius;
 };
 
@@ -235,7 +236,7 @@ struct ModelTextureDef {
 struct ModelLightDef {
   int16_t type;
   int16_t bone;
-  Vec3D pos;
+  ::math::vector_3d pos;
   AnimationBlock ambColor;
   AnimationBlock ambIntensity;
   AnimationBlock color;
@@ -249,9 +250,9 @@ struct ModelCameraDef {
   int32_t id;
   float fov, farclip, nearclip;
   AnimationBlock transPos;
-  Vec3D pos;
+  ::math::vector_3d pos;
   AnimationBlock transTarget;
-  Vec3D target;
+  ::math::vector_3d target;
   AnimationBlock rot;
 };
 
@@ -281,7 +282,7 @@ struct ModelParticleParams {
 struct ModelParticleEmitterDef {
   int32_t id;
   int32_t flags;
-  Vec3D pos; // The position. Relative to the following bone.
+  ::math::vector_3d pos; // The position. Relative to the following bone.
   int16_t bone; // The bone its attached to.
   int16_t texture; // And the texture that is used.
   int32_t nModelFileName;
@@ -316,7 +317,7 @@ struct ModelParticleEmitterDef {
 struct ModelRibbonEmitterDef {
   int32_t id;
   int32_t bone;
-  Vec3D pos;
+  ::math::vector_3d pos;
   int32_t nTextures;
   int32_t ofsTextures;
   int32_t nUnknown;
@@ -337,7 +338,7 @@ struct ModelEvents {
   char id[4];
   int32_t data;
   int32_t bone;
-  Vec3D pos;
+  ::math::vector_3d pos;
   int16_t type;
   int16_t seq;
   uint32_t nTimes;
@@ -347,7 +348,7 @@ struct ModelEvents {
 struct ModelAttachmentDef {
   int32_t id;
   int32_t bone;
-  Vec3D pos;
+  ::math::vector_3d pos;
   AnimationBlock Enabled;
 };
 
@@ -359,7 +360,7 @@ struct ModelBoneDef {
   AnimationBlock translation;
   AnimationBlock rotation;
   AnimationBlock scaling;
-  Vec3D pivot;
+  ::math::vector_3d pivot;
 };
 
 struct ModelBoundTriangle {

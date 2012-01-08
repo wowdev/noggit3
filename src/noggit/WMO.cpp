@@ -9,6 +9,8 @@
 #include <iomanip>
 #include <iostream>
 
+#include <math/vector_2d.h>
+
 #include <noggit/async/loader.h>
 
 #include <noggit/application.h>
@@ -23,7 +25,7 @@
 
 #include <opengl/call_list.h>
 
-void WMOHighlight( Vec4D color )
+void WMOHighlight( ::math::vector_4d color )
 {
   glDisable( GL_ALPHA_TEST );
   glEnable( GL_BLEND );
@@ -45,7 +47,7 @@ void WMOUnhighlight()
   glEnable( GL_CULL_FACE );
   glActiveTexture( GL_TEXTURE0 );
   glEnable( GL_TEXTURE_2D );
-  glColor4fv( Vec4D( 1, 1, 1, 1 ) );
+  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
   glDepthMask( GL_TRUE );
 }
 
@@ -90,9 +92,9 @@ WMO::WMO( World* world, const std::string& filenameArg )
       f.read(&col, 4);
       f.read(&nX, 4);
       f.read(ff,12);
-      extents[0] = Vec3D(ff[0],ff[1],ff[2]);
+      extents[0] = ::math::vector_3d(ff[0],ff[1],ff[2]);
       f.read(ff,12);
-      extents[1] = Vec3D(ff[0],ff[1],ff[2]);
+      extents[1] = ::math::vector_3d(ff[0],ff[1],ff[2]);
 
       groups = new WMOGroup[nGroups];
       mat = new WMOMaterial[nTextures];
@@ -189,13 +191,13 @@ WMO::WMO( World* world, const std::string& filenameArg )
       WMOPV p;
       for (unsigned int i=0; i<nP; ++i) {
         f.read(ff,12);
-        p.a = Vec3D(ff[0],ff[2],-ff[1]);
+        p.a = ::math::vector_3d(ff[0],ff[2],-ff[1]);
         f.read(ff,12);
-        p.b = Vec3D(ff[0],ff[2],-ff[1]);
+        p.b = ::math::vector_3d(ff[0],ff[2],-ff[1]);
         f.read(ff,12);
-        p.c = Vec3D(ff[0],ff[2],-ff[1]);
+        p.c = ::math::vector_3d(ff[0],ff[2],-ff[1]);
         f.read(ff,12);
-        p.d = Vec3D(ff[0],ff[2],-ff[1]);
+        p.d = ::math::vector_3d(ff[0],ff[2],-ff[1]);
         pvs.push_back(p);
       }
     }
@@ -256,11 +258,11 @@ WMO::~WMO()
 }
 
 // model.cpp
-void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
+void DrawABox( ::math::vector_3d pMin, ::math::vector_3d pMax, ::math::vector_4d pColor, float pLineWidth );
 
 void WMO::draw ( World* world
                , int doodadset
-               , const Vec3D &ofs
+               , const ::math::vector_3d &ofs
                , const float rot
                , bool boundingbox
                , bool groupboxes
@@ -299,21 +301,21 @@ void WMO::draw ( World* world
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     for( unsigned int i = 0; i < nGroups; ++i )
-      DrawABox( groups[i].BoundingBoxMin, groups[i].BoundingBoxMax, Vec4D( 1.0f, 1.0f, 1.0f, 1.0f ), 1.0f );
+      DrawABox( groups[i].BoundingBoxMin, groups[i].BoundingBoxMax, ::math::vector_4d( 1.0f, 1.0f, 1.0f, 1.0f ), 1.0f );
 
-    /*glColor4fv( Vec4D( 1.0f, 0.0f, 0.0f, 1.0f ) );
+    /*glColor4fv( ::math::vector_4d( 1.0f, 0.0f, 0.0f, 1.0f ) );
     glBegin( GL_LINES );
       glVertex3f( 0.0f, 0.0f, 0.0f );
       glVertex3f( header.BoundingBoxMax.x + header.BoundingBoxMax.x / 5.0f, 0.0f, 0.0f );
     glEnd();
 
-    glColor4fv( Vec4D( 0.0f, 1.0f, 0.0f, 1.0f ) );
+    glColor4fv( ::math::vector_4d( 0.0f, 1.0f, 0.0f, 1.0f ) );
     glBegin( GL_LINES );
       glVertex3f( 0.0f, 0.0f, 0.0f );
       glVertex3f( 0.0f, header.BoundingBoxMax.z + header.BoundingBoxMax.z / 5.0f, 0.0f );
     glEnd();
 
-    glColor4fv( Vec4D( 0.0f, 0.0f, 1.0f, 1.0f ) );
+    glColor4fv( ::math::vector_4d( 0.0f, 0.0f, 1.0f, 1.0f ) );
     glBegin( GL_LINES );
       glVertex3f( 0.0f, 0.0f, 0.0f );
       glVertex3f( 0.0f, 0.0f, header.BoundingBoxMax.y + header.BoundingBoxMax.y / 5.0f );
@@ -379,23 +381,23 @@ void WMO::draw ( World* world
       glEnd();
 
       // draw axis
-      glColor4fv( Vec4D( 1, 0, 0, 1 ) );
+      glColor4f( 1.0f, 0.0f, 0.0f, 1.0f );
       glBegin( GL_LINES );
-        glVertex3f( 0, 0, 0 );
-        glVertex3f( header.BoundingBoxMax.x + 6, 0, 0 );
+        glVertex3f( 0.0f, 0.0f, 0.0f );
+        glVertex3f( header.BoundingBoxMax.x + 6.0f, 0.0f, 0.0f );
       glEnd();
 
 
-      glColor4fv( Vec4D( 0, 1, 0, 1 ) );
+      glColor4f( 0.0f, 1.0f, 0.0f, 1.0f );
       glBegin( GL_LINES );
-        glVertex3f( 0, 0, 0 );
-        glVertex3f( 0, header.BoundingBoxMax.y + 6, 0 );
+        glVertex3f( 0.0f, 0.0f, 0.0f );
+        glVertex3f( 0.0f, header.BoundingBoxMax.y + 6.0f, 0.0f );
       glEnd();
 
-      glColor4fv( Vec4D( 0, 0, 1, 1 ) );
+      glColor4f( 0.0f, 0.0f, 1.0f, 1.0f );
       glBegin( GL_LINES );
-        glVertex3f( 0, 0, 0 );
-        glVertex3f( 0, 0, header.BoundingBoxMax.x + 6 );
+        glVertex3f( 0.0f, 0.0f, 0.0f );
+        glVertex3f( 0.0f, 0.0f, header.BoundingBoxMax.x + 6.0f );
       glEnd();
 
 
@@ -435,41 +437,41 @@ void WMO::draw ( World* world
       WMOGroup &header = groups[i];
       glBegin( GL_LINE_STRIP );
       //A
-        glVertex3f( header.VertexBoxMin.x, header.VertexBoxMax.y, header.VertexBoxMin.z );
+        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
       //C
-        glVertex3f( header.VertexBoxMin.x, header.VertexBoxMin.y, header.VertexBoxMin.z );
+        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
       //D
-        glVertex3f( header.VertexBoxMax.x, header.VertexBoxMin.y, header.VertexBoxMin.z );
+        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
       //G
-        glVertex3f( header.VertexBoxMax.x, header.VertexBoxMin.y, header.VertexBoxMax.z );
+        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
       //H
-        glVertex3f( header.VertexBoxMax.x, header.VertexBoxMax.y, header.VertexBoxMax.z );
+        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
       //B
-        glVertex3f( header.VertexBoxMax.x, header.VertexBoxMax.y, header.VertexBoxMin.z );
+        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
       //A
-        glVertex3f( header.VertexBoxMin.x, header.VertexBoxMax.y, header.VertexBoxMin.z );
+        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
       //E
-        glVertex3f( header.VertexBoxMin.x, header.VertexBoxMax.y, header.VertexBoxMax.z );
+        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
       //F
-        glVertex3f( header.VertexBoxMin.x, header.VertexBoxMin.y, header.VertexBoxMax.z );
+        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
       //C
-        glVertex3f( header.VertexBoxMin.x, header.VertexBoxMin.y, header.VertexBoxMin.z );
+        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
       glEnd();
 
       glBegin( GL_LINES );
       // F G
-        glVertex3f( header.VertexBoxMin.x, header.VertexBoxMin.y, header.VertexBoxMax.z );
-        glVertex3f( header.VertexBoxMax.x, header.VertexBoxMin.y, header.VertexBoxMax.z );
+        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
+        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
       glEnd();
       glBegin( GL_LINES );
       // B D
-        glVertex3f( header.VertexBoxMax.x, header.VertexBoxMax.y, header.VertexBoxMin.z );
-        glVertex3f( header.VertexBoxMax.x, header.VertexBoxMin.y, header.VertexBoxMin.z );
+        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
+        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
       glEnd();
       glBegin( GL_LINES );
       // E H
-        glVertex3f( header.VertexBoxMin.x, header.VertexBoxMax.y, header.VertexBoxMax.z );
-        glVertex3f( header.VertexBoxMax.x, header.VertexBoxMax.y, header.VertexBoxMax.z );
+        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
+        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
       glEnd();
     }
     // Back to normal light rendering
@@ -492,8 +494,8 @@ void WMO::draw ( World* world
     WMOPV &pv = pvs[pr.portal];
     if (pr.dir>0) glColor4f(1,0,0,1);
     else glColor4f(0,0,1,1);
-    Vec3D pc = (pv.a+pv.b+pv.c+pv.d)*0.25f;
-    Vec3D gc = (groups[pr.group].b1 + groups[pr.group].b2)*0.5f;
+    ::math::vector_3d pc = (pv.a+pv.b+pv.c+pv.d)*0.25f;
+    ::math::vector_3d gc = (groups[pr.group].b1 + groups[pr.group].b2)*0.5f;
     glVertex3fv(pc);
     glVertex3fv(gc);
   }
@@ -515,7 +517,7 @@ void WMO::draw ( World* world
 
 void WMO::drawSelect ( World* world
                      , int doodadset
-                     , const Vec3D &ofs
+                     , const ::math::vector_3d &ofs
                      , const float rot
                      , bool draw_doodads
                      ) const
@@ -533,9 +535,9 @@ void WMO::drawSelect ( World* world
   }
 }
 
-bool WMO::drawSkybox(World* world, Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const
+bool WMO::drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d pLower, ::math::vector_3d pUpper ) const
 {
-  if( skybox && pCamera.IsInsideOf( pLower, pUpper ) )
+  if(skybox && pCamera.is_inside_of (pLower, pUpper))
   {
     //! \todo  only draw sky if we are "inside" the WMO... ?
 
@@ -550,7 +552,7 @@ bool WMO::drawSkybox(World* world, Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) c
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glPushMatrix();
-    glTranslatef(pCamera.x, pCamera.y, pCamera.z);
+    glTranslatef(pCamera.x(), pCamera.y(), pCamera.z());
     const float sc = 2.0f;
     glScalef(sc,sc,sc);
     skybox->draw (world);
@@ -588,7 +590,7 @@ void WMOLight::init(noggit::mpq::file* f)
   f->read(unk, 4*5);
   f->read(&r,4);
 
-  pos = Vec3D(pos.x, pos.z, -pos.y);
+  pos = ::math::vector_3d(pos.x(), pos.z(), -pos.y());
 
   // rgb? bgr? hm
   float fa = ((color & 0xff000000) >> 24) / 255.0f;
@@ -596,9 +598,9 @@ void WMOLight::init(noggit::mpq::file* f)
   float fg = ((color & 0x0000ff00) >>  8) / 255.0f;
   float fb = ((color & 0x000000ff)      ) / 255.0f;
 
-  fcolor = Vec4D(fr,fg,fb,fa);
+  fcolor = ::math::vector_4d (fr,fg,fb,fa);
   fcolor *= intensity;
-  fcolor.w = 1.0f;
+  fcolor.w (1.0f);
 
   /*
   // light logging
@@ -614,7 +616,7 @@ void WMOLight::setup(opengl::light light)
   // not used right now -_-
 
   GLfloat LightAmbient[] = {0, 0, 0, 1.0f};
-  GLfloat LightPosition[] = {pos.x, pos.y, pos.z, 0.0f};
+  GLfloat LightPosition[] = {pos.x(), pos.y(), pos.z(), 0.0f};
 
   glLightfv(light, GL_AMBIENT, LightAmbient);
   glLightfv(light, GL_DIFFUSE, fcolor);
@@ -623,15 +625,15 @@ void WMOLight::setup(opengl::light light)
   glEnable(light);
 }
 
-void WMOLight::setupOnce(opengl::light light, Vec3D dir, Vec3D lcol)
+void WMOLight::setupOnce(opengl::light light, ::math::vector_3d dir, ::math::vector_3d lcol)
 {
-  Vec4D position(dir, 0);
-  //Vec4D position(0,1,0,0);
+  ::math::vector_4d position(dir, 0);
+  //::math::vector_4d position(0,1,0,0);
 
-  Vec4D ambient = Vec4D(lcol * 0.3f, 1);
-  //Vec4D ambient = Vec4D(0.101961f, 0.062776f, 0, 1);
-  Vec4D diffuse = Vec4D(lcol, 1);
-  //Vec4D diffuse = Vec4D(0.439216f, 0.266667f, 0, 1);
+  ::math::vector_4d ambient (lcol * 0.3f, 1);
+  //::math::vector_4d ambient (0.101961f, 0.062776f, 0, 1);
+  ::math::vector_4d diffuse (lcol, 1);
+  //::math::vector_4d diffuse (0.439216f, 0.266667f, 0, 1);
 
   glLightfv(light, GL_AMBIENT, ambient);
   glLightfv(light, GL_DIFFUSE, diffuse);
@@ -650,10 +652,8 @@ void WMOGroup::init(WMO *_wmo, noggit::mpq::file* f, int _num, char *names)
   // extract group info from f
   f->read(&flags,4);
   float ff[3];
-  f->read(ff,12);
-  VertexBoxMax = Vec3D(ff[0],ff[1],ff[2]);
-  f->read(ff,12);
-  VertexBoxMin = Vec3D(ff[0],ff[1],ff[2]);
+  f->read(VertexBoxMax,12);
+  f->read(VertexBoxMin,12);
   int nameOfs;
   f->read(&nameOfs,4);
 
@@ -687,13 +687,13 @@ void setGLColor(unsigned int col)
     glColor4ub(r,g,b,1);
 }
 
-Vec4D colorFromInt(unsigned int col) {
+::math::vector_4d colorFromInt(unsigned int col) {
   GLubyte r,g,b,a;
   a = (col & 0xFF000000) >> 24;
   r = (col & 0x00FF0000) >> 16;
   g = (col & 0x0000FF00) >> 8;
   b = (col & 0x000000FF);
-  return Vec4D(r/255.0f, g/255.0f, b/255.0f, a/255.0f);
+  return ::math::vector_4d(r/255.0f, g/255.0f, b/255.0f, a/255.0f);
 }
 struct WMOGroupHeader {
   uint32_t nameStart, nameStart2, flags;
@@ -706,9 +706,9 @@ struct WMOGroupHeader {
 
 void WMOGroup::initDisplayList()
 {
-  Vec3D *vertices = NULL;
-  Vec3D *normals = NULL;
-  Vec2D *texcoords = NULL;
+  ::math::vector_3d *vertices = NULL;
+  ::math::vector_3d *normals = NULL;
+  ::math::vector_2d *texcoords = NULL;
   uint16_t *indices = NULL;
   struct SMOPoly *materials = NULL;
   WMOBatch *batches = NULL;
@@ -741,8 +741,8 @@ void WMOGroup::initDisplayList()
   if (wf.r2 <= 0) fog = -1; // default outdoor fog..?
   else fog = gh.fogs[0];
 
-  BoundingBoxMin = Vec3D(gh.box1[0], gh.box1[2], -gh.box1[1]);
-  BoundingBoxMax = Vec3D(gh.box2[0], gh.box2[2], -gh.box2[1]);
+  BoundingBoxMin = ::math::vector_3d(gh.box1[0], gh.box1[2], -gh.box1[1]);
+  BoundingBoxMax = ::math::vector_3d(gh.box2[0], gh.box2[2], -gh.box2[1]);
 
   gf.seek(0x58); // first chunk
 
@@ -772,27 +772,27 @@ void WMOGroup::initDisplayList()
     else if ( fourcc == 'MOVT' ) {
       nVertices = size / 12;
       // let's hope it's padded to 12 bytes, not 16...
-      vertices = reinterpret_cast<Vec3D*>(gf.getPointer());
-      VertexBoxMin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
-      VertexBoxMax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
+      vertices = reinterpret_cast< ::math::vector_3d*>(gf.getPointer());
+      VertexBoxMin = ::math::vector_3d( 9999999.0f, 9999999.0f, 9999999.0f);
+      VertexBoxMax = ::math::vector_3d(-9999999.0f,-9999999.0f,-9999999.0f);
       rad = 0;
       for (size_t i=0; i<nVertices; ++i) {
-        Vec3D v(vertices[i].x, vertices[i].z, -vertices[i].y);
-        if (v.x < VertexBoxMin.x) VertexBoxMin.x = v.x;
-        if (v.y < VertexBoxMin.y) VertexBoxMin.y = v.y;
-        if (v.z < VertexBoxMin.z) VertexBoxMin.z = v.z;
-        if (v.x > VertexBoxMax.x) VertexBoxMax.x = v.x;
-        if (v.y > VertexBoxMax.y) VertexBoxMax.y = v.y;
-        if (v.z > VertexBoxMax.z) VertexBoxMax.z = v.z;
+        ::math::vector_3d v(vertices[i].x(), vertices[i].z(), -vertices[i].y());
+        if (v.x() < VertexBoxMin.x()) VertexBoxMin.x (v.x());
+        if (v.y() < VertexBoxMin.y()) VertexBoxMin.y (v.y());
+        if (v.z() < VertexBoxMin.z()) VertexBoxMin.z (v.z());
+        if (v.x() > VertexBoxMax.x()) VertexBoxMax.x (v.x());
+        if (v.y() > VertexBoxMax.y()) VertexBoxMax.y (v.y());
+        if (v.z() > VertexBoxMax.z()) VertexBoxMax.z (v.z());
       }
       center = (VertexBoxMax + VertexBoxMin) * 0.5f;
       rad = (VertexBoxMax-center).length();
     }
     else if ( fourcc == 'MONR' ) {
-      normals =  reinterpret_cast<Vec3D*>(gf.getPointer());
+      normals =  reinterpret_cast< ::math::vector_3d*>(gf.getPointer());
     }
     else if ( fourcc == 'MOTV' ) {
-      texcoords =  reinterpret_cast<Vec2D*>(gf.getPointer());
+      texcoords =  reinterpret_cast< ::math::vector_2d*>(gf.getPointer());
     }
     else if ( fourcc == 'MOLR' ) {
       nLR = size / 2;
@@ -820,7 +820,7 @@ void WMOGroup::initDisplayList()
       //gLog("WMO Liquid: %dx%d, %dx%d, (%f,%f,%f) %d\n", hlq.X, hlq.Y, hlq.A, hlq.B, hlq.pos.x, hlq.pos.y, hlq.pos.z, hlq.type);
 
       // Do not even try to render water..
-      //lq = new Liquid(hlq.A, hlq.B, Vec3D(hlq.pos.x, hlq.pos.z, -hlq.pos.y));
+      //lq = new Liquid(hlq.A, hlq.B, ::math::vector_3d(hlq.pos.x, hlq.pos.z, -hlq.pos.y));
       //lq->initFromWMO(gf, wmo->mat[hlq.type], (flags&0x2000)!=0);
     }
 
@@ -885,7 +885,7 @@ void WMOGroup::initDisplayList()
     if (spec_shader) {
       glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorFromInt(mat->col2));
     } else {
-      Vec4D nospec(0,0,0,1);
+      ::math::vector_4d nospec(0,0,0,1);
       glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
     }
 
@@ -902,9 +902,9 @@ void WMOGroup::initDisplayList()
       if (indoor && hascv) {
               setGLColor(cv[a]);
       }
-      glNormal3f(normals[a].x, normals[a].z, -normals[a].y);
+      glNormal3f(normals[a].x(), normals[a].z(), -normals[a].y());
       glTexCoord2fv(texcoords[a]);
-      glVertex3f(vertices[a].x, vertices[a].z, -vertices[a].y);
+      glVertex3f(vertices[a].x(), vertices[a].z(), -vertices[a].y());
     }
     glEnd();
 
@@ -930,7 +930,7 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
   // "real" lighting?
   if ((flags & 0x2000) && hascv) {
 
-    Vec3D dirmin(1,1,1);
+    ::math::vector_3d dirmin(1,1,1);
     float lenmin;
     int lmin;
 
@@ -940,8 +940,8 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
       ModelInstance &mi = wmo->modelis[ddr[i]];
       for (unsigned int j=0; j<wmo->nLights; j++) {
         WMOLight &l = wmo->lights[j];
-        Vec3D dir = l.pos - mi.pos;
-        float ll = dir.lengthSquared();
+        ::math::vector_3d dir = l.pos - mi.pos;
+        float ll = dir.length_squared();
         if (ll < lenmin) {
           lenmin = ll;
           dirmin = dir;
@@ -958,15 +958,15 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 }
 
 void WMOGroup::draw ( World* world
-                    , const Vec3D& ofs
+                    , const ::math::vector_3d& ofs
                     , const float rot
                     , bool draw_fog
                     )
 {
   visible = false;
   // view frustum culling
-  Vec3D pos = center + ofs;
-  rotate(ofs.x,ofs.z,&pos.x,&pos.z,rot*PI/180.0f);
+  ::math::vector_3d pos = center + ofs;
+  ::math::rotate (ofs.x(), ofs.z(), &pos.x(), &pos.z(), rot);
   if (!world->frustum.intersectsSphere(pos,rad)) return;
   float dist = (pos - world->camera).length() - rad;
   if (dist >= world->culldistance) return;
@@ -1014,14 +1014,14 @@ void WMOGroup::draw ( World* world
 }
 
 void WMOGroup::draw_for_selection ( World* world
-                                  , const Vec3D& ofs
+                                  , const ::math::vector_3d& ofs
                                   , const float rot
                                   )
 {
   visible = false;
 
-  Vec3D pos = center + ofs;
-  rotate (ofs.x, ofs.z, &pos.x, &pos.z, rot * PI / 180.0f);
+  ::math::vector_3d pos = center + ofs;
+  ::math::rotate (ofs.x(), ofs.z(), &pos.x(), &pos.z(), rot);
   if ( !world->frustum.intersectsSphere (pos, rad)
     || ((pos - world->camera).length() - rad) >= world->culldistance
      )
@@ -1037,7 +1037,7 @@ void WMOGroup::draw_for_selection ( World* world
 
 void WMOGroup::drawDoodads ( World* world
                            , unsigned int doodadset
-                           , const Vec3D& ofs
+                           , const ::math::vector_3d& ofs
                            , const float rot
                            , bool draw_fog
                            )
@@ -1083,7 +1083,7 @@ void WMOGroup::drawDoodads ( World* world
 
 void WMOGroup::drawDoodadsSelect ( World* world
                                  , unsigned int doodadset
-                                 , const Vec3D& ofs
+                                 , const ::math::vector_3d& ofs
                                  , const float rot
                                  )
 {
@@ -1139,9 +1139,9 @@ void WMOGroup::drawLiquid (World* world, bool draw_fog)
       //! \todo  setup some kind of indoor lighting... ?
       world->outdoorLights(false);
       glEnable(GL_LIGHT2);
-      glLightfv(GL_LIGHT2, GL_AMBIENT, Vec4D(0.1f,0.1f,0.1f,1));
-      glLightfv(GL_LIGHT2, GL_DIFFUSE, Vec4D(0.8f,0.8f,0.8f,1));
-      glLightfv(GL_LIGHT2, GL_POSITION, Vec4D(0,1,0,0));
+      glLightfv(GL_LIGHT2, GL_AMBIENT, ::math::vector_4d(0.1f,0.1f,0.1f,1));
+      glLightfv(GL_LIGHT2, GL_DIFFUSE, ::math::vector_4d(0.8f,0.8f,0.8f,1));
+      glLightfv(GL_LIGHT2, GL_POSITION, ::math::vector_4d(0,1,0,0));
     }
     glDisable(GL_BLEND);
     glDisable(GL_ALPHA_TEST);
@@ -1190,12 +1190,11 @@ WMOGroup::~WMOGroup()
 void WMOFog::init(noggit::mpq::file* f)
 {
   f->read(this, 0x30);
-  color = Vec4D( ((color1 & 0x00FF0000) >> 16)/255.0f, ((color1 & 0x0000FF00) >> 8)/255.0f,
+  color = ::math::vector_4d( ((color1 & 0x00FF0000) >> 16)/255.0f, ((color1 & 0x0000FF00) >> 8)/255.0f,
           (color1 & 0x000000FF)/255.0f, ((color1 & 0xFF000000) >> 24)/255.0f);
-  float temp;
-  temp = pos.y;
-  pos.y = pos.z;
-  pos.z = -temp;
+  const float temp (pos.y());
+  pos.y (pos.z());
+  pos.z (-temp);
   fogstart = fogstart * fogend * 1.5;
   fogend *= 1.5;
 }

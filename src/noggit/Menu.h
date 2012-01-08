@@ -14,7 +14,11 @@ namespace noggit
     class minimap_widget;
   }
 }
-class Vec3D;
+namespace math
+{
+  class vector_3d;
+}
+
 class World;
 
 class Menu : public QWidget
@@ -30,15 +34,15 @@ private slots:
   void show_bookmark_list_item (QListWidgetItem* item);
   void open_bookmark_list_item (QListWidgetItem* item);
 
-  void minimap_clicked (const Vec3D&);
+  void minimap_clicked (const ::math::vector_3d&);
 
 signals:
   void create_world_view_request (World*);
 
 private:
   void load_map (int mapID);
-  void prepare_world (const Vec3D& pos, float rotation, float tilt);
-  void enter_world_at (const Vec3D& pos, bool auto_height = true, float av = -30.0f, float ah = -90.0f);
+  void prepare_world (const ::math::vector_3d& pos, float rotation, float tilt);
+  void enter_world_at (const ::math::vector_3d& pos, bool auto_height = true, float av = -30.0f, float ah = -90.0f);
 
   noggit::ui::minimap_widget* _minimap;
   World* _world;

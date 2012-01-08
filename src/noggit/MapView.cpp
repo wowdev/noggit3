@@ -451,31 +451,31 @@ namespace noggit
   {
     dt = std::min( dt, 1.0f );
 
-    Vec3D dir( 1.0f, 0.0f, 0.0f );
-    Vec3D dirUp( 1.0f, 0.0f, 0.0f );
-    Vec3D dirRight( 0.0f, 0.0f, 1.0f );
-    rotate( 0.0f, 0.0f, &dir.x,&dir.y, av * PI / 180.0f );
-    rotate( 0.0f, 0.0f, &dir.x,&dir.z, ah * PI / 180.0f );
+    ::math::vector_3d dir( 1.0f, 0.0f, 0.0f );
+    ::math::vector_3d dirUp( 1.0f, 0.0f, 0.0f );
+    ::math::vector_3d dirRight( 0.0f, 0.0f, 1.0f );
+    ::math::rotate (0.0f, 0.0f, &dir.x(), &dir.y(), av);
+    ::math::rotate (0.0f, 0.0f, &dir.x(), &dir.z(), ah);
 
     if( _currently_holding_shift )
     {
-      dirUp.x = 0.0f;
-      dirUp.y = 1.0f;
-      dirRight *= 0.0f; //! \todo  WAT?
+      dirUp.x (0.0f);
+      dirUp.y (1.0f);
+      dirRight = ::math::vector_3d (0.0f, 0.0f, 0.0f);
     }
     else if( _currently_holding_control )
     {
-      dirUp.x = 0.0f;
-      dirUp.y = 1.0f;
-      rotate( 0.0f, 0.0f, &dirUp.x, &dirUp.y, av * PI / 180.0f );
-      rotate( 0.0f, 0.0f, &dirRight.x, &dirRight.y, av * PI / 180.0f );
-      rotate( 0.0f, 0.0f, &dirUp.x, &dirUp.z, ah * PI / 180.0f );
-      rotate( 0.0f, 0.0f, &dirRight.x, &dirRight.z, ah * PI / 180.0f );
+      dirUp.x (0.0f);
+      dirUp.y (1.0f);
+      ::math::rotate (0.0f, 0.0f, &dirUp.x(), &dirUp.y(), av);
+      ::math::rotate (0.0f, 0.0f, &dirRight.x(), &dirRight.y(), av);
+      ::math::rotate (0.0f, 0.0f, &dirUp.x(), &dirUp.z(), ah);
+      ::math::rotate (0.0f, 0.0f, &dirRight.x(), &dirRight.z(), ah);
     }
     else
     {
-      rotate( 0.0f, 0.0f, &dirUp.x, &dirUp.z, ah * PI / 180.0f );
-      rotate( 0.0f, 0.0f, &dirRight.x, &dirRight.z, ah * PI / 180.0f );
+      ::math::rotate (0.0f, 0.0f, &dirUp.x(), &dirUp.z(), ah);
+      ::math::rotate (0.0f, 0.0f, &dirRight.x(), &dirRight.z(), ah);
     }
 
     nameEntry * Selection = _world->GetCurrentSelection();
@@ -490,37 +490,60 @@ namespace noggit
 
       if( keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0)
       {
+        //! \todo On all these, setchanged() is wrong, if models are bigger than a chunk.
         // Move scale and rotate with numpad keys
         if( Selection->type == eEntry_WMO )
         {
-          _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
-          Selection->data.wmo->pos.x += keyx * keypad_object_move_ratio;
-          Selection->data.wmo->pos.y += keyy * keypad_object_move_ratio;
-          Selection->data.wmo->pos.z += keyz * keypad_object_move_ratio;
-          Selection->data.wmo->dir.y += keyr * keypad_object_move_ratio * 2.0;
-          _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
+          _world->setChanged ( Selection->data.wmo->pos.x()
+                             , Selection->data.wmo->pos.z()
+                             );
+
+          Selection->data.wmo->pos.x ( Selection->data.wmo->pos.x()
+                                     + keyx * keypad_object_move_ratio);
+          Selection->data.wmo->pos.y ( Selection->data.wmo->pos.y()
+                                     + keyy * keypad_object_move_ratio);
+          Selection->data.wmo->pos.z ( Selection->data.wmo->pos.z()
+                                     + keyz * keypad_object_move_ratio);
+          Selection->data.wmo->dir.y ( Selection->data.wmo->dir.y()
+                                     + keyr * keypad_object_move_ratio * 2.0);
+
+          _world->setChanged ( Selection->data.wmo->pos.x()
+                             , Selection->data.wmo->pos.z()
+                             );
         }
 
         if( Selection->type == eEntry_Model )
         {
-          _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
-          Selection->data.model->pos.x += keyx * keypad_object_move_ratio;
-          Selection->data.model->pos.y += keyy * keypad_object_move_ratio;
-          Selection->data.model->pos.z += keyz * keypad_object_move_ratio;
-          Selection->data.model->dir.y += keyr * keypad_object_move_ratio * 2.0;
-          Selection->data.model->sc += keys * keypad_object_move_ratio / 50.0;
-          _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+
+          _world->setChanged ( Selection->data.model->pos.x()
+                             , Selection->data.model->pos.z()
+                             );
+
+          Selection->data.model->pos.x ( Selection->data.model->pos.x()
+                                       + keyx * keypad_object_move_ratio);
+          Selection->data.model->pos.y ( Selection->data.model->pos.y()
+                                       + keyy * keypad_object_move_ratio);
+          Selection->data.model->pos.z ( Selection->data.model->pos.z()
+                                       + keyz * keypad_object_move_ratio);
+          Selection->data.model->dir.y ( Selection->data.model->dir.y()
+                                       + keyr * keypad_object_move_ratio * 2.0);
+          Selection->data.model->sc = Selection->data.model->sc
+                                    + keys * keypad_object_move_ratio / 50.0;
+
+          _world->setChanged ( Selection->data.model->pos.x()
+                             , Selection->data.model->pos.z()
+                             );
         }
       }
 
-      Vec3D ObjPos;
+      ::math::vector_3d ObjPos;
       if( _world->IsSelection( eEntry_Model ) )
       {
         //! \todo  Tell me what this is.
         ObjPos = Selection->data.model->pos - _world->camera;
-        rotate( 0.0f, 0.0f, &ObjPos.x, &ObjPos.y, av * PI / 180.0f );
-        rotate( 0.0f, 0.0f, &ObjPos.x, &ObjPos.z, ah * PI / 180.0f );
-        ObjPos.x = abs( ObjPos.x );
+        ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.y(), av);
+        ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.z(), ah);
+        ObjPos.x (fabs (ObjPos.x()));
       }
 
       // moving and scaling objects
@@ -528,18 +551,24 @@ namespace noggit
       if( _is_currently_moving_object )
         if( Selection->type == eEntry_WMO )
         {
-           _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // before move
-           ObjPos.x = 80.0f;
-           Selection->data.wmo->pos+=mv * dirUp * ObjPos.x;
-           Selection->data.wmo->pos-=mh * dirRight * ObjPos.x;
-           Selection->data.wmo->extents[0] = Selection->data.wmo->pos - Vec3D(1,1,1);
-           Selection->data.wmo->extents[1] = Selection->data.wmo->pos + Vec3D(1,1,1);
-           _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // after move. If moved to another ADT
+           _world->setChanged ( Selection->data.wmo->pos.x()
+                              , Selection->data.wmo->pos.z()
+                              ); // before move
+           ObjPos.x (80.0f);
+           Selection->data.wmo->pos += mv * dirUp * ObjPos.x();
+           Selection->data.wmo->pos -= mh * dirRight * ObjPos.x();
+           Selection->data.wmo->extents[0] =
+             Selection->data.wmo->pos - ::math::vector_3d (1,1,1);
+           Selection->data.wmo->extents[1] =
+             Selection->data.wmo->pos + ::math::vector_3d (1,1,1);
+           _world->setChanged ( Selection->data.wmo->pos.x()
+                              , Selection->data.wmo->pos.z()
+                              ); // after move. If moved to another ADT
         }
         else if( Selection->type == eEntry_Model )
           if( _currently_holding_alt )
           {
-            _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+            _world->setChanged(Selection->data.model->pos.x(),Selection->data.model->pos.z());
             float ScaleAmount;
             ScaleAmount = pow( 2.0f, mv * 4.0f );
             Selection->data.model->sc *= ScaleAmount;
@@ -550,11 +579,11 @@ namespace noggit
           }
           else
           {
-            _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // before move
-            ObjPos.x = 80.0f;
-            Selection->data.model->pos += mv * dirUp * ObjPos.x;
-            Selection->data.model->pos -= mh * dirRight * ObjPos.x;
-            _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // after move. If moved to another ADT
+            _world->setChanged(Selection->data.model->pos.x(),Selection->data.model->pos.z()); // before move
+            ObjPos.x (80.0f);
+            Selection->data.model->pos += mv * dirUp * ObjPos.x();
+            Selection->data.model->pos -= mh * dirRight * ObjPos.x();
+            _world->setChanged(Selection->data.model->pos.x(),Selection->data.model->pos.z()); // after move. If moved to another ADT
           }
 
 
@@ -566,25 +595,29 @@ namespace noggit
 
         if( Selection->type == eEntry_Model )
         {
-          _world->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+          _world->setChanged ( Selection->data.model->pos.x()
+                             , Selection->data.model->pos.z()
+                             );
           lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
           if( _currently_holding_shift )
-            lTarget = &Selection->data.model->dir.y;
+            lTarget = &Selection->data.model->dir.y();
           else if( _currently_holding_control )
-            lTarget = &Selection->data.model->dir.x;
+            lTarget = &Selection->data.model->dir.x();
           else if(_currently_holding_alt )
-            lTarget = &Selection->data.model->dir.z;
+            lTarget = &Selection->data.model->dir.z();
         }
         else if( Selection->type == eEntry_WMO )
         {
-          _world->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
+          _world->setChanged ( Selection->data.wmo->pos.x()
+                             , Selection->data.wmo->pos.z()
+                             );
           lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
           if( _currently_holding_shift )
-            lTarget = &Selection->data.wmo->dir.y;
+            lTarget = &Selection->data.wmo->dir.y();
           else if( _currently_holding_control )
-            lTarget = &Selection->data.wmo->dir.x;
+            lTarget = &Selection->data.wmo->dir.x();
           else if( _currently_holding_alt )
-            lTarget = &Selection->data.wmo->dir.z;
+            lTarget = &Selection->data.wmo->dir.z();
         }
 
         if( lModify && lTarget )
@@ -605,10 +638,10 @@ namespace noggit
 
       if( _holding_left_mouse_button && Selection->type==eEntry_MapChunk )
       {
-        const Vec3D& position (_world->_exact_terrain_selection_position);
-        float xPos = position.x;
-        float yPos = position.y;
-        float zPos = position.z;
+        const ::math::vector_3d& position (_world->_exact_terrain_selection_position);
+        float xPos = position.x();
+        float yPos = position.y();
+        float zPos = position.z();
 
         switch( _current_terrain_editing_mode )
         {
@@ -666,8 +699,8 @@ namespace noggit
             const QPointF brush_position ( mViewMode == eViewMode_3D
                                          ? QPointF (xPos, zPos)
                                          : tile_mode_brush_position()
-                                         + QPointF ( _world->camera.x
-                                                   , _world->camera.z
+                                         + QPointF ( _world->camera.x()
+                                                   , _world->camera.z()
                                                    )
                                          );
 
@@ -777,21 +810,25 @@ namespace noggit
         _world->camera += dir * dt * movespd * moving;
       if( strafing )
       {
-        Vec3D right = dir % Vec3D( 0.0f, 1.0f ,0.0f );
+        ::math::vector_3d right = dir % ::math::vector_3d( 0.0f, 1.0f ,0.0f );
         right.normalize();
         _world->camera += right * dt * movespd * strafing;
       }
       if( updown )
-        _world->camera += Vec3D( 0.0f, dt * movespd * updown, 0.0f );
+        _world->camera += ::math::vector_3d( 0.0f, dt * movespd * updown, 0.0f );
 
       _world->lookat = _world->camera + dir;
     }
     else
     {
       if( moving )
-        _world->camera.z -= dt * movespd * moving / ( _tile_mode_zoom * 1.5f );
+        _world->camera.z ( _world->camera.z()
+                         - dt * movespd * moving / (_tile_mode_zoom * 1.5f)
+                         );
       if( strafing )
-        _world->camera.x += dt * movespd * strafing / ( _tile_mode_zoom * 1.5f );
+        _world->camera.x ( _world->camera.x()
+                         + dt * movespd * strafing / (_tile_mode_zoom * 1.5f)
+                         );
       if( updown )
         _tile_mode_zoom *= pow( 2.0f, dt * updown * 4.0f );
 
@@ -1190,7 +1227,7 @@ namespace noggit
     if( _world->HasSelection() && _clipboard )
     {
       nameEntry lClipboard (*_clipboard);
-      Vec3D position;
+      ::math::vector_3d position;
       switch( _world->GetCurrentSelection()->type )
        {
         case eEntry_Model:
@@ -1250,12 +1287,12 @@ namespace noggit
     if( _world->IsSelection( eEntry_WMO ) )
     {
       _world->GetCurrentSelection()->data.wmo->resetDirection();
-      _world->setChanged(_world->GetCurrentSelection()->data.wmo->pos.x, _world->GetCurrentSelection()->data.wmo->pos.z);
+      _world->setChanged(_world->GetCurrentSelection()->data.wmo->pos.x(), _world->GetCurrentSelection()->data.wmo->pos.z());
     }
     else if( _world->IsSelection( eEntry_Model ) )
     {
       _world->GetCurrentSelection()->data.model->resetDirection();
-      _world->setChanged(_world->GetCurrentSelection()->data.model->pos.x, _world->GetCurrentSelection()->data.model->pos.z);
+      _world->setChanged(_world->GetCurrentSelection()->data.model->pos.x(), _world->GetCurrentSelection()->data.model->pos.z());
     }
   }
 
@@ -1263,18 +1300,18 @@ namespace noggit
   {
     if( _world->IsSelection( eEntry_WMO ) )
     {
-      Vec3D t = Vec3D( _world->GetCurrentSelection()->data.wmo->pos.x, _world->GetCurrentSelection()->data.wmo->pos.z, 0 );
-      _world->GetVertex( _world->GetCurrentSelection()->data.wmo->pos.x, _world->GetCurrentSelection()->data.wmo->pos.z, &t );
+      ::math::vector_3d t ( _world->GetCurrentSelection()->data.wmo->pos.x(), _world->GetCurrentSelection()->data.wmo->pos.z(), 0 );
+      _world->GetVertex( _world->GetCurrentSelection()->data.wmo->pos.x(), _world->GetCurrentSelection()->data.wmo->pos.z(), &t );
       _world->GetCurrentSelection()->data.wmo->pos = t;
-      _world->setChanged(_world->GetCurrentSelection()->data.wmo->pos.x, _world->GetCurrentSelection()->data.wmo->pos.z);
+      _world->setChanged(_world->GetCurrentSelection()->data.wmo->pos.x(), _world->GetCurrentSelection()->data.wmo->pos.z());
 
     }
     else if( _world->IsSelection( eEntry_Model ) )
     {
-      Vec3D t = Vec3D( _world->GetCurrentSelection()->data.model->pos.x, _world->GetCurrentSelection()->data.model->pos.z, 0 );
-      _world->GetVertex( _world->GetCurrentSelection()->data.model->pos.x, _world->GetCurrentSelection()->data.model->pos.z, &t );
+      ::math::vector_3d t ( _world->GetCurrentSelection()->data.model->pos.x(), _world->GetCurrentSelection()->data.model->pos.z(), 0 );
+      _world->GetVertex( _world->GetCurrentSelection()->data.model->pos.x(), _world->GetCurrentSelection()->data.model->pos.z(), &t );
       _world->GetCurrentSelection()->data.model->pos = t;
-      _world->setChanged(_world->GetCurrentSelection()->data.model->pos.x, _world->GetCurrentSelection()->data.model->pos.z);
+      _world->setChanged(_world->GetCurrentSelection()->data.model->pos.x(), _world->GetCurrentSelection()->data.model->pos.z());
     }
   }
 
@@ -1423,12 +1460,12 @@ namespace noggit
 
   void MapView::save()
   {
-    _world->saveTile( static_cast<int>( _world->camera.x ) / TILESIZE, static_cast<int>( _world->camera.z ) / TILESIZE );
+    _world->saveTile( static_cast<int>( _world->camera.x() ) / TILESIZE, static_cast<int>( _world->camera.z() ) / TILESIZE );
   }
 
   void MapView::reload_current_tile()
   {
-    _world->reloadTile( static_cast<int>( _world->camera.x ) / TILESIZE, static_cast<int>( _world->camera.z ) / TILESIZE );
+    _world->reloadTile( static_cast<int>( _world->camera.x() ) / TILESIZE, static_cast<int>( _world->camera.z() ) / TILESIZE );
   }
 
   void MapView::exit_to_menu()
@@ -1483,7 +1520,7 @@ namespace noggit
   {
     int map_id;
     int area_id;
-    Vec3D position;
+    ::math::vector_3d position;
     float rotation;
     float tilt;
   };
@@ -1502,9 +1539,9 @@ namespace noggit
 
       BookmarkEntry b;
       b.map_id = settings.value ("map_id").toInt();
-      b.position.x = settings.value ("camera/position/x").toFloat();
-      b.position.y = settings.value ("camera/position/y").toFloat();
-      b.position.z = settings.value ("camera/position/z").toFloat();
+      b.position.x (settings.value ("camera/position/x").toFloat());
+      b.position.y (settings.value ("camera/position/y").toFloat());
+      b.position.z (settings.value ("camera/position/z").toFloat());
       b.rotation = settings.value ("camera/rotation").toFloat();
       b.tilt = settings.value ("camera/tilt").toFloat();
       b.area_id = settings.value ("area_id").toInt();
@@ -1516,7 +1553,7 @@ namespace noggit
     BookmarkEntry new_bookmark;
     new_bookmark.map_id = _world->getMapID();
     new_bookmark.area_id = _world->getAreaID();
-    new_bookmark.position = Vec3D (_world->camera.x, _world->camera.y, _world->camera.z);
+    new_bookmark.position = ::math::vector_3d (_world->camera.x(), _world->camera.y(), _world->camera.z());
     new_bookmark.rotation = ah;
     new_bookmark.tilt = av;
 
@@ -1528,9 +1565,9 @@ namespace noggit
       settings.setArrayIndex (i);
 
       settings.setValue ("map_id", bookmarks[i].map_id);
-      settings.setValue ("camera/position/x", bookmarks[i].position.x);
-      settings.setValue ("camera/position/y", bookmarks[i].position.y);
-      settings.setValue ("camera/position/z", bookmarks[i].position.z);
+      settings.setValue ("camera/position/x", bookmarks[i].position.x());
+      settings.setValue ("camera/position/y", bookmarks[i].position.y());
+      settings.setValue ("camera/position/z", bookmarks[i].position.z());
       settings.setValue ("camera/rotation", bookmarks[i].rotation);
       settings.setValue ("camera/tilt", bookmarks[i].tilt);
       settings.setValue ("area_id", bookmarks[i].area_id);
@@ -1810,15 +1847,15 @@ namespace noggit
 
   void MapView::move_heightmap()
   {
-    _world->moveHeight ( tile_below_camera (_world->camera.x)
-                       , tile_below_camera (_world->camera.z)
+    _world->moveHeight ( tile_below_camera (_world->camera.x())
+                       , tile_below_camera (_world->camera.z())
                        );
   }
 
   void MapView::clear_heightmap()
   {
-    _world->clearHeight ( tile_below_camera (_world->camera.x)
-                        , tile_below_camera (_world->camera.z)
+    _world->clearHeight ( tile_below_camera (_world->camera.x())
+                        , tile_below_camera (_world->camera.z())
                         );
   }
 
@@ -1828,23 +1865,23 @@ namespace noggit
     if (_selected_area_id)
     {
       _world->setAreaID ( _selected_area_id
-                        , tile_below_camera (_world->camera.x)
-                        , tile_below_camera (_world->camera.z)
+                        , tile_below_camera (_world->camera.x())
+                        , tile_below_camera (_world->camera.z())
                         );
     }
   }
 
   void MapView::clear_all_models()
   {
-    _world->clearAllModelsOnADT ( tile_below_camera (_world->camera.x)
-                                , tile_below_camera (_world->camera.z)
+    _world->clearAllModelsOnADT ( tile_below_camera (_world->camera.x())
+                                , tile_below_camera (_world->camera.z())
                                 );
   }
 
   void MapView::clear_texture()
   {
-    _world->setBaseTexture ( tile_below_camera (_world->camera.x)
-                           , tile_below_camera (_world->camera.z)
+    _world->setBaseTexture ( tile_below_camera (_world->camera.x())
+                           , tile_below_camera (_world->camera.z())
                            , NULL
                            );
   }
@@ -2200,7 +2237,7 @@ namespace noggit
     }
 
 
-    Vec3D selectionPosition;
+    ::math::vector_3d selectionPosition;
     switch( _world->GetCurrentSelection()->type )
     {
       case eEntry_Model:
@@ -2276,7 +2313,7 @@ namespace noggit
     if (!areaIDColors.contains (area_id))
     {
       using namespace helper::math;
-      areaIDColors[area_id] = Vec3D ( random::floating_point (0.0f, 1.0f)
+      areaIDColors[area_id] = ::math::vector_3d ( random::floating_point (0.0f, 1.0f)
                                     , random::floating_point (0.0f, 1.0f)
                                     , random::floating_point (0.0f, 1.0f)
                                     );

@@ -9,12 +9,16 @@
 
 #include <noggit/MapHeaders.h>
 
-class Vec3D;
 class Liquid;
 class World;
 class MapChunk;
 
 class QRectF;
+
+namespace math
+{
+  class vector_3d;
+}
 
 class MapTile
 {
@@ -48,7 +52,7 @@ public:
                     ) const;
   void drawMFBO();
 
-  bool GetVertex( float x, float z, Vec3D *V );
+  bool GetVertex( float x, float z, ::math::vector_3d *V );
 
   void saveTile();
 

@@ -9,15 +9,15 @@ class Bone;
 
 #include <opengl/types.h>
 
-#include <noggit/async/object.h>
+#include <math/matrix_4x4.h>
+#include <math/vector_3d.h>
+#include <math/vector_4d.h>
 
+#include <noggit/async/object.h>
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/Manager.h> // ManagedItem
-#include <noggit/Matrix.h>
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
-#include <noggit/Quaternion.h>
-#include <noggit/Vec3D.h>
 
 namespace noggit
 {
@@ -28,20 +28,20 @@ namespace noggit
   }
 }
 
-Vec3D fixCoordSystem(Vec3D v);
+::math::vector_3d fixCoordSystem(const ::math::vector_3d& v);
 
 class Bone {
-  Animation::M2Value<Vec3D> trans;
-  Animation::M2Value<Quaternion, PackedQuaternion> rot;
-  Animation::M2Value<Vec3D> scale;
+  Animation::M2Value< ::math::vector_3d> trans;
+  Animation::M2Value< ::math::quaternion, ::math::packed_quaternion> rot;
+  Animation::M2Value< ::math::vector_3d> scale;
 
 public:
-  Vec3D pivot, transPivot;
+  ::math::vector_3d pivot, transPivot;
   int parent;
 
   bool billboard;
-  Matrix mat;
-  Matrix mrot;
+  ::math::matrix_4x4 mat;
+  ::math::matrix_4x4 mrot;
 
   bool calc;
   void calcMatrix(Bone* allbones, int anim, int time);
@@ -51,10 +51,10 @@ public:
 
 
 class TextureAnim {
-  Animation::M2Value<Vec3D> trans, rot, scale;
+  Animation::M2Value< ::math::vector_3d> trans, rot, scale;
 
 public:
-  Vec3D tval, rval, sval;
+  ::math::vector_3d tval, rval, sval;
 
   void calc(int anim, int time);
   void init(const noggit::mpq::file& f, const ModelTexAnimDef &mta, int *global);
@@ -62,7 +62,7 @@ public:
 };
 
 struct ModelColor {
-  Animation::M2Value<Vec3D> color;
+  Animation::M2Value< ::math::vector_3d> color;
   Animation::M2Value<float,int16_t> opacity;
 
   void init(const noggit::mpq::file& f, const ModelColorDef &mcd, int *global);
@@ -100,7 +100,8 @@ struct ModelRenderPass {
   bool swrap, twrap;
 
   // colours
-  Vec4D ocol, ecol;
+  ::math::vector_4d ocol;
+  ::math::vector_4d ecol;
 
   bool init(Model *m);
   void deinit();
@@ -117,9 +118,9 @@ struct ModelRenderPass {
 struct ModelCamera {
   bool ok;
 
-  Vec3D pos, target;
+  ::math::vector_3d pos, target;
   float nearclip, farclip, fov;
-  Animation::M2Value<Vec3D> tPos, tTarget;
+  Animation::M2Value< ::math::vector_3d> tPos, tTarget;
   Animation::M2Value<float> rot;
 
   void init(const noggit::mpq::file& f, const ModelCameraDef &mcd, int *global);
@@ -130,8 +131,8 @@ struct ModelCamera {
 
 struct ModelLight {
   int type, parent;
-  Vec3D pos, tpos, dir, tdir;
-  Animation::M2Value<Vec3D> diffColor, ambColor;
+  ::math::vector_3d pos, tpos, dir, tdir;
+  Animation::M2Value< ::math::vector_3d> diffColor, ambColor;
   Animation::M2Value<float> diffIntensity, ambIntensity;
   //Animation::M2Value<float> attStart,attEnd;
   //Animation::M2Value<bool> Enabled;
@@ -175,7 +176,7 @@ class Model: public ManagedItem, public noggit::async::object
   void initStatic(const noggit::mpq::file& f);
 
   ModelVertex *origVertices;
-  Vec3D *vertices, *normals;
+  ::math::vector_3d *vertices, *normals;
   uint16_t *indices;
   size_t nIndices;
   std::vector<ModelRenderPass> passes;

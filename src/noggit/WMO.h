@@ -9,12 +9,12 @@
 
 #include <opengl/types.h>
 
-#include <noggit/async/object.h>
+#include <math/vector_3d.h>
+#include <math/vector_4d.h>
 
+#include <noggit/async/object.h>
 #include <noggit/Manager.h>
 #include <noggit/ModelInstance.h> // ModelInstance
-#include <noggit/Quaternion.h>
-#include <noggit/Vec3D.h>
 
 namespace opengl
 {
@@ -39,9 +39,9 @@ namespace noggit
 class WMOGroup {
   WMO *wmo;
   uint32_t flags;
-  Vec3D v1,v2;
+  ::math::vector_3d v1,v2;
   uint32_t nTriangles, nVertices;
-  Vec3D center;
+  ::math::vector_3d center;
   float rad;
   int32_t num;
   int32_t fog;
@@ -50,10 +50,10 @@ class WMOGroup {
   Liquid *lq;
   std::vector< std::pair<opengl::call_list*, bool> > _lists;
 public:
-  Vec3D BoundingBoxMin;
-  Vec3D BoundingBoxMax;
-  Vec3D VertexBoxMin;
-  Vec3D VertexBoxMax;
+  ::math::vector_3d BoundingBoxMin;
+  ::math::vector_3d BoundingBoxMax;
+  ::math::vector_3d VertexBoxMin;
+  ::math::vector_3d VertexBoxMax;
   bool indoor, hascv;
   bool visible;
 
@@ -66,24 +66,24 @@ public:
   void initDisplayList();
   void initLighting(int nLR, uint16_t *useLights);
   void draw ( World* world
-            , const Vec3D& ofs
+            , const ::math::vector_3d& ofs
             , const float rot
             , bool draw_fog
             );
   void draw_for_selection ( World* world
-                          , const Vec3D& ofs
+                          , const ::math::vector_3d& ofs
                           , const float rot
                           );
   void drawLiquid (World* world, bool draw_fog);
   void drawDoodads ( World* world
                    , unsigned int doodadset
-                   , const Vec3D& ofs
+                   , const ::math::vector_3d& ofs
                    , const float rot
                    , bool draw_fog
                    );
   void drawDoodadsSelect ( World* world
                          , unsigned int doodadset
-                         , const Vec3D& ofs
+                         , const ::math::vector_3d& ofs
                          , const float rot
                          );
   void setupFog (World* world, bool draw_fog);
@@ -110,21 +110,21 @@ struct WMOMaterial {
 
 struct WMOLight {
   uint32_t flags, color;
-  Vec3D pos;
+  ::math::vector_3d pos;
   float intensity;
   float unk[5];
   float r;
 
-  Vec4D fcolor;
+  ::math::vector_4d fcolor;
 
   void init(noggit::mpq::file* f);
   void setup(opengl::light light);
 
-  static void setupOnce(opengl::light light, Vec3D dir, Vec3D lcol);
+  static void setupOnce(opengl::light light, ::math::vector_3d dir, ::math::vector_3d lcol);
 };
 
 struct WMOPV {
-  Vec3D a,b,c,d;
+  ::math::vector_3d a,b,c,d;
 };
 
 struct WMOPR {
@@ -140,20 +140,20 @@ struct WMODoodadSet {
 
 struct WMOLiquidHeader {
   int32_t X, Y, A, B;
-  Vec3D pos;
+  ::math::vector_3d pos;
   int16_t type;
 };
 
 struct WMOFog {
   unsigned int flags;
-  Vec3D pos;
+  ::math::vector_3d pos;
   float r1, r2, fogend, fogstart;
   unsigned int color1;
   float f2;
   float f3;
   unsigned int color2;
   // read to here (0x30 bytes)
-  Vec4D color;
+  ::math::vector_4d color;
   void init(noggit::mpq::file* f);
   void setup();
 };
@@ -172,7 +172,7 @@ public:
   WMOGroup *groups;
   unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
   WMOMaterial *mat;
-  Vec3D extents[2];
+  ::math::vector_3d extents[2];
   std::vector<std::string> textures;
   std::vector<std::string> models;
   std::vector<ModelInstance> modelis;
@@ -193,7 +193,7 @@ public:
   ~WMO();
   void draw ( World* world
             , int doodadset
-            , const Vec3D& ofs
+            , const ::math::vector_3d& ofs
             , const float rot
             , bool boundingbox
             , bool groupboxes
@@ -203,12 +203,12 @@ public:
             ) const;
   void drawSelect ( World* world
                   , int doodadset
-                  , const Vec3D& ofs
+                  , const ::math::vector_3d& ofs
                   , const float rot
                   , bool draw_doodads
                   ) const;
   //void drawPortals();
-  bool drawSkybox(World* world, Vec3D pCamera, Vec3D pLower, Vec3D pUpper ) const;
+  bool drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d pLower, ::math::vector_3d pUpper ) const;
 };
 
 class WMOManager

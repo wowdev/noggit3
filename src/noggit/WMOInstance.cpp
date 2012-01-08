@@ -24,8 +24,8 @@ WMOInstance::WMOInstance(World* world, WMO* _wmo, noggit::mpq::file* _file )
 
 WMOInstance::WMOInstance( World* world, WMO* _wmo, ENTRY_MODF* d )
   : wmo( _wmo )
-  , pos( Vec3D( d->pos[0], d->pos[1], d->pos[2] ) )
-  , dir( Vec3D( d->rot[0], d->rot[1], d->rot[2] ) )
+  , pos( d->pos[0], d->pos[1], d->pos[2] )
+  , dir( d->rot[0], d->rot[1], d->rot[2] )
   , mUniqueID( d->uniqueID )
   , mFlags( d->flags )
   , mUnknown( d->unknown )
@@ -34,14 +34,14 @@ WMOInstance::WMOInstance( World* world, WMO* _wmo, ENTRY_MODF* d )
   , mSelectionID( world->selection_names().add( this ) )
   , _world (world)
 {
-  extents[0] = Vec3D( d->extents[0][0], d->extents[0][1], d->extents[0][2] );
-  extents[1] = Vec3D( d->extents[1][0], d->extents[1][1], d->extents[1][2] );
+  extents[0] = ::math::vector_3d( d->extents[0][0], d->extents[0][1], d->extents[0][2] );
+  extents[1] = ::math::vector_3d( d->extents[1][0], d->extents[1][1], d->extents[1][2] );
 }
 
 WMOInstance::WMOInstance( World* world, WMO* _wmo )
   : wmo( _wmo )
-  , pos( Vec3D( 0.0f, 0.0f, 0.0f ) )
-  , dir( Vec3D( 0.0f, 0.0f, 0.0f ) )
+  , pos( 0.0f, 0.0f, 0.0f )
+  , dir( 0.0f, 0.0f, 0.0f )
   , mUniqueID( 0 )
   , mFlags( 0 )
   , mUnknown( 0 )
@@ -55,13 +55,13 @@ WMOInstance::WMOInstance( World* world, WMO* _wmo )
 void WMOInstance::draw (bool draw_doodads, bool draw_fog) const
 {
   glPushMatrix();
-  glTranslatef( pos.x, pos.y, pos.z );
+  glTranslatef( pos.x(), pos.y(), pos.z() );
 
-  const float roty = dir.y - 90.0f;
+  const float roty = dir.y() - 90.0f;
 
   glRotatef( roty, 0.0f, 1.0f, 0.0f );
-  glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
-  glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
+  glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
+  glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
 
   if( _world->IsSelection( eEntry_WMO ) && _world->GetCurrentSelection()->data.wmo->mUniqueID == mUniqueID )
     wmo->draw( _world, doodadset, pos, roty, true, true, true, draw_doodads, draw_fog );
@@ -75,13 +75,13 @@ void WMOInstance::drawSelect (bool draw_doodads)
 {
   glPushMatrix();
 
-  glTranslatef( pos.x, pos.y, pos.z );
+  glTranslatef( pos.x(), pos.y(), pos.z() );
 
-  const float roty = dir.y - 90.0f;
+  const float roty = dir.y() - 90.0f;
 
   glRotatef( roty, 0.0f, 1.0f, 0.0f );
-  glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
-  glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
+  glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
+  glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
 
   mSelectionID = _world->selection_names().add( this );
   glPushName( mSelectionID );
@@ -97,13 +97,13 @@ void WMOInstance::drawSelect (bool draw_doodads)
 {
   glPushMatrix();
 
-  glTranslatef( pos.x, pos.y, pos.z );
+  glTranslatef( pos.x(), pos.y(), pos.z() );
 
-  const float roty = dir.y - 90.0f;
+  const float roty = dir.y() - 90.0f;
 
   glRotatef( roty, 0.0f, 1.0f, 0.0f );
-  glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
-  glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
+  glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
+  glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
 
   wmo->drawPortals();
 
@@ -112,7 +112,7 @@ void WMOInstance::drawSelect (bool draw_doodads)
 
 void WMOInstance::resetDirection()
 {
-  dir = Vec3D( 0.0f, dir.y, 0.0f );
+  dir = ::math::vector_3d( 0.0f, dir.y(), 0.0f );
 }
 
 WMOInstance::~WMOInstance()

@@ -9,29 +9,34 @@
 
 static const unsigned int MAX_PARTICLES = 10000;
 
-Vec4D fromARGB(uint32_t color)
+::math::vector_4d fromARGB(uint32_t color)
 {
   const float a = ((color & 0xFF000000) >> 24) / 255.0f;
   const float r = ((color & 0x00FF0000) >> 16) / 255.0f;
   const float g = ((color & 0x0000FF00) >>  8) / 255.0f;
   const float b = ((color & 0x000000FF)      ) / 255.0f;
-    return Vec4D(r,g,b,a);
+    return ::math::vector_4d(r,g,b,a);
 }
-Vec4D fromBGRA(uint32_t color)
+::math::vector_4d fromBGRA(uint32_t color)
 {
   const float b = ((color & 0xFF000000) >> 24) / 255.0f;
   const float g = ((color & 0x00FF0000) >> 16) / 255.0f;
   const float r = ((color & 0x0000FF00) >>  8) / 255.0f;
   const float a = ((color & 0x000000FF)      ) / 255.0f;
-  return Vec4D(r,g,b,a);
+  return ::math::vector_4d(r,g,b,a);
 }
 
 template<class T>
-T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
+T lifeRamp (float life, float mid, const T& a, const T& b, const T& c)
 {
-  Animation::Interpolation::Linear interpolation;
-  if (life<=mid) return interpolation(life / mid,a,b);
-  else return interpolation((life-mid) / (1.0f-mid),b,c);
+  if (life <= mid)
+  {
+    return ::math::interpolation::linear (life / mid, a, b);
+  }
+  else
+  {
+    return ::math::interpolation::linear ((life - mid) / (1.0f - mid), b, c);
+  }
 }
 
 
@@ -49,11 +54,15 @@ void ParticleSystem::init(const noggit::mpq::file& f, const ModelParticleEmitter
   deacceleration.init (mta.Gravity2, f, globals);
   enabled.init (mta.en, f, globals);
 
-  Vec3D colors2[3];
-  memcpy(colors2, f.getBuffer()+mta.p.colors.ofsKeys, sizeof(Vec3D)*3);
+  ::math::vector_3d colors2[3];
+  memcpy(colors2, f.getBuffer()+mta.p.colors.ofsKeys, sizeof(::math::vector_3d)*3);
   for (size_t i=0; i<3; ++i) {
     float opacity = *reinterpret_cast<int16_t*>(f.getBuffer()+mta.p.opacity.ofsKeys+i*2);
-    colors[i] = Vec4D(colors2[i].x/255.0f, colors2[i].y/255.0f, colors2[i].z/255.0f, opacity/32767.0f);
+    colors[i] = ::math::vector_4d ( colors2[i].x()/255.0f
+                                  , colors2[i].y()/255.0f
+                                  , colors2[i].z()/255.0f
+                                  , opacity/32767.0f
+                                  );
     sizes[i] = (*reinterpret_cast<float*>(f.getBuffer()+mta.p.sizes.ofsKeys+i*4))*mta.p.scales[i];
   }
   mid = 0.5;
@@ -95,27 +104,17 @@ void ParticleSystem::init(const noggit::mpq::file& f, const ModelParticleEmitter
   }
 }
 
-void ParticleSystem::initTile(Vec2D *tc, int num)
+void ParticleSystem::initTile (::math::vector_2d* tc, int num)
 {
-  Vec2D otc[4];
-  Vec2D a,b;
-  int x = num % cols;
-  int y = num / cols;
-  a.x = x * (1.0f / cols);
-  b.x = (x+1) * (1.0f / cols);
-  a.y = y * (1.0f / rows);
-  b.y = (y+1) * (1.0f / rows);
+  const float per_col (1.0f / cols);
+  const float per_row (1.0f / rows);
+  const ::math::vector_2d a ((num % cols) * per_col, (num / cols) * per_row);
+  const ::math::vector_2d b (a.x() + per_col, a.y() + per_row);
 
-  otc[0] = a;
-  otc[2] = b;
-  otc[1].x = b.x;
-  otc[1].y = a.y;
-  otc[3].x = a.x;
-  otc[3].y = b.y;
-
-  for (int i=0; i<4; ++i) {
-    tc[(i+4-order) & 3] = otc[i];
-  }
+  tc[(4 - order) & 3] = a;
+  tc[(5 - order) & 3] = ::math::vector_2d (b.x(), a.y());
+  tc[(6 - order) & 3] = b;
+  tc[(7 - order) & 3] = ::math::vector_2d (a.x(), b.y());
 }
 
 
@@ -185,7 +184,7 @@ void ParticleSystem::update(float dt)
     float rlife = p.life / p.maxlife;
     // calculate size and color based on lifetime
     p.size = lifeRamp<float>(rlife, mid, sizes[0], sizes[1], sizes[2]);
-    p.color = lifeRamp<Vec4D>(rlife, mid, colors[0], colors[1], colors[2]);
+    p.color = lifeRamp< ::math::vector_4d>(rlife, mid, colors[0], colors[1], colors[2]);
 
     // kill off old particles
     if (rlife >= 1.0f)
@@ -203,7 +202,7 @@ void ParticleSystem::setup(int anim, int time)
   /*
   if (transform) {
     // transform every particle by the parent trans matrix   - apparently this isn't needed
-    Matrix m = parent->mat;
+    ::math::matrix_4x4 m = parent->mat;
     for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
       it->tpos = m * it->pos;
     }
@@ -315,23 +314,23 @@ void ParticleSystem::draw()
 
    } else { // Old slow method */
 
-  Vec3D vRight(1,0,0);
-  Vec3D vUp(0,1,0);
+  ::math::vector_3d vRight(1,0,0);
+  ::math::vector_3d vUp(0,1,0);
 
   // position stuff
   const float f = 1;//0.707106781f; // sqrt(2)/2
-  Vec3D bv0 = Vec3D(-f,+f,0);
-  Vec3D bv1 = Vec3D(+f,+f,0);
-  Vec3D bv2 = Vec3D(+f,-f,0);
-  Vec3D bv3 = Vec3D(-f,-f,0);
+  ::math::vector_3d bv0 = ::math::vector_3d(-f,+f,0);
+  ::math::vector_3d bv1 = ::math::vector_3d(+f,+f,0);
+  ::math::vector_3d bv2 = ::math::vector_3d(+f,-f,0);
+  ::math::vector_3d bv3 = ::math::vector_3d(-f,-f,0);
 
   if (billboard) {
     float modelview[16];
     glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
 
-    vRight = Vec3D(modelview[0], modelview[4], modelview[8]);
-    vUp = Vec3D(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
-    //vUp = Vec3D(0,1,0); // Cylindrical billboarding
+    vRight = ::math::vector_3d(modelview[0], modelview[4], modelview[8]);
+    vUp = ::math::vector_3d(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+    //vUp = ::math::vector_3d(0,1,0); // Cylindrical billboarding
   }
   /*
    * type:
@@ -391,12 +390,12 @@ void ParticleSystem::draw()
   } else if (type==1) { // Sphere particles
     // particles from origin to position
     /*
-     bv0 = mbb * Vec3D(0,-1.0f,0);
-     bv1 = mbb * Vec3D(0,+1.0f,0);
+     bv0 = mbb * ::math::vector_3d(0,-1.0f,0);
+     bv1 = mbb * ::math::vector_3d(0,+1.0f,0);
 
 
-     bv0 = mbb * Vec3D(-1.0f,0,0);
-     bv1 = mbb * Vec3D(1.0f,0,0);
+     bv0 = mbb * ::math::vector_3d(-1.0f,0,0);
+     bv1 = mbb * ::math::vector_3d(1.0f,0,0);
      */
 
     glBegin(GL_QUADS);
@@ -428,7 +427,7 @@ void ParticleSystem::draw()
   //glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
-void ModelHighlight( Vec4D color );
+void ModelHighlight( ::math::vector_4d color );
 void ModelUnhighlight();
 void ParticleSystem::drawHighlight()
 {
@@ -446,7 +445,7 @@ void ParticleSystem::drawHighlight()
   glEnable(GL_TEXTURE_2D);
   */
 
-  Vec3D bv0,bv1,bv2,bv3;
+  ::math::vector_3d bv0,bv1,bv2,bv3;
 
   // setup blend mode
   switch (blend) {
@@ -482,31 +481,31 @@ void ParticleSystem::drawHighlight()
 //  glPushName(texture);
   _texture->bind();
 
-  Matrix mbb;
+  ::math::matrix_4x4 mbb;
   mbb.unit();
 
-  ModelHighlight( Vec4D( 1.00, 0.25, 0.25, 0.50 ) );
+  ModelHighlight( ::math::vector_4d( 1.00, 0.25, 0.25, 0.50 ) );
   if (billboard) {
     // get a billboard matrix
-    Matrix mtrans;
-    glGetFloatv(GL_MODELVIEW_MATRIX, &(mtrans.m[0][0]));
+    ::math::matrix_4x4 mtrans;
+    glGetFloatv(GL_MODELVIEW_MATRIX, mtrans);
     mtrans.transpose();
     mtrans.invert();
-    Vec3D camera = mtrans * Vec3D(0,0,0);
-    Vec3D look = (camera - pos).normalize();
-    Vec3D up = ((mtrans * Vec3D(0,1,0)) - camera).normalize();
-    Vec3D right = (up % look).normalize();
+    ::math::vector_3d camera = mtrans * ::math::vector_3d(0,0,0);
+    ::math::vector_3d look = (camera - pos).normalize();
+    ::math::vector_3d up = ((mtrans * ::math::vector_3d(0,1,0)) - camera).normalize();
+    ::math::vector_3d right = (up % look).normalize();
     up = (look % right).normalize();
     // calculate the billboard matrix
-    mbb.m[0][1] = right.x;
-    mbb.m[1][1] = right.y;
-    mbb.m[2][1] = right.z;
-    mbb.m[0][2] = up.x;
-    mbb.m[1][2] = up.y;
-    mbb.m[2][2] = up.z;
-    mbb.m[0][0] = look.x;
-    mbb.m[1][0] = look.y;
-    mbb.m[2][0] = look.z;
+    mbb (0, 0, look.x());
+    mbb (1, 0, look.y());
+    mbb (2, 0, look.z());
+    mbb (0, 1, right.x());
+    mbb (1, 1, right.y());
+    mbb (2, 1, right.z());
+    mbb (0, 2, up.x());
+    mbb (1, 2, up.y());
+    mbb (2, 2, up.z());
   }
 
   if (type==0 || type==2) {
@@ -515,22 +514,22 @@ void ParticleSystem::drawHighlight()
     // regular particles
     float f = 0.707106781f; // sqrt(2)/2
     if (billboard) {
-      bv0 = mbb * Vec3D(0,-f,+f);
-      bv1 = mbb * Vec3D(0,+f,+f);
-      bv2 = mbb * Vec3D(0,+f,-f);
-      bv3 = mbb * Vec3D(0,-f,-f);
+      bv0 = mbb * ::math::vector_3d(0,-f,+f);
+      bv1 = mbb * ::math::vector_3d(0,+f,+f);
+      bv2 = mbb * ::math::vector_3d(0,+f,-f);
+      bv3 = mbb * ::math::vector_3d(0,-f,-f);
     } else {
-      bv0 = Vec3D(-f,0,+f);
-      bv1 = Vec3D(+f,0,+f);
-      bv2 = Vec3D(+f,0,-f);
-      bv3 = Vec3D(-f,0,-f);
+      bv0 = ::math::vector_3d(-f,0,+f);
+      bv1 = ::math::vector_3d(+f,0,+f);
+      bv2 = ::math::vector_3d(+f,0,-f);
+      bv3 = ::math::vector_3d(-f,0,-f);
     }
     //! \todo  per-particle rotation in a non-expensive way?? :|
 
     glBegin(GL_QUADS);
     for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
       //glColor4fv(it->color);
-      glColor4f(1.0f,0.25f,0.25f,it->color.w*0.5f);
+      glColor4f(1.0f,0.25f,0.25f,it->color.w()*0.5f);
 
       glTexCoord2fv(tiles[it->tile].tc[0]);
       glVertex3fv(it->pos + bv0 * it->size);
@@ -548,8 +547,8 @@ void ParticleSystem::drawHighlight()
   }
   else if (type==1) {
     // particles from origin to position
-    bv0 = mbb * Vec3D(0,-1.0f,0);
-    bv1 = mbb * Vec3D(0,+1.0f,0);
+    bv0 = mbb * ::math::vector_3d(0,-1.0f,0);
+    bv1 = mbb * ::math::vector_3d(0,+1.0f,0);
 
     glBegin(GL_QUADS);
     for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
@@ -577,12 +576,12 @@ void ParticleSystem::drawHighlight()
 //  glPopName();
 }
 //Generates the rotation matrix based on spread
-Matrix  SpreadMat;
+::math::matrix_4x4  SpreadMat;
 void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
 {
   int i,j;
   float a[2],c[2],s[2];
-  Matrix  Temp;
+  ::math::matrix_4x4  Temp;
 
   SpreadMat.unit();
 
@@ -599,25 +598,25 @@ void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
     s[i]=sin(a[i]);
   }
   Temp.unit();
-  Temp.m[1][1]=c[0];
-  Temp.m[2][1]=s[0];
-  Temp.m[2][2]=c[0];
-  Temp.m[1][2]=-s[0];
+  Temp (1, 1, c[0]);
+  Temp (2, 1, s[0]);
+  Temp (2, 2, c[0]);
+  Temp (1, 2, -s[0]);
 
   SpreadMat=SpreadMat*Temp;
 
   Temp.unit();
-  Temp.m[0][0]=c[1];
-  Temp.m[1][0]=s[1];
-  Temp.m[1][1]=c[1];
-  Temp.m[0][1]=-s[1];
+  Temp (0, 0, c[1]);
+  Temp (1, 0, s[1]);
+  Temp (1, 1, c[1]);
+  Temp (0, 1, -s[1]);
 
   SpreadMat=SpreadMat*Temp;
 
-  float Size=abs(c[0])*l+abs(s[0])*w;
+  const float Size (abs (c[0]) * l + abs (s[0]) * w);
   for(i=0;i<3;++i)
     for(j=0;j<3;j++)
-      SpreadMat.m[i][j]*=Size;
+      SpreadMat (i, j, SpreadMat (i, j) * Size);
 }
 
 Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float /*spr2*/)
@@ -664,64 +663,81 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
   Particle p;
 
   //Spread Calculation
-  Matrix mrot;
+  ::math::matrix_4x4 mrot;
 
   CalcSpreadMatrix(spr,spr,1.0f,1.0f);
   mrot=sys->parent->mrot*SpreadMat;
 
   if (sys->flags == 1041) { // Trans Halo
     p.pos = sys->parent->mat
-          * ( sys->pos + Vec3D ( ::math::random::floating_point (-l, l)
+          * ( sys->pos + ::math::vector_3d ( ::math::random::floating_point (-l, l)
                                , 0.0f
                                , ::math::random::floating_point (-w, w)
                                )
             );
 
-    const float t = ::math::random::floating_point<float> (0.0f, 2.0f * PI);
+    const float t ( ::math::random::floating_point ( 0.0f
+                                                   , 2.0f
+                                                   * ::math::constants::pi()
+                                                   )
+                  );
 
-    p.pos = Vec3D(0.0f, sys->pos.y + 0.15f, sys->pos.z) + Vec3D(cos(t)/8, 0.0f, sin(t)/8); // Need to manually correct for the halo - why?
+    p.pos = ::math::vector_3d ( 0.0f
+                              , sys->pos.y() + 0.15f
+                              , sys->pos.z()
+                              )
+          + ::math::vector_3d ( cos(t)/8
+                              , 0.0f
+                              , sin(t)/8
+                              );
+          // Need to manually correct for the halo - why?
 
     // var isn't being used, which is set to 1.0f,  whats the importance of this?
     // why does this set of values differ from other particles
 
-    Vec3D dir(0.0f, 1.0f, 0.0f);
+    ::math::vector_3d dir(0.0f, 1.0f, 0.0f);
     p.dir = dir;
 
     p.speed = dir.normalize() * spd * ::math::random::floating_point (0.0f, var);
   } else if (sys->flags == 25 && sys->parent->parent<1) { // Weapon Flame
-    p.pos = sys->parent->pivot * (sys->pos + Vec3D(::math::random::floating_point(-l,l), ::math::random::floating_point(-l,l), ::math::random::floating_point(-w,w)));
-    Vec3D dir = mrot * Vec3D(0.0f, 1.0f, 0.0f);
+    p.pos = sys->parent->pivot * (sys->pos + ::math::vector_3d(::math::random::floating_point(-l,l), ::math::random::floating_point(-l,l), ::math::random::floating_point(-w,w)));
+    ::math::vector_3d dir = mrot * ::math::vector_3d(0.0f, 1.0f, 0.0f);
     p.dir = dir.normalize();
-    //Vec3D dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * Vec3D(0.0f, 1.0f, 0.0f);
+    //::math::vector_3d dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * ::math::vector_3d(0.0f, 1.0f, 0.0f);
     //p.speed = dir.normalize() * spd;
 
   } else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
-    p.pos = sys->parent->mat * (sys->pos + Vec3D(::math::random::floating_point(-l,l), ::math::random::floating_point(-l,l), ::math::random::floating_point(-w,w)));
-    Vec3D dir = Vec3D(sys->parent->mat.m[1][0],sys->parent->mat.m[1][1], sys->parent->mat.m[1][2]) * Vec3D(0.0f, 1.0f, 0.0f);
+    p.pos = sys->parent->mat * (sys->pos + ::math::vector_3d(::math::random::floating_point(-l,l), ::math::random::floating_point(-l,l), ::math::random::floating_point(-w,w)));
+    ::math::vector_3d dir ( ( sys->parent->mat (1, 0)
+                , sys->parent->mat (1, 1)
+                , sys->parent->mat (1, 2)
+                )
+              * ::math::vector_3d (0.0f, 1.0f, 0.0f)
+              );
     p.speed = dir.normalize() * spd * ::math::random::floating_point(0.0f, var*2);
 
   } else if (sys->flags == 17 && sys->parent->parent<1) { // Weapon Glow
-    p.pos = sys->parent->pivot * (sys->pos + Vec3D(::math::random::floating_point(-l,l), ::math::random::floating_point(-l,l), ::math::random::floating_point(-w,w)));
-    Vec3D dir = mrot * Vec3D(0,1,0);
+    p.pos = sys->parent->pivot * (sys->pos + ::math::vector_3d(::math::random::floating_point(-l,l), ::math::random::floating_point(-l,l), ::math::random::floating_point(-w,w)));
+    ::math::vector_3d dir = mrot * ::math::vector_3d(0,1,0);
     p.dir = dir.normalize();
 
   } else {
-    p.pos = sys->pos + Vec3D(::math::random::floating_point(-l,l), 0.0f, ::math::random::floating_point(-w,w));
+    p.pos = sys->pos + ::math::vector_3d(::math::random::floating_point(-l,l), 0.0f, ::math::random::floating_point(-w,w));
     p.pos = sys->parent->mat * p.pos;
 
-    //Vec3D dir = mrot * Vec3D(0,1,0);
-    Vec3D dir = sys->parent->mrot * Vec3D(0,1,0);
+    //::math::vector_3d dir = mrot * ::math::vector_3d(0,1,0);
+    ::math::vector_3d dir = sys->parent->mrot * ::math::vector_3d(0,1,0);
 
     p.dir = dir;//.normalize();
-    p.down = Vec3D(0,-1.0f,0); // dir * -1.0f;
+    p.down = ::math::vector_3d(0,-1.0f,0); // dir * -1.0f;
     p.speed = dir.normalize() * spd * (1.0f+::math::random::floating_point(-var,var));
   }
 
   if(!sys->billboard)  {
-    p.corners[0] = mrot * Vec3D(-1,0,+1);
-    p.corners[1] = mrot * Vec3D(+1,0,+1);
-    p.corners[2] = mrot * Vec3D(+1,0,-1);
-    p.corners[3] = mrot * Vec3D(-1,0,-1);
+    p.corners[0] = mrot * ::math::vector_3d(-1,0,+1);
+    p.corners[1] = mrot * ::math::vector_3d(+1,0,+1);
+    p.corners[2] = mrot * ::math::vector_3d(+1,0,-1);
+    p.corners[3] = mrot * ::math::vector_3d(-1,0,-1);
   }
 
   p.life = 0;
@@ -736,19 +752,19 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
 Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2)
 {
   Particle p;
-  Vec3D dir;
+  ::math::vector_3d dir;
   const float radius (::math::random::floating_point (0.0f, 1.0f));
 
   // Spread should never be zero for sphere particles ?
   if (spr == 0.0f)
   {
-    spr = PI;
+    spr = ::math::constants::pi();
   }
   const float t (::math::random::floating_point (-spr, spr));
 
   //Spread Calculation
   CalcSpreadMatrix (spr * 2.0f, spr2 * 2.0f, w, l);
-  const Matrix mrot (sys->parent->mrot * SpreadMat);
+  const ::math::matrix_4x4 mrot (sys->parent->mrot * SpreadMat);
 
   // New
   // Length should never technically be zero ?
@@ -756,18 +772,18 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
   //  l = w;
 
   // New method
-  // Vec3D bdir(w*cosf(t), 0.0f, l*sinf(t));
+  // ::math::vector_3d bdir(w*cosf(t), 0.0f, l*sinf(t));
   // --
 
   // TODO: fix shpere emitters to work properly
   /* // Old Method
-   //Vec3D bdir(l*cosf(t), 0, w*sinf(t));
-   //Vec3D bdir(0, w*cosf(t), l*sinf(t));
+   //::math::vector_3d bdir(l*cosf(t), 0, w*sinf(t));
+   //::math::vector_3d bdir(0, w*cosf(t), l*sinf(t));
 
 
    float theta_range = sys->spread.getValue(anim, time);
    float theta = -0.5f* theta_range + ::math::random::floating_point(0, theta_range);
-   Vec3D bdir(0, l*cosf(theta), w*sinf(theta));
+   ::math::vector_3d bdir(0, l*cosf(theta), w*sinf(theta));
 
    float phi_range = sys->lat.getValue(anim, time);
    float phi = ::math::random::floating_point(0, phi_range);
@@ -775,26 +791,23 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
    */
 
   if (sys->flags == 57 || sys->flags == 313) { // Faith Halo
-    Vec3D bdir(w*cosf(t)*1.6, 0.0f, l*sinf(t)*1.6);
+    ::math::vector_3d bdir(w*cosf(t)*1.6, 0.0f, l*sinf(t)*1.6);
 
     p.pos = sys->pos + bdir;
     p.pos = sys->parent->mat * p.pos;
 
-    if (bdir.lengthSquared()==0)
-      p.speed = Vec3D(0,0,0);
+    if (bdir.length_squared()==0)
+      p.speed = ::math::vector_3d(0,0,0);
     else {
-      dir = sys->parent->mrot * (bdir.normalize());//mrot * Vec3D(0, 1.0f,0);
+      dir = sys->parent->mrot * (bdir.normalize());//mrot * ::math::vector_3d(0, 1.0f,0);
       p.speed = dir.normalize() * spd * (1.0f+::math::random::floating_point(-var,var));   // ?
     }
 
   } else {
-    Vec3D bdir;
-    float temp;
-
-    bdir = mrot * Vec3D(0,1,0) * radius;
-    temp = bdir.z;
-    bdir.z = bdir.y;
-    bdir.y = temp;
+    ::math::vector_3d bdir (mrot * ::math::vector_3d(0,1,0) * radius);
+    const float temp (bdir.z());
+    bdir.z (bdir.y());
+    bdir.y (temp);
 
     p.pos = sys->parent->mat * sys->pos + bdir;
 
@@ -803,15 +816,15 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
     //p.pos = sys->parent->mat * p.pos;
 
 
-    if (!bdir.lengthSquared() && !(sys->flags & 0x100))
+    if (!bdir.length_squared() && !(sys->flags & 0x100))
     {
-      p.speed = Vec3D(0,0,0);
-      dir = sys->parent->mrot * Vec3D(0,1,0);
+      p.speed = ::math::vector_3d(0,0,0);
+      dir = sys->parent->mrot * ::math::vector_3d(0,1,0);
     }
     else
     {
       if(sys->flags & 0x100)
-        dir = sys->parent->mrot * Vec3D(0,1,0);
+        dir = sys->parent->mrot * ::math::vector_3d(0,1,0);
       else
         dir = bdir.normalize();
 
@@ -821,8 +834,8 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
     }
   }
 
-  p.dir =  dir.normalize();//mrot * Vec3D(0, 1.0f,0);
-  p.down = Vec3D(0,-1.0f,0);
+  p.dir =  dir.normalize();//mrot * ::math::vector_3d(0, 1.0f,0);
+  p.down = ::math::vector_3d(0,-1.0f,0);
 
   p.life = 0;
   p.maxlife = sys->lifespan.getValue(anim, time);
@@ -863,8 +876,8 @@ void RibbonEmitter::init(const noggit::mpq::file &f, ModelRibbonEmitterDef &mta,
 
 void RibbonEmitter::setup(int anim, int time)
 {
-  Vec3D ntpos = parent->mat * pos;
-  Vec3D ntup = parent->mat * (pos + Vec3D(0,0,1));
+  ::math::vector_3d ntpos = parent->mat * pos;
+  ::math::vector_3d ntup = parent->mat * (pos + ::math::vector_3d(0,0,1));
   ntup -= ntpos;
   ntup.normalize();
   float dlen = (ntpos-tpos).length();
@@ -906,7 +919,7 @@ void RibbonEmitter::setup(int anim, int time)
   }
 
   tpos = ntpos;
-  tcolor = Vec4D(color.getValue(anim, time), opacity.getValue(anim, time));
+  tcolor = ::math::vector_4d(color.getValue(anim, time), opacity.getValue(anim, time));
 
   tabove = above.getValue(anim, time);
   tbelow = below.getValue(anim, time);
@@ -921,8 +934,8 @@ void RibbonEmitter::draw()
   glColor4f(1,1,1,1);
   glBegin(GL_TRIANGLES);
   glVertex3fv(tpos);
-  glVertex3fv(tpos + Vec3D(1,1,0));
-  glVertex3fv(tpos + Vec3D(-1,1,0));
+  glVertex3fv(tpos + ::math::vector_3d(1,1,0));
+  glVertex3fv(tpos + ::math::vector_3d(-1,1,0));
   glEnd();
   glEnable(GL_TEXTURE_2D);
   glEnable(GL_LIGHTING);

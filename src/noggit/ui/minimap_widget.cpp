@@ -98,8 +98,8 @@ namespace noggit
             //! \todo Inner and outer radius?
             painter.setPen (Qt::blue);
 
-            painter.drawEllipse ( QPointF ( sky.pos.x * scale_factor
-                                          , sky.pos.z * scale_factor
+            painter.drawEllipse ( QPointF ( sky.pos.x() * scale_factor
+                                          , sky.pos.z() * scale_factor
                                           )
                                 , 10.0 // radius
                                 , 10.0
@@ -111,11 +111,11 @@ namespace noggit
         {
           painter.setPen (Qt::red);
 
-          QLineF camera_vector ( QPointF ( world()->camera.x * scale_factor
-                                         , world()->camera.z * scale_factor
+          QLineF camera_vector ( QPointF ( world()->camera.x() * scale_factor
+                                         , world()->camera.z() * scale_factor
                                          )
-                               , QPointF ( world()->lookat.x * scale_factor
-                                         , world()->lookat.z * scale_factor
+                               , QPointF ( world()->lookat.x() * scale_factor
+                                         , world()->lookat.z() * scale_factor
                                          )
                                );
           camera_vector.setLength (15.0);
@@ -160,7 +160,7 @@ namespace noggit
 
       event->accept();
 
-      emit map_clicked (Vec3D (tile.x() * TILESIZE, 0.0f, tile.y() * TILESIZE));
+      emit map_clicked (::math::vector_3d (tile.x() * TILESIZE, 0.0f, tile.y() * TILESIZE));
     }
   }
 }

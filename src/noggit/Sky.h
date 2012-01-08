@@ -4,8 +4,9 @@
 #include <vector>
 #include <string>
 
+#include <math/vector_3d.h>
+
 #include <noggit/DBCFile.h>
-#include <noggit/Vec3D.h>
 
 namespace noggit
 {
@@ -19,7 +20,7 @@ class Model;
 class World;
 
 struct SkyColor {
-  Vec3D color;
+  ::math::vector_3d color;
   int time;
 
   SkyColor( int t, int col );
@@ -29,7 +30,7 @@ class Sky {
 public:
   Model *alt_sky;
 
-  Vec3D pos;
+  ::math::vector_3d pos;
   float r1, r2;
 
   explicit Sky( DBCFile::Iterator data );
@@ -39,7 +40,7 @@ public:
 
   char name[32];
 
-  Vec3D colorFor(int r, int t) const;
+  ::math::vector_3d colorFor(int r, int t) const;
 
   float weight;
   bool global;
@@ -82,17 +83,17 @@ class Skies {
 
 public:
   std::vector<Sky> skies;
-  Vec3D colorSet[18];
+  ::math::vector_3d colorSet[18];
 
   explicit Skies( unsigned int mapid );
   ~Skies();
 
-  void findSkyWeights(Vec3D pos);
-  void initSky(Vec3D pos, int t);
+  void findSkyWeights(::math::vector_3d pos);
+  void initSky(::math::vector_3d pos, int t);
 
   void draw() const;
 
-  bool drawSky (World* world, const Vec3D &pos) const;
+  bool drawSky (World* world, const ::math::vector_3d &pos) const;
   bool hasSkies() { return numSkies > 0; }
 
   void setupLighting();
@@ -110,7 +111,7 @@ struct OutdoorLightStats {
   int time; // converted from hour:min to the 2880 half-minute ticks thing used in the other Sky thing
 
   float dayIntensity, nightIntensity, ambientIntensity, fogIntensity, fogDepth;
-  Vec3D dayColor, nightColor, ambientColor, fogColor, dayDir, nightDir;
+  ::math::vector_3d dayColor, nightColor, ambientColor, fogColor, dayDir, nightDir;
 
   void init(noggit::mpq::file* f);
 

@@ -7,6 +7,9 @@
 class ParticleSystem;
 class RibbonEmitter;
 
+#include <math/vector_2d.h>
+#include <math/vector_4d.h>
+
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/Model.h>
 
@@ -24,12 +27,12 @@ namespace noggit
 }
 
 struct Particle {
-  Vec3D pos, speed, down, origin, dir;
-  Vec3D  corners[4];
-  //Vec3D tpos;
+  ::math::vector_3d pos, speed, down, origin, dir;
+  ::math::vector_3d  corners[4];
+  //::math::vector_3d tpos;
   float size, life, maxlife;
   unsigned int tile;
-  Vec4D color;
+  ::math::vector_4d color;
 };
 
 typedef std::list<Particle> ParticleList;
@@ -58,24 +61,24 @@ public:
 };
 
 struct TexCoordSet {
-    Vec2D tc[4];
+    ::math::vector_2d tc[4];
 };
 
 class ParticleSystem {
   Animation::M2Value<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw, deacceleration;
   Animation::M2Value<uint8_t> enabled;
-  Vec4D colors[3];
+  ::math::vector_4d colors[3];
   float sizes[3];
   ParticleEmitter *emitter;
   float mid, slowdown, rotation;
-  Vec3D pos;
+  ::math::vector_3d pos;
   opengl::texture* _texture;
   ParticleList particles;
   int blend,order,type;
   int manim,mtime;
   int rows, cols;
   std::vector<TexCoordSet> tiles;
-  void initTile(Vec2D *tc, int num);
+  void initTile(::math::vector_2d *tc, int num);
   bool billboard;
 
   float rem;
@@ -123,26 +126,26 @@ public:
 
 
 struct RibbonSegment {
-  Vec3D pos, up, back;
+  ::math::vector_3d pos, up, back;
   float len,len0;
 };
 
 class RibbonEmitter {
-  Animation::M2Value<Vec3D> color;
+  Animation::M2Value< ::math::vector_3d> color;
   Animation::M2Value<float,int16_t> opacity;
   Animation::M2Value<float> above, below;
 
   Bone *parent;
   float f1, f2;
 
-  Vec3D pos;
+  ::math::vector_3d pos;
 
   int manim, mtime;
   float length, seglen;
   int numsegs;
 
-  Vec3D tpos;
-  Vec4D tcolor;
+  ::math::vector_3d tpos;
+  ::math::vector_4d tcolor;
   float tabove, tbelow;
 
   opengl::texture* _texture;
