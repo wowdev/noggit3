@@ -213,17 +213,22 @@ namespace noggit
         ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Blizzard Entertainment\\World of Warcraft");
       static const QString win7_registry_path
         ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft");
+      static const QString win7_registry_path2
+        ("HKEY_CURRENT_USER\\Software\\Classes\\VirtualStore\\MACHINE\\SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft"); // path if you never installed wow under win7
 
-      //! \todo Test this. This was written on a mac with no testing at all!
       QSettings registry (default_registry_path, QSettings::NativeFormat);
-      if (registry.value ("InstallPath").isValid())
-      {
-        _game_path = registry.value ("InstallPath").toString();
-      }
-      else
+      _game_path = registry.value ("InstallPath").toString();
+
+      if(_game_path=="")
       {
         QSettings registry_win7 (win7_registry_path, QSettings::NativeFormat);
         _game_path = registry_win7.value ("InstallPath").toString();
+      }
+
+      if(_game_path=="")
+      {
+        QSettings registry_win72 (win7_registry_path2, QSettings::NativeFormat);
+        _game_path = registry_win72.value ("InstallPath").toString();
       }
   #else
   #ifdef Q_WS_MAC
