@@ -77,7 +77,7 @@ class Liquid
   int xtiles, ytiles;
   opengl::call_list* mDrawList;
 
-  Vec3D pos;
+  ::math::vector_3d pos;
 
   float tilesize;
   float ydir;
@@ -91,7 +91,7 @@ class Liquid
   int type;
   std::vector<opengl::texture*> _textures;
   std::vector<std::string> _textureFilenames;
-  Vec3D col;
+  ::math::vector_3d col;
   int tmpflag;
   bool trans;
 
@@ -105,7 +105,7 @@ private:
 public:
 
 
-  Liquid (int x, int y, Vec3D base, float ptilesize = LQ_DEFAULT_TILESIZE)
+  Liquid (int x, int y, ::math::vector_3d base, float ptilesize = LQ_DEFAULT_TILESIZE)
     : xtiles (x)
     , ytiles (y)
     , pos (base)

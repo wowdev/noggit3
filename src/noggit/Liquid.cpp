@@ -86,7 +86,7 @@ void Liquid::initFromWMO(noggit::mpq::file* f, const WMOMaterial &mat, bool indo
     if (indoor) {
       trans = true;
       type = 1;
-      col = Vec3D( ( ( mat.col2 & 0xFF0000 ) >> 16 ) / 255.0f, ( ( mat.col2 & 0xFF00 ) >> 8 ) / 255.0f, ( mat.col2 & 0xFF ) / 255.0f);
+      col = ::math::vector_3d( ( ( mat.col2 & 0xFF0000 ) >> 16 ) / 255.0f, ( ( mat.col2 & 0xFF00 ) >> 8 ) / 255.0f, ( mat.col2 & 0xFF ) / 255.0f);
     } else {
       trans = true;
       type = 2; // outdoor water (...?)
@@ -108,14 +108,14 @@ void Liquid::initGeometry(noggit::mpq::file* f)
   //memcpy(waterFlags,flags,(xtiles+1)*(ytiles+1));
 
   // generate vertices
-  Vec3D * lVertices = new Vec3D[(xtiles+1)*(ytiles+1)];
+  ::math::vector_3d * lVertices = new ::math::vector_3d[(xtiles+1)*(ytiles+1)];
   //color = new unsigned char[(xtiles+1)*(ytiles+1)];
   for (int j=0; j<ytiles+1; j++) {
     for (int i=0; i<xtiles+1; ++i) {
       size_t p = j*(xtiles+1)+i;
       float h = map[p].h;
-      if (h > 100000) h = pos.y;
-            lVertices[p] = Vec3D(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
+      if (h > 100000) h = pos.y();
+            lVertices[p] = ::math::vector_3d(pos.x() + tilesize * i, h, pos.z() + ydir * tilesize * j);
       //color[p]= map[p].c[0];
 //! \todo  if map[p].c[1] != 0, overwrite the type from the flags.
 //      gLog( "%i, {%i, %i, %i, %i}: %s\n", flags[p], map[p].c[0], map[p].c[1], map[p].c[2], map[p].c[3], gLiquidTypeDB.getByID( map[p].c[1] != 0 ? map[p].c[1] : pType ).getString( LiquidTypeDB::Name ) );
@@ -196,7 +196,7 @@ void Liquid::initGeometry(noggit::mpq::file* f)
   for (int j=0; j<ytiles+1; j++) {
     for (int i=0; i<xtiles+1; ++i) {
       size_t p = j*(xtiles+1)+i;
-      Vec3D v = verts[p];
+      ::math::vector_3d v = verts[p];
       //short s = *( (short*) (f->getPointer() + p*8) );
       //float f = s / 255.0f;
       //glColor4f(f,(1.0f-f),0,1);
@@ -207,9 +207,9 @@ void Liquid::initGeometry(noggit::mpq::file* f)
       c[3] = map[p].c[0];
       glColor4ubv(c);
 
-      glVertex3fv(v + Vec3D(-0.5f, 1.0f, 0));
-      glVertex3fv(v + Vec3D(0.5f, 1.0f, 0));
-      glVertex3fv(v + Vec3D(0.0f, 2.0f, 0));
+      glVertex3fv(v + ::math::vector_3d(-0.5f, 1.0f, 0));
+      glVertex3fv(v + ::math::vector_3d(0.5f, 1.0f, 0));
+      glVertex3fv(v + ::math::vector_3d(0.0f, 2.0f, 0));
     }
   }
   glEnd();
@@ -223,8 +223,8 @@ void Liquid::initGeometry(noggit::mpq::file* f)
   // temp: draw outlines
   glDisable(GL_TEXTURE_2D);
   glBegin(GL_LINE_LOOP);
-  Vec3D wx = Vec3D(tilesize*xtiles,0,0);
-  Vec3D wy = Vec3D(0,0,tilesize*ytiles*ydir);
+  ::math::vector_3d wx = ::math::vector_3d(tilesize*xtiles,0,0);
+  ::math::vector_3d wy = ::math::vector_3d(0,0,tilesize*ytiles*ydir);
   glColor4f(1,0,0,1);
   glVertex3fv(pos);
   glColor4f(1,1,1,1);
@@ -271,11 +271,11 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 
   // generate vertices
   //! \todo  Store them somehow else. Maybe an extensible array[][] over the whole ADT?
-  Vec3D *lVertices = new Vec3D[info->width * info->height];
+  ::math::vector_3d *lVertices = new ::math::vector_3d[info->width * info->height];
   for( int j = 0; j < info->height; j++ )
     for( int i = 0; i < info->width; ++i )
       if( render->mRender[j * info->width + i] )
-        lVertices[j * info->width + i] = Vec3D( pos.x + tilesize * i, HeightMap->mHeightValues[j][i], pos.z + ydir * tilesize * j );
+        lVertices[j * info->width + i] = ::math::vector_3d( pos.x() + tilesize * i, HeightMap->mHeightValues[j][i], pos.z() + ydir * tilesize * j );
 
   mDrawList = new opengl::call_list;
   mDrawList->start_recording();
@@ -299,13 +299,13 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
 
         glMultiTexCoord2f(GL_TEXTURE1,c,c);
         glTexCoord2f((i+1) / texRepeats, j / texRepeats);
-        glVertex3fv(lVertices[p]+Vec3D(tilesize,0,0));
+        glVertex3fv(lVertices[p]+::math::vector_3d(tilesize,0,0));
         glMultiTexCoord2f(GL_TEXTURE1,c,c);
         glTexCoord2f((i+1) / texRepeats, (j+1) / texRepeats);
-        glVertex3fv(lVertices[p]+Vec3D(tilesize,0,tilesize));
+        glVertex3fv(lVertices[p]+::math::vector_3d(tilesize,0,tilesize));
         glMultiTexCoord2f(GL_TEXTURE1,c,c);
         glTexCoord2f(i / texRepeats, (j+1) / texRepeats);
-        glVertex3fv(lVertices[p]+Vec3D(0,0,tilesize));
+        glVertex3fv(lVertices[p]+::math::vector_3d(0,0,tilesize));
 
         /*c = (float)HeightMap->mTransparency[j][i+1]/255.0f;
         glMultiTexCoord2f(GL_TEXTURE1,c,c);
@@ -362,10 +362,10 @@ void Liquid::initFromMH2O()
   mTransparency = mShaderType & 1;
 
   // generate vertices
-  Vec3D lVertices[9][9];
+  ::math::vector_3d lVertices[9][9];
   for( int j = 0; j < 9; ++j )
     for( int i = 0; i < 9; ++i )
-      lVertices[j][i] = Vec3D( pos.x + tilesize * i, mTileData.mHeightmap[j][i], pos.z + ydir * tilesize * j );
+      lVertices[j][i] = ::math::vector_3d( pos.x() + tilesize * i, mTileData.mHeightmap[j][i], pos.z() + ydir * tilesize * j );
 
   mDrawList = new opengl::call_list;
   mDrawList->start_recording();
@@ -649,7 +649,7 @@ void Liquid::draw (const float& animation_time, const Skies* skies) const
   enableWaterShader();
 #endif
 
-  Vec3D col2;
+  ::math::vector_3d col2;
   glDisable(GL_CULL_FACE);
   glDepthFunc(GL_LESS);
   size_t texidx = (size_t)(animation_time / 60.0f) % _textures.size();
@@ -671,7 +671,7 @@ void Liquid::draw (const float& animation_time, const Skies* skies) const
     glColor4f(0.0f,0.0f,0.0f,0.8f);
   else
   {
-    Vec3D color (col);
+    ::math::vector_3d color (col);
     if (type==2)
     {
       // dynamic color lookup! ^_^
@@ -679,10 +679,10 @@ void Liquid::draw (const float& animation_time, const Skies* skies) const
       color = skies->colorSet[WATER_COLOR_LIGHT];
       col2 = skies->colorSet[WATER_COLOR_DARK];
     }
-    glColor4f(color.x, color.y, color.z, tcol);
-    glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB,0,col2.x,col2.y,col2.z,tcol);
+    glColor4f(color.x(), color.y(), color.z(), tcol);
+    glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB,0,col2.x(),col2.y(),col2.z(),tcol);
 #ifdef USEBLSFILES
-    glSecondaryColor3f(col2.x,col2.y,col2.z);
+    glSecondaryColor3f(col2.x(),col2.y(),col2.z());
 #endif
     //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); //! \todo  check if ARB_texture_env_add is supported? :(
   }

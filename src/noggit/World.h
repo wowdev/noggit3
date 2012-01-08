@@ -136,8 +136,8 @@ public:
 
   OutdoorLightStats outdoorLightStats;
 
-  Vec3D camera;
-  Vec3D lookat;
+  ::math::vector_3d camera;
+  ::math::vector_3d lookat;
   Frustum frustum;
 
   explicit World( const std::string& name);
@@ -196,9 +196,9 @@ public:
   void ResetSelection() { mCurrentSelection = NULL; }
   GLuint GetCurrentSelectedTriangle() { return mCurrentSelectedTriangle; }
 
-  Vec3D _exact_terrain_selection_position;
+  ::math::vector_3d _exact_terrain_selection_position;
 
-  bool GetVertex(float x,float z, Vec3D *V);
+  bool GetVertex(float x,float z, ::math::vector_3d *V);
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   void blurTerrain(float x, float z, float remain, float radius, int BrushType);
@@ -208,21 +208,21 @@ public:
   void addHole( float x, float z );
 
   void addModel ( nameEntry entry
-                , Vec3D newPos
+                , ::math::vector_3d newPos
                 , bool size_randomization
                 , bool position_randomization
                 , bool rotation_randomization
                 );
   void addM2 ( Model *model
-             , Vec3D newPos
+             , ::math::vector_3d newPos
              , bool size_randomization = false
              , bool position_randomization = false
              , bool rotation_randomization = false
              );
-  void addWMO( WMO *wmo, Vec3D newPos );
+  void addWMO( WMO *wmo, ::math::vector_3d newPos );
 
   void removeHole( float x, float z );
-  void jumpToCords(Vec3D pos);
+  void jumpToCords(::math::vector_3d pos);
   void saveMap();
 
   void setChanged(float x, float z);

@@ -1,7 +1,7 @@
 #ifndef MODELINSTANCE_H
 #define MODELINSTANCE_H
 
-#include <noggit/Vec3D.h>
+#include <math/vector_3d.h>
 
 class Model;
 class World;
@@ -21,15 +21,15 @@ public:
 
   unsigned int nameID;
 
-  Vec3D pos, dir;
+  ::math::vector_3d pos, dir;
 
   //! \todo  Get this out and do somehow else.
   unsigned int d1;
 
   float w, sc;
 
-  Vec3D ldir;
-  Vec3D lcol;
+  ::math::vector_3d ldir;
+  ::math::vector_3d lcol;
 
   ~ModelInstance();
   ModelInstance(World*);
@@ -41,8 +41,8 @@ public:
   void drawMapTile();
 //  void drawHighlight();
   void drawSelect ();
-  void draw2 (const Vec3D& ofs, const float rot );
-  void draw2Select (const Vec3D& ofs, const float rot );
+  void draw2 (const ::math::vector_3d& ofs, const float rot );
+  void draw2Select (const ::math::vector_3d& ofs, const float rot );
 
   void resetDirection();
 

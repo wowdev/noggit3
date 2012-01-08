@@ -6,17 +6,18 @@
 #include <QSettings>
 #include <QTabWidget>
 
+#include <math/vector_3d.h>
+
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/MapView.h>
-#include <noggit/Vec3D.h>
 #include <noggit/World.h>
 #include <noggit/ui/minimap_widget.h>
 
 struct bookmark_entry
 {
   int map_id;
-  Vec3D position;
+  ::math::vector_3d position;
   float rotation;
   float tilt;
 };
@@ -64,9 +65,9 @@ Menu::Menu (QWidget* parent)
     settings.setArrayIndex (i);
     bookmark_entry b;
     b.map_id = settings.value ("map_id").toInt();
-    b.position.x = settings.value ("camera/position/x").toFloat();
-    b.position.y = settings.value ("camera/position/y").toFloat();
-    b.position.z = settings.value ("camera/position/z").toFloat();
+    b.position.x (settings.value ("camera/position/x").toFloat());
+    b.position.y (settings.value ("camera/position/y").toFloat());
+    b.position.z (settings.value ("camera/position/z").toFloat());
     b.rotation = settings.value ("camera/rotation").toFloat();
     b.tilt = settings.value ("camera/tilt").toFloat();
 
@@ -86,7 +87,7 @@ Menu::Menu (QWidget* parent)
   entry_points_tabs->addTab (bookmarks_table, tr ("Bookmarks"));
 
   _minimap->draw_boundaries (true);
-  connect (_minimap, SIGNAL (map_clicked (Vec3D)), SLOT (minimap_clicked (Vec3D)));
+  connect (_minimap, SIGNAL (map_clicked (const ::math::vector_3d&)), SLOT (minimap_clicked (const ::math::vector_3d&)));
 
   menu_layout->addWidget (entry_points_tabs);
   menu_layout->addWidget (_minimap);
@@ -98,10 +99,10 @@ Menu::~Menu()
   _world = NULL;
 }
 
-void Menu::enter_world_at (const Vec3D& pos, bool auto_height, float av, float ah )
+void Menu::enter_world_at (const ::math::vector_3d& pos, bool auto_height, float av, float ah )
 {
   prepare_world (pos, ah, av);
-  _world->enterTile (pos.x / TILESIZE, pos.y / TILESIZE);
+  _world->enterTile (pos.x() / TILESIZE, pos.y() / TILESIZE);
 
   emit create_world_view_request (_world);
 
@@ -125,16 +126,16 @@ void Menu::load_map (int map_id)
   _minimap->world (_world);
 }
 
-void Menu::minimap_clicked (const Vec3D& position)
+void Menu::minimap_clicked (const ::math::vector_3d& position)
 {
   enter_world_at (position, true, 0.0, 0.0);
 }
 
-void Menu::prepare_world (const Vec3D& pos, float rotation, float tilt)
+void Menu::prepare_world (const ::math::vector_3d& pos, float rotation, float tilt)
 {
-  _world->camera = Vec3D (pos.x, pos.y, pos.z);
+  _world->camera = ::math::vector_3d (pos.x(), pos.y(), pos.z());
   //! \todo actually set lookat!
-  _world->lookat = Vec3D (pos.x + 10.0f, pos.y + 10.0f, pos.z + 10.0f); // ah = rotation
+  _world->lookat = ::math::vector_3d (pos.x() + 10.0f, pos.y() + 10.0f, pos.z() + 10.0f); // ah = rotation
 
   _world->initDisplay();
 }

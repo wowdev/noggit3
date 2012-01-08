@@ -2,6 +2,8 @@
 
 #include <opengl/types.h>
 
+#include <math/vector_3d.h>
+
 void Plane::normalize()
 {
   float len;
@@ -66,34 +68,34 @@ void Frustum::retrieve()
 
 }
 
-bool Frustum::contains(const Vec3D &v) const
+bool Frustum::contains(const ::math::vector_3d &v) const
 {
   for (int i=0; i<6; ++i) {
-    if ((planes[i].a*v.x + planes[i].b*v.y + planes[i].c*v.z + planes[i].d) <= 0) {
+    if ((planes[i].a*v.x() + planes[i].b*v.y() + planes[i].c*v.z() + planes[i].d) <= 0) {
       return false;
     }
   }
   return true;
 }
 
-bool Frustum::intersects(const Vec3D &v1, const Vec3D &v2) const
+bool Frustum::intersects(const ::math::vector_3d &v1, const ::math::vector_3d &v2) const
 {
-  Vec3D points[8];
-  points[0] = Vec3D(v1.x,v1.y,v1.z);
-  points[1] = Vec3D(v1.x,v1.y,v2.z);
-  points[2] = Vec3D(v1.x,v2.y,v1.z);
-  points[3] = Vec3D(v1.x,v2.y,v2.z);
-  points[4] = Vec3D(v2.x,v1.y,v1.z);
-  points[5] = Vec3D(v2.x,v1.y,v2.z);
-  points[6] = Vec3D(v2.x,v2.y,v1.z);
-  points[7] = Vec3D(v2.x,v2.y,v2.z);
+  ::math::vector_3d points[8];
+  points[0] = ::math::vector_3d (v1.x(), v1.y(), v1.z());
+  points[1] = ::math::vector_3d (v1.x(), v1.y(), v2.z());
+  points[2] = ::math::vector_3d (v1.x(), v2.y(), v1.z());
+  points[3] = ::math::vector_3d (v1.x(), v2.y(), v2.z());
+  points[4] = ::math::vector_3d (v2.x(), v1.y(), v1.z());
+  points[5] = ::math::vector_3d (v2.x(), v1.y(), v2.z());
+  points[6] = ::math::vector_3d (v2.x(), v2.y(), v1.z());
+  points[7] = ::math::vector_3d (v2.x(), v2.y(), v2.z());
 
 
    for (int i=0; i<6; ++i) {
     int numIn = 0;
 
     for (int k=0; k<8; k++) {
-      if ((planes[i].a*points[k].x + planes[i].b*points[k].y + planes[i].c*points[k].z + planes[i].d) > 0)
+      if ((planes[i].a*points[k].x() + planes[i].b*points[k].y() + planes[i].c*points[k].z() + planes[i].d) > 0)
       {
         numIn++;
       }
@@ -106,10 +108,10 @@ bool Frustum::intersects(const Vec3D &v1, const Vec3D &v2) const
 }
 
 
-bool Frustum::intersectsSphere(const Vec3D& v, const float rad) const
+bool Frustum::intersectsSphere(const ::math::vector_3d& v, const float rad) const
 {
   for(int i = 0; i < 6; ++i) {
-    float distance = (planes[i].a*v.x + planes[i].b*v.y + planes[i].c*v.z + planes[i].d);
+    float distance = (planes[i].a*v.x() + planes[i].b*v.y() + planes[i].c*v.z() + planes[i].d);
     if (distance < -rad) return false;
     if (fabs(distance) < rad) return true;
   }

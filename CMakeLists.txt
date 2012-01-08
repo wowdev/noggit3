@@ -99,19 +99,16 @@ set ( noggit_headers
       src/noggit/MapHeaders.h
       src/noggit/MapTile.h
       src/noggit/MapView.h
-      src/noggit/Matrix.h
       src/noggit/Menu.h
       src/noggit/Model.h
       src/noggit/ModelHeaders.h
       src/noggit/ModelInstance.h
       src/noggit/ModelManager.h
       src/noggit/Particle.h
-      src/noggit/Quaternion.h
       src/noggit/Selection.h
       src/noggit/Shaders.h
       src/noggit/Sky.h
       src/noggit/TextureManager.h
-      src/noggit/Vec3D.h
       src/noggit/WMO.h
       src/noggit/WMOInstance.h
       src/noggit/World.h
@@ -185,11 +182,20 @@ set ( helper_headers
 
 
 set ( math_sources
+      src/math/matrix_4x4.cpp
+      src/math/vector_2d.cpp
     )
 
 set ( math_headers
       src/math/bounded_nearest.h
+      src/math/constants.h
+      src/math/interpolation.h
+      src/math/matrix_4x4.h
       src/math/random.h
+      src/math/vector_2d.h
+      src/math/vector_3d.h
+      src/math/vector_4d.h
+      src/math/quaternion.h
     )
 
 set ( headers_to_moc

@@ -3,7 +3,10 @@
 
 #include <QWidget>
 
-class Vec3D;
+namespace math
+{
+  class vector_3d;
+}
 class World;
 
 namespace noggit
@@ -41,7 +44,7 @@ namespace noggit
       virtual void mouseDoubleClickEvent (QMouseEvent*);
 
     signals:
-      void map_clicked (const Vec3D&);
+      void map_clicked (const ::math::vector_3d&);
       void tile_clicked (const QPoint&);
 
     private:

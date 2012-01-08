@@ -13,6 +13,7 @@
 
 #include <math/bounded_nearest.h>
 #include <math/random.h>
+#include <math/vector_2d.h>
 
 #include <opengl/call_list.h>
 #include <opengl/settings_saver.h>
@@ -208,8 +209,8 @@ World::World( const std::string& name )
   , mHasAGlobalWMO( false )
   , noadt( false )
   , outdoorLightStats( OutdoorLightStats() )
-  , camera( Vec3D( 0.0f, 0.0f, 0.0f ) )
-  , lookat( Vec3D( 0.0f, 0.0f, 0.0f ) )
+  , camera( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
+  , lookat( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
   , frustum( Frustum() )
   , _selection_names (this)
 {
@@ -575,8 +576,8 @@ void World::initLowresTerrain()
 
         assert (fourcc == 'MARE' && size == 0x442);
 
-        Vec3D vertices_17[17][17];
-        Vec3D vertices_16[16][16];
+        ::math::vector_3d vertices_17[17][17];
+        ::math::vector_3d vertices_16[16][16];
 
         const int16_t* data_17 (wdl_file.get<int16_t> (mare_offsets[y][x] + 8));
 
@@ -584,7 +585,7 @@ void World::initLowresTerrain()
         {
           for (size_t i (0); i < 17; ++i)
           {
-            vertices_17[j][i] = Vec3D ( TILESIZE * (x + i / 16.0f)
+            vertices_17[j][i] = ::math::vector_3d ( TILESIZE * (x + i / 16.0f)
                                       , data_17[j * 17 + i]
                                       , TILESIZE * (y + j / 16.0f)
                                       );
@@ -597,7 +598,7 @@ void World::initLowresTerrain()
         {
           for (size_t i (0); i < 16; ++i)
           {
-            vertices_16[j][i] = Vec3D ( TILESIZE * (x + (i + 0.5f) / 16.0f)
+            vertices_16[j][i] = ::math::vector_3d ( TILESIZE * (x + (i + 0.5f) / 16.0f)
                                       , data_16[j * 16 + i]
                                       , TILESIZE * (y + (j + 0.5f) / 16.0f)
                                       );
@@ -641,7 +642,7 @@ void initGlobalVBOs( GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords )
 {
   if( !*pDetailTexCoords && !*pAlphaTexCoords )
   {
-    Vec2D temp[mapbufsize], *vt;
+    ::math::vector_2d temp[mapbufsize], *vt;
     float tx,ty;
 
     // init texture coordinates for detail map:
@@ -655,7 +656,7 @@ void initGlobalVBOs( GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords )
           // offset by half
           tx += detail_half;
         }
-        *vt++ = Vec2D(tx, ty);
+        *vt++ = ::math::vector_2d(tx, ty);
       }
     }
 
@@ -675,7 +676,7 @@ void initGlobalVBOs( GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords )
           // offset by half
           tx += alpha_half;
         }
-        *vt++ = Vec2D(tx, ty);
+        *vt++ = ::math::vector_2d (tx, ty);
       }
     }
 
@@ -781,7 +782,7 @@ void World::set_camera_above_terrain()
     return;
   }
 
-  camera.y = qMax (mTiles[cz][cx].tile->getMaxHeight(), 0.0f) + 50.0f;
+  camera.y (qMax (mTiles[cz][cx].tile->getMaxHeight(), 0.0f) + 50.0f);
 }
 
 void World::reloadTile(int x, int z)
@@ -898,25 +899,25 @@ void myFakeLighting()
 
 void World::outdoorLighting()
 {
-  Vec4D black(0,0,0,0);
-  Vec4D ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
+  ::math::vector_4d black(0,0,0,0);
+  ::math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
 
   float di = outdoorLightStats.dayIntensity;
   //float ni = outdoorLightStats.nightIntensity;
 
-  Vec3D dd = outdoorLightStats.dayDir;
+  ::math::vector_3d dd = outdoorLightStats.dayDir;
   // HACK: let's just keep the light source in place for now
-  //Vec4D pos(-1, 1, -1, 0);
-  Vec4D pos(-dd.x, -dd.z, dd.y, 0.0f);
-  Vec4D col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1.0f);
+  //::math::vector_4d pos(-1, 1, -1, 0);
+  ::math::vector_4d pos(-dd.x(), -dd.z(), dd.y(), 0.0f);
+  ::math::vector_4d col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1.0f);
   glLightfv(GL_LIGHT0, GL_AMBIENT, black);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
   glLightfv(GL_LIGHT0, GL_POSITION, pos);
 
   /*
   dd = outdoorLightStats.nightDir;
-  pos(-dd.x, -dd.z, dd.y, 0.0f);
+  pos(-dd.x(), -dd.z(), dd.y(), 0.0f);
   col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * ni, 1.0f);
   glLightfv(GL_LIGHT1, GL_AMBIENT, black);
   glLightfv(GL_LIGHT1, GL_DIFFUSE, col);
@@ -925,26 +926,26 @@ void World::outdoorLighting()
 
 /*void World::outdoorLighting2()
 {
-  Vec4D black(0,0,0,0);
-  Vec4D ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
+  ::math::vector_4d black(0,0,0,0);
+  ::math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
 
   float di = outdoorLightStats.dayIntensity, ni = outdoorLightStats.nightIntensity;
   di = 1;
   ni = 0;
 
-  //Vec3D dd = outdoorLightStats.dayDir;
+  //::math::vector_3d dd = outdoorLightStats.dayDir;
   // HACK: let's just keep the light source in place for now
-  Vec4D pos(-1, -1, -1, 0);
-  Vec4D col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1);
+  ::math::vector_4d pos(-1, -1, -1, 0);
+  ::math::vector_4d col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1);
   glLightfv(GL_LIGHT0, GL_AMBIENT, black);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
   glLightfv(GL_LIGHT0, GL_POSITION, pos);
   */
   /*
-  Vec3D dd = outdoorLightStats.nightDir;
-  Vec4D pos(-dd.x, -dd.z, dd.y, 0);
-  Vec4D col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * ni, 1);
+  ::math::vector_3d dd = outdoorLightStats.nightDir;
+  ::math::vector_4d pos(-dd.x(), -dd.z(), dd.y(), 0);
+  ::math::vector_4d col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * ni, 1);
   glLightfv(GL_LIGHT1, GL_AMBIENT, black);
   glLightfv(GL_LIGHT1, GL_DIFFUSE, col);
   glLightfv(GL_LIGHT1, GL_POSITION, pos);
@@ -958,7 +959,7 @@ void World::outdoorLights(bool on)
   float ni = outdoorLightStats.nightIntensity;
 
   if (on) {
-    Vec4D ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
+    ::math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
     if (di>0) {
       glEnable(GL_LIGHT0);
@@ -971,7 +972,7 @@ void World::outdoorLights(bool on)
       glDisable(GL_LIGHT1);
     }
   } else {
-    Vec4D ambient(0, 0, 0, 1);
+    ::math::vector_4d ambient(0, 0, 0, 1);
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
     glDisable(GL_LIGHT0);
     glDisable(GL_LIGHT1);
@@ -992,7 +993,7 @@ void World::setupFog (bool draw_fog)
     culldistance = fogdist;
 
     //FOG_COLOR
-    Vec4D fogcolor(skies->colorSet[FOG_COLOR], 1);
+    ::math::vector_4d fogcolor(skies->colorSet[FOG_COLOR], 1);
     glFogfv(GL_FOG_COLOR, fogcolor);
     //! \todo  retreive fogstart and fogend from lights.lit somehow
     glFogf(GL_FOG_END, fogdist);
@@ -1026,7 +1027,7 @@ void World::draw ( bool draw_terrain_height_contour
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  gluLookAt(camera.x,camera.y,camera.z, lookat.x,lookat.y,lookat.z, 0, 1, 0);
+  gluLookAt(camera.x(),camera.y(),camera.z(), lookat.x(),lookat.y(),lookat.z(), 0, 1, 0);
 
   frustum.retrieve();
 
@@ -1119,7 +1120,7 @@ void World::draw ( bool draw_terrain_height_contour
 
   // if we're using shaders let's give it some specular
   if (enable_shaders) {
-    Vec4D spec_color(0.1f,0.1f,0.1f,0.1f);
+    ::math::vector_4d spec_color(0.1f,0.1f,0.1f,0.1f);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
     glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 5);
 
@@ -1202,7 +1203,7 @@ void World::draw ( bool draw_terrain_height_contour
       glReadPixels( winX, winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
       gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
 
-      _exact_terrain_selection_position = Vec3D (posX, posY, posZ);
+      _exact_terrain_selection_position = ::math::vector_3d (posX, posY, posZ);
 
       glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
       glDisable(GL_CULL_FACE);
@@ -1261,7 +1262,7 @@ void World::draw ( bool draw_terrain_height_contour
     glEnable(GL_BLEND);
 
     if (enable_shaders) {
-      Vec4D spec_color(0,0,0,1);
+      ::math::vector_4d spec_color(0,0,0,1);
       glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
       glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
     }
@@ -1308,7 +1309,7 @@ void World::draw ( bool draw_terrain_height_contour
     if( draw_wmos || mHasAGlobalWMO )
       if (enable_shaders)
       {
-        Vec4D spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
+        ::math::vector_4d spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
         glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
         glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 10 );
 
@@ -1317,7 +1318,7 @@ void World::draw ( bool draw_terrain_height_contour
         for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
           it->second.draw (draw_wmo_doodads, draw_fog);
 
-        spec_color = Vec4D( 0.0f, 0.0f, 0.0f, 1.0f );
+        spec_color = ::math::vector_4d( 0.0f, 0.0f, 0.0f, 1.0f );
         glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
         glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 0 );
       }
@@ -1379,8 +1380,8 @@ void World::draw ( bool draw_terrain_height_contour
   }
 
 
-  ex = camera.x / TILESIZE;
-  ez = camera.z / TILESIZE;
+  ex = camera.x() / TILESIZE;
+  ez = camera.z() / TILESIZE;
 }
 
 static const GLuint MapObjName = 1;
@@ -1419,7 +1420,7 @@ void World::drawSelection ( bool draw_wmo_doodads
 
   glBindBuffer( GL_ARRAY_BUFFER, 0 );
 
-  gluLookAt( camera.x, camera.y, camera.z, lookat.x, lookat.y, lookat.z, 0, 1, 0 );
+  gluLookAt( camera.x(), camera.y(), camera.z(), lookat.x(), lookat.y(), lookat.z(), 0, 1, 0 );
 
   frustum.retrieve();
 
@@ -1519,10 +1520,10 @@ void World::tick(float dt)
 
 unsigned int World::getAreaID()
 {
-  const int mtx = camera.x / TILESIZE;
-  const int mtz = camera.z / TILESIZE;
-  const int mcx = fmod(camera.x, TILESIZE) / CHUNKSIZE;
-  const int mcz = fmod(camera.z, TILESIZE) / CHUNKSIZE;
+  const int mtx = camera.x() / TILESIZE;
+  const int mtz = camera.z() / TILESIZE;
+  const int mcx = fmod(camera.x(), TILESIZE) / CHUNKSIZE;
+  const int mcz = fmod(camera.z(), TILESIZE) / CHUNKSIZE;
 
   if((mtx<cx-1) || (mtx>cx+1) || (mtz<cz-1) || (mtz>cz+1))
     return 0;
@@ -1551,16 +1552,16 @@ void World::clearHeight(int x, int z)
       MapChunk *curChunk = curTile->getChunk(j, i);
       if(curChunk == 0) continue;
 
-      curChunk->vmin.y = 9999999.0f;
-      curChunk->vmax.y = -9999999.0f;
+      curChunk->vmin.y (9999999.0f);
+      curChunk->vmax.y (-9999999.0f);
       curChunk->Changed=true;
 
       for(int i=0; i < mapbufsize; ++i)
       {
-        curChunk->mVertices[i].y = 0.0f;
+        curChunk->mVertices[i].y (0.0f);
 
-        curChunk->vmin.y = std::min(curChunk->vmin.y,curChunk-> mVertices[i].y);
-        curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
+        curChunk->vmin.y (std::min(curChunk->vmin.y(),curChunk-> mVertices[i].y()));
+        curChunk->vmax.y (std::max(curChunk->vmax.y(), curChunk->mVertices[i].y()));
       }
 
       glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
@@ -1623,14 +1624,14 @@ void World::drawTileMode ( bool draw_lines
                          , float zoom
                          )
 {
-  const QRectF drawing_rect ( camera.x / CHUNKSIZE - 2.0f * ratio / zoom
-                            , camera.z / CHUNKSIZE - 2.0f / zoom
+  const QRectF drawing_rect ( camera.x() / CHUNKSIZE - 2.0f * ratio / zoom
+                            , camera.z() / CHUNKSIZE - 2.0f / zoom
                             , 4.0f * ratio / zoom
                             , 4.0f / zoom
                             );
 
-  ex = camera.x / TILESIZE;
-  ez = camera.z / TILESIZE;
+  ex = camera.x() / TILESIZE;
+  ez = camera.z() / TILESIZE;
 
   glClear (GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   glEnable (GL_BLEND);
@@ -1647,7 +1648,7 @@ void World::drawTileMode ( bool draw_lines
   glScalef (zoom, zoom, 1.0f);
 
   glPushMatrix();
-  glTranslatef (-camera.x / CHUNKSIZE, -camera.z / CHUNKSIZE, 0.0f);
+  glTranslatef (-camera.x() / CHUNKSIZE, -camera.z() / CHUNKSIZE, 0.0f);
 
   //! \todo Only iterate over those intersecting?
   for (size_t j (0); j < 64; ++j)
@@ -1678,7 +1679,7 @@ void World::drawTileMode ( bool draw_lines
 
   if (draw_lines)
   {
-    glTranslatef(fmod(-camera.x/CHUNKSIZE,16), fmod(-camera.z/CHUNKSIZE,16),0);
+    glTranslatef(fmod(-camera.x()/CHUNKSIZE,16), fmod(-camera.z()/CHUNKSIZE,16),0);
     for(float x = -32.0f; x <= 48.0f; x += 1.0f)
     {
       if( static_cast<int>(x) % 16 )
@@ -1702,7 +1703,7 @@ void World::drawTileMode ( bool draw_lines
   glEnableClientState (GL_TEXTURE_COORD_ARRAY);
 }
 
-bool World::GetVertex(float x,float z, Vec3D *V)
+bool World::GetVertex(float x,float z, ::math::vector_3d *V)
 {
   const int newX = x / TILESIZE;
   const int newZ = z / TILESIZE;
@@ -2007,7 +2008,7 @@ void World::saveMap()
       glPushMatrix();
       glScalef(0.08333333f,0.08333333f,1.0f);
 
-      //glTranslatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
+      //glTranslatef(-camera.x()/CHUNKSIZE,-camera.z()/CHUNKSIZE,0);
       glTranslatef( x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f );
 
       ATile->drawTextures (QRect (0, 0, 16, 16), animtime);
@@ -2034,7 +2035,7 @@ void World::saveMap()
 void World::deleteModelInstance( int pUniqueID )
 {
   std::map<int, ModelInstance>::iterator it = mModelInstances.find( pUniqueID );
-  setChanged( it->second.pos.x, it->second.pos.z );
+  setChanged( it->second.pos.x(), it->second.pos.z() );
   mModelInstances.erase( it );
   ResetSelection();
 }
@@ -2042,13 +2043,13 @@ void World::deleteModelInstance( int pUniqueID )
 void World::deleteWMOInstance( int pUniqueID )
 {
   std::map<int, WMOInstance>::iterator it = mWMOInstances.find( pUniqueID );
-  setChanged( it->second.pos.x, it->second.pos.z );
+  setChanged( it->second.pos.x(), it->second.pos.z() );
   mWMOInstances.erase( it );
   ResetSelection();
 }
 
 void World::addModel ( nameEntry entry
-                     , Vec3D newPos
+                     , ::math::vector_3d newPos
                      , bool size_randomization
                      , bool position_randomization
                      , bool rotation_randomization
@@ -2066,7 +2067,7 @@ void World::addModel ( nameEntry entry
 }
 
 void World::addM2 ( Model* model
-                  , Vec3D newPos
+                  , ::math::vector_3d newPos
                   , bool size_randomization
                   , bool position_randomization
                   , bool rotation_randomization
@@ -2091,13 +2092,17 @@ void World::addM2 ( Model* model
   newModelis.sc = 1;
   if (rotation_randomization)
   {
-    newModelis.dir.y += ::math::random::floating_point (0.0f, 360.0f);
+    newModelis.dir.y (newModelis.dir.y() + ::math::random::floating_point (0.0f, 360.0f));
   }
 
   if (position_randomization)
   {
-    newModelis.pos.x += ::math::random::floating_point (-2.0f, 2.0f);
-    newModelis.pos.z += ::math::random::floating_point (-2.0f, 2.0f);
+    newModelis.pos.x ( newModelis.pos.x()
+                     + ::math::random::floating_point (-2.0f, 2.0f)
+                     );
+    newModelis.pos.z ( newModelis.pos.z()
+                     + ::math::random::floating_point (-2.0f, 2.0f)
+                     );
   }
 
   if (size_randomization)
@@ -2106,10 +2111,10 @@ void World::addM2 ( Model* model
   }
 
   mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
-  setChanged(newPos.x,newPos.z);
+  setChanged(newPos.x(), newPos.z());
 }
 
-void World::addWMO( WMO *wmo, Vec3D newPos )
+void World::addWMO( WMO *wmo, ::math::vector_3d newPos )
 {
   const int lMaxUID = std::max( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
                            ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
@@ -2118,7 +2123,7 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
   newWMOis.pos = newPos;
   newWMOis.mUniqueID = lMaxUID;
   mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
-  setChanged(newPos.x,newPos.z);
+  setChanged(newPos.x(),newPos.z());
 }
 
 static int tile_below_camera (const float& position)
@@ -2205,8 +2210,8 @@ void World::moveHeight(int x, int z)
       MapChunk *curChunk = curTile->getChunk(j, i);
       if(curChunk == 0) continue;
 
-      curChunk->vmin.y = 9999999.0f;
-      curChunk->vmax.y = -9999999.0f;
+      curChunk->vmin.y (9999999.0f);
+      curChunk->vmax.y (-9999999.0f);
       curChunk->Changed = true;
 
       float heightDelta = 0.0f;
@@ -2216,17 +2221,17 @@ void World::moveHeight(int x, int z)
         if(selection->type == eEntry_MapChunk)
         {
           // chunk selected
-          heightDelta = camera.y - selection->data.mapchunk->py;
+          heightDelta = camera.y() - selection->data.mapchunk->py;
         }
 
       if( heightDelta * heightDelta <= 0.1f ) continue;
 
       for(int i=0; i < mapbufsize; ++i)
       {
-        curChunk->mVertices[i].y = curChunk->mVertices[i].y + heightDelta;
+        curChunk->mVertices[i].y (curChunk->mVertices[i].y() + heightDelta);
 
-        curChunk->vmin.y = std::min(curChunk->vmin.y,curChunk-> mVertices[i].y);
-        curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
+        curChunk->vmin.y (std::min (curChunk->vmin.y(), curChunk-> mVertices[i].y()));
+        curChunk->vmax.y (std::max (curChunk->vmax.y(), curChunk->mVertices[i].y()));
       }
 
       glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);

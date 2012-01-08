@@ -4,6 +4,8 @@
 #include <sstream>
 #include <string>
 
+#include <math/vector_2d.h>
+
 #include <noggit/blp_texture.h>
 #include <noggit/Log.h>
 #include <noggit/Model.h>
@@ -204,19 +206,19 @@ bool Model::isAnimated(const noggit::mpq::file& f)
 }
 
 
-Vec3D fixCoordSystem(Vec3D v)
+::math::vector_3d fixCoordSystem (const ::math::vector_3d& v)
 {
-  return Vec3D(v.x, v.z, -v.y);
+  return ::math::vector_3d (v.x(), v.z(), -v.y());
 }
 
-Vec3D fixCoordSystem2(Vec3D v)
+::math::vector_3d fixCoordSystem2 (const ::math::vector_3d& v)
 {
-  return Vec3D(v.x, v.z, v.y);
+  return ::math::vector_3d (v.x(), v.z(), v.y());
 }
 
-Quaternion fixCoordSystemQuat(Quaternion v)
+::math::quaternion fixCoordSystemQuat (const ::math::quaternion& v)
 {
-  return Quaternion(-v.x, -v.z, v.y, v.w);
+  return ::math::quaternion (-v.x(), -v.z(), v.y(), v.w());
 }
 
 
@@ -224,8 +226,8 @@ void Model::initCommon(const noggit::mpq::file& f)
 {
   // assume: origVertices already set
   if (!animGeometry) {
-    vertices = new Vec3D[header.nVertices];
-    normals = new Vec3D[header.nVertices];
+    vertices = new ::math::vector_3d[header.nVertices];
+    normals = new ::math::vector_3d[header.nVertices];
   }
 
   // vertices, normals
@@ -238,7 +240,7 @@ void Model::initCommon(const noggit::mpq::file& f)
       normals[i] = origVertices[i].normal.normalize();
     }
 
-    float len = origVertices[i].pos.lengthSquared();
+    float len = origVertices[i].pos.length_squared();
     if (len > rad){
       rad = len;
     }
@@ -380,7 +382,7 @@ void Model::initCommon(const noggit::mpq::file& f)
       // ToDo: Work out the correct way to get the true/false of transparency
       pass.trans = (pass.blendmode>0) && (pass.opacity>0);  // Transparency - not the correct way to get transparency
 
-      pass.p = ops[geoset].BoundingBox[0].x;
+      pass.p = ops[geoset].BoundingBox[0].x();
 
       // Texture flags
       enum TextureFlags {
@@ -500,7 +502,7 @@ void Model::initAnimated(const noggit::mpq::file& f)
     delete[] vertices;
     delete[] normals;
   }
-  Vec2D *texcoords = new Vec2D[header.nVertices];
+  ::math::vector_2d *texcoords = new ::math::vector_2d[header.nVertices];
   for (size_t i=0; i<header.nVertices; ++i)
     texcoords[i] = origVertices[i].texcoords;
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
@@ -580,17 +582,17 @@ void Model::animate(int _anim)
 
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
     glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2*vbufsize, NULL, GL_STREAM_DRAW_ARB);
-    vertices = reinterpret_cast<Vec3D*>(glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
+    vertices = reinterpret_cast< ::math::vector_3d*>(glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
 
     // transform vertices
     ModelVertex *ov = origVertices;
     for (size_t i=0; i<header.nVertices; ++i,++ov) {
-      Vec3D v(0,0,0), n(0,0,0);
+      ::math::vector_3d v(0,0,0), n(0,0,0);
 
       for (size_t b=0; b<4; ++b) {
         if (ov->weights[b]>0) {
-          Vec3D tv = bones[ov->bones[b]].mat * ov->pos;
-          Vec3D tn = bones[ov->bones[b]].mrot * ov->normal;
+          ::math::vector_3d tv = bones[ov->bones[b]].mat * ov->pos;
+          ::math::vector_3d tn = bones[ov->bones[b]].mrot * ov->normal;
           v += tv * (static_cast<float>(ov->weights[b]) / 255.0f);
           n += tn * (static_cast<float>(ov->weights[b]) / 255.0f);
         }
@@ -639,38 +641,47 @@ bool ModelRenderPass::init(Model *m)
 
     // COLOUR
     // Get the colour and transparency and check that we should even render
-    ocol = Vec4D(1.0f, 1.0f, 1.0f, m->trans);
-    ecol = Vec4D(0.0f, 0.0f, 0.0f, 0.0f);
+    ocol = ::math::vector_4d(1.0f, 1.0f, 1.0f, m->trans);
+    ecol = ::math::vector_4d(0.0f, 0.0f, 0.0f, 0.0f);
 
     //if (m->trans == 1.0f)
     //  return false;
 
     // emissive colors
-    if (color!=-1 && m->colors[color].color.uses(0)) {
-      Vec3D c = m->colors[color].color.getValue(0,m->animtime);
-      if (m->colors[color].opacity.uses(m->anim)) {
-        float o = m->colors[color].opacity.getValue(m->anim,m->animtime);
-        ocol.w = o;
+    if (color!=-1 && m->colors[color].color.uses(0))
+    {
+      ::math::vector_3d c (m->colors[color].color.getValue (0, m->animtime));
+      if (m->colors[color].opacity.uses (m->anim))
+      {
+        ocol.w (m->colors[color].opacity.getValue (m->anim, m->animtime));
       }
 
-      if (unlit) {
-        ocol.x = c.x; ocol.y = c.y; ocol.z = c.z;
+      if (unlit)
+      {
+        ocol.x (c.x());
+        ocol.y (c.y());
+        ocol.z (c.z());
       } else {
-        ocol.x = ocol.y = ocol.z = 0;
+        ocol.x (ocol.y (ocol.z (0.0f)));
       }
 
-      ecol = Vec4D(c, ocol.w);
-      glMaterialfv(GL_FRONT, GL_EMISSION, ecol);
+      ecol = ::math::vector_4d (c, ocol.w());
+      glMaterialfv (GL_FRONT, GL_EMISSION, ecol);
     }
 
     // opacity
-    if (opacity!=-1) {
-      if (m->transparency[opacity].trans.uses(0))
-        ocol.w *= m->transparency[opacity].trans.getValue(0, m->animtime);
+    if (opacity!=-1)
+    {
+      if (m->transparency[opacity].trans.uses (0))
+      {
+        ocol.w ( ocol.w()
+               * m->transparency[opacity].trans.getValue (0, m->animtime)
+               );
+      }
     }
 
     // exit and return false before affecting the opengl render state
-    if (!((ocol.w > 0) && (color==-1 || ecol.w > 0)))
+    if (!((ocol.w() > 0.0f) && (color==-1 || ecol.w() > 0.0f)))
       return false;
 
     // TEXTURE
@@ -764,7 +775,7 @@ bool ModelRenderPass::init(Model *m)
     if (unlit)
       glDisable(GL_LIGHTING);
 
-    if (blendmode<=1 && ocol.w<1.0f)
+    if (blendmode<=1 && ocol.w()<1.0f)
       glEnable(GL_BLEND);
 
     return true;
@@ -807,7 +818,7 @@ void ModelRenderPass::deinit()
   //glColor4f(1,1,1,1); //???
 }
 
-void ModelHighlight( Vec4D color )
+void ModelHighlight( ::math::vector_4d color )
 {
   glDisable( GL_ALPHA_TEST );
    glEnable( GL_BLEND );
@@ -829,7 +840,7 @@ void ModelUnhighlight()
   glEnable( GL_CULL_FACE );
   glActiveTexture( GL_TEXTURE0 );
   glEnable( GL_TEXTURE_2D );
-  glColor4fv( Vec4D( 1, 1, 1, 1 ) );
+  glColor4fv( ::math::vector_4d( 1, 1, 1, 1 ) );
 //  glDepthMask( GL_TRUE );
 }
 
@@ -986,13 +997,13 @@ void TextureAnim::setup(int anim)
 {
   glLoadIdentity();
   if (trans.uses(anim)) {
-    glTranslatef(tval.x, tval.y, tval.z);
+    glTranslatef(tval.x(), tval.y(), tval.z());
   }
   if (rot.uses(anim)) {
-    glRotatef(rval.x, 0, 0, 1); // this is wrong, I have no idea what I'm doing here ;)
+    glRotatef(rval.x(), 0, 0, 1); // this is wrong, I have no idea what I'm doing here ;)
   }
   if (scale.uses(anim)) {
-    glScalef(sval.x, sval.y, sval.z);
+    glScalef(sval.x(), sval.y(), sval.z());
   }
 }
 
@@ -1024,9 +1035,9 @@ void ModelCamera::setup( int time )
   video.farclip( farclip );
   video.updateProjectionMatrix();
 
-  Vec3D p = pos + tPos.getValue( 0, time );
-  Vec3D t = target + tTarget.getValue( 0, time );
-  Vec3D u( 0.0f, 1.0f, 0.0f );
+  ::math::vector_3d p = pos + tPos.getValue( 0, time );
+  ::math::vector_3d t = target + tTarget.getValue( 0, time );
+  ::math::vector_3d u( 0.0f, 1.0f, 0.0f );
   gluLookAt( p.x, p.y, p.z, t.x, t.y, t.z, u.x, u.y, u.z );
   */
 }
@@ -1045,7 +1056,7 @@ void ModelTransparency::init(const noggit::mpq::file& f, const ModelTransDef &mc
 void ModelLight::init(const noggit::mpq::file& f, const ModelLightDef &mld, int *global)
 {
   tpos = pos = fixCoordSystem(mld.pos);
-  tdir = dir = Vec3D(0,1,0); // no idea
+  tdir = dir = ::math::vector_3d(0,1,0); // no idea
   type = mld.type;
   parent = mld.bone;
   ambColor.init(mld.ambColor, f, global);
@@ -1056,9 +1067,9 @@ void ModelLight::init(const noggit::mpq::file& f, const ModelLightDef &mld, int 
 
 void ModelLight::setup(int time, opengl::light l)
 {
-  Vec4D ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
-  Vec4D diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
-  Vec4D p;
+  ::math::vector_4d ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
+  ::math::vector_4d diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
+  ::math::vector_4d p;
 
   enum ModelLightTypes {
     MODELLIGHT_DIRECTIONAL=0,
@@ -1067,12 +1078,12 @@ void ModelLight::setup(int time, opengl::light l)
 
   if (type==MODELLIGHT_DIRECTIONAL) {
     // directional
-    p = Vec4D(tdir, 0.0f);
+    p = ::math::vector_4d(tdir, 0.0f);
   } else if (type==MODELLIGHT_POINT) {
     // point
-    p = Vec4D(tpos, 1.0f);
+    p = ::math::vector_4d(tpos, 1.0f);
   } else {
-    p = Vec4D(tpos, 1.0f);
+    p = ::math::vector_4d(tpos, 1.0f);
     LogError << "Light type " << type << " is unknown." << std::endl;
   }
   //gLog("Light %d (%f,%f,%f) (%f,%f,%f) [%f,%f,%f]\n", l-GL_LIGHT4, ambcol.x, ambcol.y, ambcol.z, diffcol.x, diffcol.y, diffcol.z, p.x, p.y, p.z);
@@ -1109,40 +1120,40 @@ void Bone::init(const noggit::mpq::file& f, const ModelBoneDef &b, int *global, 
 void Bone::calcMatrix(Bone *allbones, int anim, int time)
 {
   if (calc) return;
-  Matrix m;
-  Quaternion q;
+  ::math::matrix_4x4 m;
+  ::math::quaternion q;
 
   bool tr = rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard;
   if (tr) {
     m.translation(pivot);
 
     if (trans.uses(anim)) {
-      m *= Matrix::newTranslation(trans.getValue(anim, time));
+      m *= ::math::matrix_4x4::new_translation_matrix (trans.getValue (anim, time));
     }
     if (rot.uses(anim)) {
       q = rot.getValue(anim, time);
-      m *= Matrix::newQuatRotate(q);
+      m *= ::math::matrix_4x4::new_rotation_matrix (q);
     }
     if (scale.uses(anim)) {
-      m *= Matrix::newScale(scale.getValue(anim, time));
+      m *= ::math::matrix_4x4::new_scale_matrix (scale.getValue(anim, time));
     }
     if (billboard) {
       float modelview[16];
       glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
 
-      Vec3D vRight = Vec3D(modelview[0], modelview[4], modelview[8]);
-      Vec3D vUp = Vec3D(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
-      //Vec3D vUp = Vec3D(0,1,0); // Cylindrical billboarding
+      ::math::vector_3d vRight (modelview[0], modelview[4], modelview[8]);
+      ::math::vector_3d vUp (modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+      //::math::vector_3d vUp (0,1,0); // Cylindrical billboarding
       vRight = vRight * -1;
-      m.m[0][2] = vRight.x;
-      m.m[1][2] = vRight.y;
-      m.m[2][2] = vRight.z;
-      m.m[0][1] = vUp.x;
-      m.m[1][1] = vUp.y;
-      m.m[2][1] = vUp.z;
+      m (0, 1, vUp.x());
+      m (1, 1, vUp.y());
+      m (2, 1, vUp.z());
+      m (0, 2, vRight.x());
+      m (1, 2, vRight.y());
+      m (2, 2, vRight.z());
     }
 
-    m *= Matrix::newTranslation(pivot*-1.0f);
+    m *= ::math::matrix_4x4::new_translation_matrix (pivot*-1.0f);
 
   } else m.unit();
 
@@ -1154,8 +1165,8 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
   // transform matrix for normal vectors ... ??
   if (rot.uses(anim)) {
     if (parent>=0) {
-      mrot = allbones[parent].mrot * Matrix::newQuatRotate(q);
-    } else mrot = Matrix::newQuatRotate(q);
+      mrot = allbones[parent].mrot * ::math::matrix_4x4::new_rotation_matrix (q);
+    } else mrot = ::math::matrix_4x4::new_rotation_matrix (q);
   } else mrot.unit();
 
   transPivot = mat * pivot;

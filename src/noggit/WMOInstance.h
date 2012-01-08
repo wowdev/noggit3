@@ -4,7 +4,7 @@
 #include <set>
 #include <stdint.h>
 
-#include <noggit/Vec3D.h> // Vec3D
+#include <math/vector_3d.h>
 
 class WMO;
 class World;
@@ -22,9 +22,9 @@ class WMOInstance
 {
 public:
   WMO* wmo;
-  Vec3D pos;
-  Vec3D  extents[2];
-  Vec3D  dir;
+  ::math::vector_3d pos;
+  ::math::vector_3d  extents[2];
+  ::math::vector_3d  dir;
   int mUniqueID;
   uint16_t mFlags;
   uint16_t mUnknown;

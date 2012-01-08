@@ -5,8 +5,10 @@
 #include <map>
 #include <vector>
 
+#include <math/interpolation.h>
+#include <math/quaternion.h>
+
 #include <noggit/ModelHeaders.h>
-#include <noggit/Quaternion.h>
 #include <noggit/mpq/file.h>
 
 //! \todo Pass this in somehow and don't define as extern.
@@ -17,51 +19,13 @@ namespace Animation
 {
   namespace Interpolation
   {
-    //! \todo C++0x: Change namespace to "enum class Type : int16_t", remove typedef.
-    namespace Type
+    //! \todo C++0x: Change namespace to "enum class interpolation_type : int16_t", remove typedef.
+    typedef int16_t Type_t;
+    enum
     {
-      typedef int16_t Type_t;
-      enum
-      {
-        NONE,
-        LINEAR,
-        HERMITE
-      };
-    }
-
-    struct Linear
-    {
-      template<class AnimatedType>
-      inline AnimatedType operator()( const float& percentage, const AnimatedType& start, const AnimatedType& end )
-      {
-        return start * ( 1.0f - percentage ) + end * percentage;
-      }
-    };
-
-    //! \note "linear" interpolation for quaternions should be slerp by default.
-    template<>
-    inline Quaternion Linear::operator()( const float& percentage, const Quaternion& start, const Quaternion& end )
-    {
-      return Quaternion::slerp( percentage, start, end );
-    }
-
-    struct Hermite
-    {
-      template<class AnimatedType>
-      inline AnimatedType operator()( const float& percentage, const AnimatedType& start, const AnimatedType& end, const AnimatedType& in, const AnimatedType& out )
-      {
-        const float percentage_2 = percentage * percentage;
-        const float percentage_3 = percentage_2 * percentage;
-        const float _2_percentage_3 = 2.0f * percentage_3;
-        const float _3_percentage_2 = 3.0f * percentage_2;
-
-        const float h1 = _2_percentage_3 - _3_percentage_2 + 1.0f;
-        const float h2 = _3_percentage_2 - _2_percentage_3;
-        const float h3 = percentage_3 - 2.0f * percentage_2 + percentage;
-        const float h4 = percentage_3 - percentage_2;
-
-        return AnimatedType( start * h1 + end * h2 + in * h3 + out * h4 );
-      }
+      NONE,
+      LINEAR,
+      HERMITE,
     };
   };
 
@@ -75,10 +39,12 @@ namespace Animation
   };
 
   template<>
-  inline Quaternion Conversion<PackedQuaternion, Quaternion>::operator()( const PackedQuaternion& value )
+  inline ::math::quaternion Conversion< ::math::packed_quaternion
+                                      , ::math::quaternion
+                                      >::operator() (const ::math::packed_quaternion& value)
   {
     //! \todo Check if this is really correct.
-    return Quaternion(
+    return ::math::quaternion (
       static_cast<float>( ( value.x > 0 ? value.x - 32767 : value.x + 32767 ) / 32767.0f ),
       static_cast<float>( ( value.y > 0 ? value.y - 32767 : value.y + 32767 ) / 32767.0f ),
       static_cast<float>( ( value.z > 0 ? value.z - 32767 : value.z + 32767 ) / 32767.0f ),
@@ -110,7 +76,7 @@ namespace Animation
     int32_t _globalSequenceID;
     int32_t* _globalSequences;
 
-    Animation::Interpolation::Type::Type_t _interpolationType;
+    Animation::Interpolation::Type_t _interpolationType;
 
     std::map<AnimationIdType, TimestampTypeVectorType> times;
     std::map<AnimationIdType, AnimatedTypeVectorType> data;
@@ -179,7 +145,7 @@ namespace Animation
           }
         }
 
-        if( pos == timestampVector.size() - 1 || _interpolationType == Animation::Interpolation::Type::NONE )
+        if( pos == timestampVector.size() - 1 || _interpolationType == Animation::Interpolation::NONE )
         {
           result = dataVector[pos];
         }
@@ -191,17 +157,23 @@ namespace Animation
 
           switch( _interpolationType )
           {
-            case Animation::Interpolation::Type::LINEAR:
+            case Animation::Interpolation::LINEAR:
             {
-              Animation::Interpolation::Linear interpolation;
-              result = interpolation( percentage, dataVector[pos], dataVector[pos + 1] );
+              result = ::math::interpolation::linear ( percentage
+                                                     , dataVector[pos]
+                                                     , dataVector[pos + 1]
+                                                     );
             }
             break;
 
-            case Animation::Interpolation::Type::HERMITE:
+            case Animation::Interpolation::HERMITE:
             {
-              Animation::Interpolation::Hermite interpolation;
-              result = interpolation( percentage, dataVector[pos], dataVector[pos + 1], inVector[pos], outVector[pos] );
+              result = ::math::interpolation::hermite ( percentage
+                                                      , dataVector[pos]
+                                                      , dataVector[pos + 1]
+                                                      , inVector[pos]
+                                                      , outVector[pos]
+                                                      );
             }
             break;
           }
@@ -248,15 +220,15 @@ namespace Animation
 
         switch( _interpolationType )
         {
-          case Animation::Interpolation::Type::NONE:
-          case Animation::Interpolation::Type::LINEAR:
+          case Animation::Interpolation::NONE:
+          case Animation::Interpolation::LINEAR:
             for( size_t i = 0; i < keyHeaders[j].nEntries; ++i )
             {
               data[j].push_back( _conversion( keys[i] ) );
             }
             break;
 
-          case Animation::Interpolation::Type::HERMITE:
+          case Animation::Interpolation::HERMITE:
             for( size_t i = 0; i < keyHeaders[j].nEntries; ++i )
             {
               data[j].push_back( _conversion( keys[i * 3] ) );
@@ -268,12 +240,12 @@ namespace Animation
       }
     }
 
-    void apply( AnimatedType function( const AnimatedType ) )
+    void apply( AnimatedType function( const AnimatedType& ) )
     {
       switch( _interpolationType )
       {
-        case Animation::Interpolation::Type::NONE:
-        case Animation::Interpolation::Type::LINEAR:
+        case Animation::Interpolation::NONE:
+        case Animation::Interpolation::LINEAR:
           for( size_t i = 0; i < data.size(); ++i )
           {
             for( size_t j = 0; j < data[i].size(); ++j )
@@ -283,7 +255,7 @@ namespace Animation
           }
           break;
 
-        case Animation::Interpolation::Type::HERMITE:
+        case Animation::Interpolation::HERMITE:
           for( size_t i = 0; i < data.size(); ++i )
           {
             for( size_t j = 0; j < data[i].size(); ++j )

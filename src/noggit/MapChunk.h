@@ -1,8 +1,9 @@
 #ifndef MAPCHUNK_H
 #define MAPCHUNK_H
 
+#include <math/vector_4d.h>
+
 #include <noggit/MapTile.h> // MapTile
-#include <noggit/Quaternion.h> // Vec4D
 
 namespace noggit
 {
@@ -12,7 +13,6 @@ namespace noggit
     class file;
   }
 }
-class Vec4D;
 class brush;
 class World;
 
@@ -25,7 +25,7 @@ class MapChunk
 
 public:
   MapTile *mt;
-  Vec3D vmin, vmax, vcenter;
+  ::math::vector_3d vmin, vmax, vcenter;
   int px, py;
 
   MapChunkHeader header;
@@ -89,16 +89,16 @@ public:
 
   void recalcNorms();
 
-  Vec3D mNormals[mapbufsize];
-  Vec3D mVertices[mapbufsize];
+  ::math::vector_3d mNormals[mapbufsize];
+  ::math::vector_3d mVertices[mapbufsize];
   //! \todo Is this needed? Can't we just use the real vertices?
-  Vec3D mMinimap[mapbufsize];
-  Vec4D mFakeShadows[mapbufsize];
+  ::math::vector_3d mMinimap[mapbufsize];
+  ::math::vector_4d mFakeShadows[mapbufsize];
 
   void getSelectionCoord(float *x,float *z);
   float getSelectionHeight();
 
-  Vec3D GetSelectionPosition();
+  ::math::vector_3d GetSelectionPosition();
 
   bool changeTerrain(float x, float z, float change, float radius, int BrushType);
   bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
@@ -118,7 +118,7 @@ public:
   int getAreaID();
   void setAreaID(int ID);
 
-  bool GetVertex(float x,float z, Vec3D *V);
+  bool GetVertex(float x,float z, ::math::vector_3d *V);
 
   void loadTextures();
 //  char getAlpha(float x,float y);

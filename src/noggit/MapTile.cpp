@@ -293,7 +293,7 @@ MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bo
 
         Liquid* lq ( new Liquid ( info.width
                                 , info.height
-                                , Vec3D ( xbase + CHUNKSIZE * j
+                                , ::math::vector_3d ( xbase + CHUNKSIZE * j
                                         , lTile.mMinimum
                                         , zbase + CHUNKSIZE * i
                                         )
@@ -458,7 +458,7 @@ float MapTile::getMaxHeight()
   float maxHeight = -99999.0f;
   for( int nextChunk = 0; nextChunk < 256; ++nextChunk )
   {
-    maxHeight = std::max( mChunks[nextChunk / 16][nextChunk % 16]->vmax.y, maxHeight );
+    maxHeight = std::max( mChunks[nextChunk / 16][nextChunk % 16]->vmax.y(), maxHeight );
   }
   return maxHeight;
 }
@@ -577,7 +577,7 @@ MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )
   }
 }
 
-bool MapTile::GetVertex( float x, float z, Vec3D *V )
+bool MapTile::GetVertex( float x, float z, ::math::vector_3d *V )
 {
   int xcol = ( x - xbase ) / CHUNKSIZE;
   int ycol = ( z - zbase ) / CHUNKSIZE;
@@ -587,43 +587,37 @@ bool MapTile::GetVertex( float x, float z, Vec3D *V )
 
 /// --- Only saving related below this line. --------------------------
 
-bool pointInside( Vec3D point, Vec3D extents[2] )
+void minmax (::math::vector_3d* a, ::math::vector_3d* b)
 {
-  return point.x >= extents[0].x && point.z >= extents[0].z && point.x <= extents[1].x && point.z <= extents[1].z;
-}
-
-void minmax( Vec3D* a, Vec3D* b )
-{
-  if( a->x > b->x )
+  if( a->x() > b->x() )
   {
-    float t = b->x;
-    b->x = a->x;
-    a->x = t;
+    const float t (b->x());
+    b->x (a->x());
+    a->x (t);
   }
-  if( a->y > b->y )
+  if( a->y() > b->y() )
   {
-    float t = b->y;
-    b->y = a->y;
-    a->y = t;
+    const float t (b->y());
+    b->y (a->y());
+    a->y (t);
   }
-  if( a->z > b->z )
+  if( a->z() > b->z() )
   {
-    float t = b->z;
-    b->z = a->z;
-    a->z = t;
+    const float t (b->z());
+    b->z (a->z());
+    a->z (t);
   }
 }
 
-bool checkInside( Vec3D extentA[2], Vec3D extentB[2] )
+bool checkInside( ::math::vector_3d extentA[2], ::math::vector_3d extentB[2] )
 {
-
   minmax( &extentA[0], &extentA[1] );
   minmax( &extentB[0], &extentB[1] );
 
-  return pointInside( extentA[0], extentB ) ||
-         pointInside( extentA[1], extentB ) ||
-         pointInside( extentB[0], extentA ) ||
-         pointInside( extentB[1], extentA );
+  return extentA[0].is_inside_of (extentB[0], extentB[1]) ||
+         extentA[1].is_inside_of (extentB[0], extentB[1]) ||
+         extentB[0].is_inside_of (extentA[0], extentA[1]) ||
+         extentB[1].is_inside_of (extentA[0], extentA[1]);
 }
 
 class sExtendableArray
@@ -731,9 +725,9 @@ void MapTile::clearAllModels()
   // Collect some information we need later.
 
   // Check which doodads and WMOs are on this ADT.
-  Vec3D lTileExtents[2];
-  lTileExtents[0] = Vec3D( xbase, 0.0f, zbase );
-  lTileExtents[1] = Vec3D( xbase + TILESIZE, 0.0f, zbase + TILESIZE );
+  ::math::vector_3d lTileExtents[2];
+  lTileExtents[0] = ::math::vector_3d( xbase, 0.0f, zbase );
+  lTileExtents[1] = ::math::vector_3d( xbase + TILESIZE, 0.0f, zbase + TILESIZE );
 
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
@@ -744,7 +738,7 @@ void MapTile::clearAllModels()
 
   for( std::map<int, ModelInstance>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
   {
-    Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
+    ::math::vector_3d lModelExtentsV1[2], lModelExtentsV2[2];
     lModelExtentsV1[0] = it->second.model->header.BoundingBoxMin + it->second.pos;
     lModelExtentsV1[1] = it->second.model->header.BoundingBoxMax + it->second.pos;
     lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
@@ -766,9 +760,9 @@ void MapTile::saveTile()
   // Collect some information we need later.
 
   // Check which doodads and WMOs are on this ADT.
-  Vec3D lTileExtents[2];
-  lTileExtents[0] = Vec3D( xbase, 0.0f, zbase );
-  lTileExtents[1] = Vec3D( xbase + TILESIZE, 0.0f, zbase + TILESIZE );
+  ::math::vector_3d lTileExtents[2];
+  lTileExtents[0] = ::math::vector_3d( xbase, 0.0f, zbase );
+  lTileExtents[1] = ::math::vector_3d( xbase + TILESIZE, 0.0f, zbase + TILESIZE );
 
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
@@ -779,7 +773,7 @@ void MapTile::saveTile()
 
   for( std::map<int, ModelInstance>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
   {
-    Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
+    ::math::vector_3d lModelExtentsV1[2], lModelExtentsV2[2];
     lModelExtentsV1[0] = it->second.model->header.BoundingBoxMin + it->second.pos;
     lModelExtentsV1[1] = it->second.model->header.BoundingBoxMax + it->second.pos;
     lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
@@ -1022,12 +1016,12 @@ void MapTile::saveTile()
 
       lMDDF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
       lMDDF_Data[lID].uniqueID = it->first;
-      lMDDF_Data[lID].pos[0] = it->second.pos.x;
-      lMDDF_Data[lID].pos[1] = it->second.pos.y;
-      lMDDF_Data[lID].pos[2] = it->second.pos.z;
-      lMDDF_Data[lID].rot[0] = it->second.dir.x;
-      lMDDF_Data[lID].rot[1] = it->second.dir.y;
-      lMDDF_Data[lID].rot[2] = it->second.dir.z;
+      lMDDF_Data[lID].pos[0] = it->second.pos.x();
+      lMDDF_Data[lID].pos[1] = it->second.pos.y();
+      lMDDF_Data[lID].pos[2] = it->second.pos.z();
+      lMDDF_Data[lID].rot[0] = it->second.dir.x();
+      lMDDF_Data[lID].rot[1] = it->second.dir.y();
+      lMDDF_Data[lID].rot[2] = it->second.dir.z();
       lMDDF_Data[lID].scale = it->second.sc * 1024;
       lMDDF_Data[lID].flags = 0;
       lID++;
@@ -1068,19 +1062,19 @@ void MapTile::saveTile()
 
       lMODF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
       lMODF_Data[lID].uniqueID = it->first;
-      lMODF_Data[lID].pos[0] = it->second.pos.x;
-      lMODF_Data[lID].pos[1] = it->second.pos.y;
-      lMODF_Data[lID].pos[2] = it->second.pos.z;
-      lMODF_Data[lID].rot[0] = it->second.dir.x;
-      lMODF_Data[lID].rot[1] = it->second.dir.y;
-      lMODF_Data[lID].rot[2] = it->second.dir.z;
+      lMODF_Data[lID].pos[0] = it->second.pos.x();
+      lMODF_Data[lID].pos[1] = it->second.pos.y();
+      lMODF_Data[lID].pos[2] = it->second.pos.z();
+      lMODF_Data[lID].rot[0] = it->second.dir.x();
+      lMODF_Data[lID].rot[1] = it->second.dir.y();
+      lMODF_Data[lID].rot[2] = it->second.dir.z();
       //! \todo  Calculate them here or when rotating / moving? What is nicer? We should at least do it somewhere..
-      lMODF_Data[lID].extents[0][0] = it->second.extents[0].x;
-      lMODF_Data[lID].extents[0][1] = it->second.extents[0].y;
-      lMODF_Data[lID].extents[0][2] = it->second.extents[0].z;
-      lMODF_Data[lID].extents[1][0] = it->second.extents[1].x;
-      lMODF_Data[lID].extents[1][1] = it->second.extents[1].y;
-      lMODF_Data[lID].extents[1][2] = it->second.extents[1].z;
+      lMODF_Data[lID].extents[0][0] = it->second.extents[0].x();
+      lMODF_Data[lID].extents[0][1] = it->second.extents[0].y();
+      lMODF_Data[lID].extents[0][2] = it->second.extents[0].z();
+      lMODF_Data[lID].extents[1][0] = it->second.extents[1].x();
+      lMODF_Data[lID].extents[1][1] = it->second.extents[1].y();
+      lMODF_Data[lID].extents[1][2] = it->second.extents[1].z();
       lMODF_Data[lID].flags = it->second.mFlags;
       lMODF_Data[lID].doodadSet = it->second.doodadset;
       lMODF_Data[lID].nameSet = it->second.mNameset;
@@ -1274,13 +1268,13 @@ void MapTile::saveTile()
 
           float lMedian = 0.0f;
           for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
-            lMedian = lMedian + mChunks[y][x]->mVertices[i].y;
+            lMedian = lMedian + mChunks[y][x]->mVertices[i].y();
 
           lMedian = lMedian / ( 9 * 9 + 8 * 8 );
           lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ypos = lMedian;
 
           for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
-            lHeightmap[i] = mChunks[y][x]->mVertices[i].y - lMedian;
+            lHeightmap[i] = mChunks[y][x]->mVertices[i].y() - lMedian;
 
           lCurrentPosition += 8 + lMCVT_Size;
           lMCNK_Size += 8 + lMCVT_Size;
@@ -1301,11 +1295,11 @@ void MapTile::saveTile()
           for (size_t i (0); i < (9 * 9 + 8 * 8); ++i)
           {
             lNormals[i*3 + 0] = ::math::bounded_nearest<char>
-                                  (-mChunks[y][x]->mNormals[i].z * 127.0f);
+                                  (-mChunks[y][x]->mNormals[i].z() * 127.0f);
             lNormals[i*3 + 1] = ::math::bounded_nearest<char>
-                                  (-mChunks[y][x]->mNormals[i].x * 127.0f);
+                                  (-mChunks[y][x]->mNormals[i].x() * 127.0f);
             lNormals[i*3 + 2] = ::math::bounded_nearest<char>
-                                  ( mChunks[y][x]->mNormals[i].y * 127.0f);
+                                  ( mChunks[y][x]->mNormals[i].y() * 127.0f);
           }
 
           lCurrentPosition += 8 + lMCNR_Size;
@@ -1355,9 +1349,9 @@ void MapTile::saveTile()
           std::list<int> lDoodadIDs;
           std::list<int> lObjectIDs;
 
-          Vec3D lChunkExtents[2];
-          lChunkExtents[0] = Vec3D( mChunks[y][x]->xbase, 0.0f, mChunks[y][x]->zbase );
-          lChunkExtents[1] = Vec3D( mChunks[y][x]->xbase + CHUNKSIZE, 0.0f, mChunks[y][x]->zbase + CHUNKSIZE );
+          ::math::vector_3d lChunkExtents[2];
+          lChunkExtents[0] = ::math::vector_3d( mChunks[y][x]->xbase, 0.0f, mChunks[y][x]->zbase );
+          lChunkExtents[1] = ::math::vector_3d( mChunks[y][x]->xbase + CHUNKSIZE, 0.0f, mChunks[y][x]->zbase + CHUNKSIZE );
 
           // search all wmos that are inside this chunk
           lID = 0;
@@ -1375,15 +1369,15 @@ void MapTile::saveTile()
           {
             // get radius and position of the m2
             float radius = it->second.model->header.BoundingBoxRadius;
-            Vec3D& pos = it->second.pos;
+            ::math::vector_3d& pos = it->second.pos;
 
             // Calculate the chunk zenter
-            Vec3D chunkMid(mChunks[y][x]->xbase + CHUNKSIZE / 2, 0,
+            ::math::vector_3d chunkMid(mChunks[y][x]->xbase + CHUNKSIZE / 2, 0,
             mChunks[y][x]->zbase + CHUNKSIZE / 2);
 
             // find out if the model is inside the reach of the chunk.
-            float dx = chunkMid.x - pos.x;
-            float dz = chunkMid.z - pos.z;
+            float dx = chunkMid.x() - pos.x();
+            float dz = chunkMid.z() - pos.z();
             float dist = sqrtf(dx * dx + dz * dz);
             static float sqrt2 = sqrtf(2.0f);
 
