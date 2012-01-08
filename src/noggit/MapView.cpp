@@ -693,8 +693,8 @@ namespace noggit
                                    , brush_position.y()
                                    , brush (_texturing_radius, _texturing_hardness)
                                    , (1.0f - _texturing_opacity) * 255.0f
-                                   , 1.0f - pow ( 1.0f - _texturing_pressure
-                                                , dt * 10.0f
+                                   , 1.0f - pow ( 1.0f - (float)_texturing_pressure
+                                                , (float)dt * 10.0f
                                                 )
                                    ,
                                    #ifdef __OBSOLETE_GUI_ELEMENTS

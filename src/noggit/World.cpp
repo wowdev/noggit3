@@ -113,18 +113,17 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
             );
 
   gluQuadricOrientation(quadric, GLU_OUTSIDE);
-  gluDisk(quadric, radius - 0.25f, radius + 5.0f, subdivisions, 2);
+  gluDisk(quadric, radius , radius + 1.0f, subdivisions, 1);
 
-  //glColor4f(0.0f, 0.8f, 0.1f, 0.9f);
-  //gluDisk(quadric, (radius * 1.5) - 2, (radius * 1.5) + 2, 0, 1);
   glEnable(GL_DEPTH_TEST);
   glPopMatrix();
 }
 
 void renderDisk_convenient(float x, float y, float z, float radius)
 {
-  int subdivisions =(int)radius * 1.5;
-  if( subdivisions < 15 ) subdivisions=15;
+
+  int subdivisions =(int)radius * 2.0;
+  if( subdivisions < 20 ) subdivisions=20;
   glDisable(GL_LIGHTING);
   GLUquadricObj *quadric = gluNewQuadric();
   gluQuadricDrawStyle(quadric, GLU_LINE);
@@ -391,10 +390,18 @@ static inline QRgb color_for_height (int16_t height)
 
 void World::initMinimap()
 {
+
+  // init the minimap image
+  _minimap = QImage (17 * 64, 17 * 64, QImage::Format_RGB32);
+  _minimap.fill (Qt::transparent);
+
   const QString filename
     ( QString ("World\\Maps\\%1\\%1.wdl")
       .arg (QString::fromStdString (basename))
     );
+
+  // if wdl do not exist return.
+  if( noggit::mpq::file::exists(filename) == false ) return;
 
   noggit::mpq::file wdl_file (filename);
 
@@ -453,9 +460,6 @@ void World::initMinimap()
 
   // - MARE and MAHO by offset ---------------------------
 
-  _minimap = QImage (17 * 64, 17 * 64, QImage::Format_RGB32);
-  _minimap.fill (Qt::transparent);
-
   for (size_t y (0); y < 64; ++y)
   {
     for (size_t x (0); x < 64; ++x)
@@ -491,6 +495,9 @@ void World::initLowresTerrain()
     ( QString ("World\\Maps\\%1\\%1.wdl")
       .arg (QString::fromStdString (basename))
     );
+
+  // if wdl do not exist return.
+  if( noggit::mpq::file::exists(filename) == false ) return;
 
   noggit::mpq::file wdl_file (filename);
 
