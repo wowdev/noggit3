@@ -11,8 +11,8 @@
 
 #include <QSettings>
 
-#include <helper/math/bounded_nearest.h>
-#include <helper/math/random.h>
+#include <math/bounded_nearest.h>
+#include <math/random.h>
 
 #include <opengl/call_list.h>
 #include <opengl/settings_saver.h>
@@ -125,6 +125,7 @@ void renderDisk_convenient(float x, float y, float z, float radius)
 {
 
   int subdivisions =(int)radius * 2.0;
+
   if( subdivisions < 20 ) subdivisions=20;
   glDisable(GL_LIGHTING);
   GLUquadricObj *quadric = gluNewQuadric();
@@ -394,7 +395,9 @@ void World::initMinimap()
 {
 
   // init the minimap image
+
   _minimap = QImage (17 * 64, 17 * 64, QImage::Format_RGB32);
+
   _minimap.fill (Qt::transparent);
 
   const QString filename
@@ -403,6 +406,7 @@ void World::initMinimap()
     );
 
   // if wdl do not exist return.
+
   if( noggit::mpq::file::exists(filename) == false ) return;
 
   noggit::mpq::file wdl_file (filename);
@@ -499,6 +503,7 @@ void World::initLowresTerrain()
     );
 
   // if wdl do not exist return.
+
   if( noggit::mpq::file::exists(filename) == false ) return;
 
   noggit::mpq::file wdl_file (filename);
@@ -2086,18 +2091,18 @@ void World::addM2 ( Model* model
   newModelis.sc = 1;
   if (rotation_randomization)
   {
-    newModelis.dir.y += helper::math::random::floating_point (0.0f, 360.0f);
+    newModelis.dir.y += ::math::random::floating_point (0.0f, 360.0f);
   }
 
   if (position_randomization)
   {
-    newModelis.pos.x += helper::math::random::floating_point (-2.0f, 2.0f);
-    newModelis.pos.z += helper::math::random::floating_point (-2.0f, 2.0f);
+    newModelis.pos.x += ::math::random::floating_point (-2.0f, 2.0f);
+    newModelis.pos.z += ::math::random::floating_point (-2.0f, 2.0f);
   }
 
   if (size_randomization)
   {
-    newModelis.sc *= helper::math::random::floating_point (0.9f, 1.1f);
+    newModelis.sc *= ::math::random::floating_point (0.9f, 1.1f);
   }
 
   mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
@@ -2116,11 +2121,10 @@ void World::addWMO( WMO *wmo, Vec3D newPos )
   setChanged(newPos.x,newPos.z);
 }
 
-  static int tile_below_camera (const float& position)
-  {
-    return helper::math::bounded_nearest<int>
-      ((position - (TILESIZE / 2)) / TILESIZE);
-  }
+static int tile_below_camera (const float& position)
+{
+  return ::math::bounded_nearest<int> ((position - (TILESIZE / 2)) / TILESIZE);
+}
 
 void World::setChanged(float x, float z)
 {

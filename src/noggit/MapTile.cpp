@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include <helper/math/bounded_nearest.h>
+#include <math/bounded_nearest.h>
 
 #include <noggit/blp_texture.h>
 #include <noggit/Liquid.h>
@@ -1300,11 +1300,11 @@ void MapTile::saveTile()
           mChunks[y][x]->recalcNorms();
           for (size_t i (0); i < (9 * 9 + 8 * 8); ++i)
           {
-            lNormals[i*3 + 0] = helper::math::bounded_nearest<char>
+            lNormals[i*3 + 0] = ::math::bounded_nearest<char>
                                   (-mChunks[y][x]->mNormals[i].z * 127.0f);
-            lNormals[i*3 + 1] = helper::math::bounded_nearest<char>
+            lNormals[i*3 + 1] = ::math::bounded_nearest<char>
                                   (-mChunks[y][x]->mNormals[i].x * 127.0f);
-            lNormals[i*3 + 2] = helper::math::bounded_nearest<char>
+            lNormals[i*3 + 2] = ::math::bounded_nearest<char>
                                   ( mChunks[y][x]->mNormals[i].y * 127.0f);
           }
 

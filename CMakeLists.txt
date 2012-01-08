@@ -184,6 +184,14 @@ set ( helper_headers
     )
 
 
+set ( math_sources
+    )
+
+set ( math_headers
+      src/math/bounded_nearest.h
+      src/math/random.h
+    )
+
 set ( headers_to_moc
       ${noggit_headers_to_moc}
     )
@@ -250,10 +258,12 @@ if (WIN32)
                    ${opengl_sources}
                    ${windows_sources}
                    ${helper_sources}
+                   ${math_sources}
                    ${noggit_headers}
                    ${opengl_headers}
                    ${windows_headers}
                    ${helper_headers}
+                   ${math_headers}
                    ${moced}
                    ${rccsc}
                    ${QM}
@@ -264,6 +274,7 @@ else (WIN32)
                    ${noggit_sources}
                    ${opengl_sources}
                    ${helper_sources}
+                   ${math_sources}
                    ${ResourceFiles}
                    ${moced}
                    ${rccsc}
