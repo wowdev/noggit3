@@ -42,7 +42,7 @@ void Model::finish_loading()
 {
   noggit::mpq::file f (QString::fromStdString (_filename));
 
-  //LogDebug << "Loading model \"" << _filename << "\"." << std::endl;
+  LogDebug << "Loading model \"" << _filename << "\"." << std::endl;
 
   memcpy( &header, f.getBuffer(), sizeof( ModelHeader ) );
 
@@ -253,7 +253,8 @@ void Model::initCommon(const noggit::mpq::file& f)
   _replaceTextures.resize( header.nTextures );
   _textureFilenames.resize( header.nTextures );
   _specialTextures.resize( header.nTextures );
-  _useReplaceTextures.resize( header.nTextures );
+  //! \todo Find correct number here.
+  _useReplaceTextures.resize( 15 );
 
   for( size_t i = 0; i < header.nTextures; ++i )
   {
@@ -269,7 +270,8 @@ void Model::initCommon(const noggit::mpq::file& f)
       //! \note special texture - only on characters and such... Noggit should not even render these.
       //! \todo Check if this is actually correct. Or just remove it.
       _textures[i] = NULL;
-      _specialTextures[i] = texdef[i].type;
+      //! \note As no other replace textures are loaded, do not replace anything but armor reflection to prevent crashes.
+      _specialTextures[i] = texdef[i].type == 3 ? 3 : -2;
 
       _useReplaceTextures[texdef[i].type] = true;
 
@@ -685,9 +687,10 @@ bool ModelRenderPass::init(Model *m)
       return false;
 
     // TEXTURE
-    if( m->_specialTextures[tex] == -1 )
+    if ( m->_specialTextures[tex] == -1 )
       m->_textures[tex]->bind();
-    else
+    //! \todo this breaks, if there are no replace textures. d'uh.
+    else if ( m->_specialTextures[tex] > 0 )
       m->_replaceTextures[m->_specialTextures[tex]]->bind();
 
     // TODO: Add proper support for multi-texturing.
