@@ -63,15 +63,15 @@ namespace math
     {
       return _x = x_;
     }
-    const float& y(const float& y_)
+    const float& y (const float& y_)
     {
       return _y = y_;
     }
-    const float& z(const float& z_)
+    const float& z (const float& z_)
     {
       return _z = z_;
     }
-    const float& w(const float& w_)
+    const float& w (const float& w_)
     {
       return _w = w_;
     }
@@ -112,6 +112,10 @@ namespace math
     }
 
     operator const float*() const
+    {
+      return _data;
+    }
+    operator float*()
     {
       return _data;
     }
