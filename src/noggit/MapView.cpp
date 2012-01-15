@@ -1256,8 +1256,7 @@ namespace noggit
   {
     if( _world->HasSelection() )
     {
-      _clipboard = new nameEntry;
-      *_clipboard = *_world->GetCurrentSelection();
+      _clipboard = new nameEntry (*_world->GetCurrentSelection());
     }
   }
 
