@@ -118,7 +118,7 @@ public:
   int getAreaID();
   void setAreaID(int ID);
 
-  bool GetVertex(float x,float z, ::math::vector_3d *V);
+  bool GetVertex(float x,float z, ::math::vector_3d* V);
 
   void loadTextures();
 //  char getAlpha(float x,float y);
