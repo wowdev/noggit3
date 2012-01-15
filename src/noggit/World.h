@@ -207,7 +207,7 @@ public:
   void overwriteTextureAtCurrentChunk( float x, float z, noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture);
   void addHole( float x, float z );
 
-  void addModel ( nameEntry entry
+  void addModel ( const nameEntry& entry
                 , ::math::vector_3d newPos
                 , bool size_randomization
                 , bool position_randomization

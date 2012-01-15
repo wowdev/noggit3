@@ -17,6 +17,7 @@
 
 #include <opengl/call_list.h>
 #include <opengl/settings_saver.h>
+#include <opengl/scoped.h>
 
 #include <noggit/blp_texture.h>
 #include <noggit/DBC.h>
@@ -1384,9 +1385,12 @@ void World::draw ( bool draw_terrain_height_contour
   ez = camera.z() / TILESIZE;
 }
 
-static const GLuint MapObjName = 1;
-static const GLuint DoodadName = 2;
-static const GLuint MapTileName = 3;
+enum stack_types
+{
+  MapObjName,
+  DoodadName,
+  MapTileName,
+};
 
 struct GLNameEntry
 {
@@ -1415,22 +1419,27 @@ void World::drawSelection ( bool draw_wmo_doodads
                           , bool draw_terrain
                           )
 {
-  glSelectBuffer( sizeof( _selection_buffer ) / sizeof( GLuint ), _selection_buffer );
-  glRenderMode( GL_SELECT );
+  glSelectBuffer ( sizeof (_selection_buffer) / sizeof (GLuint)
+                 , _selection_buffer
+                 );
+  glRenderMode (GL_SELECT);
 
-  glBindBuffer( GL_ARRAY_BUFFER, 0 );
+  glBindBuffer (GL_ARRAY_BUFFER, 0);
 
-  gluLookAt( camera.x(), camera.y(), camera.z(), lookat.x(), lookat.y(), lookat.z(), 0, 1, 0 );
+  gluLookAt ( camera.x(), camera.y(), camera.z()
+            , lookat.x(), lookat.y(), lookat.z()
+            , 0, 1, 0
+            );
 
   frustum.retrieve();
 
-  glClear( GL_DEPTH_BUFFER_BIT );
+  glClear (GL_DEPTH_BUFFER_BIT);
 
   glInitNames();
 
-  glPushName( MapTileName );
-  if( draw_terrain )
+  if (draw_terrain)
   {
+    ::opengl::scoped::name_pusher type (MapTileName);
     for( int j = 0; j < 64; ++j )
     {
       for( int i = 0; i < 64; ++i )
@@ -1442,32 +1451,33 @@ void World::drawSelection ( bool draw_wmo_doodads
       }
     }
   }
-  glPopName();
 
-  if( draw_wmos )
+  if (draw_wmos)
   {
-    glPushName( MapObjName );
-    glPushName( 0 );
-    for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
+    ::opengl::scoped::name_pusher type (MapObjName);
+    ::opengl::scoped::name_pusher dummy (0);
+    for ( std::map<int, WMOInstance>::iterator it (mWMOInstances.begin())
+        ; it != mWMOInstances.end()
+        ; ++it
+        )
     {
       it->second.drawSelect (draw_wmo_doodads);
     }
-    glPopName();
-    glPopName();
   }
 
-  if( draw_doodads )
+  if (draw_doodads)
   {
     ModelManager::resetAnim();
 
-    glPushName( DoodadName );
-    glPushName( 0 );
-    for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
+    ::opengl::scoped::name_pusher type (DoodadName);
+    ::opengl::scoped::name_pusher dummy (0);
+    for ( std::map<int, ModelInstance>::iterator it (mModelInstances.begin())
+        ; it != mModelInstances.end()
+        ; ++it
+        )
     {
-      it->second.drawSelect();
+      it->second.draw_for_selection();
     }
-    glPopName();
-    glPopName();
   }
 
   GLuint minDist = 0xFFFFFFFF;
@@ -1484,6 +1494,8 @@ void World::drawSelection ( bool draw_wmo_doodads
     // We always push { MapObjName | DoodadName | MapTileName }, { 0, 0, MapTile }, { UID, UID, triangle }
     assert( entry->stackSize == 3 );
 
+    LogDebug << "Hit: " << entry->stack.type << ", " << entry->stack.dummy << ", " << entry->stack.uniqueId << std::endl;
+
     if( entry->nearZ < minDist )
     {
       minDist = entry->nearZ;
@@ -1495,9 +1507,12 @@ void World::drawSelection ( bool draw_wmo_doodads
 
   if( minEntry )
   {
+    LogDebug << "minEntry: " << minEntry->stack.type << ", " << minEntry->stack.dummy << ", " << minEntry->stack.uniqueId << std::endl << std::endl;
+
     if( minEntry->stack.type == MapObjName || minEntry->stack.type == DoodadName )
     {
       mCurrentSelection = selection_names().findEntry( minEntry->stack.uniqueId );
+      assert (mCurrentSelection);
     }
     else if( minEntry->stack.type == MapTileName )
     {
@@ -2048,7 +2063,7 @@ void World::deleteWMOInstance( int pUniqueID )
   ResetSelection();
 }
 
-void World::addModel ( nameEntry entry
+void World::addModel ( const nameEntry& entry
                      , ::math::vector_3d newPos
                      , bool size_randomization
                      , bool position_randomization
@@ -2086,7 +2101,6 @@ void World::addM2 ( Model* model
 //                           ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 
   ModelInstance newModelis (this, model);
-  newModelis.nameID = -1;
   newModelis.d1 = lMaxUID;
   newModelis.pos = newPos;
   newModelis.sc = 1;

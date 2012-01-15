@@ -3,7 +3,6 @@
 
 enum eSelectionEntryTypes
 {
-  eEntry_Fake,
   eEntry_Model,
   eEntry_WMO,
   eEntry_MapChunk
@@ -27,23 +26,20 @@ class World;
 
 class nameEntry
 {
-private:
-  std::string  Name;
 public:
-  int  type;
+  eSelectionEntryTypes type;
   union
   {
-    ModelInstance  *model;
-    WMOInstance    *wmo;
-    MapChunk    *mapchunk;
+    ModelInstance* model;
+    WMOInstance* wmo;
+    MapChunk* mapchunk;
+    void* ___DIRTY;
   } data;
 
-  explicit nameEntry( ModelInstance *model );
-  explicit nameEntry( WMOInstance *wmo );
-  explicit nameEntry( MapChunk *chunk );
-  nameEntry();
-
-  const std::string& returnName();
+  explicit nameEntry (ModelInstance* model);
+  explicit nameEntry (WMOInstance* wmo);
+  explicit nameEntry (MapChunk* chunk);
+  explicit nameEntry (const nameEntry& other);
 };
 
 /**
@@ -58,17 +54,16 @@ class nameEntryManager
 public:
   nameEntryManager (World*);
 
-  unsigned int add( ModelInstance *mod );
-  unsigned int add( WMOInstance *wmo );
-  unsigned int add( MapChunk *chunk );
+  size_t add (ModelInstance* mod);
+  size_t add (WMOInstance* wmo);
+  size_t add (MapChunk* chunk);
 
-  void del( unsigned int Ref );
+  void del (size_t ref);
 
-  nameEntry *findEntry( unsigned int ref ) const;
+  nameEntry* findEntry (size_t ref) const;
 
 private:
-  unsigned int NextName;
-  std::vector<nameEntry*> items;
+  std::vector<nameEntry*> _items;
 
   World* _world;
 };
