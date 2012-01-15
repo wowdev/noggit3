@@ -1,7 +1,6 @@
 #include <noggit/Selection.h>
 
-#include <sstream>
-#include <string>
+#include <cassert>
 
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h> // MapChunk
@@ -20,38 +19,24 @@ nameEntry::nameEntry( ModelInstance *model )
 {
   type = eEntry_Model;
   data.model = model;
-  std::stringstream temp;
-  temp << "Object: " << model->d1 << " (M2)";
-  Name = temp.str();
 }
 
 nameEntry::nameEntry( WMOInstance *wmo )
 {
   type = eEntry_WMO;
   data.wmo = wmo;
-  std::stringstream temp;
-  temp << "Object: " << wmo->mUniqueID << " (WMO)";
-  Name = temp.str();
 }
 
 nameEntry::nameEntry( MapChunk *chunk )
 {
   type = eEntry_MapChunk;
   data.mapchunk = chunk;
-  std::stringstream temp;
-  temp << "Mapchunk: " << chunk->px << ", " << chunk->py;
-  Name = temp.str();
 }
 
-nameEntry::nameEntry()
+nameEntry::nameEntry (const nameEntry& other)
 {
-  type = eEntry_Fake;
-  Name = "Fake";
-}
-
-const std::string& nameEntry::returnName()
-{
-  return Name;
+  type = other.type;
+  data.___DIRTY = data.___DIRTY;
 }
 
 /**
@@ -61,42 +46,48 @@ const std::string& nameEntry::returnName()
  **
  **/
 
-unsigned int nameEntryManager::add( ModelInstance *mod )
+size_t nameEntryManager::add( ModelInstance *mod )
 {
-  items.push_back( new nameEntry( mod ) );
-  return NextName++;
+  LogDebug << "added model with " << _items.size() << std::endl;
+  _items.push_back (new nameEntry (mod));
+  return _items.size() - 1;
 }
-unsigned int nameEntryManager::add( WMOInstance *wmo )
+size_t nameEntryManager::add( WMOInstance *wmo )
 {
-  items.push_back( new nameEntry( wmo ) );
-  return NextName++;
+  LogDebug << "added wmo with " << _items.size() << std::endl;
+  _items.push_back (new nameEntry (wmo));
+  return _items.size() - 1;
 }
-unsigned int nameEntryManager::add( MapChunk *chunk )
+size_t nameEntryManager::add( MapChunk *chunk )
 {
-  items.push_back( new nameEntry( chunk ) );
-  return NextName++;
+  LogDebug << "added chunk with " << _items.size() << std::endl;
+  _items.push_back (new nameEntry (chunk));
+  return _items.size() - 1;
 }
 
-nameEntry *nameEntryManager::findEntry( unsigned int ref ) const
+nameEntry* nameEntryManager::findEntry (size_t ref) const
 {
-  return items[ref];
+  LogDebug << "requested " << ref << " when having " << _items.size() << "items. result is " << _items[ref] << std::endl;
+  assert (ref < _items.size());
+  return _items[ref];
 }
 
 nameEntryManager::nameEntryManager (World* world)
   : _world (world)
+  , _items (0)
 {
-  items.push_back( new nameEntry() );
-  NextName = 1;
 }
 
-void nameEntryManager::del (unsigned int Ref)
+void nameEntryManager::del (size_t ref)
 {
-  if (items[Ref])
+  if (_items[ref])
   {
-    if (_world->GetCurrentSelection() == items[Ref])
+    if (_world->GetCurrentSelection() == _items[ref])
+    {
       _world->ResetSelection();
+    }
 
-    delete items[Ref];
-    items[Ref] = 0;
+    delete _items[ref];
+    _items[ref] = 0;
   }
 }

@@ -11,8 +11,10 @@
 
 #include <math/vector_2d.h>
 
-#include <noggit/async/loader.h>
+#include <opengl/call_list.h>
+#include <opengl/primitives.h>
 
+#include <noggit/async/loader.h>
 #include <noggit/application.h>
 #include <noggit/blp_texture.h>
 #include <noggit/Liquid.h>
@@ -22,8 +24,6 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
-
-#include <opengl/call_list.h>
 
 void WMOHighlight( ::math::vector_4d color )
 {
@@ -157,12 +157,43 @@ WMO::WMO( World* world, const std::string& filenameArg )
     else if ( fourcc == 'MODD' ) {
       nModels = size / 0x28;
       for (unsigned int i=0; i<nModels; ++i) {
-        int ofs;
-        f.read(&ofs,4);
+        uint32_t ofs;
+        f.read (&ofs, sizeof (uint32_t));
         Model *m = ModelManager::add( ddnames + ofs );
-        ModelInstance mi (world);
-        mi.init2(m,&f);
-        modelis.push_back(mi);
+
+        ::math::vector_3d position;
+        ::math::vector_4d rotation;
+        float scale;
+        uint32_t light;
+
+        f.read (position, sizeof (::math::vector_3d));
+        f.read (rotation, sizeof (::math::vector_4d));
+        f.read (&scale, sizeof(float));
+        f.read (&light, sizeof (uint32_t));
+
+        const float temp (position.z());
+        position.z (-position.y());
+        position.y (temp);
+
+        modelis.push_back
+          ( ModelInstance ( world
+                          , m
+                          , ::math::vector_3d ( position.x()
+                                              , position.z()
+                                              , -position.y()
+                                              )
+                          , ::math::quaternion ( -rotation.z()
+                                               , rotation.x()
+                                               , rotation.y()
+                                               , rotation.w()
+                                               )
+                          , scale
+                          , ::math::vector_3d ( ((light & 0xff0000) >> 16) / 255.0f
+                                              , ((light & 0x00ff00) >> 8) / 255.0f
+                                              , ((light & 0x0000ff)) / 255.0f
+                                              )
+                          )
+          );
       }
 
     }
@@ -257,9 +288,6 @@ WMO::~WMO()
   }
 }
 
-// model.cpp
-void DrawABox( ::math::vector_3d pMin, ::math::vector_3d pMax, ::math::vector_4d pColor, float pLineWidth );
-
 void WMO::draw ( World* world
                , int doodadset
                , const ::math::vector_3d &ofs
@@ -300,8 +328,14 @@ void WMO::draw ( World* world
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
+    static const ::math::vector_4d white (1.0f, 1.0f, 1.0f, 1.0f);
+
     for( unsigned int i = 0; i < nGroups; ++i )
-      DrawABox( groups[i].BoundingBoxMin, groups[i].BoundingBoxMax, ::math::vector_4d( 1.0f, 1.0f, 1.0f, 1.0f ), 1.0f );
+    {
+      const ::opengl::primitives::wire_box group_box
+        (groups[i].BoundingBoxMin, groups[i].BoundingBoxMax);
+      group_box.draw (white, 1.0f);
+    }
 
     /*glColor4fv( ::math::vector_4d( 1.0f, 0.0f, 0.0f, 1.0f ) );
     glBegin( GL_LINES );
