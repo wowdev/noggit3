@@ -150,6 +150,7 @@ set ( opengl_sources
       src/opengl/call_list.cpp
       src/opengl/settings_saver.cpp
       src/opengl/texture.cpp
+      src/opengl/primitives.cpp
     )
 
 set ( opengl_headers
@@ -157,6 +158,8 @@ set ( opengl_headers
       src/opengl/settings_saver.h
       src/opengl/texture.h
       src/opengl/types.h
+      src/opengl/primitives.h
+      src/opengl/scoped.h
     )
 
 
