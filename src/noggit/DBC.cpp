@@ -1,3 +1,8 @@
+// DBC.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Beket <snipbeket@mail.ru>
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Stephan Biegel <project.modcraft@googlemail.com>
+
 #include <noggit/DBC.h>
 
 #include <QObject> // QObject::tr

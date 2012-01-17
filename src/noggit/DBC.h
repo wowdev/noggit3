@@ -1,3 +1,8 @@
+// DBC.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Beket <snipbeket@mail.ru>
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Stephan Biegel <project.modcraft@googlemail.com>
+
 #ifndef AREADB_H
 #define AREADB_H
 

@@ -1,3 +1,7 @@
+// ModelManager.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Tigurius <bstigurius@googlemail.com>
+
 #include <noggit/ModelManager.h> // ModelManager
 
 #include <algorithm>

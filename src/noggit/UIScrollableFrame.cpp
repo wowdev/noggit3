@@ -1,3 +1,7 @@
+// UIScrollableFrame.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Glararan <glararan@glararan.eu>
+
 #include <noggit/UIScrollableFrame.h>
 
 #include <opengl/types.h>

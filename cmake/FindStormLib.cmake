@@ -1,3 +1,7 @@
+# FindStormLib.cmake is part of Noggit3, licensed via GNU General Publiicense (version 3).
+# Bernd Lörwald <bloerwald+noggit@googlemail.com>
+# Stephan Biegel <project.modcraft@googlemail.com>
+
 #find STORMLIB
 # STORMLIB_LIBRARIES, the name of the library to link against
 # STORMLIB_FOUND, if false, do not try to link

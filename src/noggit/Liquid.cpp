@@ -1,3 +1,9 @@
+// Liquid.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Glararan <glararan@glararan.eu>
+// Stephan Biegel <project.modcraft@googlemail.com>
+// Tigurius <bstigurius@googlemail.com>
+
 #include <noggit/Liquid.h>
 
 #include <algorithm>

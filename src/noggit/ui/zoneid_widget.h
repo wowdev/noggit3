@@ -1,3 +1,6 @@
+// zoneid_widget.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Glararan <glararan@glararan.eu>
+
 #ifndef ZONEID_WIDGET_H
 #define ZONEID_WIDGET_H
 

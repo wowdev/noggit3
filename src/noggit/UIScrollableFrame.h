@@ -1,3 +1,6 @@
+// UIScrollableFrame.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 #ifndef __UISCROLLFRAME_H
 #define __UISCROLLFRAME_H
 
