@@ -1,3 +1,6 @@
+// repository.h.in is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 #ifndef __HELPER_REPOSITORY_H
 #define __HELPER_REPOSITORY_H
 

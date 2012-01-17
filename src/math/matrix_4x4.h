@@ -1,3 +1,8 @@
+// matrix_4x4.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Stephan Biegel <project.modcraft@googlemail.com>
+// Tigurius <bstigurius@googlemail.com>
+
 #ifndef __MATH_MATRIX_4X4_H
 #define __MATH_MATRIX_4X4_H
 

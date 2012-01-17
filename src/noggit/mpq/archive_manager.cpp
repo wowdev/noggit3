@@ -1,3 +1,10 @@
+// archive_manager.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Beket <snipbeket@mail.ru>
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Glararan <glararan@glararan.eu>
+// Stephan Biegel <project.modcraft@googlemail.com>
+// Tigurius <bstigurius@googlemail.com>
+
 #include <noggit/mpq/archive_manager.h>
 
 #include <noggit/async/loader.h>

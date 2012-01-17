@@ -1,3 +1,6 @@
+// primitives.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 #include <opengl/primitives.h>
 
 #include <math/vector_4d.h>

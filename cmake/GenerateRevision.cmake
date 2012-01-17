@@ -1,3 +1,6 @@
+# GenerateRevision.cmake is part of Noggit3, licensed via GNU General Publiicense (version 3).
+# Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 # Copyright (C) 2008-2010 Trinity <http://www.trinitycore.org/>
 #
 # This file is free software; as a special exception the author gives
