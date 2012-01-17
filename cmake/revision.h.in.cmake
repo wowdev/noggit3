@@ -1,3 +1,6 @@
+// revision.h.in.cmake is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 #ifndef __REVISION_H__
 #define __REVISION_H__
  #define _REVISION      "@hg_rev_id_str@"

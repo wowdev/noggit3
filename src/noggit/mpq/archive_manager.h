@@ -1,3 +1,7 @@
+// archive_manager.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Glararan <glararan@glararan.eu>
+
 #ifndef __NOGGIT_MPQ_ARCHIVE_MANAGER_H
 #define __NOGGIT_MPQ_ARCHIVE_MANAGER_H
 

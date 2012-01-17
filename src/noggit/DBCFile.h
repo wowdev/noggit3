@@ -1,3 +1,9 @@
+// DBCFile.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Beket <snipbeket@mail.ru>
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Stephan Biegel <project.modcraft@googlemail.com>
+// Tigurius <bstigurius@googlemail.com>
+
 #ifndef DBCFILE_H
 #define DBCFILE_H
 

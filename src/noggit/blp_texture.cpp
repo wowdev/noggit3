@@ -1,3 +1,7 @@
+// blp_texture.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Glararan <glararan@glararan.eu>
+
 #include <noggit/blp_texture.h>
 
 #include <QGLWidget>

@@ -1,3 +1,7 @@
+// cursor_selector.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Glararan <glararan@glararan.eu>
+
 #ifndef CURSOR_SELECTOR_H
 #define CURSOR_SELECTOR_H
 

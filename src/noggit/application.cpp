@@ -1,3 +1,10 @@
+// application.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Beket <snipbeket@mail.ru>
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Glararan <glararan@glararan.eu>
+// Stephan Biegel <project.modcraft@googlemail.com>
+// Tigurius <bstigurius@googlemail.com>
+
 #include <noggit/application.h>
 
 #include <stdexcept>
@@ -69,7 +76,7 @@ namespace noggit
 
     qsrand (QTime::currentTime().msec());
 
-	get_game_path();
+  get_game_path();
     set_working_directory_to_application_path();
     parse_command_line_and_set_defaults();
 
@@ -227,14 +234,14 @@ namespace noggit
 
       QSettings registry (default_registry_path, QSettings::NativeFormat);
       _game_path = registry.value ("InstallPath").toString();
-	  
-	  if(_game_path=="")
+
+    if(_game_path=="")
       {
         QSettings registry_win7 (win7_registry_path, QSettings::NativeFormat);
         _game_path = registry_win7.value ("InstallPath").toString();
       }
-	  
-	  if(_game_path=="")
+
+    if(_game_path=="")
       {
         QSettings registry_win72 (win7_registry_path2, QSettings::NativeFormat);
         _game_path = registry_win72.value ("InstallPath").toString();

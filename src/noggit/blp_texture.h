@@ -1,3 +1,6 @@
+// blp_texture.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 #ifndef __NOGGIT_BLP_TEXTURE_H
 #define __NOGGIT_BLP_TEXTURE_H
 

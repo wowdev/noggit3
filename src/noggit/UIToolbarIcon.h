@@ -1,3 +1,7 @@
+// UIToolbarIcon.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Tigurius <bstigurius@googlemail.com>
+
 #ifndef __ICON_H
 #define __ICON_H
 

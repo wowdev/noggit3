@@ -1,3 +1,6 @@
+// settings_saver.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 #include <opengl/settings_saver.h>
 
 #include <opengl/texture.h>
