@@ -1,3 +1,6 @@
+# terrain1.fs is part of Noggit3, licensed via GNU General Publiicense (version 3).
+# Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 !!ARBfp1.0
 
 OPTION ARB_fog_linear;

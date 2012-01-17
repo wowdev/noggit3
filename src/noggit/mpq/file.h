@@ -1,3 +1,6 @@
+// file.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 #ifndef __NOGGIT_MPQ_FILE_H
 #define __NOGGIT_MPQ_FILE_H
 

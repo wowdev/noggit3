@@ -1,3 +1,6 @@
+// vector_2d.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 #ifndef __MATH_VECTOR_2D_H
 #define __MATH_VECTOR_2D_H
 

@@ -1,3 +1,6 @@
+// signal_blocker.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 #ifndef __SIGNAL_BLOCKER_H
 #define __SIGNAL_BLOCKER_H
 

@@ -1,3 +1,6 @@
+# Findstorm.cmake is part of Noggit3, licensed via GNU General Publiicense (version 3).
+# Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
 #find STORM
 # STORM_LIBRARIES, the name of the library to link against
 # STORM_FOUND, if false, do not try to link
