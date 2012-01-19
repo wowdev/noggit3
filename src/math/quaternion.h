@@ -38,7 +38,7 @@ namespace math
   namespace interpolation
   {
     template<>
-    quaternion linear ( const float& percentage
+    inline quaternion linear ( const float& percentage
                       , const quaternion& start
                       , const quaternion& end
                       )
