@@ -185,8 +185,6 @@ set ( helper_sources
 set ( helper_headers
       src/helper/qt/non_recursive_filter_model.h
       src/helper/qt/signal_blocker.h
-      src/helper/math/bounded_nearest.h
-      src/helper/math/random.h
     )
 
 
