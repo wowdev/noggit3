@@ -15,6 +15,7 @@
 #include <utility>
 #include <time.h>
 
+
 #include <QSettings>
 
 #include <math/bounded_nearest.h>
@@ -1303,8 +1304,8 @@ void World::draw ( bool draw_terrain_height_contour
       ModelManager::resetAnim();
 
       glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
-      for( std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
-        it->second.draw (draw_fog);
+      for( std::map<int, ModelInstance*>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
+        it->second->draw (draw_fog);
 
       //drawModelList();
     }
@@ -1477,12 +1478,12 @@ void World::drawSelection ( bool draw_wmo_doodads
 
     ::opengl::scoped::name_pusher type (DoodadName);
     ::opengl::scoped::name_pusher dummy (0);
-    for ( std::map<int, ModelInstance>::iterator it (mModelInstances.begin())
+    for ( std::map<int, ModelInstance*>::iterator it (mModelInstances.begin())
         ; it != mModelInstances.end()
         ; ++it
         )
     {
-      it->second.draw_for_selection();
+      it->second->draw_for_selection();
     }
   }
 
@@ -2055,8 +2056,9 @@ void World::saveMap()
 
 void World::deleteModelInstance( int pUniqueID )
 {
-  std::map<int, ModelInstance>::iterator it = mModelInstances.find( pUniqueID );
-  setChanged( it->second.pos.x(), it->second.pos.z() );
+  std::map<int, ModelInstance*>::iterator it = mModelInstances.find( pUniqueID );
+  setChanged( it->second->pos.x(), it->second->pos.z() );
+  delete it->second;
   mModelInstances.erase( it );
   ResetSelection();
 }
@@ -2130,7 +2132,7 @@ void World::addM2 ( Model* model
     newModelis.sc *= ::math::random::floating_point (0.9f, 1.1f);
   }
 
-  mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
+  mModelInstances.insert( std::pair<int,ModelInstance*>( lMaxUID, &newModelis ));
   setChanged(newPos.x(), newPos.z());
 }
 
