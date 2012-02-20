@@ -2,6 +2,7 @@
 // Beket <snipbeket@mail.ru>
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
+// Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
@@ -100,6 +101,18 @@ namespace noggit
   {
     return _async_loader;
   }
+
+  QVariant application::setting(const QString& key) const 
+  {
+    return _settings->value (key);
+  }
+
+  void application::setting(const QString& key, const QVariant& value)   
+	{     
+		emit settingAboutToChange (key, setting (key));     
+    _settings->setValue (key, value);
+		emit settingChanged (key, value);
+	}  
 
   void application::set_working_directory_to_application_path()
   {

@@ -1,5 +1,6 @@
 // application.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
 #ifndef __NOGGIT_APPLICATION_H
@@ -25,11 +26,18 @@ namespace noggit
     application (int& argc, char** argv);
     ~application();
 
+    QVariant setting (const QString& key) const;
+    void setting (const QString& key, const QVariant& value);
+
     async::loader& async_loader();
     mpq::archive_manager& archive_manager();
 
   public slots:
     void create_world_view (World*);
+
+	signals:   
+		void settingAboutToChange (const QString& key, const QVariant& value);   	
+		void settingChanged (const QString& key, const QVariant& value); 
 
   private:
     void set_working_directory_to_application_path();
