@@ -2,14 +2,17 @@
 // Beket <snipbeket@mail.ru>
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
+// Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
 #include <noggit/Menu.h>
 
 #include <QHBoxLayout>
+#include <QGridLayout>
 #include <QMetaType>
 #include <QListWidget>
+#include <QPushButton>
 #include <QSettings>
 #include <QTabWidget>
 
@@ -20,6 +23,7 @@
 #include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <noggit/ui/minimap_widget.h>
+#include <noggit/ui/settingsDialog.h>
 
 struct bookmark_entry
 {
@@ -85,7 +89,10 @@ Menu::Menu (QWidget* parent)
   }
   settings.endArray();
 
-  QHBoxLayout* menu_layout (new QHBoxLayout (this));
+  QPushButton* settingsButton (new QPushButton ("Change settings", this));
+  connect (settingsButton, SIGNAL (clicked()), this, SLOT (settingsButtonClicked()));
+
+  QGridLayout* menu_layout (new QGridLayout (this));
 
   QTabWidget* entry_points_tabs (new QTabWidget (NULL));
   entry_points_tabs->addTab (continents_table, tr ("Continents"));
@@ -96,8 +103,9 @@ Menu::Menu (QWidget* parent)
   _minimap->draw_boundaries (true);
   connect (_minimap, SIGNAL (map_clicked (const ::math::vector_3d&)), SLOT (minimap_clicked (const ::math::vector_3d&)));
 
-  menu_layout->addWidget (entry_points_tabs);
-  menu_layout->addWidget (_minimap);
+  menu_layout->addWidget (entry_points_tabs, 0, 0);
+  menu_layout->addWidget (_minimap, 0, 1);
+  menu_layout->addWidget (settingsButton, 1, 0);
 }
 
 Menu::~Menu()
@@ -166,4 +174,10 @@ void Menu::open_bookmark_list_item (QListWidgetItem* item)
   const bookmark_entry e (item->data (Qt::UserRole).value<bookmark_entry>());
   load_map (e.map_id);
   enter_world_at (e.position, false, e.tilt, e.rotation);
+}
+
+void Menu::settingsButtonClicked()
+{
+  settingsDialog * config = new settingsDialog();
+  config->show();
 }

@@ -1,4 +1,5 @@
 // ModelInstance.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
@@ -20,6 +21,7 @@
 ModelInstance::ModelInstance (World* world, Model *m)
   : model (m)
   , _world (world)
+  , nameID (0xFFFFFFFF)
 {
   nameID = _world->selection_names().add (this);
 }
@@ -27,6 +29,7 @@ ModelInstance::ModelInstance (World* world, Model *m)
 ModelInstance::ModelInstance (World* world, Model *m, noggit::mpq::file* f)
   : model (m)
   , _world (world)
+  , nameID (0xFFFFFFFF)
 {
   f->read (&d1, 4);
   f->read (pos, 12);
@@ -40,6 +43,7 @@ ModelInstance::ModelInstance (World* world, Model *m, noggit::mpq::file* f)
 ModelInstance::ModelInstance (World* world, Model *m, ENTRY_MDDF *d)
   : model (m)
   , _world (world)
+  , nameID (0xFFFFFFFF)
 {
   d1 = d->uniqueID;
   pos = ::math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
@@ -61,12 +65,16 @@ ModelInstance::ModelInstance ( World* world
   , _wmo_doodad_rotation (rotation)
   , sc (scale)
   , lcol (lighting_color)
-{ }
+  , _world(world)
+{
+    nameID = _world->selection_names().add (this);
+}
 
 ModelInstance::~ModelInstance()
 {
   if( nameID != 0xFFFFFFFF )
   {
+    LogDebug<<"Delete Item "<<nameID<<std::endl;
     _world->selection_names().del (nameID);
     nameID = 0xFFFFFFFF;
   }
@@ -194,6 +202,11 @@ void ModelInstance::draw_for_selection()
   static const ::math::vector_3d ofs (0.0f, 0.0f, 0.0f);
   static const float rot (0.0);
   MAYBE_DONT_DRAW;
+
+  if(!_world->selection_names().findEntry(nameID) || nameID == 0xFFFFFFFF){
+      LogDebug<<"Old item" << nameID << "not found create new one"<<std::endl;
+     nameID = _world->selection_names().add( this );
+  }
 
   ::opengl::scoped::matrix_pusher positioning_matrix;
   ::opengl::scoped::name_pusher name_pusher (nameID);

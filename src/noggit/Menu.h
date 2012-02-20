@@ -1,5 +1,6 @@
 // Menu.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
@@ -40,6 +41,8 @@ private slots:
   void open_bookmark_list_item (QListWidgetItem* item);
 
   void minimap_clicked (const ::math::vector_3d&);
+
+  void settingsButtonClicked();
 
 signals:
   void create_world_view_request (World*);
