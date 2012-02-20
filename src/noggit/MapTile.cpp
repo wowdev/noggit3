@@ -393,7 +393,7 @@ MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bo
 
   for( std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
   {
-    _world->mModelInstances.insert( std::pair<int,ModelInstance>( it->uniqueID, ModelInstance( _world, ModelManager::add( mModelFilenames[it->nameID] ), &(*it) ) ) );
+    _world->mModelInstances.insert( std::pair<int,ModelInstance *>( it->uniqueID, new ModelInstance( _world, ModelManager::add( mModelFilenames[it->nameID] ), &(*it) ) ) );
   }
 
   // - Load chunks ---------------------------------------
@@ -741,17 +741,17 @@ void MapTile::clearAllModels()
     if( checkInside( lTileExtents, it->second.extents ) )
           _world->deleteWMOInstance( it->second.mUniqueID );
 
-  for( std::map<int, ModelInstance>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
+  for( std::map<int, ModelInstance*>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
   {
     ::math::vector_3d lModelExtentsV1[2], lModelExtentsV2[2];
-    lModelExtentsV1[0] = it->second.model->header.BoundingBoxMin + it->second.pos;
-    lModelExtentsV1[1] = it->second.model->header.BoundingBoxMax + it->second.pos;
-    lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
-    lModelExtentsV2[1] = it->second.model->header.VertexBoxMax + it->second.pos;
+    lModelExtentsV1[0] = it->second->model->header.BoundingBoxMin + it->second->pos;
+    lModelExtentsV1[1] = it->second->model->header.BoundingBoxMax + it->second->pos;
+    lModelExtentsV2[0] = it->second->model->header.VertexBoxMin + it->second->pos;
+    lModelExtentsV2[1] = it->second->model->header.VertexBoxMax + it->second->pos;
 
     if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
     {
-      _world->deleteModelInstance( it->second.d1 );
+      _world->deleteModelInstance( it->second->d1 );
     }
   }
 
@@ -770,23 +770,23 @@ void MapTile::saveTile()
   lTileExtents[1] = ::math::vector_3d( xbase + TILESIZE, 0.0f, zbase + TILESIZE );
 
   std::map<int, WMOInstance> lObjectInstances;
-  std::map<int, ModelInstance> lModelInstances;
+  std::map<int, ModelInstance*> lModelInstances;
 
   for( std::map<int, WMOInstance>::iterator it = _world->mWMOInstances.begin(); it != _world->mWMOInstances.end(); ++it )
     if( checkInside( lTileExtents, it->second.extents ) )
       lObjectInstances.insert( std::pair<int, WMOInstance>( it->first, it->second ) );
 
-  for( std::map<int, ModelInstance>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
+  for( std::map<int, ModelInstance*>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
   {
     ::math::vector_3d lModelExtentsV1[2], lModelExtentsV2[2];
-    lModelExtentsV1[0] = it->second.model->header.BoundingBoxMin + it->second.pos;
-    lModelExtentsV1[1] = it->second.model->header.BoundingBoxMax + it->second.pos;
-    lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
-    lModelExtentsV2[1] = it->second.model->header.VertexBoxMax + it->second.pos;
+    lModelExtentsV1[0] = it->second->model->header.BoundingBoxMin + it->second->pos;
+    lModelExtentsV1[1] = it->second->model->header.BoundingBoxMax + it->second->pos;
+    lModelExtentsV2[0] = it->second->model->header.VertexBoxMin + it->second->pos;
+    lModelExtentsV2[1] = it->second->model->header.VertexBoxMax + it->second->pos;
 
     if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
     {
-      lModelInstances.insert( std::pair<int, ModelInstance>( it->first, it->second ) );
+      lModelInstances.insert( std::pair<int, ModelInstance*>( it->first, it->second ) );
     }
   }
 
@@ -794,10 +794,10 @@ void MapTile::saveTile()
 
   std::map<std::string, filenameOffsetThing> lModels;
 
-  for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
+  for( std::map<int,ModelInstance*>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
   {
     //! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
-    std::string lTemp = it->second.model->_filename;
+    std::string lTemp = it->second->model->_filename;
     transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
     size_t found = lTemp.rfind( ".m2" );
     if( found != std::string::npos )
@@ -1001,10 +1001,10 @@ void MapTile::saveTile()
     ENTRY_MDDF * lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>( lCurrentPosition + 8 );
 
     lID = 0;
-    for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
+    for( std::map<int,ModelInstance*>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
     {
       //! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
-      std::string lTemp = it->second.model->_filename;
+      std::string lTemp = it->second->model->_filename;
       transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
       size_t found = lTemp.rfind( ".m2" );
       if( found != std::string::npos )
@@ -1021,13 +1021,13 @@ void MapTile::saveTile()
 
       lMDDF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
       lMDDF_Data[lID].uniqueID = it->first;
-      lMDDF_Data[lID].pos[0] = it->second.pos.x();
-      lMDDF_Data[lID].pos[1] = it->second.pos.y();
-      lMDDF_Data[lID].pos[2] = it->second.pos.z();
-      lMDDF_Data[lID].rot[0] = it->second.dir.x();
-      lMDDF_Data[lID].rot[1] = it->second.dir.y();
-      lMDDF_Data[lID].rot[2] = it->second.dir.z();
-      lMDDF_Data[lID].scale = it->second.sc * 1024;
+      lMDDF_Data[lID].pos[0] = it->second->pos.x();
+      lMDDF_Data[lID].pos[1] = it->second->pos.y();
+      lMDDF_Data[lID].pos[2] = it->second->pos.z();
+      lMDDF_Data[lID].rot[0] = it->second->dir.x();
+      lMDDF_Data[lID].rot[1] = it->second->dir.y();
+      lMDDF_Data[lID].rot[2] = it->second->dir.z();
+      lMDDF_Data[lID].scale = it->second->sc * 1024;
       lMDDF_Data[lID].flags = 0;
       lID++;
     }
@@ -1212,6 +1212,8 @@ void MapTile::saveTile()
 
   // MCNK
 //  {
+
+
     for( int y = 0; y < 16; ++y )
     {
       for( int x = 0; x < 16; ++x )
@@ -1370,11 +1372,11 @@ void MapTile::saveTile()
 
           // search all models that are inside this chunk
           lID = 0;
-          for( std::map<int, ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
+          for( std::map<int, ModelInstance *>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
           {
             // get radius and position of the m2
-            float radius = it->second.model->header.BoundingBoxRadius;
-            ::math::vector_3d& pos = it->second.pos;
+            float radius = it->second->model->header.BoundingBoxRadius;
+            ::math::vector_3d& pos = it->second->pos;
 
             // Calculate the chunk zenter
             ::math::vector_3d chunkMid(mChunks[y][x]->xbase + CHUNKSIZE / 2, 0,
@@ -1453,7 +1455,7 @@ void MapTile::saveTile()
 //        {
           int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
 
-          size_t lMaps = mChunks[y][x]->nTextures ? mChunks[y][x]->nTextures - 1U : 0U;
+  	  size_t lMaps = mChunks[y][x]->nTextures ? mChunks[y][x]->nTextures - 1U : 0U;
 
           int lMCAL_Size = lDimensions * lMaps;
 
@@ -1518,6 +1520,7 @@ void MapTile::saveTile()
         lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 )->mEntries[y*16+x].size = lMCNK_Size;
       }
     }
+
 //  }
 
   // MFBO

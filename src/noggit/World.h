@@ -133,9 +133,9 @@ public:
   bool noadt;
 
   //! \todo  Get these managed? ._.
-  typedef std::pair<int, ModelInstance> model_instance_type;
+  typedef std::pair<int, ModelInstance *> model_instance_type;
   typedef std::pair<int, WMOInstance> wmo_instance_type;
-  typedef std::map<int, ModelInstance> model_instances_type;
+  typedef std::map<int, ModelInstance *> model_instances_type;
   typedef std::map<int, WMOInstance> wmo_instances_type;
   model_instances_type mModelInstances;
   wmo_instances_type mWMOInstances;
