@@ -178,6 +178,6 @@ void Menu::open_bookmark_list_item (QListWidgetItem* item)
 
 void Menu::settingsButtonClicked()
 {
-  settingsDialog * config = new settingsDialog();
+  noggit::ui::settingsDialog * config = new noggit::ui::settingsDialog;
   config->show();
 }

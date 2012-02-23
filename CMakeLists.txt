@@ -83,7 +83,7 @@ set ( noggit_sources
       src/noggit/mpq/file.cpp
 
       src/noggit/ui/about_widget.cpp
-	  src/noggit/ui/settingsDialog.cpp
+      src/noggit/ui/settingsDialog.cpp
       src/noggit/ui/help_widget.cpp
       src/noggit/ui/model_spawner.cpp
       src/noggit/ui/minimap_widget.cpp
@@ -130,7 +130,7 @@ set ( noggit_headers
       src/noggit/mpq/file.h
 
       src/noggit/ui/about_widget.h
-	  src/noggit/ui/settingsDialog.h
+      src/noggit/ui/settingsDialog.h
       src/noggit/ui/cursor_selector.h
       src/noggit/ui/help_widget.h
       src/noggit/ui/model_spawner.h
@@ -147,7 +147,7 @@ set ( noggit_headers_to_moc
       src/noggit/async/loading_thread.h
 
       src/noggit/ui/about_widget.h
-	  src/noggit/ui/settingsDialog.h
+      src/noggit/ui/settingsDialog.h
       src/noggit/ui/cursor_selector.h
       src/noggit/ui/help_widget.h
       src/noggit/ui/model_spawner.h

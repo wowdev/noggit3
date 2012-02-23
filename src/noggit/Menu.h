@@ -3,6 +3,7 @@
 // Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
+// Glararan <glararan@glararan.eu>
 
 #ifndef __MENU_H
 #define __MENU_H
@@ -18,6 +19,7 @@ namespace noggit
   namespace ui
   {
     class minimap_widget;
+    class settingsDialog;
   }
 }
 namespace math
@@ -53,6 +55,7 @@ private:
   void enter_world_at (const ::math::vector_3d& pos, bool auto_height = true, float av = -30.0f, float ah = -90.0f);
 
   noggit::ui::minimap_widget* _minimap;
+  noggit::ui::settingsDialog* _settings;
   World* _world;
 };
 
