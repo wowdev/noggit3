@@ -67,7 +67,7 @@ ModelInstance::ModelInstance ( World* world
   , lcol (lighting_color)
   , _world(world)
 {
-    nameID = _world->selection_names().add (this);
+  nameID = _world->selection_names().add (this);
 }
 
 ModelInstance::~ModelInstance()
@@ -203,9 +203,10 @@ void ModelInstance::draw_for_selection()
   static const float rot (0.0);
   MAYBE_DONT_DRAW;
 
-  if(!_world->selection_names().findEntry(nameID) || nameID == 0xFFFFFFFF){
-      LogDebug<<"Old item" << nameID << "not found create new one"<<std::endl;
-     nameID = _world->selection_names().add( this );
+  if(!_world->selection_names().findEntry(nameID) || nameID == 0xFFFFFFFF)
+  {
+    LogDebug<<"Old item" << nameID << "not found create new one"<<std::endl;
+    nameID = _world->selection_names().add( this );
   }
 
   ::opengl::scoped::matrix_pusher positioning_matrix;

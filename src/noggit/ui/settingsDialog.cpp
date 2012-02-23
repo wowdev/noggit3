@@ -1,8 +1,8 @@
 // settingsDialog.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Mjollnà <mjollna.wow@gmail.com>
+// Glararan <glararan@glararan.eu>
 
-#include <noggit/application.h>
-#include <noggit/Log.h>
+#include <noggit/ui/settingsDialog.h>
 
 #include <QApplication>
 #include <QWidget>
@@ -10,152 +10,150 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QFileDialog>
-#include "settingsDialog.h"
 
-settingsDialog::settingsDialog() : QWidget()
+#include <noggit/application.h>
+#include <noggit/Log.h>
+
+namespace noggit
 {
-	const int minViewDistanceRange = 200;
-	const int maxViewDistanceRange = 2048;
-
-  currentGamePath = new QLabel(noggit::app().setting("paths/game").toString(), this); 
-	changeGamePathButton = new QPushButton("...", this);
-
-	currentProjectPath = new QLabel(noggit::app().setting("paths/project").toString(), this); 
-	changeProjectPathButton = new QPushButton("...", this);
-
-	addProjectPathCheckBox = new QCheckBox("Select a different Project path", this);
-
-	viewDistanceSlider = new QSlider(Qt::Horizontal, this);
-	viewDistanceSlider->setRange(minViewDistanceRange, maxViewDistanceRange);
-  viewDistanceSlider->setValue(noggit::app().setting("view_distance").toReal());
-
-	viewDistanceSpinBox = new QSpinBox();
-	viewDistanceSpinBox->setRange(minViewDistanceRange, maxViewDistanceRange);
-	viewDistanceSpinBox->setValue(viewDistanceSlider->value());
-
-	antialiasingCheckBox = new QCheckBox("Antialiasing");
-  if (noggit::app().setting("antialiasing").toBool())
+  namespace ui
   {
-    antialiasingCheckBox->setChecked(true);
-  }
+    settingsDialog::settingsDialog() : QWidget()
+    {
+      const int minViewDistanceRange = 200;
+      const int maxViewDistanceRange = 2048;
 
-	QLabel* _gamePathLabel = new QLabel("Game path : ", this);
-	projectPathLabel = new QLabel("Project path : ", this);	
-	QLabel* _viewDistanceLabel = new QLabel("View Distance : ", this);
+      currentGamePath = new QLabel(noggit::app().setting("paths/game").toString(), this); 
+      changeGamePathButton = new QPushButton("...", this);
 
-	currentGamePath->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-	currentProjectPath->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
-	changeGamePathButton->setFixedWidth(30);
-	changeProjectPathButton->setFixedWidth(30);
+      currentProjectPath = new QLabel(noggit::app().setting("paths/project").toString(), this); 
+      changeProjectPathButton = new QPushButton("...", this);
 
-  toggleGameProjectDisplay(currentGamePath->text() != currentProjectPath->text());
+      addProjectPathCheckBox = new QCheckBox("Select a different Project path", this);
 
-	QGridLayout* _mainConfigurationSettingsWindow = new QGridLayout;
-	_mainConfigurationSettingsWindow->addWidget(_gamePathLabel, 0, 0);
-	_mainConfigurationSettingsWindow->addWidget(currentGamePath, 0, 1, 1, 2);
-	_mainConfigurationSettingsWindow->addWidget(changeGamePathButton, 0, 3);
-	_mainConfigurationSettingsWindow->addWidget(addProjectPathCheckBox, 0, 4);
-	_mainConfigurationSettingsWindow->addWidget(projectPathLabel, 1, 0);
-	_mainConfigurationSettingsWindow->addWidget(currentProjectPath, 1, 1, 1, 2);
-	_mainConfigurationSettingsWindow->addWidget(changeProjectPathButton, 1, 3);
-	_mainConfigurationSettingsWindow->addWidget(antialiasingCheckBox, 2, 0);
-	_mainConfigurationSettingsWindow->addWidget(_viewDistanceLabel, 3, 0);
-	_mainConfigurationSettingsWindow->addWidget(viewDistanceSlider, 3, 1);
-	_mainConfigurationSettingsWindow->addWidget(viewDistanceSpinBox, 3, 2, 1, 2);
+      viewDistanceSlider = new QSlider(Qt::Horizontal, this);
+      viewDistanceSlider->setRange(minViewDistanceRange, maxViewDistanceRange);
+      viewDistanceSlider->setValue(noggit::app().setting("view_distance").toReal());
 
-	_mainConfigurationSettingsWindow->setSpacing(10);
+      viewDistanceSpinBox = new QSpinBox();
+      viewDistanceSpinBox->setRange(minViewDistanceRange, maxViewDistanceRange);
+      viewDistanceSpinBox->setValue(viewDistanceSlider->value());
 
-	setLayout(_mainConfigurationSettingsWindow);
+      antialiasingCheckBox = new QCheckBox("Antialiasing");
+      if (noggit::app().setting("antialiasing").toBool())
+        antialiasingCheckBox->setChecked(true);
+
+      QLabel* _gamePathLabel = new QLabel("Game path : ", this);
+      projectPathLabel = new QLabel("Project path : ", this);	
+      QLabel* _viewDistanceLabel = new QLabel("View Distance : ", this);
+
+      currentGamePath->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+      currentProjectPath->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
+      changeGamePathButton->setFixedWidth(30);
+      changeProjectPathButton->setFixedWidth(30);
+
+      toggleGameProjectDisplay(currentGamePath->text() != currentProjectPath->text());
+
+      QGridLayout* _mainConfigurationSettingsWindow = new QGridLayout;
+      _mainConfigurationSettingsWindow->addWidget(_gamePathLabel, 0, 0);
+      _mainConfigurationSettingsWindow->addWidget(currentGamePath, 0, 1, 1, 2);
+      _mainConfigurationSettingsWindow->addWidget(changeGamePathButton, 0, 3);
+      _mainConfigurationSettingsWindow->addWidget(addProjectPathCheckBox, 0, 4);
+      _mainConfigurationSettingsWindow->addWidget(projectPathLabel, 1, 0);
+      _mainConfigurationSettingsWindow->addWidget(currentProjectPath, 1, 1, 1, 2);
+      _mainConfigurationSettingsWindow->addWidget(changeProjectPathButton, 1, 3);
+      _mainConfigurationSettingsWindow->addWidget(antialiasingCheckBox, 2, 0);
+      _mainConfigurationSettingsWindow->addWidget(_viewDistanceLabel, 3, 0);
+      _mainConfigurationSettingsWindow->addWidget(viewDistanceSlider, 3, 1);
+      _mainConfigurationSettingsWindow->addWidget(viewDistanceSpinBox, 3, 2, 1, 2);
+
+      _mainConfigurationSettingsWindow->setSpacing(10);
+
+      setLayout(_mainConfigurationSettingsWindow);
 	
-	setWindowTitle(tr("configuration_settings"));
-	setWindowIcon(QIcon("noggit.png"));
+      setWindowTitle(tr("configuration_settings"));
+      setWindowIcon(QIcon("noggit.png"));
 
-	viewDistanceSpinBox->connect(viewDistanceSlider, SIGNAL (valueChanged (int)), SLOT (setValue (int)));
-	viewDistanceSlider->connect(viewDistanceSpinBox, SIGNAL (valueChanged (int)), SLOT (setValue (int)));
+      viewDistanceSpinBox->connect(viewDistanceSlider, SIGNAL (valueChanged (int)), SLOT (setValue (int)));
+      viewDistanceSlider->connect(viewDistanceSpinBox, SIGNAL (valueChanged (int)), SLOT (setValue (int)));
 
-	connect(changeGamePathButton, SIGNAL (clicked()), this, SLOT (setGameAndProjectPath())); 
-	connect(changeProjectPathButton, SIGNAL (clicked()), this, SLOT (setProjectPath())); 
-	connect(addProjectPathCheckBox, SIGNAL (toggled (bool)), this, SLOT (toggleGameProjectDisplay (bool)));
+      connect(changeGamePathButton, SIGNAL (clicked()), this, SLOT (setGameAndProjectPath())); 
+      connect(changeProjectPathButton, SIGNAL (clicked()), this, SLOT (setProjectPath())); 
+      connect(addProjectPathCheckBox, SIGNAL (toggled (bool)), this, SLOT (toggleGameProjectDisplay (bool)));
 
-  connect (antialiasingCheckBox, SIGNAL (toggled (bool)), SLOT (setAntialiasing (bool)));
-  connect (viewDistanceSlider, SIGNAL (valueChanged (int)), SLOT (setViewDistance (int)));
+      connect (antialiasingCheckBox, SIGNAL (toggled (bool)), SLOT (setAntialiasing (bool)));
+      connect (viewDistanceSlider, SIGNAL (valueChanged (int)), SLOT (setViewDistance (int)));
 
-	connect (&noggit::app(), SIGNAL (settingChanged (const QString&, const QVariant&)), SLOT (settingChanged (const QString&, const QVariant&)));
-}
+      connect (&noggit::app(), SIGNAL (settingChanged (const QString&, const QVariant&)), SLOT (settingChanged (const QString&, const QVariant&)));
+    }
 
-void settingsDialog::toggleGameProjectDisplay(bool checked)
-{
-  addProjectPathCheckBox->setChecked(checked);
-	currentProjectPath->setVisible(checked);
-	changeProjectPathButton->setVisible(checked);
-	projectPathLabel->setVisible(checked);
+    void settingsDialog::toggleGameProjectDisplay(bool checked)
+    {
+      addProjectPathCheckBox->setChecked(checked);
+      currentProjectPath->setVisible(checked);
+      changeProjectPathButton->setVisible(checked);
+      projectPathLabel->setVisible(checked);
 
-	if (checked == false)
-  {
-		currentProjectPath->setText(currentGamePath->text());
-    noggit::app().setting ("paths/project", currentProjectPath->text());
-  }
-}
+      if (checked == false)
+      {
+        currentProjectPath->setText(currentGamePath->text());
+        noggit::app().setting ("paths/project", currentProjectPath->text());
+      }
+    }
 
-void settingsDialog::setGameAndProjectPath()
-{
-	QString _path;
+    void settingsDialog::setGameAndProjectPath()
+    {
+      QString _path;
  
-	_path = QFileDialog::getExistingDirectory(this, tr("Choose a directory"), "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+      _path = QFileDialog::getExistingDirectory(this, tr("Choose a directory"), "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-	if (_path != "")
-	{
-    _path.append("\\");
-		currentGamePath->setText(_path);
-    noggit::app().setting ("paths/game", currentGamePath->text());
-		if (addProjectPathCheckBox->isChecked() == false)
-		{
-			currentProjectPath->setText(_path);
-      noggit::app().setting ("paths/project", currentProjectPath->text());
-		}
-	}
-}
+      if (_path != "")
+      {
+        _path.append("\\");
+        currentGamePath->setText(_path);
+        noggit::app().setting ("paths/game", currentGamePath->text());
+        if (addProjectPathCheckBox->isChecked() == false)
+        {
+          currentProjectPath->setText(_path);
+          noggit::app().setting ("paths/project", currentProjectPath->text());
+        }
+      }
+    }
 
-void settingsDialog::setProjectPath()
-{
-	QString _path;
+    void settingsDialog::setProjectPath()
+    {
+      QString _path;
  
-	_path = QFileDialog::getExistingDirectory(this, tr("Choose a directory"), "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+      _path = QFileDialog::getExistingDirectory(this, tr("Choose a directory"), "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-	if (_path != "")
-  {
-    _path.append("\\");
-		currentProjectPath->setText(_path);
-    noggit::app().setting ("paths/project", currentProjectPath->text());
+      if (_path != "")
+      {
+        _path.append("\\");
+        currentProjectPath->setText(_path);
+        noggit::app().setting ("paths/project", currentProjectPath->text());
+      }
+    }
+
+    void settingsDialog::settingChanged(const QString& key, const QVariant& value)
+    {     
+      if (key == "antialiasing")
+        LogDebug << "antialiasing changed to : " << value.toString().toStdString() << std::endl;
+      if (key == "view_distance")
+        LogDebug << "view distance changed to : " << value.toString().toStdString() << std::endl;
+      if (key == "paths/game")
+        LogDebug << "game path changed to : " << value.toString().toStdString() << std::endl;
+      if (key == "paths/project")
+        LogDebug << "project path changed to : " << value.toString().toStdString() << std::endl;
+    }
+
+    void settingsDialog::setAntialiasing(bool value)   
+    {     
+      noggit::app().setting("antialiasing", value);
+    }
+
+    void settingsDialog::setViewDistance(int value)
+    {
+      noggit::app().setting("view_distance", value);
+    }
   }
-}
-
-void settingsDialog::settingChanged(const QString& key, const QVariant& value)
-{     
-	if (key == "antialiasing")
-	{
-    LogDebug << "antialiasing changed to : " << value.toString().toStdString() << std::endl;
-	}
-  if (key == "view_distance")
-	{
-    LogDebug << "view distance changed to : " << value.toString().toStdString() << std::endl;
-	}
-  if (key == "paths/game")
-	{
-    LogDebug << "game path changed to : " << value.toString().toStdString() << std::endl;
-	}
-  if (key == "paths/project")
-	{
-    LogDebug << "project path changed to : " << value.toString().toStdString() << std::endl;
-	}
-}
-
-void settingsDialog::setAntialiasing(bool value)   
-{     
-	noggit::app().setting("antialiasing", value);
-}
-
-void settingsDialog::setViewDistance(int value)
-{
-  noggit::app().setting("view_distance", value);
 }

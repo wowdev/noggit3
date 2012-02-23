@@ -108,11 +108,11 @@ namespace noggit
   }
 
   void application::setting(const QString& key, const QVariant& value)   
-	{     
-		emit settingAboutToChange (key, setting (key));     
+  {     
+    emit settingAboutToChange (key, setting (key));     
     _settings->setValue (key, value);
-		emit settingChanged (key, value);
-	}  
+    emit settingChanged (key, value);
+  }  
 
   void application::set_working_directory_to_application_path()
   {

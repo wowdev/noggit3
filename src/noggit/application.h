@@ -35,9 +35,9 @@ namespace noggit
   public slots:
     void create_world_view (World*);
 
-	signals:   
-		void settingAboutToChange (const QString& key, const QVariant& value);   	
-		void settingChanged (const QString& key, const QVariant& value); 
+  signals:   
+    void settingAboutToChange (const QString& key, const QVariant& value);   	
+    void settingChanged (const QString& key, const QVariant& value); 
 
   private:
     void set_working_directory_to_application_path();
