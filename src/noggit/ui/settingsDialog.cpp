@@ -29,7 +29,7 @@ namespace noggit
       currentProjectPath = new QLabel(noggit::app().setting("paths/project").toString(), this); 
       changeProjectPathButton = new QPushButton("...", this);
 
-      addProjectPathCheckBox = new QCheckBox("Select a different Project path", this);
+      addProjectPathCheckBox = new QCheckBox(tr("Select a different Project path"), this);
 
       viewDistanceSlider = new QSlider(Qt::Horizontal, this);
       viewDistanceSlider->setRange(minViewDistanceRange, maxViewDistanceRange);
@@ -39,13 +39,13 @@ namespace noggit
       viewDistanceSpinBox->setRange(minViewDistanceRange, maxViewDistanceRange);
       viewDistanceSpinBox->setValue(viewDistanceSlider->value());
 
-      antialiasingCheckBox = new QCheckBox("Antialiasing");
+      antialiasingCheckBox = new QCheckBox(tr("Antialiasing"));
       if (noggit::app().setting("antialiasing").toBool())
         antialiasingCheckBox->setChecked(true);
 
-      QLabel* _gamePathLabel = new QLabel("Game path : ", this);
-      projectPathLabel = new QLabel("Project path : ", this);	
-      QLabel* _viewDistanceLabel = new QLabel("View Distance : ", this);
+      QLabel* _gamePathLabel (new QLabel(tr("Game path : "), this));
+      projectPathLabel = new QLabel(tr("Project path : "), this);	
+      QLabel* _viewDistanceLabel (new QLabel(tr("View Distance : "), this));
 
       currentGamePath->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
       currentProjectPath->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
@@ -54,7 +54,7 @@ namespace noggit
 
       toggleGameProjectDisplay(currentGamePath->text() != currentProjectPath->text());
 
-      QGridLayout* _mainConfigurationSettingsWindow = new QGridLayout;
+      QGridLayout* _mainConfigurationSettingsWindow (new QGridLayout);
       _mainConfigurationSettingsWindow->addWidget(_gamePathLabel, 0, 0);
       _mainConfigurationSettingsWindow->addWidget(currentGamePath, 0, 1, 1, 2);
       _mainConfigurationSettingsWindow->addWidget(changeGamePathButton, 0, 3);
@@ -81,10 +81,10 @@ namespace noggit
       connect(changeProjectPathButton, SIGNAL (clicked()), this, SLOT (setProjectPath())); 
       connect(addProjectPathCheckBox, SIGNAL (toggled (bool)), this, SLOT (toggleGameProjectDisplay (bool)));
 
-      connect (antialiasingCheckBox, SIGNAL (toggled (bool)), SLOT (setAntialiasing (bool)));
-      connect (viewDistanceSlider, SIGNAL (valueChanged (int)), SLOT (setViewDistance (int)));
+      connect(antialiasingCheckBox, SIGNAL (toggled (bool)), SLOT (setAntialiasing (bool)));
+      connect(viewDistanceSlider, SIGNAL (valueChanged (int)), SLOT (setViewDistance (int)));
 
-      connect (&noggit::app(), SIGNAL (settingChanged (const QString&, const QVariant&)), SLOT (settingChanged (const QString&, const QVariant&)));
+      connect(&noggit::app(), SIGNAL (settingChanged (const QString&, const QVariant&)), SLOT (settingChanged (const QString&, const QVariant&)));
     }
 
     void settingsDialog::toggleGameProjectDisplay(bool checked)
