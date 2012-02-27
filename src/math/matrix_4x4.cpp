@@ -121,7 +121,7 @@ namespace math
     matrix_4x4 a;
     for (size_t j=0; j<4; j++) {
       for (size_t i=0; i<4; ++i) {
-        a._m[i][j] = (((i+j)&1)?-1.0f:1.0f) * minor(i,j);
+        a._m[i][j] = (((i+j)&1)?-1.0f:1.0f) * minorSize(i,j);
       }
     }
     return a;
@@ -180,7 +180,7 @@ namespace math
     #undef SUB
   }
 
-  inline float matrix_4x4::minor (size_t x, size_t y) const
+  inline float matrix_4x4::minorSize (size_t x, size_t y) const
   {
     float s[3][3];
     for (size_t j=0, v=0; j<4; j++) {

@@ -31,7 +31,8 @@ namespace noggit
       archive_manager (async::loader&);
       ~archive_manager();
 
-      void load_mpq (const QString& filename, bool process_list_file = false);
+      archive *load_mpq (const QString& filename, bool process_list_file = false);
+      archive *create_mpq (const QString& filename, bool process_list_file = false);
       void unload_all_mpqs();
       void unload_mpq (const QString& filename);
 
@@ -44,6 +45,7 @@ namespace noggit
 
       bool all_finished_loading() const;
       void all_finish_loading();
+      bool is_open(archive* arch);
 
       const QStringList& listfile() const;
       void add_to_listfile (const QStringList& other);

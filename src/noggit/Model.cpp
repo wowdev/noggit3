@@ -312,7 +312,7 @@ void Model::initCommon(const noggit::mpq::file& f)
     lodname.append("00.skin");
     noggit::mpq::file g (QString::fromStdString (lodname));
 
-    ModelView *view = reinterpret_cast<ModelView*>(g.getBuffer());
+    ModelViewStruct *view = reinterpret_cast<ModelViewStruct*>(g.getBuffer());
 
     uint16_t *indexLookup = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsIndex);
     uint16_t *triangles = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsTris);

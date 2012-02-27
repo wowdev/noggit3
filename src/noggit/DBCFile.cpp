@@ -22,6 +22,10 @@ struct dbc_header
 DBCFile::DBCFile (const QString& filename)
   : _filename (filename)
   , data (NULL)
+  , recordCount(NULL)
+  , fieldCount(NULL)
+  , recordSize(NULL)
+  , stringSize(NULL)
 {
 }
 
@@ -43,9 +47,10 @@ void DBCFile::open()
   recordSize = header.recordSize;
   stringSize = header.stringSize;
 
-  data = new unsigned char[recordSize * recordCount + stringSize];
-  stringTable = data + recordSize * recordCount;
-  f.read (data, recordSize * recordCount + stringSize);
+  data = new unsigned char[recordSize * recordCount];
+  stringTable = new unsigned char[stringSize];
+  f.read (data, recordSize * recordCount);
+  f.read(stringTable,stringSize);
   f.close();
 }
 

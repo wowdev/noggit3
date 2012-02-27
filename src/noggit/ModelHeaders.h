@@ -169,7 +169,7 @@ struct ModelVertex {
   int unk1, unk2; // always 0,0 so this is probably unused
 };
 
-struct ModelView {
+struct ModelViewStruct {
   char id[4]; // Signature
   uint32_t nIndex, ofsIndex; // Vertices in this model (index into vertices[])
   uint32_t nTris, ofsTris; // indices

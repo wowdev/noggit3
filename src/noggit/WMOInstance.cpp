@@ -68,6 +68,9 @@ void WMOInstance::draw (bool draw_doodads, bool draw_fog) const
   glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
   glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
 
+  if(_world->IsSelection( eEntry_WMO ))
+      LogDebug << "shit" << _world->GetCurrentSelection()->data.wmo->mUniqueID <<std::endl;
+
   if( _world->IsSelection( eEntry_WMO ) && _world->GetCurrentSelection()->data.wmo->mUniqueID == mUniqueID )
     wmo->draw( _world, doodadset, pos, roty, true, true, true, draw_doodads, draw_fog );
   else
@@ -88,7 +91,7 @@ void WMOInstance::drawSelect (bool draw_doodads)
   glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
   glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
 
-  mSelectionID = _world->selection_names().add( this );
+  //mSelectionID = _world->selection_names().add( this );
   glPushName( mSelectionID );
 
   wmo->drawSelect( _world, doodadset, pos, -roty, draw_doodads);

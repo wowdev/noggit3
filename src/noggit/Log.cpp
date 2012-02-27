@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <ctime>
+#include <string.h>
 
 #include <noggit/Log.h>
 

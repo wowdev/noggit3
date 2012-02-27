@@ -386,7 +386,7 @@ MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bo
 
   for( std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it )
   {
-    _world->mWMOInstances.insert( std::pair<int,WMOInstance>( it->uniqueID, WMOInstance( _world, WMOManager::add( _world, mWMOFilenames[it->nameID] ), &(*it) ) ) );
+    _world->mWMOInstances.insert( std::pair<int,WMOInstance *>( it->uniqueID, new WMOInstance( _world, WMOManager::add( _world, mWMOFilenames[it->nameID] ), &(*it) ) ) );
   }
 
   // - Load M2s ------------------------------------------
@@ -737,9 +737,9 @@ void MapTile::clearAllModels()
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
 
-  for( std::map<int, WMOInstance>::iterator it = _world->mWMOInstances.begin(); it != _world->mWMOInstances.end(); ++it )
-    if( checkInside( lTileExtents, it->second.extents ) )
-          _world->deleteWMOInstance( it->second.mUniqueID );
+  for( std::map<int, WMOInstance *>::iterator it = _world->mWMOInstances.begin(); it != _world->mWMOInstances.end(); ++it )
+    if( checkInside( lTileExtents, it->second->extents ) )
+          _world->deleteWMOInstance( it->second->mUniqueID );
 
   for( std::map<int, ModelInstance*>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
   {
@@ -769,12 +769,13 @@ void MapTile::saveTile()
   lTileExtents[0] = ::math::vector_3d( xbase, 0.0f, zbase );
   lTileExtents[1] = ::math::vector_3d( xbase + TILESIZE, 0.0f, zbase + TILESIZE );
 
-  std::map<int, WMOInstance> lObjectInstances;
+  std::map<int, WMOInstance*> lObjectInstances;
   std::map<int, ModelInstance*> lModelInstances;
 
-  for( std::map<int, WMOInstance>::iterator it = _world->mWMOInstances.begin(); it != _world->mWMOInstances.end(); ++it )
-    if( checkInside( lTileExtents, it->second.extents ) )
-      lObjectInstances.insert( std::pair<int, WMOInstance>( it->first, it->second ) );
+  for( std::map<int, WMOInstance*>::iterator it = _world->mWMOInstances.begin(); it != _world->mWMOInstances.end(); ++it )
+    //! \todo checkinside seems to fuck up everything
+    //if( checkInside( lTileExtents, it->second->extents ) )
+      lObjectInstances.insert( std::pair<int, WMOInstance*>( it->first, it->second ) );
 
   for( std::map<int, ModelInstance*>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
   {
@@ -784,10 +785,11 @@ void MapTile::saveTile()
     lModelExtentsV2[0] = it->second->model->header.VertexBoxMin + it->second->pos;
     lModelExtentsV2[1] = it->second->model->header.VertexBoxMax + it->second->pos;
 
-    if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
-    {
+    //! \todo checkinside seems to fuck up everything
+    //if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
+    //{
       lModelInstances.insert( std::pair<int, ModelInstance*>( it->first, it->second ) );
-    }
+    //}
   }
 
   filenameOffsetThing nullyThing = { 0, 0 };
@@ -818,9 +820,9 @@ void MapTile::saveTile()
 
   std::map<std::string, filenameOffsetThing> lObjects;
 
-  for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
-    if( lObjects.find( it->second.wmo->_filename ) == lObjects.end() )
-      lObjects.insert( std::pair<std::string, filenameOffsetThing>( ( it->second.wmo->_filename ), nullyThing ) );
+  for( std::map<int,WMOInstance *>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
+    if( lObjects.find( it->second->wmo->_filename ) == lObjects.end() )
+      lObjects.insert( std::pair<std::string, filenameOffsetThing>( ( it->second->wmo->_filename ), nullyThing ) );
 
   lID = 0;
   for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
@@ -1046,9 +1048,9 @@ void MapTile::saveTile()
     ENTRY_MODF * lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>( lCurrentPosition + 8 );
 
     lID = 0;
-    for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
+    for( std::map<int,WMOInstance *>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
     {
-      std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lObjects.find( it->second.wmo->_filename );
+      std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lObjects.find( it->second->wmo->_filename );
       if( lMyFilenameThingey == lObjects.end() )
       {
         LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -1067,23 +1069,23 @@ void MapTile::saveTile()
 
       lMODF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
       lMODF_Data[lID].uniqueID = it->first;
-      lMODF_Data[lID].pos[0] = it->second.pos.x();
-      lMODF_Data[lID].pos[1] = it->second.pos.y();
-      lMODF_Data[lID].pos[2] = it->second.pos.z();
-      lMODF_Data[lID].rot[0] = it->second.dir.x();
-      lMODF_Data[lID].rot[1] = it->second.dir.y();
-      lMODF_Data[lID].rot[2] = it->second.dir.z();
+      lMODF_Data[lID].pos[0] = it->second->pos.x();
+      lMODF_Data[lID].pos[1] = it->second->pos.y();
+      lMODF_Data[lID].pos[2] = it->second->pos.z();
+      lMODF_Data[lID].rot[0] = it->second->dir.x();
+      lMODF_Data[lID].rot[1] = it->second->dir.y();
+      lMODF_Data[lID].rot[2] = it->second->dir.z();
       //! \todo  Calculate them here or when rotating / moving? What is nicer? We should at least do it somewhere..
-      lMODF_Data[lID].extents[0][0] = it->second.extents[0].x();
-      lMODF_Data[lID].extents[0][1] = it->second.extents[0].y();
-      lMODF_Data[lID].extents[0][2] = it->second.extents[0].z();
-      lMODF_Data[lID].extents[1][0] = it->second.extents[1].x();
-      lMODF_Data[lID].extents[1][1] = it->second.extents[1].y();
-      lMODF_Data[lID].extents[1][2] = it->second.extents[1].z();
-      lMODF_Data[lID].flags = it->second.mFlags;
-      lMODF_Data[lID].doodadSet = it->second.doodadset;
-      lMODF_Data[lID].nameSet = it->second.mNameset;
-      lMODF_Data[lID].unknown = it->second.mUnknown;
+      lMODF_Data[lID].extents[0][0] = it->second->extents[0].x();
+      lMODF_Data[lID].extents[0][1] = it->second->extents[0].y();
+      lMODF_Data[lID].extents[0][2] = it->second->extents[0].z();
+      lMODF_Data[lID].extents[1][0] = it->second->extents[1].x();
+      lMODF_Data[lID].extents[1][1] = it->second->extents[1].y();
+      lMODF_Data[lID].extents[1][2] = it->second->extents[1].z();
+      lMODF_Data[lID].flags = it->second->mFlags;
+      lMODF_Data[lID].doodadSet = it->second->doodadset;
+      lMODF_Data[lID].nameSet = it->second->mNameset;
+      lMODF_Data[lID].unknown = it->second->mUnknown;
       lID++;
     }
 
@@ -1362,10 +1364,10 @@ void MapTile::saveTile()
 
           // search all wmos that are inside this chunk
           lID = 0;
-          for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
+          for( std::map<int,WMOInstance *>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
           {
             //! \todo  This requires the extents already being calculated. See above.
-            if( checkInside( lChunkExtents, it->second.extents ) )
+            if( checkInside( lChunkExtents, it->second->extents ) )
               lObjectIDs.push_back( lID );
             lID++;
           }
