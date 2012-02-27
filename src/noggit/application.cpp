@@ -21,6 +21,7 @@
 #include <QTranslator>
 #include <QLocale>
 #include <QLibraryInfo>
+#include <QFileDialog>
 
 #include <helper/repository.h>
 
@@ -83,6 +84,7 @@ namespace noggit
     Menu* map_selection_menu (new Menu (NULL));
     connect (map_selection_menu, SIGNAL (create_world_view_request (World*)), SLOT (create_world_view (World*)));
     map_selection_menu->show();
+
   }
 
   application::~application()
@@ -254,9 +256,19 @@ namespace noggit
   #ifdef Q_WS_MAC
       _game_path = "/Applications/World of Warcraft/";
   #else
-      _game_path = "NO DEFAULT PATH FOR YOUR OS";
+      _game_path = QFileDialog::getExistingDirectory(NULL
+                                                     , tr("Open WoW Directory")
+                                                     , "/"
+                                                     , QFileDialog::ShowDirsOnly
+                                                     )
+                                                     .append("/");
   #endif
   #endif
+    }
+
+    if(!_game_path.endsWith("/"))
+    {
+        _game_path.append("/");
     }
 
     if (!QFile::exists (_game_path))

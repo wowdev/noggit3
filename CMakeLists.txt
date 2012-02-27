@@ -74,6 +74,8 @@ set ( noggit_sources
       src/noggit/WMO.cpp
       src/noggit/WMOInstance.cpp
       src/noggit/World.cpp
+      src/noggit/ModelView.cpp
+      src/noggit/DBCTableModel.cpp
 
       src/noggit/async/loader.cpp
       src/noggit/async/loading_thread.cpp
@@ -88,6 +90,7 @@ set ( noggit_sources
       src/noggit/ui/model_spawner.cpp
       src/noggit/ui/minimap_widget.cpp
       src/noggit/ui/cursor_selector.cpp
+      src/noggit/ui/DBCEditor.cpp
     )
 
 set ( noggit_headers
@@ -120,6 +123,8 @@ set ( noggit_headers
       src/noggit/WMOInstance.h
       src/noggit/World.h
       src/noggit/errorHandling.h
+      src/noggit/ModelView.h
+      src/noggit/DBCTableModel.h
 
       src/noggit/async/loader.h
       src/noggit/async/loading_thread.h
@@ -135,6 +140,7 @@ set ( noggit_headers
       src/noggit/ui/help_widget.h
       src/noggit/ui/model_spawner.h
       src/noggit/ui/minimap_widget.h
+      src/noggit/ui/DBCEditor.h
     )
 
 set ( noggit_headers_to_moc
@@ -142,6 +148,8 @@ set ( noggit_headers_to_moc
 
       src/noggit/Menu.h
       src/noggit/MapView.h
+      src/noggit/ModelView.h
+      src/noggit/DBCTableModel.h
 
       src/noggit/async/loader.h
       src/noggit/async/loading_thread.h
@@ -152,6 +160,7 @@ set ( noggit_headers_to_moc
       src/noggit/ui/help_widget.h
       src/noggit/ui/model_spawner.h
       src/noggit/ui/minimap_widget.h
+      src/noggit/ui/DBCEditor.h
     )
 
 

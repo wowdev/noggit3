@@ -61,10 +61,11 @@ namespace noggit
       };
     }
 
-    model_spawner::model_spawner (QWidget* parent)
+    model_spawner::model_spawner (QWidget* parent, QGLWidget *shared)
       : QWidget (parent)
       , _tree_model (new helper::qt::non_recursive_filter_model (NULL))
       , _file_tree (new QTreeView (NULL))
+      , modelview(new ModelView(shared,this))
     {
       QVBoxLayout* layout (new QVBoxLayout (this));
 
@@ -108,6 +109,7 @@ namespace noggit
 
         QStandardItem* child (new QStandardItem (file.mid (qMax (file.lastIndexOf ("\\") + 1, 0))));
         child->setEditable (false);
+        child->setData(file,Qt::UserRole);
 
         items[path]->appendRow (child);
       }
@@ -119,8 +121,11 @@ namespace noggit
       _file_tree->setDragEnabled (true);
       _file_tree->setDragDropMode (QAbstractItemView::DragOnly);
 
+
+      connect(_file_tree,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(changeModel(QModelIndex)));
       connect (filter_line, SIGNAL (textChanged (const QString&)), SLOT (update_filter (const QString&)));
 
+      layout->addWidget(modelview);
       layout->addWidget (filter_line);
       layout->addWidget (_file_tree);
 
@@ -130,6 +135,13 @@ namespace noggit
     void model_spawner::update_filter (const QString& filter)
     {
       _tree_model->setFilterRegExp (QRegExp (filter, Qt::CaseInsensitive));
+    }
+
+    void model_spawner::changeModel(QModelIndex index)
+    {
+        QString data = index.data(Qt::UserRole).toString();
+        if(data.contains(QRegExp ("\\.(m2|wmo)$", Qt::CaseInsensitive)))
+            modelview->changeModel(data);
     }
 
     const QLatin1String& model_spawner::mime_type()

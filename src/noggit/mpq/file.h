@@ -12,7 +12,7 @@ namespace noggit
   {
     //! \todo Use QDir for paths instead of a QString.
     //! \todo Put file on top of QFile?
-
+    class archive;
     class file
     {
       Q_DISABLE_COPY (file);
@@ -28,11 +28,13 @@ namespace noggit
       char* getBuffer() const;
       void setBuffer (char *Buf, size_t Size);
       char* getPointer() const;
+
       bool is_at_end_of_file() const;
       void seek (size_t offset);
       void seekRelative (size_t offset);
       void close();
       bool file_is_on_disk() const;
+
 
       template<typename T>
       const T* get (size_t offset) const
@@ -42,11 +44,12 @@ namespace noggit
 
       void save_to_disk();
 
+      void save_to_mpq (archive *arch, QString pathInMPQ = NULL);
       static bool exists (const QString& filename);
       static void disk_search_path (const QString& path);
 
     private:
-      void save_to_mpq (const QString& filename);
+
 
       bool _is_at_end_of_file;
       char* buffer;

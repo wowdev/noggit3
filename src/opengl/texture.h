@@ -4,7 +4,11 @@
 #ifndef __OPENGL_TEXTURE_H
 #define __OPENGL_TEXTURE_H
 
+#ifdef __linux__
+#include <GL/glew.h>
+#else
 #include <gl/glew.h>
+#endif
 
 namespace opengl
 {

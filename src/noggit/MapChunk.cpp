@@ -420,7 +420,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
             unsigned offI = 0; //offset IN buffer
             unsigned offO = 0; //offset OUT buffer
             char* buffIn = f->getPointer(); // pointer to data in adt file
-            char buffOut[4096]; // the resulting alpha map
 
             while( offO < 4096 )
             {
@@ -431,7 +430,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
               for( unsigned k = 0; k < n; ++k )
               {
               if (offO == 4096) break;
-              buffOut[offO] = buffIn[offI];
+              amap[layer-1][offO] = buffIn[offI];
               offO++;
               if( !fill )
                 offI++;
@@ -440,7 +439,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
             }
 
             glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, buffOut);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[layer-1]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -457,6 +456,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
               }
 
             }
+
             memcpy(amap[layer-1]+63*64,amap[layer-1]+62*64,64);
             glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[layer-1]);

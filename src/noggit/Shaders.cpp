@@ -7,6 +7,8 @@
 #include <noggit/Shaders.h>
 
 #include <string>
+#include <string.h>
+#include <stdio.h>
 
 #include <noggit/Log.h>
 

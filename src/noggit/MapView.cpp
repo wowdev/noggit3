@@ -59,7 +59,7 @@ namespace noggit
     , _about_widget (NULL)
     //  , _about_widget (new ui::about_widget (NULL))
     , _minimap (new ui::minimap_widget (NULL))
-    , _model_spawner (new noggit::ui::model_spawner (NULL))
+    , _model_spawner (new noggit::ui::model_spawner (NULL,shared))
     , _cursor_selector (new ui::cursor_selector (NULL))
     , _is_currently_moving_object (false)
     , _draw_terrain_height_contour (false)
@@ -213,10 +213,11 @@ namespace noggit
   #undef NEW_ACTION_OTHER
   #undef NEW_TOGGLE_ACTION
 
-  #ifdef Q_WS_MAC
-    QMenuBar* menu_bar (new QMenuBar (NULL));
-  #else
+  #ifdef Q_WS_X11
     QMenuBar* menu_bar (new QMenuBar (this));
+
+  #else
+    QMenuBar* menu_bar (new QMenuBar (NULL));
   #endif
 
     QMenu* file_menu (menu_bar->addMenu (tr ("File")));
@@ -309,6 +310,8 @@ namespace noggit
 
     QMenu* useless_menu (debug_menu->addMenu (tr ("Stuff that should only be on keys")));
     useless_menu->addAction (turn_around);
+
+    menu_bar->show();
   }
 
   QAction* MapView::new_action (const QString& text, const char* slot, const QKeySequence& shortcut)
@@ -411,6 +414,7 @@ namespace noggit
 
   void MapView::timerEvent (QTimerEvent*)
   {
+    this->makeCurrent();
     const qreal now (_startup_time.elapsed() / 1000.0);
 
     tick (now, now - _last_update);
@@ -421,6 +425,7 @@ namespace noggit
 
   void MapView::initializeGL()
   {
+    this->makeCurrent();
     qglClearColor (Qt::black);
 
     glEnableClientState (GL_VERTEX_ARRAY);
@@ -439,6 +444,7 @@ namespace noggit
 
   void MapView::paintGL()
   {
+    this->makeCurrent();
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     display();
   }

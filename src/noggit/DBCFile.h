@@ -9,6 +9,7 @@
 
 #include <cassert>
 #include <QString>
+#include <stdio.h>
 
 class DBCFile
 {
@@ -42,6 +43,23 @@ public:
   class Record
   {
   public:
+    const void setData(size_t field, float value) const
+    {
+        assert(field < file.fieldCount);
+        memset(offset+field*4,0,4);
+        unsigned char *fp = (uchar*)&value;
+        unsigned char *op = offset+field*4;
+        while(op < offset+field*4+4)
+        {
+             *op++ = *fp++;
+        }
+    }
+    const void setData(size_t field, unsigned char value) const
+    {
+        assert(field < file.fieldCount);
+        memset(offset+field*4,0,4);
+        memset(offset+field*4,value,sizeof(value));
+    }
     const float& getFloat(size_t field) const
     {
       assert(field < file.fieldCount);
@@ -135,7 +153,7 @@ public:
   inline Iterator end()
   {
     //  assert(data);
-    return Iterator(*this, stringTable);
+    return Iterator(*this, data+recordCount*recordSize);
   }
   /// Trivial
   inline size_t getRecordCount() const { return recordCount;}

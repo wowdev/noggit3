@@ -14,6 +14,7 @@
 #include <string>
 #include <utility>
 #include <time.h>
+#include <stdio.h> //needed on linux?
 
 
 #include <QSettings>
@@ -705,10 +706,10 @@ void World::initDisplay()
 
   if( mHasAGlobalWMO )
   {
-    WMOInstance inst( this, WMOManager::add( this, mWmoFilename ), &mWmoEntry );
+    WMOInstance *inst = new WMOInstance( this, WMOManager::add( this, mWmoFilename ), &mWmoEntry );
 
-    mWMOInstances.insert( std::pair<int,WMOInstance>( mWmoEntry.uniqueID, inst ) );
-    camera = inst.pos;
+    mWMOInstances.insert( std::pair<int,WMOInstance *>( mWmoEntry.uniqueID, inst ) );
+    camera = inst->pos;
   }
 
   skies = new Skies( mMapId );
@@ -1047,10 +1048,10 @@ void World::draw ( bool draw_terrain_height_contour
   {
     foreach (const wmo_instance_type& itr, mWMOInstances)
     {
-      if ( itr.second.wmo->drawSkybox ( this
+      if ( itr.second->wmo->drawSkybox ( this
                                       , camera
-                                      , itr.second.extents[0]
-                                      , itr.second.extents[1]
+                                      , itr.second->extents[0]
+                                      , itr.second->extents[1]
                                       )
          )
       {
@@ -1323,16 +1324,16 @@ void World::draw ( bool draw_terrain_height_contour
 
         glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
 
-        for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-          it->second.draw (draw_wmo_doodads, draw_fog);
+        for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
+          it->second->draw (draw_wmo_doodads, draw_fog);
 
         spec_color = ::math::vector_4d( 0.0f, 0.0f, 0.0f, 1.0f );
         glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
         glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 0 );
       }
       else
-        for( std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-          it->second.draw (draw_wmo_doodads, draw_fog);
+        for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
+          it->second->draw (draw_wmo_doodads, draw_fog);
 
     outdoorLights( true );
     setupFog (draw_fog);
@@ -1463,12 +1464,12 @@ void World::drawSelection ( bool draw_wmo_doodads
   {
     ::opengl::scoped::name_pusher type (MapObjName);
     ::opengl::scoped::name_pusher dummy (0);
-    for ( std::map<int, WMOInstance>::iterator it (mWMOInstances.begin())
+    for ( std::map<int, WMOInstance *>::iterator it (mWMOInstances.begin())
         ; it != mWMOInstances.end()
         ; ++it
         )
     {
-      it->second.drawSelect (draw_wmo_doodads);
+      it->second->drawSelect (draw_wmo_doodads);
     }
   }
 
@@ -2065,8 +2066,8 @@ void World::deleteModelInstance( int pUniqueID )
 
 void World::deleteWMOInstance( int pUniqueID )
 {
-  std::map<int, WMOInstance>::iterator it = mWMOInstances.find( pUniqueID );
-  setChanged( it->second.pos.x(), it->second.pos.z() );
+  std::map<int, WMOInstance *>::iterator it = mWMOInstances.find( pUniqueID );
+  setChanged( it->second->pos.x(), it->second->pos.z() );
   mWMOInstances.erase( it );
   ResetSelection();
 }
@@ -2108,31 +2109,31 @@ void World::addM2 ( Model* model
 //  ( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
 //                           ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 
-  ModelInstance newModelis (this, model);
-  newModelis.d1 = lMaxUID;
-  newModelis.pos = newPos;
-  newModelis.sc = 1;
+  ModelInstance *newModelis = new ModelInstance(this, model);
+  newModelis->d1 = lMaxUID;
+  newModelis->pos = newPos;
+  newModelis->sc = 1;
   if (rotation_randomization)
   {
-    newModelis.dir.y (newModelis.dir.y() + ::math::random::floating_point (0.0f, 360.0f));
+    newModelis->dir.y (newModelis->dir.y() + ::math::random::floating_point (0.0f, 360.0f));
   }
 
   if (position_randomization)
   {
-    newModelis.pos.x ( newModelis.pos.x()
+    newModelis->pos.x ( newModelis->pos.x()
                      + ::math::random::floating_point (-2.0f, 2.0f)
                      );
-    newModelis.pos.z ( newModelis.pos.z()
+    newModelis->pos.z ( newModelis->pos.z()
                      + ::math::random::floating_point (-2.0f, 2.0f)
                      );
   }
 
   if (size_randomization)
   {
-    newModelis.sc *= ::math::random::floating_point (0.9f, 1.1f);
+    newModelis->sc *= ::math::random::floating_point (0.9f, 1.1f);
   }
 
-  mModelInstances.insert( std::pair<int,ModelInstance*>( lMaxUID, &newModelis ));
+  mModelInstances.insert( std::pair<int,ModelInstance*>( lMaxUID, newModelis ));
   setChanged(newPos.x(), newPos.z());
 }
 
@@ -2141,10 +2142,10 @@ void World::addWMO( WMO *wmo, ::math::vector_3d newPos )
   const int lMaxUID = std::max( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
                            ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 
-  WMOInstance newWMOis(this, wmo);
-  newWMOis.pos = newPos;
-  newWMOis.mUniqueID = lMaxUID;
-  mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
+  WMOInstance *newWMOis = new WMOInstance(this, wmo);
+  newWMOis->pos = newPos;
+  newWMOis->mUniqueID = lMaxUID;
+  mWMOInstances.insert( std::pair<int,WMOInstance *>( lMaxUID, newWMOis ));
   setChanged(newPos.x(),newPos.z());
 }
 

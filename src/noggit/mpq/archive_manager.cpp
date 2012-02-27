@@ -29,9 +29,9 @@ namespace noggit
 
     const QStringList& archive_manager::listfile() const
     {
-      const_cast<archive_manager*> (this)->all_finish_loading();
       return _listfile;
     }
+
     void archive_manager::add_to_listfile (const QStringList& other)
     {
       QMutexLocker locker (&_listfile_mutex);
@@ -47,13 +47,24 @@ namespace noggit
       }
     }
 
-    void archive_manager::load_mpq ( const QString& filename
+    archive *archive_manager::load_mpq( const QString& filename
                                    , bool process_list_file
                                    )
     {
       archive* arch (new archive (filename, process_list_file));
       _open_archives.push_back (archive_entry_type (filename, arch));
       _async_loader.add_object (arch);
+      return arch;
+    }
+
+    archive *archive_manager::create_mpq(const QString &filename
+                                     , bool process_list_file
+                                     )
+    {
+        archive* arch (new archive (filename, process_list_file, true));
+        _open_archives.push_back (archive_entry_type (filename, arch));
+        _async_loader.add_object (arch);
+        return arch;
     }
 
     void archive_manager::unload_all_mpqs()
@@ -125,5 +136,18 @@ namespace noggit
         }
       }
     }
+
+    bool archive_manager::is_open(archive* arch)
+    {
+        foreach (const archive_entry_type& entry, _open_archives)
+        {
+            if (entry.second == arch)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
   }
 }

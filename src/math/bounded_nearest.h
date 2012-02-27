@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <QtGlobal>
+#include <limits>
 
 namespace math
 {

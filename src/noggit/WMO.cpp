@@ -1062,8 +1062,7 @@ void WMOGroup::draw_for_selection ( World* world
   ::math::vector_3d pos = center + ofs;
   ::math::rotate (ofs.x(), ofs.z(), &pos.x(), &pos.z(), rot);
   if ( !world->frustum.intersectsSphere (pos, rad)
-    || ((pos - world->camera).length() - rad) >= world->culldistance
-     )
+    || ((pos - world->camera).length() - rad) >= world->culldistance)
     return;
 
   visible = true;

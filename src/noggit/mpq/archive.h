@@ -5,8 +5,11 @@
 #define __NOGGIT_MPQ_ARCHIVE_H
 
 #include <QString>
+#include <QStringList>
 
 #include <noggit/async/object.h>
+
+
 
 namespace noggit
 {
@@ -16,6 +19,7 @@ namespace noggit
     typedef void* HANDLE;
 
     class archive_manager;
+    class file;
 
     class archive : public async::object
     {
@@ -29,11 +33,15 @@ namespace noggit
                      ) const;
 
       void finish_loading();
+      void save_to_disk();
+      void add_file(file* file, QString pathInMPQ);
+      const QStringList& listfile() const;
 
     private:
-      archive (const QString& filename, bool process_list_file);
+      archive (const QString& filename, bool process_list_file, bool create_mpq = false);
 
       HANDLE _archive_handle;
+      QStringList _listfile;
 
       friend class archive_manager;
     };

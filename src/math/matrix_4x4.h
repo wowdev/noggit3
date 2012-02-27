@@ -7,6 +7,7 @@
 #define __MATH_MATRIX_4X4_H
 
 #include <math/quaternion.h>
+#include <stdio.h>
 
 namespace math
 {
@@ -102,7 +103,8 @@ namespace math
 
     inline float determinant() const;
 
-    inline float minor (size_t x, size_t y) const;
+    inline float minorSize (size_t x, size_t y) const;
+    //minor is keyword on unix
 
     union
     {
