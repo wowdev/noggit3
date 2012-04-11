@@ -45,6 +45,7 @@ private:
 
 public slots:
     void settingsChanged(int first,int last);
+    void save();
 };
 
 

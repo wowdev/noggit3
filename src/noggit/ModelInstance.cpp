@@ -142,7 +142,7 @@ void ModelInstance::draw_selection_indicator() const
              + model->header.VertexBoxMax.z() / 5.0f
              , 0.0f
              );
-  glEnd();
+  //glEnd();
 
   glColor4fv (blue);
   glVertex3f (0.0f, 0.0f, 0.0f);
@@ -153,6 +153,70 @@ void ModelInstance::draw_selection_indicator() const
              );
 
   glEnd();
+
+
+  glBegin(GL_TRIANGLE_STRIP);
+
+  glColor4f(0,255,0,125);
+
+  glNormal3f(0.0f, -1.0f, 0.0f);
+  glVertex3f(-5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
+  glVertex3f( 5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
+  glVertex3f (0.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+
+  glNormal3f(-1.0f, 0.0f, 0.0f);
+  glVertex3f(-5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
+  glVertex3f( 5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
+  glVertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+
+  glVertex3f(-5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
+  glVertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+  glVertex3f(-5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+
+  glNormal3f(0.0f, 0.0f, -1.0f);
+  glVertex3f(-5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
+  glVertex3f(-5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+  glVertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+
+  glVertex3f(-5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
+  glVertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  glVertex3f( 0.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+
+  glNormal3f(0.0f, 0.0f, 1.0f);
+  glVertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  glVertex3f( 0.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  glVertex3f( 5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
+
+  glVertex3f( 5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
+  glVertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  glVertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+
+  glNormal3f(0.0f, 1.0f, 0.0f);
+  glVertex3f(-5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+  glVertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+  glVertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+
+  glEnd();
+
+  glBegin(GL_TRIANGLES);
+
+  glColor4f(0,255,0,125);
+
+  glVertex3f(-5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMax.y());
+  glVertex3f(5.0f, model->header.VertexBoxMin.z(),-model->header.VertexBoxMax.y());
+  glVertex3f(0.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMax.y() -model->header.VertexBoxMax.y()/2);
+
+  glVertex3f(model->header.VertexBoxMin.x(), model->header.VertexBoxMin.z(), 5.0f);
+  glVertex3f(model->header.VertexBoxMin.x(), model->header.VertexBoxMin.z(),-5.0f);
+  glVertex3f(model->header.VertexBoxMin.x()+model->header.VertexBoxMin.x()/2, model->header.VertexBoxMin.z(), 0.0f);
+
+  glVertex3f(model->header.VertexBoxMax.x(), model->header.VertexBoxMin.z(),-5.0f);
+  glVertex3f(model->header.VertexBoxMax.x(), model->header.VertexBoxMin.z(), 5.0f);
+  glVertex3f(model->header.VertexBoxMax.x()+model->header.VertexBoxMax.x()/2, model->header.VertexBoxMin.z(), 0.0f);
+
+  glEnd();
+
+
 }
 
 void ModelInstance::draw (bool draw_fog)

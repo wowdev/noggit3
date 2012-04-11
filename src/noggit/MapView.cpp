@@ -1,6 +1,6 @@
 // MapView.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Beket <snipbeket@mail.ru>
-// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Bernd Lrwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
@@ -11,11 +11,14 @@
 #include <QMenuBar>
 #include <QKeyEvent>
 #include <QSettings>
+#include <QComboBox>
 #include <QButtonGroup>
+#include <QPushButton>
 #include <QVBoxLayout>
 #include <QRadioButton>
 #include <QSlider>
 #include <QLabel>
+#include <QToolBar>
 
 #include <math/bounded_nearest.h>
 
@@ -34,6 +37,8 @@
 #include <noggit/ui/help_widget.h>
 #include <noggit/ui/cursor_selector.h>
 #include <noggit/ui/model_spawner.h>
+#include <noggit/MainWindow.h>
+#include <noggit/blp_texture.h>
 
 //! \todo Replace all old gui elements with new classes / widgets.
 #undef __OBSOLETE_GUI_ELEMENTS
@@ -45,7 +50,7 @@ namespace noggit
                    , float ah0
                    , float av0
                    , QGLWidget* shared
-                   , QWidget* parent
+                   , MainWindow* parent
                    )
     : QGLWidget (parent, shared)
     , _startup_time ()
@@ -80,14 +85,14 @@ namespace noggit
     , _shaping_radius (15.0)
     , _shaping_speed (1.0)
     , _shaping_formula (shaping_formula_type::smooth)
-    , _shaping_formula_radio_group (NULL)
+    , _shapingComboBox (NULL)
     , _shaping_radius_slider (NULL)
     , _shaping_speed_slider (NULL)
     , _shaping_settings_widget (NULL)
     , _smoothing_radius (15.0)
     , _smoothing_speed (1.0)
     , _smoothing_formula (smoothing_formula_type::smooth)
-    , _smoothing_formula_radio_group (NULL)
+    , _smoothingComboBox (NULL)
     , _smoothing_radius_slider (NULL)
     , _smoothing_speed_slider (NULL)
     , _smoothing_settings_widget (NULL)
@@ -111,7 +116,9 @@ namespace noggit
     , movespd (66.6f)
     , look (false)
     , mViewMode (eViewMode_3D)
+    , mainWindow(parent)
   {
+    setMinimumSize(500,500);
     setAcceptDrops (true);
     setFocusPolicy (Qt::StrongFocus);
     setMouseTracking (true);
@@ -141,6 +148,8 @@ namespace noggit
     create_shaping_settings_widget();
     create_smoothing_settings_widget();
     create_paint_settings_widget();
+
+    createToolBar();
 
     create_obsolete_gui();
 
@@ -312,6 +321,7 @@ namespace noggit
     useless_menu->addAction (turn_around);
 
     menu_bar->show();
+    set_terrain_editing_mode(_current_terrain_editing_mode);
   }
 
   QAction* MapView::new_action (const QString& text, const char* slot, const QKeySequence& shortcut)
@@ -1803,29 +1813,29 @@ namespace noggit
     _mouse_position = event->pos();
   }
 
-  void MapView::set_terrain_editing_mode (const terrain_editing_modes& mode)
+  void MapView::set_terrain_editing_mode (int mode)
   {
-    _current_terrain_editing_mode = mode;
+    _current_terrain_editing_mode = (terrain_editing_modes)mode;
 
     _draw_hole_lines = mode == hole_setting;
 
     _shaping_settings_widget->hide();
     _smoothing_settings_widget->hide();
-    _texturing_settings_widget->hide();
+//    _texturing_settings_widget->hide();
 
     switch (mode)
     {
     case shaping:
-      _shaping_settings_widget->show();
+      mainWindow->setToolBar(_shaping_settings_widget);
       break;
 
     case smoothing:
-      _smoothing_settings_widget->show();
+      mainWindow->setToolBar(_smoothing_settings_widget);
       break;
 
-    case texturing:
-      _texturing_settings_widget->show();
-      break;
+//    case texturing:
+//      _texturing_settings_widget->show();
+//      break;
 
     default:
       break;
@@ -1899,15 +1909,6 @@ namespace noggit
   }
 
 
-
-
-
-
-
-
-
-
-
   // --- brush settings constants ------------------------------------------------------------------
 
   namespace detail
@@ -1953,6 +1954,22 @@ namespace noggit
       return _ ## BRUSHNAME ## _formula;                                                          \
     }
 
+  #define BRUSH_FORMULA_METHODS_COMBOBOX(BRUSHNAME)                                               \
+    void MapView::BRUSHNAME ## _formula (int id)                                                  \
+    {                                                                                             \
+      BRUSHNAME ## _formula (BRUSHNAME ## _formula_type::formula (id));                           \
+    }                                                                                             \
+    void MapView::BRUSHNAME ## _formula (BRUSHNAME ## _formula_type::formula id)                  \
+    {                                                                                             \
+      _ ## BRUSHNAME ## _formula = id;                                                            \
+      helper::qt::signal_blocker block (_ ## BRUSHNAME ## ComboBox);                              \
+      _ ## BRUSHNAME ## ComboBox->setCurrentIndex (id);                                           \
+    }                                                                                             \
+    const MapView::BRUSHNAME ## _formula_type::formula& MapView::BRUSHNAME ## _formula() const    \
+    {                                                                                             \
+      return _ ## BRUSHNAME ## _formula;                                                          \
+    }
+
   #define BRUSH_SLIDER_METHODS(BRUSHNAME, VARIABLENAME)                                           \
     void MapView::BRUSHNAME ## _ ## VARIABLENAME (int value)                                      \
     {                                                                                             \
@@ -1976,11 +1993,11 @@ namespace noggit
       return _ ## BRUSHNAME ## _ ## VARIABLENAME;                                                 \
     }
 
-  BRUSH_FORMULA_METHODS (shaping);
+  BRUSH_FORMULA_METHODS_COMBOBOX (shaping);
   BRUSH_SLIDER_METHODS (shaping, radius);
   BRUSH_SLIDER_METHODS (shaping, speed);
 
-  BRUSH_FORMULA_METHODS (smoothing);
+  BRUSH_FORMULA_METHODS_COMBOBOX (smoothing);
   BRUSH_SLIDER_METHODS (smoothing, radius);
   BRUSH_SLIDER_METHODS (smoothing, speed);
 
@@ -1998,49 +2015,31 @@ namespace noggit
   {
     delete _shaping_settings_widget;
 
-    _shaping_settings_widget = new QWidget (NULL);
-    _shaping_settings_widget->setWindowTitle (tr ("Shaping settings"));
+    _shaping_settings_widget = new QToolBar;
 
-    QVBoxLayout* widget_layout (new QVBoxLayout (_shaping_settings_widget));
+    _shapingComboBox = new QComboBox (this);
 
-    QWidget* button_holder (new QWidget (_shaping_settings_widget));
-    widget_layout->addWidget (button_holder);
+    _shapingComboBox->addItem(tr ("Flat"), shaping_formula_type::flat);
+    _shapingComboBox->addItem(tr ("Linear"), shaping_formula_type::linear);
+    _shapingComboBox->addItem(tr ("Smooth"), shaping_formula_type::smooth);
+    _shapingComboBox->addItem(tr ("Polynomial"), shaping_formula_type::polynomial);
+    _shapingComboBox->addItem(tr ("Trigonometric"), shaping_formula_type::trigonometric);
+    _shapingComboBox->addItem(tr ("Square"), shaping_formula_type::square);
 
-    QGridLayout* button_layout (new QGridLayout (button_holder));
+    connect(_shapingComboBox,SIGNAL(currentIndexChanged(int)),SLOT(shaping_formula(int)));
 
-    _shaping_formula_radio_group = new QButtonGroup (this);
-
-    QRadioButton* flat_checkbox (new QRadioButton (tr ("Flat"), NULL));
-    QRadioButton* linear_checkbox (new QRadioButton (tr ("Linear"), NULL));
-    QRadioButton* smooth_checkbox (new QRadioButton (tr ("Smooth"), NULL));
-    QRadioButton* polynomial_checkbox (new QRadioButton (tr ("Polynomial"), NULL));
-    QRadioButton* trigonometric_checkbox (new QRadioButton (tr ("Trigonometric"), NULL));
-    QRadioButton* square_checkbox (new QRadioButton (tr ("Square"), NULL));
-
-    _shaping_formula_radio_group->addButton (flat_checkbox, shaping_formula_type::flat);
-    _shaping_formula_radio_group->addButton (linear_checkbox, shaping_formula_type::linear);
-    _shaping_formula_radio_group->addButton (smooth_checkbox, shaping_formula_type::smooth);
-    _shaping_formula_radio_group->addButton (polynomial_checkbox, shaping_formula_type::polynomial);
-    _shaping_formula_radio_group->addButton (trigonometric_checkbox, shaping_formula_type::trigonometric);
-    _shaping_formula_radio_group->addButton (square_checkbox, shaping_formula_type::square);
-
-    connect (_shaping_formula_radio_group, SIGNAL (buttonClicked (int)), SLOT (shaping_formula (int)));
-
-    button_layout->addWidget (flat_checkbox, 0, 0);
-    button_layout->addWidget (linear_checkbox, 1, 0);
-    button_layout->addWidget (smooth_checkbox, 2, 0);
-    button_layout->addWidget (polynomial_checkbox, 0, 1);
-    button_layout->addWidget (trigonometric_checkbox, 1, 1);
-    button_layout->addWidget (square_checkbox, 2, 1);
+    _shaping_settings_widget->addWidget(_shapingComboBox);
 
     _shaping_radius_slider = new QSlider (Qt::Horizontal, _shaping_settings_widget);
     _shaping_radius_slider->setMinimum (shaping_radius_constants.minimum * shaping_radius_constants.scale);
     _shaping_radius_slider->setMaximum (shaping_radius_constants.maximum * shaping_radius_constants.scale);
+    _shaping_radius_slider->setMaximumWidth(200);
     connect (_shaping_radius_slider, SIGNAL (valueChanged (int)), SLOT (shaping_radius (int)));
 
     _shaping_speed_slider = new QSlider (Qt::Horizontal, _shaping_settings_widget);
     _shaping_speed_slider->setMinimum (shaping_speed_constants.minimum * shaping_speed_constants.scale);
     _shaping_speed_slider->setMaximum (shaping_speed_constants.maximum * shaping_speed_constants.scale);
+    _shaping_speed_slider->setMaximumWidth(200);
     connect (_shaping_speed_slider, SIGNAL (valueChanged (int)), SLOT (shaping_speed (int)));
 
     QLabel* radius_label (new QLabel (tr ("Brush &radius"), _shaping_settings_widget));
@@ -2049,10 +2048,10 @@ namespace noggit
     radius_label->setBuddy (_shaping_radius_slider);
     speed_label->setBuddy (_shaping_speed_slider);
 
-    widget_layout->addWidget (radius_label);
-    widget_layout->addWidget (_shaping_radius_slider);
-    widget_layout->addWidget (speed_label);
-    widget_layout->addWidget (_shaping_speed_slider);
+    _shaping_settings_widget->addWidget(radius_label);
+    _shaping_settings_widget->addWidget (_shaping_radius_slider);
+    _shaping_settings_widget->addWidget(speed_label);
+    _shaping_settings_widget->addWidget (_shaping_speed_slider);
 
     //! \note Looks funny, but sets the UI to the default position.
     shaping_radius (shaping_radius());
@@ -2064,38 +2063,28 @@ namespace noggit
   {
     delete _smoothing_settings_widget;
 
-    _smoothing_settings_widget = new QWidget (NULL);
-    _smoothing_settings_widget->setWindowTitle (tr ("Smoothing settings"));
+    _smoothing_settings_widget = new QToolBar (NULL);
 
-    QVBoxLayout* widget_layout (new QVBoxLayout (_smoothing_settings_widget));
+    _smoothingComboBox = new QComboBox (this);
 
-    QWidget* button_holder (new QWidget (_smoothing_settings_widget));
-    widget_layout->addWidget (button_holder);
+    _smoothingComboBox->addItem(tr ("Flat"), smoothing_formula_type::flat);
+    _smoothingComboBox->addItem(tr ("Linear"), smoothing_formula_type::linear);
+    _smoothingComboBox->addItem(tr ("Smooth"), smoothing_formula_type::smooth);
 
-    _smoothing_formula_radio_group = new QButtonGroup (this);
+    connect(_smoothingComboBox,SIGNAL(currentIndexChanged(int)),SLOT(shaping_formula(int)));
 
-    QRadioButton* flat_checkbox (new QRadioButton (tr ("Flat"), NULL));
-    QRadioButton* linear_checkbox (new QRadioButton (tr ("Linear"), NULL));
-    QRadioButton* smooth_checkbox (new QRadioButton (tr ("Smooth"), NULL));
-
-    _smoothing_formula_radio_group->addButton (flat_checkbox, smoothing_formula_type::flat);
-    _smoothing_formula_radio_group->addButton (linear_checkbox, smoothing_formula_type::linear);
-    _smoothing_formula_radio_group->addButton (smooth_checkbox, smoothing_formula_type::smooth);
-
-    connect (_smoothing_formula_radio_group, SIGNAL (buttonClicked (int)), SLOT (smoothing_formula (int)));
-
-    widget_layout->addWidget (flat_checkbox, 0, 0);
-    widget_layout->addWidget (linear_checkbox, 1, 0);
-    widget_layout->addWidget (smooth_checkbox, 2, 0);
+    _smoothing_settings_widget->addWidget(_smoothingComboBox);
 
     _smoothing_radius_slider = new QSlider (Qt::Horizontal, _smoothing_settings_widget);
     _smoothing_radius_slider->setMinimum (smoothing_radius_constants.minimum * smoothing_radius_constants.scale);
     _smoothing_radius_slider->setMaximum (smoothing_radius_constants.maximum * smoothing_radius_constants.scale);
+    _smoothing_radius_slider->setMaximumWidth(200);
     connect (_smoothing_radius_slider, SIGNAL (valueChanged (int)), SLOT (smoothing_radius (int)));
 
     _smoothing_speed_slider = new QSlider (Qt::Horizontal, _smoothing_settings_widget);
     _smoothing_speed_slider->setMinimum (smoothing_speed_constants.minimum * smoothing_speed_constants.scale);
     _smoothing_speed_slider->setMaximum (smoothing_speed_constants.maximum * smoothing_speed_constants.scale);
+    _smoothing_speed_slider->setMaximumWidth(200);
     connect (_smoothing_speed_slider, SIGNAL (valueChanged (int)), SLOT (smoothing_speed (int)));
 
     QLabel* radius_label (new QLabel (tr ("Brush &radius"), _smoothing_settings_widget));
@@ -2104,10 +2093,10 @@ namespace noggit
     radius_label->setBuddy (_smoothing_radius_slider);
     speed_label->setBuddy (_smoothing_speed_slider);
 
-    widget_layout->addWidget (radius_label);
-    widget_layout->addWidget (_smoothing_radius_slider);
-    widget_layout->addWidget (speed_label);
-    widget_layout->addWidget (_smoothing_speed_slider);
+    _smoothing_settings_widget->addWidget (radius_label);
+    _smoothing_settings_widget->addWidget (_smoothing_radius_slider);
+    _smoothing_settings_widget->addWidget (speed_label);
+    _smoothing_settings_widget->addWidget (_smoothing_speed_slider);
 
     //! \note Looks funny, but sets the UI to the default position.
     smoothing_radius (smoothing_radius());
@@ -2123,11 +2112,34 @@ namespace noggit
     // hardness
     // pressure
 
-    // button für swapper
+    // button for swapper
   }
 
+  void MapView::createToolBar()
+  {
+      QToolBar *toolBar = new QToolBar(NULL);
 
+      _toolbar_formula_radio_group = new QButtonGroup;
 
+      QWidget *widget = new QWidget();
+      QVBoxLayout *layout = new QVBoxLayout(widget);
+
+      QPushButton *shapingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Earth01.blp",50,50)), "");
+      shapingButton->setIconSize(QSize(50,50));
+      QPushButton *smoothingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Air01.blp",50,50)), "");
+      smoothingButton->setIconSize(QSize(50,50));
+
+      _toolbar_formula_radio_group->addButton(shapingButton, shaping);
+      _toolbar_formula_radio_group->addButton(smoothingButton, smoothing);
+
+      layout->addWidget(shapingButton);
+      layout->addWidget(smoothingButton);
+      toolBar->addWidget(widget);
+
+      connect(_toolbar_formula_radio_group,SIGNAL(buttonClicked(int)),SLOT(set_terrain_editing_mode(int)));
+
+      mainWindow->setToolBar(toolBar,Qt::RightToolBarArea);
+  }
 
 
 

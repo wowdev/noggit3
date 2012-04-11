@@ -46,10 +46,31 @@ Qt::ItemFlags DBCTableModel::flags(const QModelIndex &index) const
 
 bool DBCTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    Q_UNUSED(index);
-    Q_UNUSED(value);
-    Q_UNUSED(role);
-    return true;
+    if(role == Qt::EditRole)
+    {
+        DBCFile::Record record = dbcFile->getRecord(index.row());
+        if(hasConfigFile)
+        {
+            QString type = config->value(QString("column%1/type").arg(index.column()),"int").toString();
+
+            if(type == "int")
+                record.setData((size_t)index.column(),value.toInt());
+            else if(type == "uint")
+                record.setData((size_t)index.column(),value.toUInt());
+            else if(type == "float")
+                record.setData((size_t)index.column(),value.toFloat());
+            else if(type == "string")
+                record.setData((size_t)index.column(),value.toUInt());
+            else if(type == "loc")
+                record.setData((size_t)index.column()+record.getLocale((size_t)index.column()),value.toUInt());
+            else
+                record.setData((size_t)index.column(),value.toInt());
+
+            emit this->dataChanged(index,index);
+            return true;
+        }
+    }
+
 }
 
 QVariant DBCTableModel::data(const QModelIndex &index, int role) const
@@ -59,8 +80,7 @@ QVariant DBCTableModel::data(const QModelIndex &index, int role) const
         DBCFile::Record record = dbcFile->getRecord(index.row());
         if(hasConfigFile)
         {
-            QString value = QString("column%1/type").arg(index.column());
-            QString type = config->value(value,"int").toString();
+            QString type = config->value(QString("column%1/type").arg(index.column()),"int").toString();
 
             if(type == "int")
                 return record.getInt(index.column());
@@ -69,13 +89,15 @@ QVariant DBCTableModel::data(const QModelIndex &index, int role) const
             else if(type == "float")
                 return record.getFloat(index.column());
             else if(type == "string")
-            {
                 if(role == Qt::DisplayRole)
                     return QString::fromUtf8 (record.getString(index.column()));
-                return record.getUInt(index.column());
-            }
+                else
+                    return (int)record.getStringOffset(index.column());
             else if(type == "loc")
-                return QString::fromUtf8 (record.getLocalizedString(index.column()));
+                if(role == Qt::DisplayRole)
+                    return QString::fromUtf8 (record.getLocalizedString(index.column()));
+                else
+                    return (int)record.getLocalizedStringOffset(index.column());
             else
                 return record.getInt(index.column());
 
@@ -103,4 +125,9 @@ QVariant DBCTableModel::headerData(int section, Qt::Orientation orientation, int
 void DBCTableModel::settingsChanged(int first, int last)
 {
     emit this->headerDataChanged(Qt::Horizontal,first,last);
+}
+
+void DBCTableModel::save()
+{
+    dbcFile->saveToProjectPath();
 }

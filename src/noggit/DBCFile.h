@@ -10,6 +10,19 @@
 #include <cassert>
 #include <QString>
 #include <stdio.h>
+#include <stdint.h>
+
+#include <noggit/mpq/file.h>
+
+struct dbc_header
+{
+  uint32_t magic;
+  uint32_t recordCount;
+  uint32_t fieldCount;
+  uint32_t recordSize;
+  uint32_t stringSize;
+};
+
 
 class DBCFile
 {
@@ -19,6 +32,7 @@ public:
 
   // Open database. It must be openened before it can be used.
   void open();
+  void saveToProjectPath();
 
   // Database exceptions
   class Exception
@@ -43,22 +57,28 @@ public:
   class Record
   {
   public:
-    const void setData(size_t field, float value) const
+    const void setData(size_t field, unsigned char *value) const
     {
         assert(field < file.fieldCount);
         memset(offset+field*4,0,4);
-        unsigned char *fp = (uchar*)&value;
+        unsigned char *fp = value;
         unsigned char *op = offset+field*4;
         while(op < offset+field*4+4)
         {
              *op++ = *fp++;
         }
     }
-    const void setData(size_t field, unsigned char value) const
+    const void setData(size_t field, int value) const
     {
-        assert(field < file.fieldCount);
-        memset(offset+field*4,0,4);
-        memset(offset+field*4,value,sizeof(value));
+        this->setData(field,(uchar*)&value);
+    }
+    const void setData(size_t field, float value) const
+    {
+        this->setData(field,(uchar*)&value);
+    }
+    const void setData(size_t field, unsigned int value) const
+    {
+        this->setData(field,(uchar*)&value);
     }
     const float& getFloat(size_t field) const
     {
@@ -77,29 +97,41 @@ public:
     }
     const char *getString(size_t field) const
     {
+      return reinterpret_cast<char*>(file.stringTable + getStringOffset(field));
+    }
+    size_t getStringOffset(size_t field) const
+    {
       assert(field < file.fieldCount);
       size_t stringOffset = getUInt(field);
       assert(stringOffset < file.stringSize);
-      return reinterpret_cast<char*>(file.stringTable + stringOffset);
+      return stringOffset;
     }
     const char *getLocalizedString( size_t field, int locale = -1 ) const
+    {
+      return reinterpret_cast<char*>( file.stringTable + getLocalizedStringOffset(field,locale) );
+    }
+    size_t getLocalizedStringOffset( size_t field, int locale = -1 ) const
     {
       int loc = locale;
       if( locale == -1 )
       {
-        assert(field < file.fieldCount -  8 );
-        for( loc = 0; loc < 9; loc++ )
-        {
-          size_t stringOffset = getUInt(field + loc);
-          if( stringOffset != 0 )
-            break;
-        }
+            loc = getLocale(field);
       }
 
       assert( field + loc < file.fieldCount );
       size_t stringOffset = getUInt( field + loc );
       assert( stringOffset < file.stringSize );
-      return reinterpret_cast<char*>( file.stringTable + stringOffset );
+      return stringOffset;
+    }
+    int getLocale(size_t field) const
+    {
+        assert(field < file.fieldCount -  8 );
+        for( int loc = 0; loc < 9; loc++ )
+        {
+          size_t stringOffset = getUInt(field + loc);
+          if( stringOffset != 0 )
+            return loc;
+        }
     }
   private:
     Record(const DBCFile &pfile, unsigned char *poffset): file(pfile), offset(poffset) {}
@@ -117,13 +149,15 @@ public:
     Iterator(const DBCFile &file, unsigned char *offset):
       record(file, offset) {}
     /// Advance (prefix only)
-    Iterator & operator++() {
+    Iterator & operator++()
+    {
       record.offset += record.file.recordSize;
       return *this;
     }
     /// Return address of current instance
     Record const & operator*() const { return record; }
-    const Record* operator->() const {
+    const Record* operator->() const
+    {
       return &record;
     }
     /// Comparison
@@ -170,12 +204,15 @@ public:
 
 private:
   QString _filename;
+  noggit::mpq::file *f;
+  dbc_header header;
   size_t recordSize;
   size_t recordCount;
   size_t fieldCount;
   size_t stringSize;
   unsigned char *data;
   unsigned char *stringTable;
+  unsigned char* headerData;
 };
 
 #endif

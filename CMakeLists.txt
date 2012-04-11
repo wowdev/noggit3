@@ -76,6 +76,7 @@ set ( noggit_sources
       src/noggit/World.cpp
       src/noggit/ModelView.cpp
       src/noggit/DBCTableModel.cpp
+      src/noggit/MainWindow.cpp
 
       src/noggit/async/loader.cpp
       src/noggit/async/loading_thread.cpp
@@ -91,6 +92,7 @@ set ( noggit_sources
       src/noggit/ui/minimap_widget.cpp
       src/noggit/ui/cursor_selector.cpp
       src/noggit/ui/DBCEditor.cpp
+      src/noggit/ui/projectExplorer.cpp
     )
 
 set ( noggit_headers
@@ -125,6 +127,7 @@ set ( noggit_headers
       src/noggit/errorHandling.h
       src/noggit/ModelView.h
       src/noggit/DBCTableModel.h
+      src/noggit/MainWindow.h
 
       src/noggit/async/loader.h
       src/noggit/async/loading_thread.h
@@ -141,6 +144,7 @@ set ( noggit_headers
       src/noggit/ui/model_spawner.h
       src/noggit/ui/minimap_widget.h
       src/noggit/ui/DBCEditor.h
+      src/noggit/ui/projectExplorer.h
     )
 
 set ( noggit_headers_to_moc
@@ -150,6 +154,7 @@ set ( noggit_headers_to_moc
       src/noggit/MapView.h
       src/noggit/ModelView.h
       src/noggit/DBCTableModel.h
+      src/noggit/MainWindow.h
 
       src/noggit/async/loader.h
       src/noggit/async/loading_thread.h
@@ -161,6 +166,7 @@ set ( noggit_headers_to_moc
       src/noggit/ui/model_spawner.h
       src/noggit/ui/minimap_widget.h
       src/noggit/ui/DBCEditor.h
+      src/noggit/ui/projectExplorer.h
     )
 
 

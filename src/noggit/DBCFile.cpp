@@ -5,19 +5,7 @@
 
 #include <noggit/DBCFile.h>
 
-#include <stdint.h>
-
-#include <noggit/mpq/file.h>
 #include <noggit/Log.h>
-
-struct dbc_header
-{
-  uint32_t magic;
-  uint32_t recordCount;
-  uint32_t fieldCount;
-  uint32_t recordSize;
-  uint32_t stringSize;
-};
 
 DBCFile::DBCFile (const QString& filename)
   : _filename (filename)
@@ -31,12 +19,11 @@ DBCFile::DBCFile (const QString& filename)
 
 void DBCFile::open()
 {
-  noggit::mpq::file f (_filename);
-
+  f = new noggit::mpq::file(_filename);
   LogDebug << "Opening DBC " << qPrintable (_filename) << std::endl;
-
-  dbc_header header;
-  f.read (&header, sizeof (header));
+  headerData = new unsigned char[sizeof (header)];
+  f->read (headerData, sizeof (header));
+  memcpy(&header,headerData,sizeof(header));
 
   //! \note Yup, in these files, they store the magic as string, not uint32_t.
   assert (header.magic == 'CBDW');
@@ -49,17 +36,30 @@ void DBCFile::open()
 
   data = new unsigned char[recordSize * recordCount];
   stringTable = new unsigned char[stringSize];
-  f.read (data, recordSize * recordCount);
-  f.read(stringTable,stringSize);
-  f.close();
+  f->read (data, recordSize * recordCount);
+  f->read (stringTable, stringSize);
+
+}
+
+void DBCFile::saveToProjectPath()
+{
+  char buffer[sizeof(header)+recordSize * recordCount+stringSize];
+  memcpy(buffer,headerData,sizeof(header));
+  memcpy(buffer+sizeof(header),data,recordSize * recordCount);
+  memcpy(buffer+sizeof(header)+recordSize * recordCount,stringTable,stringSize);
+  f->setBuffer(buffer,sizeof(buffer));
+  f->save_to_disk();
 }
 
 DBCFile::~DBCFile()
 {
-  if( data )
+  f->close();
+  if( data && stringTable )
   {
     delete[] data;
+    delete[] stringTable;
     data = NULL;
+    stringTable = NULL;
   }
 }
 

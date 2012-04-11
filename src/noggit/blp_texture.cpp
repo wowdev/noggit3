@@ -98,8 +98,7 @@ namespace noggit
     mpq::file f (_filename);
 
     const char* data (f.getPointer());
-    const detail::blp_header* header
-      (reinterpret_cast<const detail::blp_header*> (data));
+    const detail::blp_header* header(reinterpret_cast<const detail::blp_header*> (data));
 
     if (header->attr_0_compression == 1)
     {
