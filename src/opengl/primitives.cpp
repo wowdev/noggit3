@@ -55,6 +55,7 @@ namespace opengl
       glVertex3f (_min_point.x(), _max_point.y(), _max_point.z());
       glVertex3f (_max_point.x(), _max_point.y(), _max_point.z());
       glEnd();
+
     }
   }
 }

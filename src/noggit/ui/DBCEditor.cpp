@@ -15,15 +15,19 @@ DBCEditor::DBCEditor(const QString& filename, QWidget *parent)
   , layout (new QVBoxLayout (this))
   , model (new DBCTableModel(filename))
 {
+
+    QPushButton *save = new QPushButton(tr("Save"),this);
     view->setEditTriggers(QAbstractItemView::DoubleClicked);
     view->setSelectionMode(QAbstractItemView::SingleSelection);
     view->setModel(model);
     view->setContextMenuPolicy(Qt::CustomContextMenu);
     layout->addWidget(view);
+    layout->addWidget(save);
 
     this->setLayout(layout);
 
     connect(view, SIGNAL(customContextMenuRequested(const QPoint &)),this, SLOT(showContextMenu(const QPoint &)));
+    connect(save,SIGNAL(clicked()),model,SLOT(save()));
 }
 
 void DBCEditor::showContextMenu(const QPoint &point)

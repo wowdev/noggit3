@@ -17,15 +17,18 @@
 
 class QAction;
 class QMenu;
-class QButtonGroup;
+class QComboBox;
 class QSlider;
 class QSettings;
+class QToolBar;
+class QButtonGroup;
 
 class World;
 class nameEntry;
 
 namespace noggit
 {
+  class MainWindow;
   namespace ui
   {
     class about_widget;
@@ -87,7 +90,7 @@ namespace noggit
             , float ah0 = -90.0f
             , float av0 = -30.0f
             , QGLWidget* shared = NULL
-            , QWidget* parent = NULL
+            , MainWindow* parent = NULL
             );
     virtual ~MapView();
 
@@ -109,7 +112,7 @@ namespace noggit
     virtual void dragMoveEvent (QDragMoveEvent*);
 
   public slots:
-    void set_terrain_editing_mode (const terrain_editing_modes&);
+    void set_terrain_editing_mode (int);
 
   private slots:
     void add_bookmark();
@@ -196,6 +199,8 @@ namespace noggit
     void create_smoothing_settings_widget();
     void create_paint_settings_widget();
 
+    void createToolBar();
+
     void create_obsolete_gui();
 
     const qreal& shaping_radius() const;
@@ -240,6 +245,8 @@ namespace noggit
 
     World* _world;
 
+    MainWindow *mainWindow;
+
     ui::minimap_widget* _minimap;
     ui::model_spawner* _model_spawner;
     ui::help_widget* _help_widget;
@@ -270,25 +277,27 @@ namespace noggit
 
     //! \todo Use the brush class for these? Or simplify that somehow?
 
+    QButtonGroup *_toolbar_formula_radio_group;
+
     // shaping -----------
     qreal _shaping_radius;
     qreal _shaping_speed;
     shaping_formula_type::formula _shaping_formula;
 
-    QButtonGroup* _shaping_formula_radio_group;
+    QComboBox* _shapingComboBox;
     QSlider* _shaping_radius_slider;
     QSlider* _shaping_speed_slider;
-    QWidget* _shaping_settings_widget;
+    QToolBar* _shaping_settings_widget;
 
     // smoothing -----------
     qreal _smoothing_radius;
     qreal _smoothing_speed;
     smoothing_formula_type::formula _smoothing_formula;
 
-    QButtonGroup* _smoothing_formula_radio_group;
+    QComboBox* _smoothingComboBox;
     QSlider* _smoothing_radius_slider;
     QSlider* _smoothing_speed_slider;
-    QWidget* _smoothing_settings_widget;
+    QToolBar* _smoothing_settings_widget;
 
     // texturing -----------
     qreal _texturing_radius;
@@ -300,7 +309,7 @@ namespace noggit
     QSlider* _texturing_hardness_slider;
     QSlider* _texturing_pressure_slider;
     QSlider* _texturing_opacity_slider;
-    QWidget* _texturing_settings_widget;
+    QToolBar* _texturing_settings_widget;
 
     bool _automatically_update_terrain_selection;
     bool _copy_size_randomization;

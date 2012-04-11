@@ -2,7 +2,7 @@
 // Beket <snipbeket@mail.ru>
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
-// Mjollnà <mjollna.wow@gmail.com>
+// Mjolln�  <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
@@ -125,6 +125,8 @@ void Menu::enter_world_at (const ::math::vector_3d& pos, bool auto_height, float
   {
     _world->set_camera_above_terrain();
   }
+
+  this->hide();
 }
 
 void Menu::load_map (int map_id)

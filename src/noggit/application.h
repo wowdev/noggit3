@@ -1,6 +1,6 @@
 // application.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
-// Mjollnà <mjollna.wow@gmail.com>
+// Mjolln�  <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
 #ifndef __NOGGIT_APPLICATION_H
@@ -8,8 +8,11 @@
 
 #include <QApplication>
 
+
 #include <noggit/async/loader.h>
 #include <noggit/mpq/archive_manager.h>
+#include <noggit/MainWindow.h>
+
 
 class QSettings;
 class QGLWidget;
@@ -33,7 +36,7 @@ namespace noggit
     mpq::archive_manager& archive_manager();
 
   public slots:
-    void create_world_view (World*);
+
 
   signals:   
     void settingAboutToChange (const QString& key, const QVariant& value);   	
@@ -42,7 +45,6 @@ namespace noggit
   private:
     void set_working_directory_to_application_path();
     void parse_command_line_and_set_defaults();
-    void initialize_video();
     void get_game_path();
     void open_mpqs();
     void add_font_from_mpq (const QString& filename) const;
@@ -52,7 +54,6 @@ namespace noggit
     QString _project_path;
     QString _locale;
 
-    QGLWidget* _dummy_gl_widget;
 
     async::loader _async_loader;
     mpq::archive_manager _archive_manager;

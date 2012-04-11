@@ -2,7 +2,7 @@
 // Beket <snipbeket@mail.ru>
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
-// Mjollnà <mjollna.wow@gmail.com>
+// Mjolln�  <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
@@ -33,6 +33,8 @@
 #include <noggit/WMO.h> // WMOManager::report()
 #include <noggit/ModelManager.h> // ModelManager::report()
 #include <noggit/mpq/file.h>
+
+#include <noggit/ui/DBCEditor.h>
 
 namespace noggit
 {
@@ -79,10 +81,11 @@ namespace noggit
 
     OpenDBs();
 
-    initialize_video();
+    MainWindow *mainwindow = new MainWindow;
+    mainwindow->show();
 
     Menu* map_selection_menu (new Menu (NULL));
-    connect (map_selection_menu, SIGNAL (create_world_view_request (World*)), SLOT (create_world_view (World*)));
+    connect (map_selection_menu, SIGNAL (create_world_view_request (World*)), mainwindow, SLOT (create_world_view (World*)));
     map_selection_menu->show();
 
   }
@@ -168,56 +171,6 @@ namespace noggit
     _settings->setValue ("antialiasing", doAntiAliasing);
     _settings->setValue ("view_distance", view_distance);
     _settings->sync();
-  }
-
-  class dummy_gl_widget : public QGLWidget
-  {
-  public:
-    dummy_gl_widget (const QGLFormat& format)
-      : QGLWidget (format)
-    {
-      updateGL();
-    }
-  protected:
-    virtual void initializeGL()
-    {
-      const GLenum err (glewInit());
-      if( GLEW_OK != err )
-      {
-        LogError << "GLEW: " << glewGetErrorString (err) << std::endl;
-        throw std::runtime_error ("unable to initialize glew.");
-      }
-
-      //! \todo Fallback for old and bad platforms.
-      if (!glGenBuffers) glGenBuffers = glGenBuffersARB;
-      if (!glBindBuffer) glBindBuffer = glBindBufferARB;
-      if (!glBufferData) glBufferData = glBufferDataARB;
-
-      LogDebug << "GL: Version: " << glGetString (GL_VERSION) << std::endl;
-      LogDebug << "GL: Vendor: " << glGetString (GL_VENDOR) << std::endl;
-      LogDebug << "GL: Renderer: " << glGetString (GL_RENDERER) << std::endl;
-    }
-  };
-
-  void application::initialize_video()
-  {
-    if (!QGLFormat::hasOpenGL())
-    {
-      LogError << "Your system does not support OpenGL. Sorry, this application can't run without it." << std::endl;
-    }
-
-    QGLFormat format;
-    format.setStencilBufferSize (1);
-    format.setDepthBufferSize (16);
-    format.setAlphaBufferSize (8);
-
-    if (_settings->value ("antialiasing").toBool())
-    {
-      format.setSampleBuffers (true);
-      format.setSamples (4);
-    }
-
-    _dummy_gl_widget = new dummy_gl_widget (format);
   }
 
   void application::get_game_path()
@@ -360,30 +313,6 @@ namespace noggit
     }
   }
 
-  void application::create_world_view (World* world)
-  {
-    MapView* map_view ( new MapView ( world
-                                    , _settings->value ("view_distance").toReal()
-                                    , 0.0
-                                    , 0.0
-                                    , _dummy_gl_widget
-                                    , NULL
-                                    )
-                      );
-
-    const bool inFullscreen (_settings->value ("fullscreen").toBool());
-    if (inFullscreen)
-    {
-      map_view->showFullScreen();
-    }
-    else
-    {
-      const int xResolution (_settings->value ("resolution/x").toInt());
-      const int yResolution (_settings->value ("resolution/y").toInt());
-      map_view->show();
-      map_view->resize (xResolution, yResolution);
-    }
-  }
 
   void application::add_font_from_mpq (const QString& filename) const
   {
