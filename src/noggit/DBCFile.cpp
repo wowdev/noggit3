@@ -43,6 +43,7 @@ void DBCFile::open()
 
 void DBCFile::saveToProjectPath()
 {
+  //ERROR: this is not c++ conform c array MUS be declared with in compiler time defined constant. Use sExtendableArray. We should pack this into the misc namespace in an own class file!
   char buffer[sizeof(header)+recordSize * recordCount+stringSize];
   memcpy(buffer,headerData,sizeof(header));
   memcpy(buffer+sizeof(header),data,recordSize * recordCount);
