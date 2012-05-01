@@ -15,8 +15,9 @@ LoadingScreensDB gLoadingScreensDB;
 LightDB gLightDB;
 LightParamsDB gLightParamsDB;
 LightSkyboxDB gLightSkyboxDB;
-LightIntBandDB gLightIntBandDB;
-LightFloatBandDB gLightFloatBandDB;
+//! \todo Is now in one file.
+//LightIntBandDB gLightIntBandDB;
+//LightFloatBandDB gLightFloatBandDB;
 GroundEffectDoodadDB gGroundEffectDoodadDB;
 GroundEffectTextureDB gGroundEffectTextureDB;
 LiquidTypeDB gLiquidTypeDB;
@@ -29,8 +30,8 @@ void OpenDBs()
   gLightDB.open();
   gLightParamsDB.open();
   gLightSkyboxDB.open();
-  gLightIntBandDB.open();
-  gLightFloatBandDB.open();
+//  gLightIntBandDB.open();
+//  gLightFloatBandDB.open();
   gGroundEffectDoodadDB.open();
   gGroundEffectTextureDB.open();
   gLiquidTypeDB.open();

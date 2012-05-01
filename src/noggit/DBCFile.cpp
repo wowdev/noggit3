@@ -9,11 +9,11 @@
 
 DBCFile::DBCFile (const QString& filename)
   : _filename (filename)
-  , data (NULL)
-  , recordCount(NULL)
-  , fieldCount(NULL)
-  , recordSize(NULL)
-  , stringSize(NULL)
+  , data (nullptr)
+  , recordCount (0U)
+  , fieldCount (0U)
+  , recordSize (0U)
+  , stringSize (0U)
 {
 }
 
@@ -43,7 +43,6 @@ void DBCFile::open()
 
 void DBCFile::saveToProjectPath()
 {
-  //ERROR: this is not c++ conform c array MUS be declared with in compiler time defined constant. Use sExtendableArray. We should pack this into the misc namespace in an own class file!
   char buffer[sizeof(header)+recordSize * recordCount+stringSize];
   memcpy(buffer,headerData,sizeof(header));
   memcpy(buffer+sizeof(header),data,recordSize * recordCount);
@@ -54,14 +53,14 @@ void DBCFile::saveToProjectPath()
 
 DBCFile::~DBCFile()
 {
-  f->close();
-  if( data && stringTable )
-  {
-    delete[] data;
-    delete[] stringTable;
-    data = NULL;
-    stringTable = NULL;
-  }
+  delete f;
+  f = nullptr;
+
+  delete[] data;
+  data = nullptr;
+
+  delete[] stringTable;
+  stringTable = nullptr;
 }
 
 

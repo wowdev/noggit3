@@ -43,12 +43,13 @@ Sky::Sky( DBCFile::Iterator data )
   {
     try
     {
-      DBCFile::Record rec = gLightIntBandDB.getByID( FirstId + i );
-      int entries = rec.getInt( LightIntBandDB::Entries );
+    //  DBCFile::Record rec = gLightIntBandDB.getByID( FirstId + i );
+    //  int entries = rec.getInt( LightIntBandDB::Entries );
+      const int entries (0);
 
       if ( entries == 0 )
         mmin[i] = -1;
-      else
+      /*else
       {
         mmin[i] = rec.getInt( LightIntBandDB::Times );
         for( int l = 0; l < entries; l++ )
@@ -56,7 +57,7 @@ Sky::Sky( DBCFile::Iterator data )
           SkyColor sc( rec.getInt( LightIntBandDB::Times + l ), rec.getInt( LightIntBandDB::Values + l ) );
           colorRows[i].push_back( sc );
         }
-      }
+      }*/
     }
     catch(...)
     {
