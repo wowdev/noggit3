@@ -14,7 +14,7 @@
 #include "UIToolbarIcon.h"
 
 UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
-: UIWindow( xPos, yPos, 105.0f, 380.0f, "interface\\tooltips\\ui-tooltip-border.blp" )
+: UIWindow( xPos, yPos, 105.0f, 280.0f, "interface\\tooltips\\ui-tooltip-border.blp" )
 , mainGui( setGui )
 , text( new UIText( 8, 7, "Raise/Lower", arialn13, eJustifyLeft ) )
 , selectedIcon( -1 )
@@ -34,14 +34,11 @@ UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
   SetIcon( 3, "Interface\\ICONS\\INV_Gizmo_HardenedAdamantiteTube.blp" );
   SetIcon( 4, "Interface\\ICONS\\INV_Misc_Map07.blp" );
   SetIcon( 5, "Interface\\ICONS\\INV_Misc_Net_01.blp" );
-  SetIcon( 6, "Interface\\ICONS\\INV_Misc_Flower_02.blp" );
-  SetIcon( 7, "Interface\\Icons\\INV_Enchant_EssenceAstralLarge.blp" );
-  SetIcon( 8, "Interface\\Icons\\Spell_Shaman_ThunderStorm.blp" );
-  SetIcon( 9, "Interface\\Icons\\Spell_Shaman_TidalWaves.blp" );
+
 
   IconSelect( 0 );
 
-  UIWindow* texture_border = new UIWindow( 5, 280, 95.0f, 95.0f );
+  UIWindow* texture_border = new UIWindow( 5, 180, 95.0f, 95.0f );
   texture_border->addChild( current_texture );
   addChild( texture_border );
 }
@@ -60,14 +57,14 @@ void UIToolbar::IconSelect( int pIcon )
 {
   change_settings_window( selectedIcon, pIcon + 1 > 6 ? 0 : pIcon + 1);
 
-  const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "AreaID Paint", "Impassible Flag", "Not used", "Not used", "Not used", "Not used" };
+  const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "AreaID Paint", "Impassible Flag" };
   text->setText( Names[pIcon] );
 
   terrainMode = pIcon;
 
   Environment::getInstance()->view_holelines = ( pIcon == 3 );
 
-  for( int j = 0; j < 10; j++ )
+  for( int j = 0; j < 6; j++ )
     if( mToolbarIcons[j] )
       mToolbarIcons[j]->selected = false;
 
