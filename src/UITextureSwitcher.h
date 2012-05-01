@@ -1,22 +1,27 @@
 #ifndef __TEXTURESWITCHER_H
 #define __TEXTURESWITCHER_H
 
-#include "UICloseWindow.h"
+#include "UIWindow.h"
 
 class nameEntry;
 class UITexture;
+class UIButton;
 
-class UITextureSwitcher : public UICloseWindow
+class UITextureSwitcher : public UIWindow
 {
 public:
   UITextureSwitcher(  int x, int y );
 
-  void getTextures( nameEntry* lSelection );
-  void setTexture( size_t id );
-  void setPosition( int x, int y );
+  OpenGL::Texture* getTextures();
+  void setTexture();
+  void setPosition( float x, float y );
 
 private:
-  UITexture* _textures;
+  UITexture *_textureFrom;
+  UITexture *_textureTo;
+
+  UIButton *_setFromButton;
+  UIButton *_setToButton;
   float xPos, zPos;
 };
 
