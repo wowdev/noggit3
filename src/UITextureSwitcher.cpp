@@ -1,47 +1,68 @@
 #include "UITextureSwitcher.h"
 
+#include "Noggit.h" // arial16
 #include "World.h"
-#include "Selection.h"
-#include "MapChunk.h"
+
 #include "UITexture.h"
 #include "UITexturingGUI.h"
+#include "UIButton.h"
+#include "UIText.h"
+#include "MapView.h"
+#include "misc.h"
 
-void textureSwitcherClick( UIFrame* f,int id )
+extern UIWindow *settings_paint;
+extern UIWindow *settings_paint;
+extern World *gWorld;
+
+void swapADT(UIFrame *f,int id)
 {
-  // redirect to sender object.
-  ( static_cast<UITextureSwitcher *>( f->parent() ) )->setTexture( id );
+  gWorld->swapTexture(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE),( static_cast<UITextureSwitcher *>( f->parent() ) )->getTextures());
 }
 
 
+void setTexturePressed(UIFrame *f,int id)
+{
+  ( static_cast<UITextureSwitcher *>( f->parent() ) )->setTexture();
+}
+
+void closeButtonPressed(UIFrame *f,int id)
+{
+  settings_paint->show();
+  if( f->parent() )
+    f->parent()->hide();
+}
+
 UITextureSwitcher::UITextureSwitcher( int x, int y )
-: UICloseWindow( x, y, 130, 140, "Texture", true )
+: UIWindow( x, y, 130, 200)
 {
    const int textureSize = 110;
 
-	_textures = new UITexture( 10 , 25, textureSize, textureSize, "tileset\\generic\\black.blp" );
+  _textureFrom = new UITexture( 10 , 60, textureSize, textureSize, "tileset\\generic\\black.blp" );
+  _setFromButton = new UIButton( 10 , 65 + textureSize, textureSize, 30, "set destination", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", setTexturePressed, 0 );
 
-    addChild( _textures );
-  
+  addChild( _textureFrom );
+  addChild( _setFromButton );
+
+  addChild( new UIText( width() / 2.0f, 2.0f, "swapper", arial16, eJustifyCenter ) );
+  addChild( new UIButton( width() - 29.0f , 1.0f, 30.0f, 30.0f, "", "Interface\\Buttons\\UI-Panel-MinimizeButton-Up.blp", "Interface\\Buttons\\UI-Panel-MinimizeButton-Down.blp", closeButtonPressed, 0 ) );
+  addChild( new UIButton( 10 , 30 , textureSize, 30, "swap ADT", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", swapADT, 0 ) );
 }
 
-void UITextureSwitcher::getTextures( nameEntry* lSelection )
+OpenGL::Texture*  UITextureSwitcher::getTextures()
 {
-  assert( lSelection );
-
-  show();
-
- 
+ return _textureFrom->getTexture();
 }
 
-void UITextureSwitcher::setTexture( size_t id )
+void UITextureSwitcher::setTexture()
 {
-  assert( id < 4 );
-  //gWorld->overwriteTextureAtCurrentChunk( this->xPos, this->zPos, _textures, UITexturingGUI::getSelectedTexture());
+  _textureFrom->setTexture(UITexturingGUI::getSelectedTexture());
 }
 
-void UITextureSwitcher::setPosition( int setX, int setY )
+void UITextureSwitcher::setPosition( float setX, float setY )
 {
-	this->xPos = setX;
-	this->zPos = setY;
+  this->_x = setX;
+  this->_y = setY;
 }
+
+
 
