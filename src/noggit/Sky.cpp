@@ -37,7 +37,7 @@ Sky::Sky( DBCFile::Iterator data )
 
   global = ( pos.x() == 0.0f && pos.y() == 0.0f && pos.z() == 0.0f );
 
-  int FirstId = data->getInt( LightDB::DataIDs ) * 18;
+  int FirstId = data->getInt(LightDB::DataIDs) * 18 - 17; // cromons light fix ;) Thanks
 
   for( int i = 0; i < 18; ++i )
   {
