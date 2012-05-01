@@ -14,7 +14,8 @@ Settings::Settings()
   this->AutoSelectingMode=true;
   this->holelinesOn=false;
   this->FarZ = 1024;
-  _noAntiAliasing = false;
+  this->_noAntiAliasing = false;
+  this->copyModelStats = true;
 
   if( boost::filesystem::exists( "noggIt.conf" ) )
   {

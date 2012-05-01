@@ -10,6 +10,7 @@ public:
   bool copy_tile;      // True = Random tileing on model insert.
   bool copy_size;      // True = Random sizing on model insert.
   bool copy_autoselect;  //
+  bool copyModelStats;
 
   int FarZ;        // the far clipping value
 
