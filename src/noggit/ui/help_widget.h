@@ -12,6 +12,8 @@ namespace noggit
   {
     class help_widget : public QTextBrowser
     {
+      Q_OBJECT
+
     public:
       help_widget (QWidget* parent = NULL);
     };

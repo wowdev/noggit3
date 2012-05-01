@@ -40,14 +40,10 @@ namespace noggit
 {
   application::application (int& argc, char** argv)
     : QApplication (argc, argv)
-    , _settings (NULL)
+    , _settings (nullptr)
     , _async_loader (1)
     , _archive_manager (_async_loader)
   {
-#ifndef _DEBUG
-    RegisterErrorHandlers();
-#endif
-    InitLogging();
     Log << "Noggit Studio - " << helper::repository::revision() << std::endl;
 
     setOrganizationDomain ("modcraft.tk");
@@ -84,7 +80,7 @@ namespace noggit
     MainWindow *mainwindow = new MainWindow;
     mainwindow->show();
 
-    Menu* map_selection_menu (new Menu (NULL));
+    Menu* map_selection_menu (new Menu (nullptr));
     connect (map_selection_menu, SIGNAL (create_world_view_request (World*)), mainwindow, SLOT (create_world_view (World*)));
     map_selection_menu->show();
 
@@ -107,17 +103,17 @@ namespace noggit
     return _async_loader;
   }
 
-  QVariant application::setting(const QString& key) const 
+  QVariant application::setting(const QString& key) const
   {
     return _settings->value (key);
   }
 
-  void application::setting(const QString& key, const QVariant& value)   
-  {     
-    emit settingAboutToChange (key, setting (key));     
+  void application::setting(const QString& key, const QVariant& value)
+  {
+    emit settingAboutToChange (key, setting (key));
     _settings->setValue (key, value);
     emit settingChanged (key, value);
-  }  
+  }
 
   void application::set_working_directory_to_application_path()
   {
@@ -209,12 +205,11 @@ namespace noggit
   #ifdef Q_WS_MAC
       _game_path = "/Applications/World of Warcraft/";
   #else
-      _game_path = QFileDialog::getExistingDirectory(NULL
+      _game_path = QFileDialog::getExistingDirectory ( nullptr
                                                      , tr("Open WoW Directory")
                                                      , "/"
                                                      , QFileDialog::ShowDirsOnly
-                                                     )
-                                                     .append("/");
+                                                     );
   #endif
   #endif
     }
@@ -342,6 +337,12 @@ int __stdcall WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmd
 
 int main (int argc, char *argv[])
 {
+#ifndef _DEBUG
+  RegisterErrorHandlers();
+#endif
+
+  InitLogging();
+
   try
   {
     noggit::application application (argc, argv);
