@@ -17,6 +17,8 @@ namespace noggit
 
     class loader : public QObject
     {
+      Q_OBJECT
+
     public:
       loader (size_t thread_count, QObject* parent = NULL);
       ~loader();
