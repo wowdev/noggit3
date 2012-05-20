@@ -57,7 +57,7 @@ public:
   class Record
   {
   public:
-    const void setData(size_t field, unsigned char *value) const
+    void setData(size_t field, unsigned char *value) const
     {
         assert(field < file.fieldCount);
         memset(offset+field*4,0,4);
@@ -68,15 +68,15 @@ public:
              *op++ = *fp++;
         }
     }
-    const void setData(size_t field, int value) const
+    void setData(size_t field, int value) const
     {
         this->setData(field,(uchar*)&value);
     }
-    const void setData(size_t field, float value) const
+    void setData(size_t field, float value) const
     {
         this->setData(field,(uchar*)&value);
     }
-    const void setData(size_t field, unsigned int value) const
+    void setData(size_t field, unsigned int value) const
     {
         this->setData(field,(uchar*)&value);
     }
@@ -132,6 +132,7 @@ public:
           if( stringOffset != 0 )
             return loc;
         }
+        return 0;
     }
   private:
     Record(const DBCFile &pfile, unsigned char *poffset): file(pfile), offset(poffset) {}
