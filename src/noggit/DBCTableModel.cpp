@@ -21,7 +21,7 @@ DBCTableModel::DBCTableModel(const QString& filename, QObject *parent)
     {
         hasConfigFile = true;
         config = new QSettings(configFile,QSettings::IniFormat);
-    }  
+    }
 }
 
 int DBCTableModel::rowCount(const QModelIndex &parent) const
@@ -70,7 +70,7 @@ bool DBCTableModel::setData(const QModelIndex &index, const QVariant &value, int
             return true;
         }
     }
-
+  return false;
 }
 
 QVariant DBCTableModel::data(const QModelIndex &index, int role) const
