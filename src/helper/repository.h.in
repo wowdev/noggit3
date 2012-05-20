@@ -8,9 +8,9 @@ namespace helper
 {
   namespace repository
   {
-    static const int revision() { return @hg_rev_id@; }
-    static const QString revision_string() { return "@hg_rev_id_str@"; }
-    static const QString hash() { return "@hg_rev_hash_str@"; }
+    inline int revision() { return @hg_rev_id@; }
+    inline QString revision_string() { return "@hg_rev_id_str@"; }
+    inline QString hash() { return "@hg_rev_hash_str@"; }
   }
 }
 
