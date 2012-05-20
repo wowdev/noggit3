@@ -44,10 +44,6 @@ namespace noggit
     , _async_loader (1)
     , _archive_manager (_async_loader)
   {
-#ifndef _DEBUG
-    RegisterErrorHandlers();
-#endif
-    InitLogging();
     Log << "Noggit Studio - " << helper::repository::revision() << std::endl;
 
     setOrganizationDomain ("modcraft.tk");
@@ -107,17 +103,17 @@ namespace noggit
     return _async_loader;
   }
 
-  QVariant application::setting(const QString& key) const 
+  QVariant application::setting(const QString& key) const
   {
     return _settings->value (key);
   }
 
-  void application::setting(const QString& key, const QVariant& value)   
-  {     
-    emit settingAboutToChange (key, setting (key));     
+  void application::setting(const QString& key, const QVariant& value)
+  {
+    emit settingAboutToChange (key, setting (key));
     _settings->setValue (key, value);
     emit settingChanged (key, value);
-  }  
+  }
 
   void application::set_working_directory_to_application_path()
   {
@@ -213,8 +209,7 @@ namespace noggit
                                                      , tr("Open WoW Directory")
                                                      , "/"
                                                      , QFileDialog::ShowDirsOnly
-                                                     )
-                                                     .append("/");
+                                                     );
   #endif
   #endif
     }
@@ -342,6 +337,11 @@ int __stdcall WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmd
 
 int main (int argc, char *argv[])
 {
+#ifndef _DEBUG
+  RegisterErrorHandlers();
+#endif
+  InitLogging();
+
   try
   {
     noggit::application application (argc, argv);
