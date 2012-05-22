@@ -46,7 +46,9 @@ void DBCFile::open()
 
 void DBCFile::saveToProjectPath()
 {
-  char buffer[sizeof(header)+recordSize * recordCount+stringSize];
+	//sizeof(header)+recordSize*recordCount+stringSize
+
+  char buffer[50000];//WRONG: Use extendeble array like in ADT save.
   memcpy(buffer,headerData,sizeof(header));
   memcpy(buffer+sizeof(header),data,recordSize * recordCount);
   memcpy(buffer+sizeof(header)+recordSize * recordCount,stringTable,stringSize);
