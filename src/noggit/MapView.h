@@ -1,6 +1,7 @@
 // MapView.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
+// Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
@@ -133,6 +134,7 @@ namespace noggit
     void reload_current_tile();
     void reset_selected_object_rotation();
     void save();
+    void saveCata();
     void save_all();
     void save_minimap();
     void snap_selected_object_to_ground();

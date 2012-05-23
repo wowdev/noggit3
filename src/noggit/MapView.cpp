@@ -2,6 +2,7 @@
 // Beket <snipbeket@mail.ru>
 // Bernd Lrwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
+// Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
@@ -217,6 +218,7 @@ namespace noggit
     NEW_ACTION (save_wdt, tr ("Save WDT"), SLOT (TEST_save_wdt()), 0);
     NEW_ACTION (save_minimap, tr ("Save minimap as raw files"), SLOT (save_minimap()), Qt::Key_P + Qt::SHIFT + Qt::CTRL);
     NEW_ACTION_OTHER (model_spawner, tr ("Add object to map"), _model_spawner, SLOT (show()), Qt::Key_T);
+    NEW_ACTION (save_current_tile_cata, tr ("Save current tile (Cata tests)"), SLOT (saveCata()), 0);
 
   #undef NEW_ACTION
   #undef NEW_ACTION_OTHER
@@ -316,6 +318,7 @@ namespace noggit
     debug_menu->addAction (save_wdt);
     debug_menu->addAction (model_spawner);
     debug_menu->addAction (save_minimap);
+    debug_menu->addAction (save_current_tile_cata);
 
     QMenu* useless_menu (debug_menu->addMenu (tr ("Stuff that should only be on keys")));
     useless_menu->addAction (turn_around);
@@ -1483,6 +1486,11 @@ namespace noggit
   void MapView::save()
   {
     _world->saveTile( static_cast<int>( _world->camera.x() ) / TILESIZE, static_cast<int>( _world->camera.z() ) / TILESIZE );
+  }
+
+  void MapView::saveCata()
+  {
+    _world->saveTileCata( static_cast<int>( _world->camera.x() ) / TILESIZE, static_cast<int>( _world->camera.z() ) / TILESIZE );
   }
 
   void MapView::reload_current_tile()

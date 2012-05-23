@@ -1,5 +1,6 @@
 // MapTile.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
@@ -60,6 +61,7 @@ public:
   bool GetVertex( float x, float z, ::math::vector_3d *V );
 
   void saveTile();
+  void saveTileCata();
 
   bool isTile( int pX, int pZ );
   void clearAllModels();

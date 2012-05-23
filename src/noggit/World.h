@@ -1,6 +1,7 @@
 // World.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
+// Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
@@ -153,6 +154,7 @@ public:
   void enterTile(int x, int z);
   void reloadTile(int x, int z);
   void saveTile(int x, int z);
+  void saveTileCata(int x, int z);
   void saveChanged();
   void tick(float dt);
   //! \todo This seriously needs to be done via flags.

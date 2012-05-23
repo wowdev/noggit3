@@ -26,47 +26,47 @@
         <translation type="obsolete">Nastavení pro tvarování</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2022"/>
-        <location filename="../src/noggit/MapView.cpp" line="2070"/>
+        <location filename="../src/noggit/MapView.cpp" line="2029"/>
+        <location filename="../src/noggit/MapView.cpp" line="2077"/>
         <source>Flat</source>
         <translation>Rovný</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2023"/>
-        <location filename="../src/noggit/MapView.cpp" line="2071"/>
+        <location filename="../src/noggit/MapView.cpp" line="2030"/>
+        <location filename="../src/noggit/MapView.cpp" line="2078"/>
         <source>Linear</source>
         <translation>Lineární</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2024"/>
-        <location filename="../src/noggit/MapView.cpp" line="2072"/>
+        <location filename="../src/noggit/MapView.cpp" line="2031"/>
+        <location filename="../src/noggit/MapView.cpp" line="2079"/>
         <source>Smooth</source>
         <translation>Hladký</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2025"/>
+        <location filename="../src/noggit/MapView.cpp" line="2032"/>
         <source>Polynomial</source>
         <translation>Polynomický</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2026"/>
+        <location filename="../src/noggit/MapView.cpp" line="2033"/>
         <source>Trigonometric</source>
         <translation>Trigonomerický</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2027"/>
+        <location filename="../src/noggit/MapView.cpp" line="2034"/>
         <source>Square</source>
         <translation>Čtverec</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2045"/>
-        <location filename="../src/noggit/MapView.cpp" line="2090"/>
+        <location filename="../src/noggit/MapView.cpp" line="2052"/>
+        <location filename="../src/noggit/MapView.cpp" line="2097"/>
         <source>Brush &amp;radius</source>
         <translation>Velikost &amp;štětce</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2046"/>
-        <location filename="../src/noggit/MapView.cpp" line="2091"/>
+        <location filename="../src/noggit/MapView.cpp" line="2053"/>
+        <location filename="../src/noggit/MapView.cpp" line="2098"/>
         <source>Shaping &amp;speed</source>
         <translation>Rychlost &amp;tvarování</translation>
     </message>
@@ -78,6 +78,11 @@
         <location filename="../src/noggit/MapView.cpp" line="160"/>
         <source>Save current tile</source>
         <translation>Uložit tuto část</translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="220"/>
+        <source>Save current tile (Cata tests)</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="161"/>
@@ -296,47 +301,47 @@
         <translation type="obsolete">přepínač_doodad_vkládání</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="232"/>
+        <location filename="../src/noggit/MapView.cpp" line="233"/>
         <source>File</source>
         <translation>Soubor</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="244"/>
+        <location filename="../src/noggit/MapView.cpp" line="245"/>
         <source>Edit</source>
         <translation>Úpravy</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="252"/>
+        <location filename="../src/noggit/MapView.cpp" line="253"/>
         <source>Assist</source>
         <translation>Assistence</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="253"/>
+        <location filename="../src/noggit/MapView.cpp" line="254"/>
         <source>Insert helper model</source>
         <translation>Vložit pomocný model</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="280"/>
+        <location filename="../src/noggit/MapView.cpp" line="281"/>
         <source>View</source>
         <translation>Ukázat</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="296"/>
+        <location filename="../src/noggit/MapView.cpp" line="297"/>
         <source>Settings</source>
         <translation>Nastavení</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="311"/>
+        <location filename="../src/noggit/MapView.cpp" line="312"/>
         <source>Help</source>
         <translation>Nápověda</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="315"/>
+        <location filename="../src/noggit/MapView.cpp" line="316"/>
         <source>Testing and Debugging</source>
         <translation>Testování a Debugování</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="320"/>
+        <location filename="../src/noggit/MapView.cpp" line="322"/>
         <source>Stuff that should only be on keys</source>
         <translation>Funkce, které mohou být jenom na zkratkách</translation>
     </message>

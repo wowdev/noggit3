@@ -1,5 +1,6 @@
 // file.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Mjollnà <mjollna.wow@gmail.com>
 
 #include <noggit/mpq/file.h>
 
@@ -170,11 +171,8 @@ namespace noggit
       return buffer + pointer;
     }
 
-    void file::save_to_disk()
+    void file::save_to_disk(const QString& filename)
     {
-      const QString file_name
-        (_path_on_disk.mid (_path_on_disk.lastIndexOf ("/")));
-
       QDir dir (_path_on_disk.left (_path_on_disk.lastIndexOf ("/")));
       dir.makeAbsolute();
       const QString dir_name (dir.absolutePath());
@@ -188,12 +186,13 @@ namespace noggit
                  << std::endl;
       }
 
-      QFile output_file (_path_on_disk);
+      //QFile output_file (_path_on_disk);
+      QFile output_file (dir_name + filename);
 
       if (output_file.open (QFile::WriteOnly))
       {
         Log << "Saving file \""
-            << qPrintable (_path_on_disk)
+            << qPrintable (dir_name + filename)
             << "\"."
             << std::endl;
 
@@ -205,6 +204,11 @@ namespace noggit
       {
         LogError << "Unable to open that file for writing." << std::endl;
       }
+    }
+
+    void file::save_to_disk()
+    {
+      save_to_disk(_path_on_disk.mid (_path_on_disk.lastIndexOf ("/")));
     }
 
     void file::save_to_mpq (archive *arch, QString pathInMPQ)

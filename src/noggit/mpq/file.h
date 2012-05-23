@@ -1,5 +1,6 @@
 // file.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Mjollnà <mjollna.wow@gmail.com>
 
 #ifndef __NOGGIT_MPQ_FILE_H
 #define __NOGGIT_MPQ_FILE_H
@@ -43,6 +44,7 @@ namespace noggit
       }
 
       void save_to_disk();
+      void save_to_disk(const QString& filename);
 
       void save_to_mpq (archive *arch, QString pathInMPQ = NULL);
       static bool exists (const QString& filename);

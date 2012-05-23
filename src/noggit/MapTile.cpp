@@ -1,9 +1,12 @@
 // MapTile.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
 #include <noggit/MapTile.h>
+
+#include <QDir>
 
 #include <algorithm>
 #include <cassert>
@@ -1569,4 +1572,773 @@ void MapTile::saveTile()
   f.setBuffer( lADTFile.GetPointer<char>(), lADTFile.mSize );
   f.save_to_disk();
   f.close();
+}
+
+void MapTile::saveTileCata()
+{
+  Log << "Saving ADT (Cata) \"" << mFilename << "\"." << std::endl;
+
+  int lID;  // This is a global counting variable. Do not store something in here you need later.
+
+  // Collect some information we need later.
+
+  // Check which doodads and WMOs are on this ADT.
+  ::math::vector_3d lTileExtents[2];
+  lTileExtents[0] = ::math::vector_3d( xbase, 0.0f, zbase );
+  lTileExtents[1] = ::math::vector_3d( xbase + TILESIZE, 0.0f, zbase + TILESIZE );
+
+  std::map<int, WMOInstance*> lObjectInstances;
+  std::map<int, ModelInstance*> lModelInstances;
+
+  for( std::map<int, WMOInstance*>::iterator it = _world->mWMOInstances.begin(); it != _world->mWMOInstances.end(); ++it )
+    //! \todo checkinside seems to fuck up everything
+    //if( checkInside( lTileExtents, it->second->extents ) )
+      lObjectInstances.insert( std::pair<int, WMOInstance*>( it->first, it->second ) );
+
+  for( std::map<int, ModelInstance*>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
+  {
+    ::math::vector_3d lModelExtentsV1[2], lModelExtentsV2[2];
+    lModelExtentsV1[0] = it->second->model->header.BoundingBoxMin + it->second->pos;
+    lModelExtentsV1[1] = it->second->model->header.BoundingBoxMax + it->second->pos;
+    lModelExtentsV2[0] = it->second->model->header.VertexBoxMin + it->second->pos;
+    lModelExtentsV2[1] = it->second->model->header.VertexBoxMax + it->second->pos;
+
+    //! \todo checkinside seems to fuck up everything
+    //if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
+    //{
+      lModelInstances.insert( std::pair<int, ModelInstance*>( it->first, it->second ) );
+    //}
+  }
+
+  filenameOffsetThing nullyThing = { 0, 0 };
+
+  std::map<std::string, filenameOffsetThing> lModels;
+
+  for( std::map<int,ModelInstance*>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
+  {
+    std::string lTemp = it->second->model->_filename;
+
+    if( lModels.find( lTemp ) == lModels.end() )
+    {
+      lModels.insert( std::pair<std::string, filenameOffsetThing>( lTemp, nullyThing ) );
+    }
+  }
+
+  lID = 0;
+  for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
+    it->second.nameID = lID++;
+
+  std::map<std::string, filenameOffsetThing> lObjects;
+
+  for( std::map<int,WMOInstance *>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
+    if( lObjects.find( it->second->wmo->_filename ) == lObjects.end() )
+      lObjects.insert( std::pair<std::string, filenameOffsetThing>( ( it->second->wmo->_filename ), nullyThing ) );
+
+  lID = 0;
+  for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
+    it->second.nameID = lID++;
+
+  // Check which textures are on this ADT.
+  std::map<std::string, int> lTextures;
+#if 0
+  //used to store texteffectinfo
+  std::vector<int> mTextureEffects;
+#endif
+
+  for( int i = 0; i < 16; ++i )
+    for( int j = 0; j < 16; ++j )
+      for( size_t tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
+        if( lTextures.find( mChunks[i][j]->_textures[tex]->filename().toStdString() ) == lTextures.end() )
+          lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->_textures[tex]->filename().toStdString(), -1 ) );
+
+  lID = 0;
+  for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
+    it->second = lID++;
+
+#if 0
+  //! \todo actually, the folder is completely independant of this. Handle this differently. Bullshit here.
+  std::string cmpCubeMaps = std::string("terrain cube maps");
+  for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it ){
+    //if texture is in folder terrain cube maps, it needs to get handled different by wow
+    if(it->first.compare(8, 17, cmpCubeMaps) == 0){
+      Log<<it->second <<": "<< it->first << std::endl;
+      mTextureEffects.push_back(1);
+    }
+    else
+      mTextureEffects.push_back(0);
+  }
+#endif
+
+  // Now write the file.
+
+  // terrain
+
+  sExtendableArray lADTFile = sExtendableArray();
+
+  int lCurrentPosition = 0;
+
+  // MVER
+//  {
+    lADTFile.Extend( 8 + 0x4 );
+    SetChunkHeader( lADTFile, lCurrentPosition, 'MVER', 4 );
+
+    // MVER data
+    *( lADTFile.GetPointer<int>( 8 ) ) = 18;
+
+    lCurrentPosition += 8 + 0x4;
+//  }
+
+  // MHDR
+  int lMHDR_Position = lCurrentPosition;
+//  {
+    lADTFile.Extend( 8 + 0x40 );
+    SetChunkHeader( lADTFile, lCurrentPosition, 'MHDR', 0x40 );
+
+    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->flags = mFlags;
+
+    lCurrentPosition += 8 + 0x40;
+//  }
+
+  // MH2O : not yet.
+
+  // MCNK
+//  {
+
+
+    for( int y = 0; y < 16; ++y )
+    {
+      for( int x = 0; x < 16; ++x )
+      {
+        int lMCNK_Size = 0x80;
+        int lMCNK_Position = lCurrentPosition;
+        lADTFile.Extend( 8 );  
+        SetChunkHeader( lADTFile, lCurrentPosition, 'MCNK', lMCNK_Size );
+
+        // MCNK data
+        lADTFile.Insert( lCurrentPosition + 8, 0x80, reinterpret_cast<char*>( &( mChunks[y][x]->header ) ) ); // This is only the size of the header. More chunks will increase the size.
+        MapChunkHeader * lMCNK_header = lADTFile.GetPointer<MapChunkHeader>( lCurrentPosition + 8 );
+
+        lMCNK_header->flags = mChunks[y][x]->Flags;
+        lMCNK_header->holes = mChunks[y][x]->holes;
+        lMCNK_header->areaid = mChunks[y][x]->areaID;
+
+        lMCNK_header->nLayers = 0;
+        lMCNK_header->nDoodadRefs = 0;
+        lMCNK_header->ofsHeight = -1;
+        lMCNK_header->ofsNormal = -1;
+        lMCNK_header->ofsLayer = 0;
+        lMCNK_header->ofsRefs = 0;
+        lMCNK_header->ofsAlpha = 0;
+        lMCNK_header->sizeAlpha = 0;
+        lMCNK_header->ofsShadow = 0;
+        lMCNK_header->sizeShadow = 0;
+        lMCNK_header->nMapObjRefs = 0;
+
+        //! \todo  Implement sound emitter support. Or not.
+        lMCNK_header->ofsSndEmitters = 0;
+        lMCNK_header->nSndEmitters = 0;
+
+        lMCNK_header->ofsLiquid = 0;
+        lMCNK_header->sizeLiquid = 0;
+
+        //! \todo  MCCV sub-chunk
+        lMCNK_header->ofsMCCV = 0;
+
+        if( lMCNK_header->flags & 0x40 )
+          LogError << "Problem with saving: This ADT is said to have vertex shading but we don't write them yet. This might get you really fucked up results." << std::endl;
+        lMCNK_header->flags = lMCNK_header->flags & ( ~0x40 );
+
+
+        lCurrentPosition += 8 + 0x80;
+
+        // MCVT
+//        {
+          int lMCVT_Size = ( 9 * 9 + 8 * 8 ) * 4;
+
+          lADTFile.Extend( 8 + lMCVT_Size );
+          SetChunkHeader( lADTFile, lCurrentPosition, 'MCVT', lMCVT_Size );
+
+          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsHeight = lCurrentPosition - lMCNK_Position;
+
+          float * lHeightmap = lADTFile.GetPointer<float>( lCurrentPosition + 8 );
+
+          float lMedian = 0.0f;
+          for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
+            lMedian = lMedian + mChunks[y][x]->mVertices[i].y();
+
+          lMedian = lMedian / ( 9 * 9 + 8 * 8 );
+          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ypos = lMedian;
+
+          for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
+            lHeightmap[i] = mChunks[y][x]->mVertices[i].y() - lMedian;
+
+          lCurrentPosition += 8 + lMCVT_Size;
+          lMCNK_Size += 8 + lMCVT_Size;
+//        }
+
+        // MCNR
+//        {
+          int lMCNR_Size = ( 9 * 9 + 8 * 8 ) * 3; 
+
+          lADTFile.Extend( 8 + lMCNR_Size );
+          SetChunkHeader( lADTFile, lCurrentPosition, 'MCNR', lMCNR_Size + 13 ); // For Cata we do add the 13 bytes too in chunk size
+
+          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsNormal = lCurrentPosition - lMCNK_Position;
+
+          char* lNormals (lADTFile.GetPointer<char> (lCurrentPosition + 8));
+
+          mChunks[y][x]->recalcNorms();
+          for (size_t i (0); i < (9 * 9 + 8 * 8); ++i)
+          {
+            lNormals[i*3 + 0] = ::math::bounded_nearest<char>
+                                  (-mChunks[y][x]->mNormals[i].z() * 127.0f);
+            lNormals[i*3 + 1] = ::math::bounded_nearest<char>
+                                  (-mChunks[y][x]->mNormals[i].x() * 127.0f);
+            lNormals[i*3 + 2] = ::math::bounded_nearest<char>
+                                  ( mChunks[y][x]->mNormals[i].y() * 127.0f);
+          }
+
+          lCurrentPosition += 8 + lMCNR_Size;
+          lMCNK_Size += 8 + lMCNR_Size;
+//        }
+
+        // Unknown MCNR bytes
+        // These are not in as we have data or something but just to make the files more blizzlike.
+//        {
+          lADTFile.Extend( 13 );
+          lCurrentPosition += 13;
+          lMCNK_Size += 13;
+//        }
+
+        // MCSE
+//        {
+          int lMCSE_Size = 0;
+          lADTFile.Extend( 8 + lMCSE_Size );
+          SetChunkHeader( lADTFile, lCurrentPosition, 'MCSE', lMCSE_Size );
+
+          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsSndEmitters = lCurrentPosition - lMCNK_Position;
+          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nSndEmitters = lMCSE_Size / 0x1C;
+
+          // if ( data ) do write
+
+          /*
+          if(sound_Exist){
+          memcpy(&Temp,f.getBuffer()+MCINs[i].offset+ChunkHeader[i].ofsSndEmitters+4,sizeof(int));
+          memcpy(Buffer+Change+MCINs[i].offset+ChunkHeader[i].ofsSndEmitters+lChange,f.getBuffer()+MCINs[i].offset+ChunkHeader[i].ofsSndEmitters,Temp+8);
+          ChunkHeader[i].ofsSndEmitters+=lChange;
+          }
+          */
+
+          lCurrentPosition += 8 + lMCSE_Size;
+          lMCNK_Size += 8 + lMCSE_Size;
+//        }
+
+
+
+        lADTFile.GetPointer<sChunkHeader>( lMCNK_Position )->mSize = lMCNK_Size;
+        lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsLiquid = lMCNK_Size;
+      }
+    }
+
+//  }
+
+  // MFBO
+  if( mFlags & 1 )
+  {
+    size_t chunkSize = sizeof( int16_t ) * 9 * 2;
+    lADTFile.Extend( 8 + chunkSize );
+    SetChunkHeader( lADTFile, lCurrentPosition, 'MFBO', chunkSize );
+    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mfbo = lCurrentPosition - 0x14;
+
+    int16_t* lMFBO_Data = lADTFile.GetPointer<int16_t>( lCurrentPosition + 8 );
+
+    lID = 0;
+    for( int i = 0; i < 9; ++i )
+      lMFBO_Data[lID++] = mMinimumValues[i * 3 + 1];
+
+    for( int i = 0; i < 9; ++i )
+      lMFBO_Data[lID++] = mMaximumValues[i * 3 + 1];
+
+    lCurrentPosition += 8 + chunkSize;
+  }
+
+  noggit::mpq::file f (QString::fromStdString (mFilename));
+  f.setBuffer( lADTFile.GetPointer<char>(), lADTFile.mSize );
+  f.save_to_disk();
+  f.close();
+
+  // tex0
+
+  sExtendableArray lADTTexFile = sExtendableArray();
+  lCurrentPosition = 0;
+
+  // MVER
+//  {
+    lADTTexFile.Extend( 8 + 0x4 );
+    SetChunkHeader( lADTTexFile, lCurrentPosition, 'MVER', 4 );
+
+    // MVER data
+    *( lADTTexFile.GetPointer<int>( 8 ) ) = 18;
+
+    lCurrentPosition += 8 + 0x4;
+//  }
+ 
+  // MAMP
+
+    lADTTexFile.Extend( 8 + 0x4 );
+    SetChunkHeader( lADTTexFile, lCurrentPosition, 'MAMP', 4 );  
+
+    // MAMP data (seems to be always 0 in tex0)
+    *( lADTTexFile.GetPointer<int>( lCurrentPosition + 8 ) ) = 0;
+
+    lCurrentPosition += 8 + 0x4;
+
+  // MTEX
+//  {
+    int lMTEX_Position = lCurrentPosition;
+    lADTTexFile.Extend( 8 + 0 );  // We don't yet know how big this will be.
+    SetChunkHeader( lADTTexFile, lCurrentPosition, 'MTEX' );
+
+    lCurrentPosition += 8 + 0;
+
+    // MTEX data
+    for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
+    {
+      lADTTexFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+      lCurrentPosition += it->first.size() + 1;
+      lADTTexFile.GetPointer<sChunkHeader>( lMTEX_Position )->mSize += it->first.size() + 1;
+      LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
+    }
+//  }  
+
+  // MCNK
+//  {
+
+    for( int y = 0; y < 16; ++y )
+    {
+      for( int x = 0; x < 16; ++x )
+      {
+        int lMCNK_Size = 0x0;
+        int lMCNK_Position = lCurrentPosition;
+		
+        lADTTexFile.Extend( 8 );  // No header in tex0
+		    SetChunkHeader( lADTTexFile, lCurrentPosition, 'MCNK', lMCNK_Size );
+        lCurrentPosition += 8;	
+
+        // MCLY
+//        {
+          size_t lMCLY_Size = mChunks[y][x]->nTextures * 0x10;
+
+          lADTTexFile.Extend( 8 + lMCLY_Size );
+          SetChunkHeader( lADTTexFile, lCurrentPosition, 'MCLY', lMCLY_Size );
+
+          // MCLY data
+          for( size_t j = 0; j < mChunks[y][x]->nTextures; ++j )
+          {
+            ENTRY_MCLY * lLayer = lADTTexFile.GetPointer<ENTRY_MCLY>( lCurrentPosition + 8 + 0x10 * j );
+
+            lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename().toStdString() )->second;
+
+            lLayer->flags = mChunks[y][x]->texFlags[j];
+
+            // if not first, have alpha layer, if first, have not. never have compression.
+            lLayer->flags = ( j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & ( ~FLAG_USE_ALPHA ) ) & ( ~FLAG_ALPHA_COMPRESSED );
+
+            lLayer->ofsAlpha = ( j == 0 ? 0 : ( mBigAlpha ? 64 * 64 * ( j - 1 ) : 32 * 64 * ( j - 1 ) ) );
+            lLayer->effectID = mChunks[y][x]->effectID[j];
+          }
+
+          lCurrentPosition += 8 + lMCLY_Size;
+          lMCNK_Size += 8 + lMCLY_Size;
+//        }	
+
+        // MCSH <-- untested, I (Mjo) need to test with an adt that has shadows.
+//        {
+          //! \todo  Somehow determine if we need to write this or not?
+          //! \todo  This sometime gets all shadows black.
+          if( mChunks[y][x]->Flags & 1 )
+          {
+            int lMCSH_Size = 0x200;
+            lADTTexFile.Extend( 8 + lMCSH_Size );
+            SetChunkHeader( lADTFile, lCurrentPosition, 'MCSH', lMCSH_Size );
+
+            char * lLayer = lADTTexFile.GetPointer<char>( lCurrentPosition + 8 );
+
+            memcpy( lLayer, mChunks[y][x]->mShadowMap, 0x200 );
+
+            lCurrentPosition += 8 + lMCSH_Size;
+            lMCNK_Size += 8 + lMCSH_Size;
+          }
+//        }
+
+        // MCAL
+//        {
+          int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
+
+  	      size_t lMaps = mChunks[y][x]->nTextures ? mChunks[y][x]->nTextures - 1U : 0U;
+
+          int lMCAL_Size = lDimensions * lMaps;
+
+          lADTTexFile.Extend( 8 + lMCAL_Size );
+          SetChunkHeader( lADTTexFile, lCurrentPosition, 'MCAL', lMCAL_Size );
+
+          char * lAlphaMaps = lADTTexFile.GetPointer<char>( lCurrentPosition + 8 );
+
+          for( size_t j = 0; j < lMaps; j++ )
+          {
+            //First thing we have to do is downsample the alpha maps before we can write them
+            if( mBigAlpha )
+              for( int k = 0; k < lDimensions; k++ )
+                lAlphaMaps[lDimensions * j + k] = mChunks[y][x]->amap[j][k];
+            else
+            {
+              unsigned char upperNibble, lowerNibble;
+              for( int k = 0; k < lDimensions; k++ )
+              {
+                lowerNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->amap[j][k * 2 + 0]) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+                upperNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->amap[j][k * 2 + 1]) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+                lAlphaMaps[lDimensions * j + k] = ( upperNibble << 4 ) + lowerNibble;
+              }
+            }
+          }
+
+          lCurrentPosition += 8 + lMCAL_Size;
+          lMCNK_Size += 8 + lMCAL_Size;
+//        }
+
+        lADTTexFile.GetPointer<sChunkHeader>( lMCNK_Position )->mSize = lMCNK_Size;
+      }
+    }
+
+  // \! todo Do not do bullshit here in MTFX.
+#if 0
+  if(!mTextureEffects.empty()) {
+    //! \todo check if nTexEffects == nTextures, correct order etc.
+    lADTTexFile.Extend( 8 + 4*mTextureEffects.size());
+    SetChunkHeader( lADTTexFile, lCurrentPosition, 'MTFX', 4*mTextureEffects.size() );
+
+    uint32_t* lMTFX_Data = lADTFile.GetPointer<uint32_t>( lCurrentPosition + 8 );
+
+    lID = 0;
+    //they should be in the correct order...
+    for(std::vector<int>::iterator it = mTextureEffects.begin(); it!= mTextureEffects.end(); ++it) {
+      lMTFX_Data[lID] = *it;
+      ++lID;
+    }
+    lCurrentPosition += 8 + sizeof( uint32_t ) * mTextureEffects.size();
+  }
+#endif
+  
+  std::string texFilename (mFilename);
+
+  size_t found = texFilename.rfind( ".adt" );
+  if( found != std::string::npos )
+  {
+    texFilename.replace( found, 4, "_tex" );
+    texFilename.append( "0.adt" );
+  }
+
+  found = texFilename.find_last_of("\\");
+  texFilename = texFilename.substr(found + 1);
+  texFilename = "/" + texFilename;
+
+  noggit::mpq::file fTex (QString::fromStdString (mFilename));
+  fTex.setBuffer( lADTTexFile.GetPointer<char>(), lADTTexFile.mSize );
+  fTex.save_to_disk(QString::fromStdString (texFilename));
+  fTex.close();
+
+  // obj0
+
+  sExtendableArray lADTObjFile = sExtendableArray();
+  lCurrentPosition = 0;
+
+  // MVER
+//  {
+    lADTObjFile.Extend( 8 + 0x4 );
+    SetChunkHeader( lADTObjFile, lCurrentPosition, 'MVER', 4 );
+
+    // MVER data
+    *( lADTObjFile.GetPointer<int>( 8 ) ) = 18;
+
+    lCurrentPosition += 8 + 0x4;
+//  }
+
+  // MMDX
+//  {
+    int lMMDX_Position = lCurrentPosition;
+    lADTObjFile.Extend( 8 + 0 );  // We don't yet know how big this will be.
+    SetChunkHeader( lADTObjFile, lCurrentPosition, 'MMDX' );
+
+    lCurrentPosition += 8 + 0;
+
+    // MMDX data
+    for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
+    {
+      it->second.filenamePosition = lADTObjFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize;
+      lADTObjFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+      lCurrentPosition += it->first.size() + 1;
+      lADTObjFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize += it->first.size() + 1;
+      LogDebug << "Added model \"" << it->first << "\"." << std::endl;
+    }
+//  }
+
+  // MMID
+//  {
+    int lMMID_Size = 4 * lModels.size();
+    lADTObjFile.Extend( 8 + lMMID_Size );
+    SetChunkHeader( lADTObjFile, lCurrentPosition, 'MMID', lMMID_Size );
+
+    // MMID data
+    int * lMMID_Data = lADTObjFile.GetPointer<int>( lCurrentPosition + 8 );
+
+    lID = 0;
+    for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
+      lMMID_Data[lID++] = it->second.filenamePosition;
+
+    lCurrentPosition += 8 + lMMID_Size;
+//  }
+
+  // MWMO
+//  {
+    int lMWMO_Position = lCurrentPosition;
+    lADTObjFile.Extend( 8 + 0 );  // We don't yet know how big this will be.
+    SetChunkHeader( lADTObjFile, lCurrentPosition, 'MWMO' );
+
+    lCurrentPosition += 8 + 0;
+
+    // MWMO data
+    for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
+    {
+      it->second.filenamePosition = lADTObjFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize;
+      lADTObjFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+      lCurrentPosition += it->first.size() + 1;
+      lADTObjFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize += it->first.size() + 1;
+      LogDebug << "Added object \"" << it->first << "\"." << std::endl;
+    }
+//  }
+
+  // MWID
+//  {
+    int lMWID_Size = 4 * lObjects.size();
+    lADTObjFile.Extend( 8 + lMWID_Size );
+    SetChunkHeader( lADTObjFile, lCurrentPosition, 'MWID', lMWID_Size );
+
+    // MWID data
+    int * lMWID_Data = lADTObjFile.GetPointer<int>( lCurrentPosition + 8 );
+
+    lID = 0;
+    for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
+      lMWID_Data[lID++] = it->second.filenamePosition;
+
+    lCurrentPosition += 8 + lMWID_Size;
+//  }
+
+  // MDDF
+//  {
+    int lMDDF_Size = 0x24 * lModelInstances.size();
+    lADTObjFile.Extend( 8 + lMDDF_Size );
+    SetChunkHeader( lADTObjFile, lCurrentPosition, 'MDDF', lMDDF_Size );
+
+    // MDDF data
+    ENTRY_MDDF * lMDDF_Data = lADTObjFile.GetPointer<ENTRY_MDDF>( lCurrentPosition + 8 );
+
+    lID = 0;
+    for( std::map<int,ModelInstance*>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
+    {
+      std::string lTemp = it->second->model->_filename;
+      std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lModels.find( lTemp );
+      if( lMyFilenameThingey == lModels.end() )
+      {
+        LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
+        return;
+      }
+
+      lMDDF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
+      lMDDF_Data[lID].uniqueID = it->first;
+      lMDDF_Data[lID].pos[0] = it->second->pos.x();
+      lMDDF_Data[lID].pos[1] = it->second->pos.y();
+      lMDDF_Data[lID].pos[2] = it->second->pos.z();
+      lMDDF_Data[lID].rot[0] = it->second->dir.x();
+      lMDDF_Data[lID].rot[1] = it->second->dir.y();
+      lMDDF_Data[lID].rot[2] = it->second->dir.z();
+      lMDDF_Data[lID].scale = it->second->sc * 1024;
+      lMDDF_Data[lID].flags = 0;
+      lID++;
+    }
+
+    lCurrentPosition += 8 + lMDDF_Size;
+//  }
+
+  // MODF
+//  {
+    int lMODF_Size = 0x40 * lObjectInstances.size();
+    lADTObjFile.Extend( 8 + lMODF_Size );
+    SetChunkHeader( lADTObjFile, lCurrentPosition, 'MODF', lMODF_Size );
+    lADTObjFile.GetPointer<MHDR>( lMHDR_Position + 8 )->modf = lCurrentPosition - 0x14;
+
+    // MODF data
+    ENTRY_MODF * lMODF_Data = lADTObjFile.GetPointer<ENTRY_MODF>( lCurrentPosition + 8 );
+
+    lID = 0;
+    for( std::map<int,WMOInstance *>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
+    {
+      std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lObjects.find( it->second->wmo->_filename );
+      if( lMyFilenameThingey == lObjects.end() )
+      {
+        LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
+        return;
+      }
+
+      lMODF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
+      lMODF_Data[lID].uniqueID = it->first;
+      lMODF_Data[lID].pos[0] = it->second->pos.x();
+      lMODF_Data[lID].pos[1] = it->second->pos.y();
+      lMODF_Data[lID].pos[2] = it->second->pos.z();
+      lMODF_Data[lID].rot[0] = it->second->dir.x();
+      lMODF_Data[lID].rot[1] = it->second->dir.y();
+      lMODF_Data[lID].rot[2] = it->second->dir.z();
+      //! \todo  Calculate them here or when rotating / moving? What is nicer? We should at least do it somewhere..
+      lMODF_Data[lID].extents[0][0] = it->second->extents[0].x();
+      lMODF_Data[lID].extents[0][1] = it->second->extents[0].y();
+      lMODF_Data[lID].extents[0][2] = it->second->extents[0].z();
+      lMODF_Data[lID].extents[1][0] = it->second->extents[1].x();
+      lMODF_Data[lID].extents[1][1] = it->second->extents[1].y();
+      lMODF_Data[lID].extents[1][2] = it->second->extents[1].z();
+      lMODF_Data[lID].flags = it->second->mFlags;
+      lMODF_Data[lID].doodadSet = it->second->doodadset;
+      lMODF_Data[lID].nameSet = it->second->mNameset;
+      lMODF_Data[lID].unknown = it->second->mUnknown;
+      lID++;
+    }
+
+    lCurrentPosition += 8 + lMODF_Size;
+//  }
+
+  // MCNK
+//  {
+
+    for( int y = 0; y < 16; ++y )
+    {
+      for( int x = 0; x < 16; ++x )
+      {
+	  
+        int lMCNK_Size = 0x0;
+        int lMCNK_Position = lCurrentPosition;
+		
+        lADTObjFile.Extend( 8 );  // No header in tex0
+		    SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCNK', lMCNK_Size );
+        lCurrentPosition += 8;
+
+        // MCRD & MCRW
+//        {
+          std::list<int> lDoodadIDs;
+          std::list<int> lObjectIDs;
+
+          ::math::vector_3d lChunkExtents[2];
+          lChunkExtents[0] = ::math::vector_3d( mChunks[y][x]->xbase, 0.0f, mChunks[y][x]->zbase );
+          lChunkExtents[1] = ::math::vector_3d( mChunks[y][x]->xbase + CHUNKSIZE, 0.0f, mChunks[y][x]->zbase + CHUNKSIZE );
+
+          // search all wmos that are inside this chunk
+          lID = 0;
+          for( std::map<int,WMOInstance *>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
+          {
+            //! \todo  This requires the extents already being calculated. See above.
+            if( checkInside( lChunkExtents, it->second->extents ) )
+              lObjectIDs.push_back( lID );
+            lID++;
+          }
+
+          // search all models that are inside this chunk
+          lID = 0;
+          for( std::map<int, ModelInstance *>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
+          {
+            // get radius and position of the m2
+            float radius = it->second->model->header.BoundingBoxRadius;
+            ::math::vector_3d& pos = it->second->pos;
+
+            // Calculate the chunk center
+            ::math::vector_3d chunkMid(mChunks[y][x]->xbase + CHUNKSIZE / 2, 0,
+            mChunks[y][x]->zbase + CHUNKSIZE / 2);
+
+            // find out if the model is inside the reach of the chunk.
+            float dx = chunkMid.x() - pos.x();
+            float dz = chunkMid.z() - pos.z();
+            float dist = sqrtf(dx * dx + dz * dz);
+            static float sqrt2 = sqrtf(2.0f);
+
+            if(dist - radius <= ((sqrt2 / 2.0f) * CHUNKSIZE))
+            {
+              lDoodadIDs.push_back(lID);
+            }
+
+            lID++;
+          }
+
+		  // MCRD data
+		  
+          if ( lDoodadIDs.size() > 0 )
+          {
+            int lMCRD_Size = 4 * ( lDoodadIDs.size() );
+		  
+            lADTObjFile.Extend( 8 + lMCRD_Size );
+            SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCRD', lMCRD_Size );
+          
+            int * lReferencesDoodads = lADTObjFile.GetPointer<int>( lCurrentPosition + 8 );
+
+            lID = 0;
+            for( std::list<int>::iterator it = lDoodadIDs.begin(); it != lDoodadIDs.end(); ++it )
+            {
+              lReferencesDoodads[lID] = *it;
+              lID++;
+            }
+
+            lCurrentPosition += 8 + lMCRD_Size;
+            lMCNK_Size += 8 + lMCRD_Size;
+          }
+
+          // MCRW data
+
+          if ( lObjectIDs.size() > 0 )
+          {
+            int lMCRW_Size = 4 * ( lObjectIDs.size() );
+
+            lADTObjFile.Extend( 8 + lMCRW_Size );
+            SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCRW', lMCRW_Size );		  
+
+		        int * lReferencesWmo = lADTObjFile.GetPointer<int>( lCurrentPosition + 8 );
+		  
+		        lID = 0;
+		        for( std::list<int>::iterator it = lObjectIDs.begin(); it != lObjectIDs.end(); ++it )
+            {
+              lReferencesWmo[lID] = *it;
+              lID++;
+            }
+		  
+            lCurrentPosition += 8 + lMCRW_Size;
+            lMCNK_Size += 8 + lMCRW_Size; 
+          }
+//        }		 
+
+        lADTObjFile.GetPointer<sChunkHeader>( lMCNK_Position )->mSize = lMCNK_Size;
+      }
+    }
+
+  std::string objFilename (mFilename);
+
+  found = objFilename.rfind( ".adt" );
+  if( found != std::string::npos )
+  {
+    objFilename.replace( found, 4, "_obj" );
+    objFilename.append( "0.adt" );
+  }
+
+  found = objFilename.find_last_of("\\");
+  objFilename = objFilename.substr(found + 1);
+  objFilename = "/" + objFilename;
+
+  noggit::mpq::file fObj (QString::fromStdString (mFilename));
+  fObj.setBuffer( lADTObjFile.GetPointer<char>(), lADTObjFile.mSize );
+  fObj.save_to_disk(QString::fromStdString (objFilename));
+  fObj.close();
+
 }
