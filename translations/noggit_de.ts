@@ -22,53 +22,58 @@
 <context>
     <name>MapView</name>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2022"/>
-        <location filename="../src/noggit/MapView.cpp" line="2070"/>
+        <location filename="../src/noggit/MapView.cpp" line="2029"/>
+        <location filename="../src/noggit/MapView.cpp" line="2077"/>
         <source>Flat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2023"/>
-        <location filename="../src/noggit/MapView.cpp" line="2071"/>
+        <location filename="../src/noggit/MapView.cpp" line="2030"/>
+        <location filename="../src/noggit/MapView.cpp" line="2078"/>
         <source>Linear</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2024"/>
-        <location filename="../src/noggit/MapView.cpp" line="2072"/>
+        <location filename="../src/noggit/MapView.cpp" line="2031"/>
+        <location filename="../src/noggit/MapView.cpp" line="2079"/>
         <source>Smooth</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2025"/>
+        <location filename="../src/noggit/MapView.cpp" line="2032"/>
         <source>Polynomial</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2026"/>
+        <location filename="../src/noggit/MapView.cpp" line="2033"/>
         <source>Trigonometric</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2027"/>
+        <location filename="../src/noggit/MapView.cpp" line="2034"/>
         <source>Square</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2045"/>
-        <location filename="../src/noggit/MapView.cpp" line="2090"/>
+        <location filename="../src/noggit/MapView.cpp" line="2052"/>
+        <location filename="../src/noggit/MapView.cpp" line="2097"/>
         <source>Brush &amp;radius</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2046"/>
-        <location filename="../src/noggit/MapView.cpp" line="2091"/>
+        <location filename="../src/noggit/MapView.cpp" line="2053"/>
+        <location filename="../src/noggit/MapView.cpp" line="2098"/>
         <source>Shaping &amp;speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="160"/>
         <source>Save current tile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="220"/>
+        <source>Save current tile (Cata tests)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -272,47 +277,47 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="232"/>
+        <location filename="../src/noggit/MapView.cpp" line="233"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="244"/>
+        <location filename="../src/noggit/MapView.cpp" line="245"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="252"/>
+        <location filename="../src/noggit/MapView.cpp" line="253"/>
         <source>Assist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="253"/>
+        <location filename="../src/noggit/MapView.cpp" line="254"/>
         <source>Insert helper model</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="280"/>
+        <location filename="../src/noggit/MapView.cpp" line="281"/>
         <source>View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="296"/>
+        <location filename="../src/noggit/MapView.cpp" line="297"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="311"/>
+        <location filename="../src/noggit/MapView.cpp" line="312"/>
         <source>Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="315"/>
+        <location filename="../src/noggit/MapView.cpp" line="316"/>
         <source>Testing and Debugging</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="320"/>
+        <location filename="../src/noggit/MapView.cpp" line="322"/>
         <source>Stuff that should only be on keys</source>
         <translation type="unfinished"></translation>
     </message>

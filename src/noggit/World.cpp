@@ -1,6 +1,7 @@
 // World.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
+// Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
@@ -815,6 +816,14 @@ void World::saveTile(int x, int z)
   if( tileLoaded( z, x ) )
   {
     mTiles[z][x].tile->saveTile();
+  }
+}
+
+void World::saveTileCata(int x, int z)
+{
+  if( tileLoaded( z, x ) )
+  {
+    mTiles[z][x].tile->saveTileCata();
   }
 }
 
