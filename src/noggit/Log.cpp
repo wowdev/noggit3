@@ -2,7 +2,6 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
-#define DEBUG__LOGGINGTOCONSOLE true
 #include <fstream>
 #include <ctime>
 #include <string.h>
