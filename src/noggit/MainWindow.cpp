@@ -6,11 +6,16 @@
 #include <QStatusBar>
 #include <QToolBar>
 #include <QLabel>
+#include <QMenu>
+#include <QMenuBar>
 
 #include <noggit/Log.h>
 #include <noggit/application.h>
 #include <noggit/ui/projectExplorer.h>
 #include <noggit/ui/model_spawner.h>
+
+#include <noggit/ui/textureselecter.h>
+#include <noggit/editortemplate.h>
 
 namespace noggit
 {
@@ -27,6 +32,12 @@ MainWindow::MainWindow(QWidget *parent) :
     mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
+    textureSelecter *test = new textureSelecter(_dummy_gl_widget);
+
+    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
+    QMenu *debugMenu = menuBar()->addMenu(tr("&Debug"));
+    debugMenu->addAction(tr("textureSelector"),test,SLOT(show()));
+
     setCentralWidget(mdiArea);
 
     createDockWidgets();
@@ -34,16 +45,6 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->showMessage(tr("Ready"));
     currentToolBar = addToolBar(tr("File"));
     currentToolBar->addWidget(new QLabel(tr("Toolbar")));
-}
-
-void MainWindow::setToolBar(QToolBar *bar, Qt::ToolBarArea area)
-{
-    //if(currentToolBar)
-    //    removeToolBar(currentToolBar);
-
-    addToolBar(area, bar);
-    bar->show();
-    //currentToolBar = bar;
 }
 
 void MainWindow::createDockWidgets()
@@ -66,8 +67,11 @@ void MainWindow::create_world_view (World* world)
                                       )
                         );
 
-    mdiArea->addSubWindow(map_view);
-    map_view->show();
+    EditorTemplate *temp = new EditorTemplate(this);
+    connect(temp,SIGNAL(parentChanged()),map_view,SLOT(updateParent()));
+    temp->setEditor(map_view);
+    mdiArea->addSubWindow(temp);
+    temp->show();
 }
 
 

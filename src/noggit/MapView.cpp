@@ -38,8 +38,9 @@
 #include <noggit/ui/help_widget.h>
 #include <noggit/ui/cursor_selector.h>
 #include <noggit/ui/model_spawner.h>
-#include <noggit/MainWindow.h>
+#include <noggit/editortemplate.h>
 #include <noggit/blp_texture.h>
+#include <noggit/TextureManager.h>
 
 //! \todo Replace all old gui elements with new classes / widgets.
 #undef __OBSOLETE_GUI_ELEMENTS
@@ -51,7 +52,7 @@ namespace noggit
                    , float ah0
                    , float av0
                    , QGLWidget* shared
-                   , MainWindow* parent
+                   , QWidget* parent
                    )
     : QGLWidget (parent, shared)
     , _startup_time ()
@@ -97,6 +98,16 @@ namespace noggit
     , _smoothing_radius_slider (NULL)
     , _smoothing_speed_slider (NULL)
     , _smoothing_settings_widget (NULL)
+    , _texturing_settings_widget(NULL)
+    , _texturing_radius_slider(NULL)
+    , _texturing_hardness_slider(NULL)
+    , _texturing_pressure_slider(NULL)
+    , _texturing_opacity_slider(NULL)
+    , _texturing_radius(15.0)
+    , _texturing_hardness(0.9f)
+    , _texturing_pressure(0.9f)
+    , _texturing_opacity(1.0f)
+    , _texturingComboBox(NULL)
     , _automatically_update_terrain_selection (true)
     , _copy_size_randomization (false)
     , _copy_position_randomization (false)
@@ -109,6 +120,7 @@ namespace noggit
     , _settings (new QSettings (this))
     , _clipboard (NULL)
     , _invert_mouse_y_axis (false)
+    , menu(NULL)
 
     //! \todo Sort to correct order and rename.
     , moving (0.0f)
@@ -117,9 +129,10 @@ namespace noggit
     , movespd (66.6f)
     , look (false)
     , mViewMode (eViewMode_3D)
-    , mainWindow(parent)
+    , editortemplate(NULL)
   {
     setMinimumSize(500,500);
+    setMaximumHeight(2000);
     setAcceptDrops (true);
     setFocusPolicy (Qt::StrongFocus);
     setMouseTracking (true);
@@ -224,14 +237,9 @@ namespace noggit
   #undef NEW_ACTION_OTHER
   #undef NEW_TOGGLE_ACTION
 
-  #ifdef Q_WS_X11
-    QMenuBar* menu_bar (new QMenuBar (this));
+    menu = new QMenu (tr("3D Editor"));
 
-  #else
-    QMenuBar* menu_bar (new QMenuBar (NULL));
-  #endif
-
-    QMenu* file_menu (menu_bar->addMenu (tr ("File")));
+    QMenu* file_menu (menu->addMenu (tr ("File")));
     file_menu->addAction (save_current_tile);
     file_menu->addAction (save_modified_tiles);
     file_menu->addAction (reload_tile);
@@ -243,7 +251,7 @@ namespace noggit
     file_menu->addSeparator();
     file_menu->addAction (to_menu);
 
-    QMenu* edit_menu (menu_bar->addMenu (tr ("Edit")));
+    QMenu* edit_menu (menu->addMenu (tr ("Edit")));
     edit_menu->addAction (copy_object);
     edit_menu->addAction (paste_object);
     edit_menu->addAction (delete_object);
@@ -251,7 +259,7 @@ namespace noggit
     edit_menu->addAction (reset_rotation);
     edit_menu->addAction (snap_object_to_ground);
 
-    QMenu* assist_menu (menu_bar->addMenu (tr ("Assist")));
+    QMenu* assist_menu (menu->addMenu (tr ("Assist")));
     QMenu* insertion_menu (assist_menu->addMenu (tr ("Insert helper model")));
 
     /*
@@ -279,7 +287,7 @@ namespace noggit
     assist_menu->addAction (tr ("Clear models", clear_all_models, 0  );
     assist_menu->addAction (tr ("Switch texture", show_texture_switcher, 0  );
   */
-    QMenu* view_menu (menu_bar->addMenu (tr ("View")));
+    QMenu* view_menu (menu->addMenu (tr ("View")));
     view_menu->addAction (current_texture);
     view_menu->addAction (toggle_minimap);
     view_menu->addAction (detail_infos);
@@ -295,7 +303,7 @@ namespace noggit
     view_menu->addAction (fog_drawing);
     view_menu->addAction (toggle_lighting);
 
-    QMenu* settings_menu (menu_bar->addMenu (tr ("Settings")));
+    QMenu* settings_menu (menu->addMenu (tr ("Settings")));
     settings_menu->addAction (cursor_selector);
     settings_menu->addSeparator();
     settings_menu->addAction (rotation_randomization);
@@ -310,11 +318,11 @@ namespace noggit
     settings_menu->addAction (decrease_moving_speed);
     settings_menu->addAction (increase_moving_speed);
 
-    QMenu* help_menu (menu_bar->addMenu (tr ("Help")));
+    QMenu* help_menu (menu->addMenu (tr ("Help")));
     help_menu->addAction (key_bindings);
     help_menu->addAction (about_noggit);
 
-    QMenu* debug_menu (menu_bar->addMenu (tr ("Testing and Debugging")));
+    QMenu* debug_menu (menu->addMenu (tr ("Testing and Debugging")));
     debug_menu->addAction (save_wdt);
     debug_menu->addAction (model_spawner);
     debug_menu->addAction (save_minimap);
@@ -323,7 +331,6 @@ namespace noggit
     QMenu* useless_menu (debug_menu->addMenu (tr ("Stuff that should only be on keys")));
     useless_menu->addAction (turn_around);
 
-    menu_bar->show();
     set_terrain_editing_mode(_current_terrain_editing_mode);
   }
 
@@ -729,40 +736,47 @@ namespace noggit
                                                    , _world->camera.z()
                                                    )
                                          );
+            if( mViewMode == eViewMode_3D )
+            {
 
-            if ( _currently_holding_shift
-              && _currently_holding_control
-               )
-            {
-              _world->eraseTextures (brush_position.x(), brush_position.y());
-            }
-            else if (_currently_holding_control)
-            {
-#ifdef __OBSOLETE_GUI_ELEMENTS
-              mainGui->TexturePicker->getTextures (_world->GetCurrentSelection());
-#endif
-            }
-            else if ( _currently_holding_shift
-#ifdef __OBSOLETE_GUI_ELEMENTS
-                   && UITexturingGUI::getSelectedTexture()
-#endif
+                if ( _currently_holding_shift
+                    && _currently_holding_control
                     )
-            {
-              _world->paintTexture ( brush_position.x()
-                                   , brush_position.y()
-                                   , brush (_texturing_radius, _texturing_hardness)
-                                   , (1.0f - _texturing_opacity) * 255.0f
-                                   , 1.0f - pow ( 1.0f - (float)_texturing_pressure
-                                                , (float)dt * 10.0f
-                                                )
-                                   ,
-                                   #ifdef __OBSOLETE_GUI_ELEMENTS
-                                   UITexturingGUI::getSelectedTexture()
-                                   #else
-                                   NULL
-                                   #endif
-                                   );
+                {
+                    _world->eraseTextures (brush_position.x(), brush_position.y());
+                }
+                else if (_currently_holding_control)
+                {
+#ifdef __OBSOLETE_GUI_ELEMENTS
+                    mainGui->TexturePicker->getTextures (_world->GetCurrentSelection());
+#endif
+                }
+                else if ( _currently_holding_shift
+                          && getSelectedTexture()
+                        )
+                {
+                    _world->paintTexture ( brush_position.x()
+                                         , brush_position.y()
+                                         , brush (_texturing_radius, _texturing_hardness)
+                                         , _texturing_opacity * 255.0f
+                                         , 1.0f - pow ( 1.0f - (float)_texturing_pressure
+                                                , (float)dt * 10.0f)
+                                         , getSelectedTexture()
+                                         );
+                }
             }
+            else
+            {
+                _world->paintTexture ( brush_position.x()
+                                     , brush_position.y()
+                                     , brush (_texturing_radius, _texturing_hardness)
+                                     , _texturing_opacity * 255.0f
+                                     , 1.0f - pow ( 1.0f - (float)_texturing_pressure
+                                            , (float)dt * 10.0f)
+                                     , getSelectedTexture()
+                                     );
+            }
+
           }
         break;
 
@@ -1829,21 +1843,21 @@ namespace noggit
 
     _shaping_settings_widget->hide();
     _smoothing_settings_widget->hide();
-//    _texturing_settings_widget->hide();
+    _texturing_settings_widget->hide();
 
     switch (mode)
     {
     case shaping:
-      mainWindow->setToolBar(_shaping_settings_widget);
+      _shaping_settings_widget->show();
       break;
 
     case smoothing:
-      mainWindow->setToolBar(_smoothing_settings_widget);
+      _smoothing_settings_widget->show();
       break;
 
-//    case texturing:
-//      _texturing_settings_widget->show();
-//      break;
+    case texturing:
+      _texturing_settings_widget->show();
+      break;
 
     default:
       break;
@@ -1914,6 +1928,11 @@ namespace noggit
                            , tile_below_camera (_world->camera.z())
                            , NULL
                            );
+  }
+
+  noggit::blp_texture *MapView::getSelectedTexture()
+  {
+      return TextureManager::newTexture(_texturingComboBox->itemData(_texturingComboBox->currentIndex()).toString().toStdString());
   }
 
 
@@ -2073,7 +2092,7 @@ namespace noggit
 
     _smoothing_settings_widget = new QToolBar (NULL);
 
-    _smoothingComboBox = new QComboBox (this);
+    _smoothingComboBox = new QComboBox (_smoothing_settings_widget);
 
     _smoothingComboBox->addItem(tr ("Flat"), smoothing_formula_type::flat);
     _smoothingComboBox->addItem(tr ("Linear"), smoothing_formula_type::linear);
@@ -2121,21 +2140,83 @@ namespace noggit
     // pressure
 
     // button for swapper
+
+    delete _texturing_settings_widget;
+
+    _texturing_settings_widget = new QToolBar (NULL);
+
+    _texturingComboBox = new QComboBox (_texturing_settings_widget);
+
+    _texturingComboBox->addItem(QIcon(render_blp_to_pixmap("tileset\\elwynn\\elwynngrassbase.blp",50,50)),"elwynngrassbase","tileset\\elwynn\\elwynngrassbase.blp");
+
+    _texturing_settings_widget->addWidget(_texturingComboBox);
+
+    _texturing_radius_slider = new QSlider (Qt::Horizontal, _texturing_settings_widget);
+    _texturing_radius_slider->setMinimum (texturing_radius_constants.minimum * texturing_radius_constants.scale);
+    _texturing_radius_slider->setMaximum (texturing_radius_constants.maximum * texturing_radius_constants.scale);
+    _texturing_radius_slider->setMaximumWidth(200);
+    connect (_texturing_radius_slider, SIGNAL (valueChanged (int)), SLOT (texturing_radius (int)));
+
+    _texturing_opacity_slider = new QSlider (Qt::Horizontal, _texturing_settings_widget);
+    _texturing_opacity_slider->setMinimum (texturing_opacity_constants.minimum * texturing_opacity_constants.scale);
+    _texturing_opacity_slider->setMaximum (texturing_opacity_constants.maximum * texturing_opacity_constants.scale);
+    _texturing_opacity_slider->setMaximumWidth(200);
+    connect (_texturing_opacity_slider, SIGNAL (valueChanged (int)), SLOT (texturing_opacity (int)));
+
+    _texturing_hardness_slider = new QSlider (Qt::Horizontal, _texturing_settings_widget);
+    _texturing_hardness_slider->setMinimum (texturing_hardness_constants.minimum * texturing_hardness_constants.scale);
+    _texturing_hardness_slider->setMaximum (texturing_hardness_constants.maximum * texturing_hardness_constants.scale);
+    _texturing_hardness_slider->setMaximumWidth(200);
+    connect (_texturing_hardness_slider, SIGNAL (valueChanged (int)), SLOT (texturing_hardness (int)));
+
+    _texturing_pressure_slider = new QSlider (Qt::Horizontal, _texturing_settings_widget);
+    _texturing_pressure_slider->setMinimum (texturing_pressure_constants.minimum * texturing_pressure_constants.scale);
+    _texturing_pressure_slider->setMaximum (texturing_pressure_constants.maximum * texturing_pressure_constants.scale);
+    _texturing_pressure_slider->setMaximumWidth(200);
+    connect (_texturing_pressure_slider, SIGNAL (valueChanged (int)), SLOT (texturing_pressure (int)));
+
+    QLabel* radius_label (new QLabel (tr ("Brush &radius"), _texturing_settings_widget));
+    QLabel* opacity_label (new QLabel (tr ("Brush &opacity"), _texturing_settings_widget));
+    QLabel* hardness_label (new QLabel (tr ("Brush &hardness"), _texturing_settings_widget));
+    QLabel* pressure_label (new QLabel (tr ("Brush &pressure"), _texturing_settings_widget));
+
+    _texturing_settings_widget->addWidget (radius_label);
+    _texturing_settings_widget->addWidget (_texturing_radius_slider);
+    _texturing_settings_widget->addWidget (opacity_label);
+    _texturing_settings_widget->addWidget (_texturing_opacity_slider);
+    _texturing_settings_widget->addWidget (hardness_label);
+    _texturing_settings_widget->addWidget (_texturing_hardness_slider);
+    _texturing_settings_widget->addWidget (pressure_label);
+    _texturing_settings_widget->addWidget (_texturing_pressure_slider);
+
+    radius_label->setBuddy (_smoothing_radius_slider);
+    opacity_label->setBuddy (_texturing_opacity_slider);
+    hardness_label->setBuddy (_texturing_hardness_slider);
+    pressure_label->setBuddy (_texturing_pressure_slider);
+
+    texturing_radius (texturing_radius());
+    texturing_opacity (texturing_opacity());
+    texturing_hardness (texturing_hardness());
+    texturing_pressure (texturing_pressure());
   }
 
   void MapView::createToolBar()
   {
-      QToolBar *toolBar = new QToolBar(NULL);
+      toolBar = new QToolBar(NULL);
 
       _toolbar_formula_radio_group = new QButtonGroup;
 
       QWidget *widget = new QWidget();
       QVBoxLayout *layout = new QVBoxLayout(widget);
 
-      QPushButton *shapingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Earth01.blp",50,50)), "");
-      shapingButton->setIconSize(QSize(50,50));
-      QPushButton *smoothingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Air01.blp",50,50)), "");
-      smoothingButton->setIconSize(QSize(50,50));
+      QPushButton *shapingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Earth01.blp",40,40)), "");
+      shapingButton->setIconSize(QSize(40,40));
+      shapingButton->setMaximumSize(50,50);
+      shapingButton->setStyleSheet("border:2px black; border-radius: 5px; background-color: black;"); //transparent
+      QPushButton *smoothingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Air01.blp",40,40)), "");
+      smoothingButton->setIconSize(QSize(40,40));
+      shapingButton->setMaximumSize(50,50);
+      smoothingButton->setStyleSheet("border:2px black; border-radius: 5px; background-color: black;");
 
       _toolbar_formula_radio_group->addButton(shapingButton, shaping);
       _toolbar_formula_radio_group->addButton(smoothingButton, smoothing);
@@ -2146,7 +2227,7 @@ namespace noggit
 
       connect(_toolbar_formula_radio_group,SIGNAL(buttonClicked(int)),SLOT(set_terrain_editing_mode(int)));
 
-      mainWindow->setToolBar(toolBar,Qt::RightToolBarArea);
+      toolBar->show();
   }
 
 
@@ -2386,8 +2467,15 @@ namespace noggit
 #endif
   }
 
-
-
+void MapView::updateParent()
+{
+    editortemplate = (noggit::EditorTemplate*)this->parent();
+    editortemplate->addPropBar(_shaping_settings_widget);
+    editortemplate->addPropBar(_texturing_settings_widget);
+    editortemplate->addPropBar(_smoothing_settings_widget);
+    editortemplate->addToolBar(toolBar);
+    editortemplate->addEditorMenu(menu);
+}
 
 
 }

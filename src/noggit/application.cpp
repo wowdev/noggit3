@@ -49,6 +49,8 @@ namespace noggit
     setOrganizationDomain ("modcraft.tk");
     setOrganizationName ("Modcraft");
     setApplicationName ("Noggit");
+    setGraphicsSystem("opengl");
+
     setApplicationVersion (helper::repository::revision_string());
 
     _settings = new QSettings (this);

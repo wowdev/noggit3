@@ -351,8 +351,10 @@ MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bo
   }
 
   // - MTFX ----------------------------------------------
-  /*
+
   //! \todo Implement this or just use Terrain Cube maps?
+
+  /*
   Log << "MTFX offs: " << Header.mtfx << std::endl;
   if(Header.mtfx != 0){
     Log << "Try to load MTFX" << std::endl;

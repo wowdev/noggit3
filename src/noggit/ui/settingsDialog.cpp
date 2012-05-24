@@ -128,7 +128,7 @@ namespace noggit
 
       if (_path != "")
       {
-        _path.append("\\");
+        _path.append("/");
         currentProjectPath->setText(_path);
         noggit::app().setting ("paths/project", currentProjectPath->text());
       }
