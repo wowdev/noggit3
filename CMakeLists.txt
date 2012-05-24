@@ -56,6 +56,7 @@ set ( noggit_sources
       src/noggit/Brush.cpp
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
+	  src/noggit/editortemplate.cpp
       src/noggit/Frustum.cpp
       src/noggit/Liquid.cpp
       src/noggit/Log.cpp
@@ -93,6 +94,7 @@ set ( noggit_sources
       src/noggit/ui/cursor_selector.cpp
       src/noggit/ui/DBCEditor.cpp
       src/noggit/ui/projectExplorer.cpp
+	  src/noggit/ui/textureselecter.cpp
     )
 
 set ( noggit_headers
@@ -103,6 +105,7 @@ set ( noggit_headers
       src/noggit/Brush.h
       src/noggit/DBC.h
       src/noggit/DBCFile.h
+	  src/noggit/editortemplate.h
       src/noggit/Frustum.h
       src/noggit/Liquid.h
       src/noggit/Log.h
@@ -145,11 +148,13 @@ set ( noggit_headers
       src/noggit/ui/minimap_widget.h
       src/noggit/ui/DBCEditor.h
       src/noggit/ui/projectExplorer.h
+	  src/noggit/ui/textureselecter.h
     )
 
 set ( noggit_headers_to_moc
       src/noggit/application.h
 
+	  src/noggit/editortemplate.h
       src/noggit/Menu.h
       src/noggit/MapView.h
       src/noggit/ModelView.h
@@ -167,6 +172,7 @@ set ( noggit_headers_to_moc
       src/noggit/ui/minimap_widget.h
       src/noggit/ui/DBCEditor.h
       src/noggit/ui/projectExplorer.h
+	  src/noggit/ui/textureselecter.h
     )
 
 
