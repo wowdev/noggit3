@@ -32,11 +32,12 @@ MainWindow::MainWindow(QWidget *parent) :
     mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    textureSelecter *test = new textureSelecter(_dummy_gl_widget);
+    //textureSelecter *test = new textureSelecter(_dummy_gl_widget);
+	//! todo windows has a problem with sharing the dummy (may sth about render contex)
 
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    QMenu *debugMenu = menuBar()->addMenu(tr("&Debug"));
-    debugMenu->addAction(tr("textureSelector"),test,SLOT(show()));
+    //QMenu *debugMenu = menuBar()->addMenu(tr("&Debug"));
+    //debugMenu->addAction(tr("textureSelector"),test,SLOT(show()));
 
     setCentralWidget(mdiArea);
 
