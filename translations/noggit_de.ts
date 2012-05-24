@@ -20,61 +20,90 @@
     </message>
 </context>
 <context>
-    <name>MapView</name>
+    <name>Menu</name>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2049"/>
-        <location filename="../src/noggit/MapView.cpp" line="2097"/>
-        <source>Flat</source>
+        <location filename="../src/noggit/Menu.cpp" line="98"/>
+        <source>Continents</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2050"/>
-        <location filename="../src/noggit/MapView.cpp" line="2098"/>
-        <source>Linear</source>
+        <location filename="../src/noggit/Menu.cpp" line="99"/>
+        <source>Dungeons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2051"/>
-        <location filename="../src/noggit/MapView.cpp" line="2099"/>
-        <source>Smooth</source>
+        <location filename="../src/noggit/Menu.cpp" line="100"/>
+        <source>Raids</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2052"/>
-        <source>Polynomial</source>
+        <location filename="../src/noggit/Menu.cpp" line="101"/>
+        <source>Bookmarks</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
+    <message>
+        <location filename="../src/noggit/DBC.cpp" line="44"/>
+        <location filename="../src/noggit/DBC.cpp" line="56"/>
+        <location filename="../src/noggit/DBC.cpp" line="66"/>
+        <source>Unknown location</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2053"/>
-        <source>Trigonometric</source>
+        <location filename="../src/noggit/DBC.cpp" line="76"/>
+        <location filename="../src/noggit/DBC.cpp" line="85"/>
+        <source>Unknown map</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>columnEditor</name>
+    <message>
+        <location filename="../src/noggit/ui/DBCEditor.cpp" line="70"/>
+        <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2054"/>
-        <source>Square</source>
+        <location filename="../src/noggit/ui/DBCEditor.cpp" line="72"/>
+        <source>Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>noggit::MainWindow</name>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="38"/>
+        <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2072"/>
-        <location filename="../src/noggit/MapView.cpp" line="2117"/>
-        <location filename="../src/noggit/MapView.cpp" line="2178"/>
-        <source>Brush &amp;radius</source>
+        <location filename="../src/noggit/MainWindow.cpp" line="46"/>
+        <source>Ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2073"/>
-        <location filename="../src/noggit/MapView.cpp" line="2118"/>
-        <source>Shaping &amp;speed</source>
+        <location filename="../src/noggit/MainWindow.cpp" line="47"/>
+        <source>File</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="48"/>
+        <source>Toolbar</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="54"/>
+        <source>Project Explorer</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>noggit::MapView</name>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="174"/>
         <source>Save current tile</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MapView.cpp" line="234"/>
-        <source>Save current tile (Cata tests)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -278,6 +307,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/noggit/MapView.cpp" line="234"/>
+        <source>Save current tile (Cata tests)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/noggit/MapView.cpp" line="240"/>
         <source>3D Editor</source>
         <translation type="unfinished"></translation>
@@ -328,6 +362,52 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/noggit/MapView.cpp" line="2049"/>
+        <location filename="../src/noggit/MapView.cpp" line="2097"/>
+        <source>Flat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="2050"/>
+        <location filename="../src/noggit/MapView.cpp" line="2098"/>
+        <source>Linear</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="2051"/>
+        <location filename="../src/noggit/MapView.cpp" line="2099"/>
+        <source>Smooth</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="2052"/>
+        <source>Polynomial</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="2053"/>
+        <source>Trigonometric</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="2054"/>
+        <source>Square</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="2072"/>
+        <location filename="../src/noggit/MapView.cpp" line="2117"/>
+        <location filename="../src/noggit/MapView.cpp" line="2178"/>
+        <source>Brush &amp;radius</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MapView.cpp" line="2073"/>
+        <location filename="../src/noggit/MapView.cpp" line="2118"/>
+        <source>Shaping &amp;speed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/noggit/MapView.cpp" line="2179"/>
         <source>Brush &amp;opacity</source>
         <translation type="unfinished"></translation>
@@ -344,46 +424,36 @@
     </message>
 </context>
 <context>
-    <name>Menu</name>
+    <name>noggit::application</name>
     <message>
-        <location filename="../src/noggit/Menu.cpp" line="98"/>
-        <source>Continents</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/Menu.cpp" line="99"/>
-        <source>Dungeons</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/Menu.cpp" line="100"/>
-        <source>Raids</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/Menu.cpp" line="101"/>
-        <source>Bookmarks</source>
+        <location filename="../src/noggit/application.cpp" line="211"/>
+        <source>Open WoW Directory</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>noggit::async::loader</name>
     <message>
-        <location filename="../src/noggit/DBC.cpp" line="44"/>
-        <location filename="../src/noggit/DBC.cpp" line="56"/>
-        <location filename="../src/noggit/DBC.cpp" line="66"/>
-        <source>Unknown location</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/DBC.cpp" line="76"/>
-        <location filename="../src/noggit/DBC.cpp" line="85"/>
-        <source>Unknown map</source>
+        <location filename="../src/noggit/async/loader.cpp" line="17"/>
+        <source>Asynchronous loading with %1 threads.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>about_widget</name>
+    <name>noggit::textureSelecter</name>
+    <message>
+        <location filename="../src/noggit/ui/textureselecter.cpp" line="38"/>
+        <source>some textures here</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/ui/textureselecter.cpp" line="52"/>
+        <source>some other textures here</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>noggit::ui::about_widget</name>
     <message>
         <location filename="../src/noggit/ui/about_widget.cpp" line="23"/>
         <source>About Noggit</source>
@@ -416,28 +486,7 @@
     </message>
 </context>
 <context>
-    <name>application</name>
-    <message>
-        <location filename="../src/noggit/application.cpp" line="211"/>
-        <source>Open WoW Directory</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>columnEditor</name>
-    <message>
-        <location filename="../src/noggit/ui/DBCEditor.cpp" line="70"/>
-        <source>Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/ui/DBCEditor.cpp" line="72"/>
-        <source>Type</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>cursor_selector</name>
+    <name>noggit::ui::cursor_selector</name>
     <message>
         <location filename="../src/noggit/ui/cursor_selector.cpp" line="60"/>
         <source>Cursor options</source>
@@ -485,7 +534,7 @@
     </message>
 </context>
 <context>
-    <name>help_widget</name>
+    <name>noggit::ui::help_widget</name>
     <message>
         <location filename="../src/noggit/ui/help_widget.cpp" line="16"/>
         <source>Help</source>
@@ -518,15 +567,7 @@
     </message>
 </context>
 <context>
-    <name>loader</name>
-    <message>
-        <location filename="../src/noggit/async/loader.cpp" line="17"/>
-        <source>Asynchronous loading with %1 threads.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>minimap_widget</name>
+    <name>noggit::ui::minimap_widget</name>
     <message>
         <location filename="../src/noggit/ui/minimap_widget.cpp" line="138"/>
         <source>Select a map on the left side.</source>
@@ -534,58 +575,7 @@
     </message>
 </context>
 <context>
-    <name>noggit::MainWindow</name>
-    <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="37"/>
-        <source>&amp;File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="38"/>
-        <source>&amp;Debug</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="39"/>
-        <source>textureSelector</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="45"/>
-        <source>Ready</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="46"/>
-        <source>File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="47"/>
-        <source>Toolbar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="53"/>
-        <source>Project Explorer</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>noggit::textureSelecter</name>
-    <message>
-        <location filename="../src/noggit/ui/textureselecter.cpp" line="38"/>
-        <source>some textures here</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/noggit/ui/textureselecter.cpp" line="52"/>
-        <source>some other textures here</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>settingsDialog</name>
+    <name>noggit::ui::settingsDialog</name>
     <message>
         <location filename="../src/noggit/ui/settingsDialog.cpp" line="32"/>
         <source>Select a different Project path</source>
