@@ -765,7 +765,7 @@ void MapChunk::drawTextures (int animation_time)
 
 void MapChunk::initStrip()
 {
-    strip = new StripType[384]; //! \todo  figure out exact length of strip needed
+    strip = new StripType[768]; //! \todo  figure out exact length of strip needed
     StripType* s = strip;
     for (size_t y=0; y < 8; ++y) {
       for (size_t x=0; x < 8; ++x) {
@@ -773,7 +773,13 @@ void MapChunk::initStrip()
             *s++ = indexLoD(y, x); //9
             *s++ = indexNoLoD(y, x); //0
             *s++ = indexNoLoD(y+1, x); //17
+            *s++ = indexLoD(y, x); //9
+            *s++ = indexNoLoD(y+1, x); //17
             *s++ = indexNoLoD(y+1, x+1); //18
+            *s++ = indexLoD(y, x); //9
+            *s++ = indexNoLoD(y+1, x+1); //18
+            *s++ = indexNoLoD(y, x+1); //1
+            *s++ = indexLoD(y, x); //9
             *s++ = indexNoLoD(y, x+1); //1
             *s++ = indexNoLoD(y, x); //0
         }
@@ -956,21 +962,7 @@ void MapChunk::drawPass (int anim, int animation_time)
     glTranslatef(f*fdx,f*fdy,0);
   }
 
-  for(int i = 0; i<striplen/6; ++i)
-  {
-//      glBegin(GL_TRIANGLE_FAN);
-//      for(int j = 0; j < 6; ++j)
-//      {
-//          int myIndex = strip[i*6+j];
-//          glVertex3fv(mVertices[myIndex]);
-//      }
-//      glEnd();
-      glDrawElements(GL_TRIANGLE_FAN, 6, GL_UNSIGNED_SHORT, strip+i*6);
-  }
-
-
-  //glDrawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
-
+  glDrawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
 
   if (anim)
   {
