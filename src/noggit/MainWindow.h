@@ -17,7 +17,6 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     MainWindow(QWidget *parent = 0);
-    void setToolBar(QToolBar *bar,  Qt::ToolBarArea area = Qt::TopToolBarArea);
     
 signals:
     

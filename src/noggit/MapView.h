@@ -23,13 +23,16 @@ class QSlider;
 class QSettings;
 class QToolBar;
 class QButtonGroup;
+class QMenuBar;
 
 class World;
 class nameEntry;
 
 namespace noggit
 {
-  class MainWindow;
+
+  class blp_texture;
+  class EditorTemplate;
   namespace ui
   {
     class about_widget;
@@ -91,7 +94,7 @@ namespace noggit
             , float ah0 = -90.0f
             , float av0 = -30.0f
             , QGLWidget* shared = NULL
-            , MainWindow* parent = NULL
+            , QWidget* parent = NULL
             );
     virtual ~MapView();
 
@@ -114,6 +117,7 @@ namespace noggit
 
   public slots:
     void set_terrain_editing_mode (int);
+    void updateParent();
 
   private slots:
     void add_bookmark();
@@ -205,6 +209,8 @@ namespace noggit
 
     void create_obsolete_gui();
 
+    noggit::blp_texture *getSelectedTexture();
+
     const qreal& shaping_radius() const;
     const qreal& shaping_speed() const;
     const shaping_formula_type::formula& shaping_formula() const;
@@ -247,7 +253,9 @@ namespace noggit
 
     World* _world;
 
-    MainWindow *mainWindow;
+    EditorTemplate *editortemplate;
+
+    QMenu* menu;
 
     ui::minimap_widget* _minimap;
     ui::model_spawner* _model_spawner;
@@ -279,6 +287,7 @@ namespace noggit
 
     //! \todo Use the brush class for these? Or simplify that somehow?
 
+    QToolBar *toolBar;
     QButtonGroup *_toolbar_formula_radio_group;
 
     // shaping -----------
@@ -312,6 +321,7 @@ namespace noggit
     QSlider* _texturing_pressure_slider;
     QSlider* _texturing_opacity_slider;
     QToolBar* _texturing_settings_widget;
+    QComboBox* _texturingComboBox;
 
     bool _automatically_update_terrain_selection;
     bool _copy_size_randomization;

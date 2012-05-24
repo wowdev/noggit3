@@ -48,6 +48,16 @@ int indexMapBuf (int x, int y)
   return ((y+1)/2)*9 + (y/2)*8 + x;
 }
 
+int indexLoD(int x, int y)
+{
+  return (x+1)*9+x*8+y;
+}
+
+int indexNoLoD(int x, int y)
+{
+  return x*8+x*9+y;
+}
+
 // 8x8x2 version with triangle strips, size = 8*18 + 7*2
 template <class V>
 void stripify(V *in, V *out)
@@ -744,46 +754,32 @@ void MapChunk::drawTextures (int animation_time)
   opengl::texture::disable_texture (0);
   opengl::texture::disable_texture (1);
 
-  glBindBuffer(GL_ARRAY_BUFFER, minimap);
+  /*glBindBuffer(GL_ARRAY_BUFFER, minimap);
   glVertexPointer(3, GL_FLOAT, 0, 0);
 
   glBindBuffer(GL_ARRAY_BUFFER, minishadows);
   glColorPointer(4, GL_FLOAT, 0, 0);
 
-  glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, mapstrip2);
+  glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, mapstrip2);*/
 }
 
 void MapChunk::initStrip()
 {
-  strip = new StripType[256]; //! \todo  figure out exact length of strip needed
-  StripType* s = strip;
-  bool first = true;
-  for (size_t y=0; y < 4; ++y) {
-    for (size_t x=0; x < 4; ++x) {
-      if (!isHole(x, y)) {
-        // draw tile here
-        // this is ugly but sort of works
-        size_t i = x*2;
-        size_t j = y*4;
-        for(size_t k=0; k < 2; ++k)
-        {
-          if(!first)
-          {
-            *s++ = indexMapBuf(i, j + k*2);
-          }
-          else
-            first = false;
-          for (size_t l=0; l < 3; ++l)
-          {
-            *s++ = indexMapBuf(i+l, j+ k*2);
-            *s++ = indexMapBuf(i+l, j+ k*2 + 2);
-          }
-          *s++ = indexMapBuf(i+2, j + k*2 + 2);
+    strip = new StripType[384]; //! \todo  figure out exact length of strip needed
+    StripType* s = strip;
+    for (size_t y=0; y < 8; ++y) {
+      for (size_t x=0; x < 8; ++x) {
+        if (!isHole(x, y)) {
+            *s++ = indexLoD(y, x); //9
+            *s++ = indexNoLoD(y, x); //0
+            *s++ = indexNoLoD(y+1, x); //17
+            *s++ = indexNoLoD(y+1, x+1); //18
+            *s++ = indexNoLoD(y, x+1); //1
+            *s++ = indexNoLoD(y, x); //0
         }
       }
     }
-  }
-  striplen = static_cast<int>(s - strip);
+    striplen = static_cast<int>(s - strip);
 }
 
 
@@ -960,7 +956,20 @@ void MapChunk::drawPass (int anim, int animation_time)
     glTranslatef(f*fdx,f*fdy,0);
   }
 
-  glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
+  for(int i = 0; i<striplen/6; ++i)
+  {
+//      glBegin(GL_TRIANGLE_FAN);
+//      for(int j = 0; j < 6; ++j)
+//      {
+//          int myIndex = strip[i*6+j];
+//          glVertex3fv(mVertices[myIndex]);
+//      }
+//      glEnd();
+      glDrawElements(GL_TRIANGLE_FAN, 6, GL_UNSIGNED_SHORT, strip+i*6);
+  }
+
+
+  //glDrawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
 
 
   if (anim)
@@ -1228,9 +1237,6 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   glEnable(GL_CULL_FACE);
   glColor4f(1,1,1,1);
   glPopMatrix();*/
-
-
-
 }
 
 void MapChunk::drawNoDetail()
@@ -1748,7 +1754,10 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
       tPressure=pressure*Brush.getValue(dist);
 
       if(texLevel>0)
-        amap[texLevel-1][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[texLevel-1][i+j*64]) ) + tPressure*target + 0.5f ,255.0f) , 0.0f));
+      {
+        uchar test = static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[texLevel-1][i+j*64]) ) + tPressure*target + 0.5f ,255.0f) , 0.0f));
+        amap[texLevel-1][i+j*64]=test;
+      }
       for(size_t k=texLevel;k<nTextures-1;k++)
         amap[k][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[k][i+j*64]) ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f));
       xPos+=change;

@@ -1077,7 +1077,7 @@ void World::draw ( bool draw_terrain_height_contour
   glDisable(GL_FOG);
 
   int daytime = static_cast<int>(time) % 2880;
-  //outdoorLightStats = ol->getLightStats(daytime);
+  outdoorLightStats = ol->getLightStats(daytime);
   skies->initSky(camera, daytime);
 
   if (!had_sky)
@@ -1406,7 +1406,7 @@ enum stack_types
 {
   MapObjName,
   DoodadName,
-  MapTileName,
+  MapTileName
 };
 
 struct GLNameEntry
