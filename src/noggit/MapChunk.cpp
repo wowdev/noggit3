@@ -754,13 +754,13 @@ void MapChunk::drawTextures (int animation_time)
   opengl::texture::disable_texture (0);
   opengl::texture::disable_texture (1);
 
-  /*glBindBuffer(GL_ARRAY_BUFFER, minimap);
+  glBindBuffer(GL_ARRAY_BUFFER, minimap);
   glVertexPointer(3, GL_FLOAT, 0, 0);
 
   glBindBuffer(GL_ARRAY_BUFFER, minishadows);
   glColorPointer(4, GL_FLOAT, 0, 0);
 
-  glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, mapstrip2);*/
+  glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, mapstrip2);
 }
 
 void MapChunk::initStrip()

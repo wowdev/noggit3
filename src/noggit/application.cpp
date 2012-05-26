@@ -82,9 +82,6 @@ namespace noggit
     MainWindow* mainwindow = new MainWindow;
     mainwindow->show();
 
-    /*Menu* map_selection_menu (new Menu (NULL));
-    connect (map_selection_menu, SIGNAL (create_world_view_request (World*)), mainwindow, SLOT (create_world_view (World*)));
-    map_selection_menu->show();*/
   }
 
   application::~application()

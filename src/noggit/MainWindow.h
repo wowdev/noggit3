@@ -42,17 +42,17 @@ namespace noggit
 	virtual ~MainWindow();
     
   signals:
-    void create_world_view_request (World*);
+//    void create_world_view_request (World*);
 
   public slots:
     void create_world_view (World*);
 
   private slots:
-    void show_map_list_item (QListWidgetItem* item);
-    void show_bookmark_list_item (QListWidgetItem* item);
-    void open_bookmark_list_item (QListWidgetItem* item);
+//    void show_map_list_item (QListWidgetItem* item);
+//    void show_bookmark_list_item (QListWidgetItem* item);
+//    void open_bookmark_list_item (QListWidgetItem* item);
 
-    void minimap_clicked (const ::math::vector_3d&);
+//    void minimap_clicked (const ::math::vector_3d&);
     void settingsClicked();
 
     void maps();
