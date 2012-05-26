@@ -2073,8 +2073,8 @@ namespace noggit
     QLabel* radius_percent_label (new QLabel (_shaping_settings_widget));
     QLabel* speed_percent_label (new QLabel (_shaping_settings_widget));
 
-    //connect (_shaping_radius_slider, SIGNAL (valueChanged (int)), radius_percent_label, SLOT (setText (const QString &str.toInt())));
-    //connect (_shaping_speed_slider,  SIGNAL (valueChanged (int)), speed_percent_label, SLOT (const QString &str.toInt()));
+    connect (_shaping_radius_slider, SIGNAL (valueChanged (int)), radius_percent_label, SLOT (setNum (int)));
+    connect (_shaping_speed_slider,  SIGNAL (valueChanged (int)), speed_percent_label, SLOT (setNum (int)));
 
     radius_label->setBuddy (_shaping_radius_slider);
     speed_label->setBuddy (_shaping_speed_slider);
@@ -2103,6 +2103,7 @@ namespace noggit
     _smoothing_settings_widget = new QToolBar (NULL);
 
     _smoothingComboBox = new QComboBox (_smoothing_settings_widget);
+    _smoothingComboBox->setStyleSheet("margin-right: 10px;");
 
     _smoothingComboBox->addItem (tr ("Flat"), smoothing_formula_type::flat);
     _smoothingComboBox->addItem (tr ("Linear"), smoothing_formula_type::linear);
@@ -2126,14 +2127,25 @@ namespace noggit
 
     QLabel* radius_label (new QLabel (tr ("Brush &radius"), _smoothing_settings_widget));
     QLabel* speed_label (new QLabel (tr ("Shaping &speed"), _smoothing_settings_widget));
+    QLabel* radius_percent_label (new QLabel (_smoothing_settings_widget));
+    QLabel* speed_percent_label (new QLabel (_smoothing_settings_widget));
+
+    connect (_smoothing_radius_slider, SIGNAL (valueChanged (int)), radius_percent_label, SLOT (setNum (int)));
+    connect (_smoothing_speed_slider,  SIGNAL (valueChanged (int)), speed_percent_label, SLOT (setNum (int)));
 
     radius_label->setBuddy (_smoothing_radius_slider);
     speed_label->setBuddy (_smoothing_speed_slider);
+    radius_percent_label->setBuddy (_smoothing_radius_slider);
+    speed_percent_label->setBuddy (_smoothing_speed_slider);
+
+    speed_label->setStyleSheet("margin-left:10px");
 
     _smoothing_settings_widget->addWidget (radius_label);
     _smoothing_settings_widget->addWidget (_smoothing_radius_slider);
+    _smoothing_settings_widget->addWidget (radius_percent_label);
     _smoothing_settings_widget->addWidget (speed_label);
     _smoothing_settings_widget->addWidget (_smoothing_speed_slider);
+    _smoothing_settings_widget->addWidget (speed_percent_label);
 
     //! \note Looks funny, but sets the UI to the default position.
     smoothing_radius (smoothing_radius());
