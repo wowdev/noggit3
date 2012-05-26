@@ -356,22 +356,22 @@
 <context>
     <name>Menu</name>
     <message>
-        <location filename="../src/noggit/Menu.cpp" line="98"/>
+        <location filename="../src/noggit/Menu.cpp" line="95"/>
         <source>Continents</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/Menu.cpp" line="99"/>
+        <location filename="../src/noggit/Menu.cpp" line="96"/>
         <source>Dungeons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/Menu.cpp" line="100"/>
+        <location filename="../src/noggit/Menu.cpp" line="97"/>
         <source>Raids</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/Menu.cpp" line="101"/>
+        <location filename="../src/noggit/Menu.cpp" line="98"/>
         <source>Bookmarks</source>
         <translation type="unfinished"></translation>
     </message>
@@ -546,32 +546,42 @@
 <context>
     <name>noggit::MainWindow</name>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="43"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="44"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="44"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="45"/>
         <source>Exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="53"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="47"/>
+        <source>&amp;Help</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="48"/>
+        <source>Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="57"/>
         <source>Ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="54"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="58"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="55"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="59"/>
         <source>Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="61"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="65"/>
         <source>Project Explorer</source>
         <translation type="unfinished"></translation>
     </message>

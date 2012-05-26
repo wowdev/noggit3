@@ -12,14 +12,15 @@
 #include <QLabel>
 #include <QMenu>
 #include <QMenuBar>
+#include <QAction>
 
 #include <noggit/Log.h>
 #include <noggit/application.h>
 #include <noggit/ui/projectExplorer.h>
 #include <noggit/ui/model_spawner.h>
-
 #include <noggit/ui/textureselecter.h>
 #include <noggit/editortemplate.h>
+#include <noggit/ui/settingsDialog.h>
 
 namespace noggit
 {
@@ -40,11 +41,14 @@ namespace noggit
     //textureSelecter *test = new textureSelecter(_dummy_gl_widget);
     //! todo windows has a problem with sharing the dummy (may sth about render contex)
 
-    QMenu *fileMenu = menuBar()->addMenu (tr("&File"));
+    QMenu* fileMenu = menuBar()->addMenu (tr("&File"));
     fileMenu->addAction (tr("Exit"), this, SLOT(close()));
 
-    //QMenu *debugMenu = menuBar()->addMenu(tr("&Debug"));
-    //debugMenu->addAction(tr("textureSelector"),test,SLOT(show()));
+	QMenu* helpMenu = menuBar()->addMenu (tr("&Help"));
+	helpMenu->addAction (tr("Settings"), this, SLOT(settingsClicked()));
+
+    //QMenu* debugMenu = menuBar()->addMenu (tr("&Debug"));
+    //debugMenu->addAction (tr("textureSelector"), test, SLOT(show()));
 
     setCentralWidget (mdiArea);
 
@@ -80,6 +84,12 @@ namespace noggit
     temp->setEditor (map_view);
     mdiArea->addSubWindow (temp);
     temp->show();
+  }
+
+  void MainWindow::settingsClicked()
+  {
+    noggit::ui::settingsDialog* config (new noggit::ui::settingsDialog);
+    config->show();
   }
 
 
