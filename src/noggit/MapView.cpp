@@ -57,10 +57,10 @@ namespace noggit
     : QGLWidget (parent, shared)
     , _startup_time ()
     , _last_update (0.0)
-    , ah( ah0 )
-    , av( av0 )
-    , _GUIDisplayingEnabled( true )
-    , mTimespeed( 0.0f )
+    , ah (ah0)
+    , av (av0)
+    , _GUIDisplayingEnabled (true)
+    , mTimespeed (0.0f)
     , _world (world)
     , _help_widget (new ui::help_widget (NULL))
     , _about_widget (NULL)
@@ -98,16 +98,16 @@ namespace noggit
     , _smoothing_radius_slider (NULL)
     , _smoothing_speed_slider (NULL)
     , _smoothing_settings_widget (NULL)
-    , _texturing_settings_widget(NULL)
-    , _texturing_radius_slider(NULL)
-    , _texturing_hardness_slider(NULL)
-    , _texturing_pressure_slider(NULL)
-    , _texturing_opacity_slider(NULL)
-    , _texturing_radius(15.0)
-    , _texturing_hardness(0.9f)
-    , _texturing_pressure(0.9f)
-    , _texturing_opacity(1.0f)
-    , _texturingComboBox(NULL)
+    , _texturing_settings_widget (NULL)
+    , _texturing_radius_slider (NULL)
+    , _texturing_hardness_slider (NULL)
+    , _texturing_pressure_slider (NULL)
+    , _texturing_opacity_slider (NULL)
+    , _texturing_radius (15.0)
+    , _texturing_hardness (0.9f)
+    , _texturing_pressure (0.9f)
+    , _texturing_opacity (1.0f)
+    , _texturingComboBox (NULL)
     , _automatically_update_terrain_selection (true)
     , _copy_size_randomization (false)
     , _copy_position_randomization (false)
@@ -120,7 +120,7 @@ namespace noggit
     , _settings (new QSettings (this))
     , _clipboard (NULL)
     , _invert_mouse_y_axis (false)
-    , menu(NULL)
+    , menu (NULL)
 
     //! \todo Sort to correct order and rename.
     , moving (0.0f)
@@ -129,10 +129,10 @@ namespace noggit
     , movespd (66.6f)
     , look (false)
     , mViewMode (eViewMode_3D)
-    , editortemplate(NULL)
+    , editortemplate (NULL)
   {
-    setMinimumSize(500,500);
-    setMaximumHeight(2000);
+    setMinimumSize (500, 500);
+    setMaximumHeight (2000);
     setAcceptDrops (true);
     setFocusPolicy (Qt::StrongFocus);
     setMouseTracking (true);
@@ -1172,9 +1172,7 @@ namespace noggit
     // fog distance or brush radius
     if (event->key() == Qt::Key_Plus)
       if( event->modifiers() & Qt::AltModifier )
-      {
         increase_brush_size();
-      }
       else if( event->modifiers() & Qt::ShiftModifier && ( !_world->HasSelection() || ( _world->HasSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk) )  )
         _world->fogdistance += 60.0f;// fog change only when no model is selected!
       else
@@ -1804,11 +1802,11 @@ namespace noggit
         break;
 
       case smoothing:
-        shaping_radius (shaping_radius() - relative_move.x() / XSENS);
+        smoothing_radius (smoothing_radius() + relative_move.x() / XSENS);
         break;
 
       case texturing:
-        texturing_radius (texturing_radius() - relative_move.x() / XSENS);
+        texturing_radius (texturing_radius() + relative_move.x() / XSENS);
         break;
     default:
       break;
@@ -2209,23 +2207,23 @@ namespace noggit
       QWidget *widget = new QWidget();
       QVBoxLayout *layout = new QVBoxLayout(widget);
 
-      QPushButton *shapingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Earth01.blp",40,40)), "");
-      shapingButton->setIconSize(QSize(40,40));
-      shapingButton->setMaximumSize(50,50);
-      shapingButton->setStyleSheet("border:2px black; border-radius: 5px; background-color: black;"); //transparent
-      QPushButton *smoothingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Air01.blp",40,40)), "");
-      smoothingButton->setIconSize(QSize(40,40));
-      shapingButton->setMaximumSize(50,50);
-      smoothingButton->setStyleSheet("border:2px black; border-radius: 5px; background-color: black;");
+      QPushButton *shapingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Earth01.blp", 40, 40)), "");
+      shapingButton->setIconSize (QSize(40, 40));
+      shapingButton->setMaximumSize (50, 50);
+      shapingButton->setStyleSheet ("border:2px black; border-radius: 5px; background-color: black;"); //transparent
+      QPushButton *smoothingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Air01.blp", 40, 40)), "");
+      smoothingButton->setIconSize (QSize(40, 40));
+      shapingButton->setMaximumSize (50, 50);
+      smoothingButton->setStyleSheet ("border:2px black; border-radius: 5px; background-color: black;");
 
-      _toolbar_formula_radio_group->addButton(shapingButton, shaping);
-      _toolbar_formula_radio_group->addButton(smoothingButton, smoothing);
+      _toolbar_formula_radio_group->addButton (shapingButton, shaping);
+      _toolbar_formula_radio_group->addButton (smoothingButton, smoothing);
 
-      layout->addWidget(shapingButton);
-      layout->addWidget(smoothingButton);
-      toolBar->addWidget(widget);
+      layout->addWidget (shapingButton);
+      layout->addWidget (smoothingButton);
+      toolBar->addWidget (widget);
 
-      connect(_toolbar_formula_radio_group,SIGNAL(buttonClicked(int)),SLOT(set_terrain_editing_mode(int)));
+      connect(_toolbar_formula_radio_group, SIGNAL(buttonClicked(int)), SLOT(set_terrain_editing_mode(int)));
 
       toolBar->show();
   }
