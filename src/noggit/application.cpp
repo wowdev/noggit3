@@ -49,7 +49,7 @@ namespace noggit
     setOrganizationDomain ("modcraft.tk");
     setOrganizationName ("Modcraft");
     setApplicationName ("Noggit");
-    setGraphicsSystem("opengl");
+    setGraphicsSystem ("opengl");
 
     setApplicationVersion (helper::repository::revision_string());
 
@@ -79,13 +79,12 @@ namespace noggit
 
     OpenDBs();
 
-    MainWindow *mainwindow = new MainWindow;
+    MainWindow* mainwindow = new MainWindow;
     mainwindow->show();
 
     Menu* map_selection_menu (new Menu (NULL));
     connect (map_selection_menu, SIGNAL (create_world_view_request (World*)), mainwindow, SLOT (create_world_view (World*)));
     map_selection_menu->show();
-
   }
 
   application::~application()
@@ -137,21 +136,17 @@ namespace noggit
     bool doAntiAliasing (_settings->value ("antialiasing", true).toBool());
     qreal view_distance (_settings->value ("view_distance", 2048.0).toReal());
 
-    foreach (const QString& argument, arguments())
+    foreach(const QString& argument, arguments())
     {
-      if (argument == "-f" || argument == "--fullscreen")
-      {
+      if(argument == "-f" || argument == "--fullscreen")
         inFullscreen = true;
-      }
-      else if (argument == "-noaa" || argument == "--noantialiasing")
-      {
+      else if(argument == "-noaa" || argument == "--noantialiasing")
         doAntiAliasing = false;
-      }
       else
       {
         QRegExp resolution ("-(-resolution=)?(\\d+)(x(\\d+))*");
 
-        if (!resolution.indexIn (argument))
+        if(!resolution.indexIn (argument))
         {
           const QStringList matched (resolution.capturedTexts());
           xResolution = matched.at (2).toInt();
@@ -176,9 +171,7 @@ namespace noggit
     QVariant game_path_variant (_settings->value ("paths/game"));
 
     if (game_path_variant.isValid())
-    {
       _game_path = game_path_variant.toString();
-    }
     else
     {
   #ifdef Q_WS_WIN
@@ -192,13 +185,13 @@ namespace noggit
       QSettings registry (default_registry_path, QSettings::NativeFormat);
       _game_path = registry.value ("InstallPath").toString();
 
-      if(_game_path=="")
+      if(_game_path == "")
       {
         QSettings registry_win7 (win7_registry_path, QSettings::NativeFormat);
         _game_path = registry_win7.value ("InstallPath").toString();
       }
 
-      if(_game_path=="")
+      if(_game_path == "")
       {
         QSettings registry_win72 (win7_registry_path2, QSettings::NativeFormat);
         _game_path = registry_win72.value ("InstallPath").toString();
@@ -217,9 +210,7 @@ namespace noggit
     }
 
     if(!_game_path.endsWith("/"))
-    {
         _game_path.append("/");
-    }
 
     if (!QFile::exists (_game_path))
     {
@@ -231,22 +222,22 @@ namespace noggit
 
     _locale = _settings->value ("locale", "****").toString();
 
-    if (_locale == "****")
+    if(_locale == "****")
     {
       QStringList locales;
       locales << "enGB" << "enUS" << "deDE" << "koKR" << "frFR"
               << "zhCN" << "zhTW" << "esES" << "esMX" << "ruRU";
 
-      foreach (const QString& locale, locales)
+      foreach(const QString& locale, locales)
       {
-        if (QFile::exists (_game_path + "Data/" + locale))
+        if(QFile::exists (_game_path + "Data/" + locale))
         {
           _locale = locale;
           break;
         }
       }
 
-      if (_locale == "****")
+      if(_locale == "****")
       {
         LogError << "Could not find locale directory. Sorry." << std::endl;
         throw std::runtime_error ("Could not find locale directory. Sorry.");
@@ -289,23 +280,19 @@ namespace noggit
       QString path (_game_path + "Data/" + archive);
       path.replace ("{locale}", _locale);
 
-      if (path.contains ("%1"))
+      if(path.contains ("%1"))
       {
         for (char i ('2'); i <= '9'; ++i)
         {
           const QString replaced (path.arg (i));
           if (QFile::exists (replaced))
-          {
             _archive_manager.load_mpq (replaced, true);
-          }
         }
       }
       else
       {
-        if (QFile::exists (path))
-        {
+        if(QFile::exists (path))
           _archive_manager.load_mpq (path, true);
-        }
       }
     }
   }
@@ -328,7 +315,7 @@ namespace noggit
   }
 }
 
-int main (int argc, char *argv[]);
+int main (int argc, char* argv[]);
 
 #ifdef Q_WS_WIN
 int __stdcall WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -337,7 +324,7 @@ int __stdcall WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmd
 }
 #endif
 
-int main (int argc, char *argv[])
+int main (int argc, char* argv[])
 {
 #ifndef _DEBUG
   RegisterErrorHandlers();
