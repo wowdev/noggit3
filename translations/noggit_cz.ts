@@ -27,19 +27,19 @@
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="2048"/>
-        <location filename="../src/noggit/MapView.cpp" line="2109"/>
+        <location filename="../src/noggit/MapView.cpp" line="2108"/>
         <source>Flat</source>
         <translation type="unfinished">Rovný</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="2049"/>
-        <location filename="../src/noggit/MapView.cpp" line="2110"/>
+        <location filename="../src/noggit/MapView.cpp" line="2109"/>
         <source>Linear</source>
         <translation type="unfinished">Lineární</translation>
     </message>
     <message>
         <location filename="../src/noggit/MapView.cpp" line="2050"/>
-        <location filename="../src/noggit/MapView.cpp" line="2111"/>
+        <location filename="../src/noggit/MapView.cpp" line="2110"/>
         <source>Smooth</source>
         <translation type="unfinished">Hladký</translation>
     </message>
@@ -59,15 +59,15 @@
         <translation type="unfinished">Čtverec</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2073"/>
-        <location filename="../src/noggit/MapView.cpp" line="2129"/>
-        <location filename="../src/noggit/MapView.cpp" line="2190"/>
+        <location filename="../src/noggit/MapView.cpp" line="2071"/>
+        <location filename="../src/noggit/MapView.cpp" line="2128"/>
+        <location filename="../src/noggit/MapView.cpp" line="2200"/>
         <source>Brush &amp;radius</source>
         <translation type="unfinished">Velikost &amp;štětce</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2074"/>
-        <location filename="../src/noggit/MapView.cpp" line="2130"/>
+        <location filename="../src/noggit/MapView.cpp" line="2072"/>
+        <location filename="../src/noggit/MapView.cpp" line="2129"/>
         <source>Shaping &amp;speed</source>
         <translation type="unfinished">Rychlost &amp;tvarování</translation>
     </message>
@@ -284,27 +284,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2191"/>
+        <location filename="../src/noggit/MapView.cpp" line="2201"/>
         <source>Brush &amp;opacity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2192"/>
+        <location filename="../src/noggit/MapView.cpp" line="2202"/>
         <source>Brush &amp;hardness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2193"/>
+        <location filename="../src/noggit/MapView.cpp" line="2203"/>
         <source>Brush &amp;pressure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2227"/>
+        <location filename="../src/noggit/MapView.cpp" line="2237"/>
         <source>Terrain Tool</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2233"/>
+        <location filename="../src/noggit/MapView.cpp" line="2243"/>
         <source>Smoothing Tool</source>
         <translation type="unfinished"></translation>
     </message>
