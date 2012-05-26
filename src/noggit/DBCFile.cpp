@@ -10,10 +10,10 @@
 DBCFile::DBCFile (const QString& filename)
   : _filename (filename)
   , f (NULL)
-  , recordCount(0)
-  , fieldCount(0)
-  , recordSize(0)
-  , stringSize(0)
+  , recordCount (0)
+  , fieldCount (0)
+  , recordSize (0)
+  , stringSize (0)
   , data (NULL)
   , stringTable (NULL)
   , headerData (NULL)
@@ -22,11 +22,11 @@ DBCFile::DBCFile (const QString& filename)
 
 void DBCFile::open()
 {
-  f = new noggit::mpq::file(_filename);
+  f = new noggit::mpq::file (_filename);
   LogDebug << "Opening DBC " << qPrintable (_filename) << std::endl;
   headerData = new unsigned char[sizeof (header)];
   f->read (headerData, sizeof (header));
-  memcpy(&header,headerData,sizeof(header));
+  memcpy (&header, headerData, sizeof(header));
 
   //! \note Yup, in these files, they store the magic as string, not uint32_t.
   assert (header.magic == 'CBDW');
@@ -41,7 +41,6 @@ void DBCFile::open()
   stringTable = new unsigned char[stringSize];
   f->read (data, recordSize * recordCount);
   f->read (stringTable, stringSize);
-
 }
 
 void DBCFile::saveToProjectPath()
@@ -49,10 +48,10 @@ void DBCFile::saveToProjectPath()
 	//sizeof(header)+recordSize*recordCount+stringSize
 
   char buffer[50000];//WRONG: Use extendeble array like in ADT save.
-  memcpy(buffer,headerData,sizeof(header));
-  memcpy(buffer+sizeof(header),data,recordSize * recordCount);
-  memcpy(buffer+sizeof(header)+recordSize * recordCount,stringTable,stringSize);
-  f->setBuffer(buffer,sizeof(buffer));
+  memcpy (buffer, headerData, sizeof(header));
+  memcpy (buffer + sizeof(header), data,recordSize * recordCount);
+  memcpy (buffer + sizeof(header) + recordSize * recordCount, stringTable, stringSize);
+  f->setBuffer (buffer, sizeof(buffer));
   f->save_to_disk();
 }
 
