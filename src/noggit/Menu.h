@@ -14,20 +14,20 @@ class QKeyEvent;
 class QMouseEvent;
 class QListWidgetItem;
 
+class World;
+
 namespace noggit
 {
   namespace ui
   {
     class minimap_widget;
-    class settingsDialog;
   }
 }
+
 namespace math
 {
   class vector_3d;
 }
-
-class World;
 
 class Menu : public QWidget
 {
@@ -44,8 +44,6 @@ private slots:
 
   void minimap_clicked (const ::math::vector_3d&);
 
-  void settingsButtonClicked();
-
 signals:
   void create_world_view_request (World*);
 
@@ -55,7 +53,6 @@ private:
   void enter_world_at (const ::math::vector_3d& pos, bool auto_height = true, float av = -30.0f, float ah = -90.0f);
 
   noggit::ui::minimap_widget* _minimap;
-  noggit::ui::settingsDialog* _settings;
   World* _world;
 };
 

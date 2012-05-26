@@ -89,9 +89,6 @@ Menu::Menu (QWidget* parent)
   }
   settings.endArray();
 
-  QPushButton* settingsButton (new QPushButton ("Change settings", this));
-  connect (settingsButton, SIGNAL (clicked()), this, SLOT (settingsButtonClicked()));
-
   QGridLayout* menu_layout (new QGridLayout (this));
 
   QTabWidget* entry_points_tabs (new QTabWidget (NULL));
@@ -105,7 +102,6 @@ Menu::Menu (QWidget* parent)
 
   menu_layout->addWidget (entry_points_tabs, 0, 0);
   menu_layout->addWidget (_minimap, 0, 1);
-  menu_layout->addWidget (settingsButton, 1, 0);
 }
 
 Menu::~Menu()
@@ -121,10 +117,8 @@ void Menu::enter_world_at (const ::math::vector_3d& pos, bool auto_height, float
 
   emit create_world_view_request (_world);
 
-  if (auto_height)
-  {
+  if(auto_height)
     _world->set_camera_above_terrain();
-  }
 
   this->hide();
 }
@@ -176,10 +170,4 @@ void Menu::open_bookmark_list_item (QListWidgetItem* item)
   const bookmark_entry e (item->data (Qt::UserRole).value<bookmark_entry>());
   load_map (e.map_id);
   enter_world_at (e.position, false, e.tilt, e.rotation);
-}
-
-void Menu::settingsButtonClicked()
-{
-  noggit::ui::settingsDialog * config (new noggit::ui::settingsDialog);
-  config->show();
 }

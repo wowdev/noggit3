@@ -1,3 +1,7 @@
+// MainWindow.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Benedikt Kleiner <benedikt.kleiner@googlemail.com>
+// Glararan <glararan@glararan.eu>
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -11,28 +15,35 @@
 
 namespace noggit
 {
+  namespace ui
+  {
+    class settingsDialog;
+  }
 
-class MainWindow : public QMainWindow
-{
+  class MainWindow : public QMainWindow
+  {
     Q_OBJECT
-public:
+
+  public:
     MainWindow(QWidget *parent = 0);
     
-signals:
+  signals:
     
-public slots:
+  public slots:
     void create_world_view (World*);
+	
+    void settingsClicked();
 
-private:
+  private:
     void initialize_video();
     void createDockWidgets();
 
     QGLWidget* _dummy_gl_widget;
-    QMdiArea *mdiArea;
-    QToolBar *currentToolBar;
-    
-};
+    QMdiArea* mdiArea;
+    QToolBar* currentToolBar;
 
+    noggit::ui::settingsDialog* _settings;
+  };
 }
 
 #endif // MAINWINDOW_H
