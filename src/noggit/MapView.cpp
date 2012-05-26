@@ -2043,40 +2043,52 @@ namespace noggit
     _shaping_settings_widget = new QToolBar;
 
     _shapingComboBox = new QComboBox (this);
+    _shapingComboBox->setStyleSheet("margin-right: 10px;");
 
-    _shapingComboBox->addItem(tr ("Flat"), shaping_formula_type::flat);
-    _shapingComboBox->addItem(tr ("Linear"), shaping_formula_type::linear);
-    _shapingComboBox->addItem(tr ("Smooth"), shaping_formula_type::smooth);
-    _shapingComboBox->addItem(tr ("Polynomial"), shaping_formula_type::polynomial);
-    _shapingComboBox->addItem(tr ("Trigonometric"), shaping_formula_type::trigonometric);
-    _shapingComboBox->addItem(tr ("Square"), shaping_formula_type::square);
+    _shapingComboBox->addItem (tr ("Flat"), shaping_formula_type::flat);
+    _shapingComboBox->addItem (tr ("Linear"), shaping_formula_type::linear);
+    _shapingComboBox->addItem (tr ("Smooth"), shaping_formula_type::smooth);
+    _shapingComboBox->addItem (tr ("Polynomial"), shaping_formula_type::polynomial);
+    _shapingComboBox->addItem (tr ("Trigonometric"), shaping_formula_type::trigonometric);
+    _shapingComboBox->addItem (tr ("Square"), shaping_formula_type::square);
 
-    connect(_shapingComboBox,SIGNAL(currentIndexChanged(int)),SLOT(shaping_formula(int)));
+    connect (_shapingComboBox, SIGNAL(currentIndexChanged(int)), SLOT(shaping_formula(int)));
 
-    _shaping_settings_widget->addWidget(_shapingComboBox);
+    _shaping_settings_widget->addWidget (_shapingComboBox);
 
     _shaping_radius_slider = new QSlider (Qt::Horizontal, _shaping_settings_widget);
     _shaping_radius_slider->setMinimum (shaping_radius_constants.minimum * shaping_radius_constants.scale);
     _shaping_radius_slider->setMaximum (shaping_radius_constants.maximum * shaping_radius_constants.scale);
-    _shaping_radius_slider->setMaximumWidth(200);
+    _shaping_radius_slider->setMaximumWidth (200);
     connect (_shaping_radius_slider, SIGNAL (valueChanged (int)), SLOT (shaping_radius (int)));
 
     _shaping_speed_slider = new QSlider (Qt::Horizontal, _shaping_settings_widget);
     _shaping_speed_slider->setMinimum (shaping_speed_constants.minimum * shaping_speed_constants.scale);
     _shaping_speed_slider->setMaximum (shaping_speed_constants.maximum * shaping_speed_constants.scale);
-    _shaping_speed_slider->setMaximumWidth(200);
+    _shaping_speed_slider->setMaximumWidth (200);
     connect (_shaping_speed_slider, SIGNAL (valueChanged (int)), SLOT (shaping_speed (int)));
 
     QLabel* radius_label (new QLabel (tr ("Brush &radius"), _shaping_settings_widget));
     QLabel* speed_label (new QLabel (tr ("Shaping &speed"), _shaping_settings_widget));
+    QLabel* radius_percent_label (new QLabel (_shaping_settings_widget));
+    QLabel* speed_percent_label (new QLabel (_shaping_settings_widget));
+
+    //connect (_shaping_radius_slider, SIGNAL (valueChanged (int)), radius_percent_label, SLOT (setText (const QString &str.toInt())));
+    //connect (_shaping_speed_slider,  SIGNAL (valueChanged (int)), speed_percent_label, SLOT (const QString &str.toInt()));
 
     radius_label->setBuddy (_shaping_radius_slider);
     speed_label->setBuddy (_shaping_speed_slider);
+    radius_percent_label->setBuddy (_shaping_radius_slider);
+    speed_percent_label->setBuddy (_shaping_speed_slider);
 
-    _shaping_settings_widget->addWidget(radius_label);
+    speed_label->setStyleSheet("margin-left:10px");
+
+    _shaping_settings_widget->addWidget (radius_label);
     _shaping_settings_widget->addWidget (_shaping_radius_slider);
-    _shaping_settings_widget->addWidget(speed_label);
+    _shaping_settings_widget->addWidget (radius_percent_label);
+    _shaping_settings_widget->addWidget (speed_label);
     _shaping_settings_widget->addWidget (_shaping_speed_slider);
+    _shaping_settings_widget->addWidget (speed_percent_label);
 
     //! \note Looks funny, but sets the UI to the default position.
     shaping_radius (shaping_radius());
@@ -2210,11 +2222,14 @@ namespace noggit
       QPushButton *shapingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Earth01.blp", 40, 40)), "");
       shapingButton->setIconSize (QSize(40, 40));
       shapingButton->setMaximumSize (50, 50);
-      shapingButton->setStyleSheet ("border:2px black; border-radius: 5px; background-color: black;"); //transparent
+      shapingButton->setToolTip (tr("Terrain Tool"));
+      shapingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black;"); //transparent
+      
       QPushButton *smoothingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Air01.blp", 40, 40)), "");
       smoothingButton->setIconSize (QSize(40, 40));
-      shapingButton->setMaximumSize (50, 50);
-      smoothingButton->setStyleSheet ("border:2px black; border-radius: 5px; background-color: black;");
+      smoothingButton->setMaximumSize (50, 50);
+      smoothingButton->setToolTip (tr("Smoothing Tool"));
+      smoothingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black;");
 
       _toolbar_formula_radio_group->addButton (shapingButton, shaping);
       _toolbar_formula_radio_group->addButton (smoothingButton, smoothing);
