@@ -2092,24 +2092,24 @@ namespace noggit
 
     _smoothingComboBox = new QComboBox (_smoothing_settings_widget);
 
-    _smoothingComboBox->addItem(tr ("Flat"), smoothing_formula_type::flat);
-    _smoothingComboBox->addItem(tr ("Linear"), smoothing_formula_type::linear);
-    _smoothingComboBox->addItem(tr ("Smooth"), smoothing_formula_type::smooth);
+    _smoothingComboBox->addItem (tr ("Flat"), smoothing_formula_type::flat);
+    _smoothingComboBox->addItem (tr ("Linear"), smoothing_formula_type::linear);
+    _smoothingComboBox->addItem (tr ("Smooth"), smoothing_formula_type::smooth);
 
-    connect(_smoothingComboBox,SIGNAL(currentIndexChanged(int)),SLOT(shaping_formula(int)));
+    connect (_smoothingComboBox, SIGNAL(currentIndexChanged(int)), SLOT(shaping_formula(int)));
 
-    _smoothing_settings_widget->addWidget(_smoothingComboBox);
+    _smoothing_settings_widget->addWidget (_smoothingComboBox);
 
     _smoothing_radius_slider = new QSlider (Qt::Horizontal, _smoothing_settings_widget);
     _smoothing_radius_slider->setMinimum (smoothing_radius_constants.minimum * smoothing_radius_constants.scale);
     _smoothing_radius_slider->setMaximum (smoothing_radius_constants.maximum * smoothing_radius_constants.scale);
-    _smoothing_radius_slider->setMaximumWidth(200);
+    _smoothing_radius_slider->setMaximumWidth (200);
     connect (_smoothing_radius_slider, SIGNAL (valueChanged (int)), SLOT (smoothing_radius (int)));
 
     _smoothing_speed_slider = new QSlider (Qt::Horizontal, _smoothing_settings_widget);
     _smoothing_speed_slider->setMinimum (smoothing_speed_constants.minimum * smoothing_speed_constants.scale);
     _smoothing_speed_slider->setMaximum (smoothing_speed_constants.maximum * smoothing_speed_constants.scale);
-    _smoothing_speed_slider->setMaximumWidth(200);
+    _smoothing_speed_slider->setMaximumWidth (200);
     connect (_smoothing_speed_slider, SIGNAL (valueChanged (int)), SLOT (smoothing_speed (int)));
 
     QLabel* radius_label (new QLabel (tr ("Brush &radius"), _smoothing_settings_widget));

@@ -536,27 +536,27 @@
 <context>
     <name>noggit::MainWindow</name>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="38"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="43"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="46"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="51"/>
         <source>Ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="47"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="52"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="48"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="53"/>
         <source>Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="54"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="59"/>
         <source>Project Explorer</source>
         <translation type="unfinished"></translation>
     </message>

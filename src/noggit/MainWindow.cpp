@@ -1,3 +1,7 @@
+// MainWindow.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Benedikt Kleiner <benedikt.kleiner@googlemail.com>
+// Glararan <glararan@glararan.eu>
+
 #include "MainWindow.h"
 
 #include <stdexcept>
@@ -19,9 +23,10 @@
 
 namespace noggit
 {
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)
-{
+  MainWindow::MainWindow(QWidget *parent)
+  : QMainWindow(parent)
+  {
+    setWindowTitle("NoggIt Studio");
     initialize_video();
 
     const int xResolution (app().setting("resolution/x").toInt());
@@ -29,36 +34,36 @@ MainWindow::MainWindow(QWidget *parent) :
     this->resize (xResolution, yResolution);
 
     mdiArea = new QMdiArea;
-    mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    mdiArea->setHorizontalScrollBarPolicy (Qt::ScrollBarAsNeeded);
+    mdiArea->setVerticalScrollBarPolicy (Qt::ScrollBarAsNeeded);
 
     //textureSelecter *test = new textureSelecter(_dummy_gl_widget);
-	//! todo windows has a problem with sharing the dummy (may sth about render contex)
+    //! todo windows has a problem with sharing the dummy (may sth about render contex)
 
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     //QMenu *debugMenu = menuBar()->addMenu(tr("&Debug"));
     //debugMenu->addAction(tr("textureSelector"),test,SLOT(show()));
 
-    setCentralWidget(mdiArea);
+    setCentralWidget (mdiArea);
 
     createDockWidgets();
 
-    statusBar()->showMessage(tr("Ready"));
-    currentToolBar = addToolBar(tr("File"));
-    currentToolBar->addWidget(new QLabel(tr("Toolbar")));
-}
+    statusBar()->showMessage (tr("Ready"));
+    currentToolBar = addToolBar (tr("File"));
+    currentToolBar->addWidget (new QLabel(tr("Toolbar")));
+  }
 
-void MainWindow::createDockWidgets()
-{
+  void MainWindow::createDockWidgets()
+  {
     projectExplorer *explorer = new projectExplorer(app().setting("paths/project").toString());
     QDockWidget *dockWidget = new QDockWidget(tr("Project Explorer"), this);
-    dockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dockWidget->setWidget(explorer);
-    this->addDockWidget(Qt::LeftDockWidgetArea,dockWidget);
-}
+    dockWidget->setAllowedAreas (Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockWidget->setWidget (explorer);
+    this->addDockWidget (Qt::LeftDockWidgetArea, dockWidget);
+  }
 
-void MainWindow::create_world_view (World* world)
-{
+  void MainWindow::create_world_view (World* world)
+  {
     MapView* map_view ( new MapView ( world
                                       , app().setting("view_distance").toReal()
                                       , 0.0
@@ -69,62 +74,59 @@ void MainWindow::create_world_view (World* world)
                         );
 
     EditorTemplate *temp = new EditorTemplate(this);
-    connect(temp,SIGNAL(parentChanged()),map_view,SLOT(updateParent()));
-    temp->setEditor(map_view);
-    mdiArea->addSubWindow(temp);
+    connect(temp, SIGNAL(parentChanged()), map_view, SLOT(updateParent()));
+    temp->setEditor (map_view);
+    mdiArea->addSubWindow (temp);
     temp->show();
-}
-
-
-
-class dummy_gl_widget : public QGLWidget
-{
-public:
-  dummy_gl_widget (const QGLFormat& format)
-    : QGLWidget (format)
-  {
-    updateGL();
   }
-protected:
-  virtual void initializeGL()
+
+
+  class dummy_gl_widget : public QGLWidget
   {
-    const GLenum err (glewInit());
-    if( GLEW_OK != err )
+  public:
+    dummy_gl_widget (const QGLFormat& format)
+    : QGLWidget (format)
     {
-      LogError << "GLEW: " << glewGetErrorString (err) << std::endl;
-      throw std::runtime_error ("unable to initialize glew.");
+      updateGL();
     }
 
-    //! \todo Fallback for old and bad platforms.
-    if (!glGenBuffers) glGenBuffers = glGenBuffersARB;
-    if (!glBindBuffer) glBindBuffer = glBindBufferARB;
-    if (!glBufferData) glBufferData = glBufferDataARB;
+  protected:
+    virtual void initializeGL()
+    {
+      const GLenum err (glewInit());
+      if( GLEW_OK != err )
+      {
+        LogError << "GLEW: " << glewGetErrorString (err) << std::endl;
+        throw std::runtime_error ("unable to initialize glew.");
+      }
 
-    LogDebug << "GL: Version: " << glGetString (GL_VERSION) << std::endl;
-    LogDebug << "GL: Vendor: " << glGetString (GL_VENDOR) << std::endl;
-    LogDebug << "GL: Renderer: " << glGetString (GL_RENDERER) << std::endl;
-  }
-};
+      //! \todo Fallback for old and bad platforms.
+      if (!glGenBuffers) glGenBuffers = glGenBuffersARB;
+      if (!glBindBuffer) glBindBuffer = glBindBufferARB;
+      if (!glBufferData) glBufferData = glBufferDataARB;
 
-void MainWindow::initialize_video()
-{
-  if (!QGLFormat::hasOpenGL())
+      LogDebug << "GL: Version: " << glGetString (GL_VERSION) << std::endl;
+      LogDebug << "GL: Vendor: " << glGetString (GL_VENDOR) << std::endl;
+      LogDebug << "GL: Renderer: " << glGetString (GL_RENDERER) << std::endl;
+    }
+  };
+
+  void MainWindow::initialize_video()
   {
-    LogError << "Your system does not support OpenGL. Sorry, this application can't run without it." << std::endl;
+    if (!QGLFormat::hasOpenGL())
+      LogError << "Your system does not support OpenGL. Sorry, this application can't run without it." << std::endl;
+
+    QGLFormat format;
+    format.setStencilBufferSize (1);
+    format.setDepthBufferSize (16);
+    format.setAlphaBufferSize (8);
+
+    if (app().setting("antialiasing").toBool())
+    {
+      format.setSampleBuffers (true);
+      format.setSamples (4);
+    }
+
+    _dummy_gl_widget = new dummy_gl_widget (format);
   }
-
-  QGLFormat format;
-  format.setStencilBufferSize (1);
-  format.setDepthBufferSize (16);
-  format.setAlphaBufferSize (8);
-
-  if (app().setting("antialiasing").toBool())
-  {
-    format.setSampleBuffers (true);
-    format.setSamples (4);
-  }
-
-  _dummy_gl_widget = new dummy_gl_widget (format);
-}
-
 }
