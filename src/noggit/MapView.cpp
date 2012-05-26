@@ -2043,7 +2043,7 @@ namespace noggit
     _shaping_settings_widget = new QToolBar;
 
     _shapingComboBox = new QComboBox (this);
-    _shapingComboBox->setStyleSheet("margin-right: 10px;");
+    _shapingComboBox->setStyleSheet("margin-right: 10px;padding-left:2px;");
 
     _shapingComboBox->addItem (tr ("Flat"), shaping_formula_type::flat);
     _shapingComboBox->addItem (tr ("Linear"), shaping_formula_type::linear);
@@ -2103,7 +2103,7 @@ namespace noggit
     _smoothing_settings_widget = new QToolBar (NULL);
 
     _smoothingComboBox = new QComboBox (_smoothing_settings_widget);
-    _smoothingComboBox->setStyleSheet("margin-right: 10px;");
+    _smoothingComboBox->setStyleSheet("margin-right: 10px;padding-left:2px;");
 
     _smoothingComboBox->addItem (tr ("Flat"), smoothing_formula_type::flat);
     _smoothingComboBox->addItem (tr ("Linear"), smoothing_formula_type::linear);

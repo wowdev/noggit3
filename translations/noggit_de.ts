@@ -428,7 +428,7 @@
 <context>
     <name>application</name>
     <message>
-        <location filename="../src/noggit/application.cpp" line="211"/>
+        <location filename="../src/noggit/application.cpp" line="205"/>
         <source>Open WoW Directory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -546,42 +546,47 @@
 <context>
     <name>noggit::MainWindow</name>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="44"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="70"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="45"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="71"/>
+        <source>Open maps</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="73"/>
         <source>Exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="47"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="75"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="48"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="76"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="57"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="85"/>
         <source>Ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="58"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="86"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="59"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="87"/>
         <source>Toolbar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="65"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="99"/>
         <source>Project Explorer</source>
         <translation type="unfinished"></translation>
     </message>
