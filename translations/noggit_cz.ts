@@ -452,7 +452,7 @@
 <context>
     <name>application</name>
     <message>
-        <location filename="../src/noggit/application.cpp" line="205"/>
+        <location filename="../src/noggit/application.cpp" line="204"/>
         <source>Open WoW Directory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -613,6 +613,26 @@
         <location filename="../src/noggit/MainWindow.cpp" line="99"/>
         <source>Project Explorer</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="184"/>
+        <source>Continents</source>
+        <translation type="unfinished">Kontinenty</translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="185"/>
+        <source>Dungeons</source>
+        <translation type="unfinished">Dungeony</translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="186"/>
+        <source>Raids</source>
+        <translation type="unfinished">Raidy</translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="187"/>
+        <source>Bookmarks</source>
+        <translation type="unfinished">Záložky</translation>
     </message>
 </context>
 <context>
