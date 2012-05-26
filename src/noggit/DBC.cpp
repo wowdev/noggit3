@@ -37,10 +37,9 @@ void OpenDBs()
 }
 
 
-
-QString AreaDB::getAreaName( int pAreaID )
+QString AreaDB::getAreaName(int pAreaID)
 {
-  if( pAreaID <= 0 )
+  if(pAreaID <= 0)
     return QObject::tr ("Unknown location");
 
   unsigned int regionID (0);
@@ -55,7 +54,8 @@ QString AreaDB::getAreaName( int pAreaID )
   {
     areaName = QObject::tr ("Unknown location");
   }
-  if (regionID != 0)
+
+  if(regionID != 0)
   {
     try
     {
@@ -70,9 +70,9 @@ QString AreaDB::getAreaName( int pAreaID )
   return areaName;
 }
 
-QString MapDB::getMapName( int pMapID )
+QString MapDB::getMapName(int pMapID)
 {
-  if( pMapID <= 0 )
+  if(pMapID <= 0)
     return QObject::tr ("Unknown map");
 
   QString mapName;
@@ -88,31 +88,32 @@ QString MapDB::getMapName( int pMapID )
   return mapName;
 }
 
-const char * getGroundEffectDoodad( unsigned int effectID, int DoodadNum )
+const char* getGroundEffectDoodad(unsigned int effectID, int DoodadNum)
 {
   try
   {
-    unsigned int doodadId = gGroundEffectTextureDB.getByID( effectID ).getUInt( GroundEffectTextureDB::Doodads + DoodadNum );
-    return gGroundEffectDoodadDB.getByID( doodadId ).getString( GroundEffectDoodadDB::Filename );
+    unsigned int doodadId = gGroundEffectTextureDB.getByID (effectID).getUInt (GroundEffectTextureDB::Doodads + DoodadNum);
+    return gGroundEffectDoodadDB.getByID (doodadId).getString (GroundEffectDoodadDB::Filename);
   }
-  catch( DBCFile::NotFound )
+  catch(DBCFile::NotFound)
   {
     LogError << "Tried to get a not existing row in GroundEffectTextureDB or GroundEffectDoodadDB ( effectID = " << effectID << ", DoodadNum = " << DoodadNum << " )!" << std::endl;
     return 0;
   }
 }
 
-int LiquidTypeDB::getLiquidType( int pID )
+int LiquidTypeDB::getLiquidType(int pID)
 {
-  int type=0;
+  int type = 0;
   try
   {
-    LiquidTypeDB::Record rec = gLiquidTypeDB.getByID( pID );
+    LiquidTypeDB::Record rec = gLiquidTypeDB.getByID (pID);
     type = rec.getUInt(LiquidTypeDB::Type);
   }
   catch(LiquidTypeDB::NotFound)
   {
     type = 0;
   }
+
   return type;
 }

@@ -40,7 +40,9 @@ namespace noggit
     //textureSelecter *test = new textureSelecter(_dummy_gl_widget);
     //! todo windows has a problem with sharing the dummy (may sth about render contex)
 
-    QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
+    QMenu *fileMenu = menuBar()->addMenu (tr("&File"));
+    fileMenu->addAction (tr("Exit"), this, SLOT(close()));
+
     //QMenu *debugMenu = menuBar()->addMenu(tr("&Debug"));
     //debugMenu->addAction(tr("textureSelector"),test,SLOT(show()));
 

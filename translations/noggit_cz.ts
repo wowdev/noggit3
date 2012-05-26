@@ -560,27 +560,37 @@
 <context>
     <name>noggit::MainWindow</name>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="43"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="45"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="51"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="44"/>
+        <source>Exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="47"/>
+        <source>Exit2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="58"/>
         <source>Ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="52"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="59"/>
         <source>File</source>
         <translation type="unfinished">Soubor</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="53"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="60"/>
         <source>Toolbar</source>
         <translation type="unfinished">Nástroje</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="59"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="66"/>
         <source>Project Explorer</source>
         <translation type="unfinished"></translation>
     </message>
