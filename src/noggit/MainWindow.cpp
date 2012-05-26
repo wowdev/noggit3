@@ -50,8 +50,8 @@ namespace noggit
 {
   MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent)
-  //, _minimap (new noggit::ui::minimap_widget (NULL))
-  //, _world (NULL)
+  , _minimap (new noggit::ui::minimap_widget (NULL))
+  , _world (NULL)
   {
     setWindowTitle("NoggIt Studio");
     initialize_video();
@@ -87,11 +87,11 @@ namespace noggit
     currentToolBar->addWidget (new QLabel(tr("Toolbar")));
   }
 
-  /*MainWindow::~MainWindow()
+  MainWindow::~MainWindow()
   {
     delete _world;
     _world = NULL;
-  }*/
+  }
 
   void MainWindow::createDockWidgets()
   {
@@ -122,9 +122,86 @@ namespace noggit
 
   void MainWindow::maps()
   {
+    prepare_maps();
+    connect (this, SIGNAL(create_world_view_request (World*)), this, SLOT (create_world_view (World*)));
   }
 
-  /*void MainWindow::enter_world_at (const ::math::vector_3d& pos, bool auto_height, float av, float ah)
+  void MainWindow::prepare_maps()
+  {
+    maps_widget = new QWidget();
+
+    QListWidget* continents_table (new QListWidget (NULL));
+    QListWidget* dungeons_table (new QListWidget (NULL));
+    QListWidget* raids_table (new QListWidget (NULL));
+
+    connect (continents_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
+    connect (dungeons_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
+    connect (raids_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
+
+    QListWidget* tables[3] = { continents_table, dungeons_table, raids_table };
+
+    for(DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
+    {
+      const int mapID (i->getInt (MapDB::MapID));
+      const int areaType (i->getUInt (MapDB::AreaType));
+      if(areaType < 0 || areaType > 2 || !World::IsEditableWorld (mapID))
+        continue;
+
+      QListWidgetItem* item (new QListWidgetItem (QString::fromUtf8 (i->getLocalizedString(MapDB::Name)), tables[areaType]));
+      item->setData (Qt::UserRole, QVariant (mapID));
+    }
+
+    QListWidget* bookmarks_table (new QListWidget (NULL));
+
+    connect (bookmarks_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_bookmark_list_item (QListWidgetItem*)));
+    connect (bookmarks_table, SIGNAL (itemDoubleClicked (QListWidgetItem*)), SLOT (open_bookmark_list_item (QListWidgetItem*)));
+
+    //! \todo The list needs to be refreshed upon adding a bookmark.
+    QSettings settings;
+
+    int bookmarks (settings.beginReadArray ("bookmarks"));
+    for(int i (0); i < bookmarks; ++i)
+    {
+      settings.setArrayIndex (i);
+      bookmark_entry b;
+      b.map_id = settings.value ("map_id").toInt();
+      b.position.x (settings.value ("camera/position/x").toFloat());
+      b.position.y (settings.value ("camera/position/y").toFloat());
+      b.position.z (settings.value ("camera/position/z").toFloat());
+      b.rotation = settings.value ("camera/rotation").toFloat();
+      b.tilt = settings.value ("camera/tilt").toFloat();
+
+      const int area_id (settings.value ("area_id").toInt());
+
+      QListWidgetItem* item (new QListWidgetItem (QString ("%1: %2").arg (MapDB::getMapName (b.map_id)).arg (AreaDB::getAreaName (area_id)), bookmarks_table));
+      item->setData (Qt::UserRole, QVariant::fromValue (b));
+    }
+    settings.endArray();
+
+    QGridLayout* menu_layout (new QGridLayout (this));
+
+    QTabWidget* entry_points_tabs (new QTabWidget (NULL));
+    entry_points_tabs->addTab (continents_table, tr ("Continents"));
+    entry_points_tabs->addTab (dungeons_table, tr ("Dungeons"));
+    entry_points_tabs->addTab (raids_table, tr ("Raids"));
+    entry_points_tabs->addTab (bookmarks_table, tr ("Bookmarks"));
+
+    _minimap->draw_boundaries (true);
+    connect (_minimap, SIGNAL (map_clicked (const ::math::vector_3d&)), SLOT (minimap_clicked (const ::math::vector_3d&)));
+
+    menu_layout->addWidget (entry_points_tabs, 0, 0);
+    menu_layout->addWidget (_minimap, 0, 1);
+
+	maps_widget->setLayout (menu_layout);
+
+    EditorTemplate* menu_temp = new EditorTemplate(this);
+    connect(menu_temp, SIGNAL(parentChanged()), maps_widget, SLOT(updateParent()));
+    menu_temp->setEditor (maps_widget);
+    mdiArea->addSubWindow (menu_temp);
+    menu_temp->show();
+  }
+
+  void MainWindow::enter_world_at (const ::math::vector_3d& pos, bool auto_height, float av, float ah)
   {
     prepare_world (pos, ah, av);
     _world->enterTile (pos.x() / TILESIZE, pos.y() / TILESIZE);
@@ -134,7 +211,7 @@ namespace noggit
     if(auto_height)
       _world->set_camera_above_terrain();
 
-    this->hide();
+	maps_widget->setVisible(false);
   }
 
   void MainWindow::load_map (int map_id)
@@ -182,7 +259,7 @@ namespace noggit
     const bookmark_entry e (item->data (Qt::UserRole).value<bookmark_entry>());
     load_map (e.map_id);
     enter_world_at (e.position, false, e.tilt, e.rotation);
-  }*/
+  }
 
   void MainWindow::settingsClicked()
   {
