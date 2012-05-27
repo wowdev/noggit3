@@ -30,6 +30,7 @@ namespace noggit
       void setGameAndProjectPath();
       void setProjectPath();
       void setAntialiasing (bool value);
+      void setMaximizedShow (bool value);
       void setViewDistance (int value);
 
       void settingChanged (const QString& key, const QVariant& value);
@@ -47,6 +48,7 @@ namespace noggit
       QSpinBox* viewDistanceSpinBox;
 
       QCheckBox* antialiasingCheckBox;
+      QCheckBox* maximizedShowCheckBox;
     };
   }
 }

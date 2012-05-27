@@ -86,17 +86,24 @@ namespace noggit
     connect(temp, SIGNAL(parentChanged()), map_view, SLOT(updateParent()));
     temp->setEditor (map_view);
     mdiArea->addSubWindow (temp);
-    temp->show();
+
+    if(noggit::app().setting("maximizedShow").toBool() == false)
+      temp->show();
+    else
+      temp->showMaximized();
   }
 
   void MainWindow::maps()
   {
     Menu* map_selection_menu (new Menu (NULL));
     connect (map_selection_menu, SIGNAL (create_world_view_request (World*)), this, SLOT (create_world_view (World*)));
-    map_selection_menu->show();
 
     mdiArea->addSubWindow(map_selection_menu);
-    map_selection_menu->show();
+
+    if(noggit::app().setting("maximizedShow").toBool() == false)
+      map_selection_menu->show();
+    else
+      map_selection_menu->showMaximized();
   }
 
   void MainWindow::projectExplorerOpen()
