@@ -26,48 +26,48 @@
         <translation type="obsolete">Nastavení pro tvarování</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2048"/>
-        <location filename="../src/noggit/MapView.cpp" line="2108"/>
+        <location filename="../src/noggit/MapView.cpp" line="2050"/>
+        <location filename="../src/noggit/MapView.cpp" line="2110"/>
         <source>Flat</source>
         <translation type="unfinished">Rovný</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2049"/>
-        <location filename="../src/noggit/MapView.cpp" line="2109"/>
+        <location filename="../src/noggit/MapView.cpp" line="2051"/>
+        <location filename="../src/noggit/MapView.cpp" line="2111"/>
         <source>Linear</source>
         <translation type="unfinished">Lineární</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2050"/>
-        <location filename="../src/noggit/MapView.cpp" line="2110"/>
+        <location filename="../src/noggit/MapView.cpp" line="2052"/>
+        <location filename="../src/noggit/MapView.cpp" line="2112"/>
         <source>Smooth</source>
         <translation type="unfinished">Hladký</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2051"/>
+        <location filename="../src/noggit/MapView.cpp" line="2053"/>
         <source>Polynomial</source>
         <translation type="unfinished">Polynomický</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2052"/>
+        <location filename="../src/noggit/MapView.cpp" line="2054"/>
         <source>Trigonometric</source>
         <translation type="unfinished">Trigonomerický</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2053"/>
+        <location filename="../src/noggit/MapView.cpp" line="2055"/>
         <source>Square</source>
         <translation type="unfinished">Čtverec</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2071"/>
-        <location filename="../src/noggit/MapView.cpp" line="2128"/>
-        <location filename="../src/noggit/MapView.cpp" line="2200"/>
+        <location filename="../src/noggit/MapView.cpp" line="2073"/>
+        <location filename="../src/noggit/MapView.cpp" line="2130"/>
+        <location filename="../src/noggit/MapView.cpp" line="2202"/>
         <source>Brush &amp;radius</source>
         <translation type="unfinished">Velikost &amp;štětce</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2072"/>
-        <location filename="../src/noggit/MapView.cpp" line="2129"/>
+        <location filename="../src/noggit/MapView.cpp" line="2074"/>
+        <location filename="../src/noggit/MapView.cpp" line="2131"/>
         <source>Shaping &amp;speed</source>
         <translation type="unfinished">Rychlost &amp;tvarování</translation>
     </message>
@@ -284,27 +284,27 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2201"/>
+        <location filename="../src/noggit/MapView.cpp" line="2203"/>
         <source>Brush &amp;opacity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2202"/>
+        <location filename="../src/noggit/MapView.cpp" line="2204"/>
         <source>Brush &amp;hardness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2203"/>
+        <location filename="../src/noggit/MapView.cpp" line="2205"/>
         <source>Brush &amp;pressure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2237"/>
+        <location filename="../src/noggit/MapView.cpp" line="2239"/>
         <source>Terrain Tool</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2243"/>
+        <location filename="../src/noggit/MapView.cpp" line="2245"/>
         <source>Smoothing Tool</source>
         <translation type="unfinished"></translation>
     </message>
@@ -452,7 +452,7 @@
 <context>
     <name>application</name>
     <message>
-        <location filename="../src/noggit/application.cpp" line="204"/>
+        <location filename="../src/noggit/application.cpp" line="200"/>
         <source>Open WoW Directory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -570,69 +570,70 @@
 <context>
     <name>noggit::MainWindow</name>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="70"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="44"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="71"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="45"/>
         <source>Open maps</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="73"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="46"/>
+        <source>Open ProjectExplorer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/MainWindow.cpp" line="48"/>
         <source>Exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="75"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="50"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="76"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="51"/>
         <source>Settings</source>
         <translation type="unfinished">Nastavení</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="85"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="60"/>
         <source>Ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="86"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="61"/>
         <source>File</source>
         <translation type="unfinished">Soubor</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="87"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="62"/>
         <source>Toolbar</source>
         <translation type="unfinished">Nástroje</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="99"/>
+        <location filename="../src/noggit/MainWindow.cpp" line="68"/>
         <source>Project Explorer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="184"/>
         <source>Continents</source>
-        <translation type="unfinished">Kontinenty</translation>
+        <translation type="obsolete">Kontinenty</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="185"/>
         <source>Dungeons</source>
-        <translation type="unfinished">Dungeony</translation>
+        <translation type="obsolete">Dungeony</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="186"/>
         <source>Raids</source>
-        <translation type="unfinished">Raidy</translation>
+        <translation type="obsolete">Raidy</translation>
     </message>
     <message>
-        <location filename="../src/noggit/MainWindow.cpp" line="187"/>
         <source>Bookmarks</source>
-        <translation type="unfinished">Záložky</translation>
+        <translation type="obsolete">Záložky</translation>
     </message>
 </context>
 <context>

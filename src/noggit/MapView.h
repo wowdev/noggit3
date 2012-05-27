@@ -24,15 +24,16 @@ class QSettings;
 class QToolBar;
 class QButtonGroup;
 class QMenuBar;
+class QLabel;
 
 class World;
 class nameEntry;
 
 namespace noggit
 {
-
   class blp_texture;
   class EditorTemplate;
+
   namespace ui
   {
     class about_widget;
@@ -293,6 +294,8 @@ namespace noggit
     // shaping -----------
     qreal _shaping_radius;
     qreal _shaping_speed;
+    QLabel* _shaping_radius_percent_label;
+    QLabel* _shaping_speed_percent_label;
     shaping_formula_type::formula _shaping_formula;
 
     QComboBox* _shapingComboBox;
@@ -303,6 +306,8 @@ namespace noggit
     // smoothing -----------
     qreal _smoothing_radius;
     qreal _smoothing_speed;
+    QLabel* _smoothing_radius_percent_label;
+    QLabel* _smoothing_speed_percent_label;
     smoothing_formula_type::formula _smoothing_formula;
 
     QComboBox* _smoothingComboBox;

@@ -81,7 +81,6 @@ namespace noggit
 
     MainWindow* mainwindow = new MainWindow;
     mainwindow->show();
-
   }
 
   application::~application()
