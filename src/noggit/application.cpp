@@ -130,6 +130,7 @@ namespace noggit
     int yResolution (_settings->value ("resolution/y", 768).toInt());
     bool inFullscreen (_settings->value ("fullscreen", false).toBool());
     bool doAntiAliasing (_settings->value ("antialiasing", true).toBool());
+    bool doMaximizedShow (_settings->value ("maximizedShow", true).toBool());
     qreal view_distance (_settings->value ("view_distance", 2048.0).toReal());
 
     foreach(const QString& argument, arguments())
@@ -138,6 +139,8 @@ namespace noggit
         inFullscreen = true;
       else if(argument == "-noaa" || argument == "--noantialiasing")
         doAntiAliasing = false;
+      else if(argument == "-nomaximizedshow" || argument == "--nomaximizedshow")
+        doMaximizedShow = false;
       else
       {
         QRegExp resolution ("-(-resolution=)?(\\d+)(x(\\d+))*");
@@ -158,6 +161,7 @@ namespace noggit
     _settings->setValue ("resolution/y", yResolution);
     _settings->setValue ("fullscreen", inFullscreen);
     _settings->setValue ("antialiasing", doAntiAliasing);
+    _settings->setValue ("maximizedShow", doMaximizedShow);
     _settings->setValue ("view_distance", view_distance);
     _settings->sync();
   }

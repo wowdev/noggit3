@@ -43,6 +43,10 @@ namespace noggit
       if (noggit::app().setting("antialiasing").toBool())
         antialiasingCheckBox->setChecked(true);
 
+      maximizedShowCheckBox = new QCheckBox(tr("Auto-Maximized Menu & 3D Editor"));
+      if (noggit::app().setting("maximizedShow").toBool())
+        maximizedShowCheckBox->setChecked(true);
+
       QLabel* _gamePathLabel (new QLabel(tr("Game path : "), this));
       projectPathLabel = new QLabel(tr("Project path : "), this);	
       QLabel* _viewDistanceLabel (new QLabel(tr("View Distance : "), this));
@@ -63,6 +67,7 @@ namespace noggit
       _mainConfigurationSettingsWindow->addWidget(currentProjectPath, 1, 1, 1, 2);
       _mainConfigurationSettingsWindow->addWidget(changeProjectPathButton, 1, 3);
       _mainConfigurationSettingsWindow->addWidget(antialiasingCheckBox, 2, 0);
+      _mainConfigurationSettingsWindow->addWidget(maximizedShowCheckBox, 2, 1);
       _mainConfigurationSettingsWindow->addWidget(_viewDistanceLabel, 3, 0);
       _mainConfigurationSettingsWindow->addWidget(viewDistanceSlider, 3, 1);
       _mainConfigurationSettingsWindow->addWidget(viewDistanceSpinBox, 3, 2, 1, 2);
@@ -82,6 +87,7 @@ namespace noggit
       connect(addProjectPathCheckBox, SIGNAL (toggled (bool)), this, SLOT (toggleGameProjectDisplay (bool)));
 
       connect(antialiasingCheckBox, SIGNAL (toggled (bool)), SLOT (setAntialiasing (bool)));
+      connect(maximizedShowCheckBox, SIGNAL (toggled (bool)), SLOT (setMaximizedShow (bool)));
       connect(viewDistanceSlider, SIGNAL (valueChanged (int)), SLOT (setViewDistance (int)));
 
       connect(&noggit::app(), SIGNAL (settingChanged (const QString&, const QVariant&)), SLOT (settingChanged (const QString&, const QVariant&)));
@@ -138,6 +144,8 @@ namespace noggit
     {     
       if (key == "antialiasing")
         LogDebug << "antialiasing changed to : " << value.toString().toStdString() << std::endl;
+      if (key == "maximizedShow")
+        LogDebug << "maximizedShow changed to : " << value.toString().toStdString() << std::endl;
       if (key == "view_distance")
         LogDebug << "view distance changed to : " << value.toString().toStdString() << std::endl;
       if (key == "paths/game")
@@ -149,6 +157,11 @@ namespace noggit
     void settingsDialog::setAntialiasing(bool value)   
     {     
       noggit::app().setting("antialiasing", value);
+    }
+
+    void settingsDialog::setMaximizedShow(bool value)
+    {
+      noggit::app().setting("maximizedShow", value);
     }
 
     void settingsDialog::setViewDistance(int value)

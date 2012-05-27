@@ -428,7 +428,7 @@
 <context>
     <name>application</name>
     <message>
-        <location filename="../src/noggit/application.cpp" line="200"/>
+        <location filename="../src/noggit/application.cpp" line="204"/>
         <source>Open WoW Directory</source>
         <translation type="unfinished"></translation>
     </message>
@@ -623,27 +623,32 @@
     </message>
     <message>
         <location filename="../src/noggit/ui/settingsDialog.cpp" line="46"/>
+        <source>Auto-Maximized Menu &amp; 3D Editor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/noggit/ui/settingsDialog.cpp" line="50"/>
         <source>Game path : </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/settingsDialog.cpp" line="47"/>
+        <location filename="../src/noggit/ui/settingsDialog.cpp" line="51"/>
         <source>Project path : </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/settingsDialog.cpp" line="48"/>
+        <location filename="../src/noggit/ui/settingsDialog.cpp" line="52"/>
         <source>View Distance : </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/settingsDialog.cpp" line="74"/>
+        <location filename="../src/noggit/ui/settingsDialog.cpp" line="79"/>
         <source>configuration_settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/ui/settingsDialog.cpp" line="108"/>
-        <location filename="../src/noggit/ui/settingsDialog.cpp" line="127"/>
+        <location filename="../src/noggit/ui/settingsDialog.cpp" line="114"/>
+        <location filename="../src/noggit/ui/settingsDialog.cpp" line="133"/>
         <source>Choose a directory</source>
         <translation type="unfinished"></translation>
     </message>
