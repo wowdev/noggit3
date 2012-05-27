@@ -43,7 +43,7 @@ namespace noggit
       if (noggit::app().setting("antialiasing").toBool())
         antialiasingCheckBox->setChecked(true);
 
-      maximizedShowCheckBox = new QCheckBox(tr("Auto-Maximized Menu & 3D Editor"));
+      maximizedShowCheckBox = new QCheckBox(tr("Auto-Maximized Menu & Map Editor"));
       if (noggit::app().setting("maximizedShow").toBool())
         maximizedShowCheckBox->setChecked(true);
 
