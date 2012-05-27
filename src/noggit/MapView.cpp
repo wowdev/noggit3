@@ -237,7 +237,7 @@ namespace noggit
   #undef NEW_ACTION_OTHER
   #undef NEW_TOGGLE_ACTION
 
-    menu = new QMenu (tr("3D Editor"));
+    menu = new QMenu (tr("Map Editor"));
 
     QMenu* file_menu (menu->addMenu (tr ("File")));
     file_menu->addAction (save_current_tile);
