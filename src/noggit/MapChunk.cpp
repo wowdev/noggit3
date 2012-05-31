@@ -915,7 +915,7 @@ void MapChunk::drawColor (bool draw_fog)
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
 
-  if (mydist > _world->culldistance)
+  if (mydist > _world->getCulldistance())
   {
     if (draw_fog)
       drawNoDetail();
@@ -1098,7 +1098,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   }
 
   glEnable(GL_LIGHTING);
-  drawPass(animated[0], _world->animtime);
+  drawPass(animated[0], _world->getAnimtime());
 
   if (nTextures > 1U) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
@@ -1117,7 +1117,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
     glBindTexture( GL_TEXTURE_2D, alphamaps[i - 1] );
 
-    drawPass(animated[i], _world->animtime);
+    drawPass(animated[i], _world->getAnimtime());
   }
 
   if (nTextures > 1U) {
@@ -1267,7 +1267,7 @@ void MapChunk::drawSelect()
 
   float mydist = (_world->camera - vcenter).length() - r;
   if (mydist > (mapdrawdistance * mapdrawdistance)) return;
-  if (mydist > _world->culldistance)
+  if (mydist > _world->getCulldistance())
     return;
 
   if( nameID == -1 )

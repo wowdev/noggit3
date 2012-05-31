@@ -63,69 +63,132 @@ public:
 private:
   QImage _minimap;
 
+  int cx; //!< camera x-coord
+  int cz; //!< camera z-coord
 
-  // Which tile are we over / entering?
-  int cx;
-  int cz;
-  int ex;
-  int ez;
+  int ex; //!< maptile x-coord
+  int ez; //!< maptile z-coord
 
-  // Holding all MapTiles there can be in a World.
+  //! Holding all MapTiles there can be in a World.
   MapTileEntry mTiles[64][64];
 
-  // Information about the currently selected model / WMO / triangle.
+  //! Information about the currently selected model / WMO / triangle.
   nameEntry* mCurrentSelection;
   int mCurrentSelectedTriangle;
   bool SelectionMode;
 
-  // Is the WDT telling us to use a different alphamap structure.
+  //! Is the WDT telling us to use a bigger alphamap (64*64) and single pass rendering.
   bool mBigAlpha;
 
-  // Call lists for the low resolution heightmaps.
+  //! opengl call lists for the WDL low resolution heightmaps.
   opengl::call_list* lowrestiles[64][64];
 
-  // Temporary variables for loading a WMO, if we have a global WMO.
+  //! Temporary variables for loading a WMO, if we have a global WMO.
   std::string mWmoFilename;
   ENTRY_MODF mWmoEntry;
 
-  // Vertex Buffer Objects for coordinates used for drawing.
+  //! Vertex Buffer Objects for coordinates used for drawing.
   GLuint detailtexcoords;
   GLuint alphatexcoords;
 
-  // Map ID of this World.
+  //! Map ID of this World.
   unsigned int mMapId;
 
-  // The lighting used.
+  //! The lighting used.
   OutdoorLighting *ol;
 
-  // Light attenuation related parameters.
+  //! Light attenuation related parameters.
   float l_const;
   float l_linear;
   float l_quadratic;
 
+  float animtime; //!< the animation time
+  float time; //!< the time of the day
+
+  //! Dynamic distances for rendering. Actually, these should be the same..
+  float fogdistance;
+  float culldistance;
 
   void initMinimap();
   void initLowresTerrain();
 
+  //! \brief Name of this map.
+  std::string basename;
+
+  //! Checks if a maptile is loaded
+  /*!
+  \param x a integer indecating the x coord
+  \param z a integer indecating the z coord
+  \return true when tile is loaded
+  */
   bool tileLoaded(int x, int z);
+
+  //! loads a maptile if isnt already
+  /*!
+  \param x a integer indecating the x coord
+  \param z a integer indecating the z coord
+  \return the corresponding MapTile object
+  */
   MapTile *loadTile(int x, int z);
 
   void outdoorLighting();
   void outdoorLighting2();
 
 public:
-  unsigned int getMapID();
 
-  // Time of the day.
-  float animtime;
-  float time;
+  //! gets the current MapID
+  /*!
+  \return the MapID found in dbcs
+  */
+  const unsigned int getMapID() const;
 
-  //! \brief Name of this map.
-  std::string basename;
+  //! gets the current animationtime
+  /*!
+  \return the animationtime
+  */
+  const float getAnimtime() const;
 
-  // Dynamic distances for rendering. Actually, these should be the same..
-  float fogdistance;
-  float culldistance;
+  //! sets the animationtime to newTime
+  /*!
+  \param newTime
+  */
+  void setAnimtime(float newTime);
+
+  //! gets the current time
+  /*!
+  \return the time
+  */
+  const float getTime() const;
+
+  //! sets the time to newTime
+  /*!
+  \param newTime
+  */
+  void setTime(float newTime);
+
+  //! gets the current fogdistance
+  /*!
+  \return the fogdistance
+  */
+  const float getFogdistance() const;
+
+  //! sets the fogdistance to distance
+  /*!
+  \param distance
+  */
+  void setFogdistance(float distance);
+
+  //! gets the current culldistance
+  /*!
+  \return the culldistance
+  */
+  const float getCulldistance() const;
+
+  //! sets the culldistance to distance
+  /*!
+  \param distance
+  */
+  void setCulldistance(float distance);
 
   void set_camera_above_terrain();
 
@@ -190,7 +253,7 @@ public:
   void setupFog (bool draw_fog);
 
   //! \brief Get the area ID of the tile on which the camera currently is on.
-  unsigned int getAreaID();
+  const unsigned int getAreaID() const;
   void setAreaID(int id, int x, int z);
   void setAreaID(int id, int x, int z , int cx, int cz);
   void setFlag(bool to, float x, float z);

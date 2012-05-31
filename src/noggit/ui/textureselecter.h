@@ -46,6 +46,7 @@ public slots:
 
 private:
     int num;
+    int rows;
 
 };
 

@@ -548,7 +548,7 @@ void MapTile::drawWater()
 
   foreach (const Liquid* liquid, mLiquids)
   {
-    liquid->draw (_world->animtime, _world->skies);
+    liquid->draw (_world->getAnimtime(), _world->skies);
   }
 
   glEnable (GL_LIGHTING);

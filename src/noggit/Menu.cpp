@@ -2,7 +2,7 @@
 // Beket <snipbeket@mail.ru>
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
-// Mjolln�  <mjollna.wow@gmail.com>
+// Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
@@ -39,7 +39,7 @@ Q_DECLARE_METATYPE (bookmark_entry);
 Menu::Menu (QWidget* parent)
   : QWidget (parent)
   , _minimap (new noggit::ui::minimap_widget (NULL))
-  , _world (NULL)
+  //, _world (NULL)
 {
   QListWidget* continents_table (new QListWidget (NULL));
   QListWidget* dungeons_table (new QListWidget (NULL));
@@ -98,7 +98,7 @@ Menu::Menu (QWidget* parent)
   entry_points_tabs->addTab (bookmarks_table, tr ("Bookmarks"));
 
   _minimap->draw_boundaries (true);
-  connect (_minimap, SIGNAL (map_clicked (const ::math::vector_3d&)), SLOT (minimap_clicked (const ::math::vector_3d&)));
+  connect (_minimap, SIGNAL (map_clicked (const World *, const ::math::vector_3d&)), SLOT (minimap_clicked (const World *, const ::math::vector_3d&)));
 
   menu_layout->addWidget (entry_points_tabs, 0, 0);
   menu_layout->addWidget (_minimap, 0, 1);
@@ -106,68 +106,62 @@ Menu::Menu (QWidget* parent)
 
 Menu::~Menu()
 {
-  delete _world;
-  _world = NULL;
+  //delete _world;
+  //_world = NULL;
 }
 
-void Menu::enter_world_at (const ::math::vector_3d& pos, bool auto_height, float av, float ah )
+void Menu::enter_world_at (World *world, const ::math::vector_3d& pos, bool auto_height, float av, float ah )
 {
-  prepare_world (pos, ah, av);
-  _world->enterTile (pos.x() / TILESIZE, pos.y() / TILESIZE);
+  prepare_world (world,pos, ah, av);
+  world->enterTile (pos.x() / TILESIZE, pos.y() / TILESIZE);
 
-  emit create_world_view_request (_world);
+  emit create_world_view_request (world);
 
   if(auto_height)
-    _world->set_camera_above_terrain();
-
-  this->hide();
+    world->set_camera_above_terrain();
 }
 
-void Menu::load_map (int map_id)
+World *Menu::load_map (int map_id)
 {
-  if (_world && _world->getMapID() == map_id)
+  if (_minimap->world() && _minimap->world()->getMapID() == map_id)
   {
-    return;
+    return const_cast<World *>(_minimap->world());
   }
 
-  delete _world;
-
-  _world = new World (gMapDB.getByID (map_id, MapDB::MapID).getString (MapDB::InternalName));
-
-  _minimap->world (_world);
+  return new World (gMapDB.getByID (map_id, MapDB::MapID).getString (MapDB::InternalName));
 }
 
-void Menu::minimap_clicked (const ::math::vector_3d& position)
+void Menu::minimap_clicked (const World *world, const ::math::vector_3d& position)
 {
-  enter_world_at (position, true, 0.0, 0.0);
+  enter_world_at (const_cast<World *>(world), position, true, 0.0, 0.0);
 }
 
-void Menu::prepare_world (const ::math::vector_3d& pos, float rotation, float tilt)
+void Menu::prepare_world (World *world, const ::math::vector_3d& pos, float rotation, float tilt)
 {
-  _world->camera = ::math::vector_3d (pos.x(), pos.y(), pos.z());
+  world->camera = ::math::vector_3d (pos.x(), pos.y(), pos.z());
   //! \todo actually set lookat!
-  _world->lookat = ::math::vector_3d (pos.x() + 10.0f, pos.y() + 10.0f, pos.z() + 10.0f); // ah = rotation
+  world->lookat = ::math::vector_3d (pos.x() + 10.0f, pos.y() + 10.0f, pos.z() + 10.0f); // ah = rotation
 
-  _world->initDisplay();
+  world->initDisplay();
 }
 
 void Menu::show_map_list_item (QListWidgetItem* item)
 {
-  load_map (item->data (Qt::UserRole).toInt());
   _minimap->draw_camera (false);
+  _minimap->world(load_map (item->data (Qt::UserRole).toInt()));
 }
 
 void Menu::show_bookmark_list_item (QListWidgetItem* item)
 {
   const bookmark_entry e (item->data (Qt::UserRole).value<bookmark_entry>());
-  load_map (e.map_id);
-  prepare_world (e.position, e.rotation, e.tilt);
+  World *world = load_map (e.map_id);
+  _minimap->world(world);
+  prepare_world (world,e.position, e.rotation, e.tilt);
   _minimap->draw_camera (true);
 }
 
 void Menu::open_bookmark_list_item (QListWidgetItem* item)
 {
   const bookmark_entry e (item->data (Qt::UserRole).value<bookmark_entry>());
-  load_map (e.map_id);
-  enter_world_at (e.position, false, e.tilt, e.rotation);
+  enter_world_at (load_map (e.map_id),e.position, false, e.tilt, e.rotation);
 }

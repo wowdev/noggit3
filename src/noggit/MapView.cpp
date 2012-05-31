@@ -875,9 +875,9 @@ namespace noggit
       _tile_mode_zoom = qBound (0.1, _tile_mode_zoom, 2.0);
     }
 
-    _world->time += mTimespeed * dt;
-    _world->animtime += dt * 1000.0f;
-    globalTime = static_cast<int>( _world->animtime );
+    _world->setTime(_world->getTime() + mTimespeed * dt );
+    _world->setAnimtime( _world->getAnimtime() + dt * 1000.0f );
+    globalTime = static_cast<int>( _world->getAnimtime() );
 
     _world->tick(dt);
 
@@ -1174,7 +1174,7 @@ namespace noggit
       if( event->modifiers() & Qt::AltModifier )
         increase_brush_size();
       else if( event->modifiers() & Qt::ShiftModifier && ( !_world->HasSelection() || ( _world->HasSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk) )  )
-        _world->fogdistance += 60.0f;// fog change only when no model is selected!
+        _world->setFogdistance( _world->getFogdistance() + 60.0f );// fog change only when no model is selected!
       else
       {
         //change selected model size
@@ -1187,7 +1187,7 @@ namespace noggit
         decrease_brush_size();
       }
       else if( event->modifiers() & Qt::ShiftModifier && ( !_world->HasSelection() || ( _world->HasSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk) )  )
-        _world->fogdistance -= 60.0f; // fog change only when no model is selected!
+        _world->setFogdistance( _world->getFogdistance() - 60.0f ); // fog change only when no model is selected!
       else
       {
         //change selected model sizesize
