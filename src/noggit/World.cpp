@@ -487,7 +487,8 @@ void World::initMinimap()
         wdl_file.read (&fourcc, 4);
         wdl_file.read (&size, 4);
 
-        assert (fourcc == 'MARE' && size == 0x442);
+        assert (fourcc == 'MARE');
+        assert (size == 0x442);
 
         //! \todo There also is a second heightmap appended which has additional 16*16 pixels.
         //! \todo There also is MAHO giving holes into this heightmap.
@@ -1550,7 +1551,7 @@ void World::tick(float dt)
   ModelManager::updateEmitters(dt);
 }
 
-unsigned int World::getAreaID()
+const unsigned int World::getAreaID() const
 {
   const int mtx = camera.x() / TILESIZE;
   const int mtz = camera.z() / TILESIZE;
@@ -2223,11 +2224,50 @@ void World::setFlag( bool to, float x, float z)
   }
 }
 
-unsigned int World::getMapID()
+const unsigned int World::getMapID() const
 {
   return mMapId;
 }
 
+const float World::getAnimtime() const
+{
+    return animtime;
+}
+
+void World::setAnimtime(float newTime)
+{
+    animtime = newTime;
+}
+
+const float World::getTime() const
+{
+    return time;
+}
+
+void World::setTime(float newTime)
+{
+    time = newTime;
+}
+
+const float World::getFogdistance() const
+{
+    return fogdistance;
+}
+
+void World::setFogdistance(float distance)
+{
+    fogdistance = distance;
+}
+
+const float World::getCulldistance() const
+{
+    return culldistance;
+}
+
+void World::setCulldistance(float distance)
+{
+    culldistance = distance;
+}
 
 void World::moveHeight(int x, int z)
 {

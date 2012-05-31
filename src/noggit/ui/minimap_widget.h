@@ -50,7 +50,7 @@ namespace noggit
       virtual void mouseDoubleClickEvent (QMouseEvent*);
 
     signals:
-      void map_clicked (const ::math::vector_3d&);
+      void map_clicked (const World *world, const ::math::vector_3d&);
       void tile_clicked (const QPoint&);
 
     private:

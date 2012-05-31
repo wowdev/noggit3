@@ -1008,7 +1008,7 @@ void WMOGroup::draw ( World* world
   ::math::rotate (ofs.x(), ofs.z(), &pos.x(), &pos.z(), rot);
   if (!world->frustum.intersectsSphere(pos,rad)) return;
   float dist = (pos - world->camera).length() - rad;
-  if (dist >= world->culldistance) return;
+  if (dist >= world->getCulldistance()) return;
   visible = true;
   setupFog(world, draw_fog);
 
@@ -1062,7 +1062,7 @@ void WMOGroup::draw_for_selection ( World* world
   ::math::vector_3d pos = center + ofs;
   ::math::rotate (ofs.x(), ofs.z(), &pos.x(), &pos.z(), rot);
   if ( !world->frustum.intersectsSphere (pos, rad)
-    || ((pos - world->camera).length() - rad) >= world->culldistance)
+    || ((pos - world->camera).length() - rad) >= world->getCulldistance())
     return;
 
   visible = true;
@@ -1185,7 +1185,7 @@ void WMOGroup::drawLiquid (World* world, bool draw_fog)
     glDisable(GL_ALPHA_TEST);
     glDepthMask(GL_TRUE);
     glColor4f(1,1,1,1);
-    lq->draw (world->animtime);
+    lq->draw (world->getAnimtime());
     glDisable(GL_LIGHT2);
   }
 }

@@ -244,11 +244,18 @@ set ( FILES_TO_TRANSLATE
 
 option (NOGGIT_LOGTOCONSOLE "Log to console instead of log.txt?" OFF)
 option (NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
+option (NOGGIT_USE_BLS "Use BLS shaders?" OFF)
 
 if (NOGGIT_LOGTOCONSOLE)
   message (STATUS "And writing log to console instead of log.txt")
   add_definitions (-DDEBUG__LOGGINGTOCONSOLE)
 endif (NOGGIT_LOGTOCONSOLE)
+
+if (NOGGIT_USE_BLS)
+  message (STATUS "using bls shaders")
+  add_definitions (-DUSEBLSSHADER)
+  add_definitions (-DUSEBLSFILES)
+endif (NOGGIT_USE_BLS)
 
 if (NOGGIT_ALL_WARNINGS)
   message (STATUS "Spilling out mass warnings.")

@@ -6,7 +6,7 @@
 #define __SHADERS_H
 
 #include <string>
-
+#include <QString>
 #include <opengl/types.h>
 
 #ifdef USEBLSSHADER
@@ -18,7 +18,7 @@ private:
   int mProgramType;
 
 public:
-  explicit BLSShader( const std::string& pFilename );
+  explicit BLSShader( const QString & pFilename );
 
   void EnableShader()
   {

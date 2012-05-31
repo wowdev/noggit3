@@ -11,14 +11,15 @@
 #include <stdio.h>
 
 #include <noggit/Log.h>
+#include <noggit/mpq/file.h>
 
 #ifdef USEBLSSHADER
-BLSShader::BLSShader( const std::string& pFilename )
+BLSShader::BLSShader( const QString & pFilename )
 {
   mOkay = false;
-  if( !MPQFile::exists( pFilename ) )
+  if( !noggit::mpq::file::exists( pFilename ) )
   {
-    LogError << "Failed to get file for shader \"" << pFilename << "\"." << std::endl;
+    LogError << "Failed to get file for shader \"" << pFilename.toStdString() << "\"." << std::endl;
     return;
   }
 
@@ -26,7 +27,7 @@ BLSShader::BLSShader( const std::string& pFilename )
   int length;
   char * buffer;
 
-  MPQFile lShader( pFilename );
+  noggit::mpq::file lShader( pFilename );
   lShader.read( &magix, sizeof( int ) );
   lShader.seek( 0x18 );
   lShader.read( &length, sizeof( int ) );
@@ -45,7 +46,7 @@ BLSShader::BLSShader( const std::string& pFilename )
   glGenProgramsARB( 1, &mShader );
   if( !mShader )
   {
-    LogError << "Failed to get program ID for shader \"" << pFilename << "\"." << std::endl;
+    LogError << "Failed to get program ID for shader \"" << pFilename.toStdString() << "\"." << std::endl;
   }
   else
   {
@@ -58,7 +59,7 @@ BLSShader::BLSShader( const std::string& pFilename )
     glGetProgramiv( mProgramType, GL_PROGRAM_UNDER_NATIVE_LIMITS_ARB, &isNative );
     if( !( errorPos == -1 && isNative == 1 ) )
     {
-      LogError << "Shader program \"" << pFilename << "\" failed to load. Reason:" << std::endl;
+      LogError << "Shader program \"" << pFilename.toStdString() << "\" failed to load. Reason:" << std::endl;
       if( isNative == 0 )
         LogError << "\t\"This fragment program exceeded the limit.\"" << std::endl;
 

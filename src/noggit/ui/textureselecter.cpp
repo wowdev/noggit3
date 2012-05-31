@@ -6,12 +6,13 @@
 #include <QResizeEvent>
 #include <QStyleOptionGraphicsItem>
 #include <QPixmap>
-#include <QPushButton>
+#include <QCheckBox>
 #include <QVBoxLayout>
 #include <QTreeWidget>
 #include <QScrollBar>
 
 #include <iostream>
+#include <math.h>
 
 namespace noggit
 {
@@ -20,13 +21,9 @@ textureSelecter::textureSelecter(QGLWidget *shared, QWidget *parent) :
     QWidget(parent)
   , sharedWidget(shared)
 {
-    while(!app().archive_manager().all_finished_loading()) app().archive_manager().all_finish_loading();
-    QStringList listfile = app().archive_manager().listfile().filter (QRegExp (".(_s.blp)", Qt::CaseInsensitive));
-    QStringList anotherList(listfile);
-    listfile.erase(listfile.begin()+20,listfile.end());
-    anotherList.erase(anotherList.begin(),anotherList.end()-30);
-
     setMinimumSize(850,600);
+
+    while(!app().archive_manager().all_finished_loading()) app().archive_manager().all_finish_loading();
 
     QVBoxLayout *layout = new QVBoxLayout(this);
 
@@ -34,34 +31,34 @@ textureSelecter::textureSelecter(QGLWidget *shared, QWidget *parent) :
     QWidget *scrollWidget = new QWidget(NULL);
     QVBoxLayout *scrollLayout = new QVBoxLayout(scrollWidget);
 
-
-    QPushButton *button = new QPushButton(tr("some textures here"),scrollWidget);
-    textureView *view   = new textureView(listfile,sharedWidget,scrollWidget);
-    view->hide();
-
-    button->setCheckable(true);
-
-    connect(button,SIGNAL(toggled(bool)),view,SLOT(setVisible(bool)));
-
-    scrollLayout->addWidget(button);
-    scrollLayout->addWidget(view);
-
-//    scrollLayout->addWidget(new QPushButton(tr("anotherList")));
-//    scrollLayout->addWidget(new textureView(anotherList,sharedWidget,scrollWidget),Qt::AlignHCenter);anotherList
-
-    button = new QPushButton(tr("some other textures here"),scrollWidget);
-    view   = new textureView(anotherList,sharedWidget,scrollWidget);
-    view->hide();
-
-    button->setCheckable(true);
-
-    connect(button,SIGNAL(toggled(bool)),view,SLOT(setVisible(bool)));
-
-    scrollLayout->addWidget(button);
-    scrollLayout->addWidget(view);
+    QStringList listfile = app().archive_manager().listfile().filter (QRegExp (".(_s.blp)", Qt::CaseInsensitive));
+    QMap<QString, QStringList> arealist;
 
 
+    for(QStringList::iterator it = listfile.begin(); it != listfile.end(); ++it)
+    {
+        QString area = it->section(QRegExp("(\\\\|/)"),1,1);
+        if(!arealist.contains(area))
+            arealist.insert(area,QStringList());
+        arealist[area].append(*it);
 
+    }
+
+    for(QMap<QString, QStringList>::iterator it = arealist.begin(); it != arealist.end(); ++it)
+    {
+        QCheckBox *check = new  QCheckBox(it.key(),scrollWidget);
+        check->setFocusPolicy(Qt::NoFocus);
+        check->setStyleSheet("QCheckBox::indicator:unchecked {image: url(rightarrow-icon);}"
+                             "QCheckBox::indicator:checked {image: url(downarrow-icon);}");
+        textureView *view   = new textureView(it.value(), sharedWidget, scrollWidget);
+        view->hide();
+
+
+        connect(check,SIGNAL(toggled(bool)),view,SLOT(setVisible(bool)));
+
+        scrollLayout->addWidget(check);
+        scrollLayout->addWidget(view);
+    }
 
     scrollWidget->setMinimumSize(770,500);
     scrollWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
@@ -135,17 +132,17 @@ textureScene::textureScene(QStringList textures, QRectF rect, QWidget *parent) :
     connect(this,SIGNAL(sceneRectChanged(QRectF)),this,SLOT(resized(QRectF)));
 }
 
-void textureScene::resized(QRectF rect)
+void textureScene::resized(QRectF /*rect*/)
 {
-    rows = 0;
+    rows = 1;
     columns = this->sceneRect().width() / WIDTH;
     int verticalOffset = (width() - columns*WIDTH) / 2;
     for(int i=0; i < textureList.count(); ++i)
     {
-        int x = (i-rows*columns)*WIDTH;
-        int y = HEIGHT*rows;
+        int x = (i-(rows-1)*columns)*WIDTH;
+        int y = HEIGHT*(rows-1);
         items().at(i)->setPos(x+verticalOffset, y);
-        if(i+1 == columns*(rows+1))
+        if(i == columns*(rows)-1)
             rows++;
     }
 }
@@ -175,7 +172,7 @@ textureView::textureView(QStringList textures, QGLWidget *shared, QWidget *paren
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     setScene(new textureScene(textures,this->rect()));
     num = textures.size();
-    setMinimumSize(QSize(770, num / 5 * HEIGHT + 20));
+    setMinimumSize(QSize(770, ceil((float)num / 5) * HEIGHT + 20));
     setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     setFrameShape(QFrame::NoFrame);
     setContentsMargins(0, 0, 0, 0);
@@ -183,17 +180,25 @@ textureView::textureView(QStringList textures, QGLWidget *shared, QWidget *paren
 
 QSize textureView::sizeHint() const
 {
-    return QSize(770, num / 5 * HEIGHT + 20);
+    return QSize(770, ceil((float)num / ((float)this->width() / (float)WIDTH)) * HEIGHT + 20);
 }
 
 void textureView::resizeEvent(QResizeEvent *event)
 {
     if (scene())
+    {
+        int rows = ceil((float)num / ((float)event->size().width() / (float)WIDTH));
+        int heightNeeded = (rows*HEIGHT);
+        this->setMinimumHeight(heightNeeded+10);
+        this->setMaximumHeight(heightNeeded+15);
+        if(event->size().height() < heightNeeded)
+        {
+            event->ignore();
+            return;
+        }
         scene()->setSceneRect(QRect(QPoint(0, 0), event->size()));
+    }
     QGraphicsView::resizeEvent(event);
-    int cols = width() / WIDTH;
-    if(cols > 5)
-        setMinimumHeight((num / cols + 1)* HEIGHT + 20);
 }
 
 }
