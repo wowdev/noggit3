@@ -1349,7 +1349,7 @@ void World::draw ( bool draw_terrain_height_contour
         glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
 
         for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-          it->second->draw (draw_wmo_doodads, draw_fog, animtime, culldistance);
+          it->second->draw (draw_wmo_doodads, draw_fog, skies->hasSkies(), animtime, culldistance);
 
         spec_color = ::math::vector_4d( 0.0f, 0.0f, 0.0f, 1.0f );
         glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
@@ -1357,7 +1357,7 @@ void World::draw ( bool draw_terrain_height_contour
       }
       else
         for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-          it->second->draw (draw_wmo_doodads, draw_fog, animtime, culldistance);
+          it->second->draw (draw_wmo_doodads, draw_fog, skies->hasSkies(), animtime, culldistance);
 
     outdoorLights( true );
     setupFog (draw_fog);

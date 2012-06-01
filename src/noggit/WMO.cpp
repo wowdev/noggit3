@@ -304,6 +304,7 @@ void WMO::draw ( World* world
                , bool /*highlight*/
                , bool draw_doodads
                , bool draw_fog
+               , bool hasSkies
                ) const
 {
   if (draw_fog)
@@ -313,7 +314,7 @@ void WMO::draw ( World* world
 
   for (unsigned int i=0; i<nGroups; ++i)
   {
-    groups[i].draw(world, ofs, rot, culldistance, draw_fog);
+    groups[i].draw(world, ofs, rot, culldistance, draw_fog, hasSkies);
 
     if (draw_doodads)
     {
@@ -1005,6 +1006,7 @@ void WMOGroup::draw ( World* world
                     , const float rot
                     , const float culldistance
                     , bool draw_fog
+                    , bool hasSkies
                     )
 {
   visible = false;

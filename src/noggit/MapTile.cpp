@@ -492,6 +492,7 @@ void MapTile::draw ( bool draw_terrain_height_contour
                           , draw_area_id_overlay
                           , dont_draw_cursor
                           , animtime
+                          , skies
                           );
     }
   }

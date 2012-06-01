@@ -75,7 +75,7 @@ public:
             , const float rot
             , const float culldistance
             , bool draw_fog
-            );
+            , bool hasSkies);
   void draw_for_selection (World* world
                           , const ::math::vector_3d& ofs
                           , const float rot
@@ -208,6 +208,7 @@ public:
             , bool highlight
             , bool draw_doodads
             , bool draw_fog
+            , bool hasSkies
             ) const;
   void drawSelect (World* world
                   , int doodadset
