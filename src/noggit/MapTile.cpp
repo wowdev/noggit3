@@ -478,6 +478,7 @@ void MapTile::draw ( bool draw_terrain_height_contour
                    , bool draw_area_id_overlay
                    , bool dont_draw_cursor
                    , const float& animtime
+                   , Skies *skies
                    )
 {
   glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
