@@ -1039,20 +1039,9 @@ void World::setupFog (bool draw_fog)
   }
 }
 
-void World::draw ( bool draw_terrain_height_contour
-                 , bool mark_impassable_chunks
-                 , bool draw_area_id_overlay
-                 , bool dont_draw_cursor
+void World::draw (int16_t flags
                  , float inner_cursor_radius
                  , float outer_cursor_radius
-                 , bool draw_wmo_doodads
-                 , bool draw_fog
-                 , bool draw_wmos
-                 , bool draw_terrain
-                 , bool draw_doodads
-                 , bool draw_lines
-                 , bool draw_hole_lines
-                 , bool draw_water
                  , const QPointF& mouse_position
                  )
 {
@@ -1066,7 +1055,7 @@ void World::draw ( bool draw_terrain_height_contour
   ///glColor4f(1,1,1,1);
 
   bool had_sky (false);
-  if (draw_wmos || mHasAGlobalWMO)
+  if ( (flags & DRAWWMO) || mHasAGlobalWMO )
   {
     foreach (const wmo_instance_type& itr, mWMOInstances)
     {
@@ -1108,10 +1097,10 @@ void World::draw ( bool draw_terrain_height_contour
   outdoorLights(true);
 
   glFogi(GL_FOG_MODE, GL_LINEAR);
-  setupFog (draw_fog);
+  setupFog (flags & FOG);
 
   // Draw verylowres heightmap
-  if (draw_fog && draw_terrain) {
+  if ((flags & FOG) && (flags & TERRAIN)) {
     glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
@@ -1184,7 +1173,7 @@ void World::draw ( bool draw_terrain_height_contour
 
     glPushMatrix();
 
-    if( draw_terrain )
+    if( flags & TERRAIN )
     {
       for( int j = 0; j < 64; ++j )
       {
@@ -1192,10 +1181,10 @@ void World::draw ( bool draw_terrain_height_contour
         {
           if( tileLoaded( j, i ) )
           {
-            mTiles[j][i].tile->draw ( draw_terrain_height_contour
-                                    , mark_impassable_chunks
-                                    , draw_area_id_overlay
-                                    , dont_draw_cursor
+            mTiles[j][i].tile->draw ( flags & HEIGHTCONTOUR
+                                    , flags & MARKIMPASSABLE
+                                    , flags & AREAID
+                                    , flags & NOCURSOR
                                     , animtime
                                     , skies
                                     );
@@ -1243,7 +1232,7 @@ void World::draw ( bool draw_terrain_height_contour
       //glDepthMask(false);
       //glDisable(GL_DEPTH_TEST);
 
-      if (!dont_draw_cursor)
+      if (!flags & NOCURSOR)
       {
         QSettings settings;
         //! \todo This actually should be an enum. And should be passed into this method.
@@ -1262,7 +1251,7 @@ void World::draw ( bool draw_terrain_height_contour
     }
 
 
-    if (draw_lines)
+    if (flags & LINES)
     {
       glDisable(GL_COLOR_MATERIAL);
       glActiveTexture(GL_TEXTURE0);
@@ -1272,14 +1261,14 @@ void World::draw ( bool draw_terrain_height_contour
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-      setupFog (draw_fog);
+      setupFog (flags & FOG);
       for( int j = 0; j < 64; ++j )
       {
         for( int i = 0; i < 64; ++i )
         {
           if( tileLoaded( j, i ) )
           {
-            mTiles[j][i].tile->drawLines (draw_hole_lines);
+            mTiles[j][i].tile->drawLines (flags & HOLELINES);
            // mTiles[j][i].tile->drawMFBO();
           }
         }
@@ -1324,13 +1313,13 @@ void World::draw ( bool draw_terrain_height_contour
 
 
     // M2s / models
-    if( draw_doodads)
+    if(flags & DOODADS)
     {
       ModelManager::resetAnim();
 
       glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
       for( std::map<int, ModelInstance*>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
-        it->second->draw (draw_fog);
+        it->second->draw (flags & FOG);
 
       //drawModelList();
     }
@@ -1339,7 +1328,7 @@ void World::draw ( bool draw_terrain_height_contour
 
 
     // WMOs / map objects
-    if( draw_wmos || mHasAGlobalWMO )
+    if( (flags & DRAWWMO) || mHasAGlobalWMO )
       if (enable_shaders)
       {
         ::math::vector_4d spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -1349,7 +1338,7 @@ void World::draw ( bool draw_terrain_height_contour
         glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
 
         for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-          it->second->draw (draw_wmo_doodads, draw_fog, skies->hasSkies(), animtime, culldistance);
+          it->second->draw (flags & WMODOODAS, flags &  FOG, skies->hasSkies(), animtime, culldistance);
 
         spec_color = ::math::vector_4d( 0.0f, 0.0f, 0.0f, 1.0f );
         glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
@@ -1357,10 +1346,10 @@ void World::draw ( bool draw_terrain_height_contour
       }
       else
         for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-          it->second->draw (draw_wmo_doodads, draw_fog, skies->hasSkies(), animtime, culldistance);
+          it->second->draw (flags & WMODOODAS, flags &  FOG, skies->hasSkies(), animtime, culldistance);
 
     outdoorLights( true );
-    setupFog (draw_fog);
+    setupFog (flags &  FOG);
 
     glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
     glDisable(GL_CULL_FACE);
@@ -1370,7 +1359,7 @@ void World::draw ( bool draw_terrain_height_contour
     glEnable(GL_LIGHTING);
   }
 
-  setupFog (draw_fog);
+  setupFog (flags &  FOG);
 
 
   glColor4f(1,1,1,1);
@@ -1398,7 +1387,7 @@ void World::draw ( bool draw_terrain_height_contour
   //glColor4f(1,1,1,1);
   glDisable(GL_COLOR_MATERIAL);
 
-  if(draw_water)
+  if(flags &  WATER)
   {
     for( int j = 0; j < 64; ++j )
     {

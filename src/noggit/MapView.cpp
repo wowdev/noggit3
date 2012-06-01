@@ -1040,20 +1040,24 @@ namespace noggit
     else if (_current_terrain_editing_mode == texturing)
       brush_radius = texturing_radius();
 
-    _world->draw ( _draw_terrain_height_contour
-                 , _current_terrain_editing_mode == impassable_flag_setting
-                 , _current_terrain_editing_mode == area_id_setting
-                 , _current_terrain_editing_mode == hole_setting
+    int16_t flags(0);
+
+    flags |= _draw_terrain ? TERRAIN : 0;
+    flags |= _draw_doodads ? DOODADS : 0;
+    flags |= _draw_fog ? FOG : 0;
+    flags |= _draw_water ? WATER : 0;
+    flags |= _draw_wmos ? DRAWWMO : 0;
+    flags |= _draw_wmo_doodads ? WMODOODAS : 0;
+    flags |= _draw_hole_lines ? HOLELINES : 0;
+    flags |= _draw_lines ? LINES : 0;
+    flags |= _current_terrain_editing_mode == hole_setting ? NOCURSOR : 0;
+    flags |= _current_terrain_editing_mode == area_id_setting ? AREAID : 0;
+    flags |= _current_terrain_editing_mode == impassable_flag_setting ? MARKIMPASSABLE : 0;
+    flags |= _draw_terrain_height_contour ? HEIGHTCONTOUR : 0;
+
+    _world->draw ( flags
                  , brush_radius
                  , brush_radius
-                 , _draw_wmo_doodads
-                 , _draw_fog
-                 , _draw_wmos
-                 , _draw_terrain
-                 , _draw_doodads
-                 , _draw_lines
-                 , _draw_hole_lines
-                 , _draw_water
                  , _mouse_position
                  );
   }
