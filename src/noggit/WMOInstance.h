@@ -45,7 +45,7 @@ public:
   explicit WMOInstance( World*, WMO* _wmo );
   ~WMOInstance();
 
-  void draw (bool draw_doodads, bool draw_fog, const float animtime, const float culldistance) const;
+  void draw (bool draw_doodads, bool draw_fog, bool hasSkies, const float animtime, const float culldistance) const;
   void drawSelect (bool draw_doodads, const float animtime, const float culldistance);
 
   void resetDirection();
