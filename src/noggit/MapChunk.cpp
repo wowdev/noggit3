@@ -1062,6 +1062,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
                     , bool draw_area_id_overlay
                     , bool dont_draw_cursor
                     , const float& animtime
+                    , Skies *skies
                     )
 {
   if (!_world->frustum.intersects( vmin, vmax ))
@@ -1130,7 +1131,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_LIGHTING);
 
-  ::math::vector_3d shc = _world->skies->colorSet[WATER_COLOR_DARK] * 0.3f;
+  ::math::vector_3d shc = skies->colorSet[WATER_COLOR_DARK] * 0.3f;
   glColor4f(shc.x(),shc.y(),shc.z(),1);
 
   //glColor4f(1,1,1,1);

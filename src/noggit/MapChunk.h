@@ -21,6 +21,7 @@ namespace noggit
 }
 class brush;
 class World;
+class Skies;
 
 typedef unsigned short StripType;
 
@@ -76,12 +77,12 @@ public:
   void destroy();
   void initStrip();
 
-  void draw ( bool draw_terrain_height_contour
+  void draw (bool draw_terrain_height_contour
             , bool mark_impassable_chunks
             , bool draw_area_id_overlay
             , bool dont_draw_cursor
             , const float& animtime
-            );
+            , Skies *skies);
   void drawContour();
   void drawAreaID();
   void drawBlock();
