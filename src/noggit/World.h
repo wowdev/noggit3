@@ -10,6 +10,7 @@
 
 #include <map>
 #include <string>
+#include <stdint.h>
 
 #include <QImage>
 
@@ -40,6 +41,21 @@ static const float highresdistance = 384.0f;
 static const float mapdrawdistance = 998.0f;
 static const float modeldrawdistance = 384.0f;
 static const float doodaddrawdistance = 64.0f;
+
+enum WorldFlags {
+    TERRAIN = 0x1,
+    FOG = 0x2,
+    DOODADS = 0x4,
+    DRAWWMO = 0x8,
+    WMODOODAS = 0x10,
+    WATER = 0x20,
+    LINES = 0x40,
+    HOLELINES = 0x80,
+    HEIGHTCONTOUR = 0x100,
+    MARKIMPASSABLE = 0x200,
+    AREAID = 0x400,
+    NOCURSOR = 0x800
+};
 
 typedef unsigned short StripType;
 
@@ -212,20 +228,9 @@ public:
   void saveChanged();
   void tick(float dt);
   //! \todo This seriously needs to be done via flags.
-  void draw ( bool draw_terrain_height_contour
-            , bool mark_impassable_chunks
-            , bool draw_area_id_overlay
-            , bool dont_draw_cursor
+  void draw ( int16_t flags
             , float inner_cursor_radius
             , float outer_cursor_radius
-            , bool draw_wmo_doodads
-            , bool draw_fog
-            , bool draw_wmos
-            , bool draw_terrain
-            , bool draw_doodads
-            , bool draw_lines
-            , bool draw_hole_lines
-            , bool draw_water
             , const QPointF& mouse_position
             );
 

@@ -387,73 +387,73 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2050"/>
-        <location filename="../src/noggit/MapView.cpp" line="2110"/>
+        <location filename="../src/noggit/MapView.cpp" line="2054"/>
+        <location filename="../src/noggit/MapView.cpp" line="2114"/>
         <source>Flat</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2051"/>
-        <location filename="../src/noggit/MapView.cpp" line="2111"/>
+        <location filename="../src/noggit/MapView.cpp" line="2055"/>
+        <location filename="../src/noggit/MapView.cpp" line="2115"/>
         <source>Linear</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2052"/>
-        <location filename="../src/noggit/MapView.cpp" line="2112"/>
+        <location filename="../src/noggit/MapView.cpp" line="2056"/>
+        <location filename="../src/noggit/MapView.cpp" line="2116"/>
         <source>Smooth</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2053"/>
+        <location filename="../src/noggit/MapView.cpp" line="2057"/>
         <source>Polynomial</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2054"/>
+        <location filename="../src/noggit/MapView.cpp" line="2058"/>
         <source>Trigonometric</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2055"/>
+        <location filename="../src/noggit/MapView.cpp" line="2059"/>
         <source>Square</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2073"/>
-        <location filename="../src/noggit/MapView.cpp" line="2130"/>
-        <location filename="../src/noggit/MapView.cpp" line="2202"/>
+        <location filename="../src/noggit/MapView.cpp" line="2077"/>
+        <location filename="../src/noggit/MapView.cpp" line="2134"/>
+        <location filename="../src/noggit/MapView.cpp" line="2206"/>
         <source>Brush &amp;radius</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2074"/>
-        <location filename="../src/noggit/MapView.cpp" line="2131"/>
+        <location filename="../src/noggit/MapView.cpp" line="2078"/>
+        <location filename="../src/noggit/MapView.cpp" line="2135"/>
         <source>Shaping &amp;speed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2203"/>
+        <location filename="../src/noggit/MapView.cpp" line="2207"/>
         <source>Brush &amp;opacity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2204"/>
+        <location filename="../src/noggit/MapView.cpp" line="2208"/>
         <source>Brush &amp;hardness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2205"/>
+        <location filename="../src/noggit/MapView.cpp" line="2209"/>
         <source>Brush &amp;pressure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2239"/>
+        <location filename="../src/noggit/MapView.cpp" line="2243"/>
         <source>Terrain Tool</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/noggit/MapView.cpp" line="2245"/>
+        <location filename="../src/noggit/MapView.cpp" line="2249"/>
         <source>Smoothing Tool</source>
         <translation type="unfinished"></translation>
     </message>
