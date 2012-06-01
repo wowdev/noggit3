@@ -1715,7 +1715,7 @@ void MapTile::saveTileCata()
       {
         int lMCNK_Size = 0x80;
         int lMCNK_Position = lCurrentPosition;
-        lADTFile.Extend( 8 );  
+        lADTFile.Extend( 8 );
         SetChunkHeader( lADTFile, lCurrentPosition, 'MCNK', lMCNK_Size );
 
         // MCNK data
@@ -1782,7 +1782,7 @@ void MapTile::saveTileCata()
 
         // MCNR
 //        {
-          int lMCNR_Size = ( 9 * 9 + 8 * 8 ) * 3; 
+          int lMCNR_Size = ( 9 * 9 + 8 * 8 ) * 3;
 
           lADTFile.Extend( 8 + lMCNR_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCNR', lMCNR_Size + 13 ); // For Cata we do add the 13 bytes too in chunk size
@@ -1886,11 +1886,11 @@ void MapTile::saveTileCata()
 
     lCurrentPosition += 8 + 0x4;
 //  }
- 
+
   // MAMP
 
     lADTTexFile.Extend( 8 + 0x4 );
-    SetChunkHeader( lADTTexFile, lCurrentPosition, 'MAMP', 4 );  
+    SetChunkHeader( lADTTexFile, lCurrentPosition, 'MAMP', 4 );
 
     // MAMP data (seems to be always 0 in tex0)
     *( lADTTexFile.GetPointer<int>( lCurrentPosition + 8 ) ) = 0;
@@ -1913,7 +1913,7 @@ void MapTile::saveTileCata()
       lADTTexFile.GetPointer<sChunkHeader>( lMTEX_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
     }
-//  }  
+//  }
 
   // MCNK
 //  {
@@ -1924,10 +1924,10 @@ void MapTile::saveTileCata()
       {
         int lMCNK_Size = 0x0;
         int lMCNK_Position = lCurrentPosition;
-		
+
         lADTTexFile.Extend( 8 );  // No header in tex0
 		    SetChunkHeader( lADTTexFile, lCurrentPosition, 'MCNK', lMCNK_Size );
-        lCurrentPosition += 8;	
+        lCurrentPosition += 8;
 
         // MCLY
 //        {
@@ -1954,7 +1954,7 @@ void MapTile::saveTileCata()
 
           lCurrentPosition += 8 + lMCLY_Size;
           lMCNK_Size += 8 + lMCLY_Size;
-//        }	
+//        }
 
         // MCSH <-- untested, I (Mjo) need to test with an adt that has shadows.
 //        {
@@ -2032,7 +2032,7 @@ void MapTile::saveTileCata()
     lCurrentPosition += 8 + sizeof( uint32_t ) * mTextureEffects.size();
   }
 #endif
-  
+
   std::string texFilename (mFilename);
 
   size_t found = texFilename.rfind( ".adt" );
@@ -2225,10 +2225,10 @@ void MapTile::saveTileCata()
     {
       for( int x = 0; x < 16; ++x )
       {
-	  
+
         int lMCNK_Size = 0x0;
         int lMCNK_Position = lCurrentPosition;
-		
+
         lADTObjFile.Extend( 8 );  // No header in tex0
 		    SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCNK', lMCNK_Size );
         lCurrentPosition += 8;
@@ -2279,14 +2279,14 @@ void MapTile::saveTileCata()
           }
 
 		  // MCRD data
-		  
+
           if ( lDoodadIDs.size() > 0 )
           {
             int lMCRD_Size = 4 * ( lDoodadIDs.size() );
-		  
+
             lADTObjFile.Extend( 8 + lMCRD_Size );
             SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCRD', lMCRD_Size );
-          
+
             int * lReferencesDoodads = lADTObjFile.GetPointer<int>( lCurrentPosition + 8 );
 
             lID = 0;
@@ -2307,21 +2307,21 @@ void MapTile::saveTileCata()
             int lMCRW_Size = 4 * ( lObjectIDs.size() );
 
             lADTObjFile.Extend( 8 + lMCRW_Size );
-            SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCRW', lMCRW_Size );		  
+            SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCRW', lMCRW_Size );
 
 		        int * lReferencesWmo = lADTObjFile.GetPointer<int>( lCurrentPosition + 8 );
-		  
+
 		        lID = 0;
 		        for( std::list<int>::iterator it = lObjectIDs.begin(); it != lObjectIDs.end(); ++it )
             {
               lReferencesWmo[lID] = *it;
               lID++;
             }
-		  
+
             lCurrentPosition += 8 + lMCRW_Size;
-            lMCNK_Size += 8 + lMCRW_Size; 
+            lMCNK_Size += 8 + lMCRW_Size;
           }
-//        }		 
+//        }
 
         lADTObjFile.GetPointer<sChunkHeader>( lMCNK_Position )->mSize = lMCNK_Size;
       }
