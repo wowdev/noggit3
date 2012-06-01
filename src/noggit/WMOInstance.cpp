@@ -57,7 +57,7 @@ WMOInstance::WMOInstance( World* world, WMO* _wmo )
 {
 }
 
-void WMOInstance::draw (bool draw_doodads, bool draw_fog) const
+void WMOInstance::draw (bool draw_doodads, bool draw_fog, const float animtime, const float culldistance) const
 {
   glPushMatrix();
   glTranslatef( pos.x(), pos.y(), pos.z() );
@@ -72,14 +72,14 @@ void WMOInstance::draw (bool draw_doodads, bool draw_fog) const
       LogDebug << "shit" << _world->GetCurrentSelection()->data.wmo->mUniqueID <<std::endl;
 
   if( _world->IsSelection( eEntry_WMO ) && _world->GetCurrentSelection()->data.wmo->mUniqueID == mUniqueID )
-    wmo->draw( _world, doodadset, pos, roty, true, true, true, draw_doodads, draw_fog );
+    wmo->draw( _world, doodadset, pos, roty, animtime, culldistance, true, true, true, draw_doodads, draw_fog );
   else
-    wmo->draw( _world, doodadset, pos, roty, false, false, false, draw_doodads, draw_fog );
+    wmo->draw( _world, doodadset, pos, roty, animtime, culldistance, false, false, false, draw_doodads, draw_fog );
 
   glPopMatrix();
 }
 
-void WMOInstance::drawSelect (bool draw_doodads)
+void WMOInstance::drawSelect (bool draw_doodads, const float animtime, const float culldistance)
 {
   glPushMatrix();
 
@@ -94,7 +94,7 @@ void WMOInstance::drawSelect (bool draw_doodads)
   //mSelectionID = _world->selection_names().add( this );
   glPushName( mSelectionID );
 
-  wmo->drawSelect( _world, doodadset, pos, -roty, draw_doodads);
+  wmo->drawSelect( _world, doodadset, pos, -roty, animtime, culldistance, draw_doodads);
 
   glPopName();
 

@@ -297,6 +297,8 @@ void WMO::draw ( World* world
                , int doodadset
                , const ::math::vector_3d &ofs
                , const float rot
+               , const float animtime
+               , const float culldistance
                , bool boundingbox
                , bool groupboxes
                , bool /*highlight*/
@@ -311,14 +313,14 @@ void WMO::draw ( World* world
 
   for (unsigned int i=0; i<nGroups; ++i)
   {
-    groups[i].draw(world, ofs, rot, draw_fog);
+    groups[i].draw(world, ofs, rot, culldistance, draw_fog);
 
     if (draw_doodads)
     {
       groups[i].drawDoodads(world, doodadset, ofs, rot, draw_fog);
     }
 
-    groups[i].drawLiquid (world, draw_fog);
+    groups[i].drawLiquid (world, draw_fog, animtime);
   }
 
   if( boundingbox )
@@ -554,23 +556,25 @@ void WMO::draw ( World* world
   */
 }
 
-void WMO::drawSelect ( World* world
+void WMO::drawSelect (World* world
                      , int doodadset
                      , const ::math::vector_3d &ofs
                      , const float rot
+                     , const float animtime
+                     , const float culldistance
                      , bool draw_doodads
                      ) const
 {
   for (unsigned int i=0; i<nGroups; ++i)
   {
-    groups[i].draw_for_selection (world, ofs, rot);
+    groups[i].draw_for_selection (world, ofs, rot, culldistance);
 
     if (draw_doodads)
     {
       groups[i].drawDoodadsSelect(world, doodadset, ofs, rot);
     }
 
-    groups[i].drawLiquid (world, false);
+    groups[i].drawLiquid (world, false, animtime);
   }
 }
 
@@ -999,6 +1003,7 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 void WMOGroup::draw ( World* world
                     , const ::math::vector_3d& ofs
                     , const float rot
+                    , const float culldistance
                     , bool draw_fog
                     )
 {
@@ -1008,7 +1013,7 @@ void WMOGroup::draw ( World* world
   ::math::rotate (ofs.x(), ofs.z(), &pos.x(), &pos.z(), rot);
   if (!world->frustum.intersectsSphere(pos,rad)) return;
   float dist = (pos - world->camera).length() - rad;
-  if (dist >= world->getCulldistance()) return;
+  if (dist >= culldistance) return;
   visible = true;
   setupFog(world, draw_fog);
 
@@ -1055,6 +1060,7 @@ void WMOGroup::draw ( World* world
 void WMOGroup::draw_for_selection ( World* world
                                   , const ::math::vector_3d& ofs
                                   , const float rot
+                                  , const float culldistance
                                   )
 {
   visible = false;
@@ -1062,7 +1068,7 @@ void WMOGroup::draw_for_selection ( World* world
   ::math::vector_3d pos = center + ofs;
   ::math::rotate (ofs.x(), ofs.z(), &pos.x(), &pos.z(), rot);
   if ( !world->frustum.intersectsSphere (pos, rad)
-    || ((pos - world->camera).length() - rad) >= world->getCulldistance())
+    || ((pos - world->camera).length() - rad) >= culldistance)
     return;
 
   visible = true;
@@ -1163,7 +1169,7 @@ void WMOGroup::drawDoodadsSelect ( World* world
 
 }
 
-void WMOGroup::drawLiquid (World* world, bool draw_fog)
+void WMOGroup::drawLiquid (World* world, bool draw_fog, float animtime)
 {
   if (!visible) return;
 
@@ -1185,7 +1191,7 @@ void WMOGroup::drawLiquid (World* world, bool draw_fog)
     glDisable(GL_ALPHA_TEST);
     glDepthMask(GL_TRUE);
     glColor4f(1,1,1,1);
-    lq->draw (world->getAnimtime());
+    lq->draw (animtime);
     glDisable(GL_LIGHT2);
   }
 }
