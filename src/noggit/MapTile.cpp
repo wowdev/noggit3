@@ -763,7 +763,11 @@ void MapTile::clearAllModels()
   }
 
 }
-void MapTile::saveTile()
+void MapTile::saveTile ( const ModelInstances_type::const_iterator& models_begin
+                       , const ModelInstances_type::const_iterator& models_end
+                       , const WMOInstances_type::const_iterator& wmos_begin
+                       , const WMOInstances_type::const_iterator& wmos_end
+                       )
 {
   Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
 
@@ -779,12 +783,19 @@ void MapTile::saveTile()
   std::map<int, WMOInstance*> lObjectInstances;
   std::map<int, ModelInstance*> lModelInstances;
 
-  for( std::map<int, WMOInstance*>::iterator it = _world->mWMOInstances.begin(); it != _world->mWMOInstances.end(); ++it )
+  //! \todo std::copy_if
+  for ( WMOInstances_type::const_iterator it (wmos_begin)
+      ; it != wmos_end
+      ; ++it
+      )
     //! \todo checkinside seems to fuck up everything
     //if( checkInside( lTileExtents, it->second->extents ) )
       lObjectInstances.insert( std::pair<int, WMOInstance*>( it->first, it->second ) );
 
-  for( std::map<int, ModelInstance*>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
+  for( ModelInstances_type::const_iterator it (models_begin)
+     ; it != models_end
+     ; ++it
+     )
   {
     ::math::vector_3d lModelExtentsV1[2], lModelExtentsV2[2];
     lModelExtentsV1[0] = it->second->model->header.BoundingBoxMin + it->second->pos;
@@ -1578,7 +1589,11 @@ void MapTile::saveTile()
   f.close();
 }
 
-void MapTile::saveTileCata()
+void MapTile::saveTileCata ( const ModelInstances_type::const_iterator& models_begin
+                           , const ModelInstances_type::const_iterator& models_end
+                           , const WMOInstances_type::const_iterator& wmos_begin
+                           , const WMOInstances_type::const_iterator& wmos_end
+                           )
 {
   Log << "Saving ADT (Cata) \"" << mFilename << "\"." << std::endl;
 
@@ -1594,12 +1609,19 @@ void MapTile::saveTileCata()
   std::map<int, WMOInstance*> lObjectInstances;
   std::map<int, ModelInstance*> lModelInstances;
 
-  for( std::map<int, WMOInstance*>::iterator it = _world->mWMOInstances.begin(); it != _world->mWMOInstances.end(); ++it )
+  //! \todo std::copy_if
+  for ( WMOInstances_type::const_iterator it (wmos_begin)
+      ; it != wmos_end
+      ; ++it
+      )
     //! \todo checkinside seems to fuck up everything
     //if( checkInside( lTileExtents, it->second->extents ) )
       lObjectInstances.insert( std::pair<int, WMOInstance*>( it->first, it->second ) );
 
-  for( std::map<int, ModelInstance*>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
+  for( ModelInstances_type::const_iterator it (models_begin)
+     ; it != models_end
+     ; ++it
+     )
   {
     ::math::vector_3d lModelExtentsV1[2], lModelExtentsV2[2];
     lModelExtentsV1[0] = it->second->model->header.BoundingBoxMin + it->second->pos;

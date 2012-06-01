@@ -816,7 +816,11 @@ void World::saveTile(int x, int z)
   // save goven tile
   if( tileLoaded( z, x ) )
   {
-    mTiles[z][x].tile->saveTile();
+    mTiles[z][x].tile->saveTile ( mModelInstances.begin()
+                                , mModelInstances.end()
+                                , mWMOInstances.begin()
+                                , mWMOInstances.end()
+                                );
   }
 }
 
@@ -824,7 +828,11 @@ void World::saveTileCata(int x, int z)
 {
   if( tileLoaded( z, x ) )
   {
-    mTiles[z][x].tile->saveTileCata();
+    mTiles[z][x].tile->saveTileCata ( mModelInstances.begin()
+                                    , mModelInstances.end()
+                                    , mWMOInstances.begin()
+                                    , mWMOInstances.end()
+                                    );
   }
 }
 
@@ -839,7 +847,11 @@ void World::saveChanged()
       {
         if(getChanged(j,i))
         {
-          mTiles[j][i].tile->saveTile();
+          mTiles[j][i].tile->saveTile ( mModelInstances.begin()
+                                      , mModelInstances.end()
+                                      , mWMOInstances.begin()
+                                      , mWMOInstances.end()
+                                      );
           unsetChanged(j,i);
         }
       }
