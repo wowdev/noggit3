@@ -26,6 +26,8 @@ namespace math
   class vector_3d;
 }
 
+class Skies;
+
 class MapTile
 {
 public:
@@ -53,7 +55,7 @@ public:
             );
   void drawSelect (const float& culldistance);
   void drawLines (bool draw_hole_lines);
-  void drawWater();
+  void drawWater (const float& animtime, const Skies* skies);
   void drawTextures ( const QRectF& chunks_to_draw
                     , int animation_time
                     ) const;
