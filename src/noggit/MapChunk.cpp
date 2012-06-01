@@ -904,7 +904,7 @@ void MapChunk::CreateStrips()
     _hole_strip[iferget++] = i;
 }
 
-void MapChunk::drawColor (bool draw_fog)
+void MapChunk::drawColor (bool draw_fog, const float& culldistance)
 {
 
   if (!_world->frustum.intersects(vmin,vmax))
@@ -915,7 +915,7 @@ void MapChunk::drawColor (bool draw_fog)
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
 
-  if (mydist > _world->getCulldistance())
+  if (mydist > culldistance)
   {
     if (draw_fog)
       drawNoDetail();
@@ -1260,14 +1260,14 @@ void MapChunk::drawNoDetail()
   glEnable( GL_TEXTURE_2D );
 }
 
-void MapChunk::drawSelect()
+void MapChunk::drawSelect (const float& culldistance)
 {
   if( !_world->frustum.intersects( vmin, vmax ) )
     return;
 
   float mydist = (_world->camera - vcenter).length() - r;
   if (mydist > (mapdrawdistance * mapdrawdistance)) return;
-  if (mydist > _world->getCulldistance())
+  if (mydist > culldistance)
     return;
 
   if( nameID == -1 )

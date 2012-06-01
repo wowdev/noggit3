@@ -50,7 +50,7 @@ public:
             , bool draw_area_id_overlay
             , bool dont_draw_cursor
             );
-  void drawSelect();
+  void drawSelect (const float& culldistance);
   void drawLines (bool draw_hole_lines);
   void drawWater();
   void drawTextures ( const QRectF& chunks_to_draw

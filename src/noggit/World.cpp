@@ -1464,7 +1464,7 @@ void World::drawSelection ( bool draw_wmo_doodads
       {
         if( tileLoaded( j, i ) )
         {
-          mTiles[j][i].tile->drawSelect();
+          mTiles[j][i].tile->drawSelect (culldistance);
         }
       }
     }
