@@ -20,6 +20,9 @@
 #include <noggit/WMO.h> // WMOManager
 #include <noggit/MapHeaders.h> // ENTRY_MODF
 
+typedef std::map<int, WMOInstance*> WMOInstances_type;
+typedef std::map<int, ModelInstance*> ModelInstances_type;
+
 namespace OpenGL
 {
   class Texture;
