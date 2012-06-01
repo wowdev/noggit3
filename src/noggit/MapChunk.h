@@ -84,8 +84,8 @@ public:
   void drawContour();
   void drawAreaID();
   void drawBlock();
-  void drawColor (bool draw_fog);
-  void drawSelect();
+  void drawColor (bool draw_fog, const float& culldistance);
+  void drawSelect (const float& culldistance);
   void drawNoDetail();
   void drawPass(int anim, int animation_time = 0);
   // todo split into draw_lines and draw_hole_lines

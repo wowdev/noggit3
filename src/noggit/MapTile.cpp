@@ -494,13 +494,13 @@ void MapTile::draw ( bool draw_terrain_height_contour
   }
 }
 
-void MapTile::drawSelect()
+void MapTile::drawSelect (const float& culldistance)
 {
   for (size_t j (0); j < 16; ++j)
   {
     for (size_t i (0); i < 16; ++i)
     {
-      mChunks[j][i]->drawSelect();
+      mChunks[j][i]->drawSelect (culldistance);
     }
   }
 }
