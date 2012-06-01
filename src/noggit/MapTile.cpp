@@ -477,6 +477,7 @@ void MapTile::draw ( bool draw_terrain_height_contour
                    , bool mark_impassable_chunks
                    , bool draw_area_id_overlay
                    , bool dont_draw_cursor
+                   , const float& animtime
                    )
 {
   glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
@@ -489,6 +490,7 @@ void MapTile::draw ( bool draw_terrain_height_contour
                           , mark_impassable_chunks
                           , draw_area_id_overlay
                           , dont_draw_cursor
+                          , animtime
                           );
     }
   }
