@@ -70,16 +70,17 @@ public:
   void init(WMO *wmo, noggit::mpq::file* f, int num, char *names);
   void initDisplayList();
   void initLighting(int nLR, uint16_t *useLights);
-  void draw ( World* world
+  void draw (World* world
             , const ::math::vector_3d& ofs
             , const float rot
+            , const float culldistance
             , bool draw_fog
             );
-  void draw_for_selection ( World* world
+  void draw_for_selection (World* world
                           , const ::math::vector_3d& ofs
                           , const float rot
-                          );
-  void drawLiquid (World* world, bool draw_fog);
+                          , const float culldistance);
+  void drawLiquid (World* world, bool draw_fog, float animtime);
   void drawDoodads ( World* world
                    , unsigned int doodadset
                    , const ::math::vector_3d& ofs
@@ -196,21 +197,24 @@ public:
   //! \todo This only has World* for wmo-doodads. ._.
   explicit WMO(World* world, const std::string& name);
   ~WMO();
-  void draw ( World* world
+  void draw (World* world
             , int doodadset
             , const ::math::vector_3d& ofs
             , const float rot
+            , const float animtime
+            , const float culldistance
             , bool boundingbox
             , bool groupboxes
             , bool highlight
             , bool draw_doodads
             , bool draw_fog
             ) const;
-  void drawSelect ( World* world
+  void drawSelect (World* world
                   , int doodadset
                   , const ::math::vector_3d& ofs
                   , const float rot
-                  , bool draw_doodads
+                  , const float animtime
+                  , const float culldistance, bool draw_doodads
                   ) const;
   //void drawPortals();
   bool drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d pLower, ::math::vector_3d pUpper ) const;
