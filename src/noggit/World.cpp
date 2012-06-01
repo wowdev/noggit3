@@ -1393,7 +1393,7 @@ void World::draw ( bool draw_terrain_height_contour
       {
         if( tileLoaded( j, i ) )
         {
-          mTiles[j][i].tile->drawWater();
+          mTiles[j][i].tile->drawWater (animtime, skies);
         }
       }
     }

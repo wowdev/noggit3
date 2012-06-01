@@ -543,14 +543,14 @@ void MapTile::drawMFBO()
   glEnd();
 }
 
-void MapTile::drawWater()
+void MapTile::drawWater (const float& animtime, const Skies* skies)
 {
   glDisable (GL_COLOR_MATERIAL);
   glDisable (GL_LIGHTING);
 
   foreach (const Liquid* liquid, mLiquids)
   {
-    liquid->draw (_world->getAnimtime(), _world->skies);
+    liquid->draw (animtime, skies);
   }
 
   glEnable (GL_LIGHTING);
