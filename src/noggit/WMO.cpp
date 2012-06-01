@@ -1025,7 +1025,7 @@ void WMOGroup::draw ( World* world
   } else
   {
 
-    if (world->skies->hasSkies())
+  if (hasSkies)
   {
     world->outdoorLights(true);
   }
