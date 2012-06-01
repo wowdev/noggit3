@@ -80,6 +80,7 @@ public:
             , bool mark_impassable_chunks
             , bool draw_area_id_overlay
             , bool dont_draw_cursor
+            , const float& animtime
             );
   void drawContour();
   void drawAreaID();

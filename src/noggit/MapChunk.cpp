@@ -1061,9 +1061,9 @@ void MapChunk::draw ( bool draw_terrain_height_contour
                     , bool mark_impassable_chunks
                     , bool draw_area_id_overlay
                     , bool dont_draw_cursor
+                    , const float& animtime
                     )
 {
-
   if (!_world->frustum.intersects( vmin, vmax ))
     return;
 
@@ -1098,7 +1098,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   }
 
   glEnable(GL_LIGHTING);
-  drawPass(animated[0], _world->getAnimtime());
+  drawPass(animated[0], animtime);
 
   if (nTextures > 1U) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
@@ -1117,7 +1117,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
     glBindTexture( GL_TEXTURE_2D, alphamaps[i - 1] );
 
-    drawPass(animated[i], _world->getAnimtime());
+    drawPass(animated[i], animtime);
   }
 
   if (nTextures > 1U) {
