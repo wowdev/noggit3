@@ -2273,16 +2273,6 @@ void World::setFogdistance(float distance)
     fogdistance = distance;
 }
 
-const float World::getCulldistance() const
-{
-    return culldistance;
-}
-
-void World::setCulldistance(float distance)
-{
-    culldistance = distance;
-}
-
 void World::moveHeight(int x, int z)
 {
   for (int j=0; j<16; ++j)

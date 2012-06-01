@@ -181,18 +181,6 @@ public:
   */
   void setFogdistance(float distance);
 
-  //! gets the current culldistance
-  /*!
-  \return the culldistance
-  */
-  const float getCulldistance() const;
-
-  //! sets the culldistance to distance
-  /*!
-  \param distance
-  */
-  void setCulldistance(float distance);
-
   void set_camera_above_terrain();
 
   Skies *skies;
