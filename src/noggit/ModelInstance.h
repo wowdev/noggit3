@@ -65,11 +65,11 @@ public:
                   , const float& rotation = 0.0f
                   ) const;
 
-  void draw (bool draw_fog);
+  void draw (bool draw_fog) const;
   void draw_for_selection();
 
-  void draw2();
-  void draw2Select();
+  void draw2() const;
+  void draw2Select() const;
 
 //  void drawMapTile();
 
