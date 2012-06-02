@@ -112,8 +112,7 @@ namespace math
 
     vector_4d& normalize()
     {
-      operator *= (1.0f / sqrtf (_x * _x + _y * _y + _z * _z + _w * _w));
-      return *this;
+      return operator *= (1.0f / sqrtf (_x * _x + _y * _y + _z * _z + _w * _w));
     }
 
     operator const float*() const
