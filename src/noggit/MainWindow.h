@@ -18,6 +18,8 @@ namespace noggit
   namespace ui
   {
     class settingsDialog;
+    class about_widget;
+    class help_widget;
   }
 
   class MainWindow : public QMainWindow
@@ -38,6 +40,9 @@ namespace noggit
     void maps();
     void projectExplorerOpen();
 
+    void help_mapEditor();
+    void about();
+
   private:
     void initialize_video();
     void createDockWidgets();
@@ -47,6 +52,8 @@ namespace noggit
     QToolBar* currentToolBar;
 
     noggit::ui::settingsDialog* _settings;
+    noggit::ui::about_widget* _about;
+    noggit::ui::help_widget* _help;
     World* _world;
   };
 }

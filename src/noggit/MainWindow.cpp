@@ -21,6 +21,8 @@
 #include <noggit/ui/projectExplorer.h>
 #include <noggit/ui/textureselecter.h>
 #include <noggit/ui/settingsDialog.h>
+#include <noggit/ui/about_widget.h>
+#include <noggit/ui/help_widget.h>
 
 namespace noggit
 {
@@ -49,6 +51,9 @@ namespace noggit
 
 	QMenu* helpMenu = menuBar()->addMenu (tr("&Help"));
 	helpMenu->addAction (tr("Settings"), this, SLOT(settingsClicked()));
+	helpMenu->addSeparator();
+    helpMenu->addAction (tr("Map Editor"), this, SLOT(help_mapEditor()));
+    helpMenu->addAction (tr("About"), this, SLOT(about()));
 
     //QMenu* debugMenu = menuBar()->addMenu (tr("&Debug"));
     //debugMenu->addAction (tr("textureSelector"), test, SLOT(show()));
@@ -114,8 +119,20 @@ namespace noggit
 
   void MainWindow::settingsClicked()
   {
-    noggit::ui::settingsDialog* config (new noggit::ui::settingsDialog);
-    config->show();
+    _settings = new noggit::ui::settingsDialog;
+    _settings->show();
+  }
+
+  void MainWindow::about()
+  {
+    _about = new noggit::ui::about_widget;
+    _about->show();
+  }
+
+  void MainWindow::help_mapEditor()
+  {
+    _help = new noggit::ui::help_widget;
+    _help->show();
   }
 
 
