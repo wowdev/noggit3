@@ -142,6 +142,7 @@ namespace noggit
     void save_minimap();
     void snap_selected_object_to_ground();
     void toggle_auto_selecting (bool);
+    void toggle_object_to_ground (bool);
     void toggle_contour_drawing (bool);
     void toggle_copy_position_randomization (bool);
     void toggle_copy_rotation_randomization (bool);
@@ -252,7 +253,7 @@ namespace noggit
 
     World* _world;
 
-    EditorTemplate *editortemplate;
+    EditorTemplate* editortemplate;
 
     QMenu* menu;
 
@@ -262,6 +263,8 @@ namespace noggit
 
     QPoint _mouse_position;
     bool _is_currently_moving_object;
+
+    bool _object_to_ground;
 
     bool _draw_terrain_height_contour;
     bool _draw_wmo_doodads;
@@ -286,8 +289,8 @@ namespace noggit
 
     //! \todo Use the brush class for these? Or simplify that somehow?
 
-    QToolBar *toolBar;
-    QButtonGroup *_toolbar_formula_radio_group;
+    QToolBar* toolBar;
+    QButtonGroup* _toolbar_formula_radio_group;
 
     // shaping -----------
     qreal _shaping_radius;

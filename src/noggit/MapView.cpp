@@ -64,6 +64,7 @@ namespace noggit
     , _model_spawner (new noggit::ui::model_spawner (NULL,shared))
     , _cursor_selector (new ui::cursor_selector (NULL))
     , _is_currently_moving_object (false)
+    , _object_to_ground (true)
     , _draw_terrain_height_contour (false)
     , _draw_wmo_doodads (true)
     , _draw_fog (true)
@@ -182,6 +183,7 @@ namespace noggit
     NEW_ACTION (copy_object, tr ("Copy object"), SLOT (copy_selected_object()), QKeySequence::Copy);
     NEW_ACTION (paste_object, tr ("Paste object"), SLOT (paste_object()), QKeySequence::Paste);
     NEW_ACTION (delete_object, tr ("Delete object"), SLOT (delete_selected_object()), QKeySequence::Delete);
+    NEW_TOGGLE_ACTION (object_to_ground, tr ("Auto-object to Ground"), SLOT (toggle_object_to_ground (bool)), 0, _object_to_ground);
     //delete_object->setShortcuts (QList<QKeySequence>() << QKeySequence::Delete << Qt::Key_Backspace);
 
     NEW_ACTION (reset_rotation, tr ("Reset object's rotation"), SLOT (reset_selected_object_rotation()), Qt::CTRL + Qt::Key_R);
@@ -247,6 +249,7 @@ namespace noggit
     edit_menu->addAction (copy_object);
     edit_menu->addAction (paste_object);
     edit_menu->addAction (delete_object);
+    edit_menu->addAction (object_to_ground);
     edit_menu->addSeparator();
     edit_menu->addAction (reset_rotation);
     edit_menu->addAction (snap_object_to_ground);
@@ -478,13 +481,13 @@ namespace noggit
     ::math::rotate (0.0f, 0.0f, &dir.x(), &dir.y(), av);
     ::math::rotate (0.0f, 0.0f, &dir.x(), &dir.z(), ah);
 
-    if( _currently_holding_shift )
+    if(_currently_holding_shift)
     {
       dirUp.x (0.0f);
       dirUp.y (1.0f);
       dirRight = ::math::vector_3d (0.0f, 0.0f, 0.0f);
     }
-    else if( _currently_holding_control )
+    else if(_currently_holding_control)
     {
       dirUp.x (0.0f);
       dirUp.y (1.0f);
@@ -501,19 +504,22 @@ namespace noggit
 
     nameEntry * Selection = _world->GetCurrentSelection();
 
-    if( Selection )
+    if(Selection)
     {
       qreal keypad_object_move_ratio (0.1);
       // Set move scale and rotate for numpad keys
-      if(_currently_holding_control && _currently_holding_shift) keypad_object_move_ratio = 0.05;
-      else if(_currently_holding_shift) keypad_object_move_ratio=0.2;
-      else if(_currently_holding_control) keypad_object_move_ratio=0.3;
+      if(_currently_holding_control && _currently_holding_shift)
+        keypad_object_move_ratio = 0.05;
+      else if(_currently_holding_shift)
+        keypad_object_move_ratio = 0.2;
+      else if(_currently_holding_control)
+        keypad_object_move_ratio = 0.3;
 
-      if( keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0)
+      if(keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0)
       {
         //! \todo On all these, setchanged() is wrong, if models are bigger than a chunk.
         // Move scale and rotate with numpad keys
-        if( Selection->type == eEntry_WMO )
+        if(Selection->type == eEntry_WMO)
         {
           _world->setChanged ( Selection->data.wmo->pos.x()
                              , Selection->data.wmo->pos.z()
@@ -533,9 +539,8 @@ namespace noggit
                              );
         }
 
-        if( Selection->type == eEntry_Model )
+        if(Selection->type == eEntry_Model)
         {
-
           _world->setChanged ( Selection->data.model->pos.x()
                              , Selection->data.model->pos.z()
                              );
@@ -558,7 +563,7 @@ namespace noggit
       }
 
       ::math::vector_3d ObjPos;
-      if( _world->IsSelection( eEntry_Model ) )
+      if(_world->IsSelection(eEntry_Model))
       {
         //! \todo  Tell me what this is.
         ObjPos = Selection->data.model->pos - _world->camera;
@@ -569,8 +574,8 @@ namespace noggit
 
       // moving and scaling objects
       //! \todo  Alternatively automatically align it to the terrain. Also try to move it where the mouse points.
-      if( _is_currently_moving_object )
-        if( Selection->type == eEntry_WMO )
+      if(_is_currently_moving_object)
+        if(Selection->type == eEntry_WMO)
         {
            _world->setChanged ( Selection->data.wmo->pos.x()
                               , Selection->data.wmo->pos.z()
@@ -585,9 +590,12 @@ namespace noggit
            _world->setChanged ( Selection->data.wmo->pos.x()
                               , Selection->data.wmo->pos.z()
                               ); // after move. If moved to another ADT
+
+           if(_object_to_ground)
+             snap_selected_object_to_ground();
         }
-        else if( Selection->type == eEntry_Model )
-          if( _currently_holding_alt )
+        else if(Selection->type == eEntry_Model)
+          if(_currently_holding_alt)
           {
             _world->setChanged(Selection->data.model->pos.x(),Selection->data.model->pos.z());
             float ScaleAmount;
@@ -595,59 +603,65 @@ namespace noggit
             Selection->data.model->sc *= ScaleAmount;
             if(Selection->data.model->sc > 63.9f )
               Selection->data.model->sc = 63.9f;
-            else if (Selection->data.model->sc < 0.00098f )
+            else if (Selection->data.model->sc < 0.00098f)
               Selection->data.model->sc = 0.00098f;
           }
           else
           {
-            _world->setChanged(Selection->data.model->pos.x(),Selection->data.model->pos.z()); // before move
+            _world->setChanged(Selection->data.model->pos.x()
+                              , Selection->data.model->pos.z()
+                              ); // before move
             ObjPos.x (80.0f);
             Selection->data.model->pos += mv * dirUp * ObjPos.x();
             Selection->data.model->pos -= mh * dirRight * ObjPos.x();
-            _world->setChanged(Selection->data.model->pos.x(),Selection->data.model->pos.z()); // after move. If moved to another ADT
+            _world->setChanged(Selection->data.model->pos.x()
+                              , Selection->data.model->pos.z()
+                              ); // after move. If moved to another ADT
+
+            if(_object_to_ground)
+              snap_selected_object_to_ground();
           }
 
-
       // rotating objects
-      if( look )
+      if(look)
       {
         float * lTarget = NULL;
         bool lModify = false;
 
-        if( Selection->type == eEntry_Model )
+        if(Selection->type == eEntry_Model)
         {
           _world->setChanged ( Selection->data.model->pos.x()
                              , Selection->data.model->pos.z()
                              );
           lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
-          if( _currently_holding_shift )
+          if(_currently_holding_shift)
             lTarget = &Selection->data.model->dir.y();
-          else if( _currently_holding_control )
+          else if(_currently_holding_control)
             lTarget = &Selection->data.model->dir.x();
-          else if(_currently_holding_alt )
+          else if(_currently_holding_alt)
             lTarget = &Selection->data.model->dir.z();
         }
-        else if( Selection->type == eEntry_WMO )
+        else if(Selection->type == eEntry_WMO)
         {
           _world->setChanged ( Selection->data.wmo->pos.x()
                              , Selection->data.wmo->pos.z()
                              );
           lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
-          if( _currently_holding_shift )
+          if(_currently_holding_shift)
             lTarget = &Selection->data.wmo->dir.y();
-          else if( _currently_holding_control )
+          else if(_currently_holding_control)
             lTarget = &Selection->data.wmo->dir.x();
-          else if( _currently_holding_alt )
+          else if(_currently_holding_alt)
             lTarget = &Selection->data.wmo->dir.z();
         }
 
-        if( lModify && lTarget )
+        if(lModify && lTarget)
         {
           *lTarget = *lTarget + rh + rv;
 
-          if( *lTarget > 360.0f )
+          if(*lTarget > 360.0f)
             *lTarget = *lTarget - 360.0f;
-          else if( *lTarget < -360.0f )
+          else if(*lTarget < -360.0f)
             *lTarget = *lTarget + 360.0f;
         }
       }
@@ -657,44 +671,39 @@ namespace noggit
       rh = 0;
       rv = 0;
 
-      if( _holding_left_mouse_button && Selection->type==eEntry_MapChunk )
+      if(_holding_left_mouse_button && Selection->type == eEntry_MapChunk)
       {
         const ::math::vector_3d& position (_world->_exact_terrain_selection_position);
         float xPos = position.x();
         float yPos = position.y();
         float zPos = position.z();
 
-        switch( _current_terrain_editing_mode )
+        switch(_current_terrain_editing_mode)
         {
         case shaping:
-          if( mViewMode == eViewMode_3D )
+          if(mViewMode == eViewMode_3D)
           {
-            if( _currently_holding_shift )
-            {
+            if(_currently_holding_shift)
               _world->changeTerrain ( xPos
                                     , zPos
                                     , 7.5f * dt * shaping_speed()
                                     , shaping_radius()
                                     , shaping_formula()
                                     );
-            }
-            else if( _currently_holding_control )
-            {
+            else if(_currently_holding_control)
               _world->changeTerrain ( xPos
                                     , zPos
                                     , -7.5f * dt * shaping_speed()
                                     , shaping_radius()
                                     , shaping_formula()
                                     );
-            }
           }
           break;
 
         case smoothing:
-          if( mViewMode == eViewMode_3D )
+          if(mViewMode == eViewMode_3D)
           {
-            if( _currently_holding_shift )
-            {
+            if(_currently_holding_shift)
               _world->flattenTerrain ( xPos
                                      , zPos
                                      , yPos
@@ -702,16 +711,13 @@ namespace noggit
                                      , smoothing_radius()
                                      , smoothing_formula()
                                      );
-            }
-            else if( _currently_holding_control )
-            {
+            else if(_currently_holding_control)
               _world->blurTerrain ( xPos
                                   , zPos
                                   , pow( 0.2f, dt ) * smoothing_speed()
                                   , std::min( smoothing_radius(), 30.0 )
                                   , smoothing_formula()
                                   );
-            }
           }
           break;
 
@@ -728,8 +734,8 @@ namespace noggit
             {
 
                 if ( _currently_holding_shift
-                    && _currently_holding_control
-                    )
+                   && _currently_holding_control
+                   )
                 {
                     _world->eraseTextures (brush_position.x(), brush_position.y());
                 }
@@ -740,7 +746,7 @@ namespace noggit
 #endif
                 }
                 else if ( _currently_holding_shift
-                          && getSelectedTexture()
+                        && getSelectedTexture()
                         )
                 {
                     _world->paintTexture ( brush_position.x()
@@ -754,16 +760,14 @@ namespace noggit
                 }
             }
             else
-            {
-                _world->paintTexture ( brush_position.x()
-                                     , brush_position.y()
-                                     , brush (_texturing_radius, _texturing_hardness)
-                                     , _texturing_opacity * 255.0f
-                                     , 1.0f - pow ( 1.0f - (float)_texturing_pressure
-                                            , (float)dt * 10.0f)
-                                     , getSelectedTexture()
-                                     );
-            }
+              _world->paintTexture ( brush_position.x()
+                                   , brush_position.y()
+                                   , brush (_texturing_radius, _texturing_hardness)
+                                   , _texturing_opacity * 255.0f
+                                   , 1.0f - pow ( 1.0f - (float)_texturing_pressure
+                                   , (float)dt * 10.0f)
+                                   , getSelectedTexture()
+                                   );
 
           }
         break;
@@ -772,27 +776,27 @@ namespace noggit
           if (_currently_holding_shift)
           {
             // if there is no terain the projection mothod dont work. So get the cords by selection.
-            Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
+            Selection->data.mapchunk->getSelectionCoord(&xPos, &zPos);
             yPos = Selection->data.mapchunk->getSelectionHeight();
 
-            if( mViewMode == eViewMode_3D )
-              _world->removeHole( xPos, zPos );
-            //else if( mViewMode == eViewMode_2D )
+            if(mViewMode == eViewMode_3D)
+              _world->removeHole(xPos, zPos);
+            //else if(mViewMode == eViewMode_2D)
             //  _world->removeHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom + _world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom + _world->camera.z );
           }
-          else if( _currently_holding_control )
+          else if(_currently_holding_control)
           {
-            if( mViewMode == eViewMode_3D )
-              _world->addHole( xPos, zPos );
+            if(mViewMode == eViewMode_3D)
+              _world->addHole(xPos, zPos);
             //else if( mViewMode == eViewMode_2D )
             //  _world->addHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom+_world->camera.z );
           }
         break;
 
         case area_id_setting:
-          if( _currently_holding_shift  )
+          if(_currently_holding_shift)
           {
-            if( mViewMode == eViewMode_3D )
+            if(mViewMode == eViewMode_3D)
             {
               // draw the selected AreaId on current selected chunk
               nameEntry * lSelection = _world->GetCurrentSelection();
@@ -801,12 +805,12 @@ namespace noggit
               mtz = lSelection->data.mapchunk->mt->mPositionZ ;
               mcx = lSelection->data.mapchunk->px;
               mcy = lSelection->data.mapchunk->py;
-              _world->setAreaID( _selected_area_id, mtx,mtz, mcx, mcy );
+              _world->setAreaID(_selected_area_id, mtx,mtz, mcx, mcy);
             }
           }
-          else if( _currently_holding_control )
+          else if(_currently_holding_control)
           {
-            if( mViewMode == eViewMode_3D )
+            if(mViewMode == eViewMode_3D)
             {
               // pick areaID from chunk
               _selected_area_id = _world->GetCurrentSelection()->data.mapchunk->areaID;
@@ -819,45 +823,47 @@ namespace noggit
         break;
 
         case impassable_flag_setting:
-          if( _currently_holding_shift  )
+          if(_currently_holding_shift)
           {
-            if( mViewMode == eViewMode_3D ) _world->setFlag( true, xPos, zPos );
+            if(mViewMode == eViewMode_3D)
+              _world->setFlag( true, xPos, zPos );
           }
-          else if( _currently_holding_control )
+          else if(_currently_holding_control)
           {
-            if( mViewMode == eViewMode_3D ) _world->setFlag( false, xPos, zPos );
+            if(mViewMode == eViewMode_3D)
+              _world->setFlag( false, xPos, zPos );
           }
         break;
         }
       }
     }
 
-    if( mViewMode != eViewMode_2D )
+    if(mViewMode != eViewMode_2D)
     {
-      if( moving )
+      if(moving)
         _world->camera += dir * dt * movespd * moving;
-      if( strafing )
+      if(strafing)
       {
         ::math::vector_3d right = dir % ::math::vector_3d( 0.0f, 1.0f ,0.0f );
         right.normalize();
         _world->camera += right * dt * movespd * strafing;
       }
-      if( updown )
+      if(updown)
         _world->camera += ::math::vector_3d( 0.0f, dt * movespd * updown, 0.0f );
 
       _world->lookat = _world->camera + dir;
     }
     else
     {
-      if( moving )
+      if(moving)
         _world->camera.z ( _world->camera.z()
                          - dt * movespd * moving / (_tile_mode_zoom * 1.5f)
                          );
-      if( strafing )
+      if(strafing)
         _world->camera.x ( _world->camera.x()
                          + dt * movespd * strafing / (_tile_mode_zoom * 1.5f)
                          );
-      if( updown )
+      if(updown)
         _tile_mode_zoom *= pow( 2.0f, dt * updown * 4.0f );
 
       _tile_mode_zoom = qBound (0.1, _tile_mode_zoom, 2.0);
@@ -1404,6 +1410,11 @@ namespace noggit
     _automatically_update_terrain_selection = value;
   }
 
+  void MapView::toggle_object_to_ground (bool value)
+  {
+    _object_to_ground = value;
+  }
+
   /// --- Drawing toggles --------------------------------------------------------
 
   void MapView::toggle_doodad_drawing (bool value)
@@ -1443,7 +1454,7 @@ namespace noggit
   //! \todo these should be symetrical, so maybe combine.
   void MapView::increase_brush_size()
   {
-    switch( _current_terrain_editing_mode )
+    switch(_current_terrain_editing_mode)
     {
     case shaping:
       shaping_radius (shaping_radius() + 0.01);
@@ -1759,9 +1770,10 @@ namespace noggit
       av = qBound (-80.0f, av, 80.0f);
     }
 
-    if( _is_currently_moving_object )
+    if(_is_currently_moving_object)
     {
       // TODO find better formula ( it have still some missing x, y)
+      // Very slowed when snap_object_to_ground
       mh = -relative_move.x() / XSENS / 5.0f;
       mv = -relative_move.y() / YSENS / 5.0f;
     }
