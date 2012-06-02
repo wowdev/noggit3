@@ -89,6 +89,12 @@ namespace math
       return _data;
     }
 
+    template<size_t i>
+    vector_4d column() const
+    {
+      return ::math::vector_4d (_m[i][0], _m[i][1], _m[i][2], _m[i][3]);
+    }
+
   private:
     enum axis
     {
