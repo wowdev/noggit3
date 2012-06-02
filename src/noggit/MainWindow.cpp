@@ -44,8 +44,8 @@ namespace noggit
     //! todo windows has a problem with sharing the dummy (may sth about render contex)
 
     QMenu* fileMenu = menuBar()->addMenu (tr("&File"));
-    fileMenu->addAction (tr("Open maps"), this, SLOT(maps()));
-    fileMenu->addAction (tr("Open ProjectExplorer"), this, SLOT(projectExplorerOpen()));
+    fileMenu->addAction (tr("Open Maps"), this, SLOT(maps()));
+    fileMenu->addAction (tr("Open Project Explorer"), this, SLOT(projectExplorerOpen()));
     fileMenu->addSeparator();
     fileMenu->addAction (tr("Exit"), this, SLOT(close()));
 
