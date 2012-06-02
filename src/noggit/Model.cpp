@@ -56,7 +56,6 @@ void Model::finish_loading()
   vbuf = nbuf = tbuf = 0;
 
   globalSequences = 0;
-  animtime = 0;
   anim = 0;
   colors = 0;
   lights = 0;
@@ -428,12 +427,12 @@ void Model::initStatic( const noggit::mpq::file& f )
 
   ModelDrawList = glGenLists( 1 );
   glNewList( ModelDrawList, GL_COMPILE );
-    drawModel( /*false*/ );
+    drawModel( 0 );
   glEndList();
 
   SelectModelDrawList = glGenLists( 1 );
   glNewList( SelectModelDrawList, GL_COMPILE );
-    drawModelSelect();
+    drawModelSelect(0);
   glEndList();
 
   // clean up vertices, indices etc
@@ -576,7 +575,6 @@ void Model::animate(int _anim, int time)
   ModelAnimation &a = anims[anim];
   int tmax = a.length;
   time %= tmax;
-  animtime = time;
 
   if (animBones) {
     calcBones(anim, time);
@@ -638,7 +636,7 @@ void Model::animate(int _anim, int time)
   }
 }
 
-bool ModelRenderPass::init(Model *m)
+bool ModelRenderPass::init(Model *m, int animtime)
 {
   // May aswell check that we're going to render the geoset before doing all this crap.
   if (m->showGeosets[geoset]) {
@@ -654,10 +652,10 @@ bool ModelRenderPass::init(Model *m)
     // emissive colors
     if (color!=-1 && m->colors[color].color.uses(0))
     {
-      ::math::vector_3d c (m->colors[color].color.getValue (0, m->animtime));
+      ::math::vector_3d c (m->colors[color].color.getValue (0, animtime));
       if (m->colors[color].opacity.uses (m->anim))
       {
-        ocol.w (m->colors[color].opacity.getValue (m->anim, m->animtime));
+        ocol.w (m->colors[color].opacity.getValue (m->anim, animtime));
       }
 
       if (unlit)
@@ -679,7 +677,7 @@ bool ModelRenderPass::init(Model *m)
       if (m->transparency[opacity].trans.uses (0))
       {
         ocol.w ( ocol.w()
-               * m->transparency[opacity].trans.getValue (0, m->animtime)
+               * m->transparency[opacity].trans.getValue (0, animtime)
                );
       }
     }
@@ -849,7 +847,7 @@ void ModelUnhighlight()
 //  glDepthMask( GL_TRUE );
 }
 
-void Model::drawModel( /*bool unlit*/ )
+void Model::drawModel(int animtime)
 {
   // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
 
@@ -879,7 +877,7 @@ void Model::drawModel( /*bool unlit*/ )
   for (size_t i=0; i<passes.size(); ++i) {
     ModelRenderPass &p = passes[i];
 
-    if (p.init(this)) {
+    if (p.init(this, animtime)) {
       // we don't want to render completely transparent parts
 
       // render
@@ -915,7 +913,7 @@ void Model::drawModel( /*bool unlit*/ )
   glDepthMask(GL_TRUE);
 }
 
-void Model::drawModelSelect()
+void Model::drawModelSelect (int animtime)
 {
   // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
 
@@ -945,7 +943,7 @@ void Model::drawModelSelect()
   for (size_t i=0; i<passes.size(); ++i) {
     ModelRenderPass &p = passes[i];
 
-    if (p.init(this)) {
+    if (p.init(this, animtime)) {
       // we don't want to render completely transparent parts
 
       // render
@@ -1203,8 +1201,8 @@ void Model::draw (bool draw_fog, size_t time)
     }
 
 
-    lightsOn( GL_LIGHT4 );
-        drawModel( /*false*/ );
+    lightsOn( GL_LIGHT4, time );
+    drawModel(time);
     lightsOff( GL_LIGHT4 );
 
 
@@ -1234,7 +1232,7 @@ void Model::drawSelect (size_t time)
         animcalc = true;
       }
 
-    drawModelSelect();
+    drawModelSelect(time);
 
     //QUESTION: Do we need to drow this stuff for selectio??
     // draw particle systems
@@ -1248,7 +1246,7 @@ void Model::drawSelect (size_t time)
   }
 }
 
-void Model::lightsOn(opengl::light lbase)
+void Model::lightsOn(opengl::light lbase, int animtime)
 {
   // setup lights
   for (unsigned int i=0, l=lbase; i<header.nLights; ++i) lights[i].setup(animtime, l++);

@@ -477,7 +477,6 @@ void MapTile::draw ( bool draw_terrain_height_contour
                    , bool mark_impassable_chunks
                    , bool draw_area_id_overlay
                    , bool dont_draw_cursor
-                   , const float& animtime
                    , const Skies* skies
                    , const float& cull_distance
                    , const Frustum& frustum
@@ -496,7 +495,6 @@ void MapTile::draw ( bool draw_terrain_height_contour
                             , mark_impassable_chunks
                             , draw_area_id_overlay
                             , dont_draw_cursor
-                            , animtime
                             , skies
                             );
       }
@@ -564,14 +562,14 @@ void MapTile::drawMFBO()
   glEnd();
 }
 
-void MapTile::drawWater (const float& animtime, const Skies* skies)
+void MapTile::drawWater (const Skies* skies)
 {
   glDisable (GL_COLOR_MATERIAL);
   glDisable (GL_LIGHTING);
 
   foreach (const Liquid* liquid, mLiquids)
   {
-    liquid->draw (animtime, skies);
+    liquid->draw (skies);
   }
 
   glEnable (GL_LIGHTING);
@@ -579,9 +577,7 @@ void MapTile::drawWater (const float& animtime, const Skies* skies)
 }
 
 // This is for the 2D mode only.
-void MapTile::drawTextures ( const QRectF& chunks_to_draw
-                           , int animation_time
-                           ) const
+void MapTile::drawTextures (const QRectF& chunks_to_draw) const
 {
   glPushMatrix();
 
@@ -591,7 +587,7 @@ void MapTile::drawTextures ( const QRectF& chunks_to_draw
   {
     for (size_t i (chunks_to_draw.left()); i < chunks_to_draw.right(); ++i)
     {
-      mChunks[j][i]->drawTextures (animation_time);
+      mChunks[j][i]->drawTextures();
     }
   }
 

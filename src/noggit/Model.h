@@ -108,7 +108,7 @@ struct ModelRenderPass {
   ::math::vector_4d ocol;
   ::math::vector_4d ecol;
 
-  bool init(Model *m);
+  bool init(Model *m, int animtime);
   void deinit();
 
   bool operator< (const ModelRenderPass &m) const
@@ -172,8 +172,8 @@ class Model: public ManagedItem, public noggit::async::object
   ParticleSystem *particleSystems;
   RibbonEmitter *ribbons;
 
-  void drawModel( /*bool unlit*/ );
-  void drawModelSelect();
+  void drawModel (int animtime);
+  void drawModelSelect (int animtime);
 
   void initCommon(const noggit::mpq::file& f);
   bool isAnimated(const noggit::mpq::file& f);
@@ -189,7 +189,7 @@ class Model: public ManagedItem, public noggit::async::object
   void animate(int anim, int time);
   void calcBones(int anim, int time);
 
-  void lightsOn(opengl::light lbase);
+  void lightsOn(opengl::light lbase, int animtime);
   void lightsOff(opengl::light lbase);
 
 public:
@@ -215,7 +215,7 @@ public:
   float trans;
   bool animcalc;
   bool mPerInstanceAnimation;
-  int anim, animtime;
+  int anim;
 
   Model(const std::string& name, bool forceAnim=false);
   ~Model();

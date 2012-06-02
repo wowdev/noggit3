@@ -299,7 +299,6 @@ void WMO::draw ( World* world
                , int doodadset
                , const ::math::vector_3d &ofs
                , const float rot
-               , const float animtime
                , const float culldistance
                , bool boundingbox
                , bool groupboxes
@@ -337,7 +336,7 @@ void WMO::draw ( World* world
                               );
       }
 
-      groups[i].drawLiquid (world, draw_fog, animtime, fog_distance);
+      groups[i].drawLiquid (world, draw_fog, fog_distance);
     }
   }
 
@@ -578,7 +577,6 @@ void WMO::drawSelect (World* world
                      , int doodadset
                      , const ::math::vector_3d &ofs
                      , const float rot
-                     , const float animtime
                      , const float culldistance
                      , bool draw_doodads
                      , const Frustum& frustum
@@ -603,7 +601,7 @@ void WMO::drawSelect (World* world
                                    );
       }
 
-      groups[i].drawLiquid (world, false, animtime, 0.0f);
+      groups[i].drawLiquid (world, false, 0.0f);
     }
   }
 }
@@ -1204,7 +1202,6 @@ void WMOGroup::drawDoodadsSelect ( World* world
 
 void WMOGroup::drawLiquid ( World* world
                           , bool draw_fog
-                          , float animtime
                           , const float& fog_distance
                           )
 {
@@ -1226,7 +1223,7 @@ void WMOGroup::drawLiquid ( World* world
     glDisable(GL_ALPHA_TEST);
     glDepthMask(GL_TRUE);
     glColor4f(1,1,1,1);
-    lq->draw (animtime);
+    lq->draw();
     glDisable(GL_LIGHT2);
   }
 }

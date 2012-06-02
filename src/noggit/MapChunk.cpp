@@ -7,6 +7,7 @@
 #include <noggit/MapChunk.h>
 
 #include <algorithm>
+#include <ctime>
 #include <iostream>
 
 #include <QMap>
@@ -649,7 +650,7 @@ void MapChunk::loadTextures()
 
 
 
-void MapChunk::SetAnim (int anim, const float& anim_time) const
+void MapChunk::SetAnim (int anim) const
 {
   if (anim) {
     glActiveTexture(GL_TEXTURE0);
@@ -663,7 +664,7 @@ void MapChunk::SetAnim (int anim, const float& anim_time) const
     const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
     const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
 
-    const float f = ( static_cast<int>( anim_time * (spd/15.0f) ) % 1600) / 1600.0f;
+    const float f = ( static_cast<int>( clock() / CLOCKS_PER_SEC * (spd/15.0f) ) % 1600) / 1600.0f;
     glTranslatef(f*fdx, f*fdy, 0);
   }
 }
@@ -678,7 +679,7 @@ void MapChunk::RemoveAnim (int anim) const
 }
 
 
-void MapChunk::drawTextures (int animation_time)
+void MapChunk::drawTextures()
 {
   glColor4f(1.0f,1.0f,1.0f,1.0f);
 
@@ -699,7 +700,7 @@ void MapChunk::drawTextures (int animation_time)
     opengl::texture::disable_texture (1);
   }
 
-  SetAnim(animated[0], animation_time);
+  SetAnim(animated[0]);
   glBegin(GL_TRIANGLE_STRIP);
   glTexCoord2f(0.0f,texDetail);
   glVertex3f(static_cast<float>(px), py+1.0f, -2.0f);
@@ -732,7 +733,7 @@ void MapChunk::drawTextures (int animation_time)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    SetAnim(animated[i], animation_time);
+    SetAnim(animated[i]);
 
     glBegin(GL_TRIANGLE_STRIP);
     glMultiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
@@ -905,7 +906,7 @@ void MapChunk::CreateStrips()
     _hole_strip[iferget++] = i;
 }
 
-void MapChunk::drawPass (int anim, int animation_time)
+void MapChunk::drawPass (int anim)
 {
   if (anim)
   {
@@ -920,7 +921,7 @@ void MapChunk::drawPass (int anim, int animation_time)
     const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
     const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
     const int animspd = 200 * detail_size;
-    float f = ( (static_cast<int>(animation_time*(spd/15.0f))) % animspd) / static_cast<float>(animspd);
+    float f = ( (static_cast<int>(clock() / CLOCKS_PER_SEC *(spd/15.0f))) % animspd) / static_cast<float>(animspd);
     glTranslatef(f*fdx,f*fdy,0);
   }
 
@@ -1022,7 +1023,6 @@ void MapChunk::draw ( bool draw_terrain_height_contour
                     , bool mark_impassable_chunks
                     , bool draw_area_id_overlay
                     , bool dont_draw_cursor
-                    , const float& animtime
                     , const Skies* skies
                     )
 {
@@ -1052,7 +1052,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   }
 
   glEnable(GL_LIGHTING);
-  drawPass(animated[0], animtime);
+  drawPass(animated[0]);
 
   if (nTextures > 1U) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
@@ -1071,7 +1071,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
     glBindTexture( GL_TEXTURE_2D, alphamaps[i - 1] );
 
-    drawPass(animated[i], animtime);
+    drawPass(animated[i]);
   }
 
   if (nTextures > 1U) {

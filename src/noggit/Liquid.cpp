@@ -642,7 +642,7 @@ void CheckForGLError( const std::string& pLocation )
   }
 }
 
-void Liquid::draw (const float& animation_time, const Skies* skies) const
+void Liquid::draw (const Skies* skies) const
 {
   glEnable(GL_FRAGMENT_PROGRAM_ARB);
 
@@ -658,7 +658,7 @@ void Liquid::draw (const float& animation_time, const Skies* skies) const
   ::math::vector_3d col2;
   glDisable(GL_CULL_FACE);
   glDepthFunc(GL_LESS);
-  size_t texidx = (size_t)(animation_time / 60.0f) % _textures.size();
+  size_t texidx = (size_t)(clock() / CLOCKS_PER_SEC / 60.0f) % _textures.size();
 
   //glActiveTexture(GL_TEXTURE0);
   //glDisable(GL_TEXTURE_2D);

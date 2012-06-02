@@ -144,7 +144,7 @@ public:
   void setRender(int i, int j);
   void unsetRender(int i, int j);
 
-  void draw (const float&, const Skies* = NULL) const;
+  void draw (const Skies* = NULL) const;
 
 private:
   void recalcSize();
