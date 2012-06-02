@@ -140,11 +140,7 @@ namespace math
 
     inline vector_3d& normalize()
     {
-      const float repri (1.0f / length());
-      _x *= repri;
-      _y *= repri;
-      _z *= repri;
-      return *this;
+      return operator *= (1.0f / length());
     }
 
     inline operator float*()
