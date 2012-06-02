@@ -7,6 +7,7 @@
 #include <noggit/ModelInstance.h>
 
 #include <cassert>
+#include <ctime>
 
 #include <math/matrix_4x4.h>
 
@@ -23,6 +24,7 @@ ModelInstance::ModelInstance (World* world, Model *m)
   : model (m)
   , _world (world)
   , nameID (0xFFFFFFFF)
+  , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
   nameID = _world->selection_names().add (this);
 }
@@ -31,6 +33,7 @@ ModelInstance::ModelInstance (World* world, Model *m, noggit::mpq::file* f)
   : model (m)
   , _world (world)
   , nameID (0xFFFFFFFF)
+  , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
   f->read (&d1, 4);
   f->read (pos, 12);
@@ -45,6 +48,7 @@ ModelInstance::ModelInstance (World* world, Model *m, ENTRY_MDDF *d)
   : model (m)
   , _world (world)
   , nameID (0xFFFFFFFF)
+  , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
   d1 = d->uniqueID;
   pos = ::math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
@@ -67,6 +71,7 @@ ModelInstance::ModelInstance ( World* world
   , sc (scale)
   , lcol (lighting_color)
   , _world(world)
+  , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
   nameID = _world->selection_names().add (this);
 }
@@ -233,6 +238,11 @@ bool ModelInstance::is_visible ( const float& cull_distance
       && ((position - camera).length() < (cull_distance + radius));
 }
 
+size_t ModelInstance::time_since_spawn() const
+{
+  return (clock() / CLOCKS_PER_SEC) - _spawn_timestamp;
+}
+
 void ModelInstance::draw (bool draw_fog) const
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
@@ -243,7 +253,7 @@ void ModelInstance::draw (bool draw_fog) const
   glRotatef (dir.z(), 1.0f, 0.0f, 0.0f);
   glScalef (sc, sc, sc);
 
-  model->draw (draw_fog);
+  model->draw (draw_fog, time_since_spawn());
 
   const bool is_selected ( _world->IsSelection (eEntry_Model)
                         && _world->GetCurrentSelection()->data.model->d1 == d1
@@ -290,7 +300,7 @@ void ModelInstance::draw_for_selection()
   glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
   glScalef( sc, sc, sc );
 
-  model->drawSelect();
+  model->drawSelect (time_since_spawn());
 }
 
 void ModelInstance::draw2() const
@@ -302,7 +312,7 @@ void ModelInstance::draw2() const
   glMultMatrixf (::math::matrix_4x4::new_rotation_matrix (_wmo_doodad_rotation));
   glScalef (sc, -sc, -sc);
 
-  model->draw (_world);
+  model->draw (_world, time_since_spawn());
 }
 
 void ModelInstance::draw2Select() const
@@ -313,7 +323,7 @@ void ModelInstance::draw2Select() const
   glMultMatrixf (::math::matrix_4x4::new_rotation_matrix (_wmo_doodad_rotation));
   glScalef (sc, -sc, -sc);
 
-  model->drawSelect();
+  model->drawSelect (time_since_spawn());
 }
 
 void ModelInstance::resetDirection()

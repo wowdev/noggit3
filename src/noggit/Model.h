@@ -186,7 +186,7 @@ class Model: public ManagedItem, public noggit::async::object
   size_t nIndices;
   std::vector<ModelRenderPass> passes;
 
-  void animate(int anim);
+  void animate(int anim, int time);
   void calcBones(int anim, int time);
 
   void lightsOn(opengl::light lbase);
@@ -219,9 +219,9 @@ public:
 
   Model(const std::string& name, bool forceAnim=false);
   ~Model();
-  void draw (bool draw_fog);
+  void draw (bool draw_fog, size_t time);
   void drawTileMode();
-  void drawSelect();
+  void drawSelect(size_t time);
   void updateEmitters(float dt);
 
   friend struct ModelRenderPass;

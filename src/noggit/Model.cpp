@@ -17,8 +17,6 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 
-int globalTime = 0;
-
 Model::Model(const std::string& filename, bool _forceAnim)
 : ManagedItem( )
 , forceAnim(_forceAnim)
@@ -572,17 +570,16 @@ void Model::calcBones(int _anim, int time)
   }
 }
 
-void Model::animate(int _anim)
+void Model::animate(int _anim, int time)
 {
   anim = _anim;
   ModelAnimation &a = anims[anim];
-  int t = globalTime; //(int)(gWorld->animtime /* / a.playSpeed*/);
   int tmax = a.length;
-  t %= tmax;
-  animtime = t;
+  time %= tmax;
+  animtime = time;
 
   if (animBones) {
-    calcBones(anim, t);
+    calcBones(anim, time);
   }
 
   if (animGeometry) {
@@ -626,17 +623,17 @@ void Model::animate(int _anim)
 
   for (size_t i=0; i<header.nParticleEmitters; ++i) {
     // random time distribution for teh win ..?
-    int pt = (t + static_cast<int>(tmax*particleSystems[i].tofs)) % tmax;
+    int pt = (time + static_cast<int>(tmax*particleSystems[i].tofs)) % tmax;
     particleSystems[i].setup(anim, pt);
   }
 
   for (size_t i=0; i<header.nRibbonEmitters; ++i) {
-    ribbons[i].setup(anim, t);
+    ribbons[i].setup(anim, time);
   }
 
   if (animTextures) {
     for (size_t i=0; i<header.nTexAnims; ++i) {
-      texanims[i].calc(anim, t);
+      texanims[i].calc(anim, time);
     }
   }
 }
@@ -1183,7 +1180,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 }
 
 
-void Model::draw (bool draw_fog)
+void Model::draw (bool draw_fog, size_t time)
 {
   if(!finished_loading())
     return;
@@ -1201,7 +1198,7 @@ void Model::draw (bool draw_fog)
   {
     if( !animcalc || mPerInstanceAnimation )
     {
-      animate( 0 );
+      animate(0, time);
       animcalc = true;
     }
 
@@ -1220,7 +1217,7 @@ void Model::draw (bool draw_fog)
   }
 }
 
-void Model::drawSelect()
+void Model::drawSelect (size_t time)
 {
   if (!_finished)
   {
@@ -1233,7 +1230,7 @@ void Model::drawSelect()
   {
       if( !animcalc || mPerInstanceAnimation )
       {
-        animate( 0 );
+        animate(0, time);
         animcalc = true;
       }
 

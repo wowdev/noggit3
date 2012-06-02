@@ -1557,11 +1557,6 @@ void World::advance_times ( const float& seconds
 {
   animtime += seconds;
   time += time_of_day_speed_factor * seconds;
-
-  //! \todo  This should  not even  exist but  be a  renderer internal
-  //! variable   that   gets  incremented   by   getTicks,  not   from
-  //! outside. Only time of day is relevant and should be stored.
-  globalTime = animtime;
 }
 
 void World::tick (float dt)

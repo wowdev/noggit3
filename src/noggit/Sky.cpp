@@ -6,6 +6,7 @@
 #include <noggit/Sky.h>
 
 #include <algorithm>
+#include <ctime>
 #include <string>
 
 #include <math/vector_2d.h>
@@ -341,7 +342,7 @@ bool Skies::drawSky (World* world, const ::math::vector_3d &pos) const
     //! \todo Also disable it again?
     glEnable (GL_TEXTURE_2D);
     stars->trans = ni;
-    stars->draw (world);
+    stars->draw (world, clock() / CLOCKS_PER_SEC);
   }
 
   glPopMatrix();

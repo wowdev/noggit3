@@ -7,6 +7,7 @@
 #define ANIMATED_H
 
 #include <cassert>
+#include <ctime>
 #include <map>
 #include <vector>
 
@@ -15,10 +16,6 @@
 
 #include <noggit/ModelHeaders.h>
 #include <noggit/mpq/file.h>
-
-//! \todo Pass this in somehow and don't define as extern.
-// global time for global sequences
-extern int globalTime;
 
 namespace Animation
 {
@@ -107,7 +104,8 @@ namespace Animation
       {
         if( _globalSequences[_globalSequenceID] )
         {
-          time = globalTime % _globalSequences[_globalSequenceID];
+          time = clock() / CLOCKS_PER_SEC
+               % _globalSequences[_globalSequenceID];
         }
         else
         {
