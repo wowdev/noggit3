@@ -148,35 +148,15 @@ private:
 
 public:
 
+  void advance_times ( const float& seconds
+                     , const float& time_of_day_speed_factor
+                     );
+
   //! gets the current MapID
   /*!
   \return the MapID found in dbcs
   */
   const unsigned int getMapID() const;
-
-  //! gets the current animationtime
-  /*!
-  \return the animationtime
-  */
-  const float getAnimtime() const;
-
-  //! sets the animationtime to newTime
-  /*!
-  \param newTime
-  */
-  void setAnimtime(float newTime);
-
-  //! gets the current time
-  /*!
-  \return the time
-  */
-  const float getTime() const;
-
-  //! sets the time to newTime
-  /*!
-  \param newTime
-  */
-  void setTime(float newTime);
 
   void set_camera_above_terrain();
 

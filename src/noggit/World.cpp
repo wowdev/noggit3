@@ -1546,7 +1546,20 @@ void World::drawSelection ( bool draw_wmo_doodads
   }
 }
 
-void World::tick(float dt)
+void World::advance_times ( const float& seconds
+                          , const float& time_of_day_speed_factor
+                          )
+{
+  animtime += seconds;
+  time += time_of_day_speed_factor * seconds;
+
+  //! \todo  This should  not even  exist but  be a  renderer internal
+  //! variable   that   gets  incremented   by   getTicks,  not   from
+  //! outside. Only time of day is relevant and should be stored.
+  globalTime = animtime;
+}
+
+void World::tick (float dt)
 {
   enterTile(ex,ez);
 
@@ -2233,26 +2246,6 @@ void World::setFlag( bool to, float x, float z)
 const unsigned int World::getMapID() const
 {
   return mMapId;
-}
-
-const float World::getAnimtime() const
-{
-    return animtime;
-}
-
-void World::setAnimtime(float newTime)
-{
-    animtime = newTime;
-}
-
-const float World::getTime() const
-{
-    return time;
-}
-
-void World::setTime(float newTime)
-{
-    time = newTime;
 }
 
 void World::moveHeight(int x, int z)
