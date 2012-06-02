@@ -31,6 +31,7 @@ namespace noggit
       void setProjectPath();
       void setAntialiasing (bool value);
       void setMaximizedShow (bool value);
+      void setMaximizedAppShow (bool value);
       void setProjectExplorerShow (bool value);
       void setViewDistance (int value);
 
@@ -50,6 +51,7 @@ namespace noggit
 
       QCheckBox* antialiasingCheckBox;
       QCheckBox* maximizedShowCheckBox;
+      QCheckBox* maximizedAppShowCheckBox;
       QCheckBox* projectExplorerShowCheckBox;
     };
   }
