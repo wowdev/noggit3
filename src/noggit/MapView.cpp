@@ -58,7 +58,7 @@ namespace noggit
     , ah (ah0)
     , av (av0)
     , _GUIDisplayingEnabled (true)
-    , mTimespeed (0.0f)
+    , mTimespeed (1.0f)
     , _world (world)
     , _minimap (new ui::minimap_widget (NULL))
     , _model_spawner (new noggit::ui::model_spawner (NULL,shared))
@@ -863,10 +863,7 @@ namespace noggit
       _tile_mode_zoom = qBound (0.1, _tile_mode_zoom, 2.0);
     }
 
-    _world->setTime(_world->getTime() + mTimespeed * dt );
-    _world->setAnimtime( _world->getAnimtime() + dt * 1000.0f );
-    globalTime = static_cast<int>( _world->getAnimtime() );
-
+    _world->advance_times (dt * 1000.0f, mTimespeed);
     _world->tick(dt);
 
 #ifdef __OBSOLETE_GUI_ELEMENTS
@@ -1352,7 +1349,7 @@ namespace noggit
     _GUIDisplayingEnabled = !_GUIDisplayingEnabled;
   }
 
-  static const qreal time_speed_step_length (90.0);
+  static const qreal time_speed_step_length (0.01);
   void MapView::increase_time_speed()
   {
     mTimespeed += time_speed_step_length;
