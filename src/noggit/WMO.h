@@ -27,8 +27,7 @@ namespace opengl
   class texture;
 }
 
-struct Frustum;
-
+class Frustum;
 class WMO;
 class WMOGroup;
 class WMOInstance;

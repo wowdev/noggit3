@@ -18,9 +18,9 @@ enum SIDES
   SIDES_MAX,
 };
 
-struct Frustum
+class Frustum
 {
-  class Plane
+  class plane
   {
   public:
     void normalize()

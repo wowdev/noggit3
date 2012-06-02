@@ -30,6 +30,7 @@
 
 #include <noggit/blp_texture.h>
 #include <noggit/DBC.h>
+#include <noggit/Frustum.h> // Frustum
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>

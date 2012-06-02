@@ -13,6 +13,7 @@
 #include <opengl/primitives.h>
 #include <opengl/scoped.h>
 
+#include <noggit/Frustum.h> // Frustum
 #include <noggit/Log.h>
 #include <noggit/Model.h>
 #include <noggit/World.h>
