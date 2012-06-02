@@ -27,13 +27,15 @@ namespace opengl
   class texture;
 }
 
-class Frustum;
+struct Frustum;
+
 class WMO;
 class WMOGroup;
 class WMOInstance;
 class WMOManager;
 class Liquid;
 class Model;
+
 namespace noggit
 {
   namespace mpq

@@ -8,10 +8,12 @@
 #include <math/vector_3d.h>
 #include <math/quaternion.h>
 
-class Frustum;
 class Model;
 class World;
+
 struct ENTRY_MDDF;
+struct Frustum;
+
 namespace noggit
 {
   namespace mpq
@@ -23,7 +25,7 @@ namespace noggit
 class ModelInstance
 {
 public:
-  Model *model;
+  Model* model;
 
 private:
   unsigned int nameID;
