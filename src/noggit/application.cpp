@@ -80,7 +80,10 @@ namespace noggit
     OpenDBs();
 
     MainWindow* mainwindow = new MainWindow;
-    mainwindow->show();
+    if (_settings->value ("maximizedAppShow").toBool() == true)
+      mainwindow->showMaximized();
+    else
+      mainwindow->show();
   }
 
   application::~application()
@@ -131,6 +134,7 @@ namespace noggit
     bool inFullscreen (_settings->value ("fullscreen", false).toBool());
     bool doAntiAliasing (_settings->value ("antialiasing", true).toBool());
     bool doMaximizedShow (_settings->value ("maximizedShow", true).toBool());
+    bool doMaximizedAppShow (_settings->value ("maximizedAppShow", true).toBool());
     bool doProjectExplorerShow (_settings->value ("projectExplorerShow", false).toBool());
     qreal view_distance (_settings->value ("view_distance", 2048.0).toReal());
 
@@ -142,6 +146,8 @@ namespace noggit
         doAntiAliasing = false;
       else if(argument == "-nomaximizedshow" || argument == "--nomaximizedshow")
         doMaximizedShow = false;
+      else if(argument == "-nomaximizedappshow" || argument == "--nomaximizedappshow")
+        doMaximizedAppShow = false;
       else if(argument == "-projectexplorershow" || argument == "--projectexplorershow")
         doProjectExplorerShow = true;
       else
@@ -165,6 +171,7 @@ namespace noggit
     _settings->setValue ("fullscreen", inFullscreen);
     _settings->setValue ("antialiasing", doAntiAliasing);
     _settings->setValue ("maximizedShow", doMaximizedShow);
+    _settings->setValue ("maximizedAppShow", doMaximizedAppShow);
     _settings->setValue ("projectExplorerShow", doProjectExplorerShow);
     _settings->setValue ("view_distance", view_distance);
     _settings->sync();

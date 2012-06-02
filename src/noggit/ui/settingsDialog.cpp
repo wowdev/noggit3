@@ -47,6 +47,10 @@ namespace noggit
       if (noggit::app().setting("maximizedShow").toBool())
         maximizedShowCheckBox->setChecked(true);
 
+      maximizedAppShowCheckBox = new QCheckBox(tr("Maximized App on Start"));
+      if (noggit::app().setting("maximizedAppShow").toBool())
+        maximizedAppShowCheckBox->setChecked(true);
+
       projectExplorerShowCheckBox = new QCheckBox(tr("Open ProjectExplorer on Start"));
       if (noggit::app().setting("projectExplorerShow").toBool())
         projectExplorerShowCheckBox->setChecked(true);
@@ -72,7 +76,8 @@ namespace noggit
       _mainConfigurationSettingsWindow->addWidget(changeProjectPathButton, 1, 3);
       _mainConfigurationSettingsWindow->addWidget(antialiasingCheckBox, 2, 0);
       _mainConfigurationSettingsWindow->addWidget(maximizedShowCheckBox, 2, 1);
-      _mainConfigurationSettingsWindow->addWidget(projectExplorerShowCheckBox, 3, 0);
+      _mainConfigurationSettingsWindow->addWidget(maximizedAppShowCheckBox, 3, 0);
+      _mainConfigurationSettingsWindow->addWidget(projectExplorerShowCheckBox, 3, 1);
       _mainConfigurationSettingsWindow->addWidget(_viewDistanceLabel, 4, 0);
       _mainConfigurationSettingsWindow->addWidget(viewDistanceSlider, 4, 1);
       _mainConfigurationSettingsWindow->addWidget(viewDistanceSpinBox, 4, 2, 1, 2);
@@ -93,6 +98,7 @@ namespace noggit
 
       connect(antialiasingCheckBox, SIGNAL (toggled (bool)), SLOT (setAntialiasing (bool)));
       connect(maximizedShowCheckBox, SIGNAL (toggled (bool)), SLOT (setMaximizedShow (bool)));
+      connect(maximizedAppShowCheckBox, SIGNAL (toggled (bool)), SLOT (setMaximizedAppShow (bool)));
       connect(projectExplorerShowCheckBox, SIGNAL (toggled (bool)), SLOT (setProjectExplorerShow (bool)));
       connect(viewDistanceSlider, SIGNAL (valueChanged (int)), SLOT (setViewDistance (int)));
 
@@ -168,6 +174,11 @@ namespace noggit
     void settingsDialog::setMaximizedShow(bool value)
     {
       noggit::app().setting("maximizedShow", value);
+    }
+
+    void settingsDialog::setMaximizedAppShow(bool value)
+    {
+      noggit::app().setting("maximizedAppShow", value);
     }
 
     void settingsDialog::setProjectExplorerShow(bool value)
