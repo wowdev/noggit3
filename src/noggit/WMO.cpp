@@ -22,6 +22,7 @@
 #include <noggit/async/loader.h>
 #include <noggit/application.h>
 #include <noggit/blp_texture.h>
+#include <noggit/Frustum.h> // Frustum
 #include <noggit/Liquid.h>
 #include <noggit/Log.h> // LogDebug
 #include <noggit/ModelManager.h> // ModelManager

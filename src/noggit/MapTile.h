@@ -16,6 +16,7 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/World.h> // instances types
 
+class Frustum;
 class Liquid;
 class World;
 class MapChunk;

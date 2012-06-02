@@ -11,11 +11,11 @@
 
 #include <math/vector_3d.h>
 
+class Frustum;
 class WMO;
 class World;
 
 struct ENTRY_MODF;
-struct Frustum;
 
 namespace noggit
 {

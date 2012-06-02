@@ -19,6 +19,7 @@
 
 #include <noggit/blp_texture.h>
 #include <noggit/Brush.h>
+#include <noggit/Frustum.h> // Frustum
 #include <noggit/Liquid.h>
 #include <noggit/Log.h>
 #include <noggit/MapHeaders.h>

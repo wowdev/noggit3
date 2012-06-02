@@ -20,6 +20,7 @@ namespace noggit
   }
 }
 class brush;
+class Frustum;
 class World;
 class Skies;
 

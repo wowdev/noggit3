@@ -14,7 +14,6 @@
 
 #include <QImage>
 
-#include <noggit/Frustum.h> // Frustum
 #include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h> // nameEntryManager
 #include <noggit/Sky.h> // Skies, OutdoorLighting, OutdoorLightStats
