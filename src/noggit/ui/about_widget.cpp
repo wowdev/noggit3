@@ -2,6 +2,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
+// Glararan <glararan@glararan.eu>
 
 #include <noggit/ui/about_widget.h>
 
@@ -17,8 +18,8 @@ namespace noggit
     about_widget::about_widget (QWidget* parent)
       : QWidget (parent)
     {
-      setMinimumSize (400, 230);
-      setMaximumSize (400, 230);
+      setMinimumSize (500, 260);
+      setMaximumSize (500, 260);
 
       setWindowTitle (tr ("About Noggit"));
 
@@ -30,7 +31,7 @@ namespace noggit
       QLabel* icon (new QLabel (this));
       QLabel* title (new QLabel (tr ("Noggit Studio"), this));
       QLabel* description (new QLabel (tr ("a WoW map editor for 3.3.5a"), this));
-      QLabel* authors (new QLabel (tr ("Maintained by %1").arg ("Ufoz, [...], Cryect, Beket, Schlumpf, Tigurius, Steff, Garthog, Glararan"), this));
+      QLabel* authors (new QLabel (tr ("Maintained by %1").arg ("Ufoz, [...], Cryect, Beket, Schlumpf, Tigurius, Steff, Garthog, Glararan, Hanfer & Mjollna"), this));
       QLabel* copyright (new QLabel (trUtf8 ("World of Warcraft © Blizzard Entertainment"), this));
       QLabel* product_version (new QLabel (helper::repository::revision_string(), this));
       QLabel* date (new QLabel (tr ("%1, %2").arg (__DATE__).arg (__TIME__), this));
@@ -44,19 +45,19 @@ namespace noggit
       title->move (73, 24);
       title->setFont (skurri32);
       title->setPalette (p);
-      description->move (155, 57);
+      description->move (160, 70);
       description->setFont (friz16);
       description->setPalette (p);
-      authors->move (20, 100);
+      authors->move (20, 125);
       authors->setWordWrap (true);
       authors->setFont (friz16);
       authors->setPalette (p);
 
-      copyright->move (20, 170);
+      copyright->move (20, 205);
       copyright->setPalette (p);
-      product_version->move (20, 190);
+      product_version->move (20, 220);
       product_version->setPalette (p);
-      date->setGeometry (0, 190, 375, 16);
+      date->setGeometry (10, 220, 400, 16);
       date->setAlignment (Qt::AlignRight | Qt::AlignBottom);
       date->setPalette (p);
     }
