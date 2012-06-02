@@ -55,7 +55,8 @@ namespace noggit
 
     setCentralWidget (mdiArea);
 
-    createDockWidgets();
+    if(noggit::app().setting("projectExplorerShow").toBool() == true)
+      createDockWidgets();
 
     statusBar()->showMessage (tr("Ready"));
     currentToolBar = addToolBar (tr("File"));
