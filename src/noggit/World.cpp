@@ -1314,7 +1314,12 @@ void World::draw ( size_t flags
 
       glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
       for( std::map<int, ModelInstance*>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
-        it->second->draw (flags & FOG, frustum);
+      {
+        if (it->second->is_visible (mapdrawdistance, frustum, camera))
+        {
+          it->second->draw (flags & FOG);
+        }
+      }
 
       //drawModelList();
     }
@@ -1497,7 +1502,10 @@ void World::drawSelection ( bool draw_wmo_doodads
         ; ++it
         )
     {
-      it->second->draw_for_selection (frustum);
+      if (it->second->is_visible (mapdrawdistance, frustum, camera))
+      {
+        it->second->draw_for_selection();
+      }
     }
   }
 

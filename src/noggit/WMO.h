@@ -95,12 +95,16 @@ public:
                    , bool draw_fog
                    , const float& fog_distance
                    , const Frustum& frustum
+                   , const float& cull_distance
+                   , const ::math::vector_3d& camera
                    );
   void drawDoodadsSelect ( World* world
                          , unsigned int doodadset
                          , const ::math::vector_3d& ofs
                          , const float rot
                          , const Frustum& frustum
+                         , const float& cull_distance
+                         , const ::math::vector_3d& camera
                          );
   void setupFog ( World* world
                 , bool draw_fog
@@ -231,7 +235,8 @@ public:
                   , const ::math::vector_3d& ofs
                   , const float rot
                   , const float animtime
-                  , const float culldistance, bool draw_doodads
+                  , const float culldistance
+                  , bool draw_doodads
                   , const Frustum& frustum
                   , const ::math::vector_3d& camera
                   ) const;
