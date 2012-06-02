@@ -65,15 +65,15 @@ public:
 
   bool GetVertex( float x, float z, ::math::vector_3d *V );
 
-  void saveTile ( const ModelInstances_type::const_iterator& models_begin
-                , const ModelInstances_type::const_iterator& models_end
-                , const WMOInstances_type::const_iterator& wmos_begin
-                , const WMOInstances_type::const_iterator& wmos_end
+  void saveTile ( const World::model_instances_type::const_iterator& models_begin
+                , const World::model_instances_type::const_iterator& models_end
+                , const World::wmo_instances_type::const_iterator& wmos_begin
+                , const World::wmo_instances_type::const_iterator& wmos_end
                 );
-  void saveTileCata ( const ModelInstances_type::const_iterator& models_begin
-                    , const ModelInstances_type::const_iterator& models_end
-                    , const WMOInstances_type::const_iterator& wmos_begin
-                    , const WMOInstances_type::const_iterator& wmos_end
+  void saveTileCata ( const World::model_instances_type::const_iterator& models_begin
+                    , const World::model_instances_type::const_iterator& models_end
+                    , const World::wmo_instances_type::const_iterator& wmos_begin
+                    , const World::wmo_instances_type::const_iterator& wmos_end
                     );
 
   bool isTile( int pX, int pZ );
