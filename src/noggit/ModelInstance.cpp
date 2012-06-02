@@ -89,14 +89,6 @@ ModelInstance::~ModelInstance()
   return lTemp;
 }
 
-static const float doodaddrawdistance2 (700.0f * 700.0f);
-
-#define MAYBE_DONT_DRAW \
-  ::math::vector_3d tpos (ofs + pos); \
-  ::math::rotate (ofs.x(), ofs.z(), &tpos.x(), &tpos.z(), rot); \
-  if ( (tpos - _world->camera).length_squared() > (doodaddrawdistance2 * model->rad * sc) || !frustum.intersectsSphere (tpos, model->rad * sc)) return
-
-
 void ModelInstance::draw_selection_indicator() const
 {
   ::opengl::scoped::bool_setter<GL_FOG, GL_FALSE> fog_setter;
@@ -220,12 +212,29 @@ void ModelInstance::draw_selection_indicator() const
 
 }
 
-void ModelInstance::draw (bool draw_fog, const Frustum& frustum)
-{
-  static const ::math::vector_3d ofs (0.0f, 0.0f, 0.0f);
-  static const float rot (0.0);
-  MAYBE_DONT_DRAW;
 
+bool ModelInstance::is_visible ( const float& cull_distance
+                               , const Frustum& frustum
+                               , const ::math::vector_3d& camera
+                               , const ::math::vector_3d& offset
+                               , const float& rotation
+                               ) const
+{
+  const ::math::vector_3d& base_position (pos);
+  const float radius (model->rad * sc);
+
+  ::math::vector_3d position (base_position + offset);
+  ::math::rotate ( offset.x(), offset.z()
+                 , &position.x(), &position.z()
+                 , rotation
+                 );
+
+  return frustum.intersectsSphere (position, radius)
+      && ((position - camera).length() < (cull_distance + radius));
+}
+
+void ModelInstance::draw (bool draw_fog)
+{
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
   glTranslatef (pos.x(), pos.y(), pos.z());
@@ -262,12 +271,8 @@ void ModelInstance::draw (bool draw_fog, const Frustum& frustum)
   model->draw ();
 }*/
 
-void ModelInstance::draw_for_selection(const Frustum& frustum)
+void ModelInstance::draw_for_selection()
 {
-  static const ::math::vector_3d ofs (0.0f, 0.0f, 0.0f);
-  static const float rot (0.0);
-  MAYBE_DONT_DRAW;
-
   if(!_world->selection_names().findEntry(nameID) || nameID == 0xFFFFFFFF)
   {
     LogDebug<<"Old item" << nameID << "not found create new one"<<std::endl;
@@ -288,13 +293,8 @@ void ModelInstance::draw_for_selection(const Frustum& frustum)
   model->drawSelect();
 }
 
-void ModelInstance::draw2 ( const ::math::vector_3d& ofs
-                          , const float rot
-                          , const Frustum& frustum
-                          )
+void ModelInstance::draw2()
 {
-  MAYBE_DONT_DRAW;
-
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
   //! \todo This could all be done in one composed matrix.
@@ -305,13 +305,8 @@ void ModelInstance::draw2 ( const ::math::vector_3d& ofs
   model->draw (_world);
 }
 
-void ModelInstance::draw2Select ( const ::math::vector_3d& ofs
-                                , const float rot
-                                , const Frustum& frustum
-                                )
+void ModelInstance::draw2Select()
 {
-  MAYBE_DONT_DRAW;
-
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
   glTranslatef (pos.x(), pos.y(), pos.z());

@@ -58,18 +58,20 @@ public:
                 );
   ~ModelInstance();
 
-  void draw (bool draw_fog, const Frustum& frustum);
-  void draw_for_selection (const Frustum& frustum);
+  bool is_visible ( const float& cull_distance
+                  , const Frustum& frustum
+                  , const ::math::vector_3d& camera
+                  , const ::math::vector_3d& offset = ::math::vector_3d()
+                  , const float& rotation = 0.0f
+                  ) const;
 
-  void drawMapTile();
-//  void drawHighlight();
-  void draw2 ( const ::math::vector_3d& ofs
-             , const float rot
-             , const Frustum& frustum);
-  void draw2Select ( const ::math::vector_3d& ofs
-                   , const float rot
-                   , const Frustum& frustum
-                   );
+  void draw (bool draw_fog);
+  void draw_for_selection();
+
+  void draw2();
+  void draw2Select();
+
+//  void drawMapTile();
 
   void resetDirection();
 

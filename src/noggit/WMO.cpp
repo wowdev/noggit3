@@ -331,6 +331,8 @@ void WMO::draw ( World* world
                               , draw_fog
                               , fog_distance
                               , frustum
+                              , culldistance
+                              , camera
                               );
       }
 
@@ -590,7 +592,14 @@ void WMO::drawSelect (World* world
 
       if (draw_doodads)
       {
-        groups[i].drawDoodadsSelect(world, doodadset, ofs, rot, frustum);
+        groups[i].drawDoodadsSelect( world
+                                   , doodadset
+                                   , ofs
+                                   , rot
+                                   , frustum
+                                   , culldistance
+                                   , camera
+                                   );
       }
 
       groups[i].drawLiquid (world, false, animtime, 0.0f);
@@ -1027,11 +1036,17 @@ bool WMOGroup::is_visible ( const ::math::vector_3d& offset
                           , const ::math::vector_3d& camera
                           ) const
 {
-  ::math::vector_3d pos (center + offset);
-  ::math::rotate (offset.x(), offset.z(), &pos.x(), &pos.z(), rotation);
+  const ::math::vector_3d& base_position (center);
+  const float& radius (rad);
 
-  return frustum.intersectsSphere (pos, rad)
-      && (((pos - camera).length() - rad) < cull_distance);
+  ::math::vector_3d position (base_position + offset);
+  ::math::rotate ( offset.x(), offset.z()
+                 , &position.x(), &position.z()
+                 , rotation
+                 );
+
+  return frustum.intersectsSphere (position, radius)
+      && ((position - camera).length() < (cull_distance + radius));
 }
 
 void WMOGroup::draw ( World* world
@@ -1098,6 +1113,8 @@ void WMOGroup::drawDoodads ( World* world
                            , bool draw_fog
                            , const float& fog_distance
                            , const Frustum& frustum
+                           , const float& cull_distance
+                           , const ::math::vector_3d& camera
                            )
 {
   if (nDoodads==0) return;
@@ -1126,7 +1143,10 @@ void WMOGroup::drawDoodads ( World* world
           WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
         }
         setupFog(world, draw_fog, fog_distance);
-        mi.draw2 (ofs, rot, frustum);
+        if (mi.is_visible (cull_distance, frustum, camera, ofs, rot))
+        {
+          mi.draw2();
+        }
       }
   }
 
@@ -1142,6 +1162,8 @@ void WMOGroup::drawDoodadsSelect ( World* world
                                  , const ::math::vector_3d& ofs
                                  , const float rot
                                  , const Frustum& frustum
+                                 , const float& cull_distance
+                                 , const ::math::vector_3d& camera
                                  )
 {
   if (nDoodads==0) return;
@@ -1166,8 +1188,10 @@ void WMOGroup::drawDoodadsSelect ( World* world
         if (!outdoorLights) {
           WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
         }
-
-        mi.draw2Select (ofs, rot, frustum);
+        if (mi.is_visible (cull_distance, frustum, camera, ofs, rot))
+        {
+          mi.draw2Select();
+        }
       }
   }
 
