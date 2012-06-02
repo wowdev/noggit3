@@ -1019,17 +1019,18 @@ void WMOGroup::draw ( World* world
   visible = true;
   setupFog(world, draw_fog);
 
-  if (hascv) {
+  if (hascv)
+  {
     glDisable(GL_LIGHTING);
     world->outdoorLights(false);
-  } else
-  {
-
-  if (hasSkies)
+  } 
+  else if (hasSkies)
   {
     world->outdoorLights(true);
   }
-  else glDisable(GL_LIGHTING);
+  else
+  {
+    glDisable(GL_LIGHTING);
   }
 
 
