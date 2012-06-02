@@ -213,8 +213,7 @@ World::World( const std::string& name )
   , animtime( 0 )
   , time( 1450 )
   , basename( name )
-  , fogdistance( 777.0f )
-  , culldistance( fogdistance )
+  , culldistance( 777.0f )
   , skies( NULL )
   , mHasAGlobalWMO( false )
   , noadt( false )
@@ -1010,7 +1009,7 @@ void World::outdoorLights(bool on)
   }
 }
 
-void World::setupFog (bool draw_fog)
+void World::setupFog (bool draw_fog, const float& fog_distance)
 {
   if (draw_fog)
   {
@@ -1018,17 +1017,16 @@ void World::setupFog (bool draw_fog)
     //float fogdist = 357.0f; // minimum draw distance in wow
     //float fogdist = 777.0f; // maximum draw distance in wow
 
-    float fogdist = fogdistance;
     float fogstart = 0.5f;
 
-    culldistance = fogdist;
+    culldistance = fog_distance;
 
     //FOG_COLOR
     ::math::vector_4d fogcolor(skies->colorSet[FOG_COLOR], 1);
     glFogfv(GL_FOG_COLOR, fogcolor);
     //! \todo  retreive fogstart and fogend from lights.lit somehow
-    glFogf(GL_FOG_END, fogdist);
-    glFogf(GL_FOG_START, fogdist * fogstart);
+    glFogf(GL_FOG_END, fog_distance);
+    glFogf(GL_FOG_START, fog_distance * fogstart);
 
     glEnable(GL_FOG);
   }
@@ -1043,6 +1041,7 @@ void World::draw ( size_t flags
                  , float inner_cursor_radius
                  , float outer_cursor_radius
                  , const QPointF& mouse_position
+                 , const float& fog_distance
                  )
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1097,7 +1096,7 @@ void World::draw ( size_t flags
   outdoorLights(true);
 
   glFogi(GL_FOG_MODE, GL_LINEAR);
-  setupFog (flags & FOG);
+  setupFog (flags & FOG, fog_distance);
 
   // Draw verylowres heightmap
   if ((flags & FOG) && (flags & TERRAIN)) {
@@ -1261,7 +1260,7 @@ void World::draw ( size_t flags
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-      setupFog (flags & FOG);
+      setupFog (flags & FOG, fog_distance);
       for( int j = 0; j < 64; ++j )
       {
         for( int i = 0; i < 64; ++i )
@@ -1338,7 +1337,13 @@ void World::draw ( size_t flags
         glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
 
         for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-          it->second->draw (flags & WMODOODAS, flags &  FOG, skies->hasSkies(), animtime, culldistance);
+          it->second->draw ( flags & WMODOODAS
+                           , flags & FOG
+                           , skies->hasSkies()
+                           , animtime
+                           , culldistance
+                           , fog_distance
+                           );
 
         spec_color = ::math::vector_4d( 0.0f, 0.0f, 0.0f, 1.0f );
         glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
@@ -1346,10 +1351,16 @@ void World::draw ( size_t flags
       }
       else
         for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-          it->second->draw (flags & WMODOODAS, flags &  FOG, skies->hasSkies(), animtime, culldistance);
+          it->second->draw ( flags & WMODOODAS
+                           , flags & FOG
+                           , skies->hasSkies()
+                           , animtime
+                           , culldistance
+                           , fog_distance
+                           );
 
     outdoorLights( true );
-    setupFog (flags &  FOG);
+    setupFog (flags & FOG, fog_distance);
 
     glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
     glDisable(GL_CULL_FACE);
@@ -1359,7 +1370,7 @@ void World::draw ( size_t flags
     glEnable(GL_LIGHTING);
   }
 
-  setupFog (flags &  FOG);
+  setupFog (flags & FOG, fog_distance);
 
 
   glColor4f(1,1,1,1);
@@ -2250,16 +2261,6 @@ const float World::getTime() const
 void World::setTime(float newTime)
 {
     time = newTime;
-}
-
-const float World::getFogdistance() const
-{
-    return fogdistance;
-}
-
-void World::setFogdistance(float distance)
-{
-    fogdistance = distance;
 }
 
 void World::moveHeight(int x, int z)

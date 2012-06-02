@@ -74,6 +74,7 @@ namespace noggit
     , _draw_wmos (true)
     , _draw_hole_lines (false)
     , _draw_lighting (true)
+    , _fog_distance (777.0f)
     , _holding_left_mouse_button (false)
     , _holding_right_mouse_button (false)
     , _current_terrain_editing_mode (shaping)
@@ -1046,6 +1047,7 @@ namespace noggit
                  , brush_radius
                  , brush_radius
                  , _mouse_position
+                 , _fog_distance
                  );
   }
 
@@ -1160,12 +1162,14 @@ namespace noggit
     if (event->key() == Qt::Key_F1 && event->modifiers() & Qt::ShiftModifier)
       toggle_terrain_texturing_mode();
 
+    static const float fog_distance_step (60.0f);
+
     // fog distance or brush radius
     if (event->key() == Qt::Key_Plus)
       if( event->modifiers() & Qt::AltModifier )
         increase_brush_size();
       else if( event->modifiers() & Qt::ShiftModifier && ( !_world->HasSelection() || ( _world->HasSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk) )  )
-        _world->setFogdistance( _world->getFogdistance() + 60.0f );// fog change only when no model is selected!
+        _fog_distance += fog_distance_step;// fog change only when no model is selected!
       else
       {
         //change selected model size
@@ -1178,7 +1182,7 @@ namespace noggit
         decrease_brush_size();
       }
       else if( event->modifiers() & Qt::ShiftModifier && ( !_world->HasSelection() || ( _world->HasSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk) )  )
-        _world->setFogdistance( _world->getFogdistance() - 60.0f ); // fog change only when no model is selected!
+        _fog_distance -= fog_distance_step; // fog change only when no model is selected!
       else
       {
         //change selected model sizesize

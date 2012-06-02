@@ -274,6 +274,8 @@ namespace noggit
     bool _draw_hole_lines;
     bool _draw_lighting;
 
+    float _fog_distance;
+
     bool _holding_left_mouse_button;
     bool _holding_right_mouse_button;
 
