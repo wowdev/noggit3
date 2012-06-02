@@ -233,6 +233,7 @@ set ( headers_to_moc
       ${noggit_headers_to_moc}
     )
 
+if (COMPILE_DEFINITIONS_RELEASE)
 
 file (GLOB TRANSLATIONS translations/noggit_*.ts)
 
@@ -241,6 +242,7 @@ set ( FILES_TO_TRANSLATE
       ${noggit_sources}
     )
 
+endif (COMPILE_DEFINITIONS_RELEASE)
 
 option (NOGGIT_LOGTOCONSOLE "Log to console instead of log.txt?" OFF)
 option (NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
