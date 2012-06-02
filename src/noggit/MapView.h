@@ -36,9 +36,7 @@ namespace noggit
 
   namespace ui
   {
-    class about_widget;
     class cursor_selector;
-    class help_widget;
     class minimap_widget;
     class model_spawner;
   }
@@ -260,8 +258,6 @@ namespace noggit
 
     ui::minimap_widget* _minimap;
     ui::model_spawner* _model_spawner;
-    ui::help_widget* _help_widget;
-    ui::about_widget* _about_widget;
     ui::cursor_selector* _cursor_selector;
 
     QPoint _mouse_position;
