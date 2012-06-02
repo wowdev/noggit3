@@ -1689,18 +1689,17 @@ namespace noggit
     if (event->button() == Qt::LeftButton)
     {
       _holding_left_mouse_button = true;
+
+      if (_world->HasSelection())
+        _is_currently_moving_object = true;
     }
     if (event->button() == Qt::RightButton)
-    {
       _holding_right_mouse_button = true;
-    }
-    if (event->button() == Qt::MidButton)
+    /*if (event->button() == Qt::MidButton)
     {
       if (_world->HasSelection())
-      {
         _is_currently_moving_object = true;
-      }
-    }
+    }*/
 
     if (_holding_left_mouse_button && _holding_right_mouse_button)
     {
@@ -1721,11 +1720,10 @@ namespace noggit
     if (event->button() == Qt::LeftButton)
     {
       _holding_left_mouse_button = false;
+      _is_currently_moving_object = false;
 
       if (!key_w && moving > 0.0f)
-      {
         moving = 0.0f;
-      }
 
       if (mViewMode == eViewMode_2D)
       {
@@ -1740,19 +1738,13 @@ namespace noggit
       look = false;
 
       if (!key_w && moving > 0.0f)
-      {
         moving = 0.0f;
-      }
 
       if (mViewMode == eViewMode_2D)
-      {
         updown = 0;
-      }
     }
-    if (event->button() == Qt::MidButton)
-    {
-      _is_currently_moving_object = false;
-    }
+    /*if (event->button() == Qt::MidButton)
+      _is_currently_moving_object = false;*/
   }
 
   void MapView::mouseMoveEvent (QMouseEvent* event)
@@ -1772,9 +1764,9 @@ namespace noggit
 
     if( _is_currently_moving_object )
     {
-      const qreal ratio (height() / qreal (width()));
-      mh = -ratio * relative_move.x() / qreal (width());
-      mv = -relative_move.y() / qreal (height());
+      // TODO find better formula ( it have still some missing x, y)
+      mh = -relative_move.x() / XSENS / 5.0f;
+      mv = -relative_move.y() / YSENS / 5.0f;
     }
     else
     {
