@@ -57,7 +57,13 @@ WMOInstance::WMOInstance( World* world, WMO* _wmo )
 {
 }
 
-void WMOInstance::draw (bool draw_doodads, bool draw_fog, bool hasSkies, const float animtime, const float culldistance) const
+void WMOInstance::draw ( bool draw_doodads
+                       , bool draw_fog
+                       , bool hasSkies
+                       , const float animtime
+                       , const float culldistance
+                       , const float& fog_distance
+                       ) const
 {
   glPushMatrix();
   glTranslatef( pos.x(), pos.y(), pos.z() );
@@ -71,10 +77,24 @@ void WMOInstance::draw (bool draw_doodads, bool draw_fog, bool hasSkies, const f
   if(_world->IsSelection( eEntry_WMO ))
       LogDebug << "shit" << _world->GetCurrentSelection()->data.wmo->mUniqueID <<std::endl;
 
-  if( _world->IsSelection( eEntry_WMO ) && _world->GetCurrentSelection()->data.wmo->mUniqueID == mUniqueID )
-    wmo->draw( _world, doodadset, pos, roty, animtime, culldistance, true, true, true, draw_doodads, draw_fog, hasSkies);
-  else
-    wmo->draw( _world, doodadset, pos, roty, animtime, culldistance, false, false, false, draw_doodads, draw_fog, hasSkies);
+  const bool is_selected ( _world->IsSelection( eEntry_WMO )
+                        && _world->GetCurrentSelection()->data.wmo->mUniqueID == mUniqueID
+                         );
+
+  wmo->draw ( _world
+            , doodadset
+            , pos
+            , roty
+            , animtime
+            , culldistance
+            , is_selected
+            , is_selected
+            , is_selected
+            , draw_doodads
+            , draw_fog
+            , hasSkies
+            , fog_distance
+            );
 
   glPopMatrix();
 }

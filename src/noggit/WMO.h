@@ -70,29 +70,40 @@ public:
   void init(WMO *wmo, noggit::mpq::file* f, int num, char *names);
   void initDisplayList();
   void initLighting(int nLR, uint16_t *useLights);
-  void draw (World* world
+  void draw ( World* world
             , const ::math::vector_3d& ofs
             , const float rot
             , const float culldistance
             , bool draw_fog
-            , bool hasSkies);
-  void draw_for_selection (World* world
+            , bool hasSkies
+            , const float& fog_distance
+            );
+  void draw_for_selection ( World* world
                           , const ::math::vector_3d& ofs
                           , const float rot
-                          , const float culldistance);
-  void drawLiquid (World* world, bool draw_fog, float animtime);
+                          , const float culldistance
+                          );
+  void drawLiquid ( World* world
+                  , bool draw_fog
+                  , float animtime
+                  , const float& fog_distance
+                  );
   void drawDoodads ( World* world
                    , unsigned int doodadset
                    , const ::math::vector_3d& ofs
                    , const float rot
                    , bool draw_fog
+                   , const float& fog_distance
                    );
   void drawDoodadsSelect ( World* world
                          , unsigned int doodadset
                          , const ::math::vector_3d& ofs
                          , const float rot
                          );
-  void setupFog (World* world, bool draw_fog);
+  void setupFog ( World* world
+                , bool draw_fog
+                , const float& fog_distance
+                );
 };
 
 struct WMOMaterial {
@@ -209,6 +220,7 @@ public:
             , bool draw_doodads
             , bool draw_fog
             , bool hasSkies
+            , const float& fog_distance
             ) const;
   void drawSelect (World* world
                   , int doodadset

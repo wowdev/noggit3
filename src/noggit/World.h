@@ -182,18 +182,6 @@ public:
   */
   void setTime(float newTime);
 
-  //! gets the current fogdistance
-  /*!
-  \return the fogdistance
-  */
-  const float getFogdistance() const;
-
-  //! sets the fogdistance to distance
-  /*!
-  \param distance
-  */
-  void setFogdistance(float distance);
-
   void set_camera_above_terrain();
 
   Skies *skies;
@@ -228,6 +216,7 @@ public:
             , float inner_cursor_radius
             , float outer_cursor_radius
             , const QPointF& mouse_position
+            , const float& fog_distance
             );
 
   void drawSelection ( bool draw_wmo_doodads
@@ -242,7 +231,7 @@ public:
                     );
 
   void outdoorLights(bool on);
-  void setupFog (bool draw_fog);
+  void setupFog (bool draw_fog, const float& fog_distance);
 
   //! \brief Get the area ID of the tile on which the camera currently is on.
   const unsigned int getAreaID() const;

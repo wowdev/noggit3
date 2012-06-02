@@ -305,6 +305,7 @@ void WMO::draw ( World* world
                , bool draw_doodads
                , bool draw_fog
                , bool hasSkies
+               , const float& fog_distance
                ) const
 {
   if (draw_fog)
@@ -314,14 +315,27 @@ void WMO::draw ( World* world
 
   for (unsigned int i=0; i<nGroups; ++i)
   {
-    groups[i].draw(world, ofs, rot, culldistance, draw_fog, hasSkies);
+    groups[i].draw ( world
+                   , ofs
+                   , rot
+                   , culldistance
+                   , draw_fog
+                   , hasSkies
+                   , fog_distance
+                   );
 
     if (draw_doodads)
     {
-      groups[i].drawDoodads(world, doodadset, ofs, rot, draw_fog);
+      groups[i].drawDoodads ( world
+                            , doodadset
+                            , ofs
+                            , rot
+                            , draw_fog
+                            , fog_distance
+                            );
     }
 
-    groups[i].drawLiquid (world, draw_fog, animtime);
+    groups[i].drawLiquid (world, draw_fog, animtime, fog_distance);
   }
 
   if( boundingbox )
@@ -575,7 +589,7 @@ void WMO::drawSelect (World* world
       groups[i].drawDoodadsSelect(world, doodadset, ofs, rot);
     }
 
-    groups[i].drawLiquid (world, false, animtime);
+    groups[i].drawLiquid (world, false, animtime, 0.0f);
   }
 }
 
@@ -1007,6 +1021,7 @@ void WMOGroup::draw ( World* world
                     , const float culldistance
                     , bool draw_fog
                     , bool hasSkies
+                    , const float& fog_distance
                     )
 {
   visible = false;
@@ -1017,7 +1032,7 @@ void WMOGroup::draw ( World* world
   float dist = (pos - world->camera).length() - rad;
   if (dist >= culldistance) return;
   visible = true;
-  setupFog(world, draw_fog);
+  setupFog(world, draw_fog, fog_distance);
 
   if (hascv)
   {
@@ -1087,6 +1102,7 @@ void WMOGroup::drawDoodads ( World* world
                            , const ::math::vector_3d& ofs
                            , const float rot
                            , bool draw_fog
+                           , const float& fog_distance
                            )
 {
 
@@ -1094,7 +1110,7 @@ void WMOGroup::drawDoodads ( World* world
   if (nDoodads==0) return;
 
   world->outdoorLights(outdoorLights);
-  setupFog(world, draw_fog);
+  setupFog(world, draw_fog, fog_distance);
 
   /*
   float xr=0,xg=0,xb=0;
@@ -1116,7 +1132,7 @@ void WMOGroup::drawDoodads ( World* world
         if (!outdoorLights) {
           WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
         }
-        setupFog(world, draw_fog);
+        setupFog(world, draw_fog, fog_distance);
         wmo->modelis[dd].draw2 (ofs, rot);
       }
   }
@@ -1136,10 +1152,6 @@ void WMOGroup::drawDoodadsSelect ( World* world
 {
   if (!visible) return;
   if (nDoodads==0) return;
-
-  //! \todo Why do we do this? Oo This should all not need any light stuff at all.
-  world->outdoorLights(outdoorLights);
-  setupFog(world, false);
 
   /*
   float xr=0,xg=0,xb=0;
@@ -1172,14 +1184,18 @@ void WMOGroup::drawDoodadsSelect ( World* world
 
 }
 
-void WMOGroup::drawLiquid (World* world, bool draw_fog, float animtime)
+void WMOGroup::drawLiquid ( World* world
+                          , bool draw_fog
+                          , float animtime
+                          , const float& fog_distance
+                          )
 {
   if (!visible) return;
 
   // draw liquid
   //! \todo  culling for liquid boundingbox or something
   if (lq) {
-    setupFog (world, draw_fog);
+    setupFog (world, draw_fog, fog_distance);
     if (outdoorLights) {
       world->outdoorLights(true);
     } else {
@@ -1199,12 +1215,17 @@ void WMOGroup::drawLiquid (World* world, bool draw_fog, float animtime)
   }
 }
 
-void WMOGroup::setupFog (World* world, bool draw_fog)
+void WMOGroup::setupFog ( World* world
+                        , bool draw_fog
+                        , const float& fog_distance
+                        )
 {
-  if (outdoorLights || fog==-1)
+  if (outdoorLights || fog == -1)
   {
-    world->setupFog (draw_fog);
-  } else {
+    world->setupFog (draw_fog, fog_distance);
+  }
+  else
+  {
     wmo->fogs[fog].setup();
   }
 }
