@@ -1036,8 +1036,7 @@ void World::draw ( size_t flags
 
   gluLookAt(camera.x(),camera.y(),camera.z(), lookat.x(),lookat.y(),lookat.z(), 0, 1, 0);
 
-  Frustum frustum;
-  frustum.retrieve();
+  const Frustum frustum;
 
   ///glDisable(GL_LIGHTING);
   ///glColor4f(1,1,1,1);
@@ -1444,8 +1443,7 @@ void World::drawSelection ( bool draw_wmo_doodads
             , 0, 1, 0
             );
 
-  Frustum frustum;
-  frustum.retrieve();
+  const Frustum frustum;
 
   glClear (GL_DEPTH_BUFFER_BIT);
 

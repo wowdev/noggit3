@@ -20,7 +20,7 @@ void Plane::normalize()
 }
 
 
-void Frustum::retrieve()
+Frustum::Frustum()
 {
   float mat[16];
 
