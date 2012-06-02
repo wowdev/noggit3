@@ -295,6 +295,11 @@ if (APPLE)
                               )
 endif (APPLE)
 
+# in Visual studio need use include to project...maybe wrong CMake command?
+if (WIN32)
+  set (ResourceFiles "${CMAKE_SOURCE_DIR}/media/noggit.rc")
+endif (WIN32)
+
 if (WIN32)
   add_executable ( noggit
                    WIN32
