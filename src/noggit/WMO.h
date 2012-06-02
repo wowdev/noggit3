@@ -27,6 +27,7 @@ namespace opengl
   class texture;
 }
 
+class Frustum;
 class WMO;
 class WMOGroup;
 class WMOInstance;
@@ -60,7 +61,6 @@ public:
   ::math::vector_3d VertexBoxMin;
   ::math::vector_3d VertexBoxMax;
   bool indoor, hascv;
-  bool visible;
 
   bool outdoorLights;
   std::string name;
@@ -70,19 +70,18 @@ public:
   void init(WMO *wmo, noggit::mpq::file* f, int num, char *names);
   void initDisplayList();
   void initLighting(int nLR, uint16_t *useLights);
+  bool is_visible ( const ::math::vector_3d& offset
+                  , const float& rotation
+                  , const float& cull_distance
+                  , const Frustum& frustum
+                  , const ::math::vector_3d& camera
+                  ) const;
   void draw ( World* world
-            , const ::math::vector_3d& ofs
-            , const float rot
-            , const float culldistance
             , bool draw_fog
             , bool hasSkies
             , const float& fog_distance
             );
-  void draw_for_selection ( World* world
-                          , const ::math::vector_3d& ofs
-                          , const float rot
-                          , const float culldistance
-                          );
+  void draw_for_selection() const;
   void drawLiquid ( World* world
                   , bool draw_fog
                   , float animtime
@@ -94,11 +93,13 @@ public:
                    , const float rot
                    , bool draw_fog
                    , const float& fog_distance
+                   , const Frustum& frustum
                    );
   void drawDoodadsSelect ( World* world
                          , unsigned int doodadset
                          , const ::math::vector_3d& ofs
                          , const float rot
+                         , const Frustum& frustum
                          );
   void setupFog ( World* world
                 , bool draw_fog
@@ -221,6 +222,8 @@ public:
             , bool draw_fog
             , bool hasSkies
             , const float& fog_distance
+            , const Frustum& frustum
+            , const ::math::vector_3d& camera
             ) const;
   void drawSelect (World* world
                   , int doodadset
@@ -228,6 +231,8 @@ public:
                   , const float rot
                   , const float animtime
                   , const float culldistance, bool draw_doodads
+                  , const Frustum& frustum
+                  , const ::math::vector_3d& camera
                   ) const;
   //void drawPortals();
   bool drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d pLower, ::math::vector_3d pUpper ) const;

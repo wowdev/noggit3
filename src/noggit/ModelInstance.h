@@ -8,6 +8,7 @@
 #include <math/vector_3d.h>
 #include <math/quaternion.h>
 
+class Frustum;
 class Model;
 class World;
 struct ENTRY_MDDF;
@@ -55,13 +56,18 @@ public:
                 );
   ~ModelInstance();
 
-  void draw (bool draw_fog);
-  void draw_for_selection();
+  void draw (bool draw_fog, const Frustum& frustum);
+  void draw_for_selection (const Frustum& frustum);
 
   void drawMapTile();
 //  void drawHighlight();
-  void draw2 (const ::math::vector_3d& ofs, const float rot );
-  void draw2Select (const ::math::vector_3d& ofs, const float rot );
+  void draw2 ( const ::math::vector_3d& ofs
+             , const float rot
+             , const Frustum& frustum);
+  void draw2Select ( const ::math::vector_3d& ofs
+                   , const float rot
+                   , const Frustum& frustum
+                   );
 
   void resetDirection();
 

@@ -11,6 +11,7 @@
 
 #include <math/vector_3d.h>
 
+class Frustum;
 class WMO;
 class World;
 struct ENTRY_MODF;
@@ -51,8 +52,15 @@ public:
             , const float animtime
             , const float culldistance
             , const float& fog_distance
+            , const Frustum& frustum
+            , const ::math::vector_3d& camera
             ) const;
-  void drawSelect (bool draw_doodads, const float animtime, const float culldistance);
+  void drawSelect ( bool draw_doodads
+                  , const float animtime
+                  , const float culldistance
+                  , const Frustum& frustum
+                  , const ::math::vector_3d& camera
+                  ) const;
 
   void resetDirection();
 

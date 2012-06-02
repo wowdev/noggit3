@@ -77,6 +77,11 @@ public:
   void destroy();
   void initStrip();
 
+  bool is_visible ( const float& cull_distance
+                  , const Frustum& frustum
+                  , const ::math::vector_3d& camera
+                  ) const;
+
   void draw (bool draw_terrain_height_contour
             , bool mark_impassable_chunks
             , bool draw_area_id_overlay
@@ -86,8 +91,7 @@ public:
   void drawContour();
   void drawAreaID();
   void drawBlock();
-  void drawColor (bool draw_fog, const float& culldistance);
-  void drawSelect (const float& culldistance);
+  void drawSelect();
   void drawNoDetail();
   void drawPass(int anim, int animation_time = 0);
   // todo split into draw_lines and draw_hole_lines
