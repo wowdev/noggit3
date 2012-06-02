@@ -227,8 +227,7 @@ public:
   void saveTileCata(int x, int z);
   void saveChanged();
   void tick(float dt);
-  //! \todo This seriously needs to be done via flags.
-  void draw ( int16_t flags
+  void draw ( size_t flags
             , float inner_cursor_radius
             , float outer_cursor_radius
             , const QPointF& mouse_position

@@ -1027,7 +1027,7 @@ namespace noggit
     else if (_current_terrain_editing_mode == texturing)
       brush_radius = texturing_radius();
 
-    int16_t flags(0);
+    size_t flags (0);
 
     flags |= _draw_terrain ? TERRAIN : 0;
     flags |= _draw_doodads ? DOODADS : 0;

@@ -1039,7 +1039,7 @@ void World::setupFog (bool draw_fog)
   }
 }
 
-void World::draw (int16_t flags
+void World::draw ( size_t flags
                  , float inner_cursor_radius
                  , float outer_cursor_radius
                  , const QPointF& mouse_position
