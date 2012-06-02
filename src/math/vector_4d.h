@@ -81,6 +81,18 @@ namespace math
       return _w = w_;
     }
 
+    const vector_3d& xyz() const
+    {
+      return vector_3d (_x, _y, _z);
+    }
+    const vector_3d& xyz (const vector_3d& xyz_)
+    {
+      _x = xyz_.x();
+      _y = xyz_.y();
+      _z = xyz_.z();
+      return xyz_;
+    }
+
     vector_4d operator+ (const vector_4d &v) const
     {
       return vector_4d (_x + v._x, _y + v._y, _z + v._z, _w + v._w);
