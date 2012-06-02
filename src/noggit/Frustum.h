@@ -25,7 +25,7 @@ struct Frustum
 {
   Plane planes[6];
 
-  void retrieve();
+  Frustum();
 
   bool contains (const ::math::vector_3d& v) const;
   bool intersects (const ::math::vector_3d& v1, const ::math::vector_3d& v2) const;
