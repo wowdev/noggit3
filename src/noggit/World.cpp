@@ -213,7 +213,6 @@ World::World( const std::string& name )
   , animtime( 0 )
   , time( 1450 )
   , basename( name )
-  , culldistance( 777.0f )
   , skies( NULL )
   , mHasAGlobalWMO( false )
   , noadt( false )
@@ -1013,27 +1012,17 @@ void World::setupFog (bool draw_fog, const float& fog_distance)
 {
   if (draw_fog)
   {
-
-    //float fogdist = 357.0f; // minimum draw distance in wow
-    //float fogdist = 777.0f; // maximum draw distance in wow
-
-    float fogstart = 0.5f;
-
-    culldistance = fog_distance;
-
-    //FOG_COLOR
-    ::math::vector_4d fogcolor(skies->colorSet[FOG_COLOR], 1);
-    glFogfv(GL_FOG_COLOR, fogcolor);
+    const ::math::vector_4d fogcolor (skies->colorSet[FOG_COLOR], 1);
+    glFogfv (GL_FOG_COLOR, fogcolor);
     //! \todo  retreive fogstart and fogend from lights.lit somehow
-    glFogf(GL_FOG_END, fog_distance);
-    glFogf(GL_FOG_START, fog_distance * fogstart);
+    glFogf (GL_FOG_END, fog_distance);
+    glFogf (GL_FOG_START, fog_distance * 0.5f);
 
     glEnable(GL_FOG);
   }
   else
   {
     glDisable(GL_FOG);
-    culldistance = mapdrawdistance;
   }
 }
 
@@ -1341,7 +1330,7 @@ void World::draw ( size_t flags
                            , flags & FOG
                            , skies->hasSkies()
                            , animtime
-                           , culldistance
+                           , (flags & FOG) ? fog_distance : mapdrawdistance
                            , fog_distance
                            );
 
@@ -1355,7 +1344,7 @@ void World::draw ( size_t flags
                            , flags & FOG
                            , skies->hasSkies()
                            , animtime
-                           , culldistance
+                           , (flags & FOG) ? fog_distance : mapdrawdistance
                            , fog_distance
                            );
 
@@ -1478,7 +1467,7 @@ void World::drawSelection ( bool draw_wmo_doodads
       {
         if( tileLoaded( j, i ) )
         {
-          mTiles[j][i].tile->drawSelect (culldistance);
+          mTiles[j][i].tile->drawSelect (mapdrawdistance);
         }
       }
     }
@@ -1493,7 +1482,10 @@ void World::drawSelection ( bool draw_wmo_doodads
         ; ++it
         )
     {
-      it->second->drawSelect (draw_wmo_doodads, animtime, culldistance);
+      it->second->drawSelect ( draw_wmo_doodads
+                             , animtime
+                             , mapdrawdistance
+                             );
     }
   }
 

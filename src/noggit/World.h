@@ -121,10 +121,6 @@ private:
   float animtime; //!< the animation time
   float time; //!< the time of the day
 
-  //! Dynamic distances for rendering. Actually, these should be the same..
-  float fogdistance;
-  float culldistance;
-
   void initMinimap();
   void initLowresTerrain();
 
