@@ -47,6 +47,10 @@ namespace noggit
       if (noggit::app().setting("maximizedShow").toBool())
         maximizedShowCheckBox->setChecked(true);
 
+      projectExplorerShowCheckBox = new QCheckBox(tr("Open ProjectExplorer on Start"));
+      if (noggit::app().setting("projectExplorerShow").toBool())
+        projectExplorerShowCheckBox->setChecked(true);
+
       QLabel* _gamePathLabel (new QLabel(tr("Game path : "), this));
       projectPathLabel = new QLabel(tr("Project path : "), this);	
       QLabel* _viewDistanceLabel (new QLabel(tr("View Distance : "), this));
@@ -68,9 +72,10 @@ namespace noggit
       _mainConfigurationSettingsWindow->addWidget(changeProjectPathButton, 1, 3);
       _mainConfigurationSettingsWindow->addWidget(antialiasingCheckBox, 2, 0);
       _mainConfigurationSettingsWindow->addWidget(maximizedShowCheckBox, 2, 1);
-      _mainConfigurationSettingsWindow->addWidget(_viewDistanceLabel, 3, 0);
-      _mainConfigurationSettingsWindow->addWidget(viewDistanceSlider, 3, 1);
-      _mainConfigurationSettingsWindow->addWidget(viewDistanceSpinBox, 3, 2, 1, 2);
+      _mainConfigurationSettingsWindow->addWidget(projectExplorerShowCheckBox, 3, 0);
+      _mainConfigurationSettingsWindow->addWidget(_viewDistanceLabel, 4, 0);
+      _mainConfigurationSettingsWindow->addWidget(viewDistanceSlider, 4, 1);
+      _mainConfigurationSettingsWindow->addWidget(viewDistanceSpinBox, 4, 2, 1, 2);
 
       _mainConfigurationSettingsWindow->setSpacing(10);
 
@@ -88,6 +93,7 @@ namespace noggit
 
       connect(antialiasingCheckBox, SIGNAL (toggled (bool)), SLOT (setAntialiasing (bool)));
       connect(maximizedShowCheckBox, SIGNAL (toggled (bool)), SLOT (setMaximizedShow (bool)));
+      connect(projectExplorerShowCheckBox, SIGNAL (toggled (bool)), SLOT (setProjectExplorerShow (bool)));
       connect(viewDistanceSlider, SIGNAL (valueChanged (int)), SLOT (setViewDistance (int)));
 
       connect(&noggit::app(), SIGNAL (settingChanged (const QString&, const QVariant&)), SLOT (settingChanged (const QString&, const QVariant&)));
@@ -162,6 +168,11 @@ namespace noggit
     void settingsDialog::setMaximizedShow(bool value)
     {
       noggit::app().setting("maximizedShow", value);
+    }
+
+    void settingsDialog::setProjectExplorerShow(bool value)
+    {
+      noggit::app().setting("projectExplorerShow", value);
     }
 
     void settingsDialog::setViewDistance(int value)
