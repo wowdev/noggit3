@@ -6,6 +6,7 @@
 #include <noggit/WMO.h>
 
 #include <algorithm>
+#include <ctime>
 #include <map>
 #include <string>
 #include <vector>
@@ -627,7 +628,7 @@ bool WMO::drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d 
     glTranslatef(pCamera.x(), pCamera.y(), pCamera.z());
     const float sc = 2.0f;
     glScalef(sc,sc,sc);
-    skybox->draw (world);
+    skybox->draw (world, clock() / CLOCKS_PER_SEC);
     glPopMatrix();
     glEnable(GL_DEPTH_TEST);
 

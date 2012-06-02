@@ -4,6 +4,7 @@
 #include "ModelView.h"
 
 #include <algorithm>
+#include <ctime>
 #include <string>
 
 #include <noggit/DBC.h>
@@ -65,7 +66,8 @@ void ModelView::paintGL()
     if(_draw_loading){
         renderText (width()/2-2, height()/2-2, QString("Loading..."), QFont("Arial"));
     }else
-        theModel->draw(false);
+      //! \todo Have a local timer starting upon opening.
+      theModel->draw(false, clock() / CLOCKS_PER_SEC);
 
 }
 

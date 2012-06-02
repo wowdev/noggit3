@@ -79,6 +79,9 @@ private:
   void draw_selection_indicator() const;
 
   World* _world;
+
+  size_t _spawn_timestamp;
+  size_t time_since_spawn() const;
 };
 
 #endif // MODELINSTANCE_H
