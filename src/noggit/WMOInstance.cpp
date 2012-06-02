@@ -60,7 +60,6 @@ WMOInstance::WMOInstance( World* world, WMO* _wmo )
 void WMOInstance::draw ( bool draw_doodads
                        , bool draw_fog
                        , bool hasSkies
-                       , const float animtime
                        , const float culldistance
                        , const float& fog_distance
                        , const Frustum& frustum
@@ -87,7 +86,6 @@ void WMOInstance::draw ( bool draw_doodads
             , doodadset
             , pos
             , roty
-            , animtime
             , culldistance
             , is_selected
             , is_selected
@@ -104,7 +102,6 @@ void WMOInstance::draw ( bool draw_doodads
 }
 
 void WMOInstance::drawSelect ( bool draw_doodads
-                             , const float animtime
                              , const float culldistance
                              , const Frustum& frustum
                              , const ::math::vector_3d& camera
@@ -127,7 +124,6 @@ void WMOInstance::drawSelect ( bool draw_doodads
                   , doodadset
                   , pos
                   , -roty
-                  , animtime
                   , culldistance
                   , draw_doodads
                   , frustum

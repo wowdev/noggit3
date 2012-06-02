@@ -85,7 +85,6 @@ public:
   void draw_for_selection() const;
   void drawLiquid ( World* world
                   , bool draw_fog
-                  , float animtime
                   , const float& fog_distance
                   );
   void drawDoodads ( World* world
@@ -218,7 +217,6 @@ public:
             , int doodadset
             , const ::math::vector_3d& ofs
             , const float rot
-            , const float animtime
             , const float culldistance
             , bool boundingbox
             , bool groupboxes
@@ -234,7 +232,6 @@ public:
                   , int doodadset
                   , const ::math::vector_3d& ofs
                   , const float rot
-                  , const float animtime
                   , const float culldistance
                   , bool draw_doodads
                   , const Frustum& frustum

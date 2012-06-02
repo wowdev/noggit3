@@ -50,14 +50,12 @@ public:
   void draw ( bool draw_doodads
             , bool draw_fog
             , bool hasSkies
-            , const float animtime
             , const float culldistance
             , const float& fog_distance
             , const Frustum& frustum
             , const ::math::vector_3d& camera
             ) const;
   void drawSelect ( bool draw_doodads
-                  , const float animtime
                   , const float culldistance
                   , const Frustum& frustum
                   , const ::math::vector_3d& camera

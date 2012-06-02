@@ -87,18 +87,17 @@ public:
             , bool mark_impassable_chunks
             , bool draw_area_id_overlay
             , bool dont_draw_cursor
-            , const float& animtime
             , const Skies* skies);
   void drawContour();
   void drawAreaID();
   void drawBlock();
   void drawSelect();
   void drawNoDetail();
-  void drawPass(int anim, int animation_time = 0);
+  void drawPass(int anim);
   // todo split into draw_lines and draw_hole_lines
   void drawLines (bool draw_hole_lines);
 
-  void drawTextures (int animation_time);
+  void drawTextures();
 
   void recalcNorms();
 
@@ -139,7 +138,7 @@ public:
 
   //float getTerrainHeight(float x, float z);
 
-  void SetAnim (int anim, const float& anim_time) const;
+  void SetAnim (int anim) const;
   void RemoveAnim (int anim) const;
 
   void GenerateContourMap();

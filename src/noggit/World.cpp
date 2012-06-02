@@ -211,7 +211,6 @@ World::World( const std::string& name )
   , l_const( 0.0f )
   , l_linear( 0.7f )
   , l_quadratic( 0.03f )
-  , animtime( 0 )
   , time( 1450 )
   , basename( name )
   , skies( NULL )
@@ -1173,7 +1172,6 @@ void World::draw ( size_t flags
                                     , flags & MARKIMPASSABLE
                                     , flags & AREAID
                                     , flags & NOCURSOR
-                                    , animtime
                                     , skies
                                     , mapdrawdistance
                                     , frustum
@@ -1341,7 +1339,6 @@ void World::draw ( size_t flags
           it->second->draw ( flags & WMODOODAS
                            , flags & FOG
                            , skies->hasSkies()
-                           , animtime
                            , (flags & FOG) ? fog_distance : mapdrawdistance
                            , fog_distance
                            , frustum
@@ -1357,7 +1354,6 @@ void World::draw ( size_t flags
           it->second->draw ( flags & WMODOODAS
                            , flags & FOG
                            , skies->hasSkies()
-                           , animtime
                            , (flags & FOG) ? fog_distance : mapdrawdistance
                            , fog_distance
                            , frustum
@@ -1384,7 +1380,7 @@ void World::draw ( size_t flags
   //glColor4f(1,1,1,1);
   glDisable(GL_COLOR_MATERIAL);
 
-  if(flags &  WATER)
+  if(flags & WATER)
   {
     for( int j = 0; j < 64; ++j )
     {
@@ -1392,7 +1388,7 @@ void World::draw ( size_t flags
       {
         if( tileLoaded( j, i ) )
         {
-          mTiles[j][i].tile->drawWater (animtime, skies);
+          mTiles[j][i].tile->drawWater (skies);
         }
       }
     }
@@ -1483,7 +1479,6 @@ void World::drawSelection ( bool draw_wmo_doodads
         )
     {
       it->second->drawSelect ( draw_wmo_doodads
-                             , animtime
                              , mapdrawdistance
                              , frustum
                              , camera
@@ -1555,7 +1550,6 @@ void World::advance_times ( const float& seconds
                           , const float& time_of_day_speed_factor
                           )
 {
-  animtime += seconds;
   time += time_of_day_speed_factor * seconds;
 }
 
@@ -1720,7 +1714,6 @@ void World::drawTileMode ( bool draw_lines
         {
           tile->drawTextures ( drawing_rect.intersected (map_rect)
                                            .translated (-map_rect.topLeft())
-                             , animtime
                              );
         }
       }
@@ -2063,7 +2056,7 @@ void World::saveMap()
       //glTranslatef(-camera.x()/CHUNKSIZE,-camera.z()/CHUNKSIZE,0);
       glTranslatef( x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f );
 
-      ATile->drawTextures (QRect (0, 0, 16, 16), animtime);
+      ATile->drawTextures (QRect (0, 0, 16, 16));
       glPopMatrix();
 
   //! \todo Fix these two lines. THEY ARE VITAL!

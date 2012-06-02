@@ -117,7 +117,6 @@ private:
   float l_linear;
   float l_quadratic;
 
-  float animtime; //!< the animation time
   float time; //!< the time of the day
 
   void initMinimap();
