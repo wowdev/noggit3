@@ -33,9 +33,7 @@
 #include <noggit/ModelManager.h>
 #include <noggit/World.h>
 #include <noggit/Log.h>
-#include <noggit/ui/about_widget.h>
 #include <noggit/ui/minimap_widget.h>
-#include <noggit/ui/help_widget.h>
 #include <noggit/ui/cursor_selector.h>
 #include <noggit/ui/model_spawner.h>
 #include <noggit/editortemplate.h>
@@ -62,9 +60,6 @@ namespace noggit
     , _GUIDisplayingEnabled (true)
     , mTimespeed (0.0f)
     , _world (world)
-    , _help_widget (new ui::help_widget (NULL))
-    , _about_widget (NULL)
-    //  , _about_widget (new ui::about_widget (NULL))
     , _minimap (new ui::minimap_widget (NULL))
     , _model_spawner (new noggit::ui::model_spawner (NULL,shared))
     , _cursor_selector (new ui::cursor_selector (NULL))
@@ -224,10 +219,6 @@ namespace noggit
     NEW_ACTION (decrease_moving_speed, tr ("Decrease movement speed"), SLOT (decrease_moving_speed()), Qt::Key_O);
     NEW_ACTION (increase_moving_speed, tr ("Increase movement speed"), SLOT (increase_moving_speed()), Qt::Key_P);
 
-
-    NEW_ACTION_OTHER (key_bindings, tr ("Key bindings"), _help_widget, SLOT (show()), Qt::Key_H);
-    NEW_ACTION_OTHER (about_noggit, tr ("About Noggit"), _about_widget, SLOT (show()), 0);
-
     NEW_ACTION (save_wdt, tr ("Save WDT"), SLOT (TEST_save_wdt()), 0);
     NEW_ACTION (save_minimap, tr ("Save minimap as raw files"), SLOT (save_minimap()), Qt::Key_P + Qt::SHIFT + Qt::CTRL);
     NEW_ACTION_OTHER (model_spawner, tr ("Add object to map"), _model_spawner, SLOT (show()), Qt::Key_T);
@@ -317,10 +308,6 @@ namespace noggit
     settings_menu->addAction (increase_time_speed);
     settings_menu->addAction (decrease_moving_speed);
     settings_menu->addAction (increase_moving_speed);
-
-    QMenu* help_menu (menu->addMenu (tr ("Help")));
-    help_menu->addAction (key_bindings);
-    help_menu->addAction (about_noggit);
 
     QMenu* debug_menu (menu->addMenu (tr ("Testing and Debugging")));
     debug_menu->addAction (save_wdt);
