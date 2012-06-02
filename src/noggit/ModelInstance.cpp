@@ -233,7 +233,7 @@ bool ModelInstance::is_visible ( const float& cull_distance
       && ((position - camera).length() < (cull_distance + radius));
 }
 
-void ModelInstance::draw (bool draw_fog)
+void ModelInstance::draw (bool draw_fog) const
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
@@ -293,7 +293,7 @@ void ModelInstance::draw_for_selection()
   model->drawSelect();
 }
 
-void ModelInstance::draw2()
+void ModelInstance::draw2() const
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
@@ -305,7 +305,7 @@ void ModelInstance::draw2()
   model->draw (_world);
 }
 
-void ModelInstance::draw2Select()
+void ModelInstance::draw2Select() const
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
