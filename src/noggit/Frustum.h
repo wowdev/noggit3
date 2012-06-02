@@ -53,6 +53,7 @@ class Frustum
     float _distance;
   } planes[SIDES_MAX];
 
+public:
   Frustum();
 
   bool contains (const ::math::vector_3d& point) const;
