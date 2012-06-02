@@ -1062,7 +1062,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
                     , bool draw_area_id_overlay
                     , bool dont_draw_cursor
                     , const float& animtime
-                    , Skies *skies
+                    , const Skies* skies
                     )
 {
   if (!_world->frustum.intersects( vmin, vmax ))

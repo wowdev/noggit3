@@ -82,7 +82,7 @@ public:
             , bool draw_area_id_overlay
             , bool dont_draw_cursor
             , const float& animtime
-            , Skies *skies);
+            , const Skies* skies);
   void drawContour();
   void drawAreaID();
   void drawBlock();

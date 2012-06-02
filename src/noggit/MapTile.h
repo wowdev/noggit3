@@ -48,12 +48,13 @@ public:
 
   bool changed;
 
-  void draw (bool draw_terrain_height_contour
+  void draw ( bool draw_terrain_height_contour
             , bool mark_impassable_chunks
             , bool draw_area_id_overlay
             , bool dont_draw_cursor
             , const float& animtime
-            , Skies *skies);
+            , const Skies* skies
+            );
   void drawSelect (const float& culldistance);
   void drawLines (bool draw_hole_lines);
   void drawWater (const float& animtime, const Skies* skies);
