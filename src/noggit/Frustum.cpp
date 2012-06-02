@@ -7,83 +7,81 @@
 
 #include <opengl/types.h>
 
-#include <math/vector_3d.h>
-
-void Plane::normalize()
-{
-  float len;
-  len = sqrtf(a*a + b*b + c*c);
-  a /= len;
-  b /= len;
-  c /= len;
-  d /= len;
-}
-
+#include <math/matrix_4x4.h>
 
 Frustum::Frustum()
 {
-  float mat[16];
+  ::math::matrix_4x4 matrix;
 
-  glGetFloatv(GL_MODELVIEW_MATRIX, mat);
-  glMatrixMode(GL_PROJECTION);
+  glGetFloatv (GL_MODELVIEW_MATRIX, matrix);
+  glMatrixMode (GL_PROJECTION);
 
   glPushMatrix();
 
-  glMultMatrixf(mat);
-  glGetFloatv(GL_PROJECTION_MATRIX, mat);
+  glMultMatrixf (matrix);
+  glGetFloatv (GL_PROJECTION_MATRIX, matrix);
 
   glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
+  glMatrixMode (GL_MODELVIEW);
 
-  planes[RIGHT].a = mat[ 3] - mat[ 0];
-  planes[RIGHT].b = mat[ 7] - mat[ 4];
-  planes[RIGHT].c = mat[11] - mat[ 8];
-  planes[RIGHT].d = mat[15] - mat[12];
-  planes[RIGHT].normalize();
+  const ::math::vector_4d column_0 (matrix.column<0>());
+  const ::math::vector_4d column_1 (matrix.column<1>());
+  const ::math::vector_4d column_2 (matrix.column<2>());
+  const ::math::vector_4d column_3 (matrix.column<3>());
 
-  planes[LEFT].a = mat[ 3] + mat[ 0];
-  planes[LEFT].b = mat[ 7] + mat[ 4];
-  planes[LEFT].c = mat[11] + mat[ 8];
-  planes[LEFT].d = mat[15] + mat[12];
-  planes[LEFT].normalize();
-
-  planes[BOTTOM].a = mat[ 3] + mat[ 1];
-  planes[BOTTOM].b = mat[ 7] + mat[ 5];
-  planes[BOTTOM].c = mat[11] + mat[ 9];
-  planes[BOTTOM].d = mat[15] + mat[13];
-  planes[BOTTOM].normalize();
-
-  planes[TOP].a = mat[ 3] - mat[ 1];
-  planes[TOP].b = mat[ 7] - mat[ 5];
-  planes[TOP].c = mat[11] - mat[ 9];
-  planes[TOP].d = mat[15] - mat[13];
-  planes[TOP].normalize();
-
-  planes[BACK].a = mat[ 3] - mat[ 2];
-  planes[BACK].b = mat[ 7] - mat[ 6];
-  planes[BACK].c = mat[11] - mat[10];
-  planes[BACK].d = mat[15] - mat[14];
-  planes[BACK].normalize();
-
-  planes[FRONT].a = mat[ 3] + mat[ 2];
-  planes[FRONT].b = mat[ 7] + mat[ 6];
-  planes[FRONT].c = mat[11] + mat[10];
-  planes[FRONT].d = mat[15] + mat[14];
-  planes[FRONT].normalize();
-
+  {
+    const ::math::vector_4d temp (column_3 - column_0);
+    planes[RIGHT].normal (temp.xyz());
+    planes[RIGHT].distance (temp.w());
+    planes[RIGHT].normalize();
+  }
+  {
+    const ::math::vector_4d temp (column_3 + column_0);
+    planes[LEFT].normal (temp.xyz());
+    planes[LEFT].distance (temp.w());
+    planes[LEFT].normalize();
+  }
+  {
+    const ::math::vector_4d temp (column_3 - column_1);
+    planes[BOTTOM].normal (temp.xyz());
+    planes[BOTTOM].distance (temp.w());
+    planes[BOTTOM].normalize();
+  }
+  {
+    const ::math::vector_4d temp (column_3 + column_1);
+    planes[TOP].normal (temp.xyz());
+    planes[TOP].distance (temp.w());
+    planes[TOP].normalize();
+  }
+  {
+    const ::math::vector_4d temp (column_3 - column_2);
+    planes[BACK].normal (temp.xyz());
+    planes[BACK].distance (temp.w());
+    planes[BACK].normalize();
+  }
+  {
+    const ::math::vector_4d temp (column_3 + column_2);
+    planes[FRONT].normal (temp.xyz());
+    planes[FRONT].distance (temp.w());
+    planes[FRONT].normalize();
+  }
 }
 
-bool Frustum::contains(const ::math::vector_3d &v) const
+bool Frustum::contains (const ::math::vector_3d& point) const
 {
-  for (int i=0; i<6; ++i) {
-    if ((planes[i].a*v.x() + planes[i].b*v.y() + planes[i].c*v.z() + planes[i].d) <= 0) {
+  for (size_t side (0); side < SIDES_MAX; ++side)
+  {
+    if (planes[side].normal() * point <= -planes[side].distance())
+    {
       return false;
     }
   }
   return true;
 }
 
-bool Frustum::intersects(const ::math::vector_3d &v1, const ::math::vector_3d &v2) const
+bool Frustum::intersects ( const ::math::vector_3d& v1
+                         , const ::math::vector_3d& v2
+                         ) const
 {
   ::math::vector_3d points[8];
   points[0] = ::math::vector_3d (v1.x(), v1.y(), v1.z());
@@ -96,29 +94,43 @@ bool Frustum::intersects(const ::math::vector_3d &v1, const ::math::vector_3d &v
   points[7] = ::math::vector_3d (v2.x(), v2.y(), v2.z());
 
 
-   for (int i=0; i<6; ++i) {
-    int numIn = 0;
-
-    for (int k=0; k<8; k++) {
-      if ((planes[i].a*points[k].x() + planes[i].b*points[k].y() + planes[i].c*points[k].z() + planes[i].d) > 0)
+  for (size_t side (0); side < SIDES_MAX; ++side)
+  {
+    for (size_t point (0); point < 8; ++point)
+    {
+      if (planes[side].normal() * points[point] > -planes[side].distance())
       {
-        numIn++;
+        //! \note C does not know how to continue out of two loops otherwise.
+        goto intersects_next_side;
       }
     }
 
-    if (numIn == 0) return false;
+    return false;
+
+  intersects_next_side: ;
   }
 
   return true;
 }
 
 
-bool Frustum::intersectsSphere(const ::math::vector_3d& v, const float rad) const
+bool Frustum::intersectsSphere ( const ::math::vector_3d& position
+                               , const float& radius
+                               ) const
 {
-  for(int i = 0; i < 6; ++i) {
-    float distance = (planes[i].a*v.x() + planes[i].b*v.y() + planes[i].c*v.z() + planes[i].d);
-    if (distance < -rad) return false;
-    if (fabs(distance) < rad) return true;
+  for (size_t side (0); side < SIDES_MAX; ++side)
+  {
+    const float distance ( planes[side].normal() * position
+                         + planes[side].distance()
+                         );
+    if (distance < -radius)
+    {
+      return false;
+    }
+    else if (fabsf (distance) < radius)
+    {
+      return true;
+    }
   }
   return true;
 }

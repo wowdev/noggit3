@@ -5,31 +5,63 @@
 #ifndef FRUSTUM_H
 #define FRUSTUM_H
 
-namespace math
-{
-  class vector_3d;
-}
+#include <math/vector_3d.h>
 
-struct Plane
+enum SIDES
 {
-  float a,b,c,d;
-  void normalize();
-};
-
-enum Directions
-{
-  RIGHT, LEFT, BOTTOM, TOP, BACK, FRONT
+  RIGHT,
+  LEFT,
+  BOTTOM,
+  TOP,
+  BACK,
+  FRONT,
+  SIDES_MAX,
 };
 
 struct Frustum
 {
-  Plane planes[6];
+  class Plane
+  {
+  public:
+    void normalize()
+    {
+      const float repri (_normal.length());
+      _normal *= repri;
+      _distance *= repri;
+    }
+
+    const float& distance() const
+    {
+      return _distance;
+    }
+    const float& distance (const float& distance_)
+    {
+      return _distance = distance_;
+    }
+
+    const ::math::vector_3d& normal() const
+    {
+      return _normal;
+    }
+    const ::math::vector_3d& normal (const ::math::vector_3d& normal_)
+    {
+      return _normal = normal_;
+    }
+
+  private:
+    ::math::vector_3d _normal;
+    float _distance;
+  } planes[SIDES_MAX];
 
   Frustum();
 
-  bool contains (const ::math::vector_3d& v) const;
-  bool intersects (const ::math::vector_3d& v1, const ::math::vector_3d& v2) const;
-  bool intersectsSphere (const ::math::vector_3d& v, const float rad) const;
+  bool contains (const ::math::vector_3d& point) const;
+  bool intersects ( const ::math::vector_3d& v1
+                  , const ::math::vector_3d& v2
+                  ) const;
+  bool intersectsSphere ( const ::math::vector_3d& position
+                        , const float& radius
+                        ) const;
 };
 
 
