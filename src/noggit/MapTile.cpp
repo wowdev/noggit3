@@ -765,10 +765,10 @@ void MapTile::clearAllModels()
   }
 
 }
-void MapTile::saveTile ( const ModelInstances_type::const_iterator& models_begin
-                       , const ModelInstances_type::const_iterator& models_end
-                       , const WMOInstances_type::const_iterator& wmos_begin
-                       , const WMOInstances_type::const_iterator& wmos_end
+void MapTile::saveTile ( const World::model_instances_type::const_iterator& models_begin
+                       , const World::model_instances_type::const_iterator& models_end
+                       , const World::wmo_instances_type::const_iterator& wmos_begin
+                       , const World::wmo_instances_type::const_iterator& wmos_end
                        )
 {
   Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
@@ -782,11 +782,11 @@ void MapTile::saveTile ( const ModelInstances_type::const_iterator& models_begin
   lTileExtents[0] = ::math::vector_3d( xbase, 0.0f, zbase );
   lTileExtents[1] = ::math::vector_3d( xbase + TILESIZE, 0.0f, zbase + TILESIZE );
 
-  std::map<int, WMOInstance*> lObjectInstances;
-  std::map<int, ModelInstance*> lModelInstances;
+  World::wmo_instances_type lObjectInstances;
+  World::model_instances_type lModelInstances;
 
   //! \todo std::copy_if
-  for ( WMOInstances_type::const_iterator it (wmos_begin)
+  for ( World::wmo_instances_type::const_iterator it (wmos_begin)
       ; it != wmos_end
       ; ++it
       )
@@ -794,7 +794,7 @@ void MapTile::saveTile ( const ModelInstances_type::const_iterator& models_begin
     //if( checkInside( lTileExtents, it->second->extents ) )
       lObjectInstances.insert( std::pair<int, WMOInstance*>( it->first, it->second ) );
 
-  for( ModelInstances_type::const_iterator it (models_begin)
+  for( World::model_instances_type::const_iterator it (models_begin)
      ; it != models_end
      ; ++it
      )
@@ -1591,10 +1591,10 @@ void MapTile::saveTile ( const ModelInstances_type::const_iterator& models_begin
   f.close();
 }
 
-void MapTile::saveTileCata ( const ModelInstances_type::const_iterator& models_begin
-                           , const ModelInstances_type::const_iterator& models_end
-                           , const WMOInstances_type::const_iterator& wmos_begin
-                           , const WMOInstances_type::const_iterator& wmos_end
+void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& models_begin
+                           , const World::model_instances_type::const_iterator& models_end
+                           , const World::wmo_instances_type::const_iterator& wmos_begin
+                           , const World::wmo_instances_type::const_iterator& wmos_end
                            )
 {
   Log << "Saving ADT (Cata) \"" << mFilename << "\"." << std::endl;
@@ -1608,11 +1608,11 @@ void MapTile::saveTileCata ( const ModelInstances_type::const_iterator& models_b
   lTileExtents[0] = ::math::vector_3d( xbase, 0.0f, zbase );
   lTileExtents[1] = ::math::vector_3d( xbase + TILESIZE, 0.0f, zbase + TILESIZE );
 
-  std::map<int, WMOInstance*> lObjectInstances;
-  std::map<int, ModelInstance*> lModelInstances;
+  World::wmo_instances_type lObjectInstances;
+  World::model_instances_type lModelInstances;
 
   //! \todo std::copy_if
-  for ( WMOInstances_type::const_iterator it (wmos_begin)
+  for ( World::wmo_instances_type::const_iterator it (wmos_begin)
       ; it != wmos_end
       ; ++it
       )
@@ -1620,7 +1620,7 @@ void MapTile::saveTileCata ( const ModelInstances_type::const_iterator& models_b
     //if( checkInside( lTileExtents, it->second->extents ) )
       lObjectInstances.insert( std::pair<int, WMOInstance*>( it->first, it->second ) );
 
-  for( ModelInstances_type::const_iterator it (models_begin)
+  for( World::model_instances_type::const_iterator it (models_begin)
      ; it != models_end
      ; ++it
      )
