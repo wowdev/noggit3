@@ -904,45 +904,6 @@ void MapChunk::CreateStrips()
     _hole_strip[iferget++] = i;
 }
 
-void MapChunk::drawColor (bool draw_fog, const float& culldistance)
-{
-
-  if (!_world->frustum.intersects(vmin,vmax))
-    return;
-
-  float mydist = (_world->camera - vcenter).length() - r;
-
-  if (mydist > (mapdrawdistance * mapdrawdistance))
-    return;
-
-  if (mydist > culldistance)
-  {
-    if (draw_fog)
-      drawNoDetail();
-    return;
-  }
-
-  glActiveTexture(GL_TEXTURE1);
-  glDisable(GL_TEXTURE_2D);
-
-  glActiveTexture(GL_TEXTURE0);
-  glDisable(GL_TEXTURE_2D);
-  //glDisable(GL_LIGHTING);
-
-  glBegin(GL_TRIANGLE_STRIP);
-  for(int i=0; i < striplen; ++i)
-  {
-    ::math::vector_3d Color;
-    HeightColor( mVertices[strip[i]].y(), &Color);
-    glColor3fv(Color);
-    glNormal3fv(mNormals[strip[i]]);
-    glVertex3fv(mVertices[strip[i]]);
-  }
-  glEnd();
-  //glEnable(GL_LIGHTING);
-}
-
-
 void MapChunk::drawPass (int anim, int animation_time)
 {
   if (anim)
@@ -974,14 +935,6 @@ void MapChunk::drawPass (int anim, int animation_time)
 
 void MapChunk::drawLines (bool draw_hole_lines)
 {
-  if (!_world->frustum.intersects(vmin,vmax))
-    return;
-
-  float mydist = (_world->camera - vcenter).length() - r;
-
-  if (mydist > (mapdrawdistance * mapdrawdistance))
-    return;
-
   glBindBuffer(GL_ARRAY_BUFFER, vertices);
   glVertexPointer(3, GL_FLOAT, 0, 0);
 
@@ -1055,7 +1008,14 @@ void MapChunk::drawContour()
   glDisable(GL_TEXTURE_GEN_S);
 }
 
-
+bool MapChunk::is_visible ( const float& cull_distance
+                          , const Frustum& frustum
+                          , const ::math::vector_3d& camera
+                          ) const
+{
+  return frustum.intersects (vmin, vmax)
+      && (((camera - vcenter).length() - r) < cull_distance);
+}
 
 void MapChunk::draw ( bool draw_terrain_height_contour
                     , bool mark_impassable_chunks
@@ -1065,14 +1025,6 @@ void MapChunk::draw ( bool draw_terrain_height_contour
                     , const Skies* skies
                     )
 {
-  if (!_world->frustum.intersects( vmin, vmax ))
-    return;
-
-  float mydist = (_world->camera - vcenter).length() - r;
-
-  if (mydist > (mapdrawdistance * mapdrawdistance))
-    return;
-
   // setup vertex buffers
   glBindBuffer(GL_ARRAY_BUFFER, vertices);
   glVertexPointer(3, GL_FLOAT, 0, 0);
@@ -1261,16 +1213,8 @@ void MapChunk::drawNoDetail()
   glEnable( GL_TEXTURE_2D );
 }
 
-void MapChunk::drawSelect (const float& culldistance)
+void MapChunk::drawSelect()
 {
-  if( !_world->frustum.intersects( vmin, vmax ) )
-    return;
-
-  float mydist = (_world->camera - vcenter).length() - r;
-  if (mydist > (mapdrawdistance * mapdrawdistance)) return;
-  if (mydist > culldistance)
-    return;
-
   if( nameID == -1 )
     nameID = _world->selection_names().add( this );
 

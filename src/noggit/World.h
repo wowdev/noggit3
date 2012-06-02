@@ -176,7 +176,6 @@ public:
 
   ::math::vector_3d camera;
   ::math::vector_3d lookat;
-  Frustum frustum;
 
   explicit World( const std::string& name);
   ~World();

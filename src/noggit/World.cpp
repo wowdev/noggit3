@@ -219,7 +219,6 @@ World::World( const std::string& name )
   , outdoorLightStats( OutdoorLightStats() )
   , camera( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
   , lookat( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
-  , frustum( Frustum() )
   , _selection_names (this)
 {
   for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
@@ -1037,6 +1036,7 @@ void World::draw ( size_t flags
 
   gluLookAt(camera.x(),camera.y(),camera.z(), lookat.x(),lookat.y(),lookat.z(), 0, 1, 0);
 
+  Frustum frustum;
   frustum.retrieve();
 
   ///glDisable(GL_LIGHTING);
@@ -1175,6 +1175,9 @@ void World::draw ( size_t flags
                                     , flags & NOCURSOR
                                     , animtime
                                     , skies
+                                    , mapdrawdistance
+                                    , frustum
+                                    , camera
                                     );
           }
         }
@@ -1256,7 +1259,11 @@ void World::draw ( size_t flags
         {
           if( tileLoaded( j, i ) )
           {
-            mTiles[j][i].tile->drawLines (flags & HOLELINES);
+            mTiles[j][i].tile->drawLines ( flags & HOLELINES
+                                         , mapdrawdistance
+                                         , frustum
+                                         , camera
+                                         );
            // mTiles[j][i].tile->drawMFBO();
           }
         }
@@ -1307,7 +1314,7 @@ void World::draw ( size_t flags
 
       glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
       for( std::map<int, ModelInstance*>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
-        it->second->draw (flags & FOG);
+        it->second->draw (flags & FOG, frustum);
 
       //drawModelList();
     }
@@ -1332,6 +1339,8 @@ void World::draw ( size_t flags
                            , animtime
                            , (flags & FOG) ? fog_distance : mapdrawdistance
                            , fog_distance
+                           , frustum
+                           , camera
                            );
 
         spec_color = ::math::vector_4d( 0.0f, 0.0f, 0.0f, 1.0f );
@@ -1346,6 +1355,8 @@ void World::draw ( size_t flags
                            , animtime
                            , (flags & FOG) ? fog_distance : mapdrawdistance
                            , fog_distance
+                           , frustum
+                           , camera
                            );
 
     outdoorLights( true );
@@ -1364,25 +1375,6 @@ void World::draw ( size_t flags
 
   glColor4f(1,1,1,1);
   glEnable(GL_BLEND);
-
-  /*
-  // temp frustum code
-  glDisable(GL_LIGHTING);
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_CULL_FACE);
-  glEnable(GL_BLEND);
-  glBegin(GL_TRIANGLES);
-  glColor4f(0,1,0,0.5);
-  glVertex3fv(camera);
-  glVertex3fv(fp - rt * fl * 1.33f - up * fl);
-  glVertex3fv(fp + rt * fl * 1.33f - up * fl);
-  glColor4f(0,0,1,0.5);
-  glVertex3fv(camera);
-  fl *= 0.5f;
-  glVertex3fv(fp - rt * fl * 1.33f + up * fl);
-  glVertex3fv(fp + rt * fl * 1.33f + up * fl);
-  glEnd();
-  */
 
   //glColor4f(1,1,1,1);
   glDisable(GL_COLOR_MATERIAL);
@@ -1452,6 +1444,7 @@ void World::drawSelection ( bool draw_wmo_doodads
             , 0, 1, 0
             );
 
+  Frustum frustum;
   frustum.retrieve();
 
   glClear (GL_DEPTH_BUFFER_BIT);
@@ -1467,7 +1460,10 @@ void World::drawSelection ( bool draw_wmo_doodads
       {
         if( tileLoaded( j, i ) )
         {
-          mTiles[j][i].tile->drawSelect (mapdrawdistance);
+          mTiles[j][i].tile->drawSelect ( mapdrawdistance
+                                        , frustum
+                                        , camera
+                                        );
         }
       }
     }
@@ -1485,6 +1481,8 @@ void World::drawSelection ( bool draw_wmo_doodads
       it->second->drawSelect ( draw_wmo_doodads
                              , animtime
                              , mapdrawdistance
+                             , frustum
+                             , camera
                              );
     }
   }
@@ -1500,7 +1498,7 @@ void World::drawSelection ( bool draw_wmo_doodads
         ; ++it
         )
     {
-      it->second->draw_for_selection();
+      it->second->draw_for_selection (frustum);
     }
   }
 

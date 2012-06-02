@@ -63,6 +63,8 @@ void WMOInstance::draw ( bool draw_doodads
                        , const float animtime
                        , const float culldistance
                        , const float& fog_distance
+                       , const Frustum& frustum
+                       , const ::math::vector_3d& camera
                        ) const
 {
   glPushMatrix();
@@ -94,12 +96,19 @@ void WMOInstance::draw ( bool draw_doodads
             , draw_fog
             , hasSkies
             , fog_distance
+            , frustum
+            , camera
             );
 
   glPopMatrix();
 }
 
-void WMOInstance::drawSelect (bool draw_doodads, const float animtime, const float culldistance)
+void WMOInstance::drawSelect ( bool draw_doodads
+                             , const float animtime
+                             , const float culldistance
+                             , const Frustum& frustum
+                             , const ::math::vector_3d& camera
+                             ) const
 {
   glPushMatrix();
 
@@ -114,7 +123,16 @@ void WMOInstance::drawSelect (bool draw_doodads, const float animtime, const flo
   //mSelectionID = _world->selection_names().add( this );
   glPushName( mSelectionID );
 
-  wmo->drawSelect( _world, doodadset, pos, -roty, animtime, culldistance, draw_doodads);
+  wmo->drawSelect ( _world
+                  , doodadset
+                  , pos
+                  , -roty
+                  , animtime
+                  , culldistance
+                  , draw_doodads
+                  , frustum
+                  , camera
+                  );
 
   glPopName();
 

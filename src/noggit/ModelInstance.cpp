@@ -93,7 +93,7 @@ static const float doodaddrawdistance2 (700.0f * 700.0f);
 #define MAYBE_DONT_DRAW \
   ::math::vector_3d tpos (ofs + pos); \
   ::math::rotate (ofs.x(), ofs.z(), &tpos.x(), &tpos.z(), rot); \
-  if ( (tpos - _world->camera).length_squared() > (doodaddrawdistance2 * model->rad * sc) || !_world->frustum.intersectsSphere (tpos, model->rad * sc)) return
+  if ( (tpos - _world->camera).length_squared() > (doodaddrawdistance2 * model->rad * sc) || !frustum.intersectsSphere (tpos, model->rad * sc)) return
 
 
 void ModelInstance::draw_selection_indicator() const
@@ -219,7 +219,7 @@ void ModelInstance::draw_selection_indicator() const
 
 }
 
-void ModelInstance::draw (bool draw_fog)
+void ModelInstance::draw (bool draw_fog, const Frustum& frustum)
 {
   static const ::math::vector_3d ofs (0.0f, 0.0f, 0.0f);
   static const float rot (0.0);
@@ -261,7 +261,7 @@ void ModelInstance::draw (bool draw_fog)
   model->draw ();
 }*/
 
-void ModelInstance::draw_for_selection()
+void ModelInstance::draw_for_selection(const Frustum& frustum)
 {
   static const ::math::vector_3d ofs (0.0f, 0.0f, 0.0f);
   static const float rot (0.0);
@@ -287,7 +287,10 @@ void ModelInstance::draw_for_selection()
   model->drawSelect();
 }
 
-void ModelInstance::draw2 (const ::math::vector_3d& ofs, const float rot)
+void ModelInstance::draw2 ( const ::math::vector_3d& ofs
+                          , const float rot
+                          , const Frustum& frustum
+                          )
 {
   MAYBE_DONT_DRAW;
 
@@ -301,7 +304,10 @@ void ModelInstance::draw2 (const ::math::vector_3d& ofs, const float rot)
   model->draw (_world);
 }
 
-void ModelInstance::draw2Select (const ::math::vector_3d& ofs, const float rot)
+void ModelInstance::draw2Select ( const ::math::vector_3d& ofs
+                                , const float rot
+                                , const Frustum& frustum
+                                )
 {
   MAYBE_DONT_DRAW;
 

@@ -54,9 +54,19 @@ public:
             , bool dont_draw_cursor
             , const float& animtime
             , const Skies* skies
+            , const float& cull_distance
+            , const Frustum& frustum
+            , const ::math::vector_3d& camera
             );
-  void drawSelect (const float& culldistance);
-  void drawLines (bool draw_hole_lines);
+  void drawSelect ( const float& cull_distance
+                  , const Frustum& frustum
+                  , const ::math::vector_3d& camera
+                  );
+  void drawLines ( bool draw_hole_lines
+                 , const float& cull_distance
+                 , const Frustum& frustum
+                 , const ::math::vector_3d& camera
+                 );
   void drawWater (const float& animtime, const Skies* skies);
   void drawTextures ( const QRectF& chunks_to_draw
                     , int animation_time

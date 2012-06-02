@@ -479,6 +479,9 @@ void MapTile::draw ( bool draw_terrain_height_contour
                    , bool dont_draw_cursor
                    , const float& animtime
                    , const Skies* skies
+                   , const float& cull_distance
+                   , const Frustum& frustum
+                   , const ::math::vector_3d& camera
                    )
 {
   glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
@@ -487,29 +490,42 @@ void MapTile::draw ( bool draw_terrain_height_contour
   {
     for (size_t i (0); i < 16; ++i)
     {
-      mChunks[j][i]->draw ( draw_terrain_height_contour
-                          , mark_impassable_chunks
-                          , draw_area_id_overlay
-                          , dont_draw_cursor
-                          , animtime
-                          , skies
-                          );
+      if (mChunks[j][i]->is_visible (cull_distance, frustum, camera))
+      {
+        mChunks[j][i]->draw ( draw_terrain_height_contour
+                            , mark_impassable_chunks
+                            , draw_area_id_overlay
+                            , dont_draw_cursor
+                            , animtime
+                            , skies
+                            );
+      }
     }
   }
 }
 
-void MapTile::drawSelect (const float& culldistance)
+void MapTile::drawSelect ( const float& cull_distance
+                         , const Frustum& frustum
+                         , const ::math::vector_3d& camera
+                         )
 {
   for (size_t j (0); j < 16; ++j)
   {
     for (size_t i (0); i < 16; ++i)
     {
-      mChunks[j][i]->drawSelect (culldistance);
+      if (mChunks[j][i]->is_visible (cull_distance, frustum, camera))
+      {
+        mChunks[j][i]->drawSelect();
+      }
     }
   }
 }
 
-void MapTile::drawLines (bool draw_hole_lines)
+void MapTile::drawLines ( bool draw_hole_lines
+                        , const float& cull_distance
+                        , const Frustum& frustum
+                        , const ::math::vector_3d& camera
+                        )
 {
   glDisable (GL_COLOR_MATERIAL);
 
@@ -517,7 +533,10 @@ void MapTile::drawLines (bool draw_hole_lines)
   {
     for (size_t i (0); i < 16; ++i)
     {
-      mChunks[j][i]->drawLines (draw_hole_lines);
+      if (mChunks[j][i]->is_visible (cull_distance, frustum, camera))
+      {
+        mChunks[j][i]->drawLines (draw_hole_lines);
+      }
     }
   }
 

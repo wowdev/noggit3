@@ -306,6 +306,8 @@ void WMO::draw ( World* world
                , bool draw_fog
                , bool hasSkies
                , const float& fog_distance
+               , const Frustum& frustum
+               , const ::math::vector_3d& camera
                ) const
 {
   if (draw_fog)
@@ -315,27 +317,24 @@ void WMO::draw ( World* world
 
   for (unsigned int i=0; i<nGroups; ++i)
   {
-    groups[i].draw ( world
-                   , ofs
-                   , rot
-                   , culldistance
-                   , draw_fog
-                   , hasSkies
-                   , fog_distance
-                   );
-
-    if (draw_doodads)
+    if (groups[i].is_visible (ofs, rot, culldistance, frustum, camera))
     {
-      groups[i].drawDoodads ( world
-                            , doodadset
-                            , ofs
-                            , rot
-                            , draw_fog
-                            , fog_distance
-                            );
-    }
+      groups[i].draw (world, draw_fog, hasSkies, fog_distance);
 
-    groups[i].drawLiquid (world, draw_fog, animtime, fog_distance);
+      if (draw_doodads)
+      {
+        groups[i].drawDoodads ( world
+                              , doodadset
+                              , ofs
+                              , rot
+                              , draw_fog
+                              , fog_distance
+                              , frustum
+                              );
+      }
+
+      groups[i].drawLiquid (world, draw_fog, animtime, fog_distance);
+    }
   }
 
   if( boundingbox )
@@ -578,18 +577,23 @@ void WMO::drawSelect (World* world
                      , const float animtime
                      , const float culldistance
                      , bool draw_doodads
+                     , const Frustum& frustum
+                     , const ::math::vector_3d& camera
                      ) const
 {
   for (unsigned int i=0; i<nGroups; ++i)
   {
-    groups[i].draw_for_selection (world, ofs, rot, culldistance);
-
-    if (draw_doodads)
+    if (groups[i].is_visible (ofs, rot, culldistance, frustum, camera))
     {
-      groups[i].drawDoodadsSelect(world, doodadset, ofs, rot);
-    }
+      groups[i].draw_for_selection();
 
-    groups[i].drawLiquid (world, false, animtime, 0.0f);
+      if (draw_doodads)
+      {
+        groups[i].drawDoodadsSelect(world, doodadset, ofs, rot, frustum);
+      }
+
+      groups[i].drawLiquid (world, false, animtime, 0.0f);
+    }
   }
 }
 
@@ -1015,30 +1019,33 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
   }
 }
 
+bool WMOGroup::is_visible ( const ::math::vector_3d& offset
+                          , const float& rotation
+                          , const float& cull_distance
+                          , const Frustum& frustum
+                          , const ::math::vector_3d& camera
+                          ) const
+{
+  ::math::vector_3d pos (center + offset);
+  ::math::rotate (offset.x(), offset.z(), &pos.x(), &pos.z(), rotation);
+
+  return frustum.intersectsSphere (pos, rad)
+      && (((pos - camera).length() - rad) < cull_distance);
+}
+
 void WMOGroup::draw ( World* world
-                    , const ::math::vector_3d& ofs
-                    , const float rot
-                    , const float culldistance
                     , bool draw_fog
                     , bool hasSkies
                     , const float& fog_distance
                     )
 {
-  visible = false;
-  // view frustum culling
-  ::math::vector_3d pos = center + ofs;
-  ::math::rotate (ofs.x(), ofs.z(), &pos.x(), &pos.z(), rot);
-  if (!world->frustum.intersectsSphere(pos,rad)) return;
-  float dist = (pos - world->camera).length() - rad;
-  if (dist >= culldistance) return;
-  visible = true;
   setupFog(world, draw_fog, fog_distance);
 
   if (hascv)
   {
     glDisable(GL_LIGHTING);
     world->outdoorLights(false);
-  } 
+  }
   else if (hasSkies)
   {
     world->outdoorLights(true);
@@ -1075,23 +1082,9 @@ void WMOGroup::draw ( World* world
 
 }
 
-void WMOGroup::draw_for_selection ( World* world
-                                  , const ::math::vector_3d& ofs
-                                  , const float rot
-                                  , const float culldistance
-                                  )
+void WMOGroup::draw_for_selection() const
 {
-  visible = false;
-
-  ::math::vector_3d pos = center + ofs;
-  ::math::rotate (ofs.x(), ofs.z(), &pos.x(), &pos.z(), rot);
-  if ( !world->frustum.intersectsSphere (pos, rad)
-    || ((pos - world->camera).length() - rad) >= culldistance)
-    return;
-
-  visible = true;
-
-  for (int i=0; i<nBatches; ++i)
+  for (size_t i (0); i < nBatches; ++i)
   {
     _lists[i].first->render();
   }
@@ -1103,10 +1096,9 @@ void WMOGroup::drawDoodads ( World* world
                            , const float rot
                            , bool draw_fog
                            , const float& fog_distance
+                           , const Frustum& frustum
                            )
 {
-
-  if (!visible) return;
   if (nDoodads==0) return;
 
   world->outdoorLights(outdoorLights);
@@ -1133,7 +1125,7 @@ void WMOGroup::drawDoodads ( World* world
           WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
         }
         setupFog(world, draw_fog, fog_distance);
-        wmo->modelis[dd].draw2 (ofs, rot);
+        mi.draw2 (ofs, rot, frustum);
       }
   }
 
@@ -1148,9 +1140,9 @@ void WMOGroup::drawDoodadsSelect ( World* world
                                  , unsigned int doodadset
                                  , const ::math::vector_3d& ofs
                                  , const float rot
+                                 , const Frustum& frustum
                                  )
 {
-  if (!visible) return;
   if (nDoodads==0) return;
 
   /*
@@ -1174,7 +1166,7 @@ void WMOGroup::drawDoodadsSelect ( World* world
           WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
         }
 
-        wmo->modelis[dd].draw2Select (ofs, rot);
+        mi.draw2Select (ofs, rot, frustum);
       }
   }
 
@@ -1190,8 +1182,6 @@ void WMOGroup::drawLiquid ( World* world
                           , const float& fog_distance
                           )
 {
-  if (!visible) return;
-
   // draw liquid
   //! \todo  culling for liquid boundingbox or something
   if (lq) {
