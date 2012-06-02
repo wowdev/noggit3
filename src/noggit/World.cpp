@@ -1232,7 +1232,7 @@ void World::draw ( size_t flags
       //glDepthMask(false);
       //glDisable(GL_DEPTH_TEST);
 
-      if (!flags & NOCURSOR)
+      if (!(flags & NOCURSOR))
       {
         QSettings settings;
         //! \todo This actually should be an enum. And should be passed into this method.
