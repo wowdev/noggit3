@@ -649,31 +649,16 @@ bool checkInside( ::math::vector_3d extentA[2], ::math::vector_3d extentB[2] )
          extentB[1].is_inside_of (extentA[0], extentA[1]);
 }
 
-class sExtendableArray
+class sExtendableArray : public std::vector<char>
 {
 public:
   sExtendableArray()
-    : _data (0, 0)
+    : std::vector<char> (0, 0)
   { }
-
-  template<typename T>
-  void resize (const T& size)
-  {
-    _data.resize (size);
-  }
-  template<typename A, typename B, typename C>
-  void insert (const A& a, const B& b, const C& c)
-  {
-    _data.insert (a, b, c);
-  }
-  size_t size() const
-  {
-    return _data.size();
-  }
 
   void Insert( int pPosition, int pAddition, const char * pAdditionalData )
   {
-    insert (_data.begin() + pPosition
+    insert ( begin() + pPosition
            , pAdditionalData
            , pAdditionalData + pAddition
            );
@@ -682,23 +667,14 @@ public:
   template<typename To>
   To * GetPointer (size_t pPosition = 0)
   {
-    return reinterpret_cast<To*> (&_data[pPosition]);
+    return reinterpret_cast<To*> (&(operator [](pPosition)));
   }
-
-private:
-  std::vector<char> _data;
 };
 
 template<typename T>
 T* get_pointer (std::vector<char>& vector, size_t pPosition = 0)
 {
   return reinterpret_cast<T*> (&vector[pPosition]);
-}
-
-template<typename T>
-T* get_pointer (sExtendableArray& arr, size_t pPosition = 0)
-{
-  return arr.GetPointer<T> (pPosition);
 }
 
 struct sChunkHeader
