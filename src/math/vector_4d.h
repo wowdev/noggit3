@@ -81,7 +81,7 @@ namespace math
       return _w = w_;
     }
 
-    const vector_3d& xyz() const
+    vector_3d xyz() const
     {
       return vector_3d (_x, _y, _z);
     }

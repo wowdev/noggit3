@@ -1879,3 +1879,45 @@ void MapChunk::setFlag( bool on_or_off, int flag)
   else
     Flags = Flags & ~(flag);
 }
+
+void MapChunk::update_low_quality_texture_map()
+{
+  memset ( header.low_quality_texture_map
+         , 0
+         , sizeof (header.low_quality_texture_map)
+         );
+
+  for (size_t layer (1); layer < nTextures; ++layer)
+  {
+    for (size_t y (0); y < 8; ++y)
+    {
+      for (size_t x (0); x < 8; ++x)
+      {
+        size_t sum (0);
+        for (size_t j (0); j < 8; ++j)
+        {
+          for (size_t i (0); i < 8; ++i)
+          {
+            sum += amap[layer][(y * 8 + j) * 64 + (x * 8 + i)];
+          }
+        }
+
+        static const size_t minimum_value_to_overwrite (120);
+
+        if (sum > minimum_value_to_overwrite * 8 * 8)
+        {
+          const size_t array_index ((y * 8 + x) / 4);
+          const size_t bit_index (((y * 8 + x) % 4) * 2);
+
+          header.low_quality_texture_map[array_index]
+            |= ((layer & 3) << bit_index);
+        }
+      }
+    }
+  }
+}
+
+const unsigned char* MapChunk::low_quality_texture_map() const
+{
+  return header.low_quality_texture_map;
+}
