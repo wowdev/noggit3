@@ -31,37 +31,37 @@ Frustum::Frustum()
 
   {
     const ::math::vector_4d temp (column_3 - column_0);
-    planes[RIGHT].normal (::math::vector_3d(temp.x(),temp.y(),temp.z()) );
+    planes[RIGHT].normal (temp.xyz());
     planes[RIGHT].distance (temp.w());
     planes[RIGHT].normalize();
   }
   {
     const ::math::vector_4d temp (column_3 + column_0);
-    planes[LEFT].normal (::math::vector_3d(temp.x(),temp.y(),temp.z()));
+    planes[LEFT].normal (temp.xyz());
     planes[LEFT].distance (temp.w());
     planes[LEFT].normalize();
   }
   {
     const ::math::vector_4d temp (column_3 - column_1);
-    planes[BOTTOM].normal (::math::vector_3d(temp.x(),temp.y(),temp.z()));
+    planes[BOTTOM].normal (temp.xyz());
     planes[BOTTOM].distance (temp.w());
     planes[BOTTOM].normalize();
   }
   {
     const ::math::vector_4d temp (column_3 + column_1);
-    planes[TOP].normal (::math::vector_3d(temp.x(),temp.y(),temp.z()));
+    planes[TOP].normal (temp.xyz());
     planes[TOP].distance (temp.w());
     planes[TOP].normalize();
   }
   {
     const ::math::vector_4d temp (column_3 - column_2);
-    planes[BACK].normal (::math::vector_3d(temp.x(),temp.y(),temp.z()));
+    planes[BACK].normal (temp.xyz());
     planes[BACK].distance (temp.w());
     planes[BACK].normalize();
   }
   {
     const ::math::vector_4d temp (column_3 + column_2);
-    planes[FRONT].normal (::math::vector_3d(temp.x(),temp.y(),temp.z()));
+    planes[FRONT].normal (temp.xyz());
     planes[FRONT].distance (temp.w());
     planes[FRONT].normalize();
   }
@@ -98,7 +98,7 @@ bool Frustum::intersects ( const ::math::vector_3d& v1
   {
     for (size_t point (0); point < 8; ++point)
     {
-      if (planes[side].normal() * points[point] >= -planes[side].distance())
+      if (planes[side].normal() * points[point] > -planes[side].distance())
       {
         //! \note C does not know how to continue out of two loops otherwise.
         goto intersects_next_side;
