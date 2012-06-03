@@ -671,10 +671,6 @@ public:
     return _data.size();
   }
 
-  void Insert( int pPosition, int pAddition )
-  {
-    insert (_data.begin() + pPosition, pAddition, 0);
-  }
   void Insert( int pPosition, int pAddition, const char * pAdditionalData )
   {
     insert (_data.begin() + pPosition
@@ -692,6 +688,18 @@ public:
 private:
   std::vector<char> _data;
 };
+
+template<typename T>
+T* get_pointer (std::vector<char>& vector, size_t pPosition = 0)
+{
+  return reinterpret_cast<T*> (&vector[pPosition]);
+}
+
+template<typename T>
+T* get_pointer (sExtendableArray& arr, size_t pPosition = 0)
+{
+  return arr.GetPointer<T> (pPosition);
+}
 
 struct sChunkHeader
 {
