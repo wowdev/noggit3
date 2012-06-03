@@ -655,20 +655,23 @@ public:
   sExtendableArray()
     : std::vector<char> (0, 0)
   { }
-
-  void Insert( int pPosition, int pAddition, const char * pAdditionalData )
-  {
-    insert ( begin() + pPosition
-           , pAdditionalData
-           , pAdditionalData + pAddition
-           );
-  }
 };
 
 template<typename T>
 T* get_pointer (std::vector<char>& vector, size_t pPosition = 0)
 {
   return reinterpret_cast<T*> (&vector[pPosition]);
+}
+
+void insert_string ( std::vector<char>& vector
+                   , size_t position
+                   , const std::string& str
+                   )
+{
+  vector.insert ( vector.begin() + position
+                , str.size() + 1
+                , str.c_str()
+                );
 }
 
 struct sChunkHeader
@@ -889,7 +892,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     // MTEX data
     for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
     {
-      lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+      insert_string (lADTFile, lCurrentPosition, it->first);
       lCurrentPosition += it->first.size() + 1;
       get_pointer<sChunkHeader>( lADTFile, lMTEX_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
@@ -909,7 +912,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
     {
       it->second.filenamePosition = get_pointer<sChunkHeader>( lADTFile, lMMDX_Position )->mSize;
-      lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+      insert_string (lADTFile, lCurrentPosition, it->first);
       lCurrentPosition += it->first.size() + 1;
       get_pointer<sChunkHeader>( lADTFile, lMMDX_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added model \"" << it->first << "\"." << std::endl;
@@ -946,7 +949,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
     {
       it->second.filenamePosition = get_pointer<sChunkHeader>( lADTFile, lMWMO_Position )->mSize;
-      lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+      insert_string (lADTFile, lCurrentPosition, it->first);
       lCurrentPosition += it->first.size() + 1;
       get_pointer<sChunkHeader>( lADTFile, lMWMO_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added object \"" << it->first << "\"." << std::endl;
@@ -1205,7 +1208,10 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
         get_pointer<MCIN>( lADTFile, lMCIN_Position + 8 )->mEntries[y*16+x].offset = lCurrentPosition;
 
         // MCNK data
-        lADTFile.Insert( lCurrentPosition + 8, 0x80, reinterpret_cast<char*>( &( mChunks[y][x]->header ) ) );
+        lADTFile.insert ( begin() + lCurrentPosition + 8
+                        , reinterpret_cast<char*> (&(mChunks[y][x]->header))
+                        , reinterpret_cast<char*> (&(mChunks[y][x]->header)) + 0x80
+                        );
         MapChunkHeader * lMCNK_header = get_pointer<MapChunkHeader>( lADTFile, lCurrentPosition + 8 );
 
         lMCNK_header->flags = mChunks[y][x]->Flags;
@@ -1707,7 +1713,11 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
         SetChunkHeader( lADTFile, lCurrentPosition, 'MCNK', lMCNK_Size );
 
         // MCNK data
-        lADTFile.Insert( lCurrentPosition + 8, 0x80, reinterpret_cast<char*>( &( mChunks[y][x]->header ) ) ); // This is only the size of the header. More chunks will increase the size.
+        lADTFile.insert ( begin() + lCurrentPosition + 8
+                        , reinterpret_cast<char*> (&(mChunks[y][x]->header))
+                        , reinterpret_cast<char*> (&(mChunks[y][x]->header)) + 0x80
+                        );
+        // This is only the size of the header. More chunks will increase the size.
         MapChunkHeader * lMCNK_header = get_pointer<MapChunkHeader>( lADTFile, lCurrentPosition + 8 );
 
         lMCNK_header->flags = mChunks[y][x]->Flags;
@@ -1902,7 +1912,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     // MTEX data
     for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
     {
-      lADTTexFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+      insert_string (lADTTexFile, lCurrentPosition, it->first);
       lCurrentPosition += it->first.size() + 1;
       get_pointer<sChunkHeader>( lADTTexFile, lMTEX_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
@@ -2073,7 +2083,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
     {
       it->second.filenamePosition = get_pointer<sChunkHeader>( lADTObjFile, lMMDX_Position )->mSize;
-      lADTObjFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+      insert_string (lADTObjFile, lCurrentPosition, it->first);
       lCurrentPosition += it->first.size() + 1;
       get_pointer<sChunkHeader>( lADTObjFile, lMMDX_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added model \"" << it->first << "\"." << std::endl;
@@ -2108,7 +2118,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
     {
       it->second.filenamePosition = get_pointer<sChunkHeader>( lADTObjFile, lMWMO_Position )->mSize;
-      lADTObjFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+      insert_string (lADTObjFile, lCurrentPosition, it->first);
       lCurrentPosition += it->first.size() + 1;
       get_pointer<sChunkHeader>( lADTObjFile, lMWMO_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added object \"" << it->first << "\"." << std::endl;
