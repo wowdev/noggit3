@@ -20,6 +20,7 @@
 #include <QSlider>
 #include <QLabel>
 #include <QToolBar>
+#include <QVariant>
 
 #include <math/bounded_nearest.h>
 
@@ -43,6 +44,8 @@
 //! \todo Replace all old gui elements with new classes / widgets.
 #undef __OBSOLETE_GUI_ELEMENTS
 
+Q_DECLARE_METATYPE (WorldFlags)
+
 namespace noggit
 {
   MapView::MapView ( World* world
@@ -65,15 +68,8 @@ namespace noggit
     , _cursor_selector (new ui::cursor_selector (NULL))
     , _is_currently_moving_object (false)
     , _object_to_ground (true)
-    , _draw_terrain_height_contour (false)
-    , _draw_wmo_doodads (true)
-    , _draw_fog (true)
-    , _draw_lines (false)
-    , _draw_doodads (true)
-    , _draw_terrain (true)
-    , _draw_water (false)
-    , _draw_wmos (true)
-    , _draw_hole_lines (false)
+    , flags(TERRAIN | WMODOODAS | FOG | DOODADS | TERRAIN | DRAWWMO)
+    , backupFlags(0)
     , _draw_lighting (true)
     , _fog_distance (777.0f)
     , _holding_left_mouse_button (false)
@@ -133,13 +129,14 @@ namespace noggit
     setAcceptDrops (true);
     setFocusPolicy (Qt::StrongFocus);
     setMouseTracking (true);
-
+    //flags |= _draw_terrain ? TERRAIN : 0;
     createGUI();
 
     //! \todo Dynamic?
     startTimer (40);
     //! \todo QTimerEvent->time_since_startup or something?
     _startup_time.start();
+
   }
 
   float mh,mv,rh,rv;
@@ -167,6 +164,7 @@ namespace noggit
   #define NEW_ACTION(__NAME__, __TEXT, __SLOT, __KEYS) QAction* __NAME__ (new_action (__TEXT, __SLOT, __KEYS));
   #define NEW_ACTION_OTHER(__NAME__, __TEXT, __RECEIVER, __SLOT, __KEYS) QAction* __NAME__ (new_action (__TEXT, __RECEIVER, __SLOT, __KEYS));
   #define NEW_TOGGLE_ACTION(__NAME__, __TEXT, __SLOT, __KEYS, __DEFAULT) QAction* __NAME__ (new_toggleable_action (__TEXT, __SLOT, __DEFAULT, __KEYS));
+  #define NEW_FLAG_ACTION(__NAME__, __TEXT, __FLAG, __KEYS) QAction* __NAME__ (new_flag_action (__TEXT, __FLAG, __KEYS));
 
     NEW_ACTION (save_current_tile, tr ("Save current tile"), SLOT (save()), Qt::CTRL + Qt::SHIFT + Qt::Key_S);
     NEW_ACTION (save_modified_tiles, tr ("Save all modified tiles"), SLOT (save_all()), QKeySequence::Save);
@@ -195,16 +193,18 @@ namespace noggit
     NEW_TOGGLE_ACTION (detail_infos, tr ("Object information"), SLOT (toggle_detail_info_window (bool)), Qt::Key_F8, false);
 
 
-    NEW_TOGGLE_ACTION (doodad_drawing, tr ("Draw doodads"), SLOT (toggle_doodad_drawing (bool)), Qt::Key_F1, _draw_doodads);
-    NEW_TOGGLE_ACTION (wmo_doodad_drawing, tr ("Draw doodads inside of WMOs"), SLOT (toggle_wmo_doodad_drawing (bool)), Qt::Key_F2, _draw_wmo_doodads);
-    NEW_TOGGLE_ACTION (terrain_drawing, tr ("Draw terrain"), SLOT (toggle_terrain_drawing (bool)), Qt::Key_F3, _draw_terrain);
-    NEW_TOGGLE_ACTION (water_drawing, tr ("Draw water"), SLOT (toggle_water_drawing (bool)), Qt::Key_F4, _draw_water);
-    NEW_TOGGLE_ACTION (wmo_drawing, tr ("Draw WMOs"), SLOT (toggle_wmo_drawing (bool)), Qt::Key_F6, _draw_wmos);
-    NEW_TOGGLE_ACTION (line_drawing, tr ("Draw lines"), SLOT (toggle_line_drawing (bool)), Qt::Key_F7, _draw_lines);
-    NEW_TOGGLE_ACTION (hole_line_drawing, tr ("Draw lines for holes"), SLOT (toggle_hole_line_drawing (bool)), Qt::SHIFT + Qt::Key_F7, _draw_hole_lines);
+    NEW_FLAG_ACTION (doodad_drawing, tr ("Draw doodads"), DOODADS, Qt::Key_F1);
+    NEW_FLAG_ACTION (wmo_doodad_drawing, tr ("Draw doodads inside of WMOs"), WMODOODAS, Qt::Key_F2);
+    NEW_FLAG_ACTION (terrain_drawing, tr ("Draw terrain"), TERRAIN, Qt::Key_F3);
+    NEW_FLAG_ACTION (water_drawing, tr ("Draw water"), WATER, Qt::Key_F4);
+    NEW_FLAG_ACTION (wmo_drawing, tr ("Draw WMOs"), DRAWWMO, Qt::Key_F6);
+    NEW_FLAG_ACTION (line_drawing, tr ("Draw lines"), LINES, Qt::Key_F7);
+    NEW_FLAG_ACTION (hole_line_drawing, tr ("Draw lines for holes"), HOLELINES, Qt::SHIFT + Qt::Key_F7);
     //! \todo on OSX this shows up as "8" in menu and does not react to the keybinding.
-    NEW_TOGGLE_ACTION (contour_drawing, tr ("Draw contours"), SLOT (toggle_contour_drawing (bool)), Qt::Key_F9, _draw_terrain_height_contour);
-    NEW_TOGGLE_ACTION (fog_drawing, tr ("Draw fog"), SLOT (toggle_fog_drawing (bool)), Qt::Key_F, _draw_fog);
+    NEW_FLAG_ACTION (contour_drawing, tr ("Draw contours"), HEIGHTCONTOUR, Qt::Key_F9);
+    NEW_FLAG_ACTION (fog_drawing, tr ("Draw fog"), FOG, Qt::Key_F);
+
+    //! \todo is unused atm
     NEW_TOGGLE_ACTION (toggle_lighting, tr ("Enable Lighting"), SLOT (toggle_lighting (bool)), Qt::Key_L, _draw_lighting);
 
     NEW_ACTION (turn_around, tr ("Turn camera 180 degrees"), SLOT (turn_around()), Qt::Key_R);
@@ -353,6 +353,20 @@ namespace noggit
     connect (action, SIGNAL (toggled (bool)), slot);
     action->setCheckable (true);
     action->setChecked (default_value);
+    if (shortcut != QKeySequence (0))
+    {
+      action->setShortcuts (QList<QKeySequence>() << shortcut);
+    }
+    return action;
+  }
+
+  QAction *MapView::new_flag_action(const QString &text, WorldFlags flag, const QKeySequence &shortcut)
+  {
+    QAction* action (new QAction (text, this));
+    connect (action, SIGNAL(toggled(bool)), SLOT(toggle_flag(bool)) );
+    action->setCheckable (true);
+    action->setData(flag);
+    action->setChecked (flags & flag);
     if (shortcut != QKeySequence (0))
     {
       action->setShortcuts (QList<QKeySequence>() << shortcut);
@@ -944,11 +958,7 @@ namespace noggit
   {
     setup_3d_selection_rendering();
 
-    _world->drawSelection ( _draw_wmo_doodads
-                          , _draw_wmos && !selectTerrainOnly
-                          , _draw_doodads && !selectTerrainOnly
-                          , _draw_terrain
-                          );
+    _world->drawSelection (flags);
   }
 
   QPointF MapView::tile_mode_brush_position() const
@@ -1003,7 +1013,7 @@ namespace noggit
   void MapView::displayViewMode_2D()
   {
     setup_tile_mode_rendering();
-    _world->drawTileMode ( _draw_lines, width() / qreal (height())
+    _world->drawTileMode ( flags & LINES, width() / qreal (height())
                          , _tile_mode_zoom
                          );
     draw_tile_mode_brush();
@@ -1030,21 +1040,6 @@ namespace noggit
       brush_radius = smoothing_radius();
     else if (_current_terrain_editing_mode == texturing)
       brush_radius = texturing_radius();
-
-    size_t flags (0);
-
-    flags |= _draw_terrain ? TERRAIN : 0;
-    flags |= _draw_doodads ? DOODADS : 0;
-    flags |= _draw_fog ? FOG : 0;
-    flags |= _draw_water ? WATER : 0;
-    flags |= _draw_wmos ? DRAWWMO : 0;
-    flags |= _draw_wmo_doodads ? WMODOODAS : 0;
-    flags |= _draw_hole_lines ? HOLELINES : 0;
-    flags |= _draw_lines ? LINES : 0;
-    flags |= _current_terrain_editing_mode == hole_setting ? NOCURSOR : 0;
-    flags |= _current_terrain_editing_mode == area_id_setting ? AREAID : 0;
-    flags |= _current_terrain_editing_mode == impassable_flag_setting ? MARKIMPASSABLE : 0;
-    flags |= _draw_terrain_height_contour ? HEIGHTCONTOUR : 0;
 
     _world->draw ( flags
                  , brush_radius
@@ -1369,38 +1364,15 @@ namespace noggit
   {
     //! \todo This is BAD global state! Use a stack<settings_type> as member.
     static bool in_texturing_mode (false);
-    static bool backup_draw_doodads;
-    static bool backup_draw_wmo_doodads;
-    static bool backup_draw_terrain_height_contour;
-    static bool backup_draw_wmos;
-    static bool backup_draw_detailselect;
-    static bool backup_draw_fog;
-    static bool backup_draw_terrain;
 
     if( !in_texturing_mode )
     {
-      backup_draw_doodads = _draw_doodads;
-      backup_draw_wmo_doodads = _draw_wmo_doodads;
-      backup_draw_terrain_height_contour = _draw_terrain_height_contour;
-      backup_draw_wmos = _draw_wmos;
-      backup_draw_fog = _draw_fog;
-      backup_draw_terrain = _draw_terrain;
-
-      _draw_doodads = false;
-      _draw_wmo_doodads = false;
-      _draw_terrain_height_contour = true;
-      _draw_wmos = false;
-      _draw_terrain = true;
-      _draw_fog = false;
+      backupFlags = flags;
+      flags = TERRAIN | HEIGHTCONTOUR;
     }
     else
     {
-      _draw_doodads = backup_draw_doodads;
-      _draw_wmo_doodads = backup_draw_wmo_doodads;
-      _draw_terrain_height_contour = backup_draw_terrain_height_contour;
-      _draw_wmos = backup_draw_wmos;
-      _draw_terrain = backup_draw_terrain;
-      _draw_fog = backup_draw_fog;
+      flags = backupFlags;
     }
     in_texturing_mode = !in_texturing_mode;
   }
@@ -1417,34 +1389,15 @@ namespace noggit
 
   /// --- Drawing toggles --------------------------------------------------------
 
-  void MapView::toggle_doodad_drawing (bool value)
+  void MapView::toggle_flag (bool value)
   {
-    _draw_doodads = value;
+    QAction *action = (QAction *)sender();
+    if(value)
+        flags |= action->data().toInt();
+    else
+        flags &= ~action->data().toInt();
   }
-  void MapView::toggle_water_drawing (bool value)
-  {
-    _draw_water = value;
-  }
-  void MapView::toggle_terrain_drawing (bool value)
-  {
-    _draw_terrain = value;
-  }
-  void MapView::toggle_wmo_doodad_drawing (bool value)
-  {
-    _draw_wmo_doodads = value;
-  }
-  void MapView::toggle_line_drawing (bool value)
-  {
-    _draw_lines = value;
-  }
-  void MapView::toggle_wmo_drawing (bool value)
-  {
-    _draw_wmos = value;
-  }
-  void MapView::toggle_hole_line_drawing (bool value)
-  {
-    _draw_hole_lines = value;
-  }
+
   void MapView::toggle_lighting (bool value)
   {
     _draw_lighting = value;
@@ -1534,16 +1487,6 @@ namespace noggit
     default:
       break;
     }
-  }
-
-  void MapView::toggle_contour_drawing (bool value)
-  {
-    _draw_terrain_height_contour = value;
-  }
-
-  void MapView::toggle_fog_drawing (bool value)
-  {
-    _draw_fog = value;
   }
 
   void MapView::toggle_tile_mode()
@@ -1835,7 +1778,10 @@ namespace noggit
   {
     _current_terrain_editing_mode = (terrain_editing_modes)mode;
 
-    _draw_hole_lines = mode == hole_setting;
+    flags &= ~HOLELINES;
+    flags &= ~NOCURSOR;
+    flags &= ~AREAID;
+    flags &= ~MARKIMPASSABLE;
 
     _shaping_settings_widget->hide();
     _smoothing_settings_widget->hide();
@@ -1853,6 +1799,18 @@ namespace noggit
 
     case texturing:
       _texturing_settings_widget->show();
+      break;
+
+    case hole_setting:
+      flags |= HOLELINES | NOCURSOR;
+      break;
+
+    case area_id_setting:
+      flags |= AREAID;
+      break;
+
+    case impassable_flag_setting:
+      flags |= MARKIMPASSABLE;
       break;
 
     default:

@@ -1427,11 +1427,7 @@ struct GLNameEntry
   } stack;
 };
 
-void World::drawSelection ( bool draw_wmo_doodads
-                          , bool draw_wmos
-                          , bool draw_doodads
-                          , bool draw_terrain
-                          )
+void World::drawSelection ( size_t flags)
 {
   glSelectBuffer ( sizeof (_selection_buffer) / sizeof (GLuint)
                  , _selection_buffer
@@ -1451,7 +1447,7 @@ void World::drawSelection ( bool draw_wmo_doodads
 
   glInitNames();
 
-  if (draw_terrain)
+  if (flags & TERRAIN)
   {
     ::opengl::scoped::name_pusher type (MapTileName);
     for( int j = 0; j < 64; ++j )
@@ -1469,7 +1465,7 @@ void World::drawSelection ( bool draw_wmo_doodads
     }
   }
 
-  if (draw_wmos)
+  if (flags & DRAWWMO)
   {
     ::opengl::scoped::name_pusher type (MapObjName);
     ::opengl::scoped::name_pusher dummy (0);
@@ -1478,7 +1474,7 @@ void World::drawSelection ( bool draw_wmo_doodads
         ; ++it
         )
     {
-      it->second->drawSelect ( draw_wmo_doodads
+      it->second->drawSelect ( flags & WMODOODAS
                              , mapdrawdistance
                              , frustum
                              , camera
@@ -1486,7 +1482,7 @@ void World::drawSelection ( bool draw_wmo_doodads
     }
   }
 
-  if (draw_doodads)
+  if (flags & DOODADS)
   {
     ModelManager::resetAnim();
 

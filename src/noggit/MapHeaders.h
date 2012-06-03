@@ -8,6 +8,21 @@
 
 #include <stdint.h>
 
+enum WorldFlags {
+    TERRAIN = 0x1,
+    FOG = 0x2,
+    DOODADS = 0x4,
+    DRAWWMO = 0x8,
+    WMODOODAS = 0x10,
+    WATER = 0x20,
+    LINES = 0x40,
+    HOLELINES = 0x80,
+    HEIGHTCONTOUR = 0x100,
+    MARKIMPASSABLE = 0x200,
+    AREAID = 0x400,
+    NOCURSOR = 0x800
+};
+
 enum eMCNKFlags
 {
   FLAG_SHADOW = 0x1,

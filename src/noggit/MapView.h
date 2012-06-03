@@ -10,6 +10,7 @@
 
 // GL needs to be included before GLWidget.
 #include <opengl/types.h>
+#include <noggit/MapHeaders.h>
 
 #include <QPoint>
 #include <QGLWidget>
@@ -141,28 +142,20 @@ namespace noggit
     void save_all();
     void save_minimap();
     void snap_selected_object_to_ground();
+    void toggle_flag(bool);
     void toggle_auto_selecting (bool);
     void toggle_object_to_ground (bool);
-    void toggle_contour_drawing (bool);
     void toggle_copy_position_randomization (bool);
     void toggle_copy_rotation_randomization (bool);
     void toggle_copy_size_randomization (bool);
     void toggle_current_texture_visiblity (bool);
     void toggle_detail_info_window (bool);
-    void toggle_doodad_drawing (bool);
-    void toggle_fog_drawing (bool);
-    void toggle_hole_line_drawing (bool);
     void toggle_interface();
     void toggle_lighting (bool);
-    void toggle_line_drawing (bool);
     void toggle_minimap (bool);
-    void toggle_terrain_drawing (bool);
     void toggle_terrain_mode_window();
     void toggle_terrain_texturing_mode();
     void toggle_tile_mode();
-    void toggle_water_drawing (bool);
-    void toggle_wmo_doodad_drawing (bool);
-    void toggle_wmo_drawing (bool);
     void turn_around();
     void clear_heightmap();
     void move_heightmap();
@@ -198,6 +191,7 @@ namespace noggit
 
   private:
     QAction* new_toggleable_action (const QString& text, const char* slot, bool default_value, const QKeySequence& shortcut = 0);
+    QAction* new_flag_action (const QString& text, WorldFlags flag, const QKeySequence& shortcut = 0);
     QAction* new_action (const QString& text, const char* slot, const QKeySequence& shortcut = 0);
     QAction* new_action (const QString& text, QObject* receiver, const char* slot, const QKeySequence& shortcut = 0);
 
@@ -237,6 +231,8 @@ namespace noggit
 
     void doSelection( bool selectTerrainOnly );
 
+    size_t flags;
+    size_t backupFlags;
     int mViewMode;
 
     void displayViewMode_2D();
@@ -266,15 +262,6 @@ namespace noggit
 
     bool _object_to_ground;
 
-    bool _draw_terrain_height_contour;
-    bool _draw_wmo_doodads;
-    bool _draw_fog;
-    bool _draw_lines;
-    bool _draw_doodads;
-    bool _draw_terrain;
-    bool _draw_water;
-    bool _draw_wmos;
-    bool _draw_hole_lines;
     bool _draw_lighting;
 
     float _fog_distance;
