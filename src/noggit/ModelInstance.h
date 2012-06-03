@@ -7,7 +7,6 @@
 
 #include <math/vector_3d.h>
 #include <math/quaternion.h>
-#include <stddef.h>
 
 class Frustum;
 class Model;
