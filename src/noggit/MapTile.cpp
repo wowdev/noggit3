@@ -652,80 +652,49 @@ bool checkInside( ::math::vector_3d extentA[2], ::math::vector_3d extentB[2] )
 class sExtendableArray
 {
 public:
-  int mSize;
-  char * mData;
-
-  bool Allocate( int pSize )
-  {
-    mSize = pSize;
-    mData = static_cast<char*>( realloc( mData, mSize ) );
-    memset( mData, 0, mSize );
-    return( mData != NULL );
-  }
-  bool Extend( int pAddition )
-  {
-    mSize = mSize + pAddition;
-    mData = static_cast<char*>( realloc( mData, mSize ) );
-    memset( mData + mSize - pAddition, 0, pAddition );
-    return( mData != NULL );
-  }
-  bool Insert( int pPosition, int pAddition )
-  {
-    const int lPostSize = mSize - pPosition;
-
-    char * lPost = static_cast<char*>( malloc( lPostSize ) );
-    memcpy( lPost, mData + pPosition, lPostSize );
-
-    if( !Extend( pAddition ) )
-      return false;
-
-    memcpy( mData + pPosition + pAddition, lPost, lPostSize );
-    memset( mData + pPosition, 0, pAddition );
-    return true;
-  }
-  bool Insert( int pPosition, int pAddition, const char * pAdditionalData )
-  {
-    const int lPostSize = mSize - pPosition;
-
-    char * lPost = static_cast<char*>( malloc( lPostSize ) );
-    memcpy( lPost, mData + pPosition, lPostSize );
-
-    if( !Extend( pAddition ) )
-      return false;
-
-    memcpy( mData + pPosition + pAddition, lPost, lPostSize );
-    memcpy( mData + pPosition, pAdditionalData, pAddition );
-    return true;
-  }
-
-  template<typename To>
-  To * GetPointer()
-  {
-    return( reinterpret_cast<To*>( mData ) );
-  }
-  template<typename To>
-  To * GetPointer( unsigned int pPosition )
-  {
-    return( reinterpret_cast<To*>( mData + pPosition ) );
-  }
-
   sExtendableArray()
+    : _data (0, 0)
+  { }
+
+  template<typename T>
+  void resize (const T& size)
   {
-    mSize = 0;
-    mData = NULL;
+    _data.resize (size);
   }
-  sExtendableArray( int pSize, const char * pData )
+  template<typename A, typename B, typename C>
+  void insert (const A& a, const B& b, const C& c)
   {
-    if( Allocate( pSize ) )
-      memcpy( mData, pData, pSize );
-    else
-      LogError << "Allocating " << pSize << " bytes failed. This may crash soon." << std::endl;
+    _data.insert (a, b, c);
+  }
+  size_t size() const
+  {
+    return _data.size();
   }
 
-  void Destroy()
+  void Extend( int pAddition )
   {
-    free( mData );
+    resize (_data.size() + pAddition);
   }
+  void Insert( int pPosition, int pAddition )
+  {
+    insert (_data.begin() + pPosition, pAddition, 0);
+  }
+  void Insert( int pPosition, int pAddition, const char * pAdditionalData )
+  {
+    insert (_data.begin() + pPosition
+           , pAdditionalData
+           , pAdditionalData + pAddition
+           );
+  }
+
+  template<typename To>
+  To * GetPointer (size_t pPosition = 0)
+  {
+    return reinterpret_cast<To*> (&_data[pPosition]);
+  }
+
+private:
+  std::vector<char> _data;
 };
 
 struct sChunkHeader
@@ -734,7 +703,7 @@ struct sChunkHeader
   int mSize;
 };
 
-void SetChunkHeader( sExtendableArray pArray, int pPosition, int pMagix, int pSize = 0 )
+void SetChunkHeader( sExtendableArray& pArray, int pPosition, int pMagix, int pSize = 0 )
 {
   sChunkHeader * Header = pArray.GetPointer<sChunkHeader>( pPosition );
   Header->mMagic = pMagix;
@@ -896,7 +865,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
   // Now write the file.
 
-  sExtendableArray lADTFile = sExtendableArray();
+  sExtendableArray lADTFile;
 
   int lCurrentPosition = 0;
 
@@ -1607,7 +1576,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 #endif
 
   noggit::mpq::file f (QString::fromStdString (mFilename));
-  f.setBuffer( lADTFile.GetPointer<char>(), lADTFile.mSize );
+  f.setBuffer( lADTFile.GetPointer<char>(), lADTFile.size() );
   f.save_to_disk();
   f.close();
 }
@@ -1722,7 +1691,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
   // terrain
 
-  sExtendableArray lADTFile = sExtendableArray();
+  sExtendableArray lADTFile;
 
   int lCurrentPosition = 0;
 
@@ -1918,13 +1887,13 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
   }
 
   noggit::mpq::file f (QString::fromStdString (mFilename));
-  f.setBuffer( lADTFile.GetPointer<char>(), lADTFile.mSize );
+  f.setBuffer( lADTFile.GetPointer<char>(), lADTFile.size() );
   f.save_to_disk();
   f.close();
 
   // tex0
 
-  sExtendableArray lADTTexFile = sExtendableArray();
+  sExtendableArray lADTTexFile;
   lCurrentPosition = 0;
 
   // MVER
@@ -2098,13 +2067,13 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
   texFilename = "/" + texFilename;
 
   noggit::mpq::file fTex (QString::fromStdString (mFilename));
-  fTex.setBuffer( lADTTexFile.GetPointer<char>(), lADTTexFile.mSize );
+  fTex.setBuffer( lADTTexFile.GetPointer<char>(), lADTTexFile.size() );
   fTex.save_to_disk(QString::fromStdString (texFilename));
   fTex.close();
 
   // obj0
 
-  sExtendableArray lADTObjFile = sExtendableArray();
+  sExtendableArray lADTObjFile;
   lCurrentPosition = 0;
 
   // MVER
@@ -2392,7 +2361,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
   objFilename = "/" + objFilename;
 
   noggit::mpq::file fObj (QString::fromStdString (mFilename));
-  fObj.setBuffer( lADTObjFile.GetPointer<char>(), lADTObjFile.mSize );
+  fObj.setBuffer( lADTObjFile.GetPointer<char>(), lADTObjFile.size() );
   fObj.save_to_disk(QString::fromStdString (objFilename));
   fObj.close();
 
