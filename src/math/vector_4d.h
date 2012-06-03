@@ -83,6 +83,7 @@ namespace math
 
     const vector_3d& xyz() const
     {
+      // this is only temporary so doesent work
       return vector_3d (_x, _y, _z);
     }
     const vector_3d& xyz (const vector_3d& xyz_)
