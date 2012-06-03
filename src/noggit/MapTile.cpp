@@ -1292,6 +1292,12 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
         //! \todo  MCCV sub-chunk
         lMCNK_header->ofsMCCV = 0;
 
+        mChunks[y][x]->update_low_quality_texture_map();
+        memcpy ( lMCNK_header->low_quality_texture_map
+               , mChunks[y][x]->low_quality_texture_map()
+               , sizeof (lMCNK_header->low_quality_texture_map)
+               );
+
         if( lMCNK_header->flags & 0x40 )
           LogError << "Problem with saving: This ADT is said to have vertex shading but we don't write them yet. This might get you really fucked up results." << std::endl;
         lMCNK_header->flags = lMCNK_header->flags & ( ~0x40 );
@@ -1786,6 +1792,12 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
         //! \todo  MCCV sub-chunk
         lMCNK_header->ofsMCCV = 0;
+
+        mChunks[y][x]->update_low_quality_texture_map();
+        memcpy ( lMCNK_header->low_quality_texture_map
+               , mChunks[y][x]->low_quality_texture_map()
+               , sizeof (lMCNK_header->low_quality_texture_map)
+               );
 
         if( lMCNK_header->flags & 0x40 )
           LogError << "Problem with saving: This ADT is said to have vertex shading but we don't write them yet. This might get you really fucked up results." << std::endl;
