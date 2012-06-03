@@ -38,21 +38,6 @@ static const float mapdrawdistance = 998.0f;
 static const float modeldrawdistance = 384.0f;
 static const float doodaddrawdistance = 64.0f;
 
-enum WorldFlags {
-    TERRAIN = 0x1,
-    FOG = 0x2,
-    DOODADS = 0x4,
-    DRAWWMO = 0x8,
-    WMODOODAS = 0x10,
-    WATER = 0x20,
-    LINES = 0x40,
-    HOLELINES = 0x80,
-    HEIGHTCONTOUR = 0x100,
-    MARKIMPASSABLE = 0x200,
-    AREAID = 0x400,
-    NOCURSOR = 0x800
-};
-
 typedef unsigned short StripType;
 
 /*!
@@ -192,11 +177,7 @@ public:
             , const float& fog_distance
             );
 
-  void drawSelection ( bool draw_wmo_doodads
-                     , bool draw_wmos
-                     , bool draw_doodads
-                     , bool draw_terrain
-                     );
+  void drawSelection (size_t flags);
   void drawSelectionChunk(int cursorX,int cursorY);
   void drawTileMode ( bool draw_lines
                     , float ratio
