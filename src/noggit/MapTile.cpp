@@ -661,8 +661,8 @@ void insert_string ( std::vector<char>& vector
                    )
 {
   vector.insert ( vector.begin() + position
-                , str.size() + 1
-                , str.c_str()
+                , str.begin()
+                , str.end()
                 );
 }
 
@@ -1200,7 +1200,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
         get_pointer<MCIN>( lADTFile, lMCIN_Position + 8 )->mEntries[y*16+x].offset = lCurrentPosition;
 
         // MCNK data
-        lADTFile.insert ( begin() + lCurrentPosition + 8
+        lADTFile.insert ( lADTFile.begin() + lCurrentPosition + 8
                         , reinterpret_cast<char*> (&(mChunks[y][x]->header))
                         , reinterpret_cast<char*> (&(mChunks[y][x]->header)) + 0x80
                         );
@@ -1705,7 +1705,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
         SetChunkHeader( lADTFile, lCurrentPosition, 'MCNK', lMCNK_Size );
 
         // MCNK data
-        lADTFile.insert ( begin() + lCurrentPosition + 8
+        lADTFile.insert ( lADTFile.begin() + lCurrentPosition + 8
                         , reinterpret_cast<char*> (&(mChunks[y][x]->header))
                         , reinterpret_cast<char*> (&(mChunks[y][x]->header)) + 0x80
                         );
