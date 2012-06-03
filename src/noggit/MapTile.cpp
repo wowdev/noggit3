@@ -663,12 +663,6 @@ public:
            , pAdditionalData + pAddition
            );
   }
-
-  template<typename To>
-  To * GetPointer (size_t pPosition = 0)
-  {
-    return reinterpret_cast<To*> (&(operator [](pPosition)));
-  }
 };
 
 template<typename T>
@@ -685,7 +679,7 @@ struct sChunkHeader
 
 void SetChunkHeader( sExtendableArray& pArray, int pPosition, int pMagix, int pSize = 0 )
 {
-  sChunkHeader * Header = pArray.GetPointer<sChunkHeader>( pPosition );
+  sChunkHeader * Header = get_pointer<sChunkHeader>( pArray, pPosition );
   Header->mMagic = pMagix;
   Header->mSize = pSize;
 }
@@ -855,7 +849,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     SetChunkHeader( lADTFile, lCurrentPosition, 'MVER', 4 );
 
     // MVER data
-    *( lADTFile.GetPointer<int>( 8 ) ) = 18;
+    *( get_pointer<int>( lADTFile, 8 ) ) = 18;
 
     lCurrentPosition += 8 + 0x4;
 //  }
@@ -866,7 +860,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     lADTFile.resize (lADTFile.size() + 8 + 0x40 );
     SetChunkHeader( lADTFile, lCurrentPosition, 'MHDR', 0x40 );
 
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->flags = mFlags;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->flags = mFlags;
 
     lCurrentPosition += 8 + 0x40;
 //  }
@@ -876,9 +870,9 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 //  {
     lADTFile.resize (lADTFile.size() + 8 + 256 * 0x10 );
     SetChunkHeader( lADTFile, lCurrentPosition, 'MCIN', 256 * 0x10 );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mcin = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->mcin = lCurrentPosition - 0x14;
 
-    // MCIN * MCIN_Data = lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 );
+    // MCIN * MCIN_Data = get_pointer<MCIN>( lADTFile, lMCIN_Position + 8 );
 
     lCurrentPosition += 8 + 256 * 0x10;
 //  }
@@ -888,7 +882,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     int lMTEX_Position = lCurrentPosition;
     lADTFile.resize (lADTFile.size() + 8 + 0 );  // We don't yet know how big this will be.
     SetChunkHeader( lADTFile, lCurrentPosition, 'MTEX' );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mtex = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->mtex = lCurrentPosition - 0x14;
 
     lCurrentPosition += 8 + 0;
 
@@ -897,7 +891,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     {
       lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
       lCurrentPosition += it->first.size() + 1;
-      lADTFile.GetPointer<sChunkHeader>( lMTEX_Position )->mSize += it->first.size() + 1;
+      get_pointer<sChunkHeader>( lADTFile, lMTEX_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
     }
 //  }
@@ -907,17 +901,17 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     int lMMDX_Position = lCurrentPosition;
     lADTFile.resize (lADTFile.size() + 8 + 0 );  // We don't yet know how big this will be.
     SetChunkHeader( lADTFile, lCurrentPosition, 'MMDX' );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mmdx = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->mmdx = lCurrentPosition - 0x14;
 
     lCurrentPosition += 8 + 0;
 
     // MMDX data
     for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
     {
-      it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize;
+      it->second.filenamePosition = get_pointer<sChunkHeader>( lADTFile, lMMDX_Position )->mSize;
       lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
       lCurrentPosition += it->first.size() + 1;
-      lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize += it->first.size() + 1;
+      get_pointer<sChunkHeader>( lADTFile, lMMDX_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added model \"" << it->first << "\"." << std::endl;
     }
 //  }
@@ -927,10 +921,10 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     int lMMID_Size = 4 * lModels.size();
     lADTFile.resize (lADTFile.size() + 8 + lMMID_Size );
     SetChunkHeader( lADTFile, lCurrentPosition, 'MMID', lMMID_Size );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mmid = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->mmid = lCurrentPosition - 0x14;
 
     // MMID data
-    int * lMMID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
+    int * lMMID_Data = get_pointer<int>( lADTFile, lCurrentPosition + 8 );
 
     lID = 0;
     for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
@@ -944,17 +938,17 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     int lMWMO_Position = lCurrentPosition;
     lADTFile.resize (lADTFile.size() + 8 + 0 );  // We don't yet know how big this will be.
     SetChunkHeader( lADTFile, lCurrentPosition, 'MWMO' );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mwmo = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->mwmo = lCurrentPosition - 0x14;
 
     lCurrentPosition += 8 + 0;
 
     // MWMO data
     for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
     {
-      it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize;
+      it->second.filenamePosition = get_pointer<sChunkHeader>( lADTFile, lMWMO_Position )->mSize;
       lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
       lCurrentPosition += it->first.size() + 1;
-      lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize += it->first.size() + 1;
+      get_pointer<sChunkHeader>( lADTFile, lMWMO_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added object \"" << it->first << "\"." << std::endl;
     }
 //  }
@@ -964,10 +958,10 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     int lMWID_Size = 4 * lObjects.size();
     lADTFile.resize (lADTFile.size() + 8 + lMWID_Size );
     SetChunkHeader( lADTFile, lCurrentPosition, 'MWID', lMWID_Size );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mwid = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->mwid = lCurrentPosition - 0x14;
 
     // MWID data
-    int * lMWID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
+    int * lMWID_Data = get_pointer<int>( lADTFile, lCurrentPosition + 8 );
 
     lID = 0;
     for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
@@ -981,10 +975,10 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     int lMDDF_Size = 0x24 * lModelInstances.size();
     lADTFile.resize (lADTFile.size() + 8 + lMDDF_Size );
     SetChunkHeader( lADTFile, lCurrentPosition, 'MDDF', lMDDF_Size );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mddf = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->mddf = lCurrentPosition - 0x14;
 
     // MDDF data
-    ENTRY_MDDF * lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>( lCurrentPosition + 8 );
+    ENTRY_MDDF * lMDDF_Data = get_pointer<ENTRY_MDDF>( lADTFile, lCurrentPosition + 8 );
 
     lID = 0;
     for( std::map<int,ModelInstance*>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
@@ -1026,10 +1020,10 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     int lMODF_Size = 0x40 * lObjectInstances.size();
     lADTFile.resize (lADTFile.size() + 8 + lMODF_Size );
     SetChunkHeader( lADTFile, lCurrentPosition, 'MODF', lMODF_Size );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->modf = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->modf = lCurrentPosition - 0x14;
 
     // MODF data
-    ENTRY_MODF * lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>( lCurrentPosition + 8 );
+    ENTRY_MODF * lMODF_Data = get_pointer<ENTRY_MODF>( lADTFile, lCurrentPosition + 8 );
 
     lID = 0;
     for( std::map<int,WMOInstance *>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
@@ -1160,19 +1154,19 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
         }
     }
 
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mh2o = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->mh2o = lCurrentPosition - 0x14;
     lADTFile.resize (lADTFile.size() + 8 + lMH2O_size);
     SetChunkHeader( lADTFile, lCurrentPosition, 'MH2O', lMH2O_size );
 
     for(int i=0; i<256; ++i){
-        MH2O_Header * tmpHeader = lADTFile.GetPointer<MH2O_Header>(lCurrentPosition + 8 + i*sizeof(MH2O_Header));
+      MH2O_Header * tmpHeader = get_pointer<MH2O_Header>(lADTFile, lCurrentPosition + 8 + i*sizeof(MH2O_Header));
         memcpy(tmpHeader, &lHeader[i], sizeof(MH2O_Header));
         if(tmpHeader->nLayers != 0){
-          MH2O_Information* tmpInfo = lADTFile.GetPointer<MH2O_Information>(lCurrentPosition + 8 + tmpHeader->ofsInformation);
+          MH2O_Information* tmpInfo = get_pointer<MH2O_Information>(lADTFile, lCurrentPosition + 8 + tmpHeader->ofsInformation);
           memcpy(tmpInfo, &lInfo[i], sizeof(MH2O_Information));
 
-          float * tmpHeight = lADTFile.GetPointer<float>(lCurrentPosition + 8 + tmpInfo->ofsHeightMap);
-          char * tmpDepth = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpInfo->ofsHeightMap + (tmpInfo->width+1)*(tmpInfo->height+1)*sizeof(float));
+          float * tmpHeight = get_pointer<float>(lADTFile, lCurrentPosition + 8 + tmpInfo->ofsHeightMap);
+          char * tmpDepth = get_pointer<char>(lADTFile, lCurrentPosition + 8 + tmpInfo->ofsHeightMap + (tmpInfo->width+1)*(tmpInfo->height+1)*sizeof(float));
           int c = 0;
           for(int w = tmpInfo->yOffset; w < tmpInfo->yOffset+tmpInfo->width + 1; ++w){
             for(int h = tmpInfo->xOffset; h < tmpInfo->xOffset+tmpInfo->height + 1; ++h){
@@ -1181,8 +1175,8 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
               ++c;
             }
           }
-          char* tmpMask = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpInfo->ofsInfoMask);
-          char * tmpRender = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpHeader->ofsRenderMask);
+          char* tmpMask = get_pointer<char>(lADTFile, lCurrentPosition + 8 + tmpInfo->ofsInfoMask);
+          char * tmpRender = get_pointer<char>(lADTFile, lCurrentPosition + 8 + tmpHeader->ofsRenderMask);
           for(int w = 0; w < 8; ++w){
               tmpRender[w] = lRender[i][w];
           }
@@ -1208,11 +1202,11 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
         int lMCNK_Position = lCurrentPosition;
         lADTFile.resize (lADTFile.size() + 8 + 0x80 );  // This is only the size of the header. More chunks will increase the size.
         SetChunkHeader( lADTFile, lCurrentPosition, 'MCNK', lMCNK_Size );
-        lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 )->mEntries[y*16+x].offset = lCurrentPosition;
+        get_pointer<MCIN>( lADTFile, lMCIN_Position + 8 )->mEntries[y*16+x].offset = lCurrentPosition;
 
         // MCNK data
         lADTFile.Insert( lCurrentPosition + 8, 0x80, reinterpret_cast<char*>( &( mChunks[y][x]->header ) ) );
-        MapChunkHeader * lMCNK_header = lADTFile.GetPointer<MapChunkHeader>( lCurrentPosition + 8 );
+        MapChunkHeader * lMCNK_header = get_pointer<MapChunkHeader>( lADTFile, lCurrentPosition + 8 );
 
         lMCNK_header->flags = mChunks[y][x]->Flags;
         lMCNK_header->holes = mChunks[y][x]->holes;
@@ -1261,16 +1255,16 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
           lADTFile.resize (lADTFile.size() + 8 + lMCVT_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCVT', lMCVT_Size );
 
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsHeight = lCurrentPosition - lMCNK_Position;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsHeight = lCurrentPosition - lMCNK_Position;
 
-          float * lHeightmap = lADTFile.GetPointer<float>( lCurrentPosition + 8 );
+          float * lHeightmap = get_pointer<float>( lADTFile, lCurrentPosition + 8 );
 
           float lMedian = 0.0f;
           for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
             lMedian = lMedian + mChunks[y][x]->mVertices[i].y();
 
           lMedian = lMedian / ( 9 * 9 + 8 * 8 );
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ypos = lMedian;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ypos = lMedian;
 
           for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
             lHeightmap[i] = mChunks[y][x]->mVertices[i].y() - lMedian;
@@ -1286,9 +1280,9 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
           lADTFile.resize (lADTFile.size() + 8 + lMCNR_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCNR', lMCNR_Size );
 
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsNormal = lCurrentPosition - lMCNK_Position;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsNormal = lCurrentPosition - lMCNK_Position;
 
-          char* lNormals (lADTFile.GetPointer<char> (lCurrentPosition + 8));
+          char* lNormals (get_pointer<char> (lADTFile, lCurrentPosition + 8));
 
           mChunks[y][x]->recalcNorms();
           for (size_t i (0); i < (9 * 9 + 8 * 8); ++i)
@@ -1320,13 +1314,13 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
           lADTFile.resize (lADTFile.size() + 8 + lMCLY_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCLY', lMCLY_Size );
 
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsLayer = lCurrentPosition - lMCNK_Position;
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nLayers = mChunks[y][x]->nTextures;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsLayer = lCurrentPosition - lMCNK_Position;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->nLayers = mChunks[y][x]->nTextures;
 
           // MCLY data
           for( size_t j = 0; j < mChunks[y][x]->nTextures; ++j )
           {
-            ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>( lCurrentPosition + 8 + 0x10 * j );
+            ENTRY_MCLY * lLayer = get_pointer<ENTRY_MCLY>( lADTFile, lCurrentPosition + 8 + 0x10 * j );
 
             lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename().toStdString() )->second;
 
@@ -1392,12 +1386,12 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
           lADTFile.resize (lADTFile.size() + 8 + lMCRF_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCRF', lMCRF_Size );
 
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsRefs = lCurrentPosition - lMCNK_Position;
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nDoodadRefs = lDoodadIDs.size();
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nMapObjRefs = lObjectIDs.size();
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsRefs = lCurrentPosition - lMCNK_Position;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->nDoodadRefs = lDoodadIDs.size();
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->nMapObjRefs = lObjectIDs.size();
 
           // MCRF data
-          int * lReferences = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
+          int * lReferences = get_pointer<int>( lADTFile, lCurrentPosition + 8 );
 
           lID = 0;
           for( std::list<int>::iterator it = lDoodadIDs.begin(); it != lDoodadIDs.end(); ++it )
@@ -1426,10 +1420,10 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
             lADTFile.resize (lADTFile.size() + 8 + lMCSH_Size );
             SetChunkHeader( lADTFile, lCurrentPosition, 'MCSH', lMCSH_Size );
 
-            lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsShadow = lCurrentPosition - lMCNK_Position;
-            lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->sizeShadow = 0x200;
+            get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsShadow = lCurrentPosition - lMCNK_Position;
+            get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->sizeShadow = 0x200;
 
-            char * lLayer = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
+            char * lLayer = get_pointer<char>( lADTFile, lCurrentPosition + 8 );
 
             memcpy( lLayer, mChunks[y][x]->mShadowMap, 0x200 );
 
@@ -1438,8 +1432,8 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
           }
           else
           {
-            lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsShadow = 0;
-            lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->sizeShadow = 0;
+            get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsShadow = 0;
+            get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->sizeShadow = 0;
           }
 //        }
 
@@ -1454,10 +1448,10 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
           lADTFile.resize (lADTFile.size() + 8 + lMCAL_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCAL', lMCAL_Size );
 
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsAlpha = lCurrentPosition - lMCNK_Position;
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->sizeAlpha = 8 + lMCAL_Size;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsAlpha = lCurrentPosition - lMCNK_Position;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->sizeAlpha = 8 + lMCAL_Size;
 
-          char * lAlphaMaps = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
+          char * lAlphaMaps = get_pointer<char>( lADTFile, lCurrentPosition + 8 );
 
           for( size_t j = 0; j < lMaps; j++ )
           {
@@ -1489,8 +1483,8 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
           lADTFile.resize (lADTFile.size() + 8 + lMCSE_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCSE', lMCSE_Size );
 
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsSndEmitters = lCurrentPosition - lMCNK_Position;
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nSndEmitters = lMCSE_Size / 0x1C;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsSndEmitters = lCurrentPosition - lMCNK_Position;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->nSndEmitters = lMCSE_Size / 0x1C;
 
           // if ( data ) do write
 
@@ -1508,8 +1502,8 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
 
 
-        lADTFile.GetPointer<sChunkHeader>( lMCNK_Position )->mSize = lMCNK_Size;
-        lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 )->mEntries[y*16+x].size = lMCNK_Size;
+          get_pointer<sChunkHeader>( lADTFile, lMCNK_Position )->mSize = lMCNK_Size;
+          get_pointer<MCIN>( lADTFile, lMCIN_Position + 8 )->mEntries[y*16+x].size = lMCNK_Size;
       }
     }
 
@@ -1521,9 +1515,9 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     size_t chunkSize = sizeof( int16_t ) * 9 * 2;
     lADTFile.resize (lADTFile.size() + 8 + chunkSize );
     SetChunkHeader( lADTFile, lCurrentPosition, 'MFBO', chunkSize );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mfbo = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->mfbo = lCurrentPosition - 0x14;
 
-    int16_t* lMFBO_Data = lADTFile.GetPointer<int16_t>( lCurrentPosition + 8 );
+    int16_t* lMFBO_Data = get_pointer<int16_t>( lADTFile, lCurrentPosition + 8 );
 
     lID = 0;
     for( int i = 0; i < 9; ++i )
@@ -1541,9 +1535,9 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     //! \todo check if nTexEffects == nTextures, correct order etc.
     lADTFile.resize (lADTFile.size() + 8 + 4*mTextureEffects.size());
     SetChunkHeader( lADTFile, lCurrentPosition, 'MTFX', 4*mTextureEffects.size() );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mtfx = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->mtfx = lCurrentPosition - 0x14;
 
-    uint32_t* lMTFX_Data = lADTFile.GetPointer<uint32_t>( lCurrentPosition + 8 );
+    uint32_t* lMTFX_Data = get_pointer<uint32_t>( lADTFile, lCurrentPosition + 8 );
 
     lID = 0;
     //they should be in the correct order...
@@ -1556,7 +1550,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 #endif
 
   noggit::mpq::file f (QString::fromStdString (mFilename));
-  f.setBuffer( lADTFile.GetPointer<char>(), lADTFile.size() );
+  f.setBuffer( get_pointer<char>(lADTFile), lADTFile.size() );
   f.save_to_disk();
   f.close();
 }
@@ -1681,7 +1675,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     SetChunkHeader( lADTFile, lCurrentPosition, 'MVER', 4 );
 
     // MVER data
-    *( lADTFile.GetPointer<int>( 8 ) ) = 18;
+    *( get_pointer<int>( lADTFile, 8 ) ) = 18;
 
     lCurrentPosition += 8 + 0x4;
 //  }
@@ -1692,7 +1686,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     lADTFile.resize (lADTFile.size() + 8 + 0x40 );
     SetChunkHeader( lADTFile, lCurrentPosition, 'MHDR', 0x40 );
 
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->flags = mFlags;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->flags = mFlags;
 
     lCurrentPosition += 8 + 0x40;
 //  }
@@ -1714,7 +1708,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
         // MCNK data
         lADTFile.Insert( lCurrentPosition + 8, 0x80, reinterpret_cast<char*>( &( mChunks[y][x]->header ) ) ); // This is only the size of the header. More chunks will increase the size.
-        MapChunkHeader * lMCNK_header = lADTFile.GetPointer<MapChunkHeader>( lCurrentPosition + 8 );
+        MapChunkHeader * lMCNK_header = get_pointer<MapChunkHeader>( lADTFile, lCurrentPosition + 8 );
 
         lMCNK_header->flags = mChunks[y][x]->Flags;
         lMCNK_header->holes = mChunks[y][x]->holes;
@@ -1762,16 +1756,16 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
           lADTFile.resize (lADTFile.size() + 8 + lMCVT_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCVT', lMCVT_Size );
 
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsHeight = lCurrentPosition - lMCNK_Position;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsHeight = lCurrentPosition - lMCNK_Position;
 
-          float * lHeightmap = lADTFile.GetPointer<float>( lCurrentPosition + 8 );
+          float * lHeightmap = get_pointer<float>( lADTFile, lCurrentPosition + 8 );
 
           float lMedian = 0.0f;
           for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
             lMedian = lMedian + mChunks[y][x]->mVertices[i].y();
 
           lMedian = lMedian / ( 9 * 9 + 8 * 8 );
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ypos = lMedian;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ypos = lMedian;
 
           for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
             lHeightmap[i] = mChunks[y][x]->mVertices[i].y() - lMedian;
@@ -1787,9 +1781,9 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
           lADTFile.resize (lADTFile.size() + 8 + lMCNR_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCNR', lMCNR_Size + 13 ); // For Cata we do add the 13 bytes too in chunk size
 
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsNormal = lCurrentPosition - lMCNK_Position;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsNormal = lCurrentPosition - lMCNK_Position;
 
-          char* lNormals (lADTFile.GetPointer<char> (lCurrentPosition + 8));
+          char* lNormals (get_pointer<char> (lADTFile, lCurrentPosition + 8));
 
           mChunks[y][x]->recalcNorms();
           for (size_t i (0); i < (9 * 9 + 8 * 8); ++i)
@@ -1820,8 +1814,8 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
           lADTFile.resize (lADTFile.size() + 8 + lMCSE_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCSE', lMCSE_Size );
 
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsSndEmitters = lCurrentPosition - lMCNK_Position;
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nSndEmitters = lMCSE_Size / 0x1C;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsSndEmitters = lCurrentPosition - lMCNK_Position;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->nSndEmitters = lMCSE_Size / 0x1C;
 
           // if ( data ) do write
 
@@ -1839,8 +1833,8 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
 
 
-        lADTFile.GetPointer<sChunkHeader>( lMCNK_Position )->mSize = lMCNK_Size;
-        lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsLiquid = lMCNK_Size;
+          get_pointer<sChunkHeader>( lADTFile, lMCNK_Position )->mSize = lMCNK_Size;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsLiquid = lMCNK_Size;
       }
     }
 
@@ -1852,9 +1846,9 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     size_t chunkSize = sizeof( int16_t ) * 9 * 2;
     lADTFile.resize (lADTFile.size() + 8 + chunkSize );
     SetChunkHeader( lADTFile, lCurrentPosition, 'MFBO', chunkSize );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mfbo = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTFile, lMHDR_Position + 8 )->mfbo = lCurrentPosition - 0x14;
 
-    int16_t* lMFBO_Data = lADTFile.GetPointer<int16_t>( lCurrentPosition + 8 );
+    int16_t* lMFBO_Data = get_pointer<int16_t>( lADTFile, lCurrentPosition + 8 );
 
     lID = 0;
     for( int i = 0; i < 9; ++i )
@@ -1867,7 +1861,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
   }
 
   noggit::mpq::file f (QString::fromStdString (mFilename));
-  f.setBuffer( lADTFile.GetPointer<char>(), lADTFile.size() );
+  f.setBuffer( get_pointer<char>(lADTFile), lADTFile.size() );
   f.save_to_disk();
   f.close();
 
@@ -1882,7 +1876,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     SetChunkHeader( lADTTexFile, lCurrentPosition, 'MVER', 4 );
 
     // MVER data
-    *( lADTTexFile.GetPointer<int>( 8 ) ) = 18;
+    *( get_pointer<int>( lADTTexFile, 8 ) ) = 18;
 
     lCurrentPosition += 8 + 0x4;
 //  }
@@ -1893,7 +1887,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     SetChunkHeader( lADTTexFile, lCurrentPosition, 'MAMP', 4 );
 
     // MAMP data (seems to be always 0 in tex0)
-    *( lADTTexFile.GetPointer<int>( lCurrentPosition + 8 ) ) = 0;
+    *( get_pointer<int>( lADTTexFile, lCurrentPosition + 8 ) ) = 0;
 
     lCurrentPosition += 8 + 0x4;
 
@@ -1910,7 +1904,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     {
       lADTTexFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
       lCurrentPosition += it->first.size() + 1;
-      lADTTexFile.GetPointer<sChunkHeader>( lMTEX_Position )->mSize += it->first.size() + 1;
+      get_pointer<sChunkHeader>( lADTTexFile, lMTEX_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
     }
 //  }
@@ -1939,7 +1933,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
           // MCLY data
           for( size_t j = 0; j < mChunks[y][x]->nTextures; ++j )
           {
-            ENTRY_MCLY * lLayer = lADTTexFile.GetPointer<ENTRY_MCLY>( lCurrentPosition + 8 + 0x10 * j );
+            ENTRY_MCLY * lLayer = get_pointer<ENTRY_MCLY>( lADTTexFile, lCurrentPosition + 8 + 0x10 * j );
 
             lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename().toStdString() )->second;
 
@@ -1966,7 +1960,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
             lADTTexFile.resize (lADTTexFile.size() + 8 + lMCSH_Size );
             SetChunkHeader( lADTFile, lCurrentPosition, 'MCSH', lMCSH_Size );
 
-            char * lLayer = lADTTexFile.GetPointer<char>( lCurrentPosition + 8 );
+            char * lLayer = get_pointer<char>( lADTTexFile, lCurrentPosition + 8 );
 
             memcpy( lLayer, mChunks[y][x]->mShadowMap, 0x200 );
 
@@ -1986,7 +1980,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
           lADTTexFile.resize (lADTTexFile.size() + 8 + lMCAL_Size );
           SetChunkHeader( lADTTexFile, lCurrentPosition, 'MCAL', lMCAL_Size );
 
-          char * lAlphaMaps = lADTTexFile.GetPointer<char>( lCurrentPosition + 8 );
+          char * lAlphaMaps = get_pointer<char>( lADTTexFile, lCurrentPosition + 8 );
 
           for( size_t j = 0; j < lMaps; j++ )
           {
@@ -2010,7 +2004,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
           lMCNK_Size += 8 + lMCAL_Size;
 //        }
 
-        lADTTexFile.GetPointer<sChunkHeader>( lMCNK_Position )->mSize = lMCNK_Size;
+          get_pointer<sChunkHeader>( lADTTexFile, lMCNK_Position )->mSize = lMCNK_Size;
       }
     }
 
@@ -2021,7 +2015,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     lADTTexFile.resize (lADTTexFile.size() + 8 + 4*mTextureEffects.size());
     SetChunkHeader( lADTTexFile, lCurrentPosition, 'MTFX', 4*mTextureEffects.size() );
 
-    uint32_t* lMTFX_Data = lADTFile.GetPointer<uint32_t>( lCurrentPosition + 8 );
+    uint32_t* lMTFX_Data = get_pointer<uint32_t>( lADTFile, lCurrentPosition + 8 );
 
     lID = 0;
     //they should be in the correct order...
@@ -2047,7 +2041,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
   texFilename = "/" + texFilename;
 
   noggit::mpq::file fTex (QString::fromStdString (mFilename));
-  fTex.setBuffer( lADTTexFile.GetPointer<char>(), lADTTexFile.size() );
+  fTex.setBuffer( get_pointer<char>(lADTTexFile), lADTTexFile.size() );
   fTex.save_to_disk(QString::fromStdString (texFilename));
   fTex.close();
 
@@ -2062,7 +2056,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     SetChunkHeader( lADTObjFile, lCurrentPosition, 'MVER', 4 );
 
     // MVER data
-    *( lADTObjFile.GetPointer<int>( 8 ) ) = 18;
+    *( get_pointer<int>( lADTObjFile, 8 ) ) = 18;
 
     lCurrentPosition += 8 + 0x4;
 //  }
@@ -2078,10 +2072,10 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     // MMDX data
     for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
     {
-      it->second.filenamePosition = lADTObjFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize;
+      it->second.filenamePosition = get_pointer<sChunkHeader>( lADTObjFile, lMMDX_Position )->mSize;
       lADTObjFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
       lCurrentPosition += it->first.size() + 1;
-      lADTObjFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize += it->first.size() + 1;
+      get_pointer<sChunkHeader>( lADTObjFile, lMMDX_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added model \"" << it->first << "\"." << std::endl;
     }
 //  }
@@ -2093,7 +2087,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     SetChunkHeader( lADTObjFile, lCurrentPosition, 'MMID', lMMID_Size );
 
     // MMID data
-    int * lMMID_Data = lADTObjFile.GetPointer<int>( lCurrentPosition + 8 );
+    int * lMMID_Data = get_pointer<int>( lADTObjFile, lCurrentPosition + 8 );
 
     lID = 0;
     for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
@@ -2113,10 +2107,10 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     // MWMO data
     for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
     {
-      it->second.filenamePosition = lADTObjFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize;
+      it->second.filenamePosition = get_pointer<sChunkHeader>( lADTObjFile, lMWMO_Position )->mSize;
       lADTObjFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
       lCurrentPosition += it->first.size() + 1;
-      lADTObjFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize += it->first.size() + 1;
+      get_pointer<sChunkHeader>( lADTObjFile, lMWMO_Position )->mSize += it->first.size() + 1;
       LogDebug << "Added object \"" << it->first << "\"." << std::endl;
     }
 //  }
@@ -2128,7 +2122,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     SetChunkHeader( lADTObjFile, lCurrentPosition, 'MWID', lMWID_Size );
 
     // MWID data
-    int * lMWID_Data = lADTObjFile.GetPointer<int>( lCurrentPosition + 8 );
+    int * lMWID_Data = get_pointer<int>( lADTObjFile, lCurrentPosition + 8 );
 
     lID = 0;
     for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
@@ -2144,7 +2138,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     SetChunkHeader( lADTObjFile, lCurrentPosition, 'MDDF', lMDDF_Size );
 
     // MDDF data
-    ENTRY_MDDF * lMDDF_Data = lADTObjFile.GetPointer<ENTRY_MDDF>( lCurrentPosition + 8 );
+    ENTRY_MDDF * lMDDF_Data = get_pointer<ENTRY_MDDF>( lADTObjFile, lCurrentPosition + 8 );
 
     lID = 0;
     for( std::map<int,ModelInstance*>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
@@ -2178,10 +2172,10 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     int lMODF_Size = 0x40 * lObjectInstances.size();
     lADTObjFile.resize (lADTObjFile.size() + 8 + lMODF_Size );
     SetChunkHeader( lADTObjFile, lCurrentPosition, 'MODF', lMODF_Size );
-    lADTObjFile.GetPointer<MHDR>( lMHDR_Position + 8 )->modf = lCurrentPosition - 0x14;
+    get_pointer<MHDR>( lADTObjFile, lMHDR_Position + 8 )->modf = lCurrentPosition - 0x14;
 
     // MODF data
-    ENTRY_MODF * lMODF_Data = lADTObjFile.GetPointer<ENTRY_MODF>( lCurrentPosition + 8 );
+    ENTRY_MODF * lMODF_Data = get_pointer<ENTRY_MODF>( lADTObjFile, lCurrentPosition + 8 );
 
     lID = 0;
     for( std::map<int,WMOInstance *>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
@@ -2287,7 +2281,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
             lADTObjFile.resize (lADTObjFile.size() + 8 + lMCRD_Size );
             SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCRD', lMCRD_Size );
 
-            int * lReferencesDoodads = lADTObjFile.GetPointer<int>( lCurrentPosition + 8 );
+            int * lReferencesDoodads = get_pointer<int>( lADTObjFile, lCurrentPosition + 8 );
 
             lID = 0;
             for( std::list<int>::iterator it = lDoodadIDs.begin(); it != lDoodadIDs.end(); ++it )
@@ -2309,7 +2303,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
             lADTObjFile.resize (lADTObjFile.size() + 8 + lMCRW_Size );
             SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCRW', lMCRW_Size );
 
-		        int * lReferencesWmo = lADTObjFile.GetPointer<int>( lCurrentPosition + 8 );
+		        int * lReferencesWmo = get_pointer<int>( lADTObjFile, lCurrentPosition + 8 );
 
 		        lID = 0;
 		        for( std::list<int>::iterator it = lObjectIDs.begin(); it != lObjectIDs.end(); ++it )
@@ -2323,7 +2317,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
           }
 //        }
 
-        lADTObjFile.GetPointer<sChunkHeader>( lMCNK_Position )->mSize = lMCNK_Size;
+          get_pointer<sChunkHeader>( lADTObjFile, lMCNK_Position )->mSize = lMCNK_Size;
       }
     }
 
@@ -2341,7 +2335,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
   objFilename = "/" + objFilename;
 
   noggit::mpq::file fObj (QString::fromStdString (mFilename));
-  fObj.setBuffer( lADTObjFile.GetPointer<char>(), lADTObjFile.size() );
+  fObj.setBuffer( get_pointer<char>(lADTObjFile), lADTObjFile.size() );
   fObj.save_to_disk(QString::fromStdString (objFilename));
   fObj.close();
 
