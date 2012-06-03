@@ -869,7 +869,7 @@ namespace noggit
       _tile_mode_zoom = qBound (0.1, _tile_mode_zoom, 2.0);
     }
 
-    _world->advance_times (dt * 1000.0f, mTimespeed);
+    _world->advance_times (dt, mTimespeed);
     _world->tick(dt);
 
 #ifdef __OBSOLETE_GUI_ELEMENTS
