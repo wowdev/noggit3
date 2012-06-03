@@ -144,6 +144,9 @@ public:
   void GenerateContourMap();
   void CreateStrips();
 
+  void update_low_quality_texture_map();
+  const unsigned char* low_quality_texture_map() const;
+
 private:
   World* _world;
 
