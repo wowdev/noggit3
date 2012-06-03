@@ -649,14 +649,6 @@ bool checkInside( ::math::vector_3d extentA[2], ::math::vector_3d extentB[2] )
          extentB[1].is_inside_of (extentA[0], extentA[1]);
 }
 
-class sExtendableArray : public std::vector<char>
-{
-public:
-  sExtendableArray()
-    : std::vector<char> (0, 0)
-  { }
-};
-
 template<typename T>
 T* get_pointer (std::vector<char>& vector, size_t pPosition = 0)
 {
@@ -680,7 +672,7 @@ struct sChunkHeader
   int mSize;
 };
 
-void SetChunkHeader( sExtendableArray& pArray, int pPosition, int pMagix, int pSize = 0 )
+void SetChunkHeader( std::vector<char>& pArray, int pPosition, int pMagix, int pSize = 0 )
 {
   sChunkHeader * Header = get_pointer<sChunkHeader>( pArray, pPosition );
   Header->mMagic = pMagix;
@@ -842,7 +834,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
   // Now write the file.
 
-  sExtendableArray lADTFile;
+  std::vector<char> lADTFile;
 
   int lCurrentPosition = 0;
 
@@ -1671,7 +1663,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
   // terrain
 
-  sExtendableArray lADTFile;
+  std::vector<char> lADTFile;
 
   int lCurrentPosition = 0;
 
@@ -1877,7 +1869,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
   // tex0
 
-  sExtendableArray lADTTexFile;
+  std::vector<char> lADTTexFile;
   lCurrentPosition = 0;
 
   // MVER
@@ -2057,7 +2049,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
   // obj0
 
-  sExtendableArray lADTObjFile;
+  std::vector<char> lADTObjFile;
   lCurrentPosition = 0;
 
   // MVER
