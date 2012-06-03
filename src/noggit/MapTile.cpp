@@ -660,10 +660,8 @@ void insert_string ( std::vector<char>& vector
                    , const std::string& str
                    )
 {
-  vector.insert ( vector.begin() + position
-                , str.begin()
-                , str.end()
-                );
+  const char* const cstr (str.c_str());
+  vector.insert (vector.begin() + position, cstr, cstr + str.size() + 1);
 }
 
 struct sChunkHeader
@@ -1439,7 +1437,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 //        {
           int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
 
-  	  size_t lMaps = mChunks[y][x]->nTextures ? mChunks[y][x]->nTextures - 1U : 0U;
+      size_t lMaps = mChunks[y][x]->nTextures ? mChunks[y][x]->nTextures - 1U : 0U;
 
           int lMCAL_Size = lDimensions * lMaps;
 
@@ -1922,7 +1920,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
         int lMCNK_Position = lCurrentPosition;
 
         lADTTexFile.resize (lADTTexFile.size() + 8 );  // No header in tex0
-		    SetChunkHeader( lADTTexFile, lCurrentPosition, 'MCNK', lMCNK_Size );
+        SetChunkHeader( lADTTexFile, lCurrentPosition, 'MCNK', lMCNK_Size );
         lCurrentPosition += 8;
 
         // MCLY
@@ -1975,7 +1973,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 //        {
           int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
 
-  	      size_t lMaps = mChunks[y][x]->nTextures ? mChunks[y][x]->nTextures - 1U : 0U;
+          size_t lMaps = mChunks[y][x]->nTextures ? mChunks[y][x]->nTextures - 1U : 0U;
 
           int lMCAL_Size = lDimensions * lMaps;
 
@@ -2226,7 +2224,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
         int lMCNK_Position = lCurrentPosition;
 
         lADTObjFile.resize (lADTObjFile.size() + 8 );  // No header in tex0
-		    SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCNK', lMCNK_Size );
+        SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCNK', lMCNK_Size );
         lCurrentPosition += 8;
 
         // MCRD & MCRW
@@ -2274,7 +2272,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
             lID++;
           }
 
-		  // MCRD data
+      // MCRD data
 
           if ( lDoodadIDs.size() > 0 )
           {
@@ -2305,10 +2303,10 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
             lADTObjFile.resize (lADTObjFile.size() + 8 + lMCRW_Size );
             SetChunkHeader( lADTObjFile, lCurrentPosition, 'MCRW', lMCRW_Size );
 
-		        int * lReferencesWmo = get_pointer<int>( lADTObjFile, lCurrentPosition + 8 );
+            int * lReferencesWmo = get_pointer<int>( lADTObjFile, lCurrentPosition + 8 );
 
-		        lID = 0;
-		        for( std::list<int>::iterator it = lObjectIDs.begin(); it != lObjectIDs.end(); ++it )
+            lID = 0;
+            for( std::list<int>::iterator it = lObjectIDs.begin(); it != lObjectIDs.end(); ++it )
             {
               lReferencesWmo[lID] = *it;
               lID++;
