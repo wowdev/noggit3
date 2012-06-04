@@ -725,11 +725,9 @@ World::~World()
   {
     for( int i = 0; i < 64; ++i )
     {
-      if( lowrestiles[j][i] )
-      {
-        delete lowrestiles[j][i];
-        lowrestiles[j][i] = NULL;
-      }
+      delete lowrestiles[j][i];
+      lowrestiles[j][i] = NULL;
+
       if( tileLoaded( j, i ) )
       {
         delete mTiles[j][i].tile;
@@ -738,16 +736,11 @@ World::~World()
     }
   }
 
-  if (skies)
-  {
-    delete skies;
-    skies = NULL;
-  }
-  if (ol)
-  {
-    delete ol;
-    ol = NULL;
-  }
+  delete skies;
+  skies = NULL;
+
+  delete ol;
+  ol = NULL;
 
   LogDebug << "Unloaded world \"" << basename << "\"." << std::endl;
 }

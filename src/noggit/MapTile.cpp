@@ -424,11 +424,8 @@ MapTile::~MapTile()
   {
     for( int i = 0; i < 16; ++i )
     {
-      if( mChunks[j][i] )
-      {
-        delete mChunks[j][i];
-        mChunks[j][i] = NULL;
-      }
+      delete mChunks[j][i];
+      mChunks[j][i] = NULL;
     }
   }
 
@@ -448,11 +445,8 @@ MapTile::~MapTile()
 
   for( std::vector<Liquid*>::iterator it = mLiquids.begin(); it != mLiquids.end(); ++it )
   {
-    if( *it )
-    {
-      delete *it;
-      *it  = NULL;
-    }
+    delete *it;
+    *it  = NULL;
   }
 
   mLiquids.clear();

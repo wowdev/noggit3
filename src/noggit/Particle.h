@@ -116,7 +116,11 @@ public:
     rotation = 0;
     tofs = 0;
   }
-  virtual ~ParticleSystem() { if( emitter ) { delete emitter; emitter = NULL; } }
+  virtual ~ParticleSystem()
+  {
+    delete emitter;
+    emitter = NULL;
+  }
 
   void init(const noggit::mpq::file& f, const ModelParticleEmitterDef &mta, int *globals);
   void update(float dt);

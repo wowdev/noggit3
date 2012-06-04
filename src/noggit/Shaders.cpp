@@ -106,22 +106,14 @@ void reloadShaders()
 {
   for (int i=0; i<4; ++i)
   {
-    if( terrainShaders[i] )
-    {
-      delete terrainShaders[i];
-      terrainShaders[i] = NULL;
-    }
+    delete terrainShaders[i];
+    terrainShaders[i] = NULL;
   }
-  if( wmoShader )
-  {
-    delete wmoShader;
-    wmoShader = NULL;
-  }
-  if( waterShaders[0] )
-  {
-    delete waterShaders[0];
-    waterShaders[0] = NULL;
-  }
+
+  delete wmoShader;
+  wmoShader = NULL;
+  delete waterShaders[0];
+  waterShaders[0] = NULL;
 
   terrainShaders[0] = new ShaderPair(0, "shaders/terrain1.fs", true);
   terrainShaders[1] = new ShaderPair(0, "shaders/terrain2.fs", true);
