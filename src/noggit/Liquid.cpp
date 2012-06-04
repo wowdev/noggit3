@@ -241,11 +241,9 @@ void Liquid::initGeometry(noggit::mpq::file* f)
   glEnable(GL_TEXTURE_2D);*/
 
   mDrawList->end_recording();
-  if(lVertices)
-  {
-    delete[] lVertices;
-    lVertices = NULL;
-  }
+
+  delete[] lVertices;
+  lVertices = NULL;
 }
 
 void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, MH2O_Render *render )
@@ -332,11 +330,9 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
   glEnd();
 
   mDrawList->end_recording();
-  if(lVertices)
-  {
-    delete[] lVertices;
-    lVertices = NULL;
-  }
+
+  delete[] lVertices;
+  lVertices = NULL;
 }
 
 void Liquid::initFromMH2O()
@@ -736,11 +732,8 @@ void Liquid::initTextures( const std::string& pFilename )
 
 Liquid::~Liquid()
 {
-  if( mDrawList )
-  {
-    delete mDrawList;
-    mDrawList = NULL;
-  }
+  delete mDrawList;
+  mDrawList = NULL;
 
   for( std::vector<std::string>::iterator filename = _textureFilenames.begin(); filename != _textureFilenames.end(); ++filename )
   {

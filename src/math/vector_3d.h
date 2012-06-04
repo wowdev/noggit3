@@ -143,6 +143,11 @@ namespace math
       return operator *= (1.0f / length());
     }
 
+    vector_3d normalized() const
+    {
+      return *this * (1.0f / length());
+    }
+
     inline operator float*()
     {
       return _data;

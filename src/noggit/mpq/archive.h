@@ -9,8 +9,6 @@
 
 #include <noggit/async/object.h>
 
-
-
 namespace noggit
 {
   namespace mpq
@@ -44,6 +42,7 @@ namespace noggit
       QStringList _listfile;
 
       friend class archive_manager;
+      friend class application;
     };
   }
 }

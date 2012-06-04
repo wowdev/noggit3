@@ -11,6 +11,8 @@
 #include <map>
 #include <string>
 
+#include <boost/optional.hpp>
+
 #include <opengl/types.h>
 
 #include <noggit/MapHeaders.h>
@@ -72,6 +74,7 @@ public:
   void drawMFBO();
 
   bool GetVertex( float x, float z, ::math::vector_3d *V );
+  boost::optional<float> get_height (const float& x, const float& z) const;
 
   void saveTile ( const World::model_instances_type::const_iterator& models_begin
                 , const World::model_instances_type::const_iterator& models_end

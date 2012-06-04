@@ -7,6 +7,8 @@
 #ifndef MAPCHUNK_H
 #define MAPCHUNK_H
 
+#include <boost/optional.hpp>
+
 #include <math/vector_4d.h>
 
 #include <noggit/MapTile.h> // MapTile
@@ -99,7 +101,7 @@ public:
 
   void drawTextures();
 
-  void recalcNorms();
+  void update_normal_vectors();
 
   ::math::vector_3d mNormals[mapbufsize];
   ::math::vector_3d mVertices[mapbufsize];
@@ -131,6 +133,7 @@ public:
   void setAreaID(int ID);
 
   bool GetVertex(float x,float z, ::math::vector_3d* V);
+  boost::optional<float> get_height (const float& x, const float& z) const;
 
   void loadTextures();
 //  char getAlpha(float x,float y);
@@ -138,8 +141,8 @@ public:
 
   //float getTerrainHeight(float x, float z);
 
-  void SetAnim (int anim) const;
-  void RemoveAnim (int anim) const;
+  void SetAnim (const mcly_flags_type& flags) const;
+  void RemoveAnim (const mcly_flags_type& flags) const;
 
   void GenerateContourMap();
   void CreateStrips();
