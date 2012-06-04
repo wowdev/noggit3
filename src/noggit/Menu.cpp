@@ -121,7 +121,7 @@ void Menu::enter_world_at (World *world, const ::math::vector_3d& pos, bool auto
     world->set_camera_above_terrain();
 }
 
-World *Menu::load_map (int map_id)
+World *Menu::load_map (unsigned int map_id)
 {
   if (_minimap->world() && _minimap->world()->getMapID() == map_id)
   {

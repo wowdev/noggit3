@@ -52,7 +52,8 @@ class WMOGroup {
   float rad;
   int32_t num;
   int32_t fog;
-  int32_t nDoodads, nBatches;
+  int32_t nDoodads;
+  size_t nBatches;
   int16_t *ddr;
   Liquid *lq;
   std::vector< std::pair<opengl::call_list*, bool> > _lists;
@@ -97,8 +98,7 @@ public:
                    , const float& cull_distance
                    , const ::math::vector_3d& camera
                    );
-  void drawDoodadsSelect ( World* world
-                         , unsigned int doodadset
+  void drawDoodadsSelect ( unsigned int doodadset
                          , const ::math::vector_3d& ofs
                          , const float rot
                          , const Frustum& frustum

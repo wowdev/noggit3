@@ -1553,7 +1553,7 @@ void World::tick (float dt)
   ModelManager::updateEmitters(dt);
 }
 
-const unsigned int World::getAreaID() const
+unsigned int World::getAreaID() const
 {
   const int mtx = camera.x() / TILESIZE;
   const int mtz = camera.z() / TILESIZE;
@@ -1591,12 +1591,12 @@ void World::clearHeight(int x, int z)
       curChunk->vmax.y (-9999999.0f);
       curChunk->Changed=true;
 
-      for(int i=0; i < mapbufsize; ++i)
+      for(int k=0; k < mapbufsize; ++k)
       {
-        curChunk->mVertices[i].y (0.0f);
+        curChunk->mVertices[k].y (0.0f);
 
-        curChunk->vmin.y (std::min(curChunk->vmin.y(),curChunk-> mVertices[i].y()));
-        curChunk->vmax.y (std::max(curChunk->vmax.y(), curChunk->mVertices[i].y()));
+        curChunk->vmin.y (std::min(curChunk->vmin.y(),curChunk-> mVertices[k].y()));
+        curChunk->vmax.y (std::max(curChunk->vmax.y(), curChunk->mVertices[k].y()));
       }
 
       glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
@@ -2241,7 +2241,7 @@ void World::setFlag( bool to, float x, float z)
   }
 }
 
-const unsigned int World::getMapID() const
+const unsigned int& World::getMapID() const
 {
   return mMapId;
 }
@@ -2275,12 +2275,12 @@ void World::moveHeight(int x, int z)
 
       if( heightDelta * heightDelta <= 0.1f ) continue;
 
-      for(int i=0; i < mapbufsize; ++i)
+      for(int k=0; k < mapbufsize; ++k)
       {
-        curChunk->mVertices[i].y (curChunk->mVertices[i].y() + heightDelta);
+        curChunk->mVertices[k].y (curChunk->mVertices[k].y() + heightDelta);
 
-        curChunk->vmin.y (std::min (curChunk->vmin.y(), curChunk-> mVertices[i].y()));
-        curChunk->vmax.y (std::max (curChunk->vmax.y(), curChunk->mVertices[i].y()));
+        curChunk->vmin.y (std::min (curChunk->vmin.y(), curChunk-> mVertices[k].y()));
+        curChunk->vmax.y (std::max (curChunk->vmax.y(), curChunk->mVertices[k].y()));
       }
 
       glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);

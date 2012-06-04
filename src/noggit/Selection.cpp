@@ -78,8 +78,8 @@ nameEntry* nameEntryManager::findEntry (size_t ref) const
 }
 
 nameEntryManager::nameEntryManager (World* world)
-  : _world (world)
-  , _items (0)
+  : _items (0)
+  ,_world (world) 
 {
 }
 

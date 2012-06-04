@@ -141,7 +141,7 @@ public:
   /*!
   \return the MapID found in dbcs
   */
-  const unsigned int getMapID() const;
+  const unsigned int& getMapID() const;
 
   void set_camera_above_terrain();
 
@@ -190,7 +190,7 @@ public:
   void setupFog (bool draw_fog, const float& fog_distance);
 
   //! \brief Get the area ID of the tile on which the camera currently is on.
-  const unsigned int getAreaID() const;
+  unsigned int getAreaID() const;
   void setAreaID(int id, int x, int z);
   void setAreaID(int id, int x, int z , int cx, int cz);
   void setFlag(bool to, float x, float z);
