@@ -4,8 +4,6 @@
 
 #include <noggit/mpq/file.h>
 
-#include <QDir>
-
 #include <stdexcept>
 
 #include <StormLib.h>
@@ -19,56 +17,60 @@ namespace noggit
 {
   namespace mpq
   {
-    QString file::_disk_search_path;
+    QDir file::_disk_search_path;
 
-    file::file (const QString& filename)
+    file::file (const QString& filename, const bool& maybe_create)
       : _is_at_end_of_file (true)
       , buffer (NULL)
       , pointer (0)
       , size (0)
       , _file_is_on_disk (false)
+      , _filename (filename)
     {
-      if (!exists (filename))
+      if (!exists (_filename))
       {
-        LogError << "Requested file "
-                 << qPrintable (filename)
-                 << " which does not exist."
-                 << std::endl;
+        if (!maybe_create)
+        {
+          LogError << "Requested file "
+                   << qPrintable (_filename)
+                   << " which does not exist."
+                   << std::endl;
 
-        throw std::runtime_error ("Requested file does not exist.");
-        return;
-      }
-
-      _path_on_disk = (_disk_search_path + filename).toLower();
-      _path_on_disk.replace ("\\", "/");
-
-      _file_is_on_disk = QFile::exists (_path_on_disk);
-
-      if (_file_is_on_disk)
-      {
-        QFile file (_path_on_disk);
-        file.open (QFile::ReadOnly);
-
-        size = file.size();
-        buffer = new char[size];
-
-        memcpy (buffer, file.readAll().data(), size);
+          throw std::runtime_error ("Requested file does not exist.");
+        }
+        else
+        {
+          _file_is_on_disk = true;
+        }
       }
       else
       {
-        QString corrected_filename (filename);
-        corrected_filename.replace ("/", "\\");
+        if (_disk_search_path.exists (_filename))
+        {
+          QFile file (_disk_search_path.absoluteFilePath (_filename));
+          file.open (QFile::ReadOnly);
 
-        app().archive_manager().open_file_from_an_mpq ( corrected_filename
-                                                      , &size
-                                                      , &buffer
-                                                      );
+          size = file.size();
+          buffer = new char[size];
+
+          memcpy (buffer, file.readAll().data(), size);
+        }
+        else
+        {
+          QString corrected_filename (filename);
+          corrected_filename.replace ("/", "\\");
+
+          app().archive_manager().open_file_from_an_mpq ( corrected_filename
+                                                        , &size
+                                                        , &buffer
+                                                        );
+        }
       }
 
       _is_at_end_of_file = size == 0;
     }
 
-    void file::disk_search_path (const QString& path)
+    void file::disk_search_path (const QDir& path)
     {
       _disk_search_path = path;
     }
@@ -80,15 +82,8 @@ namespace noggit
 
     bool file::exists ( const QString &filename)
     {
-
-        if(!app().archive_manager().file_exists_in_an_mpq (filename))
-        {
-          QString path = _disk_search_path + filename;
-          path.replace("\\", "/");
-          return QFile::exists (path.toLower());
-        }
-        else
-          return true;
+      return app().archive_manager().file_exists_in_an_mpq (filename)
+          || _disk_search_path.exists (filename);
     }
 
     size_t file::read (void* dest, size_t bytes)
@@ -169,28 +164,31 @@ namespace noggit
       return buffer + pointer;
     }
 
-    void file::save_to_disk(const QString& filename)
+    void file::save_to_disk()
     {
-      QDir dir (_path_on_disk.left (_path_on_disk.lastIndexOf ("/")));
-      dir.makeAbsolute();
-      const QString dir_name (dir.absolutePath());
+      const QString full_path
+        (_disk_search_path.absoluteFilePath (_filename));
 
-      if (!QDir().mkpath (dir_name))
+      const int pos (_filename.lastIndexOf ("/"));
+      const QString filename (_filename.mid (pos));
+
+      QDir dir (_disk_search_path);
+      dir.cd (_filename.left (pos));
+
+      if (!QDir().mkpath (dir.absolutePath()))
       {
-
-        LogError << "Is \""
-                 << qPrintable (dir_name)
-                 << "\" really a location I can write to?"
+        LogError << "Unable to create directory \""
+                 << qPrintable (dir.absolutePath())
+                 << "\". Saving might fail."
                  << std::endl;
       }
 
-      //QFile output_file (_path_on_disk);
-      QFile output_file (dir_name + filename);
+      QFile output_file (dir.absoluteFilePath (filename));
 
       if (output_file.open (QFile::WriteOnly))
       {
         Log << "Saving file \""
-            << qPrintable (dir_name + filename)
+            << qPrintable (dir.absoluteFilePath (filename))
             << "\"."
             << std::endl;
 
@@ -200,13 +198,10 @@ namespace noggit
       }
       else
       {
-        LogError << "Unable to open that file for writing." << std::endl;
+        LogError << "Unable to open \""
+                 << qPrintable (dir.absoluteFilePath (filename))
+                 << "\" for writing." << std::endl;
       }
-    }
-
-    void file::save_to_disk()
-    {
-      save_to_disk(_path_on_disk.mid (_path_on_disk.lastIndexOf ("/")));
     }
 
     void file::save_to_mpq (archive *arch, QString pathInMPQ)
