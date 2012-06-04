@@ -33,13 +33,13 @@ class nameEntry;
 namespace noggit
 {
   class blp_texture;
-  class EditorTemplate;
 
   namespace ui
   {
     class cursor_selector;
     class minimap_widget;
     class model_spawner;
+    class EditorTemplate;
   }
 
   enum eViewMode
@@ -249,13 +249,12 @@ namespace noggit
 
     World* _world;
 
-    EditorTemplate* editortemplate;
-
     QMenu* menu;
 
     ui::minimap_widget* _minimap;
     ui::model_spawner* _model_spawner;
     ui::cursor_selector* _cursor_selector;
+    ui::EditorTemplate* editortemplate;
 
     QPoint _mouse_position;
     bool _is_currently_moving_object;

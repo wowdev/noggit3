@@ -11,8 +11,6 @@
 
 #include <noggit/async/loader.h>
 #include <noggit/mpq/archive_manager.h>
-#include <noggit/MainWindow.h>
-
 
 class QSettings;
 class QGLWidget;
