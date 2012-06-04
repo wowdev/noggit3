@@ -45,9 +45,9 @@ namespace noggit
       }
       else
       {
-        if (_disk_search_path.exists (_filename.toLower()))
+        if (_disk_search_path.exists (_filename))
         {
-          QFile file (_disk_search_path.absoluteFilePath (_filename.toLower()));
+          QFile file (_disk_search_path.absoluteFilePath (_filename));
           file.open (QFile::ReadOnly);
 
           size = file.size();
@@ -167,13 +167,13 @@ namespace noggit
     void file::save_to_disk()
     {
       const QString full_path
-        (_disk_search_path.absoluteFilePath (_filename.toLower()));
+        (_disk_search_path.absoluteFilePath (_filename));
 
       const int pos (_filename.lastIndexOf ("/"));
       const QString filename (_filename.mid (pos));
 
       QDir dir (_disk_search_path);
-      dir.cd (_filename.left (pos).toLower());
+      dir.cd (_filename.left (pos));
 
       if (!QDir().mkpath (dir.absolutePath()))
       {
@@ -183,12 +183,12 @@ namespace noggit
                  << std::endl;
       }
 
-      QFile output_file (dir.absoluteFilePath (filename.toLower()));
+      QFile output_file (dir.absoluteFilePath (filename));
 
       if (output_file.open (QFile::WriteOnly))
       {
         Log << "Saving file \""
-            << qPrintable (dir.absoluteFilePath (filename.toLower()))
+            << qPrintable (dir.absoluteFilePath (filename))
             << "\"."
             << std::endl;
 
@@ -199,7 +199,7 @@ namespace noggit
       else
       {
         LogError << "Unable to open \""
-                 << qPrintable (dir.absoluteFilePath (filename.toLower()))
+                 << qPrintable (dir.absoluteFilePath (filename))
                  << "\" for writing." << std::endl;
       }
     }
