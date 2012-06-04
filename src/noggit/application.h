@@ -7,7 +7,7 @@
 #define __NOGGIT_APPLICATION_H
 
 #include <QApplication>
-
+#include <QDir>
 
 #include <noggit/async/loader.h>
 #include <noggit/mpq/archive_manager.h>
@@ -35,12 +35,9 @@ namespace noggit
     async::loader& async_loader();
     mpq::archive_manager& archive_manager();
 
-  public slots:
-
-
-  signals:   
-    void settingAboutToChange (const QString& key, const QVariant& value);   	
-    void settingChanged (const QString& key, const QVariant& value); 
+  signals:
+    void settingAboutToChange (const QString& key, const QVariant& value);
+    void settingChanged (const QString& key, const QVariant& value);
 
   private:
     void set_working_directory_to_application_path();
@@ -48,12 +45,13 @@ namespace noggit
     void get_game_path();
     void open_mpqs();
     void add_font_from_mpq (const QString& filename) const;
+    void auto_detect_game_path();
+    static bool is_valid_game_path (const QDir& path);
 
     QSettings* _settings;
-    QString _game_path;
-    QString _project_path;
+    QDir _game_path;
+    QDir _project_path;
     QString _locale;
-
 
     async::loader _async_loader;
     mpq::archive_manager _archive_manager;
