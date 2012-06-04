@@ -652,26 +652,31 @@ void MapChunk::loadTextures()
 
 void MapChunk::SetAnim (int anim) const
 {
-  if (anim) {
+  if (anim)
+  {
     glActiveTexture(GL_TEXTURE0);
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
 
     // note: this is ad hoc and probably completely wrong
-    const int spd = (anim & 0x08) | ((anim & 0x10) >> 2) | ((anim & 0x20) >> 4) | ((anim & 0x40) >> 6);
+    const int spd = (anim & 0x08) | ((anim & 0x10) >> 2)
+      | ((anim & 0x20) >> 4) | ((anim & 0x40) >> 6);
     const int dir = anim & 0x07;
     const float texanimxtab[8] = {0, 1, 1, 1, 0, -1, -1, -1};
     const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
     const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
-
-    const float f = ( static_cast<int>( clock() / CLOCKS_PER_SEC * (spd/15.0f) ) % 1600) / 1600.0f;
+    const int animspd = 200 * detail_size;
+    const float f = ( (static_cast<int>(clock() / CLOCKS_PER_SEC
+                                       *(spd/15.0f))) % animspd)
+      / static_cast<float>(animspd);
     glTranslatef(f*fdx, f*fdy, 0);
   }
 }
 
 void MapChunk::RemoveAnim (int anim) const
 {
-  if (anim) {
+  if (anim)
+  {
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glActiveTexture(GL_TEXTURE1);
@@ -895,31 +900,11 @@ void MapChunk::CreateStrips()
 
 void MapChunk::drawPass (int anim)
 {
-  if (anim)
-  {
-    glActiveTexture(GL_TEXTURE0);
-    glMatrixMode(GL_TEXTURE);
-    glPushMatrix();
-
-    // note: this is ad hoc and probably completely wrong
-    const int spd = (anim & 0x08) | ((anim & 0x10) >> 2) | ((anim & 0x20) >> 4) | ((anim & 0x40) >> 6);
-    const int dir = anim & 0x07;
-    const float texanimxtab[8] = {0, 1, 1, 1, 0, -1, -1, -1};
-    const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
-    const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
-    const int animspd = 200 * detail_size;
-    float f = ( (static_cast<int>(clock() / CLOCKS_PER_SEC *(spd/15.0f))) % animspd) / static_cast<float>(animspd);
-    glTranslatef(f*fdx,f*fdy,0);
-  }
+  SetAnim (anim);
 
   glDrawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
 
-  if (anim)
-  {
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glActiveTexture(GL_TEXTURE1);
-  }
+  RemoveAnim (anim);
 }
 
 void MapChunk::drawLines (bool draw_hole_lines)
