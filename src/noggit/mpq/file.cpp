@@ -12,12 +12,13 @@
 #include <noggit/mpq/archive_manager.h>
 #include <noggit/application.h>
 #include <noggit/mpq/archive.h>
+#include <helper/qt/case_insensitive.h>
 
 namespace noggit
 {
   namespace mpq
   {
-    QDir file::_disk_search_path;
+    helper::qt::case_insensitive::directory file::_disk_search_path;
 
     file::file (const QString& filename, const bool& maybe_create)
       : _is_at_end_of_file (true)
@@ -45,9 +46,9 @@ namespace noggit
       }
       else
       {
-        if (_disk_search_path.exists (_filename))
+        if (_disk_search_path.exists(_filename) )
         {
-          QFile file (_disk_search_path.absoluteFilePath (_filename));
+          helper::qt::case_insensitive::file file (_disk_search_path.absoluteFilePath (_filename));
           file.open (QFile::ReadOnly);
 
           size = file.size();
@@ -70,9 +71,9 @@ namespace noggit
       _is_at_end_of_file = size == 0;
     }
 
-    void file::disk_search_path (const QDir& path)
+    void file::disk_search_path (const QString &path)
     {
-      _disk_search_path = path;
+      _disk_search_path = helper::qt::case_insensitive::directory(path);
     }
 
     file::~file()
@@ -83,7 +84,7 @@ namespace noggit
     bool file::exists ( const QString &filename)
     {
       return app().archive_manager().file_exists_in_an_mpq (filename)
-          || _disk_search_path.exists (filename);
+          || _disk_search_path.exists(filename);
     }
 
     size_t file::read (void* dest, size_t bytes)
@@ -172,7 +173,7 @@ namespace noggit
       const int pos (_filename.lastIndexOf ("/"));
       const QString filename (_filename.mid (pos));
 
-      QDir dir (_disk_search_path);
+      helper::qt::case_insensitive::directory dir (_disk_search_path);
       dir.cd (_filename.left (pos));
 
       if (!QDir().mkpath (dir.absolutePath()))
@@ -183,7 +184,7 @@ namespace noggit
                  << std::endl;
       }
 
-      QFile output_file (dir.absoluteFilePath (filename));
+      helper::qt::case_insensitive::file output_file (dir.absoluteFilePath (filename));
 
       if (output_file.open (QFile::WriteOnly))
       {
