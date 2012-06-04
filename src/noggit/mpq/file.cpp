@@ -46,7 +46,7 @@ namespace noggit
       }
       else
       {
-        if (_disk_search_path.exists(_filename) )
+        if (_disk_search_path.exists (_filename))
         {
           helper::qt::case_insensitive::file file (_disk_search_path.absoluteFilePath (_filename));
           file.open (QFile::ReadOnly);
@@ -71,9 +71,10 @@ namespace noggit
       _is_at_end_of_file = size == 0;
     }
 
-    void file::disk_search_path (const QString &path)
+    void file::disk_search_path
+      (const helper::qt::case_insensitive::directory& path)
     {
-      _disk_search_path = helper::qt::case_insensitive::directory(path);
+      _disk_search_path = path;
     }
 
     file::~file()
@@ -81,10 +82,10 @@ namespace noggit
       close();
     }
 
-    bool file::exists ( const QString &filename)
+    bool file::exists (const QString &filename)
     {
       return app().archive_manager().file_exists_in_an_mpq (filename)
-          || _disk_search_path.exists(filename);
+          || _disk_search_path.exists (filename);
     }
 
     size_t file::read (void* dest, size_t bytes)
