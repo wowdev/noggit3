@@ -37,7 +37,7 @@
 #include <noggit/ui/minimap_widget.h>
 #include <noggit/ui/cursor_selector.h>
 #include <noggit/ui/model_spawner.h>
-#include <noggit/editortemplate.h>
+#include <noggit/ui/editortemplate.h>
 #include <noggit/blp_texture.h>
 #include <noggit/TextureManager.h>
 
@@ -2450,7 +2450,7 @@ namespace noggit
 
 void MapView::updateParent()
 {
-    editortemplate = (noggit::EditorTemplate*)this->parent();
+    editortemplate = (noggit::ui::EditorTemplate*)this->parent();
     editortemplate->addPropBar(_shaping_settings_widget);
     editortemplate->addPropBar(_texturing_settings_widget);
     editortemplate->addPropBar(_smoothing_settings_widget);

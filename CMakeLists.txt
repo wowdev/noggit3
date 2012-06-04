@@ -1,5 +1,5 @@
 # CMakeLists.txt is part of Noggit3, licensed via GNU General Publiicense (version 3).
-# Bernd LÃ¶rwald <bloerwald+noggit@googlemail.com>
+# Bernd Lörwald <bloerwald+noggit@googlemail.com>
 # Glararan <glararan@glararan.eu>
 # Stephan Biegel <project.modcraft@googlemail.com>
 # Tigurius <bstigurius@googlemail.com>
@@ -56,7 +56,6 @@ set ( noggit_sources
       src/noggit/Brush.cpp
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
-	  src/noggit/editortemplate.cpp
       src/noggit/Frustum.cpp
       src/noggit/Liquid.cpp
       src/noggit/Log.cpp
@@ -77,7 +76,6 @@ set ( noggit_sources
       src/noggit/World.cpp
       src/noggit/ModelView.cpp
       src/noggit/DBCTableModel.cpp
-      src/noggit/MainWindow.cpp
 
       src/noggit/async/loader.cpp
       src/noggit/async/loading_thread.cpp
@@ -94,7 +92,9 @@ set ( noggit_sources
       src/noggit/ui/cursor_selector.cpp
       src/noggit/ui/DBCEditor.cpp
       src/noggit/ui/projectExplorer.cpp
-	  src/noggit/ui/textureselecter.cpp
+      src/noggit/ui/textureselecter.cpp
+      src/noggit/ui/editortemplate.cpp
+      src/noggit/ui/MainWindow.cpp
     )
 
 set ( noggit_headers
@@ -105,7 +105,6 @@ set ( noggit_headers
       src/noggit/Brush.h
       src/noggit/DBC.h
       src/noggit/DBCFile.h
-	  src/noggit/editortemplate.h
       src/noggit/Frustum.h
       src/noggit/Liquid.h
       src/noggit/Log.h
@@ -130,7 +129,6 @@ set ( noggit_headers
       src/noggit/errorHandling.h
       src/noggit/ModelView.h
       src/noggit/DBCTableModel.h
-      src/noggit/MainWindow.h
 
       src/noggit/async/loader.h
       src/noggit/async/loading_thread.h
@@ -148,18 +146,18 @@ set ( noggit_headers
       src/noggit/ui/minimap_widget.h
       src/noggit/ui/DBCEditor.h
       src/noggit/ui/projectExplorer.h
-	  src/noggit/ui/textureselecter.h
+      src/noggit/ui/textureselecter.h
+      src/noggit/ui/editortemplate.h
+      src/noggit/ui/MainWindow.h
     )
 
 set ( noggit_headers_to_moc
       src/noggit/application.h
 
-	  src/noggit/editortemplate.h
       src/noggit/Menu.h
       src/noggit/MapView.h
       src/noggit/ModelView.h
       src/noggit/DBCTableModel.h
-      src/noggit/MainWindow.h
 
       src/noggit/async/loader.h
       src/noggit/async/loading_thread.h
@@ -172,7 +170,9 @@ set ( noggit_headers_to_moc
       src/noggit/ui/minimap_widget.h
       src/noggit/ui/DBCEditor.h
       src/noggit/ui/projectExplorer.h
-	  src/noggit/ui/textureselecter.h
+      src/noggit/ui/textureselecter.h
+      src/noggit/ui/editortemplate.h
+      src/noggit/ui/MainWindow.h
     )
 
 

@@ -34,16 +34,16 @@
 #include <noggit/ModelManager.h> // ModelManager::report()
 #include <noggit/mpq/archive.h>
 #include <noggit/mpq/file.h>
-
+#include <noggit/ui/MainWindow.h>
 #include <noggit/ui/DBCEditor.h>
 
 namespace noggit
 {
   application::application (int& argc, char** argv)
-    : QApplication (argc, argv)
-    , _settings (NULL)
-    , _async_loader (1)
-    , _archive_manager (_async_loader)
+  : QApplication (argc, argv)
+  , _settings (NULL)
+  , _async_loader (1)
+  , _archive_manager (_async_loader)
   {
     Log << "Noggit Studio - " << helper::repository::revision() << std::endl;
 
@@ -80,7 +80,7 @@ namespace noggit
 
     OpenDBs();
 
-    MainWindow* mainwindow = new MainWindow;
+    ui::MainWindow* mainwindow = new ui::MainWindow;
     if (_settings->value ("maximizedAppShow").toBool() == true)
       mainwindow->showMaximized();
     else
@@ -191,13 +191,13 @@ namespace noggit
     QSettings registry (default_registry_path, QSettings::NativeFormat);
     _game_path = registry.value ("InstallPath").toString();
 
-    if(_game_path == "")
+    if(_game_path.path() == "")
     {
       QSettings registry_win7 (win7_registry_path, QSettings::NativeFormat);
       _game_path = registry_win7.value ("InstallPath").toString();
     }
 
-    if(_game_path == "")
+    if(_game_path.path() == "")
     {
       QSettings registry_win72 (win7_registry_path2, QSettings::NativeFormat);
       _game_path = registry_win72.value ("InstallPath").toString();
