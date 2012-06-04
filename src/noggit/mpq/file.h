@@ -13,7 +13,7 @@ namespace helper
   {
     namespace case_insensitive
     {
-        class directory;
+      class directory;
     }
   }
 }
@@ -60,7 +60,8 @@ namespace noggit
 
       void save_to_mpq (archive *arch, QString pathInMPQ = NULL);
       static bool exists (const QString& filename);
-      static void disk_search_path (const QString& path);
+      static void disk_search_path
+        (const helper::qt::case_insensitive::directory& path);
 
     private:
       bool _is_at_end_of_file;
