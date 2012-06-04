@@ -40,7 +40,7 @@ include (${QT_USE_FILE})
 include_directories ( ${GLEW_INCLUDE_PATH}
                       ${GLUT_INCLUDE_DIRS}
                       ${STORM_INCLUDES}
-                      ${Boost_INCLUDE_DIRS}
+                      ${Boost_INCLUDE_DIR}
                       "${CMAKE_SOURCE_DIR}/include/"
                     )
 
