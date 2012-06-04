@@ -850,7 +850,7 @@ void World::saveChanged()
 
 }
 
-inline bool World::tileLoaded(int z, int x)
+inline bool World::tileLoaded(int z, int x) const
 {
   return hasTile( z, x ) && mTiles[z][x].tile;
 }
@@ -1613,7 +1613,7 @@ void World::clearHeight(int x, int z)
       if(curTile == 0) continue;
       setChanged(z,x);
       MapChunk *curChunk = curTile->getChunk(j, i);
-      curChunk->recalcNorms();
+      curChunk->update_normal_vectors();
     }
   }
 }
@@ -1750,6 +1750,22 @@ bool World::GetVertex(float x,float z, ::math::vector_3d *V)
   return mTiles[newZ][newX].tile->GetVertex(x, z, V);
 }
 
+boost::optional<float> World::get_height ( const float& x
+                                         , const float& z
+                                         ) const
+{
+  const int newX (x / TILESIZE);
+  const int newZ (z / TILESIZE);
+
+  if( !tileLoaded( newZ, newX ) )
+  {
+    return boost::none;
+  }
+
+  return mTiles[newZ][newX].tile->get_height(x, z);
+}
+
+
 void World::changeTerrain(float x, float z, float change, float radius, int BrushType)
 {
   for( int j = 0; j < 64; ++j )
@@ -1780,7 +1796,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
         {
           for( size_t tx = 0; tx < 16; ++tx )
           {
-            mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
+            mTiles[j][i].tile->getChunk(ty,tx)->update_normal_vectors();
           }
         }
       }
@@ -1818,7 +1834,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
         {
           for( size_t tx = 0; tx < 16; ++tx )
           {
-            mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
+            mTiles[j][i].tile->getChunk(ty,tx)->update_normal_vectors();
           }
         }
       }
@@ -1856,7 +1872,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
         {
           for( size_t tx = 0; tx < 16; ++tx )
           {
-            mTiles[j][i].tile->getChunk(ty,tx)->recalcNorms();
+            mTiles[j][i].tile->getChunk(ty,tx)->update_normal_vectors();
           }
         }
       }
@@ -2279,7 +2295,7 @@ void World::moveHeight(int x, int z)
       MapTile *curTile = mTiles[z][x].tile;
       if(curTile == 0) continue;
       setChanged(z,x);
-      curTile->getChunk(j, i)->recalcNorms();
+      curTile->getChunk(j, i)->update_normal_vectors();
     }
   }
 
