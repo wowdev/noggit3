@@ -11,6 +11,7 @@
 
 namespace noggit
 {
+  class application;
   namespace mpq
   {
     //! \note Instead of including StormLib.
@@ -42,7 +43,7 @@ namespace noggit
       QStringList _listfile;
 
       friend class archive_manager;
-      friend class application;
+      friend class noggit::application;
     };
   }
 }
