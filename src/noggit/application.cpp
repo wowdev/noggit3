@@ -206,7 +206,7 @@ namespace noggit
 #ifdef Q_WS_MAC
     _game_path = "/Applications/World of Warcraft/";
 #else
-    _game_path.clear();
+    _game_path = "";
 #endif
 #endif
   }
