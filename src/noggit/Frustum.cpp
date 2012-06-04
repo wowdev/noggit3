@@ -43,15 +43,15 @@ Frustum::Frustum()
   }
   {
     const ::math::vector_4d temp (column_3 - column_1);
-    planes[BOTTOM].normal (temp.xyz());
-    planes[BOTTOM].distance (temp.w());
-    planes[BOTTOM].normalize();
-  }
-  {
-    const ::math::vector_4d temp (column_3 + column_1);
     planes[TOP].normal (temp.xyz());
     planes[TOP].distance (temp.w());
     planes[TOP].normalize();
+  }
+  {
+    const ::math::vector_4d temp (column_3 + column_1);
+    planes[BOTTOM].normal (temp.xyz());
+    planes[BOTTOM].distance (temp.w());
+    planes[BOTTOM].normalize();
   }
   {
     const ::math::vector_4d temp (column_3 - column_2);
