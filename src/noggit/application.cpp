@@ -245,8 +245,8 @@ namespace noggit
 
     if (app()._settings->value ("check_for_client_build", true).toBool())
     {
-      //! \todo  Do somehow else  with not  loading and  unloading the
-      //! MPQs multiple times. (Is that file in one specific one?)
+      //! \todo Do somehow else. This  also does not take patches into
+      //! account and will always fail.
       mpq::archive archive ( path.absoluteFilePath ( "Data/"
                                                    + found_locale
                                                    + "/locale-"
@@ -263,14 +263,14 @@ namespace noggit
                         , &buffer
                         );
       const QString component_file (buffer);
-      
+
       const QRegExp version_regexp (".*version=\"(\\d+)\".*");
       version_regexp.exactMatch (component_file);
-      
+
       const int client_build (version_regexp.cap (1).toInt());
-      
+
       static const int build_3_3_5a (12340);
-      
+
       if (client_build != build_3_3_5a)
       {
         LogError << "Path \"" << qPrintable (path.absolutePath())
