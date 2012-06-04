@@ -243,7 +243,7 @@ namespace noggit
       return false;
     }
 
-    if (_settings->value ("check_for_client_build", true).toBool())
+    if (app()._settings->value ("check_for_client_build", true).toBool())
     {
       //! \todo  Do somehow else  with not  loading and  unloading the
       //! MPQs multiple times. (Is that file in one specific one?)
