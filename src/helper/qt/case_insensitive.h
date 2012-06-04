@@ -21,7 +21,7 @@ namespace helper
           directory dir (ps < 0 ? QDir::rootPath() : path.left (pos));
           const QStringList files (dir.entryList());
           return dir.absoluteFilePath
-            (files.at ( files.indexOf ( QRegExp ( path.mid (pos+1)
+            (files.at ( files.indexOf ( QRegExp ( path.mid (pos + 1)
                                                 , Qt::CaseInsensitive
                                                 )
                                       )
