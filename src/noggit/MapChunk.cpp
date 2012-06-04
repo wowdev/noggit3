@@ -850,6 +850,25 @@ bool MapChunk::GetVertex(float x,float z, ::math::vector_3d *V)
   return true;
 }
 
+boost::optional<float> MapChunk::get_height ( const float& x
+                                            , const float& z
+                                            ) const
+{
+  const float xdiff = x - xbase;
+  const float zdiff = z - zbase;
+
+  const int row = static_cast<int>( zdiff / (UNITSIZE * 0.5f ) + 0.5f );
+  const int column = static_cast<int>( ( xdiff - UNITSIZE * 0.5f * (row % 2) ) / UNITSIZE + 0.5f );
+  if ( (row < 0) || (column < 0)
+    || (row > 16) || (column > ((row % 2) ? 8 : 9))
+     )
+  {
+    return boost::none;
+  }
+
+  return mVertices[17*(row/2) + ((row % 2) ? 9 : 0) + column].y();
+}
+
 
 void MapChunk::CreateStrips()
 {
@@ -1269,58 +1288,65 @@ float MapChunk::getSelectionHeight()
   return lPosition;
 }
 
-void MapChunk::recalcNorms()
+void MapChunk::update_normal_vectors()
 {
-
-  ::math::vector_3d P1,P2,P3,P4;
-  ::math::vector_3d Norm,N1,N2,N3,N4,D;
-
-
-  if(Changed==false)
-    return;
-  Changed=false;
-
-  for(int i=0;i<mapbufsize;++i)
+  //! \todo This should be checked before calling.
+  if (!Changed)
   {
-    if(!_world->GetVertex( mVertices[i].x() - UNITSIZE*0.5f, mVertices[i].z() - UNITSIZE*0.5f, &P1 ))
-    {
-      P1.x (mVertices[i].x() - UNITSIZE*0.5f);
-      P1.y (mVertices[i].y());
-      P1.z (mVertices[i].z() - UNITSIZE*0.5f);
-    }
-
-    if(!_world->GetVertex( mVertices[i].x() + UNITSIZE*0.5f, mVertices[i].z() - UNITSIZE*0.5f, &P2 ))
-    {
-      P2.x (mVertices[i].x() + UNITSIZE*0.5f);
-      P2.y (mVertices[i].y());
-      P2.z (mVertices[i].z() - UNITSIZE*0.5f);
-    }
-
-    if(!_world->GetVertex( mVertices[i].x() + UNITSIZE*0.5f, mVertices[i].z() + UNITSIZE*0.5f, &P3 ))
-    {
-      P3.x (mVertices[i].x() + UNITSIZE*0.5f);
-      P3.y (mVertices[i].y());
-      P3.z (mVertices[i].z() + UNITSIZE*0.5f);
-    }
-
-    if(!_world->GetVertex( mVertices[i].x() - UNITSIZE*0.5f, mVertices[i].z() + UNITSIZE*0.5f, &P4 ))
-    {
-      P4.x (mVertices[i].x() - UNITSIZE*0.5f);
-      P4.y (mVertices[i].y());
-      P4.z (mVertices[i].z() + UNITSIZE*0.5f);
-    }
-
-    N1 = (P2 - mVertices[i]) % (P1 - mVertices[i]);
-    N2 = (P3 - mVertices[i]) % (P2 - mVertices[i]);
-    N3 = (P4 - mVertices[i]) % (P3 - mVertices[i]);
-    N4 = (P1 - mVertices[i]) % (P4 - mVertices[i]);
-
-    Norm = N1 + N2 + N3 + N4;
-    Norm.normalize();
-    mNormals[i] = Norm;
+    return;
   }
-  glBindBuffer(GL_ARRAY_BUFFER, normals);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+
+  Changed = false;
+
+  static const float point_offset (UNITSIZE * 0.5f);
+
+  for (size_t i (0); i < mapbufsize; ++i)
+  {
+    const ::math::vector_3d point_1 ( -point_offset
+                                    , _world->get_height ( mVertices[i].x()
+                                                         , mVertices[i].z()
+                                                         )
+                                    .get_value_or (mVertices[i].y())
+                                    , -point_offset
+                                    );
+
+    const ::math::vector_3d point_2 ( point_offset
+                                    , _world->get_height ( mVertices[i].x()
+                                                         , mVertices[i].z()
+                                                         )
+                                    .get_value_or (mVertices[i].y())
+                                    , -point_offset
+                                    );
+
+    const ::math::vector_3d point_3 ( point_offset
+                                    , _world->get_height ( mVertices[i].x()
+                                                         , mVertices[i].z()
+                                                         )
+                                    .get_value_or (mVertices[i].y())
+                                    , point_offset
+                                    );
+
+    const ::math::vector_3d point_4 ( -point_offset
+                                    , _world->get_height ( mVertices[i].x()
+                                                         , mVertices[i].z()
+                                                         )
+                                    .get_value_or (mVertices[i].y())
+                                    , point_offset
+                                    );
+
+    mNormals[i] = ( (point_2 % point_1)
+                  + (point_3 % point_2)
+                  + (point_4 % point_3)
+                  + (point_1 % point_4)
+                  ).normalized();
+  }
+
+  glBindBuffer (GL_ARRAY_BUFFER, normals);
+  glBufferData ( GL_ARRAY_BUFFER
+               , sizeof(mNormals)
+               , mNormals
+               , GL_STATIC_DRAW
+               );
 
   for (size_t j (0); j < mapbufsize; ++j)
   {

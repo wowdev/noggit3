@@ -608,6 +608,22 @@ bool MapTile::GetVertex( float x, float z, ::math::vector_3d *V )
   return xcol >= 0 && xcol <= 15 && ycol >= 0 && ycol <= 15 && mChunks[ycol][xcol]->GetVertex( x, z, V );
 }
 
+boost::optional<float> MapTile::get_height ( const float& x
+                                           , const float& z
+                                           ) const
+{
+  const int xcol ((x - xbase) / CHUNKSIZE);
+  const int ycol ((z - zbase) / CHUNKSIZE);
+
+  if (xcol < 0 || xcol > 15 || ycol < 0 || ycol > 15)
+  {
+    return boost::none;
+  }
+
+  return mChunks[ycol][xcol]->get_height (x, z);
+}
+
+
 /// --- Only saving related below this line. --------------------------
 
 void minmax (::math::vector_3d* a, ::math::vector_3d* b)
@@ -1274,7 +1290,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
           char* lNormals (get_pointer<char> (lADTFile, lCurrentPosition + 8));
 
-          mChunks[y][x]->recalcNorms();
+          mChunks[y][x]->update_normal_vectors();
           for (size_t i (0); i < (9 * 9 + 8 * 8); ++i)
           {
             lNormals[i*3 + 0] = ::math::bounded_nearest<char>
@@ -1779,7 +1795,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
           char* lNormals (get_pointer<char> (lADTFile, lCurrentPosition + 8));
 
-          mChunks[y][x]->recalcNorms();
+          mChunks[y][x]->update_normal_vectors();
           for (size_t i (0); i < (9 * 9 + 8 * 8); ++i)
           {
             lNormals[i*3 + 0] = ::math::bounded_nearest<char>
