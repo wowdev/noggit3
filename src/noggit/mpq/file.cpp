@@ -83,7 +83,7 @@ namespace noggit
     bool file::exists ( const QString &filename)
     {
       return app().archive_manager().file_exists_in_an_mpq (filename)
-          || _disk_search_path.exists (filename.toLower());
+          || _disk_search_path.exists (filename);
     }
 
     size_t file::read (void* dest, size_t bytes)
