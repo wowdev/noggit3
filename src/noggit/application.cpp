@@ -32,6 +32,7 @@
 #include <noggit/TextureManager.h> // TextureManager::report()
 #include <noggit/WMO.h> // WMOManager::report()
 #include <noggit/ModelManager.h> // ModelManager::report()
+#include <noggit/mpq/archive.h>
 #include <noggit/mpq/file.h>
 
 #include <noggit/ui/DBCEditor.h>
@@ -69,7 +70,7 @@ namespace noggit
     parse_command_line_and_set_defaults();
     get_game_path();
 
-    mpq::file::disk_search_path (_project_path);
+    mpq::file::disk_search_path (_project_path.absolutePath());
     open_mpqs();
 
     add_font_from_mpq ("fonts/skurri.ttf");
@@ -177,59 +178,135 @@ namespace noggit
     _settings->sync();
   }
 
+  void application::auto_detect_game_path()
+  {
+#ifdef Q_WS_WIN
+    static const QString default_registry_path
+      ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Blizzard Entertainment\\World of Warcraft");
+    static const QString win7_registry_path
+      ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft");
+    static const QString win7_registry_path2
+      ("HKEY_CURRENT_USER\\Software\\Classes\\VirtualStore\\MACHINE\\SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft"); // path if you never installed wow under win7
+
+    QSettings registry (default_registry_path, QSettings::NativeFormat);
+    _game_path = registry.value ("InstallPath").toString();
+
+    if(_game_path == "")
+    {
+      QSettings registry_win7 (win7_registry_path, QSettings::NativeFormat);
+      _game_path = registry_win7.value ("InstallPath").toString();
+    }
+
+    if(_game_path == "")
+    {
+      QSettings registry_win72 (win7_registry_path2, QSettings::NativeFormat);
+      _game_path = registry_win72.value ("InstallPath").toString();
+    }
+#else
+#ifdef Q_WS_MAC
+    _game_path = "/Applications/World of Warcraft/";
+#else
+    _game_path.clear();
+#endif
+#endif
+  }
+
+  bool application::is_valid_game_path (const QDir& path)
+  {
+    if (!path.exists())
+    {
+      LogError << "Path \"" << qPrintable (path.absolutePath())
+               << "\" does not exist." << std::endl;
+      return false;
+    }
+
+    QStringList locales;
+    locales << "enGB" << "enUS" << "deDE" << "koKR" << "frFR"
+            << "zhCN" << "zhTW" << "esES" << "esMX" << "ruRU";
+    QString found_locale ("****");
+
+    foreach(const QString& locale, locales)
+    {
+      if (path.exists (("Data/" + locale)))
+      {
+        found_locale = locale;
+        break;
+      }
+    }
+
+    if (found_locale == "****")
+    {
+      LogError << "Path \"" << qPrintable (path.absolutePath())
+               << "\" does not contain a locale directory "
+               << "(invalid installation or no installation at all)."
+               << std::endl;
+      return false;
+    }
+
+    //! \todo Do somehow else with  not loading and unloading the MPQs
+    //! multiple times. (Is that file in one specific one?)
+    mpq::archive archive ( path.absoluteFilePath ( "Data/"
+                                                 + found_locale
+                                                 + "/locale-"
+                                                 + found_locale
+                                                 + ".mpq"
+                                                 )
+                         , false
+                         );
+
+    char* buffer;
+    size_t size;
+    archive.open_file ( "component.wow-" + found_locale + ".txt"
+                      , &size
+                      , &buffer
+                      );
+    const QString component_file (buffer);
+
+    const QRegExp version_regexp (".*version=\"(\\d+)\".*");
+    version_regexp.exactMatch (component_file);
+
+    const int client_build (version_regexp.cap (1).toInt());
+
+    static const int build_3_3_5a (12340);
+
+    if (client_build != build_3_3_5a)
+    {
+      LogError << "Path \"" << qPrintable (path.absolutePath())
+               << "\" does not include a client of version "
+               << build_3_3_5a << " but version "
+               << client_build << "." << std::endl;
+      return false;
+    }
+
+    return true;
+  }
+
   void application::get_game_path()
   {
     QVariant game_path_variant (_settings->value ("paths/game"));
 
     if (game_path_variant.isValid())
+    {
       _game_path = game_path_variant.toString();
+    }
     else
     {
-  #ifdef Q_WS_WIN
-      static const QString default_registry_path
-        ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Blizzard Entertainment\\World of Warcraft");
-      static const QString win7_registry_path
-        ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft");
-      static const QString win7_registry_path2
-        ("HKEY_CURRENT_USER\\Software\\Classes\\VirtualStore\\MACHINE\\SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft"); // path if you never installed wow under win7
-
-      QSettings registry (default_registry_path, QSettings::NativeFormat);
-      _game_path = registry.value ("InstallPath").toString();
-
-      if(_game_path == "")
-      {
-        QSettings registry_win7 (win7_registry_path, QSettings::NativeFormat);
-        _game_path = registry_win7.value ("InstallPath").toString();
-      }
-
-      if(_game_path == "")
-      {
-        QSettings registry_win72 (win7_registry_path2, QSettings::NativeFormat);
-        _game_path = registry_win72.value ("InstallPath").toString();
-      }
-  #else
-  #ifdef Q_WS_MAC
-      _game_path = "/Applications/World of Warcraft/";
-  #else
-      _game_path = QFileDialog::getExistingDirectory(NULL
-                                                     , tr("Open WoW Directory")
-                                                     , "/"
-                                                     , QFileDialog::ShowDirsOnly
-                                                     );
-  #endif
-  #endif
+      auto_detect_game_path();
     }
 
-    if(!_game_path.endsWith("/"))
-        _game_path.append("/");
-
-    if (!QFile::exists (_game_path))
+    while (!is_valid_game_path (_game_path))
     {
-      LogError << "Nonexisting game-path set: " << qPrintable (_game_path) << std::endl;
-      throw std::runtime_error ("Nonexisting game-path set.");
+      _game_path = QFileDialog::getExistingDirectory
+        (NULL, tr("Open WoW Directory"), "/", QFileDialog::ShowDirsOnly);
+      if (_game_path.absolutePath() == "")
+      {
+        LogError << "Could not auto-detect game path "
+                 << "and user canceled the dialog." << std::endl;
+        throw std::runtime_error ("no folder chosen");
+      }
     }
 
-    _project_path = _settings->value ("paths/project", _game_path).toString();
+    _project_path = _settings->value ("paths/project", _game_path.absolutePath()).toString();
 
     _locale = _settings->value ("locale", "****").toString();
 
@@ -241,27 +318,21 @@ namespace noggit
 
       foreach(const QString& locale, locales)
       {
-        if(QFile::exists (_game_path + "Data/" + locale))
+        if (_game_path.exists (("Data/" + locale)))
         {
           _locale = locale;
           break;
         }
       }
-
-      if(_locale == "****")
-      {
-        LogError << "Could not find locale directory. Sorry." << std::endl;
-        throw std::runtime_error ("Could not find locale directory. Sorry.");
-      }
     }
 
-    _settings->setValue ("paths/game", _game_path);
-    _settings->setValue ("paths/project", _project_path);
+    _settings->setValue ("paths/game", _game_path.absolutePath());
+    _settings->setValue ("paths/project", _project_path.absolutePath());
     _settings->setValue ("locale", _locale);
     _settings->sync();
 
-    Log << "Game path: " << qPrintable (_game_path) << std::endl;
-    Log << "Project path: " << qPrintable (_project_path) << std::endl;
+    Log << "Game path: " << qPrintable (_game_path.absolutePath()) << std::endl;
+    Log << "Project path: " << qPrintable (_project_path.absolutePath()) << std::endl;
   }
 
   void application::open_mpqs()
@@ -288,7 +359,7 @@ namespace noggit
 
     foreach (const QString& archive, archive_names)
     {
-      QString path (_game_path + "Data/" + archive);
+      QString path (_game_path.absoluteFilePath ("Data/" + archive));
       path.replace ("{locale}", _locale);
 
       if(path.contains ("%1"))

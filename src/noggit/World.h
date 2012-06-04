@@ -12,6 +12,8 @@
 #include <string>
 #include <stdint.h>
 
+#include <boost/optional.hpp>
+
 #include <QImage>
 
 #include <noggit/Model.h> // ModelManager
@@ -116,7 +118,7 @@ private:
   \param z a integer indecating the z coord
   \return true when tile is loaded
   */
-  bool tileLoaded(int x, int z);
+  bool tileLoaded(int x, int z) const;
 
   //! loads a maptile if isnt already
   /*!
@@ -205,6 +207,8 @@ public:
   ::math::vector_3d _exact_terrain_selection_position;
 
   bool GetVertex(float x,float z, ::math::vector_3d *V);
+  boost::optional<float> get_height (const float& x, const float& z) const;
+
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   void blurTerrain(float x, float z, float remain, float radius, int BrushType);

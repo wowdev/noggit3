@@ -50,6 +50,28 @@ enum eMCLYFlags
   FLAG_REFLECTION = 0x400
 };
 
+struct mcly_flags_type
+{
+  uint32_t animation_rotation : 3;
+  uint32_t animation_speed : 3;
+  uint32_t animate : 1;
+  uint32_t glow : 1;
+  uint32_t alpha_layer : 1;
+  uint32_t compressed_alpha_layer : 1;
+  uint32_t skybox_reflection : 1;
+  uint32_t unused : 21;
+
+  static mcly_flags_type& interpret (uint32_t& base)
+  {
+    return reinterpret_cast<mcly_flags_type&> (base);
+  }
+  static const mcly_flags_type& interpret (const uint32_t& base)
+  {
+    return reinterpret_cast<const mcly_flags_type&> (base);
+  }
+};
+
+
 static const float TILESIZE = 533.33333f;
 static const float CHUNKSIZE = ((TILESIZE) / 16.0f);
 static const float UNITSIZE = (CHUNKSIZE / 8.0f);

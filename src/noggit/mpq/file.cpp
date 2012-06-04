@@ -157,11 +157,9 @@ namespace noggit
 
     void file::setBuffer(char *Buf, size_t Size)
     {
-      if(buffer)
-      {
-        delete buffer;
-        buffer = NULL;
-      }
+      delete buffer;
+      buffer = NULL;
+
       buffer=Buf;
       size=Size;
     }

@@ -648,33 +648,48 @@ void MapChunk::loadTextures()
     _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);*/
 }
 
-
-
-void MapChunk::SetAnim (int anim) const
+void MapChunk::SetAnim (const mcly_flags_type& flags) const
 {
-  if (anim) {
-    glActiveTexture(GL_TEXTURE0);
-    glMatrixMode(GL_TEXTURE);
+  if (flags.animate)
+  {
+    opengl::texture::set_active_texture (0);
+    glMatrixMode (GL_TEXTURE);
     glPushMatrix();
 
-    // note: this is ad hoc and probably completely wrong
-    const int spd = (anim & 0x08) | ((anim & 0x10) >> 2) | ((anim & 0x20) >> 4) | ((anim & 0x40) >> 6);
-    const int dir = anim & 0x07;
-    const float texanimxtab[8] = {0, 1, 1, 1, 0, -1, -1, -1};
-    const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
-    const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
+    static const float direction_table_x[8] = {  0.0f, -1.0f, -1.0f, -1.0f
+                                              ,  0.0f,  1.0f,  1.0f,  1.0f
+                                              };
+    static const float direction_table_y[8] = {  1.0f,  1.0f,  0.0f, -1.0f
+                                              , -1.0f, -1.0f,  0.0f,  1.0f
+                                              };
 
-    const float f = ( static_cast<int>( clock() / CLOCKS_PER_SEC * (spd/15.0f) ) % 1600) / 1600.0f;
-    glTranslatef(f*fdx, f*fdy, 0);
+    //! \todo  Find  a good  factor  to slow  this  thing  down to  an
+    //! appropriate speed.
+    static const float animation_slowdown_factor (1.0f);
+
+    //! \note This does not wrap back to zero! Maybe this is therefore
+    //! wrong. Needs to be tested.
+    const float animation_progress ( (clock() / CLOCKS_PER_SEC)
+                                   * (flags.animation_speed + 1)
+                                   * animation_slowdown_factor
+                                   );
+
+    glTranslatef ( animation_progress
+                 * direction_table_x[flags.animation_rotation]
+                 , animation_progress
+                 * direction_table_y[flags.animation_rotation]
+                 , 0.0f
+                 );
   }
 }
 
-void MapChunk::RemoveAnim (int anim) const
+void MapChunk::RemoveAnim (const mcly_flags_type& flags) const
 {
-  if (anim) {
+  if (flags.animate)
+  {
     glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glActiveTexture(GL_TEXTURE1);
+    glMatrixMode (GL_MODELVIEW);
+    opengl::texture::set_active_texture (1);
   }
 }
 
@@ -700,7 +715,11 @@ void MapChunk::drawTextures()
     opengl::texture::disable_texture (1);
   }
 
-  SetAnim(animated[0]);
+  const mcly_flags_type& flags_layer_0
+    (mcly_flags_type::interpret (animated[0]));
+
+  SetAnim(flags_layer_0);
+
   glBegin(GL_TRIANGLE_STRIP);
   glTexCoord2f(0.0f,texDetail);
   glVertex3f(static_cast<float>(px), py+1.0f, -2.0f);
@@ -711,7 +730,8 @@ void MapChunk::drawTextures()
   glTexCoord2f(texDetail, 0.0f);
   glVertex3f(px+1.0f, static_cast<float>(py), -2.0f);
   glEnd();
-  RemoveAnim(animated[0]);
+
+  RemoveAnim(flags_layer_0);
 
   if (nTextures > 1U) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
@@ -733,7 +753,9 @@ void MapChunk::drawTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    SetAnim(animated[i]);
+    const mcly_flags_type& flags (mcly_flags_type::interpret (animated[i]));
+
+    SetAnim(flags);
 
     glBegin(GL_TRIANGLE_STRIP);
     glMultiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
@@ -750,7 +772,7 @@ void MapChunk::drawTextures()
     glVertex3f(static_cast<float>(px), py+1.0f, -2.0f);
     glEnd();
 
-    RemoveAnim(animated[i]);
+    RemoveAnim(flags);
   }
 
   opengl::texture::disable_texture (0);
@@ -793,16 +815,6 @@ void MapChunk::initStrip()
 
 MapChunk::~MapChunk()
 {
-  //! \todo random crash here.
-  /*
-    3   ???                                 0x0000000101930340 0x0 + 4321379136
-    4   noggit                              0x00000001000298b8 _ZN8MapChunkD1Ev + 196
-    5   noggit                              0x0000000100032ce4 _ZN7MapTileD1Ev + 266
-    6   noggit                              0x00000001000bbadd _ZN5WorldD1Ev + 247
-    7   noggit                              0x0000000100044500 _ZN7MapViewD0Ev + 106
-    8   noggit                              0x000000010007cc66 SDL_main + 8004
-   */
-
   // unload alpha maps
   glDeleteTextures( 3, alphamaps );
   // shadow maps, too
@@ -812,11 +824,8 @@ MapChunk::~MapChunk()
   glDeleteBuffers( 1, &vertices );
   glDeleteBuffers( 1, &normals );
 
-  if( strip )
-  {
-    delete strip;
-    strip = NULL;
-  }
+  delete strip;
+  strip = NULL;
 
   if( nameID != -1 )
   {
@@ -839,6 +848,25 @@ bool MapChunk::GetVertex(float x,float z, ::math::vector_3d *V)
 
   *V=mVertices[17*(row/2) + ((row % 2) ? 9 : 0) + column];
   return true;
+}
+
+boost::optional<float> MapChunk::get_height ( const float& x
+                                            , const float& z
+                                            ) const
+{
+  const float xdiff = x - xbase;
+  const float zdiff = z - zbase;
+
+  const int row = static_cast<int>( zdiff / (UNITSIZE * 0.5f ) + 0.5f );
+  const int column = static_cast<int>( ( xdiff - UNITSIZE * 0.5f * (row % 2) ) / UNITSIZE + 0.5f );
+  if ( (row < 0) || (column < 0)
+    || (row > 16) || (column > ((row % 2) ? 8 : 9))
+     )
+  {
+    return boost::none;
+  }
+
+  return mVertices[17*(row/2) + ((row % 2) ? 9 : 0) + column].y();
 }
 
 
@@ -908,31 +936,13 @@ void MapChunk::CreateStrips()
 
 void MapChunk::drawPass (int anim)
 {
-  if (anim)
-  {
-    glActiveTexture(GL_TEXTURE0);
-    glMatrixMode(GL_TEXTURE);
-    glPushMatrix();
+  const mcly_flags_type& flags (mcly_flags_type::interpret (anim));
 
-    // note: this is ad hoc and probably completely wrong
-    const int spd = (anim & 0x08) | ((anim & 0x10) >> 2) | ((anim & 0x20) >> 4) | ((anim & 0x40) >> 6);
-    const int dir = anim & 0x07;
-    const float texanimxtab[8] = {0, 1, 1, 1, 0, -1, -1, -1};
-    const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
-    const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
-    const int animspd = 200 * detail_size;
-    float f = ( (static_cast<int>(clock() / CLOCKS_PER_SEC *(spd/15.0f))) % animspd) / static_cast<float>(animspd);
-    glTranslatef(f*fdx,f*fdy,0);
-  }
+  SetAnim (flags);
 
   glDrawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
 
-  if (anim)
-  {
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glActiveTexture(GL_TEXTURE1);
-  }
+  RemoveAnim (flags);
 }
 
 void MapChunk::drawLines (bool draw_hole_lines)
@@ -1278,58 +1288,65 @@ float MapChunk::getSelectionHeight()
   return lPosition;
 }
 
-void MapChunk::recalcNorms()
+void MapChunk::update_normal_vectors()
 {
-
-  ::math::vector_3d P1,P2,P3,P4;
-  ::math::vector_3d Norm,N1,N2,N3,N4,D;
-
-
-  if(Changed==false)
-    return;
-  Changed=false;
-
-  for(int i=0;i<mapbufsize;++i)
+  //! \todo This should be checked before calling.
+  if (!Changed)
   {
-    if(!_world->GetVertex( mVertices[i].x() - UNITSIZE*0.5f, mVertices[i].z() - UNITSIZE*0.5f, &P1 ))
-    {
-      P1.x (mVertices[i].x() - UNITSIZE*0.5f);
-      P1.y (mVertices[i].y());
-      P1.z (mVertices[i].z() - UNITSIZE*0.5f);
-    }
-
-    if(!_world->GetVertex( mVertices[i].x() + UNITSIZE*0.5f, mVertices[i].z() - UNITSIZE*0.5f, &P2 ))
-    {
-      P2.x (mVertices[i].x() + UNITSIZE*0.5f);
-      P2.y (mVertices[i].y());
-      P2.z (mVertices[i].z() - UNITSIZE*0.5f);
-    }
-
-    if(!_world->GetVertex( mVertices[i].x() + UNITSIZE*0.5f, mVertices[i].z() + UNITSIZE*0.5f, &P3 ))
-    {
-      P3.x (mVertices[i].x() + UNITSIZE*0.5f);
-      P3.y (mVertices[i].y());
-      P3.z (mVertices[i].z() + UNITSIZE*0.5f);
-    }
-
-    if(!_world->GetVertex( mVertices[i].x() - UNITSIZE*0.5f, mVertices[i].z() + UNITSIZE*0.5f, &P4 ))
-    {
-      P4.x (mVertices[i].x() - UNITSIZE*0.5f);
-      P4.y (mVertices[i].y());
-      P4.z (mVertices[i].z() + UNITSIZE*0.5f);
-    }
-
-    N1 = (P2 - mVertices[i]) % (P1 - mVertices[i]);
-    N2 = (P3 - mVertices[i]) % (P2 - mVertices[i]);
-    N3 = (P4 - mVertices[i]) % (P3 - mVertices[i]);
-    N4 = (P1 - mVertices[i]) % (P4 - mVertices[i]);
-
-    Norm = N1 + N2 + N3 + N4;
-    Norm.normalize();
-    mNormals[i] = Norm;
+    return;
   }
-  glBindBuffer(GL_ARRAY_BUFFER, normals);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+
+  Changed = false;
+
+  static const float point_offset (UNITSIZE * 0.5f);
+
+  for (size_t i (0); i < mapbufsize; ++i)
+  {
+    const ::math::vector_3d point_1 ( -point_offset
+                                    , _world->get_height ( mVertices[i].x()
+                                                         , mVertices[i].z()
+                                                         )
+                                    .get_value_or (mVertices[i].y())
+                                    , -point_offset
+                                    );
+
+    const ::math::vector_3d point_2 ( point_offset
+                                    , _world->get_height ( mVertices[i].x()
+                                                         , mVertices[i].z()
+                                                         )
+                                    .get_value_or (mVertices[i].y())
+                                    , -point_offset
+                                    );
+
+    const ::math::vector_3d point_3 ( point_offset
+                                    , _world->get_height ( mVertices[i].x()
+                                                         , mVertices[i].z()
+                                                         )
+                                    .get_value_or (mVertices[i].y())
+                                    , point_offset
+                                    );
+
+    const ::math::vector_3d point_4 ( -point_offset
+                                    , _world->get_height ( mVertices[i].x()
+                                                         , mVertices[i].z()
+                                                         )
+                                    .get_value_or (mVertices[i].y())
+                                    , point_offset
+                                    );
+
+    mNormals[i] = ( (point_2 % point_1)
+                  + (point_3 % point_2)
+                  + (point_4 % point_3)
+                  + (point_1 % point_4)
+                  ).normalized();
+  }
+
+  glBindBuffer (GL_ARRAY_BUFFER, normals);
+  glBufferData ( GL_ARRAY_BUFFER
+               , sizeof(mNormals)
+               , mNormals
+               , GL_STATIC_DRAW
+               );
 
   for (size_t j (0); j < mapbufsize; ++j)
   {
@@ -1347,8 +1364,12 @@ void MapChunk::recalcNorms()
                       );
   }
 
-  glBindBuffer(GL_ARRAY_BUFFER, minishadows);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
+  glBindBuffer (GL_ARRAY_BUFFER, minishadows);
+  glBufferData ( GL_ARRAY_BUFFER
+               , sizeof(mFakeShadows)
+               , mFakeShadows
+               , GL_STATIC_DRAW
+               );
 }
 
 bool MapChunk::changeTerrain(float x, float z, float change, float radius, int BrushType)
