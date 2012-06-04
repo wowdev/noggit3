@@ -243,7 +243,7 @@ namespace noggit
       return false;
     }
 
-    if (app()._settings->value ("check_for_client_build", true).toBool())
+    if (app()._settings->value ("check_for_client_build", false).toBool())
     {
       //! \todo Do somehow else. This  also does not take patches into
       //! account and will always fail.
