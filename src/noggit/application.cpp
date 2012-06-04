@@ -191,13 +191,13 @@ namespace noggit
     QSettings registry (default_registry_path, QSettings::NativeFormat);
     _game_path = registry.value ("InstallPath").toString();
 
-    if(_game_path.path() == "")
+    if(_game_path.absolutePath() == "")
     {
       QSettings registry_win7 (win7_registry_path, QSettings::NativeFormat);
       _game_path = registry_win7.value ("InstallPath").toString();
     }
 
-    if(_game_path.path() == "")
+    if(_game_path.absolutePath() == "")
     {
       QSettings registry_win72 (win7_registry_path2, QSettings::NativeFormat);
       _game_path = registry_win72.value ("InstallPath").toString();
