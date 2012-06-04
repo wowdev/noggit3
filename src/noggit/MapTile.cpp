@@ -53,7 +53,7 @@ MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bo
     }
   }
 
-  noggit::mpq::file theFile (QString::fromStdString (mFilename));
+  noggit::mpq::file theFile (QString::fromStdString (mFilename), true);
 
   Log << "Opening tile " << mPositionX << ", " << mPositionZ << " (\"" << mFilename << "\") from " << (theFile.file_is_on_disk() ? "disk" : "MPQ") << "." << std::endl;
 
@@ -1555,7 +1555,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
   }
 #endif
 
-  noggit::mpq::file f (QString::fromStdString (mFilename));
+  noggit::mpq::file f (QString::fromStdString (mFilename), true);
   f.setBuffer( get_pointer<char>(lADTFile), lADTFile.size() );
   f.save_to_disk();
   f.close();
@@ -1870,7 +1870,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     lCurrentPosition += 8 + chunkSize;
   }
 
-  noggit::mpq::file f (QString::fromStdString (mFilename));
+  noggit::mpq::file f (QString::fromStdString (mFilename), true);
   f.setBuffer( get_pointer<char>(lADTFile), lADTFile.size() );
   f.save_to_disk();
   f.close();
@@ -2050,9 +2050,9 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
   texFilename = texFilename.substr(found + 1);
   texFilename = "/" + texFilename;
 
-  noggit::mpq::file fTex (QString::fromStdString (mFilename));
+  noggit::mpq::file fTex (QString::fromStdString (texFilename), true);
   fTex.setBuffer( get_pointer<char>(lADTTexFile), lADTTexFile.size() );
-  fTex.save_to_disk(QString::fromStdString (texFilename));
+  fTex.save_to_disk();
   fTex.close();
 
   // obj0
@@ -2344,9 +2344,9 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
   objFilename = objFilename.substr(found + 1);
   objFilename = "/" + objFilename;
 
-  noggit::mpq::file fObj (QString::fromStdString (mFilename));
+  noggit::mpq::file fObj (QString::fromStdString (objFilename), true);
   fObj.setBuffer( get_pointer<char>(lADTObjFile), lADTObjFile.size() );
-  fObj.save_to_disk(QString::fromStdString (objFilename));
+  fObj.save_to_disk();
   fObj.close();
 
 }

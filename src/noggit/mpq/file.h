@@ -6,6 +6,7 @@
 #define __NOGGIT_MPQ_FILE_H
 
 #include <QString>
+#include <QDir>
 
 namespace noggit
 {
@@ -20,7 +21,9 @@ namespace noggit
 
     public:
       //! \note filenames are not case sensitive
-      explicit file (const QString& filename);
+      explicit file ( const QString& filename
+                    , const bool& maybe_create = false
+                    );
       ~file();
 
       size_t read (void* dest, size_t bytes);
@@ -44,24 +47,22 @@ namespace noggit
       }
 
       void save_to_disk();
-      void save_to_disk(const QString& filename);
 
       void save_to_mpq (archive *arch, QString pathInMPQ = NULL);
       static bool exists (const QString& filename);
-      static void disk_search_path (const QString& path);
+      static void disk_search_path (const QDir& path);
 
     private:
-
-
       bool _is_at_end_of_file;
       char* buffer;
       size_t pointer;
       size_t size;
 
       bool _file_is_on_disk;
-      QString _path_on_disk;
 
-      static QString _disk_search_path;
+      QString _filename;
+
+      static QDir _disk_search_path;
 
       friend class archive;
     };
