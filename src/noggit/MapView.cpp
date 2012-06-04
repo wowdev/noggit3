@@ -68,8 +68,6 @@ namespace noggit
     , _cursor_selector (new ui::cursor_selector (NULL))
     , _is_currently_moving_object (false)
     , _object_to_ground (true)
-    , flags(TERRAIN | WMODOODAS | FOG | DOODADS | TERRAIN | DRAWWMO)
-    , backupFlags(0)
     , _draw_lighting (true)
     , _fog_distance (777.0f)
     , _holding_left_mouse_button (false)
@@ -91,15 +89,15 @@ namespace noggit
     , _smoothing_radius_slider (NULL)
     , _smoothing_speed_slider (NULL)
     , _smoothing_settings_widget (NULL)
-    , _texturing_settings_widget (NULL)
-    , _texturing_radius_slider (NULL)
-    , _texturing_hardness_slider (NULL)
-    , _texturing_pressure_slider (NULL)
-    , _texturing_opacity_slider (NULL)
     , _texturing_radius (15.0)
     , _texturing_hardness (0.9f)
     , _texturing_pressure (0.9f)
     , _texturing_opacity (1.0f)
+    , _texturing_radius_slider (NULL)
+    , _texturing_hardness_slider (NULL)
+    , _texturing_pressure_slider (NULL)
+    , _texturing_opacity_slider (NULL)
+    , _texturing_settings_widget (NULL)
     , _texturingComboBox (NULL)
     , _automatically_update_terrain_selection (true)
     , _copy_size_randomization (false)
@@ -123,6 +121,8 @@ namespace noggit
     , look (false)
     , mViewMode (eViewMode_3D)
     , editortemplate (NULL)
+    , flags(TERRAIN | WMODOODAS | FOG | DOODADS | TERRAIN | DRAWWMO)
+    , backupFlags(0)
   {
     setMinimumSize (500, 500);
     setMaximumHeight (2000);
@@ -254,10 +254,11 @@ namespace noggit
     edit_menu->addAction (reset_rotation);
     edit_menu->addAction (snap_object_to_ground);
 
+    /*
     QMenu* assist_menu (menu->addMenu (tr ("Assist")));
+
     QMenu* insertion_menu (assist_menu->addMenu (tr ("Insert helper model")));
 
-    /*
     assist_menu->addAction (tr ("all from MV", InsertObject, 0  );
     assist_menu->addAction (tr ("last M2 from MV", InsertObject, 14  );
     assist_menu->addAction (tr ("last WMO from MV", InsertObject, 15  );
@@ -958,7 +959,14 @@ namespace noggit
   {
     setup_3d_selection_rendering();
 
-    _world->drawSelection (flags);
+    if (selectTerrainOnly)
+    {
+      _world->drawSelection (flags & (~DOODADS & ~DRAWWMO & ~WMODOODAS));
+    }
+    else
+    {
+      _world->drawSelection (flags);
+    }
   }
 
   QPointF MapView::tile_mode_brush_position() const

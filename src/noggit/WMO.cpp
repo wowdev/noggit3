@@ -584,8 +584,7 @@ void WMO::drawSelect (World* world
 
       if (draw_doodads)
       {
-        groups[i].drawDoodadsSelect( world
-                                   , doodadset
+        groups[i].drawDoodadsSelect( doodadset
                                    , ofs
                                    , rot
                                    , frustum
@@ -715,7 +714,6 @@ void WMOGroup::init(WMO *_wmo, noggit::mpq::file* f, int _num, char *names)
 
   // extract group info from f
   f->read(&flags,4);
-  float ff[3];
   f->read(VertexBoxMax,12);
   f->read(VertexBoxMin,12);
   int nameOfs;
@@ -918,7 +916,7 @@ void WMOGroup::initDisplayList()
 
   // assume that texturing is on, for unit 1
 
-  for (int b=0; b<nBatches; b++)
+  for (size_t b=0; b<nBatches; b++)
   {
     WMOBatch *batch = &batches[b];
     WMOMaterial *mat = &wmo->mat[batch->texture];
@@ -1067,7 +1065,7 @@ void WMOGroup::draw ( World* world
   //glCallList(dl);
   glDisable(GL_BLEND);
   glColor4f(1,1,1,1);
-  for (int i=0; i<nBatches; ++i)
+  for (size_t i=0; i<nBatches; ++i)
   {
     if (wmoShader)
     {
@@ -1149,8 +1147,7 @@ void WMOGroup::drawDoodads ( World* world
 }
 
 
-void WMOGroup::drawDoodadsSelect ( World* world
-                                 , unsigned int doodadset
+void WMOGroup::drawDoodadsSelect ( unsigned int doodadset
                                  , const ::math::vector_3d& ofs
                                  , const float rot
                                  , const Frustum& frustum

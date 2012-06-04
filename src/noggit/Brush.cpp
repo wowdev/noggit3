@@ -10,8 +10,8 @@
 #include <opengl/texture.h>
 
 brush::brush(float r, float h)
-  : _texture (new opengl::texture)
-  , radius (r)
+  : radius (r)
+  , _texture (new opengl::texture)
 {
   setHardness (h);
 }

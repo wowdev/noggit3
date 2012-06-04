@@ -22,8 +22,8 @@
 
 ModelInstance::ModelInstance (World* world, Model *m)
   : model (m)
-  , _world (world)
   , nameID (0xFFFFFFFF)
+  , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
   nameID = _world->selection_names().add (this);
@@ -31,8 +31,8 @@ ModelInstance::ModelInstance (World* world, Model *m)
 
 ModelInstance::ModelInstance (World* world, Model *m, noggit::mpq::file* f)
   : model (m)
-  , _world (world)
   , nameID (0xFFFFFFFF)
+  , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
   f->read (&d1, 4);
@@ -46,8 +46,8 @@ ModelInstance::ModelInstance (World* world, Model *m, noggit::mpq::file* f)
 
 ModelInstance::ModelInstance (World* world, Model *m, ENTRY_MDDF *d)
   : model (m)
-  , _world (world)
   , nameID (0xFFFFFFFF)
+  , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
   d1 = d->uniqueID;
@@ -58,13 +58,13 @@ ModelInstance::ModelInstance (World* world, Model *m, ENTRY_MDDF *d)
 }
 
 ModelInstance::ModelInstance ( World* world
-                             , Model* model
+                             , Model* model_
                              , const ::math::vector_3d& position
                              , const ::math::quaternion& rotation
                              , const float& scale
                              , const ::math::vector_3d& lighting_color
                              )
-  : model (model)
+  : model (model_)
   , nameID (0xFFFFFFFF)
   , pos (position)
   , _wmo_doodad_rotation (rotation)
