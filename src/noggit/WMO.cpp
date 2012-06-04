@@ -259,11 +259,9 @@ WMO::WMO( World* world, const std::string& filenameArg )
   }
 
   f.close();
-  if( texbuf )
-  {
-    delete[] texbuf;
-    texbuf = NULL;
-  }
+
+  delete[] texbuf;
+  texbuf = NULL;
 
   for (unsigned int i=0; i<nGroups; ++i)
     groups[i].initDisplayList();
@@ -272,21 +270,16 @@ WMO::WMO( World* world, const std::string& filenameArg )
 WMO::~WMO()
 {
   LogDebug << "Unloading WMO \"" << filename() << "\"." << std::endl;
-  if(groups)
-  {
-    delete[] groups;
-    groups = NULL;
-  }
+
+  delete[] groups;
+  groups = NULL;
 
   for (std::vector<std::string>::iterator it = textures.begin(); it != textures.end(); ++it) {
     TextureManager::delbyname(*it);
   }
 
-  if( mat )
-  {
-    delete[] mat;
-    mat = NULL;
-  }
+  delete[] mat;
+  mat = NULL;
 
   if (skybox) {
     //delete skybox;
@@ -1255,16 +1248,10 @@ WMOGroup::~WMOGroup()
   }
   _lists.clear();
 
-  if (nDoodads)
-  {
-    delete[] ddr;
-    ddr = NULL;
-  }
-  if (lq)
-  {
-    delete lq;
-    lq = NULL;
-  }
+  delete[] ddr;
+  ddr = NULL;
+  delete lq;
+  lq = NULL;
 }
 
 
