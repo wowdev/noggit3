@@ -1364,8 +1364,12 @@ void MapChunk::update_normal_vectors()
                       );
   }
 
-  glBindBuffer(GL_ARRAY_BUFFER, minishadows);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
+  glBindBuffer (GL_ARRAY_BUFFER, minishadows);
+  glBufferData ( GL_ARRAY_BUFFER
+               , sizeof(mFakeShadows)
+               , mFakeShadows
+               , GL_STATIC_DRAW
+               );
 }
 
 bool MapChunk::changeTerrain(float x, float z, float change, float radius, int BrushType)
