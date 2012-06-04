@@ -652,7 +652,7 @@ void MapChunk::SetAnim (const mcly_flags_type& flags) const
 {
   if (flags.animate)
   {
-    glActiveTexture (GL_TEXTURE0);
+    opengl::texture::set_active_texture (0);
     glMatrixMode (GL_TEXTURE);
     glPushMatrix();
 
@@ -689,7 +689,7 @@ void MapChunk::RemoveAnim (const mcly_flags_type& flags) const
   {
     glPopMatrix();
     glMatrixMode (GL_MODELVIEW);
-    glActiveTexture (GL_TEXTURE1);
+    opengl::texture::set_active_texture (1);
   }
 }
 
