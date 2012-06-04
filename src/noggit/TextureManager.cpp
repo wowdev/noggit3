@@ -44,7 +44,7 @@ noggit::blp_texture* TextureManager::newTexture( std::string name )
 
   if( items.find( name ) == items.end() )
   {
-    items[name] = new noggit::blp_texture (QString::fromStdString (name));
+    items[name] = new noggit::blp_texture (QString::fromAscii(name.c_str()));
   }
 
   items[name]->addReference();

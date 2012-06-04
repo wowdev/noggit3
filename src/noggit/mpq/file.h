@@ -6,7 +6,17 @@
 #define __NOGGIT_MPQ_FILE_H
 
 #include <QString>
-#include <QDir>
+
+namespace helper
+{
+  namespace qt
+  {
+    namespace case_insensitive
+    {
+        class directory;
+    }
+  }
+}
 
 namespace noggit
 {
@@ -50,7 +60,7 @@ namespace noggit
 
       void save_to_mpq (archive *arch, QString pathInMPQ = NULL);
       static bool exists (const QString& filename);
-      static void disk_search_path (const QDir& path);
+      static void disk_search_path (const QString& path);
 
     private:
       bool _is_at_end_of_file;
@@ -62,7 +72,7 @@ namespace noggit
 
       QString _filename;
 
-      static QDir _disk_search_path;
+      static helper::qt::case_insensitive::directory _disk_search_path;
 
       friend class archive;
     };
