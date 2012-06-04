@@ -648,38 +648,48 @@ void MapChunk::loadTextures()
     _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);*/
 }
 
-
-
-void MapChunk::SetAnim (int anim) const
+void MapChunk::SetAnim (const mcly_flags_type& flags) const
 {
-  if (anim)
+  if (flags.animate)
   {
-    glActiveTexture(GL_TEXTURE0);
-    glMatrixMode(GL_TEXTURE);
+    glActiveTexture (GL_TEXTURE0);
+    glMatrixMode (GL_TEXTURE);
     glPushMatrix();
 
-    // note: this is ad hoc and probably completely wrong
-    const int spd = (anim & 0x08) | ((anim & 0x10) >> 2)
-      | ((anim & 0x20) >> 4) | ((anim & 0x40) >> 6);
-    const int dir = anim & 0x07;
-    const float texanimxtab[8] = {0, 1, 1, 1, 0, -1, -1, -1};
-    const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
-    const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
-    const int animspd = 200 * detail_size;
-    const float f = ( (static_cast<int>(clock() / CLOCKS_PER_SEC
-                                       *(spd/15.0f))) % animspd)
-      / static_cast<float>(animspd);
-    glTranslatef(f*fdx, f*fdy, 0);
+    static const float direction_table_x[8] = {  0.0f, -1.0f, -1.0f, -1.0f
+                                              ,  0.0f,  1.0f,  1.0f,  1.0f
+                                              };
+    static const float direction_table_y[8] = {  1.0f,  1.0f,  0.0f, -1.0f
+                                              , -1.0f, -1.0f,  0.0f,  1.0f
+                                              };
+
+    //! \todo  Find  a good  factor  to slow  this  thing  down to  an
+    //! appropriate speed.
+    static const float animation_slowdown_factor (1.0f);
+
+    //! \note This does not wrap back to zero! Maybe this is therefore
+    //! wrong. Needs to be tested.
+    const float animation_progress ( (clock() / CLOCKS_PER_SEC)
+                                   * (flags.animation_speed + 1)
+                                   * animation_slowdown_factor
+                                   );
+
+    glTranslatef ( animation_progress
+                 * direction_table_x[flags.animation_rotation]
+                 , animation_progress
+                 * direction_table_y[flags.animation_rotation]
+                 , 0.0f
+                 );
   }
 }
 
-void MapChunk::RemoveAnim (int anim) const
+void MapChunk::RemoveAnim (const mcly_flags_type& flags) const
 {
-  if (anim)
+  if (flags.animate)
   {
     glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glActiveTexture(GL_TEXTURE1);
+    glMatrixMode (GL_MODELVIEW);
+    glActiveTexture (GL_TEXTURE1);
   }
 }
 
@@ -705,7 +715,11 @@ void MapChunk::drawTextures()
     opengl::texture::disable_texture (1);
   }
 
-  SetAnim(animated[0]);
+  const mcly_flags_type& flags_layer_0
+    (mcly_flags_type::interpret (animated[0]));
+
+  SetAnim(flags_layer_0);
+
   glBegin(GL_TRIANGLE_STRIP);
   glTexCoord2f(0.0f,texDetail);
   glVertex3f(static_cast<float>(px), py+1.0f, -2.0f);
@@ -716,7 +730,8 @@ void MapChunk::drawTextures()
   glTexCoord2f(texDetail, 0.0f);
   glVertex3f(px+1.0f, static_cast<float>(py), -2.0f);
   glEnd();
-  RemoveAnim(animated[0]);
+
+  RemoveAnim(flags_layer_0);
 
   if (nTextures > 1U) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
@@ -738,7 +753,9 @@ void MapChunk::drawTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    SetAnim(animated[i]);
+    const mcly_flags_type& flags (mcly_flags_type::interpret (animated[i]));
+
+    SetAnim(flags);
 
     glBegin(GL_TRIANGLE_STRIP);
     glMultiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
@@ -755,7 +772,7 @@ void MapChunk::drawTextures()
     glVertex3f(static_cast<float>(px), py+1.0f, -2.0f);
     glEnd();
 
-    RemoveAnim(animated[i]);
+    RemoveAnim(flags);
   }
 
   opengl::texture::disable_texture (0);
@@ -900,11 +917,13 @@ void MapChunk::CreateStrips()
 
 void MapChunk::drawPass (int anim)
 {
-  SetAnim (anim);
+  const mcly_flags_type& flags (mcly_flags_type::interpret (anim));
+
+  SetAnim (flags);
 
   glDrawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
 
-  RemoveAnim (anim);
+  RemoveAnim (flags);
 }
 
 void MapChunk::drawLines (bool draw_hole_lines)

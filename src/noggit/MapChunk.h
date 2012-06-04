@@ -138,8 +138,8 @@ public:
 
   //float getTerrainHeight(float x, float z);
 
-  void SetAnim (int anim) const;
-  void RemoveAnim (int anim) const;
+  void SetAnim (const mcly_flags_type& flags) const;
+  void RemoveAnim (const mcly_flags_type& flags) const;
 
   void GenerateContourMap();
   void CreateStrips();
