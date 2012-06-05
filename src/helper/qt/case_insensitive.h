@@ -72,7 +72,7 @@ namespace helper
               }
 
               parent.cd
-                ( entrys.at ( entrys.indexOf ( QRegExp ( dir
+                ( entries.at ( entries.indexOf ( QRegExp ( dir
                                                        , Qt::CaseInsensitive
                                                        )
                                              )
