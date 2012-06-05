@@ -2199,13 +2199,13 @@ namespace noggit
       shapingButton->setIconSize (QSize(40, 40));
       shapingButton->setMaximumSize (50, 50);
       shapingButton->setToolTip (tr("Terrain Tool"));
-      shapingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black;"); //transparent
+      shapingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black; color: white;"); //transparent
       
       QPushButton *smoothingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Air01.blp", 40, 40)), "");
       smoothingButton->setIconSize (QSize(40, 40));
       smoothingButton->setMaximumSize (50, 50);
       smoothingButton->setToolTip (tr("Smoothing Tool"));
-      smoothingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black;");
+      smoothingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black; color: white;");
 
       _toolbar_formula_radio_group->addButton (shapingButton, shaping);
       _toolbar_formula_radio_group->addButton (smoothingButton, smoothing);
