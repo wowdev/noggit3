@@ -16,7 +16,10 @@ namespace helper
         {
           const int pos (path.lastIndexOf (QRegExp("[\\\\/]")));
 
-          directory dir (pos < 0 ? QDir::rootPath() : path.left (pos));
+          //loops till its death without
+          if(pos < 0) return QDir::rootPath();
+
+          directory dir (path.left (pos));
           const QStringList files (dir.entryList());
           return dir.absoluteFilePath
             (files.at ( files.indexOf ( QRegExp ( path.mid (pos + 1)
