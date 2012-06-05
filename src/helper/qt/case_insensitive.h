@@ -1,4 +1,4 @@
-// non_recursive_filter_model.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// case_insensitive.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 
