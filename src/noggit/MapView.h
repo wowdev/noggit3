@@ -11,6 +11,7 @@
 // GL needs to be included before GLWidget.
 #include <opengl/types.h>
 #include <noggit/MapHeaders.h>
+#include <noggit/WorldController.h>
 
 #include <QPoint>
 #include <QGLWidget>
@@ -53,15 +54,6 @@ namespace noggit
     Q_OBJECT
 
   public:
-    enum terrain_editing_modes
-    {
-      shaping = 0,
-      smoothing = 1,
-      texturing = 2,
-      hole_setting = 3,
-      area_id_setting = 4,
-      impassable_flag_setting = 5,
-    };
 
     //! \todo enum class with C++0x
     struct shaping_formula_type
@@ -116,7 +108,6 @@ namespace noggit
     virtual void dragMoveEvent (QDragMoveEvent*);
 
   public slots:
-    void set_terrain_editing_mode (int);
     void updateParent();
 
   private slots:
@@ -142,7 +133,6 @@ namespace noggit
     void save_all();
     void save_minimap();
     void snap_selected_object_to_ground();
-    void toggle_flag(bool);
     void toggle_auto_selecting (bool);
     void toggle_object_to_ground (bool);
     void toggle_copy_position_randomization (bool);
@@ -189,6 +179,9 @@ namespace noggit
 
     void TEST_save_wdt();
 
+  signals:
+    void change_terrain_editing_mode(int);
+
   private:
     QAction* new_toggleable_action (const QString& text, const char* slot, bool default_value, const QKeySequence& shortcut = 0);
     QAction* new_flag_action (const QString& text, WorldFlags flag, const QKeySequence& shortcut = 0);
@@ -231,7 +224,7 @@ namespace noggit
 
     void doSelection( bool selectTerrainOnly );
 
-    size_t flags;
+
     size_t backupFlags;
     int mViewMode;
 
@@ -267,9 +260,6 @@ namespace noggit
 
     bool _holding_left_mouse_button;
     bool _holding_right_mouse_button;
-
-    terrain_editing_modes _current_terrain_editing_mode;
-    terrain_editing_modes _terrain_editing_mode_before_2d;
 
     bool _save_to_minimap_on_next_drawing;
 
