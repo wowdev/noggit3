@@ -24,6 +24,7 @@
 #include <QFileDialog>
 
 #include <helper/repository.h>
+#include <helper/qt/case_insensitive.h> //implizit cast
 
 #include <noggit/DBC.h>
 #include <noggit/errorHandling.h>
