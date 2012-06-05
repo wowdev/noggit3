@@ -204,6 +204,7 @@ set ( windows_headers
 
 set ( helper_sources
       src/helper/qt/non_recursive_filter_model.cpp
+      src/helper/qt/case_insensitive.cpp
     )
 
 set ( helper_headers
