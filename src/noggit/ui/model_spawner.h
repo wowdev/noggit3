@@ -26,7 +26,7 @@ namespace noggit
   {
     class model_spawner : public QWidget
     {
-    Q_OBJECT
+      Q_OBJECT
 
     public:
       model_spawner (QWidget* parent = NULL, QGLWidget *shared = NULL);

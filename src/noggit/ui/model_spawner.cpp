@@ -27,7 +27,7 @@ namespace noggit
       {
       public:
         model_tree_model (QObject* parent = NULL)
-          : QStandardItemModel (parent)
+        : QStandardItemModel (parent)
         { }
 
         virtual QStringList mimeTypes() const

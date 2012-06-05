@@ -16,6 +16,7 @@ namespace noggit
     class cursor_selector : public QWidget
     {
       Q_OBJECT
+
     public:
       cursor_selector (QWidget* parent = NULL);
 

@@ -18,7 +18,8 @@ namespace noggit
 {
   namespace ui
   {
-    settingsDialog::settingsDialog() : QWidget()
+    settingsDialog::settingsDialog()
+    : QWidget()
     {
       const int minViewDistanceRange = 200;
       const int maxViewDistanceRange = 2048;

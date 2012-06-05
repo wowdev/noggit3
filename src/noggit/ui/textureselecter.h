@@ -1,7 +1,7 @@
 #ifndef TEXTURESELECTER_H
 #define TEXTURESELECTER_H
 
-#include "noggit/blp_texture.h"
+#include <noggit/blp_texture.h>
 
 #include <QGLWidget>
 #include <QGraphicsView>
@@ -17,74 +17,61 @@ class QResizeEvent;
 
 namespace noggit
 {
+  namespace ui
+  {
+    class textureSelecter : public QWidget
+    {
+      Q_OBJECT
 
-class textureSelecter : public QWidget
-{
-    Q_OBJECT
-public:
-    textureSelecter(QGLWidget *shared, QWidget *parent = 0);
+    public:
+      textureSelecter(QGLWidget *shared, QWidget *parent = 0);
 
-signals:
+    private:
+      QGLWidget* sharedWidget;
+    };
 
-public slots:
+    class textureView : public QGraphicsView
+    {
+      Q_OBJECT
 
-private:
-    QGLWidget *sharedWidget;
+    public:
+      textureView(QStringList textures, QGLWidget* shared, QWidget* parent = 0);
+      void resizeEvent(QResizeEvent* event);
+      QSize sizeHint() const;
 
-};
+    private:
+      int num;
+      int rows;
+    };
 
-class textureView : public QGraphicsView
-{
-    Q_OBJECT
-public:
-    textureView(QStringList textures, QGLWidget *shared, QWidget *parent = 0);
-    void resizeEvent(QResizeEvent *event);
-    QSize sizeHint() const;
-signals:
+    class textureScene : public QGraphicsScene
+    {
+      Q_OBJECT
 
-public slots:
+    public:
+      textureScene(QStringList textures, QRectF rect, QWidget* parent= 0);
+      void drawBackground(QPainter* painter, const QRectF&);
 
-private:
-    int num;
-    int rows;
+    public slots:
+      void resized(QRectF);
 
-};
+    private:
+      QStringList textureList;
+      int rows, columns;
+    };
 
-class textureScene : public QGraphicsScene
-{
-    Q_OBJECT
-public:
-    textureScene(QStringList textures, QRectF rect , QWidget *parent= 0);
-    void drawBackground(QPainter *painter, const QRectF &);
+    class textureItem : public QGraphicsItem
+    {
+    public:
+      textureItem(QString texturename);
 
-signals:
+      void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/);
+      QRectF boundingRect() const;
 
-public slots:
-    void resized(QRectF);
-private:
-    QStringList textureList;
-    int rows, columns;
-
-};
-
-class textureItem : public QGraphicsItem
-{
-
-public:
-    textureItem(QString texturename);
-
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem */*option*/, QWidget */*widget*/);
-    QRectF boundingRect() const;
-
-signals:
-
-public slots:
-
-private:
-    noggit::blp_texture *blptexture;
-
-};
-
+    private:
+      noggit::blp_texture *blptexture;
+    };
+  }
 }
 
 #endif // TEXTURESELECTER_H
