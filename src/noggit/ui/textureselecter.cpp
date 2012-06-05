@@ -183,7 +183,7 @@ namespace noggit
       return QSize(770, ceil((float)num / ((float)this->width() / (float)WIDTH)) * HEIGHT + 20);
     }
 
-    void textureView::resizeEvent(QResizeEvent *event)
+    void textureView::resizeEvent(QResizeEvent* event)
     {
       if (scene())
       {
