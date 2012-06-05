@@ -82,12 +82,12 @@ namespace noggit
     void MainWindow::create_world_view (World* world)
     {
       MapView* map_view ( new MapView ( world
-                                        , app().setting("view_distance").toReal()
-                                        , 0.0
-                                        , 0.0
-                                        , _dummy_gl_widget
-                                        , this
-                                        )
+                                      , app().setting("view_distance").toReal()
+                                      , 0.0
+                                      , 0.0
+                                      , _dummy_gl_widget
+                                      , this
+                                      )
                           );
 
       noggit::ui::EditorTemplate* temp = new noggit::ui::EditorTemplate(this);
