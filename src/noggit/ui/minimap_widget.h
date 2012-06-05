@@ -22,7 +22,7 @@ namespace noggit
     //! \todo Make this a fixed square somehow.
     class minimap_widget : public QWidget
     {
-    Q_OBJECT
+      Q_OBJECT
 
     public:
       minimap_widget (QWidget* parent = NULL);

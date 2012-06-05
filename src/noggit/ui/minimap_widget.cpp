@@ -16,10 +16,10 @@ namespace noggit
   namespace ui
   {
     minimap_widget::minimap_widget (QWidget* parent)
-      : QWidget (parent)
-      , _world (NULL)
-      , _draw_skies (false)
-      , _draw_camera (false)
+    : QWidget (parent)
+    , _world (NULL)
+    , _draw_skies (false)
+    , _draw_camera (false)
     {
       setSizePolicy (QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     }

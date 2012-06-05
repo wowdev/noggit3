@@ -11,7 +11,7 @@ namespace noggit
   namespace ui
   {
     help_widget::help_widget (QWidget* parent)
-      : QTextBrowser (parent)
+    : QTextBrowser (parent)
     {
       setWindowTitle (tr ("Help"));
       resize (800, 800);

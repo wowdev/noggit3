@@ -54,8 +54,8 @@ namespace noggit
     }
 
     cursor_selector::cursor_selector (QWidget* parent)
-      : QWidget (parent)
-      , _settings (new QSettings (this))
+    : QWidget (parent)
+    , _settings (new QSettings (this))
     {
       setWindowTitle (tr ("Cursor options"));
 

@@ -16,7 +16,7 @@ namespace noggit
   namespace ui
   {
     about_widget::about_widget (QWidget* parent)
-      : QWidget (parent)
+    : QWidget (parent)
     {
       setMinimumSize (500, 260);
       setMaximumSize (500, 260);
