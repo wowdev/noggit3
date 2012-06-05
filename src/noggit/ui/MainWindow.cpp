@@ -66,8 +66,6 @@ namespace noggit
         createDockWidgets();
 
       statusBar()->showMessage (tr("Ready"));
-      currentToolBar = addToolBar (tr("File"));
-      currentToolBar->addWidget (new QLabel(tr("Toolbar")));
     }
 
     void MainWindow::createDockWidgets()
