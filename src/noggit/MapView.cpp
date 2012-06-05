@@ -72,8 +72,6 @@ namespace noggit
     , _fog_distance (777.0f)
     , _holding_left_mouse_button (false)
     , _holding_right_mouse_button (false)
-    , _current_terrain_editing_mode (shaping)
-    , _terrain_editing_mode_before_2d (_current_terrain_editing_mode)
     , _save_to_minimap_on_next_drawing (false)
     , _shaping_radius (15.0)
     , _shaping_speed (1.0)
@@ -121,7 +119,6 @@ namespace noggit
     , look (false)
     , mViewMode (eViewMode_3D)
     , editortemplate (NULL)
-    , flags(TERRAIN | WMODOODAS | FOG | DOODADS | TERRAIN | DRAWWMO)
     , backupFlags(0)
   {
     setMinimumSize (500, 500);
@@ -322,8 +319,8 @@ namespace noggit
 
     QMenu* useless_menu (debug_menu->addMenu (tr ("Stuff that should only be on keys")));
     useless_menu->addAction (turn_around);
-
-    set_terrain_editing_mode(_current_terrain_editing_mode);
+    //! \todo bring shapingwidget etc to show up
+    //emit change_terrain_editing_mode(_current_terrain_editing_mode);
   }
 
   QAction* MapView::new_action (const QString& text, const char* slot, const QKeySequence& shortcut)
@@ -367,7 +364,7 @@ namespace noggit
     connect (action, SIGNAL(toggled(bool)), SLOT(toggle_flag(bool)) );
     action->setCheckable (true);
     action->setData(flag);
-    action->setChecked (flags & flag);
+    action->setChecked (_world->getRenderflags() & flag);
     if (shortcut != QKeySequence (0))
     {
       action->setShortcuts (QList<QKeySequence>() << shortcut);
@@ -488,414 +485,416 @@ namespace noggit
 
   void MapView::tick( float /*t*/, float dt )
   {
-    dt = std::min( dt, 1.0f );
 
-    ::math::vector_3d dir( 1.0f, 0.0f, 0.0f );
-    ::math::vector_3d dirUp( 1.0f, 0.0f, 0.0f );
-    ::math::vector_3d dirRight( 0.0f, 0.0f, 1.0f );
-    ::math::rotate (0.0f, 0.0f, &dir.x(), &dir.y(), av);
-    ::math::rotate (0.0f, 0.0f, &dir.x(), &dir.z(), ah);
+    //! \todo bring these to WorldController
+//    dt = std::min( dt, 1.0f );
 
-    if(_currently_holding_shift)
-    {
-      dirUp.x (0.0f);
-      dirUp.y (1.0f);
-      dirRight = ::math::vector_3d (0.0f, 0.0f, 0.0f);
-    }
-    else if(_currently_holding_control)
-    {
-      dirUp.x (0.0f);
-      dirUp.y (1.0f);
-      ::math::rotate (0.0f, 0.0f, &dirUp.x(), &dirUp.y(), av);
-      ::math::rotate (0.0f, 0.0f, &dirRight.x(), &dirRight.y(), av);
-      ::math::rotate (0.0f, 0.0f, &dirUp.x(), &dirUp.z(), ah);
-      ::math::rotate (0.0f, 0.0f, &dirRight.x(), &dirRight.z(), ah);
-    }
-    else
-    {
-      ::math::rotate (0.0f, 0.0f, &dirUp.x(), &dirUp.z(), ah);
-      ::math::rotate (0.0f, 0.0f, &dirRight.x(), &dirRight.z(), ah);
-    }
+//    ::math::vector_3d dir( 1.0f, 0.0f, 0.0f );
+//    ::math::vector_3d dirUp( 1.0f, 0.0f, 0.0f );
+//    ::math::vector_3d dirRight( 0.0f, 0.0f, 1.0f );
+//    ::math::rotate (0.0f, 0.0f, &dir.x(), &dir.y(), av);
+//    ::math::rotate (0.0f, 0.0f, &dir.x(), &dir.z(), ah);
 
-    nameEntry * Selection = _world->GetCurrentSelection();
+//    if(_currently_holding_shift)
+//    {
+//      dirUp.x (0.0f);
+//      dirUp.y (1.0f);
+//      dirRight = ::math::vector_3d (0.0f, 0.0f, 0.0f);
+//    }
+//    else if(_currently_holding_control)
+//    {
+//      dirUp.x (0.0f);
+//      dirUp.y (1.0f);
+//      ::math::rotate (0.0f, 0.0f, &dirUp.x(), &dirUp.y(), av);
+//      ::math::rotate (0.0f, 0.0f, &dirRight.x(), &dirRight.y(), av);
+//      ::math::rotate (0.0f, 0.0f, &dirUp.x(), &dirUp.z(), ah);
+//      ::math::rotate (0.0f, 0.0f, &dirRight.x(), &dirRight.z(), ah);
+//    }
+//    else
+//    {
+//      ::math::rotate (0.0f, 0.0f, &dirUp.x(), &dirUp.z(), ah);
+//      ::math::rotate (0.0f, 0.0f, &dirRight.x(), &dirRight.z(), ah);
+//    }
 
-    if(Selection)
-    {
-      qreal keypad_object_move_ratio (0.1);
-      // Set move scale and rotate for numpad keys
-      if(_currently_holding_control && _currently_holding_shift)
-        keypad_object_move_ratio = 0.05;
-      else if(_currently_holding_shift)
-        keypad_object_move_ratio = 0.2;
-      else if(_currently_holding_control)
-        keypad_object_move_ratio = 0.3;
+//    nameEntry * Selection = _world->GetCurrentSelection();
 
-      if(keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0)
-      {
-        //! \todo On all these, setchanged() is wrong, if models are bigger than a chunk.
-        // Move scale and rotate with numpad keys
-        if(Selection->type == eEntry_WMO)
-        {
-          _world->setChanged ( Selection->data.wmo->pos.x()
-                             , Selection->data.wmo->pos.z()
-                             );
+//    if(Selection)
+//    {
+//      qreal keypad_object_move_ratio (0.1);
+//      // Set move scale and rotate for numpad keys
+//      if(_currently_holding_control && _currently_holding_shift)
+//        keypad_object_move_ratio = 0.05;
+//      else if(_currently_holding_shift)
+//        keypad_object_move_ratio = 0.2;
+//      else if(_currently_holding_control)
+//        keypad_object_move_ratio = 0.3;
 
-          Selection->data.wmo->pos.x ( Selection->data.wmo->pos.x()
-                                     + keyx * keypad_object_move_ratio);
-          Selection->data.wmo->pos.y ( Selection->data.wmo->pos.y()
-                                     + keyy * keypad_object_move_ratio);
-          Selection->data.wmo->pos.z ( Selection->data.wmo->pos.z()
-                                     + keyz * keypad_object_move_ratio);
-          Selection->data.wmo->dir.y ( Selection->data.wmo->dir.y()
-                                     + keyr * keypad_object_move_ratio * 2.0);
+//      if(keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0)
+//      {
+//        //! \todo On all these, setchanged() is wrong, if models are bigger than a chunk.
+//        // Move scale and rotate with numpad keys
+//        if(Selection->type == eEntry_WMO)
+//        {
+//          _world->setChanged ( Selection->data.wmo->pos.x()
+//                             , Selection->data.wmo->pos.z()
+//                             );
 
-          _world->setChanged ( Selection->data.wmo->pos.x()
-                             , Selection->data.wmo->pos.z()
-                             );
-        }
+//          Selection->data.wmo->pos.x ( Selection->data.wmo->pos.x()
+//                                     + keyx * keypad_object_move_ratio);
+//          Selection->data.wmo->pos.y ( Selection->data.wmo->pos.y()
+//                                     + keyy * keypad_object_move_ratio);
+//          Selection->data.wmo->pos.z ( Selection->data.wmo->pos.z()
+//                                     + keyz * keypad_object_move_ratio);
+//          Selection->data.wmo->dir.y ( Selection->data.wmo->dir.y()
+//                                     + keyr * keypad_object_move_ratio * 2.0);
 
-        if(Selection->type == eEntry_Model)
-        {
-          _world->setChanged ( Selection->data.model->pos.x()
-                             , Selection->data.model->pos.z()
-                             );
+//          _world->setChanged ( Selection->data.wmo->pos.x()
+//                             , Selection->data.wmo->pos.z()
+//                             );
+//        }
 
-          Selection->data.model->pos.x ( Selection->data.model->pos.x()
-                                       + keyx * keypad_object_move_ratio);
-          Selection->data.model->pos.y ( Selection->data.model->pos.y()
-                                       + keyy * keypad_object_move_ratio);
-          Selection->data.model->pos.z ( Selection->data.model->pos.z()
-                                       + keyz * keypad_object_move_ratio);
-          Selection->data.model->dir.y ( Selection->data.model->dir.y()
-                                       + keyr * keypad_object_move_ratio * 2.0);
-          Selection->data.model->sc = Selection->data.model->sc
-                                    + keys * keypad_object_move_ratio / 50.0;
+//        if(Selection->type == eEntry_Model)
+//        {
+//          _world->setChanged ( Selection->data.model->pos.x()
+//                             , Selection->data.model->pos.z()
+//                             );
 
-          _world->setChanged ( Selection->data.model->pos.x()
-                             , Selection->data.model->pos.z()
-                             );
-        }
-      }
+//          Selection->data.model->pos.x ( Selection->data.model->pos.x()
+//                                       + keyx * keypad_object_move_ratio);
+//          Selection->data.model->pos.y ( Selection->data.model->pos.y()
+//                                       + keyy * keypad_object_move_ratio);
+//          Selection->data.model->pos.z ( Selection->data.model->pos.z()
+//                                       + keyz * keypad_object_move_ratio);
+//          Selection->data.model->dir.y ( Selection->data.model->dir.y()
+//                                       + keyr * keypad_object_move_ratio * 2.0);
+//          Selection->data.model->sc = Selection->data.model->sc
+//                                    + keys * keypad_object_move_ratio / 50.0;
 
-      ::math::vector_3d ObjPos;
-      if(_world->IsSelection(eEntry_Model))
-      {
-        //! \todo  Tell me what this is.
-        ObjPos = Selection->data.model->pos - _world->camera;
-        ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.y(), av);
-        ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.z(), ah);
-        ObjPos.x (fabs (ObjPos.x()));
-      }
+//          _world->setChanged ( Selection->data.model->pos.x()
+//                             , Selection->data.model->pos.z()
+//                             );
+//        }
+//      }
 
-      // moving and scaling objects
-      //! \todo  Alternatively automatically align it to the terrain. Also try to move it where the mouse points.
-      if(_is_currently_moving_object)
-        if(Selection->type == eEntry_WMO)
-        {
-           _world->setChanged ( Selection->data.wmo->pos.x()
-                              , Selection->data.wmo->pos.z()
-                              ); // before move
-           ObjPos.x (80.0f);
-           Selection->data.wmo->pos += mv * dirUp * ObjPos.x();
-           Selection->data.wmo->pos -= mh * dirRight * ObjPos.x();
-           Selection->data.wmo->extents[0] =
-             Selection->data.wmo->pos - ::math::vector_3d (1,1,1);
-           Selection->data.wmo->extents[1] =
-             Selection->data.wmo->pos + ::math::vector_3d (1,1,1);
-           _world->setChanged ( Selection->data.wmo->pos.x()
-                              , Selection->data.wmo->pos.z()
-                              ); // after move. If moved to another ADT
+//      ::math::vector_3d ObjPos;
+//      if(_world->IsSelection(eEntry_Model))
+//      {
+//        //! \todo  Tell me what this is.
+//        ObjPos = Selection->data.model->pos - _world->camera;
+//        ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.y(), av);
+//        ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.z(), ah);
+//        ObjPos.x (fabs (ObjPos.x()));
+//      }
 
-           if(_object_to_ground)
-             snap_selected_object_to_ground();
-        }
-        else if(Selection->type == eEntry_Model)
-          if(_currently_holding_alt)
-          {
-            _world->setChanged(Selection->data.model->pos.x(),Selection->data.model->pos.z());
-            float ScaleAmount;
-            ScaleAmount = pow( 2.0f, mv * 4.0f );
-            Selection->data.model->sc *= ScaleAmount;
-            if(Selection->data.model->sc > 63.9f )
-              Selection->data.model->sc = 63.9f;
-            else if (Selection->data.model->sc < 0.00098f)
-              Selection->data.model->sc = 0.00098f;
-          }
-          else
-          {
-            _world->setChanged(Selection->data.model->pos.x()
-                              , Selection->data.model->pos.z()
-                              ); // before move
-            ObjPos.x (80.0f);
-            Selection->data.model->pos += mv * dirUp * ObjPos.x();
-            Selection->data.model->pos -= mh * dirRight * ObjPos.x();
-            _world->setChanged(Selection->data.model->pos.x()
-                              , Selection->data.model->pos.z()
-                              ); // after move. If moved to another ADT
+//      // moving and scaling objects
+//      //! \todo  Alternatively automatically align it to the terrain. Also try to move it where the mouse points.
+//      if(_is_currently_moving_object)
+//        if(Selection->type == eEntry_WMO)
+//        {
+//           _world->setChanged ( Selection->data.wmo->pos.x()
+//                              , Selection->data.wmo->pos.z()
+//                              ); // before move
+//           ObjPos.x (80.0f);
+//           Selection->data.wmo->pos += mv * dirUp * ObjPos.x();
+//           Selection->data.wmo->pos -= mh * dirRight * ObjPos.x();
+//           Selection->data.wmo->extents[0] =
+//             Selection->data.wmo->pos - ::math::vector_3d (1,1,1);
+//           Selection->data.wmo->extents[1] =
+//             Selection->data.wmo->pos + ::math::vector_3d (1,1,1);
+//           _world->setChanged ( Selection->data.wmo->pos.x()
+//                              , Selection->data.wmo->pos.z()
+//                              ); // after move. If moved to another ADT
 
-            if(_object_to_ground)
-              snap_selected_object_to_ground();
-          }
+//           if(_object_to_ground)
+//             snap_selected_object_to_ground();
+//        }
+//        else if(Selection->type == eEntry_Model)
+//          if(_currently_holding_alt)
+//          {
+//            _world->setChanged(Selection->data.model->pos.x(),Selection->data.model->pos.z());
+//            float ScaleAmount;
+//            ScaleAmount = pow( 2.0f, mv * 4.0f );
+//            Selection->data.model->sc *= ScaleAmount;
+//            if(Selection->data.model->sc > 63.9f )
+//              Selection->data.model->sc = 63.9f;
+//            else if (Selection->data.model->sc < 0.00098f)
+//              Selection->data.model->sc = 0.00098f;
+//          }
+//          else
+//          {
+//            _world->setChanged(Selection->data.model->pos.x()
+//                              , Selection->data.model->pos.z()
+//                              ); // before move
+//            ObjPos.x (80.0f);
+//            Selection->data.model->pos += mv * dirUp * ObjPos.x();
+//            Selection->data.model->pos -= mh * dirRight * ObjPos.x();
+//            _world->setChanged(Selection->data.model->pos.x()
+//                              , Selection->data.model->pos.z()
+//                              ); // after move. If moved to another ADT
 
-      // rotating objects
-      if(look)
-      {
-        float * lTarget = NULL;
-        bool lModify = false;
+//            if(_object_to_ground)
+//              snap_selected_object_to_ground();
+//          }
 
-        if(Selection->type == eEntry_Model)
-        {
-          _world->setChanged ( Selection->data.model->pos.x()
-                             , Selection->data.model->pos.z()
-                             );
-          lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
-          if(_currently_holding_shift)
-            lTarget = &Selection->data.model->dir.y();
-          else if(_currently_holding_control)
-            lTarget = &Selection->data.model->dir.x();
-          else if(_currently_holding_alt)
-            lTarget = &Selection->data.model->dir.z();
-        }
-        else if(Selection->type == eEntry_WMO)
-        {
-          _world->setChanged ( Selection->data.wmo->pos.x()
-                             , Selection->data.wmo->pos.z()
-                             );
-          lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
-          if(_currently_holding_shift)
-            lTarget = &Selection->data.wmo->dir.y();
-          else if(_currently_holding_control)
-            lTarget = &Selection->data.wmo->dir.x();
-          else if(_currently_holding_alt)
-            lTarget = &Selection->data.wmo->dir.z();
-        }
+//      // rotating objects
+//      if(look)
+//      {
+//        float * lTarget = NULL;
+//        bool lModify = false;
 
-        if(lModify && lTarget)
-        {
-          *lTarget = *lTarget + rh + rv;
+//        if(Selection->type == eEntry_Model)
+//        {
+//          _world->setChanged ( Selection->data.model->pos.x()
+//                             , Selection->data.model->pos.z()
+//                             );
+//          lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
+//          if(_currently_holding_shift)
+//            lTarget = &Selection->data.model->dir.y();
+//          else if(_currently_holding_control)
+//            lTarget = &Selection->data.model->dir.x();
+//          else if(_currently_holding_alt)
+//            lTarget = &Selection->data.model->dir.z();
+//        }
+//        else if(Selection->type == eEntry_WMO)
+//        {
+//          _world->setChanged ( Selection->data.wmo->pos.x()
+//                             , Selection->data.wmo->pos.z()
+//                             );
+//          lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
+//          if(_currently_holding_shift)
+//            lTarget = &Selection->data.wmo->dir.y();
+//          else if(_currently_holding_control)
+//            lTarget = &Selection->data.wmo->dir.x();
+//          else if(_currently_holding_alt)
+//            lTarget = &Selection->data.wmo->dir.z();
+//        }
 
-          if(*lTarget > 360.0f)
-            *lTarget = *lTarget - 360.0f;
-          else if(*lTarget < -360.0f)
-            *lTarget = *lTarget + 360.0f;
-        }
-      }
+//        if(lModify && lTarget)
+//        {
+//          *lTarget = *lTarget + rh + rv;
 
-      mh = 0;
-      mv = 0;
-      rh = 0;
-      rv = 0;
+//          if(*lTarget > 360.0f)
+//            *lTarget = *lTarget - 360.0f;
+//          else if(*lTarget < -360.0f)
+//            *lTarget = *lTarget + 360.0f;
+//        }
+//      }
 
-      if(_holding_left_mouse_button && Selection->type == eEntry_MapChunk)
-      {
-        const ::math::vector_3d& position (_world->_exact_terrain_selection_position);
-        float xPos = position.x();
-        float yPos = position.y();
-        float zPos = position.z();
+//      mh = 0;
+//      mv = 0;
+//      rh = 0;
+//      rv = 0;
 
-        switch(_current_terrain_editing_mode)
-        {
-        case shaping:
-          if(mViewMode == eViewMode_3D)
-          {
-            if(_currently_holding_shift)
-              _world->changeTerrain ( xPos
-                                    , zPos
-                                    , 7.5f * dt * shaping_speed()
-                                    , shaping_radius()
-                                    , shaping_formula()
-                                    );
-            else if(_currently_holding_control)
-              _world->changeTerrain ( xPos
-                                    , zPos
-                                    , -7.5f * dt * shaping_speed()
-                                    , shaping_radius()
-                                    , shaping_formula()
-                                    );
-          }
-          break;
+//      if(_holding_left_mouse_button && Selection->type == eEntry_MapChunk)
+//      {
+//        const ::math::vector_3d& position (_world->_exact_terrain_selection_position);
+//        float xPos = position.x();
+//        float yPos = position.y();
+//        float zPos = position.z();
 
-        case smoothing:
-          if(mViewMode == eViewMode_3D)
-          {
-            if(_currently_holding_shift)
-              _world->flattenTerrain ( xPos
-                                     , zPos
-                                     , yPos
-                                     , pow( 0.2f, dt ) * smoothing_speed()
-                                     , smoothing_radius()
-                                     , smoothing_formula()
-                                     );
-            else if(_currently_holding_control)
-              _world->blurTerrain ( xPos
-                                  , zPos
-                                  , pow( 0.2f, dt ) * smoothing_speed()
-                                  , std::min( smoothing_radius(), 30.0 )
-                                  , smoothing_formula()
-                                  );
-          }
-          break;
+//        switch(_current_terrain_editing_mode)
+//        {
+//        case shaping:
+//          if(mViewMode == eViewMode_3D)
+//          {
+//            if(_currently_holding_shift)
+//              _world->changeTerrain ( xPos
+//                                    , zPos
+//                                    , 7.5f * dt * shaping_speed()
+//                                    , shaping_radius()
+//                                    , shaping_formula()
+//                                    );
+//            else if(_currently_holding_control)
+//              _world->changeTerrain ( xPos
+//                                    , zPos
+//                                    , -7.5f * dt * shaping_speed()
+//                                    , shaping_radius()
+//                                    , shaping_formula()
+//                                    );
+//          }
+//          break;
 
-        case texturing:
-          {
-            const QPointF brush_position ( mViewMode == eViewMode_3D
-                                         ? QPointF (xPos, zPos)
-                                         : tile_mode_brush_position()
-                                         + QPointF ( _world->camera.x()
-                                                   , _world->camera.z()
-                                                   )
-                                         );
-            if( mViewMode == eViewMode_3D )
-            {
+//        case smoothing:
+//          if(mViewMode == eViewMode_3D)
+//          {
+//            if(_currently_holding_shift)
+//              _world->flattenTerrain ( xPos
+//                                     , zPos
+//                                     , yPos
+//                                     , pow( 0.2f, dt ) * smoothing_speed()
+//                                     , smoothing_radius()
+//                                     , smoothing_formula()
+//                                     );
+//            else if(_currently_holding_control)
+//              _world->blurTerrain ( xPos
+//                                  , zPos
+//                                  , pow( 0.2f, dt ) * smoothing_speed()
+//                                  , std::min( smoothing_radius(), 30.0 )
+//                                  , smoothing_formula()
+//                                  );
+//          }
+//          break;
 
-                if ( _currently_holding_shift
-                   && _currently_holding_control
-                   )
-                {
-                    _world->eraseTextures (brush_position.x(), brush_position.y());
-                }
-                else if (_currently_holding_control)
-                {
-#ifdef __OBSOLETE_GUI_ELEMENTS
-                    mainGui->TexturePicker->getTextures (_world->GetCurrentSelection());
-#endif
-                }
-                else if ( _currently_holding_shift
-                        && getSelectedTexture()
-                        )
-                {
-                    _world->paintTexture ( brush_position.x()
-                                         , brush_position.y()
-                                         , brush (_texturing_radius, _texturing_hardness)
-                                         , _texturing_opacity * 255.0f
-                                         , 1.0f - pow ( 1.0f - (float)_texturing_pressure
-                                                , (float)dt * 10.0f)
-                                         , getSelectedTexture()
-                                         );
-                }
-            }
-            else
-              _world->paintTexture ( brush_position.x()
-                                   , brush_position.y()
-                                   , brush (_texturing_radius, _texturing_hardness)
-                                   , _texturing_opacity * 255.0f
-                                   , 1.0f - pow ( 1.0f - (float)_texturing_pressure
-                                   , (float)dt * 10.0f)
-                                   , getSelectedTexture()
-                                   );
+//        case texturing:
+//          {
+//            const QPointF brush_position ( mViewMode == eViewMode_3D
+//                                         ? QPointF (xPos, zPos)
+//                                         : tile_mode_brush_position()
+//                                         + QPointF ( _world->camera.x()
+//                                                   , _world->camera.z()
+//                                                   )
+//                                         );
+//            if( mViewMode == eViewMode_3D )
+//            {
 
-          }
-        break;
+//                if ( _currently_holding_shift
+//                   && _currently_holding_control
+//                   )
+//                {
+//                    _world->eraseTextures (brush_position.x(), brush_position.y());
+//                }
+//                else if (_currently_holding_control)
+//                {
+//#ifdef __OBSOLETE_GUI_ELEMENTS
+//                    mainGui->TexturePicker->getTextures (_world->GetCurrentSelection());
+//#endif
+//                }
+//                else if ( _currently_holding_shift
+//                        && getSelectedTexture()
+//                        )
+//                {
+//                    _world->paintTexture ( brush_position.x()
+//                                         , brush_position.y()
+//                                         , brush (_texturing_radius, _texturing_hardness)
+//                                         , _texturing_opacity * 255.0f
+//                                         , 1.0f - pow ( 1.0f - (float)_texturing_pressure
+//                                                , (float)dt * 10.0f)
+//                                         , getSelectedTexture()
+//                                         );
+//                }
+//            }
+//            else
+//              _world->paintTexture ( brush_position.x()
+//                                   , brush_position.y()
+//                                   , brush (_texturing_radius, _texturing_hardness)
+//                                   , _texturing_opacity * 255.0f
+//                                   , 1.0f - pow ( 1.0f - (float)_texturing_pressure
+//                                   , (float)dt * 10.0f)
+//                                   , getSelectedTexture()
+//                                   );
 
-        case hole_setting:
-          if (_currently_holding_shift)
-          {
-            // if there is no terain the projection mothod dont work. So get the cords by selection.
-            Selection->data.mapchunk->getSelectionCoord(&xPos, &zPos);
-            yPos = Selection->data.mapchunk->getSelectionHeight();
+//          }
+//        break;
 
-            if(mViewMode == eViewMode_3D)
-              _world->removeHole(xPos, zPos);
-            //else if(mViewMode == eViewMode_2D)
-            //  _world->removeHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom + _world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom + _world->camera.z );
-          }
-          else if(_currently_holding_control)
-          {
-            if(mViewMode == eViewMode_3D)
-              _world->addHole(xPos, zPos);
-            //else if( mViewMode == eViewMode_2D )
-            //  _world->addHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom+_world->camera.z );
-          }
-        break;
+//        case hole_setting:
+//          if (_currently_holding_shift)
+//          {
+//            // if there is no terain the projection mothod dont work. So get the cords by selection.
+//            Selection->data.mapchunk->getSelectionCoord(&xPos, &zPos);
+//            yPos = Selection->data.mapchunk->getSelectionHeight();
 
-        case area_id_setting:
-          if(_currently_holding_shift)
-          {
-            if(mViewMode == eViewMode_3D)
-            {
-              // draw the selected AreaId on current selected chunk
-              nameEntry * lSelection = _world->GetCurrentSelection();
-              int mtx,mtz,mcx,mcy;
-              mtx = lSelection->data.mapchunk->mt->mPositionX;
-              mtz = lSelection->data.mapchunk->mt->mPositionZ ;
-              mcx = lSelection->data.mapchunk->px;
-              mcy = lSelection->data.mapchunk->py;
-              _world->setAreaID(_selected_area_id, mtx,mtz, mcx, mcy);
-            }
-          }
-          else if(_currently_holding_control)
-          {
-            if(mViewMode == eViewMode_3D)
-            {
-              // pick areaID from chunk
-              _selected_area_id = _world->GetCurrentSelection()->data.mapchunk->areaID;
-#ifdef __OBSOLETE_GUI_ELEMENTS
-              mainGui->ZoneIDBrowser->setZoneID(_selected_area_id);
-#endif
-            }
-          }
+//            if(mViewMode == eViewMode_3D)
+//              _world->removeHole(xPos, zPos);
+//            //else if(mViewMode == eViewMode_2D)
+//            //  _world->removeHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom + _world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom + _world->camera.z );
+//          }
+//          else if(_currently_holding_control)
+//          {
+//            if(mViewMode == eViewMode_3D)
+//              _world->addHole(xPos, zPos);
+//            //else if( mViewMode == eViewMode_2D )
+//            //  _world->addHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom+_world->camera.z );
+//          }
+//        break;
 
-        break;
+//        case area_id_setting:
+//          if(_currently_holding_shift)
+//          {
+//            if(mViewMode == eViewMode_3D)
+//            {
+//              // draw the selected AreaId on current selected chunk
+//              nameEntry * lSelection = _world->GetCurrentSelection();
+//              int mtx,mtz,mcx,mcy;
+//              mtx = lSelection->data.mapchunk->mt->mPositionX;
+//              mtz = lSelection->data.mapchunk->mt->mPositionZ ;
+//              mcx = lSelection->data.mapchunk->px;
+//              mcy = lSelection->data.mapchunk->py;
+//              _world->setAreaID(_selected_area_id, mtx,mtz, mcx, mcy);
+//            }
+//          }
+//          else if(_currently_holding_control)
+//          {
+//            if(mViewMode == eViewMode_3D)
+//            {
+//              // pick areaID from chunk
+//              _selected_area_id = _world->GetCurrentSelection()->data.mapchunk->areaID;
+//#ifdef __OBSOLETE_GUI_ELEMENTS
+//              mainGui->ZoneIDBrowser->setZoneID(_selected_area_id);
+//#endif
+//            }
+//          }
 
-        case impassable_flag_setting:
-          if(_currently_holding_shift)
-          {
-            if(mViewMode == eViewMode_3D)
-              _world->setFlag( true, xPos, zPos );
-          }
-          else if(_currently_holding_control)
-          {
-            if(mViewMode == eViewMode_3D)
-              _world->setFlag( false, xPos, zPos );
-          }
-        break;
-        }
-      }
-    }
+//        break;
 
-    if(mViewMode != eViewMode_2D)
-    {
-      if(moving)
-        _world->camera += dir * dt * movespd * moving;
-      if(strafing)
-      {
-        ::math::vector_3d right = dir % ::math::vector_3d( 0.0f, 1.0f ,0.0f );
-        right.normalize();
-        _world->camera += right * dt * movespd * strafing;
-      }
-      if(updown)
-        _world->camera += ::math::vector_3d( 0.0f, dt * movespd * updown, 0.0f );
+//        case impassable_flag_setting:
+//          if(_currently_holding_shift)
+//          {
+//            if(mViewMode == eViewMode_3D)
+//              _world->setFlag( true, xPos, zPos );
+//          }
+//          else if(_currently_holding_control)
+//          {
+//            if(mViewMode == eViewMode_3D)
+//              _world->setFlag( false, xPos, zPos );
+//          }
+//        break;
+//        }
+//      }
+//    }
 
-      _world->lookat = _world->camera + dir;
-    }
-    else
-    {
-      if(moving)
-        _world->camera.z ( _world->camera.z()
-                         - dt * movespd * moving / (_tile_mode_zoom * 1.5f)
-                         );
-      if(strafing)
-        _world->camera.x ( _world->camera.x()
-                         + dt * movespd * strafing / (_tile_mode_zoom * 1.5f)
-                         );
-      if(updown)
-        _tile_mode_zoom *= pow( 2.0f, dt * updown * 4.0f );
+//    if(mViewMode != eViewMode_2D)
+//    {
+//      if(moving)
+//        _world->camera += dir * dt * movespd * moving;
+//      if(strafing)
+//      {
+//        ::math::vector_3d right = dir % ::math::vector_3d( 0.0f, 1.0f ,0.0f );
+//        right.normalize();
+//        _world->camera += right * dt * movespd * strafing;
+//      }
+//      if(updown)
+//        _world->camera += ::math::vector_3d( 0.0f, dt * movespd * updown, 0.0f );
 
-      _tile_mode_zoom = qBound (0.1, _tile_mode_zoom, 2.0);
-    }
+//      _world->lookat = _world->camera + dir;
+//    }
+//    else
+//    {
+//      if(moving)
+//        _world->camera.z ( _world->camera.z()
+//                         - dt * movespd * moving / (_tile_mode_zoom * 1.5f)
+//                         );
+//      if(strafing)
+//        _world->camera.x ( _world->camera.x()
+//                         + dt * movespd * strafing / (_tile_mode_zoom * 1.5f)
+//                         );
+//      if(updown)
+//        _tile_mode_zoom *= pow( 2.0f, dt * updown * 4.0f );
 
-    _world->advance_times (dt, mTimespeed);
-    _world->tick(dt);
+//      _tile_mode_zoom = qBound (0.1, _tile_mode_zoom, 2.0);
+//    }
 
-#ifdef __OBSOLETE_GUI_ELEMENTS
-    if( !_map_chunk_properties_window->hidden() && _world->GetCurrentSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk )
-    {
-      UITexturingGUI::setChunkWindow( _world->GetCurrentSelection()->data.mapchunk );
-    }
-#endif
+//    _world->advance_times (dt, mTimespeed);
+//    _world->tick(dt);
 
-    //! \todo This should only be done when actually needed. (on movement and camera changes as well as modifying an adt)
-    _minimap->update();
+//#ifdef __OBSOLETE_GUI_ELEMENTS
+//    if( !_map_chunk_properties_window->hidden() && _world->GetCurrentSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk )
+//    {
+//      UITexturingGUI::setChunkWindow( _world->GetCurrentSelection()->data.mapchunk );
+//    }
+//#endif
+
+//    //! \todo This should only be done when actually needed. (on movement and camera changes as well as modifying an adt)
+//    _minimap->update();
   }
 
   void MapView::setup_tile_mode_rendering() const
@@ -961,11 +960,12 @@ namespace noggit
 
     if (selectTerrainOnly)
     {
-      _world->drawSelection (flags & (~DOODADS & ~DRAWWMO & ~WMODOODAS));
+      //! \todo emit setFlags(flags & (~DOODADS & ~DRAWWMO & ~WMODOODAS))
+      _world->drawSelection ();
     }
     else
     {
-      _world->drawSelection (flags);
+      _world->drawSelection ();
     }
   }
 
@@ -1021,7 +1021,7 @@ namespace noggit
   void MapView::displayViewMode_2D()
   {
     setup_tile_mode_rendering();
-    _world->drawTileMode ( flags & LINES, width() / qreal (height())
+    _world->drawTileMode ( width() / qreal (height())
                          , _tile_mode_zoom
                          );
     draw_tile_mode_brush();
@@ -1040,17 +1040,18 @@ namespace noggit
 
     setup_3d_rendering();
 
+
+    //! \todo set brush radius
     float brush_radius (0.3f);
 
-    if (_current_terrain_editing_mode == shaping)
-      brush_radius = shaping_radius();
-    else if (_current_terrain_editing_mode == smoothing)
-      brush_radius = smoothing_radius();
-    else if (_current_terrain_editing_mode == texturing)
-      brush_radius = texturing_radius();
+//    if (_current_terrain_editing_mode == shaping)
+//      brush_radius = shaping_radius();
+//    else if (_current_terrain_editing_mode == smoothing)
+//      brush_radius = smoothing_radius();
+//    else if (_current_terrain_editing_mode == texturing)
+//      brush_radius = texturing_radius();
 
-    _world->draw ( flags
-                 , brush_radius
+    _world->draw ( brush_radius
                  , brush_radius
                  , _mouse_position
                  , _fog_distance
@@ -1225,8 +1226,8 @@ namespace noggit
       }
       else if (event->key() >= Qt::Key_1 && event->key() <= Qt::Key_6)
       {
-        set_terrain_editing_mode
-          (terrain_editing_modes (event->key() - Qt::Key_1));
+        emit change_terrain_editing_mode
+          (WorldController::terrain_editing_modes (event->key() - Qt::Key_1));
       }
     }
   }
@@ -1371,18 +1372,19 @@ namespace noggit
   void MapView::toggle_terrain_texturing_mode()
   {
     //! \todo This is BAD global state! Use a stack<settings_type> as member.
-    static bool in_texturing_mode (false);
+    //! move into WorldController
+//    static bool in_texturing_mode (false);
 
-    if( !in_texturing_mode )
-    {
-      backupFlags = flags;
-      flags = TERRAIN | HEIGHTCONTOUR;
-    }
-    else
-    {
-      flags = backupFlags;
-    }
-    in_texturing_mode = !in_texturing_mode;
+//    if( !in_texturing_mode )
+//    {
+//      backupFlags = flags;
+//      flags = TERRAIN | HEIGHTCONTOUR;
+//    }
+//    else
+//    {
+//      flags = backupFlags;
+//    }
+//    in_texturing_mode = !in_texturing_mode;
   }
 
   void MapView::toggle_auto_selecting (bool value)
@@ -1397,15 +1399,6 @@ namespace noggit
 
   /// --- Drawing toggles --------------------------------------------------------
 
-  void MapView::toggle_flag (bool value)
-  {
-    QAction *action = (QAction *)sender();
-    if(value)
-        flags |= action->data().toInt();
-    else
-        flags &= ~action->data().toInt();
-  }
-
   void MapView::toggle_lighting (bool value)
   {
     _draw_lighting = value;
@@ -1415,38 +1408,40 @@ namespace noggit
   //! \todo these should be symetrical, so maybe combine.
   void MapView::increase_brush_size()
   {
-    switch(_current_terrain_editing_mode)
-    {
-    case shaping:
-      shaping_radius (shaping_radius() + 0.01);
-      break;
-    case smoothing:
-      smoothing_radius (smoothing_radius() + 0.01);
-      break;
-    case texturing:
-      texturing_radius (texturing_radius() + 0.01);
-      break;
-    default:
-      break;
-    }
+      //! \todo move into WorldController
+//    switch(_current_terrain_editing_mode)
+//    {
+//    case shaping:
+//      shaping_radius (shaping_radius() + 0.01);
+//      break;
+//    case smoothing:
+//      smoothing_radius (smoothing_radius() + 0.01);
+//      break;
+//    case texturing:
+//      texturing_radius (texturing_radius() + 0.01);
+//      break;
+//    default:
+//      break;
+//    }
   }
 
   void MapView::decrease_brush_size()
   {
-    switch( _current_terrain_editing_mode )
-    {
-    case shaping:
-      shaping_radius (shaping_radius() - 0.01);
-      break;
-    case smoothing:
-      smoothing_radius (smoothing_radius() - 0.01);
-      break;
-    case texturing:
-      texturing_radius (texturing_radius() - 0.01);
-      break;
-    default:
-      break;
-    }
+      //! \todo move into WorldController
+//    switch( _current_terrain_editing_mode )
+//    {
+//    case shaping:
+//      shaping_radius (shaping_radius() - 0.01);
+//      break;
+//    case smoothing:
+//      smoothing_radius (smoothing_radius() - 0.01);
+//      break;
+//    case texturing:
+//      texturing_radius (texturing_radius() - 0.01);
+//      break;
+//    default:
+//      break;
+//    }
   }
 
   void MapView::toggle_minimap (bool value)
@@ -1482,33 +1477,35 @@ namespace noggit
   void MapView::cycle_brush_type()
   {
     // toogle between smooth / flat / linear
-    switch( _current_terrain_editing_mode )
-    {
-    case shaping:
-      shaping_formula ((shaping_formula() + 1) % shaping_formula_type::shaping_formula_types);
-      break;
+    //! \todo move into WorldController
+//    switch( _current_terrain_editing_mode )
+//    {
+//    case shaping:
+//      shaping_formula ((shaping_formula() + 1) % shaping_formula_type::shaping_formula_types);
+//      break;
 
-    case smoothing:
-      smoothing_formula ((smoothing_formula() + 1) % smoothing_formula_type::smoothing_formula_types);
-      break;
+//    case smoothing:
+//      smoothing_formula ((smoothing_formula() + 1) % smoothing_formula_type::smoothing_formula_types);
+//      break;
 
-    default:
-      break;
-    }
+//    default:
+//      break;
+//    }
   }
 
   void MapView::toggle_tile_mode()
   {
+    //! \todo move into WorldController
     if( mViewMode == eViewMode_2D )
     {
       mViewMode = eViewMode_3D;
-      set_terrain_editing_mode (_terrain_editing_mode_before_2d);
+//      emit change_terrain_editing_mode (_terrain_editing_mode_before_2d);
     }
     else
     {
       mViewMode = eViewMode_2D;
-      _terrain_editing_mode_before_2d = _current_terrain_editing_mode;
-      set_terrain_editing_mode (texturing);
+//      _terrain_editing_mode_before_2d = _current_terrain_editing_mode;
+      emit change_terrain_editing_mode (WorldController::texturing);
     }
   }
 
@@ -1742,24 +1739,25 @@ namespace noggit
 
     if (event->buttons() & Qt::LeftButton && event->modifiers() & Qt::AltModifier)
     {
-      switch( _current_terrain_editing_mode )
-      {
-      case shaping:
-        shaping_radius (shaping_radius() + relative_move.x() / XSENS);
-        connect (_shaping_radius_slider, SIGNAL(valueChanged (int)), _shaping_radius_percent_label, SLOT(setNum (int)));
-        break;
+        //! \todo move into WorldController
+//      switch( _current_terrain_editing_mode )
+//      {
+//      case shaping:
+//        shaping_radius (shaping_radius() + relative_move.x() / XSENS);
+//        connect (_shaping_radius_slider, SIGNAL(valueChanged (int)), _shaping_radius_percent_label, SLOT(setNum (int)));
+//        break;
 
-      case smoothing:
-        smoothing_radius (smoothing_radius() + relative_move.x() / XSENS);
-        connect (_smoothing_radius_slider, SIGNAL(valueChanged (int)), _smoothing_radius_percent_label, SLOT(setNum (int)));
-        break;
+//      case smoothing:
+//        smoothing_radius (smoothing_radius() + relative_move.x() / XSENS);
+//        connect (_smoothing_radius_slider, SIGNAL(valueChanged (int)), _smoothing_radius_percent_label, SLOT(setNum (int)));
+//        break;
 
-      case texturing:
-        texturing_radius (texturing_radius() + relative_move.x() / XSENS);
-        break;
-    default:
-      break;
-      }
+//      case texturing:
+//        texturing_radius (texturing_radius() + relative_move.x() / XSENS);
+//        break;
+//    default:
+//      break;
+//      }
     }
 
     if ( mViewMode == eViewMode_2D
@@ -1780,50 +1778,7 @@ namespace noggit
     }
 
     _mouse_position = event->pos();
-  }
 
-  void MapView::set_terrain_editing_mode (int mode)
-  {
-    _current_terrain_editing_mode = (terrain_editing_modes)mode;
-
-    flags &= ~HOLELINES;
-    flags &= ~NOCURSOR;
-    flags &= ~AREAID;
-    flags &= ~MARKIMPASSABLE;
-
-    _shaping_settings_widget->hide();
-    _smoothing_settings_widget->hide();
-    _texturing_settings_widget->hide();
-
-    switch (mode)
-    {
-    case shaping:
-      _shaping_settings_widget->show();
-      break;
-
-    case smoothing:
-      _smoothing_settings_widget->show();
-      break;
-
-    case texturing:
-      _texturing_settings_widget->show();
-      break;
-
-    case hole_setting:
-      flags |= HOLELINES | NOCURSOR;
-      break;
-
-    case area_id_setting:
-      flags |= AREAID;
-      break;
-
-    case impassable_flag_setting:
-      flags |= MARKIMPASSABLE;
-      break;
-
-    default:
-      break;
-    }
 
 #ifdef __OBSOLETE_GUI_ELEMENTS
     if (mainGui && mainGui->guiToolbar)
@@ -1853,6 +1808,7 @@ namespace noggit
 
   void MapView::move_heightmap()
   {
+    //! \todo move into WorldController
     _world->moveHeight ( tile_below_camera (_world->camera.x())
                        , tile_below_camera (_world->camera.z())
                        );
@@ -1860,6 +1816,7 @@ namespace noggit
 
   void MapView::clear_heightmap()
   {
+    //! \todo move into WorldController
     _world->clearHeight ( tile_below_camera (_world->camera.x())
                         , tile_below_camera (_world->camera.z())
                         );
@@ -1867,6 +1824,7 @@ namespace noggit
 
   void MapView::set_area_id()
   {
+    //! \todo move into WorldController
     //! \todo This should not be called via menu requiring to have been set somewhere else prior to calling this. THIS IS UTTER BULLSHIT.
     if (_selected_area_id)
     {
@@ -1879,6 +1837,7 @@ namespace noggit
 
   void MapView::clear_all_models()
   {
+      //! \todo move into WorldController
     _world->clearAllModelsOnADT ( tile_below_camera (_world->camera.x())
                                 , tile_below_camera (_world->camera.z())
                                 );
@@ -1886,6 +1845,7 @@ namespace noggit
 
   void MapView::clear_texture()
   {
+      //! \todo move into WorldController
     _world->setBaseTexture ( tile_below_camera (_world->camera.x())
                            , tile_below_camera (_world->camera.z())
                            , NULL
@@ -1894,6 +1854,7 @@ namespace noggit
 
   noggit::blp_texture *MapView::getSelectedTexture()
   {
+      //! \todo maybe move into WorldController
       return TextureManager::newTexture(_texturingComboBox->itemData(_texturingComboBox->currentIndex()).toString().toStdString());
   }
 
@@ -2120,11 +2081,6 @@ namespace noggit
   void MapView::create_paint_settings_widget()
   {
     //! \todo actually do stuff, not only have comments.
-    // radius
-    // opacity
-    // hardness
-    // pressure
-
     // button for swapper
 
     delete _texturing_settings_widget;

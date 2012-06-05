@@ -220,6 +220,7 @@ World::World( const std::string& name )
   , camera( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
   , lookat( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
   , _selection_names (this)
+  , renderflags(TERRAIN | WMODOODAS | FOG | DOODADS | TERRAIN | DRAWWMO)
 {
   for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
   {
@@ -1018,8 +1019,7 @@ void World::setupFog (bool draw_fog, const float& fog_distance)
   }
 }
 
-void World::draw ( size_t flags
-                 , float inner_cursor_radius
+void World::draw ( float inner_cursor_radius
                  , float outer_cursor_radius
                  , const QPointF& mouse_position
                  , const float& fog_distance
@@ -1077,10 +1077,10 @@ void World::draw ( size_t flags
   outdoorLights(true);
 
   glFogi(GL_FOG_MODE, GL_LINEAR);
-  setupFog (flags & FOG, fog_distance);
+  setupFog (renderflags & FOG, fog_distance);
 
   // Draw verylowres heightmap
-  if ((flags & FOG) && (flags & TERRAIN)) {
+  if ((renderflags & FOG) && (renderflags & TERRAIN)) {
     glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
@@ -1153,7 +1153,7 @@ void World::draw ( size_t flags
 
     glPushMatrix();
 
-    if( flags & TERRAIN )
+    if( renderflags & TERRAIN )
     {
       for( int j = 0; j < 64; ++j )
       {
@@ -1161,10 +1161,10 @@ void World::draw ( size_t flags
         {
           if( tileLoaded( j, i ) )
           {
-            mTiles[j][i].tile->draw ( flags & HEIGHTCONTOUR
-                                    , flags & MARKIMPASSABLE
-                                    , flags & AREAID
-                                    , flags & NOCURSOR
+            mTiles[j][i].tile->draw ( renderflags & HEIGHTCONTOUR
+                                    , renderflags & MARKIMPASSABLE
+                                    , renderflags & AREAID
+                                    , renderflags & NOCURSOR
                                     , skies
                                     , mapdrawdistance
                                     , frustum
@@ -1214,7 +1214,7 @@ void World::draw ( size_t flags
       //glDepthMask(false);
       //glDisable(GL_DEPTH_TEST);
 
-      if (!(flags & NOCURSOR))
+      if (!(renderflags & NOCURSOR))
       {
         QSettings settings;
         //! \todo This actually should be an enum. And should be passed into this method.
@@ -1233,7 +1233,7 @@ void World::draw ( size_t flags
     }
 
 
-    if (flags & LINES)
+    if (renderflags & LINES)
     {
       glDisable(GL_COLOR_MATERIAL);
       glActiveTexture(GL_TEXTURE0);
@@ -1243,14 +1243,14 @@ void World::draw ( size_t flags
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-      setupFog (flags & FOG, fog_distance);
+      setupFog (renderflags & FOG, fog_distance);
       for( int j = 0; j < 64; ++j )
       {
         for( int i = 0; i < 64; ++i )
         {
           if( tileLoaded( j, i ) )
           {
-            mTiles[j][i].tile->drawLines ( flags & HOLELINES
+            mTiles[j][i].tile->drawLines ( renderflags & HOLELINES
                                          , mapdrawdistance
                                          , frustum
                                          , camera
@@ -1299,7 +1299,7 @@ void World::draw ( size_t flags
 
 
     // M2s / models
-    if(flags & DOODADS)
+    if(renderflags & DOODADS)
     {
       ModelManager::resetAnim();
 
@@ -1308,7 +1308,7 @@ void World::draw ( size_t flags
       {
         if (it->second->is_visible (mapdrawdistance, frustum, camera))
         {
-          it->second->draw (flags & FOG);
+          it->second->draw (renderflags & FOG);
         }
       }
 
@@ -1319,7 +1319,7 @@ void World::draw ( size_t flags
 
 
     // WMOs / map objects
-    if( (flags & DRAWWMO) || mHasAGlobalWMO )
+    if( (renderflags & DRAWWMO) || mHasAGlobalWMO )
       if (enable_shaders)
       {
         ::math::vector_4d spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -1329,10 +1329,10 @@ void World::draw ( size_t flags
         glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
 
         for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-          it->second->draw ( flags & WMODOODAS
-                           , flags & FOG
+          it->second->draw ( renderflags & WMODOODAS
+                           , renderflags & FOG
                            , skies->hasSkies()
-                           , (flags & FOG) ? fog_distance : mapdrawdistance
+                           , (renderflags & FOG) ? fog_distance : mapdrawdistance
                            , fog_distance
                            , frustum
                            , camera
@@ -1344,17 +1344,17 @@ void World::draw ( size_t flags
       }
       else
         for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-          it->second->draw ( flags & WMODOODAS
-                           , flags & FOG
+          it->second->draw ( renderflags & WMODOODAS
+                           , renderflags & FOG
                            , skies->hasSkies()
-                           , (flags & FOG) ? fog_distance : mapdrawdistance
+                           , (renderflags & FOG) ? fog_distance : mapdrawdistance
                            , fog_distance
                            , frustum
                            , camera
                            );
 
     outdoorLights( true );
-    setupFog (flags & FOG, fog_distance);
+    setupFog (renderflags & FOG, fog_distance);
 
     glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
     glDisable(GL_CULL_FACE);
@@ -1364,7 +1364,7 @@ void World::draw ( size_t flags
     glEnable(GL_LIGHTING);
   }
 
-  setupFog (flags & FOG, fog_distance);
+  setupFog (renderflags & FOG, fog_distance);
 
 
   glColor4f(1,1,1,1);
@@ -1373,7 +1373,7 @@ void World::draw ( size_t flags
   //glColor4f(1,1,1,1);
   glDisable(GL_COLOR_MATERIAL);
 
-  if(flags & WATER)
+  if(renderflags & WATER)
   {
     for( int j = 0; j < 64; ++j )
     {
@@ -1420,7 +1420,7 @@ struct GLNameEntry
   } stack;
 };
 
-void World::drawSelection ( size_t flags)
+void World::drawSelection ()
 {
   glSelectBuffer ( sizeof (_selection_buffer) / sizeof (GLuint)
                  , _selection_buffer
@@ -1440,7 +1440,7 @@ void World::drawSelection ( size_t flags)
 
   glInitNames();
 
-  if (flags & TERRAIN)
+  if (renderflags & TERRAIN)
   {
     ::opengl::scoped::name_pusher type (MapTileName);
     for( int j = 0; j < 64; ++j )
@@ -1458,7 +1458,7 @@ void World::drawSelection ( size_t flags)
     }
   }
 
-  if (flags & DRAWWMO)
+  if (renderflags & DRAWWMO)
   {
     ::opengl::scoped::name_pusher type (MapObjName);
     ::opengl::scoped::name_pusher dummy (0);
@@ -1467,7 +1467,7 @@ void World::drawSelection ( size_t flags)
         ; ++it
         )
     {
-      it->second->drawSelect ( flags & WMODOODAS
+      it->second->drawSelect ( renderflags & WMODOODAS
                              , mapdrawdistance
                              , frustum
                              , camera
@@ -1475,7 +1475,7 @@ void World::drawSelection ( size_t flags)
     }
   }
 
-  if (flags & DOODADS)
+  if (renderflags & DOODADS)
   {
     ModelManager::resetAnim();
 
@@ -1654,8 +1654,7 @@ void World::setAreaID(int id, int x, int z , int _cx, int _cz)
   curChunk->areaID = id;
 }
 
-void World::drawTileMode ( bool draw_lines
-                         , float ratio
+void World::drawTileMode ( float ratio
                          , float zoom
                          )
 {
@@ -1711,7 +1710,7 @@ void World::drawTileMode ( bool draw_lines
 
   glPopMatrix();
 
-  if (draw_lines)
+  if (renderflags & LINES)
   {
     glTranslatef(fmod(-camera.x()/CHUNKSIZE,16), fmod(-camera.z()/CHUNKSIZE,16),0);
     for(float x = -32.0f; x <= 48.0f; x += 1.0f)
@@ -2047,7 +2046,7 @@ void World::saveMap()
   {
     for(int x=0;x<64;x++)
     {
-      if( !( mTiles[y][x].flags & 1 ) )
+      if( !( mTiles[y][x].renderflags & 1 ) )
       {
         continue;
       }
@@ -2244,6 +2243,11 @@ void World::setFlag( bool to, float x, float z)
 const unsigned int& World::getMapID() const
 {
   return mMapId;
+}
+
+const size_t& World::getRenderflags() const
+{
+    return renderflags;
 }
 
 void World::moveHeight(int x, int z)
