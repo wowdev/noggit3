@@ -131,8 +131,6 @@ private:
   void outdoorLighting();
   void outdoorLighting2();
 
-  size_t renderflags;
-
 public:
 
   void advance_times ( const float& seconds
@@ -144,8 +142,6 @@ public:
   \return the MapID found in dbcs
   */
   const unsigned int& getMapID() const;
-
-  const size_t& getRenderflags() const;
 
   void set_camera_above_terrain();
 
@@ -176,15 +172,17 @@ public:
   void saveTileCata(int x, int z);
   void saveChanged();
   void tick(float dt);
-  void draw (float inner_cursor_radius
+  void draw ( size_t flags
+            , float inner_cursor_radius
             , float outer_cursor_radius
             , const QPointF& mouse_position
             , const float& fog_distance
             );
 
-  void drawSelection ();
+  void drawSelection (size_t flags);
   void drawSelectionChunk(int cursorX,int cursorY);
-  void drawTileMode (float ratio
+  void drawTileMode ( bool draw_lines
+                    , float ratio
                     , float zoom
                     );
 
@@ -263,8 +261,6 @@ private:
   nameEntryManager _selection_names;
 
   GLuint _selection_buffer[8192];
-
-  friend class WorldController;
 };
 
 #endif
