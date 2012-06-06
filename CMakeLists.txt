@@ -74,6 +74,7 @@ set ( noggit_sources
       src/noggit/WMO.cpp
       src/noggit/WMOInstance.cpp
       src/noggit/World.cpp
+      src/noggit/WorldController.cpp
       src/noggit/ModelView.cpp
       src/noggit/DBCTableModel.cpp
 
@@ -126,6 +127,7 @@ set ( noggit_headers
       src/noggit/WMO.h
       src/noggit/WMOInstance.h
       src/noggit/World.h
+      src/noggit/WorldController.h
       src/noggit/errorHandling.h
       src/noggit/ModelView.h
       src/noggit/DBCTableModel.h
