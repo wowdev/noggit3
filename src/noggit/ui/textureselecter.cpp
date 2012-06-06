@@ -1,7 +1,11 @@
-#include "textureselecter.h"
+// model_spawner.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+// Glararan <glararan@glararan.eu>
 
-#include "noggit/application.h"
-#include "noggit/TextureManager.h"
+#include <noggit/ui/textureselecter.h>
+
+#include <noggit/application.h>
+#include <noggit/TextureManager.h>
 
 #include <QResizeEvent>
 #include <QStyleOptionGraphicsItem>
