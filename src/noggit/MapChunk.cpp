@@ -11,13 +11,13 @@
 #include <iostream>
 
 #include <QMap>
-#include <QSettings>
 
 #include <math/random.h>
 #include <math/vector_3d.h>
 
 #include <opengl/texture.h>
 
+#include <noggit/application.h>
 #include <noggit/blp_texture.h>
 #include <noggit/Brush.h>
 #include <noggit/Frustum.h> // Frustum
@@ -1130,7 +1130,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   }
 
   //! \todo This actually should be an enum. And should be passed into this method.
-  if ( QSettings().value ("cursor/type", 1).toInt() == 3
+  if ( noggit::app().setting ("cursor/type", 1).toInt() == 3
     && _world->IsSelection (eEntry_MapChunk)
     && _world->GetCurrentSelection()->data.mapchunk == this
     && !dont_draw_cursor
