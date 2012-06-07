@@ -15,12 +15,28 @@ namespace helper
         QString case_sensitive_equivalent (const QString& path)
         {
           const int pos (path.lastIndexOf (QRegExp("[\\\\/]")));
+          const QString parent_path ( pos <= 0
+                                    ? QDir::rootPath()
+                                    : case_sensitive_equivalent
+                                        (path.left (pos))
+                                    );
 
-          //loops till its death without
-          if(pos < 0) return QDir::rootPath();
+          if (path.size() == 0)
+          {
+            return parent_path;
+          }
 
-          directory dir (path.left (pos));
-          const QStringList files (dir.entryList());
+          const QDir dir (parent_path);
+          const QStringList files ( dir.entryList ( QDir::Dirs
+                                                  | QDir::AllDirs
+                                                  | QDir::Files
+                                                  | QDir::Drives
+                                                  | QDir::NoDotAndDotDot
+                                                  | QDir::Hidden
+                                                  | QDir::System
+                                                  | QDir::AllEntries
+                                                  )
+                                  );
           return dir.absoluteFilePath
             (files.at ( files.indexOf ( QRegExp ( path.mid (pos + 1)
                                                 , Qt::CaseInsensitive
@@ -31,8 +47,8 @@ namespace helper
         }
       }
 
-      directory::directory (const QDir & dir)
-        : QDir (dir)
+      directory::directory (const QDir& dir)
+        : QDir (detail::case_sensitive_equivalent (dir.absolutePath()))
       { }
 
       directory::directory (const QString& path)
@@ -40,10 +56,10 @@ namespace helper
       { }
 
       directory::directory ( const QString& path
-                , const QString& nameFilter
-                , QDir::SortFlags sort
-                , QDir::Filters filters
-                  )
+                           , const QString& nameFilter
+                           , QDir::SortFlags sort
+                           , QDir::Filters filters
+                           )
         : QDir ( detail::case_sensitive_equivalent (path)
                , nameFilter
                , sort
