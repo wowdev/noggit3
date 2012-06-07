@@ -105,12 +105,14 @@ namespace noggit
     return _async_loader;
   }
 
-  QVariant application::setting(const QString& key) const
+  QVariant application::setting ( const QString& key
+                                , const QVariant& value
+                                ) const
   {
-    return _settings->value (key);
+    return _settings->value (key, value);
   }
 
-  void application::setting(const QString& key, const QVariant& value)
+  void application::set_setting(const QString& key, const QVariant& value)
   {
     emit settingAboutToChange (key, setting (key));
     _settings->setValue (key, value);
