@@ -8,6 +8,7 @@
 
 #include <QApplication>
 #include <QDir>
+#include <QVariant>
 
 #include <noggit/async/loader.h>
 #include <noggit/mpq/archive_manager.h>
@@ -27,8 +28,10 @@ namespace noggit
     application (int& argc, char** argv);
     ~application();
 
-    QVariant setting (const QString& key) const;
-    void setting (const QString& key, const QVariant& value);
+    QVariant setting ( const QString& key
+                     , const QVariant& value = QVariant()
+                     ) const;
+    void set_setting (const QString& key, const QVariant& value);
 
     async::loader& async_loader();
     mpq::archive_manager& archive_manager();
