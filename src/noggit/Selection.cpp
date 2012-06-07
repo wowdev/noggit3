@@ -53,33 +53,29 @@ nameEntry::nameEntry (const nameEntry& other)
 
 size_t nameEntryManager::add( ModelInstance *mod )
 {
-  LogDebug << "added model with " << _items.size() << std::endl;
   _items.push_back (new nameEntry (mod));
   return _items.size() - 1;
 }
 size_t nameEntryManager::add( WMOInstance *wmo )
 {
-  LogDebug << "added wmo with " << _items.size() << std::endl;
   _items.push_back (new nameEntry (wmo));
   return _items.size() - 1;
 }
 size_t nameEntryManager::add( MapChunk *chunk )
 {
-  LogDebug << "added chunk with " << _items.size() << std::endl;
   _items.push_back (new nameEntry (chunk));
   return _items.size() - 1;
 }
 
 nameEntry* nameEntryManager::findEntry (size_t ref) const
 {
-  LogDebug << "requested " << ref << " when having " << _items.size() << "items. result is " << _items[ref] << std::endl;
   assert (ref < _items.size());
   return _items[ref];
 }
 
 nameEntryManager::nameEntryManager (World* world)
   : _items (0)
-  ,_world (world) 
+  ,_world (world)
 {
 }
 
