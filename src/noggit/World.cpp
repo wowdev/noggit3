@@ -1422,8 +1422,10 @@ struct GLNameEntry
 
 void World::drawSelection ( size_t flags)
 {
-  glSelectBuffer ( sizeof (_selection_buffer) / sizeof (GLuint)
-                 , _selection_buffer
+  static GLuint selection_buffer[8192];
+
+  glSelectBuffer ( sizeof (selection_buffer) / sizeof (GLuint)
+                 , selection_buffer
                  );
   glRenderMode (GL_SELECT);
 
@@ -1501,7 +1503,7 @@ void World::drawSelection ( size_t flags)
   const GLint hits (glRenderMode (GL_RENDER));
   for (GLint hit (0); hit < hits; ++hit)
   {
-    GLNameEntry* entry = reinterpret_cast<GLNameEntry*>( &_selection_buffer[offset] );
+    GLNameEntry* entry = reinterpret_cast<GLNameEntry*>( &selection_buffer[offset] );
 
     // We always push { MapObjName | DoodadName | MapTileName }, { 0, 0, MapTile }, { UID, UID, triangle }
     assert( entry->stackSize == 3 );
