@@ -14,6 +14,7 @@ class MapView;
 class WorldController : public QObject
 {
     Q_OBJECT
+
 public:
   WorldController();
 

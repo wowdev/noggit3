@@ -5,14 +5,11 @@
 #include <noggit/WorldController.h>
 
 #include <noggit/World.h>
-
 #include <noggit/MapView.h>
 
-WorldController::WorldController() : QObject(NULL)
-  , model(NULL)
-  , views(NULL)
+WorldController::WorldController() : QObject()
+  , _model(NULL)
 {
-
 }
 
 void WorldController::addView(MapView *view)

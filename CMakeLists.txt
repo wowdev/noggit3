@@ -160,6 +160,7 @@ set ( noggit_headers_to_moc
       src/noggit/MapView.h
       src/noggit/ModelView.h
       src/noggit/DBCTableModel.h
+      src/noggit/WorldController.h
 
       src/noggit/async/loader.h
       src/noggit/async/loading_thread.h
