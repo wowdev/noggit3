@@ -332,6 +332,9 @@ namespace noggit
     int _selected_area_id;
 
     bool _invert_mouse_y_axis;
+
+    //! \todo This should be an optional<int>, not an int.
+    int _selected_polygon;
   };
 }
 
