@@ -69,7 +69,6 @@ private:
 
   //! Information about the currently selected model / WMO / triangle.
   nameEntry* mCurrentSelection;
-  bool SelectionMode;
 
   float time; //!< the time of the day
 
