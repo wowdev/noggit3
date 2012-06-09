@@ -1,4 +1,4 @@
-// non_recursive_filter_model.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// non_recursive_filter_model.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
 #ifndef __HELPER_QT_NON_RECURSIVE_FILTER_MODEL_H
