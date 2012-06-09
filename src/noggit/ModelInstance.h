@@ -1,4 +1,4 @@
-// ModelInstance.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// ModelInstance.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 

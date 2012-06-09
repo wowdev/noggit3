@@ -1,4 +1,4 @@
-// Frustum.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Frustum.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
@@ -51,7 +51,7 @@ class Frustum
   private:
     ::math::vector_3d _normal;
     float _distance;
-  } planes[SIDES_MAX];
+  } _planes[SIDES_MAX];
 
 public:
   Frustum();

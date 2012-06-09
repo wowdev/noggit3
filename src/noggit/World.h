@@ -1,4 +1,4 @@
-// World.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// World.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 // Mjollnà <mjollna.wow@gmail.com>
@@ -59,91 +59,53 @@ private:
 //! \todo Split this. There should be a seperate class for WDTs.
 class World
 {
-public:
-  const QImage& minimap() const { return _minimap; }
-
 private:
-  QImage _minimap;
-
+  // --- stuff that should not be here. ----------------------------------------
   int cx; //!< camera x-coord
   int cz; //!< camera z-coord
 
   int ex; //!< maptile x-coord
   int ez; //!< maptile z-coord
 
-  //! Holding all MapTiles there can be in a World.
-  MapTileEntry mTiles[64][64];
-
   //! Information about the currently selected model / WMO / triangle.
   nameEntry* mCurrentSelection;
-  int mCurrentSelectedTriangle;
   bool SelectionMode;
-
-  //! Is the WDT telling us to use a bigger alphamap (64*64) and single pass rendering.
-  bool mBigAlpha;
-
-  //! opengl call lists for the WDL low resolution heightmaps.
-  opengl::call_list* lowrestiles[64][64];
-
-  //! Temporary variables for loading a WMO, if we have a global WMO.
-  std::string mWmoFilename;
-  ENTRY_MODF mWmoEntry;
-
-  //! Vertex Buffer Objects for coordinates used for drawing.
-  GLuint detailtexcoords;
-  GLuint alphatexcoords;
-
-  //! Map ID of this World.
-  unsigned int mMapId;
-
-  //! The lighting used.
-  OutdoorLighting *ol;
-
-  //! Light attenuation related parameters.
-  float l_const;
-  float l_linear;
-  float l_quadratic;
 
   float time; //!< the time of the day
 
-  void initMinimap();
-  void initLowresTerrain();
+  void moveADT();
 
-  //! \brief Name of this map.
-  std::string basename;
-
-  //! Checks if a maptile is loaded
-  /*!
-  \param x a integer indecating the x coord
-  \param z a integer indecating the z coord
-  \return true when tile is loaded
-  */
-  bool tileLoaded(int x, int z) const;
-
-  //! loads a maptile if isnt already
-  /*!
-  \param x a integer indecating the x coord
-  \param z a integer indecating the z coord
-  \return the corresponding MapTile object
-  */
-  MapTile *loadTile(int x, int z);
-
-  void outdoorLighting();
-  void outdoorLighting2();
+  void jumpToCords(::math::vector_3d pos);
+  void unsetChanged(int x, int z);
 
 public:
-
+  nameEntry * GetCurrentSelection() { return mCurrentSelection; }
+  bool IsSelection( int pSelectionType ) { return HasSelection() && mCurrentSelection->type == pSelectionType; }
+  bool HasSelection() { return mCurrentSelection; }
+  void ResetSelection() { mCurrentSelection = NULL; }
+  void setChanged(float x, float z);
+  void setChanged(int x, int z);
+  void set_camera_above_terrain();
   void advance_times ( const float& seconds
                      , const float& time_of_day_speed_factor
                      );
+  bool getChanged(int x, int z) const;
+
+  ::math::vector_3d _exact_terrain_selection_position;
+  ::math::vector_3d camera;
+  ::math::vector_3d lookat;
+
+  // --- stuff that should be in here. -----------------------------------------
+
+public:
+  explicit World( const std::string& name);
+  ~World();
 
   //! gets the current MapID
   /*!
   \return the MapID found in dbcs
   */
   const unsigned int& getMapID() const;
-
-  void set_camera_above_terrain();
 
   Skies *skies;
   bool mHasAGlobalWMO;
@@ -159,12 +121,6 @@ public:
 
   OutdoorLightStats outdoorLightStats;
 
-  ::math::vector_3d camera;
-  ::math::vector_3d lookat;
-
-  explicit World( const std::string& name);
-  ~World();
-
   void initDisplay();
   void enterTile(int x, int z);
   void reloadTile(int x, int z);
@@ -177,9 +133,10 @@ public:
             , float outer_cursor_radius
             , const QPointF& mouse_position
             , const float& fog_distance
+            , const int& selected_polygon
             );
 
-  void drawSelection (size_t flags);
+  int drawSelection (size_t flags);
   void drawSelectionChunk(int cursorX,int cursorY);
   void drawTileMode ( bool draw_lines
                     , float ratio
@@ -195,16 +152,6 @@ public:
   void setAreaID(int id, int x, int z , int cx, int cz);
   void setFlag(bool to, float x, float z);
   void setBaseTexture(int x, int z, noggit::blp_texture* texture );
-
-  void moveADT();
-
-  bool HasSelection() { return mCurrentSelection; }
-  bool IsSelection( int pSelectionType ) { return HasSelection() && mCurrentSelection->type == pSelectionType; }
-  nameEntry * GetCurrentSelection() { return mCurrentSelection; }
-  void ResetSelection() { mCurrentSelection = NULL; }
-  GLuint GetCurrentSelectedTriangle() { return mCurrentSelectedTriangle; }
-
-  ::math::vector_3d _exact_terrain_selection_position;
 
   bool GetVertex(float x,float z, ::math::vector_3d *V);
   boost::optional<float> get_height (const float& x, const float& z) const;
@@ -232,13 +179,7 @@ public:
   void addWMO( WMO *wmo, ::math::vector_3d newPos );
 
   void removeHole( float x, float z );
-  void jumpToCords(::math::vector_3d pos);
   void saveMap();
-
-  void setChanged(float x, float z);
-  void setChanged(int x, int z);
-  void unsetChanged(int x, int z);
-  bool getChanged(int x, int z) const;
 
   void deleteModelInstance( int pUniqueID );
   void deleteWMOInstance( int pUniqueID );
@@ -257,10 +198,64 @@ public:
     return _selection_names;
   }
 
-private:
-  nameEntryManager _selection_names;
+  const QImage& minimap() const { return _minimap; }
 
-  GLuint _selection_buffer[8192];
+private:
+  QImage _minimap;
+
+  //! Holding all MapTiles there can be in a World.
+  MapTileEntry mTiles[64][64];
+
+  //! Is the WDT telling us to use a bigger alphamap (64*64) and single pass rendering.
+  bool mBigAlpha;
+
+  //! opengl call lists for the WDL low resolution heightmaps.
+  opengl::call_list* lowrestiles[64][64];
+
+  //! Temporary variables for loading a WMO, if we have a global WMO.
+  std::string mWmoFilename;
+  ENTRY_MODF mWmoEntry;
+
+  //! Vertex Buffer Objects for coordinates used for drawing.
+  GLuint detailtexcoords;
+  GLuint alphatexcoords;
+
+  //! Map ID of this World.
+  unsigned int mMapId;
+  //! \brief Name of this map.
+  std::string basename;
+
+  //! The lighting used.
+  OutdoorLighting *ol;
+
+  //! Light attenuation related parameters.
+  float l_const;
+  float l_linear;
+  float l_quadratic;
+
+  void initMinimap();
+  void initLowresTerrain();
+
+  //! Checks if a maptile is loaded
+  /*!
+  \param x a integer indecating the x coord
+  \param z a integer indecating the z coord
+  \return true when tile is loaded
+  */
+  bool tileLoaded(int x, int z) const;
+
+  //! loads a maptile if isnt already
+  /*!
+  \param x a integer indecating the x coord
+  \param z a integer indecating the z coord
+  \return the corresponding MapTile object
+  */
+  MapTile *loadTile(int x, int z);
+
+  void outdoorLighting();
+  void outdoorLighting2();
+
+  nameEntryManager _selection_names;
 };
 
 #endif

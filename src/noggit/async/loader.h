@@ -1,4 +1,4 @@
-// loader.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// loader.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
 #ifndef __NOGGIT_ASYNC_LOADER_H

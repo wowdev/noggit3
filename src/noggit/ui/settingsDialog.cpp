@@ -1,4 +1,4 @@
-// settingsDialog.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// settingsDialog.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Mjollnà <mjollna.wow@gmail.com>
 // Glararan <glararan@glararan.eu>
 

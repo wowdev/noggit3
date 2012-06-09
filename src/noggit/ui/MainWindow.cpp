@@ -1,4 +1,4 @@
-// MainWindow.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// MainWindow.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
@@ -51,7 +51,7 @@ namespace noggit
       fileMenu->addSeparator();
       fileMenu->addAction (tr("Exit"), this, SLOT(close()));
 
-	  QMenu* helpMenu = menuBar()->addMenu (tr("&Help"));
+    QMenu* helpMenu = menuBar()->addMenu (tr("&Help"));
       helpMenu->addAction (tr("Settings"), this, SLOT(settingsClicked()));
       helpMenu->addSeparator();
       helpMenu->addAction (tr("Map Editor"), this, SLOT(help_mapEditor()));

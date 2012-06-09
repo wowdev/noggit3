@@ -1,4 +1,4 @@
-// settingsDialog.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// settingsDialog.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Mjollnà <mjollna.wow@gmail.com>
 // Glararan <glararan@glararan.eu>
 
@@ -21,10 +21,10 @@ namespace noggit
     {
       Q_OBJECT
 
-    public:	
+    public:
       settingsDialog();
 
-    private slots:		
+    private slots:
       void toggleGameProjectDisplay (bool);
 
       void setGameAndProjectPath();
@@ -37,7 +37,7 @@ namespace noggit
 
       void settingChanged (const QString& key, const QVariant& value);
 
-    private:	
+    private:
       QLabel* currentGamePath;
       QPushButton* changeGamePathButton;
 
