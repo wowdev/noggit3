@@ -1,4 +1,4 @@
-// DBCEditor.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// DBCEditor.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 
 #ifndef DBCEDITOR_H
@@ -24,9 +24,9 @@ private:
     QAction *editColumn;
     DBCTableModel *model;
     int columnToEdit;
-    
+
 signals:
-    
+
 public slots:
     void showContextMenu(const QPoint& point);
     void editColumnSettings();

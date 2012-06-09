@@ -1,4 +1,4 @@
-// DBCFile.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// DBCFile.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Beket <snipbeket@mail.ru>
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
@@ -88,7 +88,7 @@ public:
     {
       assert(field < file.fieldCount);
       return *reinterpret_cast<float*>(offset + field * 4);
-	}
+  }
 
     const unsigned int& getUInt(size_t field) const
     {

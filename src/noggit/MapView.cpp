@@ -1,4 +1,4 @@
-// MapView.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// MapView.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Beket <snipbeket@mail.ru>
 // Bernd Lrwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
@@ -111,9 +111,10 @@ namespace noggit
     , _settings (new QSettings (this))
     , _clipboard (NULL)
     , _invert_mouse_y_axis (false)
-    , menu (NULL)
+    , _selected_polygon (-1)
 
     //! \todo Sort to correct order and rename.
+    , menu (NULL)
     , moving (0.0f)
     , strafing (0.0f)
     , updown (0.0f)
@@ -791,8 +792,10 @@ namespace noggit
           if (_currently_holding_shift)
           {
             // if there is no terain the projection mothod dont work. So get the cords by selection.
-            Selection->data.mapchunk->getSelectionCoord(&xPos, &zPos);
-            yPos = Selection->data.mapchunk->getSelectionHeight();
+            Selection->data.mapchunk->getSelectionCoord
+              (_selected_polygon, &xPos, &zPos);
+            yPos = Selection->data.mapchunk->getSelectionHeight
+              (_selected_polygon);
 
             if(mViewMode == eViewMode_3D)
               _world->removeHole(xPos, zPos);
@@ -961,11 +964,15 @@ namespace noggit
 
     if (selectTerrainOnly)
     {
-      _world->drawSelection (flags & (~DOODADS & ~DRAWWMO & ~WMODOODAS));
+      _selected_polygon = _world->drawSelection ( flags & ( ~DOODADS
+                                                          & ~DRAWWMO
+                                                          & ~WMODOODAS
+                                                          )
+                                                );
     }
     else
     {
-      _world->drawSelection (flags);
+      _selected_polygon = _world->drawSelection (flags);
     }
   }
 
@@ -1054,6 +1061,7 @@ namespace noggit
                  , brush_radius
                  , _mouse_position
                  , _fog_distance
+                 , _selected_polygon
                  );
   }
 
@@ -1277,7 +1285,7 @@ namespace noggit
           break;
         case eEntry_MapChunk:
           position = _world->GetCurrentSelection()->data.mapchunk->
-                             GetSelectionPosition();
+                             GetSelectionPosition (_selected_polygon);
           break;
         default:
           break;
@@ -2200,7 +2208,7 @@ namespace noggit
       shapingButton->setMaximumSize (50, 50);
       shapingButton->setToolTip (tr("Terrain Tool"));
       shapingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black; color: white;"); //transparent
-      
+
       QPushButton *smoothingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Air01.blp", 40, 40)), "");
       smoothingButton->setIconSize (QSize(40, 40));
       smoothingButton->setMaximumSize (50, 50);
@@ -2349,7 +2357,7 @@ namespace noggit
         selectionPosition = _world->GetCurrentSelection()->data.wmo->pos;
         break;
       case eEntry_MapChunk:
-        selectionPosition = _world->GetCurrentSelection()->data.mapchunk->GetSelectionPosition();
+        selectionPosition = _world->GetCurrentSelection()->data.mapchunk->GetSelectionPosition (_selected_polygon);
         break;
     }
 

@@ -1,4 +1,4 @@
-// World.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// World.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 // Mjollnà <mjollna.wow@gmail.com>
@@ -199,7 +199,6 @@ World::World( const std::string& name )
   , ex( -1 )
   , ez( -1 )
   , mCurrentSelection( NULL )
-  , mCurrentSelectedTriangle( 0 )
   , SelectionMode( false )
   , mBigAlpha( false )
   , mWmoFilename( "" )
@@ -1023,6 +1022,7 @@ void World::draw ( size_t flags
                  , float outer_cursor_radius
                  , const QPointF& mouse_position
                  , const float& fog_distance
+                 , const int& selected_polygon
                  )
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1169,6 +1169,7 @@ void World::draw ( size_t flags
                                     , mapdrawdistance
                                     , frustum
                                     , camera
+                                    , selected_polygon
                                     );
           }
         }
@@ -1180,8 +1181,6 @@ void World::draw ( size_t flags
     // Selection circle
     if( IsSelection( eEntry_MapChunk )  )
     {
-      //int poly = GetCurrentSelectedTriangle();
-
       glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
       //nameEntry * Selection = GetCurrentSelection();
@@ -1420,10 +1419,12 @@ struct GLNameEntry
   } stack;
 };
 
-void World::drawSelection ( size_t flags)
+int World::drawSelection (size_t flags)
 {
-  glSelectBuffer ( sizeof (_selection_buffer) / sizeof (GLuint)
-                 , _selection_buffer
+  static GLuint selection_buffer[8192];
+
+  glSelectBuffer ( sizeof (selection_buffer) / sizeof (GLuint)
+                 , selection_buffer
                  );
   glRenderMode (GL_SELECT);
 
@@ -1495,14 +1496,13 @@ void World::drawSelection ( size_t flags)
 
   GLuint minDist = 0xFFFFFFFF;
   GLNameEntry* minEntry = NULL;
-  GLuint hits = glRenderMode( GL_RENDER );
 
   size_t offset = 0;
 
-  //! \todo Isn't the closest one always the first? Iterating would be worthless then.
-  while( hits-- > 0U )
+  const GLint hits (glRenderMode (GL_RENDER));
+  for (GLint hit (0); hit < hits; ++hit)
   {
-    GLNameEntry* entry = reinterpret_cast<GLNameEntry*>( &_selection_buffer[offset] );
+    GLNameEntry* entry = reinterpret_cast<GLNameEntry*>( &selection_buffer[offset] );
 
     // We always push { MapObjName | DoodadName | MapTileName }, { 0, 0, MapTile }, { UID, UID, triangle }
     assert( entry->stackSize == 3 );
@@ -1530,7 +1530,7 @@ void World::drawSelection ( size_t flags)
     else if( minEntry->stack.type == MapTileName )
     {
       mCurrentSelection = selection_names().findEntry( minEntry->stack.chunk );
-      mCurrentSelectedTriangle = minEntry->stack.triangle;
+      return minEntry->stack.triangle;
     }
   }
 }

@@ -1,4 +1,4 @@
-// MapTile.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// MapTile.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
@@ -59,6 +59,7 @@ public:
             , const float& cull_distance
             , const Frustum& frustum
             , const ::math::vector_3d& camera
+            , const int& selected_polygon
             );
   void drawSelect ( const float& cull_distance
                   , const Frustum& frustum

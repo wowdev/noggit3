@@ -1,4 +1,4 @@
-// help_widget.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// help_widget.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 

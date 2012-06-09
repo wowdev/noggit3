@@ -1,4 +1,4 @@
-// MapTile.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// MapTile.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
@@ -475,6 +475,7 @@ void MapTile::draw ( bool draw_terrain_height_contour
                    , const float& cull_distance
                    , const Frustum& frustum
                    , const ::math::vector_3d& camera
+                   , const int& selected_polygon
                    )
 {
   glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
@@ -490,6 +491,7 @@ void MapTile::draw ( bool draw_terrain_height_contour
                             , draw_area_id_overlay
                             , dont_draw_cursor
                             , skies
+                            , selected_polygon
                             );
       }
     }

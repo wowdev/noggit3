@@ -1,4 +1,4 @@
-// MapView.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// MapView.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 // Mjollnà <mjollna.wow@gmail.com>
@@ -332,6 +332,9 @@ namespace noggit
     int _selected_area_id;
 
     bool _invert_mouse_y_axis;
+
+    //! \todo This should be an optional<int>, not an int.
+    int _selected_polygon;
   };
 }
 
