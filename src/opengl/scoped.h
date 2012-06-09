@@ -93,6 +93,24 @@ namespace opengl
       }
     };
 
+    template<GLint matrix_mode>
+    class matrix_mode_setter
+    {
+    public:
+      matrix_mode_setter()
+      {
+        glGetIntegerv (GL_MATRIX_MODE, &_old_mode);
+        glMatrixMode (matrix_mode);
+      }
+      ~matrix_mode_setter()
+      {
+        glMatrixMode (_old_mode);
+      }
+
+    private:
+      GLint _old_mode;
+    };
+
     class name_pusher
     {
     public:
