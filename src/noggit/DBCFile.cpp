@@ -1,4 +1,4 @@
-// DBCFile.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// DBCFile.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
@@ -45,7 +45,7 @@ void DBCFile::open()
 
 void DBCFile::saveToProjectPath()
 {
-	//sizeof(header)+recordSize*recordCount+stringSize
+  //sizeof(header)+recordSize*recordCount+stringSize
 
   char buffer[50000];//WRONG: Use extendeble array like in ADT save.
   memcpy (buffer, headerData, sizeof(header));

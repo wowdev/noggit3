@@ -1,4 +1,4 @@
-// MapView.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// MapView.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Beket <snipbeket@mail.ru>
 // Bernd Lrwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
@@ -2200,7 +2200,7 @@ namespace noggit
       shapingButton->setMaximumSize (50, 50);
       shapingButton->setToolTip (tr("Terrain Tool"));
       shapingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black; color: white;"); //transparent
-      
+
       QPushButton *smoothingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Air01.blp", 40, 40)), "");
       smoothingButton->setIconSize (QSize(40, 40));
       smoothingButton->setMaximumSize (50, 50);

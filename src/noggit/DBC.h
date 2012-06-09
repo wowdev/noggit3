@@ -1,4 +1,4 @@
-// DBC.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// DBC.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Beket <snipbeket@mail.ru>
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>

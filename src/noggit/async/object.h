@@ -1,4 +1,4 @@
-// object.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// object.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
 #ifndef __NOGGIT_ASYNC_OBJECT_H
