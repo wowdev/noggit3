@@ -69,7 +69,6 @@ private:
 
   //! Information about the currently selected model / WMO / triangle.
   nameEntry* mCurrentSelection;
-  int mCurrentSelectedTriangle;
   bool SelectionMode;
 
   float time; //!< the time of the day
@@ -80,7 +79,6 @@ private:
   void unsetChanged(int x, int z);
 
 public:
-  GLuint GetCurrentSelectedTriangle() { return mCurrentSelectedTriangle; }
   nameEntry * GetCurrentSelection() { return mCurrentSelection; }
   bool IsSelection( int pSelectionType ) { return HasSelection() && mCurrentSelection->type == pSelectionType; }
   bool HasSelection() { return mCurrentSelection; }
@@ -135,9 +133,10 @@ public:
             , float outer_cursor_radius
             , const QPointF& mouse_position
             , const float& fog_distance
+            , const int& selected_polygon
             );
 
-  void drawSelection (size_t flags);
+  int drawSelection (size_t flags);
   void drawSelectionChunk(int cursorX,int cursorY);
   void drawTileMode ( bool draw_lines
                     , float ratio

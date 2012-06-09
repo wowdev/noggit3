@@ -1034,6 +1034,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
                     , bool draw_area_id_overlay
                     , bool dont_draw_cursor
                     , const Skies* skies
+                    , const int& selected_polygon
                     )
 {
   // setup vertex buffers
@@ -1136,8 +1137,6 @@ void MapChunk::draw ( bool draw_terrain_height_contour
     && !dont_draw_cursor
      )
   {
-    const int poly (_world->GetCurrentSelectedTriangle());
-
     glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
 
     glPushMatrix();
@@ -1146,9 +1145,9 @@ void MapChunk::draw ( bool draw_terrain_height_contour
     glDepthMask( false );
     glDisable( GL_DEPTH_TEST );
     glBegin( GL_TRIANGLES );
-    glVertex3fv( mVertices[mapstrip2[poly + 0]] );
-    glVertex3fv( mVertices[mapstrip2[poly + 1]] );
-    glVertex3fv( mVertices[mapstrip2[poly + 2]] );
+    glVertex3fv( mVertices[mapstrip2[selected_polygon + 0]] );
+    glVertex3fv( mVertices[mapstrip2[selected_polygon + 1]] );
+    glVertex3fv( mVertices[mapstrip2[selected_polygon + 2]] );
     glEnd();
     glEnable( GL_CULL_FACE );
     glEnable( GL_DEPTH_TEST );
@@ -1248,44 +1247,74 @@ void MapChunk::drawSelect()
   //glEnable( GL_CULL_FACE );
 }
 
-void MapChunk::getSelectionCoord( float *x, float *z )
+void MapChunk::getSelectionCoord ( const int& selected_polygon
+                                 , float* x
+                                 , float* z
+                                 ) const
 {
-  int Poly = _world->GetCurrentSelectedTriangle();
-  if( Poly + 2 > stripsize2 )
+  if (selected_polygon + 2 >= stripsize2)
   {
+    LogError << "getSelectionCoord() fucked up because the selection was bad. "
+             << selected_polygon
+             << " with stripsize2 of "
+             << stripsize2
+             << ".\n";
+    //! \todo Return none, instead of some weird constant.
     *x = -1000000.0f;
     *z = -1000000.0f;
     return;
   }
-  *x = ( mVertices[mapstrip2[Poly + 0]].x() + mVertices[mapstrip2[Poly + 1]].x() + mVertices[mapstrip2[Poly + 2]].x() ) / 3;
-  *z = ( mVertices[mapstrip2[Poly + 0]].z() + mVertices[mapstrip2[Poly + 1]].z() + mVertices[mapstrip2[Poly + 2]].z() ) / 3;
+
+  *x = ( mVertices[mapstrip2[selected_polygon + 0]].x()
+       + mVertices[mapstrip2[selected_polygon + 1]].x()
+       + mVertices[mapstrip2[selected_polygon + 2]].x()
+       )
+     / 3.0f;
+  *z = ( mVertices[mapstrip2[selected_polygon + 0]].z()
+       + mVertices[mapstrip2[selected_polygon + 1]].z()
+       + mVertices[mapstrip2[selected_polygon + 2]].z()
+       )
+     / 3.0f;
 }
 
-float MapChunk::getSelectionHeight()
+float MapChunk::getSelectionHeight (const int& selected_polygon) const
 {
-  int Poly = _world->GetCurrentSelectedTriangle();
-  if( Poly + 2 < stripsize2 )
-    return ( mVertices[mapstrip2[Poly + 0]].y() + mVertices[mapstrip2[Poly + 1]].y() + mVertices[mapstrip2[Poly + 2]].y() ) / 3;
-  LogError << "Getting selection height fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
-  return 0.0f;
-}
-
-::math::vector_3d MapChunk::GetSelectionPosition()
-{
-  int Poly = _world->GetCurrentSelectedTriangle();
-  if( Poly + 2 > stripsize2 )
+  if (selected_polygon + 2 >= stripsize2)
   {
-    LogError << "Getting selection position fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
-    return ::math::vector_3d( -1000000.0f, -1000000.0f, -1000000.0f );
+    LogError << "getSelectionHeight() fucked up because the selection was bad. "
+             << selected_polygon
+             << " with stripsize2 of "
+             << stripsize2
+             << ".\n";
+    //! \todo Return none, instead of some weird constant.
+    return -1000000.0f;
   }
 
-  ::math::vector_3d lPosition;
-  lPosition  = ::math::vector_3d( mVertices[mapstrip2[Poly + 0]] );
-  lPosition += ::math::vector_3d( mVertices[mapstrip2[Poly + 1]] );
-  lPosition += ::math::vector_3d( mVertices[mapstrip2[Poly + 2]] );
-  lPosition *= 0.3333333f;
+  return ( mVertices[mapstrip2[selected_polygon + 0]].y()
+         + mVertices[mapstrip2[selected_polygon + 1]].y()
+         + mVertices[mapstrip2[selected_polygon + 2]].y()
+         )
+         / 3.0f;
+}
 
-  return lPosition;
+::math::vector_3d MapChunk::GetSelectionPosition (const int& selected_polygon) const
+{
+  if (selected_polygon + 2 >= stripsize2)
+  {
+    LogError << "GetSelectionPosition() fucked up because the selection was bad. "
+             << selected_polygon
+             << " with stripsize2 of "
+             << stripsize2
+             << ".\n";
+    //! \todo Return none, instead of some weird constant.
+    return ::math::vector_3d (-1000000.0f, -1000000.0f, -1000000.0f);
+  }
+
+  return ( ::math::vector_3d( mVertices[mapstrip2[selected_polygon + 0]] )
+         + ::math::vector_3d( mVertices[mapstrip2[selected_polygon + 1]] )
+         + ::math::vector_3d( mVertices[mapstrip2[selected_polygon + 2]] )
+         )
+         * (1.0f / 3.0f);
 }
 
 void MapChunk::update_normal_vectors()

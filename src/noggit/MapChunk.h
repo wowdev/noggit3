@@ -85,11 +85,13 @@ public:
                   , const ::math::vector_3d& camera
                   ) const;
 
-  void draw (bool draw_terrain_height_contour
+  void draw ( bool draw_terrain_height_contour
             , bool mark_impassable_chunks
             , bool draw_area_id_overlay
             , bool dont_draw_cursor
-            , const Skies* skies);
+            , const Skies* skies
+            , const int& selected_polygon
+            );
   void drawContour();
   void drawAreaID();
   void drawBlock();
@@ -109,10 +111,9 @@ public:
   ::math::vector_3d mMinimap[mapbufsize];
   ::math::vector_4d mFakeShadows[mapbufsize];
 
-  void getSelectionCoord(float *x,float *z);
-  float getSelectionHeight();
-
-  ::math::vector_3d GetSelectionPosition();
+  void getSelectionCoord (const int& selected_polygon, float* x, float* z) const;
+  float getSelectionHeight (const int& selected_polygon) const;
+  ::math::vector_3d GetSelectionPosition(const int& selected_polygon) const;
 
   bool changeTerrain(float x, float z, float change, float radius, int BrushType);
   bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);

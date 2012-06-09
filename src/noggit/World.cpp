@@ -199,7 +199,6 @@ World::World( const std::string& name )
   , ex( -1 )
   , ez( -1 )
   , mCurrentSelection( NULL )
-  , mCurrentSelectedTriangle( 0 )
   , SelectionMode( false )
   , mBigAlpha( false )
   , mWmoFilename( "" )
@@ -1023,6 +1022,7 @@ void World::draw ( size_t flags
                  , float outer_cursor_radius
                  , const QPointF& mouse_position
                  , const float& fog_distance
+                 , const int& selected_polygon
                  )
 {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1169,6 +1169,7 @@ void World::draw ( size_t flags
                                     , mapdrawdistance
                                     , frustum
                                     , camera
+                                    , selected_polygon
                                     );
           }
         }
@@ -1180,8 +1181,6 @@ void World::draw ( size_t flags
     // Selection circle
     if( IsSelection( eEntry_MapChunk )  )
     {
-      //int poly = GetCurrentSelectedTriangle();
-
       glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
       //nameEntry * Selection = GetCurrentSelection();
@@ -1420,7 +1419,7 @@ struct GLNameEntry
   } stack;
 };
 
-void World::drawSelection ( size_t flags)
+int World::drawSelection (size_t flags)
 {
   static GLuint selection_buffer[8192];
 
@@ -1531,7 +1530,7 @@ void World::drawSelection ( size_t flags)
     else if( minEntry->stack.type == MapTileName )
     {
       mCurrentSelection = selection_names().findEntry( minEntry->stack.chunk );
-      mCurrentSelectedTriangle = minEntry->stack.triangle;
+      return minEntry->stack.triangle;
     }
   }
 }
