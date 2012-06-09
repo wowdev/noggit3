@@ -1,4 +1,4 @@
-# terrain3.fs is part of Noggit3, licensed via GNU General Publiicense (version 3).
+# terrain3.fs is part of Noggit3, licensed via GNU General Public License (version 3).
 # Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
 !!ARBfp1.0
