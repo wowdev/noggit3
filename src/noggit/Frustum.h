@@ -51,7 +51,7 @@ class Frustum
   private:
     ::math::vector_3d _normal;
     float _distance;
-  } planes[SIDES_MAX];
+  } _planes[SIDES_MAX];
 
 public:
   Frustum();
