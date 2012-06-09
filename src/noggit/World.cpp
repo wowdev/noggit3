@@ -1495,12 +1495,11 @@ void World::drawSelection ( size_t flags)
 
   GLuint minDist = 0xFFFFFFFF;
   GLNameEntry* minEntry = NULL;
-  GLuint hits = glRenderMode( GL_RENDER );
 
   size_t offset = 0;
 
-  //! \todo Isn't the closest one always the first? Iterating would be worthless then.
-  while( hits-- > 0U )
+  const GLint hits (glRenderMode (GL_RENDER));
+  for (GLint hit (0); hit < hits; ++hit)
   {
     GLNameEntry* entry = reinterpret_cast<GLNameEntry*>( &_selection_buffer[offset] );
 
