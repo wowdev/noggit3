@@ -227,7 +227,6 @@ private:
   MapTile *loadTile(int x, int z);
 
   void outdoorLighting();
-  void outdoorLighting2();
 
   nameEntryManager _selection_names;
 };
