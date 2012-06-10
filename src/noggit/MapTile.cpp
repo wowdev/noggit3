@@ -29,13 +29,11 @@
 #include <noggit/mpq/file.h>
 
 MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
-  : modelCount (0)
-  , mPositionX (pX)
+  : mPositionX (pX)
   , mPositionZ (pZ)
 //! \todo Actually, this is defined inside the ADT.
   , xbase (mPositionX * TILESIZE)
   , zbase (mPositionZ * TILESIZE)
-  , changed (false)
   , mFlags (0)
   , mBigAlpha (pBigAlpha)
   , mTextureFilenames (0)
@@ -455,16 +453,6 @@ MapTile::~MapTile()
 bool MapTile::isTile( int pX, int pZ )
 {
   return pX == mPositionX && pZ == mPositionZ;
-}
-
-float MapTile::getMaxHeight()
-{
-  float maxHeight = -99999.0f;
-  for( int nextChunk = 0; nextChunk < 256; ++nextChunk )
-  {
-    maxHeight = std::max( mChunks[nextChunk / 16][nextChunk % 16]->vmax.y(), maxHeight );
-  }
-  return maxHeight;
 }
 
 void MapTile::draw ( bool draw_terrain_height_contour

@@ -69,6 +69,8 @@ private:
 
   void unsetChanged(int x, int z);
 
+  bool _tile_got_modified[64][64];
+
 public:
   nameEntry * GetCurrentSelection() { return mCurrentSelection; }
   bool IsSelection( int pSelectionType ) { return HasSelection() && mCurrentSelection->type == pSelectionType; }

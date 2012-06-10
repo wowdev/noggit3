@@ -2158,35 +2158,30 @@ static int tile_below_camera (const float& position)
   return ::math::bounded_nearest<int> ((position - (TILESIZE / 2)) / TILESIZE);
 }
 
-void World::setChanged(float x, float z)
+void World::setChanged (float x, float z)
 {
-  // change the changed flag of the map tile
-  int row (tile_below_camera (x));
-  int column (tile_below_camera (z));
-  if( row >= 0 && row <= 64 && column >= 0 && column <= 64 )
-    if( mTiles[column][row].tile )
-      mTiles[column][row].tile->changed = true;
+  const int column (tile_below_camera (z));
+  const int row (tile_below_camera (x));
+
+  setChanged (column, row);
 }
 
 void World::setChanged(int x, int z)
 {
-  // change the changed flag of the map tile
-  if( mTiles[x][z].tile )
-    mTiles[x][z].tile->changed = true;
+  assert (oktile (x, z));
+  _tile_got_modified[x][z] = true;
 }
 
 void World::unsetChanged(int x, int z)
 {
-  // change the changed flag of the map tile
-  if( mTiles[x][z].tile )
-    mTiles[x][z].tile->changed = false;
+  assert (oktile (x, z));
+  _tile_got_modified[x][z] = false;
 }
 
 bool World::getChanged(int x, int z) const
 {
-  if(mTiles[x][z].tile)
-    return mTiles[x][z].tile->changed;
-  else return false;
+  assert (oktile (x, z));
+  return _tile_got_modified[x][z];
 }
 
 void World::setFlag( bool to, float x, float z)
