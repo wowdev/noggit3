@@ -67,8 +67,6 @@ private:
 
   float time; //!< the time of the day
 
-  void moveADT();
-
   void jumpToCords(::math::vector_3d pos);
   void unsetChanged(int x, int z);
 
