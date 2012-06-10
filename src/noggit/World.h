@@ -100,7 +100,6 @@ public:
   const unsigned int& getMapID() const;
 
   Skies *skies;
-  bool mHasAGlobalWMO;
 
   //! \todo  Get these managed? ._.
   typedef std::pair<int, ModelInstance *> model_instance_type;
@@ -206,10 +205,6 @@ private:
   //! opengl call lists for the WDL low resolution heightmaps.
   opengl::call_list* lowrestiles[64][64];
 
-  //! Temporary variables for loading a WMO, if we have a global WMO.
-  std::string mWmoFilename;
-  ENTRY_MODF mWmoEntry;
-
   //! Vertex Buffer Objects for coordinates used for drawing.
   GLuint detailtexcoords;
   GLuint alphatexcoords;
@@ -231,19 +226,9 @@ private:
   void initLowresTerrain();
 
   //! Checks if a maptile is loaded
-  /*!
-  \param x a integer indecating the x coord
-  \param z a integer indecating the z coord
-  \return true when tile is loaded
-  */
   bool tileLoaded(int x, int z) const;
 
   //! loads a maptile if isnt already
-  /*!
-  \param x a integer indecating the x coord
-  \param z a integer indecating the z coord
-  \return the corresponding MapTile object
-  */
   MapTile *loadTile(int x, int z);
 
   void outdoorLighting();

@@ -196,8 +196,6 @@ bool World::IsEditableWorld( int pMapId )
 World::World( const std::string& name )
   : mCurrentSelection( NULL )
   , mBigAlpha( false )
-  , mWmoFilename( "" )
-  , mWmoEntry( ENTRY_MODF() )
   , detailtexcoords( 0 )
   , alphatexcoords( 0 )
   , mMapId( 0xFFFFFFFF )
@@ -208,7 +206,6 @@ World::World( const std::string& name )
   , time( 1450 )
   , basename( name )
   , skies( NULL )
-  , mHasAGlobalWMO( false )
   , outdoorLightStats( OutdoorLightStats() )
   , camera( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
   , lookat( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
@@ -242,7 +239,6 @@ World::World( const std::string& name )
 
   noggit::mpq::file theFile (filename);
   uint32_t fourcc;
-  //uint32_t size;
 
   // - MVER ----------------------------------------------
 
@@ -267,7 +263,10 @@ World::World( const std::string& name )
   theFile.read( &flags, 4 );
   theFile.seekRelative( 4 * 7 );
 
-  mHasAGlobalWMO = flags & 1;
+  //! \note This indicates a global WMO, which we don't want to edit, as Noggit
+  //        is an ADT based map editor.
+  assert (!(flags & 1));
+
   mBigAlpha = flags & 4;
 
   // - MAIN ----------------------------------------------
@@ -276,9 +275,6 @@ World::World( const std::string& name )
   theFile.seekRelative( 4 );
 
   assert( fourcc == 'MAIN' );
-
-  /// this is the theory. Sadly, we are also compiling on 64 bit machines with size_t being 8 byte, not 4. Therefore, we can't do the same thing, Blizzard does in its 32bit executable.
-  //theFile.read( &(mTiles[0][0]), sizeof( 8 * 64 * 64 ) );
 
   for( int j = 0; j < 64; ++j )
   {
@@ -290,51 +286,11 @@ World::World( const std::string& name )
     }
   }
 
-  if( !theFile.is_at_end_of_file() )
-  {
-    //! \note We actually don't load WMO only worlds, so we just stop reading here, k?
-    //! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
-
-    mHasAGlobalWMO = false;
-
-#ifdef __ASSERTIONBUGFIXED
-
-    // - MWMO ----------------------------------------------
-
-    theFile.read( &fourcc, 4 );
-    theFile.read( &size, 4 );
-
-    assert( fourcc == 'MWMO' );
-
-    char * wmoFilenameBuf = new char[size];
-    theFile.read( &wmoFilenameBuf, size );
-
-    mWmoFilename = wmoFilenameBuf;
-
-    free(wmoFilenameBuf);
-
-    // - MODF ----------------------------------------------
-
-    theFile.read( &fourcc, 4 );
-    theFile.seekRelative( 4 );
-
-    assert( fourcc == 'MODF' );
-
-    theFile.read( &mWmoEntry, sizeof( ENTRY_MODF ) );
-
-#endif //__ASSERTIONBUGFIXED
-
-  }
-
   // -----------------------------------------------------
 
   theFile.close();
 
-  if( !mHasAGlobalWMO )
-    initMinimap();
-
-  // don't load map objects while still on the menu screen
-  //initDisplay();
+  initMinimap();
 }
 
 static inline QRgb color_for_height (int16_t height)
@@ -694,14 +650,6 @@ void World::initDisplay()
 {
   initGlobalVBOs( &detailtexcoords, &alphatexcoords );
 
-  if( mHasAGlobalWMO )
-  {
-    WMOInstance *inst = new WMOInstance( this, WMOManager::add( this, mWmoFilename ), &mWmoEntry );
-
-    mWMOInstances.insert( std::pair<int,WMOInstance *>( mWmoEntry.uniqueID, inst ) );
-    camera = inst->pos;
-  }
-
   skies = new Skies( mMapId );
 
   ol = new OutdoorLighting("World\\dnc.db");
@@ -1017,7 +965,7 @@ void World::draw ( size_t flags
   ///glColor4f(1,1,1,1);
 
   bool had_sky (false);
-  if ( (flags & DRAWWMO) || mHasAGlobalWMO )
+  if (flags & DRAWWMO)
   {
     foreach (const wmo_instance_type& itr, mWMOInstances)
     {
@@ -1259,9 +1207,6 @@ void World::draw ( size_t flags
     // unbind hardware buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-
-
-
     glEnable(GL_CULL_FACE);
 
     glDisable(GL_BLEND);
@@ -1274,10 +1219,6 @@ void World::draw ( size_t flags
       glLightf(light, GL_LINEAR_ATTENUATION, l_linear);
       glLightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
     }
-
-
-
-
 
     // M2s / models
     if(flags & DOODADS)
@@ -1300,7 +1241,7 @@ void World::draw ( size_t flags
 
 
     // WMOs / map objects
-    if( (flags & DRAWWMO) || mHasAGlobalWMO )
+    if (flags & DRAWWMO)
       if (enable_shaders)
       {
         ::math::vector_4d spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
