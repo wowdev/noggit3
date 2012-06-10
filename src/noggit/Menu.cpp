@@ -113,12 +113,20 @@ Menu::~Menu()
 void Menu::enter_world_at (World *world, const ::math::vector_3d& pos, bool auto_height, float av, float ah )
 {
   prepare_world (world,pos, ah, av);
-  world->enterTile (pos.x() / TILESIZE, pos.y() / TILESIZE);
+  world->load_tiles_around ( pos.x() / TILESIZE
+                           , pos.y() / TILESIZE
+                           //! \todo Something based on viewing distance.
+                           , 2
+                           );
 
   emit create_world_view_request (world);
 
   if(auto_height)
-    world->set_camera_above_terrain();
+  {
+    world->camera.y ( world->get_height (pos.x(), pos.y()).get_value_or (0.0f)
+                    + 50.0f
+                    );
+  }
 }
 
 World *Menu::load_map (unsigned int map_id)

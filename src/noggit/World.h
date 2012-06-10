@@ -61,8 +61,8 @@ class World
 {
 private:
   // --- stuff that should not be here. ----------------------------------------
-  int cx; //!< camera x-coord
-  int cz; //!< camera z-coord
+  int _cx; //!< camera x-coord
+  int _cz; //!< camera z-coord
 
   //! Information about the currently selected model / WMO / triangle.
   nameEntry* mCurrentSelection;
@@ -81,7 +81,6 @@ public:
   void ResetSelection() { mCurrentSelection = NULL; }
   void setChanged(float x, float z);
   void setChanged(int x, int z);
-  void set_camera_above_terrain();
   void advance_times ( const float& seconds
                      , const float& time_of_day_speed_factor
                      );
@@ -105,7 +104,6 @@ public:
 
   Skies *skies;
   bool mHasAGlobalWMO;
-  bool noadt;
 
   //! \todo  Get these managed? ._.
   typedef std::pair<int, ModelInstance *> model_instance_type;
@@ -118,7 +116,10 @@ public:
   OutdoorLightStats outdoorLightStats;
 
   void initDisplay();
-  void enterTile(int x, int z);
+  void load_tiles_around ( const size_t& x
+                         , const size_t& z
+                         , const size_t& distance
+                         );
   void reloadTile(int x, int z);
   void saveTile(int x, int z);
   void saveTileCata(int x, int z);
