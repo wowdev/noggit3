@@ -8,7 +8,6 @@
 #include <QMainWindow>
 #include <QVariant>
 #include <QDockWidget>
-#include <QMdiArea>
 
 #include <noggit/Menu.h>
 #include <noggit/MapView.h>
@@ -45,7 +44,6 @@ namespace noggit
       void createDockWidgets();
 
       QGLWidget* _dummy_gl_widget;
-      QMdiArea* mdiArea;
       QToolBar* currentToolBar;
 
       noggit::ui::settingsDialog* _settings;

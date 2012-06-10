@@ -12,7 +12,7 @@ namespace noggit
   namespace ui
   {
     EditorTemplate::EditorTemplate(MainWindow* parent)
-    : QWidget(parent)
+    : QWidget (NULL)
     {
       mainWindow = parent;
       layout = new QGridLayout (this);
