@@ -61,8 +61,6 @@ class World
 {
 private:
   // --- stuff that should not be here. ----------------------------------------
-  int _cx; //!< camera x-coord
-  int _cz; //!< camera z-coord
 
   //! Information about the currently selected model / WMO / triangle.
   nameEntry* mCurrentSelection;
