@@ -780,7 +780,7 @@ void World::reloadTile (int x, int z)
   }
 }
 
-void World::saveTile(int x, int z)
+void World::saveTile(int x, int z) const
 {
   if( tileLoaded( z, x ) )
   {
@@ -792,7 +792,7 @@ void World::saveTile(int x, int z)
   }
 }
 
-void World::saveTileCata(int x, int z)
+void World::saveTileCata(int x, int z) const
 {
   if( tileLoaded( z, x ) )
   {

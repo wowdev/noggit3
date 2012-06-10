@@ -118,8 +118,8 @@ public:
                          , const size_t& distance
                          );
   void reloadTile(int x, int z);
-  void saveTile(int x, int z);
-  void saveTileCata(int x, int z);
+  void saveTile(int x, int z) const;
+  void saveTileCata(int x, int z) const;
   void saveChanged();
   void tick(float dt);
   void draw ( size_t flags
