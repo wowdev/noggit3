@@ -34,18 +34,14 @@ namespace noggit
       initialize_video();
       setWindowTitle("NoggIt Studio");
 
-      const int xResolution (app().setting("resolution/x").toInt());
-      const int yResolution (app().setting("resolution/y").toInt());
-      this->resize (xResolution, yResolution);
-
       //textureSelecter *test = new textureSelecter(_dummy_gl_widget);
       //! todo windows has a problem with sharing the dummy (may sth about render contex)
 
       QMenu* fileMenu = menuBar()->addMenu (tr("&File"));
-      fileMenu->addAction (tr("Open Maps"), this, SLOT(maps()));
+      //fileMenu->addAction (tr("Open Maps"), this, SLOT(maps()));
       fileMenu->addAction (tr("Open Project Explorer"), this, SLOT(projectExplorerOpen()));
       fileMenu->addSeparator();
-      fileMenu->addAction (tr("Exit"), this, SLOT(close()));
+      fileMenu->addAction (tr("Exit"), this, SLOT(QApplication::closeAllWindows()));
 
     QMenu* helpMenu = menuBar()->addMenu (tr("&Help"));
       helpMenu->addAction (tr("Settings"), this, SLOT(settingsClicked()));
@@ -60,6 +56,8 @@ namespace noggit
         createDockWidgets();
 
       statusBar()->showMessage (tr("Ready"));
+
+      maps();
     }
 
     void MainWindow::createDockWidgets()
@@ -85,6 +83,9 @@ namespace noggit
       noggit::ui::EditorTemplate* temp = new noggit::ui::EditorTemplate (this);
       connect(temp, SIGNAL(parentChanged()), map_view, SLOT(updateParent()));
       temp->setEditor (map_view);
+      const int xResolution (app().setting("resolution/x").toInt());
+      const int yResolution (app().setting("resolution/y").toInt());
+      temp->resize (xResolution, yResolution);
 
       if(noggit::app().setting("maximizedShow").toBool() == false)
         temp->show();
