@@ -196,8 +196,6 @@ bool World::IsEditableWorld( int pMapId )
 World::World( const std::string& name )
   : cx( -1 )
   , cz( -1 )
-  , ex( -1 )
-  , ez( -1 )
   , mCurrentSelection( NULL )
   , mBigAlpha( false )
   , mWmoFilename( "" )
@@ -1384,10 +1382,6 @@ void World::draw ( size_t flags
       }
     }
   }
-
-
-  ex = camera.x() / TILESIZE;
-  ez = camera.z() / TILESIZE;
 }
 
 enum stack_types
@@ -1543,7 +1537,7 @@ void World::advance_times ( const float& seconds
 
 void World::tick (float dt)
 {
-  enterTile(ex,ez);
+  enterTile (camera.x() / TILESIZE,camera.z() / TILESIZE);
 
   while (dt > 0.1f) {
     ModelManager::updateEmitters(0.1f);
@@ -1663,9 +1657,6 @@ void World::drawTileMode ( bool draw_lines
                             , 4.0f * ratio / zoom
                             , 4.0f / zoom
                             );
-
-  ex = camera.x() / TILESIZE;
-  ez = camera.z() / TILESIZE;
 
   glClear (GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   glEnable (GL_BLEND);

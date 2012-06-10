@@ -64,9 +64,6 @@ private:
   int cx; //!< camera x-coord
   int cz; //!< camera z-coord
 
-  int ex; //!< maptile x-coord
-  int ez; //!< maptile z-coord
-
   //! Information about the currently selected model / WMO / triangle.
   nameEntry* mCurrentSelection;
 
