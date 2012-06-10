@@ -217,11 +217,6 @@ private:
   //! The lighting used.
   OutdoorLighting *ol;
 
-  //! Light attenuation related parameters.
-  float l_const;
-  float l_linear;
-  float l_quadratic;
-
   void initMinimap();
   void initLowresTerrain();
 
