@@ -194,9 +194,7 @@ bool World::IsEditableWorld( int pMapId )
 }
 
 World::World( const std::string& name )
-  : cx( -1 )
-  , cz( -1 )
-  , mCurrentSelection( NULL )
+  : mCurrentSelection( NULL )
   , mBigAlpha( false )
   , mWmoFilename( "" )
   , mWmoEntry( ENTRY_MODF() )
@@ -211,7 +209,6 @@ World::World( const std::string& name )
   , basename( name )
   , skies( NULL )
   , mHasAGlobalWMO( false )
-  , noadt( false )
   , outdoorLightStats( OutdoorLightStats() )
   , camera( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
   , lookat( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
@@ -697,8 +694,6 @@ void World::initDisplay()
 {
   initGlobalVBOs( &detailtexcoords, &alphatexcoords );
 
-  noadt = false;
-
   if( mHasAGlobalWMO )
   {
     WMOInstance *inst = new WMOInstance( this, WMOManager::add( this, mWmoFilename ), &mWmoEntry );
@@ -751,55 +746,42 @@ bool World::hasTile( int pZ, int pX ) const
   return oktile( pZ, pX ) && ( mTiles[pZ][pX].flags & 1 );
 }
 
-void World::enterTile( int x, int z )
+void World::load_tiles_around ( const size_t& x
+                              , const size_t& z
+                              , const size_t& distance
+                              )
 {
-  if( !hasTile( z, x ) )
+  for ( size_t i (std::max<size_t> (z - distance, 0))
+      ; i < std::min<size_t> (z + distance, 64)
+      ; ++i
+      )
   {
-    noadt = true;
-    return;
-  }
-
-  noadt = false;
-
-  cx = x;
-  cz = z;
-  for( int i = std::max(cz - 2, 0); i < std::min(cz + 2, 64); ++i )
-  {
-    for( int j = std::max(cx - 2, 0); j < std::min(cx + 2, 64); ++j )
+    for ( size_t j (std::max<size_t> (x - distance, 0))
+        ; j < std::min<size_t> (x + distance, 64)
+        ; ++j
+        )
     {
-      mTiles[i][j].tile = loadTile( i, j );
+      if (hasTile (i, j))
+      {
+        loadTile (i, j);
+      }
     }
   }
 }
 
-void World::set_camera_above_terrain()
+void World::reloadTile (int x, int z)
 {
-  if (!tileLoaded (cz, cx))
-  {
-    return;
-  }
-
-  camera.y (qMax (mTiles[cz][cx].tile->getMaxHeight(), 0.0f) + 50.0f);
-}
-
-void World::reloadTile(int x, int z)
-{
-  if( tileLoaded( z, x ) )
+  if (tileLoaded (z, x))
   {
     delete mTiles[z][x].tile;
     mTiles[z][x].tile = NULL;
 
-    std::stringstream filename;
-    filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
-
-    mTiles[z][x].tile = new MapTile( this, x, z, filename.str(), mBigAlpha );
-    enterTile( cx, cz );
+    loadTile (z, x);
   }
 }
 
 void World::saveTile(int x, int z)
 {
-  // save goven tile
   if( tileLoaded( z, x ) )
   {
     mTiles[z][x].tile->saveTile ( mModelInstances.begin()
@@ -1022,6 +1004,9 @@ void World::draw ( size_t flags
                  , const int& selected_polygon
                  )
 {
+  const int cx (camera.x() / TILESIZE);
+  const int cz (camera.z() / TILESIZE);
+
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   gluLookAt(camera.x(),camera.y(),camera.z(), lookat.x(),lookat.y(),lookat.z(), 0, 1, 0);
@@ -1537,7 +1522,11 @@ void World::advance_times ( const float& seconds
 
 void World::tick (float dt)
 {
-  enterTile (camera.x() / TILESIZE,camera.z() / TILESIZE);
+  load_tiles_around ( camera.x() / TILESIZE
+                    , camera.z() / TILESIZE
+                    //! \todo Something based on viewing distance.
+                    , 2
+                    );
 
   while (dt > 0.1f) {
     ModelManager::updateEmitters(0.1f);
@@ -1553,14 +1542,12 @@ unsigned int World::getAreaID() const
   const int mcx = fmod(camera.x(), TILESIZE) / CHUNKSIZE;
   const int mcz = fmod(camera.z(), TILESIZE) / CHUNKSIZE;
 
-  if((mtx<cx-1) || (mtx>cx+1) || (mtz<cz-1) || (mtz>cz+1))
+  if (!tileLoaded (mtz, mtx))
+  {
     return 0;
+  }
 
-  MapTile* curTile = mTiles[mtz][mtx].tile;
-  if(!curTile)
-    return 0;
-
-  MapChunk *curChunk = curTile->getChunk(mcx, mcz);
+  const MapChunk *curChunk (mTiles[mtz][mtx].tile->getChunk(mcx, mcz));
   if(!curChunk)
     return 0;
 
