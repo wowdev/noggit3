@@ -38,18 +38,13 @@ public:
   MapTile( World*, int x0, int z0, const std::string& pFilename, bool pBigAlpha );
   ~MapTile();
 
-  //! \brief Get the maximum height of terrain on this map tile.
-  float getMaxHeight();
-
   //! \brief Get chunk for sub offset x,z.
   MapChunk* getChunk( unsigned int x, unsigned int z );
 
-  int modelCount;
   int mPositionX;
   int mPositionZ;
-  float xbase, zbase;
-
-  bool changed;
+  float xbase;
+  float zbase;
 
   void draw ( bool draw_terrain_height_contour
             , bool mark_impassable_chunks
