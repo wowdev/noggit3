@@ -807,40 +807,6 @@ MapTile* World::loadTile(int z, int x)
   return mTiles[z][x].tile;
 }
 
-
-
-void lightingDefaults()
-{
-  glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1);
-  glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0);
-  glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0);
-
-  glEnable(GL_LIGHT0);
-  // wtf
-  glDisable(GL_LIGHT1);
-  glDisable(GL_LIGHT2);
-  glDisable(GL_LIGHT3);
-  glDisable(GL_LIGHT4);
-  glDisable(GL_LIGHT5);
-  glDisable(GL_LIGHT6);
-  glDisable(GL_LIGHT7);
-}
-
-/*
-void myFakeLighting()
-{
-  GLfloat la = 0.5f;
-  GLfloat ld = 1.0f;
-
-  GLfloat LightAmbient[] = {la, la, la, 1.0f};
-  GLfloat LightDiffuse[] = {ld, ld, ld, 1.0f};
-  GLfloat LightPosition[] = {-10.0f, 20.0f, -10.0f, 0.0f};
-  glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
-  glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);
-}
-*/
-
 void World::outdoorLighting()
 {
   ::math::vector_4d black(0,0,0,0);
@@ -867,35 +833,6 @@ void World::outdoorLighting()
   glLightfv(GL_LIGHT1, GL_DIFFUSE, col);
   glLightfv(GL_LIGHT1, GL_POSITION, pos);*/
 }
-
-/*void World::outdoorLighting2()
-{
-  ::math::vector_4d black(0,0,0,0);
-  ::math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-
-  float di = outdoorLightStats.dayIntensity, ni = outdoorLightStats.nightIntensity;
-  di = 1;
-  ni = 0;
-
-  //::math::vector_3d dd = outdoorLightStats.dayDir;
-  // HACK: let's just keep the light source in place for now
-  ::math::vector_4d pos(-1, -1, -1, 0);
-  ::math::vector_4d col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1);
-  glLightfv(GL_LIGHT0, GL_AMBIENT, black);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
-  glLightfv(GL_LIGHT0, GL_POSITION, pos);
-  */
-  /*
-  ::math::vector_3d dd = outdoorLightStats.nightDir;
-  ::math::vector_4d pos(-dd.x(), -dd.z(), dd.y(), 0);
-  ::math::vector_4d col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * ni, 1);
-  glLightfv(GL_LIGHT1, GL_AMBIENT, black);
-  glLightfv(GL_LIGHT1, GL_DIFFUSE, col);
-  glLightfv(GL_LIGHT1, GL_POSITION, pos);
-  */ /*
-}*/
-
 
 void World::outdoorLights(bool on)
 {
