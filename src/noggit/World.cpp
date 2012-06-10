@@ -200,9 +200,6 @@ World::World( const std::string& name )
   , alphatexcoords( 0 )
   , mMapId( 0xFFFFFFFF )
   , ol( NULL )
-  , l_const( 0.0f )
-  , l_linear( 0.7f )
-  , l_quadratic( 0.03f )
   , time( 1450 )
   , basename( name )
   , skies( NULL )
@@ -1215,6 +1212,9 @@ void World::draw ( size_t flags
     // TEMP: for fucking around with lighting
     for(opengl::light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light )
     {
+      const float l_const( 0.0f );
+      const float l_linear( 0.7f );
+      const float l_quadratic( 0.03f );
       glLightf(light, GL_CONSTANT_ATTENUATION, l_const);
       glLightf(light, GL_LINEAR_ATTENUATION, l_linear);
       glLightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
