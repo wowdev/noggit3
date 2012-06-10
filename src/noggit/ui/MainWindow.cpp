@@ -38,10 +38,6 @@ namespace noggit
       const int yResolution (app().setting("resolution/y").toInt());
       this->resize (xResolution, yResolution);
 
-      mdiArea = new QMdiArea;
-      mdiArea->setHorizontalScrollBarPolicy (Qt::ScrollBarAsNeeded);
-      mdiArea->setVerticalScrollBarPolicy (Qt::ScrollBarAsNeeded);
-
       //textureSelecter *test = new textureSelecter(_dummy_gl_widget);
       //! todo windows has a problem with sharing the dummy (may sth about render contex)
 
@@ -59,8 +55,6 @@ namespace noggit
 
       //QMenu* debugMenu = menuBar()->addMenu (tr("&Debug"));
       //debugMenu->addAction (tr("textureSelector"), test, SLOT(show()));
-
-      setCentralWidget (mdiArea);
 
       if(noggit::app().setting("projectExplorerShow").toBool() == true)
         createDockWidgets();
@@ -88,10 +82,9 @@ namespace noggit
                                       )
                           );
 
-      noggit::ui::EditorTemplate* temp = new noggit::ui::EditorTemplate(this);
+      noggit::ui::EditorTemplate* temp = new noggit::ui::EditorTemplate (this);
       connect(temp, SIGNAL(parentChanged()), map_view, SLOT(updateParent()));
       temp->setEditor (map_view);
-      mdiArea->addSubWindow (temp);
 
       if(noggit::app().setting("maximizedShow").toBool() == false)
         temp->show();
@@ -103,8 +96,6 @@ namespace noggit
     {
       Menu* map_selection_menu (new Menu (NULL));
       connect (map_selection_menu, SIGNAL (create_world_view_request (World*)), this, SLOT (create_world_view (World*)));
-
-      mdiArea->addSubWindow(map_selection_menu);
 
       if(noggit::app().setting("maximizedShow").toBool() == false)
         map_selection_menu->show();
