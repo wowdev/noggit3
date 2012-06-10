@@ -226,6 +226,7 @@ World::World( const std::string& name )
     for( size_t i = 0; i < 64; ++i )
     {
       lowrestiles[j][i] = NULL;
+      _tile_got_modified[j][i] = false;
     }
   }
 
