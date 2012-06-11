@@ -9,7 +9,11 @@
 #include <set>
 #include <stdint.h>
 
+#include <boost/optional.hpp>
+
 #include <math/vector_3d.h>
+
+#include <noggit/Selection.h>
 
 class Frustum;
 class WMO;
@@ -54,6 +58,7 @@ public:
             , const float& fog_distance
             , const Frustum& frustum
             , const ::math::vector_3d& camera
+            , const boost::optional<selection_type>& selected_item
             ) const;
   void drawSelect ( bool draw_doodads
                   , const float culldistance

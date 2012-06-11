@@ -194,8 +194,7 @@ bool World::IsEditableWorld( int pMapId )
 }
 
 World::World( const std::string& name )
-  : mCurrentSelection( NULL )
-  , mBigAlpha( false )
+  : mBigAlpha( false )
   , detailtexcoords( 0 )
   , alphatexcoords( 0 )
   , mMapId( 0xFFFFFFFF )
@@ -206,7 +205,7 @@ World::World( const std::string& name )
   , outdoorLightStats( OutdoorLightStats() )
   , camera( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
   , lookat( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
-  , _selection_names (this)
+  , _selection_names()
 {
   for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
   {
@@ -884,7 +883,7 @@ void World::draw ( size_t flags
                  , float outer_cursor_radius
                  , const QPointF& mouse_position
                  , const float& fog_distance
-                 , const int& selected_polygon
+                 , const boost::optional<selection_type>& selected_item
                  )
 {
   const int cx (camera.x() / TILESIZE);
@@ -1034,7 +1033,7 @@ void World::draw ( size_t flags
                                     , mapdrawdistance
                                     , frustum
                                     , camera
-                                    , selected_polygon
+                                    , selected_item
                                     );
           }
         }
@@ -1044,15 +1043,9 @@ void World::draw ( size_t flags
     glPopMatrix();
 
     // Selection circle
-    if( IsSelection( eEntry_MapChunk )  )
+    if (selected_item && noggit::selection::is_chunk (*selected_item))
     {
       glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-
-      //nameEntry * Selection = GetCurrentSelection();
-
-      //if( !Selection->data.mapchunk->strip )
-      // Selection->data.mapchunk->initStrip();
-
 
       GLint viewport[4];
       GLdouble modelview[16];
@@ -1168,7 +1161,7 @@ void World::draw ( size_t flags
       {
         if (it->second->is_visible (mapdrawdistance, frustum, camera))
         {
-          it->second->draw (flags & FOG);
+          it->second->draw (flags & FOG, selected_item);
         }
       }
 
@@ -1196,6 +1189,7 @@ void World::draw ( size_t flags
                            , fog_distance
                            , frustum
                            , camera
+                           , selected_item
                            );
 
         spec_color = ::math::vector_4d( 0.0f, 0.0f, 0.0f, 1.0f );
@@ -1211,6 +1205,7 @@ void World::draw ( size_t flags
                            , fog_distance
                            , frustum
                            , camera
+                           , selected_item
                            );
 
     outdoorLights( true );
@@ -1276,7 +1271,7 @@ struct GLNameEntry
   } stack;
 };
 
-int World::drawSelection (size_t flags)
+boost::optional<selection_type> World::drawSelection (size_t flags)
 {
   static GLuint selection_buffer[8192];
 
@@ -1364,8 +1359,6 @@ int World::drawSelection (size_t flags)
     // We always push { MapObjName | DoodadName | MapTileName }, { 0, 0, MapTile }, { UID, UID, triangle }
     assert( entry->stackSize == 3 );
 
-    LogDebug << "Hit: " << entry->stack.type << ", " << entry->stack.dummy << ", " << entry->stack.uniqueId << std::endl;
-
     if( entry->nearZ < minDist )
     {
       minDist = entry->nearZ;
@@ -1377,19 +1370,27 @@ int World::drawSelection (size_t flags)
 
   if( minEntry )
   {
-    LogDebug << "minEntry: " << minEntry->stack.type << ", " << minEntry->stack.dummy << ", " << minEntry->stack.uniqueId << std::endl << std::endl;
-
-    if( minEntry->stack.type == MapObjName || minEntry->stack.type == DoodadName )
+    if (minEntry->stack.type == MapObjName)
     {
-      mCurrentSelection = selection_names().findEntry( minEntry->stack.uniqueId );
-      assert (mCurrentSelection);
+      return selection_type
+        (selection_names().findEntry (minEntry->stack.uniqueId)->data.wmo);
     }
-    else if( minEntry->stack.type == MapTileName )
+    else if (minEntry->stack.type == DoodadName)
     {
-      mCurrentSelection = selection_names().findEntry( minEntry->stack.chunk );
-      return minEntry->stack.triangle;
+      return selection_type
+        (selection_names().findEntry (minEntry->stack.uniqueId)->data.model);
+    }
+    else if (minEntry->stack.type == MapTileName)
+    {
+      return selection_type
+        ( selected_chunk_type ( selection_names().findEntry (minEntry->stack.chunk)->data.mapchunk
+                              , minEntry->stack.triangle
+                              )
+        );
     }
   }
+
+  return boost::none;
 }
 
 void World::advance_times ( const float& seconds
@@ -1496,6 +1497,16 @@ void World::setAreaID(int id, int x,int z)
       setAreaID(id, x, z, j, i);
     }
   }
+}
+
+void World::setAreaID (int id, const ::math::vector_3d& position)
+{
+  const int mtx (position.x() / TILESIZE);
+  const int mtz (position.z() / TILESIZE);
+  const int mcx (fmod (position.x(), TILESIZE) / CHUNKSIZE);
+  const int mcz (fmod (position.z(), TILESIZE) / CHUNKSIZE);
+
+  setAreaID (id, mtx, mtz, mcx, mcz);
 }
 
 void World::setAreaID(int id, int x, int z , int _cx, int _cz)
@@ -1944,7 +1955,6 @@ void World::deleteModelInstance( int pUniqueID )
   setChanged( it->second->pos.x(), it->second->pos.z() );
   delete it->second;
   mModelInstances.erase( it );
-  ResetSelection();
 }
 
 void World::deleteWMOInstance( int pUniqueID )
@@ -1952,7 +1962,6 @@ void World::deleteWMOInstance( int pUniqueID )
   std::map<int, WMOInstance *>::iterator it = mWMOInstances.find( pUniqueID );
   setChanged( it->second->pos.x(), it->second->pos.z() );
   mWMOInstances.erase( it );
-  ResetSelection();
 }
 
 void World::addModel ( const nameEntry& entry
@@ -2097,7 +2106,7 @@ const unsigned int& World::getMapID() const
   return mMapId;
 }
 
-void World::moveHeight(int x, int z)
+void World::moveHeight(int x, int z, const float& heightDelta)
 {
   for (int j=0; j<16; ++j)
   {
@@ -2110,29 +2119,15 @@ void World::moveHeight(int x, int z)
       MapChunk *curChunk = curTile->getChunk(j, i);
       if(curChunk == 0) continue;
 
-      curChunk->vmin.y (9999999.0f);
-      curChunk->vmax.y (-9999999.0f);
       curChunk->Changed = true;
-
-      float heightDelta = 0.0f;
-      nameEntry *selection = GetCurrentSelection();
-
-      if(selection)
-        if(selection->type == eEntry_MapChunk)
-        {
-          // chunk selected
-          heightDelta = camera.y() - selection->data.mapchunk->py;
-        }
-
-      if( heightDelta * heightDelta <= 0.1f ) continue;
 
       for(int k=0; k < mapbufsize; ++k)
       {
         curChunk->mVertices[k].y (curChunk->mVertices[k].y() + heightDelta);
-
-        curChunk->vmin.y (std::min (curChunk->vmin.y(), curChunk-> mVertices[k].y()));
-        curChunk->vmax.y (std::max (curChunk->vmax.y(), curChunk->mVertices[k].y()));
       }
+
+      curChunk->vmin.y (curChunk->vmin.y() + heightDelta);
+      curChunk->vmax.y (curChunk->vmax.y() + heightDelta);
 
       glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
       glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);

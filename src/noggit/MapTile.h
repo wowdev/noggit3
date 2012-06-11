@@ -54,7 +54,7 @@ public:
             , const float& cull_distance
             , const Frustum& frustum
             , const ::math::vector_3d& camera
-            , const int& selected_polygon
+            , const boost::optional<selection_type>& selected_item
             );
   void drawSelect ( const float& cull_distance
                   , const Frustum& frustum

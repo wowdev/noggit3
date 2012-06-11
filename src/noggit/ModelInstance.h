@@ -5,8 +5,12 @@
 #ifndef MODELINSTANCE_H
 #define MODELINSTANCE_H
 
+#include <boost/optional.hpp>
+
 #include <math/vector_3d.h>
 #include <math/quaternion.h>
+
+#include <noggit/Selection.h>
 
 class Frustum;
 class Model;
@@ -65,7 +69,9 @@ public:
                   , const float& rotation = 0.0f
                   ) const;
 
-  void draw (bool draw_fog) const;
+  void draw ( bool draw_fog
+            , const boost::optional<selection_type>& selected_item
+            ) const;
   void draw_for_selection();
 
   void draw2() const;
