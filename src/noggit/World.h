@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 #include <boost/optional.hpp>
+#include <boost/variant.hpp>
 
 #include <QImage>
 
@@ -62,9 +63,6 @@ class World
 private:
   // --- stuff that should not be here. ----------------------------------------
 
-  //! Information about the currently selected model / WMO / triangle.
-  nameEntry* mCurrentSelection;
-
   float time; //!< the time of the day
 
   void unsetChanged(int x, int z);
@@ -72,10 +70,6 @@ private:
   bool _tile_got_modified[64][64];
 
 public:
-  nameEntry * GetCurrentSelection() { return mCurrentSelection; }
-  bool IsSelection( int pSelectionType ) { return HasSelection() && mCurrentSelection->type == pSelectionType; }
-  bool HasSelection() { return mCurrentSelection; }
-  void ResetSelection() { mCurrentSelection = NULL; }
   void setChanged(float x, float z);
   void setChanged(int x, int z);
   void advance_times ( const float& seconds
@@ -126,15 +120,11 @@ public:
             , float outer_cursor_radius
             , const QPointF& mouse_position
             , const float& fog_distance
-            , const int& selected_polygon
+            , const boost::optional<selection_type>& selected_item
             );
 
-  int drawSelection (size_t flags);
-  void drawSelectionChunk(int cursorX,int cursorY);
-  void drawTileMode ( bool draw_lines
-                    , float ratio
-                    , float zoom
-                    );
+  boost::optional<selection_type> drawSelection (size_t flags);
+  void drawTileMode (bool draw_lines, float ratio, float zoom);
 
   void outdoorLights(bool on);
   void setupFog (bool draw_fog, const float& fog_distance);
@@ -143,6 +133,7 @@ public:
   unsigned int getAreaID() const;
   void setAreaID(int id, int x, int z);
   void setAreaID(int id, int x, int z , int cx, int cz);
+  void setAreaID (int id, const ::math::vector_3d& position);
   void setFlag(bool to, float x, float z);
   void setBaseTexture(int x, int z, noggit::blp_texture* texture );
 
@@ -181,7 +172,7 @@ public:
 
   static bool IsEditableWorld( int pMapId );
   void clearHeight(int x, int z);
-  void moveHeight(int x, int z);
+  void moveHeight(int x, int z, const float& heightDelta);
 
   void saveWDT();
   void clearAllModelsOnADT(int x, int z);

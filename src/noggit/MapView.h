@@ -8,9 +8,13 @@
 #ifndef MAPVIEW_H
 #define MAPVIEW_H
 
+#include <boost/optional.hpp>
+
 // GL needs to be included before GLWidget.
 #include <opengl/types.h>
+
 #include <noggit/MapHeaders.h>
+#include <noggit/Selection.h>
 
 #include <QPoint>
 #include <QGLWidget>
@@ -29,6 +33,11 @@ class QLabel;
 
 class World;
 class nameEntry;
+
+namespace math
+{
+  class vector_3d;
+}
 
 namespace noggit
 {
@@ -98,7 +107,7 @@ namespace noggit
             );
     virtual ~MapView();
 
-    virtual void tick( float t, float dt );
+    virtual void tick(float dt );
     virtual void display();
 
   protected:
@@ -226,10 +235,12 @@ namespace noggit
 
     float ah,av,moving,strafing,updown,mousedir,movespd;
     bool key_w;
-    bool look;
     bool _GUIDisplayingEnabled;
 
     void doSelection( bool selectTerrainOnly );
+
+    void maybe_move_selection_depending_on_weird_global_variables();
+    void move_camera (const float& dt, const ::math::vector_3d& dir);
 
     size_t flags;
     size_t backupFlags;
@@ -267,6 +278,7 @@ namespace noggit
 
     bool _holding_left_mouse_button;
     bool _holding_right_mouse_button;
+    bool _only_holding_right_mouse_button;
 
     terrain_editing_modes _current_terrain_editing_mode;
     terrain_editing_modes _terrain_editing_mode_before_2d;
@@ -328,13 +340,12 @@ namespace noggit
     bool _currently_holding_control;
 
     QSettings* _settings;
-    nameEntry* _clipboard;
+    boost::optional<nameEntry*> _clipboard;
     int _selected_area_id;
 
     bool _invert_mouse_y_axis;
 
-    //! \todo This should be an optional<int>, not an int.
-    int _selected_polygon;
+    boost::optional<selection_type> _selection;
   };
 }
 

@@ -90,7 +90,7 @@ public:
             , bool draw_area_id_overlay
             , bool dont_draw_cursor
             , const Skies* skies
-            , const int& selected_polygon
+            , const boost::optional<selection_type>& selected_item
             );
   void drawContour();
   void drawAreaID();

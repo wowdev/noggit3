@@ -243,7 +243,9 @@ size_t ModelInstance::time_since_spawn() const
   return (clock() / CLOCKS_PER_SEC) - _spawn_timestamp;
 }
 
-void ModelInstance::draw (bool draw_fog) const
+void ModelInstance::draw ( bool draw_fog
+                         , const boost::optional<selection_type>& selected_item
+                         ) const
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
@@ -255,8 +257,10 @@ void ModelInstance::draw (bool draw_fog) const
 
   model->draw (draw_fog, time_since_spawn());
 
-  const bool is_selected ( _world->IsSelection (eEntry_Model)
-                        && _world->GetCurrentSelection()->data.model->d1 == d1
+  const bool is_selected ( selected_item
+                        && noggit::selection::is_the_same_as ( this
+                                                             , *selected_item
+                                                             )
                          );
 
   if (is_selected)

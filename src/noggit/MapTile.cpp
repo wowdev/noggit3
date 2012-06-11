@@ -463,7 +463,7 @@ void MapTile::draw ( bool draw_terrain_height_contour
                    , const float& cull_distance
                    , const Frustum& frustum
                    , const ::math::vector_3d& camera
-                   , const int& selected_polygon
+                   , const boost::optional<selection_type>& selected_item
                    )
 {
   glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
@@ -479,7 +479,7 @@ void MapTile::draw ( bool draw_terrain_height_contour
                             , draw_area_id_overlay
                             , dont_draw_cursor
                             , skies
-                            , selected_polygon
+                            , selected_item
                             );
       }
     }

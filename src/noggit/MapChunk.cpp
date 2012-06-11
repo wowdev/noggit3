@@ -24,6 +24,7 @@
 #include <noggit/Liquid.h>
 #include <noggit/Log.h>
 #include <noggit/MapHeaders.h>
+#include <noggit/Selection.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
@@ -1034,7 +1035,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
                     , bool draw_area_id_overlay
                     , bool dont_draw_cursor
                     , const Skies* skies
-                    , const int& selected_polygon
+                    , const boost::optional<selection_type>& selected_item
                     )
 {
   // setup vertex buffers
@@ -1131,12 +1132,15 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   }
 
   //! \todo This actually should be an enum. And should be passed into this method.
-  if ( noggit::app().setting ("cursor/type", 1).toInt() == 3
-    && _world->IsSelection (eEntry_MapChunk)
-    && _world->GetCurrentSelection()->data.mapchunk == this
-    && !dont_draw_cursor
+  if ( !dont_draw_cursor
+    && noggit::app().setting ("cursor/type", 1).toInt() == 3
+    && selected_item
+    && noggit::selection::is_the_same_as (this, *selected_item)
      )
   {
+    const int selected_polygon
+      (noggit::selection::selected_polygon (*selected_item));
+
     glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
 
     glPushMatrix();
