@@ -72,9 +72,7 @@ ModelInstance::ModelInstance ( World* world
   , lcol (lighting_color)
   , _world(world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
-{
-  nameID = _world->selection_names().add (this);
-}
+{ }
 
 ModelInstance::~ModelInstance()
 {
