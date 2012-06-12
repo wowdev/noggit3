@@ -490,8 +490,9 @@ namespace noggit
 
   void MapView::maybe_move_selection_depending_on_weird_global_variables()
   {
-    if (!_selection)
+    if (!_selection || !keyx || !keyy || !keyz || !keyr || !keys)
     {
+      //! \note As this code is called every tick instead of only when needed, we need to prevent it from crashing with selection::is_chunk (*_selection).
       return;
     }
 
