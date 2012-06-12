@@ -166,28 +166,25 @@ WMO::WMO( World* world, const std::string& filenameArg )
       for (unsigned int i=0; i<nModels; ++i) {
         uint32_t ofs;
         f.read (&ofs, sizeof (uint32_t));
-        Model *m = ModelManager::add( ddnames + ofs );
 
         ::math::vector_3d position;
+        f.read (position, sizeof (position));
+
         ::math::vector_4d rotation;
+        f.read (rotation, sizeof (rotation));
+
         float scale;
-        uint32_t light;
-
-        f.read (position, sizeof (::math::vector_3d));
-        f.read (rotation, sizeof (::math::vector_4d));
         f.read (&scale, sizeof(float));
-        f.read (&light, sizeof (uint32_t));
 
-        const float temp (position.z());
-        position.z (-position.y());
-        position.y (temp);
+        uint32_t light;
+        f.read (&light, sizeof (uint32_t));
 
         modelis.push_back
           ( ModelInstance ( world
-                          , m
+                          , ModelManager::add (ddnames + ofs)
                           , ::math::vector_3d ( position.x()
-                                              , position.z()
                                               , -position.y()
+                                              , -position.z()
                                               )
                           , ::math::quaternion ( -rotation.z()
                                                , rotation.x()
