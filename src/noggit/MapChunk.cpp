@@ -826,28 +826,12 @@ MapChunk::~MapChunk()
   }
 }
 
-bool MapChunk::GetVertex(float x,float z, ::math::vector_3d *V)
-{
-  float xdiff,zdiff;
-
-  xdiff = x - xbase;
-  zdiff = z - zbase;
-
-  const int row = static_cast<int>( zdiff / (UNITSIZE * 0.5f ) + 0.5f );
-  const int column = static_cast<int>( ( xdiff - UNITSIZE * 0.5f * (row % 2) ) / UNITSIZE + 0.5f );
-  if( (row < 0) || (column < 0) || (row > 16) || (column > ((row % 2) ? 8 : 9)))
-    return false;
-
-  *V=mVertices[17*(row/2) + ((row % 2) ? 9 : 0) + column];
-  return true;
-}
-
 boost::optional<float> MapChunk::get_height ( const float& x
                                             , const float& z
                                             ) const
 {
-  const float xdiff = x - xbase;
-  const float zdiff = z - zbase;
+  const float xdiff (x - xbase);
+  const float zdiff (z - zbase);
 
   const int row = static_cast<int>( zdiff / (UNITSIZE * 0.5f ) + 0.5f );
   const int column = static_cast<int>( ( xdiff - UNITSIZE * 0.5f * (row % 2) ) / UNITSIZE + 0.5f );
@@ -1535,7 +1519,6 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
       float TotalHeight;
       float TotalWeight;
       float tx,tz, h;
-      ::math::vector_3d TempVec;
       int Rad=(radius/UNITSIZE);
 
       TotalHeight=0;
@@ -1551,9 +1534,14 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
           dist2= sqrt(xdiff*xdiff + zdiff*zdiff);
           if(dist2 > radius)
             continue;
-          _world->GetVertex(tx,tz,&TempVec);
-          TotalHeight += (1.0f - dist2/radius) * TempVec.y();
-          TotalWeight += (1.0f - dist2/radius);
+
+          const boost::optional<float> height
+            (_world->get_height (tx, tz));
+          if (height)
+          {
+            TotalHeight += (1.0f - dist2/radius) * *height;
+            TotalWeight += (1.0f - dist2/radius);
+          }
         }
       }
 
