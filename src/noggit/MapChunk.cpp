@@ -686,7 +686,7 @@ void MapChunk::RemoveAnim (const mcly_flags_type& flags) const
 }
 
 
-void MapChunk::drawTextures()
+void MapChunk::drawTextures() const
 {
   glColor4f(1.0f,1.0f,1.0f,1.0f);
 
@@ -937,7 +937,7 @@ void MapChunk::drawPass (int anim) const
   RemoveAnim (flags);
 }
 
-void MapChunk::drawLines (bool draw_hole_lines)
+void MapChunk::drawLines (bool draw_hole_lines) const
 {
   glBindBuffer(GL_ARRAY_BUFFER, vertices);
   glVertexPointer(3, GL_FLOAT, 0, 0);
