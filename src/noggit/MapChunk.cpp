@@ -367,8 +367,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
       vmin.z (zbase);
       vmax.x (xbase + 8 * UNITSIZE);
       vmax.z (zbase + 8 * UNITSIZE);
-      r = (vmax - vmin).length() * 0.5f;
-
     }
     else if ( fourcc == 'MCLY' ) {
       // texture info
@@ -999,8 +997,10 @@ bool MapChunk::is_visible ( const float& cull_distance
                           , const ::math::vector_3d& camera
                           ) const
 {
+  static const float chunk_radius = sqrtf (4.0f * CHUNKSIZE) * 0.5f;
+
   return frustum.intersects (vmin, vmax)
-      && (((camera - vcenter).length() - r) < cull_distance);
+      && (((camera - vcenter).length() - chunk_radius) < cull_distance);
 }
 
 void MapChunk::draw ( bool draw_terrain_height_contour

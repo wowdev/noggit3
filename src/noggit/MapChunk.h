@@ -108,7 +108,6 @@ public:
   size_t nTextures;
 
   float xbase, ybase, zbase;
-  float r;
 
   int nameID;
 
