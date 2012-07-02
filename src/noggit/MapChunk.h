@@ -36,8 +36,70 @@ static const int mapbufsize = 9*9 + 8*8;
 
 class MapChunk
 {
-
 public:
+  MapChunk(World* world, MapTile* mt, noggit::mpq::file* f,bool bigAlpha);
+  ~MapChunk();
+
+  void initStrip();
+
+  bool is_visible ( const float& cull_distance
+                  , const Frustum& frustum
+                  , const ::math::vector_3d& camera
+                  ) const;
+
+  void draw ( bool draw_terrain_height_contour
+            , bool mark_impassable_chunks
+            , bool draw_area_id_overlay
+            , bool dont_draw_cursor
+            , const Skies* skies
+            , const boost::optional<selection_type>& selected_item
+            );
+  void drawContour() const;
+  void drawSelect();
+  void drawNoDetail() const;
+  void drawPass(int anim) const;
+  // todo split into draw_lines and draw_hole_lines
+  void drawLines (bool draw_hole_lines) const;
+
+  void drawTextures() const;
+
+  void update_normal_vectors();
+
+  void getSelectionCoord (const int& selected_polygon, float* x, float* z) const;
+  float getSelectionHeight (const int& selected_polygon) const;
+  ::math::vector_3d GetSelectionPosition(const int& selected_polygon) const;
+
+  bool changeTerrain(float x, float z, float change, float radius, int BrushType);
+  bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
+  bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
+
+  bool paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture);
+  int addTexture(noggit::blp_texture* texture);
+  void switchTexture( noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture );
+  void eraseTextures();
+
+  bool isHole(int i,int j);
+  void addHole(int i,int j);
+  void removeHole(int i,int j);
+
+  void setFlag(bool on_or_off, int flag);
+
+  int getAreaID();
+  void setAreaID(int ID);
+
+  bool GetVertex(float x,float z, ::math::vector_3d* V);
+  boost::optional<float> get_height (const float& x, const float& z) const;
+
+  void SetAnim (const mcly_flags_type& flags) const;
+  void RemoveAnim (const mcly_flags_type& flags) const;
+
+  void GenerateContourMap();
+  void CreateStrips();
+
+  void update_low_quality_texture_map();
+  const unsigned char* low_quality_texture_map() const;
+
+
   ::math::vector_3d vmin, vmax, vcenter;
   int px, py;
 
@@ -75,78 +137,11 @@ public:
   StripType *strip;
   int striplen;
 
-  MapChunk(World* world, MapTile* mt, noggit::mpq::file* f,bool bigAlpha);
-  ~MapChunk();
-
-  void initStrip();
-
-  bool is_visible ( const float& cull_distance
-                  , const Frustum& frustum
-                  , const ::math::vector_3d& camera
-                  ) const;
-
-  void draw ( bool draw_terrain_height_contour
-            , bool mark_impassable_chunks
-            , bool draw_area_id_overlay
-            , bool dont_draw_cursor
-            , const Skies* skies
-            , const boost::optional<selection_type>& selected_item
-            );
-  void drawContour() const;
-  void drawSelect();
-  void drawNoDetail() const;
-  void drawPass(int anim) const;
-  // todo split into draw_lines and draw_hole_lines
-  void drawLines (bool draw_hole_lines) const;
-
-  void drawTextures() const;
-
-  void update_normal_vectors();
-
   ::math::vector_3d mNormals[mapbufsize];
   ::math::vector_3d mVertices[mapbufsize];
   //! \todo Is this needed? Can't we just use the real vertices?
   ::math::vector_3d mMinimap[mapbufsize];
   ::math::vector_4d mFakeShadows[mapbufsize];
-
-  void getSelectionCoord (const int& selected_polygon, float* x, float* z) const;
-  float getSelectionHeight (const int& selected_polygon) const;
-  ::math::vector_3d GetSelectionPosition(const int& selected_polygon) const;
-
-  bool changeTerrain(float x, float z, float change, float radius, int BrushType);
-  bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
-  bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
-
-  bool paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture);
-  int addTexture(noggit::blp_texture* texture);
-  void switchTexture( noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture );
-  void eraseTextures();
-
-  bool isHole(int i,int j);
-  void addHole(int i,int j);
-  void removeHole(int i,int j);
-
-  void setFlag(bool on_or_off, int flag);
-
-  int getAreaID();
-  void setAreaID(int ID);
-
-  bool GetVertex(float x,float z, ::math::vector_3d* V);
-  boost::optional<float> get_height (const float& x, const float& z) const;
-
-//  char getAlpha(float x,float y);
-
-
-  //float getTerrainHeight(float x, float z);
-
-  void SetAnim (const mcly_flags_type& flags) const;
-  void RemoveAnim (const mcly_flags_type& flags) const;
-
-  void GenerateContourMap();
-  void CreateStrips();
-
-  void update_low_quality_texture_map();
-  const unsigned char* low_quality_texture_map() const;
 
 private:
   World* _world;
