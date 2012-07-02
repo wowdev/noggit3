@@ -1312,13 +1312,13 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
             lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename().toStdString() )->second;
 
-            lLayer->flags = mChunks[y][x]->texFlags[j];
+            lLayer->flags = mChunks[y][x]->texture_flags (j);
 
             // if not first, have alpha layer, if first, have not. never have compression.
             lLayer->flags = ( j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & ( ~FLAG_USE_ALPHA ) ) & ( ~FLAG_ALPHA_COMPRESSED );
 
             lLayer->ofsAlpha = ( j == 0 ? 0 : ( mBigAlpha ? 64 * 64 * ( j - 1 ) : 32 * 64 * ( j - 1 ) ) );
-            lLayer->effectID = mChunks[y][x]->effectID[j];
+            lLayer->effectID = mChunks[y][x]->texture_effect_id (j);
           }
 
           lCurrentPosition += 8 + lMCLY_Size;
@@ -1929,13 +1929,13 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
             lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename().toStdString() )->second;
 
-            lLayer->flags = mChunks[y][x]->texFlags[j];
+            lLayer->flags = mChunks[y][x]->texture_flags (j);
 
             // if not first, have alpha layer, if first, have not. never have compression.
             lLayer->flags = ( j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & ( ~FLAG_USE_ALPHA ) ) & ( ~FLAG_ALPHA_COMPRESSED );
 
             lLayer->ofsAlpha = ( j == 0 ? 0 : ( mBigAlpha ? 64 * 64 * ( j - 1 ) : 32 * 64 * ( j - 1 ) ) );
-            lLayer->effectID = mChunks[y][x]->effectID[j];
+            lLayer->effectID = mChunks[y][x]->texture_effect_id (j);
           }
 
           lCurrentPosition += 8 + lMCLY_Size;

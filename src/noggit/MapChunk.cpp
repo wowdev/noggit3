@@ -371,12 +371,13 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
       //gLog("=\n");
       for (size_t i=0; i<nTextures; ++i) {
         f->read(&tex[i],4);
-        f->read(&texFlags[i], 4);
+        f->read(&_texFlags[i], 4);
         f->read(&MCALoffset[i], 4);
-        f->read(&effectID[i], 4);
+        f->read(&_effectID[i], 4);
 
-        if (texFlags[i] & FLAG_ANIMATE) {
-          animated[i] = texFlags[i];
+        if (texture_flags (i) & FLAG_ANIMATE)
+        {
+          animated[i] = texture_flags (i);
         } else {
           animated[i] = 0;
         }
@@ -413,12 +414,12 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
       unsigned int MCALbase = f->getPos();
       for( unsigned int layer = 0; layer < header.nLayers; ++layer )
       {
-        if( texFlags[layer] & 0x100 )
+        if( texture_flags (layer) & 0x100 )
         {
 
           f->seek( MCALbase + MCALoffset[layer] );
 
-          if( texFlags[layer] & 0x200 )
+          if( texture_flags (layer) & 0x200 )
           {  // compressed
 
             // 21-10-2008 by Flow
@@ -1606,8 +1607,8 @@ int MapChunk::addTexture( noggit::blp_texture* texture )
     nTextures++;
     _textures[texLevel] = texture;
     animated[texLevel] = 0;
-    texFlags[texLevel] = 0;
-    effectID[texLevel] = 0;
+    texture_flags (texLevel, 0);
+    texture_effect_id (texLevel, 0);
     if( texLevel )
     {
       if( alphamaps[texLevel-1] < 1 )
@@ -1804,8 +1805,8 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
           {
             _textures[i] = _textures[i+1];
             animated[i] = animated[i+1];
-            texFlags[i] = texFlags[i+1];
-            effectID[i] = effectID[i+1];
+            texture_flags (i, texture_flags (i + 1));
+            texture_effect_id (i, texture_effect_id (i + 1));
             if( i )
               memcpy( amap[i-1], amap[i], 64*64 );
           }
