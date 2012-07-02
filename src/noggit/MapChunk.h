@@ -89,11 +89,11 @@ public:
             , const Skies* skies
             , const boost::optional<selection_type>& selected_item
             );
-  void drawContour();
+  void drawContour() const;
   void drawBlock();
   void drawSelect();
   void drawNoDetail();
-  void drawPass(int anim);
+  void drawPass(int anim) const;
   // todo split into draw_lines and draw_hole_lines
   void drawLines (bool draw_hole_lines);
 
