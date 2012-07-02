@@ -998,7 +998,7 @@ bool MapChunk::is_visible ( const float& cull_distance
                           , const ::math::vector_3d& camera
                           ) const
 {
-  static const float chunk_radius = sqrtf (4.0f * CHUNKSIZE) * 0.5f;
+  static const float chunk_radius = sqrtf (2.0f * CHUNKSIZE);
 
   return frustum.intersects (vmin, vmax)
       && (((camera - vcenter).length() - chunk_radius) < cull_distance);
