@@ -90,7 +90,6 @@ public:
             , const boost::optional<selection_type>& selected_item
             );
   void drawContour() const;
-  void drawBlock();
   void drawSelect();
   void drawNoDetail();
   void drawPass(int anim) const;
