@@ -111,8 +111,6 @@ public:
 
   int nameID;
 
-  unsigned int Flags;
-
   unsigned int areaID;
 
   bool haswater;

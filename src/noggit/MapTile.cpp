@@ -1196,7 +1196,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
                         );
         MapChunkHeader * lMCNK_header = get_pointer<MapChunkHeader>( lADTFile, lCurrentPosition + 8 );
 
-        lMCNK_header->flags = mChunks[y][x]->Flags;
+        lMCNK_header->flags = mChunks[y][x]->header.flags;
         lMCNK_header->holes = mChunks[y][x]->holes;
         lMCNK_header->areaid = mChunks[y][x]->areaID;
 
@@ -1402,7 +1402,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 //        {
           //! \todo  Somehow determine if we need to write this or not?
           //! \todo  This sometime gets all shadows black.
-          if( mChunks[y][x]->Flags & 1 )
+          if( mChunks[y][x]->header.flags & 1 )
           {
             int lMCSH_Size = 0x200;
             lADTFile.resize (lADTFile.size() + 8 + lMCSH_Size );
@@ -1702,7 +1702,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
         // This is only the size of the header. More chunks will increase the size.
         MapChunkHeader * lMCNK_header = get_pointer<MapChunkHeader>( lADTFile, lCurrentPosition + 8 );
 
-        lMCNK_header->flags = mChunks[y][x]->Flags;
+        lMCNK_header->flags = mChunks[y][x]->header.flags;
         lMCNK_header->holes = mChunks[y][x]->holes;
         lMCNK_header->areaid = mChunks[y][x]->areaID;
 
@@ -1946,7 +1946,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 //        {
           //! \todo  Somehow determine if we need to write this or not?
           //! \todo  This sometime gets all shadows black.
-          if( mChunks[y][x]->Flags & 1 )
+          if( mChunks[y][x]->header.flags & 1 )
           {
             int lMCSH_Size = 0x200;
             lADTTexFile.resize (lADTTexFile.size() + 8 + lMCSH_Size );

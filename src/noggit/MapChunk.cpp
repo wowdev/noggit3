@@ -281,7 +281,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
 
   f->read(&header, 0x80);
 
-  Flags = header.flags;
   areaID = header.areaid;
 
   if (!areaIDColors.contains (areaID))
@@ -590,7 +589,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
     }
   }
 
-  if( ( Flags & 1 ) == 0 )
+  if( ( header.flags & 1 ) == 0 )
   {
     /** We have no shadow map (MCSH), so we got no shadows at all!  **
      ** This results in everything being black.. Yay. Lets fake it! **/
@@ -1088,7 +1087,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
     drawContour();
   }
 
-  if (mark_impassable_chunks && Flags & FLAG_IMPASS)
+  if (mark_impassable_chunks && (header.flags & FLAG_IMPASS))
   {
     glColor4f (1.0f, 1.0f, 1.0f, 0.6f);
     drawPass (0);
@@ -1899,9 +1898,9 @@ int MapChunk::getAreaID(){
 void MapChunk::setFlag( bool on_or_off, int flag)
 {
   if(on_or_off)
-    Flags = Flags | flag;
+    header.flags |= flag;
   else
-    Flags = Flags & ~(flag);
+    header.flags &= ~(flag);
 }
 
 void MapChunk::update_low_quality_texture_map()
