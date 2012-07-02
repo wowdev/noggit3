@@ -11,7 +11,10 @@
 
 #include <math/vector_4d.h>
 
-#include <noggit/MapTile.h> // MapTile
+#include <opengl/types.h>
+
+#include <noggit/MapHeaders.h>
+#include <noggit/Selection.h>
 
 namespace noggit
 {
@@ -23,6 +26,7 @@ namespace noggit
 }
 class brush;
 class Frustum;
+class MapTile;
 class World;
 class Skies;
 
