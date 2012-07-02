@@ -590,14 +590,6 @@ MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )
   }
 }
 
-bool MapTile::GetVertex( float x, float z, ::math::vector_3d *V )
-{
-  int xcol = ( x - xbase ) / CHUNKSIZE;
-  int ycol = ( z - zbase ) / CHUNKSIZE;
-
-  return xcol >= 0 && xcol <= 15 && ycol >= 0 && ycol <= 15 && mChunks[ycol][xcol]->GetVertex( x, z, V );
-}
-
 boost::optional<float> MapTile::get_height ( const float& x
                                            , const float& z
                                            ) const

@@ -87,8 +87,9 @@ public:
   int getAreaID();
   void setAreaID(int ID);
 
-  bool GetVertex(float x,float z, ::math::vector_3d* V);
-  boost::optional<float> get_height (const float& x, const float& z) const;
+  boost::optional<float> get_height ( const float& x
+                                    , const float& z
+                                    ) const;
 
   void SetAnim (const mcly_flags_type& flags) const;
   void RemoveAnim (const mcly_flags_type& flags) const;

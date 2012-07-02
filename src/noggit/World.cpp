@@ -1604,19 +1604,6 @@ void World::drawTileMode ( bool draw_lines
   glEnableClientState (GL_TEXTURE_COORD_ARRAY);
 }
 
-bool World::GetVertex(float x,float z, ::math::vector_3d *V)
-{
-  const int newX = x / TILESIZE;
-  const int newZ = z / TILESIZE;
-
-  if( !tileLoaded( newZ, newX ) )
-  {
-    return false;
-  }
-
-  return mTiles[newZ][newX].tile->GetVertex(x, z, V);
-}
-
 boost::optional<float> World::get_height ( const float& x
                                          , const float& z
                                          ) const
@@ -1624,12 +1611,12 @@ boost::optional<float> World::get_height ( const float& x
   const int newX (x / TILESIZE);
   const int newZ (z / TILESIZE);
 
-  if( !tileLoaded( newZ, newX ) )
+  if (!tileLoaded (newZ, newX))
   {
     return boost::none;
   }
 
-  return mTiles[newZ][newX].tile->get_height(x, z);
+  return mTiles[newZ][newX].tile->get_height (x, z);
 }
 
 

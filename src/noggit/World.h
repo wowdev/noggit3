@@ -137,8 +137,9 @@ public:
   void setFlag(bool to, float x, float z);
   void setBaseTexture(int x, int z, noggit::blp_texture* texture );
 
-  bool GetVertex(float x,float z, ::math::vector_3d *V);
-  boost::optional<float> get_height (const float& x, const float& z) const;
+  boost::optional<float> get_height ( const float& x
+                                    , const float& z
+                                    ) const;
 
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
