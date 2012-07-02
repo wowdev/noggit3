@@ -105,7 +105,6 @@ public:
   int px, py;
 
   MapChunkHeader header;
-  bool Changed;
   size_t nTextures;
 
   float xbase, ybase, zbase;

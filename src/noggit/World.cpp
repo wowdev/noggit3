@@ -1449,7 +1449,6 @@ void World::clearHeight(int x, int z)
 
       curChunk->vmin.y (9999999.0f);
       curChunk->vmax.y (-9999999.0f);
-      curChunk->Changed=true;
 
       for(int k=0; k < mapbufsize; ++k)
       {
@@ -1468,12 +1467,10 @@ void World::clearHeight(int x, int z)
   {
     for (int i=0; i<16; ++i)
     {
-      MapTile *curTile;
-      curTile = mTiles[z][x].tile;
+      MapTile *curTile = mTiles[z][x].tile;
       if(curTile == 0) continue;
       setChanged(z,x);
-      MapChunk *curChunk = curTile->getChunk(j, i);
-      curChunk->update_normal_vectors();
+      curTile->getChunk(j, i)->update_normal_vectors();
     }
   }
 }
@@ -1619,9 +1616,29 @@ boost::optional<float> World::get_height ( const float& x
   return mTiles[newZ][newX].tile->get_height (x, z);
 }
 
+struct chunk_identifier
+{
+  size_t _tile_x;
+  size_t _tile_y;
+  size_t _chunk_x;
+  size_t _chunk_y;
+
+  chunk_identifier ( const size_t& tile_x, const size_t& tile_y
+                   , const size_t& chunk_x, const size_t& chunk_y
+                   )
+    : _tile_x (tile_x)
+    , _tile_y (tile_y)
+    , _chunk_x (chunk_x)
+    , _chunk_y (chunk_y)
+  { }
+};
+
+typedef std::vector<chunk_identifier> changed_chunks_type;
 
 void World::changeTerrain(float x, float z, float change, float radius, int BrushType)
 {
+  changed_chunks_type changed_chunks;
+
   for( int j = 0; j < 64; ++j )
   {
     for( int i = 0; i < 64; ++i )
@@ -1633,33 +1650,30 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
           for( size_t tx = 0; tx < 16; ++tx )
           {
             if( mTiles[j][i].tile->getChunk(ty,tx)->changeTerrain(x,z,change,radius,BrushType) )
+            {
+              changed_chunks.push_back (chunk_identifier (i, j, tx, ty));
               setChanged( j, i );
+            }
           }
         }
       }
     }
   }
 
-  for( size_t j = 0; j < 64; ++j )
+  for ( changed_chunks_type::const_iterator it (changed_chunks.begin())
+      ; it != changed_chunks.end()
+      ; ++it
+      )
   {
-    for( size_t i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( size_t ty = 0; ty < 16; ++ty )
-        {
-          for( size_t tx = 0; tx < 16; ++tx )
-          {
-            mTiles[j][i].tile->getChunk(ty,tx)->update_normal_vectors();
-          }
-        }
-      }
-    }
+    mTiles[it->_tile_y][it->_tile_x].tile->
+      getChunk (it->_chunk_y, it->_chunk_x)->update_normal_vectors();
   }
 }
 
 void World::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
 {
+  changed_chunks_type changed_chunks;
+
   for( int j = 0; j < 64; ++j )
   {
     for( int i = 0; i < 64; ++i )
@@ -1671,33 +1685,30 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
           for( size_t tx = 0; tx < 16; ++tx )
           {
             if( mTiles[j][i].tile->getChunk(ty,tx)->flattenTerrain(x,z,h,remain,radius,BrushType) )
-              setChanged(j,i);
+            {
+              changed_chunks.push_back (chunk_identifier (i, j, tx, ty));
+              setChanged( j, i );
+            }
           }
         }
       }
     }
   }
 
-  for( size_t j = 0; j < 64; ++j )
+  for ( changed_chunks_type::const_iterator it (changed_chunks.begin())
+      ; it != changed_chunks.end()
+      ; ++it
+      )
   {
-    for( size_t i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( size_t ty = 0; ty < 16; ++ty )
-        {
-          for( size_t tx = 0; tx < 16; ++tx )
-          {
-            mTiles[j][i].tile->getChunk(ty,tx)->update_normal_vectors();
-          }
-        }
-      }
-    }
+    mTiles[it->_tile_y][it->_tile_x].tile->
+      getChunk (it->_chunk_y, it->_chunk_x)->update_normal_vectors();
   }
 }
 
 void World::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
+  changed_chunks_type changed_chunks;
+
   for( int j = 0; j < 64; ++j )
   {
     for( int i = 0; i < 64; ++i )
@@ -1709,28 +1720,23 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
           for( size_t tx = 0; tx < 16; ++tx )
           {
             if( mTiles[j][i].tile->getChunk(ty,tx)->blurTerrain(x, z, remain, radius, BrushType) )
-              setChanged(j,i);
+            {
+              changed_chunks.push_back (chunk_identifier (i, j, tx, ty));
+              setChanged( j, i );
+            }
           }
         }
       }
     }
   }
 
-  for( size_t j = 0; j < 64; ++j )
+  for ( changed_chunks_type::const_iterator it (changed_chunks.begin())
+      ; it != changed_chunks.end()
+      ; ++it
+      )
   {
-    for( size_t i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        for( size_t ty = 0; ty < 16; ++ty )
-        {
-          for( size_t tx = 0; tx < 16; ++tx )
-          {
-            mTiles[j][i].tile->getChunk(ty,tx)->update_normal_vectors();
-          }
-        }
-      }
-    }
+    mTiles[it->_tile_y][it->_tile_x].tile->
+      getChunk (it->_chunk_y, it->_chunk_x)->update_normal_vectors();
   }
 }
 
@@ -2105,8 +2111,6 @@ void World::moveHeight(int x, int z, const float& heightDelta)
       setChanged(z,x);
       MapChunk *curChunk = curTile->getChunk(j, i);
       if(curChunk == 0) continue;
-
-      curChunk->Changed = true;
 
       for(int k=0; k < mapbufsize; ++k)
       {
