@@ -90,7 +90,6 @@ public:
             , const boost::optional<selection_type>& selected_item
             );
   void drawContour();
-  void drawAreaID();
   void drawBlock();
   void drawSelect();
   void drawNoDetail();
