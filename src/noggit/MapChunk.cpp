@@ -636,6 +636,8 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
 
   glBindBuffer(GL_ARRAY_BUFFER, minishadows);
   glBufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
+
+  GenerateContourMap();
 }
 
 void MapChunk::SetAnim (const mcly_flags_type& flags) const
@@ -924,7 +926,7 @@ void MapChunk::CreateStrips()
     _hole_strip[iferget++] = i;
 }
 
-void MapChunk::drawPass (int anim)
+void MapChunk::drawPass (int anim) const
 {
   const mcly_flags_type& flags (mcly_flags_type::interpret (anim));
 
@@ -989,7 +991,7 @@ void MapChunk::drawLines (bool draw_hole_lines)
   glColor4f(1,1,1,1);
 }
 
-void MapChunk::drawContour()
+void MapChunk::drawContour() const
 {
   glColor4f(1,1,1,1);
   glActiveTexture(GL_TEXTURE0);
@@ -997,8 +999,6 @@ void MapChunk::drawContour()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDisable(GL_ALPHA_TEST);
-  if(_contour_texture == 0)
-    GenerateContourMap();
   glBindTexture(GL_TEXTURE_2D, _contour_texture);
 
   glEnable(GL_TEXTURE_GEN_S);
