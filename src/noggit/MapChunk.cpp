@@ -1187,7 +1187,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   glPopMatrix();*/
 }
 
-void MapChunk::drawNoDetail()
+void MapChunk::drawNoDetail() const
 {
   glActiveTexture( GL_TEXTURE1 );
   glDisable( GL_TEXTURE_2D );
