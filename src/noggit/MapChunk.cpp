@@ -281,11 +281,9 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
 
   f->read(&header, 0x80);
 
-  areaID = header.areaid;
-
-  if (!areaIDColors.contains (areaID))
+  if (!areaIDColors.contains (header.areaid))
   {
-    areaIDColors[areaID] = ::math::vector_3d ( ::math::random::floating_point (0.0f, 1.0f)
+    areaIDColors[header.areaid] = ::math::vector_3d ( ::math::random::floating_point (0.0f, 1.0f)
                                  , ::math::random::floating_point (0.0f, 1.0f)
                                  , ::math::random::floating_point (0.0f, 1.0f)
                                  );
@@ -1095,9 +1093,9 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
   if (draw_area_id_overlay)
   {
-    glColor4f ( areaIDColors[areaID].x()
-              , areaIDColors[areaID].y()
-              , areaIDColors[areaID].z()
+    glColor4f ( areaIDColors[header.areaid].x()
+              , areaIDColors[header.areaid].y()
+              , areaIDColors[header.areaid].z()
               , 0.7f
               );
     drawPass (0);
@@ -1887,11 +1885,11 @@ void MapChunk::removeHole( int i, int j )
 
 void MapChunk::setAreaID( int ID )
 {
-  areaID = ID;
+  header.areaid = ID;
 }
 
 int MapChunk::getAreaID(){
-  return areaID;
+  return header.areaid;
 }
 
 

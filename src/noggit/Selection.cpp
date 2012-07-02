@@ -236,7 +236,7 @@ namespace noggit
       public:
         int operator() (const selected_chunk_type& chunk) const
         {
-          return chunk.first->areaID;
+          return chunk.first->header.areaid;
         }
         template<typename T>
         int operator() (const T&) const
