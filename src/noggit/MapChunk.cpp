@@ -1296,14 +1296,6 @@ float MapChunk::getSelectionHeight (const int& selected_polygon) const
 
 void MapChunk::update_normal_vectors()
 {
-  //! \todo This should be checked before calling.
-  if (!Changed)
-  {
-    return;
-  }
-
-  Changed = false;
-
   static const float point_offset (UNITSIZE * 0.5f);
 
   for (size_t i (0); i < mapbufsize; ++i)
@@ -1382,14 +1374,15 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 {
   float dist,xdiff,zdiff;
 
-  Changed=false;
+  bool Changed=false;
 
   xdiff = xbase - x + CHUNKSIZE/2;
   zdiff = zbase - z + CHUNKSIZE/2;
   dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
   if(dist > (radius + MAPCHUNK_DIAMETER))
-    return Changed;
+    return false;
+
   vmin.y (9999999.0f);
   vmax.y (-9999999.0f);
   for(int i=0; i < mapbufsize; ++i)
@@ -1442,14 +1435,14 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
 {
   float dist,xdiff,zdiff,nremain;
-  Changed=false;
+  bool Changed=false;
 
   xdiff= xbase - x + CHUNKSIZE/2;
   zdiff= zbase - z + CHUNKSIZE/2;
   dist= sqrt(xdiff*xdiff + zdiff*zdiff);
 
   if(dist > (radius + MAPCHUNK_DIAMETER))
-    return Changed;
+    return false;
 
   vmin.y (9999999.0f);
   vmax.y (-9999999.0f);
@@ -1495,14 +1488,14 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
   float dist,dist2,xdiff,zdiff,nremain;
-  Changed = false;
+  bool Changed = false;
 
   xdiff = xbase - x + CHUNKSIZE/2;
   zdiff = zbase - z + CHUNKSIZE/2;
   dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
   if(dist > (radius + MAPCHUNK_DIAMETER) )
-    return Changed;
+    return false;
 
   vmin.y (9999999.0f);
   vmax.y (-9999999.0f);
