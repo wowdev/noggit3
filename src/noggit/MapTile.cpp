@@ -1198,7 +1198,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
         lMCNK_header->flags = mChunks[y][x]->header.flags;
         lMCNK_header->holes = mChunks[y][x]->holes;
-        lMCNK_header->areaid = mChunks[y][x]->areaID;
+        lMCNK_header->areaid = mChunks[y][x]->header.areaid;
 
         lMCNK_header->nLayers = -1;
         lMCNK_header->nDoodadRefs = -1;
@@ -1704,7 +1704,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
         lMCNK_header->flags = mChunks[y][x]->header.flags;
         lMCNK_header->holes = mChunks[y][x]->holes;
-        lMCNK_header->areaid = mChunks[y][x]->areaID;
+        lMCNK_header->areaid = mChunks[y][x]->header.areaid;
 
         lMCNK_header->nLayers = 0;
         lMCNK_header->nDoodadRefs = 0;

@@ -111,8 +111,6 @@ public:
 
   int nameID;
 
-  unsigned int areaID;
-
   bool haswater;
 
   int holes;

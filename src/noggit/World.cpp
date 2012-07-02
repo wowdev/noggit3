@@ -1431,7 +1431,7 @@ unsigned int World::getAreaID() const
   if(!curChunk)
     return 0;
 
-  return curChunk->areaID;
+  return curChunk->header.areaid;
 }
 
 void World::clearHeight(int x, int z)
@@ -1518,7 +1518,7 @@ void World::setAreaID(int id, int x, int z , int _cx, int _cz)
 
   if(curChunk == 0) return;
 
-  curChunk->areaID = id;
+  curChunk->header.areaid = id;
 }
 
 void World::drawTileMode ( bool draw_lines
