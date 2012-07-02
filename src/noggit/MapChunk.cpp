@@ -269,8 +269,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   CreateStrips();
   init_map_strip();
 
-  mBigAlpha=bigAlpha;
-
   uint32_t fourcc;
   uint32_t size;
 
@@ -457,7 +455,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
           }
-          else if(mBigAlpha){
+          else if(bigAlpha){
             // not compressed
             unsigned char *p;
             char *abuf = f->getPointer();

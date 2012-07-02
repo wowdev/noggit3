@@ -44,8 +44,6 @@ public:
   float xbase, ybase, zbase;
   float r;
 
-  bool mBigAlpha;
-
   int nameID;
 
   unsigned int Flags;
