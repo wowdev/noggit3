@@ -269,7 +269,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   CreateStrips();
   init_map_strip();
 
-  mt=maintile;
   mBigAlpha=bigAlpha;
 
   uint32_t fourcc;
@@ -388,7 +387,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
         } else {
           animated[i] = 0;
         }
-        _textures[i] = TextureManager::newTexture( mt->mTextureFilenames[tex[i]] );
+        _textures[i] = TextureManager::newTexture( maintile->mTextureFilenames[tex[i]] );
       }
     }
     else if ( fourcc == 'MCSH' ) {
@@ -537,7 +536,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
         //lq->init(f);
         lq->initFromTerrain(f, header.flags);
 
-        mt->mLiquids.insert(std::pair<int,Liquid*>( 0, lq) );
+        maintile->mLiquids.insert(std::pair<int,Liquid*>( 0, lq) );
 
 
         // let's output some debug info! ( '-')b
@@ -639,14 +638,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
 
   glBindBuffer(GL_ARRAY_BUFFER, minishadows);
   glBufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
-}
-
-void MapChunk::loadTextures()
-{
-  //! \todo Use this kind of preloading again?
-  return;
-/*  for(int i=0; i < nTextures; ++i)
-    _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);*/
 }
 
 void MapChunk::SetAnim (const mcly_flags_type& flags) const
