@@ -320,6 +320,9 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   vmax = ::math::vector_3d(-9999999.0f,-9999999.0f,-9999999.0f);
   glGenTextures(3, alphamaps);
 
+  //! \note Temporary between chunks (MCLY and MCAL).
+  unsigned int MCALoffset[4];
+
   while (f->getPos() < lastpos) {
     f->read(&fourcc,4);
     f->read(&size, 4);

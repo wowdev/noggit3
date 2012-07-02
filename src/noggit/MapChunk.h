@@ -137,7 +137,6 @@ private:
   unsigned int _texFlags[4];
   unsigned int _effectID[4];
 public:
-  unsigned int MCALoffset[4];
   unsigned char amap[3][64*64];
   unsigned char mShadowMap[8*64];
   GLuint alphamaps[3];
