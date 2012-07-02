@@ -74,7 +74,6 @@ public:
   MapChunk(World* world, MapTile* mt, noggit::mpq::file* f,bool bigAlpha);
   ~MapChunk();
 
-  void destroy();
   void initStrip();
 
   bool is_visible ( const float& cull_distance
