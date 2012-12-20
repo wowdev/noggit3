@@ -1,0 +1,29 @@
+!!ARBfp1.0
+# Simple shader for water in Nogg-It
+# Blends 2 water colors together based on weighting then adds texture value to the result
+OPTION ARB_fog_linear;
+
+ATTRIB	iColor0=fragment.color.primary;
+ATTRIB	iTex0=fragment.texcoord[0];
+ATTRIB	iTex1=fragment.texcoord[1];
+ATTRIB	iPos=fragment.position;
+
+OUTPUT	oColor=result.color;
+OUTPUT	oPos=result.depth;
+
+PARAM	pLocal0=program.local[0];
+TEMP	texel;
+TEMP	lerp;
+TEMP	tResult;
+
+TXP	texel, iTex0, texture[0], 2D;
+LRP lerp, iTex1.x, pLocal0, iColor0;
+ADD_SAT tResult, texel, lerp;
+ADD_SAT oColor, texel, tResult;
+MOV	oColor.a, lerp.a;
+
+
+MOV	oPos, iPos;
+
+
+END
