@@ -1,0 +1,144 @@
+diff --git a/src/model.cpp b/src/model.cpp
+--- a/src/model.cpp
++++ b/src/model.cpp
+@@ -980,7 +980,7 @@
+   ok = true;
+     nearclip = mcd.nearclip;
+   farclip = mcd.farclip;
+-  fov = mcd.fov;
++  fov = -40;//mcd.fov; //! \todo This is now animated.
+   pos = fixCoordSystem(mcd.pos);
+   target = fixCoordSystem(mcd.target);
+   tPos.init(mcd.transPos, f, global);
+diff --git a/src/modelheaders.h b/src/modelheaders.h
+--- a/src/modelheaders.h
++++ b/src/modelheaders.h
+@@ -247,12 +247,13 @@
+ 
+ struct ModelCameraDef {
+ 	int32_t id;
+-	float fov, farclip, nearclip;
++	float farclip, nearclip;
+ 	AnimationBlock transPos;
+ 	Vec3D pos;
+ 	AnimationBlock transTarget;
+ 	Vec3D target;
+ 	AnimationBlock rot;
++	AnimationBlock fov;
+ };
+ 
+ struct ModelParticleParams {
+diff --git a/src/mpq_stormlib.cpp b/src/mpq_stormlib.cpp
+--- a/src/mpq_stormlib.cpp
++++ b/src/mpq_stormlib.cpp
+@@ -18,14 +18,12 @@
+ 
+ MPQArchive::MPQArchive(const std::string& filename,bool doListfile)
+ {
+-
+-	bool result = SFileOpenArchive( filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE, &mpq_a );
+-
+-	if(!result) {
+-		//gLog("Error opening archive %s\n", filename);
++	if( !SFileOpenArchive( filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE, &mpq_a ) )
++  {
++		Log << "Error opening archive \"" << filename << "\"." << std::endl;
+ 		return;
+ 	}
+-	Log << "Opening archive:" << filename << std::endl;
++	Log << "Opening archive \"" << filename << "\"." << std::endl;
+ 	gOpenArchives.push_back( make_pair( filename, &mpq_a ) );
+ 
+ 	if( doListfile )
+@@ -187,6 +185,7 @@
+ 			return;
+ 		}
+     
++		Log << "Opening file \"" << filename << "\" from MPQ." << std::endl;
+ 		buffer = new unsigned char[size];
+ 		SFileReadFile( fh, buffer, size );
+ 		SFileCloseFile( fh );
+diff --git a/src/noggit.cpp b/src/noggit.cpp
+--- a/src/noggit.cpp
++++ b/src/noggit.cpp
+@@ -257,25 +257,25 @@
+   
+ 	std::vector<MPQArchive*> archives;
+ 	std::vector<std::string> archiveNames;
+-	archiveNames.push_back( "common.MPQ" );
+-	archiveNames.push_back( "common-2.MPQ" ); 
+-	archiveNames.push_back( "expansion.MPQ" );
+-	archiveNames.push_back( "lichking.MPQ" );
+-	archiveNames.push_back( "patch.MPQ" );
+-	archiveNames.push_back( "patch-{number}.MPQ" );
+-	archiveNames.push_back( "patch-{character}.MPQ" );
+-	
+-	//archiveNames.push_back( "{locale}/backup-{locale}.MPQ" );	
+-	//archiveNames.push_back( "{locale}/base-{locale}.MPQ" );
++	archiveNames.push_back( "art.MPQ" );
++	archiveNames.push_back( "expansion{number}.MPQ" );
++	archiveNames.push_back( "sound.MPQ" );
++	archiveNames.push_back( "world.MPQ" );
++	archiveNames.push_back( "OldWorld.MPQ" ); // 4.0.1 only, will most likely be removed with Cataclysm itself.
++  
++	//archiveNames.push_back( "wow-update-[oldworld-]{buildnumber}.MPQ" ); // Somehow get these updates included..
++	//archiveNames.push_back( "Cache/patch-base-[oldworld-]{buildnumber}.MPQ" ); 
++  //! \todo Actually get updates included at all. This might be a bit more hacky and might require more changes to MPQ management as patches have a differing MPQ structure including folders for locales and base. Same for OldWorld. This needs hell a lot of work.
++
++	archiveNames.push_back( "{locale}/backup-{locale}.MPQ" );
++	archiveNames.push_back( "{locale}/base-{locale}.MPQ" );
++	archiveNames.push_back( "{locale}/expansion{number}-locale-{locale}.MPQ" );
++	archiveNames.push_back( "{locale}/expansion{number}-speech-{locale}.MPQ" );
+ 	archiveNames.push_back( "{locale}/locale-{locale}.MPQ" );
+-	//archiveNames.push_back( "{locale}/speech-{locale}.MPQ" );
+-	archiveNames.push_back( "{locale}/expansion-locale-{locale}.MPQ" );
+-	//archiveNames.push_back( "{locale}/expansion-speech-{locale}.MPQ" );
+-	archiveNames.push_back( "{locale}/lichking-locale-{locale}.MPQ" );
+-	//archiveNames.push_back( "{locale}/lichking-speech-{locale}.MPQ" );
+-	archiveNames.push_back( "{locale}/patch-{locale}.MPQ" );
+-	archiveNames.push_back( "{locale}/patch-{locale}-{number}.MPQ" );
+-	archiveNames.push_back( "{locale}/patch-{locale}-{character}.MPQ" );
++	archiveNames.push_back( "{locale}/speech-{locale}.MPQ" );
++	archiveNames.push_back( "{locale}/OldWorld-{locale}.MPQ" ); // 4.0.1 only, will most likely be removed with Cataclysm itself.
++  
++  // How are updates done in locale? Are they done? Most likely they are included in the wow-update MPQs from /Data/ or in the Cache.
+   
+ 	const char * locales[] = { "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "zhTW", "esES", "esMX", "ruRU" };
+ 	const char * locale = "****";
+@@ -299,10 +299,10 @@
+ 	}
+   
+ 	//! \todo  This may be done faster. Maybe.
+-	for( size_t i = 0; i < archiveNames.size(); ++i )
++	for( std::vector<std::string>::const_iterator it = archiveNames.begin(); it != archiveNames.end(); ++it )
+ 	{
+ 		std::string path = wowpath;
+-		path.append( "Data/" ).append( archiveNames[i] );
++		path.append( "Data/" ).append( *it );
+ 		std::string::size_type location = std::string::npos;
+     
+ 		do
+@@ -320,7 +320,7 @@
+ 			char temp[10];
+ 			location = path.find( "{number}" );
+ 			path.replace( location, 8, " " );
+-			for( int j = 2; j < 10; j++ )
++			for( int j = 0; j < 10; j++ )
+ 			{
+ 				sprintf( temp, "%i", j );
+ 				path.replace( location, 1, std::string( temp ) );
+diff --git a/src/world.cpp b/src/world.cpp
+--- a/src/world.cpp
++++ b/src/world.cpp
+@@ -43,9 +43,10 @@
+ 	
+ 	if( !MPQFile::exists( ssfilename.str() ) )
+ 	{
+-		Log << "World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
++		Log << "- World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
+ 		return false;
+ 	}
++  Log << "+ World " << pMapId << ": " << lMapName << " has a WDT file!" << std::endl;
+ 
+ 	MPQFile mf( ssfilename.str() );
+ 
