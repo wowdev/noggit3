@@ -11,7 +11,7 @@ class UITexturingGUI
 {
 public:
   static UIFrame* createSelectedTexture();
-  static UIFrame* createTexturePalette(int rows, int cols,UIMapViewGUI* setgui);
+  static UIFrame* createTexturePalette(UIMapViewGUI* setgui);
   static UIFrame* createTilesetLoader();
   static UIFrame* createTextureFilter();
   static UIFrame* createMapChunkWindow();

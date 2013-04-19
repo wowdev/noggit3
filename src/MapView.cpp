@@ -816,10 +816,11 @@ void MapView::createGUI()
   B1=new UIButton( 6.0f, 111.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1 ) ;
   settings_paint->addChild(B1);
  
-  mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(4,8,mainGui));
+
+  mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
   mainGui->TexturePalette->hide();
-  mainGui->addChild(mainGui->SelectedTexture = UITexturingGUI::createSelectedTexture());
-  mainGui->SelectedTexture->hide();
+  //mainGui->addChild(mainGui->SelectedTexture = UITexturingGUI::createSelectedTexture());
+  //mainGui->SelectedTexture->hide();
   mainGui->addChild(UITexturingGUI::createTilesetLoader());
   mainGui->addChild(UITexturingGUI::createTextureFilter());
   mainGui->addChild(MapChunkWindow = UITexturingGUI::createMapChunkWindow());
@@ -878,7 +879,7 @@ void MapView::createGUI()
 
   mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", mainGui->guiToolbar->hidden_evil(), true );
-  mbar->GetMenu( "View" )->AddMenuItemToggle( "Current texture", mainGui->SelectedTexture->hidden_evil(), true );
+ // mbar->GetMenu( "View" )->AddMenuItemToggle( "Current texture", mainGui->SelectedTexture->hidden_evil(), true );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", mainGui->TexturePalette->hidden_evil(), true );
   mbar->GetMenu( "View" )->AddMenuItemButton( "Cursor options", showCursorSwitcher, 0);
   mbar->GetMenu( "View" )->AddMenuItemSeperator( "Toggle" );

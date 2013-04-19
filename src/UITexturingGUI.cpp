@@ -210,6 +210,8 @@ void UITexturingGUI::updateSelectedTexture()
     textSelectedTexture->setText( UITexturingGUI::getSelectedTexture()->filename() );
   if( textGui )
     textGui->guiToolbar->current_texture->setTexture( UITexturingGUI::getSelectedTexture() );
+
+
 }
 
 void texturePaletteClick( UIFrame* /*f*/, int id )
@@ -239,7 +241,7 @@ void LoadTileset( UIFrame* /*button*/, int id )
 {
   for( std::vector<std::string>::iterator it = textureNames.begin(); it != textureNames.end(); ++it )
   {
-    if( it->find( tilesetDirectories[id] ) != std::string::npos )
+    if( it->find( tilesetDirectories[id] ) != std::string::npos || id == -1)
     {
       //! \todo Actually save the texture returned here and do no longer iterate over all cached textures.
       TextureManager::newTexture( *it );
@@ -341,18 +343,18 @@ void clickFileFilterTexture(bool value,int id)
 
 
 //! \todo  Make this cleaner.
-UIFrame* UITexturingGUI::createTexturePalette( int rows, int cols, UIMapViewGUI *setgui )
+UIFrame* UITexturingGUI::createTexturePalette( UIMapViewGUI *setgui )
 {
   gCurrentPage = 0;
 
   textGui = setgui;
-  pal_rows = rows;
-  pal_cols = cols;
-  windowTexturePalette = new UICloseWindow( 115.0f, 38.0f, ( pal_rows * 68.0f ) + 10.0f, ( pal_cols * 68.0f ) + 50.0f, "Texture Palette", true );
+  pal_rows = 10;
+  pal_cols = 5;
+  windowTexturePalette = new UICloseWindow( 115.0f, 33.0f, ( pal_rows * 68.0f + 355.0f ) + 10.0f, ( pal_cols * 68.0f ) + 60.0f, "Texture Palette", true );
 
   for(int i=0;i<(pal_cols*pal_rows);++i)
   {
-    curTextures[i]=new UITexture(8.0f+(i%pal_rows)*68.0f,22.0f+(i/pal_rows)*68.0f,64.0f,64.0f,"tileset\\generic\\black.blp");
+    curTextures[i]=new UITexture(12.0f+(i%pal_rows)*68.0f,32.0f+(i/pal_rows)*68.0f,64.0f,64.0f,"tileset\\generic\\black.blp");
     curTextures[i]->setClickFunc(texturePaletteClick,i);
     windowTexturePalette->addChild(curTextures[i]);
   }
@@ -367,30 +369,43 @@ UIFrame* UITexturingGUI::createTexturePalette( int rows, int cols, UIMapViewGUI 
   windowTexturePalette->addChild( new UIButton( 20.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Down.blp", changePage, +1 ) );
   windowTexturePalette->addChild( new UIButton( 2.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Down.blp", changePage, -1 ) );
 
-  windowTexturePalette->addChild( new UIButton( 145.0f, windowTexturePalette->height() - 24.0f, 132.0f, 28.0f, "Load Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureLoader, 0 ) );
-  windowTexturePalette->addChild( new UIButton( 7.0f, windowTexturePalette->height() - 24.0f, 132.0f, 28.0f, "Filter Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureFilter, 0 ) );
+  windowTexturePalette->addChild( new UIButton( 7.0f, windowTexturePalette->height() - 28.0f, 132.0f, 32.0f, "Load all Sets", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", LoadTileset, -1 ) );
+  windowTexturePalette->addChild( new UIButton( 145.0f, windowTexturePalette->height() - 28.0f, 132.0f, 32.0f, "Load Tilesets", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureLoader, 0 ) );
+  windowTexturePalette->addChild( new UIButton( 283.0f, windowTexturePalette->height() - 28.0f, 132.0f, 32.0f, "Filter Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureFilter, 0 ) );
+
+  std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->filename() : "tileset\\generic\\black.blp";
+
+  textureSelected = new UITexture( 18.0f+pal_rows*68.0f,32.0f, 336.0f, 336.0f, lTexture );
+  windowTexturePalette->addChild( textureSelected );
+
+  textSelectedTexture = new UIText( windowTexturePalette->width()-10, windowTexturePalette->height() - 28.0f, lTexture, arial16, eJustifyRight );
+ // textSelectedTexture->setBackground( 0.0f, 0.0f, 0.0f, 0.5f );
+
+  windowTexturePalette->addChild( textSelectedTexture );
 
   return windowTexturePalette;
 }
 
 UIFrame* UITexturingGUI::createSelectedTexture()
 {
+  /*
   windowSelectedTexture = new UICloseWindow( video.xres() - 148.0f - 128.0f, video.yres() - 320.0f, 274.0f, 288.0f, "Current Texture", true );
 
   std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->filename() : "tileset\\generic\\black.blp";
 
-  textureSelected = new UITexture( 9.0f, 24.0f, 256.0f, 256.0f, lTexture );
   windowSelectedTexture->addChild( textureSelected );
 
-  textSelectedTexture = new UIText( 137.0f, 264.0f, lTexture, arialn13, eJustifyCenter );
-  textSelectedTexture->setBackground( 0.0f, 0.0f, 0.0f, 0.5f );
+
   windowSelectedTexture->addChild( textSelectedTexture );
 
   return windowSelectedTexture;
+  */
+  return false;
 }
 
 UIFrame* UITexturingGUI::createTilesetLoader()
 {
+  float buttonSize = 150.0f;
   LoadTextureNames();
 
   int columns = tilesetDirectories.size() / 4;
@@ -401,17 +416,19 @@ UIFrame* UITexturingGUI::createTilesetLoader()
   windowTilesetLoader = new UICloseWindow(
     video.xres() / 2.0f - 308.0f,
     video.yres() / 2.0f - 139.0f,
-    616.0f,
+   856.0f,
     22.0f + 21.0f * columns + 5.0f,
     "Tileset Loading" );
   windowTilesetLoader->movable( true );
 
-  for( unsigned int i = 0; i < tilesetDirectories.size(); ++i )
+
+
+  for( unsigned int i = 0; i < tilesetDirectories.size()  ; ++i )
   {
     name = new UIButton(
-      5.0f + 152.0f * ( i / columns ),
+      5.0f + 212.0f * ( i / columns ),
       23.0f + 21.0f * ( i % columns ),
-      150.0f,
+      210.0f,
       28.0f,
       "Interface\\Buttons\\UI-DialogBox-Button-Up.blp",
       "Interface\\Buttons\\UI-DialogBox-Button-Down.blp"
@@ -419,13 +436,14 @@ UIFrame* UITexturingGUI::createTilesetLoader()
 
     std::string setname;
     setname = tilesetDirectories[i];
-    misc::find_and_replace(setname,"expansion01\\","");
-    misc::find_and_replace(setname,"expansion02\\","");
 
     name->setText( setname );
     name->setClickFunc( LoadTileset, i );
     windowTilesetLoader->addChild( name );
   }
+
+  
+
   windowTilesetLoader->hide();
 
   return windowTilesetLoader;
@@ -436,21 +454,21 @@ UIFrame* UITexturingGUI::createTextureFilter()
   InitFilenameFilterList();
 
   LoadTextureNames();
-  windowTextureFilter = new UICloseWindow( video.xres() / 2.0f - 450.0f, video.yres() / 2.0f - 300.0f, 900.0f, 610.0f, "Texture Filtering", true );
+  windowTextureFilter = new UICloseWindow( video.xres() / 2.0f - 450.0f, video.yres() / 2.0f - 300.0f, 1000.0f, 700.0f, "", true );
   windowTextureFilter->hide();
 
   //Filename Filters
-  windowTextureFilter->addChild( new UIText( 60.0f, 23.0f, "Filename Filters", arial14, eJustifyCenter ) );
+  windowTextureFilter->addChild( new UIText( 70.0f, 13.0f, "Filename Filters", arial14, eJustifyCenter ) );
 
   for( std::map<int,std::string>::iterator it = gFilenameFilters.begin(); it != gFilenameFilters.end(); ++it )
   {
-    windowTextureFilter->addChild( new UICheckBox( 5.0f + 152.0f * ( it->first / 4 ), 43.0f + 30.0f * ( it->first % 4 ), it->second, clickFileFilterTexture, it->first ) );
+    windowTextureFilter->addChild( new UICheckBox( 15.0f + 200.0f * ( it->first / 5 ), 30.0f + 30.0f * ( it->first % 5 ), it->second, clickFileFilterTexture, it->first ) );
   }
 
-  windowTextureFilter->addChild( new UICheckBox( 350.0f, 45.0f + 30.0f * 4.0f, "Misc (Everything Else)", clickFileFilterTexture, 24 ) );
+  windowTextureFilter->addChild( new UICheckBox( 15.0f + 200.0f *  4 , 30.0f + 30.0f * 4, "Misc (Everything Else)", clickFileFilterTexture, 24 ) );
 
   //Tileset Filters
-  windowTextureFilter->addChild( new UIText( 55.0f, 190.0f, "Tileset Filters", arial14, eJustifyCenter ) );
+  windowTextureFilter->addChild( new UIText( 70.0f, 190.0f, "Tileset Filters", arial14, eJustifyCenter ) );
 
   for( unsigned int i = 0; i < tilesetDirectories.size(); ++i )
   {
@@ -458,7 +476,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
     name = tilesetDirectories[i];
     misc::find_and_replace(name,"expansion01\\","");
     misc::find_and_replace(name,"expansion02\\","");
-    windowTextureFilter->addChild( new UICheckBox( 5.0f + 152.0f * ( i / 13 ), 210.0f + 30.0f * ( i % 13 ), name, clickFilterTexture, i ) );
+    windowTextureFilter->addChild( new UICheckBox( 15.0f + 200.0f * ( i / 16 ), 210.0f + 30.0f * ( i % 16 ), name, clickFilterTexture, i ) );
   }
 
   return windowTextureFilter;

@@ -305,11 +305,12 @@ void Menu::buildMenuBar()
   mGUImenuBar->GetMenu( "File" )->AddMenuItemSwitch( "exit ESC", &gPop, true );
   mGUIFrame->addChild( mGUImenuBar );
 
-  static const char* typeToName[3] = { "Continent", "Dungeons", "Raid" };
+  static const char* typeToName[4] = { "Continent", "Dungeons", "Raid", "Battleground" };
 
   mGUImenuBar->AddMenu( typeToName[0] );
   mGUImenuBar->AddMenu( typeToName[1] );
   mGUImenuBar->AddMenu( typeToName[2] );
+  mGUImenuBar->AddMenu( typeToName[3] );
 
   for( std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it )
   {
@@ -357,7 +358,9 @@ void Menu::createMapList()
     e.mapID = i->getInt( MapDB::MapID );
     e.name = i->getLocalizedString( MapDB::Name );
     e.areaType = i->getUInt( MapDB::AreaType );
-    if( e.areaType < 0 || e.areaType > 2 || !World::IsEditableWorld( e.mapID ) )
+    if(e.areaType==3) e.name = i->getString(MapDB::InternalName);   
+
+    if( e.areaType < 0 || e.areaType > 3 || !World::IsEditableWorld( e.mapID ) )
       continue;
 
     mMaps.push_back( e );
