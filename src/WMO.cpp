@@ -769,7 +769,7 @@ void WMOGroup::initDisplayList()
         if (v.z > VertexBoxMax.z) VertexBoxMax.z = v.z;
       }
       center = (VertexBoxMax + VertexBoxMin) * 0.5f;
-      rad = (VertexBoxMax-center).length();
+      rad = (VertexBoxMax-center).length() + 300.0f;
     }
     else if ( fourcc == 'MONR' ) {
       normals =  reinterpret_cast<Vec3D*>(gf.getPointer());
@@ -944,9 +944,13 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
 {
   visible = false;
   // view frustum culling
+
   Vec3D pos = center + ofs;
+  
   rotate(ofs.x,ofs.z,&pos.x,&pos.z,rot*PI/180.0f);
-  if (!gWorld->frustum.intersectsSphere(pos,rad)) return;
+
+  if (!gWorld->frustum.intersectsSphere(pos, rad )) return;
+  
   float dist = (pos - gWorld->camera).length() - rad;
   if (dist >= gWorld->culldistance) return;
   visible = true;
@@ -955,10 +959,11 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
   if (hascv) {
     glDisable(GL_LIGHTING);
     gWorld->outdoorLights(false);
-  } else 
+  } 
+  else 
   {
 
-    if (gWorld->skies->hasSkies()) 
+  if (gWorld->skies->hasSkies()) 
 	{
 		gWorld->outdoorLights(true);
 	} 
