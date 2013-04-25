@@ -22,6 +22,7 @@ public:
   bool ShiftDown;
   bool AltDown;
   bool CtrlDown;
+  bool SpaceDown;
 
   bool paintMode;
   int flagPaintMode;

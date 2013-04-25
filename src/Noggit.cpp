@@ -62,7 +62,21 @@ std::string getGamePath()
 {
   if( !boost::filesystem::exists( "NoggIt.conf" ) )
   {
+      Log << "DON NOT find a config file." << std::endl;
+
+      if( boost::filesystem::exists( "NoggIt.conf.conf" ) )
+      {
+        Log << "Error: You have named your config file noggit.conf.conf!" << std::endl;
+        Log << "Erase the second .conf!" << std::endl;
+      }
+      else if( boost::filesystem::exists( "noggit_template.conf" ) )
+      {
+        Log << "You must rename noggit_template.conf to NoggIt.conf if noggit should use the config file!" << std::endl;
+      }
+
+
   #ifdef _WIN32
+    Log << "Will try to load the game path from you registry now:" << std::endl;
     HKEY key;
     DWORD t;
     const DWORD s( 1024 );
@@ -81,10 +95,11 @@ std::string getGamePath()
   #else
     return "/Applications/World of Warcraft/";
   #endif
+
   }
   else
   {
-    Log << "Using config file." << std::endl;
+      Log << "Using config file." << std::endl;
     return ConfigFile( "NoggIt.conf" ).read<std::string>( "Path" );
   }
 }

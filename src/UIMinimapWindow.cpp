@@ -6,6 +6,8 @@
 #include "UIMinimapWindow.h"
 #include "Video.h"
 #include "World.h"
+#include "UIText.h"
+#include "Noggit.h"
 
 UIMinimapWindow::UIMinimapWindow( Menu* menuLink )
 : UIWindow( 0.0f, 0.0f, 0.0f, 0.0f )
@@ -21,12 +23,15 @@ UIMinimapWindow::UIMinimapWindow( Menu* menuLink )
 UIMinimapWindow::UIMinimapWindow( World* setMap )
 : UIWindow( 0.0f, 0.0f, 0.0f, 0.0f )
 , borderwidth( 5.0f )
+, bottomspace( 20.0f )
 , tilesize( 0.0f )
 , lookAt( 0.0f )
 , mMenuLink( NULL )
 , map( setMap )
 {
   resize();
+  this->cursor_position = new UIText(width() / 1,  height() - 50.0f, "World of Warcraft is (C) Blizzard Entertainment", fritz16, eJustifyLeft );
+  this->addChild(cursor_position);
 }
 
 UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
@@ -54,10 +59,10 @@ UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
 
 void UIMinimapWindow::resize()
 {
-  tilesize = ( video.yres() - 70.0f - borderwidth * 2.0f ) / 64.0f;
+  tilesize = ( video.yres() - 100.0f - borderwidth * 2.0f ) / 64.0f;
 
   width( borderwidth * 2.0f + tilesize * 64.0f );
-  height( width() );
+  height( width() + 30.0f );
   x( video.xres() / 2.0f - width() / 2.0f );
   y( video.yres() / 2.0f - height() / 2.0f );
 }
@@ -143,6 +148,7 @@ void UIMinimapWindow::render() const
         }
       }
     }
+
   }
 
   // draw the arrow if shown inside a map
