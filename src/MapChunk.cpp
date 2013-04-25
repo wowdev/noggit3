@@ -1409,6 +1409,7 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 
 bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
 {
+  float speed = 1.00f;
   float dist,xdiff,zdiff,nremain;
   Changed=false;
 
@@ -1443,7 +1444,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
       else if(BrushType==2)//Smooth
       {
         nremain = 1.0f - pow(1.0f - remain, (1.0f + dist/radius));
-        mVertices[i].y = nremain*mVertices[i].y + (1 - nremain)*h;
+        mVertices[i].y = nremain*mVertices[i].y + ((1 - nremain)*h);
       }
 
       Changed=true;

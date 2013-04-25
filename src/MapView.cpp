@@ -114,6 +114,8 @@ UISlider* ground_brush_radius;
 float groundBrushRadius=15.0f;
 UISlider* ground_brush_speed;
 float groundBrushSpeed=1.0f;
+UISlider* ground_blur_speed;
+float groundBlurSpeed=2.0f;
 int    groundBrushType=1;
 
 UISlider* blur_brush;
@@ -158,14 +160,21 @@ void setGroundBrushRadius(float f)
 {
   groundBrushRadius = f;
 }
+
 void setGroundBrushSpeed(float f)
 {
-  groundBrushSpeed =f;
+  groundBlurSpeed = f;
 }
+
 
 void setBlurBrushRadius(float f)
 {
   blurBrushRadius = f;
+}
+
+void setBlurBrushSpeed(float f)
+{
+ groundBlurSpeed = f;
 }
 
 
@@ -750,7 +759,7 @@ void MapView::createGUI()
   setting_ground->addChild(ground_brush_speed);
 
   // flatten/blur
-  setting_blur=new UIWindow(tool_settings_x,tool_settings_y,180.0f,100.0f);
+  setting_blur=new UIWindow(tool_settings_x,tool_settings_y,180.0f,130.0f);
   setting_blur->movable( true );
   setting_blur->hide();
   mainGui->addChild(setting_blur);
@@ -768,6 +777,12 @@ void MapView::createGUI()
   blur_brush->setValue(blurBrushRadius/1000);
   blur_brush->setText( "Brush radius: " );
   setting_blur->addChild(blur_brush);
+
+  ground_blur_speed=new UISlider(6.0f,110.0f,167.0f,10.0f,0.00001f);
+  ground_blur_speed->setFunc(setBlurBrushSpeed);
+  ground_blur_speed->setValue(groundBlurSpeed/10);
+  ground_blur_speed->setText( "Brush Speed: " );
+  setting_blur->addChild(ground_blur_speed);
 
   //3D Paint settings UIWindow
   settings_paint=new UIWindow(tool_settings_x,tool_settings_y,180.0f,140.0f);
@@ -1155,10 +1170,10 @@ void MapView::tick( float t, float dt )
 
         case 1:
           if( Environment::getInstance()->ShiftDown )
-            if( mViewMode == eViewMode_3D ) gWorld->flattenTerrain( xPos, zPos, yPos, pow( 0.2f, dt ), blurBrushRadius, blurBrushType );
+            if( mViewMode == eViewMode_3D ) gWorld->flattenTerrain( xPos, zPos, yPos, pow( 0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType );
           if( Environment::getInstance()->CtrlDown )
           {
-            if( mViewMode == eViewMode_3D ) gWorld->blurTerrain( xPos, zPos, pow( 0.2f, dt ), std::min( blurBrushRadius, 30.0f ), blurBrushType );
+            if( mViewMode == eViewMode_3D ) gWorld->blurTerrain( xPos, zPos, pow( 0.5f, dt * groundBlurSpeed), std::min( blurBrushRadius, 30.0f ), blurBrushType );
           }
         break;
 
@@ -2144,6 +2159,14 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
           groundBrushSpeed = 0.01f;
         ground_brush_speed->setValue( groundBrushSpeed / 10.0f );
       break;
+      case 1:
+        groundBlurSpeed += e->xrel / 30.0f;
+        if( groundBlurSpeed > 10.0f )
+          groundBlurSpeed = 10.0f;
+        else if( groundBlurSpeed < 0.01f )
+          groundBlurSpeed = 0.01f;
+        ground_blur_speed->setValue( groundBlurSpeed / 10.0f );
+        break;
       case 2:
         mainGui->S1->setValue(  mainGui->S1->value + e->xrel / 300.0f );
         if(  mainGui->S1->value > 1.0f )
