@@ -8,11 +8,14 @@ Noggit SDL 1.3 changelog
 - Discard the old current texture window
 - Fix texture pallet size to fit names
 - Do Rel with debug now
+- ALT + 1 till 5 set now the texture paint opercety to 100,75,50,25 and 0 %
+- Space + Maus = Speed and Pressure
+- Log file caonfig file hints
+- Link to Manual wiki
 
 
-- Space + Maus = Speed
-- Shortcut für opercity 0  25 50 75 100 ALT 1 2 3 4 5
 - Vertics Rendering
 - UID Fix
 - Modelviewer
-
+- WMO auslende Fehler
+-Speed für 

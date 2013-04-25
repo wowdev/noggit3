@@ -19,7 +19,8 @@ class UIExitWarning;
 class UICapsWarning;
 class UIModelImport;
 class UIHelperModels;
-
+class UISlider;
+class UIGradient;
 #include "UIFrame.h"
 
 //! \todo Give better name.
@@ -36,6 +37,8 @@ public:
   // position of the tools window(s)
   int tool_settings_x;
   int tool_settings_y;
+  UISlider* S1;
+  UIGradient *G1;
 
   // Editor paramter
   int ground_edit_mode;

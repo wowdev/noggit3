@@ -260,9 +260,10 @@ void openHelp( UIFrame*, int )
   mainGui->showHelp();
 }
 
-void openURL( UIFrame*, int )
+void openURL( UIFrame*,  int target)
 {
-  ShellExecute(NULL, "open", "http://modcraft.superparanoid.de", NULL, NULL, SW_SHOWNORMAL);
+  if(target==1)  ShellExecute(NULL, "open", "http://modcraft.superparanoid.de", NULL, NULL, SW_SHOWNORMAL);
+  if(target==2)  ShellExecute(NULL, "open", "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual", NULL, NULL, SW_SHOWNORMAL);
 }
 
 void ResetSelectedObjectRotation( UIFrame* /*button*/, int /*id*/ )
@@ -777,27 +778,26 @@ void MapView::createGUI()
 
   settings_paint->addChild( new UIText( 78.5f, 2.0f, "3D Paint", arial14, eJustifyCenter ) );
 
-  UIGradient *G1;
-  G1=new UIGradient;
-  G1->width( 20.0f );
-  G1->x( settings_paint->width() - 4.0f - G1->width() );
-  G1->y( 4.0f );
-  G1->height( 92.0f );
-  G1->setMaxColor(1.0f,1.0f,1.0f,1.0f);
-  G1->setMinColor(0.0f,0.0f,0.0f,1.0f);
-  G1->horiz=false;
-  G1->setClickColor(1.0f,0.0f,0.0f,1.0f);
-  G1->setClickFunc(setTextureBrushLevel);
-  G1->setValue(0.0f);
 
-  settings_paint->addChild(G1);
+  mainGui->G1=new UIGradient;
+  mainGui->G1->width( 20.0f );
+  mainGui->G1->x( settings_paint->width() - 4.0f - mainGui->G1->width() );
+  mainGui->G1->y( 4.0f );
+  mainGui->G1->height( 92.0f );
+  mainGui->G1->setMaxColor(1.0f,1.0f,1.0f,1.0f);
+  mainGui->G1->setMinColor(0.0f,0.0f,0.0f,1.0f);
+  mainGui->G1->horiz=false;
+  mainGui->G1->setClickColor(1.0f,0.0f,0.0f,1.0f);
+  mainGui->G1->setClickFunc(setTextureBrushLevel);
+  mainGui->G1->setValue(0.0f);
 
-  UISlider* S1;
-  S1=new UISlider(6.0f,33.0f,145.0f,1.0f,0.0f);
-  S1->setFunc(setTextureBrushHardness);
-  S1->setValue(textureBrush.getHardness());
-  S1->setText("Hardness: ");
-  settings_paint->addChild(S1);
+  settings_paint->addChild(mainGui->G1);
+
+  mainGui->S1 = new UISlider(6.0f,33.0f,145.0f,1.0f,0.0f);
+  mainGui->S1->setFunc(setTextureBrushHardness);
+  mainGui->S1->setValue(textureBrush.getHardness());
+  mainGui->S1->setText("Hardness: ");
+  settings_paint->addChild(mainGui->S1);
 
   paint_brush=new UISlider(6.0f,59.0f,145.0f,100.0f,0.00001);
   paint_brush->setFunc(setTextureBrushRadius);
@@ -805,11 +805,11 @@ void MapView::createGUI()
   paint_brush->setText("Radius: ");
   settings_paint->addChild(paint_brush);
 
-  S1=new UISlider(6.0f,85.0f,145.0f,0.99f,0.01f);
-  S1->setFunc(setTextureBrushPressure);
-  S1->setValue(brushPressure);
-  S1->setText("Pressure: ");
-  settings_paint->addChild(S1);
+  mainGui->S1=new UISlider(6.0f,85.0f,145.0f,0.99f,0.01f);
+  mainGui->S1->setFunc(setTextureBrushPressure);
+  mainGui->S1->setValue(brushPressure);
+  mainGui->S1->setText("Pressure: ");
+  settings_paint->addChild(mainGui->S1);
 
   
   UIButton* B1;
@@ -895,7 +895,8 @@ void MapView::createGUI()
   mbar->GetMenu( "View" )->AddMenuItemToggle( "Hole lines always on", &Settings::getInstance()->holelinesOn, false );
 
   mbar->GetMenu( "Help" )->AddMenuItemButton( "Key Bindings", openHelp, 0 );
-  mbar->GetMenu( "Help" )->AddMenuItemButton( "Homepage", openURL, 0 );
+  mbar->GetMenu( "Help" )->AddMenuItemButton( "Manual online", openURL, 2 );
+  mbar->GetMenu( "Help" )->AddMenuItemButton( "Homepage", openURL, 1 );
 
   mainGui->addChild( mbar );
 
@@ -999,7 +1000,6 @@ void MapView::tick( float t, float dt )
     }
 
     nameEntry * Selection = gWorld->GetCurrentSelection();
-
 
 
     if( Selection )
@@ -1496,6 +1496,9 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_LCTRL || e->keysym.sym == SDLK_RCTRL )
       Environment::getInstance()->CtrlDown = true;
 
+    if( e->keysym.sym == SDLK_SPACE)
+      Environment::getInstance()->SpaceDown = true;
+
     // movement
     if( e->keysym.sym == SDLK_w )
     {
@@ -1948,6 +1951,31 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
             movespd = 800.0f;
             break;
         }
+      }      
+      else if( Environment::getInstance()->AltDown )
+      {
+        switch( e->keysym.sym )
+        {
+        case SDLK_1:
+          mainGui->G1->setValue(0.01f);
+          break;
+
+        case SDLK_2:
+          mainGui->G1->setValue(0.25f);
+          break;
+
+        case SDLK_3:
+          mainGui->G1->setValue(0.50f);
+          break;
+
+        case SDLK_4:
+          mainGui->G1->setValue(0.75f);
+          break;
+
+        case SDLK_5:
+          mainGui->G1->setValue(0.99f);
+          break;
+        }
       }
       else if( e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_6 )
       {
@@ -1976,7 +2004,8 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_LCTRL || e->keysym.sym == SDLK_RCTRL )
       Environment::getInstance()->CtrlDown = false;
 
-
+    if( e->keysym.sym == SDLK_SPACE )
+      Environment::getInstance()->SpaceDown = false;
 
     // movement
     if( e->keysym.sym == SDLK_w)
@@ -2082,7 +2111,7 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
         groundBrushRadius = 1000.0f;
       else if( groundBrushRadius < 0.01f )
         groundBrushRadius = 0.01f;
-      ground_brush_radius->setValue( groundBrushRadius / 1000 );
+      ground_brush_radius->setValue( groundBrushRadius / 1000.0f );
       break;
     case 1:
       blurBrushRadius += e->xrel / XSENS;
@@ -2090,7 +2119,7 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
         blurBrushRadius = 1000.0f;
       else if( blurBrushRadius < 0.01f )
         blurBrushRadius = 0.01f;
-      blur_brush->setValue( blurBrushRadius / 1000 );
+      blur_brush->setValue( blurBrushRadius / 1000.0f );
       break;
     case 2:
       textureBrush.setRadius( textureBrush.getRadius() + e->xrel / XSENS );
@@ -2100,6 +2129,29 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
         textureBrush.setRadius(0.1f);
       paint_brush->setValue( textureBrush.getRadius() / 100.0f );
       break;
+    }
+  }
+
+  if( leftMouse && Environment::getInstance()->SpaceDown )
+  {
+    switch( terrainMode )
+    {
+      case 0:
+        groundBrushSpeed += e->xrel / 30.0f;
+        if( groundBrushSpeed > 10.0f )
+          groundBrushSpeed = 10.0f;
+        else if( groundBrushSpeed < 0.01f )
+          groundBrushSpeed = 0.01f;
+        ground_brush_speed->setValue( groundBrushSpeed / 10.0f );
+      break;
+      case 2:
+        mainGui->S1->setValue(  mainGui->S1->value + e->xrel / 300.0f );
+        if(  mainGui->S1->value > 1.0f )
+           mainGui->S1->setValue(1.0f);
+        else if(  mainGui->S1->value < 0.0001f )
+           mainGui->S1->setValue(0.0001f);
+         mainGui->S1->setValue(  mainGui->S1->value );
+        break;
     }
   }
 

@@ -36,8 +36,8 @@ void MPQArchive::loadMPQ( const std::string& filename, bool doListfile )
 
 MPQArchive::MPQArchive( const std::string& filename, bool doListfile )
 : _archiveHandle( NULL )
-{
-  if(!SFileOpenArchive( filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE, &_archiveHandle ))
+{ 
+  if(!SFileOpenArchive( filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE | STREAM_FLAG_READ_ONLY, &_archiveHandle ))
   {
     LogError << "Error opening archive: " << filename << "\n";
     return;
