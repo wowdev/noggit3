@@ -95,7 +95,10 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
 
   float rx = -vy * vz;
   float ry = vx * vz;
-
+  
+  glLineWidth (2.0);
+//   glEnable (GL_LINE_STIPPLE);
+//   glLineStipple(2, 0x00FF);
   glPushMatrix();
   glDisable(GL_DEPTH_TEST);
   glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
@@ -2210,17 +2213,20 @@ void World::setChanged(int x, int z)
 {
   // change the changed flag of the map tile
   if( mTiles[x][z].tile )
-    mTiles[x][z].tile->changed = true;
+    mTiles[x][z].tile->changed = 1;
+
+  // mark surrounding as 2
+
 }
 
 void World::unsetChanged(int x, int z)
 {
   // change the changed flag of the map tile
   if( mTiles[x][z].tile )
-    mTiles[x][z].tile->changed = false;
+    mTiles[x][z].tile->changed = 0;
 }
 
-bool World::getChanged(int x, int z)
+int World::getChanged(int x, int z)
 {
   if(mTiles[x][z].tile)
     return mTiles[x][z].tile->changed;
