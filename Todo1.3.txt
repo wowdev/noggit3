@@ -18,10 +18,18 @@ Noggit SDL 1.3 changelog
 
 
 
-
 - better Vertics Rendering
 - UID Fix
-- newer Modelviewer
+- Try own adder if not > newer Modelviewer
+- Delete move and add all models thing
+- cords on minimap
+- Another resize try
+- Export heightmap out
+- Also import
+- save current raus!
+- Areal ID raus
+- Test aout tiling rotat size again
+- Test copy size and rotation
 
 
-
+VIDEO

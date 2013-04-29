@@ -850,16 +850,16 @@ void MapView::createGUI()
   mbar->AddMenu( "Assist" );
   mbar->AddMenu( "Help" );
 
-  mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", SaveOrReload, 0 );
+ // mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", SaveOrReload, 0 );
   mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+S Save all", SaveOrReload, 2 );
   mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", SaveOrReload, 1 );
-  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
-  mbar->GetMenu( "File" )->AddMenuItemButton( "Export heightmap", exportPNG, 1 );
-  mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
+//  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
+ // mbar->GetMenu( "File" )->AddMenuItemButton( "Export heightmap", exportPNG, 1 );
+// mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
   mbar->GetMenu( "File" )->AddMenuItemSeperator( " " );
   mbar->GetMenu( "File" )->AddMenuItemButton( "ESC Exit", SaveOrReload, 3 );
 
-  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
+//  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
   mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
 
   mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "selected object" );
@@ -879,7 +879,7 @@ void MapView::createGUI()
 
 
   mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Model" );
-  mbar->GetMenu( "Assist" )->AddMenuItemButton( "All from MV", InsertObject, 0  );
+ // mbar->GetMenu( "Assist" )->AddMenuItemButton( "All from MV", InsertObject, 0  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Last M2 from MV", InsertObject, 14  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Last WMO from MV", InsertObject, 15  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "From Text File", showImportModels, 1  );
@@ -888,7 +888,7 @@ void MapView::createGUI()
   mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "ADT" );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Set Area ID", adtSetAreaID, 0  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear height map", clearHeightmap, 0  );
-  mbar->GetMenu( "Assist" )->AddMenuItemButton( "Move to position", moveHeightmap, 0  );
+ // mbar->GetMenu( "Assist" )->AddMenuItemButton( "Move to position", moveHeightmap, 0  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear texture", clearTexture, 0  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear models", clearAllModels, 0  );
 

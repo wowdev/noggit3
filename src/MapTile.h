@@ -34,7 +34,7 @@ public:
   int mPositionZ;
   float xbase, zbase;
 
-  bool changed;
+  int changed;
 
   void draw();
   void drawSelect();
