@@ -851,8 +851,8 @@ void MapView::createGUI()
   mbar->AddMenu( "Help" );
 
  // mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", SaveOrReload, 0 );
-  mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+S Save all", SaveOrReload, 2 );
-  mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", SaveOrReload, 1 );
+  mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+S Save", SaveOrReload, 2 );
+ // mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", SaveOrReload, 1 );
 //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
  // mbar->GetMenu( "File" )->AddMenuItemButton( "Export heightmap", exportPNG, 1 );
 // mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
@@ -860,7 +860,7 @@ void MapView::createGUI()
   mbar->GetMenu( "File" )->AddMenuItemButton( "ESC Exit", SaveOrReload, 3 );
 
 //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
-  mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
+  //mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
 
   mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "selected object" );
   mbar->GetMenu( "Edit" )->AddMenuItemButton( "CTRL + C copy", CopySelectedObject, 0  );
@@ -870,7 +870,7 @@ void MapView::createGUI()
   mbar->GetMenu( "Edit" )->AddMenuItemButton( "PAGE DOWN set to ground", SnapSelectedObjectToGround, 0 );
   mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "Model copy options" );
   mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Copy random rotation", &Settings::getInstance()->copy_rot, false  );
-  mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Copy random tile", &Settings::getInstance()->copy_tile, false  );
+  mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Copy random tilt", &Settings::getInstance()->copy_tile, false  );
   mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Copy random size", &Settings::getInstance()->copy_size, false  );
   mbar->GetMenu( "Edit" )->AddMenuItemToggle( "Copy size and rotation", &Settings::getInstance()->copyModelStats, false  );
 
@@ -1543,9 +1543,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
     // save
     if( e->keysym.sym == SDLK_s )
-      if( Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown )
-        gWorld->saveTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
-      else
         moving = -1.0f;
 
     if( e->keysym.sym == SDLK_a )
@@ -1797,9 +1794,9 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_f )
       gWorld->drawfog = !gWorld->drawfog;
 
-    // reload a map tile
-    if( e->keysym.sym == SDLK_j && Environment::getInstance()->ShiftDown )
-      gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
+    // reload a map tile STEFF out because of UID recalc. reload could kill all.
+    //if( e->keysym.sym == SDLK_j && Environment::getInstance()->ShiftDown )
+    //  gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
 
     // fog distance or brush radius
     if( e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS )
@@ -2087,6 +2084,7 @@ void MapView::inserObjectFromExtern(int model  )
 
 void MapView::mousemove( SDL_MouseMotionEvent *e )
 {
+  mainGui->minimapWindow->mousemove(e);
   if ( ( look && !( Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown || Environment::getInstance()->AltDown ) ) || video.fullscreen() )
   {
     ah += e->xrel / XSENS;

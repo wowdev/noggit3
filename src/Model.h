@@ -143,6 +143,7 @@ class Model: public ManagedItem, public AsyncObject {
   bool forceAnim;
   MPQFile **animfiles;
 
+
   void init(const MPQFile& f);
 
 

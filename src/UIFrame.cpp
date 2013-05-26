@@ -121,13 +121,3 @@ int UIFrame::getY()
 {
 	return this->_y;
 }
-
-void UIFrame::setX(int setX)
-{
-	this->_x = setX;
-}
-
-void UIFrame::setY(int setY)
-{
-	this->_y = setY;
-}

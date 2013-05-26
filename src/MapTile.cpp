@@ -803,20 +803,22 @@ void MapTile::saveTile()
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
 
-
+  UINT UID_counter = 1;
   for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
   {
     if( checkInside( lTileExtents, it->second.extents ) )
     {
+      // If save mode == 1 recalc UID
+      if(this->changed==1)
+      {
+
+        it->second.mUniqueID =  mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
+      }
+
       lObjectInstances.insert( std::pair<int, WMOInstance>( it->first, it->second ) );
-      LogDebug << "WMO SAVE: "<< it->second.wmo->filename() << std::endl;
     }
-    else
-    {
-      LogDebug << "WMO NOT SAVE: "<< it->second.wmo->filename() << std::endl;
-    }
-     LogDebug << " Extents " << lTileExtents[0].x << "-" << lTileExtents[0].z << "    " << lTileExtents[1].x << "-" << lTileExtents[1].x << " <>" <<  it->second.extents[0].x << "-" <<  it->second.extents[0].z << "     " << it->second.extents[1].x << "-" << it->second.extents[1].z << std::endl;
-  }
+   }
+  
 
   for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
   {
@@ -828,6 +830,15 @@ void MapTile::saveTile()
 
     if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
     {
+
+      // If save mode == 1 recalc UID
+      if(this->changed==1)
+      {
+        
+        it->second.d1 = mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
+         LogDebug << "recalc UID:" << it->second.d1 << std::endl;
+      }
+
       lModelInstances.insert( std::pair<int, ModelInstance>( it->first, it->second ) );
     }
   }
@@ -1062,7 +1073,7 @@ void MapTile::saveTile()
       }
 
       lMDDF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
-      lMDDF_Data[lID].uniqueID = it->first;
+      lMDDF_Data[lID].uniqueID = it->second.d1;
       lMDDF_Data[lID].pos[0] = it->second.pos.x;
       lMDDF_Data[lID].pos[1] = it->second.pos.y;
       lMDDF_Data[lID].pos[2] = it->second.pos.z;
@@ -1097,18 +1108,10 @@ void MapTile::saveTile()
         return;
       }
 
-      //! \todo Do not fuck things up via UIDs here! Stop calculating them. Or somewhere else. Or idk. This is shit. Pure shit.
 
-      // XXZZTNNN
-      //        1
-      //     1000
-      //    10000
-      //  1000000
-
-      //int lNewUID = lID + mPositionX * 1000000 + mPositionZ * 10000 + 2 * 1000;
 
       lMODF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
-      lMODF_Data[lID].uniqueID = it->first;
+      lMODF_Data[lID].uniqueID = it->second.mUniqueID;
       lMODF_Data[lID].pos[0] = it->second.pos.x;
       lMODF_Data[lID].pos[1] = it->second.pos.y;
       lMODF_Data[lID].pos[2] = it->second.pos.z;

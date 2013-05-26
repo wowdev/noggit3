@@ -37,8 +37,7 @@ public:
   int getX();
   int getY();
 
-  void setX(int setX);
-  void setY(int setY);
+
 
   getter(width, float)
   setter(width, float)

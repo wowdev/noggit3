@@ -2,9 +2,9 @@ Noggit SDL 1.3 changelog
 
 - Add app Icon
 - You can now load BGs
-- Add load all tilesetz function to texture pallet
+- Add load all tileset function to texture pallet
 - Change rows and cols direction and count
-. Add big preview of selected texture
+- Add big preview of selected texture
 - Discard the old current texture window
 - Fix texture pallet size to fit names
 - Do Rel with debug now
@@ -13,23 +13,17 @@ Noggit SDL 1.3 changelog
 - Log file caonfig file hints
 - Link to Manual wiki
 - Load MPQs now in read only
-- WMO culing Work now some better
+- WMO culing Work now better
 - Add ground flatten&blur speed
+- UID Fix
+- Clean out test and deprecated menu functions
+- Maptile display on minimap
 
+
+M2 auto options should overwrite copy size and rotation!!!
 
 
 - better Vertics Rendering
-- UID Fix
-- Try own adder if not > newer Modelviewer
-- Delete move and add all models thing
-- cords on minimap
-- Another resize try
-- Export heightmap out
-- Also import
-- save current raus!
-- Areal ID raus
-- Test aout tiling rotat size again
-- Test copy size and rotation
 
 
 VIDEO
