@@ -22,7 +22,8 @@ private:
 public:
   explicit UIMinimapWindow( Menu* menuLink );
   explicit UIMinimapWindow( World* setMap );
-  UIFrame* processLeftClick( float mx, float my );
+  UIFrame* processLeftClick( float mx, float my );  
+  void mousemove(SDL_MouseMotionEvent *e);
   void resize();
   void render() const;
   void changePlayerLookAt( float ah );

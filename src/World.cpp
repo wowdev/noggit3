@@ -866,14 +866,31 @@ void World::saveTile(int x, int z)
 
 void World::saveChanged()
 {
-  // save all changed tiles
+
+  // First save all marked as 1. During save all UIDs will get recalculated. 
   for( int j = 0; j < 64; ++j )
   {
     for( int i = 0; i < 64; ++i )
     {
       if( tileLoaded( j, i ) )
       {
-        if(this->getChanged(j,i))
+        if(this->getChanged(j,i) == 1)
+        {
+          mTiles[j][i].tile->saveTile();
+          this->unsetChanged(j,i);
+        }
+      }
+    }
+  }
+
+  // Now save all marked as 2 because UIDs now fits.
+  for( int j = 0; j < 64; ++j )
+  {
+    for( int i = 0; i < 64; ++i )
+    {
+      if( tileLoaded( j, i ) )
+      {
+        if(this->getChanged(j,i) == 2)
         {
           mTiles[j][i].tile->saveTile();
           this->unsetChanged(j,i);
@@ -2146,6 +2163,14 @@ void World::addM2( Model *model, Vec3D newPos ,bool copyit )
   newModelis.pos = newPos;
   newModelis.sc = 1;
 
+  if(Settings::getInstance()->copyModelStats==true && copyit == true)
+  {
+    // copy rot size from original model. Dirty but woring
+    newModelis.sc = Environment::getInstance()->get_clipboard().data.model->sc;
+    newModelis.dir = Environment::getInstance()->get_clipboard().data.model->dir;
+    newModelis.ldir = Environment::getInstance()->get_clipboard().data.model->ldir;
+  }
+
   if(Settings::getInstance()->copy_rot)
   {
     newModelis.dir.y += (rand() % 360 + 1);
@@ -2162,15 +2187,9 @@ void World::addM2( Model *model, Vec3D newPos ,bool copyit )
     newModelis.sc *= misc::randfloat( 0.9f, 1.1f );
   }
 
-  if(Settings::getInstance()->copyModelStats==true && copyit == true)
-  {
-    // copy rot size from original model. Dirty but woring
-     newModelis.sc = Environment::getInstance()->get_clipboard().data.model->sc;
-     newModelis.dir = Environment::getInstance()->get_clipboard().data.model->dir;
-     newModelis.ldir = Environment::getInstance()->get_clipboard().data.model->ldir;
-  }
 
-  mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));
+
+  mModelInstances.insert( std::pair<int,ModelInstance>( lMaxUID, newModelis ));  
   this->setChanged(newPos.x,newPos.z);
 }
 
@@ -2206,16 +2225,64 @@ void World::setChanged(float x, float z)
   int column =  misc::FtoIround((z-(TILESIZE/2))/TILESIZE);
   if( row >= 0 && row <= 64 && column >= 0 && column <= 64 )
     if( mTiles[column][row].tile )
-      mTiles[column][row].tile->changed = true;
+      this->setChanged(column, row);
 }
 
 void World::setChanged(int x, int z)
 {
   // change the changed flag of the map tile
-  if( mTiles[x][z].tile )
-    mTiles[x][z].tile->changed = 1;
+  if( !mTiles[x][z].tile ) return;
+  if( mTiles[x][z].tile->changed == 1) return;
+   
+  mTiles[x][z].tile->changed = 1;
 
+  for (int posaddx=-1; posaddx<2; posaddx++) 
+  {
+    for (int posaddz=-1; posaddz<2; posaddz++) 
+    {
+      if(!(posaddx==0 && posaddz==0))// exclude center ADT
+      {
+        if(gWorld->hasTile( x+posaddx,z+posaddz ))
+        {
+          if( !mTiles[x+posaddx][z+posaddz].tile  )
+          {
+            mTiles[x+posaddx][z+posaddz].tile = loadTile( x+posaddx, z+posaddz );
+            mTiles[x+posaddx][z+posaddz].tile->changed = 2;
+          }
+          else if( mTiles[x+posaddx][z+posaddz].tile->changed != 1 )
+          {
+            mTiles[x+posaddx][z+posaddz].tile->changed = 2;
+          }
+        }
+      }
+    }
+  }
+
+  int px;
+  int pz;
   // mark surrounding as 2
+  for(px=0;px==2;px++)
+  {
+    LogDebug << "X: " << px << std::endl;
+    for(pz=0;pz==2;pz++)
+    {
+      LogDebug << "Z: " << pz << std::endl;
+      if(px!=1 && pz!=1)// exclude center ADT
+      {
+        LogDebug << "Tile not Center: " << x+px << "_" << z+pz << std::endl;
+        if( mTiles[x+px-1][z+pz-1].tile )
+        {
+          LogDebug << "Tile exist: " << x+px << "_" << z+pz << std::endl;
+          if(  mTiles[x+px-1][z+pz-1].tile->changed!=1 )
+          {
+            LogDebug << "MarkSave 2: " << x+px << "_" << z+pz << std::endl;
+             mTiles[x+px-1][z+pz-1].tile->changed = 2;
+          }
+        }      
+      }
+    }
+  }
+
 
 }
 
@@ -2230,7 +2297,7 @@ int World::getChanged(int x, int z)
 {
   if(mTiles[x][z].tile)
     return mTiles[x][z].tile->changed;
-  else return false;
+  else return 0;
 }
 
 void World::setFlag( bool to, float x, float z)

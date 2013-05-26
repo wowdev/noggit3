@@ -259,6 +259,7 @@ void Menu::mousemove( SDL_MouseMotionEvent *e )
   {
     LastClickedMenu->processLeftDrag( e->x - 4, e->y - 4, e->xrel, e->yrel );
   }
+  this->mGUIMinimapWindow->mousemove(e);
 }
 
 void Menu::resizewindow()

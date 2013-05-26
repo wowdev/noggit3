@@ -8,6 +8,8 @@
 #include "World.h"
 #include "UIText.h"
 #include "Noggit.h"
+#include <sstream>
+#include <string>
 
 UIMinimapWindow::UIMinimapWindow( Menu* menuLink )
 : UIWindow( 0.0f, 0.0f, 0.0f, 0.0f )
@@ -17,6 +19,8 @@ UIMinimapWindow::UIMinimapWindow( Menu* menuLink )
 , mMenuLink( menuLink )
 , map( NULL )
 {
+  this->cursor_position = new UIText(10,  height() - 20.0f, "Maptile: ", arial14, eJustifyLeft );
+  this->addChild(cursor_position);
   resize();
 }
 
@@ -29,17 +33,41 @@ UIMinimapWindow::UIMinimapWindow( World* setMap )
 , mMenuLink( NULL )
 , map( setMap )
 {
-  resize();
-  this->cursor_position = new UIText(width() / 1,  height() - 50.0f, "World of Warcraft is (C) Blizzard Entertainment", fritz16, eJustifyLeft );
+  this->cursor_position = new UIText(10,  height() - 20.0f, "Maptile: ", arial14, eJustifyLeft );
   this->addChild(cursor_position);
+  resize();
+}
+
+
+
+void UIMinimapWindow::mousemove( SDL_MouseMotionEvent *e )
+{
+  
+  int mx = e->x - ((video.xres() - this->width())/2);
+  int my = e->y - ((video.yres() - this->height())/2);
+
+  if(
+      mx < borderwidth || mx > height() - borderwidth ||
+      my < borderwidth || my > height() - borderwidth )
+      return;
+
+  int i = static_cast<int>( mx - borderwidth ) / tilesize;
+  int j = static_cast<int>( my - borderwidth ) / tilesize;
+
+  if ( i < 64 && j < 64 && i > -1 && j > -1 )
+  {
+    std::stringstream sstr;
+    sstr << "Maptile: " << gWorld->basename << "_" << i << "_" << j<< ".adt      ";
+    this->cursor_position->setText(sstr.str());
+  }
 }
 
 UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
 {
   // no click outside the adt block
   if( !gWorld ||
-      mx < borderwidth || mx > height() - borderwidth ||
-      my < borderwidth || my > height() - borderwidth )
+    mx < borderwidth || mx > height() - borderwidth ||
+    my < borderwidth || my > height() - borderwidth )
     return NULL;
 
   // is there a tile?
@@ -59,12 +87,14 @@ UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
 
 void UIMinimapWindow::resize()
 {
-  tilesize = ( video.yres() - 100.0f - borderwidth * 2.0f ) / 64.0f;
+  tilesize = ( video.yres() - 90.0f - borderwidth * 2.0f ) / 64.0f;
 
   width( borderwidth * 2.0f + tilesize * 64.0f );
-  height( width() + 30.0f );
+  height( width() + 20.0f );
   x( video.xres() / 2.0f - width() / 2.0f );
   y( video.yres() / 2.0f - height() / 2.0f );
+  
+  this->cursor_position->y( height() - 20.0f );  
 }
 
 void UIMinimapWindow::changePlayerLookAt(float ah)
@@ -131,9 +161,13 @@ void UIMinimapWindow::render() const
 
       if( map )
       {
-        if( map->getChanged(j,i) )
+        if( map->getChanged(j,i) > 0 )
         {
-          glColor4f( 1.0f, 1.0f, 1.0f, 0.6f );
+          if(map->getChanged(j,i)==1)
+            glColor4f( 1.0f, 1.0f, 1.0f, 0.6f );
+          else
+            glColor4f( 0.7f, 0.7f, 0.7f, 0.6f );
+
           glBegin( GL_LINES );
           glVertex2i( i * tilesize, j * tilesize );
           glVertex2i( (( i + 1 ) * tilesize) , j * tilesize );
@@ -144,7 +178,6 @@ void UIMinimapWindow::render() const
           glVertex2i( i * tilesize, (( j + 1 ) * tilesize) -1 );
           glVertex2i( i * tilesize, j * tilesize );
           glEnd();
-
         }
       }
     }
