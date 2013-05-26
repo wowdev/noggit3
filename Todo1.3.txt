@@ -18,9 +18,7 @@ Noggit SDL 1.3 changelog
 - UID Fix
 - Clean out test and deprecated menu functions
 - Maptile display on minimap
-
-
-M2 auto options should overwrite copy size and rotation!!!
+- Auto size,tile and rotation works now also if you have copy model size and rotation activated.
 
 
 - better Vertics Rendering
