@@ -1999,7 +1999,7 @@ void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* ol
   }
 }
 
-void World::addHole( float x, float z )
+void World::addHole( float x, float z, bool big )
 {
   this->setChanged(x, z);
   const size_t newX = x / TILESIZE;
@@ -2020,7 +2020,10 @@ void World::addHole( float x, float z )
             {
               int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
               int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
-              chunk->addHole( k, l );
+              if(big)
+                chunk->addHoleBig( k, l );
+              else
+                chunk->addHole( k, l );
             }
           }
         }
@@ -2029,7 +2032,7 @@ void World::addHole( float x, float z )
   }
 }
 
-void World::removeHole( float x, float z )
+void World::removeHole( float x, float z,bool big )
 {
   this->setChanged(x, z);
   const size_t newX = x / TILESIZE;
@@ -2050,7 +2053,10 @@ void World::removeHole( float x, float z )
             {
               int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
               int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
-              chunk->removeHole( k, l );
+              if(big)
+                chunk->removeHoleBig( k, l );
+              else
+                chunk->removeHole( k, l );
             }
           }
         }

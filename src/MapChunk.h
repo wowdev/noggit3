@@ -99,7 +99,9 @@ public:
 
   bool isHole(int i,int j);
   void addHole(int i,int j);
+  void addHoleBig( int i, int j );
   void removeHole(int i,int j);
+  void removeHoleBig(int i,int j);
 
   void setFlag(bool value);
 
@@ -109,7 +111,8 @@ public:
   bool GetVertex(float x,float z, Vec3D *V);
 
   void loadTextures();
-//  char getAlpha(float x,float y);
+
+  //  char getAlpha(float x,float y);
 
 
   //float getTerrainHeight(float x, float z);

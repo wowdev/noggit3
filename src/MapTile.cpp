@@ -619,40 +619,19 @@ void minmax( Vec3D* a, Vec3D* b )
 
 bool checkInside( Vec3D extentA[2], Vec3D extentB[2] )
 {
-  // stupid foolish steff version of finding points inside.
-  /*
-  bool inside = false;
-
-  //P1   extentB[0].x extentB[0].z
-  if(  (extentB[0].x > extentA[0].x && extentB[0].x < extentA[1].x) && (extentB[0].z > extentA[0].z && extentB[0].z < extentA[1].z) )
-    inside = true;
- 
-  //P2  extentB[1].x extentB[0].z
-  if(  (extentB[1].x > extentA[0].x && extentB[1].x < extentA[1].x) && (extentB[0].z > extentA[0].z && extentB[0].z < extentA[1].z) )
-    inside = true;
-  
-  //P3   extentB[1].x extentB[1].z
-  if(  (extentB[1].x > extentA[0].x && extentB[1].x < extentA[1].x) && (extentB[1].z > extentA[0].z && extentB[1].z < extentA[1].z) )
-    inside = true;
-
-  //P4  extentB[0].x extentB[1].z
-  if(  (extentB[0].x > extentA[0].x && extentB[0].x < extentA[1].x) && (extentB[1].z > extentA[0].z && extentB[1].z < extentA[1].z) )
-    inside = true;
-
-  return inside;
- */
-
-
   minmax( &extentA[0], &extentA[1] );
   minmax( &extentB[0], &extentB[1] );
 
   return pointInside( extentA[0], extentB ) ||
          pointInside( extentA[1], extentB ) ||
          pointInside( extentB[0], extentA ) ||
-         pointInside( extentB[1], extentA );
-        
+         pointInside( extentB[1], extentA );     
 }
 
+bool checkOriginInside( Vec3D extentA[2], Vec3D modelPos )
+{
+  return pointInside( extentA[0], &modelPos );
+}
 
 class sExtendableArray
 {
@@ -808,10 +787,9 @@ void MapTile::saveTile()
   {
     if( checkInside( lTileExtents, it->second.extents ) )
     {
-      // If save mode == 1 recalc UID
-      if(this->changed==1)
+      // If save mode == 1 and models origin is located on the adt then recalc UID
+      if(this->changed==1 && checkOriginInside( lTileExtents, it->second.pos ))
       {
-
         it->second.mUniqueID =  mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
       }
 

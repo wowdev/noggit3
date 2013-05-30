@@ -192,11 +192,11 @@ public:
   bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture);
   void eraseTextures(float x, float z);
   void overwriteTextureAtCurrentChunk( float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
-  void addHole( float x, float z );
+  void addHole( float x, float z , bool big);
+  void removeHole( float x, float z , bool big);
   void addModel( nameEntry entry, Vec3D newPos,bool copyit );
   void addM2( Model *model, Vec3D newPos,bool copyit  );
   void addWMO( WMO *wmo, Vec3D newPos ,bool copyit );
-  void removeHole( float x, float z );
   void jumpToCords(Vec3D pos);
   void saveMap();
 

@@ -1854,10 +1854,32 @@ void MapChunk::addHole( int i, int j )
   initStrip();
 }
 
+void MapChunk::addHoleBig( int i, int j )
+{
+  for(int x=-3;x<4;x++)
+  {
+    for(int y=-3;y<4;y++)
+    {
+      addHole( i+x, j+y );
+    }
+  }
+}
+
 void MapChunk::removeHole( int i, int j )
 {
   holes = holes & ~( ( 1 << ((j*4)+i)) );
   initStrip();
+}
+
+void MapChunk::removeHoleBig( int i,int j )
+{
+  for(int x=-3;x<4;x++)
+  {
+    for(int y=-3;y<4;y++)
+    {
+      removeHole( i+x, j+y );
+    }
+  }
 }
 
 void MapChunk::setAreaID( int ID )
@@ -1877,3 +1899,4 @@ void MapChunk::setFlag( bool changeto )
   else
     this->Flags = this->Flags & ~(Environment::getInstance()->flagPaintMode);
 }
+
