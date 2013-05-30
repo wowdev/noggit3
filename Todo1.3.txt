@@ -19,9 +19,7 @@ Noggit SDL 1.3 changelog
 - Clean out test and deprecated menu functions
 - Maptile display on minimap
 - Auto size,tile and rotation works now also if you have copy model size and rotation activated.
-
-
 - better Vertics Rendering
-
+- In Holes mode you can now alos edit the full chunk if you hold down the ALT key during edit.
 
 VIDEO
