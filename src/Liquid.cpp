@@ -675,8 +675,12 @@ void Liquid::initTextures( const std::string& pFilename )
 {
   for( int i = pFirst; i <= pLast; ++i )
   {
-    _textureFilenames.push_back( pFilename );
-    _textures.push_back( TextureManager::newTexture( pFilename )) ;
+	  std::string tempString=pFilename;
+	  char c[3];
+	  sprintf(c, "%d", i);
+	  tempString.replace(tempString.find("%d"),2,c,strlen(c)); //little fix for water texture loading (replace %d with iteration id)*/
+	  _textureFilenames.push_back( tempString );
+	  _textures.push_back( TextureManager::newTexture( tempString )) ;
   }
 }
 
