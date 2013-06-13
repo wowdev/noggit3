@@ -867,7 +867,7 @@ void World::saveTile(int x, int z)
 void World::saveChanged()
 {
 
-  // First save all marked as 1. During save all UIDs will get recalculated. 
+  // First recalculated UIDs.
   for( int j = 0; j < 64; ++j )
   {
     for( int i = 0; i < 64; ++i )
@@ -876,21 +876,20 @@ void World::saveChanged()
       {
         if(this->getChanged(j,i) == 1)
         {
-          mTiles[j][i].tile->saveTile();
-          this->unsetChanged(j,i);
+          mTiles[j][i].tile->uidTile();
         }
       }
     }
   }
 
-  // Now save all marked as 2 because UIDs now fits.
+  // Now save all marked as 1 and 2 because UIDs now fits.
   for( int j = 0; j < 64; ++j )
   {
     for( int i = 0; i < 64; ++i )
     {
       if( tileLoaded( j, i ) )
       {
-        if(this->getChanged(j,i) == 2)
+        if(this->getChanged(j,i) > 0)
         {
           mTiles[j][i].tile->saveTile();
           this->unsetChanged(j,i);
