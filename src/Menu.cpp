@@ -258,8 +258,8 @@ void Menu::mousemove( SDL_MouseMotionEvent *e )
   if( LastClickedMenu )
   {
     LastClickedMenu->processLeftDrag( e->x - 4, e->y - 4, e->xrel, e->yrel );
-  }
-  this->mGUIMinimapWindow->mousemove(e);
+	this->mGUIMinimapWindow->mousemove(e); //fix for Noggit's exit while moving a mouse on start menu
+  } 
 }
 
 void Menu::resizewindow()

@@ -62,10 +62,10 @@ void MPQArchive::finishLoading()
 
   if( SFileOpenFileEx( _archiveHandle, "(listfile)", 0, &fh ) )
   {
-    size_t filesize = SFileGetFileSize( fh );
+    size_t filesize = SFileGetFileSize( fh, NULL ); //last NULL for newer version of StormLib
 
     char* readbuffer = new char[filesize];
-    SFileReadFile( fh, readbuffer, filesize );
+    SFileReadFile( fh, readbuffer, filesize, NULL, NULL); //last NULLs for newer version of StormLib
     SFileCloseFile( fh );
 
     std::string list( readbuffer );
@@ -200,11 +200,11 @@ MPQFile::MPQFile( const std::string& filename )
     if( !i->second->openFile( filename_corrected, &fileHandle ) )
       continue;
 
-    size = SFileGetFileSize( fileHandle );
+    size = SFileGetFileSize( fileHandle, NULL ); //last NULL for newer version of StormLib
 
     eof = false;
     buffer = new char[size];
-    SFileReadFile( fileHandle, buffer, size );
+    SFileReadFile( fileHandle, buffer, size, NULL, NULL ); //last NULLs for newer version of StormLib
     SFileCloseFile( fileHandle );
 
     return;
@@ -257,8 +257,8 @@ void MPQFile::save(const char* filename)  //save to MPQ
     SFileCreateArchive(newmodmpq.c_str(),MPQ_CREATE_ARCHIVE_V2 | MPQ_CREATE_ATTRIBUTES,0x40,&mpq_a);
     //! \note Is locale setting needed? LOCALE_NEUTRAL is windows only.
     SFileSetFileLocale(mpq_a,0); // 0 = LOCALE_NEUTRAL.
-    SFileAddFileEx(mpq_a,"shaders\\terrain1.fs","myworld",MPQ_FILE_COMPRESS,MPQ_COMPRESSION_ZLIB);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld"
-    SFileCompactArchive(mpq_a);
+    SFileAddFileEx(mpq_a,"shaders\\terrain1.fs","myworld",MPQ_FILE_COMPRESS,MPQ_COMPRESSION_ZLIB, NULL);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld". Last NULLs for newer version of StormLib
+    SFileCompactArchive(mpq_a, NULL, NULL ); //last NULLs for newer version of StormLib
     SFileCloseArchive(mpq_a);
     modmpqpath=newmodmpq;
   }
@@ -275,9 +275,9 @@ void MPQFile::save(const char* filename)  //save to MPQ
     nameInMPQ.replace( found, 1, "\\" );
     found = nameInMPQ.find( "/" );
   }
-  if(SFileAddFileEx(mpq_a,filename,nameInMPQ.c_str(),MPQ_FILE_COMPRESS|MPQ_FILE_ENCRYPTED|MPQ_FILE_REPLACEEXISTING,MPQ_COMPRESSION_ZLIB))
+  if(SFileAddFileEx(mpq_a,filename,nameInMPQ.c_str(),MPQ_FILE_COMPRESS|MPQ_FILE_ENCRYPTED|MPQ_FILE_REPLACEEXISTING,MPQ_COMPRESSION_ZLIB, NULL)) //last NULL for newer version of StormLib
   {LogDebug << "Added file "<<fname.c_str()<<" to archive \n";} else LogDebug << "Error "<<GetLastError()<< " on adding file to archive! Report this message \n";
-  SFileCompactArchive(mpq_a);//recompact our archive to avoid fragmentation
+  SFileCompactArchive(mpq_a, NULL, NULL );//recompact our archive to avoid fragmentation. Last NULLs for newer version of StormLib
   SFileCloseArchive(mpq_a);
   new MPQArchive(modmpqpath,true);//now load edited archive to memory again
 }
