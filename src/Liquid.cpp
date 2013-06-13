@@ -624,6 +624,7 @@ void Liquid::draw()
     glDepthMask(GL_FALSE);
   }
 
+#if 0 // 0 - nice water with monotone, 1 - old style water
   if (type==0)
     glColor4f(0.0f,0.0f,0.0f,0.8f);
   else
@@ -631,17 +632,23 @@ void Liquid::draw()
     if (type==2)
     {
       // dynamic color lookup! ^_^
-      col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]; //! \todo  add variable water color
+      col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]*0.3f; //! \todo  add variable water color
       col2 = gWorld->skies->colorSet[WATER_COLOR_DARK];
     }
     glColor4f(col.x, col.y, col.z, tcol);
     glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB,0,col2.x,col2.y,col2.z,tcol);
-#ifdef USEBLSFILES
-    glSecondaryColor3f(col2.x,col2.y,col2.z);
-#endif
+//#ifdef USEBLSFILES
+//    glSecondaryColor3f(col2.x,col2.y,col2.z);
+
     //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); //! \todo  check if ARB_texture_env_add is supported? :(
   }
+#else 
+  col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]*0.3f; //! \todo  add variable water color
+  col2 = gWorld->skies->colorSet[WATER_COLOR_DARK];
 
+  glColor4f(col.x, col.y, col.z, tcol);
+  glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB,0,col2.x,col2.y,col2.z,tcol);
+#endif
   OpenGL::Texture::setActiveTexture(0);
   OpenGL::Texture::enableTexture();
 
