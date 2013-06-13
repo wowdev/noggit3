@@ -766,6 +766,49 @@ void MapTile::clearAllModels()
   }
 
 }
+
+void MapTile::uidTile()
+{
+  // Check which doodads and WMOs are on this ADT.
+  Vec3D lTileExtents[2];
+  lTileExtents[0] = Vec3D( this->xbase, 0.0f, this->zbase );
+  lTileExtents[1] = Vec3D( this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE );
+
+  std::map<int, WMOInstance> lObjectInstances;
+  std::map<int, ModelInstance> lModelInstances;
+
+  UINT UID_counter = 1;
+  for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
+  {
+    if( checkInside( lTileExtents, it->second.extents ) )
+    {
+      // If save mode == 1 and models origin is located on the adt then recalc UID
+      if(this->changed==1 && checkOriginInside( lTileExtents, it->second.pos ))
+      {
+        it->second.mUniqueID =  mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
+      }
+    }
+  }
+
+  for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
+  {
+    Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
+    lModelExtentsV1[0] = it->second.model->header.BoundingBoxMin + it->second.pos;
+    lModelExtentsV1[1] = it->second.model->header.BoundingBoxMax + it->second.pos;
+    lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
+    lModelExtentsV2[1] = it->second.model->header.VertexBoxMax + it->second.pos;
+
+    if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
+    {
+      // If save mode == 1 recalc UID
+      if(this->changed==1)
+      {
+        it->second.d1 = mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
+      }
+    }
+  }
+}
+
 void MapTile::saveTile()
 {
   Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
@@ -787,12 +830,6 @@ void MapTile::saveTile()
   {
     if( checkInside( lTileExtents, it->second.extents ) )
     {
-      // If save mode == 1 and models origin is located on the adt then recalc UID
-      if(this->changed==1 && checkOriginInside( lTileExtents, it->second.pos ))
-      {
-        it->second.mUniqueID =  mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
-      }
-
       lObjectInstances.insert( std::pair<int, WMOInstance>( it->first, it->second ) );
     }
    }
@@ -808,15 +845,6 @@ void MapTile::saveTile()
 
     if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
     {
-
-      // If save mode == 1 recalc UID
-      if(this->changed==1)
-      {
-        
-        it->second.d1 = mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
-         LogDebug << "recalc UID:" << it->second.d1 << std::endl;
-      }
-
       lModelInstances.insert( std::pair<int, ModelInstance>( it->first, it->second ) );
     }
   }
