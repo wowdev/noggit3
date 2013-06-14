@@ -18,6 +18,7 @@ private:
   unsigned __int32 mWaterSize;
   MH2O_Header mWaterHeaders[256];
   MH2O_Information mWaterInfos[256];
+  char* MH2O_Buffer; // Water info storage...
   std::map<int, std::vector<unsigned char>> mWaterMasks;
 public:
   MapTile( int x0, int z0, const std::string& pFilename, bool pBigAlpha );

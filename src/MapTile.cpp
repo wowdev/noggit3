@@ -199,6 +199,11 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
     MH2O_Header lHeader[256];
     theFile.read(lHeader, 256*sizeof(MH2O_Header));
     memcpy(mWaterHeaders, lHeader, 256 * sizeof(MH2O_Header));
+
+	theFile.seek( Header.mh2o + 0x14 );    //
+	MH2O_Buffer=new char[mWaterSize];	   // saving all water info from original .adt
+	theFile.read(MH2O_Buffer, mWaterSize); //
+
     int infoCounter = 0;
     for(int i=0; i < 16; ++i) {
       for(int j=0; j < 16; ++j) {
@@ -1143,7 +1148,13 @@ void MapTile::saveTile()
 
     //MH2O just data saving
 
-#if 0
+	lADTFile.Extend(8+mWaterSize);													// Beket's temporary way to save a water
+	lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mh2o = lCurrentPosition - 0x14;	// Just insert full MH2O data from original .adt to generated one...
+	LogDebug << "Water size "<< mWaterSize << std::endl;							// It is not nice, but works! Sometimes crash!
+	lADTFile.Insert( lCurrentPosition, mWaterSize, MH2O_Buffer );					// Still need to fix Bernds way...
+	lCurrentPosition += 8+mWaterSize;
+
+#if 0 //Bernds way to save a water... Still not working
 #pragma region WaterSaving
     lADTFile.Extend(8 + 256 * sizeof(MH2O_Header));
     lADTFile.GetPointer<MHDR>(0x14)->mh2o = lCurrentPosition;
