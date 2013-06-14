@@ -199,11 +199,12 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
     MH2O_Header lHeader[256];
     theFile.read(lHeader, 256*sizeof(MH2O_Header));
     memcpy(mWaterHeaders, lHeader, 256 * sizeof(MH2O_Header));
-
-	theFile.seek( Header.mh2o + 0x14 );    //
-	MH2O_Buffer=new char[mWaterSize];	   // saving all water info from original .adt
-	theFile.read(MH2O_Buffer, mWaterSize); //
-
+	
+	// saving all water info from original .adt... Accodring to Beket's way of saving a water :)
+	theFile.seek( Header.mh2o + 0x14 );    
+	MH2O_Buffer=new char[mWaterSize];   
+	theFile.read(MH2O_Buffer, mWaterSize);
+	
     int infoCounter = 0;
     for(int i=0; i < 16; ++i) {
       for(int j=0; j < 16; ++j) {
@@ -319,7 +320,9 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
       }
     }
 
-  }
+  }else{
+	  mWaterSize=0; //Tile has no water
+}
 
 
 
@@ -1148,11 +1151,17 @@ void MapTile::saveTile()
 
     //MH2O just data saving
 
-	lADTFile.Extend(8+mWaterSize);													// Beket's temporary way to save a water
-	lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mh2o = lCurrentPosition - 0x14;	// Just insert full MH2O data from original .adt to generated one...
-	LogDebug << "Water size "<< mWaterSize << std::endl;							// It is not nice, but works! Sometimes crash!
-	lADTFile.Insert( lCurrentPosition, mWaterSize, MH2O_Buffer );					// Still need to fix Bernds way...
-	lCurrentPosition += 8+mWaterSize;
+	// Beket's temporary way to save a water
+	// Just insert full MH2O data from original .adt to generated one...
+	// Still need to fix Bernds way...
+	if(mWaterSize>0){					//if has water... had a stupid crashes because of not checking this =))
+		lADTFile.Extend(8+mWaterSize);													
+		lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mh2o = lCurrentPosition - 0x14;	
+		LogDebug << "Water size "<< mWaterSize << std::endl;
+		lADTFile.Insert( lCurrentPosition, mWaterSize, MH2O_Buffer );					
+		lCurrentPosition += 8+mWaterSize;
+	}
+	
 
 #if 0 //Bernds way to save a water... Still not working
 #pragma region WaterSaving

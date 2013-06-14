@@ -15,7 +15,7 @@ class MapChunk;
 class MapTile
 {
 private:
-  unsigned __int32 mWaterSize;
+  uint32_t mWaterSize;
   MH2O_Header mWaterHeaders[256];
   MH2O_Information mWaterInfos[256];
   char* MH2O_Buffer; // Water info storage...
