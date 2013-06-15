@@ -658,7 +658,8 @@ public:
   {
     mSize = mSize + pAddition;
     mData = static_cast<char*>( realloc( mData, mSize ) );
-    memset( mData + mSize - pAddition, 0, pAddition );
+	if(pAddition>0)
+		memset( mData + mSize - pAddition, 0, pAddition );
     return( mData != NULL );
   }
   bool Insert( int pPosition, int pAddition )
@@ -698,7 +699,7 @@ public:
   template<typename To>
   To * GetPointer( unsigned int pPosition )
   {
-    return( reinterpret_cast<To*>( mData + pPosition ) );
+	return( reinterpret_cast<To*>( mData + pPosition ) );
   }
 
   sExtendableArray()
@@ -706,12 +707,13 @@ public:
     mSize = 0;
     mData = NULL;
   }
+
   sExtendableArray( int pSize, const char * pData )
   {
     if( Allocate( pSize ) )
-      memcpy( mData, pData, pSize );
-    else
-      LogError << "Allocating " << pSize << " bytes failed. This may crash soon." << std::endl;
+		memcpy( mData, pData, pSize );
+	else
+		LogError << "Allocating " << pSize << " bytes failed. This may crash soon." << std::endl;
   }
 
   void Destroy()
@@ -1699,6 +1701,7 @@ void MapTile::saveTile()
   }
 #endif
 
+  lADTFile.Extend(lCurrentPosition-lADTFile.mSize); // cleaning unused nulls at the end of file
   MPQFile f( mFilename );
   f.setBuffer( lADTFile.GetPointer<char>(), lADTFile.mSize );
   f.SaveFile();
