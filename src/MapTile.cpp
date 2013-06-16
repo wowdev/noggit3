@@ -547,7 +547,7 @@ void MapTile::drawWater()
   for( std::vector<Liquid*>::iterator liq = mLiquids.begin(); liq != mLiquids.end(); liq++ )
     (*liq)->draw();
 
-  if(mFlags) //Dont know why but if mFlags!=0 then Blizz uses old MCLQ subchunk for water render. But if mFlags==0 then MCLQ subchunk is corrupted (Blizzs forgot to remove?). Dont render it because it is crap =))
+  if( mFlags && mWaterSize==0 ) //Dont know why but if mFlags!=0 then Blizz uses old MCLQ subchunk for water render. But if mFlags==0 then MCLQ subchunk is corrupted (Blizzs forgot to remove?). Dont render it because it is crap =))
 	  for( std::vector<Liquid*>::iterator liq = chunksLiquids.begin(); liq != chunksLiquids.end(); liq++ )
 		(*liq)->draw();
 
