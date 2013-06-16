@@ -221,6 +221,8 @@ public:
   void swapTexture( int x, int z, OpenGL::Texture *tex );
   bool isTileExternal(int x, int z);
   void markOnDisc(int x, int z, bool mto);
+
+  bool canWaterSave(int x, int y);
 };
 
 extern World *gWorld;

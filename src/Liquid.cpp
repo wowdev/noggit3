@@ -24,8 +24,24 @@ void Liquid::initFromTerrain(MPQFile* f, int flags)
   16 - magma
   */
   ydir = 1.0f;
+  if (flags & 32) {
+    // slime:
+    //initTextures<1,30>( "XTEXTURES\\LAVA\\lava.%d.blp" );
+    initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
+    type = 0; // not colored
+    pType = 2;
+    mTransparency = false;
+  }
   if (flags & 16) {
     // magma:
+    //initTextures<1,30>( "XTEXTURES\\LAVA\\lava.%d.blp" );
+    initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
+    type = 0; // not colored
+    pType = 2;
+    mTransparency = false;
+  }
+  if (flags & 8) {
+    // ocean:
     //initTextures<1,30>( "XTEXTURES\\LAVA\\lava.%d.blp" );
     initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
     type = 0; // not colored
@@ -94,26 +110,17 @@ void Liquid::initFromWMO(MPQFile* f, const WMOMaterial &mat, bool indoor)
 
 void Liquid::initGeometry(MPQFile* f)
 {
-  // assume: f is at the appropriate starting position
-
   LiquidVertex *map = reinterpret_cast<LiquidVertex*>(f->getPointer());
   unsigned char *flags = reinterpret_cast<unsigned char*>(f->getPointer() + (xtiles+1)*(ytiles+1)*sizeof(LiquidVertex));
 
-  //waterFlags=new unsigned char[(xtiles+1)*(ytiles+1)];
-  //memcpy(waterFlags,flags,(xtiles+1)*(ytiles+1));
-
   // generate vertices
   Vec3D * lVertices = new Vec3D[(xtiles+1)*(ytiles+1)];
-  //color = new unsigned char[(xtiles+1)*(ytiles+1)];
   for (int j=0; j<ytiles+1; j++) {
     for (int i=0; i<xtiles+1; ++i) {
       size_t p = j*(xtiles+1)+i;
       float h = map[p].h;
       if (h > 100000) h = pos.y;
             lVertices[p] = Vec3D(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
-      //color[p]= map[p].c[0];
-//! \todo  if map[p].c[1] != 0, overwrite the type from the flags.
-//      gLog( "%i, {%i, %i, %i, %i}: %s\n", flags[p], map[p].c[0], map[p].c[1], map[p].c[2], map[p].c[3], gLiquidTypeDB.getByID( map[p].c[1] != 0 ? map[p].c[1] : pType ).getString( LiquidTypeDB::Name ) );
     }
   }
 
@@ -121,41 +128,21 @@ void Liquid::initGeometry(MPQFile* f)
   mDrawList->startRecording();
 
   //! \todo  handle light/dark liquid colors
-  glNormal3f(0, 1, 0);
+  
   glBegin(GL_QUADS);
+  glNormal3f(0, 1, 0);
+
   // draw tiles
   for (int j=0; j<ytiles; j++) {
     for (int i=0; i<xtiles; ++i) {
       unsigned char flag = flags[j*xtiles+i];
       if ( !( flag & 8 ) )
-      {
+      { 
         tmpflag = flag;
         // 15 seems to be "don't draw"
         size_t p = j*(xtiles+1)+i;
-
         float c;
 
-#ifdef USEBLSFILES
-        c=type==2?static_cast<float>(map[p].c[0])/255.0f:1.0f;
-        glMultiTexCoord2f(GL_TEXTURE1,c,c);
-        glTexCoord2f(i / texRepeats, j / texRepeats);
-        glVertex3fv(lVertices[p]);
-
-        c=type==2?static_cast<float>(map[p+1].c[0])/255.0f:1.0f;
-        glMultiTexCoord2f(GL_TEXTURE1,c,c);
-        glTexCoord2f((i+1) / texRepeats, j / texRepeats);
-        glVertex3fv(lVertices[p+1]);
-
-        c=type==2?static_cast<float>(map[p+xtiles+1+1].c[0])/255.0f:1.0f;
-        glMultiTexCoord2f(GL_TEXTURE1,c,c);
-        glTexCoord2f((i+1) / texRepeats, (j+1) / texRepeats);
-        glVertex3fv(lVertices[p+xtiles+1+1]);
-
-        c=type==2?static_cast<float>(map[p+xtiles+1].c[0])/255.0f:1.0f;
-        glMultiTexCoord2f(GL_TEXTURE1,c,c);
-        glTexCoord2f(i / texRepeats, (j+1) / texRepeats);
-        glVertex3fv(lVertices[p+xtiles+1]);
-#else
         c=static_cast<float>(map[p].c[0])/255.0f;
         glMultiTexCoord2f(GL_TEXTURE1,c,c);
         glTexCoord2f(i / texRepeats, j / texRepeats);
@@ -175,59 +162,10 @@ void Liquid::initGeometry(MPQFile* f)
         glMultiTexCoord2f(GL_TEXTURE1,c,c);
         glTexCoord2f(i / texRepeats, (j+1) / texRepeats);
         glVertex3fv(lVertices[p+xtiles+1]);
-#endif
-
       }
     }
   }
   glEnd();
-
-  /*
-  // debug triangles:
-  //glColor4f(1,1,1,1);
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_LIGHTING);
-  glBegin(GL_TRIANGLES);
-  for (int j=0; j<ytiles+1; j++) {
-    for (int i=0; i<xtiles+1; ++i) {
-      size_t p = j*(xtiles+1)+i;
-      Vec3D v = verts[p];
-      //short s = *( (short*) (f->getPointer() + p*8) );
-      //float f = s / 255.0f;
-      //glColor4f(f,(1.0f-f),0,1);
-      unsigned char c[4];
-      c[0] = 255-map[p].c[3];
-      c[1] = 255-map[p].c[2];
-      c[2] = 255-map[p].c[1];
-      c[3] = map[p].c[0];
-      glColor4ubv(c);
-
-      glVertex3fv(v + Vec3D(-0.5f, 1.0f, 0));
-      glVertex3fv(v + Vec3D(0.5f, 1.0f, 0));
-      glVertex3fv(v + Vec3D(0.0f, 2.0f, 0));
-    }
-  }
-  glEnd();
-  glColor4f(1,1,1,1);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_TEXTURE_2D);
-  */
-
-
-  /*
-  // temp: draw outlines
-  glDisable(GL_TEXTURE_2D);
-  glBegin(GL_LINE_LOOP);
-  Vec3D wx = Vec3D(tilesize*xtiles,0,0);
-  Vec3D wy = Vec3D(0,0,tilesize*ytiles*ydir);
-  glColor4f(1,0,0,1);
-  glVertex3fv(pos);
-  glColor4f(1,1,1,1);
-  glVertex3fv(pos+wx);
-  glVertex3fv(pos+wx+wy);
-  glVertex3fv(pos+wy);
-  glEnd();
-  glEnable(GL_TEXTURE_2D);*/
 
   mDrawList->endRecording();
   if(lVertices)
@@ -359,8 +297,9 @@ void Liquid::initFromMH2O()
   // generate vertices
   Vec3D lVertices[9][9];
   for( int j = 0; j < 9; ++j )
-    for( int i = 0; i < 9; ++i )
+    for( int i = 0; i < 9; ++i ){
       lVertices[j][i] = Vec3D( pos.x + tilesize * i, mTileData.mHeightmap[j][i], pos.z + ydir * tilesize * j );
+	}
 
   mDrawList = new OpenGL::CallList();
   mDrawList->startRecording();
@@ -596,7 +535,6 @@ void enableWaterShader()
 void Liquid::draw()
 {
   glEnable(GL_FRAGMENT_PROGRAM_ARB);
-
 #ifdef USEBLSFILES
   if( type == 2 && mWaterShader->IsOkay() )
     mWaterShader->EnableShader();

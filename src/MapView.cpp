@@ -53,6 +53,7 @@
 #include "World.h"
 #include "UIExitWarning.h"
 #include "UICapsWarning.h"
+#include "UIWaterSaveWarning.h"
 #include "UIModelImport.h"
 #include "UIHelperModels.h"
 
@@ -930,6 +931,11 @@ void MapView::createGUI()
   mainGui->capsWarning->hide();
   mainGui->addChild( mainGui->capsWarning );
 
+  // Water unable to save warning
+  mainGui->waterSaveWarning = new UIWaterSaveWarning(this);
+  mainGui->waterSaveWarning->hide();
+  mainGui->addChild( mainGui->waterSaveWarning );
+
   // modelimport
   mainGui->ModelImport = new UIModelImport(this);
   mainGui->ModelImport->hide();
@@ -1344,6 +1350,7 @@ void MapView::tick( float t, float dt )
     rightMouse = false;
     look = false;
     MoveObj = false;
+	
     moving = 0;
     strafing = 0;
     updown = 0;
@@ -1560,7 +1567,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
         moving = -1.0f;
 
     if( e->keysym.sym == SDLK_a )
-      strafing = -1.0f;
+		strafing = -1.0f;      
 
     if( e->keysym.sym == SDLK_d )
       strafing = 1.0f;
@@ -2037,11 +2044,16 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_w)
     {
       key_w = false;
-      if( !(leftMouse && rightMouse) && moving > 0.0f) moving = 0.0f;
+      if( !(leftMouse && rightMouse) && moving > 0.0f) {
+		  
+		  moving = 0.0f;
+	  }
     }
 
-    if( e->keysym.sym == SDLK_s && moving < 0.0f )
-      moving = 0.0f;
+    if( e->keysym.sym == SDLK_s && moving < 0.0f ){
+		
+		moving = 0.0f;
+	}
 
     if ( e->keysym.sym == SDLK_UP || e->keysym.sym == SDLK_DOWN)
       lookat=0.0f;
@@ -2049,11 +2061,15 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if ( e->keysym.sym == SDLK_LEFT || e->keysym.sym == SDLK_RIGHT )
       turn = 0.0f;
 
-    if( e->keysym.sym == SDLK_d && strafing > 0.0f )
-      strafing = 0.0f;
+    if( e->keysym.sym == SDLK_d && strafing > 0.0f ){
+		
+		strafing = 0.0f;
+	}
 
-    if( e->keysym.sym == SDLK_a && strafing < 0.0f )
-      strafing = 0.0f;
+    if( e->keysym.sym == SDLK_a && strafing < 0.0f ){
+		
+		strafing = 0.0f;
+	}
 
     if( e->keysym.sym == SDLK_q && updown > 0.0f )
       updown = 0.0f;
@@ -2210,6 +2226,7 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
   
   Environment::getInstance()->screenX = MouseX = e->x;
   Environment::getInstance()->screenY = MouseY = e->y;
+  checkWaterSave();
 }
 
 void MapView::addModelFromTextSelection( int id )
@@ -2265,13 +2282,16 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
         if( LastClicked )
           LastClicked->processUnclick();
 
-        if(!key_w && moving > 0.0f )
-          moving = 0.0f;
+        if(!key_w && moving > 0.0f ){
+			
+			moving = 0.0f;
+		}
 
         if( mViewMode == eViewMode_2D )
         {
-          strafing = 0;
-          moving = 0;
+			
+			strafing = 0;
+			moving = 0;
         }
       break;
 
@@ -2280,7 +2300,10 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 
         look = false;
 
-        if(!key_w && moving > 0.0f )moving = 0.0f;
+        if(!key_w && moving > 0.0f ){
+			
+			moving = 0.0f;
+		}
 
         if( mViewMode == eViewMode_2D )
         {
@@ -2300,4 +2323,11 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
   {
     Environment::getInstance()->view_holelines = Settings::getInstance()->holelinesOn;
   }
+}
+
+void MapView::checkWaterSave(){
+	if(gWorld->canWaterSave(static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE))
+		mainGui->waterSaveWarning->hide(); 
+	else 
+		mainGui->waterSaveWarning->show();
 }

@@ -2224,7 +2224,7 @@ void World::addWMO( WMO *wmo, Vec3D newPos, bool copyit )
 }
 
 void World::setChanged(float x, float z)
-{
+{ 
   // change the changed flag of the map tile
   int row =  misc::FtoIround((x-(TILESIZE/2))/TILESIZE);
   int column =  misc::FtoIround((z-(TILESIZE/2))/TILESIZE);
@@ -2234,7 +2234,7 @@ void World::setChanged(float x, float z)
 }
 
 void World::setChanged(int x, int z)
-{
+{	
   // change the changed flag of the map tile
   if( !mTiles[x][z].tile ) return;
   if( mTiles[x][z].tile->changed == 1) return;
@@ -2300,13 +2300,13 @@ void World::unsetChanged(int x, int z)
 
 int World::getChanged(int x, int z)
 {
-  if(mTiles[x][z].tile)
+  if(mTiles[x][z].tile && mTiles[x][z].tile->changed==1) // why do we need to save tile with changed=2? What "2" means?
     return mTiles[x][z].tile->changed;
   else return 0;
 }
 
 void World::setFlag( bool to, float x, float z)
-{
+{	
   // set the inpass flag to selected chunk
   this->setChanged(x, z);
   const int newX = x / TILESIZE;
@@ -2446,7 +2446,6 @@ void World::swapTexture( int x, int z, OpenGL::Texture *tex )
   }
 }
 
-
 void World::saveWDT()
 {
    // int lCurrentPosition = 0;
@@ -2458,4 +2457,8 @@ void World::saveWDT()
    // f.setBuffer( lWDTFile.GetPointer<uint8_t>(), lWDTFile.mSize );
    // f.SaveFile();
    // f.close();
+}
+
+bool World::canWaterSave(int x, int y){ 
+	return mTiles[y][x].tile->canWaterSave();
 }
