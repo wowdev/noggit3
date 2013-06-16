@@ -19,7 +19,7 @@ UIWaterSaveWarning::UIWaterSaveWarning( MapView *mapview )
 {
   addChild( new UITexture( 10.0f, 10.0f, 64.0f, 64.0f, "Interface\\ICONS\\Ability_Creature_Poison_06.blp" ) );
   addChild( new UIText( 95.0f, 20.0f, "Old style water! Noggit will not", arial14, eJustifyLeft ) );
-  addChild( new UIText( 95.0f, 40.0f, "save old water on this ADT!", arial14, eJustifyLeft ) );
+  addChild( new UIText( 95.0f, 40.0f, "save some water on this ADT!", arial14, eJustifyLeft ) );
 }
 
 void UIWaterSaveWarning::resize()
