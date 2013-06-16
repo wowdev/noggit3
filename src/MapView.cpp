@@ -2010,7 +2010,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
           break;
         }
       }
-      else if( e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_6 )
+      else if( e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_8 )
       {
         terrainMode = e->keysym.sym - SDLK_1;
         mainGui->guiToolbar->IconSelect( terrainMode );
