@@ -41,3 +41,4 @@ bugs
 - After you have saved the selection works not. You have to cloase noggit and reload.
 - There is no unloading of ADTs. We should think abut and implement
 - WMO culling dont work 100%. On big models you have often parts that disapeare.
+- If you make a model copy to clipboard, delete it then and past then noggit crash.
