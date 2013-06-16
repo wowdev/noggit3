@@ -1,5 +1,7 @@
 Noggit SDL 1.3 changelog
 
+Done:
+
 - Add app Icon
 - You can now load BGs
 - Add load all tileset function to texture pallet
@@ -19,7 +21,23 @@ Noggit SDL 1.3 changelog
 - Clean out test and deprecated menu functions
 - Maptile display on minimap
 - Auto size,tile and rotation works now also if you have copy model size and rotation activated.
-- better Vertics Rendering
 - In Holes mode you can now alos edit the full chunk if you hold down the ALT key during edit.
+- Water save
 
-VIDEO
+ToDo:
+- Water fix for custom added water
+- better Vertics Rendering ( Hanfer )
+- water delete all
+- Water full create at level x perhaps just over slider with realtime rendering.
+
+bugs
+
+- Resize bug. After the load of a map and the resice of the window the selection do not work.
+- Some WMOs crash noggit on render call. Like in Mulgot near start area.
+- Some models render not or wrong. Perhaps 2 side force. Some mushrooms for example
+- Fish model render wrong.
+- Holes tool sometimes make hols where it likes. Its because the old selectin. But hols work not with new one.
+- Bigger models (Like stormwind) should mark and load all adts they are located on after insert, move or delete.
+- After you have saved the selection works not. You have to cloase noggit and reload.
+- There is no unloading of ADTs. We should think abut and implement
+- WMO culling dont work 100%. On big models you have often parts that disapeare.
