@@ -229,6 +229,8 @@ SET( SourceFiles
   src/UIExitWarning.h
   src/UICapsWarning.cpp
   src/UICapsWarning.h
+  src/UIWaterSaveWarning.cpp
+  src/UIWaterSaveWarning.h
   src/UIHelperModels.cpp
   src/UIHelperModels.h
   src/UIModel.cpp

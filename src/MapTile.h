@@ -51,7 +51,9 @@ public:
   bool isTile( int pX, int pZ );
   void clearAllModels();
   void uidTile();
+  void addChunksLiquid(Liquid *lq);
 
+  bool canWaterSave();
 private:
   // MFBO:
   GLfloat mMinimumValues[3*3*3];
@@ -70,6 +72,7 @@ private:
 
   MapChunk * mChunks[16][16];
   std::vector<Liquid*> mLiquids;
+  std::vector<Liquid*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
 
   friend class MapChunk;
 };

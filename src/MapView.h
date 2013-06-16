@@ -38,6 +38,8 @@ private:
 
   float mTimespeed;
 
+  void checkWaterSave();
+
 public:
   void quit();
   MapView(float ah0 = -90.0f, float av0 = -30.0f);

@@ -419,7 +419,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
         }
       }
     }
-    else if ( fourcc == 'MCLQ' ) {
+	/*else if ( fourcc == 'MCLQ' ) { // old one
       // liquid / water level
       f->read(&fourcc,4);
       if( fourcc != 'MCSE' ||  fourcc != 'MCNK' || header.sizeLiquid == 8  || true ) { // Do not even try to read water..
@@ -454,12 +454,34 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
         if (flags & 16) lq.append(" magma");
         if (flags & 32) lq.append(" slime?");
         LogDebug << "LQ" << lq << " (base:" << waterlevel << ")" << std::endl;
-        */
+        
 
       }
       // we're done here!
       break;
-    }
+    }*/
+    else if ( fourcc == 'MCLQ' ) { // new one
+      // liquid / water level
+      f->read(&fourcc,4);haswater = false;
+	  if( header.flags==32769 || header.flags==32768 ){ //empty flags
+        haswater = false;
+      }
+      else // Trying to read water if there are not empty water flags
+      {   
+        haswater = true;
+        f->seekRelative(-4);
+        float waterlevel[2];
+        f->read(waterlevel,8);//2 values - Lowest water Level, Highest Water Level
+
+        if (waterlevel[1] > vmax.y) vmax.y = waterlevel[1];
+
+        Liquid * lq = new Liquid(8, 8, Vec3D(xbase, waterlevel[1], zbase));
+        lq->initFromTerrain(f, header.flags);
+		mt->addChunksLiquid(lq);
+	  }
+      // we're done here!
+      break;
+	  }
     else if( fourcc == 'MCCV' )
     {
       //! \todo  implement
@@ -989,8 +1011,6 @@ void MapChunk::drawContour()
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_TEXTURE_GEN_S);
 }
-
-
 
 void MapChunk::draw()
 {

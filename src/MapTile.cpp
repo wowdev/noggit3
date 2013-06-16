@@ -313,7 +313,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
         }*/
 
 
-        Liquid * lq = new Liquid( info.width, info.height, Vec3D( xbase + CHUNKSIZE * j, lTile.mMinimum, zbase + CHUNKSIZE * i ) );
+		Liquid * lq = new Liquid( info.width, info.height, Vec3D( xbase + CHUNKSIZE * j, lTile.mMinimum, zbase + CHUNKSIZE * i ) );
         lq->setMH2OData( lTile );
         //LogDebug << "Inserted Data to MH2O: "<<i*16+j << std::endl;
         mLiquids.push_back( lq );
@@ -321,7 +321,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
     }
 
   }else{
-	  mWaterSize=0; //Tile has no water
+	  mWaterSize=0; //Tile has no MH2O water
 }
 
 
@@ -547,8 +547,21 @@ void MapTile::drawWater()
   for( std::vector<Liquid*>::iterator liq = mLiquids.begin(); liq != mLiquids.end(); liq++ )
     (*liq)->draw();
 
+  if(mFlags) //Dont know why but if mFlags!=0 then Blizz uses old MCLQ subchunk for water render. But if mFlags==0 then MCLQ subchunk is corrupted (Blizzs forgot to remove?). Dont render it because it is crap =))
+	  for( std::vector<Liquid*>::iterator liq = chunksLiquids.begin(); liq != chunksLiquids.end(); liq++ )
+		(*liq)->draw();
+
   glEnable(GL_LIGHTING);
   glEnable(GL_COLOR_MATERIAL);
+}
+
+void MapTile::addChunksLiquid(Liquid *lq)
+{
+	chunksLiquids.push_back( lq );
+}
+
+bool MapTile::canWaterSave(){
+	return !mFlags;
 }
 
 // This is for the 2D mode only.
@@ -822,7 +835,7 @@ void MapTile::uidTile()
 void MapTile::saveTile()
 {
   Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
-
+  LogDebug << "CHANGED FLAG "<< changed << std::endl;
   int lID;  // This is a global counting variable. Do not store something in here you need later.
 
   // Collect some information we need later.
