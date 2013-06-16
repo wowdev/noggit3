@@ -561,7 +561,7 @@ void MapTile::addChunksLiquid(Liquid *lq)
 }
 
 bool MapTile::canWaterSave(){
-	return !mFlags;
+	return !mFlags || mWaterSize>0;
 }
 
 // This is for the 2D mode only.
