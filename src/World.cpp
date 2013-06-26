@@ -98,7 +98,7 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
   
   glLineWidth (2.0);
 //   glEnable (GL_LINE_STIPPLE);
-//   glLineStipple(2, 0x00FF);
+//   glLineStipple(2, 0x00FF);
   glPushMatrix();
   glDisable(GL_DEPTH_TEST);
   glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
@@ -308,7 +308,7 @@ World::World( const std::string& name )
       // exist file on disc?
       ADTfilename << Project::getInstance()->getPath() << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
 
-      std::ifstream myFile(ADTfilename.str());
+      std::ifstream myFile(ADTfilename.str().c_str());
 
       if(myFile)
       {

@@ -102,7 +102,12 @@ SET( SourceFiles
   src/UIMenuBar.cpp
   src/UIMinimapWindow.cpp
   src/UIMinimizeButton.cpp
+  src/UIExitWarning.cpp
+  src/UICapsWarning.cpp
+  src/UIWaterSaveWarning.cpp
+  src/UIHelperModels.cpp
   src/UIModel.cpp
+  src/UIModelImport.cpp
   src/UIScrollableFrame.cpp
   src/UIScrollBar.cpp
   src/UISlider.cpp
