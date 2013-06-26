@@ -210,7 +210,7 @@ public:
     #undef SUB
   }
 
-  inline float minor(size_t x, size_t y) const
+  inline float minorSize(size_t x, size_t y) const
   {
     float s[3][3];
     for (size_t j=0, v=0; j<4; j++) {
@@ -232,7 +232,7 @@ public:
     Matrix a;
     for (size_t j=0; j<4; j++) {
       for (size_t i=0; i<4; ++i) {
-        a.m[i][j] = (((i+j)&1)?-1.0f:1.0f) * minor(i,j);
+        a.m[i][j] = (((i+j)&1)?-1.0f:1.0f) * minorSize(i,j);
       }
     }
     return a;
