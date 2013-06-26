@@ -1,5 +1,6 @@
 #include <fstream>
 #include <ctime>
+#include <cstring>
 
 #include "Log.h"
 
