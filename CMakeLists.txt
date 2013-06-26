@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+#CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 cmake_policy(SET CMP0015 OLD)
 
@@ -24,7 +24,10 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS( OpenGL DEFAULT_MSG OPENGL_LIBRARIES OPENGL_IN
 endif( APPLE )
 
 # Hacky boost finding.
-SET( Boost_USE_STATIC_LIBS ON )
+
+IF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  SET( Boost_USE_STATIC_LIBS ON )
+ENDIF(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 #SET( Boost_USE_MULTITHREADED OFF )
 
 IF( WIN32 )
@@ -52,7 +55,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS( SDL DEFAULT_MSG SDL_LIBRARY SDL_INCLUDE_DIR )
 # Add the found include directories to our include list.
 SET( IncludeDirectories ${GLEW_INCLUDE_PATH} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${SDL_INCLUDE_DIR} ${STORMLIB_INCLUDES} ${Boost_INCLUDE_DIRS} )
 
-if( APPLE )
+if( UNIX )
 # Gather source files.
 SET( SourceFiles
   src/AsyncLoader.cpp
@@ -121,7 +124,7 @@ SET( SourceFiles
   src/WMOInstance.cpp
   src/World.cpp
 )
-endif( APPLE )
+endif( UNIX )
 
 # Set sourcefiles for windows. I want the .h files.
 if( WIN32 )
