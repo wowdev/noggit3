@@ -5,7 +5,7 @@
 
 find_path(STORMLIB_INCLUDE_DIR StormLib.h StormPort.h )
 find_path(STORMLIB_LIBRARY_DIR StormLibRAD.lib )
-find_library(STORMLIB_LIBRARY StormLib)
+find_library(STORMLIB_LIBRARY NAMES StormLib storm)
 set(STORMLIB_LIBRARIES ${STORMLIB_LIBRARY})
 if( WIN32 )
   find_library(STORMLIB_LIBRARYRAD StormLibRAD.lib)
