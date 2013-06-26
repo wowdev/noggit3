@@ -800,7 +800,7 @@ void MapTile::uidTile()
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
 
-  UINT UID_counter = 1;
+  unsigned int UID_counter = 1;
   for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
   {
     if( checkInside( lTileExtents, it->second.extents ) )
@@ -848,7 +848,7 @@ void MapTile::saveTile()
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
 
-  UINT UID_counter = 1;
+  unsigned int UID_counter = 1;
   for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
   {
     if( checkInside( lTileExtents, it->second.extents ) )
