@@ -272,8 +272,10 @@ void openHelp( UIFrame*, int )
 
 void openURL( UIFrame*,  int target)
 {
+#if defined(_WIN32) || defined(WIN32)
   if(target==1)  ShellExecute(NULL, "open", "http://modcraft.superparanoid.de", NULL, NULL, SW_SHOWNORMAL);
   if(target==2)  ShellExecute(NULL, "open", "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual", NULL, NULL, SW_SHOWNORMAL);
+#endif
 }
 
 void ResetSelectedObjectRotation( UIFrame* /*button*/, int /*id*/ )
