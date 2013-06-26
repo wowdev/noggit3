@@ -13,10 +13,10 @@ class UIWindow : public UIFrame
 public:
   typedef UIWindow* Ptr;
 
-  float UIWindow::getX(){return this->_x;};
-  float UIWindow::getY(){return this->_y;};
-  float UIWindow::getW(){return this->_width;};
-  float UIWindow::getH(){return this->_height;};
+  float getX(){return this->_x;};
+  float getY(){return this->_y;};
+  float getW(){return this->_width;};
+  float getH(){return this->_height;};
 
 protected:
   OpenGL::Texture* texture;
