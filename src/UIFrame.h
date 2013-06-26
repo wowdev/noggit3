@@ -2,6 +2,7 @@
 #define __FRAME_H
 
 #include <vector>
+#include <cstddef>
 
 struct SDL_KeyboardEvent;
 

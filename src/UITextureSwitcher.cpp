@@ -8,7 +8,7 @@
 #include "UIButton.h"
 #include "UIText.h"
 #include "MapView.h"
-#include "misc.h"
+#include "Misc.h"
 
 extern UIWindow *settings_paint;
 extern UIWindow *settings_paint;
