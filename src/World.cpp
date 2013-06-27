@@ -2460,5 +2460,9 @@ void World::saveWDT()
 }
 
 bool World::canWaterSave(int x, int y){ 
+
+    if(!tileLoaded(y, x)) //! TODO else there are null pointers
+        return false;
+
 	return mTiles[y][x].tile->canWaterSave();
 }
