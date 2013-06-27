@@ -709,35 +709,41 @@ void MapChunk::drawTextures()
   glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, gWorld->mapstrip2);
 }
 
+int indexLoD(int x, int y)
+{
+    return (x+1)*9+x*8+y;
+}
+
+int indexNoLoD(int x, int y)
+{
+    return x*8+x*9+y;
+}
+
 void MapChunk::initStrip()
 {
-  strip = new StripType[256]; //! \todo  figure out exact length of strip needed
+  strip = new StripType[768]; //! \todo  figure out exact length of strip needed
   StripType* s = strip;
-  bool first = true;
-  for (size_t y=0; y < 4; ++y) {
-    for (size_t x=0; x < 4; ++x) {
-      if (!isHole(x, y)) {
-        // draw tile here
-        // this is ugly but sort of works
-        size_t i = x*2;
-        size_t j = y*4;
-        for(size_t k=0; k < 2; ++k)
-        {
-          if(!first)
-          {
-            *s++ = indexMapBuf(i, j + k*2);
-          }
-          else
-            first = false;
-          for (size_t l=0; l < 3; ++l)
-          {
-            *s++ = indexMapBuf(i+l, j+ k*2);
-            *s++ = indexMapBuf(i+l, j+ k*2 + 2);
-          }
-          *s++ = indexMapBuf(i+2, j + k*2 + 2);
-        }
+
+  for(int x=0; x<8; ++x)
+  {
+      for(int y=0; y<8; ++y)
+      {
+          if (isHole(x/2, y/2))
+              continue;
+
+          *s++ = indexLoD(y, x); //9
+          *s++ = indexNoLoD(y, x); //0
+          *s++ = indexNoLoD(y+1, x); //17
+          *s++ = indexLoD(y, x); //9
+          *s++ = indexNoLoD(y+1, x); //17
+          *s++ = indexNoLoD(y+1, x+1); //18
+          *s++ = indexLoD(y, x); //9
+          *s++ = indexNoLoD(y+1, x+1); //18
+          *s++ = indexNoLoD(y, x+1); //1
+          *s++ = indexLoD(y, x); //9
+          *s++ = indexNoLoD(y, x+1); //1
+          *s++ = indexNoLoD(y, x); //0
       }
-    }
   }
   striplen = static_cast<int>(s - strip);
 }
@@ -915,8 +921,7 @@ void MapChunk::drawPass(int anim)
     glTranslatef(f*fdx,f*fdy,0);
   }
 
-  glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
-
+  glDrawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
 
   if (anim)
   {
