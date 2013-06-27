@@ -14,6 +14,7 @@
 #include "TextureManager.h" // TextureManager, Texture
 #include "Vec3D.h"
 #include "World.h"
+#include "Alphamap.h"
 
 extern int terrainMode;
 
@@ -231,7 +232,6 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
 
   vmin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
   vmax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
-  glGenTextures(3, alphamaps);
 
   while (f->getPos() < lastpos) {
     f->read(&fourcc,4);
@@ -330,92 +330,8 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
       {
         if( texFlags[layer] & 0x100 )
         {
-
           f->seek( MCALbase + MCALoffset[layer] );
-
-          if( texFlags[layer] & 0x200 )
-          {  // compressed
-
-            // 21-10-2008 by Flow
-            unsigned offI = 0; //offset IN buffer
-            unsigned offO = 0; //offset OUT buffer
-            char* buffIn = f->getPointer(); // pointer to data in adt file
-            char buffOut[4096]; // the resulting alpha map
-
-            while( offO < 4096 )
-            {
-              // fill or copy mode
-              bool fill = buffIn[offI] & 0x80;
-              unsigned n = buffIn[offI] & 0x7F;
-              offI++;
-              for( unsigned k = 0; k < n; ++k )
-              {
-              if (offO == 4096) break;
-              buffOut[offO] = buffIn[offI];
-              offO++;
-              if( !fill )
-                offI++;
-              }
-              if( fill ) offI++;
-            }
-
-            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, buffOut);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-          }
-          else if(mBigAlpha){
-            // not compressed
-            unsigned char *p;
-            char *abuf = f->getPointer();
-            p = amap[layer-1];
-            for (int j=0; j<64; ++j) {
-              for (int i=0; i<64; ++i) {
-                *p++ = *abuf++;
-              }
-
-            }
-            memcpy(amap[layer-1]+63*64,amap[layer-1]+62*64,64);
-            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[layer-1]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            f->seekRelative(0x1000);
-          }
-          else
-          {
-            // not compressed
-            unsigned char *p;
-            char *abuf = f->getPointer();
-            p = amap[layer-1];
-            for (int j=0; j<63; ++j) {
-              for (int i=0; i<32; ++i) {
-                unsigned char c = *abuf++;
-                *p++ = static_cast<unsigned char>((255*(static_cast<int>(c & 0x0f)))/0x0f);
-                if(i != 31)
-                {
-                  *p++ = static_cast<unsigned char>((255*(static_cast<int>(c & 0xf0)))/0xf0);
-                }
-                else
-                {
-                  *p++ = static_cast<unsigned char>((255*(static_cast<int>(c & 0x0f)))/0x0f);
-                }
-              }
-
-            }
-            memcpy(amap[layer-1]+63*64,amap[layer-1]+62*64,64);
-            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[layer-1]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            f->seekRelative(0x800);
-          }
+          alphamaps[layer-1] = new Alphamap(f, texFlags[layer], mBigAlpha);
         }
       }
     }
@@ -669,7 +585,7 @@ void MapChunk::drawTextures()
     OpenGL::Texture::setActiveTexture( 1 );
     OpenGL::Texture::enableTexture();
 
-    glBindTexture(GL_TEXTURE_2D, alphamaps[i-1]);
+    alphamaps[i-1]->bind();
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -761,8 +677,6 @@ MapChunk::~MapChunk()
     8   noggit                              0x000000010007cc66 SDL_main + 8004
    */
 
-  // unload alpha maps
-  glDeleteTextures( 3, alphamaps );
   // shadow maps, too
   glDeleteTextures( 1, &shadow );
 
@@ -1078,7 +992,7 @@ void MapChunk::draw()
     OpenGL::Texture::setActiveTexture( 1 );
     OpenGL::Texture::enableTexture();
 
-    glBindTexture( GL_TEXTURE_2D, alphamaps[i - 1] );
+    alphamaps[i-1]->bind();
 
     drawPass(animated[i]);
   }
@@ -1610,19 +1524,13 @@ int MapChunk::addTexture( OpenGL::Texture* texture )
     effectID[texLevel] = 0;
     if( texLevel )
     {
-      if( alphamaps[texLevel-1] < 1 )
+      if(alphamaps[texLevel-1]->id() < 1)
       {
         LogError << "Alpha Map has invalid texture binding" << std::endl;
         nTextures--;
         return -1;
       }
-      memset( amap[texLevel - 1], 0, 64 * 64 );
-      glBindTexture( GL_TEXTURE_2D, alphamaps[texLevel - 1] );
-      glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[texLevel - 1] );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-      glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+      alphamaps[texLevel-1] = new Alphamap();
     }
   }
   return texLevel;
@@ -1714,9 +1622,14 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
         tPressure=pressure*Brush->getValue(dist);
 
         if(texLevel>0)
-          amap[texLevel-1][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[texLevel-1][i+j*64]) ) + tPressure*target + 0.5f ,255.0f) , 0.0f));
-        for(size_t k=texLevel;k<nTextures-1;k++)
-          amap[k][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[k][i+j*64]) ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f));
+        {
+          alphamaps[texLevel-1]->setAlpha(i+j*64, static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(alphamaps[texLevel-1]->getAlpha(i+j*64)) ) + tPressure*target + 0.5f ,255.0f) , 0.0f)));
+        }
+
+        for(size_t k = texLevel; k < nTextures-1; k++)
+        {
+          alphamaps[k]->setAlpha(i+j*64, static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(alphamaps[k]->getAlpha(i+j*64)) ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f)));
+        }
         xPos+=change;
       }
       zPos+=change;
@@ -1735,17 +1648,17 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
         LogError << "WTF how did you get here??? Get a cookie." << std::endl;
         continue;
       }
-      glBindTexture( GL_TEXTURE_2D, alphamaps[j] );
-      glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j] );
+
+      alphamaps[j]->loadTexture();
     }
 
     if( texLevel )
     {
-      glBindTexture( GL_TEXTURE_2D, alphamaps[texLevel - 1] );
-      glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[texLevel - 1] );
+      alphamaps[texLevel-1]->loadTexture();
     }
 
   }
+  /*
   else
   {
     // new stuff from bernd.
@@ -1864,6 +1777,7 @@ bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, flo
       }
 
   }
+  */
 
   return true;
 }

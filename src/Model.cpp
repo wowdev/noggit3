@@ -576,6 +576,10 @@ void Model::animate(int _anim)
 {
   this->anim = _anim;
   ModelAnimation &a = anims[anim];
+
+  if(!anims)
+      return;
+
   int t = globalTime; //(int)(gWorld->animtime /* / a.playSpeed*/);
   int tmax = a.length;
   t %= tmax;
