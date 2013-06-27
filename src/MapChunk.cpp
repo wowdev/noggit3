@@ -677,6 +677,9 @@ MapChunk::~MapChunk()
     8   noggit                              0x000000010007cc66 SDL_main + 8004
    */
 
+  for(size_t i = 1; i < nTextures; ++i)
+    delete alphamaps[i-1];
+
   // shadow maps, too
   glDeleteTextures( 1, &shadow );
 
@@ -1044,31 +1047,31 @@ void MapChunk::draw()
     }
   }
 
-if(Environment::getInstance()->cursorType == 3)
-{
-  if( gWorld->IsSelection( eEntry_MapChunk ) && gWorld->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3 )
+  if(Environment::getInstance()->cursorType == 3)
   {
-    int poly = gWorld->GetCurrentSelectedTriangle();
+    if( gWorld->IsSelection( eEntry_MapChunk ) && gWorld->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3 )
+    {
+      int poly = gWorld->GetCurrentSelectedTriangle();
 
-    glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
+      glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
 
-    glPushMatrix();
+      glPushMatrix();
 
-    glDisable( GL_CULL_FACE );
-    glDepthMask( false );
-    glDisable( GL_DEPTH_TEST );
-    glBegin( GL_TRIANGLES );
-    glVertex3fv( mVertices[gWorld->mapstrip2[poly + 0]] );
-    glVertex3fv( mVertices[gWorld->mapstrip2[poly + 1]] );
-    glVertex3fv( mVertices[gWorld->mapstrip2[poly + 2]] );
-    glEnd();
-    glEnable( GL_CULL_FACE );
-    glEnable( GL_DEPTH_TEST );
-    glDepthMask( true );
+      glDisable( GL_CULL_FACE );
+      glDepthMask( false );
+      glDisable( GL_DEPTH_TEST );
+      glBegin( GL_TRIANGLES );
+      glVertex3fv( mVertices[gWorld->mapstrip2[poly + 0]] );
+      glVertex3fv( mVertices[gWorld->mapstrip2[poly + 1]] );
+      glVertex3fv( mVertices[gWorld->mapstrip2[poly + 2]] );
+      glEnd();
+      glEnable( GL_CULL_FACE );
+      glEnable( GL_DEPTH_TEST );
+      glDepthMask( true );
 
-    glPopMatrix();
+      glPopMatrix();
+    }
   }
-}
 
 
   glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
