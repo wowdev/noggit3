@@ -60,7 +60,7 @@ public:
   MapChunk(MapTile* mt, MPQFile* f,bool bigAlpha);
   ~MapChunk();
 
-  void destroy();
+  //void destroy(); wtf? does not exist
   void initStrip();
 
   void draw();
