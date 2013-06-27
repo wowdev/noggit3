@@ -8,6 +8,7 @@
 class MPQFile;
 class Vec4D;
 class brush;
+class Alphamap;
 
 typedef unsigned short StripType;
 
@@ -45,9 +46,8 @@ public:
   unsigned int texFlags[4];
   unsigned int effectID[4];
   unsigned int MCALoffset[4];
-  unsigned char amap[3][64*64];
   unsigned char mShadowMap[8*64];
-  GLuint alphamaps[3];
+  Alphamap* alphamaps[3];
   GLuint shadow;
 
   int animated[4];

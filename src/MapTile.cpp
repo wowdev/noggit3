@@ -17,7 +17,7 @@
 #include "ModelManager.h" // ModelManager
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
-
+#include "Alphamap.h"
 
 int indexMapBuf(int x, int y)
 {
@@ -1624,14 +1624,14 @@ void MapTile::saveTile()
             //First thing we have to do is downsample the alpha maps before we can write them
             if( mBigAlpha )
               for( int k = 0; k < lDimensions; k++ )
-                lAlphaMaps[lDimensions * j + k] = mChunks[y][x]->amap[j][k];
+                lAlphaMaps[lDimensions * j + k] = mChunks[y][x]->alphamaps[j]->getAlpha(k);
             else
             {
               unsigned char upperNibble, lowerNibble;
               for( int k = 0; k < lDimensions; k++ )
               {
-                lowerNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->amap[j][k * 2 + 0]) ) * 0.05882f + 0.5f , 15.0f),0.0f));
-                upperNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->amap[j][k * 2 + 1]) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+                lowerNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->alphamaps[j]->getAlpha(k * 2 + 0)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+                upperNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->alphamaps[j]->getAlpha(k * 2 + 1)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
                 lAlphaMaps[lDimensions * j + k] = ( upperNibble << 4 ) + lowerNibble;
               }
             }

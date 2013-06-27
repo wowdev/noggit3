@@ -59,6 +59,7 @@ if( UNIX )
 # Gather source files.
 SET( SourceFiles
   src/AsyncLoader.cpp
+  src/Alphamap.cpp
   src/Brush.cpp
   src/ConfigFile.cpp
   src/DBC.cpp
@@ -139,6 +140,8 @@ SET( SourceFiles
   src/AppState.h
   src/AsyncLoader.cpp
   src/AsyncLoader.h
+  src/Alphamap.cpp
+  src/Alphamap.h
   src/AsyncObject.h
   src/Brush.cpp
   src/Brush.h
