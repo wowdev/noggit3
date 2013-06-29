@@ -174,6 +174,110 @@ void GenerateContourMap()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 }
 
+void SetAnim(int anim)
+{
+  if (anim) {
+    glActiveTexture(GL_TEXTURE0);
+    glMatrixMode(GL_TEXTURE);
+    glPushMatrix();
+
+    // note: this is ad hoc and probably completely wrong
+    const int spd = (anim & 0x08) | ((anim & 0x10) >> 2) | ((anim & 0x20) >> 4) | ((anim & 0x40) >> 6);
+    const int dir = anim & 0x07;
+    const float texanimxtab[8] = {0, 1, 1, 1, 0, -1, -1, -1};
+    const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
+    const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
+
+    const float f = ( static_cast<int>( gWorld->animtime * (spd/15.0f) ) % 1600) / 1600.0f;
+    glTranslatef(f*fdx, f*fdy, 0);
+  }
+}
+
+void RemoveAnim(int anim)
+{
+  if (anim) {
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glActiveTexture(GL_TEXTURE1);
+  }
+}
+
+
+
+void CreateStrips()
+{
+  StripType Temp[18];
+  int j;
+
+  for(int i=0; i < 8; ++i)
+  {
+    OddStrips[i*18+0] = i*17 + 17;
+    for(j=0; j < 8; j++)
+    {
+      OddStrips[i*18 + 2*j + 1] = i*17 + j;
+      OddStrips[i*18 + 2*j + 2] = i*17 + j + 9;
+      EvenStrips[i*18 + 2*j] = i*17 + 17 + j;
+      EvenStrips[i*18 + 2*j + 1] = i*17 + 9 + j;
+    }
+    OddStrips[i*18 + 17] = i*17 + 8;
+    EvenStrips[i*18 + 16] = i*17 + 17 + 8;
+    EvenStrips[i*18 + 17] = i*17 + 8;
+  }
+
+  //Reverse the order whoops
+  for(int i=0; i < 8; ++i)
+  {
+    for(j=0; j < 18; ++j)
+      Temp[17-j] = OddStrips[i*18 + j];
+    memcpy(&OddStrips[i*18], Temp, sizeof(Temp));
+    for(j=0; j < 18; ++j)
+      Temp[17-j] = EvenStrips[i*18 + j];
+    memcpy(&EvenStrips[i*18], Temp, sizeof(Temp));
+
+  }
+
+  for(int i=0; i < 32; ++i)
+  {
+    if(i < 9)
+      LineStrip[i] = i;
+    else if(i < 17)
+      LineStrip[i] = 8 + (i-8)*17;
+    else if(i < 25)
+      LineStrip[i] = 145 - (i-15);
+    else
+      LineStrip[i] = (32-i)*17;
+  }
+
+  int iferget = 0;
+
+  for( size_t i = 34; i < 43; ++i )
+     HoleStrip[iferget++] = i;
+
+  for( size_t i = 68; i < 77; ++i )
+    HoleStrip[iferget++] = i;
+
+  for( size_t i = 102; i < 111; ++i )
+     HoleStrip[iferget++] = i;
+
+  for( size_t i = 2; i < 139; i += 17 )
+    HoleStrip[iferget++] = i;
+
+  for( size_t i = 4; i < 141; i += 17 )
+    HoleStrip[iferget++] = i;
+
+  for( size_t i = 6; i < 143; i += 17 )
+    HoleStrip[iferget++] = i;
+}
+
+int indexLoD(int x, int y)
+{
+    return (x+1)*9+x*8+y;
+}
+
+int indexNoLoD(int x, int y)
+{
+    return x*8+x*9+y;
+}
 
 MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
 {
@@ -497,37 +601,6 @@ void MapChunk::loadTextures()
     _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);*/
 }
 
-
-
-void SetAnim(int anim)
-{
-  if (anim) {
-    glActiveTexture(GL_TEXTURE0);
-    glMatrixMode(GL_TEXTURE);
-    glPushMatrix();
-
-    // note: this is ad hoc and probably completely wrong
-    const int spd = (anim & 0x08) | ((anim & 0x10) >> 2) | ((anim & 0x20) >> 4) | ((anim & 0x40) >> 6);
-    const int dir = anim & 0x07;
-    const float texanimxtab[8] = {0, 1, 1, 1, 0, -1, -1, -1};
-    const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
-    const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
-
-    const float f = ( static_cast<int>( gWorld->animtime * (spd/15.0f) ) % 1600) / 1600.0f;
-    glTranslatef(f*fdx, f*fdy, 0);
-  }
-}
-
-void RemoveAnim(int anim)
-{
-  if (anim) {
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glActiveTexture(GL_TEXTURE1);
-  }
-}
-
-
 void MapChunk::drawTextures()
 {
 
@@ -625,16 +698,6 @@ void MapChunk::drawTextures()
   glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, gWorld->mapstrip2);
 }
 
-int indexLoD(int x, int y)
-{
-    return (x+1)*9+x*8+y;
-}
-
-int indexNoLoD(int x, int y)
-{
-    return x*8+x*9+y;
-}
-
 void MapChunk::initStrip()
 {
   strip = new StripType[768]; //! \todo  figure out exact length of strip needed
@@ -717,71 +780,6 @@ bool MapChunk::GetVertex(float x,float z, Vec3D *V)
 }
 
 
-void CreateStrips()
-{
-  StripType Temp[18];
-  int j;
-
-  for(int i=0; i < 8; ++i)
-  {
-    OddStrips[i*18+0] = i*17 + 17;
-    for(j=0; j < 8; j++)
-    {
-      OddStrips[i*18 + 2*j + 1] = i*17 + j;
-      OddStrips[i*18 + 2*j + 2] = i*17 + j + 9;
-      EvenStrips[i*18 + 2*j] = i*17 + 17 + j;
-      EvenStrips[i*18 + 2*j + 1] = i*17 + 9 + j;
-    }
-    OddStrips[i*18 + 17] = i*17 + 8;
-    EvenStrips[i*18 + 16] = i*17 + 17 + 8;
-    EvenStrips[i*18 + 17] = i*17 + 8;
-  }
-
-  //Reverse the order whoops
-  for(int i=0; i < 8; ++i)
-  {
-    for(j=0; j < 18; ++j)
-      Temp[17-j] = OddStrips[i*18 + j];
-    memcpy(&OddStrips[i*18], Temp, sizeof(Temp));
-    for(j=0; j < 18; ++j)
-      Temp[17-j] = EvenStrips[i*18 + j];
-    memcpy(&EvenStrips[i*18], Temp, sizeof(Temp));
-
-  }
-
-  for(int i=0; i < 32; ++i)
-  {
-    if(i < 9)
-      LineStrip[i] = i;
-    else if(i < 17)
-      LineStrip[i] = 8 + (i-8)*17;
-    else if(i < 25)
-      LineStrip[i] = 145 - (i-15);
-    else
-      LineStrip[i] = (32-i)*17;
-  }
-
-  int iferget = 0;
-
-  for( size_t i = 34; i < 43; ++i )
-     HoleStrip[iferget++] = i;
-
-  for( size_t i = 68; i < 77; ++i )
-    HoleStrip[iferget++] = i;
-
-  for( size_t i = 102; i < 111; ++i )
-     HoleStrip[iferget++] = i;
-
-  for( size_t i = 2; i < 139; i += 17 )
-    HoleStrip[iferget++] = i;
-
-  for( size_t i = 4; i < 141; i += 17 )
-    HoleStrip[iferget++] = i;
-
-  for( size_t i = 6; i < 143; i += 17 )
-    HoleStrip[iferget++] = i;
-}
-
 void MapChunk::drawColor()
 {
 
@@ -817,7 +815,6 @@ void MapChunk::drawColor()
   glEnd();
   //glEnable(GL_LIGHTING);
 }
-
 
 void MapChunk::drawPass(int anim)
 {
@@ -1538,6 +1535,7 @@ int MapChunk::addTexture( OpenGL::Texture* texture )
   }
   return texLevel;
 }
+
 void MapChunk::switchTexture( OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture )
 {
   int texLevel = -1;
@@ -1550,9 +1548,10 @@ void MapChunk::switchTexture( OpenGL::Texture* oldTexture, OpenGL::Texture* newT
   _textures[texLevel] = newTexture;
   }
 }
+
 bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, float pressure, OpenGL::Texture* texture )
 {
-  if( Environment::getInstance()->paintMode == true)
+  if(Environment::getInstance()->paintMode == true)
   {
     float zPos,xPos,change,xdiff,zdiff,dist, radius;
 
@@ -1829,7 +1828,8 @@ void MapChunk::setAreaID( int ID )
   areaID = ID;
 }
 
-int MapChunk::getAreaID(){
+int MapChunk::getAreaID()
+{
   return areaID;
 }
 
