@@ -1925,9 +1925,19 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
     {
       if( tileLoaded( j, i ) )
       {
-        for( size_t ty = 0; ty < 16; ++ty )
+        int chunkLowerX = (int)((x - Brush->getRadius())/ CHUNKSIZE)-i*16;
+        int chunkUperX = (int)((x + Brush->getRadius())/ CHUNKSIZE)-i*16+1;
+        int chunkLowerZ = (int)((z - Brush->getRadius()) / CHUNKSIZE)-j*16;
+        int chunkUperZ = (int)((z + Brush->getRadius()) / CHUNKSIZE)-j*16+1;
+
+        if(chunkLowerX < 0) chunkLowerX = 0;
+        if(chunkLowerZ < 0) chunkLowerZ = 0;
+        if(chunkUperX > 16) chunkUperX = 16;
+        if(chunkUperZ > 16) chunkUperZ = 16;
+
+        for( size_t ty = chunkLowerX; ty < chunkUperX; ++ty )
         {
-          for( size_t tx = 0; tx < 16; ++tx )
+          for( size_t tx = chunkLowerZ; tx < chunkUperZ; ++tx )
           {
             if( mTiles[j][i].tile->getChunk( ty, tx )->paintTexture( x, z, Brush, strength, pressure, texture ) )
             {
