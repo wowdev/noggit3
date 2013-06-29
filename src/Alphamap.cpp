@@ -1,13 +1,17 @@
 #include "Alphamap.h"
 
 Alphamap::Alphamap()
+  : map(0)
 {
+  glGenTextures(1, &map);
   createNew();
   genTexture();
 }
 
 Alphamap::Alphamap(MPQFile *f, unsigned int &flags, bool mBigAlpha)
+  : map(0)
 {
+  createNew();
   glGenTextures(1, &map);
 
   if(flags & 0x200 )
@@ -112,12 +116,4 @@ void Alphamap::genTexture()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
-void Alphamap::setAlpha(size_t offset, unsigned char value)
-{
-  amap[offset] = value;
-}
 
-unsigned char Alphamap::getAlpha(size_t offset)
-{
-  return amap[offset];
-}

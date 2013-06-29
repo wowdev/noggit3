@@ -25,6 +25,7 @@
 #include "Video.h" // video
 #include "WMOInstance.h"
 #include "World.h"
+#include "TextureSet.h"
 
 UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 : UIFrame( 0.0f, 0.0f, video.xres(), video.yres() )
@@ -226,7 +227,7 @@ void UIMapViewGUI::render( ) const
           << ( flags & FLAG_LQ_RIVER ? "river " : "" )
           << ( flags & FLAG_LQ_OCEAN ? "ocean " : "" )
           << ( flags & FLAG_LQ_MAGMA ? "lava" : "" )
-          << "\ntextures used: " << lSelection->data.mapchunk->nTextures;
+          << "\ntextures used: " << lSelection->data.mapchunk->textureSet->num();
 
         //! \todo get a list of textures and their flags as well as detail doodads.
         /*

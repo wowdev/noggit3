@@ -9,9 +9,9 @@ class MPQFile;
 class Vec4D;
 class brush;
 class Alphamap;
+class TextureSet;
 
 typedef unsigned short StripType;
-
 static const int mapbufsize = 9*9 + 8*8;
 
 class MapChunk
@@ -24,33 +24,23 @@ public:
 
   MapChunkHeader header;
   bool Changed;
-  size_t nTextures;
 
   float xbase, ybase, zbase;
   float r;
 
   bool mBigAlpha;
-
-  int nameID;
-
-  unsigned int Flags;
-
-  unsigned int areaID;
-
   bool haswater;
 
+  unsigned int Flags;
+  unsigned int areaID;
+
+  int nameID;
   int holes;
 
-  int tex[4];
-  OpenGL::Texture* _textures[4];
-  unsigned int texFlags[4];
-  unsigned int effectID[4];
-  unsigned int MCALoffset[4];
-  unsigned char mShadowMap[8*64];
-  Alphamap* alphamaps[3];
-  GLuint shadow;
+  TextureSet* textureSet;
 
-  int animated[4];
+  unsigned char mShadowMap[8*64];
+  GLuint shadow;
 
   GLuint vertices, normals, minimap, minishadows;
 
@@ -70,7 +60,7 @@ public:
   void drawColor();
   void drawSelect();
   void drawNoDetail();
-  void drawPass(int anim);
+  void drawPass(int id);
   void drawLines();
 
   void drawTextures();

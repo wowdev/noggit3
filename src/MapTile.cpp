@@ -18,6 +18,7 @@
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
 #include "Alphamap.h"
+#include "TextureSet.h"
 
 int indexMapBuf(int x, int y)
 {
@@ -917,9 +918,9 @@ void MapTile::saveTile()
 
   for( int i = 0; i < 16; ++i )
     for( int j = 0; j < 16; ++j )
-      for( size_t tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
-        if( lTextures.find( mChunks[i][j]->_textures[tex]->filename() ) == lTextures.end() )
-          lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->_textures[tex]->filename(), -1 ) );
+      for( size_t tex = 0; tex < mChunks[i][j]->textureSet->num(); tex++ )
+        if( lTextures.find( mChunks[i][j]->textureSet->filename(tex) ) == lTextures.end() )
+          lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->textureSet->filename(tex), -1 ) );
 
   lID = 0;
   for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
@@ -1475,28 +1476,28 @@ void MapTile::saveTile()
 
         // MCLY
 //        {
-          size_t lMCLY_Size = mChunks[y][x]->nTextures * 0x10;
+          size_t lMCLY_Size = mChunks[y][x]->textureSet->num() * 0x10;
 
           lADTFile.Extend( 8 + lMCLY_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCLY', lMCLY_Size );
 
           lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsLayer = lCurrentPosition - lMCNK_Position;
-          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nLayers = mChunks[y][x]->nTextures;
+          lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nLayers = mChunks[y][x]->textureSet->num();
 
           // MCLY data
-          for( size_t j = 0; j < mChunks[y][x]->nTextures; ++j )
+          for( size_t j = 0; j < mChunks[y][x]->textureSet->num(); ++j )
           {
             ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>( lCurrentPosition + 8 + 0x10 * j );
 
-            lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename() )->second;
+            lLayer->textureID = lTextures.find( mChunks[y][x]->textureSet->filename(j) )->second;
 
-            lLayer->flags = mChunks[y][x]->texFlags[j];
+            lLayer->flags = mChunks[y][x]->textureSet->flag(j);
 
             // if not first, have alpha layer, if first, have not. never have compression.
             lLayer->flags = ( j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & ( ~FLAG_USE_ALPHA ) ) & ( ~FLAG_ALPHA_COMPRESSED );
 
             lLayer->ofsAlpha = ( j == 0 ? 0 : ( mBigAlpha ? 64 * 64 * ( j - 1 ) : 32 * 64 * ( j - 1 ) ) );
-            lLayer->effectID = mChunks[y][x]->effectID[j];
+            lLayer->effectID = mChunks[y][x]->textureSet->effect(j);
           }
 
           lCurrentPosition += 8 + lMCLY_Size;
@@ -1607,7 +1608,7 @@ void MapTile::saveTile()
 //        {
           int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
 
-          size_t lMaps = mChunks[y][x]->nTextures ? mChunks[y][x]->nTextures - 1U : 0U;
+          size_t lMaps = mChunks[y][x]->textureSet->num() ? mChunks[y][x]->textureSet->num() - 1U : 0U;
 
           int lMCAL_Size = lDimensions * lMaps;
 
@@ -1624,14 +1625,14 @@ void MapTile::saveTile()
             //First thing we have to do is downsample the alpha maps before we can write them
             if( mBigAlpha )
               for( int k = 0; k < lDimensions; k++ )
-                lAlphaMaps[lDimensions * j + k] = mChunks[y][x]->alphamaps[j]->getAlpha(k);
+                lAlphaMaps[lDimensions * j + k] = mChunks[y][x]->textureSet->getAlpha(j, k);
             else
             {
               unsigned char upperNibble, lowerNibble;
               for( int k = 0; k < lDimensions; k++ )
               {
-                lowerNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->alphamaps[j]->getAlpha(k * 2 + 0)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
-                upperNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->alphamaps[j]->getAlpha(k * 2 + 1)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+                lowerNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->textureSet->getAlpha(j, k * 2 + 0)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+                upperNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->textureSet->getAlpha(j, k * 2 + 1)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
                 lAlphaMaps[lDimensions * j + k] = ( upperNibble << 4 ) + lowerNibble;
               }
             }
