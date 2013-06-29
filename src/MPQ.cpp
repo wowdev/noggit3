@@ -167,7 +167,7 @@ MPQFile::MPQFile( const std::string& filename )
   fname = diskpath;
   std::transform( fname.begin(), fname.end(), fname.begin(), ::tolower );
 
-  std::ifstream input( diskpath.c_str(), std::ios_base::binary | std::ios_base::in );
+  std::ifstream input( fname.c_str(), std::ios_base::binary | std::ios_base::in );
   if( input.is_open() )
   {
     External = true;
