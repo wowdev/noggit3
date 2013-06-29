@@ -220,7 +220,7 @@ void UIMapViewGUI::render( ) const
 
         detailInfo << "MCNK " << lSelection->data.mapchunk->px << ", " << lSelection->data.mapchunk->py << " (" << lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px
           << ") of tile (" << lSelection->data.mapchunk->mt->mPositionX << " " << lSelection->data.mapchunk->mt->mPositionZ << ")"
-          << "\narea ID: " << lSelection->data.mapchunk->areaID << " (\"" << gAreaDB.getAreaName( lSelection->data.mapchunk->areaID ) << "\")"
+          << "\narea ID: " << lSelection->data.mapchunk->getAreaID() << " (\"" << gAreaDB.getAreaName( lSelection->data.mapchunk->getAreaID() ) << "\")"
           << "\nflags: "
           << ( flags & FLAG_SHADOW ? "shadows " : "" )
           << ( flags & FLAG_IMPASS ? "impassable " : "" )

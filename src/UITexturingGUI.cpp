@@ -573,7 +573,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
   std::string areaName;
   try
   {
-    AreaDB::Record rec = gAreaDB.getByID(chunk->areaID);
+    AreaDB::Record rec = gAreaDB.getByID(chunk->getAreaID());
     areaName = rec.getString(AreaDB::Name);
   }
   catch(...)
@@ -581,7 +581,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
     areaName = "";
   }
   Temp.clear();
-  Temp << "AreaID: " << areaName.c_str() << " (" << chunk->areaID << ")" ;
+  Temp << "AreaID: " << areaName.c_str() << " (" << chunk->getAreaID() << ")" ;
   chunkAreaID->setText(Temp.str().c_str());///
 
   Temp.clear();

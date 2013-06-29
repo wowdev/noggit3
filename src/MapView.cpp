@@ -131,7 +131,7 @@ float brushLevel=255.0f;
 int terrainMode=0;
 int saveterrainMode = 0;
 
-brush textureBrush;
+Brush textureBrush;
 
 
 UICursorSwitcher* CursorSwitcher;
@@ -1277,7 +1277,7 @@ void MapView::tick( float t, float dt )
             if( mViewMode == eViewMode_3D )
             {
             // pick areaID from chunk
-            int newID = gWorld->GetCurrentSelection()->data.mapchunk->areaID;
+            int newID = gWorld->GetCurrentSelection()->data.mapchunk->getAreaID();
             Environment::getInstance()->selectedAreaID = newID;
             mainGui->ZoneIDBrowser->setZoneID(newID);
             }

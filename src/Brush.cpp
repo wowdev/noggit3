@@ -4,7 +4,7 @@
 
 #include "Video.h" // OpenGL::Texture
 
-void brush::init()
+void Brush::init()
 {
   radius = 15;
   hardness = 0.5f;
@@ -14,7 +14,7 @@ void brush::init()
   GenerateTexture();
 }
 
-void brush::GenerateTexture()
+void Brush::GenerateTexture()
 {
   float x, y, dist;
   float change = 2.0f / 256.0f;
@@ -47,28 +47,28 @@ void brush::GenerateTexture()
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 }
 
-void brush::setHardness( float H )
+void Brush::setHardness( float H )
 {
   hardness = H;
   iradius = hardness * radius;
   oradius = radius - iradius;
   update = true;
 }
-void brush::setRadius( float R )
+void Brush::setRadius( float R )
 {
   radius = R;
   iradius = hardness * radius;
   oradius = radius - iradius;
 }
-float brush::getHardness()
+float Brush::getHardness()
 {
   return hardness;
 }
-float brush::getRadius()
+float Brush::getRadius()
 {
   return radius;
 }
-float brush::getValue( float dist )
+float Brush::getValue( float dist )
 {
   if( dist > radius )
     return 0.0f;
@@ -76,11 +76,11 @@ float brush::getValue( float dist )
     return 1.0f;
   return( 1.0f - ( dist - iradius ) / oradius );
 }
-OpenGL::Texture* brush::getTexture()
+OpenGL::Texture* Brush::getTexture()
 {
   return _texture;
 }
-bool brush::needUpdate()
+bool Brush::needUpdate()
 {
   return update;
 }
