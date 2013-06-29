@@ -27,8 +27,8 @@ UIExitWarning::UIExitWarning( MapView *mapview )
   : UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f - ( video.yres() /4), winWidth, winHeight, "" )
 {
   addChild( new UITexture( 10.0f, 10.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Misc_QuestionMark.blp" ) );
-  addChild( new UIText( 95.0f, 20.0f, "Do you really want to exit?", arial14, eJustifyLeft ) );
-  addChild( new UIText( 95.0f, 40.0f, "Changes will be lost!", arial14, eJustifyLeft ) );
+  addChild( new UIText( 95.0f, 20.0f, "Do you really want to exit?", app.getArial14(), eJustifyLeft ) );
+  addChild( new UIText( 95.0f, 40.0f, "Changes will be lost!", app.getArial14(), eJustifyLeft ) );
   addChild( new UIButton( this->width() - 225.0f, 80.0f, 100.0f, 30.0f, "OK", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", exitMeNow, 1 ) );
   addChild( new UIButton( this->width() - 120.0f, 80.0f, 100.0f, 30.0f, "Cancel", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", closeme, 2 ) );
 

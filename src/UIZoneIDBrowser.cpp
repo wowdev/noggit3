@@ -7,7 +7,7 @@
 #include "DBC.h"
 #include "Log.h"
 #include "Misc.h"
-#include "Noggit.h" // arial14, arialn13
+#include "Noggit.h" // app.getArial14(), arialn13
 #include "UIButton.h"
 #include "UIListView.h"
 #include "UIMapViewGUI.h"
@@ -39,7 +39,7 @@ UIZoneIDBrowser::UIZoneIDBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *
 , ZoneName( "" )
 , SubZoneName( "" )
 , backZone( new UIButton( 387.5f, 4.0f, 24.0f, 24.0f, "", "Interface\\BUTTONS\\UI-RotationLeft-Button-Up.blp", "Interface\\BUTTONS\\UI-RotationLeft-Button-Down.blp", theButtonMapPressed, 0 ) )
-, ZoneIDPath( new UIText( 10.0f, 6.0f, "", arial12, eJustifyLeft) )
+, ZoneIDPath( new UIText( 10.0f, 6.0f, "", app.getArial12(), eJustifyLeft) )
 {
   addChild(ZoneIDPath);
   addChild(backZone);

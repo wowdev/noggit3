@@ -6,7 +6,7 @@
 
 #include "Log.h"
 #include "Misc.h"
-#include "Noggit.h" // arial14, arialn13
+#include "Noggit.h" // app.getArial14(), arialn13
 #include "UIButton.h"
 #include "UIText.h"
 #include "UITexture.h"

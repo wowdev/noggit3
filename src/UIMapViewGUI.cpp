@@ -8,7 +8,7 @@
 #include "Environment.h"
 #include "MapChunk.h"
 #include "MapView.h"
-#include "Noggit.h" // gStates, gPop, arial14, morpheus40, arial...
+#include "Noggit.h" // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
 #include "Project.h"
 #include "UIAppInfo.h" // UIAppInfo
 #include "UICursorSwitcher.h" // UICursorSwitcher
@@ -141,16 +141,16 @@ void UIMapViewGUI::render( ) const
   UIFrame::render();
 
   //! \todo Make these some textUIs.
-  arial16.shprint( 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
+  app.getArial16().shprint( 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
 
   int time = static_cast<int>( gWorld->time ) % 2880;
   std::stringstream timestrs; timestrs << "Time: " << ( time / 120 ) << ":" << ( time % 120 );
-  arial16.shprint( video.xres() - 100.0f, 5.0f, timestrs.str() );
+  app.getArial16().shprint( video.xres() - 100.0f, 5.0f, timestrs.str() );
 
   if ( gWorld->loading )
   {
     std::string toDisplay( gWorld->noadt ? "No ADT at this Point" : "Loading..." );
-    arial16.shprint( video.xres() / 2.0f - arial16.width( toDisplay ) / 2.0f, 30.0f, toDisplay );
+    app.getArial16().shprint( video.xres() / 2.0f - app.getArial16().width( toDisplay ) / 2.0f, 30.0f, toDisplay );
   }
 
   std::ostringstream statusbarInfo;
@@ -242,7 +242,7 @@ void UIMapViewGUI::render( ) const
               if( EffectModel )
               {
                   s << r << " - World\\NoDXT\\" << EffectModel << endl;
-                  //freetype::shprint( arial16, 30, 103 + TextOffset, "%d - World\\NoDXT\\%s", r, EffectModel );
+                  //freetype::shprint( app.getArial16(), 30, 103 + TextOffset, "%d - World\\NoDXT\\%s", r, EffectModel );
                   TextOffset += 20;
               }
             }

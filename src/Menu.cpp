@@ -137,7 +137,7 @@ void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
   gWorld->initDisplay();
   gWorld->enterTile( tile.x, tile.y );
 
-  gStates.push_back( new MapView( ah, av ) ); // on gPop, MapView is deleted.
+  app.getStates().push_back( new MapView( ah, av ) ); // on gPop, MapView is deleted.
 
   mGUIMinimapWindow->hide();
 
@@ -222,7 +222,7 @@ void Menu::keypressed( SDL_KeyboardEvent* e )
     }
     else
     {
-      gPop = true;
+      app.pop = true;
     }
   }
 }
@@ -303,7 +303,7 @@ void Menu::buildMenuBar()
 
   mGUImenuBar = new UIMenuBar();
   mGUImenuBar->AddMenu( "File" );
-  mGUImenuBar->GetMenu( "File" )->AddMenuItemSwitch( "exit ESC", &gPop, true );
+  mGUImenuBar->GetMenu( "File" )->AddMenuItemSwitch( "exit ESC", &app.pop, true );
   mGUIFrame->addChild( mGUImenuBar );
 
   static const char* typeToName[4] = { "Continent", "Dungeons", "Raid", "Battleground" };

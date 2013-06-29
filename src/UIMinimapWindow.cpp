@@ -19,7 +19,7 @@ UIMinimapWindow::UIMinimapWindow( Menu* menuLink )
 , mMenuLink( menuLink )
 , map( NULL )
 {
-  this->cursor_position = new UIText(10,  height() - 20.0f, "Maptile: ", arial14, eJustifyLeft );
+  this->cursor_position = new UIText(10,  height() - 20.0f, "Maptile: ", app.getArial14(), eJustifyLeft );
   this->addChild(cursor_position);
   resize();
 }
@@ -33,7 +33,7 @@ UIMinimapWindow::UIMinimapWindow( World* setMap )
 , mMenuLink( NULL )
 , map( setMap )
 {
-  this->cursor_position = new UIText(10,  height() - 20.0f, "Maptile: ", arial14, eJustifyLeft );
+  this->cursor_position = new UIText(10,  height() - 20.0f, "Maptile: ", app.getArial14(), eJustifyLeft );
   this->addChild(cursor_position);
   resize();
 }
