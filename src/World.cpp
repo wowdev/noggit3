@@ -1913,15 +1913,15 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
 
 bool World::paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture)
 {
-  //const int newX = (int)(x / TILESIZE);
-  //const int newZ = (int)(z / TILESIZE);
-
-  //Log << "Painting Textures at " << x << " and " << z;
+  const int xLower = (int)((x - Brush->getRadius())/ TILESIZE);
+  const int xUper = (int)((x + Brush->getRadius())/ TILESIZE)+1;
+  const int zLower = (int)((z - Brush->getRadius()) / TILESIZE);
+  const int zUper = (int)((z + Brush->getRadius()) / TILESIZE)+1;
   bool succ = false;
 
-  for( int j = 0; j < 64; ++j )
+  for( int j = zLower; j < zUper; ++j )
   {
-    for( int i = 0; i < 64; ++i )
+    for( int i = xLower; i < xUper; ++i )
     {
       if( tileLoaded( j, i ) )
       {
@@ -1939,6 +1939,7 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
       }
     }
   }
+
   return succ;
 }
 
