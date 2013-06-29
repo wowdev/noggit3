@@ -39,8 +39,8 @@
 #include "ModelManager.h" // ModelManager::report()
 
 Noggit app;
-
 void CreateStrips();
+extern std::list<std::string> gListfile;
 
 Noggit::Noggit()
   : fullscreen(false)
@@ -502,7 +502,7 @@ int Noggit::start(int argc, char *argv[])
   asyncLoader->join();
 
   MPQArchive::unloadAllMPQs();
-  //gListfile.clear();
+  gListfile.clear();
 
   LogDebug << "Exited" << std::endl;
 
