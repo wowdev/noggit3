@@ -449,10 +449,7 @@ int Noggit::start(int argc, char *argv[])
   wowpath = getGamePath();
 
   if( wowpath == "" )
-  {
     return -1;
-  }
-
   Log << "Game path: " << wowpath << std::endl;
 
   if(Project::getInstance()->getPath() == "")
@@ -460,7 +457,7 @@ int Noggit::start(int argc, char *argv[])
   Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
 
   CreateStrips();
-  loadMPQs();
+  loadMPQs(); // listfiles are not available straight away! They are async! Do not rely on anything at this point!
   OpenDBs();
 
   if( !video.init( xres, yres, fullscreen, doAntiAliasing ) )
@@ -511,8 +508,6 @@ int main( int argc, char *argv[] )
 {
   return app.start(argc, argv);
 }
-
-// listfiles are not available straight away! They are async! Do not rely on anything at this point!
 
 //! \todo  Get this out?
 //gFileList = new Directory( "root" );
