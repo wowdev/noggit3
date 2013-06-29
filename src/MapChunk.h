@@ -21,6 +21,8 @@ class MapChunk
 {
 
 public:
+  //! \todo make most of these private
+
   MapTile *mt;
   Vec3D vmin, vmax, vcenter;
   int px, py;
@@ -56,7 +58,8 @@ public:
   //void destroy(); wtf? does not exist
   void initStrip();
 
-  void draw();
+  void draw(); //! \todo only this function should be public, all others should be called from it
+
   void drawContour();
   //void drawAreaID(); wtf? does not exist
   //void drawBlock(); wtf? does not exist
@@ -81,10 +84,12 @@ public:
 
   Vec3D GetSelectionPosition();
 
+  //! \todo implement Action stack for these
   bool changeTerrain(float x, float z, float change, float radius, int BrushType);
   bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
+  //! \todo implement Action stack for these
   bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture);
   int addTexture(OpenGL::Texture* texture);
   void switchTexture( OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture );
@@ -105,11 +110,10 @@ public:
 
   void loadTextures();
 
+  //! \todo this is ugly create a build struct or sth
   void save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::map<int, WMOInstance> &lObjectInstances, std::map<int, ModelInstance> &lModelInstances);
 
-  //  char getAlpha(float x,float y);
-
-
+  //char getAlpha(float x,float y);
   //float getTerrainHeight(float x, float z);
 };
 

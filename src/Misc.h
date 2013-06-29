@@ -23,7 +23,9 @@ namespace misc
   int randint(int lower, int upper);
   int getADTCord(float cord);
   std::string explode (std::string original, std::string exploder=".");
-};
+}
+
+//! \todo collect all lose functions/classes/structs for now, sort them later
 
 class sExtendableArray
 {
