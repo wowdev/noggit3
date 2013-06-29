@@ -55,86 +55,6 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS( SDL DEFAULT_MSG SDL_LIBRARY SDL_INCLUDE_DIR )
 # Add the found include directories to our include list.
 SET( IncludeDirectories ${GLEW_INCLUDE_PATH} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${SDL_INCLUDE_DIR} ${STORMLIB_INCLUDES} ${Boost_INCLUDE_DIRS} )
 
-if( UNIX )
-# Gather source files.
-SET( SourceFiles
-  src/AsyncLoader.cpp
-  src/Alphamap.cpp
-  src/Brush.cpp
-  src/ConfigFile.cpp
-  src/DBC.cpp
-  src/DBCFile.cpp
-  src/Directory.cpp
-  src/Environment.cpp
-  src/FreeType.cpp
-  src/Frustum.cpp
-  src/Liquid.cpp
-  src/Log.cpp
-  src/MPQ.cpp
-  src/MapChunk.cpp
-  src/MapTile.cpp
-  src/MapView.cpp
-  src/Menu.cpp
-  src/Misc.cpp
-  src/Model.cpp
-  src/ModelInstance.cpp
-  src/ModelManager.cpp
-  src/Noggit.cpp
-  src/Particle.cpp
-  src/Project.cpp
-  src/Selection.cpp
-  src/Settings.cpp
-  src/Shaders.cpp
-  src/Sky.cpp
-  src/TextureManager.cpp
-  src/UIAbout.cpp
-  src/UIAppInfo.cpp
-  src/UIButton.cpp
-  src/UICheckBox.cpp
-  src/UICloseWindow.cpp
-  src/UICursorSwitcher.cpp
-  src/UIDetailInfos.cpp
-  src/UIDoodadSpawner.cpp
-  src/UIFrame.cpp
-  src/UIGradient.cpp
-  src/UIHelp.cpp
-  src/UIListView.cpp
-  src/UIMapViewGUI.cpp
-  src/UIMenuBar.cpp
-  src/UIMinimapWindow.cpp
-  src/UIMinimizeButton.cpp
-  src/UIExitWarning.cpp
-  src/UICapsWarning.cpp
-  src/UIWaterSaveWarning.cpp
-  src/UIHelperModels.cpp
-  src/UIModel.cpp
-  src/UIModelImport.cpp
-  src/UIScrollableFrame.cpp
-  src/UIScrollBar.cpp
-  src/UISlider.cpp
-  src/UIStatusBar.cpp
-  src/UIText.cpp
-  src/UITextBox.cpp
-  src/UITexture.cpp
-  src/UITexturePicker.cpp
-  src/UITextureSwitcher.cpp
-  src/UITexturingGUI.cpp
-  src/UIToggleGroup.cpp
-  src/UIToolbar.cpp
-  src/UIToolbarIcon.cpp
-  src/UITreeView.cpp
-  src/UIWindow.cpp
-  src/UIZoneIDBrowser.cpp
-  src/Video.cpp
-  src/WMO.cpp
-  src/WMOInstance.cpp
-  src/World.cpp
-)
-endif( UNIX )
-
-# Set sourcefiles for windows. I want the .h files.
-if( WIN32 )
-  # Set this to more paths you windows guys need.
 SET( SourceFiles
   src/Animated.h
   src/AppState.h
@@ -203,6 +123,8 @@ SET( SourceFiles
   src/Sky.h
   src/TextureManager.cpp
   src/TextureManager.h
+  src/TextureSet.cpp
+  src/TextureSet.h
   src/UIAbout.cpp
   src/UIAbout.h
   src/UIAppInfo.cpp
@@ -289,8 +211,7 @@ SET( SourceFiles
   src/WMOInstance.h
   src/World.cpp
   src/World.h
-) 
- endif( WIN32 )
+)
 
 SET( IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/" )
 
