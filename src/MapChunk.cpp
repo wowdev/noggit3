@@ -41,69 +41,6 @@ StripType EvenStrips[8*18];
 StripType LineStrip[32];
 StripType HoleStrip[128];
 
-/*
- White  1.00  1.00  1.00
- Brown  0.75  0.50  0.00
- Green  0.00  1.00  0.00
- Yellow  1.00  1.00  0.00
- Lt Blue  0.00  1.00  1.00
- Blue  0.00  0.00  1.00
- Black  0.00  0.00  0.00
- */
-
-void HeightColor(float height, Vec3D *Color)
-{
-  float Amount;
-
-  if(height>HEIGHT_TOP)
-  {
-    Color->x=1.0;
-    Color->y=1.0;
-    Color->z=1.0;
-  }
-  else if(height>HEIGHT_MID)
-  {
-    Amount=(height-HEIGHT_MID)/(HEIGHT_TOP-HEIGHT_MID);
-    Color->x=.75f+Amount*0.25f;
-    Color->y=0.5f+0.5f*Amount;
-    Color->z=Amount;
-  }
-  else if(height>HEIGHT_LOW)
-  {
-    Amount=(height-HEIGHT_LOW)/(HEIGHT_MID-HEIGHT_LOW);
-    Color->x=Amount*0.75f;
-    Color->y=1.00f-0.5f*Amount;
-    Color->z=0.0f;
-  }
-  else if(height>HEIGHT_ZERO)
-  {
-    Amount=(height-HEIGHT_ZERO)/(HEIGHT_LOW-HEIGHT_ZERO);
-
-    Color->x=1.0f-Amount;
-    Color->y=1.0f;
-    Color->z=0.0f;
-  }
-  else if(height>HEIGHT_SHALLOW)
-  {
-    Amount=(height-HEIGHT_SHALLOW)/(HEIGHT_ZERO-HEIGHT_SHALLOW);
-    Color->x=0.0f;
-    Color->y=Amount;
-    Color->z=1.0f;
-  }
-  else if(height>HEIGHT_DEEP)
-  {
-    Amount=(height-HEIGHT_DEEP)/(HEIGHT_SHALLOW-HEIGHT_DEEP);
-    Color->x=0.0f;
-    Color->y=0.0f;
-    Color->z=Amount;
-  }
-  else
-    (*Color)*=0.0f;
-
-}
-
-
-
 void GenerateContourMap()
 {
   unsigned char  CTexture[CONTOUR_WIDTH*4];
@@ -533,15 +470,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
   glBindBuffer(GL_ARRAY_BUFFER, minishadows);
   glBufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 }
-/*
-void MapChunk::loadTextures()
-{
-  //! \todo Use this kind of preloading again?
-  return;
-    for(int i=0; i < nTextures; ++i)
-    _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
-}
-*/
+
 void MapChunk::drawTextures()
 {
 
@@ -717,43 +646,6 @@ bool MapChunk::GetVertex(float x,float z, Vec3D *V)
 
   *V=mVertices[17*(row/2) + ((row % 2) ? 9 : 0) + column];
   return true;
-}
-
-
-void MapChunk::drawColor()
-{
-
-  if (!gWorld->frustum.intersects(vmin,vmax))
-    return;
-
-  float mydist = (gWorld->camera - vcenter).length() - r;
-
-  if (mydist > (mapdrawdistance * mapdrawdistance))
-    return;
-
-  if (mydist > gWorld->culldistance) {
-    if (gWorld->drawfog) this->drawNoDetail();
-    return;
-  }
-
-  glActiveTexture(GL_TEXTURE1);
-  glDisable(GL_TEXTURE_2D);
-
-  glActiveTexture(GL_TEXTURE0);
-  glDisable(GL_TEXTURE_2D);
-  //glDisable(GL_LIGHTING);
-
-  Vec3D Color;
-  glBegin(GL_TRIANGLE_STRIP);
-  for(int i=0; i < striplen; ++i)
-  {
-    HeightColor( mVertices[strip[i]].y, &Color);
-    glColor3fv(&Color.x);
-    glNormal3fv(&mNormals[strip[i]].x);
-    glVertex3fv(&mVertices[strip[i]].x);
-  }
-  glEnd();
-  //glEnable(GL_LIGHTING);
 }
 
 void MapChunk::drawPass(int id)
@@ -1018,35 +910,6 @@ void MapChunk::draw()
 
 
 
-}
-
-void MapChunk::drawNoDetail()
-{
-  glActiveTexture( GL_TEXTURE1 );
-  glDisable( GL_TEXTURE_2D );
-  glActiveTexture(GL_TEXTURE0 );
-  glDisable( GL_TEXTURE_2D );
-  glDisable( GL_LIGHTING );
-
-  //glColor3fv(gWorld->skies->colorSet[FOG_COLOR]);
-  //glColor3f(1,0,0);
-  //glDisable(GL_FOG);
-
-  // low detail version
-  glBindBuffer( GL_ARRAY_BUFFER, vertices );
-  glVertexPointer( 3, GL_FLOAT, 0, 0 );
-  glDisableClientState( GL_NORMAL_ARRAY );
-  glDrawElements( GL_TRIANGLE_STRIP, stripsize, GL_UNSIGNED_SHORT, gWorld->mapstrip );
-  glEnableClientState( GL_NORMAL_ARRAY );
-
-  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-  //glEnable(GL_FOG);
-
-  glEnable( GL_LIGHTING );
-  glActiveTexture( GL_TEXTURE1 );
-  glEnable( GL_TEXTURE_2D );
-  glActiveTexture( GL_TEXTURE0 );
-  glEnable( GL_TEXTURE_2D );
 }
 
 void MapChunk::drawSelect()
@@ -1770,3 +1633,146 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lADTFile.GetPointer<sChunkHeader>( lMCNK_Position )->mSize = lMCNK_Size;
   lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 )->mEntries[py*16+px].size = lMCNK_Size;
 }
+
+
+//! ------ unused functions -----
+
+/*
+void MapChunk::drawNoDetail()
+{
+  glActiveTexture( GL_TEXTURE1 );
+  glDisable( GL_TEXTURE_2D );
+  glActiveTexture(GL_TEXTURE0 );
+  glDisable( GL_TEXTURE_2D );
+  glDisable( GL_LIGHTING );
+
+  //glColor3fv(gWorld->skies->colorSet[FOG_COLOR]);
+  //glColor3f(1,0,0);
+  //glDisable(GL_FOG);
+
+  // low detail version
+  glBindBuffer( GL_ARRAY_BUFFER, vertices );
+  glVertexPointer( 3, GL_FLOAT, 0, 0 );
+  glDisableClientState( GL_NORMAL_ARRAY );
+  glDrawElements( GL_TRIANGLE_STRIP, stripsize, GL_UNSIGNED_SHORT, gWorld->mapstrip );
+  glEnableClientState( GL_NORMAL_ARRAY );
+
+  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+  //glEnable(GL_FOG);
+
+  glEnable( GL_LIGHTING );
+  glActiveTexture( GL_TEXTURE1 );
+  glEnable( GL_TEXTURE_2D );
+  glActiveTexture( GL_TEXTURE0 );
+  glEnable( GL_TEXTURE_2D );
+}
+*/
+
+/*
+void MapChunk::drawColor()
+{
+
+  if (!gWorld->frustum.intersects(vmin,vmax))
+    return;
+
+  float mydist = (gWorld->camera - vcenter).length() - r;
+
+  if (mydist > (mapdrawdistance * mapdrawdistance))
+    return;
+
+  if (mydist > gWorld->culldistance) {
+    if (gWorld->drawfog) this->drawNoDetail();
+    return;
+  }
+
+  glActiveTexture(GL_TEXTURE1);
+  glDisable(GL_TEXTURE_2D);
+
+  glActiveTexture(GL_TEXTURE0);
+  glDisable(GL_TEXTURE_2D);
+  //glDisable(GL_LIGHTING);
+
+  Vec3D Color;
+  glBegin(GL_TRIANGLE_STRIP);
+  for(int i=0; i < striplen; ++i)
+  {
+    HeightColor( mVertices[strip[i]].y, &Color);
+    glColor3fv(&Color.x);
+    glNormal3fv(&mNormals[strip[i]].x);
+    glVertex3fv(&mVertices[strip[i]].x);
+  }
+  glEnd();
+  //glEnable(GL_LIGHTING);
+}
+*/
+
+/*
+void MapChunk::loadTextures()
+{
+  //! \todo Use this kind of preloading again?
+  return;
+    for(int i=0; i < nTextures; ++i)
+    _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
+}
+*/
+
+
+
+/*void HeightColor(float height, Vec3D *Color)
+{
+  White  1.00  1.00  1.00
+  Brown  0.75  0.50  0.00
+  Green  0.00  1.00  0.00
+  Yellow  1.00  1.00  0.00
+  Lt Blue  0.00  1.00  1.00
+  Blue  0.00  0.00  1.00
+  Black  0.00  0.00  0.00
+
+  float Amount;
+
+  if(height>HEIGHT_TOP)
+  {
+    Color->x=1.0;
+    Color->y=1.0;
+    Color->z=1.0;
+  }
+  else if(height>HEIGHT_MID)
+  {
+    Amount=(height-HEIGHT_MID)/(HEIGHT_TOP-HEIGHT_MID);
+    Color->x=.75f+Amount*0.25f;
+    Color->y=0.5f+0.5f*Amount;
+    Color->z=Amount;
+  }
+  else if(height>HEIGHT_LOW)
+  {
+    Amount=(height-HEIGHT_LOW)/(HEIGHT_MID-HEIGHT_LOW);
+    Color->x=Amount*0.75f;
+    Color->y=1.00f-0.5f*Amount;
+    Color->z=0.0f;
+  }
+  else if(height>HEIGHT_ZERO)
+  {
+    Amount=(height-HEIGHT_ZERO)/(HEIGHT_LOW-HEIGHT_ZERO);
+
+    Color->x=1.0f-Amount;
+    Color->y=1.0f;
+    Color->z=0.0f;
+  }
+  else if(height>HEIGHT_SHALLOW)
+  {
+    Amount=(height-HEIGHT_SHALLOW)/(HEIGHT_ZERO-HEIGHT_SHALLOW);
+    Color->x=0.0f;
+    Color->y=Amount;
+    Color->z=1.0f;
+  }
+  else if(height>HEIGHT_DEEP)
+  {
+    Amount=(height-HEIGHT_DEEP)/(HEIGHT_SHALLOW-HEIGHT_DEEP);
+    Color->x=0.0f;
+    Color->y=0.0f;
+    Color->z=Amount;
+  }
+  else
+    (*Color)*=0.0f;
+
+}*/
