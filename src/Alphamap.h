@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 
 #include "MPQ.h"
+#include "Log.h"
 
 class Alphamap
 {
@@ -12,8 +13,6 @@ public:
   Alphamap(MPQFile* f, unsigned int & flags, bool mBigAlpha);
   ~Alphamap();
 
-  void setAlpha(size_t offset, unsigned char value);
-  unsigned char getAlpha(size_t offset);
   void loadTexture();
 
   inline void bind()
@@ -21,9 +20,19 @@ public:
     glBindTexture(GL_TEXTURE_2D, map);
   }
 
-  inline const GLuint id() const
+  inline bool isValid()
   {
-    return map;
+    return (map > 0);
+  }
+
+  inline void setAlpha(size_t offset, unsigned char value)
+  {
+    amap[offset] = value;
+  }
+
+  inline const unsigned char getAlpha(size_t offset)
+  {
+    return amap[offset];
   }
 
 private:

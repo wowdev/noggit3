@@ -75,6 +75,7 @@ private:
   std::vector<Liquid*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
 
   friend class MapChunk;
+  friend class TextureSet;
 };
 
 int indexMapBuf(int x, int y);
