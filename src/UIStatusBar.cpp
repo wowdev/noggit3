@@ -3,14 +3,14 @@
 #include <vector>
 #include <string>
 
-#include "Noggit.h" // arial16
+#include "Noggit.h" // app.getArial16()
 #include "UIText.h"
 #include "Video.h"
 
 UIStatusBar::UIStatusBar( float xPos, float yPos, float w, float h )
 : UIWindow( xPos, yPos, w, h )
-, leftInfo( new UIText( 8.0f, 7.0f, "", arial16, eJustifyLeft ) )
-, rightInfo( new UIText( width() - 8.0f, 7.0f, "", arial16, eJustifyRight ) )
+, leftInfo( new UIText( 8.0f, 7.0f, "", app.getArial16(), eJustifyLeft ) )
+, rightInfo( new UIText( width() - 8.0f, 7.0f, "", app.getArial16(), eJustifyRight ) )
 {
   addChild( leftInfo );
   addChild( rightInfo );

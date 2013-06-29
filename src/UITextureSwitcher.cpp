@@ -1,6 +1,6 @@
 #include "UITextureSwitcher.h"
 
-#include "Noggit.h" // arial16
+#include "Noggit.h" // app.getArial16()
 #include "World.h"
 
 #include "UITexture.h"
@@ -43,7 +43,7 @@ UITextureSwitcher::UITextureSwitcher( int x, int y )
   addChild( _textureFrom );
   addChild( _setFromButton );
 
-  addChild( new UIText( width() / 2.0f, 2.0f, "swapper", arial16, eJustifyCenter ) );
+  addChild( new UIText( width() / 2.0f, 2.0f, "swapper", app.getArial16(), eJustifyCenter ) );
   addChild( new UIButton( width() - 29.0f , 1.0f, 30.0f, 30.0f, "", "Interface\\Buttons\\UI-Panel-MinimizeButton-Up.blp", "Interface\\Buttons\\UI-Panel-MinimizeButton-Down.blp", closeButtonPressed, 0 ) );
   addChild( new UIButton( 10 , 30 , textureSize, 30, "swap ADT", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", swapADT, 0 ) );
 }

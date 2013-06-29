@@ -14,13 +14,13 @@ UIAbout::UIAbout( )
 : UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "" )
 {
   addChild( new UITexture( 20.0f, 20.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Potion_83.blp" ) );
-  addChild( new UIText( 73.0f, 24.0f, "Noggit Studio", skurri32, eJustifyLeft ) );
-  addChild( new UIText( 155.0f, 57.0f, "a wow map editor for 3.3.5a", fritz16, eJustifyLeft ) );
-  addChild( new UIText( 20.0f, 100.0f, "Ufoz [...],   Cryect,   Beket,   Schlumpf,   Tigurius", fritz16, eJustifyLeft ) );
-  addChild( new UIText( 20.0f, 120.0f, " Steff,  Garthog,  Glararan,  Cromon  &  Hanfer", fritz16, eJustifyLeft ) );
-  addChild( new UIText( 20.0f, 160.0f, "World of Warcraft is (C) Blizzard Entertainment", fritz16, eJustifyLeft ) );
-  addChild( new UIText( 20.0f, 190.0f, STRPRODUCTVER , fritz16, eJustifyLeft ) );
-  addChild( new UIText( 375.0f, 190.0f, __DATE__ ", " __TIME__, fritz16, eJustifyRight ) );
+  addChild( new UIText( 73.0f, 24.0f, "Noggit Studio", app.getSkurri32(), eJustifyLeft ) );
+  addChild( new UIText( 155.0f, 57.0f, "a wow map editor for 3.3.5a", app.getFritz16(), eJustifyLeft ) );
+  addChild( new UIText( 20.0f, 100.0f, "Ufoz [...],   Cryect,   Beket,   Schlumpf,   Tigurius", app.getFritz16(), eJustifyLeft ) );
+  addChild( new UIText( 20.0f, 120.0f, " Steff,  Garthog,  Glararan,  Cromon  &  Hanfer", app.getFritz16(), eJustifyLeft ) );
+  addChild( new UIText( 20.0f, 160.0f, "World of Warcraft is (C) Blizzard Entertainment", app.getFritz16(), eJustifyLeft ) );
+  addChild( new UIText( 20.0f, 190.0f, STRPRODUCTVER , app.getFritz16(), eJustifyLeft ) );
+  addChild( new UIText( 375.0f, 190.0f, __DATE__ ", " __TIME__, app.getFritz16(), eJustifyRight ) );
 }
 
 void UIAbout::resize()

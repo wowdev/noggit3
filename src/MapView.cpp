@@ -25,7 +25,7 @@
 #include "MapView.h"
 #include "Misc.h"
 #include "ModelManager.h" // ModelManager
-#include "Noggit.h" // gStates, gPop, gFPS, arial14, morpheus40, arial...
+#include "Noggit.h" // app.getStates(), gPop, gFPS, app.getArial14(), morpheus40, arial...
 #include "Project.h"
 #include "Settings.h"
 #include "Environment.h"
@@ -208,7 +208,7 @@ void SaveOrReload( UIFrame*, int pMode )
   else if( pMode == 2 )
     gWorld->saveChanged();
   else if( pMode == 3 )
-      static_cast<MapView*>( gStates.back() )->quit();
+      static_cast<MapView*>( app.getStates().back() )->quit();
 
 }
 
@@ -573,7 +573,7 @@ void view_texture_palette( UIFrame* /*button*/, int /*id*/ )
 
 void exit_tilemode(  UIFrame* /*button*/, int /*id*/ )
 {
-  gPop = true;
+  app.pop = true;
 }
 
 void test_menu_action(  UIFrame* /*button*/, int /*id*/ )
@@ -738,7 +738,7 @@ void MapView::createGUI()
   setting_ground->movable( true );
   mainGui->addChild( setting_ground );
 
-  setting_ground->addChild( new UIText( 78.5f, 2.0f, "Raise / Lower", arial14, eJustifyCenter ) );
+  setting_ground->addChild( new UIText( 78.5f, 2.0f, "Raise / Lower", app.getArial14(), eJustifyCenter ) );
 
   gGroundToggleGroup = new UIToggleGroup( &groundBrushType );
   setting_ground->addChild( new UICheckBox( 6.0f, 15.0f, "Flat", gGroundToggleGroup, 0 ) );
@@ -767,7 +767,7 @@ void MapView::createGUI()
   setting_blur->hide();
   mainGui->addChild(setting_blur);
 
-  setting_blur->addChild( new UIText( 78.5f, 2.0f, "Flatten / Blur", arial14, eJustifyCenter ) );
+  setting_blur->addChild( new UIText( 78.5f, 2.0f, "Flatten / Blur", app.getArial14(), eJustifyCenter ) );
 
   gBlurToggleGroup = new UIToggleGroup( &blurBrushType );
   setting_blur->addChild( new UICheckBox( 6.0f, 15.0f, "Flat", gBlurToggleGroup, 0 ) );
@@ -794,7 +794,7 @@ void MapView::createGUI()
 
   mainGui->addChild(settings_paint);
 
-  settings_paint->addChild( new UIText( 78.5f, 2.0f, "3D Paint", arial14, eJustifyCenter ) );
+  settings_paint->addChild( new UIText( 78.5f, 2.0f, "3D Paint", app.getArial14(), eJustifyCenter ) );
 
 
   mainGui->G1=new UIGradient;
@@ -1494,7 +1494,7 @@ void MapView::save()
 
 void MapView::quit()
 {
-  gPop = true;
+  app.pop = true;
 }
 
 void MapView::quitask()

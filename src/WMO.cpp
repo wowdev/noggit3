@@ -1187,7 +1187,7 @@ WMO* WMOManager::add( std::string name )
     items[name] = new WMO( name );
     //! \todo Uncomment this, if loading is threaded.
     //items[name]->finishLoading();
-    //gAsyncLoader->addObject( items[name] );
+    //app.loader()->addObject( items[name] );
   }
 
   items[name]->addReference();

@@ -1,7 +1,7 @@
 #include "UIHelp.h"
 
 #include "UIText.h" // UIText
-#include "Noggit.h" // arial14
+#include "Noggit.h" // app.getArial14()
 #include "Video.h" // video
 
 const int winWidth = 775;
@@ -59,7 +59,7 @@ UIHelp::UIHelp( )
     "  B / N - slower/faster time\n"
 	"  SHIFT + +/-: fog distance when no model is selected\n"
 	"\n"
-    , arial14, eJustifyLeft )
+    , app.getArial14(), eJustifyLeft )
   );
 
   addChild( new UIText( 380.0f, 30.0f,
@@ -110,6 +110,6 @@ UIHelp::UIHelp( )
 	"Impassible Flags:\n"
 	"  SHIFT + Left mouse - Paint flag\n"
 	"  CTRL + Left mouse  - Clear flag\n"
-    , arial14, eJustifyLeft )
+    , app.getArial14(), eJustifyLeft )
   );
 }

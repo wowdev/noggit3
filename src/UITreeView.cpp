@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "Directory.h"
-#include "Noggit.h" // arial12
+#include "Noggit.h" // app.getArial12()
 #include "UIText.h"
 #include "Video.h"
 
@@ -33,7 +33,7 @@ UITreeView::UITreeView( float pX, float pY, const std::string& directoryName, Di
 , mParent( pParent )
 , mMyDir( pDirectory )
 , mMyButton( new UITreeViewButton( 0, 0, UITreeView::Ptr( this ) ) )
-, mMyText( new UIText( 13, 0, directoryName, arial12, eJustifyLeft ) )
+, mMyText( new UIText( 13, 0, directoryName, app.getArial12(), eJustifyLeft ) )
 , _directoryName( directoryName )
 , mSelectFunction( pSelectFunction )
 , mExpanded( false )
@@ -53,7 +53,7 @@ UITreeView::UITreeView( float pX, float pY, const std::string& directoryName, Di
      ; ++it
      )
   {
-    mFiles.push_back( new UIText( 13.0f, lY, *it, arial12, eJustifyLeft ) );
+    mFiles.push_back( new UIText( 13.0f, lY, *it, app.getArial12(), eJustifyLeft ) );
     lY = lY + 13.0f;
   }
 }
