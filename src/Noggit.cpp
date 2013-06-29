@@ -139,6 +139,10 @@ void Noggit::initEnv()
     if( myConfigfile.keyExists("CursorType"))
       Environment::getInstance()->cursorType = myConfigfile.read<int>( "CursorType" );
   }
+
+  Settings::getInstance();
+  Project::getInstance();
+  Environment::getInstance();
 }
 
 void Noggit::parseArgs(int argc, char *argv[])
@@ -195,6 +199,11 @@ void Noggit::parseArgs(int argc, char *argv[])
       yres = 1536;
     }
   }
+
+  if( Settings::getInstance()->noAntiAliasing() )
+  {
+    doAntiAliasing = false;
+  }
 }
 
 std::string Noggit::getGamePath()
@@ -246,6 +255,9 @@ std::string Noggit::getGamePath()
 
 void Noggit::loadMPQs()
 {
+  asyncLoader = new AsyncLoader();
+  asyncLoader->start(1);
+
   std::vector<std::string> archiveNames;
   archiveNames.push_back( "common.MPQ" );
   archiveNames.push_back( "common-2.MPQ" );
@@ -337,12 +349,10 @@ void Noggit::loadMPQs()
 
 void Noggit::mainLoop()
 {
-  LogDebug << "Entering Main Loop" << std::endl;
-
-  bool done( false );
-  Uint32 ticks( SDL_GetTicks() );
-  AppState* activeAppState( NULL );
-  Uint32 time( 0 );
+  bool done(false);
+  Uint32 ticks(SDL_GetTicks());
+  AppState* activeAppState(NULL);
+  Uint32 time(0);
 
   SDL_EnableUNICODE( true );
 
@@ -431,32 +441,12 @@ int Noggit::start(int argc, char *argv[])
   InitLogging();
   initPath(argv);
 
-  wowpath = getGamePath();
-
-  Settings::getInstance();
-  Project::getInstance();
-  Environment::getInstance();
-
   Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 
   initEnv();
   parseArgs(argc, argv);
-
-  srand( time( NULL ) );
-
-  if( Settings::getInstance()->noAntiAliasing() )
-  {
-    doAntiAliasing = false;
-  }
-
-  if( !video.init( xres, yres, fullscreen, doAntiAliasing ) )
-  {
-    LogError << "Initializing video failed." << std::endl;
-    return -1;
-  }
-
-  SDL_WM_SetCaption( "Noggit Studio - " STRPRODUCTVER, "" );
-
+  srand(time(NULL));
+  wowpath = getGamePath();
 
   if( wowpath == "" )
   {
@@ -465,31 +455,32 @@ int Noggit::start(int argc, char *argv[])
 
   Log << "Game path: " << wowpath << std::endl;
 
-  if( Project::getInstance()->getPath() == "" )
+  if(Project::getInstance()->getPath() == "")
     Project::getInstance()->setPath( wowpath );
   Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
 
   CreateStrips();
-
-  asyncLoader = new AsyncLoader();
-  asyncLoader->start( 1 );
-
   loadMPQs();
-
-  // Opening DBCs
   OpenDBs();
 
+  if( !video.init( xres, yres, fullscreen, doAntiAliasing ) )
+  {
+    LogError << "Initializing video failed." << std::endl;
+    return -1;
+  }
+
+  SDL_WM_SetCaption( "Noggit Studio - " STRPRODUCTVER, "" );
   initFont();
 
-  if( video.mSupportShaders )
+  if(video.mSupportShaders)
     loadWaterShader();
   else
     LogError << "Your GPU does not support ARB vertex programs (shaders). Sorry." << std::endl;
 
   LogDebug << "Creating Menu" << std::endl;
-
   states.push_back( new Menu() );
 
+  LogDebug << "Entering Main Loop" << std::endl;
   mainLoop();
 
   video.close();
