@@ -70,10 +70,7 @@ public:
   void draw(); //! \todo only this function should be public, all others should be called from it
 
   void drawContour();
-  void drawColor();
   void drawSelect();
-  void drawNoDetail();
-  void drawPass(int id);
   void drawLines();
   void drawTextures();
 
@@ -119,12 +116,16 @@ public:
   //void drawAreaID(); wtf? does not exist
   //void drawBlock(); wtf? does not exist
   //void loadTextures(); not used
+  //void drawColor(); not used
+  //void drawNoDetail(); not used
 
 private:
   void initStrip();
 
   int indexNoLoD(int x, int y);
   int indexLoD(int x, int y);
+
+  void drawPass(int id);
 
 };
 
