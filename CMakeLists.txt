@@ -113,6 +113,8 @@ SET( SourceFiles
   src/Project.cpp
   src/Project.h
   src/Quaternion.h
+  src/StateMachine.cpp
+  src/StateMachine.h
   src/Selection.cpp
   src/Selection.h
   src/Settings.cpp
