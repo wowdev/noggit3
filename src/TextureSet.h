@@ -3,6 +3,7 @@
 
 #include "MPQ.h"
 #include "Alphamap.h"
+#include <stdint.h>
 
 namespace OpenGL
 {

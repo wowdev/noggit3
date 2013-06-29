@@ -448,7 +448,7 @@ void loadWaterShader()
   waterPath.make_preferred();
   fogPath.make_preferred();
 
-  FILE *shader = fopen(waterPath.c_str(), "r");
+  FILE *shader = fopen(waterPath.string().c_str(), "r");
   if(!shader)
   {
     LogError << "Unable to open water shader " << waterPath.string() << std::endl;
@@ -490,7 +490,7 @@ void loadWaterShader()
     }
   }
 
-  shader = fopen(fogPath.c_str(), "r");
+  shader = fopen(fogPath.string().c_str(), "r");
   if(!shader)
   {
     LogError << "Unable to open water shader " << fogPath.string() << std::endl;
