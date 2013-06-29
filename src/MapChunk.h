@@ -9,7 +9,7 @@
 
 class MPQFile;
 class Vec4D;
-class brush;
+class Brush;
 class Alphamap;
 class TextureSet;
 class sExtendableArray;
@@ -19,7 +19,7 @@ static const int mapbufsize = 9*9 + 8*8;
 
 class MapChunk
 {
-
+//! ------ Variables ---------
 public:
   //! \todo make most of these private
 
@@ -31,53 +31,53 @@ public:
   bool Changed;
 
   float xbase, ybase, zbase;
+
+  unsigned int Flags;
+
+  TextureSet* textureSet;
+
+  GLuint vertices, normals, minimap, minishadows;
+
+  Vec3D mVertices[mapbufsize];
+
+private:
   float r;
 
   bool mBigAlpha;
   bool haswater;
 
-  unsigned int Flags;
-  unsigned int areaID;
-
   int nameID;
   int holes;
 
-  TextureSet* textureSet;
+  unsigned int areaID;
 
   unsigned char mShadowMap[8*64];
   GLuint shadow;
 
-  GLuint vertices, normals, minimap, minishadows;
-
   StripType *strip;
   int striplen;
 
+  Vec3D mNormals[mapbufsize];
+  //! \todo Is this needed? Can't we just use the real vertices?
+  Vec3D mMinimap[mapbufsize];
+  Vec4D mFakeShadows[mapbufsize];
+
+//! ------ Functions ---------
+public:
   MapChunk(MapTile* mt, MPQFile* f,bool bigAlpha);
   ~MapChunk();
-
-  //void destroy(); wtf? does not exist
-  void initStrip();
 
   void draw(); //! \todo only this function should be public, all others should be called from it
 
   void drawContour();
-  //void drawAreaID(); wtf? does not exist
-  //void drawBlock(); wtf? does not exist
   void drawColor();
   void drawSelect();
   void drawNoDetail();
   void drawPass(int id);
   void drawLines();
-
   void drawTextures();
 
   void recalcNorms();
-
-  Vec3D mNormals[mapbufsize];
-  Vec3D mVertices[mapbufsize];
-  //! \todo Is this needed? Can't we just use the real vertices?
-  Vec3D mMinimap[mapbufsize];
-  Vec4D mFakeShadows[mapbufsize];
 
   void getSelectionCoord(float *x,float *z);
   float getSelectionHeight();
@@ -90,14 +90,15 @@ public:
   bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
   //! \todo implement Action stack for these
-  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture);
+  bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
   int addTexture(OpenGL::Texture* texture);
   void switchTexture( OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture );
   void eraseTextures();
 
+  //! \todo implement Action stack for these
   bool isHole(int i,int j);
   void addHole(int i,int j);
-  void addHoleBig( int i, int j );
+  void addHoleBig(int i, int j);
   void removeHole(int i,int j);
   void removeHoleBig(int i,int j);
 
@@ -108,13 +109,23 @@ public:
 
   bool GetVertex(float x,float z, Vec3D *V);
 
-  void loadTextures();
-
   //! \todo this is ugly create a build struct or sth
   void save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::map<int, WMOInstance> &lObjectInstances, std::map<int, ModelInstance> &lModelInstances);
 
   //char getAlpha(float x,float y);
   //float getTerrainHeight(float x, float z);
+
+  //void destroy(); wtf? does not exist
+  //void drawAreaID(); wtf? does not exist
+  //void drawBlock(); wtf? does not exist
+  //void loadTextures(); not used
+
+private:
+  void initStrip();
+
+  int indexNoLoD(int x, int y);
+  int indexLoD(int x, int y);
+
 };
 
 #endif // MAPCHUNK_H

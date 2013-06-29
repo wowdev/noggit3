@@ -16,7 +16,7 @@ namespace OpenGL
   class Texture;
 };
 
-class brush;
+class Brush;
 class MapTile;
 
 extern nameEntryManager SelectionNames;
@@ -189,7 +189,7 @@ public:
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   void blurTerrain(float x, float z, float remain, float radius, int BrushType);
-  bool paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture);
+  bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
   void eraseTextures(float x, float z);
   void overwriteTextureAtCurrentChunk( float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
   void addHole( float x, float z , bool big);

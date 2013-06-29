@@ -238,15 +238,7 @@ void CreateStrips()
     HoleStrip[iferget++] = i;
 }
 
-int indexLoD(int x, int y)
-{
-  return (x+1)*9+x*8+y;
-}
 
-int indexNoLoD(int x, int y)
-{
-  return x*8+x*9+y;
-}
 
 MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
   : textureSet(new TextureSet)
@@ -541,15 +533,15 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
   glBindBuffer(GL_ARRAY_BUFFER, minishadows);
   glBufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 }
-
+/*
 void MapChunk::loadTextures()
 {
   //! \todo Use this kind of preloading again?
   return;
-  /*  for(int i=0; i < nTextures; ++i)
-    _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);*/
+    for(int i=0; i < nTextures; ++i)
+    _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
 }
-
+*/
 void MapChunk::drawTextures()
 {
 
@@ -635,6 +627,16 @@ void MapChunk::drawTextures()
   glColorPointer(4, GL_FLOAT, 0, 0);
 
   glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, gWorld->mapstrip2);
+}
+
+int MapChunk::indexLoD(int x, int y)
+{
+  return (x+1)*9+x*8+y;
+}
+
+int MapChunk::indexNoLoD(int x, int y)
+{
+  return x*8+x*9+y;
 }
 
 void MapChunk::initStrip()
@@ -1403,9 +1405,9 @@ void MapChunk::switchTexture( OpenGL::Texture* oldTexture, OpenGL::Texture* newT
   textureSet->switchTexture(oldTexture, newTexture);
 }
 
-bool MapChunk::paintTexture( float x, float z, brush* Brush, float strength, float pressure, OpenGL::Texture* texture )
+bool MapChunk::paintTexture( float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture )
 {
-  return textureSet->paintTexture(xbase, zbase, x, z, Brush, strength, pressure, texture);
+  return textureSet->paintTexture(xbase, zbase, x, z, brush, strength, pressure, texture);
 }
 
 bool MapChunk::isHole( int i, int j )

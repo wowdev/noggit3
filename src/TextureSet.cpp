@@ -201,7 +201,7 @@ void TextureSet::stopAnim(int id)
   }
 }
 
-bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, brush* Brush, float strength, float pressure, OpenGL::Texture* texture)
+bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
 {
   /* The correct way to do everything
   Visibility = (1-Alpha above)*Alpha
@@ -239,7 +239,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, brush*
 
     int texLevel=-1;
 
-    radius=Brush->getRadius();
+    radius=brush->getRadius();
 
     xdiff= xbase - x + CHUNKSIZE/2;
     zdiff= zbase - z + CHUNKSIZE/2;
@@ -303,7 +303,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, brush*
         target=strength;
         tarAbove=1-target;
 
-        tPressure=pressure*Brush->getValue(dist);
+        tPressure=pressure*brush->getValue(dist);
 
         if(texLevel>0)
         {
@@ -347,7 +347,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, brush*
   {
     // new stuff from bernd.
     // need to get rework. Add old code with switch that the guys out there can use paint.
-      const float radius = Brush->getRadius();
+      const float radius = brush->getRadius();
 
       // Are we really painting on this chunk?
       const float xdiff = xbase + CHUNKSIZE / 2 - x;
@@ -446,7 +446,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, brush*
 
           if( dist <= radius )
           {
-              amap[texLevel - 1][i + j * 64] = (unsigned char)( std::max( std::min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
+              amap[texLevel - 1][i + j * 64] = (unsigned char)( std::max( std::min( amap[texLevel - 1][i + j * 64] + pressure * strength * brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
           }
         }
       }

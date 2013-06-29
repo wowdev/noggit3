@@ -200,12 +200,12 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
     MH2O_Header lHeader[256];
     theFile.read(lHeader, 256*sizeof(MH2O_Header));
     memcpy(mWaterHeaders, lHeader, 256 * sizeof(MH2O_Header));
-	
-	// saving all water info from original .adt... Accodring to Beket's way of saving a water :)
-	theFile.seek( Header.mh2o + 0x14 );    
-	MH2O_Buffer=new char[mWaterSize];   
-	theFile.read(MH2O_Buffer, mWaterSize);
-	
+
+    // saving all water info from original .adt... Accodring to Beket's way of saving a water :)
+    theFile.seek( Header.mh2o + 0x14 );
+    MH2O_Buffer=new char[mWaterSize];
+    theFile.read(MH2O_Buffer, mWaterSize);
+
     int infoCounter = 0;
     for(int i=0; i < 16; ++i) {
       for(int j=0; j < 16; ++j) {
@@ -286,7 +286,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
           }
         }
         else
-        /* if (info.Flags == 0)*/
+          /* if (info.Flags == 0)*/
         {
           for(int h=info.yOffset ; h < info.yOffset+info.height; ++h) {
             for(int w=info.xOffset; w < info.xOffset+info.width; ++w) {
@@ -314,7 +314,7 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
         }*/
 
 
-		Liquid * lq = new Liquid( info.width, info.height, Vec3D( xbase + CHUNKSIZE * j, lTile.mMinimum, zbase + CHUNKSIZE * i ) );
+        Liquid * lq = new Liquid( info.width, info.height, Vec3D( xbase + CHUNKSIZE * j, lTile.mMinimum, zbase + CHUNKSIZE * i ) );
         lq->setMH2OData( lTile );
         //LogDebug << "Inserted Data to MH2O: "<<i*16+j << std::endl;
         mLiquids.push_back( lq );
@@ -322,8 +322,8 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
     }
 
   }else{
-	  mWaterSize=0; //Tile has no MH2O water
-}
+    mWaterSize=0; //Tile has no MH2O water
+  }
 
 
 
@@ -485,7 +485,7 @@ float MapTile::getMaxHeight()
 extern float groundBrushRadius;
 extern float blurBrushRadius;
 extern int terrainMode;
-extern brush textureBrush;
+extern Brush textureBrush;
 
 
 
@@ -549,8 +549,8 @@ void MapTile::drawWater()
     (*liq)->draw();
 
   if( mFlags && mWaterSize==0 ) //Dont know why but if mFlags!=0 then Blizz uses old MCLQ subchunk for water render. But if mFlags==0 then MCLQ subchunk is corrupted (Blizzs forgot to remove?). Dont render it because it is crap =))
-	  for( std::vector<Liquid*>::iterator liq = chunksLiquids.begin(); liq != chunksLiquids.end(); liq++ )
-		(*liq)->draw();
+    for( std::vector<Liquid*>::iterator liq = chunksLiquids.begin(); liq != chunksLiquids.end(); liq++ )
+      (*liq)->draw();
 
   glEnable(GL_LIGHTING);
   glEnable(GL_COLOR_MATERIAL);
@@ -558,11 +558,11 @@ void MapTile::drawWater()
 
 void MapTile::addChunksLiquid(Liquid *lq)
 {
-	chunksLiquids.push_back( lq );
+  chunksLiquids.push_back( lq );
 }
 
 bool MapTile::canWaterSave(){
-	return !mFlags || mWaterSize>0;
+  return !mFlags || mWaterSize>0;
 }
 
 // This is for the 2D mode only.
@@ -630,7 +630,7 @@ void MapTile::clearAllModels()
 
   for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
     if( checkInside( lTileExtents, it->second.extents ) )
-          gWorld->deleteWMOInstance( it->second.mUniqueID );
+      gWorld->deleteWMOInstance( it->second.mUniqueID );
 
   for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
   {
@@ -713,7 +713,7 @@ void MapTile::saveTile()
     {
       lObjectInstances.insert( std::pair<int, WMOInstance>( it->first, it->second ) );
     }
-   }
+  }
   
 
   for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
@@ -804,303 +804,303 @@ void MapTile::saveTile()
   int lCurrentPosition = 0;
 
   // MVER
-//  {
-    lADTFile.Extend( 8 + 0x4 );
-    SetChunkHeader( lADTFile, lCurrentPosition, 'MVER', 4 );
+  //  {
+  lADTFile.Extend( 8 + 0x4 );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MVER', 4 );
 
-    // MVER data
-    *( lADTFile.GetPointer<int>( 8 ) ) = 18;
+  // MVER data
+  *( lADTFile.GetPointer<int>( 8 ) ) = 18;
 
-    lCurrentPosition += 8 + 0x4;
-//  }
+  lCurrentPosition += 8 + 0x4;
+  //  }
 
   // MHDR
   int lMHDR_Position = lCurrentPosition;
-//  {
-    lADTFile.Extend( 8 + 0x40 );
-    SetChunkHeader( lADTFile, lCurrentPosition, 'MHDR', 0x40 );
+  //  {
+  lADTFile.Extend( 8 + 0x40 );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MHDR', 0x40 );
 
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->flags = mFlags;
+  lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->flags = mFlags;
 
-    lCurrentPosition += 8 + 0x40;
-//  }
+  lCurrentPosition += 8 + 0x40;
+  //  }
 
   // MCIN
   int lMCIN_Position = lCurrentPosition;
-//  {
-    lADTFile.Extend( 8 + 256 * 0x10 );
-    SetChunkHeader( lADTFile, lCurrentPosition, 'MCIN', 256 * 0x10 );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mcin = lCurrentPosition - 0x14;
+  //  {
+  lADTFile.Extend( 8 + 256 * 0x10 );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MCIN', 256 * 0x10 );
+  lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mcin = lCurrentPosition - 0x14;
 
-    // MCIN * MCIN_Data = lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 );
+  // MCIN * MCIN_Data = lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 );
 
-    lCurrentPosition += 8 + 256 * 0x10;
-//  }
+  lCurrentPosition += 8 + 256 * 0x10;
+  //  }
 
   // MTEX
-//  {
-    int lMTEX_Position = lCurrentPosition;
-    lADTFile.Extend( 8 + 0 );  // We don't yet know how big this will be.
-    SetChunkHeader( lADTFile, lCurrentPosition, 'MTEX' );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mtex = lCurrentPosition - 0x14;
+  //  {
+  int lMTEX_Position = lCurrentPosition;
+  lADTFile.Extend( 8 + 0 );  // We don't yet know how big this will be.
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MTEX' );
+  lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mtex = lCurrentPosition - 0x14;
 
-    lCurrentPosition += 8 + 0;
+  lCurrentPosition += 8 + 0;
 
-    // MTEX data
-    for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
-    {
-      lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
-      lCurrentPosition += it->first.size() + 1;
-      lADTFile.GetPointer<sChunkHeader>( lMTEX_Position )->mSize += it->first.size() + 1;
-      LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
-    }
-//  }
+  // MTEX data
+  for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
+  {
+    lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+    lCurrentPosition += it->first.size() + 1;
+    lADTFile.GetPointer<sChunkHeader>( lMTEX_Position )->mSize += it->first.size() + 1;
+    LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
+  }
+  //  }
 
   // MMDX
-//  {
-    int lMMDX_Position = lCurrentPosition;
-    lADTFile.Extend( 8 + 0 );  // We don't yet know how big this will be.
-    SetChunkHeader( lADTFile, lCurrentPosition, 'MMDX' );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mmdx = lCurrentPosition - 0x14;
+  //  {
+  int lMMDX_Position = lCurrentPosition;
+  lADTFile.Extend( 8 + 0 );  // We don't yet know how big this will be.
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MMDX' );
+  lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mmdx = lCurrentPosition - 0x14;
 
-    lCurrentPosition += 8 + 0;
+  lCurrentPosition += 8 + 0;
 
-    // MMDX data
-    for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
-    {
-      it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize;
-      lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
-      lCurrentPosition += it->first.size() + 1;
-      lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize += it->first.size() + 1;
-      LogDebug << "Added model \"" << it->first << "\"." << std::endl;
-    }
-//  }
+  // MMDX data
+  for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
+  {
+    it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize;
+    lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+    lCurrentPosition += it->first.size() + 1;
+    lADTFile.GetPointer<sChunkHeader>( lMMDX_Position )->mSize += it->first.size() + 1;
+    LogDebug << "Added model \"" << it->first << "\"." << std::endl;
+  }
+  //  }
 
   // MMID
-//  {
-    int lMMID_Size = 4 * lModels.size();
-    lADTFile.Extend( 8 + lMMID_Size );
-    SetChunkHeader( lADTFile, lCurrentPosition, 'MMID', lMMID_Size );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mmid = lCurrentPosition - 0x14;
+  //  {
+  int lMMID_Size = 4 * lModels.size();
+  lADTFile.Extend( 8 + lMMID_Size );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MMID', lMMID_Size );
+  lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mmid = lCurrentPosition - 0x14;
 
-    // MMID data
-    int * lMMID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
+  // MMID data
+  int * lMMID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
 
-    lID = 0;
-    for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
-      lMMID_Data[lID++] = it->second.filenamePosition;
+  lID = 0;
+  for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
+    lMMID_Data[lID++] = it->second.filenamePosition;
 
-    lCurrentPosition += 8 + lMMID_Size;
-//  }
+  lCurrentPosition += 8 + lMMID_Size;
+  //  }
 
   // MWMO
-//  {
-    int lMWMO_Position = lCurrentPosition;
-    lADTFile.Extend( 8 + 0 );  // We don't yet know how big this will be.
-    SetChunkHeader( lADTFile, lCurrentPosition, 'MWMO' );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mwmo = lCurrentPosition - 0x14;
+  //  {
+  int lMWMO_Position = lCurrentPosition;
+  lADTFile.Extend( 8 + 0 );  // We don't yet know how big this will be.
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MWMO' );
+  lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mwmo = lCurrentPosition - 0x14;
 
-    lCurrentPosition += 8 + 0;
+  lCurrentPosition += 8 + 0;
 
-    // MWMO data
-    for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
-    {
-      it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize;
-      lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
-      lCurrentPosition += it->first.size() + 1;
-      lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize += it->first.size() + 1;
-      LogDebug << "Added object \"" << it->first << "\"." << std::endl;
-    }
-//  }
+  // MWMO data
+  for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
+  {
+    it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize;
+    lADTFile.Insert( lCurrentPosition, it->first.size() + 1, it->first.c_str() );
+    lCurrentPosition += it->first.size() + 1;
+    lADTFile.GetPointer<sChunkHeader>( lMWMO_Position )->mSize += it->first.size() + 1;
+    LogDebug << "Added object \"" << it->first << "\"." << std::endl;
+  }
+  //  }
 
   // MWID
-//  {
-    int lMWID_Size = 4 * lObjects.size();
-    lADTFile.Extend( 8 + lMWID_Size );
-    SetChunkHeader( lADTFile, lCurrentPosition, 'MWID', lMWID_Size );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mwid = lCurrentPosition - 0x14;
+  //  {
+  int lMWID_Size = 4 * lObjects.size();
+  lADTFile.Extend( 8 + lMWID_Size );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MWID', lMWID_Size );
+  lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mwid = lCurrentPosition - 0x14;
 
-    // MWID data
-    int * lMWID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
+  // MWID data
+  int * lMWID_Data = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
 
-    lID = 0;
-    for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
-      lMWID_Data[lID++] = it->second.filenamePosition;
+  lID = 0;
+  for( std::map<std::string, filenameOffsetThing>::iterator it = lObjects.begin(); it != lObjects.end(); ++it )
+    lMWID_Data[lID++] = it->second.filenamePosition;
 
-    lCurrentPosition += 8 + lMWID_Size;
-//  }
+  lCurrentPosition += 8 + lMWID_Size;
+  //  }
 
   // MDDF
-//  {
-    int lMDDF_Size = 0x24 * lModelInstances.size();
-    lADTFile.Extend( 8 + lMDDF_Size );
-    SetChunkHeader( lADTFile, lCurrentPosition, 'MDDF', lMDDF_Size );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mddf = lCurrentPosition - 0x14;
+  //  {
+  int lMDDF_Size = 0x24 * lModelInstances.size();
+  lADTFile.Extend( 8 + lMDDF_Size );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MDDF', lMDDF_Size );
+  lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mddf = lCurrentPosition - 0x14;
 
-    // MDDF data
-    ENTRY_MDDF * lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>( lCurrentPosition + 8 );
+  // MDDF data
+  ENTRY_MDDF * lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>( lCurrentPosition + 8 );
 
-    lID = 0;
-    for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
+  lID = 0;
+  for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
+  {
+    //! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
+    std::string lTemp = it->second.model->_filename;
+    transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
+    size_t found = lTemp.rfind( ".m2" );
+    if( found != std::string::npos )
     {
-      //! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
-      std::string lTemp = it->second.model->_filename;
-      transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
-      size_t found = lTemp.rfind( ".m2" );
-      if( found != std::string::npos )
-      {
-        lTemp.replace( found, 3, ".md" );
-        lTemp.append( "x" );
-      }
-      std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lModels.find( lTemp );
-      if( lMyFilenameThingey == lModels.end() )
-      {
-        LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
-        return;
-      }
-
-      lMDDF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
-      lMDDF_Data[lID].uniqueID = it->second.d1;
-      lMDDF_Data[lID].pos[0] = it->second.pos.x;
-      lMDDF_Data[lID].pos[1] = it->second.pos.y;
-      lMDDF_Data[lID].pos[2] = it->second.pos.z;
-      lMDDF_Data[lID].rot[0] = it->second.dir.x;
-      lMDDF_Data[lID].rot[1] = it->second.dir.y;
-      lMDDF_Data[lID].rot[2] = it->second.dir.z;
-      lMDDF_Data[lID].scale = it->second.sc * 1024;
-      lMDDF_Data[lID].flags = 0;
-      lID++;
+      lTemp.replace( found, 3, ".md" );
+      lTemp.append( "x" );
+    }
+    std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lModels.find( lTemp );
+    if( lMyFilenameThingey == lModels.end() )
+    {
+      LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
+      return;
     }
 
-    lCurrentPosition += 8 + lMDDF_Size;
-//  }
+    lMDDF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
+    lMDDF_Data[lID].uniqueID = it->second.d1;
+    lMDDF_Data[lID].pos[0] = it->second.pos.x;
+    lMDDF_Data[lID].pos[1] = it->second.pos.y;
+    lMDDF_Data[lID].pos[2] = it->second.pos.z;
+    lMDDF_Data[lID].rot[0] = it->second.dir.x;
+    lMDDF_Data[lID].rot[1] = it->second.dir.y;
+    lMDDF_Data[lID].rot[2] = it->second.dir.z;
+    lMDDF_Data[lID].scale = it->second.sc * 1024;
+    lMDDF_Data[lID].flags = 0;
+    lID++;
+  }
+
+  lCurrentPosition += 8 + lMDDF_Size;
+  //  }
 
   // MODF
-//  {
-    int lMODF_Size = 0x40 * lObjectInstances.size();
-    lADTFile.Extend( 8 + lMODF_Size );
-    SetChunkHeader( lADTFile, lCurrentPosition, 'MODF', lMODF_Size );
-    lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->modf = lCurrentPosition - 0x14;
+  //  {
+  int lMODF_Size = 0x40 * lObjectInstances.size();
+  lADTFile.Extend( 8 + lMODF_Size );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MODF', lMODF_Size );
+  lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->modf = lCurrentPosition - 0x14;
 
-    // MODF data
-    ENTRY_MODF * lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>( lCurrentPosition + 8 );
+  // MODF data
+  ENTRY_MODF * lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>( lCurrentPosition + 8 );
 
-    lID = 0;
-    for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
+  lID = 0;
+  for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
+  {
+    std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lObjects.find( it->second.wmo->_filename );
+    if( lMyFilenameThingey == lObjects.end() )
     {
-      std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lObjects.find( it->second.wmo->_filename );
-      if( lMyFilenameThingey == lObjects.end() )
-      {
-        LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
-        return;
-      }
-
-
-
-      lMODF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
-      lMODF_Data[lID].uniqueID = it->second.mUniqueID;
-      lMODF_Data[lID].pos[0] = it->second.pos.x;
-      lMODF_Data[lID].pos[1] = it->second.pos.y;
-      lMODF_Data[lID].pos[2] = it->second.pos.z;
-      lMODF_Data[lID].rot[0] = it->second.dir.x;
-      lMODF_Data[lID].rot[1] = it->second.dir.y;
-      lMODF_Data[lID].rot[2] = it->second.dir.z;
-      //! \todo  Calculate them here or when rotating / moving? What is nicer? We should at least do it somewhere..
-      lMODF_Data[lID].extents[0][0] = it->second.extents[0].x;
-      lMODF_Data[lID].extents[0][1] = it->second.extents[0].y;
-      lMODF_Data[lID].extents[0][2] = it->second.extents[0].z;
-      lMODF_Data[lID].extents[1][0] = it->second.extents[1].x;
-      lMODF_Data[lID].extents[1][1] = it->second.extents[1].y;
-      lMODF_Data[lID].extents[1][2] = it->second.extents[1].z;
-      lMODF_Data[lID].flags = it->second.mFlags;
-      lMODF_Data[lID].doodadSet = it->second.doodadset;
-      lMODF_Data[lID].nameSet = it->second.mNameset;
-      lMODF_Data[lID].unknown = it->second.mUnknown;
-      lID++;
+      LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
+      return;
     }
 
-    lCurrentPosition += 8 + lMODF_Size;
-//  }
 
-    //MH2O just data saving
 
-	// Beket's temporary way to save a water
-	// Just insert full MH2O data from original .adt to generated one...
-	// Still need to fix Bernds way...
-	if(mWaterSize>0){					//if has water... had a stupid crashes because of not checking this =))
-		lADTFile.Extend(8+mWaterSize);													
-		lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mh2o = lCurrentPosition - 0x14;	
-		LogDebug << "Water size "<< mWaterSize << std::endl;
-		lADTFile.Insert( lCurrentPosition, mWaterSize, MH2O_Buffer );					
-		lCurrentPosition += 8+mWaterSize;
-	}
-	
+    lMODF_Data[lID].nameID = lMyFilenameThingey->second.nameID;
+    lMODF_Data[lID].uniqueID = it->second.mUniqueID;
+    lMODF_Data[lID].pos[0] = it->second.pos.x;
+    lMODF_Data[lID].pos[1] = it->second.pos.y;
+    lMODF_Data[lID].pos[2] = it->second.pos.z;
+    lMODF_Data[lID].rot[0] = it->second.dir.x;
+    lMODF_Data[lID].rot[1] = it->second.dir.y;
+    lMODF_Data[lID].rot[2] = it->second.dir.z;
+    //! \todo  Calculate them here or when rotating / moving? What is nicer? We should at least do it somewhere..
+    lMODF_Data[lID].extents[0][0] = it->second.extents[0].x;
+    lMODF_Data[lID].extents[0][1] = it->second.extents[0].y;
+    lMODF_Data[lID].extents[0][2] = it->second.extents[0].z;
+    lMODF_Data[lID].extents[1][0] = it->second.extents[1].x;
+    lMODF_Data[lID].extents[1][1] = it->second.extents[1].y;
+    lMODF_Data[lID].extents[1][2] = it->second.extents[1].z;
+    lMODF_Data[lID].flags = it->second.mFlags;
+    lMODF_Data[lID].doodadSet = it->second.doodadset;
+    lMODF_Data[lID].nameSet = it->second.mNameset;
+    lMODF_Data[lID].unknown = it->second.mUnknown;
+    lID++;
+  }
+
+  lCurrentPosition += 8 + lMODF_Size;
+  //  }
+
+  //MH2O just data saving
+
+  // Beket's temporary way to save a water
+  // Just insert full MH2O data from original .adt to generated one...
+  // Still need to fix Bernds way...
+  if(mWaterSize>0){					//if has water... had a stupid crashes because of not checking this =))
+    lADTFile.Extend(8+mWaterSize);
+    lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mh2o = lCurrentPosition - 0x14;
+    LogDebug << "Water size "<< mWaterSize << std::endl;
+    lADTFile.Insert( lCurrentPosition, mWaterSize, MH2O_Buffer );
+    lCurrentPosition += 8+mWaterSize;
+  }
+
 
 #if 0 //Bernds way to save a water... Still not working
 #pragma region WaterSaving
-    lADTFile.Extend(8 + 256 * sizeof(MH2O_Header));
-    lADTFile.GetPointer<MHDR>(0x14)->mh2o = lCurrentPosition;
-    SetChunkHeader(lADTFile, lCurrentPosition, 'MH2O', mWaterSize);
-    lCurrentPosition += 8;
-    int waterHeaderPos = lCurrentPosition;
-    auto waterHeaders = lADTFile.GetPointer<MH2O_Header>(lCurrentPosition);
-    std::copy(mWaterHeaders, mWaterHeaders + 256, waterHeaders);
-    lCurrentPosition += 256 * sizeof(MH2O_Header);
-    int infoCounter = 0;
-    for(int i = 0; i < 16; ++i) {
-      for(int j = 0; j < 16; ++j) {
-        waterHeaders[i * 16 + j].ofsInformation = lCurrentPosition;
-        // meh... Das auch noch^^
-        waterHeaders[i * 16 + j].ofsRenderMask = 0;
-        if(waterHeaders[i * 16 + j].nLayers < 1)
-          continue;
+  lADTFile.Extend(8 + 256 * sizeof(MH2O_Header));
+  lADTFile.GetPointer<MHDR>(0x14)->mh2o = lCurrentPosition;
+  SetChunkHeader(lADTFile, lCurrentPosition, 'MH2O', mWaterSize);
+  lCurrentPosition += 8;
+  int waterHeaderPos = lCurrentPosition;
+  auto waterHeaders = lADTFile.GetPointer<MH2O_Header>(lCurrentPosition);
+  std::copy(mWaterHeaders, mWaterHeaders + 256, waterHeaders);
+  lCurrentPosition += 256 * sizeof(MH2O_Header);
+  int infoCounter = 0;
+  for(int i = 0; i < 16; ++i) {
+    for(int j = 0; j < 16; ++j) {
+      waterHeaders[i * 16 + j].ofsInformation = lCurrentPosition;
+      // meh... Das auch noch^^
+      waterHeaders[i * 16 + j].ofsRenderMask = 0;
+      if(waterHeaders[i * 16 + j].nLayers < 1)
+        continue;
 
-        lADTFile.Extend(sizeof(MH2O_Information));
-        waterHeaders = lADTFile.GetPointer<MH2O_Header>(waterHeaderPos);
-        auto curInfo = mWaterInfos[infoCounter];
-        auto infoPtr = lADTFile.GetPointer<MH2O_Information>(lCurrentPosition);
-        *(infoPtr) = curInfo;
-        int infoPos = lCurrentPosition;
-        lCurrentPosition += sizeof(MH2O_Information);
+      lADTFile.Extend(sizeof(MH2O_Information));
+      waterHeaders = lADTFile.GetPointer<MH2O_Header>(waterHeaderPos);
+      auto curInfo = mWaterInfos[infoCounter];
+      auto infoPtr = lADTFile.GetPointer<MH2O_Information>(lCurrentPosition);
+      *(infoPtr) = curInfo;
+      int infoPos = lCurrentPosition;
+      lCurrentPosition += sizeof(MH2O_Information);
 
-        if(curInfo.ofsInfoMask != 0 && curInfo.ofsHeightMap != 0 && !(curInfo.Flags & 2))
-        {
-          std::vector<unsigned char>& infoMask = mWaterMasks[infoCounter];
-          lADTFile.Extend(infoMask.size() + (curInfo.width * curInfo.height * 5 /* sizeof(float) + sizeof(char) */));
-          infoPtr = lADTFile.GetPointer<MH2O_Information>(infoPos);
-          std::copy(infoMask.begin(), infoMask.end(), lADTFile.GetPointer<unsigned char>(lCurrentPosition));
-          infoPtr->ofsInfoMask = lCurrentPosition;
-          lCurrentPosition += infoMask.size();
-          for(int w = 0; w < curInfo.height; ++w) {
-            for(int h = 0; h < curInfo.width; ++h) {
-              // yay, w = height, h = width....
-              auto tileData = mLiquids[i * 16 + j]->getMH2OData();
-              float wh = tileData.mHeightmap[w + curInfo.yOffset][h + curInfo.xOffset];
-              *(lADTFile.GetPointer<float>(lCurrentPosition)) = wh;
-              lCurrentPosition += 4;
-            }
+      if(curInfo.ofsInfoMask != 0 && curInfo.ofsHeightMap != 0 && !(curInfo.Flags & 2))
+      {
+        std::vector<unsigned char>& infoMask = mWaterMasks[infoCounter];
+        lADTFile.Extend(infoMask.size() + (curInfo.width * curInfo.height * 5 /* sizeof(float) + sizeof(char) */));
+        infoPtr = lADTFile.GetPointer<MH2O_Information>(infoPos);
+        std::copy(infoMask.begin(), infoMask.end(), lADTFile.GetPointer<unsigned char>(lCurrentPosition));
+        infoPtr->ofsInfoMask = lCurrentPosition;
+        lCurrentPosition += infoMask.size();
+        for(int w = 0; w < curInfo.height; ++w) {
+          for(int h = 0; h < curInfo.width; ++h) {
+            // yay, w = height, h = width....
+            auto tileData = mLiquids[i * 16 + j]->getMH2OData();
+            float wh = tileData.mHeightmap[w + curInfo.yOffset][h + curInfo.xOffset];
+            *(lADTFile.GetPointer<float>(lCurrentPosition)) = wh;
+            lCurrentPosition += 4;
           }
-          for(int w = 0; w < curInfo.height; ++w) {
-            for(int h = 0; h < curInfo.width; ++h) {
-              auto tileData = mLiquids[i * 16 + j]->getMH2OData();
-              unsigned char wh = (unsigned char)((tileData.mDepth[w + curInfo.yOffset][h + curInfo.xOffset]) * 255.0f);
-
-              *(lADTFile.GetPointer<char>(lCurrentPosition)) = wh;
-              lCurrentPosition++;
-            }
-          }
-
         }
-        else
-        {
-          infoPtr->ofsHeightMap = 0;
-          infoPtr->ofsInfoMask = 0;
-          infoPtr->width = infoPtr->height = 0;
+        for(int w = 0; w < curInfo.height; ++w) {
+          for(int h = 0; h < curInfo.width; ++h) {
+            auto tileData = mLiquids[i * 16 + j]->getMH2OData();
+            unsigned char wh = (unsigned char)((tileData.mDepth[w + curInfo.yOffset][h + curInfo.xOffset]) * 255.0f);
+
+            *(lADTFile.GetPointer<char>(lCurrentPosition)) = wh;
+            lCurrentPosition++;
+          }
         }
 
-        ++infoCounter;
       }
+      else
+      {
+        infoPtr->ofsHeightMap = 0;
+        infoPtr->ofsInfoMask = 0;
+        infoPtr->width = infoPtr->height = 0;
+      }
+
+      ++infoCounter;
     }
+  }
 
 #pragma endregion
 
@@ -1119,73 +1119,73 @@ void MapTile::saveTile()
     //! \todo implement finding the correct liquids...
     //prev work for writing MH2O, setting offsets etc.
     for(int i=0; i< 256;++i){
-        Liquid* tmpLiqu = lLiquids[i];//mLiquids[i];
-        if(tmpLiqu && tmpLiqu->isNotEmpty()){
-          MH2O_Tile tTile = tmpLiqu->getMH2OData();
-          //! \todo implement more than just one layer...
-          lHeader[i].nLayers  = 1;
-          lHeader[i].ofsInformation = lMH2O_size;
+      Liquid* tmpLiqu = lLiquids[i];//mLiquids[i];
+      if(tmpLiqu && tmpLiqu->isNotEmpty()){
+        MH2O_Tile tTile = tmpLiqu->getMH2OData();
+        //! \todo implement more than just one layer...
+        lHeader[i].nLayers  = 1;
+        lHeader[i].ofsInformation = lMH2O_size;
 
-          lMH2O_size += sizeof(MH2O_Information);
-          lInfo[i].Flags = tTile.mFlags;
-          lInfo[i].LiquidType = tTile.mLiquidType;
-          lInfo[i].maxHeight = tTile.mMaximum;
-          lInfo[i].minHeight = tTile.mMinimum;
-          lInfo[i].width = tmpLiqu->getWidth();
-          lInfo[i].height = tmpLiqu->getHeight();
-          lInfo[i].xOffset = tmpLiqu->getXOffset();
-          lInfo[i].yOffset = tmpLiqu->getYOffset();
-          //LogDebug << "TileInfo "<< i << " " << j << " Width: "<<lInfo[i*16+j].width << " Height: "<<lInfo[i*16+j].height;
+        lMH2O_size += sizeof(MH2O_Information);
+        lInfo[i].Flags = tTile.mFlags;
+        lInfo[i].LiquidType = tTile.mLiquidType;
+        lInfo[i].maxHeight = tTile.mMaximum;
+        lInfo[i].minHeight = tTile.mMinimum;
+        lInfo[i].width = tmpLiqu->getWidth();
+        lInfo[i].height = tmpLiqu->getHeight();
+        lInfo[i].xOffset = tmpLiqu->getXOffset();
+        lInfo[i].yOffset = tmpLiqu->getYOffset();
+        //LogDebug << "TileInfo "<< i << " " << j << " Width: "<<lInfo[i*16+j].width << " Height: "<<lInfo[i*16+j].height;
 
-          //! put the data instead after all info?
+        //! put the data instead after all info?
 
-          lInfo[i].ofsHeightMap = lMH2O_size;
-          //raising size for the heightmask
-          lMH2O_size += (lInfo[i].height+1)*(lInfo[i].width+1)*(sizeof(float)+sizeof(char));
-          for(int w = lInfo[i].yOffset; w < lInfo[i].yOffset+lInfo[i].width + 1; ++w){
-            for(int h = lInfo[i].xOffset; h < lInfo[i].xOffset+lInfo[i].height + 1; ++h){
-              heightMask[i][w][h] =  tTile.mHeightmap[w][h];
-              depthMask[i][w][h] = char(255*tTile.mDepth[w][h]);
-            }
+        lInfo[i].ofsHeightMap = lMH2O_size;
+        //raising size for the heightmask
+        lMH2O_size += (lInfo[i].height+1)*(lInfo[i].width+1)*(sizeof(float)+sizeof(char));
+        for(int w = lInfo[i].yOffset; w < lInfo[i].yOffset+lInfo[i].width + 1; ++w){
+          for(int h = lInfo[i].xOffset; h < lInfo[i].xOffset+lInfo[i].height + 1; ++h){
+            heightMask[i][w][h] =  tTile.mHeightmap[w][h];
+            depthMask[i][w][h] = char(255*tTile.mDepth[w][h]);
           }
+        }
 
-          lInfo[i].ofsInfoMask = lMH2O_size;
-          //raising size for the infomask
-          lMH2O_size += lInfo[i].height*sizeof(char); //this is false?
-          //! \todo check for flags
-          lHeader[i].ofsRenderMask = lMH2O_size;
-          lMH2O_size += 8*sizeof(char); //rendermask
-          for(int w = 0; w < 8; ++w) {
-            char tmp = 0;
-            for(int h = 0; h < 8; ++h) {
-              if(tTile.mRender[w][h]) {
-                tmp |= 1 << h;
-              }
-            }
-            lRender[i][w] = tmp;
-          }
-          int tc = 0;
-          int shft = 0;
+        lInfo[i].ofsInfoMask = lMH2O_size;
+        //raising size for the infomask
+        lMH2O_size += lInfo[i].height*sizeof(char); //this is false?
+        //! \todo check for flags
+        lHeader[i].ofsRenderMask = lMH2O_size;
+        lMH2O_size += 8*sizeof(char); //rendermask
+        for(int w = 0; w < 8; ++w) {
           char tmp = 0;
-          for(int w = 0; w < lInfo[i].width; ++w){
-            for(int h = 0; h < lInfo[i].height; ++h){
-              tmp += 1 << shft;
-              ++shft;
-              if(shft == 8){
-                lMask[i][tc++] = tmp;
-                shft = 0;
-                tmp = 0;
-              }
+          for(int h = 0; h < 8; ++h) {
+            if(tTile.mRender[w][h]) {
+              tmp |= 1 << h;
             }
           }
-          if(shft != 0)
-            lMask[i][tc++] = tmp;
+          lRender[i][w] = tmp;
         }
-        else{
-          lHeader[i].nLayers  = 0;
-          lHeader[i].ofsInformation = 0;
-          lHeader[i].ofsRenderMask = 0;
+        int tc = 0;
+        int shft = 0;
+        char tmp = 0;
+        for(int w = 0; w < lInfo[i].width; ++w){
+          for(int h = 0; h < lInfo[i].height; ++h){
+            tmp += 1 << shft;
+            ++shft;
+            if(shft == 8){
+              lMask[i][tc++] = tmp;
+              shft = 0;
+              tmp = 0;
+            }
+          }
         }
+        if(shft != 0)
+          lMask[i][tc++] = tmp;
+      }
+      else{
+        lHeader[i].nLayers  = 0;
+        lHeader[i].ofsInformation = 0;
+        lHeader[i].ofsRenderMask = 0;
+      }
     }
 
     lADTFile.GetPointer<MHDR>( lMHDR_Position + 8 )->mh2o = lCurrentPosition - 0x14;
@@ -1193,31 +1193,31 @@ void MapTile::saveTile()
     SetChunkHeader( lADTFile, lCurrentPosition, 'MH2O', lMH2O_size );
 
     for(int i=0; i<256; ++i){
-        MH2O_Header * tmpHeader = lADTFile.GetPointer<MH2O_Header>(lCurrentPosition + 8 + i*sizeof(MH2O_Header));
-        memcpy(tmpHeader, &lHeader[i], sizeof(MH2O_Header));
-        if(tmpHeader->nLayers != 0){
-          MH2O_Information* tmpInfo = lADTFile.GetPointer<MH2O_Information>(lCurrentPosition + 8 + tmpHeader->ofsInformation);
-          memcpy(tmpInfo, &lInfo[i], sizeof(MH2O_Information));
+      MH2O_Header * tmpHeader = lADTFile.GetPointer<MH2O_Header>(lCurrentPosition + 8 + i*sizeof(MH2O_Header));
+      memcpy(tmpHeader, &lHeader[i], sizeof(MH2O_Header));
+      if(tmpHeader->nLayers != 0){
+        MH2O_Information* tmpInfo = lADTFile.GetPointer<MH2O_Information>(lCurrentPosition + 8 + tmpHeader->ofsInformation);
+        memcpy(tmpInfo, &lInfo[i], sizeof(MH2O_Information));
 
-          float * tmpHeight = lADTFile.GetPointer<float>(lCurrentPosition + 8 + tmpInfo->ofsHeightMap);
-          char * tmpDepth = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpInfo->ofsHeightMap + (tmpInfo->width+1)*(tmpInfo->height+1)*sizeof(float));
-          int c = 0;
-          for(int w = tmpInfo->yOffset; w < tmpInfo->yOffset+tmpInfo->width + 1; ++w){
-            for(int h = tmpInfo->xOffset; h < tmpInfo->xOffset+tmpInfo->height + 1; ++h){
-              tmpHeight[c] = heightMask[i][w][h];
-              tmpDepth[c] = depthMask[i][w][h];
-              ++c;
-            }
-          }
-          char* tmpMask = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpInfo->ofsInfoMask);
-          char * tmpRender = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpHeader->ofsRenderMask);
-          for(int w = 0; w < 8; ++w){
-              tmpRender[w] = lRender[i][w];
-          }
-          for(int h =0; h < tmpInfo->height; ++h){
-            tmpMask[h] = lMask[i][h];
+        float * tmpHeight = lADTFile.GetPointer<float>(lCurrentPosition + 8 + tmpInfo->ofsHeightMap);
+        char * tmpDepth = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpInfo->ofsHeightMap + (tmpInfo->width+1)*(tmpInfo->height+1)*sizeof(float));
+        int c = 0;
+        for(int w = tmpInfo->yOffset; w < tmpInfo->yOffset+tmpInfo->width + 1; ++w){
+          for(int h = tmpInfo->xOffset; h < tmpInfo->xOffset+tmpInfo->height + 1; ++h){
+            tmpHeight[c] = heightMask[i][w][h];
+            tmpDepth[c] = depthMask[i][w][h];
+            ++c;
           }
         }
+        char* tmpMask = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpInfo->ofsInfoMask);
+        char * tmpRender = lADTFile.GetPointer<char>(lCurrentPosition + 8 + tmpHeader->ofsRenderMask);
+        for(int w = 0; w < 8; ++w){
+          tmpRender[w] = lRender[i][w];
+        }
+        for(int h =0; h < tmpInfo->height; ++h){
+          tmpMask[h] = lMask[i][h];
+        }
+      }
     }
     LogDebug << "Wrote MH2O!" << std::endl;
     lCurrentPosition += 8 + lMH2O_size;
@@ -1225,15 +1225,15 @@ void MapTile::saveTile()
 #endif
 
   // MCNK
-//  {
-    for( int y = 0; y < 16; ++y )
+  //  {
+  for( int y = 0; y < 16; ++y )
+  {
+    for( int x = 0; x < 16; ++x )
     {
-      for( int x = 0; x < 16; ++x )
-      {
-        mChunks[y][x]->save(lADTFile, lCurrentPosition, lMCIN_Position, lTextures, lObjectInstances, lModelInstances);
-      }
+      mChunks[y][x]->save(lADTFile, lCurrentPosition, lMCIN_Position, lTextures, lObjectInstances, lModelInstances);
     }
-//  }
+  }
+  //  }
 
   // MFBO
   if( mFlags & 1 )
@@ -1281,5 +1281,5 @@ void MapTile::saveTile()
   f.SaveFile();
   f.close();
   
-   gWorld->markOnDisc(this->mPositionX,this->mPositionZ,true);
+  gWorld->markOnDisc(this->mPositionX,this->mPositionZ,true);
 }

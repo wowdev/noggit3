@@ -1075,7 +1075,7 @@ void World::setupFog()
 extern float groundBrushRadius;
 extern float blurBrushRadius;
 extern int terrainMode;
-extern brush textureBrush;
+extern Brush textureBrush;
 
 
 void World::draw()
@@ -1611,7 +1611,7 @@ unsigned int World::getAreaID()
   if(!curChunk)
     return 0;
 
-  return curChunk->areaID;
+  return curChunk->getAreaID();
 }
 
 void World::clearHeight(int id, int x, int z)
@@ -1701,7 +1701,7 @@ void World::setAreaID(int id, int x, int z , int _cx, int _cz)
 
   if(curChunk == 0) return;
 
-  curChunk->areaID = id;
+  curChunk->setAreaID(id);
 }
 
 void World::drawTileMode(float /*ah*/)
@@ -1911,12 +1911,12 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
   }
 }
 
-bool World::paintTexture(float x, float z, brush *Brush, float strength, float pressure, OpenGL::Texture* texture)
+bool World::paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture)
 {
-  const int xLower = (int)((x - Brush->getRadius())/ TILESIZE);
-  const int xUper = (int)((x + Brush->getRadius())/ TILESIZE)+1;
-  const int zLower = (int)((z - Brush->getRadius()) / TILESIZE);
-  const int zUper = (int)((z + Brush->getRadius()) / TILESIZE)+1;
+  const int xLower = (int)((x - brush->getRadius())/ TILESIZE);
+  const int xUper = (int)((x + brush->getRadius())/ TILESIZE)+1;
+  const int zLower = (int)((z - brush->getRadius()) / TILESIZE);
+  const int zUper = (int)((z + brush->getRadius()) / TILESIZE)+1;
   bool succ = false;
 
   for( int j = zLower; j < zUper; ++j )
@@ -1925,10 +1925,10 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
     {
       if( tileLoaded( j, i ) )
       {
-        int chunkLowerX = (int)((x - Brush->getRadius())/ CHUNKSIZE)-i*16;
-        int chunkUperX = (int)((x + Brush->getRadius())/ CHUNKSIZE)-i*16+1;
-        int chunkLowerZ = (int)((z - Brush->getRadius()) / CHUNKSIZE)-j*16;
-        int chunkUperZ = (int)((z + Brush->getRadius()) / CHUNKSIZE)-j*16+1;
+        int chunkLowerX = (int)((x - brush->getRadius())/ CHUNKSIZE)-i*16;
+        int chunkUperX = (int)((x + brush->getRadius())/ CHUNKSIZE)-i*16+1;
+        int chunkLowerZ = (int)((z - brush->getRadius()) / CHUNKSIZE)-j*16;
+        int chunkUperZ = (int)((z + brush->getRadius()) / CHUNKSIZE)-j*16+1;
 
         if(chunkLowerX < 0) chunkLowerX = 0;
         if(chunkLowerZ < 0) chunkLowerZ = 0;
@@ -1939,7 +1939,7 @@ bool World::paintTexture(float x, float z, brush *Brush, float strength, float p
         {
           for( size_t tx = chunkLowerZ; tx < chunkUperZ; ++tx )
           {
-            if( mTiles[j][i].tile->getChunk( ty, tx )->paintTexture( x, z, Brush, strength, pressure, texture ) )
+            if( mTiles[j][i].tile->getChunk( ty, tx )->paintTexture( x, z, brush, strength, pressure, texture ) )
             {
               succ |= true;
               this->setChanged( j, i );
