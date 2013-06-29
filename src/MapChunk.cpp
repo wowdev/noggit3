@@ -220,13 +220,13 @@ void CreateStrips()
   int iferget = 0;
 
   for( size_t i = 34; i < 43; ++i )
-     HoleStrip[iferget++] = i;
+    HoleStrip[iferget++] = i;
 
   for( size_t i = 68; i < 77; ++i )
     HoleStrip[iferget++] = i;
 
   for( size_t i = 102; i < 111; ++i )
-     HoleStrip[iferget++] = i;
+    HoleStrip[iferget++] = i;
 
   for( size_t i = 2; i < 139; i += 17 )
     HoleStrip[iferget++] = i;
@@ -240,12 +240,12 @@ void CreateStrips()
 
 int indexLoD(int x, int y)
 {
-    return (x+1)*9+x*8+y;
+  return (x+1)*9+x*8+y;
 }
 
 int indexNoLoD(int x, int y)
 {
-    return x*8+x*9+y;
+  return x*8+x*9+y;
 }
 
 MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
@@ -338,7 +338,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
           xpos = i * UNITSIZE;
           zpos = j * 0.5f * UNITSIZE;
           if (j%2) {
-                        xpos += UNITSIZE*0.5f;
+            xpos += UNITSIZE*0.5f;
           }
           Vec3D v = Vec3D(xbase+xpos, ybase+h, zbase+zpos);
           *ttv++ = v;
@@ -388,7 +388,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
     {
       textureSet->initAlphamaps(f, header.nLayers, mBigAlpha);
     }
-	/*else if ( fourcc == 'MCLQ' ) { // old one
+    /*else if ( fourcc == 'MCLQ' ) { // old one
       // liquid / water level
       f->read(&fourcc,4);
       if( fourcc != 'MCSE' ||  fourcc != 'MCNK' || header.sizeLiquid == 8  || true ) { // Do not even try to read water..
@@ -484,11 +484,11 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
   for (int j=0; j<17; ++j) {
     for (int i=0; i < ((j % 2) ? 8 : 9); ++i) {
       float xpos,zpos;
-        //f->read(&h,4);
+      //f->read(&h,4);
       xpos = i * 0.125f;
       zpos = j * 0.5f * 0.125f;
       if (j % 2) {
-                 xpos += 0.125f*0.5f;
+        xpos += 0.125f*0.5f;
       }
       Vec3D v = Vec3D(xpos+px, zpos+py, -1);
       *ttv++ = v;
@@ -546,7 +546,7 @@ void MapChunk::loadTextures()
 {
   //! \todo Use this kind of preloading again?
   return;
-/*  for(int i=0; i < nTextures; ++i)
+  /*  for(int i=0; i < nTextures; ++i)
     _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);*/
 }
 
@@ -644,24 +644,24 @@ void MapChunk::initStrip()
 
   for(int x=0; x<8; ++x)
   {
-      for(int y=0; y<8; ++y)
-      {
-          if (isHole(x/2, y/2))
-              continue;
+    for(int y=0; y<8; ++y)
+    {
+      if (isHole(x/2, y/2))
+        continue;
 
-          *s++ = indexLoD(y, x); //9
-          *s++ = indexNoLoD(y, x); //0
-          *s++ = indexNoLoD(y+1, x); //17
-          *s++ = indexLoD(y, x); //9
-          *s++ = indexNoLoD(y+1, x); //17
-          *s++ = indexNoLoD(y+1, x+1); //18
-          *s++ = indexLoD(y, x); //9
-          *s++ = indexNoLoD(y+1, x+1); //18
-          *s++ = indexNoLoD(y, x+1); //1
-          *s++ = indexLoD(y, x); //9
-          *s++ = indexNoLoD(y, x+1); //1
-          *s++ = indexNoLoD(y, x); //0
-      }
+      *s++ = indexLoD(y, x); //9
+      *s++ = indexNoLoD(y, x); //0
+      *s++ = indexNoLoD(y+1, x); //17
+      *s++ = indexLoD(y, x); //9
+      *s++ = indexNoLoD(y+1, x); //17
+      *s++ = indexNoLoD(y+1, x+1); //18
+      *s++ = indexLoD(y, x); //9
+      *s++ = indexNoLoD(y+1, x+1); //18
+      *s++ = indexNoLoD(y, x+1); //1
+      *s++ = indexLoD(y, x); //9
+      *s++ = indexNoLoD(y, x+1); //1
+      *s++ = indexNoLoD(y, x); //0
+    }
   }
   striplen = static_cast<int>(s - strip);
 }
@@ -1466,3 +1466,305 @@ void MapChunk::setFlag( bool changeto )
     this->Flags = this->Flags & ~(Environment::getInstance()->flagPaintMode);
 }
 
+void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::map<int, WMOInstance> &lObjectInstances, std::map<int, ModelInstance> &lModelInstances)
+{
+  int lID;
+  int lMCNK_Size = 0x80;
+  int lMCNK_Position = lCurrentPosition;
+  lADTFile.Extend( 8 + 0x80 );  // This is only the size of the header. More chunks will increase the size.
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MCNK', lMCNK_Size );
+  lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 )->mEntries[py*16+px].offset = lCurrentPosition; // check this
+
+  // MCNK data
+  lADTFile.Insert( lCurrentPosition + 8, 0x80, reinterpret_cast<char*>( &( header ) ) );
+  MapChunkHeader * lMCNK_header = lADTFile.GetPointer<MapChunkHeader>( lCurrentPosition + 8 );
+
+  lMCNK_header->flags = Flags;
+  lMCNK_header->holes = holes;
+  lMCNK_header->areaid = areaID;
+
+  lMCNK_header->nLayers = -1;
+  lMCNK_header->nDoodadRefs = -1;
+  lMCNK_header->ofsHeight = -1;
+  lMCNK_header->ofsNormal = -1;
+  lMCNK_header->ofsLayer = -1;
+  lMCNK_header->ofsRefs = -1;
+  lMCNK_header->ofsAlpha = -1;
+  lMCNK_header->sizeAlpha = -1;
+  lMCNK_header->ofsShadow = -1;
+  lMCNK_header->sizeShadow = -1;
+  lMCNK_header->nMapObjRefs = -1;
+
+  //! \todo  Implement sound emitter support. Or not.
+  lMCNK_header->ofsSndEmitters = 0;
+  lMCNK_header->nSndEmitters = 0;
+
+  lMCNK_header->ofsLiquid = 0;
+  //! \todo Is this still 8 if no chunk is present? Or did they correct that?
+  lMCNK_header->sizeLiquid = 8;
+
+  //! \todo  MCCV sub-chunk
+  lMCNK_header->ofsMCCV = 0;
+
+  if( lMCNK_header->flags & 0x40 )
+    LogError << "Problem with saving: This ADT is said to have vertex shading but we don't write them yet. This might get you really fucked up results." << std::endl;
+  lMCNK_header->flags = lMCNK_header->flags & ( ~0x40 );
+
+
+  lCurrentPosition += 8 + 0x80;
+
+  // MCVT
+  //        {
+  int lMCVT_Size = ( 9 * 9 + 8 * 8 ) * 4;
+
+  lADTFile.Extend( 8 + lMCVT_Size );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MCVT', lMCVT_Size );
+
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsHeight = lCurrentPosition - lMCNK_Position;
+
+  float * lHeightmap = lADTFile.GetPointer<float>( lCurrentPosition + 8 );
+
+  float lMedian = 0.0f;
+  for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
+    lMedian = lMedian + mVertices[i].y;
+
+  lMedian = lMedian / ( 9 * 9 + 8 * 8 );
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ypos = lMedian;
+
+  for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
+    lHeightmap[i] = mVertices[i].y - lMedian;
+
+  lCurrentPosition += 8 + lMCVT_Size;
+  lMCNK_Size += 8 + lMCVT_Size;
+  //        }
+
+  // MCNR
+  //        {
+  int lMCNR_Size = ( 9 * 9 + 8 * 8 ) * 3;
+
+  lADTFile.Extend( 8 + lMCNR_Size );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MCNR', lMCNR_Size );
+
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsNormal = lCurrentPosition - lMCNK_Position;
+
+  char * lNormals = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
+
+  // recalculate the normals
+  recalcNorms();
+  for( int i = 0; i < ( 9 * 9 + 8 * 8 ); ++i )
+  {
+    lNormals[i*3+0] = misc::roundc( -mNormals[i].z * 127 );
+    lNormals[i*3+1] = misc::roundc( -mNormals[i].x * 127 );
+    lNormals[i*3+2] = misc::roundc(  mNormals[i].y * 127 );
+  }
+
+  lCurrentPosition += 8 + lMCNR_Size;
+  lMCNK_Size += 8 + lMCNR_Size;
+  //        }
+
+  // Unknown MCNR bytes
+  // These are not in as we have data or something but just to make the files more blizzlike.
+  //        {
+  lADTFile.Extend( 13 );
+  lCurrentPosition += 13;
+  lMCNK_Size += 13;
+  //        }
+
+  // MCLY
+  //        {
+  size_t lMCLY_Size = textureSet->num() * 0x10;
+
+  lADTFile.Extend( 8 + lMCLY_Size );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MCLY', lMCLY_Size );
+
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsLayer = lCurrentPosition - lMCNK_Position;
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nLayers = textureSet->num();
+
+  // MCLY data
+  for( size_t j = 0; j < textureSet->num(); ++j )
+  {
+    ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>( lCurrentPosition + 8 + 0x10 * j );
+
+    lLayer->textureID = lTextures.find( textureSet->filename(j) )->second;
+
+    lLayer->flags = textureSet->flag(j);
+
+    // if not first, have alpha layer, if first, have not. never have compression.
+    lLayer->flags = ( j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & ( ~FLAG_USE_ALPHA ) ) & ( ~FLAG_ALPHA_COMPRESSED );
+
+    lLayer->ofsAlpha = ( j == 0 ? 0 : ( mBigAlpha ? 64 * 64 * ( j - 1 ) : 32 * 64 * ( j - 1 ) ) );
+    lLayer->effectID = textureSet->effect(j);
+  }
+
+  lCurrentPosition += 8 + lMCLY_Size;
+  lMCNK_Size += 8 + lMCLY_Size;
+  //        }
+
+  // MCRF
+  //        {
+  std::list<int> lDoodadIDs;
+  std::list<int> lObjectIDs;
+
+  Vec3D lChunkExtents[2];
+  lChunkExtents[0] = Vec3D( xbase, 0.0f, zbase );
+  lChunkExtents[1] = Vec3D( xbase + CHUNKSIZE, 0.0f, zbase + CHUNKSIZE );
+
+  // search all wmos that are inside this chunk
+  lID = 0;
+  for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
+  {
+    //! \todo  This requires the extents already being calculated. See above.
+    if( checkInside( lChunkExtents, it->second.extents ) )
+      lObjectIDs.push_back( lID );
+    lID++;
+  }
+
+  // search all models that are inside this chunk
+  lID = 0;
+  for( std::map<int, ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
+  {
+    // get radius and position of the m2
+    float radius = it->second.model->header.BoundingBoxRadius;
+    Vec3D& pos = it->second.pos;
+
+    // Calculate the chunk zenter
+    Vec3D chunkMid(xbase + CHUNKSIZE / 2, 0,
+                   zbase + CHUNKSIZE / 2);
+
+    // find out if the model is inside the reach of the chunk.
+    float dx = chunkMid.x - pos.x;
+    float dz = chunkMid.z - pos.z;
+    float dist = sqrtf(dx * dx + dz * dz);
+    static float sqrt2 = sqrtf(2.0f);
+
+    if(dist - radius <= ((sqrt2 / 2.0f) * CHUNKSIZE))
+    {
+      lDoodadIDs.push_back(lID);
+    }
+
+    lID++;
+  }
+
+  int lMCRF_Size = 4 * ( lDoodadIDs.size() + lObjectIDs.size() );
+  lADTFile.Extend( 8 + lMCRF_Size );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MCRF', lMCRF_Size );
+
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsRefs = lCurrentPosition - lMCNK_Position;
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nDoodadRefs = lDoodadIDs.size();
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nMapObjRefs = lObjectIDs.size();
+
+  // MCRF data
+  int * lReferences = lADTFile.GetPointer<int>( lCurrentPosition + 8 );
+
+  lID = 0;
+  for( std::list<int>::iterator it = lDoodadIDs.begin(); it != lDoodadIDs.end(); ++it )
+  {
+    lReferences[lID] = *it;
+    lID++;
+  }
+
+  for( std::list<int>::iterator it = lObjectIDs.begin(); it != lObjectIDs.end(); ++it )
+  {
+    lReferences[lID] = *it;
+    lID++;
+  }
+
+  lCurrentPosition += 8 + lMCRF_Size;
+  lMCNK_Size += 8 + lMCRF_Size;
+  //        }
+
+  // MCSH
+  //        {
+  //! \todo  Somehow determine if we need to write this or not?
+  //! \todo  This sometime gets all shadows black.
+  if( Flags & 1 )
+  {
+    int lMCSH_Size = 0x200;
+    lADTFile.Extend( 8 + lMCSH_Size );
+    SetChunkHeader( lADTFile, lCurrentPosition, 'MCSH', lMCSH_Size );
+
+    lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsShadow = lCurrentPosition - lMCNK_Position;
+    lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->sizeShadow = 0x200;
+
+    char * lLayer = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
+
+    memcpy( lLayer, mShadowMap, 0x200 );
+
+    lCurrentPosition += 8 + lMCSH_Size;
+    lMCNK_Size += 8 + lMCSH_Size;
+  }
+  else
+  {
+    lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsShadow = 0;
+    lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->sizeShadow = 0;
+  }
+  //        }
+
+  // MCAL
+  //        {
+  int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
+
+  size_t lMaps = textureSet->num() ? textureSet->num() - 1U : 0U;
+
+  int lMCAL_Size = lDimensions * lMaps;
+
+  lADTFile.Extend( 8 + lMCAL_Size );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MCAL', lMCAL_Size );
+
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsAlpha = lCurrentPosition - lMCNK_Position;
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->sizeAlpha = 8 + lMCAL_Size;
+
+  char * lAlphaMaps = lADTFile.GetPointer<char>( lCurrentPosition + 8 );
+
+  for( size_t j = 0; j < lMaps; j++ )
+  {
+    //First thing we have to do is downsample the alpha maps before we can write them
+    if( mBigAlpha )
+      for( int k = 0; k < lDimensions; k++ )
+        lAlphaMaps[lDimensions * j + k] = textureSet->getAlpha(j, k);
+    else
+    {
+      unsigned char upperNibble, lowerNibble;
+      for( int k = 0; k < lDimensions; k++ )
+      {
+        lowerNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(textureSet->getAlpha(j, k * 2 + 0)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+        upperNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(textureSet->getAlpha(j, k * 2 + 1)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+        lAlphaMaps[lDimensions * j + k] = ( upperNibble << 4 ) + lowerNibble;
+      }
+    }
+  }
+
+  lCurrentPosition += 8 + lMCAL_Size;
+  lMCNK_Size += 8 + lMCAL_Size;
+  //        }
+
+  //! Don't write anything MCLQ related anymore...
+
+  // MCSE
+  //        {
+  int lMCSE_Size = 0;
+  lADTFile.Extend( 8 + lMCSE_Size );
+  SetChunkHeader( lADTFile, lCurrentPosition, 'MCSE', lMCSE_Size );
+
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->ofsSndEmitters = lCurrentPosition - lMCNK_Position;
+  lADTFile.GetPointer<MapChunkHeader>( lMCNK_Position + 8 )->nSndEmitters = lMCSE_Size / 0x1C;
+
+  // if ( data ) do write
+
+  /*
+    if(sound_Exist){
+    memcpy(&Temp,f.getBuffer()+MCINs[i].offset+ChunkHeader[i].ofsSndEmitters+4,sizeof(int));
+    memcpy(Buffer+Change+MCINs[i].offset+ChunkHeader[i].ofsSndEmitters+lChange,f.getBuffer()+MCINs[i].offset+ChunkHeader[i].ofsSndEmitters,Temp+8);
+    ChunkHeader[i].ofsSndEmitters+=lChange;
+    }
+    */
+
+  lCurrentPosition += 8 + lMCSE_Size;
+  lMCNK_Size += 8 + lMCSE_Size;
+  //        }
+
+
+
+  lADTFile.GetPointer<sChunkHeader>( lMCNK_Position )->mSize = lMCNK_Size;
+  lADTFile.GetPointer<MCIN>( lMCIN_Position + 8 )->mEntries[py*16+px].size = lMCNK_Size;
+}

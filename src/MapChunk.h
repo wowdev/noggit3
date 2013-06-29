@@ -4,12 +4,15 @@
 #include "MapTile.h" // MapTile
 #include "Quaternion.h" // Vec4D
 #include "Video.h" // GLuint
+#include "WMOInstance.h"
+#include "ModelInstance.h"
 
 class MPQFile;
 class Vec4D;
 class brush;
 class Alphamap;
 class TextureSet;
+class sExtendableArray;
 
 typedef unsigned short StripType;
 static const int mapbufsize = 9*9 + 8*8;
@@ -55,8 +58,8 @@ public:
 
   void draw();
   void drawContour();
-  void drawAreaID();
-  void drawBlock();
+  //void drawAreaID(); wtf? does not exist
+  //void drawBlock(); wtf? does not exist
   void drawColor();
   void drawSelect();
   void drawNoDetail();
@@ -101,6 +104,8 @@ public:
   bool GetVertex(float x,float z, Vec3D *V);
 
   void loadTextures();
+
+  void save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::map<int, WMOInstance> &lObjectInstances, std::map<int, ModelInstance> &lModelInstances);
 
   //  char getAlpha(float x,float y);
 
