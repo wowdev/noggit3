@@ -358,10 +358,11 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
       // we're done here!
       break;
     }*/
-    else if ( fourcc == 'MCLQ' ) { // new one
+    /*else if ( fourcc == 'MCLQ' ) { // old style water rendering //TODO! Is is unstable and we will work only with MH20...  
       // liquid / water level
-      f->read(&fourcc,4);haswater = false;
-      if( header.flags==32769 || header.flags==32768 ){ //empty flags
+      f->read(&fourcc,4);
+	  haswater = false;
+      if( header.flags == 32769 || header.flags == 32768 || size == 0){ //empty flags
         haswater = false;
       }
       else // Trying to read water if there are not empty water flags
@@ -379,7 +380,7 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
       }
       // we're done here!
       break;
-    }
+    }*/
     else if( fourcc == 'MCCV' )
     {
       //! \todo  implement
