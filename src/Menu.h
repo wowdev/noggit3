@@ -52,7 +52,7 @@ public:
   void loadBookmark( int bookmarkID );
 
   //! \brief Enter the the map on the given location.
-  void enterMapAt( Vec3D pos, bool autoHeight = true, float av = -30.0f, float ah = -90.0f );
+  void enterMapAt(Vec3D pos, bool pAutoHeight = true, float av = -30.0f, float ah = -90.0f );
 
 private:
   UIFrame* mGUIFrame;

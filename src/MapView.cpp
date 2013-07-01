@@ -56,6 +56,7 @@
 #include "UIWaterSaveWarning.h"
 #include "UIModelImport.h"
 #include "UIHelperModels.h"
+#include "MapIndex.h"
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -202,11 +203,11 @@ void setTextureBrushLevel(float f)
 void SaveOrReload( UIFrame*, int pMode )
 {
   if( pMode == 1 )
-    gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
+    gWorld->mapIndex->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
   else if( pMode == 0 )
-    gWorld->saveTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
+    gWorld->mapIndex->saveTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
   else if( pMode == 2 )
-    gWorld->saveChanged();
+    gWorld->mapIndex->saveChanged();
   else if( pMode == 3 )
       static_cast<MapView*>( app.getStates().back() )->quit();
 
@@ -283,12 +284,12 @@ void ResetSelectedObjectRotation( UIFrame* /*button*/, int /*id*/ )
   if( gWorld->IsSelection( eEntry_WMO ) )
   {
     gWorld->GetCurrentSelection()->data.wmo->resetDirection();
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
+    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
   }
   else if( gWorld->IsSelection( eEntry_Model ) )
   {
     gWorld->GetCurrentSelection()->data.model->resetDirection();
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
+    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
   }
 }
 
@@ -299,7 +300,7 @@ void SnapSelectedObjectToGround( UIFrame* /*button*/, int /*id*/ )
     Vec3D t = Vec3D( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, 0 );
     gWorld->GetVertex( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, &t );
     gWorld->GetCurrentSelection()->data.wmo->pos = t;
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
+    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
 
   }
   else if( gWorld->IsSelection( eEntry_Model ) )
@@ -307,7 +308,7 @@ void SnapSelectedObjectToGround( UIFrame* /*button*/, int /*id*/ )
     Vec3D t = Vec3D( gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, 0 );
     gWorld->GetVertex( gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, &t );
     gWorld->GetCurrentSelection()->data.model->pos = t;
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
+    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
   }
 }
 
@@ -1039,23 +1040,23 @@ void MapView::tick( float t, float dt )
         // Move scale and rotate with numpad keys
         if( Selection->type == eEntry_WMO )
         {
-          gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
           Selection->data.wmo->pos.x += keyx * moveratio;
           Selection->data.wmo->pos.y += keyy * moveratio;
           Selection->data.wmo->pos.z += keyz * moveratio;
           Selection->data.wmo->dir.y += keyr * moveratio * 5;
-          gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
         }
 
         if( Selection->type == eEntry_Model )
         {
-          gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
           Selection->data.model->pos.x += keyx * moveratio;
           Selection->data.model->pos.y += keyy * moveratio;
           Selection->data.model->pos.z += keyz * moveratio;
           Selection->data.model->dir.y += keyr * moveratio * 5;
           Selection->data.model->sc += keys * moveratio / 50;
-          gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
         }
       }
 
@@ -1074,18 +1075,18 @@ void MapView::tick( float t, float dt )
       if( MoveObj )
         if( Selection->type == eEntry_WMO )
         {
-           gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // before move
+           gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // before move
            ObjPos.x = 80.0f;
            Selection->data.wmo->pos+=mv * dirUp * ObjPos.x;
            Selection->data.wmo->pos-=mh * dirRight * ObjPos.x;
            Selection->data.wmo->extents[0] = Selection->data.wmo->pos - Vec3D(1,1,1);
            Selection->data.wmo->extents[1] = Selection->data.wmo->pos + Vec3D(1,1,1);
-           gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // after move. If moved to another ADT
+           gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // after move. If moved to another ADT
         }
         else if( Selection->type == eEntry_Model )
           if( Environment::getInstance()->AltDown )
           {
-            gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+            gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
             float ScaleAmount;
   
           ScaleAmount = pow( 2.0f, mv * 4.0f );
@@ -1097,11 +1098,11 @@ void MapView::tick( float t, float dt )
           }
           else
           {
-            gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // before move
+            gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // before move
             ObjPos.x = 80.0f;
             Selection->data.model->pos += mv * dirUp * ObjPos.x;
             Selection->data.model->pos -= mh * dirRight * ObjPos.x;
-            gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // after move. If moved to another ADT
+            gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // after move. If moved to another ADT
           }
 
 
@@ -1113,7 +1114,7 @@ void MapView::tick( float t, float dt )
 
         if( Selection->type == eEntry_Model )
         {
-          gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
           lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
           if( Environment::getInstance()->ShiftDown )
             lTarget = &Selection->data.model->dir.y;
@@ -1124,7 +1125,7 @@ void MapView::tick( float t, float dt )
         }
         else if( Selection->type == eEntry_WMO )
         {
-          gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
           lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
           if( Environment::getInstance()->ShiftDown )
             lTarget = &Selection->data.wmo->dir.y;
@@ -1288,11 +1289,11 @@ void MapView::tick( float t, float dt )
         case 5:
           if( Environment::getInstance()->ShiftDown  )
           {
-            if( mViewMode == eViewMode_3D ) gWorld->setFlag( true, xPos, zPos );
+            if( mViewMode == eViewMode_3D ) gWorld->mapIndex->setFlag( true, xPos, zPos );
           }
           else if( Environment::getInstance()->CtrlDown )
           {
-            if( mViewMode == eViewMode_3D ) gWorld->setFlag( false, xPos, zPos );
+            if( mViewMode == eViewMode_3D ) gWorld->mapIndex->setFlag( false, xPos, zPos );
           }
         break;
         }
@@ -1485,7 +1486,7 @@ void MapView::display( float t, float dt )
 
 void MapView::save()
 {
-  gWorld->saveChanged();
+  gWorld->mapIndex->saveChanged();
   //ConfigFile::add("RedColor", RedColor);
   //ConfigFile::add("GreenColor", GreenColor);
   //ConfigFile::add("BlueColor", BlueColor);
