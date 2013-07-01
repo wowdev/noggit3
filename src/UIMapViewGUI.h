@@ -22,7 +22,11 @@ class UIModelImport;
 class UIHelperModels;
 class UISlider;
 class UIGradient;
+
+class UIModel;
+
 #include "UIFrame.h"
+
 
 //! \todo Give better name.
 class UIMapViewGUI : public UIFrame
@@ -31,7 +35,7 @@ private:
   bool _tilemode;
   UICursorSwitcher* CursorSwitcher;
   UIHelp* _help;
-  //UIDoodadSpawner* _test;
+  //UIModel* _test;
 
 
 public:

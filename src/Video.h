@@ -40,8 +40,8 @@ public:
   inline const float& farclip() const;
 
   void fov( const float& fov_ );
-   void nearclip( const float& nearclip_ );
-   void farclip( const float& farclip_ );
+  void nearclip( const float& nearclip_ );
+  void farclip( const float& farclip_ );
 
   void updateProjectionMatrix();
 

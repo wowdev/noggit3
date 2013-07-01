@@ -28,6 +28,9 @@
 #include "TextureSet.h"
 #include "MapIndex.h"
 
+#include "UIModel.h"
+#include "ModelManager.h"
+
 UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 : UIFrame( 0.0f, 0.0f, video.xres(), video.yres() )
 , theMapview( setMapview )
@@ -87,9 +90,12 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   _help->hide();
   addChild( _help );
 
-  //_test = new UIDoodadSpawner();
- // _test->hide();
- // addChild( _test );
+  /*
+  _test = new UIModel(100.0f, 100.0f, 400.0f, 500.0f);
+  _test->setModel(ModelManager::add("world\\azeroth\\elwynn\\passivedoodads\\tree\\elwynnlog02.m2"));
+  _test->show();
+  addChild( _test );
+  */
 }
 
 void UIMapViewGUI::showCursorSwitcher()
@@ -151,7 +157,7 @@ void UIMapViewGUI::render( ) const
 
   if ( gWorld->loading )
   {
-    std::string toDisplay( gWorld->wdt->hasAdt() ? "No ADT at this Point" : "Loading..." );
+    std::string toDisplay( gWorld->mapIndex->hasAdt() ? "No ADT at this Point" : "Loading..." );
     app.getArial16().shprint( video.xres() / 2.0f - app.getArial16().width( toDisplay ) / 2.0f, 30.0f, toDisplay );
   }
 

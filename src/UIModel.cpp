@@ -3,63 +3,124 @@
 #include "Video.h"
 
 UIModel::UIModel( float xPos, float yPos, float w, float h )
-: UIFrame( xPos, yPos, w, h )
-, model( NULL )
+  : UIFrame(xPos, yPos, w, h)
+  , model( NULL )
 {
+  glGenFramebuffers(1, &fbo);
+  glGenRenderbuffers(1, &depthBuffer);
+  glGenTextures(1, &modelTexture);
+
+  glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width(), height());
+
+  OpenGL::Texture::enableTexture(0);
+  glBindTexture(GL_TEXTURE_2D, modelTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width(), height(), 0, GL_RGBA, GL_FLOAT, NULL);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, modelTexture, 0);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+}
+
+void UIModel::drawFBO() const
+{
+  glPushAttrib(GL_VIEWPORT_BIT);
+  glViewport(0, 0, width(), height());
+
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+  glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(video.fov(), width()/height(), video.nearclip(), video.farclip());
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  gluLookAt(0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f);
+
+
+  glPushMatrix();
+    glTranslatef(0.0f, 0.0f, -50.0f);
+
+    OpenGL::Texture::enableTexture(0);
+    glEnable(GL_NORMALIZE);
+
+    model->draw();
+  glPopMatrix();
+
+  glPopAttrib();
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void UIModel::drawTexture() const
+{
+  video.set2D();
+
+  OpenGL::Texture::enableTexture(0);
+  glBindTexture(GL_TEXTURE_2D, modelTexture);
+
+  glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex2f(x(), y());
+    glTexCoord2f(1.0f, 0.0f);
+    glVertex2f(x() + width(), y());
+    glTexCoord2f(1.0f, 1.0f);
+    glVertex2f(x() + width(), y() + height());
+    glTexCoord2f(0.0f, 1.0f);
+    glVertex2f(x(), y() + height());
+  glEnd();
+
+  CheckForGLError("UIModel::draw:: after quads");
+
+  OpenGL::Texture::disableTexture(0);
 }
 
 void UIModel::render() const
 {
-  glMatrixMode(GL_PROJECTION);
-  gluPerspective(45.0f, (GLfloat)video.xres()/(GLfloat)video.yres(), 1.0f, 1024.0f);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+  UIFrame::render();
 
-  //glMatrixMode(GL_PROJECTION);
-  //glLoadIdentity();
-  //glOrtho(0, xres(), yres(), 0, -1.0, 1.0);
-  //glMatrixMode(GL_MODELVIEW);
-  //glLoadIdentity();
-
-  glPushMatrix();
-
-  static const float rot = 45.0f;
-
-  glTranslatef( x() + width() / 2.0f, y() + height() / 2.0f, 0.0f );
-  glRotatef( rot, 0.0f, 1.0f, 0.0f );
-  glRotatef( 180, 1.0f, 0.0f, 0.0f );
-  glScalef( 5.0f, 5.0f, 5.0f );
-
-  glDisable(GL_FOG);
-
-
-  glEnable(GL_COLOR_MATERIAL);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  glColor4f(1,1,1,1);
-
-  glDisable(GL_CULL_FACE);
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_LIGHTING);
-
-  model->cam.setup( 0 );
-  model->draw();
-
-  video.set2D();
-  glEnable(GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_LIGHTING);
-
-
-  glColor4f(1,1,1,1);
-
-  glEnable(GL_TEXTURE_2D);
-
-  glPopMatrix();
+  drawFBO();
+  drawTexture();
 }
 
 void UIModel::setModel( Model* _setModel )
 {
   model = _setModel;
 }
+
+//! \todo create class for framebuffers and implement this check
+/*
+GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
+{
+  switch(fboStatus)
+  {
+    case GL_FRAMEBUFFER_UNDEFINED:
+      return;
+    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+      return;
+    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+      return;
+    case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+      return;
+    case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+      return;
+    case GL_FRAMEBUFFER_UNSUPPORTED:
+      return;
+    case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+      return;
+    case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+      return;
+  }
+}
+*/
