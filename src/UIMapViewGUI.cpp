@@ -26,6 +26,7 @@
 #include "WMOInstance.h"
 #include "World.h"
 #include "TextureSet.h"
+#include "MapIndex.h"
 
 UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 : UIFrame( 0.0f, 0.0f, video.xres(), video.yres() )
@@ -150,7 +151,7 @@ void UIMapViewGUI::render( ) const
 
   if ( gWorld->loading )
   {
-    std::string toDisplay( gWorld->hasAdt() ? "No ADT at this Point" : "Loading..." );
+    std::string toDisplay( gWorld->wdt->hasAdt() ? "No ADT at this Point" : "Loading..." );
     app.getArial16().shprint( video.xres() / 2.0f - app.getArial16().width( toDisplay ) / 2.0f, 30.0f, toDisplay );
   }
 
