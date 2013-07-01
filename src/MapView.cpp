@@ -958,7 +958,7 @@ MapView::MapView( float ah0, float av0 )
 , _GUIDisplayingEnabled( true )
 , mTimespeed( 0.0f )
 {
-  LastClicked=0;
+  LastClicked = NULL;
 
   moving = strafing = updown = lookat = turn = 0.0f;
 
