@@ -437,7 +437,6 @@ void Noggit::mainLoop()
 
 int Noggit::start(int argc, char *argv[])
 {
-  RegisterErrorHandlers();
   InitLogging();
   initPath(argv);
 
@@ -506,6 +505,7 @@ int WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int 
 
 int main( int argc, char *argv[] )
 {
+  RegisterErrorHandlers();
   return app.start(argc, argv);
 }
 

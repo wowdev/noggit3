@@ -19,6 +19,7 @@
 #include "World.h"
 #include "Alphamap.h"
 #include "TextureSet.h"
+#include "MapIndex.h"
 
 int indexMapBuf(int x, int y)
 {
@@ -1281,5 +1282,5 @@ void MapTile::saveTile()
   f.SaveFile();
   f.close();
   
-  gWorld->markOnDisc(this->mPositionX,this->mPositionZ,true);
+  gWorld->mapIndex->markOnDisc(this->mPositionX,this->mPositionZ,true);
 }

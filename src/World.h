@@ -18,6 +18,7 @@ namespace OpenGL
 
 class Brush;
 class MapTile;
+class MapIndex;
 
 extern nameEntryManager SelectionNames;
 
@@ -29,40 +30,24 @@ static const float doodaddrawdistance = 64.0f;
 
 typedef unsigned short StripType;
 
-/*!
- \brief This class is only a holder to have easier access to MapTiles and their flags for easier WDT parsing. This is private and for the class World only.
- */
-class MapTileEntry
-{
-private:
-  uint32_t flags;
-  MapTile* tile;
-  bool onDisc;
 
-  MapTileEntry() : flags( 0 ), tile( NULL ) {}
-
-  friend class World;
-};
 
 //! \todo Split this. There should be a seperate class for WDTs.
 class World
 {
+public:
   // Which tile are we over / entering?
-  int cx;
-  int cz;
   int ex;
   int ez;
+  int cx;
+  int cz;
 
-  // Holding all MapTiles there can be in a World.
-  MapTileEntry mTiles[64][64];
+  MapIndex *mapIndex;
 
   // Information about the currently selected model / WMO / triangle.
   nameEntry* mCurrentSelection;
   int mCurrentSelectedTriangle;
   bool SelectionMode;
-
-  // Is the WDT telling us to use a different alphamap structure.
-  bool mBigAlpha;
 
   // Call lists for the low resolution heightmaps.
   OpenGL::CallList* lowrestiles[64][64];
@@ -90,13 +75,9 @@ class World
   void initMinimap();
   void initLowresTerrain();
 
-  bool tileLoaded(int x, int z);
-  MapTile *loadTile(int x, int z);
-
   void outdoorLighting();
   void outdoorLighting2();
 
-public:
   unsigned int getMapID();
   // Do we draw *? Should be moved somewhere else, these are not World related.
   bool drawdoodads;
@@ -119,8 +100,6 @@ public:
   float fogdistance;
   float culldistance;
 
-  bool autoheight;
-
   float minX;
   float maxX;
   float minY;
@@ -128,10 +107,11 @@ public:
   float zoom;
 
   Skies *skies;
-  bool mHasAGlobalWMO;
+
   bool loading;
-  bool noadt;
   bool hadSky;
+
+  bool autoheight;
 
   //! \todo  Get these managed? ._.
   std::map<int, ModelInstance> mModelInstances;
@@ -152,10 +132,7 @@ public:
   ~World();
 
   void initDisplay();
-  void enterTile(int x, int z);
-  void reloadTile(int x, int z);
-  void saveTile(int x, int z);
-  void saveChanged();
+
   void tick(float dt);
   void draw();
 
@@ -166,7 +143,6 @@ public:
   unsigned int getAreaID();
   void setAreaID(int id, int x, int z);
   void setAreaID(int id, int x, int z , int cx, int cz);
-  void setFlag(bool to, float x, float z);
   void setBaseTexture(int x, int z );
 
   void moveADT();
@@ -174,6 +150,10 @@ public:
   void drawSelection(int cursorX,int cursorY, bool pOnlyMap = false );
   void drawSelectionChunk(int cursorX,int cursorY);
   void drawTileMode(float ah);
+
+  bool hasAdt();
+
+  void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
 
   // Selection related methods.
 private:
@@ -200,15 +180,11 @@ public:
   void jumpToCords(Vec3D pos);
   void saveMap();
 
-  void setChanged(float x, float z);
-  void setChanged(int x, int z);
   void unsetChanged(int x, int z);
   int getChanged(int x, int z);
 
   void deleteModelInstance( int pUniqueID );
   void deleteWMOInstance( int pUniqueID );
-
-  bool hasTile( int pX, int pZ );
 
   static bool IsEditableWorld( int pMapId );
   void clearHeight(int id, int x, int z);
@@ -219,8 +195,6 @@ public:
   void saveWDT();
   void clearAllModelsOnADT(int x, int z);
   void swapTexture( int x, int z, OpenGL::Texture *tex );
-  bool isTileExternal(int x, int z);
-  void markOnDisc(int x, int z, bool mto);
 
   bool canWaterSave(int x, int y);
 };

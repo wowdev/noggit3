@@ -88,6 +88,8 @@ SET( SourceFiles
   src/MapChunk.cpp
   src/MapChunk.h
   src/MapHeaders.h
+  src/MapIndex.cpp
+  src/MapIndex.h
   src/MapTile.cpp
   src/MapTile.h
   src/MapView.cpp

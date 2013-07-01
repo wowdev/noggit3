@@ -81,9 +81,9 @@ private:
 int indexMapBuf(int x, int y);
 
 //! \todo get stripify related functions somewhere else.
-
+// unused
 // 8x8x2 version with triangle strips, size = 8*18 + 7*2
-const int stripsize = 8*18 + 7*2;
+/*const int stripsize = 8*18 + 7*2;
 template <class V>
 void stripify(V *in, V *out)
 {
@@ -98,7 +98,7 @@ void stripify(V *in, V *out)
     }
     if (row<7) *out++ = nextrow[8];
   }
-}
+}*/
 
 // high res version, size = 16*18 + 7*2 + 8*2
 const int stripsize2 = 16*18 + 7*2 + 8*2;
