@@ -253,13 +253,6 @@ World::World( const std::string& name )
   if(!mapIndex->hasAGlobalWMO())
     initMinimap();
 
-  // don't load map objects while still on the menu screen
-  //initDisplay();
-}
-
-bool World::hasAdt()
-{
-  return mapIndex->hasAdt();
 }
 
 void World::initMinimap()
