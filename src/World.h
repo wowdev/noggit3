@@ -30,9 +30,6 @@ static const float doodaddrawdistance = 64.0f;
 
 typedef unsigned short StripType;
 
-
-
-//! \todo Split this. There should be a seperate class for WDTs.
 class World
 {
 public:
@@ -145,13 +142,12 @@ public:
   void setAreaID(int id, int x, int z , int cx, int cz);
   void setBaseTexture(int x, int z );
 
-  void moveADT();
+  //void moveADT(); does not exist
+  //void drawSelectionChunk(int cursorX,int cursorY); does not exist
+  //bool hasAdt(); does not exist
 
   void drawSelection(int cursorX,int cursorY, bool pOnlyMap = false );
-  void drawSelectionChunk(int cursorX,int cursorY);
   void drawTileMode(float ah);
-
-  bool hasAdt();
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
 
@@ -166,22 +162,26 @@ public:
   GLuint GetCurrentSelectedTriangle() { return mCurrentSelectedTriangle; }
 
   bool GetVertex(float x,float z, Vec3D *V);
+
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   void blurTerrain(float x, float z, float remain, float radius, int BrushType);
   bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
   void eraseTextures(float x, float z);
   void overwriteTextureAtCurrentChunk( float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
+
   void addHole( float x, float z , bool big);
   void removeHole( float x, float z , bool big);
+
   void addModel( nameEntry entry, Vec3D newPos,bool copyit );
   void addM2( Model *model, Vec3D newPos,bool copyit  );
   void addWMO( WMO *wmo, Vec3D newPos ,bool copyit );
+
   void jumpToCords(Vec3D pos);
   void saveMap();
 
-  void unsetChanged(int x, int z);
-  int getChanged(int x, int z);
+  //void unsetChanged(int x, int z); does not exist
+  //int getChanged(int x, int z); does not exist
 
   void deleteModelInstance( int pUniqueID );
   void deleteWMOInstance( int pUniqueID );
@@ -201,7 +201,7 @@ public:
 
 extern World *gWorld;
 
-void lightingDefaults();
-void myFakeLighting();
+//void lightingDefaults(); not used
+//void myFakeLighting(); not used
 
 #endif

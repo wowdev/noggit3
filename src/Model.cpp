@@ -362,7 +362,7 @@ void Model::initCommon(const MPQFile& f)
       //pass.texture = texid;
       pass.tex = texlookup[tex[j].textureid];
 
-      // TODO: figure out these flags properly -_-
+      //! \todo figure out these flags properly -_-
       ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
 
 
@@ -376,7 +376,7 @@ void Model::initCommon(const MPQFile& f)
         RENDERFLAGS_UNsGED = 2,
         RENDERFLAGS_TWOSIDED = 4,
         RENDERFLAGS_BILLBOARD = 8,
-        RENDERFLAGS_ZBUFFERED = 16,
+        RENDERFLAGS_ZBUFFERED = 16
       };
 
       pass.unlit = (rf.flags & RENDERFLAGS_UNLIT)!=0;
@@ -387,7 +387,7 @@ void Model::initCommon(const MPQFile& f)
       pass.useenvmap = (texunitlookup[tex[j].texunit] == -1) && pass.billboard && rf.blend>2;
       pass.nozwrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
 
-      // ToDo: Work out the correct way to get the true/false of transparency
+      //! \todo Work out the correct way to get the true/false of transparency
       pass.trans = (pass.blendmode>0) && (pass.opacity>0);  // Transparency - not the correct way to get transparency
 
       pass.p = ops[geoset].BoundingBox[0].x;
@@ -692,7 +692,7 @@ bool ModelRenderPass::init(Model *m)
     else
       m->_replaceTextures[m->_specialTextures[tex]]->bind();
 
-    // TODO: Add proper support for multi-texturing.
+    //! \todo Add proper support for multi-texturing.
 
     // blend mode
     switch (blendmode) {

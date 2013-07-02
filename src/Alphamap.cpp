@@ -116,4 +116,29 @@ void Alphamap::genTexture()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
+void Alphamap::bind()
+{
+  glBindTexture(GL_TEXTURE_2D, map);
+}
+
+bool Alphamap::isValid()
+{
+  return (map > 0);
+}
+
+void Alphamap::setAlpha(size_t offset, unsigned char value)
+{
+  amap[offset] = value;
+}
+
+void Alphamap::setAlpha(unsigned char *pAmap)
+{
+  memcpy(amap, pAmap, 64*64);
+}
+
+const unsigned char Alphamap::getAlpha(size_t offset)
+{
+  return amap[offset];
+}
+
 

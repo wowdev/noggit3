@@ -13,7 +13,7 @@
 
 #include "Log.h"
 
-// TODO : Add TreeView. Add ScrollBar. Add ModelPreview
+//! \todo Add TreeView. Add ScrollBar. Add ModelPreview
 
 static const float winWidth( 500.0f );
 static const float winHeight( 100.0f );

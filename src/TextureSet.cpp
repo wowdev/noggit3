@@ -114,16 +114,14 @@ const std::string& TextureSet::filename(size_t id)
 
 void TextureSet::bindAlphamap(size_t id, size_t activeTexture)
 {
-  OpenGL::Texture::setActiveTexture(activeTexture);
-  OpenGL::Texture::enableTexture();
+  OpenGL::Texture::enableTexture(activeTexture);
 
   alphamaps[id]->bind();
 }
 
 void TextureSet::bindTexture(size_t id, size_t activeTexture)
 {
-  OpenGL::Texture::setActiveTexture(activeTexture);
-  OpenGL::Texture::enableTexture();
+  OpenGL::Texture::enableTexture(activeTexture);
 
   textures[id]->bind();
 }
@@ -464,4 +462,39 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
   */
 
   return true;
+}
+
+const size_t TextureSet::num()
+{
+  return nTextures;
+}
+
+const unsigned int TextureSet::flag(size_t id)
+{
+  return texFlags[id];
+}
+
+const unsigned int TextureSet::effect(size_t id)
+{
+  return effectID[id];
+}
+
+void TextureSet::setAlpha(size_t id, size_t offset, unsigned char value)
+{
+  alphamaps[id]->setAlpha(offset, value);
+}
+
+void TextureSet::setAlpha(size_t id, unsigned char *amap)
+{
+  alphamaps[id]->setAlpha(amap);
+}
+
+const unsigned char TextureSet::getAlpha(size_t id, size_t offset)
+{
+  return alphamaps[id]->getAlpha(offset);
+}
+
+OpenGL::Texture* TextureSet::texture(size_t id)
+{
+  return textures[id];
 }

@@ -11,7 +11,7 @@
 #include "UITexture.h"
 #include "Video.h"
 
-// TODO : Handle Selection, Handle Clipboard ( CTRL + C / CTRL + V / CTRL + X ), Handle the Backspace staying down. Details, but better like that.
+//! \todo Handle Selection, Handle Clipboard ( CTRL + C / CTRL + V / CTRL + X ), Handle the Backspace staying down. Details, but better like that.
 
 static const std::string texture( "Interface\\Common\\Common-Input-Border.blp" );
 static const std::string textureFocused( "Interface\\Common\\Common-Input-Border.blp" );

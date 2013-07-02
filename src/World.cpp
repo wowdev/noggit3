@@ -674,7 +674,7 @@ World::~World()
 }
 
 
-
+/*
 void lightingDefaults()
 {
   glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1);
@@ -692,7 +692,7 @@ void lightingDefaults()
   glDisable(GL_LIGHT7);
 }
 
-/*
+
 void myFakeLighting()
 {
   GLfloat la = 0.5f;
@@ -1132,20 +1132,6 @@ void World::draw()
 
   OpenGL::SettingsSaver::restore();
   setupFog();
-
-  /*
-  for( int j = 0; j < 64; ++j )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        mTiles[j][i].tile->drawWater();
-      }
-    }
-  }
-  */
-
 
   glColor4f(1,1,1,1);
   glEnable(GL_BLEND);
@@ -2106,7 +2092,7 @@ void World::saveWDT()
 
 bool World::canWaterSave(int x, int y){ 
 
-  if(!mapIndex->tileLoaded(y, x)) //! TODO else there are null pointers
+  if(!mapIndex->tileLoaded(y, x)) //! \todo else there are null pointers
     return false;
 
   return mapIndex->getTile(y, x)->canWaterSave();
