@@ -154,7 +154,7 @@ namespace OpenGL
 
 extern Video video;
 
-bool isExtensionSupported(const char *search);
+//bool isExtensionSupported(const char *search);
 void CheckForGLError( const std::string& pLocation );
 
 #endif

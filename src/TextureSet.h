@@ -37,35 +37,16 @@ public:
 
   const std::string& filename(size_t id);
 
-  inline const size_t num()
-  {
-    return nTextures;
-  }
+  const size_t num();
+  const unsigned int flag(size_t id);
+  const unsigned int effect(size_t id);
 
-  inline const unsigned int flag(size_t id)
-  {
-    return texFlags[id];
-  }
+  void setAlpha(size_t id, size_t offset, unsigned char value);
+  void setAlpha(size_t id, unsigned char *amap);
 
-  inline const unsigned int effect(size_t id)
-  {
-    return effectID[id];
-  }
+  const unsigned char getAlpha(size_t id, size_t offset);
 
-  inline void setAlpha(size_t id, size_t offset, unsigned char value)
-  {
-    alphamaps[id]->setAlpha(offset, value);
-  }
-
-  inline const unsigned char getAlpha(size_t id, size_t offset)
-  {
-    return alphamaps[id]->getAlpha(offset);
-  }
-
-  inline OpenGL::Texture* texture(size_t id)
-  {
-    return textures[id];
-  }
+  OpenGL::Texture* texture(size_t id);
 
 private:
   OpenGL::Texture* textures[4];

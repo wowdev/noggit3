@@ -21,7 +21,8 @@ UIHelp::UIHelp( )
 	"  C - Switch cursor type\n"
     "  M - Show map\n"
     "  U - 2D texture editor\n"
-    //"C - chunk settings\n" //! \todo: C chunk settings must get fixed first. Then turn on this again
+    //! \todo C chunk settings must get fixed first. Then turn on this again
+    //"C - chunk settings\n"
     "  H - This help\n"
 	"  CTRL + ALT + C - Toggle cursor options\n"
     "  SHIFT + R - Turn camera 180 degres\n"

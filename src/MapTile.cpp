@@ -1256,7 +1256,7 @@ void MapTile::saveTile()
     lCurrentPosition += 8 + chunkSize;
   }
 
-  // \! todo Do not do bullshit here in MTFX.
+  //! \todo Do not do bullshit here in MTFX.
 #if 0
   if(!mTextureEffects.empty()) {
     //! \todo check if nTexEffects == nTextures, correct order etc.

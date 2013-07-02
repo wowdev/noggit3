@@ -15,25 +15,13 @@ public:
 
   void loadTexture();
 
-  inline void bind()
-  {
-    glBindTexture(GL_TEXTURE_2D, map);
-  }
+  void bind();
+  bool isValid();
 
-  inline bool isValid()
-  {
-    return (map > 0);
-  }
+  void setAlpha(size_t offset, unsigned char value);
+  void setAlpha(unsigned char *pAmap);
 
-  inline void setAlpha(size_t offset, unsigned char value)
-  {
-    amap[offset] = value;
-  }
-
-  inline const unsigned char getAlpha(size_t offset)
-  {
-    return amap[offset];
-  }
+  const unsigned char getAlpha(size_t offset);
 
 private:
   void readCompressed(MPQFile *f);

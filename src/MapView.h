@@ -41,7 +41,6 @@ private:
   void checkWaterSave();
 
 public:
-  void quit();
   MapView(float ah0 = -90.0f, float av0 = -30.0f);
   ~MapView();
 
@@ -52,9 +51,11 @@ public:
   void mousemove(SDL_MouseMotionEvent *e);
   void mouseclick(SDL_MouseButtonEvent *e);
   void resizewindow();
+
+  void quit();
   void quitask();
-  void inserObjectFromExtern(int model );
-  void addModelFromTextSelection( int id );
+  void inserObjectFromExtern(int model);
+  void addModelFromTextSelection(int id);
 };
 
 

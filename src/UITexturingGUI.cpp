@@ -610,7 +610,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
   ss << "Num Effects: " << chunk->header.nEffectDoodad;
   chunkNumEffects->setText(ss.str().c_str());///
 
-  //! /todo rework texture reading
+  //! \todo rework texture reading
   /*
   int pl=0;
   for(pl=0;pl<(chunk->nTextures);pl++)
@@ -647,8 +647,8 @@ OpenGL::Texture* UITexturingGUI::getSelectedTexture(){
 void UITexturingGUI::setSelectedTexture(OpenGL::Texture * t){
   UITexturingGUI::selectedTexture = t;
 }
-
-/* //! /todo rework!
+//! \todo rework!
+/*
 void setChunk(MapChunk *chunk)//I dont remember, but is is maybe mine ground texture changing function
 {
   int i;
