@@ -212,8 +212,8 @@ void ModelInstance::drawSelect()
   glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
   glScalef( sc, sc, sc );
 
-  if( nameID == 0xFFFFFFFF )
-    nameID = SelectionNames.add( this );
+  //if( nameID == 0xFFFFFFFF ) //for what is this line? It cracks model selection after map save! Temporary commenting...
+  nameID = SelectionNames.add( this );
 
   glPushName( nameID );
 
