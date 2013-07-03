@@ -566,6 +566,34 @@ bool MapTile::canWaterSave(){
   return !mFlags || mWaterSize>0;
 }
 
+void MapTile::getAlpha(size_t id, unsigned char *amap)
+{
+  int index = 0;
+  int offsetIndex = 0;
+
+  for(size_t j = 0; j < 1024; ++j)
+  {
+    index = (int)j/64;
+
+    for(int i = 0; i < 16; ++i)
+    {
+      if(mChunks[index][i]->textureSet->num() > id+1)
+      {
+        memcpy(amap + j*1024 + i*64, mChunks[index][i]->textureSet->getAlpha(id) + offsetIndex*64, 64);
+      }
+      else
+      {
+        memset(amap + j*1024 + i*64, 1, 64);
+      }
+    }
+
+    if(offsetIndex == 63)
+      offsetIndex = 0;
+    else
+      offsetIndex++;
+  }
+}
+
 // This is for the 2D mode only.
 void MapTile::drawTextures()
 {
@@ -582,8 +610,6 @@ void MapTile::drawTextures()
     for (int i=0; i<16; ++i) {
       if(((i+1+xOffset)>gWorld->minX)&&((j+1+yOffset)>gWorld->minY)&&((i+xOffset)<gWorld->maxX)&&((j+yOffset)<gWorld->maxY))
         mChunks[j][i]->drawTextures();
-
-
     }
   }
   glPopMatrix();

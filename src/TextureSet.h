@@ -45,6 +45,7 @@ public:
   void setAlpha(size_t id, unsigned char *amap);
 
   const unsigned char getAlpha(size_t id, size_t offset);
+  const unsigned char *getAlpha(size_t id);
 
   OpenGL::Texture* texture(size_t id);
 

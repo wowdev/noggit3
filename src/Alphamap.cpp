@@ -141,4 +141,9 @@ const unsigned char Alphamap::getAlpha(size_t offset)
   return amap[offset];
 }
 
+const unsigned char *Alphamap::getAlpha()
+{
+  return amap;
+}
+
 

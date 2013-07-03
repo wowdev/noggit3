@@ -494,6 +494,11 @@ const unsigned char TextureSet::getAlpha(size_t id, size_t offset)
   return alphamaps[id]->getAlpha(offset);
 }
 
+const unsigned char *TextureSet::getAlpha(size_t id)
+{
+  return alphamaps[id]->getAlpha();
+}
+
 OpenGL::Texture* TextureSet::texture(size_t id)
 {
   return textures[id];

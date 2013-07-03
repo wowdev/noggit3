@@ -54,6 +54,8 @@ public:
   void addChunksLiquid(Liquid *lq);
 
   bool canWaterSave();
+
+  void getAlpha(size_t id, unsigned char *amap);
 private:
   // MFBO:
   GLfloat mMinimumValues[3*3*3];
