@@ -31,6 +31,8 @@
 #include "UIModel.h"
 #include "ModelManager.h"
 
+#include "UIAlphamap.h"
+
 UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 : UIFrame( 0.0f, 0.0f, video.xres(), video.yres() )
 , theMapview( setMapview )
@@ -90,12 +92,10 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   _help->hide();
   addChild( _help );
 
-  /*
-  _test = new UIModel(100.0f, 100.0f, 400.0f, 500.0f);
-  _test->setModel(ModelManager::add("world\\azeroth\\elwynn\\passivedoodads\\tree\\elwynnlog02.m2"));
-  _test->show();
-  addChild( _test );
-  */
+  //_test = new UIAlphamap(100.0f, 100.0f);
+  //_test->setModel(ModelManager::add("world\\azeroth\\elwynn\\passivedoodads\\tree\\elwynnlog02.m2"));
+  //_test->show();
+  //addChild( _test );
 }
 
 void UIMapViewGUI::showCursorSwitcher()

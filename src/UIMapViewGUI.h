@@ -24,6 +24,7 @@ class UISlider;
 class UIGradient;
 
 class UIModel;
+class UIAlphamap;
 
 #include "UIFrame.h"
 
@@ -35,7 +36,7 @@ private:
   bool _tilemode;
   UICursorSwitcher* CursorSwitcher;
   UIHelp* _help;
-  //UIModel* _test;
+  //UIAlphamap* _test;
 
 
 public:

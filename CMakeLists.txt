@@ -133,6 +133,8 @@ SET( SourceFiles
   src/UIAbout.h
   src/UIAppInfo.cpp
   src/UIAppInfo.h
+  src/UIAlphamap.cpp
+  src/UIAlphamap.h
   src/UIButton.cpp
   src/UIButton.h
   src/UICheckBox.cpp

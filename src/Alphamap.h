@@ -22,6 +22,7 @@ public:
   void setAlpha(unsigned char *pAmap);
 
   const unsigned char getAlpha(size_t offset);
+  const unsigned char *getAlpha();
 
 private:
   void readCompressed(MPQFile *f);
