@@ -1,7 +1,7 @@
 #include "UIHelp.h"
 
 #include "UIText.h" // UIText
-#include "Noggit.h" // arial14
+#include "Noggit.h" // app.getArial14()
 #include "Video.h" // video
 
 const int winWidth = 775;
@@ -21,7 +21,8 @@ UIHelp::UIHelp( )
 	"  C - Switch cursor type\n"
     "  M - Show map\n"
     "  U - 2D texture editor\n"
-    //"C - chunk settings\n" //! \todo: C chunk settings must get fixed first. Then turn on this again
+    //! \todo C chunk settings must get fixed first. Then turn on this again
+    //"C - chunk settings\n"
     "  H - This help\n"
 	"  CTRL + ALT + C - Toggle cursor options\n"
     "  SHIFT + R - Turn camera 180 degres\n"
@@ -59,7 +60,7 @@ UIHelp::UIHelp( )
     "  B / N - slower/faster time\n"
 	"  SHIFT + +/-: fog distance when no model is selected\n"
 	"\n"
-    , arial14, eJustifyLeft )
+    , app.getArial14(), eJustifyLeft )
   );
 
   addChild( new UIText( 380.0f, 30.0f,
@@ -110,6 +111,6 @@ UIHelp::UIHelp( )
 	"Impassible Flags:\n"
 	"  SHIFT + Left mouse - Paint flag\n"
 	"  CTRL + Left mouse  - Clear flag\n"
-    , arial14, eJustifyLeft )
+    , app.getArial14(), eJustifyLeft )
   );
 }

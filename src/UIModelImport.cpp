@@ -29,7 +29,7 @@ UIModelImport::UIModelImport( MapView *mapview  )
   : UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "" )
 {
 
-  addChild( new UIText( 12.0f, 7.0f, "Select model.", arial14, eJustifyLeft ) );
+  addChild( new UIText( 12.0f, 7.0f, "Select model.", app.getArial14(), eJustifyLeft ) );
 
   builModelList();
 

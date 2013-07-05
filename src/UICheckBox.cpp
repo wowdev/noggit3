@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Noggit.h" // arialn13
+#include "Noggit.h" // app.getArialn13()
 #include "UIText.h"
 #include "UITexture.h"
 #include "UIToggleGroup.h"
@@ -10,7 +10,7 @@
 UICheckBox::UICheckBox( float xPos, float yPos, const std::string& pText )
 : UIFrame( xPos, yPos, 30.0f, 30.0f )
 , check( new UITexture( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Check.blp" ) )
-, text( new UIText( 32.0f, 8.0f, pText, arialn13, eJustifyLeft ) )
+, text( new UIText( 32.0f, 8.0f, pText, app.getArialn13(), eJustifyLeft ) )
 , checked( false )
 , id( 0 )
 , clickFunc( NULL )
@@ -25,7 +25,7 @@ UICheckBox::UICheckBox( float xPos, float yPos, const std::string& pText )
 UICheckBox::UICheckBox( float xPos, float yPos, const std::string& pText, void (*pClickFunc)(bool,int), int pClickFuncParameter )
 : UIFrame( xPos, yPos, 30.0f, 30.0f )
 , check( new UITexture( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Check.blp" ) )
-, text( new UIText( 32.0f, 8.0f, pText, arialn13, eJustifyLeft ) )
+, text( new UIText( 32.0f, 8.0f, pText, app.getArialn13(), eJustifyLeft ) )
 , checked( false )
 , id( pClickFuncParameter )
 , clickFunc( pClickFunc )
@@ -40,7 +40,7 @@ UICheckBox::UICheckBox( float xPos, float yPos, const std::string& pText, void (
 UICheckBox::UICheckBox( float xPos, float yPos, const std::string& pText, UIToggleGroup * pToggleGroup, int pToggleID )
 : UIFrame( xPos, yPos, 30.0f, 30.0f )
 , check( new UITexture( 0.0f, 0.0f, 32.0f, 32.0f, "Interface\\Buttons\\UI-CheckBox-Check.blp" ) )
-, text( new UIText( 32.0f, 8.0f, pText, arialn13, eJustifyLeft ) )
+, text( new UIText( 32.0f, 8.0f, pText, app.getArialn13(), eJustifyLeft ) )
 , checked( false )
 , id( 0 )
 , clickFunc( NULL )

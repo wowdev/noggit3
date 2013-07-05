@@ -8,6 +8,8 @@
 #include "World.h"
 #include "UIText.h"
 #include "Noggit.h"
+#include "MapIndex.h"
+
 #include <sstream>
 #include <string>
 
@@ -19,7 +21,7 @@ UIMinimapWindow::UIMinimapWindow( Menu* menuLink )
 , mMenuLink( menuLink )
 , map( NULL )
 {
-  this->cursor_position = new UIText(10,  height() - 20.0f, "Maptile: ", arial14, eJustifyLeft );
+  this->cursor_position = new UIText(10,  height() - 20.0f, "Maptile: ", app.getArial14(), eJustifyLeft );
   this->addChild(cursor_position);
   resize();
 }
@@ -33,7 +35,7 @@ UIMinimapWindow::UIMinimapWindow( World* setMap )
 , mMenuLink( NULL )
 , map( setMap )
 {
-  this->cursor_position = new UIText(10,  height() - 20.0f, "Maptile: ", arial14, eJustifyLeft );
+  this->cursor_position = new UIText(10,  height() - 20.0f, "Maptile: ", app.getArial14(), eJustifyLeft );
   this->addChild(cursor_position);
   resize();
 }
@@ -73,13 +75,13 @@ UIFrame* UIMinimapWindow::processLeftClick( float mx, float my )
   // is there a tile?
   int i = static_cast<int>( mx - borderwidth ) / tilesize;
   int j = static_cast<int>( my - borderwidth ) / tilesize;
-  if( !gWorld->hasTile( j, i ) )
+  if( !gWorld->mapIndex->hasTile( j, i ) )
     return NULL;
 
   if(mMenuLink)
-	mMenuLink->enterMapAt( Vec3D( ( ( mx - borderwidth ) / tilesize ) * TILESIZE, 0.0f, ( ( my - borderwidth ) / tilesize ) * TILESIZE ) );
+    mMenuLink->enterMapAt( Vec3D( ( ( mx - borderwidth ) / tilesize ) * TILESIZE, 0.0f, ( ( my - borderwidth ) / tilesize ) * TILESIZE ) );
   else if(map)
-	map->jumpToCords(  Vec3D( ( ( mx - borderwidth ) / tilesize ) * TILESIZE, 50.0f, ( ( my - borderwidth ) / tilesize ) * TILESIZE ) );
+    map->jumpToCords(  Vec3D( ( ( mx - borderwidth ) / tilesize ) * TILESIZE, 50.0f, ( ( my - borderwidth ) / tilesize ) * TILESIZE ) );
 
   return this;
 }
@@ -142,9 +144,9 @@ void UIMinimapWindow::render() const
   {
     for( int i = 0; i < 64; ++i )
     {
-      if( gWorld->hasTile( j, i ) )
+      if(gWorld->mapIndex->hasTile( j, i ))
       {
-       if(gWorld->isTileExternal(i, j) )
+       if(gWorld->mapIndex->isTileExternal(i, j) )
           glColor4f( 1.0f, 0.7f, 0.5f, 0.6f );
        else
           glColor4f( 0.8f, 0.8f, 0.8f, 0.4f );
@@ -161,9 +163,9 @@ void UIMinimapWindow::render() const
 
       if( map )
       {
-        if( map->getChanged(j,i) > 0 )
+        if( map->mapIndex->getChanged(j,i) > 0 )
         {
-          if(map->getChanged(j,i)==1)
+          if(map->mapIndex->getChanged(j,i)==1)
             glColor4f( 1.0f, 1.0f, 1.0f, 0.6f );
           else
             glColor4f( 0.7f, 0.7f, 0.7f, 0.6f );

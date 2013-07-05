@@ -8,7 +8,7 @@
 #include <sstream>
 
 #include "FreeType.h" // freetype::
-#include "Noggit.h" // arial12
+#include "Noggit.h" // app.getArial12()
 #include "TextureManager.h" // TextureManager, Texture
 #include "Video.h"
 
@@ -89,7 +89,7 @@ void UISlider::render() const
   std::stringstream temp;
   temp << text << std::fixed << std::setprecision( 2 ) << ( value * scale + offset );
   const std::string tempStr = temp.str();
-  arial12.shprint( width() / 2.0f - arial12.width( tempStr ) / 2.0f, -16.0f, tempStr );
+  app.getArial12().shprint( width() / 2.0f - app.getArial12().width( tempStr ) / 2.0f, -16.0f, tempStr );
 
   glPushMatrix();
 

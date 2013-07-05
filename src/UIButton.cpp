@@ -3,7 +3,7 @@
 #include <string>
 
 #include "FreeType.h"
-#include "Noggit.h" // arial12
+#include "Noggit.h" // app.getArial12()
 #include "TextureManager.h" // TextureManager
 #include "UIText.h"
 #include "Video.h" // Texture
@@ -17,7 +17,7 @@ UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTe
 , clickFunc( NULL )
 , id( 0 )
 , clicked( false )
-, text( new UIText( width() / 2.0f, 2.0f, arial12, eJustifyCenter ) )
+, text( new UIText( width() / 2.0f, 2.0f, app.getArial12(), eJustifyCenter ) )
 {
   addChild( text );
 }
@@ -31,13 +31,13 @@ UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTe
 , clickFunc( NULL )
 , id( 0 )
 , clicked( false )
-, text( new UIText( width() / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
+, text( new UIText( width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter ) )
 {
   addChild( text );
 }
 
 UIButton::UIButton( float pX, float pY, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown )
-: UIFrame( pX, pY, arial12.width( pText ) + 20.0f, h )
+: UIFrame( pX, pY, app.getArial12().width( pText ) + 20.0f, h )
 , texture( TextureManager::newTexture( pTexNormal ) )
 , textureDown( TextureManager::newTexture( pTexDown ) )
 , _textureFilename( pTexNormal )
@@ -45,7 +45,7 @@ UIButton::UIButton( float pX, float pY, float h, const std::string& pText, const
 , clickFunc( NULL )
 , id( 0 )
 , clicked( false )
-, text( new UIText( width() / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
+, text( new UIText( width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter ) )
 {
   addChild( text );
 }
@@ -59,7 +59,7 @@ UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTe
 , clickFunc( pFunc )
 , id( pFuncParam )
 , clicked( false )
-, text( new UIText( width() / 2.0f, 2.0f, pText, arial12, eJustifyCenter ) )
+, text( new UIText( width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter ) )
 {
   addChild( text );
 }

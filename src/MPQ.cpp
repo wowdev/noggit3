@@ -17,7 +17,7 @@
 #include "Log.h"
 #include "Project.h"
 #include "AsyncLoader.h" // AsyncLoader
-#include "Noggit.h" // gAsyncLoader
+#include "Noggit.h" // app.loader()
 
 typedef std::pair<std::string, MPQArchive*> ArchiveEntry;
 typedef std::list<ArchiveEntry> ArchivesMap;
@@ -31,7 +31,7 @@ std::string modmpqpath="";//this will be the path to modders archive (with 'mywo
 void MPQArchive::loadMPQ( const std::string& filename, bool doListfile )
 {
   _openArchives.push_back( ArchiveEntry( filename, new MPQArchive( filename, doListfile ) ) );
-  gAsyncLoader->addObject( _openArchives.back().second );
+  app.loader()->addObject( _openArchives.back().second );
 }
 
 MPQArchive::MPQArchive( const std::string& filename, bool doListfile )
@@ -167,7 +167,7 @@ MPQFile::MPQFile( const std::string& filename )
   fname = diskpath;
   std::transform( fname.begin(), fname.end(), fname.begin(), ::tolower );
 
-  std::ifstream input( diskpath.c_str(), std::ios_base::binary | std::ios_base::in );
+  std::ifstream input( fname.c_str(), std::ios_base::binary | std::ios_base::in );
   if( input.is_open() )
   {
     External = true;

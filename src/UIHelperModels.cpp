@@ -41,8 +41,8 @@ UIHelperModels::UIHelperModels( MapView *mapview )
 
   
   addChild( new UITexture( 10.0f, 10.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Misc_EngGizmos_swissArmy.blp" ) );
-  addChild( new UIText( 95.0f, 20.0f, "Select a model to add.", arial14, eJustifyLeft ) );
-  addChild( new UIText( 95.0f, 40.0f, "You must select a chunk first!", arial14, eJustifyLeft ) );
+  addChild( new UIText( 95.0f, 20.0f, "Select a model to add.", app.getArial14(), eJustifyLeft ) );
+  addChild( new UIText( 95.0f, 40.0f, "You must select a chunk first!", app.getArial14(), eJustifyLeft ) );
   addChild( new UIButton( leftStart, currentPos+=(buttonheight - 5), buttonWidth, buttonheight, "Human scale", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 2 ) );
   addChild( new UIButton( leftStart, currentPos+=(buttonheight - 5), buttonWidth, buttonheight, "Cube 50", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 3 ) );
   addChild( new UIButton( leftStart, currentPos+=(buttonheight - 5), buttonWidth, buttonheight, "Cube 100", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 4 ) );

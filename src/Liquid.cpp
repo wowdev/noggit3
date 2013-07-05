@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <string>
+#include <boost/filesystem.hpp>
 
 #include "DBC.h"
 #include "Log.h"
@@ -441,10 +442,16 @@ void loadWaterShader()
   mWaterShader = new BLSShader( "shaders\\pixel\\arbfp1\\psLiquidWater.bls" );
   mMagmaShader = new BLSShader( "shaders\\pixel\\arbfp1\\psLiquidMagma.bls" );
 #else
-  FILE *shader = fopen( "shaders\\water.ps", "r" );
-  if( !shader )
+  boost::filesystem::path waterPath("shaders/water.ps");
+  boost::filesystem::path fogPath("shaders/waterfog.ps");
+
+  waterPath.make_preferred();
+  fogPath.make_preferred();
+
+  FILE *shader = fopen(waterPath.string().c_str(), "r");
+  if(!shader)
   {
-    LogError << "Unable to open water shader \"shaders\\water.ps\"." << std::endl;
+    LogError << "Unable to open water shader " << waterPath.string() << std::endl;
   }
   else
   {
@@ -452,8 +459,10 @@ void loadWaterShader()
     int length=fread(buffer, 1, 8192, shader);
     fclose(shader);
     glGenProgramsARB(1, &waterShader);
-    if(waterShader==0)
-      LogError << "Failed to get program ID for water shader \"shaders\\water.ps\"." << std::endl;
+    if(!waterShader)
+    {
+      LogError << "Failed to get program ID for water shader " << waterPath.string() << std::endl;
+    }
     else
     {
       GLint errorPos, isNative;
@@ -481,17 +490,21 @@ void loadWaterShader()
     }
   }
 
-  shader=fopen("shaders\\waterfog.ps", "r");
-  if(shader==0)
-    LogError << "Unable to open water shader \"shaders/waterfog.ps\"." << std::endl;
+  shader = fopen(fogPath.string().c_str(), "r");
+  if(!shader)
+  {
+    LogError << "Unable to open water shader " << fogPath.string() << std::endl;
+  }
   else
   {
     char buffer[8192];
     int length=fread(buffer, 1, 8192, shader);
     fclose(shader);
     glGenProgramsARB(1, &waterFogShader);
-    if(waterFogShader==0)
-      LogError << "Failed to get program ID for water shader \"shaders/waterfog.ps\"." << std::endl;
+    if(!waterFogShader)
+    {
+      LogError << "Failed to get program ID for water shader " << fogPath.string() << std::endl;
+    }
     else
     {
       GLint errorPos, isNative;

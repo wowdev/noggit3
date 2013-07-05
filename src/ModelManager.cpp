@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "AsyncLoader.h"// AsyncLoader
-#include "Noggit.h" // gAsyncLoader
+#include "Noggit.h" // app.loader()
 #include "Model.h" // Model
 #include "Log.h" // LogDebug
 
@@ -35,7 +35,7 @@ Model* ModelManager::add( std::string name )
   {
     items[name] = new Model( name );
     items[name]->finishLoading();
-    gAsyncLoader->addObject( items[name] );
+    app.loader()->addObject( items[name] );
   }
 
   items[name]->addReference();

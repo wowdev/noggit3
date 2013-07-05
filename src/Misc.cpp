@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <stdlib.h>
 
 namespace misc
 {
@@ -79,4 +78,54 @@ namespace misc
   {
     return cord / 533.33333f;
   }
+}
+
+void SetChunkHeader(sExtendableArray pArray, int pPosition, int pMagix, int pSize)
+{
+  sChunkHeader * Header = pArray.GetPointer<sChunkHeader>( pPosition );
+  Header->mMagic = pMagix;
+  Header->mSize = pSize;
+}
+
+bool pointInside(Vec3D point, Vec3D extents[2])
+{
+  return point.x >= extents[0].x && point.z >= extents[0].z && point.x <= extents[1].x && point.z <= extents[1].z;
+}
+
+void minmax(Vec3D* a, Vec3D* b)
+{
+  if( a->x > b->x )
+  {
+    float t = b->x;
+    b->x = a->x;
+    a->x = t;
+  }
+  if( a->y > b->y )
+  {
+    float t = b->y;
+    b->y = a->y;
+    a->y = t;
+  }
+  if( a->z > b->z )
+  {
+    float t = b->z;
+    b->z = a->z;
+    a->z = t;
+  }
+}
+
+bool checkInside( Vec3D extentA[2], Vec3D extentB[2] )
+{
+  minmax( &extentA[0], &extentA[1] );
+  minmax( &extentB[0], &extentB[1] );
+
+  return pointInside( extentA[0], extentB ) ||
+         pointInside( extentA[1], extentB ) ||
+         pointInside( extentB[0], extentA ) ||
+         pointInside( extentB[1], extentA );
+}
+
+bool checkOriginInside( Vec3D extentA[2], Vec3D modelPos )
+{
+  return pointInside( extentA[0], &modelPos );
 }

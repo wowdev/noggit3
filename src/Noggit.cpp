@@ -12,7 +12,6 @@
 #include <fstream>
 #include <iostream>
 #include <list>
-#include <string>
 #include <vector>
 
 #include <boost/filesystem.hpp>
@@ -23,10 +22,8 @@
 #include "AppState.h"
 #include "AsyncLoader.h"
 #include "ConfigFile.h"
-#include "DBC.h"
 #include "Environment.h"  // This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
 #include "errorHandling.h"
-#include "FreeType.h" // fonts.
 #include "Liquid.h"
 #include "Log.h"
 #include "MapView.h"
@@ -41,84 +38,24 @@
 #include "WMO.h" // WMOManager::report()
 #include "ModelManager.h" // ModelManager::report()
 
-std::vector<AppState*> gStates;
-bool gPop = false;
-
+Noggit app;
+void CreateStrips();
 extern std::list<std::string> gListfile;
 
-freetype::font_data arialn13;
-freetype::font_data arial12;
-freetype::font_data arial14;
-freetype::font_data arial16;
-freetype::font_data arial24;
-freetype::font_data arial32;
-freetype::font_data morpheus40;
-freetype::font_data skurri32;
-freetype::font_data fritz16;
+Noggit::Noggit()
+  : fullscreen(false)
+  , doAntiAliasing(true)
+  , xres(1280)
+  , yres(720)
+{}
 
-AsyncLoader* gAsyncLoader;
-
-std::string getGamePath()
+Noggit::~Noggit()
 {
-  if( !boost::filesystem::exists( "NoggIt.conf" ) )
-  {
-      Log << "DON NOT find a config file." << std::endl;
 
-      if( boost::filesystem::exists( "NoggIt.conf.conf" ) )
-      {
-        Log << "Error: You have named your config file noggit.conf.conf!" << std::endl;
-        Log << "Erase the second .conf!" << std::endl;
-      }
-      else if( boost::filesystem::exists( "noggit_template.conf" ) )
-      {
-        Log << "You must rename noggit_template.conf to NoggIt.conf if noggit should use the config file!" << std::endl;
-      }
-
-
-  #ifdef _WIN32
-    Log << "Will try to load the game path from you registry now:" << std::endl;
-    HKEY key;
-    DWORD t;
-    const DWORD s( 1024 );
-    char temp[s];
-    memset(temp,0,s);
-    LONG l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
-    if (l != ERROR_SUCCESS)
-      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
-    if (l != ERROR_SUCCESS)
-      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
-    if (l == ERROR_SUCCESS && RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,(LPDWORD)&s) == ERROR_SUCCESS)
-      return temp;
-    else
-      return "";
-    RegCloseKey(key);
-  #else
-    return "/Applications/World of Warcraft/";
-  #endif
-
-  }
-  else
-  {
-      Log << "Using config file." << std::endl;
-    return ConfigFile( "NoggIt.conf" ).read<std::string>( "Path" );
-  }
 }
 
-
-void CreateStrips();
-
-#ifdef _WIN32
-int WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
+void Noggit::initPath(char *argv[])
 {
-  return main( __argc, __argv );
-}
-#endif
-
-int main( int argc, char *argv[] )
-{
-  RegisterErrorHandlers();
-  InitLogging();
-
   try
   {
     boost::filesystem::path startupPath( argv[0] );
@@ -137,12 +74,10 @@ int main( int argc, char *argv[] )
   {
     LogError << ex.what() << std::endl;
   }
+}
 
-  Settings::getInstance();
-  Project::getInstance();
-  Environment::getInstance();
-
-  Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
+void Noggit::initFont()
+{
 
   std::string arialFilename( "<PLEASE GET SOME FONT FOR YOUR OS>" );
 #ifdef _WIN32
@@ -161,11 +96,27 @@ int main( int argc, char *argv[] )
       if( !boost::filesystem::exists( arialFilename ) )
       {
         LogError << "Can not find arial.ttf." << std::endl;
-        return -1;
+        //return -1;
       }
     }
   }
 
+  // Initializing Fonts
+  skurri32.init( "fonts/skurri.ttf", 32, true );
+  fritz16.init( "fonts/frizqt__.ttf", 16, true );
+  morpheus40.init( "fonts/morpheus.ttf", 40, true );
+  arialn13.init( "fonts/arialn.ttf", 13, true );
+
+  arial12.init( arialFilename, 12, false );
+  arial14.init( arialFilename, 14, false );
+  arial16.init( arialFilename, 16, false );
+  arial24.init( arialFilename, 24, false );
+  arial32.init( arialFilename, 32, false );
+
+}
+
+void Noggit::initEnv()
+{
   // init
   Environment::getInstance()->cursorColorR = 1.0f;
   Environment::getInstance()->cursorColorG = 1.0f;
@@ -182,21 +133,20 @@ int main( int argc, char *argv[] )
       Environment::getInstance()->cursorColorR = myConfigfile.read<float>( "RedColor" );
       Environment::getInstance()->cursorColorG = myConfigfile.read<float>( "GreenColor" );
       Environment::getInstance()->cursorColorB = myConfigfile.read<float>( "BlueColor" );
-      Environment::getInstance()->cursorColorA = myConfigfile.read<float>( "AlphaColor" );    
+      Environment::getInstance()->cursorColorA = myConfigfile.read<float>( "AlphaColor" );
     }
 
-	if( myConfigfile.keyExists("CursorType"))
-		Environment::getInstance()->cursorType = myConfigfile.read<int>( "CursorType" );
+    if( myConfigfile.keyExists("CursorType"))
+      Environment::getInstance()->cursorType = myConfigfile.read<int>( "CursorType" );
   }
 
+  Settings::getInstance();
+  Project::getInstance();
+  Environment::getInstance();
+}
 
-  srand( time( NULL ) );
-
-  int xres( 1280 );
-  int yres( 720 );
-  bool fullscreen( false );
-  bool doAntiAliasing( true );
-
+void Noggit::parseArgs(int argc, char *argv[])
+{
   // handle starting parameters
   for( int i( 1 ); i < argc; ++i )
   {
@@ -254,31 +204,59 @@ int main( int argc, char *argv[] )
   {
     doAntiAliasing = false;
   }
+}
 
-  if( !video.init( xres, yres, fullscreen, doAntiAliasing ) )
+std::string Noggit::getGamePath()
+{
+  if( !boost::filesystem::exists( "NoggIt.conf" ) )
   {
-    LogError << "Initializing video failed." << std::endl;
-    return -1;
+    Log << "DON NOT find a config file." << std::endl;
+
+    if( boost::filesystem::exists( "NoggIt.conf.conf" ) )
+    {
+      Log << "Error: You have named your config file noggit.conf.conf!" << std::endl;
+      Log << "Erase the second .conf!" << std::endl;
+    }
+    else if( boost::filesystem::exists( "noggit_template.conf" ) )
+    {
+      Log << "You must rename noggit_template.conf to NoggIt.conf if noggit should use the config file!" << std::endl;
+    }
+
+
+#ifdef _WIN32
+    Log << "Will try to load the game path from you registry now:" << std::endl;
+    HKEY key;
+    DWORD t;
+    const DWORD s( 1024 );
+    char temp[s];
+    memset(temp,0,s);
+    LONG l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
+    if (l != ERROR_SUCCESS)
+      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR",0,KEY_QUERY_VALUE,&key);
+    if (l != ERROR_SUCCESS)
+      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SOFTWARE\\Blizzard Entertainment\\World of Warcraft",0,KEY_QUERY_VALUE,&key);
+    if (l == ERROR_SUCCESS && RegQueryValueEx(key,"InstallPath",0,&t,(LPBYTE)temp,(LPDWORD)&s) == ERROR_SUCCESS)
+      return temp;
+    else
+      return "";
+    RegCloseKey(key);
+#else
+    return "/Applications/World of Warcraft/";
+#endif
+
   }
-
-  SDL_WM_SetCaption( "Noggit Studio - " STRPRODUCTVER, "" );
-
-  std::string wowpath( getGamePath() );
-  if( wowpath == "" )
+  else
   {
-    return -1;
+    Log << "Using config file." << std::endl;
+    return ConfigFile( "NoggIt.conf" ).read<std::string>( "Path" );
   }
+}
 
-  Log << "Game path: " << wowpath << std::endl;
 
-  if( Project::getInstance()->getPath() == "" )
-    Project::getInstance()->setPath( wowpath );
-  Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
-
-  CreateStrips();
-
-  gAsyncLoader = new AsyncLoader();
-  gAsyncLoader->start( 1 );
+void Noggit::loadMPQs()
+{
+  asyncLoader = new AsyncLoader();
+  asyncLoader->start(1);
 
   std::vector<std::string> archiveNames;
   archiveNames.push_back( "common.MPQ" );
@@ -321,7 +299,7 @@ int main( int argc, char *argv[] )
   if( !strcmp( locale, "****" ) )
   {
     LogError << "Could not find locale directory. Be sure, that there is one containing the file \"realmlist.wtf\"." << std::endl;
-    return -1;
+    //return -1;
   }
 
   //! \todo  This may be done faster. Maybe.
@@ -367,68 +345,14 @@ int main( int argc, char *argv[] )
       if( boost::filesystem::exists( path ) )
         MPQArchive::loadMPQ( path, true );
   }
-  // listfiles are not available straight away! They are async! Do not rely on anything at this point!
+}
 
-  //! \todo  Get this out?
-  //gFileList = new Directory( "root" );
-  //size_t found;
-  // This is an example with filter:
-  /*
-   std::vector<std::string>::iterator it;
-   for( it = gListfile.begin(); it != gListfile.end(); ++it )
-   {
-   if( it->find( pFilter ) != std::string::npos )
-   {
-   found = it->find_last_of("/\\");
-   if( found != std::string::npos )
-   mDirectory->AddSubDirectory( it->substr(0,found) )->AddFile( it->substr(found+1) );
-   else
-   mDirectory->AddFile( *it );
-   }
-   }
-   */
-  // This is an example for getting all files in the list.
-  /*  std::list<std::string>::iterator it;
-   for( it = gListfile.begin(); it != gListfile.end(); ++it )
-   {
-   found = it->find_last_of("/\\");
-   if( found != std::string::npos )
-   gFileList->AddSubDirectory( it->substr(0,found) )->AddFile( it->substr(found+1) );
-   else
-   gFileList->AddFile( *it );
-   }
-   */
-
-  // Opening DBCs
-  OpenDBs();
-
-  // Initializing Fonts
-  skurri32.init( "fonts/skurri.ttf", 32, true );
-  fritz16.init( "fonts/frizqt__.ttf", 16, true );
-  morpheus40.init( "fonts/morpheus.ttf", 40, true );
-  arialn13.init( "fonts/arialn.ttf", 13, true );
-
-  arial12.init( arialFilename, 12, false );
-  arial14.init( arialFilename, 14, false );
-  arial16.init( arialFilename, 16, false );
-  arial24.init( arialFilename, 24, false );
-  arial32.init( arialFilename, 32, false );
-
-  if( video.mSupportShaders )
-    loadWaterShader();
-  else
-    LogError << "Your GPU does not support ARB vertex programs (shaders). Sorry." << std::endl;
-
-  LogDebug << "Creating Menu" << std::endl;
-
-  gStates.push_back( new Menu() );
-
-  LogDebug << "Entering Main Loop" << std::endl;
-
-  bool done( false );
-  Uint32 ticks( SDL_GetTicks() );
-  AppState* activeAppState( NULL );
-  Uint32 time( 0 );
+void Noggit::mainLoop()
+{
+  bool done(false);
+  Uint32 ticks(SDL_GetTicks());
+  AppState* activeAppState(NULL);
+  Uint32 time(0);
 
   SDL_EnableUNICODE( true );
 
@@ -436,79 +360,124 @@ int main( int argc, char *argv[] )
 
   try {
 
-  while( !gStates.empty() && !done )
-  {
-    Uint32 lastTicks( ticks );
-    ticks = SDL_GetTicks();
-    Uint32 tickDelta( ticks - lastTicks );
-    time += tickDelta;
-
-    activeAppState = gStates[gStates.size() - 1];
-
-    const Uint8 appState( SDL_GetAppState() );
-    const bool isActiveApplication( appState & SDL_APPACTIVE );
-    const bool hasInputFocus( appState & SDL_APPINPUTFOCUS );
-    const bool hasMouseFocus( appState & SDL_APPMOUSEFOCUS );
-
-    if( isActiveApplication )
+    while( !states.empty() && !done )
     {
-      const float ftime( time / 1000.0f );
-      const float ftickDelta( tickDelta / 1000.0f );
-      activeAppState->tick( ftime, ftickDelta );
-      activeAppState->display( ftime, ftickDelta );
+      Uint32 lastTicks( ticks );
+      ticks = SDL_GetTicks();
+      Uint32 tickDelta( ticks - lastTicks );
+      time += tickDelta;
 
-      video.flip();
-    }
-    else
-    {
-      boost::this_thread::sleep( boost::posix_time::milliseconds( 200 ) );
-    }
+      activeAppState = states[states.size() - 1];
 
-    while( SDL_PollEvent( &event ) )
-    {
-      if( event.type == SDL_QUIT )
+      const Uint8 appState( SDL_GetAppState() );
+      const bool isActiveApplication( appState & SDL_APPACTIVE );
+      const bool hasInputFocus( appState & SDL_APPINPUTFOCUS );
+      const bool hasMouseFocus( appState & SDL_APPMOUSEFOCUS );
+
+      if( isActiveApplication )
       {
-        done = true;
+        const float ftime( time / 1000.0f );
+        const float ftickDelta( tickDelta / 1000.0f );
+        activeAppState->tick( ftime, ftickDelta );
+        activeAppState->display( ftime, ftickDelta );
+
+        video.flip();
       }
-      else if( event.type == SDL_VIDEORESIZE )
+      else
       {
-        video.resize( event.resize.w, event.resize.h );
-        activeAppState->resizewindow();
+        boost::this_thread::sleep( boost::posix_time::milliseconds( 200 ) );
       }
-      else if( hasInputFocus )
+
+      while( SDL_PollEvent( &event ) )
       {
-        if( ( event.type == SDL_KEYDOWN || event.type == SDL_KEYUP ) )
+        if( event.type == SDL_QUIT )
         {
-          activeAppState->keypressed( &event.key );
+          done = true;
         }
-        else if( hasMouseFocus )
+        else if( event.type == SDL_VIDEORESIZE )
         {
-          if( event.type == SDL_MOUSEMOTION )
+          video.resize( event.resize.w, event.resize.h );
+          activeAppState->resizewindow();
+        }
+        else if( hasInputFocus )
+        {
+          if( ( event.type == SDL_KEYDOWN || event.type == SDL_KEYUP ) )
           {
-            activeAppState->mousemove( &event.motion );
+            activeAppState->keypressed( &event.key );
           }
-          else if( event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP )
+          else if( hasMouseFocus )
           {
-            activeAppState->mouseclick( &event.button );
+            if( event.type == SDL_MOUSEMOTION )
+            {
+              activeAppState->mousemove( &event.motion );
+            }
+            else if( event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP )
+            {
+              activeAppState->mouseclick( &event.button );
+            }
           }
         }
       }
-    }
 
-    if( gPop )
-    {
-      gPop = false;
-      gStates.pop_back();
-      delete activeAppState;
-      activeAppState = NULL;
+      if( pop )
+      {
+        pop = false;
+        states.pop_back();
+        delete activeAppState;
+        activeAppState = NULL;
+      }
     }
-  }
 
   }
   catch( const std::exception& e )
-{
-  LogError << "expection: " << e.what() << std::endl;
+  {
+    LogError << "expection: " << e.what() << std::endl;
+  }
 }
+
+int Noggit::start(int argc, char *argv[])
+{
+  InitLogging();
+  initPath(argv);
+
+  Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
+
+  initEnv();
+  parseArgs(argc, argv);
+  srand(time(NULL));
+  wowpath = getGamePath();
+
+  if( wowpath == "" )
+    return -1;
+  Log << "Game path: " << wowpath << std::endl;
+
+  if(Project::getInstance()->getPath() == "")
+    Project::getInstance()->setPath( wowpath );
+  Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
+
+  CreateStrips();
+  loadMPQs(); // listfiles are not available straight away! They are async! Do not rely on anything at this point!
+  OpenDBs();
+
+  if( !video.init( xres, yres, fullscreen, doAntiAliasing ) )
+  {
+    LogError << "Initializing video failed." << std::endl;
+    return -1;
+  }
+
+  SDL_WM_SetCaption( "Noggit Studio - " STRPRODUCTVER, "" );
+  initFont();
+
+  if(video.mSupportShaders)
+    loadWaterShader();
+  else
+    LogError << "Your GPU does not support ARB vertex programs (shaders). Sorry." << std::endl;
+
+  LogDebug << "Creating Menu" << std::endl;
+  states.push_back( new Menu() );
+
+  LogDebug << "Entering Main Loop" << std::endl;
+  mainLoop();
 
   video.close();
 
@@ -516,8 +485,8 @@ int main( int argc, char *argv[] )
   ModelManager::report();
   WMOManager::report();
 
-  gAsyncLoader->stop();
-  gAsyncLoader->join();
+  asyncLoader->stop();
+  asyncLoader->join();
 
   MPQArchive::unloadAllMPQs();
   gListfile.clear();
@@ -526,3 +495,46 @@ int main( int argc, char *argv[] )
 
   return 0;
 }
+
+#ifdef _WIN32
+int WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow )
+{
+  return main( __argc, __argv );
+}
+#endif
+
+int main( int argc, char *argv[] )
+{
+  RegisterErrorHandlers();
+  return app.start(argc, argv);
+}
+
+//! \todo  Get this out?
+//gFileList = new Directory( "root" );
+//size_t found;
+// This is an example with filter:
+/*
+ std::vector<std::string>::iterator it;
+ for( it = gListfile.begin(); it != gListfile.end(); ++it )
+ {
+ if( it->find( pFilter ) != std::string::npos )
+ {
+ found = it->find_last_of("/\\");
+ if( found != std::string::npos )
+ mDirectory->AddSubDirectory( it->substr(0,found) )->AddFile( it->substr(found+1) );
+ else
+ mDirectory->AddFile( *it );
+ }
+ }
+ */
+// This is an example for getting all files in the list.
+/*  std::list<std::string>::iterator it;
+ for( it = gListfile.begin(); it != gListfile.end(); ++it )
+ {
+ found = it->find_last_of("/\\");
+ if( found != std::string::npos )
+ gFileList->AddSubDirectory( it->substr(0,found) )->AddFile( it->substr(found+1) );
+ else
+ gFileList->AddFile( *it );
+ }
+ */

@@ -333,13 +333,13 @@ void ParticleSystem::draw()
    * 2  seems to be the same as 0 (found some in the Deeprun Tram blinky-lights-sign thing)
    */
   if (type==0 || type==2 ) {
-    // TODO: figure out type 2 (deeprun tram subway sign)
+    //! \todo figure out type 2 (deeprun tram subway sign)
     // - doesn't seem to be any different from 0 -_-
     // regular particles
 
     if (billboard) {
       glBegin(GL_QUADS);
-      // TODO: per-particle rotation in a non-expensive way?? :|
+      //! \todo per-particle rotation in a non-expensive way?? :|
       for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
         if (tiles.size() - 1 < it->tile) // Alfred, 2009.08.07, error prevent
           break;
@@ -755,7 +755,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
   // Vec3D bdir(w*cosf(t), 0.0f, l*sinf(t));
   // --
 
-  // TODO: fix shpere emitters to work properly
+  //! \todo fix shpere emitters to work properly
   /* // Old Method
    //Vec3D bdir(l*cosf(t), 0, w*sinf(t));
    //Vec3D bdir(0, w*cosf(t), l*sinf(t));

@@ -12,7 +12,7 @@
 #include "MapChunk.h"
 #include "Misc.h"
 #include "MPQ.h"
-#include "Noggit.h" // arial14, arialn13
+#include "Noggit.h" // app.getArial14(), app.getapp.getArialn13()()
 #include "TextureManager.h" // TextureManager, Texture
 #include "UIButton.h" // UIButton
 #include "UICheckBox.h" // UICheckBox
@@ -365,7 +365,7 @@ UIFrame* UITexturingGUI::createTexturePalette( UIMapViewGUI *setgui )
   updateTextures();
   texturePaletteClick( 0, 0 );
 
-  windowTexturePalette->addChild( gPageNumber = new UIText( 44.0f, 4.0f, "1 / 1", arialn13, eJustifyLeft ) );
+  windowTexturePalette->addChild( gPageNumber = new UIText( 44.0f, 4.0f, "1 / 1", app.getArialn13(), eJustifyLeft ) );
   windowTexturePalette->addChild( new UIButton( 20.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Down.blp", changePage, +1 ) );
   windowTexturePalette->addChild( new UIButton( 2.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Down.blp", changePage, -1 ) );
 
@@ -378,7 +378,7 @@ UIFrame* UITexturingGUI::createTexturePalette( UIMapViewGUI *setgui )
   textureSelected = new UITexture( 18.0f+pal_rows*68.0f,32.0f, 336.0f, 336.0f, lTexture );
   windowTexturePalette->addChild( textureSelected );
 
-  textSelectedTexture = new UIText( windowTexturePalette->width()-10, windowTexturePalette->height() - 28.0f, lTexture, arial16, eJustifyRight );
+  textSelectedTexture = new UIText( windowTexturePalette->width()-10, windowTexturePalette->height() - 28.0f, lTexture, app.getArial16(), eJustifyRight );
  // textSelectedTexture->setBackground( 0.0f, 0.0f, 0.0f, 0.5f );
 
   windowTexturePalette->addChild( textSelectedTexture );
@@ -458,7 +458,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
   windowTextureFilter->hide();
 
   //Filename Filters
-  windowTextureFilter->addChild( new UIText( 70.0f, 13.0f, "Filename Filters", arial14, eJustifyCenter ) );
+  windowTextureFilter->addChild( new UIText( 70.0f, 13.0f, "Filename Filters", app.getArial14(), eJustifyCenter ) );
 
   for( std::map<int,std::string>::iterator it = gFilenameFilters.begin(); it != gFilenameFilters.end(); ++it )
   {
@@ -468,7 +468,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
   windowTextureFilter->addChild( new UICheckBox( 15.0f + 200.0f *  4 , 30.0f + 30.0f * 4, "Misc (Everything Else)", clickFileFilterTexture, 24 ) );
 
   //Tileset Filters
-  windowTextureFilter->addChild( new UIText( 70.0f, 190.0f, "Tileset Filters", arial14, eJustifyCenter ) );
+  windowTextureFilter->addChild( new UIText( 70.0f, 190.0f, "Tileset Filters", app.getArial14(), eJustifyCenter ) );
 
   for( unsigned int i = 0; i < tilesetDirectories.size(); ++i )
   {
@@ -491,13 +491,13 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
   chunkSettingsWindow=new UIWindow(11.0f,26.0f,300.0f,300.0f);
   windowMapChunk->addChild(chunkSettingsWindow);
 
-  chunkLocation=new UIText(5.0f,4.0f,"Chunk x, y of Tile x, y at (x, y, z)", arial14, eJustifyLeft);
+  chunkLocation=new UIText(5.0f,4.0f,"Chunk x, y of Tile x, y at (x, y, z)", app.getArial14(), eJustifyLeft);
   chunkSettingsWindow->addChild(chunkLocation);
 
-  chunkAreaID=new UIText(5.0,chunkLocation->y()+25.0f,"AreaID:", arial14, eJustifyLeft);
+  chunkAreaID=new UIText(5.0,chunkLocation->y()+25.0f,"AreaID:", app.getArial14(), eJustifyLeft);
   chunkSettingsWindow->addChild(chunkAreaID);
 
-  chunkFlags=new UIText(5.0,chunkAreaID->y()+25.0f,"Flags:", arial14, eJustifyLeft);
+  chunkFlags=new UIText(5.0,chunkAreaID->y()+25.0f,"Flags:", app.getArial14(), eJustifyLeft);
   chunkSettingsWindow->addChild(chunkFlags);
 
 
@@ -518,10 +518,10 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
   chunkSettingsWindow->addChild(chunkFlagChecks[4]);
 
 
-  chunkEffectID=new UIText(5.0f,chunkFlagChecks[4]->y()+35.0f,"EffectID:", arial14, eJustifyLeft);
+  chunkEffectID=new UIText(5.0f,chunkFlagChecks[4]->y()+35.0f,"EffectID:", app.getArial14(), eJustifyLeft);
   chunkSettingsWindow->addChild(chunkEffectID);
   chunkEffectID->hide();
-  chunkNumEffects=new UIText(150.0f,chunkEffectID->y(),"Num Effects:", arial14, eJustifyLeft);
+  chunkNumEffects=new UIText(150.0f,chunkEffectID->y(),"Num Effects:", app.getArial14(), eJustifyLeft);
   chunkSettingsWindow->addChild(chunkNumEffects);
   chunkNumEffects->hide();
 
@@ -529,7 +529,7 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
   chunkSettingsWindow->addChild(chunkEffectWindow);
   chunkEffectWindow->hide();
 
-  chunkEffectModels[0]=new UIText(8.0f,8.0f,"Effect Doodad", arial14, eJustifyLeft);
+  chunkEffectModels[0]=new UIText(8.0f,8.0f,"Effect Doodad", app.getArial14(), eJustifyLeft);
   chunkEffectWindow->addChild(chunkEffectModels[0]);
   chunkEffectModels[0]->hide();
 
@@ -540,20 +540,20 @@ UIFrame* UITexturingGUI::createMapChunkWindow()
 
     for(int i=1;i<4;++i)
   {
-    chunkEffectModels[i]=new UIText(8.0f,chunkEffectModels[i-1]->y()+20.0f,"Effect Doodad", arial14, eJustifyLeft);
+    chunkEffectModels[i]=new UIText(8.0f,chunkEffectModels[i-1]->y()+20.0f,"Effect Doodad", app.getArial14(), eJustifyLeft);
     chunkEffectWindow->addChild(chunkEffectModels[i]);
     chunkEffectModels[i]->hide();
 
     chunkTexture[i]=new UITexture( 10.0f, yPos, 64.0f, 64.0f, "tileset\\generic\\black.blp" );
     chunkTextureWindow->addChild(chunkTexture[i]);
 
-    chunkTextureNames[i]=new UIText(83.0f,yPos+5.0f,"Texture Name", arial14, eJustifyLeft);
+    chunkTextureNames[i]=new UIText(83.0f,yPos+5.0f,"Texture Name", app.getArial14(), eJustifyLeft);
     chunkTextureWindow->addChild(chunkTextureNames[i]);
 
-    chunkTextureFlags[i]=new UIText(83.0f,yPos+30.0f,"Flags -", arial14, eJustifyLeft);
+    chunkTextureFlags[i]=new UIText(83.0f,yPos+30.0f,"Flags -", app.getArial14(), eJustifyLeft);
     chunkTextureWindow->addChild(chunkTextureFlags[i]);
 
-    chunkTextureEffectID[i]=new UIText(184.0f,yPos+30.0f,"EffectID -", arial14, eJustifyLeft);
+    chunkTextureEffectID[i]=new UIText(184.0f,yPos+30.0f,"EffectID -", app.getArial14(), eJustifyLeft);
     chunkTextureWindow->addChild(chunkTextureEffectID[i]);
 
     yPos+=64.0f+8.0f;
@@ -573,7 +573,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
   std::string areaName;
   try
   {
-    AreaDB::Record rec = gAreaDB.getByID(chunk->areaID);
+    AreaDB::Record rec = gAreaDB.getByID(chunk->getAreaID());
     areaName = rec.getString(AreaDB::Name);
   }
   catch(...)
@@ -581,7 +581,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
     areaName = "";
   }
   Temp.clear();
-  Temp << "AreaID: " << areaName.c_str() << " (" << chunk->areaID << ")" ;
+  Temp << "AreaID: " << areaName.c_str() << " (" << chunk->getAreaID() << ")" ;
   chunkAreaID->setText(Temp.str().c_str());///
 
   Temp.clear();
@@ -610,7 +610,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
   ss << "Num Effects: " << chunk->header.nEffectDoodad;
   chunkNumEffects->setText(ss.str().c_str());///
 
-  //! /todo rework texture reading
+  //! \todo rework texture reading
   /*
   int pl=0;
   for(pl=0;pl<(chunk->nTextures);pl++)
@@ -647,8 +647,8 @@ OpenGL::Texture* UITexturingGUI::getSelectedTexture(){
 void UITexturingGUI::setSelectedTexture(OpenGL::Texture * t){
   UITexturingGUI::selectedTexture = t;
 }
-
-/* //! /todo rework!
+//! \todo rework!
+/*
 void setChunk(MapChunk *chunk)//I dont remember, but is is maybe mine ground texture changing function
 {
   int i;
