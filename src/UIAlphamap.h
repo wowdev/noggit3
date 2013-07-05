@@ -10,5 +10,8 @@ public:
 
   void render() const;
 
+private:
+  void drawQuad(size_t i, size_t j) const;
+
 };
 #endif
