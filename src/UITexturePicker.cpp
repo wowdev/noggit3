@@ -2,6 +2,7 @@
 
 #include "Selection.h"
 #include "MapChunk.h"
+#include "TextureSet.h"
 #include "UITexture.h"
 #include "UITexturingGUI.h"
 
@@ -39,9 +40,9 @@ void UITexturePicker::getTextures( nameEntry* lSelection )
 
     size_t index = 0;
 
-    for( ; index < 4U && chunk->nTextures > index; ++index )
+    for( ; index < 4U && chunk->textureSet->num() > index; ++index )
     {
-      _textures[index]->setTexture( chunk->_textures[index] );
+      _textures[index]->setTexture( chunk->textureSet->texture(index) );
       _textures[index]->show();
     }
 

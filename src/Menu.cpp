@@ -26,6 +26,7 @@
 #include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
 #include "World.h"
 #include "Settings.h"
+#include "MapIndex.h"
 
 Menu* theMenu = NULL;
 
@@ -124,20 +125,20 @@ void Menu::randBackground()
 }
 
 
-void Menu::enterMapAt( Vec3D pos, bool autoHeight, float av, float ah )
+void Menu::enterMapAt( Vec3D pos, bool pAutoHeight, float av, float ah )
 {
   video.farclip( Settings::getInstance()->FarZ );
   Vec2D tile( pos.x / TILESIZE, pos.y / TILESIZE );
 
-  gWorld->autoheight = autoHeight;
+  gWorld->autoheight = pAutoHeight;
 
   gWorld->camera = Vec3D( pos.x, pos.y, pos.z );
   gWorld->lookat = Vec3D( pos.x, pos.y, pos.z - 1.0f );
 
   gWorld->initDisplay();
-  gWorld->enterTile( tile.x, tile.y );
+  gWorld->mapIndex->enterTile( tile.x, tile.y );
 
-  gStates.push_back( new MapView( ah, av ) ); // on gPop, MapView is deleted.
+  app.getStates().push_back( new MapView( ah, av ) ); // on gPop, MapView is deleted.
 
   mGUIMinimapWindow->hide();
 
@@ -222,7 +223,7 @@ void Menu::keypressed( SDL_KeyboardEvent* e )
     }
     else
     {
-      gPop = true;
+      app.pop = true;
     }
   }
 }
@@ -303,7 +304,7 @@ void Menu::buildMenuBar()
 
   mGUImenuBar = new UIMenuBar();
   mGUImenuBar->AddMenu( "File" );
-  mGUImenuBar->GetMenu( "File" )->AddMenuItemSwitch( "exit ESC", &gPop, true );
+  mGUImenuBar->GetMenu( "File" )->AddMenuItemSwitch( "exit ESC", &app.pop, true );
   mGUIFrame->addChild( mGUImenuBar );
 
   static const char* typeToName[4] = { "Continent", "Dungeons", "Raid", "Battleground" };

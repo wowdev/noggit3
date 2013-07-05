@@ -6,17 +6,17 @@
 #include "FreeType.h" // fonts.
 #include "UIFrame.h"
 
-namespace OpenGL { class Texture; };
+namespace OpenGL { class Texture; }
 
 class UIWindow : public UIFrame
 {
 public:
   typedef UIWindow* Ptr;
 
-  float getX(){return this->_x;};
-  float getY(){return this->_y;};
-  float getW(){return this->_width;};
-  float getH(){return this->_height;};
+  float getX(){return this->_x;}
+  float getY(){return this->_y;}
+  float getW(){return this->_width;}
+  float getH(){return this->_height;}
 
 protected:
   OpenGL::Texture* texture;

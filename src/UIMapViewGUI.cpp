@@ -8,7 +8,7 @@
 #include "Environment.h"
 #include "MapChunk.h"
 #include "MapView.h"
-#include "Noggit.h" // gStates, gPop, arial14, morpheus40, arial...
+#include "Noggit.h" // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
 #include "Project.h"
 #include "UIAppInfo.h" // UIAppInfo
 #include "UICursorSwitcher.h" // UICursorSwitcher
@@ -25,6 +25,13 @@
 #include "Video.h" // video
 #include "WMOInstance.h"
 #include "World.h"
+#include "TextureSet.h"
+#include "MapIndex.h"
+
+#include "UIModel.h"
+#include "ModelManager.h"
+
+#include "UIAlphamap.h"
 
 UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 : UIFrame( 0.0f, 0.0f, video.xres(), video.yres() )
@@ -85,9 +92,10 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   _help->hide();
   addChild( _help );
 
-  //_test = new UIDoodadSpawner();
- // _test->hide();
- // addChild( _test );
+  //_test = new UIAlphamap(100.0f, 100.0f);
+  //_test->setModel(ModelManager::add("world\\azeroth\\elwynn\\passivedoodads\\tree\\elwynnlog02.m2"));
+  //_test->show();
+  //addChild( _test );
 }
 
 void UIMapViewGUI::showCursorSwitcher()
@@ -141,16 +149,16 @@ void UIMapViewGUI::render( ) const
   UIFrame::render();
 
   //! \todo Make these some textUIs.
-  arial16.shprint( 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
+  app.getArial16().shprint( 510, 4, gAreaDB.getAreaName( gWorld->getAreaID() ) );
 
   int time = static_cast<int>( gWorld->time ) % 2880;
   std::stringstream timestrs; timestrs << "Time: " << ( time / 120 ) << ":" << ( time % 120 );
-  arial16.shprint( video.xres() - 100.0f, 5.0f, timestrs.str() );
+  app.getArial16().shprint( video.xres() - 100.0f, 5.0f, timestrs.str() );
 
   if ( gWorld->loading )
   {
-    std::string toDisplay( gWorld->noadt ? "No ADT at this Point" : "Loading..." );
-    arial16.shprint( video.xres() / 2.0f - arial16.width( toDisplay ) / 2.0f, 30.0f, toDisplay );
+    std::string toDisplay( gWorld->mapIndex->hasAdt() ? "No ADT at this Point" : "Loading..." );
+    app.getArial16().shprint( video.xres() / 2.0f - app.getArial16().width( toDisplay ) / 2.0f, 30.0f, toDisplay );
   }
 
   std::ostringstream statusbarInfo;
@@ -219,14 +227,14 @@ void UIMapViewGUI::render( ) const
 
         detailInfo << "MCNK " << lSelection->data.mapchunk->px << ", " << lSelection->data.mapchunk->py << " (" << lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px
           << ") of tile (" << lSelection->data.mapchunk->mt->mPositionX << " " << lSelection->data.mapchunk->mt->mPositionZ << ")"
-          << "\narea ID: " << lSelection->data.mapchunk->areaID << " (\"" << gAreaDB.getAreaName( lSelection->data.mapchunk->areaID ) << "\")"
+          << "\narea ID: " << lSelection->data.mapchunk->getAreaID() << " (\"" << gAreaDB.getAreaName( lSelection->data.mapchunk->getAreaID() ) << "\")"
           << "\nflags: "
           << ( flags & FLAG_SHADOW ? "shadows " : "" )
           << ( flags & FLAG_IMPASS ? "impassable " : "" )
           << ( flags & FLAG_LQ_RIVER ? "river " : "" )
           << ( flags & FLAG_LQ_OCEAN ? "ocean " : "" )
           << ( flags & FLAG_LQ_MAGMA ? "lava" : "" )
-          << "\ntextures used: " << lSelection->data.mapchunk->nTextures;
+          << "\ntextures used: " << lSelection->data.mapchunk->textureSet->num();
 
         //! \todo get a list of textures and their flags as well as detail doodads.
         /*
@@ -242,7 +250,7 @@ void UIMapViewGUI::render( ) const
               if( EffectModel )
               {
                   s << r << " - World\\NoDXT\\" << EffectModel << endl;
-                  //freetype::shprint( arial16, 30, 103 + TextOffset, "%d - World\\NoDXT\\%s", r, EffectModel );
+                  //freetype::shprint( app.getArial16(), 30, 103 + TextOffset, "%d - World\\NoDXT\\%s", r, EffectModel );
                   TextOffset += 20;
               }
             }

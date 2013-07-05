@@ -54,6 +54,8 @@ public:
   void addChunksLiquid(Liquid *lq);
 
   bool canWaterSave();
+
+  void getAlpha(size_t id, unsigned char *amap);
 private:
   // MFBO:
   GLfloat mMinimumValues[3*3*3];
@@ -75,14 +77,15 @@ private:
   std::vector<Liquid*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
 
   friend class MapChunk;
+  friend class TextureSet;
 };
 
 int indexMapBuf(int x, int y);
 
 //! \todo get stripify related functions somewhere else.
-
+// unused
 // 8x8x2 version with triangle strips, size = 8*18 + 7*2
-const int stripsize = 8*18 + 7*2;
+/*const int stripsize = 8*18 + 7*2;
 template <class V>
 void stripify(V *in, V *out)
 {
@@ -97,7 +100,7 @@ void stripify(V *in, V *out)
     }
     if (row<7) *out++ = nextrow[8];
   }
-}
+}*/
 
 // high res version, size = 16*18 + 7*2 + 8*2
 const int stripsize2 = 16*18 + 7*2 + 8*2;

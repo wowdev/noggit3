@@ -4,7 +4,7 @@
 
 #include "Model.h" // Model
 #include "ModelManager.h" // ModelManager
-#include "Noggit.h" // arial14
+#include "Noggit.h" // app.getArial14()
 #include "UIMapViewGUI.h" // UIMapViewGUI
 #include "UIModel.h" // UIModel
 #include "UIText.h" // UIText
@@ -12,7 +12,7 @@
 UIAppInfo::UIAppInfo( float xPos, float yPos, float w, float h, UIMapViewGUI* setGui )
 : UICloseWindow( xPos, yPos, w, h, "Application Info", true )
 , mainGui( setGui )
-, theInfos( new UIText( 8.0f, 20.0f, arial14, eJustifyLeft ) )
+, theInfos( new UIText( 8.0f, 20.0f, app.getArial14(), eJustifyLeft ) )
 , mModelToLoad( "World\\AZEROTH\\ELWYNN\\PASSIVEDOODADS\\Trees\\CanopylessTree01.m2" )
 {
   this->addChild( this->theInfos );

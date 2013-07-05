@@ -7,7 +7,7 @@
 #include "DBC.h"
 #include "Log.h"
 #include "Misc.h"
-#include "Noggit.h" // arial14, arialn13
+#include "Noggit.h" // app.getArial14(), arialn13
 #include "UIButton.h"
 #include "UIListView.h"
 #include "UIMapViewGUI.h"

@@ -4,7 +4,7 @@
 
 #include "MapChunk.h"
 #include "ModelManager.h" // ModelManager
-#include "Noggit.h" // arial14
+#include "Noggit.h" // app.getArial14()
 #include "UIButton.h"
 #include "UITextBox.h"
 #include "Video.h" // video
@@ -13,7 +13,7 @@
 
 #include "Log.h"
 
-// TODO : Add TreeView. Add ScrollBar. Add ModelPreview
+//! \todo Add TreeView. Add ScrollBar. Add ModelPreview
 
 static const float winWidth( 500.0f );
 static const float winHeight( 100.0f );

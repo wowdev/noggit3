@@ -11,7 +11,7 @@
 #include "UITexture.h"
 #include "Video.h"
 
-// TODO : Handle Selection, Handle Clipboard ( CTRL + C / CTRL + V / CTRL + X ), Handle the Backspace staying down. Details, but better like that.
+//! \todo Handle Selection, Handle Clipboard ( CTRL + C / CTRL + V / CTRL + X ), Handle the Backspace staying down. Details, but better like that.
 
 static const std::string texture( "Interface\\Common\\Common-Input-Border.blp" );
 static const std::string textureFocused( "Interface\\Common\\Common-Input-Border.blp" );
@@ -21,7 +21,7 @@ UITextBox::UITextBox( float xPos, float yPos, float w, float h )
 , _texture( TextureManager::newTexture( texture ) )
 , _textureFocused( TextureManager::newTexture( textureFocused ) )
 , _focus( false )
-, _uiText( new UIText( 8.0f, 2.5f, arial16, eJustifyLeft ) )
+, _uiText( new UIText( 8.0f, 2.5f, app.getArial16(), eJustifyLeft ) )
 , _value( "" )
 , _enterFunction( NULL )
 , _updateFunction( NULL )
@@ -33,7 +33,7 @@ UITextBox::UITextBox( float xPos, float yPos, float w, float h, TriggerFunction 
 , _texture( TextureManager::newTexture( texture ) )
 , _textureFocused( TextureManager::newTexture( textureFocused ) )
 , _focus( false )
-, _uiText( new UIText( 8.0f, 2.5f, arial16, eJustifyLeft ) )
+, _uiText( new UIText( 8.0f, 2.5f, app.getArial16(), eJustifyLeft ) )
 , _value( "" )
 , _enterFunction( enterFunction )
 , _updateFunction( NULL )

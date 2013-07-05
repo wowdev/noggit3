@@ -25,7 +25,7 @@
 #include "MapView.h"
 #include "Misc.h"
 #include "ModelManager.h" // ModelManager
-#include "Noggit.h" // gStates, gPop, gFPS, arial14, morpheus40, arial...
+#include "Noggit.h" // app.getStates(), gPop, gFPS, app.getArial14(), morpheus40, arial...
 #include "Project.h"
 #include "Settings.h"
 #include "Environment.h"
@@ -56,6 +56,7 @@
 #include "UIWaterSaveWarning.h"
 #include "UIModelImport.h"
 #include "UIHelperModels.h"
+#include "MapIndex.h"
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -131,7 +132,7 @@ float brushLevel=255.0f;
 int terrainMode=0;
 int saveterrainMode = 0;
 
-brush textureBrush;
+Brush textureBrush;
 
 
 UICursorSwitcher* CursorSwitcher;
@@ -202,13 +203,13 @@ void setTextureBrushLevel(float f)
 void SaveOrReload( UIFrame*, int pMode )
 {
   if( pMode == 1 )
-    gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
+    gWorld->mapIndex->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
   else if( pMode == 0 )
-    gWorld->saveTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
+    gWorld->mapIndex->saveTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
   else if( pMode == 2 )
-    gWorld->saveChanged();
+    gWorld->mapIndex->saveChanged();
   else if( pMode == 3 )
-      static_cast<MapView*>( gStates.back() )->quit();
+      static_cast<MapView*>( app.getStates().back() )->quit();
 
 }
 
@@ -283,12 +284,12 @@ void ResetSelectedObjectRotation( UIFrame* /*button*/, int /*id*/ )
   if( gWorld->IsSelection( eEntry_WMO ) )
   {
     gWorld->GetCurrentSelection()->data.wmo->resetDirection();
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
+    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
   }
   else if( gWorld->IsSelection( eEntry_Model ) )
   {
     gWorld->GetCurrentSelection()->data.model->resetDirection();
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
+    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
   }
 }
 
@@ -299,7 +300,7 @@ void SnapSelectedObjectToGround( UIFrame* /*button*/, int /*id*/ )
     Vec3D t = Vec3D( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, 0 );
     gWorld->GetVertex( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, &t );
     gWorld->GetCurrentSelection()->data.wmo->pos = t;
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
+    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
 
   }
   else if( gWorld->IsSelection( eEntry_Model ) )
@@ -307,7 +308,7 @@ void SnapSelectedObjectToGround( UIFrame* /*button*/, int /*id*/ )
     Vec3D t = Vec3D( gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, 0 );
     gWorld->GetVertex( gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, &t );
     gWorld->GetCurrentSelection()->data.model->pos = t;
-    gWorld->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
+    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
   }
 }
 
@@ -573,7 +574,7 @@ void view_texture_palette( UIFrame* /*button*/, int /*id*/ )
 
 void exit_tilemode(  UIFrame* /*button*/, int /*id*/ )
 {
-  gPop = true;
+  app.pop = true;
 }
 
 void test_menu_action(  UIFrame* /*button*/, int /*id*/ )
@@ -738,7 +739,7 @@ void MapView::createGUI()
   setting_ground->movable( true );
   mainGui->addChild( setting_ground );
 
-  setting_ground->addChild( new UIText( 78.5f, 2.0f, "Raise / Lower", arial14, eJustifyCenter ) );
+  setting_ground->addChild( new UIText( 78.5f, 2.0f, "Raise / Lower", app.getArial14(), eJustifyCenter ) );
 
   gGroundToggleGroup = new UIToggleGroup( &groundBrushType );
   setting_ground->addChild( new UICheckBox( 6.0f, 15.0f, "Flat", gGroundToggleGroup, 0 ) );
@@ -767,7 +768,7 @@ void MapView::createGUI()
   setting_blur->hide();
   mainGui->addChild(setting_blur);
 
-  setting_blur->addChild( new UIText( 78.5f, 2.0f, "Flatten / Blur", arial14, eJustifyCenter ) );
+  setting_blur->addChild( new UIText( 78.5f, 2.0f, "Flatten / Blur", app.getArial14(), eJustifyCenter ) );
 
   gBlurToggleGroup = new UIToggleGroup( &blurBrushType );
   setting_blur->addChild( new UICheckBox( 6.0f, 15.0f, "Flat", gBlurToggleGroup, 0 ) );
@@ -794,7 +795,7 @@ void MapView::createGUI()
 
   mainGui->addChild(settings_paint);
 
-  settings_paint->addChild( new UIText( 78.5f, 2.0f, "3D Paint", arial14, eJustifyCenter ) );
+  settings_paint->addChild( new UIText( 78.5f, 2.0f, "3D Paint", app.getArial14(), eJustifyCenter ) );
 
 
   mainGui->G1=new UIGradient;
@@ -957,7 +958,7 @@ MapView::MapView( float ah0, float av0 )
 , _GUIDisplayingEnabled( true )
 , mTimespeed( 0.0f )
 {
-  LastClicked=0;
+  LastClicked = NULL;
 
   moving = strafing = updown = lookat = turn = 0.0f;
 
@@ -1039,23 +1040,23 @@ void MapView::tick( float t, float dt )
         // Move scale and rotate with numpad keys
         if( Selection->type == eEntry_WMO )
         {
-          gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
           Selection->data.wmo->pos.x += keyx * moveratio;
           Selection->data.wmo->pos.y += keyy * moveratio;
           Selection->data.wmo->pos.z += keyz * moveratio;
           Selection->data.wmo->dir.y += keyr * moveratio * 5;
-          gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
         }
 
         if( Selection->type == eEntry_Model )
         {
-          gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
           Selection->data.model->pos.x += keyx * moveratio;
           Selection->data.model->pos.y += keyy * moveratio;
           Selection->data.model->pos.z += keyz * moveratio;
           Selection->data.model->dir.y += keyr * moveratio * 5;
           Selection->data.model->sc += keys * moveratio / 50;
-          gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
         }
       }
 
@@ -1072,23 +1073,25 @@ void MapView::tick( float t, float dt )
       // moving and scaling objects
       //! \todo  Alternatively automatically align it to the terrain. Also try to move it where the mouse points.
       if( MoveObj )
+      {
         if( Selection->type == eEntry_WMO )
         {
-           gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // before move
+           gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // before move
            ObjPos.x = 80.0f;
            Selection->data.wmo->pos+=mv * dirUp * ObjPos.x;
            Selection->data.wmo->pos-=mh * dirRight * ObjPos.x;
            Selection->data.wmo->extents[0] = Selection->data.wmo->pos - Vec3D(1,1,1);
            Selection->data.wmo->extents[1] = Selection->data.wmo->pos + Vec3D(1,1,1);
-           gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // after move. If moved to another ADT
+           gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // after move. If moved to another ADT
         }
         else if( Selection->type == eEntry_Model )
+        {
           if( Environment::getInstance()->AltDown )
           {
-            gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+            gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
             float ScaleAmount;
   
-          ScaleAmount = pow( 2.0f, mv * 4.0f );
+            ScaleAmount = pow( 2.0f, mv * 4.0f );
             Selection->data.model->sc *= ScaleAmount;
             if(Selection->data.model->sc > 63.9f )
               Selection->data.model->sc = 63.9f;
@@ -1097,12 +1100,14 @@ void MapView::tick( float t, float dt )
           }
           else
           {
-            gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // before move
+            gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // before move
             ObjPos.x = 80.0f;
             Selection->data.model->pos += mv * dirUp * ObjPos.x;
             Selection->data.model->pos -= mh * dirRight * ObjPos.x;
-            gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // after move. If moved to another ADT
+            gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z); // after move. If moved to another ADT
           }
+        }
+      }
 
 
       // rotating objects
@@ -1113,7 +1118,7 @@ void MapView::tick( float t, float dt )
 
         if( Selection->type == eEntry_Model )
         {
-          gWorld->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
           lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
           if( Environment::getInstance()->ShiftDown )
             lTarget = &Selection->data.model->dir.y;
@@ -1124,7 +1129,7 @@ void MapView::tick( float t, float dt )
         }
         else if( Selection->type == eEntry_WMO )
         {
-          gWorld->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
+          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
           lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
           if( Environment::getInstance()->ShiftDown )
             lTarget = &Selection->data.wmo->dir.y;
@@ -1277,7 +1282,7 @@ void MapView::tick( float t, float dt )
             if( mViewMode == eViewMode_3D )
             {
             // pick areaID from chunk
-            int newID = gWorld->GetCurrentSelection()->data.mapchunk->areaID;
+            int newID = gWorld->GetCurrentSelection()->data.mapchunk->getAreaID();
             Environment::getInstance()->selectedAreaID = newID;
             mainGui->ZoneIDBrowser->setZoneID(newID);
             }
@@ -1288,11 +1293,11 @@ void MapView::tick( float t, float dt )
         case 5:
           if( Environment::getInstance()->ShiftDown  )
           {
-            if( mViewMode == eViewMode_3D ) gWorld->setFlag( true, xPos, zPos );
+            if( mViewMode == eViewMode_3D ) gWorld->mapIndex->setFlag( true, xPos, zPos );
           }
           else if( Environment::getInstance()->CtrlDown )
           {
-            if( mViewMode == eViewMode_3D ) gWorld->setFlag( false, xPos, zPos );
+            if( mViewMode == eViewMode_3D ) gWorld->mapIndex->setFlag( false, xPos, zPos );
           }
         break;
         }
@@ -1485,7 +1490,7 @@ void MapView::display( float t, float dt )
 
 void MapView::save()
 {
-  gWorld->saveChanged();
+  gWorld->mapIndex->saveChanged();
   //ConfigFile::add("RedColor", RedColor);
   //ConfigFile::add("GreenColor", GreenColor);
   //ConfigFile::add("BlueColor", BlueColor);
@@ -1494,7 +1499,7 @@ void MapView::save()
 
 void MapView::quit()
 {
-  gPop = true;
+  app.pop = true;
 }
 
 void MapView::quitask()
@@ -1540,36 +1545,36 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     // movement
     if( e->keysym.sym == SDLK_w )
     {
-        key_w = true;
-        moving = 1.0f;
+      key_w = true;
+      moving = 1.0f;
     }
 
     if ( e->keysym.sym == SDLK_UP )
     {
-        lookat = 0.75f;
+      lookat = 0.75f;
     }
 
     if ( e->keysym.sym ==SDLK_DOWN )
     {
-        lookat = -0.75f;
+      lookat = -0.75f;
     }
 
     if ( e->keysym.sym == SDLK_LEFT )
     {
-        turn =- 0.75f;
+      turn =- 0.75f;
     }
 
     if ( e->keysym.sym == SDLK_RIGHT )
     {
-        turn = 0.75f;
+      turn = 0.75f;
     }
 
     // save
     if( e->keysym.sym == SDLK_s )
-        moving = -1.0f;
+      moving = -1.0f;
 
     if( e->keysym.sym == SDLK_a )
-		strafing = -1.0f;      
+      strafing = -1.0f;
 
     if( e->keysym.sym == SDLK_d )
       strafing = 1.0f;
@@ -1611,21 +1616,21 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
     // copy model to clipboard
     if( e->keysym.sym == SDLK_c )
-	{
-	  if(Environment::getInstance()->CtrlDown )
+    {
+      if(Environment::getInstance()->CtrlDown )
         CopySelectedObject( 0, 0 );
-	  else if(Environment::getInstance()->AltDown && Environment::getInstance()->CtrlDown)
-		  mainGui->toggleCursorSwitcher();
-	  else if(Environment::getInstance()->ShiftDown)
-		  InsertObject(0, 14);
-	  else if(Environment::getInstance()->AltDown)
-		  InsertObject(0, 15);
-	  else
-	  {
-		  Environment::getInstance()->cursorType++;
-			  if (Environment::getInstance()->cursorType>3) Environment::getInstance()->cursorType = 0;
-	  }
-	}
+      else if(Environment::getInstance()->AltDown && Environment::getInstance()->CtrlDown)
+        mainGui->toggleCursorSwitcher();
+      else if(Environment::getInstance()->ShiftDown)
+        InsertObject(0, 14);
+      else if(Environment::getInstance()->AltDown)
+        InsertObject(0, 15);
+      else
+      {
+        Environment::getInstance()->cursorType++;
+        if (Environment::getInstance()->cursorType>3) Environment::getInstance()->cursorType = 0;
+      }
+    }
 
 
     // paste model
@@ -1672,7 +1677,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
       {
         // temp till fixe draw texture.
         if(Environment::getInstance()->paintMode) Environment::getInstance()->paintMode = false;
-          else Environment::getInstance()->paintMode = true;
+        else Environment::getInstance()->paintMode = true;
       }
       else
       {
@@ -1711,14 +1716,14 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     // speed of daytime.
     if( e->keysym.sym == SDLK_n )
       this->mTimespeed += 90.0f;
-	
-	if( e->keysym.sym == SDLK_b )
+
+    if( e->keysym.sym == SDLK_b )
       this->mTimespeed -= 90.0f;
 
-	// no negativ time speed!
-	if(this->mTimespeed < 0.0f )  this->mTimespeed = 0.0f;
+    // no negativ time speed!
+    if(this->mTimespeed < 0.0f )  this->mTimespeed = 0.0f;
 
-	if( e->keysym.sym == SDLK_j )
+    if( e->keysym.sym == SDLK_j )
       this->mTimespeed = 0.0f;
 
 
@@ -1782,7 +1787,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
 
     // toggle draw water
     if( e->keysym.sym == SDLK_F4 && !Environment::getInstance()->ShiftDown )
-        gWorld->drawwater = !gWorld->drawwater;
+      gWorld->drawwater = !gWorld->drawwater;
 
     // toggle chunk limitation lines
     if( e->keysym.sym == SDLK_F7 )
@@ -1791,7 +1796,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
         Environment::getInstance()->view_holelines = !Environment::getInstance()->view_holelines;
       }
       else
-      gWorld->drawlines = !gWorld->drawlines;
+        gWorld->drawlines = !gWorld->drawlines;
 
     // toggle drawing of WMOs
     if( e->keysym.sym == SDLK_F6 )
@@ -1827,30 +1832,30 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
       {
         switch( terrainMode )
         {
-        case 0:
-          groundBrushRadius += 0.01f;
-          if( groundBrushRadius > 1000.0f )
-            groundBrushRadius = 1000.0f;
-          else if( groundBrushRadius < 0.0005f )
-            groundBrushRadius = 0.0005f;
-          ground_brush_radius->setValue( groundBrushRadius / 1000 );
-          break;
-        case 1:
-          blurBrushRadius += 0.01f;
-          if( blurBrushRadius > 1000.0f )
-            blurBrushRadius = 1000.0f;
-          else if( blurBrushRadius < 0.01f )
-            blurBrushRadius = 0.01f;
-          blur_brush->setValue( blurBrushRadius / 1000 );
-          break;
-        case 2:
-          textureBrush.setRadius( textureBrush.getRadius() + 0.1f );
-          if( textureBrush.getRadius() > 100.0f )
-            textureBrush.setRadius(100.0f);
-          else if( textureBrush.getRadius() < 0.1f )
-            textureBrush.setRadius(0.1f);
-          paint_brush->setValue( textureBrush.getRadius() / 100 );
-          break;
+          case 0:
+            groundBrushRadius += 0.01f;
+            if( groundBrushRadius > 1000.0f )
+              groundBrushRadius = 1000.0f;
+            else if( groundBrushRadius < 0.0005f )
+              groundBrushRadius = 0.0005f;
+            ground_brush_radius->setValue( groundBrushRadius / 1000 );
+            break;
+          case 1:
+            blurBrushRadius += 0.01f;
+            if( blurBrushRadius > 1000.0f )
+              blurBrushRadius = 1000.0f;
+            else if( blurBrushRadius < 0.01f )
+              blurBrushRadius = 0.01f;
+            blur_brush->setValue( blurBrushRadius / 1000 );
+            break;
+          case 2:
+            textureBrush.setRadius( textureBrush.getRadius() + 0.1f );
+            if( textureBrush.getRadius() > 100.0f )
+              textureBrush.setRadius(100.0f);
+            else if( textureBrush.getRadius() < 0.1f )
+              textureBrush.setRadius(0.1f);
+            paint_brush->setValue( textureBrush.getRadius() / 100 );
+            break;
         }
       }
       else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
@@ -1866,30 +1871,30 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
       {
         switch( terrainMode )
         {
-        case 0:
-          groundBrushRadius -= 0.01f;
-          if( groundBrushRadius > 1000.0f )
-            groundBrushRadius = 1000.0f;
-          else if( groundBrushRadius < 0.0005f )
-            groundBrushRadius = 0.0005f;
-          ground_brush_radius->setValue( groundBrushRadius / 1000 );
-          break;
-        case 1:
-          blurBrushRadius -= 0.01f;
-          if( blurBrushRadius > 1000.0f )
-            blurBrushRadius = 1000.0f;
-          else if( blurBrushRadius < 0.01f )
-            blurBrushRadius = 0.01f;
-          blur_brush->setValue( blurBrushRadius / 1000 );
-          break;
-        case 2:
-          textureBrush.setRadius( textureBrush.getRadius() - 0.1f );
-          if( textureBrush.getRadius() > 100.0f )
-            textureBrush.setRadius(100.0f);
-          else if( textureBrush.getRadius() < 0.1f )
-            textureBrush.setRadius(0.1f);
-          paint_brush->setValue( textureBrush.getRadius() / 100 );
-          break;
+          case 0:
+            groundBrushRadius -= 0.01f;
+            if( groundBrushRadius > 1000.0f )
+              groundBrushRadius = 1000.0f;
+            else if( groundBrushRadius < 0.0005f )
+              groundBrushRadius = 0.0005f;
+            ground_brush_radius->setValue( groundBrushRadius / 1000 );
+            break;
+          case 1:
+            blurBrushRadius -= 0.01f;
+            if( blurBrushRadius > 1000.0f )
+              blurBrushRadius = 1000.0f;
+            else if( blurBrushRadius < 0.01f )
+              blurBrushRadius = 0.01f;
+            blur_brush->setValue( blurBrushRadius / 1000 );
+            break;
+          case 2:
+            textureBrush.setRadius( textureBrush.getRadius() - 0.1f );
+            if( textureBrush.getRadius() > 100.0f )
+              textureBrush.setRadius(100.0f);
+            else if( textureBrush.getRadius() < 0.1f )
+              textureBrush.setRadius(0.1f);
+            paint_brush->setValue( textureBrush.getRadius() / 100 );
+            break;
         }
       }
       else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
@@ -1903,7 +1908,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     // minimap
     if( e->keysym.sym == SDLK_m )
       mainGui->minimapWindow->toggleVisibility();
-   
+
     if( e->keysym.sym == SDLK_g )
     {
       // write teleport cords to txt file
@@ -1919,17 +1924,17 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_y )
       switch( terrainMode )
       {
-      case 0:
-        groundBrushType++;
-        groundBrushType = groundBrushType % 6;
-        gGroundToggleGroup->Activate( groundBrushType );
-        break;
+        case 0:
+          groundBrushType++;
+          groundBrushType = groundBrushType % 6;
+          gGroundToggleGroup->Activate( groundBrushType );
+          break;
 
-      case 1:
-        blurBrushType++;
-        blurBrushType = blurBrushType % 3;
-        gBlurToggleGroup->Activate( blurBrushType );
-        break;
+        case 1:
+          blurBrushType++;
+          blurBrushType = blurBrushType % 3;
+          gBlurToggleGroup->Activate( blurBrushType );
+          break;
       }
 
     // is not used somewere else!!
@@ -1958,8 +1963,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     }
 
     // doodads set
-    //! \todo  Does anyone use these?
-    //! Yes to change the doodadset of houses i use it . Steff :)
     if( e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9 )
     {
       if( gWorld->IsSelection( eEntry_WMO ) )
@@ -1986,30 +1989,30 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
             movespd = 800.0f;
             break;
         }
-      }      
+      }
       else if( Environment::getInstance()->AltDown )
       {
         switch( e->keysym.sym )
         {
-        case SDLK_1:
-          mainGui->G1->setValue(0.01f);
-          break;
+          case SDLK_1:
+            mainGui->G1->setValue(0.01f);
+            break;
 
-        case SDLK_2:
-          mainGui->G1->setValue(0.25f);
-          break;
+          case SDLK_2:
+            mainGui->G1->setValue(0.25f);
+            break;
 
-        case SDLK_3:
-          mainGui->G1->setValue(0.50f);
-          break;
+          case SDLK_3:
+            mainGui->G1->setValue(0.50f);
+            break;
 
-        case SDLK_4:
-          mainGui->G1->setValue(0.75f);
-          break;
+          case SDLK_4:
+            mainGui->G1->setValue(0.75f);
+            break;
 
-        case SDLK_5:
-          mainGui->G1->setValue(0.99f);
-          break;
+          case SDLK_5:
+            mainGui->G1->setValue(0.99f);
+            break;
         }
       }
       else if( e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_8 )
@@ -2023,7 +2026,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_F5 )
     {
       std::ofstream f( "bookmarks.txt", std::ios_base::app );
-    f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << ah << " " << av << " " << gWorld->getAreaID() << std::endl;
+      f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << ah << " " << av << " " << gWorld->getAreaID() << std::endl;
       f.close();
     }
   }
@@ -2047,15 +2050,15 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     {
       key_w = false;
       if( !(leftMouse && rightMouse) && moving > 0.0f) {
-		  
-		  moving = 0.0f;
-	  }
+
+        moving = 0.0f;
+      }
     }
 
     if( e->keysym.sym == SDLK_s && moving < 0.0f ){
-		
-		moving = 0.0f;
-	}
+
+      moving = 0.0f;
+    }
 
     if ( e->keysym.sym == SDLK_UP || e->keysym.sym == SDLK_DOWN)
       lookat=0.0f;
@@ -2064,14 +2067,14 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
       turn = 0.0f;
 
     if( e->keysym.sym == SDLK_d && strafing > 0.0f ){
-		
-		strafing = 0.0f;
-	}
+
+      strafing = 0.0f;
+    }
 
     if( e->keysym.sym == SDLK_a && strafing < 0.0f ){
-		
-		strafing = 0.0f;
-	}
+
+      strafing = 0.0f;
+    }
 
     if( e->keysym.sym == SDLK_q && updown > 0.0f )
       updown = 0.0f;
@@ -2244,25 +2247,25 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
     {
       case SDL_BUTTON_LEFT:
         leftMouse = true;
-      break;
+        break;
 
       case SDL_BUTTON_RIGHT:
         rightMouse = true;
-      break;
+        break;
 
       case SDL_BUTTON_MIDDLE:
         if( gWorld->HasSelection() )
           MoveObj = true;
-      break;
+        break;
     }
 
-     if (leftMouse && rightMouse)
-     {
-       // Both buttons
-       moving = 1.0f;
-     }
-     else if (leftMouse)
-     {
+    if (leftMouse && rightMouse)
+    {
+      // Both buttons
+      moving = 1.0f;
+    }
+    else if (leftMouse)
+    {
       LastClicked = mainGui->processLeftClick( static_cast<float>( MouseX ), static_cast<float>( MouseY ) );
       if( mViewMode == eViewMode_3D && !LastClicked )
       {
@@ -2284,38 +2287,32 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
         if( LastClicked )
           LastClicked->processUnclick();
 
-        if(!key_w && moving > 0.0f ){
-			
-			moving = 0.0f;
-		}
+        if(!key_w && moving > 0.0f )
+          moving = 0.0f;
 
         if( mViewMode == eViewMode_2D )
         {
-			
-			strafing = 0;
-			moving = 0;
+          strafing = 0;
+          moving = 0;
         }
-      break;
+        break;
 
       case SDL_BUTTON_RIGHT:
         rightMouse = false;
 
         look = false;
 
-        if(!key_w && moving > 0.0f ){
-			
-			moving = 0.0f;
-		}
+        if(!key_w && moving > 0.0f )
+          moving = 0.0f;
 
         if( mViewMode == eViewMode_2D )
-        {
           updown = 0;
-        }
-      break;
+
+        break;
 
       case SDL_BUTTON_MIDDLE:
         MoveObj = false;
-      break;
+        break;
     }
   }
 

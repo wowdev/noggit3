@@ -6,7 +6,7 @@ namespace OpenGL
   class Texture;
 }
 
-class brush
+class Brush
 {
 private:
   float hardness;
