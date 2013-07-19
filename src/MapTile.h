@@ -9,7 +9,7 @@
 #include "Video.h" // GLfloat, GLshort, ...
 
 class Vec3D;
-class Liquid;
+class TileWater;
 class MapChunk;
 
 class MapTile
@@ -20,10 +20,10 @@ private:
   MH2O_Information mWaterInfos[256];
   char* MH2O_Buffer; // Water info storage...
   std::map<int, std::vector<unsigned char> > mWaterMasks;
+  bool hasWater;
 public:
   MapTile( int x0, int z0, const std::string& pFilename, bool pBigAlpha );
   ~MapTile();
-
   //! \brief Get the maximum height of terrain on this map tile.
   float getMaxHeight();
 
@@ -51,12 +51,14 @@ public:
   bool isTile( int pX, int pZ );
   void clearAllModels();
   void uidTile();
-  void addChunksLiquid(Liquid *lq);
+  void addChunksLiquid(TileWater *lq);
 
   bool canWaterSave();
 
   void getAlpha(size_t id, unsigned char *amap);
 private:
+  TileWater * Water;
+
   // MFBO:
   GLfloat mMinimumValues[3*3*3];
   GLfloat mMaximumValues[3*3*3];
@@ -73,8 +75,8 @@ private:
   std::string mFilename;
 
   MapChunk * mChunks[16][16];
-  std::vector<Liquid*> mLiquids;
-  std::vector<Liquid*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
+  std::vector<TileWater*> mLiquids;
+  std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
 
   friend class MapChunk;
   friend class TextureSet;

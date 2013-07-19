@@ -1156,7 +1156,7 @@ void World::draw()
   */
 
   //glColor4f(1,1,1,1);
-  glDisable(GL_COLOR_MATERIAL);
+  //glDisable(GL_COLOR_MATERIAL);
 
   if(this->drawwater)
   {

@@ -160,11 +160,24 @@ struct MH2O_Information{
   uint8_t height;
   uint32_t ofsInfoMask;
   uint32_t ofsHeightMap;
+
+  MH2O_Information(){
+	LiquidType = 2;
+	Flags = 0;
+	maxHeight = 0;
+	minHeight = 0;
+	xOffset = 0;
+	yOffset = 0;
+	width = 8;
+	height = 8;
+	ofsInfoMask = 0;
+	ofsHeightMap = 0;
+  }
 };
 
 struct MH2O_HeightMask{
   float **mHeightValues;
-  uint8_t **mTransparency;
+  unsigned char **mTransparency;
   int mWidth;
   int mHeight;
   MH2O_HeightMask(int Width,int Height,char*file,int Position){
@@ -173,9 +186,9 @@ struct MH2O_HeightMask{
     mHeightValues=new float*[mHeight];
     for(int i=0; i < mHeight; ++i)
       mHeightValues[i]=new float[mWidth];
-    mTransparency=new uint8_t*[mHeight];
+    mTransparency=new unsigned char*[mHeight];
     for(int i=0; i < mHeight; ++i)
-      mTransparency[i]=new uint8_t[mWidth];
+      mTransparency[i]=new unsigned char[mWidth];
     for(int i=0; i < mHeight; ++i)
       memcpy(mHeightValues[i], file + Position + i*mWidth*sizeof(float), mWidth*sizeof(float));
     for(int i=0; i < mHeight; ++i)
@@ -187,9 +200,9 @@ struct MH2O_HeightMask{
     mHeightValues=new float*[mHeight];
     for(int i=0; i < mHeight; ++i)
       mHeightValues[i] = new float[mWidth];
-    mTransparency=new uint8_t*[mHeight];
+    mTransparency=new unsigned char*[mHeight];
     for(int i=0; i < mHeight; ++i)
-      mTransparency[i]=new uint8_t[mWidth];
+      mTransparency[i]=new unsigned char[mWidth];
     for(int i=0; i < mHeight; ++i)
       memcpy(mHeightValues[i],HeightValues+i*mWidth*sizeof(float),mWidth*sizeof(float));
     for(int i=0; i < mHeight; ++i)
@@ -199,25 +212,52 @@ struct MH2O_HeightMask{
     mWidth=Width;
     mHeight=Height;
     mHeightValues=new float*[mHeight];
-    for(int i=0; i < mHeight; ++i)
+    for(int i=0; i < mHeight; ++i){
       mHeightValues[i]=new float[mWidth];
-    mTransparency=new uint8_t*[mHeight];
-    for(int i=0; i < mHeight; ++i)
-      mTransparency[i]=new uint8_t[mWidth];
+	  for(int j=0; j<mWidth;++j)
+		mHeightValues[i][j]=0.0f;
+	}
+    mTransparency=new unsigned char*[mHeight];
+    for(int i=0; i < mHeight; ++i){
+      mTransparency[i]=new unsigned char[mWidth];
+	  for(int j=0; j<mWidth;++j)
+		mTransparency[i][j]=(unsigned char)0;
+	}
   }
 };
 
 struct MH2O_Render{
-  bool mRender[64];
-  MH2O_Render(){
+  bool mRender[8][8]; //render mask
+  bool fRender[8][8]; //fatigue mask?
+};
 
-  }
-  //! Todo: this most likely is wrong!
-  explicit MH2O_Render(uint64_t Mask){
-    for(int i=0; i < 64; ++i){
-      uint8_t t = Mask << i;
-      mRender[i] = t & 0x1;
-    }
+struct MH2O_HeightmapData
+{
+	// if type & 1 != 1, this chunk is "ocean".  in this case, do not use this structure.
+
+	float **mHeightValues; 	// w*h
+	unsigned char **mTransparency; 	// w*h
+};
+
+struct MH2O_UsedChunks{ //registry of used items. Needed for corrent water saving. 
+  bool Header[16][16]; 
+  bool Info[16][16];
+  bool Mask[16][16];
+  bool HeightData[16][16];
+  bool TransparencyData[16][16];
+  bool Render[16][16];
+
+  MH2O_UsedChunks(){
+	for(int i=0; i < 16; ++i){
+		for(int j=0; j < 16; ++j){
+			Header[i][j] = false; 
+			Info[i][j] = false; 
+			Mask[i][j] = false;
+			HeightData[i][j] = false;
+			TransparencyData[i][j] = false;
+			Render[i][j] = false; 
+		}
+	}  
   }
 };
 
