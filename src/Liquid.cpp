@@ -566,7 +566,7 @@ void Liquid::draw()
   //glDisable(GL_TEXTURE_2D);
   //glBindTexture(GL_TEXTURE_2D, textures[texidx]);
 
-  const float tcol = mTransparency ? 0.75f : 1.0f;
+  const float tcol = mTransparency? 0.85f : 1.0f;
 
   if( mTransparency )
   {
@@ -594,8 +594,8 @@ void Liquid::draw()
     //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); //! \todo  check if ARB_texture_env_add is supported? :(
   }
 #else 
-  col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]*0.3f; //! \todo  add variable water color
-  col2 = gWorld->skies->colorSet[WATER_COLOR_DARK];
+  col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]*0.7; //! \todo  add variable water color
+  col2 = gWorld->skies->colorSet[WATER_COLOR_DARK]*0.2f;
 
   glColor4f(col.x, col.y, col.z, tcol);
   glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB,0,col2.x,col2.y,col2.z,tcol);

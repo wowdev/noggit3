@@ -129,6 +129,8 @@ SET( SourceFiles
   src/TextureManager.h
   src/TextureSet.cpp
   src/TextureSet.h
+  src/TileWater.cpp
+  src/TileWater.h
   src/UIAbout.cpp
   src/UIAbout.h
   src/UIAppInfo.cpp
