@@ -244,7 +244,9 @@ struct MH2O_UsedChunks{ //registry of used items. Needed for corrent water savin
   bool Info[16][16];
   bool Mask[16][16];
   bool HeightData[16][16];
+  bool HeightDataPr[16][16][9][9]; //more precisely
   bool TransparencyData[16][16];
+  bool TransparencyDataPr[16][16][9][9]; //more precisely
   bool Render[16][16];
 
   MH2O_UsedChunks(){
@@ -255,6 +257,12 @@ struct MH2O_UsedChunks{ //registry of used items. Needed for corrent water savin
 			Mask[i][j] = false;
 			HeightData[i][j] = false;
 			TransparencyData[i][j] = false;
+			for(int w=0; w<9;++w){
+				for(int h=0; h<9; ++h){
+					HeightDataPr[i][j][w][h] = false;
+					TransparencyDataPr[i][j][w][h] = false;
+				}
+			}
 			Render[i][j] = false; 
 		}
 	}  

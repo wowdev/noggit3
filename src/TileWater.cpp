@@ -78,20 +78,23 @@ void TileWater::readFromFile(MPQFile &theFile, int &ofsW){
 			if(Info[i][j][k].ofsHeightMap != 0){// && !(Info[i][j][k].Flags & 2)) {
 			  theFile.seek(ofsW + Info[i][j][k].ofsHeightMap);
 
-			  if(Info[i][j][k].Flags != 2){ //if Flags == 2 then there are no Heighmap data...
-			  for (int w = Info[i][j][k].yOffset; w < Info[i][j][k].yOffset + Info[i][j][k].height + 1; ++w) {
-				for(int h=Info[i][j][k].xOffset; h < Info[i][j][k].xOffset + Info[i][j][k].width + 1; ++h) {
-				  theFile.read(&HeightData[i][j][k].mHeightValues[w][h], sizeof(float));
-				  used.HeightData[i][j] = true;
+				if(Info[i][j][k].Flags != 2){ //if Flags == 2 then there are no Heighmap data...
+					used.HeightData[i][j] = true;
+					for (int w = Info[i][j][k].yOffset; w < Info[i][j][k].yOffset + Info[i][j][k].height + 1; ++w) {
+						for(int h=Info[i][j][k].xOffset; h < Info[i][j][k].xOffset + Info[i][j][k].width + 1; ++h) {
+							theFile.read(&HeightData[i][j][k].mHeightValues[w][h], sizeof(float));
+							used.HeightDataPr[i][j][w][h] = true;
+						}
+					}		
 				}
-			  }}
 
-			  for (int w = Info[i][j][k].yOffset; w < Info[i][j][k].yOffset + Info[i][j][k].height + 1; ++w) {
-				for(int h=Info[i][j][k].xOffset; h < Info[i][j][k].xOffset + Info[i][j][k].width + 1; ++h) {
-				  theFile.read(&HeightData[i][j][k].mTransparency[w][h], sizeof(unsigned char));
-				  used.TransparencyData[i][j] = true;
+				used.TransparencyData[i][j] = true;
+				for (int w = Info[i][j][k].yOffset; w < Info[i][j][k].yOffset + Info[i][j][k].height + 1; ++w) {
+					for(int h=Info[i][j][k].xOffset; h < Info[i][j][k].xOffset + Info[i][j][k].width + 1; ++h) {
+						theFile.read(&HeightData[i][j][k].mTransparency[w][h], sizeof(unsigned char));
+						used.TransparencyDataPr[i][j][w][h] = true;
+					}
 				}
-			  }
             }
 		  }
 		} else {
@@ -205,32 +208,16 @@ void TileWater::init(float xbase, float zbase){
 		
         for( int x = 0; x < 9; ++x ) {
           for( int y = 0; y < 9; ++y ) {
-			  lTile.mHeightmap[x][y] = used.HeightData[i][j]? (HeightData[i][j][0].mHeightValues[x][y]) : lTile.mMinimum;
-			  lTile.mDepth[x][y] = used.TransparencyData[i][j]? (HeightData[i][j][0].mTransparency[x][y] / 255.0f) : 1.0f;
+			  lTile.mHeightmap[x][y] = (used.HeightDataPr[i][j][x][y]&&HeightData[i][j][0].mHeightValues[x][y]>0)? (HeightData[i][j][0].mHeightValues[x][y]) : lTile.mMinimum;
+			  lTile.mDepth[x][y] = used.TransparencyDataPr[i][j][x][y]? (HeightData[i][j][0].mTransparency[x][y] / 255.0f) : 1.0f;
           }
         }
-		
-		/*for( int x = 0; x < 9; ++x ) {
-          for( int y = 0; y < 9; ++y ) {
-            lTile.mHeightmap[x][y] = lTile.mMinimum;
-            lTile.mDepth[x][y] = 0.0f;
-          }
-        }
-
-        if(Info[i][j][0].ofsHeightMap != 0 && !(lTile.mFlags & 2)) {
-          for (int w = Info[i][j][0].yOffset; w < Info[i][j][0].yOffset + Info[i][j][0].height + 1; ++w) {
-            for(int h=Info[i][j][0].xOffset; h < Info[i][j][0].xOffset + Info[i][j][0].width + 1; ++h) {
-			  lTile.mHeightmap[w][h] = HeightData[i][j][0].mHeightValues[w][h];
-			  lTile.mDepth[w][h] = HeightData[i][j][0].mTransparency[w][h] / 255.0f;
-			}
-		  }
-        }*/
         
-       for(int h=0 ; h < 8; ++h) {
-		for(int w=0; w < 8; ++w) {
-			lTile.mRender[w][h] = Render[i][j][0].mRender[w][h];
-          }
-        }
+		for(int h=0 ; h < 8; ++h) {
+			for(int w=0; w < 8; ++w) {
+				lTile.mRender[w][h] = (used.HeightDataPr[i][j][w][h]&&HeightData[i][j][0].mHeightValues[w][h]>0)?HeightData[i][j][0].mHeightValues[w][h] : Render[i][j][0].mRender[w][h];
+			}
+		}
 		Liquids[i][j][0]->setMH2OData(lTile);
 	  }
   }
