@@ -2097,3 +2097,12 @@ bool World::canWaterSave(int x, int y){
 
   return mapIndex->getTile(y, x)->canWaterSave();
 }
+
+void World::setWaterLevel(int x, int y, int h){ 
+
+  if(mapIndex->tileLoaded(y, x)){
+	  mapIndex->getTile(y,x)->setWaterLevel(h);
+	  mapIndex->setChanged(y,x);
+  }
+	
+}

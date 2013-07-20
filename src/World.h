@@ -197,6 +197,7 @@ public:
   void swapTexture( int x, int z, OpenGL::Texture *tex );
 
   bool canWaterSave(int x, int y);
+  void setWaterLevel(int x, int y, int h);
 };
 
 extern World *gWorld;

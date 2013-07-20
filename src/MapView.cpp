@@ -1812,6 +1812,13 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_F9 )
       DrawMapContour = !DrawMapContour;
 
+	if( e->keysym.sym == SDLK_F11 )
+		if( Environment::getInstance()->ShiftDown ){
+			gWorld->setWaterLevel(static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE,1);
+		}else{
+			gWorld->setWaterLevel(static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE,-1);
+		}
+
     // toggle help window
     if( e->keysym.sym == SDLK_h )
     {
