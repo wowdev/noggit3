@@ -29,6 +29,7 @@ public:
 	void saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
 	void init(float xbase, float zbase);
 	void draw();
+	void setWaterLevel(int waterLevel);
 	
 	virtual ~TileWater(void);
 };

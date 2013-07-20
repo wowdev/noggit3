@@ -471,6 +471,11 @@ void MapTile::getAlpha(size_t id, unsigned char *amap)
   }
 }
 
+void MapTile::setWaterLevel(int h){
+	if(!hasWater)return;
+	Water->setWaterLevel(h);
+}
+
 // This is for the 2D mode only.
 void MapTile::drawTextures()
 {

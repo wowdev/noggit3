@@ -56,9 +56,10 @@ public:
   bool canWaterSave();
 
   void getAlpha(size_t id, unsigned char *amap);
+
+  void setWaterLevel(int h);
 private:
   TileWater * Water;
-
   // MFBO:
   GLfloat mMinimumValues[3*3*3];
   GLfloat mMaximumValues[3*3*3];

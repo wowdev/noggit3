@@ -221,7 +221,7 @@ struct MH2O_HeightMask{
     for(int i=0; i < mHeight; ++i){
       mTransparency[i]=new unsigned char[mWidth];
 	  for(int j=0; j<mWidth;++j)
-		mTransparency[i][j]=(unsigned char)0;
+		mTransparency[i][j]=(unsigned char)255;
 	}
   }
 };
