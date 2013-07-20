@@ -57,9 +57,9 @@ public:
 
   void getAlpha(size_t id, unsigned char *amap);
 
-  void setWaterLevel(int h);
-private:
   TileWater * Water;
+private:
+  
   // MFBO:
   GLfloat mMinimumValues[3*3*3];
   GLfloat mMaximumValues[3*3*3];

@@ -4,8 +4,8 @@
 #include "Misc.h"
 
 
-TileWater::TileWater(void){
-
+TileWater::TileWater(bool waterExists){
+	this->hasWater = waterExists;
 }
 
 void TileWater::readFromFile(MPQFile &theFile, int &ofsW){
@@ -194,19 +194,16 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
 
 		//mask
 		if(used.Mask[i][j]){
-			LogDebug << "MASK B INFO "<< lCurrentPosition << std::endl;
 			int maskLen = Info[i][j][0].height;
 			lADTFile.Insert(lCurrentPosition, maskLen, reinterpret_cast<char*>(&Mask[i][j][0]));
 			lADTFile.GetPointer<MH2O_Information>(ofsW + lADTFile.GetPointer<MH2O_Header>(ofsW + (16 * i + j) * sizeof(MH2O_Header))->ofsInformation)->ofsInfoMask = lCurrentPosition - ofsW;
 			waterSize += maskLen;
 			lCurrentPosition +=  maskLen;
-			LogDebug << "MASK A INFO "<< lCurrentPosition << ' ' << maskLen <<std::endl;
 		}
 
 		//setting offset to HeightData/Transparency
 		if(used.HeightData[i][j] || used.TransparencyData[i][j]){
 			lADTFile.GetPointer<MH2O_Information>(ofsW + lADTFile.GetPointer<MH2O_Header>(ofsW + (16 * i + j) * sizeof(MH2O_Header))->ofsInformation)->ofsHeightMap = lCurrentPosition - ofsW;
-			LogDebug << "Height INFO "<< lCurrentPosition << std::endl;
 		}
 		
 		//HeighData
@@ -244,11 +241,9 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
 
 			for (int w = Info[i][j][0].yOffset; w < Info[i][j][0].yOffset + Info[i][j][0].height + 1; ++w) {
 				for(int h=Info[i][j][0].xOffset; h < Info[i][j][0].xOffset + Info[i][j][0].width + 1; ++h) {
-					LogDebug << "Opb INFO "<< lCurrentPosition << std::endl;
 					lADTFile.Insert(lCurrentPosition, sizeof(unsigned char), reinterpret_cast<char*>(&HeightData[i][j][0].mTransparency[w][h]));
 					lCurrentPosition+=sizeof(unsigned char);
 					waterSize += sizeof(unsigned char);
-					LogDebug << "Opa INFO "<< lCurrentPosition << std::endl;
 				}
 			}
 		}
@@ -261,6 +256,7 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
 }
 
 void TileWater::setWaterLevel(int waterLevel){
+	if(!hasWater)return;
 	for(int i=0; i < 16; ++i) {
 		for(int j=0; j < 16; ++j) {
 			if(!used.Info[i][j])continue;
@@ -271,6 +267,7 @@ void TileWater::setWaterLevel(int waterLevel){
 			for(int h=0 ; h < 9; ++h){
 				for(int w=0; w < 9; ++w){
 					lTile.mHeightmap[w][h]+=waterLevel;//visual change
+
 					used.HeightDataPr[i][j][w][h]=true;
 					if(used.HeightDataPr[i][j][w][h]){
 						HeightData[i][j][0].mHeightValues[w][h]+=waterLevel;

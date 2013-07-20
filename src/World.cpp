@@ -29,6 +29,7 @@
 #include "Brush.h" // brush
 #include "ConfigFile.h"
 #include "MapIndex.h"
+#include "TileWater.h"// tile water
 
 World *gWorld = NULL;
 
@@ -2101,7 +2102,7 @@ bool World::canWaterSave(int x, int y){
 void World::setWaterLevel(int x, int y, int h){ 
 
   if(mapIndex->tileLoaded(y, x)){
-	  mapIndex->getTile(y,x)->setWaterLevel(h);
+	  mapIndex->getTile(y,x)->Water->setWaterLevel(h);
 	  mapIndex->setChanged(y,x);
   }
 	

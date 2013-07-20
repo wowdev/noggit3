@@ -200,12 +200,12 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
     int ofsW = Header.mh2o + 0x14 + 0x8;
     assert( fourcc == 'MH2O' );
     
-	Water = new TileWater();
+	Water = new TileWater(true); //has water
 	Water->readFromFile(theFile, ofsW); //reading MH2O data at separated class...
-
    	Water->init(xbase,zbase);
   }else{
 	hasWater = false;
+	Water = new TileWater(false); //empty water tile
   }
 
   // - MFBO ----------------------------------------------
@@ -469,11 +469,6 @@ void MapTile::getAlpha(size_t id, unsigned char *amap)
     else
       offsetIndex++;
   }
-}
-
-void MapTile::setWaterLevel(int h){
-	if(!hasWater)return;
-	Water->setWaterLevel(h);
 }
 
 // This is for the 2D mode only.
