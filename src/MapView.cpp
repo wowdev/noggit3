@@ -49,6 +49,7 @@
 #include "UIToolbar.h" // UIToolbar
 #include "UIToolbarIcon.h" // ToolbarIcon
 #include "UIZoneIDBrowser.h"
+#include "UIWater.h"
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
 #include "UIExitWarning.h"
@@ -215,11 +216,12 @@ void SaveOrReload( UIFrame*, int pMode )
 
 void change_settings_window(int oldid, int newid)
 {
-  if(!setting_ground || !setting_blur || !settings_paint)
+  if(!setting_ground || !setting_blur || !settings_paint || !mainGui->guiWater)
     return;
   setting_ground->hide();
   setting_blur->hide();
   settings_paint->hide();
+  mainGui->guiWater->hide();
   if(!mainGui || !mainGui->TexturePalette)
     return;
   mainGui->TexturePalette->hide();
@@ -238,6 +240,10 @@ void change_settings_window(int oldid, int newid)
     tool_settings_x=settings_paint->x();
     tool_settings_y=settings_paint->y();
   break;
+  case 7:
+    tool_settings_x = mainGui->guiWater->x();
+    tool_settings_y = mainGui->guiWater->y();
+   break;
   }
   // set new win pos and make visible
   switch(newid)
@@ -257,6 +263,11 @@ void change_settings_window(int oldid, int newid)
     settings_paint->y( tool_settings_y );
     settings_paint->show();
   break;
+  case 7:
+    mainGui->guiWater->x( tool_settings_x );
+    mainGui->guiWater->y( tool_settings_y );
+    mainGui->guiWater->show();
+    break;
   }
 }
 

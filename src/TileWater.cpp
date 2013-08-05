@@ -290,3 +290,13 @@ void TileWater::setWaterLevel(int waterLevel){
 TileWater::~TileWater(void){
 	
 }
+
+void TileWater::setWaterOpercity( int waterOpercity )
+{
+  //TODO: Beket implement water opercity
+}
+
+void TileWater::setWaterType( int waterTyp )
+{
+  //TODO: Beket implement water typ
+}

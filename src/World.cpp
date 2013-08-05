@@ -2107,3 +2107,21 @@ void World::setWaterLevel(int x, int y, int h){
   }
 	
 }
+
+void World::setWaterOpercity(int x, int y, int value){ 
+
+  if(mapIndex->tileLoaded(y, x)){
+    mapIndex->getTile(y,x)->Water->setWaterOpercity(value);
+    mapIndex->setChanged(y,x);
+  }
+
+}
+
+void World::setWaterype(int x, int y, int type){ 
+
+  if(mapIndex->tileLoaded(y, x)){
+    mapIndex->getTile(y,x)->Water->setWaterType(type);
+    mapIndex->setChanged(y,x);
+  }
+
+}
