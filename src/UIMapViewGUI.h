@@ -22,6 +22,7 @@ class UIModelImport;
 class UIHelperModels;
 class UISlider;
 class UIGradient;
+class UIWater;
 
 class UIModel;
 class UIAlphamap;
@@ -53,6 +54,7 @@ public:
   MapView* theMapview;
   // UI elements
   UIFrame* TexturePalette;
+  UIModel* ModelBrowser;
   UIFrame* SelectedTexture;
   UIMinimapWindow* minimapWindow;
   UIToolbar* guiToolbar;
@@ -62,6 +64,7 @@ public:
   UIZoneIDBrowser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
   UITextureSwitcher* TextureSwitcher;
+  UIWater* guiWater;
 
   UIWindow *setting_ground;
   UIWindow *setting_blur;

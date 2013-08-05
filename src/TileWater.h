@@ -30,8 +30,11 @@ public:
 	void init(float xbase, float zbase);
 	void draw();
 	void setWaterLevel(int waterLevel);
-	
+	void setWaterOpercity(int waterOpercity);
+  void setWaterType( int waterTyp );
+
 	virtual ~TileWater(void);
+
 private:
 	bool hasWater;
 };

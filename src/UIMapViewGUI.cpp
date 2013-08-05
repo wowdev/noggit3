@@ -22,6 +22,7 @@
 #include "UITexturingGUI.h"
 #include "UIToolbar.h" // UIToolbar
 #include "UIZoneIDBrowser.h" //
+#include "UIWater.h" //
 #include "Video.h" // video
 #include "WMOInstance.h"
 #include "World.h"
@@ -92,6 +93,11 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   _help->hide();
   addChild( _help );
 
+  guiWater = new UIWater(setMapview);
+  guiWater->hide();
+  guiWater->movable(true);
+  addChild(guiWater);
+  
   //_test = new UIAlphamap(100.0f, 100.0f);
   //_test->setModel(ModelManager::add("world\\azeroth\\elwynn\\passivedoodads\\tree\\elwynnlog02.m2"));
   //_test->show();
