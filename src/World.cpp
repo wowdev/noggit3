@@ -2091,7 +2091,8 @@ void World::saveWDT()
   // f.close();
 }
 
-bool World::canWaterSave(int x, int y){ 
+bool World::canWaterSave(int x, int y)
+{ 
 
   if(!mapIndex->tileLoaded(y, x)) //! \todo else there are null pointers
     return false;
@@ -2099,29 +2100,63 @@ bool World::canWaterSave(int x, int y){
   return mapIndex->getTile(y, x)->canWaterSave();
 }
 
-void World::setWaterLevel(int x, int y, int h){ 
+void World::setWaterLevel(int x, int y, int h)
+{ 
 
-  if(mapIndex->tileLoaded(y, x)){
-	  mapIndex->getTile(y,x)->Water->setWaterLevel(h);
+  if(mapIndex->tileLoaded(y, x))
+  {
+	  mapIndex->getTile(y,x)->Water->setLevel(h);
 	  mapIndex->setChanged(y,x);
   }
-	
 }
 
-void World::setWaterOpercity(int x, int y, int value){ 
+int World::getWaterLevel(int x, int y)
+{ 
+    if(mapIndex->tileLoaded(y, x))
+    {
+      return mapIndex->getTile(y,x)->Water->getLevel();
+    }
+    else return false;
+}
 
-  if(mapIndex->tileLoaded(y, x)){
-    mapIndex->getTile(y,x)->Water->setWaterOpercity(value);
+void World::setWaterOpercity(int x, int y, int value)
+{ 
+
+  if(mapIndex->tileLoaded(y, x))
+  {
+    mapIndex->getTile(y,x)->Water->setOpercity(value);
+    mapIndex->setChanged(y,x);
+  }
+}
+
+int World::getWaterOpercity(int x, int y)
+{ 
+
+  if(mapIndex->tileLoaded(y, x))
+  {
+    return mapIndex->getTile(y,x)->Water->getOpercity();
+  }
+  else return false;
+}
+
+void World::setWaterType(int x, int y, int type)
+{ 
+
+  if(mapIndex->tileLoaded(y, x))
+  {
+    mapIndex->getTile(y,x)->Water->setType(type);
     mapIndex->setChanged(y,x);
   }
 
 }
 
-void World::setWaterype(int x, int y, int type){ 
-
-  if(mapIndex->tileLoaded(y, x)){
-    mapIndex->getTile(y,x)->Water->setWaterType(type);
+int World::getWaterType(int x, int y)
+{ 
+  if(mapIndex->tileLoaded(y, x))
+  {
+    return mapIndex->getTile(y,x)->Water->getType();
     mapIndex->setChanged(y,x);
   }
-
+  else return false;
 }
+

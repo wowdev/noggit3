@@ -30,6 +30,7 @@ UIWater::UIWater( MapView *mapview )
   waterOpercity = new UISlider(8.0f,40.0f,167.0f,99.0f,1.0f);
  // waterOpercity->setFunc(setWaterOpercity); // Ask Hanferfor binding.
   waterOpercity->setValue(1);
+  //waterOpercity->setFunc()
   waterOpercity->setText( "Opercity: " );
   addChild(waterOpercity);
 
@@ -48,12 +49,12 @@ UIWater::UIWater( MapView *mapview )
 
 void UIWater::resize()
 {
-
+  // fixed so no resize
 }
 
 void UIWater::setWaterOpercity( float level )
 {
-  //gWorld->setWaterOpercity(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE),50.0f);
+  gWorld->setWaterOpercity(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE),50.0f);
 }
 
 

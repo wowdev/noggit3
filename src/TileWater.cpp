@@ -255,7 +255,12 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
 
 }
 
-void TileWater::setWaterLevel(int waterLevel){
+TileWater::~TileWater(void){
+
+}
+
+// following functions change the full ADT
+void TileWater::setLevel(int waterLevel){
 	if(!hasWater)return;
 	for(int i=0; i < 16; ++i) {
 		for(int j=0; j < 16; ++j) {
@@ -286,17 +291,33 @@ void TileWater::setWaterLevel(int waterLevel){
 	}
 }
 
-
-TileWater::~TileWater(void){
-	
+int TileWater::getLevel()
+{
+  //TODO: Beket implement water typ
+  return false;
 }
 
-void TileWater::setWaterOpercity( int waterOpercity )
+void TileWater::setOpercity( int opercity )
 {
   //TODO: Beket implement water opercity
 }
 
-void TileWater::setWaterType( int waterTyp )
+int TileWater::getOpercity()
+{
+  //TODO: Beket implement water opercity
+    return false;
+}
+
+void TileWater::setType( int typ )
 {
   //TODO: Beket implement water typ
 }
+
+int TileWater::getType()
+{
+  //TODO: Beket implement water typ
+    return false;
+}
+
+
+
