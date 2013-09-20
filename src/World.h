@@ -198,8 +198,11 @@ public:
 
   bool canWaterSave(int x, int y);
   void setWaterLevel(int x, int y, int h);
+  int getWaterLevel(int x, int y);
   void setWaterOpercity(int x, int y, int value);
-  void setWaterype(int x, int y, int type);
+  int getWaterOpercity(int x, int y);
+  void setWaterType(int x, int y, int type);
+  int getWaterType(int x, int y);
 };
 
 extern World *gWorld;
