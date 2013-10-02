@@ -27,6 +27,7 @@ public:
   int getOpercity();
   void setType(int waterType);
   int getType();
+
 private:
   void reload();
 
