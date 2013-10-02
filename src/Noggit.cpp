@@ -125,9 +125,9 @@ void Noggit::initEnv()
   Environment::getInstance()->cursorType = 1;
 
   // load cursor settings
-  if(boost::filesystem::exists("NoggIt.conf"))
+  if(boost::filesystem::exists("noggit.conf"))
   {
-    ConfigFile myConfigfile = ConfigFile( "NoggIt.conf" );
+    ConfigFile myConfigfile = ConfigFile( "noggit.conf" );
     if( myConfigfile.keyExists("RedColor") && myConfigfile.keyExists("GreenColor")  &&  myConfigfile.keyExists("BlueColor") &&  myConfigfile.keyExists("AlphaColor") )
     {
       Environment::getInstance()->cursorColorR = myConfigfile.read<float>( "RedColor" );
@@ -208,18 +208,18 @@ void Noggit::parseArgs(int argc, char *argv[])
 
 std::string Noggit::getGamePath()
 {
-  if( !boost::filesystem::exists( "NoggIt.conf" ) )
+  if( !boost::filesystem::exists( "noggit.conf" ) )
   {
     Log << "DON NOT find a config file." << std::endl;
 
-    if( boost::filesystem::exists( "NoggIt.conf.conf" ) )
+    if( boost::filesystem::exists( "noggit.conf.conf" ) )
     {
       Log << "Error: You have named your config file noggit.conf.conf!" << std::endl;
       Log << "Erase the second .conf!" << std::endl;
     }
     else if( boost::filesystem::exists( "noggit_template.conf" ) )
     {
-      Log << "You must rename noggit_template.conf to NoggIt.conf if noggit should use the config file!" << std::endl;
+      Log << "You must rename noggit_template.conf to noggit.conf if noggit should use the config file!" << std::endl;
     }
 
 
@@ -248,7 +248,7 @@ std::string Noggit::getGamePath()
   else
   {
     Log << "Using config file." << std::endl;
-    return ConfigFile( "NoggIt.conf" ).read<std::string>( "Path" );
+    return ConfigFile( "noggit.conf" ).read<std::string>( "Path" );
   }
 }
 
