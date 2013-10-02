@@ -13,6 +13,7 @@ ChunkWater::~ChunkWater()
 
 void ChunkWater::reloadRendering()
 {
+  if(!Header.nLayers) return;
   Liquids[0] = new Liquid(Info[0].width, Info[0].height, Vec3D(x, Info[0].minHeight, y));
 
   MH2O_Tile lTile;
@@ -21,15 +22,19 @@ void ChunkWater::reloadRendering()
   lTile.mMinimum = Info[0].minHeight;
   lTile.mFlags = Info[0].Flags;
 
-  for( int x = 0; x < 9; ++x ) {
-    for( int y = 0; y < 9; ++y ) {
-      lTile.mHeightmap[x][y] = (HeightData[0].mHeightValues[x][y]>0)? (HeightData[0].mHeightValues[x][y]) : lTile.mMinimum;
+  for( int x = 0; x < 9; ++x )
+  {
+    for( int y = 0; y < 9; ++y )
+    {
+      lTile.mHeightmap[x][y] = HeightData[0].mHeightValues[x][y];
       lTile.mDepth[x][y] = (HeightData[0].mTransparency[x][y] / 255.0f);
     }
   }
 
-  for(int h=0 ; h < 8; ++h) {
-    for(int w=0; w < 8; ++w) {
+  for(int h=0 ; h < 8; ++h)
+  {
+    for(int w=0; w < 8; ++w)
+    {
       lTile.mRender[w][h] = (HeightData[0].mHeightValues[w][h]>0)?HeightData[0].mHeightValues[w][h] : Render[0].mRender[w][h];
     }
   }

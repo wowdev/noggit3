@@ -5,6 +5,8 @@
 #include "ChunkWater.h"
 
 TileWater::TileWater(float pXbase, float pZbase)
+  : xbase(pXbase)
+  , zbase(pZbase)
 {}
 
 TileWater::~TileWater(void)
