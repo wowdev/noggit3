@@ -175,54 +175,19 @@ struct MH2O_Information{
   }
 };
 
-struct MH2O_HeightMask{
-  float **mHeightValues;
-  unsigned char **mTransparency;
+struct MH2O_HeightMask
+{
+  float mHeightValues[9][9];
+  unsigned char mTransparency[9][9];
   int mWidth;
   int mHeight;
-  MH2O_HeightMask(int Width,int Height,char*file,int Position){
-    mWidth=Width;
-    mHeight=Height;
-    mHeightValues=new float*[mHeight];
-    for(int i=0; i < mHeight; ++i)
-      mHeightValues[i]=new float[mWidth];
-    mTransparency=new unsigned char*[mHeight];
-    for(int i=0; i < mHeight; ++i)
-      mTransparency[i]=new unsigned char[mWidth];
-    for(int i=0; i < mHeight; ++i)
-      memcpy(mHeightValues[i], file + Position + i*mWidth*sizeof(float), mWidth*sizeof(float));
-    for(int i=0; i < mHeight; ++i)
-      memcpy(mTransparency[i], file + Position + mWidth*mHeight*sizeof(float) + i*mWidth*sizeof(uint8_t), mWidth*sizeof(uint8_t));
-  }
-  MH2O_HeightMask(int Width,int Height,float*HeightValues,uint8_t *Transparency){
-    mWidth=Width;
-    mHeight=Height;
-    mHeightValues=new float*[mHeight];
-    for(int i=0; i < mHeight; ++i)
-      mHeightValues[i] = new float[mWidth];
-    mTransparency=new unsigned char*[mHeight];
-    for(int i=0; i < mHeight; ++i)
-      mTransparency[i]=new unsigned char[mWidth];
-    for(int i=0; i < mHeight; ++i)
-      memcpy(mHeightValues[i],HeightValues+i*mWidth*sizeof(float),mWidth*sizeof(float));
-    for(int i=0; i < mHeight; ++i)
-      memcpy(mTransparency[i],Transparency+i*mWidth*sizeof(uint8_t),mWidth*sizeof(uint8_t));
-  }
-  MH2O_HeightMask(int Width=0,int Height=0){
-    mWidth=Width;
-    mHeight=Height;
-    mHeightValues=new float*[mHeight];
-    for(int i=0; i < mHeight; ++i){
-      mHeightValues[i]=new float[mWidth];
-	  for(int j=0; j<mWidth;++j)
-		mHeightValues[i][j]=0.0f;
-	}
-    mTransparency=new unsigned char*[mHeight];
-    for(int i=0; i < mHeight; ++i){
-      mTransparency[i]=new unsigned char[mWidth];
-	  for(int j=0; j<mWidth;++j)
-		mTransparency[i][j]=(unsigned char)255;
-	}
+
+  MH2O_HeightMask()
+    : mWidth(0)
+    , mHeight(0)
+  {
+    memset(mHeightValues, 0, 9*9*sizeof(float));
+    memset(mTransparency, 0, 9*9*sizeof(unsigned char));
   }
 };
 

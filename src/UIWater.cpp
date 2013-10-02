@@ -9,7 +9,7 @@
 #include "UITexture.h"
 #include "UISlider.h"
 #include "MapView.h"
-#include "misc.h"
+#include "Misc.h"
 #include "World.h"
 #include "Video.h" // video
 
