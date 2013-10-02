@@ -5,42 +5,36 @@
 #include "MapHeaders.h"
 #include "MapTile.h"
 #include "Vec3D.h"
-#include "Liquid.h"
 
-class Liquid;
+class ChunkWater;
 class sExtendableArray;
 
 class TileWater
 {
 
 public:
-	TileWater(bool waterExists);
-	MH2O_Header Header[16][16];
-	MH2O_Information Info[16][16][5];
-	char *Mask[16][16][5];
-	MH2O_HeightMask HeightData[16][16][5];
-	MH2O_Render Render[16][16][5];
+  TileWater(float pXbase, float pZbase);
+  ~TileWater(void);
 
-	MH2O_UsedChunks used; //registry of used data
+  void readFromFile(MPQFile &theFile, size_t basePos);
+  void saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
 
-	Liquid * Liquids[16][16][5];
+  void draw();
 
-	void readFromFile(MPQFile &theFile, int &ofsW);
-	void saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
-	void init(float xbase, float zbase);
-	void draw();
-	void setLevel(int waterLevel);
-	void setOpercity(int waterOpercity);
-  void setType( int waterTyp );
-
+  void setLevel(int waterLevel);
   int getLevel();
+  void setOpercity(int waterOpercity);
   int getOpercity();
+  void setType(int waterType);
   int getType();
-
-	virtual ~TileWater(void);
-
 private:
-	bool hasWater;
+  void reload();
+
+  ChunkWater *chunks[16][16];
+
+  bool hasWater;
+  float xbase;
+  float zbase;
 };
 
 #endif

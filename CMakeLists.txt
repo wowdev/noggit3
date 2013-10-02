@@ -65,6 +65,8 @@ SET( SourceFiles
   src/AsyncObject.h
   src/Brush.cpp
   src/Brush.h
+  src/ChunkWater.cpp
+  src/ChunkWater.h
   src/ConfigFile.cpp
   src/ConfigFile.h
   src/DBC.cpp
@@ -208,6 +210,8 @@ SET( SourceFiles
   src/UITreeView.h
   src/UIWindow.cpp
   src/UIWindow.h
+  src/UIWater.cpp
+  src/UIWater.h
   src/UIZoneIDBrowser.cpp
   src/UIZoneIDBrowser.h
   src/Vec3D.h
