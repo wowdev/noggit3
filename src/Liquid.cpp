@@ -317,7 +317,7 @@ void Liquid::initFromMH2O()
   {
     for( int i = 0; i < 8; ++i )
     {
-      //if(!mTileData.mRender[j][i]) continue;
+      if(!mTileData.mRender[j][i]) continue;
 
       float c;
       c = mTileData.mDepth[j][i];// / 255.0f;

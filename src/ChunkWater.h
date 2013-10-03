@@ -4,6 +4,7 @@
 
 class MPQFile;
 class Liquid;
+class sExtendableArray;
 
 class ChunkWater
 {
@@ -14,6 +15,10 @@ public:
   void fromFile(MPQFile &f, size_t basePos);
   void reloadRendering();
   void draw();
+
+  void writeHeader(sExtendableArray &lADTFile, int &lCurrentPosition);
+  void writeInfo(sExtendableArray &lADTFile, MH2O_Header *header, size_t basePos, int &lCurrentPosition);
+  void writeData(MH2O_Header *header, MH2O_Information *info, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition);
 
 private:
   MH2O_Header Header;

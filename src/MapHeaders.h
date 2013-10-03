@@ -194,6 +194,14 @@ struct MH2O_HeightMask
 struct MH2O_Render{
   bool mRender[8][8]; //render mask
   bool fRender[8][8]; //fatigue mask?
+
+  bool isFull()
+  {
+    for(size_t i = 0; i < 8*8; ++i)
+      if(!mRender[i / 8][i % 8]) return false;
+
+    return true;
+  }
 };
 
 struct MH2O_HeightmapData

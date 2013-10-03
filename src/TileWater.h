@@ -23,9 +23,11 @@ public:
 
   void setLevel(int waterLevel);
   int getLevel();
+
   void setOpercity(int waterOpercity);
   int getOpercity();
-  void setType(int waterType);
+
+  void setType(int type);
   int getType();
 
 private:
