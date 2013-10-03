@@ -3,7 +3,7 @@
 #include "MPQ.h"
 #include "Liquid.h"
 
-ChunkWater::ChunkWater(size_t pX, size_t pY)
+ChunkWater::ChunkWater(float pX, float pY)
   : x(pX)
   , y(pY)
 {}
@@ -14,6 +14,7 @@ ChunkWater::~ChunkWater()
 void ChunkWater::reloadRendering()
 {
   if(!Header.nLayers) return;
+
   Liquids[0] = new Liquid(Info[0].width, Info[0].height, Vec3D(x, Info[0].minHeight, y));
 
   MH2O_Tile lTile;
@@ -35,9 +36,10 @@ void ChunkWater::reloadRendering()
   {
     for(int w=0; w < 8; ++w)
     {
-      lTile.mRender[w][h] = (HeightData[0].mHeightValues[w][h]>0)?HeightData[0].mHeightValues[w][h] : Render[0].mRender[w][h];
+      lTile.mRender[w][h] = Render[0].mRender[w][h];
     }
   }
+
   Liquids[0]->setMH2OData(lTile);
 }
 
@@ -80,16 +82,21 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
     }
 
     //mask
-    if(Info[k].ofsInfoMask > 0)
+    if(Info[k].ofsInfoMask > 0 && Info[k].height > 0)
     {
-      int numBytes = Info[k].height;//(Info[k].width * Info[k].height) / 8;
-      f.seek(Info[k].ofsInfoMask + basePos);
-      /*if(numBytes == 0 && (Info[k].width > 0 && Info[k].height > 0))
-                                    numBytes = 1;*/
-      if(numBytes>0)
+      //(Info[k].width * Info[k].height) / 8;
+      f.seek(Info[k].ofsInfoMask + basePos);  /*if(numBytes == 0 && (Info[k].width > 0 && Info[k].height > 0)) numBytes = 1;*/
+
+      InfoMask[k] = new char[Info[k].height];
+      f.read(&InfoMask[k], Info[k].height);
+    }
+
+    for(int h=0 ; h < 9; ++h)
+    {
+      for(int w=0; w < 9; ++w)
       {
-        InfoMask[k] = new char[numBytes];
-        f.read(&InfoMask[k], numBytes);
+        HeightData[k].mHeightValues[w][h] = Info[k].minHeight;
+        HeightData[k].mTransparency[w][h] = 255;
       }
     }
 
