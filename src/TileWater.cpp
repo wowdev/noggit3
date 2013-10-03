@@ -50,7 +50,6 @@ void TileWater::draw()
 
 void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition)
 {
-  /*
   int waterSize = 0; //used water size. Needed for mh2o header.
   int ofsW = lCurrentPosition + 0x8; //water Header pos
 
@@ -59,112 +58,39 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
   lCurrentPosition = ofsW;
 
   //writing MH2O_Header
-  for(int i=0; i < 16; ++i) {
-    for(int j=0; j < 16; ++j) {
-      if(!used.Header[i][j])continue; //header not used
-
-      lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Header), reinterpret_cast<char*>(&Header[i][j]));
-      waterSize += sizeof(MH2O_Header);
-      lCurrentPosition += sizeof(MH2O_Header);
+  for(int i = 0; i < 16; ++i)
+  {
+    for(int j = 0; j < 16; ++j)
+    {
+      //there is always a bloody header
+      chunks[i][j]->writeHeader(lADTFile, lCurrentPosition);
     }
   }
 
   //writing MH2O_Information
-  for(int i=0; i < 16; ++i) {
-    for(int j=0; j < 16; ++j) {
-      if(!used.Info[i][j])continue; //info not used
-
-      lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Information), reinterpret_cast<char*>(&Info[i][j][0])); //insert MH2O_Information
-      lADTFile.GetPointer<MH2O_Header>(ofsW + (16 * i + j) * sizeof(MH2O_Header))->ofsInformation = lCurrentPosition - ofsW; //setting offset to this info at the header
-      lADTFile.GetPointer<MH2O_Header>(ofsW + (16 * i + j) * sizeof(MH2O_Header))->nLayers = 1; //setting number of layers
-      lCurrentPosition += sizeof(MH2O_Information);
-      waterSize += sizeof(MH2O_Information);
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+      MH2O_Header *header(lADTFile.GetPointer<MH2O_Header>(ofsW + (i * 16 + j) * sizeof(MH2O_Header)));
+      chunks[i][j]->writeInfo(lADTFile, header, ofsW, lCurrentPosition); //let chunk check if there is info!
     }
   }
 
   //writing other Info
-  for(int i=0; i < 16; ++i) {
-    for(int j=0; j < 16; ++j) {
+  for(int i = 0; i < 16; ++i)
+  {
+    for(int j = 0; j < 16; ++j)
+    {
+      MH2O_Header *header(lADTFile.GetPointer<MH2O_Header>(ofsW + (i * 16 + j) * sizeof(MH2O_Header)));
+      MH2O_Information *info(lADTFile.GetPointer<MH2O_Information>(ofsW + header->ofsInformation));
 
-      //render
-      if(used.Render[i][j]){
-        char wRender[8];
-        char fRender[8];
-        for(int h=0 ; h < 8; ++h) {
-          for(int w=0; w < 8; ++w) {
-            Render[i][j][0].mRender[w][h]? (wRender[w] |= (1<<h)) : (wRender[w] &=~(1<<h)); //render mask
-            Render[i][j][0].fRender[w][h]? (fRender[w] |= (1<<h)) : (fRender[w] &=~(1<<h)); //fatigue render mask?
-          }
-        }
-        lADTFile.Insert(lCurrentPosition, sizeof(wRender), reinterpret_cast<char*>(&wRender));
-        lADTFile.Insert(lCurrentPosition+8, sizeof(fRender), reinterpret_cast<char*>(&fRender));
-        lADTFile.GetPointer<MH2O_Header>(ofsW + (16 * i + j) * sizeof(MH2O_Header))->ofsRenderMask = lCurrentPosition - ofsW;
-        waterSize += 2*sizeof(wRender);
-        lCurrentPosition +=  2*sizeof(wRender);
-      }
-
-      //mask
-      if(used.Mask[i][j]){
-        int maskLen = Info[i][j][0].height;
-        lADTFile.Insert(lCurrentPosition, maskLen, reinterpret_cast<char*>(&Mask[i][j][0]));
-        lADTFile.GetPointer<MH2O_Information>(ofsW + lADTFile.GetPointer<MH2O_Header>(ofsW + (16 * i + j) * sizeof(MH2O_Header))->ofsInformation)->ofsInfoMask = lCurrentPosition - ofsW;
-        waterSize += maskLen;
-        lCurrentPosition +=  maskLen;
-      }
-
-      //setting offset to HeightData/Transparency
-      if(used.HeightData[i][j] || used.TransparencyData[i][j]){
-        lADTFile.GetPointer<MH2O_Information>(ofsW + lADTFile.GetPointer<MH2O_Header>(ofsW + (16 * i + j) * sizeof(MH2O_Header))->ofsInformation)->ofsHeightMap = lCurrentPosition - ofsW;
-      }
-
-      //HeighData
-      if(used.HeightData[i][j]){
-        for (int w = Info[i][j][0].yOffset; w < Info[i][j][0].yOffset + Info[i][j][0].height + 1; ++w) {
-          for(int h=Info[i][j][0].xOffset; h < Info[i][j][0].xOffset + Info[i][j][0].width + 1; ++h) {
-            lADTFile.Insert(lCurrentPosition, sizeof(float), reinterpret_cast<char*>(&HeightData[i][j][0].mHeightValues[w][h]));
-            lCurrentPosition += sizeof(float);
-            waterSize += sizeof(float);
-          }
-        }
-      }
-
-      //TransparencyData
-
-      if(used.TransparencyData[i][j]){
-        bool eFlag = true; //Blizz zips their files here using same bytes at mask and transparency. They move transparency bytes back if some last bytes of previous data matches some first bytes of next data.
-                                                                 //It is genious I think! We have to do it better =)
-                        int offs = 1;		 //ADT will be fully correct without this but if we want to make Blizzlike files or better we have to make it work.
-                        int offs2 =1;
-                        if(used.Mask[i][j])
-                        while(eFlag){
-                                for(int i=0; i<offs; ++i)
-                                        if(lADTFile.GetPointer<unsigned char>(lCurrentPosition-offs)[i]==HeightData[i][j][0].mTransparency[0][i]){
-                                                offs2++;
-                                                break;
-                                        }else{
-                                                eFlag = false;
-                                                break;
-                                        }
-                                offs=offs2;
-                        }
-
-                        lCurrentPosition-=offs-1;
-
-        for (int w = Info[i][j][0].yOffset; w < Info[i][j][0].yOffset + Info[i][j][0].height + 1; ++w) {
-          for(int h=Info[i][j][0].xOffset; h < Info[i][j][0].xOffset + Info[i][j][0].width + 1; ++h) {
-            lADTFile.Insert(lCurrentPosition, sizeof(unsigned char), reinterpret_cast<char*>(&HeightData[i][j][0].mTransparency[w][h]));
-            lCurrentPosition+=sizeof(unsigned char);
-            waterSize += sizeof(unsigned char);
-          }
-        }
-      }
+      chunks[i][j]->writeData(header, info, lADTFile, ofsW, lCurrentPosition);
     }
   }
 
-  SetChunkHeader( lADTFile, ofsW - 8, 'MH2O', waterSize);
+  SetChunkHeader(lADTFile, ofsW - 8, 'MH2O', lCurrentPosition - ofsW);
   lCurrentPosition += 8;
-  */
-
 }
 
 // following functions change the full ADT
@@ -209,7 +135,7 @@ int TileWater::getLevel()
   return false;
 }
 
-void TileWater::setOpercity( int opercity )
+void TileWater::setOpercity(int opercity)
 {
   //TODO: Beket implement water opercity
 }
@@ -220,14 +146,14 @@ int TileWater::getOpercity()
   return false;
 }
 
-void TileWater::setType( int typ )
+void TileWater::setType(int type)
 {
-  //TODO: Beket implement water typ
+  //TODO: Beket implement water type
 }
 
 int TileWater::getType()
 {
-  //TODO: Beket implement water typ
+  //TODO: Beket implement water type
   return false;
 }
 
