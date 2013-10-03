@@ -48,7 +48,8 @@ void TileWater::draw()
   }
 }
 
-void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition){
+void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition)
+{
   /*
   int waterSize = 0; //used water size. Needed for mh2o header.
   int ofsW = lCurrentPosition + 0x8; //water Header pos

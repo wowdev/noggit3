@@ -8,7 +8,7 @@ class Liquid;
 class ChunkWater
 {
 public:
-  ChunkWater(size_t pX, size_t pY);
+  ChunkWater(float pX, float pY);
   ~ChunkWater();
 
   void fromFile(MPQFile &f, size_t basePos);
@@ -23,5 +23,5 @@ private:
   MH2O_Render Render[5];
   Liquid * Liquids[5];
 
-  size_t x, y;
+  float x, y;
 };

@@ -52,7 +52,7 @@ void Liquid::initFromTerrain(MPQFile* f, int flags)
   else if (flags & 4) {
     // river/lake
     //initTextures<1,30>( "XTEXTURES\\river\\lake_a.%d.blp" )
-      initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");;
+    initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");;
     type = 2; // dynamic color
     pType = 1;
     mTransparency = true;
@@ -121,7 +121,7 @@ void Liquid::initGeometry(MPQFile* f)
       size_t p = j*(xtiles+1)+i;
       float h = map[p].h;
       if (h > 100000) h = pos.y;
-            lVertices[p] = Vec3D(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
+      lVertices[p] = Vec3D(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
     }
   }
 
@@ -138,7 +138,7 @@ void Liquid::initGeometry(MPQFile* f)
     for (int i=0; i<xtiles; ++i) {
       unsigned char flag = flags[j*xtiles+i];
       if ( !( flag & 8 ) )
-      { 
+      {
         tmpflag = flag;
         // 15 seems to be "don't draw"
         size_t p = j*(xtiles+1)+i;
@@ -185,10 +185,10 @@ void Liquid::initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, M
   {
     DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID( info->LiquidType );
     //initTextures<1,30>( lLiquidTypeRow.getString( LiquidTypeDB::TextureFilenames - 1 ) );
-        initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
+    initTextures<1,30>("XTextures\\river\\lake_a.%d.blp");
     mLiquidType = lLiquidTypeRow.getInt( LiquidTypeDB::Type );
     mShaderType = lLiquidTypeRow.getInt( LiquidTypeDB::ShaderType );
-        mLiquidType = 0;
+    mLiquidType = 0;
     mShaderType = 1;
     //! \todo  Get texRepeats too.
   }
@@ -298,9 +298,12 @@ void Liquid::initFromMH2O()
   // generate vertices
   Vec3D lVertices[9][9];
   for( int j = 0; j < 9; ++j )
-    for( int i = 0; i < 9; ++i ){
+  {
+    for( int i = 0; i < 9; ++i )
+    {
       lVertices[j][i] = Vec3D( pos.x + tilesize * i, mTileData.mHeightmap[j][i], pos.z + ydir * tilesize * j );
-	}
+    }
+  }
 
   mDrawList = new OpenGL::CallList();
   mDrawList->startRecording();
@@ -311,30 +314,34 @@ void Liquid::initFromMH2O()
 
   // draw tiles
   for( int j = 0; j < 8; ++j )
+  {
     for( int i = 0; i < 8; ++i )
-      if( mTileData.mRender[j][i] )
-      {
-        float c;
-        c = mTileData.mDepth[j][i];// / 255.0f;
-        glMultiTexCoord2f( GL_TEXTURE1, c, c );
-        glTexCoord2f( i / texRepeats, j / texRepeats);
-        glVertex3fv( lVertices[j][i] );
+    {
+      //if(!mTileData.mRender[j][i]) continue;
 
-        c = mTileData.mDepth[j][i + 1];// / 255.0f;
-        glMultiTexCoord2f( GL_TEXTURE1, c, c );
-        glTexCoord2f( ( i + 1 ) / texRepeats, j / texRepeats);
-        glVertex3fv( lVertices[j][i + 1] );
+      float c;
+      c = mTileData.mDepth[j][i];// / 255.0f;
+      glMultiTexCoord2f( GL_TEXTURE1, c, c );
+      glTexCoord2f( i / texRepeats, j / texRepeats);
+      glVertex3fv( lVertices[j][i] );
 
-        c = mTileData.mDepth[j + 1][i + 1];// / 255.0f;
-        glMultiTexCoord2f( GL_TEXTURE1, c, c );
-        glTexCoord2f( ( i + 1 ) / texRepeats, ( j + 1 ) / texRepeats);
-        glVertex3fv( lVertices[j + 1][i + 1] );
+      c = mTileData.mDepth[j][i + 1];// / 255.0f;
+      glMultiTexCoord2f( GL_TEXTURE1, c, c );
+      glTexCoord2f( ( i + 1 ) / texRepeats, j / texRepeats);
+      glVertex3fv( lVertices[j][i + 1] );
 
-        c = mTileData.mDepth[j + 1][i];// / 255.0f;
-        glMultiTexCoord2f( GL_TEXTURE1, c, c );
-        glTexCoord2f( i / texRepeats, ( j + 1 ) / texRepeats);
-        glVertex3fv( lVertices[j + 1][i] );
-      }
+      c = mTileData.mDepth[j + 1][i + 1];// / 255.0f;
+      glMultiTexCoord2f( GL_TEXTURE1, c, c );
+      glTexCoord2f( ( i + 1 ) / texRepeats, ( j + 1 ) / texRepeats);
+      glVertex3fv( lVertices[j + 1][i + 1] );
+
+      c = mTileData.mDepth[j + 1][i];// / 255.0f;
+      glMultiTexCoord2f( GL_TEXTURE1, c, c );
+      glTexCoord2f( i / texRepeats, ( j + 1 ) / texRepeats);
+      glVertex3fv( lVertices[j + 1][i] );
+    }
+  }
+
 
   glEnd();
 
@@ -429,11 +436,11 @@ void Liquid::recalcSize() {
 }
 
 #ifdef USEBLSFILES
-  BLSShader * mWaterShader;
-  BLSShader * mMagmaShader;
+BLSShader * mWaterShader;
+BLSShader * mMagmaShader;
 #else
-  OpenGL::Shader  waterShader;
-  OpenGL::Shader  waterFogShader;
+OpenGL::Shader  waterShader;
+OpenGL::Shader  waterFogShader;
 #endif
 
 void loadWaterShader()
@@ -588,8 +595,8 @@ void Liquid::draw()
     }
     glColor4f(col.x, col.y, col.z, tcol);
     glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB,0,col2.x,col2.y,col2.z,tcol);
-//#ifdef USEBLSFILES
-//    glSecondaryColor3f(col2.x,col2.y,col2.z);
+    //#ifdef USEBLSFILES
+    //    glSecondaryColor3f(col2.x,col2.y,col2.z);
 
     //glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); //! \todo  check if ARB_texture_env_add is supported? :(
   }
@@ -633,12 +640,12 @@ void Liquid::initTextures( const std::string& pFilename )
 {
   for( int i = pFirst; i <= pLast; ++i )
   {
-	  std::string tempString=pFilename;
-	  char c[3];
-	  sprintf(c, "%d", i);
-	  tempString.replace(tempString.find("%d"),2,c,strlen(c)); //little fix for water texture loading (replace %d with iteration id)*/
-	  _textureFilenames.push_back( tempString );
-	  _textures.push_back( TextureManager::newTexture( tempString )) ;
+    std::string tempString=pFilename;
+    char c[3];
+    sprintf(c, "%d", i);
+    tempString.replace(tempString.find("%d"),2,c,strlen(c)); //little fix for water texture loading (replace %d with iteration id)*/
+    _textureFilenames.push_back( tempString );
+    _textures.push_back( TextureManager::newTexture( tempString )) ;
   }
 }
 
