@@ -35,7 +35,7 @@ private:
 
   ChunkWater *chunks[16][16];
 
-  bool hasWater;
+  bool hasData;
   float xbase;
   float zbase;
 };
