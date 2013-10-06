@@ -270,15 +270,12 @@ void World::initMinimap()
   int ofsbuf[64][64];
   memset(ofsbuf, 0, 64*64*4);
 
-  int fourcc;
-  size_t size;
+  int fourcc(0);
+  size_t size(0);
 
   while (!f.isEof()) {
     f.read(&fourcc,4);
     f.read(&size, 4);
-
-    if (size == 0)
-      continue;
 
     size_t nextpos = f.getPos() + size;
 
