@@ -7,6 +7,7 @@
 TileWater::TileWater(float pXbase, float pZbase)
   : xbase(pXbase)
   , zbase(pZbase)
+  , hasData(false)
 {}
 
 TileWater::~TileWater(void)
@@ -23,6 +24,7 @@ void TileWater::readFromFile(MPQFile &theFile, size_t basePos)
       chunks[i][j]->fromFile(theFile, basePos);
     }
   }
+  hasData = true;
   reload();
 }
 
@@ -50,8 +52,8 @@ void TileWater::draw()
 
 void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition)
 {
-  int waterSize = 0; //used water size. Needed for mh2o header.
-  int ofsW = lCurrentPosition + 0x8; //water Header pos
+  if(!hasData) return;
+  size_t ofsW = lCurrentPosition + 0x8; //water Header pos
 
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mh2o = lCurrentPosition - 0x14; //setting offset to MH2O data in Header
   lADTFile.Extend(8); // we need 8 empty bytes

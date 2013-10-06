@@ -147,6 +147,12 @@ struct MH2O_Header{
   uint32_t ofsInformation;
   uint32_t nLayers;
   uint32_t ofsRenderMask;
+
+  MH2O_Header()
+    : ofsInformation(0)
+    , nLayers(0)
+    , ofsRenderMask(0)
+  {}
 };
 
 struct MH2O_Information{
