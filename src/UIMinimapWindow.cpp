@@ -44,7 +44,9 @@ UIMinimapWindow::UIMinimapWindow( World* setMap )
 
 void UIMinimapWindow::mousemove( SDL_MouseMotionEvent *e )
 {
-  
+  if(hidden()) return;
+  if(!gWorld) return;
+
   int mx = e->x - ((video.xres() - this->width())/2);
   int my = e->y - ((video.yres() - this->height())/2);
 
