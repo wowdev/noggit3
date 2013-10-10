@@ -1955,8 +1955,9 @@ void World::addWMO( WMO *wmo, Vec3D newPos, bool copyit )
   }
 
   // recalc the extends
-  newWMOis.extents[0] = newWMOis.pos - Vec3D(1,1,1);
-  newWMOis.extents[1] = newWMOis.pos + Vec3D(1,1,1);
+  //! \todo dunno about that one....needs testing
+  newWMOis.extents[0] = newWMOis.pos - wmo->extents[0];
+  newWMOis.extents[1] = newWMOis.pos + wmo->extents[1];
 
   mWMOInstances.insert( std::pair<int,WMOInstance>( lMaxUID, newWMOis ));
   mapIndex->setChanged(newPos.x,newPos.z);
