@@ -217,6 +217,44 @@ void ChunkWater::writeData(MH2O_Header *header,  MH2O_Information *info, sExtend
   */
 }
 
+bool ChunkWater::hasLayer(size_t x, size_t y)
+{
+  if(!Header.nLayers) return false;
+  if(x > 8 || y > 8) return false;
+  return Render[0].mRender[y][x];
+}
+
+void ChunkWater::addLayer(size_t x, size_t y)
+{
+  if(hasLayer(x,y)) return;
+  Render[0].mRender[y][x] = true;
+}
+
+void ChunkWater::setHeight(size_t x, size_t y, float height)
+{
+  if(x > 8 || y > 8) return;
+  addLayer(x,y);
+
+  HeightData[0].mHeightValues[y][x] = height;
+  HeightData[0].mHeightValues[y+1][x] = height;
+  HeightData[0].mHeightValues[y][x+1] = height;
+  HeightData[0].mHeightValues[y+1][x+1] = height;
+
+  reloadRendering();
+}
+
+void ChunkWater::setTrans(size_t x, size_t y, unsigned char trans)
+{
+  if(!hasLayer(x,y)) return;
+
+  HeightData[0].mTransparency[y][x]  = trans;
+  HeightData[0].mTransparency[y+1][x]  = trans;
+  HeightData[0].mTransparency[y][x+1]  = trans;
+  HeightData[0].mTransparency[y+1][x+1]  = trans;
+
+  reloadRendering();
+}
+
 void ChunkWater::draw()
 {
   if(!Header.nLayers) return;

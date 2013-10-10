@@ -20,6 +20,11 @@ public:
   void writeInfo(sExtendableArray &lADTFile, MH2O_Header *header, size_t basePos, int &lCurrentPosition);
   void writeData(MH2O_Header *header, MH2O_Information *info, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition);
 
+  void addLayer(size_t x, size_t y);
+  bool hasLayer(size_t x, size_t y);
+  void setHeight(size_t x, size_t y, float height);
+  void setTrans(size_t x, size_t y, unsigned char trans);
+
 private:
   MH2O_Header Header;
   MH2O_Information Info[5];
