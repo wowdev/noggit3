@@ -9,9 +9,9 @@ Project::Project()
 {
   // Read out config and set path in project if exists.
   // will later come direct from the project file.
-  if( boost::filesystem::exists( "NoggIt.conf" ) )
+  if( boost::filesystem::exists( "noggit.conf" ) )
   {
-    ConfigFile config( "NoggIt.conf" );
+    ConfigFile config( "noggit.conf" );
     if(  config.keyExists("ProjectPath"))
     config.readInto( path, "ProjectPath" );
   }

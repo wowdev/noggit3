@@ -17,9 +17,9 @@ Settings::Settings()
   this->_noAntiAliasing = false;
   this->copyModelStats = true;
 
-  if( boost::filesystem::exists( "noggIt.conf" ) )
+  if( boost::filesystem::exists( "noggit.conf" ) )
   {
-    ConfigFile config( "noggIt.conf" );
+    ConfigFile config( "noggit.conf" );
     config.readInto( this->FarZ, "FarZ" );
     _noAntiAliasing = config.readInto( _noAntiAliasing, "noAntiAliasing" );
   }
