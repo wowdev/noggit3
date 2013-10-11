@@ -52,7 +52,7 @@ class MPQFile
   std::string fname;
 
 public:
-  explicit MPQFile(const std::string& filename);  // filenames are not case sensitive
+  explicit MPQFile(const std::string& pFilename);  // filenames are not case sensitive, the are if u dont use a filesystem which is kinda shitty...
   ~MPQFile();
   size_t read(void* dest, size_t bytes);
   size_t getSize() const;
