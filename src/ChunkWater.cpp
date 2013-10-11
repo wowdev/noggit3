@@ -7,7 +7,9 @@
 ChunkWater::ChunkWater(float pX, float pY)
   : x(pX)
   , y(pY)
-{}
+{
+  Liquids[0] = NULL;
+}
 
 ChunkWater::~ChunkWater()
 {}
@@ -15,8 +17,7 @@ ChunkWater::~ChunkWater()
 void ChunkWater::reloadRendering()
 {
   if(!Header.nLayers) return;
-
-  Liquids[0] = new Liquid(Info[0].width, Info[0].height, Vec3D(x, Info[0].minHeight, y));
+  if(!Liquids[0]) Liquids[0] = new Liquid(Info[0].width, Info[0].height, Vec3D(x, Info[0].minHeight, y));
 
   MH2O_Tile lTile;
   lTile.mLiquidType = Info[0].LiquidType;
@@ -131,7 +132,7 @@ void ChunkWater::writeHeader(sExtendableArray &lADTFile, int &lCurrentPosition)
 
 void ChunkWater::writeInfo(sExtendableArray &lADTFile, MH2O_Header *header, size_t basePos, int &lCurrentPosition)
 {
-  if(!Header.nLayers) return;
+  if(!hasData()) return;
 
   lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Information), reinterpret_cast<char*>(&Info[0])); //insert MH2O_Information
   header->ofsInformation = lCurrentPosition - basePos; //setting offset to this info at the header
@@ -141,7 +142,7 @@ void ChunkWater::writeInfo(sExtendableArray &lADTFile, MH2O_Header *header, size
 
 void ChunkWater::writeData(MH2O_Header *header,  MH2O_Information *info, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
 {
-  if(!Header.nLayers) return;
+  if(!hasData()) return;
 
   //info->Flags = 550;
 
@@ -219,21 +220,64 @@ void ChunkWater::writeData(MH2O_Header *header,  MH2O_Information *info, sExtend
 
 bool ChunkWater::hasLayer(size_t x, size_t y)
 {
-  if(!Header.nLayers) return false;
+  if(!hasData()) return false;
   if(x > 8 || y > 8) return false;
   return Render[0].mRender[y][x];
+}
+
+void ChunkWater::addLayer()
+{
+  for(size_t y = 0; y < 8; ++y)
+  {
+    for(size_t x = 0; x < 8; ++x)
+    {
+      addLayer(x, y);
+    }
+  }
 }
 
 void ChunkWater::addLayer(size_t x, size_t y)
 {
   if(hasLayer(x,y)) return;
+  if(!hasData()) Header.nLayers = 1;
   Render[0].mRender[y][x] = true;
+}
+
+void ChunkWater::deleteLayer()
+{
+  for(size_t y = 0; y < 8; ++y)
+  {
+    for(size_t x = 0; x < 8; ++x)
+    {
+      deleteLayer(x, y);
+    }
+  }
+  Header.nLayers = 0;
+}
+
+void ChunkWater::deleteLayer(size_t x, size_t y)
+{
+  if(!hasLayer(x,y)) return;
+  Render[0].mRender[y][x] = false;
+}
+
+void ChunkWater::setHeight(float height)
+{
+  for(size_t y = 0; y < 9; ++y)
+  {
+    for(size_t x = 0; x < 9; ++x)
+    {
+      HeightData[0].mHeightValues[y][x] = height;
+    }
+  }
+
+  reloadRendering();
 }
 
 void ChunkWater::setHeight(size_t x, size_t y, float height)
 {
   if(x > 8 || y > 8) return;
-  addLayer(x,y);
+  if(!hasLayer(x,y)) return;
 
   HeightData[0].mHeightValues[y][x] = height;
   HeightData[0].mHeightValues[y+1][x] = height;
@@ -241,6 +285,42 @@ void ChunkWater::setHeight(size_t x, size_t y, float height)
   HeightData[0].mHeightValues[y+1][x+1] = height;
 
   reloadRendering();
+}
+
+float ChunkWater::getHeight()
+{
+  for(size_t y = 0; y < 9; ++y)
+  {
+    for(size_t x = 0; x < 9; ++x)
+    {
+      if(hasLayer(x,y)) return getHeight(x,y);
+    }
+  }
+  return -1;
+}
+
+float ChunkWater::getHeight(size_t x, size_t y)
+{
+  if(!hasLayer(x,y)) return -1;
+  return HeightData[0].mHeightValues[y][x];
+}
+
+unsigned char ChunkWater::getTrans()
+{
+  for(size_t y = 0; y < 9; ++y)
+  {
+    for(size_t x = 0; x < 9; ++x)
+    {
+      if(hasLayer(x,y)) return getTrans(x,y);
+    }
+  }
+  return -1;
+}
+
+unsigned char ChunkWater::getTrans(size_t x, size_t y)
+{
+  if(!hasLayer(x,y)) return 0;
+  return HeightData[0].mTransparency[y][x];
 }
 
 void ChunkWater::setTrans(size_t x, size_t y, unsigned char trans)
@@ -255,8 +335,31 @@ void ChunkWater::setTrans(size_t x, size_t y, unsigned char trans)
   reloadRendering();
 }
 
+void ChunkWater::setTrans(unsigned char trans)
+{
+  for(size_t y = 0; y < 9; ++y)
+  {
+    for(size_t x = 0; x < 9; ++x)
+    {
+      HeightData[0].mTransparency[y][x] = trans;
+    }
+  }
+
+  reloadRendering();
+}
+
+void ChunkWater::setType(int type)
+{
+  Info[0].LiquidType = type;
+}
+
+bool ChunkWater::hasData()
+{
+  return (Header.nLayers > 0);
+}
+
 void ChunkWater::draw()
 {
-  if(!Header.nLayers) return;
+  if(!hasData()) return;
   Liquids[0]->draw();
 }

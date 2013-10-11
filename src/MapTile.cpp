@@ -190,7 +190,6 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
 
   // - MH2O ----------------------------------------------
   if(Header.mh2o != 0) {
-    hasWater = true;
     theFile.seek( Header.mh2o + 0x14 );
     theFile.read( &fourcc, 4 );
     theFile.read( &size, 4 );
@@ -203,7 +202,6 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
     Water = new TileWater(xbase,zbase); //has water
     Water->readFromFile(theFile, ofsW); //reading MH2O data at separated class...
   }else{
-    hasWater = false;
     Water = new TileWater(xbase,zbase); //empty water tile
   }
 
@@ -422,7 +420,7 @@ void MapTile::drawMFBO()
 
 void MapTile::drawWater()
 {
-  if(!hasWater) return; //no need to draw water on tile without water =)
+  if(!Water->hasData()) return; //no need to draw water on tile without water =)
 
   glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_LIGHTING);

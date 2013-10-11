@@ -216,7 +216,7 @@ void SaveOrReload( UIFrame*, int pMode )
 
 void change_settings_window(int oldid, int newid)
 {
-  if(!setting_ground || !setting_blur || !settings_paint || !mainGui->guiWater)
+  if(!setting_ground || !setting_blur || !settings_paint || (!mainGui || !mainGui->guiWater))
     return;
   setting_ground->hide();
   setting_blur->hide();
@@ -625,9 +625,9 @@ void menuWater( UIFrame* /*button*/, int id )
 {
   // call the clearAllModelsOnADT method to clear them all on current ADT
   if(id == 1)
-    gWorld->createWaterOnADT(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+    gWorld->addWaterLayer(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
   else if(id == 0)
-    gWorld->clearWaterOnADT(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+    gWorld->deleteWaterLayer(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
 void changeZoneIDValue(UIFrame* /*f*/,int set)
@@ -1834,13 +1834,6 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_F9 )
       DrawMapContour = !DrawMapContour;
 
-	if( e->keysym.sym == SDLK_F11 )
-		if( Environment::getInstance()->ShiftDown ){
-			gWorld->setWaterLevel(static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE,1);
-		}else{
-			gWorld->setWaterLevel(static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE,-1);
-		}
-
     // toggle help window
     if( e->keysym.sym == SDLK_h )
     {
@@ -1887,8 +1880,23 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
             break;
         }
       }
-      else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
-        gWorld->fogdistance += 60.0f;// fog change only when no model is selected!
+      else if((!gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk)))
+      {
+        if(terrainMode == 6)
+        {
+          int x = static_cast<int>( gWorld->camera.x ) / TILESIZE;
+          int z = static_cast<int>( gWorld->camera.z ) / TILESIZE;
+          if(Environment::getInstance()->ShiftDown)
+            gWorld->setWaterTrans(x, z, std::ceil(gWorld->getWaterTrans(x, z)) + 1);
+          else
+            gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z)) + 1.0f);
+          mainGui->guiWater->updateData();
+        }
+        else if(Environment::getInstance()->ShiftDown)
+        {
+          gWorld->fogdistance += 60.0f;// fog change only when no model is selected!
+        }
+      }
       else
       {
         //change selected model size
@@ -1926,8 +1934,24 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
             break;
         }
       }
-      else if( Environment::getInstance()->ShiftDown && ( !gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk) )  )
-        gWorld->fogdistance -= 60.0f; // fog change only when no model is selected!
+      else if((!gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk)))
+      {
+        if(terrainMode == 6)
+        {
+          int x = static_cast<int>( gWorld->camera.x ) / TILESIZE;
+          int z = static_cast<int>( gWorld->camera.z ) / TILESIZE;
+          if(Environment::getInstance()->ShiftDown)
+            gWorld->setWaterTrans(x, z, std::floor(gWorld->getWaterTrans(x, z)) - 1);
+          else
+            gWorld->setWaterHeight(x, z, std::floor(gWorld->getWaterHeight(x, z)) - 1.0f);
+          mainGui->guiWater->updateData();
+        }
+        else if(Environment::getInstance()->ShiftDown)
+        {
+          gWorld->fogdistance -= 60.0f;// fog change only when no model is selected!
+        }
+
+      }
       else
       {
         //change selected model size

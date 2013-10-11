@@ -359,62 +359,6 @@ MH2O_Tile Liquid::getMH2OData(){
   return mTileData;
 }
 
-int Liquid::getWidth(){
-  return xtiles;
-}
-
-int Liquid::getHeight(){
-  return ytiles;
-}
-
-int Liquid::getXOffset(){
-  int ret = 8;
-  for(int i=0; i < 8; ++i) {
-    for(int j=0; j < 8; ++j) {
-      if(mTileData.mRender[i][j] && (j < ret)) {
-        ret = j;
-      }
-    }
-  }
-  return ret;
-}
-
-int Liquid::getYOffset() {
-  int ret = 8;
-  for(int i=0; i < 8; ++i) {
-    for(int j=0; j < 8; ++j) {
-      if(mTileData.mRender[i][j] && (i < ret)) {
-        ret = i;
-      }
-    }
-  }
-  return ret;
-}
-
-bool Liquid::isNotEmpty() {
-  bool ret = false;
-  for(int i=0; i < 8; ++i) {
-    for(int j=0; j < 8; ++j) {
-      ret |= mTileData.mRender[i][j];
-    }
-  }
-  return ret;
-}
-
-bool Liquid::isRendered(int i, int j) {
-  return mTileData.mRender[i][j];
-}
-
-void Liquid::setRender(int i, int j) {
-  mTileData.mRender[i][j] = true;
-  recalcSize();
-}
-
-void Liquid::unsetRender(int i, int j) {
-  mTileData.mRender[i][j] = false;
-  recalcSize();
-}
-
 void Liquid::recalcSize() {
   int h = 0;
   int w = 0;

@@ -1331,16 +1331,14 @@ unsigned int World::getAreaID()
   const int mcx = fmod(camera.x, TILESIZE) / CHUNKSIZE;
   const int mcz = fmod(camera.z, TILESIZE) / CHUNKSIZE;
 
-  if((mtx<cx-1) || (mtx>cx+1) || (mtz<cz-1) || (mtz>cz+1))
-    return 0;
+  //if((mtx<cx-1) || (mtx>cx+1) || (mtz<cz-1) || (mtz>cz+1))
+  //  return 0;
 
   MapTile* curTile = mapIndex->getTile(mtz,mtx);
-  if(!curTile)
-    return 0;
+  if(!curTile) return 0;
 
   MapChunk *curChunk = curTile->getChunk(mcx, mcz);
-  if(!curChunk)
-    return 0;
+  if(!curChunk)  return 0;
 
   return curChunk->getAreaID();
 }
@@ -1408,22 +1406,28 @@ void World::clearAllModelsOnADT(int x,int z)
   curTile->clearAllModels();
 }
 
-void World::clearWaterOnADT(int x,int z)
+void World::deleteWaterLayer(int x,int z)
 {
-  // get the adt
-  //MapTile *curTile;
-  //curTile = mapIndex->getTile(z,x);
-  //if(curTile == 0) return;
-  //curTile->Water->deleteAllChunks();
+  MapTile *curTile = mapIndex->getTile(z,x);
+  if(!curTile) return;
+
+  curTile->Water->deleteLayer();
 }
 
-void World::createWaterOnADT(int x,int z)
+void World::addWaterLayer(int x, int z)
 {
-  // get the adt
-  MapTile *curTile;
-  curTile = mapIndex->getTile(z,x);
-  if(curTile == 0) return;
-  curTile->Water->AddAllChunks();
+  MapTile *curTile = mapIndex->getTile(z,x);
+  if(!curTile) return;
+
+  curTile->Water->addLayer();
+}
+
+void World::addWaterLayer(int x, int z, float height, unsigned char trans)
+{
+  MapTile *curTile = mapIndex->getTile(z,x);
+  if(!curTile) return;
+
+  curTile->Water->addLayer(height, trans);
 }
 
 void World::setAreaID(int id, int x,int z)
@@ -2116,36 +2120,35 @@ bool World::canWaterSave(int x, int y)
   return mapIndex->getTile(y, x)->canWaterSave();
 }
 
-void World::setWaterLevel(int x, int y, int h)
+void World::setWaterHeight(int x, int y, float h)
 { 
-
   if(mapIndex->tileLoaded(y, x))
   {
-	  mapIndex->getTile(y,x)->Water->setLevel(h);
-	  mapIndex->setChanged(y,x);
-  }
-}
-
-int World::getWaterLevel(int x, int y)
-{ 
-    if(mapIndex->tileLoaded(y, x))
-    {
-      return mapIndex->getTile(y,x)->Water->getLevel();
-    }
-    else return false;
-}
-
-void World::setWaterOpercity(int x, int y, int value)
-{ 
-
-  if(mapIndex->tileLoaded(y, x))
-  {
-    mapIndex->getTile(y,x)->Water->setOpercity(value);
+    mapIndex->getTile(y,x)->Water->setHeight(h);
     mapIndex->setChanged(y,x);
   }
 }
 
-int World::getWaterOpercity(int x, int y)
+float World::getWaterHeight(int x, int y)
+{ 
+    if(mapIndex->tileLoaded(y, x))
+    {
+      return mapIndex->getTile(y,x)->Water->getHeight();
+    }
+    else return -1;
+}
+
+void World::setWaterTrans(int x, int y, unsigned char value)
+{ 
+
+  if(mapIndex->tileLoaded(y, x))
+  {
+    mapIndex->getTile(y,x)->Water->setTrans(value);
+    mapIndex->setChanged(y,x);
+  }
+}
+
+unsigned char World::getWaterTrans(int x, int y)
 { 
 
   if(mapIndex->tileLoaded(y, x))

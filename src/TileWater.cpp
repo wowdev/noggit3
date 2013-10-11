@@ -7,8 +7,11 @@
 TileWater::TileWater(float pXbase, float pZbase)
   : xbase(pXbase)
   , zbase(pZbase)
-  , hasData(false)
-{}
+{
+  for(int i=0; i < 16; ++i)
+    for(int j=0; j < 16; ++j)
+        chunks[i][j] = new ChunkWater(xbase + CHUNKSIZE * j, zbase + CHUNKSIZE * i);
+}
 
 TileWater::~TileWater(void)
 {}
@@ -20,11 +23,9 @@ void TileWater::readFromFile(MPQFile &theFile, size_t basePos)
     for(int j=0; j < 16; ++j)
     {
       theFile.seek(basePos + (i * 16 + j) * sizeof(MH2O_Header));
-      chunks[i][j] = new ChunkWater(xbase + CHUNKSIZE * j, zbase + CHUNKSIZE * i);
       chunks[i][j]->fromFile(theFile, basePos);
     }
   }
-  hasData = true;
   reload();
 }
 
@@ -57,7 +58,7 @@ ChunkWater* TileWater::getChunk(int x, int y)
 
 void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition)
 {
-  if(!hasData) return;
+  if(!hasData()) return;
   size_t ofsW = lCurrentPosition + 0x8; //water Header pos
 
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mh2o = lCurrentPosition - 0x14; //setting offset to MH2O data in Header
@@ -100,101 +101,102 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
   lCurrentPosition += 8;
 }
 
-// following functions change the full ADT
-void TileWater::setLevel(int waterLevel)
+bool TileWater::hasData()
 {
-  /*
   for(int i=0; i < 16; ++i)
   {
     for(int j=0; j < 16; ++j)
     {
-      if(!used.Info[i][j])continue;
-      if(Info[i][j][0].Flags==2)Info[i][j][0].Flags=0;
-      MH2O_Tile lTile = Liquids[i][j][0]->getMH2OData();
-      used.HeightData[i][j]=true;
-      used.TransparencyData[i][j]=true;
-      for(int h=0 ; h < 9; ++h){
-        for(int w=0; w < 9; ++w){
-          lTile.mHeightmap[w][h]+=waterLevel;//visual change
-
-          used.HeightDataPr[i][j][w][h]=true;
-          if(used.HeightDataPr[i][j][w][h]){
-            HeightData[i][j][0].mHeightValues[w][h]+=waterLevel;
-            if(Info[i][j][0].maxHeight<HeightData[i][j][0].mHeightValues[w][h])
-              Info[i][j][0].maxHeight=HeightData[i][j][0].mHeightValues[w][h];
-            if(Info[i][j][0].minHeight>HeightData[i][j][0].mHeightValues[w][h])
-              Info[i][j][0].minHeight=HeightData[i][j][0].mHeightValues[w][h];
-          }
-          used.TransparencyDataPr[i][j][w][h]=true;
-        }
-      }
-
-      Liquids[i][j][0]->setMH2OData(lTile);
-      Liquids[i][j][0]->initFromMH2O();
+      if(chunks[i][j]->hasData()) return true;
     }
   }
-  */
-}
 
-int TileWater::getLevel()
-{
-  //TODO: Beket implement water typ
   return false;
 }
 
-void TileWater::setOpercity(int opercity)
+void TileWater::deleteLayer()
 {
-  //TODO: Beket implement water opercity
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+      chunks[i][j]->deleteLayer();
+    }
+  }
 }
 
-int TileWater::getOpercity()
+void TileWater::addLayer(float height, unsigned char trans)
 {
-  //TODO: Beket implement water opercity
-  return false;
+  addLayer();
+  setHeight(height);
+  setTrans(trans);
+}
+
+void TileWater::addLayer()
+{
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+      chunks[i][j]->addLayer();
+    }
+  }
+}
+
+void TileWater::setHeight(float height)
+{
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+      chunks[i][j]->setHeight(height);
+    }
+  }
+}
+
+float TileWater::getHeight()
+{
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+      if(chunks[i][j]->hasData())
+        return chunks[i][j]->getHeight();
+    }
+  }
+  return 0;
+}
+
+void TileWater::setTrans(unsigned char opercity)
+{
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+      chunks[i][j]->setTrans(opercity);
+    }
+  }
+}
+
+unsigned char TileWater::getOpercity()
+{
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+      if(chunks[i][j]->hasData())
+        return chunks[i][j]->getTrans();
+    }
+  }
+  return 255;
 }
 
 void TileWater::setType(int type)
 {
-  //TODO: Beket implement water type
+
 }
 
 int TileWater::getType()
 {
-  //TODO: Beket implement water type
-  return false;
-}
-
-int TileWater::deleteAllChunks()
-{
-  //Delete all water on this adt
-
-  for(int i=0; i < 16; ++i)
-  {
-    for(int j=0; j < 16; ++j)
-    {
-        // call of delete Layer later
-    }
-  }
-
-  return false;
-}
-
-void TileWater::AddAllChunks()
-{
-  //Add water to all chunks on level 0
-
-  for(int i=0; i < 16; ++i)
-  {
-    for(int j=0; j < 16; ++j)
-    {
-       chunks[i][j]->addLayer(1,1);
-       //chunks[i][j]->setHeight(8,8,0.00f);
-       //chunks[i][j]->setTrans(8,8,80);
-    }
-  }
 
 }
-
-
-
-

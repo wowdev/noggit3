@@ -2,6 +2,7 @@
 #define __UIBUTTON_H
 
 #include <string>
+#include <boost/function.hpp>
 
 #include "UIFrame.h"
 #include "UIText.h"
@@ -13,6 +14,7 @@ class UIButton : public UIFrame
 {
 public:
   typedef UIButton* Ptr;
+  typedef void ( *ClickFunction )( UIFrame::Ptr, int );
 
 protected:
   OpenGL::Texture* texture;
@@ -20,8 +22,8 @@ protected:
   std::string _textureFilename;
   std::string _textureDownFilename;
 
-  typedef void ( *ClickFunction )( UIFrame::Ptr, int );
-  ClickFunction clickFunc;
+
+  boost::function<void(UIFrame::Ptr, int)> clickFunc;
   int id;
 
   bool clicked;
@@ -32,6 +34,7 @@ public:
   explicit UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
   explicit UIButton( float x, float y, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
   explicit UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, ClickFunction pFunc, int pFuncParam );
+  explicit UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, boost::function<void(UIFrame::Ptr, int)> pFunc, int pFuncParam );
   ~UIButton();
 
   void render() const;

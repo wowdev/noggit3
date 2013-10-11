@@ -36,6 +36,11 @@ void UISlider::setFunc( void( *f )( float val ) )
   func = f;
 }
 
+void UISlider::setFunc(boost::function<void (float)> pFunc)
+{
+  func = pFunc;
+}
+
 void UISlider::setValue( float f )
 {
   value = std::min( 1.0f, std::max( 0.0f, f ) );
