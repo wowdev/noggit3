@@ -621,6 +621,15 @@ void clearAllModels( UIFrame* /*button*/, int /*id*/ )
     gWorld->clearAllModelsOnADT(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
+void menuWater( UIFrame* /*button*/, int id )
+{
+  // call the clearAllModelsOnADT method to clear them all on current ADT
+  if(id == 1)
+    gWorld->createWaterOnADT(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+  else if(id == 0)
+    gWorld->clearWaterOnADT(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+}
+
 void changeZoneIDValue(UIFrame* /*f*/,int set)
 {
   Environment::getInstance()->selectedAreaID = set;
@@ -903,9 +912,11 @@ void MapView::createGUI()
   mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "ADT" );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Set Area ID", adtSetAreaID, 0  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear height map", clearHeightmap, 0  );
- // mbar->GetMenu( "Assist" )->AddMenuItemButton( "Move to position", moveHeightmap, 0  );
+
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear texture", clearTexture, 0  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear models", clearAllModels, 0  );
+  mbar->GetMenu( "Assist" )->AddMenuItemButton( "Clear water", menuWater, 0  );
+  mbar->GetMenu( "Assist" )->AddMenuItemButton( "Create water", menuWater, 1  );
 
   mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", mainGui->guiToolbar->hidden_evil(), true );

@@ -1408,6 +1408,24 @@ void World::clearAllModelsOnADT(int x,int z)
   curTile->clearAllModels();
 }
 
+void World::clearWaterOnADT(int x,int z)
+{
+  // get the adt
+  //MapTile *curTile;
+  //curTile = mapIndex->getTile(z,x);
+  //if(curTile == 0) return;
+  //curTile->Water->deleteAllChunks();
+}
+
+void World::createWaterOnADT(int x,int z)
+{
+  // get the adt
+  MapTile *curTile;
+  curTile = mapIndex->getTile(z,x);
+  if(curTile == 0) return;
+  curTile->Water->AddAllChunks();
+}
+
 void World::setAreaID(int id, int x,int z)
 {
   // set the Area ID on a tile x,z on all chunks
