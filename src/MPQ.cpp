@@ -156,7 +156,7 @@ MPQFile::MPQFile(const std::string& pFilename)
   boost::mutex::scoped_lock lock(gMPQFileMutex);
 
   std::string filename(pFilename);
-  std::transform( filename.begin(), filename.end(), filename.begin(), ::tolower );
+  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
   std::string diskpath = Project::getInstance()->getPath().append(filename);
 
   size_t found = diskpath.find( "\\" );
@@ -185,20 +185,18 @@ MPQFile::MPQFile(const std::string& pFilename)
     return;
   }
 
-  std::string filename_corrected = filename;
-
-  found = filename_corrected.find( "/" );
+  found = filename.find( "/" );
   while( found != std::string::npos )
   {
-    filename_corrected.replace( found, 1, "\\" );
-    found = filename_corrected.find( "/" );
+    filename.replace( found, 1, "\\" );
+    found = filename.find( "/" );
   }
 
   for( ArchivesMap::reverse_iterator i = _openArchives.rbegin(); i != _openArchives.rend(); ++i )
   {
     HANDLE fileHandle;
 
-    if( !i->second->openFile( filename_corrected, &fileHandle ) )
+    if(!i->second->openFile(filename, &fileHandle))
       continue;
 
     size = SFileGetFileSize( fileHandle, NULL ); //last NULL for newer version of StormLib
