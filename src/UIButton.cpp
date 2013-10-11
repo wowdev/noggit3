@@ -64,6 +64,20 @@ UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pTe
   addChild( text );
 }
 
+UIButton::UIButton( float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, boost::function<void(UIFrame::Ptr, int)> pFunc, int pFuncParam )
+: UIFrame( pX, pY, w, h )
+, texture( TextureManager::newTexture( pTexNormal ) )
+, textureDown( TextureManager::newTexture( pTexDown ) )
+, _textureFilename( pTexNormal )
+, _textureDownFilename( pTexDown )
+, clickFunc( pFunc )
+, id( pFuncParam )
+, clicked( false )
+, text( new UIText( width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter ) )
+{
+  addChild( text );
+}
+
 UIButton::~UIButton()
 {
   TextureManager::delbyname( _textureFilename );

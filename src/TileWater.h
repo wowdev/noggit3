@@ -11,37 +11,38 @@ class sExtendableArray;
 
 class TileWater
 {
-
 public:
   TileWater(float pXbase, float pZbase);
   ~TileWater(void);
+
+  ChunkWater* getChunk(int x, int y);
 
   void readFromFile(MPQFile &theFile, size_t basePos);
   void saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
 
   void draw();
+  bool hasData();
 
-  void setLevel(int waterLevel);
-  int getLevel();
+  void setHeight(float height);
+  float getHeight();
 
-  void setOpercity(int waterOpercity);
-  int getOpercity();
+  void setTrans(unsigned char waterOpercity);
+  unsigned char getOpercity();
 
   void setType(int type);
   int getType();
 
-  ChunkWater* getChunk(int x, int y);
-  void AddAllChunks();
+  void addLayer();
+  void addLayer(float height, unsigned char trans);
+
+  void deleteLayer();
 
 private:
   void reload();
-  int deleteAllChunks();
-
 
 
   ChunkWater *chunks[16][16];
 
-  bool hasData;
   float xbase;
   float zbase;
 };

@@ -167,7 +167,8 @@ struct MH2O_Information{
   uint32_t ofsInfoMask;
   uint32_t ofsHeightMap;
 
-  MH2O_Information(){
+  MH2O_Information()
+  {
 	LiquidType = 2;
 	Flags = 0;
 	maxHeight = 0;
@@ -201,50 +202,18 @@ struct MH2O_Render{
   bool mRender[8][8]; //render mask
   bool fRender[8][8]; //fatigue mask?
 
+  MH2O_Render()
+  {
+    memset(mRender, 0, 8*8*sizeof(bool));
+    memset(fRender, 0, 8*8*sizeof(bool));
+  }
+
   bool isFull()
   {
     for(size_t i = 0; i < 8*8; ++i)
       if(!mRender[i / 8][i % 8]) return false;
 
     return true;
-  }
-};
-
-struct MH2O_HeightmapData
-{
-	// if type & 1 != 1, this chunk is "ocean".  in this case, do not use this structure.
-
-	float **mHeightValues; 	// w*h
-	unsigned char **mTransparency; 	// w*h
-};
-
-struct MH2O_UsedChunks{ //registry of used items. Needed for corrent water saving. 
-  bool Header[16][16]; 
-  bool Info[16][16];
-  bool Mask[16][16];
-  bool HeightData[16][16];
-  bool HeightDataPr[16][16][9][9]; //more precisely
-  bool TransparencyData[16][16];
-  bool TransparencyDataPr[16][16][9][9]; //more precisely
-  bool Render[16][16];
-
-  MH2O_UsedChunks(){
-	for(int i=0; i < 16; ++i){
-		for(int j=0; j < 16; ++j){
-			Header[i][j] = false; 
-			Info[i][j] = false; 
-			Mask[i][j] = false;
-			HeightData[i][j] = false;
-			TransparencyData[i][j] = false;
-			for(int w=0; w<9;++w){
-				for(int h=0; h<9; ++h){
-					HeightDataPr[i][j][w][h] = false;
-					TransparencyDataPr[i][j][w][h] = false;
-				}
-			}
-			Render[i][j] = false; 
-		}
-	}  
   }
 };
 

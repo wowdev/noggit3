@@ -114,22 +114,11 @@ public:
   //void init(MPQFile &f);
   void initFromTerrain(MPQFile* f, int flags);
   void initFromWMO(MPQFile* f, const WMOMaterial &mat, bool indoor);
-  void initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, MH2O_Render *render );
+  void initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, MH2O_Render *render);
   void initFromMH2O();
 
   MH2O_Tile getMH2OData();
   void setMH2OData(MH2O_Tile pTileInfo);
-
-  int getWidth();
-  int getHeight();
-  int getXOffset();
-  int getYOffset();
-
-  bool isNotEmpty();
-
-  bool isRendered(int i, int j);
-  void setRender(int i, int j);
-  void unsetRender(int i, int j);
 
   void draw();
 

@@ -28,6 +28,7 @@
 #include "World.h"
 #include "TextureSet.h"
 #include "MapIndex.h"
+#include "Misc.h"
 
 #include "UIModel.h"
 #include "ModelManager.h"
@@ -175,6 +176,7 @@ void UIMapViewGUI::render( ) const
   guiStatusbar->setLeftInfo( statusbarInfo.str() );
 
   guiStatusbar->setRightInfo( "" );
+  guiWater->updatePos(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE), misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 
   if( !_tilemode && !guidetailInfos->hidden() )
   {

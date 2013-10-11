@@ -1188,6 +1188,7 @@ void Model::draw()
   if( !animated )
   {
     glCallList( ModelDrawList );
+    CheckForGLError( "Model::draw:: after the draw list" );
   }
   else
   {

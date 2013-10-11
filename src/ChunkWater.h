@@ -20,12 +20,30 @@ public:
   void writeInfo(sExtendableArray &lADTFile, MH2O_Header *header, size_t basePos, int &lCurrentPosition);
   void writeData(MH2O_Header *header, MH2O_Information *info, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition);
 
-  void addLayer(size_t x, size_t y);
-  bool hasLayer(size_t x, size_t y);
+
+  void setHeight(float height);
   void setHeight(size_t x, size_t y, float height);
+  float getHeight();
+  float getHeight(size_t x, size_t y);
+
+  void setTrans(unsigned char trans);
   void setTrans(size_t x, size_t y, unsigned char trans);
+  unsigned char getTrans();
+  unsigned char getTrans(size_t x, size_t y);
+
+  void setType(int type);
+  bool hasData();
+
+  void addLayer();
+  void addLayer(size_t x, size_t y);
+
+  void deleteLayer();
+  void deleteLayer(size_t x, size_t y);
 
 private:
+
+  bool hasLayer(size_t x, size_t y);
+
   MH2O_Header Header;
   MH2O_Information Info[5];
   MH2O_HeightMask HeightData[5];

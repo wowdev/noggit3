@@ -197,14 +197,20 @@ public:
   void swapTexture( int x, int z, OpenGL::Texture *tex );
 
   bool canWaterSave(int x, int y);
-  void setWaterLevel(int x, int y, int h);
-  int getWaterLevel(int x, int y);
-  void setWaterOpercity(int x, int y, int value);
-  int getWaterOpercity(int x, int y);
+
+  void setWaterHeight(int x, int y, float h);
+  float getWaterHeight(int x, int y);
+
+  void setWaterTrans(int x, int y, unsigned char value);
+  unsigned char getWaterTrans(int x, int y);
+
   void setWaterType(int x, int y, int type);
   int getWaterType(int x, int y);
-  void clearWaterOnADT(int x,int z);
-  void createWaterOnADT(int x,int z);
+
+  void deleteWaterLayer(int x,int z);
+
+  void addWaterLayer(int x, int z);
+  void addWaterLayer(int x, int z, float height, unsigned char trans);
 };
 
 extern World *gWorld;
