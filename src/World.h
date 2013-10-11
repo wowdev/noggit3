@@ -203,6 +203,8 @@ public:
   int getWaterOpercity(int x, int y);
   void setWaterType(int x, int y, int type);
   int getWaterType(int x, int y);
+  void clearWaterOnADT(int x,int z);
+  void createWaterOnADT(int x,int z);
 };
 
 extern World *gWorld;

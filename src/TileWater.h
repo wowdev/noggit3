@@ -30,8 +30,14 @@ public:
   void setType(int type);
   int getType();
 
+  ChunkWater* getChunk(int x, int y);
+  void AddAllChunks();
+
 private:
   void reload();
+  int deleteAllChunks();
+
+
 
   ChunkWater *chunks[16][16];
 
@@ -39,5 +45,6 @@ private:
   float xbase;
   float zbase;
 };
+
 
 #endif

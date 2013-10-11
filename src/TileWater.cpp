@@ -50,6 +50,11 @@ void TileWater::draw()
   }
 }
 
+ChunkWater* TileWater::getChunk(int x, int y)
+{
+  return chunks[x][y];
+}
+
 void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition)
 {
   if(!hasData) return;
@@ -158,6 +163,38 @@ int TileWater::getType()
   //TODO: Beket implement water type
   return false;
 }
+
+int TileWater::deleteAllChunks()
+{
+  //Delete all water on this adt
+
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+        // call of delete Layer later
+    }
+  }
+
+  return false;
+}
+
+void TileWater::AddAllChunks()
+{
+  //Add water to all chunks on level 0
+
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+       chunks[i][j]->addLayer(1,1);
+       //chunks[i][j]->setHeight(8,8,0.00f);
+       //chunks[i][j]->setTrans(8,8,80);
+    }
+  }
+
+}
+
 
 
 
