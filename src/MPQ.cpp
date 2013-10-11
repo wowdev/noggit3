@@ -146,7 +146,7 @@ bool MPQArchive::openFile( const std::string& filename, HANDLE* fileHandle ) con
   return SFileOpenFileEx( _archiveHandle, filename.c_str(), 0, fileHandle );
 }
 
-MPQFile::MPQFile( const std::string& filename )
+MPQFile::MPQFile(const std::string& pFilename)
 : eof(true)
 , buffer(NULL)
 , pointer(0)
@@ -155,6 +155,8 @@ MPQFile::MPQFile( const std::string& filename )
 {
   boost::mutex::scoped_lock lock(gMPQFileMutex);
 
+  std::string filename(pFilename);
+  std::transform( filename.begin(), filename.end(), filename.begin(), ::tolower );
   std::string diskpath = Project::getInstance()->getPath().append(filename);
 
   size_t found = diskpath.find( "\\" );
@@ -165,7 +167,6 @@ MPQFile::MPQFile( const std::string& filename )
   }
 
   fname = diskpath;
-  std::transform( fname.begin(), fname.end(), fname.begin(), ::tolower );
 
   std::ifstream input( fname.c_str(), std::ios_base::binary | std::ios_base::in );
   if( input.is_open() )
