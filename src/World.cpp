@@ -2150,12 +2150,11 @@ void World::setWaterTrans(int x, int y, unsigned char value)
 
 unsigned char World::getWaterTrans(int x, int y)
 { 
-
   if(mapIndex->tileLoaded(y, x))
   {
     return mapIndex->getTile(y,x)->Water->getOpercity();
   }
-  else return false;
+  else return 255;
 }
 
 void World::setWaterType(int x, int y, int type)
