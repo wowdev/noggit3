@@ -314,7 +314,7 @@ unsigned char ChunkWater::getTrans()
       if(hasLayer(x,y)) return getTrans(x,y);
     }
   }
-  return -1;
+  return 255;
 }
 
 unsigned char ChunkWater::getTrans(size_t x, size_t y)

@@ -198,5 +198,5 @@ void TileWater::setType(int type)
 
 int TileWater::getType()
 {
-
+	return 1;
 }
