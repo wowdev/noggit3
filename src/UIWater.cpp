@@ -59,9 +59,7 @@ UIWater::UIWater( MapView *mapview )
 
   // Add dropdown type
 
-  // Add button Delete
 
-  // Add button New
 }
 
 void UIWater::updatePos(int newTileX, int newTileY)
@@ -87,7 +85,7 @@ void UIWater::resize()
 
 void UIWater::setWaterTrans(float val)
 {
-  //gWorld->setWaterTrans(tileX, tileY, val);
+  gWorld->setWaterTrans(tileX, tileY, val);
 }
 
 void UIWater::addWaterLayer(UIFrame::Ptr /*ptr*/, int /*someint*/)
@@ -102,7 +100,7 @@ void UIWater::deleteWaterLayer(UIFrame::Ptr /*ptr*/, int /*someint*/)
 
 void UIWater::setWaterHeight(float val)
 {
-  //gWorld->setWaterHeight(tileX, tileY, val);
+  gWorld->setWaterHeight(tileX, tileY, val);
 }
 
 
