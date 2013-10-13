@@ -14,6 +14,8 @@
 #include "Misc.h"
 #include "World.h"
 #include "Video.h" // video
+#include <iostream>
+#include <sstream>
 
 #include "Log.h"
 
@@ -24,40 +26,67 @@ UIWater::UIWater( MapView *mapview )
 {
   addChild( new UIText( 78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter ) );
 
-  // addChild( new UITexture( 10.0f, 10.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Misc_QuestionMark.blp" ) );
 
-  // addChild( new UIText( 95.0f, 40.0f, "Changes will be lost!", app.getArial14(), eJustifyLeft ) );
-
-
-  waterOpercity = new UISlider(8.0f, 40.0f, 167.0f,255.0f,0.0f);
+  waterOpercity = new UISlider(5.0f, 40.0f, 169.0f,255.0f,0.0f);
   waterOpercity->setValue(1);
   waterOpercity->setText("Opercity: ");
   waterOpercity->setFunc(boost::bind(&UIWater::setWaterTrans, this, _1));
   addChild(waterOpercity);
-  addChild(new UIText(8.0f, 50.0f, "shift + numpad +/-", app.getArial12(), eJustifyLeft));
+  addChild(new UIText(5.0f, 50.0f, "shift + numpad +/-", app.getArial12(), eJustifyLeft));
 
-  waterLevel = new UISlider(8.0f, 85.0f, 167.0f, 200.0f, -100.0f);
-  waterLevel->setValue(0.0f);
-  waterLevel->setText("Level: ");
-  waterLevel->setFunc(boost::bind(&UIWater::setWaterHeight, this, _1));
+  addChild(new UIText(60.0f, 74.0f, "Level: ", app.getArial12(), eJustifyLeft));
+  waterLevel = new UIText(95.0f, 74.0f, "0.0", app.getArial12(), eJustifyLeft);
   addChild(waterLevel);
-  addChild(new UIText(8.0f, 95.f, "numpad +/-", app.getArial12(), eJustifyLeft));
 
-  addChild(new UIButton(8.0f, 120.0f, 100.0f, 30.0f,
-                        "Fill Tile",
-                        "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-                        "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-                        boost::bind(&UIWater::addWaterLayer, this, _1, _2),
-                        2)
-           );
+  addChild(new UIButton(5.0f, 90.0f, 38.0f, 30.0f,
+    "-100",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    -100)
+    );
 
-  addChild(new UIButton(8.0f, 160.0f, 100.0f, 30.0f,
-                        "Clear Tile",
-                        "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-                        "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-                        boost::bind(&UIWater::deleteWaterLayer, this, _1, _2),
-                        2)
-           );
+  addChild(new UIButton(45.0f, 90.0f, 23.0f, 30.0f,
+    "-10",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    -10)
+    );
+
+  addChild(new UIButton(70.0f, 90.0f, 19.0f, 30.0f,
+    "-1",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    -1)
+    );
+
+  addChild(new UIButton(91.0f, 90.0f, 19.0f, 30.0f,
+    "+1",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    1)
+    );
+
+  addChild(new UIButton(112.0f, 90.0f, 23.0f, 30.0f,
+    "+10",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    10)
+    );
+
+  addChild(new UIButton(137.0f, 90.0f, 38.0f, 30.0f,
+    "+100",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    100)
+    );
+  addChild(new UIText(5.0f, 108.f, "numpad +/- (alt *2, ctrl *5)", app.getArial12(), eJustifyLeft));
+
 
   // Add dropdown type
 
@@ -76,7 +105,10 @@ void UIWater::updatePos(int newTileX, int newTileY)
 
 void UIWater::updateData()
 {
-  waterLevel->setValue((gWorld->getWaterHeight(tileX, tileY) + 100.0f)/200.0f);
+  std::stringstream ms;
+  ms << gWorld->getWaterHeight(tileX, tileY) ;
+
+  waterLevel->setText(ms.str());
   waterOpercity->setValue(gWorld->getWaterTrans(tileX, tileY)/255.0f);
 }
 
@@ -93,7 +125,7 @@ void UIWater::setWaterTrans(float val)
 
 void UIWater::addWaterLayer(UIFrame::Ptr /*ptr*/, int /*someint*/)
 {
-  gWorld->addWaterLayer(tileX, tileY, waterLevel->value * 200.0f - 100.0f, waterOpercity->value * 255);
+  gWorld->addWaterLayer(tileX, tileY, 0.0f, waterOpercity->value * 255);
 }
 
 void UIWater::deleteWaterLayer(UIFrame::Ptr /*ptr*/, int /*someint*/)
@@ -107,5 +139,8 @@ void UIWater::setWaterHeight(float val)
   gWorld->setWaterHeight(tileX, tileY, val);
 }
 
-
-
+void UIWater::changeWaterHeight(UIFrame::Ptr /*ptr*/, int someint)
+{
+  gWorld->setWaterHeight(tileX, tileY, ( gWorld->getWaterHeight(tileX, tileY) + someint ) );
+  updateData();
+}

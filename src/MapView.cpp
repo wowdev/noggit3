@@ -1632,6 +1632,14 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_KP9 )
       keyr = -1;
 
+    if( e->keysym.sym == SDLK_KP0 ) 
+      if(terrainMode==6) 
+      {
+        gWorld->setWaterHeight(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE),0.0f);
+        mainGui->guiWater->updateData();
+      }
+
+
     // delete object
     if( e->keysym.sym == SDLK_DELETE )
       DeleteSelectedObject( 0, 0 );
@@ -1878,6 +1886,12 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
               textureBrush.setRadius(0.1f);
             paint_brush->setValue( textureBrush.getRadius() / 100 );
             break;
+          case 6:
+            int x = static_cast<int>( gWorld->camera.x ) / TILESIZE;
+            int z = static_cast<int>( gWorld->camera.z ) / TILESIZE;
+            gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) + 2.0f));
+            mainGui->guiWater->updateData();
+            break;
         }
       }
       else if((!gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk)))
@@ -1886,10 +1900,14 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
         {
           int x = static_cast<int>( gWorld->camera.x ) / TILESIZE;
           int z = static_cast<int>( gWorld->camera.z ) / TILESIZE;
+
           if(Environment::getInstance()->ShiftDown)
             gWorld->setWaterTrans(x, z,  static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(x, z)) + 1)));
-          else
+          else if(Environment::getInstance()->CtrlDown)
+            gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) + 5.0f));
+          else 
             gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) + 1.0f));
+
           mainGui->guiWater->updateData();
         }
         else if(Environment::getInstance()->ShiftDown)
@@ -1932,6 +1950,12 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
               textureBrush.setRadius(0.1f);
             paint_brush->setValue( textureBrush.getRadius() / 100 );
             break;
+          case 6:
+            int x = static_cast<int>( gWorld->camera.x ) / TILESIZE;
+            int z = static_cast<int>( gWorld->camera.z ) / TILESIZE;
+            gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 2.0f));
+            mainGui->guiWater->updateData();
+            break;
         }
       }
       else if((!gWorld->HasSelection() || ( gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk)))
@@ -1942,8 +1966,11 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
           int z = static_cast<int>( gWorld->camera.z ) / TILESIZE;
           if(Environment::getInstance()->ShiftDown)
             gWorld->setWaterTrans(x, z, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(x, z))) - 1) );
-          else
-            gWorld->setWaterHeight(x, z, std::floor(gWorld->getWaterHeight(x, z)) - 1.0f);
+          else if(Environment::getInstance()->CtrlDown)
+            gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 5.0f));
+          else 
+            gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 1.0f));
+
           mainGui->guiWater->updateData();
         }
         else if(Environment::getInstance()->ShiftDown)
