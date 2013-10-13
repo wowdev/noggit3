@@ -1887,9 +1887,9 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
           int x = static_cast<int>( gWorld->camera.x ) / TILESIZE;
           int z = static_cast<int>( gWorld->camera.z ) / TILESIZE;
           if(Environment::getInstance()->ShiftDown)
-            gWorld->setWaterTrans(x, z,  static_cast<unsigned char>(std::ceil( static_cast<float>(gWorld->getWaterTrans(x, z)) + 1)) );
+            gWorld->setWaterTrans(x, z,  static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(x, z)) + 1)));
           else
-            gWorld->setWaterHeight(x, z, static_cast<unsigned char>(std::ceil( static_cast<float>(gWorld->getWaterHeight(x, z)) + 1.0f)) );
+            gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) + 1.0f));
           mainGui->guiWater->updateData();
         }
         else if(Environment::getInstance()->ShiftDown)
@@ -1943,7 +1943,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
           if(Environment::getInstance()->ShiftDown)
             gWorld->setWaterTrans(x, z, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(x, z))) - 1) );
           else
-            gWorld->setWaterHeight(x, z, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterHeight(x, z))) - 1.0f) );
+            gWorld->setWaterHeight(x, z, std::floor(gWorld->getWaterHeight(x, z)) - 1.0f);
           mainGui->guiWater->updateData();
         }
         else if(Environment::getInstance()->ShiftDown)
