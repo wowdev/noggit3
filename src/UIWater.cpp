@@ -34,12 +34,14 @@ UIWater::UIWater( MapView *mapview )
   waterOpercity->setText("Opercity: ");
   waterOpercity->setFunc(boost::bind(&UIWater::setWaterTrans, this, _1));
   addChild(waterOpercity);
+  addChild(new UIText(8.0f, 50.0f, "shift + numpad +/-", app.getArial12(), eJustifyLeft));
 
-  waterLevel = new UISlider(8.0f, 65.0f, 167.0f, 200.0f, -100.0f);
+  waterLevel = new UISlider(8.0f, 85.0f, 167.0f, 200.0f, -100.0f);
   waterLevel->setValue(0.0f);
   waterLevel->setText("Level: ");
   waterLevel->setFunc(boost::bind(&UIWater::setWaterHeight, this, _1));
   addChild(waterLevel);
+  addChild(new UIText(8.0f, 95.f, "numpad +/-", app.getArial12(), eJustifyLeft));
 
   addChild(new UIButton(8.0f, 120.0f, 100.0f, 30.0f,
                         "Fill Tile",
@@ -85,6 +87,7 @@ void UIWater::resize()
 
 void UIWater::setWaterTrans(float val)
 {
+  if(std::fmod(val, 0.1f) > 0.1f) return; //reduce performence hit
   gWorld->setWaterTrans(tileX, tileY, val);
 }
 
@@ -100,6 +103,7 @@ void UIWater::deleteWaterLayer(UIFrame::Ptr /*ptr*/, int /*someint*/)
 
 void UIWater::setWaterHeight(float val)
 {
+  if(std::fmod(val, 0.1f) > 0.1f) return; //reduce performence hit
   gWorld->setWaterHeight(tileX, tileY, val);
 }
 
