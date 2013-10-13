@@ -2378,8 +2378,8 @@ void MapView::mouseclick( SDL_MouseButtonEvent *e )
 }
 
 void MapView::checkWaterSave(){
-	if(gWorld->canWaterSave(static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE))
-		mainGui->waterSaveWarning->hide(); 
-	else 
-		mainGui->waterSaveWarning->show();
+  if(gWorld->canWaterSave(static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE))
+    mainGui->waterSaveWarning->hide();
+  else
+    mainGui->waterSaveWarning->show();
 }
