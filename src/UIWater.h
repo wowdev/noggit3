@@ -4,6 +4,7 @@
 #include "UICloseWindow.h"
 #include "MapView.h"
 class UISlider;
+class UIText;
 
 class UIWater : public UIWindow
 {
@@ -17,8 +18,10 @@ public:
 
   void setWaterTrans(float val);
   void setWaterHeight(float val);
+  void changeWaterHeight(UIFrame::Ptr,int someint);
   void addWaterLayer(UIFrame::Ptr, int);
   void deleteWaterLayer(UIFrame::Ptr ptr, int someint);
+
 
 private:
   static const int winWidth = 180;
@@ -26,7 +29,7 @@ private:
 
   MapView *_MapView;
   UISlider *waterOpercity;
-  UISlider *waterLevel;
+  UIText *waterLevel;
 
   int tileX;
   int tileY;
