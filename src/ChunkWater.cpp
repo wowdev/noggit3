@@ -42,7 +42,7 @@ void ChunkWater::reloadRendering()
     }
   }
 
-  Liquids[0]->setMH2OData(lTile);
+  Liquids[0]->initFromMH2O(lTile);
 }
 
 void ChunkWater::fromFile(MPQFile &f, size_t basePos)

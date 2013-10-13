@@ -301,6 +301,12 @@ MapTile* MapIndex::loadTile(int z, int x)
     return NULL;
   }
 
+  if(mTiles[z][x].tile) //just to sure
+  {
+    delete mTiles[z][x].tile;
+    mTiles[z][x].tile = NULL;
+  }
+
   mTiles[z][x].tile = new MapTile( x, z, filename.str(), mBigAlpha );// XZ STEFF Swap MapTile( z, x, file
   return mTiles[z][x].tile;
 }

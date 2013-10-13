@@ -2135,7 +2135,7 @@ float World::getWaterHeight(int x, int y)
     {
       return mapIndex->getTile(y,x)->Water->getHeight();
     }
-    else return -1;
+    else return 0;
 }
 
 void World::setWaterTrans(int x, int y, unsigned char value)
