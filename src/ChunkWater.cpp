@@ -73,8 +73,8 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
     {
       for(int w=0; w < 8; ++w)
       {
-        Render[k].mRender[w][h] = /*(Header.ofsRenderMask) ? (1 << h) & rMask[w] : */true; //if we have no MH2O_Render structure
-        Render[k].fRender[w][h] = /*(Header.ofsRenderMask) ? (1 << h) & fMask[w] : */true;
+        Render[k].mRender[w][h] = (Header.ofsRenderMask) ? (1 << h) & rMask[w] : true; //if we have no MH2O_Render structure
+        Render[k].fRender[w][h] = (Header.ofsRenderMask) ? (1 << h) & fMask[w] : true;
       }
     }
 
@@ -143,8 +143,6 @@ void ChunkWater::writeInfo(sExtendableArray &lADTFile, MH2O_Header *header, size
 void ChunkWater::writeData(MH2O_Header *header,  MH2O_Information *info, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
 {
   if(!hasData()) return;
-
-  //info->Flags = 550;
 
   //render
   //just write this in anycase should be fine
