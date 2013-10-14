@@ -109,7 +109,7 @@ void UIWater::updateData()
   ms << gWorld->getWaterHeight(tileX, tileY) ;
 
   waterLevel->setText(ms.str());
-  waterOpercity->setValue(gWorld->getWaterTrans(tileX, tileY)/255.0f);
+  waterOpercity->value = (gWorld->getWaterTrans(tileX, tileY)/255.0f);
 }
 
 void UIWater::resize()
