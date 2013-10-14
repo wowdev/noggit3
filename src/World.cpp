@@ -1412,6 +1412,7 @@ void World::deleteWaterLayer(int x,int z)
   if(!curTile) return;
 
   curTile->Water->deleteLayer();
+  mapIndex->setChanged(z,x);
 }
 
 void World::addWaterLayer(int x, int z)
@@ -1420,6 +1421,7 @@ void World::addWaterLayer(int x, int z)
   if(!curTile) return;
 
   curTile->Water->addLayer();
+  mapIndex->setChanged(z,x);
 }
 
 void World::addWaterLayer(int x, int z, float height, unsigned char trans)
@@ -1428,6 +1430,7 @@ void World::addWaterLayer(int x, int z, float height, unsigned char trans)
   if(!curTile) return;
 
   curTile->Water->addLayer(height, trans);
+  mapIndex->setChanged(z,x);
 }
 
 void World::setAreaID(int id, int x,int z)
