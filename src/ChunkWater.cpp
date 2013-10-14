@@ -239,7 +239,11 @@ void ChunkWater::addLayer()
 void ChunkWater::addLayer(size_t x, size_t y)
 {
   if(hasLayer(x,y)) return;
-  if(!hasData()) Header.nLayers = 1;
+  if(!hasData())
+  {
+    Header.nLayers = 1;
+    reloadRendering();
+  }
   Render[0].mRender[y][x] = true;
 }
 
