@@ -87,10 +87,19 @@ UIWater::UIWater( MapView *mapview )
     );
   addChild(new UIText(5.0f, 108.f, "numpad +/- (alt *2, ctrl *5)", app.getArial12(), eJustifyLeft));
 
+  waterType = new UIButton(5.0f, 130.0f, 170.0f, 30.0f,
+    "Type: none",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterType, this, _1, _2),
+    100);
+
+  addChild(waterType);
+
 
   // Add dropdown type
 
-
+  updateData();
 }
 
 void UIWater::updatePos(int newTileX, int newTileY)
@@ -110,6 +119,11 @@ void UIWater::updateData()
 
   waterLevel->setText(ms.str());
   waterOpercity->value = (gWorld->getWaterTrans(tileX, tileY)/255.0f);
+
+  std::stringstream mt;
+  mt << gWorld->getWaterType(tileX, tileY) << " - " << LiquidTypeDB::getLiquidName(gWorld->getWaterType(tileX, tileY));
+
+  waterType->setText(mt.str());
 }
 
 void UIWater::resize()
@@ -143,4 +157,9 @@ void UIWater::changeWaterHeight(UIFrame::Ptr /*ptr*/, int someint)
 {
   gWorld->setWaterHeight(tileX, tileY, ( gWorld->getWaterHeight(tileX, tileY) + someint ) );
   updateData();
+}
+
+void UIWater::changeWaterType(UIFrame::Ptr /*ptr*/, int someint)
+{
+    // open type selector
 }

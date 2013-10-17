@@ -5,6 +5,7 @@
 #include "MapView.h"
 class UISlider;
 class UIText;
+class UIButton;
 
 class UIWater : public UIWindow
 {
@@ -21,6 +22,7 @@ public:
   void changeWaterHeight(UIFrame::Ptr,int someint);
   void addWaterLayer(UIFrame::Ptr, int);
   void deleteWaterLayer(UIFrame::Ptr ptr, int someint);
+  void changeWaterType(UIFrame::Ptr /*ptr*/, int someint);
 
 
 private:
@@ -30,6 +32,7 @@ private:
   MapView *_MapView;
   UISlider *waterOpercity;
   UIText *waterLevel;
+  UIButton *waterType;
 
   int tileX;
   int tileY;
