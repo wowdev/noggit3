@@ -2176,7 +2176,7 @@ int World::getWaterType(int x, int y)
   if(mapIndex->tileLoaded(y, x))
   {
     return mapIndex->getTile(y,x)->Water->getType();
-    mapIndex->setChanged(y,x);
+    //mapIndex->setChanged(y,x); Should only change if you change something :)
   }
   else return false;
 }

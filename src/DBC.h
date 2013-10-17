@@ -166,6 +166,7 @@ public:
   static const size_t TextureFilenames = 16;    // string[8]
 
   static int getLiquidType( int pID );
+  static std::string getLiquidName( int pID );
 };
 
 void OpenDBs();
