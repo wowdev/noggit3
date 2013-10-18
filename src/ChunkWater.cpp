@@ -307,6 +307,24 @@ float ChunkWater::getHeight(size_t x, size_t y)
   return HeightData[0].mHeightValues[y][x];
 }
 
+int ChunkWater::getType()
+{
+  for(size_t y = 0; y < 9; ++y)
+  {
+    for(size_t x = 0; x < 9; ++x)
+    {
+      if(hasLayer(x,y)) return getType(x,y);
+    }
+  }
+  return 0;
+}
+
+int ChunkWater::getType(size_t x, size_t y)
+{
+  if(!hasLayer(x,y)) return 0;
+  return Info[0].LiquidType;
+}
+
 unsigned char ChunkWater::getTrans()
 {
   for(size_t y = 0; y < 9; ++y)
