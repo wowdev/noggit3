@@ -32,6 +32,8 @@ public:
   unsigned char getTrans(size_t x, size_t y);
 
   void setType(int type);
+  int getType();
+  int getType(size_t x, size_t y);
   bool hasData();
 
   void addLayer();

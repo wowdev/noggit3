@@ -198,7 +198,13 @@ void TileWater::setType(int type)
 
 int TileWater::getType()
 {
-	return 1;
-  // naahhh searched 30 minutes why i always get same type on every adt... grrr ;)
-  // Could you please implement this and also setType. Would be nice :)
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+      if(chunks[i][j]->hasData())
+        return chunks[i][j]->getType();
+    }
+  }
+  return 0;
 }
