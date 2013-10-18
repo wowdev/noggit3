@@ -58,6 +58,7 @@
 #include "UIModelImport.h"
 #include "UIHelperModels.h"
 #include "MapIndex.h"
+#include "UIWaterTypeBrowser.h"
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -218,6 +219,7 @@ void change_settings_window(int oldid, int newid)
 {
   if(!setting_ground || !setting_blur || !settings_paint || (!mainGui || !mainGui->guiWater))
     return;
+  mainGui->guiWaterTypeSelector->hide();
   setting_ground->hide();
   setting_blur->hide();
   settings_paint->hide();

@@ -10,19 +10,20 @@
 #include "UIButton.h"
 #include "UITexture.h"
 #include "UISlider.h"
-#include "MapView.h"
+#include "UIMapViewGUI.h"
 #include "Misc.h"
 #include "World.h"
 #include "Video.h" // video
 #include <iostream>
 #include <sstream>
+#include "UIWaterTypeBrowser.h"
 
 #include "Log.h"
 
 
 
-UIWater::UIWater( MapView *mapview ) 
-  : UIWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f - ( video.yres() /4), winWidth, winHeight )
+UIWater::UIWater( UIMapViewGUI *setGui ) 
+  : UIWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f - ( video.yres() /4), winWidth, winHeight ),  mainGui( setGui )
 {
   addChild( new UIText( 78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter ) );
 
@@ -87,11 +88,11 @@ UIWater::UIWater( MapView *mapview )
     );
   addChild(new UIText(5.0f, 108.f, "numpad +/- (alt *2, ctrl *5)", app.getArial12(), eJustifyLeft));
 
-  waterType = new UIButton(5.0f, 130.0f, 170.0f, 30.0f,
+  waterType = new UIButton(5.0f, 135.0f, 170.0f, 30.0f,
     "Type: none",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    boost::bind(&UIWater::changeWaterType, this, _1, _2),
+    boost::bind(&UIWater::openWaterTypeBrowser, this, _1, _2),
     100);
 
   addChild(waterType);
@@ -159,7 +160,16 @@ void UIWater::changeWaterHeight(UIFrame::Ptr /*ptr*/, int someint)
   updateData();
 }
 
-void UIWater::changeWaterType(UIFrame::Ptr /*ptr*/, int someint)
+void UIWater::openWaterTypeBrowser(UIFrame::Ptr /*ptr*/, int someint)
 {
-    // open type selector
+  if(this->mainGui->guiWaterTypeSelector->hidden())
+    this->mainGui->guiWaterTypeSelector->show();
+  else
+    this->mainGui->guiWaterTypeSelector->hide();
+}
+
+void UIWater::changeWaterType( int waterint )
+{
+  gWorld->setWaterType(tileX, tileY,waterint);
+  updateData();
 }
