@@ -193,7 +193,13 @@ unsigned char TileWater::getOpercity()
 
 void TileWater::setType(int type)
 {
-
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+      chunks[i][j]->setType(type);
+    }
+  }
 }
 
 int TileWater::getType()

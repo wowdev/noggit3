@@ -33,14 +33,14 @@ public:
 
   void setType(int type);
   int getType();
-  int getType(size_t x, size_t y);
-  bool hasData();
 
   void addLayer();
   void addLayer(size_t x, size_t y);
 
   void deleteLayer();
   void deleteLayer(size_t x, size_t y);
+
+  bool hasData();
 
 private:
 
