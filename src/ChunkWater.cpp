@@ -34,13 +34,7 @@ void ChunkWater::reloadRendering()
     }
   }
 
-  for(int h=0 ; h < 8; ++h)
-  {
-    for(int w=0; w < 8; ++w)
-    {
-      lTile.mRender[w][h] = Render[0].mRender[w][h];
-    }
-  }
+  memcpy(lTile.mRender, existsTable, 8*8);
 
   Liquids[0]->initFromMH2O(lTile);
 }
@@ -54,26 +48,26 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
   {
     if(k > 0) break; //Temporary only for 1 layer
 
+    memset(existsTable[k], 0, 8*8);
+    memset(InfoMask, 0, 8);
+
     //info
     f.seek(basePos + Header.ofsInformation);
     f.read(&Info[k], sizeof(MH2O_Information));
-
-    char rMask[8];
-    char fMask[8];
 
     //render
     if(Header.ofsRenderMask)
     {
       f.seek(basePos + Header.ofsRenderMask);
-      f.read(rMask,sizeof(rMask));
-      f.read(fMask,sizeof(fMask));
+      f.read(&Render[k], sizeof(MH2O_Render));
     }
 
     //mask
     if(Info[k].ofsInfoMask > 0 && Info[k].height > 0)
     {
       f.seek(Info[k].ofsInfoMask + basePos);
-      f.read(InfoMask[k], Info[k].height);
+      size_t size(std::ceil(Info[k].height * Info[k].width / 8.0f));
+      f.read(InfoMask, size);
     }
 
     int bitOffset = 0;
@@ -86,11 +80,11 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 
         if(Info[k].ofsInfoMask > 0)
         {
-          render = (InfoMask[k][bitOffset / 8] >> bitOffset % 8) & 1;
+          render = (InfoMask[bitOffset / 8] >> (bitOffset % 8)) & 1;
           bitOffset++;
         }
 
-        Render[k].mRender[h + Info[k].yOffset][w + Info[k].xOffset] = render; //if we have no MH2O_Render structure
+        existsTable[k][h + Info[k].yOffset][w + Info[k].xOffset] = render;
       }
     }
 
@@ -153,82 +147,90 @@ void ChunkWater::writeData(MH2O_Header *header,  MH2O_Information *info, sExtend
   if(!hasData()) return;
 
   //render
-  //just write this in anycase should be fine
-  char wRender[8];
-  char fRender[8];
-
-  for(int h=0 ; h < 8; ++h)
-  {
-    for(int w=0; w < 8; ++w)
-    {
-      Render[0].mRender[w][h] ? (wRender[w] |= (1<<h)) : (wRender[w] &=~(1<<h)); //render mask
-      Render[0].fRender[w][h] ? (fRender[w] |= (1<<h)) : (fRender[w] &=~(1<<h)); //fatigue render mask?
-    }
-  }
-
-  lADTFile.Insert(lCurrentPosition, 8*sizeof(char), reinterpret_cast<char*>(wRender));
-  lADTFile.Insert(lCurrentPosition+8, 8*sizeof(char), reinterpret_cast<char*>(fRender));
+  lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render[0]));
   header->ofsRenderMask = lCurrentPosition - basePos;
   lCurrentPosition +=  2*8*sizeof(char);
 
-  //mask
-  if(Info[0].ofsInfoMask > 0 && Info[0].height > 0)
+
+  info->yOffset = 8;
+  info->xOffset = 8;
+  info->height = 0;
+  info->width = 0;
+
+  for(int h = 0; h < 8; ++h)
   {
-    lADTFile.Insert(lCurrentPosition, Info[0].height, reinterpret_cast<char*>(&InfoMask[0]));
-    info->ofsInfoMask = lCurrentPosition - basePos;
-    lCurrentPosition +=  Info[0].height;
+    for(int w = 0; w < 8; ++w)
+    {
+      if(!existsTable[0][h][w]) continue;
+
+      if(w < info->xOffset) info->xOffset = w;
+      if(h < info->yOffset) info->yOffset = h;
+
+      if(w > info->width) info->width = w;
+      if(h > info->height) info->height = h;
+
+
+    }
   }
 
-  bool hasHeightmap((Info[0].Flags != 2));
+  info->height -= info->yOffset - 1;
+  info->width -= info->xOffset - 1;
+
+  uint8_t infoMask[8];
+  int bitOffset = 0;
+
+  memset(infoMask, 0, 8);
+
+  for(int h = 0; h < info->height; ++h)
+  {
+    for(int w = 0; w < info->width; ++w)
+    {
+      infoMask[bitOffset / 8] |= (1 << (bitOffset % 8));
+      bitOffset++;
+    }
+  }
+
+  //mask
+  lADTFile.Insert(lCurrentPosition, std::ceil(bitOffset / 8.0f), reinterpret_cast<char*>(infoMask));
+  info->ofsInfoMask = lCurrentPosition - basePos;
+  lCurrentPosition += std::ceil(bitOffset / 8.0f);
 
   //HeighData & TransparencyData
-  if(hasHeightmap)
+  if(info->Flags != 2)
   {
     //write a full heightmap here; should be the safest for now
-    info->yOffset = 0;
-    info->xOffset = 0;
-    info->height = 8;
-    info->width = 8;
+
     info->ofsHeightMap = lCurrentPosition - basePos;
 
-    lADTFile.Insert(lCurrentPosition, 9*9*sizeof(float), reinterpret_cast<char*>(HeightData[0].mHeightValues));
-    lCurrentPosition +=  9*9*sizeof(float);
+    for (int h = info->yOffset; h < info->yOffset + info->height + 1; ++h)
+    {
+      for(int w = info->xOffset; w < info->xOffset + info->width + 1; ++w)
+      {
+        lADTFile.Insert(lCurrentPosition, sizeof(float), reinterpret_cast<char*>(&HeightData[0].mHeightValues[h][w]));
+        lCurrentPosition +=  sizeof(float);
+      }
+    }
 
-    lADTFile.Insert(lCurrentPosition, 9*9*sizeof(unsigned char), reinterpret_cast<char*>(HeightData[0].mTransparency));
-    lCurrentPosition += 9*9*sizeof(unsigned char);
+    for (int h = info->yOffset; h < info->yOffset + info->height + 1; ++h)
+    {
+      for(int w = info->xOffset; w < info->xOffset + info->width + 1; ++w)
+      {
+        lADTFile.Insert(lCurrentPosition, sizeof(unsigned char), reinterpret_cast<char*>(&HeightData[0].mTransparency[h][w]));
+        lCurrentPosition += sizeof(unsigned char);
+      }
+    }
   }
   else
   {
     info->ofsHeightMap = 0;
   }
-
-  /*
-  bool eFlag = true; //Blizz zips their files here using same bytes at mask and transparency. They move transparency bytes back if some last bytes of previous data matches some first bytes of next data.
-  //It is genious I think! We have to do it better =)
-  int offs = 1;		 //ADT will be fully correct without this but if we want to make Blizzlike files or better we have to make it work.
-  int offs2 =1;
-  if(used.Mask[i][j])
-    while(eFlag){
-      for(int i=0; i<offs; ++i)
-        if(lADTFile.GetPointer<unsigned char>(lCurrentPosition-offs)[i]==HeightData[i][j][0].mTransparency[0][i]){
-          offs2++;
-          break;
-        }else{
-          eFlag = false;
-          break;
-        }
-      offs=offs2;
-    }
-
-  lCurrentPosition-=offs-1;
-  */
 }
 
 bool ChunkWater::hasLayer(size_t x, size_t y)
 {
   if(!hasData()) return false;
   if(x > 8 || y > 8) return false;
-  return Render[0].mRender[y][x];
+  return existsTable[0][y][x];
 }
 
 void ChunkWater::addLayer()
@@ -250,7 +252,7 @@ void ChunkWater::addLayer(size_t x, size_t y)
     Header.nLayers = 1;
     reloadRendering();
   }
-  Render[0].mRender[y][x] = true;
+ existsTable[0][y][x] = true;
 }
 
 void ChunkWater::deleteLayer()
@@ -268,7 +270,7 @@ void ChunkWater::deleteLayer()
 void ChunkWater::deleteLayer(size_t x, size_t y)
 {
   if(!hasLayer(x,y)) return;
-  Render[0].mRender[y][x] = false;
+  existsTable[0][y][x] = false;
 }
 
 void ChunkWater::setHeight(float height)
