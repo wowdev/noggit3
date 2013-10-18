@@ -49,7 +49,7 @@ private:
   MH2O_Header Header;
   MH2O_Information Info[5];
   MH2O_HeightMask HeightData[5];
-  char *InfoMask[5];
+  uint8_t InfoMask[5][8];
   MH2O_Render Render[5];
   Liquid * Liquids[5];
 

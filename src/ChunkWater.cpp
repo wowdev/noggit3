@@ -69,24 +69,32 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
       f.read(fMask,sizeof(fMask));
     }
 
-    for(int h=0 ; h < 8; ++h)
-    {
-      for(int w=0; w < 8; ++w)
-      {
-        Render[k].mRender[w][h] = (Header.ofsRenderMask) ? (1 << h) & rMask[w] : true; //if we have no MH2O_Render structure
-        Render[k].fRender[w][h] = (Header.ofsRenderMask) ? (1 << h) & fMask[w] : true;
-      }
-    }
-
     //mask
     if(Info[k].ofsInfoMask > 0 && Info[k].height > 0)
     {
-      //(Info[k].width * Info[k].height) / 8;
-      f.seek(Info[k].ofsInfoMask + basePos);  /*if(numBytes == 0 && (Info[k].width > 0 && Info[k].height > 0)) numBytes = 1;*/
-
-      InfoMask[k] = new char[Info[k].height];
-      f.read(&InfoMask[k], Info[k].height);
+      f.seek(Info[k].ofsInfoMask + basePos);
+      f.read(InfoMask[k], Info[k].height);
     }
+
+    int bitOffset = 0;
+
+    for(int h = 0; h < Info[k].height; ++h)
+    {
+      for(int w = 0; w < Info[k].width; ++w)
+      {
+        bool render = true;
+
+        if(Info[k].ofsInfoMask > 0)
+        {
+          render = (InfoMask[k][bitOffset / 8] >> bitOffset % 8) & 1;
+          bitOffset++;
+        }
+
+        Render[k].mRender[h + Info[k].yOffset][w + Info[k].xOffset] = render; //if we have no MH2O_Render structure
+      }
+    }
+
+
 
     for(int h=0 ; h < 9; ++h)
     {
