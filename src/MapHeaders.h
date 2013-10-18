@@ -186,34 +186,23 @@ struct MH2O_HeightMask
 {
   float mHeightValues[9][9];
   unsigned char mTransparency[9][9];
-  int mWidth;
-  int mHeight;
 
   MH2O_HeightMask()
-    : mWidth(0)
-    , mHeight(0)
   {
     memset(mHeightValues, 0, 9*9*sizeof(float));
     memset(mTransparency, 0, 9*9*sizeof(unsigned char));
   }
 };
 
-struct MH2O_Render{
-  bool mRender[8][8]; //render mask
-  bool fRender[8][8]; //fatigue mask?
+struct MH2O_Render
+{
+  unsigned char mask[8]; //render mask
+  unsigned char fatigue[8]; //fatigue mask?
 
   MH2O_Render()
   {
-    memset(mRender, 0, 8*8*sizeof(bool));
-    memset(fRender, 0, 8*8*sizeof(bool));
-  }
-
-  bool isFull()
-  {
-    for(size_t i = 0; i < 8*8; ++i)
-      if(!mRender[i / 8][i % 8]) return false;
-
-    return true;
+    memset(mask, 255, 8);
+    memset(fatigue, 0, 8);
   }
 };
 
