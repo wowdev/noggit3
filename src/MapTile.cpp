@@ -913,7 +913,7 @@ void MapTile::saveTile()
     lMODF_Data[lID].extents[0][1] = extend.y;
     lMODF_Data[lID].extents[0][2] = extend.z;
 
-    extend = it->second.pos + it->second.wmo->extents[0];
+    extend = it->second.pos + it->second.wmo->extents[1];
     lMODF_Data[lID].extents[1][0] = extend.x;
     lMODF_Data[lID].extents[1][1] = extend.y;
     lMODF_Data[lID].extents[1][2] = extend.z;
