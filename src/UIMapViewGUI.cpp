@@ -29,6 +29,7 @@
 #include "TextureSet.h"
 #include "MapIndex.h"
 #include "Misc.h"
+#include "UIWaterTypeBrowser.h"
 
 #include "UIModel.h"
 #include "ModelManager.h"
@@ -94,11 +95,15 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   _help->hide();
   addChild( _help );
 
-  guiWater = new UIWater(setMapview);
+  guiWater = new UIWater(this);
   guiWater->hide();
   guiWater->movable(true);
   addChild(guiWater);
-  
+
+  guiWaterTypeSelector = new UIWaterTypeBrowser( this->width()-430.0f, 38.0f, 240.0f, 300.0f, this );
+  guiWaterTypeSelector->hide();
+  guiWaterTypeSelector->movable(true);
+  addChild(guiWaterTypeSelector);
   //_test = new UIAlphamap(100.0f, 100.0f);
   //_test->setModel(ModelManager::add("world\\azeroth\\elwynn\\passivedoodads\\tree\\elwynnlog02.m2"));
   //_test->show();

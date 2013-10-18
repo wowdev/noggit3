@@ -26,6 +26,7 @@ class UIWater;
 
 class UIModel;
 class UIAlphamap;
+class UIWaterTypeBrowser;
 
 #include "UIFrame.h"
 
@@ -65,6 +66,7 @@ public:
   UITexturePicker* TexturePicker;
   UITextureSwitcher* TextureSwitcher;
   UIWater* guiWater;
+  UIWaterTypeBrowser* guiWaterTypeSelector;
 
   UIWindow *setting_ground;
   UIWindow *setting_blur;

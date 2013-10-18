@@ -2,15 +2,16 @@
 #define __UI_WATER_H
 
 #include "UICloseWindow.h"
-#include "MapView.h"
+
 class UISlider;
 class UIText;
 class UIButton;
+class UIMapViewGUI;
 
 class UIWater : public UIWindow
 {
 public:
-  UIWater(MapView *mapView );
+  UIWater(UIMapViewGUI *setGui );
 
   void resize();
 
@@ -22,14 +23,15 @@ public:
   void changeWaterHeight(UIFrame::Ptr,int someint);
   void addWaterLayer(UIFrame::Ptr, int);
   void deleteWaterLayer(UIFrame::Ptr ptr, int someint);
-  void changeWaterType(UIFrame::Ptr /*ptr*/, int someint);
+  void changeWaterType( int waterint );
+  void openWaterTypeBrowser(UIFrame::Ptr /*ptr*/, int someint);
 
 
 private:
   static const int winWidth = 180;
-  static const int winHeight = 200;
+  static const int winHeight = 165;
 
-  MapView *_MapView;
+  UIMapViewGUI *mainGui;
   UISlider *waterOpercity;
   UIText *waterLevel;
   UIButton *waterType;
