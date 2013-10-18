@@ -319,20 +319,15 @@ float ChunkWater::getHeight(size_t x, size_t y)
 
 int ChunkWater::getType()
 {
-  for(size_t y = 0; y < 9; ++y)
-  {
-    for(size_t x = 0; x < 9; ++x)
-    {
-      if(hasLayer(x,y)) return getType(x,y);
-    }
-  }
-  return 0;
+  if(!hasData()) return 0;
+  return Info[0].LiquidType;
 }
 
-int ChunkWater::getType(size_t x, size_t y)
+void ChunkWater::setType(int type)
 {
-  if(!hasLayer(x,y)) return 0;
-  return Info[0].LiquidType;
+  if(!hasData()) return;
+  Info[0].LiquidType = type;
+  reloadRendering();
 }
 
 unsigned char ChunkWater::getTrans()
@@ -376,11 +371,6 @@ void ChunkWater::setTrans(unsigned char trans)
   }
 
   reloadRendering();
-}
-
-void ChunkWater::setType(int type)
-{
-  Info[0].LiquidType = type;
 }
 
 bool ChunkWater::hasData()
