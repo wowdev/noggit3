@@ -62,6 +62,10 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
       f.seek(basePos + Header.ofsRenderMask);
       f.read(&Render[k], sizeof(MH2O_Render));
     }
+    else
+    {
+      memset(&Render[k].mask, 255, 8);
+    }
 
     //mask
     if(Info[k].ofsInfoMask > 0 && Info[k].height > 0)
@@ -101,27 +105,27 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
     }
 
 
-    if(Info[k].ofsHeightMap)// && !(Info[k].Flags & 2)) {
+    if(!Info[k].ofsHeightMap)
+      return;
+
+    f.seek(basePos + Info[k].ofsHeightMap);
+
+    if(Info[k].Flags != 2)
     {
-      f.seek(basePos + Info[k].ofsHeightMap);
-
-      if(Info[k].Flags != 2) //if Flags == 2 then there are no Heighmap data...
-      {
-        for (int w = Info[k].yOffset; w < Info[k].yOffset + Info[k].height + 1; ++w)
-        {
-          for(int h = Info[k].xOffset; h < Info[k].xOffset + Info[k].width + 1; ++h)
-          {
-            f.read(&HeightData[k].mHeightValues[w][h], sizeof(float));
-          }
-        }
-      }
-
       for (int w = Info[k].yOffset; w < Info[k].yOffset + Info[k].height + 1; ++w)
       {
         for(int h = Info[k].xOffset; h < Info[k].xOffset + Info[k].width + 1; ++h)
         {
-          f.read(&HeightData[k].mTransparency[w][h], sizeof(unsigned char));
+          f.read(&HeightData[k].mHeightValues[w][h], sizeof(float));
         }
+      }
+    }
+
+    for (int w = Info[k].yOffset; w < Info[k].yOffset + Info[k].height + 1; ++w)
+    {
+      for(int h = Info[k].xOffset; h < Info[k].xOffset + Info[k].width + 1; ++h)
+      {
+        f.read(&HeightData[k].mTransparency[w][h], sizeof(unsigned char));
       }
     }
   }
@@ -147,16 +151,20 @@ void ChunkWater::writeData(MH2O_Header *header,  MH2O_Information *info, sExtend
 {
   if(!hasData()) return;
 
+  MH2O_Information newinfo;
+
+  newinfo.yOffset = 8;
+  newinfo.xOffset = 8;
+  newinfo.height = 0;
+  newinfo.width = 0;
+  newinfo.minHeight = 0;
+  newinfo.maxHeight = 1000;
+  newinfo.ofsHeightMap = 0;
+
   //render
-  lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render[0]));
   header->ofsRenderMask = lCurrentPosition - basePos;
-  lCurrentPosition +=  2*8*sizeof(char);
-
-
-  info->yOffset = 8;
-  info->xOffset = 8;
-  info->height = 0;
-  info->width = 0;
+  lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render[0]));
+  lCurrentPosition += sizeof(MH2O_Render);
 
   for(int h = 0; h < 8; ++h)
   {
@@ -164,27 +172,25 @@ void ChunkWater::writeData(MH2O_Header *header,  MH2O_Information *info, sExtend
     {
       if(!existsTable[0][h][w]) continue;
 
-      if(w < info->xOffset) info->xOffset = w;
-      if(h < info->yOffset) info->yOffset = h;
+      if(w < newinfo.xOffset) newinfo.xOffset = w;
+      if(h < newinfo.yOffset) newinfo.yOffset = h;
 
-      if(w > info->width) info->width = w;
-      if(h > info->height) info->height = h;
-
-
+      if(w > newinfo.width) newinfo.width = w;
+      if(h > newinfo.height) newinfo.height = h;
     }
   }
 
-  info->height -= info->yOffset - 1;
-  info->width -= info->xOffset - 1;
+  newinfo.height -= newinfo.yOffset - 1;
+  newinfo.width -= newinfo.xOffset - 1;
 
   uint8_t infoMask[8];
   int bitOffset = 0;
 
   memset(infoMask, 0, 8);
 
-  for(int h = 0; h < info->height; ++h)
+  for(int h = 0; h < newinfo.height; ++h)
   {
-    for(int w = 0; w < info->width; ++w)
+    for(int w = 0; w < newinfo.width; ++w)
     {
       infoMask[bitOffset / 8] |= (1 << (bitOffset % 8));
       bitOffset++;
@@ -193,38 +199,36 @@ void ChunkWater::writeData(MH2O_Header *header,  MH2O_Information *info, sExtend
 
   //mask
   lADTFile.Insert(lCurrentPosition, std::ceil(bitOffset / 8.0f), reinterpret_cast<char*>(infoMask));
-  info->ofsInfoMask = lCurrentPosition - basePos;
+  newinfo.ofsInfoMask = lCurrentPosition - basePos;
   lCurrentPosition += std::ceil(bitOffset / 8.0f);
 
   //HeighData & TransparencyData
-  if(info->Flags != 2)
+  if(newinfo.LiquidType == 2) return;
+  newinfo.ofsHeightMap = lCurrentPosition - basePos;
+
+  for (int h = newinfo.yOffset; h < newinfo.yOffset + newinfo.height + 1; ++h)
   {
-    //write a full heightmap here; should be the safest for now
-
-    info->ofsHeightMap = lCurrentPosition - basePos;
-
-    for (int h = info->yOffset; h < info->yOffset + info->height + 1; ++h)
+    for(int w = newinfo.xOffset; w < newinfo.xOffset + newinfo.width + 1; ++w)
     {
-      for(int w = info->xOffset; w < info->xOffset + info->width + 1; ++w)
-      {
-        lADTFile.Insert(lCurrentPosition, sizeof(float), reinterpret_cast<char*>(&HeightData[0].mHeightValues[h][w]));
-        lCurrentPosition +=  sizeof(float);
-      }
-    }
+      if(HeightData[0].mHeightValues[h][w] < newinfo.minHeight) newinfo.minHeight = HeightData[0].mHeightValues[h][w];
+      if(HeightData[0].mHeightValues[h][w] > newinfo.maxHeight) newinfo.maxHeight = HeightData[0].mHeightValues[h][w];
 
-    for (int h = info->yOffset; h < info->yOffset + info->height + 1; ++h)
-    {
-      for(int w = info->xOffset; w < info->xOffset + info->width + 1; ++w)
-      {
-        lADTFile.Insert(lCurrentPosition, sizeof(unsigned char), reinterpret_cast<char*>(&HeightData[0].mTransparency[h][w]));
-        lCurrentPosition += sizeof(unsigned char);
-      }
+
+      lADTFile.Insert(lCurrentPosition, sizeof(float), reinterpret_cast<char*>(&HeightData[0].mHeightValues[h][w]));
+      lCurrentPosition +=  sizeof(float);
     }
   }
-  else
+
+  for (int h = newinfo.yOffset; h < newinfo.yOffset + newinfo.height + 1; ++h)
   {
-    info->ofsHeightMap = 0;
+    for(int w = newinfo.xOffset; w < newinfo.xOffset + newinfo.width + 1; ++w)
+    {
+      lADTFile.Insert(lCurrentPosition, sizeof(unsigned char), reinterpret_cast<char*>(&HeightData[0].mTransparency[h][w]));
+      lCurrentPosition += sizeof(unsigned char);
+    }
   }
+
+  memcpy(lADTFile.GetPointer<char>(basePos + header->ofsInformation), &newinfo, sizeof(MH2O_Information));
 }
 
 void ChunkWater::autoGen(MapChunk *chunk, int factor)
@@ -271,7 +275,7 @@ void ChunkWater::addLayer(size_t x, size_t y)
     Header.nLayers = 1;
     reloadRendering();
   }
- existsTable[0][y][x] = true;
+  existsTable[0][y][x] = true;
 }
 
 void ChunkWater::deleteLayer()
@@ -284,6 +288,11 @@ void ChunkWater::deleteLayer()
     }
   }
   Header.nLayers = 0;
+  Info[0] = MH2O_Information();
+  HeightData[0] = MH2O_HeightMask();
+  Render[0] = MH2O_Render();
+  delete Liquids[0];
+  Liquids[0] = NULL;
 }
 
 void ChunkWater::deleteLayer(size_t x, size_t y)

@@ -926,19 +926,7 @@ void MapTile::saveTile()
   lCurrentPosition += 8 + lMODF_Size;
   //  }
 
-  //MH2O just data saving
-
-  // Beket's temporary way to save a water
-  // Just insert full MH2O data from original .adt to generated one...
-  // Still need to fix Bernds way...
-  /*if(mWaterSize>0){					//if has water... had a stupid crashes because of not checking this =))
-    lADTFile.Extend(8+mWaterSize);
-    lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mh2o = lCurrentPosition - 0x14;
-    LogDebug << "Water size "<< mWaterSize << std::endl;
-    lADTFile.Insert( lCurrentPosition, mWaterSize, MH2O_Buffer );
-    lCurrentPosition += 8+mWaterSize;
-  }*/
-
+  //MH2O
   Water->saveToFile(lADTFile, lMHDR_Position, lCurrentPosition);
   
   // MCNK
