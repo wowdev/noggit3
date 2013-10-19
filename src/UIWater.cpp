@@ -97,7 +97,12 @@ UIWater::UIWater( UIMapViewGUI *setGui )
 
   addChild(waterType);
 
-  waterGen = new UIButton(5.0f, 165.0f, 170.0f, 30.0f,
+  waterGenFactor = new UISlider(5.0f, 185.0f, 169.0f, 100.0f, 0.0f);
+  waterGenFactor->setValue(0.5f);
+  waterGenFactor->setText("Opacity Gen Factor: ");
+  addChild(waterGenFactor);
+
+  waterGen = new UIButton(5.0f, 205.0f, 170.0f, 30.0f,
     "Auto Opacity",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
@@ -185,6 +190,6 @@ void UIWater::changeWaterType( int waterint )
 
 void UIWater::autoGen(UIFrame::Ptr ptr, int someint)
 {
-  gWorld->autoGenWaterTrans(tileX, tileY);
+  gWorld->autoGenWaterTrans(tileX, tileY, waterGenFactor->value * 100);
   updateData();
 }

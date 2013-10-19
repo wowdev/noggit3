@@ -30,13 +30,14 @@ public:
 
 private:
   static const int winWidth = 180;
-  static const int winHeight = 200;
+  static const int winHeight = 230;
 
   UIMapViewGUI *mainGui;
   UISlider *waterOpacity;
   UIText *waterLevel;
   UIButton *waterType;
   UIButton *waterGen;
+  UISlider *waterGenFactor;
 
   int tileX;
   int tileY;

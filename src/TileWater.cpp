@@ -57,13 +57,13 @@ ChunkWater* TileWater::getChunk(int x, int y)
   return chunks[x][y];
 }
 
-void TileWater::autoGen()
+void TileWater::autoGen(int factor)
 {
   for(int i=0; i < 16; ++i)
   {
     for(int j=0; j < 16; ++j)
     {
-      chunks[i][j]->autoGen(tile->getChunk(j, i));
+      chunks[i][j]->autoGen(tile->getChunk(j, i), factor);
     }
   }
 }
