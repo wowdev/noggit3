@@ -76,13 +76,14 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mh2o = lCurrentPosition - 0x14; //setting offset to MH2O data in Header
   lADTFile.Extend(8); // we need 8 empty bytes
   lCurrentPosition = ofsW;
+  size_t headerOffsets[16][16];
 
   //writing MH2O_Header
   for(int i = 0; i < 16; ++i)
   {
     for(int j = 0; j < 16; ++j)
     {
-      //there is always a bloody header
+      headerOffsets[i][j] = lCurrentPosition;
       chunks[i][j]->writeHeader(lADTFile, lCurrentPosition);
     }
   }
@@ -92,7 +93,8 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
   {
     for(int j=0; j < 16; ++j)
     {
-      MH2O_Header *header(lADTFile.GetPointer<MH2O_Header>(ofsW + (i * 16 + j) * sizeof(MH2O_Header)));
+      MH2O_Header *header(lADTFile.GetPointer<MH2O_Header>(headerOffsets[i][j]));
+
       chunks[i][j]->writeInfo(lADTFile, header, ofsW, lCurrentPosition); //let chunk check if there is info!
     }
   }
@@ -102,7 +104,7 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
   {
     for(int j = 0; j < 16; ++j)
     {
-      MH2O_Header *header(lADTFile.GetPointer<MH2O_Header>(ofsW + (i * 16 + j) * sizeof(MH2O_Header)));
+      MH2O_Header *header(lADTFile.GetPointer<MH2O_Header>(headerOffsets[i][j]));
       MH2O_Information *info(lADTFile.GetPointer<MH2O_Information>(ofsW + header->ofsInformation));
 
       chunks[i][j]->writeData(header, info, lADTFile, ofsW, lCurrentPosition);

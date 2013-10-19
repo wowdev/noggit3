@@ -169,7 +169,7 @@ struct MH2O_Information{
 
   MH2O_Information()
   {
-        LiquidType = 0;
+        LiquidType = 5;
 	Flags = 0;
 	maxHeight = 0;
 	minHeight = 0;
