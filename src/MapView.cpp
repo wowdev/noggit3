@@ -167,7 +167,7 @@ void setGroundBrushRadius(float f)
 
 void setGroundBrushSpeed(float f)
 {
-  groundBlurSpeed = f;
+  groundBrushSpeed = f;
 }
 
 
@@ -1215,7 +1215,7 @@ void MapView::tick( float t, float dt )
         break;
 
         case 2:
-          if( Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown)
+          if( Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown && Environment::getInstance()->AltDown)
           {
             // clear chunk texture
             if( mViewMode == eViewMode_3D )
