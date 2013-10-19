@@ -105,9 +105,8 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
     for(int j = 0; j < 16; ++j)
     {
       MH2O_Header *header(lADTFile.GetPointer<MH2O_Header>(headerOffsets[i][j]));
-      MH2O_Information *info(lADTFile.GetPointer<MH2O_Information>(ofsW + header->ofsInformation));
 
-      chunks[i][j]->writeData(header, info, lADTFile, ofsW, lCurrentPosition);
+      chunks[i][j]->writeData(header, lADTFile, ofsW, lCurrentPosition);
     }
   }
 
