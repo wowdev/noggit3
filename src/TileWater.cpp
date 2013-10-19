@@ -179,18 +179,18 @@ float TileWater::getHeight()
   return 0;
 }
 
-void TileWater::setTrans(unsigned char opercity)
+void TileWater::setTrans(unsigned char opacity)
 {
   for(int i=0; i < 16; ++i)
   {
     for(int j=0; j < 16; ++j)
     {
-      chunks[i][j]->setTrans(opercity);
+      chunks[i][j]->setTrans(opacity);
     }
   }
 }
 
-unsigned char TileWater::getOpercity()
+unsigned char TileWater::getOpacity()
 {
   for(int i=0; i < 16; ++i)
   {
