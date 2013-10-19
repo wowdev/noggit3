@@ -3,6 +3,7 @@
 #include "MPQ.h"
 #include "Liquid.h"
 #include "Misc.h"
+#include "MapChunk.h"
 
 ChunkWater::ChunkWater(float pX, float pY)
   : x(pX)
@@ -224,6 +225,24 @@ void ChunkWater::writeData(MH2O_Header *header,  MH2O_Information *info, sExtend
   {
     info->ofsHeightMap = 0;
   }
+}
+
+void ChunkWater::autoGen(MapChunk *chunk)
+{
+  for(size_t y = 0; y < 9; ++y)
+  {
+    for(size_t x = 0; x < 9; ++x)
+    {
+      float terrainHeight(chunk->getHeight(y, x));
+      float waterHeight(HeightData[0].mHeightValues[y][x]);
+
+      int diff(50 * std::log(std::abs(waterHeight - terrainHeight) + 1.0f));
+      diff = std::min(std::max(diff, 0), 255);
+
+      HeightData[0].mTransparency[y][x] = diff;
+    }
+  }
+  reloadRendering();
 }
 
 bool ChunkWater::hasLayer(size_t x, size_t y)

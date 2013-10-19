@@ -211,6 +211,8 @@ public:
 
   void addWaterLayer(int x, int z);
   void addWaterLayer(int x, int z, float height, unsigned char trans);
+
+  void autoGenWaterTrans(int x, int y);
 };
 
 extern World *gWorld;

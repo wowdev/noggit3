@@ -4,8 +4,9 @@
 #include "Misc.h"
 #include "ChunkWater.h"
 
-TileWater::TileWater(float pXbase, float pZbase)
-  : xbase(pXbase)
+TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase)
+  : tile(pTile)
+  , xbase(pXbase)
   , zbase(pZbase)
 {
   for(int i=0; i < 16; ++i)
@@ -54,6 +55,17 @@ void TileWater::draw()
 ChunkWater* TileWater::getChunk(int x, int y)
 {
   return chunks[x][y];
+}
+
+void TileWater::autoGen()
+{
+  for(int i=0; i < 16; ++i)
+  {
+    for(int j=0; j < 16; ++j)
+    {
+      chunks[i][j]->autoGen(tile->getChunk(j, i));
+    }
+  }
 }
 
 void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition)

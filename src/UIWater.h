@@ -25,16 +25,18 @@ public:
   void deleteWaterLayer(UIFrame::Ptr ptr, int someint);
   void changeWaterType( int waterint );
   void openWaterTypeBrowser(UIFrame::Ptr /*ptr*/, int someint);
+  void autoGen(UIFrame::Ptr ptr, int someint);
 
 
 private:
   static const int winWidth = 180;
-  static const int winHeight = 165;
+  static const int winHeight = 200;
 
   UIMapViewGUI *mainGui;
   UISlider *waterOpercity;
   UIText *waterLevel;
   UIButton *waterType;
+  UIButton *waterGen;
 
   int tileX;
   int tileY;

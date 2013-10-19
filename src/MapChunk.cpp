@@ -649,6 +649,12 @@ bool MapChunk::GetVertex(float x,float z, Vec3D *V)
   return true;
 }
 
+float MapChunk::getHeight(int x, int z)
+{
+  if(x > 9 || z > 9 || x < 0 || z < 0) return 0.0f;
+  return mVertices[indexNoLoD(x, z)].y;
+}
+
 void MapChunk::drawPass(int id)
 {
   textureSet->startAnim(id);
