@@ -174,6 +174,8 @@ SET( SourceFiles
   src/UICapsWarning.h
   src/UIWaterSaveWarning.cpp
   src/UIWaterSaveWarning.h
+  src/UIWaterTypeBrowser.cpp
+  src/UIWaterTypeBrowser.h
   src/UIHelperModels.cpp
   src/UIHelperModels.h
   src/UIModel.cpp
