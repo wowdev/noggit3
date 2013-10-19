@@ -2155,7 +2155,7 @@ unsigned char World::getWaterTrans(int x, int y)
 { 
   if(mapIndex->tileLoaded(y, x))
   {
-    return mapIndex->getTile(y,x)->Water->getOpercity();
+    return mapIndex->getTile(y,x)->Water->getOpacity();
   }
   else return 255;
 }

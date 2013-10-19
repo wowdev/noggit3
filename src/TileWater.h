@@ -28,8 +28,8 @@ public:
   void setHeight(float height);
   float getHeight();
 
-  void setTrans(unsigned char waterOpercity);
-  unsigned char getOpercity();
+  void setTrans(unsigned char opacity);
+  unsigned char getOpacity();
 
   void setType(int type);
   int getType();

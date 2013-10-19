@@ -28,11 +28,11 @@ UIWater::UIWater( UIMapViewGUI *setGui )
   addChild( new UIText( 78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter ) );
 
 
-  waterOpercity = new UISlider(5.0f, 40.0f, 169.0f,255.0f,0.0f);
-  waterOpercity->setValue(1);
-  waterOpercity->setText("Opercity: ");
-  waterOpercity->setFunc(boost::bind(&UIWater::setWaterTrans, this, _1));
-  addChild(waterOpercity);
+  waterOpacity = new UISlider(5.0f, 40.0f, 169.0f,255.0f,0.0f);
+  waterOpacity->setValue(1);
+  waterOpacity->setText("Opacity: ");
+  waterOpacity->setFunc(boost::bind(&UIWater::setWaterTrans, this, _1));
+  addChild(waterOpacity);
   addChild(new UIText(5.0f, 50.0f, "shift + numpad +/-", app.getArial12(), eJustifyLeft));
 
   addChild(new UIText(60.0f, 74.0f, "Level: ", app.getArial12(), eJustifyLeft));
@@ -128,7 +128,7 @@ void UIWater::updateData()
   ms << gWorld->getWaterHeight(tileX, tileY) ;
 
   waterLevel->setText(ms.str());
-  waterOpercity->value = (gWorld->getWaterTrans(tileX, tileY)/255.0f);
+  waterOpacity->value = (gWorld->getWaterTrans(tileX, tileY)/255.0f);
 
   std::stringstream mt;
   mt << gWorld->getWaterType(tileX, tileY) << " - " << LiquidTypeDB::getLiquidName(gWorld->getWaterType(tileX, tileY));
@@ -149,7 +149,7 @@ void UIWater::setWaterTrans(float val)
 
 void UIWater::addWaterLayer(UIFrame::Ptr /*ptr*/, int /*someint*/)
 {
-  gWorld->addWaterLayer(tileX, tileY, 0.0f, waterOpercity->value * 255);
+  gWorld->addWaterLayer(tileX, tileY, 0.0f, waterOpacity->value * 255);
 }
 
 void UIWater::deleteWaterLayer(UIFrame::Ptr /*ptr*/, int /*someint*/)

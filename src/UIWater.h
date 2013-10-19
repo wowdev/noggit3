@@ -33,7 +33,7 @@ private:
   static const int winHeight = 200;
 
   UIMapViewGUI *mainGui;
-  UISlider *waterOpercity;
+  UISlider *waterOpacity;
   UIText *waterLevel;
   UIButton *waterType;
   UIButton *waterGen;
