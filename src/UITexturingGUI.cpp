@@ -241,7 +241,7 @@ void LoadTileset( UIFrame* /*button*/, int id )
 {
   for( std::vector<std::string>::iterator it = textureNames.begin(); it != textureNames.end(); ++it )
   {
-    if( it->find( tilesetDirectories[id] ) != std::string::npos || id == -1)
+    if(id == -1 || it->find(tilesetDirectories[id]) != std::string::npos)
     {
       //! \todo Actually save the texture returned here and do no longer iterate over all cached textures.
       TextureManager::newTexture( *it );
