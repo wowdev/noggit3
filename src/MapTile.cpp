@@ -194,8 +194,6 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
     theFile.read( &fourcc, 4 );
     theFile.read( &size, 4 );
 
-    mWaterSize = size;
-
     int ofsW = Header.mh2o + 0x14 + 0x8;
     assert( fourcc == 'MH2O' );
     
@@ -437,7 +435,7 @@ void MapTile::addChunksLiquid(TileWater *lq)
 }
 
 bool MapTile::canWaterSave(){
-  return !mFlags || mWaterSize>0;
+  return true;
 }
 
 void MapTile::getAlpha(size_t id, unsigned char *amap)
