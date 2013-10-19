@@ -147,7 +147,7 @@ void ChunkWater::writeInfo(sExtendableArray &lADTFile, MH2O_Header *header, size
   lCurrentPosition += sizeof(MH2O_Information);
 }
 
-void ChunkWater::writeData(MH2O_Header *header,  MH2O_Information *info, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
+void ChunkWater::writeData(MH2O_Header *header, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
 {
   if(!hasData()) return;
 
