@@ -21,7 +21,7 @@ public:
   void writeInfo(sExtendableArray &lADTFile, MH2O_Header *header, size_t basePos, int &lCurrentPosition);
   void writeData(MH2O_Header *header, MH2O_Information *info, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition);
 
-  void autoGen(MapChunk* chunk);
+  void autoGen(MapChunk* chunk, int factor);
 
   void setHeight(float height);
   void setHeight(size_t x, size_t y, float height);

@@ -227,7 +227,7 @@ void ChunkWater::writeData(MH2O_Header *header,  MH2O_Information *info, sExtend
   }
 }
 
-void ChunkWater::autoGen(MapChunk *chunk)
+void ChunkWater::autoGen(MapChunk *chunk, int factor)
 {
   for(size_t y = 0; y < 9; ++y)
   {
@@ -236,7 +236,7 @@ void ChunkWater::autoGen(MapChunk *chunk)
       float terrainHeight(chunk->getHeight(y, x));
       float waterHeight(HeightData[0].mHeightValues[y][x]);
 
-      int diff(50 * std::log(std::abs(waterHeight - terrainHeight) + 1.0f));
+      int diff(factor * std::log(std::abs(waterHeight - terrainHeight) + 1.0f));
       diff = std::min(std::max(diff, 0), 255);
 
       HeightData[0].mTransparency[y][x] = diff;

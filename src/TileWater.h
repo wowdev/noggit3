@@ -23,7 +23,7 @@ public:
   void draw();
   bool hasData();
 
-  void autoGen();
+  void autoGen(int factor);
 
   void setHeight(float height);
   float getHeight();
