@@ -1420,7 +1420,7 @@ void World::addWaterLayer(int x, int z)
   MapTile *curTile = mapIndex->getTile(z,x);
   if(!curTile) return;
 
-  curTile->Water->addLayer();
+  curTile->Water->addLayer(1, 255);
   mapIndex->setChanged(z,x);
 }
 
