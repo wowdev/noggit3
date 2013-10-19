@@ -111,9 +111,6 @@ UIWater::UIWater( UIMapViewGUI *setGui )
 
   addChild(waterGen);
 
-
-  // Add dropdown type
-
   updateData();
 }
 

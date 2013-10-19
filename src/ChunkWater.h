@@ -19,7 +19,7 @@ public:
 
   void writeHeader(sExtendableArray &lADTFile, int &lCurrentPosition);
   void writeInfo(sExtendableArray &lADTFile, MH2O_Header *header, size_t basePos, int &lCurrentPosition);
-  void writeData(MH2O_Header *header, MH2O_Information *info, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition);
+  void writeData(MH2O_Header *header, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition);
 
   void autoGen(MapChunk* chunk, int factor);
 
