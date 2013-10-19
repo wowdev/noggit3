@@ -12,7 +12,7 @@ class sExtendableArray;
 class TileWater
 {
 public:
-  TileWater(float pXbase, float pZbase);
+  TileWater(MapTile *pTile, float pXbase, float pZbase);
   ~TileWater(void);
 
   ChunkWater* getChunk(int x, int y);
@@ -22,6 +22,8 @@ public:
 
   void draw();
   bool hasData();
+
+  void autoGen();
 
   void setHeight(float height);
   float getHeight();
@@ -40,7 +42,7 @@ public:
 private:
   void reload();
 
-
+  MapTile *tile;
   ChunkWater *chunks[16][16];
 
   float xbase;

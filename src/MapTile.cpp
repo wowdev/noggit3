@@ -197,10 +197,10 @@ MapTile::MapTile( int pX, int pZ, const std::string& pFilename, bool pBigAlpha )
     int ofsW = Header.mh2o + 0x14 + 0x8;
     assert( fourcc == 'MH2O' );
     
-    Water = new TileWater(xbase,zbase); //has water
+    Water = new TileWater(this, xbase,zbase); //has water
     Water->readFromFile(theFile, ofsW); //reading MH2O data at separated class...
   }else{
-    Water = new TileWater(xbase,zbase); //empty water tile
+    Water = new TileWater(this, xbase,zbase); //empty water tile
   }
 
   // - MFBO ----------------------------------------------

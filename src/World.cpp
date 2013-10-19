@@ -2181,3 +2181,12 @@ int World::getWaterType(int x, int y)
   else return false;
 }
 
+void World::autoGenWaterTrans(int x, int y)
+{
+  if(mapIndex->tileLoaded(y, x))
+  {
+    mapIndex->getTile(y,x)->Water->autoGen();
+    mapIndex->setChanged(y,x);
+  }
+}
+

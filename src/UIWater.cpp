@@ -97,6 +97,15 @@ UIWater::UIWater( UIMapViewGUI *setGui )
 
   addChild(waterType);
 
+  waterGen = new UIButton(5.0f, 165.0f, 170.0f, 30.0f,
+    "Auto Opacity",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::autoGen, this, _1, _2),
+    100);
+
+  addChild(waterGen);
+
 
   // Add dropdown type
 
@@ -171,5 +180,11 @@ void UIWater::openWaterTypeBrowser(UIFrame::Ptr /*ptr*/, int someint)
 void UIWater::changeWaterType( int waterint )
 {
   gWorld->setWaterType(tileX, tileY,waterint);
+  updateData();
+}
+
+void UIWater::autoGen(UIFrame::Ptr ptr, int someint)
+{
+  gWorld->autoGenWaterTrans(tileX, tileY);
   updateData();
 }
