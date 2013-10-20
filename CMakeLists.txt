@@ -325,4 +325,4 @@ IF(APPLE)
 ENDIF(APPLE)
 
 install(TARGETS noggit DESTINATION bin)
-install(DIRECTORY "bin" DESTINATION bin)
+install(DIRECTORY "bin" DESTINATION .)
