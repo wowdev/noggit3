@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 2.8)
 project(Noggit)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+set(EXECUTABLE_OUTPUT_PATH bin)
+set(LIBARY_OUTPUT_PATH bin)
 
 macro(includePlattform SUFFIX)
   if(UNIX)
