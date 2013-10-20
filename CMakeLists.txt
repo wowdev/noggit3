@@ -326,6 +326,8 @@ ENDIF(APPLE)
 
 INCLUDE(CPack)
 
+set(CPACK_GENERATOR "ZIP")
+
 install(TARGETS noggit DESTINATION bin)
 install(DIRECTORY "bin" DESTINATION .)
 
