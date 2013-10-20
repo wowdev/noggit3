@@ -137,17 +137,17 @@ void ChunkWater::writeHeader(sExtendableArray &lADTFile, int &lCurrentPosition)
   lCurrentPosition += sizeof(MH2O_Header);
 }
 
-void ChunkWater::writeInfo(sExtendableArray &lADTFile, MH2O_Header *header, size_t basePos, int &lCurrentPosition)
+void ChunkWater::writeInfo(sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
 {
   if(!hasData()) return;
 
   lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Information), reinterpret_cast<char*>(&Info[0])); //insert MH2O_Information
-  header->ofsInformation = lCurrentPosition - basePos; //setting offset to this info at the header
-  header->nLayers = 1;
+  Header.ofsInformation = lCurrentPosition - basePos; //setting offset to this info at the header
+  Header.nLayers = 1;
   lCurrentPosition += sizeof(MH2O_Information);
 }
 
-void ChunkWater::writeData(MH2O_Header *header, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
+void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
 {
   if(!hasData()) return;
 
@@ -162,7 +162,7 @@ void ChunkWater::writeData(MH2O_Header *header, sExtendableArray &lADTFile, size
   newinfo.ofsHeightMap = 0;
 
   //render
-  header->ofsRenderMask = lCurrentPosition - basePos;
+  Header.ofsRenderMask = lCurrentPosition - basePos;
   lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render[0]));
   lCurrentPosition += sizeof(MH2O_Render);
 
@@ -228,7 +228,8 @@ void ChunkWater::writeData(MH2O_Header *header, sExtendableArray &lADTFile, size
     }
   }
 
-  memcpy(lADTFile.GetPointer<char>(basePos + header->ofsInformation), &newinfo, sizeof(MH2O_Information));
+  memcpy(lADTFile.GetPointer<char>(offHeader), &Header, sizeof(MH2O_Header));
+  memcpy(lADTFile.GetPointer<char>(basePos + Header.ofsInformation), &newinfo, sizeof(MH2O_Information));
 }
 
 void ChunkWater::autoGen(MapChunk *chunk, int factor)
