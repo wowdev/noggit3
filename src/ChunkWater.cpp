@@ -240,7 +240,7 @@ void ChunkWater::autoGen(MapChunk *chunk, int factor)
       float terrainHeight(chunk->getHeight(y, x));
       float waterHeight(HeightData[0].mHeightValues[y][x]);
 
-      int diff(std::abs(waterHeight - terrainHeight) * std::abs(waterHeight - terrainHeight));
+      int diff(factor * std::log(std::abs(waterHeight - terrainHeight) + 1.0f));
       diff = std::min(std::max(diff, 0), 255);
 
       HeightData[0].mTransparency[y][x] = diff;
