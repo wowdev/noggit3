@@ -323,3 +323,6 @@ IF(APPLE)
   SET(CPACK_PACKAGE_VERSION "SDL 1.3")
   INCLUDE(CPack)
 ENDIF(APPLE)
+
+install(TARGETS noggit)
+install(FILES bin/*)
