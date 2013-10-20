@@ -30,7 +30,7 @@ private:
   UIButton* closeBrowser;
   UIText* ZoneIDPath;
 
-  void buildAreaList();
+  void buildModelList();
   void expandList();
   void collapseList();
 
