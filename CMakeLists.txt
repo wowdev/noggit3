@@ -324,5 +324,8 @@ IF(APPLE)
   INCLUDE(CPack)
 ENDIF(APPLE)
 
+INCLUDE(CPack)
+
 install(TARGETS noggit DESTINATION bin)
 install(DIRECTORY "bin" DESTINATION .)
+
