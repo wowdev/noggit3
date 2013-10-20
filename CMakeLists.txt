@@ -325,5 +325,4 @@ IF(APPLE)
 ENDIF(APPLE)
 
 install(TARGETS noggit DESTINATION bin)
-file(GLOB files "bin/*")
-install(FILES ${files} DESTINATION bin)
+install(DIRECTORY "bin" DESTINATION bin)
