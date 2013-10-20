@@ -14,12 +14,7 @@
 #include "UIScrollBar.h"
 #include "UIText.h" // UIText
 #include "UICloseWindow.h" // UICloseWindow
-
-void theButtonMapPressed(UIFrame *f,int id)
-{
-  ( static_cast<UIZoneIDBrowser::Ptr>( f->parent() ) )->ButtonMapPressed( id );
-}
-
+#include "UIZoneIDBrowser.h"
 
 
 UIModelSelectorFromTxt::UIModelSelectorFromTxt(int xPos,int yPos, int w, int h, UIMapViewGUI *setGui)
@@ -34,8 +29,8 @@ UIModelSelectorFromTxt::UIModelSelectorFromTxt(int xPos,int yPos, int w, int h, 
   , MapName( "" )
   , ZoneName( "" )
   , SubZoneName( "" )
-  , backZone( new UIButton( 387.5f, 4.0f, 24.0f, 24.0f, "", "Interface\\BUTTONS\\UI-RotationLeft-Button-Up.blp", "Interface\\BUTTONS\\UI-RotationLeft-Button-Down.blp", theButtonMapPressed, 0 ) )
-  , ZoneIDPath( new UIText( 10.0f, 6.0f, "", arial12, eJustifyLeft) )
+  , backZone( new UIButton( 387.5f, 4.0f, 24.0f, 24.0f, "", "Interface\\BUTTONS\\UI-RotationLeft-Button-Up.blp", "Interface\\BUTTONS\\UI-RotationLeft-Button-Down.blp", NULL, 0 ) )
+  , ZoneIDPath( new UIText( 10.0f, 6.0f, "", app.getArial12(), eJustifyLeft) )
 {
   addChild(ZoneIDPath);
   addChild(backZone);
@@ -60,7 +55,7 @@ void UIModelSelectorFromTxt::buildModelList()
           UIFrame *curFrame = new UIFrame(1,1,1,1);
           std::stringstream ss;
           ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
-          UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
+          UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", NULL, i->getInt(AreaDB::AreaID) );
           tempButton->setLeft();
           curFrame->addChild(tempButton);
           ZoneIdList->addElement(curFrame);
@@ -73,7 +68,7 @@ void UIModelSelectorFromTxt::buildModelList()
           UIFrame *curFrame = new UIFrame(1,1,1,1);
           std::stringstream ss;
           ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
-          UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeZoneValue, i->getInt(AreaDB::AreaID) );
+          UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", NULL, i->getInt(AreaDB::AreaID) );
           tempButton->setLeft();
           curFrame->addChild(tempButton);
           ZoneIdList->addElement(curFrame);
