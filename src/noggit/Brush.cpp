@@ -1,4 +1,4 @@
-// Brush.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Brush.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
@@ -10,8 +10,8 @@
 #include <opengl/texture.h>
 
 brush::brush(float r, float h)
-  : _texture (new opengl::texture)
-  , radius (r)
+  : radius (r)
+  , _texture (new opengl::texture)
 {
   setHardness (h);
 }

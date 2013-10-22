@@ -1,4 +1,4 @@
-// archive.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// archive.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
 #ifndef __NOGGIT_MPQ_ARCHIVE_H
@@ -11,6 +11,7 @@
 
 namespace noggit
 {
+  class application;
   namespace mpq
   {
     //! \note Instead of including StormLib.
@@ -42,7 +43,7 @@ namespace noggit
       QStringList _listfile;
 
       friend class archive_manager;
-      friend class application;
+      friend class noggit::application;
     };
   }
 }

@@ -1,4 +1,4 @@
-// matrix_4x4.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// matrix_4x4.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
 #include <math/matrix_4x4.h>

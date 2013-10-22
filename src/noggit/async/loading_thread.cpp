@@ -1,4 +1,4 @@
-// loading_thread.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// loading_thread.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
 #include <noggit/async/loading_thread.h>

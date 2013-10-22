@@ -1,4 +1,4 @@
-// MapChunk.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// MapChunk.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 // Stephan Biegel <project.modcraft@googlemail.com>
@@ -11,19 +11,20 @@
 #include <iostream>
 
 #include <QMap>
-#include <QSettings>
 
 #include <math/random.h>
 #include <math/vector_3d.h>
 
 #include <opengl/texture.h>
 
+#include <noggit/application.h>
 #include <noggit/blp_texture.h>
 #include <noggit/Brush.h>
 #include <noggit/Frustum.h> // Frustum
 #include <noggit/Liquid.h>
 #include <noggit/Log.h>
 #include <noggit/MapHeaders.h>
+#include <noggit/Selection.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
@@ -268,9 +269,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   CreateStrips();
   init_map_strip();
 
-  mt=maintile;
-  mBigAlpha=bigAlpha;
-
   uint32_t fourcc;
   uint32_t size;
 
@@ -283,12 +281,9 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
 
   f->read(&header, 0x80);
 
-  Flags = header.flags;
-  areaID = header.areaid;
-
-  if (!areaIDColors.contains (areaID))
+  if (!areaIDColors.contains (header.areaid))
   {
-    areaIDColors[areaID] = ::math::vector_3d ( ::math::random::floating_point (0.0f, 1.0f)
+    areaIDColors[header.areaid] = ::math::vector_3d ( ::math::random::floating_point (0.0f, 1.0f)
                                  , ::math::random::floating_point (0.0f, 1.0f)
                                  , ::math::random::floating_point (0.0f, 1.0f)
                                  );
@@ -324,6 +319,9 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   vmin = ::math::vector_3d( 9999999.0f, 9999999.0f, 9999999.0f);
   vmax = ::math::vector_3d(-9999999.0f,-9999999.0f,-9999999.0f);
   glGenTextures(3, alphamaps);
+
+  //! \note Temporary between chunks (MCLY and MCAL).
+  unsigned int MCALoffset[4];
 
   while (f->getPos() < lastpos) {
     f->read(&fourcc,4);
@@ -369,8 +367,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
       vmin.z (zbase);
       vmax.x (xbase + 8 * UNITSIZE);
       vmax.z (zbase + 8 * UNITSIZE);
-      r = (vmax - vmin).length() * 0.5f;
-
     }
     else if ( fourcc == 'MCLY' ) {
       // texture info
@@ -378,16 +374,17 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
       //gLog("=\n");
       for (size_t i=0; i<nTextures; ++i) {
         f->read(&tex[i],4);
-        f->read(&texFlags[i], 4);
+        f->read(&_texFlags[i], 4);
         f->read(&MCALoffset[i], 4);
-        f->read(&effectID[i], 4);
+        f->read(&_effectID[i], 4);
 
-        if (texFlags[i] & FLAG_ANIMATE) {
-          animated[i] = texFlags[i];
+        if (texture_flags (i) & FLAG_ANIMATE)
+        {
+          animated[i] = texture_flags (i);
         } else {
           animated[i] = 0;
         }
-        _textures[i] = TextureManager::newTexture( mt->mTextureFilenames[tex[i]] );
+        _textures[i] = TextureManager::newTexture( maintile->mTextureFilenames[tex[i]] );
       }
     }
     else if ( fourcc == 'MCSH' ) {
@@ -420,12 +417,12 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
       unsigned int MCALbase = f->getPos();
       for( unsigned int layer = 0; layer < header.nLayers; ++layer )
       {
-        if( texFlags[layer] & 0x100 )
+        if( texture_flags (layer) & 0x100 )
         {
 
           f->seek( MCALbase + MCALoffset[layer] );
 
-          if( texFlags[layer] & 0x200 )
+          if( texture_flags (layer) & 0x200 )
           {  // compressed
 
             // 21-10-2008 by Flow
@@ -457,7 +454,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
           }
-          else if(mBigAlpha){
+          else if(bigAlpha){
             // not compressed
             unsigned char *p;
             char *abuf = f->getPointer();
@@ -536,7 +533,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
         //lq->init(f);
         lq->initFromTerrain(f, header.flags);
 
-        mt->mLiquids.insert(std::pair<int,Liquid*>( 0, lq) );
+        maintile->mLiquids.insert(std::pair<int,Liquid*>( 0, lq) );
 
 
         // let's output some debug info! ( '-')b
@@ -594,7 +591,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
     }
   }
 
-  if( ( Flags & 1 ) == 0 )
+  if( ( header.flags & 1 ) == 0 )
   {
     /** We have no shadow map (MCSH), so we got no shadows at all!  **
      ** This results in everything being black.. Yay. Lets fake it! **/
@@ -638,14 +635,8 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
 
   glBindBuffer(GL_ARRAY_BUFFER, minishadows);
   glBufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
-}
 
-void MapChunk::loadTextures()
-{
-  //! \todo Use this kind of preloading again?
-  return;
-/*  for(int i=0; i < nTextures; ++i)
-    _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);*/
+  GenerateContourMap();
 }
 
 void MapChunk::SetAnim (const mcly_flags_type& flags) const
@@ -694,7 +685,7 @@ void MapChunk::RemoveAnim (const mcly_flags_type& flags) const
 }
 
 
-void MapChunk::drawTextures()
+void MapChunk::drawTextures() const
 {
   glColor4f(1.0f,1.0f,1.0f,1.0f);
 
@@ -834,28 +825,12 @@ MapChunk::~MapChunk()
   }
 }
 
-bool MapChunk::GetVertex(float x,float z, ::math::vector_3d *V)
-{
-  float xdiff,zdiff;
-
-  xdiff = x - xbase;
-  zdiff = z - zbase;
-
-  const int row = static_cast<int>( zdiff / (UNITSIZE * 0.5f ) + 0.5f );
-  const int column = static_cast<int>( ( xdiff - UNITSIZE * 0.5f * (row % 2) ) / UNITSIZE + 0.5f );
-  if( (row < 0) || (column < 0) || (row > 16) || (column > ((row % 2) ? 8 : 9)))
-    return false;
-
-  *V=mVertices[17*(row/2) + ((row % 2) ? 9 : 0) + column];
-  return true;
-}
-
 boost::optional<float> MapChunk::get_height ( const float& x
                                             , const float& z
                                             ) const
 {
-  const float xdiff = x - xbase;
-  const float zdiff = z - zbase;
+  const float xdiff (x - xbase);
+  const float zdiff (z - zbase);
 
   const int row = static_cast<int>( zdiff / (UNITSIZE * 0.5f ) + 0.5f );
   const int column = static_cast<int>( ( xdiff - UNITSIZE * 0.5f * (row % 2) ) / UNITSIZE + 0.5f );
@@ -934,7 +909,7 @@ void MapChunk::CreateStrips()
     _hole_strip[iferget++] = i;
 }
 
-void MapChunk::drawPass (int anim)
+void MapChunk::drawPass (int anim) const
 {
   const mcly_flags_type& flags (mcly_flags_type::interpret (anim));
 
@@ -945,7 +920,7 @@ void MapChunk::drawPass (int anim)
   RemoveAnim (flags);
 }
 
-void MapChunk::drawLines (bool draw_hole_lines)
+void MapChunk::drawLines (bool draw_hole_lines) const
 {
   glBindBuffer(GL_ARRAY_BUFFER, vertices);
   glVertexPointer(3, GL_FLOAT, 0, 0);
@@ -999,7 +974,7 @@ void MapChunk::drawLines (bool draw_hole_lines)
   glColor4f(1,1,1,1);
 }
 
-void MapChunk::drawContour()
+void MapChunk::drawContour() const
 {
   glColor4f(1,1,1,1);
   glActiveTexture(GL_TEXTURE0);
@@ -1007,8 +982,6 @@ void MapChunk::drawContour()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDisable(GL_ALPHA_TEST);
-  if(_contour_texture == 0)
-    GenerateContourMap();
   glBindTexture(GL_TEXTURE_2D, _contour_texture);
 
   glEnable(GL_TEXTURE_GEN_S);
@@ -1025,8 +998,10 @@ bool MapChunk::is_visible ( const float& cull_distance
                           , const ::math::vector_3d& camera
                           ) const
 {
+  static const float chunk_radius = sqrtf (CHUNKSIZE * CHUNKSIZE / 2.0f);
+
   return frustum.intersects (vmin, vmax)
-      && (((camera - vcenter).length() - r) < cull_distance);
+      && (((camera - vcenter).length() - chunk_radius) < cull_distance);
 }
 
 void MapChunk::draw ( bool draw_terrain_height_contour
@@ -1034,6 +1009,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
                     , bool draw_area_id_overlay
                     , bool dont_draw_cursor
                     , const Skies* skies
+                    , const boost::optional<selection_type>& selected_item
                     )
 {
   // setup vertex buffers
@@ -1113,7 +1089,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
     drawContour();
   }
 
-  if (mark_impassable_chunks && Flags & FLAG_IMPASS)
+  if (mark_impassable_chunks && (header.flags & FLAG_IMPASS))
   {
     glColor4f (1.0f, 1.0f, 1.0f, 0.6f);
     drawPass (0);
@@ -1121,22 +1097,23 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
   if (draw_area_id_overlay)
   {
-    glColor4f ( areaIDColors[areaID].x()
-              , areaIDColors[areaID].y()
-              , areaIDColors[areaID].z()
+    glColor4f ( areaIDColors[header.areaid].x()
+              , areaIDColors[header.areaid].y()
+              , areaIDColors[header.areaid].z()
               , 0.7f
               );
     drawPass (0);
   }
 
   //! \todo This actually should be an enum. And should be passed into this method.
-  if ( QSettings().value ("cursor/type", 1).toInt() == 3
-    && _world->IsSelection (eEntry_MapChunk)
-    && _world->GetCurrentSelection()->data.mapchunk == this
-    && !dont_draw_cursor
+  if ( !dont_draw_cursor
+    && noggit::app().setting ("cursor/type", 1).toInt() == 3
+    && selected_item
+    && noggit::selection::is_the_same_as (this, *selected_item)
      )
   {
-    const int poly (_world->GetCurrentSelectedTriangle());
+    const int selected_polygon
+      (noggit::selection::selected_polygon (*selected_item));
 
     glColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
 
@@ -1146,9 +1123,9 @@ void MapChunk::draw ( bool draw_terrain_height_contour
     glDepthMask( false );
     glDisable( GL_DEPTH_TEST );
     glBegin( GL_TRIANGLES );
-    glVertex3fv( mVertices[mapstrip2[poly + 0]] );
-    glVertex3fv( mVertices[mapstrip2[poly + 1]] );
-    glVertex3fv( mVertices[mapstrip2[poly + 2]] );
+    glVertex3fv( mVertices[mapstrip2[selected_polygon + 0]] );
+    glVertex3fv( mVertices[mapstrip2[selected_polygon + 1]] );
+    glVertex3fv( mVertices[mapstrip2[selected_polygon + 2]] );
     glEnd();
     glEnable( GL_CULL_FACE );
     glEnable( GL_DEPTH_TEST );
@@ -1195,7 +1172,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   glPopMatrix();*/
 }
 
-void MapChunk::drawNoDetail()
+void MapChunk::drawNoDetail() const
 {
   glActiveTexture( GL_TEXTURE1 );
   glDisable( GL_TEXTURE_2D );
@@ -1248,56 +1225,78 @@ void MapChunk::drawSelect()
   //glEnable( GL_CULL_FACE );
 }
 
-void MapChunk::getSelectionCoord( float *x, float *z )
+void MapChunk::getSelectionCoord ( const int& selected_polygon
+                                 , float* x
+                                 , float* z
+                                 ) const
 {
-  int Poly = _world->GetCurrentSelectedTriangle();
-  if( Poly + 2 > stripsize2 )
+  if (selected_polygon + 2 >= stripsize2)
   {
+    LogError << "getSelectionCoord() fucked up because the selection was bad. "
+             << selected_polygon
+             << " with stripsize2 of "
+             << stripsize2
+             << ".\n";
+    //! \todo Return none, instead of some weird constant.
     *x = -1000000.0f;
     *z = -1000000.0f;
     return;
   }
-  *x = ( mVertices[mapstrip2[Poly + 0]].x() + mVertices[mapstrip2[Poly + 1]].x() + mVertices[mapstrip2[Poly + 2]].x() ) / 3;
-  *z = ( mVertices[mapstrip2[Poly + 0]].z() + mVertices[mapstrip2[Poly + 1]].z() + mVertices[mapstrip2[Poly + 2]].z() ) / 3;
+
+  *x = ( mVertices[mapstrip2[selected_polygon + 0]].x()
+       + mVertices[mapstrip2[selected_polygon + 1]].x()
+       + mVertices[mapstrip2[selected_polygon + 2]].x()
+       )
+     / 3.0f;
+  *z = ( mVertices[mapstrip2[selected_polygon + 0]].z()
+       + mVertices[mapstrip2[selected_polygon + 1]].z()
+       + mVertices[mapstrip2[selected_polygon + 2]].z()
+       )
+     / 3.0f;
 }
 
-float MapChunk::getSelectionHeight()
+float MapChunk::getSelectionHeight (const int& selected_polygon) const
 {
-  int Poly = _world->GetCurrentSelectedTriangle();
-  if( Poly + 2 < stripsize2 )
-    return ( mVertices[mapstrip2[Poly + 0]].y() + mVertices[mapstrip2[Poly + 1]].y() + mVertices[mapstrip2[Poly + 2]].y() ) / 3;
-  LogError << "Getting selection height fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
-  return 0.0f;
-}
-
-::math::vector_3d MapChunk::GetSelectionPosition()
-{
-  int Poly = _world->GetCurrentSelectedTriangle();
-  if( Poly + 2 > stripsize2 )
+  if (selected_polygon + 2 >= stripsize2)
   {
-    LogError << "Getting selection position fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
-    return ::math::vector_3d( -1000000.0f, -1000000.0f, -1000000.0f );
+    LogError << "getSelectionHeight() fucked up because the selection was bad. "
+             << selected_polygon
+             << " with stripsize2 of "
+             << stripsize2
+             << ".\n";
+    //! \todo Return none, instead of some weird constant.
+    return -1000000.0f;
   }
 
-  ::math::vector_3d lPosition;
-  lPosition  = ::math::vector_3d( mVertices[mapstrip2[Poly + 0]] );
-  lPosition += ::math::vector_3d( mVertices[mapstrip2[Poly + 1]] );
-  lPosition += ::math::vector_3d( mVertices[mapstrip2[Poly + 2]] );
-  lPosition *= 0.3333333f;
+  return ( mVertices[mapstrip2[selected_polygon + 0]].y()
+         + mVertices[mapstrip2[selected_polygon + 1]].y()
+         + mVertices[mapstrip2[selected_polygon + 2]].y()
+         )
+         / 3.0f;
+}
 
-  return lPosition;
+::math::vector_3d MapChunk::GetSelectionPosition (const int& selected_polygon) const
+{
+  if (selected_polygon + 2 >= stripsize2)
+  {
+    LogError << "GetSelectionPosition() fucked up because the selection was bad. "
+             << selected_polygon
+             << " with stripsize2 of "
+             << stripsize2
+             << ".\n";
+    //! \todo Return none, instead of some weird constant.
+    return ::math::vector_3d (-1000000.0f, -1000000.0f, -1000000.0f);
+  }
+
+  return ( ::math::vector_3d( mVertices[mapstrip2[selected_polygon + 0]] )
+         + ::math::vector_3d( mVertices[mapstrip2[selected_polygon + 1]] )
+         + ::math::vector_3d( mVertices[mapstrip2[selected_polygon + 2]] )
+         )
+         * (1.0f / 3.0f);
 }
 
 void MapChunk::update_normal_vectors()
 {
-  //! \todo This should be checked before calling.
-  if (!Changed)
-  {
-    return;
-  }
-
-  Changed = false;
-
   static const float point_offset (UNITSIZE * 0.5f);
 
   for (size_t i (0); i < mapbufsize; ++i)
@@ -1376,14 +1375,15 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 {
   float dist,xdiff,zdiff;
 
-  Changed=false;
+  bool Changed=false;
 
   xdiff = xbase - x + CHUNKSIZE/2;
   zdiff = zbase - z + CHUNKSIZE/2;
   dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
   if(dist > (radius + MAPCHUNK_DIAMETER))
-    return Changed;
+    return false;
+
   vmin.y (9999999.0f);
   vmax.y (-9999999.0f);
   for(int i=0; i < mapbufsize; ++i)
@@ -1436,14 +1436,14 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
 {
   float dist,xdiff,zdiff,nremain;
-  Changed=false;
+  bool Changed=false;
 
   xdiff= xbase - x + CHUNKSIZE/2;
   zdiff= zbase - z + CHUNKSIZE/2;
   dist= sqrt(xdiff*xdiff + zdiff*zdiff);
 
   if(dist > (radius + MAPCHUNK_DIAMETER))
-    return Changed;
+    return false;
 
   vmin.y (9999999.0f);
   vmax.y (-9999999.0f);
@@ -1489,14 +1489,14 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
   float dist,dist2,xdiff,zdiff,nremain;
-  Changed = false;
+  bool Changed = false;
 
   xdiff = xbase - x + CHUNKSIZE/2;
   zdiff = zbase - z + CHUNKSIZE/2;
   dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
   if(dist > (radius + MAPCHUNK_DIAMETER) )
-    return Changed;
+    return false;
 
   vmin.y (9999999.0f);
   vmax.y (-9999999.0f);
@@ -1513,7 +1513,6 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
       float TotalHeight;
       float TotalWeight;
       float tx,tz, h;
-      ::math::vector_3d TempVec;
       int Rad=(radius/UNITSIZE);
 
       TotalHeight=0;
@@ -1529,9 +1528,14 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
           dist2= sqrt(xdiff*xdiff + zdiff*zdiff);
           if(dist2 > radius)
             continue;
-          _world->GetVertex(tx,tz,&TempVec);
-          TotalHeight += (1.0f - dist2/radius) * TempVec.y();
-          TotalWeight += (1.0f - dist2/radius);
+
+          const boost::optional<float> height
+            (_world->get_height (tx, tz));
+          if (height)
+          {
+            TotalHeight += (1.0f - dist2/radius) * *height;
+            TotalWeight += (1.0f - dist2/radius);
+          }
         }
       }
 
@@ -1606,8 +1610,8 @@ int MapChunk::addTexture( noggit::blp_texture* texture )
     nTextures++;
     _textures[texLevel] = texture;
     animated[texLevel] = 0;
-    texFlags[texLevel] = 0;
-    effectID[texLevel] = 0;
+    texture_flags (texLevel, 0);
+    texture_effect_id (texLevel, 0);
     if( texLevel )
     {
       if( alphamaps[texLevel-1] < 1 )
@@ -1804,8 +1808,8 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
           {
             _textures[i] = _textures[i+1];
             animated[i] = animated[i+1];
-            texFlags[i] = texFlags[i+1];
-            effectID[i] = effectID[i+1];
+            texture_flags (i, texture_flags (i + 1));
+            texture_effect_id (i, texture_effect_id (i + 1));
             if( i )
               memcpy( amap[i-1], amap[i], 64*64 );
           }
@@ -1885,20 +1889,20 @@ void MapChunk::removeHole( int i, int j )
 
 void MapChunk::setAreaID( int ID )
 {
-  areaID = ID;
+  header.areaid = ID;
 }
 
 int MapChunk::getAreaID(){
-  return areaID;
+  return header.areaid;
 }
 
 
 void MapChunk::setFlag( bool on_or_off, int flag)
 {
   if(on_or_off)
-    Flags = Flags | flag;
+    header.flags |= flag;
   else
-    Flags = Flags & ~(flag);
+    header.flags &= ~(flag);
 }
 
 void MapChunk::update_low_quality_texture_map()

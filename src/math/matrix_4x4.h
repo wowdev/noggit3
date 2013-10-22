@@ -1,4 +1,4 @@
-// matrix_4x4.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// matrix_4x4.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
@@ -92,7 +92,7 @@ namespace math
     template<size_t i>
     vector_4d column() const
     {
-      return ::math::vector_4d (_m[i][0], _m[i][1], _m[i][2], _m[i][3]);
+      return ::math::vector_4d (_m[0][i], _m[1][i], _m[2][i], _m[3][i]);
     }
 
   private:

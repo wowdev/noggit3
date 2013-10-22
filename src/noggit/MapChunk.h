@@ -1,4 +1,4 @@
-// MapChunk.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// MapChunk.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 // Stephan Biegel <project.modcraft@googlemail.com>
@@ -11,7 +11,10 @@
 
 #include <math/vector_4d.h>
 
-#include <noggit/MapTile.h> // MapTile
+#include <opengl/types.h>
+
+#include <noggit/MapHeaders.h>
+#include <noggit/Selection.h>
 
 namespace noggit
 {
@@ -23,6 +26,7 @@ namespace noggit
 }
 class brush;
 class Frustum;
+class MapTile;
 class World;
 class Skies;
 
@@ -32,52 +36,10 @@ static const int mapbufsize = 9*9 + 8*8;
 
 class MapChunk
 {
-
 public:
-  MapTile *mt;
-  ::math::vector_3d vmin, vmax, vcenter;
-  int px, py;
-
-  MapChunkHeader header;
-  bool Changed;
-  size_t nTextures;
-
-  float xbase, ybase, zbase;
-  float r;
-
-  bool mBigAlpha;
-
-  int nameID;
-
-  unsigned int Flags;
-
-  unsigned int areaID;
-
-  bool haswater;
-
-  int holes;
-
-  int tex[4];
-  noggit::blp_texture* _textures[4];
-  unsigned int texFlags[4];
-  unsigned int effectID[4];
-  unsigned int MCALoffset[4];
-  unsigned char amap[3][64*64];
-  unsigned char mShadowMap[8*64];
-  GLuint alphamaps[3];
-  GLuint shadow;
-
-  int animated[4];
-
-  GLuint vertices, normals, minimap, minishadows;
-
-  StripType *strip;
-  int striplen;
-
   MapChunk(World* world, MapTile* mt, noggit::mpq::file* f,bool bigAlpha);
   ~MapChunk();
 
-  void destroy();
   void initStrip();
 
   bool is_visible ( const float& cull_distance
@@ -85,34 +47,27 @@ public:
                   , const ::math::vector_3d& camera
                   ) const;
 
-  void draw (bool draw_terrain_height_contour
+  void draw ( bool draw_terrain_height_contour
             , bool mark_impassable_chunks
             , bool draw_area_id_overlay
             , bool dont_draw_cursor
-            , const Skies* skies);
-  void drawContour();
-  void drawAreaID();
-  void drawBlock();
+            , const Skies* skies
+            , const boost::optional<selection_type>& selected_item
+            );
+  void drawContour() const;
   void drawSelect();
-  void drawNoDetail();
-  void drawPass(int anim);
+  void drawNoDetail() const;
+  void drawPass(int anim) const;
   // todo split into draw_lines and draw_hole_lines
-  void drawLines (bool draw_hole_lines);
+  void drawLines (bool draw_hole_lines) const;
 
-  void drawTextures();
+  void drawTextures() const;
 
   void update_normal_vectors();
 
-  ::math::vector_3d mNormals[mapbufsize];
-  ::math::vector_3d mVertices[mapbufsize];
-  //! \todo Is this needed? Can't we just use the real vertices?
-  ::math::vector_3d mMinimap[mapbufsize];
-  ::math::vector_4d mFakeShadows[mapbufsize];
-
-  void getSelectionCoord(float *x,float *z);
-  float getSelectionHeight();
-
-  ::math::vector_3d GetSelectionPosition();
+  void getSelectionCoord (const int& selected_polygon, float* x, float* z) const;
+  float getSelectionHeight (const int& selected_polygon) const;
+  ::math::vector_3d GetSelectionPosition(const int& selected_polygon) const;
 
   bool changeTerrain(float x, float z, float change, float radius, int BrushType);
   bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
@@ -132,14 +87,9 @@ public:
   int getAreaID();
   void setAreaID(int ID);
 
-  bool GetVertex(float x,float z, ::math::vector_3d* V);
-  boost::optional<float> get_height (const float& x, const float& z) const;
-
-  void loadTextures();
-//  char getAlpha(float x,float y);
-
-
-  //float getTerrainHeight(float x, float z);
+  boost::optional<float> get_height ( const float& x
+                                    , const float& z
+                                    ) const;
 
   void SetAnim (const mcly_flags_type& flags) const;
   void RemoveAnim (const mcly_flags_type& flags) const;
@@ -149,6 +99,61 @@ public:
 
   void update_low_quality_texture_map();
   const unsigned char* low_quality_texture_map() const;
+
+
+  ::math::vector_3d vmin, vmax, vcenter;
+  int px, py;
+
+  MapChunkHeader header;
+  size_t nTextures;
+
+  float xbase, ybase, zbase;
+
+  int nameID;
+
+  bool haswater;
+
+  int holes;
+
+  int tex[4];
+  noggit::blp_texture* _textures[4];
+  const unsigned int& texture_flags (const size_t& layer) const
+  {
+    return _texFlags[layer];
+  }
+  void texture_flags (const size_t& layer, const unsigned int& flags)
+  {
+    _texFlags[layer] = flags;
+  }
+  const unsigned int& texture_effect_id (const size_t& layer) const
+  {
+    return _effectID[layer];
+  }
+  void texture_effect_id (const size_t& layer, const unsigned int& id)
+  {
+    _effectID[layer] = id;
+  }
+private:
+  unsigned int _texFlags[4];
+  unsigned int _effectID[4];
+public:
+  unsigned char amap[3][64*64];
+  unsigned char mShadowMap[8*64];
+  GLuint alphamaps[3];
+  GLuint shadow;
+
+  int animated[4];
+
+  GLuint vertices, normals, minimap, minishadows;
+
+  StripType *strip;
+  int striplen;
+
+  ::math::vector_3d mNormals[mapbufsize];
+  ::math::vector_3d mVertices[mapbufsize];
+  //! \todo Is this needed? Can't we just use the real vertices?
+  ::math::vector_3d mMinimap[mapbufsize];
+  ::math::vector_4d mFakeShadows[mapbufsize];
 
 private:
   World* _world;

@@ -1,4 +1,4 @@
-// MapTile.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// MapTile.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
@@ -38,18 +38,13 @@ public:
   MapTile( World*, int x0, int z0, const std::string& pFilename, bool pBigAlpha );
   ~MapTile();
 
-  //! \brief Get the maximum height of terrain on this map tile.
-  float getMaxHeight();
-
   //! \brief Get chunk for sub offset x,z.
   MapChunk* getChunk( unsigned int x, unsigned int z );
 
-  int modelCount;
   int mPositionX;
   int mPositionZ;
-  float xbase, zbase;
-
-  bool changed;
+  float xbase;
+  float zbase;
 
   void draw ( bool draw_terrain_height_contour
             , bool mark_impassable_chunks
@@ -59,6 +54,7 @@ public:
             , const float& cull_distance
             , const Frustum& frustum
             , const ::math::vector_3d& camera
+            , const boost::optional<selection_type>& selected_item
             );
   void drawSelect ( const float& cull_distance
                   , const Frustum& frustum
@@ -73,8 +69,9 @@ public:
   void drawTextures (const QRectF& chunks_to_draw) const;
   void drawMFBO();
 
-  bool GetVertex( float x, float z, ::math::vector_3d *V );
-  boost::optional<float> get_height (const float& x, const float& z) const;
+  boost::optional<float> get_height ( const float& x
+                                    , const float& z
+                                    ) const;
 
   void saveTile ( const World::model_instances_type::const_iterator& models_begin
                 , const World::model_instances_type::const_iterator& models_end

@@ -1,4 +1,4 @@
-// model_spawner.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// model_spawner.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
@@ -26,7 +26,7 @@ namespace noggit
   {
     class model_spawner : public QWidget
     {
-    Q_OBJECT
+      Q_OBJECT
 
     public:
       model_spawner (QWidget* parent = NULL, QGLWidget *shared = NULL);

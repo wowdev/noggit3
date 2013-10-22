@@ -1,4 +1,4 @@
-// model_spawner.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// model_spawner.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
@@ -27,7 +27,7 @@ namespace noggit
       {
       public:
         model_tree_model (QObject* parent = NULL)
-          : QStandardItemModel (parent)
+        : QStandardItemModel (parent)
         { }
 
         virtual QStringList mimeTypes() const

@@ -1,4 +1,4 @@
-// cursor_selector.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// cursor_selector.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
@@ -54,8 +54,8 @@ namespace noggit
     }
 
     cursor_selector::cursor_selector (QWidget* parent)
-      : QWidget (parent)
-      , _settings (new QSettings (this))
+    : QWidget (parent)
+    , _settings (new QSettings (this))
     {
       setWindowTitle (tr ("Cursor options"));
 

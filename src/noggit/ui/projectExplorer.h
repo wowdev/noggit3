@@ -1,18 +1,24 @@
+// MainWindow.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
+// Benedikt Kleiner <benedikt.kleiner@googlemail.com>
+// Glararan <glararan@glararan.eu>
+
 #ifndef PROJECTEXPLORER_H
 #define PROJECTEXPLORER_H
 
 #include <QWidget>
 
-class projectExplorer : public QWidget
+namespace noggit
 {
-    Q_OBJECT
-public:
-    explicit projectExplorer(const QString& projectPath, QWidget *parent = 0);
-    
-signals:
-    
-public slots:
-    
-};
+  namespace ui
+  {
+    class projectExplorer : public QWidget
+    {
+      Q_OBJECT
+
+    public:
+      explicit projectExplorer(const QString& projectPath, QWidget* parent = 0);
+    };
+  }
+}
 
 #endif // PROJECTEXPLORER_H
