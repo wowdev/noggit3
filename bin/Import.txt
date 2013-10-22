@@ -1,3 +1,0 @@
-world\azeroth\elwynn\passivedoodads\trees\elwynntreecanopy04.m2
-world\azeroth\elwynn\passivedoodads\trees\elwynntreecanopy02.m2
-world\azeroth\elwynn\passivedoodads\trees\elwynntreecanopy04.m2

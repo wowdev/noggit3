@@ -1,0 +1,17 @@
+// repository.h.in is part of Noggit3, licensed via GNU General Public License (version 3).
+// Bernd Lörwald <bloerwald+noggit@googlemail.com>
+
+#ifndef __HELPER_REPOSITORY_H
+#define __HELPER_REPOSITORY_H
+
+namespace helper
+{
+  namespace repository
+  {
+    inline int revision() { return @hg_rev_id@; }
+    inline QString revision_string() { return "@hg_rev_id_str@"; }
+    inline QString hash() { return "@hg_rev_hash_str@"; }
+  }
+}
+
+#endif
