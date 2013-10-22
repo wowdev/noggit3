@@ -1,4 +1,4 @@
-// DBCTableModel.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// DBCTableModel.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 
 
@@ -35,7 +35,7 @@ public:
         }
         return config;
     }
-    
+
 
 private:
     DBCFile *dbcFile;

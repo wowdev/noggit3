@@ -1,4 +1,4 @@
-// WMOInstance.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// WMOInstance.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
@@ -64,6 +64,7 @@ void WMOInstance::draw ( bool draw_doodads
                        , const float& fog_distance
                        , const Frustum& frustum
                        , const ::math::vector_3d& camera
+                       , const boost::optional<selection_type>& selected_item
                        ) const
 {
   glPushMatrix();
@@ -75,11 +76,10 @@ void WMOInstance::draw ( bool draw_doodads
   glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
   glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
 
-  if(_world->IsSelection( eEntry_WMO ))
-      LogDebug << "shit" << _world->GetCurrentSelection()->data.wmo->mUniqueID <<std::endl;
-
-  const bool is_selected ( _world->IsSelection( eEntry_WMO )
-                        && _world->GetCurrentSelection()->data.wmo->mUniqueID == mUniqueID
+  const bool is_selected ( selected_item
+                        && noggit::selection::is_the_same_as ( this
+                                                             , *selected_item
+                                                             )
                          );
 
   wmo->draw ( _world

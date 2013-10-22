@@ -1,4 +1,4 @@
-// MapView.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// MapView.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Beket <snipbeket@mail.ru>
 // Bernd Lrwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
@@ -7,6 +7,8 @@
 // Tigurius <bstigurius@googlemail.com>
 
 #include <noggit/MapView.h>
+
+#include <stdexcept>
 
 #include <QMenu>
 #include <QMenuBar>
@@ -37,7 +39,7 @@
 #include <noggit/ui/minimap_widget.h>
 #include <noggit/ui/cursor_selector.h>
 #include <noggit/ui/model_spawner.h>
-#include <noggit/editortemplate.h>
+#include <noggit/ui/editortemplate.h>
 #include <noggit/blp_texture.h>
 #include <noggit/TextureManager.h>
 
@@ -68,8 +70,6 @@ namespace noggit
     , _cursor_selector (new ui::cursor_selector (NULL))
     , _is_currently_moving_object (false)
     , _object_to_ground (true)
-    , flags(TERRAIN | WMODOODAS | FOG | DOODADS | TERRAIN | DRAWWMO)
-    , backupFlags(0)
     , _draw_lighting (true)
     , _fog_distance (777.0f)
     , _holding_left_mouse_button (false)
@@ -91,15 +91,15 @@ namespace noggit
     , _smoothing_radius_slider (NULL)
     , _smoothing_speed_slider (NULL)
     , _smoothing_settings_widget (NULL)
-    , _texturing_settings_widget (NULL)
-    , _texturing_radius_slider (NULL)
-    , _texturing_hardness_slider (NULL)
-    , _texturing_pressure_slider (NULL)
-    , _texturing_opacity_slider (NULL)
     , _texturing_radius (15.0)
     , _texturing_hardness (0.9f)
     , _texturing_pressure (0.9f)
     , _texturing_opacity (1.0f)
+    , _texturing_radius_slider (NULL)
+    , _texturing_hardness_slider (NULL)
+    , _texturing_pressure_slider (NULL)
+    , _texturing_opacity_slider (NULL)
+    , _texturing_settings_widget (NULL)
     , _texturingComboBox (NULL)
     , _automatically_update_terrain_selection (true)
     , _copy_size_randomization (false)
@@ -111,18 +111,20 @@ namespace noggit
     , _currently_holding_alt (false)
     , _currently_holding_control (false)
     , _settings (new QSettings (this))
-    , _clipboard (NULL)
+    , _clipboard (boost::none)
     , _invert_mouse_y_axis (false)
-    , menu (NULL)
 
     //! \todo Sort to correct order and rename.
+    , menu (NULL)
     , moving (0.0f)
     , strafing (0.0f)
     , updown (0.0f)
     , movespd (66.6f)
-    , look (false)
+    , _only_holding_right_mouse_button (false)
     , mViewMode (eViewMode_3D)
     , editortemplate (NULL)
+    , flags(TERRAIN | WMODOODAS | FOG | DOODADS | TERRAIN | DRAWWMO)
+    , backupFlags(0)
   {
     setMinimumSize (500, 500);
     setMaximumHeight (2000);
@@ -254,10 +256,11 @@ namespace noggit
     edit_menu->addAction (reset_rotation);
     edit_menu->addAction (snap_object_to_ground);
 
+    /*
     QMenu* assist_menu (menu->addMenu (tr ("Assist")));
+
     QMenu* insertion_menu (assist_menu->addMenu (tr ("Insert helper model")));
 
-    /*
     assist_menu->addAction (tr ("all from MV", InsertObject, 0  );
     assist_menu->addAction (tr ("last M2 from MV", InsertObject, 14  );
     assist_menu->addAction (tr ("last WMO from MV", InsertObject, 15  );
@@ -442,7 +445,7 @@ namespace noggit
     this->makeCurrent();
     const qreal now (_startup_time.elapsed() / 1000.0);
 
-    tick (now, now - _last_update);
+    tick (now - _last_update);
     updateGL();
 
     _last_update = now;
@@ -485,10 +488,42 @@ namespace noggit
     _world = NULL;
   }
 
-  void MapView::tick( float /*t*/, float dt )
+  void MapView::maybe_move_selection_depending_on_weird_global_variables()
   {
-    dt = std::min( dt, 1.0f );
+    if (!_selection || !keyx || !keyy || !keyz || !keyr || !keys)
+    {
+      //! \note As this code is called every tick instead of only when needed, we need to prevent it from crashing with selection::is_chunk (*_selection).
+      return;
+    }
 
+    qreal keypad_object_move_ratio (0.1);
+    if(_currently_holding_control && _currently_holding_shift)
+    {
+      keypad_object_move_ratio *= 0.5;
+    }
+    else if(_currently_holding_shift)
+    {
+      keypad_object_move_ratio *= 2.0;
+    }
+    else if(_currently_holding_control)
+    {
+      keypad_object_move_ratio *= 3.0;
+    }
+
+    selection::move ( ::math::vector_3d (keyx, keyy, keyz)
+                    * keypad_object_move_ratio
+                    , *_selection
+                    );
+    selection::rotate_y ( keyr * keypad_object_move_ratio * 2.0
+                        , *_selection
+                        );
+    selection::scale ( keys * keypad_object_move_ratio / 50.0
+                     , *_selection
+                     );
+  }
+
+  void MapView::tick(float dt )
+  {
     ::math::vector_3d dir( 1.0f, 0.0f, 0.0f );
     ::math::vector_3d dirUp( 1.0f, 0.0f, 0.0f );
     ::math::vector_3d dirRight( 0.0f, 0.0f, 1.0f );
@@ -516,181 +551,68 @@ namespace noggit
       ::math::rotate (0.0f, 0.0f, &dirRight.x(), &dirRight.z(), ah);
     }
 
-    nameEntry * Selection = _world->GetCurrentSelection();
+    maybe_move_selection_depending_on_weird_global_variables();
 
-    if(Selection)
+    if (_selection)
     {
-      qreal keypad_object_move_ratio (0.1);
-      // Set move scale and rotate for numpad keys
-      if(_currently_holding_control && _currently_holding_shift)
-        keypad_object_move_ratio = 0.05;
-      else if(_currently_holding_shift)
-        keypad_object_move_ratio = 0.2;
-      else if(_currently_holding_control)
-        keypad_object_move_ratio = 0.3;
-
-      if(keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0)
+      //! \todo   Alternatively   automatically   align  it   to   the
+      //! terrain. Also try to move it where the mouse points.
+      if (_is_currently_moving_object)
       {
-        //! \todo On all these, setchanged() is wrong, if models are bigger than a chunk.
-        // Move scale and rotate with numpad keys
-        if(Selection->type == eEntry_WMO)
+        if (_currently_holding_alt)
         {
-          _world->setChanged ( Selection->data.wmo->pos.x()
-                             , Selection->data.wmo->pos.z()
-                             );
-
-          Selection->data.wmo->pos.x ( Selection->data.wmo->pos.x()
-                                     + keyx * keypad_object_move_ratio);
-          Selection->data.wmo->pos.y ( Selection->data.wmo->pos.y()
-                                     + keyy * keypad_object_move_ratio);
-          Selection->data.wmo->pos.z ( Selection->data.wmo->pos.z()
-                                     + keyz * keypad_object_move_ratio);
-          Selection->data.wmo->dir.y ( Selection->data.wmo->dir.y()
-                                     + keyr * keypad_object_move_ratio * 2.0);
-
-          _world->setChanged ( Selection->data.wmo->pos.x()
-                             , Selection->data.wmo->pos.z()
-                             );
+          selection::scale (powf (2.0f, mv * 4.0f), *_selection);
         }
-
-        if(Selection->type == eEntry_Model)
+        else
         {
-          _world->setChanged ( Selection->data.model->pos.x()
-                             , Selection->data.model->pos.z()
-                             );
+          //! \note The  commented out code  here was executed  when a
+          //! model was  selected. I am  unsure, if it is  relevant as
+          //! ObjPos.x()  is  the  only   thing  used.   Also,  it  is
+          //! overwritten    before   being   used.    ObjPos.x()   is
+          //! weird_constant now.
+          // ObjPos = Selection->data.model->pos - _world->camera;
+          // ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.y(), av);
+          // ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.z(), ah);
+          // ObjPos.x (fabs (ObjPos.x()));
+          static const float weird_constant (80.0f);
+          const ::math::vector_3d offset ( mv * dirUp * weird_constant
+                                         - mh * dirRight * weird_constant
+                                         );
+          selection::move (offset, *_selection);
 
-          Selection->data.model->pos.x ( Selection->data.model->pos.x()
-                                       + keyx * keypad_object_move_ratio);
-          Selection->data.model->pos.y ( Selection->data.model->pos.y()
-                                       + keyy * keypad_object_move_ratio);
-          Selection->data.model->pos.z ( Selection->data.model->pos.z()
-                                       + keyz * keypad_object_move_ratio);
-          Selection->data.model->dir.y ( Selection->data.model->dir.y()
-                                       + keyr * keypad_object_move_ratio * 2.0);
-          Selection->data.model->sc = Selection->data.model->sc
-                                    + keys * keypad_object_move_ratio / 50.0;
-
-          _world->setChanged ( Selection->data.model->pos.x()
-                             , Selection->data.model->pos.z()
-                             );
-        }
-      }
-
-      ::math::vector_3d ObjPos;
-      if(_world->IsSelection(eEntry_Model))
-      {
-        //! \todo  Tell me what this is.
-        ObjPos = Selection->data.model->pos - _world->camera;
-        ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.y(), av);
-        ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.z(), ah);
-        ObjPos.x (fabs (ObjPos.x()));
-      }
-
-      // moving and scaling objects
-      //! \todo  Alternatively automatically align it to the terrain. Also try to move it where the mouse points.
-      if(_is_currently_moving_object)
-        if(Selection->type == eEntry_WMO)
-        {
-           _world->setChanged ( Selection->data.wmo->pos.x()
-                              , Selection->data.wmo->pos.z()
-                              ); // before move
-           ObjPos.x (80.0f);
-           Selection->data.wmo->pos += mv * dirUp * ObjPos.x();
-           Selection->data.wmo->pos -= mh * dirRight * ObjPos.x();
-           Selection->data.wmo->extents[0] =
-             Selection->data.wmo->pos - ::math::vector_3d (1,1,1);
-           Selection->data.wmo->extents[1] =
-             Selection->data.wmo->pos + ::math::vector_3d (1,1,1);
-           _world->setChanged ( Selection->data.wmo->pos.x()
-                              , Selection->data.wmo->pos.z()
-                              ); // after move. If moved to another ADT
-
-           if(_object_to_ground)
-             snap_selected_object_to_ground();
-        }
-        else if(Selection->type == eEntry_Model)
-          if(_currently_holding_alt)
+          if(_object_to_ground)
           {
-            _world->setChanged(Selection->data.model->pos.x(),Selection->data.model->pos.z());
-            float ScaleAmount;
-            ScaleAmount = pow( 2.0f, mv * 4.0f );
-            Selection->data.model->sc *= ScaleAmount;
-            if(Selection->data.model->sc > 63.9f )
-              Selection->data.model->sc = 63.9f;
-            else if (Selection->data.model->sc < 0.00098f)
-              Selection->data.model->sc = 0.00098f;
+            snap_selected_object_to_ground();
           }
-          else
-          {
-            _world->setChanged(Selection->data.model->pos.x()
-                              , Selection->data.model->pos.z()
-                              ); // before move
-            ObjPos.x (80.0f);
-            Selection->data.model->pos += mv * dirUp * ObjPos.x();
-            Selection->data.model->pos -= mh * dirRight * ObjPos.x();
-            _world->setChanged(Selection->data.model->pos.x()
-                              , Selection->data.model->pos.z()
-                              ); // after move. If moved to another ADT
-
-            if(_object_to_ground)
-              snap_selected_object_to_ground();
-          }
-
-      // rotating objects
-      if(look)
-      {
-        float * lTarget = NULL;
-        bool lModify = false;
-
-        if(Selection->type == eEntry_Model)
-        {
-          _world->setChanged ( Selection->data.model->pos.x()
-                             , Selection->data.model->pos.z()
-                             );
-          lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
-          if(_currently_holding_shift)
-            lTarget = &Selection->data.model->dir.y();
-          else if(_currently_holding_control)
-            lTarget = &Selection->data.model->dir.x();
-          else if(_currently_holding_alt)
-            lTarget = &Selection->data.model->dir.z();
-        }
-        else if(Selection->type == eEntry_WMO)
-        {
-          _world->setChanged ( Selection->data.wmo->pos.x()
-                             , Selection->data.wmo->pos.z()
-                             );
-          lModify = _currently_holding_shift | _currently_holding_control | _currently_holding_alt;
-          if(_currently_holding_shift)
-            lTarget = &Selection->data.wmo->dir.y();
-          else if(_currently_holding_control)
-            lTarget = &Selection->data.wmo->dir.x();
-          else if(_currently_holding_alt)
-            lTarget = &Selection->data.wmo->dir.z();
         }
 
-        if(lModify && lTarget)
-        {
-          *lTarget = *lTarget + rh + rv;
-
-          if(*lTarget > 360.0f)
-            *lTarget = *lTarget - 360.0f;
-          else if(*lTarget < -360.0f)
-            *lTarget = *lTarget + 360.0f;
-        }
+        mh = 0.0f;
+        mv = 0.0f;
       }
 
-      mh = 0;
-      mv = 0;
-      rh = 0;
-      rv = 0;
-
-      if(_holding_left_mouse_button && Selection->type == eEntry_MapChunk)
+      if (_only_holding_right_mouse_button)
       {
-        const ::math::vector_3d& position (_world->_exact_terrain_selection_position);
-        float xPos = position.x();
-        float yPos = position.y();
-        float zPos = position.z();
+        if (_currently_holding_control)
+        {
+          selection::rotate_x (rh + rv, *_selection);
+        }
+        else if (_currently_holding_shift)
+        {
+          selection::rotate_y (rh + rv, *_selection);
+        }
+        else if (_currently_holding_alt)
+        {
+          selection::rotate_z (rh + rv, *_selection);
+        }
+
+        rh = 0.0f;
+        rv = 0.0f;
+      }
+
+      if (_holding_left_mouse_button && selection::is_chunk (*_selection))
+      {
+        const ::math::vector_3d& position
+          (_world->_exact_terrain_selection_position);
 
         switch(_current_terrain_editing_mode)
         {
@@ -698,19 +620,23 @@ namespace noggit
           if(mViewMode == eViewMode_3D)
           {
             if(_currently_holding_shift)
-              _world->changeTerrain ( xPos
-                                    , zPos
+            {
+              _world->changeTerrain ( position.x()
+                                    , position.z()
                                     , 7.5f * dt * shaping_speed()
                                     , shaping_radius()
                                     , shaping_formula()
                                     );
+            }
             else if(_currently_holding_control)
-              _world->changeTerrain ( xPos
-                                    , zPos
+            {
+              _world->changeTerrain ( position.x()
+                                    , position.z()
                                     , -7.5f * dt * shaping_speed()
                                     , shaping_radius()
                                     , shaping_formula()
                                     );
+            }
           }
           break;
 
@@ -718,140 +644,158 @@ namespace noggit
           if(mViewMode == eViewMode_3D)
           {
             if(_currently_holding_shift)
-              _world->flattenTerrain ( xPos
-                                     , zPos
-                                     , yPos
+            {
+              _world->flattenTerrain ( position.x()
+                                     , position.z()
+                                     , position.y()
                                      , pow( 0.2f, dt ) * smoothing_speed()
                                      , smoothing_radius()
                                      , smoothing_formula()
                                      );
+            }
             else if(_currently_holding_control)
-              _world->blurTerrain ( xPos
-                                  , zPos
+            {
+              _world->blurTerrain ( position.x()
+                                  , position.z()
                                   , pow( 0.2f, dt ) * smoothing_speed()
                                   , std::min( smoothing_radius(), 30.0 )
                                   , smoothing_formula()
                                   );
+            }
           }
           break;
 
         case texturing:
           {
             const QPointF brush_position ( mViewMode == eViewMode_3D
-                                         ? QPointF (xPos, zPos)
+                                         ? QPointF ( position.x()
+                                                   , position.z()
+                                                   )
                                          : tile_mode_brush_position()
                                          + QPointF ( _world->camera.x()
                                                    , _world->camera.z()
                                                    )
                                          );
+
             if( mViewMode == eViewMode_3D )
             {
-
-                if ( _currently_holding_shift
-                   && _currently_holding_control
-                   )
-                {
-                    _world->eraseTextures (brush_position.x(), brush_position.y());
-                }
-                else if (_currently_holding_control)
-                {
+              if ( _currently_holding_shift
+                && _currently_holding_control
+                 )
+              {
+                _world->eraseTextures (brush_position.x(), brush_position.y());
+              }
+              else if (_currently_holding_control)
+              {
 #ifdef __OBSOLETE_GUI_ELEMENTS
-                    mainGui->TexturePicker->getTextures (_world->GetCurrentSelection());
+                mainGui->TexturePicker->getTextures
+                  (_world->GetCurrentSelection());
 #endif
-                }
-                else if ( _currently_holding_shift
-                        && getSelectedTexture()
-                        )
-                {
-                    _world->paintTexture ( brush_position.x()
-                                         , brush_position.y()
-                                         , brush (_texturing_radius, _texturing_hardness)
-                                         , _texturing_opacity * 255.0f
-                                         , 1.0f - pow ( 1.0f - (float)_texturing_pressure
-                                                , (float)dt * 10.0f)
-                                         , getSelectedTexture()
-                                         );
-                }
+              }
+              else if ( _currently_holding_shift
+                     && getSelectedTexture()
+                      )
+              {
+                _world->paintTexture ( brush_position.x()
+                                     , brush_position.y()
+                                     , brush (_texturing_radius, _texturing_hardness)
+                                     , _texturing_opacity * 255.0f
+                                     , 1.0f - powf ( 1.0f - (float)_texturing_pressure
+                                                   , (float)dt * 10.0f
+                                                   )
+                                     , getSelectedTexture()
+                                     );
+              }
             }
             else
+            {
               _world->paintTexture ( brush_position.x()
                                    , brush_position.y()
                                    , brush (_texturing_radius, _texturing_hardness)
                                    , _texturing_opacity * 255.0f
-                                   , 1.0f - pow ( 1.0f - (float)_texturing_pressure
-                                   , (float)dt * 10.0f)
+                                   , 1.0f - powf ( 1.0f - (float)_texturing_pressure
+                                                 , (float)dt * 10.0f
+                                                 )
                                    , getSelectedTexture()
                                    );
-
+            }
           }
         break;
 
         case hole_setting:
-          if (_currently_holding_shift)
+          if(mViewMode == eViewMode_3D)
           {
-            // if there is no terain the projection mothod dont work. So get the cords by selection.
-            Selection->data.mapchunk->getSelectionCoord(&xPos, &zPos);
-            yPos = Selection->data.mapchunk->getSelectionHeight();
+            if (_currently_holding_shift)
+            {
+              const ::math::vector_3d selection_position
+                (selection::position (*_selection));
 
-            if(mViewMode == eViewMode_3D)
-              _world->removeHole(xPos, zPos);
-            //else if(mViewMode == eViewMode_2D)
-            //  _world->removeHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom + _world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom + _world->camera.z );
-          }
-          else if(_currently_holding_control)
-          {
-            if(mViewMode == eViewMode_3D)
-              _world->addHole(xPos, zPos);
-            //else if( mViewMode == eViewMode_2D )
-            //  _world->addHole( CHUNKSIZE * 4.0f * ratio * ( _mouse_position.x() / float( width() ) - 0.5f ) / _tile_mode_zoom+_world->camera.x, CHUNKSIZE * 4.0f * ( _mouse_position.y() / float( height() ) - 0.5f) / _tile_mode_zoom+_world->camera.z );
+              _world->removeHole ( selection_position.x()
+                                 , selection_position.z()
+                                 );
+            }
+            else if(_currently_holding_control)
+            {
+              _world->addHole(position.x(), position.z());
+            }
           }
         break;
 
         case area_id_setting:
-          if(_currently_holding_shift)
+          if(mViewMode == eViewMode_3D)
           {
-            if(mViewMode == eViewMode_3D)
+            if(_currently_holding_shift)
             {
-              // draw the selected AreaId on current selected chunk
-              nameEntry * lSelection = _world->GetCurrentSelection();
-              int mtx,mtz,mcx,mcy;
-              mtx = lSelection->data.mapchunk->mt->mPositionX;
-              mtz = lSelection->data.mapchunk->mt->mPositionZ ;
-              mcx = lSelection->data.mapchunk->px;
-              mcy = lSelection->data.mapchunk->py;
-              _world->setAreaID(_selected_area_id, mtx,mtz, mcx, mcy);
+              _world->setAreaID (_selected_area_id, position);
             }
-          }
-          else if(_currently_holding_control)
-          {
-            if(mViewMode == eViewMode_3D)
+            else if(_currently_holding_control)
             {
-              // pick areaID from chunk
-              _selected_area_id = _world->GetCurrentSelection()->data.mapchunk->areaID;
+              _selected_area_id = selection::area_id (*_selection);
 #ifdef __OBSOLETE_GUI_ELEMENTS
               mainGui->ZoneIDBrowser->setZoneID(_selected_area_id);
 #endif
             }
           }
-
         break;
 
         case impassable_flag_setting:
-          if(_currently_holding_shift)
+          if(mViewMode == eViewMode_3D)
           {
-            if(mViewMode == eViewMode_3D)
-              _world->setFlag( true, xPos, zPos );
-          }
-          else if(_currently_holding_control)
-          {
-            if(mViewMode == eViewMode_3D)
-              _world->setFlag( false, xPos, zPos );
+            if(_currently_holding_shift)
+            {
+              _world->setFlag( true, position.x(), position.z() );
+            }
+            else if(_currently_holding_control)
+            {
+              _world->setFlag( false, position.x(), position.z() );
+            }
           }
         break;
         }
       }
     }
 
+    move_camera (dt, dir);
+
+    _world->advance_times (dt, mTimespeed);
+    _world->tick (dt);
+
+#ifdef __OBSOLETE_GUI_ELEMENTS
+    if (!_map_chunk_properties_window->hidden()
+      && selection::is_chunk (*_selection)
+       )
+    {
+      UITexturingGUI::setChunkWindow
+        ( _world->GetCurrentSelection()->data.mapchunk );
+    }
+#endif
+
+    //! \todo This should only be done when actually needed. (on movement and camera changes as well as modifying an adt)
+    _minimap->update();
+  }
+
+  void MapView::move_camera (const float& dt, const ::math::vector_3d& dir)
+  {
     if(mViewMode != eViewMode_2D)
     {
       if(moving)
@@ -882,19 +826,6 @@ namespace noggit
 
       _tile_mode_zoom = qBound (0.1, _tile_mode_zoom, 2.0);
     }
-
-    _world->advance_times (dt, mTimespeed);
-    _world->tick(dt);
-
-#ifdef __OBSOLETE_GUI_ELEMENTS
-    if( !_map_chunk_properties_window->hidden() && _world->GetCurrentSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk )
-    {
-      UITexturingGUI::setChunkWindow( _world->GetCurrentSelection()->data.mapchunk );
-    }
-#endif
-
-    //! \todo This should only be done when actually needed. (on movement and camera changes as well as modifying an adt)
-    _minimap->update();
   }
 
   void MapView::setup_tile_mode_rendering() const
@@ -958,7 +889,18 @@ namespace noggit
   {
     setup_3d_selection_rendering();
 
-    _world->drawSelection (flags);
+    if (selectTerrainOnly)
+    {
+      _selection = _world->drawSelection ( flags & ( ~DOODADS
+                                                   & ~DRAWWMO
+                                                   & ~WMODOODAS
+                                                   )
+                                         );
+    }
+    else
+    {
+      _selection = _world->drawSelection (flags);
+    }
   }
 
   QPointF MapView::tile_mode_brush_position() const
@@ -1021,11 +963,13 @@ namespace noggit
 
   void MapView::displayViewMode_3D()
   {
-    //! \note Select terrain below mouse, if no item selected or the item is map.
-    if ( !_world->IsSelection( eEntry_Model )
-      && !_world->IsSelection( eEntry_WMO )
-      && _automatically_update_terrain_selection
-       )
+    const bool update_selection (_automatically_update_terrain_selection
+                              && ( !_selection
+                                || selection::is_chunk (*_selection)
+                                 )
+                                );
+
+    if (update_selection)
     {
       doSelection (true);
     }
@@ -1046,6 +990,7 @@ namespace noggit
                  , brush_radius
                  , _mouse_position
                  , _fog_distance
+                 , _selection
                  );
   }
 
@@ -1162,63 +1107,56 @@ namespace noggit
 
     static const float fog_distance_step (60.0f);
 
-    // fog distance or brush radius
+    //! \todo All  these are not  exclusive but additive which  is not
+    //! only bad but wrong. (alt+shift will still increase brush size)
     if (event->key() == Qt::Key_Plus)
+    {
       if( event->modifiers() & Qt::AltModifier )
-        increase_brush_size();
-      else if( event->modifiers() & Qt::ShiftModifier && ( !_world->HasSelection() || ( _world->HasSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk) )  )
-        _fog_distance += fog_distance_step;// fog change only when no model is selected!
-      else
       {
-        //change selected model size
+        increase_brush_size();
+      }
+      else if( event->modifiers() & Qt::ShiftModifier)
+      {
+        _fog_distance += fog_distance_step;
+      }
+      else //change selected model size
+      {
         keys=1;
       }
+    }
 
     if (event->key() == Qt::Key_Minus)
+    {
       if (event->modifiers() & Qt::AltModifier)
       {
         decrease_brush_size();
       }
-      else if( event->modifiers() & Qt::ShiftModifier && ( !_world->HasSelection() || ( _world->HasSelection() && _world->GetCurrentSelection()->type == eEntry_MapChunk) )  )
-        _fog_distance -= fog_distance_step; // fog change only when no model is selected!
-      else
+      else if( event->modifiers() & Qt::ShiftModifier)
       {
-        //change selected model sizesize
+        _fog_distance -= fog_distance_step;
+      }
+      else //change selected model size
+      {
         keys=-1;
       }
+    }
 
     // doodads set
     if( event->key() >= Qt::Key_0 && event->key() <= Qt::Key_9 )
     {
-      if( _world->IsSelection( eEntry_WMO ) )
+      const int key (event->key() - Qt::Key_0);
+      if (event->modifiers() & Qt::ShiftModifier && key >= 1 && key <= 4)
       {
-        _world->GetCurrentSelection()->data.wmo->doodadset = event->key() - Qt::Key_0;
+        static const float speeds[4] = {15.0f, 50.0f, 300.0f, 1000.0f};
+        movespd = speeds[key - 1];
       }
-      else if (event->modifiers() & Qt::ShiftModifier)
+      else if (_selection && selection::is_wmo (*_selection))
       {
-        switch (event->key())
-        {
-          case Qt::Key_1:
-            movespd = 15.0f;
-            break;
-
-          case Qt::Key_2:
-            movespd = 50.0f;
-            break;
-
-          case Qt::Key_3:
-            movespd = 300.0f;
-            break;
-
-          case Qt::Key_4:
-            movespd = 1000.0f;
-            break;
-        }
+        selection::set_doodad_set (key, *_selection);
       }
       else if (event->key() >= Qt::Key_1 && event->key() <= Qt::Key_6)
       {
-        set_terrain_editing_mode
-          (terrain_editing_modes (event->key() - Qt::Key_1));
+        set_terrain_editing_mode (terrain_editing_modes (key - 1));
       }
     }
   }
@@ -1247,48 +1185,29 @@ namespace noggit
 
   void MapView::delete_selected_object()
   {
-    if( _world->IsSelection( eEntry_WMO ) )
-      _world->deleteWMOInstance( _world->GetCurrentSelection()->data.wmo->mUniqueID );
-    else if( _world->IsSelection( eEntry_Model ) )
-      _world->deleteModelInstance( _world->GetCurrentSelection()->data.model->d1 );
+    //! \note Pre-condition: _selection.
+
+    selection::remove_from_world (_world, *_selection);
   }
 
   void MapView::paste_object()
   {
-    if( _world->HasSelection() && _clipboard )
-    {
-      nameEntry lClipboard (*_clipboard);
-      ::math::vector_3d position;
-      switch( _world->GetCurrentSelection()->type )
-       {
-        case eEntry_Model:
-          position = _world->GetCurrentSelection()->data.model->pos;
-          break;
-        case eEntry_WMO:
-          position = _world->GetCurrentSelection()->data.wmo->pos;
-          break;
-        case eEntry_MapChunk:
-          position = _world->GetCurrentSelection()->data.mapchunk->
-                             GetSelectionPosition();
-          break;
-        default:
-          break;
-      }
-      _world->addModel ( lClipboard
-                       , position
-                       , _copy_size_randomization
-                       , _copy_position_randomization
-                       , _copy_rotation_randomization
-                       );
-    }
+    //! \note Pre-condition: _selection and _clipboard.
+
+    //! \todo Visitor to call addM2 or addWMO directly.
+    _world->addModel ( **_clipboard
+                     , selection::position (*_selection)
+                     , _copy_size_randomization
+                     , _copy_position_randomization
+                     , _copy_rotation_randomization
+                     );
   }
 
   void MapView::copy_selected_object()
   {
-    if( _world->HasSelection() )
-    {
-      _clipboard = new nameEntry (*_world->GetCurrentSelection());
-    }
+    //! \note Pre-condition: _selection.
+
+    _clipboard = selection::name_entry (*_selection);
   }
 
   void MapView::increase_moving_speed()
@@ -1312,37 +1231,40 @@ namespace noggit
     ah += 180.0f;
   }
 
+
+
   void MapView::reset_selected_object_rotation()
   {
-    if( _world->IsSelection( eEntry_WMO ) )
-    {
-      _world->GetCurrentSelection()->data.wmo->resetDirection();
-      _world->setChanged(_world->GetCurrentSelection()->data.wmo->pos.x(), _world->GetCurrentSelection()->data.wmo->pos.z());
-    }
-    else if( _world->IsSelection( eEntry_Model ) )
-    {
-      _world->GetCurrentSelection()->data.model->resetDirection();
-      _world->setChanged(_world->GetCurrentSelection()->data.model->pos.x(), _world->GetCurrentSelection()->data.model->pos.z());
-    }
+    //! \note Pre-condition: _selection.
+
+    selection::reset_rotation (*_selection);
   }
 
   void MapView::snap_selected_object_to_ground()
   {
-    if( _world->IsSelection( eEntry_WMO ) )
+    if (selection::is_chunk (*_selection))
     {
-      ::math::vector_3d t ( _world->GetCurrentSelection()->data.wmo->pos.x(), _world->GetCurrentSelection()->data.wmo->pos.z(), 0 );
-      _world->GetVertex( _world->GetCurrentSelection()->data.wmo->pos.x(), _world->GetCurrentSelection()->data.wmo->pos.z(), &t );
-      _world->GetCurrentSelection()->data.wmo->pos = t;
-      _world->setChanged(_world->GetCurrentSelection()->data.wmo->pos.x(), _world->GetCurrentSelection()->data.wmo->pos.z());
+      throw std::runtime_error ( "Can not snap chunks to ground "
+                                 "as it already is the ground, duh."
+                               );
+    }
 
-    }
-    else if( _world->IsSelection( eEntry_Model ) )
+    ::math::vector_3d position (selection::position (*_selection));
+    boost::optional<float> height ( _world->get_height ( position.x()
+                                                       , position.y()
+                                                       )
+                                  );
+
+    if (!height)
     {
-      ::math::vector_3d t ( _world->GetCurrentSelection()->data.model->pos.x(), _world->GetCurrentSelection()->data.model->pos.z(), 0 );
-      _world->GetVertex( _world->GetCurrentSelection()->data.model->pos.x(), _world->GetCurrentSelection()->data.model->pos.z(), &t );
-      _world->GetCurrentSelection()->data.model->pos = t;
-      _world->setChanged(_world->GetCurrentSelection()->data.model->pos.x(), _world->GetCurrentSelection()->data.model->pos.z());
+      throw std::runtime_error ( "Tried snapping to ground while there is "
+                                 "no ground below the object."
+                               );
     }
+
+    selection::move ( ::math::vector_3d (0.0f, *height, 0.0f) - position
+                    , *_selection
+                    );
   }
 
   void MapView::toggle_interface()
@@ -1640,21 +1562,20 @@ namespace noggit
     if (event->button() == Qt::LeftButton)
     {
       _holding_left_mouse_button = true;
-
-      if (_world->HasSelection())
-        _is_currently_moving_object = true;
     }
     if (event->button() == Qt::RightButton)
-      _holding_right_mouse_button = true;
-    /*if (event->button() == Qt::MidButton)
     {
-      if (_world->HasSelection())
-        _is_currently_moving_object = true;
-    }*/
+      _holding_right_mouse_button = true;
+    }
+
+    if (event->button() == Qt::LeftButton && _selection)
+    {
+      _is_currently_moving_object = true;
+    }
 
     if (_holding_left_mouse_button && _holding_right_mouse_button)
     {
-     moving = 1.0f;
+      moving = 1.0f;
     }
     else if (_holding_left_mouse_button && mViewMode == eViewMode_3D)
     {
@@ -1662,7 +1583,7 @@ namespace noggit
     }
     else if (_holding_right_mouse_button)
     {
-      look = true;
+      _only_holding_right_mouse_button = true;
     }
   }
 
@@ -1685,8 +1606,7 @@ namespace noggit
     if (event->button() == Qt::RightButton)
     {
       _holding_right_mouse_button = false;
-
-      look = false;
+      _only_holding_right_mouse_button = false;
 
       if (!key_w && moving > 0.0f)
         moving = 0.0f;
@@ -1694,8 +1614,6 @@ namespace noggit
       if (mViewMode == eViewMode_2D)
         updown = 0;
     }
-    /*if (event->button() == Qt::MidButton)
-      _is_currently_moving_object = false;*/
   }
 
   void MapView::mouseMoveEvent (QMouseEvent* event)
@@ -1705,7 +1623,9 @@ namespace noggit
 
     const QPoint relative_move (event->pos() - _mouse_position);
 
-    if (look && event->modifiers() == Qt::NoModifier)
+    if ( _only_holding_right_mouse_button
+      && event->modifiers() == Qt::NoModifier
+       )
     {
       ah += relative_move.x() / XSENS;
       av += (_invert_mouse_y_axis ? 1.0 : -1.0) * relative_move.y() / YSENS;
@@ -1713,6 +1633,7 @@ namespace noggit
       av = qBound (-80.0f, av, 80.0f);
     }
 
+    //! \todo Actually move and rotate objects here instead of ::tick().
     if(_is_currently_moving_object)
     {
       // TODO find better formula ( it have still some missing x, y)
@@ -1845,8 +1766,14 @@ namespace noggit
 
   void MapView::move_heightmap()
   {
+    //! \note Pre-condition: _selection
+
+    const float height_delta ( _world->camera.y()
+                             - selection::position (*_selection).y()
+                             );
     _world->moveHeight ( tile_below_camera (_world->camera.x())
                        , tile_below_camera (_world->camera.z())
+                       , height_delta
                        );
   }
 
@@ -2191,13 +2118,13 @@ namespace noggit
       shapingButton->setIconSize (QSize(40, 40));
       shapingButton->setMaximumSize (50, 50);
       shapingButton->setToolTip (tr("Terrain Tool"));
-      shapingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black;"); //transparent
-      
+      shapingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black; color: white;"); //transparent
+
       QPushButton *smoothingButton = new QPushButton(QIcon(render_blp_to_pixmap("Interface\\ICONS\\INV_Elemental_Mote_Air01.blp", 40, 40)), "");
       smoothingButton->setIconSize (QSize(40, 40));
       smoothingButton->setMaximumSize (50, 50);
       smoothingButton->setToolTip (tr("Smoothing Tool"));
-      smoothingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black;");
+      smoothingButton->setStyleSheet ("border:2px solid black; border-radius: 5px; background-color: black; color: white;");
 
       _toolbar_formula_radio_group->addButton (shapingButton, shaping);
       _toolbar_formula_radio_group->addButton (smoothingButton, smoothing);
@@ -2233,7 +2160,7 @@ namespace noggit
     //! \todo Beautify.
 
     // Test if there is an selection
-    if( !_world->HasSelection() )
+    if( !_selection )
       return;
     // the list of the models to import
     std::vector<std::string> m2s_to_add;
@@ -2330,21 +2257,8 @@ namespace noggit
       }
     }
 
-
-    ::math::vector_3d selectionPosition;
-    switch( _world->GetCurrentSelection()->type )
-    {
-      case eEntry_Model:
-        selectionPosition = _world->GetCurrentSelection()->data.model->pos;
-        break;
-      case eEntry_WMO:
-        selectionPosition = _world->GetCurrentSelection()->data.wmo->pos;
-        break;
-      case eEntry_MapChunk:
-        selectionPosition = _world->GetCurrentSelection()->data.mapchunk->GetSelectionPosition();
-        break;
-    }
-
+    const ::math::vector_3d selectionPosition
+      (selection::position (*_selection));
 
     if(id==14)
     {
@@ -2408,9 +2322,9 @@ namespace noggit
     {
       using namespace helper::math;
       areaIDColors[area_id] = ::math::vector_3d ( random::floating_point (0.0f, 1.0f)
-                                    , random::floating_point (0.0f, 1.0f)
-                                    , random::floating_point (0.0f, 1.0f)
-                                    );
+                                                , random::floating_point (0.0f, 1.0f)
+                                                , random::floating_point (0.0f, 1.0f)
+                                                );
     }
   }
 #endif
@@ -2418,7 +2332,8 @@ namespace noggit
   void MapView::show_texture_switcher()
   {
 #ifdef __OBSOLETE_GUI_ELEMENTS
-    _texture_switcher->textures_by_selection (_world->GetCurrentSelection());
+    _texture_switcher->textures_by_selection
+      (_world->GetCurrentSelection());
     _texture_switcher->show();
 #endif
   }
@@ -2450,7 +2365,7 @@ namespace noggit
 
 void MapView::updateParent()
 {
-    editortemplate = (noggit::EditorTemplate*)this->parent();
+    editortemplate = (noggit::ui::EditorTemplate*)this->parent();
     editortemplate->addPropBar(_shaping_settings_widget);
     editortemplate->addPropBar(_texturing_settings_widget);
     editortemplate->addPropBar(_smoothing_settings_widget);

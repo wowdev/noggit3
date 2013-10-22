@@ -1,4 +1,4 @@
-// minimap_widget.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// minimap_widget.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 // Stephan Biegel <project.modcraft@googlemail.com>
@@ -22,7 +22,7 @@ namespace noggit
     //! \todo Make this a fixed square somehow.
     class minimap_widget : public QWidget
     {
-    Q_OBJECT
+      Q_OBJECT
 
     public:
       minimap_widget (QWidget* parent = NULL);

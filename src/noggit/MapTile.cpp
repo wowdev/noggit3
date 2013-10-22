@@ -1,4 +1,4 @@
-// MapTile.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// MapTile.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Mjollnà <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
@@ -29,13 +29,11 @@
 #include <noggit/mpq/file.h>
 
 MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
-  : modelCount (0)
-  , mPositionX (pX)
+  : mPositionX (pX)
   , mPositionZ (pZ)
 //! \todo Actually, this is defined inside the ADT.
   , xbase (mPositionX * TILESIZE)
   , zbase (mPositionZ * TILESIZE)
-  , changed (false)
   , mFlags (0)
   , mBigAlpha (pBigAlpha)
   , mTextureFilenames (0)
@@ -53,7 +51,7 @@ MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bo
     }
   }
 
-  noggit::mpq::file theFile (QString::fromStdString (mFilename));
+  noggit::mpq::file theFile (QString::fromStdString (mFilename), true);
 
   Log << "Opening tile " << mPositionX << ", " << mPositionZ << " (\"" << mFilename << "\") from " << (theFile.file_is_on_disk() ? "disk" : "MPQ") << "." << std::endl;
 
@@ -457,16 +455,6 @@ bool MapTile::isTile( int pX, int pZ )
   return pX == mPositionX && pZ == mPositionZ;
 }
 
-float MapTile::getMaxHeight()
-{
-  float maxHeight = -99999.0f;
-  for( int nextChunk = 0; nextChunk < 256; ++nextChunk )
-  {
-    maxHeight = std::max( mChunks[nextChunk / 16][nextChunk % 16]->vmax.y(), maxHeight );
-  }
-  return maxHeight;
-}
-
 void MapTile::draw ( bool draw_terrain_height_contour
                    , bool mark_impassable_chunks
                    , bool draw_area_id_overlay
@@ -475,6 +463,7 @@ void MapTile::draw ( bool draw_terrain_height_contour
                    , const float& cull_distance
                    , const Frustum& frustum
                    , const ::math::vector_3d& camera
+                   , const boost::optional<selection_type>& selected_item
                    )
 {
   glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
@@ -490,6 +479,7 @@ void MapTile::draw ( bool draw_terrain_height_contour
                             , draw_area_id_overlay
                             , dont_draw_cursor
                             , skies
+                            , selected_item
                             );
       }
     }
@@ -598,14 +588,6 @@ MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )
   {
     return NULL;
   }
-}
-
-bool MapTile::GetVertex( float x, float z, ::math::vector_3d *V )
-{
-  int xcol = ( x - xbase ) / CHUNKSIZE;
-  int ycol = ( z - zbase ) / CHUNKSIZE;
-
-  return xcol >= 0 && xcol <= 15 && ycol >= 0 && ycol <= 15 && mChunks[ycol][xcol]->GetVertex( x, z, V );
 }
 
 boost::optional<float> MapTile::get_height ( const float& x
@@ -1214,9 +1196,9 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
                         );
         MapChunkHeader * lMCNK_header = get_pointer<MapChunkHeader>( lADTFile, lCurrentPosition + 8 );
 
-        lMCNK_header->flags = mChunks[y][x]->Flags;
+        lMCNK_header->flags = mChunks[y][x]->header.flags;
         lMCNK_header->holes = mChunks[y][x]->holes;
-        lMCNK_header->areaid = mChunks[y][x]->areaID;
+        lMCNK_header->areaid = mChunks[y][x]->header.areaid;
 
         lMCNK_header->nLayers = -1;
         lMCNK_header->nDoodadRefs = -1;
@@ -1330,13 +1312,13 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
             lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename().toStdString() )->second;
 
-            lLayer->flags = mChunks[y][x]->texFlags[j];
+            lLayer->flags = mChunks[y][x]->texture_flags (j);
 
             // if not first, have alpha layer, if first, have not. never have compression.
             lLayer->flags = ( j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & ( ~FLAG_USE_ALPHA ) ) & ( ~FLAG_ALPHA_COMPRESSED );
 
             lLayer->ofsAlpha = ( j == 0 ? 0 : ( mBigAlpha ? 64 * 64 * ( j - 1 ) : 32 * 64 * ( j - 1 ) ) );
-            lLayer->effectID = mChunks[y][x]->effectID[j];
+            lLayer->effectID = mChunks[y][x]->texture_effect_id (j);
           }
 
           lCurrentPosition += 8 + lMCLY_Size;
@@ -1420,7 +1402,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 //        {
           //! \todo  Somehow determine if we need to write this or not?
           //! \todo  This sometime gets all shadows black.
-          if( mChunks[y][x]->Flags & 1 )
+          if( mChunks[y][x]->header.flags & 1 )
           {
             int lMCSH_Size = 0x200;
             lADTFile.resize (lADTFile.size() + 8 + lMCSH_Size );
@@ -1555,7 +1537,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
   }
 #endif
 
-  noggit::mpq::file f (QString::fromStdString (mFilename));
+  noggit::mpq::file f (QString::fromStdString (mFilename), true);
   f.setBuffer( get_pointer<char>(lADTFile), lADTFile.size() );
   f.save_to_disk();
   f.close();
@@ -1720,9 +1702,9 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
         // This is only the size of the header. More chunks will increase the size.
         MapChunkHeader * lMCNK_header = get_pointer<MapChunkHeader>( lADTFile, lCurrentPosition + 8 );
 
-        lMCNK_header->flags = mChunks[y][x]->Flags;
+        lMCNK_header->flags = mChunks[y][x]->header.flags;
         lMCNK_header->holes = mChunks[y][x]->holes;
-        lMCNK_header->areaid = mChunks[y][x]->areaID;
+        lMCNK_header->areaid = mChunks[y][x]->header.areaid;
 
         lMCNK_header->nLayers = 0;
         lMCNK_header->nDoodadRefs = 0;
@@ -1870,7 +1852,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
     lCurrentPosition += 8 + chunkSize;
   }
 
-  noggit::mpq::file f (QString::fromStdString (mFilename));
+  noggit::mpq::file f (QString::fromStdString (mFilename), true);
   f.setBuffer( get_pointer<char>(lADTFile), lADTFile.size() );
   f.save_to_disk();
   f.close();
@@ -1947,13 +1929,13 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
             lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename().toStdString() )->second;
 
-            lLayer->flags = mChunks[y][x]->texFlags[j];
+            lLayer->flags = mChunks[y][x]->texture_flags (j);
 
             // if not first, have alpha layer, if first, have not. never have compression.
             lLayer->flags = ( j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & ( ~FLAG_USE_ALPHA ) ) & ( ~FLAG_ALPHA_COMPRESSED );
 
             lLayer->ofsAlpha = ( j == 0 ? 0 : ( mBigAlpha ? 64 * 64 * ( j - 1 ) : 32 * 64 * ( j - 1 ) ) );
-            lLayer->effectID = mChunks[y][x]->effectID[j];
+            lLayer->effectID = mChunks[y][x]->texture_effect_id (j);
           }
 
           lCurrentPosition += 8 + lMCLY_Size;
@@ -1964,7 +1946,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 //        {
           //! \todo  Somehow determine if we need to write this or not?
           //! \todo  This sometime gets all shadows black.
-          if( mChunks[y][x]->Flags & 1 )
+          if( mChunks[y][x]->header.flags & 1 )
           {
             int lMCSH_Size = 0x200;
             lADTTexFile.resize (lADTTexFile.size() + 8 + lMCSH_Size );
@@ -2050,9 +2032,9 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
   texFilename = texFilename.substr(found + 1);
   texFilename = "/" + texFilename;
 
-  noggit::mpq::file fTex (QString::fromStdString (mFilename));
+  noggit::mpq::file fTex (QString::fromStdString (texFilename), true);
   fTex.setBuffer( get_pointer<char>(lADTTexFile), lADTTexFile.size() );
-  fTex.save_to_disk(QString::fromStdString (texFilename));
+  fTex.save_to_disk();
   fTex.close();
 
   // obj0
@@ -2344,9 +2326,9 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
   objFilename = objFilename.substr(found + 1);
   objFilename = "/" + objFilename;
 
-  noggit::mpq::file fObj (QString::fromStdString (mFilename));
+  noggit::mpq::file fObj (QString::fromStdString (objFilename), true);
   fObj.setBuffer( get_pointer<char>(lADTObjFile), lADTObjFile.size() );
-  fObj.save_to_disk(QString::fromStdString (objFilename));
+  fObj.save_to_disk();
   fObj.close();
 
 }

@@ -1,4 +1,4 @@
-// archive.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// archive.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
 #include <noggit/mpq/archive.h>

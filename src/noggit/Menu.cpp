@@ -1,4 +1,4 @@
-// Menu.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Menu.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Beket <snipbeket@mail.ru>
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
@@ -113,15 +113,23 @@ Menu::~Menu()
 void Menu::enter_world_at (World *world, const ::math::vector_3d& pos, bool auto_height, float av, float ah )
 {
   prepare_world (world,pos, ah, av);
-  world->enterTile (pos.x() / TILESIZE, pos.y() / TILESIZE);
+  world->load_tiles_around ( pos.x() / TILESIZE
+                           , pos.y() / TILESIZE
+                           //! \todo Something based on viewing distance.
+                           , 2
+                           );
 
   emit create_world_view_request (world);
 
   if(auto_height)
-    world->set_camera_above_terrain();
+  {
+    world->camera.y ( world->get_height (pos.x(), pos.y()).get_value_or (0.0f)
+                    + 50.0f
+                    );
+  }
 }
 
-World *Menu::load_map (int map_id)
+World *Menu::load_map (unsigned int map_id)
 {
   if (_minimap->world() && _minimap->world()->getMapID() == map_id)
   {

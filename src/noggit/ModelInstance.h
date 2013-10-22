@@ -1,12 +1,16 @@
-// ModelInstance.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// ModelInstance.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
 #ifndef MODELINSTANCE_H
 #define MODELINSTANCE_H
 
+#include <boost/optional.hpp>
+
 #include <math/vector_3d.h>
 #include <math/quaternion.h>
+
+#include <noggit/Selection.h>
 
 class Frustum;
 class Model;
@@ -65,7 +69,9 @@ public:
                   , const float& rotation = 0.0f
                   ) const;
 
-  void draw (bool draw_fog) const;
+  void draw ( bool draw_fog
+            , const boost::optional<selection_type>& selected_item
+            ) const;
   void draw_for_selection();
 
   void draw2() const;

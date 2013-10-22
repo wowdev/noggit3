@@ -1,4 +1,4 @@
-// about_widget.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// about_widget.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
@@ -16,7 +16,7 @@ namespace noggit
   namespace ui
   {
     about_widget::about_widget (QWidget* parent)
-      : QWidget (parent)
+    : QWidget (parent)
     {
       setMinimumSize (500, 260);
       setMaximumSize (500, 260);

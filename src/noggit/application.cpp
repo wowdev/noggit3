@@ -1,4 +1,4 @@
-// application.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// application.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Beket <snipbeket@mail.ru>
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
@@ -24,6 +24,7 @@
 #include <QFileDialog>
 
 #include <helper/repository.h>
+#include <helper/qt/case_insensitive.h> //implizit cast
 
 #include <noggit/DBC.h>
 #include <noggit/errorHandling.h>
@@ -34,16 +35,16 @@
 #include <noggit/ModelManager.h> // ModelManager::report()
 #include <noggit/mpq/archive.h>
 #include <noggit/mpq/file.h>
-
+#include <noggit/ui/MainWindow.h>
 #include <noggit/ui/DBCEditor.h>
 
 namespace noggit
 {
   application::application (int& argc, char** argv)
-    : QApplication (argc, argv)
-    , _settings (NULL)
-    , _async_loader (1)
-    , _archive_manager (_async_loader)
+  : QApplication (argc, argv)
+  , _settings (NULL)
+  , _async_loader (1)
+  , _archive_manager (_async_loader)
   {
     Log << "Noggit Studio - " << helper::repository::revision() << std::endl;
 
@@ -80,7 +81,7 @@ namespace noggit
 
     OpenDBs();
 
-    MainWindow* mainwindow = new MainWindow;
+    ui::MainWindow* mainwindow = new ui::MainWindow;
     if (_settings->value ("maximizedAppShow").toBool() == true)
       mainwindow->showMaximized();
     else
@@ -104,12 +105,14 @@ namespace noggit
     return _async_loader;
   }
 
-  QVariant application::setting(const QString& key) const
+  QVariant application::setting ( const QString& key
+                                , const QVariant& value
+                                ) const
   {
-    return _settings->value (key);
+    return _settings->value (key, value);
   }
 
-  void application::setting(const QString& key, const QVariant& value)
+  void application::set_setting(const QString& key, const QVariant& value)
   {
     emit settingAboutToChange (key, setting (key));
     _settings->setValue (key, value);
@@ -191,13 +194,13 @@ namespace noggit
     QSettings registry (default_registry_path, QSettings::NativeFormat);
     _game_path = registry.value ("InstallPath").toString();
 
-    if(_game_path == "")
+    if(_game_path.absolutePath() == "")
     {
       QSettings registry_win7 (win7_registry_path, QSettings::NativeFormat);
       _game_path = registry_win7.value ("InstallPath").toString();
     }
 
-    if(_game_path == "")
+    if(_game_path.absolutePath() == "")
     {
       QSettings registry_win72 (win7_registry_path2, QSettings::NativeFormat);
       _game_path = registry_win72.value ("InstallPath").toString();
@@ -206,7 +209,7 @@ namespace noggit
 #ifdef Q_WS_MAC
     _game_path = "/Applications/World of Warcraft/";
 #else
-    _game_path.clear();
+    _game_path = "";
 #endif
 #endif
   }
@@ -243,39 +246,42 @@ namespace noggit
       return false;
     }
 
-    //! \todo Do somehow else with  not loading and unloading the MPQs
-    //! multiple times. (Is that file in one specific one?)
-    mpq::archive archive ( path.absoluteFilePath ( "Data/"
-                                                 + found_locale
-                                                 + "/locale-"
-                                                 + found_locale
-                                                 + ".mpq"
-                                                 )
-                         , false
-                         );
-
-    char* buffer;
-    size_t size;
-    archive.open_file ( "component.wow-" + found_locale + ".txt"
-                      , &size
-                      , &buffer
-                      );
-    const QString component_file (buffer);
-
-    const QRegExp version_regexp (".*version=\"(\\d+)\".*");
-    version_regexp.exactMatch (component_file);
-
-    const int client_build (version_regexp.cap (1).toInt());
-
-    static const int build_3_3_5a (12340);
-
-    if (client_build != build_3_3_5a)
+    if (app()._settings->value ("check_for_client_build", false).toBool())
     {
-      LogError << "Path \"" << qPrintable (path.absolutePath())
-               << "\" does not include a client of version "
-               << build_3_3_5a << " but version "
-               << client_build << "." << std::endl;
-      return false;
+      //! \todo Do somehow else. This  also does not take patches into
+      //! account and will always fail.
+      mpq::archive archive ( path.absoluteFilePath ( "Data/"
+                                                   + found_locale
+                                                   + "/locale-"
+                                                   + found_locale
+                                                   + ".mpq"
+                                                   )
+                           , false
+                           );
+
+      char* buffer;
+      size_t size;
+      archive.open_file ( "component.wow-" + found_locale + ".txt"
+                        , &size
+                        , &buffer
+                        );
+      const QString component_file (buffer);
+
+      const QRegExp version_regexp (".*version=\"(\\d+)\".*");
+      version_regexp.exactMatch (component_file);
+
+      const int client_build (version_regexp.cap (1).toInt());
+
+      static const int build_3_3_5a (12340);
+
+      if (client_build != build_3_3_5a)
+      {
+        LogError << "Path \"" << qPrintable (path.absolutePath())
+                 << "\" does not include a client of version "
+                 << build_3_3_5a << " but version "
+                 << client_build << "." << std::endl;
+        return false;
+      }
     }
 
     return true;

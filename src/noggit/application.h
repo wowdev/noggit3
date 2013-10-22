@@ -1,4 +1,4 @@
-// application.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// application.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd L√∂rwald <bloerwald+noggit@googlemail.com>
 // Mjolln√  <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
@@ -8,11 +8,10 @@
 
 #include <QApplication>
 #include <QDir>
+#include <QVariant>
 
 #include <noggit/async/loader.h>
 #include <noggit/mpq/archive_manager.h>
-#include <noggit/MainWindow.h>
-
 
 class QSettings;
 class QGLWidget;
@@ -29,8 +28,10 @@ namespace noggit
     application (int& argc, char** argv);
     ~application();
 
-    QVariant setting (const QString& key) const;
-    void setting (const QString& key, const QVariant& value);
+    QVariant setting ( const QString& key
+                     , const QVariant& value = QVariant()
+                     ) const;
+    void set_setting (const QString& key, const QVariant& value);
 
     async::loader& async_loader();
     mpq::archive_manager& archive_manager();

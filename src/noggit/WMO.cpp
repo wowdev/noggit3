@@ -1,4 +1,4 @@
-// WMO.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// WMO.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
@@ -166,28 +166,25 @@ WMO::WMO( World* world, const std::string& filenameArg )
       for (unsigned int i=0; i<nModels; ++i) {
         uint32_t ofs;
         f.read (&ofs, sizeof (uint32_t));
-        Model *m = ModelManager::add( ddnames + ofs );
 
         ::math::vector_3d position;
+        f.read (position, sizeof (position));
+
         ::math::vector_4d rotation;
+        f.read (rotation, sizeof (rotation));
+
         float scale;
-        uint32_t light;
-
-        f.read (position, sizeof (::math::vector_3d));
-        f.read (rotation, sizeof (::math::vector_4d));
         f.read (&scale, sizeof(float));
-        f.read (&light, sizeof (uint32_t));
 
-        const float temp (position.z());
-        position.z (-position.y());
-        position.y (temp);
+        uint32_t light;
+        f.read (&light, sizeof (uint32_t));
 
         modelis.push_back
           ( ModelInstance ( world
-                          , m
+                          , ModelManager::add (ddnames + ofs)
                           , ::math::vector_3d ( position.x()
-                                              , position.z()
                                               , -position.y()
+                                              , -position.z()
                                               )
                           , ::math::quaternion ( -rotation.z()
                                                , rotation.x()
@@ -584,8 +581,7 @@ void WMO::drawSelect (World* world
 
       if (draw_doodads)
       {
-        groups[i].drawDoodadsSelect( world
-                                   , doodadset
+        groups[i].drawDoodadsSelect( doodadset
                                    , ofs
                                    , rot
                                    , frustum
@@ -715,7 +711,6 @@ void WMOGroup::init(WMO *_wmo, noggit::mpq::file* f, int _num, char *names)
 
   // extract group info from f
   f->read(&flags,4);
-  float ff[3];
   f->read(VertexBoxMax,12);
   f->read(VertexBoxMin,12);
   int nameOfs;
@@ -918,7 +913,7 @@ void WMOGroup::initDisplayList()
 
   // assume that texturing is on, for unit 1
 
-  for (int b=0; b<nBatches; b++)
+  for (size_t b=0; b<nBatches; b++)
   {
     WMOBatch *batch = &batches[b];
     WMOMaterial *mat = &wmo->mat[batch->texture];
@@ -1067,7 +1062,7 @@ void WMOGroup::draw ( World* world
   //glCallList(dl);
   glDisable(GL_BLEND);
   glColor4f(1,1,1,1);
-  for (int i=0; i<nBatches; ++i)
+  for (size_t i=0; i<nBatches; ++i)
   {
     if (wmoShader)
     {
@@ -1149,8 +1144,7 @@ void WMOGroup::drawDoodads ( World* world
 }
 
 
-void WMOGroup::drawDoodadsSelect ( World* world
-                                 , unsigned int doodadset
+void WMOGroup::drawDoodadsSelect ( unsigned int doodadset
                                  , const ::math::vector_3d& ofs
                                  , const float rot
                                  , const Frustum& frustum

@@ -1,4 +1,4 @@
-// ModelInstance.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// ModelInstance.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
@@ -22,8 +22,8 @@
 
 ModelInstance::ModelInstance (World* world, Model *m)
   : model (m)
-  , _world (world)
   , nameID (0xFFFFFFFF)
+  , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
   nameID = _world->selection_names().add (this);
@@ -31,8 +31,8 @@ ModelInstance::ModelInstance (World* world, Model *m)
 
 ModelInstance::ModelInstance (World* world, Model *m, noggit::mpq::file* f)
   : model (m)
-  , _world (world)
   , nameID (0xFFFFFFFF)
+  , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
   f->read (&d1, 4);
@@ -46,8 +46,8 @@ ModelInstance::ModelInstance (World* world, Model *m, noggit::mpq::file* f)
 
 ModelInstance::ModelInstance (World* world, Model *m, ENTRY_MDDF *d)
   : model (m)
-  , _world (world)
   , nameID (0xFFFFFFFF)
+  , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
   d1 = d->uniqueID;
@@ -58,13 +58,13 @@ ModelInstance::ModelInstance (World* world, Model *m, ENTRY_MDDF *d)
 }
 
 ModelInstance::ModelInstance ( World* world
-                             , Model* model
+                             , Model* model_
                              , const ::math::vector_3d& position
                              , const ::math::quaternion& rotation
                              , const float& scale
                              , const ::math::vector_3d& lighting_color
                              )
-  : model (model)
+  : model (model_)
   , nameID (0xFFFFFFFF)
   , pos (position)
   , _wmo_doodad_rotation (rotation)
@@ -72,9 +72,7 @@ ModelInstance::ModelInstance ( World* world
   , lcol (lighting_color)
   , _world(world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
-{
-  nameID = _world->selection_names().add (this);
-}
+{ }
 
 ModelInstance::~ModelInstance()
 {
@@ -243,7 +241,9 @@ size_t ModelInstance::time_since_spawn() const
   return (clock() / CLOCKS_PER_SEC) - _spawn_timestamp;
 }
 
-void ModelInstance::draw (bool draw_fog) const
+void ModelInstance::draw ( bool draw_fog
+                         , const boost::optional<selection_type>& selected_item
+                         ) const
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
@@ -255,8 +255,10 @@ void ModelInstance::draw (bool draw_fog) const
 
   model->draw (draw_fog, time_since_spawn());
 
-  const bool is_selected ( _world->IsSelection (eEntry_Model)
-                        && _world->GetCurrentSelection()->data.model->d1 == d1
+  const bool is_selected ( selected_item
+                        && noggit::selection::is_the_same_as ( this
+                                                             , *selected_item
+                                                             )
                          );
 
   if (is_selected)

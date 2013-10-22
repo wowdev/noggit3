@@ -1,28 +1,20 @@
-// Frustum.cpp is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// Frustum.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
 #include <noggit/Frustum.h>
 
+#include <opengl/matrix.h>
 #include <opengl/types.h>
 
 #include <math/matrix_4x4.h>
 
 Frustum::Frustum()
 {
-  ::math::matrix_4x4 matrix;
+  const ::math::matrix_4x4 matrix
+    (::opengl::matrix::model_view() * ::opengl::matrix::projection());
 
-  glGetFloatv (GL_MODELVIEW_MATRIX, matrix);
-  glMatrixMode (GL_PROJECTION);
-
-  glPushMatrix();
-
-  glMultMatrixf (matrix);
-  glGetFloatv (GL_PROJECTION_MATRIX, matrix);
-
-  glPopMatrix();
-  glMatrixMode (GL_MODELVIEW);
 
   const ::math::vector_4d column_0 (matrix.column<0>());
   const ::math::vector_4d column_1 (matrix.column<1>());
@@ -31,39 +23,39 @@ Frustum::Frustum()
 
   {
     const ::math::vector_4d temp (column_3 - column_0);
-    planes[RIGHT].normal (temp.xyz());
-    planes[RIGHT].distance (temp.w());
-    planes[RIGHT].normalize();
+    _planes[RIGHT].normal (temp.xyz());
+    _planes[RIGHT].distance (temp.w());
+    _planes[RIGHT].normalize();
   }
   {
     const ::math::vector_4d temp (column_3 + column_0);
-    planes[LEFT].normal (temp.xyz());
-    planes[LEFT].distance (temp.w());
-    planes[LEFT].normalize();
+    _planes[LEFT].normal (temp.xyz());
+    _planes[LEFT].distance (temp.w());
+    _planes[LEFT].normalize();
   }
   {
     const ::math::vector_4d temp (column_3 - column_1);
-    planes[BOTTOM].normal (temp.xyz());
-    planes[BOTTOM].distance (temp.w());
-    planes[BOTTOM].normalize();
+    _planes[TOP].normal (temp.xyz());
+    _planes[TOP].distance (temp.w());
+    _planes[TOP].normalize();
   }
   {
     const ::math::vector_4d temp (column_3 + column_1);
-    planes[TOP].normal (temp.xyz());
-    planes[TOP].distance (temp.w());
-    planes[TOP].normalize();
+    _planes[BOTTOM].normal (temp.xyz());
+    _planes[BOTTOM].distance (temp.w());
+    _planes[BOTTOM].normalize();
   }
   {
     const ::math::vector_4d temp (column_3 - column_2);
-    planes[BACK].normal (temp.xyz());
-    planes[BACK].distance (temp.w());
-    planes[BACK].normalize();
+    _planes[BACK].normal (temp.xyz());
+    _planes[BACK].distance (temp.w());
+    _planes[BACK].normalize();
   }
   {
     const ::math::vector_4d temp (column_3 + column_2);
-    planes[FRONT].normal (temp.xyz());
-    planes[FRONT].distance (temp.w());
-    planes[FRONT].normalize();
+    _planes[FRONT].normal (temp.xyz());
+    _planes[FRONT].distance (temp.w());
+    _planes[FRONT].normalize();
   }
 }
 
@@ -71,7 +63,7 @@ bool Frustum::contains (const ::math::vector_3d& point) const
 {
   for (size_t side (0); side < SIDES_MAX; ++side)
   {
-    if (planes[side].normal() * point <= -planes[side].distance())
+    if (_planes[side].normal() * point <= -_planes[side].distance())
     {
       return false;
     }
@@ -98,7 +90,7 @@ bool Frustum::intersects ( const ::math::vector_3d& v1
   {
     for (size_t point (0); point < 8; ++point)
     {
-      if (planes[side].normal() * points[point] > -planes[side].distance())
+      if (_planes[side].normal() * points[point] > -_planes[side].distance())
       {
         //! \note C does not know how to continue out of two loops otherwise.
         goto intersects_next_side;
@@ -120,8 +112,8 @@ bool Frustum::intersectsSphere ( const ::math::vector_3d& position
 {
   for (size_t side (0); side < SIDES_MAX; ++side)
   {
-    const float distance ( planes[side].normal() * position
-                         + planes[side].distance()
+    const float distance ( _planes[side].normal() * position
+                         + _planes[side].distance()
                          );
     if (distance < -radius)
     {

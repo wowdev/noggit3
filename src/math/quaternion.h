@@ -1,4 +1,4 @@
-// quaternion.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
+// quaternion.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
 #ifndef __MATH_QUATERNION_H
