@@ -1,2 +1,5 @@
+<<<<<<< local
 syntax: glob
 CMakeLists.txt.user
+=======
+CMakeLists.txt.user>>>>>>> other
