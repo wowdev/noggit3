@@ -151,15 +151,13 @@ void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t 
 {
   if(!hasData()) return;
 
-  MH2O_Information newinfo;
-
-  newinfo.yOffset = 8;
-  newinfo.xOffset = 8;
-  newinfo.height = 0;
-  newinfo.width = 0;
-  newinfo.minHeight = 0;
-  newinfo.maxHeight = 1000;
-  newinfo.ofsHeightMap = 0;
+  Info[0].yOffset = 8;
+  Info[0].xOffset = 8;
+  Info[0].height = 0;
+  Info[0].width = 0;
+  Info[0].minHeight = 0;
+  Info[0].maxHeight = 1000;
+  Info[0].ofsHeightMap = 0;
 
   //render
   Header.ofsRenderMask = lCurrentPosition - basePos;
@@ -172,25 +170,25 @@ void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t 
     {
       if(!existsTable[0][h][w]) continue;
 
-      if(w < newinfo.xOffset) newinfo.xOffset = w;
-      if(h < newinfo.yOffset) newinfo.yOffset = h;
+      if(w < Info[0].xOffset) Info[0].xOffset = w;
+      if(h < Info[0].yOffset) Info[0].yOffset = h;
 
-      if(w > newinfo.width) newinfo.width = w;
-      if(h > newinfo.height) newinfo.height = h;
+      if(w > Info[0].width) Info[0].width = w;
+      if(h > Info[0].height) Info[0].height = h;
     }
   }
 
-  newinfo.height -= newinfo.yOffset - 1;
-  newinfo.width -= newinfo.xOffset - 1;
+  Info[0].height -= Info[0].yOffset - 1;
+  Info[0].width -= Info[0].xOffset - 1;
 
   uint8_t infoMask[8];
   int bitOffset = 0;
 
   memset(infoMask, 0, 8);
 
-  for(int h = 0; h < newinfo.height; ++h)
+  for(int h = 0; h < Info[0].height; ++h)
   {
-    for(int w = 0; w < newinfo.width; ++w)
+    for(int w = 0; w < Info[0].width; ++w)
     {
       infoMask[bitOffset / 8] |= (1 << (bitOffset % 8));
       bitOffset++;
@@ -199,19 +197,18 @@ void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t 
 
   //mask
   lADTFile.Insert(lCurrentPosition, std::ceil(bitOffset / 8.0f), reinterpret_cast<char*>(infoMask));
-  newinfo.ofsInfoMask = lCurrentPosition - basePos;
+  Info[0].ofsInfoMask = lCurrentPosition - basePos;
   lCurrentPosition += std::ceil(bitOffset / 8.0f);
 
   //HeighData & TransparencyData
-  if(newinfo.LiquidType == 2) return;
-  newinfo.ofsHeightMap = lCurrentPosition - basePos;
+  Info[0].ofsHeightMap = lCurrentPosition - basePos;
 
-  for (int h = newinfo.yOffset; h < newinfo.yOffset + newinfo.height + 1; ++h)
+  for (int h = Info[0].yOffset; h < Info[0].yOffset + Info[0].height + 1; ++h)
   {
-    for(int w = newinfo.xOffset; w < newinfo.xOffset + newinfo.width + 1; ++w)
+    for(int w = Info[0].xOffset; w < Info[0].xOffset + Info[0].width + 1; ++w)
     {
-      if(HeightData[0].mHeightValues[h][w] < newinfo.minHeight) newinfo.minHeight = HeightData[0].mHeightValues[h][w];
-      if(HeightData[0].mHeightValues[h][w] > newinfo.maxHeight) newinfo.maxHeight = HeightData[0].mHeightValues[h][w];
+      if(HeightData[0].mHeightValues[h][w] < Info[0].minHeight) Info[0].minHeight = HeightData[0].mHeightValues[h][w];
+      if(HeightData[0].mHeightValues[h][w] > Info[0].maxHeight) Info[0].maxHeight = HeightData[0].mHeightValues[h][w];
 
 
       lADTFile.Insert(lCurrentPosition, sizeof(float), reinterpret_cast<char*>(&HeightData[0].mHeightValues[h][w]));
@@ -219,9 +216,9 @@ void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t 
     }
   }
 
-  for (int h = newinfo.yOffset; h < newinfo.yOffset + newinfo.height + 1; ++h)
+  for (int h = Info[0].yOffset; h < Info[0].yOffset + Info[0].height + 1; ++h)
   {
-    for(int w = newinfo.xOffset; w < newinfo.xOffset + newinfo.width + 1; ++w)
+    for(int w = Info[0].xOffset; w < Info[0].xOffset + Info[0].width + 1; ++w)
     {
       lADTFile.Insert(lCurrentPosition, sizeof(unsigned char), reinterpret_cast<char*>(&HeightData[0].mTransparency[h][w]));
       lCurrentPosition += sizeof(unsigned char);
@@ -229,7 +226,7 @@ void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t 
   }
 
   memcpy(lADTFile.GetPointer<char>(offHeader), &Header, sizeof(MH2O_Header));
-  memcpy(lADTFile.GetPointer<char>(basePos + Header.ofsInformation), &newinfo, sizeof(MH2O_Information));
+  memcpy(lADTFile.GetPointer<char>(basePos + Header.ofsInformation), &Info[0], sizeof(MH2O_Information));
 }
 
 void ChunkWater::autoGen(MapChunk *chunk, int factor)
