@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <boost/bind.hpp>
 
 #include "DBC.h"
 #include "Log.h"
@@ -16,14 +17,8 @@
 #include "UIWaterTypeBrowser.h"
 #include "UIWater.h"
 
-void changeWaterType(UIFrame *f,int id)
-{
-  ( static_cast<UIWaterTypeBrowser::Ptr>( f->parent()->parent()->parent() ) )->setWaterTypeID( id );
-}
-
 UIWaterTypeBrowser::UIWaterTypeBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *setGui)
   : UICloseWindow(xPos,yPos,w,h, "", true)
-  , changeFunc( NULL )
   , mainGui( setGui )
 {
   addChild( new UIText( 10.0f, 3.0f, "Select a water type", app.getArial14(), eJustifyLeft ) );
@@ -49,7 +44,16 @@ void UIWaterTypeBrowser::buildTypeList()
           UIFrame *curFrame = new UIFrame(1,1,1,1);
           std::stringstream ss;
           ss << i->getInt(LiquidTypeDB::ID) << "-" << LiquidTypeDB::getLiquidName(i->getInt(LiquidTypeDB::ID));
-          UIButton *tempButton = new UIButton(0.0f, 0.0f, 200.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", changeWaterType, i->getInt(LiquidTypeDB::ID) );
+          UIButton *tempButton = new UIButton(0.0f,
+                                              0.0f,
+                                              200.0f,
+                                              28.0f,
+                                              ss.str(),
+                                              "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp",
+                                              "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp",
+                                              boost::bind(&UIWaterTypeBrowser::setWaterTypeID, this, _1, _2), //steff: kidding me? we talked about this some h before u did this
+                                              i->getInt(LiquidTypeDB::ID)
+                                              );
           tempButton->setLeft();
           curFrame->addChild(tempButton);
           WaterTypeList->addElement(curFrame);
@@ -59,12 +63,7 @@ void UIWaterTypeBrowser::buildTypeList()
   WaterTypeList->recalcElements(1);
 }
 
-void UIWaterTypeBrowser::setWaterTypeID( int id )
+void UIWaterTypeBrowser::setWaterTypeID(UIFrame *f,int id)
 {
   mainGui->guiWater->changeWaterType(id);
-}
-
-void UIWaterTypeBrowser::setChangeFunc( void (*f)( UIFrame *, int ))
-{
-  changeFunc=f;
 }

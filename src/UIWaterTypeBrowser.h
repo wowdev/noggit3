@@ -16,16 +16,13 @@ public:
   typedef UIWaterTypeBrowser* Ptr;
 
 private:
-  void ( *changeFunc )( UIFrame *, int );
   UIMapViewGUI *mainGui;
   UIListView* WaterTypeList;
-  
-
 
 public:
   UIWaterTypeBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *setGui);
-  void setChangeFunc( void (*f)( UIFrame *, int ));
-  void setWaterTypeID( int id );
+
+  void setWaterTypeID(UIFrame *f, int id );
   void buildTypeList();
 };
 
