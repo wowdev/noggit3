@@ -432,6 +432,7 @@ void Noggit::mainLoop()
   catch( const std::exception& e )
   {
     LogError << "expection: " << e.what() << std::endl;
+    printStacktrace();
   }
 }
 
