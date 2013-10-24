@@ -1,3 +1,4 @@
+//\! pls update and/or find other solution...
 Noggit SDL 1.3 changelog
 
 Done:
