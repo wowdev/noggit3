@@ -155,8 +155,8 @@ void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t 
   Info[0].xOffset = 8;
   Info[0].height = 0;
   Info[0].width = 0;
-  Info[0].minHeight = 0;
-  Info[0].maxHeight = 1000;
+  Info[0].minHeight = HeightData[0].mHeightValues[0][0];
+  Info[0].maxHeight = HeightData[0].mHeightValues[0][0];
   Info[0].ofsHeightMap = 0;
 
   //render
