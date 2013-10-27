@@ -317,70 +317,6 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
     {
       textureSet->initAlphamaps(f, header.nLayers, mBigAlpha);
     }
-    /*else if ( fourcc == 'MCLQ' ) { // old one
-      // liquid / water level
-      f->read(&fourcc,4);
-      if( fourcc != 'MCSE' ||  fourcc != 'MCNK' || header.sizeLiquid == 8  || true ) { // Do not even try to read water..
-        haswater = false;
-      }
-      else
-      {
-        //! \todo this is just commented out, till initFromTerrain is reimplemented for saving with MH2O!
-        haswater = false;
-      /*
-        haswater = true;
-        f->seekRelative(-4);
-        float waterlevel[2];
-        f->read(waterlevel,8);//2 values - Lowest water Level, Highest Water Level
-
-        if (waterlevel[1] > vmax.y) vmax.y = waterlevel[1];
-        //if (waterlevel < vmin.y) haswater = false;
-
-        //f->seekRelative(4);
-
-        Liquid * lq = new Liquid(8, 8, Vec3D(xbase, waterlevel[1], zbase));
-        //lq->init(f);
-        lq->initFromTerrain(f, header.flags);
-
-        this->mt->mLiquids.insert(std::pair<int,Liquid*>( 0, lq) );
-
-
-        // let's output some debug info! ( '-')b
-        string lq = "";
-        if (flags & 4) lq.append(" river");
-        if (flags & 8) lq.append(" ocean");
-        if (flags & 16) lq.append(" magma");
-        if (flags & 32) lq.append(" slime?");
-        LogDebug << "LQ" << lq << " (base:" << waterlevel << ")" << std::endl;
-        
-
-      }
-      // we're done here!
-      break;
-    }*/
-    /*else if ( fourcc == 'MCLQ' ) { // old style water rendering //TODO! Is is unstable and we will work only with MH20...  
-      // liquid / water level
-      f->read(&fourcc,4);
-	  haswater = false;
-      if( header.flags == 32769 || header.flags == 32768 || size == 0){ //empty flags
-        haswater = false;
-      }
-      else // Trying to read water if there are not empty water flags
-      {
-        haswater = true;
-        f->seekRelative(-4);
-        float waterlevel[2];
-        f->read(waterlevel,8);//2 values - Lowest water Level, Highest Water Level
-
-        if (waterlevel[1] > vmax.y) vmax.y = waterlevel[1];
-
-        Liquid * lq = new Liquid(8, 8, Vec3D(xbase, waterlevel[1], zbase));
-        lq->initFromTerrain(f, header.flags);
-        mt->addChunksLiquid(lq);
-      }
-      // we're done here!
-      break;
-    }*/
     else if( fourcc == 'MCCV' )
     {
       //! \todo  implement
@@ -1381,6 +1317,40 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   if( lMCNK_header->flags & 0x40 )
     LogError << "Problem with saving: This ADT is said to have vertex shading but we don't write them yet. This might get you really fucked up results." << std::endl;
   lMCNK_header->flags = lMCNK_header->flags & ( ~0x40 );
+
+  //really low tex map
+
+  memset (lMCNK_header->low_quality_texture_map, 0, 0x10);
+
+  for (size_t layer (0); layer < textureSet->num() - 1; ++layer)
+  {
+    for (size_t y (0); y < 8; ++y)
+    {
+      for (size_t x (0); x < 8; ++x)
+      {
+        size_t sum (0);
+
+        for (size_t j (0); j < 8; ++j)
+        {
+          for (size_t i (0); i < 8; ++i)
+          {
+            sum += textureSet->getAlpha(layer, (y * 8 + j) * 64 + (x * 8 + i));
+
+          }
+        }
+
+        static const size_t minimum_value_to_overwrite (120);
+
+        if (sum > minimum_value_to_overwrite * 8 * 8)
+        {
+          const size_t array_index ((y * 8 + x) / 4);
+          const size_t bit_index (((y * 8 + x) % 4) * 2);
+
+          lMCNK_header->low_quality_texture_map[array_index] |= ((layer & 3) << bit_index);
+        }
+      }
+    }
+  }
 
 
   lCurrentPosition += 8 + 0x80;
