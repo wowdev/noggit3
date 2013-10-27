@@ -113,11 +113,7 @@ struct MapChunkHeader {
   uint32_t areaid;
   uint32_t nMapObjRefs;
   uint32_t holes;
-  uint16_t s1;
-  uint16_t s2;
-  uint32_t d1;
-  uint32_t d2;
-  uint32_t d3;
+  uint8_t low_quality_texture_map[0x10];
   uint32_t predTex;
   uint32_t nEffectDoodad;
   uint32_t ofsSndEmitters;
