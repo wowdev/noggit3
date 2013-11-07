@@ -132,13 +132,7 @@ void Video::resize( int xres_, int yres_ )
 
   LogDebug << "resize(" << xres() << ", " << yres() << ");" << std::endl;
 
-#ifdef linux
   _primary = SDL_SetVideoMode( xres(), yres(), 0, _primary->flags );
-#else
-  SDL_Rect rect = { 0, 0, xres(), yres() };
-  SDL_SetClipRect( _primary, &rect );
-#endif
-
   updateProjectionMatrix();
 }
 
