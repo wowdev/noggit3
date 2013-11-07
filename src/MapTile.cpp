@@ -608,6 +608,7 @@ void MapTile::saveTile()
   unsigned int UID_counter = 1;
   for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
   {
+    it->second.recalcExtents();
     if( checkInside( lTileExtents, it->second.extents ) )
     {
       lObjectInstances.insert( std::pair<int, WMOInstance>( it->first, it->second ) );
@@ -904,17 +905,14 @@ void MapTile::saveTile()
     lMODF_Data[lID].rot[0] = it->second.dir.x;
     lMODF_Data[lID].rot[1] = it->second.dir.y;
     lMODF_Data[lID].rot[2] = it->second.dir.z;
-    //! \todo  Calculate them here or when rotating / moving? What is nicer? We should at least do it somewhere..
-    //! \todo im still not sure about this shit but its worth a try (ALSO: if we had a proper WMOInstance->rotate function this wouldnt be a problem at all)
-    Vec3D extend = it->second.pos + it->second.wmo->extents[0];
-    lMODF_Data[lID].extents[0][0] = extend.x;
-    lMODF_Data[lID].extents[0][1] = extend.y;
-    lMODF_Data[lID].extents[0][2] = extend.z;
 
-    extend = it->second.pos + it->second.wmo->extents[1];
-    lMODF_Data[lID].extents[1][0] = extend.x;
-    lMODF_Data[lID].extents[1][1] = extend.y;
-    lMODF_Data[lID].extents[1][2] = extend.z;
+    lMODF_Data[lID].extents[0][0] = it->second.extents[0].x;
+    lMODF_Data[lID].extents[0][1] = it->second.extents[0].y;
+    lMODF_Data[lID].extents[0][2] = it->second.extents[0].z;
+
+    lMODF_Data[lID].extents[1][0] = it->second.extents[1].x;
+    lMODF_Data[lID].extents[1][1] = it->second.extents[1].y;
+    lMODF_Data[lID].extents[1][2] = it->second.extents[1].z;
 
     lMODF_Data[lID].flags = it->second.mFlags;
     lMODF_Data[lID].doodadSet = it->second.doodadset;

@@ -289,6 +289,8 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
     for( unsigned int i = 0; i < nGroups; ++i )
       DrawABox( groups[i].BoundingBoxMin, groups[i].BoundingBoxMax, Vec4D( 1.0f, 1.0f, 1.0f, 1.0f ), 1.0f );
 
+    DrawABox(Vec3D(extents[0].x, extents[0].z, -extents[0].y), Vec3D(extents[1].x, extents[1].z, -extents[1].y), Vec4D( 1.0f, 0.0f, 0.0f, 1.0f ), 2.0f );
+
     /*glColor4fv( Vec4D( 1.0f, 0.0f, 0.0f, 1.0f ) );
     glBegin( GL_LINES );
       glVertex3f( 0.0f, 0.0f, 0.0f );
@@ -959,15 +961,15 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot,bool selection)
   if (hascv) {
     glDisable(GL_LIGHTING);
     gWorld->outdoorLights(false);
-  } 
-  else 
+  }
+  else
   {
 
-  if (gWorld->skies->hasSkies()) 
-	{
-		gWorld->outdoorLights(true);
-	} 
-	else glDisable(GL_LIGHTING);
+  if (gWorld->skies->hasSkies())
+        {
+                gWorld->outdoorLights(true);
+        }
+        else glDisable(GL_LIGHTING);
   }
 
 

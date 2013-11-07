@@ -29,7 +29,9 @@ WMOInstance::WMOInstance( WMO* _wmo ) : wmo( _wmo ), pos( Vec3D( 0.0f, 0.0f, 0.0
 }
 
 
-void WMOInstance::draw() const
+void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
+
+void WMOInstance::draw()
 {
 
   glPushMatrix();
@@ -47,6 +49,82 @@ void WMOInstance::draw() const
     wmo->draw( doodadset, pos, roty, false, false, false );
 
   glPopMatrix();
+
+  if( gWorld->IsSelection( eEntry_WMO ) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID )
+  {
+    glDisable( GL_LIGHTING );
+
+    glDisable( GL_COLOR_MATERIAL );
+    glActiveTexture( GL_TEXTURE0 );
+    glDisable( GL_TEXTURE_2D );
+    glActiveTexture( GL_TEXTURE1 );
+    glDisable( GL_TEXTURE_2D );
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+    DrawABox(extents[0], extents[1], Vec4D(0.0f, 1.0f, 0.0f, 1.0f ), 1.0f);
+
+    glActiveTexture( GL_TEXTURE1 );
+    glDisable( GL_TEXTURE_2D );
+    glActiveTexture( GL_TEXTURE0 );
+    glEnable( GL_TEXTURE_2D );
+
+    glEnable( GL_LIGHTING );
+  }
+}
+
+void WMOInstance::recalcExtents()
+{
+  Vec3D min(100000, 100000, 100000);
+  Vec3D max(-100000, -100000, -100000);
+  Matrix rot(Matrix::newTranslation(pos)
+             * Matrix::newRotate((dir.y - 90.0f) * PI/180.0f, Vec3D(0, 1, 0))
+             * Matrix::newRotate(dir.x * -1.0f * PI/180.0f, Vec3D(0, 0, 1))
+             * Matrix::newRotate(dir.z * PI/180.0f, Vec3D(1, 0, 0))
+             );
+
+  Vec3D *bounds = new Vec3D[8*(wmo->nGroups+1)];
+  Vec3D *ptr = bounds;
+  Vec3D wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
+  Vec3D wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
+
+  *ptr++ = rot * Vec3D(wmoMax.x, wmoMax.y, wmoMin.z);
+  *ptr++ = rot * Vec3D(wmoMin.x, wmoMax.y, wmoMin.z);
+  *ptr++ = rot * Vec3D(wmoMin.x, wmoMin.y, wmoMin.z);
+  *ptr++ = rot * Vec3D(wmoMax.x, wmoMin.y, wmoMin.z);
+  *ptr++ = rot * Vec3D(wmoMax.x, wmoMin.y, wmoMax.z);
+  *ptr++ = rot * Vec3D(wmoMax.x, wmoMax.y, wmoMax.z);
+  *ptr++ = rot * Vec3D(wmoMin.x, wmoMax.y, wmoMax.z);
+  *ptr++ = rot * Vec3D(wmoMin.x, wmoMin.y, wmoMax.z);
+
+  for (int i = 0; i < wmo->nGroups; ++i)
+  {
+    *ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
+    *ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
+    *ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
+    *ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
+    *ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
+    *ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
+    *ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
+    *ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
+  }
+
+
+  for (int i = 0; i < 8*(wmo->nGroups+1); ++i)
+  {
+    if(bounds[i].x < min.x) min.x = bounds[i].x;
+    if(bounds[i].y < min.y) min.y = bounds[i].y;
+    if(bounds[i].z < min.z) min.z = bounds[i].z;
+
+    if(bounds[i].x > max.x) max.x = bounds[i].x;
+    if(bounds[i].y > max.y) max.y = bounds[i].y;
+    if(bounds[i].z > max.z) max.z = bounds[i].z;
+  }
+
+  extents[0] = min;
+  extents[1] = max;
+
+  delete bounds;
 }
 
 void WMOInstance::drawSelect()

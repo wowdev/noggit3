@@ -33,9 +33,10 @@ public:
   explicit WMOInstance( WMO* _wmo );
   ~WMOInstance();
 
-  void draw() const;
+  void draw();
   void drawSelect();
 
+  void recalcExtents();
   void resetDirection();
 };
 

@@ -109,40 +109,43 @@ public:
       ###0
       0001
     */
-    Matrix rot;
-    float cosV,sinV;
 
-    //Rotate around the Y axis by B-90
-    rot.unit();
-    cosV=cosf((r.y-90.0f)*PI/180.0f);
-    sinV=sinf((r.y-90.0f)*PI/180.0f);
-    rot.unit();
-    rot.m[0][0]=cosV;
-    rot.m[0][2]=sinV;
-    rot.m[2][0]=-sinV;
-    rot.m[2][2]=cosV;
-    this->operator*=(rot);
+    rotate(r.x, Vec3D(1, 0, 0));
+    rotate(r.y, Vec3D(0, 1, 0));
+    rotate(r.z, Vec3D(0, 0, 1));
+  }
 
-    //Rotate around the Z axis by -A
-    rot.unit();
-    cosV=cosf(-r.x*PI/180.0f);
-    sinV=sinf(-r.x*PI/180.0f);
-    rot.unit();
-    rot.m[0][0]=cosV;
-    rot.m[0][1]=sinV;
-    rot.m[1][0]=-sinV;
-    rot.m[1][1]=cosV;
-    this->operator*=(rot);
+  inline void rotate(float angle, Vec3D axis)
+  {
+    float diff(1.0f - cos(angle));
 
-    //Rotate around the X axis by C
-    cosV=cosf(r.z*PI/180.0f);
-    sinV=sinf(r.z*PI/180.0f);
-    rot.unit();
-    rot.m[1][1]=cosV;
-    rot.m[1][2]=sinV;
-    rot.m[2][1]=-sinV;
-    rot.m[2][2]=cosV;
-    this->operator*=(rot);
+    unit();
+
+    setRow(0,
+           axis.x * axis.x * diff + cos(angle),
+           axis.x * axis.y * diff - axis.z * sin(angle),
+           axis.x * axis.z * diff + axis.y * sin(angle),
+           0);
+
+    setRow(1,
+           axis.y * axis.x * diff + axis.z * sin(angle),
+           axis.y * axis.y * diff + cos(angle),
+           axis.y * axis.z * diff - axis.x * sin(angle),
+           0);
+
+    setRow(2,
+           axis.z * axis.x * diff - axis.y * sin(angle),
+           axis.z * axis.y * diff + axis.x * sin(angle),
+           axis.z * axis.z * diff + cos(angle),
+           0);
+  }
+
+  inline void setRow(int row, float x, float y, float z, float w)
+  {
+    m[row][0] = x;
+    m[row][1] = y;
+    m[row][2] = z;
+    m[row][3] = w;
   }
 
   static inline const Matrix newQuatRotate( const Quaternion& qr )
@@ -156,6 +159,13 @@ public:
   {
     Matrix t;
     t.rotate( r );
+    return t;
+  }
+
+  static inline const Matrix newRotate(float angle, const Vec3D& r)
+  {
+    Matrix t;
+    t.rotate(angle, r);
     return t;
   }
 
@@ -201,13 +211,13 @@ public:
 
   inline float determinant() const
   {
-    #define SUB(a,b) (m[2][a]*m[3][b] - m[3][a]*m[2][b])
+#define SUB(a,b) (m[2][a]*m[3][b] - m[3][a]*m[2][b])
     return
-       m[0][0] * (m[1][1]*SUB(2,3) - m[1][2]*SUB(1,3) + m[1][3]*SUB(1,2))
-      -m[0][1] * (m[1][0]*SUB(2,3) - m[1][2]*SUB(0,3) + m[1][3]*SUB(0,2))
-      +m[0][2] * (m[1][0]*SUB(1,3) - m[1][1]*SUB(0,3) + m[1][3]*SUB(0,1))
-      -m[0][3] * (m[1][0]*SUB(1,2) - m[1][1]*SUB(0,2) + m[1][2]*SUB(0,1));
-    #undef SUB
+        m[0][0] * (m[1][1]*SUB(2,3) - m[1][2]*SUB(1,3) + m[1][3]*SUB(1,2))
+        -m[0][1] * (m[1][0]*SUB(2,3) - m[1][2]*SUB(0,3) + m[1][3]*SUB(0,2))
+        +m[0][2] * (m[1][0]*SUB(1,3) - m[1][1]*SUB(0,3) + m[1][3]*SUB(0,1))
+        -m[0][3] * (m[1][0]*SUB(1,2) - m[1][1]*SUB(0,2) + m[1][2]*SUB(0,1));
+#undef SUB
   }
 
   inline float minorSize(size_t x, size_t y) const
@@ -222,9 +232,9 @@ public:
       }
       v++;
     }
-    #define SUB(a,b) (s[1][a]*s[2][b] - s[2][a]*s[1][b])
+#define SUB(a,b) (s[1][a]*s[2][b] - s[2][a]*s[1][b])
     return s[0][0] * SUB(1,2) - s[0][1] * SUB(0,2) + s[0][2] * SUB(0,1);
-    #undef SUB
+#undef SUB
   }
 
   inline const Matrix adjoint() const
@@ -242,8 +252,8 @@ public:
   {
     Matrix adj = this->adjoint();
     float invdet = 1.0f / this->determinant();
-        for (size_t j=0; j<4; j++) {
-          for (size_t i=0; i<4; ++i) {
+    for (size_t j=0; j<4; j++) {
+      for (size_t i=0; i<4; ++i) {
         m[j][i] = adj.m[j][i] * invdet;
       }
     }
@@ -251,8 +261,8 @@ public:
 
   inline void transpose()
   {
-   for (size_t j=1; j<4; j++) {
-     for (size_t i=0; i<j; ++i) {
+    for (size_t j=1; j<4; j++) {
+      for (size_t i=0; i<j; ++i) {
         float f = m[j][i];
         m[j][i] = m[i][j];
         m[i][j] = f;
