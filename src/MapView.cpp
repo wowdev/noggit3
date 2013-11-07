@@ -178,7 +178,7 @@ void setBlurBrushRadius(float f)
 
 void setBlurBrushSpeed(float f)
 {
- groundBlurSpeed = f;
+  groundBlurSpeed = f;
 }
 
 
@@ -211,7 +211,7 @@ void SaveOrReload( UIFrame*, int pMode )
   else if( pMode == 2 )
     gWorld->mapIndex->saveChanged();
   else if( pMode == 3 )
-      static_cast<MapView*>( app.getStates().back() )->quit();
+    static_cast<MapView*>( app.getStates().back() )->quit();
 
 }
 
@@ -230,53 +230,53 @@ void change_settings_window(int oldid, int newid)
   // fetch old win position
   switch(oldid)
   {
-  case 1:
-    tool_settings_x=setting_ground->x();
-    tool_settings_y=setting_ground->y();
-  break;
-  case 2:
-    tool_settings_x=setting_blur->x();
-    tool_settings_y=setting_blur->y();
-  break;
-  case 3:
-    tool_settings_x=settings_paint->x();
-    tool_settings_y=settings_paint->y();
-  break;
-  case 7:
-    tool_settings_x = mainGui->guiWater->x();
-    tool_settings_y = mainGui->guiWater->y();
-   break;
+    case 1:
+      tool_settings_x=setting_ground->x();
+      tool_settings_y=setting_ground->y();
+      break;
+    case 2:
+      tool_settings_x=setting_blur->x();
+      tool_settings_y=setting_blur->y();
+      break;
+    case 3:
+      tool_settings_x=settings_paint->x();
+      tool_settings_y=settings_paint->y();
+      break;
+    case 7:
+      tool_settings_x = mainGui->guiWater->x();
+      tool_settings_y = mainGui->guiWater->y();
+      break;
   }
   // set new win pos and make visible
   switch(newid)
   {
-  case 1:
-    setting_ground->x( tool_settings_x );
-    setting_ground->y( tool_settings_y );
-    setting_ground->show();
-  break;
-  case 2:
-    setting_blur->x( tool_settings_x );
-    setting_blur->y( tool_settings_y );
-    setting_blur->show();
-  break;
-  case 3:
-    settings_paint->x( tool_settings_x );
-    settings_paint->y( tool_settings_y );
-    settings_paint->show();
-  break;
-  case 7:
-    mainGui->guiWater->x( tool_settings_x );
-    mainGui->guiWater->y( tool_settings_y );
-    mainGui->guiWater->show();
-    break;
+    case 1:
+      setting_ground->x( tool_settings_x );
+      setting_ground->y( tool_settings_y );
+      setting_ground->show();
+      break;
+    case 2:
+      setting_blur->x( tool_settings_x );
+      setting_blur->y( tool_settings_y );
+      setting_blur->show();
+      break;
+    case 3:
+      settings_paint->x( tool_settings_x );
+      settings_paint->y( tool_settings_y );
+      settings_paint->show();
+      break;
+    case 7:
+      mainGui->guiWater->x( tool_settings_x );
+      mainGui->guiWater->y( tool_settings_y );
+      mainGui->guiWater->show();
+      break;
   }
 }
 
 void openSwapper( UIFrame*, int )
 {
-	mainGui->TextureSwitcher->show();
-    settings_paint->hide();
+  mainGui->TextureSwitcher->show();
+  settings_paint->hide();
 }
 
 void openHelp( UIFrame*, int )
@@ -313,6 +313,7 @@ void SnapSelectedObjectToGround( UIFrame* /*button*/, int /*id*/ )
     Vec3D t = Vec3D( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, 0 );
     gWorld->GetVertex( gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, &t );
     gWorld->GetCurrentSelection()->data.wmo->pos = t;
+    gWorld->GetCurrentSelection()->data.wmo->recalcExtents();
     gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
 
   }
@@ -347,7 +348,7 @@ void PasteSelectedObject( UIFrame* /*button*/, int /*id*/ )
   {
 
     switch( gWorld->GetCurrentSelection()->type )
-     {
+    {
       case eEntry_Model:
         gWorld->addModel( Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.model->pos,true );
         break;
@@ -431,19 +432,19 @@ void InsertObject( UIFrame* /*button*/, int id )
   // is a source file set in config file?
 
 
-    if(id == 0 || id == 14 || id == 15 && boost::filesystem::exists( "noggit.conf" ) )
-    {
-      ConfigFile config( "noggit.conf" );
-      config.readInto( importFile, "ImportFile" );
-    }
-    else if(id == 1)
-     importFile="Import.txt"; //  use import.txt in noggit folder!
-    else if(id>99)
-      importFile="Import.txt"; //  use import.txt in noggit folder!
-    else
-     m2s_to_add.push_back( filesToAdd[id] );
+  if(id == 0 || id == 14 || id == 15 && boost::filesystem::exists( "noggit.conf" ) )
+  {
+    ConfigFile config( "noggit.conf" );
+    config.readInto( importFile, "ImportFile" );
+  }
+  else if(id == 1)
+    importFile="Import.txt"; //  use import.txt in noggit folder!
+  else if(id>99)
+    importFile="Import.txt"; //  use import.txt in noggit folder!
+  else
+    m2s_to_add.push_back( filesToAdd[id] );
 
-    LogDebug << id << "-" << importFile << std::endl;
+  LogDebug << id << "-" << importFile << std::endl;
 
   std::string lastModel;
   std::string lastWMO;
@@ -542,7 +543,7 @@ void InsertObject( UIFrame* /*button*/, int id )
   }
   else if(id==15)
   {
-      LogError << "M2 Problem 15:" << lastModel << " - " << id << std::endl;
+    LogError << "M2 Problem 15:" << lastModel << " - " << id << std::endl;
     if(lastWMO!="")
       if( !MPQFile::exists(lastWMO) )
         LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
@@ -620,7 +621,7 @@ void adtSetAreaID( UIFrame* /*button*/, int /*id*/ )
 void clearAllModels( UIFrame* /*button*/, int /*id*/ )
 {
   // call the clearAllModelsOnADT method to clear them all on current ADT
-    gWorld->clearAllModelsOnADT(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
+  gWorld->clearAllModelsOnADT(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE));
 }
 
 void menuWater( UIFrame* /*button*/, int id )
@@ -656,7 +657,7 @@ std::string getCurrentHeightmapPath()
   // build the path and filename string.
   std::stringstream png_filename;
   png_filename << Project::getInstance()->getPath() << "world\\maps\\" << mapName << "\\H_" << mapName
-    << "_" << misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE) << "_" << misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE) << ".png" ;
+               << "_" << misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE) << "_" << misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE) << ".png" ;
   return png_filename.str();
 
 }
@@ -670,7 +671,7 @@ void clearTexture(UIFrame* /*f*/,int /*set*/)
 
 void showCursorSwitcher(UIFrame* /*f*/, int /*set*/)
 {
-	mainGui->showCursorSwitcher();
+  mainGui->showCursorSwitcher();
 }
 
 #ifdef __FILESAREMISSING
@@ -856,7 +857,7 @@ void MapView::createGUI()
   UIButton* B1;
   B1=new UIButton( 6.0f, 111.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1 ) ;
   settings_paint->addChild(B1);
- 
+
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
   mainGui->TexturePalette->hide();
@@ -876,16 +877,16 @@ void MapView::createGUI()
   mbar->AddMenu( "Assist" );
   mbar->AddMenu( "Help" );
 
- // mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", SaveOrReload, 0 );
+  // mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", SaveOrReload, 0 );
   mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+S Save", SaveOrReload, 2 );
- // mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", SaveOrReload, 1 );
-//  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
- // mbar->GetMenu( "File" )->AddMenuItemButton( "Export heightmap", exportPNG, 1 );
-// mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
+  // mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", SaveOrReload, 1 );
+  //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
+  // mbar->GetMenu( "File" )->AddMenuItemButton( "Export heightmap", exportPNG, 1 );
+  // mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
   mbar->GetMenu( "File" )->AddMenuItemSeperator( " " );
   mbar->GetMenu( "File" )->AddMenuItemButton( "ESC Exit", SaveOrReload, 3 );
 
-//  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
+  //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
   //mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
 
   mbar->GetMenu( "Edit" )->AddMenuItemSeperator( "selected object" );
@@ -905,7 +906,7 @@ void MapView::createGUI()
 
 
   mbar->GetMenu( "Assist" )->AddMenuItemSeperator( "Model" );
- // mbar->GetMenu( "Assist" )->AddMenuItemButton( "All from MV", InsertObject, 0  );
+  // mbar->GetMenu( "Assist" )->AddMenuItemButton( "All from MV", InsertObject, 0  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Last M2 from MV", InsertObject, 14  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "Last WMO from MV", InsertObject, 15  );
   mbar->GetMenu( "Assist" )->AddMenuItemButton( "From Text File", showImportModels, 1  );
@@ -922,7 +923,7 @@ void MapView::createGUI()
 
   mbar->GetMenu( "View" )->AddMenuItemSeperator( "Windows" );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "Toolbar", mainGui->guiToolbar->hidden_evil(), true );
- // mbar->GetMenu( "View" )->AddMenuItemToggle( "Current texture", mainGui->SelectedTexture->hidden_evil(), true );
+  // mbar->GetMenu( "View" )->AddMenuItemToggle( "Current texture", mainGui->SelectedTexture->hidden_evil(), true );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "Texture palette", mainGui->TexturePalette->hidden_evil(), true );
   mbar->GetMenu( "View" )->AddMenuItemButton( "Cursor options", showCursorSwitcher, 0);
   mbar->GetMenu( "View" )->AddMenuItemSeperator( "Toggle" );
@@ -977,10 +978,10 @@ void MapView::createGUI()
 }
 
 MapView::MapView( float ah0, float av0 )
-: ah( ah0 )
-, av( av0 )
-, _GUIDisplayingEnabled( true )
-, mTimespeed( 0.0f )
+  : ah( ah0 )
+  , av( av0 )
+  , _GUIDisplayingEnabled( true )
+  , mTimespeed( 0.0f )
 {
   LastClicked = NULL;
 
@@ -1069,6 +1070,8 @@ void MapView::tick( float t, float dt )
           Selection->data.wmo->pos.y += keyy * moveratio;
           Selection->data.wmo->pos.z += keyz * moveratio;
           Selection->data.wmo->dir.y += keyr * moveratio * 5;
+
+          Selection->data.wmo->recalcExtents();
           gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z);
         }
 
@@ -1100,13 +1103,12 @@ void MapView::tick( float t, float dt )
       {
         if( Selection->type == eEntry_WMO )
         {
-           gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // before move
-           ObjPos.x = 80.0f;
-           Selection->data.wmo->pos+=mv * dirUp * ObjPos.x;
-           Selection->data.wmo->pos-=mh * dirRight * ObjPos.x;
-           Selection->data.wmo->extents[0] = Selection->data.wmo->pos - Vec3D(1,1,1);
-           Selection->data.wmo->extents[1] = Selection->data.wmo->pos + Vec3D(1,1,1);
-           gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // after move. If moved to another ADT
+          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // before move
+          ObjPos.x = 80.0f;
+          Selection->data.wmo->pos+=mv * dirUp * ObjPos.x;
+          Selection->data.wmo->pos-=mh * dirRight * ObjPos.x;
+          Selection->data.wmo->recalcExtents();
+          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x,Selection->data.wmo->pos.z); // after move. If moved to another ADT
         }
         else if( Selection->type == eEntry_Model )
         {
@@ -1114,7 +1116,7 @@ void MapView::tick( float t, float dt )
           {
             gWorld->mapIndex->setChanged(Selection->data.model->pos.x,Selection->data.model->pos.z);
             float ScaleAmount;
-  
+
             ScaleAmount = pow( 2.0f, mv * 4.0f );
             Selection->data.model->sc *= ScaleAmount;
             if(Selection->data.model->sc > 63.9f )
@@ -1171,6 +1173,9 @@ void MapView::tick( float t, float dt )
             *lTarget = *lTarget - 360.0f;
           else if( *lTarget < -360.0f )
             *lTarget = *lTarget + 360.0f;
+
+          if(Selection->type == eEntry_WMO)
+            Selection->data.wmo->recalcExtents();
         }
       }
 
@@ -1192,138 +1197,138 @@ void MapView::tick( float t, float dt )
 
         switch( terrainMode )
         {
-        case 0:
-          if( Environment::getInstance()->ShiftDown )
-          {
-            // Move ground up
-            if( mViewMode == eViewMode_3D ) gWorld->changeTerrain( xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
-          }
-          else if( Environment::getInstance()->CtrlDown )
-          {
-            // Move ground down
-            if( mViewMode == eViewMode_3D ) gWorld->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
-          }
-        break;
-
-        case 1:
-          if( Environment::getInstance()->ShiftDown )
-            if( mViewMode == eViewMode_3D ) gWorld->flattenTerrain( xPos, zPos, yPos, pow( 0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType );
-          if( Environment::getInstance()->CtrlDown )
-          {
-            if( mViewMode == eViewMode_3D ) gWorld->blurTerrain( xPos, zPos, pow( 0.5f, dt * groundBlurSpeed), std::min( blurBrushRadius, 30.0f ), blurBrushType );
-          }
-        break;
-
-        case 2:
-          if( Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown && Environment::getInstance()->AltDown)
-          {
-            // clear chunk texture
-            if( mViewMode == eViewMode_3D )
-              gWorld->eraseTextures(xPos, zPos);
-            else if( mViewMode == eViewMode_2D )
-              gWorld->eraseTextures( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
-          }
-          else if( Environment::getInstance()->CtrlDown )
-          {
-            // Pick texture
-            mainGui->TexturePicker->getTextures( gWorld->GetCurrentSelection());
-          }
-          else  if( Environment::getInstance()->ShiftDown)
-          {
-            // Paint 3d if shift down.
-            if( UITexturingGUI::getSelectedTexture() )
+          case 0:
+            if( Environment::getInstance()->ShiftDown )
             {
+              // Move ground up
+              if( mViewMode == eViewMode_3D ) gWorld->changeTerrain( xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+            }
+            else if( Environment::getInstance()->CtrlDown )
+            {
+              // Move ground down
+              if( mViewMode == eViewMode_3D ) gWorld->changeTerrain( xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType );
+            }
+            break;
+
+          case 1:
+            if( Environment::getInstance()->ShiftDown )
+              if( mViewMode == eViewMode_3D ) gWorld->flattenTerrain( xPos, zPos, yPos, pow( 0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType );
+            if( Environment::getInstance()->CtrlDown )
+            {
+              if( mViewMode == eViewMode_3D ) gWorld->blurTerrain( xPos, zPos, pow( 0.5f, dt * groundBlurSpeed), std::min( blurBrushRadius, 30.0f ), blurBrushType );
+            }
+            break;
+
+          case 2:
+            if( Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown && Environment::getInstance()->AltDown)
+            {
+              // clear chunk texture
+              if( mViewMode == eViewMode_3D )
+                gWorld->eraseTextures(xPos, zPos);
+              else if( mViewMode == eViewMode_2D )
+                gWorld->eraseTextures( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+            }
+            else if( Environment::getInstance()->CtrlDown )
+            {
+              // Pick texture
+              mainGui->TexturePicker->getTextures( gWorld->GetCurrentSelection());
+            }
+            else  if( Environment::getInstance()->ShiftDown)
+            {
+              // Paint 3d if shift down.
+              if( UITexturingGUI::getSelectedTexture() )
+              {
+                if( textureBrush.needUpdate() )
+                {
+                  textureBrush.GenerateTexture();
+                }
+                if( mViewMode == eViewMode_3D )
+                  if( mainGui->TextureSwitcher->hidden() )
+                    gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
+                  else
+                    gWorld->overwriteTextureAtCurrentChunk(xPos,zPos, mainGui->TextureSwitcher->getTextures() ,UITexturingGUI::getSelectedTexture());
+              }
+            }
+            else
+            {
+              // paint 2d if nothing is pressed.
               if( textureBrush.needUpdate() )
               {
                 textureBrush.GenerateTexture();
               }
+              if( mViewMode == eViewMode_2D && !(Environment::getInstance()->ShiftDown) && !(Environment::getInstance()->AltDown) )
+                gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
+            }
+            break;
+
+          case 3:
+            if( Environment::getInstance()->ShiftDown  )
+            {
+              // if there is no terrain the projection method do not work. So get the cords by selection.
+              Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
+              yPos = Selection->data.mapchunk->getSelectionHeight();
+
+              if( Environment::getInstance()->AltDown )
+              {
+                if( mViewMode == eViewMode_3D )      gWorld->removeHole( xPos, zPos,true );
+              }
+              else
+              {
+                if( mViewMode == eViewMode_3D )      gWorld->removeHole( xPos, zPos,false);
+              }
+              //else if( mViewMode == eViewMode_2D )  gWorld->removeHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
+            }
+            else if( Environment::getInstance()->CtrlDown )
+            {
+              if( Environment::getInstance()->AltDown )
+              {
+                if( mViewMode == eViewMode_3D )      gWorld->addHole( xPos, zPos,true );
+              }
+              else
+              {
+                if( mViewMode == eViewMode_3D )      gWorld->addHole( xPos, zPos,false);
+              }
+            }
+            break;
+
+          case 4:
+            if( Environment::getInstance()->ShiftDown  )
+            {
               if( mViewMode == eViewMode_3D )
-                if( mainGui->TextureSwitcher->hidden() )
-                  gWorld->paintTexture( xPos, zPos, &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
-                else
-                  gWorld->overwriteTextureAtCurrentChunk(xPos,zPos, mainGui->TextureSwitcher->getTextures() ,UITexturingGUI::getSelectedTexture());
+              {
+                // draw the selected AreaId on current selected chunk
+                nameEntry * lSelection = gWorld->GetCurrentSelection();
+                int mtx,mtz,mcx,mcy;
+                mtx = lSelection->data.mapchunk->mt->mPositionX;
+                mtz = lSelection->data.mapchunk->mt->mPositionZ ;
+                mcx = lSelection->data.mapchunk->px;
+                mcy = lSelection->data.mapchunk->py;
+                gWorld->setAreaID( Environment::getInstance()->selectedAreaID, mtx,mtz, mcx, mcy );
+              }
             }
-          }
-          else
-          {
-            // paint 2d if nothing is pressed.
-            if( textureBrush.needUpdate() )
+            else if( Environment::getInstance()->CtrlDown )
             {
-              textureBrush.GenerateTexture();
+              if( mViewMode == eViewMode_3D )
+              {
+                // pick areaID from chunk
+                int newID = gWorld->GetCurrentSelection()->data.mapchunk->getAreaID();
+                Environment::getInstance()->selectedAreaID = newID;
+                mainGui->ZoneIDBrowser->setZoneID(newID);
+              }
             }
-            if( mViewMode == eViewMode_2D && !(Environment::getInstance()->ShiftDown) && !(Environment::getInstance()->AltDown) )
-              gWorld->paintTexture( CHUNKSIZE * 4.0f * video.ratio() * ( static_cast<float>( MouseX ) / static_cast<float>( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( static_cast<float>( MouseY ) / static_cast<float>( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z , &textureBrush, brushLevel, 1.0f - pow( 1.0f - brushPressure, dt * 10.0f ), UITexturingGUI::getSelectedTexture() );
-          }
-        break;
 
-        case 3:
-          if( Environment::getInstance()->ShiftDown  )
-          {
-		        // if there is no terrain the projection method do not work. So get the cords by selection.
-			      Selection->data.mapchunk->getSelectionCoord( &xPos, &zPos );
-			      yPos = Selection->data.mapchunk->getSelectionHeight();
+            break;
 
-            if( Environment::getInstance()->AltDown )
+          case 5:
+            if( Environment::getInstance()->ShiftDown  )
             {
-              if( mViewMode == eViewMode_3D )      gWorld->removeHole( xPos, zPos,true );
+              if( mViewMode == eViewMode_3D ) gWorld->mapIndex->setFlag( true, xPos, zPos );
             }
-            else
+            else if( Environment::getInstance()->CtrlDown )
             {
-              if( mViewMode == eViewMode_3D )      gWorld->removeHole( xPos, zPos,false);
+              if( mViewMode == eViewMode_3D ) gWorld->mapIndex->setFlag( false, xPos, zPos );
             }
-            //else if( mViewMode == eViewMode_2D )  gWorld->removeHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
-          }
-          else if( Environment::getInstance()->CtrlDown )
-          {
-            if( Environment::getInstance()->AltDown )
-            {
-              if( mViewMode == eViewMode_3D )      gWorld->addHole( xPos, zPos,true );
-            }
-            else
-            {
-              if( mViewMode == eViewMode_3D )      gWorld->addHole( xPos, zPos,false);
-            }
-          }
-        break;
-
-        case 4:
-          if( Environment::getInstance()->ShiftDown  )
-          {
-            if( mViewMode == eViewMode_3D )
-            {
-            // draw the selected AreaId on current selected chunk
-            nameEntry * lSelection = gWorld->GetCurrentSelection();
-            int mtx,mtz,mcx,mcy;
-            mtx = lSelection->data.mapchunk->mt->mPositionX;
-            mtz = lSelection->data.mapchunk->mt->mPositionZ ;
-            mcx = lSelection->data.mapchunk->px;
-            mcy = lSelection->data.mapchunk->py;
-            gWorld->setAreaID( Environment::getInstance()->selectedAreaID, mtx,mtz, mcx, mcy );
-            }
-          }
-          else if( Environment::getInstance()->CtrlDown )
-          {
-            if( mViewMode == eViewMode_3D )
-            {
-            // pick areaID from chunk
-            int newID = gWorld->GetCurrentSelection()->data.mapchunk->getAreaID();
-            Environment::getInstance()->selectedAreaID = newID;
-            mainGui->ZoneIDBrowser->setZoneID(newID);
-            }
-          }
-
-        break;
-
-        case 5:
-          if( Environment::getInstance()->ShiftDown  )
-          {
-            if( mViewMode == eViewMode_3D ) gWorld->mapIndex->setFlag( true, xPos, zPos );
-          }
-          else if( Environment::getInstance()->CtrlDown )
-          {
-            if( mViewMode == eViewMode_3D ) gWorld->mapIndex->setFlag( false, xPos, zPos );
-          }
-        break;
+            break;
         }
       }
     }
@@ -1381,13 +1386,13 @@ void MapView::tick( float t, float dt )
     rightMouse = false;
     look = false;
     MoveObj = false;
-	
+
     moving = 0;
     strafing = 0;
     updown = 0;
   }
 
-  if( ( t - lastBrushUpdate ) > 0.1f && textureBrush.needUpdate() ) 
+  if( ( t - lastBrushUpdate ) > 0.1f && textureBrush.needUpdate() )
   {
     textureBrush.GenerateTexture();
   }
@@ -1448,28 +1453,28 @@ void MapView::displayViewMode_2D( float /*t*/, float /*dt*/ )
 
   // draw brush
   glPushMatrix();
-    glScalef(gWorld->zoom,gWorld->zoom,1.0f);
-    glTranslatef(-gWorld->camera.x/CHUNKSIZE,-gWorld->camera.z/CHUNKSIZE,0);
+  glScalef(gWorld->zoom,gWorld->zoom,1.0f);
+  glTranslatef(-gWorld->camera.x/CHUNKSIZE,-gWorld->camera.z/CHUNKSIZE,0);
 
-    glColor4f(1.0f,1.0f,1.0f,0.5f);
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
+  glColor4f(1.0f,1.0f,1.0f,0.5f);
+  glActiveTexture(GL_TEXTURE1);
+  glDisable(GL_TEXTURE_2D);
+  glActiveTexture(GL_TEXTURE0);
+  glEnable(GL_TEXTURE_2D);
 
-    textureBrush.getTexture()->bind();
+  textureBrush.getTexture()->bind();
 
-    const float tRadius = textureBrush.getRadius()/CHUNKSIZE;// *gWorld->zoom;
-    glBegin(GL_QUADS);
-      glTexCoord2f(0.0f,0.0f);
-      glVertex3f(mX-tRadius,mY+tRadius,0);
-      glTexCoord2f(1.0f,0.0f);
-      glVertex3f(mX+tRadius,mY+tRadius,0);
-      glTexCoord2f(1.0f,1.0f);
-      glVertex3f(mX+tRadius,mY-tRadius,0);
-      glTexCoord2f(0.0f,1.0f);
-      glVertex3f(mX-tRadius,mY-tRadius,0);
-    glEnd();
+  const float tRadius = textureBrush.getRadius()/CHUNKSIZE;// *gWorld->zoom;
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0f,0.0f);
+  glVertex3f(mX-tRadius,mY+tRadius,0);
+  glTexCoord2f(1.0f,0.0f);
+  glVertex3f(mX+tRadius,mY+tRadius,0);
+  glTexCoord2f(1.0f,1.0f);
+  glVertex3f(mX+tRadius,mY-tRadius,0);
+  glTexCoord2f(0.0f,1.0f);
+  glVertex3f(mX-tRadius,mY-tRadius,0);
+  glEnd();
   glPopMatrix();
 
   displayGUIIfEnabled();
@@ -1502,13 +1507,13 @@ void MapView::display( float t, float dt )
 
   switch( mViewMode )
   {
-  case eViewMode_2D:
-    displayViewMode_2D( t, dt );
-    break;
+    case eViewMode_2D:
+      displayViewMode_2D( t, dt );
+      break;
 
-  case eViewMode_3D:
-    displayViewMode_3D( t, dt );
-    break;
+    case eViewMode_3D:
+      displayViewMode_3D( t, dt );
+      break;
   }
 }
 
@@ -1634,8 +1639,8 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
     if( e->keysym.sym == SDLK_KP9 )
       keyr = -1;
 
-    if( e->keysym.sym == SDLK_KP0 ) 
-      if(terrainMode==6) 
+    if( e->keysym.sym == SDLK_KP0 )
+      if(terrainMode==6)
       {
         gWorld->setWaterHeight(misc::FtoIround((gWorld->camera.x-(TILESIZE/2))/TILESIZE),misc::FtoIround((gWorld->camera.z-(TILESIZE/2))/TILESIZE),0.0f);
         mainGui->guiWater->updateData();
@@ -1907,7 +1912,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
             gWorld->setWaterTrans(x, z,  static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(x, z)) + 1)));
           else if(Environment::getInstance()->CtrlDown)
             gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) + 5.0f));
-          else 
+          else
             gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) + 1.0f));
 
           mainGui->guiWater->updateData();
@@ -1970,7 +1975,7 @@ void MapView::keypressed( SDL_KeyboardEvent *e )
             gWorld->setWaterTrans(x, z, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(x, z))) - 1) );
           else if(Environment::getInstance()->CtrlDown)
             gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 5.0f));
-          else 
+          else
             gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 1.0f));
 
           mainGui->guiWater->updateData();
@@ -2235,30 +2240,30 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
   {
     switch( terrainMode )
     {
-    case 0:
-      groundBrushRadius += e->xrel / XSENS;
-      if( groundBrushRadius > 1000.0f )
-        groundBrushRadius = 1000.0f;
-      else if( groundBrushRadius < 0.01f )
-        groundBrushRadius = 0.01f;
-      ground_brush_radius->setValue( groundBrushRadius / 1000.0f );
-      break;
-    case 1:
-      blurBrushRadius += e->xrel / XSENS;
-      if( blurBrushRadius > 1000.0f )
-        blurBrushRadius = 1000.0f;
-      else if( blurBrushRadius < 0.01f )
-        blurBrushRadius = 0.01f;
-      blur_brush->setValue( blurBrushRadius / 1000.0f );
-      break;
-    case 2:
-      textureBrush.setRadius( textureBrush.getRadius() + e->xrel / XSENS );
-      if( textureBrush.getRadius() > 100.0f )
-        textureBrush.setRadius(100.0f);
-      else if( textureBrush.getRadius() < 0.1f )
-        textureBrush.setRadius(0.1f);
-      paint_brush->setValue( textureBrush.getRadius() / 100.0f );
-      break;
+      case 0:
+        groundBrushRadius += e->xrel / XSENS;
+        if( groundBrushRadius > 1000.0f )
+          groundBrushRadius = 1000.0f;
+        else if( groundBrushRadius < 0.01f )
+          groundBrushRadius = 0.01f;
+        ground_brush_radius->setValue( groundBrushRadius / 1000.0f );
+        break;
+      case 1:
+        blurBrushRadius += e->xrel / XSENS;
+        if( blurBrushRadius > 1000.0f )
+          blurBrushRadius = 1000.0f;
+        else if( blurBrushRadius < 0.01f )
+          blurBrushRadius = 0.01f;
+        blur_brush->setValue( blurBrushRadius / 1000.0f );
+        break;
+      case 2:
+        textureBrush.setRadius( textureBrush.getRadius() + e->xrel / XSENS );
+        if( textureBrush.getRadius() > 100.0f )
+          textureBrush.setRadius(100.0f);
+        else if( textureBrush.getRadius() < 0.1f )
+          textureBrush.setRadius(0.1f);
+        paint_brush->setValue( textureBrush.getRadius() / 100.0f );
+        break;
     }
   }
 
@@ -2273,7 +2278,7 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
         else if( groundBrushSpeed < 0.01f )
           groundBrushSpeed = 0.01f;
         ground_brush_speed->setValue( groundBrushSpeed / 10.0f );
-      break;
+        break;
       case 1:
         groundBlurSpeed += e->xrel / 30.0f;
         if( groundBlurSpeed > 10.0f )
@@ -2285,10 +2290,10 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
       case 2:
         mainGui->S1->setValue(  mainGui->S1->value + e->xrel / 300.0f );
         if(  mainGui->S1->value > 1.0f )
-           mainGui->S1->setValue(1.0f);
+          mainGui->S1->setValue(1.0f);
         else if(  mainGui->S1->value < 0.0001f )
-           mainGui->S1->setValue(0.0001f);
-         mainGui->S1->setValue(  mainGui->S1->value );
+          mainGui->S1->setValue(0.0001f);
+        mainGui->S1->setValue(  mainGui->S1->value );
         break;
     }
   }
@@ -2318,7 +2323,7 @@ void MapView::mousemove( SDL_MouseMotionEvent *e )
 
 void MapView::addModelFromTextSelection( int id )
 {
-   InsertObject( 0, id );
+  InsertObject( 0, id );
 }
 
 void MapView::mouseclick( SDL_MouseButtonEvent *e )
