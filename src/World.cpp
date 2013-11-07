@@ -1913,7 +1913,7 @@ void World::addModel( nameEntry entry, Vec3D newPos,bool copyit  )
     this->addWMO( entry.data.wmo->wmo, newPos,copyit );
 }
 
-void World::addM2( Model *model, Vec3D newPos ,bool copyit )
+void World::addM2( Model *model, Vec3D newPos, bool copyit)
 {
   int temp = 0;
   if  (mModelInstances.empty()) {
@@ -1933,7 +1933,9 @@ void World::addM2( Model *model, Vec3D newPos ,bool copyit )
   newModelis.pos = newPos;
   newModelis.sc = 1;
 
-  if(Settings::getInstance()->copyModelStats==true && copyit == true)
+  if(Settings::getInstance()->copyModelStats
+     && copyit
+     && Environment::getInstance()->get_clipboard().type == eEntry_Model)
   {
     // copy rot size from original model. Dirty but woring
     newModelis.sc = Environment::getInstance()->get_clipboard().data.model->sc;
@@ -1973,7 +1975,8 @@ void World::addWMO( WMO *wmo, Vec3D newPos, bool copyit )
   newWMOis.pos = newPos;
   newWMOis.mUniqueID = lMaxUID;
 
-  if(Settings::getInstance()->copyModelStats==true)
+  if(Settings::getInstance()->copyModelStats
+     && Environment::getInstance()->get_clipboard().type == eEntry_WMO)
   {
     // copy rot from original model. Dirty but working
     newWMOis.dir = Environment::getInstance()->get_clipboard().data.wmo->dir;
