@@ -358,7 +358,7 @@ void Noggit::mainLoop()
 
   SDL_Event event;
 
-  try {
+//  try {
 
     while( !states.empty() && !done )
     {
@@ -428,12 +428,12 @@ void Noggit::mainLoop()
       }
     }
 
-  }
-  catch( const std::exception& e )
-  {
-    LogError << "expection: " << e.what() << std::endl;
-    printStacktrace();
-  }
+//  }
+//  catch( const std::exception& e )
+//  {
+//    LogError << "expection: " << e.what() << std::endl;
+//    printStacktrace();
+//  }
 }
 
 int Noggit::start(int argc, char *argv[])

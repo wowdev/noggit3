@@ -34,8 +34,17 @@ Model* ModelManager::add( std::string name )
   if( items.find( name ) == items.end() )
   {
     items[name] = new Model( name );
-    items[name]->finishLoading();
-    app.loader()->addObject( items[name] );
+
+    try
+    {
+      items[name]->finishLoading();
+    }
+    catch( const std::exception& e )
+    {
+      LogError << "Exception " << e.what() << " while loading " << name << std::endl;
+    }
+
+    //app.loader()->addObject( items[name] ); isnt that loading it two times?
   }
 
   items[name]->addReference();

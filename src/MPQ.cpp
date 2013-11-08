@@ -155,6 +155,8 @@ MPQFile::MPQFile(const std::string& pFilename)
 {
   boost::mutex::scoped_lock lock(gMPQFileMutex);
 
+  if(pFilename.empty()) throw std::runtime_error("MPQFile: filename empty");
+
   std::string filename(pFilename);
   std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
   std::string diskpath = Project::getInstance()->getPath().append(filename);
