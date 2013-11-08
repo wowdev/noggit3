@@ -1456,8 +1456,9 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
   {
     //! \todo  This requires the extents already being calculated. See above.
-    if( checkInside( lChunkExtents, it->second.extents ) )
+    if(it->second.isInside(lChunkExtents))
       lObjectIDs.push_back( lID );
+
     lID++;
   }
 
