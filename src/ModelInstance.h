@@ -38,6 +38,15 @@ public:
   void draw2Select( const Vec3D& ofs, const float rot );
 
   void resetDirection();
+
+  bool hasUIDLock();
+  void lockUID();
+  void unlockUID();
+
+  bool isInside(Vec3D lTileExtents[2]);
+
+private:
+  bool uidLock;
 };
 
 #endif // MODELINSTANCE_H

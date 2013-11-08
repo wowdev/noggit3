@@ -549,42 +549,34 @@ void MapTile::clearAllModels()
 
 void MapTile::uidTile()
 {
-  // Check which doodads and WMOs are on this ADT.
-  Vec3D lTileExtents[2];
-  lTileExtents[0] = Vec3D( this->xbase, 0.0f, this->zbase );
-  lTileExtents[1] = Vec3D( this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE );
+//  // Check which doodads and WMOs are on this ADT.
+//  Vec3D lTileExtents[2];
+//  unsigned int UID(0);
 
-  std::map<int, WMOInstance> lObjectInstances;
-  std::map<int, ModelInstance> lModelInstances;
+//  lTileExtents[0] = Vec3D( this->xbase, 0.0f, this->zbase );
+//  lTileExtents[1] = Vec3D( this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE );
 
-  unsigned int UID_counter = 1;
-  for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
-  {
-    it->second.recalcExtents();
-    if(checkInside( lTileExtents, it->second.extents ) )
-    {
-      // If save mode == 1 and models origin is located on the adt then recalc UID
-      if(changed == 1 && checkOriginInside( lTileExtents, it->second.pos))
-      {
-        it->second.mUniqueID =  mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
-      }
-    }
-  }
+//  UID += mPositionX * 10000000;
+//  UID += mPositionZ *   100000;
 
-  for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
-  {
-    Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
-    lModelExtentsV1[0] = it->second.model->header.BoundingBoxMin + it->second.pos;
-    lModelExtentsV1[1] = it->second.model->header.BoundingBoxMax + it->second.pos;
-    lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
-    lModelExtentsV2[1] = it->second.model->header.VertexBoxMax + it->second.pos;
 
-    if(changed == 1 && (checkInside(lTileExtents, lModelExtentsV1) || checkInside(lTileExtents, lModelExtentsV2)))
-    {
-      // If save mode == 1 recalc UID
-      it->second.d1 = mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
-    }
-  }
+//  for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
+//  {
+//    if(!it->second.isInside(lTileExtents)) continue;
+//    if(it->second.hasUIDLock()) continue;
+
+//    it->second.mUniqueID = UID++;
+//    it->second.lockUID();
+//  }
+
+//  for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
+//  {
+//    if(!it->second.isInside(lTileExtents)) continue;
+//    if(it->second.hasUIDLock()) continue;
+
+//    it->second.d1 = UID++;
+//    it->second.lockUID();
+//  }
 }
 
 void MapTile::saveTile()
@@ -597,35 +589,41 @@ void MapTile::saveTile()
 
   // Check which doodads and WMOs are on this ADT.
   Vec3D lTileExtents[2];
-  lTileExtents[0] = Vec3D( this->xbase, 0.0f, this->zbase );
-  lTileExtents[1] = Vec3D( this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE );
-
+  unsigned int UID(0);
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
 
-  unsigned int UID_counter = 1;
+  lTileExtents[0] = Vec3D( this->xbase, 0.0f, this->zbase );
+  lTileExtents[1] = Vec3D( this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE );
+
+  UID += mPositionX * 10000000;
+  UID += mPositionZ *   100000;
+
   for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
   {
-    it->second.recalcExtents();
-    if( checkInside( lTileExtents, it->second.extents ) )
+    if(!it->second.isInside(lTileExtents)) continue;
+
+    if(!it->second.hasUIDLock())
     {
-      lObjectInstances.insert( std::pair<int, WMOInstance>( it->first, it->second ) );
+      it->second.mUniqueID = UID++;
+      it->second.lockUID();
     }
+
+    lObjectInstances.insert(std::pair<int, WMOInstance>(it->first, it->second));
   }
   
 
   for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
   {
-    Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
-    lModelExtentsV1[0] = it->second.model->header.BoundingBoxMin + it->second.pos;
-    lModelExtentsV1[1] = it->second.model->header.BoundingBoxMax + it->second.pos;
-    lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
-    lModelExtentsV2[1] = it->second.model->header.VertexBoxMax + it->second.pos;
+    if(!it->second.isInside(lTileExtents)) continue;
 
-    if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
+    if(!it->second.hasUIDLock())
     {
-      lModelInstances.insert( std::pair<int, ModelInstance>( it->first, it->second ) );
+      it->second.d1 = UID++;
+      it->second.lockUID();
     }
+
+    lModelInstances.insert(std::pair<int, ModelInstance>(it->first, it->second));
   }
 
   filenameOffsetThing nullyThing = { 0, 0 };
@@ -666,10 +664,6 @@ void MapTile::saveTile()
 
   // Check which textures are on this ADT.
   std::map<std::string, int> lTextures;
-#if 0
-  //used to store texteffectinfo
-  std::vector<int> mTextureEffects;
-#endif
 
   for( int i = 0; i < 16; ++i )
     for( int j = 0; j < 16; ++j )
@@ -680,20 +674,6 @@ void MapTile::saveTile()
   lID = 0;
   for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
     it->second = lID++;
-
-#if 0
-  //! \todo actually, the folder is completely independant of this. Handle this differently. Bullshit here.
-  std::string cmpCubeMaps = std::string("terrain cube maps");
-  for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it ){
-    //if texture is in folder terrain cube maps, it needs to get handled different by wow
-    if(it->first.compare(8, 17, cmpCubeMaps) == 0){
-      Log<<it->second <<": "<< it->first << std::endl;
-      mTextureEffects.push_back(1);
-    }
-    else
-      mTextureEffects.push_back(0);
-  }
-#endif
 
   // Now write the file.
 
