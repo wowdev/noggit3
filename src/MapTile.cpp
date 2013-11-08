@@ -560,10 +560,11 @@ void MapTile::uidTile()
   unsigned int UID_counter = 1;
   for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
   {
-    if( checkInside( lTileExtents, it->second.extents ) )
+    it->second.recalcExtents();
+    if(checkInside( lTileExtents, it->second.extents ) )
     {
       // If save mode == 1 and models origin is located on the adt then recalc UID
-      if(this->changed==1 && checkOriginInside( lTileExtents, it->second.pos ))
+      if(changed == 1 && checkOriginInside( lTileExtents, it->second.pos))
       {
         it->second.mUniqueID =  mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
       }
@@ -578,13 +579,10 @@ void MapTile::uidTile()
     lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
     lModelExtentsV2[1] = it->second.model->header.VertexBoxMax + it->second.pos;
 
-    if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
+    if(changed == 1 && (checkInside(lTileExtents, lModelExtentsV1) || checkInside(lTileExtents, lModelExtentsV2)))
     {
       // If save mode == 1 recalc UID
-      if(this->changed==1)
-      {
-        it->second.d1 = mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
-      }
+      it->second.d1 = mPositionX * 10000000 + mPositionZ * 100000 + UID_counter++;
     }
   }
 }
