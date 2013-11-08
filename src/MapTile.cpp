@@ -515,10 +515,6 @@ void MapTile::clearAllModels()
 {
   Log << "Clear all models from ADT \"" << mFilename << "\"." << std::endl;
 
-  int lID;  // This is a global counting variable. Do not store something in here you need later.
-
-  // Collect some information we need later.
-
   // Check which doodads and WMOs are on this ADT.
   Vec3D lTileExtents[2];
   lTileExtents[0] = Vec3D( this->xbase, 0.0f, this->zbase );
@@ -528,55 +524,45 @@ void MapTile::clearAllModels()
   std::map<int, ModelInstance> lModelInstances;
 
   for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
-    if( checkInside( lTileExtents, it->second.extents ) )
+    if(it->second.isInside(lTileExtents))
       gWorld->deleteWMOInstance( it->second.mUniqueID );
 
   for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
-  {
-    Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
-    lModelExtentsV1[0] = it->second.model->header.BoundingBoxMin + it->second.pos;
-    lModelExtentsV1[1] = it->second.model->header.BoundingBoxMax + it->second.pos;
-    lModelExtentsV2[0] = it->second.model->header.VertexBoxMin + it->second.pos;
-    lModelExtentsV2[1] = it->second.model->header.VertexBoxMax + it->second.pos;
-
-    if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
-    {
+    if(it->second.isInside(lTileExtents))
       gWorld->deleteModelInstance( it->second.d1 );
-    }
-  }
 
 }
 
 void MapTile::uidTile()
 {
-//  // Check which doodads and WMOs are on this ADT.
-//  Vec3D lTileExtents[2];
-//  unsigned int UID(0);
+  //  // Check which doodads and WMOs are on this ADT.
+  //  Vec3D lTileExtents[2];
+  //  unsigned int UID(0);
 
-//  lTileExtents[0] = Vec3D( this->xbase, 0.0f, this->zbase );
-//  lTileExtents[1] = Vec3D( this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE );
+  //  lTileExtents[0] = Vec3D( this->xbase, 0.0f, this->zbase );
+  //  lTileExtents[1] = Vec3D( this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE );
 
-//  UID += mPositionX * 10000000;
-//  UID += mPositionZ *   100000;
+  //  UID += mPositionX * 10000000;
+  //  UID += mPositionZ *   100000;
 
 
-//  for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
-//  {
-//    if(!it->second.isInside(lTileExtents)) continue;
-//    if(it->second.hasUIDLock()) continue;
+  //  for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
+  //  {
+  //    if(!it->second.isInside(lTileExtents)) continue;
+  //    if(it->second.hasUIDLock()) continue;
 
-//    it->second.mUniqueID = UID++;
-//    it->second.lockUID();
-//  }
+  //    it->second.mUniqueID = UID++;
+  //    it->second.lockUID();
+  //  }
 
-//  for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
-//  {
-//    if(!it->second.isInside(lTileExtents)) continue;
-//    if(it->second.hasUIDLock()) continue;
+  //  for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
+  //  {
+  //    if(!it->second.isInside(lTileExtents)) continue;
+  //    if(it->second.hasUIDLock()) continue;
 
-//    it->second.d1 = UID++;
-//    it->second.lockUID();
-//  }
+  //    it->second.d1 = UID++;
+  //    it->second.lockUID();
+  //  }
 }
 
 void MapTile::saveTile()
@@ -632,19 +618,9 @@ void MapTile::saveTile()
 
   for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
   {
-    //! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
-    std::string lTemp = it->second.model->_filename;
-    transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
-    size_t found = lTemp.rfind( ".m2" );
-    if( found != std::string::npos )
+    if( lModels.find( it->second.model->_filename ) == lModels.end() )
     {
-      lTemp.replace( found, 3, ".md" );
-      lTemp.append( "x" );
-    }
-
-    if( lModels.find( lTemp ) == lModels.end() )
-    {
-      lModels.insert( std::pair<std::string, filenameOffsetThing>( lTemp, nullyThing ) );
+      lModels.insert( std::pair<std::string, filenameOffsetThing>( it->second.model->_filename, nullyThing ) );
     }
   }
 
@@ -821,16 +797,7 @@ void MapTile::saveTile()
   lID = 0;
   for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
   {
-    //! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
-    std::string lTemp = it->second.model->_filename;
-    transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
-    size_t found = lTemp.rfind( ".m2" );
-    if( found != std::string::npos )
-    {
-      lTemp.replace( found, 3, ".md" );
-      lTemp.append( "x" );
-    }
-    std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lModels.find( lTemp );
+    std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lModels.find(it->second.model->_filename);
     if( lMyFilenameThingey == lModels.end() )
     {
       LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
