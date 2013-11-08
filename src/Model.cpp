@@ -42,7 +42,7 @@ void Model::finishLoading()
   if( f.isEof() )
   {
       LogError << "Error loading file \"" << _filename << "\". Aborting to load model." << std::endl;
-       finished = true;
+      finished = true;
       return;
   }
 
