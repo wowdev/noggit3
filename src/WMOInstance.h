@@ -17,14 +17,11 @@ public:
   Vec3D pos;
   Vec3D  extents[2];
   Vec3D  dir;
-  int mUniqueID;
+  unsigned int mUniqueID;
   uint16_t mFlags;
   uint16_t mUnknown;
   uint16_t mNameset;
   uint16_t doodadset;
-
-private:
-  unsigned int mSelectionID;
 
 public:
   WMOInstance();
@@ -38,6 +35,16 @@ public:
 
   void recalcExtents();
   void resetDirection();
+
+  bool isInside(Vec3D lTileExtents[2]);
+
+  bool hasUIDLock();
+  void lockUID();
+  void unlockUID();
+
+private:
+  bool uidLock;
+  unsigned int mSelectionID;
 };
 
 

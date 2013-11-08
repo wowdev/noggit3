@@ -4,6 +4,7 @@
 #include "MapHeaders.h"
 #include "WMO.h" // WMO
 #include "World.h" // gWorld
+#include "Misc.h" // checkinside
 
 WMOInstance::WMOInstance( WMO* _wmo, MPQFile* _file ) : wmo( _wmo ), mSelectionID( SelectionNames.add( this ) )
 {
@@ -127,6 +128,12 @@ void WMOInstance::recalcExtents()
   delete bounds;
 }
 
+bool WMOInstance::isInside(Vec3D lTileExtents[2])
+{
+  recalcExtents();
+  return checkInside(lTileExtents, extents);
+}
+
 void WMOInstance::drawSelect()
 {
   glPushMatrix();
@@ -174,4 +181,19 @@ void WMOInstance::resetDirection()
 WMOInstance::~WMOInstance()
 {
   SelectionNames.del( mSelectionID );
+}
+
+void WMOInstance::lockUID()
+{
+  uidLock = true;
+}
+
+void WMOInstance::unlockUID()
+{
+  uidLock = false;
+}
+
+bool WMOInstance::hasUIDLock()
+{
+  return uidLock;
 }

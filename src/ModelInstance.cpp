@@ -3,6 +3,7 @@
 #include "Log.h"
 #include "Model.h" // Model, etc.
 #include "World.h" // gWorld
+#include "Misc.h" // checkinside
 
 Vec3D TransformCoordsForModel( Vec3D pIn )
 {
@@ -47,14 +48,19 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth )
 }
 
 ModelInstance::ModelInstance()
+  : uidLock(false)
 {
 }
 
-ModelInstance::ModelInstance(Model *m) : model (m)
+ModelInstance::ModelInstance(Model *m)
+  : model (m)
+  , uidLock(false)
 {
 }
 
-ModelInstance::ModelInstance(Model *m, MPQFile* f) : model (m)
+ModelInstance::ModelInstance(Model *m, MPQFile* f)
+  : model (m)
+  , uidLock(false)
 {
   float ff[3];
 
@@ -70,7 +76,9 @@ ModelInstance::ModelInstance(Model *m, MPQFile* f) : model (m)
   nameID=0xFFFFFFFF;
 }
 
-ModelInstance::ModelInstance(Model *m, ENTRY_MDDF *d) : model (m)
+ModelInstance::ModelInstance(Model *m, ENTRY_MDDF *d)
+  : model (m)
+  , uidLock(false)
 {
   d1 = d->uniqueID;
   pos = Vec3D(d->pos[0],d->pos[1],d->pos[2]);
@@ -286,3 +294,28 @@ void ModelInstance::resetDirection(){
   dir.z=0;
 }
 
+void ModelInstance::lockUID()
+{
+  uidLock = true;
+}
+
+void ModelInstance::unlockUID()
+{
+  uidLock = false;
+}
+
+bool ModelInstance::hasUIDLock()
+{
+  return uidLock;
+}
+
+bool ModelInstance::isInside(Vec3D lTileExtents[2])
+{
+  Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
+  lModelExtentsV1[0] = pos + model->header.BoundingBoxMin;
+  lModelExtentsV1[1] = pos + model->header.BoundingBoxMax;
+  lModelExtentsV2[0] = pos + model->header.VertexBoxMin;
+  lModelExtentsV2[1] = pos + model->header.VertexBoxMax;
+
+  return (checkInside(lTileExtents, lModelExtentsV1) || checkInside(lTileExtents, lModelExtentsV2));
+}

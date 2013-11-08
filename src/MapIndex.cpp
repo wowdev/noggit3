@@ -182,58 +182,27 @@ void MapIndex::setChanged(float x, float z)
 void MapIndex::setChanged(int x, int z)
 {
   // change the changed flag of the map tile
-  if( !mTiles[x][z].tile ) return;
-  if( mTiles[x][z].tile->changed == 1) return;
+  if(!mTiles[x][z].tile) return;
+  if(mTiles[x][z].tile->changed == 1) return;
 
   mTiles[x][z].tile->changed = 1;
 
-  for (int posaddx=-1; posaddx<2; posaddx++)
+  for (int posaddx = -1; posaddx < 2; posaddx++)
   {
-    for (int posaddz=-1; posaddz<2; posaddz++)
+    for (int posaddz = -1; posaddz < 2; posaddz++)
     {
-      if(!(posaddx==0 && posaddz==0))// exclude center ADT
-      {
-        if(hasTile( x+posaddx,z+posaddz ))
-        {
-          if( !mTiles[x+posaddx][z+posaddz].tile  )
-          {
-            mTiles[x+posaddx][z+posaddz].tile = loadTile( x+posaddx, z+posaddz );
-            mTiles[x+posaddx][z+posaddz].tile->changed = 2;
-          }
-          else if( mTiles[x+posaddx][z+posaddz].tile->changed != 1 )
-          {
-            mTiles[x+posaddx][z+posaddz].tile->changed = 2;
-          }
-        }
-      }
+      if(!hasTile(x+posaddx,z+posaddz))
+        continue;
+
+      if(!mTiles[x+posaddx][z+posaddz].tile)
+       loadTile(x+posaddx, z+posaddz);
+
+      if(mTiles[x+posaddx][z+posaddz].tile->changed == 1)
+        continue;
+
+      mTiles[x+posaddx][z+posaddz].tile->changed = 2;
     }
   }
-
-  int px;
-  int pz;
-  // mark surrounding as 2
-  for(px=0;px==2;px++)
-  {
-    LogDebug << "X: " << px << std::endl;
-    for(pz=0;pz==2;pz++)
-    {
-      LogDebug << "Z: " << pz << std::endl;
-      if(px!=1 && pz!=1)// exclude center ADT
-      {
-        LogDebug << "Tile not Center: " << x+px << "_" << z+pz << std::endl;
-        if( mTiles[x+px-1][z+pz-1].tile )
-        {
-          LogDebug << "Tile exist: " << x+px << "_" << z+pz << std::endl;
-          if(  mTiles[x+px-1][z+pz-1].tile->changed!=1 )
-          {
-            LogDebug << "MarkSave 2: " << x+px << "_" << z+pz << std::endl;
-            mTiles[x+px-1][z+pz-1].tile->changed = 2;
-          }
-        }
-      }
-    }
-  }
-
 
 }
 
@@ -246,9 +215,10 @@ void MapIndex::unsetChanged(int x, int z)
 
 int MapIndex::getChanged(int x, int z)
 {
-  if(mTiles[x][z].tile && mTiles[x][z].tile->changed==1) // why do we need to save tile with changed=2? What "2" means?
+  if(mTiles[x][z].tile) // why do we need to save tile with changed=2? What "2" means? its adts which have models with new adts, and who ever added this here broke everything, thanks
     return mTiles[x][z].tile->changed;
-  else return 0;
+  else
+    return 0;
 }
 
 void MapIndex::setFlag(bool to, float x, float z)
@@ -350,36 +320,38 @@ void MapIndex::saveChanged()
 {
 
   // First recalculated UIDs.
-  for( int j = 0; j < 64; ++j )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      if( tileLoaded( j, i ) )
-      {
-        if(this->getChanged(j,i) == 1)
-        {
-          mTiles[j][i].tile->uidTile();
-        }
-      }
-    }
-  }
+  //  for( int j = 0; j < 64; ++j )
+  //  {
+  //    for( int i = 0; i < 64; ++i )
+  //    {
+  //      if( tileLoaded( j, i ) )
+  //      {
+  //        if(this->getChanged(j,i) == 1)
+  //        {
+  //          mTiles[j][i].tile->uidTile();
+  //        }
+  //      }
+  //    }
+  //  }
 
   // Now save all marked as 1 and 2 because UIDs now fits.
   for( int j = 0; j < 64; ++j )
   {
     for( int i = 0; i < 64; ++i )
     {
-      if( tileLoaded( j, i ) )
-      {
-        if(this->getChanged(j,i) > 0)
-        {
-          mTiles[j][i].tile->saveTile();
-          this->unsetChanged(j,i);
-        }
-      }
+      if(!tileLoaded(j, i)) continue;
+      if(!getChanged(j,i)) continue;
+
+      mTiles[j][i].tile->saveTile();
+      unsetChanged(j,i);
     }
   }
 
+  for(std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
+    it->second.unlockUID();
+
+  for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
+    it->second.unlockUID();
 }
 
 bool MapIndex::hasAGlobalWMO()
