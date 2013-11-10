@@ -1334,14 +1334,14 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
         {
           for (size_t i (0); i < 8; ++i)
           {
-            sum += textureSet->getAlpha(layer, (y * 8 + j) * 64 + (x * 8 + i));
+            sum += textureSet->getAlpha(layer, (y * 8 + x) * 64 + (j * 8 + i));
 
           }
         }
 
-        static const size_t minimum_value_to_overwrite (120);
+        static const size_t minimum_value_to_overwrite (128);
 
-        if (sum > minimum_value_to_overwrite * 8 * 8)
+        if ((sum / 8 * 8)  > minimum_value_to_overwrite)
         {
           const size_t array_index ((y * 8 + x) / 4);
           const size_t bit_index (((y * 8 + x) % 4) * 2);
