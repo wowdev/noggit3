@@ -38,7 +38,7 @@ private:
   bool _tilemode;
   UICursorSwitcher* CursorSwitcher;
   UIHelp* _help;
-  //UIAlphamap* _test;
+  UIDoodadSpawner* _test;
 
 
 public:

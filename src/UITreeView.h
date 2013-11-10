@@ -27,14 +27,14 @@ private:
   Directory::Ptr mMyDir;
   UITreeViewButton * mMyButton;
   UIText * mMyText;
-  const std::string& _directoryName;
+  const std::string _directoryName;
 
-  void (*mSelectFunction)( const std::string& );
+  boost::function<void(const std::string&)> mSelectFunction;
 
   bool mExpanded;
 
 public:
-  UITreeView( float pX, float pY, const std::string& directoryName, Directory::Ptr pDirectory, UITreeView::Ptr pParent, void (*pSelectFunction)( const std::string& ) );
+  UITreeView( float pX, float pY, const std::string& directoryName, Directory::Ptr pDirectory, UITreeView::Ptr pParent, boost::function<void(const std::string&)> pSelectFunction);
 
   void Expand();
   void Minimize();

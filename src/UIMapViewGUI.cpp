@@ -104,10 +104,10 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   guiWaterTypeSelector->hide();
   guiWaterTypeSelector->movable(true);
   addChild(guiWaterTypeSelector);
-  //_test = new UIAlphamap(100.0f, 100.0f);
-  //_test->setModel(ModelManager::add("world\\azeroth\\elwynn\\passivedoodads\\tree\\elwynnlog02.m2"));
-  //_test->show();
-  //addChild( _test );
+
+//  _test = new UIDoodadSpawner();
+//  _test->show();
+//  addChild( _test );
 }
 
 void UIMapViewGUI::showCursorSwitcher()

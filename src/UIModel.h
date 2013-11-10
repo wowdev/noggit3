@@ -1,6 +1,8 @@
 #ifndef MODELUI_H
 #define MODELUI_H
 
+#include <string>
+
 #include "UIFrame.h"
 
 class Model;
@@ -11,7 +13,7 @@ public:
   UIModel( float x, float y, float width, float height );
 
   void render() const;
-  void setModel( Model* setModel );
+  void setModel(const std::string &name);
 
 private:
   Model* model;
