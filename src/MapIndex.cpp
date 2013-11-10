@@ -11,6 +11,7 @@ MapIndex::MapIndex(const std::string &pBasename)
   : mHasAGlobalWMO(false)
   , mBigAlpha(false)
   , noadt(false)
+  , changed(false)
   , cx(-1)
   , cz(-1)
   , basename(pBasename)
@@ -19,34 +20,32 @@ MapIndex::MapIndex(const std::string &pBasename)
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
 
   MPQFile theFile(filename.str());
+
   uint32_t fourcc;
-  //uint32_t size;
+  uint32_t size;
 
   // - MVER ----------------------------------------------
 
   uint32_t version;
 
-  theFile.read( &fourcc, 4 );
-  theFile.seekRelative( 4 );
-  theFile.read( &version, 4 );
+  theFile.read(&fourcc, 4);
+  theFile.read(&size, 4);
+  theFile.read(&version, 4);
 
   //! \todo find the correct version of WDT files.
   assert( fourcc == 'MVER' && version == 18 );
 
   // - MHDR ----------------------------------------------
 
-  uint32_t flags;
-
-  theFile.read( &fourcc, 4 );
-  theFile.seekRelative( 4 );
+  theFile.read(&fourcc, 4);
+  theFile.read(&size, 4);
 
   assert( fourcc == 'MPHD' );
 
-  theFile.read( &flags, 4 );
-  theFile.seekRelative( 4 * 7 );
+  theFile.read(&mphd, sizeof(MPHD));
 
-  mHasAGlobalWMO = flags & 1;
-  mBigAlpha = flags & 4;
+  mHasAGlobalWMO = mphd.flags & 1;
+  mBigAlpha = mphd.flags & 4;
 
   // - MAIN ----------------------------------------------
 
@@ -62,61 +61,49 @@ MapIndex::MapIndex(const std::string &pBasename)
   {
     for( int i = 0; i < 64; ++i )
     {
-      theFile.read( &mTiles[j][i].flags, 4 );
+      theFile.read(&mTiles[j][i].flags, 4);
       theFile.seekRelative( 4 );
+
+      std::stringstream filename;
+      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
+
       mTiles[j][i].tile = NULL;
-      std::stringstream ADTfilename;
-      // exist file on disc?
-      ADTfilename << Project::getInstance()->getPath() << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
+      mTiles[j][i].onDisc = MPQFile::existsOnDisk(filename.str());
 
-      std::ifstream myFile(ADTfilename.str().c_str());
-
-      if(myFile)
+      if(mTiles[j][i].onDisc && !(mTiles[j][i].flags & 1))
       {
-        mTiles[j][i].onDisc = true;
-        myFile.close();
+        mTiles[j][i].flags |= 1;
+        changed = true;
       }
-      else mTiles[j][i].onDisc = false;
-
-      //LogDebug << "Look at : " << ADTfilename.str() << " is on disc:" << mTiles[j][i].onDisc << std::endl;
-
     }
   }
 
-  if( !theFile.isEof() )
+  if(!theFile.isEof() && mHasAGlobalWMO)
   {
     //! \note We actually don't load WMO only worlds, so we just stop reading here, k?
     //! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
+    //! \nofuckingbug  on eof read returns just without doing sth to the var and some wdts have a MWMO without having a MODF so only checking for eof above is not enough
 
     mHasAGlobalWMO = false;
 
-#ifdef __ASSERTIONBUGFIXED
-
     // - MWMO ----------------------------------------------
 
-    theFile.read( &fourcc, 4 );
-    theFile.read( &size, 4 );
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
 
-    assert( fourcc == 'MWMO' );
+    assert(fourcc == 'MWMO');
 
-    char * wmoFilenameBuf = new char[size];
-    theFile.read( &wmoFilenameBuf, size );
-
-    mWmoFilename = wmoFilenameBuf;
-
-    free(wmoFilenameBuf);
+    globalWMOName = std::string(theFile.getPointer(), size);
+    theFile.seekRelative(size);
 
     // - MODF ----------------------------------------------
 
-    theFile.read( &fourcc, 4 );
-    theFile.seekRelative( 4 );
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
 
     assert( fourcc == 'MODF' );
 
-    theFile.read( &mWmoEntry, sizeof( ENTRY_MODF ) );
-
-#endif //__ASSERTIONBUGFIXED
-
+    theFile.read(&wmoEntry, sizeof(ENTRY_MODF));
   }
 
   // -----------------------------------------------------
@@ -137,6 +124,85 @@ MapIndex::~MapIndex()
       }
     }
   }
+}
+
+void MapIndex::save()
+{
+  std::stringstream filename;
+  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
+
+  Log << "Saving WDT \"" << filename << "\"." << std::endl;
+
+  sExtendableArray wdtFile = sExtendableArray();
+  int curPos = 0;
+
+  // MVER
+  //  {
+  wdtFile.Extend(8 + 0x4);
+  SetChunkHeader(wdtFile, curPos, 'MVER', 4);
+
+  // MVER data
+  *( wdtFile.GetPointer<int>( 8 ) ) = 18;
+
+  curPos += 8 + 0x4;
+  //  }
+
+  // MPHD
+  //  {
+  wdtFile.Extend(8);
+  SetChunkHeader(wdtFile, curPos, 'MPHD', sizeof(MPHD));
+  curPos += 8;
+
+  wdtFile.Insert(curPos, sizeof(MPHD), (char*)&mphd);
+  curPos += sizeof(MPHD);
+  //  }
+
+  // MAIN
+  //  {
+  wdtFile.Extend(8);
+  SetChunkHeader(wdtFile, curPos, 'MAIN', 64*64*8);
+  curPos += 8;
+
+  for( int j = 0; j < 64; ++j )
+  {
+    for( int i = 0; i < 64; ++i )
+    {
+      wdtFile.Insert(curPos, 4, (char*)&mTiles[j][i].flags);
+      wdtFile.Extend(4);
+      curPos += 8;
+    }
+  }
+  //  }
+
+  if(mHasAGlobalWMO)
+  {
+    // MWMO
+    //  {
+    wdtFile.Extend(8);
+    SetChunkHeader(wdtFile, curPos, 'MWMO', globalWMOName.size());
+    curPos += 8;
+
+    wdtFile.Insert(curPos, globalWMOName.size(), globalWMOName.data());
+    curPos += globalWMOName.size();
+    //  }
+
+    // MODF
+    //  {
+    wdtFile.Extend(8);
+    SetChunkHeader(wdtFile, curPos, 'MODF', sizeof(ENTRY_MODF));
+    curPos += 8;
+
+    wdtFile.Insert(curPos, sizeof(ENTRY_MODF), (char*)&wmoEntry);
+    curPos += sizeof(ENTRY_MODF);
+    //  }
+  }
+
+  MPQFile f(filename.str());
+  f.setBuffer(wdtFile.GetPointer<char>(), wdtFile.mSize);
+  f.SaveFile();
+  f.close();
+
+  changed = false;
 }
 
 void MapIndex::enterTile( int x, int z )
@@ -195,7 +261,7 @@ void MapIndex::setChanged(int x, int z)
         continue;
 
       if(!mTiles[x+posaddx][z+posaddz].tile)
-       loadTile(x+posaddx, z+posaddz);
+        loadTile(x+posaddx, z+posaddz);
 
       if(mTiles[x+posaddx][z+posaddz].tile->changed == 1)
         continue;
@@ -333,6 +399,9 @@ void MapIndex::saveChanged()
   //      }
   //    }
   //  }
+
+  if(changed)
+    save();
 
   // Now save all marked as 1 and 2 because UIDs now fits.
   for( int j = 0; j < 64; ++j )
