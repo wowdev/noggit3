@@ -524,11 +524,11 @@ void MapTile::clearAllModels()
   std::map<int, ModelInstance> lModelInstances;
 
   for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
-    if(it->second.isInside(lTileExtents))
+    if(it->second.isInsideTile(lTileExtents))
       gWorld->deleteWMOInstance( it->second.mUniqueID );
 
   for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
-    if(it->second.isInside(lTileExtents))
+    if(it->second.isInsideTile(lTileExtents))
       gWorld->deleteModelInstance( it->second.d1 );
 
 }
@@ -587,7 +587,7 @@ void MapTile::saveTile()
 
   for( std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it )
   {
-    if(!it->second.isInside(lTileExtents)) continue;
+    if(!it->second.isInsideTile(lTileExtents)) continue;
 
     if(!it->second.hasUIDLock())
     {
@@ -601,7 +601,7 @@ void MapTile::saveTile()
 
   for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
   {
-    if(!it->second.isInside(lTileExtents)) continue;
+    if(!it->second.isInsideTile(lTileExtents)) continue;
 
     if(!it->second.hasUIDLock())
     {
