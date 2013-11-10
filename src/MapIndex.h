@@ -6,6 +6,8 @@
 #include <sstream>
 #include <fstream>
 
+#include "MapHeaders.h"
+
 class MapTile;
 
 /*!
@@ -53,16 +55,20 @@ public:
   bool hasAdt();
   void setAdt(bool value);
 
+  void save();
+
   MapTile* getTile(size_t z, size_t x);
   uint32_t getFlag(size_t z, size_t x);
 
 private:
   const std::string basename;
+  std::string globalWMOName;
 
   // Is the WDT telling us to use a different alphamap structure.
   bool mBigAlpha;
   bool mHasAGlobalWMO;
   bool noadt;
+  bool changed;
 
   bool autoheight;
 
@@ -72,6 +78,8 @@ private:
   // Holding all MapTiles there can be in a World.
   MapTileEntry mTiles[64][64];
 
+  ENTRY_MODF wmoEntry;
+  MPHD mphd;
 };
 
 #endif //MAPINDEX_H
