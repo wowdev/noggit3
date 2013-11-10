@@ -311,11 +311,51 @@ bool ModelInstance::hasUIDLock()
 
 bool ModelInstance::isInside(Vec3D lTileExtents[2])
 {
-  Vec3D lModelExtentsV1[2], lModelExtentsV2[2];
-  lModelExtentsV1[0] = pos + model->header.BoundingBoxMin;
-  lModelExtentsV1[1] = pos + model->header.BoundingBoxMax;
-  lModelExtentsV2[0] = pos + model->header.VertexBoxMin;
-  lModelExtentsV2[1] = pos + model->header.VertexBoxMax;
+  Vec3D min(100000, 100000, 100000);
+  Vec3D max(-100000, -100000, -100000);
+  Matrix rot(Matrix::newTranslation(pos)
+             * Matrix::newRotate((dir.y - 90.0f) * PI/180.0f, Vec3D(0, 1, 0))
+             * Matrix::newRotate(dir.x * -1.0f * PI/180.0f, Vec3D(0, 0, 1))
+             * Matrix::newRotate(dir.z * PI/180.0f, Vec3D(1, 0, 0))
+             );
 
-  return (checkInside(lTileExtents, lModelExtentsV1) || checkInside(lTileExtents, lModelExtentsV2));
+  Vec3D *bounds = new Vec3D[8*2];
+  Vec3D *ptr = bounds;
+
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z);
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z);
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z);
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z);
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z);
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z);
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z);
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z);
+
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z);
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z);
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z);
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z);
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z);
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z);
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z);
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z);
+
+
+  for (int i = 0; i < 8*2; ++i)
+  {
+    if(bounds[i].x < min.x) min.x = bounds[i].x;
+    if(bounds[i].y < min.y) min.y = bounds[i].y;
+    if(bounds[i].z < min.z) min.z = bounds[i].z;
+
+    if(bounds[i].x > max.x) max.x = bounds[i].x;
+    if(bounds[i].y > max.y) max.y = bounds[i].y;
+    if(bounds[i].z > max.z) max.z = bounds[i].z;
+  }
+
+  Vec3D extents[2];
+
+  extents[0] = min;
+  extents[1] = max;
+
+  return checkInside(lTileExtents, extents);
 }
