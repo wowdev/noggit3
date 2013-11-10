@@ -202,4 +202,11 @@ struct MH2O_Render
   }
 };
 
+struct MPHD
+{
+  uint32_t flags;
+  uint32_t something;
+  uint32_t unused[6];
+};
+
 #endif

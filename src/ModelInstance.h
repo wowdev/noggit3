@@ -43,7 +43,7 @@ public:
   void lockUID();
   void unlockUID();
 
-  bool isInside(Vec3D lTileExtents[2]);
+  bool isInsideTile(Vec3D lTileExtents[2]);
 
 private:
   bool uidLock;
