@@ -1,6 +1,7 @@
 #include "UIDoodadSpawner.h"
 
 #include <boost/filesystem.hpp>
+#include <boost/bind.hpp>
 
 #include "MapChunk.h"
 #include "ModelManager.h" // ModelManager
@@ -15,8 +16,8 @@
 
 //! \todo Add TreeView. Add ScrollBar. Add ModelPreview
 
-static const float winWidth( 500.0f );
-static const float winHeight( 100.0f );
+static const float winWidth(1000.0f);
+static const float winHeight(500.0f);
 
 static UIDoodadSpawner* global_doodadSpawner_evil( NULL );
 
@@ -39,15 +40,17 @@ void AddM2Click( UIFrame* f, int i )
 extern std::list<std::string> gListfile;
 
 UIDoodadSpawner::UIDoodadSpawner( )
-: UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Test", true )
-, _button( new UIButton( 145.0f, winHeight - 24.0f, 132.0f, 28.0f, "Test", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", AddM2Click, 0 ) )
-, _tbox( new UITextBox( 30.0f, 30.0f, 400.0f, 40.0f, UIDoodadSpawner__TextBoxEnter ) )
-, _treeView( UITreeView::Ptr() )
+  : UICloseWindow( video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Test", true )
+  , _button( new UIButton( 145.0f, winHeight - 24.0f, 132.0f, 28.0f, "Test", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", AddM2Click, 0 ) )
+  , _tbox( new UITextBox(30.0f, 30.0f, 400.0f, 40.0f, UIDoodadSpawner__TextBoxEnter ) )
+  , _treeView( UITreeView::Ptr() )
+  , modelView(new UIModel(500.0f, 30.0f, 400.0f, 400.0f))
 {
   global_doodadSpawner_evil = this;
+  addChild(modelView);
 
-  addChild( _button );
-  addChild( _tbox );
+  //  addChild( _button );
+  //  addChild( _tbox );
 
   Directory::Ptr fileList( new Directory() );
 
@@ -64,13 +67,15 @@ UIDoodadSpawner::UIDoodadSpawner( )
     }
   }
 
-  _treeView = UITreeView::Ptr( new UITreeView( 30.0f, 80.0f, "Models", fileList, UITreeView::Ptr(), UIDoodadSpawner__TreeSelect ) );
+  _treeView = UITreeView::Ptr(new UITreeView( 30.0f, 80.0f, "Models", fileList, UITreeView::Ptr(), boost::bind(&UIModel::setModel, modelView, _1)));
   addChild( _treeView.get() );
 }
 
 void UIDoodadSpawner::AddM2( const std::string& filename )
 {
   Vec3D selectionPosition;
+  if(!gWorld->GetCurrentSelection())
+    return;
 
   switch( gWorld->GetCurrentSelection()->type )
   {
@@ -98,4 +103,4 @@ void UIDoodadSpawner::AddM2( const std::string& filename )
       gWorld->addWMO( WMOManager::add( filename ), selectionPosition,false );
     }
   }
- }
+}

@@ -272,6 +272,8 @@ void Model::initCommon(const MPQFile& f)
     {
       //! \note special texture - only on characters and such... Noggit should not even render these.
       //! \todo Check if this is actually correct. Or just remove it.
+      throw std::exception(); //this just fucks things up, dont load them for now
+
       _textures[i] = NULL;
       _specialTextures[i] = texdef[i].type;
 

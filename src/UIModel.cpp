@@ -2,6 +2,8 @@
 #include "UIModel.h"
 #include "Video.h"
 
+#include "ModelManager.h"
+
 UIModel::UIModel( float xPos, float yPos, float w, float h )
   : UIFrame(xPos, yPos, w, h)
   , model( NULL )
@@ -30,6 +32,7 @@ UIModel::UIModel( float xPos, float yPos, float w, float h )
 
 void UIModel::drawFBO() const
 {
+  glPushMatrix();
   glPushAttrib(GL_VIEWPORT_BIT);
   glViewport(0, 0, width(), height());
 
@@ -50,52 +53,63 @@ void UIModel::drawFBO() const
 
 
   glPushMatrix();
-    glTranslatef(0.0f, 0.0f, -50.0f);
+  glTranslatef(0.0f, 0.0f, -50.0f);
+  glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
 
-    OpenGL::Texture::enableTexture(0);
-    glEnable(GL_NORMALIZE);
+  OpenGL::Texture::enableTexture(0);
+  glEnable(GL_NORMALIZE);
 
-    model->draw();
+  model->draw();
   glPopMatrix();
 
   glPopAttrib();
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glPopMatrix();
 }
 
 void UIModel::drawTexture() const
 {
+  glPushMatrix();
   video.set2D();
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslatef(x(), y(), 0.0f);
 
   OpenGL::Texture::enableTexture(0);
   glBindTexture(GL_TEXTURE_2D, modelTexture);
 
   glBegin(GL_QUADS);
     glTexCoord2f(0.0f, 0.0f);
-    glVertex2f(x(), y());
+    glVertex2f(0.0f, 0.0f);
     glTexCoord2f(1.0f, 0.0f);
-    glVertex2f(x() + width(), y());
+    glVertex2f(width(), 0.0f);
     glTexCoord2f(1.0f, 1.0f);
-    glVertex2f(x() + width(), y() + height());
+    glVertex2f(width(), height());
     glTexCoord2f(0.0f, 1.0f);
-    glVertex2f(x(), y() + height());
+    glVertex2f(0.0f, height());
   glEnd();
 
   CheckForGLError("UIModel::draw:: after quads");
 
   OpenGL::Texture::disableTexture(0);
+  glPopMatrix();
 }
 
 void UIModel::render() const
 {
-  UIFrame::render();
+  if(!model) return;
 
   drawFBO();
   drawTexture();
 }
 
-void UIModel::setModel( Model* _setModel )
+void UIModel::setModel(const std::string &name)
 {
-  model = _setModel;
+  if(model)
+    ModelManager::delbyname(model->_filename);
+
+  model = ModelManager::add(name);
 }
 
 //! \todo create class for framebuffers and implement this check
