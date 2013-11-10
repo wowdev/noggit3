@@ -155,20 +155,12 @@ MPQFile::MPQFile(const std::string& pFilename)
 {
   boost::mutex::scoped_lock lock(gMPQFileMutex);
 
-  if(pFilename.empty()) throw std::runtime_error("MPQFile: filename empty");
+  if(pFilename.empty())
+    throw std::runtime_error("MPQFile: filename empty");
+  if(!exists(pFilename))
+    return;
 
-  std::string filename(pFilename);
-  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
-  std::string diskpath = Project::getInstance()->getPath().append(filename);
-
-  size_t found = diskpath.find( "\\" );
-  while( found != std::string::npos )
-  {
-    diskpath.replace( found, 1, "/" );
-    found = diskpath.find( "\\" );
-  }
-
-  fname = diskpath;
+  fname = getDiskPath(pFilename);
 
   std::ifstream input( fname.c_str(), std::ios_base::binary | std::ios_base::in );
   if( input.is_open() )
@@ -187,12 +179,7 @@ MPQFile::MPQFile(const std::string& pFilename)
     return;
   }
 
-  found = filename.find( "/" );
-  while( found != std::string::npos )
-  {
-    filename.replace( found, 1, "\\" );
-    found = filename.find( "/" );
-  }
+  std::string filename(getMPQPath(pFilename));
 
   for( ArchivesMap::reverse_iterator i = _openArchives.rbegin(); i != _openArchives.rend(); ++i )
   {
@@ -217,13 +204,10 @@ MPQFile::~MPQFile()
   close();
 }
 
-bool MPQFile::exists( const std::string& filename )
+std::string MPQFile::getDiskPath(const std::string &pFilename)
 {
-  boost::mutex::scoped_lock lock(gMPQFileMutex);
-  for( ArchivesMap::iterator it = _openArchives.begin(); it != _openArchives.end(); ++it )
-    if( it->second->hasFile( filename ) )
-      return true;
-
+  std::string filename(pFilename);
+  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
   std::string diskpath = Project::getInstance()->getPath().append(filename);
 
   size_t found = diskpath.find( "\\" );
@@ -233,13 +217,42 @@ bool MPQFile::exists( const std::string& filename )
     found = diskpath.find( "\\" );
   }
 
-  FILE* fd = fopen( diskpath.c_str(), "rb" );
+  return diskpath;
+}
 
-  if( fd )
+std::string MPQFile::getMPQPath(const std::string &pFilename)
+{
+  std::string filename(pFilename);
+  std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+
+  size_t found = filename.find( "/" );
+  while( found != std::string::npos )
   {
-    fclose( fd );
-    return true;
+    filename.replace( found, 1, "\\" );
+    found = filename.find( "/" );
   }
+
+  return filename;
+}
+
+bool MPQFile::exists(const std::string& pFilename)
+{
+  return (existsOnDisk(pFilename) || existsInMPQ(pFilename));
+}
+
+bool MPQFile::existsOnDisk(const std::string &pFilename)
+{
+  std::string filename(getDiskPath(pFilename));
+  return boost::filesystem::exists(filename);
+}
+
+bool MPQFile::existsInMPQ(const std::string &pFilename)
+{
+  std::string filename(getMPQPath(pFilename));
+
+  for(ArchivesMap::reverse_iterator it = _openArchives.rbegin(); it != _openArchives.rend(); ++it)
+    if(it->second->hasFile(filename))
+      return true;
 
   return false;
 }
