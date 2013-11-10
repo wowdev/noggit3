@@ -88,9 +88,15 @@ public:
 
   void SaveFile();
 
-  static bool exists( const std::string& filename );
+  static bool exists(const std::string& pFilename);
+  static bool existsOnDisk(const std::string& pFilename);
+  static bool existsInMPQ(const std::string& pFilename);
 
   friend class MPQArchive;
+
+private:
+  static std::string getDiskPath(const std::string& pFilename);
+  static std::string getMPQPath(const std::string& pFilename);
 };
 
 #endif
