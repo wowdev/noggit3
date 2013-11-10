@@ -1322,7 +1322,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   memset (lMCNK_header->low_quality_texture_map, 0, 0x10);
 
-  for (size_t layer (0); layer < textureSet->num() - 1; ++layer)
+  for (size_t layer (0); layer < std::max((int)(textureSet->num() - 1), 0); ++layer)
   {
     for (size_t y (0); y < 8; ++y)
     {
