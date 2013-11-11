@@ -1322,6 +1322,8 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   memset (lMCNK_header->low_quality_texture_map, 0, 0x10);
 
+  static const size_t minimum_value_to_overwrite (128);
+
   for (size_t layer (0); layer < std::max((int)(textureSet->num() - 1), 0); ++layer)
   {
     for (size_t y (0); y < 8; ++y)
@@ -1335,13 +1337,10 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
           for (size_t i (0); i < 8; ++i)
           {
             sum += textureSet->getAlpha(layer, (y * 8 + x) * 64 + (j * 8 + i));
-
           }
         }
 
-        static const size_t minimum_value_to_overwrite (128);
-
-        if ((sum / 8 * 8)  > minimum_value_to_overwrite)
+        if ((sum / 8 * 8)  > (minimum_value_to_overwrite >> layer))
         {
           const size_t array_index ((y * 8 + x) / 4);
           const size_t bit_index (((y * 8 + x) % 4) * 2);
