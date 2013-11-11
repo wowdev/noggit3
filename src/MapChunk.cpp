@@ -1453,39 +1453,14 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   // search all wmos that are inside this chunk
   lID = 0;
   for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
-  {
-    //! \todo  This requires the extents already being calculated. See above.
     if(it->second.isInsideTile(lChunkExtents))
-      lObjectIDs.push_back( lID );
-
-    lID++;
-  }
+      lObjectIDs.push_back(lID++);
 
   // search all models that are inside this chunk
   lID = 0;
   for( std::map<int, ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
-  {
-    // get radius and position of the m2
-    float radius = it->second.model->header.BoundingBoxRadius;
-    Vec3D& pos = it->second.pos;
-
-    // Calculate the chunk zenter
-    Vec3D chunkMid(xbase + CHUNKSIZE / 2, 0,
-                   zbase + CHUNKSIZE / 2);
-
-    // find out if the model is inside the reach of the chunk.
-    float dx = chunkMid.x - pos.x;
-    float dz = chunkMid.z - pos.z;
-    float dist = sqrtf(dx * dx + dz * dz);
-    static float sqrt2 = sqrtf(2.0f);
-
-    if(dist - radius <= ((sqrt2 / 2.0f) * CHUNKSIZE))
-    {
-      lDoodadIDs.push_back(lID);
-    }
-
-    lID++;
-  }
+    if(it->second.isInsideTile(lChunkExtents))
+      lDoodadIDs.push_back(lID++);
 
   int lMCRF_Size = 4 * ( lDoodadIDs.size() + lObjectIDs.size() );
   lADTFile.Extend( 8 + lMCRF_Size );
