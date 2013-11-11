@@ -1324,7 +1324,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   static const size_t minimum_value_to_overwrite (128);
 
-  for (size_t layer (0); layer < std::max((int)(textureSet->num() - 1), 0); ++layer)
+  for (size_t layer (1); layer < textureSet->num(); ++layer)
   {
     for (size_t y (0); y < 8; ++y)
     {
@@ -1336,11 +1336,11 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
         {
           for (size_t i (0); i < 8; ++i)
           {
-            sum += textureSet->getAlpha(layer, (y * 8 + x) * 64 + (j * 8 + i));
+            sum += textureSet->getAlpha(layer-1, (y * 8 + j) * 64 + (x * 8 + i));
           }
         }
 
-        if ((sum / 8 * 8)  > (minimum_value_to_overwrite >> layer))
+        if (sum  > minimum_value_to_overwrite * 8 * 8)
         {
           const size_t array_index ((y * 8 + x) / 4);
           const size_t bit_index (((y * 8 + x) % 4) * 2);
@@ -1453,14 +1453,22 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   // search all wmos that are inside this chunk
   lID = 0;
   for( std::map<int,WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
+  {
     if(it->second.isInsideTile(lChunkExtents))
-      lObjectIDs.push_back(lID++);
+      lObjectIDs.push_back(lID);
+
+    lID++;
+  }
 
   // search all models that are inside this chunk
   lID = 0;
   for( std::map<int, ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
+  {
     if(it->second.isInsideTile(lChunkExtents))
-      lDoodadIDs.push_back(lID++);
+      lDoodadIDs.push_back(lID);
+
+    lID++;
+  }
 
   int lMCRF_Size = 4 * ( lDoodadIDs.size() + lObjectIDs.size() );
   lADTFile.Extend( 8 + lMCRF_Size );
