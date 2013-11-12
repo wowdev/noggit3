@@ -332,8 +332,14 @@ bool ModelInstance::isInsideTile(Vec3D lTileExtents[2])
   *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, 0, model->header.VertexBoxMin.z);
 
   for (int i = 0; i < 8; ++i)
+  {
     if(pointInside(bounds[i], lTileExtents))
+    {
+      delete bounds;
       return true;
+    }
+  }
 
+  delete bounds;
   return false;
 }

@@ -156,9 +156,15 @@ bool WMOInstance::isInsideTile(Vec3D lTileExtents[2])
 
 
   for (int i = 0; i < 4*(wmo->nGroups+1); ++i)
+  {
     if(pointInside(bounds[i], lTileExtents))
+    {
+      delete bounds;
       return true;
+    }
+  }
 
+  delete bounds;
   return false;
 }
 
