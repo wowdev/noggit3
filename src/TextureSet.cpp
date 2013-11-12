@@ -104,6 +104,17 @@ void TextureSet::switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* new
 
 void TextureSet::eraseTextures()
 {
+  for(size_t i = 0; i < nTextures; ++i)
+  {
+    TextureManager::delbyname(textures[i]->filename());
+    tex[i] = 0;
+
+    if(i < 1) continue;
+
+    delete alphamaps[i-1];
+    alphamaps[i-1] = NULL;
+  }
+
   nTextures = 0U;
 }
 
