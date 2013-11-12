@@ -136,10 +136,12 @@ bool WMOInstance::isInsideTile(Vec3D lTileExtents[2])
              * Matrix::newRotate(dir.z * PI/180.0f, Vec3D(1, 0, 0))
              );
 
-  Vec3D *bounds = new Vec3D[4*(wmo->nGroups+1)];
+  Vec3D *bounds = new Vec3D[4*(wmo->nGroups)+5];
   Vec3D *ptr = bounds;
   Vec3D wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
   Vec3D wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
+
+  *ptr++ = pos;
 
   *ptr++ = rot * Vec3D(wmoMax.x, 0, wmoMax.z);
   *ptr++ = rot * Vec3D(wmoMax.x, 0, wmoMin.z);
@@ -155,9 +157,21 @@ bool WMOInstance::isInsideTile(Vec3D lTileExtents[2])
   }
 
 
-  for (int i = 0; i < 4*(wmo->nGroups+1); ++i)
+  for (int i = 0; i < 4*(wmo->nGroups)+5; ++i)
   {
     if(pointInside(bounds[i], lTileExtents))
+    {
+      delete bounds;
+      return true;
+    }
+  }
+
+  //maybe model > chunk || tile
+  recalcExtents();
+
+  for (int i = 0; i < 2; ++i)
+  {
+    if(pointInside(lTileExtents[i], extents))
     {
       delete bounds;
       return true;

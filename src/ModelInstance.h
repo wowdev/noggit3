@@ -11,6 +11,7 @@ class ModelInstance
 {
 public:
   Model *model;
+  Vec3D extents[2];
 
   unsigned int nameID;
 
@@ -44,6 +45,8 @@ public:
   void unlockUID();
 
   bool isInsideTile(Vec3D lTileExtents[2]);
+
+  void recalcExtents();
 
 private:
   bool uidLock;
