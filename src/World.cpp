@@ -1714,7 +1714,9 @@ void World::eraseTextures(float x, float z)
   mapIndex->setChanged(x,z);
   const size_t newX = x / TILESIZE;
   const size_t newZ = z / TILESIZE;
-  Log << "Erasing Textures at " << x << " and " << z;
+
+  Log << "Erasing Textures at " << x << " and " << z << std::endl;
+
   for( size_t j = newZ - 1; j < newZ + 1; ++j )
   {
     for( size_t i = newX - 1; i < newX + 1; ++i )
@@ -1742,7 +1744,9 @@ void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* ol
   mapIndex->setChanged(x,z);
   const size_t newX = x / TILESIZE;
   const size_t newZ = z / TILESIZE;
-  Log << "Switching Textures at " << x << " and " << z;
+
+  Log << "Switching Textures at " << x << " and " << z << std::endl;
+
   for( size_t j = newZ - 1; j < newZ + 1; ++j )
   {
     for( size_t i = newX - 1; i < newX + 1; ++i )
