@@ -89,7 +89,10 @@ void SetChunkHeader(sExtendableArray pArray, int pPosition, int pMagix, int pSiz
 
 bool pointInside(Vec3D point, Vec3D extents[2])
 {
-  return point.x >= extents[0].x && point.z >= extents[0].z && point.x <= extents[1].x && point.z <= extents[1].z;
+  minmax(&extents[0], &extents[1]);
+
+  return point.x >= extents[0].x && point.z >= extents[0].z &&
+         point.x <= extents[1].x && point.z <= extents[1].z;
 }
 
 void minmax(Vec3D* a, Vec3D* b)
@@ -127,5 +130,5 @@ bool checkInside( Vec3D extentA[2], Vec3D extentB[2] )
 
 bool checkOriginInside( Vec3D extentA[2], Vec3D modelPos )
 {
-  return pointInside( extentA[0], &modelPos );
+  return pointInside(modelPos, extentA);
 }
