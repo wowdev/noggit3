@@ -323,15 +323,15 @@ bool ModelInstance::isInsideTile(Vec3D lTileExtents[2])
 
   *ptr++ = pos;
 
-  *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, 0, model->header.BoundingBoxMax.z);
-  *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, 0, model->header.BoundingBoxMax.z);
-  *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, 0, model->header.BoundingBoxMin.z);
-  *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, 0, model->header.BoundingBoxMin.z);
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, 0, -model->header.BoundingBoxMax.y);
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, 0, -model->header.BoundingBoxMax.y);
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, 0, -model->header.BoundingBoxMin.y);
+  *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, 0, -model->header.BoundingBoxMin.y);
 
-  *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, 0, model->header.VertexBoxMax.z);
-  *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, 0, model->header.VertexBoxMax.z);
-  *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, 0, model->header.VertexBoxMin.z);
-  *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, 0, model->header.VertexBoxMin.z);
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, 0, -model->header.VertexBoxMax.y);
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, 0, -model->header.VertexBoxMax.y);
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, 0, -model->header.VertexBoxMin.y);
+  *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, 0, -model->header.VertexBoxMin.y);
 
   for (int i = 0; i < 9; ++i)
   {
@@ -371,23 +371,23 @@ void ModelInstance::recalcExtents()
     Vec3D *bounds = new Vec3D[8*2];
     Vec3D *ptr = bounds;
 
-    *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z);
-    *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z);
-    *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z);
-    *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z);
-    *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z);
-    *ptr++ = rot * Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z);
-    *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z);
-    *ptr++ = rot * Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z);
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z));
 
-    *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z);
-    *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z);
-    *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z);
-    *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z);
-    *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z);
-    *ptr++ = rot * Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z);
-    *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z);
-    *ptr++ = rot * Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z);
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z));
+    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z));
 
 
     for (int i = 0; i < 8*2; ++i)
