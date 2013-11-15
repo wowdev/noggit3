@@ -37,6 +37,7 @@ public:
   void resetDirection();
 
   bool isInsideTile(Vec3D lTileExtents[2]);
+  bool isInsideChunk(Vec3D lTileExtents[2]);
 
   bool hasUIDLock();
   void lockUID();

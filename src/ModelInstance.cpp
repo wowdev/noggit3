@@ -109,7 +109,7 @@ void ModelInstance::init2(Model *m, MPQFile* f)
 
 void ModelInstance::draw()
 {
-/*  float dist = ( pos - gWorld->camera ).length() - model->rad;
+  /*  float dist = ( pos - gWorld->camera ).length() - model->rad;
 
   if( dist > 2.0f * gWorld->modeldrawdistance )
     return;
@@ -149,20 +149,20 @@ void ModelInstance::draw()
 
     glColor4fv( Vec4D( 1.0f, 0.0f, 0.0f, 1.0f ) );
     glBegin( GL_LINES );
-      glVertex3f( 0.0f, 0.0f, 0.0f );
-      glVertex3f( model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f );
+    glVertex3f( 0.0f, 0.0f, 0.0f );
+    glVertex3f( model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f );
     glEnd();
 
     glColor4fv( Vec4D( 0.0f, 1.0f, 0.0f, 1.0f ) );
     glBegin( GL_LINES );
-      glVertex3f( 0.0f, 0.0f, 0.0f );
-      glVertex3f( 0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f );
+    glVertex3f( 0.0f, 0.0f, 0.0f );
+    glVertex3f( 0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f );
     glEnd();
 
     glColor4fv( Vec4D( 0.0f, 0.0f, 1.0f, 1.0f ) );
     glBegin( GL_LINES );
-      glVertex3f( 0.0f, 0.0f, 0.0f );
-      glVertex3f( 0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f );
+    glVertex3f( 0.0f, 0.0f, 0.0f );
+    glVertex3f( 0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f );
     glEnd();
 
     glActiveTexture( GL_TEXTURE1 );
@@ -342,67 +342,70 @@ bool ModelInstance::isInsideTile(Vec3D lTileExtents[2])
     }
   }
 
+  delete bounds;
+  return false;
+}
+
+bool ModelInstance::isInsideChunk(Vec3D lTileExtents[2])
+{
+  if(isInsideTile(lTileExtents))
+    return true;
+
   //maybe model > chunk || tile
   recalcExtents();
 
   for (int i = 0; i < 2; ++i)
-  {
     if(pointInside(lTileExtents[i], extents))
-    {
-      delete bounds;
       return true;
-    }
-  }
 
-  delete bounds;
   return false;
 }
 
 void ModelInstance::recalcExtents()
 {
   Vec3D min(100000, 100000, 100000);
-    Vec3D max(-100000, -100000, -100000);
-    Matrix rot(Matrix::newTranslation(pos)
-               * Matrix::newRotate((dir.y - 90.0f) * PI/180.0f, Vec3D(0, 1, 0))
-               * Matrix::newRotate(dir.x * -1.0f * PI/180.0f, Vec3D(0, 0, 1))
-               * Matrix::newRotate(dir.z * PI/180.0f, Vec3D(1, 0, 0))
-               );
+  Vec3D max(-100000, -100000, -100000);
+  Matrix rot(Matrix::newTranslation(pos)
+             * Matrix::newRotate((dir.y - 90.0f) * PI/180.0f, Vec3D(0, 1, 0))
+             * Matrix::newRotate(dir.x * -1.0f * PI/180.0f, Vec3D(0, 0, 1))
+             * Matrix::newRotate(dir.z * PI/180.0f, Vec3D(1, 0, 0))
+             );
 
-    Vec3D *bounds = new Vec3D[8*2];
-    Vec3D *ptr = bounds;
+  Vec3D *bounds = new Vec3D[8*2];
+  Vec3D *ptr = bounds;
 
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMin.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMax.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMin.x, model->header.BoundingBoxMin.y, model->header.BoundingBoxMax.z));
 
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z));
-    *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMin.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMin.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMax.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMax.y, model->header.VertexBoxMax.z));
+  *ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.VertexBoxMin.x, model->header.VertexBoxMin.y, model->header.VertexBoxMax.z));
 
 
-    for (int i = 0; i < 8*2; ++i)
-    {
-      if(bounds[i].x < min.x) min.x = bounds[i].x;
-      if(bounds[i].y < min.y) min.y = bounds[i].y;
-      if(bounds[i].z < min.z) min.z = bounds[i].z;
+  for (int i = 0; i < 8*2; ++i)
+  {
+    if(bounds[i].x < min.x) min.x = bounds[i].x;
+    if(bounds[i].y < min.y) min.y = bounds[i].y;
+    if(bounds[i].z < min.z) min.z = bounds[i].z;
 
-      if(bounds[i].x > max.x) max.x = bounds[i].x;
-      if(bounds[i].y > max.y) max.y = bounds[i].y;
-      if(bounds[i].z > max.z) max.z = bounds[i].z;
-    }
+    if(bounds[i].x > max.x) max.x = bounds[i].x;
+    if(bounds[i].y > max.y) max.y = bounds[i].y;
+    if(bounds[i].z > max.z) max.z = bounds[i].z;
+  }
 
-    extents[0] = min;
-    extents[1] = max;
+  extents[0] = min;
+  extents[1] = max;
 
-    delete bounds;
+  delete bounds;
 }

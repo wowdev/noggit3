@@ -45,6 +45,7 @@ public:
   void unlockUID();
 
   bool isInsideTile(Vec3D lTileExtents[2]);
+  bool isInsideChunk(Vec3D lTileExtents[2]);
 
   void recalcExtents();
 
