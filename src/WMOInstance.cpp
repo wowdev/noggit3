@@ -166,19 +166,22 @@ bool WMOInstance::isInsideTile(Vec3D lTileExtents[2])
     }
   }
 
+  delete bounds;
+  return false;
+}
+
+bool WMOInstance::isInsideChunk(Vec3D lTileExtents[2])
+{
+  if(isInsideTile(lTileExtents))
+    return true;
+
   //maybe model > chunk || tile
   recalcExtents();
 
   for (int i = 0; i < 2; ++i)
-  {
     if(pointInside(lTileExtents[i], extents))
-    {
-      delete bounds;
       return true;
-    }
-  }
 
-  delete bounds;
   return false;
 }
 
