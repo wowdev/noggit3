@@ -84,6 +84,7 @@ public:
   bool drawterrain;
   bool drawwater;
   bool drawwmo;
+  bool drawwireframe;
   bool lighting;
 
   // Time of the day.
