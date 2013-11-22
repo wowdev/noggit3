@@ -937,6 +937,7 @@ void MapView::createGUI()
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F9 Map contour infos", &DrawMapContour );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "F Fog", &gWorld->drawfog );
   mbar->GetMenu( "View" )->AddMenuItemToggle( "Hole lines always on", &Settings::getInstance()->holelinesOn, false );
+  mbar->GetMenu( "View" )->AddMenuItemToggle( "Wireframe", &gWorld->drawwireframe );
 
   mbar->GetMenu( "Help" )->AddMenuItemButton( "Key Bindings", openHelp, 0 );
   mbar->GetMenu( "Help" )->AddMenuItemButton( "Manual online", openURL, 2 );

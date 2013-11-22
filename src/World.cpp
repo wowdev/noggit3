@@ -205,6 +205,7 @@ World::World( const std::string& name )
   , drawterrain( true )
   , drawwater( true )
   , drawwmo( true )
+  , drawwireframe( false )
   , lighting( true )
   , animtime( 0 )
   , time( 1450 )
@@ -930,6 +931,10 @@ void World::draw()
 
   if( drawterrain )
   {
+    if(drawwireframe)
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+
     for( int j = 0; j < 64; ++j )
     {
       for( int i = 0; i < 64; ++i )
@@ -940,6 +945,9 @@ void World::draw()
         }
       }
     }
+
+    if(drawwireframe)
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
 
   glPopMatrix();
