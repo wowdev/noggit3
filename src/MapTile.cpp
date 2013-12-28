@@ -617,12 +617,8 @@ void MapTile::saveTile()
   std::map<std::string, filenameOffsetThing> lModels;
 
   for( std::map<int,ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
-  {
     if( lModels.find( it->second.model->_filename ) == lModels.end() )
-    {
       lModels.insert( std::pair<std::string, filenameOffsetThing>( it->second.model->_filename, nullyThing ) );
-    }
-  }
 
   lID = 0;
   for( std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it )
