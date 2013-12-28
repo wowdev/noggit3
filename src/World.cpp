@@ -1904,6 +1904,8 @@ void World::saveMap()
 void World::deleteModelInstance( int pUniqueID )
 {
   std::map<int, ModelInstance>::iterator it = mModelInstances.find( pUniqueID );
+  if(it == mModelInstances.end()) return;
+  
   mapIndex->setChanged( it->second.pos.x, it->second.pos.z );
   mModelInstances.erase( it );
   ResetSelection();
@@ -1912,6 +1914,8 @@ void World::deleteModelInstance( int pUniqueID )
 void World::deleteWMOInstance( int pUniqueID )
 {
   std::map<int, WMOInstance>::iterator it = mWMOInstances.find( pUniqueID );
+  if(it == mWMOInstances.end()) return;
+  
   mapIndex->setChanged( it->second.pos.x, it->second.pos.z );
   mWMOInstances.erase( it );
   ResetSelection();

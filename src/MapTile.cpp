@@ -595,7 +595,7 @@ void MapTile::saveTile()
       it->second.lockUID();
     }
 
-    lObjectInstances.insert(std::pair<int, WMOInstance>(it->first, it->second));
+    lObjectInstances[it->second.mUniqueID] = it->second;
   }
   
 
@@ -609,7 +609,7 @@ void MapTile::saveTile()
       it->second.lockUID();
     }
 
-    lModelInstances.insert(std::pair<int, ModelInstance>(it->first, it->second));
+    lModelInstances[it->second.d1] = it->second;
   }
 
   filenameOffsetThing nullyThing = { 0, 0 };
@@ -815,6 +815,8 @@ void MapTile::saveTile()
 
   lCurrentPosition += 8 + lMDDF_Size;
   //  }
+  
+  LogDebug << "Added " << lID << " doodads to MDDF" << std::endl;
 
   // MODF
   //  {
@@ -861,6 +863,8 @@ void MapTile::saveTile()
     lMODF_Data[lID].unknown = it->second.mUnknown;
     lID++;
   }
+  
+  LogDebug << "Added " << lID << " wmos to MODF" << std::endl;
 
   lCurrentPosition += 8 + lMODF_Size;
   //  }

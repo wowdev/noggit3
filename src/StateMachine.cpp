@@ -8,7 +8,7 @@ StateMachine::StateMachine()
 
 bool StateMachine::isEnabled(int state_)
 {
-  return state & state_ == state_;
+  return (state & state_) == state_;
 }
 
 void StateMachine::enable(int state_)
