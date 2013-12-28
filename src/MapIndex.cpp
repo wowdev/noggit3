@@ -240,18 +240,24 @@ void MapIndex::setChanged(float x, float z)
   // change the changed flag of the map tile
   int row =  misc::FtoIround((x-(TILESIZE/2))/TILESIZE);
   int column =  misc::FtoIround((z-(TILESIZE/2))/TILESIZE);
+
   if( row >= 0 && row <= 64 && column >= 0 && column <= 64 )
-    if( mTiles[column][row].tile )
-      this->setChanged(column, row);
+      setChanged(column, row);
 }
 
 void MapIndex::setChanged(int x, int z)
 {
   // change the changed flag of the map tile
-  if(!mTiles[x][z].tile) return;
-  if(mTiles[x][z].tile->changed == 1) return;
+  if(hasTile(x, z))
+  {
+    if(!mTiles[x][z].tile)
+      loadTile(x, z);
 
-  mTiles[x][z].tile->changed = 1;
+    if(mTiles[x][z].tile->changed == 1)
+      return;
+
+     mTiles[x][z].tile->changed = 1;
+  }
 
   for (int posaddx = -1; posaddx < 2; posaddx++)
   {
@@ -416,11 +422,23 @@ void MapIndex::saveChanged()
     }
   }
 
-  for(std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
-    it->second.unlockUID();
+  std::map<int, WMOInstance> wmoTemp(gWorld->mWMOInstances);
+  gWorld->mWMOInstances.clear();
 
-  for( std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it )
+  for(std::map<int, WMOInstance>::iterator it = wmoTemp.begin(); it != wmoTemp.end(); ++it)
+  {
+    gWorld->mWMOInstances[it->second.mUniqueID] = it->second;
     it->second.unlockUID();
+  }
+
+  std::map<int, ModelInstance> modelTemp(gWorld->mModelInstances);
+  gWorld->mModelInstances.clear();
+
+  for( std::map<int, ModelInstance>::iterator it = modelTemp.begin(); it != modelTemp.end(); ++it )
+  {
+    gWorld->mModelInstances[it->second.d1] = it->second;
+    it->second.unlockUID();
+  }
 }
 
 bool MapIndex::hasAGlobalWMO()
