@@ -432,7 +432,7 @@ void InsertObject( UIFrame* /*button*/, int id )
   // is a source file set in config file?
 
 
-  if(id == 0 || id == 14 || id == 15 && boost::filesystem::exists( "noggit.conf" ) )
+  if((id == 0 || id == 14 || id == 15) && boost::filesystem::exists("noggit.conf"))
   {
     ConfigFile config( "noggit.conf" );
     config.readInto( importFile, "ImportFile" );
