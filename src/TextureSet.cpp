@@ -254,7 +254,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     zdiff= zbase - z + CHUNKSIZE/2;
     dist= sqrt( xdiff*xdiff + zdiff*zdiff );
 
-    if( dist > (radius+MAPCHUNK_DIAMETER) )
+    if( dist > (radius+MAPCHUNK_RADIUS) )
       return false;
 
     //First Lets find out do we have the texture already
