@@ -49,18 +49,21 @@ void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth )
 
 ModelInstance::ModelInstance()
   : uidLock(false)
+  , nameID(0xFFFFFFFF)
 {
 }
 
 ModelInstance::ModelInstance(Model *m)
   : model (m)
   , uidLock(false)
+  , nameID(0xFFFFFFFF)
 {
 }
 
 ModelInstance::ModelInstance(Model *m, MPQFile* f)
   : model (m)
   , uidLock(false)
+  , nameID(0xFFFFFFFF)
 {
   float ff[3];
 
@@ -73,19 +76,18 @@ ModelInstance::ModelInstance(Model *m, MPQFile* f)
   f->read( &scale, 2 );
   // scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
   sc = scale / 1024.0f;
-  nameID=0xFFFFFFFF;
 }
 
 ModelInstance::ModelInstance(Model *m, ENTRY_MDDF *d)
   : model (m)
   , uidLock(false)
+  , nameID(0xFFFFFFFF)
 {
   d1 = d->uniqueID;
   pos = Vec3D(d->pos[0],d->pos[1],d->pos[2]);
   dir = Vec3D(d->rot[0],d->rot[1],d->rot[2]);
   // scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
   sc = d->scale / 1024.0f;
-  nameID=0xFFFFFFFF;
 }
 
 void ModelInstance::init2(Model *m, MPQFile* f)
