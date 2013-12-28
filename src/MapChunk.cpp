@@ -179,10 +179,9 @@ void CreateStrips()
 
 MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
   : textureSet(new TextureSet)
+  , mt(maintile)
+  , mBigAlpha(bigAlpha)
 {
-  mt=maintile;
-  mBigAlpha=bigAlpha;
-
   uint32_t fourcc;
   uint32_t size;
 
@@ -335,8 +334,6 @@ MapChunk::MapChunk(MapTile* maintile, MPQFile* f,bool bigAlpha)
   glBufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
   initStrip();
-
-  this->mt = mt;
 
   vcenter = (vmin + vmax) * 0.5f;
 

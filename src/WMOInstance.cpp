@@ -6,7 +6,16 @@
 #include "World.h" // gWorld
 #include "Misc.h" // checkinside
 
-WMOInstance::WMOInstance( WMO* _wmo, MPQFile* _file ) : wmo( _wmo ), mSelectionID( SelectionNames.add( this ) )
+WMOInstance::WMOInstance()
+  : mSelectionID( SelectionNames.add( this ) )
+  , uidLock(false)
+{
+}
+
+WMOInstance::WMOInstance( WMO* _wmo, MPQFile* _file )
+  : wmo( _wmo )
+  , mSelectionID( SelectionNames.add( this ) )
+  , uidLock(false)
 {
   _file->read( &mUniqueID, 4 );
   _file->read( &pos, 12 );
@@ -19,16 +28,38 @@ WMOInstance::WMOInstance( WMO* _wmo, MPQFile* _file ) : wmo( _wmo ), mSelectionI
   _file->read( &mUnknown, 2 );
 }
 
-WMOInstance::WMOInstance( WMO* _wmo, ENTRY_MODF* d ) : wmo( _wmo ), pos( Vec3D( d->pos[0], d->pos[1], d->pos[2] ) ), dir( Vec3D( d->rot[0], d->rot[1], d->rot[2] ) ), mUniqueID( d->uniqueID ), mFlags( d->flags ), mUnknown( d->unknown ), mNameset( d->nameSet ), doodadset( d->doodadSet ), mSelectionID( SelectionNames.add( this ) )
+WMOInstance::WMOInstance( WMO* _wmo, ENTRY_MODF* d )
+  : wmo( _wmo )
+  , pos( Vec3D( d->pos[0], d->pos[1], d->pos[2] ) )
+  , dir( Vec3D( d->rot[0], d->rot[1], d->rot[2] ) )
+  , mUniqueID( d->uniqueID ), mFlags( d->flags )
+  , mUnknown( d->unknown ), mNameset( d->nameSet )
+  , doodadset( d->doodadSet )
+  , mSelectionID( SelectionNames.add( this ) )
+  , uidLock(false)
 {
   extents[0] = Vec3D( d->extents[0][0], d->extents[0][1], d->extents[0][2] );
   extents[1] = Vec3D( d->extents[1][0], d->extents[1][1], d->extents[1][2] );
 }
 
-WMOInstance::WMOInstance( WMO* _wmo ) : wmo( _wmo ), pos( Vec3D( 0.0f, 0.0f, 0.0f ) ), dir( Vec3D( 0.0f, 0.0f, 0.0f ) ), mUniqueID( 0 ), mFlags( 0 ), mUnknown( 0 ), mNameset( 0 ), doodadset( 0 ), mSelectionID( SelectionNames.add( this ) )
+WMOInstance::WMOInstance( WMO* _wmo )
+  : wmo( _wmo )
+  , pos( Vec3D( 0.0f, 0.0f, 0.0f ) )
+  , dir( Vec3D( 0.0f, 0.0f, 0.0f ) )
+  , mUniqueID( 0 )
+  , mFlags( 0 )
+  , mUnknown( 0 )
+  , mNameset( 0 )
+  , doodadset( 0 )
+  , mSelectionID( SelectionNames.add( this ) )
+  , uidLock(false)
 {
 }
 
+WMOInstance::~WMOInstance()
+{
+  SelectionNames.del( mSelectionID );
+}
 
 void DrawABox( Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth );
 
@@ -229,10 +260,7 @@ void WMOInstance::resetDirection()
   dir = Vec3D( 0.0f, dir.y, 0.0f );
 }
 
-WMOInstance::~WMOInstance()
-{
-  SelectionNames.del( mSelectionID );
-}
+
 
 void WMOInstance::lockUID()
 {
