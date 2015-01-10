@@ -6,6 +6,8 @@
 #include "UITexture.h"
 #include "UITexturingGUI.h"
 
+#include <cassert>
+
 void texturePickerClick( UIFrame* f,int id )
 {
   // redirect to sender object.
