@@ -10,15 +10,15 @@
 class UIDoodadSpawner : public UICloseWindow
 {
 private:
-  UITextBox::Ptr _tbox;
-  UIButton::Ptr _button;
-  UITreeView::Ptr _treeView;
-  UIModel *modelView;
+	UITextBox::Ptr _tbox;
+	UIButton::Ptr _button;
+	UITreeView::Ptr _treeView;
+	UIModel *modelView;
 
 public:
-  UIDoodadSpawner();
+	UIDoodadSpawner();
 
-  void AddM2( const std::string& filename );
+	void AddM2(const std::string& filename);
 };
 
 #endif

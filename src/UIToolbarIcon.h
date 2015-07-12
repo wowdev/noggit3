@@ -11,23 +11,23 @@ namespace OpenGL { class Texture; };
 class UIToolbarIcon : public UIFrame, public UIEventSender
 {
 public:
-  UIEventEventHandlerDefinition(int);
+	UIEventEventHandlerDefinition(int);
 protected:
-  OpenGL::Texture* texture;
-  OpenGL::Texture* textureSelected;
+	OpenGL::Texture* texture;
+	OpenGL::Texture* textureSelected;
 
-  std::string _textureFilename;
-  std::string _textureSelectedFilename;
+	std::string _textureFilename;
+	std::string _textureSelectedFilename;
 
-  int iconId;
+	int iconId;
 
 public:
-  UIToolbarIcon( float x, float y, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments );
-  ~UIToolbarIcon();
+	UIToolbarIcon(float x, float y, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments);
+	~UIToolbarIcon();
 
-  void render() const;
-  UIFrame *processLeftClick(float mx,float my);
+	void render() const;
+	UIFrame *processLeftClick(float mx, float my);
 
-  bool selected;
+	bool selected;
 };
 #endif

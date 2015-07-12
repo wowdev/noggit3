@@ -9,13 +9,13 @@ class UITexture;
 class UITexturePicker : public UICloseWindow
 {
 public:
-  UITexturePicker( float x, float y, float w, float h );
+	UITexturePicker(float x, float y, float w, float h);
 
-  void getTextures( nameEntry* lSelection );
-  void setTexture( size_t id );
+	void getTextures(nameEntry* lSelection);
+	void setTexture(size_t id);
 
 private:
-  UITexture* _textures[4];
+	UITexture* _textures[4];
 };
 
 #endif

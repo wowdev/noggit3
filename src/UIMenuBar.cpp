@@ -10,295 +10,295 @@
 #include "Video.h"
 
 UIMenuBar::UIMenuBar()
-: UIWindow( 0.0f, 0.0f, static_cast<float>( video.xres() ), static_cast<float>( video.yres() ) )
-, mNumMenus( 0 )
+	: UIWindow(0.0f, 0.0f, static_cast<float>(video.xres()), static_cast<float>(video.yres()))
+	, mNumMenus(0)
 {
 }
 
 void UIMenuBar::render() const
 {
-  glColor4f( 0.2f, 0.2f, 0.2f, 0.5f );
-  glBegin( GL_TRIANGLE_STRIP );
-  glVertex2f( 0.0f, 0.0f );
-  glVertex2f( static_cast<float>( video.xres() ), 0.0f );
-  glVertex2f( 0.0f, 30.0f );
-  glVertex2f( static_cast<float>( video.xres() ), 30.0f );
-  glEnd();
+	glColor4f(0.2f, 0.2f, 0.2f, 0.5f);
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex2f(0.0f, 0.0f);
+	glVertex2f(static_cast<float>(video.xres()), 0.0f);
+	glVertex2f(0.0f, 30.0f);
+	glVertex2f(static_cast<float>(video.xres()), 30.0f);
+	glEnd();
 
-  UIFrame::render();
+	UIFrame::render();
 
-  glColor3f( 1.0f, 1.0f, 1.0f );
+	glColor3f(1.0f, 1.0f, 1.0f);
 
-  OpenGL::Texture::setActiveTexture();
-  OpenGL::Texture::enableTexture();
+	OpenGL::Texture::setActiveTexture();
+	OpenGL::Texture::enableTexture();
 
-  texture->bind();
+	texture->bind();
 
-  //Draw Top Side
-  glBegin( GL_TRIANGLE_STRIP );
-    glTexCoord2f( 0.5f, 1.0f );
-    glVertex2f( 0.0f, 33.0f );
-    glTexCoord2f( 0.5f, 0.0f );
-    glVertex2f( static_cast<float>( video.xres() ), 33.0f );
-    glTexCoord2f( 0.375f, 1.0f );
-    glVertex2f( 0.0f, 17.0f );
-    glTexCoord2f( 0.375f, 0.0f );
-    glVertex2f( static_cast<float>(video.xres() ), 17.0f );
-  glEnd();
+	//Draw Top Side
+	glBegin(GL_TRIANGLE_STRIP);
+	glTexCoord2f(0.5f, 1.0f);
+	glVertex2f(0.0f, 33.0f);
+	glTexCoord2f(0.5f, 0.0f);
+	glVertex2f(static_cast<float>(video.xres()), 33.0f);
+	glTexCoord2f(0.375f, 1.0f);
+	glVertex2f(0.0f, 17.0f);
+	glTexCoord2f(0.375f, 0.0f);
+	glVertex2f(static_cast<float>(video.xres()), 17.0f);
+	glEnd();
 
-  OpenGL::Texture::disableTexture();
+	OpenGL::Texture::disableTexture();
 }
 
 void UIMenuBar::resize()
 {
-  width( static_cast<float>( video.xres() ) );
+	width(static_cast<float>(video.xres()));
 }
 
 void UIMenuBar::CloseAll()
 {
-  if( !Environment::getInstance()->CtrlDown )
-  {
-    for( MenuPanes::iterator it( mMenuPanes.begin() ), end( mMenuPanes.end() )
-       ; it != end; ++it )
-    {
-      it->second->hide();
-    }
-  }
+	if (!Environment::getInstance()->CtrlDown)
+	{
+		for (MenuPanes::iterator it(mMenuPanes.begin()), end(mMenuPanes.end())
+			; it != end; ++it)
+		{
+			it->second->hide();
+		}
+	}
 }
 
-void UIMenuBar::AddMenu( const std::string& pName )
+void UIMenuBar::AddMenu(const std::string& pName)
 {
-  mMenuPanes[pName] = new MenuPane( 1.0f + mNumMenus * 101.0f, 33.0f );
+	mMenuPanes[pName] = new MenuPane(1.0f + mNumMenus * 101.0f, 33.0f);
 
-  addChild( mMenuPanes[pName] );
-  addChild( new MenuButton( mMenuPanes[pName], 3.0f + mNumMenus * 100.0f, 5.0f, pName ) );
+	addChild(mMenuPanes[pName]);
+	addChild(new MenuButton(mMenuPanes[pName], 3.0f + mNumMenus * 100.0f, 5.0f, pName));
 
-  mNumMenus++;
+	mNumMenus++;
 }
 
-MenuPane::Ptr UIMenuBar::GetMenu( const std::string& pName )
+MenuPane::Ptr UIMenuBar::GetMenu(const std::string& pName)
 {
-  return mMenuPanes[pName];
+	return mMenuPanes[pName];
 }
 
-UIFrame::Ptr UIMenuBar::processLeftClick(float mx,float my)
+UIFrame::Ptr UIMenuBar::processLeftClick(float mx, float my)
 {
-  UIFrame::Ptr tmp( UIFrame::processLeftClick( mx, my ) );
-  if( tmp )
-  {
-    return tmp;
-  }
+	UIFrame::Ptr tmp(UIFrame::processLeftClick(mx, my));
+	if (tmp)
+	{
+		return tmp;
+	}
 
-  CloseAll();
-  return NULL;
+	CloseAll();
+	return NULL;
 }
 
-MenuButton::MenuButton( MenuPane::Ptr pPane, float pX, float pY, const std::string& pText )
-: UIButton( pX, pY, 95.0f, 27.0f, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
-, mPane( pPane )
+MenuButton::MenuButton(MenuPane::Ptr pPane, float pX, float pY, const std::string& pText)
+	: UIButton(pX, pY, 95.0f, 27.0f, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp")
+	, mPane(pPane)
 {
-  setText( pText );
+	setText(pText);
 }
 
-UIFrame* MenuButton::processLeftClick( float /*pX*/, float /*pY*/ )
+UIFrame* MenuButton::processLeftClick(float /*pX*/, float /*pY*/)
 {
-  clicked = true;
-  mPane->Open();
+	clicked = true;
+	mPane->Open();
 
-  return this;
+	return this;
 }
 
-MenuItem::MenuItem( MenuPane::Ptr pParent, float pX, float pY, float pHeight, const std::string& pText, const std::string& pNormal, const std::string& pDown )
-: UIButton( pX, pY, pHeight, pText, pNormal, pDown )
-, mParent( pParent )
+MenuItem::MenuItem(MenuPane::Ptr pParent, float pX, float pY, float pHeight, const std::string& pText, const std::string& pNormal, const std::string& pDown)
+	: UIButton(pX, pY, pHeight, pText, pNormal, pDown)
+	, mParent(pParent)
 {
-  setLeft();
+	setLeft();
 }
 
-MenuItemButton::MenuItemButton( MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, void ( *pClickFunc )( UIFrame::Ptr, int ), int pClickFuncID )
-: MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
+MenuItemButton::MenuItemButton(MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, void(*pClickFunc)(UIFrame::Ptr, int), int pClickFuncID)
+	: MenuItem(pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp")
 {
-  setClickFunc( pClickFunc, pClickFuncID );
+	setClickFunc(pClickFunc, pClickFuncID);
 }
 
-UIFrame* MenuItemButton::processLeftClick( float /*pX*/, float /*pY*/ )
+UIFrame* MenuItemButton::processLeftClick(float /*pX*/, float /*pY*/)
 {
-  clicked = true;
-  if( clickFunc )
-    clickFunc( this, id );
+	clicked = true;
+	if (clickFunc)
+		clickFunc(this, id);
 
-  if(!Environment::getInstance()->CtrlDown)
-    mParent->Close();
+	if (!Environment::getInstance()->CtrlDown)
+		mParent->Close();
 
-  return this;
+	return this;
 }
 
-MenuItemToggle::MenuItemToggle( MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert )
-: MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
-, mMyCheckbox( new UICheckBox( 147.0f, -1.0f, "" ) )
-, mMyState( pMyState )
-, mInvert( pInvert )
+MenuItemToggle::MenuItemToggle(MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert)
+	: MenuItem(pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp")
+	, mMyCheckbox(new UICheckBox(147.0f, -1.0f, ""))
+	, mMyState(pMyState)
+	, mInvert(pInvert)
 {
-  setText( pText );
-  setLeft();
+	setText(pText);
+	setLeft();
 
-  addChild( mMyCheckbox );
+	addChild(mMyCheckbox);
 
-  mMyCheckbox->setState( *mMyState );
+	mMyCheckbox->setState(*mMyState);
 }
 
-UIFrame* MenuItemToggle::processLeftClick( float /*pX*/, float /*pY*/ )
+UIFrame* MenuItemToggle::processLeftClick(float /*pX*/, float /*pY*/)
 {
-  clicked = true;
-  *mMyState = !( *mMyState );
-  if( mInvert )
-    mMyCheckbox->setState( !( *mMyState ) );
-  else
-    mMyCheckbox->setState( *mMyState );
-  mParent->Close();
-  return this;
+	clicked = true;
+	*mMyState = !(*mMyState);
+	if (mInvert)
+		mMyCheckbox->setState(!(*mMyState));
+	else
+		mMyCheckbox->setState(*mMyState);
+	mParent->Close();
+	return this;
 }
 
 void MenuItemToggle::render() const
 {
-  if( mInvert )
-    mMyCheckbox->setState( !( *mMyState ) );
-  else
-    mMyCheckbox->setState( *mMyState );
+	if (mInvert)
+		mMyCheckbox->setState(!(*mMyState));
+	else
+		mMyCheckbox->setState(*mMyState);
 
-  glColor3f( 1.0f, 1.0f, 1.0f );
+	glColor3f(1.0f, 1.0f, 1.0f);
 
-  glPushMatrix();
-  glTranslatef( x(), y(), 0.0f );
+	glPushMatrix();
+	glTranslatef(x(), y(), 0.0f);
 
-  OpenGL::Texture::setActiveTexture();
-  OpenGL::Texture::enableTexture();
+	OpenGL::Texture::setActiveTexture();
+	OpenGL::Texture::enableTexture();
 
-  if( !clicked )
-    texture->bind();
-  else
-    textureDown->bind();
+	if (!clicked)
+		texture->bind();
+	else
+		textureDown->bind();
 
-  glBegin( GL_TRIANGLE_STRIP );
-  glTexCoord2f( 0.0f, 0.0f );
-  glVertex2f( 0.0f, 0.0f );
-  glTexCoord2f( 1.0f, .0f );
-  glVertex2f( width(), 0.0f );
-  glTexCoord2f( 0.0f, 1.0f );
-  glVertex2f( 0.0f, height() );
-  glTexCoord2f( 1.0f, 1.0f );
-  glVertex2f( width(), height() );
-  glEnd();
+	glBegin(GL_TRIANGLE_STRIP);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex2f(0.0f, 0.0f);
+	glTexCoord2f(1.0f, .0f);
+	glVertex2f(width(), 0.0f);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex2f(0.0f, height());
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex2f(width(), height());
+	glEnd();
 
-  OpenGL::Texture::disableTexture();
+	OpenGL::Texture::disableTexture();
 
-  text->render();
-  mMyCheckbox->render();
+	text->render();
+	mMyCheckbox->render();
 
-  glPopMatrix();
+	glPopMatrix();
 }
 
-MenuItemSwitch::MenuItemSwitch( MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert )
-: MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
-, mMyState( pMyState )
-, mInvert( pInvert )
+MenuItemSwitch::MenuItemSwitch(MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert)
+	: MenuItem(pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp")
+	, mMyState(pMyState)
+	, mInvert(pInvert)
 {
-  setText( pText );
-  setLeft();
+	setText(pText);
+	setLeft();
 }
 
-UIFrame::Ptr MenuItemSwitch::processLeftClick( float /*pX*/, float /*pY*/ )
+UIFrame::Ptr MenuItemSwitch::processLeftClick(float /*pX*/, float /*pY*/)
 {
-  clicked = true;
-  *mMyState = mInvert;
-  mParent->Close();
-  return this;
+	clicked = true;
+	*mMyState = mInvert;
+	mParent->Close();
+	return this;
 }
 
 
-MenuItemSet::MenuItemSet( MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, int * pMyState, int pSet )
-: MenuItem( pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp" )
-, mSet( pSet )
-, mMyState( pMyState )
+MenuItemSet::MenuItemSet(MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, int * pMyState, int pSet)
+	: MenuItem(pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp")
+	, mSet(pSet)
+	, mMyState(pMyState)
 {
-  setText( pText );
-  setLeft();
+	setText(pText);
+	setLeft();
 }
 
-UIFrame::Ptr MenuItemSet::processLeftClick( float /*pX*/, float /*pY*/ )
+UIFrame::Ptr MenuItemSet::processLeftClick(float /*pX*/, float /*pY*/)
 {
-  clicked = true;
-  *mMyState = mSet;
-  mParent->Close();
-  return this;
+	clicked = true;
+	*mMyState = mSet;
+	mParent->Close();
+	return this;
 }
 
-MenuItemSeperator::MenuItemSeperator( MenuPane::Ptr pParent, float pX, float pY, const std::string& pText )
-: MenuItem( pParent, pX, pY, 20.0f, pText, "Interface\\BUTTONS\\UI-SliderBar-Background.blp", "Interface\\BUTTONS\\UI-SliderBar-Background.blp" )
+MenuItemSeperator::MenuItemSeperator(MenuPane::Ptr pParent, float pX, float pY, const std::string& pText)
+	: MenuItem(pParent, pX, pY, 20.0f, pText, "Interface\\BUTTONS\\UI-SliderBar-Background.blp", "Interface\\BUTTONS\\UI-SliderBar-Background.blp")
 {
-  setText( pText );
+	setText(pText);
 }
 
-UIFrame::Ptr MenuItemSeperator::processLeftClick( float /*pX*/, float /*pY*/ )
+UIFrame::Ptr MenuItemSeperator::processLeftClick(float /*pX*/, float /*pY*/)
 {
-  return NULL;
+	return NULL;
 }
 
-MenuPane::MenuPane( float pX, float pY )
-: UIWindow( pX, pY, 180.0f, 1.0f )
+MenuPane::MenuPane(float pX, float pY)
+	: UIWindow(pX, pY, 180.0f, 1.0f)
 {
-  movable( false );
-  hide();
+	movable(false);
+	hide();
 
-  mNumItems = 0;
+	mNumItems = 0;
 }
 
 void MenuPane::Close()
 {
-  static_cast<UIMenuBar::Ptr>( parent() )->CloseAll();
+	static_cast<UIMenuBar::Ptr>(parent())->CloseAll();
 }
 
 void MenuPane::Open()
 {
-  Close();
-  show();
+	Close();
+	show();
 }
 
 void MenuPane::fixSizes()
 {
-  height( 6.0f + mNumItems * 25.0f );
+	height(6.0f + mNumItems * 25.0f);
 
-  width( std::max( ( *_children.rbegin() )->width() + 5.0f, width() ) );
-  const float buttonWidth = width() - 5.0f;
-  for( Children::iterator it( _children.begin() ), end( _children.end() )
-     ; it != end; ++it )
-  {
-    (*it)->width( buttonWidth );
-  }
+	width(std::max((*_children.rbegin())->width() + 5.0f, width()));
+	const float buttonWidth = width() - 5.0f;
+	for (Children::iterator it(_children.begin()), end(_children.end())
+		; it != end; ++it)
+	{
+		(*it)->width(buttonWidth);
+	}
 }
 
-void MenuPane::AddMenuItemButton( const std::string& pName, void ( *pClickFunc )( UIFrame::Ptr, int ), int pClickFuncID )
+void MenuPane::AddMenuItemButton(const std::string& pName, void(*pClickFunc)(UIFrame::Ptr, int), int pClickFuncID)
 {
-  addChild( new MenuItemButton( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pClickFunc, pClickFuncID ) );
-  fixSizes();
+	addChild(new MenuItemButton(this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pClickFunc, pClickFuncID));
+	fixSizes();
 }
-void MenuPane::AddMenuItemToggle( const std::string& pName, bool * pMyState, bool pInvert )
+void MenuPane::AddMenuItemToggle(const std::string& pName, bool * pMyState, bool pInvert)
 {
-  addChild( new MenuItemToggle( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pInvert ) );
-  fixSizes();
+	addChild(new MenuItemToggle(this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pInvert));
+	fixSizes();
 }
-void MenuPane::AddMenuItemSwitch( const std::string& pName, bool * pMyState, bool pInvert )
+void MenuPane::AddMenuItemSwitch(const std::string& pName, bool * pMyState, bool pInvert)
 {
-  addChild( new MenuItemSwitch( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pInvert ) );
-  fixSizes();
+	addChild(new MenuItemSwitch(this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pInvert));
+	fixSizes();
 }
-void MenuPane::AddMenuItemSet( const std::string& pName, int * pMyState, int pSet )
+void MenuPane::AddMenuItemSet(const std::string& pName, int * pMyState, int pSet)
 {
-  addChild( new MenuItemSet( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pSet ) );
-  fixSizes();
+	addChild(new MenuItemSet(this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pMyState, pSet));
+	fixSizes();
 }
-void MenuPane::AddMenuItemSeperator( const std::string& pName )
+void MenuPane::AddMenuItemSeperator(const std::string& pName)
 {
-  addChild( new MenuItemSeperator( this, 5.0f, 5.0f + 25.0f * mNumItems++, pName ) );
-  fixSizes();
+	addChild(new MenuItemSeperator(this, 5.0f, 5.0f + 25.0f * mNumItems++, pName));
+	fixSizes();
 }

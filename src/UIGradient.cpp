@@ -2,127 +2,130 @@
 
 #include "Video.h" // gl*
 
+#include <iostream>     // std::cout
+#include <algorithm>    // std::min
+
 void UIGradient::render() const
 {
-  if( hidden() )
-  {
-   // return;
-  }
+	if (hidden())
+	{
+		// return;
+	}
 
-  glPushMatrix();
-  glTranslatef( x(), y(), 0.0f );
+	glPushMatrix();
+	glTranslatef(x(), y(), 0.0f);
 
-  if(horiz)
-  {
-    glBegin( GL_TRIANGLE_STRIP );
-    glColor4fv( &MinColor.x );
-    glVertex2f( 0.0f, 0.0f );
-    glVertex2f( 0.0f, height() );
-    glColor4fv( &MaxColor.x );
-    glVertex2f( width(), 0.0f );
-    glVertex2f( width(), height() );
-    glEnd();
+	if (horiz)
+	{
+		glBegin(GL_TRIANGLE_STRIP);
+		glColor4fv(&MinColor.x);
+		glVertex2f(0.0f, 0.0f);
+		glVertex2f(0.0f, height());
+		glColor4fv(&MaxColor.x);
+		glVertex2f(width(), 0.0f);
+		glVertex2f(width(), height());
+		glEnd();
 
-    if( clickable() )
-    {
-      glColor4fv( &ClickColor.x );
-      glBegin( GL_LINE );
-      glVertex2f( width() * value, 0.0f );
-      glVertex2f( width() * value, height() );
-      glEnd();
-    }
-  }
-  else
-  {
-    glBegin( GL_TRIANGLE_STRIP );
-    glColor4fv( &MinColor.x );
-    glVertex2f( width(), 0.0f );
-    glVertex2f( 0.0f, 0.0f );
-    glColor4fv( &MaxColor.x );
-    glVertex2f( width(), height() );
-    glVertex2f( 0.0f, height() );
-    glEnd();
+		if (clickable())
+		{
+			glColor4fv(&ClickColor.x);
+			glBegin(GL_LINE);
+			glVertex2f(width() * value, 0.0f);
+			glVertex2f(width() * value, height());
+			glEnd();
+		}
+	}
+	else
+	{
+		glBegin(GL_TRIANGLE_STRIP);
+		glColor4fv(&MinColor.x);
+		glVertex2f(width(), 0.0f);
+		glVertex2f(0.0f, 0.0f);
+		glColor4fv(&MaxColor.x);
+		glVertex2f(width(), height());
+		glVertex2f(0.0f, height());
+		glEnd();
 
 
 
-    if( clickable() )
-    {
-      glBegin( GL_TRIANGLE_STRIP );
-      glColor4fv( &ClickColor.x );
-      glVertex2f( width(), (height() * value) );
-      glVertex2f( 0.0f, (height() * value) );
-      glVertex2f( width(), (height() * value-1.5f) );
-      glVertex2f( 0.0f, (height() * value-1.5f) );
-      glEnd();
-    }
-  }
+		if (clickable())
+		{
+			glBegin(GL_TRIANGLE_STRIP);
+			glColor4fv(&ClickColor.x);
+			glVertex2f(width(), (height() * value));
+			glVertex2f(0.0f, (height() * value));
+			glVertex2f(width(), (height() * value - 1.5f));
+			glVertex2f(0.0f, (height() * value - 1.5f));
+			glEnd();
+		}
+	}
 
-  glPopMatrix();
+	glPopMatrix();
 }
 
-void UIGradient::setMaxColor( float r, float g, float b, float a )
+void UIGradient::setMaxColor(float r, float g, float b, float a)
 {
-  MaxColor = Vec4D( r, g, b, a );
+	MaxColor = Vec4D(r, g, b, a);
 }
 
-void UIGradient::setMinColor( float r, float g, float b, float a )
+void UIGradient::setMinColor(float r, float g, float b, float a)
 {
-  MinColor = Vec4D( r, g, b, a );
+	MinColor = Vec4D(r, g, b, a);
 }
 
-void UIGradient::setClickColor( float r, float g, float b, float a )
+void UIGradient::setClickColor(float r, float g, float b, float a)
 {
-  ClickColor = Vec4D( r, g, b, a );
+	ClickColor = Vec4D(r, g, b, a);
 }
 
-void UIGradient::setClickFunc( void (*f)( float val ) )
+void UIGradient::setClickFunc(void(*f)(float val))
 {
-  value = 0.0f;
-  clickFunc = f;
-  clickable( true );
+	value = 0.0f;
+	clickFunc = f;
+	clickable(true);
 }
 
-UIFrame::Ptr UIGradient::processLeftClick( float mx, float my )
+UIFrame::Ptr UIGradient::processLeftClick(float mx, float my)
 {
-  if( clickable() )
-  {
-    if( horiz )
-      value = mx / width();
-    else
-      value = my / height();
+	if (clickable())
+	{
+		if (horiz)
+			value = mx / width();
+		else
+			value = my / height();
 
-    value = std::min( std::max( value, 0.0f ), 1.0f );
+		value = std::min(std::max(value, 0.0f), 1.0f);
 
-    clickFunc( value );
-    return this;
-  }
+		clickFunc(value);
+		return this;
+	}
 
-  return NULL;
+	return NULL;
 }
 
-bool UIGradient::processLeftDrag( float mx, float my, float xDrag, float yDrag )
+bool UIGradient::processLeftDrag(float mx, float my, float xDrag, float yDrag)
 {
-  float tx( 0.0f );
-  float ty( 0.0f );
+	float tx(0.0f);
+	float ty(0.0f);
 
-  parent()->getOffset( &tx, &ty );
+	parent()->getOffset(&tx, &ty);
 
-  mx -= tx;
-  my -= ty;
+	mx -= tx;
+	my -= ty;
 
-  if( processLeftClick( mx, my ) )
-  {
-    return true;
-  }
+	if (processLeftClick(mx, my))
+	{
+		return true;
+	}
 
-  return UIFrame::processLeftDrag( mx, my, xDrag, yDrag );
+	return UIFrame::processLeftDrag(mx, my, xDrag, yDrag);
 }
 
-void UIGradient::setValue( float f )
+void UIGradient::setValue(float f)
 {
-  value = std::min( std::max( f, 0.0f ), 1.0f );
-  if( clickFunc )
-  {
-    clickFunc( value );
-  }
+	value = std::min(std::max(f, 0.0f), 1.0f);
+	if (clickFunc)
+	{
+		clickFunc(value);
+	}
 }

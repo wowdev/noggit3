@@ -40,7 +40,7 @@ void Alphamap::readCompressed(MPQFile *f)
   while( offO < 4096 )
   {
     // fill or copy mode
-    bool fill = buffIn[offI] & 0x80;
+	  bool fill = (buffIn[offI] & 0x80) != 0;
     unsigned n = buffIn[offI] & 0x7F;
     offI++;
     for( unsigned k = 0; k < n; ++k )

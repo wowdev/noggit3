@@ -12,8 +12,8 @@
 
 namespace OpenGL
 {
-  class CallList;
-  class Texture;
+	class CallList;
+	class Texture;
 };
 
 class Brush;
@@ -33,187 +33,196 @@ typedef unsigned short StripType;
 class World
 {
 public:
-  // Which tile are we over / entering?
-  int ex;
-  int ez;
-  int cx;
-  int cz;
+	// Which tile are we over / entering?
+	int ex;
+	int ez;
+	int cx;
+	int cz;
 
-  MapIndex *mapIndex;
+	MapIndex *mapIndex;
 
-  // Information about the currently selected model / WMO / triangle.
-  nameEntry* mCurrentSelection;
-  int mCurrentSelectedTriangle;
-  bool SelectionMode;
+	// Information about the currently selected model / WMO / triangle.
+	nameEntry *mCurrentSelection;
+	int mCurrentSelectedTriangle;
+	bool SelectionMode;
 
-  // Call lists for the low resolution heightmaps.
-  OpenGL::CallList* lowrestiles[64][64];
+	// Call lists for the low resolution heightmaps.
+	OpenGL::CallList *lowrestiles[64][64];
 
-  // Temporary variables for loading a WMO, if we have a global WMO.
-  std::string mWmoFilename;
-  ENTRY_MODF mWmoEntry;
+	// Temporary variables for loading a WMO, if we have a global WMO.
+	std::string mWmoFilename;
+	ENTRY_MODF mWmoEntry;
 
-  // Vertex Buffer Objects for coordinates used for drawing.
-  GLuint detailtexcoords;
-  GLuint alphatexcoords;
+	// Vertex Buffer Objects for coordinates used for drawing.
+	GLuint detailtexcoords;
+	GLuint alphatexcoords;
 
-  // Map ID of this World.
-  unsigned int mMapId;
+	// Map ID of this World.
+	unsigned int mMapId;
 
-  // The lighting used.
-  OutdoorLighting *ol;
+	// The lighting used.
+	OutdoorLighting *ol;
 
-  // Light attenuation related parameters.
-  float l_const;
-  float l_linear;
-  float l_quadratic;
+	// Light attenuation related parameters.
+	float l_const;
+	float l_linear;
+	float l_quadratic;
 
 
-  void initMinimap();
-  void initLowresTerrain();
+	void initMinimap();
+	void initLowresTerrain();
 
-  void outdoorLighting();
-  void outdoorLighting2();
+	void outdoorLighting();
+	void outdoorLighting2();
 
-  unsigned int getMapID();
-  // Do we draw *? Should be moved somewhere else, these are not World related.
-  bool drawdoodads;
-  bool drawfog;
-  bool drawlines;
-  bool drawmodels;
-  bool drawterrain;
-  bool drawwater;
-  bool drawwmo;
-  bool drawwireframe;
-  bool lighting;
+	unsigned int getMapID();
+	// Do we draw *? Should be moved somewhere else, these are not World related.
+	bool drawdoodads;
+	bool drawfog;
+	bool drawlines;
+	bool drawmodels;
+	bool drawterrain;
+	bool drawwater;
+	bool drawwmo;
+	bool drawwireframe;
+	bool lighting;
 
-  // Time of the day.
-  float animtime;
-  float time;
+	// Time of the day.
+	float animtime;
+	float time;
 
-  //! \brief Name of this map.
-  std::string basename;
+	//! \brief Name of this map.
+	std::string basename;
 
-  // Dynamic distances for rendering. Actually, these should be the same..
-  float fogdistance;
-  float culldistance;
+	// Dynamic distances for rendering. Actually, these should be the same..
+	float fogdistance;
+	float culldistance;
 
-  float minX;
-  float maxX;
-  float minY;
-  float maxY;
-  float zoom;
+	float minX;
+	float maxX;
+	float minY;
+	float maxY;
+	float zoom;
 
-  Skies *skies;
+	Skies *skies;
 
-  bool loading;
-  bool hadSky;
+	bool loading;
+	bool hadSky;
 
-  bool autoheight;
+	bool autoheight;
 
-  //! \todo  Get these managed? ._.
-  std::map<int, ModelInstance> mModelInstances;
-  std::map<int, WMOInstance> mWMOInstances;
+	//! \todo  Get these managed? ._.
+	std::map<int, ModelInstance> mModelInstances;
+	std::map<int, WMOInstance> mWMOInstances;
 
-  OutdoorLightStats outdoorLightStats;
+	OutdoorLightStats outdoorLightStats;
 
-  GLuint minimap;
+	GLuint minimap;
 
-  StripType *mapstrip;
-  StripType *mapstrip2;
+	StripType *mapstrip;
+	StripType *mapstrip2;
 
-  Vec3D camera;
-  Vec3D lookat;
-  Frustum frustum;
+	Vec3D camera;
+	Vec3D lookat;
+	Frustum frustum;
 
-  explicit World( const std::string& name);
-  ~World();
+	explicit World(const std::string& name);
+	~World();
 
-  void initDisplay();
+	void initDisplay();
 
-  void tick(float dt);
-  void draw();
+	void tick(float dt);
+	void draw();
 
-  void outdoorLights(bool on);
-  void setupFog();
+	void outdoorLights(bool on);
+	void setupFog();
 
-  //! \brief Get the area ID of the tile on which the camera currently is on.
-  unsigned int getAreaID();
-  void setAreaID(int id, int x, int z);
-  void setAreaID(int id, int x, int z , int cx, int cz);
-  void setBaseTexture(int x, int z );
+	//! \brief Get the area ID of the tile on which the camera currently is on.
+	unsigned int getAreaID();
+	void setAreaID(int id, int x, int z);
+	void setAreaID(int id, int x, int z, int cx, int cz);
+	void setBaseTexture(int x, int z);
 
-  //void moveADT(); does not exist
-  //void drawSelectionChunk(int cursorX,int cursorY); does not exist
-  //bool hasAdt(); does not exist
+	//void moveADT(); does not exist
+	//void drawSelectionChunk(int cursorX,int cursorY); does not exist
+	//bool hasAdt(); does not exist
 
-  void drawSelection(int cursorX,int cursorY, bool pOnlyMap = false );
-  void drawTileMode(float ah);
+	void drawSelection(int cursorX, int cursorY, bool pOnlyMap = false);
+	void drawTileMode(float ah);
 
-  void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
+	void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
 
-  // Selection related methods.
+	bool HasSelection();
+
+	// Selection related methods.
+	bool IsSelection(int pSelectionType);
+	nameEntry * GetCurrentSelection() { return mCurrentSelection; }
+	void ResetSelection() { mCurrentSelection = NULL; }
+	GLuint GetCurrentSelectedTriangle() { return (unsigned int)mCurrentSelectedTriangle; }
+
+	bool GetVertex(float x, float z, Vec3D *V);
+
+	void changeTerrain(float x, float z, float change, float radius, int BrushType);
+	void changeShader(float x, float z, float radius, bool editMode);
+	void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
+	void blurTerrain(float x, float z, float remain, float radius, int BrushType);
+	bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
+	void eraseTextures(float x, float z);
+	void overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
+
+	void addHole(float x, float z, bool big);
+	void removeHole(float x, float z, bool big);
+
+	void addModel(nameEntry entry, Vec3D newPos, bool copyit);
+	void addM2(Model *model, Vec3D newPos, bool copyit);
+	void addWMO(WMO *wmo, Vec3D newPos);
+
+	void jumpToCords(Vec3D pos);
+	void saveMap();
+
+	//void unsetChanged(int x, int z); does not exist
+	//int getChanged(int x, int z); does not exist
+
+	void deleteModelInstance(int pUniqueID);
+	void deleteWMOInstance(int pUniqueID);
+
+	static bool IsEditableWorld(int pMapId);
+	void clearHeight(int id, int x, int z);
+	void clearHeight(int id, int x, int z, int _cx, int _cz);
+	void moveHeight(int id, int x, int z);
+	void moveHeight(int id, int x, int z, int _cx, int _cz);
+
+	void saveWDT();
+	void clearAllModelsOnADT(int x, int z);
+	void ClearDupModelsOnADT(int x, int z);
+	void swapTexture(int x, int z, OpenGL::Texture *tex);
+
+	bool canWaterSave(int x, int y);
+
+	void setWaterHeight(int x, int y, float h);
+	float getWaterHeight(int x, int y);
+	float HaveSelectWater(int x, int y);
+	void CropWaterADT(int x, int z);
+	void setWaterTrans(int x, int y, unsigned char value);
+	unsigned char getWaterTrans(int x, int y);
+
+	void setWaterType(int x, int y, int type);
+	int getWaterType(int x, int y);
+
+	void deleteWaterLayer(int x, int z);
+	void Fix(int x, int z);
+	void FixAll();
+	void ClearShader(int x, int z);
+
+	void addWaterLayer(int x, int z);
+	void addWaterLayer(int x, int z, float height, unsigned char trans);
+	void addWaterLayerChunk(int x, int z, int i, int j);
+	void delWaterLayerChunk(int x, int z, int i, int j);
+
+	void autoGenWaterTrans(int x, int y, int factor);
+	void AddWaters(int x, int y);
 private:
-  void getSelection( );
-public:
-  bool HasSelection() { return mCurrentSelection; }
-  bool IsSelection( int pSelectionType ) { return HasSelection() && mCurrentSelection->type == pSelectionType; }
-  nameEntry * GetCurrentSelection() { return mCurrentSelection; }
-  void ResetSelection() { mCurrentSelection = NULL; }
-  GLuint GetCurrentSelectedTriangle() { return mCurrentSelectedTriangle; }
-
-  bool GetVertex(float x,float z, Vec3D *V);
-
-  void changeTerrain(float x, float z, float change, float radius, int BrushType);
-  void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
-  void blurTerrain(float x, float z, float remain, float radius, int BrushType);
-  bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
-  void eraseTextures(float x, float z);
-  void overwriteTextureAtCurrentChunk( float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
-
-  void addHole( float x, float z , bool big);
-  void removeHole( float x, float z , bool big);
-
-  void addModel( nameEntry entry, Vec3D newPos,bool copyit );
-  void addM2( Model *model, Vec3D newPos,bool copyit  );
-  void addWMO( WMO *wmo, Vec3D newPos ,bool copyit );
-
-  void jumpToCords(Vec3D pos);
-  void saveMap();
-
-  //void unsetChanged(int x, int z); does not exist
-  //int getChanged(int x, int z); does not exist
-
-  void deleteModelInstance( int pUniqueID );
-  void deleteWMOInstance( int pUniqueID );
-
-  static bool IsEditableWorld( int pMapId );
-  void clearHeight(int id, int x, int z);
-  void clearHeight(int id, int x, int z , int _cx, int _cz);
-  void moveHeight(int id, int x, int z);
-  void moveHeight(int id, int x, int z , int _cx, int _cz);
-
-  void saveWDT();
-  void clearAllModelsOnADT(int x, int z);
-  void swapTexture( int x, int z, OpenGL::Texture *tex );
-
-  bool canWaterSave(int x, int y);
-
-  void setWaterHeight(int x, int y, float h);
-  float getWaterHeight(int x, int y);
-
-  void setWaterTrans(int x, int y, unsigned char value);
-  unsigned char getWaterTrans(int x, int y);
-
-  void setWaterType(int x, int y, int type);
-  int getWaterType(int x, int y);
-
-  void deleteWaterLayer(int x,int z);
-
-  void addWaterLayer(int x, int z);
-  void addWaterLayer(int x, int z, float height, unsigned char trans);
-
-  void autoGenWaterTrans(int x, int y, int factor);
+	void getSelection();
 };
 
 extern World *gWorld;

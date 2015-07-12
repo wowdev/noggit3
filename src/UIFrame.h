@@ -9,22 +9,22 @@ struct SDL_KeyboardEvent;
 class UIFrame
 {
 public:
-  typedef UIFrame* Ptr;
-  typedef std::vector<UIFrame::Ptr> Children;
+	typedef UIFrame* Ptr;
+	typedef std::vector<UIFrame::Ptr> Children;
 
 protected:
-  UIFrame::Ptr _parent;
+	UIFrame::Ptr _parent;
 
-  Children _children;
+	Children _children;
 
-  float _x;
-  float _y;
-  float _width;
-  float _height;
+	float _x;
+	float _y;
+	float _width;
+	float _height;
 
-  bool _movable;
-  bool _hidden;
-  bool _clickable;
+	bool _movable;
+	bool _hidden;
+	bool _clickable;
 
 #define getter(var, type) inline const type& var() const { return _ ## var; }
 #define setter(var, type) inline void var(const type& var) { _ ## var = var; }
@@ -35,111 +35,111 @@ protected:
 
 public:
 
-  int getX();
-  int getY();
+	int getX();
+	int getY();
 
 
 
-  getter(width, float)
-  setter(width, float)
+	getter(width, float)
+		setter(width, float)
 
-  getter(height, float)
-  setter(height, float)
+		getter(height, float)
+		setter(height, float)
 
-  getter(x, float)
-  setter(x, float)
+		getter(x, float)
+		setter(x, float)
 
-  getter(y, float)
-  setter(y, float)
+		getter(y, float)
+		setter(y, float)
 
-  getter(children, Children)
-  setter(children, Children)
+		getter(children, Children)
+		setter(children, Children)
 
-  getter(parent, UIFrame::Ptr)
-  setter(parent, UIFrame::Ptr)
+		getter(parent, UIFrame::Ptr)
+		setter(parent, UIFrame::Ptr)
 
-  getter(movable, bool)
-  setter(movable, bool)
+		getter(movable, bool)
+		setter(movable, bool)
 
 
 
-  getter(hidden, bool)
-  setter(hidden, bool)
-  boolsetter(hidden, hide, show, toggleVisibility)
-  evilgetter(hidden, bool)
+		getter(hidden, bool)
+		setter(hidden, bool)
+		boolsetter(hidden, hide, show, toggleVisibility)
+		evilgetter(hidden, bool)
 
-  getter(clickable, bool)
-  setter(clickable, bool)
+		getter(clickable, bool)
+		setter(clickable, bool)
 #undef getter
 #undef setter
 #undef boolsetter
 #undef evilgetter
 
-  UIFrame()
-  : _parent( NULL )
-  , _children()
-  , _x( 0.0f )
-  , _y( 0.0f )
-  , _width( 0.0f )
-  , _height( 0.0f )
-  , _movable( false )
-  , _hidden( false )
-  , _clickable( false )
-  {
-  }
+		UIFrame()
+		: _parent(NULL)
+		, _children()
+		, _x(0.0f)
+		, _y(0.0f)
+		, _width(0.0f)
+		, _height(0.0f)
+		, _movable(false)
+		, _hidden(false)
+		, _clickable(false)
+	{
+	}
 
-  UIFrame( float pX, float pY, float w, float h )
-  : _parent( NULL )
-  , _children()
-  , _x( pX )
-  , _y( pY )
-  , _width( w )
-  , _height( h )
-  , _movable( false )
-  , _hidden( false )
-  , _clickable( false )
-  {
-  }
+	UIFrame(float pX, float pY, float w, float h)
+		: _parent(NULL)
+		, _children()
+		, _x(pX)
+		, _y(pY)
+		, _width(w)
+		, _height(h)
+		, _movable(false)
+		, _hidden(false)
+		, _clickable(false)
+	{
+	}
 
-  virtual ~UIFrame()
-  {
-    for( Children::iterator it( _children.begin() ), end( _children.end() )
-       ; it != end; ++it )
-    {
-      if( *it )
-      {
-        delete *it;
-        *it = NULL;
-      }
-    }
-    _children.clear();
-  }
+	virtual ~UIFrame()
+	{
+		for (Children::iterator it(_children.begin()), end(_children.end())
+			; it != end; ++it)
+		{
+			if (*it)
+			{
+				delete *it;
+				*it = NULL;
+			}
+		}
+		_children.clear();
+	}
 
-  void addChild( UIFrame::Ptr );
-  void removeChild( UIFrame::Ptr );
+	void addChild(UIFrame::Ptr);
+	void removeChild(UIFrame::Ptr);
 
-  void renderChildren() const;
+	void renderChildren() const;
 
-  virtual void render() const;
-  virtual UIFrame::Ptr processLeftClick( float mx, float my );
-  virtual bool processLeftDrag( float mx, float my, float xChange, float yChange );
-  virtual void processUnclick() { }
-  virtual bool processRightClick( float mx, float my );
-  virtual bool KeyBoardEvent( SDL_KeyboardEvent *e );
-  virtual void resize()
-  {
-    for( Children::iterator it( _children.begin() ), end( _children.end() )
-       ; it != end; ++it )
-    {
-      (*it)->resize();
-    }
-  }
-  void getOffset( float* xOff, float* yOff );
+	virtual void render() const;
+	virtual UIFrame::Ptr processLeftClick(float mx, float my);
+	virtual bool processLeftDrag(float mx, float my, float xChange, float yChange);
+	virtual void processUnclick() { }
+	virtual bool processRightClick(float mx, float my);
+	virtual bool KeyBoardEvent(SDL_KeyboardEvent *e);
+	virtual void resize()
+	{
+		for (Children::iterator it(_children.begin()), end(_children.end())
+			; it != end; ++it)
+		{
+			(*it)->resize();
+		}
+	}
+	void getOffset(float* xOff, float* yOff);
 
-  inline bool IsHit( float pX, float pY ) const
-  {
-    return x() < pX && x() + width() > pX && y() < pY && y() + height() > pY;
-  }
+	inline bool IsHit(float pX, float pY) const
+	{
+		return x() < pX && x() + width() > pX && y() < pY && y() + height() > pY;
+	}
 };
 
 #endif
