@@ -9,19 +9,19 @@ class UICheckBox;
 class UIToggleGroup
 {
 public:
-  typedef UIToggleGroup* Ptr;
+	typedef UIToggleGroup* Ptr;
 
 private:
-  int* mTarget;
-  typedef std::map<int, UICheckBox*> Frames;
-  Frames mFrames;
+	int* mTarget;
+	typedef std::map<int, UICheckBox*> Frames;
+	Frames mFrames;
 
 public:
-  explicit UIToggleGroup( int * pTarget );
+	explicit UIToggleGroup(int * pTarget);
 
-  void Add( UICheckBox* pFrame, int pValue );
+	void Add(UICheckBox* pFrame, int pValue);
 
-  void Activate( UICheckBox* pFrame );
-  void Activate( int pID );
+	void Activate(UICheckBox* pFrame);
+	void Activate(int pID);
 };
 #endif

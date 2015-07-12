@@ -13,17 +13,17 @@ class UIListView;
 class UIWaterTypeBrowser : public UICloseWindow
 {
 public:
-  typedef UIWaterTypeBrowser* Ptr;
+	typedef UIWaterTypeBrowser* Ptr;
 
 private:
-  UIMapViewGUI *mainGui;
-  UIListView* WaterTypeList;
+	UIMapViewGUI *mainGui;
+	UIListView* WaterTypeList;
 
 public:
-  UIWaterTypeBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *setGui);
+	UIWaterTypeBrowser(float xPos, float yPos, float w, float h, UIMapViewGUI *setGui);
 
-  void setWaterTypeID(UIFrame *f, int id );
-  void buildTypeList();
+	void setWaterTypeID(UIFrame *f, int id);
+	void buildTypeList();
 };
 
 #endif

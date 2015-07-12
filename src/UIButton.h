@@ -13,37 +13,37 @@ namespace freetype { class font_data; };
 class UIButton : public UIFrame
 {
 public:
-  typedef UIButton* Ptr;
-  typedef void ( *ClickFunction )( UIFrame::Ptr, int );
+	typedef UIButton* Ptr;
+	typedef void(*ClickFunction)(UIFrame::Ptr, int);
 
 protected:
-  OpenGL::Texture* texture;
-  OpenGL::Texture* textureDown;
-  std::string _textureFilename;
-  std::string _textureDownFilename;
+	OpenGL::Texture* texture;
+	OpenGL::Texture* textureDown;
+	std::string _textureFilename;
+	std::string _textureDownFilename;
 
 
-  boost::function<void(UIFrame::Ptr, int)> clickFunc;
-  int id;
+	boost::function<void(UIFrame::Ptr, int)> clickFunc;
+	int id;
 
-  bool clicked;
-  UIText::Ptr text;
+	bool clicked;
+	UIText::Ptr text;
 
 public:
-  explicit UIButton( float x, float y, float width, float height, const std::string& pTexNormal, const std::string& pTexDown );
-  explicit UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
-  explicit UIButton( float x, float y, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown );
-  explicit UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, ClickFunction pFunc, int pFuncParam );
-  explicit UIButton( float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, boost::function<void(UIFrame::Ptr, int)> pFunc, int pFuncParam );
-  ~UIButton();
+	explicit UIButton(float x, float y, float width, float height, const std::string& pTexNormal, const std::string& pTexDown);
+	explicit UIButton(float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown);
+	explicit UIButton(float x, float y, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown);
+	explicit UIButton(float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, ClickFunction pFunc, int pFuncParam);
+	explicit UIButton(float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, boost::function<void(UIFrame::Ptr, int)> pFunc, int pFuncParam);
+	~UIButton();
 
-  void render() const;
+	void render() const;
 
-  void setLeft();
-  void setText( const std::string& pText );
+	void setLeft();
+	void setText(const std::string& pText);
 
-  UIFrame::Ptr processLeftClick( float mx, float my );
-  void setClickFunc( ClickFunction f, int num );
-  void processUnclick();
+	UIFrame::Ptr processLeftClick(float mx, float my);
+	void setClickFunc(ClickFunction f, int num);
+	void processUnclick();
 };
 #endif

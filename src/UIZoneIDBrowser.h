@@ -13,34 +13,34 @@ class UIListView;
 class UIZoneIDBrowser : public UICloseWindow
 {
 public:
-  typedef UIZoneIDBrowser* Ptr;
+	typedef UIZoneIDBrowser* Ptr;
 
 private:
-  void ( *changeFunc )( UIFrame *, int );
-  UIMapViewGUI *mainGui;
-  UIListView* ZoneIdList;
-  int mapID;
-  unsigned int zoneID;
-  int subZoneID;
-  int selectedAreaID;
-  std::string MapName;
-  std::string ZoneName;
-  std::string SubZoneName;
-  UIButton* backZone;
-  UIButton* closeBrowser;
-  UIText* ZoneIDPath;
+	void(*changeFunc)(UIFrame *, int);
+	UIMapViewGUI *mainGui;
+	UIListView* ZoneIdList;
+	int mapID;
+	unsigned int zoneID;
+	int subZoneID;
+	int selectedAreaID;
+	std::string MapName;
+	std::string ZoneName;
+	std::string SubZoneName;
+	UIButton* backZone;
+	UIButton* closeBrowser;
+	UIText* ZoneIDPath;
 
-  void buildAreaList();
-  void expandList();
-  void collapseList();
+	void buildAreaList();
+	void expandList();
+	void collapseList();
 
 public:
-  UIZoneIDBrowser(int xPos,int yPos, int w, int h, UIMapViewGUI *setGui);
-  void setMapID(int id);
-  void setZoneID( int id );
-  void ButtonMapPressed( int id );
-  void refreshMapPath();
-  void setChangeFunc( void (*f)( UIFrame *, int ));
+	UIZoneIDBrowser(int xPos, int yPos, int w, int h, UIMapViewGUI *setGui);
+	void setMapID(int id);
+	void setZoneID(int id);
+	void ButtonMapPressed(int id);
+	void refreshMapPath();
+	void setChangeFunc(void(*f)(UIFrame *, int));
 };
 
 #endif

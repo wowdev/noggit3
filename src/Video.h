@@ -15,55 +15,55 @@ struct SDL_Surface;
 class Video
 {
 public:
-  bool init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_);
+	bool init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_);
 
-  void close();
+	void close();
 
-  void flip() const;
-  void clearScreen() const;
-  void set3D() const;
-  void set3D_select() const;
-  void set2D() const;
-  void setTileMode() const;
-  void resize(int w, int h);
+	void flip() const;
+	void clearScreen() const;
+	void set3D() const;
+	void set3D_select() const;
+	void set2D() const;
+	void setTileMode() const;
+	void resize(int w, int h);
 
-  inline const int& xres() const;
-  inline const int& yres() const;
-  inline const float& ratio() const;
-  inline const bool& fullscreen() const;
-  inline const bool& doAntiAliasing() const;
+	inline const int& xres() const;
+	inline const int& yres() const;
+	inline const float& ratio() const;
+	inline const bool& fullscreen() const;
+	inline const bool& doAntiAliasing() const;
 
-  inline void doAntiAliasing( const bool& doAntiAliasing_ );
+	inline void doAntiAliasing(const bool& doAntiAliasing_);
 
-  inline const float& fov() const;
-  inline const float& nearclip() const;
-  inline const float& farclip() const;
+	inline const float& fov() const;
+	inline const float& nearclip() const;
+	inline const float& farclip() const;
 
-  void fov( const float& fov_ );
-  void nearclip( const float& nearclip_ );
-  void farclip( const float& farclip_ );
+	void fov(const float& fov_);
+	void nearclip(const float& nearclip_);
+	void farclip(const float& farclip_);
 
-  void updateProjectionMatrix();
+	void updateProjectionMatrix();
 
-  /// is * supported:
-  bool mSupportShaders;
-  bool mSupportCompression;
+	/// is * supported:
+	bool mSupportShaders;
+	bool mSupportCompression;
 
 private:
-  int _xres;
-  int _yres;
-  float _ratio;
+	int _xres;
+	int _yres;
+	float _ratio;
 
-  float _fov;
-  float _nearclip;
-  float _farclip;
+	float _fov;
+	float _nearclip;
+	float _farclip;
 
-  bool _fullscreen;
-  bool _doAntiAliasing;
+	bool _fullscreen;
+	bool _doAntiAliasing;
 
-  int _status;
+	int _status;
 
-  SDL_Surface* _primary;
+	SDL_Surface* _primary;
 };
 
 #include "Manager.h" // ManagedItem
@@ -72,89 +72,89 @@ struct BLPHeader;
 
 namespace OpenGL
 {
-  class SettingsSaver
-  {
-  private:
-    struct GLSettings
-    {
-      GLboolean alphaTesting;
-      GLboolean blend;
-      GLboolean colorMaterial;
-      GLboolean cullFace;
-      GLboolean depthTest;
-      GLboolean fog;
-      GLboolean fragmentProgram;
-      GLboolean lighting;
-      GLboolean lineSmooth;
-      GLboolean texture0;
-      GLboolean texture1;
-      GLboolean textureGenS;
-      GLboolean textureGenT;
-    };
+	class SettingsSaver
+	{
+	private:
+		struct GLSettings
+		{
+			GLboolean alphaTesting;
+			GLboolean blend;
+			GLboolean colorMaterial;
+			GLboolean cullFace;
+			GLboolean depthTest;
+			GLboolean fog;
+			GLboolean fragmentProgram;
+			GLboolean lighting;
+			GLboolean lineSmooth;
+			GLboolean texture0;
+			GLboolean texture1;
+			GLboolean textureGenS;
+			GLboolean textureGenT;
+		};
 
-    static std::stack<GLSettings> _savedSettings;
+		static std::stack<GLSettings> _savedSettings;
 
-  public:
-    static void save();
-    static void restore();
-  };
+	public:
+		static void save();
+		static void restore();
+	};
 
-  class CallList
-  {
-  public:
-    CallList();
-    ~CallList();
+	class CallList
+	{
+	public:
+		CallList();
+		~CallList();
 
-    typedef GLuint ModeEnum;
+		typedef GLuint ModeEnum;
 
-    void startRecording(ModeEnum mode = GL_COMPILE);
-    void endRecording();
-    void render();
+		void startRecording(ModeEnum mode = GL_COMPILE);
+		void endRecording();
+		void render();
 
-  private:
-    typedef GLuint InternalRepresentation;
+	private:
+		typedef GLuint InternalRepresentation;
 
-    InternalRepresentation list;
-  };
+		InternalRepresentation list;
+	};
 
-  class Texture : public ManagedItem
-  {
-  public:
-    typedef GLuint InternalRepresentation;
+	class Texture : public ManagedItem
+	{
+	public:
+		typedef GLuint InternalRepresentation;
 
-    Texture();
-    ~Texture();
+		Texture();
+		~Texture();
 
-    void invalidate();
+		void invalidate();
 
-    void loadFromBLP( const std::string& filename );
-    void loadFromUncompressedData( BLPHeader* lHeader, char* lData );
-    void loadFromCompressedData( BLPHeader* lHeader, char* lData );
+		void loadFromBLP(const std::string& filename);
+		void loadFromUncompressedData(BLPHeader* lHeader, char* lData);
+		void loadFromCompressedData(BLPHeader* lHeader, char* lData);
 
-    void bind() const;
+		void bind() const;
 
-    static void enableTexture();
-    static void enableTexture( size_t num );
-    static void disableTexture();
-    static void disableTexture( size_t num );
-    static void setActiveTexture( size_t num = 0 );
+		static void enableTexture();
+		static void enableTexture(size_t num);
+		static void disableTexture();
+		static void disableTexture(size_t num);
+		static void setActiveTexture(size_t num = 0);
 
-    const std::string& filename();
+		const std::string& filename();
 
-  private:
-    int _width;
-    int _height;
-    InternalRepresentation _id;
-    std::string _filename;
-  };
+	private:
+		int _width;
+		int _height;
+		InternalRepresentation _id;
+		std::string _filename;
+	};
 
-  typedef GLuint Shader;
-  typedef GLuint Light;
+	typedef GLuint Shader;
+	typedef GLuint Light;
 }
 
 extern Video video;
 
 //bool isExtensionSupported(const char *search);
-void CheckForGLError( const std::string& pLocation );
+void CheckForGLError(const std::string& pLocation);
 
 #endif

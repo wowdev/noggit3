@@ -10,19 +10,19 @@ class UIButton;
 class UITextureSwitcher : public UIWindow
 {
 public:
-  UITextureSwitcher(  int x, int y );
+	UITextureSwitcher(int x, int y);
 
-  OpenGL::Texture* getTextures();
-  void setTexture();
-  void setPosition( float x, float y );
+	OpenGL::Texture* getTextures();
+	void setTexture();
+	void setPosition(float x, float y);
 
 private:
-  UITexture *_textureFrom;
-  UITexture *_textureTo;
+	UITexture *_textureFrom;
+	UITexture *_textureTo;
 
-  UIButton *_setFromButton;
-  UIButton *_setToButton;
-  float xPos, zPos;
+	UIButton *_setFromButton;
+	UIButton *_setToButton;
+	float xPos, zPos;
 };
 
 #endif

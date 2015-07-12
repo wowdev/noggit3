@@ -9,23 +9,23 @@ class AsyncObject;
 class AsyncLoader
 {
 public:
-  AsyncLoader() { }
+	AsyncLoader() { }
 
-  void process();
+	void process();
 
-  AsyncObject* nextObjectToLoad();
+	AsyncObject* nextObjectToLoad();
 
-  void addObject(AsyncObject* _pObject);
-  void removeObject(AsyncObject* _pObject);
+	void addObject(AsyncObject* _pObject);
+	void removeObject(AsyncObject* _pObject);
 
-  void start(int _numThreads = 1);
-  void stop();
+	void start(int _numThreads = 1);
+	void stop();
 
-  void join();
+	void join();
 private:
-  std::list<AsyncObject*> m_objects;
-  boost::thread_group m_threads;
-  boost::mutex m_loadingMutex;
+	std::list<AsyncObject*> m_objects;
+	boost::thread_group m_threads;
+	boost::mutex m_loadingMutex;
 };
 
 #endif //ASYNCLOADER_H

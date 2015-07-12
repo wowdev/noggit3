@@ -8,32 +8,32 @@
 class ManagedItem
 {
 private:
-  size_t _referenceCount;
+	size_t _referenceCount;
 
 public:
-  explicit ManagedItem( )
-  : _referenceCount( 0 )
-  {
-  }
+	explicit ManagedItem()
+		: _referenceCount(0)
+	{
+	}
 
-  virtual ~ManagedItem()
-  {
-  }
+	virtual ~ManagedItem()
+	{
+	}
 
-  inline void addReference()
-  {
-    ++_referenceCount;
-  }
+	inline void addReference()
+	{
+		++_referenceCount;
+	}
 
-  inline void removeReference()
-  {
-    --_referenceCount;
-  }
+	inline void removeReference()
+	{
+		--_referenceCount;
+	}
 
-  inline bool hasNoReferences()
-  {
-    return _referenceCount == 0;
-  }
+	inline bool hasNoReferences()
+	{
+		return _referenceCount == 0;
+	}
 };
 
 #endif

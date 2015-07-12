@@ -11,16 +11,16 @@ class UIMapViewGUI;
 class UIAppInfo : public UICloseWindow
 {
 public:
-  typedef UIAppInfo* Ptr;
+	typedef UIAppInfo* Ptr;
 
 private:
-  UIMapViewGUI* mainGui;
-  UIText::Ptr theInfos;
-  std::string mModelToLoad;
+	UIMapViewGUI* mainGui;
+	UIText::Ptr theInfos;
+	std::string mModelToLoad;
 
 public:
-  UIAppInfo( float x, float y, float width, float height, UIMapViewGUI* setGui );
-  virtual ~UIAppInfo();
-  void setText( const std::string& t );
+	UIAppInfo(float x, float y, float width, float height, UIMapViewGUI* setGui);
+	virtual ~UIAppInfo();
+	void setText(const std::string& t);
 };
 #endif

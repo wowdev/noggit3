@@ -4,22 +4,22 @@
 #include "Vec3D.h"
 
 struct Plane {
-  float a,b,c,d;
-  void normalize();
+	float a, b, c, d;
+	void normalize();
 };
 
 enum Directions {
-  RIGHT, LEFT, BOTTOM, TOP, BACK, FRONT
+	RIGHT, LEFT, BOTTOM, TOP, BACK, FRONT
 };
 
 struct Frustum {
-  Plane planes[6];
+	Plane planes[6];
 
-  void retrieve();
+	void retrieve();
 
-  bool contains(const Vec3D &v) const;
-  bool intersects(const Vec3D &v1, const Vec3D &v2) const;
-  bool intersectsSphere(const Vec3D& v, const float rad) const;
+	bool contains(const Vec3D &v) const;
+	bool intersects(const Vec3D &v1, const Vec3D &v2) const;
+	bool intersectsSphere(const Vec3D& v, const float rad) const;
 };
 
 

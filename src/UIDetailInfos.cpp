@@ -7,16 +7,16 @@
 #include "UIMinimizeButton.h"
 #include "UIText.h"
 
-UIDetailInfos::UIDetailInfos( float xPos, float yPos, float w, float h, UIMapViewGUI *setGui )
-: UIWindow( xPos, yPos, w, h )
-, mainGui( setGui )
-, theInfos( new UIText( 8.0f, 7.0f, "", app.getArial14(), eJustifyLeft ) )
+UIDetailInfos::UIDetailInfos(float xPos, float yPos, float w, float h, UIMapViewGUI *setGui)
+	: UIWindow(xPos, yPos, w, h)
+	, mainGui(setGui)
+	, theInfos(new UIText(8.0f, 7.0f, "", app.getArial14(), eJustifyLeft))
 {
-  addChild( new UIMinimizeButton( width() ) );
-  addChild( theInfos );
+	addChild(new UIMinimizeButton(width()));
+	addChild(theInfos);
 }
 
-void UIDetailInfos::setText( const std::string& t )
+void UIDetailInfos::setText(const std::string& t)
 {
-  theInfos->setText( t );
+	theInfos->setText(t);
 }

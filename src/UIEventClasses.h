@@ -5,17 +5,17 @@
 
 /*!
 
-  Your handling class extends UIEventListener. When constructing the button or whatever, you pass UIEventConstructorArgument(SenderClass,ListenerObject,ListenerMethod).
-  class MyClass : public UIEventListener {
-    MyClass() {
-      SenderClass* sc = new SenderClass( UIEventConstructorArgument(SenderClass, this, MyClass::MyHandler) );
-    }
-    void MyHandler(int i) {
-      LogDebug << i << "\n";
-    }
-  };
+Your handling class extends UIEventListener. When constructing the button or whatever, you pass UIEventConstructorArgument(SenderClass,ListenerObject,ListenerMethod).
+class MyClass : public UIEventListener {
+MyClass() {
+SenderClass* sc = new SenderClass( UIEventConstructorArgument(SenderClass, this, MyClass::MyHandler) );
+}
+void MyHandler(int i) {
+LogDebug << i << "\n";
+}
+};
 
- */
+*/
 
 class UIEventListener {
 };
@@ -28,29 +28,29 @@ class UIEventListener {
 
 /*!
 
-  Your event sending class extends UIEventSender. In your constructor, you take UIEventClassConstructorArguments. Then in the initializer list, you call UIEventClassConstructorSuperCall(). In the event sending method, you call UIEventHandlerCall(...) with your arguments. You can define a new handler structure by also defining UIEventEventHandlerDefinition(...); in your class where ... are the parameter types.
+Your event sending class extends UIEventSender. In your constructor, you take UIEventClassConstructorArguments. Then in the initializer list, you call UIEventClassConstructorSuperCall(). In the event sending method, you call UIEventHandlerCall(...) with your arguments. You can define a new handler structure by also defining UIEventEventHandlerDefinition(...); in your class where ... are the parameter types.
 
-  class SenderClass : public UIEventSender {
-  public:
-    UIEventEventHandlerDefinition(int);
-    SenderClass(UIEventClassConstructorArguments) : UIEventClassConstructorSuperCall() {
-      UIEventEventHandlerCall(1);
-    }
-  };
+class SenderClass : public UIEventSender {
+public:
+UIEventEventHandlerDefinition(int);
+SenderClass(UIEventClassConstructorArguments) : UIEventClassConstructorSuperCall() {
+UIEventEventHandlerCall(1);
+}
+};
 
- */
+*/
 
 class UIEventSender {
 public:
-  UIEventEventHandlerDefinition();
+	UIEventEventHandlerDefinition();
 protected:
-  EventHandlerType eventHandler;
-  UIEventListener* listener;
+	EventHandlerType eventHandler;
+	UIEventListener* listener;
 public:
-  explicit UIEventSender(UIEventClassConstructorArguments) : eventHandler(_eventHandler), listener(_listener) {
-    assert( eventHandler && listener );
-  }
-  //UIEventSender() : eventHandler(NULL), listener(NULL) { }
+	explicit UIEventSender(UIEventClassConstructorArguments) : eventHandler(_eventHandler), listener(_listener) {
+		assert(eventHandler && listener);
+	}
+	//UIEventSender() : eventHandler(NULL), listener(NULL) { }
 };
 
 #endif //UIEVENTCLASSES_H
