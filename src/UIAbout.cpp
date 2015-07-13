@@ -17,7 +17,8 @@ UIAbout::UIAbout()
 	addChild(new UIText(73.0f, 24.0f, "Noggit Studio", app.getSkurri32(), eJustifyLeft));
 	addChild(new UIText(155.0f, 57.0f, "a wow map editor for 3.3.5a", app.getFritz16(), eJustifyLeft));
 	addChild(new UIText(20.0f, 100.0f, "Ufoz [...],   Cryect,   Beket,   Schlumpf,   Tigurius", app.getFritz16(), eJustifyLeft));
-	addChild(new UIText(20.0f, 120.0f, " Steff,  Garthog,  Glararan,  Cromon  &  Hanfer", app.getFritz16(), eJustifyLeft));
+	addChild(new UIText(20.0f, 120.0f, " Steff,  Garthog,  Glararan,  Cromon,  Hanfer", app.getFritz16(), eJustifyLeft));
+	addChild(new UIText(20.0f, 140.0f, " Skarn  &  AxelSheva", app.getFritz16(), eJustifyLeft));
 	addChild(new UIText(20.0f, 160.0f, "World of Warcraft is (C) Blizzard Entertainment", app.getFritz16(), eJustifyLeft));
 	addChild(new UIText(20.0f, 190.0f, STRPRODUCTVER, app.getFritz16(), eJustifyLeft));
 	addChild(new UIText(375.0f, 190.0f, __DATE__ ", " __TIME__, app.getFritz16(), eJustifyRight));
