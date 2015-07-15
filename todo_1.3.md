@@ -1,5 +1,5 @@
 //\! pls update and/or find other solution...
-Noggit SDL 1.3 changelog
+Noggit SDL 1.4 changelog
 
 Done:
 
@@ -7,17 +7,17 @@ Done:
 - You can now load BGs
 
 - Rework texture pallet
-o Add load all tileset function to texture pallet
-o Change rows and cols direction and count
-o Add big preview of selected texture
-o Discard the old current texture window
-o Fix texture pallet size to fit names
+- Add load all tileset function to texture pallet
+- Change rows and cols direction and count
+- Add big preview of selected texture
+- Discard the old current texture window
+- Fix texture pallet size to fit names
 
 - Do Rel with debug now - test do this realy work. !!!!!!
 
 - New keys and mouse functions
-o ALT + 1 till 5 set now the texture paint opercety to 100,75,50,25 and 0 %
-o Space + Maus = Speed and Pressure
+- ALT + 1 till 5 set now the texture paint opercety to 100,75,50,25 and 0 %
+- Space + Mouse = Speed and Pressure
 
 - During load noggit test the config file and report common problems into the logfile. So perhaps users can fix this problems alone in the future.
 - Link to Manual in modcraft  wiki
@@ -34,8 +34,8 @@ o Space + Maus = Speed and Pressure
 - better Vertics Rendering ( Hanfer )
 - After you have saved the selection works not. Fixed.
 
-
 ToDo:
+
 - Maptile display on minimap << Works not in the manu now because it was jsut cleard out and not fixed.
 - Water Functions Assist menu actions and basic edit UI ( Steff ) 
 - Add the ALT Key to texture delete from chunk function. You have to hold all 3 keys. This often cause problems of unwanted deleting in past
@@ -61,9 +61,7 @@ Discuss:
 
 - U mode usage or rework to fit more. Perhaps add here also basic alpha map editing and view.
 
-
-
-Future
+Future:
 
 - Auto terrain painter/generator
 - DBC Save function
