@@ -192,7 +192,7 @@ void updateTextures()
 {
 	gTexturesInList.clear();
 	gTexturesInList = TextureManager::getAllTexturesMatching(TextureInPalette);
-	showPage(gCurrentPage);
+	showPage(0);
 }
 
 void changePage(UIFrame*, int direction)
@@ -315,7 +315,6 @@ void clickFilterTexture(bool value, int id)
 			}
 		}
 	}
-
 	updateTextures();
 }
 
@@ -337,7 +336,6 @@ void clickFileFilterTexture(bool value, int id)
 			}
 		}
 	}
-
 	updateTextures();
 }
 
@@ -454,7 +452,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
 	InitFilenameFilterList();
 
 	LoadTextureNames();
-	windowTextureFilter = new UICloseWindow(video.xres() / 2.0f - 450.0f, video.yres() / 2.0f - 300.0f, 1000.0f, 700.0f, "", true);
+	windowTextureFilter = new UICloseWindow(video.xres() / 2.0f - 450.0f, video.yres() / 2.0f - 300.0f, 1000.0f, 755.0f, "", true);
 	windowTextureFilter->hide();
 
 	//Filename Filters
@@ -476,7 +474,12 @@ UIFrame* UITexturingGUI::createTextureFilter()
 		name = tilesetDirectories[i];
 		misc::find_and_replace(name, "expansion01\\", "");
 		misc::find_and_replace(name, "expansion02\\", "");
-		windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * (i / 16), 210.0f + 30.0f * (i % 16), name, clickFilterTexture, i));
+		misc::find_and_replace(name, "expansion03\\", "");
+		misc::find_and_replace(name, "expansion04\\", "");
+		misc::find_and_replace(name, "expansion05\\", "");
+		misc::find_and_replace(name, "expansion06\\", "");
+		misc::find_and_replace(name, "expansion07\\", "");
+		windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * (i / 18), 210.0f + 30.0f * (i % 18), name, clickFilterTexture, i));
 	}
 
 	return windowTextureFilter;

@@ -585,7 +585,7 @@ void InsertObject(UIFrame*, int id)
 			if (!MPQFile::exists(lastWMO))
 				LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
 			else
-				gWorld->addWMO(WMOManager::add(lastWMO), selectionPosition);
+				gWorld->addWMO(WMOManager::add(lastWMO), selectionPosition, false);
 	}
 	else
 	{
@@ -599,7 +599,7 @@ void InsertObject(UIFrame*, int id)
 				continue;
 			}
 
-			gWorld->addWMO(WMOManager::add(*it), selectionPosition);
+			gWorld->addWMO(WMOManager::add(*it), selectionPosition, false);
 		}
 
 		for (std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it)
@@ -994,7 +994,6 @@ void MapView::createGUI()
 
 
 	mbar->GetMenu("Assist")->AddMenuItemSeperator("Model");
-	// mbar->GetMenu( "Assist" )->AddMenuItemButton( "All from MV", InsertObject, 0  );
 	mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", InsertObject, 14);
 	mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", InsertObject, 15);
 	mbar->GetMenu("Assist")->AddMenuItemButton("From Text File", showImportModels, 1);
@@ -1015,7 +1014,7 @@ void MapView::createGUI()
 
 	mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
 	mbar->GetMenu("View")->AddMenuItemToggle("Toolbar", mainGui->guiToolbar->hidden_evil(), true);
-	// mbar->GetMenu( "View" )->AddMenuItemToggle( "Current texture", mainGui->SelectedTexture->hidden_evil(), true );
+
 	mbar->GetMenu("View")->AddMenuItemToggle("Texture palette", mainGui->TexturePalette->hidden_evil(), true);
 	mbar->GetMenu("View")->AddMenuItemButton("Cursor options", showCursorSwitcher, 0);
 	mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
