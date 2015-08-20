@@ -1949,7 +1949,7 @@ void World::addModel(nameEntry entry, Vec3D newPos, bool copyit)
 	if (entry.type == eEntry_Model)
 		this->addM2(entry.data.model->model, newPos, copyit);
 	else if (entry.type == eEntry_WMO)
-		this->addWMO(entry.data.wmo->wmo, newPos);
+		this->addWMO(entry.data.wmo->wmo, newPos, copyit);
 }
 
 void World::addM2(Model *model, Vec3D newPos, bool copyit)
@@ -2004,7 +2004,7 @@ void World::addM2(Model *model, Vec3D newPos, bool copyit)
 	mapIndex->setChanged(newPos.x, newPos.z);
 }
 
-void World::addWMO(WMO *wmo, Vec3D newPos)
+void World::addWMO(WMO *wmo, Vec3D newPos, bool copyit)
 {
 
 	const int lMaxUID = std::max((mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1),
@@ -2015,6 +2015,7 @@ void World::addWMO(WMO *wmo, Vec3D newPos)
 	newWMOis.mUniqueID = (unsigned int)lMaxUID;
 
 	if (Settings::getInstance()->copyModelStats
+		&& copyit
 		&& Environment::getInstance()->get_clipboard().type == eEntry_WMO)
 	{
 		// copy rot from original model. Dirty but working

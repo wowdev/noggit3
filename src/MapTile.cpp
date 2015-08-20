@@ -568,6 +568,9 @@ void MapTile::saveTile()
 	lTileExtents[0] = Vec3D(this->xbase, 0.0f, this->zbase);
 	lTileExtents[1] = Vec3D(this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE);
 
+	// as selection of models dont work right so I comment all the UID stuff out again. 
+	// UID Problem so is here but no model duplications or delete
+	/*
 	UID += mPositionX * 10000000;
 	UID += mPositionZ *   100000;
 
@@ -592,7 +595,7 @@ void MapTile::saveTile()
 		}
 		lModelInstances[it->second.d1] = it->second;
 	}
-
+	*/
 	filenameOffsetThing nullyThing = { 0, 0 };
 
 	std::map<std::string, filenameOffsetThing> lModels;

@@ -13,6 +13,13 @@
 #include "UITexture.h"
 #include "UIToolbarIcon.h"
 
+
+void swap_texture_palette(UIFrame*, int)
+{
+	LogError << "!!!!!!!!!!!CLicked" << std::endl;
+	//mainGui->TexturePalette->toggleVisibility();
+}
+
 UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
 	: UIWindow(xPos, yPos + 10.0f, 55.0f, (float)video.yres() - 185.0f, "interface\\tooltips\\ui-tooltip-border.blp")
 	, mainGui(setGui)
@@ -36,9 +43,10 @@ UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
 
 	IconSelect(0);
 
-	UIWindow* texture_border = new UIWindow(0, height() + 5.0f, 95.0f, 95.0f);
+	UIWindow* texture_border = new UIWindow(0, height() + 5.0F, 95.0f, 95.0f);
 	texture_border->addChild(current_texture);
 	addChild(texture_border);
+	current_texture->setClickFunc(swap_texture_palette, 0);
 }
 
 void UIToolbar::SetIcon(int pIcon, const std::string& pIconFile)
@@ -46,6 +54,7 @@ void UIToolbar::SetIcon(int pIcon, const std::string& pIconFile)
 	mToolbarIcons[pIcon] = new UIToolbarIcon(5.0f, (pIcon)* 50.0f + 5.0f, pIconFile, std::string("Interface\\BUTTONS\\CheckButtonGlow.blp"), pIcon, UIEventConstructorArgument(UIToolbarIcon, this, UIToolbar::IconSelect));
 	addChild(mToolbarIcons[pIcon]);
 }
+
 
 // MapView.cpp
 void change_settings_window(int oldid, int newid);
