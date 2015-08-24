@@ -1098,6 +1098,12 @@ MapView::MapView(float ah0, float av0)
 	mViewMode = eViewMode_3D;
 
 	createGUI();
+
+	// Set camera y (height) position to current ground height plus some space.
+	Vec3D t = Vec3D(0, 0, 0);
+	gWorld->GetVertex(gWorld->camera.x, gWorld->camera.z, &t);
+	gWorld->camera.y = t.y + 2000.0f;
+	if (gWorld->camera.y < 200) gWorld->camera.y = 200.0f;
 }
 
 MapView::~MapView()
