@@ -9,6 +9,7 @@
 #include "UIText.h"
 #include "MapView.h"
 #include "Misc.h"
+#include "TextureSet.h"
 
 extern UIWindow *settings_paint;
 extern UIWindow *settings_paint;

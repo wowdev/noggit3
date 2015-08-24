@@ -17,6 +17,7 @@
 #include "Environment.h"
 #include "Log.h"
 #include "MapChunk.h"
+#include "TextureSet.h"
 #include "MapTile.h"
 #include "Misc.h"
 #include "ModelManager.h" // ModelManager
@@ -31,6 +32,7 @@
 #include "ConfigFile.h"
 #include "MapIndex.h"
 #include "TileWater.h"// tile water
+
 
 World *gWorld = NULL;
 
@@ -2137,7 +2139,19 @@ void World::swapTexture(int x, int z, OpenGL::Texture *tex)
 		for (int i = 0; i<16; ++i)
 		{
 			MapChunk *curChunk = curTile->getChunk((size_t)j, (size_t)i);
-			curChunk->switchTexture(tex, UITexturingGUI::getSelectedTexture());
+			/*
+			dont know if this is good. People should always use 4 textures from start 
+			bool hasTextureAlready = false;
+			size_t index = 0;1
+			for (; index < 4U && curChunk->textureSet->num() > index; ++index)
+			{
+				if (curChunk->textureSet->texture(index) == UITexturingGUI::getSelectedTexture())
+					hasTextureAlready = true;
+			}
+			// set texture if not already on chunk
+			if (hasTextureAlready == false)*/
+				
+				curChunk->switchTexture(tex, UITexturingGUI::getSelectedTexture());
 		}
 	}
 }
