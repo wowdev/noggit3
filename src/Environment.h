@@ -13,6 +13,8 @@ public:
 	static Environment* getInstance();
 	nameEntry get_clipboard();
 	void set_clipboard(nameEntry* entry);
+	void clear_clipboard();
+	bool is_clipboard();
 
 	bool view_holelines;
 	// values for areaID painting
@@ -43,6 +45,8 @@ private:
 	static Environment* instance;
 
 	nameEntry clipboard;
+	bool clipboard_filled;
+
 };
 
 #endif

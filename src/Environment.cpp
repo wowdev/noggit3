@@ -30,5 +30,16 @@ nameEntry Environment::get_clipboard()
 void Environment::set_clipboard(nameEntry* set)
 {
 	clipboard = *set;
+	clipboard_filled = true;
+}
+
+void Environment::clear_clipboard()
+{
+	clipboard_filled = false;
+}
+
+bool Environment::is_clipboard()
+{
+	return clipboard_filled;
 }
 

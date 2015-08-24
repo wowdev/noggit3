@@ -384,31 +384,39 @@ Paste the current model stored in Environment::getInstance()->get_clipboard() at
 */
 void PasteSelectedObject(UIFrame*, int)
 {
-	if (gWorld->HasSelection())
-	{
-
-		switch (gWorld->GetCurrentSelection()->type)
-		{
-		case eEntry_Model:
-			gWorld->addModel(Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.model->pos, true);
-			break;
-		case eEntry_WMO:
-			gWorld->addModel(Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.wmo->pos, true);
-			break;
-		case eEntry_MapChunk:
-			gWorld->addModel(Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition(), true);
-			break;
-		default: break;
-		}
+	if ( gWorld->HasSelection() && Environment::getInstance()->is_clipboard() )
+	{	
+			switch (gWorld->GetCurrentSelection()->type)
+			{
+			case eEntry_Model:
+				gWorld->addModel(Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.model->pos, true);
+				break;
+			case eEntry_WMO:
+				gWorld->addModel(Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.wmo->pos, true);
+				break;
+			case eEntry_MapChunk:
+				gWorld->addModel(Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition(), true);
+				break;
+			default: break;
+			}
 	}
 }
 
 void DeleteSelectedObject(UIFrame*, int)
 {
 	if (gWorld->IsSelection(eEntry_WMO))
+	{ 
+		if (Environment::getInstance()->get_clipboard().data.wmo == gWorld->GetCurrentSelection()->data.wmo)
+			Environment::getInstance()->clear_clipboard();
 		gWorld->deleteWMOInstance(gWorld->GetCurrentSelection()->data.wmo->mUniqueID);
+	
+	}
 	else if (gWorld->IsSelection(eEntry_Model))
+	{
+		if (Environment::getInstance()->get_clipboard().data.model == gWorld->GetCurrentSelection()->data.model)
+			Environment::getInstance()->clear_clipboard();
 		gWorld->deleteModelInstance(gWorld->GetCurrentSelection()->data.model->d1);
+	}
 }
 
 void showHelperModels(UIFrame*, int)
