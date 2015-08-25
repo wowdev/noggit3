@@ -255,6 +255,7 @@ void change_settings_window(int oldid, int newid)
 	settings_paint->hide();
 	settings_shader->hide();
 	mainGui->guiWater->hide();
+	mainGui->TextureSwitcher->hide();
 	if (!mainGui || !mainGui->TexturePalette)
 		return;
 	mainGui->TexturePalette->hide();
@@ -814,7 +815,7 @@ void MapView::createGUI()
 {
 	// create main gui object that holds all other gui elements for access ( in the future ;) )
 	mainGui = new UIMapViewGUI(this);
-	mainGui->guiToolbar->current_texture->setClickFunc(view_texture_palette, 0);
+	mainGui->guiCurrentTexture->current_texture->setClickFunc(view_texture_palette, 0);
 
 	mainGui->ZoneIDBrowser->setMapID(gWorld->getMapID());
 	mainGui->ZoneIDBrowser->setChangeFunc(changeZoneIDValue);

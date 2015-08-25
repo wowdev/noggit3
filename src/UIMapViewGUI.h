@@ -29,7 +29,7 @@ class UIAlphamap;
 class UIWaterTypeBrowser;
 
 #include "UIFrame.h"
-
+#include "UICurrentTexture.h"
 
 //! \todo Give better name.
 class UIMapViewGUI : public UIFrame
@@ -67,7 +67,7 @@ public:
 	UITextureSwitcher* TextureSwitcher;
 	UIWater* guiWater;
 	UIWaterTypeBrowser* guiWaterTypeSelector;
-
+	UICurrentTexture* guiCurrentTexture;
 	UIWindow *setting_ground;
 	UIWindow *setting_blur;
 	UIWindow *settings_paint;
@@ -86,7 +86,6 @@ public:
 	void showCursorSwitcher();
 	void hideCursorSwitcher();
 	void toggleCursorSwitcher();
-
 	void showHelp();
 	void hideHelp();
 	void toggleHelp();
