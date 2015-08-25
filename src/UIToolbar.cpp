@@ -17,9 +17,9 @@
 
 
 UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
-	: UIWindow(xPos, yPos + 10.0f, 55.0f, (float)video.yres() - 185.0f, "interface\\tooltips\\ui-tooltip-border.blp")
+	: UIWindow(xPos, yPos + 10.0f, 55.0f, 460, "interface\\tooltips\\ui-tooltip-border.blp")
 	, mainGui(setGui)
-	, text(new UIText(0, -17, "TEXT", app.getArialn13(), eJustifyLeft))
+	, text(new UIText(6, -26, "TEXT", app.getArialn13(), eJustifyLeft))
 	, selectedIcon(-1)
 {
 	movable(false);
