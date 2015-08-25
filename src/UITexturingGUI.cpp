@@ -348,7 +348,7 @@ UIFrame* UITexturingGUI::createTexturePalette(UIMapViewGUI *setgui)
 	textGui = setgui;
 	pal_rows = 10;
 	pal_cols = 5;
-	windowTexturePalette = new UICloseWindow(115.0f, 33.0f, (pal_rows * 68.0f + 355.0f) + 10.0f, (pal_cols * 68.0f) + 60.0f, "Texture Palette", true);
+	windowTexturePalette = new UICloseWindow(((float)video.xres()/2) - (((pal_rows * 68.0f + 355.0f)/2) + 10.0f), ((float)video.yres()/2) - (((pal_cols * 68.0f) + 60.0f)/2) - 200, (pal_rows * 68.0f + 355.0f) + 10.0f, (pal_cols * 68.0f) + 60.0f, "Texture Palette", true);
 
 	for (int i = 0; i<(pal_cols*pal_rows); ++i)
 	{
