@@ -37,6 +37,8 @@
 
 #include "UIAlphamap.h"
 
+
+
 UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 	: UIFrame(0.0f, 0.0f, (float)video.xres(), (float)video.yres())
 	, theMapview(setMapview)
@@ -49,6 +51,10 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 	// UIToolbar
 	guiToolbar = new UIToolbar(6.0f, 38.0f, this);
 	addChild(guiToolbar);
+
+	// UICurrentTexture
+	guiCurrentTexture = new UICurrentTexture(6.0f, (float)video.yres() - 133.0f, this);
+	addChild(guiCurrentTexture);
 
 	// Statusbar
 	guiStatusbar = new UIStatusBar(0.0f, (float)video.yres() - 30.0f, (float)video.xres(), 30.0f);

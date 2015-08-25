@@ -9,7 +9,6 @@
 class UIMapViewGUI;
 class UIText;
 class UIToolbarIcon;
-class UITexture;
 
 class UIToolbar : public UIWindow, public UIEventListener
 {
@@ -23,8 +22,6 @@ public:
 	// current selected Icon
 	int selectedIcon;
 
-	// current active texture
-	UITexture* current_texture;
 	UIToolbar(float x, float y, UIMapViewGUI *setGui);
 	void IconSelect(int i);
 };

@@ -209,7 +209,7 @@ void UITexturingGUI::updateSelectedTexture()
 	if (textSelectedTexture)
 		textSelectedTexture->setText(UITexturingGUI::getSelectedTexture()->filename());
 	if (textGui)
-		textGui->guiToolbar->current_texture->setTexture(UITexturingGUI::getSelectedTexture());
+		textGui->guiCurrentTexture->current_texture->setTexture(UITexturingGUI::getSelectedTexture());
 
 
 }

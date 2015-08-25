@@ -14,18 +14,13 @@
 #include "UIToolbarIcon.h"
 
 
-void swap_texture_palette(UIFrame*, int)
-{
-	LogError << "!!!!!!!!!!!CLicked" << std::endl;
-	//mainGui->TexturePalette->toggleVisibility();
-}
+
 
 UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
 	: UIWindow(xPos, yPos + 10.0f, 55.0f, (float)video.yres() - 185.0f, "interface\\tooltips\\ui-tooltip-border.blp")
 	, mainGui(setGui)
 	, text(new UIText(0, -17, "TEXT", app.getArialn13(), eJustifyLeft))
 	, selectedIcon(-1)
-	, current_texture(new UITexture(0, 0, 92.0f, 92.0f, "tileset\\generic\\black.blp"))
 {
 	movable(false);
 	addChild(text);
@@ -43,10 +38,7 @@ UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
 
 	IconSelect(0);
 
-	UIWindow* texture_border = new UIWindow(0, height() + 5.0F, 95.0f, 95.0f);
-	texture_border->addChild(current_texture);
-	addChild(texture_border);
-	current_texture->setClickFunc(swap_texture_palette, 0);
+
 }
 
 void UIToolbar::SetIcon(int pIcon, const std::string& pIconFile)
