@@ -403,6 +403,35 @@ void MapIndex::reloadTile(int x, int z)
 	}
 }
 
+void MapIndex::unloadTiles(int x, int z)
+{
+	Log << "Test unloading for Tile " << x << "-" << z << "\n";
+	int unloadBoundery = 6; // perhaps into settings file?
+	for (int j = 0; j < 64; ++j)
+	{
+		for (int i = 0; i < 64; ++i)
+		{
+				if (j > (x + unloadBoundery) && j < (x - unloadBoundery) && i >(z + unloadBoundery) && i < (z - unloadBoundery))
+				{ 
+					unloadTile(j, i);
+					Log << "Unload Tile " << j << "-" << i << "\n";
+				}	
+		}
+	}
+	// unloads all tiles morent ehn 20 adts away from given tile
+
+}
+
+void MapIndex::unloadTile(int x, int z)
+{
+	// unloads a tile with givn cords
+	if (tileLoaded(z, x))
+	{
+		delete mTiles[z][x].tile;
+		mTiles[z][x].tile = NULL;
+	}
+}
+
 void MapIndex::markOnDisc(int x, int z, bool mto)
 {
 	mTiles[z][x].onDisc = mto;

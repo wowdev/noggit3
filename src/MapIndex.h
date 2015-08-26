@@ -44,7 +44,9 @@ public:
 
 	void saveTile(int x, int z);
 	void saveChanged();
-	void reloadTile(int x, int z);
+	void reloadTile(int x, int z);					
+	void unloadTiles(int x, int z);					// unloads all tiles more then x adts away fr0m given
+	void unloadTile(int x, int z);					// unload given tile
 	void markOnDisc(int x, int z, bool mto);
 	bool isTileExternal(int x, int z);
 
