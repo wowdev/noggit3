@@ -113,6 +113,7 @@ bool  alloff_detailselect = false;
 bool  alloff_fog = false;
 bool  alloff_terrain = false;
 
+
 UISlider* shader_radius;
 UISlider* shader_red;
 UISlider* shader_green;
@@ -324,6 +325,7 @@ void openHelp(UIFrame*, int)
 {
 	mainGui->showHelp();
 }
+
 
 void openURL(UIFrame*, int target)
 {
@@ -1035,11 +1037,12 @@ void MapView::createGUI()
 	mbar->GetMenu("View")->AddMenuItemToggle("F7 Lines", &gWorld->drawlines);
 	mbar->GetMenu("View")->AddMenuItemToggle("F8 Detail infos", mainGui->guidetailInfos->hidden_evil(), true);
 	mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &DrawMapContour);
+	mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &gWorld->renderAnimations);
 	mbar->GetMenu("View")->AddMenuItemToggle("F Fog", &gWorld->drawfog);
 	mbar->GetMenu("View")->AddMenuItemToggle("Hole lines always on", &Settings::getInstance()->holelinesOn, false);
 	mbar->GetMenu("View")->AddMenuItemToggle("Wireframe", &gWorld->drawwireframe);
 
-	mbar->GetMenu("Help")->AddMenuItemButton("Key Bindings", openHelp, 0);
+	mbar->GetMenu("Help")->AddMenuItemButton("Key Bindings F10", openHelp, 0);
 	mbar->GetMenu("Help")->AddMenuItemButton("Manual online", openURL, 2);
 	mbar->GetMenu("Help")->AddMenuItemButton("Homepage", openURL, 1);
 
@@ -1767,8 +1770,8 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 		if (e->keysym.sym == SDLK_KP0)
 			if (terrainMode == 6)
 			{
-			gWorld->setWaterHeight(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE), 0.0f);
-			mainGui->guiWater->updateData();
+				gWorld->setWaterHeight(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE), 0.0f);
+				mainGui->guiWater->updateData();
 			}
 
 
@@ -1790,7 +1793,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			else
 			{
 				Environment::getInstance()->cursorType++;
-				if (Environment::getInstance()->cursorType>3) Environment::getInstance()->cursorType = 0;
+				if (Environment::getInstance()->cursorType > 3) Environment::getInstance()->cursorType = 0;
 			}
 		}
 
@@ -1902,32 +1905,32 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 		if (e->keysym.sym == SDLK_F1)
 			if (Environment::getInstance()->ShiftDown)
 			{
-			if (alloff)
-			{
-				alloff_models = gWorld->drawmodels;
-				alloff_doodads = gWorld->drawdoodads;
-				alloff_contour = DrawMapContour;
-				alloff_wmo = gWorld->drawwmo;
-				alloff_fog = gWorld->drawfog;
-				alloff_terrain = gWorld->drawterrain;
+				if (alloff)
+				{
+					alloff_models = gWorld->drawmodels;
+					alloff_doodads = gWorld->drawdoodads;
+					alloff_contour = DrawMapContour;
+					alloff_wmo = gWorld->drawwmo;
+					alloff_fog = gWorld->drawfog;
+					alloff_terrain = gWorld->drawterrain;
 
-				gWorld->drawmodels = false;
-				gWorld->drawdoodads = false;
-				DrawMapContour = true;
-				gWorld->drawwmo = false;
-				gWorld->drawterrain = true;
-				gWorld->drawfog = false;
-			}
-			else
-			{
-				gWorld->drawmodels = alloff_models;
-				gWorld->drawdoodads = alloff_doodads;
-				DrawMapContour = alloff_contour;
-				gWorld->drawwmo = alloff_wmo;
-				gWorld->drawterrain = alloff_terrain;
-				gWorld->drawfog = alloff_fog;
-			}
-			alloff = !alloff;
+					gWorld->drawmodels = false;
+					gWorld->drawdoodads = false;
+					DrawMapContour = true;
+					gWorld->drawwmo = false;
+					gWorld->drawterrain = true;
+					gWorld->drawfog = false;
+				}
+				else
+				{
+					gWorld->drawmodels = alloff_models;
+					gWorld->drawdoodads = alloff_doodads;
+					DrawMapContour = alloff_contour;
+					gWorld->drawwmo = alloff_wmo;
+					gWorld->drawterrain = alloff_terrain;
+					gWorld->drawfog = alloff_fog;
+				}
+				alloff = !alloff;
 			}
 			else
 				gWorld->drawmodels = !gWorld->drawmodels;
@@ -1951,11 +1954,17 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 		if (e->keysym.sym == SDLK_F4 && !Environment::getInstance()->ShiftDown)
 			gWorld->drawwater = !gWorld->drawwater;
 
+		// toggle Animation
+		if (e->keysym.sym == SDLK_F11)
+		{
+			gWorld->renderAnimations = !gWorld->renderAnimations;
+		}
+
 		// toggle chunk limitation lines
 		if (e->keysym.sym == SDLK_F7)
 			if (Environment::getInstance()->ShiftDown)
 			{
-			Environment::getInstance()->view_holelines = !Environment::getInstance()->view_holelines;
+				Environment::getInstance()->view_holelines = !Environment::getInstance()->view_holelines;
 			}
 			else
 				gWorld->drawlines = !gWorld->drawlines;
@@ -1974,11 +1983,15 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 		if (e->keysym.sym == SDLK_F9)
 			DrawMapContour = !DrawMapContour;
 
+
+
 		// toggle help window
 		if (e->keysym.sym == SDLK_h)
 		{
 			mainGui->toggleHelp();
 		}
+
+
 
 		// draw fog
 		if (e->keysym.sym == SDLK_f)
@@ -2205,7 +2218,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 						if (e->keysym.sym == SDLK_5)
 							mainGui->G1->setValue(0.99f);
 					}
-					else if (e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_8)
+					else if (e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_9)
 					{
 						terrainMode = e->keysym.sym - SDLK_1;
 						mainGui->guiToolbar->IconSelect(terrainMode);

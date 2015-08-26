@@ -203,6 +203,7 @@ World::World(const std::string& name)
 	, drawdoodads(true)
 	, drawfog(false)
 	, drawlines(false)
+	, renderAnimations(false)
 	, drawmodels(true)
 	, drawterrain(true)
 	, drawwater(true)
@@ -1015,7 +1016,7 @@ void World::draw()
 	// M2s / models
 	if (drawmodels)
 	{
-		ModelManager::resetAnim();
+		if (renderAnimations)ModelManager::resetAnim();
 
 		glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
 		for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
@@ -1173,7 +1174,7 @@ void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap)
 		// M2s / models
 		if (drawmodels)
 		{
-			ModelManager::resetAnim();
+			if (renderAnimations)ModelManager::resetAnim();
 
 			glPushName(DoodadName);
 			glPushName(0);
