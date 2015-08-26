@@ -86,7 +86,7 @@ public:
 	bool drawwmo;
 	bool drawwireframe;
 	bool lighting;
-
+	bool renderAnimations;
 	// Time of the day.
 	float animtime;
 	float time;
