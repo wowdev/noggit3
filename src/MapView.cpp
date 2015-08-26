@@ -1120,6 +1120,10 @@ MapView::~MapView()
 
 void MapView::tick(float t, float dt)
 {
+
+	// start unloading tiles
+	gWorld->mapIndex->unloadTiles(static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE);
+
 	dt = std::min(dt, 1.0f);
 
 	// write some stuff into infos window for debuging
