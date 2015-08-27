@@ -107,7 +107,6 @@ public:
 	Skies *skies;
 
 	bool loading;
-	bool hadSky;
 
 	bool autoheight;
 

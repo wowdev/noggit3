@@ -500,7 +500,7 @@ void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot) const
 	}
 }
 
-void WMO::drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const
+bool WMO::drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const
 {
 	if (skybox && pCamera.IsInsideOf(pLower, pUpper))
 	{
@@ -523,9 +523,12 @@ void WMO::drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const
 		glScalef(sc, sc, sc);
 		skybox.get()->draw();
 		glPopMatrix();
-		gWorld->hadSky = true;
 		glEnable(GL_DEPTH_TEST);
+
+		return true;
 	}
+
+	return false;
 }
 
 /*
