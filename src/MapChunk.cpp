@@ -135,6 +135,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 	: textureSet(new TextureSet)
 	, mt(maintile)
 	, mBigAlpha(bigAlpha)
+	, water (false)
 {
 	uint32_t fourcc;
 	uint32_t size;
