@@ -20,6 +20,7 @@ private:
 	MapTile* tile;
 	bool onDisc;
 
+
 	MapTileEntry() : flags(0), tile(NULL) {}
 
 	friend class MapIndex;
@@ -66,6 +67,8 @@ public:
 private:
 	const std::string basename;
 	std::string globalWMOName;
+
+	int unloadTimeDelay;
 
 	// Is the WDT telling us to use a different alphamap structure.
 	bool mBigAlpha;

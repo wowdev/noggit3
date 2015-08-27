@@ -16,6 +16,8 @@ MapIndex::MapIndex(const std::string &pBasename)
 	, cz(-1)
 	, basename(pBasename)
 {
+
+	unloadTimeDelay = 10000;
 	std::stringstream filename;
 	filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
 
@@ -411,10 +413,10 @@ void MapIndex::unloadTiles(int x, int z)
 	{
 		for (int i = 0; i < 64; ++i)
 		{
-				if (j > (x + unloadBoundery) && j < (x - unloadBoundery) && i >(z + unloadBoundery) && i < (z - unloadBoundery))
+
+				if (  !( (j > (x - unloadBoundery)) &&  (j < (x + unloadBoundery)) && (i >(z - unloadBoundery)) && (i < (z + unloadBoundery))) )
 				{ 
 					unloadTile(j, i);
-					Log << "Unload Tile " << j << "-" << i << "\n";
 				}	
 		}
 	}
@@ -429,6 +431,7 @@ void MapIndex::unloadTile(int x, int z)
 	{
 		delete mTiles[z][x].tile;
 		mTiles[z][x].tile = NULL;
+		Log << "Unload Tile " << x << "-" << z << "\n";
 	}
 }
 
