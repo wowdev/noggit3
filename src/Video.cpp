@@ -64,56 +64,6 @@ namespace OpenGL
 
 Video video;
 
-inline const int& Video::xres() const
-{
-	return _xres;
-}
-inline const int& Video::yres() const
-{
-	return _yres;
-}
-inline const float& Video::ratio() const
-{
-	return _ratio;
-}
-inline const bool& Video::fullscreen() const
-{
-	return _fullscreen;
-}
-inline const bool& Video::doAntiAliasing() const
-{
-	return _doAntiAliasing;
-}
-inline const float& Video::fov() const
-{
-	return _fov;
-}
-inline const float& Video::nearclip() const
-{
-	return _nearclip;
-}
-inline const float& Video::farclip() const
-{
-	return _farclip;
-}
-
-inline void Video::doAntiAliasing(const bool& doAntiAliasing_)
-{
-	_doAntiAliasing = doAntiAliasing_;
-}
-void Video::fov(const float& fov_)
-{
-	_fov = fov_;
-}
-void Video::nearclip(const float& nearclip_)
-{
-	_nearclip = nearclip_;
-}
-void Video::farclip(const float& farclip_)
-{
-	_farclip = farclip_;
-}
-
 void Video::updateProjectionMatrix()
 {
 	glMatrixMode(GL_PROJECTION);
