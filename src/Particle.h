@@ -27,6 +27,7 @@ protected:
 	ParticleSystem *sys;
 public:
 	explicit ParticleEmitter(ParticleSystem *psys) : sys(psys) {}
+	virtual ~ParticleEmitter() {}
 	virtual Particle newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float spr2) = 0;
 };
 
