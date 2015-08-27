@@ -96,7 +96,7 @@ void UIDoodadSpawner::AddM2(const std::string& filename)
 		std::transform(ext.begin(), ext.end(), ext.begin(), ::toupper);
 		if (ext == ".M2")
 		{
-			gWorld->addM2(ModelManager::add(filename), selectionPosition, false);
+			gWorld->addM2(filename, selectionPosition, false);
 		}
 		if (ext == ".WMO")
 		{
