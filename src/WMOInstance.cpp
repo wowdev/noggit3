@@ -52,7 +52,10 @@ WMOInstance::WMOInstance(std::string const& filename)
 
 WMOInstance::~WMOInstance()
 {
-	SelectionNames.del(mSelectionID);
+  if (mSelectionID != -1)
+  {
+    SelectionNames.del(mSelectionID);
+  }
 }
 
 void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth);
