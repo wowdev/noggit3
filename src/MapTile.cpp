@@ -529,41 +529,38 @@ void MapTile::saveTile()
 
 	// Check which doodads and WMOs are on this ADT.
 	Vec3D lTileExtents[2];
-	unsigned int UID(0);
+	// unsigned int UID(0);
 	std::map<int, WMOInstance> lObjectInstances;
 	std::map<int, ModelInstance> lModelInstances;
 
 	lTileExtents[0] = Vec3D(this->xbase, 0.0f, this->zbase);
 	lTileExtents[1] = Vec3D(this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE);
 
-	// as selection of models dont work right so I comment all the UID stuff out again. 
-	// UID Problem so is here but no model duplications or delete
-	/*
-	UID += mPositionX * 10000000;
-	UID += mPositionZ *   100000;
+	// UID += mPositionX * 10000000;
+	// UID += mPositionZ *   100000;
 
 	for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
 	{
 		if (!it->second.isInsideTile(lTileExtents)) continue;
-		if (!it->second.hasUIDLock())
-		{
-			it->second.mUniqueID = UID++;
-			it->second.lockUID();
-		}
+		// if (!it->second.hasUIDLock())
+		// {
+		// 	it->second.mUniqueID = UID++;
+		// 	it->second.lockUID();
+		// }
 		lObjectInstances[it->second.mUniqueID] = it->second;
 	}
 
 	for (std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it)
 	{
 		if (!it->second.isInsideTile(lTileExtents)) continue;
-		if (!it->second.hasUIDLock())
-		{
-			it->second.d1 = UID++;
-			it->second.lockUID();
-		}
+		// if (!it->second.hasUIDLock())
+		// {
+		// 	it->second.d1 = UID++;
+		// 	it->second.lockUID();
+		// }
 		lModelInstances[it->second.d1] = it->second;
 	}
-	*/
+	
 	filenameOffsetThing nullyThing = { 0, 0 };
 
 	std::map<std::string, filenameOffsetThing> lModels;
