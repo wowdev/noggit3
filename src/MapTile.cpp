@@ -276,7 +276,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
 
 	for (std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it)
 	{
-		gWorld->mWMOInstances.insert(std::pair<int, WMOInstance>(it->uniqueID, WMOInstance(WMOManager::add(mWMOFilenames[it->nameID]), &(*it))));
+		gWorld->mWMOInstances.insert(std::pair<int, WMOInstance>(it->uniqueID, WMOInstance(mWMOFilenames[it->nameID], &(*it))));
 	}
 
 	// - Load M2s ------------------------------------------
@@ -318,12 +318,6 @@ MapTile::~MapTile()
 	}
 
 	mTextureFilenames.clear();
-
-	for (std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); ++it)
-	{
-		WMOManager::delbyname(*it);
-	}
-	mWMOFilenames.clear();
 
 	/*for( std::vector<Liquid*>::iterator it = mLiquids.begin(); it != mLiquids.end(); ++it )
 	{

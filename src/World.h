@@ -175,7 +175,7 @@ public:
 
 	void addModel(nameEntry entry, Vec3D newPos, bool copyit);
 	void addM2(std::string const& filename, Vec3D newPos, bool copyit);
-	void addWMO(WMO *wmo, Vec3D newPos, bool copyit);
+	void addWMO(std::string const& filename, Vec3D newPos, bool copyit);
 
 	void jumpToCords(Vec3D pos);
 	void saveMap();

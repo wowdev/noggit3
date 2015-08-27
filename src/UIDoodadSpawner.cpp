@@ -100,7 +100,7 @@ void UIDoodadSpawner::AddM2(const std::string& filename)
 		}
 		if (ext == ".WMO")
 		{
-			gWorld->addWMO(WMOManager::add(filename), selectionPosition, false);
+			gWorld->addWMO(filename, selectionPosition, false);
 		}
 	}
 }

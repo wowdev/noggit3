@@ -586,7 +586,7 @@ void World::initDisplay()
 
 	if (mapIndex->hasAGlobalWMO())
 	{
-		WMOInstance inst(WMOManager::add(mWmoFilename), &mWmoEntry);
+		WMOInstance inst(mWmoFilename, &mWmoEntry);
 
 		gWorld->mWMOInstances.insert(std::pair<int, WMOInstance>(mWmoEntry.uniqueID, inst));
 		camera = inst.pos;
@@ -1951,7 +1951,7 @@ void World::addModel(nameEntry entry, Vec3D newPos, bool copyit)
 	if (entry.type == eEntry_Model)
 		this->addM2(entry.data.model->model->_filename, newPos, copyit);
 	else if (entry.type == eEntry_WMO)
-		this->addWMO(entry.data.wmo->wmo, newPos, copyit);
+		this->addWMO(entry.data.wmo->wmo->_filename, newPos, copyit);
 }
 
 void World::addM2(std::string const& filename, Vec3D newPos, bool copyit)
@@ -2004,13 +2004,13 @@ void World::addM2(std::string const& filename, Vec3D newPos, bool copyit)
 	mapIndex->setChanged(newPos.x, newPos.z);
 }
 
-void World::addWMO(WMO *wmo, Vec3D newPos, bool copyit)
+void World::addWMO(std::string const& filename, Vec3D newPos, bool copyit)
 {
 
 	const int lMaxUID = std::max((mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1),
 		(mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1));
 
-	WMOInstance newWMOis(wmo);
+	WMOInstance newWMOis(filename);
 	newWMOis.pos = newPos;
 	newWMOis.mUniqueID = (unsigned int)lMaxUID;
 
