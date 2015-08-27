@@ -5,15 +5,15 @@
 #include <stdint.h>
 
 #include "Vec3D.h" // Vec3D
+#include "WMO.h"
 
-class WMO;
 class MPQFile;
 struct ENTRY_MODF;
 
 class WMOInstance
 {
 public:
-	WMO* wmo;
+	scoped_wmo_reference wmo;
 	Vec3D pos;
 	Vec3D  extents[2];
 	Vec3D  dir;
@@ -24,10 +24,9 @@ public:
 	uint16_t doodadset;
 
 public:
-	WMOInstance();
-	WMOInstance(WMO* _wmo, MPQFile* _file);
-	WMOInstance(WMO* _wmo, ENTRY_MODF* d);
-	explicit WMOInstance(WMO* _wmo);
+	WMOInstance(std::string const& filename, MPQFile* _file);
+	WMOInstance(std::string const& filename, ENTRY_MODF* d);
+	explicit WMOInstance(std::string const& filename);
 	~WMOInstance();
 
 	void draw();

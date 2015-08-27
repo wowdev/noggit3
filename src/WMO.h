@@ -167,14 +167,36 @@ public:
 class WMOManager
 {
 public:
-	static void delbyname(std::string name);
-	static WMO* add(std::string name);
-
 	static void report();
 
 private:
+	friend struct scoped_wmo_reference;
+	static WMO* add(std::string name);
+	static void delbyname(std::string name);
+
 	typedef std::map<std::string, WMO*> mapType;
 	static mapType items;
+};
+
+struct scoped_wmo_reference
+{
+  scoped_wmo_reference (std::string const& filename)
+    : _filename (filename)
+    , _wmo (WMOManager::add (_filename))
+  {}
+  ~scoped_wmo_reference()
+  {
+    WMOManager::delbyname (_filename);
+  }
+
+  WMO* operator->() const
+  {
+    return _wmo;
+  }
+
+private:
+  std::string _filename;
+  WMO* _wmo;
 };
 
 

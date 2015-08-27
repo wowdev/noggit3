@@ -6,14 +6,8 @@
 #include "World.h" // gWorld
 #include "Misc.h" // checkinside
 
-WMOInstance::WMOInstance()
-	: mSelectionID(SelectionNames.add(this))
-	, uidLock(false)
-{
-}
-
-WMOInstance::WMOInstance(WMO* _wmo, MPQFile* _file)
-	: wmo(_wmo)
+WMOInstance::WMOInstance(std::string const& filename, MPQFile* _file)
+	: wmo(filename)
 	, mSelectionID(SelectionNames.add(this))
 	, uidLock(false)
 {
@@ -28,8 +22,8 @@ WMOInstance::WMOInstance(WMO* _wmo, MPQFile* _file)
 	_file->read(&mUnknown, 2);
 }
 
-WMOInstance::WMOInstance(WMO* _wmo, ENTRY_MODF* d)
-	: wmo(_wmo)
+WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF* d)
+	: wmo(filename)
 	, pos(Vec3D(d->pos[0], d->pos[1], d->pos[2]))
 	, dir(Vec3D(d->rot[0], d->rot[1], d->rot[2]))
 	, mUniqueID(d->uniqueID), mFlags(d->flags)
@@ -42,8 +36,8 @@ WMOInstance::WMOInstance(WMO* _wmo, ENTRY_MODF* d)
 	extents[1] = Vec3D(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
 }
 
-WMOInstance::WMOInstance(WMO* _wmo)
-	: wmo(_wmo)
+WMOInstance::WMOInstance(std::string const& filename)
+	: wmo(filename)
 	, pos(Vec3D(0.0f, 0.0f, 0.0f))
 	, dir(Vec3D(0.0f, 0.0f, 0.0f))
 	, mUniqueID(0)

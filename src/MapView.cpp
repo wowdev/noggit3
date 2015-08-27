@@ -606,7 +606,7 @@ void InsertObject(UIFrame*, int id)
 			}
 			else
 			{
-				gWorld->addWMO(WMOManager::add(lastWMO), selectionPosition, false);
+				gWorld->addWMO(lastWMO, selectionPosition, false);
 			}
 		}
 	}
@@ -622,7 +622,7 @@ void InsertObject(UIFrame*, int id)
 				continue;
 			}
 
-			gWorld->addWMO(WMOManager::add(*it), selectionPosition, false);
+			gWorld->addWMO(*it, selectionPosition, false);
 		}
 
 		for (std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it)
