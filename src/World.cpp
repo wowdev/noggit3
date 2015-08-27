@@ -1949,12 +1949,12 @@ void World::deleteWMOInstance(int pUniqueID)
 void World::addModel(nameEntry entry, Vec3D newPos, bool copyit)
 {
 	if (entry.type == eEntry_Model)
-		this->addM2(entry.data.model->model, newPos, copyit);
+		this->addM2(entry.data.model->model->_filename, newPos, copyit);
 	else if (entry.type == eEntry_WMO)
 		this->addWMO(entry.data.wmo->wmo, newPos, copyit);
 }
 
-void World::addM2(Model *model, Vec3D newPos, bool copyit)
+void World::addM2(std::string const& filename, Vec3D newPos, bool copyit)
 {
 	int temp = 0;
 	if (mModelInstances.empty()) {
@@ -1967,7 +1967,7 @@ void World::addM2(Model *model, Vec3D newPos, bool copyit)
 	//  ( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
 	//                           ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 
-	ModelInstance newModelis = ModelInstance (model->_filename);
+	ModelInstance newModelis = ModelInstance (filename);
 	newModelis.d1 = (unsigned int)lMaxUID;
 	newModelis.pos = newPos;
 	newModelis.sc = 1;

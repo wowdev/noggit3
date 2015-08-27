@@ -174,7 +174,7 @@ public:
 	void removeHole(float x, float z, bool big);
 
 	void addModel(nameEntry entry, Vec3D newPos, bool copyit);
-	void addM2(Model *model, Vec3D newPos, bool copyit);
+	void addM2(std::string const& filename, Vec3D newPos, bool copyit);
 	void addWMO(WMO *wmo, Vec3D newPos, bool copyit);
 
 	void jumpToCords(Vec3D pos);

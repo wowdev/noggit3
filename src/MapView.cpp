@@ -591,7 +591,7 @@ void InsertObject(UIFrame*, int id)
 			}
 			else
 			{
-				gWorld->addM2(ModelManager::add(lastModel), selectionPosition, false);
+				gWorld->addM2(lastModel, selectionPosition, false);
 			}
 		}
 	}
@@ -635,7 +635,7 @@ void InsertObject(UIFrame*, int id)
 				continue;
 			}
 
-			gWorld->addM2(ModelManager::add(*it), selectionPosition, false);
+			gWorld->addM2(*it, selectionPosition, false);
 		}
 	}
 	//! \todo Memoryleak: These models will never get deleted.
