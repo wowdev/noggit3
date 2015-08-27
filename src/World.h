@@ -185,6 +185,8 @@ public:
 	void deleteModelInstance(int pUniqueID);
 	void deleteWMOInstance(int pUniqueID);
 
+	void delete_duplicate_model_and_wmo_instances();
+
   void ensure_instance_maps_having_correct_keys_and_unlock_uids();
 
 	static bool IsEditableWorld(int pMapId);
@@ -195,7 +197,6 @@ public:
 
 	void saveWDT();
 	void clearAllModelsOnADT(int x, int z);
-	void ClearDupModelsOnADT(int x, int z);
 	void swapTexture(int x, int z, OpenGL::Texture *tex);
 
 	bool canWaterSave(int x, int y);

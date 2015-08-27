@@ -686,7 +686,7 @@ void clearAllModels(UIFrame*, int)
 
 void ClearDupModels(UIFrame*, int)
 {
-	gWorld->ClearDupModelsOnADT(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
+	gWorld->delete_duplicate_model_and_wmo_instances();
 }
 
 void menuWater(UIFrame*, int id)
