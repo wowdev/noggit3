@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <iostream>
 #include <map>
-#include <conio.h>
 #include "Brush.h"
 #include "Environment.h"
 #include "Liquid.h"
@@ -328,8 +327,8 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-	glBufferData(GL_ARRAY_BUFFER, mapbufsize * sizeof(UINT32), mccv.data(), GL_STATIC_DRAW);
-	
+	glBufferData(GL_ARRAY_BUFFER, mapbufsize * sizeof(uint32_t), mccv.data(), GL_STATIC_DRAW);
+
 	initStrip();
 
 	vcenter = (vmin + vmax) * 0.5f;
@@ -415,7 +414,7 @@ void MapChunk::ClearShader()
 	if (changed)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-		glBufferData(GL_ARRAY_BUFFER, mapbufsize * sizeof(UINT32), mccv.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, mapbufsize * sizeof(uint32_t), mccv.data(), GL_STATIC_DRAW);
 	}
 }
 
@@ -1110,7 +1109,7 @@ bool MapChunk::ChangeMCCV(float x, float z, float radius, bool editMode)
 	if (Changed)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-		glBufferData(GL_ARRAY_BUFFER, mapbufsize * sizeof(UINT32), mccv.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, mapbufsize * sizeof(uint32_t), mccv.data(), GL_STATIC_DRAW);
 	}
 	return Changed;
 }

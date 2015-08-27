@@ -7,7 +7,6 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include <conio.h>
 #include <utility>
 #include <time.h>
 #include <boost/filesystem.hpp>
