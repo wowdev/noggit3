@@ -478,7 +478,7 @@ void MapIndex::saveChanged()
 
 	for (std::map<int, WMOInstance>::iterator it = wmoTemp.begin(); it != wmoTemp.end(); ++it)
 	{
-		gWorld->mWMOInstances[it->second.mUniqueID] = it->second;
+		gWorld->mWMOInstances.insert (std::make_pair (it->second.mUniqueID, it->second));
 		it->second.unlockUID();
 	}
 
@@ -487,7 +487,7 @@ void MapIndex::saveChanged()
 
 	for (std::map<int, ModelInstance>::iterator it = modelTemp.begin(); it != modelTemp.end(); ++it)
 	{
-		gWorld->mModelInstances[it->second.d1] = it->second;
+		gWorld->mModelInstances.insert (std::make_pair (it->second.d1, it->second));
 		it->second.unlockUID();
 	}
 
