@@ -34,8 +34,6 @@ static const float texDetail = 8.0f;
 
 static const float TEX_RANGE = 62.0f / 64.0f;
 
-StripType OddStrips[8 * 18];
-StripType EvenStrips[8 * 18];
 StripType LineStrip[32];
 StripType HoleStrip[128];
 
@@ -100,37 +98,6 @@ void GenerateContourMap()
 
 void CreateStrips()
 {
-	StripType *Temp = new StripType[18];
-	int j;
-
-	for (int i = 0; i < 8; ++i)
-	{
-		OddStrips[i * 18 + 0] = i * 17 + 17;
-		for (j = 0; j < 8; j++)
-		{
-			OddStrips[i * 18 + 2 * j + 1] = i * 17 + j;
-			OddStrips[i * 18 + 2 * j + 2] = i * 17 + j + 9;
-			EvenStrips[i * 18 + 2 * j] = i * 17 + 17 + j;
-			EvenStrips[i * 18 + 2 * j + 1] = i * 17 + 9 + j;
-		}
-		OddStrips[i * 18 + 17] = i * 17 + 8;
-		EvenStrips[i * 18 + 16] = i * 17 + 17 + 8;
-		EvenStrips[i * 18 + 17] = i * 17 + 8;
-	}
-
-	//Reverse the order whoops
-	for (int i = 0; i < 8; ++i)
-	{
-		for (j = 0; j < 18; ++j)
-			Temp[17 - j] = OddStrips[i * 18 + j];
-		memcpy(&OddStrips[i * 18], Temp, sizeof(Temp));
-		for (j = 0; j < 18; ++j)
-			Temp[17 - j] = EvenStrips[i * 18 + j];
-		memcpy(&EvenStrips[i * 18], Temp, sizeof(Temp));
-	}
-
-	delete[] Temp;
-
 	for (int i = 0; i < 32; ++i)
 	{
 		if (i < 9)
