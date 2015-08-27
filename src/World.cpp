@@ -33,6 +33,7 @@
 #include "MapIndex.h"
 #include "TileWater.h"// tile water
 
+#include <unordered_set>
 
 World *gWorld = NULL;
 
@@ -1349,14 +1350,6 @@ void World::clearAllModelsOnADT(int x, int z)
 	curTile->clearAllModels();
 }
 
-void World::ClearDupModelsOnADT(int x, int z)
-{
-	MapTile *curTile;
-	curTile = mapIndex->getTile((size_t)z, (size_t)x);
-	if (curTile == 0) return;
-	curTile->ClearDupModels();
-}
-
 void World::deleteWaterLayer(int x, int z)
 {
 	MapTile *curTile = mapIndex->getTile((size_t)z, (size_t)x);
@@ -1951,6 +1944,50 @@ void World::deleteWMOInstance(int pUniqueID)
 	mapIndex->setChanged(it->second.pos.x, it->second.pos.z);
 	mWMOInstances.erase(it);
 	ResetSelection();
+}
+
+void World::delete_duplicate_model_and_wmo_instances()
+{
+  std::unordered_set<int> wmos_to_remove;
+  std::unordered_set<int> models_to_remove;
+
+  for (auto lhs (mWMOInstances.begin()); lhs != mWMOInstances.end(); ++lhs)
+  {
+    for (auto rhs (std::next (lhs)); rhs != mWMOInstances.end(); ++rhs)
+    {
+      assert (lhs->first != rhs->first);
+
+      if (lhs->second.pos == rhs->second.pos)
+      {
+        wmos_to_remove.emplace (rhs->second.mUniqueID);
+      }
+    }
+  }
+
+  for (auto lhs (mModelInstances.begin()); lhs != mModelInstances.end(); ++lhs)
+  {
+    for (auto rhs (std::next (lhs)); rhs != mModelInstances.end(); ++rhs)
+    {
+      assert (lhs->first != rhs->first);
+
+      if (lhs->second.pos == rhs->second.pos)
+      {
+        models_to_remove.emplace (rhs->second.d1);
+      }
+    }
+  }
+
+  for (int uid : wmos_to_remove)
+  {
+    deleteWMOInstance (uid);
+  }
+  for (int uid : models_to_remove)
+  {
+    deleteModelInstance (uid);
+  }
+
+  Log << "Deleted " << wmos_to_remove.size() << " duplicate WMOs" << std::endl;
+  Log << "Deleted " << models_to_remove.size() << " duplicate models" << std::endl;
 }
 
 void World::ensure_instance_maps_having_correct_keys_and_unlock_uids()

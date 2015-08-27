@@ -519,26 +519,6 @@ void MapTile::clearAllModels()
 			gWorld->deleteModelInstance(it->second.d1);
 }
 
-void MapTile::ClearDupModels()
-{
-	int i = 0;
-	for (std::map<int, WMOInstance>::iterator it1 = gWorld->mWMOInstances.begin(); it1 != gWorld->mWMOInstances.end(); ++it1)
-		for (std::map<int, WMOInstance>::iterator it2 = gWorld->mWMOInstances.begin(); it2 != gWorld->mWMOInstances.end(); ++it2)
-			if (it1->first != it2->first && it1->second.pos.x == it2->second.pos.x && it1->second.pos.y == it2->second.pos.y && it1->second.pos.z == it2->second.pos.z)
-			{
-				gWorld->deleteWMOInstance(it2->second.mUniqueID);
-				++i;
-			}
-	for (std::map<int, ModelInstance>::iterator it1 = gWorld->mModelInstances.begin(); it1 != gWorld->mModelInstances.end(); ++it1)
-		for (std::map<int, ModelInstance>::iterator it2 = gWorld->mModelInstances.begin(); it2 != gWorld->mModelInstances.end(); ++it2)
-			if (it1->first != it2->first && it1->second.pos.x == it2->second.pos.x && it1->second.pos.y == it2->second.pos.y && it1->second.pos.z == it2->second.pos.z)
-			{
-				gWorld->deleteModelInstance(it2->second.d1);
-				++i;
-			}
-	Log << "Deleted " << i << " duplicate" << std::endl;
-}
-
 void MapTile::saveTile()
 {
 	Log << "Saving ADT \"" << mFilename << "\"." << std::endl;

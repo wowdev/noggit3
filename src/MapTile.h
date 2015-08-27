@@ -45,7 +45,6 @@ public:
 	void FixAllGapt(MapTile *next, bool a);
 	void CropWater();
 	void ClearShader();
-	void ClearDupModels();
 
 	bool isTile(int pX, int pZ);
 	void clearAllModels();
