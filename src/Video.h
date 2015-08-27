@@ -27,21 +27,55 @@ public:
 	void setTileMode() const;
 	void resize(int w, int h);
 
-	inline const int& xres() const;
-	inline const int& yres() const;
-	inline const float& ratio() const;
-	inline const bool& fullscreen() const;
-	inline const bool& doAntiAliasing() const;
+	int xres() const
+	{
+		return _xres;
+	}
+	int yres() const
+	{
+		return _yres;
+	}
+	float ratio() const
+	{
+		return _ratio;
+	}
+	bool fullscreen() const
+	{
+		return _fullscreen;
+	}
+	bool doAntiAliasing() const
+	{
+		return _doAntiAliasing;
+	}
+	float fov() const
+	{
+		return _fov;
+	}
+	float nearclip() const
+	{
+		return _nearclip;
+	}
+	float farclip() const
+	{
+		return _farclip;
+	}
 
-	inline void doAntiAliasing(const bool& doAntiAliasing_);
-
-	inline const float& fov() const;
-	inline const float& nearclip() const;
-	inline const float& farclip() const;
-
-	void fov(const float& fov_);
-	void nearclip(const float& nearclip_);
-	void farclip(const float& farclip_);
+	void doAntiAliasing(bool doAntiAliasing_)
+	{
+		_doAntiAliasing = doAntiAliasing_;
+	}
+	void fov(float fov_)
+	{
+		_fov = fov_;
+	}
+	void nearclip(float nearclip_)
+	{
+		_nearclip = nearclip_;
+	}
+	void farclip(float farclip_)
+	{
+		_farclip = farclip_;
+	}
 
 	void updateProjectionMatrix();
 
