@@ -1967,9 +1967,7 @@ void World::addM2(Model *model, Vec3D newPos, bool copyit)
 	//  ( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
 	//                           ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 
-	ModelInstance newModelis = ModelInstance();
-	newModelis.model = model;
-	newModelis.nameID = (unsigned int)-1;
+	ModelInstance newModelis = ModelInstance (model->_filename);
 	newModelis.d1 = (unsigned int)lMaxUID;
 	newModelis.pos = newPos;
 	newModelis.sc = 1;

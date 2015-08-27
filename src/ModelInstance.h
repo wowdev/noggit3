@@ -26,11 +26,9 @@ public:
 	Vec3D lcol;
 
 	~ModelInstance();
-	ModelInstance();
 	explicit ModelInstance(std::string const& filename);
 	explicit ModelInstance(std::string const& filename, MPQFile* f);
 	explicit ModelInstance(std::string const& filename, ENTRY_MDDF *d);
-	void init2(std::string const& filename, MPQFile* f);
 	void draw();
 	void drawMapTile();
 	//  void drawHighlight();

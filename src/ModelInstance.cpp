@@ -48,12 +48,6 @@ void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth)
 	glEnd();
 }
 
-ModelInstance::ModelInstance()
-	: uidLock(false)
-	, nameID(0xFFFFFFFF)
-{
-}
-
 ModelInstance::ModelInstance(std::string const& filename)
 	: model (ModelManager::add (filename))
 	, uidLock(false)
@@ -64,38 +58,8 @@ ModelInstance::ModelInstance(std::string const& filename)
 ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
 	: model (ModelManager::add (filename))
 	, uidLock(false)
-	, nameID(0xFFFFFFFF)
+	, nameID(SelectionNames.add(this))
 {
-	float ff[3];
-
-	f->read(&d1, 4);
-	f->read(ff, 12);
-	pos = Vec3D(ff[0], ff[1], ff[2]);
-	f->read(ff, 12);
-	dir = Vec3D(ff[0], ff[1], ff[2]);
-	int16_t scale;
-	f->read(&scale, 2);
-	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
-	sc = scale / 1024.0f;
-}
-
-ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
-	: model (ModelManager::add (filename))
-	, uidLock(false)
-	, nameID(0xFFFFFFFF)
-{
-	d1 = d->uniqueID;
-	pos = Vec3D(d->pos[0], d->pos[1], d->pos[2]);
-	dir = Vec3D(d->rot[0], d->rot[1], d->rot[2]);
-	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
-	sc = d->scale / 1024.0f;
-}
-
-void ModelInstance::init2(std::string const& filename, MPQFile* f)
-{
-	nameID = 0xFFFFFFFF;
-	model = ModelManager::add (filename);
-	nameID = SelectionNames.add(this);
 	float ff[3], temp;
 	f->read(ff, 12);
 	pos = Vec3D(ff[0], ff[1], ff[2]);
@@ -108,6 +72,18 @@ void ModelInstance::init2(std::string const& filename, MPQFile* f)
 	f->read(&sc, 4);
 	f->read(&d1, 4);
 	lcol = Vec3D(((d1 & 0xff0000) >> 16) / 255.0f, ((d1 & 0x00ff00) >> 8) / 255.0f, (d1 & 0x0000ff) / 255.0f);
+}
+
+ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
+	: model (ModelManager::add (filename))
+	, uidLock(false)
+	, nameID(0xFFFFFFFF)
+{
+	d1 = d->uniqueID;
+	pos = Vec3D(d->pos[0], d->pos[1], d->pos[2]);
+	dir = Vec3D(d->rot[0], d->rot[1], d->rot[2]);
+	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
+	sc = d->scale / 1024.0f;
 }
 
 void ModelInstance::draw()
