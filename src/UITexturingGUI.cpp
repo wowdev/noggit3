@@ -398,7 +398,7 @@ UIFrame* UITexturingGUI::createSelectedTexture()
 
 	return windowSelectedTexture;
 	*/
-	return false;
+	return NULL;
 }
 
 UIFrame* UITexturingGUI::createTilesetLoader()
