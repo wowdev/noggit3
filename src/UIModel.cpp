@@ -6,7 +6,7 @@
 
 UIModel::UIModel(float xPos, float yPos, float w, float h)
 	: UIFrame(xPos, yPos, w, h)
-	, model(NULL)
+	, model(boost::none)
 {
 	glGenFramebuffers(1, &fbo);
 	glGenRenderbuffers(1, &depthBuffer);
@@ -59,7 +59,7 @@ void UIModel::drawFBO() const
 	OpenGL::Texture::enableTexture(0);
 	glEnable(GL_NORMALIZE);
 
-	model->draw();
+	model.get()->draw();
 	glPopMatrix();
 
 	glPopAttrib();
@@ -106,10 +106,7 @@ void UIModel::render() const
 
 void UIModel::setModel(const std::string &name)
 {
-	if (model)
-		ModelManager::delbyname(model->_filename);
-
-	model = ModelManager::add(name);
+	model = scoped_model_reference (name);
 }
 
 //! \todo create class for framebuffers and implement this check

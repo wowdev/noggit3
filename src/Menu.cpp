@@ -52,7 +52,7 @@ Menu::Menu()
 	, mGUICreditsWindow(NULL)
 	, mGUIMinimapWindow(NULL)
 	, mGUImenuBar(NULL)
-	, mBackgroundModel(NULL)
+	, mBackgroundModel(boost::none)
 	, mLastBackgroundId(-1)
 {
 	gWorld = NULL;
@@ -95,21 +95,11 @@ Menu::~Menu()
 
 	delete gWorld;
 	gWorld = NULL;
-
-	if (mBackgroundModel)
-	{
-		ModelManager::delbyname(buildModelPath(mLastBackgroundId));
-		mBackgroundModel = NULL;
-	}
 }
 
 void Menu::randBackground()
 {
-	if (mBackgroundModel)
-	{
-		ModelManager::delbyname(buildModelPath(mLastBackgroundId));
-		mBackgroundModel = NULL;
-	}
+	mBackgroundModel.reset();
 
 	int randnum;
 	do
@@ -119,8 +109,8 @@ void Menu::randBackground()
 
 	mLastBackgroundId = randnum;
 
-	mBackgroundModel = ModelManager::add(buildModelPath(randnum));
-	mBackgroundModel->mPerInstanceAnimation = true;
+	mBackgroundModel = scoped_model_reference (buildModelPath(randnum));
+	mBackgroundModel.get()->mPerInstanceAnimation = true;
 }
 
 
@@ -141,11 +131,7 @@ void Menu::enterMapAt(Vec3D pos, bool pAutoHeight, float av, float ah)
 
 	mGUIMinimapWindow->hide();
 
-	if (mBackgroundModel)
-	{
-		ModelManager::delbyname(buildModelPath(mLastBackgroundId));
-		mBackgroundModel = NULL;
-	}
+	mBackgroundModel.reset();
 }
 
 void Menu::tick(float t, float /*dt*/)
@@ -154,7 +140,7 @@ void Menu::tick(float t, float /*dt*/)
 
 	if (mBackgroundModel)
 	{
-		mBackgroundModel->updateEmitters(t);
+		mBackgroundModel.get()->updateEmitters(t);
 	}
 	else
 	{
@@ -193,8 +179,8 @@ void Menu::display(float /*t*/, float /*dt*/)
 	glEnable(GL_LIGHTING);
 	glEnable(GL_TEXTURE_2D);
 
-	mBackgroundModel->cam.setup(globalTime);
-	mBackgroundModel->draw();
+	mBackgroundModel.get()->cam.setup(globalTime);
+	mBackgroundModel.get()->draw();
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);

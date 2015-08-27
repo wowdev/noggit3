@@ -5,7 +5,10 @@
 #include <vector>
 
 #include "AppState.h"
+#include "ModelManager.h"
 #include "Vec3D.h"
+
+#include <boost/optional.hpp>
 
 // ui classes
 class UIFrame;
@@ -64,7 +67,7 @@ private:
 	std::vector<MapEntry> mMaps;
 	std::vector<BookmarkEntry> mBookmarks;
 
-	Model* mBackgroundModel;
+	boost::optional<scoped_model_reference> mBackgroundModel;
 	int mLastBackgroundId;
 
 	void createBookmarkList();

@@ -3,7 +3,10 @@
 
 #include <string>
 
+#include "ModelManager.h"
 #include "UIFrame.h"
+
+#include <boost/optional.hpp>
 
 class Model;
 
@@ -16,7 +19,7 @@ public:
 	void setModel(const std::string &name);
 
 private:
-	Model* model;
+	boost::optional<scoped_model_reference> model;
 
 	GLuint fbo;
 	GLuint modelTexture;

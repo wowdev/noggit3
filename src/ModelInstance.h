@@ -1,16 +1,17 @@
 #ifndef MODELINSTANCE_H
 #define MODELINSTANCE_H
 
-#include "Vec3D.h" // Vec3D
-#include "MPQ.h" // MPQFile
 #include "MapHeaders.h" // ENTRY_MDDF
+#include "ModelManager.h"
+#include "MPQ.h" // MPQFile
+#include "Vec3D.h" // Vec3D
 
 class Model;
 
 class ModelInstance
 {
 public:
-	Model *model;
+	scoped_model_reference model;
 	Vec3D extents[2];
 
 	unsigned int nameID;

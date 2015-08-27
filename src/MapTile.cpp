@@ -325,12 +325,6 @@ MapTile::~MapTile()
 	}
 	mWMOFilenames.clear();
 
-	for (std::vector<std::string>::iterator it = mModelFilenames.begin(); it != mModelFilenames.end(); ++it)
-	{
-		ModelManager::delbyname(*it);
-	}
-	mModelFilenames.clear();
-
 	/*for( std::vector<Liquid*>::iterator it = mLiquids.begin(); it != mLiquids.end(); ++it )
 	{
 	if( *it )

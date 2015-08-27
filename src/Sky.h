@@ -5,6 +5,7 @@
 #include <string>
 
 #include "DBCFile.h"
+#include "ModelManager.h"
 #include "MPQ.h"
 #include "Vec3D.h"
 
@@ -69,7 +70,7 @@ class Skies {
 
 	int numSkies;
 	int cs;
-	Model *stars;
+	scoped_model_reference stars;
 	char skyname[128];
 
 public:
@@ -77,7 +78,6 @@ public:
 	Vec3D colorSet[18];
 
 	explicit Skies(unsigned int mapid);
-	~Skies();
 
 	void findSkyWeights(Vec3D pos);
 	void initSky(Vec3D pos, int t);
