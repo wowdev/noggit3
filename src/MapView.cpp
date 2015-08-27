@@ -584,19 +584,31 @@ void InsertObject(UIFrame*, int id)
 	{
 		LogError << "M2 Problem 14:" << lastModel << " - " << id << std::endl;
 		if (lastModel != "")
+		{
 			if (!MPQFile::exists(lastModel))
+			{
 				LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
+			}
 			else
+			{
 				gWorld->addM2(ModelManager::add(lastModel), selectionPosition, false);
+			}
+		}
 	}
 	else if (id == 15)
 	{
 		LogError << "M2 Problem 15:" << lastModel << " - " << id << std::endl;
 		if (lastWMO != "")
+		{
 			if (!MPQFile::exists(lastWMO))
+			{
 				LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
+			}
 			else
+			{
 				gWorld->addWMO(WMOManager::add(lastWMO), selectionPosition, false);
+			}
+		}
 	}
 	else
 	{
@@ -1353,10 +1365,16 @@ void MapView::tick(float t, float dt)
 								textureBrush.GenerateTexture();
 							}
 							if (mViewMode == eViewMode_3D)
+							{
 								if (mainGui->TextureSwitcher->hidden())
+								{
 									gWorld->paintTexture(xPos, zPos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
+								}
 								else
+								{
 									gWorld->overwriteTextureAtCurrentChunk(xPos, zPos, mainGui->TextureSwitcher->getTextures(), UITexturingGUI::getSelectedTexture());
+								}
+							}
 						}
 						// paint 2d if nothing is pressed.
 						if (textureBrush.needUpdate())
@@ -1856,10 +1874,16 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 		}
 		// move speed doubling or raw saving
 		if (e->keysym.sym == SDLK_p)
+		{
 			if (Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown)
+			{
 				Saving = true;
+			}
 			else
+			{
 				movespd *= 2.0f;
+			}
+		}
 
 		if (e->keysym.sym == SDLK_o)
 			movespd *= 0.5f;
@@ -1907,6 +1931,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 
 		// toggle "terrain texturing mode" / draw models
 		if (e->keysym.sym == SDLK_F1)
+		{
 			if (Environment::getInstance()->ShiftDown)
 			{
 				if (alloff)
@@ -1937,7 +1962,10 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 				alloff = !alloff;
 			}
 			else
+			{
 				gWorld->drawmodels = !gWorld->drawmodels;
+			}
+		}
 
 
 		// toggle drawing of doodads in WMOs.
@@ -1966,12 +1994,16 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 
 		// toggle chunk limitation lines
 		if (e->keysym.sym == SDLK_F7)
+		{
 			if (Environment::getInstance()->ShiftDown)
 			{
 				Environment::getInstance()->view_holelines = !Environment::getInstance()->view_holelines;
 			}
 			else
+			{
 				gWorld->drawlines = !gWorld->drawlines;
+			}
+		}
 
 		// toggle drawing of WMOs
 		if (e->keysym.sym == SDLK_F6)
@@ -2007,41 +2039,42 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 
 		// fog distance or brush radius
 		if (e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS)
+		{
 			if (Environment::getInstance()->AltDown)
 			{
-			switch (terrainMode)
-			{
-			case 0:
-				groundBrushRadius += 0.01f;
-				if (groundBrushRadius > 1000.0f)
-					groundBrushRadius = 1000.0f;
-				else if (groundBrushRadius < 0.0005f)
-					groundBrushRadius = 0.0005f;
-				ground_brush_radius->setValue(groundBrushRadius / 1000);
-				break;
-			case 1:
-				blurBrushRadius += 0.01f;
-				if (blurBrushRadius > 1000.0f)
-					blurBrushRadius = 1000.0f;
-				else if (blurBrushRadius < 0.01f)
-					blurBrushRadius = 0.01f;
-				blur_brush->setValue(blurBrushRadius / 1000);
-				break;
-			case 2:
-				textureBrush.setRadius(textureBrush.getRadius() + 0.1f);
-				if (textureBrush.getRadius() > 100.0f)
-					textureBrush.setRadius(100.0f);
-				else if (textureBrush.getRadius() < 0.1f)
-					textureBrush.setRadius(0.1f);
-				paint_brush->setValue(textureBrush.getRadius() / 100);
-				break;
-			case 6:
-				int x = (int)(static_cast<int>(gWorld->camera.x) / TILESIZE);
-				int z = (int)(static_cast<int>(gWorld->camera.z) / TILESIZE);
-				gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) + 2.0f));
-				mainGui->guiWater->updateData();
-				break;
-			}
+				switch (terrainMode)
+				{
+				case 0:
+					groundBrushRadius += 0.01f;
+					if (groundBrushRadius > 1000.0f)
+						groundBrushRadius = 1000.0f;
+					else if (groundBrushRadius < 0.0005f)
+						groundBrushRadius = 0.0005f;
+					ground_brush_radius->setValue(groundBrushRadius / 1000);
+					break;
+				case 1:
+					blurBrushRadius += 0.01f;
+					if (blurBrushRadius > 1000.0f)
+						blurBrushRadius = 1000.0f;
+					else if (blurBrushRadius < 0.01f)
+						blurBrushRadius = 0.01f;
+					blur_brush->setValue(blurBrushRadius / 1000);
+					break;
+				case 2:
+					textureBrush.setRadius(textureBrush.getRadius() + 0.1f);
+					if (textureBrush.getRadius() > 100.0f)
+						textureBrush.setRadius(100.0f);
+					else if (textureBrush.getRadius() < 0.1f)
+						textureBrush.setRadius(0.1f);
+					paint_brush->setValue(textureBrush.getRadius() / 100);
+					break;
+				case 6:
+					int x = (int)(static_cast<int>(gWorld->camera.x) / TILESIZE);
+					int z = (int)(static_cast<int>(gWorld->camera.z) / TILESIZE);
+					gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) + 2.0f));
+					mainGui->guiWater->updateData();
+					break;
+				}
 			}
 			else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk)))
 			{
@@ -2069,10 +2102,12 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 				//change selected model size
 				keys = 1;
 			}
+		}
 
-			if (e->keysym.sym == SDLK_KP_MINUS || e->keysym.sym == SDLK_MINUS)
-				if (Environment::getInstance()->AltDown)
-				{
+		if (e->keysym.sym == SDLK_KP_MINUS || e->keysym.sym == SDLK_MINUS)
+		{
+			if (Environment::getInstance()->AltDown)
+			{
 				switch (terrainMode)
 				{
 				case 0:
@@ -2106,136 +2141,139 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 					mainGui->guiWater->updateData();
 					break;
 				}
-				}
-				else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk)))
+			}
+			else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk)))
+			{
+				if (terrainMode == 6)
 				{
-					if (terrainMode == 6)
-					{
-						int x = (int)(static_cast<int>(gWorld->camera.x) / TILESIZE);
-						int z = (int)(static_cast<int>(gWorld->camera.z) / TILESIZE);
-						if (Environment::getInstance()->ShiftDown)
-							gWorld->setWaterTrans(x, z, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(x, z))) - 1));
-						else if (Environment::getInstance()->CtrlDown)
-							gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 5.0f));
-						else
-							gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 1.0f));
-
-						mainGui->guiWater->updateData();
-					}
-					else if (Environment::getInstance()->ShiftDown)
-					{
-						gWorld->fogdistance -= 60.0f;// fog change only when no model is selected!
-					}
-
-				}
-				else
-				{
-					//change selected model size
-					keys = -1;
-				}
-
-				// minimap
-				if (e->keysym.sym == SDLK_m)
-					mainGui->minimapWindow->toggleVisibility();
-
-				if (e->keysym.sym == SDLK_g)
-				{
-					// write teleport cords to txt file
-					std::ofstream f("ports.txt", std::ios_base::app);
-					f << std::endl << std::endl << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID()) << " on ADT " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE) << std::endl << std::endl;
-					f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << gWorld->getMapID() << std::endl << std::endl;
-					f << "ArcEmu:" << std::endl << ".worldport " << gWorld->getMapID() << " " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << std::endl << std::endl;
-					f.close();
-				}
-
-
-				// toogle between smooth / flat / linear
-				if (e->keysym.sym == SDLK_y)
-					switch (terrainMode)
-				{
-					case 0:
-						groundBrushType++;
-						groundBrushType = groundBrushType % 6;
-						gGroundToggleGroup->Activate(groundBrushType);
-						break;
-
-					case 1:
-						blurBrushType++;
-						blurBrushType = blurBrushType % 3;
-						gBlurToggleGroup->Activate(blurBrushType);
-						break;
-				}
-
-				// is not used somewere else!!
-				//! \todo  what is this?
-				if (e->keysym.sym == SDLK_g)
-					drawFlags = !drawFlags;
-
-				// toogle tile mode
-				if (e->keysym.sym == SDLK_u)
-				{
-					if (mViewMode == eViewMode_2D)
-					{
-						mViewMode = eViewMode_3D;
-						terrainMode = saveterrainMode;
-						// Set the right icon in toolbar
-						mainGui->guiToolbar->IconSelect(terrainMode);
-					}
+					int x = (int)(static_cast<int>(gWorld->camera.x) / TILESIZE);
+					int z = (int)(static_cast<int>(gWorld->camera.z) / TILESIZE);
+					if (Environment::getInstance()->ShiftDown)
+						gWorld->setWaterTrans(x, z, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(x, z))) - 1));
+					else if (Environment::getInstance()->CtrlDown)
+						gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 5.0f));
 					else
-					{
-						mViewMode = eViewMode_2D;
-						saveterrainMode = terrainMode;
-						terrainMode = 2;
-						// Set the right icon in toolbar
-						mainGui->guiToolbar->IconSelect(terrainMode);
-					}
+						gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 1.0f));
+
+					mainGui->guiWater->updateData();
+				}
+				else if (Environment::getInstance()->ShiftDown)
+				{
+					gWorld->fogdistance -= 60.0f;// fog change only when no model is selected!
 				}
 
-				// doodads set
-				if (e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9)
-				{
-					if (gWorld->IsSelection(eEntry_WMO))
-					{
-						gWorld->GetCurrentSelection()->data.wmo->doodadset = e->keysym.sym - SDLK_0;
-					}
-					else if (Environment::getInstance()->ShiftDown)
-					{
-						if (e->keysym.sym == SDLK_1)
-							movespd = 15.0f;
-						if (e->keysym.sym == SDLK_2)
-							movespd = 50.0f;
-						if (e->keysym.sym == SDLK_3)
-							movespd = 200.0f;
-						if (e->keysym.sym == SDLK_4)
-							movespd = 800.0f;
-					}
-					else if (Environment::getInstance()->AltDown)
-					{
-						if (e->keysym.sym == SDLK_1)
-							mainGui->G1->setValue(0.01f);
-						if (e->keysym.sym == SDLK_2)
-							mainGui->G1->setValue(0.25f);
-						if (e->keysym.sym == SDLK_3)
-							mainGui->G1->setValue(0.50f);
-						if (e->keysym.sym == SDLK_4)
-							mainGui->G1->setValue(0.75f);
-						if (e->keysym.sym == SDLK_5)
-							mainGui->G1->setValue(0.99f);
-					}
-					else if (e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_9)
-					{
-						terrainMode = e->keysym.sym - SDLK_1;
-						mainGui->guiToolbar->IconSelect(terrainMode);
-					}
-				}
+			}
+			else
+			{
+				//change selected model size
+				keys = -1;
+			}
+		}
 
-				// add a new bookmark
-				if (e->keysym.sym == SDLK_F5)
-				{
-					std::ofstream f("bookmarks.txt", std::ios_base::app);
-					f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << ah << " " << av << " " << gWorld->getAreaID() << std::endl;
-					f.close();
-				}
+		// minimap
+		if (e->keysym.sym == SDLK_m)
+			mainGui->minimapWindow->toggleVisibility();
+
+		if (e->keysym.sym == SDLK_g)
+		{
+			// write teleport cords to txt file
+			std::ofstream f("ports.txt", std::ios_base::app);
+			f << std::endl << std::endl << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID()) << " on ADT " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE) << std::endl << std::endl;
+			f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << gWorld->getMapID() << std::endl << std::endl;
+			f << "ArcEmu:" << std::endl << ".worldport " << gWorld->getMapID() << " " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << std::endl << std::endl;
+			f.close();
+		}
+
+
+		// toogle between smooth / flat / linear
+		if (e->keysym.sym == SDLK_y)
+		{
+			switch (terrainMode)
+			{
+				case 0:
+					groundBrushType++;
+					groundBrushType = groundBrushType % 6;
+					gGroundToggleGroup->Activate(groundBrushType);
+					break;
+
+				case 1:
+					blurBrushType++;
+					blurBrushType = blurBrushType % 3;
+					gBlurToggleGroup->Activate(blurBrushType);
+					break;
+			}
+		}
+
+		// is not used somewere else!!
+		//! \todo  what is this?
+		if (e->keysym.sym == SDLK_g)
+			drawFlags = !drawFlags;
+
+		// toogle tile mode
+		if (e->keysym.sym == SDLK_u)
+		{
+			if (mViewMode == eViewMode_2D)
+			{
+				mViewMode = eViewMode_3D;
+				terrainMode = saveterrainMode;
+				// Set the right icon in toolbar
+				mainGui->guiToolbar->IconSelect(terrainMode);
+			}
+			else
+			{
+				mViewMode = eViewMode_2D;
+				saveterrainMode = terrainMode;
+				terrainMode = 2;
+				// Set the right icon in toolbar
+				mainGui->guiToolbar->IconSelect(terrainMode);
+			}
+		}
+
+		// doodads set
+		if (e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9)
+		{
+			if (gWorld->IsSelection(eEntry_WMO))
+			{
+				gWorld->GetCurrentSelection()->data.wmo->doodadset = e->keysym.sym - SDLK_0;
+			}
+			else if (Environment::getInstance()->ShiftDown)
+			{
+				if (e->keysym.sym == SDLK_1)
+					movespd = 15.0f;
+				if (e->keysym.sym == SDLK_2)
+					movespd = 50.0f;
+				if (e->keysym.sym == SDLK_3)
+					movespd = 200.0f;
+				if (e->keysym.sym == SDLK_4)
+					movespd = 800.0f;
+			}
+			else if (Environment::getInstance()->AltDown)
+			{
+				if (e->keysym.sym == SDLK_1)
+					mainGui->G1->setValue(0.01f);
+				if (e->keysym.sym == SDLK_2)
+					mainGui->G1->setValue(0.25f);
+				if (e->keysym.sym == SDLK_3)
+					mainGui->G1->setValue(0.50f);
+				if (e->keysym.sym == SDLK_4)
+					mainGui->G1->setValue(0.75f);
+				if (e->keysym.sym == SDLK_5)
+					mainGui->G1->setValue(0.99f);
+			}
+			else if (e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_9)
+			{
+				terrainMode = e->keysym.sym - SDLK_1;
+				mainGui->guiToolbar->IconSelect(terrainMode);
+			}
+		}
+
+		// add a new bookmark
+		if (e->keysym.sym == SDLK_F5)
+		{
+			std::ofstream f("bookmarks.txt", std::ios_base::app);
+			f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << ah << " " << av << " " << gWorld->getAreaID() << std::endl;
+			f.close();
+		}
 	}
 	else
 	{
