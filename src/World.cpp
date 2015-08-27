@@ -2006,7 +2006,7 @@ void World::addM2(std::string const& filename, Vec3D newPos, bool copyit)
 
 
 
-	mModelInstances.insert(std::pair<int, ModelInstance>(lMaxUID, newModelis));
+	mModelInstances.emplace (lMaxUID, std::move (newModelis));
 	mapIndex->setChanged(newPos.x, newPos.z);
 }
 
