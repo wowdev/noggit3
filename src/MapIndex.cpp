@@ -7,6 +7,8 @@
 #include "World.h"
 #include "MapChunk.h"
 
+#include <boost/range/adaptor/map.hpp>
+
 MapIndex::MapIndex(const std::string &pBasename)
 	: mHasAGlobalWMO(false)
 	, mBigAlpha(false)
@@ -473,26 +475,21 @@ void MapIndex::saveChanged()
 		}
 	}
 
-	std::map<int, WMOInstance> wmoTemp(gWorld->mWMOInstances);
-	gWorld->mWMOInstances.clear();
+	std::map<int, WMOInstance> wmoTemp;
+	std::swap (gWorld->mWMOInstances, wmoTemp);
 
-	for (std::map<int, WMOInstance>::iterator it = wmoTemp.begin(); it != wmoTemp.end(); ++it)
+	for (WMOInstance& instance : wmoTemp | boost::adaptors::map_values)
 	{
-		gWorld->mWMOInstances.insert (std::make_pair (it->second.mUniqueID, it->second));
-		it->second.unlockUID();
+		gWorld->mWMOInstances.emplace (instance.mUniqueID, std::move (instance)).first->second.unlockUID();
 	}
 
-	std::map<int, ModelInstance> modelTemp(gWorld->mModelInstances);
-	gWorld->mModelInstances.clear();
+	std::map<int, ModelInstance> modelTemp;
+	std::swap (gWorld->mModelInstances, modelTemp);
 
-	for (std::map<int, ModelInstance>::iterator it = modelTemp.begin(); it != modelTemp.end(); ++it)
+	for (ModelInstance& instance : modelTemp | boost::adaptors::map_values)
 	{
-		gWorld->mModelInstances.insert (std::make_pair (it->second.d1, it->second));
-		it->second.unlockUID();
+		gWorld->mModelInstances.emplace (instance.d1, std::move (instance)).first->second.unlockUID();
 	}
-
-	wmoTemp.clear();
-	modelTemp.clear();
 }
 
 bool MapIndex::hasAGlobalWMO()

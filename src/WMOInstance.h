@@ -29,6 +29,24 @@ public:
 	explicit WMOInstance(std::string const& filename);
 	~WMOInstance();
 
+  WMOInstance (WMOInstance&& other)
+    : wmo (std::move (other.wmo))
+    , pos (other.pos)
+    // , extents (other.extents)
+    , dir (other.dir)
+    , mUniqueID (other.mUniqueID)
+    , mFlags (other.mFlags)
+    , mUnknown (other.mUnknown)
+    , mNameset (other.mNameset)
+    , doodadset (other.doodadset)
+    , uidLock (other.uidLock)
+    , mSelectionID (other.mSelectionID)
+  {
+    std::swap (extents, other.extents);
+    other.mSelectionID = -1;
+  }
+  WMOInstance& operator= (WMOInstance&&) = delete;
+
 	void draw();
 	void drawSelect();
 

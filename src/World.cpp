@@ -586,9 +586,8 @@ void World::initDisplay()
 	if (mapIndex->hasAGlobalWMO())
 	{
 		WMOInstance inst(mWmoFilename, &mWmoEntry);
-
-		gWorld->mWMOInstances.insert(std::pair<int, WMOInstance>(mWmoEntry.uniqueID, inst));
 		camera = inst.pos;
+		gWorld->mWMOInstances.emplace (mWmoEntry.uniqueID, std::move (inst));
 	}
 
 	skies = new Skies(mMapId);
@@ -2032,7 +2031,7 @@ void World::addWMO(std::string const& filename, Vec3D newPos, bool copyit)
 	// recalc the extends
 	newWMOis.recalcExtents();
 
-	mWMOInstances.insert(std::pair<int, WMOInstance>(lMaxUID, newWMOis));
+	mWMOInstances.emplace (lMaxUID, std::move (newWMOis));
 	mapIndex->setChanged(newPos.x, newPos.z);
 
 }

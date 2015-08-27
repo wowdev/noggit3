@@ -276,7 +276,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
 
 	for (std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it)
 	{
-		gWorld->mWMOInstances.insert(std::pair<int, WMOInstance>(it->uniqueID, WMOInstance(mWMOFilenames[it->nameID], &(*it))));
+		gWorld->mWMOInstances.emplace (it->uniqueID, WMOInstance(mWMOFilenames[it->nameID], &(*it)));
 	}
 
 	// - Load M2s ------------------------------------------

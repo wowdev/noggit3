@@ -181,12 +181,28 @@ private:
 struct scoped_wmo_reference
 {
   scoped_wmo_reference (std::string const& filename)
-    : _filename (filename)
+    : _valid (true)
+    , _filename (filename)
     , _wmo (WMOManager::add (_filename))
   {}
+
+  scoped_wmo_reference (scoped_wmo_reference const&) = delete;
+  scoped_wmo_reference& operator= (scoped_wmo_reference const&) = delete;
+  scoped_wmo_reference (scoped_wmo_reference&& other)
+    : _valid (other._valid)
+    , _filename (other._filename)
+    , _wmo (other._wmo)
+  {
+    other._valid = false;
+  }
+  scoped_wmo_reference& operator= (scoped_wmo_reference&&) = delete;
+
   ~scoped_wmo_reference()
   {
-    WMOManager::delbyname (_filename);
+    if (_valid)
+    {
+      WMOManager::delbyname (_filename);
+    }
   }
 
   WMO* operator->() const
@@ -195,6 +211,8 @@ struct scoped_wmo_reference
   }
 
 private:
+  bool _valid;
+
   std::string _filename;
   WMO* _wmo;
 };
