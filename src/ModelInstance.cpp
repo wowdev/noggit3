@@ -3,7 +3,6 @@
 #include "Log.h"
 #include "Misc.h" // checkinside
 #include "Model.h" // Model, etc.
-#include "ModelManager.h"
 #include "World.h" // gWorld
 
 Vec3D TransformCoordsForModel(Vec3D pIn)
@@ -49,14 +48,14 @@ void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth)
 }
 
 ModelInstance::ModelInstance(std::string const& filename)
-	: model (ModelManager::add (filename))
+	: model (filename)
 	, uidLock(false)
 	, nameID(0xFFFFFFFF)
 {
 }
 
 ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
-	: model (ModelManager::add (filename))
+	: model (filename)
 	, uidLock(false)
 	, nameID(SelectionNames.add(this))
 {
@@ -75,7 +74,7 @@ ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
 }
 
 ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
-	: model (ModelManager::add (filename))
+	: model (filename)
 	, uidLock(false)
 	, nameID(0xFFFFFFFF)
 {

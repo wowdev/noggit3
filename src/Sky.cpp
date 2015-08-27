@@ -176,10 +176,10 @@ void Skies::draw()
 }
 
 Skies::Skies(unsigned int mapid)
+  : stars ("Environments\\Stars\\Stars.mdx")
 {
 	numSkies = 0;
 	cs = -1;
-	stars = 0;
 
 	for (DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i)
 	{
@@ -210,17 +210,6 @@ Skies::Skies(unsigned int mapid)
 	// sort skies from smallest to largest; global last.
 	// smaller skies will have precedence when calculating weights to achieve smooth transitions etc.
 	std::sort(skies.begin(), skies.end());
-
-	stars = ModelManager::add("Environments\\Stars\\Stars.mdx");
-}
-
-Skies::~Skies()
-{
-	if (stars)
-	{
-		ModelManager::delbyname("Environments\\Stars\\Stars.mdx");
-		stars = NULL;
-	}
 }
 
 void Skies::findSkyWeights(Vec3D pos)

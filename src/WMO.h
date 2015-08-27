@@ -9,10 +9,13 @@
 
 #include "Manager.h"
 #include "ModelInstance.h" // ModelInstance
+#include "ModelManager.h"
 #include "MPQ.h"
 #include "Quaternion.h"
 #include "Vec3D.h"
 #include "Video.h"
+
+#include <boost/optional.hpp>
 
 class WMO;
 class WMOGroup;
@@ -151,8 +154,7 @@ public:
 
 	std::vector<WMODoodadSet> doodadsets;
 
-	Model *skybox;
-	std::string skyboxFilename;
+	boost::optional<scoped_model_reference> skybox;
 
 	explicit WMO(const std::string& name);
 	~WMO();

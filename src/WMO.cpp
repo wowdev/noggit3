@@ -64,8 +64,6 @@ WMO::WMO(const std::string& filenameArg)
 	char *ddnames = NULL;
 	char *groupnames = NULL;
 
-	skybox = 0;
-
 	char *texbuf = 0;
 
 	while (!f.isEof()) {
@@ -169,12 +167,7 @@ WMO::WMO(const std::string& filenameArg)
 
 					if (MPQFile::exists(path))
 					{
-						skybox = ModelManager::add(path);
-						skyboxFilename = path;
-					}
-					else
-					{
-						skybox = NULL;
+						skybox = scoped_model_reference (path);
 					}
 				}
 			}
@@ -240,12 +233,6 @@ WMO::~WMO()
 	{
 		delete[] mat;
 		mat = NULL;
-	}
-
-	if (skybox) {
-		//delete skybox;
-		ModelManager::delbyname(skyboxFilename);
-		skybox = NULL;
 	}
 }
 
@@ -534,7 +521,7 @@ void WMO::drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const
 		glTranslatef(o.x, o.y, o.z);
 		const float sc = 2.0f;
 		glScalef(sc, sc, sc);
-		skybox->draw();
+		skybox.get()->draw();
 		glPopMatrix();
 		gWorld->hadSky = true;
 		glEnable(GL_DEPTH_TEST);
