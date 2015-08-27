@@ -38,7 +38,7 @@ private:
 	StripType *strip;
 	int striplen;
 
-	bool water = false;
+	bool water;
 
 	Vec3D mNormals[mapbufsize];
 	Vec3D mMinimap[mapbufsize];
