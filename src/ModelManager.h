@@ -26,12 +26,35 @@ private:
 struct scoped_model_reference
 {
   scoped_model_reference (std::string const& filename)
-    : _filename (filename)
+    : _valid (true)
+    , _filename (filename)
     , _model (ModelManager::add (_filename))
   {}
+
+  scoped_model_reference (scoped_model_reference const&) = delete;
+  scoped_model_reference& operator= (scoped_model_reference const&) = delete;
+  scoped_model_reference (scoped_model_reference&& other)
+    : _valid (other._valid)
+    , _filename (other._filename)
+    , _model (other._model)
+  {
+    other._valid = false;
+  }
+  scoped_model_reference& operator= (scoped_model_reference&& other)
+  {
+    std::swap (_valid, other._valid);
+    std::swap (_filename, other._filename);
+    std::swap (_model, other._model);
+    other._valid = false;
+    return *this;
+  }
+
   ~scoped_model_reference()
   {
-    ModelManager::delbyname (_filename);
+    if (_valid)
+    {
+      ModelManager::delbyname (_filename);
+    }
   }
 
   Model* operator->() const
@@ -40,6 +63,7 @@ struct scoped_model_reference
   }
 
 private:
+  bool _valid;
   std::string _filename;
   Model* _model;
 };
