@@ -154,9 +154,7 @@ WMO::WMO(const std::string& filenameArg)
 			for (unsigned int i = 0; i<nModels; ++i) {
 				int ofs;
 				f.read(&ofs, 4);
-				ModelInstance mi;
-				mi.init2(ddnames + ofs, &f);
-				modelis.push_back(mi);
+				modelis.push_back(ModelInstance (ddnames + ofs, &f));
 			}
 
 		}
