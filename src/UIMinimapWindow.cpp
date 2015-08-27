@@ -150,6 +150,8 @@ void UIMinimapWindow::render() const
 			{
 				if (gWorld->mapIndex->isTileExternal(i, j))
 					glColor4f(1.0f, 0.7f, 0.5f, 0.6f);
+				else if (gWorld->mapIndex->tileLoaded(j, i))
+					glColor4f(0.0f, 1.0f, 1.0f, 0.4f);
 				else
 					glColor4f(0.8f, 0.8f, 0.8f, 0.4f);
 			}
