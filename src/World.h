@@ -185,6 +185,8 @@ public:
 	void deleteModelInstance(int pUniqueID);
 	void deleteWMOInstance(int pUniqueID);
 
+  void ensure_instance_maps_having_correct_keys_and_unlock_uids();
+
 	static bool IsEditableWorld(int pMapId);
 	void clearHeight(int id, int x, int z);
 	void clearHeight(int id, int x, int z, int _cx, int _cz);

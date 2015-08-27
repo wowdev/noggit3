@@ -475,21 +475,7 @@ void MapIndex::saveChanged()
 		}
 	}
 
-	std::map<int, WMOInstance> wmoTemp;
-	std::swap (gWorld->mWMOInstances, wmoTemp);
-
-	for (WMOInstance& instance : wmoTemp | boost::adaptors::map_values)
-	{
-		gWorld->mWMOInstances.emplace (instance.mUniqueID, std::move (instance)).first->second.unlockUID();
-	}
-
-	std::map<int, ModelInstance> modelTemp;
-	std::swap (gWorld->mModelInstances, modelTemp);
-
-	for (ModelInstance& instance : modelTemp | boost::adaptors::map_values)
-	{
-		gWorld->mModelInstances.emplace (instance.d1, std::move (instance)).first->second.unlockUID();
-	}
+	gWorld->ensure_instance_maps_having_correct_keys_and_unlock_uids();
 }
 
 bool MapIndex::hasAGlobalWMO()
