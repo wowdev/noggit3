@@ -1,9 +1,10 @@
 #include "ModelInstance.h"
 
 #include "Log.h"
-#include "Model.h" // Model, etc.
-#include "World.h" // gWorld
 #include "Misc.h" // checkinside
+#include "Model.h" // Model, etc.
+#include "ModelManager.h"
+#include "World.h" // gWorld
 
 Vec3D TransformCoordsForModel(Vec3D pIn)
 {
@@ -53,15 +54,15 @@ ModelInstance::ModelInstance()
 {
 }
 
-ModelInstance::ModelInstance(Model *m)
-	: model(m)
+ModelInstance::ModelInstance(std::string const& filename)
+	: model (ModelManager::add (filename))
 	, uidLock(false)
 	, nameID(0xFFFFFFFF)
 {
 }
 
-ModelInstance::ModelInstance(Model *m, MPQFile* f)
-	: model(m)
+ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
+	: model (ModelManager::add (filename))
 	, uidLock(false)
 	, nameID(0xFFFFFFFF)
 {
@@ -78,8 +79,8 @@ ModelInstance::ModelInstance(Model *m, MPQFile* f)
 	sc = scale / 1024.0f;
 }
 
-ModelInstance::ModelInstance(Model *m, ENTRY_MDDF *d)
-	: model(m)
+ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
+	: model (ModelManager::add (filename))
 	, uidLock(false)
 	, nameID(0xFFFFFFFF)
 {
@@ -90,10 +91,10 @@ ModelInstance::ModelInstance(Model *m, ENTRY_MDDF *d)
 	sc = d->scale / 1024.0f;
 }
 
-void ModelInstance::init2(Model *m, MPQFile* f)
+void ModelInstance::init2(std::string const& filename, MPQFile* f)
 {
 	nameID = 0xFFFFFFFF;
-	model = m;
+	model = ModelManager::add (filename);
 	nameID = SelectionNames.add(this);
 	float ff[3], temp;
 	f->read(ff, 12);

@@ -283,7 +283,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
 
 	for (std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it)
 	{
-		gWorld->mModelInstances.insert(std::pair<int, ModelInstance>(it->uniqueID, ModelInstance(ModelManager::add(mModelFilenames[it->nameID]), &(*it))));
+		gWorld->mModelInstances.insert(std::pair<int, ModelInstance>(it->uniqueID, ModelInstance(mModelFilenames[it->nameID], &(*it))));
 	}
 
 	// - Load chunks ---------------------------------------
