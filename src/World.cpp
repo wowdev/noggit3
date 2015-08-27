@@ -10,6 +10,7 @@
 #include <utility>
 #include <time.h>
 #include <boost/filesystem.hpp>
+#include <boost/range/adaptor/map.hpp>
 #include <boost/thread/thread.hpp>
 
 #include "DBC.h"
@@ -1950,6 +1951,29 @@ void World::deleteWMOInstance(int pUniqueID)
 	mapIndex->setChanged(it->second.pos.x, it->second.pos.z);
 	mWMOInstances.erase(it);
 	ResetSelection();
+}
+
+void World::ensure_instance_maps_having_correct_keys_and_unlock_uids()
+{
+  {
+    std::map<int, WMOInstance> tmp;
+    std::swap (mWMOInstances, tmp);
+
+    for (WMOInstance& instance : tmp | boost::adaptors::map_values)
+    {
+      mWMOInstances.emplace (instance.mUniqueID, std::move (instance)).first->second.unlockUID();
+    }
+  }
+
+  {
+    std::map<int, ModelInstance> tmp;
+    std::swap (mModelInstances, tmp);
+
+    for (ModelInstance& instance : tmp | boost::adaptors::map_values)
+    {
+      mModelInstances.emplace (instance.d1, std::move (instance)).first->second.unlockUID();
+    }
+  }
 }
 
 void World::addModel(nameEntry entry, Vec3D newPos, bool copyit)
