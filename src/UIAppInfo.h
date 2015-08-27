@@ -20,7 +20,6 @@ private:
 
 public:
 	UIAppInfo(float x, float y, float width, float height, UIMapViewGUI* setGui);
-	virtual ~UIAppInfo();
 	void setText(const std::string& t);
 };
 #endif
