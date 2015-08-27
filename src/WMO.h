@@ -161,7 +161,7 @@ public:
 	void draw(int doodadset, const Vec3D& ofs, const float rot, bool boundingbox, bool groupboxes, bool highlight) const;
 	void drawSelect(int doodadset, const Vec3D& ofs, const float rot) const;
 	//void drawPortals();
-	void drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const;
+	bool drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const;
 };
 
 class WMOManager

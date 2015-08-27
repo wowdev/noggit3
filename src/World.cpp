@@ -222,7 +222,6 @@ World::World(const std::string& name)
 	, zoom(0.25f)
 	, skies(NULL)
 	, loading(false)
-	, hadSky(false)
 	, outdoorLightStats(OutdoorLightStats())
 	, minimap(0)
 	, mapstrip(NULL)
@@ -752,10 +751,18 @@ void World::draw()
 	///glDisable(GL_LIGHTING);
 	///glColor4f(1,1,1,1);World::draw()
 
-	hadSky = false;
+	bool hadSky = false;
 	if (drawwmo || mapIndex->hasAGlobalWMO())
-		for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); !hadSky && it != mWMOInstances.end(); ++it)
-			it->second.wmo->drawSkybox(this->camera, it->second.extents[0], it->second.extents[1]);
+	{
+		for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
+		{
+			hadSky = it->second.wmo->drawSkybox(this->camera, it->second.extents[0], it->second.extents[1]);
+			if (hadSky)
+			{
+				break;
+			}
+		}
+	}
 
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
