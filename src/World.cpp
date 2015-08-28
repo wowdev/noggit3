@@ -2008,7 +2008,7 @@ void World::ensure_instance_maps_having_correct_keys_and_unlock_uids()
 
     for (ModelInstance& instance : tmp | boost::adaptors::map_values)
     {
-      mModelInstances.emplace (instance.d1, std::move (instance)).first->second.unlockUID();
+		mModelInstances.emplace(instance.d1, std::move(instance)).first->second.unlockUID();
     }
   }
 }
