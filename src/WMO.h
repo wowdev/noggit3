@@ -195,7 +195,14 @@ struct scoped_wmo_reference
   {
     other._valid = false;
   }
-  scoped_wmo_reference& operator= (scoped_wmo_reference&&) = delete;
+  scoped_wmo_reference& operator= (scoped_wmo_reference&& other)
+  {
+	  std::swap(_valid, other._valid);
+	  std::swap(_filename, other._filename);
+	  std::swap(_wmo, other._wmo);
+	  other._valid = false;
+	  return *this;
+  }
 
   ~scoped_wmo_reference()
   {

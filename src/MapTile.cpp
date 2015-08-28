@@ -561,7 +561,7 @@ void MapTile::saveTile()
 		// 	it->second.mUniqueID = UID++;
 		// 	it->second.lockUID();
 		// }
-		lObjectInstances[it->second.mUniqueID] = it->second;
+		lObjectInstances.emplace(it->second.mUniqueID, it->second);
 	}
 
 	for (std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it)
@@ -572,7 +572,8 @@ void MapTile::saveTile()
 		// 	it->second.d1 = UID++;
 		// 	it->second.lockUID();
 		// }
-		lModelInstances[it->second.d1] = it->second;
+		lModelInstances.emplace(it->second.d1, it->second);
+
 	}
 	
 	filenameOffsetThing nullyThing = { 0, 0 };
