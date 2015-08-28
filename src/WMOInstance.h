@@ -45,7 +45,22 @@ public:
     std::swap (extents, other.extents);
     other.mSelectionID = -1;
   }
-  WMOInstance& operator= (WMOInstance&&) = delete;
+  WMOInstance& operator= (WMOInstance&& other)
+  {
+	  std::swap(wmo, other.wmo);
+	  std::swap(pos, other.pos);
+	  std::swap(extents, other.extents);
+	  std::swap(dir, other.dir);
+	  std::swap(mUniqueID, other.mUniqueID);
+	  std::swap(mFlags, other.mFlags);
+	  std::swap(mUnknown, other.mUnknown);
+	  std::swap(mNameset, other.mNameset);
+	  std::swap(doodadset, other.doodadset);
+	  std::swap(uidLock, other.uidLock);
+	  std::swap(mSelectionID, other.mSelectionID);
+	  other.mSelectionID = -1;
+	  return *this;
+  }
 
 	void draw();
 	void drawSelect();
