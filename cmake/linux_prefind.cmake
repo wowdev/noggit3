@@ -1,0 +1,1 @@
+SET(Boost_USE_STATIC_LIBS OFF)
