@@ -29,6 +29,24 @@ public:
 	explicit WMOInstance(std::string const& filename);
 	~WMOInstance();
 
+	WMOInstance(WMOInstance& other)
+		: wmo(std::move(other.wmo))
+		, pos(other.pos)
+		// , extents (other.extents)
+		, dir(other.dir)
+		, mUniqueID(other.mUniqueID)
+		, mFlags(other.mFlags)
+		, mUnknown(other.mUnknown)
+		, mNameset(other.mNameset)
+		, doodadset(other.doodadset)
+		, uidLock(other.uidLock)
+		, mSelectionID(other.mSelectionID)
+	{
+		//std::copy(std::begin(other.extents), std::end(other.extents), extents);
+		std::swap(extents, other.extents);
+		other.mSelectionID = -1;
+	}
+
   WMOInstance (WMOInstance&& other)
     : wmo (std::move (other.wmo))
     , pos (other.pos)
@@ -42,9 +60,11 @@ public:
     , uidLock (other.uidLock)
     , mSelectionID (other.mSelectionID)
   {
+	//  std::move(std::begin(other.extents), std::end(other.extents), extents);
     std::swap (extents, other.extents);
     other.mSelectionID = -1;
   }
+
   WMOInstance& operator= (WMOInstance&& other)
   {
 	  std::swap(wmo, other.wmo);
