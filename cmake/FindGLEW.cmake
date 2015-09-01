@@ -1,10 +1,7 @@
-<<<<<<< local
 # FindGLEW.cmake is part of Noggit3, licensed via GNU General Public License (version 3).
 # Bernd Lörwald <bloerwald+noggit@googlemail.com>
 # Stephan Biegel <project.modcraft@googlemail.com>
 
-=======
->>>>>>> other
 #
 # Try to find GLEW library and include path.
 # Once done this will define
