@@ -59,6 +59,27 @@ namespace noggit
       _finished = !process_list_file;
     }
 
+    namespace
+    {
+      //! \note This all does not work with files > 2^32 at all.
+      std::size_t get_file_size (HANDLE file_handle)
+      {
+        unsigned int filesize_high (0);
+        const unsigned int filesize_low (SFileGetFileSize (file_handle, &filesize_high));
+        return filesize_low | size_t (filesize_high) << 32;
+      }
+
+      void read_file (HANDLE file_handle, void* buffer, std::size_t size)
+      {
+        unsigned int read (0);
+        SFileReadFile (file_handle, buffer, size, &read, NULL);
+        if (read != size)
+        {
+          throw std::logic_error ("read less than filesize");
+        }
+      }
+    }
+
     void archive::finish_loading()
     {
       if (_finished)
@@ -71,10 +92,10 @@ namespace noggit
 
       if (SFileOpenFileEx (_archive_handle, "(listfile)", 0, &file_handle))
       {
-        const size_t filesize (SFileGetFileSize (file_handle));
+        const size_t filesize (get_file_size (file_handle));
 
         char* readbuffer (new char[filesize]);
-        SFileReadFile (file_handle, readbuffer, filesize);
+        read_file (file_handle, readbuffer, filesize);
         SFileCloseFile (file_handle);
         _listfile = QString::fromAscii (readbuffer, filesize).toLower().split ("\r\n", QString::SkipEmptyParts);
 
@@ -119,10 +140,10 @@ namespace noggit
                   );
       if (opened)
       {
-        *size = SFileGetFileSize (file_handle);
+        *size = get_file_size (file_handle);
         *buffer = new char[*size];
 
-        SFileReadFile (file_handle, *buffer, *size);
+        read_file (file_handle, *buffer, *size);
         SFileCloseFile (file_handle);
       }
 
@@ -131,7 +152,7 @@ namespace noggit
 
     void archive::save_to_disk()
     {
-        if(SFileCompactArchive(_archive_handle) && SFileCloseArchive(_archive_handle))
+        if(SFileCompactArchive(_archive_handle, NULL, false) && SFileCloseArchive(_archive_handle))
             LogDebug << "Saved MPQ to disk" << std::endl;
         else
             LogError << "Error: " << GetLastError()<< "while saving MPQ to disk" << std::endl;
