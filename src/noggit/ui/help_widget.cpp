@@ -121,7 +121,7 @@ namespace noggit
               %         __ ("Y", "Changes brush type")
               %         __ ("ALT + Left mouse + Mouse move", "Change brush size")
               %        "</ul> "
-              %        "<h2>"
+              +        QString ("<h2>")
               %         "Terrain Mode"
               %        "</h2>"
               %        "<h3>"
