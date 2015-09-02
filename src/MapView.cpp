@@ -113,7 +113,6 @@ bool  alloff_detailselect = false;
 bool  alloff_fog = false;
 bool  alloff_terrain = false;
 
-
 UISlider* shader_radius;
 UISlider* shader_red;
 UISlider* shader_green;
@@ -130,6 +129,9 @@ float groundBrushSpeed = 1.0f;
 UISlider* ground_blur_speed;
 float groundBlurSpeed = 2.0f;
 int    groundBrushType = 1;
+int		groundTabletControlSelect = 1;
+int    groundTabletSelect = 1;
+int shaderTabletControlSelect = 1;
 
 UISlider* blur_brush;
 float blurBrushRadius = 10.0f;
@@ -158,6 +160,9 @@ UIFrame* MapChunkWindow;
 
 UIToggleGroup * gBlurToggleGroup;
 UIToggleGroup * gGroundToggleGroup;
+UIToggleGroup * gGroundTabletControl;
+UIToggleGroup * gShaderTabletControl;
+UIToggleGroup * gGroundTabletActiveGroup;
 UIToggleGroup * gFlagsToggleGroup;
 
 UIWindow *setting_ground;
@@ -837,7 +842,11 @@ void MapView::createGUI()
 	tool_settings_y = 38;
 
 	// Raise/Lower
-	setting_ground = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 160.0f);
+	if(app.tabletActive)
+		setting_ground = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 240.0f);
+	else
+		setting_ground = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 160.0f);
+
 	setting_ground->movable(true);
 	mainGui->addChild(setting_ground);
 
@@ -864,8 +873,26 @@ void MapView::createGUI()
 	ground_brush_speed->setText("Brush Speed: ");
 	setting_ground->addChild(ground_brush_speed);
 
+	if (app.tabletActive)
+	{
+		setting_ground->addChild(new UIText(78.5f, 170.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
+
+		gGroundTabletControl = new UIToggleGroup(&groundTabletControlSelect);
+		setting_ground->addChild(new UICheckBox(6.0f, 182.0f, "Off", gGroundTabletControl, 0));
+		setting_ground->addChild(new UICheckBox(85.0f, 182.0f, "On", gGroundTabletControl, 1));
+		gGroundTabletControl->Activate(1);
+
+		gGroundTabletActiveGroup = new UIToggleGroup(&groundTabletSelect);
+		setting_ground->addChild(new UICheckBox(6.0f, 207.0f, "Radius", gGroundTabletActiveGroup, 0));
+		setting_ground->addChild(new UICheckBox(85.0f, 207.0f, "Speed", gGroundTabletActiveGroup, 1));
+		gGroundTabletActiveGroup->Activate(1);
+	}
+
 	// shader
-	settings_shader = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 160.0f);
+	if(app.tabletActive)
+		settings_shader = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 200.0f);
+	else
+		settings_shader = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 160.0f);
 	settings_shader->movable(true);
 	settings_shader->hide();
 	mainGui->addChild(settings_shader);
@@ -895,6 +922,15 @@ void MapView::createGUI()
 	shader_blue->setValue(shaderBlue);
 	shader_blue->setText("Blue: ");
 	settings_shader->addChild(shader_blue);
+	if (app.tabletActive)
+	{
+		settings_shader->addChild(new UIText(78.5f, 137.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
+
+		gShaderTabletControl = new UIToggleGroup(&shaderTabletControlSelect);
+		settings_shader->addChild(new UICheckBox(6.0f, 151.0f, "Off", gShaderTabletControl, 0));
+		settings_shader->addChild(new UICheckBox(85.0f, 151.0f, "On", gShaderTabletControl, 1));
+		gShaderTabletControl->Activate(1);
+	}
 
 	// flatten/blur
 	setting_blur = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 130.0f);
@@ -1143,6 +1179,70 @@ void MapView::tick(float t, float dt)
 	appinfoText << "Project Path: " << Project::getInstance()->getPath() << std::endl;
 	appinfoText << "Current cursor: " << Environment::getInstance()->cursorType << std::endl;
 	mainGui->guiappInfo->setText(appinfoText.str());
+
+	if (app.tabletActive)
+	{
+		switch (terrainMode)
+		{
+		case 0:
+			switch (groundTabletSelect)
+			{
+			case 0:
+				if (groundTabletControlSelect == 1) 
+				{
+					groundBrushRadius = (float)app.pressure / 20.48f;
+					if (groundBrushRadius > 1000.0f)
+						groundBrushRadius = 1000.0f;
+					else if (groundBrushRadius < 0.01f)
+						groundBrushRadius = 0.01f;
+					ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
+				}
+				break;
+			case 1:
+				if (groundTabletControlSelect == 1)
+				{
+					groundBrushSpeed = (float)app.pressure / 204.8f;
+					if (groundBrushSpeed > 10.0f)
+						groundBrushSpeed = 10.0f;
+					else if (groundBrushSpeed < 0.01f)
+						groundBrushSpeed = 0.01f;
+					ground_brush_speed->setValue(groundBrushSpeed / 10.0f);
+				}
+				break;
+			}
+			break;
+
+		case 1:
+			blurBrushRadius = app.pressure / 20;
+			if (blurBrushRadius > 1000.0f)
+				blurBrushRadius = 1000.0f;
+			else if (blurBrushRadius < 0.01f)
+				blurBrushRadius = 0.01f;
+			blur_brush->setValue(blurBrushRadius / 1000.0f);
+			break;
+		case 2:
+			mainGui->S1->setValue((float)app.pressure / 2048.0f);
+			if (mainGui->S1->value > 1.0f)
+				mainGui->S1->setValue(1.0f);
+			else if (mainGui->S1->value < 0.0001f)
+				mainGui->S1->setValue(0.0001f);
+			mainGui->S1->setValue(mainGui->S1->value);
+			break;
+		case 8:
+			if (shaderTabletControlSelect == 1)
+			{
+				shaderRadius = (float)app.pressure / 20.48f;
+				if (shaderRadius > 1000.0f)
+					shaderRadius = 1000.0f;
+				else if (shaderRadius < 0.01f)
+					shaderRadius = 0.01f;
+				shader_radius->setValue(shaderRadius / 1000.0f);
+			}
+			
+			break;
+		}
+	}
+	
 
 	if (SDL_GetAppState() & SDL_APPINPUTFOCUS)
 	{
