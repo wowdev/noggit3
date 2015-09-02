@@ -42,7 +42,6 @@ public:
 		, uidLock(other.uidLock)
 		, mSelectionID(other.mSelectionID)
 	{
-		//std::copy(std::begin(other.extents), std::end(other.extents), extents);
 		std::swap(extents, other.extents);
 		other.mSelectionID = -1;
 	}
@@ -60,8 +59,7 @@ public:
     , uidLock (other.uidLock)
     , mSelectionID (other.mSelectionID)
   {
-	//  std::move(std::begin(other.extents), std::end(other.extents), extents);
-    std::swap (extents, other.extents);
+	std::swap (extents, other.extents);
     other.mSelectionID = -1;
   }
 

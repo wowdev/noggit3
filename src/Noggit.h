@@ -10,11 +10,24 @@
 class AppState;
 class AsyncLoader;
 
+#ifdef _WIN32
+#include "MSGPACK.H"
+#include "WINTAB.h"
+#define PACKETDATA	(PK_BUTTONS | PK_NORMAL_PRESSURE)
+#define PACKETMODE	PK_BUTTONS
+#include "PKTDEF.H"
+#include "Utils.h"
+HWND static WindowHandle;
+HCTX static NEAR TabletInit(HWND hWnd);
+#endif
+
 class Noggit
 {
 public:
 	float FPS;
-
+	UINT pressure;
+	HCTX hCtx;
+	BOOL tabletActive;
 	Noggit();
 	~Noggit();
 
