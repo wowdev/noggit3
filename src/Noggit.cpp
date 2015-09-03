@@ -466,6 +466,7 @@ void Noggit::mainLoop()
 			delete activeAppState;
 			activeAppState = NULL;
 		}
+#ifdef _WIN32
 		if (tabletActive)
 		{
 			while (gpWTPacketsGet(hCtx, 1, &pkt) > 0) //this is a while because we really only want the last packet.
@@ -473,6 +474,7 @@ void Noggit::mainLoop()
 				pressure = pkt.pkNormalPressure;
 			}
 		}
+#endif
 		timeB = SDL_GetTicks();
 		diff = timeB - timeA;
 		if (diff > 0)

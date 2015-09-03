@@ -25,9 +25,11 @@ class Noggit
 {
 public:
 	float FPS;
+#ifdef _WIN32
 	UINT pressure;
 	HCTX hCtx;
 	BOOL tabletActive;
+#endif
 	Noggit();
 	~Noggit();
 

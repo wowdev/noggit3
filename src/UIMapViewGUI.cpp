@@ -211,10 +211,20 @@ void UIMapViewGUI::render() const
 	//! \todo Make these some textUIs.
 	app.getArial16().shprint(510, 4, gAreaDB.getAreaName(gWorld->getAreaID()));
 
-		int time = static_cast<int>(gWorld->time) % 2880;
-	std::stringstream timestrs; timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", FPS: " << (int)app.FPS << ", Pres: " << app.pressure;
-	app.getArial16().shprint(video.xres() - 450.0f, 5.0f, timestrs.str());
-
+	int time = static_cast<int>(gWorld->time) % 2880;
+	std::stringstream timestrs;
+#ifdef _WIN32
+	if (app.tabletActive) {
+		timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", FPS: " << (int)app.FPS << ", Pres: " << app.pressure;
+		app.getArial16().shprint(video.xres() - 250.0f, 5.0f, timestrs.str());
+	}
+	else
+#endif
+	{
+		timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", FPS: " << (int)app.FPS;
+		app.getArial16().shprint(video.xres() - 200.0f, 5.0f, timestrs.str());
+	}
+		
 	if (gWorld->loading)
 	{
 		std::string toDisplay(gWorld->mapIndex->hasAdt() ? "No ADT at this Point" : "Loading...");

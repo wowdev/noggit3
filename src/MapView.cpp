@@ -129,9 +129,11 @@ float groundBrushSpeed = 1.0f;
 UISlider* ground_blur_speed;
 float groundBlurSpeed = 2.0f;
 int    groundBrushType = 1;
+#ifdef _WIN32
 int		groundTabletControlSelect = 1;
 int    groundTabletSelect = 1;
-int shaderTabletControlSelect = 1;
+int shaderTabletControlSelect = 0;//Defaulting to off
+#endif
 
 UISlider* blur_brush;
 float blurBrushRadius = 10.0f;
@@ -160,10 +162,13 @@ UIFrame* MapChunkWindow;
 
 UIToggleGroup * gBlurToggleGroup;
 UIToggleGroup * gGroundToggleGroup;
+UIToggleGroup * gFlagsToggleGroup;
+
+#ifdef _WIN32
 UIToggleGroup * gGroundTabletControl;
 UIToggleGroup * gShaderTabletControl;
 UIToggleGroup * gGroundTabletActiveGroup;
-UIToggleGroup * gFlagsToggleGroup;
+#endif
 
 UIWindow *setting_ground;
 UIWindow *setting_blur;
@@ -842,9 +847,11 @@ void MapView::createGUI()
 	tool_settings_y = 38;
 
 	// Raise/Lower
+#ifdef _WIN32
 	if(app.tabletActive)
 		setting_ground = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 240.0f);
 	else
+#endif
 		setting_ground = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 160.0f);
 
 	setting_ground->movable(true);
@@ -873,6 +880,7 @@ void MapView::createGUI()
 	ground_brush_speed->setText("Brush Speed: ");
 	setting_ground->addChild(ground_brush_speed);
 
+#ifdef _WIN32
 	if (app.tabletActive)
 	{
 		setting_ground->addChild(new UIText(78.5f, 170.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
@@ -887,11 +895,14 @@ void MapView::createGUI()
 		setting_ground->addChild(new UICheckBox(85.0f, 207.0f, "Speed", gGroundTabletActiveGroup, 1));
 		gGroundTabletActiveGroup->Activate(1);
 	}
+#endif
 
 	// shader
+#ifdef _WIN32
 	if(app.tabletActive)
 		settings_shader = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 200.0f);
 	else
+#endif
 		settings_shader = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 160.0f);
 	settings_shader->movable(true);
 	settings_shader->hide();
@@ -922,6 +933,7 @@ void MapView::createGUI()
 	shader_blue->setValue(shaderBlue);
 	shader_blue->setText("Blue: ");
 	settings_shader->addChild(shader_blue);
+#ifdef _WIN32
 	if (app.tabletActive)
 	{
 		settings_shader->addChild(new UIText(78.5f, 137.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
@@ -929,8 +941,9 @@ void MapView::createGUI()
 		gShaderTabletControl = new UIToggleGroup(&shaderTabletControlSelect);
 		settings_shader->addChild(new UICheckBox(6.0f, 151.0f, "Off", gShaderTabletControl, 0));
 		settings_shader->addChild(new UICheckBox(85.0f, 151.0f, "On", gShaderTabletControl, 1));
-		gShaderTabletControl->Activate(1);
+		gShaderTabletControl->Activate(0);
 	}
+#endif
 
 	// flatten/blur
 	setting_blur = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 130.0f);
@@ -1179,7 +1192,7 @@ void MapView::tick(float t, float dt)
 	appinfoText << "Project Path: " << Project::getInstance()->getPath() << std::endl;
 	appinfoText << "Current cursor: " << Environment::getInstance()->cursorType << std::endl;
 	mainGui->guiappInfo->setText(appinfoText.str());
-
+#ifdef _WIN32
 	if (app.tabletActive)
 	{
 		switch (terrainMode)
@@ -1242,7 +1255,7 @@ void MapView::tick(float t, float dt)
 			break;
 		}
 	}
-	
+#endif
 
 	if (SDL_GetAppState() & SDL_APPINPUTFOCUS)
 	{
