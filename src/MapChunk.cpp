@@ -810,7 +810,27 @@ void MapChunk::draw()
 		}
 	}
 
-
+	if (gWorld->drawwireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glLineWidth(1);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glPolygonOffset(-1, -1);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+		glColor4f(1, 1, 1, 0.2f);
+		drawPass(-1);
+		glDisable(GL_POLYGON_OFFSET_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+		glPointSize(2);
+		glEnable(GL_POLYGON_OFFSET_POINT);
+		glPolygonOffset(-1, -1);
+		glColor4f(1, 1, 1, 0.5f);
+		drawPass(-1);
+		glDisable(GL_POLYGON_OFFSET_POINT);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+	
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
 	glEnable(GL_LIGHTING);
