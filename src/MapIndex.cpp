@@ -19,7 +19,6 @@ MapIndex::MapIndex(const std::string &pBasename)
 	, basename(pBasename)
 {
 
-	unloadTimeDelay = 10000;
 	std::stringstream filename;
 	filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
 
@@ -297,6 +296,7 @@ void MapIndex::unsetChanged(int x, int z)
 
 int MapIndex::getChanged(int x, int z)
 {
+	// Changed 2 are adts around the changed one that have 1 in changed. You must save them also IF you do any UID recalculation on changed 1 adts. Because the new UIDs MUST also get saved in surrounding adts to ahve no model duplucation. So to avoid unnneeded save you can also skip changed 2 adts IF no models get added or moved around. This would be stepp to IF uid workes. Steff
 	if (mTiles[x][z].tile) // why do we need to save tile with changed=2? What "2" means? its adts which have models with new adts, and who ever added this here broke everything, thanks
 		return mTiles[x][z].tile->changed;
 	else
@@ -409,21 +409,21 @@ void MapIndex::reloadTile(int x, int z)
 
 void MapIndex::unloadTiles(int x, int z)
 {
-	Log << "Test unloading for Tile " << x << "-" << z << "\n";
-	int unloadBoundery = 6; // perhaps into settings file?
-	for (int j = 0; j < 64; ++j)
+	if ( ((clock() / CLOCKS_PER_SEC) - this->lastUnloadTime) > 5) // only unload every 5 seconds
 	{
-		for (int i = 0; i < 64; ++i)
+		int unloadBoundery = 6; // means noggit hold always plus X adts in all direction in ram - perhaps move this into settings file?
+		for (int j = 0; j < 64; ++j)
 		{
-
-				if (  !( (j > (x - unloadBoundery)) &&  (j < (x + unloadBoundery)) && (i >(z - unloadBoundery)) && (i < (z + unloadBoundery))) )
-				{ 
-					unloadTile(j, i);
-				}	
+			for (int i = 0; i < 64; ++i)
+			{
+					if (!((j > (x - unloadBoundery)) && (j < (x + unloadBoundery)) && (i >(z - unloadBoundery)) && (i < (z + unloadBoundery))))
+					{
+						if (getChanged(j, i) == 0) unloadTile(j, i); //Only unload adts not marked to save
+					}
+			}
 		}
+		this->lastUnloadTime = clock() / CLOCKS_PER_SEC;
 	}
-	// unloads all tiles morent ehn 20 adts away from given tile
-
 }
 
 void MapIndex::unloadTile(int x, int z)

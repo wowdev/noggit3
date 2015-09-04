@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <sstream>
 #include <fstream>
+#include <ctime>
 
 #include "MapHeaders.h"
 
@@ -68,7 +69,7 @@ private:
 	const std::string basename;
 	std::string globalWMOName;
 
-	int unloadTimeDelay;
+	int lastUnloadTime;
 
 	// Is the WDT telling us to use a different alphamap structure.
 	bool mBigAlpha;
