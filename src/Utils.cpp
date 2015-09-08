@@ -63,13 +63,13 @@ BOOL LoadWintab( void )
 //	ghWintab = LoadLibraryA(  "C:\\dev\\mainline\\Wacom\\Win\\Win32\\Debug\\Wintab32.dll" );	
 	ghWintab = LoadLibraryA( "Wintab32.dll" );
 	
-	if ( !ghWintab )
+	if ( FAILED(ghWintab) || ghWintab == NULL)
 	{
 		DWORD err = GetLastError();
 		WACOM_TRACE("LoadLibrary error: %i\n", err);
 		return FALSE;
 	}
-
+	
 	// Explicitly find the exported Wintab functions in which we are interested.
 	// We are using the ASCII, not unicode versions (where applicable).
 	GETPROCADDRESS( WTOPENA, WTOpenA );
