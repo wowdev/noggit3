@@ -1342,11 +1342,12 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
 	static const size_t minimum_value_to_overwrite(128);
 
-	for (size_t layer(1); layer < textureSet->num(); ++layer)
+	for (size_t y(0); y < 8; ++y)
 	{
-		for (size_t y(0); y < 8; ++y)
+		for (size_t x(0); x < 8; ++x)
 		{
-			for (size_t x(0); x < 8; ++x)
+			size_t winning_layer (0);
+			for (size_t layer(1); layer < textureSet->num(); ++layer)
 			{
 				size_t sum(0);
 
@@ -1360,12 +1361,14 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
 				if (sum  > minimum_value_to_overwrite * 8 * 8)
 				{
-					const size_t array_index((y * 8 + x) / 4);
-					const size_t bit_index(((y * 8 + x) % 4) * 2);
-
-					lMCNK_header->low_quality_texture_map[array_index] |= ((layer & 3) << bit_index);
+					winning_layer = layer;
 				}
 			}
+
+			const size_t array_index((y * 8 + x) / 4);
+			const size_t bit_index(((y * 8 + x) % 4) * 2);
+
+			lMCNK_header->low_quality_texture_map[array_index] |= ((layer & 3) << bit_index);
 		}
 	}
 	lCurrentPosition += 8 + 0x80;
