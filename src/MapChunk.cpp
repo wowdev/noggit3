@@ -1368,7 +1368,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 			const size_t array_index((y * 8 + x) / 4);
 			const size_t bit_index(((y * 8 + x) % 4) * 2);
 
-			lMCNK_header->low_quality_texture_map[array_index] |= ((layer & 3) << bit_index);
+			lMCNK_header->low_quality_texture_map[array_index] |= ((winning_layer & 3) << bit_index);
 		}
 	}
 	lCurrentPosition += 8 + 0x80;
