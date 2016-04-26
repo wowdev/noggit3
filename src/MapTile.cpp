@@ -20,6 +20,7 @@
 #include "Alphamap.h"
 #include "TextureSet.h"
 #include "MapIndex.h"
+#include "Settings.h"
 
 int indexMapBuf(int x, int y)
 {
@@ -535,9 +536,20 @@ void MapTile::clearAllModels()
 
 void MapTile::saveTile()
 {
+	
 	Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
 	LogDebug << "CHANGED FLAG " << changed << std::endl;
 	int lID;  // This is a global counting variable. Do not store something in here you need later.
+	
+	// if wod output path is set creat also wod map files and save them in this alternate path.
+	bool wodSave = false;
+	std::string wodSavePath = "";
+	if (Settings::getInstance()->wodSavePath != "")
+	{
+		wodSave = true;
+		wodSavePath = Settings::getInstance()->wodSavePath;
+		LogDebug << "WOD Save path is set to : " << wodSavePath << std::endl;
+	}
 
 	// Collect some information we need later.
 
@@ -550,6 +562,7 @@ void MapTile::saveTile()
 	lTileExtents[0] = Vec3D(this->xbase, 0.0f, this->zbase);
 	lTileExtents[1] = Vec3D(this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE);
 
+	// TODO: Steff > needs to reimplement UID recalculation
 	// UID += mPositionX * 10000000;
 	// UID += mPositionZ *   100000;
 
@@ -612,8 +625,19 @@ void MapTile::saveTile()
 		it->second = lID++;
 
 	// Now write the file.
-
 	sExtendableArray *lADTFile = new sExtendableArray();
+
+
+	// Create the other files for wod saving
+	int lADTRootFileCurrentPosition = 0;
+	sExtendableArray *lADTRootFile = new sExtendableArray();
+	int lADTObjFileCurrentPosition = 0;
+	sExtendableArray *lADTObjFile  = new sExtendableArray();
+	int lADTTexFileCurrentPosition = 0;
+	sExtendableArray *lADTTexFile  = new sExtendableArray();
+
+
+	
 
 	int lCurrentPosition = 0;
 
@@ -863,11 +887,22 @@ void MapTile::saveTile()
 #endif
 
 	lADTFile->Extend(lCurrentPosition - lADTFile->mSize); // cleaning unused nulls at the end of file
+	
+
 	MPQFile *f = new MPQFile(mFilename);
 	f->setBuffer(lADTFile->GetPointer<char>(), lADTFile->mSize);
 	f->SaveFile();
 	f->close();
-	
+
+	// save wod files
+	if (wodSave)
+	{
+		MPQFile *f = new MPQFile(mFilename,wodSavePath); 
+		f->setBuffer(lADTRootFile->GetPointer<char>(), lADTRootFile->mSize);
+		f->SaveFile();
+		f->close();
+	}
+
 	gWorld->mapIndex->markOnDisc(this->mPositionX, this->mPositionZ, true);
 
 	lObjectInstances.clear();

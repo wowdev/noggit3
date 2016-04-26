@@ -1,6 +1,8 @@
 #ifndef __SETTINGS_H
 #define __SETTINGS_H
 
+#include <string>
+
 class Settings
 {
 public:
@@ -18,6 +20,8 @@ public:
 	bool holelinesOn;    // If true show the blue subchunk lines always. Not only in holemode is on.
 
 	const bool& noAntiAliasing() const;
+
+	std::string wodSavePath;
 
 private:
 	bool _noAntiAliasing;

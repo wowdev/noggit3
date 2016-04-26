@@ -21,8 +21,10 @@ Settings::Settings()
 	{
 		ConfigFile config("noggit.conf");
 		config.readInto(this->FarZ, "FarZ");
-		_noAntiAliasing = config.readInto(_noAntiAliasing, "noAntiAliasing");
+		config.readInto(_noAntiAliasing, "noAntiAliasing");
+		config.readInto(this->wodSavePath, "wodSavePath");
 	}
+
 }
 
 const bool& Settings::noAntiAliasing() const
