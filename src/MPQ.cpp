@@ -158,7 +158,9 @@ bool MPQArchive::openFile(const std::string& filename, HANDLE* fileHandle) const
 	assert(fileHandle);
 	return SFileOpenFileEx(_archiveHandle, filename.c_str(), 0, fileHandle);
 }
-
+/*
+* basic constructor to save the file to project path
+*/
 MPQFile::MPQFile(const std::string& pFilename)
 	: eof(true)
 	, buffer(NULL)
@@ -174,6 +176,61 @@ MPQFile::MPQFile(const std::string& pFilename)
 		return;
 
 	fname = getDiskPath(pFilename);
+
+	std::ifstream input(fname.c_str(), std::ios_base::binary | std::ios_base::in);
+	if (input.is_open())
+	{
+		External = true;
+		eof = false;
+
+		input.seekg(0, std::ios::end);
+		size = (size_t)input.tellg();
+		input.seekg(0, std::ios::beg);
+
+		buffer = new char[size];
+		input.read(buffer, size);
+
+		input.close();
+		return;
+	}
+
+	std::string filename(getMPQPath(pFilename));
+
+	for (ArchivesMap::reverse_iterator i = _openArchives.rbegin(); i != _openArchives.rend(); ++i)
+	{
+		HANDLE fileHandle;
+
+		if (!i->second->openFile(filename, &fileHandle))
+			continue;
+
+		size = SFileGetFileSize(fileHandle, NULL); //last NULL for newer version of StormLib
+
+		eof = false;
+		buffer = new char[size];
+		SFileReadFile(fileHandle, buffer, size, NULL, NULL); //last NULLs for newer version of StormLib
+		SFileCloseFile(fileHandle);
+
+		return;
+	}
+}
+/*
+* Alternate constructor to save the file to an outside path
+*/
+MPQFile::MPQFile(const std::string& pFilename, const std::string& alternateSavePath)
+	: eof(true)
+	, buffer(NULL)
+	, pointer(0)
+	, size(0)
+	, External(false)
+{
+	boost::mutex::scoped_lock lock(gMPQFileMutex);
+
+	if (pFilename.empty())
+		throw std::runtime_error("MPQFile: filename empty");
+	if (!exists(pFilename))
+		return;
+
+	fname = getAlternateDiskPath(pFilename, alternateSavePath);
 
 	std::ifstream input(fname.c_str(), std::ios_base::binary | std::ios_base::in);
 	if (input.is_open())
@@ -230,6 +287,24 @@ std::string MPQFile::getDiskPath(const std::string &pFilename)
 		found = diskpath.find("\\");
 	}
 
+	return diskpath;
+}
+
+std::string MPQFile::getAlternateDiskPath(const std::string &pFilename, const std::string &pDiscpath)
+{
+	std::string filename(pFilename);
+	std::transform(filename.begin(), filename.end(), filename.begin(), ::tolower);
+	std::string diskpath = pDiscpath;
+	diskpath.append(filename);
+
+	size_t found = diskpath.find("\\");
+	while (found != std::string::npos)
+	{
+		diskpath.replace(found, 1, "/");
+		found = diskpath.find("\\");
+	}
+
+	LogDebug << "Alternate disc patch: " << diskpath << std::endl;
 	return diskpath;
 }
 
