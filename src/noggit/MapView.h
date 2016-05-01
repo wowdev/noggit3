@@ -49,6 +49,7 @@ namespace noggit
     class minimap_widget;
     class model_spawner;
     class EditorTemplate;
+    class zoneid_widget;
   }
 
   enum eViewMode
@@ -266,6 +267,7 @@ namespace noggit
     ui::model_spawner* _model_spawner;
     ui::cursor_selector* _cursor_selector;
     ui::EditorTemplate* editortemplate;
+    ui::zoneid_widget* _zoneid_widget;
 
     QPoint _mouse_position;
     bool _is_currently_moving_object;
