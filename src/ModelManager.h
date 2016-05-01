@@ -31,8 +31,19 @@ struct scoped_model_reference
     , _model (ModelManager::add (_filename))
   {}
 
-  scoped_model_reference (scoped_model_reference const&) = delete;
-  scoped_model_reference& operator= (scoped_model_reference const&) = delete;
+  scoped_model_reference (scoped_model_reference const& other)
+    : _valid (other._valid)
+    , _filename (other._filename)
+    , _model (ModelManager::add (_filename))
+  {}
+  scoped_model_reference& operator= (scoped_model_reference const& other)
+  {
+    _valid = other._valid;
+    _filename = other._filename;
+    _model = ModelManager::add (_filename);
+    return *this;
+  }
+
   scoped_model_reference (scoped_model_reference&& other)
     : _valid (other._valid)
     , _filename (other._filename)
