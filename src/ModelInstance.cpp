@@ -296,7 +296,7 @@ bool ModelInstance::isInsideTile(Vec3D lTileExtents[2])
 		* Matrix::newScale(Vec3D(sc, sc, sc))
 		);
 
-	Vec3D *bounds = new Vec3D[9];
+	Vec3D bounds[9];
 	Vec3D *ptr = bounds;
 
 	*ptr++ = pos;
@@ -315,12 +315,10 @@ bool ModelInstance::isInsideTile(Vec3D lTileExtents[2])
 	{
 		if (pointInside(bounds[i], lTileExtents))
 		{
-			delete bounds;
 			return true;
 		}
 	}
 
-	delete bounds;
 	return false;
 }
 
@@ -349,7 +347,7 @@ void ModelInstance::recalcExtents()
 		* Matrix::newRotate(dir.z * (float)PI / 180.0f, Vec3D(1, 0, 0))
 		);
 
-	Vec3D *bounds = new Vec3D[8 * 2];
+	Vec3D bounds[8 * 2];
 	Vec3D *ptr = bounds;
 
 	*ptr++ = rot * TransformCoordsForModel(Vec3D(model->header.BoundingBoxMax.x, model->header.BoundingBoxMax.y, model->header.BoundingBoxMin.z));
@@ -384,6 +382,4 @@ void ModelInstance::recalcExtents()
 
 	extents[0] = min;
 	extents[1] = max;
-
-	delete bounds;
 }

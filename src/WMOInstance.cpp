@@ -112,8 +112,8 @@ void WMOInstance::recalcExtents()
 		* Matrix::newRotate(dir.z * (float)PI / 180.0f, Vec3D(1, 0, 0))
 		);
 
-	Vec3D *bounds = new Vec3D[8 * (wmo->nGroups + 1)];
-	Vec3D *ptr = bounds;
+	std::vector<Vec3D> bounds (8 * (wmo->nGroups + 1));
+	Vec3D *ptr = bounds.data();
 	Vec3D wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
 	Vec3D wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
 
@@ -152,8 +152,6 @@ void WMOInstance::recalcExtents()
 
 	extents[0] = min;
 	extents[1] = max;
-
-	delete bounds;
 }
 
 bool WMOInstance::isInsideTile(Vec3D lTileExtents[2])
@@ -164,8 +162,8 @@ bool WMOInstance::isInsideTile(Vec3D lTileExtents[2])
 		* Matrix::newRotate(dir.z * (float)PI / 180.0f, Vec3D(1, 0, 0))
 		);
 
-	Vec3D *bounds = new Vec3D[4 * (wmo->nGroups) + 5];
-	Vec3D *ptr = bounds;
+	std::vector<Vec3D> bounds (4 * (wmo->nGroups) + 5);
+	Vec3D *ptr = bounds.data();
 	Vec3D wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
 	Vec3D wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
 
@@ -189,12 +187,10 @@ bool WMOInstance::isInsideTile(Vec3D lTileExtents[2])
 	{
 		if (pointInside(bounds[i], lTileExtents))
 		{
-			delete bounds;
 			return true;
 		}
 	}
 
-	delete bounds;
 	return false;
 }
 
