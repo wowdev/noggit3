@@ -292,7 +292,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 			{
 				xdiff = xPos - x;
 				zdiff = zPos - z;
-				dist = abs(sqrt(xdiff*xdiff + zdiff*zdiff));
+				dist = std::abs(std::sqrt(xdiff*xdiff + zdiff*zdiff));
 
 				if (dist>radius)
 				{
