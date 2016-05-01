@@ -117,26 +117,26 @@ public:
 
 	inline void rotate(float angle, Vec3D axis)
 	{
-		float diff(1.0f - cos(angle));
+		float diff(1.0f - std::cos(angle));
 
 		unit();
 
 		setRow(0,
-			axis.x * axis.x * diff + cos(angle),
-			axis.x * axis.y * diff - axis.z * sin(angle),
-			axis.x * axis.z * diff + axis.y * sin(angle),
+			axis.x * axis.x * diff + std::cos(angle),
+			axis.x * axis.y * diff - axis.z * std::sin(angle),
+			axis.x * axis.z * diff + axis.y * std::sin(angle),
 			0);
 
 		setRow(1,
-			axis.y * axis.x * diff + axis.z * sin(angle),
-			axis.y * axis.y * diff + cos(angle),
-			axis.y * axis.z * diff - axis.x * sin(angle),
+			axis.y * axis.x * diff + axis.z * std::sin(angle),
+			axis.y * axis.y * diff + std::cos(angle),
+			axis.y * axis.z * diff - axis.x * std::sin(angle),
 			0);
 
 		setRow(2,
-			axis.z * axis.x * diff - axis.y * sin(angle),
-			axis.z * axis.y * diff + axis.x * sin(angle),
-			axis.z * axis.z * diff + cos(angle),
+			axis.z * axis.x * diff - axis.y * std::sin(angle),
+			axis.z * axis.y * diff + axis.x * std::sin(angle),
+			axis.z * axis.z * diff + std::cos(angle),
 			0);
 	}
 
