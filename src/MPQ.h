@@ -86,7 +86,7 @@ public:
 		}
 		buffer = Buf;
 		size = Size;
-	};
+	}
 
 	void SaveFile();
 
