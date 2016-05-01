@@ -40,6 +40,7 @@
 #include <noggit/ui/cursor_selector.h>
 #include <noggit/ui/model_spawner.h>
 #include <noggit/ui/editortemplate.h>
+#include <noggit/ui/zoneid_widget.h>
 #include <noggit/blp_texture.h>
 #include <noggit/TextureManager.h>
 
@@ -68,6 +69,7 @@ namespace noggit
     , _minimap (new ui::minimap_widget (NULL))
     , _model_spawner (new noggit::ui::model_spawner (NULL,shared))
     , _cursor_selector (new ui::cursor_selector (NULL))
+    , _zoneid_widget( new ui::zoneid_widget (NULL))
     , _is_currently_moving_object (false)
     , _object_to_ground (true)
     , _draw_lighting (true)
@@ -228,6 +230,7 @@ namespace noggit
     NEW_ACTION (save_minimap, tr ("Save minimap as raw files"), SLOT (save_minimap()), Qt::Key_P + Qt::SHIFT + Qt::CTRL);
     NEW_ACTION_OTHER (model_spawner, tr ("Add object to map"), _model_spawner, SLOT (show()), Qt::Key_T);
     NEW_ACTION (save_current_tile_cata, tr ("Save current tile (Cata tests)"), SLOT (saveCata()), 0);
+    NEW_ACTION_OTHER (area_id_browser, tr ("Area Id Browser"), _zoneid_widget, SLOT (show()), 0);
 
   #undef NEW_ACTION
   #undef NEW_ACTION_OTHER
@@ -321,6 +324,7 @@ namespace noggit
     debug_menu->addAction (model_spawner);
     debug_menu->addAction (save_minimap);
     debug_menu->addAction (save_current_tile_cata);
+    debug_menu->addAction (area_id_browser);
 
     QMenu* useless_menu (debug_menu->addMenu (tr ("Stuff that should only be on keys")));
     useless_menu->addAction (turn_around);
@@ -754,6 +758,8 @@ namespace noggit
 #ifdef __OBSOLETE_GUI_ELEMENTS
               mainGui->ZoneIDBrowser->setZoneID(_selected_area_id);
 #endif
+              _zoneid_widget->setZoneID(int(_world->GetCurrentSelection()->data.mapchunk->areaID));
+              _zoneid_widget->setMapID();
             }
           }
         break;
