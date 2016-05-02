@@ -210,14 +210,19 @@ MPQFile::MPQFile(const std::string& pFilename, const std::string& alternateSaveP
 	, size(0)
 	, External(false)
 {
+	LogDebug << "MPGFILE 1 alternateSavePath: " << alternateSavePath << std::endl;
 	boost::mutex::scoped_lock lock(gMPQFileMutex);
 
 	if (pFilename.empty())
 		throw std::runtime_error("MPQFile: filename empty");
-	if (!exists(pFilename))
+
+	if(alternateSavePath.empty())if (!exists(pFilename))
 		return;
 
+	LogDebug << "WEITER!!! " << std::endl;
+
 	fname = getAlternateDiskPath(pFilename, alternateSavePath);
+	
 
 	std::ifstream input(fname.c_str(), std::ios_base::binary | std::ios_base::in);
 	if (input.is_open())
@@ -451,7 +456,9 @@ char* MPQFile::getPointer() const
 
 void MPQFile::SaveFile()
 {
+
 	std::string lFilename = fname;
+	LogDebug << "Save file to: " << lFilename << std::endl;
 
 	size_t found = lFilename.find("\\");
 	while (found != std::string::npos)
