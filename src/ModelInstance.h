@@ -31,39 +31,8 @@ public:
 	explicit ModelInstance(std::string const& filename, MPQFile* f);
 	explicit ModelInstance(std::string const& filename, ENTRY_MDDF *d);
 
-	ModelInstance(ModelInstance &other)
-		: model(std::move(other.model))
-		// , extents (other.extents)
-		, nameID(other.nameID)
-		, pos(other.pos)
-		, dir(other.dir)
-		, d1(other.d1)
-		, w(other.w)
-		, sc(other.sc)
-		, ldir(other.ldir)
-		, lcol(other.lcol)
-		, uidLock(other.uidLock)
-	{
-		std::swap(extents, other.extents);
-		other.nameID = -1;
-	}
-  
-	ModelInstance& operator= (ModelInstance &other)
-  {
-	  std::swap(model, other.model);
-	  std::swap(extents, other.extents);
-	  std::swap(nameID, other.nameID);
-	  std::swap(pos, other.pos);
-	  std::swap(dir, other.dir);
-	  std::swap(d1, other.d1);
-	  std::swap(w, other.w);
-	  std::swap(sc, other.sc);
-	  std::swap(ldir, other.ldir);
-	  std::swap(lcol, other.lcol);
-	  std::swap(uidLock, other.uidLock);
-	  other.nameID = -1;
-	  return *this;
-  }
+	ModelInstance(ModelInstance const& other) = default;
+	ModelInstance& operator= (ModelInstance const& other) = default;
 
   ModelInstance (ModelInstance&& other)
     : model (std::move (other.model))

@@ -111,7 +111,7 @@ bool Frustum::intersectsSphere(const Vec3D& v, const float rad) const
 	for (int i = 0; i < 6; ++i) {
 		float distance = (planes[i].a*v.x + planes[i].b*v.y + planes[i].c*v.z + planes[i].d);
 		if (distance < -rad) return false;
-		if (fabs(distance) < rad) return true;
+		if (std::abs (distance) < rad) return true;
 	}
 	return true;
 }

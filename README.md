@@ -13,10 +13,10 @@ following libraries:
 
 * OpenGL
 * GLEW
-* Qt (4.8, Core, Gui, OpenGL)
+* Freetype2
 * storm (stormlib by Ladislav Zezula)
 * Boost
-* Lua (5.1)
+* SDL 1.2
 
 For Windows there is a repo with all needed libs to compile noggit3.
 Read the description there before you start.

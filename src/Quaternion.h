@@ -86,7 +86,7 @@ public:
 
 	float length() const
 	{
-		return sqrt(x*x + y*y + z*z + w*w);
+		return std::sqrt (lengthSquared());
 	}
 
 	Vec4D& normalize()
@@ -119,7 +119,7 @@ public:
 		// SLERP
 		float dot = v1*v2;
 
-		if (fabs(dot) > 0.9995f) {
+		if (std::abs (dot) > 0.9995f) {
 			// fall back to LERP
 			return Quaternion::lerp(r, v1, v2);
 		}

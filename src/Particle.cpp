@@ -611,7 +611,7 @@ void CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
 
 	SpreadMat = SpreadMat*Temp;
 
-	float Size = abs(c[0])*l + abs(s[0])*w;
+	float Size = std::abs(c[0])*l + std::abs(s[0])*w;
 	for (i = 0; i<3; ++i)
 		for (j = 0; j<3; j++)
 			SpreadMat.m[i][j] *= Size;
