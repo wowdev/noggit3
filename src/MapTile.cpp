@@ -644,11 +644,33 @@ void MapTile::saveTile()
 	// MVER
 	lADTFile->Extend(8 + 0x4);
 	SetChunkHeader(*lADTFile, lCurrentPosition, 'MVER', 4);
-
+	
+	if (wodSave)
+	{
+		// WOD ALL
+		lADTRootFile->Extend(8 + 0x4);
+		SetChunkHeader(*lADTRootFile, lADTRootFileCurrentPosition, 'MVER', 4);
+		lADTObjFile->Extend(8 + 0x4);
+		SetChunkHeader(*lADTObjFile, lADTObjFileCurrentPosition, 'MVER', 4);
+		lADTTexFile->Extend(8 + 0x4);
+		SetChunkHeader(*lADTTexFile, lADTTexFileCurrentPosition, 'MVER', 4);
+	}
+	
 	// MVER data
 	*(lADTFile->GetPointer<int>(8)) = 18;
-
 	lCurrentPosition += 8 + 0x4;
+
+	if (wodSave)
+	{
+		// WOD ALL
+		*(lADTRootFile->GetPointer<int>(8)) = 18;
+		lADTRootFileCurrentPosition += 8 + 0x4;
+		*(lADTObjFile->GetPointer<int>(8)) = 18;
+		lADTObjFileCurrentPosition += 8 + 0x4;
+		*(lADTTexFile->GetPointer<int>(8)) = 18;
+		lADTTexFileCurrentPosition += 8 + 0x4;
+	}
+
 
 	// MHDR
 	int lMHDR_Position = lCurrentPosition;
@@ -659,6 +681,18 @@ void MapTile::saveTile()
 
 	lCurrentPosition += 8 + 0x40;
 
+
+	if (wodSave)
+	{
+		// WOD ROOT
+		int ROOT_lMHDR_Position = lADTRootFileCurrentPosition;
+		lADTRootFile->Extend(8 + 0x40);
+		SetChunkHeader(*lADTRootFile, lADTRootFileCurrentPosition, 'MHDR', 0x40);
+		lADTRootFile->GetPointer<MHDR>(ROOT_lMHDR_Position + 8)->flags = mFlags;
+		lADTRootFileCurrentPosition += 8 + 0x40;
+	}
+
+
 	// MCIN
 	int lMCIN_Position = lCurrentPosition;
 
@@ -668,6 +702,10 @@ void MapTile::saveTile()
 
 	lCurrentPosition += 8 + 256 * 0x10;
 
+	// MCIN dont exist in wod so no save
+
+	// MAMP TODO:need implementation for WOD here!!!!!
+
 	// MTEX
 	int lMTEX_Position = lCurrentPosition;
 	lADTFile->Extend(8 + 0);  // We don't yet know how big this will be.
@@ -676,14 +714,39 @@ void MapTile::saveTile()
 
 	lCurrentPosition += 8 + 0;
 
+	int TEX_lMTEX_Position;
+	if (wodSave)
+	{
+		// WOD TEX
+		TEX_lMTEX_Position = lADTTexFileCurrentPosition;
+		lADTTexFile->Extend(8 + 0);  // We don't yet know how big this will be.
+		SetChunkHeader(*lADTTexFile, lADTTexFileCurrentPosition, 'MTEX');
+		lADTTexFile->GetPointer<MHDR>(lMHDR_Position + 8)->mtex = lADTTexFileCurrentPosition - 0x14;
+
+		lADTTexFileCurrentPosition += 8 + 0;
+	}
+
+
 	// MTEX data
 	for (std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it)
 	{
 		lADTFile->Insert(lCurrentPosition, it->first.size() + 1, it->first.c_str());
+
 		lCurrentPosition += it->first.size() + 1;
 		lADTFile->GetPointer<sChunkHeader>(lMTEX_Position)->mSize += it->first.size() + 1;
 		LogDebug << "Added texture \"" << it->first << "\"." << std::endl;
+
+		if (wodSave)
+		{
+			// WOD TEX
+			lADTTexFile->Insert(lADTTexFileCurrentPosition, it->first.size() + 1, it->first.c_str());
+			lADTTexFileCurrentPosition += it->first.size() + 1;
+			lADTTexFile->GetPointer<sChunkHeader>(TEX_lMTEX_Position)->mSize += it->first.size() + 1;
+		}
 	}
+
+
+
 
 	// MMDX
 	int lMMDX_Position = lCurrentPosition;
@@ -693,6 +756,20 @@ void MapTile::saveTile()
 
 	lCurrentPosition += 8 + 0;
 
+
+	int OBJ_lMMDX_Position;
+	if (wodSave)
+	{
+		// WOD OBJ
+		OBJ_lMMDX_Position = lADTObjFileCurrentPosition;
+		lADTObjFile->Extend(8 + 0);  // We don't yet know how big this will be.
+		SetChunkHeader(*lADTObjFile, lADTObjFileCurrentPosition, 'MMDX');
+		lADTRootFile->GetPointer<MHDR>(OBJ_lMMDX_Position + 8)->mmdx = lADTObjFileCurrentPosition - 0x14; //ISTHISRIGHT ???MHDR is in root so I set the mmdx value there not in obj
+
+		lADTObjFileCurrentPosition += 8 + 0;
+	}
+
+
 	// MMDX data
 	for (std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it)
 	{
@@ -701,22 +778,51 @@ void MapTile::saveTile()
 		lCurrentPosition += it->first.size() + 1;
 		lADTFile->GetPointer<sChunkHeader>(lMMDX_Position)->mSize += it->first.size() + 1;
 		LogDebug << "Added model \"" << it->first << "\"." << std::endl;
+
+		if (wodSave)
+		{
+			// WOD OBJ
+			it->second.filenamePosition = lADTObjFile->GetPointer<sChunkHeader>(OBJ_lMMDX_Position)->mSize;
+			lADTObjFile->Insert(lADTObjFileCurrentPosition, it->first.size() + 1, it->first.c_str());
+			lADTObjFileCurrentPosition += it->first.size() + 1;
+			lADTObjFile->GetPointer<sChunkHeader>(OBJ_lMMDX_Position)->mSize += it->first.size() + 1;
+		}
+
+
 	}
 
 	// MMID
+	// M2 model names
 	int lMMID_Size = 4 * lModels.size();
 	lADTFile->Extend(8 + lMMID_Size);
 	SetChunkHeader(*lADTFile, lCurrentPosition, 'MMID', lMMID_Size);
 	lADTFile->GetPointer<MHDR>(lMHDR_Position + 8)->mmid = lCurrentPosition - 0x14;
 
+	if (wodSave)
+	{
+		// WOD OBJ
+		lADTObjFile->Extend(8 + lMMID_Size);
+		SetChunkHeader(*lADTObjFile, lADTObjFileCurrentPosition, 'MMID', lMMID_Size);
+		lADTRootFile->GetPointer<MHDR>(lMHDR_Position + 8)->mmid = lADTObjFileCurrentPosition - 0x14;
+	}
+
 	// MMID data
+	// WMO model names
 	int * lMMID_Data = lADTFile->GetPointer<int>(lCurrentPosition + 8);
+	int * OBJlMMID_Data = lADTObjFile->GetPointer<int>(lADTObjFileCurrentPosition + 8); // WOD OBJ
 
 	lID = 0;
 	for (std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it)
-		lMMID_Data[lID++] = it->second.filenamePosition;
+	{
+		lID++;
+		lMMID_Data[lID] = it->second.filenamePosition;
+		if (wodSave) OBJlMMID_Data[lID] = it->second.filenamePosition; // WOD OBJ
 
+	}
 	lCurrentPosition += 8 + lMMID_Size;
+	if (wodSave) lADTObjFileCurrentPosition += 8 + lMMID_Size; // WOD OBJ
+
+
 
 	// MWMO
 	int lMWMO_Position = lCurrentPosition;
@@ -897,10 +1003,45 @@ void MapTile::saveTile()
 	// save wod files
 	if (wodSave)
 	{
-		MPQFile *f = new MPQFile(mFilename,wodSavePath); 
-		f->setBuffer(lADTRootFile->GetPointer<char>(), lADTRootFile->mSize);
-		f->SaveFile();
-		f->close();
+		// ADT root file
+		MPQFile *f1 = new MPQFile(mFilename, wodSavePath);
+		f1->setBuffer(lADTRootFile->GetPointer<char>(), lADTRootFile->mSize);
+		f1->SaveFile();
+		f1->close();
+
+		// both tex files
+		std::stringstream texFilename1;
+		texFilename1 << mFilename.substr(0, mFilename.size() - 4) << "_tex0.adt";
+		std::stringstream texFilename2;
+		texFilename2 << mFilename.substr(0, mFilename.size() - 4) << "_tex1.adt";
+
+
+		MPQFile *f2 = new MPQFile(texFilename1.str(), wodSavePath);
+		f2->setBuffer(lADTTexFile->GetPointer<char>(), lADTTexFile->mSize);
+		f2->SaveFile();
+		f2->close();
+
+		MPQFile *f3 = new MPQFile(texFilename2.str(), wodSavePath);
+		f3->setBuffer(lADTTexFile->GetPointer<char>(), lADTTexFile->mSize);
+		f3->SaveFile();
+		f3->close();
+
+		// both obj files
+		std::stringstream objFilename1;
+		objFilename1 << mFilename.substr(0, mFilename.size() - 4) << "_obj0.adt";
+		std::stringstream objFilename2;
+		objFilename2 << mFilename.substr(0, mFilename.size() - 4) << "_obj1.adt";
+
+
+		MPQFile *f4 = new MPQFile(objFilename1.str(), wodSavePath);
+		f4->setBuffer(lADTObjFile->GetPointer<char>(), lADTObjFile->mSize);
+		f4->SaveFile();
+		f4->close();
+
+		MPQFile *f5 = new MPQFile(objFilename2.str(), wodSavePath);
+		f5->setBuffer(lADTObjFile->GetPointer<char>(), lADTObjFile->mSize);
+		f5->SaveFile();
+		f5->close();
 	}
 
 	gWorld->mapIndex->markOnDisc(this->mPositionX, this->mPositionZ, true);
