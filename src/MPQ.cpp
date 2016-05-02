@@ -10,7 +10,6 @@
 #include <vector>
 #include <fstream>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
@@ -64,20 +63,34 @@ void MPQArchive::finishLoading()
 	{
 		size_t filesize = SFileGetFileSize(fh, NULL); //last NULL for newer version of StormLib
 
-		char* readbuffer = new char[filesize];
-		SFileReadFile(fh, readbuffer, filesize, NULL, NULL); //last NULLs for newer version of StormLib
+		std::vector<char> list(filesize);
+		SFileReadFile(fh, &list[0], filesize, NULL, NULL); //last NULLs for newer version of StormLib
 		SFileCloseFile(fh);
 
-		std::string list(readbuffer);
+		int lineBeginOfst = 0, lineEndOfst = 0;
+		for (int i = 0; i < filesize; i++)
+		{
+			if (i + 1 <= filesize && (list[i] == '\r' && list[i + 1] == '\n'))
+			{
+				lineEndOfst = i - 1;
+				i+=2;
+			}
+			else if (list[i] == '\n')
+			{
+				lineEndOfst = i - 1;
+				i++;
+			}
 
-		boost::algorithm::to_lower(list);
-		boost::algorithm::replace_all(list, "\r\n", "\n");
-
-		std::vector<std::string> temp;
-		boost::algorithm::split(temp, list, boost::algorithm::is_any_of("\n"));
-		gListfile.insert(gListfile.end(), temp.begin(), temp.end());
-
-		delete[] readbuffer;
+			if (lineEndOfst != 0)
+			{
+				std::string temp(lineEndOfst - lineBeginOfst + 1, '\0');
+				for (int x = lineBeginOfst; x < lineEndOfst; x++)
+					temp += tolower(list[x]);
+				gListfile.push_back(std::move(temp));
+				lineBeginOfst = i;
+				lineEndOfst = 0;
+			}
+		}
 	}
 
 	finished = true;
@@ -351,8 +364,8 @@ void MPQFile::save(const char* filename)  //save to MPQ
 		SFileCreateArchive(newmodmpq.c_str(), MPQ_CREATE_ARCHIVE_V2 | MPQ_CREATE_ATTRIBUTES, 0x40, &mpq_a);
 		//! \note Is locale setting needed? LOCALE_NEUTRAL is windows only.
 		SFileSetFileLocale(mpq_a, 0); // 0 = LOCALE_NEUTRAL.
-		SFileAddFileEx(mpq_a, "shaders\\terrain1.fs", "myworld", MPQ_FILE_COMPRESS, MPQ_COMPRESSION_ZLIB, NULL);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld". Last NULLs for newer version of StormLib
-		SFileCompactArchive(mpq_a, NULL, NULL); //last NULLs for newer version of StormLib
+		SFileAddFileEx(mpq_a, "shaders\\terrain1.fs", "myworld", MPQ_FILE_COMPRESS, MPQ_COMPRESSION_ZLIB, 0);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld". Last NULLs for newer version of StormLib
+		SFileCompactArchive(mpq_a, nullptr, false); //last NULLs for newer version of StormLib
 		SFileCloseArchive(mpq_a);
 		modmpqpath = newmodmpq;
 	}
@@ -369,12 +382,12 @@ void MPQFile::save(const char* filename)  //save to MPQ
 		nameInMPQ.replace(found, 1, "\\");
 		found = nameInMPQ.find("/");
 	}
-	if (SFileAddFileEx(mpq_a, filename, nameInMPQ.c_str(), MPQ_FILE_COMPRESS | MPQ_FILE_ENCRYPTED | MPQ_FILE_REPLACEEXISTING, MPQ_COMPRESSION_ZLIB, NULL)) //last NULL for newer version of StormLib
+	if (SFileAddFileEx(mpq_a, filename, nameInMPQ.c_str(), MPQ_FILE_COMPRESS | MPQ_FILE_ENCRYPTED | MPQ_FILE_REPLACEEXISTING, MPQ_COMPRESSION_ZLIB, 0)) //last NULL for newer version of StormLib
 	{
 		LogDebug << "Added file " << fname.c_str() << " to archive \n";
 	}
 	else LogDebug << "Error " << GetLastError() << " on adding file to archive! Report this message \n";
-	SFileCompactArchive(mpq_a, NULL, NULL);//recompact our archive to avoid fragmentation. Last NULLs for newer version of StormLib
+	SFileCompactArchive(mpq_a, nullptr, false);//recompact our archive to avoid fragmentation. Last NULLs for newer version of StormLib
 	SFileCloseArchive(mpq_a);
 	new MPQArchive(modmpqpath, true);//now load edited archive to memory again
 }

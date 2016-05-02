@@ -860,10 +860,6 @@ void World::draw()
 
 	if (drawterrain)
 	{
-		if (drawwireframe)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-
 		for (int j = 0; j < 64; ++j)
 		{
 			for (int i = 0; i < 64; ++i)
@@ -874,9 +870,6 @@ void World::draw()
 				}
 			}
 		}
-
-		if (drawwireframe)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
 	glPopMatrix();

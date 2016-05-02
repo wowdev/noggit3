@@ -27,7 +27,7 @@ void Brush::GenerateTexture()
 		x = -1;
 		for (int i = 0; i < 256; ++i)
 		{
-			dist = sqrt(x * x + y * y);
+			dist = std::sqrt (x * x + y * y);
 			if (dist > 1)
 				tex[j * 256 + i] = 0;
 			else if (dist < hardness)

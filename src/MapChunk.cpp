@@ -810,7 +810,27 @@ void MapChunk::draw()
 		}
 	}
 
-
+	if (gWorld->drawwireframe)
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glLineWidth(1);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glPolygonOffset(-1, -1);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+		glColor4f(1, 1, 1, 0.2f);
+		drawPass(-1);
+		glDisable(GL_POLYGON_OFFSET_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+		glPointSize(2);
+		glEnable(GL_POLYGON_OFFSET_POINT);
+		glPolygonOffset(-1, -1);
+		glColor4f(1, 1, 1, 0.5f);
+		drawPass(-1);
+		glDisable(GL_POLYGON_OFFSET_POINT);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+	
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
 	glEnable(GL_LIGHTING);
@@ -981,7 +1001,7 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 
 	xdiff = xbase - x + CHUNKSIZE / 2;
 	zdiff = zbase - z + CHUNKSIZE / 2;
-	dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+	dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
 	if (dist > (radius + MAPCHUNK_RADIUS))
 		return Changed;
@@ -992,14 +1012,14 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 		xdiff = mVertices[i].x - x;
 		zdiff = mVertices[i].z - z;
 		if (BrushType == 5){
-			if ((abs(xdiff) < abs(radius / 2)) && (abs(zdiff) < abs(radius / 2))){
+			if ((std::abs(xdiff) < std::abs(radius / 2)) && (std::abs(zdiff) < std::abs(radius / 2))){
 				mVertices[i].y += change;
 				Changed = true;
 			}
 		}
 		else
 		{
-			dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+			dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 			if (dist < radius)
 			{
 				if (BrushType == 0)//Flat
@@ -1056,7 +1076,7 @@ bool MapChunk::ChangeMCCV(float x, float z, float radius, bool editMode)
 
 	xdiff = xbase - x + CHUNKSIZE / 2;
 	zdiff = zbase - z + CHUNKSIZE / 2;
-	dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+	dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
 	if (dist > (radius + MAPCHUNK_RADIUS))
 		return Changed;
@@ -1064,7 +1084,7 @@ bool MapChunk::ChangeMCCV(float x, float z, float radius, bool editMode)
 	{
 		xdiff = mVertices[i].x - x;
 		zdiff = mVertices[i].z - z;
-		dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+		dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 		if (dist < radius)
 		{
 			if (editMode)
@@ -1090,7 +1110,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 
 	xdiff = xbase - x + CHUNKSIZE / 2;
 	zdiff = zbase - z + CHUNKSIZE / 2;
-	dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+	dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
 	if (dist > (radius + MAPCHUNK_RADIUS))
 		return Changed;
@@ -1103,7 +1123,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 		xdiff = mVertices[i].x - x;
 		zdiff = mVertices[i].z - z;
 
-		dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+		dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
 		if (dist < radius)
 		{
@@ -1143,7 +1163,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 
 	xdiff = xbase - x + CHUNKSIZE / 2;
 	zdiff = zbase - z + CHUNKSIZE / 2;
-	dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+	dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
 	if (dist > (radius + MAPCHUNK_RADIUS))
 		return Changed;
@@ -1156,7 +1176,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 		xdiff = mVertices[i].x - x;
 		zdiff = mVertices[i].z - z;
 
-		dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+		dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
 		if (dist < radius)
 		{
@@ -1176,7 +1196,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 					tx = x + k*UNITSIZE + (j % 2) * UNITSIZE / 2.0f;
 					xdiff = tx - mVertices[i].x;
 					zdiff = tz - mVertices[i].z;
-					dist2 = sqrt(xdiff*xdiff + zdiff*zdiff);
+					dist2 = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 					if (dist2 > radius)
 						continue;
 					gWorld->GetVertex(tx, tz, &TempVec);
