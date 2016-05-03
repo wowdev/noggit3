@@ -113,10 +113,16 @@ void UITreeView::Toggle()
 	}
 
 	if (mParent)
-		if (!mExpanded)
-			mParent->Move(-static_cast<int>((_others.size() + mFiles.size())), shared_from_this());
-		else
-			mParent->Move((_others.size() + mFiles.size()), shared_from_this());
+  {
+    if (!mExpanded)
+    {
+      mParent->Move(-static_cast<int>((_others.size() + mFiles.size())), shared_from_this());
+    }
+    else
+    {
+      mParent->Move((_others.size() + mFiles.size()), shared_from_this());
+    }
+  }
 }
 
 void UITreeView::render() const

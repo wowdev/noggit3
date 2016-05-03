@@ -186,8 +186,19 @@ struct scoped_wmo_reference
     , _wmo (WMOManager::add (_filename))
   {}
 
-  scoped_wmo_reference (scoped_wmo_reference const&) = delete;
-  scoped_wmo_reference& operator= (scoped_wmo_reference const&) = delete;
+  scoped_wmo_reference (scoped_wmo_reference const& other)
+    : _valid (other._valid)
+    , _filename (other._filename)
+    , _wmo (WMOManager::add (_filename))
+  {}
+  scoped_wmo_reference& operator= (scoped_wmo_reference const& other)
+  {
+    _valid = other._valid;
+    _filename = other._filename;
+    _wmo = WMOManager::add (_filename);
+    return *this;
+  }
+
   scoped_wmo_reference (scoped_wmo_reference&& other)
     : _valid (other._valid)
     , _filename (other._filename)

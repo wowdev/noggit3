@@ -91,7 +91,7 @@ public:
 
 	inline float length() const
 	{
-		return sqrt(lengthSquared());
+		return std::sqrt (lengthSquared());
 	}
 
 	inline Vec3D& normalize()
@@ -197,7 +197,7 @@ public:
 
 	inline float length() const
 	{
-		return sqrt(lengthSquared());
+		return std::sqrt (lengthSquared());
 	}
 
 	inline Vec2D& normalize()
