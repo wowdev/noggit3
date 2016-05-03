@@ -95,9 +95,14 @@ int TextureSet::addTexture(OpenGL::Texture* texture)
 void TextureSet::switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
 {
 	int texLevel = -1;
-	for (size_t i = 0; i<nTextures; ++i)
+	for (size_t i = 0; i < nTextures; ++i)
+	{
 		if (textures[i] == oldTexture)
 			texLevel = i;
+		// prevent texture duplication
+		if (textures[i] == newTexture) 
+			return;
+	}		
 
 	if (texLevel != -1)
 	{
