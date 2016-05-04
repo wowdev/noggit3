@@ -69,7 +69,7 @@ namespace noggit
     , _minimap (new ui::minimap_widget (NULL))
     , _model_spawner (new noggit::ui::model_spawner (NULL,shared))
     , _cursor_selector (new ui::cursor_selector (NULL))
-    , _zoneid_widget( new ui::zoneid_widget (NULL))
+    , _zoneid_widget( new ui::zoneid_widget (world,NULL))
     , _is_currently_moving_object (false)
     , _object_to_ground (true)
     , _draw_lighting (true)
@@ -758,7 +758,10 @@ namespace noggit
 #ifdef __OBSOLETE_GUI_ELEMENTS
               mainGui->ZoneIDBrowser->setZoneID(_selected_area_id);
 #endif
-              _zoneid_widget->setZoneID(int(_world->GetCurrentSelection()->data.mapchunk->areaID));
+              _zoneid_widget->setZoneID(_selected_area_id);
+
+			 // in zeile 761 aus int(_world->GetCurrentSelection()->data.mapchunk->areaID) _selected_area_id machen.
+
               _zoneid_widget->setMapID();
             }
           }

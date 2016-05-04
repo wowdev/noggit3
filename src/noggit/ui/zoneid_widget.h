@@ -6,36 +6,37 @@
 #include <QString>
 
 class World;
-
-namespace ui
+namespace noggit
 {
-  class zoneid_widget : public QTreeWidget
-  {
-    Q_OBJECT
+	namespace ui
+	{
+		class zoneid_widget : public QTreeWidget
+		{
+			Q_OBJECT
 
-  public:
-    zoneid_widget(QWidget* Parent = NULL);
-    typedef zoneid_widget* Ptr;
+		public:
+			zoneid_widget(World *world, QWidget* Parent = NULL );
+			typedef zoneid_widget* Ptr;
 
-    void setMapID();
-    void setZoneID(int id);
+			void setMapID();
+			void setZoneID(int id);
 
-  private:
-    World* _world;
+		private:
+			World* _world;
 
-    QString ZoneName;
-    QString SubZoneName;
-    QString MapName;
+			QString ZoneName;
+			QString SubZoneName;
+			QString MapName;
 
-    unsigned int ZoneID;
-    int SubZoneID;
-    int MapID;
-    int selectedArea;
+			unsigned int ZoneID;
+			int SubZoneID;
+			int MapID;
+			int selectedArea;
 
-    QTreeWidgetItem* item_1;
+			QTreeWidgetItem* item_1;
 
-    void AreaList();
-  };
+			void AreaList();
+		};
+	}
 }
-
 #endif
