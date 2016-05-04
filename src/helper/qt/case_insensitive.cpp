@@ -4,6 +4,7 @@
 
 #include <helper/qt/case_insensitive.h>
 
+
 namespace helper
 {
   namespace qt
@@ -13,8 +14,8 @@ namespace helper
       namespace detail
       {
         QString case_sensitive_equivalent (const QString& path)
-        {
-          const int pos (path.lastIndexOf (QRegExp("[\\\\/]")));
+		{
+          const int pos (path.lastIndexOf (QRegExp("[\\\\/]"))); 
           const QString parent_path ( pos <= 0
                                     ? QDir::rootPath()
                                     : case_sensitive_equivalent
@@ -37,13 +38,15 @@ namespace helper
                                                   | QDir::AllEntries
                                                   )
                                   );
-          return dir.absoluteFilePath
-            (files.at ( files.indexOf ( QRegExp ( path.mid (pos + 1)
-                                                , Qt::CaseInsensitive
-                                                )
-                                      )
-                      )
-            );
+
+
+		  int const index(files.indexOf(QRegExp(path.mid(pos + 1)
+			  , Qt::CaseInsensitive
+			  )
+			  ));
+
+		  return dir.absoluteFilePath(index == -1 ? path.mid(pos + 1) : files.at(index));
+
         }
       }
 

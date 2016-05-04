@@ -23,6 +23,7 @@
 #include <noggit/ui/settingsDialog.h>
 #include <noggit/ui/about_widget.h>
 #include <noggit/ui/help_widget.h>
+#include <noggit/World.h>
 
 namespace noggit
 {
@@ -71,6 +72,7 @@ namespace noggit
 
     void MainWindow::create_world_view (World* world)
     {
+	
       MapView* map_view ( new MapView ( world
                                       , app().setting("view_distance").toReal()
                                       , 0.0
