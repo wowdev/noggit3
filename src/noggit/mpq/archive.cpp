@@ -64,14 +64,14 @@ namespace noggit
       //! \note This all does not work with files > 2^32 at all.
       std::size_t get_file_size (HANDLE file_handle)
       {
-        unsigned int filesize_high (0);
+		DWORD filesize_high (0);
         const unsigned int filesize_low (SFileGetFileSize (file_handle, &filesize_high));
         return filesize_low | size_t (filesize_high) << 32;
       }
 
       void read_file (HANDLE file_handle, void* buffer, std::size_t size)
       {
-        unsigned int read (0);
+		DWORD read (0);
         SFileReadFile (file_handle, buffer, size, &read, NULL);
         if (read != size)
         {
