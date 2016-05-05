@@ -574,8 +574,12 @@ float MapChunk::getMinHeight()
 	float min = mVertices[indexNoLoD(0, 0)].y;
 
 	for (int j = 0; j < 9; ++j)
+	{
 		for (int i = 0; i < 9; ++i)
+		{
 			min = std::fmin(mVertices[indexNoLoD(i, j)].y, min);
+		}
+	}			
 
 	return min;
 }

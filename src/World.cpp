@@ -1831,7 +1831,6 @@ void World::addHole(float x, float y, float z, bool big)
 
 void World::removeHole(float x, float z, bool big)
 {
-	mapIndex->setChanged(x, z);
 	const size_t newX = (const size_t)(x / TILESIZE);
 	const size_t newZ = (const size_t)(z / TILESIZE);
 
@@ -1848,6 +1847,8 @@ void World::removeHole(float x, float z, bool big)
 						MapChunk* chunk = mapIndex->getTile(j, i)->getChunk(ty, tx);
 						if (chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
 						{
+							mapIndex->setChanged(x, z);
+
 							int k = (int)((x - chunk->xbase) / MINICHUNKSIZE);
 							int l = (int)((z - chunk->zbase) / MINICHUNKSIZE);
 							if (big)
@@ -2197,22 +2198,12 @@ void World::swapTexture(int x, int z, OpenGL::Texture *tex)
 	{
 		for (int i = 0; i<16; ++i)
 		{
-			MapChunk *curChunk = curTile->getChunk((size_t)j, (size_t)i);
-			/*
-			dont know if this is good. People should always use 4 textures from start 
-			bool hasTextureAlready = false;
-			size_t index = 0;1
-			for (; index < 4U && curChunk->textureSet->num() > index; ++index)
-			{
-				if (curChunk->textureSet->texture(index) == UITexturingGUI::getSelectedTexture())
-					hasTextureAlready = true;
-			}
-			// set texture if not already on chunk
-			if (hasTextureAlready == false)*/
-				
-				curChunk->switchTexture(tex, UITexturingGUI::getSelectedTexture());
+			MapChunk *curChunk = curTile->getChunk((size_t)j, (size_t)i);				
+			curChunk->switchTexture(tex, UITexturingGUI::getSelectedTexture());
 		}
 	}
+
+	mapIndex->setChanged(z, x);
 }
 
 void World::saveWDT()
