@@ -117,6 +117,7 @@ public:
 
 	bool GetVertex(float x, float z, Vec3D *V);
 	float getHeight(int x, int z);
+	float getMinHeight();
 
 	//! \todo this is ugly create a build struct or sth
 	void save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::map<int, WMOInstance> &lObjectInstances, std::map<int, ModelInstance> &lModelInstances);

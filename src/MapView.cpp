@@ -1501,32 +1501,15 @@ void MapView::tick(float t, float dt)
 					break;
 
 				case 3:
-					if (Environment::getInstance()->ShiftDown)
+					if (mViewMode == eViewMode_3D)
 					{
-						// if there is no terrain the projection method do not work. So get the cords by selection.
-						Selection->data.mapchunk->getSelectionCoord(&xPos, &zPos);
-						yPos = Selection->data.mapchunk->getSelectionHeight();
-
-						if (Environment::getInstance()->AltDown)
+						if (Environment::getInstance()->ShiftDown)
 						{
-							if (mViewMode == eViewMode_3D)      gWorld->removeHole(xPos, zPos, true);
+							Selection->data.mapchunk->getSelectionCoord(&xPos, &zPos);
+							gWorld->removeHole(xPos, zPos, Environment::getInstance()->AltDown);
 						}
-						else
-						{
-							if (mViewMode == eViewMode_3D)      gWorld->removeHole(xPos, zPos, false);
-						}
-						//else if( mViewMode == eViewMode_2D )  gWorld->removeHole( CHUNKSIZE * 4.0f * video.ratio() * ( float( MouseX ) / float( video.xres() ) - 0.5f ) / gWorld->zoom+gWorld->camera.x, CHUNKSIZE * 4.0f * ( float( MouseY ) / float( video.yres() ) - 0.5f) / gWorld->zoom+gWorld->camera.z );
-					}
-					else if (Environment::getInstance()->CtrlDown)
-					{
-						if (Environment::getInstance()->AltDown)
-						{
-							if (mViewMode == eViewMode_3D)      gWorld->addHole(xPos, zPos, true);
-						}
-						else
-						{
-							if (mViewMode == eViewMode_3D)      gWorld->addHole(xPos, zPos, false);
-						}
+						else if (Environment::getInstance()->CtrlDown)
+							gWorld->addHole(xPos, yPos, zPos, Environment::getInstance()->AltDown);
 					}
 					break;
 				case 4:
