@@ -169,7 +169,7 @@ public:
 	void eraseTextures(float x, float z);
 	void overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
 
-	void addHole(float x, float z, bool big);
+	void addHole(float x, float y, float z, bool big);
 	void removeHole(float x, float z, bool big);
 
 	void addModel(nameEntry entry, Vec3D newPos, bool copyit);

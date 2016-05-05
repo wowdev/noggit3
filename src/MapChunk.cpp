@@ -569,6 +569,23 @@ float MapChunk::getHeight(int x, int z)
 	return mVertices[indexNoLoD(x, z)].y;
 }
 
+float MapChunk::getMinHeight()
+{
+	float min = mVertices[indexNoLoD(0, 0)].y;
+
+	for (int j = 0; j < 9; ++j)
+	{
+		for (int i = 0; i < 9; ++i)
+		{
+			float h = mVertices[indexNoLoD(i, j)].y;
+			if (h < min)
+				min = h;
+		}
+	}
+
+	return min;
+}
+
 void MapChunk::drawPass(int id)
 {
 	textureSet->startAnim(id);

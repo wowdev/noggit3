@@ -1795,9 +1795,8 @@ void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* ol
 	}
 }
 
-void World::addHole(float x, float z, bool big)
+void World::addHole(float x, float y, float z, bool big)
 {
-	mapIndex->setChanged(x, z);
 	const size_t newX = (const size_t)(x / TILESIZE);
 	const size_t newZ = (const size_t)(z / TILESIZE);
 
@@ -1812,8 +1811,10 @@ void World::addHole(float x, float z, bool big)
 					for (size_t tx = 0; tx < 16; ++tx)
 					{
 						MapChunk* chunk = mapIndex->getTile(j, i)->getChunk(ty, tx);
-						if (chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
+						// check if the cursor is not undermap 
+						if (chunk->getMinHeight() < y + 1.0f && chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
 						{
+							mapIndex->setChanged(x, z);
 							int k = (int)((x - chunk->xbase) / MINICHUNKSIZE);
 							int l = (int)((z - chunk->zbase) / MINICHUNKSIZE);
 							if (big)
