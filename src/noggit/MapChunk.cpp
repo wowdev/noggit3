@@ -424,92 +424,66 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
       {
         if( texture_flags (layer) & 0x100 )
         {
+          uint8_t* const alpha_map (&amap[layer - 1][0]);
+          uint8_t const* input (f->get<uint8_t> (MCALbase + MCALoffset[layer]));
 
-          f->seek( MCALbase + MCALoffset[layer] );
+          memset (alpha_map, 255, 64 * 64);
 
-          if( texture_flags (layer) & 0x200 )
-          {  // compressed
-
-            // 21-10-2008 by Flow
-            unsigned offI = 0; //offset IN buffer
-            unsigned offO = 0; //offset OUT buffer
-            char* buffIn = f->getPointer(); // pointer to data in adt file
-
-            while( offO < 4096 )
+          if (texture_flags (layer) & 0x200)
+          {
+            for (std::size_t offset_output (0); offset_output < 4096;)
             {
-              // fill or copy mode
-              bool fill = buffIn[offI] & 0x80;
-              unsigned n = buffIn[offI] & 0x7F;
-              offI++;
-              for( unsigned k = 0; k < n; ++k )
+              bool const fill (*input & 0x80);
+              std::size_t const n (*input & 0x7F);
+              ++input;
+
+              if (fill)
               {
-              if (offO == 4096) break;
-              amap[layer-1][offO] = buffIn[offI];
-              offO++;
-              if( !fill )
-                offI++;
+                memset (&alpha_map[offset_output], *input, n);
+                ++input;
               }
-              if( fill ) offI++;
-            }
+              else
+              {
+                memcpy (&alpha_map[offset_output], input, n);
+                input += n;
+              }
 
-            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[layer-1]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+              offset_output += n;
+            }
           }
-          else if(bigAlpha){
-            // not compressed
-            unsigned char *p;
-            char *abuf = f->getPointer();
-            p = amap[layer-1];
-            for (int j=0; j<64; ++j) {
-              for (int i=0; i<64; ++i) {
-                *p++ = *abuf++;
-              }
-
-            }
-
-            memcpy(amap[layer-1]+63*64,amap[layer-1]+62*64,64);
-            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[layer-1]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            f->seekRelative(0x1000);
+          else if (bigAlpha)
+          {
+            memcpy (alpha_map, input, 64 * 64);
           }
           else
           {
-            // not compressed
-            unsigned char *p;
-            char *abuf = f->getPointer();
-            p = amap[layer-1];
-            for (int j=0; j<63; ++j) {
-              for (int i=0; i<32; ++i) {
-                unsigned char c = *abuf++;
-                *p++ = static_cast<unsigned char>((255*(static_cast<int>(c & 0x0f)))/0x0f);
-                if(i != 31)
-                {
-                  *p++ = static_cast<unsigned char>((255*(static_cast<int>(c & 0xf0)))/0xf0);
-                }
-                else
-                {
-                  *p++ = static_cast<unsigned char>((255*(static_cast<int>(c & 0x0f)))/0x0f);
-                }
+            for (std::size_t x (0); x < 64; ++x)
+            {
+              for (std::size_t y (0); y < 64; y += 2)
+              {
+                alpha_map[x * 64 + y + 0] = ((*input & 0x0f) << 4) | 0xf;
+                alpha_map[x * 64 + y + 1] = ((*input & 0xf0) << 0) | 0xf;
+                ++input;
               }
-
             }
-            memcpy(amap[layer-1]+63*64,amap[layer-1]+62*64,64);
-            glBindTexture(GL_TEXTURE_2D, alphamaps[layer-1]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[layer-1]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            f->seekRelative(0x800);
           }
+
+          if (!(header.flags & FLAG_do_not_fix_alpha_map))
+          {
+            for (std::size_t i (0); i < 64; ++i)
+            {
+              alpha_map[i * 64 + 63] = alpha_map[i * 64 + 62];
+              alpha_map[63 * 64 + i] = alpha_map[62 * 64 + i];
+            }
+            alpha_map[63 * 64 + 63] = alpha_map[62 * 64 + 62];
+          }
+
+          glBindTexture(GL_TEXTURE_2D, alphamaps[layer - 1]);
+          glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, alpha_map);
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         }
       }
     }

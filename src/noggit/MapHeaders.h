@@ -32,7 +32,7 @@ enum eMCNKFlags
   FLAG_LQ_MAGMA  = 0x10,
   FLAG_LQ_SLIME  = 0x20,
   FLAG_MCCV = 0x40,
-  FLAG_TBC = 0x8000
+  FLAG_do_not_fix_alpha_map = 0x8000
 };
 
 enum eMCLYFlags
