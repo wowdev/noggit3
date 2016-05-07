@@ -192,6 +192,8 @@ void HeightColor(float height, ::math::vector_3d *Color)
 
 void MapChunk::GenerateContourMap()
 {
+  glEnable(GL_TEXTURE_2D);
+
   unsigned char  CTexture[CONTOUR_WIDTH*4];
 
   _contour_coord_gen[0]=0.0f;
@@ -257,6 +259,9 @@ void MapChunk::GenerateContourMap()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+
+  glDisable(GL_TEXTURE_GEN_S);
+  glDisable(GL_TEXTURE_2D);
 }
 
 //! \note I am aware of this being global state not even being inside a class BUT I DONT CARE AT ALL. THIS WHOLE THING IS BULLSHIT AND NOT WORTH A BIT AND COSTING ME TIME OF MY LIFE FOR JUST BEING BAD AS FUCK. REMOVEING ENVIRONMENT TOOK ME HOURS WHILE MOST VARIABLES HAD BEEN ONLY USED IN A SINGLE FUCKING CLASS,  DID NOT HAVE MEANINGFUL NAMES OR ANYTHING.
