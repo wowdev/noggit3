@@ -183,13 +183,13 @@ WMO::WMO( World* world, const std::string& filenameArg )
           ( ModelInstance ( world
                           , ModelManager::add (ddnames + ofs)
                           , ::math::vector_3d ( position.x()
+                                              , position.z()
                                               , -position.y()
-                                              , -position.z()
                                               )
-                          , ::math::quaternion ( -rotation.z()
-                                               , rotation.x()
+                          , ::math::quaternion ( -rotation.w()
                                                , rotation.y()
-                                               , rotation.w()
+                                               , rotation.z()
+                                               , rotation.x()
                                                )
                           , scale
                           , ::math::vector_3d ( ((light & 0xff0000) >> 16) / 255.0f
