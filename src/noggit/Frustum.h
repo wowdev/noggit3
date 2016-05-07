@@ -25,9 +25,9 @@ class Frustum
   public:
     void normalize()
     {
-      const float repri (_normal.length());
-      _normal *= repri;
-      _distance *= repri;
+      const float recip (1.0f / _normal.length());
+      _normal *= recip;
+      _distance *= recip;
     }
 
     const float& distance() const
