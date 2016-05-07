@@ -353,8 +353,24 @@ target_link_libraries ( noggit
 if (APPLE)
   set_target_properties ( noggit
                           PROPERTIES
-                          MACOSX_BUNDLE_INFO_PLIST
-                          "${CMAKE_SOURCE_DIR}/media/Info.plist"
+                          MACOSX_BUNDLE_ICON_FILE
+                          "noggit"
+                        )
+  set_source_files_properties (media/noggit.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+  set_target_properties ( noggit
+                          PROPERTIES
+                          MACOSX_BUNDLE_BUNDLE_NAME
+                          "Noggit 3"
+                        )
+  set_target_properties ( noggit
+                          PROPERTIES
+                          MACOSX_BUNDLE_BUNDLE_VERSION
+                          "3"
+                        )
+  set_target_properties ( noggit
+                          PROPERTIES
+                          MACOSX_BUNDLE_GUI_IDENTIFIER
+                          "com.noggit.noggit"
                         )
 
   # Copy the binary to bin/.
