@@ -29,6 +29,7 @@
 #include <opengl/scoped.h>
 
 #include <noggit/blp_texture.h>
+#include <noggit/Brush.h>
 #include <noggit/DBC.h>
 #include <noggit/Frustum.h> // Frustum
 #include <noggit/Log.h>
@@ -1738,21 +1739,27 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
 
 bool World::paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture)
 {
-  //const int newX = (int)(x / TILESIZE);
-  //const int newZ = (int)(z / TILESIZE);
+  int const x_lower (static_cast<int> ((x - Brush.getRadius()) / TILESIZE));
+  int const x_upper (static_cast<int> ((x + Brush.getRadius()) / TILESIZE));
+  int const z_lower (static_cast<int> ((z - Brush.getRadius()) / TILESIZE));
+  int const z_upper (static_cast<int> ((z + Brush.getRadius()) / TILESIZE));
 
-  //Log << "Painting Textures at " << x << " and " << z;
   bool succ = false;
 
-  for( int j = 0; j < 64; ++j )
+  for (int j (z_lower); j <= z_upper; ++j)
   {
-    for( int i = 0; i < 64; ++i )
+    for (int i (x_lower); i <= x_upper; ++i)
     {
       if( tileLoaded( j, i ) )
       {
-        for( size_t ty = 0; ty < 16; ++ty )
+        int const x_chunk_lower (std::max (0, static_cast<int> ((x - Brush.getRadius()) / CHUNKSIZE) - i * 16));
+        int const x_chunk_upper (std::min (16, static_cast<int> ((x + Brush.getRadius()) / CHUNKSIZE) - i * 16));
+        int const z_chunk_lower (std::max (0, static_cast<int> ((z - Brush.getRadius()) / CHUNKSIZE) - j * 16));
+        int const z_chunk_upper (std::min (16, static_cast<int> ((z + Brush.getRadius()) / CHUNKSIZE) - j * 16));
+
+        for (int ty (x_chunk_lower); ty <= x_chunk_upper; ++ty)
         {
-          for( size_t tx = 0; tx < 16; ++tx )
+          for (int tx (z_chunk_lower); tx <= z_chunk_upper; ++tx)
           {
             if( mTiles[j][i].tile->getChunk( ty, tx )->paintTexture( x, z, Brush, strength, pressure, texture ) )
             {
