@@ -40,7 +40,7 @@ namespace noggit
         }else{
             if ( !SFileOpenArchive ( filename.toLatin1().data()
                                      , 0
-                                     , MPQ_OPEN_NO_LISTFILE
+                                     , MPQ_OPEN_NO_LISTFILE | STREAM_FLAG_READ_ONLY
                                      , &_archive_handle
                                      )
                  )
