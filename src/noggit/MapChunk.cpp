@@ -826,35 +826,6 @@ boost::optional<float> MapChunk::get_height ( const float& x
 
 void MapChunk::CreateStrips()
 {
-  StripType Temp[18];
-
-  for(int i=0; i < 8; ++i)
-  {
-    _odd_strips[i*18+0] = i*17 + 17;
-    for(int j=0; j < 8; j++)
-    {
-      _odd_strips[i*18 + 2*j + 1] = i*17 + j;
-      _odd_strips[i*18 + 2*j + 2] = i*17 + j + 9;
-      _even_strips[i*18 + 2*j] = i*17 + 17 + j;
-      _even_strips[i*18 + 2*j + 1] = i*17 + 9 + j;
-    }
-    _odd_strips[i*18 + 17] = i*17 + 8;
-    _even_strips[i*18 + 16] = i*17 + 17 + 8;
-    _even_strips[i*18 + 17] = i*17 + 8;
-  }
-
-  //Reverse the order whoops
-  for(int i=0; i < 8; ++i)
-  {
-    for(int j=0; j < 18; ++j)
-      Temp[17-j] = _odd_strips[i*18 + j];
-    memcpy(&_odd_strips[i*18], Temp, sizeof(Temp));
-    for(int j=0; j < 18; ++j)
-      Temp[17-j] = _even_strips[i*18 + j];
-    memcpy(&_even_strips[i*18], Temp, sizeof(Temp));
-
-  }
-
   for(int i=0; i < 32; ++i)
   {
     if(i < 9)

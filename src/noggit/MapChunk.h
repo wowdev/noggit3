@@ -163,8 +163,6 @@ private:
   GLuint _contour_texture;
   float _contour_coord_gen[4];
 
-  StripType _odd_strips[8*18];
-  StripType _even_strips[8*18];
   StripType _line_strip[32];
   StripType _hole_strip[128];
 };
