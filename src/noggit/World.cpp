@@ -90,7 +90,7 @@ void renderSphere_convenient(float x, float y, float z, float radius, int subdiv
   glEnable(GL_LIGHTING);
 }
 
-void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
+void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, float radius, GLUquadricObj *quadric)
 {
   float vx = x2 - x1;
   float vy = y2 - y1;
@@ -127,7 +127,7 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
             );
 
   gluQuadricOrientation(quadric, GLU_OUTSIDE);
-  gluDisk(quadric, radius , radius + 1.0f, subdivisions, 1);
+  gluDisk(quadric, radius , radius + 1.0f, std::max (15.0, radius * 1.5), 1);
 
   glEnable(GL_DEPTH_TEST);
   glPopMatrix();
@@ -135,15 +135,11 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
 
 void renderDisk_convenient(float x, float y, float z, float radius)
 {
-
-  int subdivisions =(int)radius * 2.0;
-
-  if( subdivisions < 20 ) subdivisions=20;
   glDisable(GL_LIGHTING);
   GLUquadricObj *quadric = gluNewQuadric();
   gluQuadricDrawStyle(quadric, GLU_LINE);
   gluQuadricNormals(quadric, GLU_SMOOTH);
-  renderDisk(x, y, z, x, y, z, radius, subdivisions, quadric);
+  renderDisk(x, y, z, x, y, z, radius, quadric);
   renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
   gluDeleteQuadric(quadric);
   glEnable(GL_LIGHTING);
