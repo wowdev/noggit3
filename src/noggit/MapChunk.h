@@ -81,6 +81,8 @@ public:
   bool isHole(int i,int j);
   void addHole(int i,int j);
   void removeHole(int i,int j);
+  void make_all_holes();
+  void remove_all_holes();
 
   void setFlag(bool on_or_off, int flag);
 
