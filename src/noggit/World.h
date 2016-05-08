@@ -147,7 +147,8 @@ public:
   bool paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture);
   void eraseTextures(float x, float z);
   void overwriteTextureAtCurrentChunk( float x, float z, noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture);
-  void addHole( float x, float z );
+  void addHole (float x, float z, bool whole_chunk);
+  void removeHole (float x, float z, bool whole_chunk);
 
   void addModel ( const nameEntry& entry
                 , ::math::vector_3d newPos
@@ -163,7 +164,6 @@ public:
              );
   void addWMO( WMO *wmo, ::math::vector_3d newPos );
 
-  void removeHole( float x, float z );
   void saveMap();
 
   void deleteModelInstance( int pUniqueID );

@@ -1823,7 +1823,7 @@ void World::overwriteTextureAtCurrentChunk(float x, float z, noggit::blp_texture
   }
 }
 
-void World::addHole( float x, float z )
+void World::addHole (float x, float z, bool whole_chunk)
 {
   setChanged(x, z);
   const size_t newX = x / TILESIZE;
@@ -1842,9 +1842,16 @@ void World::addHole( float x, float z )
             MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
             if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
             {
-              int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
-              int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
-              chunk->addHole( k, l );
+              if (whole_chunk)
+              {
+                chunk->make_all_holes();
+              }
+              else
+              {
+                int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
+                int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
+                chunk->addHole (k, l);
+              }
             }
           }
         }
@@ -1853,7 +1860,7 @@ void World::addHole( float x, float z )
   }
 }
 
-void World::removeHole( float x, float z )
+void World::removeHole (float x, float z, bool whole_chunk)
 {
   setChanged(x, z);
   const size_t newX = x / TILESIZE;
@@ -1872,9 +1879,16 @@ void World::removeHole( float x, float z )
             MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
             if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
             {
-              int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
-              int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
-              chunk->removeHole( k, l );
+              if (whole_chunk)
+              {
+                chunk->remove_all_holes();
+              }
+              else
+              {
+                int k = ( x - chunk->xbase ) / MINICHUNKSIZE;
+                int l = ( z - chunk->zbase ) / MINICHUNKSIZE;
+                chunk->removeHole (k, l);
+              }
             }
           }
         }

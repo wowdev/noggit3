@@ -1865,6 +1865,16 @@ void MapChunk::removeHole( int i, int j )
   holes = holes & ~( ( 1 << ((j*4)+i)) );
   initStrip();
 }
+void MapChunk::make_all_holes()
+{
+  holes = 0xffff;
+  initStrip();
+}
+void MapChunk::remove_all_holes()
+{
+  holes = 0;
+  initStrip();
+}
 
 void MapChunk::setAreaID( int ID )
 {

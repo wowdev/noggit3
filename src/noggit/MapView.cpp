@@ -736,11 +736,15 @@ namespace noggit
 
               _world->removeHole ( selection_position.x()
                                  , selection_position.z()
+                                 , _currently_holding_alt
                                  );
             }
             else if(_currently_holding_control)
             {
-              _world->addHole(position.x(), position.z());
+              _world->addHole ( position.x()
+                              , position.z()
+                              , _currently_holding_alt
+                              );
             }
           }
         break;
