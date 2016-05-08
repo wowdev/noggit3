@@ -44,18 +44,22 @@ Menu::Menu (QWidget* parent)
   QListWidget* continents_table (new QListWidget (NULL));
   QListWidget* dungeons_table (new QListWidget (NULL));
   QListWidget* raids_table (new QListWidget (NULL));
+  QListWidget* battlegrounds_table (new QListWidget (NULL));
+  QListWidget* arenas_table (new QListWidget (NULL));
 
   connect (continents_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
   connect (dungeons_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
   connect (raids_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
+  connect (battlegrounds_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
+  connect (arenas_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
 
-  QListWidget* tables[3] = { continents_table, dungeons_table, raids_table };
+  QListWidget* tables[5] = {continents_table, dungeons_table, raids_table, battlegrounds_table, arenas_table};
 
   for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
   {
     const int mapID (i->getInt (MapDB::MapID));
     const int areaType (i->getUInt (MapDB::AreaType));
-    if (areaType < 0 || areaType > 2 || !World::IsEditableWorld (mapID))
+    if (!World::IsEditableWorld (mapID))
       continue;
 
     QListWidgetItem* item (new QListWidgetItem (QString::fromUtf8 (i->getLocalizedString(MapDB::Name)), tables[areaType]));
@@ -95,6 +99,8 @@ Menu::Menu (QWidget* parent)
   entry_points_tabs->addTab (continents_table, tr ("Continents"));
   entry_points_tabs->addTab (dungeons_table, tr ("Dungeons"));
   entry_points_tabs->addTab (raids_table, tr ("Raids"));
+  entry_points_tabs->addTab (battlegrounds_table, tr ("Battlegrounds"));
+  entry_points_tabs->addTab (arenas_table, tr ("Arenas"));
   entry_points_tabs->addTab (bookmarks_table, tr ("Bookmarks"));
 
   _minimap->draw_boundaries (true);
