@@ -763,7 +763,7 @@ void MapChunk::initStrip()
     StripType* s = strip;
     for (size_t y=0; y < 8; ++y) {
       for (size_t x=0; x < 8; ++x) {
-        if (!isHole(x, y)) {
+        if (!isHole(x/2, y/2)) {
             *s++ = indexLoD(y, x); //9
             *s++ = indexNoLoD(y, x); //0
             *s++ = indexNoLoD(y+1, x); //17
