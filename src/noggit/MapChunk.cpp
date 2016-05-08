@@ -1867,16 +1867,12 @@ void MapChunk::setFlag( bool on_or_off, int flag)
 
 void MapChunk::update_low_quality_texture_map()
 {
-  memset ( header.low_quality_texture_map
-         , 0
-         , sizeof (header.low_quality_texture_map)
-         );
-
-  for (size_t layer (1); layer < nTextures; ++layer)
+  for (size_t y (0); y < 8; ++y)
   {
-    for (size_t y (0); y < 8; ++y)
+    for (size_t x (0); x < 8; ++x)
     {
-      for (size_t x (0); x < 8; ++x)
+      size_t winning_layer (0);
+      for (size_t layer (1); layer < nTextures; ++layer)
       {
         size_t sum (0);
         for (size_t j (0); j < 8; ++j)
@@ -1886,18 +1882,21 @@ void MapChunk::update_low_quality_texture_map()
             sum += amap[layer][(y * 8 + j) * 64 + (x * 8 + i)];
           }
         }
+        sum /= 8 * 8;
 
-        static const size_t minimum_value_to_overwrite (120);
+        const size_t minimum_value_to_overwrite (128 / layer);
 
-        if (sum > minimum_value_to_overwrite * 8 * 8)
+        if (sum > minimum_value_to_overwrite)
         {
-          const size_t array_index ((y * 8 + x) / 4);
-          const size_t bit_index (((y * 8 + x) % 4) * 2);
-
-          header.low_quality_texture_map[array_index]
-            |= ((layer & 3) << bit_index);
+          winning_layer = layer;
         }
       }
+
+      const size_t array_index ((y * 8 + x) / 4);
+      const size_t bit_index (((y * 8 + x) % 4) * 2);
+
+      header.low_quality_texture_map[array_index]
+        |= ((winning_layer & 3) << bit_index);
     }
   }
 }
