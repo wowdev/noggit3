@@ -54,7 +54,7 @@ namespace noggit
       //debugMenu->addAction (tr("textureSelector"), test, SLOT(show()));
 
       if(noggit::app().setting("projectExplorerShow").toBool() == true)
-        createDockWidgets();
+      createDockWidgets();
 
       statusBar()->showMessage (tr("Ready"));
 
@@ -97,13 +97,10 @@ namespace noggit
 
     void MainWindow::maps()
     {
-      Menu* map_selection_menu (new Menu (NULL));
-      connect (map_selection_menu, SIGNAL (create_world_view_request (World*)), this, SLOT (create_world_view (World*)));
+      this->map_selection_menu = new Menu (NULL);
+      connect (this->map_selection_menu, SIGNAL (create_world_view_request (World*)), this, SLOT (create_world_view (World*)));
+	  this->map_selection_menu->show();
 
-      if(noggit::app().setting("maximizedShow").toBool() == false)
-        map_selection_menu->show();
-      else
-        map_selection_menu->showMaximized();
     }
 
     void MainWindow::projectExplorerOpen()

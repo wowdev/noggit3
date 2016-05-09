@@ -27,6 +27,9 @@ namespace noggit
     public:
       MainWindow(QWidget* parent = 0);
 
+	public:
+		Menu* map_selection_menu;
+
     public slots:
       void create_world_view (World*);
 

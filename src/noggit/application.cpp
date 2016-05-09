@@ -81,11 +81,15 @@ namespace noggit
 
     OpenDBs();
 
+	loadStyles();
+
     ui::MainWindow* mainwindow = new ui::MainWindow;
     if (_settings->value ("maximizedAppShow").toBool() == true)
       mainwindow->showMaximized();
     else
       mainwindow->show();
+	mainwindow->map_selection_menu->raise();
+	mainwindow->map_selection_menu->activateWindow();
   }
 
   application::~application()
@@ -138,7 +142,7 @@ namespace noggit
     bool inFullscreen (_settings->value ("fullscreen", false).toBool());
     bool doAntiAliasing (_settings->value ("antialiasing", true).toBool());
     bool doMaximizedShow (_settings->value ("maximizedShow", true).toBool());
-    bool doMaximizedAppShow (_settings->value ("maximizedAppShow", true).toBool());
+    bool doMaximizedAppShow (_settings->value ("maximizedAppShow", false).toBool());
     bool doProjectExplorerShow (_settings->value ("projectExplorerShow", false).toBool());
     qreal view_distance (_settings->value ("view_distance", 2048.0).toReal());
 
@@ -395,6 +399,24 @@ namespace noggit
                                 , file.getSize()
                                 )
       );
+  }
+
+  void application::loadStyles()
+  {
+	  // load external style file
+	  this->setStyle("plastique");
+
+	  // set stylesheet file path
+	  // check if file exists and if yes: Is it really a file and no directory?
+	  QString stylePath = "style/noggit.style";
+	  QFileInfo check_file(stylePath);
+	  if (check_file.exists() && check_file.isFile())
+	  {
+		  QFile File(stylePath);
+		  File.open(QFile::ReadOnly);
+		  QString StyleSheet = QLatin1String(File.readAll());
+		  this->setStyleSheet(StyleSheet);
+	  }
   }
 
   application& app()
