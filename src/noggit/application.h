@@ -48,6 +48,7 @@ namespace noggit
     void add_font_from_mpq (const QString& filename) const;
     void auto_detect_game_path();
     static bool is_valid_game_path (const QDir& path);
+	void loadStyles();
 
     QSettings* _settings;
     QDir _game_path;
