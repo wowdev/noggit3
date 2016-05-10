@@ -4,6 +4,8 @@
 #ifndef MODELVIEW_H
 #define MODELVIEW_H
 
+#include <noggit/ModelManager.h>
+
 #include <opengl/types.h>
 #include <QGLWidget>
 #include <QSettings>
@@ -26,7 +28,7 @@ private:
     bool _draw_loading;
     QTime _run_time;
     qreal _last_update;
-    Model *theModel;
+    scoped_model_reference theModel;
     GLfloat distance;
     GLfloat xRot;
     GLfloat yRot;

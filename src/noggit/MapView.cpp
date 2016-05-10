@@ -391,11 +391,11 @@ namespace noggit
 
       if (path.endsWith (".m2"))
       {
-        _world->addM2 (ModelManager::add (path.toStdString()), _world->_exact_terrain_selection_position);
+        _world->addM2 (path.toStdString(), _world->_exact_terrain_selection_position);
       }
       else if (path.endsWith (".wmo"))
       {
-        _world->addWMO (WMOManager::add (_world, path.toStdString()), _world->_exact_terrain_selection_position);
+        _world->addWMO (path.toStdString(), _world->_exact_terrain_selection_position);
       }
     }
     else
@@ -2280,7 +2280,7 @@ namespace noggit
         if( !MPQFile::exists(lastModel) )
           LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
         else
-          _world->addM2( ModelManager::add( lastModel ), selectionPosition );
+          _world->addM2(lastModel, selectionPosition );
     }
     else if(id==15)
     {
@@ -2289,7 +2289,7 @@ namespace noggit
         if( !MPQFile::exists(lastWMO) )
           LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
         else
-          _world->addWMO( WMOManager::add( lastWMO ), selectionPosition );
+          _world->addWMO(lastWMO, selectionPosition );
     }
     else
     {
@@ -2303,7 +2303,7 @@ namespace noggit
           continue;
         }
 
-        _world->addWMO( WMOManager::add( *it ), selectionPosition );
+        _world->addWMO(*it, selectionPosition );
       }
 
       for( std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it )
@@ -2316,7 +2316,7 @@ namespace noggit
           continue;
         }
 
-        _world->addM2( ModelManager::add( *it ), selectionPosition );
+        _world->addM2(*it, selectionPosition );
       }
     }
     //! \todo Memoryleak: These models will never get deleted.

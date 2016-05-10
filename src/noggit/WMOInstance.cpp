@@ -11,8 +11,8 @@
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
-WMOInstance::WMOInstance(World* world, WMO* _wmo, noggit::mpq::file* _file )
-  : wmo( _wmo )
+WMOInstance::WMOInstance(World* world, std::string const& path, noggit::mpq::file* _file )
+  : wmo (world, path)
   , mSelectionID( world->selection_names().add( this ) )
   , _world (world)
 {
@@ -27,8 +27,8 @@ WMOInstance::WMOInstance(World* world, WMO* _wmo, noggit::mpq::file* _file )
   _file->read( &mUnknown, 2 );
 }
 
-WMOInstance::WMOInstance( World* world, WMO* _wmo, ENTRY_MODF* d )
-  : wmo( _wmo )
+WMOInstance::WMOInstance( World* world, std::string const& path, ENTRY_MODF* d )
+  : wmo (world, path)
   , pos( d->pos[0], d->pos[1], d->pos[2] )
   , dir( d->rot[0], d->rot[1], d->rot[2] )
   , mUniqueID( d->uniqueID )
@@ -43,8 +43,8 @@ WMOInstance::WMOInstance( World* world, WMO* _wmo, ENTRY_MODF* d )
   extents[1] = ::math::vector_3d( d->extents[1][0], d->extents[1][1], d->extents[1][2] );
 }
 
-WMOInstance::WMOInstance( World* world, WMO* _wmo )
-  : wmo( _wmo )
+WMOInstance::WMOInstance( World* world, std::string const& path )
+  : wmo (world, path)
   , pos( 0.0f, 0.0f, 0.0f )
   , dir( 0.0f, 0.0f, 0.0f )
   , mUniqueID( 0 )

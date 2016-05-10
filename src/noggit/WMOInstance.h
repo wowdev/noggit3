@@ -14,6 +14,7 @@
 #include <math/vector_3d.h>
 
 #include <noggit/Selection.h>
+#include <noggit/WMO.h>
 
 class Frustum;
 class WMO;
@@ -32,7 +33,7 @@ namespace noggit
 class WMOInstance
 {
 public:
-  WMO* wmo;
+  scoped_wmo_reference wmo;
   ::math::vector_3d pos;
   ::math::vector_3d  extents[2];
   ::math::vector_3d  dir;
@@ -46,9 +47,9 @@ private:
   unsigned int mSelectionID;
 
 public:
-  WMOInstance( World*, WMO* _wmo, noggit::mpq::file* _file );
-  WMOInstance( World*, WMO* _wmo, ENTRY_MODF* d );
-  explicit WMOInstance( World*, WMO* _wmo );
+  WMOInstance( World*, std::string const& path, noggit::mpq::file* _file );
+  WMOInstance( World*, std::string const& path, ENTRY_MODF* d );
+  explicit WMOInstance( World*, std::string const& path );
   ~WMOInstance();
 
   void draw ( bool draw_doodads

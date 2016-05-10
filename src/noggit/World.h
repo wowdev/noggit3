@@ -156,13 +156,13 @@ public:
                 , bool position_randomization
                 , bool rotation_randomization
                 );
-  void addM2 ( Model *model
+  void addM2 ( std::string const& path
              , ::math::vector_3d newPos
              , bool size_randomization = false
              , bool position_randomization = false
              , bool rotation_randomization = false
              );
-  void addWMO( WMO *wmo, ::math::vector_3d newPos );
+  void addWMO (std::string const& path, ::math::vector_3d newPos );
 
   void saveMap();
 

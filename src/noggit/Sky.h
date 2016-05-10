@@ -12,6 +12,7 @@
 #include <math/vector_3d.h>
 
 #include <noggit/DBCFile.h>
+#include <noggit/ModelManager.h>
 
 namespace noggit
 {
@@ -83,7 +84,7 @@ class Skies {
 
   int numSkies;
   int cs;
-  Model *stars;
+  scoped_model_reference stars;
   char skyname[128];
 
 public:
@@ -91,7 +92,6 @@ public:
   ::math::vector_3d colorSet[18];
 
   explicit Skies( unsigned int mapid );
-  ~Skies();
 
   void findSkyWeights(::math::vector_3d pos);
   void initSky(::math::vector_3d pos, int t);
