@@ -81,7 +81,10 @@ namespace noggit
 
     OpenDBs();
 
-	loadStyles();
+    if (_settings->value ("use_styled_ui", false).toBool())
+    {
+      loadStyles();
+    }
 
     ui::MainWindow* mainwindow = new ui::MainWindow;
     if (_settings->value ("maximizedAppShow").toBool() == true)
