@@ -35,7 +35,7 @@ static const int HEIGHT_LOW = 300;
 static const int HEIGHT_ZERO = 0;
 static const int HEIGHT_SHALLOW = -100;
 static const int HEIGHT_DEEP = -250;
-static const double MAPCHUNK_DIAMETER  = 47.140452079103168293389624140323;
+static const double MAPCHUNK_RADIUS = 47.140452079103168293389624140323; //sqrt((533.33333/16)^2 + (533.33333/16)^2)
 static const int CONTOUR_WIDTH = 128;
 static const float texDetail = 8.0f;
 static const float TEX_RANGE = 62.0f / 64.0f;
@@ -1331,7 +1331,7 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
   zdiff = zbase - z + CHUNKSIZE/2;
   dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
-  if(dist > (radius + MAPCHUNK_DIAMETER))
+  if(dist > (radius + MAPCHUNK_RADIUS))
     return false;
 
   vmin.y (9999999.0f);
@@ -1392,7 +1392,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
   zdiff= zbase - z + CHUNKSIZE/2;
   dist= sqrt(xdiff*xdiff + zdiff*zdiff);
 
-  if(dist > (radius + MAPCHUNK_DIAMETER))
+  if(dist > (radius + MAPCHUNK_RADIUS))
     return false;
 
   vmin.y (9999999.0f);
@@ -1445,7 +1445,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
   zdiff = zbase - z + CHUNKSIZE/2;
   dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
-  if(dist > (radius + MAPCHUNK_DIAMETER) )
+  if(dist > (radius + MAPCHUNK_RADIUS) )
     return false;
 
   vmin.y (9999999.0f);
@@ -1606,7 +1606,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
   zdiff= zbase - z + CHUNKSIZE/2;
   dist= sqrt( xdiff*xdiff + zdiff*zdiff );
 
-  if( dist > (radius+MAPCHUNK_DIAMETER) )
+  if( dist > (radius+MAPCHUNK_RADIUS) )
     return false;
 
   //First Lets find out do we have the texture already
@@ -1709,7 +1709,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
   const float xdiff = xbase + CHUNKSIZE / 2 - x;
   const float zdiff = zbase + CHUNKSIZE / 2 - z;
 
-  if( ( xdiff * xdiff + zdiff * zdiff ) > ( MAPCHUNK_DIAMETER / 2 + radius ) * ( MAPCHUNK_DIAMETER / 2 + radius ) )
+  if( ( xdiff * xdiff + zdiff * zdiff ) > ( MAPCHUNK_RADIUS+ radius ) * ( MAPCHUNK_RADIUS + radius ) )
   return false;
 
 
