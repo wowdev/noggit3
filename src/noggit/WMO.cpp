@@ -76,8 +76,6 @@ WMO::WMO( World* world, const std::string& filenameArg )
   char *ddnames = NULL;
   char *groupnames = NULL;
 
-  skybox = 0;
-
   char *texbuf=0;
 
   while (!f.is_at_end_of_file()) {
@@ -179,24 +177,23 @@ WMO::WMO( World* world, const std::string& filenameArg )
         uint32_t light;
         f.read (&light, sizeof (uint32_t));
 
-        modelis.push_back
-          ( ModelInstance ( world
-                          , ModelManager::add (ddnames + ofs)
-                          , ::math::vector_3d ( position.x()
-                                              , position.z()
-                                              , -position.y()
-                                              )
-                          , ::math::quaternion ( -rotation.w()
-                                               , rotation.y()
-                                               , rotation.z()
-                                               , rotation.x()
-                                               )
-                          , scale
-                          , ::math::vector_3d ( ((light & 0xff0000) >> 16) / 255.0f
-                                              , ((light & 0x00ff00) >> 8) / 255.0f
-                                              , ((light & 0x0000ff)) / 255.0f
-                                              )
-                          )
+        modelis.emplace_back
+          ( world
+          , ddnames + ofs
+          , ::math::vector_3d ( position.x()
+                              , position.z()
+                              , -position.y()
+                              )
+          , ::math::quaternion ( -rotation.w()
+                               , rotation.y()
+                               , rotation.z()
+                               , rotation.x()
+                               )
+          , scale
+          , ::math::vector_3d ( ((light & 0xff0000) >> 16) / 255.0f
+                              , ((light & 0x00ff00) >> 8) / 255.0f
+                              , ((light & 0x0000ff)) / 255.0f
+                              )
           );
       }
 
@@ -212,12 +209,7 @@ WMO::WMO( World* world, const std::string& filenameArg )
 
           if( noggit::mpq::file::exists( QString::fromStdString (path) ) )
           {
-            skybox = ModelManager::add( path );
-            skyboxFilename = path;
-          }
-          else
-          {
-            skybox = NULL;
+            skybox = scoped_model_reference (path);
           }
         }
       }
@@ -277,12 +269,6 @@ WMO::~WMO()
 
   delete[] mat;
   mat = NULL;
-
-  if (skybox) {
-    //delete skybox;
-    ModelManager::delbyname(skyboxFilename);
-    skybox = NULL;
-  }
 }
 
 void WMO::draw ( World* world
@@ -615,7 +601,7 @@ bool WMO::drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d 
     glTranslatef(pCamera.x(), pCamera.y(), pCamera.z());
     const float sc = 2.0f;
     glScalef(sc,sc,sc);
-    skybox->draw (world, clock() / CLOCKS_PER_SEC);
+    skybox.get()->draw (world, clock() / CLOCKS_PER_SEC);
     glPopMatrix();
     glEnable(GL_DEPTH_TEST);
 

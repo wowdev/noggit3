@@ -1982,17 +1982,17 @@ void World::addModel ( const nameEntry& entry
                      )
 {
   if( entry.type == eEntry_Model )
-    addM2 ( entry.data.model->model
+    addM2 ( entry.data.model->model->_filename
           , newPos
           , size_randomization
           , position_randomization
           , rotation_randomization
           );
   else if( entry.type == eEntry_WMO )
-    addWMO( entry.data.wmo->wmo, newPos );
+    addWMO( entry.data.wmo->wmo->_filename, newPos );
 }
 
-void World::addM2 ( Model* model
+void World::addM2 ( std::string const& path
                   , ::math::vector_3d newPos
                   , bool size_randomization
                   , bool position_randomization
@@ -2011,7 +2011,7 @@ void World::addM2 ( Model* model
 //  ( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
 //                           ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 
-  ModelInstance *newModelis = new ModelInstance(this, model);
+  ModelInstance *newModelis = new ModelInstance(this, path);
   newModelis->d1 = lMaxUID;
   newModelis->pos = newPos;
   newModelis->sc = 1;
@@ -2039,12 +2039,12 @@ void World::addM2 ( Model* model
   setChanged(newPos.x(), newPos.z());
 }
 
-void World::addWMO( WMO *wmo, ::math::vector_3d newPos )
+void World::addWMO (std::string const& path, ::math::vector_3d newPos )
 {
   const int lMaxUID = std::max( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
                            ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
 
-  WMOInstance *newWMOis = new WMOInstance(this, wmo);
+  WMOInstance *newWMOis = new WMOInstance(this, path);
   newWMOis->pos = newPos;
   newWMOis->mUniqueID = lMaxUID;
   mWMOInstances.insert( std::pair<int,WMOInstance *>( lMaxUID, newWMOis ));

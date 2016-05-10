@@ -17,11 +17,12 @@
 #include <noggit/Frustum.h> // Frustum
 #include <noggit/Log.h>
 #include <noggit/Model.h>
-#include <noggit/World.h>
+#include <noggit/ModelManager.h>
 #include <noggit/mpq/file.h>
+#include <noggit/World.h>
 
-ModelInstance::ModelInstance (World* world, Model *m)
-  : model (m)
+ModelInstance::ModelInstance (World* world, std::string const& path)
+  : model (path)
   , nameID (0xFFFFFFFF)
   , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
@@ -29,8 +30,8 @@ ModelInstance::ModelInstance (World* world, Model *m)
   nameID = _world->selection_names().add (this);
 }
 
-ModelInstance::ModelInstance (World* world, Model *m, noggit::mpq::file* f)
-  : model (m)
+ModelInstance::ModelInstance (World* world, std::string const& path, noggit::mpq::file* f)
+  : model (path)
   , nameID (0xFFFFFFFF)
   , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
@@ -44,8 +45,8 @@ ModelInstance::ModelInstance (World* world, Model *m, noggit::mpq::file* f)
   nameID = _world->selection_names().add( this );
 }
 
-ModelInstance::ModelInstance (World* world, Model *m, ENTRY_MDDF *d)
-  : model (m)
+ModelInstance::ModelInstance (World* world, std::string const& path, ENTRY_MDDF *d)
+  : model (path)
   , nameID (0xFFFFFFFF)
   , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
@@ -58,13 +59,13 @@ ModelInstance::ModelInstance (World* world, Model *m, ENTRY_MDDF *d)
 }
 
 ModelInstance::ModelInstance ( World* world
-                             , Model* model_
+                             , std::string const& path
                              , const ::math::vector_3d& position
                              , const ::math::quaternion& rotation
                              , const float& scale
                              , const ::math::vector_3d& lighting_color
                              )
-  : model (model_)
+  : model (path)
   , nameID (0xFFFFFFFF)
   , pos (position)
   , _wmo_doodad_rotation (rotation)

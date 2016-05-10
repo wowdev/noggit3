@@ -21,6 +21,8 @@
 #include <noggit/Manager.h>
 #include <noggit/ModelInstance.h> // ModelInstance
 
+#include <boost/optional.hpp>
+
 namespace opengl
 {
   class call_list;
@@ -207,8 +209,7 @@ public:
 
   std::vector<WMODoodadSet> doodadsets;
 
-  Model *skybox;
-  std::string skyboxFilename;
+  boost::optional<scoped_model_reference> skybox;
 
   //! \todo This only has World* for wmo-doodads. ._.
   explicit WMO(World* world, const std::string& name);
@@ -244,15 +245,65 @@ public:
 class WMOManager
 {
 public:
-  static void delbyname( std::string name );
-  //! \todo This only has World* for wmo-doodads. ._.
-  static WMO* add(World* world, std::string name);
-
   static void report();
 
 private:
+  friend struct scoped_wmo_reference;
+  //! \todo This only has World* for wmo-doodads. ._.
+  static WMO* add(World* world, std::string name);
+  static void delbyname( std::string name );
   typedef std::map<std::string, WMO*> mapType;
   static mapType items;
+};
+
+struct scoped_wmo_reference
+{
+  scoped_wmo_reference (World* world, std::string const& filename)
+    : _valid (true)
+    , _filename (filename)
+    , _world (world)
+    , _wmo (WMOManager::add (_world, _filename))
+  {}
+
+  scoped_wmo_reference (scoped_wmo_reference const& other)
+    : scoped_wmo_reference (other._world, other._filename)
+  {}
+  scoped_wmo_reference (scoped_wmo_reference&& other)
+    : _valid (std::move (other._valid))
+    , _filename (std::move (other._filename))
+    , _world (std::move (other._world))
+    , _wmo (std::move (other._wmo))
+  {
+    other._valid = false;
+  }
+  scoped_wmo_reference& operator= (scoped_wmo_reference const&) = delete;
+  scoped_wmo_reference& operator= (scoped_wmo_reference&& other)
+  {
+    std::swap (_valid, other._valid);
+    std::swap (_filename, other._filename);
+    std::swap (_world, other._world);
+    std::swap (_wmo, other._wmo);
+    return *this;
+  }
+
+  ~scoped_wmo_reference()
+  {
+    if (_valid)
+    {
+      WMOManager::delbyname (_filename);
+    }
+  }
+
+  WMO* operator->() const
+  {
+    return _wmo;
+  }
+
+private:
+  bool _valid;
+  std::string _filename;
+  World* _world;
+  WMO* _wmo;
 };
 
 

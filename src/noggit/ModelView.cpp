@@ -18,8 +18,8 @@ static const qreal fov (45.0);
 
 ModelView::ModelView(QGLWidget *shared, QWidget *parent) :
     QGLWidget(parent, shared)
+  , theModel ("World\\Azeroth\\elwynn\\passivedoodads\\tree\\elwynnlog02.m2")
 {
-    theModel = ModelManager::add("World\\Azeroth\\elwynn\\passivedoodads\\tree\\elwynnlog02.m2");
     _draw_loading = true;
     startTimer(40);
     _run_time.start();
@@ -121,8 +121,7 @@ void ModelView::resizeGL (int width, int height)
 
 void ModelView::changeModel(QString filename)
 {
-    ModelManager::delbyname(theModel->_filename);
-    theModel = ModelManager::add(filename.toStdString());
+    theModel = scoped_model_reference (filename.toStdString());
     _draw_loading = true;
     updateGL();
 }

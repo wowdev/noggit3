@@ -389,14 +389,14 @@ MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bo
 
   for( std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it )
   {
-    _world->mWMOInstances.insert( std::pair<int,WMOInstance *>( it->uniqueID, new WMOInstance( _world, WMOManager::add( _world, mWMOFilenames[it->nameID] ), &(*it) ) ) );
+    _world->mWMOInstances.insert( std::pair<int,WMOInstance *>( it->uniqueID, new WMOInstance( _world, mWMOFilenames[it->nameID], &(*it) ) ) );
   }
 
   // - Load M2s ------------------------------------------
 
   for( std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
   {
-    _world->mModelInstances.insert( std::pair<int,ModelInstance *>( it->uniqueID, new ModelInstance( _world, ModelManager::add( mModelFilenames[it->nameID] ), &(*it) ) ) );
+    _world->mModelInstances.insert( std::pair<int,ModelInstance *>( it->uniqueID, new ModelInstance( _world, mModelFilenames[it->nameID], &(*it) ) ) );
   }
 
   // - Load chunks ---------------------------------------
@@ -428,18 +428,6 @@ MapTile::~MapTile()
   }
 
   mTextureFilenames.clear();
-
-  for( std::vector<std::string>::iterator it = mWMOFilenames.begin(); it != mWMOFilenames.end(); ++it )
-  {
-    WMOManager::delbyname( *it );
-  }
-  mWMOFilenames.clear();
-
-  for( std::vector<std::string>::iterator it = mModelFilenames.begin(); it != mModelFilenames.end(); ++it )
-  {
-    ModelManager::delbyname( *it );
-  }
-  mModelFilenames.clear();
 
   for( std::vector<Liquid*>::iterator it = mLiquids.begin(); it != mLiquids.end(); ++it )
   {

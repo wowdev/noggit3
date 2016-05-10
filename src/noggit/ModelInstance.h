@@ -10,6 +10,7 @@
 #include <math/vector_3d.h>
 #include <math/quaternion.h>
 
+#include <noggit/ModelManager.h>
 #include <noggit/Selection.h>
 
 class Frustum;
@@ -29,7 +30,7 @@ namespace noggit
 class ModelInstance
 {
 public:
-  Model* model;
+  scoped_model_reference model;
 
 private:
   unsigned int nameID;
@@ -48,13 +49,13 @@ public:
   ::math::vector_3d lcol;
   ::math::vector_3d ldir;
 
-  ModelInstance( World*, Model *m );
-  ModelInstance( World*, Model *m, noggit::mpq::file* f );
-  ModelInstance( World*, Model *m, ENTRY_MDDF *d );
+  ModelInstance( World*, std::string const& path );
+  ModelInstance( World*, std::string const& path, noggit::mpq::file* f );
+  ModelInstance( World*, std::string const& path, ENTRY_MDDF *d );
 
   //! \todo This constructor should actually be one of a subclass.
   ModelInstance ( World* world
-                , Model* model
+                , std::string const& path
                 , const ::math::vector_3d& position
                 , const ::math::quaternion& rotation
                 , const float& scale
