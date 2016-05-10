@@ -9,6 +9,9 @@ cmake_policy (SET CMP0015 OLD)
 
 project (Noggit)
 
+set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD_REQUIRED true)
+
 # Additional search paths for find_package.
 # Set this to more paths you windows guys need.
 if (WIN32)
