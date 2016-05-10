@@ -1198,14 +1198,20 @@ namespace noggit
 
   void MapView::delete_selected_object()
   {
-    //! \note Pre-condition: _selection.
+    if (!_selection)
+    {
+      return;
+    }
 
     selection::remove_from_world (_world, *_selection);
   }
 
   void MapView::paste_object()
   {
-    //! \note Pre-condition: _selection and _clipboard.
+    if (!_selection || !_clipboard)
+    {
+      return;
+    }
 
     //! \todo Visitor to call addM2 or addWMO directly.
     _world->addModel ( **_clipboard
@@ -1218,7 +1224,10 @@ namespace noggit
 
   void MapView::copy_selected_object()
   {
-    //! \note Pre-condition: _selection.
+    if (!_selection)
+    {
+      return;
+    }
 
     _clipboard = selection::name_entry (*_selection);
   }
@@ -1248,7 +1257,10 @@ namespace noggit
 
   void MapView::reset_selected_object_rotation()
   {
-    //! \note Pre-condition: _selection.
+    if (!_selection)
+    {
+      return;
+    }
 
     selection::reset_rotation (*_selection);
   }
