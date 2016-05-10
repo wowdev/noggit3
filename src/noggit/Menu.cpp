@@ -41,9 +41,6 @@ Menu::Menu (QWidget* parent)
   , _minimap (new noggit::ui::minimap_widget (NULL))
   //, _world (NULL)
 {
-  // set size
-  this->resize(1000, 600);
-
   QListWidget* continents_table (new QListWidget (NULL));
   QListWidget* dungeons_table (new QListWidget (NULL));
   QListWidget* raids_table (new QListWidget (NULL));
