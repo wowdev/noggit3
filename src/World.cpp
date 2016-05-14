@@ -552,11 +552,11 @@ void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
 		// init texture coordinates for alpha map:
 		vt = temp;
 
-		const float alpha_half = 0.5f * (62.0f / 64.0f) / 8.0f;
+		const float alpha_half = 0.5f / 8.0f;
 		for (int j = 0; j<17; ++j) {
 			for (int i = 0; i<((j % 2) ? 8 : 9); ++i) {
-				tx = (62.0f / 64.0f) / 8.0f * i;
-				ty = (62.0f / 64.0f) / 8.0f * j * 0.5f;
+				tx = 1.0f / 8.0f * i;
+				ty = 0.5f / 8.0f * j;
 				if (j % 2) {
 					// offset by half
 					tx += alpha_half;
