@@ -1238,7 +1238,9 @@ void World::getSelection()
 
 	if (minEntry)
 	{
-		if (minEntry->stack.type == MapObjName || minEntry->stack.type == DoodadName)
+		// prevent from selecting objects when trying to use a tool
+		if ((minEntry->stack.type == MapObjName || minEntry->stack.type == DoodadName)
+			&& !(Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown))
 		{
 			mCurrentSelection = SelectionNames.findEntry(minEntry->stack.uniqueId);
 		}
