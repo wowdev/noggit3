@@ -294,17 +294,17 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 			}
 		}
 
-		change = CHUNKSIZE / 62.0f;
+		change = CHUNKSIZE / 64.0f;
 		zPos = zbase;
 
 		float target, tarAbove, tPressure;
 		//int texAbove=nTextures-texLevel-1;
 
 
-		for (int j = 0; j < 63; j++)
+		for (int j = 0; j < 64; j++)
 		{
 			xPos = xbase;
-			for (int i = 0; i < 63; ++i)
+			for (int i = 0; i < 64; ++i)
 			{
 				xdiff = xPos - x;
 				zdiff = zPos - z;

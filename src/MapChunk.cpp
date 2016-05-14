@@ -32,7 +32,7 @@ static const int CONTOUR_WIDTH = 128;
 
 static const float texDetail = 8.0f;
 
-static const float TEX_RANGE = 62.0f / 64.0f;
+static const float TEX_RANGE = 1.0f;
 
 StripType LineStrip[32];
 StripType HoleStrip[128];
@@ -1348,7 +1348,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 	lADTFile.Insert(lCurrentPosition + 8, 0x80, reinterpret_cast<char*>(&(header)));
 	MapChunkHeader *lMCNK_header = lADTFile.GetPointer<MapChunkHeader>(lCurrentPosition + 8);
 
-	lMCNK_header->flags = Flags;
+	lMCNK_header->flags = Flags & ~FLAG_do_not_fix_alpha_map;
 	lMCNK_header->holes = holes;
 	lMCNK_header->areaid = areaID;
 
