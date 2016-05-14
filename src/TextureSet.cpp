@@ -282,6 +282,17 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 		if ((texLevel != -1) && (nTextures == 1))
 			return true;
 
+		if (texLevel == -1)
+		{
+			texLevel = addTexture(texture);
+			if (texLevel == 0)
+				return true;
+			if (texLevel == -1)
+			{
+				LogDebug << "paintTexture: Unable to add texture." << std::endl;
+				return false;
+			}
+		}
 
 		change = CHUNKSIZE / 62.0f;
 		zPos = zbase;
@@ -303,19 +314,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 				{
 					xPos += change;
 					continue;
-				}
-
-				if (texLevel == -1)
-				{
-					texLevel = addTexture(texture);
-					if (texLevel == 0)
-						return true;
-					if (texLevel == -1)
-					{
-						LogDebug << "paintTexture: Unable to add texture." << std::endl;
-						return false;
-					}
-				}
+				}				
 
 				target = strength;
 				tarAbove = 1 - target;
