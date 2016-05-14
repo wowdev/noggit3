@@ -6,7 +6,9 @@
 #ifndef __MATH_VECTOR_3D_H
 #define __MATH_VECTOR_3D_H
 
+#include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace math
 {
@@ -24,6 +26,15 @@ namespace math
       , _y (v._y)
       , _z (v._z)
     {}
+
+    inline static vector_3d min()
+    {
+      return {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
+    }
+    inline static vector_3d max()
+    {
+      return {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+    }
 
     inline vector_3d& operator= (const vector_3d &v)
     {
@@ -177,6 +188,21 @@ namespace math
       };
     };
   };
+
+  inline vector_3d min (vector_3d const& lhs, vector_3d const& rhs)
+  {
+    return { std::min (lhs.x(), rhs.x())
+           , std::min (lhs.y(), rhs.y())
+           , std::min (lhs.z(), rhs.z())
+           };
+  }
+  inline vector_3d max (vector_3d const& lhs, vector_3d const& rhs)
+  {
+    return { std::max (lhs.x(), rhs.x())
+           , std::max (lhs.y(), rhs.y())
+           , std::max (lhs.z(), rhs.z())
+           };
+  }
 }
 
 #endif

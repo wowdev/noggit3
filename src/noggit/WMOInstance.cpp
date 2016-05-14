@@ -161,3 +161,44 @@ WMOInstance::~WMOInstance()
 {
   _world->selection_names().del( mSelectionID );
 }
+
+namespace
+{
+  void maybe_expand (::math::vector_3d* extents, ::math::vector_3d new_point)
+  {
+    extents[0] = ::math::min (extents[0], new_point);
+    extents[1] = ::math::max (extents[1], new_point);
+  }
+}
+
+void WMOInstance::recalc_extents()
+{
+  ::math::matrix_4x4 const rot
+    ( ::math::matrix_4x4::new_translation_matrix (pos)
+    * ::math::matrix_4x4::new_rotation_matrix (dir)
+    );
+
+  extents[0] = ::math::vector_3d::max();
+  extents[1] = ::math::vector_3d::min();
+
+  maybe_expand (extents, rot * ::math::vector_3d (wmo->extents[0].x(), wmo->extents[0].y(), wmo->extents[0].z()));
+  maybe_expand (extents, rot * ::math::vector_3d (wmo->extents[0].x(), wmo->extents[0].y(), wmo->extents[1].z()));
+  maybe_expand (extents, rot * ::math::vector_3d (wmo->extents[0].x(), wmo->extents[1].y(), wmo->extents[0].z()));
+  maybe_expand (extents, rot * ::math::vector_3d (wmo->extents[0].x(), wmo->extents[1].y(), wmo->extents[1].z()));
+  maybe_expand (extents, rot * ::math::vector_3d (wmo->extents[1].x(), wmo->extents[0].y(), wmo->extents[0].z()));
+  maybe_expand (extents, rot * ::math::vector_3d (wmo->extents[1].x(), wmo->extents[0].y(), wmo->extents[1].z()));
+  maybe_expand (extents, rot * ::math::vector_3d (wmo->extents[1].x(), wmo->extents[1].y(), wmo->extents[0].z()));
+  maybe_expand (extents, rot * ::math::vector_3d (wmo->extents[1].x(), wmo->extents[1].y(), wmo->extents[1].z()));
+
+  for (std::size_t i (0); i < wmo->nGroups; ++i)
+  {
+    maybe_expand (extents, rot * ::math::vector_3d (wmo->groups[i].BoundingBoxMin.x(), wmo->groups[i].BoundingBoxMin.y(), wmo->groups[i].BoundingBoxMin.z()));
+    maybe_expand (extents, rot * ::math::vector_3d (wmo->groups[i].BoundingBoxMin.x(), wmo->groups[i].BoundingBoxMin.y(), wmo->groups[i].BoundingBoxMax.z()));
+    maybe_expand (extents, rot * ::math::vector_3d (wmo->groups[i].BoundingBoxMin.x(), wmo->groups[i].BoundingBoxMax.y(), wmo->groups[i].BoundingBoxMin.z()));
+    maybe_expand (extents, rot * ::math::vector_3d (wmo->groups[i].BoundingBoxMin.x(), wmo->groups[i].BoundingBoxMax.y(), wmo->groups[i].BoundingBoxMax.z()));
+    maybe_expand (extents, rot * ::math::vector_3d (wmo->groups[i].BoundingBoxMax.x(), wmo->groups[i].BoundingBoxMin.y(), wmo->groups[i].BoundingBoxMin.z()));
+    maybe_expand (extents, rot * ::math::vector_3d (wmo->groups[i].BoundingBoxMax.x(), wmo->groups[i].BoundingBoxMin.y(), wmo->groups[i].BoundingBoxMax.z()));
+    maybe_expand (extents, rot * ::math::vector_3d (wmo->groups[i].BoundingBoxMax.x(), wmo->groups[i].BoundingBoxMax.y(), wmo->groups[i].BoundingBoxMin.z()));
+    maybe_expand (extents, rot * ::math::vector_3d (wmo->groups[i].BoundingBoxMax.x(), wmo->groups[i].BoundingBoxMax.y(), wmo->groups[i].BoundingBoxMax.z()));
+  }
+}

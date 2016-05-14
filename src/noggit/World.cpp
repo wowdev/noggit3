@@ -2047,6 +2047,7 @@ void World::addWMO (std::string const& path, ::math::vector_3d newPos )
   WMOInstance *newWMOis = new WMOInstance(this, path);
   newWMOis->pos = newPos;
   newWMOis->mUniqueID = lMaxUID;
+  newWMOis->recalc_extents();
   mWMOInstances.insert( std::pair<int,WMOInstance *>( lMaxUID, newWMOis ));
   setChanged(newPos.x(),newPos.z());
 }

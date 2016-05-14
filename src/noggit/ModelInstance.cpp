@@ -334,3 +334,46 @@ void ModelInstance::resetDirection()
   dir.x (0.0f);
   dir.z (0.0f);
 }
+
+namespace
+{
+  void maybe_expand ( std::pair<::math::vector_3d, ::math::vector_3d>& extents
+                    , ::math::vector_3d new_point
+                    )
+  {
+    extents.first = ::math::min (extents.first, new_point);
+    extents.second = ::math::max (extents.second, new_point);
+  }
+}
+
+std::pair<::math::vector_3d, ::math::vector_3d> ModelInstance::extents() const
+{
+  ::math::matrix_4x4 const rot
+    ( ::math::matrix_4x4::new_translation_matrix (pos)
+    * ::math::matrix_4x4::new_rotation_matrix (dir)
+    * ::math::matrix_4x4::new_scale_matrix ({sc, sc, sc})
+    );
+
+  std::pair<::math::vector_3d, ::math::vector_3d> extents
+    (::math::vector_3d::max(), ::math::vector_3d::min());
+
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.VertexBoxMin.x(), model->header.VertexBoxMin.y(), model->header.VertexBoxMin.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.VertexBoxMin.x(), model->header.VertexBoxMin.y(), model->header.VertexBoxMax.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.VertexBoxMin.x(), model->header.VertexBoxMax.y(), model->header.VertexBoxMin.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.VertexBoxMin.x(), model->header.VertexBoxMax.y(), model->header.VertexBoxMax.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.VertexBoxMax.x(), model->header.VertexBoxMin.y(), model->header.VertexBoxMin.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.VertexBoxMax.x(), model->header.VertexBoxMin.y(), model->header.VertexBoxMax.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.VertexBoxMax.x(), model->header.VertexBoxMax.y(), model->header.VertexBoxMin.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.VertexBoxMax.x(), model->header.VertexBoxMax.y(), model->header.VertexBoxMax.z()}));
+
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.BoundingBoxMin.x(), model->header.BoundingBoxMin.y(), model->header.BoundingBoxMin.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.BoundingBoxMin.x(), model->header.BoundingBoxMin.y(), model->header.BoundingBoxMax.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.BoundingBoxMin.x(), model->header.BoundingBoxMax.y(), model->header.BoundingBoxMin.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.BoundingBoxMin.x(), model->header.BoundingBoxMax.y(), model->header.BoundingBoxMax.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.BoundingBoxMax.x(), model->header.BoundingBoxMin.y(), model->header.BoundingBoxMin.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.BoundingBoxMax.x(), model->header.BoundingBoxMin.y(), model->header.BoundingBoxMax.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.BoundingBoxMax.x(), model->header.BoundingBoxMax.y(), model->header.BoundingBoxMin.z()}));
+  maybe_expand (extents, rot * TransformCoordsForModel ({model->header.BoundingBoxMax.x(), model->header.BoundingBoxMax.y(), model->header.BoundingBoxMax.z()}));
+
+  return extents;
+}

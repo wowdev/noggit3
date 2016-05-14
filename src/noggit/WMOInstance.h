@@ -69,6 +69,8 @@ public:
 
   void resetDirection();
 
+  void recalc_extents();
+
 private:
   World* _world;
 };
