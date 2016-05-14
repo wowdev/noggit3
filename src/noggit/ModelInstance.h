@@ -82,6 +82,8 @@ public:
 
   void resetDirection();
 
+  std::pair<::math::vector_3d, ::math::vector_3d> extents() const;
+
 private:
   void draw_selection_indicator() const;
 

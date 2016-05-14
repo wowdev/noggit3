@@ -210,10 +210,14 @@ namespace noggit
         {
           throw std::runtime_error ("Can't reset rotation chunks.");
         }
-        template<typename T>
-        void operator() (const T& object) const
+        void operator() (selected_model_type const& model) const
         {
-          object->resetDirection();
+          model->resetDirection();
+        }
+        void operator() (selected_wmo_type const& wmo) const
+        {
+          wmo->resetDirection();
+          wmo->recalc_extents();
         }
       };
 
@@ -258,18 +262,30 @@ namespace noggit
         {                                                               \
           throw std::runtime_error ("Can't rotate a chunk as of now."); \
         }                                                               \
-        template<typename T>                                            \
-        void operator() (const T& object) const                         \
+        void operator() (selected_model_type const& model) const        \
         {                                                               \
-          object->dir.AXIS() += _degrees;                               \
-          while (object->dir.AXIS() > 360.0f)                           \
+          model->dir.AXIS() += _degrees;                                \
+          while (model->dir.AXIS() > 360.0f)                            \
           {                                                             \
-            object->dir.AXIS() -= 360.0f;                               \
+            model->dir.AXIS() -= 360.0f;                                \
           }                                                             \
-          while (object->dir.AXIS() < 0.0f)                             \
+          while (model->dir.AXIS() < 0.0f)                              \
           {                                                             \
-            object->dir.AXIS() += 360.0f;                               \
+            model->dir.AXIS() += 360.0f;                                \
           }                                                             \
+        }                                                               \
+        void operator() (selected_wmo_type const& wmo) const            \
+        {                                                               \
+          wmo->dir.AXIS() += _degrees;                                  \
+          while (wmo->dir.AXIS() > 360.0f)                              \
+          {                                                             \
+            wmo->dir.AXIS() -= 360.0f;                                  \
+          }                                                             \
+          while (wmo->dir.AXIS() < 0.0f)                                \
+          {                                                             \
+            wmo->dir.AXIS() += 360.0f;                                  \
+          }                                                             \
+          wmo->recalc_extents();                                        \
         }                                                               \
                                                                         \
       private:                                                          \
@@ -326,8 +342,7 @@ namespace noggit
         void operator() (const selected_wmo_type& wmo) const
         {
           wmo->pos += _offset;
-          wmo->extents[0] += _offset;
-          wmo->extents[1] += _offset;
+          wmo->recalc_extents();
         }
 
       private:

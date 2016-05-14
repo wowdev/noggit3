@@ -642,6 +642,16 @@ bool checkInside( ::math::vector_3d extentA[2], ::math::vector_3d extentB[2] )
          extentB[0].is_inside_of (extentA[0], extentA[1]) ||
          extentB[1].is_inside_of (extentA[0], extentA[1]);
 }
+bool checkInside( ::math::vector_3d extentA[2], std::pair<::math::vector_3d, ::math::vector_3d> extentB )
+{
+  minmax( &extentA[0], &extentA[1] );
+  minmax( &extentB.first, &extentB.second );
+
+  return extentA[0].is_inside_of (extentB.first, extentB.second) ||
+         extentA[1].is_inside_of (extentB.first, extentB.second) ||
+         extentB.first.is_inside_of (extentA[0], extentA[1]) ||
+         extentB.second.is_inside_of (extentA[0], extentA[1]);
+}
 
 template<typename T>
 T* get_pointer (std::vector<char>& vector, size_t pPosition = 0)
@@ -692,18 +702,17 @@ void MapTile::clearAllModels()
   std::map<int, ModelInstance> lModelInstances;
 
   for( std::map<int, WMOInstance *>::iterator it = _world->mWMOInstances.begin(); it != _world->mWMOInstances.end(); ++it )
-    if( checkInside( lTileExtents, it->second->extents ) )
-          _world->deleteWMOInstance( it->second->mUniqueID );
+  {
+    it->second->recalc_extents();
+    if (checkInside (lTileExtents, it->second->extents))
+    {
+      _world->deleteWMOInstance( it->second->mUniqueID );
+    }
+  }
 
   for( std::map<int, ModelInstance*>::iterator it = _world->mModelInstances.begin(); it != _world->mModelInstances.end(); ++it )
   {
-    ::math::vector_3d lModelExtentsV1[2], lModelExtentsV2[2];
-    lModelExtentsV1[0] = it->second->model->header.BoundingBoxMin + it->second->pos;
-    lModelExtentsV1[1] = it->second->model->header.BoundingBoxMax + it->second->pos;
-    lModelExtentsV2[0] = it->second->model->header.VertexBoxMin + it->second->pos;
-    lModelExtentsV2[1] = it->second->model->header.VertexBoxMax + it->second->pos;
-
-    if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
+    if (checkInside (lTileExtents, it->second->extents()))
     {
       _world->deleteModelInstance( it->second->d1 );
     }
@@ -735,26 +744,23 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
       ; it != wmos_end
       ; ++it
       )
-    //! \todo checkinside seems to fuck up everything
-    //if( checkInside( lTileExtents, it->second->extents ) )
+  {
+    it->second->recalc_extents();
+    if (checkInside (lTileExtents, it->second->extents))
+    {
       lObjectInstances.insert( std::pair<int, WMOInstance*>( it->first, it->second ) );
+    }
+  }
 
   for( World::model_instances_type::const_iterator it (models_begin)
      ; it != models_end
      ; ++it
      )
   {
-    ::math::vector_3d lModelExtentsV1[2], lModelExtentsV2[2];
-    lModelExtentsV1[0] = it->second->model->header.BoundingBoxMin + it->second->pos;
-    lModelExtentsV1[1] = it->second->model->header.BoundingBoxMax + it->second->pos;
-    lModelExtentsV2[0] = it->second->model->header.VertexBoxMin + it->second->pos;
-    lModelExtentsV2[1] = it->second->model->header.VertexBoxMax + it->second->pos;
-
-    //! \todo checkinside seems to fuck up everything
-    //if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
-    //{
+    if (checkInside (lTileExtents, it->second->extents()))
+    {
       lModelInstances.insert( std::pair<int, ModelInstance*>( it->first, it->second ) );
-    //}
+    }
   }
 
   filenameOffsetThing nullyThing = { 0, 0 };
@@ -1340,7 +1346,6 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
           lID = 0;
           for( std::map<int,WMOInstance *>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
           {
-            //! \todo  This requires the extents already being calculated. See above.
             if( checkInside( lChunkExtents, it->second->extents ) )
               lObjectIDs.push_back( lID );
             lID++;
@@ -1570,26 +1575,23 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
       ; it != wmos_end
       ; ++it
       )
-    //! \todo checkinside seems to fuck up everything
-    //if( checkInside( lTileExtents, it->second->extents ) )
+  {
+    it->second->recalc_extents();
+    if (checkInside (lTileExtents, it->second->extents))
+    {
       lObjectInstances.insert( std::pair<int, WMOInstance*>( it->first, it->second ) );
+    }
+  }
 
   for( World::model_instances_type::const_iterator it (models_begin)
      ; it != models_end
      ; ++it
      )
   {
-    ::math::vector_3d lModelExtentsV1[2], lModelExtentsV2[2];
-    lModelExtentsV1[0] = it->second->model->header.BoundingBoxMin + it->second->pos;
-    lModelExtentsV1[1] = it->second->model->header.BoundingBoxMax + it->second->pos;
-    lModelExtentsV2[0] = it->second->model->header.VertexBoxMin + it->second->pos;
-    lModelExtentsV2[1] = it->second->model->header.VertexBoxMax + it->second->pos;
-
-    //! \todo checkinside seems to fuck up everything
-    //if( checkInside( lTileExtents, lModelExtentsV1 ) || checkInside( lTileExtents, lModelExtentsV2 ) )
-    //{
+    if (checkInside (lTileExtents, it->second->extents()))
+    {
       lModelInstances.insert( std::pair<int, ModelInstance*>( it->first, it->second ) );
-    //}
+    }
   }
 
   filenameOffsetThing nullyThing = { 0, 0 };
@@ -2234,7 +2236,6 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
           lID = 0;
           for( std::map<int,WMOInstance *>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it )
           {
-            //! \todo  This requires the extents already being calculated. See above.
             if( checkInside( lChunkExtents, it->second->extents ) )
               lObjectIDs.push_back( lID );
             lID++;
