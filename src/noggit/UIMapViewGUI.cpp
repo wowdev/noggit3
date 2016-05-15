@@ -41,7 +41,7 @@ UIMapViewGUI::UIMapViewGUI (World* world, MapView *map_view, float xres, float y
   addChild(guiStatusbar);
 
   // DetailInfoWindow
-  guidetailInfos = new QTextEdit (NULL);
+  guidetailInfos = new QTextEdit (nullptr);
   guidetailInfos->resize (600, 250);
   guidetailInfos->hide();
 

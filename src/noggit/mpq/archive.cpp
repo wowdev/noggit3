@@ -19,7 +19,7 @@ namespace noggit
   namespace mpq
   {
     archive::archive (const QString& filename, bool process_list_file, bool create_mpq)
-      : _archive_handle (NULL)
+      : _archive_handle (nullptr)
     {
         if (create_mpq)
         {
@@ -72,7 +72,7 @@ namespace noggit
       void read_file (HANDLE file_handle, void* buffer, std::size_t size)
       {
 		DWORD read (0);
-        SFileReadFile (file_handle, buffer, size, &read, NULL);
+        SFileReadFile (file_handle, buffer, size, &read, nullptr);
         if (read != size)
         {
           throw std::logic_error ("read less than filesize");
@@ -152,7 +152,7 @@ namespace noggit
 
     void archive::save_to_disk()
     {
-        if(SFileCompactArchive(_archive_handle, NULL, false) && SFileCloseArchive(_archive_handle))
+        if(SFileCompactArchive(_archive_handle, nullptr, false) && SFileCloseArchive(_archive_handle))
             LogDebug << "Saved MPQ to disk" << std::endl;
         else
             LogError << "Error: " << GetLastError()<< "while saving MPQ to disk" << std::endl;

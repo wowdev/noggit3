@@ -334,7 +334,7 @@ namespace noggit
   	HeightData = MH2O_HeightMask();
   	Render = MH2O_Render();
   	delete Liquids;
-  	Liquids = NULL;
+  	Liquids = nullptr;
   }
 
   void ChunkWater::deleteLayer(size_t x, size_t y)

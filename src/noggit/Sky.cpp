@@ -89,7 +89,7 @@ Sky::Sky( DBCFile::Iterator data )
 
 
       if ( skybox == 0 )
-        alt_sky=NULL;
+        alt_sky=nullptr;
       else{
         DBCFile::Record rec = gLightSkyboxDB.getByID(skybox);
         std::string skyname= rec.getString(LightSkyboxDB::filename);

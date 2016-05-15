@@ -65,10 +65,10 @@ namespace noggit
     , _GUIDisplayingEnabled (true)
     , mTimespeed (1.0f)
     , _world (world)
-    , _minimap (new ui::minimap_widget (NULL))
-    , _model_spawner (new noggit::ui::model_spawner (NULL,shared))
-    , _cursor_selector (new ui::cursor_selector (NULL))
-    , _zoneid_widget( new ui::zoneid_widget (world,NULL))
+    , _minimap (new ui::minimap_widget (nullptr))
+    , _model_spawner (new noggit::ui::model_spawner (nullptr,shared))
+    , _cursor_selector (new ui::cursor_selector (nullptr))
+    , _zoneid_widget( new ui::zoneid_widget (world,nullptr))
     , _is_currently_moving_object (false)
     , _object_to_ground (false)
     , _draw_lighting (true)
@@ -81,27 +81,27 @@ namespace noggit
     , _shaping_radius (15.0)
     , _shaping_speed (1.0)
     , _shaping_formula (shaping_formula_type::smooth)
-    , _shapingComboBox (NULL)
-    , _shaping_radius_slider (NULL)
-    , _shaping_speed_slider (NULL)
-    , _shaping_settings_widget (NULL)
+    , _shapingComboBox (nullptr)
+    , _shaping_radius_slider (nullptr)
+    , _shaping_speed_slider (nullptr)
+    , _shaping_settings_widget (nullptr)
     , _smoothing_radius (15.0)
     , _smoothing_speed (1.0)
     , _smoothing_formula (smoothing_formula_type::smooth)
-    , _smoothingComboBox (NULL)
-    , _smoothing_radius_slider (NULL)
-    , _smoothing_speed_slider (NULL)
-    , _smoothing_settings_widget (NULL)
+    , _smoothingComboBox (nullptr)
+    , _smoothing_radius_slider (nullptr)
+    , _smoothing_speed_slider (nullptr)
+    , _smoothing_settings_widget (nullptr)
     , _texturing_radius (15.0)
     , _texturing_hardness (0.9f)
     , _texturing_pressure (0.9f)
     , _texturing_opacity (1.0f)
-    , _texturing_radius_slider (NULL)
-    , _texturing_hardness_slider (NULL)
-    , _texturing_pressure_slider (NULL)
-    , _texturing_opacity_slider (NULL)
-    , _texturing_settings_widget (NULL)
-    , _texturingComboBox (NULL)
+    , _texturing_radius_slider (nullptr)
+    , _texturing_hardness_slider (nullptr)
+    , _texturing_pressure_slider (nullptr)
+    , _texturing_opacity_slider (nullptr)
+    , _texturing_settings_widget (nullptr)
+    , _texturingComboBox (nullptr)
     , _automatically_update_terrain_selection (true)
     , _copy_size_randomization (false)
     , _copy_position_randomization (false)
@@ -116,14 +116,14 @@ namespace noggit
     , _invert_mouse_y_axis (false)
 
     //! \todo Sort to correct order and rename.
-    , menu (NULL)
+    , menu (nullptr)
     , moving (0.0f)
     , strafing (0.0f)
     , updown (0.0f)
     , movespd (66.6f)
     , _only_holding_right_mouse_button (false)
     , mViewMode (eViewMode_3D)
-    , editortemplate (NULL)
+    , editortemplate (nullptr)
     , flags(TERRAIN | WMODOODAS | FOG | DOODADS | TERRAIN | DRAWWMO)
     , backupFlags(0)
   {
@@ -488,7 +488,7 @@ namespace noggit
   MapView::~MapView()
   {
     delete _world;
-    _world = NULL;
+    _world = nullptr;
   }
 
   void MapView::maybe_move_selection_depending_on_weird_global_variables()
@@ -2005,7 +2005,7 @@ namespace noggit
   {
     delete _smoothing_settings_widget;
 
-    _smoothing_settings_widget = new QToolBar (NULL);
+    _smoothing_settings_widget = new QToolBar (nullptr);
 
     _smoothingComboBox = new QComboBox (_smoothing_settings_widget);
     _smoothingComboBox->setStyleSheet("margin-right: 10px;padding-left:2px;");
@@ -2070,7 +2070,7 @@ namespace noggit
 
     delete _texturing_settings_widget;
 
-    _texturing_settings_widget = new QToolBar (NULL);
+    _texturing_settings_widget = new QToolBar (nullptr);
 
     _texturingComboBox = new QComboBox (_texturing_settings_widget);
 
@@ -2129,7 +2129,7 @@ namespace noggit
 
   void MapView::createToolBar()
   {
-      toolBar = new QToolBar(NULL);
+      toolBar = new QToolBar(nullptr);
 
       _toolbar_formula_radio_group = new QButtonGroup;
 

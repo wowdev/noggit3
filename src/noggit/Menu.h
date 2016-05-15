@@ -34,7 +34,7 @@ class Menu : public QWidget
 Q_OBJECT
 
 public:
-  Menu (QWidget* parent = NULL);
+  Menu (QWidget* parent = nullptr);
   virtual ~Menu();
 
 private slots:

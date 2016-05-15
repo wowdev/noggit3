@@ -38,14 +38,14 @@ Q_DECLARE_METATYPE (bookmark_entry);
 
 Menu::Menu (QWidget* parent)
   : QWidget (parent)
-  , _minimap (new noggit::ui::minimap_widget (NULL))
-  //, _world (NULL)
+  , _minimap (new noggit::ui::minimap_widget (nullptr))
+  //, _world (nullptr)
 {
-  QListWidget* continents_table (new QListWidget (NULL));
-  QListWidget* dungeons_table (new QListWidget (NULL));
-  QListWidget* raids_table (new QListWidget (NULL));
-  QListWidget* battlegrounds_table (new QListWidget (NULL));
-  QListWidget* arenas_table (new QListWidget (NULL));
+  QListWidget* continents_table (new QListWidget (nullptr));
+  QListWidget* dungeons_table (new QListWidget (nullptr));
+  QListWidget* raids_table (new QListWidget (nullptr));
+  QListWidget* battlegrounds_table (new QListWidget (nullptr));
+  QListWidget* arenas_table (new QListWidget (nullptr));
 
   connect (continents_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
   connect (dungeons_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
@@ -66,7 +66,7 @@ Menu::Menu (QWidget* parent)
     item->setData (Qt::UserRole, QVariant (mapID));
   }
 
-  QListWidget* bookmarks_table (new QListWidget (NULL));
+  QListWidget* bookmarks_table (new QListWidget (nullptr));
 
   connect (bookmarks_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_bookmark_list_item (QListWidgetItem*)));
   connect (bookmarks_table, SIGNAL (itemDoubleClicked (QListWidgetItem*)), SLOT (open_bookmark_list_item (QListWidgetItem*)));
@@ -95,7 +95,7 @@ Menu::Menu (QWidget* parent)
 
   QGridLayout* menu_layout (new QGridLayout (this));
 
-  QTabWidget* entry_points_tabs (new QTabWidget (NULL));
+  QTabWidget* entry_points_tabs (new QTabWidget (nullptr));
   entry_points_tabs->addTab (continents_table, tr ("Continents"));
   entry_points_tabs->addTab (dungeons_table, tr ("Dungeons"));
   entry_points_tabs->addTab (raids_table, tr ("Raids"));
@@ -113,7 +113,7 @@ Menu::Menu (QWidget* parent)
 Menu::~Menu()
 {
   //delete _world;
-  //_world = NULL;
+  //_world = nullptr;
 }
 
 void Menu::enter_world_at (World *world, const ::math::vector_3d& pos, bool auto_height, float av, float ah )

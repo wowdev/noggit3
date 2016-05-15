@@ -58,7 +58,7 @@ namespace noggit
 
       void save_to_disk();
 
-      void save_to_mpq (archive *arch, QString pathInMPQ = NULL);
+      void save_to_mpq (archive *arch, QString pathInMPQ = nullptr);
       static bool exists (const QString& filename);
       static void disk_search_path
         (const helper::qt::case_insensitive::directory& path);

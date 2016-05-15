@@ -20,7 +20,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      loader (size_t thread_count, QObject* parent = NULL);
+      loader (size_t thread_count, QObject* parent = nullptr);
       ~loader();
 
       void add_object (object*);

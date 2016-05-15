@@ -42,7 +42,7 @@ namespace noggit
 {
   application::application (int& argc, char** argv)
   : QApplication (argc, argv)
-  , _settings (NULL)
+  , _settings (nullptr)
   , _async_loader (1)
   , _archive_manager (_async_loader)
   {
@@ -316,7 +316,7 @@ namespace noggit
     while (!is_valid_game_path (_game_path))
     {
       _game_path = QFileDialog::getExistingDirectory
-        (NULL, tr("Open WoW Directory"), "/", QFileDialog::ShowDirsOnly);
+        (nullptr, tr("Open WoW Directory"), "/", QFileDialog::ShowDirsOnly);
       if (_game_path.absolutePath() == "")
       {
         LogError << "Could not auto-detect game path "

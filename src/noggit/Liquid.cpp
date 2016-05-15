@@ -241,7 +241,7 @@ void Liquid::initGeometry(noggit::mpq::file* f)
   mDrawList->end_recording();
 
   delete[] lVertices;
-  lVertices = NULL;
+  lVertices = nullptr;
 }
 
 void Liquid::initFromMH2O (MH2O_Tile const& tile_info)

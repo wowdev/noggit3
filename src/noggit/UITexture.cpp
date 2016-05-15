@@ -15,7 +15,7 @@ UITexture::UITexture( float xPos, float yPos, float w, float h, const std::strin
 , texture( TextureManager::newTexture( tex ) )
 , _textureFilename( tex )
 , highlight( false )
-, clickFunc( NULL )
+, clickFunc( nullptr )
 , id( 0 )
 {
 }
@@ -25,7 +25,7 @@ UITexture::~UITexture()
   if( texture )
   {
     TextureManager::delbyname( _textureFilename );
-    texture = NULL;
+    texture = nullptr;
   }
 }
 
@@ -41,7 +41,7 @@ void UITexture::setTexture( const std::string& textureFilename )
   if( texture )
   {
     TextureManager::delbyname( _textureFilename );
-    texture = NULL;
+    texture = nullptr;
   }
   _textureFilename = textureFilename;
   texture = TextureManager::newTexture( textureFilename );

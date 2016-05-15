@@ -187,7 +187,7 @@ namespace Animation
     }
 
     //! \todo Use a vector of mpq::file& for the anim files instead for safety.
-    M2Value (const AnimationBlock& animationBlock, const noggit::mpq::file& file, int32_t* globalSequences, noggit::mpq::file** animfiles = NULL )
+    M2Value (const AnimationBlock& animationBlock, const noggit::mpq::file& file, int32_t* globalSequences, noggit::mpq::file** animfiles = nullptr )
     {
       assert( animationBlock.nTimes == animationBlock.nKeys );
 
@@ -197,7 +197,7 @@ namespace Animation
       _globalSequenceID = animationBlock.seq;
       if( _globalSequenceID != NO_GLOBAL_SEQUENCE )
       {
-        assert( _globalSequences && "Animation said to have global sequence, but pointer to global sequence data is NULL" );
+        assert( _globalSequences && "Animation said to have global sequence, but pointer to global sequence data is nullptr" );
       }
 
       const AnimationBlockHeader* timestampHeaders = file.get<AnimationBlockHeader>( animationBlock.ofsTimes );

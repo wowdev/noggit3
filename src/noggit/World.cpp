@@ -222,7 +222,7 @@ World::World( const std::string& name )
   {
     for( size_t i = 0; i < 64; ++i )
     {
-      lowrestiles[j][i] = NULL;
+      lowrestiles[j][i] = nullptr;
       _tile_got_modified[j][i] = false;
     }
   }
@@ -756,7 +756,7 @@ MapTile* World::loadTile(int z, int x)
 {
   if( !hasTile( z, x ) )
   {
-    return NULL;
+    return nullptr;
   }
 
   if( tileLoaded( z, x ) )
@@ -774,7 +774,7 @@ MapTile* World::loadTile(int z, int x)
   if( !noggit::mpq::file::exists( filename ) )
   {
     LogError << "The requested tile \"" << qPrintable (filename) << "\" does not exist! Oo" << std::endl;
-    return NULL;
+    return nullptr;
   }
 
   mTiles[z][x].tile.reset (new MapTile( this, x, z, filename.toStdString(), mBigAlpha ));
@@ -1321,7 +1321,7 @@ boost::optional<selection_type> World::drawSelection (size_t flags)
   }
 
   GLuint minDist = 0xFFFFFFFF;
-  GLNameEntry* minEntry = NULL;
+  GLNameEntry* minEntry = nullptr;
 
   size_t offset = 0;
 
