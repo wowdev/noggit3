@@ -1563,9 +1563,15 @@ int MapChunk::addTexture( noggit::blp_texture* texture )
 void MapChunk::switchTexture( noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture )
 {
   int texLevel = -1;
-  for(size_t i=0;i<nTextures;++i)
-    if(_textures[i]==oldTexture)
-      texLevel=i;
+  for (size_t i = 0;i < nTextures;++i)
+  {
+    // prevent texture duplication
+    if (_textures[i] == newTexture)
+      return;
+    if (_textures[i] == oldTexture)
+      texLevel = i;
+  }
+    
 
   if(texLevel != -1)
   {
