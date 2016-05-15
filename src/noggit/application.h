@@ -11,7 +11,10 @@
 #include <QVariant>
 
 #include <noggit/async/loader.h>
+#include <noggit/ModelManager.h>
 #include <noggit/mpq/archive_manager.h>
+#include <noggit/TextureManager.h>
+#include <noggit/WMO.h>
 
 class QSettings;
 class QGLWidget;
@@ -26,7 +29,6 @@ namespace noggit
 
   public:
     application (int& argc, char** argv);
-    ~application();
 
     QVariant setting ( const QString& key
                      , const QVariant& value = QVariant()
@@ -35,6 +37,10 @@ namespace noggit
 
     async::loader& async_loader();
     mpq::archive_manager& archive_manager();
+
+    texture_manager& texture_manager();
+    model_manager& model_manager();
+    wmo_manager& wmo_manager();
 
   signals:
     void settingAboutToChange (const QString& key, const QVariant& value);
@@ -57,6 +63,9 @@ namespace noggit
 
     async::loader _async_loader;
     mpq::archive_manager _archive_manager;
+    noggit::texture_manager _texture_manager;
+    noggit::model_manager _model_manager;
+    noggit::wmo_manager _wmo_manager;
   };
 
   application& app();

@@ -33,7 +33,7 @@ namespace noggit
 class WMOInstance
 {
 public:
-  scoped_wmo_reference wmo;
+  noggit::scoped_wmo_reference wmo;
   ::math::vector_3d pos;
   ::math::vector_3d  extents[2];
   ::math::vector_3d  dir;

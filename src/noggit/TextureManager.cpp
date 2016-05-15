@@ -1,66 +1,66 @@
-// TextureManager.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
-// Bernd Lörwald <bloerwald+noggit@googlemail.com>
-// Stephan Biegel <project.modcraft@googlemail.com>
-// Tigurius <bstigurius@googlemail.com>
+// This file is part of Noggit3, licensed via GNU General Public License (version 3).
 
 #include <noggit/TextureManager.h>
 
-#include <algorithm>
+#include <noggit/application.h>
 
-#include <noggit/blp_texture.h>
-#include <noggit/Log.h> // LogDebug
-
-TextureManager::mapType TextureManager::items;
-
-void TextureManager::report()
+namespace noggit
 {
-  std::string output = "Still in the texture manager:\n";
-  for( mapType::iterator t = items.begin(); t != items.end(); ++t )
+  std::vector<noggit::blp_texture*> texture_manager::getAllTexturesMatching
+    (std::function<bool (std::string const&)> function)
   {
-    output += "- " + t->first + "\n";
+    std::vector<noggit::blp_texture*> returnVector;
+    apply ( [&] (std::string const& key, blp_texture& element)
+            {
+              if (function (key))
+              {
+                returnVector.emplace_back (&element);
+              }
+            }
+          );
+    return returnVector;
   }
-  LogDebug << output;
-}
 
-void TextureManager::delbyname( std::string name )
-{
-  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+  scoped_blp_texture_reference::scoped_blp_texture_reference (std::string const& filename)
+    : _valid (true)
+    , _filename (filename)
+    , _texture (noggit::app().texture_manager().emplace (_filename))
+  {}
 
-  if( items.find( name ) != items.end() )
+  scoped_blp_texture_reference::scoped_blp_texture_reference (scoped_blp_texture_reference const& other)
+    : scoped_blp_texture_reference (other._filename)
+  {}
+  scoped_blp_texture_reference::scoped_blp_texture_reference (scoped_blp_texture_reference&& other)
+    : _valid (std::move (other._valid))
+    , _filename (std::move (other._filename))
+    , _texture (std::move (other._texture))
   {
-    items[name]->removeReference();
-
-    if( items[name]->hasNoReferences() )
+    other._valid = false;
+  }
+  scoped_blp_texture_reference& scoped_blp_texture_reference::operator= (scoped_blp_texture_reference const& other)
+  {
+    if (_valid)
     {
-      delete items[name];
-      items.erase( items.find( name ) );
+      noggit::app().texture_manager().erase (_filename);
+    }
+    _valid = other._valid;
+    _filename = other._filename;
+    _texture = noggit::app().texture_manager().emplace (_filename);
+    return *this;
+  }
+  scoped_blp_texture_reference& scoped_blp_texture_reference::operator= (scoped_blp_texture_reference&& other)
+  {
+    std::swap (_valid, other._valid);
+    std::swap (_filename, other._filename);
+    std::swap (_texture, other._texture);
+    return *this;
+  }
+
+  scoped_blp_texture_reference::~scoped_blp_texture_reference()
+  {
+    if (_valid)
+    {
+      noggit::app().texture_manager().erase (_filename);
     }
   }
-}
-
-noggit::blp_texture* TextureManager::newTexture( std::string name )
-{
-  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-
-  if( items.find( name ) == items.end() )
-  {
-    items[name] = new noggit::blp_texture (QString::fromStdString (name));
-  }
-
-  items[name]->addReference();
-
-  return items[name];
-}
-
-std::vector<noggit::blp_texture*> TextureManager::getAllTexturesMatching(bool (*function)( const std::string& name ) )
-{
-  std::vector<noggit::blp_texture*> returnVector;
-  for( mapType::iterator t = items.begin(); t != items.end(); ++t )
-  {
-    if( function( t->first ) )
-    {
-      returnVector.push_back( items[t->first] );
-    }
-  }
-  return returnVector;
 }

@@ -7,8 +7,6 @@
 #include <QString>
 #include <QPixmap>
 
-#include <noggit/Manager.h>
-
 #include <opengl/texture.h>
 
 namespace noggit
@@ -18,10 +16,11 @@ namespace noggit
     struct blp_header;
   }
 
-  class blp_texture : public ManagedItem, public opengl::texture
+  class blp_texture : public opengl::texture
   {
   public:
     blp_texture (const QString& filename);
+    blp_texture (std::string const& filename);
 
     const QString& filename();
 

@@ -121,7 +121,7 @@ void ModelView::resizeGL (int width, int height)
 
 void ModelView::changeModel(QString filename)
 {
-    theModel = scoped_model_reference (filename.toStdString());
+    theModel = noggit::scoped_model_reference (filename.toStdString());
     _draw_loading = true;
     updateGL();
 }

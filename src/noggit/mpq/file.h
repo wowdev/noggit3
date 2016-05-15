@@ -77,6 +77,8 @@ namespace noggit
 
       friend class archive;
     };
+
+    std::string normalized_filename (std::string);
   }
 }
 
