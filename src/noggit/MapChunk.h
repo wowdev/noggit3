@@ -15,6 +15,7 @@
 
 #include <noggit/MapHeaders.h>
 #include <noggit/Selection.h>
+#include <noggit/TextureManager.h>
 
 namespace noggit
 {
@@ -76,9 +77,9 @@ public:
   bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
-  bool paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture);
-  int addTexture(noggit::blp_texture* texture);
-  void switchTexture( noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture );
+  bool paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::scoped_blp_texture_reference texture);
+  int addTexture(noggit::scoped_blp_texture_reference texture);
+  void switchTexture( noggit::scoped_blp_texture_reference oldTexture, noggit::scoped_blp_texture_reference newTexture );
   void eraseTextures();
 
   bool isHole(int i,int j);
@@ -110,7 +111,6 @@ public:
   int px, py;
 
   MapChunkHeader header;
-  size_t nTextures;
 
   float xbase, ybase, zbase;
 
@@ -121,7 +121,7 @@ public:
   int holes;
 
   int tex[4];
-  noggit::blp_texture* _textures[4];
+  std::vector<noggit::scoped_blp_texture_reference> _textures;
   const unsigned int& texture_flags (const size_t& layer) const
   {
     return _texFlags[layer];

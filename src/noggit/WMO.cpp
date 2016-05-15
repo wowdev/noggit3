@@ -28,7 +28,6 @@
 #include <noggit/Log.h> // LogDebug
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/Shaders.h>
-#include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
@@ -102,11 +101,8 @@ WMO::WMO( World* world, const std::string& filenameArg )
       extents[1] = ::math::vector_3d(ff[0],ff[1],ff[2]);
 
       groups = new WMOGroup[nGroups];
-      mat = new WMOMaterial[nTextures];
-
     }
     else if ( fourcc == 'MOTX' ) {
-      // textures
       texbuf = new char[size];
       f.read(texbuf, size);
     }
@@ -116,12 +112,10 @@ WMO::WMO( World* world, const std::string& filenameArg )
 
       for (size_t i (0); i < num_materials; ++i)
       {
-        f.read (&mat[i], 0x40);
+        SMOMaterial material;
+        f.read (&material, sizeof (material));
 
-        const std::string texpath(texbuf + mat[i].nameStart);
-
-        mat[i]._texture = TextureManager::newTexture(texpath);
-        textures.push_back(texpath);
+        _materials.emplace_back (material, texbuf + material.nameStart);
       }
     }
     else if ( fourcc == 'MOGN' ) {
@@ -262,13 +256,6 @@ WMO::~WMO()
 
   delete[] groups;
   groups = NULL;
-
-  for (std::vector<std::string>::iterator it = textures.begin(); it != textures.end(); ++it) {
-    TextureManager::delbyname(*it);
-  }
-
-  delete[] mat;
-  mat = NULL;
 }
 
 void WMO::draw ( World* world
@@ -862,7 +849,7 @@ void WMOGroup::initDisplayList()
       gf.read (&hlq, sizeof (WMOLiquidHeader));
 
       lq = new Liquid (hlq.A, hlq.B, ::math::vector_3d (hlq.pos.x(), hlq.pos.z(), -hlq.pos.y()));
-      lq->initFromWMO (&gf, wmo->mat[hlq.type], flags & 0x2000);
+      lq->initFromWMO (&gf, wmo->_materials[hlq.type], flags & 0x2000);
     }
 
     //! \todo  figure out/use MFOG ?
@@ -898,7 +885,7 @@ void WMOGroup::initDisplayList()
   for (size_t b=0; b<nBatches; b++)
   {
     WMOBatch *batch = &batches[b];
-    WMOMaterial *mat = &wmo->mat[batch->texture];
+    WMOMaterial* mat (&wmo->_materials.at (batch->texture));
 
     bool overbright = ((mat->flags & 0x10) && !hascv);
     bool spec_shader = (mat->specular && !hascv && !overbright);

@@ -17,6 +17,7 @@ class Liquid;
   #include <noggit/Shaders.h>
 #endif
 #include <noggit/MapTile.h>
+#include <noggit/TextureManager.h>
 #include <noggit/WMO.h>
 
 class Skies;
@@ -107,8 +108,7 @@ private:
   void initTextures( const std::string& pFilename );
 
   int type;
-  std::vector<opengl::texture*> _textures;
-  std::vector<std::string> _texture_filenames;
+  std::vector<noggit::scoped_blp_texture_reference> _textures;
   ::math::vector_3d col;
   int tmpflag;
   bool trans;

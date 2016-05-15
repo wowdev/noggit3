@@ -15,6 +15,7 @@
 
 #include <noggit/MapHeaders.h>
 #include <noggit/Selection.h>
+#include <noggit/TextureManager.h>
 
 #include <QPoint>
 #include <QGLWidget>
@@ -213,7 +214,7 @@ namespace noggit
 
     void create_obsolete_gui();
 
-    noggit::blp_texture *getSelectedTexture();
+    noggit::scoped_blp_texture_reference getSelectedTexture();
 
     const qreal& shaping_radius() const;
     const qreal& shaping_speed() const;

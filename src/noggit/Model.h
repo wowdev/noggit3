@@ -23,6 +23,7 @@ class Bone;
 #include <noggit/Manager.h> // ManagedItem
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
+#include <noggit/TextureManager.h>
 
 #include <boost/optional.hpp>
 
@@ -157,7 +158,6 @@ class Model: public ManagedItem, public noggit::async::object
   bool forceAnim;
   noggit::mpq::file **animfiles;
 
-
   std::vector<TextureAnim> texanims;
   ModelAnimation *anims;
   int *globalSequences;
@@ -200,10 +200,8 @@ public:
   // ===============================
   // Texture data
   // ===============================
-  std::vector<noggit::blp_texture*> _textures;
-  std::vector<std::string> _textureFilenames;
-  std::vector<noggit::blp_texture*> _replaceTextures;
-  std::vector<int> _specialTextures;
+  std::vector<noggit::scoped_blp_texture_reference> _textures;
+  std::vector<noggit::scoped_blp_texture_reference> _replaceTextures;
   std::vector<bool> _useReplaceTextures;
 
   float rad;

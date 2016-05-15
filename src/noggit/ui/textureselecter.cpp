@@ -5,7 +5,6 @@
 #include <noggit/ui/textureselecter.h>
 
 #include <noggit/application.h>
-#include <noggit/TextureManager.h>
 
 #include <QResizeEvent>
 #include <QStyleOptionGraphicsItem>
@@ -80,7 +79,7 @@ namespace noggit
 
     textureItem::textureItem(QString texturename)
     : QGraphicsItem()
-    , blptexture(TextureManager::newTexture(texturename.toStdString()))
+    , blptexture(texturename.toStdString())
     {
       this->setFlag(QGraphicsItem::ItemIsSelectable);
     }

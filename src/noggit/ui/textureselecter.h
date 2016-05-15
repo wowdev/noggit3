@@ -6,6 +6,7 @@
 #define TEXTURESELECTER_H
 
 #include <noggit/blp_texture.h>
+#include <noggit/TextureManager.h>
 
 #include <QGLWidget>
 #include <QGraphicsView>
@@ -73,7 +74,7 @@ namespace noggit
       QRectF boundingRect() const;
 
     private:
-      noggit::blp_texture *blptexture;
+      noggit::scoped_blp_texture_reference blptexture;
     };
   }
 }
