@@ -99,8 +99,8 @@ void ModelInstance::draw_selection_indicator() const
   ::opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting_setter;
   ::opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> blend_setter;
   ::opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_FALSE> color_mat_setter;
-  ::opengl::scoped::texture_setter<GL_TEXTURE0, GL_FALSE> texture_0_setter;
-  ::opengl::scoped::texture_setter<GL_TEXTURE1, GL_FALSE> texture_1_setter;
+  ::opengl::scoped::texture_setter<0, GL_FALSE> texture_0_setter;
+  ::opengl::scoped::texture_setter<1, GL_FALSE> texture_1_setter;
 
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
