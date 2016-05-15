@@ -94,7 +94,7 @@ private:
   bool mTransparency;
 
   int xtiles, ytiles;
-  opengl::call_list* mDrawList;
+  std::unique_ptr<opengl::call_list> mDrawList;
 
   ::math::vector_3d pos;
 

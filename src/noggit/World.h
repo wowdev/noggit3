@@ -50,9 +50,9 @@ class MapTileEntry
 {
 private:
   uint32_t flags;
-  MapTile* tile;
+  std::unique_ptr<MapTile> tile;
 
-  MapTileEntry() : flags( 0 ), tile( NULL ) {}
+  MapTileEntry();
 
   friend class World;
 };
@@ -93,7 +93,7 @@ public:
   */
   const unsigned int& getMapID() const;
 
-  Skies *skies;
+  std::unique_ptr<Skies> skies;
 
   //! \todo  Get these managed? ._.
   typedef std::pair<int, ModelInstance *> model_instance_type;
@@ -213,7 +213,7 @@ private:
   bool mBigAlpha;
 
   //! opengl call lists for the WDL low resolution heightmaps.
-  opengl::call_list* lowrestiles[64][64];
+  std::unique_ptr<opengl::call_list> lowrestiles[64][64];
 
   //! Vertex Buffer Objects for coordinates used for drawing.
   GLuint detailtexcoords;
@@ -225,7 +225,7 @@ private:
   std::string basename;
 
   //! The lighting used.
-  OutdoorLighting *ol;
+  std::unique_ptr<OutdoorLighting> ol;
 
   void initMinimap();
   void initLowresTerrain();

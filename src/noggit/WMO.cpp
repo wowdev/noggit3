@@ -1178,7 +1178,7 @@ void WMOGroup::drawLiquid ( World* world
     glDisable(GL_ALPHA_TEST);
     glDepthMask(GL_TRUE);
     glColor4f(1,1,1,1);
-    lq->draw (world->skies);
+    lq->draw (world->skies.get());
     glDisable(GL_LIGHT2);
   }
 }
