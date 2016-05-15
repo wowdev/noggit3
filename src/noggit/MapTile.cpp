@@ -639,14 +639,15 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
   for( std::map<int,ModelInstance*>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
   {
-    //! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
     std::string lTemp = it->second->model->_filename;
     transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
-    size_t found = lTemp.rfind( ".m2" );
-    if( found != std::string::npos )
     {
-      lTemp.replace( found, 3, ".md" );
-      lTemp.append( "x" );
+      size_t found = lTemp.rfind( ".mdx" );
+      if( found != std::string::npos )
+      {
+        lTemp.replace( found, 3, ".m2" );
+        lTemp.pop_back();
+      }
     }
 
     if( lModels.find( lTemp ) == lModels.end() )
@@ -846,14 +847,15 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     lID = 0;
     for( std::map<int,ModelInstance*>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it )
     {
-      //! \todo  Is it still needed, that they are ending in .mdx? As far as I know it isn't. So maybe remove renaming them.
       std::string lTemp = it->second->model->_filename;
       transform( lTemp.begin(), lTemp.end(), lTemp.begin(), ::tolower );
-      size_t found = lTemp.rfind( ".m2" );
-      if( found != std::string::npos )
       {
-        lTemp.replace( found, 3, ".md" );
-        lTemp.append( "x" );
+        size_t found = lTemp.rfind( ".mdx" );
+        if( found != std::string::npos )
+        {
+          lTemp.replace( found, 3, ".m2" );
+          lTemp.pop_back();
+        }
       }
       std::map<std::string, filenameOffsetThing>::iterator lMyFilenameThingey = lModels.find( lTemp );
       if( lMyFilenameThingey == lModels.end() )
