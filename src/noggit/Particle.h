@@ -70,11 +70,12 @@ struct TexCoordSet {
 };
 
 class ParticleSystem {
+  Model *model;
+  std::unique_ptr<ParticleEmitter> emitter;
   Animation::M2Value<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw, deacceleration;
   Animation::M2Value<uint8_t> enabled;
   ::math::vector_4d colors[3];
   float sizes[3];
-  ParticleEmitter *emitter;
   float mid, slowdown, rotation;
   ::math::vector_3d pos;
   opengl::texture* _texture;
@@ -95,34 +96,11 @@ class ParticleSystem {
   int16_t pType;
 
 public:
-  Model *model;
   float tofs;
 
-  ParticleSystem(): emitter(NULL), mid(0), rem(0)
-  {
-    blend = 0;
-    order = 0;
-    type = 0;
-    manim = 0;
-    mtime = 0;
-    rows = 0;
-    cols = 0;
+  ParticleSystem (Model*, noggit::mpq::file const& f, ModelParticleEmitterDef const& mta, int* globals);
 
-    model = 0;
-    parent = 0;
-    _texture = NULL;
-
-    slowdown = 0;
-    rotation = 0;
-    tofs = 0;
-  }
-  virtual ~ParticleSystem()
-  {
-    delete emitter;
-    emitter = NULL;
-  }
-
-  void init(const noggit::mpq::file& f, const ModelParticleEmitterDef &mta, int *globals);
+  void init();
   void update(float dt);
 
   void setup(int anim, int time);
@@ -137,9 +115,14 @@ public:
 struct RibbonSegment {
   ::math::vector_3d pos, up, back;
   float len,len0;
+  RibbonSegment (::math::vector_3d pos_, float len_)
+    : pos (pos_)
+    , len (len_)
+  {}
 };
 
 class RibbonEmitter {
+  Model *model;
   Animation::M2Value< ::math::vector_3d> color;
   Animation::M2Value<float,int16_t> opacity;
   Animation::M2Value<float> above, below;
@@ -150,7 +133,8 @@ class RibbonEmitter {
   ::math::vector_3d pos;
 
   int manim, mtime;
-  float length, seglen;
+  float seglen;
+  float length;
   int numsegs;
 
   ::math::vector_3d tpos;
@@ -162,9 +146,7 @@ class RibbonEmitter {
   std::list<RibbonSegment> segs;
 
 public:
-  Model *model;
-
-  void init(const noggit::mpq::file &f, ModelRibbonEmitterDef &mta, int *globals);
+  RibbonEmitter (Model*, const noggit::mpq::file &f, ModelRibbonEmitterDef &mta, int *globals);
   void setup(int anim, int time);
   void draw();
 };

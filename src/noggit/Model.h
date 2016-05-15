@@ -24,6 +24,8 @@ class Bone;
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
 
+#include <boost/optional.hpp>
+
 namespace noggit
 {
   class blp_texture;
@@ -50,8 +52,7 @@ public:
 
   bool calc;
   void calcMatrix(Bone* allbones, int anim, int time);
-  void init(const noggit::mpq::file& f, const ModelBoneDef &b, int *global, noggit::mpq::file **animfiles);
-
+  Bone (const noggit::mpq::file& f, const ModelBoneDef &b, int *global, noggit::mpq::file **animfiles);
 };
 
 
@@ -62,7 +63,7 @@ public:
   ::math::vector_3d tval, rval, sval;
 
   void calc(int anim, int time);
-  void init(const noggit::mpq::file& f, const ModelTexAnimDef &mta, int *global);
+  TextureAnim (const noggit::mpq::file& f, const ModelTexAnimDef &mta, int *global);
   void setup(int anim);
 };
 
@@ -70,13 +71,13 @@ struct ModelColor {
   Animation::M2Value< ::math::vector_3d> color;
   Animation::M2Value<float,int16_t> opacity;
 
-  void init(const noggit::mpq::file& f, const ModelColorDef &mcd, int *global);
+  ModelColor (const noggit::mpq::file& f, const ModelColorDef &mcd, int *global);
 };
 
 struct ModelTransparency {
   Animation::M2Value<float,int16_t> trans;
 
-  void init(const noggit::mpq::file& f, const ModelTransDef &mtd, int *global);
+  ModelTransparency (const noggit::mpq::file& f, const ModelTransDef &mtd, int *global);
 };
 
 // copied from the .mdl docs? this might be completely wrong
@@ -121,17 +122,13 @@ struct ModelRenderPass {
 };
 
 struct ModelCamera {
-  bool ok;
-
   ::math::vector_3d pos, target;
   float nearclip, farclip, fov;
   Animation::M2Value< ::math::vector_3d> tPos, tTarget;
   Animation::M2Value<float> rot;
 
-  void init(const noggit::mpq::file& f, const ModelCameraDef &mcd, int *global);
+  ModelCamera(const noggit::mpq::file& f, const ModelCameraDef &mcd, int *global);
   void setup(int time=0);
-
-  ModelCamera():ok(false) {}
 };
 
 struct ModelLight {
@@ -142,7 +139,7 @@ struct ModelLight {
   //Animation::M2Value<float> attStart,attEnd;
   //Animation::M2Value<bool> Enabled;
 
-  void init(const noggit::mpq::file&  f, const ModelLightDef &mld, int *global);
+  ModelLight (const noggit::mpq::file&  f, const ModelLightDef &mld, int *global);
   void setup(int time, opengl::light l);
 };
 
@@ -160,17 +157,15 @@ class Model: public ManagedItem, public noggit::async::object
   bool forceAnim;
   noggit::mpq::file **animfiles;
 
-  void init(const noggit::mpq::file& f);
 
-
-  TextureAnim *texanims;
+  std::vector<TextureAnim> texanims;
   ModelAnimation *anims;
   int *globalSequences;
-  ModelColor *colors;
-  ModelTransparency *transparency;
-  ModelLight *lights;
-  ParticleSystem *particleSystems;
-  RibbonEmitter *ribbons;
+  std::vector<ModelColor> colors;
+  std::vector<ModelTransparency> transparency;
+  std::vector<ModelLight> lights;
+  std::vector<ParticleSystem> particleSystems;
+  std::vector<RibbonEmitter> ribbons;
 
   void drawModel (int animtime);
   void drawModelSelect (int animtime);
@@ -194,8 +189,8 @@ class Model: public ManagedItem, public noggit::async::object
 
 public:
   std::string _filename; //! \todo ManagedItem already has a name. Use that?
-  ModelCamera cam;
-  Bone *bones;
+  boost::optional<ModelCamera> cam;
+  std::vector<Bone> bones;
   ModelHeader header;
 
   // ===============================
