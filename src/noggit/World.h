@@ -185,6 +185,24 @@ public:
 
   const QImage& minimap() const { return _minimap; }
 
+  bool canWaterSave (int x, int y) const;
+
+  void setWaterHeight (int x, int y, float h);
+  boost::optional<float> getWaterHeight (int x, int y) const;
+
+  void setWaterTrans (int x, int y, unsigned char value);
+  boost::optional<unsigned char> getWaterTrans(int x, int y) const;
+
+  void setWaterType (int x, int y, int type);
+  boost::optional<int> getWaterType (int x, int y) const;
+
+  void deleteWaterLayer (int x,int z);
+
+  void addWaterLayer (int x, int z);
+  void addWaterLayer (int x, int z, float height, unsigned char trans);
+
+  void autoGenWaterTrans (int x, int y, int factor);
+
 private:
   QImage _minimap;
 

@@ -61,6 +61,8 @@ public:
   // todo split into draw_lines and draw_hole_lines
   void drawLines (bool draw_hole_lines) const;
 
+  float getHeight (int x, int z) const;
+
   void drawTextures() const;
 
   void update_normal_vectors();

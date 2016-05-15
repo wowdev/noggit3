@@ -16,10 +16,10 @@
 #include <opengl/types.h>
 
 #include <noggit/MapHeaders.h>
+#include <noggit/TileWater.hpp>
 #include <noggit/World.h> // instances types
 
 class Frustum;
-class Liquid;
 class World;
 class MapChunk;
 
@@ -104,11 +104,13 @@ private:
   std::string mFilename;
 
   MapChunk * mChunks[16][16];
-  std::vector<Liquid*> mLiquids;
 
   World* _world;
 
+  noggit::TileWater _water;
+
   friend class MapChunk;
+  friend class World;
 };
 
 #endif
