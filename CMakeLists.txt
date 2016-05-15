@@ -35,6 +35,7 @@ find_package (OpenGL REQUIRED)
 find_package (GLEW REQUIRED)
 find_package (Qt4 4.8 COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
 find_package (storm REQUIRED)
+find_package (Boost REQUIRED COMPONENTS filesystem system)
 
 # Qt setup
 include (${QT_USE_FILE})
@@ -79,6 +80,9 @@ set ( noggit_sources
       src/noggit/World.cpp
       src/noggit/ModelView.cpp
       src/noggit/DBCTableModel.cpp
+
+      src/noggit/ChunkWater.cpp
+      src/noggit/TileWater.cpp
 
       src/noggit/async/loader.cpp
       src/noggit/async/loading_thread.cpp
@@ -351,6 +355,8 @@ target_link_libraries ( noggit
                         ${STORM_LIBRARIES}
                         ${GLEW_LIBRARY}
                         ${QT_LIBRARIES}
+                        ${Boost_FILESYSTEM_LIBRARY}
+                        ${Boost_SYSTEM_LIBRARY}
                       )
 
 if (APPLE)

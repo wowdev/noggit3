@@ -858,15 +858,11 @@ void WMOGroup::initDisplayList()
       cv = reinterpret_cast<uint32_t*>(gf.getPointer());
     }
     else if ( fourcc == 'MLIQ' ) {
-      // liquids
       WMOLiquidHeader hlq;
-      gf.read(&hlq, 0x1E);
+      gf.read (&hlq, sizeof (WMOLiquidHeader));
 
-      //gLog("WMO Liquid: %dx%d, %dx%d, (%f,%f,%f) %d\n", hlq.X, hlq.Y, hlq.A, hlq.B, hlq.pos.x, hlq.pos.y, hlq.pos.z, hlq.type);
-
-      // Do not even try to render water..
-      //lq = new Liquid(hlq.A, hlq.B, ::math::vector_3d(hlq.pos.x, hlq.pos.z, -hlq.pos.y));
-      //lq->initFromWMO(gf, wmo->mat[hlq.type], (flags&0x2000)!=0);
+      lq = new Liquid (hlq.A, hlq.B, ::math::vector_3d (hlq.pos.x(), hlq.pos.z(), -hlq.pos.y()));
+      lq->initFromWMO (&gf, wmo->mat[hlq.type], flags & 0x2000);
     }
 
     //! \todo  figure out/use MFOG ?
@@ -1196,7 +1192,7 @@ void WMOGroup::drawLiquid ( World* world
     glDisable(GL_ALPHA_TEST);
     glDepthMask(GL_TRUE);
     glColor4f(1,1,1,1);
-    lq->draw();
+    lq->draw (world->skies);
     glDisable(GL_LIGHT2);
   }
 }

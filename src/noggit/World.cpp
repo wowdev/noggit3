@@ -2190,3 +2190,36 @@ void World::saveWDT()
    // f.SaveFile();
    // f.close();
 }
+
+#define accessor(T_, name_)                                         \
+  void World::setWater ## name_ (int x, int y, T_ value)            \
+  {                                                                 \
+    if (tileLoaded (y, x))                                          \
+    {                                                               \
+      mTiles[y][x].tile->_water.set ## name_ (value);               \
+      setChanged (y, x);                                            \
+    }                                                               \
+  }                                                                 \
+  boost::optional<T_> World::getWater ## name_ (int x, int y) const \
+  {                                                                 \
+    if (tileLoaded (y, x))                                          \
+    {                                                               \
+      return mTiles[y][x].tile->_water.get ## name_();              \
+    }                                                               \
+    return boost::none;                                             \
+  }
+
+  accessor (float, Height)
+  accessor (unsigned char, Trans)
+  accessor (int, Type)
+
+#undef accessor
+
+void World::autoGenWaterTrans (int x, int y, int factor)
+{
+  if (tileLoaded (y, x))
+  {
+    mTiles[y][x].tile->_water.autoGen (factor);
+    setChanged (y, x);
+  }
+}

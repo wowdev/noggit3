@@ -70,11 +70,24 @@ struct MH2O_Tile
   }
 };
 
+struct LiquidVertex {
+  unsigned char c[4];
+  float h;
+};
+
 // handle liquids like oceans, lakes, rivers, slime, magma
 class Liquid
 {
-  int pType;
+public:
+  Liquid (int x, int y, ::math::vector_3d base, float ptilesize = LQ_DEFAULT_TILESIZE);
+  ~Liquid();
 
+  void initFromWMO (noggit::mpq::file*, WMOMaterial const&, bool indoor);
+  void initFromMH2O (MH2O_Tile const&);
+
+  void draw (Skies const*) const;
+
+private:
   int mShaderType;
   int mLiquidType;
   bool mTransparency;
@@ -95,59 +108,12 @@ class Liquid
 
   int type;
   std::vector<opengl::texture*> _textures;
-  std::vector<std::string> _textureFilenames;
+  std::vector<std::string> _texture_filenames;
   ::math::vector_3d col;
   int tmpflag;
   bool trans;
 
-  unsigned char  *waterFlags;
-
-  //int number;
-
-private:
   MH2O_Tile mTileData;
-
-public:
-
-
-  Liquid (int x, int y, ::math::vector_3d base, float ptilesize = LQ_DEFAULT_TILESIZE)
-    : xtiles (x)
-    , ytiles (y)
-    , pos (base)
-    , tilesize (ptilesize)
-  {
-  //  number = ++lCount;
-  //  LogDebug << "Created Liquid of Number: " << number << std::endl;
-    ydir = 1.0f;
-    mDrawList = NULL;
-  }
-  ~Liquid();
-
-
-  //void init(noggit::mpq::file &f);
-  void initFromTerrain(noggit::mpq::file* f, int flags);
-  void initFromWMO(noggit::mpq::file* f, const WMOMaterial &mat, bool indoor);
-  void initFromMH2O( MH2O_Information *info, MH2O_HeightMask *HeightMap, MH2O_Render *render );
-  void initFromMH2O();
-
-  MH2O_Tile getMH2OData();
-  void setMH2OData(MH2O_Tile pTileInfo);
-
-  int getWidth();
-  int getHeight();
-  int getXOffset();
-  int getYOffset();
-
-  bool isNotEmpty();
-
-  bool isRendered(int i, int j);
-  void setRender(int i, int j);
-  void unsetRender(int i, int j);
-
-  void draw (const Skies* = NULL) const;
-
-private:
-  void recalcSize();
 };
 
 #endif

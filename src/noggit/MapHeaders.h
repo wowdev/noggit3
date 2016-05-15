@@ -26,11 +26,11 @@ enum WorldFlags {
 enum eMCNKFlags
 {
   FLAG_SHADOW = 0x1,
-  FLAG_IMPASS  = 0x2,
-  FLAG_LQ_RIVER  = 0x4,
-  FLAG_LQ_OCEAN  = 0x8,
-  FLAG_LQ_MAGMA  = 0x10,
-  FLAG_LQ_SLIME  = 0x20,
+  FLAG_IMPASS = 0x2,
+  FLAG_LQ_RIVER = 0x4,
+  FLAG_LQ_OCEAN = 0x8,
+  FLAG_LQ_MAGMA = 0x10,
+  FLAG_LQ_SLIME = 0x20,
   FLAG_MCCV = 0x40,
   FLAG_do_not_fix_alpha_map = 0x8000
 };
@@ -80,23 +80,23 @@ static const float ZEROPOINT = (32.0f * (TILESIZE));
 
 struct MHDR
 {
- /*000h*/  uint32_t flags;        // &1: MFBO, &2: unknown. in some Northrend ones.
- /*004h*/  uint32_t mcin;  //Positions of MCNK's
- /*008h*/  uint32_t mtex;  //List of all the textures used
- /*00Ch*/  uint32_t mmdx;  //List of all the md2's used
- /*010h*/  uint32_t mmid;  //Offsets into MMDX list for what each ID is
- /*014h*/  uint32_t mwmo;  //list of all the WMO's used
- /*018h*/  uint32_t mwid;  //Offsets into MWMO list for what each ID is
- /*01Ch*/  uint32_t mddf;  //Doodad Information
- /*020h*/  uint32_t modf;  //WMO Positioning Information
- /*024h*/  uint32_t mfbo;  // tbc, wotlk; only when flags&1
- /*028h*/  uint32_t mh2o;  // wotlk
- /*02Ch*/  uint32_t mtfx;  // wotlk
- /*030h*/  uint32_t pad4;
- /*034h*/  uint32_t pad5;
- /*038h*/  uint32_t pad6;
- /*03Ch*/  uint32_t pad7;
- /*040h*/
+  /*000h*/  uint32_t flags;        // &1: MFBO, &2: unknown. in some Northrend ones.
+  /*004h*/  uint32_t mcin;  //Positions of MCNK's
+  /*008h*/  uint32_t mtex;  //List of all the textures used
+  /*00Ch*/  uint32_t mmdx;  //List of all the md2's used
+  /*010h*/  uint32_t mmid;  //Offsets into MMDX list for what each ID is
+  /*014h*/  uint32_t mwmo;  //list of all the WMO's used
+  /*018h*/  uint32_t mwid;  //Offsets into MWMO list for what each ID is
+  /*01Ch*/  uint32_t mddf;  //Doodad Information
+  /*020h*/  uint32_t modf;  //WMO Positioning Information
+  /*024h*/  uint32_t mfbo;  // tbc, wotlk; only when flags&1
+  /*028h*/  uint32_t mh2o;  // wotlk
+  /*02Ch*/  uint32_t mtfx;  // wotlk
+  /*030h*/  uint32_t pad4;
+  /*034h*/  uint32_t pad5;
+  /*038h*/  uint32_t pad6;
+  /*03Ch*/  uint32_t pad7;
+  /*040h*/
 };
 
 struct ENTRY_MCIN
@@ -178,83 +178,49 @@ struct ENTRY_MCLY
 };
 
 #include <string.h> // memcpy()
-// are these used?
 
-struct MH2O_Header{
-  uint32_t ofsInformation;
-  uint32_t nLayers;
-  uint32_t ofsRenderMask;
+struct MH2O_Header
+{
+  uint32_t ofsInformation = 0;
+  uint32_t nLayers = 0;
+  uint32_t ofsRenderMask = 0;
 };
 
-struct MH2O_Information{
-  uint16_t LiquidType;
-  uint16_t Flags;
-  float minHeight;//I just took these random ._.
-  float maxHeight;
-  uint8_t xOffset;
-  uint8_t yOffset;
-  uint8_t width;
-  uint8_t height;
-  uint32_t ofsInfoMask;
-  uint32_t ofsHeightMap;
+struct MH2O_Information
+{
+  uint16_t LiquidType = 5;
+  uint16_t Flags = 0;
+  float minHeight = 0;//I just took these random ._.
+  float maxHeight = 0;
+  uint8_t xOffset = 0;
+  uint8_t yOffset = 0;
+  uint8_t width = 8;
+  uint8_t height = 8;
+  uint32_t ofsInfoMask = 0;
+  uint32_t ofsHeightMap = 0;
 };
 
-struct MH2O_HeightMask{
-  float **mHeightValues;
-  uint8_t **mTransparency;
-  int mWidth;
-  int mHeight;
-  MH2O_HeightMask(int Width,int Height,char*file,int Position){
-    mWidth=Width;
-    mHeight=Height;
-    mHeightValues=new float*[mHeight];
-    for(int i=0; i < mHeight; ++i)
-      mHeightValues[i]=new float[mWidth];
-    mTransparency=new uint8_t*[mHeight];
-    for(int i=0; i < mHeight; ++i)
-      mTransparency[i]=new uint8_t[mWidth];
-    for(int i=0; i < mHeight; ++i)
-      memcpy(mHeightValues[i], file + Position + i*mWidth*sizeof(float), mWidth*sizeof(float));
-    for(int i=0; i < mHeight; ++i)
-      memcpy(mTransparency[i], file + Position + mWidth*mHeight*sizeof(float) + i*mWidth*sizeof(uint8_t), mWidth*sizeof(uint8_t));
-  }
-  MH2O_HeightMask(int Width,int Height,float*HeightValues,uint8_t *Transparency){
-    mWidth=Width;
-    mHeight=Height;
-    mHeightValues=new float*[mHeight];
-    for(int i=0; i < mHeight; ++i)
-      mHeightValues[i] = new float[mWidth];
-    mTransparency=new uint8_t*[mHeight];
-    for(int i=0; i < mHeight; ++i)
-      mTransparency[i]=new uint8_t[mWidth];
-    for(int i=0; i < mHeight; ++i)
-      memcpy(mHeightValues[i],HeightValues+i*mWidth*sizeof(float),mWidth*sizeof(float));
-    for(int i=0; i < mHeight; ++i)
-      memcpy(mTransparency[i],Transparency+i*mWidth*sizeof(uint8_t),mWidth*sizeof(uint8_t));
-  }
-  MH2O_HeightMask(int Width=0,int Height=0){
-    mWidth=Width;
-    mHeight=Height;
-    mHeightValues=new float*[mHeight];
-    for(int i=0; i < mHeight; ++i)
-      mHeightValues[i]=new float[mWidth];
-    mTransparency=new uint8_t*[mHeight];
-    for(int i=0; i < mHeight; ++i)
-      mTransparency[i]=new uint8_t[mWidth];
+struct MH2O_HeightMask
+{
+  float mHeightValues[9][9];
+  unsigned char mTransparency[9][9];
+
+  MH2O_HeightMask()
+  {
+    memset(mHeightValues, 0, sizeof(mHeightValues));
+    memset(mTransparency, 0, sizeof(mTransparency));
   }
 };
 
-struct MH2O_Render{
-  bool mRender[64];
-  MH2O_Render(){
+struct MH2O_Render
+{
+  unsigned char mask[8]; //render mask
+  unsigned char fatigue[8]; //fatigue mask?
 
-  }
-  //! Todo: this most likely is wrong!
-  explicit MH2O_Render(uint64_t Mask){
-    for(int i=0; i < 64; ++i){
-      uint8_t t = Mask << i;
-      mRender[i] = t & 0x1;
-    }
+  MH2O_Render()
+  {
+    memset(mask, 255, sizeof (mask));
+    memset(fatigue, 0, sizeof (fatigue));
   }
 };
 

@@ -117,3 +117,15 @@ int LiquidTypeDB::getLiquidType(int pID)
 
   return type;
 }
+
+std::string LiquidTypeDB::get_liquid_name (int id)
+{
+  try
+  {
+    return gLiquidTypeDB.getByID (id).getString (LiquidTypeDB::Name);
+  }
+  catch (LiquidTypeDB::NotFound)
+  {
+    return "Unknown type";
+  }
+}

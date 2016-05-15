@@ -487,47 +487,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
         }
       }
     }
-    else if ( fourcc == 'MCLQ' ) {
-      // liquid / water level
-      f->read(&fourcc,4);
-      if( fourcc != 'MCSE' ||  fourcc != 'MCNK' || header.sizeLiquid == 8  || true ) { // Do not even try to read water..
-        haswater = false;
-      }
-      else
-      {
-        //! \todo this is just commented out, till initFromTerrain is reimplemented for saving with MH2O!
-        haswater = false;
-      /*
-        haswater = true;
-        f->seekRelative(-4);
-        float waterlevel[2];
-        f->read(waterlevel,8);//2 values - Lowest water Level, Highest Water Level
-
-        if (waterlevel[1] > vmax.y) vmax.y = waterlevel[1];
-        //if (waterlevel < vmin.y) haswater = false;
-
-        //f->seekRelative(4);
-
-        Liquid * lq = new Liquid(8, 8, ::math::vector_3d(xbase, waterlevel[1], zbase));
-        //lq->init(f);
-        lq->initFromTerrain(f, header.flags);
-
-        maintile->mLiquids.insert(std::pair<int,Liquid*>( 0, lq) );
-
-
-        // let's output some debug info! ( '-')b
-        string lq = "";
-        if (flags & 4) lq.append(" river");
-        if (flags & 8) lq.append(" ocean");
-        if (flags & 16) lq.append(" magma");
-        if (flags & 32) lq.append(" slime?");
-        LogDebug << "LQ" << lq << " (base:" << waterlevel << ")" << std::endl;
-        */
-
-      }
-      // we're done here!
-      break;
-    }
     else if( fourcc == 'MCCV' )
     {
       //! \todo  implement
@@ -857,6 +816,11 @@ void MapChunk::CreateStrips()
 
   for( size_t i = 6; i < 143; i += 17 )
     _hole_strip[iferget++] = i;
+}
+
+float MapChunk::getHeight (int x, int z) const
+{
+  return mVertices[indexNoLoD(x, z)].y();
 }
 
 void MapChunk::drawPass (int anim) const
