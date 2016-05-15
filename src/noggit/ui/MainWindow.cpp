@@ -42,7 +42,7 @@ namespace noggit
       //fileMenu->addAction (tr("Open Maps"), this, SLOT(maps()));
       fileMenu->addAction (tr("Open Project Explorer"), this, SLOT(projectExplorerOpen()));
       fileMenu->addSeparator();
-      fileMenu->addAction (tr("Exit"), this, SLOT(QApplication::closeAllWindows()));
+      fileMenu->addAction (tr("Exit"), &noggit::app(), SLOT(closeAllWindows()));
 
     QMenu* helpMenu = menuBar()->addMenu (tr("&Help"));
       helpMenu->addAction (tr("Settings"), this, SLOT(settingsClicked()));
@@ -72,7 +72,7 @@ namespace noggit
 
     void MainWindow::create_world_view (World* world)
     {
-	
+
       MapView* map_view ( new MapView ( world
                                       , app().setting("view_distance").toReal()
                                       , 0.0
