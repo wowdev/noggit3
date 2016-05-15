@@ -224,6 +224,18 @@ namespace noggit
       arch->add_file(this, pathInMPQ);
 
     }
+
+    std::string normalized_filename (std::string filename)
+    {
+      std::transform (filename.begin(), filename.end(), filename.begin(), ::tolower);
+      std::transform ( filename.begin(), filename.end(), filename.begin()
+                     , [] (char c)
+                       {
+                         return c == '\\' ? '/' : c;
+                       }
+                     );
+      return filename;
+    }
   }
 }
 

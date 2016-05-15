@@ -88,9 +88,12 @@ namespace noggit
     };
   }
 
+  blp_texture::blp_texture (std::string const& filename)
+    : blp_texture (QString::fromStdString (filename))
+  {}
+
   blp_texture::blp_texture (const QString& filename)
-  : ManagedItem()
-  , texture()
+  : texture()
   , _filename (filename)
   {
     bind();

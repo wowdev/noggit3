@@ -62,9 +62,8 @@ const std::string& WMO::filename() const
   return _filename;
 }
 
-WMO::WMO( World* world, const std::string& filenameArg )
-  : ManagedItem( )
-  , _filename( filenameArg )
+WMO::WMO (const std::string& filenameArg, World* world)
+  : _filename( filenameArg )
 {
   noggit::mpq::file f (QString::fromStdString (_filename));
 
@@ -203,7 +202,7 @@ WMO::WMO( World* world, const std::string& filenameArg )
 
           if( noggit::mpq::file::exists( QString::fromStdString (path) ) )
           {
-            skybox = scoped_model_reference (path);
+            skybox = noggit::scoped_model_reference (path);
           }
         }
       }
@@ -1249,47 +1248,40 @@ void WMO::finish_loading()
   _finished = true;
 }
 
-WMOManager::mapType WMOManager::items;
-
-void WMOManager::report()
+namespace noggit
 {
-  std::string output = "Still in the WMO manager:\n";
-  for( mapType::iterator t = items.begin(); t != items.end(); ++t )
+  scoped_wmo_reference::scoped_wmo_reference (World* world, std::string const& filename)
+    : _valid (true)
+    , _filename (filename)
+    , _world (world)
+    , _wmo (noggit::app().wmo_manager().emplace (_filename, _world))
+  {}
+
+  scoped_wmo_reference::scoped_wmo_reference (scoped_wmo_reference const& other)
+    : scoped_wmo_reference (other._world, other._filename)
+  {}
+  scoped_wmo_reference::scoped_wmo_reference (scoped_wmo_reference&& other)
+    : _valid (std::move (other._valid))
+    , _filename (std::move (other._filename))
+    , _world (std::move (other._world))
+    , _wmo (std::move (other._wmo))
   {
-    output += "- " + t->first + "\n";
+    other._valid = false;
   }
-  LogDebug << output;
-}
-
-WMO* WMOManager::add( World* world, std::string name )
-{
-  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-
-  if( items.find( name ) == items.end() )
+  scoped_wmo_reference& scoped_wmo_reference::operator= (scoped_wmo_reference&& other)
   {
-    items[name] = new WMO( world, name );
-    //! \todo Remove this, when finally loading is threaded.
-    items[name]->finish_loading();
-    noggit::app().async_loader().add_object (items[name]);
+    std::swap (_valid, other._valid);
+    std::swap (_filename, other._filename);
+    std::swap (_world, other._world);
+    std::swap (_wmo, other._wmo);
+    return *this;
   }
 
-  items[name]->addReference();
-  return items[name];
-}
-
-void WMOManager::delbyname( std::string name )
-{
-  std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-
-  if( items.find( name ) != items.end() )
+  scoped_wmo_reference::~scoped_wmo_reference()
   {
-    items[name]->removeReference();
-
-    if( items[name]->hasNoReferences() )
+    if (_valid)
     {
-      delete items[name];
-      items.erase( items.find( name ) );
+      noggit::app().wmo_manager().erase (_filename);
     }
   }
 }
-

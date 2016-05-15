@@ -18,8 +18,8 @@
 #include <math/vector_4d.h>
 
 #include <noggit/async/object.h>
-#include <noggit/Manager.h>
 #include <noggit/ModelInstance.h> // ModelInstance
+#include <noggit/multimap_with_normalized_key.hpp>
 #include <noggit/TextureManager.h>
 
 #include <boost/optional.hpp>
@@ -34,7 +34,6 @@ class Frustum;
 class WMO;
 class WMOGroup;
 class WMOInstance;
-class WMOManager;
 class Liquid;
 class Model;
 
@@ -192,7 +191,7 @@ struct WMOFog {
   void setup();
 };
 
-class WMO : public ManagedItem, public noggit::async::object
+class WMO : public noggit::async::object
 {
 public:
   virtual void finish_loading();
@@ -219,10 +218,10 @@ public:
 
   std::vector<WMODoodadSet> doodadsets;
 
-  boost::optional<scoped_model_reference> skybox;
+  boost::optional<noggit::scoped_model_reference> skybox;
 
   //! \todo This only has World* for wmo-doodads. ._.
-  explicit WMO(World* world, const std::string& name);
+  explicit WMO(const std::string& name, World* world);
   ~WMO();
   void draw (World* world
             , int doodadset
@@ -252,69 +251,35 @@ public:
   bool drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d pLower, ::math::vector_3d pUpper ) const;
 };
 
-class WMOManager
+namespace noggit
 {
-public:
-  static void report();
-
-private:
-  friend struct scoped_wmo_reference;
-  //! \todo This only has World* for wmo-doodads. ._.
-  static WMO* add(World* world, std::string name);
-  static void delbyname( std::string name );
-  typedef std::map<std::string, WMO*> mapType;
-  static mapType items;
-};
-
-struct scoped_wmo_reference
-{
-  scoped_wmo_reference (World* world, std::string const& filename)
-    : _valid (true)
-    , _filename (filename)
-    , _world (world)
-    , _wmo (WMOManager::add (_world, _filename))
-  {}
-
-  scoped_wmo_reference (scoped_wmo_reference const& other)
-    : scoped_wmo_reference (other._world, other._filename)
-  {}
-  scoped_wmo_reference (scoped_wmo_reference&& other)
-    : _valid (std::move (other._valid))
-    , _filename (std::move (other._filename))
-    , _world (std::move (other._world))
-    , _wmo (std::move (other._wmo))
+  struct wmo_manager : private multimap_with_normalized_key<WMO>
   {
-    other._valid = false;
-  }
-  scoped_wmo_reference& operator= (scoped_wmo_reference const&) = delete;
-  scoped_wmo_reference& operator= (scoped_wmo_reference&& other)
-  {
-    std::swap (_valid, other._valid);
-    std::swap (_filename, other._filename);
-    std::swap (_world, other._world);
-    std::swap (_wmo, other._wmo);
-    return *this;
-  }
+    friend struct scoped_wmo_reference;
+  };
 
-  ~scoped_wmo_reference()
+  struct scoped_wmo_reference
   {
-    if (_valid)
+    scoped_wmo_reference (World*, std::string const& filename);
+
+    scoped_wmo_reference (scoped_wmo_reference const&);
+    scoped_wmo_reference (scoped_wmo_reference&&);
+    scoped_wmo_reference& operator= (scoped_wmo_reference const&) = delete;
+    scoped_wmo_reference& operator= (scoped_wmo_reference&&);
+
+    ~scoped_wmo_reference();
+
+    WMO* operator->() const
     {
-      WMOManager::delbyname (_filename);
+      return _wmo;
     }
-  }
 
-  WMO* operator->() const
-  {
-    return _wmo;
-  }
-
-private:
-  bool _valid;
-  std::string _filename;
-  World* _world;
-  WMO* _wmo;
-};
-
+  private:
+    bool _valid;
+    std::string _filename;
+    World* _world;
+    WMO* _wmo;
+  };
+}
 
 #endif

@@ -28,6 +28,7 @@
 #include <opengl/settings_saver.h>
 #include <opengl/scoped.h>
 
+#include <noggit/application.h>
 #include <noggit/blp_texture.h>
 #include <noggit/Brush.h>
 #include <noggit/DBC.h>
@@ -35,7 +36,7 @@
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
-#include <noggit/ModelManager.h> // ModelManager
+#include <noggit/ModelManager.h>
 #include <noggit/TextureManager.h>
 #include <noggit/UITexturingGUI.h>
 #include <noggit/WMOInstance.h> // WMOInstance
@@ -1151,7 +1152,7 @@ void World::draw ( size_t flags
     // M2s / models
     if(flags & DOODADS)
     {
-      ModelManager::resetAnim();
+      noggit::app().model_manager().resetAnim();
 
       glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
       for( std::map<int, ModelInstance*>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
@@ -1327,7 +1328,7 @@ boost::optional<selection_type> World::drawSelection (size_t flags)
 
   if (flags & DOODADS)
   {
-    ModelManager::resetAnim();
+    noggit::app().model_manager().resetAnim();
 
     ::opengl::scoped::name_pusher type (DoodadName);
     ::opengl::scoped::name_pusher dummy (0);
@@ -1406,10 +1407,10 @@ void World::tick (float dt)
                     );
 
   while (dt > 0.1f) {
-    ModelManager::updateEmitters(0.1f);
+    noggit::app().model_manager().updateEmitters(0.1f);
     dt -= 0.1f;
   }
-  ModelManager::updateEmitters(dt);
+  noggit::app().model_manager().updateEmitters(dt);
 }
 
 unsigned int World::getAreaID() const

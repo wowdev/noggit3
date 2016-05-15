@@ -28,7 +28,7 @@ private:
     bool _draw_loading;
     QTime _run_time;
     qreal _last_update;
-    scoped_model_reference theModel;
+    noggit::scoped_model_reference theModel;
     GLfloat distance;
     GLfloat xRot;
     GLfloat yRot;

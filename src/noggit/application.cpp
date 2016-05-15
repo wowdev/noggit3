@@ -95,13 +95,6 @@ namespace noggit
 	mainwindow->map_selection_menu->activateWindow();
   }
 
-  application::~application()
-  {
-    TextureManager::report();
-    ModelManager::report();
-    WMOManager::report();
-  }
-
   mpq::archive_manager& application::archive_manager()
   {
     return _archive_manager;
@@ -110,6 +103,19 @@ namespace noggit
   async::loader& application::async_loader()
   {
     return _async_loader;
+  }
+
+  texture_manager& application::texture_manager()
+  {
+    return _texture_manager;
+  }
+  model_manager& application::model_manager()
+  {
+    return _model_manager;
+  }
+  wmo_manager& application::wmo_manager()
+  {
+    return _wmo_manager;
   }
 
   QVariant application::setting ( const QString& key

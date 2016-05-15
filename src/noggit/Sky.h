@@ -84,7 +84,7 @@ class Skies {
 
   int numSkies;
   int cs;
-  scoped_model_reference stars;
+  noggit::scoped_model_reference stars;
   char skyname[128];
 
 public:

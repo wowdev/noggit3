@@ -11,14 +11,14 @@
 
 #include <math/vector_2d.h>
 
+#include <noggit/application.h>
 #include <noggit/blp_texture.h>
 #include <noggit/Log.h>
 #include <noggit/Model.h>
 #include <noggit/World.h>
 
 Model::Model(const std::string& filename, bool _forceAnim)
-: ManagedItem( )
-, forceAnim(_forceAnim)
+: forceAnim(_forceAnim)
 , _filename( filename )
 {
   memset( &header, 0, sizeof( ModelHeader ) );
@@ -31,6 +31,8 @@ Model::Model(const std::string& filename, bool _forceAnim)
   showGeosets = NULL;
 
   _finished = false;
+
+  noggit::app().async_loader().add_object (this);
 }
 
 void Model::finish_loading()

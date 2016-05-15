@@ -30,7 +30,7 @@ namespace noggit
 class ModelInstance
 {
 public:
-  scoped_model_reference model;
+  noggit::scoped_model_reference model;
 
 private:
   unsigned int nameID;

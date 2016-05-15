@@ -20,7 +20,6 @@ class Bone;
 
 #include <noggit/async/object.h>
 #include <noggit/Animated.h> // Animation::M2Value
-#include <noggit/Manager.h> // ManagedItem
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
 #include <noggit/TextureManager.h>
@@ -144,7 +143,7 @@ struct ModelLight {
   void setup(int time, opengl::light l);
 };
 
-class Model: public ManagedItem, public noggit::async::object
+class Model: public noggit::async::object
 {
 
   GLuint ModelDrawList;
