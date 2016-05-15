@@ -22,7 +22,7 @@ namespace noggit
 
     file::file (const QString& filename, const bool& maybe_create)
       : _is_at_end_of_file (true)
-      , buffer (NULL)
+      , buffer (nullptr)
       , pointer (0)
       , size (0)
       , _file_is_on_disk (false)
@@ -127,7 +127,7 @@ namespace noggit
     void file::close()
     {
       delete[] buffer;
-      buffer = NULL;
+      buffer = nullptr;
 
       _is_at_end_of_file = true;
     }
@@ -155,7 +155,7 @@ namespace noggit
     void file::setBuffer(char *Buf, size_t Size)
     {
       delete buffer;
-      buffer = NULL;
+      buffer = nullptr;
 
       buffer=Buf;
       size=Size;

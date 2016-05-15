@@ -29,7 +29,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      model_spawner (QWidget* parent = NULL, QGLWidget *shared = NULL);
+      model_spawner (QWidget* parent = nullptr, QGLWidget *shared = nullptr);
 
       static const QLatin1String& mime_type();
 

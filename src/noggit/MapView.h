@@ -104,8 +104,8 @@ namespace noggit
             , qreal viewing_distance
             , float ah0 = -90.0f
             , float av0 = -30.0f
-            , QGLWidget* shared = NULL
-            , QWidget* parent = NULL
+            , QGLWidget* shared = nullptr
+            , QWidget* parent = nullptr
             );
     virtual ~MapView();
 

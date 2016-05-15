@@ -36,7 +36,7 @@ namespace noggit
 
     public:
       conversion_helper_widget (const QString& blp_filename)
-        : _texture (NULL)
+        : _texture (nullptr)
         , _blp_filename (blp_filename)
       { }
 

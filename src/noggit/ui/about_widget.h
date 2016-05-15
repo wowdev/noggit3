@@ -17,7 +17,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      about_widget (QWidget* parent = NULL);
+      about_widget (QWidget* parent = nullptr);
     };
   }
 }

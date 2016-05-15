@@ -15,7 +15,7 @@ namespace noggit
 			Q_OBJECT
 
 		public:
-			zoneid_widget(World *world, QWidget* Parent = NULL );
+			zoneid_widget(World *world, QWidget* Parent = nullptr );
 			typedef zoneid_widget* Ptr;
 
 			void setMapID();

@@ -85,7 +85,7 @@ BLSShader::BLSShader( const QString & pFilename )
 #endif
 
 
-ShaderPair *terrainShaders[4]={NULL,NULL,NULL,NULL}, *wmoShader=NULL, *waterShaders[1]={NULL};
+ShaderPair *terrainShaders[4]={nullptr,nullptr,nullptr,nullptr}, *wmoShader=nullptr, *waterShaders[1]={nullptr};
 
 void initShaders()
 {
@@ -107,13 +107,13 @@ void reloadShaders()
   for (int i=0; i<4; ++i)
   {
     delete terrainShaders[i];
-    terrainShaders[i] = NULL;
+    terrainShaders[i] = nullptr;
   }
 
   delete wmoShader;
-  wmoShader = NULL;
+  wmoShader = nullptr;
   delete waterShaders[0];
-  waterShaders[0] = NULL;
+  waterShaders[0] = nullptr;
 
   terrainShaders[0] = new ShaderPair(0, "shaders/terrain1.fs", true);
   terrainShaders[1] = new ShaderPair(0, "shaders/terrain2.fs", true);
@@ -151,7 +151,7 @@ Shader::Shader(GLenum _target, const char *program, bool fromFile):id(0),target(
     if( buf )
     {
       delete[] buf;
-      buf = NULL;
+      buf = nullptr;
     }
   } else progtext = program;
 
@@ -190,16 +190,16 @@ ShaderPair::ShaderPair(const char *vprog, const char *fprog, bool fromFile)
     vertex = new Shader(GL_VERTEX_PROGRAM_ARB, vprog, fromFile);
     if (vertex && !vertex->ok) {
       delete vertex;
-      vertex = NULL;
+      vertex = nullptr;
     }
-  } else vertex = NULL;
+  } else vertex = nullptr;
   if (fprog && strlen(fprog)) {
     fragment = new Shader(GL_FRAGMENT_PROGRAM_ARB, fprog, fromFile);
     if (fragment && !fragment->ok) {
       delete fragment;
-      fragment = NULL;
+      fragment = nullptr;
     }
-  } else fragment = NULL;
+  } else fragment = nullptr;
 }
 
 void ShaderPair::bind()

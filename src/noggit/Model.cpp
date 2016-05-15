@@ -23,12 +23,12 @@ Model::Model(const std::string& filename, bool _forceAnim)
 {
   memset( &header, 0, sizeof( ModelHeader ) );
 
-  globalSequences = NULL;
-  indices = NULL;
-  anims = NULL;
-  origVertices = NULL;
+  globalSequences = nullptr;
+  indices = nullptr;
+  anims = nullptr;
+  origVertices = nullptr;
 
-  showGeosets = NULL;
+  showGeosets = nullptr;
 
   _finished = false;
 
@@ -434,7 +434,7 @@ void Model::initAnimated(const noggit::mpq::file& f)
       }
       else
       {
-        animfiles[i] = NULL;
+        animfiles[i] = nullptr;
       }
     }
   }
@@ -527,7 +527,7 @@ void Model::animate(int _anim, int time)
   if (animGeometry) {
 
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2*vbufsize, NULL, GL_STREAM_DRAW_ARB);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2*vbufsize, nullptr, GL_STREAM_DRAW_ARB);
     vertices = reinterpret_cast< ::math::vector_3d*>(glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
 
     // transform vertices

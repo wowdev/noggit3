@@ -97,7 +97,7 @@ namespace noggit
 
     void MainWindow::maps()
     {
-      this->map_selection_menu = new Menu (NULL);
+      this->map_selection_menu = new Menu (nullptr);
       connect (this->map_selection_menu, SIGNAL (create_world_view_request (World*)), this, SLOT (create_world_view (World*)));
 	  this->map_selection_menu->show();
 

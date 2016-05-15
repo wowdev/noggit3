@@ -9,7 +9,7 @@
 
 UIModel::UIModel( float xPos, float yPos, float w, float h )
 : UIFrame( xPos, yPos, w, h )
-, model( NULL )
+, model( nullptr )
 {
 }
 
@@ -49,7 +49,7 @@ void UIModel::render() const
 
   model->cam.setup( 0 );
   //! \todo This will crash instantly. This would need passing stuff from inside World into model, not passing world.
-  model->draw (NULL);
+  model->draw (nullptr);
 
   video.set2D();
   */

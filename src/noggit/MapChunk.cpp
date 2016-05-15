@@ -750,7 +750,7 @@ MapChunk::~MapChunk()
   glDeleteBuffers( 1, &normals );
 
   delete strip;
-  strip = NULL;
+  strip = nullptr;
 
   if( nameID != -1 )
   {

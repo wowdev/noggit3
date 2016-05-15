@@ -64,7 +64,7 @@ are similar.
                  , const type_2& name_2
                  , const type& name3
                  )
-           : QWidget (NULL)
+           : QWidget (nullptr)
          //! \note Prefer initialization lists over assignment.
            , _var (name)
          {}

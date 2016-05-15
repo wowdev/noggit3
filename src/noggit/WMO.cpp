@@ -71,8 +71,8 @@ WMO::WMO (const std::string& filenameArg, World* world)
   uint32_t size;
   float ff[3];
 
-  char *ddnames = NULL;
-  char *groupnames = NULL;
+  char *ddnames = nullptr;
+  char *groupnames = nullptr;
 
   char *texbuf=0;
 
@@ -243,7 +243,7 @@ WMO::WMO (const std::string& filenameArg, World* world)
   f.close();
 
   delete[] texbuf;
-  texbuf = NULL;
+  texbuf = nullptr;
 
   for (unsigned int i=0; i<nGroups; ++i)
     groups[i].initDisplayList();
@@ -254,7 +254,7 @@ WMO::~WMO()
   LogDebug << "Unloading WMO \"" << filename() << "\"." << std::endl;
 
   delete[] groups;
-  groups = NULL;
+  groups = nullptr;
 }
 
 void WMO::draw ( World* world
@@ -737,12 +737,12 @@ struct WMOGroupHeader {
 
 void WMOGroup::initDisplayList()
 {
-  ::math::vector_3d *vertices = NULL;
-  ::math::vector_3d *normals = NULL;
-  ::math::vector_2d *texcoords = NULL;
-  uint16_t *indices = NULL;
-  struct SMOPoly *materials = NULL;
-  WMOBatch *batches = NULL;
+  ::math::vector_3d *vertices = nullptr;
+  ::math::vector_3d *normals = nullptr;
+  ::math::vector_2d *texcoords = nullptr;
+  uint16_t *indices = nullptr;
+  struct SMOPoly *materials = nullptr;
+  WMOBatch *batches = nullptr;
 
   WMOGroupHeader gh;
 
@@ -780,7 +780,7 @@ void WMOGroup::initDisplayList()
   uint32_t fourcc;
   uint32_t size;
 
-  unsigned int *cv = NULL;
+  unsigned int *cv = nullptr;
   hascv = false;
 
   while (!gf.is_at_end_of_file()) {
@@ -1211,9 +1211,9 @@ WMOGroup::~WMOGroup()
   _lists.clear();
 
   delete[] ddr;
-  ddr = NULL;
+  ddr = nullptr;
   delete lq;
-  lq = NULL;
+  lq = nullptr;
 }
 
 

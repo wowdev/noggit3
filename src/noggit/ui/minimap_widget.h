@@ -25,7 +25,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      minimap_widget (QWidget* parent = NULL);
+      minimap_widget (QWidget* parent = nullptr);
 
       virtual QSize sizeHint() const;
 

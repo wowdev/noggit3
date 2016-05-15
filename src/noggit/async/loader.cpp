@@ -58,7 +58,7 @@ namespace noggit
         }
       }
 
-      return NULL;
+      return nullptr;
     }
   }
 }

@@ -13,7 +13,7 @@ namespace helper
     class non_recursive_filter_model : public QSortFilterProxyModel
     {
     public:
-      non_recursive_filter_model (QObject* parent = NULL);
+      non_recursive_filter_model (QObject* parent = nullptr);
 
     protected:
       virtual bool filterAcceptsRow (int source_row, const QModelIndex &source_parent) const;

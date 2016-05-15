@@ -18,7 +18,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      cursor_selector (QWidget* parent = NULL);
+      cursor_selector (QWidget* parent = nullptr);
 
     public slots:
       void set_cursor_type (int value);

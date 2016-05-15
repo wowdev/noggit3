@@ -33,7 +33,7 @@ namespace noggit
       QVBoxLayout* layout = new QVBoxLayout(this);
 
       QScrollArea* scroll = new QScrollArea();
-      QWidget* scrollWidget = new QWidget(NULL);
+      QWidget* scrollWidget = new QWidget(nullptr);
       QVBoxLayout* scrollLayout = new QVBoxLayout(scrollWidget);
 
       QStringList listfile = app().archive_manager().listfile().filter (QRegExp (".(_s.blp)", Qt::CaseInsensitive));

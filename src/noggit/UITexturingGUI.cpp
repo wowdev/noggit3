@@ -78,7 +78,7 @@ UIText      *chunkTextureNames[4];
 UIText      *chunkTextureFlags[4];
 UIText      *chunkTextureEffectID[4];
 
-noggit::blp_texture* UITexturingGUI::selectedTexture = NULL;
+noggit::blp_texture* UITexturingGUI::selectedTexture = nullptr;
 
 void LoadTextureNames()
 {
@@ -359,8 +359,8 @@ UIFrame* UITexturingGUI::createTexturePalette( int rows, int cols, UIMapViewGUI 
     windowTexturePalette->addChild(curTextures[i]);
   }
 
-  gPageNumber = NULL;
-  textSelectedTexture = NULL;
+  gPageNumber = nullptr;
+  textSelectedTexture = nullptr;
 
   updateTextures();
   texturePaletteClick( 0, 0 );
