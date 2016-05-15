@@ -13,7 +13,6 @@
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/Shaders.h>
-#include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
@@ -147,11 +146,6 @@ Liquid::~Liquid()
 {
   delete mDrawList;
   mDrawList = NULL;
-
-  for (auto const& filename : _texture_filenames)
-  {
-    TextureManager::delbyname (filename);
-  }
 }
 
 void Liquid::initFromWMO(noggit::mpq::file* f, const WMOMaterial &mat, bool indoor)
@@ -442,8 +436,6 @@ void Liquid::initTextures( const std::string& pFilename )
     QString tmp (QString::fromStdString(pFilename));
     tmp = tmp.replace("%d", "%1");
     tmp = tmp.arg (i);
-    std::string doo (tmp.toStdString());
-    _texture_filenames.push_back( doo );
-    _textures.push_back( TextureManager::newTexture( doo )) ;
+    _textures.emplace_back (tmp.toStdString());
   }
 }

@@ -1737,7 +1737,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
   }
 }
 
-bool World::paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture)
+bool World::paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::scoped_blp_texture_reference texture)
 {
   int const x_lower (static_cast<int> ((x - Brush.getRadius()) / TILESIZE));
   int const x_upper (static_cast<int> ((x + Brush.getRadius()) / TILESIZE));
@@ -1802,7 +1802,7 @@ void World::eraseTextures(float x, float z)
   }
 }
 
-void World::overwriteTextureAtCurrentChunk(float x, float z, noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture)
+void World::overwriteTextureAtCurrentChunk(float x, float z, noggit::scoped_blp_texture_reference oldTexture, noggit::scoped_blp_texture_reference newTexture)
 {
   setChanged(x,z);
   const size_t newX = x / TILESIZE;
@@ -2159,7 +2159,7 @@ void World::moveHeight(int x, int z, const float& heightDelta)
 
 }
 
-void World::setBaseTexture( int x, int z, noggit::blp_texture* texture )
+void World::setBaseTexture( int x, int z, noggit::scoped_blp_texture_reference texture )
 {
   MapTile *curTile;
   curTile = mTiles[z][x].tile;
@@ -2171,11 +2171,7 @@ void World::setBaseTexture( int x, int z, noggit::blp_texture* texture )
     {
       MapChunk *curChunk = curTile->getChunk(j, i);
       curChunk->eraseTextures();
-      if (texture)
-      {
-        curChunk->addTexture( texture );
-        texture->addReference();
-      }
+      curChunk->addTexture( texture );
     }
   }
 }

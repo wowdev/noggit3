@@ -42,7 +42,6 @@
 #include <noggit/ui/editortemplate.h>
 #include <noggit/ui/zoneid_widget.h>
 #include <noggit/blp_texture.h>
-#include <noggit/TextureManager.h>
 
 //! \todo Replace all old gui elements with new classes / widgets.
 #undef __OBSOLETE_GUI_ELEMENTS
@@ -696,9 +695,7 @@ namespace noggit
                   (_world->GetCurrentSelection());
 #endif
               }
-              else if ( _currently_holding_shift
-                     && getSelectedTexture()
-                      )
+              else if (_currently_holding_shift)
               {
                 _world->paintTexture ( brush_position.x()
                                      , brush_position.y()
@@ -1831,15 +1828,14 @@ namespace noggit
 
   void MapView::clear_texture()
   {
-    _world->setBaseTexture ( tile_below_camera (_world->camera.x())
-                           , tile_below_camera (_world->camera.z())
-                           , NULL
-                           );
+    _world->eraseTextures ( tile_below_camera (_world->camera.x())
+                          , tile_below_camera (_world->camera.z())
+                          );
   }
 
-  noggit::blp_texture *MapView::getSelectedTexture()
+  noggit::scoped_blp_texture_reference MapView::getSelectedTexture()
   {
-      return TextureManager::newTexture(_texturingComboBox->itemData(_texturingComboBox->currentIndex()).toString().toStdString());
+      return {_texturingComboBox->itemData(_texturingComboBox->currentIndex()).toString().toStdString()};
   }
 
 

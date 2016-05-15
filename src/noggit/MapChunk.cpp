@@ -25,7 +25,6 @@
 #include <noggit/Log.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/Selection.h>
-#include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
@@ -374,10 +373,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
       vmax.z (zbase + 8 * UNITSIZE);
     }
     else if ( fourcc == 'MCLY' ) {
-      // texture info
-      nTextures = size / 16U;
-      //gLog("=\n");
-      for (size_t i=0; i<nTextures; ++i) {
+      for (size_t i=0; i<(size / 16U); ++i) {
         f->read(&tex[i],4);
         f->read(&_texFlags[i], 4);
         f->read(&MCALoffset[i], 4);
@@ -389,7 +385,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
         } else {
           animated[i] = 0;
         }
-        _textures[i] = TextureManager::newTexture( maintile->mTextureFilenames[tex[i]] );
+        _textures.emplace_back (maintile->mTextureFilenames[tex[i]]);
       }
     }
     else if ( fourcc == 'MCSH' ) {
@@ -627,7 +623,7 @@ void MapChunk::drawTextures() const
 {
   glColor4f(1.0f,1.0f,1.0f,1.0f);
 
-  if(nTextures > 0U)
+  if(_textures.size() > 0U)
   {
     opengl::texture::enable_texture (0);
 
@@ -662,11 +658,11 @@ void MapChunk::drawTextures() const
 
   RemoveAnim(flags_layer_0);
 
-  if (nTextures > 1U) {
+  if (_textures.size() > 1U) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
     //glDepthMask(GL_FALSE);
   }
-  for(size_t i=1; i < nTextures; ++i)
+  for(size_t i=1; i < _textures.size(); ++i)
   {
     opengl::texture::enable_texture (0);
 
@@ -834,7 +830,7 @@ float MapChunk::getMinHeight() const
       min = std::fmin(mVertices[indexNoLoD(i, j)].y(), min);
     }
   }
-  
+
 	return min;
 }
 
@@ -950,7 +946,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
 
   // first pass: base texture
-  if (nTextures == 0U)
+  if (_textures.empty())
   {
     opengl::texture::disable_texture (0);
     opengl::texture::disable_texture (1);
@@ -969,13 +965,13 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   glEnable(GL_LIGHTING);
   drawPass(animated[0]);
 
-  if (nTextures > 1U) {
+  if (_textures.size() > 1U) {
     //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
     glDepthMask(GL_FALSE);
   }
 
   // additional passes: if required
-  for( size_t i = 1; i < nTextures; ++i )
+  for( size_t i = 1; i < _textures.size(); ++i )
   {
     opengl::texture::enable_texture (0);
 
@@ -989,7 +985,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
     drawPass(animated[i]);
   }
 
-  if (nTextures > 1U) {
+  if (_textures.size() > 1U) {
     //glDepthFunc(GL_LEQUAL);
     glDepthMask(GL_TRUE);
   }
@@ -1527,17 +1523,16 @@ w=sqrt(L*z/(u*y))
 */
 void MapChunk::eraseTextures()
 {
-  nTextures = 0U;
+  _textures.clear();
 }
 
-int MapChunk::addTexture( noggit::blp_texture* texture )
+int MapChunk::addTexture( noggit::scoped_blp_texture_reference texture )
 {
   int texLevel = -1;
-  if( nTextures < 4U )
+  if( _textures.size() < 4U )
   {
-    texLevel = nTextures;
-    nTextures++;
-    _textures[texLevel] = texture;
+    texLevel = _textures.size();
+    _textures.emplace_back (texture);
     animated[texLevel] = 0;
     texture_flags (texLevel, 0);
     texture_effect_id (texLevel, 0);
@@ -1546,7 +1541,7 @@ int MapChunk::addTexture( noggit::blp_texture* texture )
       if( alphamaps[texLevel-1] < 1 )
       {
         LogError << "Alpha Map has invalid texture binding" << std::endl;
-        nTextures--;
+        _textures.pop_back();
         return -1;
       }
       memset( amap[texLevel - 1], 0, 64 * 64 );
@@ -1560,10 +1555,10 @@ int MapChunk::addTexture( noggit::blp_texture* texture )
   }
   return texLevel;
 }
-void MapChunk::switchTexture( noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture )
+void MapChunk::switchTexture( noggit::scoped_blp_texture_reference oldTexture, noggit::scoped_blp_texture_reference newTexture )
 {
   int texLevel = -1;
-  for (size_t i = 0;i < nTextures;++i)
+  for (size_t i = 0;i < _textures.size();++i)
   {
     // prevent texture duplication
     if (_textures[i] == newTexture)
@@ -1571,14 +1566,13 @@ void MapChunk::switchTexture( noggit::blp_texture* oldTexture, noggit::blp_textu
     if (_textures[i] == oldTexture)
       texLevel = i;
   }
-    
 
   if(texLevel != -1)
   {
   _textures[texLevel] = newTexture;
   }
 }
-bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture )
+bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strength, float pressure, noggit::scoped_blp_texture_reference texture )
 {
 #if 1
   float zPos,xPos,change,xdiff,zdiff,dist, radius;
@@ -1595,12 +1589,12 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
     return false;
 
   //First Lets find out do we have the texture already
-  for(size_t i=0;i<nTextures;++i)
+  for(size_t i=0;i<_textures.size();++i)
     if(_textures[i]==texture)
       texLevel=i;
 
 
-  if( (texLevel==-1) && (nTextures==4) )
+  if( (texLevel==-1) && (_textures.size()==4) )
   {
     // Implement here auto texture slot freeing :)
     LogDebug << "paintTexture: No free texture slot" << std::endl;
@@ -1608,7 +1602,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
   }
 
   //Only 1 layer and its that layer
-  if( (texLevel!=-1) && (nTextures==1) )
+  if( (texLevel!=-1) && (_textures.size()==1) )
     return true;
 
 
@@ -1616,7 +1610,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
   zPos=zbase;
 
   float target,tarAbove, tPressure;
-  //int texAbove=nTextures-texLevel-1;
+  //int texAbove=_textures.size()-texLevel-1;
 
 
   for(int j=0; j < 63 ; j++)
@@ -1656,7 +1650,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
         uchar test = static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[texLevel-1][i+j*64]) ) + tPressure*target + 0.5f ,255.0f) , 0.0f));
         amap[texLevel-1][i+j*64]=test;
       }
-      for(size_t k=texLevel;k<nTextures-1;k++)
+      for(size_t k=texLevel;k<_textures.size()-1;k++)
         amap[k][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[k][i+j*64]) ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f));
       xPos+=change;
     }
@@ -1669,7 +1663,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
     return false;
   }
 
-  for( size_t j = texLevel; j < nTextures - 1; j++ )
+  for( size_t j = texLevel; j < _textures.size() - 1; j++ )
   {
     if( j > 2 )
     {
@@ -1701,7 +1695,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
   // Search for empty layer.
   int texLevel = -1;
 
-  for( size_t i = 0; i < nTextures; ++i )
+  for( size_t i = 0; i < _textures.size(); ++i )
   {
     if( _textures[i] == texture )
     {
@@ -1712,9 +1706,9 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
   if( texLevel == -1 )
   {
 
-    if( nTextures == 4 )
+    if( _textures.size() == 4 )
     {
-      for( size_t layer = 0; layer < nTextures; ++layer )
+      for( size_t layer = 0; layer < _textures.size(); ++layer )
       {
         unsigned char map[64*64];
         if( layer )
@@ -1722,7 +1716,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
         else
           memset( map, 255, 64*64 );
 
-        for( size_t layerAbove = layer + 1; layerAbove < nTextures; ++layerAbove )
+        for( size_t layerAbove = layer + 1; layerAbove < _textures.size(); ++layerAbove )
         {
           unsigned char* above = amap[layerAbove-1];
           for( size_t i = 0; i < 64 * 64; ++i )
@@ -1739,7 +1733,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
 
         if( !sum )
         {
-          for( size_t i = layer; i < nTextures - 1; ++i )
+          for( size_t i = layer; i < _textures.size() - 1; ++i )
           {
             _textures[i] = _textures[i+1];
             animated[i] = animated[i+1];
@@ -1749,17 +1743,17 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
               memcpy( amap[i-1], amap[i], 64*64 );
           }
 
-          for( size_t j = layer; j < nTextures; j++ )
+          for( size_t j = layer; j < _textures.size(); j++ )
               {
                 glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
                 glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
               }
-              nTextures--;
+              _textures.pop_back();
         }
       }
     }
 
-    if( nTextures == 4 )
+    if( _textures.size() == 4 )
     return false;
 
       texLevel = addTexture( texture );
@@ -1767,10 +1761,10 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
   }
   else
   {
-    if( nTextures == 1 )
+    if( _textures.size() == 1 )
       return true;
   }
-  LogDebug << "TexLevel: " << texLevel << " -  NTextures: " << nTextures << "\n";
+  LogDebug << "TexLevel: " << texLevel << " -  _textures.size(): " << _textures.size() << "\n";
   // We now have a texture at texLevel > 0.
   static const float change = CHUNKSIZE / 62.0f; //! \todo 64? 63? 62? Wtf?
 
@@ -1795,7 +1789,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
 
   // Redraw changed layers.
 
-  for( size_t j = texLevel; j < nTextures; j++ )
+  for( size_t j = texLevel; j < _textures.size(); j++ )
   {
     glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
     glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
@@ -1857,7 +1851,7 @@ void MapChunk::update_low_quality_texture_map()
     for (size_t x (0); x < 8; ++x)
     {
       size_t winning_layer (0);
-      for (size_t layer (1); layer < nTextures; ++layer)
+      for (size_t layer (1); layer < _textures.size(); ++layer)
       {
         size_t sum (0);
         for (size_t j (0); j < 8; ++j)

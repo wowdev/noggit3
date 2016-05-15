@@ -679,7 +679,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
   for( int i = 0; i < 16; ++i )
     for( int j = 0; j < 16; ++j )
-      for( size_t tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
+      for( size_t tex = 0; tex < mChunks[i][j]->_textures.size(); tex++ )
         if( lTextures.find( mChunks[i][j]->_textures[tex]->filename().toStdString() ) == lTextures.end() )
           lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->_textures[tex]->filename().toStdString(), -1 ) );
 
@@ -1062,16 +1062,16 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
         // MCLY
 //        {
-          size_t lMCLY_Size = mChunks[y][x]->nTextures * 0x10;
+          size_t lMCLY_Size = mChunks[y][x]->_textures.size() * 0x10;
 
           lADTFile.resize (lADTFile.size() + 8 + lMCLY_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCLY', lMCLY_Size );
 
           get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsLayer = lCurrentPosition - lMCNK_Position;
-          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->nLayers = mChunks[y][x]->nTextures;
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->nLayers = mChunks[y][x]->_textures.size();
 
           // MCLY data
-          for( size_t j = 0; j < mChunks[y][x]->nTextures; ++j )
+          for( size_t j = 0; j < mChunks[y][x]->_textures.size(); ++j )
           {
             ENTRY_MCLY * lLayer = get_pointer<ENTRY_MCLY>( lADTFile, lCurrentPosition + 8 + 0x10 * j );
 
@@ -1193,7 +1193,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 //        {
           int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
 
-      size_t lMaps = mChunks[y][x]->nTextures ? mChunks[y][x]->nTextures - 1U : 0U;
+      size_t lMaps = mChunks[y][x]->_textures.size() ? mChunks[y][x]->_textures.size() - 1U : 0U;
 
           int lMCAL_Size = lDimensions * lMaps;
 
@@ -1388,7 +1388,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
   for( int i = 0; i < 16; ++i )
     for( int j = 0; j < 16; ++j )
-      for( size_t tex = 0; tex < mChunks[i][j]->nTextures; tex++ )
+      for( size_t tex = 0; tex < mChunks[i][j]->_textures.size(); tex++ )
         if( lTextures.find( mChunks[i][j]->_textures[tex]->filename().toStdString() ) == lTextures.end() )
           lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->_textures[tex]->filename().toStdString(), -1 ) );
 
@@ -1681,13 +1681,13 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
         // MCLY
 //        {
-          size_t lMCLY_Size = mChunks[y][x]->nTextures * 0x10;
+          size_t lMCLY_Size = mChunks[y][x]->_textures.size() * 0x10;
 
           lADTTexFile.resize (lADTTexFile.size() + 8 + lMCLY_Size );
           SetChunkHeader( lADTTexFile, lCurrentPosition, 'MCLY', lMCLY_Size );
 
           // MCLY data
-          for( size_t j = 0; j < mChunks[y][x]->nTextures; ++j )
+          for( size_t j = 0; j < mChunks[y][x]->_textures.size(); ++j )
           {
             ENTRY_MCLY * lLayer = get_pointer<ENTRY_MCLY>( lADTTexFile, lCurrentPosition + 8 + 0x10 * j );
 
@@ -1729,7 +1729,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 //        {
           int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
 
-          size_t lMaps = mChunks[y][x]->nTextures ? mChunks[y][x]->nTextures - 1U : 0U;
+          size_t lMaps = mChunks[y][x]->_textures.size() ? mChunks[y][x]->_textures.size() - 1U : 0U;
 
           int lMCAL_Size = lDimensions * lMaps;
 

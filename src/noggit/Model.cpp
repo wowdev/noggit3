@@ -14,7 +14,6 @@
 #include <noggit/blp_texture.h>
 #include <noggit/Log.h>
 #include <noggit/Model.h>
-#include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 
 Model::Model(const std::string& filename, bool _forceAnim)
@@ -72,13 +71,6 @@ void Model::finish_loading()
 Model::~Model()
 {
   LogDebug << "Unloading model \"" << _filename << "\"." << std::endl;
-
-  for(std::vector<std::string>::iterator it = _textureFilenames.begin(); it != _textureFilenames.end(); ++it )
-  {
-    TextureManager::delbyname( *it );
-  }
-  _textures.clear();
-  _textureFilenames.clear();
 
   if( globalSequences )
     delete[] globalSequences;
@@ -223,38 +215,21 @@ void Model::initCommon(const noggit::mpq::file& f)
 
   // textures
   ModelTextureDef* texdef = reinterpret_cast<ModelTextureDef*>( f.getBuffer() + header.ofsTextures );
-  _textures.resize( header.nTextures );
-  _replaceTextures.resize( header.nTextures );
-  _textureFilenames.resize( header.nTextures );
-  _specialTextures.resize( header.nTextures );
-  //! \todo Find correct number here.
-  _useReplaceTextures.resize( 15 );
 
   for( size_t i = 0; i < header.nTextures; ++i )
   {
     if( texdef[i].type == 0 )
     {
-      _specialTextures[i] = -1;
-      _useReplaceTextures[i] = false;
-      _textureFilenames[i] = std::string( f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen );
-      _textures[i] = TextureManager::newTexture( _textureFilenames[i] );
+      _textures.emplace_back (std::string (f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen));
     }
     else
     {
-      //! \note special texture - only on characters and such... Noggit should not even render these.
-      //! \todo Check if this is actually correct. Or just remove it.
-      _textures[i] = NULL;
-      //! \note As no other replace textures are loaded, do not replace anything but armor reflection to prevent crashes.
-      _specialTextures[i] = texdef[i].type == 3 ? 3 : -2;
-
-      _useReplaceTextures[texdef[i].type] = true;
-
-      if (texdef[i].type == 3)
-      {
-        _textureFilenames[i] = "Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP";
-        // a fix for weapons with type-3 textures.
-        _replaceTextures[texdef[i].type] = TextureManager::newTexture( _textureFilenames[i] );
-      }
+      //! \note special texture - only on characters and such... Noggit should
+      //! not even render these. probably should be replaced more intelligent.
+      _textures.emplace_back ( texdef[i].type == 3
+                             ? "item/weapon/armorreflect4.blp"
+                             : "tileset/generic/checkers.blp"
+                             );
     }
   }
 
@@ -654,11 +629,7 @@ bool ModelRenderPass::init(Model *m, int animtime)
       return false;
 
     // TEXTURE
-    if ( m->_specialTextures[tex] == -1 )
-      m->_textures[tex]->bind();
-    //! \todo this breaks, if there are no replace textures. d'uh.
-    else if ( m->_specialTextures[tex] > 0 )
-      m->_replaceTextures[m->_specialTextures[tex]]->bind();
+    m->_textures[tex]->bind();
 
     // TODO: Add proper support for multi-texturing.
 

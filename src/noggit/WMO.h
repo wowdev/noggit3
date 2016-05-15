@@ -20,6 +20,7 @@
 #include <noggit/async/object.h>
 #include <noggit/Manager.h>
 #include <noggit/ModelInstance.h> // ModelInstance
+#include <noggit/TextureManager.h>
 
 #include <boost/optional.hpp>
 
@@ -113,7 +114,8 @@ public:
                 );
 };
 
-struct WMOMaterial {
+struct SMOMaterial
+{
   int32_t flags;
   int32_t specular;
   int32_t transparent; // Blending: 0 for opaque, 1 for transparent
@@ -128,8 +130,16 @@ struct WMOMaterial {
   float diffColor[3];
   uint32_t texture1; // this is the first texture object. of course only in RAM. leave this alone. :D
   uint32_t texture2; // this is the second texture object.
-  // read up to here -_-
-  opengl::texture* _texture;
+};
+
+struct WMOMaterial : public SMOMaterial
+{
+  noggit::scoped_blp_texture_reference _texture;
+
+  WMOMaterial (SMOMaterial material, std::string filename)
+    : SMOMaterial (std::move (material))
+    , _texture (filename)
+  {}
 };
 
 struct WMOLight {
@@ -195,7 +205,7 @@ public:
   std::string _filename;
   WMOGroup *groups;
   unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
-  WMOMaterial *mat;
+  std::vector<WMOMaterial> _materials;
   ::math::vector_3d extents[2];
   std::vector<std::string> textures;
   std::vector<std::string> models;
