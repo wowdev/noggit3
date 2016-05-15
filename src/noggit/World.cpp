@@ -147,6 +147,8 @@ void renderDisk_convenient(float x, float y, float z, float radius)
   glEnable(GL_LIGHTING);
 }
 
+MapTileEntry::MapTileEntry() : flags( 0 ), tile( nullptr ) {}
+
 bool World::IsEditableWorld( int pMapId )
 {
   std::string lMapName;
@@ -196,10 +198,8 @@ World::World( const std::string& name )
   , detailtexcoords( 0 )
   , alphatexcoords( 0 )
   , mMapId( 0xFFFFFFFF )
-  , ol( NULL )
   , time( 1450 )
   , basename( name )
-  , skies( NULL )
   , outdoorLightStats( OutdoorLightStats() )
   , camera( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
   , lookat( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
@@ -277,7 +277,6 @@ World::World( const std::string& name )
     {
       theFile.read( &mTiles[j][i].flags, 4 );
       theFile.seekRelative( 4 );
-      mTiles[j][i].tile = NULL;
     }
   }
 
@@ -557,7 +556,7 @@ void World::initLowresTerrain()
           }
         }
 
-        lowrestiles[y][x] = new opengl::call_list;
+        lowrestiles[y][x].reset (new opengl::call_list);
         lowrestiles[y][x]->start_recording();
 
         //! \todo Make a strip out of this.
@@ -645,37 +644,15 @@ void World::initDisplay()
 {
   initGlobalVBOs( &detailtexcoords, &alphatexcoords );
 
-  skies = new Skies( mMapId );
+  skies.reset (new Skies (mMapId));
 
-  ol = new OutdoorLighting("World\\dnc.db");
+  ol.reset (new OutdoorLighting ("World\\dnc.db"));
 
   initLowresTerrain();
 }
 
 World::~World()
 {
-
-  for( int j = 0; j < 64; ++j )
-  {
-    for( int i = 0; i < 64; ++i )
-    {
-      delete lowrestiles[j][i];
-      lowrestiles[j][i] = NULL;
-
-      if( tileLoaded( j, i ) )
-      {
-        delete mTiles[j][i].tile;
-        mTiles[j][i].tile = NULL;
-      }
-    }
-  }
-
-  delete skies;
-  skies = NULL;
-
-  delete ol;
-  ol = NULL;
-
   LogDebug << "Unloaded world \"" << basename << "\"." << std::endl;
 }
 
@@ -716,8 +693,7 @@ void World::reloadTile (int x, int z)
 {
   if (tileLoaded (z, x))
   {
-    delete mTiles[z][x].tile;
-    mTiles[z][x].tile = NULL;
+    mTiles[z][x].tile.reset();
 
     loadTile (z, x);
   }
@@ -785,7 +761,7 @@ MapTile* World::loadTile(int z, int x)
 
   if( tileLoaded( z, x ) )
   {
-    return mTiles[z][x].tile;
+    return mTiles[z][x].tile.get();
   }
 
   const QString filename
@@ -801,8 +777,8 @@ MapTile* World::loadTile(int z, int x)
     return NULL;
   }
 
-  mTiles[z][x].tile = new MapTile( this, x, z, filename.toStdString(), mBigAlpha );
-  return mTiles[z][x].tile;
+  mTiles[z][x].tile.reset (new MapTile( this, x, z, filename.toStdString(), mBigAlpha ));
+  return mTiles[z][x].tile.get();
 }
 
 void World::outdoorLighting()
@@ -1027,7 +1003,7 @@ void World::draw ( size_t flags
                                     , flags & MARKIMPASSABLE
                                     , flags & AREAID
                                     , flags & NOCURSOR
-                                    , skies
+                                    , skies.get()
                                     , mapdrawdistance
                                     , frustum
                                     , camera
@@ -1234,7 +1210,7 @@ void World::draw ( size_t flags
       {
         if( tileLoaded( j, i ) )
         {
-          mTiles[j][i].tile->drawWater (skies);
+          mTiles[j][i].tile->drawWater (skies.get());
         }
       }
     }
@@ -1439,7 +1415,7 @@ void World::clearHeight(int x, int z)
     for (int i=0; i<16; ++i)
     {
       MapTile *curTile;
-      curTile = mTiles[z][x].tile;
+      curTile = mTiles[z][x].tile.get();
       if(curTile == 0) continue;
       setChanged(z,x);
       MapChunk *curChunk = curTile->getChunk(j, i);
@@ -1465,7 +1441,7 @@ void World::clearHeight(int x, int z)
   {
     for (int i=0; i<16; ++i)
     {
-      MapTile *curTile = mTiles[z][x].tile;
+      MapTile *curTile = mTiles[z][x].tile.get();
       if(curTile == 0) continue;
       setChanged(z,x);
       curTile->getChunk(j, i)->update_normal_vectors();
@@ -1477,7 +1453,7 @@ void World::clearAllModelsOnADT(int x,int z)
 {
   // get the adt
   MapTile *curTile;
-  curTile = mTiles[z][x].tile;
+  curTile = mTiles[z][x].tile.get();
   if(curTile == 0) return;
   curTile->clearAllModels();
 }
@@ -1509,7 +1485,7 @@ void World::setAreaID(int id, int x, int z , int _cx, int _cz)
 
   // set the Area ID on a tile x,z on the chunk cx,cz
   MapTile *curTile;
-  curTile = mTiles[z][x].tile;
+  curTile = mTiles[z][x].tile.get();
   if(curTile == 0) return;
   setChanged(z,x);
   MapChunk *curChunk = curTile->getChunk(_cx, _cz);
@@ -1554,7 +1530,7 @@ void World::drawTileMode ( bool draw_lines
     {
       if (tileLoaded (j, i))
       {
-        const MapTile* tile (mTiles[j][i].tile);
+        const MapTile* tile (mTiles[j][i].tile.get());
         const QRectF map_rect ( tile->xbase / CHUNKSIZE
                               , tile->zbase / CHUNKSIZE
                               , TILESIZE / CHUNKSIZE
@@ -2128,7 +2104,7 @@ void World::moveHeight(int x, int z, const float& heightDelta)
     for (int i=0; i<16; ++i)
     {
       MapTile *curTile;
-      curTile = mTiles[z][x].tile;
+      curTile = mTiles[z][x].tile.get();
       if(curTile == 0) continue;
       setChanged(z,x);
       MapChunk *curChunk = curTile->getChunk(j, i);
@@ -2151,7 +2127,7 @@ void World::moveHeight(int x, int z, const float& heightDelta)
   {
     for (int i=0; i<16; ++i)
     {
-      MapTile *curTile = mTiles[z][x].tile;
+      MapTile *curTile = mTiles[z][x].tile.get();
       if(curTile == 0) continue;
       setChanged(z,x);
       curTile->getChunk(j, i)->update_normal_vectors();
@@ -2163,7 +2139,7 @@ void World::moveHeight(int x, int z, const float& heightDelta)
 void World::setBaseTexture( int x, int z, noggit::scoped_blp_texture_reference texture )
 {
   MapTile *curTile;
-  curTile = mTiles[z][x].tile;
+  curTile = mTiles[z][x].tile.get();
   if(curTile == 0) return;
 
   for (int j=0; j<16; ++j)

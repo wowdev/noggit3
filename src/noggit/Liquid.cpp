@@ -139,14 +139,9 @@ Liquid::Liquid(int x, int y, ::math::vector_3d base, float ptilesize)
   , pos(base)
   , tilesize(ptilesize)
   , ydir(1.0f)
-  , mDrawList(NULL)
 {}
 
-Liquid::~Liquid()
-{
-  delete mDrawList;
-  mDrawList = NULL;
-}
+Liquid::~Liquid() = default;
 
 void Liquid::initFromWMO(noggit::mpq::file* f, const WMOMaterial &mat, bool indoor)
 {
@@ -201,7 +196,7 @@ void Liquid::initGeometry(noggit::mpq::file* f)
     }
   }
 
-  mDrawList = new opengl::call_list;
+  mDrawList.reset (new opengl::call_list);
   mDrawList->start_recording();
 
   //! \todo  handle light/dark liquid colors
@@ -251,9 +246,6 @@ void Liquid::initGeometry(noggit::mpq::file* f)
 
 void Liquid::initFromMH2O (MH2O_Tile const& tile_info)
 {
-  delete mDrawList;
-  mDrawList = NULL;
-
   texRepeats = 4.0f;
   ydir = 1.0f;
 
@@ -288,7 +280,7 @@ void Liquid::initFromMH2O (MH2O_Tile const& tile_info)
     }
   }
 
-  mDrawList = new opengl::call_list;
+  mDrawList.reset (new opengl::call_list);
   mDrawList->start_recording();
 
   glBegin(GL_QUADS);

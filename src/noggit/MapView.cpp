@@ -70,7 +70,7 @@ namespace noggit
     , _cursor_selector (new ui::cursor_selector (NULL))
     , _zoneid_widget( new ui::zoneid_widget (world,NULL))
     , _is_currently_moving_object (false)
-    , _object_to_ground (true)
+    , _object_to_ground (false)
     , _draw_lighting (true)
     , _fog_distance (777.0f)
     , _holding_left_mouse_button (false)
