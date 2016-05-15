@@ -1832,7 +1832,6 @@ void World::overwriteTextureAtCurrentChunk(float x, float z, noggit::blp_texture
 
 void World::addHole (float x, float z, float h, bool whole_chunk)
 {
-  setChanged(x, z);
   const size_t newX = x / TILESIZE;
   const size_t newZ = z / TILESIZE;
 
@@ -1850,6 +1849,8 @@ void World::addHole (float x, float z, float h, bool whole_chunk)
             // check if the cursor is not undermap
             if(chunk->getMinHeight() <= h + 1.0f && chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
             {
+              setChanged(x, z);
+
               if (whole_chunk)
               {
                 chunk->make_all_holes();
@@ -1870,7 +1871,6 @@ void World::addHole (float x, float z, float h, bool whole_chunk)
 
 void World::removeHole (float x, float z, bool whole_chunk)
 {
-  setChanged(x, z);
   const size_t newX = x / TILESIZE;
   const size_t newZ = z / TILESIZE;
 
@@ -1887,6 +1887,8 @@ void World::removeHole (float x, float z, bool whole_chunk)
             MapChunk* chunk = mTiles[j][i].tile->getChunk( ty, tx );
             if( chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z )
             {
+              setChanged(x, z);
+
               if (whole_chunk)
               {
                 chunk->remove_all_holes();
