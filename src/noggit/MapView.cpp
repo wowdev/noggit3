@@ -1304,7 +1304,7 @@ namespace noggit
   }
   void MapView::decrease_time_speed()
   {
-    mTimespeed -= time_speed_step_length;
+    mTimespeed = std::max (qreal (0), mTimespeed - time_speed_step_length);
   }
 
   void MapView::toggle_terrain_texturing_mode()
