@@ -10,7 +10,7 @@ class Alphamap
 {
 public:
 	Alphamap();
-	Alphamap(MPQFile* f, unsigned int & flags, bool mBigAlpha);
+	Alphamap(MPQFile* f, unsigned int & flags, bool mBigAlpha, bool doNotFixAlpha);
 	~Alphamap();
 
 	void loadTexture();
@@ -27,7 +27,7 @@ public:
 private:
 	void readCompressed(MPQFile *f);
 	void readBigAlpha(MPQFile *f);
-	void readNotCompressed(MPQFile *f);
+	void readNotCompressed(MPQFile *f, bool doNotFixAlpha);
 
 	void createNew();
 

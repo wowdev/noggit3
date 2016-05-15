@@ -8,7 +8,7 @@ Alphamap::Alphamap()
   genTexture();
 }
 
-Alphamap::Alphamap(MPQFile *f, unsigned int &flags, bool mBigAlpha)
+Alphamap::Alphamap(MPQFile *f, unsigned int &flags, bool mBigAlpha, bool doNotFixAlpha)
   : map(0)
 {
   createNew();
@@ -19,7 +19,7 @@ Alphamap::Alphamap(MPQFile *f, unsigned int &flags, bool mBigAlpha)
   else if(mBigAlpha)
     readBigAlpha(f);
   else
-    readNotCompressed(f);
+    readNotCompressed(f, doNotFixAlpha);
 
   genTexture();
 }
@@ -32,67 +32,61 @@ Alphamap::~Alphamap()
 void Alphamap::readCompressed(MPQFile *f)
 {
   // compressed
-  // 21-10-2008 by Flow
-  unsigned offI = 0; //offset IN buffer
-  unsigned offO = 0; //offset OUT buffer
-  char* buffIn = f->getPointer(); // pointer to data in adt file
+  char* input = f->getPointer();
 
-  while( offO < 4096 )
+  for (std::size_t offset_output(0); offset_output < 4096;)
   {
-    // fill or copy mode
-	  bool fill = (buffIn[offI] & 0x80) != 0;
-    unsigned n = buffIn[offI] & 0x7F;
-    offI++;
-    for( unsigned k = 0; k < n; ++k )
+    bool const fill(*input & 0x80);
+    std::size_t const n(*input & 0x7F);
+    ++input;
+
+    if (fill)
     {
-      if (offO == 4096) break;
-      amap[offO] = buffIn[offI];
-      offO++;
-      if( !fill )
-        offI++;
+      memset(&amap[offset_output], *input, n);
+      ++input;
     }
-    if( fill ) offI++;
+    else
+    {
+      memcpy(&amap[offset_output], input, n);
+      input += n;
+    }
+
+    offset_output += n;
   }
 }
 
 void Alphamap::readBigAlpha(MPQFile *f)
 {
-  // not compressed
-  unsigned char *p;
-  char *abuf = f->getPointer();
-  p = amap;
-  for (int j=0; j<64; ++j) {
-    for (int i=0; i<64; ++i) {
-      *p++ = *abuf++;
-    }
-
-  }
-  memcpy(amap+63*64,amap+62*64,64);
+  memcpy(amap, f->getPointer(), 64 * 64);
   f->seekRelative(0x1000);
 }
 
-void Alphamap::readNotCompressed(MPQFile *f)
+void Alphamap::readNotCompressed(MPQFile *f, bool doNotFixAlpha)
 {
   // not compressed
   unsigned char *p;
   char *abuf = f->getPointer();
   p = amap;
-  for (int j=0; j<63; ++j) {
-    for (int i=0; i<32; ++i) {
-      unsigned char c = *abuf++;
-      *p++ = static_cast<unsigned char>((255*(static_cast<int>(c & 0x0f)))/0x0f);
-      if(i != 31)
-      {
-        *p++ = static_cast<unsigned char>((255*(static_cast<int>(c & 0xf0)))/0xf0);
-      }
-      else
-      {
-        *p++ = static_cast<unsigned char>((255*(static_cast<int>(c & 0x0f)))/0x0f);
-      }
-    }
 
+  for (std::size_t x(0); x < 64; ++x)
+  {
+    for (std::size_t y(0); y < 64; y += 2)
+    {
+      amap[x * 64 + y + 0] = ((*abuf & 0x0f) << 4) | 0xf;
+      amap[x * 64 + y + 1] = ((*abuf & 0xf0) << 0) | 0xf;
+      ++abuf;
+    }
   }
-  memcpy(amap+63*64,amap+62*64,64);
+
+  if (doNotFixAlpha)
+  {
+    for (std::size_t i(0); i < 64; ++i)
+    {
+      amap[i * 64 + 63] = amap[i * 64 + 62];
+      amap[63 * 64 + i] = amap[62 * 64 + i];
+    }
+    amap[63 * 64 + 63] = amap[62 * 64 + 62];
+  }
   f->seekRelative(0x800);
 }
 
