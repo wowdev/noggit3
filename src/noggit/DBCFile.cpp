@@ -9,62 +9,32 @@
 
 DBCFile::DBCFile (const QString& filename)
   : _filename (filename)
-  , f (NULL)
-  , recordSize (0)
-  , recordCount (0)
-  , fieldCount (0)
-  , stringSize (0)
-  , data (NULL)
-  , stringTable (NULL)
-  , headerData (NULL)
-{
-}
+{}
 
 void DBCFile::open()
 {
-  f = new noggit::mpq::file (_filename);
+  noggit::mpq::file file (_filename);
   LogDebug << "Opening DBC " << qPrintable (_filename) << std::endl;
-  headerData = new unsigned char[sizeof (header)];
-  f->read (headerData, sizeof (header));
-  memcpy (&header, headerData, sizeof(header));
+  file.read (&header, sizeof (header));
 
   //! \note Yup, in these files, they store the magic as string, not uint32_t.
   assert (header.magic == 'CBDW');
-  assert (fieldCount * 4 == recordSize);
+  assert (header.fieldCount * 4 == header.recordSize);
 
-  recordCount = header.recordCount;
-  fieldCount = header.fieldCount;
-  recordSize = header.recordSize;
-  stringSize = header.stringSize;
-
-  data = new unsigned char[recordSize * recordCount];
-  stringTable = new unsigned char[stringSize];
-  f->read (data, recordSize * recordCount);
-  f->read (stringTable, stringSize);
+  data.resize (header.recordSize * header.recordCount);
+  stringTable.resize (header.stringSize);
+  file.read (data.data(), data.size());
+  file.read (stringTable.data(), stringTable.size());
 }
 
 void DBCFile::saveToProjectPath()
 {
-  //sizeof(header)+recordSize*recordCount+stringSize
+  std::vector<char> buffer (sizeof(header) + header.recordSize * header.recordCount + stringTable.size());
+  memcpy (buffer.data(), &header, sizeof(header));
+  memcpy (buffer.data() + sizeof(header), data.data(), header.recordSize * header.recordCount);
+  memcpy (buffer.data() + sizeof(header) + header.recordSize * header.recordCount, stringTable.data(), stringTable.size());
 
-  char buffer[50000];//WRONG: Use extendeble array like in ADT save.
-  memcpy (buffer, headerData, sizeof(header));
-  memcpy (buffer + sizeof(header), data,recordSize * recordCount);
-  memcpy (buffer + sizeof(header) + recordSize * recordCount, stringTable, stringSize);
-  f->setBuffer (buffer, sizeof(buffer));
-  f->save_to_disk();
+  noggit::mpq::file file (_filename);
+  file.setBuffer (buffer.data(), buffer.size());
+  file.save_to_disk();
 }
-
-DBCFile::~DBCFile()
-{
-  delete f;
-  f = NULL;
-
-  delete[] data;
-  data = NULL;
-
-  delete[] stringTable;
-  stringTable = NULL;
-}
-
-

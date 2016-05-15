@@ -11,6 +11,7 @@
 #include <QString>
 #include <stdio.h>
 #include <stdint.h>
+#include <vector>
 
 #include <noggit/mpq/file.h>
 
@@ -27,7 +28,6 @@ class DBCFile
 {
 public:
   explicit DBCFile(const QString& filename);
-  virtual ~DBCFile();
 
   // Open database. It must be openened before it can be used.
   void open();
@@ -59,7 +59,7 @@ public:
   public:
     void setData(size_t field, unsigned char* value) const
     {
-        assert (field < file.fieldCount);
+        assert (field < file.header.fieldCount);
         memset (offset + field * 4, 0, 4);
         unsigned char* fp = value;
         unsigned char* op = offset + field * 4;
@@ -86,38 +86,38 @@ public:
 
     const float& getFloat(size_t field) const
     {
-      assert(field < file.fieldCount);
+      assert(field < file.header.fieldCount);
       return *reinterpret_cast<float*>(offset + field * 4);
   }
 
     const unsigned int& getUInt(size_t field) const
     {
-      assert(field < file.fieldCount);
+      assert(field < file.header.fieldCount);
       return *reinterpret_cast<unsigned int*>(offset + field * 4);
     }
 
     const int& getInt(size_t field) const
     {
-      assert(field < file.fieldCount);
+      assert(field < file.header.fieldCount);
       return *reinterpret_cast<int*>(offset + field * 4);
     }
 
     const char* getString(size_t field) const
     {
-      return reinterpret_cast<char*>(file.stringTable + getStringOffset(field));
+      return file.stringTable.data() + getStringOffset(field);
     }
 
     size_t getStringOffset(size_t field) const
     {
-      assert(field < file.fieldCount);
+      assert(field < file.header.fieldCount);
       size_t stringOffset = getUInt(field);
-      assert(stringOffset < file.stringSize);
+      assert(stringOffset < file.header.stringSize);
       return stringOffset;
     }
 
     const char *getLocalizedString(size_t field, int locale = -1) const
     {
-      return reinterpret_cast<char*>(file.stringTable + getLocalizedStringOffset(field, locale));
+      return file.stringTable.data() + getLocalizedStringOffset(field, locale);
     }
 
     size_t getLocalizedStringOffset(size_t field, int locale = -1) const
@@ -126,15 +126,15 @@ public:
       if(locale == -1)
         loc = getLocale(field);
 
-      assert (field + loc < file.fieldCount);
+      assert (field + loc < file.header.fieldCount);
       size_t stringOffset = getUInt(field + loc);
-      assert (stringOffset < file.stringSize);
+      assert (stringOffset < file.header.stringSize);
       return stringOffset;
     }
 
     int getLocale(size_t field) const
     {
-      assert (field < file.fieldCount - 8);
+      assert (field < file.header.fieldCount - 8);
       for(int loc = 0; loc < 9; loc++)
       {
         size_t stringOffset = getUInt(field + loc);
@@ -164,7 +164,7 @@ public:
     /// Advance (prefix only)
     Iterator & operator++()
     {
-      record.offset += record.file.recordSize;
+      record.offset += record.file.header.recordSize;
       return *this;
     }
 
@@ -192,23 +192,20 @@ public:
 
   inline Record getRecord(size_t id)
   {
-    //  assert(data);
-    return Record(*this, data + id * recordSize);
+    return Record(*this, data.data() + id * header.recordSize);
   }
 
   inline Iterator begin()
   {
-    //  assert(data);
-    return Iterator(*this, data);
+    return Iterator(*this, data.data());
   }
   inline Iterator end()
   {
-    //  assert(data);
-    return Iterator(*this, data + recordCount * recordSize);
+    return Iterator(*this, data.data() + header.recordCount * header.recordSize);
   }
   /// Trivial
-  inline size_t getRecordCount() const { return recordCount;}
-  inline size_t getFieldCount() const { return fieldCount; }
+  inline size_t getRecordCount() const { return header.recordCount;}
+  inline size_t getFieldCount() const { return header.fieldCount; }
 
   inline Record getByID(unsigned int id, size_t field = 0)
   {
@@ -222,15 +219,9 @@ public:
 
 private:
   QString _filename;
-  noggit::mpq::file* f;
   dbc_header header;
-  size_t recordSize;
-  size_t recordCount;
-  size_t fieldCount;
-  size_t stringSize;
-  unsigned char* data;
-  unsigned char* stringTable;
-  unsigned char* headerData;
+  std::vector<unsigned char> data;
+  std::vector<char> stringTable;
 };
 
 #endif
