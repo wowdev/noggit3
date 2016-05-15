@@ -55,11 +55,11 @@ namespace opengl
         _was_enabled = (glIsEnabled (GL_TEXTURE_2D) == GL_TRUE);
         if (value == GL_TRUE)
         {
-          glEnable (GL_TEXTURE_2D);
+          texture::enable_texture();
         }
         else
         {
-          glDisable (GL_TEXTURE_2D);
+          texture::disable_texture();
         }
       }
 
@@ -68,11 +68,11 @@ namespace opengl
         texture::set_active_texture (texture_number);
         if (_was_enabled == GL_TRUE)
         {
-          glEnable (GL_TEXTURE_2D);
+          texture::enable_texture();
         }
         else
         {
-          glDisable (GL_TEXTURE_2D);
+          texture::disable_texture();
         }
       }
 
