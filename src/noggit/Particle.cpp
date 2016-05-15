@@ -44,21 +44,40 @@ T lifeRamp (float life, float mid, const T& a, const T& b, const T& c)
   }
 }
 
-
-void ParticleSystem::init(const noggit::mpq::file& f, const ModelParticleEmitterDef &mta, int *globals)
+ParticleSystem::ParticleSystem(Model* model_, const noggit::mpq::file& f, const ModelParticleEmitterDef &mta, int *globals)
+  : model (model_)
+  , emitter ( mta.EmitterType == 1 ? std::unique_ptr<ParticleEmitter> (new PlaneParticleEmitter (this))
+            : mta.EmitterType == 2 ? std::unique_ptr<ParticleEmitter> (new SphereParticleEmitter (this))
+            : throw std::logic_error ("unimplemented emitter type")
+            )
+  , mid (0.5)
+  , rem(0)
+  , blend (mta.blend)
+  , order (mta.ParticleType > 0 ? -1 : 0)
+  , type (mta.ParticleType)
+  , manim (0)
+  , mtime (0)
+  , rows (mta.rows)
+  , cols (mta.cols)
+  , parent (&model->bones[mta.bone])
+  , slowdown (mta.p.slowdown)
+  , rotation (mta.p.rotation)
+  , tofs (::math::random::floating_point (0.0f, 1.0f))
+  , speed (mta.EmissionSpeed, f, globals)
+  , variation (mta.SpeedVariation, f, globals)
+  , spread (mta.VerticalRange, f, globals)
+  , lat (mta.HorizontalRange, f, globals)
+  , gravity (mta.Gravity, f, globals)
+  , deacceleration (mta.Gravity2, f, globals)
+  , lifespan (mta.Lifespan, f, globals)
+  , rate (mta.EmissionRate, f, globals)
+  , areal (mta.EmissionAreaLength, f, globals)
+  , areaw (mta.EmissionAreaWidth, f, globals)
+  , enabled (mta.en, f, globals)
+  , pos (fixCoordSystem(mta.pos))
+  , _texture (model->_textures[mta.texture])
+  , billboard (!(mta.flags & 4096))
 {
-  speed.init   (mta.EmissionSpeed, f, globals);
-  variation.init(mta.SpeedVariation, f, globals);
-  spread.init   (mta.VerticalRange, f, globals);
-  lat.init   (mta.HorizontalRange, f, globals);
-  gravity.init (mta.Gravity, f, globals);
-  lifespan.init(mta.Lifespan, f, globals);
-  rate.init   (mta.EmissionRate, f, globals);
-  areal.init   (mta.EmissionAreaLength, f, globals);
-  areaw.init   (mta.EmissionAreaWidth, f, globals);
-  deacceleration.init (mta.Gravity2, f, globals);
-  enabled.init (mta.en, f, globals);
-
   ::math::vector_3d colors2[3];
   memcpy(colors2, f.getBuffer()+mta.p.colors.ofsKeys, sizeof(::math::vector_3d)*3);
   for (size_t i=0; i<3; ++i) {
@@ -70,36 +89,8 @@ void ParticleSystem::init(const noggit::mpq::file& f, const ModelParticleEmitter
                                   );
     sizes[i] = (*reinterpret_cast<float*>(f.getBuffer()+mta.p.sizes.ofsKeys+i*4))*mta.p.scales[i];
   }
-  mid = 0.5;
-  slowdown = mta.p.slowdown;
-  rotation = mta.p.rotation;
-  pos = fixCoordSystem(mta.pos);
-  _texture = model->_textures[mta.texture];
-  blend = mta.blend;
-  rows = mta.rows;
-  cols = mta.cols;
-  type = mta.ParticleType;
-  //order = mta.s2;
-  order = mta.ParticleType>0 ? -1 : 0;
-  parent = model->bones + mta.bone;
-
-  switch (mta.EmitterType) {
-  case 1:
-    emitter = new PlaneParticleEmitter(this);
-    break;
-  case 2:
-    emitter = new SphereParticleEmitter(this);
-    break;
-  }
 
   //transform = mta.flags & 1024;
-
-  billboard = !(mta.flags & 4096);
-
-  manim = mtime = 0;
-  rem = 0;
-
-  tofs = ::math::random::floating_point (0.0f, 1.0f);
 
   // init tiles
   for (int i=0; i<rows*cols; ++i) {
@@ -851,32 +842,26 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
   return p;
 }
 
-void RibbonEmitter::init(const noggit::mpq::file &f, ModelRibbonEmitterDef &mta, int *globals)
-{
-  color.init(mta.color, f, globals);
-  opacity.init(mta.opacity, f, globals);
-  above.init(mta.above, f, globals);
-  below.init(mta.below, f, globals);
-
-  parent = model->bones + mta.bone;
-  uint32_t *texlist = reinterpret_cast<uint32_t*>(f.getBuffer() + mta.ofsTextures);
+RibbonEmitter::RibbonEmitter(Model* model_, const noggit::mpq::file &f, ModelRibbonEmitterDef &mta, int *globals)
+  : model (model_)
+  , color (mta.color, f, globals)
+  , opacity (mta.opacity, f, globals)
+  , above (mta.above, f, globals)
+  , below (mta.below, f, globals)
+  , parent (&model->bones[mta.bone])
   // just use the first texture for now; most models I've checked only had one
-  _texture = model->_textures[texlist[0]];
-
-  tpos = pos = fixCoordSystem(mta.pos);
-
+  , _texture (model->_textures[*reinterpret_cast<uint32_t*> (f.getBuffer() + mta.ofsTextures)])
+  , tpos (fixCoordSystem(mta.pos))
+  , pos (fixCoordSystem(mta.pos))
   //! \todo  figure out actual correct way to calculate length
   // in BFD, res is 60 and len is 0.6, the trails are very short (too long here)
   // in CoT, res and len are like 10 but the trails are supposed to be much longer (too short here)
-  numsegs = mta.res;
-  seglen = mta.length;
-  length = mta.res * seglen;
-
+  , numsegs (mta.res)
+  , seglen (mta.length)
+  , length (mta.res * seglen)
+{
   // create first segment
-  RibbonSegment rs;
-  rs.pos = tpos;
-  rs.len = 0;
-  segs.push_back(rs);
+  segs.emplace_back(tpos, 0);
 }
 
 void RibbonEmitter::setup(int anim, int time)
@@ -896,10 +881,8 @@ void RibbonEmitter::setup(int anim, int time)
     // add new segment
     first.back = (tpos-ntpos).normalize();
     first.len0 = first.len;
-    RibbonSegment newseg;
-    newseg.pos = ntpos;
+    RibbonSegment newseg (ntpos, dlen);
     newseg.up = ntup;
-    newseg.len = dlen;
     segs.push_front(newseg);
   } else {
     first.up = ntup;

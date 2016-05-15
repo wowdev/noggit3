@@ -28,13 +28,6 @@ Model::Model(const std::string& filename, bool _forceAnim)
   indices = NULL;
   anims = NULL;
   origVertices = NULL;
-  bones = NULL;
-  texanims = NULL;
-  colors = NULL;
-  transparency = NULL;
-  lights = NULL;
-  particleSystems = NULL;
-  ribbons = NULL;
 
   showGeosets = NULL;
 
@@ -57,13 +50,8 @@ void Model::finish_loading()
 
   globalSequences = 0;
   anim = 0;
-  colors = 0;
-  lights = 0;
-  transparency = 0;
-  particleSystems = 0;
   header.nParticleEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   header.nRibbonEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
-  ribbons = 0;
   if (header.nGlobalSequences)
   {
     globalSequences = new int[header.nGlobalSequences];
@@ -102,33 +90,17 @@ Model::~Model()
     // unload all sorts of crap
     //delete[] vertices;
     //delete[] normals;
-    if (colors)
-      delete[] colors;
-    if (transparency)
-      delete[] transparency;
     if(indices)
       delete[] indices;
     if(anims)
       delete[] anims;
     if(origVertices)
       delete[] origVertices;
-    if(bones)
-      delete[] bones;
     if (!animGeometry) {
       glDeleteBuffers(1, &nbuf);
     }
     glDeleteBuffers(1, &vbuf);
     glDeleteBuffers(1, &tbuf);
-
-    if (animTextures && texanims)
-      delete[] texanims;
-    if (lights)
-      delete[] lights;
-
-    if (particleSystems)
-      delete[] particleSystems;
-    if (ribbons)
-      delete[] ribbons;
   } else {
     glDeleteLists(ModelDrawList, 1);
   }
@@ -288,16 +260,20 @@ void Model::initCommon(const noggit::mpq::file& f)
 
   // init colors
   if (header.nColors) {
-    colors = new ModelColor[header.nColors];
     ModelColorDef *colorDefs = reinterpret_cast<ModelColorDef*>(f.getBuffer() + header.ofsColors);
-    for (size_t i=0; i<header.nColors; ++i) colors[i].init(f, colorDefs[i], globalSequences);
+    for (size_t i=0; i<header.nColors; ++i)
+    {
+      colors.emplace_back (f, colorDefs[i], globalSequences);
+    }
   }
   // init transparency
   int16_t *transLookup = reinterpret_cast<int16_t*>(f.getBuffer() + header.ofsTransparencyLookup);
   if (header.nTransparency) {
-    transparency = new ModelTransparency[header.nTransparency];
     ModelTransDef *trDefs = reinterpret_cast<ModelTransDef*>(f.getBuffer() + header.ofsTransparency);
-    for (size_t i=0; i<header.nTransparency; ++i) transparency[i].init(f, trDefs[i], globalSequences);
+    for (size_t i=0; i<header.nTransparency; ++i)
+    {
+      transparency.emplace_back (f, trDefs[i], globalSequences);
+    }
   }
 
 
@@ -442,10 +418,8 @@ void Model::initStatic( const noggit::mpq::file& f )
     delete[] normals;
   if( indices )
     delete[] indices;
-  if( colors )
-    delete[] colors;
-  if( transparency )
-    delete[] transparency;
+  colors.clear();
+  transparency.clear();
 }
 
 void Model::initAnimated(const noggit::mpq::file& f)
@@ -490,10 +464,9 @@ void Model::initAnimated(const noggit::mpq::file& f)
 
   if (animBones) {
     // init bones...
-    bones = new Bone[header.nBones];
     ModelBoneDef *mb = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
     for (size_t i=0; i<header.nBones; ++i) {
-      bones[i].init(f, mb[i], globalSequences, animfiles);
+      bones.emplace_back (f, mb[i], globalSequences, animfiles);
     }
   }
 
@@ -514,45 +487,39 @@ void Model::initAnimated(const noggit::mpq::file& f)
   delete[] texcoords;
 
   if (animTextures) {
-    texanims = new TextureAnim[header.nTexAnims];
     ModelTexAnimDef *ta = reinterpret_cast<ModelTexAnimDef*>(f.getBuffer() + header.ofsTexAnims);
     for (size_t i=0; i<header.nTexAnims; ++i) {
-      texanims[i].init(f, ta[i], globalSequences);
+      texanims.emplace_back (f, ta[i], globalSequences);
     }
   }
 
   // particle systems
   if (header.nParticleEmitters) {
     ModelParticleEmitterDef *pdefs = reinterpret_cast<ModelParticleEmitterDef*>(f.getBuffer() + header.ofsParticleEmitters);
-    particleSystems = new ParticleSystem[header.nParticleEmitters];
     for (size_t i=0; i<header.nParticleEmitters; ++i) {
-      particleSystems[i].model = this;
-      particleSystems[i].init(f, pdefs[i], globalSequences);
+      particleSystems.emplace_back (this, f, pdefs[i], globalSequences);
     }
   }
 
   // ribbons
   if (header.nRibbonEmitters) {
     ModelRibbonEmitterDef *rdefs = reinterpret_cast<ModelRibbonEmitterDef*>(f.getBuffer() + header.ofsRibbonEmitters);
-    ribbons = new RibbonEmitter[header.nRibbonEmitters];
     for (size_t i=0; i<header.nRibbonEmitters; ++i) {
-      ribbons[i].model = this;
-      ribbons[i].init(f, rdefs[i], globalSequences);
+      ribbons.emplace_back (this, f, rdefs[i], globalSequences);
     }
   }
 
   // just use the first camera, meh
   if (header.nCameras>0) {
     ModelCameraDef *camDefs = reinterpret_cast<ModelCameraDef*>(f.getBuffer() + header.ofsCameras);
-    cam.init(f, camDefs[0], globalSequences);
+    cam = ModelCamera (f, camDefs[0], globalSequences);
   }
 
   // init lights
   if (header.nLights) {
-    lights = new ModelLight[header.nLights];
     ModelLightDef *lDefs = reinterpret_cast<ModelLightDef*>(f.getBuffer() + header.ofsLights);
     for (size_t i=0; i<header.nLights; ++i)
-      lights[i].init(f, lDefs[i], globalSequences);
+      lights.emplace_back (f, lDefs[i], globalSequences);
   }
 
   animcalc = false;
@@ -565,7 +532,7 @@ void Model::calcBones(int _anim, int time)
   }
 
   for (size_t i=0; i<header.nBones; ++i) {
-    bones[i].calcMatrix(bones, _anim, time);
+    bones[i].calcMatrix(bones.data(), _anim, time);
   }
 }
 
@@ -1010,27 +977,22 @@ void TextureAnim::setup(int anim)
   }
 }
 
-void ModelCamera::init(const noggit::mpq::file& f, const ModelCameraDef &mcd, int *global)
+ModelCamera::ModelCamera(const noggit::mpq::file& f, const ModelCameraDef &mcd, int *global)
+  : nearclip (mcd.nearclip)
+  , farclip (mcd.farclip)
+  , fov (mcd.fov)
+  , pos (fixCoordSystem(mcd.pos))
+  , target (fixCoordSystem(mcd.target))
+  , tPos (mcd.transPos, f, global)
+  , tTarget (mcd.transTarget, f, global)
+  , rot (mcd.rot, f, global)
 {
-  ok = true;
-    nearclip = mcd.nearclip;
-  farclip = mcd.farclip;
-  fov = mcd.fov;
-  pos = fixCoordSystem(mcd.pos);
-  target = fixCoordSystem(mcd.target);
-  tPos.init(mcd.transPos, f, global);
-  tTarget.init(mcd.transTarget, f, global);
-  rot.init(mcd.rot, f, global);
   tPos.apply(fixCoordSystem);
   tTarget.apply(fixCoordSystem);
 }
 
 void ModelCamera::setup( int time )
 {
-  if( !ok )
-  {
-    return;
-  }
   //! \todo This really needs to be done differently.
 /*
   video.fov( fov * 34.5f );
@@ -1045,28 +1007,27 @@ void ModelCamera::setup( int time )
   */
 }
 
-void ModelColor::init(const noggit::mpq::file& f, const ModelColorDef &mcd, int *global)
-{
-  color.init(mcd.color, f, global);
-  opacity.init(mcd.opacity, f, global);
-}
+ModelColor::ModelColor(const noggit::mpq::file& f, const ModelColorDef &mcd, int *global)
+  : color(mcd.color, f, global)
+  , opacity(mcd.opacity, f, global)
+{}
 
-void ModelTransparency::init(const noggit::mpq::file& f, const ModelTransDef &mcd, int *global)
-{
-  trans.init(mcd.trans, f, global);
-}
+ModelTransparency::ModelTransparency(const noggit::mpq::file& f, const ModelTransDef &mcd, int *global)
+  : trans(mcd.trans, f, global)
+{}
 
-void ModelLight::init(const noggit::mpq::file& f, const ModelLightDef &mld, int *global)
-{
-  tpos = pos = fixCoordSystem(mld.pos);
-  tdir = dir = ::math::vector_3d(0,1,0); // no idea
-  type = mld.type;
-  parent = mld.bone;
-  ambColor.init(mld.ambColor, f, global);
-  ambIntensity.init(mld.ambIntensity, f, global);
-  diffColor.init(mld.color, f, global);
-  diffIntensity.init(mld.intensity, f, global);
-}
+ModelLight::ModelLight(const noggit::mpq::file& f, const ModelLightDef &mld, int *global)
+  : tpos (fixCoordSystem(mld.pos))
+  , pos (fixCoordSystem(mld.pos))
+  , tdir (::math::vector_3d(0,1,0)) // obviously wrong
+  , dir (::math::vector_3d(0,1,0))
+  , type (mld.type)
+  , parent (mld.bone)
+  , ambColor (mld.ambColor, f, global)
+  , ambIntensity (mld.ambIntensity, f, global)
+  , diffColor (mld.color, f, global)
+  , diffIntensity (mld.intensity, f, global)
+{}
 
 void ModelLight::setup(int time, opengl::light l)
 {
@@ -1096,25 +1057,24 @@ void ModelLight::setup(int time, opengl::light l)
   glEnable(l);
 }
 
-void TextureAnim::init(const noggit::mpq::file& f, const ModelTexAnimDef &mta, int *global)
-{
-  trans.init(mta.trans, f, global);
-  rot.init(mta.rot, f, global);
-  scale.init(mta.scale, f, global);
-}
+TextureAnim::TextureAnim(const noggit::mpq::file& f, const ModelTexAnimDef &mta, int *global)
+  : trans (mta.trans, f, global)
+  , rot (mta.rot, f, global)
+  , scale (mta.scale, f, global)
+{}
 
-void Bone::init(const noggit::mpq::file& f, const ModelBoneDef &b, int *global, noggit::mpq::file **animfiles)
+namespace
 {
-  parent = b.parent;
-  pivot = fixCoordSystem(b.pivot);
-
   static const int MODELBONE_BILLBOARD = 8;
-
-  billboard = (b.flags & MODELBONE_BILLBOARD) != 0;
-
-  trans.init(b.translation, f, global, animfiles);
-  rot.init(b.rotation, f, global, animfiles);
-  scale.init(b.scaling, f, global, animfiles);
+}
+Bone::Bone(const noggit::mpq::file& f, const ModelBoneDef &b, int *global, noggit::mpq::file **animfiles)
+  : parent (b.parent)
+  , pivot (fixCoordSystem (b.pivot))
+  , billboard (b.flags & MODELBONE_BILLBOARD)
+  , trans (b.translation, f, global, animfiles)
+  , rot (b.rotation, f, global, animfiles)
+  , scale (b.scaling, f, global, animfiles)
+{
   trans.apply(fixCoordSystem);
   rot.apply(fixCoordSystemQuat);
   scale.apply(fixCoordSystem2);

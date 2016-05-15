@@ -187,7 +187,7 @@ namespace Animation
     }
 
     //! \todo Use a vector of mpq::file& for the anim files instead for safety.
-    void init(const AnimationBlock& animationBlock, const noggit::mpq::file& file, int32_t* globalSequences, noggit::mpq::file** animfiles = NULL )
+    M2Value (const AnimationBlock& animationBlock, const noggit::mpq::file& file, int32_t* globalSequences, noggit::mpq::file** animfiles = NULL )
     {
       assert( animationBlock.nTimes == animationBlock.nKeys );
 
