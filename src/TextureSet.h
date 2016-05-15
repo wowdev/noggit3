@@ -20,7 +20,7 @@ public:
 	~TextureSet();
 
 	void initTextures(MPQFile* f, MapTile *maintile, uint32_t size);
-	void initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha);
+	void initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool doNotFixAlpha);
 
 	void start2DAnim(int id);
 	void stop2DAnim(int id);

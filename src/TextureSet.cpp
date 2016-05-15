@@ -44,7 +44,7 @@ void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
 	}
 }
 
-void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha)
+void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool doNotFixAlpha)
 {
 	unsigned int MCALbase = f->getPos();
 
@@ -58,7 +58,7 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha)
 		if (texFlags[layer] & 0x100)
 		{
 			f->seek(MCALbase + MCALoffset[layer]);
-			alphamaps[layer - 1] = new Alphamap(f, texFlags[layer], mBigAlpha);
+			alphamaps[layer - 1] = new Alphamap(f, texFlags[layer], mBigAlpha, doNotFixAlpha);
 		}
 	}
 }
