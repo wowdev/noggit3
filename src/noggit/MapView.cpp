@@ -743,6 +743,7 @@ namespace noggit
             {
               _world->addHole ( position.x()
                               , position.z()
+                              , position.y()
                               , _currently_holding_alt
                               );
             }

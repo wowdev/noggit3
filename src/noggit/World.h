@@ -147,7 +147,7 @@ public:
   bool paintTexture(float x, float z, const brush& Brush, float strength, float pressure, noggit::blp_texture* texture);
   void eraseTextures(float x, float z);
   void overwriteTextureAtCurrentChunk( float x, float z, noggit::blp_texture* oldTexture, noggit::blp_texture* newTexture);
-  void addHole (float x, float z, bool whole_chunk);
+  void addHole (float x, float z, float h, bool whole_chunk);
   void removeHole (float x, float z, bool whole_chunk);
 
   void addModel ( const nameEntry& entry

@@ -62,6 +62,7 @@ public:
   void drawLines (bool draw_hole_lines) const;
 
   float getHeight (int x, int z) const;
+  float getMinHeight() const;
 
   void drawTextures() const;
 
