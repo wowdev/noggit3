@@ -7,6 +7,7 @@
 #include <boost/optional.hpp>
 
 #include <vector>
+#include <memory>
 
 class MapTile;
 class Skies;

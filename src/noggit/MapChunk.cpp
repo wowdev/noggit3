@@ -823,6 +823,21 @@ float MapChunk::getHeight (int x, int z) const
   return mVertices[indexNoLoD(x, z)].y();
 }
 
+float MapChunk::getMinHeight() const
+{
+  float min = mVertices[indexNoLoD(0, 0)].y();
+
+  for (int j = 0; j < 9; ++j)
+  {
+    for (int i = 0; i < 9; ++i)
+    {
+      min = std::fmin(mVertices[indexNoLoD(i, j)].y(), min);
+    }
+  }
+  
+	return min;
+}
+
 void MapChunk::drawPass (int anim) const
 {
   const mcly_flags_type& flags (mcly_flags_type::interpret (anim));
