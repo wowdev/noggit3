@@ -16,7 +16,7 @@ namespace noggit
       setWindowTitle (tr ("Help"));
       resize (800, 800);
 
-      #define __(key, action) "<li><span class='key'>" \
+      #define entry(key, action) "<li><span class='key'>" \
                             % trUtf8 (key) \
                             % ": </span><span class='action'>" \
                             % trUtf8 (action) \
@@ -53,60 +53,60 @@ namespace noggit
               %         tr ("Basic controls")
               %        "</h2>"
               %        "<ul>"
-              %         __ ("Right mouse dragged", "Rotate camera")
-              %         __ ("Left mouse", "Select chunk or object")
-              %         __ ("Both mouse buttons", "Move forward")
-              %         __ ("I", "Invert mouse y-axis")
-              %         __ ("Q, E", "Move vertically, up and down")
-              %         __ ("A, D, W, S", "Move left, right, up, down")
-              %         __ ("M", "Show minimap")
-              %         __ ("U", "2D texture editor")
+              %         entry ("Right mouse dragged", "Rotate camera")
+              %         entry ("Left mouse", "Select chunk or object")
+              %         entry ("Both mouse buttons", "Move forward")
+              %         entry ("I", "Invert mouse y-axis")
+              %         entry ("Q, E", "Move vertically, up and down")
+              %         entry ("A, D, W, S", "Move left, right, up, down")
+              %         entry ("M", "Show minimap")
+              %         entry ("U", "2D texture editor")
               //! \todo: C chunk settings must get fixed first. Then turn on this again
-              //      %         __ ("C", "Chunk settings")
-              %         __ ("C", "Switch cursor")
-              %         __ ("Alt + C", "Show cursor switcher")
-              %         __ ("H", "Help")
-              %         __ ("Shift + R", "Turn camera 180°")
-              %         __ ("Shift + F4", "Toggle automatic selection")
+              //      %         entry ("C", "Chunk settings")
+              %         entry ("C", "Switch cursor")
+              %         entry ("Alt + C", "Show cursor switcher")
+              %         entry ("H", "Help")
+              %         entry ("Shift + R", "Turn camera 180°")
+              %         entry ("Shift + F4", "Toggle automatic selection")
               %        "</ul>"
               %        "<h2>"
               %         tr ("Toggles")
               %        "</h2>"
               %        "<ul>"
-              %         __ ("F1", "Models (M2s)")
-              %         __ ("F2", "Models in WMOs (doodad sets)")
-              %         __ ("F3", "Terrain")
+              %         entry ("F1", "Models (M2s)")
+              %         entry ("F2", "Models in WMOs (doodad sets)")
+              %         entry ("F3", "Terrain")
               //! \todo This is NOT GUI. I bet.
-              %         __ ("F4", "GUI")
-              %         __ ("F6", "WMOs")
-              %         __ ("F7", "Lines around chunks(red) and ADTs (green)")
-              %         __ ("F8", "Detailed informations")
-              %         __ ("F9", "Height contours")
-              %         __ ("F", "Fog")
-              %         __ ("Tab", "UI")
-              %         __ ("X", "Texture palette in paint-mode")
-              %         __ ("Ctrl + X", "Detail window")
-              %         __ ("R, T", "Editing mode")
+              %         entry ("F4", "GUI")
+              %         entry ("F6", "WMOs")
+              %         entry ("F7", "Lines around chunks(red) and ADTs (green)")
+              %         entry ("F8", "Detailed informations")
+              %         entry ("F9", "Height contours")
+              %         entry ("F", "Fog")
+              %         entry ("Tab", "UI")
+              %         entry ("X", "Texture palette in paint-mode")
+              %         entry ("Ctrl + X", "Detail window")
+              %         entry ("R, T", "Editing mode")
               %        "</ul>"
               %         "<h2>"
               %         tr ("Files")
               %        "</h2>"
               %        "<ul>"
-              %         __ ("F5", "Save bookmark")
-              %         __ ("F10", "Reload textures (BLP)")
-              %         __ ("F11", "Reload models (M2)")
-              %         __ ("F12", "Reload objects (WMO)")
-              %         __ ("Shift + J", "Reload current ADT")
-              %         __ ("Ctrl + S", "Save all changed ADTs")
-              %         __ ("Ctrl + Shift + S", "Save the current ADT")
+              %         entry ("F5", "Save bookmark")
+              %         entry ("F10", "Reload textures (BLP)")
+              %         entry ("F11", "Reload models (M2)")
+              %         entry ("F12", "Reload objects (WMO)")
+              %         entry ("Shift + J", "Reload current ADT")
+              %         entry ("Ctrl + S", "Save all changed ADTs")
+              %         entry ("Ctrl + Shift + S", "Save the current ADT")
               %        "</ul>"
               %        "<h2>"
               %         tr ("Adjust")
               %        "</h2>"
               %        "<ul>"
-              %         __ ("O, P", "Decrease, increase movement speed")
-              %         __ ("B, N", "Decrease, increase animation speed")
-              %         __ ("Shift + -, Shift + +", "Decrease, increase fog distance")
+              %         entry ("O, P", "Decrease, increase movement speed")
+              %         entry ("B, N", "Decrease, increase animation speed")
+              %         entry ("Shift + -, Shift + +", "Decrease, increase fog distance")
               %        "</ul>"
               %       "</div>"
               %      "</td>"
@@ -116,10 +116,10 @@ namespace noggit
               %         "Edit ground"
               %        "</h2>"
               %        "<ul>"
-              %         __ ("SHIFT + F1", "Toggle ground edit mode")
-              %         __ ("T", "Change terrain mode")
-              %         __ ("Y", "Changes brush type")
-              %         __ ("ALT + Left mouse + Mouse move", "Change brush size")
+              %         entry ("SHIFT + F1", "Toggle ground edit mode")
+              %         entry ("T", "Change terrain mode")
+              %         entry ("Y", "Changes brush type")
+              %         entry ("ALT + Left mouse + Mouse move", "Change brush size")
               %        "</ul> "
               +        QString ("<h2>")
               %         "Terrain Mode"
@@ -128,66 +128,66 @@ namespace noggit
               %         "Raise / Lower"
               %        "</h3>"
               %        "<ul>"
-              %         __ ("SHIFT + Left mouse", "Raise terrain")
-              %         __ ("ALT + Left mouse", "Lower terrain")
+              %         entry ("SHIFT + Left mouse", "Raise terrain")
+              %         entry ("ALT + Left mouse", "Lower terrain")
               %        "</ul>"
               %        "<h3>"
               %         "Flatten / Blur"
               %        "</h3>"
               %        "<ul>"
-              %         __ ("SHIFT + Left mouse", "Flatten terrain")
-              %         __ ("ALT + Left mouse", "Blur terrain")
-              %         __ ("Z", "Change the mode in the option window")
+              %         entry ("SHIFT + Left mouse", "Flatten terrain")
+              %         entry ("ALT + Left mouse", "Blur terrain")
+              %         entry ("Z", "Change the mode in the option window")
               %        "</ul>"
               %        "<br>"
               %        "<h2>"
               %         "Edit objects if a model is selected with left click"
               %        "</h2>"
               %        "<ul>"
-              %         __ ("Hold middle mouse", "Move object")
-              %         __ ("ALT + Hold middle mouse", "Scale M2")
-              %         __ ("SHIFT / CTRL / ALT + Hold left mouse", "Rotate object")
-              %         __ ("0 - 9", "Change doodads set of selected WMO")
-              %         __ ("CTRL + R", "Reset rotation")
-              %         __ ("PageDown", "Set object to Groundlevel")
-              %         __ ("CTRL + C", "Copy object to clipboard")
-              %         __ ("CTRL + V", "Paste object on mouse position")
-              %         __ ("- / +", "Scale M2")
-              %         __ ("Numpad 7 / 9", "rotate object")
-              %         __ ("Numpad 4 / 8 / 6 / 2", "Vertical position")
-              %         __ ("Numpad 1 / 3", "Move up/dow")
-              %         __ ("  holding SHIFT", "Double speed")
-              %         __ ("  holding CTRL", "Triple speed")
-              %         __ ("  holding SHIFT and CTRL together", "Half speed")
+              %         entry ("Hold middle mouse", "Move object")
+              %         entry ("ALT + Hold middle mouse", "Scale M2")
+              %         entry ("SHIFT / CTRL / ALT + Hold left mouse", "Rotate object")
+              %         entry ("0 - 9", "Change doodads set of selected WMO")
+              %         entry ("CTRL + R", "Reset rotation")
+              %         entry ("PageDown", "Set object to Groundlevel")
+              %         entry ("CTRL + C", "Copy object to clipboard")
+              %         entry ("CTRL + V", "Paste object on mouse position")
+              %         entry ("- / +", "Scale M2")
+              %         entry ("Numpad 7 / 9", "rotate object")
+              %         entry ("Numpad 4 / 8 / 6 / 2", "Vertical position")
+              %         entry ("Numpad 1 / 3", "Move up/dow")
+              %         entry ("  holding SHIFT", "Double speed")
+              %         entry ("  holding CTRL", "Triple speed")
+              %         entry ("  holding SHIFT and CTRL together", "Half speed")
               %        "</ul>"
               %        "<h2>"
               %         "Edit texture"
               %        "</h2>"
               %        "<ul>"
-              %         __ ("CTRL + SHIFT + Left mouse", "Clear all textures on chunk")
-              %         __ ("CTRL + Left mouse", "Draw texture or fills if chunk is empty")
+              %         entry ("CTRL + SHIFT + Left mouse", "Clear all textures on chunk")
+              %         entry ("CTRL + Left mouse", "Draw texture or fills if chunk is empty")
               %        "</ul>"
               %        "<h2>"
               %         "Holes"
               %        "</h2>"
               %        "<ul>"
-              %         __ ("SHIFT + Left mouse", "Add texture")
-              %         __ ("CTRL + Left mouse", "Remove texture")
+              %         entry ("SHIFT + Left mouse", "Add texture")
+              %         entry ("CTRL + Left mouse", "Remove texture")
               %        "</ul>"
               %        "<h2>"
               %         "AreaID"
               %        "</h2>"
               %        "<ul>"
-              %         __ ("X", "Show browser with existing AreaID in AreaTable.dbc, click show sub-zones")
-              %         __ ("CTRL + Left mouse", "Pick existing AreaID")
-              %         __ ("SHIFT + Left mouse", "Paint selected AreaID")
+              %         entry ("X", "Show browser with existing AreaID in AreaTable.dbc, click show sub-zones")
+              %         entry ("CTRL + Left mouse", "Pick existing AreaID")
+              %         entry ("SHIFT + Left mouse", "Paint selected AreaID")
               %        "</ul>"
               %        "<h2>"
               %         "Impassible Flags"
               %        "</h2>"
               %        "<ul>"
-              %         __ ("SHIFT + Left mouse", "Paint flag")
-              %         __ ("CTRL + Left mouse", "Clear flag")
+              %         entry ("SHIFT + Left mouse", "Paint flag")
+              %         entry ("CTRL + Left mouse", "Clear flag")
               %        "</ul>"
               %       "</div>"
               %       "<br class='clear'"
@@ -199,7 +199,7 @@ namespace noggit
               % "</body>"
               % "</html>"
               );
-      #undef __
+      #undef entry
     }
   }
 }
