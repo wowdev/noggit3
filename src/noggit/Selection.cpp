@@ -186,7 +186,7 @@ namespace noggit
           : _world_link (world_link)
         {}
 
-        void operator() (const selected_chunk_type&) const
+        [[noreturn]] void operator() (const selected_chunk_type&) const
         {
           throw std::runtime_error ("Can't delete chunks as of now.");
         }
@@ -206,7 +206,7 @@ namespace noggit
       class reset_rotation : public boost::static_visitor<>
       {
       public:
-        void operator() (const selected_chunk_type&) const
+        [[noreturn]] void operator() (const selected_chunk_type&) const
         {
           throw std::runtime_error ("Can't reset rotation chunks.");
         }
@@ -229,7 +229,7 @@ namespace noggit
           return chunk.second;
         }
         template<typename T>
-        int operator() (const T&) const
+          [[noreturn]] int operator() (const T&) const
         {
           throw std::runtime_error ("Only chunks have a selected polygon.");
         }
@@ -243,7 +243,7 @@ namespace noggit
           return chunk.first->header.areaid;
         }
         template<typename T>
-        int operator() (const T&) const
+          [[noreturn]] int operator() (const T&) const
         {
           throw std::runtime_error ("Only chunks have an area id.");
         }
@@ -258,7 +258,7 @@ namespace noggit
           : _degrees (degrees)                                          \
         { }                                                             \
                                                                         \
-        void operator() (const selected_chunk_type&) const              \
+        [[noreturn]] void operator() (const selected_chunk_type&) const \
         {                                                               \
           throw std::runtime_error ("Can't rotate a chunk as of now."); \
         }                                                               \
@@ -306,7 +306,7 @@ namespace noggit
         { }
 
         template<typename T>
-        void operator() (const T&) const
+          [[noreturn]] void operator() (const T&) const
         {
           throw std::runtime_error ("Can only scale doodads.");
         }
@@ -331,7 +331,7 @@ namespace noggit
           : _offset (offset)
         { }
 
-        void operator() (const selected_chunk_type&) const
+        [[noreturn]] void operator() (const selected_chunk_type&) const
         {
           throw std::runtime_error ("Can't move chunks as of now.");
         }
@@ -361,7 +361,7 @@ namespace noggit
           wmo->doodadset = _id;
         }
         template<typename T>
-        void operator() (const T&) const
+          [[noreturn]] void operator() (const T&) const
         {
           throw std::runtime_error ("Can only set doodad set ids of WMOs");
         }

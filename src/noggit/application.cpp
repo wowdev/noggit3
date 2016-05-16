@@ -521,7 +521,7 @@ int __stdcall WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmd
 
 namespace
 {
-  void print_error_and_exit (int sig)
+  [[noreturn]] void print_error_and_exit (int sig)
   {
     // Reset to defaults.
     signal (SIGABRT, SIG_DFL);
