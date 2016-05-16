@@ -116,7 +116,6 @@ namespace noggit
     , _invert_mouse_y_axis (false)
 
     //! \todo Sort to correct order and rename.
-    , menu (nullptr)
     , moving (0.0f)
     , strafing (0.0f)
     , updown (0.0f)
@@ -235,9 +234,8 @@ namespace noggit
   #undef NEW_ACTION_OTHER
   #undef NEW_TOGGLE_ACTION
 
-    menu = new QMenu (tr("Map Editor"));
-
-    QMenu* file_menu (menu->addMenu (tr ("File")));
+    QMenu* file_menu (new QMenu (tr ("File")));
+    _menus.emplace_back (file_menu);
     file_menu->addAction (save_current_tile);
     file_menu->addAction (save_modified_tiles);
     file_menu->addAction (reload_tile);
@@ -249,7 +247,8 @@ namespace noggit
     file_menu->addSeparator();
     file_menu->addAction (to_menu);
 
-    QMenu* edit_menu (menu->addMenu (tr ("Edit")));
+    QMenu* edit_menu (new QMenu (tr ("Edit")));
+    _menus.emplace_back (edit_menu);
     edit_menu->addAction (copy_object);
     edit_menu->addAction (paste_object);
     edit_menu->addAction (delete_object);
@@ -259,7 +258,8 @@ namespace noggit
     edit_menu->addAction (snap_object_to_ground);
 
     /*
-    QMenu* assist_menu (menu->addMenu (tr ("Assist")));
+    QMenu* assist_menu (new QMenu (tr ("Assist")));
+    _menus.emplace_back (assist_menu);
 
     QMenu* insertion_menu (assist_menu->addMenu (tr ("Insert helper model")));
 
@@ -287,7 +287,8 @@ namespace noggit
     assist_menu->addAction (tr ("Clear models", clear_all_models, 0  );
     assist_menu->addAction (tr ("Switch texture", show_texture_switcher, 0  );
   */
-    QMenu* view_menu (menu->addMenu (tr ("View")));
+    QMenu* view_menu (new QMenu (tr ("View")));
+    _menus.emplace_back (view_menu);
     view_menu->addAction (current_texture);
     view_menu->addAction (toggle_minimap);
     view_menu->addAction (detail_infos);
@@ -303,7 +304,8 @@ namespace noggit
     view_menu->addAction (fog_drawing);
     view_menu->addAction (toggle_lighting);
 
-    QMenu* settings_menu (menu->addMenu (tr ("Settings")));
+    QMenu* settings_menu (new QMenu (tr ("Settings")));
+    _menus.emplace_back (settings_menu);
     settings_menu->addAction (cursor_selector);
     settings_menu->addSeparator();
     settings_menu->addAction (rotation_randomization);
@@ -318,7 +320,8 @@ namespace noggit
     settings_menu->addAction (decrease_moving_speed);
     settings_menu->addAction (increase_moving_speed);
 
-    QMenu* debug_menu (menu->addMenu (tr ("Testing and Debugging")));
+    QMenu* debug_menu (new QMenu (tr ("Testing and Debugging")));
+    _menus.emplace_back (debug_menu);
     debug_menu->addAction (save_wdt);
     debug_menu->addAction (model_spawner);
     debug_menu->addAction (save_minimap);
@@ -2392,7 +2395,10 @@ void MapView::updateParent()
     editortemplate->addPropBar(_texturing_settings_widget);
     editortemplate->addPropBar(_smoothing_settings_widget);
     editortemplate->addToolBar(toolBar);
-    editortemplate->addEditorMenu(menu);
+    for (QMenu* menu : _menus)
+    {
+      editortemplate->addEditorMenu(menu);
+    }
 }
 
 

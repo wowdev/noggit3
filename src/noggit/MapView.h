@@ -262,7 +262,7 @@ namespace noggit
 
     World* _world;
 
-    QMenu* menu;
+    std::vector<QMenu*> _menus;
 
     ui::minimap_widget* _minimap;
     ui::model_spawner* _model_spawner;
