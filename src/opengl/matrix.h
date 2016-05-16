@@ -12,18 +12,18 @@ namespace opengl
   namespace matrix
   {
     template<GLint matrix_type>
-    ::math::matrix_4x4 from()
+      inline ::math::matrix_4x4 from()
     {
       ::math::matrix_4x4 matrix;
       glGetFloatv (matrix_type, matrix);
       return matrix;
     }
 
-    ::math::matrix_4x4 model_view()
+    inline ::math::matrix_4x4 model_view()
     {
       return from<GL_MODELVIEW_MATRIX>();
     }
-    ::math::matrix_4x4 projection()
+    inline ::math::matrix_4x4 projection()
     {
       return from<GL_PROJECTION_MATRIX>();
     }

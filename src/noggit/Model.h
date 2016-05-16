@@ -35,6 +35,8 @@ namespace noggit
 }
 
 ::math::vector_3d fixCoordSystem(const ::math::vector_3d& v);
+void ModelHighlight (::math::vector_4d color);
+void ModelUnhighlight();
 
 class Bone {
   Animation::M2Value< ::math::vector_3d> trans;

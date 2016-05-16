@@ -173,22 +173,22 @@ bool Model::isAnimated(const noggit::mpq::file& f)
   return animGeometry || animTextures || animMisc;
 }
 
-
 ::math::vector_3d fixCoordSystem (const ::math::vector_3d& v)
 {
   return ::math::vector_3d (v.x(), v.z(), -v.y());
 }
-
-::math::vector_3d fixCoordSystem2 (const ::math::vector_3d& v)
+namespace
 {
-  return ::math::vector_3d (v.x(), v.z(), v.y());
-}
+  ::math::vector_3d fixCoordSystem2 (const ::math::vector_3d& v)
+  {
+    return ::math::vector_3d (v.x(), v.z(), v.y());
+  }
 
-::math::quaternion fixCoordSystemQuat (const ::math::quaternion& v)
-{
-  return ::math::quaternion (-v.x(), -v.z(), v.y(), v.w());
+  ::math::quaternion fixCoordSystemQuat (const ::math::quaternion& v)
+  {
+    return ::math::quaternion (-v.x(), -v.z(), v.y(), v.w());
+  }
 }
-
 
 void Model::initCommon(const noggit::mpq::file& f)
 {
@@ -764,7 +764,7 @@ void ModelRenderPass::deinit()
 void ModelHighlight( ::math::vector_4d color )
 {
   glDisable( GL_ALPHA_TEST );
-   glEnable( GL_BLEND );
+  glEnable( GL_BLEND );
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   glDisable( GL_CULL_FACE );
   glActiveTexture( GL_TEXTURE0 );
@@ -773,18 +773,18 @@ void ModelHighlight( ::math::vector_4d color )
   glDisable( GL_TEXTURE_2D );
   glColor4fv( color );
   glMaterialfv( GL_FRONT, GL_EMISSION, color );
-//  glDepthMask( GL_FALSE );
+  //  glDepthMask( GL_FALSE );
 }
 
 void ModelUnhighlight()
 {
   glEnable( GL_ALPHA_TEST );
-   glDisable( GL_BLEND );
+  glDisable( GL_BLEND );
   glEnable( GL_CULL_FACE );
   glActiveTexture( GL_TEXTURE0 );
   glEnable( GL_TEXTURE_2D );
   glColor4fv( ::math::vector_4d( 1, 1, 1, 1 ) );
-//  glDepthMask( GL_TRUE );
+  //  glDepthMask( GL_TRUE );
 }
 
 void Model::drawModel(int animtime)
