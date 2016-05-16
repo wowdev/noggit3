@@ -53,10 +53,6 @@ include_directories ( ${GLEW_INCLUDE_PATH}
                       "${CMAKE_SOURCE_DIR}/include/"
                     )
 
-if (WIN32)
-  include_directories ("${CMAKE_SOURCE_DIR}/include/windows/")
-endif (WIN32)
-
 # Gather source files.
 set ( noggit_sources
       src/noggit/application.cpp

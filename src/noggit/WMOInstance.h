@@ -6,7 +6,7 @@
 #pragma once
 
 #include <set>
-#include <stdint.h>
+#include <cstdint>
 
 #include <boost/optional.hpp>
 

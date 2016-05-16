@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 enum WorldFlags {
     TERRAIN = 0x1,

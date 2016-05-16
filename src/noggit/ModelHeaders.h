@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <math/vector_2d.h>
 #include <math/vector_3d.h>
