@@ -31,6 +31,12 @@ namespace noggit
   {
     MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
+#ifdef Q_WS_MAC
+    //! \note do not set parent to have global menu bar for all windows so long editor is not part of mainwindow
+    , _menu_bar (new QMenuBar (nullptr))
+#else
+    , _menu_bar (new QMenuBar (this))
+#endif
     {
       initialize_video();
       setWindowTitle("NoggIt Studio");
@@ -59,6 +65,11 @@ namespace noggit
       statusBar()->showMessage (tr("Ready"));
 
       maps();
+    }
+
+    QMenuBar* MainWindow::menuBar()
+    {
+      return _menu_bar;
     }
 
     void MainWindow::createDockWidgets()
