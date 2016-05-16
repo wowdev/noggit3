@@ -300,7 +300,7 @@ void ParticleSystem::draw()
   ::math::vector_3d vUp(0,1,0);
 
   // position stuff
-  const float f = 1;//0.707106781f; // sqrt(2)/2
+  const float f = 1;//0.707106781f; // std::sqrt(2)/2
   ::math::vector_3d bv0 = ::math::vector_3d(-f,+f,0);
   ::math::vector_3d bv1 = ::math::vector_3d(+f,+f,0);
   ::math::vector_3d bv2 = ::math::vector_3d(+f,-f,0);
@@ -494,7 +494,7 @@ void ParticleSystem::drawHighlight()
     //! \todo  figure out type 2 (deeprun tram subway sign)
     // - doesn't seem to be any different from 0 -_-
     // regular particles
-    float f = 0.707106781f; // sqrt(2)/2
+    float f = 0.707106781f; // std::sqrt(2)/2
     if (billboard) {
       bv0 = mbb * ::math::vector_3d(0,-f,+f);
       bv1 = mbb * ::math::vector_3d(0,+f,+f);
@@ -598,7 +598,7 @@ namespace
 
     SpreadMat=SpreadMat*Temp;
 
-    const float Size (abs (c[0]) * l + abs (s[0]) * w);
+    const float Size (std::abs (c[0]) * l + std::abs (s[0]) * w);
     for(i=0;i<3;++i)
       for(j=0;j<3;j++)
         SpreadMat (i, j, SpreadMat (i, j) * Size);

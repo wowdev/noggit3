@@ -1126,8 +1126,8 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
             // find out if the model is inside the reach of the chunk.
             float dx = chunkMid.x() - pos.x();
             float dz = chunkMid.z() - pos.z();
-            float dist = sqrtf(dx * dx + dz * dz);
-            static float sqrt2 = sqrtf(2.0f);
+            float dist = std::sqrt(dx * dx + dz * dz);
+            static float sqrt2 = std::sqrt(2.0f);
 
             if(dist - radius <= ((sqrt2 / 2.0f) * CHUNKSIZE))
             {
@@ -2019,8 +2019,8 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
             // find out if the model is inside the reach of the chunk.
             float dx = chunkMid.x() - pos.x();
             float dz = chunkMid.z() - pos.z();
-            float dist = sqrtf(dx * dx + dz * dz);
-            static float sqrt2 = sqrtf(2.0f);
+            float dist = std::sqrt(dx * dx + dz * dz);
+            static float sqrt2 = std::sqrt(2.0f);
 
             if(dist - radius <= ((sqrt2 / 2.0f) * CHUNKSIZE))
             {

@@ -145,7 +145,7 @@ namespace math
 
     inline float length() const
     {
-      return sqrtf (length_squared());
+      return std::sqrt (length_squared());
     }
 
     inline vector_3d& normalize()

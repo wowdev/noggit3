@@ -123,7 +123,7 @@ namespace math
 
     vector_4d& normalize()
     {
-      return operator *= (1.0f / sqrtf (_x * _x + _y * _y + _z * _z + _w * _w));
+      return operator *= (1.0f / std::sqrt (_x * _x + _y * _y + _z * _z + _w * _w));
     }
 
     operator const float*() const

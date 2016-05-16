@@ -55,7 +55,7 @@ namespace
     if( vz == 0.0f )
       vz = .0001f;
 
-    float v = sqrt( vx*vx + vy*vy + vz*vz );
+    float v = std::sqrt( vx*vx + vy*vy + vz*vz );
     float ax = 57.2957795f*acos( vz/v );
     if ( vz < 0.0f )
       ax = -ax;
@@ -104,7 +104,7 @@ namespace
     if( vz == 0.0f )
       vz = .0001f;
 
-    float v = sqrt( vx*vx + vy*vy + vz*vz );
+    float v = std::sqrt( vx*vx + vy*vy + vz*vz );
     float ax = 57.2957795f*acos( vz/v );
     if(vz < 0.0f)
       ax = -ax;

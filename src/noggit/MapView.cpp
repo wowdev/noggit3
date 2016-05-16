@@ -578,7 +578,7 @@ namespace noggit
           // ObjPos = Selection->data.model->pos - _world->camera;
           // ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.y(), av);
           // ::math::rotate (0.0f, 0.0f, &ObjPos.x(), &ObjPos.z(), ah);
-          // ObjPos.x (fabs (ObjPos.x()));
+          // ObjPos.x (std::abs (ObjPos.x()));
           static const float weird_constant (80.0f);
           const ::math::vector_3d offset ( mv * dirUp * weird_constant
                                          - mh * dirRight * weird_constant
