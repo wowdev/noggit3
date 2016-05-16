@@ -45,7 +45,7 @@ namespace noggit
       //! todo windows has a problem with sharing the dummy (may sth about render contex)
 
       QMenu* fileMenu = menuBar()->addMenu (tr("&File"));
-      //fileMenu->addAction (tr("Open Maps"), this, SLOT(maps()));
+      fileMenu->addAction (tr("Open Maps"), this, SLOT(maps()));
       fileMenu->addAction (tr("Open Project Explorer"), this, SLOT(projectExplorerOpen()));
       fileMenu->addSeparator();
       fileMenu->addAction (tr("Exit"), &noggit::app(), SLOT(closeAllWindows()));
@@ -110,6 +110,7 @@ namespace noggit
     {
       this->map_selection_menu = new Menu (nullptr);
       connect (this->map_selection_menu, SIGNAL (create_world_view_request (World*)), this, SLOT (create_world_view (World*)));
+      connect (map_selection_menu, SIGNAL (create_world_view_request (World*)), map_selection_menu, SLOT (deleteLater()));
 	  this->map_selection_menu->show();
 
     }
