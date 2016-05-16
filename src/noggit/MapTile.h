@@ -4,8 +4,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef MAPTILE_H
-#define MAPTILE_H
+#pragma once
 
 #include <vector>
 #include <map>
@@ -112,5 +111,3 @@ private:
   friend class MapChunk;
   friend class World;
 };
-
-#endif

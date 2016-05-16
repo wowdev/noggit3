@@ -5,8 +5,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef MAPVIEW_H
-#define MAPVIEW_H
+#pragma once
 
 #include <boost/optional.hpp>
 
@@ -351,5 +350,3 @@ namespace noggit
     boost::optional<selection_type> _selection;
   };
 }
-
-#endif

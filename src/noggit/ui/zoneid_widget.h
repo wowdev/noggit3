@@ -1,5 +1,4 @@
-#ifndef ZONEID_WIDGET_H
-#define ZONEID_WIDGET_H
+#pragma once
 
 #include <QWidget>
 #include <QTreeWidget>
@@ -39,4 +38,3 @@ namespace noggit
 		};
 	}
 }
-#endif

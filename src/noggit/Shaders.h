@@ -2,8 +2,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
-#ifndef __SHADERS_H
-#define __SHADERS_H
+#pragma once
 
 #include <string>
 #include <QString>
@@ -62,5 +61,3 @@ public:
 };
 
 extern ShaderPair *terrainShaders[4], *wmoShader, *waterShaders[1];
-
-#endif

@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef WMO_H
-#define WMO_H
+#pragma once
 
 #include <set>
 #include <string>
@@ -281,5 +280,3 @@ namespace noggit
     WMO* _wmo;
   };
 }
-
-#endif

@@ -1,8 +1,7 @@
 // settings_saver.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __OPENGL_SETTINGS_SAVER_H
-#define __OPENGL_SETTINGS_SAVER_H
+#pragma once
 
 #ifdef __linux__
 #include <GL/glew.h>
@@ -37,5 +36,3 @@ namespace opengl
     } _saved_settings;
   };
 }
-
-#endif

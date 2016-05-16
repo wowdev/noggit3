@@ -2,8 +2,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef MODELINSTANCE_H
-#define MODELINSTANCE_H
+#pragma once
 
 #include <boost/optional.hpp>
 
@@ -92,5 +91,3 @@ private:
   size_t _spawn_timestamp;
   size_t time_since_spawn() const;
 };
-
-#endif // MODELINSTANCE_H

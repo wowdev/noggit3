@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef ANIMATED_H
-#define ANIMATED_H
+#pragma once
 
 #include <cassert>
 #include <ctime>
@@ -273,5 +272,3 @@ namespace Animation
     }
   };
 };
-
-#endif

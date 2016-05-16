@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef __TOOLBAR_H
-#define __TOOLBAR_H
+#pragma once
 
 #include <string>
 
@@ -34,5 +33,3 @@ public:
   void set_icon_visual (int i);
   void IconSelect(int i);
 };
-#endif
-

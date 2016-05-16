@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef MODELHEADERS_H
-#define MODELHEADERS_H
+#pragma once
 
 #include <stdint.h>
 
@@ -373,6 +372,3 @@ struct ModelBoundTriangle {
 };
 
 #pragma pack(pop)
-
-
-#endif

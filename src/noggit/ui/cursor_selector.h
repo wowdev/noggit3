@@ -2,8 +2,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
-#ifndef CURSOR_SELECTOR_H
-#define CURSOR_SELECTOR_H
+#pragma once
 
 #include <QWidget>
 
@@ -32,5 +31,3 @@ namespace noggit
     };
   }
 }
-
-#endif

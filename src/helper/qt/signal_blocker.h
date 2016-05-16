@@ -1,8 +1,7 @@
 // signal_blocker.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __SIGNAL_BLOCKER_H
-#define __SIGNAL_BLOCKER_H
+#pragma once
 
 #include <QObject>
 
@@ -34,5 +33,3 @@ namespace helper
     };
   }
 }
-
-#endif

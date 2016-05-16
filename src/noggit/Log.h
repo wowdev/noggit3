@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef __LOG_H
-#define __LOG_H
+#pragma once
 
 #include <iostream>
 
@@ -17,5 +16,3 @@ std::ostream& _Log( const char * pFile, int pLine );
 #define Log _Log( __FILE__, __LINE__ )
 
 void InitLogging();
-
-#endif

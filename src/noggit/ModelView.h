@@ -1,8 +1,7 @@
 // ModelView.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 
-#ifndef MODELVIEW_H
-#define MODELVIEW_H
+#pragma once
 
 #include <noggit/ModelManager.h>
 
@@ -46,5 +45,3 @@ protected:
     void timerEvent (QTimerEvent*);
 
 };
-
-#endif // MODELVIEW_H

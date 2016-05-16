@@ -1,8 +1,7 @@
 // DBCEditor.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 
-#ifndef DBCEDITOR_H
-#define DBCEDITOR_H
+#pragma once
 
 #include <QWidget>
 #include <QDialog>
@@ -52,8 +51,3 @@ signals:
 public slots:
 
 };
-
-
-
-
-#endif // DBCEDITOR_H

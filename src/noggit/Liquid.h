@@ -5,8 +5,7 @@
 
 // #define USEBLSFILES
 
-#ifndef LIQUID_H
-#define LIQUID_H
+#pragma once
 
 class Liquid;
 
@@ -115,5 +114,3 @@ private:
 
   MH2O_Tile mTileData;
 };
-
-#endif

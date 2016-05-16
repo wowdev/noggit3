@@ -2,8 +2,8 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
-#ifndef __NOGGIT_UI_MODEL_SPAWNER_H
-#define __NOGGIT_UI_MODEL_SPAWNER_H
+#pragma once
+
 #include <noggit/ModelView.h>
 #include <QWidget>
 #include <QGLWidget>
@@ -44,5 +44,3 @@ namespace noggit
     };
   }
 }
-
-#endif

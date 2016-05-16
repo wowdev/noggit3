@@ -1,8 +1,7 @@
 // archive.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __NOGGIT_MPQ_ARCHIVE_H
-#define __NOGGIT_MPQ_ARCHIVE_H
+#pragma once
 
 #include <QString>
 #include <QStringList>
@@ -47,6 +46,3 @@ namespace noggit
     };
   }
 }
-
-#endif
-

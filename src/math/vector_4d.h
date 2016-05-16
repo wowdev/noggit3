@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef QUATERNION_H
-#define QUATERNION_H
+#pragma once
 
 #include <math/vector_3d.h>
 
@@ -152,5 +151,3 @@ namespace math
     friend class Matrix;
   };
 }
-
-#endif

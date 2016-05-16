@@ -4,8 +4,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef __MINIMAPWINDOWUI_H
-#define __MINIMAPWINDOWUI_H
+#pragma once
 
 #include <QWidget>
 
@@ -61,5 +60,3 @@ namespace noggit
     };
   }
 }
-
-#endif

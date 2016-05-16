@@ -2,8 +2,7 @@
 // Mjollnà <mjollna.wow@gmail.com>
 // Glararan <glararan@glararan.eu>
 
-#ifndef __CONFIG_SETTINGS_H
-#define __CONFIG_SETTINGS_H
+#pragma once
 
 #include <QApplication>
 #include <QWidget>
@@ -56,5 +55,3 @@ namespace noggit
     };
   }
 }
-
-#endif

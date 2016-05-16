@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef __BRUSH_H
-#define __BRUSH_H
+#pragma once
 
 namespace opengl
 {
@@ -33,5 +32,3 @@ public:
   bool needUpdate();
   brush(float r = 15.0f, float h = 0.5f);
 };
-
-#endif

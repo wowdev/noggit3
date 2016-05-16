@@ -1,8 +1,7 @@
 // interpolation.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __MATH_INTERPOLATION_H
-#define __MATH_INTERPOLATION_H
+#pragma once
 
 #include <cmath>
 
@@ -54,5 +53,3 @@ namespace math
     }
   }
 }
-
-#endif

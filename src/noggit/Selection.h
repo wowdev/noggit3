@@ -2,8 +2,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
-#ifndef __SELECTION_H__
-#define __SELECTION_H__
+#pragma once
 
 enum eSelectionEntryTypes
 {
@@ -123,5 +122,3 @@ namespace noggit
     bool is_the_same_as (const void* other, const selection_type& selection);
   }
 }
-
-#endif

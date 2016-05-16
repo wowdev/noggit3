@@ -2,8 +2,7 @@
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
-#ifndef PROJECTEXPLORER_H
-#define PROJECTEXPLORER_H
+#pragma once
 
 #include <QWidget>
 
@@ -20,5 +19,3 @@ namespace noggit
     };
   }
 }
-
-#endif // PROJECTEXPLORER_H

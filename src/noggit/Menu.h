@@ -5,8 +5,7 @@
 // Tigurius <bstigurius@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
-#ifndef __MENU_H
-#define __MENU_H
+#pragma once
 
 #include <QWidget>
 
@@ -55,5 +54,3 @@ private:
   noggit::ui::minimap_widget* _minimap;
   //World* _world;
 };
-
-#endif

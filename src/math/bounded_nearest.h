@@ -1,8 +1,7 @@
 // bounded_nearest.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __MATH_BOUNDED_NEAREST_H
-#define __MATH_BOUNDED_NEAREST_H
+#pragma once
 
 #include <cmath>
 #include <QtGlobal>
@@ -19,5 +18,3 @@ namespace math
                   );
   }
 }
-
-#endif

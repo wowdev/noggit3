@@ -3,8 +3,7 @@
 // Glararan <glararan@glararan.eu>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
-#ifndef __ZONEIDBROWSER_H
-#define __ZONEIDBROWSER_H
+#pragma once
 
 #include <string>
 
@@ -47,5 +46,3 @@ public:
   void refreshMapPath();
   void setChangeFunc( void (*f)( UIFrame *, int ));
 };
-
-#endif

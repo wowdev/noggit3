@@ -4,8 +4,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef DBCFILE_H
-#define DBCFILE_H
+#pragma once
 
 #include <cassert>
 #include <QString>
@@ -223,5 +222,3 @@ private:
   std::vector<unsigned char> data;
   std::vector<char> stringTable;
 };
-
-#endif

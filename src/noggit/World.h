@@ -5,8 +5,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef WORLD_H
-#define WORLD_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -240,5 +239,3 @@ private:
 
   nameEntryManager _selection_names;
 };
-
-#endif
