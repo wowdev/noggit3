@@ -26,7 +26,7 @@ namespace noggit
     class archive;
     class file
     {
-      Q_DISABLE_COPY (file);
+      Q_DISABLE_COPY (file)
 
     public:
       //! \note filenames are not case sensitive
