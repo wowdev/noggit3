@@ -4,11 +4,13 @@
 
 #include <noggit/blp_texture.h>
 
-#include <QGLWidget>
-
 #include <stdint.h>
 
 #include <noggit/mpq/file.h>
+
+#include <opengl/scoped.h>
+
+#include <QGLPixelBuffer>
 
 namespace noggit
 {
@@ -29,63 +31,6 @@ namespace noggit
       int32_t sizes[16];
     };
 #pragma pack (pop)
-
-    class conversion_helper_widget : public QGLWidget
-    {
-    //  Q_OBJECT
-
-    public:
-      conversion_helper_widget (const QString& blp_filename)
-        : _texture (nullptr)
-        , _blp_filename (blp_filename)
-      { }
-
-      ~conversion_helper_widget()
-      {
-        delete _texture;
-      }
-
-    protected:
-      virtual void initializeGL()
-      {
-        _texture = new noggit::blp_texture (_blp_filename);
-      }
-
-      virtual void resizeGL (int width, int height)
-      {
-        resize (width, height);
-        glViewport (0.0f, 0.0f, width, height);
-        glMatrixMode (GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho (0.0f, width, height, 0.0f, 1.0f, -1.0f);
-        glMatrixMode (GL_MODELVIEW);
-        glLoadIdentity();
-      }
-
-      virtual void paintGL()
-      {
-        opengl::texture::enable_texture (0);
-
-        _texture->bind();
-
-        glBegin (GL_TRIANGLE_FAN);
-        glTexCoord2f (0.0f, 0.0f);
-        glVertex2f (0.0f, 0.0f);
-        glTexCoord2f (1.0f, 0.0f);
-        glVertex2f (rect().width(), 0.0f);
-        glTexCoord2f (1.0f, 1.0f);
-        glVertex2f (rect().width(), rect().height());
-        glTexCoord2f (0.0f, 1.0f);
-        glVertex2f (0.0f, rect().height());
-        glEnd();
-
-        opengl::texture::disable_texture (0);
-      }
-
-    private:
-      noggit::blp_texture* _texture;
-      const QString& _blp_filename;
-    };
   }
 
   blp_texture::blp_texture (std::string const& filename)
@@ -287,7 +232,37 @@ namespace noggit
                                , const int& height
                                )
   {
-    return detail::conversion_helper_widget (blp_filename)
-                    .renderPixmap (width, height, false);
+    QGLPixelBuffer pixel_buffer (width, height);
+    pixel_buffer.makeCurrent();
+
+    glViewport (0.0f, 0.0f, width, height);
+    glMatrixMode (GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho (0.0f, width, height, 0.0f, 1.0f, -1.0f);
+    glMatrixMode (GL_MODELVIEW);
+    glLoadIdentity();
+
+    opengl::scoped::texture_setter<0, GL_TRUE> const texture0;
+    noggit::blp_texture const texture (blp_filename);
+
+    glBegin (GL_TRIANGLE_FAN);
+    glTexCoord2f (0.0f, 0.0f);
+    glVertex2f (0.0f, 0.0f);
+    glTexCoord2f (1.0f, 0.0f);
+    glVertex2f (width, 0.0f);
+    glTexCoord2f (1.0f, 1.0f);
+    glVertex2f (width, height);
+    glTexCoord2f (0.0f, 1.0f);
+    glVertex2f (0.0f, height);
+    glEnd();
+
+    QPixmap pixmap (QPixmap::fromImage (pixel_buffer.toImage()));
+
+    if (pixmap.isNull())
+    {
+      throw std::runtime_error
+        ("failed rendering " + blp_filename.toStdString() + " to pixmap");
+    }
+    return pixmap;
   }
 }
