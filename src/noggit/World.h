@@ -9,7 +9,7 @@
 
 #include <map>
 #include <string>
-#include <stdint.h>
+#include <cstdint>
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>

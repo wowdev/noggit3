@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <math/interpolation.h>
 #include <math/vector_4d.h>

@@ -4,7 +4,7 @@
 
 #include <noggit/blp_texture.h>
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <noggit/mpq/file.h>
 

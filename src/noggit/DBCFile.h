@@ -9,7 +9,7 @@
 #include <cassert>
 #include <QString>
 #include <stdio.h>
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 
 #include <noggit/mpq/file.h>
