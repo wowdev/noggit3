@@ -131,6 +131,10 @@ namespace noggit
                 ++alpha_pointer;
               }
             }
+            else
+            {
+              throw std::logic_error ("other alpha bit depths than 8 and 1 nyi");
+            }
 
             *result_pointer++ = (color_value & 0x00FF0000) >> 16
                               | (color_value & 0x0000FF00)
