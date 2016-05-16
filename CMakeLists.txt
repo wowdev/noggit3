@@ -41,11 +41,10 @@ find_package (Boost REQUIRED COMPONENTS filesystem system)
 include (${QT_USE_FILE})
 
 # include paths
-include_directories ( ${GLEW_INCLUDE_PATH}
-                      ${GLUT_INCLUDE_DIRS}
-                      ${STORM_INCLUDES}
-                      ${Boost_INCLUDE_DIR}
-                      "${CMAKE_SOURCE_DIR}/include/"
+include_directories ( SYSTEM ${GLEW_INCLUDE_PATH}
+                      SYSTEM ${GLUT_INCLUDE_DIRS}
+                      SYSTEM ${STORM_INCLUDES}
+                      SYSTEM ${Boost_INCLUDE_DIR}
                     )
 
 # Gather source files.
