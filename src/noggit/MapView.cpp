@@ -44,7 +44,7 @@
 #include <noggit/blp_texture.h>
 
 //! \todo Replace all old gui elements with new classes / widgets.
-#undef __OBSOLETE_GUI_ELEMENTS
+#undef COMPILE_OBSOLETE_GUI_ELEMENTS
 
 Q_DECLARE_METATYPE (WorldFlags)
 
@@ -427,7 +427,7 @@ namespace noggit
 
   void MapView::toggle_current_texture_visiblity (bool value)
   {
-#ifdef __OBSOLETE_GUI_ELEMENTS
+#ifdef COMPILE_OBSOLETE_GUI_ELEMENTS
     mainGui->SelectedTexture->hidden (!value);
 #endif
   }
@@ -692,7 +692,7 @@ namespace noggit
               }
               else if (_currently_holding_control)
               {
-#ifdef __OBSOLETE_GUI_ELEMENTS
+#ifdef COMPILE_OBSOLETE_GUI_ELEMENTS
                 mainGui->TexturePicker->getTextures
                   (_world->GetCurrentSelection());
 #endif
@@ -759,7 +759,7 @@ namespace noggit
             else if(_currently_holding_control)
             {
               _selected_area_id = selection::area_id (*_selection);
-#ifdef __OBSOLETE_GUI_ELEMENTS
+#ifdef COMPILE_OBSOLETE_GUI_ELEMENTS
               mainGui->ZoneIDBrowser->setZoneID(_selected_area_id);
 #endif
               _zoneid_widget->setZoneID(_selected_area_id);
@@ -793,7 +793,7 @@ namespace noggit
     _world->advance_times (dt, mTimespeed);
     _world->tick (dt);
 
-#ifdef __OBSOLETE_GUI_ELEMENTS
+#ifdef COMPILE_OBSOLETE_GUI_ELEMENTS
     if (!_map_chunk_properties_window->hidden()
       && selection::is_chunk (*_selection)
        )
@@ -1175,14 +1175,14 @@ namespace noggit
 
   void MapView::toggle_detail_info_window (bool value)
   {
-#ifdef __OBSOLETE_GUI_ELEMENTS
+#ifdef COMPILE_OBSOLETE_GUI_ELEMENTS
     mainGui->guidetailInfos->setVisible (value);
 #endif
   }
 
   void MapView::toggle_terrain_mode_window()
   {
-#ifdef __OBSOLETE_GUI_ELEMENTS
+#ifdef COMPILE_OBSOLETE_GUI_ELEMENTS
     if(_current_terrain_editing_mode == texturing)
       view_texture_palette( 0, 0 );
     else if(_current_terrain_editing_mode == area_id_setting)
@@ -1762,7 +1762,7 @@ namespace noggit
       break;
     }
 
-#ifdef __OBSOLETE_GUI_ELEMENTS
+#ifdef COMPILE_OBSOLETE_GUI_ELEMENTS
     if (mainGui && mainGui->guiToolbar)
       mainGui->guiToolbar->set_icon_visual (_current_terrain_editing_mode);
 #endif
@@ -2170,7 +2170,7 @@ namespace noggit
   // --- OBSOLETE GUI ------------------------------------------------------------------------------
 
 
-#ifdef __OBSOLETE_GUI_ELEMENTS
+#ifdef COMPILE_OBSOLETE_GUI_ELEMENTS
 
   //! \todo Make this a member of MapView. Also correctly add the actions below again.
   /*!
@@ -2354,7 +2354,7 @@ namespace noggit
 
   void MapView::show_texture_switcher()
   {
-#ifdef __OBSOLETE_GUI_ELEMENTS
+#ifdef COMPILE_OBSOLETE_GUI_ELEMENTS
     _texture_switcher->textures_by_selection
       (_world->GetCurrentSelection());
     _texture_switcher->show();
@@ -2365,7 +2365,7 @@ namespace noggit
 
   void MapView::create_obsolete_gui()
   {
-#ifdef __OBSOLETE_GUI_ELEMENTS
+#ifdef COMPILE_OBSOLETE_GUI_ELEMENTS
     // create main gui object that holds all other gui elements for access ( in the future ;) )
     mainGui = new UIMapViewGUI (_world, this, width(), height());
 
