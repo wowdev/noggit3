@@ -86,13 +86,15 @@ namespace noggit
       loadStyles();
     }
 
+    initialize_shared_gl_widget();
+
     ui::MainWindow* mainwindow = new ui::MainWindow;
     if (_settings->value ("maximizedAppShow").toBool() == true)
       mainwindow->showMaximized();
     else
       mainwindow->show();
-	mainwindow->map_selection_menu->raise();
-	mainwindow->map_selection_menu->activateWindow();
+    mainwindow->map_selection_menu->raise();
+    mainwindow->map_selection_menu->activateWindow();
   }
 
   mpq::archive_manager& application::archive_manager()
@@ -116,6 +118,72 @@ namespace noggit
   wmo_manager& application::wmo_manager()
   {
     return _wmo_manager;
+  }
+
+  void application::initialize_shared_gl_widget()
+  {
+    if (!QGLFormat::hasOpenGL())
+    {
+      throw std::runtime_error ("Your system does not support OpenGL. Sorry, this application can't run without it.");
+    }
+
+    QGLFormat format;
+    format.setStencilBufferSize (1);
+    format.setDepthBufferSize (16);
+    format.setAlphaBufferSize (8);
+
+    if (setting("antialiasing").toBool())
+    {
+      format.setSampleBuffers (true);
+      format.setSamples (4);
+    }
+
+    class dummy_gl_widget : public QGLWidget
+    {
+    public:
+      dummy_gl_widget (const QGLFormat& format)
+        : QGLWidget (format)
+      {
+        updateGL();
+      }
+
+    protected:
+      virtual void initializeGL()
+      {
+        GLenum const err (glewInit());
+        if(GLEW_OK != err)
+        {
+          throw std::runtime_error
+            ( "unable to initialize glew: "
+            + std::string ((char const*)glewGetErrorString (err))
+            );
+        }
+
+        //! \todo Fallback for old and bad platforms.
+        if(!glGenBuffers)
+        {
+          glGenBuffers = glGenBuffersARB;
+        }
+        if(!glBindBuffer)
+        {
+          glBindBuffer = glBindBufferARB;
+        }
+        if(!glBufferData)
+        {
+          glBufferData = glBufferDataARB;
+        }
+
+        LogDebug << "GL: Version: " << glGetString (GL_VERSION) << std::endl;
+        LogDebug << "GL: Vendor: " << glGetString (GL_VENDOR) << std::endl;
+        LogDebug << "GL: Renderer: " << glGetString (GL_RENDERER) << std::endl;
+      }
+    };
+
+    _shared_gl_widget = new dummy_gl_widget (format);
+  }
+  QGLWidget* application::shared_gl_widget() const
+  {
+    return _shared_gl_widget;
   }
 
   QVariant application::setting ( const QString& key

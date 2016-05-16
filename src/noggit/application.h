@@ -42,6 +42,8 @@ namespace noggit
     model_manager& model_manager();
     wmo_manager& wmo_manager();
 
+    QGLWidget* shared_gl_widget() const;
+
   signals:
     void settingAboutToChange (const QString& key, const QVariant& value);
     void settingChanged (const QString& key, const QVariant& value);
@@ -55,6 +57,9 @@ namespace noggit
     void auto_detect_game_path();
     static bool is_valid_game_path (const QDir& path);
 	void loadStyles();
+
+    void initialize_shared_gl_widget();
+    QGLWidget* _shared_gl_widget;
 
     QSettings* _settings;
     QDir _game_path;
