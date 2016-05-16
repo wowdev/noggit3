@@ -20,7 +20,7 @@ namespace math
     {
       const float dot (start * end);
 
-      if (fabsf (dot) > 0.9995f)
+      if (std::abs (dot) > 0.9995f)
       {
         //! \note Don't call linear here, as this will recurse with quaternions.
         return T (start * (1.0f - percentage) + end * percentage);

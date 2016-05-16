@@ -213,7 +213,7 @@ void Model::initCommon(const noggit::mpq::file& f)
       rad = len;
     }
   }
-  rad = sqrtf(rad);
+  rad = std::sqrt(rad);
 
   // textures
   ModelTextureDef* texdef = reinterpret_cast<ModelTextureDef*>( f.getBuffer() + header.ofsTextures );

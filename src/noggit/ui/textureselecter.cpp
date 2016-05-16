@@ -175,7 +175,7 @@ namespace noggit
       setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
       setScene(new textureScene(textures, this->rect()));
       num = textures.size();
-      setMinimumSize(QSize(770, ceil((float)num / 5) * HEIGHT + 20));
+      setMinimumSize(QSize(770, std::ceil((float)num / 5) * HEIGHT + 20));
       setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
       setFrameShape(QFrame::NoFrame);
       setContentsMargins(0, 0, 0, 0);
@@ -183,14 +183,14 @@ namespace noggit
 
     QSize textureView::sizeHint() const
     {
-      return QSize(770, ceil((float)num / ((float)this->width() / (float)WIDTH)) * HEIGHT + 20);
+      return QSize(770, std::ceil((float)num / ((float)this->width() / (float)WIDTH)) * HEIGHT + 20);
     }
 
     void textureView::resizeEvent(QResizeEvent* event)
     {
       if (scene())
       {
-        int rows = ceil((float)num / ((float)event->size().width() / (float)WIDTH));
+        int rows = std::ceil((float)num / ((float)event->size().width() / (float)WIDTH));
         int heightNeeded = (rows * HEIGHT);
         this->setMinimumHeight(heightNeeded + 10);
         this->setMaximumHeight(heightNeeded + 15);

@@ -119,7 +119,7 @@ bool Frustum::intersectsSphere ( const ::math::vector_3d& position
     {
       return false;
     }
-    else if (fabsf (distance) < radius)
+    else if (std::abs (distance) < radius)
     {
       return true;
     }

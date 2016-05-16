@@ -28,7 +28,7 @@
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
-static const double MAPCHUNK_RADIUS = 47.140452079103168293389624140323; //sqrt((533.33333/16)^2 + (533.33333/16)^2)
+static const double MAPCHUNK_RADIUS = 47.140452079103168293389624140323; //std::sqrt((533.33333/16)^2 + (533.33333/16)^2)
 static const int CONTOUR_WIDTH = 128;
 static const float texDetail = 8.0f;
 static const float TEX_RANGE = 62.0f / 64.0f;
@@ -760,7 +760,7 @@ float MapChunk::getMinHeight() const
   {
     for (int i = 0; i < 9; ++i)
     {
-      min = std::fmin(mVertices[indexNoLoD(i, j)].y(), min);
+      min = std::min(mVertices[indexNoLoD(i, j)].y(), min);
     }
   }
 
@@ -856,7 +856,7 @@ bool MapChunk::is_visible ( const float& cull_distance
                           , const ::math::vector_3d& camera
                           ) const
 {
-  static const float chunk_radius = sqrtf (CHUNKSIZE * CHUNKSIZE / 2.0f);
+  static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f);
 
   return frustum.intersects (vmin, vmax)
       && (((camera - vcenter).length() - chunk_radius) < cull_distance);
@@ -1237,7 +1237,7 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 
   xdiff = xbase - x + CHUNKSIZE/2;
   zdiff = zbase - z + CHUNKSIZE/2;
-  dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+  dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
   if(dist > (radius + MAPCHUNK_RADIUS))
     return false;
@@ -1249,14 +1249,14 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
     xdiff = mVertices[i].x() - x;
     zdiff = mVertices[i].z() - z;
     if(BrushType == 5){
-      if((abs(xdiff) < abs(radius/2)) && (abs(zdiff) < abs(radius/2))){
+      if((std::abs(xdiff) < std::abs(radius/2)) && (std::abs(zdiff) < std::abs(radius/2))){
         mVertices[i].y (mVertices[i].y() + change);
         Changed=true;
       }
     }
     else
     {
-      dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+      dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
       if(dist < radius)
       {
 
@@ -1298,7 +1298,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 
   xdiff= xbase - x + CHUNKSIZE/2;
   zdiff= zbase - z + CHUNKSIZE/2;
-  dist= sqrt(xdiff*xdiff + zdiff*zdiff);
+  dist= std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
   if(dist > (radius + MAPCHUNK_RADIUS))
     return false;
@@ -1311,7 +1311,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
     xdiff = mVertices[i].x() - x;
     zdiff = mVertices[i].z() - z;
 
-    dist=sqrt(xdiff*xdiff + zdiff*zdiff);
+    dist=std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
     if(dist < radius)
     {
@@ -1351,7 +1351,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 
   xdiff = xbase - x + CHUNKSIZE/2;
   zdiff = zbase - z + CHUNKSIZE/2;
-  dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+  dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
   if(dist > (radius + MAPCHUNK_RADIUS) )
     return false;
@@ -1364,7 +1364,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
     xdiff= mVertices[i].x() - x;
     zdiff= mVertices[i].z() - z;
 
-    dist= sqrt(xdiff*xdiff + zdiff*zdiff);
+    dist= std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
     if(dist < radius)
     {
@@ -1383,7 +1383,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
           tx= x + k*UNITSIZE + (j%2) * UNITSIZE/2.0f;
           xdiff= tx - mVertices[i].x();
           zdiff= tz - mVertices[i].z();
-          dist2= sqrt(xdiff*xdiff + zdiff*zdiff);
+          dist2= std::sqrt(xdiff*xdiff + zdiff*zdiff);
           if(dist2 > radius)
             continue;
 
@@ -1444,7 +1444,7 @@ For bottom texture with multiple above textures
 For 2 textures above
 x,y = current alphas
 u,v = target alphas
-v=sqrt((1-level)*y/x)
+v=std::sqrt((1-level)*y/x)
 u=(1-level)/v
 
 For 3 textures above
@@ -1452,7 +1452,7 @@ x,y,z = current alphas
 u,v,w = target alphas
 L=(1-Level)
 u=pow(L*x*x/(y*y),1.0f/3.0f)
-w=sqrt(L*z/(u*y))
+w=std::sqrt(L*z/(u*y))
 */
 void MapChunk::eraseTextures()
 {
@@ -1516,7 +1516,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
 
   xdiff= xbase - x + CHUNKSIZE/2;
   zdiff= zbase - z + CHUNKSIZE/2;
-  dist= sqrt( xdiff*xdiff + zdiff*zdiff );
+  dist= std::sqrt( xdiff*xdiff + zdiff*zdiff );
 
   if( dist > (radius+MAPCHUNK_RADIUS) )
     return false;
@@ -1553,7 +1553,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
     {
       xdiff=xPos-x;
       zdiff=zPos-z;
-      dist=abs(sqrt( xdiff*xdiff + zdiff*zdiff ));
+      dist=std::abs(std::sqrt( xdiff*xdiff + zdiff*zdiff ));
 
       if(dist>radius)
       {
@@ -1710,7 +1710,7 @@ bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strengt
     {
       const float xdiff_ = xbase + change * i - x;
       const float zdiff_ = zbase + change * j - z;
-      const float dist = sqrtf( xdiff_ * xdiff_ + zdiff_ * zdiff_ );
+      const float dist = std::sqrt( xdiff_ * xdiff_ + zdiff_ * zdiff_ );
 
       if( dist <= radius )
       {
