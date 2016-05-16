@@ -72,17 +72,32 @@ struct TexCoordSet {
 class ParticleSystem {
   Model *model;
   std::unique_ptr<ParticleEmitter> emitter;
-  Animation::M2Value<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw, deacceleration;
+  Animation::M2Value<float> speed;
+  Animation::M2Value<float> variation;
+  Animation::M2Value<float> spread;
+  Animation::M2Value<float> lat;
+  Animation::M2Value<float> gravity;
+  Animation::M2Value<float> lifespan;
+  Animation::M2Value<float> rate;
+  Animation::M2Value<float> areal;
+  Animation::M2Value<float> areaw;
+  Animation::M2Value<float> deacceleration;
   Animation::M2Value<uint8_t> enabled;
   ::math::vector_4d colors[3];
   float sizes[3];
-  float mid, slowdown, rotation;
+  float mid;
+  float slowdown;
+  float rotation;
   ::math::vector_3d pos;
   noggit::scoped_blp_texture_reference _texture;
   ParticleList particles;
-  int blend,order,type;
-  int manim,mtime;
-  int rows, cols;
+  int blend;
+  int order;
+  int type;
+  int manim;
+  int mtime;
+  int rows;
+  int cols;
   std::vector<TexCoordSet> tiles;
   void initTile(::math::vector_2d *tc, int num);
   bool billboard;
@@ -125,21 +140,25 @@ class RibbonEmitter {
   Model *model;
   Animation::M2Value< ::math::vector_3d> color;
   Animation::M2Value<float,int16_t> opacity;
-  Animation::M2Value<float> above, below;
+  Animation::M2Value<float> above;
+  Animation::M2Value<float> below;
 
   Bone *parent;
-  float f1, f2;
+  float f1;
+  float f2;
 
   ::math::vector_3d pos;
 
-  int manim, mtime;
+  int manim;
+  int mtime;
   float seglen;
   float length;
   int numsegs;
 
   ::math::vector_3d tpos;
   ::math::vector_4d tcolor;
-  float tabove, tbelow;
+  float tabove;
+  float tbelow;
 
   noggit::scoped_blp_texture_reference _texture;
 

@@ -48,7 +48,6 @@ namespace noggit
     class cursor_selector;
     class minimap_widget;
     class model_spawner;
-    class EditorTemplate;
     class zoneid_widget;
   }
 
@@ -234,7 +233,8 @@ namespace noggit
     QTime _startup_time;
     qreal _last_update;
 
-    float ah,av,moving,strafing,updown,mousedir,movespd;
+    float ah;
+    float av;
     bool key_w;
     bool _GUIDisplayingEnabled;
 
@@ -266,7 +266,6 @@ namespace noggit
     ui::minimap_widget* _minimap;
     ui::model_spawner* _model_spawner;
     ui::cursor_selector* _cursor_selector;
-    ui::EditorTemplate* editortemplate;
     ui::zoneid_widget* _zoneid_widget;
 
     QPoint _mouse_position;
@@ -346,6 +345,11 @@ namespace noggit
     int _selected_area_id;
 
     bool _invert_mouse_y_axis;
+
+    float moving;
+    float strafing;
+    float updown;
+    float movespd;
 
     boost::optional<selection_type> _selection;
   };

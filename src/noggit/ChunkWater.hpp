@@ -64,6 +64,7 @@ namespace noggit
 
     uint8_t InfoMask[8];
 
-    float x, y;
+    float x;
+    float y;
   };
 }

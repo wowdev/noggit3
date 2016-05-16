@@ -7,9 +7,9 @@
 namespace noggit
 {
   ChunkWater::ChunkWater(float pX, float pY)
-  	: x(pX)
+  	: Liquids (nullptr)
+    , x(pX)
   	, y(pY)
-    , Liquids (nullptr)
   {
   }
 

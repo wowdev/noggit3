@@ -44,7 +44,8 @@ class Bone {
   Animation::M2Value< ::math::vector_3d> scale;
 
 public:
-  ::math::vector_3d pivot, transPivot;
+  ::math::vector_3d pivot;
+  ::math::vector_3d transPivot;
   int parent;
 
   bool billboard;
@@ -123,9 +124,13 @@ struct ModelRenderPass {
 };
 
 struct ModelCamera {
-  ::math::vector_3d pos, target;
-  float nearclip, farclip, fov;
-  Animation::M2Value< ::math::vector_3d> tPos, tTarget;
+  ::math::vector_3d pos;
+  ::math::vector_3d target;
+  float nearclip;
+  float farclip;
+  float fov;
+  Animation::M2Value< ::math::vector_3d> tPos;
+  Animation::M2Value< ::math::vector_3d> tTarget;
   Animation::M2Value<float> rot;
 
   ModelCamera(const noggit::mpq::file& f, const ModelCameraDef &mcd, int *global);
@@ -133,10 +138,16 @@ struct ModelCamera {
 };
 
 struct ModelLight {
-  int type, parent;
-  ::math::vector_3d pos, tpos, dir, tdir;
-  Animation::M2Value< ::math::vector_3d> diffColor, ambColor;
-  Animation::M2Value<float> diffIntensity, ambIntensity;
+  int type;
+  int parent;
+  ::math::vector_3d pos;
+  ::math::vector_3d tpos;
+  ::math::vector_3d dir;
+  ::math::vector_3d tdir;
+  Animation::M2Value< ::math::vector_3d> diffColor;
+  Animation::M2Value< ::math::vector_3d> ambColor;
+  Animation::M2Value<float> diffIntensity;
+  Animation::M2Value<float> ambIntensity;
   //Animation::M2Value<float> attStart,attEnd;
   //Animation::M2Value<bool> Enabled;
 

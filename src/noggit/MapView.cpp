@@ -63,6 +63,9 @@ namespace noggit
     , ah (ah0)
     , av (av0)
     , _GUIDisplayingEnabled (true)
+    , flags(TERRAIN | WMODOODAS | FOG | DOODADS | TERRAIN | DRAWWMO)
+    , backupFlags(0)
+    , mViewMode (eViewMode_3D)
     , mTimespeed (1.0f)
     , _world (world)
     , _minimap (new ui::minimap_widget (nullptr))
@@ -75,6 +78,7 @@ namespace noggit
     , _fog_distance (777.0f)
     , _holding_left_mouse_button (false)
     , _holding_right_mouse_button (false)
+    , _only_holding_right_mouse_button (false)
     , _current_terrain_editing_mode (shaping)
     , _terrain_editing_mode_before_2d (_current_terrain_editing_mode)
     , _save_to_minimap_on_next_drawing (false)
@@ -114,17 +118,10 @@ namespace noggit
     , _settings (new QSettings (this))
     , _clipboard (boost::none)
     , _invert_mouse_y_axis (false)
-
-    //! \todo Sort to correct order and rename.
     , moving (0.0f)
     , strafing (0.0f)
     , updown (0.0f)
     , movespd (66.6f)
-    , _only_holding_right_mouse_button (false)
-    , mViewMode (eViewMode_3D)
-    , editortemplate (nullptr)
-    , flags(TERRAIN | WMODOODAS | FOG | DOODADS | TERRAIN | DRAWWMO)
-    , backupFlags(0)
   {
     setMinimumSize (500, 500);
     setMaximumHeight (2000);
@@ -2392,7 +2389,7 @@ namespace noggit
 
 void MapView::updateParent()
 {
-    editortemplate = (noggit::ui::EditorTemplate*)this->parent();
+    noggit::ui::EditorTemplate* editortemplate = (noggit::ui::EditorTemplate*)this->parent();
     editortemplate->addPropBar(_shaping_settings_widget);
     editortemplate->addPropBar(_texturing_settings_widget);
     editortemplate->addPropBar(_smoothing_settings_widget);
