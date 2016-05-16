@@ -16,6 +16,8 @@ namespace noggit
       }
       virtual void finish_loading() = 0;
 
+      virtual ~object() = default;
+
     protected:
       bool _finished;
     };
