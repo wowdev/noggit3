@@ -38,10 +38,9 @@ namespace noggit
     , _menu_bar (new QMenuBar (this))
 #endif
     {
-      initialize_video();
       setWindowTitle("NoggIt Studio");
 
-      //textureSelecter *test = new textureSelecter(_dummy_gl_widget);
+      //textureSelecter *test = new textureSelecter(app().shared_gl_widget());
       //! todo windows has a problem with sharing the dummy (may sth about render contex)
 
       QMenu* fileMenu = menuBar()->addMenu (tr("&File"));
@@ -88,7 +87,7 @@ namespace noggit
                                       , app().setting("view_distance").toReal()
                                       , 0.0
                                       , 0.0
-                                      , _dummy_gl_widget
+                                      , app().shared_gl_widget()
                                       , this
                                       )
                           );
@@ -136,59 +135,6 @@ namespace noggit
     {
       _help = new noggit::ui::help_widget;
       _help->show();
-    }
-
-
-    class dummy_gl_widget : public QGLWidget
-    {
-    public:
-      dummy_gl_widget (const QGLFormat& format)
-      : QGLWidget (format)
-      {
-        updateGL();
-      }
-
-    protected:
-      virtual void initializeGL()
-      {
-        const GLenum err (glewInit());
-        if(GLEW_OK != err)
-        {
-          LogError << "GLEW: " << glewGetErrorString (err) << std::endl;
-          throw std::runtime_error ("unable to initialize glew.");
-        }
-
-        //! \todo Fallback for old and bad platforms.
-        if(!glGenBuffers)
-          glGenBuffers = glGenBuffersARB;
-        if(!glBindBuffer)
-          glBindBuffer = glBindBufferARB;
-        if(!glBufferData)
-          glBufferData = glBufferDataARB;
-
-        LogDebug << "GL: Version: " << glGetString (GL_VERSION) << std::endl;
-        LogDebug << "GL: Vendor: " << glGetString (GL_VENDOR) << std::endl;
-        LogDebug << "GL: Renderer: " << glGetString (GL_RENDERER) << std::endl;
-      }
-    };
-
-    void MainWindow::initialize_video()
-    {
-      if(!QGLFormat::hasOpenGL())
-        LogError << "Your system does not support OpenGL. Sorry, this application can't run without it." << std::endl;
-
-      QGLFormat format;
-      format.setStencilBufferSize (1);
-      format.setDepthBufferSize (16);
-      format.setAlphaBufferSize (8);
-
-      if(app().setting("antialiasing").toBool())
-      {
-        format.setSampleBuffers (true);
-        format.setSamples (4);
-      }
-
-      _dummy_gl_widget = new dummy_gl_widget (format);
     }
   }
 }
