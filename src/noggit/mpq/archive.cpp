@@ -30,8 +30,7 @@ namespace noggit
                                         )
                  )
             {
-                LogError << "Error creating archive: " << filename.toStdString() << "\n";
-                return;
+              throw std::runtime_error ("Error creating archive: " + filename.toStdString());
             }
             else
             {
@@ -45,9 +44,7 @@ namespace noggit
                                      )
                  )
             {
-                LogError << "Error opening archive: " << filename.toStdString() << "\n";
-                throw std::runtime_error ("Opening archive failed.");
-                return;
+              throw std::runtime_error ("Error opening archive: " + filename.toStdString());
             }
             else
             {
