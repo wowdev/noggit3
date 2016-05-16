@@ -28,12 +28,6 @@
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
-static const int HEIGHT_TOP = 1000;
-static const int HEIGHT_MID = 600;
-static const int HEIGHT_LOW = 300;
-static const int HEIGHT_ZERO = 0;
-static const int HEIGHT_SHALLOW = -100;
-static const int HEIGHT_DEEP = -250;
 static const double MAPCHUNK_RADIUS = 47.140452079103168293389624140323; //sqrt((533.33333/16)^2 + (533.33333/16)^2)
 static const int CONTOUR_WIDTH = 128;
 static const float texDetail = 8.0f;
@@ -122,71 +116,6 @@ namespace
     mapstrip2 = new StripType[stripsize2];
     stripify2<StripType>(defstrip, mapstrip2);
     delete[] defstrip;
-  }
-
-
-  /*
-   White  1.00  1.00  1.00
-   Brown  0.75  0.50  0.00
-   Green  0.00  1.00  0.00
-   Yellow  1.00  1.00  0.00
-   Lt Blue  0.00  1.00  1.00
-   Blue  0.00  0.00  1.00
-   Black  0.00  0.00  0.00
-   */
-
-  void HeightColor(float height, ::math::vector_3d *Color)
-  {
-    float Amount;
-
-    if(height>HEIGHT_TOP)
-    {
-      Color->x (1.0f);
-      Color->y (1.0f);
-      Color->z (1.0f);
-    }
-    else if(height>HEIGHT_MID)
-    {
-      Amount=(height-HEIGHT_MID)/(HEIGHT_TOP-HEIGHT_MID);
-      Color->x (0.75f + Amount * 0.25f);
-      Color->y (0.5f + 0.5f * Amount);
-      Color->z (Amount);
-    }
-    else if(height>HEIGHT_LOW)
-    {
-      Amount=(height-HEIGHT_LOW)/(HEIGHT_MID-HEIGHT_LOW);
-      Color->x (Amount * 0.75f);
-      Color->y (1.00f - 0.5f * Amount);
-      Color->z (0.0f);
-    }
-    else if(height>HEIGHT_ZERO)
-    {
-      Amount=(height-HEIGHT_ZERO)/(HEIGHT_LOW-HEIGHT_ZERO);
-
-      Color->x (1.0f - Amount);
-      Color->y (1.0f);
-      Color->z (0.0f);
-    }
-    else if(height>HEIGHT_SHALLOW)
-    {
-      Amount=(height-HEIGHT_SHALLOW)/(HEIGHT_ZERO-HEIGHT_SHALLOW);
-      Color->x (0.0f);
-      Color->y (Amount);
-      Color->z (1.0f);
-    }
-    else if(height>HEIGHT_DEEP)
-    {
-      Amount=(height-HEIGHT_DEEP)/(HEIGHT_SHALLOW-HEIGHT_DEEP);
-      Color->x (0.0f);
-      Color->y (0.0f);
-      Color->z (Amount);
-    }
-    else
-    {
-      Color->x (0.0f);
-      Color->y (0.0f);
-      Color->z (0.0f);
-    }
   }
 }
 

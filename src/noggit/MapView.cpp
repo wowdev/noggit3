@@ -864,7 +864,6 @@ namespace noggit
     glLoadIdentity();
   }
 
-  static const qreal nearclip (1.0);
   static const qreal fov (45.0);
   void MapView::setup_3d_rendering() const
   {
