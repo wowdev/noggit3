@@ -862,7 +862,6 @@ RibbonEmitter::RibbonEmitter(Model* model_, const noggit::mpq::file &f, ModelRib
   // in BFD, res is 60 and len is 0.6, the trails are very short (too long here)
   // in CoT, res and len are like 10 but the trails are supposed to be much longer (too short here)
   , length (mta.res * seglen)
-  , numsegs (mta.res)
   , tpos (fixCoordSystem(mta.pos))
   // just use the first texture for now; most models I've checked only had one
   , _texture (model->_textures[*reinterpret_cast<uint32_t*> (f.getBuffer() + mta.ofsTextures)])
