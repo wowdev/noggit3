@@ -16,14 +16,14 @@ namespace noggit
 	{
 		zoneid_widget::zoneid_widget(World *world,QWidget* Parent)
 			: QTreeWidget(Parent)
-			, MapName("")
+      , _world(world)
 			, ZoneName("")
 			, SubZoneName("")
-			, MapID(-1)
-			, ZoneID(-1)
-			, SubZoneID(-1)
+      , MapName("")
+      , ZoneID(-1)
+      , SubZoneID(-1)
+      , MapID(-1)
 			, selectedArea(-1)
-			, _world(world)
 		{
 			int width = 640;
 			int height = 480;
