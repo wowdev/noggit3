@@ -144,8 +144,6 @@ class RibbonEmitter {
   Animation::M2Value<float> below;
 
   Bone *parent;
-  float f1;
-  float f2;
 
   ::math::vector_3d pos;
 
@@ -153,7 +151,6 @@ class RibbonEmitter {
   int mtime;
   float seglen;
   float length;
-  int numsegs;
 
   ::math::vector_3d tpos;
   ::math::vector_4d tcolor;

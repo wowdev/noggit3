@@ -23,10 +23,8 @@ public:
     void changeModel(QString filename);
 
 private:
-    int frames;
     bool _draw_loading;
     QTime _run_time;
-    qreal _last_update;
     noggit::scoped_model_reference theModel;
     GLfloat distance;
     GLfloat xRot;
