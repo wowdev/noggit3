@@ -1,8 +1,7 @@
 // random.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __MATH_RANDOM_H
-#define __MATH_RANDOM_H
+#pragma once
 
 namespace math
 {
@@ -21,5 +20,3 @@ namespace math
     }
   }
 }
-
-#endif

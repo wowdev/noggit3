@@ -2,8 +2,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
-#ifndef __TEXTUREPICKER_H
-#define __TEXTUREPICKER_H
+#pragma once
 
 #include <noggit/UICloseWindow.h>
 
@@ -21,5 +20,3 @@ public:
 private:
   UITexture* _textures[4];
 };
-
-#endif

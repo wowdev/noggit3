@@ -1,8 +1,7 @@
 // loading_thread.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __NOGGIT_ASYNC_LOADING_THREAD_H
-#define __NOGGIT_ASYNC_LOADING_THREAD_H
+#pragma once
 
 #include <QThread>
 
@@ -26,5 +25,3 @@ namespace noggit
     };
   }
 }
-
-#endif

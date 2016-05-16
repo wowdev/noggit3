@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef __TEXTURINGUI_H
-#define __TEXTURINGUI_H
+#pragma once
 
 class MapChunk;
 class UIFrame;
@@ -30,5 +29,3 @@ public:
   static void updateSelectedTexture();
   static noggit::blp_texture* selectedTexture;
 };
-
-#endif

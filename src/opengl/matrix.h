@@ -1,8 +1,7 @@
 // matrix.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __OPENGL_MATRIX_H
-#define __OPENGL_MATRIX_H
+#pragma once
 
 #include <math/matrix_4x4.h>
 
@@ -30,5 +29,3 @@ namespace opengl
     }
   }
 }
-
-#endif

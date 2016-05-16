@@ -1,8 +1,7 @@
 // vector_2d.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __MATH_VECTOR_2D_H
-#define __MATH_VECTOR_2D_H
+#pragma once
 
 #include <math/constants.h>
 
@@ -44,5 +43,3 @@ namespace math
 
   void rotate (float x0, float y0, float* x, float* y, float radians);
 }
-
-#endif

@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef WMOINSTANCE_H
-#define WMOINSTANCE_H
+#pragma once
 
 #include <set>
 #include <stdint.h>
@@ -74,6 +73,3 @@ public:
 private:
   World* _world;
 };
-
-
-#endif // WMOINSTANCE_H

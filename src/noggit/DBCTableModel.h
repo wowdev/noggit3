@@ -1,9 +1,7 @@
 // DBCTableModel.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 
-
-#ifndef DBCTABLEMODEL_H
-#define DBCTABLEMODEL_H
+#pragma once
 
 #include <QString>
 #include <QAbstractTableModel>
@@ -47,7 +45,3 @@ public slots:
     void settingsChanged(int first,int last);
     void save();
 };
-
-
-
-#endif // DBCTABLEMODEL_H

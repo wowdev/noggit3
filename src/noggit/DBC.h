@@ -3,8 +3,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
-#ifndef AREADB_H
-#define AREADB_H
+#pragma once
 
 #include <QString>
 
@@ -202,5 +201,3 @@ extern LightFloatBandDB gLightFloatBandDB;
 extern GroundEffectDoodadDB gGroundEffectDoodadDB;
 extern GroundEffectTextureDB gGroundEffectTextureDB;
 extern LiquidTypeDB gLiquidTypeDB;
-
-#endif

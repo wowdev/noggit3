@@ -2,8 +2,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 
-#ifndef __HELPER_QT_CASE_INSENSITIVE_H
-#define __HELPER_QT_CASE_INSENSITIVE_H
+#pragma once
 
 #include <QString>
 #include <QDir>
@@ -42,4 +41,3 @@ namespace helper
     }
   }
 }
-#endif

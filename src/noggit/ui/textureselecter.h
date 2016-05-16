@@ -2,8 +2,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
-#ifndef TEXTURESELECTER_H
-#define TEXTURESELECTER_H
+#pragma once
 
 #include <noggit/blp_texture.h>
 #include <noggit/TextureManager.h>
@@ -78,5 +77,3 @@ namespace noggit
     };
   }
 }
-
-#endif // TEXTURESELECTER_H

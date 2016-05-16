@@ -2,8 +2,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
-#ifndef MODELUI_H
-#define MODELUI_H
+#pragma once
 
 #include <noggit/UIFrame.h>
 
@@ -19,4 +18,3 @@ public:
   void render() const;
   void setModel( Model* setModel );
 };
-#endif

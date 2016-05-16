@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef PARTICLE_H
-#define PARTICLE_H
+#pragma once
 
 #include <list>
 #include <vector>
@@ -151,7 +150,3 @@ public:
   void setup(int anim, int time);
   void draw();
 };
-
-
-
-#endif

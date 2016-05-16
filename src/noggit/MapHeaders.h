@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef MAPHEADERS
-#define MAPHEADERS
+#pragma once
 
 #include <stdint.h>
 
@@ -223,5 +222,3 @@ struct MH2O_Render
     memset(fatigue, 0, sizeof (fatigue));
   }
 };
-
-#endif

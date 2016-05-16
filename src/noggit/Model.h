@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef MODEL_H
-#define MODEL_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -220,5 +219,3 @@ public:
 
   virtual void finish_loading();
 };
-
-#endif

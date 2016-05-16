@@ -3,9 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef __TEXTUREUI_H
-#define __TEXTUREUI_H
-
+#pragma once
 #include <string>
 
 #include <noggit/UIFrame.h>
@@ -44,5 +42,3 @@ public:
   }
   noggit::blp_texture* getTexture( );
 };
-
-#endif

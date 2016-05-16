@@ -11,7 +11,7 @@ automatically updated.
 This  project  requires  CMake  to  be built.  It  also  requires  the
 following libraries:
 
-* OpenGL 
+* OpenGL
 * GLEW
 * Qt (4.8, Core, Gui, OpenGL)
 * storm (stormlib by Ladislav Zezula)
@@ -36,10 +36,9 @@ are similar.
 
    // foo_ban.h is part of Noggit3, licensed via GNU General Publiicense (version 3).
    // First Lastname <MAIL@ADDRESS>
-   
-   //! \note Include guard shall be the full path except for src/.
-   #ifndef NOGGIT_UI_FOO_H
-   #define NOGGIT_UI_FOO_H
+
+   //! \note Include guard shall use pragma once.
+   #pragma once
 
    //! \note   Use  fully   qualified  paths.   Standard   >  external
    //! dependencies > own.
@@ -55,7 +54,7 @@ are similar.
        class foo_ban : public QWidget
        {
        Q_OBJECT
-         
+
        public:
          //! \note  Long  parameter  list.   Would  be  more  than  80
          //! chars.  Break  with comma  in  front.  Use  spaces to  be
@@ -72,7 +71,7 @@ are similar.
          //! \note Use const where possible. No space between name and
          //! braces when no arguments are given.
          void render() const;
-         
+
          //! \note If you really need getters and setters, your design
          //! might be broken.
          const type& var() const
@@ -106,7 +105,7 @@ are similar.
 
            return *smallest;
          }
- 
+
        private:
          //! \note Member variables are prefixed with an underscore.
          type _var;
@@ -116,5 +115,5 @@ are similar.
          typedef std::vector<baz_type> bazs_type;
          bazs_type _bazs;
        }
-     }        
-   }     
+     }
+   }

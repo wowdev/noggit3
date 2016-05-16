@@ -3,8 +3,7 @@
 // Glararan <glararan@glararan.eu>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
-#ifndef __GUI_H
-#define __GUI_H
+#pragma once
 
 class UIToolbar;
 class UIStatusBar;
@@ -45,5 +44,3 @@ public:
 private:
   World* _world;
 };
-
-#endif

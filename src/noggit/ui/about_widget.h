@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef __WIN_CREDITS_H
-#define __WIN_CREDITS_H
+#pragma once
 
 #include <QWidget>
 
@@ -21,5 +20,3 @@ namespace noggit
     };
   }
 }
-
-#endif

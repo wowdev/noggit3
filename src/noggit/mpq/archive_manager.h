@@ -2,8 +2,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
-#ifndef __NOGGIT_MPQ_ARCHIVE_MANAGER_H
-#define __NOGGIT_MPQ_ARCHIVE_MANAGER_H
+#pragma once
 
 #include <QString>
 #include <QList>
@@ -62,6 +61,3 @@ namespace noggit
     };
   }
 }
-
-#endif
-

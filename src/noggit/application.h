@@ -3,8 +3,7 @@
 // Mjolln√  <mjollna.wow@gmail.com>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
-#ifndef __NOGGIT_APPLICATION_H
-#define __NOGGIT_APPLICATION_H
+#pragma once
 
 #include <QApplication>
 #include <QDir>
@@ -75,5 +74,3 @@ namespace noggit
 
   application& app();
 }
-
-#endif

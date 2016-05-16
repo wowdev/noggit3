@@ -4,8 +4,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef MAPCHUNK_H
-#define MAPCHUNK_H
+#pragma once
 
 #include <boost/optional.hpp>
 
@@ -169,5 +168,3 @@ private:
   StripType _line_strip[32];
   StripType _hole_strip[128];
 };
-
-#endif // MAPCHUNK_H

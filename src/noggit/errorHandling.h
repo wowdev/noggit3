@@ -5,17 +5,7 @@
 // Tigurius <bstigurius@googlemail.com>
 // Vincent Ambo <tazjin@me.com>
 
-/*
- * ErrorHandling.h
- *
- * Description: Simple implementation of signal handlers. Include this and call RegisterErrorHandlers(); in main() once.
- *
- *  Created on: Apr 26, 2010
- *      Author: loerwald
- */
-
-#ifndef ERRORHANDLING_H_
-#define ERRORHANDLING_H_
+#pragma once
 
 #include <csignal>
 #include <string>
@@ -119,7 +109,5 @@ void printStacktrace()
   StackWalker sw;
   sw.ShowCallstack();
 }
-
-#endif
 
 #endif

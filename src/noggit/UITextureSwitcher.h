@@ -3,8 +3,7 @@
 // Glararan <glararan@glararan.eu>
 // Stephan Biegel <project.modcraft@googlemail.com>
 
-#ifndef __TEXTURESWITCHER_H
-#define __TEXTURESWITCHER_H
+#pragma once
 
 #include <noggit/UICloseWindow.h>
 
@@ -28,5 +27,3 @@ private:
 
   World* _world;
 };
-
-#endif

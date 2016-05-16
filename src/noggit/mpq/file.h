@@ -2,8 +2,7 @@
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 // Mjollnà <mjollna.wow@gmail.com>
 
-#ifndef __NOGGIT_MPQ_FILE_H
-#define __NOGGIT_MPQ_FILE_H
+#pragma once
 
 #include <QString>
 
@@ -81,6 +80,3 @@ namespace noggit
     std::string normalized_filename (std::string);
   }
 }
-
-#endif
-

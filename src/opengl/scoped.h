@@ -1,8 +1,7 @@
 // scoped.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __OPENGL_SCOPED_H
-#define __OPENGL_SCOPED_H
+#pragma once
 
 #include <opengl/texture.h>
 
@@ -125,5 +124,3 @@ namespace opengl
     };
   }
 }
-
-#endif

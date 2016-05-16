@@ -3,8 +3,7 @@
 // Stephan Biegel <project.modcraft@googlemail.com>
 // Tigurius <bstigurius@googlemail.com>
 
-#ifndef SKY_H
-#define SKY_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -137,9 +136,3 @@ public:
   OutdoorLightStats getLightStats(int time);
 
 };
-
-
-
-
-#endif
-

@@ -2,8 +2,7 @@
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QVariant>
@@ -60,5 +59,3 @@ namespace noggit
     };
   }
 }
-
-#endif // MAINWINDOW_H

@@ -2,8 +2,7 @@
 // Benedikt Kleiner <benedikt.kleiner@googlemail.com>
 // Glararan <glararan@glararan.eu>
 
-#ifndef EDITORTEMPLATE_H
-#define EDITORTEMPLATE_H
+#pragma once
 
 #include <noggit/ui/MainWindow.h>
 
@@ -37,5 +36,3 @@ namespace noggit
     };
   }
 }
-
-#endif // EDITORTEMPLATE_H

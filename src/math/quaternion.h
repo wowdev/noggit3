@@ -1,8 +1,7 @@
 // quaternion.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __MATH_QUATERNION_H
-#define __MATH_QUATERNION_H
+#pragma once
 
 #include <stdint.h>
 
@@ -56,5 +55,3 @@ namespace math
     int16_t w;
   };
 }
-
-#endif

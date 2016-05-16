@@ -1,8 +1,7 @@
 // blp_texture.h is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
-#ifndef __NOGGIT_BLP_TEXTURE_H
-#define __NOGGIT_BLP_TEXTURE_H
+#pragma once
 
 #include <QString>
 #include <QPixmap>
@@ -36,5 +35,3 @@ namespace noggit
                                , const int& height
                                );
 }
-
-#endif
