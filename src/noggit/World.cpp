@@ -1152,6 +1152,7 @@ void World::draw ( size_t flags
 
     // WMOs / map objects
     if (flags & DRAWWMO)
+    {
       if (enable_shaders)
       {
         ::math::vector_4d spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
@@ -1176,7 +1177,9 @@ void World::draw ( size_t flags
         glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 0 );
       }
       else
+      {
         for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
+        {
           it->second->draw ( flags & WMODOODAS
                            , flags & FOG
                            , skies->hasSkies()
@@ -1186,6 +1189,9 @@ void World::draw ( size_t flags
                            , camera
                            , selected_item
                            );
+        }
+      }
+    }
 
     outdoorLights( true );
     setupFog (flags & FOG, fog_distance);
