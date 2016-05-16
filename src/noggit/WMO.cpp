@@ -31,35 +31,6 @@
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
-namespace
-{
-  void WMOHighlight( ::math::vector_4d color )
-  {
-    glDisable( GL_ALPHA_TEST );
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glDisable( GL_CULL_FACE );
-    glActiveTexture( GL_TEXTURE0 );
-    glDisable( GL_TEXTURE_2D);
-    glActiveTexture( GL_TEXTURE1 );
-    glDisable( GL_TEXTURE_2D );
-    glColor4fv( color );
-    glMaterialfv( GL_FRONT, GL_EMISSION, color );
-    glDepthMask( GL_FALSE );
-  }
-
-  void WMOUnhighlight()
-  {
-    glEnable( GL_ALPHA_TEST );
-    glDisable( GL_BLEND );
-    glEnable( GL_CULL_FACE );
-    glActiveTexture( GL_TEXTURE0 );
-    glEnable( GL_TEXTURE_2D );
-    glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-    glDepthMask( GL_TRUE );
-  }
-}
-
 const std::string& WMO::filename() const
 {
   return _filename;

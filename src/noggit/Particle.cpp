@@ -16,23 +16,6 @@ static const unsigned int MAX_PARTICLES = 10000;
 
 namespace
 {
-  ::math::vector_4d fromARGB(uint32_t color)
-  {
-    const float a = ((color & 0xFF000000) >> 24) / 255.0f;
-    const float r = ((color & 0x00FF0000) >> 16) / 255.0f;
-    const float g = ((color & 0x0000FF00) >>  8) / 255.0f;
-    const float b = ((color & 0x000000FF)      ) / 255.0f;
-    return ::math::vector_4d(r,g,b,a);
-  }
-  ::math::vector_4d fromBGRA(uint32_t color)
-  {
-    const float b = ((color & 0xFF000000) >> 24) / 255.0f;
-    const float g = ((color & 0x00FF0000) >> 16) / 255.0f;
-    const float r = ((color & 0x0000FF00) >>  8) / 255.0f;
-    const float a = ((color & 0x000000FF)      ) / 255.0f;
-    return ::math::vector_4d(r,g,b,a);
-  }
-
   template<class T>
   T lifeRamp (float life, float mid, const T& a, const T& b, const T& c)
   {
