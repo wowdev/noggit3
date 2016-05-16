@@ -8,7 +8,10 @@
 
 #include <noggit/Log.h>
 
-std::ofstream gLogStream;
+namespace
+{
+  std::ofstream gLogStream;
+}
 
 std::ostream& _LogError( const char * pFile, int pLine )
 {

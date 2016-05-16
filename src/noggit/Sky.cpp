@@ -285,16 +285,19 @@ void Skies::initSky(::math::vector_3d pos, int t)
   }
 }
 
-void drawCircle(unsigned int *buf, int dim, float x, float y, float r, unsigned int col)
+namespace
 {
-    float circ = 2*r* ::math::constants::pi();
-  glBegin( GL_LINES );
-  for (int i=0; i<circ; ++i) {
-    float phi = 2* ::math::constants::pi() *i/circ;
-    int px = x + r * cosf(phi);
-    int py = y + r * sinf(phi);
-    if (px>=0 && px<dim && py>=0 && py<dim) {
-            buf[py*dim+px] = col;
+  void drawCircle(unsigned int *buf, int dim, float x, float y, float r, unsigned int col)
+  {
+      float circ = 2*r* ::math::constants::pi();
+    glBegin( GL_LINES );
+    for (int i=0; i<circ; ++i) {
+      float phi = 2* ::math::constants::pi() *i/circ;
+      int px = x + r * cosf(phi);
+      int py = y + r * sinf(phi);
+      if (px>=0 && px<dim && py>=0 && py<dim) {
+              buf[py*dim+px] = col;
+      }
     }
   }
 }

@@ -85,12 +85,15 @@ ModelInstance::~ModelInstance()
   }
 }
 
-::math::vector_3d TransformCoordsForModel (const ::math::vector_3d& pIn)
+namespace
 {
-  ::math::vector_3d lTemp (pIn);
-  lTemp.y (pIn.z());
-  lTemp.z (-pIn.y());
-  return lTemp;
+  ::math::vector_3d TransformCoordsForModel (const ::math::vector_3d& pIn)
+  {
+    ::math::vector_3d lTemp (pIn);
+    lTemp.y (pIn.z());
+    lTemp.z (-pIn.y());
+    return lTemp;
+  }
 }
 
 void ModelInstance::draw_selection_indicator() const

@@ -43,108 +43,111 @@
 #include <noggit/MapTile.h>
 #include <noggit/mpq/file.h>
 
-void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
+namespace
 {
-  float vx = x2-x1;
-  float vy = y2-y1;
-  float vz = z2-z1;
+  void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
+  {
+    float vx = x2-x1;
+    float vy = y2-y1;
+    float vz = z2-z1;
 
-  //handle the degenerate case of z1 == z2 with an approximation
-  if( vz == 0.0f )
-    vz = .0001f;
+    //handle the degenerate case of z1 == z2 with an approximation
+    if( vz == 0.0f )
+      vz = .0001f;
 
-  float v = sqrt( vx*vx + vy*vy + vz*vz );
-  float ax = 57.2957795f*acos( vz/v );
-  if ( vz < 0.0f )
-    ax = -ax;
-  float rx = -vy*vz;
-  float ry = vx*vz;
-  glPushMatrix();
+    float v = sqrt( vx*vx + vy*vy + vz*vz );
+    float ax = 57.2957795f*acos( vz/v );
+    if ( vz < 0.0f )
+      ax = -ax;
+    float rx = -vy*vz;
+    float ry = vx*vz;
+    glPushMatrix();
 
-  //draw the quadric
-  glTranslatef( x1,y1,z1 );
-  glRotatef(ax, rx, ry, 0.0);
+    //draw the quadric
+    glTranslatef( x1,y1,z1 );
+    glRotatef(ax, rx, ry, 0.0);
 
-  gluQuadricOrientation(quadric,GLU_OUTSIDE);
-  gluSphere(quadric, radius, subdivisions , subdivisions );
+    gluQuadricOrientation(quadric,GLU_OUTSIDE);
+    gluSphere(quadric, radius, subdivisions , subdivisions );
 
-  glPopMatrix();
-}
+    glPopMatrix();
+  }
 
-void renderSphere_convenient(float x, float y, float z, float radius, int subdivisions)
-{
-  //the same quadric can be re-used for drawing many objects
-  glDisable(GL_LIGHTING);
+  void renderSphere_convenient(float x, float y, float z, float radius, int subdivisions)
+  {
+    //the same quadric can be re-used for drawing many objects
+    glDisable(GL_LIGHTING);
 
-  //! \todo This should be passed in!
-  QSettings settings;
-  glColor4f ( settings.value ("cursor/red", 1.0f).toFloat()
-            , settings.value ("cursor/green", 1.0f).toFloat()
-            , settings.value ("cursor/blue", 1.0f).toFloat()
-            , settings.value ("cursor/alpha", 1.0f).toFloat()
-            );
+    //! \todo This should be passed in!
+    QSettings settings;
+    glColor4f ( settings.value ("cursor/red", 1.0f).toFloat()
+              , settings.value ("cursor/green", 1.0f).toFloat()
+              , settings.value ("cursor/blue", 1.0f).toFloat()
+              , settings.value ("cursor/alpha", 1.0f).toFloat()
+              );
 
-  GLUquadricObj *quadric=gluNewQuadric();
-  gluQuadricNormals(quadric, GLU_SMOOTH);
-  renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
-  renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
-  gluDeleteQuadric(quadric);
-  glEnable(GL_LIGHTING);
-}
+    GLUquadricObj *quadric=gluNewQuadric();
+    gluQuadricNormals(quadric, GLU_SMOOTH);
+    renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
+    renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
+    gluDeleteQuadric(quadric);
+    glEnable(GL_LIGHTING);
+  }
 
-void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, float radius, GLUquadricObj *quadric)
-{
-  float vx = x2 - x1;
-  float vy = y2 - y1;
-  float vz = z2 - z1;
+  void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, float radius, GLUquadricObj *quadric)
+  {
+    float vx = x2 - x1;
+    float vy = y2 - y1;
+    float vz = z2 - z1;
 
-  //handle the degenerate case of z1 == z2 with an approximation
-  if( vz == 0.0f )
-    vz = .0001f;
+    //handle the degenerate case of z1 == z2 with an approximation
+    if( vz == 0.0f )
+      vz = .0001f;
 
-  float v = sqrt( vx*vx + vy*vy + vz*vz );
-  float ax = 57.2957795f*acos( vz/v );
-  if(vz < 0.0f)
-    ax = -ax;
+    float v = sqrt( vx*vx + vy*vy + vz*vz );
+    float ax = 57.2957795f*acos( vz/v );
+    if(vz < 0.0f)
+      ax = -ax;
 
-  float rx = -vy * vz;
-  float ry = vx * vz;
+    float rx = -vy * vz;
+    float ry = vx * vz;
 
-  glPushMatrix();
-  glDisable(GL_DEPTH_TEST);
-  glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-  glEnable(GL_COLOR_MATERIAL);
+    glPushMatrix();
+    glDisable(GL_DEPTH_TEST);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+    glEnable(GL_COLOR_MATERIAL);
 
-  //draw the quadric
-  glTranslatef(x1, y1, z1);
-  glRotatef(ax, rx, ry, 0.0f);
-  glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+    //draw the quadric
+    glTranslatef(x1, y1, z1);
+    glRotatef(ax, rx, ry, 0.0f);
+    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
 
-  //! \todo This should be passed in!
-  QSettings settings;
-  glColor4f ( settings.value ("cursor/red", 1.0f).toFloat()
-            , settings.value ("cursor/green", 1.0f).toFloat()
-            , settings.value ("cursor/blue", 1.0f).toFloat()
-            , settings.value ("cursor/alpha", 1.0f).toFloat()
-            );
+    //! \todo This should be passed in!
+    QSettings settings;
+    glColor4f ( settings.value ("cursor/red", 1.0f).toFloat()
+              , settings.value ("cursor/green", 1.0f).toFloat()
+              , settings.value ("cursor/blue", 1.0f).toFloat()
+              , settings.value ("cursor/alpha", 1.0f).toFloat()
+              );
 
-  gluQuadricOrientation(quadric, GLU_OUTSIDE);
-  gluDisk(quadric, radius , radius + 1.0f, std::max (15.0, radius * 1.5), 1);
+    gluQuadricOrientation(quadric, GLU_OUTSIDE);
+    gluDisk(quadric, radius , radius + 1.0f, std::max (15.0, radius * 1.5), 1);
 
-  glEnable(GL_DEPTH_TEST);
-  glPopMatrix();
-}
+    glEnable(GL_DEPTH_TEST);
+    glPopMatrix();
+  }
 
-void renderDisk_convenient(float x, float y, float z, float radius)
-{
-  glDisable(GL_LIGHTING);
-  GLUquadricObj *quadric = gluNewQuadric();
-  gluQuadricDrawStyle(quadric, GLU_LINE);
-  gluQuadricNormals(quadric, GLU_SMOOTH);
-  renderDisk(x, y, z, x, y, z, radius, quadric);
-  renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
-  gluDeleteQuadric(quadric);
-  glEnable(GL_LIGHTING);
+  void renderDisk_convenient(float x, float y, float z, float radius)
+  {
+    glDisable(GL_LIGHTING);
+    GLUquadricObj *quadric = gluNewQuadric();
+    gluQuadricDrawStyle(quadric, GLU_LINE);
+    gluQuadricNormals(quadric, GLU_SMOOTH);
+    renderDisk(x, y, z, x, y, z, radius, quadric);
+    renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
+    gluDeleteQuadric(quadric);
+    glEnable(GL_LIGHTING);
+  }
 }
 
 MapTileEntry::MapTileEntry() : flags( 0 ), tile( nullptr ) {}
@@ -589,56 +592,58 @@ void World::initLowresTerrain()
   }
 }
 
-void initGlobalVBOs( GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords )
+namespace
 {
-  if( !*pDetailTexCoords && !*pAlphaTexCoords )
+  void initGlobalVBOs( GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords )
   {
-    ::math::vector_2d temp[mapbufsize], *vt;
-    float tx,ty;
+    if( !*pDetailTexCoords && !*pAlphaTexCoords )
+    {
+      ::math::vector_2d temp[mapbufsize], *vt;
+      float tx,ty;
 
-    // init texture coordinates for detail map:
-    vt = temp;
-    const float detail_half = 0.5f * detail_size / 8.0f;
-    for (int j=0; j<17; ++j) {
-      for (int i=0; i<((j%2)?8:9); ++i) {
-        tx = detail_size / 8.0f * i;
-        ty = detail_size / 8.0f * j * 0.5f;
-        if (j%2) {
-          // offset by half
-          tx += detail_half;
+      // init texture coordinates for detail map:
+      vt = temp;
+      const float detail_half = 0.5f * detail_size / 8.0f;
+      for (int j=0; j<17; ++j) {
+        for (int i=0; i<((j%2)?8:9); ++i) {
+          tx = detail_size / 8.0f * i;
+          ty = detail_size / 8.0f * j * 0.5f;
+          if (j%2) {
+            // offset by half
+            tx += detail_half;
+          }
+          *vt++ = ::math::vector_2d(tx, ty);
         }
-        *vt++ = ::math::vector_2d(tx, ty);
       }
-    }
 
-    glGenBuffers(1, pDetailTexCoords);
-    glBindBuffer(GL_ARRAY_BUFFER, *pDetailTexCoords);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
+      glGenBuffers(1, pDetailTexCoords);
+      glBindBuffer(GL_ARRAY_BUFFER, *pDetailTexCoords);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
 
-    // init texture coordinates for alpha map:
-    vt = temp;
+      // init texture coordinates for alpha map:
+      vt = temp;
 
-    const float alpha_half = 0.5f * (62.0f/64.0f) / 8.0f;
-    for (int j=0; j<17; ++j) {
-      for (int i=0; i<((j%2)?8:9); ++i) {
-        tx = (62.0f/64.0f) / 8.0f * i;
-        ty = (62.0f/64.0f) / 8.0f * j * 0.5f;
-        if (j%2) {
-          // offset by half
-          tx += alpha_half;
+      const float alpha_half = 0.5f * (62.0f/64.0f) / 8.0f;
+      for (int j=0; j<17; ++j) {
+        for (int i=0; i<((j%2)?8:9); ++i) {
+          tx = (62.0f/64.0f) / 8.0f * i;
+          ty = (62.0f/64.0f) / 8.0f * j * 0.5f;
+          if (j%2) {
+            // offset by half
+            tx += alpha_half;
+          }
+          *vt++ = ::math::vector_2d (tx, ty);
         }
-        *vt++ = ::math::vector_2d (tx, ty);
       }
+
+      glGenBuffers(1, pAlphaTexCoords);
+      glBindBuffer(GL_ARRAY_BUFFER, *pAlphaTexCoords);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
+
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
-
-    glGenBuffers(1, pAlphaTexCoords);
-    glBindBuffer(GL_ARRAY_BUFFER, *pAlphaTexCoords);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 }
-
 
 void World::initDisplay()
 {

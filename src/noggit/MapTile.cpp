@@ -480,82 +480,85 @@ boost::optional<float> MapTile::get_height ( const float& x
 
 /// --- Only saving related below this line. --------------------------
 
-void minmax (::math::vector_3d* a, ::math::vector_3d* b)
+namespace
 {
-  if( a->x() > b->x() )
+  void minmax (::math::vector_3d* a, ::math::vector_3d* b)
   {
-    const float t (b->x());
-    b->x (a->x());
-    a->x (t);
+    if( a->x() > b->x() )
+    {
+      const float t (b->x());
+      b->x (a->x());
+      a->x (t);
+    }
+    if( a->y() > b->y() )
+    {
+      const float t (b->y());
+      b->y (a->y());
+      a->y (t);
+    }
+    if( a->z() > b->z() )
+    {
+      const float t (b->z());
+      b->z (a->z());
+      a->z (t);
+    }
   }
-  if( a->y() > b->y() )
+
+  bool checkInside( ::math::vector_3d extentA[2], ::math::vector_3d extentB[2] )
   {
-    const float t (b->y());
-    b->y (a->y());
-    a->y (t);
+    minmax( &extentA[0], &extentA[1] );
+    minmax( &extentB[0], &extentB[1] );
+
+    return extentA[0].is_inside_of (extentB[0], extentB[1]) ||
+           extentA[1].is_inside_of (extentB[0], extentB[1]) ||
+           extentB[0].is_inside_of (extentA[0], extentA[1]) ||
+           extentB[1].is_inside_of (extentA[0], extentA[1]);
   }
-  if( a->z() > b->z() )
+  bool checkInside( ::math::vector_3d extentA[2], std::pair<::math::vector_3d, ::math::vector_3d> extentB )
   {
-    const float t (b->z());
-    b->z (a->z());
-    a->z (t);
+    minmax( &extentA[0], &extentA[1] );
+    minmax( &extentB.first, &extentB.second );
+
+    return extentA[0].is_inside_of (extentB.first, extentB.second) ||
+           extentA[1].is_inside_of (extentB.first, extentB.second) ||
+           extentB.first.is_inside_of (extentA[0], extentA[1]) ||
+           extentB.second.is_inside_of (extentA[0], extentA[1]);
   }
+
+  template<typename T>
+  T* get_pointer (std::vector<char>& vector, size_t pPosition = 0)
+  {
+    return reinterpret_cast<T*> (&vector[pPosition]);
+  }
+
+  void insert_string ( std::vector<char>& vector
+                     , size_t position
+                     , const std::string& str
+                     )
+  {
+    const char* const cstr (str.c_str());
+    vector.insert (vector.begin() + position, cstr, cstr + str.size() + 1);
+  }
+
+  struct sChunkHeader
+  {
+    int mMagic;
+    int mSize;
+  };
+
+  void SetChunkHeader( std::vector<char>& pArray, int pPosition, int pMagix, int pSize = 0 )
+  {
+    sChunkHeader * Header = get_pointer<sChunkHeader>( pArray, pPosition );
+    Header->mMagic = pMagix;
+    Header->mSize = pSize;
+  }
+
+  struct filenameOffsetThing
+  {
+    int nameID;
+    int filenamePosition;
+  };
 }
-
-bool checkInside( ::math::vector_3d extentA[2], ::math::vector_3d extentB[2] )
-{
-  minmax( &extentA[0], &extentA[1] );
-  minmax( &extentB[0], &extentB[1] );
-
-  return extentA[0].is_inside_of (extentB[0], extentB[1]) ||
-         extentA[1].is_inside_of (extentB[0], extentB[1]) ||
-         extentB[0].is_inside_of (extentA[0], extentA[1]) ||
-         extentB[1].is_inside_of (extentA[0], extentA[1]);
-}
-bool checkInside( ::math::vector_3d extentA[2], std::pair<::math::vector_3d, ::math::vector_3d> extentB )
-{
-  minmax( &extentA[0], &extentA[1] );
-  minmax( &extentB.first, &extentB.second );
-
-  return extentA[0].is_inside_of (extentB.first, extentB.second) ||
-         extentA[1].is_inside_of (extentB.first, extentB.second) ||
-         extentB.first.is_inside_of (extentA[0], extentA[1]) ||
-         extentB.second.is_inside_of (extentA[0], extentA[1]);
-}
-
-template<typename T>
-T* get_pointer (std::vector<char>& vector, size_t pPosition = 0)
-{
-  return reinterpret_cast<T*> (&vector[pPosition]);
-}
-
-void insert_string ( std::vector<char>& vector
-                   , size_t position
-                   , const std::string& str
-                   )
-{
-  const char* const cstr (str.c_str());
-  vector.insert (vector.begin() + position, cstr, cstr + str.size() + 1);
-}
-
-struct sChunkHeader
-{
-  int mMagic;
-  int mSize;
-};
-
-void SetChunkHeader( std::vector<char>& pArray, int pPosition, int pMagix, int pSize = 0 )
-{
-  sChunkHeader * Header = get_pointer<sChunkHeader>( pArray, pPosition );
-  Header->mMagic = pMagix;
-  Header->mSize = pSize;
-}
-
-struct filenameOffsetThing
-{
-  int nameID;
-  int filenamePosition;
-};
 
 void MapTile::clearAllModels()
 {

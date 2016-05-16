@@ -42,152 +42,153 @@ static const float TEX_RANGE = 62.0f / 64.0f;
 
 const int stripsize = 8*18 + 7*2;
 
-StripType *mapstrip;
-StripType *mapstrip2;
+namespace
+  {
+  StripType *mapstrip;
+  StripType *mapstrip2;
 
-int indexMapBuf (int x, int y)
-{
-  return ((y+1)/2)*9 + (y/2)*8 + x;
-}
+  int indexMapBuf (int x, int y)
+  {
+    return ((y+1)/2)*9 + (y/2)*8 + x;
+  }
 
-int indexLoD(int x, int y)
-{
-  return (x+1)*9+x*8+y;
-}
+  int indexLoD(int x, int y)
+  {
+    return (x+1)*9+x*8+y;
+  }
 
-int indexNoLoD(int x, int y)
-{
-  return x*8+x*9+y;
-}
+  int indexNoLoD(int x, int y)
+  {
+    return x*8+x*9+y;
+  }
 
-// 8x8x2 version with triangle strips, size = 8*18 + 7*2
-template <class V>
-void stripify(V *in, V *out)
-{
-  for (int row=0; row<8; row++) {
-    V *thisrow = &in[indexMapBuf(0,row*2)];
-    V *nextrow = &in[indexMapBuf(0,(row+1)*2)];
+  // 8x8x2 version with triangle strips, size = 8*18 + 7*2
+  template <class V>
+  void stripify(V *in, V *out)
+  {
+    for (int row=0; row<8; row++) {
+      V *thisrow = &in[indexMapBuf(0,row*2)];
+      V *nextrow = &in[indexMapBuf(0,(row+1)*2)];
 
-    if (row>0) *out++ = thisrow[0];
-    for (int col=0; col<9; col++) {
-      *out++ = thisrow[col];
-      *out++ = nextrow[col];
+      if (row>0) *out++ = thisrow[0];
+      for (int col=0; col<9; col++) {
+        *out++ = thisrow[col];
+        *out++ = nextrow[col];
+      }
+      if (row<7) *out++ = nextrow[8];
     }
-    if (row<7) *out++ = nextrow[8];
   }
-}
 
-// high res version, size = 16*18 + 7*2 + 8*2
-const int stripsize2 = 16*18 + 7*2 + 8*2;
-template <class V>
-void stripify2(V *in, V *out)
-{
-  for (int row=0; row<8; row++) {
-    V *thisrow = &in[indexMapBuf(0,row*2)];
-    V *nextrow = &in[indexMapBuf(0,row*2+1)];
-    V *overrow = &in[indexMapBuf(0,(row+1)*2)];
+  // high res version, size = 16*18 + 7*2 + 8*2
+  const int stripsize2 = 16*18 + 7*2 + 8*2;
+  template <class V>
+  void stripify2(V *in, V *out)
+  {
+    for (int row=0; row<8; row++) {
+      V *thisrow = &in[indexMapBuf(0,row*2)];
+      V *nextrow = &in[indexMapBuf(0,row*2+1)];
+      V *overrow = &in[indexMapBuf(0,(row+1)*2)];
 
-    if (row>0) *out++ = thisrow[0];// jump end
-    for (int col=0; col<8; col++) {
-      *out++ = thisrow[col];
-      *out++ = nextrow[col];
+      if (row>0) *out++ = thisrow[0];// jump end
+      for (int col=0; col<8; col++) {
+        *out++ = thisrow[col];
+        *out++ = nextrow[col];
+      }
+      *out++ = thisrow[8];
+      *out++ = overrow[8];
+      *out++ = overrow[8];// jump start
+      *out++ = thisrow[0];// jump end
+      *out++ = thisrow[0];
+      for (int col=0; col<8; col++) {
+        *out++ = overrow[col];
+        *out++ = nextrow[col];
+      }
+      if (row<8) *out++ = overrow[8];
+      if (row<7) *out++ = overrow[8];// jump start
     }
-    *out++ = thisrow[8];
-    *out++ = overrow[8];
-    *out++ = overrow[8];// jump start
-    *out++ = thisrow[0];// jump end
-    *out++ = thisrow[0];
-    for (int col=0; col<8; col++) {
-      *out++ = overrow[col];
-      *out++ = nextrow[col];
+  }
+
+  void init_map_strip()
+  {
+    // default strip indices
+    StripType *defstrip = new StripType[stripsize];
+    for (int i=0; i<stripsize; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
+    mapstrip = new StripType[stripsize];
+    stripify<StripType>(defstrip, mapstrip);
+    delete[] defstrip;
+
+    defstrip = new StripType[stripsize2];
+    for (int i=0; i<stripsize2; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
+    mapstrip2 = new StripType[stripsize2];
+    stripify2<StripType>(defstrip, mapstrip2);
+    delete[] defstrip;
+  }
+
+
+  /*
+   White  1.00  1.00  1.00
+   Brown  0.75  0.50  0.00
+   Green  0.00  1.00  0.00
+   Yellow  1.00  1.00  0.00
+   Lt Blue  0.00  1.00  1.00
+   Blue  0.00  0.00  1.00
+   Black  0.00  0.00  0.00
+   */
+
+  void HeightColor(float height, ::math::vector_3d *Color)
+  {
+    float Amount;
+
+    if(height>HEIGHT_TOP)
+    {
+      Color->x (1.0f);
+      Color->y (1.0f);
+      Color->z (1.0f);
     }
-    if (row<8) *out++ = overrow[8];
-    if (row<7) *out++ = overrow[8];// jump start
+    else if(height>HEIGHT_MID)
+    {
+      Amount=(height-HEIGHT_MID)/(HEIGHT_TOP-HEIGHT_MID);
+      Color->x (0.75f + Amount * 0.25f);
+      Color->y (0.5f + 0.5f * Amount);
+      Color->z (Amount);
+    }
+    else if(height>HEIGHT_LOW)
+    {
+      Amount=(height-HEIGHT_LOW)/(HEIGHT_MID-HEIGHT_LOW);
+      Color->x (Amount * 0.75f);
+      Color->y (1.00f - 0.5f * Amount);
+      Color->z (0.0f);
+    }
+    else if(height>HEIGHT_ZERO)
+    {
+      Amount=(height-HEIGHT_ZERO)/(HEIGHT_LOW-HEIGHT_ZERO);
+
+      Color->x (1.0f - Amount);
+      Color->y (1.0f);
+      Color->z (0.0f);
+    }
+    else if(height>HEIGHT_SHALLOW)
+    {
+      Amount=(height-HEIGHT_SHALLOW)/(HEIGHT_ZERO-HEIGHT_SHALLOW);
+      Color->x (0.0f);
+      Color->y (Amount);
+      Color->z (1.0f);
+    }
+    else if(height>HEIGHT_DEEP)
+    {
+      Amount=(height-HEIGHT_DEEP)/(HEIGHT_SHALLOW-HEIGHT_DEEP);
+      Color->x (0.0f);
+      Color->y (0.0f);
+      Color->z (Amount);
+    }
+    else
+    {
+      Color->x (0.0f);
+      Color->y (0.0f);
+      Color->z (0.0f);
+    }
   }
 }
-
-void init_map_strip()
-{
-  // default strip indices
-  StripType *defstrip = new StripType[stripsize];
-  for (int i=0; i<stripsize; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
-  mapstrip = new StripType[stripsize];
-  stripify<StripType>(defstrip, mapstrip);
-  delete[] defstrip;
-
-  defstrip = new StripType[stripsize2];
-  for (int i=0; i<stripsize2; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
-  mapstrip2 = new StripType[stripsize2];
-  stripify2<StripType>(defstrip, mapstrip2);
-  delete[] defstrip;
-}
-
-
-/*
- White  1.00  1.00  1.00
- Brown  0.75  0.50  0.00
- Green  0.00  1.00  0.00
- Yellow  1.00  1.00  0.00
- Lt Blue  0.00  1.00  1.00
- Blue  0.00  0.00  1.00
- Black  0.00  0.00  0.00
- */
-
-void HeightColor(float height, ::math::vector_3d *Color)
-{
-  float Amount;
-
-  if(height>HEIGHT_TOP)
-  {
-    Color->x (1.0f);
-    Color->y (1.0f);
-    Color->z (1.0f);
-  }
-  else if(height>HEIGHT_MID)
-  {
-    Amount=(height-HEIGHT_MID)/(HEIGHT_TOP-HEIGHT_MID);
-    Color->x (0.75f + Amount * 0.25f);
-    Color->y (0.5f + 0.5f * Amount);
-    Color->z (Amount);
-  }
-  else if(height>HEIGHT_LOW)
-  {
-    Amount=(height-HEIGHT_LOW)/(HEIGHT_MID-HEIGHT_LOW);
-    Color->x (Amount * 0.75f);
-    Color->y (1.00f - 0.5f * Amount);
-    Color->z (0.0f);
-  }
-  else if(height>HEIGHT_ZERO)
-  {
-    Amount=(height-HEIGHT_ZERO)/(HEIGHT_LOW-HEIGHT_ZERO);
-
-    Color->x (1.0f - Amount);
-    Color->y (1.0f);
-    Color->z (0.0f);
-  }
-  else if(height>HEIGHT_SHALLOW)
-  {
-    Amount=(height-HEIGHT_SHALLOW)/(HEIGHT_ZERO-HEIGHT_SHALLOW);
-    Color->x (0.0f);
-    Color->y (Amount);
-    Color->z (1.0f);
-  }
-  else if(height>HEIGHT_DEEP)
-  {
-    Amount=(height-HEIGHT_DEEP)/(HEIGHT_SHALLOW-HEIGHT_DEEP);
-    Color->x (0.0f);
-    Color->y (0.0f);
-    Color->z (Amount);
-  }
-  else
-  {
-    Color->x (0.0f);
-    Color->y (0.0f);
-    Color->z (0.0f);
-  }
-}
-
-
 
 void MapChunk::GenerateContourMap()
 {
@@ -264,7 +265,10 @@ void MapChunk::GenerateContourMap()
 }
 
 //! \note I am aware of this being global state not even being inside a class BUT I DONT CARE AT ALL. THIS WHOLE THING IS BULLSHIT AND NOT WORTH A BIT AND COSTING ME TIME OF MY LIFE FOR JUST BEING BAD AS FUCK. REMOVEING ENVIRONMENT TOOK ME HOURS WHILE MOST VARIABLES HAD BEEN ONLY USED IN A SINGLE FUCKING CLASS,  DID NOT HAVE MEANINGFUL NAMES OR ANYTHING.
-QMap<int, ::math::vector_3d> areaIDColors;
+namespace
+{
+  QMap<int, ::math::vector_3d> areaIDColors;
+}
 
 MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bigAlpha)
   : _world (world)

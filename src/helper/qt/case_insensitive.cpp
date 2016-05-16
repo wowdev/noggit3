@@ -11,11 +11,11 @@ namespace helper
   {
     namespace case_insensitive
     {
-      namespace detail
+      namespace
       {
         QString case_sensitive_equivalent (const QString& path)
 		{
-          const int pos (path.lastIndexOf (QRegExp("[\\\\/]"))); 
+          const int pos (path.lastIndexOf (QRegExp("[\\\\/]")));
           const QString parent_path ( pos <= 0
                                     ? QDir::rootPath()
                                     : case_sensitive_equivalent
@@ -51,11 +51,11 @@ namespace helper
       }
 
       directory::directory (const QDir& dir)
-        : QDir (detail::case_sensitive_equivalent (dir.absolutePath()))
+        : QDir (case_sensitive_equivalent (dir.absolutePath()))
       { }
 
       directory::directory (const QString& path)
-        : QDir (detail::case_sensitive_equivalent (path))
+        : QDir (case_sensitive_equivalent (path))
       { }
 
       directory::directory ( const QString& path
@@ -63,7 +63,7 @@ namespace helper
                            , QDir::SortFlags sort
                            , QDir::Filters filters
                            )
-        : QDir ( detail::case_sensitive_equivalent (path)
+        : QDir ( case_sensitive_equivalent (path)
                , nameFilter
                , sort
                , filters & ~QDir::CaseSensitive
@@ -102,7 +102,7 @@ namespace helper
 
 
       file::file (const QString& name)
-        : QFile (detail::case_sensitive_equivalent (name))
+        : QFile (case_sensitive_equivalent (name))
       { }
 
       file::file (QObject* parent)
@@ -110,7 +110,7 @@ namespace helper
       { }
 
       file::file (const QString& name, QObject* parent)
-        : QFile (detail::case_sensitive_equivalent (name), parent)
+        : QFile (case_sensitive_equivalent (name), parent)
       { }
 
     }

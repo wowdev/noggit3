@@ -141,9 +141,11 @@ namespace noggit
 
   }
 
-  float mh,mv,rh,rv;
-
-  float keyx,keyy,keyz,keyr,keys;
+  namespace
+  {
+    float mh,mv,rh,rv;
+    float keyx,keyy,keyz,keyr,keys;
+  }
 
   void MapView::createGUI()
   {

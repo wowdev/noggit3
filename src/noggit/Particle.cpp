@@ -14,33 +14,36 @@
 
 static const unsigned int MAX_PARTICLES = 10000;
 
-::math::vector_4d fromARGB(uint32_t color)
+namespace
 {
-  const float a = ((color & 0xFF000000) >> 24) / 255.0f;
-  const float r = ((color & 0x00FF0000) >> 16) / 255.0f;
-  const float g = ((color & 0x0000FF00) >>  8) / 255.0f;
-  const float b = ((color & 0x000000FF)      ) / 255.0f;
+  ::math::vector_4d fromARGB(uint32_t color)
+  {
+    const float a = ((color & 0xFF000000) >> 24) / 255.0f;
+    const float r = ((color & 0x00FF0000) >> 16) / 255.0f;
+    const float g = ((color & 0x0000FF00) >>  8) / 255.0f;
+    const float b = ((color & 0x000000FF)      ) / 255.0f;
     return ::math::vector_4d(r,g,b,a);
-}
-::math::vector_4d fromBGRA(uint32_t color)
-{
-  const float b = ((color & 0xFF000000) >> 24) / 255.0f;
-  const float g = ((color & 0x00FF0000) >> 16) / 255.0f;
-  const float r = ((color & 0x0000FF00) >>  8) / 255.0f;
-  const float a = ((color & 0x000000FF)      ) / 255.0f;
-  return ::math::vector_4d(r,g,b,a);
-}
-
-template<class T>
-T lifeRamp (float life, float mid, const T& a, const T& b, const T& c)
-{
-  if (life <= mid)
-  {
-    return ::math::interpolation::linear (life / mid, a, b);
   }
-  else
+  ::math::vector_4d fromBGRA(uint32_t color)
   {
-    return ::math::interpolation::linear ((life - mid) / (1.0f - mid), b, c);
+    const float b = ((color & 0xFF000000) >> 24) / 255.0f;
+    const float g = ((color & 0x00FF0000) >> 16) / 255.0f;
+    const float r = ((color & 0x0000FF00) >>  8) / 255.0f;
+    const float a = ((color & 0x000000FF)      ) / 255.0f;
+    return ::math::vector_4d(r,g,b,a);
+  }
+
+  template<class T>
+  T lifeRamp (float life, float mid, const T& a, const T& b, const T& c)
+  {
+    if (life <= mid)
+    {
+      return ::math::interpolation::linear (life / mid, a, b);
+    }
+    else
+    {
+      return ::math::interpolation::linear ((life - mid) / (1.0f - mid), b, c);
+    }
   }
 }
 
@@ -571,48 +574,54 @@ void ParticleSystem::drawHighlight()
   glColor4f(1,1,1,1);
 //  glPopName();
 }
-//Generates the rotation matrix based on spread
-::math::matrix_4x4  SpreadMat;
-void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
+
+namespace
 {
-  int i,j;
-  float a[2],c[2],s[2];
-  ::math::matrix_4x4  Temp;
-
-  SpreadMat.unit();
-
-  a[0]=::math::random::floating_point(-Spread1,Spread1)/2.0f;
-  a[1]=::math::random::floating_point(-Spread2,Spread2)/2.0f;
-
-  /*SpreadMat.m[0][0]*=l;
-   SpreadMat.m[1][1]*=l;
-   SpreadMat.m[2][2]*=w;*/
-
-  for(i=0;i<2;++i)
+  //Generates the rotation matrix based on spread
+  ::math::matrix_4x4 CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
   {
-    c[i]=cos(a[i]);
-    s[i]=sin(a[i]);
+    ::math::matrix_4x4  SpreadMat;
+    int i,j;
+    float a[2],c[2],s[2];
+    ::math::matrix_4x4  Temp;
+
+    SpreadMat.unit();
+
+    a[0]=::math::random::floating_point(-Spread1,Spread1)/2.0f;
+    a[1]=::math::random::floating_point(-Spread2,Spread2)/2.0f;
+
+    /*SpreadMat.m[0][0]*=l;
+     SpreadMat.m[1][1]*=l;
+     SpreadMat.m[2][2]*=w;*/
+
+    for(i=0;i<2;++i)
+    {
+      c[i]=cos(a[i]);
+      s[i]=sin(a[i]);
+    }
+    Temp.unit();
+    Temp (1, 1, c[0]);
+    Temp (2, 1, s[0]);
+    Temp (2, 2, c[0]);
+    Temp (1, 2, -s[0]);
+
+    SpreadMat=SpreadMat*Temp;
+
+    Temp.unit();
+    Temp (0, 0, c[1]);
+    Temp (1, 0, s[1]);
+    Temp (1, 1, c[1]);
+    Temp (0, 1, -s[1]);
+
+    SpreadMat=SpreadMat*Temp;
+
+    const float Size (abs (c[0]) * l + abs (s[0]) * w);
+    for(i=0;i<3;++i)
+      for(j=0;j<3;j++)
+        SpreadMat (i, j, SpreadMat (i, j) * Size);
+
+    return SpreadMat;
   }
-  Temp.unit();
-  Temp (1, 1, c[0]);
-  Temp (2, 1, s[0]);
-  Temp (2, 2, c[0]);
-  Temp (1, 2, -s[0]);
-
-  SpreadMat=SpreadMat*Temp;
-
-  Temp.unit();
-  Temp (0, 0, c[1]);
-  Temp (1, 0, s[1]);
-  Temp (1, 1, c[1]);
-  Temp (0, 1, -s[1]);
-
-  SpreadMat=SpreadMat*Temp;
-
-  const float Size (abs (c[0]) * l + abs (s[0]) * w);
-  for(i=0;i<3;++i)
-    for(j=0;j<3;j++)
-      SpreadMat (i, j, SpreadMat (i, j) * Size);
 }
 
 Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float /*spr2*/)
@@ -661,8 +670,7 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
   //Spread Calculation
   ::math::matrix_4x4 mrot;
 
-  CalcSpreadMatrix(spr,spr,1.0f,1.0f);
-  mrot=sys->parent->mrot*SpreadMat;
+  mrot=sys->parent->mrot*CalcSpreadMatrix(spr,spr,1.0f,1.0f);
 
   if (sys->flags == 1041) { // Trans Halo
     p.pos = sys->parent->mat
@@ -759,8 +767,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
   const float t (::math::random::floating_point (-spr, spr));
 
   //Spread Calculation
-  CalcSpreadMatrix (spr * 2.0f, spr2 * 2.0f, w, l);
-  const ::math::matrix_4x4 mrot (sys->parent->mrot * SpreadMat);
+  const ::math::matrix_4x4 mrot (sys->parent->mrot * CalcSpreadMatrix (spr * 2.0f, spr2 * 2.0f, w, l));
 
   // New
   // Length should never technically be zero ?

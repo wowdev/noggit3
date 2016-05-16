@@ -31,30 +31,33 @@
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
-void WMOHighlight( ::math::vector_4d color )
+namespace
 {
-  glDisable( GL_ALPHA_TEST );
-  glEnable( GL_BLEND );
-  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-  glDisable( GL_CULL_FACE );
-  glActiveTexture( GL_TEXTURE0 );
-  glDisable( GL_TEXTURE_2D);
-  glActiveTexture( GL_TEXTURE1 );
-  glDisable( GL_TEXTURE_2D );
-  glColor4fv( color );
-  glMaterialfv( GL_FRONT, GL_EMISSION, color );
-  glDepthMask( GL_FALSE );
-}
+  void WMOHighlight( ::math::vector_4d color )
+  {
+    glDisable( GL_ALPHA_TEST );
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glDisable( GL_CULL_FACE );
+    glActiveTexture( GL_TEXTURE0 );
+    glDisable( GL_TEXTURE_2D);
+    glActiveTexture( GL_TEXTURE1 );
+    glDisable( GL_TEXTURE_2D );
+    glColor4fv( color );
+    glMaterialfv( GL_FRONT, GL_EMISSION, color );
+    glDepthMask( GL_FALSE );
+  }
 
-void WMOUnhighlight()
-{
-  glEnable( GL_ALPHA_TEST );
-   glDisable( GL_BLEND );
-  glEnable( GL_CULL_FACE );
-  glActiveTexture( GL_TEXTURE0 );
-  glEnable( GL_TEXTURE_2D );
-  glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-  glDepthMask( GL_TRUE );
+  void WMOUnhighlight()
+  {
+    glEnable( GL_ALPHA_TEST );
+    glDisable( GL_BLEND );
+    glEnable( GL_CULL_FACE );
+    glActiveTexture( GL_TEXTURE0 );
+    glEnable( GL_TEXTURE_2D );
+    glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+    glDepthMask( GL_TRUE );
+  }
 }
 
 const std::string& WMO::filename() const
@@ -707,25 +710,29 @@ struct WMOBatch {
   unsigned char flags, texture;
 };
 
-void setGLColor(unsigned int col)
+namespace
 {
-  //glColor4ubv((GLubyte*)(&col));
-  GLubyte r,g,b,a;
-  a = (col & 0xFF000000) >> 24;
-  r = (col & 0x00FF0000) >> 16;
-  g = (col & 0x0000FF00) >> 8;
-  b = (col & 0x000000FF);
-    glColor4ub(r,g,b,1);
+  void setGLColor(unsigned int col)
+  {
+    //glColor4ubv((GLubyte*)(&col));
+    GLubyte r,g,b,a;
+    a = (col & 0xFF000000) >> 24;
+    r = (col & 0x00FF0000) >> 16;
+    g = (col & 0x0000FF00) >> 8;
+    b = (col & 0x000000FF);
+      glColor4ub(r,g,b,1);
+  }
+
+  ::math::vector_4d colorFromInt(unsigned int col) {
+    GLubyte r,g,b,a;
+    a = (col & 0xFF000000) >> 24;
+    r = (col & 0x00FF0000) >> 16;
+    g = (col & 0x0000FF00) >> 8;
+    b = (col & 0x000000FF);
+    return ::math::vector_4d(r/255.0f, g/255.0f, b/255.0f, a/255.0f);
+  }
 }
 
-::math::vector_4d colorFromInt(unsigned int col) {
-  GLubyte r,g,b,a;
-  a = (col & 0xFF000000) >> 24;
-  r = (col & 0x00FF0000) >> 16;
-  g = (col & 0x0000FF00) >> 8;
-  b = (col & 0x000000FF);
-  return ::math::vector_4d(r/255.0f, g/255.0f, b/255.0f, a/255.0f);
-}
 struct WMOGroupHeader {
   uint32_t nameStart, nameStart2, flags;
   float box1[3], box2[3];

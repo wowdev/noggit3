@@ -21,13 +21,16 @@
 
 #include <boost/filesystem/path.hpp>
 
+namespace
+{
 #ifdef USEBLSFILES
-BLSShader * mWaterShader;
-BLSShader * mMagmaShader;
+  BLSShader* mWaterShader;
+  BLSShader* mMagmaShader;
 #else
-opengl::shader  waterShader;
-opengl::shader  waterFogShader;
+  opengl::shader waterShader;
+  opengl::shader waterFogShader;
 #endif
+}
 
 void loadWaterShader()
 {
@@ -122,16 +125,6 @@ void loadWaterShader()
   }
 #endif
 }
-
-#ifndef USEBLSFILES
-void enableWaterShader()
-{
-  if(glIsEnabled(GL_FOG)==GL_TRUE)
-    glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, waterFogShader);
-  else
-    glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, waterShader);
-}
-#endif
 
 Liquid::Liquid(int x, int y, ::math::vector_3d base, float ptilesize)
   : xtiles(x)
@@ -374,7 +367,10 @@ void Liquid::draw (Skies const* skies) const
   if( type == 0 && mMagmaShader->IsOkay() )
     mMagmaShader->EnableShader();
 #else
-  enableWaterShader();
+  if(glIsEnabled(GL_FOG)==GL_TRUE)
+    glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, waterFogShader);
+  else
+    glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, waterShader);
 #endif
 
   glDisable(GL_CULL_FACE);
