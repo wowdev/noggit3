@@ -994,6 +994,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float
 
 	if (!visible) return;
 	if (nDoodads == 0) return;
+  if (doodadset >= wmo->doodadsets.size()) return;
 
 	gWorld->outdoorLights(outdoorLights);
 	setupFog();
@@ -1010,17 +1011,19 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float
 	glColor4f(1, 1, 1, 1);
 	for (int i = 0; i<nDoodads; ++i) {
 		int16_t dd = ddr[i];
-		if (!(wmo->doodadsets.size() < doodadset))
-			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start + wmo->doodadsets[doodadset].size))) {
+    if ( dd >= wmo->doodadsets[doodadset].start
+      && dd < (wmo->doodadsets[doodadset].start + wmo->doodadsets[doodadset].size)
+      && dd < wmo->modelis.size()
+      )
+    {
+      ModelInstance &mi = wmo->modelis[dd];
 
-			ModelInstance &mi = wmo->modelis[dd];
-
-			if (!outdoorLights) {
-				WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
-			}
-			setupFog();
-			wmo->modelis[dd].draw2(ofs, rot);
-			}
+      if (!outdoorLights) {
+        WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
+      }
+      setupFog();
+      wmo->modelis[dd].draw2(ofs, rot);
+    }
 	}
 
 	glDisable(GL_LIGHT2);
@@ -1034,7 +1037,7 @@ void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const
 {
 	if (!visible) return;
 	if (nDoodads == 0) return;
-
+  if (doodadset >= wmo->doodadsets.size()) return;
 
 	gWorld->outdoorLights(outdoorLights);
 	setupFog();
@@ -1051,17 +1054,17 @@ void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const
 	glColor4f(1, 1, 1, 1);
 	for (int i = 0; i<nDoodads; ++i) {
 		int16_t dd = ddr[i];
-		if (!(wmo->doodadsets.size() < doodadset))
-			if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start + wmo->doodadsets[doodadset].size))) {
-
-			ModelInstance &mi = wmo->modelis[dd];
-
+    if ( dd >= wmo->doodadsets[doodadset].start
+      && dd < (wmo->doodadsets[doodadset].start + wmo->doodadsets[doodadset].size)
+      && dd < wmo->modelis.size()
+      )
+    {
+      ModelInstance &mi = wmo->modelis[dd];
 			if (!outdoorLights) {
 				WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
 			}
-
 			wmo->modelis[dd].draw2Select(ofs, rot);
-			}
+		}
 	}
 
 	glDisable(GL_LIGHT2);
@@ -1177,7 +1180,7 @@ WMO* WMOManager::add(std::string name)
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
 	if (items.find(name) == items.end())
-	{
+	{     
 		items[name] = new WMO(name);
 		//! \todo Uncomment this, if loading is threaded.
 		//items[name]->finishLoading();
