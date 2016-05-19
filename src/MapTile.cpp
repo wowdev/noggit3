@@ -568,7 +568,7 @@ void MapTile::saveTile()
 
 	for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
 	{
-		if (!it->second.isInsideTile(lTileExtents)) continue;
+    if (!it->second.isInsideTile(lTileExtents)) continue;
 		// if (!it->second.hasUIDLock())
 		// {
 		// 	it->second.mUniqueID = UID++;
@@ -714,7 +714,7 @@ void MapTile::saveTile()
 
 	lCurrentPosition += 8 + 0;
 
-	int TEX_lMTEX_Position;
+	int TEX_lMTEX_Position = 0;
 	if (wodSave)
 	{
 		// WOD TEX
@@ -814,15 +814,12 @@ void MapTile::saveTile()
 	lID = 0;
 	for (std::map<std::string, filenameOffsetThing>::iterator it = lModels.begin(); it != lModels.end(); ++it)
 	{
-		lID++;
-		lMMID_Data[lID] = it->second.filenamePosition;
+	  lMMID_Data[lID] = it->second.filenamePosition;
 		if (wodSave) OBJlMMID_Data[lID] = it->second.filenamePosition; // WOD OBJ
-
+    lID++;
 	}
 	lCurrentPosition += 8 + lMMID_Size;
 	if (wodSave) lADTObjFileCurrentPosition += 8 + lMMID_Size; // WOD OBJ
-
-
 
 	// MWMO
 	int lMWMO_Position = lCurrentPosition;
