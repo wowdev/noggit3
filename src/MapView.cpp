@@ -1166,10 +1166,13 @@ MapView::MapView(float ah0, float av0)
 	createGUI();
 
 	// Set camera y (height) position to current ground height plus some space.
-	Vec3D t = Vec3D(0, 0, 0);
-	gWorld->GetVertex(gWorld->camera.x, gWorld->camera.z, &t);
-	gWorld->camera.y = t.y + 2000.0f;
-	if (gWorld->camera.y < 200) gWorld->camera.y = 200.0f;
+  Vec3D t = Vec3D(0, 0, 0);
+  const int x = (const int)(gWorld->camera.x / TILESIZE);
+  const int z = (const int)(gWorld->camera.z / TILESIZE);
+  if (!gWorld->mapIndex->tileLoaded(z, x))
+    gWorld->mapIndex->loadTile(z, x);
+  gWorld->GetVertex(gWorld->camera.x, gWorld->camera.z, &t);
+  gWorld->camera.y = t.y + 50.0f;
 }
 
 MapView::~MapView()
