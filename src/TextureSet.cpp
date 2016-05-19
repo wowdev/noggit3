@@ -44,7 +44,7 @@ void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
 	}
 }
 
-void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha)
+void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool doNotFixAlpha)
 {
 	unsigned int MCALbase = f->getPos();
 
@@ -58,7 +58,7 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha)
 		if (texFlags[layer] & 0x100)
 		{
 			f->seek(MCALbase + MCALoffset[layer]);
-			alphamaps[layer - 1] = new Alphamap(f, texFlags[layer], mBigAlpha);
+			alphamaps[layer - 1] = new Alphamap(f, texFlags[layer], mBigAlpha, doNotFixAlpha);
 		}
 	}
 }
@@ -294,17 +294,17 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 			}
 		}
 
-		change = CHUNKSIZE / 62.0f;
+		change = CHUNKSIZE / 64.0f;
 		zPos = zbase;
 
 		float target, tarAbove, tPressure;
 		//int texAbove=nTextures-texLevel-1;
 
 
-		for (int j = 0; j < 63; j++)
+		for (int j = 0; j < 64; j++)
 		{
 			xPos = xbase;
-			for (int i = 0; i < 63; ++i)
+			for (int i = 0; i < 64; ++i)
 			{
 				xdiff = xPos - x;
 				zdiff = zPos - z;
