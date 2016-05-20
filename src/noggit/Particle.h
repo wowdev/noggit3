@@ -7,7 +7,6 @@
 
 #include <list>
 #include <vector>
-#include <memory>
 
 class ParticleSystem;
 class RibbonEmitter;
