@@ -18,29 +18,18 @@ if (WIN32)
   set ( CMAKE_INCLUDE_PATH
         "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include/"
         "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/include/"
-		"../Noggit_QT_libs/Glew/include/"
-		"../Noggit_QT_libs/StormLib/include/"
+        "C:/Program Files (x86)/glew-1.5.7/include/"
+        "C:/Program Files (x86)/StormLib/src/"
       )
   set ( CMAKE_LIBRARY_PATH
         "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/"
         "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/lib/"
-		"../Noggit_QT_libs/Glew/lib/Release/Win32"
-		"../Noggit_QT_libs/StormLib/ReleaseAD/"
-		"../Noggit_QT_libs/StormLib/DebugAD/"
+        "C:/Program Files (x86)/StormLib/bin/"
       )
-	  
-	set(BOOST_ROOT "../Noggit_QT_libs/Boost/1.60/")
-	set(QT_BINARY_DIR "../Noggit_QT_libs/Qt/4.8.6/bin/")
-	set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "../Noggit_QT_libs/Qt/4.8.6/")
-	
 endif( WIN32 )
 
 # Our own FindModule.cmake scripts.
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
-
-set(Boost_USE_STATIC_LIBS ON)
-
-
 
 find_package (OpenGL REQUIRED)
 find_package (GLEW REQUIRED)
@@ -62,6 +51,7 @@ include_directories ( SYSTEM ${GLEW_INCLUDE_PATH}
 set ( noggit_sources
       src/noggit/application.cpp
       src/noggit/blp_texture.cpp
+
       src/noggit/Brush.cpp
       src/noggit/DBC.cpp
       src/noggit/DBCFile.cpp
@@ -85,13 +75,17 @@ set ( noggit_sources
       src/noggit/World.cpp
       src/noggit/ModelView.cpp
       src/noggit/DBCTableModel.cpp
+
       src/noggit/ChunkWater.cpp
       src/noggit/TileWater.cpp
+
       src/noggit/async/loader.cpp
       src/noggit/async/loading_thread.cpp
+
       src/noggit/mpq/archive_manager.cpp
       src/noggit/mpq/archive.cpp
       src/noggit/mpq/file.cpp
+
       src/noggit/ui/about_widget.cpp
       src/noggit/ui/settingsDialog.cpp
       src/noggit/ui/help_widget.cpp
@@ -109,6 +103,7 @@ set ( noggit_sources
 set ( noggit_headers
       src/noggit/application.h
       src/noggit/blp_texture.h
+
       src/noggit/Animated.h
       src/noggit/Brush.h
       src/noggit/DBC.h
@@ -116,6 +111,7 @@ set ( noggit_headers
       src/noggit/Frustum.h
       src/noggit/Liquid.h
       src/noggit/Log.h
+      src/noggit/Manager.h
       src/noggit/MapChunk.h
       src/noggit/MapHeaders.h
       src/noggit/MapTile.h
@@ -133,14 +129,18 @@ set ( noggit_headers
       src/noggit/WMO.h
       src/noggit/WMOInstance.h
       src/noggit/World.h
+      src/noggit/errorHandling.h
       src/noggit/ModelView.h
       src/noggit/DBCTableModel.h
+
       src/noggit/async/loader.h
       src/noggit/async/loading_thread.h
       src/noggit/async/object.h
+
       src/noggit/mpq/archive_manager.h
       src/noggit/mpq/archive.h
       src/noggit/mpq/file.h
+
       src/noggit/ui/about_widget.h
       src/noggit/ui/settingsDialog.h
       src/noggit/ui/cursor_selector.h
@@ -157,6 +157,7 @@ set ( noggit_headers
 
 set ( noggit_headers_to_moc
       src/noggit/application.h
+
       src/noggit/Menu.h
       src/noggit/MapView.h
       src/noggit/ModelView.h
@@ -330,15 +331,6 @@ if (WIN32)
                    ${rccsc}
                    ${QM}
                  )
-				 
-	source_group("noggit"  FILES ${noggit_sources} ${noggit_headers})
-	source_group("opengl"  FILES ${opengl_sources} ${opengl_headers})
-	source_group("windows"  FILES ${windows_sources} ${windows_headers})
-	source_group("helper"  FILES ${helper_sources} ${helper_headers})
-	source_group("math"  FILES ${math_sources} ${math_headers})
-	source_group("moced"  FILES ${moced} )
-	source_group("resources"  FILES ${noggit_rc} )
-	
 else (WIN32)
   add_executable ( noggit
                    MACOSX_BUNDLE
