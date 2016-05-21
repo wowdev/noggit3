@@ -7,6 +7,8 @@
 
 #include <noggit/Model.h>
 
+#include <opengl/matrix.h>
+
 UIModel::UIModel( float xPos, float yPos, float w, float h )
 : UIFrame( xPos, yPos, w, h )
 , model( nullptr )
@@ -17,7 +19,7 @@ void UIModel::render() const
 {
   //! \todo Fix, save matrixes before changing. or something.
  /* glMatrixMode(GL_PROJECTION);
-  gluPerspective(45.0f, (GLfloat)video.xres()/(GLfloat)video.yres(), 1.0f, 1024.0f);
+  opengl::matrix::perspective (45.0f, (GLfloat)video.xres()/(GLfloat)video.yres(), 1.0f, 1024.0f);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 

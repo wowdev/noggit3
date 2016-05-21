@@ -28,6 +28,7 @@
 
 #include <helper/qt/signal_blocker.h>
 
+#include <opengl/matrix.h>
 #include <opengl/texture.h>
 
 #include <noggit/Brush.h>
@@ -871,7 +872,7 @@ namespace noggit
     glLoadIdentity();
 
     const qreal ratio (width() / qreal (height()));
-    gluPerspective (fov, ratio, 1.0f, _viewing_distance);
+    opengl::matrix::perspective (fov, ratio, 1.0f, _viewing_distance);
 
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();
@@ -891,7 +892,7 @@ namespace noggit
                   );
 
     const qreal ratio (width() / qreal (height()));
-    gluPerspective (fov, ratio, 1.0f, _viewing_distance);
+    opengl::matrix::perspective (fov, ratio, 1.0f, _viewing_distance);
 
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();
