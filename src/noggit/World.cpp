@@ -976,17 +976,11 @@ void World::draw ( size_t flags
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
   glColor4f(1,1,1,1);
 
-  const bool enable_shaders
-    (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program);
+  ::math::vector_4d spec_color(0.1f,0.1f,0.1f,0.1f);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
+  glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 5);
 
-  // if we're using shaders let's give it some specular
-  if (enable_shaders) {
-    ::math::vector_4d spec_color(0.1f,0.1f,0.1f,0.1f);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 5);
-
-    glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
-  }
+  glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 
   glEnable(GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1129,11 +1123,9 @@ void World::draw ( size_t flags
     glColor4f(1,1,1,1);
     glEnable(GL_BLEND);
 
-    if (enable_shaders) {
-      ::math::vector_4d spec_color(0,0,0,1);
-      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-      glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
-    }
+    ::math::vector_4d spec_color(0,0,0,1);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
+    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
 
     // unbind hardware buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1177,44 +1169,26 @@ void World::draw ( size_t flags
     // WMOs / map objects
     if (flags & DRAWWMO)
     {
-      if (enable_shaders)
-      {
-        ::math::vector_4d spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
-        glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
-        glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 10 );
+      ::math::vector_4d spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
+      glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
+      glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 10 );
 
-        glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
+      glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
 
-        for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-          it->second->draw ( flags & WMODOODAS
-                           , flags & FOG
-                           , skies->hasSkies()
-                           , (flags & FOG) ? fog_distance : mapdrawdistance
-                           , fog_distance
-                           , frustum
-                           , camera
-                           , selected_item
-                           );
+      for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
+        it->second->draw ( flags & WMODOODAS
+                         , flags & FOG
+                         , skies->hasSkies()
+                         , (flags & FOG) ? fog_distance : mapdrawdistance
+                         , fog_distance
+                         , frustum
+                         , camera
+                         , selected_item
+                         );
 
-        spec_color = ::math::vector_4d( 0.0f, 0.0f, 0.0f, 1.0f );
-        glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
-        glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 0 );
-      }
-      else
-      {
-        for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-        {
-          it->second->draw ( flags & WMODOODAS
-                           , flags & FOG
-                           , skies->hasSkies()
-                           , (flags & FOG) ? fog_distance : mapdrawdistance
-                           , fog_distance
-                           , frustum
-                           , camera
-                           , selected_item
-                           );
-        }
-      }
+      spec_color = ::math::vector_4d( 0.0f, 0.0f, 0.0f, 1.0f );
+      glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
+      glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 0 );
     }
 
     outdoorLights( true );
