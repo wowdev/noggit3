@@ -398,21 +398,21 @@ Paste the current model stored in Environment::getInstance()->get_clipboard() at
 */
 void PasteSelectedObject(UIFrame*, int)
 {
-	if ( gWorld->HasSelection() && Environment::getInstance()->is_clipboard() )
-	{	
-			switch (gWorld->GetCurrentSelection()->type)
-			{
-			case eEntry_Model:
-				gWorld->addModel(Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.model->pos, true);
-				break;
-			case eEntry_WMO:
-				gWorld->addModel(Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.wmo->pos, true);
-				break;
-			case eEntry_MapChunk:
-				gWorld->addModel(Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition(), true);
-				break;
-			default: break;
-			}
+  if ( gWorld->HasSelection() && Environment::getInstance()->is_clipboard() )
+  {	
+    switch (gWorld->GetCurrentSelection()->type)
+    {
+      case eEntry_Model:
+	      gWorld->addModel(Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.model->pos, true);
+	      break;
+      case eEntry_WMO:
+	      gWorld->addModel(Environment::getInstance()->get_clipboard(), gWorld->GetCurrentSelection()->data.wmo->pos, true);
+	      break;
+      case eEntry_MapChunk:
+	      gWorld->addModel(Environment::getInstance()->get_clipboard(), Environment::getInstance()->get_cursor_pos(), true);
+	      break;
+      default: break;
+		}
 	}
 }
 
