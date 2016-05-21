@@ -31,7 +31,6 @@ public:
 
 //Shaders WoWMapView 3.x
 
-void initShaders();
 void reloadShaders();
 
 class Shader {
