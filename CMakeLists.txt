@@ -4,7 +4,7 @@
 # Stephan Biegel <project.modcraft@googlemail.com>
 # Tigurius <bstigurius@googlemail.com>
 
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.11)
 cmake_policy (SET CMP0015 OLD)
 
 project (Noggit)
@@ -44,12 +44,11 @@ set(Boost_USE_STATIC_LIBS ON)
 
 find_package (OpenGL REQUIRED)
 find_package (GLEW REQUIRED)
-find_package (Qt4 4.8 COMPONENTS QtCore QtGui QtOpenGL REQUIRED)
+find_package (Qt5Widgets REQUIRED)
+find_package (Qt5OpenGL REQUIRED)
+find_package (Qt5LinguistTools REQUIRED)
 find_package (storm REQUIRED)
 find_package (Boost REQUIRED COMPONENTS filesystem system)
-
-# Qt setup
-include (${QT_USE_FILE})
 
 # include paths
 include_directories ( SYSTEM ${GLEW_INCLUDE_PATH}
@@ -287,12 +286,11 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}
                     )
 
 # Moc, translate, ressource.
-qt4_wrap_cpp (moced ${headers_to_moc} ${headers_to_moc})
-qt4_automoc (${moced})
+qt5_wrap_cpp (moced ${headers_to_moc} ${headers_to_moc})
 
-qt4_create_translation (QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS})
-qt4_add_translation (QM ${TRANSLATIONS})
-#qt4_add_resources (rccsc ${foo})
+qt5_create_translation (QM_FILES ${FILES_TO_TRANSLATE} ${TRANSLATIONS})
+qt5_add_translation (QM ${TRANSLATIONS})
+# qt4_add_resources (rccsc ${foo})
 
 if (APPLE)
   set (ResourceFiles "${CMAKE_SOURCE_DIR}/media/noggit.icns")
@@ -357,7 +355,8 @@ target_link_libraries ( noggit
                         ${OPENGL_LIBRARIES}
                         ${STORM_LIBRARIES}
                         ${GLEW_LIBRARY}
-                        ${QT_LIBRARIES}
+                        Qt5::Widgets
+                        Qt5::OpenGL
                         ${Boost_FILESYSTEM_LIBRARY}
                         ${Boost_SYSTEM_LIBRARY}
                       )
@@ -387,24 +386,40 @@ if (APPLE)
 
   # Copy the binary to bin/.
   install(TARGETS noggit
-    BUNDLE DESTINATION ${CMAKE_CURRENT_BINARY_DIR} COMPONENT Runtime
+    BUNDLE DESTINATION ${CMAKE_INSTALL_PREFIX} COMPONENT Runtime
     RUNTIME DESTINATION bin COMPONENT Runtime
     )
 
   include (InstallRequiredSystemLibraries)
 
-  set (APPS "${CMAKE_CURRENT_BINARY_DIR}/noggit.app")
+  get_filename_component (Qt5_HOME "${Qt5Core_DIR}/../../.." REALPATH)
 
-  set ( DIRS
-      ${OPENGL_LIBRARY_DIR}
-      ${GLEW_LIBRARY_DIR}
+  set (qt_plugins)
+  file (GLOB qt_plugin_dirs
+    FOLLOW_SYMLINKS
+    RELATIVE "${Qt5_HOME}/plugins/"
+    "${Qt5_HOME}/plugins/*"
+    )
+
+  foreach (qt_plugin_dir ${qt_plugin_dirs})
+    file (GLOB qt_plugins_${qt_plugin_dir}
+      FOLLOW_SYMLINKS
+      RELATIVE "${Qt5_HOME}/plugins/${qt_plugin_dir}"
+      "${Qt5_HOME}/plugins/${qt_plugin_dir}/*"
       )
+    foreach (qt_plugin ${qt_plugins_${qt_plugin_dir}})
+      install (FILES "${Qt5_HOME}/plugins/${qt_plugin_dir}/${qt_plugin}"
+        DESTINATION "noggit.app/Contents/plugins/${qt_plugin_dir}"
+        )
+      list (APPEND qt_plugins "${CMAKE_INSTALL_PREFIX}/noggit.app/Contents/plugins/${qt_plugin_dir}/${qt_plugin}")
+    endforeach()
+  endforeach()
 
   install ( CODE
             " include (BundleUtilities)
-              fixup_bundle ( \"${APPS}\"
+              fixup_bundle ( \"${CMAKE_INSTALL_PREFIX}/noggit.app\"
+                             \"${qt_plugins}\"
                              \"\"
-                             \"${DIRS}\"
                            )
             "
             COMPONENT
