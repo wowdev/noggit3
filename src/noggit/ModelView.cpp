@@ -64,8 +64,13 @@ void ModelView::paintGL()
     glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
     glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
 
-    if(_draw_loading){
-        renderText (width()/2-2, height()/2-2, QString("Loading..."), QFont("Arial"));
+    if(_draw_loading)
+    {
+      QPainter painter(this);
+      painter.setPen(Qt::white);
+      painter.setFont(QFont("Arial"));
+      painter.drawText(width()/2, height()/2, QString("Loading..."));
+      painter.end();
     }else
       //! \todo Have a local timer starting upon opening.
       theModel->draw(false, clock() / CLOCKS_PER_SEC);
