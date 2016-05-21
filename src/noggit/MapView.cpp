@@ -883,13 +883,15 @@ namespace noggit
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity();
 
-    GLint viewport[4] = {0, 0, width(), height()};
-    gluPickMatrix ( _mouse_position.x()
-                  , height() - _mouse_position.y()
-                  , 7
-                  , 7
-                  , viewport
-                  );
+    GLint viewport[4];
+    glGetIntegerv (GL_VIEWPORT, viewport);
+
+    float const delta (7.0f);
+    glTranslatef ( (viewport[2] - 2.0f * (_mouse_position.x() - viewport[0])) / delta
+                 , (viewport[3] - 2.0f * ((viewport[3] - _mouse_position.y()) - viewport[1])) / delta
+                 , 0.0f
+                 );
+    glScalef (viewport[2] / delta, viewport[3] / delta, 1.0f);
 
     const qreal ratio (width() / qreal (height()));
     opengl::matrix::perspective (fov, ratio, 1.0f, _viewing_distance);
