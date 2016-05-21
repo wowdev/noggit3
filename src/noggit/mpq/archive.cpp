@@ -94,7 +94,7 @@ namespace noggit
         char* readbuffer (new char[filesize]);
         read_file (file_handle, readbuffer, filesize);
         SFileCloseFile (file_handle);
-        _listfile = QString::fromAscii (readbuffer, filesize).toLower().split ("\r\n", QString::SkipEmptyParts);
+        _listfile = QString::fromLatin1(readbuffer, filesize).toLower().split ("\r\n", QString::SkipEmptyParts);
 
         app().archive_manager().add_to_listfile(_listfile);
 
