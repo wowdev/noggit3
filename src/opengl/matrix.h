@@ -3,10 +3,13 @@
 
 #pragma once
 
+#include <math/constants.h>
 #include <math/matrix_4x4.h>
 #include <math/vector_3d.h>
 
 #include <opengl/types.h>
+
+#include <cmath>
 
 namespace opengl
 {
@@ -27,6 +30,12 @@ namespace opengl
     inline ::math::matrix_4x4 projection()
     {
       return from<GL_PROJECTION_MATRIX>();
+    }
+
+    inline void perspective (float fovy, float aspect, float zNear, float zFar)
+    {
+      float const ymax (zNear * std::tan (fovy * ::math::constants::pi() / 360.0));
+      glFrustum (-ymax * aspect, ymax * aspect, -ymax, ymax, zNear, zFar);
     }
 
     inline void look_at ( ::math::vector_3d const& eye

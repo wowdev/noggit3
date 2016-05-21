@@ -13,6 +13,7 @@
 #include <noggit/ModelManager.h>
 #include <noggit/World.h>
 
+#include <opengl/matrix.h>
 
 static const qreal fov (45.0);
 
@@ -53,7 +54,7 @@ void ModelView::paintGL()
     glLoadIdentity();
 
     const qreal ratio (width() / qreal (height()));
-    gluPerspective (fov, ratio, 2.0f, 600.0);
+    opengl::matrix::perspective (fov, ratio, 2.0f, 600.0);
 
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();
