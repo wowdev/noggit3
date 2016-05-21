@@ -28,11 +28,11 @@ if (WIN32)
 		"../Noggit_QT_libs/StormLib/ReleaseAD/"
 		"../Noggit_QT_libs/StormLib/DebugAD/"
       )
-	  
+
 	set(BOOST_ROOT "../Noggit_QT_libs/Boost/1.60/")
 	set(QT_BINARY_DIR "../Noggit_QT_libs/Qt/4.8.6/bin/")
 	set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "../Noggit_QT_libs/Qt/4.8.6/")
-	
+
 endif( WIN32 )
 
 # Our own FindModule.cmake scripts.
@@ -54,7 +54,7 @@ include (${QT_USE_FILE})
 # include paths
 include_directories ( SYSTEM ${GLEW_INCLUDE_PATH}
                       SYSTEM ${GLUT_INCLUDE_DIRS}
-                      SYSTEM ${STORM_INCLUDES}
+                      SYSTEM ${STORM_INCLUDE_DIR}
                       SYSTEM ${Boost_INCLUDE_DIR}
                     )
 
@@ -330,7 +330,7 @@ if (WIN32)
                    ${rccsc}
                    ${QM}
                  )
-				 
+
 	source_group("noggit"  FILES ${noggit_sources} ${noggit_headers})
 	source_group("opengl"  FILES ${opengl_sources} ${opengl_headers})
 	source_group("windows"  FILES ${windows_sources} ${windows_headers})
@@ -338,7 +338,7 @@ if (WIN32)
 	source_group("math"  FILES ${math_sources} ${math_headers})
 	source_group("moced"  FILES ${moced} )
 	source_group("resources"  FILES ${noggit_rc} )
-	
+
 else (WIN32)
   add_executable ( noggit
                    MACOSX_BUNDLE
@@ -397,7 +397,6 @@ if (APPLE)
 
   set ( DIRS
       ${OPENGL_LIBRARY_DIR}
-      ${STORM_LIBRARY_DIR}
       ${GLEW_LIBRARY_DIR}
       )
 
