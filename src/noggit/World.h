@@ -211,6 +211,8 @@ private:
   //! Is the WDT telling us to use a bigger alphamap (64*64) and single pass rendering.
   bool mBigAlpha;
 
+  bool _initialized_display;
+
   //! opengl call lists for the WDL low resolution heightmaps.
   std::unique_ptr<opengl::call_list> lowrestiles[64][64];
 
