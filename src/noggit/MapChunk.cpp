@@ -140,46 +140,8 @@ void MapChunk::GenerateContourMap()
   glGenTextures(1, &_contour_texture);
   glBindTexture(GL_TEXTURE_2D, _contour_texture);
 
-
-  gluBuild2DMipmaps(GL_TEXTURE_2D,4,CONTOUR_WIDTH,1,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-  /*glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,CONTOUR_WIDTH,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-
-   for(int i=0;i<(CONTOUR_WIDTH*4)/2;++i)
-   CTexture[i]=0;
-   CTexture[3]=0xff;
-
-   glTexImage1D(GL_TEXTURE_1D,1,GL_RGBA,CONTOUR_WIDTH/2,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-
-   for(int i=0;i<(CONTOUR_WIDTH*4)/4;++i)
-   CTexture[i]=0;
-   CTexture[3]=0x80;
-
-   glTexImage1D(GL_TEXTURE_1D,2,GL_RGBA,CONTOUR_WIDTH/4,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-
-   for(int i=0;i<(CONTOUR_WIDTH*4)/8;++i)
-   CTexture[i]=0;
-   CTexture[3]=0x40;
-
-   glTexImage1D(GL_TEXTURE_1D,3,GL_RGBA,CONTOUR_WIDTH/8,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-
-   for(int i=0;i<(CONTOUR_WIDTH*4)/16;++i)
-   CTexture[i]=0;
-   CTexture[3]=0x20;
-
-   glTexImage1D(GL_TEXTURE_1D,4,GL_RGBA,CONTOUR_WIDTH/16,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-
-   for(int i=0;i<(CONTOUR_WIDTH*4)/32;++i)
-   CTexture[i]=0;
-   CTexture[3]=0x10;
-
-   glTexImage1D(GL_TEXTURE_1D,5,GL_RGBA,CONTOUR_WIDTH/32,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);
-
-   for(int i=0;i<(CONTOUR_WIDTH*4)/64;++i)
-   CTexture[i]=0;
-   CTexture[3]=0x08;
-
-   glTexImage1D(GL_TEXTURE_1D,6,GL_RGBA,CONTOUR_WIDTH/64,0,GL_RGBA,GL_UNSIGNED_BYTE,CTexture);*/
-
+  glTexImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, CONTOUR_WIDTH, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, CTexture);
+  glGenerateMipmap (GL_TEXTURE_2D);
 
   glEnable(GL_TEXTURE_GEN_S);
   glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
