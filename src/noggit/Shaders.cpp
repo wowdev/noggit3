@@ -87,21 +87,6 @@ BLSShader::BLSShader( const QString & pFilename )
 
 ShaderPair *terrainShaders[4]={nullptr,nullptr,nullptr,nullptr}, *wmoShader=nullptr, *waterShaders[1]={nullptr};
 
-void initShaders()
-{
-  const bool enable_shaders
-    (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program);
-
-  if (enable_shaders)
-  {
-    reloadShaders();
-  }
-
-  LogDebug << "Shaders are "
-           << (enable_shaders ? "enabled." : "disabled.")
-           << std::endl;
-}
-
 void reloadShaders()
 {
   for (int i=0; i<4; ++i)
