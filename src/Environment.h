@@ -15,6 +15,7 @@ public:
 	void set_clipboard(nameEntry* entry);
 	void clear_clipboard();
 	bool is_clipboard();
+  Vec3D get_cursor_pos();
 
 	bool view_holelines;
 	// values for areaID painting
