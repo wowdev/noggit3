@@ -25,6 +25,7 @@
 #include <math/vector_2d.h>
 
 #include <opengl/call_list.h>
+#include <opengl/matrix.h>
 #include <opengl/scoped.h>
 #include <opengl/settings_saver.h>
 
@@ -887,7 +888,7 @@ void World::draw ( size_t flags
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  gluLookAt(camera.x(),camera.y(),camera.z(), lookat.x(),lookat.y(),lookat.z(), 0, 1, 0);
+  opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
   const Frustum frustum;
 
@@ -1288,10 +1289,7 @@ boost::optional<selection_type> World::drawSelection (size_t flags)
 
   glBindBuffer (GL_ARRAY_BUFFER, 0);
 
-  gluLookAt ( camera.x(), camera.y(), camera.z()
-            , lookat.x(), lookat.y(), lookat.z()
-            , 0, 1, 0
-            );
+  opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
   const Frustum frustum;
 

@@ -17,6 +17,8 @@
 #include <noggit/Model.h>
 #include <noggit/World.h>
 
+#include <opengl/matrix.h>
+
 Model::Model(const std::string& filename, bool _forceAnim)
 : forceAnim(_forceAnim)
 , _filename( filename )
@@ -973,10 +975,10 @@ void ModelCamera::setup( int time )
   video.farclip( farclip );
   video.updateProjectionMatrix();
 
-  ::math::vector_3d p = pos + tPos.getValue( 0, time );
-  ::math::vector_3d t = target + tTarget.getValue( 0, time );
-  ::math::vector_3d u( 0.0f, 1.0f, 0.0f );
-  gluLookAt( p.x, p.y, p.z, t.x, t.y, t.z, u.x, u.y, u.z );
+  opengl::matrix::look_at ( pos + tPos.getValue( 0, time )
+                          , target + tTarget.getValue( 0, time )
+                          , {0.0f, 1.0f, 0.0f}
+                          );
   */
 }
 

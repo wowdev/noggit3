@@ -4,6 +4,7 @@
 #pragma once
 
 #include <math/matrix_4x4.h>
+#include <math/vector_3d.h>
 
 #include <opengl/types.h>
 
@@ -26,6 +27,23 @@ namespace opengl
     inline ::math::matrix_4x4 projection()
     {
       return from<GL_PROJECTION_MATRIX>();
+    }
+
+    inline void look_at ( ::math::vector_3d const& eye
+                        , ::math::vector_3d const& center
+                        , ::math::vector_3d const& up
+                        )
+    {
+      ::math::vector_3d const z ((eye - center).normalized());
+      ::math::vector_3d const x ((up % z).normalized());
+      ::math::vector_3d const y ((z % x).normalized());
+      ::math::matrix_4x4 const matrix ( x.x(),    y.x(),    z.x(),     0.0f
+                                      , x.y(),    y.y(),    z.y(),     0.0f
+                                      , x.z(),    y.z(),    z.z(),     0.0f
+                                      , x * -eye, y * -eye, z * -eye,  1.0f
+                                      );
+
+      glMultMatrixf (matrix);
     }
   }
 }
