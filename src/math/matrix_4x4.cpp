@@ -84,6 +84,14 @@ namespace math
                      , _m[2][0] * x + _m[2][1] * y + _m[2][2] * z + _m[2][3]
                      );
   }
+  vector_4d matrix_4x4::operator* (const vector_4d& v) const
+  {
+    return { _m[0][0] * v[0] + _m[0][1] * v[1] + _m[0][2] * v[2] + _m[0][3] * v[3]
+           , _m[1][0] * v[0] + _m[1][1] * v[1] + _m[1][2] * v[2] + _m[1][3] * v[3]
+           , _m[2][0] * v[0] + _m[2][1] * v[1] + _m[2][2] * v[2] + _m[2][3] * v[3]
+           , _m[3][0] * v[0] + _m[3][1] * v[1] + _m[3][2] * v[2] + _m[3][3] * v[3]
+           };
+  }
 
   matrix_4x4 matrix_4x4::operator* (const matrix_4x4& p) const
   {
@@ -116,7 +124,7 @@ namespace math
     return o;
   }
 
-  const matrix_4x4 matrix_4x4::adjoint() const
+  matrix_4x4 matrix_4x4::adjoint() const
   {
     matrix_4x4 a;
     for (size_t j=0; j<4; j++) {
@@ -127,33 +135,45 @@ namespace math
     return a;
   }
 
+  matrix_4x4& matrix_4x4::operator* (float f)
+  {
+    for (std::size_t i (0); i < 16; ++i)
+    {
+      _data[i] *= f;
+    }
+    return *this;
+  }
+  matrix_4x4& matrix_4x4::operator/ (float f)
+  {
+    return *this * (1 / f);
+  }
+
   void matrix_4x4::invert()
   {
-    const matrix_4x4 adj (adjoint());
-    const float invdet (1.0f / determinant());
-    for (size_t j=0; j<4; j++) {
-      for (size_t i=0; i<4; ++i) {
-        _m[j][i] = adj._m[j][i] * invdet;
-      }
-    }
+    *this = inverted();
   }
   matrix_4x4 matrix_4x4::inverted() const
   {
-    matrix_4x4 result (*this);
-    result.invert();
-    return result;
+    return adjoint() / determinant();
   }
 
   void matrix_4x4::transpose()
   {
-   for (size_t j=1; j<4; j++) {
-     for (size_t i=0; i<j; ++i) {
-        const float f (_m[j][i]);
-        _m[j][i] = _m[i][j];
-        _m[i][j] = f;
+    for (size_t j=1; j<4; ++j)
+    {
+      for (size_t i=0; i<j; ++i)
+      {
+        std::swap (_m[j][i], _m[i][j]);
       }
     }
   }
+  matrix_4x4 matrix_4x4::transposed() const
+  {
+    matrix_4x4 res (*this);
+    res.transpose();
+    return res;
+  }
+
 
   template<matrix_4x4::axis a>
   inline const matrix_4x4& matrix_4x4::rotate_axis (const float& radians)

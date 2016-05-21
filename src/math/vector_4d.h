@@ -91,6 +91,10 @@ namespace math
       _z = xyz_.z();
       return xyz_;
     }
+    vector_3d xyz_normalized_by_w() const
+    {
+      return vector_3d (_x / _w, _y / _w, _z / _w);
+    }
 
     vector_4d operator+ (const vector_4d &v) const
     {
