@@ -72,8 +72,8 @@ void Alphamap::readNotCompressed(MPQFile *f, bool doNotFixAlpha)
   {
     for (std::size_t y(0); y < 64; y += 2)
     {
-      amap[x * 64 + y + 0] = ((*abuf & 0x0f) << 4) | 0xf;
-      amap[x * 64 + y + 1] = ((*abuf & 0xf0) << 0) | 0xf;
+      amap[x * 64 + y + 0] = ((*abuf & 0x0f) << 4) | (*abuf & 0x0f);
+      amap[x * 64 + y + 1] = ((*abuf & 0xf0) >> 4) | (*abuf & 0xf0);
       ++abuf;
     }
   }
