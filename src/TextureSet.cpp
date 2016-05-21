@@ -294,25 +294,21 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 			}
 		}
 
-		change = CHUNKSIZE / 64.0f;
 		zPos = zbase;
-
 		float target, tarAbove, tPressure;
-		//int texAbove=nTextures-texLevel-1;
-
 
 		for (int j = 0; j < 64; j++)
 		{
 			xPos = xbase;
 			for (int i = 0; i < 64; ++i)
 			{
-				xdiff = xPos - x + 0.25f; // Use the center instead of
-				zdiff = zPos - z + 0.25f; // the top left corner
+				xdiff = xPos - x + (TEXDETAILSIZE / 2.0f); // Use the center instead of
+				zdiff = zPos - z + (TEXDETAILSIZE / 2.0f); // the top left corner
 				dist = std::abs(std::sqrt(xdiff*xdiff + zdiff*zdiff));
 
 				if (dist>radius)
 				{
-					xPos += change;
+					xPos += TEXDETAILSIZE;
 					continue;
 				}				
 
@@ -330,9 +326,9 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 				{
 					alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::max(std::min((1.0f - tPressure)*(static_cast<float>(alphamaps[k]->getAlpha(i + j * 64))) + tPressure*tarAbove + 0.5f, 255.0f), 0.0f)));
 				}
-				xPos += change;
+				xPos += TEXDETAILSIZE;
 			}
-			zPos += change;
+			zPos += TEXDETAILSIZE;
 		}
 
 		if (texLevel == -1)
