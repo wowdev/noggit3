@@ -258,7 +258,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 		}
 		else if (fourcc == 'MCAL')
 		{
-			textureSet->initAlphamaps(f, header.nLayers, mBigAlpha, header.flags & FLAG_do_not_fix_alpha_map);
+			textureSet->initAlphamaps(f, header.nLayers, mBigAlpha, (header.flags & FLAG_do_not_fix_alpha_map) == 0);
 		}
 		else if (fourcc == 'MCCV')
 		{
@@ -1348,7 +1348,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 	lADTFile.Insert(lCurrentPosition + 8, 0x80, reinterpret_cast<char*>(&(header)));
 	MapChunkHeader *lMCNK_header = lADTFile.GetPointer<MapChunkHeader>(lCurrentPosition + 8);
 
-	lMCNK_header->flags = Flags & ~FLAG_do_not_fix_alpha_map;
+	lMCNK_header->flags = Flags | FLAG_do_not_fix_alpha_map;
 	lMCNK_header->holes = holes;
 	lMCNK_header->areaid = areaID;
 
