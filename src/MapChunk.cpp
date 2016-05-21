@@ -32,7 +32,7 @@ static const int CONTOUR_WIDTH = 128;
 
 static const float texDetail = 8.0f;
 
-static const float TEX_RANGE = 62.0f / 64.0f;
+static const float TEX_RANGE = 1.0f;
 
 StripType LineStrip[32];
 StripType HoleStrip[128];
@@ -258,7 +258,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 		}
 		else if (fourcc == 'MCAL')
 		{
-			textureSet->initAlphamaps(f, header.nLayers, mBigAlpha);
+			textureSet->initAlphamaps(f, header.nLayers, mBigAlpha, header.flags & FLAG_do_not_fix_alpha_map);
 		}
 		else if (fourcc == 'MCCV')
 		{
@@ -1348,7 +1348,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 	lADTFile.Insert(lCurrentPosition + 8, 0x80, reinterpret_cast<char*>(&(header)));
 	MapChunkHeader *lMCNK_header = lADTFile.GetPointer<MapChunkHeader>(lCurrentPosition + 8);
 
-	lMCNK_header->flags = Flags;
+	lMCNK_header->flags = Flags & ~FLAG_do_not_fix_alpha_map;
 	lMCNK_header->holes = holes;
 	lMCNK_header->areaid = areaID;
 
@@ -1616,9 +1616,9 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 			unsigned char upperNibble, lowerNibble;
 			for (int k = 0; k < lDimensions; k++)
 			{
-				lowerNibble = static_cast<unsigned char>(std::max(std::min((static_cast<float>(textureSet->getAlpha(j, k * 2 + 0))) * 0.05882f + 0.5f, 15.0f), 0.0f));
-				upperNibble = static_cast<unsigned char>(std::max(std::min((static_cast<float>(textureSet->getAlpha(j, k * 2 + 1))) * 0.05882f + 0.5f, 15.0f), 0.0f));
-				lAlphaMaps[lDimensions * j + k] = (upperNibble << 4) + lowerNibble;
+        lowerNibble = (textureSet->getAlpha(j, k * 2 + 0) & 0xF0);
+        upperNibble = (textureSet->getAlpha(j, k * 2 + 1) & 0xF0);
+				lAlphaMaps[lDimensions * j + k] = (upperNibble) + (lowerNibble >> 4);
 			}
 		}
 	}
