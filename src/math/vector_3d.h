@@ -91,6 +91,11 @@ namespace math
       return vector_3d (_x - v._x, _y - v._y, _z - v._z);
     }
 
+    inline vector_3d operator-() const
+    {
+      return vector_3d (-_x, -_y, -_z);
+    }
+
     inline float operator* (const vector_3d &v) const
     {
       return _x * v._x + _y * v._y + _z * v._z;
