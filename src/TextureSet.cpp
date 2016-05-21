@@ -306,8 +306,8 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 			xPos = xbase;
 			for (int i = 0; i < 64; ++i)
 			{
-				xdiff = xPos - x;
-				zdiff = zPos - z;
+				xdiff = xPos - x + 0.25f; // Use the center instead of
+				zdiff = zPos - z + 0.25f; // the top left corner
 				dist = std::abs(std::sqrt(xdiff*xdiff + zdiff*zdiff));
 
 				if (dist>radius)
