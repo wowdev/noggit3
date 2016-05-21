@@ -80,12 +80,17 @@ namespace math
     }
 
     vector_3d operator* (const vector_3d& v) const;
+    vector_4d operator* (const vector_4d& v) const;
     matrix_4x4 operator* (const matrix_4x4& p) const;
 
-    const matrix_4x4 adjoint() const;
+    matrix_4x4& operator* (float);
+    matrix_4x4& operator/ (float);
+
+    matrix_4x4 adjoint() const;
     void invert();
     matrix_4x4 inverted() const;
     void transpose();
+    matrix_4x4 transposed() const;
 
     inline matrix_4x4& operator*= (const matrix_4x4& p)
     {
