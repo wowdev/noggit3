@@ -28,7 +28,7 @@ ModelView::ModelView(QGLWidget *shared, QWidget *parent) :
 void ModelView::initializeGL()
 {
     makeCurrent();
-    qglClearColor (Qt::blue);
+    glClearColor (0.0f, 0.0f, 1.0f, 0.0f);
 
     glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_NORMAL_ARRAY);
