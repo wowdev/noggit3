@@ -49,7 +49,6 @@ namespace noggit
 
       QMenuBar* _menu_bar;
 
-      QGLWidget* _dummy_gl_widget;
       QToolBar* currentToolBar;
 
       noggit::ui::settingsDialog* _settings;
