@@ -40,7 +40,8 @@
 
 #include <csignal>
 #include <string>
-#ifdef Q_WS_WIN
+
+#ifdef Q_OS_WIN
 #include <windows/StackWalker.h>
 #else
 #include <execinfo.h>
@@ -272,7 +273,7 @@ namespace noggit
 
   void application::auto_detect_game_path()
   {
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
     static const QString default_registry_path
       ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Blizzard Entertainment\\World of Warcraft");
     static const QString win7_registry_path
@@ -295,7 +296,7 @@ namespace noggit
       _game_path = registry_win72.value ("InstallPath").toString();
     }
 #else
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
     _game_path = "/Applications/World of Warcraft/";
 #else
     _game_path = "";
@@ -512,7 +513,7 @@ namespace noggit
 
 int main (int argc, char* argv[]);
 
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
 int __stdcall WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
  return main (__argc, __argv);
@@ -572,7 +573,7 @@ namespace
              << "\".\nPlease excuse the inconvenience. You may want to report this error including the log to the developers.\n"
              << std::endl;
 
-#ifndef Q_WS_WIN
+#ifndef Q_OS_WIN
     static const int nframes (30);
 
     void* array[nframes];
