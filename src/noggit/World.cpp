@@ -25,8 +25,8 @@
 #include <math/vector_2d.h>
 
 #include <opengl/call_list.h>
-#include <opengl/settings_saver.h>
 #include <opengl/scoped.h>
+#include <opengl/settings_saver.h>
 
 #include <noggit/application.h>
 #include <noggit/blp_texture.h>
@@ -45,38 +45,44 @@
 
 namespace
 {
-  void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
+  std::size_t const sphere_segments (15);
+  void draw_sphere_point (int i, int j, float radius)
   {
-    float vx = x2-x1;
-    float vy = y2-y1;
-    float vz = z2-z1;
+    static float const drho (::math::constants::pi() / sphere_segments);
+    static float const dtheta (2.0f * ::math::constants::pi() / sphere_segments);
 
-    //handle the degenerate case of z1 == z2 with an approximation
-    if( vz == 0.0f )
-      vz = .0001f;
-
-    float v = std::sqrt( vx*vx + vy*vy + vz*vz );
-    float ax = 57.2957795f*acos( vz/v );
-    if ( vz < 0.0f )
-      ax = -ax;
-    float rx = -vy*vz;
-    float ry = vx*vz;
-    glPushMatrix();
-
-    //draw the quadric
-    glTranslatef( x1,y1,z1 );
-    glRotatef(ax, rx, ry, 0.0);
-
-    gluQuadricOrientation(quadric,GLU_OUTSIDE);
-    gluSphere(quadric, radius, subdivisions , subdivisions );
-
-    glPopMatrix();
+    float const rho (i * drho);
+    float const theta (j * dtheta);
+    glVertex3f ( std::cos (theta) * std::sin (rho) * radius
+               , std::sin (theta) * std::sin (rho) * radius
+               , std::cos (rho) * radius
+               );
   }
-
-  void renderSphere_convenient(float x, float y, float z, float radius, int subdivisions)
+  void draw_sphere (float radius)
   {
-    //the same quadric can be re-used for drawing many objects
-    glDisable(GL_LIGHTING);
+    for (int i = 1; i < sphere_segments; i++)
+    {
+      glBegin (GL_LINE_LOOP);
+      for (int j = 0; j < sphere_segments; j++)
+      {
+        draw_sphere_point (i, j, radius);
+      }
+      glEnd();
+    }
+
+    for (int j = 0; j < sphere_segments; j++)
+    {
+      glBegin(GL_LINE_STRIP);
+      for (int i = 0; i <= sphere_segments; i++)
+      {
+        draw_sphere_point (i, j, radius);
+      }
+      glEnd();
+    }
+  }
+  void renderSphere_convenient(::math::vector_3d const& position, float radius)
+  {
+    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
 
     //! \todo This should be passed in!
     QSettings settings;
@@ -86,67 +92,78 @@ namespace
               , settings.value ("cursor/alpha", 1.0f).toFloat()
               );
 
-    GLUquadricObj *quadric=gluNewQuadric();
-    gluQuadricNormals(quadric, GLU_SMOOTH);
-    renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
-    renderSphere(x,y,z,x,y,z,radius,subdivisions,quadric);
-    gluDeleteQuadric(quadric);
-    glEnable(GL_LIGHTING);
+    opengl::scoped::matrix_pusher matrix;
+
+    glTranslatef (position.x(), position.y(), position.z());
+
+    draw_sphere (0.3f);
+    draw_sphere (radius);
   }
 
-  void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, float radius, GLUquadricObj *quadric)
+  void draw_disk_point (float radius, float arc)
   {
-    float vx = x2 - x1;
-    float vy = y2 - y1;
-    float vz = z2 - z1;
+    glVertex3f (radius * std::sin (arc), radius * std::cos (arc), 0.0f);
+  }
+  void draw_disk (float radius)
+  {
+    int const slices (std::max (15.0f, radius * 1.5f));
+    static float const max (2.0f * ::math::constants::pi());
+    float const stride (max / slices);
 
-    //handle the degenerate case of z1 == z2 with an approximation
-    if( vz == 0.0f )
-      vz = .0001f;
+    glBegin (GL_LINE_LOOP);
+    for (float arc (0.0f); arc < max; arc += stride)
+    {
+      draw_disk_point (radius, arc);
+    }
+    glEnd();
 
-    float v = std::sqrt( vx*vx + vy*vy + vz*vz );
-    float ax = 57.2957795f*acos( vz/v );
-    if(vz < 0.0f)
-      ax = -ax;
+    glBegin (GL_LINE_LOOP);
+    for (float arc (0.0f); arc < max; arc += stride)
+    {
+      draw_disk_point (radius + 1.0f, arc);
+    }
+    glEnd();
 
-    float rx = -vy * vz;
-    float ry = vx * vz;
-
-    glPushMatrix();
-    glDisable(GL_DEPTH_TEST);
-    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-    glEnable(GL_COLOR_MATERIAL);
-
-    //draw the quadric
-    glTranslatef(x1, y1, z1);
-    glRotatef(ax, rx, ry, 0.0f);
-    glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-
-    //! \todo This should be passed in!
-    QSettings settings;
-    glColor4f ( settings.value ("cursor/red", 1.0f).toFloat()
-              , settings.value ("cursor/green", 1.0f).toFloat()
-              , settings.value ("cursor/blue", 1.0f).toFloat()
-              , settings.value ("cursor/alpha", 1.0f).toFloat()
-              );
-
-    gluQuadricOrientation(quadric, GLU_OUTSIDE);
-    gluDisk(quadric, radius , radius + 1.0f, std::max (15.0, radius * 1.5), 1);
-
-    glEnable(GL_DEPTH_TEST);
-    glPopMatrix();
+    for (float arc (0.0f); arc < max; arc += stride)
+    {
+      glBegin (GL_LINES);
+      draw_disk_point (radius, arc);
+      draw_disk_point (radius + 1.0f, arc);
+      glEnd();
+     }
   }
 
-  void renderDisk_convenient(float x, float y, float z, float radius)
+  void renderDisk_convenient(::math::vector_3d const& position, float radius)
   {
-    glDisable(GL_LIGHTING);
-    GLUquadricObj *quadric = gluNewQuadric();
-    gluQuadricDrawStyle(quadric, GLU_LINE);
-    gluQuadricNormals(quadric, GLU_SMOOTH);
-    renderDisk(x, y, z, x, y, z, radius, quadric);
-    renderSphere(x,y,z,x,y,z,0.3f,15,quadric);
-    gluDeleteQuadric(quadric);
-    glEnable(GL_LIGHTING);
+    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
+
+    {
+      opengl::scoped::matrix_pusher matrix;
+      opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
+      glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+      opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_TRUE> color_material;
+
+      glTranslatef (position.x(), position.y(), position.z());
+      glRotatef (90.0f, 1.0f, 0.0f, 0.0f);
+
+      //! \todo This should be passed in!
+      QSettings settings;
+      glColor4f ( settings.value ("cursor/red", 1.0f).toFloat()
+                , settings.value ("cursor/green", 1.0f).toFloat()
+                , settings.value ("cursor/blue", 1.0f).toFloat()
+                , settings.value ("cursor/alpha", 1.0f).toFloat()
+                );
+
+      draw_disk (radius);
+    }
+
+    {
+      opengl::scoped::matrix_pusher matrix;
+
+      glTranslatef (position.x(), position.y(), position.z());
+
+      draw_sphere (0.3f);
+    }
   }
 }
 
@@ -1056,9 +1073,13 @@ void World::draw ( size_t flags
         //! \todo This actually should be an enum. And should be passed into this method.
         const int cursor_type (settings.value ("cursor/type", 1).toInt());
         if(cursor_type == 1)
-          renderDisk_convenient(posX, posY, posZ, outer_cursor_radius);
+          renderDisk_convenient ( _exact_terrain_selection_position
+                                , outer_cursor_radius
+                                );
         else if(cursor_type == 2)
-          renderSphere_convenient(posX, posY, posZ, outer_cursor_radius, 15);
+          renderSphere_convenient ( _exact_terrain_selection_position
+                                  , outer_cursor_radius
+                                  );
       }
 
       glEnable(GL_CULL_FACE);
