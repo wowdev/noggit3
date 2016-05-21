@@ -23,6 +23,7 @@
 #include <QLabel>
 #include <QToolBar>
 #include <QVariant>
+#include <QMimeData>
 
 #include <math/bounded_nearest.h>
 
