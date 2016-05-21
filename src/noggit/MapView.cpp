@@ -459,7 +459,7 @@ namespace noggit
   void MapView::initializeGL()
   {
     this->makeCurrent();
-    qglClearColor (Qt::black);
+    glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
 
     glEnableClientState (GL_VERTEX_ARRAY);
     glEnableClientState (GL_NORMAL_ARRAY);
