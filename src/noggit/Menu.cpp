@@ -155,8 +155,6 @@ void Menu::prepare_world (World *world, const ::math::vector_3d& pos, float rota
   world->camera = ::math::vector_3d (pos.x(), pos.y(), pos.z());
   //! \todo actually set lookat!
   world->lookat = ::math::vector_3d (pos.x() + 10.0f, pos.y() + 10.0f, pos.z() + 10.0f); // ah = rotation
-
-  world->initDisplay();
 }
 
 void Menu::show_map_list_item (QListWidgetItem* item)

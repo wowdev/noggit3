@@ -220,6 +220,7 @@ World::World( const std::string& name )
   , lookat( ::math::vector_3d( 0.0f, 0.0f, 0.0f ) )
   , outdoorLightStats( OutdoorLightStats() )
   , mBigAlpha( false )
+  , _initialized_display (false)
   , detailtexcoords( 0 )
   , alphatexcoords( 0 )
   , mMapId( 0xFFFFFFFF )
@@ -883,6 +884,12 @@ void World::draw ( size_t flags
                  , const boost::optional<selection_type>& selected_item
                  )
 {
+  if (!_initialized_display)
+  {
+    initDisplay();
+    _initialized_display = true;
+  }
+
   const int cx (camera.x() / TILESIZE);
   const int cz (camera.z() / TILESIZE);
 
