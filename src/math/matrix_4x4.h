@@ -72,6 +72,7 @@ namespace math
 
     const matrix_4x4 adjoint() const;
     void invert();
+    matrix_4x4 inverted() const;
     void transpose();
 
     inline matrix_4x4& operator*= (const matrix_4x4& p)
