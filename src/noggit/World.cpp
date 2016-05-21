@@ -1045,23 +1045,25 @@ void World::draw ( size_t flags
       glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
       GLint viewport[4];
-      GLdouble modelview[16];
-      GLdouble projection[16];
-      GLfloat winX, winY, winZ;
-      GLdouble posX, posY, posZ;
+      glGetIntegerv (GL_VIEWPORT, viewport);
 
-      glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-      glGetDoublev( GL_PROJECTION_MATRIX, projection );
-      glGetIntegerv( GL_VIEWPORT, viewport );
+      float const win_x (mouse_position.x());
+      float const win_y (static_cast<float> (viewport[3]) - mouse_position.y());
+      float win_z;
+      glReadPixels (win_x, win_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
 
+      ::math::vector_4d const normalized_device_coords
+        ( 2.0f * (win_x - static_cast<float> (viewport[0])) / static_cast<float> (viewport[2]) - 1.0f
+        , 2.0f * (win_y - static_cast<float> (viewport[1])) / static_cast<float> (viewport[3]) - 1.0f
+        , 2.0f * win_z - 1.0f
+        , 1.0f
+        );
 
-      winX = mouse_position.x();
-      winY = (float)viewport[3] - mouse_position.y();
-
-      glReadPixels( winX, winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
-      gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-
-      _exact_terrain_selection_position = ::math::vector_3d (posX, posY, posZ);
+      _exact_terrain_selection_position = ( ( opengl::matrix::model_view()
+                                            * opengl::matrix::projection()
+                                            ).inverted().transposed()
+                                          * normalized_device_coords
+                                          ).xyz_normalized_by_w();
 
       glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
       glDisable(GL_CULL_FACE);
