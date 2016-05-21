@@ -137,6 +137,12 @@ namespace math
       }
     }
   }
+  matrix_4x4 matrix_4x4::inverted() const
+  {
+    matrix_4x4 result (*this);
+    result.invert();
+    return result;
+  }
 
   void matrix_4x4::transpose()
   {
