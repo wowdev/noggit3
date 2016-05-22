@@ -6,7 +6,7 @@
 #include <noggit/ModelManager.h>
 
 #include <opengl/types.h>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QSettings>
 #include <QMouseEvent>
 #include <QWheelEvent>
@@ -14,11 +14,11 @@
 
 class Model;
 
-class ModelView : public QGLWidget
+class ModelView : public QOpenGLWidget
 {
 
 public:
-    ModelView(QGLWidget *shared, QWidget *parent = 0);
+    ModelView(QWidget *parent = 0);
     virtual QSize sizeHint() const;
     void changeModel(QString filename);
 

@@ -3,11 +3,7 @@
 
 #pragma once
 
-#ifdef __linux__
-#include <GL/glew.h>
-#else
-#include <gl/glew.h>
-#endif
+#include <QtOpenGL>
 
 namespace opengl
 {

@@ -17,7 +17,7 @@
 #include <noggit/TextureManager.h>
 
 #include <QPoint>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QKeySequence>
 #include <QTime>
 
@@ -57,7 +57,7 @@ namespace noggit
     eViewMode_3D,
   };
 
-  class MapView : public QGLWidget
+  class MapView : public QOpenGLWidget
   {
     Q_OBJECT
 
@@ -102,7 +102,6 @@ namespace noggit
             , qreal viewing_distance
             , float ah0 = -90.0f
             , float av0 = -30.0f
-            , QGLWidget* shared = nullptr
             , QWidget* parent = nullptr
             );
     virtual ~MapView();

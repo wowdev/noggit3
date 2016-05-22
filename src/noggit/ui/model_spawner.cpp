@@ -61,11 +61,11 @@ namespace noggit
       };
     }
 
-    model_spawner::model_spawner (QWidget* parent, QGLWidget *shared)
+    model_spawner::model_spawner (QWidget* parent)
       : QWidget (parent)
       , _tree_model (new helper::qt::non_recursive_filter_model (nullptr))
       , _file_tree (new QTreeView (nullptr))
-      , modelview(new ModelView(shared,this))
+      , modelview(new ModelView(this))
     {
       QVBoxLayout* layout (new QVBoxLayout (this));
 
