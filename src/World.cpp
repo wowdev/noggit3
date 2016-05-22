@@ -1560,7 +1560,7 @@ bool World::GetVertex(float x, float z, Vec3D *V)
 	return mapIndex->getTile((size_t)newZ, (size_t)newX)->GetVertex(x, z, V);
 }
 
-void World::changeShader(float x, float z, float radius, bool editMode)
+void World::changeShader(float x, float z, float change, float radius, bool editMode)
 {
 	for (int j = 0; j < 64; ++j)
 	{
@@ -1572,7 +1572,7 @@ void World::changeShader(float x, float z, float radius, bool editMode)
 				{
 					for (size_t tx = 0; tx < 16; ++tx)
 					{
-						if (mapIndex->getTile((size_t)j, (size_t)i)->getChunk(ty, tx)->ChangeMCCV(x, z, radius, editMode))
+						if (mapIndex->getTile((size_t)j, (size_t)i)->getChunk(ty, tx)->ChangeMCCV(x, z, change, radius, editMode))
 							mapIndex->setChanged(j, i);
 					}
 				}

@@ -37,35 +37,6 @@ static const float TEX_RANGE = 1.0f;
 StripType LineStrip[32];
 StripType HoleStrip[128];
 
-typedef union rgba
-{
-	unsigned int x;
-	unsigned char a[4];
-} newColor;
-
-unsigned int Reverse(unsigned int old, bool load)
-{
-	newColor a;
-	a.x = old;
-	if (load)
-	{
-		a.a[0] *= 2;
-		a.a[1] *= 2;
-		a.a[2] *= 2;
-		if (a.a[3] == 0xFF)
-			a.a[3] = 0x7F;
-	}
-	else
-	{
-		a.a[0] /= 2;
-		a.a[1] /= 2;
-		a.a[2] /= 2;
-	}
-	unsigned char b = a.a[0];
-	a.a[0] = a.a[2];
-	a.a[2] = b;
-	return a.x;
-}
 
 void GenerateContourMap()
 {
@@ -265,22 +236,24 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 			if (!(Flags & FLAG_MCCV))
 				Flags |= FLAG_MCCV;
 			hasMCCV = true;
-			mccv.resize(mapbufsize);
-			size = std::min<int>(size, mapbufsize * 4);
-			f->read(mccv.data(), size);
-			auto numEntries = size / 4;
-			for (auto i = numEntries; i < mapbufsize; ++i) { mccv[i] = 0x00FFFFFF; }
-			for (int i = 0; i < mapbufsize; ++i)
-				mccv[i] = Reverse(mccv[i], true);
+			
+      unsigned char t[4];
+
+      for (int i = 0; i < mapbufsize; ++i)
+      {
+        f->read(t, 4);
+        mccv[i] = Vec3D((float)t[2] / 127.0f, (float)t[1] / 127.0f, (float)t[0] / 127.0f);
+      }				
 		}
 		f->seek(nextpos);
 	}
 
 	if (!hasMCCV)
 	{
-		if (!(Flags & FLAG_MCCV))
-			Flags |= FLAG_MCCV;
-		mccv.assign(mapbufsize, 0x00FFFFFF);
+		Flags |= FLAG_MCCV;
+    
+    for (int i = 0; i < mapbufsize; i++)
+      mccv[i] = Vec3D(1.0f, 1.0f, 1.0f);;
 	}
 
 	// create vertex buffers
@@ -295,7 +268,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-	glBufferData(GL_ARRAY_BUFFER, mapbufsize * sizeof(uint32_t), mccv.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
 
 	initStrip();
 
@@ -369,21 +342,13 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
 void MapChunk::ClearShader()
 {
-	bool changed = false;
 	for (int i = 0; i < mapbufsize; ++i) 
 	{ 
-		if (mccv[i] == 0x7F7F7F7F)
-		{
-			mccv[i] = 0x007F7F7F;
-			if (!changed)
-				changed = true;
-		}
+    mccv[i] = Vec3D(1.0f, 1.0f, 1.0f);
 	}
-	if (changed)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-		glBufferData(GL_ARRAY_BUFFER, mapbufsize * sizeof(uint32_t), mccv.data(), GL_STATIC_DRAW);
-	}
+	
+	glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
 }
 
 void MapChunk::drawTextures()
@@ -689,13 +654,18 @@ void MapChunk::draw()
 		return;
 
 	// setup vertex buffers
+  glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
+  glColorPointer(3, GL_FLOAT, 0, 0);
+  glEnableClientState(GL_COLOR_ARRAY);
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
 	glVertexPointer(3, GL_FLOAT, 0, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, normals);
 	glNormalPointer(GL_FLOAT, 0, 0);
+
 	// ASSUME: texture coordinates set up already
 
 	// first pass: base texture
+
 	if (textureSet->num() == 0U)
 	{
 		OpenGL::Texture::setActiveTexture(0);
@@ -756,6 +726,7 @@ void MapChunk::draw()
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
+  glDisableClientState(GL_COLOR_ARRAY);
 
 	drawContour();
 
@@ -768,7 +739,6 @@ void MapChunk::draw()
 			drawPass(-1);
 		}
 	}
-
 	if (terrainMode == 6)
 	{
 		if (water)
@@ -787,16 +757,6 @@ void MapChunk::draw()
 			glColor4f(colorValues.x, colorValues.y, colorValues.z, 0.7f);
 			drawPass(-1);
 		}
-	}
-
-	if (terrainMode == 8)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-		glColorPointer(4, GL_UNSIGNED_BYTE, 0, 0);
-
-		glEnableClientState(GL_COLOR_ARRAY);
-		drawPass(-1);
-		glDisableClientState(GL_COLOR_ARRAY);
 	}
 
 	if (Environment::getInstance()->cursorType == 3)
@@ -1066,55 +1026,56 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 	return Changed;
 }
 
-unsigned int Convert(float r, float g, float b)
-{
-	unsigned char br = (unsigned char)std::min<float>(r * 255, 255);
-	unsigned char bg = (unsigned char)std::min<float>(g * 255, 255);
-	unsigned char bb = (unsigned char)std::min<float>(b * 255, 255);
-
-	unsigned int ret = 0x7F000000;
-	ret |= (bb << 16);
-	ret |= (bg << 8);
-	ret |= br;
-
-	return ret;
-}
-
 extern float shaderRed;
 extern float shaderGreen;
 extern float shaderBlue;
 
-bool MapChunk::ChangeMCCV(float x, float z, float radius, bool editMode)
+bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool editMode)
 {
-	float dist, xdiff, zdiff;
-	Changed = false;
+  float dist, xdiff, zdiff;
+  Changed = false;
 
-	xdiff = xbase - x + CHUNKSIZE / 2;
-	zdiff = zbase - z + CHUNKSIZE / 2;
-	dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
+  xdiff = xbase - x + CHUNKSIZE / 2;
+  zdiff = zbase - z + CHUNKSIZE / 2;
+  dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
-	if (dist > (radius + MAPCHUNK_RADIUS))
-		return Changed;
-	for (int i = 0; i < mapbufsize; ++i)
-	{
-		xdiff = mVertices[i].x - x;
-		zdiff = mVertices[i].z - z;
-		dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
-		if (dist < radius)
-		{
-			if (editMode)
-				mccv[i] = Convert(shaderRed, shaderGreen, shaderBlue);
-			else
-				mccv[i] = 0x00FFFFFF;
+  if (dist > (radius + MAPCHUNK_RADIUS))
+    return Changed;
+
+  for (int i = 0; i < mapbufsize; ++i)
+  {
+    xdiff = mVertices[i].x - x;
+    zdiff = mVertices[i].z - z;
+    dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+    if (dist <= radius)
+    {
+      float edit = change * (1.0f - dist / radius);
+      if (editMode)
+      {
+        mccv[i].x += ((2.0f * shaderRed)   - mccv[i].x)* edit;
+        mccv[i].y += ((2.0f * shaderGreen) - mccv[i].y)* edit;
+        mccv[i].z += ((2.0f * shaderBlue)  - mccv[i].z)* edit;
+      }
+      else
+      {
+        mccv[i].x += (1.0f - mccv[i].x) * edit;
+        mccv[i].y += (1.0f - mccv[i].y) * edit;
+        mccv[i].z += (1.0f - mccv[i].z) * edit;
+      }
+
+      mccv[i].x = std::min(std::max(mccv[i].x, 0.0f), 2.0f);
+      mccv[i].y = std::min(std::max(mccv[i].y, 0.0f), 2.0f);
+      mccv[i].z = std::min(std::max(mccv[i].z, 0.0f), 2.0f);
+        
 			Changed = true;
-		}
-	}
-	if (Changed)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-		glBufferData(GL_ARRAY_BUFFER, mapbufsize * sizeof(uint32_t), mccv.data(), GL_STATIC_DRAW);
-	}
-	return Changed;
+    }
+  }
+  if (Changed)
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
+  }
+  return Changed;
 }
 
 bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
@@ -1438,11 +1399,14 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 	lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsMCCV = lCurrentPosition - lMCNK_Position;
 
 	unsigned int *lmccv = lADTFile.GetPointer<unsigned int>(lCurrentPosition + 8);
-	memcpy(lmccv, mccv.data(), lMCCV_Size);
 
-	for (int i = 0; i < mapbufsize; ++i)
-		lmccv[i] = Reverse(lmccv[i], false);
-
+  for (int i = 0; i < mapbufsize; ++i)
+  {
+    *lmccv++ =  ((unsigned char)(mccv[i].z * 127.0f) & 0xFF)
+             + (((unsigned char)(mccv[i].y * 127.0f) & 0xFF) << 8)
+             + (((unsigned char)(mccv[i].x * 127.0f) & 0xFF) << 16);
+  }
+    
 	lCurrentPosition += 8 + lMCCV_Size;
 	lMCNK_Size += 8 + lMCCV_Size;
 
