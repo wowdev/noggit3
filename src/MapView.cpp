@@ -118,10 +118,13 @@ UISlider* shader_radius;
 UISlider* shader_red;
 UISlider* shader_green;
 UISlider* shader_blue;
+UISlider* shader_speed;
 float shaderRadius = 15.0f;
+float shaderSpeed = 1.0f;
 float shaderRed = 1.0f;
 float shaderGreen = 1.0f;
 float shaderBlue = 1.0f;
+
 
 UISlider* ground_brush_radius;
 float groundBrushRadius = 15.0f;
@@ -189,22 +192,27 @@ void SetShaderRadius(float f)
 	shaderRadius = f;
 }
 
+void SetShaderSpeed(float f)
+{
+  shaderSpeed = f;
+}
+
 void SetShaderRed(float f)
 {
 	shaderRed = f;
-	Environment::getInstance()->cursorColorR = f;
+	Environment::getInstance()->cursorColorR = f / 2;
 }
 
 void SetShaderGreen(float f)
 {
 	shaderGreen = f;
-	Environment::getInstance()->cursorColorG = f;
+	Environment::getInstance()->cursorColorG = f / 2;
 }
 
 void SetShaderBlue(float f)
 {
 	shaderBlue = f;
-	Environment::getInstance()->cursorColorB = f;
+	Environment::getInstance()->cursorColorB = f / 2;
 }
 
 void setGroundBrushSpeed(float f)
@@ -917,21 +925,27 @@ void MapView::createGUI()
 	shader_radius->setText("Radius: ");
 	settings_shader->addChild(shader_radius);
 
-	shader_red = new UISlider(6.0f, 59.0f, 167.0f, 1.0f, 0.00001f);
+  shader_speed = new UISlider(6.0f, 59.0f, 167.0f, 10.0f, 0.00001f);
+  shader_speed->setFunc(SetShaderSpeed);
+  shader_speed->setValue(shaderSpeed/10.0f);
+  shader_speed->setText("Speed: ");
+  settings_shader->addChild(shader_speed);
+
+	shader_red = new UISlider(6.0f, 85.0f, 167.0f, 2.0f, 0.00001f);
 	shader_red->setFunc(SetShaderRed);
-	shader_red->setValue(shaderRed);
+  shader_red->setValue(shaderRed / 2.0f);
 	shader_red->setText("Red: ");
 	settings_shader->addChild(shader_red);
 
-	shader_green = new UISlider(6.0f, 85.0f, 167.0f, 1.0f, 0.00001f);
+	shader_green = new UISlider(6.0f, 111.0f, 167.0f, 2.0f, 0.00001f);
 	shader_green->setFunc(SetShaderGreen);
-	shader_green->setValue(shaderGreen);
+	shader_green->setValue(shaderGreen / 2.0f);
 	shader_green->setText("Green: ");
 	settings_shader->addChild(shader_green);
 
-	shader_blue = new UISlider(6.0f, 111.0f, 167.0f, 1.0f, 0.00001f);
+	shader_blue = new UISlider(6.0f, 137.0f, 167.0f, 2.0f, 0.00001f);
 	shader_blue->setFunc(SetShaderBlue);
-	shader_blue->setValue(shaderBlue);
+	shader_blue->setValue(shaderBlue / 2.0f);
 	shader_blue->setText("Blue: ");
 	settings_shader->addChild(shader_blue);
 #ifdef _WIN32
@@ -1083,7 +1097,7 @@ void MapView::createGUI()
 	mbar->GetMenu("Assist")->AddMenuItemButton("Create water", menuWater, 1);
 	mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (current adt)", funcFix, 0);
 	mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all adts)", funcAllFix, 0);
-	//mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", ClearShader, 0);
+	mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", ClearShader, 0);
 
 	mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
 	mbar->GetMenu("View")->AddMenuItemToggle("Toolbar", mainGui->guiToolbar->hidden_evil(), true);
@@ -1580,9 +1594,9 @@ void MapView::tick(float t, float dt)
 					if (mViewMode == eViewMode_3D)
 					{
 						if (Environment::getInstance()->ShiftDown)
-							gWorld->changeShader(xPos, zPos, shaderRadius, true);
+							gWorld->changeShader(xPos, zPos, dt*shaderSpeed*2, shaderRadius, true);
 						if (Environment::getInstance()->CtrlDown)
-							gWorld->changeShader(xPos, zPos, shaderRadius, false);
+							gWorld->changeShader(xPos, zPos, dt*shaderSpeed*2, shaderRadius, false);
 					}
 					break;
 				}
@@ -2561,6 +2575,14 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
 				mainGui->S1->setValue(0.0001f);
 			mainGui->S1->setValue(mainGui->S1->value);
 			break;
+    case 8:
+      shaderSpeed += e->xrel / 30.0f;
+      if (shaderSpeed > 10.0f)
+        shaderSpeed = 10.0f;
+      else if (shaderSpeed < 0.0f)
+        shaderSpeed = 0.0f;
+      shader_speed->setValue(shaderSpeed / 10.0f);
+      break;
 		}
 	}
 

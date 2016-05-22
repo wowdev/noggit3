@@ -30,8 +30,6 @@ private:
 
 	unsigned int areaID;
 
-	std::vector<unsigned int> mccv;
-
 	unsigned char mShadowMap[8 * 64];
 	GLuint shadow;
 
@@ -43,6 +41,7 @@ private:
 	Vec3D mNormals[mapbufsize];
 	Vec3D mMinimap[mapbufsize];
 	Vec4D mFakeShadows[mapbufsize];
+  Vec3D mccv[mapbufsize];
 
 	void initStrip();
 
@@ -79,7 +78,7 @@ public:
 	void drawSelect();
 	void drawLines();
 	void drawTextures();
-	bool ChangeMCCV(float x, float z, float radius, bool editMode);
+	bool ChangeMCCV(float x, float z, float change, float radius, bool editMode);
 	void ClearShader();
 	void SetWater(bool w);
 	bool GetWater();

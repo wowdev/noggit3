@@ -162,7 +162,7 @@ public:
 	bool GetVertex(float x, float z, Vec3D *V);
 
 	void changeTerrain(float x, float z, float change, float radius, int BrushType);
-	void changeShader(float x, float z, float radius, bool editMode);
+	void changeShader(float x, float z, float change, float radius, bool editMode);
 	void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
 	void blurTerrain(float x, float z, float remain, float radius, int BrushType);
 	bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
