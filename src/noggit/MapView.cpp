@@ -56,10 +56,9 @@ namespace noggit
                    , qreal viewing_distance
                    , float ah0
                    , float av0
-                   , QGLWidget* shared
                    , QWidget* parent
                    )
-    : QGLWidget (parent, shared)
+    : QOpenGLWidget (parent)
     , _startup_time ()
     , _last_update (0.0)
     , ah (ah0)
@@ -71,7 +70,7 @@ namespace noggit
     , mTimespeed (1.0f)
     , _world (world)
     , _minimap (new ui::minimap_widget (nullptr))
-    , _model_spawner (new noggit::ui::model_spawner (nullptr,shared))
+    , _model_spawner (new noggit::ui::model_spawner (nullptr))
     , _cursor_selector (new ui::cursor_selector (nullptr))
     , _zoneid_widget( new ui::zoneid_widget (world,nullptr))
     , _is_currently_moving_object (false)
@@ -453,7 +452,7 @@ namespace noggit
     const qreal now (_startup_time.elapsed() / 1000.0);
 
     tick (now - _last_update);
-    updateGL();
+    update();
 
     _last_update = now;
   }

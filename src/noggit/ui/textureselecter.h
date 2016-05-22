@@ -7,7 +7,6 @@
 #include <noggit/blp_texture.h>
 #include <noggit/TextureManager.h>
 
-#include <QGLWidget>
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsItem>
@@ -28,10 +27,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      textureSelecter(QGLWidget *shared, QWidget *parent = 0);
-
-    private:
-      QGLWidget* sharedWidget;
+      textureSelecter(QWidget *parent = 0);
     };
 
     class textureView : public QGraphicsView
@@ -39,7 +35,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      textureView(QStringList textures, QGLWidget* shared, QWidget* parent = 0);
+      textureView(QStringList textures, QWidget* parent = 0);
       void resizeEvent(QResizeEvent* event);
       QSize sizeHint() const;
 

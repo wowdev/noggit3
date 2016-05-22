@@ -6,7 +6,6 @@
 
 #include <noggit/ModelView.h>
 #include <QWidget>
-#include <QGLWidget>
 #include <QModelIndex>
 
 
@@ -29,7 +28,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      model_spawner (QWidget* parent = nullptr, QGLWidget *shared = nullptr);
+      model_spawner (QWidget* parent = nullptr);
 
       static const QLatin1String& mime_type();
 

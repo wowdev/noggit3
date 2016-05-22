@@ -6,7 +6,6 @@
 
 #include <stdexcept>
 
-#include <QGLWidget>
 #include <QTextEdit>
 #include <QStatusBar>
 #include <QToolBar>
@@ -40,8 +39,7 @@ namespace noggit
     {
       setWindowTitle("NoggIt Studio");
 
-      //textureSelecter *test = new textureSelecter(app().shared_gl_widget());
-      //! todo windows has a problem with sharing the dummy (may sth about render contex)
+      //textureSelecter *test = new textureSelecter();
 
       QMenu* fileMenu = menuBar()->addMenu (tr("&File"));
       fileMenu->addAction (tr("Open Maps"), this, SLOT(maps()));
@@ -87,7 +85,6 @@ namespace noggit
                                       , app().setting("view_distance").toReal()
                                       , 0.0
                                       , 0.0
-                                      , app().shared_gl_widget()
                                       , this
                                       )
                           );

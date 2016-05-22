@@ -21,9 +21,8 @@ namespace noggit
 {
   namespace ui
   {
-    textureSelecter::textureSelecter(QGLWidget* shared, QWidget* parent)
+    textureSelecter::textureSelecter(QWidget* parent)
     : QWidget(parent)
-    ,sharedWidget(shared)
     {
       setMinimumSize(850, 600);
 
@@ -55,7 +54,7 @@ namespace noggit
         check->setFocusPolicy(Qt::NoFocus);
         check->setStyleSheet("QCheckBox::indicator:unchecked {image: url(rightarrow-icon);}"
                              "QCheckBox::indicator:checked {image: url(downarrow-icon);}");
-        textureView* view  = new textureView(it.value(), sharedWidget, scrollWidget);
+        textureView* view  = new textureView(it.value(), scrollWidget);
         view->hide();
 
         connect(check, SIGNAL(toggled(bool)), view, SLOT(setVisible(bool)));
@@ -154,7 +153,7 @@ namespace noggit
     {
       if (painter->paintEngine()->type() != QPaintEngine::OpenGL && painter->paintEngine()->type() != QPaintEngine::OpenGL2)
       {
-        qWarning("OpenGLScene: drawBackground needs a QGLWidget to be set as viewport on the graphics view");
+        qWarning("OpenGLScene: drawBackground needs a QOpenGLWidget to be set as viewport on the graphics view");
         return;
       }
 
@@ -168,10 +167,10 @@ namespace noggit
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    textureView::textureView(QStringList textures, QGLWidget *shared, QWidget *parent)
+    textureView::textureView(QStringList textures, QWidget *parent)
     : QGraphicsView(parent)
     {
-      setViewport(new QGLWidget(parent,shared));
+      setViewport (new QOpenGLWidget(parent));
       setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
       setScene(new textureScene(textures, this->rect()));
       num = textures.size();

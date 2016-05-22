@@ -17,8 +17,8 @@
 
 static const qreal fov (45.0);
 
-ModelView::ModelView(QGLWidget *shared, QWidget *parent) :
-    QGLWidget(parent, shared)
+ModelView::ModelView(QWidget *parent) :
+    QOpenGLWidget(parent)
   , theModel ("World\\Azeroth\\elwynn\\passivedoodads\\tree\\elwynnlog02.m2")
 {
     _draw_loading = true;
@@ -85,7 +85,7 @@ void ModelView::timerEvent (QTimerEvent*)
         distance = -(theModel->header.VertexBoxMax.z()*3);
         _draw_loading = false;
     }
-    updateGL();
+    update();
 }
 
 QSize ModelView::sizeHint() const
@@ -106,7 +106,7 @@ void ModelView::mouseMoveEvent(QMouseEvent *event)
     if (event->buttons() & Qt::LeftButton) {
         xRot = (xRot + 8 * dy);
         yRot = (yRot + 8 * dx);
-        updateGL();
+        update();
     }
     lastPos = event->pos();
 }
@@ -116,7 +116,7 @@ void ModelView::wheelEvent(QWheelEvent *event)
     event->accept();
     if (event->buttons() & Qt::LeftButton) {
         distance = distance + float(event->delta())/32;
-        updateGL();
+        update();
     }
 }
 
@@ -129,6 +129,6 @@ void ModelView::changeModel(QString filename)
 {
     theModel = noggit::scoped_model_reference (filename.toStdString());
     _draw_loading = true;
-    updateGL();
+    update();
 }
 
