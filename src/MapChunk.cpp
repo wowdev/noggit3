@@ -704,6 +704,9 @@ void MapChunk::draw()
 		glDepthMask(GL_TRUE);
 	}
 
+  if (hasMCCV)
+    glDisableClientState(GL_COLOR_ARRAY);
+
 	// shadow map
 	glActiveTexture(GL_TEXTURE0);
 	glDisable(GL_TEXTURE_2D);
@@ -722,8 +725,6 @@ void MapChunk::draw()
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
-  if (hasMCCV)
-    glDisableClientState(GL_COLOR_ARRAY);  
 
 	drawContour();
 
