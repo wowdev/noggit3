@@ -248,14 +248,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 		f->seek(nextpos);
 	}
 
-	if (!hasMCCV)
-	{
-		Flags |= FLAG_MCCV;
-    
-    for (int i = 0; i < mapbufsize; i++)
-      mccv[i] = Vec3D(1.0f, 1.0f, 1.0f);;
-	}
-
 	// create vertex buffers
 	glGenBuffers(1, &vertices);
 	glGenBuffers(1, &normals);
@@ -653,14 +645,18 @@ void MapChunk::draw()
 	if (mydist > (mapdrawdistance * mapdrawdistance))
 		return;
 
-	// setup vertex buffers
-  glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-  glColorPointer(3, GL_FLOAT, 0, 0);
-  glEnableClientState(GL_COLOR_ARRAY);
+	// setup vertex buffers  
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
 	glVertexPointer(3, GL_FLOAT, 0, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, normals);
 	glNormalPointer(GL_FLOAT, 0, 0);
+
+  if (hasMCCV)
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
+    glColorPointer(3, GL_FLOAT, 0, 0);
+    glEnableClientState(GL_COLOR_ARRAY);
+  }
 
 	// ASSUME: texture coordinates set up already
 
@@ -726,7 +722,8 @@ void MapChunk::draw()
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
-  glDisableClientState(GL_COLOR_ARRAY);
+  if (hasMCCV)
+    glDisableClientState(GL_COLOR_ARRAY);  
 
 	drawContour();
 
@@ -1041,6 +1038,14 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
 
   if (dist > (radius + MAPCHUNK_RADIUS))
     return Changed;
+
+  if (!hasMCCV)
+  {
+    ClearShader(); // create default shaders
+    Changed = true;
+    Flags |= FLAG_MCCV;
+    hasMCCV = true;
+  }    
 
   for (int i = 0; i < mapbufsize; ++i)
   {
@@ -1393,22 +1398,30 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 	lMCNK_Size += 8 + lMCVT_Size;
 	
 	// MCCV
-	int lMCCV_Size = mapbufsize * sizeof(unsigned int);
-	lADTFile.Extend(8 + lMCCV_Size);
-	SetChunkHeader(lADTFile, lCurrentPosition, 'MCCV', lMCCV_Size);
-	lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsMCCV = lCurrentPosition - lMCNK_Position;
-
-	unsigned int *lmccv = lADTFile.GetPointer<unsigned int>(lCurrentPosition + 8);
-
-  for (int i = 0; i < mapbufsize; ++i)
+  int lMCCV_Size = 0;
+  if (hasMCCV)
   {
-    *lmccv++ =  ((unsigned char)(mccv[i].z * 127.0f) & 0xFF)
-             + (((unsigned char)(mccv[i].y * 127.0f) & 0xFF) << 8)
-             + (((unsigned char)(mccv[i].x * 127.0f) & 0xFF) << 16);
+    lMCCV_Size = mapbufsize * sizeof(unsigned int);
+    lADTFile.Extend(8 + lMCCV_Size);
+    SetChunkHeader(lADTFile, lCurrentPosition, 'MCCV', lMCCV_Size);
+    lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsMCCV = lCurrentPosition - lMCNK_Position;
+
+    unsigned int *lmccv = lADTFile.GetPointer<unsigned int>(lCurrentPosition + 8);
+
+    for (int i = 0; i < mapbufsize; ++i)
+    {
+      *lmccv++ = ((unsigned char)(mccv[i].z * 127.0f) & 0xFF)
+        + (((unsigned char)(mccv[i].y * 127.0f) & 0xFF) << 8)
+        + (((unsigned char)(mccv[i].x * 127.0f) & 0xFF) << 16);
+    }
+
+    lCurrentPosition += 8 + lMCCV_Size;
+    lMCNK_Size += 8 + lMCCV_Size;
   }
-    
-	lCurrentPosition += 8 + lMCCV_Size;
-	lMCNK_Size += 8 + lMCCV_Size;
+  else
+  {
+    lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsMCCV = 0;
+  }
 
 	// MCNR
 	int lMCNR_Size = mapbufsize * 3;
