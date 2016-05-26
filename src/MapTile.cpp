@@ -168,7 +168,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, u
 	assert(fourcc == 'MDDF');
 
 	ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>(theFile.getPointer());
-	for (unsigned int i = 0; i < size / 36; ++i)
+	for (unsigned int i = 0; i < size / sizeof(ENTRY_MDDF); ++i)
 	{
 		lModelInstances.push_back(mddf_ptr[i]);
 	}
@@ -182,7 +182,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, u
 	assert(fourcc == 'MODF');
 
 	ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>(theFile.getPointer());
-	for (unsigned int i = 0; i < size / 64; ++i)
+	for (unsigned int i = 0; i < size / sizeof(ENTRY_MODF); ++i)
 	{
 		lWMOInstances.push_back(modf_ptr[i]);
 	}

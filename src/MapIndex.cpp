@@ -561,11 +561,10 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename)
     assert(fourcc == 'MDDF');
 
     ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>(theFile.getPointer());
-    for (unsigned int i = 0; i < size / 36; ++i)
+    for (unsigned int i = 0; i < size / sizeof(ENTRY_MDDF); ++i)
     {
         uint32_t guid = mddf_ptr[i].uniqueID;
-        if (guid > highGUID)
-            highGUID = guid;
+        highGUID = std::max(highGUID, mddf_ptr[i].uniqueID);
     }
 
     // - MODF ----------------------------------------------
@@ -577,11 +576,10 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename)
     assert(fourcc == 'MODF');
 
     ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>(theFile.getPointer());
-    for (unsigned int i = 0; i < size / 64; ++i)
+    for (unsigned int i = 0; i < size / sizeof(ENTRY_MODF); ++i)
     {
         uint32_t guid = modf_ptr[i].uniqueID;
-        if (guid < highGUID)
-            highGUID = guid;
+        highGUID = std::max(highGUID, modf_ptr[i].uniqueID);
     }
     theFile.close();
 
