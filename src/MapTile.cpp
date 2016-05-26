@@ -27,7 +27,7 @@ int indexMapBuf(int x, int y)
 	return ((y + 1) / 2) * 9 + (y / 2) * 8 + x;
 }
 
-MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
+MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, uint32_t* highGUID)
 {
 	this->modelCount = 0;
 	this->mPositionX = pX;
@@ -38,6 +38,8 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
 	this->zbase = mPositionZ * TILESIZE;
 
 	this->mBigAlpha = pBigAlpha;
+
+    this->highestGUID = highGUID;
 
 	for (int i = 0; i < 16; ++i)
 	{
@@ -566,28 +568,19 @@ void MapTile::saveTile()
 	// UID += mPositionX * 10000000;
 	// UID += mPositionZ *   100000;
 
-	for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
-	{
-    if (!it->second.isInsideTile(lTileExtents)) continue;
-		// if (!it->second.hasUIDLock())
-		// {
-		// 	it->second.mUniqueID = UID++;
-		// 	it->second.lockUID();
-		// }
-		lObjectInstances.emplace(it->second.mUniqueID, it->second);
-	}
+    for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
+    {
+        if (!it->second.isInsideTile(lTileExtents)) continue;
+        if (!lObjectInstances.emplace(it->second.mUniqueID, it->second).second)
+            lObjectInstances.emplace(++*highestGUID, it->second);
+    }
 
-	for (std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it)
-	{
-		if (!it->second.isInsideTile(lTileExtents)) continue;
-		// if (!it->second.hasUIDLock())
-		// {
-		// 	it->second.d1 = UID++;
-		// 	it->second.lockUID();
-		// }
-		lModelInstances.emplace(it->second.d1, it->second);
-
-	}
+    for (std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it)
+    {
+        if (!it->second.isInsideTile(lTileExtents)) continue;
+        if (!lModelInstances.emplace(it->second.d1, it->second).second)
+            lModelInstances.emplace(++*highestGUID, it->second);
+    }
 	
 	filenameOffsetThing nullyThing = { 0, 0 };
 

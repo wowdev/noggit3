@@ -17,6 +17,7 @@ MapIndex::MapIndex(const std::string &pBasename)
 	, cx(-1)
 	, cz(-1)
 	, basename(pBasename)
+    , highestGUID(0)
 {
 
 	std::stringstream filename;
@@ -83,6 +84,9 @@ MapIndex::MapIndex(const std::string &pBasename)
 			{
 				mTiles[j][i].flags |= 1;
 				changed = true;
+
+                // get highest GUID
+                highestGUID = getHighestGUIDFromFile(filename.str());
 			}
 		}
 	}
@@ -388,7 +392,7 @@ MapTile* MapIndex::loadTile(int z, int x)
 		mTiles[z][x].tile = NULL;
 	}
 
-	mTiles[z][x].tile = new MapTile(x, z, filename.str(), mBigAlpha);// XZ STEFF Swap MapTile( z, x, file
+	mTiles[z][x].tile = new MapTile(x, z, filename.str(), mBigAlpha, &highestGUID);// XZ STEFF Swap MapTile( z, x, file
 	return mTiles[z][x].tile;
 }
 
@@ -402,7 +406,7 @@ void MapIndex::reloadTile(int x, int z)
 		std::stringstream filename;
 		filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
 
-		mTiles[z][x].tile = new MapTile(x, z, filename.str(), mBigAlpha);
+		mTiles[z][x].tile = new MapTile(x, z, filename.str(), mBigAlpha, &highestGUID);
 		enterTile(cx, cz);
 	}
 }
@@ -516,4 +520,70 @@ MapTile* MapIndex::getTile(size_t z, size_t x)
 uint32_t MapIndex::getFlag(size_t z, size_t x)
 {
 	return mTiles[z][x].flags;
+}
+
+uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename)
+{
+    uint32_t highGUID = 0;
+
+    MPQFile theFile(pFilename);
+
+    uint32_t fourcc;
+    uint32_t size;
+
+    MHDR Header;
+
+    // - MVER ----------------------------------------------
+
+    uint32_t version;
+
+    theFile.read(&fourcc, 4);
+    theFile.seekRelative(4);
+    theFile.read(&version, 4);
+
+    assert(fourcc == 'MVER' && version == 18);
+
+    // - MHDR ----------------------------------------------
+
+    theFile.read(&fourcc, 4);
+    theFile.seekRelative(4);
+
+    assert(fourcc == 'MHDR');
+
+    theFile.read(&Header, sizeof(MHDR));
+
+    // - MDDF ----------------------------------------------
+
+    theFile.seek(Header.mddf + 0x14);
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
+
+    assert(fourcc == 'MDDF');
+
+    ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>(theFile.getPointer());
+    for (unsigned int i = 0; i < size / 36; ++i)
+    {
+        uint32_t guid = mddf_ptr[i].uniqueID;
+        if (guid > highGUID)
+            highGUID = guid;
+    }
+
+    // - MODF ----------------------------------------------
+
+    theFile.seek(Header.modf + 0x14);
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
+
+    assert(fourcc == 'MODF');
+
+    ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>(theFile.getPointer());
+    for (unsigned int i = 0; i < size / 64; ++i)
+    {
+        uint32_t guid = modf_ptr[i].uniqueID;
+        if (guid < highGUID)
+            highGUID = guid;
+    }
+    theFile.close();
+
+    return highGUID;
 }
