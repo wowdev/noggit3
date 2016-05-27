@@ -18,13 +18,11 @@ if (WIN32)
   set ( CMAKE_INCLUDE_PATH
         "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include/"
         "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/include/"
-		"../Noggit_QT_libs/Glew/include/"
 		"../Noggit_QT_libs/StormLib/include/"
       )
   set ( CMAKE_LIBRARY_PATH
         "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/lib/"
         "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/lib/"
-		"../Noggit_QT_libs/Glew/lib/Release/Win32"
 		"../Noggit_QT_libs/StormLib/ReleaseAD/"
 		"../Noggit_QT_libs/StormLib/DebugAD/"
       )
@@ -43,7 +41,6 @@ set(Boost_USE_STATIC_LIBS ON)
 
 
 find_package (OpenGL REQUIRED)
-find_package (GLEW REQUIRED)
 find_package (Qt5Widgets REQUIRED)
 find_package (Qt5OpenGL REQUIRED)
 find_package (Qt5LinguistTools REQUIRED)
@@ -51,8 +48,7 @@ find_package (storm REQUIRED)
 find_package (Boost REQUIRED COMPONENTS filesystem system)
 
 # include paths
-include_directories ( SYSTEM ${GLEW_INCLUDE_PATH}
-                      SYSTEM ${GLUT_INCLUDE_DIRS}
+include_directories ( SYSTEM ${GLUT_INCLUDE_DIRS}
                       SYSTEM ${STORM_INCLUDE_DIR}
                       SYSTEM ${Boost_INCLUDE_DIR}
                     )
@@ -354,7 +350,6 @@ endif (WIN32)
 target_link_libraries ( noggit
                         ${OPENGL_LIBRARIES}
                         ${STORM_LIBRARIES}
-                        ${GLEW_LIBRARY}
                         Qt5::Widgets
                         Qt5::OpenGL
                         ${Boost_FILESYSTEM_LIBRARY}
