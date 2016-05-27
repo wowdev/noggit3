@@ -12,8 +12,7 @@ This  project  requires  CMake  to  be built.  It  also  requires  the
 following libraries:
 
 * OpenGL
-* GLEW
-* Qt (4.8, Core, Gui, OpenGL)
+* Qt (5.*, Core, Gui, OpenGL)
 * storm (stormlib by Ladislav Zezula)
 * Boost
 * Lua (5.1)
