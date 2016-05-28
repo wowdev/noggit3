@@ -992,35 +992,6 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   gl.color4f(1,1,1,1);*/
 }
 
-void MapChunk::drawNoDetail() const
-{
-  gl.activeTexture( GL_TEXTURE1 );
-  gl.disable( GL_TEXTURE_2D );
-  gl.activeTexture(GL_TEXTURE0 );
-  gl.disable( GL_TEXTURE_2D );
-  gl.disable( GL_LIGHTING );
-
-  //gl.color3fv(_world->skies->colorSet[FOG_COLOR]);
-  //gl.color3f(1,0,0);
-  //gl.disable(GL_FOG);
-
-  // low detail version
-  gl.bindBuffer( GL_ARRAY_BUFFER, vertices );
-  gl.vertexPointer( 3, GL_FLOAT, 0, 0 );
-  gl.disableClientState( GL_NORMAL_ARRAY );
-  gl.drawElements( GL_TRIANGLE_STRIP, stripsize, GL_UNSIGNED_SHORT, mapstrip );
-  gl.enableClientState( GL_NORMAL_ARRAY );
-
-  gl.color4f( 1.0f, 1.0f, 1.0f, 1.0f );
-  //gl.enable(GL_FOG);
-
-  gl.enable( GL_LIGHTING );
-  gl.activeTexture( GL_TEXTURE1 );
-  gl.enable( GL_TEXTURE_2D );
-  gl.activeTexture( GL_TEXTURE0 );
-  gl.enable( GL_TEXTURE_2D );
-}
-
 void MapChunk::drawSelect()
 {
   if( nameID == -1 )
