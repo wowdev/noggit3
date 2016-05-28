@@ -37,7 +37,6 @@ namespace opengl
 
     struct verify_context_and_check_for_gl_errors
     {
-#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
       template<typename ExtraInfo> verify_context_and_check_for_gl_errors
           (QOpenGLContext* current_context, char const* function, ExtraInfo&& extra_info)
         : _current_context (current_context)
@@ -90,6 +89,7 @@ namespace opengl
 
       ~verify_context_and_check_for_gl_errors()
       {
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
         if (inside_gl_begin_end)
         {
           return;
@@ -120,14 +120,8 @@ namespace opengl
           throw std::runtime_error (_function + ":" + errors);
 #endif
         }
-      }
-#else
-      inline verify_context_and_check_for_gl_errors (QOpenGLContext*, char const*)
-      {}
-      template<typename ExtraInfo>
-        inline verify_context_and_check_for_gl_errors (QOpenGLContext*, char const*, ExtraInfo&&)
-      {}
 #endif
+      }
     };
   }
 
