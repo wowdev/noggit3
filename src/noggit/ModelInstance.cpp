@@ -11,6 +11,7 @@
 
 #include <math/matrix_4x4.h>
 
+#include <opengl/context.hpp>
 #include <opengl/primitives.h>
 #include <opengl/scoped.h>
 
@@ -105,7 +106,7 @@ void ModelInstance::draw_selection_indicator() const
   ::opengl::scoped::texture_setter<0, GL_FALSE> texture_0_setter;
   ::opengl::scoped::texture_setter<1, GL_FALSE> texture_1_setter;
 
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.blendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   static const ::math::vector_4d white (1.0f, 1.0f, 1.0f, 1.0f);
   static const ::math::vector_4d yellow (1.0f, 1.0f, 0.0f, 1.0f);
@@ -125,96 +126,96 @@ void ModelInstance::draw_selection_indicator() const
   vertex_bounding.draw (white, 1.0f);
   bounding_bounding.draw (yellow, 1.0f);
 
-  glBegin (GL_LINES);
+  gl.begin (GL_LINES);
 
-  glColor4fv (red);
-  glVertex3f (0.0f, 0.0f, 0.0f);
-  glVertex3f ( model->header.VertexBoxMax.x()
+  gl.color4fv (red);
+  gl.vertex3f (0.0f, 0.0f, 0.0f);
+  gl.vertex3f ( model->header.VertexBoxMax.x()
              + model->header.VertexBoxMax.x() / 5.0f
              , 0.0f
              , 0.0f
              );
 
-  glColor4fv (green);
-  glVertex3f (0.0f, 0.0f, 0.0f);
-  glVertex3f ( 0.0f
+  gl.color4fv (green);
+  gl.vertex3f (0.0f, 0.0f, 0.0f);
+  gl.vertex3f ( 0.0f
              , model->header.VertexBoxMax.z()
              + model->header.VertexBoxMax.z() / 5.0f
              , 0.0f
              );
-  //glEnd();
+  //gl.end();
 
-  glColor4fv (blue);
-  glVertex3f (0.0f, 0.0f, 0.0f);
-  glVertex3f ( 0.0f
+  gl.color4fv (blue);
+  gl.vertex3f (0.0f, 0.0f, 0.0f);
+  gl.vertex3f ( 0.0f
              , 0.0f
              , model->header.VertexBoxMax.y()
              + model->header.VertexBoxMax.y() / 5.0f
              );
 
-  glEnd();
+  gl.end();
 
 
-  glBegin(GL_TRIANGLE_STRIP);
+  gl.begin(GL_TRIANGLE_STRIP);
 
-  glColor4f(0,255,0,125);
+  gl.color4f(0,255,0,125);
 
-  glNormal3f(0.0f, -1.0f, 0.0f);
-  glVertex3f(-5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
-  glVertex3f( 5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
-  glVertex3f (0.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  gl.normal3f(0.0f, -1.0f, 0.0f);
+  gl.vertex3f(-5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
+  gl.vertex3f( 5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
+  gl.vertex3f (0.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
 
-  glNormal3f(-1.0f, 0.0f, 0.0f);
-  glVertex3f(-5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
-  glVertex3f( 5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
-  glVertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+  gl.normal3f(-1.0f, 0.0f, 0.0f);
+  gl.vertex3f(-5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
+  gl.vertex3f( 5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMin.y());
+  gl.vertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
 
-  glVertex3f(-5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
-  glVertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
-  glVertex3f(-5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+  gl.vertex3f(-5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
+  gl.vertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+  gl.vertex3f(-5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
 
-  glNormal3f(0.0f, 0.0f, -1.0f);
-  glVertex3f(-5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
-  glVertex3f(-5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
-  glVertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  gl.normal3f(0.0f, 0.0f, -1.0f);
+  gl.vertex3f(-5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
+  gl.vertex3f(-5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+  gl.vertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
 
-  glVertex3f(-5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
-  glVertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
-  glVertex3f( 0.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  gl.vertex3f(-5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
+  gl.vertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  gl.vertex3f( 0.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
 
-  glNormal3f(0.0f, 0.0f, 1.0f);
-  glVertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
-  glVertex3f( 0.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
-  glVertex3f( 5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
+  gl.normal3f(0.0f, 0.0f, 1.0f);
+  gl.vertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  gl.vertex3f( 0.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  gl.vertex3f( 5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
 
-  glVertex3f( 5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
-  glVertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
-  glVertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+  gl.vertex3f( 5.0f, model->header.VertexBoxMin.z(),      -model->header.VertexBoxMin.y());
+  gl.vertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  gl.vertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
 
-  glNormal3f(0.0f, 1.0f, 0.0f);
-  glVertex3f(-5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
-  glVertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
-  glVertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
+  gl.normal3f(0.0f, 1.0f, 0.0f);
+  gl.vertex3f(-5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+  gl.vertex3f( 5.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y());
+  gl.vertex3f( 0.0f, model->header.VertexBoxMin.z()+2.0f, -model->header.VertexBoxMin.y()+(-model->header.VertexBoxMin.y())/2);
 
-  glEnd();
+  gl.end();
 
-  glBegin(GL_TRIANGLES);
+  gl.begin(GL_TRIANGLES);
 
-  glColor4f(0,255,0,125);
+  gl.color4f(0,255,0,125);
 
-  glVertex3f(-5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMax.y());
-  glVertex3f(5.0f, model->header.VertexBoxMin.z(),-model->header.VertexBoxMax.y());
-  glVertex3f(0.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMax.y() -model->header.VertexBoxMax.y()/2);
+  gl.vertex3f(-5.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMax.y());
+  gl.vertex3f(5.0f, model->header.VertexBoxMin.z(),-model->header.VertexBoxMax.y());
+  gl.vertex3f(0.0f, model->header.VertexBoxMin.z(), -model->header.VertexBoxMax.y() -model->header.VertexBoxMax.y()/2);
 
-  glVertex3f(model->header.VertexBoxMin.x(), model->header.VertexBoxMin.z(), 5.0f);
-  glVertex3f(model->header.VertexBoxMin.x(), model->header.VertexBoxMin.z(),-5.0f);
-  glVertex3f(model->header.VertexBoxMin.x()+model->header.VertexBoxMin.x()/2, model->header.VertexBoxMin.z(), 0.0f);
+  gl.vertex3f(model->header.VertexBoxMin.x(), model->header.VertexBoxMin.z(), 5.0f);
+  gl.vertex3f(model->header.VertexBoxMin.x(), model->header.VertexBoxMin.z(),-5.0f);
+  gl.vertex3f(model->header.VertexBoxMin.x()+model->header.VertexBoxMin.x()/2, model->header.VertexBoxMin.z(), 0.0f);
 
-  glVertex3f(model->header.VertexBoxMax.x(), model->header.VertexBoxMin.z(),-5.0f);
-  glVertex3f(model->header.VertexBoxMax.x(), model->header.VertexBoxMin.z(), 5.0f);
-  glVertex3f(model->header.VertexBoxMax.x()+model->header.VertexBoxMax.x()/2, model->header.VertexBoxMin.z(), 0.0f);
+  gl.vertex3f(model->header.VertexBoxMax.x(), model->header.VertexBoxMin.z(),-5.0f);
+  gl.vertex3f(model->header.VertexBoxMax.x(), model->header.VertexBoxMin.z(), 5.0f);
+  gl.vertex3f(model->header.VertexBoxMax.x()+model->header.VertexBoxMax.x()/2, model->header.VertexBoxMin.z(), 0.0f);
 
-  glEnd();
+  gl.end();
 
 
 }
@@ -251,11 +252,11 @@ void ModelInstance::draw ( bool draw_fog
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
-  glTranslatef (pos.x(), pos.y(), pos.z());
-  glRotatef (dir.y() - 90.0f, 0.0f, 1.0f, 0.0f);
-  glRotatef (-dir.x(), 0.0f, 0.0f, 1.0f);
-  glRotatef (dir.z(), 1.0f, 0.0f, 0.0f);
-  glScalef (sc, sc, sc);
+  gl.translatef (pos.x(), pos.y(), pos.z());
+  gl.rotatef (dir.y() - 90.0f, 0.0f, 1.0f, 0.0f);
+  gl.rotatef (-dir.x(), 0.0f, 0.0f, 1.0f);
+  gl.rotatef (dir.z(), 1.0f, 0.0f, 0.0f);
+  gl.scalef (sc, sc, sc);
 
   model->draw (draw_fog, time_since_spawn());
 
@@ -276,13 +277,13 @@ void ModelInstance::draw ( bool draw_fog
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
-  glTranslatef(pos.x/CHUNKSIZE, pos.z/CHUNKSIZE, pos.y);
-  glRotatef(-90.0f, 1, 0, 0);
-  glRotatef(dir.y - 90.0f, 0, 1, 0);
-  glRotatef(-dir.x, 0, 0, 1);
-  glRotatef(dir.z, 1, 0, 0);
-  glScalef(1/CHUNKSIZE,1/CHUNKSIZE,1/CHUNKSIZE);
-  glScalef(sc,sc,sc);
+  gl.translatef(pos.x/CHUNKSIZE, pos.z/CHUNKSIZE, pos.y);
+  gl.rotatef(-90.0f, 1, 0, 0);
+  gl.rotatef(dir.y - 90.0f, 0, 1, 0);
+  gl.rotatef(-dir.x, 0, 0, 1);
+  gl.rotatef(dir.z, 1, 0, 0);
+  gl.scalef(1/CHUNKSIZE,1/CHUNKSIZE,1/CHUNKSIZE);
+  gl.scalef(sc,sc,sc);
 
   model->draw ();
 }*/
@@ -300,11 +301,11 @@ void ModelInstance::draw_for_selection()
 
   LogDebug << "I am  " << nameID << std::endl;
 
-  glTranslatef( pos.x(), pos.y(), pos.z() );
-  glRotatef( dir.y() - 90.0f, 0.0f, 1.0f, 0.0f );
-  glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
-  glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
-  glScalef( sc, sc, sc );
+  gl.translatef( pos.x(), pos.y(), pos.z() );
+  gl.rotatef( dir.y() - 90.0f, 0.0f, 1.0f, 0.0f );
+  gl.rotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
+  gl.rotatef( dir.z(), 1.0f, 0.0f, 0.0f );
+  gl.scalef( sc, sc, sc );
 
   model->drawSelect (time_since_spawn());
 }
@@ -314,9 +315,9 @@ void ModelInstance::draw2() const
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
   //! \todo This could all be done in one composed matrix.
-  glTranslatef (pos.x(), pos.y(), pos.z());
-  glMultMatrixf (::math::matrix_4x4::new_rotation_matrix (_wmo_doodad_rotation));
-  glScalef (sc, -sc, -sc);
+  gl.translatef (pos.x(), pos.y(), pos.z());
+  gl.multMatrixf (::math::matrix_4x4::new_rotation_matrix (_wmo_doodad_rotation));
+  gl.scalef (sc, -sc, -sc);
 
   model->draw (_world, time_since_spawn());
 }
@@ -325,9 +326,9 @@ void ModelInstance::draw2Select() const
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
-  glTranslatef (pos.x(), pos.y(), pos.z());
-  glMultMatrixf (::math::matrix_4x4::new_rotation_matrix (_wmo_doodad_rotation));
-  glScalef (sc, -sc, -sc);
+  gl.translatef (pos.x(), pos.y(), pos.z());
+  gl.multMatrixf (::math::matrix_4x4::new_rotation_matrix (_wmo_doodad_rotation));
+  gl.scalef (sc, -sc, -sc);
 
   model->drawSelect (time_since_spawn());
 }

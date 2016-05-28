@@ -3,13 +3,14 @@
 
 #include <opengl/settings_saver.h>
 
+#include <opengl/context.hpp>
 #include <opengl/texture.h>
 
 namespace opengl
 {
   settings_saver::settings_saver()
   {
-#define SAVE(NAME, VARNAME) _saved_settings.VARNAME = glIsEnabled (NAME)
+#define SAVE(NAME, VARNAME) _saved_settings.VARNAME = gl.isEnabled (NAME)
 
     SAVE (GL_ALPHA_TEST, alpha_testing);
     SAVE (GL_BLEND, blend);
@@ -32,15 +33,15 @@ namespace opengl
 
   settings_saver::~settings_saver()
   {
-#define LOAD(NAME, VARNAME) if (glIsEnabled (NAME) != _saved_settings.VARNAME) \
+#define LOAD(NAME, VARNAME) if (gl.isEnabled (NAME) != _saved_settings.VARNAME) \
                             { \
                               if (_saved_settings.VARNAME == GL_TRUE) \
                               { \
-                                glEnable (NAME); \
+                                gl.enable (NAME); \
                               } \
                               else \
                               { \
-                                glDisable (NAME); \
+                                gl.disable (NAME); \
                               } \
                             }
 

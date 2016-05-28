@@ -13,6 +13,8 @@
 #include <noggit/Log.h>
 #include <noggit/mpq/file.h>
 
+#include <opengl/context.hpp>
+
 #ifdef USEBLSSHADER
 BLSShader::BLSShader( const QString & pFilename )
 {
@@ -43,7 +45,7 @@ BLSShader::BLSShader( const QString & pFilename )
 
   mProgramType = magix == 'GXPS' ? GL_FRAGMENT_PROGRAM_ARB : ( 'GXVS' ? GL_VERTEX_PROGRAM_ARB : -1 );
 
-  glGenProgramsARB( 1, &mShader );
+  gl.genPrograms( 1, &mShader );
   if( !mShader )
   {
     LogError << "Failed to get program ID for shader \"" << pFilename.toStdString() << "\"." << std::endl;
@@ -52,11 +54,11 @@ BLSShader::BLSShader( const QString & pFilename )
   {
     GLint errorPos, isNative;
 
-    glBindProgramARB( mProgramType, mShader );
-    glProgramStringARB( mProgramType, GL_PROGRAM_FORMAT_ASCII_ARB, length, buffer );
-    glGetIntegerv( GL_PROGRAM_ERROR_POSITION_ARB, &errorPos );
+    gl.bindProgram( mProgramType, mShader );
+    gl.programString( mProgramType, GL_PROGRAM_FORMAT_ASCII_ARB, length, buffer );
+    gl.getIntegerv( GL_PROGRAM_ERROR_POSITION_ARB, &errorPos );
 
-    glGetProgramiv( mProgramType, GL_PROGRAM_UNDER_NATIVE_LIMITS_ARB, &isNative );
+    gl.getProgramiv( mProgramType, GL_PROGRAM_UNDER_NATIVE_LIMITS_ARB, &isNative );
     if( !( errorPos == -1 && isNative == 1 ) )
     {
       LogError << "Shader program \"" << pFilename.toStdString() << "\" failed to load. Reason:" << std::endl;
@@ -64,7 +66,7 @@ BLSShader::BLSShader( const QString & pFilename )
         LogError << "\t\"This fragment program exceeded the limit.\"" << std::endl;
 
       const GLubyte *stringy;
-      stringy = glGetString(GL_PROGRAM_ERROR_STRING_ARB);      //This is only available in ARB
+      stringy = gl.getString(GL_PROGRAM_ERROR_STRING_ARB);      //This is only available in ARB
       if( stringy )
         LogError << "\t\"" << reinterpret_cast<const char*>( stringy ) << "\"" << std::endl;
 
@@ -140,33 +142,26 @@ Shader::Shader(GLenum _target, const char *program, bool fromFile):id(0),target(
     }
   } else progtext = program;
 
-  glGenProgramsARB(1, &id);
-  glBindProgramARB(target, id);
-  glProgramStringARB(target, GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)strlen(progtext), progtext);
-  if (glGetError() != 0) {
-    int errpos;
-    glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errpos);
-    LogError << "Error loading shader: " << glGetString(GL_PROGRAM_ERROR_STRING_ARB) << std::endl;
-    LogError << "Error position: " << errpos << std::endl;
-    ok = false;
-  } else ok = true;
-
+  gl.genPrograms(1, &id);
+  gl.bindProgram(target, id);
+  gl.programString(target, GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)strlen(progtext), progtext);
+  ok = true;
 }
 
 Shader::~Shader()
 {
-  if (ok && id) glDeleteProgramsARB(1, &id);
+  if (ok && id) gl.deletePrograms(1, &id);
 }
 
 void Shader::bind()
 {
-  glBindProgramARB(target, id);
-  glEnable(target);
+  gl.bindProgram(target, id);
+  gl.enable(target);
 }
 
 void Shader::unbind()
 {
-  glDisable(target);
+  gl.disable(target);
 }
 
 ShaderPair::ShaderPair(const char *vprog, const char *fprog, bool fromFile)
@@ -193,12 +188,12 @@ void ShaderPair::bind()
   {
     vertex->bind();
   } else {
-    glDisable(GL_VERTEX_PROGRAM_ARB);
+    gl.disable(GL_VERTEX_PROGRAM_ARB);
   }
   if (fragment) {
     fragment->bind();
   } else {
-    glDisable(GL_FRAGMENT_PROGRAM_ARB);
+    gl.disable(GL_FRAGMENT_PROGRAM_ARB);
   }
 }
 

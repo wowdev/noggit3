@@ -6,6 +6,8 @@
 
 #include <noggit/application.h>
 
+#include <opengl/context.hpp>
+
 #include <QResizeEvent>
 #include <QStyleOptionGraphicsItem>
 #include <QPixmap>
@@ -90,35 +92,35 @@ namespace noggit
 
     void textureItem::paint(QPainter* /*painter*/, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
     {
-      glColor3f(1.0f, 1.0f, 1.0f);
+      gl.color3f(1.0f, 1.0f, 1.0f);
       opengl::texture::enable_texture (0);
 
       blptexture->bind();
 
-      glBegin(GL_TRIANGLE_FAN);
-      glTexCoord2f(0.0f, 0.0f);
-      glVertex2f(pos().x(), pos().y());
-      glTexCoord2f(1.0f, 0.0f);
-      glVertex2f(pos().x() + option->rect.width() - 5, pos().y());
-      glTexCoord2f(1.0f, 1.0f);
-      glVertex2f(pos().x() + option->rect.width() - 5, pos().y() + option->rect.height() - 5);
-      glTexCoord2f(0.0f, 1.0f);
-      glVertex2f(pos().x(), pos().y() + option->rect.height() - 5);
-      glEnd();
+      gl.begin(GL_TRIANGLE_FAN);
+      gl.texCoord2f(0.0f, 0.0f);
+      gl.vertex2f(pos().x(), pos().y());
+      gl.texCoord2f(1.0f, 0.0f);
+      gl.vertex2f(pos().x() + option->rect.width() - 5, pos().y());
+      gl.texCoord2f(1.0f, 1.0f);
+      gl.vertex2f(pos().x() + option->rect.width() - 5, pos().y() + option->rect.height() - 5);
+      gl.texCoord2f(0.0f, 1.0f);
+      gl.vertex2f(pos().x(), pos().y() + option->rect.height() - 5);
+      gl.end();
 
       opengl::texture::disable_texture (0);
 
       if(isSelected())
       {
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glEnable(GL_LINE_SMOOTH);
-        glLineWidth(3);
-        glBegin(GL_LINE_LOOP);
-        glVertex2f(pos().x(), pos().y());
-        glVertex2f(pos().x() + option->rect.width() - 5, pos().y());
-        glVertex2f(pos().x() + option->rect.width() - 5, pos().y()+option->rect.height() - 5);
-        glVertex2f(pos().x(), pos().y() + option->rect.height() - 5);
-        glEnd();
+        gl.color3f(0.0f, 0.0f, 0.0f);
+        gl.enable(GL_LINE_SMOOTH);
+        gl.lineWidth(3);
+        gl.begin(GL_LINE_LOOP);
+        gl.vertex2f(pos().x(), pos().y());
+        gl.vertex2f(pos().x() + option->rect.width() - 5, pos().y());
+        gl.vertex2f(pos().x() + option->rect.width() - 5, pos().y()+option->rect.height() - 5);
+        gl.vertex2f(pos().x(), pos().y() + option->rect.height() - 5);
+        gl.end();
       }
     }
 
@@ -157,14 +159,14 @@ namespace noggit
         return;
       }
 
-      glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
-      glOrtho(0.0f, width(), height(), 0.0f, 1.0f, -1.0f);
-      glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
+      gl.matrixMode(GL_PROJECTION);
+      gl.loadIdentity();
+      gl.ortho(0.0f, width(), height(), 0.0f, 1.0f, -1.0f);
+      gl.matrixMode(GL_MODELVIEW);
+      gl.loadIdentity();
 
-      glClearColor(this->palette().background().color().redF(), this->palette().background().color().greenF(), this->palette().background().color().blueF(), 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      gl.clearColor(this->palette().background().color().redF(), this->palette().background().color().greenF(), this->palette().background().color().blueF(), 1.0f);
+      gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     textureView::textureView(QStringList textures, QWidget *parent)

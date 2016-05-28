@@ -1,6 +1,7 @@
 // texture.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
 // Bernd Lörwald <bloerwald+noggit@googlemail.com>
 
+#include <opengl/context.hpp>
 #include <opengl/texture.h>
 
 namespace opengl
@@ -8,23 +9,23 @@ namespace opengl
   texture::texture()
     : _id (0)
   {
-    glGenTextures (1, &_id);
+    gl.genTextures (1, &_id);
   }
 
   texture::~texture()
   {
-    glDeleteTextures (1, &_id);
+    gl.deleteTextures (1, &_id);
     _id = 0;
   }
 
   void texture::bind() const
   {
-    glBindTexture (GL_TEXTURE_2D, _id);
+    gl.bindTexture (GL_TEXTURE_2D, _id);
   }
 
   void texture::enable_texture()
   {
-    glEnable (GL_TEXTURE_2D);
+    gl.enable (GL_TEXTURE_2D);
   }
   void texture::enable_texture (size_t num)
   {
@@ -33,7 +34,7 @@ namespace opengl
   }
   void texture::disable_texture()
   {
-    glDisable (GL_TEXTURE_2D);
+    gl.disable (GL_TEXTURE_2D);
   }
   void texture::disable_texture (size_t num)
   {
@@ -42,6 +43,6 @@ namespace opengl
   }
   void texture::set_active_texture (size_t num)
   {
-    glActiveTexture (GL_TEXTURE0 + num);
+    gl.activeTexture (GL_TEXTURE0 + num);
   }
 }

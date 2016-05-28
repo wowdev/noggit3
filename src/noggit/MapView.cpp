@@ -29,6 +29,7 @@
 
 #include <helper/qt/signal_blocker.h>
 
+#include <opengl/context.hpp>
 #include <opengl/matrix.h>
 #include <opengl/texture.h>
 
@@ -124,6 +125,9 @@ namespace noggit
     , updown (0.0f)
     , movespd (66.6f)
   {
+    this->makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+
     setMinimumSize (500, 500);
     setMaximumHeight (2000);
     setAcceptDrops (true);
@@ -460,32 +464,36 @@ namespace noggit
   void MapView::initializeGL()
   {
     this->makeCurrent();
-    glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
+    opengl::context::scoped_setter const _ (::gl, context());
+    gl.clearColor (0.0f, 0.0f, 0.0f, 0.0f);
 
-    glEnableClientState (GL_VERTEX_ARRAY);
-    glEnableClientState (GL_NORMAL_ARRAY);
-    glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+    gl.enableClientState (GL_VERTEX_ARRAY);
+    gl.enableClientState (GL_NORMAL_ARRAY);
+    gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
 
-    glEnable (GL_DEPTH_TEST);
-    glEnable (GL_CULL_FACE);
-    glShadeModel (GL_SMOOTH);
-    glEnable (GL_LIGHTING);
-    glEnable (GL_LIGHT0);
-    glEnable (GL_MULTISAMPLE);
+    gl.enable (GL_DEPTH_TEST);
+    gl.enable (GL_CULL_FACE);
+    gl.shadeModel (GL_SMOOTH);
+    gl.enable (GL_LIGHTING);
+    gl.enable (GL_LIGHT0);
+    gl.enable (GL_MULTISAMPLE);
     static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
-    glLightfv (GL_LIGHT0, GL_POSITION, lightPosition);
+    gl.lightfv (GL_LIGHT0, GL_POSITION, lightPosition);
   }
 
   void MapView::paintGL()
   {
     this->makeCurrent();
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    opengl::context::scoped_setter const _ (::gl, context());
+    gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     display();
   }
 
   void MapView::resizeGL (int width, int height)
   {
-    glViewport (0.0f, 0.0f, width, height);
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+    gl.viewport (0.0f, 0.0f, width, height);
   }
 
   MapView::~MapView()
@@ -530,6 +538,9 @@ namespace noggit
 
   void MapView::tick(float dt )
   {
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+
     ::math::vector_3d dir( 1.0f, 0.0f, 0.0f );
     ::math::vector_3d dirUp( 1.0f, 0.0f, 0.0f );
     ::math::vector_3d dirRight( 0.0f, 0.0f, 1.0f );
@@ -844,64 +855,67 @@ namespace noggit
 
   void MapView::setup_tile_mode_rendering() const
   {
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity();
+    gl.matrixMode (GL_PROJECTION);
+    gl.loadIdentity();
 
     const qreal ratio (width() / qreal (height()));
-    glOrtho (-2.0f * ratio, 2.0f * ratio, 2.0f, -2.0f, -100.0f, 300.0f );
+    gl.ortho (-2.0f * ratio, 2.0f * ratio, 2.0f, -2.0f, -100.0f, 300.0f );
 
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity();
+    gl.matrixMode (GL_MODELVIEW);
+    gl.loadIdentity();
   }
 
   void MapView::setup_2d_rendering() const
   {
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity();
+    gl.matrixMode (GL_PROJECTION);
+    gl.loadIdentity();
 
-    glOrtho (0.0f, width(), height(), 0.0f, -1.0f, 1.0f);
+    gl.ortho (0.0f, width(), height(), 0.0f, -1.0f, 1.0f);
 
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity();
+    gl.matrixMode (GL_MODELVIEW);
+    gl.loadIdentity();
   }
 
   static const qreal fov (45.0);
   void MapView::setup_3d_rendering() const
   {
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity();
+    gl.matrixMode (GL_PROJECTION);
+    gl.loadIdentity();
 
     const qreal ratio (width() / qreal (height()));
     opengl::matrix::perspective (fov, ratio, 1.0f, _viewing_distance);
 
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity();
+    gl.matrixMode (GL_MODELVIEW);
+    gl.loadIdentity();
   }
 
   void MapView::setup_3d_selection_rendering() const
   {
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity();
+    gl.matrixMode (GL_PROJECTION);
+    gl.loadIdentity();
 
     GLint viewport[4];
-    glGetIntegerv (GL_VIEWPORT, viewport);
+    gl.getIntegerv (GL_VIEWPORT, viewport);
 
     float const delta (7.0f);
-    glTranslatef ( (viewport[2] - 2.0f * (_mouse_position.x() - viewport[0])) / delta
+    gl.translatef ( (viewport[2] - 2.0f * (_mouse_position.x() - viewport[0])) / delta
                  , (viewport[3] - 2.0f * ((viewport[3] - _mouse_position.y()) - viewport[1])) / delta
                  , 0.0f
                  );
-    glScalef (viewport[2] / delta, viewport[3] / delta, 1.0f);
+    gl.scalef (viewport[2] / delta, viewport[3] / delta, 1.0f);
 
     const qreal ratio (width() / qreal (height()));
     opengl::matrix::perspective (fov, ratio, 1.0f, _viewing_distance);
 
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity();
+    gl.matrixMode (GL_MODELVIEW);
+    gl.loadIdentity();
   }
 
   void MapView::doSelection( bool selectTerrainOnly )
   {
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+
     setup_3d_selection_rendering();
 
     if (selectTerrainOnly)
@@ -942,29 +956,29 @@ namespace noggit
     const qreal brush_diameter (brush_radius * 2.0);
     const QPointF brush_position (tile_mode_brush_position());
 
-    glPushMatrix();
+    gl.pushMatrix();
 
-    glColor4f (1.0f, 1.0f, 1.0f, 0.5f);
+    gl.color4f (1.0f, 1.0f, 1.0f, 0.5f);
     opengl::texture::enable_texture (0);
     brush (_texturing_radius, _texturing_hardness).getTexture()->bind();
 
-    glScalef (_tile_mode_zoom / CHUNKSIZE, _tile_mode_zoom / CHUNKSIZE, 1.0f);
-    glTranslatef ( brush_position.x() - _texturing_radius
+    gl.scalef (_tile_mode_zoom / CHUNKSIZE, _tile_mode_zoom / CHUNKSIZE, 1.0f);
+    gl.translatef ( brush_position.x() - _texturing_radius
                  , brush_position.y() - _texturing_radius
                  , 0.0f
                  );
 
-    glBegin (GL_QUADS);
-    glTexCoord2f (0.0f, 0.0f);
-    glVertex3f (0.0f, brush_diameter, 0.0f);
-    glTexCoord2f (1.0f, 0.0f);
-    glVertex3f (brush_diameter, brush_diameter, 0.0f);
-    glTexCoord2f (1.0f, 1.0f);
-    glVertex3f (brush_diameter, 0.0f, 0.0f);
-    glTexCoord2f (0.0f, 1.0f);
-    glVertex3f (0.0f, 0.0f, 0.0f);
-    glEnd();
-    glPopMatrix();
+    gl.begin (GL_QUADS);
+    gl.texCoord2f (0.0f, 0.0f);
+    gl.vertex3f (0.0f, brush_diameter, 0.0f);
+    gl.texCoord2f (1.0f, 0.0f);
+    gl.vertex3f (brush_diameter, brush_diameter, 0.0f);
+    gl.texCoord2f (1.0f, 1.0f);
+    gl.vertex3f (brush_diameter, 0.0f, 0.0f);
+    gl.texCoord2f (0.0f, 1.0f);
+    gl.vertex3f (0.0f, 0.0f, 0.0f);
+    gl.end();
+    gl.popMatrix();
   }
 
   void MapView::displayViewMode_2D()
@@ -1011,6 +1025,9 @@ namespace noggit
 
   void MapView::display()
   {
+    makeCurrent();
+    opengl::context::scoped_setter const _ (::gl, context());
+
     //! \todo  Get this out or do it somehow else. This is ugly and is a senseless if each draw.
     if (_save_to_minimap_on_next_drawing)
     {

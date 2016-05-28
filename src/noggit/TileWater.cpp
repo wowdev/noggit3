@@ -3,6 +3,8 @@
 #include <noggit/ChunkWater.hpp>
 #include <noggit/MapTile.h>
 
+#include <opengl/context.hpp>
+
 namespace noggit
 {
   TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase)
@@ -45,8 +47,8 @@ namespace noggit
 
   void TileWater::draw (Skies const* skies)
   {
-    glDisable (GL_COLOR_MATERIAL);
-    glDisable (GL_LIGHTING);
+    gl.disable (GL_COLOR_MATERIAL);
+    gl.disable (GL_LIGHTING);
 
     for(int i (0); i < 16; ++i)
     {
@@ -56,8 +58,8 @@ namespace noggit
       }
     }
 
-    glEnable (GL_LIGHTING);
-    glEnable (GL_COLOR_MATERIAL);
+    gl.enable (GL_LIGHTING);
+    gl.enable (GL_COLOR_MATERIAL);
   }
 
   ChunkWater* TileWater::getChunk(int x, int y)

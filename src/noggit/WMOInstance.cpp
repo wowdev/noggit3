@@ -11,6 +11,8 @@
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
+#include <opengl/context.hpp>
+
 WMOInstance::WMOInstance(World* world, std::string const& path, noggit::mpq::file* _file )
   : wmo (world, path)
   , mSelectionID( world->selection_names().add( this ) )
@@ -67,14 +69,14 @@ void WMOInstance::draw ( bool draw_doodads
                        , const boost::optional<selection_type>& selected_item
                        ) const
 {
-  glPushMatrix();
-  glTranslatef( pos.x(), pos.y(), pos.z() );
+  gl.pushMatrix();
+  gl.translatef( pos.x(), pos.y(), pos.z() );
 
   const float roty = dir.y() - 90.0f;
 
-  glRotatef( roty, 0.0f, 1.0f, 0.0f );
-  glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
-  glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
+  gl.rotatef( roty, 0.0f, 1.0f, 0.0f );
+  gl.rotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
+  gl.rotatef( dir.z(), 1.0f, 0.0f, 0.0f );
 
   const bool is_selected ( selected_item
                         && noggit::selection::is_the_same_as ( this
@@ -98,7 +100,7 @@ void WMOInstance::draw ( bool draw_doodads
             , camera
             );
 
-  glPopMatrix();
+  gl.popMatrix();
 }
 
 void WMOInstance::drawSelect ( bool draw_doodads
@@ -107,18 +109,18 @@ void WMOInstance::drawSelect ( bool draw_doodads
                              , const ::math::vector_3d& camera
                              ) const
 {
-  glPushMatrix();
+  gl.pushMatrix();
 
-  glTranslatef( pos.x(), pos.y(), pos.z() );
+  gl.translatef( pos.x(), pos.y(), pos.z() );
 
   const float roty = dir.y() - 90.0f;
 
-  glRotatef( roty, 0.0f, 1.0f, 0.0f );
-  glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
-  glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
+  gl.rotatef( roty, 0.0f, 1.0f, 0.0f );
+  gl.rotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
+  gl.rotatef( dir.z(), 1.0f, 0.0f, 0.0f );
 
   //mSelectionID = _world->selection_names().add( this );
-  glPushName( mSelectionID );
+  gl.pushName( mSelectionID );
 
   wmo->drawSelect ( _world
                   , doodadset
@@ -130,26 +132,26 @@ void WMOInstance::drawSelect ( bool draw_doodads
                   , camera
                   );
 
-  glPopName();
+  gl.popName();
 
-  glPopMatrix();
+  gl.popMatrix();
 }
 
 /*void WMOInstance::drawPortals()
 {
-  glPushMatrix();
+  gl.pushMatrix();
 
-  glTranslatef( pos.x(), pos.y(), pos.z() );
+  gl.translatef( pos.x(), pos.y(), pos.z() );
 
   const float roty = dir.y() - 90.0f;
 
-  glRotatef( roty, 0.0f, 1.0f, 0.0f );
-  glRotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
-  glRotatef( dir.z(), 1.0f, 0.0f, 0.0f );
+  gl.rotatef( roty, 0.0f, 1.0f, 0.0f );
+  gl.rotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
+  gl.rotatef( dir.z(), 1.0f, 0.0f, 0.0f );
 
   wmo->drawPortals();
 
-  glPopMatrix();
+  gl.popMatrix();
 }*/
 
 void WMOInstance::resetDirection()

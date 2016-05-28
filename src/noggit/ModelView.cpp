@@ -13,6 +13,7 @@
 #include <noggit/ModelManager.h>
 #include <noggit/World.h>
 
+#include <opengl/context.hpp>
 #include <opengl/matrix.h>
 
 static const qreal fov (45.0);
@@ -29,40 +30,42 @@ ModelView::ModelView(QWidget *parent) :
 void ModelView::initializeGL()
 {
     makeCurrent();
-    glClearColor (0.0f, 0.0f, 1.0f, 0.0f);
+    opengl::context::scoped_setter const _ (::gl, context());
+    gl.clearColor (0.0f, 0.0f, 1.0f, 0.0f);
 
-    glEnableClientState (GL_VERTEX_ARRAY);
-    glEnableClientState (GL_NORMAL_ARRAY);
-    glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+    gl.enableClientState (GL_VERTEX_ARRAY);
+    gl.enableClientState (GL_NORMAL_ARRAY);
+    gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_COLOR_MATERIAL);
-    glShadeModel(GL_SMOOTH);
-    glEnable(GL_TEXTURE_2D);
+    gl.enable(GL_DEPTH_TEST);
+    gl.enable(GL_LIGHTING);
+    gl.enable(GL_LIGHT0);
+    gl.enable(GL_NORMALIZE);
+    gl.enable(GL_COLOR_MATERIAL);
+    gl.shadeModel(GL_SMOOTH);
+    gl.enable(GL_TEXTURE_2D);
     static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
-    glLightfv (GL_LIGHT0, GL_POSITION, lightPosition);
+    gl.lightfv (GL_LIGHT0, GL_POSITION, lightPosition);
 
 }
 
 void ModelView::paintGL()
 {
     makeCurrent();
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity();
+    opengl::context::scoped_setter const _ (::gl, context());
+    gl.matrixMode (GL_PROJECTION);
+    gl.loadIdentity();
 
     const qreal ratio (width() / qreal (height()));
     opengl::matrix::perspective (fov, ratio, 2.0f, 600.0);
 
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity();
+    gl.matrixMode (GL_MODELVIEW);
+    gl.loadIdentity();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glTranslatef(0.0, theModel->header.VertexBoxMin.y()/2, distance);
-    glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-    glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
+    gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    gl.translatef(0.0, theModel->header.VertexBoxMin.y()/2, distance);
+    gl.rotatef(xRot / 16.0, 1.0, 0.0, 0.0);
+    gl.rotatef(yRot / 16.0, 0.0, 1.0, 0.0);
 
     if(_draw_loading)
     {
@@ -122,7 +125,9 @@ void ModelView::wheelEvent(QWheelEvent *event)
 
 void ModelView::resizeGL (int width, int height)
 {
-  glViewport (0.0f, 0.0f, width, height);
+  makeCurrent();
+  opengl::context::scoped_setter const _ (::gl, context());
+  gl.viewport (0.0f, 0.0f, width, height);
 }
 
 void ModelView::changeModel(QString filename)

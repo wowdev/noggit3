@@ -44,6 +44,7 @@ find_package (OpenGL REQUIRED)
 find_package (Qt5Widgets REQUIRED)
 find_package (Qt5OpenGL REQUIRED)
 find_package (Qt5LinguistTools REQUIRED)
+find_package (Qt5OpenGLExtensions REQUIRED)
 find_package (storm REQUIRED)
 find_package (Boost REQUIRED COMPONENTS filesystem system)
 
@@ -177,6 +178,7 @@ set ( noggit_headers_to_moc
 
 set ( opengl_sources
       src/opengl/call_list.cpp
+      src/opengl/context.cpp
       src/opengl/settings_saver.cpp
       src/opengl/texture.cpp
       src/opengl/primitives.cpp
@@ -352,6 +354,7 @@ target_link_libraries ( noggit
                         ${STORM_LIBRARIES}
                         Qt5::Widgets
                         Qt5::OpenGL
+                        Qt5::OpenGLExtensions
                         ${Boost_FILESYSTEM_LIBRARY}
                         ${Boost_SYSTEM_LIBRARY}
                       )
