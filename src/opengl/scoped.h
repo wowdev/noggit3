@@ -43,6 +43,25 @@ namespace opengl
       bool _was_enabled;
     };
 
+    template<GLboolean value>
+    class depth_mask_setter
+    {
+    public:
+      depth_mask_setter()
+      {
+        gl.getBooleanv (GL_DEPTH_WRITEMASK, &_was_enabled);
+        gl.depthMask (value);
+      }
+
+      ~depth_mask_setter()
+      {
+        gl.depthMask (_was_enabled);
+      }
+
+    private:
+      GLboolean _was_enabled;
+    };
+
     template<GLenum texture_number, GLboolean value>
     class texture_setter
     {
