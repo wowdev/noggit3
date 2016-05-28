@@ -55,7 +55,7 @@ namespace noggit
             for (size_t j (0); j < 64; ++j)
             {
               //! \todo Check, if correct order!
-              if (world()->getChanged (j, i))
+              if (world()->map_index().get_changed (j, i))
               {
                 painter.drawLine ( tile_size * i
                                  , tile_size * j
@@ -78,7 +78,7 @@ namespace noggit
           {
             for (size_t j (0); j < 64; ++j)
             {
-              if (world()->hasTile (j, i))
+              if (world()->map_index().has_tile (j, i))
               {
                 painter.drawRect ( QRect ( tile_size * i + 1
                                          , tile_size * j + 1
@@ -154,7 +154,7 @@ namespace noggit
 
       emit tile_clicked (tile);
 
-      if (!world()->hasTile (tile.y(), tile.x()))
+      if (!world()->map_index().has_tile (tile.y(), tile.x()))
       {
         event->ignore();
         return;

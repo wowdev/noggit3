@@ -1408,22 +1408,22 @@ namespace noggit
 
   void MapView::save_all()
   {
-    _world->saveChanged();
+    _world->map_index().save_changed();
   }
 
   void MapView::save()
   {
-    _world->saveTile( static_cast<int>( _world->camera.x() ) / TILESIZE, static_cast<int>( _world->camera.z() ) / TILESIZE );
+    _world->map_index().save_tile( static_cast<int>( _world->camera.x() ) / TILESIZE, static_cast<int>( _world->camera.z() ) / TILESIZE );
   }
 
   void MapView::saveCata()
   {
-    _world->saveTileCata( static_cast<int>( _world->camera.x() ) / TILESIZE, static_cast<int>( _world->camera.z() ) / TILESIZE );
+    _world->map_index().save_tile_cata( static_cast<int>( _world->camera.x() ) / TILESIZE, static_cast<int>( _world->camera.z() ) / TILESIZE );
   }
 
   void MapView::reload_current_tile()
   {
-    _world->reloadTile( static_cast<int>( _world->camera.x() ) / TILESIZE, static_cast<int>( _world->camera.z() ) / TILESIZE );
+    _world->map_index().reload_tile( static_cast<int>( _world->camera.x() ) / TILESIZE, static_cast<int>( _world->camera.z() ) / TILESIZE );
   }
 
   void MapView::exit_to_menu()
@@ -1793,7 +1793,8 @@ namespace noggit
 
   void MapView::TEST_save_wdt()
   {
-    _world->saveWDT();
+    //! \todo: Ask map_index to save
+    //_world->saveWDT();
   }
 
   static int tile_below_camera (const float& position)

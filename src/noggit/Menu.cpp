@@ -113,11 +113,11 @@ Menu::~Menu()
 void Menu::enter_world_at (World *world, const ::math::vector_3d& pos, bool auto_height, float av, float ah )
 {
   prepare_world (world,pos, ah, av);
-  world->load_tiles_around ( pos.x() / TILESIZE
-                           , pos.y() / TILESIZE
-                           //! \todo Something based on viewing distance.
-                           , 2
-                           );
+  world->map_index().load_tiles_around ( pos.x() / TILESIZE
+                                       , pos.y() / TILESIZE
+                                      //! \todo Something based on viewing distance.
+                                       , 2
+                                      );
 
   emit create_world_view_request (world);
 
