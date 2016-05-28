@@ -6,6 +6,7 @@
 
 #include <string>
 #include <QString>
+#include <opengl/context.hpp>
 #include <opengl/types.h>
 
 #ifdef USEBLSSHADER
@@ -22,7 +23,7 @@ public:
   void EnableShader()
   {
     if( IsOkay() )
-      glBindProgramARB( mProgramType, mShader );
+      gl.bindProgram( mProgramType, mShader );
   }
 
   bool IsOkay() { return mOkay; }

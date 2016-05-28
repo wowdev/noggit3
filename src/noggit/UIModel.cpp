@@ -7,6 +7,7 @@
 
 #include <noggit/Model.h>
 
+#include <opengl/context.hpp>
 #include <opengl/matrix.h>
 
 UIModel::UIModel( float xPos, float yPos, float w, float h )
@@ -18,36 +19,36 @@ UIModel::UIModel( float xPos, float yPos, float w, float h )
 void UIModel::render() const
 {
   //! \todo Fix, save matrixes before changing. or something.
- /* glMatrixMode(GL_PROJECTION);
+ /* gl.matrixMode(GL_PROJECTION);
   opengl::matrix::perspective (45.0f, (GLfloat)video.xres()/(GLfloat)video.yres(), 1.0f, 1024.0f);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+  gl.matrixMode(GL_MODELVIEW);
+  gl.loadIdentity();
 
-  //glMatrixMode(GL_PROJECTION);
-  //glLoadIdentity();
-  //glOrtho(0, xres(), yres(), 0, -1.0, 1.0);
-  //glMatrixMode(GL_MODELVIEW);
-  //glLoadIdentity();
+  //gl.matrixMode(GL_PROJECTION);
+  //gl.loadIdentity();
+  //gl.ortho(0, xres(), yres(), 0, -1.0, 1.0);
+  //gl.matrixMode(GL_MODELVIEW);
+  //gl.loadIdentity();
 
-  glPushMatrix();
+  gl.pushMatrix();
 
   static const float rot = 45.0f;
 
-  glTranslatef( x() + width() / 2.0f, y() + height() / 2.0f, 0.0f );
-  glRotatef( rot, 0.0f, 1.0f, 0.0f );
-  glRotatef( 180, 1.0f, 0.0f, 0.0f );
-  glScalef( 5.0f, 5.0f, 5.0f );
+  gl.translatef( x() + width() / 2.0f, y() + height() / 2.0f, 0.0f );
+  gl.rotatef( rot, 0.0f, 1.0f, 0.0f );
+  gl.rotatef( 180, 1.0f, 0.0f, 0.0f );
+  gl.scalef( 5.0f, 5.0f, 5.0f );
 
-  glDisable(GL_FOG);
+  gl.disable(GL_FOG);
 
 
-  glEnable(GL_COLOR_MATERIAL);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  glColor4f(1,1,1,1);
+  gl.enable(GL_COLOR_MATERIAL);
+  gl.colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+  gl.color4f(1,1,1,1);
 
-  glDisable(GL_CULL_FACE);
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_LIGHTING);
+  gl.disable(GL_CULL_FACE);
+  gl.enable(GL_TEXTURE_2D);
+  gl.enable(GL_LIGHTING);
 
   model->cam.setup( 0 );
   //! \todo This will crash instantly. This would need passing stuff from inside World into model, not passing world.
@@ -55,18 +56,18 @@ void UIModel::render() const
 
   video.set2D();
   */
-  glEnable(GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_LIGHTING);
+  gl.enable(GL_BLEND);
+  gl.blendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.disable(GL_DEPTH_TEST);
+  gl.disable(GL_CULL_FACE);
+  gl.disable(GL_LIGHTING);
 
 
-  glColor4f(1,1,1,1);
+  gl.color4f(1,1,1,1);
 
-  glEnable(GL_TEXTURE_2D);
+  gl.enable(GL_TEXTURE_2D);
 
-  glPopMatrix();
+  gl.popMatrix();
 }
 
 void UIModel::setModel( Model* _setModel )

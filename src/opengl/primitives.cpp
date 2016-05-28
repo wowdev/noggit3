@@ -5,6 +5,7 @@
 
 #include <math/vector_4d.h>
 
+#include <opengl/context.hpp>
 #include <opengl/types.h>
 
 namespace opengl
@@ -22,39 +23,39 @@ namespace opengl
                         , const float& line_width
                         ) const
     {
-      glEnable (GL_LINE_SMOOTH);
-      glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-      glLineWidth (line_width);
+      gl.enable (GL_LINE_SMOOTH);
+      gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+      gl.lineWidth (line_width);
 
-      glColor4fv (color);
+      gl.color4fv (color);
 
-      glBegin (GL_LINE_STRIP);
-      glVertex3f (_min_point.x(), _max_point.y(), _min_point.z());
-      glVertex3f (_min_point.x(), _min_point.y(), _min_point.z());
-      glVertex3f (_max_point.x(), _min_point.y(), _min_point.z());
-      glVertex3f (_max_point.x(), _min_point.y(), _max_point.z());
-      glVertex3f (_max_point.x(), _max_point.y(), _max_point.z());
-      glVertex3f (_max_point.x(), _max_point.y(), _min_point.z());
-      glVertex3f (_min_point.x(), _max_point.y(), _min_point.z());
-      glVertex3f (_min_point.x(), _max_point.y(), _max_point.z());
-      glVertex3f (_min_point.x(), _min_point.y(), _max_point.z());
-      glVertex3f (_min_point.x(), _min_point.y(), _min_point.z());
-      glEnd();
+      gl.begin (GL_LINE_STRIP);
+      gl.vertex3f (_min_point.x(), _max_point.y(), _min_point.z());
+      gl.vertex3f (_min_point.x(), _min_point.y(), _min_point.z());
+      gl.vertex3f (_max_point.x(), _min_point.y(), _min_point.z());
+      gl.vertex3f (_max_point.x(), _min_point.y(), _max_point.z());
+      gl.vertex3f (_max_point.x(), _max_point.y(), _max_point.z());
+      gl.vertex3f (_max_point.x(), _max_point.y(), _min_point.z());
+      gl.vertex3f (_min_point.x(), _max_point.y(), _min_point.z());
+      gl.vertex3f (_min_point.x(), _max_point.y(), _max_point.z());
+      gl.vertex3f (_min_point.x(), _min_point.y(), _max_point.z());
+      gl.vertex3f (_min_point.x(), _min_point.y(), _min_point.z());
+      gl.end();
 
-      glBegin (GL_LINES);
-      glVertex3f (_min_point.x(), _min_point.y(), _max_point.z());
-      glVertex3f (_max_point.x(), _min_point.y(), _max_point.z());
-      glEnd();
+      gl.begin (GL_LINES);
+      gl.vertex3f (_min_point.x(), _min_point.y(), _max_point.z());
+      gl.vertex3f (_max_point.x(), _min_point.y(), _max_point.z());
+      gl.end();
 
-      glBegin (GL_LINES);
-      glVertex3f (_max_point.x(), _max_point.y(), _min_point.z());
-      glVertex3f (_max_point.x(), _min_point.y(), _min_point.z());
-      glEnd();
+      gl.begin (GL_LINES);
+      gl.vertex3f (_max_point.x(), _max_point.y(), _min_point.z());
+      gl.vertex3f (_max_point.x(), _min_point.y(), _min_point.z());
+      gl.end();
 
-      glBegin (GL_LINES);
-      glVertex3f (_min_point.x(), _max_point.y(), _max_point.z());
-      glVertex3f (_max_point.x(), _max_point.y(), _max_point.z());
-      glEnd();
+      gl.begin (GL_LINES);
+      gl.vertex3f (_min_point.x(), _max_point.y(), _max_point.z());
+      gl.vertex3f (_max_point.x(), _max_point.y(), _max_point.z());
+      gl.end();
 
     }
   }

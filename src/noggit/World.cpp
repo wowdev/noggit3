@@ -25,6 +25,7 @@
 #include <math/vector_2d.h>
 
 #include <opengl/call_list.h>
+#include <opengl/context.hpp>
 #include <opengl/matrix.h>
 #include <opengl/scoped.h>
 #include <opengl/settings_saver.h>
@@ -54,7 +55,7 @@ namespace
 
     float const rho (i * drho);
     float const theta (j * dtheta);
-    glVertex3f ( std::cos (theta) * std::sin (rho) * radius
+    gl.vertex3f ( std::cos (theta) * std::sin (rho) * radius
                , std::sin (theta) * std::sin (rho) * radius
                , std::cos (rho) * radius
                );
@@ -63,22 +64,22 @@ namespace
   {
     for (int i = 1; i < sphere_segments; i++)
     {
-      glBegin (GL_LINE_LOOP);
+      gl.begin (GL_LINE_LOOP);
       for (int j = 0; j < sphere_segments; j++)
       {
         draw_sphere_point (i, j, radius);
       }
-      glEnd();
+      gl.end();
     }
 
     for (int j = 0; j < sphere_segments; j++)
     {
-      glBegin(GL_LINE_STRIP);
+      gl.begin(GL_LINE_STRIP);
       for (int i = 0; i <= sphere_segments; i++)
       {
         draw_sphere_point (i, j, radius);
       }
-      glEnd();
+      gl.end();
     }
   }
   void renderSphere_convenient(::math::vector_3d const& position, float radius)
@@ -87,7 +88,7 @@ namespace
 
     //! \todo This should be passed in!
     QSettings settings;
-    glColor4f ( settings.value ("cursor/red", 1.0f).toFloat()
+    gl.color4f ( settings.value ("cursor/red", 1.0f).toFloat()
               , settings.value ("cursor/green", 1.0f).toFloat()
               , settings.value ("cursor/blue", 1.0f).toFloat()
               , settings.value ("cursor/alpha", 1.0f).toFloat()
@@ -95,7 +96,7 @@ namespace
 
     opengl::scoped::matrix_pusher matrix;
 
-    glTranslatef (position.x(), position.y(), position.z());
+    gl.translatef (position.x(), position.y(), position.z());
 
     draw_sphere (0.3f);
     draw_sphere (radius);
@@ -103,7 +104,7 @@ namespace
 
   void draw_disk_point (float radius, float arc)
   {
-    glVertex3f (radius * std::sin (arc), radius * std::cos (arc), 0.0f);
+    gl.vertex3f (radius * std::sin (arc), radius * std::cos (arc), 0.0f);
   }
   void draw_disk (float radius)
   {
@@ -111,26 +112,26 @@ namespace
     static float const max (2.0f * ::math::constants::pi());
     float const stride (max / slices);
 
-    glBegin (GL_LINE_LOOP);
+    gl.begin (GL_LINE_LOOP);
     for (float arc (0.0f); arc < max; arc += stride)
     {
       draw_disk_point (radius, arc);
     }
-    glEnd();
+    gl.end();
 
-    glBegin (GL_LINE_LOOP);
+    gl.begin (GL_LINE_LOOP);
     for (float arc (0.0f); arc < max; arc += stride)
     {
       draw_disk_point (radius + 1.0f, arc);
     }
-    glEnd();
+    gl.end();
 
     for (float arc (0.0f); arc < max; arc += stride)
     {
-      glBegin (GL_LINES);
+      gl.begin (GL_LINES);
       draw_disk_point (radius, arc);
       draw_disk_point (radius + 1.0f, arc);
-      glEnd();
+      gl.end();
      }
   }
 
@@ -141,15 +142,15 @@ namespace
     {
       opengl::scoped::matrix_pusher matrix;
       opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
-      glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+      gl.colorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
       opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_TRUE> color_material;
 
-      glTranslatef (position.x(), position.y(), position.z());
-      glRotatef (90.0f, 1.0f, 0.0f, 0.0f);
+      gl.translatef (position.x(), position.y(), position.z());
+      gl.rotatef (90.0f, 1.0f, 0.0f, 0.0f);
 
       //! \todo This should be passed in!
       QSettings settings;
-      glColor4f ( settings.value ("cursor/red", 1.0f).toFloat()
+      gl.color4f ( settings.value ("cursor/red", 1.0f).toFloat()
                 , settings.value ("cursor/green", 1.0f).toFloat()
                 , settings.value ("cursor/blue", 1.0f).toFloat()
                 , settings.value ("cursor/alpha", 1.0f).toFloat()
@@ -161,7 +162,7 @@ namespace
     {
       opengl::scoped::matrix_pusher matrix;
 
-      glTranslatef (position.x(), position.y(), position.z());
+      gl.translatef (position.x(), position.y(), position.z());
 
       draw_sphere (0.3f);
     }
@@ -582,26 +583,26 @@ void World::initLowresTerrain()
         lowrestiles[y][x]->start_recording();
 
         //! \todo Make a strip out of this.
-        glBegin( GL_TRIANGLES );
+        gl.begin( GL_TRIANGLES );
         for (size_t j (0); j < 16; ++j )
         {
           for (size_t i (0); i < 16; ++i )
           {
-            glVertex3fv (vertices_17[j][i]);
-            glVertex3fv (vertices_16[j][i]);
-            glVertex3fv (vertices_17[j][i + 1]);
-            glVertex3fv (vertices_17[j][i + 1]);
-            glVertex3fv (vertices_16[j][i]);
-            glVertex3fv (vertices_17[j + 1][i + 1]);
-            glVertex3fv (vertices_17[j + 1][i + 1]);
-            glVertex3fv (vertices_16[j][i]);
-            glVertex3fv (vertices_17[j + 1][i]);
-            glVertex3fv (vertices_17[j + 1][i]);
-            glVertex3fv (vertices_16[j][i]);
-            glVertex3fv (vertices_17[j][i]);
+            gl.vertex3fv (vertices_17[j][i]);
+            gl.vertex3fv (vertices_16[j][i]);
+            gl.vertex3fv (vertices_17[j][i + 1]);
+            gl.vertex3fv (vertices_17[j][i + 1]);
+            gl.vertex3fv (vertices_16[j][i]);
+            gl.vertex3fv (vertices_17[j + 1][i + 1]);
+            gl.vertex3fv (vertices_17[j + 1][i + 1]);
+            gl.vertex3fv (vertices_16[j][i]);
+            gl.vertex3fv (vertices_17[j + 1][i]);
+            gl.vertex3fv (vertices_17[j + 1][i]);
+            gl.vertex3fv (vertices_16[j][i]);
+            gl.vertex3fv (vertices_17[j][i]);
           }
         }
-        glEnd();
+        gl.end();
 
         lowrestiles[y][x]->end_recording();
 
@@ -635,9 +636,9 @@ namespace
         }
       }
 
-      glGenBuffers(1, pDetailTexCoords);
-      glBindBuffer(GL_ARRAY_BUFFER, *pDetailTexCoords);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
+      gl.genBuffers(1, pDetailTexCoords);
+      gl.bindBuffer(GL_ARRAY_BUFFER, *pDetailTexCoords);
+      gl.bufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
 
       // init texture coordinates for alpha map:
       vt = temp;
@@ -655,11 +656,11 @@ namespace
         }
       }
 
-      glGenBuffers(1, pAlphaTexCoords);
-      glBindBuffer(GL_ARRAY_BUFFER, *pAlphaTexCoords);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
+      gl.genBuffers(1, pAlphaTexCoords);
+      gl.bindBuffer(GL_ARRAY_BUFFER, *pAlphaTexCoords);
+      gl.bufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
 
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      gl.bindBuffer(GL_ARRAY_BUFFER, 0);
     }
   }
 }
@@ -809,7 +810,7 @@ void World::outdoorLighting()
 {
   ::math::vector_4d black(0,0,0,0);
   ::math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
+  gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
 
   float di = outdoorLightStats.dayIntensity;
   //float ni = outdoorLightStats.nightIntensity;
@@ -819,17 +820,17 @@ void World::outdoorLighting()
   //::math::vector_4d pos(-1, 1, -1, 0);
   ::math::vector_4d pos(-dd.x(), -dd.z(), dd.y(), 0.0f);
   ::math::vector_4d col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1.0f);
-  glLightfv(GL_LIGHT0, GL_AMBIENT, black);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
-  glLightfv(GL_LIGHT0, GL_POSITION, pos);
+  gl.lightfv(GL_LIGHT0, GL_AMBIENT, black);
+  gl.lightfv(GL_LIGHT0, GL_DIFFUSE, col);
+  gl.lightfv(GL_LIGHT0, GL_POSITION, pos);
 
   /*
   dd = outdoorLightStats.nightDir;
   pos(-dd.x(), -dd.z(), dd.y(), 0.0f);
   col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * ni, 1.0f);
-  glLightfv(GL_LIGHT1, GL_AMBIENT, black);
-  glLightfv(GL_LIGHT1, GL_DIFFUSE, col);
-  glLightfv(GL_LIGHT1, GL_POSITION, pos);*/
+  gl.lightfv(GL_LIGHT1, GL_AMBIENT, black);
+  gl.lightfv(GL_LIGHT1, GL_DIFFUSE, col);
+  gl.lightfv(GL_LIGHT1, GL_POSITION, pos);*/
 }
 
 void World::outdoorLights(bool on)
@@ -839,22 +840,22 @@ void World::outdoorLights(bool on)
 
   if (on) {
     ::math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
+    gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
     if (di>0) {
-      glEnable(GL_LIGHT0);
+      gl.enable(GL_LIGHT0);
     } else {
-      glDisable(GL_LIGHT0);
+      gl.disable(GL_LIGHT0);
     }
     if (ni>0) {
-      glEnable(GL_LIGHT1);
+      gl.enable(GL_LIGHT1);
     } else {
-      glDisable(GL_LIGHT1);
+      gl.disable(GL_LIGHT1);
     }
   } else {
     ::math::vector_4d ambient(0, 0, 0, 1);
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-    glDisable(GL_LIGHT0);
-    glDisable(GL_LIGHT1);
+    gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
+    gl.disable(GL_LIGHT0);
+    gl.disable(GL_LIGHT1);
   }
 }
 
@@ -863,16 +864,16 @@ void World::setupFog (bool draw_fog, const float& fog_distance)
   if (draw_fog)
   {
     const ::math::vector_4d fogcolor (skies->colorSet[FOG_COLOR], 1);
-    glFogfv (GL_FOG_COLOR, fogcolor);
+    gl.fogfv (GL_FOG_COLOR, fogcolor);
     //! \todo  retreive fogstart and fogend from lights.lit somehow
-    glFogf (GL_FOG_END, fog_distance);
-    glFogf (GL_FOG_START, fog_distance * 0.5f);
+    gl.fogf (GL_FOG_END, fog_distance);
+    gl.fogf (GL_FOG_START, fog_distance * 0.5f);
 
-    glEnable(GL_FOG);
+    gl.enable(GL_FOG);
   }
   else
   {
-    glDisable(GL_FOG);
+    gl.disable(GL_FOG);
   }
 }
 
@@ -893,14 +894,14 @@ void World::draw ( size_t flags
   const int cx (camera.x() / TILESIZE);
   const int cz (camera.z() / TILESIZE);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  gl.bindBuffer(GL_ARRAY_BUFFER, 0);
 
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
   const Frustum frustum;
 
-  ///glDisable(GL_LIGHTING);
-  ///glColor4f(1,1,1,1);
+  ///gl.disable(GL_LIGHTING);
+  ///gl.color4f(1,1,1,1);
 
   bool had_sky (false);
   if (flags & DRAWWMO)
@@ -920,11 +921,11 @@ void World::draw ( size_t flags
     }
   }
 
-  glEnable(GL_CULL_FACE);
-  glDisable(GL_BLEND);
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_FOG);
+  gl.enable(GL_CULL_FACE);
+  gl.disable(GL_BLEND);
+  gl.disable(GL_TEXTURE_2D);
+  gl.disable(GL_DEPTH_TEST);
+  gl.disable(GL_FOG);
 
   int daytime = static_cast<int>(time) % 2880;
   outdoorLightStats = ol->getLightStats(daytime);
@@ -937,24 +938,24 @@ void World::draw ( size_t flags
   // unless there is no sky OR skybox
   GLbitfield clearmask = GL_DEPTH_BUFFER_BIT;
   if (!had_sky)   clearmask |= GL_COLOR_BUFFER_BIT;
-  glClear(clearmask);
+  gl.clear(clearmask);
 
-  glDisable(GL_TEXTURE_2D);
+  gl.disable(GL_TEXTURE_2D);
 
   outdoorLighting();
   outdoorLights(true);
 
-  glFogi(GL_FOG_MODE, GL_LINEAR);
+  gl.fogi(GL_FOG_MODE, GL_LINEAR);
   setupFog (flags & FOG, fog_distance);
 
   // Draw verylowres heightmap
   if ((flags & FOG) && (flags & TERRAIN)) {
-    glEnable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glColor3fv(skies->colorSet[FOG_COLOR]);
-    //glColor3f(0,1,0);
-    //glDisable(GL_FOG);
+    gl.enable(GL_CULL_FACE);
+    gl.disable(GL_DEPTH_TEST);
+    gl.disable(GL_LIGHTING);
+    gl.color3fv(skies->colorSet[FOG_COLOR]);
+    //gl.color3f(0,1,0);
+    //gl.disable(GL_FOG);
     const int lrr = 2;
     for (int i=cx-lrr; i<=cx+lrr; ++i) {
       for (int j=cz-lrr; j<=cz+lrr; ++j) {
@@ -967,42 +968,42 @@ void World::draw ( size_t flags
         }
       }
     }
-    //glEnable(GL_FOG);
+    //gl.enable(GL_FOG);
   }
 
   // Draw height map
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
+  gl.enableClientState(GL_VERTEX_ARRAY);
+  gl.enableClientState(GL_NORMAL_ARRAY);
 
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
-  glEnable(GL_LIGHTING);
+  gl.enable(GL_DEPTH_TEST);
+  gl.depthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
+  gl.enable(GL_LIGHTING);
 
-  glEnable(GL_COLOR_MATERIAL);
-  //glColorMaterial(GL_FRONT, GL_DIFFUSE);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  glColor4f(1,1,1,1);
+  gl.enable(GL_COLOR_MATERIAL);
+  //gl.colorMaterial(GL_FRONT, GL_DIFFUSE);
+  gl.colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+  gl.color4f(1,1,1,1);
 
   ::math::vector_4d spec_color(0.1f,0.1f,0.1f,0.1f);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-  glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 5);
+  gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
+  gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 5);
 
-  glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+  gl.lightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 
-  glEnable(GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.enable(GL_BLEND);
+  gl.blendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  glClientActiveTexture(GL_TEXTURE0);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glBindBuffer(GL_ARRAY_BUFFER, detailtexcoords);
-  glTexCoordPointer(2, GL_FLOAT, 0, 0);
+  gl.clientActiveTexture(GL_TEXTURE0);
+  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
+  gl.bindBuffer(GL_ARRAY_BUFFER, detailtexcoords);
+  gl.texCoordPointer(2, GL_FLOAT, 0, 0);
 
-  glClientActiveTexture(GL_TEXTURE1);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glBindBuffer(GL_ARRAY_BUFFER, alphatexcoords);
-  glTexCoordPointer(2, GL_FLOAT, 0, 0);
+  gl.clientActiveTexture(GL_TEXTURE1);
+  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
+  gl.bindBuffer(GL_ARRAY_BUFFER, alphatexcoords);
+  gl.texCoordPointer(2, GL_FLOAT, 0, 0);
 
-  glClientActiveTexture(GL_TEXTURE0);
+  gl.clientActiveTexture(GL_TEXTURE0);
 
 
   // gosh darn alpha blended evil
@@ -1013,7 +1014,7 @@ void World::draw ( size_t flags
     // height map w/ a zillion texture passes
     //! \todo  Do we need to push the matrix here?
 
-    glPushMatrix();
+    gl.pushMatrix();
 
     if( flags & TERRAIN )
     {
@@ -1038,20 +1039,20 @@ void World::draw ( size_t flags
       }
     }
 
-    glPopMatrix();
+    gl.popMatrix();
 
     // Selection circle
     if (selected_item && noggit::selection::is_chunk (*selected_item))
     {
-      glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+      gl.polygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
       GLint viewport[4];
-      glGetIntegerv (GL_VIEWPORT, viewport);
+      gl.getIntegerv (GL_VIEWPORT, viewport);
 
       float const win_x (mouse_position.x());
       float const win_y (static_cast<float> (viewport[3]) - mouse_position.y());
       float win_z;
-      glReadPixels (win_x, win_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
+      gl.readPixels (win_x, win_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
 
       ::math::vector_4d const normalized_device_coords
         ( 2.0f * (win_x - static_cast<float> (viewport[0])) / static_cast<float> (viewport[2]) - 1.0f
@@ -1066,10 +1067,10 @@ void World::draw ( size_t flags
                                           * normalized_device_coords
                                           ).xyz_normalized_by_w();
 
-      glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-      glDisable(GL_CULL_FACE);
-      //glDepthMask(false);
-      //glDisable(GL_DEPTH_TEST);
+      gl.color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+      gl.disable(GL_CULL_FACE);
+      //gl.depthMask(false);
+      //gl.disable(GL_DEPTH_TEST);
 
       if (!(flags & NOCURSOR))
       {
@@ -1086,23 +1087,23 @@ void World::draw ( size_t flags
                                   );
       }
 
-      glEnable(GL_CULL_FACE);
-      glEnable(GL_DEPTH_TEST);
+      gl.enable(GL_CULL_FACE);
+      gl.enable(GL_DEPTH_TEST);
       //GlDepthMask(true);
-      glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+      gl.polygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
     }
 
 
     if (flags & LINES)
     {
-      glDisable(GL_COLOR_MATERIAL);
-      glActiveTexture(GL_TEXTURE0);
-      glDisable(GL_TEXTURE_2D);
-      glActiveTexture(GL_TEXTURE1);
-      glDisable(GL_TEXTURE_2D);
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      gl.disable(GL_COLOR_MATERIAL);
+      gl.activeTexture(GL_TEXTURE0);
+      gl.disable(GL_TEXTURE_2D);
+      gl.activeTexture(GL_TEXTURE1);
+      gl.disable(GL_TEXTURE_2D);
+      gl.enable(GL_BLEND);
+      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       setupFog (flags & FOG, fog_distance);
       for( int j = 0; j < 64; ++j )
@@ -1122,25 +1123,25 @@ void World::draw ( size_t flags
       }
     }
 
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
+    gl.activeTexture(GL_TEXTURE1);
+    gl.disable(GL_TEXTURE_2D);
+    gl.activeTexture(GL_TEXTURE0);
+    gl.enable(GL_TEXTURE_2D);
 
-    glColor4f(1,1,1,1);
-    glEnable(GL_BLEND);
+    gl.color4f(1,1,1,1);
+    gl.enable(GL_BLEND);
 
     ::math::vector_4d spec_color(0,0,0,1);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
+    gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
+    gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
 
     // unbind hardware buffers
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    gl.bindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glEnable(GL_CULL_FACE);
+    gl.enable(GL_CULL_FACE);
 
-    glDisable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
+    gl.disable(GL_BLEND);
+    gl.disable(GL_ALPHA_TEST);
 
     // TEMP: for fucking around with lighting
     for(opengl::light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light )
@@ -1148,9 +1149,9 @@ void World::draw ( size_t flags
       const float l_const( 0.0f );
       const float l_linear( 0.7f );
       const float l_quadratic( 0.03f );
-      glLightf(light, GL_CONSTANT_ATTENUATION, l_const);
-      glLightf(light, GL_LINEAR_ATTENUATION, l_linear);
-      glLightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
+      gl.lightf(light, GL_CONSTANT_ATTENUATION, l_const);
+      gl.lightf(light, GL_LINEAR_ATTENUATION, l_linear);
+      gl.lightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
     }
 
     // M2s / models
@@ -1158,7 +1159,7 @@ void World::draw ( size_t flags
     {
       noggit::app().model_manager().resetAnim();
 
-      glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
+      gl.enable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
       for( std::map<int, ModelInstance*>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it )
       {
         if (it->second->is_visible (mapdrawdistance, frustum, camera))
@@ -1177,10 +1178,10 @@ void World::draw ( size_t flags
     if (flags & DRAWWMO)
     {
       ::math::vector_4d spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
-      glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
-      glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 10 );
+      gl.materialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
+      gl.materiali( GL_FRONT_AND_BACK, GL_SHININESS, 10 );
 
-      glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
+      gl.lightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
 
       for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
         it->second->draw ( flags & WMODOODAS
@@ -1194,29 +1195,29 @@ void World::draw ( size_t flags
                          );
 
       spec_color = ::math::vector_4d( 0.0f, 0.0f, 0.0f, 1.0f );
-      glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
-      glMateriali( GL_FRONT_AND_BACK, GL_SHININESS, 0 );
+      gl.materialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
+      gl.materiali( GL_FRONT_AND_BACK, GL_SHININESS, 0 );
     }
 
     outdoorLights( true );
     setupFog (flags & FOG, fog_distance);
 
-    glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-    glDisable(GL_CULL_FACE);
+    gl.color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+    gl.disable(GL_CULL_FACE);
 
-    glDisable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    glEnable(GL_LIGHTING);
+    gl.disable(GL_BLEND);
+    gl.disable(GL_ALPHA_TEST);
+    gl.enable(GL_LIGHTING);
   }
 
   setupFog (flags & FOG, fog_distance);
 
 
-  glColor4f(1,1,1,1);
-  glEnable(GL_BLEND);
+  gl.color4f(1,1,1,1);
+  gl.enable(GL_BLEND);
 
-  //glColor4f(1,1,1,1);
-  glDisable(GL_COLOR_MATERIAL);
+  //gl.color4f(1,1,1,1);
+  gl.disable(GL_COLOR_MATERIAL);
 
   if(flags & WATER)
   {
@@ -1265,20 +1266,20 @@ boost::optional<selection_type> World::drawSelection (size_t flags)
 {
   static GLuint selection_buffer[8192];
 
-  glSelectBuffer ( sizeof (selection_buffer) / sizeof (GLuint)
+  gl.selectBuffer ( sizeof (selection_buffer) / sizeof (GLuint)
                  , selection_buffer
                  );
-  glRenderMode (GL_SELECT);
+  gl.renderMode (GL_SELECT);
 
-  glBindBuffer (GL_ARRAY_BUFFER, 0);
+  gl.bindBuffer (GL_ARRAY_BUFFER, 0);
 
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
   const Frustum frustum;
 
-  glClear (GL_DEPTH_BUFFER_BIT);
+  gl.clear (GL_DEPTH_BUFFER_BIT);
 
-  glInitNames();
+  gl.initNames();
 
   if (flags & TERRAIN)
   {
@@ -1338,7 +1339,7 @@ boost::optional<selection_type> World::drawSelection (size_t flags)
 
   size_t offset = 0;
 
-  const GLint hits (glRenderMode (GL_RENDER));
+  const GLint hits (gl.renderMode (GL_RENDER));
   for (GLint hit (0); hit < hits; ++hit)
   {
     GLNameEntry* entry = reinterpret_cast<GLNameEntry*>( &selection_buffer[offset] );
@@ -1445,8 +1446,8 @@ void World::clearHeight(int x, int z)
         curChunk->vmax.y (std::max(curChunk->vmax.y(), curChunk->mVertices[k].y()));
       }
 
-      glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
+      gl.bindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
+      gl.bufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
     }
   }
 
@@ -1519,22 +1520,22 @@ void World::drawTileMode ( bool draw_lines
                             , 4.0f / zoom
                             );
 
-  glClear (GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-  glEnable (GL_BLEND);
+  gl.clear (GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+  gl.enable (GL_BLEND);
 
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.blendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  glEnableClientState (GL_COLOR_ARRAY);
-  glDisableClientState (GL_NORMAL_ARRAY);
-  glDisableClientState (GL_TEXTURE_COORD_ARRAY);
-  glDisable (GL_CULL_FACE);
-  glDepthMask (GL_FALSE);
+  gl.enableClientState (GL_COLOR_ARRAY);
+  gl.disableClientState (GL_NORMAL_ARRAY);
+  gl.disableClientState (GL_TEXTURE_COORD_ARRAY);
+  gl.disable (GL_CULL_FACE);
+  gl.depthMask (GL_FALSE);
 
-  glPushMatrix();
-  glScalef (zoom, zoom, 1.0f);
+  gl.pushMatrix();
+  gl.scalef (zoom, zoom, 1.0f);
 
-  glPushMatrix();
-  glTranslatef (-camera.x() / CHUNKSIZE, -camera.z() / CHUNKSIZE, 0.0f);
+  gl.pushMatrix();
+  gl.translatef (-camera.x() / CHUNKSIZE, -camera.z() / CHUNKSIZE, 0.0f);
 
   //! \todo Only iterate over those intersecting?
   for (size_t j (0); j < 64; ++j)
@@ -1560,32 +1561,32 @@ void World::drawTileMode ( bool draw_lines
     }
   }
 
-  glPopMatrix();
+  gl.popMatrix();
 
   if (draw_lines)
   {
-    glTranslatef(fmod(-camera.x()/CHUNKSIZE,16), fmod(-camera.z()/CHUNKSIZE,16),0);
+    gl.translatef(fmod(-camera.x()/CHUNKSIZE,16), fmod(-camera.z()/CHUNKSIZE,16),0);
     for(float x = -32.0f; x <= 48.0f; x += 1.0f)
     {
       if( static_cast<int>(x) % 16 )
-        glColor4f(1.0f,0.0f,0.0f,0.5f);
+        gl.color4f(1.0f,0.0f,0.0f,0.5f);
       else
-        glColor4f(0.0f,1.0f,0.0f,0.5f);
-      glBegin(GL_LINES);
-      glVertex3f(-32.0f,x,-1);
-      glVertex3f(48.0f,x,-1);
-      glVertex3f(x,-32.0f,-1);
-      glVertex3f(x,48.0f,-1);
-      glEnd();
+        gl.color4f(0.0f,1.0f,0.0f,0.5f);
+      gl.begin(GL_LINES);
+      gl.vertex3f(-32.0f,x,-1);
+      gl.vertex3f(48.0f,x,-1);
+      gl.vertex3f(x,-32.0f,-1);
+      gl.vertex3f(x,48.0f,-1);
+      gl.end();
     }
   }
 
-  glPopMatrix();
+  gl.popMatrix();
 
-  glDisableClientState (GL_COLOR_ARRAY);
+  gl.disableClientState (GL_COLOR_ARRAY);
 
-  glEnableClientState (GL_NORMAL_ARRAY);
-  glEnableClientState (GL_TEXTURE_COORD_ARRAY);
+  gl.enableClientState (GL_NORMAL_ARRAY);
+  gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
 }
 
 boost::optional<float> World::get_height ( const float& x
@@ -1905,13 +1906,13 @@ void World::saveMap()
   unsigned char image[256*256*3];
   MapTile *ATile;
   FILE *fid;
-  glEnable(GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glReadBuffer(GL_BACK);
+  gl.enable(GL_BLEND);
+  gl.blendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.readBuffer(GL_BACK);
 
-  glEnableClientState(GL_COLOR_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  gl.enableClientState(GL_COLOR_ARRAY);
+  gl.disableClientState(GL_NORMAL_ARRAY);
+  gl.disableClientState(GL_TEXTURE_COORD_ARRAY);
 
   for(int y=0;y<64;y++)
   {
@@ -1923,19 +1924,19 @@ void World::saveMap()
       }
 
       ATile=loadTile(x,y);
-      glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+      gl.clear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
-      glPushMatrix();
-      glScalef(0.08333333f,0.08333333f,1.0f);
+      gl.pushMatrix();
+      gl.scalef(0.08333333f,0.08333333f,1.0f);
 
-      //glTranslatef(-camera.x()/CHUNKSIZE,-camera.z()/CHUNKSIZE,0);
-      glTranslatef( x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f );
+      //gl.translatef(-camera.x()/CHUNKSIZE,-camera.z()/CHUNKSIZE,0);
+      gl.translatef( x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f );
 
       ATile->drawTextures (QRect (0, 0, 16, 16));
-      glPopMatrix();
+      gl.popMatrix();
 
   //! \todo Fix these two lines. THEY ARE VITAL!
-//    glReadPixels (video.xres()/2-128, video.yres()/2-128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
+//    gl.readPixels (video.xres()/2-128, video.yres()/2-128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
 //      swapBuffers();
 
     std::stringstream ss;
@@ -1946,10 +1947,10 @@ void World::saveMap()
     }
   }
 
-  glDisableClientState(GL_COLOR_ARRAY);
+  gl.disableClientState(GL_COLOR_ARRAY);
 
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  gl.enableClientState(GL_NORMAL_ARRAY);
+  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void World::deleteModelInstance( int pUniqueID )
@@ -2131,8 +2132,8 @@ void World::moveHeight(int x, int z, const float& heightDelta)
       curChunk->vmin.y (curChunk->vmin.y() + heightDelta);
       curChunk->vmax.y (curChunk->vmax.y() + heightDelta);
 
-      glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
+      gl.bindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
+      gl.bufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
     }
   }
 

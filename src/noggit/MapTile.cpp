@@ -27,6 +27,8 @@
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
+#include <opengl/context.hpp>
+
 MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
   : mPositionX (pX)
   , mPositionZ (pZ)
@@ -347,7 +349,7 @@ void MapTile::draw ( bool draw_terrain_height_contour
                    , const boost::optional<selection_type>& selected_item
                    )
 {
-  glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+  gl.color4f (1.0f, 1.0f, 1.0f, 1.0f);
 
   for (size_t j (0); j < 16; ++j)
   {
@@ -390,7 +392,7 @@ void MapTile::drawLines ( bool draw_hole_lines
                         , const ::math::vector_3d& camera
                         )
 {
-  glDisable (GL_COLOR_MATERIAL);
+  gl.disable (GL_COLOR_MATERIAL);
 
   for (size_t j (0); j < 16; ++j)
   {
@@ -403,28 +405,28 @@ void MapTile::drawLines ( bool draw_hole_lines
     }
   }
 
-  glEnable (GL_COLOR_MATERIAL);
+  gl.enable (GL_COLOR_MATERIAL);
 }
 
 void MapTile::drawMFBO()
 {
   static const GLshort lIndices[] = { 4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1 };
 
-  glColor4f(0,1,1,0.2f);
-  glBegin(GL_TRIANGLE_FAN);
+  gl.color4f(0,1,1,0.2f);
+  gl.begin(GL_TRIANGLE_FAN);
   for( int i = 0; i < 18; ++i )
   {
-    glVertex3f( mMinimumValues[lIndices[i]*3 + 0], mMinimumValues[lIndices[i]*3 + 1], mMinimumValues[lIndices[i]*3 + 2]  );
+    gl.vertex3f( mMinimumValues[lIndices[i]*3 + 0], mMinimumValues[lIndices[i]*3 + 1], mMinimumValues[lIndices[i]*3 + 2]  );
   }
-  glEnd();
+  gl.end();
 
-  glColor4f(1,1,0,0.2f);
-  glBegin(GL_TRIANGLE_FAN);
+  gl.color4f(1,1,0,0.2f);
+  gl.begin(GL_TRIANGLE_FAN);
   for( int i = 0; i < 18; ++i )
   {
-    glVertex3f( mMaximumValues[lIndices[i]*3 + 0], mMaximumValues[lIndices[i]*3 + 1], mMaximumValues[lIndices[i]*3 + 2]  );
+    gl.vertex3f( mMaximumValues[lIndices[i]*3 + 0], mMaximumValues[lIndices[i]*3 + 1], mMaximumValues[lIndices[i]*3 + 2]  );
   }
-  glEnd();
+  gl.end();
 }
 
 void MapTile::drawWater (Skies const* skies)
@@ -435,9 +437,9 @@ void MapTile::drawWater (Skies const* skies)
 // This is for the 2D mode only.
 void MapTile::drawTextures (const QRectF& chunks_to_draw) const
 {
-  glPushMatrix();
+  gl.pushMatrix();
 
-  glTranslatef (xbase / CHUNKSIZE, zbase / CHUNKSIZE, 0.0f);
+  gl.translatef (xbase / CHUNKSIZE, zbase / CHUNKSIZE, 0.0f);
 
   for (size_t j (chunks_to_draw.top()); j < chunks_to_draw.bottom(); ++j)
   {
@@ -447,7 +449,7 @@ void MapTile::drawTextures (const QRectF& chunks_to_draw) const
     }
   }
 
-  glPopMatrix();
+  gl.popMatrix();
 }
 
 MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )

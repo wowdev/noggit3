@@ -7,6 +7,7 @@
 #include <math/matrix_4x4.h>
 #include <math/vector_3d.h>
 
+#include <opengl/context.hpp>
 #include <opengl/types.h>
 
 #include <cmath>
@@ -19,7 +20,7 @@ namespace opengl
       inline ::math::matrix_4x4 from()
     {
       ::math::matrix_4x4 matrix;
-      glGetFloatv (matrix_type, matrix);
+      gl.getFloatv (matrix_type, matrix);
       return matrix;
     }
 
@@ -35,7 +36,7 @@ namespace opengl
     inline void perspective (float fovy, float aspect, float zNear, float zFar)
     {
       float const ymax (zNear * std::tan (fovy * ::math::constants::pi() / 360.0));
-      glFrustum (-ymax * aspect, ymax * aspect, -ymax, ymax, zNear, zFar);
+      gl.frustum (-ymax * aspect, ymax * aspect, -ymax, ymax, zNear, zFar);
     }
 
     inline void look_at ( ::math::vector_3d const& eye
@@ -52,7 +53,7 @@ namespace opengl
                                       , x * -eye, y * -eye, z * -eye,  1.0f
                                       );
 
-      glMultMatrixf (matrix);
+      gl.multMatrixf (matrix);
     }
   }
 }

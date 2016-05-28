@@ -12,6 +12,8 @@
 #include <noggit/blp_texture.h>
 #include <noggit/mpq/file.h>
 
+#include <opengl/context.hpp>
+
 static const unsigned int MAX_PARTICLES = 10000;
 
 namespace
@@ -200,50 +202,50 @@ void ParticleSystem::draw()
 {
   /*
   // just draw points:
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_LIGHTING);
-  glColor4f(1,1,1,1);
-  glBegin(GL_POINTS);
+  gl.disable(GL_TEXTURE_2D);
+  gl.disable(GL_LIGHTING);
+  gl.color4f(1,1,1,1);
+  gl.begin(GL_POINTS);
   for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-    glVertex3fv(it->tpos);
+    gl.vertex3fv(it->tpos);
   }
-  glEnd();
-  glEnable(GL_LIGHTING);
-  glEnable(GL_TEXTURE_2D);
+  gl.end();
+  gl.enable(GL_LIGHTING);
+  gl.enable(GL_TEXTURE_2D);
   */
 
   // setup blend mode
   switch (blend) {
   case 0:
-    glDisable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
+    gl.disable(GL_BLEND);
+    gl.disable(GL_ALPHA_TEST);
     break;
   case 1:
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_COLOR, GL_ONE);
-    glDisable(GL_ALPHA_TEST);
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_COLOR, GL_ONE);
+    gl.disable(GL_ALPHA_TEST);
     break;
   case 2:
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_ALPHA_TEST);
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.disable(GL_ALPHA_TEST);
     break;
   case 3:
-    glDisable(GL_BLEND);
-    glEnable(GL_ALPHA_TEST);
+    gl.disable(GL_BLEND);
+    gl.enable(GL_ALPHA_TEST);
     break;
   case 4:
-    glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-      glDisable(GL_ALPHA_TEST);
+    gl.enable(GL_BLEND);
+      gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
+      gl.disable(GL_ALPHA_TEST);
     break;
   }
 
-  //glDisable(GL_LIGHTING);
-  //glDisable(GL_CULL_FACE);
-  //glDepthMask(GL_FALSE);
+  //gl.disable(GL_LIGHTING);
+  //gl.disable(GL_CULL_FACE);
+  //gl.depthMask(GL_FALSE);
 
-//  glPushName(texture);
+//  gl.pushName(texture);
   _texture->bind();
 
   /*
@@ -252,11 +254,11 @@ void ParticleSystem::draw()
    // distance from the viewer
    float quadratic[] = {0.1f, 0.0f, 0.5f};
    //float quadratic[] = {0.88f, 0.001f, 0.000004f};
-   glPointParameterfvARB( GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic);
+   gl.pointParameterfvARB( GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic);
 
    // Query for the max point size supported by the hardware
    float maxSize = 512.0f;
-   //glGetFloatv(GL_POINT_SIZE_MAX_ARB, &maxSize );
+   //gl.getFloatv(GL_POINT_SIZE_MAX_ARB, &maxSize );
 
    // Clamp size to 100.0f or the sprites could get a little too big on some
    // of the newer graphic cards. My ATI card at home supports a max point
@@ -264,35 +266,35 @@ void ParticleSystem::draw()
    //if( maxSize > 100.0f )
    //  maxSize = 100.0f;
 
-   glPointSize(maxSize);
+   gl.pointSize(maxSize);
 
    // The alpha of a point is calculated to allow the fading of points
    // instead of shrinking them past a defined threshold size. The threshold
    // is defined by GL_POINT_FADE_THRESHOLD_SIZE_ARB and is not clamped to
    // the minimum and maximum point sizes.
-   glPointParameterfARB(GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f);
+   gl.pointParameterfARB(GL_POINT_FADE_THRESHOLD_SIZE_ARB, 60.0f);
 
-   glPointParameterfARB(GL_POINT_SIZE_MIN_ARB, 1.0f );
-   glPointParameterfARB(GL_POINT_SIZE_MAX_ARB, maxSize );
+   gl.pointParameterfARB(GL_POINT_SIZE_MIN_ARB, 1.0f );
+   gl.pointParameterfARB(GL_POINT_SIZE_MAX_ARB, maxSize );
 
    // Specify point sprite texture coordinate replacement mode for each texture unit
-   glTexEnvf(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
+   gl.texEnvf(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
    // Render point sprites...
-   glEnable(GL_POINT_SPRITE_ARB);
+   gl.enable(GL_POINT_SPRITE_ARB);
 
-   glBegin(GL_POINTS);
+   gl.begin(GL_POINTS);
    {
    for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-   glPointSize(it->size);
-   glTexCoord2fv(tiles[it->tile].tc[0]);
-   glColor4fv(it->color);
-   glVertex3fv(it->pos);
+   gl.pointSize(it->size);
+   gl.texCoord2fv(tiles[it->tile].tc[0]);
+   gl.color4fv(it->color);
+   gl.vertex3fv(it->pos);
    }
    }
-   glEnd();
+   gl.end();
 
-   glDisable(GL_POINT_SPRITE_ARB);
-   glTexEnvf(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_FALSE);
+   gl.disable(GL_POINT_SPRITE_ARB);
+   gl.texEnvf(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_FALSE);
 
    } else { // Old slow method */
 
@@ -308,7 +310,7 @@ void ParticleSystem::draw()
 
   if (billboard) {
     float modelview[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+    gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
 
     vRight = ::math::vector_3d(modelview[0], modelview[4], modelview[8]);
     vUp = ::math::vector_3d(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
@@ -326,48 +328,48 @@ void ParticleSystem::draw()
     // regular particles
 
     if (billboard) {
-      glBegin(GL_QUADS);
+      gl.begin(GL_QUADS);
       // TODO: per-particle rotation in a non-expensive way?? :|
       for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
         if (tiles.size() - 1 < it->tile) // Alfred, 2009.08.07, error prevent
           break;
         const float size = it->size;// / 2;
-        glColor4fv(it->color);
+        gl.color4fv(it->color);
 
-        glTexCoord2fv(tiles[it->tile].tc[0]);
-        glVertex3fv(it->pos - (vRight + vUp) * size);
+        gl.texCoord2fv(tiles[it->tile].tc[0]);
+        gl.vertex3fv(it->pos - (vRight + vUp) * size);
 
-        glTexCoord2fv(tiles[it->tile].tc[1]);
-        glVertex3fv(it->pos + (vRight - vUp) * size);
+        gl.texCoord2fv(tiles[it->tile].tc[1]);
+        gl.vertex3fv(it->pos + (vRight - vUp) * size);
 
-        glTexCoord2fv(tiles[it->tile].tc[2]);
-        glVertex3fv(it->pos + (vRight + vUp) * size);
+        gl.texCoord2fv(tiles[it->tile].tc[2]);
+        gl.vertex3fv(it->pos + (vRight + vUp) * size);
 
-        glTexCoord2fv(tiles[it->tile].tc[3]);
-        glVertex3fv(it->pos - (vRight - vUp) * size);
+        gl.texCoord2fv(tiles[it->tile].tc[3]);
+        gl.vertex3fv(it->pos - (vRight - vUp) * size);
       }
-      glEnd();
+      gl.end();
 
     } else {
-      glBegin(GL_QUADS);
+      gl.begin(GL_QUADS);
       for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
         if (tiles.size() - 1 < it->tile) // Alfred, 2009.08.07, error prevent
           break;
-        glColor4fv(it->color);
+        gl.color4fv(it->color);
 
-        glTexCoord2fv(tiles[it->tile].tc[0]);
-        glVertex3fv(it->pos + it->corners[0] * it->size);
+        gl.texCoord2fv(tiles[it->tile].tc[0]);
+        gl.vertex3fv(it->pos + it->corners[0] * it->size);
 
-        glTexCoord2fv(tiles[it->tile].tc[1]);
-        glVertex3fv(it->pos + it->corners[1] * it->size);
+        gl.texCoord2fv(tiles[it->tile].tc[1]);
+        gl.vertex3fv(it->pos + it->corners[1] * it->size);
 
-        glTexCoord2fv(tiles[it->tile].tc[2]);
-        glVertex3fv(it->pos + it->corners[2] * it->size);
+        gl.texCoord2fv(tiles[it->tile].tc[2]);
+        gl.vertex3fv(it->pos + it->corners[2] * it->size);
 
-        glTexCoord2fv(tiles[it->tile].tc[3]);
-        glVertex3fv(it->pos + it->corners[3] * it->size);
+        gl.texCoord2fv(tiles[it->tile].tc[3]);
+        gl.vertex3fv(it->pos + it->corners[3] * it->size);
       }
-      glEnd();
+      gl.end();
     }
   } else if (type==1) { // Sphere particles
     // particles from origin to position
@@ -380,33 +382,33 @@ void ParticleSystem::draw()
      bv1 = mbb * ::math::vector_3d(1.0f,0,0);
      */
 
-    glBegin(GL_QUADS);
+    gl.begin(GL_QUADS);
     for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
       if (tiles.size() - 1 < it->tile) // Alfred, 2009.08.07, error prevent
         break;
-      glColor4fv(it->color);
+      gl.color4fv(it->color);
 
-      glTexCoord2fv(tiles[it->tile].tc[0]);
-      glVertex3fv(it->pos + bv0 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[0]);
+      gl.vertex3fv(it->pos + bv0 * it->size);
 
-      glTexCoord2fv(tiles[it->tile].tc[1]);
-      glVertex3fv(it->pos + bv1 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[1]);
+      gl.vertex3fv(it->pos + bv1 * it->size);
 
-      glTexCoord2fv(tiles[it->tile].tc[2]);
-      glVertex3fv(it->origin + bv1 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[2]);
+      gl.vertex3fv(it->origin + bv1 * it->size);
 
-      glTexCoord2fv(tiles[it->tile].tc[3]);
-      glVertex3fv(it->origin + bv0 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[3]);
+      gl.vertex3fv(it->origin + bv0 * it->size);
     }
-    glEnd();
+    gl.end();
 
   }
   //}
 
-  //glEnable(GL_LIGHTING);
-  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  //glDepthMask(GL_TRUE);
-  //glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+  //gl.enable(GL_LIGHTING);
+  //gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  //gl.depthMask(GL_TRUE);
+  //gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void ModelHighlight( ::math::vector_4d color );
@@ -415,16 +417,16 @@ void ParticleSystem::drawHighlight()
 {
   /*
   // just draw points:
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_LIGHTING);
-  glColor4f(1,1,1,1);
-  glBegin(GL_POINTS);
+  gl.disable(GL_TEXTURE_2D);
+  gl.disable(GL_LIGHTING);
+  gl.color4f(1,1,1,1);
+  gl.begin(GL_POINTS);
   for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-    glVertex3fv(it->tpos);
+    gl.vertex3fv(it->tpos);
   }
-  glEnd();
-  glEnable(GL_LIGHTING);
-  glEnable(GL_TEXTURE_2D);
+  gl.end();
+  gl.enable(GL_LIGHTING);
+  gl.enable(GL_TEXTURE_2D);
   */
 
   ::math::vector_3d bv0,bv1,bv2,bv3;
@@ -432,35 +434,35 @@ void ParticleSystem::drawHighlight()
   // setup blend mode
   switch (blend) {
   case 0:
-    glDisable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
+    gl.disable(GL_BLEND);
+    gl.disable(GL_ALPHA_TEST);
     break;
   case 1:
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_COLOR, GL_ONE);
-    glDisable(GL_ALPHA_TEST);
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_COLOR, GL_ONE);
+    gl.disable(GL_ALPHA_TEST);
     break;
   case 2:
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_ALPHA_TEST);
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.disable(GL_ALPHA_TEST);
     break;
   case 3:
-    glDisable(GL_BLEND);
-    glEnable(GL_ALPHA_TEST);
+    gl.disable(GL_BLEND);
+    gl.enable(GL_ALPHA_TEST);
     break;
   case 4:
-    glEnable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    gl.enable(GL_BLEND);
+    gl.disable(GL_ALPHA_TEST);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
     break;
   }
 
-  glDisable(GL_LIGHTING);
-  glDisable(GL_CULL_FACE);
-  glDepthMask(GL_FALSE);
+  gl.disable(GL_LIGHTING);
+  gl.disable(GL_CULL_FACE);
+  gl.depthMask(GL_FALSE);
 
-//  glPushName(texture);
+//  gl.pushName(texture);
   _texture->bind();
 
   ::math::matrix_4x4 mbb;
@@ -470,7 +472,7 @@ void ParticleSystem::drawHighlight()
   if (billboard) {
     // get a billboard matrix
     ::math::matrix_4x4 mtrans;
-    glGetFloatv(GL_MODELVIEW_MATRIX, mtrans);
+    gl.getFloatv(GL_MODELVIEW_MATRIX, mtrans);
     mtrans.transpose();
     mtrans.invert();
     ::math::vector_3d camera = mtrans * ::math::vector_3d(0,0,0);
@@ -508,54 +510,54 @@ void ParticleSystem::drawHighlight()
     }
     //! \todo  per-particle rotation in a non-expensive way?? :|
 
-    glBegin(GL_QUADS);
+    gl.begin(GL_QUADS);
     for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-      //glColor4fv(it->color);
-      glColor4f(1.0f,0.25f,0.25f,it->color.w()*0.5f);
+      //gl.color4fv(it->color);
+      gl.color4f(1.0f,0.25f,0.25f,it->color.w()*0.5f);
 
-      glTexCoord2fv(tiles[it->tile].tc[0]);
-      glVertex3fv(it->pos + bv0 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[0]);
+      gl.vertex3fv(it->pos + bv0 * it->size);
 
-      glTexCoord2fv(tiles[it->tile].tc[1]);
-      glVertex3fv(it->pos + bv1 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[1]);
+      gl.vertex3fv(it->pos + bv1 * it->size);
 
-      glTexCoord2fv(tiles[it->tile].tc[2]);
-      glVertex3fv(it->pos + bv2 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[2]);
+      gl.vertex3fv(it->pos + bv2 * it->size);
 
-      glTexCoord2fv(tiles[it->tile].tc[3]);
-      glVertex3fv(it->pos + bv3 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[3]);
+      gl.vertex3fv(it->pos + bv3 * it->size);
     }
-    glEnd();
+    gl.end();
   }
   else if (type==1) {
     // particles from origin to position
     bv0 = mbb * ::math::vector_3d(0,-1.0f,0);
     bv1 = mbb * ::math::vector_3d(0,+1.0f,0);
 
-    glBegin(GL_QUADS);
+    gl.begin(GL_QUADS);
     for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-      glColor4fv(it->color);
+      gl.color4fv(it->color);
 
-      glTexCoord2fv(tiles[it->tile].tc[0]);
-      glVertex3fv(it->pos + bv0 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[0]);
+      gl.vertex3fv(it->pos + bv0 * it->size);
 
-      glTexCoord2fv(tiles[it->tile].tc[1]);
-      glVertex3fv(it->pos + bv1 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[1]);
+      gl.vertex3fv(it->pos + bv1 * it->size);
 
-      glTexCoord2fv(tiles[it->tile].tc[2]);
-      glVertex3fv(it->origin + bv1 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[2]);
+      gl.vertex3fv(it->origin + bv1 * it->size);
 
-      glTexCoord2fv(tiles[it->tile].tc[3]);
-      glVertex3fv(it->origin + bv0 * it->size);
+      gl.texCoord2fv(tiles[it->tile].tc[3]);
+      gl.vertex3fv(it->origin + bv0 * it->size);
     }
-    glEnd();
+    gl.end();
   }
   ModelUnhighlight();
-  glEnable(GL_LIGHTING);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glDepthMask(GL_TRUE);
-  glColor4f(1,1,1,1);
-//  glPopName();
+  gl.enable(GL_LIGHTING);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.depthMask(GL_TRUE);
+  gl.color4f(1,1,1,1);
+//  gl.popName();
 }
 
 namespace
@@ -906,38 +908,38 @@ void RibbonEmitter::draw()
 {
   /*
   // placeholders
-  glDisable(GL_TEXTURE_2D);
-  glDisable(GL_LIGHTING);
-  glColor4f(1,1,1,1);
-  glBegin(GL_TRIANGLES);
-  glVertex3fv(tpos);
-  glVertex3fv(tpos + ::math::vector_3d(1,1,0));
-  glVertex3fv(tpos + ::math::vector_3d(-1,1,0));
-  glEnd();
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_LIGHTING);
+  gl.disable(GL_TEXTURE_2D);
+  gl.disable(GL_LIGHTING);
+  gl.color4f(1,1,1,1);
+  gl.begin(GL_TRIANGLES);
+  gl.vertex3fv(tpos);
+  gl.vertex3fv(tpos + ::math::vector_3d(1,1,0));
+  gl.vertex3fv(tpos + ::math::vector_3d(-1,1,0));
+  gl.end();
+  gl.enable(GL_TEXTURE_2D);
+  gl.enable(GL_LIGHTING);
   */
 
-//  glPushName(texture);
+//  gl.pushName(texture);
   _texture->bind();
-  glEnable(GL_BLEND);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_ALPHA_TEST);
-  glDisable(GL_CULL_FACE);
-  glDepthMask(GL_FALSE);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-  glColor4fv(tcolor);
+  gl.enable(GL_BLEND);
+  gl.disable(GL_LIGHTING);
+  gl.disable(GL_ALPHA_TEST);
+  gl.disable(GL_CULL_FACE);
+  gl.depthMask(GL_FALSE);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
+  gl.color4fv(tcolor);
 
-  glBegin(GL_QUAD_STRIP);
+  gl.begin(GL_QUAD_STRIP);
   std::list<RibbonSegment>::iterator it = segs.begin();
   float l = 0;
   for (; it != segs.end(); ++it) {
         float u = l/length;
 
-    glTexCoord2f(u,0);
-    glVertex3fv(it->pos + tabove * it->up);
-    glTexCoord2f(u,1);
-    glVertex3fv(it->pos - tbelow * it->up);
+    gl.texCoord2f(u,0);
+    gl.vertex3fv(it->pos + tabove * it->up);
+    gl.texCoord2f(u,1);
+    gl.vertex3fv(it->pos - tbelow * it->up);
 
     l += it->len;
   }
@@ -945,17 +947,17 @@ void RibbonEmitter::draw()
   if (segs.size() > 1) {
     // last segment...?
     --it;
-    glTexCoord2f(1,0);
-    glVertex3fv(it->pos + tabove * it->up + (it->len/it->len0) * it->back);
-    glTexCoord2f(1,1);
-    glVertex3fv(it->pos - tbelow * it->up + (it->len/it->len0) * it->back);
+    gl.texCoord2f(1,0);
+    gl.vertex3fv(it->pos + tabove * it->up + (it->len/it->len0) * it->back);
+    gl.texCoord2f(1,1);
+    gl.vertex3fv(it->pos - tbelow * it->up + (it->len/it->len0) * it->back);
   }
-  glEnd();
+  gl.end();
 
-  glColor4f(1,1,1,1);
-  glEnable(GL_LIGHTING);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glDepthMask(GL_TRUE);
-//  glPopName();
+  gl.color4f(1,1,1,1);
+  gl.enable(GL_LIGHTING);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.depthMask(GL_TRUE);
+//  gl.popName();
 }
 

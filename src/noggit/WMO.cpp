@@ -18,6 +18,7 @@
 #include <math/vector_2d.h>
 
 #include <opengl/call_list.h>
+#include <opengl/context.hpp>
 #include <opengl/primitives.h>
 
 #include <noggit/async/loader.h>
@@ -248,9 +249,9 @@ void WMO::draw ( World* world
                ) const
 {
   if (draw_fog)
-    glEnable( GL_FOG );
+    gl.enable( GL_FOG );
   else
-    glDisable( GL_FOG );
+    gl.disable( GL_FOG );
 
   for (unsigned int i=0; i<nGroups; ++i)
   {
@@ -278,15 +279,15 @@ void WMO::draw ( World* world
 
   if( boundingbox )
   {
-    glDisable( GL_LIGHTING );
+    gl.disable( GL_LIGHTING );
 
-    glDisable( GL_COLOR_MATERIAL );
-    glActiveTexture( GL_TEXTURE0 );
-    glDisable( GL_TEXTURE_2D );
-    glActiveTexture( GL_TEXTURE1 );
-    glDisable( GL_TEXTURE_2D );
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    gl.disable( GL_COLOR_MATERIAL );
+    gl.activeTexture( GL_TEXTURE0 );
+    gl.disable( GL_TEXTURE_2D );
+    gl.activeTexture( GL_TEXTURE1 );
+    gl.disable( GL_TEXTURE_2D );
+    gl.enable( GL_BLEND );
+    gl.blendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     static const ::math::vector_4d white (1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -297,112 +298,112 @@ void WMO::draw ( World* world
       group_box.draw (white, 1.0f);
     }
 
-    /*glColor4fv( ::math::vector_4d( 1.0f, 0.0f, 0.0f, 1.0f ) );
-    glBegin( GL_LINES );
-      glVertex3f( 0.0f, 0.0f, 0.0f );
-      glVertex3f( header.BoundingBoxMax.x + header.BoundingBoxMax.x / 5.0f, 0.0f, 0.0f );
-    glEnd();
+    /*gl.color4fv( ::math::vector_4d( 1.0f, 0.0f, 0.0f, 1.0f ) );
+    gl.begin( GL_LINES );
+      gl.vertex3f( 0.0f, 0.0f, 0.0f );
+      gl.vertex3f( header.BoundingBoxMax.x + header.BoundingBoxMax.x / 5.0f, 0.0f, 0.0f );
+    gl.end();
 
-    glColor4fv( ::math::vector_4d( 0.0f, 1.0f, 0.0f, 1.0f ) );
-    glBegin( GL_LINES );
-      glVertex3f( 0.0f, 0.0f, 0.0f );
-      glVertex3f( 0.0f, header.BoundingBoxMax.z + header.BoundingBoxMax.z / 5.0f, 0.0f );
-    glEnd();
+    gl.color4fv( ::math::vector_4d( 0.0f, 1.0f, 0.0f, 1.0f ) );
+    gl.begin( GL_LINES );
+      gl.vertex3f( 0.0f, 0.0f, 0.0f );
+      gl.vertex3f( 0.0f, header.BoundingBoxMax.z + header.BoundingBoxMax.z / 5.0f, 0.0f );
+    gl.end();
 
-    glColor4fv( ::math::vector_4d( 0.0f, 0.0f, 1.0f, 1.0f ) );
-    glBegin( GL_LINES );
-      glVertex3f( 0.0f, 0.0f, 0.0f );
-      glVertex3f( 0.0f, 0.0f, header.BoundingBoxMax.y + header.BoundingBoxMax.y / 5.0f );
-    glEnd();*/
+    gl.color4fv( ::math::vector_4d( 0.0f, 0.0f, 1.0f, 1.0f ) );
+    gl.begin( GL_LINES );
+      gl.vertex3f( 0.0f, 0.0f, 0.0f );
+      gl.vertex3f( 0.0f, 0.0f, header.BoundingBoxMax.y + header.BoundingBoxMax.y / 5.0f );
+    gl.end();*/
 
-    glActiveTexture( GL_TEXTURE1 );
-    glDisable( GL_TEXTURE_2D );
-    glActiveTexture( GL_TEXTURE0 );
-    glEnable( GL_TEXTURE_2D );
+    gl.activeTexture( GL_TEXTURE1 );
+    gl.disable( GL_TEXTURE_2D );
+    gl.activeTexture( GL_TEXTURE0 );
+    gl.enable( GL_TEXTURE_2D );
 
-    glEnable( GL_LIGHTING );
+    gl.enable( GL_LIGHTING );
 
   }
 
 /*  {
     // draw boundingboxe and axis
     // Turn light off and highlight the following
-    glDisable(GL_LIGHTING);
-    glDisable(GL_COLOR_MATERIAL);
-    glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable (GL_LINE_SMOOTH);
-    glLineWidth(1.0);
-    glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+    gl.disable(GL_LIGHTING);
+    gl.disable(GL_COLOR_MATERIAL);
+    gl.activeTexture(GL_TEXTURE0);
+    gl.disable(GL_TEXTURE_2D);
+    gl.activeTexture(GL_TEXTURE1);
+    gl.disable(GL_TEXTURE_2D);
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.enable (GL_LINE_SMOOTH);
+    gl.lineWidth(1.0);
+    gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-    glColor4f( 1, 1, 1, 1 );
+    gl.color4f( 1, 1, 1, 1 );
 
-    glLineWidth(1.0);
-    glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+    gl.lineWidth(1.0);
+    gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
     for (int i=0; i<nGroups; ++i)
     {
       WMOGroup &header = groups[i];
       /// Bounding box
-      glColor4f( 1, 1, 1, 1 );
-      glBegin( GL_LINE_STRIP );
-        glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
-        glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
-        glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
-        glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
-        glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
-        glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
-        glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
-        glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
-        glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
-        glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
-      glEnd();
+      gl.color4f( 1, 1, 1, 1 );
+      gl.begin( GL_LINE_STRIP );
+        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
+        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
+        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
+        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
+        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
+        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
+        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
+        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
+        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
+        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
+      gl.end();
 
-      glBegin( GL_LINES );
-        glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
-        glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
-      glEnd();
-      glBegin( GL_LINES );
-        glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
-        glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
-      glEnd();
-      glBegin( GL_LINES );
-        glVertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
-        glVertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
-      glEnd();
+      gl.begin( GL_LINES );
+        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
+        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
+      gl.end();
+      gl.begin( GL_LINES );
+        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
+        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
+      gl.end();
+      gl.begin( GL_LINES );
+        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
+        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
+      gl.end();
 
       // draw axis
-      glColor4f( 1.0f, 0.0f, 0.0f, 1.0f );
-      glBegin( GL_LINES );
-        glVertex3f( 0.0f, 0.0f, 0.0f );
-        glVertex3f( header.BoundingBoxMax.x + 6.0f, 0.0f, 0.0f );
-      glEnd();
+      gl.color4f( 1.0f, 0.0f, 0.0f, 1.0f );
+      gl.begin( GL_LINES );
+        gl.vertex3f( 0.0f, 0.0f, 0.0f );
+        gl.vertex3f( header.BoundingBoxMax.x + 6.0f, 0.0f, 0.0f );
+      gl.end();
 
 
-      glColor4f( 0.0f, 1.0f, 0.0f, 1.0f );
-      glBegin( GL_LINES );
-        glVertex3f( 0.0f, 0.0f, 0.0f );
-        glVertex3f( 0.0f, header.BoundingBoxMax.y + 6.0f, 0.0f );
-      glEnd();
+      gl.color4f( 0.0f, 1.0f, 0.0f, 1.0f );
+      gl.begin( GL_LINES );
+        gl.vertex3f( 0.0f, 0.0f, 0.0f );
+        gl.vertex3f( 0.0f, header.BoundingBoxMax.y + 6.0f, 0.0f );
+      gl.end();
 
-      glColor4f( 0.0f, 0.0f, 1.0f, 1.0f );
-      glBegin( GL_LINES );
-        glVertex3f( 0.0f, 0.0f, 0.0f );
-        glVertex3f( 0.0f, 0.0f, header.BoundingBoxMax.x + 6.0f );
-      glEnd();
+      gl.color4f( 0.0f, 0.0f, 1.0f, 1.0f );
+      gl.begin( GL_LINES );
+        gl.vertex3f( 0.0f, 0.0f, 0.0f );
+        gl.vertex3f( 0.0f, 0.0f, header.BoundingBoxMax.x + 6.0f );
+      gl.end();
 
 
 
     }
     // Back to normal light rendering
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_LIGHTING);
+    gl.activeTexture(GL_TEXTURE1);
+    gl.disable(GL_TEXTURE_2D);
+    gl.activeTexture(GL_TEXTURE0);
+    gl.enable(GL_TEXTURE_2D);
+    gl.enable(GL_LIGHTING);
   } // end bounding  boxes.*/
 
   if(false && groupboxes)
@@ -410,70 +411,70 @@ void WMO::draw ( World* world
     //WIP STEFF
     // draw group boundingboxes
     // Turn light off and highlight the following
-    glDisable(GL_LIGHTING);
-    glDisable(GL_COLOR_MATERIAL);
-    glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable (GL_LINE_SMOOTH);
-    glLineWidth(1.0);
-    glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+    gl.disable(GL_LIGHTING);
+    gl.disable(GL_COLOR_MATERIAL);
+    gl.activeTexture(GL_TEXTURE0);
+    gl.disable(GL_TEXTURE_2D);
+    gl.activeTexture(GL_TEXTURE1);
+    gl.disable(GL_TEXTURE_2D);
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.enable (GL_LINE_SMOOTH);
+    gl.lineWidth(1.0);
+    gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-    glColor4f( 1, 1, 0, 1 );
+    gl.color4f( 1, 1, 0, 1 );
 
-    glLineWidth(1.0);
-    glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+    gl.lineWidth(1.0);
+    gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
     for (unsigned int i=0; i<nGroups; ++i)
     {
       WMOGroup &header = groups[i];
-      glBegin( GL_LINE_STRIP );
+      gl.begin( GL_LINE_STRIP );
       //A
-        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
+        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
       //C
-        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
+        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
       //D
-        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
+        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
       //G
-        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
+        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
       //H
-        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
+        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
       //B
-        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
+        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
       //A
-        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
+        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
       //E
-        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
+        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
       //F
-        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
+        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
       //C
-        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
-      glEnd();
+        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
+      gl.end();
 
-      glBegin( GL_LINES );
+      gl.begin( GL_LINES );
       // F G
-        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
-        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
-      glEnd();
-      glBegin( GL_LINES );
+        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
+        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
+      gl.end();
+      gl.begin( GL_LINES );
       // B D
-        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
-        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
-      glEnd();
-      glBegin( GL_LINES );
+        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
+        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
+      gl.end();
+      gl.begin( GL_LINES );
       // E H
-        glVertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
-        glVertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
-      glEnd();
+        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
+        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
+      gl.end();
     }
     // Back to normal light rendering
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_LIGHTING);
+    gl.activeTexture(GL_TEXTURE1);
+    gl.disable(GL_TEXTURE_2D);
+    gl.activeTexture(GL_TEXTURE0);
+    gl.enable(GL_TEXTURE_2D);
+    gl.enable(GL_LIGHTING);
   } // end drow groupe boxes.
 
 
@@ -482,30 +483,30 @@ void WMO::draw ( World* world
 
   /*
   // draw portal relations
-  glBegin(GL_LINES);
+  gl.begin(GL_LINES);
   for (size_t i=0; i<prs.size(); ++i) {
     WMOPR &pr = prs[i];
     WMOPV &pv = pvs[pr.portal];
-    if (pr.dir>0) glColor4f(1,0,0,1);
-    else glColor4f(0,0,1,1);
+    if (pr.dir>0) gl.color4f(1,0,0,1);
+    else gl.color4f(0,0,1,1);
     ::math::vector_3d pc = (pv.a+pv.b+pv.c+pv.d)*0.25f;
     ::math::vector_3d gc = (groups[pr.group].b1 + groups[pr.group].b2)*0.5f;
-    glVertex3fv(pc);
-    glVertex3fv(gc);
+    gl.vertex3fv(pc);
+    gl.vertex3fv(gc);
   }
-  glEnd();
-  glColor4f(1,1,1,1);
+  gl.end();
+  gl.color4f(1,1,1,1);
   // draw portals
   for (int i=0; i<nP; ++i) {
-    glBegin(GL_LINE_STRIP);
-    glVertex3fv(pvs[i].d);
-    glVertex3fv(pvs[i].c);
-    glVertex3fv(pvs[i].b);
-    glVertex3fv(pvs[i].a);
-    glEnd();
+    gl.begin(GL_LINE_STRIP);
+    gl.vertex3fv(pvs[i].d);
+    gl.vertex3fv(pvs[i].c);
+    gl.vertex3fv(pvs[i].b);
+    gl.vertex3fv(pvs[i].a);
+    gl.end();
   }
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_LIGHTING);
+  gl.enable(GL_TEXTURE_2D);
+  gl.enable(GL_LIGHTING);
   */
 }
 
@@ -550,20 +551,20 @@ bool WMO::drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d 
     // We need to clear the depth buffer, because the skybox model can (will?)
     // require it *. This is inefficient - is there a better way to do this?
     // * planets in front of "space" in Caverns of Time
-    //glClear(GL_DEPTH_BUFFER_BIT);
+    //gl.clear(GL_DEPTH_BUFFER_BIT);
 
     // update: skybox models seem to have an explicit renderop ordering!
     // that saves us the depth buffer clear and the depth testing, too
 
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glPushMatrix();
-    glTranslatef(pCamera.x(), pCamera.y(), pCamera.z());
+    gl.disable(GL_CULL_FACE);
+    gl.disable(GL_DEPTH_TEST);
+    gl.pushMatrix();
+    gl.translatef(pCamera.x(), pCamera.y(), pCamera.z());
     const float sc = 2.0f;
-    glScalef(sc,sc,sc);
+    gl.scalef(sc,sc,sc);
     skybox.get()->draw (world, clock() / CLOCKS_PER_SEC);
-    glPopMatrix();
-    glEnable(GL_DEPTH_TEST);
+    gl.popMatrix();
+    gl.enable(GL_DEPTH_TEST);
 
     return true;
   }
@@ -575,14 +576,14 @@ bool WMO::drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d 
 void WMO::drawPortals()
 {
   // not used ;)
-  glBegin(GL_QUADS);
+  gl.begin(GL_QUADS);
   for (int i=0; i<nP; ++i) {
-    glVertex3fv(pvs[i].d);
-    glVertex3fv(pvs[i].c);
-    glVertex3fv(pvs[i].b);
-    glVertex3fv(pvs[i].a);
+    gl.vertex3fv(pvs[i].d);
+    gl.vertex3fv(pvs[i].c);
+    gl.vertex3fv(pvs[i].b);
+    gl.vertex3fv(pvs[i].a);
   }
-  glEnd();
+  gl.end();
 }
 */
 
@@ -624,11 +625,11 @@ void WMOLight::setup(opengl::light light)
   GLfloat LightAmbient[] = {0, 0, 0, 1.0f};
   GLfloat LightPosition[] = {pos.x(), pos.y(), pos.z(), 0.0f};
 
-  glLightfv(light, GL_AMBIENT, LightAmbient);
-  glLightfv(light, GL_DIFFUSE, fcolor);
-  glLightfv(light, GL_POSITION,LightPosition);
+  gl.lightfv(light, GL_AMBIENT, LightAmbient);
+  gl.lightfv(light, GL_DIFFUSE, fcolor);
+  gl.lightfv(light, GL_POSITION,LightPosition);
 
-  glEnable(light);
+  gl.enable(light);
 }
 
 void WMOLight::setupOnce(opengl::light light, ::math::vector_3d dir, ::math::vector_3d lcol)
@@ -641,11 +642,11 @@ void WMOLight::setupOnce(opengl::light light, ::math::vector_3d dir, ::math::vec
   ::math::vector_4d diffuse (lcol, 1);
   //::math::vector_4d diffuse (0.439216f, 0.266667f, 0, 1);
 
-  glLightfv(light, GL_AMBIENT, ambient);
-  glLightfv(light, GL_DIFFUSE, diffuse);
-  glLightfv(light, GL_POSITION,position);
+  gl.lightfv(light, GL_AMBIENT, ambient);
+  gl.lightfv(light, GL_DIFFUSE, diffuse);
+  gl.lightfv(light, GL_POSITION,position);
 
-  glEnable(light);
+  gl.enable(light);
 }
 
 
@@ -685,13 +686,13 @@ namespace
 {
   void setGLColor(unsigned int col)
   {
-    //glColor4ubv((GLubyte*)(&col));
+    //gl.color4ubv((GLubyte*)(&col));
     GLubyte r,g,b,a;
     a = (col & 0xFF000000) >> 24;
     r = (col & 0x00FF0000) >> 16;
     g = (col & 0x0000FF00) >> 8;
     b = (col & 0x000000FF);
-      glColor4ub(r,g,b,1);
+      gl.color4ub(r,g,b,1);
   }
 
   ::math::vector_4d colorFromInt(unsigned int col) {
@@ -841,17 +842,17 @@ void WMOGroup::initDisplayList()
 
   initLighting(nLR,useLights);
 
-  //dl = glGenLists(1);
-  //glNewList(dl, GL_COMPILE);
-  //glDisable(GL_BLEND);
-  //glColor4f(1,1,1,1);
+  //dl = gl.genLists(1);
+  //gl.newList(dl, GL_COMPILE);
+  //gl.disable(GL_BLEND);
+  //gl.color4f(1,1,1,1);
 
   /*
   float xr=0,xg=0,xb=0;
   if (flags & 0x0040) xr = 1;
   if (flags & 0x2000) xg = 1;
   if (flags & 0x8000) xb = 1;
-  glColor4f(xr,xg,xb,1);
+  gl.color4f(xr,xg,xb,1);
   */
 
   // generate lists for each batch individually instead
@@ -877,49 +878,49 @@ void WMOGroup::initDisplayList()
     bool atest = (mat->transparent) != 0;
 
     if (atest) {
-      glEnable(GL_ALPHA_TEST);
+      gl.enable(GL_ALPHA_TEST);
       float aval = 0;
             if (mat->flags & 0x80) aval = 0.3f;
       if (mat->flags & 0x01) aval = 0.0f;
-      glAlphaFunc(GL_GREATER, aval);
+      gl.alphaFunc(GL_GREATER, aval);
     }
 
-    if (mat->flags & 0x04) glDisable(GL_CULL_FACE);
-    else glEnable(GL_CULL_FACE);
+    if (mat->flags & 0x04) gl.disable(GL_CULL_FACE);
+    else gl.enable(GL_CULL_FACE);
 
     if (spec_shader) {
-      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorFromInt(mat->col2));
+      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorFromInt(mat->col2));
     } else {
       ::math::vector_4d nospec(0,0,0,1);
-      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
+      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
     }
 
     if (overbright) {
       //! \todo  use emissive color from the WMO Material instead of 1,1,1,1
       GLfloat em[4] = {1,1,1,1};
-      glMaterialfv(GL_FRONT, GL_EMISSION, em);
+      gl.materialfv(GL_FRONT, GL_EMISSION, em);
     }
 
     // render
-    glBegin(GL_TRIANGLES);
+    gl.begin(GL_TRIANGLES);
     for (int t=0, i=batch->indexStart; t<batch->indexCount; t++,++i) {
       int a = indices[i];
       if (indoor && hascv) {
               setGLColor(cv[a]);
       }
-      glNormal3f(normals[a].x(), normals[a].z(), -normals[a].y());
-      glTexCoord2fv(texcoords[a]);
-      glVertex3f(vertices[a].x(), vertices[a].z(), -vertices[a].y());
+      gl.normal3f(normals[a].x(), normals[a].z(), -normals[a].y());
+      gl.texCoord2fv(texcoords[a]);
+      gl.vertex3f(vertices[a].x(), vertices[a].z(), -vertices[a].y());
     }
-    glEnd();
+    gl.end();
 
     if (overbright) {
       GLfloat em[4] = {0,0,0,1};
-      glMaterialfv(GL_FRONT, GL_EMISSION, em);
+      gl.materialfv(GL_FRONT, GL_EMISSION, em);
     }
 
     if (atest) {
-      glDisable(GL_ALPHA_TEST);
+      gl.disable(GL_ALPHA_TEST);
     }
 
     _lists[b].first->end_recording();
@@ -992,7 +993,7 @@ void WMOGroup::draw ( World* world
 
   if (hascv)
   {
-    glDisable(GL_LIGHTING);
+    gl.disable(GL_LIGHTING);
     world->outdoorLights(false);
   }
   else if (hasSkies)
@@ -1001,13 +1002,13 @@ void WMOGroup::draw ( World* world
   }
   else
   {
-    glDisable(GL_LIGHTING);
+    gl.disable(GL_LIGHTING);
   }
 
 
-  //glCallList(dl);
-  glDisable(GL_BLEND);
-  glColor4f(1,1,1,1);
+  //gl.callList(dl);
+  gl.disable(GL_BLEND);
+  gl.color4f(1,1,1,1);
   for (size_t i=0; i<nBatches; ++i)
   {
     if (wmoShader)
@@ -1022,11 +1023,11 @@ void WMOGroup::draw ( World* world
     }
   }
 
-  glColor4f(1,1,1,1);
-  glEnable(GL_CULL_FACE);
+  gl.color4f(1,1,1,1);
+  gl.enable(GL_CULL_FACE);
 
   if (hascv)
-      glEnable(GL_LIGHTING);
+      gl.enable(GL_LIGHTING);
 
 
 }
@@ -1060,11 +1061,11 @@ void WMOGroup::drawDoodads ( World* world
   if (flags & 0x0040) xr = 1;
   //if (flags & 0x0008) xg = 1;
   if (flags & 0x8000) xb = 1;
-  glColor4f(xr,xg,xb,1);
+  gl.color4f(xr,xg,xb,1);
   */
 
   // draw doodads
-  glColor4f(1,1,1,1);
+  gl.color4f(1,1,1,1);
   for (int i=0; i<nDoodads; ++i) {
     int16_t dd = ddr[i];
     if( ! ( wmo->doodadsets.size() < doodadset ) )
@@ -1083,9 +1084,9 @@ void WMOGroup::drawDoodads ( World* world
       }
   }
 
-  glDisable(GL_LIGHT2);
+  gl.disable(GL_LIGHT2);
 
-  glColor4f(1,1,1,1);
+  gl.color4f(1,1,1,1);
 
 }
 
@@ -1105,11 +1106,11 @@ void WMOGroup::drawDoodadsSelect ( unsigned int doodadset
   if (flags & 0x0040) xr = 1;
   //if (flags & 0x0008) xg = 1;
   if (flags & 0x8000) xb = 1;
-  glColor4f(xr,xg,xb,1);
+  gl.color4f(xr,xg,xb,1);
   */
 
   // draw doodads
-  glColor4f(1,1,1,1);
+  gl.color4f(1,1,1,1);
   for (int i=0; i<nDoodads; ++i) {
     int16_t dd = ddr[i];
     if( ! ( wmo->doodadsets.size() < doodadset ) )
@@ -1127,9 +1128,9 @@ void WMOGroup::drawDoodadsSelect ( unsigned int doodadset
       }
   }
 
-  glDisable(GL_LIGHT2);
+  gl.disable(GL_LIGHT2);
 
-  glColor4f(1,1,1,1);
+  gl.color4f(1,1,1,1);
 
 }
 
@@ -1147,17 +1148,17 @@ void WMOGroup::drawLiquid ( World* world
     } else {
       //! \todo  setup some kind of indoor lighting... ?
       world->outdoorLights(false);
-      glEnable(GL_LIGHT2);
-      glLightfv(GL_LIGHT2, GL_AMBIENT, ::math::vector_4d(0.1f,0.1f,0.1f,1));
-      glLightfv(GL_LIGHT2, GL_DIFFUSE, ::math::vector_4d(0.8f,0.8f,0.8f,1));
-      glLightfv(GL_LIGHT2, GL_POSITION, ::math::vector_4d(0,1,0,0));
+      gl.enable(GL_LIGHT2);
+      gl.lightfv(GL_LIGHT2, GL_AMBIENT, ::math::vector_4d(0.1f,0.1f,0.1f,1));
+      gl.lightfv(GL_LIGHT2, GL_DIFFUSE, ::math::vector_4d(0.8f,0.8f,0.8f,1));
+      gl.lightfv(GL_LIGHT2, GL_POSITION, ::math::vector_4d(0,1,0,0));
     }
-    glDisable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    glDepthMask(GL_TRUE);
-    glColor4f(1,1,1,1);
+    gl.disable(GL_BLEND);
+    gl.disable(GL_ALPHA_TEST);
+    gl.depthMask(GL_TRUE);
+    gl.color4f(1,1,1,1);
     lq->draw (world->skies.get());
-    glDisable(GL_LIGHT2);
+    gl.disable(GL_LIGHT2);
   }
 }
 
@@ -1180,8 +1181,8 @@ void WMOGroup::setupFog ( World* world
 
 WMOGroup::~WMOGroup()
 {
-  //if (dl) glDeleteLists(dl, 1);
-  //if (dl_light) glDeleteLists(dl_light, 1);
+  //if (dl) gl.deleteLists(dl, 1);
+  //if (dl_light) gl.deleteLists(dl_light, 1);
   for( std::vector< std::pair<opengl::call_list*, bool> >::iterator it = _lists.begin(); it != _lists.end(); ++it )
   {
     delete it->first;
@@ -1210,15 +1211,15 @@ void WMOFog::init(noggit::mpq::file* f)
 void WMOFog::setup()
 {
   /*if (world->drawfog) {
-    glFogfv(GL_FOG_COLOR, color);
-    glFogf(GL_FOG_START, fogstart);
-    glFogf(GL_FOG_END, fogend);
+    gl.fogfv(GL_FOG_COLOR, color);
+    gl.fogf(GL_FOG_START, fogstart);
+    gl.fogf(GL_FOG_END, fogend);
 
-    glEnable(GL_FOG);
+    gl.enable(GL_FOG);
   } else {
-    glDisable(GL_FOG);
+    gl.disable(GL_FOG);
   }*/
-    glDisable(GL_FOG);
+    gl.disable(GL_FOG);
 }
 
 void WMO::finish_loading()

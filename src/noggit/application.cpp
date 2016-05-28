@@ -10,6 +10,7 @@
 
 #include <stdexcept>
 
+#include <opengl/context.hpp>
 #include <opengl/types.h>
 
 #include <QDir>
@@ -151,9 +152,11 @@ namespace noggit
     surface.create();
     context.makeCurrent (&surface);
 
-    LogDebug << "GL: Version: " << context.functions()->glGetString (GL_VERSION) << std::endl;
-    LogDebug << "GL: Vendor: " << context.functions()->glGetString (GL_VENDOR) << std::endl;
-    LogDebug << "GL: Renderer: " << context.functions()->glGetString (GL_RENDERER) << std::endl;
+    opengl::context::scoped_setter const _ (::gl, &context);
+
+    LogDebug << "GL: Version: " << gl.getString (GL_VERSION) << std::endl;
+    LogDebug << "GL: Vendor: " << gl.getString (GL_VENDOR) << std::endl;
+    LogDebug << "GL: Renderer: " << gl.getString (GL_RENDERER) << std::endl;
   }
 
   QVariant application::setting ( const QString& key

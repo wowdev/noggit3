@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <opengl/context.hpp>
 #include <opengl/texture.h>
 
 namespace opengl
@@ -15,15 +16,15 @@ namespace opengl
     {
     public:
       bool_setter()
-        : _was_enabled (glIsEnabled (cap) == GL_TRUE)
+        : _was_enabled (gl.isEnabled (cap) == GL_TRUE)
       {
         if (value == GL_TRUE)
         {
-          glEnable (cap);
+          gl.enable (cap);
         }
         else
         {
-          glDisable (cap);
+          gl.disable (cap);
         }
       }
 
@@ -31,11 +32,11 @@ namespace opengl
       {
         if (_was_enabled == GL_TRUE)
         {
-          glEnable (cap);
+          gl.enable (cap);
         }
         else
         {
-          glDisable (cap);
+          gl.disable (cap);
         }
       }
 
@@ -51,7 +52,7 @@ namespace opengl
         : _was_enabled (false)
       {
         texture::set_active_texture (texture_number);
-        _was_enabled = (glIsEnabled (GL_TEXTURE_2D) == GL_TRUE);
+        _was_enabled = (gl.isEnabled (GL_TEXTURE_2D) == GL_TRUE);
         if (value == GL_TRUE)
         {
           texture::enable_texture();
@@ -84,11 +85,11 @@ namespace opengl
     public:
       matrix_pusher()
       {
-        glPushMatrix();
+        gl.pushMatrix();
       }
       ~matrix_pusher()
       {
-        glPopMatrix();
+        gl.popMatrix();
       }
     };
 
@@ -98,12 +99,12 @@ namespace opengl
     public:
       matrix_mode_setter()
       {
-        glGetIntegerv (GL_MATRIX_MODE, &_old_mode);
-        glMatrixMode (matrix_mode);
+        gl.getIntegerv (GL_MATRIX_MODE, &_old_mode);
+        gl.matrixMode (matrix_mode);
       }
       ~matrix_mode_setter()
       {
-        glMatrixMode (_old_mode);
+        gl.matrixMode (_old_mode);
       }
 
     private:
@@ -115,11 +116,11 @@ namespace opengl
     public:
       name_pusher (GLuint name_id)
       {
-        glPushName (name_id);
+        gl.pushName (name_id);
       }
       ~name_pusher()
       {
-        glPopName();
+        gl.popName();
       }
     };
   }

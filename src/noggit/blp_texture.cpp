@@ -8,6 +8,7 @@
 
 #include <noggit/mpq/file.h>
 
+#include <opengl/context.hpp>
 #include <opengl/scoped.h>
 
 #include <QGLPixelBuffer>
@@ -57,11 +58,11 @@ namespace noggit
       from_compressed_data(header, data);
     }
 
-    glTexParameteri ( GL_TEXTURE_2D
+    gl.texParameteri ( GL_TEXTURE_2D
                     , GL_TEXTURE_MIN_FILTER
                     , GL_LINEAR_MIPMAP_LINEAR
                     );
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl.texParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   }
 
   const QString& blp_texture::filename()
@@ -158,7 +159,7 @@ namespace noggit
         }
       }
 
-      glTexImage2D ( GL_TEXTURE_2D
+      gl.texImage2D ( GL_TEXTURE_2D
                    , mipmap_level
                    , GL_RGBA8
                    , width
@@ -216,7 +217,7 @@ namespace noggit
         break;
       }
 
-      glCompressedTexImage2D ( GL_TEXTURE_2D
+      gl.compressedTexImage2D ( GL_TEXTURE_2D
                              , mipmap_level
                              , format
                              , width
@@ -236,29 +237,37 @@ namespace noggit
                                , const int& height
                                )
   {
-    QGLPixelBuffer pixel_buffer (width, height);
-    pixel_buffer.makeCurrent();
+    QOpenGLContext context;
+    context.create();
+    QOffscreenSurface surface;
+    surface.create();
+    context.makeCurrent (&surface);
 
-    glViewport (0.0f, 0.0f, width, height);
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho (0.0f, width, height, 0.0f, 1.0f, -1.0f);
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity();
+    opengl::context::scoped_setter const _ (::gl, &context);
+
+    QOpenGLFramebufferObject pixel_buffer (width, height);
+    pixel_buffer.bind();
+
+    gl.viewport (0.0f, 0.0f, width, height);
+    gl.matrixMode (GL_PROJECTION);
+    gl.loadIdentity();
+    gl.ortho (0.0f, width, height, 0.0f, 1.0f, -1.0f);
+    gl.matrixMode (GL_MODELVIEW);
+    gl.loadIdentity();
 
     opengl::scoped::texture_setter<0, GL_TRUE> const texture0;
     noggit::blp_texture const texture (blp_filename);
 
-    glBegin (GL_TRIANGLE_FAN);
-    glTexCoord2f (0.0f, 0.0f);
-    glVertex2f (0.0f, 0.0f);
-    glTexCoord2f (1.0f, 0.0f);
-    glVertex2f (width, 0.0f);
-    glTexCoord2f (1.0f, 1.0f);
-    glVertex2f (width, height);
-    glTexCoord2f (0.0f, 1.0f);
-    glVertex2f (0.0f, height);
-    glEnd();
+    gl.begin (GL_TRIANGLE_FAN);
+    gl.texCoord2f (0.0f, 0.0f);
+    gl.vertex2f (0.0f, 0.0f);
+    gl.texCoord2f (1.0f, 0.0f);
+    gl.vertex2f (width, 0.0f);
+    gl.texCoord2f (1.0f, 1.0f);
+    gl.vertex2f (width, height);
+    gl.texCoord2f (0.0f, 1.0f);
+    gl.vertex2f (0.0f, height);
+    gl.end();
 
     QPixmap pixmap (QPixmap::fromImage (pixel_buffer.toImage()));
 
