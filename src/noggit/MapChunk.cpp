@@ -799,21 +799,21 @@ void MapChunk::drawLines (bool draw_hole_lines) const
 
 void MapChunk::drawContour() const
 {
-  gl.color4f(1,1,1,1);
-  gl.activeTexture(GL_TEXTURE0);
-  gl.enable(GL_TEXTURE_2D);
-  gl.enable(GL_BLEND);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.disable(GL_ALPHA_TEST);
-  gl.bindTexture(GL_TEXTURE_2D, _contour_texture);
+  opengl::scoped::texture_setter<0, GL_TRUE> const texture_0;
+  gl.bindTexture (GL_TEXTURE_2D, _contour_texture);
 
-  gl.enable(GL_TEXTURE_GEN_S);
-  gl.texGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-  gl.texGenfv(GL_S,GL_OBJECT_PLANE,_contour_coord_gen);
+  opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
+  gl.blendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  drawPass(0);
-  gl.disable(GL_TEXTURE_2D);
-  gl.disable(GL_TEXTURE_GEN_S);
+  opengl::scoped::bool_setter<GL_ALPHA_TEST, GL_TRUE> const alpha_test;
+
+  opengl::scoped::bool_setter<GL_TEXTURE_GEN_S, GL_TRUE> const texture_gen_s;
+  gl.texGeni (GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+  gl.texGenfv (GL_S, GL_OBJECT_PLANE, _contour_coord_gen);
+
+  gl.color4f (1.0f, 1.0f, 1.0f, 1.0f);
+
+  drawPass (0);
 }
 
 bool MapChunk::is_visible ( const float& cull_distance
@@ -938,21 +938,16 @@ void MapChunk::draw ( bool draw_terrain_height_contour
     const int selected_polygon
       (noggit::selection::selected_polygon (*selected_item));
 
-    gl.color4f( 1.0f, 1.0f, 0.0f, 1.0f );
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull_face;
+    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const depth_test;
+    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
-    opengl::scoped::matrix_pusher const matrix_pusher;
-
-    gl.disable( GL_CULL_FACE );
-    gl.depthMask( false );
-    gl.disable( GL_DEPTH_TEST );
     gl.begin( GL_TRIANGLES );
+    gl.color4f( 1.0f, 1.0f, 0.0f, 1.0f );
     gl.vertex3fv( mVertices[mapstrip2[selected_polygon + 0]] );
     gl.vertex3fv( mVertices[mapstrip2[selected_polygon + 1]] );
     gl.vertex3fv( mVertices[mapstrip2[selected_polygon + 2]] );
     gl.end();
-    gl.enable( GL_CULL_FACE );
-    gl.enable( GL_DEPTH_TEST );
-    gl.depthMask( true );
   }
 
 
@@ -998,22 +993,19 @@ void MapChunk::drawSelect()
     nameID = _world->selection_names().add( this );
 
   //! \todo Use backface culling again? Maybe this adds problems. Idk.
-  //gl.disable( GL_CULL_FACE );
-  gl.pushName( nameID );
+  // opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull_face;
+
+  opengl::scoped::name_pusher const name_pusher (nameID);
 
   for( int i = 0; i < stripsize2 - 2; ++i )
   {
-    gl.pushName( i );
+    opengl::scoped::name_pusher const inner_name_pusher (i);
     gl.begin( GL_TRIANGLES );
     gl.vertex3fv( mVertices[mapstrip2[i]] );
     gl.vertex3fv( mVertices[mapstrip2[i + 1]] );
     gl.vertex3fv( mVertices[mapstrip2[i + 2]] );
     gl.end();
-    gl.popName();
   }
-
-  gl.popName();
-  //gl.enable( GL_CULL_FACE );
 }
 
 void MapChunk::getSelectionCoord ( const int& selected_polygon
