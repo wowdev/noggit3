@@ -1,2 +1,4 @@
 syntax: glob
 CMakeLists.txt.user
+build
+.vscode
