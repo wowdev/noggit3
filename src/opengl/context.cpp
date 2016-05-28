@@ -29,6 +29,12 @@ namespace opengl
   {
     std::size_t inside_gl_begin_end = 0;
 
+    template<typename Extension> struct extension_traits;
+    template<> struct extension_traits<QOpenGLExtension_ARB_vertex_program>
+    {
+      static constexpr char const* const name = "GL_ARB_vertex_program";
+    };
+
     struct verify_context_and_check_for_gl_errors
     {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
@@ -66,11 +72,11 @@ namespace opengl
         return f;
       }
       template<typename Extension>
-        std::unique_ptr<Extension> extension_functions (char const* name) const
+        std::unique_ptr<Extension> extension_functions() const
       {
-        if (!_current_context->hasExtension (name))
+        if (!_current_context->hasExtension (extension_traits<Extension>::name))
         {
-          throw std::runtime_error (_function + ": requires OpenGL extension " + name);
+          throw std::runtime_error (_function + ": requires OpenGL extension " + extension_traits<Extension>::name);
         }
         std::unique_ptr<Extension> functions (new Extension());
         functions->initializeOpenGLFunctions();
@@ -579,17 +585,17 @@ namespace opengl
   void context::genPrograms (GLsizei count, GLuint* programs)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, FUNCTION_NAME);
-    return _.extension_functions<QOpenGLExtension_ARB_vertex_program> ("ARB_vertex_program")->glGenProgramsARB (count, programs);
+    return _.extension_functions<QOpenGLExtension_ARB_vertex_program>()->glGenProgramsARB (count, programs);
   }
   void context::deletePrograms (GLsizei count, GLuint* programs)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, FUNCTION_NAME);
-    return _.extension_functions<QOpenGLExtension_ARB_vertex_program> ("ARB_vertex_program")->glDeleteProgramsARB (count, programs);
+    return _.extension_functions<QOpenGLExtension_ARB_vertex_program>()->glDeleteProgramsARB (count, programs);
   }
   void context::bindProgram (GLenum target, GLuint program)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, FUNCTION_NAME);
-    return _.extension_functions<QOpenGLExtension_ARB_vertex_program> ("ARB_vertex_program")->glBindProgramARB (target, program);
+    return _.extension_functions<QOpenGLExtension_ARB_vertex_program>()->glBindProgramARB (target, program);
   }
   void context::programString (GLenum target, GLenum format, GLsizei len, GLvoid const* pointer)
   {
@@ -603,7 +609,7 @@ namespace opengl
           return " at " + std::to_string (error_position) + ": " + reinterpret_cast<char const*> (getString (GL_PROGRAM_ERROR_STRING_ARB));
         }
       );
-    return _.extension_functions<QOpenGLExtension_ARB_vertex_program> ("ARB_vertex_program")->glProgramStringARB (target, format, len, pointer);
+    return _.extension_functions<QOpenGLExtension_ARB_vertex_program>()->glProgramStringARB (target, format, len, pointer);
   }
   void context::getProgramiv (GLuint program, GLenum pname, GLint* params)
   {
@@ -613,7 +619,7 @@ namespace opengl
   void context::programLocalParameter4f (GLenum target, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, FUNCTION_NAME);
-    return _.extension_functions<QOpenGLExtension_ARB_vertex_program> ("ARB_vertex_program")->glProgramLocalParameter4fARB (target, index, x, y, z, w);
+    return _.extension_functions<QOpenGLExtension_ARB_vertex_program>()->glProgramLocalParameter4fARB (target, index, x, y, z, w);
   }
 
   void context::initNames()
