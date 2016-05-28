@@ -1,6 +1,4 @@
-// case_insensitive.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
-// Bernd Lörwald <bloerwald+noggit@googlemail.com>
-// Benedikt Kleiner <benedikt.kleiner@googlemail.com>
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <helper/qt/case_insensitive.h>
 

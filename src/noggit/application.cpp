@@ -1,10 +1,4 @@
-// application.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
-// Beket <snipbeket@mail.ru>
-// Bernd L√∂rwald <bloerwald+noggit@googlemail.com>
-// Glararan <glararan@glararan.eu>
-// Mjolln√  <mjollna.wow@gmail.com>
-// Stephan Biegel <project.modcraft@googlemail.com>
-// Tigurius <bstigurius@googlemail.com>
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/application.h>
 

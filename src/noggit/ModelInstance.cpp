@@ -1,8 +1,4 @@
-// ModelInstance.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
-// Benedikt Kleiner <benedikt.kleiner@googlemail.com>
-// Bernd Lörwald <bloerwald+noggit@googlemail.com>
-// Stephan Biegel <project.modcraft@googlemail.com>
-// Tigurius <bstigurius@googlemail.com>
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ModelInstance.h>
 

@@ -1,8 +1,4 @@
-# CMakeLists.txt is part of Noggit3, licensed via GNU General Publiicense (version 3).
-# Bernd Lörwald <bloerwald+noggit@googlemail.com>
-# Glararan <glararan@glararan.eu>
-# Stephan Biegel <project.modcraft@googlemail.com>
-# Tigurius <bstigurius@googlemail.com>
+# This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 cmake_minimum_required (VERSION 2.8.11)
 cmake_policy (SET CMP0015 OLD)

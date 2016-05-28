@@ -1,9 +1,4 @@
-// Menu.h is part of Noggit3, licensed via GNU General Public License (version 3).
-// Bernd Lörwald <bloerwald+noggit@googlemail.com>
-// Mjollnà <mjollna.wow@gmail.com>
-// Stephan Biegel <project.modcraft@googlemail.com>
-// Tigurius <bstigurius@googlemail.com>
-// Glararan <glararan@glararan.eu>
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
 
