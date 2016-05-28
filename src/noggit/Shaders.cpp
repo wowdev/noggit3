@@ -9,7 +9,7 @@
 #include <noggit/Log.h>
 #include <noggit/mpq/file.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 
 #ifdef USEBLSSHADER
 BLSShader::BLSShader( const QString & pFilename )

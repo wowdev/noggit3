@@ -181,6 +181,7 @@ set ( opengl_sources
     )
 
 set ( opengl_headers
+	  src/opengl/context.h
       src/opengl/call_list.h
       src/opengl/settings_saver.h
       src/opengl/texture.h

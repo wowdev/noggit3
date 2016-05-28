@@ -6,7 +6,7 @@
 
 #include <noggit/mpq/file.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/scoped.h>
 
 #include <QGLPixelBuffer>

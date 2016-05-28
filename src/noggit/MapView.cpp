@@ -23,7 +23,7 @@
 
 #include <helper/qt/signal_blocker.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/matrix.h>
 #include <opengl/texture.h>
 

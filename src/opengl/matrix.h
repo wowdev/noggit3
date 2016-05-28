@@ -6,7 +6,7 @@
 #include <math/matrix_4x4.h>
 #include <math/vector_3d.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/types.h>
 
 #include <cmath>

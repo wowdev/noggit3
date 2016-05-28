@@ -14,7 +14,7 @@
 #include <noggit/Model.h>
 #include <noggit/World.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/matrix.h>
 
 Model::Model(const std::string& filename, bool _forceAnim)

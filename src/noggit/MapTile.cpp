@@ -23,7 +23,7 @@
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 
 MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
   : mPositionX (pX)

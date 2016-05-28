@@ -14,7 +14,7 @@
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/World.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 
 const float skymul = 36.0f;
 
