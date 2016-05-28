@@ -60,6 +60,7 @@ set ( noggit_sources
       src/noggit/Frustum.cpp
       src/noggit/Liquid.cpp
       src/noggit/Log.cpp
+      src/noggit/map_index.cpp
       src/noggit/MapChunk.cpp
       src/noggit/MapTile.cpp
       src/noggit/MapView.cpp
@@ -108,6 +109,7 @@ set ( noggit_headers
       src/noggit/Frustum.h
       src/noggit/Liquid.h
       src/noggit/Log.h
+      src/noggit/map_index.hpp
       src/noggit/MapChunk.h
       src/noggit/MapHeaders.h
       src/noggit/MapTile.h

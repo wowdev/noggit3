@@ -15,6 +15,7 @@
 #include <noggit/Selection.h> // nameEntryManager
 #include <noggit/Sky.h> // Skies, OutdoorLighting, OutdoorLightStats
 #include <noggit/WMO.h> // WMOManager
+#include <noggit/map_index.hpp>
 #include <noggit/MapHeaders.h> // ENTRY_MODF
 
 namespace OpenGL
@@ -37,19 +38,7 @@ static const float doodaddrawdistance = 64.0f;
 
 typedef unsigned short StripType;
 
-/*!
- \brief This class is only a holder to have easier access to MapTiles and their flags for easier WDT parsing. This is private and for the class World only.
- */
-class MapTileEntry
-{
-private:
-  uint32_t flags;
-  std::unique_ptr<MapTile> tile;
 
-  MapTileEntry();
-
-  friend class World;
-};
 
 //! \todo Split this. There should be a seperate class for WDTs.
 class World
@@ -59,17 +48,10 @@ private:
 
   float time; //!< the time of the day
 
-  void unsetChanged(int x, int z);
-
-  bool _tile_got_modified[64][64];
-
 public:
-  void setChanged(float x, float z);
-  void setChanged(int x, int z);
   void advance_times ( const float& seconds
                      , const float& time_of_day_speed_factor
                      );
-  bool getChanged(int x, int z) const;
 
   ::math::vector_3d _exact_terrain_selection_position;
   ::math::vector_3d camera;
@@ -92,22 +74,17 @@ public:
   //! \todo  Get these managed? ._.
   typedef std::pair<int, ModelInstance *> model_instance_type;
   typedef std::pair<int, WMOInstance *> wmo_instance_type;
+
   typedef std::map<int, ModelInstance *> model_instances_type;
   typedef std::map<int, WMOInstance *> wmo_instances_type;
+
   model_instances_type mModelInstances;
   wmo_instances_type mWMOInstances;
 
   OutdoorLightStats outdoorLightStats;
 
   void initDisplay();
-  void load_tiles_around ( const size_t& x
-                         , const size_t& z
-                         , const size_t& distance
-                         );
-  void reloadTile(int x, int z);
-  void saveTile(int x, int z) const;
-  void saveTileCata(int x, int z) const;
-  void saveChanged();
+
   void tick(float dt);
   void draw ( size_t flags
             , float inner_cursor_radius
@@ -163,18 +140,25 @@ public:
   void deleteModelInstance( int pUniqueID );
   void deleteWMOInstance( int pUniqueID );
 
-  bool hasTile( int pX, int pZ ) const;
-
   static bool IsEditableWorld( int pMapId );
   void clearHeight(int x, int z);
   void moveHeight(int x, int z, const float& heightDelta);
 
-  void saveWDT();
   void clearAllModelsOnADT(int x, int z);
 
   nameEntryManager& selection_names()
   {
     return _selection_names;
+  }
+
+  noggit::map_index& map_index()
+  {
+    return _map_index;
+  }
+
+  const noggit::map_index& map_index() const
+  {
+    return _map_index;
   }
 
   const QImage& minimap() const { return _minimap; }
@@ -200,12 +184,6 @@ public:
 private:
   QImage _minimap;
 
-  //! Holding all MapTiles there can be in a World.
-  MapTileEntry mTiles[64][64];
-
-  //! Is the WDT telling us to use a bigger alphamap (64*64) and single pass rendering.
-  bool mBigAlpha;
-
   bool _initialized_display;
 
   //! opengl call lists for the WDL low resolution heightmaps.
@@ -226,13 +204,9 @@ private:
   void initMinimap();
   void initLowresTerrain();
 
-  //! Checks if a maptile is loaded
-  bool tileLoaded(int x, int z) const;
-
-  //! loads a maptile if isnt already
-  MapTile *loadTile(int x, int z);
-
   void outdoorLighting();
 
   nameEntryManager _selection_names;
+
+  noggit::map_index _map_index;
 };
