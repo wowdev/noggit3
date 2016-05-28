@@ -288,14 +288,11 @@ void ModelInstance::draw_for_selection()
 {
   if(!_world->selection_names().findEntry(nameID) || nameID == 0xFFFFFFFF)
   {
-    LogDebug<<"Old item" << nameID << "not found create new one"<<std::endl;
     nameID = _world->selection_names().add( this );
   }
 
   ::opengl::scoped::matrix_pusher positioning_matrix;
   ::opengl::scoped::name_pusher name_pusher (nameID);
-
-  LogDebug << "I am  " << nameID << std::endl;
 
   gl.translatef( pos.x(), pos.y(), pos.z() );
   gl.rotatef( dir.y() - 90.0f, 0.0f, 1.0f, 0.0f );
