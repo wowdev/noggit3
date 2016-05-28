@@ -27,7 +27,7 @@ void UIModel::render() const
   //gl.matrixMode(GL_MODELVIEW);
   //gl.loadIdentity();
 
-  gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_pusher;
 
   static const float rot = 45.0f;
 
@@ -63,8 +63,6 @@ void UIModel::render() const
   gl.color4f(1,1,1,1);
 
   gl.enable(GL_TEXTURE_2D);
-
-  gl.popMatrix();
 }
 
 void UIModel::setModel( Model* _setModel )

@@ -1009,32 +1009,32 @@ void World::draw ( size_t flags
     // height map w/ a zillion texture passes
     //! \todo  Do we need to push the matrix here?
 
-    gl.pushMatrix();
-
-    if( flags & TERRAIN )
     {
-      for( int j = 0; j < 64; ++j )
+      opengl::scoped::matrix_pusher const matrix_pusher;
+
+      if( flags & TERRAIN )
       {
-        for( int i = 0; i < 64; ++i )
+        for( int j = 0; j < 64; ++j )
         {
-          if( tileLoaded( j, i ) )
+          for( int i = 0; i < 64; ++i )
           {
-            mTiles[j][i].tile->draw ( flags & HEIGHTCONTOUR
-                                    , flags & MARKIMPASSABLE
-                                    , flags & AREAID
-                                    , flags & NOCURSOR
-                                    , skies.get()
-                                    , mapdrawdistance
-                                    , frustum
-                                    , camera
-                                    , selected_item
-                                    );
+            if( tileLoaded( j, i ) )
+            {
+              mTiles[j][i].tile->draw ( flags & HEIGHTCONTOUR
+                                      , flags & MARKIMPASSABLE
+                                      , flags & AREAID
+                                      , flags & NOCURSOR
+                                      , skies.get()
+                                      , mapdrawdistance
+                                      , frustum
+                                      , camera
+                                      , selected_item
+                                      );
+            }
           }
         }
       }
     }
-
-    gl.popMatrix();
 
     // Selection circle
     if (selected_item && noggit::selection::is_chunk (*selected_item))
@@ -1526,57 +1526,57 @@ void World::drawTileMode ( bool draw_lines
   gl.disable (GL_CULL_FACE);
   gl.depthMask (GL_FALSE);
 
-  gl.pushMatrix();
-  gl.scalef (zoom, zoom, 1.0f);
-
-  gl.pushMatrix();
-  gl.translatef (-camera.x() / CHUNKSIZE, -camera.z() / CHUNKSIZE, 0.0f);
-
-  //! \todo Only iterate over those intersecting?
-  for (size_t j (0); j < 64; ++j)
   {
-    for (size_t i (0); i < 64; ++i)
-    {
-      if (tileLoaded (j, i))
-      {
-        const MapTile* tile (mTiles[j][i].tile.get());
-        const QRectF map_rect ( tile->xbase / CHUNKSIZE
-                              , tile->zbase / CHUNKSIZE
-                              , TILESIZE / CHUNKSIZE
-                              , TILESIZE / CHUNKSIZE
-                              );
+    opengl::scoped::matrix_pusher const scale_matrix;
+    gl.scalef (zoom, zoom, 1.0f);
 
-        if (drawing_rect.intersects (map_rect))
+    {
+      opengl::scoped::matrix_pusher const translate_matrix;
+      gl.translatef (-camera.x() / CHUNKSIZE, -camera.z() / CHUNKSIZE, 0.0f);
+
+      //! \todo Only iterate over those intersecting?
+      for (size_t j (0); j < 64; ++j)
+      {
+        for (size_t i (0); i < 64; ++i)
         {
-          tile->drawTextures ( drawing_rect.intersected (map_rect)
-                                           .translated (-map_rect.topLeft())
-                             );
+          if (tileLoaded (j, i))
+          {
+            const MapTile* tile (mTiles[j][i].tile.get());
+            const QRectF map_rect ( tile->xbase / CHUNKSIZE
+                                  , tile->zbase / CHUNKSIZE
+                                  , TILESIZE / CHUNKSIZE
+                                  , TILESIZE / CHUNKSIZE
+                                  );
+
+            if (drawing_rect.intersects (map_rect))
+            {
+              tile->drawTextures ( drawing_rect.intersected (map_rect)
+                                               .translated (-map_rect.topLeft())
+                                 );
+            }
+          }
         }
       }
     }
-  }
 
-  gl.popMatrix();
-
-  if (draw_lines)
-  {
-    gl.translatef(fmod(-camera.x()/CHUNKSIZE,16), fmod(-camera.z()/CHUNKSIZE,16),0);
-    for(float x = -32.0f; x <= 48.0f; x += 1.0f)
+    if (draw_lines)
     {
-      if( static_cast<int>(x) % 16 )
-        gl.color4f(1.0f,0.0f,0.0f,0.5f);
-      else
-        gl.color4f(0.0f,1.0f,0.0f,0.5f);
-      gl.begin(GL_LINES);
-      gl.vertex3f(-32.0f,x,-1);
-      gl.vertex3f(48.0f,x,-1);
-      gl.vertex3f(x,-32.0f,-1);
-      gl.vertex3f(x,48.0f,-1);
-      gl.end();
+      gl.translatef(fmod(-camera.x()/CHUNKSIZE,16), fmod(-camera.z()/CHUNKSIZE,16),0);
+      for(float x = -32.0f; x <= 48.0f; x += 1.0f)
+      {
+        if( static_cast<int>(x) % 16 )
+          gl.color4f(1.0f,0.0f,0.0f,0.5f);
+        else
+          gl.color4f(0.0f,1.0f,0.0f,0.5f);
+        gl.begin(GL_LINES);
+        gl.vertex3f(-32.0f,x,-1);
+        gl.vertex3f(48.0f,x,-1);
+        gl.vertex3f(x,-32.0f,-1);
+        gl.vertex3f(x,48.0f,-1);
+        gl.end();
+      }
     }
   }
-
-  gl.popMatrix();
 
   gl.disableClientState (GL_COLOR_ARRAY);
 
@@ -1921,14 +1921,16 @@ void World::saveMap()
       ATile=loadTile(x,y);
       gl.clear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
-      gl.pushMatrix();
-      gl.scalef(0.08333333f,0.08333333f,1.0f);
+      {
+        opengl::scoped::matrix_pusher const matrix_pusher;
 
-      //gl.translatef(-camera.x()/CHUNKSIZE,-camera.z()/CHUNKSIZE,0);
-      gl.translatef( x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f );
+        gl.scalef(0.08333333f,0.08333333f,1.0f);
 
-      ATile->drawTextures (QRect (0, 0, 16, 16));
-      gl.popMatrix();
+        //gl.translatef(-camera.x()/CHUNKSIZE,-camera.z()/CHUNKSIZE,0);
+        gl.translatef( x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f );
+
+        ATile->drawTextures (QRect (0, 0, 16, 16));
+      }
 
   //! \todo Fix these two lines. THEY ARE VITAL!
 //    gl.readPixels (video.xres()/2-128, video.yres()/2-128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);

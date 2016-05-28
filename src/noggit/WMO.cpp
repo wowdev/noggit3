@@ -17,6 +17,7 @@
 #include <opengl/call_list.h>
 #include <opengl/context.h>
 #include <opengl/primitives.h>
+#include <opengl/scoped.h>
 
 #include <noggit/async/loader.h>
 #include <noggit/application.h>
@@ -555,12 +556,12 @@ bool WMO::drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d 
 
     gl.disable(GL_CULL_FACE);
     gl.disable(GL_DEPTH_TEST);
-    gl.pushMatrix();
+
+    opengl::scoped::matrix_pusher const matrix_pusher;
     gl.translatef(pCamera.x(), pCamera.y(), pCamera.z());
     const float sc = 2.0f;
     gl.scalef(sc,sc,sc);
     skybox.get()->draw (world, clock() / CLOCKS_PER_SEC);
-    gl.popMatrix();
     gl.enable(GL_DEPTH_TEST);
 
     return true;

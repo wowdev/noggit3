@@ -24,6 +24,7 @@
 #include <noggit/mpq/file.h>
 
 #include <opengl/context.h>
+#include <opengl/scoped.h>
 
 MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
   : mPositionX (pX)
@@ -433,7 +434,7 @@ void MapTile::drawWater (Skies const* skies)
 // This is for the 2D mode only.
 void MapTile::drawTextures (const QRectF& chunks_to_draw) const
 {
-  gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_pusher;
 
   gl.translatef (xbase / CHUNKSIZE, zbase / CHUNKSIZE, 0.0f);
 
@@ -444,8 +445,6 @@ void MapTile::drawTextures (const QRectF& chunks_to_draw) const
       mChunks[j][i]->drawTextures();
     }
   }
-
-  gl.popMatrix();
 }
 
 MapChunk* MapTile::getChunk( unsigned int x, unsigned int z )

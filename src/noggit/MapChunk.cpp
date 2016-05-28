@@ -12,6 +12,7 @@
 #include <math/vector_3d.h>
 
 #include <opengl/context.h>
+#include <opengl/scoped.h>
 #include <opengl/texture.h>
 
 #include <noggit/application.h>
@@ -465,51 +466,60 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   GenerateContourMap();
 }
 
-void MapChunk::SetAnim (const mcly_flags_type& flags) const
+namespace
 {
-  if (flags.animate)
+  struct texture_animation_setup
   {
-    opengl::texture::set_active_texture (0);
-    gl.matrixMode (GL_TEXTURE);
-    gl.pushMatrix();
+    mcly_flags_type _flags;
+    boost::optional<opengl::scoped::matrix_pusher> _matrix_pusher;
 
-    static const float direction_table_x[8] = {  0.0f, -1.0f, -1.0f, -1.0f
-                                              ,  0.0f,  1.0f,  1.0f,  1.0f
-                                              };
-    static const float direction_table_y[8] = {  1.0f,  1.0f,  0.0f, -1.0f
-                                              , -1.0f, -1.0f,  0.0f,  1.0f
-                                              };
+    texture_animation_setup (mcly_flags_type flags)
+      : _flags (flags)
+    {
+      if (_flags.animate)
+      {
+        opengl::texture::set_active_texture (0);
+        gl.matrixMode (GL_TEXTURE);
+        _matrix_pusher = opengl::scoped::matrix_pusher();
 
-    //! \todo  Find  a good  factor  to slow  this  thing  down to  an
-    //! appropriate speed.
-    static const float animation_slowdown_factor (1.0f);
+        static float const direction_table_x[8] = {  0.0f, -1.0f, -1.0f, -1.0f
+                                                  ,  0.0f,  1.0f,  1.0f,  1.0f
+                                                  };
+        static float const direction_table_y[8] = {  1.0f,  1.0f,  0.0f, -1.0f
+                                                  , -1.0f, -1.0f,  0.0f,  1.0f
+                                                  };
 
-    //! \note This does not wrap back to zero! Maybe this is therefore
-    //! wrong. Needs to be tested.
-    const float animation_progress ( (clock() / CLOCKS_PER_SEC)
-                                   * (flags.animation_speed + 1)
-                                   * animation_slowdown_factor
-                                   );
+        //! \todo  Find  a good  factor  to slow  this  thing  down to  an
+        //! appropriate speed.
+        static float const animation_slowdown_factor (1.0f);
 
-    gl.translatef ( animation_progress
-                 * direction_table_x[flags.animation_rotation]
-                 , animation_progress
-                 * direction_table_y[flags.animation_rotation]
-                 , 0.0f
-                 );
-  }
+        //! \note This does not wrap back to zero! Maybe this is therefore
+        //! wrong. Needs to be tested.
+        float const animation_progress ( (clock() / CLOCKS_PER_SEC)
+                                       * (_flags.animation_speed + 1)
+                                       * animation_slowdown_factor
+                                       );
+
+        gl.translatef ( animation_progress
+                     * direction_table_x[_flags.animation_rotation]
+                     , animation_progress
+                     * direction_table_y[_flags.animation_rotation]
+                     , 0.0f
+                     );
+      }
+    }
+
+    ~texture_animation_setup()
+    {
+      if (_flags.animate)
+      {
+        _matrix_pusher.reset();
+        gl.matrixMode (GL_MODELVIEW);
+        opengl::texture::set_active_texture (1);
+      }
+    }
+  };
 }
-
-void MapChunk::RemoveAnim (const mcly_flags_type& flags) const
-{
-  if (flags.animate)
-  {
-    gl.popMatrix();
-    gl.matrixMode (GL_MODELVIEW);
-    opengl::texture::set_active_texture (1);
-  }
-}
-
 
 void MapChunk::drawTextures() const
 {
@@ -535,20 +545,20 @@ void MapChunk::drawTextures() const
   const mcly_flags_type& flags_layer_0
     (mcly_flags_type::interpret (animated[0]));
 
-  SetAnim(flags_layer_0);
+  {
+    texture_animation_setup const texture_animation (flags_layer_0);
 
-  gl.begin(GL_TRIANGLE_STRIP);
-  gl.texCoord2f(0.0f,texDetail);
-  gl.vertex3f(static_cast<float>(px), py+1.0f, -2.0f);
-  gl.texCoord2f(0.0f, 0.0f);
-  gl.vertex3f(static_cast<float>(px), static_cast<float>(py), -2.0f);
-  gl.texCoord2f(texDetail, texDetail);
-  gl.vertex3f(px+1.0f, py+1.0f, -2.0f);
-  gl.texCoord2f(texDetail, 0.0f);
-  gl.vertex3f(px+1.0f, static_cast<float>(py), -2.0f);
-  gl.end();
-
-  RemoveAnim(flags_layer_0);
+    gl.begin(GL_TRIANGLE_STRIP);
+    gl.texCoord2f(0.0f,texDetail);
+    gl.vertex3f(static_cast<float>(px), py+1.0f, -2.0f);
+    gl.texCoord2f(0.0f, 0.0f);
+    gl.vertex3f(static_cast<float>(px), static_cast<float>(py), -2.0f);
+    gl.texCoord2f(texDetail, texDetail);
+    gl.vertex3f(px+1.0f, py+1.0f, -2.0f);
+    gl.texCoord2f(texDetail, 0.0f);
+    gl.vertex3f(px+1.0f, static_cast<float>(py), -2.0f);
+    gl.end();
+  }
 
   if (_textures.size() > 1U) {
     //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
@@ -572,7 +582,7 @@ void MapChunk::drawTextures() const
 
     const mcly_flags_type& flags (mcly_flags_type::interpret (animated[i]));
 
-    SetAnim(flags);
+    texture_animation_setup const texture_animation (flags);
 
     gl.begin(GL_TRIANGLE_STRIP);
     gl.multiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
@@ -588,8 +598,6 @@ void MapChunk::drawTextures() const
     gl.multiTexCoord2f(GL_TEXTURE1, 0.0f, TEX_RANGE);
     gl.vertex3f(static_cast<float>(px), py+1.0f, -2.0f);
     gl.end();
-
-    RemoveAnim(flags);
   }
 
   opengl::texture::disable_texture (0);
@@ -730,11 +738,9 @@ void MapChunk::drawPass (int anim) const
 {
   const mcly_flags_type& flags (mcly_flags_type::interpret (anim));
 
-  SetAnim (flags);
+  texture_animation_setup const texture_animation (flags);
 
   gl.drawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
-
-  RemoveAnim (flags);
 }
 
 void MapChunk::drawLines (bool draw_hole_lines) const
@@ -745,7 +751,8 @@ void MapChunk::drawLines (bool draw_hole_lines) const
   gl.disable(GL_TEXTURE_2D);
   gl.disable(GL_LIGHTING);
 
-  gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_pusher;
+
   gl.color4f(1.0,0.0,0.0f,0.5f);
   gl.translatef(0.0f,0.05f,0.0f);
   gl.enable (GL_LINE_SMOOTH);
@@ -786,7 +793,6 @@ void MapChunk::drawLines (bool draw_hole_lines) const
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &_hole_strip[45]);
   }
 
-  gl.popMatrix();
   gl.enable(GL_LIGHTING);
   gl.color4f(1,1,1,1);
 }
@@ -934,7 +940,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
     gl.color4f( 1.0f, 1.0f, 0.0f, 1.0f );
 
-    gl.pushMatrix();
+    opengl::scoped::matrix_pusher const matrix_pusher;
 
     gl.disable( GL_CULL_FACE );
     gl.depthMask( false );
@@ -947,8 +953,6 @@ void MapChunk::draw ( bool draw_terrain_height_contour
     gl.enable( GL_CULL_FACE );
     gl.enable( GL_DEPTH_TEST );
     gl.depthMask( true );
-
-    gl.popMatrix();
   }
 
 
@@ -964,7 +968,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
     {1,0,0,1}, {1, 0.5f, 0, 1}, {1, 1, 0, 1},
     {0,1,0,1}, {0,1,1,1}, {0,0,1,1}, {0.8f, 0, 1,1}
   };
-  gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_pusher;
   gl.disable(GL_CULL_FACE);
   gl.disable(GL_TEXTURE_2D);
   gl.translatef(xbase, ybase, zbase);
@@ -985,8 +989,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   }
   gl.enable(GL_TEXTURE_2D);
   gl.enable(GL_CULL_FACE);
-  gl.color4f(1,1,1,1);
-  gl.popMatrix();*/
+  gl.color4f(1,1,1,1);*/
 }
 
 void MapChunk::drawNoDetail() const
