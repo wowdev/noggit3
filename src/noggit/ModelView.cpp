@@ -30,7 +30,7 @@ void ModelView::initializeGL()
 {
     makeCurrent();
     opengl::context::scoped_setter const _ (::gl, context());
-    gl.clearColor (0.0f, 0.0f, 1.0f, 0.0f);
+    gl.clearColor (0.0f, 0.0f, 1.0f, 1.0f);
 
     gl.enableClientState (GL_VERTEX_ARRAY);
     gl.enableClientState (GL_NORMAL_ARRAY);
