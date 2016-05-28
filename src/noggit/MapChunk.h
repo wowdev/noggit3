@@ -52,7 +52,6 @@ public:
             );
   void drawContour() const;
   void drawSelect();
-  void drawNoDetail() const;
   void drawPass(int anim) const;
   // todo split into draw_lines and draw_hole_lines
   void drawLines (bool draw_hole_lines) const;
