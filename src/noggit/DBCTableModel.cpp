@@ -1,5 +1,4 @@
-// DBCTableModel.cpp is part of Noggit3, licensed via GNU General Public License (version 3).
-// Benedikt Kleiner <benedikt.kleiner@googlemail.com>
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "DBCTableModel.h"
 #include <QDir>
