@@ -9,6 +9,7 @@
 #include <noggit/mpq/file.h>
 
 #include <opengl/context.h>
+#include <opengl/scoped.h>
 
 WMOInstance::WMOInstance(World* world, std::string const& path, noggit::mpq::file* _file )
   : wmo (world, path)
@@ -66,7 +67,8 @@ void WMOInstance::draw ( bool draw_doodads
                        , const boost::optional<selection_type>& selected_item
                        ) const
 {
-  gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_pusher;
+
   gl.translatef( pos.x(), pos.y(), pos.z() );
 
   const float roty = dir.y() - 90.0f;
@@ -96,8 +98,6 @@ void WMOInstance::draw ( bool draw_doodads
             , frustum
             , camera
             );
-
-  gl.popMatrix();
 }
 
 void WMOInstance::drawSelect ( bool draw_doodads
@@ -106,7 +106,7 @@ void WMOInstance::drawSelect ( bool draw_doodads
                              , const ::math::vector_3d& camera
                              ) const
 {
-  gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_pusher;
 
   gl.translatef( pos.x(), pos.y(), pos.z() );
 
@@ -130,13 +130,11 @@ void WMOInstance::drawSelect ( bool draw_doodads
                   );
 
   gl.popName();
-
-  gl.popMatrix();
 }
 
 /*void WMOInstance::drawPortals()
 {
-  gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_pusher;
 
   gl.translatef( pos.x(), pos.y(), pos.z() );
 
@@ -147,8 +145,6 @@ void WMOInstance::drawSelect ( bool draw_doodads
   gl.rotatef( dir.z(), 1.0f, 0.0f, 0.0f );
 
   wmo->drawPortals();
-
-  gl.popMatrix();
 }*/
 
 void WMOInstance::resetDirection()

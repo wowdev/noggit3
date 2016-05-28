@@ -15,6 +15,7 @@
 #include <noggit/World.h>
 
 #include <opengl/context.h>
+#include <opengl/scoped.h>
 
 const float skymul = 36.0f;
 
@@ -320,7 +321,8 @@ bool Skies::drawSky (World* world, const ::math::vector_3d &pos) const
   if (numSkies==0) return false;
 
   // drawing the sky: we'll undo the camera translation
-  gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_pusher;
+
   gl.translatef(pos.x(), pos.y(), pos.z());
 
   draw();
@@ -335,8 +337,6 @@ bool Skies::drawSky (World* world, const ::math::vector_3d &pos) const
     stars->trans = ni;
     stars->draw (world, clock() / CLOCKS_PER_SEC);
   }
-
-  gl.popMatrix();
 
   return true;
 }

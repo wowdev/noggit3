@@ -53,7 +53,8 @@ noggit::blp_texture* UITexture::getTexture( )
 
 void UITexture::render() const
 {
-  gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_pusher;
+
   gl.translatef( x(), y(), 0.0f );
 
   gl.color3f( 1.0f, 1.0f, 1.0f );
@@ -85,8 +86,6 @@ void UITexture::render() const
     gl.vertex2f( -1.0f, height() );
     gl.end();
   }
-
-  gl.popMatrix();
 }
 
 UIFrame *UITexture::processLeftClick( float /*mx*/, float /*my*/ )

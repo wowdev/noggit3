@@ -25,6 +25,7 @@
 
 #include <opengl/context.h>
 #include <opengl/matrix.h>
+#include <opengl/scoped.h>
 #include <opengl/texture.h>
 
 #include <noggit/Brush.h>
@@ -950,7 +951,7 @@ namespace noggit
     const qreal brush_diameter (brush_radius * 2.0);
     const QPointF brush_position (tile_mode_brush_position());
 
-    gl.pushMatrix();
+    opengl::scoped::matrix_pusher const matrix_pusher;
 
     gl.color4f (1.0f, 1.0f, 1.0f, 0.5f);
     opengl::texture::enable_texture (0);
@@ -972,7 +973,6 @@ namespace noggit
     gl.texCoord2f (0.0f, 1.0f);
     gl.vertex3f (0.0f, 0.0f, 0.0f);
     gl.end();
-    gl.popMatrix();
   }
 
   void MapView::displayViewMode_2D()
