@@ -129,14 +129,21 @@ namespace noggit
     }
 
     QSurfaceFormat format;
-    format.setStencilBufferSize (1);
-    format.setDepthBufferSize (16);
-    format.setAlphaBufferSize (8);
+
+	format.setRenderableType(QSurfaceFormat::OpenGL);
+	format.setVersion(2, 1);
+
+	format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+	format.setSwapInterval(1);
 
     if (setting("antialiasing").toBool())
     {
       format.setSamples (4);
     }
+
+#ifdef _DEBUG
+	format.setOption(QSurfaceFormat::DebugContext);
+#endif
 
     QSurfaceFormat::setDefaultFormat (format);
 
