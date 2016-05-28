@@ -79,6 +79,7 @@ namespace
   }
   void renderSphere_convenient(::math::vector_3d const& position, float radius)
   {
+    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
     opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
 
     //! \todo This should be passed in!
@@ -579,24 +580,24 @@ void World::initLowresTerrain()
 
         //! \todo Make a strip out of this.
         gl.begin( GL_TRIANGLES );
-        for (size_t j (0); j < 16; ++j )
-        {
-          for (size_t i (0); i < 16; ++i )
+          for (size_t j (0); j < 16; ++j )
           {
-            gl.vertex3fv (vertices_17[j][i]);
-            gl.vertex3fv (vertices_16[j][i]);
-            gl.vertex3fv (vertices_17[j][i + 1]);
-            gl.vertex3fv (vertices_17[j][i + 1]);
-            gl.vertex3fv (vertices_16[j][i]);
-            gl.vertex3fv (vertices_17[j + 1][i + 1]);
-            gl.vertex3fv (vertices_17[j + 1][i + 1]);
-            gl.vertex3fv (vertices_16[j][i]);
-            gl.vertex3fv (vertices_17[j + 1][i]);
-            gl.vertex3fv (vertices_17[j + 1][i]);
-            gl.vertex3fv (vertices_16[j][i]);
-            gl.vertex3fv (vertices_17[j][i]);
+            for (size_t i (0); i < 16; ++i )
+            {
+              gl.vertex3fv (vertices_17[j][i]);
+              gl.vertex3fv (vertices_16[j][i]);
+              gl.vertex3fv (vertices_17[j][i + 1]);
+              gl.vertex3fv (vertices_17[j][i + 1]);
+              gl.vertex3fv (vertices_16[j][i]);
+              gl.vertex3fv (vertices_17[j + 1][i + 1]);
+              gl.vertex3fv (vertices_17[j + 1][i + 1]);
+              gl.vertex3fv (vertices_16[j][i]);
+              gl.vertex3fv (vertices_17[j + 1][i]);
+              gl.vertex3fv (vertices_17[j + 1][i]);
+              gl.vertex3fv (vertices_16[j][i]);
+              gl.vertex3fv (vertices_17[j][i]);
+            }
           }
-        }
         gl.end();
 
         lowrestiles[y][x]->end_recording();
@@ -1039,8 +1040,6 @@ void World::draw ( size_t flags
     // Selection circle
     if (selected_item && noggit::selection::is_chunk (*selected_item))
     {
-      gl.polygonMode( GL_FRONT_AND_BACK, GL_LINE );
-
       GLint viewport[4];
       gl.getIntegerv (GL_VIEWPORT, viewport);
 
@@ -1062,11 +1061,6 @@ void World::draw ( size_t flags
                                           * normalized_device_coords
                                           ).xyz_normalized_by_w();
 
-      gl.color4f( 1.0f, 1.0f, 1.0f, 1.0f );
-      gl.disable(GL_CULL_FACE);
-      //gl.depthMask(false);
-      //gl.disable(GL_DEPTH_TEST);
-
       if (!(flags & NOCURSOR))
       {
         QSettings settings;
@@ -1081,12 +1075,6 @@ void World::draw ( size_t flags
                                   , outer_cursor_radius
                                   );
       }
-
-      gl.enable(GL_CULL_FACE);
-      gl.enable(GL_DEPTH_TEST);
-      //GlDepthMask(true);
-      gl.polygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
     }
 
 
