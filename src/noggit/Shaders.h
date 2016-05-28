@@ -4,7 +4,7 @@
 
 #include <string>
 #include <QString>
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/types.h>
 
 #ifdef USEBLSSHADER

@@ -13,7 +13,7 @@
 #include <noggit/mpq/file.h>
 
 #include <opengl/call_list.h>
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/texture.h>
 
 #include <boost/filesystem/path.hpp>

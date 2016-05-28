@@ -12,7 +12,7 @@
 #include <noggit/ModelManager.h>
 #include <noggit/World.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/matrix.h>
 
 static const qreal fov (45.0);

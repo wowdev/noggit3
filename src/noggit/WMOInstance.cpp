@@ -8,7 +8,7 @@
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 
 WMOInstance::WMOInstance(World* world, std::string const& path, noggit::mpq::file* _file )
   : wmo (world, path)

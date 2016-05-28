@@ -4,7 +4,7 @@
 
 #include <noggit/application.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 
 #include <QResizeEvent>
 #include <QStyleOptionGraphicsItem>

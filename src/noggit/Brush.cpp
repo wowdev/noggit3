@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/texture.h>
 
 brush::brush(float r, float h)

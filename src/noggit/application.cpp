@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/types.h>
 
 #include <QDir>

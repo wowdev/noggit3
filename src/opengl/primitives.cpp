@@ -4,7 +4,7 @@
 
 #include <math/vector_4d.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/types.h>
 
 namespace opengl

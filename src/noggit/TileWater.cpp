@@ -3,7 +3,7 @@
 #include <noggit/ChunkWater.hpp>
 #include <noggit/MapTile.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 
 namespace noggit
 {

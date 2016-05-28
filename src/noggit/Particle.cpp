@@ -9,7 +9,7 @@
 #include <noggit/blp_texture.h>
 #include <noggit/mpq/file.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 
 static const unsigned int MAX_PARTICLES = 10000;
 

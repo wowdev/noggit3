@@ -7,7 +7,7 @@
 
 #include <math/matrix_4x4.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/primitives.h>
 #include <opengl/scoped.h>
 

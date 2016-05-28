@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/texture.h>
 
 namespace opengl

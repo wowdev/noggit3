@@ -2,7 +2,7 @@
 
 #include <opengl/settings_saver.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/texture.h>
 
 namespace opengl

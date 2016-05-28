@@ -15,7 +15,7 @@
 #include <math/vector_2d.h>
 
 #include <opengl/call_list.h>
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/primitives.h>
 
 #include <noggit/async/loader.h>

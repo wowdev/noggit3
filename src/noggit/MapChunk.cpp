@@ -11,7 +11,7 @@
 #include <math/random.h>
 #include <math/vector_3d.h>
 
-#include <opengl/context.hpp>
+#include <opengl/context.h>
 #include <opengl/texture.h>
 
 #include <noggit/application.h>
