@@ -36,9 +36,6 @@ static const float mapdrawdistance = 998.0f;
 static const float modeldrawdistance = 384.0f;
 static const float doodaddrawdistance = 64.0f;
 
-typedef unsigned short StripType;
-
-
 
 //! \todo Split this. There should be a seperate class for WDTs.
 class World

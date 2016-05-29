@@ -393,6 +393,8 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   gl.bindBuffer(GL_ARRAY_BUFFER, normals);
   gl.bufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
+  gl.genBuffers(1, &indices);
+
   initStrip();
 
   vcenter = (vmin + vmax) * 0.5f;
@@ -635,6 +637,9 @@ void MapChunk::initStrip()
       }
     }
     striplen = static_cast<int>(s - strip);
+
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
+    gl.bufferData(GL_ELEMENT_ARRAY_BUFFER, striplen * sizeof(StripType), strip, GL_STATIC_DRAW);
 }
 
 
@@ -648,6 +653,9 @@ MapChunk::~MapChunk()
   // delete VBOs
   gl.deleteBuffers( 1, &vertices );
   gl.deleteBuffers( 1, &normals );
+
+  //delete IBO
+  gl.deleteBuffers( 1, &indices );
 
   delete strip;
   strip = nullptr;
@@ -740,7 +748,7 @@ void MapChunk::drawPass (int anim) const
 
   texture_animation_setup const texture_animation (flags);
 
-  gl.drawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
+  gl.drawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
 }
 
 void MapChunk::drawLines (bool draw_hole_lines) const
@@ -840,6 +848,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   gl.vertexPointer(3, GL_FLOAT, 0, 0);
   gl.bindBuffer(GL_ARRAY_BUFFER, normals);
   gl.normalPointer(GL_FLOAT, 0, 0);
+  gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
   // ASSUME: texture coordinates set up already
 
 
@@ -904,6 +913,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
   drawPass (0);
 
+  gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   gl.disable(GL_TEXTURE_2D);
   gl.disable(GL_LIGHTING);
 

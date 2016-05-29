@@ -26,7 +26,7 @@ class MapTile;
 class World;
 class Skies;
 
-typedef unsigned short StripType;
+typedef uint16_t StripType;
 
 static const int mapbufsize = 9*9 + 8*8;
 
@@ -140,7 +140,7 @@ public:
 
   int animated[4];
 
-  GLuint vertices, normals, minimap, minishadows;
+  GLuint vertices, normals, indices, minimap, minishadows;
 
   StripType *strip;
   int striplen;
