@@ -12,15 +12,15 @@
 #include <QMenuBar>
 #include <QAction>
 
+#include <noggit/World.h>
 #include <noggit/Log.h>
 #include <noggit/application.h>
-#include <noggit/ui/editortemplate.h>
 #include <noggit/ui/projectExplorer.h>
 #include <noggit/ui/textureselecter.h>
 #include <noggit/ui/settingsDialog.h>
 #include <noggit/ui/about_widget.h>
 #include <noggit/ui/help_widget.h>
-#include <noggit/World.h>
+
 
 namespace noggit
 {
