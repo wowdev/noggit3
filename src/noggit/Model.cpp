@@ -20,6 +20,7 @@
 Model::Model(const std::string& filename, bool _forceAnim)
 : forceAnim(_forceAnim)
 , _filename( filename )
+, _finished_upload(false)
 {
   memset( &header, 0, sizeof( ModelHeader ) );
 
@@ -60,10 +61,10 @@ void Model::finish_loading()
   }
 
   //! \todo  This takes a biiiiiit long. Have a look at this.
-  if( animated )
-    initAnimated( f );
-  else
-    initStatic( f );
+  initCommon(f);
+
+  if(animated)
+    initAnimated(f);
 
   f.close();
 
@@ -192,6 +193,9 @@ namespace
 
 void Model::initCommon(const noggit::mpq::file& f)
 {
+  origVertices = new ModelVertex[header.nVertices];
+  memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
+
   // assume: origVertices already set
   if (!animGeometry) {
     vertices = new ::math::vector_3d[header.nVertices];
@@ -222,13 +226,13 @@ void Model::initCommon(const noggit::mpq::file& f)
   {
     if( texdef[i].type == 0 )
     {
-      _textures.emplace_back (std::string (f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen));
+      _texture_names.emplace_back (std::string (f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen));
     }
     else
     {
       //! \note special texture - only on characters and such... Noggit should
       //! not even render these. probably should be replaced more intelligent.
-      _textures.emplace_back ( texdef[i].type == 3
+      _texture_names.emplace_back ( texdef[i].type == 3
                              ? "item/weapon/armorreflect4.blp"
                              : "tileset/generic/checkers.blp"
                              );
@@ -372,45 +376,8 @@ void Model::initCommon(const noggit::mpq::file& f)
   // zomg done
 }
 
-void Model::initStatic( const noggit::mpq::file& f )
-{
-  origVertices = ( ModelVertex* )( f.getBuffer() + header.ofsVertices );
-
-  initCommon( f );
-
-  ModelDrawList = gl.genLists( 1 );
-  gl.newList( ModelDrawList, GL_COMPILE );
-    drawModel( 0 );
-  gl.endList();
-
-  SelectModelDrawList = gl.genLists( 1 );
-  gl.newList( SelectModelDrawList, GL_COMPILE );
-    drawModelSelect(0);
-  gl.endList();
-
-  // clean up vertices, indices etc
-  if( vertices )
-    delete[] vertices;
-  if( normals )
-    delete[] normals;
-  if( indices )
-    delete[] indices;
-  colors.clear();
-  transparency.clear();
-}
-
 void Model::initAnimated(const noggit::mpq::file& f)
 {
-  origVertices = new ModelVertex[header.nVertices];
-  memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
-
-  gl.genBuffers(1,&vbuf);
-  gl.genBuffers(1,&tbuf);
-  const size_t size = header.nVertices * sizeof(float);
-  vbufsize = 3 * size;
-
-  initCommon(f);
-
   if (header.nAnimations > 0) {
     anims = new ModelAnimation[header.nAnimations];
     memcpy(anims, f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
@@ -446,22 +413,6 @@ void Model::initAnimated(const noggit::mpq::file& f)
       bones.emplace_back (f, mb[i], globalSequences, animfiles);
     }
   }
-
-  if (!animGeometry) {
-    gl.bindBuffer(GL_ARRAY_BUFFER_ARB, vbuf);
-    gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
-    gl.genBuffers(1,&nbuf);
-    gl.bindBuffer(GL_ARRAY_BUFFER_ARB, nbuf);
-    gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
-    delete[] vertices;
-    delete[] normals;
-  }
-  ::math::vector_2d *texcoords = new ::math::vector_2d[header.nVertices];
-  for (size_t i=0; i<header.nVertices; ++i)
-    texcoords[i] = origVertices[i].texcoords;
-  gl.bindBuffer(GL_ARRAY_BUFFER_ARB, tbuf);
-  gl.bufferData(GL_ARRAY_BUFFER_ARB, 2*size, texcoords, GL_STATIC_DRAW_ARB);
-  delete[] texcoords;
 
   if (animTextures) {
     ModelTexAnimDef *ta = reinterpret_cast<ModelTexAnimDef*>(f.getBuffer() + header.ofsTexAnims);
@@ -894,20 +845,20 @@ void Model::drawModelSelect (int animtime)
         gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
 
       }
-    else
-    {
+      else
+      {
         gl.begin(GL_TRIANGLES);
-    for (size_t k = 0, b=p.indexStart; k<p.indexCount; ++k,++b)
-    {
-      uint16_t a = indices[b];
-      gl.normal3fv(normals[a]);
-      gl.texCoord2fv(origVertices[a].texcoords);
-      gl.vertex3fv(vertices[a]);
-    }
+        for (size_t k = 0, b=p.indexStart; k<p.indexCount; ++k,++b)
+        {
+          uint16_t a = indices[b];
+          gl.normal3fv(normals[a]);
+          gl.texCoord2fv(origVertices[a].texcoords);
+          gl.vertex3fv(vertices[a]);
+        }
         gl.end();
       }
 
-      p.deinit();
+    p.deinit();
     }
 
   }
@@ -1116,6 +1067,11 @@ void Model::draw (bool draw_fog, size_t time)
   if(!finished_loading())
     return;
 
+  if (!_finished_upload) {
+    upload();
+    return;
+  }
+
   if (draw_fog)
     gl.enable( GL_FOG );
   else
@@ -1150,8 +1106,11 @@ void Model::draw (bool draw_fog, size_t time)
 
 void Model::drawSelect (size_t time)
 {
-  if (!_finished)
-  {
+  if (!finished_loading())
+    return;
+
+  if (!_finished_upload) {
+    upload();
     return;
   }
 
@@ -1188,6 +1147,66 @@ void Model::lightsOn(opengl::light lbase, int animtime)
 void Model::lightsOff(opengl::light lbase)
 {
   for (unsigned int i=0, l=lbase; i<header.nLights; ++i) gl.disable(l++);
+}
+
+void Model::upload()
+{
+  for (std::string texture : _texture_names)
+    _textures.emplace_back(texture);
+
+  if (animated)
+  {
+    gl.genBuffers(1, &vbuf);
+    gl.genBuffers(1, &tbuf);
+    const size_t size = header.nVertices * sizeof(float);
+    vbufsize = 3 * size;
+
+    if (!animGeometry) {
+      gl.bindBuffer(GL_ARRAY_BUFFER_ARB, vbuf);
+      gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
+
+      gl.genBuffers(1, &nbuf);
+      gl.bindBuffer(GL_ARRAY_BUFFER_ARB, nbuf);
+      gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
+
+      delete[] vertices;
+      delete[] normals;
+    }
+
+    ::math::vector_2d *texcoords = new ::math::vector_2d[header.nVertices];
+
+    for (size_t i = 0; i<header.nVertices; ++i)
+      texcoords[i] = origVertices[i].texcoords;
+
+    gl.bindBuffer(GL_ARRAY_BUFFER_ARB, tbuf);
+    gl.bufferData(GL_ARRAY_BUFFER_ARB, 2 * size, texcoords, GL_STATIC_DRAW_ARB);
+
+    delete[] texcoords;
+  }
+  else
+  {
+    ModelDrawList = gl.genLists(1);
+    gl.newList(ModelDrawList, GL_COMPILE);
+    drawModel(0);
+    gl.endList();
+
+    SelectModelDrawList = gl.genLists(1);
+    gl.newList(SelectModelDrawList, GL_COMPILE);
+    drawModelSelect(0);
+    gl.endList();
+
+    // clean up vertices, indices etc
+    if (vertices)
+      delete[] vertices;
+    if (normals)
+      delete[] normals;
+    if (indices)
+      delete[] indices;
+    colors.clear();
+    transparency.clear();
+  }
+
+  _finished_upload = true;
 }
 
 void Model::updateEmitters(float dt)
