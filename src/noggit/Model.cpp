@@ -17,6 +17,7 @@ int globalTime = 0;
 
 Model::Model(const std::string& filename)
   : _filename(filename)
+  , _finished_upload(false)
 {
   memset(&header, 0, sizeof(ModelHeader));
 
@@ -63,10 +64,10 @@ void Model::finishLoading()
   }
 
   //! \todo  This takes a biiiiiit long. Have a look at this.
-  if (animated)
+  initCommon(f);
+
+  if(animated)
     initAnimated(f);
-  else
-    initStatic(f);
 
   f.close();
 
@@ -198,6 +199,9 @@ math::quaternion fixCoordSystemQuat(math::quaternion v)
 
 void Model::initCommon(const MPQFile& f)
 {
+  origVertices = new ModelVertex[header.nVertices];
+  memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
+
   // assume: origVertices already set
   if (!animGeometry) {
     vertices = new math::vector_3d[header.nVertices];
@@ -232,14 +236,12 @@ void Model::initCommon(const MPQFile& f)
     {
       _specialTextures[i] = -1;
       _textureFilenames[i] = std::string(f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen);
-      _textures.emplace_back (_textureFilenames[i]);
     }
     else
     {
 #ifndef NO_REPLACIBLE_TEXTURES_HACK
       _specialTextures[i] = -1;
       _textureFilenames[i] = "tileset/generic/black.blp";
-      _textures.emplace_back (_textureFilenames[i]);
 #else
       //! \note special texture - only on characters and such... Noggit should not even render these.
       //! \todo Check if this is actually correct. Or just remove it.
@@ -393,34 +395,8 @@ void Model::initCommon(const MPQFile& f)
   // zomg done
 }
 
-void Model::initStatic(const MPQFile& f)
-{
-  origVertices = (ModelVertex*)(f.getBuffer() + header.ofsVertices);
-
-  initCommon(f);
-
-  ModelDrawList = gl.genLists(1);
-  gl.newList(ModelDrawList, GL_COMPILE);
-  drawModel( /*false*/);
-  gl.endList();
-
-  // clean up vertices, indices etc
-  if (normals)
-    delete[] normals;
-}
-
 void Model::initAnimated(const MPQFile& f)
 {
-  origVertices = new ModelVertex[header.nVertices];
-  memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
-
-  gl.genBuffers(1, &vbuf);
-  gl.genBuffers(1, &tbuf);
-  const size_t size = header.nVertices * sizeof(float);
-  vbufsize = 3 * size;
-
-  initCommon(f);
-
   if (header.nAnimations > 0) {
     anims.resize (header.nAnimations);
     memcpy(anims.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
@@ -455,18 +431,6 @@ void Model::initAnimated(const MPQFile& f)
       bones.emplace_back(f, mb[i], globalSequences.data(), animfiles);
     }
   }
-
-  if (!animGeometry) {
-    gl.bufferData<GL_ARRAY_BUFFER> (vbuf, vbufsize, vertices, GL_STATIC_DRAW);
-    gl.genBuffers(1, &nbuf);
-    gl.bufferData<GL_ARRAY_BUFFER> (nbuf, vbufsize, normals, GL_STATIC_DRAW);
-    delete[] normals;
-  }
-  math::vector_2d *texcoords = new math::vector_2d[header.nVertices];
-  for (size_t i = 0; i<header.nVertices; ++i)
-    texcoords[i] = origVertices[i].texcoords;
-  gl.bufferData<GL_ARRAY_BUFFER> (tbuf, 2 * size, texcoords, GL_STATIC_DRAW);
-  delete[] texcoords;
 
   if (animTextures) {
     ModelTexAnimDef *ta = reinterpret_cast<ModelTexAnimDef*>(f.getBuffer() + header.ofsTexAnims);
@@ -1068,6 +1032,11 @@ void Model::draw()
   if (!finishedLoading())
     return;
 
+  if (!_finished_upload) {
+    upload();
+    return;
+  }
+
   if (gWorld && gWorld->drawfog)
     gl.enable(GL_FOG);
   else
@@ -1139,6 +1108,56 @@ void Model::lightsOn(opengl::light lbase)
 void Model::lightsOff(opengl::light lbase)
 {
   for (unsigned int i = 0, l = lbase; i<header.nLights; ++i) gl.disable(l++);
+}
+
+void Model::upload()
+{
+  for (std::string texture : _textureFilenames)
+    _textures.emplace_back(texture);
+
+  if (animated)
+  {
+    gl.genBuffers(1, &vbuf);
+    gl.genBuffers(1, &tbuf);
+    const size_t size = header.nVertices * sizeof(float);
+    vbufsize = 3 * size;
+
+    if (!animGeometry) {
+      gl.bindBuffer(GL_ARRAY_BUFFER_ARB, vbuf);
+      gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
+
+      gl.genBuffers(1, &nbuf);
+      gl.bindBuffer(GL_ARRAY_BUFFER_ARB, nbuf);
+      gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
+
+      delete[] normals;
+    }
+
+    ::math::vector_2d *texcoords = new ::math::vector_2d[header.nVertices];
+
+    for (size_t i = 0; i<header.nVertices; ++i)
+      texcoords[i] = origVertices[i].texcoords;
+
+    gl.bindBuffer(GL_ARRAY_BUFFER_ARB, tbuf);
+    gl.bufferData(GL_ARRAY_BUFFER_ARB, 2 * size, texcoords, GL_STATIC_DRAW_ARB);
+
+    delete[] texcoords;
+  }
+  else
+  {
+    ModelDrawList = gl.genLists(1);
+    gl.newList(ModelDrawList, GL_COMPILE);
+    drawModel();
+    gl.endList();
+
+    // clean up vertices, indices etc
+    if (normals)
+      delete[] normals;
+    colors.clear();
+    transparency.clear();
+  }
+
+  _finished_upload = true;
 }
 
 void Model::updateEmitters(float dt)
