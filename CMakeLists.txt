@@ -103,7 +103,7 @@ set ( noggit_ui_sources
       src/noggit/ui/DBCEditor.cpp
       src/noggit/ui/projectExplorer.cpp
       src/noggit/ui/textureselecter.cpp
-      src/noggit/ui/MainWindow.cpp
+      src/noggit/ui/main_window.cpp
       src/noggit/ui/zoneid_widget.cpp
     )
 
@@ -158,6 +158,7 @@ set ( noggit_ui_headers
       src/noggit/ui/help_widget.h
       src/noggit/ui/model_spawner.h
       src/noggit/ui/minimap_widget.h
+      src/noggit/ui/main_window.hpp
       src/noggit/ui/DBCEditor.h
       src/noggit/ui/projectExplorer.h
       src/noggit/ui/textureselecter.h
@@ -183,7 +184,7 @@ set ( noggit_headers_to_moc
       src/noggit/ui/DBCEditor.h
       src/noggit/ui/projectExplorer.h
       src/noggit/ui/textureselecter.h
-      src/noggit/ui/MainWindow.h
+      src/noggit/ui/main_window.hpp
       src/noggit/ui/zoneid_widget.h
     )
 

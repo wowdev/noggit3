@@ -17,12 +17,12 @@ namespace noggit
     class about_widget;
     class help_widget;
 
-    class MainWindow : public QMainWindow
+    class main_window : public QMainWindow
     {
       Q_OBJECT
 
     public:
-      MainWindow(QWidget* parent = 0);
+      main_window(QWidget* parent = 0);
 
       void addEditorMenu(QMenu* menu);
 
