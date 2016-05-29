@@ -51,7 +51,7 @@ include_directories ( SYSTEM ${GLUT_INCLUDE_DIRS}
                     )
 
 # Gather source files.
-set ( noggit_sources
+set ( noggit_root_sources
       src/noggit/application.cpp
       src/noggit/blp_texture.cpp
       src/noggit/Brush.cpp
@@ -80,11 +80,20 @@ set ( noggit_sources
       src/noggit/DBCTableModel.cpp
       src/noggit/ChunkWater.cpp
       src/noggit/TileWater.cpp
+    )
+
+set ( noggit_async_sources
       src/noggit/async/loader.cpp
       src/noggit/async/loading_thread.cpp
+    )
+
+set ( noggit_mpq_sources
       src/noggit/mpq/archive_manager.cpp
       src/noggit/mpq/archive.cpp
       src/noggit/mpq/file.cpp
+    )
+
+set ( noggit_ui_sources
       src/noggit/ui/about_widget.cpp
       src/noggit/ui/settingsDialog.cpp
       src/noggit/ui/help_widget.cpp
@@ -99,7 +108,7 @@ set ( noggit_sources
       src/noggit/ui/zoneid_widget.cpp
     )
 
-set ( noggit_headers
+set ( noggit_root_headers
       src/noggit/application.h
       src/noggit/blp_texture.h
       src/noggit/Animated.h
@@ -129,12 +138,21 @@ set ( noggit_headers
       src/noggit/World.h
       src/noggit/ModelView.h
       src/noggit/DBCTableModel.h
+    )
+
+set ( noggit_async_headers
       src/noggit/async/loader.h
       src/noggit/async/loading_thread.h
       src/noggit/async/object.h
+    )
+
+set ( noggit_mpq_headers
       src/noggit/mpq/archive_manager.h
       src/noggit/mpq/archive.h
       src/noggit/mpq/file.h
+    )
+
+set ( noggit_ui_headers
       src/noggit/ui/about_widget.h
       src/noggit/ui/settingsDialog.h
       src/noggit/ui/cursor_selector.h
@@ -145,7 +163,6 @@ set ( noggit_headers
       src/noggit/ui/projectExplorer.h
       src/noggit/ui/textureselecter.h
       src/noggit/ui/editortemplate.h
-      src/noggit/ui/MainWindow.h
       src/noggit/ui/zoneid_widget.h
     )
 
@@ -183,7 +200,7 @@ set ( opengl_sources
     )
 
 set ( opengl_headers
-	  src/opengl/context.h
+	    src/opengl/context.h
       src/opengl/call_list.h
       src/opengl/settings_saver.h
       src/opengl/texture.h
@@ -233,6 +250,20 @@ set ( math_headers
 
 set ( headers_to_moc
       ${noggit_headers_to_moc}
+    )
+
+set ( noggit_sources
+      ${noggit_root_sources}
+      ${noggit_async_sources}
+      ${noggit_mpq_sources}
+      ${noggit_ui_sources}
+    )
+
+set ( noggit_headers
+      ${noggit_root_headers}
+      ${noggit_async_headers}
+      ${noggit_mpq_headers}
+      ${noggit_ui_headers}
     )
 
 if (COMPILE_DEFINITIONS_RELEASE)
@@ -326,7 +357,10 @@ if (WIN32)
                    ${QM}
                  )
 
-	source_group("noggit"  FILES ${noggit_sources} ${noggit_headers})
+	source_group("noggit"  FILES ${noggit_root_sources} ${noggit_root_headers})
+  source_group("noggit\\async"  FILES ${noggit_async_sources} ${noggit_async_headers})
+  source_group("noggit\\mpq"  FILES ${noggit_mpq_sources} ${noggit_mpq_headers})
+  source_group("noggit\\ui"  FILES ${noggit_ui_sources} ${noggit_ui_headers})
 	source_group("opengl"  FILES ${opengl_sources} ${opengl_headers})
 	source_group("windows"  FILES ${windows_sources} ${windows_headers})
 	source_group("helper"  FILES ${helper_sources} ${helper_headers})
