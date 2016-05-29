@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "MainWindow.h"
+#include "main_window.hpp"
 
 #include <stdexcept>
 
@@ -26,7 +26,7 @@ namespace noggit
 {
   namespace ui
   {
-    MainWindow::MainWindow(QWidget* parent)
+    main_window::main_window(QWidget* parent)
     : QMainWindow(parent)
 #ifdef Q_WS_MAC
     //! \note do not set parent to have global menu bar for all windows so long editor is not part of mainwindow
@@ -67,7 +67,7 @@ namespace noggit
 
 
 
-    void MainWindow::createDockWidgets()
+    void main_window::createDockWidgets()
     {
       projectExplorer* explorer = new projectExplorer(app().setting("paths/project").toString());
       QDockWidget* dockWidget = new QDockWidget(tr("Project Explorer"), this);
@@ -78,7 +78,7 @@ namespace noggit
       addDockWidget (Qt::LeftDockWidgetArea, dockWidget);
     }
 
-    void MainWindow::create_world_view (World* world)
+    void main_window::create_world_view (World* world)
     {
 
       MapView* map_view ( new MapView ( world
@@ -93,7 +93,7 @@ namespace noggit
       map_view->updateParent();
     }
 
-    void MainWindow::maps()
+    void main_window::maps()
     {
       this->map_selection_menu = new Menu (nullptr);
       connect (this->map_selection_menu, SIGNAL (create_world_view_request (World*)), this, SLOT (create_world_view (World*)));
@@ -101,36 +101,36 @@ namespace noggit
 	    this->map_selection_menu->show();
     }
 
-    void MainWindow::projectExplorerOpen()
+    void main_window::projectExplorerOpen()
     {
       createDockWidgets();
     }
 
-    void MainWindow::settingsClicked()
+    void main_window::settingsClicked()
     {
       _settings = new noggit::ui::settingsDialog;
       _settings->show();
     }
 
-    void MainWindow::about()
+    void main_window::about()
     {
       _about = new noggit::ui::about_widget;
       _about->show();
     }
 
-    void MainWindow::help_mapEditor()
+    void main_window::help_mapEditor()
     {
       _help = new noggit::ui::help_widget;
       _help->show();
     }
 
-    void MainWindow::addEditorMenu(QMenu* menu)
+    void main_window::addEditorMenu(QMenu* menu)
     {
       menuBar()->addMenu(menu);
     }
 
 #ifdef Q_OS_MAC
-    QMenuBar* MainWindow::menuBar()
+    QMenuBar* main_window::menuBar()
     {
       return _menu_bar;
     }

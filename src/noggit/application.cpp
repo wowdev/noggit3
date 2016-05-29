@@ -28,7 +28,7 @@
 #include <noggit/mpq/file.h>
 #include <noggit/TextureManager.h> // TextureManager::report()
 #include <noggit/ui/DBCEditor.h>
-#include <noggit/ui/MainWindow.h>
+#include <noggit/ui/main_window.hpp>
 #include <noggit/WMO.h> // WMOManager::report()
 
 #include <csignal>
@@ -89,7 +89,7 @@ namespace noggit
 
     initialize_gl_format();
 
-    ui::MainWindow* mainwindow = new ui::MainWindow;
+    ui::main_window* mainwindow = new ui::main_window;
     if (_settings->value ("maximizedAppShow").toBool() == true)
       mainwindow->showMaximized();
     else

@@ -37,9 +37,9 @@
 #include <noggit/ui/minimap_widget.h>
 #include <noggit/ui/cursor_selector.h>
 #include <noggit/ui/model_spawner.h>
-#include <noggit/ui/editortemplate.h>
 #include <noggit/ui/zoneid_widget.h>
 #include <noggit/blp_texture.h>
+#include <noggit/ui/main_window.hpp>
 
 //! \todo Replace all old gui elements with new classes / widgets.
 #undef COMPILE_OBSOLETE_GUI_ELEMENTS
@@ -2403,7 +2403,7 @@ namespace noggit
 
 void MapView::updateParent()
 {
-    noggit::ui::MainWindow* editortemplate = (noggit::ui::MainWindow*)this->parent();
+    noggit::ui::main_window* editortemplate = (noggit::ui::main_window*)this->parent();
 
     editortemplate->addToolBar(Qt::TopToolBarArea, _shaping_settings_widget);
     editortemplate->addToolBar(Qt::TopToolBarArea, _texturing_settings_widget);
