@@ -166,6 +166,9 @@ class Model: public noggit::async::object
   bool forceAnim;
   noggit::mpq::file **animfiles;
 
+  std::vector<std::string> _texture_names;
+  bool _finished_upload;
+
   std::vector<TextureAnim> texanims;
   ModelAnimation *anims;
   int *globalSequences;
@@ -181,7 +184,6 @@ class Model: public noggit::async::object
   void initCommon(const noggit::mpq::file& f);
   bool isAnimated(const noggit::mpq::file& f);
   void initAnimated(const noggit::mpq::file& f);
-  void initStatic(const noggit::mpq::file& f);
 
   ModelVertex *origVertices;
   ::math::vector_3d *vertices, *normals;
@@ -194,6 +196,8 @@ class Model: public noggit::async::object
 
   void lightsOn(opengl::light lbase, int animtime);
   void lightsOff(opengl::light lbase);
+
+  void upload();
 
 public:
   std::string _filename; //! \todo ManagedItem already has a name. Use that?
