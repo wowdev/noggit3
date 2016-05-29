@@ -2403,11 +2403,14 @@ namespace noggit
 
 void MapView::updateParent()
 {
-    noggit::ui::EditorTemplate* editortemplate = (noggit::ui::EditorTemplate*)this->parent();
-    editortemplate->addPropBar(_shaping_settings_widget);
-    editortemplate->addPropBar(_texturing_settings_widget);
-    editortemplate->addPropBar(_smoothing_settings_widget);
-    editortemplate->addToolBar(toolBar);
+    noggit::ui::MainWindow* editortemplate = (noggit::ui::MainWindow*)this->parent();
+
+    editortemplate->addToolBar(Qt::TopToolBarArea, _shaping_settings_widget);
+    editortemplate->addToolBar(Qt::TopToolBarArea, _texturing_settings_widget);
+    editortemplate->addToolBar(Qt::TopToolBarArea, _smoothing_settings_widget);
+
+    editortemplate->addToolBar(Qt::LeftToolBarArea, toolBar);
+
     for (QMenu* menu : _menus)
     {
       editortemplate->addEditorMenu(menu);
