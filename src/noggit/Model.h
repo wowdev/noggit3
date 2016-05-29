@@ -146,6 +146,8 @@ class Model : public AsyncObject {
   Model(const MPQFile& f);
 
 
+  bool _finished_upload;
+
   std::vector<TextureAnim> texanims;
   std::vector<ModelAnimation> anims;
   std::vector<int> globalSequences;
@@ -160,7 +162,6 @@ class Model : public AsyncObject {
   void initCommon(const MPQFile& f);
   bool isAnimated(const MPQFile& f);
   void initAnimated(const MPQFile& f);
-  void initStatic(const MPQFile& f);
 
   ModelVertex *origVertices;
   math::vector_3d *vertices, *normals;
@@ -173,6 +174,8 @@ class Model : public AsyncObject {
 
   void lightsOn(opengl::light lbase);
   void lightsOff(opengl::light lbase);
+
+  void upload();
 
 public:
   std::string _filename; //! \todo ManagedItem already has a name. Use that?
