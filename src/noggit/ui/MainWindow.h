@@ -24,7 +24,7 @@ namespace noggit
     public:
       MainWindow(QWidget* parent = 0);
 
-      QMenuBar* menuBar();
+      void addEditorMenu(QMenu* menu);
 
 	public:
 		Menu* map_selection_menu;
@@ -45,7 +45,10 @@ namespace noggit
       void initialize_video();
       void createDockWidgets();
 
+#ifdef Q_OS_MAC
       QMenuBar* _menu_bar;
+      QMenuBar* menuBar();
+#endif
 
       QToolBar* currentToolBar;
 
