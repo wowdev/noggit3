@@ -171,7 +171,7 @@ namespace noggit
 
   }
 
-  inline bool map_index::tile_loaded(int z, int x) const
+  bool map_index::tile_loaded (int z, int x) const
   {
     return has_tile(z, x) && _tiles[z][x].tile;
   }
