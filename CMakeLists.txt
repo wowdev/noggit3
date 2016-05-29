@@ -103,7 +103,6 @@ set ( noggit_ui_sources
       src/noggit/ui/DBCEditor.cpp
       src/noggit/ui/projectExplorer.cpp
       src/noggit/ui/textureselecter.cpp
-      src/noggit/ui/editortemplate.cpp
       src/noggit/ui/MainWindow.cpp
       src/noggit/ui/zoneid_widget.cpp
     )
@@ -162,7 +161,6 @@ set ( noggit_ui_headers
       src/noggit/ui/DBCEditor.h
       src/noggit/ui/projectExplorer.h
       src/noggit/ui/textureselecter.h
-      src/noggit/ui/editortemplate.h
       src/noggit/ui/zoneid_widget.h
     )
 
@@ -185,7 +183,6 @@ set ( noggit_headers_to_moc
       src/noggit/ui/DBCEditor.h
       src/noggit/ui/projectExplorer.h
       src/noggit/ui/textureselecter.h
-      src/noggit/ui/editortemplate.h
       src/noggit/ui/MainWindow.h
       src/noggit/ui/zoneid_widget.h
     )
