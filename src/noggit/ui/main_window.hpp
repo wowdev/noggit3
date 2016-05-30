@@ -45,11 +45,6 @@ namespace noggit
       void initialize_video();
       void createDockWidgets();
 
-#ifdef Q_OS_MAC
-      QMenuBar* _menu_bar;
-      QMenuBar* menuBar();
-#endif
-
       QToolBar* currentToolBar;
 
       noggit::ui::settingsDialog* _settings;
