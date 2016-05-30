@@ -28,11 +28,9 @@ namespace noggit
   {
     main_window::main_window(QWidget* parent)
     : QMainWindow(parent)
-#ifdef Q_WS_MAC
-    //! \note do not set parent to have global menu bar for all windows so long editor is not part of mainwindow
-    , _menu_bar (new QMenuBar (nullptr))
-#endif
     {
+      setMenuBar (new QMenuBar (nullptr));
+
       const int xResolution(app().setting("resolution/x").toInt());
       const int yResolution(app().setting("resolution/y").toInt());
 
@@ -128,12 +126,5 @@ namespace noggit
     {
       menuBar()->addMenu(menu);
     }
-
-#ifdef Q_OS_MAC
-    QMenuBar* main_window::menuBar()
-    {
-      return _menu_bar;
-    }
-#endif
   }
 }
