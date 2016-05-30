@@ -12,7 +12,7 @@
 #include <time.h>
 #include <stdio.h> //needed on linux?
 
-
+#include <QOpenGLFramebufferObject>
 #include <QSettings>
 
 #include <math/bounded_nearest.h>
@@ -855,13 +855,29 @@ void World::draw ( size_t flags
     // Selection circle
     if (selected_item && noggit::selection::is_chunk (*selected_item))
     {
+      //! \todo raycasting instead of readPixels and depth buffer
+
       GLint viewport[4];
       gl.getIntegerv (GL_VIEWPORT, viewport);
 
-      float const win_x (mouse_position.x());
-      float const win_y (static_cast<float> (viewport[3]) - mouse_position.y());
+      int const win_x (mouse_position.x());
+      int const win_y (static_cast<float> (viewport[3]) - mouse_position.y());
       float win_z;
-      gl.readPixels (win_x, win_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
+
+      if (QSurfaceFormat::defaultFormat().samples() != -1)
+      {
+        QOpenGLFramebufferObject downsampled_fbo (1, 1, QOpenGLFramebufferObject::CombinedDepthStencil);
+
+        QOpenGLFramebufferObject::blitFramebuffer
+          (&downsampled_fbo, {0, 0, 1, 1}, nullptr, {win_x, win_y, 1, 1}, GL_DEPTH_BUFFER_BIT);
+
+        downsampled_fbo.bind();
+        gl.readPixels (0, 0, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
+      }
+      else
+      {
+        gl.readPixels (win_x, win_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
+      }
 
       ::math::vector_4d const normalized_device_coords
         ( 2.0f * (win_x - static_cast<float> (viewport[0])) / static_cast<float> (viewport[2]) - 1.0f
