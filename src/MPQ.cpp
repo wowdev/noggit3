@@ -10,6 +10,7 @@
 #include <vector>
 #include <fstream>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
@@ -63,34 +64,18 @@ void MPQArchive::finishLoading()
 	{
 		size_t filesize = SFileGetFileSize(fh, NULL); //last NULL for newer version of StormLib
 
-		std::vector<char> list(filesize);
-		SFileReadFile(fh, &list[0], filesize, NULL, NULL); //last NULLs for newer version of StormLib
+        char* readbuffer = new char[filesize];
+		SFileReadFile(fh, readbuffer, filesize, NULL, NULL); //last NULLs for newer version of StormLib
 		SFileCloseFile(fh);
 
-		int lineBeginOfst = 0, lineEndOfst = 0;
-		for (int i = 0; i < filesize; i++)
-		{
-			if (i + 1 <= filesize && (list[i] == '\r' && list[i + 1] == '\n'))
-			{
-				lineEndOfst = i - 1;
-				i+=2;
-			}
-			else if (list[i] == '\n')
-			{
-				lineEndOfst = i - 1;
-				i++;
-			}
+        std::string list(readbuffer);
+        boost::algorithm::to_lower(list);
+        boost::algorithm::replace_all(list, "\r\n", "\n");
 
-			if (lineEndOfst != 0)
-			{
-				std::string temp(lineEndOfst - lineBeginOfst + 1, '\0');
-				for (int x = lineBeginOfst; x < lineEndOfst; x++)
-					temp += tolower(list[x]);
-				gListfile.push_back(std::move(temp));
-				lineBeginOfst = i;
-				lineEndOfst = 0;
-			}
-		}
+        std::vector<std::string> temp;
+        boost::algorithm::split(temp, list, boost::algorithm::is_any_of("\n"));
+        gListfile.insert(gListfile.end(), temp.begin(), temp.end());
+        delete[] readbuffer;
 	}
 
 	finished = true;
