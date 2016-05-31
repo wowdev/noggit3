@@ -237,13 +237,19 @@ namespace noggit
   {
     QOpenGLContext context;
     context.create();
+
+    QOpenGLFramebufferObjectFormat fmt;
+    fmt.setSamples(1);
+    fmt.setInternalTextureFormat(GL_RGBA8);
+
     QOffscreenSurface surface;
     surface.create();
+
     context.makeCurrent (&surface);
 
     opengl::context::scoped_setter const _ (::gl, &context);
 
-    QOpenGLFramebufferObject pixel_buffer (width, height);
+    QOpenGLFramebufferObject pixel_buffer (width, height, fmt);
     pixel_buffer.bind();
 
     gl.viewport (0.0f, 0.0f, width, height);
@@ -252,6 +258,9 @@ namespace noggit
     gl.ortho (0.0f, width, height, 0.0f, 1.0f, -1.0f);
     gl.matrixMode (GL_MODELVIEW);
     gl.loadIdentity();
+
+    gl.clearColor(.0f, .0f, .0f, .0f);
+    gl.clear(GL_COLOR_BUFFER_BIT);
 
     opengl::scoped::texture_setter<0, GL_TRUE> const texture0;
     noggit::blp_texture const texture (blp_filename);
