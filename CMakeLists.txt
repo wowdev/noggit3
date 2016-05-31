@@ -5,8 +5,7 @@ cmake_policy (SET CMP0015 OLD)
 
 project (Noggit)
 
-option(useLibsRepo "Use windows 32 libs repo"
-       [false])
+option(useLibsRepo "Use windows 32 libs repo")
 	   
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED true)
