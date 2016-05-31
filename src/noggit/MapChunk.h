@@ -11,6 +11,7 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/Selection.h>
 #include <noggit/TextureManager.h>
+#include <noggit/texture_set.hpp>
 
 namespace noggit
 {
@@ -105,40 +106,14 @@ public:
 
   float xbase, ybase, zbase;
 
-  int nameID;
+  int nameID, holes;
 
   bool haswater;
 
-  int holes;
+  noggit::texture_set textures;
 
-  int tex[4];
-  std::vector<noggit::scoped_blp_texture_reference> _textures;
-  const unsigned int& texture_flags (const size_t& layer) const
-  {
-    return _texFlags[layer];
-  }
-  void texture_flags (const size_t& layer, const unsigned int& flags)
-  {
-    _texFlags[layer] = flags;
-  }
-  const unsigned int& texture_effect_id (const size_t& layer) const
-  {
-    return _effectID[layer];
-  }
-  void texture_effect_id (const size_t& layer, const unsigned int& id)
-  {
-    _effectID[layer] = id;
-  }
-private:
-  unsigned int _texFlags[4];
-  unsigned int _effectID[4];
-public:
-  unsigned char amap[3][64*64];
   unsigned char mShadowMap[8*64];
-  GLuint alphamaps[3];
   GLuint shadow;
-
-  int animated[4];
 
   GLuint vertices, normals, indices, minimap, minishadows;
 

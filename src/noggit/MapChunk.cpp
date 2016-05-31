@@ -16,7 +16,6 @@
 #include <opengl/texture.h>
 
 #include <noggit/application.h>
-#include <noggit/blp_texture.h>
 #include <noggit/Brush.h>
 #include <noggit/Frustum.h> // Frustum
 #include <noggit/Liquid.h>
@@ -25,12 +24,11 @@
 #include <noggit/Selection.h>
 #include <noggit/World.h>
 #include <noggit/mpq/file.h>
+#include <noggit/texture_set.hpp>
 
-static const double MAPCHUNK_RADIUS = 47.140452079103168293389624140323; //std::sqrt((533.33333/16)^2 + (533.33333/16)^2)
 static const int CONTOUR_WIDTH = 128;
 static const float texDetail = 8.0f;
 static const float TEX_RANGE = 62.0f / 64.0f;
-
 
 const int stripsize = 8*18 + 7*2;
 
@@ -263,21 +261,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
 
     assert(fourcc == 'MCLY');
 
-    for (size_t i = 0; i < (size / 16U); ++i) {
-      f->read(&tex[i], 4);
-      f->read(&_texFlags[i], 4);
-      f->read(&MCALoffset[i], 4);
-      f->read(&_effectID[i], 4);
-
-      if (texture_flags(i) & FLAG_ANIMATE)
-      {
-        animated[i] = texture_flags(i);
-      }
-      else {
-        animated[i] = 0;
-      }
-      _textures.emplace_back(maintile->mTextureFilenames[tex[i]]);
-    }
+    textures.initTextures(f, &maintile->mTextureFilenames, size);
   }
   // - MCSH ----------------------------------------------
   {
@@ -316,75 +300,8 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
 
     assert(fourcc == 'MCAL');
 
-    gl.genTextures(3, alphamaps);
-    size_t MCALbase = f->getPos();
-
-    for (unsigned int layer = 0; layer < header.nLayers; ++layer)
-    {
-      if (texture_flags(layer) & 0x100)
-      {
-        uint8_t* const alpha_map(&amap[layer - 1][0]);
-        uint8_t const* input(f->get<uint8_t>(MCALbase + MCALoffset[layer]));
-
-        memset(alpha_map, 255, 64 * 64);
-
-        if (texture_flags(layer) & 0x200)
-        {
-          for (std::size_t offset_output(0); offset_output < 4096;)
-          {
-            bool const fill(*input & 0x80);
-            std::size_t const n(*input & 0x7F);
-            ++input;
-
-            if (fill)
-            {
-              memset(&alpha_map[offset_output], *input, n);
-              ++input;
-            }
-            else
-            {
-              memcpy(&alpha_map[offset_output], input, n);
-              input += n;
-            }
-
-            offset_output += n;
-          }
-        }
-        else if (bigAlpha)
-        {
-          memcpy(alpha_map, input, 64 * 64);
-        }
-        else
-        {
-          for (std::size_t x(0); x < 64; ++x)
-          {
-            for (std::size_t y(0); y < 64; y += 2)
-            {
-              alpha_map[x * 64 + y + 0] = ((*input & 0x0f) << 4) | 0xf;
-              alpha_map[x * 64 + y + 1] = ((*input & 0xf0) << 0) | 0xf;
-              ++input;
-            }
-          }
-        }
-
-        if (!(header.flags & FLAG_do_not_fix_alpha_map))
-        {
-          for (std::size_t i(0); i < 64; ++i)
-          {
-            alpha_map[i * 64 + 63] = alpha_map[i * 64 + 62];
-            alpha_map[63 * 64 + i] = alpha_map[62 * 64 + i];
-          }
-          alpha_map[63 * 64 + 63] = alpha_map[62 * 64 + 62];
-        }
-
-        gl.bindTexture(GL_TEXTURE_2D, alphamaps[layer - 1]);
-        gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, alpha_map);
-        gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      }
-    }
+    const mcnk_flags_type flags = mcnk_flags_type::interpret(header.flags);
+    textures.initAlphamaps(f, maintile->mBigAlpha, flags.do_not_fix_alpha_map);
   }
 
   vcenter = (vmin + vmax) * 0.5f;
@@ -528,11 +445,9 @@ void MapChunk::drawTextures() const
 {
   gl.color4f(1.0f,1.0f,1.0f,1.0f);
 
-  if(_textures.size() > 0U)
+  if(textures.num() > 0U)
   {
-    opengl::texture::enable_texture (0);
-
-    _textures[0]->bind();
+    textures.bindTexture(0, 0);
 
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -546,7 +461,7 @@ void MapChunk::drawTextures() const
   }
 
   const mcly_flags_type& flags_layer_0
-    (mcly_flags_type::interpret (animated[0]));
+    (mcly_flags_type::interpret (textures.animated(0)));
 
   {
     texture_animation_setup const texture_animation (flags_layer_0);
@@ -563,27 +478,23 @@ void MapChunk::drawTextures() const
     gl.end();
   }
 
-  if (_textures.size() > 1U) {
+  if (textures.num() > 1U) {
     //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
     //gl.depthMask(GL_FALSE);
   }
-  for(size_t i=1; i < _textures.size(); ++i)
+  for(size_t i=1; i < textures.num(); ++i)
   {
-    opengl::texture::enable_texture (0);
-
-    _textures[i]->bind();
+    textures.bindTexture(i, 0);
 
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    opengl::texture::enable_texture (1);
-
-    gl.bindTexture(GL_TEXTURE_2D, alphamaps[i-1]);
+    textures.bindAlphamap(i - 1, 1);
 
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    const mcly_flags_type& flags (mcly_flags_type::interpret (animated[i]));
+    const mcly_flags_type& flags (mcly_flags_type::interpret (textures.animated(i)));
 
     texture_animation_setup const texture_animation (flags);
 
@@ -646,8 +557,6 @@ void MapChunk::initStrip()
 
 MapChunk::~MapChunk()
 {
-  // unload alpha maps
-  gl.deleteTextures( 3, alphamaps );
   // shadow maps, too
   gl.deleteTextures( 1, &shadow );
 
@@ -854,7 +763,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
 
   // first pass: base texture
-  if (_textures.empty())
+  if (textures.num() == 0)
   {
     opengl::texture::disable_texture (0);
     opengl::texture::disable_texture (1);
@@ -863,37 +772,31 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   }
   else
   {
-    opengl::texture::enable_texture (0);
-
-    _textures[0]->bind();
+    textures.bindTexture(0, 0);
 
     opengl::texture::disable_texture (1);
   }
 
   gl.enable(GL_LIGHTING);
-  drawPass(animated[0]);
+  drawPass(textures.animated(0));
 
-  if (_textures.size() > 1U) {
+  if (textures.num() > 1U) {
     //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
     gl.depthMask(GL_FALSE);
   }
 
   // additional passes: if required
-  for( size_t i = 1; i < _textures.size(); ++i )
+  for( size_t i = 1; i < textures.num(); ++i )
   {
-    opengl::texture::enable_texture (0);
-
-    _textures[i]->bind();
+    textures.bindTexture(i, 0);
 
     // this time, use blending:
-    opengl::texture::enable_texture (1);
+    textures.bindAlphamap(i - 1, 1);
 
-    gl.bindTexture( GL_TEXTURE_2D, alphamaps[i - 1] );
-
-    drawPass(animated[i]);
+    drawPass(textures.animated(i));
   }
 
-  if (_textures.size() > 1U) {
+  if (textures.num() > 1U) {
     //gl.depthFunc(GL_LEQUAL);
     gl.depthMask(GL_TRUE);
   }
@@ -1175,7 +1078,7 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
   zdiff = zbase - z + CHUNKSIZE/2;
   dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
-  if(dist > (radius + MAPCHUNK_RADIUS))
+  if(dist > (radius + noggit::MAPCHUNK_RADIUS))
     return false;
 
   vmin.y (9999999.0f);
@@ -1236,7 +1139,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
   zdiff= zbase - z + CHUNKSIZE/2;
   dist= std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
-  if(dist > (radius + MAPCHUNK_RADIUS))
+  if(dist > (radius + noggit::MAPCHUNK_RADIUS))
     return false;
 
   vmin.y (9999999.0f);
@@ -1289,7 +1192,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
   zdiff = zbase - z + CHUNKSIZE/2;
   dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
-  if(dist > (radius + MAPCHUNK_RADIUS) )
+  if(dist > (radius + noggit::MAPCHUNK_RADIUS) )
     return false;
 
   vmin.y (9999999.0f);
@@ -1392,280 +1295,20 @@ w=std::sqrt(L*z/(u*y))
 */
 void MapChunk::eraseTextures()
 {
-  _textures.clear();
+  textures.eraseTextures();
 }
 
 int MapChunk::addTexture( noggit::scoped_blp_texture_reference texture )
 {
-  int texLevel = -1;
-  if( _textures.size() < 4U )
-  {
-    texLevel = _textures.size();
-    _textures.emplace_back (texture);
-    animated[texLevel] = 0;
-    texture_flags (texLevel, 0);
-    texture_effect_id (texLevel, 0);
-    if( texLevel )
-    {
-      if( alphamaps[texLevel-1] < 1 )
-      {
-        LogError << "Alpha Map has invalid texture binding" << std::endl;
-        _textures.pop_back();
-        return -1;
-      }
-      memset( amap[texLevel - 1], 0, 64 * 64 );
-      gl.bindTexture( GL_TEXTURE_2D, alphamaps[texLevel - 1] );
-      gl.texImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[texLevel - 1] );
-      gl.texParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-      gl.texParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-      gl.texParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-      gl.texParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-    }
-  }
-  return texLevel;
+  return textures.addTexture(texture);
 }
 void MapChunk::switchTexture( noggit::scoped_blp_texture_reference oldTexture, noggit::scoped_blp_texture_reference newTexture )
 {
-  int texLevel = -1;
-  for (size_t i = 0;i < _textures.size();++i)
-  {
-    // prevent texture duplication
-    if (_textures[i] == newTexture)
-      return;
-    if (_textures[i] == oldTexture)
-      texLevel = i;
-  }
-
-  if(texLevel != -1)
-  {
-  _textures[texLevel] = newTexture;
-  }
+  textures.switchTexture(oldTexture, newTexture);
 }
 bool MapChunk::paintTexture( float x, float z, const brush& Brush, float strength, float pressure, noggit::scoped_blp_texture_reference texture )
 {
-#if 1
-  float zPos,xPos,change,xdiff,zdiff,dist, radius;
-
-  int texLevel=-1;
-
-  radius=Brush.getRadius();
-
-  xdiff= xbase - x + CHUNKSIZE/2;
-  zdiff= zbase - z + CHUNKSIZE/2;
-  dist= std::sqrt( xdiff*xdiff + zdiff*zdiff );
-
-  if( dist > (radius+MAPCHUNK_RADIUS) )
-    return false;
-
-  //First Lets find out do we have the texture already
-  for(size_t i=0;i<_textures.size();++i)
-    if(_textures[i]==texture)
-      texLevel=i;
-
-
-  if( (texLevel==-1) && (_textures.size()==4) )
-  {
-    // Implement here auto texture slot freeing :)
-    LogDebug << "paintTexture: No free texture slot" << std::endl;
-    return false;
-  }
-
-  //Only 1 layer and its that layer
-  if( (texLevel!=-1) && (_textures.size()==1) )
-    return true;
-
-
-  change=CHUNKSIZE/62.0f;
-  zPos=zbase;
-
-  float target,tarAbove, tPressure;
-  //int texAbove=_textures.size()-texLevel-1;
-
-
-  for(int j=0; j < 63 ; j++)
-  {
-    xPos=xbase;
-    for(int i=0; i < 63; ++i)
-    {
-      xdiff=xPos-x;
-      zdiff=zPos-z;
-      dist=std::abs(std::sqrt( xdiff*xdiff + zdiff*zdiff ));
-
-      if(dist>radius)
-      {
-        xPos+=change;
-        continue;
-      }
-
-      if(texLevel==-1)
-      {
-        texLevel=addTexture(texture);
-        if(texLevel==0)
-          return true;
-        if(texLevel==-1)
-        {
-          LogDebug << "paintTexture: Unable to add texture." << std::endl;
-          return false;
-        }
-      }
-
-      target=strength;
-      tarAbove=1-target;
-
-      tPressure=pressure*Brush.getValue(dist);
-
-      if(texLevel>0)
-      {
-        uchar test = static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[texLevel-1][i+j*64]) ) + tPressure*target + 0.5f ,255.0f) , 0.0f));
-        amap[texLevel-1][i+j*64]=test;
-      }
-      for(size_t k=texLevel;k<_textures.size()-1;k++)
-        amap[k][i+j*64]=static_cast<unsigned char>(std::max( std::min( (1.0f-tPressure)*( static_cast<float>(amap[k][i+j*64]) ) + tPressure*tarAbove + 0.5f ,255.0f) , 0.0f));
-      xPos+=change;
-    }
-    zPos+=change;
-  }
-
-  if( texLevel == -1 )
-  {
-    LogDebug << "Somehow no texture got painted." << std::endl;
-    return false;
-  }
-
-  for( size_t j = texLevel; j < _textures.size() - 1; j++ )
-  {
-    if( j > 2 )
-    {
-      LogError << "WTF how did you get here??? Get a cookie." << std::endl;
-      continue;
-    }
-    gl.bindTexture( GL_TEXTURE_2D, alphamaps[j] );
-    gl.texImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j] );
-  }
-
-  if( texLevel )
-  {
-    gl.bindTexture( GL_TEXTURE_2D, alphamaps[texLevel - 1] );
-    gl.texImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[texLevel - 1] );
-  }
-#else
-  // new stuff from bernd.
-  // need to get rework. Add old code with switch that the guys out there can use paint.
-  const float radius = Brush.getRadius();
-
-  // Are we really painting on this chunk?
-  const float xdiff = xbase + CHUNKSIZE / 2 - x;
-  const float zdiff = zbase + CHUNKSIZE / 2 - z;
-
-  if( ( xdiff * xdiff + zdiff * zdiff ) > ( MAPCHUNK_RADIUS+ radius ) * ( MAPCHUNK_RADIUS + radius ) )
-  return false;
-
-
-  // Search for empty layer.
-  int texLevel = -1;
-
-  for( size_t i = 0; i < _textures.size(); ++i )
-  {
-    if( _textures[i] == texture )
-    {
-      texLevel = i;
-    }
-   }
-
-  if( texLevel == -1 )
-  {
-
-    if( _textures.size() == 4 )
-    {
-      for( size_t layer = 0; layer < _textures.size(); ++layer )
-      {
-        unsigned char map[64*64];
-        if( layer )
-          memcpy( map, amap[layer-1], 64*64 );
-        else
-          memset( map, 255, 64*64 );
-
-        for( size_t layerAbove = layer + 1; layerAbove < _textures.size(); ++layerAbove )
-        {
-          unsigned char* above = amap[layerAbove-1];
-          for( size_t i = 0; i < 64 * 64; ++i )
-          {
-            map[i] = std::max( 0, map[i] - above[i] );
-          }
-        }
-
-        size_t sum = 0;
-        for( size_t i = 0; i < 64 * 64; ++i )
-        {
-          sum += map[i];
-        }
-
-        if( !sum )
-        {
-          for( size_t i = layer; i < _textures.size() - 1; ++i )
-          {
-            _textures[i] = _textures[i+1];
-            animated[i] = animated[i+1];
-            texture_flags (i, texture_flags (i + 1));
-            texture_effect_id (i, texture_effect_id (i + 1));
-            if( i )
-              memcpy( amap[i-1], amap[i], 64*64 );
-          }
-
-          for( size_t j = layer; j < _textures.size(); j++ )
-              {
-                gl.bindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
-                gl.texImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
-              }
-              _textures.pop_back();
-        }
-      }
-    }
-
-    if( _textures.size() == 4 )
-    return false;
-
-      texLevel = addTexture( texture );
-
-  }
-  else
-  {
-    if( _textures.size() == 1 )
-      return true;
-  }
-  LogDebug << "TexLevel: " << texLevel << " -  _textures.size(): " << _textures.size() << "\n";
-  // We now have a texture at texLevel > 0.
-  static const float change = CHUNKSIZE / 62.0f; //! \todo 64? 63? 62? Wtf?
-
-  if( texLevel == 0 )
-    return true;
-
-  for( size_t j = 0; j < 64; ++j )
-  {
-    for( size_t i = 0; i < 64; ++i )
-    {
-      const float xdiff_ = xbase + change * i - x;
-      const float zdiff_ = zbase + change * j - z;
-      const float dist = std::sqrt( xdiff_ * xdiff_ + zdiff_ * zdiff_ );
-
-      if( dist <= radius )
-      {
-          amap[texLevel - 1][i + j * 64] = (unsigned char)( std::max( std::min( amap[texLevel - 1][i + j * 64] + pressure * strength * Brush.getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
-      }
-    }
-  }
-
-
-  // Redraw changed layers.
-
-  for( size_t j = texLevel; j < _textures.size(); j++ )
-  {
-    gl.bindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
-    gl.texImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
-  }
-#endif
-
-  return true;
+  return textures.paintTexture(xbase, zbase, x, z, Brush, strength, pressure, texture);
 }
 
 bool MapChunk::isHole( int i, int j )
@@ -1720,14 +1363,14 @@ void MapChunk::update_low_quality_texture_map()
     for (size_t x (0); x < 8; ++x)
     {
       size_t winning_layer (0);
-      for (size_t layer (1); layer < _textures.size(); ++layer)
+      for (size_t layer (1); layer < textures.num(); ++layer)
       {
         size_t sum (0);
         for (size_t j (0); j < 8; ++j)
         {
           for (size_t i (0); i < 8; ++i)
           {
-            sum += amap[layer][(y * 8 + j) * 64 + (x * 8 + i)];
+            sum += textures.getAlpha(layer, (y * 8 + j) * 64 + (x * 8 + i));
           }
         }
         sum /= 8 * 8;

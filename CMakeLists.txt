@@ -6,7 +6,7 @@ cmake_policy (SET CMP0015 OLD)
 project (Noggit)
 
 option(useLibsRepo "Use windows 32 libs repo")
-	   
+
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED true)
 
@@ -54,6 +54,7 @@ include_directories ( SYSTEM ${GLUT_INCLUDE_DIRS}
 
 # Gather source files.
 set ( noggit_root_sources
+      src/noggit/alphamap.cpp
       src/noggit/application.cpp
       src/noggit/blp_texture.cpp
       src/noggit/Brush.cpp
@@ -74,6 +75,7 @@ set ( noggit_root_sources
       src/noggit/Selection.cpp
       src/noggit/Shaders.cpp
       src/noggit/Sky.cpp
+      src/noggit/texture_set.cpp
       src/noggit/TextureManager.cpp
       src/noggit/WMO.cpp
       src/noggit/WMOInstance.cpp
@@ -110,6 +112,7 @@ set ( noggit_ui_sources
     )
 
 set ( noggit_root_headers
+      src/noggit/alphamap.hpp
       src/noggit/application.h
       src/noggit/blp_texture.h
       src/noggit/Animated.h
@@ -133,6 +136,7 @@ set ( noggit_root_headers
       src/noggit/Selection.h
       src/noggit/Shaders.h
       src/noggit/Sky.h
+      src/noggit/texture_set.hpp
       src/noggit/TextureManager.h
       src/noggit/WMO.h
       src/noggit/WMOInstance.h

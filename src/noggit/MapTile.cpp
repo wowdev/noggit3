@@ -679,9 +679,9 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
   for( int i = 0; i < 16; ++i )
     for( int j = 0; j < 16; ++j )
-      for( size_t tex = 0; tex < mChunks[i][j]->_textures.size(); tex++ )
-        if( lTextures.find( mChunks[i][j]->_textures[tex]->filename().toStdString() ) == lTextures.end() )
-          lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->_textures[tex]->filename().toStdString(), -1 ) );
+      for( size_t tex = 0; tex < mChunks[i][j]->textures.num(); tex++ )
+        if( lTextures.find( mChunks[i][j]->textures.filename(tex) ) == lTextures.end() )
+          lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->textures.filename(tex), -1 ) );
 
   lID = 0;
   for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
@@ -1062,28 +1062,28 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
         // MCLY
 //        {
-          size_t lMCLY_Size = mChunks[y][x]->_textures.size() * 0x10;
+          size_t lMCLY_Size = mChunks[y][x]->textures.num() * 0x10;
 
           lADTFile.resize (lADTFile.size() + 8 + lMCLY_Size );
           SetChunkHeader( lADTFile, lCurrentPosition, 'MCLY', lMCLY_Size );
 
           get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->ofsLayer = lCurrentPosition - lMCNK_Position;
-          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->nLayers = mChunks[y][x]->_textures.size();
+          get_pointer<MapChunkHeader>( lADTFile, lMCNK_Position + 8 )->nLayers = mChunks[y][x]->textures.num();
 
           // MCLY data
-          for( size_t j = 0; j < mChunks[y][x]->_textures.size(); ++j )
+          for( size_t j = 0; j < mChunks[y][x]->textures.num(); ++j )
           {
             ENTRY_MCLY * lLayer = get_pointer<ENTRY_MCLY>( lADTFile, lCurrentPosition + 8 + 0x10 * j );
 
-            lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename().toStdString() )->second;
+            lLayer->textureID = lTextures.find( mChunks[y][x]->textures.filename(j) )->second;
 
-            lLayer->flags = mChunks[y][x]->texture_flags (j);
+            lLayer->flags = mChunks[y][x]->textures.flag (j);
 
             // if not first, have alpha layer, if first, have not. never have compression.
             lLayer->flags = ( j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & ( ~FLAG_USE_ALPHA ) ) & ( ~FLAG_ALPHA_COMPRESSED );
 
             lLayer->ofsAlpha = ( j == 0 ? 0 : ( mBigAlpha ? 64 * 64 * ( j - 1 ) : 32 * 64 * ( j - 1 ) ) );
-            lLayer->effectID = mChunks[y][x]->texture_effect_id (j);
+            lLayer->effectID = mChunks[y][x]->textures.effect (j);
           }
 
           lCurrentPosition += 8 + lMCLY_Size;
@@ -1193,7 +1193,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 //        {
           int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
 
-      size_t lMaps = mChunks[y][x]->_textures.size() ? mChunks[y][x]->_textures.size() - 1U : 0U;
+      size_t lMaps = mChunks[y][x]->textures.num() ? mChunks[y][x]->textures.num() - 1U : 0U;
 
           int lMCAL_Size = lDimensions * lMaps;
 
@@ -1210,14 +1210,14 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
             //First thing we have to do is downsample the alpha maps before we can write them
             if( mBigAlpha )
               for( int k = 0; k < lDimensions; k++ )
-                lAlphaMaps[lDimensions * j + k] = mChunks[y][x]->amap[j][k];
+                lAlphaMaps[lDimensions * j + k] = mChunks[y][x]->textures.getAlpha(j, k);
             else
             {
               unsigned char upperNibble, lowerNibble;
               for( int k = 0; k < lDimensions; k++ )
               {
-                lowerNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->amap[j][k * 2 + 0]) ) * 0.05882f + 0.5f , 15.0f),0.0f));
-                upperNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->amap[j][k * 2 + 1]) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+                lowerNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->textures.getAlpha(j, k * 2 + 0)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+                upperNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->textures.getAlpha(j, k * 2 + 1)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
                 lAlphaMaps[lDimensions * j + k] = ( upperNibble << 4 ) + lowerNibble;
               }
             }
@@ -1388,9 +1388,9 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
   for( int i = 0; i < 16; ++i )
     for( int j = 0; j < 16; ++j )
-      for( size_t tex = 0; tex < mChunks[i][j]->_textures.size(); tex++ )
-        if( lTextures.find( mChunks[i][j]->_textures[tex]->filename().toStdString() ) == lTextures.end() )
-          lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->_textures[tex]->filename().toStdString(), -1 ) );
+      for( size_t tex = 0; tex < mChunks[i][j]->textures.num(); tex++ )
+        if( lTextures.find( mChunks[i][j]->textures.filename(tex) ) == lTextures.end() )
+          lTextures.insert( std::pair<std::string, int>( mChunks[i][j]->textures.filename(tex), -1 ) );
 
   lID = 0;
   for( std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it )
@@ -1681,25 +1681,25 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
         // MCLY
 //        {
-          size_t lMCLY_Size = mChunks[y][x]->_textures.size() * 0x10;
+          size_t lMCLY_Size = mChunks[y][x]->textures.num() * 0x10;
 
           lADTTexFile.resize (lADTTexFile.size() + 8 + lMCLY_Size );
           SetChunkHeader( lADTTexFile, lCurrentPosition, 'MCLY', lMCLY_Size );
 
           // MCLY data
-          for( size_t j = 0; j < mChunks[y][x]->_textures.size(); ++j )
+          for( size_t j = 0; j < mChunks[y][x]->textures.num(); ++j )
           {
             ENTRY_MCLY * lLayer = get_pointer<ENTRY_MCLY>( lADTTexFile, lCurrentPosition + 8 + 0x10 * j );
 
-            lLayer->textureID = lTextures.find( mChunks[y][x]->_textures[j]->filename().toStdString() )->second;
+            lLayer->textureID = lTextures.find( mChunks[y][x]->textures.filename(j) )->second;
 
-            lLayer->flags = mChunks[y][x]->texture_flags (j);
+            lLayer->flags = mChunks[y][x]->textures.flag (j);
 
             // if not first, have alpha layer, if first, have not. never have compression.
             lLayer->flags = ( j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & ( ~FLAG_USE_ALPHA ) ) & ( ~FLAG_ALPHA_COMPRESSED );
 
             lLayer->ofsAlpha = ( j == 0 ? 0 : ( mBigAlpha ? 64 * 64 * ( j - 1 ) : 32 * 64 * ( j - 1 ) ) );
-            lLayer->effectID = mChunks[y][x]->texture_effect_id (j);
+            lLayer->effectID = mChunks[y][x]->textures.effect (j);
           }
 
           lCurrentPosition += 8 + lMCLY_Size;
@@ -1729,7 +1729,7 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 //        {
           int lDimensions = 64 * ( mBigAlpha ? 64 : 32 );
 
-          size_t lMaps = mChunks[y][x]->_textures.size() ? mChunks[y][x]->_textures.size() - 1U : 0U;
+          size_t lMaps = mChunks[y][x]->textures.num() ? mChunks[y][x]->textures.num() - 1U : 0U;
 
           int lMCAL_Size = lDimensions * lMaps;
 
@@ -1741,16 +1741,16 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
           for( size_t j = 0; j < lMaps; j++ )
           {
             //First thing we have to do is downsample the alpha maps before we can write them
-            if( mBigAlpha )
-              for( int k = 0; k < lDimensions; k++ )
-                lAlphaMaps[lDimensions * j + k] = mChunks[y][x]->amap[j][k];
+            if (mBigAlpha)
+              for (int k = 0; k < lDimensions; k++)
+                lAlphaMaps[lDimensions * j + k] = mChunks[y][x]->textures.getAlpha(j, k);
             else
             {
               unsigned char upperNibble, lowerNibble;
               for( int k = 0; k < lDimensions; k++ )
               {
-                lowerNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->amap[j][k * 2 + 0]) ) * 0.05882f + 0.5f , 15.0f),0.0f));
-                upperNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->amap[j][k * 2 + 1]) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+                lowerNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->textures.getAlpha(j, k * 2 + 0)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
+                upperNibble = static_cast<unsigned char>(std::max(std::min( ( static_cast<float>(mChunks[y][x]->textures.getAlpha(j, k * 2 + 1)) ) * 0.05882f + 0.5f , 15.0f),0.0f));
                 lAlphaMaps[lDimensions * j + k] = ( upperNibble << 4 ) + lowerNibble;
               }
             }
