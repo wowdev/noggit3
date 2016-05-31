@@ -169,219 +169,226 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   uint32_t fourcc;
   uint32_t size;
 
-  f->read(&fourcc, 4);
-  f->read(&size, 4);
-
-  assert( fourcc == 'MCNK' );
-
-  size_t lastpos = f->getPos() + size;
-
-  f->read(&header, 0x80);
-
-  if (!areaIDColors.contains (header.areaid))
-  {
-    areaIDColors[header.areaid] = ::math::vector_3d ( ::math::random::floating_point (0.0f, 1.0f)
-                                 , ::math::random::floating_point (0.0f, 1.0f)
-                                 , ::math::random::floating_point (0.0f, 1.0f)
-                                 );
-  }
-
-  zbase = header.zpos;
-  xbase = header.xpos;
-  ybase = header.ypos;
-
-  px = header.ix;
-  py = header.iy;
-
-  holes = header.holes;
-
-  /*
-  if (hasholes) {
-    gLog("Holes: %d\n", holes);
-    int k=1;
-    for (int j=0; j<4; j++) {
-      for (int i=0; i<4; ++i) {
-        gLog((holes & k)?"1":"0");
-        k <<= 1;
-      }
-      gLog("\n");
-    }
-  }
-  */
-
-  // correct the x and z values ^_^
-  zbase = zbase*-1.0f + ZEROPOINT;
-  xbase = xbase*-1.0f + ZEROPOINT;
-
-  vmin = ::math::vector_3d( 9999999.0f, 9999999.0f, 9999999.0f);
-  vmax = ::math::vector_3d(-9999999.0f,-9999999.0f,-9999999.0f);
-  gl.genTextures(3, alphamaps);
-
-  //! \note Temporary between chunks (MCLY and MCAL).
+  size_t base = f->getPos();
   unsigned int MCALoffset[4];
 
-  while (f->getPos() < lastpos) {
-    f->read(&fourcc,4);
+  // - MCNK ----------------------------------------------
+  {
+    f->read(&fourcc, 4);
     f->read(&size, 4);
 
-    size_t nextpos = f->getPos() + size;
+    assert(fourcc == 'MCNK');
 
-    if ( fourcc == 'MCNR' ) {
-      nextpos = f->getPos() + 0x1C0; // size fix
-      // normal vectors
-      char nor[3];
-      ::math::vector_3d *ttn = mNormals;
-      for (int j=0; j<17; ++j) {
-        for (int i=0; i<((j%2)?8:9); ++i) {
-          f->read(nor,3);
-          // order X,Z,Y
-          // *ttn++ = ::math::vector_3d((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
-          *ttn++ = ::math::vector_3d(-nor[1]/127.0f, nor[2]/127.0f, -nor[0]/127.0f);
-        }
-      }
-    }
-    else if ( fourcc == 'MCVT' ) {
-      ::math::vector_3d *ttv = mVertices;
+    f->read(&header, 0x80);
 
-      // vertices
-      for (int j=0; j < 17; ++j) {
-        for (int i=0; i < ((j % 2) ? 8 : 9); ++i) {
-          float h,xpos,zpos;
-          f->read(&h,4);
-          xpos = i * UNITSIZE;
-          zpos = j * 0.5f * UNITSIZE;
-          if (j%2) {
-                        xpos += UNITSIZE*0.5f;
-          }
-          ::math::vector_3d v (xbase+xpos, ybase+h, zbase+zpos);
-          *ttv++ = v;
-          vmin.y (std::min(vmin.y(), v.y()));
-          vmax.y (std::max(vmax.y(), v.y()));
-        }
-      }
-
-      vmin.x (xbase);
-      vmin.z (zbase);
-      vmax.x (xbase + 8 * UNITSIZE);
-      vmax.z (zbase + 8 * UNITSIZE);
-    }
-    else if ( fourcc == 'MCLY' ) {
-      for (size_t i=0; i<(size / 16U); ++i) {
-        f->read(&tex[i],4);
-        f->read(&_texFlags[i], 4);
-        f->read(&MCALoffset[i], 4);
-        f->read(&_effectID[i], 4);
-
-        if (texture_flags (i) & FLAG_ANIMATE)
-        {
-          animated[i] = texture_flags (i);
-        } else {
-          animated[i] = 0;
-        }
-        _textures.emplace_back (maintile->mTextureFilenames[tex[i]]);
-      }
-    }
-    else if ( fourcc == 'MCSH' ) {
-      // shadow map 64 x 64
-
-      f->read( mShadowMap, 0x200 );
-      f->seekRelative( -0x200 );
-
-      unsigned char sbuf[64*64], *p, c[8];
-      p = sbuf;
-      for (int j=0; j<64; ++j) {
-        f->read(c,8);
-        for (int i=0; i<8; ++i) {
-          for (int b = 0x01; b != 0x100; b <<= 1) {
-            *p++ = (c[i] & b) ? 85 : 0;
-          }
-        }
-      }
-      gl.genTextures(1, &shadow);
-      gl.bindTexture(GL_TEXTURE_2D, shadow);
-      gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    }
-    else if ( fourcc == 'MCAL' )
+    if (!areaIDColors.contains(header.areaid))
     {
-      unsigned int MCALbase = f->getPos();
-      for( unsigned int layer = 0; layer < header.nLayers; ++layer )
-      {
-        if( texture_flags (layer) & 0x100 )
-        {
-          uint8_t* const alpha_map (&amap[layer - 1][0]);
-          uint8_t const* input (f->get<uint8_t> (MCALbase + MCALoffset[layer]));
-
-          memset (alpha_map, 255, 64 * 64);
-
-          if (texture_flags (layer) & 0x200)
-          {
-            for (std::size_t offset_output (0); offset_output < 4096;)
-            {
-              bool const fill (*input & 0x80);
-              std::size_t const n (*input & 0x7F);
-              ++input;
-
-              if (fill)
-              {
-                memset (&alpha_map[offset_output], *input, n);
-                ++input;
-              }
-              else
-              {
-                memcpy (&alpha_map[offset_output], input, n);
-                input += n;
-              }
-
-              offset_output += n;
-            }
-          }
-          else if (bigAlpha)
-          {
-            memcpy (alpha_map, input, 64 * 64);
-          }
-          else
-          {
-            for (std::size_t x (0); x < 64; ++x)
-            {
-              for (std::size_t y (0); y < 64; y += 2)
-              {
-                alpha_map[x * 64 + y + 0] = ((*input & 0x0f) << 4) | 0xf;
-                alpha_map[x * 64 + y + 1] = ((*input & 0xf0) << 0) | 0xf;
-                ++input;
-              }
-            }
-          }
-
-          if (!(header.flags & FLAG_do_not_fix_alpha_map))
-          {
-            for (std::size_t i (0); i < 64; ++i)
-            {
-              alpha_map[i * 64 + 63] = alpha_map[i * 64 + 62];
-              alpha_map[63 * 64 + i] = alpha_map[62 * 64 + i];
-            }
-            alpha_map[63 * 64 + 63] = alpha_map[62 * 64 + 62];
-          }
-
-          gl.bindTexture(GL_TEXTURE_2D, alphamaps[layer - 1]);
-          gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, alpha_map);
-          gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-          gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-          gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-          gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        }
-      }
+      areaIDColors[header.areaid] = ::math::vector_3d(::math::random::floating_point(0.0f, 1.0f)
+        , ::math::random::floating_point(0.0f, 1.0f)
+        , ::math::random::floating_point(0.0f, 1.0f)
+      );
     }
-    else if( fourcc == 'MCCV' )
-    {
-      //! \todo  implement
-    }
-    f->seek(nextpos);
+
+    zbase = header.zpos;
+    xbase = header.xpos;
+    ybase = header.ypos;
+
+    px = header.ix;
+    py = header.iy;
+
+    holes = header.holes;
+    // correct the x and z values ^_^
+    zbase = zbase * -1.0f + ZEROPOINT;
+    xbase = xbase * -1.0f + ZEROPOINT;
+
+    vmin = ::math::vector_3d(9999999.0f, 9999999.0f, 9999999.0f);
+    vmax = ::math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
   }
+  // - MCVT ----------------------------------------------
+  {
+    f->seek(base + header.ofsHeight);
+    f->read(&fourcc, 4);
+    f->read(&size, 4);
+
+    assert(fourcc == 'MCVT');
+
+    ::math::vector_3d *ttv = mVertices;
+
+    // vertices
+    for (int j = 0; j < 17; ++j) {
+      for (int i = 0; i < ((j % 2) ? 8 : 9); ++i) {
+        float h, xpos, zpos;
+        f->read(&h, 4);
+        xpos = i * UNITSIZE;
+        zpos = j * 0.5f * UNITSIZE;
+        if (j % 2) {
+          xpos += UNITSIZE*0.5f;
+        }
+        ::math::vector_3d v(xbase + xpos, ybase + h, zbase + zpos);
+        *ttv++ = v;
+        vmin.y(std::min(vmin.y(), v.y()));
+        vmax.y(std::max(vmax.y(), v.y()));
+      }
+    }
+
+    vmin.x(xbase);
+    vmin.z(zbase);
+    vmax.x(xbase + 8 * UNITSIZE);
+    vmax.z(zbase + 8 * UNITSIZE);
+  }
+  // - MCNR ----------------------------------------------
+  {
+    f->seek(base + header.ofsNormal);
+    f->read(&fourcc, 4);
+    f->read(&size, 4);
+
+    assert(fourcc == 'MCNR');
+
+    char nor[3];
+    ::math::vector_3d *ttn = mNormals;
+    for (int j = 0; j < 17; ++j) {
+      for (int i = 0; i < ((j % 2) ? 8 : 9); ++i) {
+        f->read(nor, 3);
+        // order X,Z,Y
+        // *ttn++ = ::math::vector_3d((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
+        *ttn++ = ::math::vector_3d(-nor[1] / 127.0f, nor[2] / 127.0f, -nor[0] / 127.0f);
+      }
+    }
+  }
+  // - MCLY ----------------------------------------------
+  {
+    f->seek(base + header.ofsLayer);
+    f->read(&fourcc, 4);
+    f->read(&size, 4);
+
+    assert(fourcc == 'MCLY');
+
+    for (size_t i = 0; i < (size / 16U); ++i) {
+      f->read(&tex[i], 4);
+      f->read(&_texFlags[i], 4);
+      f->read(&MCALoffset[i], 4);
+      f->read(&_effectID[i], 4);
+
+      if (texture_flags(i) & FLAG_ANIMATE)
+      {
+        animated[i] = texture_flags(i);
+      }
+      else {
+        animated[i] = 0;
+      }
+      _textures.emplace_back(maintile->mTextureFilenames[tex[i]]);
+    }
+  }
+  // - MCSH ----------------------------------------------
+  {
+    f->seek(base + header.ofsShadow);
+    f->read(&fourcc, 4);
+    f->read(&size, 4);
+
+    assert(fourcc == 'MCSH');
+
+    f->read(mShadowMap, 0x200);
+    f->seekRelative(-0x200);
+
+    unsigned char sbuf[64 * 64], *p, c[8];
+    p = sbuf;
+    for (int j = 0; j < 64; ++j) {
+      f->read(c, 8);
+      for (int i = 0; i < 8; ++i) {
+        for (int b = 0x01; b != 0x100; b <<= 1) {
+          *p++ = (c[i] & b) ? 85 : 0;
+        }
+      }
+    }
+    gl.genTextures(1, &shadow);
+    gl.bindTexture(GL_TEXTURE_2D, shadow);
+    gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  }
+  // - MCAL ----------------------------------------------
+  {
+    f->seek(base + header.ofsAlpha);
+    f->read(&fourcc, 4);
+    f->read(&size, 4);
+
+    assert(fourcc == 'MCAL');
+
+    gl.genTextures(3, alphamaps);
+    size_t MCALbase = f->getPos();
+
+    for (unsigned int layer = 0; layer < header.nLayers; ++layer)
+    {
+      if (texture_flags(layer) & 0x100)
+      {
+        uint8_t* const alpha_map(&amap[layer - 1][0]);
+        uint8_t const* input(f->get<uint8_t>(MCALbase + MCALoffset[layer]));
+
+        memset(alpha_map, 255, 64 * 64);
+
+        if (texture_flags(layer) & 0x200)
+        {
+          for (std::size_t offset_output(0); offset_output < 4096;)
+          {
+            bool const fill(*input & 0x80);
+            std::size_t const n(*input & 0x7F);
+            ++input;
+
+            if (fill)
+            {
+              memset(&alpha_map[offset_output], *input, n);
+              ++input;
+            }
+            else
+            {
+              memcpy(&alpha_map[offset_output], input, n);
+              input += n;
+            }
+
+            offset_output += n;
+          }
+        }
+        else if (bigAlpha)
+        {
+          memcpy(alpha_map, input, 64 * 64);
+        }
+        else
+        {
+          for (std::size_t x(0); x < 64; ++x)
+          {
+            for (std::size_t y(0); y < 64; y += 2)
+            {
+              alpha_map[x * 64 + y + 0] = ((*input & 0x0f) << 4) | 0xf;
+              alpha_map[x * 64 + y + 1] = ((*input & 0xf0) << 0) | 0xf;
+              ++input;
+            }
+          }
+        }
+
+        if (!(header.flags & FLAG_do_not_fix_alpha_map))
+        {
+          for (std::size_t i(0); i < 64; ++i)
+          {
+            alpha_map[i * 64 + 63] = alpha_map[i * 64 + 62];
+            alpha_map[63 * 64 + i] = alpha_map[62 * 64 + i];
+          }
+          alpha_map[63 * 64 + 63] = alpha_map[62 * 64 + 62];
+        }
+
+        gl.bindTexture(GL_TEXTURE_2D, alphamaps[layer - 1]);
+        gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, alpha_map);
+        gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      }
+    }
+  }
+
+  vcenter = (vmin + vmax) * 0.5f;
+  nameID = _world->selection_names().add(this);
 
   // create vertex buffers
   gl.genBuffers(1,&vertices);
@@ -397,19 +404,13 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
 
   initStrip();
 
-  vcenter = (vmin + vmax) * 0.5f;
-
-  nameID = _world->selection_names().add( this );
-
-
-
+  // minimap
   ::math::vector_3d *ttv = mMinimap;
 
-  // vertices
   for (int j=0; j<17; ++j) {
     for (int i=0; i < ((j % 2) ? 8 : 9); ++i) {
       float xpos,zpos;
-        //f->read(&h,4);
+
       xpos = i * 0.125f;
       zpos = j * 0.5f * 0.125f;
       if (j % 2) {
