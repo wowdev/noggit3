@@ -264,6 +264,7 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
     textures.initTextures(f, &maintile->mTextureFilenames, size);
   }
   // - MCSH ----------------------------------------------
+  if(header.ofsShadow && header.sizeShadow)
   {
     f->seek(base + header.ofsShadow);
     f->read(&fourcc, 4);
