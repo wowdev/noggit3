@@ -5,12 +5,15 @@ cmake_policy (SET CMP0015 OLD)
 
 project (Noggit)
 
+option(useLibsRepo "Use windows 32 libs repo"
+       [false])
+	   
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED true)
 
 # Additional search paths for find_package.
 # Set this to more paths you windows guys need.
-if (WIN32)
+if (${useLibsRepo})
   set ( CMAKE_INCLUDE_PATH
         "D:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/include/"
         "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/include/"
@@ -24,10 +27,10 @@ if (WIN32)
       )
 
 	set(BOOST_ROOT "../Noggit_QT_libs/Boost/1.60/")
-	set(QT_BINARY_DIR "../Noggit_QT_libs/Qt/4.8.6/bin/")
-	set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "../Noggit_QT_libs/Qt/4.8.6/")
+	set(QT_BINARY_DIR "../Noggit_QT_libs/Qt/5.6/msvc2015/bin/")
+	set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "../Noggit_QT_libs/Qt/5.6/msvc2015/")
 
-endif( WIN32 )
+endif(${useLibsRepo})
 
 # Our own FindModule.cmake scripts.
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
