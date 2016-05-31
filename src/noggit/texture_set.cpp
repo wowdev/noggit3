@@ -58,7 +58,7 @@ namespace noggit
       if (_tex_flags[layer] & 0x100)
       {
         f->seek(MCALbase + _mcal_offset[layer]);
-        _alphamaps[layer - 1] = new alphamap(f, _tex_flags[layer], mBigAlpha, !doNotFixAlpha);
+        _alphamaps[layer - 1] = new alphamap(f, _tex_flags[layer], mBigAlpha, doNotFixAlpha);
       }
     }
   }
