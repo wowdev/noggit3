@@ -67,6 +67,32 @@ struct mcly_flags_type
   }
 };
 
+struct mcnk_flags_type
+{
+  uint32_t has_mcsh : 1;
+  uint32_t impass : 1;
+  uint32_t lq_river : 1;
+  uint32_t lq_ocean : 1;
+  uint32_t lq_magma : 1;
+  uint32_t lq_slime : 1;
+  uint32_t has_mccv : 1;
+  uint32_t unknown_0x80 : 1;
+  uint32_t unk0: 7;                      // not set in 6.2.0.20338
+  uint32_t do_not_fix_alpha_map : 1; // "fix" alpha maps in MCAL (4 bit alpha maps are 63*63 instead of 64*64). Note that this also means that it *has* to be 4 bit alpha maps, otherwise UnpackAlphaShadowBits will assert.
+  uint32_t high_res_holes : 1;       // Since ~5.3 WoW uses full 64-bit to store holes for each tile if this flag is set. The holes are a uint64_t at 0x14.
+  uint32_t unk1 : 15;                     // not set in 6.2.0.20338
+
+  static mcnk_flags_type& interpret(uint32_t& base)
+  {
+    return reinterpret_cast<mcnk_flags_type&> (base);
+  }
+
+  static const mcnk_flags_type& interpret(const uint32_t& base)
+  {
+    return reinterpret_cast<const mcnk_flags_type&> (base);
+  }
+};
+
 
 static const float TILESIZE = 533.33333f;
 static const float CHUNKSIZE = ((TILESIZE) / 16.0f);

@@ -104,6 +104,7 @@ private:
 
   noggit::TileWater _water;
 
+  friend class texture_set;
   friend class MapChunk;
   friend class World;
 };
