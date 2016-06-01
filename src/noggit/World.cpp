@@ -24,6 +24,7 @@
 #include <opengl/matrix.h>
 #include <opengl/scoped.h>
 #include <opengl/settings_saver.h>
+#include <opengl/shader.hpp>
 
 #include <noggit/application.h>
 #include <noggit/blp_texture.h>
@@ -931,7 +932,55 @@ void World::draw ( size_t flags
                                          , frustum
                                          , camera
                                          );
-           // _map_index.tile( j, i )->drawMFBO();
+          }
+        }
+      }
+
+      gl.bindBuffer (GL_ARRAY_BUFFER, 0);
+      gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
+
+      //! \todo don't compile on every frame
+
+      opengl::shader const vertex_shader
+        { GL_VERTEX_SHADER
+        , R"code(
+#version 110
+
+attribute vec4 position;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+void main()
+{
+  gl_Position = projection * model_view * position;
+}
+)code"
+        };
+      opengl::shader const fragment_shader
+        { GL_FRAGMENT_SHADER
+        , R"code(
+#version 110
+
+uniform vec4 color;
+
+void main()
+{
+  gl_FragColor = color;
+}
+)code"
+        };
+      opengl::program const program {&vertex_shader, &fragment_shader};
+
+      opengl::scoped::use_program mfbo_shader {program};
+
+      for( int j = 0; j < 64; ++j )
+      {
+        for( int i = 0; i < 64; ++i )
+        {
+          if( _map_index.tile_loaded( j, i ) )
+          {
+            _map_index.tile( j, i )->drawMFBO (mfbo_shader);
           }
         }
       }

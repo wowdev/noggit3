@@ -176,6 +176,30 @@ namespace opengl
     void getIntegerv (GLenum, GLint*);
 
     GLubyte const* getString (GLenum);
+
+    GLuint createShader (GLenum shader_type);
+    void deleteShader (GLuint shader);
+    void shaderSource (GLuint shader, GLsizei count, GLchar const** string, GLint const* length);
+    void compile_shader (GLuint shader);
+    GLint get_shader (GLuint shader, GLenum pname);
+
+    GLuint createProgram();
+    void deleteProgram (GLuint program);
+    void attachShader (GLuint program, GLuint shader);
+    void detachShader (GLuint program, GLuint shader);
+    void link_program (GLuint program);
+    void useProgram (GLuint program);
+    void validate_program (GLuint program);
+    GLint get_program (GLuint program, GLenum pname);
+
+    GLint getAttribLocation (GLuint program, GLchar const* name);
+    void vertexAttribPointer (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLvoid const* pointer);
+    void enableVertexAttribArray (GLuint index);
+    void disableVertexAttribArray (GLuint index);
+
+    GLint getUniformLocation (GLuint program, GLchar const* name);
+    void uniform4fv (GLint location, GLsizei count, GLfloat const* value);
+    void uniformMatrix4fv (GLint location, GLsizei count, GLboolean transpose, GLfloat const* value);
   };
 }
 

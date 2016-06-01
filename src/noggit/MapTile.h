@@ -8,6 +8,7 @@
 
 #include <boost/optional.hpp>
 
+#include <opengl/shader.fwd.hpp>
 #include <opengl/types.h>
 
 #include <noggit/MapHeaders.h>
@@ -62,7 +63,7 @@ public:
                  );
   void drawWater (const Skies* skies);
   void drawTextures (const QRectF& chunks_to_draw) const;
-  void drawMFBO();
+  void drawMFBO (opengl::scoped::use_program&);
 
   boost::optional<float> get_height ( const float& x
                                     , const float& z
