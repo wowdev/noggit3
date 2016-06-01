@@ -33,7 +33,7 @@ public:
 void reloadShaders();
 
 class Shader {
-  opengl::shader id;
+  GLuint id;
   GLenum target;
 public:
   bool ok;
