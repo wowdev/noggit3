@@ -6,11 +6,12 @@
 #include <map>
 #include <string>
 
-#include <noggit/MapHeaders.h>
-#include <noggit/Video.h> // GLfloat, GLshort, ...
 #include <math/ray.hpp>
+#include <noggit/MapHeaders.h>
 #include <noggit/Selection.h>
+#include <noggit/Video.h> // GLfloat, GLshort, ...
 #include <noggit/tile_index.hpp>
+#include <opengl/shader.fwd.hpp>
 
 class Frustum;
 class MapChunk;
@@ -45,7 +46,7 @@ public:
 	void drawLines (Frustum const&);
 	void drawWater();
 	void drawTextures();
-	void drawMFBO();
+  void drawMFBO (opengl::scoped::use_program&);
 
 	bool GetVertex(float x, float z, math::vector_3d *V);
 

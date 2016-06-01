@@ -23,7 +23,9 @@
 #include <noggit/texture_set.hpp>
 #include <noggit/map_index.hpp>
 #include <noggit/Settings.h>
+#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
 
 int indexMapBuf(int x, int y)
 {
@@ -407,25 +409,20 @@ void MapTile::drawLines (Frustum const& frustum)//draw red lines around the squa
   gl.enable(GL_COLOR_MATERIAL);
 }
 
-void MapTile::drawMFBO()
+void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
 {
-  static const GLshort lIndices[] = { 4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1 };
+  static unsigned char const indices[] = { 4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1 };
 
-  gl.color4f(0, 1, 1, 0.2f);
-  gl.begin(GL_TRIANGLE_FAN);
-  for (int i = 0; i < 18; ++i)
-  {
-    gl.vertex3fv(mMinimumValues[lIndices[i]]);
-  }
-  gl.end();
+  mfbo_shader.uniform ("model_view", opengl::matrix::model_view());
+  mfbo_shader.uniform ("projection", opengl::matrix::projection());
 
-  gl.color4f(1, 1, 0, 0.2f);
-  gl.begin(GL_TRIANGLE_FAN);
-  for (int i = 0; i < 18; ++i)
-  {
-    gl.vertex3fv(mMaximumValues[lIndices[i]]);
-  }
-  gl.end();
+  mfbo_shader.attrib ("position", mMaximumValues);
+  mfbo_shader.uniform ("color", math::vector_4d (0.0f, 1.0f, 1.0f, 0.2f));
+  gl.drawElements (GL_TRIANGLE_FAN, sizeof (indices) / sizeof (*indices), GL_UNSIGNED_BYTE, indices);
+
+  mfbo_shader.attrib ("position", mMinimumValues);
+  mfbo_shader.uniform ("color", math::vector_4d (1.0f, 1.0f, 0.0f, 0.2f));
+  gl.drawElements (GL_TRIANGLE_FAN, sizeof (indices) / sizeof (*indices), GL_UNSIGNED_BYTE, indices);
 }
 
 void MapTile::drawWater()
