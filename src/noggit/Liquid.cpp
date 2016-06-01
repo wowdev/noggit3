@@ -24,8 +24,8 @@ namespace
   BLSShader* mWaterShader;
   BLSShader* mMagmaShader;
 #else
-  opengl::shader waterShader;
-  opengl::shader waterFogShader;
+  GLuint waterShader;
+  GLuint waterFogShader;
 #endif
 }
 

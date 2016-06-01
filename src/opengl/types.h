@@ -6,6 +6,5 @@
 
 namespace opengl
 {
-  typedef GLuint shader;
   typedef GLuint light;
 }
