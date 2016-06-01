@@ -24,7 +24,9 @@
 #include <noggit/mpq/file.h>
 
 #include <opengl/context.h>
+#include <opengl/matrix.h>
 #include <opengl/scoped.h>
+#include <opengl/shader.hpp>
 
 MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
   : mPositionX (pX)
@@ -400,25 +402,20 @@ void MapTile::drawLines ( bool draw_hole_lines
   gl.enable (GL_COLOR_MATERIAL);
 }
 
-void MapTile::drawMFBO()
+void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
 {
-  static const GLshort lIndices[] = { 4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1 };
+  static unsigned char const indices[] = { 4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1 };
 
-  gl.color4f(0,1,1,0.2f);
-  gl.begin(GL_TRIANGLE_FAN);
-  for( int i = 0; i < 18; ++i )
-  {
-    gl.vertex3f( mMinimumValues[lIndices[i]].x(), mMinimumValues[lIndices[i]].y(), mMinimumValues[lIndices[i]].z()  );
-  }
-  gl.end();
+  mfbo_shader.uniform ("model_view", opengl::matrix::model_view());
+  mfbo_shader.uniform ("projection", opengl::matrix::projection());
 
-  gl.color4f(1,1,0,0.2f);
-  gl.begin(GL_TRIANGLE_FAN);
-  for( int i = 0; i < 18; ++i )
-  {
-    gl.vertex3f( mMaximumValues[lIndices[i]].x(), mMaximumValues[lIndices[i]].y(), mMaximumValues[lIndices[i]].z()  );
-  }
-  gl.end();
+  mfbo_shader.attrib ("position", mMaximumValues);
+  mfbo_shader.uniform ("color", math::vector_4d (0.0f, 1.0f, 1.0f, 0.2f));
+  gl.drawElements (GL_TRIANGLE_FAN, sizeof (indices) / sizeof (*indices), GL_UNSIGNED_BYTE, indices);
+
+  mfbo_shader.attrib ("position", mMinimumValues);
+  mfbo_shader.uniform ("color", math::vector_4d (1.0f, 1.0f, 0.0f, 0.2f));
+  gl.drawElements (GL_TRIANGLE_FAN, sizeof (indices) / sizeof (*indices), GL_UNSIGNED_BYTE, indices);
 }
 
 void MapTile::drawWater (Skies const* skies)

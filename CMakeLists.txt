@@ -201,6 +201,7 @@ set ( opengl_sources
       src/opengl/settings_saver.cpp
       src/opengl/texture.cpp
       src/opengl/primitives.cpp
+      src/opengl/shader.cpp
     )
 
 set ( opengl_headers
@@ -211,6 +212,8 @@ set ( opengl_headers
       src/opengl/types.h
       src/opengl/primitives.h
       src/opengl/scoped.h
+      src/opengl/shader.fwd.hpp
+      src/opengl/shader.hpp
     )
 
 

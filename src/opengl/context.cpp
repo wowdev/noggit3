@@ -747,4 +747,133 @@ namespace opengl
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
     return _current_context->functions()->glGetString (target);
   }
+
+  GLuint context::createShader (GLenum shader_type)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glCreateShader (shader_type);
+  }
+  void context::deleteShader (GLuint shader)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glDeleteShader (shader);
+  }
+  void context::shaderSource (GLuint shader, GLsizei count, GLchar const** string, GLint const* length)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glShaderSource (shader, count, string, length);
+  }
+  void context::compile_shader (GLuint shader)
+  {
+    {
+      verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+      _current_context->functions()->glCompileShader (shader);
+    }
+    if (get_shader (shader, GL_COMPILE_STATUS) != GL_TRUE)
+    {
+      //! \todo show log
+      throw std::runtime_error ("compiling shader failed");
+    }
+  }
+  GLint context::get_shader (GLuint shader, GLenum pname)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    GLint params;
+    _current_context->functions()->glGetShaderiv (shader, pname, &params);
+    return params;
+  }
+
+  GLuint context::createProgram()
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glCreateProgram();
+  }
+  void context::deleteProgram (GLuint program)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glDeleteProgram (program);
+  }
+  void context::attachShader (GLuint program, GLuint shader)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glAttachShader (program, shader);
+  }
+  void context::detachShader (GLuint program, GLuint shader)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glDetachShader (program, shader);
+  }
+  void context::link_program (GLuint program)
+  {
+    {
+      verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+      _current_context->functions()->glLinkProgram (program);
+    }
+    if (get_program (program, GL_LINK_STATUS) != GL_TRUE)
+    {
+      //! \todo show log
+      throw std::runtime_error ("linking program failed");
+    }
+  }
+  void context::useProgram (GLuint program)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glUseProgram (program);
+  }
+  void context::validate_program (GLuint program)
+  {
+    {
+      verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+      _current_context->functions()->glValidateProgram (program);
+    }
+    if (get_program (program, GL_VALIDATE_STATUS) != GL_TRUE)
+    {
+      //! \todo show log
+      throw std::runtime_error ("validating program failed");
+    }
+  }
+  GLint context::get_program (GLuint program, GLenum pname)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    GLint params;
+    _current_context->functions()->glGetProgramiv (program, pname, &params);
+    return params;
+  }
+
+  GLint context::getAttribLocation (GLuint program, GLchar const* name)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glGetAttribLocation (program, name);
+  }
+  void context::vertexAttribPointer (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLvoid const* pointer)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glVertexAttribPointer (index, size, type, normalized, stride, pointer);
+  }
+  void context::enableVertexAttribArray (GLuint index)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glEnableVertexAttribArray (index);
+  }
+  void context::disableVertexAttribArray (GLuint index)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glDisableVertexAttribArray (index);
+  }
+
+  GLint context::getUniformLocation (GLuint program, GLchar const* name)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glGetUniformLocation (program, name);
+  }
+  void context::uniform4fv (GLint location, GLsizei count, GLfloat const* value)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glUniform4fv (location, count, value);
+  }
+  void context::uniformMatrix4fv (GLint location, GLsizei count, GLboolean transpose, GLfloat const* value)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glUniformMatrix4fv (location, count, transpose, value);
+  }
 }
