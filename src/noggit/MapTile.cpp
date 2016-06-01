@@ -223,13 +223,8 @@ MapTile::MapTile (World* world, int pX, int pZ, const std::string& pFilename, bo
       for( int x = 0; x < 3; x++ )
       {
         int pos = x + y * 3;
-        mMinimumValues[pos * 3 + 0] = xPositions[x];
-        mMinimumValues[pos * 3 + 1] = mMinimum[pos];
-        mMinimumValues[pos * 3 + 2] = yPositions[y];
-
-        mMaximumValues[pos * 3 + 0] = xPositions[x];
-        mMaximumValues[pos * 3 + 1] = mMaximum[pos];
-        mMaximumValues[pos * 3 + 2] = yPositions[y];
+        mMinimumValues[pos] = math::vector_3d (xPositions[x], mMinimum[pos], yPositions[y]);
+        mMaximumValues[pos] = math::vector_3d (xPositions[x], mMaximum[pos], yPositions[y]);
       }
     }
   }
@@ -413,7 +408,7 @@ void MapTile::drawMFBO()
   gl.begin(GL_TRIANGLE_FAN);
   for( int i = 0; i < 18; ++i )
   {
-    gl.vertex3f( mMinimumValues[lIndices[i]*3 + 0], mMinimumValues[lIndices[i]*3 + 1], mMinimumValues[lIndices[i]*3 + 2]  );
+    gl.vertex3f( mMinimumValues[lIndices[i]].x(), mMinimumValues[lIndices[i]].y(), mMinimumValues[lIndices[i]].z()  );
   }
   gl.end();
 
@@ -421,7 +416,7 @@ void MapTile::drawMFBO()
   gl.begin(GL_TRIANGLE_FAN);
   for( int i = 0; i < 18; ++i )
   {
-    gl.vertex3f( mMaximumValues[lIndices[i]*3 + 0], mMaximumValues[lIndices[i]*3 + 1], mMaximumValues[lIndices[i]*3 + 2]  );
+    gl.vertex3f( mMaximumValues[lIndices[i]].x(), mMaximumValues[lIndices[i]].y(), mMaximumValues[lIndices[i]].z()  );
   }
   gl.end();
 }
@@ -1273,10 +1268,10 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
     lID = 0;
     for( int i = 0; i < 9; ++i )
-      lMFBO_Data[lID++] = mMinimumValues[i * 3 + 1];
+      lMFBO_Data[lID++] = mMinimumValues[i].y();
 
     for( int i = 0; i < 9; ++i )
-      lMFBO_Data[lID++] = mMaximumValues[i * 3 + 1];
+      lMFBO_Data[lID++] = mMaximumValues[i].y();
 
     lCurrentPosition += 8 + chunkSize;
   }
@@ -1608,10 +1603,10 @@ void MapTile::saveTileCata ( const World::model_instances_type::const_iterator& 
 
     lID = 0;
     for( int i = 0; i < 9; ++i )
-      lMFBO_Data[lID++] = mMinimumValues[i * 3 + 1];
+      lMFBO_Data[lID++] = mMinimumValues[i].y();
 
     for( int i = 0; i < 9; ++i )
-      lMFBO_Data[lID++] = mMaximumValues[i * 3 + 1];
+      lMFBO_Data[lID++] = mMaximumValues[i].y();
 
     lCurrentPosition += 8 + chunkSize;
   }

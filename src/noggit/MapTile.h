@@ -84,8 +84,8 @@ public:
 
 private:
   // MFBO:
-  GLfloat mMinimumValues[3*3*3];
-  GLfloat mMaximumValues[3*3*3];
+  math::vector_3d mMinimumValues[3 * 3];
+  math::vector_3d mMaximumValues[3 * 3];
 
   // MHDR:
   int mFlags;
