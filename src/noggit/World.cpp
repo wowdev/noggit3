@@ -37,6 +37,7 @@
 #include <noggit/TileWater.hpp>// tile water
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
 
 #include <unordered_set>
 
@@ -1007,9 +1008,44 @@ void World::draw()
 
   if (draw_mfbo)
   {
+    gl.bindBuffer (GL_ARRAY_BUFFER, 0);
+    gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    //! \todo don't compile on every frame
+    opengl::program const program
+      { { GL_VERTEX_SHADER
+        , R"code(
+#version 110
+
+attribute vec4 position;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+void main()
+{
+  gl_Position = projection * model_view * position;
+}
+)code"
+        }
+      , { GL_FRAGMENT_SHADER
+        , R"code(
+#version 110
+
+uniform vec4 color;
+
+void main()
+{
+  gl_FragColor = color;
+}
+)code"
+        }
+      };
+    opengl::scoped::use_program mfbo_shader {program};
+
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
-      tile->drawMFBO();
+      tile->drawMFBO (mfbo_shader);
     }
   }
 
