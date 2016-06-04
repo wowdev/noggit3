@@ -220,32 +220,6 @@ void TextureSet::stopAnim(int id)
 
 bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
 {
-	/* The correct way to do everything
-	Visibility = (1-Alpha above)*Alpha
-
-	Objective is Visibility = level
-
-	if (not bottom texture)
-	New Alpha = Pressure*Level+(1-Pressure)*Alpha;
-	New Alpha Above = (1-Pressure)*Alpha Above;
-	else Bottom Texture
-	New Alpha Above = Pressure*(1-Level)+(1-Pressure)*Alpha Above
-
-	For bottom texture with multiple above textures
-
-	For 2 textures above
-	x,y = current alphas
-	u,v = target alphas
-	v=sqrt((1-level)*y/x)
-	u=(1-level)/v
-
-	For 3 textures above
-	x,y,z = current alphas
-	u,v,w = target alphas
-	L=(1-Level)
-	u=pow(L*x*x/(y*y),1.0f/3.0f)
-	w=sqrt(L*z/(u*y))
-	*/
 
 	if (Environment::getInstance()->paintMode == true)
 	{
@@ -295,7 +269,6 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 		}
 
 		zPos = zbase;
-		float target, tarAbove, tPressure;
 
 		for (int j = 0; j < 64; j++)
 		{
@@ -312,20 +285,75 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 					continue;
 				}				
 
-				target = strength;
-				tarAbove = 1 - target;
+        float tPressure = pressure*brush->getValue(dist);
+        float alphas[3] = { 0.0f, 0.0f, 0.0f };
+        float visibility[4] = { 255.0f, 0.0f, 0.0f, 0.0f };
+        
+        for (size_t k = 0; k < nTextures - 1; k++)
+        {
+          float f = static_cast<float>(alphamaps[k]->getAlpha(i + j * 64));
+          visibility[k+1] = f;
+          alphas[k] = f;
+          for (size_t n = 0; n <= k; n++)
+            visibility[n] = (visibility[n] * ((255.0f - f)) / 255.0f);
+        }
 
-				tPressure = pressure*brush->getValue(dist);
+        // nothing to do
+        if (visibility[texLevel] == strength)
+        {
+          xPos += TEXDETAILSIZE;
+          continue;
+        }
 
-				if (texLevel>0)
-				{
-					alphamaps[texLevel - 1]->setAlpha(i + j * 64, static_cast<unsigned char>(std::max(std::min((1.0f - tPressure)*(static_cast<float>(alphamaps[texLevel - 1]->getAlpha(i + j * 64))) + tPressure*target + 0.5f, 255.0f), 0.0f)));
-				}
+        // alpha delta
+        float diffA = (strength - visibility[texLevel])* tPressure;
 
-				for (size_t k = texLevel; k < nTextures - 1; k++)
-				{
-					alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::max(std::min((1.0f - tPressure)*(static_cast<float>(alphamaps[k]->getAlpha(i + j * 64))) + tPressure*tarAbove + 0.5f, 255.0f), 0.0f)));
-				}
+        // visibility = 255 => all other at 0
+        if (visibility[texLevel] + diffA >= 255.0f)
+        {
+          for (size_t k = 0; k < nTextures; k++)
+          {
+            visibility[k] = (k == texLevel) ? 255.0f : 0.0f;
+          }          
+        }
+        else
+        {
+          float other = 255.0f - visibility[texLevel];
+
+          if (!texLevel && visibility[0] == 255.0f)
+          {
+            visibility[0] += diffA;
+            visibility[1] -= diffA; // nTexture > 1 else it'd have returned true at the beginning
+          }
+          else
+          {
+            visibility[texLevel] += diffA;
+
+            for (size_t k = 0; k < nTextures; k++)
+            {
+              if (k == texLevel || visibility[k] == 0)
+                continue;
+              float coef = diffA * (visibility[k] / other);
+              visibility[k] = std::max(std::min(visibility[k] - coef, 255.0f), 0.0f);
+            }
+          }          
+        }
+
+        for (int k = nTextures - 2; k >= 0; k--)
+        {
+          alphas[k] = visibility[k+1];
+          for (int n = nTextures - 2; n > k; n--)
+          {
+            // prevent 0 division
+            alphas[k] = (alphas[k] / std::max((255.0f - alphas[n]), 0.001f)) * 255.0f;
+          }
+        }
+          
+        for (size_t k = 0; k < nTextures - 1; k++)
+        {
+          alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(alphas[k], 0.0f), 255.0f)));
+        }
+
 				xPos += TEXDETAILSIZE;
 			}
 			zPos += TEXDETAILSIZE;
@@ -352,128 +380,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 		{
 			alphamaps[texLevel - 1]->loadTexture();
 		}
-
 	}
-	/*
-	else
-	{
-	// new stuff from bernd.
-	// need to get rework. Add old code with switch that the guys out there can use paint.
-	const float radius = brush->getRadius();
-
-	// Are we really painting on this chunk?
-	const float xdiff = xbase + CHUNKSIZE / 2 - x;
-	const float zdiff = zbase + CHUNKSIZE / 2 - z;
-
-	if( ( xdiff * xdiff + zdiff * zdiff ) > ( MAPCHUNK_DIAMETER / 2 + radius ) * ( MAPCHUNK_DIAMETER / 2 + radius ) )
-	return false;
-
-
-	// Search for empty layer.
-	int texLevel = -1;
-
-	for( size_t i = 0; i < nTextures; ++i )
-	{
-	if( _textures[i] == texture )
-	{
-	texLevel = i;
-	}
-	}
-
-	if( texLevel == -1 )
-	{
-
-	if( nTextures == 4 )
-	{
-	for( size_t layer = 0; layer < nTextures; ++layer )
-	{
-	unsigned char map[64*64];
-	if( layer )
-	memcpy( map, amap[layer-1], 64*64 );
-	else
-	memset( map, 255, 64*64 );
-
-	for( size_t layerAbove = layer + 1; layerAbove < nTextures; ++layerAbove )
-	{
-	unsigned char* above = amap[layerAbove-1];
-	for( size_t i = 0; i < 64 * 64; ++i )
-	{
-	map[i] = std::max( 0, map[i] - above[i] );
-	}
-	}
-
-	size_t sum = 0;
-	for( size_t i = 0; i < 64 * 64; ++i )
-	{
-	sum += map[i];
-	}
-
-	if( !sum )
-	{
-	for( size_t i = layer; i < nTextures - 1; ++i )
-	{
-	_textures[i] = _textures[i+1];
-	animated[i] = animated[i+1];
-	texFlags[i] = texFlags[i+1];
-	effectID[i] = effectID[i+1];
-	if( i )
-	memcpy( amap[i-1], amap[i], 64*64 );
-	}
-
-	for( size_t j = layer; j < nTextures; j++ )
-	{
-	glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
-	glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
-	}
-	nTextures--;
-	}
-	}
-	}
-
-	if( nTextures == 4 )
-	return false;
-
-	texLevel = addTexture( texture );
-
-	}
-	else
-	{
-	if( nTextures == 1 )
-	return true;
-	}
-	LogDebug << "TexLevel: " << texLevel << " -  NTextures: " << nTextures << "\n";
-	// We now have a texture at texLevel > 0.
-	static const float change = CHUNKSIZE / 62.0f; //! \todo 64? 63? 62? Wtf?
-
-	if( texLevel == 0 )
-	return true;
-
-	for( size_t j = 0; j < 64; ++j )
-	{
-	for( size_t i = 0; i < 64; ++i )
-	{
-	const float xdiff_ = xbase + change * i - x;
-	const float zdiff_ = zbase + change * j - z;
-	const float dist = sqrtf( xdiff_ * xdiff_ + zdiff_ * zdiff_ );
-
-	if( dist <= radius )
-	{
-	amap[texLevel - 1][i + j * 64] = (unsigned char)( std::max( std::min( amap[texLevel - 1][i + j * 64] + pressure * strength * brush->getValue( dist ) + 0.5f, 255.0f ), 0.0f ) );
-	}
-	}
-	}
-
-
-	// Redraw changed layers.
-
-	for( size_t j = texLevel; j < nTextures; j++ )
-	{
-	glBindTexture( GL_TEXTURE_2D, alphamaps[j - 1] );
-	glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap[j - 1] );
-	}
-
-	}
-	*/
 
 	return true;
 }
