@@ -857,7 +857,7 @@ void MapView::createGUI()
 
 	// Raise/Lower
 #ifdef _WIN32
-	if(app.tabletActive)
+	if(app.tabletActive && Settings::getInstance()->tabletMode)
 		setting_ground = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 240.0f);
 	else
 #endif
@@ -890,7 +890,7 @@ void MapView::createGUI()
 	setting_ground->addChild(ground_brush_speed);
 
 #ifdef _WIN32
-	if (app.tabletActive)
+	if (app.tabletActive && Settings::getInstance()->tabletMode)
 	{
 		setting_ground->addChild(new UIText(78.5f, 170.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
 
@@ -908,7 +908,7 @@ void MapView::createGUI()
 
 	// shader
 #ifdef _WIN32
-	if(app.tabletActive)
+	if(app.tabletActive && Settings::getInstance()->tabletMode)
 		settings_shader = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 200.0f);
 	else
 #endif
@@ -949,7 +949,7 @@ void MapView::createGUI()
 	shader_blue->setText("Blue: ");
 	settings_shader->addChild(shader_blue);
 #ifdef _WIN32
-	if (app.tabletActive)
+	if (app.tabletActive && Settings::getInstance()->tabletMode)
 	{
 		settings_shader->addChild(new UIText(78.5f, 137.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
 
@@ -1211,7 +1211,7 @@ void MapView::tick(float t, float dt)
 	appinfoText << "Current cursor: " << Environment::getInstance()->cursorType << std::endl;
 	mainGui->guiappInfo->setText(appinfoText.str());
 #ifdef _WIN32
-	if (app.tabletActive)
+	if (app.tabletActive && Settings::getInstance()->tabletMode)
 	{
 		switch (terrainMode)
 		{

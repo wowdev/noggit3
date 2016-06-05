@@ -16,6 +16,7 @@ Settings::Settings()
 	this->FarZ = 1024;
 	this->_noAntiAliasing = false;
 	this->copyModelStats = true;
+  this->tabletMode = false;
 
 	if (boost::filesystem::exists("noggit.conf"))
 	{
@@ -23,6 +24,7 @@ Settings::Settings()
 		config.readInto(this->FarZ, "FarZ");
 		config.readInto(_noAntiAliasing, "noAntiAliasing");
 		config.readInto(this->wodSavePath, "wodSavePath");
+    config.readInto(this->tabletMode, "TabletMode");
 	}
 
 }

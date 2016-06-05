@@ -19,6 +19,8 @@ public:
 	bool AutoSelectingMode;  // true activates auto selection when you deselect a model. False not.
 	bool holelinesOn;    // If true show the blue subchunk lines always. Not only in holemode is on.
 
+  bool tabletMode;
+
 	const bool& noAntiAliasing() const;
 
 	std::string wodSavePath;
