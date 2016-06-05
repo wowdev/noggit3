@@ -655,11 +655,9 @@ float MapChunk::getMinHeight() const
 
 void MapChunk::drawPass (int anim) const
 {
-  const mcly_flags_type& flags (mcly_flags_type::interpret (anim));
+  texture_animation_setup const texture_animation (mcly_flags_type::interpret (anim));
 
-  texture_animation_setup const texture_animation (flags);
-
-  gl.drawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
 }
 
 void MapChunk::drawLines (bool draw_hole_lines) const
@@ -732,7 +730,7 @@ void MapChunk::drawContour() const
 
   gl.color4f (1.0f, 1.0f, 1.0f, 1.0f);
 
-  drawPass (0);
+  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
 }
 
 bool MapChunk::is_visible ( const float& cull_distance
@@ -816,7 +814,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   gl.bindTexture(GL_TEXTURE_2D, shadow);
   gl.enable(GL_TEXTURE_2D);
 
-  drawPass (0);
+  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
 
   gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   gl.disable(GL_TEXTURE_2D);
@@ -830,7 +828,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
   if (mark_impassable_chunks && (header.flags & FLAG_IMPASS))
   {
     gl.color4f (1.0f, 1.0f, 1.0f, 0.6f);
-    drawPass (0);
+    gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
   }
 
   if (draw_area_id_overlay)
@@ -840,7 +838,7 @@ void MapChunk::draw ( bool draw_terrain_height_contour
               , areaIDColors[header.areaid].z()
               , 0.7f
               );
-    drawPass (0);
+    gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
   }
 
   //! \todo This actually should be an enum. And should be passed into this method.
