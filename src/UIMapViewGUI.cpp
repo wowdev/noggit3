@@ -75,6 +75,7 @@
 #include "ModelManager.h"
 
 #include "UIAlphamap.h"
+#include "Settings.h"
 
 
 
@@ -214,7 +215,7 @@ void UIMapViewGUI::render() const
 	int time = static_cast<int>(gWorld->time) % 2880;
 	std::stringstream timestrs;
 #ifdef _WIN32
-	if (app.tabletActive) {
+	if (app.tabletActive && Settings::getInstance()->tabletMode) {
 		timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", FPS: " << (int)app.FPS << ", Pres: " << app.pressure;
 		app.getArial16().shprint(video.xres() - 250.0f, 5.0f, timestrs.str());
 	}
