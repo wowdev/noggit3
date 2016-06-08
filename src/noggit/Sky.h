@@ -73,7 +73,8 @@ enum SkyColorNames {
   SKY_UNKNOWN_4,
   WATER_COLOR_DARK,
   WATER_COLOR_LIGHT,
-  SHADOW_COLOR
+  SHADOW_COLOR,
+  NUM_SkyColorNames
 };
 
 class Skies {
@@ -85,7 +86,7 @@ class Skies {
 
 public:
   std::vector<Sky> skies;
-  ::math::vector_3d colorSet[18];
+  ::math::vector_3d colorSet[NUM_SkyColorNames];
 
   explicit Skies( unsigned int mapid );
 

@@ -10,6 +10,48 @@ option(useLibsRepo "Use windows 32 libs repo")
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED true)
 
+include (CheckCXXCompilerFlag)
+macro (add_compiler_flag_if_supported _VAR _FLAG)
+  string (MAKE_C_IDENTIFIER "CXX_COMPILER_SUPPORTS_${_FLAG}" _test_variable)
+  check_cxx_compiler_flag ("${_FLAG}" ${_test_variable})
+  if (${_test_variable})
+     set (${_VAR} "${${_VAR}} ${_FLAG}")
+  endif()
+endmacro()
+
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -fcolor-diagnostics)
+
+# covered by CMAKE_CXX_STANDARD
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-c++98-compat)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-c++98-compat-pedantic)
+
+# covered by compilers used
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-gnu-anonymous-struct)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-variadic-macros)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-vla)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-vla-extension)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-zero-length-array)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-gnu-zero-variadic-macro-arguments)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-nested-anon-types)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-four-char-constants)
+
+# we assume that our constructors and destructors do not access other global state
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-exit-time-destructors)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-global-constructors)
+
+# is fine with GNU, required due to our libstdc
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-disabled-macro-expansion)
+
+# we can live with the compilation unit containing the vtable not being fixed
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-weak-vtables)
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-weak-template-vtables)
+
+# __DATE__ and __TIME__ not being reproducible is exactly why they exist.
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-date-time)
+
+# we don't care for a few bytes
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-padded)
+
 # Additional search paths for find_package.
 # Set this to more paths you windows guys need.
 if (${useLibsRepo})

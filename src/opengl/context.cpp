@@ -771,8 +771,9 @@ namespace opengl
     }
     if (get_shader (shader, GL_COMPILE_STATUS) != GL_TRUE)
     {
-      //! \todo show log
-      throw std::runtime_error ("compiling shader failed");
+      std::vector<char> log (get_shader (shader, GL_INFO_LOG_LENGTH));
+      _current_context->functions()->glGetShaderInfoLog (shader, log.size(), nullptr, log.data());
+      throw std::runtime_error ("compiling shader failed: " + std::string (log.data()));
     }
   }
   GLint context::get_shader (GLuint shader, GLenum pname)
@@ -811,8 +812,9 @@ namespace opengl
     }
     if (get_program (program, GL_LINK_STATUS) != GL_TRUE)
     {
-      //! \todo show log
-      throw std::runtime_error ("linking program failed");
+      std::vector<char> log (get_program (program, GL_INFO_LOG_LENGTH));
+      _current_context->functions()->glGetProgramInfoLog (program, log.size(), nullptr, log.data());
+      throw std::runtime_error ("linking program failed: " + std::string (log.data()));
     }
   }
   void context::useProgram (GLuint program)
@@ -864,7 +866,22 @@ namespace opengl
   GLint context::getUniformLocation (GLuint program, GLchar const* name)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _current_context->functions()->glGetUniformLocation (program, name);
+    auto val (_current_context->functions()->glGetUniformLocation (program, name));
+    if (val == -1)
+    {
+      throw std::logic_error ("unknown uniform " + std::string (name));
+    }
+    return val;
+  }
+  void context::uniform1i (GLint location, GLint value)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glUniform1i (location, value);
+  }
+  void context::uniform3fv (GLint location, GLsizei count, GLfloat const* value)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glUniform3fv (location, count, value);
   }
   void context::uniform4fv (GLint location, GLsizei count, GLfloat const* value)
   {
