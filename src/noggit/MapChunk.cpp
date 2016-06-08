@@ -640,16 +640,11 @@ float MapChunk::getHeight (int x, int z) const
 
 float MapChunk::getMinHeight() const
 {
-  float min = mVertices[indexNoLoD(0, 0)].y();
-
-  for (int j = 0; j < 9; ++j)
+  float min (mVertices[0].y());
+  for (auto const& vertex : mVertices)
   {
-    for (int i = 0; i < 9; ++i)
-    {
-      min = std::min(mVertices[indexNoLoD(i, j)].y(), min);
-    }
+    min = std::min (min, vertex.y());
   }
-
 	return min;
 }
 
