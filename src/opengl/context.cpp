@@ -866,7 +866,12 @@ namespace opengl
   GLint context::getUniformLocation (GLuint program, GLchar const* name)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _current_context->functions()->glGetUniformLocation (program, name);
+    auto val (_current_context->functions()->glGetUniformLocation (program, name));
+    if (val == -1)
+    {
+      throw std::logic_error ("unknown uniform " + std::string (name));
+    }
+    return val;
   }
   void context::uniform4fv (GLint location, GLsizei count, GLfloat const* value)
   {
