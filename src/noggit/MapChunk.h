@@ -6,6 +6,7 @@
 
 #include <math/vector_4d.h>
 
+#include <opengl/shader.hpp>
 #include <opengl/types.h>
 
 #include <noggit/MapHeaders.h>
@@ -44,14 +45,9 @@ public:
                   , const ::math::vector_3d& camera
                   ) const;
 
-  void draw ( bool draw_terrain_height_contour
-            , bool mark_impassable_chunks
-            , bool draw_area_id_overlay
-            , bool dont_draw_cursor
-            , const Skies* skies
+  void draw ( opengl::scoped::use_program& mcnk_shader
             , const boost::optional<selection_type>& selected_item
             );
-  void drawContour() const;
   void drawSelect();
   void drawPass(int anim) const;
   // todo split into draw_lines and draw_hole_lines
@@ -92,7 +88,6 @@ public:
                                     , const float& z
                                     ) const;
 
-  void GenerateContourMap();
   void CreateStrips();
 
   void update_low_quality_texture_map();
@@ -128,9 +123,6 @@ public:
 
 private:
   World* _world;
-
-  GLuint _contour_texture;
-  float _contour_coord_gen[4];
 
   StripType _line_strip[32];
   StripType _hole_strip[128];

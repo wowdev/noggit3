@@ -689,6 +689,47 @@ void World::setupFog (bool draw_fog, const float& fog_distance)
   }
 }
 
+namespace
+{
+  enum row_type { inner, outer };
+  void add (std::vector<math::vector_2d>& texcoords, std::size_t x, std::size_t y, row_type type)
+  {
+    static float const per_step (1.0f / 8.0f);
+    static math::vector_2d const inner_inset (per_step / 2.0f, per_step / 2.0f);
+
+    if (type == inner)
+    {
+      texcoords.emplace_back (inner_inset + math::vector_2d (x, y) * per_step);
+    }
+    else
+    {
+      texcoords.emplace_back (math::vector_2d (x, y) * per_step);
+    }
+  }
+  void add_row (std::vector<math::vector_2d>& texcoords, std::size_t y, row_type type)
+  {
+    for (std::size_t x (0); x < (type == inner ? 8 : 9); ++x)
+    {
+      add (texcoords, x, y, type);
+    }
+  }
+
+  std::vector<math::vector_2d> make_texcoords()
+  {
+    std::vector<math::vector_2d> texcoords;
+    texcoords.reserve (9 * 9 + 8 * 8);
+
+    for (std::size_t y (0); y < 8; ++y)
+    {
+      add_row (texcoords, y, outer);
+      add_row (texcoords, y, inner);
+    }
+    add_row (texcoords, 9, outer);
+
+    return texcoords;
+  }
+}
+
 void World::draw ( size_t flags
                  , float inner_cursor_radius
                  , float outer_cursor_radius
@@ -824,30 +865,162 @@ void World::draw ( size_t flags
     opengl::settings_saver saver;
 
     // height map w/ a zillion texture passes
-    //! \todo  Do we need to push the matrix here?
 
+    if (flags & TERRAIN)
     {
-      opengl::scoped::matrix_pusher const matrix_pusher;
+      gl.bindBuffer (GL_ARRAY_BUFFER, 0);
+      gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
 
-      if( flags & TERRAIN )
+      //! \todo don't compile on every frame
+
+      opengl::shader const vertex_shader
+        { GL_VERTEX_SHADER
+        , R"code(
+#version 110
+
+attribute vec4 position;
+attribute vec3 normal;
+attribute vec2 texcoord;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+varying vec4 vary_position;
+varying vec2 vary_texcoord;
+varying vec3 vary_normal;
+
+void main()
+{
+  gl_Position = projection * model_view * position;
+  //! \todo gl_NormalMatrix deprecated
+  vary_normal = normalize (gl_NormalMatrix * normal);
+  vary_position = position;
+  vary_texcoord = texcoord;
+}
+)code"
+        };
+      opengl::shader const fragment_shader
+        { GL_FRAGMENT_SHADER
+        , R"code(
+#version 110
+
+uniform bool draw_area_id_overlay;
+//! \todo draw triangle selection cursor
+// uniform bool draw_triangle_selection_cursor;
+uniform bool draw_terrain_height_contour;
+uniform bool is_impassable_chunk;
+uniform bool mark_impassable_chunks;
+uniform vec3 area_id_color;
+uniform vec3 shadow_color;
+
+uniform mat4 model_view;
+
+uniform sampler2D shadow_map;
+
+varying vec4 vary_position;
+varying vec2 vary_texcoord;
+varying vec3 vary_normal;
+
+const float contour_height_delta = 2.0;
+
+// glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+vec4 blend_by_alpha (in vec4 source, in vec4 dest)
+{
+  return source * source.w + dest * (1.0 - source.w);
+}
+
+vec4 phong_lighting()
+{
+  // Implementing Phong Shader (for one Point-Light)
+  // https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/lighting.php
+
+  vec3 N = vary_normal;
+  vec3 v = (model_view * vary_position).xyz;
+
+  //! \todo gl_LightSource deprecated
+  vec3 L = normalize (gl_LightSource[0].position.xyz - v);
+  vec3 E = normalize (-v);
+  vec3 R = normalize (-reflect (L, N));
+
+  //! \todo gl_FrontLightProduct deprecated
+  vec4 Iamb = gl_FrontLightProduct[0].ambient;
+  vec4 Idiff = clamp (gl_FrontLightProduct[0].diffuse * max (dot (N, L), 0.0), 0.0, 1.0);
+  vec4 Ispec = clamp (gl_FrontLightProduct[0].specular * pow (max (dot (R, E),0.0), 0.3 * gl_FrontMaterial.shininess), 0.0, 1.0);
+
+  //! \todo gl_FrontLightModelProduct deprecated
+  return gl_FrontLightModelProduct.sceneColor + Iamb + Idiff + Ispec;
+}
+
+void main()
+{
+  if (draw_terrain_height_contour && abs (mod (vary_position.y, contour_height_delta)) <= 0.25)
+  {
+    gl_FragColor = vec4 (0.0, 0.0, 0.0, 1.0);
+    return;
+  }
+
+  //! \todo is selected triangle in triangle selection cursor mode
+  // if (draw_triangle_selection_cursor && is_selected_triangle)
+  // {
+  //   gl_FragColor = vec4 (1.0, 1.0, 0.0, 1.0);
+  //   return;
+  // }
+
+  //! \todo layers
+  // if none: white
+  // else for layer:
+  //   texture_animation_setup
+  //   alpha = layer == 0 ? 1 : alphamap
+  //   texture
+
+  gl_FragColor = phong_lighting();
+
+  gl_FragColor = blend_by_alpha (vec4 (shadow_color, texture2D (shadow_map, vary_texcoord).a), gl_FragColor);
+
+  if (mark_impassable_chunks && is_impassable_chunk)
+  {
+    gl_FragColor = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.6), gl_FragColor);
+  }
+
+  if (draw_area_id_overlay)
+  {
+    gl_FragColor = blend_by_alpha (vec4 (area_id_color, 0.7), gl_FragColor);
+  }
+}
+)code"
+        };
+      opengl::program const program {&vertex_shader, &fragment_shader};
+
+      opengl::scoped::use_program mcnk_shader {program};
+
+      mcnk_shader.uniform ("model_view", opengl::matrix::model_view());
+      mcnk_shader.uniform ("projection", opengl::matrix::projection());
+
+      mcnk_shader.uniform ("shadow_color", skies->colorSet[SHADOW_COLOR]);
+
+      //! \todo cache
+      mcnk_shader.attrib ("texcoord", make_texcoords());
+
+      mcnk_shader.uniform ("draw_area_id_overlay", flags & AREAID);
+      mcnk_shader.uniform ("draw_terrain_height_contour", flags & HEIGHTCONTOUR);
+      mcnk_shader.uniform ("mark_impassable_chunks", flags & MARKIMPASSABLE);
+
+      //! \todo draw triangle selection cursor
+      // selected indices = mapstrip2[noggit::selection::selected_polygon (*selected_item) + 0…2]
+      // mcnk_shader.uniform ( "draw_triangle_selection_cursor"
+      //                     , !(flags & NOCURSOR)
+      //                     //! \todo This actually should be an enum.
+      //                     && noggit::app().setting ("cursor/type", 1).toInt() == 3
+      //                     );
+
+      for (int j (0); j < 64; ++j)
       {
-        for( int j = 0; j < 64; ++j )
+        for (int i (0); i < 64; ++i)
         {
-          for( int i = 0; i < 64; ++i )
+          if (_map_index.tile_loaded (j, i))
           {
-            if( _map_index.tile_loaded( j, i ) )
-            {
-              _map_index.tile( j, i )->draw ( flags & HEIGHTCONTOUR
-                                      , flags & MARKIMPASSABLE
-                                      , flags & AREAID
-                                      , flags & NOCURSOR
-                                      , skies.get()
-                                      , mapdrawdistance
-                                      , frustum
-                                      , camera
-                                      , selected_item
-                                      );
-            }
+            _map_index.tile (j, i)->draw
+              (mcnk_shader, mapdrawdistance, frustum, camera, selected_item);
           }
         }
       }
