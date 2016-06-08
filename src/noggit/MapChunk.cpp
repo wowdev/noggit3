@@ -34,7 +34,6 @@ const int stripsize = 8*18 + 7*2;
 
 namespace
   {
-  StripType *mapstrip;
   StripType *mapstrip2;
 
   int indexMapBuf (int x, int y)
@@ -49,24 +48,7 @@ namespace
 
   int indexNoLoD(int x, int y)
   {
-    return x*8+x*9+y;
-  }
-
-  // 8x8x2 version with triangle strips, size = 8*18 + 7*2
-  template <class V>
-  void stripify(V *in, V *out)
-  {
-    for (int row=0; row<8; row++) {
-      V *thisrow = &in[indexMapBuf(0,row*2)];
-      V *nextrow = &in[indexMapBuf(0,(row+1)*2)];
-
-      if (row>0) *out++ = thisrow[0];
-      for (int col=0; col<9; col++) {
-        *out++ = thisrow[col];
-        *out++ = nextrow[col];
-      }
-      if (row<7) *out++ = nextrow[8];
-    }
+    return x * 8 + x * 9 + y;
   }
 
   // high res version, size = 16*18 + 7*2 + 8*2
@@ -100,14 +82,7 @@ namespace
 
   void init_map_strip()
   {
-    // default strip indices
-    StripType *defstrip = new StripType[stripsize];
-    for (int i=0; i<stripsize; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
-    mapstrip = new StripType[stripsize];
-    stripify<StripType>(defstrip, mapstrip);
-    delete[] defstrip;
-
-    defstrip = new StripType[stripsize2];
+    StripType *defstrip = new StripType[stripsize2];
     for (int i=0; i<stripsize2; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
     mapstrip2 = new StripType[stripsize2];
     stripify2<StripType>(defstrip, mapstrip2);
