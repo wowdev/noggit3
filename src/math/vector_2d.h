@@ -28,6 +28,15 @@ namespace math
       return _data;
     }
 
+    vector_2d operator* (float factor) const
+    {
+      return {_x * factor, _y * factor};
+    }
+    vector_2d operator+ (vector_2d const& other) const
+    {
+      return {_x + other._x, _y + other._y};
+    }
+
   private:
     union
     {
