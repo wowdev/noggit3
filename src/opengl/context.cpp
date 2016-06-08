@@ -771,8 +771,9 @@ namespace opengl
     }
     if (get_shader (shader, GL_COMPILE_STATUS) != GL_TRUE)
     {
-      //! \todo show log
-      throw std::runtime_error ("compiling shader failed");
+      std::vector<char> log (get_shader (shader, GL_INFO_LOG_LENGTH));
+      _current_context->functions()->glGetShaderInfoLog (shader, log.size(), nullptr, log.data());
+      throw std::runtime_error ("compiling shader failed: " + std::string (log.data()));
     }
   }
   GLint context::get_shader (GLuint shader, GLenum pname)
@@ -811,8 +812,9 @@ namespace opengl
     }
     if (get_program (program, GL_LINK_STATUS) != GL_TRUE)
     {
-      //! \todo show log
-      throw std::runtime_error ("linking program failed");
+      std::vector<char> log (get_program (program, GL_INFO_LOG_LENGTH));
+      _current_context->functions()->glGetProgramInfoLog (program, log.size(), nullptr, log.data());
+      throw std::runtime_error ("linking program failed: " + std::string (log.data()));
     }
   }
   void context::useProgram (GLuint program)
