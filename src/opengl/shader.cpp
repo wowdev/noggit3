@@ -3,10 +3,12 @@
 #include <opengl/shader.hpp>
 
 #include <math/matrix_4x4.h>
+#include <math/vector_2d.h>
 #include <math/vector_3d.h>
 #include <math/vector_4d.h>
 
 #include <opengl/context.h>
+#include <opengl/texture.h>
 
 namespace opengl
 {
@@ -82,6 +84,14 @@ namespace opengl
       gl.useProgram (0);
     }
 
+    void use_program::uniform (std::string const& name, bool value)
+    {
+      gl.uniform1i (_program.uniform_location (name), value);
+    }
+    void use_program::uniform (std::string const& name, math::vector_3d const& value)
+    {
+      gl.uniform3fv (_program.uniform_location (name), 1, value);
+    }
     void use_program::uniform (std::string const& name, math::vector_4d const& value)
     {
       gl.uniform4fv (_program.uniform_location (name), 1, value);
@@ -91,7 +101,21 @@ namespace opengl
       gl.uniformMatrix4fv (_program.uniform_location (name), 1, GL_FALSE, value);
     }
 
-    void use_program::attrib (std::string const& name, math::vector_3d* data)
+    void use_program::sampler (std::string const& name, GLenum type, GLenum texture_slot, GLint id)
+    {
+      uniform (name, texture_slot - GL_TEXTURE0);
+      texture::enable_texture (texture_slot - GL_TEXTURE0);
+      gl.bindTexture (GL_TEXTURE_2D, id);
+    }
+
+    void use_program::attrib (std::string const& name, std::vector<math::vector_2d> const& data)
+    {
+      GLuint const location (_program.attrib_location (name));
+      gl.enableVertexAttribArray (location);
+      _enabled_vertex_attrib_arrays.emplace (location);
+      gl.vertexAttribPointer (location, 2, GL_FLOAT, GL_FALSE, 0, data.data());
+    }
+    void use_program::attrib (std::string const& name, math::vector_3d const* data)
     {
       GLuint const location (_program.attrib_location (name));
       gl.enableVertexAttribArray (location);
