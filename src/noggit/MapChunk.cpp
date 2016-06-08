@@ -26,7 +26,6 @@
 #include <noggit/mpq/file.h>
 #include <noggit/texture_set.hpp>
 
-static const int CONTOUR_WIDTH = 128;
 static const float texDetail = 8.0f;
 static const float TEX_RANGE = 62.0f / 64.0f;
 
@@ -115,42 +114,6 @@ namespace
   }
 }
 
-void MapChunk::GenerateContourMap()
-{
-  gl.enable(GL_TEXTURE_2D);
-
-  unsigned char  CTexture[CONTOUR_WIDTH*4];
-
-  _contour_coord_gen[0]=0.0f;
-  _contour_coord_gen[1]=0.25f;
-  _contour_coord_gen[2]=0.0f;
-  _contour_coord_gen[3]=0.0f;
-
-
-  for(int i=0;i<(CONTOUR_WIDTH*4);++i)
-    CTexture[i]=0;
-  CTexture[3+CONTOUR_WIDTH/2]=0xff;
-  CTexture[7+CONTOUR_WIDTH/2]=0xff;
-  CTexture[11+CONTOUR_WIDTH/2]=0xff;
-
-  gl.genTextures(1, &_contour_texture);
-  gl.bindTexture(GL_TEXTURE_2D, _contour_texture);
-
-  gl.texImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, CONTOUR_WIDTH, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, CTexture);
-  gl.generateMipmap (GL_TEXTURE_2D);
-
-  gl.enable(GL_TEXTURE_GEN_S);
-  gl.texGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
-  gl.texGenfv(GL_S,GL_OBJECT_PLANE,_contour_coord_gen);
-
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-
-  gl.disable(GL_TEXTURE_GEN_S);
-  gl.disable(GL_TEXTURE_2D);
-}
-
 //! \note I am aware of this being global state not even being inside a class BUT I DONT CARE AT ALL. THIS WHOLE THING IS BULLSHIT AND NOT WORTH A BIT AND COSTING ME TIME OF MY LIFE FOR JUST BEING BAD AS FUCK. REMOVEING ENVIRONMENT TOOK ME HOURS WHILE MOST VARIABLES HAD BEEN ONLY USED IN A SINGLE FUCKING CLASS,  DID NOT HAVE MEANINGFUL NAMES OR ANYTHING.
 namespace
 {
@@ -159,7 +122,6 @@ namespace
 
 MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bigAlpha)
   : _world (world)
-  , _contour_texture (0)
 {
   CreateStrips();
   init_map_strip();
@@ -383,8 +345,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
 
   gl.bindBuffer(GL_ARRAY_BUFFER, minishadows);
   gl.bufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
-
-  GenerateContourMap();
 }
 
 namespace
@@ -709,25 +669,6 @@ void MapChunk::drawLines (bool draw_hole_lines) const
   gl.color4f(1,1,1,1);
 }
 
-void MapChunk::drawContour() const
-{
-  opengl::scoped::texture_setter<0, GL_TRUE> const texture_0;
-  gl.bindTexture (GL_TEXTURE_2D, _contour_texture);
-
-  opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
-  gl.blendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  opengl::scoped::bool_setter<GL_ALPHA_TEST, GL_TRUE> const alpha_test;
-
-  opengl::scoped::bool_setter<GL_TEXTURE_GEN_S, GL_TRUE> const texture_gen_s;
-  gl.texGeni (GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-  gl.texGenfv (GL_S, GL_OBJECT_PLANE, _contour_coord_gen);
-
-  gl.color4f (1.0f, 1.0f, 1.0f, 1.0f);
-
-  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
-}
-
 bool MapChunk::is_visible ( const float& cull_distance
                           , const Frustum& frustum
                           , const ::math::vector_3d& camera
@@ -739,160 +680,23 @@ bool MapChunk::is_visible ( const float& cull_distance
       && (((camera - vcenter).length() - chunk_radius) < cull_distance);
 }
 
-void MapChunk::draw ( bool draw_terrain_height_contour
-                    , bool mark_impassable_chunks
-                    , bool draw_area_id_overlay
-                    , bool dont_draw_cursor
-                    , const Skies* skies
+void MapChunk::draw ( opengl::scoped::use_program& shader
                     , const boost::optional<selection_type>& selected_item
                     )
 {
-  // setup vertex buffers
-  gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
-  gl.vertexPointer(3, GL_FLOAT, 0, 0);
-  gl.bindBuffer(GL_ARRAY_BUFFER, normals);
-  gl.normalPointer(GL_FLOAT, 0, 0);
-  gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
-  // ASSUME: texture coordinates set up already
+  shader.sampler ("shadow_map", GL_TEXTURE_2D, GL_TEXTURE1, shadow);
 
+  shader.uniform ("area_id_color", areaIDColors[header.areaid]);
 
-  // first pass: base texture
-  if (textures.num() == 0)
-  {
-    opengl::texture::disable_texture (0);
-    opengl::texture::disable_texture (1);
+  shader.uniform ("is_impassable_chunk", !!(header.flags & FLAG_IMPASS));
 
-    gl.color3f(1.0f,1.0f,1.0f);
-  }
-  else
-  {
-    textures.bindTexture(0, 0);
+  shader.attrib ("position", mVertices);
+  shader.attrib ("normal", mNormals);
 
-    opengl::texture::disable_texture (1);
-  }
+  //! \todo noggit::selection::is_the_same_as (this, *selected_item)
+  // -> selected indices = mapstrip2[noggit::selection::selected_polygon (*selected_item) + 0…2]
 
-  gl.enable(GL_LIGHTING);
-  drawPass(textures.animated(0));
-
-  if (textures.num() > 1U) {
-    //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
-    gl.depthMask(GL_FALSE);
-  }
-
-  // additional passes: if required
-  for( size_t i = 1; i < textures.num(); ++i )
-  {
-    textures.bindTexture(i, 0);
-
-    // this time, use blending:
-    textures.bindAlphamap(i - 1, 1);
-
-    drawPass(textures.animated(i));
-  }
-
-  if (textures.num() > 1U) {
-    //gl.depthFunc(GL_LEQUAL);
-    gl.depthMask(GL_TRUE);
-  }
-
-  // shadow map
-  gl.activeTexture(GL_TEXTURE0);
-  gl.disable(GL_TEXTURE_2D);
-  gl.disable(GL_LIGHTING);
-
-  ::math::vector_3d shc = skies->colorSet[WATER_COLOR_DARK] * 0.3f;
-  gl.color4f(shc.x(),shc.y(),shc.z(),1);
-
-  //gl.color4f(1,1,1,1);
-
-  gl.activeTexture(GL_TEXTURE1);
-  gl.bindTexture(GL_TEXTURE_2D, shadow);
-  gl.enable(GL_TEXTURE_2D);
-
-  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
-
-  gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  gl.disable(GL_TEXTURE_2D);
-  gl.disable(GL_LIGHTING);
-
-  if (draw_terrain_height_contour)
-  {
-    drawContour();
-  }
-
-  if (mark_impassable_chunks && (header.flags & FLAG_IMPASS))
-  {
-    gl.color4f (1.0f, 1.0f, 1.0f, 0.6f);
-    gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
-  }
-
-  if (draw_area_id_overlay)
-  {
-    gl.color4f ( areaIDColors[header.areaid].x()
-              , areaIDColors[header.areaid].y()
-              , areaIDColors[header.areaid].z()
-              , 0.7f
-              );
-    gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
-  }
-
-  //! \todo This actually should be an enum. And should be passed into this method.
-  if ( !dont_draw_cursor
-    && noggit::app().setting ("cursor/type", 1).toInt() == 3
-    && selected_item
-    && noggit::selection::is_the_same_as (this, *selected_item)
-     )
-  {
-    const int selected_polygon
-      (noggit::selection::selected_polygon (*selected_item));
-
-    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull_face;
-    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const depth_test;
-    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
-
-    gl.begin( GL_TRIANGLES );
-    gl.color4f( 1.0f, 1.0f, 0.0f, 1.0f );
-    gl.vertex3fv( mVertices[mapstrip2[selected_polygon + 0]] );
-    gl.vertex3fv( mVertices[mapstrip2[selected_polygon + 1]] );
-    gl.vertex3fv( mVertices[mapstrip2[selected_polygon + 2]] );
-    gl.end();
-  }
-
-
-  gl.color4f( 1.0f, 1.0f, 1.0f, 1.0f );
-
-  gl.enable( GL_LIGHTING );
-  gl.color4f( 1.0f, 1.0f, 1.0f, 1.0f );
-
-  /*
-  //////////////////////////////////
-  // debugging tile flags:
-  GLfloat tcols[8][4] = {  {1,1,1,1},
-    {1,0,0,1}, {1, 0.5f, 0, 1}, {1, 1, 0, 1},
-    {0,1,0,1}, {0,1,1,1}, {0,0,1,1}, {0.8f, 0, 1,1}
-  };
-  opengl::scoped::matrix_pusher const matrix_pusher;
-  gl.disable(GL_CULL_FACE);
-  gl.disable(GL_TEXTURE_2D);
-  gl.translatef(xbase, ybase, zbase);
-  for (int i=0; i<8; ++i) {
-    int v = 1 << (7-i);
-    for (int j=0; j<4; j++) {
-      if (animated[j] & v) {
-        gl.begin(GL_TRIANGLES);
-        gl.color4fv(tcols[i]);
-
-        gl.vertex3f(i*2.0f, 2.0f, j*2.0f);
-        gl.vertex3f(i*2.0f+1.0f, 2.0f, j*2.0f);
-        gl.vertex3f(i*2.0f+0.5f, 4.0f, j*2.0f);
-
-        gl.end();
-      }
-    }
-  }
-  gl.enable(GL_TEXTURE_2D);
-  gl.enable(GL_CULL_FACE);
-  gl.color4f(1,1,1,1);*/
+  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
 }
 
 void MapChunk::drawSelect()

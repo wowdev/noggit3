@@ -42,11 +42,7 @@ public:
   float xbase;
   float zbase;
 
-  void draw ( bool draw_terrain_height_contour
-            , bool mark_impassable_chunks
-            , bool draw_area_id_overlay
-            , bool dont_draw_cursor
-            , const Skies* skies
+  void draw ( opengl::scoped::use_program& mcnk_shader
             , const float& cull_distance
             , const Frustum& frustum
             , const ::math::vector_3d& camera

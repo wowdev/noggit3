@@ -332,32 +332,20 @@ bool MapTile::isTile( int pX, int pZ )
   return pX == mPositionX && pZ == mPositionZ;
 }
 
-void MapTile::draw ( bool draw_terrain_height_contour
-                   , bool mark_impassable_chunks
-                   , bool draw_area_id_overlay
-                   , bool dont_draw_cursor
-                   , const Skies* skies
+void MapTile::draw ( opengl::scoped::use_program& mcnk_shader
                    , const float& cull_distance
                    , const Frustum& frustum
                    , const ::math::vector_3d& camera
                    , const boost::optional<selection_type>& selected_item
                    )
 {
-  gl.color4f (1.0f, 1.0f, 1.0f, 1.0f);
-
   for (size_t j (0); j < 16; ++j)
   {
     for (size_t i (0); i < 16; ++i)
     {
       if (mChunks[j][i]->is_visible (cull_distance, frustum, camera))
       {
-        mChunks[j][i]->draw ( draw_terrain_height_contour
-                            , mark_impassable_chunks
-                            , draw_area_id_overlay
-                            , dont_draw_cursor
-                            , skies
-                            , selected_item
-                            );
+        mChunks[j][i]->draw (mcnk_shader, selected_item);
       }
     }
   }
