@@ -30,17 +30,8 @@ static const int CONTOUR_WIDTH = 128;
 static const float texDetail = 8.0f;
 static const float TEX_RANGE = 62.0f / 64.0f;
 
-const int stripsize = 8*18 + 7*2;
-
 namespace
-  {
-  StripType *mapstrip2;
-
-  int indexMapBuf (int x, int y)
-  {
-    return ((y+1)/2)*9 + (y/2)*8 + x;
-  }
-
+{
   int indexLoD(int x, int y)
   {
     return (x+1)*9+x*8+y;
@@ -49,44 +40,6 @@ namespace
   int indexNoLoD(int x, int y)
   {
     return x * 8 + x * 9 + y;
-  }
-
-  // high res version, size = 16*18 + 7*2 + 8*2
-  const int stripsize2 = 16*18 + 7*2 + 8*2;
-  template <class V>
-  void stripify2(V *in, V *out)
-  {
-    for (int row=0; row<8; row++) {
-      V *thisrow = &in[indexMapBuf(0,row*2)];
-      V *nextrow = &in[indexMapBuf(0,row*2+1)];
-      V *overrow = &in[indexMapBuf(0,(row+1)*2)];
-
-      if (row>0) *out++ = thisrow[0];// jump end
-      for (int col=0; col<8; col++) {
-        *out++ = thisrow[col];
-        *out++ = nextrow[col];
-      }
-      *out++ = thisrow[8];
-      *out++ = overrow[8];
-      *out++ = overrow[8];// jump start
-      *out++ = thisrow[0];// jump end
-      *out++ = thisrow[0];
-      for (int col=0; col<8; col++) {
-        *out++ = overrow[col];
-        *out++ = nextrow[col];
-      }
-      if (row<8) *out++ = overrow[8];
-      if (row<7) *out++ = overrow[8];// jump start
-    }
-  }
-
-  void init_map_strip()
-  {
-    StripType *defstrip = new StripType[stripsize2];
-    for (int i=0; i<stripsize2; ++i) defstrip[i] = i; // note: this is ugly and should be handled in stripify
-    mapstrip2 = new StripType[stripsize2];
-    stripify2<StripType>(defstrip, mapstrip2);
-    delete[] defstrip;
   }
 }
 
@@ -137,7 +90,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   , _contour_texture (0)
 {
   CreateStrips();
-  init_map_strip();
 
   uint32_t fourcc;
   uint32_t size;
@@ -499,7 +451,7 @@ void MapChunk::drawTextures() const
   gl.bindBuffer(GL_ARRAY_BUFFER, minishadows);
   gl.colorPointer(4, GL_FLOAT, 0, 0);
 
-  gl.drawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, mapstrip2);
+  gl.drawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
 }
 
 void MapChunk::initStrip()
@@ -834,9 +786,9 @@ void MapChunk::draw ( bool draw_terrain_height_contour
 
     gl.begin( GL_TRIANGLES );
     gl.color4f( 1.0f, 1.0f, 0.0f, 1.0f );
-    gl.vertex3fv( mVertices[mapstrip2[selected_polygon + 0]] );
-    gl.vertex3fv( mVertices[mapstrip2[selected_polygon + 1]] );
-    gl.vertex3fv( mVertices[mapstrip2[selected_polygon + 2]] );
+    gl.vertex3fv( mVertices[strip[selected_polygon + 0]] );
+    gl.vertex3fv( mVertices[strip[selected_polygon + 1]] );
+    gl.vertex3fv( mVertices[strip[selected_polygon + 2]] );
     gl.end();
   }
 
@@ -887,13 +839,13 @@ void MapChunk::drawSelect()
 
   opengl::scoped::name_pusher const name_pusher (nameID);
 
-  for( int i = 0; i < stripsize2 - 2; ++i )
+  for( int i = 0; i < striplen - 2; ++i )
   {
     opengl::scoped::name_pusher const inner_name_pusher (i);
     gl.begin( GL_TRIANGLES );
-    gl.vertex3fv( mVertices[mapstrip2[i]] );
-    gl.vertex3fv( mVertices[mapstrip2[i + 1]] );
-    gl.vertex3fv( mVertices[mapstrip2[i + 2]] );
+    gl.vertex3fv( mVertices[strip[i]] );
+    gl.vertex3fv( mVertices[strip[i + 1]] );
+    gl.vertex3fv( mVertices[strip[i + 2]] );
     gl.end();
   }
 }
@@ -903,12 +855,12 @@ void MapChunk::getSelectionCoord ( const int& selected_polygon
                                  , float* z
                                  ) const
 {
-  if (selected_polygon + 2 >= stripsize2)
+  if (selected_polygon + 2 >= striplen)
   {
     LogError << "getSelectionCoord() fucked up because the selection was bad. "
              << selected_polygon
              << " with stripsize2 of "
-             << stripsize2
+             << striplen
              << ".\n";
     //! \todo Return none, instead of some weird constant.
     *x = -1000000.0f;
@@ -916,54 +868,54 @@ void MapChunk::getSelectionCoord ( const int& selected_polygon
     return;
   }
 
-  *x = ( mVertices[mapstrip2[selected_polygon + 0]].x()
-       + mVertices[mapstrip2[selected_polygon + 1]].x()
-       + mVertices[mapstrip2[selected_polygon + 2]].x()
+  *x = ( mVertices[strip[selected_polygon + 0]].x()
+       + mVertices[strip[selected_polygon + 1]].x()
+       + mVertices[strip[selected_polygon + 2]].x()
        )
      / 3.0f;
-  *z = ( mVertices[mapstrip2[selected_polygon + 0]].z()
-       + mVertices[mapstrip2[selected_polygon + 1]].z()
-       + mVertices[mapstrip2[selected_polygon + 2]].z()
+  *z = ( mVertices[strip[selected_polygon + 0]].z()
+       + mVertices[strip[selected_polygon + 1]].z()
+       + mVertices[strip[selected_polygon + 2]].z()
        )
      / 3.0f;
 }
 
 float MapChunk::getSelectionHeight (const int& selected_polygon) const
 {
-  if (selected_polygon + 2 >= stripsize2)
+  if (selected_polygon + 2 >= striplen)
   {
     LogError << "getSelectionHeight() fucked up because the selection was bad. "
              << selected_polygon
              << " with stripsize2 of "
-             << stripsize2
+             << striplen
              << ".\n";
     //! \todo Return none, instead of some weird constant.
     return -1000000.0f;
   }
 
-  return ( mVertices[mapstrip2[selected_polygon + 0]].y()
-         + mVertices[mapstrip2[selected_polygon + 1]].y()
-         + mVertices[mapstrip2[selected_polygon + 2]].y()
+  return ( mVertices[strip[selected_polygon + 0]].y()
+         + mVertices[strip[selected_polygon + 1]].y()
+         + mVertices[strip[selected_polygon + 2]].y()
          )
          / 3.0f;
 }
 
 ::math::vector_3d MapChunk::GetSelectionPosition (const int& selected_polygon) const
 {
-  if (selected_polygon + 2 >= stripsize2)
+  if (selected_polygon + 2 >= striplen)
   {
     LogError << "GetSelectionPosition() fucked up because the selection was bad. "
              << selected_polygon
              << " with stripsize2 of "
-             << stripsize2
+             << striplen
              << ".\n";
     //! \todo Return none, instead of some weird constant.
     return ::math::vector_3d (-1000000.0f, -1000000.0f, -1000000.0f);
   }
 
-  return ( ::math::vector_3d( mVertices[mapstrip2[selected_polygon + 0]] )
-         + ::math::vector_3d( mVertices[mapstrip2[selected_polygon + 1]] )
-         + ::math::vector_3d( mVertices[mapstrip2[selected_polygon + 2]] )
+  return ( ::math::vector_3d( mVertices[strip[selected_polygon + 0]] )
+         + ::math::vector_3d( mVertices[strip[selected_polygon + 1]] )
+         + ::math::vector_3d( mVertices[strip[selected_polygon + 2]] )
          )
          * (1.0f / 3.0f);
 }
