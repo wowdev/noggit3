@@ -873,6 +873,16 @@ namespace opengl
     }
     return val;
   }
+  void context::uniform1i (GLint location, GLint value)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glUniform1i (location, value);
+  }
+  void context::uniform3fv (GLint location, GLsizei count, GLfloat const* value)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glUniform3fv (location, count, value);
+  }
   void context::uniform4fv (GLint location, GLsizei count, GLfloat const* value)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);

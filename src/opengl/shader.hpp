@@ -12,6 +12,7 @@
 namespace math
 {
   class matrix_4x4;
+  class vector_2d;
   class vector_3d;
   class vector_4d;
 }
@@ -65,10 +66,15 @@ namespace opengl
       use_program& operator= (use_program const&) = delete;
       use_program& operator= (use_program&&) = delete;
 
+      void uniform (std::string const& name, bool);
+      void uniform (std::string const& name, math::vector_3d const&);
       void uniform (std::string const& name, math::vector_4d const&);
       void uniform (std::string const& name, math::matrix_4x4 const&);
 
-      void attrib (std::string const& name, math::vector_3d*);
+      void sampler (std::string const& name, GLenum type, GLenum texture_slot, GLint id);
+
+      void attrib (std::string const& name, std::vector<math::vector_2d> const&);
+      void attrib (std::string const& name, math::vector_3d const*);
 
     private:
       program const& _program;
