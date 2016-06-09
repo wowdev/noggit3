@@ -84,7 +84,7 @@ namespace opengl
       gl.useProgram (0);
     }
 
-    void use_program::uniform (std::string const& name, bool value)
+    void use_program::uniform (std::string const& name, int value)
     {
       gl.uniform1i (_program.uniform_location (name), value);
     }
