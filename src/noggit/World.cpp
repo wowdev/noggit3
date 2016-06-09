@@ -858,6 +858,8 @@ void World::draw ( size_t flags
 
   gl.clientActiveTexture(GL_TEXTURE0);
 
+  gl.enable(GL_FRAMEBUFFER_SRGB);
+
 
   // gosh darn alpha blended evil
   //! \note THIS SCOPE IS NEEDED FOR THE SETTINGS SAVER!
@@ -899,9 +901,9 @@ void main()
 }
 )code"
         };
-      opengl::shader const fragment_shader
-        { GL_FRAGMENT_SHADER
-        , R"code(
+opengl::shader const fragment_shader
+{ GL_FRAGMENT_SHADER
+, R"code(
 #version 110
 
 uniform bool draw_area_id_overlay;
@@ -912,10 +914,14 @@ uniform bool is_impassable_chunk;
 uniform bool mark_impassable_chunks;
 uniform vec3 area_id_color;
 uniform vec3 shadow_color;
+uniform int layer_count;
 
 uniform mat4 model_view;
 
 uniform sampler2D shadow_map;
+
+uniform sampler2D textures[4];
+uniform sampler2D alphamaps[3];
 
 varying vec4 vary_position;
 varying vec2 vary_texcoord;
@@ -929,7 +935,7 @@ vec4 blend_by_alpha (in vec4 source, in vec4 dest)
   return source * source.w + dest * (1.0 - source.w);
 }
 
-vec4 phong_lighting()
+vec4 phong_lighting(in vec4 diffuse)
 {
   // Implementing Phong Shader (for one Point-Light)
   // https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/lighting.php
@@ -944,11 +950,33 @@ vec4 phong_lighting()
 
   //! \todo gl_FrontLightProduct deprecated
   vec4 Iamb = gl_FrontLightProduct[0].ambient;
-  vec4 Idiff = clamp (gl_FrontLightProduct[0].diffuse * max (dot (N, L), 0.0), 0.0, 1.0);
+  vec4 Idiff = clamp (diffuse * max (dot (N, L), 0.0), 0.0, 1.0);
   vec4 Ispec = clamp (gl_FrontLightProduct[0].specular * pow (max (dot (R, E),0.0), 0.3 * gl_FrontMaterial.shininess), 0.0, 1.0);
 
   //! \todo gl_FrontLightModelProduct deprecated
   return gl_FrontLightModelProduct.sceneColor + Iamb + Idiff + Ispec;
+}
+
+vec4 texture_blend() {
+  if(layer_count == 0)
+    return vec4 (1.0, 1.0, 1.0, 1.0);
+
+  vec4 color = vec4 (0.0, 0.0, 0.0, 0.0);
+
+  for(int i = 0; i < layer_count; ++i)
+  {
+    float alpha = 1;
+    vec4 texture_color = texture2D (textures[i], vary_texcoord);
+
+    if(i != 0)
+    {
+      alpha = texture2D (alphamaps[i - 1], vary_texcoord).a;
+    }
+
+    color = blend_by_alpha(vec4(texture_color.rgb, alpha), color);
+  }
+
+  return color;
 }
 
 void main()
@@ -966,14 +994,8 @@ void main()
   //   return;
   // }
 
-  //! \todo layers
-  // if none: white
-  // else for layer:
-  //   texture_animation_setup
-  //   alpha = layer == 0 ? 1 : alphamap
-  //   texture
-
-  gl_FragColor = phong_lighting();
+  //! \todo this is quite bright. pretty sure its a gamma issue
+  gl_FragColor = phong_lighting(texture_blend());
 
   gl_FragColor = blend_by_alpha (vec4 (shadow_color, texture2D (shadow_map, vary_texcoord).a), gl_FragColor);
 
