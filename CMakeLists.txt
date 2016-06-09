@@ -417,6 +417,11 @@ if (WIN32)
 	source_group("moced"  FILES ${moced} )
 	source_group("resources"  FILES ${noggit_rc} )
 
+  if (NOGGIT_LOGTOCONSOLE)
+    set_property(TARGET noggit APPEND PROPERTY LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+    set_property(TARGET noggit APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:"_CONSOLE">)
+  endif (NOGGIT_LOGTOCONSOLE)
+
 else (WIN32)
   add_executable ( noggit
                    MACOSX_BUNDLE
