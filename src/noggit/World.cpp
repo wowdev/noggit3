@@ -965,7 +965,7 @@ vec4 texture_blend() {
 
   for (int i = 0; i < layer_count; ++i)
   {
-    float alpha = 1;
+    float alpha = 1.0;
     vec4 texture_color = texture2D (textures[i], vary_texcoord * 8.0);
 
     if (i != 0)
