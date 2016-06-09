@@ -81,24 +81,21 @@ Model::~Model()
   if(showGeosets)
     delete[] showGeosets;
 
-  if (animated) {
-    // unload all sorts of crap
-    //delete[] vertices;
-    //delete[] normals;
-    if(indices)
-      delete[] indices;
-    if(anims)
-      delete[] anims;
-    if(origVertices)
-      delete[] origVertices;
-    if (!animGeometry) {
-      gl.deleteBuffers(1, &nbuf);
-    }
-    gl.deleteBuffers(1, &vbuf);
-    gl.deleteBuffers(1, &tbuf);
-  } else {
-    gl.deleteLists(ModelDrawList, 1);
+  // unload all sorts of crap
+  //delete[] vertices;
+  //delete[] normals;
+  if (indices)
+    delete[] indices;
+  if (anims)
+    delete[] anims;
+  if (origVertices)
+    delete[] origVertices;
+  if (!animGeometry)
+  {
+    gl.deleteBuffers(1, &nbuf);
   }
+  gl.deleteBuffers(1, &vbuf);
+  gl.deleteBuffers(1, &tbuf);
 }
 
 
@@ -769,56 +766,41 @@ void Model::drawModel(int animtime)
 {
   // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
 
-  if( animated )
+  if (animGeometry)
   {
-    if( animGeometry )
-    {
-      gl.bindBuffer( GL_ARRAY_BUFFER, vbuf );
-      gl.vertexPointer( 3, GL_FLOAT, 0, 0 );
-      gl.normalPointer( GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize) );
-    }
-    else
-    {
-      gl.bindBuffer( GL_ARRAY_BUFFER, vbuf );
-      gl.vertexPointer( 3, GL_FLOAT, 0, 0 );
-      gl.bindBuffer( GL_ARRAY_BUFFER, nbuf );
-      gl.normalPointer( GL_FLOAT, 0, 0 );
-    }
-
-    gl.bindBuffer( GL_ARRAY_BUFFER, tbuf );
-    gl.texCoordPointer( 2, GL_FLOAT, 0, 0 );
+    gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
+    gl.vertexPointer(3, GL_FLOAT, 0, 0);
+    gl.normalPointer(GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize));
   }
+  else
+  {
+    gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
+    gl.vertexPointer(3, GL_FLOAT, 0, 0);
+    gl.bindBuffer(GL_ARRAY_BUFFER, nbuf);
+    gl.normalPointer(GL_FLOAT, 0, 0);
+  }
+
+  gl.bindBuffer(GL_ARRAY_BUFFER, tbuf);
+  gl.texCoordPointer(2, GL_FLOAT, 0, 0);
 
   gl.blendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   gl.alphaFunc( GL_GREATER, 0.3f );
 
-  for (size_t i=0; i<passes.size(); ++i) {
-    ModelRenderPass &p = passes[i];
+  for (size_t i = 0; i < passes.size(); ++i)
+  {
+    ModelRenderPass& p = passes[i];
 
-    if (p.init(this, animtime)) {
+    if (p.init(this, animtime))
+    {
       // we don't want to render completely transparent parts
 
-      // render
-      if (animated) {
-        //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-        // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
-        // I can't notice a difference but I guess it can't hurt
-          gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-
-      } else {
-        gl.begin(GL_TRIANGLES);
-        for (size_t k = 0, b=p.indexStart; k<p.indexCount; ++k,++b) {
-          uint16_t a = indices[b];
-          gl.normal3fv(normals[a]);
-          gl.texCoord2fv(origVertices[a].texcoords);
-          gl.vertex3fv(vertices[a]);
-        }
-        gl.end();
-      }
+      //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+      // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
+      // I can't notice a difference but I guess it can't hurt
+      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
 
       p.deinit();
     }
-
   }
   // done with all render ops
 
@@ -835,59 +817,41 @@ void Model::drawModelSelect (int animtime)
 {
   // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
 
-  if( animated )
+  if (animGeometry)
   {
-    if( animGeometry )
-    {
-      gl.bindBuffer( GL_ARRAY_BUFFER, vbuf );
-      gl.vertexPointer( 3, GL_FLOAT, 0, 0 );
-      gl.normalPointer( GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize) );
-    }
-    else
-    {
-      gl.bindBuffer( GL_ARRAY_BUFFER, vbuf );
-      gl.vertexPointer( 3, GL_FLOAT, 0, 0 );
-      gl.bindBuffer( GL_ARRAY_BUFFER, nbuf );
-      gl.normalPointer( GL_FLOAT, 0, 0 );
-    }
-
-    gl.bindBuffer( GL_ARRAY_BUFFER, tbuf );
-    gl.texCoordPointer( 2, GL_FLOAT, 0, 0 );
+    gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
+    gl.vertexPointer(3, GL_FLOAT, 0, 0);
+    gl.normalPointer(GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize));
+  }
+  else
+  {
+    gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
+    gl.vertexPointer(3, GL_FLOAT, 0, 0);
+    gl.bindBuffer(GL_ARRAY_BUFFER, nbuf);
+    gl.normalPointer(GL_FLOAT, 0, 0);
   }
 
-  gl.blendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-  gl.alphaFunc( GL_GREATER, 0.3f );
+  gl.bindBuffer(GL_ARRAY_BUFFER, tbuf);
+  gl.texCoordPointer(2, GL_FLOAT, 0, 0);
 
-  for (size_t i=0; i<passes.size(); ++i) {
-    ModelRenderPass &p = passes[i];
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.alphaFunc(GL_GREATER, 0.3f);
 
-    if (p.init(this, animtime)) {
+  for (size_t i = 0; i < passes.size(); ++i)
+  {
+    ModelRenderPass& p = passes[i];
+
+    if (p.init(this, animtime))
+    {
       // we don't want to render completely transparent parts
 
-      // render
-      if (animated) {
-        //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-        // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
-        // I can't notice a difference but I guess it can't hurt
-        gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+      //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+      // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
+      // I can't notice a difference but I guess it can't hurt
+      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
 
-      }
-      else
-      {
-        gl.begin(GL_TRIANGLES);
-        for (size_t k = 0, b=p.indexStart; k<p.indexCount; ++k,++b)
-        {
-          uint16_t a = indices[b];
-          gl.normal3fv(normals[a]);
-          gl.texCoord2fv(origVertices[a].texcoords);
-          gl.vertex3fv(vertices[a]);
-        }
-        gl.end();
-      }
-
-    p.deinit();
+      p.deinit();
     }
-
   }
   // done with all render ops
 
@@ -1112,31 +1076,24 @@ void Model::draw (bool draw_fog, size_t time)
   else
     gl.disable( GL_FOG );
 
-  if( !animated )
+  if (animated && (!animcalc || mPerInstanceAnimation))
   {
-    gl.callList( ModelDrawList );
+    animate(0, time);
+    animcalc = true;
   }
-  else
-  {
-    if( !animcalc || mPerInstanceAnimation )
-    {
-      animate(0, time);
-      animcalc = true;
-    }
 
 
-    lightsOn( GL_LIGHT4, time );
-    drawModel(time);
-    lightsOff( GL_LIGHT4 );
+  lightsOn(GL_LIGHT4, time);
+  drawModel(time);
+  lightsOff(GL_LIGHT4);
 
 
-    // draw particle systems & ribbons
-    for( size_t i = 0; i < header.nParticleEmitters; ++i )
-      particleSystems[i].draw();
+  // draw particle systems & ribbons
+  for (size_t i = 0; i < header.nParticleEmitters; ++i)
+    particleSystems[i].draw();
 
-    for( size_t i = 0; i < header.nRibbonEmitters; ++i )
-      ribbons[i].draw();
-  }
+  for (size_t i = 0; i < header.nRibbonEmitters; ++i)
+    ribbons[i].draw();
 }
 
 void Model::drawSelect (size_t time)
@@ -1144,33 +1101,13 @@ void Model::drawSelect (size_t time)
   if (!finished_loading())
     return;
 
-  if (!_finished_upload) {
-    upload();
-    return;
-  }
-
-  if( !animated )
-    gl.callList(SelectModelDrawList);
-  else
+  if (animated && (!animcalc || mPerInstanceAnimation))
   {
-      if( !animcalc || mPerInstanceAnimation )
-      {
-        animate(0, time);
-        animcalc = true;
-      }
-
-    drawModelSelect(time);
-
-    //QUESTION: Do we need to drow this stuff for selectio??
-    // draw particle systems
-    // for( size_t i = 0; i < header.nParticleEmitters; ++i )
-      // particleSystems[i].draw();
-
-     //QUESTION: Do we need to drow this stuff for selectio??
-    // draw ribbons
-    // for( size_t i = 0; i < header.nRibbonEmitters; ++i )
-       //ribbons[i].draw();
+    animate(0, time);
+    animcalc = true;
   }
+
+  drawModelSelect(time);
 }
 
 void Model::lightsOn(opengl::light lbase, int animtime)
@@ -1189,57 +1126,33 @@ void Model::upload()
   for (std::string texture : _texture_names)
     _textures.emplace_back(texture);
 
-  if (animated)
+  gl.genBuffers(1, &vbuf);
+  gl.genBuffers(1, &tbuf);
+  const size_t size = header.nVertices * sizeof(float);
+  vbufsize = 3 * size;
+
+  if (!animGeometry)
   {
-    gl.genBuffers(1, &vbuf);
-    gl.genBuffers(1, &tbuf);
-    const size_t size = header.nVertices * sizeof(float);
-    vbufsize = 3 * size;
+    gl.bindBuffer(GL_ARRAY_BUFFER_ARB, vbuf);
+    gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
 
-    if (!animGeometry) {
-      gl.bindBuffer(GL_ARRAY_BUFFER_ARB, vbuf);
-      gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
+    gl.genBuffers(1, &nbuf);
+    gl.bindBuffer(GL_ARRAY_BUFFER_ARB, nbuf);
+    gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
 
-      gl.genBuffers(1, &nbuf);
-      gl.bindBuffer(GL_ARRAY_BUFFER_ARB, nbuf);
-      gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
-
-      delete[] vertices;
-      delete[] normals;
-    }
-
-    ::math::vector_2d *texcoords = new ::math::vector_2d[header.nVertices];
-
-    for (size_t i = 0; i<header.nVertices; ++i)
-      texcoords[i] = origVertices[i].texcoords;
-
-    gl.bindBuffer(GL_ARRAY_BUFFER_ARB, tbuf);
-    gl.bufferData(GL_ARRAY_BUFFER_ARB, 2 * size, texcoords, GL_STATIC_DRAW_ARB);
-
-    delete[] texcoords;
+    delete[] vertices;
+    delete[] normals;
   }
-  else
-  {
-    ModelDrawList = gl.genLists(1);
-    gl.newList(ModelDrawList, GL_COMPILE);
-    drawModel(0);
-    gl.endList();
 
-    SelectModelDrawList = gl.genLists(1);
-    gl.newList(SelectModelDrawList, GL_COMPILE);
-    drawModelSelect(0);
-    gl.endList();
+  ::math::vector_2d* texcoords = new ::math::vector_2d[header.nVertices];
 
-    // clean up vertices, indices etc
-    if (vertices)
-      delete[] vertices;
-    if (normals)
-      delete[] normals;
-    if (indices)
-      delete[] indices;
-    colors.clear();
-    transparency.clear();
-  }
+  for (size_t i = 0; i < header.nVertices; ++i)
+    texcoords[i] = origVertices[i].texcoords;
+
+  gl.bindBuffer(GL_ARRAY_BUFFER_ARB, tbuf);
+  gl.bufferData(GL_ARRAY_BUFFER_ARB, 2 * size, texcoords, GL_STATIC_DRAW_ARB);
+
+  delete[] texcoords;
 
   _finished_upload = true;
 }
