@@ -901,9 +901,9 @@ void main()
 }
 )code"
         };
-opengl::shader const fragment_shader
-{ GL_FRAGMENT_SHADER
-, R"code(
+      opengl::shader const fragment_shader
+        { GL_FRAGMENT_SHADER
+        , R"code(
 #version 110
 
 uniform bool draw_area_id_overlay;
@@ -963,17 +963,17 @@ vec4 texture_blend() {
 
   vec4 color = vec4 (0.0, 0.0, 0.0, 0.0);
 
-  for(int i = 0; i < layer_count; ++i)
+  for (int i = 0; i < layer_count; ++i)
   {
     float alpha = 1;
-    vec4 texture_color = texture2D (textures[i], vary_texcoord);
+    vec4 texture_color = texture2D (textures[i], vary_texcoord * 8.0);
 
-    if(i != 0)
+    if (i != 0)
     {
       alpha = texture2D (alphamaps[i - 1], vary_texcoord).a;
     }
 
-    color = blend_by_alpha(vec4(texture_color.rgb, alpha), color);
+    color = blend_by_alpha (vec4 (texture_color.rgb, alpha), color);
   }
 
   return color;
