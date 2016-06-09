@@ -879,7 +879,7 @@ namespace opengl
     return _current_context->functions()->glUniform1i (location, value);
   }
 
-  void context::uniform1iv(GLint location, GLsizei count, GLint const* value)
+  void context::uniform1iv (GLint location, GLsizei count, GLint const* value)
   {
     verify_context_and_check_for_gl_errors const _(_current_context, BOOST_CURRENT_FUNCTION);
     return _current_context->functions()->glUniform1iv(location, count, value);

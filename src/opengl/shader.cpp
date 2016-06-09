@@ -88,7 +88,7 @@ namespace opengl
     {
       gl.uniform1i (_program.uniform_location (name), value);
     }
-    void use_program::uniform(std::string const& name, std::vector<int> const& value)
+    void use_program::uniform (std::string const& name, std::vector<int> const& value)
     {
       gl.uniform1iv(_program.uniform_location(name), value.size(), value.data());
     }
