@@ -156,11 +156,6 @@ struct ModelLight {
 
 class Model: public noggit::async::object
 {
-
-  GLuint ModelDrawList;
-  GLuint SelectModelDrawList;
-  //GLuint TileModeModelDrawList;
-
   GLuint vbuf, nbuf, tbuf;
   size_t vbufsize;
   bool animated;
