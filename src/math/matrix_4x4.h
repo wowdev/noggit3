@@ -12,10 +12,20 @@ namespace math
   class matrix_4x4
   {
   public:
-    matrix_4x4()
-    { }
+    static struct uninitialized_t {} uninitialized;
+    matrix_4x4 (uninitialized_t) {}
 
-    matrix_4x4 (const matrix_4x4& p);
+    static struct zero_t {} zero;
+    matrix_4x4 (zero_t)
+    {
+      memset (_data, 0, sizeof (_data));
+    }
+
+    static struct unit_t {} unit;
+    matrix_4x4 (unit_t) : matrix_4x4 (zero)
+    {
+      _m[0][0] = _m[1][1] = _m[2][2] = _m[3][3] = 1.0f;
+    }
 
     matrix_4x4 ( float m00, float m01, float m02, float m03
                , float m10, float m11, float m12, float m13
@@ -29,67 +39,56 @@ namespace math
       _m[3][0] = m30; _m[3][1] = m31; _m[3][2] = m32; _m[3][3] = m33;
     }
 
-    matrix_4x4& operator= (const matrix_4x4& p);
+    static struct translation_t {} translation;
+    matrix_4x4 (translation_t, vector_3d const& tr)
+      : matrix_4x4 ( 1.0f, 0.0f, 0.0f, tr.x()
+                   , 0.0f, 1.0f, 0.0f, tr.y()
+                   , 0.0f, 0.0f, 1.0f, tr.z()
+                   , 0.0f, 0.0f, 0.0f, 1.0f
+                   )
+    {}
 
-    const float& operator() (const size_t& j, const size_t& i) const
+    static struct scale_t {} scale;
+    matrix_4x4 (scale_t, vector_3d const& sc)
+      : matrix_4x4 ( sc.x(), 0.0f, 0.0f, 0.0f
+                   , 0.0f, sc.y(), 0.0f, 0.0f
+                   , 0.0f, 0.0f, sc.z(), 0.0f
+                   , 0.0f, 0.0f, 0.0f, 1.0f
+                   )
+    {}
+
+    static struct rotation_t {} rotation;
+    matrix_4x4 (rotation_t, quaternion const&);
+    matrix_4x4 (rotation_t, vector_3d const& degrees);
+
+    matrix_4x4() = delete;
+    matrix_4x4 (matrix_4x4 const&) = default;
+    matrix_4x4 (matrix_4x4&&) = default;
+    matrix_4x4& operator= (matrix_4x4 const&) = default;
+    matrix_4x4& operator= (matrix_4x4&&) = default;
+    ~matrix_4x4() = default;
+
+    float operator() (std::size_t const& j, std::size_t const& i) const
     {
       return _m[j][i];
     }
-    const float& operator() (const size_t& j, const size_t& i, float value)
+    float operator() (std::size_t const& j, std::size_t const& i, float value)
     {
       return _m[j][i] = value;
     }
 
-    void zero();
-    void unit();
-
-    void translation (const vector_3d& tr);
-    void rotate (const quaternion& q);
-    void rotate (const vector_3d& r);
-    void scale (const vector_3d& sc);
-
-    static inline const matrix_4x4 new_translation_matrix (const vector_3d& tr)
-    {
-      matrix_4x4 t;
-      t.translation(tr);
-      return t;
-    }
-
-    static inline const matrix_4x4 new_scale_matrix (const vector_3d& sc)
-    {
-      matrix_4x4 t;
-      t.scale (sc);
-      return t;
-    }
-
-    static inline const matrix_4x4 new_rotation_matrix (const quaternion& qr)
-    {
-      matrix_4x4 t;
-      t.rotate (qr);
-      return t;
-    }
-
-    static inline const matrix_4x4 new_rotation_matrix (const vector_3d& r)
-    {
-      matrix_4x4 t;
-      t.rotate (r);
-      return t;
-    }
-
-    vector_3d operator* (const vector_3d& v) const;
-    vector_4d operator* (const vector_4d& v) const;
-    matrix_4x4 operator* (const matrix_4x4& p) const;
+    vector_3d operator* (vector_3d const&) const;
+    vector_4d operator* (vector_4d const&) const;
+    matrix_4x4 operator* (matrix_4x4 const&) const;
 
     matrix_4x4& operator* (float);
     matrix_4x4& operator/ (float);
 
     matrix_4x4 adjoint() const;
-    void invert();
     matrix_4x4 inverted() const;
-    void transpose();
     matrix_4x4 transposed() const;
 
-    inline matrix_4x4& operator*= (const matrix_4x4& p)
+    inline matrix_4x4& operator*= (matrix_4x4 const& p)
     {
       return *this = operator* (p);
     }
@@ -103,29 +102,13 @@ namespace math
       return _data;
     }
 
-    template<size_t i>
-    vector_4d column() const
+    template<std::size_t i>
+      vector_4d column() const
     {
-      return ::math::vector_4d (_m[0][i], _m[1][i], _m[2][i], _m[3][i]);
+      return {_m[0][i], _m[1][i], _m[2][i], _m[3][i]};
     }
 
   private:
-    enum axis
-    {
-      x = 0,
-      y = 1,
-      z = 2,
-      num_axis,
-    };
-
-    template<axis a>
-    inline const matrix_4x4& rotate_axis (const float& radians);
-
-    inline float determinant() const;
-
-    inline float minorSize (size_t x, size_t y) const;
-    //minor is keyword on unix
-
     union
     {
       float _m[4][4];

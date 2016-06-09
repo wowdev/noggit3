@@ -309,7 +309,7 @@ void ModelInstance::draw2() const
 
   //! \todo This could all be done in one composed matrix.
   gl.translatef (pos.x(), pos.y(), pos.z());
-  gl.multMatrixf (::math::matrix_4x4::new_rotation_matrix (_wmo_doodad_rotation));
+  gl.multMatrixf (::math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_doodad_rotation));
   gl.scalef (sc, -sc, -sc);
 
   model->draw (_world, time_since_spawn());
@@ -320,7 +320,7 @@ void ModelInstance::draw2Select() const
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
   gl.translatef (pos.x(), pos.y(), pos.z());
-  gl.multMatrixf (::math::matrix_4x4::new_rotation_matrix (_wmo_doodad_rotation));
+  gl.multMatrixf (::math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_doodad_rotation));
   gl.scalef (sc, -sc, -sc);
 
   model->drawSelect (time_since_spawn());
@@ -341,14 +341,19 @@ namespace
     extents.first = ::math::min (extents.first, new_point);
     extents.second = ::math::max (extents.second, new_point);
   }
+
+  math::vector_3d convert_rotation (math::vector_3d in)
+  {
+    return {in.z(), in.y() - 90.0f, -in.x()};
+  }
 }
 
 std::pair<::math::vector_3d, ::math::vector_3d> ModelInstance::extents() const
 {
   ::math::matrix_4x4 const rot
-    ( ::math::matrix_4x4::new_translation_matrix (pos)
-    * ::math::matrix_4x4::new_rotation_matrix (dir)
-    * ::math::matrix_4x4::new_scale_matrix ({sc, sc, sc})
+    ( ::math::matrix_4x4 (math::matrix_4x4::translation, pos)
+    * ::math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir))
+    * ::math::matrix_4x4 (math::matrix_4x4::scale, {sc, sc, sc})
     );
 
   std::pair<::math::vector_3d, ::math::vector_3d> extents

@@ -998,6 +998,8 @@ Bone::Bone(const noggit::mpq::file& f, const ModelBoneDef &b, int *global, noggi
   , pivot (fixCoordSystem (b.pivot))
   , parent (b.parent)
   , billboard (b.flags & MODELBONE_BILLBOARD)
+  , mat (math::matrix_4x4::uninitialized)
+  , mrot (math::matrix_4x4::uninitialized)
 {
   trans.apply(fixCoordSystem);
   rot.apply(fixCoordSystemQuat);
@@ -1007,31 +1009,29 @@ Bone::Bone(const noggit::mpq::file& f, const ModelBoneDef &b, int *global, noggi
 void Bone::calcMatrix(Bone *allbones, int anim, int time)
 {
   if (calc) return;
-  ::math::matrix_4x4 m;
+  ::math::matrix_4x4 m (math::matrix_4x4::uninitialized);
   ::math::quaternion q;
 
   bool tr = rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard;
   if (tr) {
-    m.translation(pivot);
+    m = math::matrix_4x4 (math::matrix_4x4::translation, pivot);
 
     if (trans.uses(anim)) {
-      m *= ::math::matrix_4x4::new_translation_matrix (trans.getValue (anim, time));
+      m *= ::math::matrix_4x4 (math::matrix_4x4::translation, trans.getValue (anim, time));
     }
     if (rot.uses(anim)) {
       q = rot.getValue(anim, time);
-      m *= ::math::matrix_4x4::new_rotation_matrix (q);
+      m *= ::math::matrix_4x4 (math::matrix_4x4::rotation, q);
     }
     if (scale.uses(anim)) {
-      m *= ::math::matrix_4x4::new_scale_matrix (scale.getValue(anim, time));
+      m *= ::math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue(anim, time));
     }
     if (billboard) {
-      float modelview[16];
-      gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
+      math::matrix_4x4 const modelview (opengl::matrix::model_view());
 
-      ::math::vector_3d vRight (modelview[0], modelview[4], modelview[8]);
-      ::math::vector_3d vUp (modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+      ::math::vector_3d const vRight (-modelview.column<0>().xyz());
+      ::math::vector_3d const vUp (modelview.column<1>().xyz()); // Spherical billboarding
       //::math::vector_3d vUp (0,1,0); // Cylindrical billboarding
-      vRight = vRight * -1;
       m (0, 1, vUp.x());
       m (1, 1, vUp.y());
       m (2, 1, vUp.z());
@@ -1040,9 +1040,13 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
       m (2, 2, vRight.z());
     }
 
-    m *= ::math::matrix_4x4::new_translation_matrix (pivot*-1.0f);
+    m *= ::math::matrix_4x4 (math::matrix_4x4::translation, pivot*-1.0f);
 
-  } else m.unit();
+  }
+  else
+  {
+    m = math::matrix_4x4::unit;
+  }
 
   if (parent>=0) {
     allbones[parent].calcMatrix(allbones, anim, time);
@@ -1052,9 +1056,13 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
   // transform matrix for normal vectors ... ??
   if (rot.uses(anim)) {
     if (parent>=0) {
-      mrot = allbones[parent].mrot * ::math::matrix_4x4::new_rotation_matrix (q);
-    } else mrot = ::math::matrix_4x4::new_rotation_matrix (q);
-  } else mrot.unit();
+      mrot = allbones[parent].mrot * ::math::matrix_4x4 (math::matrix_4x4::rotation, q);
+    } else mrot = ::math::matrix_4x4 (math::matrix_4x4::rotation, q);
+  }
+  else
+  {
+    mrot = math::matrix_4x4::unit;
+  }
 
   transPivot = mat * pivot;
 

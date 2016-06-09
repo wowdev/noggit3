@@ -11,5 +11,11 @@ namespace math
       static const float pi (3.14159f);
       return pi;
     }
+
+    inline float angle_to_radians()
+    {
+      static float const _ (pi() / 180.0f);
+      return _;
+    }
   }
 }
