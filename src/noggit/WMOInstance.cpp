@@ -164,13 +164,18 @@ namespace
     extents[0] = ::math::min (extents[0], new_point);
     extents[1] = ::math::max (extents[1], new_point);
   }
+
+  math::vector_3d convert_rotation (math::vector_3d in)
+  {
+    return {in.z(), in.y() - 90.0f, -in.x()};
+  }
 }
 
 void WMOInstance::recalc_extents()
 {
   ::math::matrix_4x4 const rot
-    ( ::math::matrix_4x4::new_translation_matrix (pos)
-    * ::math::matrix_4x4::new_rotation_matrix (dir)
+    ( ::math::matrix_4x4 (math::matrix_4x4::translation, pos)
+    * ::math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir))
     );
 
   extents[0] = ::math::vector_3d::max();

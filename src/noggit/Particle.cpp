@@ -10,6 +10,7 @@
 #include <noggit/mpq/file.h>
 
 #include <opengl/context.h>
+#include <opengl/matrix.h>
 
 static const unsigned int MAX_PARTICLES = 10000;
 
@@ -306,11 +307,10 @@ void ParticleSystem::draw()
   ::math::vector_3d bv3 = ::math::vector_3d(-f,-f,0);
 
   if (billboard) {
-    float modelview[16];
-    gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
+    math::matrix_4x4 const modelview (opengl::matrix::model_view());
 
-    vRight = ::math::vector_3d(modelview[0], modelview[4], modelview[8]);
-    vUp = ::math::vector_3d(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+    vRight = modelview.column<0>().xyz();
+    vUp = modelview.column<1>().xyz(); // Spherical billboarding
     //vUp = ::math::vector_3d(0,1,0); // Cylindrical billboarding
   }
   /*
@@ -462,21 +462,17 @@ void ParticleSystem::drawHighlight()
 //  gl.pushName(texture);
   _texture->bind();
 
-  ::math::matrix_4x4 mbb;
-  mbb.unit();
+  ::math::matrix_4x4 mbb (math::matrix_4x4::unit);
 
   ModelHighlight( ::math::vector_4d( 1.00, 0.25, 0.25, 0.50 ) );
   if (billboard) {
     // get a billboard matrix
-    ::math::matrix_4x4 mtrans;
-    gl.getFloatv(GL_MODELVIEW_MATRIX, mtrans);
-    mtrans.transpose();
-    mtrans.invert();
+    ::math::matrix_4x4 mtrans (opengl::matrix::model_view().transposed().inverted());
     ::math::vector_3d camera = mtrans * ::math::vector_3d(0,0,0);
-    ::math::vector_3d look = (camera - pos).normalize();
-    ::math::vector_3d up = ((mtrans * ::math::vector_3d(0,1,0)) - camera).normalize();
-    ::math::vector_3d right = (up % look).normalize();
-    up = (look % right).normalize();
+    ::math::vector_3d look = (camera - pos).normalized();
+    ::math::vector_3d up = ((mtrans * ::math::vector_3d(0,1,0)) - camera).normalized();
+    ::math::vector_3d right = (up % look).normalized();
+    up = (look % right).normalized();
     // calculate the billboard matrix
     mbb (0, 0, look.x());
     mbb (1, 0, look.y());
@@ -562,12 +558,9 @@ namespace
   //Generates the rotation matrix based on spread
   ::math::matrix_4x4 CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
   {
-    ::math::matrix_4x4  SpreadMat;
+    ::math::matrix_4x4  SpreadMat (math::matrix_4x4::unit);
     int i,j;
     float a[2],c[2],s[2];
-    ::math::matrix_4x4  Temp;
-
-    SpreadMat.unit();
 
     a[0]=::math::random::floating_point(-Spread1,Spread1)/2.0f;
     a[1]=::math::random::floating_point(-Spread2,Spread2)/2.0f;
@@ -581,21 +574,26 @@ namespace
       c[i]=cos(a[i]);
       s[i]=sin(a[i]);
     }
-    Temp.unit();
-    Temp (1, 1, c[0]);
-    Temp (2, 1, s[0]);
-    Temp (2, 2, c[0]);
-    Temp (1, 2, -s[0]);
 
-    SpreadMat=SpreadMat*Temp;
+    {
+      ::math::matrix_4x4  Temp (math::matrix_4x4::unit);
+      Temp (2, 2, c[0]);
+      Temp (2, 1, s[0]);
+      Temp (1, 2, -s[0]);
+      Temp (1, 1, c[0]);
 
-    Temp.unit();
-    Temp (0, 0, c[1]);
-    Temp (1, 0, s[1]);
-    Temp (1, 1, c[1]);
-    Temp (0, 1, -s[1]);
+      SpreadMat=SpreadMat*Temp;
+    }
 
-    SpreadMat=SpreadMat*Temp;
+    {
+      ::math::matrix_4x4  Temp (math::matrix_4x4::unit);
+      Temp (1, 1, c[1]);
+      Temp (1, 0, s[1]);
+      Temp (0, 1, -s[1]);
+      Temp (0, 0, c[1]);
+
+      SpreadMat=SpreadMat*Temp;
+    }
 
     const float Size (std::abs (c[0]) * l + std::abs (s[0]) * w);
     for(i=0;i<3;++i)
@@ -650,9 +648,8 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
   Particle p;
 
   //Spread Calculation
-  ::math::matrix_4x4 mrot;
-
-  mrot=sys->parent->mrot*CalcSpreadMatrix(spr,spr,1.0f,1.0f);
+  ::math::matrix_4x4 mrot
+    (sys->parent->mrot*CalcSpreadMatrix(spr,spr,1.0f,1.0f));
 
   if (sys->flags == 1041) { // Trans Halo
     p.pos = sys->parent->mat
@@ -684,13 +681,13 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
     ::math::vector_3d dir(0.0f, 1.0f, 0.0f);
     p.dir = dir;
 
-    p.speed = dir.normalize() * spd * ::math::random::floating_point (0.0f, var);
+    p.speed = dir.normalized() * spd * ::math::random::floating_point (0.0f, var);
   } else if (sys->flags == 25 && sys->parent->parent<1) { // Weapon Flame
     p.pos = sys->parent->pivot * (sys->pos + ::math::vector_3d(::math::random::floating_point(-l,l), ::math::random::floating_point(-l,l), ::math::random::floating_point(-w,w)));
     ::math::vector_3d dir = mrot * ::math::vector_3d(0.0f, 1.0f, 0.0f);
-    p.dir = dir.normalize();
+    p.dir = dir.normalized();
     //::math::vector_3d dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * ::math::vector_3d(0.0f, 1.0f, 0.0f);
-    //p.speed = dir.normalize() * spd;
+    //p.speed = dir.normalized() * spd;
 
   } else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
     p.pos = sys->parent->mat * (sys->pos + ::math::vector_3d(::math::random::floating_point(-l,l), ::math::random::floating_point(-l,l), ::math::random::floating_point(-w,w)));
@@ -700,12 +697,12 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
                 )
               * ::math::vector_3d (0.0f, 1.0f, 0.0f)
               );
-    p.speed = dir.normalize() * spd * ::math::random::floating_point(0.0f, var*2);
+    p.speed = dir.normalized() * spd * ::math::random::floating_point(0.0f, var*2);
 
   } else if (sys->flags == 17 && sys->parent->parent<1) { // Weapon Glow
     p.pos = sys->parent->pivot * (sys->pos + ::math::vector_3d(::math::random::floating_point(-l,l), ::math::random::floating_point(-l,l), ::math::random::floating_point(-w,w)));
     ::math::vector_3d dir = mrot * ::math::vector_3d(0,1,0);
-    p.dir = dir.normalize();
+    p.dir = dir.normalized();
 
   } else {
     p.pos = sys->pos + ::math::vector_3d(::math::random::floating_point(-l,l), 0.0f, ::math::random::floating_point(-w,w));
@@ -714,9 +711,9 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
     //::math::vector_3d dir = mrot * ::math::vector_3d(0,1,0);
     ::math::vector_3d dir = sys->parent->mrot * ::math::vector_3d(0,1,0);
 
-    p.dir = dir;//.normalize();
+    p.dir = dir;//.normalized();
     p.down = ::math::vector_3d(0,-1.0f,0); // dir * -1.0f;
-    p.speed = dir.normalize() * spd * (1.0f+::math::random::floating_point(-var,var));
+    p.speed = dir.normalized() * spd * (1.0f+::math::random::floating_point(-var,var));
   }
 
   if(!sys->billboard)  {
@@ -784,8 +781,8 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
     if (bdir.length_squared()==0)
       p.speed = ::math::vector_3d(0,0,0);
     else {
-      dir = sys->parent->mrot * (bdir.normalize());//mrot * ::math::vector_3d(0, 1.0f,0);
-      p.speed = dir.normalize() * spd * (1.0f+::math::random::floating_point(-var,var));   // ?
+      dir = sys->parent->mrot * (bdir.normalized());//mrot * ::math::vector_3d(0, 1.0f,0);
+      p.speed = dir.normalized() * spd * (1.0f+::math::random::floating_point(-var,var));   // ?
     }
 
   } else {
@@ -811,15 +808,15 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
       if(sys->flags & 0x100)
         dir = sys->parent->mrot * ::math::vector_3d(0,1,0);
       else
-        dir = bdir.normalize();
+        dir = bdir.normalized();
 
-      p.speed = dir.normalize()
+      p.speed = dir.normalized()
               * spd
               * ::math::random::floating_point ( 1.0f - var, 1.0f + var);
     }
   }
 
-  p.dir =  dir.normalize();//mrot * ::math::vector_3d(0, 1.0f,0);
+  p.dir =  dir.normalized();//mrot * ::math::vector_3d(0, 1.0f,0);
   p.down = ::math::vector_3d(0,-1.0f,0);
 
   p.life = 0;
@@ -867,7 +864,7 @@ void RibbonEmitter::setup(int anim, int time)
   RibbonSegment &first = *segs.begin();
   if (first.len > seglen) {
     // add new segment
-    first.back = (tpos-ntpos).normalize();
+    first.back = (tpos-ntpos).normalized();
     first.len0 = first.len;
     RibbonSegment newseg (ntpos, dlen);
     newseg.up = ntup;

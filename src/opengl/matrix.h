@@ -18,7 +18,7 @@ namespace opengl
     template<GLint matrix_type>
       inline ::math::matrix_4x4 from()
     {
-      ::math::matrix_4x4 matrix;
+      ::math::matrix_4x4 matrix (math::matrix_4x4::uninitialized);
       gl.getFloatv (matrix_type, matrix);
       return matrix;
     }
