@@ -352,7 +352,7 @@ endif (NOGGIT_ALL_WARNINGS)
 
 # MSVC++ specific defines.
 if (WIN32)
-    add_definitions (/vmg /D NOMINMAX /wd"4503" /wd"4996")
+    add_definitions (/MP /vmg /D NOMINMAX /wd"4503" /wd"4996")
 endif (WIN32)
 
 # Find revision ID and hash of the sourcetree
