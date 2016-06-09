@@ -110,6 +110,61 @@ void TextureSet::switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* new
 	}
 }
 
+// swap 2 textures of a chunk with their alpha
+void TextureSet::swapTexture(int id1, int id2)
+{
+  if (id1 >= 0 && id2 >= 0 && id1 < nTextures && id2 < nTextures)
+  {
+    OpenGL::Texture* temp = textures[id1];
+    textures[id1] = textures[id2];
+    textures[id2] = temp;
+
+    for (int j = 0; j < 64; j++)
+    {
+      for (int i = 0; i < 64; ++i)
+      {
+        float alphas[3] = { 0.0f, 0.0f, 0.0f };
+        float visibility[4] = { 255.0f, 0.0f, 0.0f, 0.0f };
+
+        for (size_t k = 0; k < nTextures - 1; k++)
+        {
+          float f = static_cast<float>(alphamaps[k]->getAlpha(i + j * 64));
+          visibility[k + 1] = f;
+          alphas[k] = f;
+          for (size_t n = 0; n <= k; n++)
+            visibility[n] = (visibility[n] * ((255.0f - f)) / 255.0f);
+        }
+
+        float tmp = visibility[id1];
+        visibility[id1] = visibility[id2];
+        visibility[id2] = tmp;
+
+        for (int k = nTextures - 2; k >= 0; k--)
+        {
+          alphas[k] = visibility[k + 1];
+          for (int n = nTextures - 2; n > k; n--)
+          {
+            // prevent 0 division
+            if (alphas[n] == 255.0f)
+            {
+              alphas[k] = 0.0f;
+              break;
+            }
+            else
+              alphas[k] = (alphas[k] / (255.0f - alphas[n])) * 255.0f;
+          }
+        }
+
+        for (size_t k = 0; k < nTextures - 1; k++)
+        {
+          alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(alphas[k], 0.0f), 255.0f)));
+          alphamaps[k]->loadTexture();
+        }
+      }
+    }
+  }
+}
+
 void TextureSet::eraseTextures()
 {
 	for (size_t i = 0; i < nTextures; ++i)
