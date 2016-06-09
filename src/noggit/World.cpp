@@ -1020,8 +1020,7 @@ void main()
 
       mcnk_shader.uniform ("shadow_color", skies->colorSet[SHADOW_COLOR]);
 
-      //! \todo cache
-      auto texcoords = make_texcoords();
+      static auto const texcoords (make_texcoords());
       mcnk_shader.attrib ("texcoord", texcoords);
 
       mcnk_shader.uniform ("draw_area_id_overlay", flags & AREAID);
