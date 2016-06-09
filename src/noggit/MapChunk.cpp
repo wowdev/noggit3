@@ -644,7 +644,8 @@ void MapChunk::draw ( opengl::scoped::use_program& shader
   //! \todo noggit::selection::is_the_same_as (this, *selected_item)
   // -> selected indices = mapstrip2[noggit::selection::selected_polygon (*selected_item) + 0…2]
 
-  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
+  gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, indices);
+  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
 }
 
 void MapChunk::drawSelect()

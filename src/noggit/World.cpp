@@ -1185,7 +1185,8 @@ void main()
     gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
 
     // unbind hardware buffers
-    gl.bindBuffer(GL_ARRAY_BUFFER, 0);
+    gl.bindBuffer (GL_ARRAY_BUFFER, 0);
+    gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
 
     gl.enable(GL_CULL_FACE);
 
