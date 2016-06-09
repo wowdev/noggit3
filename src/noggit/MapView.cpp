@@ -132,10 +132,9 @@ namespace noggit
     createGUI();
 
     //! \todo Dynamic?
-    startTimer (40);
+    startTimer(20, Qt::PreciseTimer);
     //! \todo QTimerEvent->time_since_startup or something?
     _startup_time.start();
-
   }
 
   namespace
@@ -447,13 +446,7 @@ namespace noggit
 
   void MapView::timerEvent (QTimerEvent*)
   {
-    this->makeCurrent();
-    const qreal now (_startup_time.elapsed() / 1000.0);
-
-    tick (now - _last_update);
     update();
-
-    _last_update = now;
   }
 
   void MapView::initializeGL()
@@ -480,6 +473,11 @@ namespace noggit
   {
     this->makeCurrent();
     opengl::context::scoped_setter const _ (::gl, context());
+
+    const qreal now(_startup_time.elapsed() / 1000.0);
+    tick(now - _last_update);
+    _last_update = now;
+
     gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     display();
   }
