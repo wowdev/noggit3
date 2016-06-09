@@ -122,7 +122,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 	guiappInfo->setText(appinfoText.str());
 	addChild(guiappInfo);
 
-	TexturePicker = new UITexturePicker(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f, 490.0f, 150.0f);
+	TexturePicker = new UITexturePicker(video.xres() / 2 - 100.0f, video.yres() / 2 - 100.0f, 490.0f, 170.0f);
 	TexturePicker->hide();
 	TexturePicker->movable(true);
 	addChild(TexturePicker);
