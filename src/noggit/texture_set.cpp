@@ -50,7 +50,7 @@ namespace noggit
 
     for (size_t i = 0; i < 3; ++i)
     {
-      _alphamaps[i] = NULL;
+      _alphamaps[i] = nullptr;
     }
 
     for (unsigned int layer = 0; layer < _textures.size(); ++layer)
@@ -131,14 +131,14 @@ namespace noggit
 
   void texture_set::bindAlphamap(size_t id, size_t activeTexture) const
   {
-    opengl::texture::enable_texture(activeTexture);
+    opengl::texture::set_active_texture(activeTexture);
 
     _alphamaps[id]->bind();
   }
 
   void texture_set::bindTexture(size_t id, size_t activeTexture) const
   {
-    opengl::texture::enable_texture(activeTexture);
+    opengl::texture::set_active_texture(activeTexture);
 
     _textures[id]->bind();
   }

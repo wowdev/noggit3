@@ -613,11 +613,30 @@ void MapChunk::draw ( opengl::scoped::use_program& shader
                     , const boost::optional<selection_type>& selected_item
                     )
 {
-  shader.sampler ("shadow_map", GL_TEXTURE_2D, GL_TEXTURE1, shadow);
+  shader.sampler ("shadow_map", GL_TEXTURE_2D, GL_TEXTURE0, shadow);
 
   shader.uniform ("area_id_color", areaIDColors[header.areaid]);
 
   shader.uniform ("is_impassable_chunk", !!(header.flags & FLAG_IMPASS));
+
+  std::vector<int> texture_indices;
+  std::vector<int> alphamap_indices;
+
+  for (int i = 0; i < textures.num(); ++i)
+  {
+    texture_indices.push_back(i + 1);
+    textures.bindTexture(i, i + 1);
+
+    if (i == 0) continue;
+
+    alphamap_indices.push_back(i + 5);
+    textures.bindAlphamap(i - 1, i + 5);
+  }
+
+  shader.uniform("textures", texture_indices);
+  shader.uniform("alphamaps", alphamap_indices);
+  shader.uniform("layer_count", textures.num());
+
 
   shader.attrib ("position", mVertices);
   shader.attrib ("normal", mNormals);
