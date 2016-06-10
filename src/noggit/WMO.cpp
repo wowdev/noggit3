@@ -275,237 +275,36 @@ void WMO::draw ( World* world
     }
   }
 
-  if( boundingbox )
+  if (groupboxes || boundingbox)
   {
-    gl.disable( GL_LIGHTING );
+    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> const lighting;
+    opengl::scoped::bool_setter<GL_FOG, GL_FALSE> const fog;
+    opengl::scoped::texture_setter<GL_TEXTURE0, GL_FALSE> const texture0;
+    opengl::scoped::texture_setter<GL_TEXTURE1, GL_FALSE> const texture1;
+    opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_FALSE> const color_material;
+    opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
 
-    gl.disable( GL_COLOR_MATERIAL );
-    gl.activeTexture( GL_TEXTURE0 );
-    gl.disable( GL_TEXTURE_2D );
-    gl.activeTexture( GL_TEXTURE1 );
-    gl.disable( GL_TEXTURE_2D );
-    gl.enable( GL_BLEND );
-    gl.blendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    gl.blendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    static const ::math::vector_4d white (1.0f, 1.0f, 1.0f, 1.0f);
-
-    for( unsigned int i = 0; i < nGroups; ++i )
     {
-      const ::opengl::primitives::wire_box group_box
-        (groups[i].BoundingBoxMin, groups[i].BoundingBoxMax);
-      group_box.draw (white, 1.0f);
+      static ::math::vector_4d const white (1.0f, 1.0f, 1.0f, 1.0f);
+
+      for (std::size_t i (0); i < nGroups; ++i)
+      {
+        opengl::primitives::wire_box
+          (groups[i].BoundingBoxMin, groups[i].BoundingBoxMax).draw (white, 1.0f);
+      }
     }
 
-    /*gl.color4fv( ::math::vector_4d( 1.0f, 0.0f, 0.0f, 1.0f ) );
-    gl.begin( GL_LINES );
-      gl.vertex3f( 0.0f, 0.0f, 0.0f );
-      gl.vertex3f( header.BoundingBoxMax.x + header.BoundingBoxMax.x / 5.0f, 0.0f, 0.0f );
-    gl.end();
-
-    gl.color4fv( ::math::vector_4d( 0.0f, 1.0f, 0.0f, 1.0f ) );
-    gl.begin( GL_LINES );
-      gl.vertex3f( 0.0f, 0.0f, 0.0f );
-      gl.vertex3f( 0.0f, header.BoundingBoxMax.z + header.BoundingBoxMax.z / 5.0f, 0.0f );
-    gl.end();
-
-    gl.color4fv( ::math::vector_4d( 0.0f, 0.0f, 1.0f, 1.0f ) );
-    gl.begin( GL_LINES );
-      gl.vertex3f( 0.0f, 0.0f, 0.0f );
-      gl.vertex3f( 0.0f, 0.0f, header.BoundingBoxMax.y + header.BoundingBoxMax.y / 5.0f );
-    gl.end();*/
-
-    gl.activeTexture( GL_TEXTURE1 );
-    gl.disable( GL_TEXTURE_2D );
-    gl.activeTexture( GL_TEXTURE0 );
-    gl.enable( GL_TEXTURE_2D );
-
-    gl.enable( GL_LIGHTING );
-
-  }
-
-/*  {
-    // draw boundingboxe and axis
-    // Turn light off and highlight the following
-    gl.disable(GL_LIGHTING);
-    gl.disable(GL_COLOR_MATERIAL);
-    gl.activeTexture(GL_TEXTURE0);
-    gl.disable(GL_TEXTURE_2D);
-    gl.activeTexture(GL_TEXTURE1);
-    gl.disable(GL_TEXTURE_2D);
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    gl.enable (GL_LINE_SMOOTH);
-    gl.lineWidth(1.0);
-    gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-    gl.color4f( 1, 1, 1, 1 );
-
-    gl.lineWidth(1.0);
-    gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-    for (int i=0; i<nGroups; ++i)
+    if (boundingbox)
     {
-      WMOGroup &header = groups[i];
-      /// Bounding box
-      gl.color4f( 1, 1, 1, 1 );
-      gl.begin( GL_LINE_STRIP );
-        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
-        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
-        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
-        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
-        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
-        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
-        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
-        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
-        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
-        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
-      gl.end();
+      static ::math::vector_4d const yellow (1.0f, 1.0f, 0.0f, 1.0f);
 
-      gl.begin( GL_LINES );
-        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
-        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMax.z );
-      gl.end();
-      gl.begin( GL_LINES );
-        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMin.z );
-        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMin.y, header.BoundingBoxMin.z );
-      gl.end();
-      gl.begin( GL_LINES );
-        gl.vertex3f( header.BoundingBoxMin.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
-        gl.vertex3f( header.BoundingBoxMax.x, header.BoundingBoxMax.y, header.BoundingBoxMax.z );
-      gl.end();
-
-      // draw axis
-      gl.color4f( 1.0f, 0.0f, 0.0f, 1.0f );
-      gl.begin( GL_LINES );
-        gl.vertex3f( 0.0f, 0.0f, 0.0f );
-        gl.vertex3f( header.BoundingBoxMax.x + 6.0f, 0.0f, 0.0f );
-      gl.end();
-
-
-      gl.color4f( 0.0f, 1.0f, 0.0f, 1.0f );
-      gl.begin( GL_LINES );
-        gl.vertex3f( 0.0f, 0.0f, 0.0f );
-        gl.vertex3f( 0.0f, header.BoundingBoxMax.y + 6.0f, 0.0f );
-      gl.end();
-
-      gl.color4f( 0.0f, 0.0f, 1.0f, 1.0f );
-      gl.begin( GL_LINES );
-        gl.vertex3f( 0.0f, 0.0f, 0.0f );
-        gl.vertex3f( 0.0f, 0.0f, header.BoundingBoxMax.x + 6.0f );
-      gl.end();
-
-
-
+      opengl::primitives::wire_box ( {extents[0][0], extents[0][2], -extents[0][1]}
+                                   , {extents[1][0], extents[1][2], -extents[1][1]}
+                                   ).draw (yellow, 1.0f);
     }
-    // Back to normal light rendering
-    gl.activeTexture(GL_TEXTURE1);
-    gl.disable(GL_TEXTURE_2D);
-    gl.activeTexture(GL_TEXTURE0);
-    gl.enable(GL_TEXTURE_2D);
-    gl.enable(GL_LIGHTING);
-  } // end bounding  boxes.*/
-
-  if(false && groupboxes)
-  {
-    //WIP STEFF
-    // draw group boundingboxes
-    // Turn light off and highlight the following
-    gl.disable(GL_LIGHTING);
-    gl.disable(GL_COLOR_MATERIAL);
-    gl.activeTexture(GL_TEXTURE0);
-    gl.disable(GL_TEXTURE_2D);
-    gl.activeTexture(GL_TEXTURE1);
-    gl.disable(GL_TEXTURE_2D);
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    gl.enable (GL_LINE_SMOOTH);
-    gl.lineWidth(1.0);
-    gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-    gl.color4f( 1, 1, 0, 1 );
-
-    gl.lineWidth(1.0);
-    gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-    for (unsigned int i=0; i<nGroups; ++i)
-    {
-      WMOGroup &header = groups[i];
-      gl.begin( GL_LINE_STRIP );
-      //A
-        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
-      //C
-        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
-      //D
-        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
-      //G
-        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
-      //H
-        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
-      //B
-        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
-      //A
-        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
-      //E
-        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
-      //F
-        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
-      //C
-        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
-      gl.end();
-
-      gl.begin( GL_LINES );
-      // F G
-        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
-        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMax.z() );
-      gl.end();
-      gl.begin( GL_LINES );
-      // B D
-        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMin.z() );
-        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMin.y(), header.VertexBoxMin.z() );
-      gl.end();
-      gl.begin( GL_LINES );
-      // E H
-        gl.vertex3f( header.VertexBoxMin.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
-        gl.vertex3f( header.VertexBoxMax.x(), header.VertexBoxMax.y(), header.VertexBoxMax.z() );
-      gl.end();
-    }
-    // Back to normal light rendering
-    gl.activeTexture(GL_TEXTURE1);
-    gl.disable(GL_TEXTURE_2D);
-    gl.activeTexture(GL_TEXTURE0);
-    gl.enable(GL_TEXTURE_2D);
-    gl.enable(GL_LIGHTING);
-  } // end drow groupe boxes.
-
-
-
-
-
-  /*
-  // draw portal relations
-  gl.begin(GL_LINES);
-  for (size_t i=0; i<prs.size(); ++i) {
-    WMOPR &pr = prs[i];
-    WMOPV &pv = pvs[pr.portal];
-    if (pr.dir>0) gl.color4f(1,0,0,1);
-    else gl.color4f(0,0,1,1);
-    ::math::vector_3d pc = (pv.a+pv.b+pv.c+pv.d)*0.25f;
-    ::math::vector_3d gc = (groups[pr.group].b1 + groups[pr.group].b2)*0.5f;
-    gl.vertex3fv(pc);
-    gl.vertex3fv(gc);
   }
-  gl.end();
-  gl.color4f(1,1,1,1);
-  // draw portals
-  for (int i=0; i<nP; ++i) {
-    gl.begin(GL_LINE_STRIP);
-    gl.vertex3fv(pvs[i].d);
-    gl.vertex3fv(pvs[i].c);
-    gl.vertex3fv(pvs[i].b);
-    gl.vertex3fv(pvs[i].a);
-    gl.end();
-  }
-  gl.enable(GL_TEXTURE_2D);
-  gl.enable(GL_LIGHTING);
-  */
 }
 
 void WMO::drawSelect (World* world
