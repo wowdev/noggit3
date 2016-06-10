@@ -11,6 +11,13 @@
 
 namespace math
 {
+  matrix_4x4::uninitialized_t matrix_4x4::uninitialized;
+  matrix_4x4::zero_t matrix_4x4::zero;
+  matrix_4x4::unit_t matrix_4x4::unit;
+  matrix_4x4::translation_t matrix_4x4::translation;
+  matrix_4x4::scale_t matrix_4x4::scale;
+  matrix_4x4::rotation_t matrix_4x4::rotation;
+
   matrix_4x4::matrix_4x4 (rotation_t, quaternion const& q)
   {
     _m[0][0] = 1.0f - 2.0f * q.y() * q.y() - 2.0f * q.z() * q.z();
