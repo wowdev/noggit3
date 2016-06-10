@@ -39,6 +39,32 @@ World *gWorld = NULL;
 
 GLuint selectionBuffer[8192];
 
+void renderLine(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_LIGHTING);
+  glColor4f( Environment::getInstance()->cursorColorR
+           , Environment::getInstance()->cursorColorG
+           , Environment::getInstance()->cursorColorB
+           , Environment::getInstance()->cursorColorA
+           );
+
+  glPushMatrix();
+
+  glLineWidth(2.5);
+
+  glBegin(GL_LINES);
+  glVertex3f(x1, y1, z1);
+  glVertex3f(x2, y2, z2);
+  glEnd();
+  glFlush();
+
+  glEnable(GL_LIGHTING);
+  glEnable(GL_DEPTH_TEST);
+
+  glPopMatrix();
+}
+
 void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
 {
 	float vx = x2 - x1;
@@ -927,6 +953,14 @@ void World::draw()
 				renderDisk_convenient((float)posX, (float)posY, (float)posZ, blurBrushRadius);
 			else if (Environment::getInstance()->cursorType == 2)
 				renderSphere_convenient((float)posX, (float)posY, (float)posZ, blurBrushRadius, 15);
+
+      if (Environment::getInstance()->flattenAngleEnabled)
+      {
+        float r = blurBrushRadius / 2, o = Environment::getInstance()->flattenOrientation;
+        float x = posX + blurBrushRadius*cos(o);
+        float z = posZ + blurBrushRadius*sin(o);
+        renderLine(posX, posY, posZ, x, posY, z);
+      }
 		}
 		else if (terrainMode == 2)
 		{
@@ -1619,42 +1653,45 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
 	}
 }
 
-void World::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
+void World::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, float angle, float orientation)
 {
-	for (int j = 0; j < 64; ++j)
-	{
-		for (int i = 0; i < 64; ++i)
-		{
-			if (mapIndex->tileLoaded(j, i))
-			{
-				for (size_t ty = 0; ty < 16; ++ty)
-				{
-					for (size_t tx = 0; tx < 16; ++tx)
-					{
-						if (mapIndex->getTile((size_t)j, (size_t)i)->getChunk(ty, tx)->flattenTerrain(x, z, h, remain, radius, BrushType))
-							mapIndex->setChanged(j, i);
-					}
-				}
-			}
-		}
-	}
-
-	for (int j = 0; j < 64; ++j)
-	{
-		for (int i = 0; i < 64; ++i)
-		{
-			if (mapIndex->tileLoaded(j, i))
-			{
-				for (size_t ty = 0; ty < 16; ++ty)
-				{
-					for (size_t tx = 0; tx < 16; ++tx)
-					{
-						mapIndex->getTile((size_t)j, (size_t)i)->getChunk((unsigned int)ty, (unsigned int)tx)->recalcNorms();
-					}
-				}
-			}
-		}
-	}
+  for (int j = 0; j < 64; ++j)
+  {
+    for (int i = 0; i < 64; ++i)
+    {
+      if (mapIndex->tileLoaded(j, i))
+      {
+        MapTile* tile = mapIndex->getTile((size_t)j, (size_t)i);
+        for (size_t ty = 0; ty < 16; ++ty)
+        {
+          for (size_t tx = 0; tx < 16; ++tx)
+          {
+            if (tile->getChunk(ty, tx)->flattenTerrain(x, z, h, remain, radius, BrushType, angle, orientation))
+            {
+              mapIndex->setChanged(j, i);
+            }
+          }
+        }
+      }
+    }
+  }
+  for (size_t j = 0; j < 64; ++j)
+  {
+    for (size_t i = 0; i < 64; ++i)
+    {
+      if (mapIndex->tileLoaded((int)j, (int)i))
+      {
+        MapTile* tile = mapIndex->getTile((size_t)j, (size_t)i);
+        for (size_t ty = 0; ty < 16; ++ty)
+        {
+          for (size_t tx = 0; tx < 16; ++tx)
+          {
+            tile->getChunk(ty, tx)->recalcNorms();
+          }
+        }
+      }
+    }
+  }
 }
 
 void World::blurTerrain(float x, float z, float remain, float radius, int BrushType)
