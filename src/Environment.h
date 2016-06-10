@@ -36,6 +36,10 @@ public:
 	float Pos3DY;
 	float Pos3DZ;
 
+  bool flattenAngleEnabled;
+  float flattenAngle;
+  float flattenOrientation;
+
 	float cursorColorR;
 	float cursorColorG;
 	float cursorColorB;

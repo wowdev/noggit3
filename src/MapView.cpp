@@ -143,6 +143,15 @@ UISlider* blur_brush;
 float blurBrushRadius = 10.0f;
 int    blurBrushType = 1;
 
+
+UICheckBox* toggle_flatten;
+
+UISlider* flatten_angle;
+float flattenAngle = 0.0f;
+
+UISlider* flatten_orientation;
+float flattenOrientation = 0.0f;
+
 UISlider* paint_brush;
 
 float brushPressure = 0.9f;
@@ -231,6 +240,18 @@ void setBlurBrushSpeed(float f)
 	groundBlurSpeed = f;
 }
 
+void setFlattenAngle(float f)
+{
+  flattenAngle = f;
+  Environment::getInstance()->flattenAngle = f;
+}
+
+void setFlattenOrientation(float f)
+{
+  flattenOrientation = f;
+  Environment::getInstance()->flattenOrientation = (PI*f) / 180;
+}
+
 
 void setTextureBrushHardness(float f)
 {
@@ -250,6 +271,11 @@ void setTextureBrushPressure(float f)
 void setTextureBrushLevel(float f)
 {
 	brushLevel = (1.0f - f)*255.0f;
+}
+
+void toggleFlattenAngle(bool state, int)
+{
+  Environment::getInstance()->flattenAngleEnabled = state;
 }
 
 void SaveOrReload(UIFrame*, int pMode)
@@ -961,7 +987,7 @@ void MapView::createGUI()
 #endif
 
 	// flatten/blur
-	setting_blur = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 130.0f);
+	setting_blur = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 220.0f);
 	setting_blur->movable(true);
 	setting_blur->hide();
 	mainGui->addChild(setting_blur);
@@ -985,6 +1011,22 @@ void MapView::createGUI()
 	ground_blur_speed->setValue(groundBlurSpeed / 10);
 	ground_blur_speed->setText("Brush Speed: ");
 	setting_blur->addChild(ground_blur_speed);
+
+  toggle_flatten = new UICheckBox(6.0f, 130.0f, "Flatten Angle", toggleFlattenAngle, 0);
+  toggle_flatten->setState(Environment::getInstance()->flattenAngleEnabled);
+  setting_blur->addChild(toggle_flatten);
+
+  flatten_angle = new UISlider(6.0f, 175.0f, 167.0f, 90.0f, 0.00001f);
+  flatten_angle->setValue(flattenAngle / 10);
+  flatten_angle->setText("Angle: ");
+  flatten_angle->setFunc(setFlattenAngle);
+  setting_blur->addChild(flatten_angle);
+
+  flatten_orientation = new UISlider(6.0f, 200.0f, 167.0f, 360.0f, 0.00001f);
+  flatten_orientation->setValue(flattenOrientation / 10);
+  flatten_orientation->setText("Orientation: ");
+  flatten_orientation->setFunc(setFlattenOrientation);
+  setting_blur->addChild(flatten_orientation);
 
 	//3D Paint settings UIWindow
 	settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 140.0f);
@@ -1463,14 +1505,20 @@ void MapView::tick(float t, float dt)
 					}
 					break;
 				case 1:
-					if (Environment::getInstance()->ShiftDown)
-						if (mViewMode == eViewMode_3D) 
-							gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType);
-					if (Environment::getInstance()->CtrlDown)
-					{
-						if (mViewMode == eViewMode_3D) 
-							gWorld->blurTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), std::min(blurBrushRadius, 30.0f), blurBrushType);
-					}
+          if (mViewMode == eViewMode_3D)
+          {
+            if (Environment::getInstance()->ShiftDown)
+            {
+              if(Environment::getInstance()->flattenAngleEnabled)
+                gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenAngle, flattenOrientation);
+              else
+                gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType);
+            }
+            else if (Environment::getInstance()->CtrlDown)
+            {
+              gWorld->blurTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), std::min(blurBrushRadius, 30.0f), blurBrushType);
+            }
+          }
 					break;
 				case 2:
 					if (Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown && Environment::getInstance()->AltDown)
@@ -2010,10 +2058,14 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			else ah += 180.0f;
 		}
 
-		// Test windows
 		if (e->keysym.sym == SDLK_t)
 		{
-			mainGui->toggleTest();
+      // toggle flatten angle mode
+      if (terrainMode == 1)
+      {
+        toggle_flatten->setState(!(Environment::getInstance()->flattenAngleEnabled));
+        toggleFlattenAngle(!(Environment::getInstance()->flattenAngleEnabled), 0);
+      }
 		}
 
 		// clip object to ground
@@ -2632,6 +2684,45 @@ void MapView::mouseclick(SDL_MouseButtonEvent *e)
 			if (gWorld->HasSelection())
 				MoveObj = true;
 			break;
+
+    case SDL_BUTTON_WHEELUP:
+      if (terrainMode == 1)
+      {
+        if (Environment::getInstance()->AltDown)
+        {
+          flattenOrientation += Environment::getInstance()->CtrlDown ? 1.0f : 10.0f;
+          if (flattenOrientation > 360.0f)
+            flattenOrientation = 0.0f;
+          flatten_orientation->setValue(flattenOrientation / 360);
+        }
+        else if (Environment::getInstance()->ShiftDown)
+        {
+          flattenAngle += Environment::getInstance()->CtrlDown ? 0.2f : 2.0f;
+          if (flattenAngle > 89.0f)
+            flattenAngle = 89.0f;
+          flatten_angle->setValue(flattenAngle / 90);
+        }
+      }
+      break;
+    case SDL_BUTTON_WHEELDOWN:
+      if (terrainMode == 1)
+      {
+        if (Environment::getInstance()->AltDown)
+        {
+          flattenOrientation -= Environment::getInstance()->CtrlDown ? 1.0f : 10.0f;
+          if (flattenOrientation < 0.0f)
+            flattenOrientation = 360.0f;
+          flatten_orientation->setValue(flattenOrientation / 360);
+        }
+        else if (Environment::getInstance()->ShiftDown)
+        {
+          flattenAngle -= Environment::getInstance()->CtrlDown ? 0.2f : 2.0f;;
+          if (flattenAngle < 0.0f)
+            flattenAngle = 0.0f;
+          flatten_angle->setValue(flattenAngle / 90);
+        }
+      }
+      break;
 		}
 
 		if (leftMouse && rightMouse)

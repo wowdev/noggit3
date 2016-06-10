@@ -1084,58 +1084,60 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
   return Changed;
 }
 
-bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType)
+bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, float angle, float orientation)
 {
-	float speed = 1.00f;
-	float dist, xdiff, zdiff, nremain;
-	Changed = false;
+  float speed = 1.00f;
+  float dist, xdiff, zdiff, nremain;
 
-	xdiff = xbase - x + CHUNKSIZE / 2;
-	zdiff = zbase - z + CHUNKSIZE / 2;
-	dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
+  xdiff = xbase - x + CHUNKSIZE / 2;
+  zdiff = zbase - z + CHUNKSIZE / 2;
+  dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
-	if (dist > (radius + MAPCHUNK_RADIUS))
-		return Changed;
+  if (dist > (radius + MAPCHUNK_RADIUS))
+    return Changed;
 
-	vmin.y = 9999999.0f;
-	vmax.y = -9999999.0f;
+  vmin.y = 9999999.0f;
+  vmax.y = -9999999.0f;
 
-	for (int i = 0; i < mapbufsize; ++i)
-	{
-		xdiff = mVertices[i].x - x;
-		zdiff = mVertices[i].z - z;
+  for (int i = 0; i < mapbufsize; ++i)
+  {
+    xdiff = mVertices[i].x - x;
+    zdiff = mVertices[i].z - z;
 
-		dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
+    dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
-		if (dist < radius)
-		{
-			if (BrushType == 0)//Flat
-			{
-				mVertices[i].y = remain*mVertices[i].y + (1 - remain)*h;
-			}
-			else if (BrushType == 1)//Linear
-			{
-				nremain = 1 - (1 - remain) * (1 - dist / radius);
-				mVertices[i].y = nremain*mVertices[i].y + (1 - nremain)*h;
-			}
-			else if (BrushType == 2)//Smooth
-			{
-				nremain = 1.0f - pow(1.0f - remain, (1.0f + dist / radius));
-				mVertices[i].y = nremain*mVertices[i].y + ((1 - nremain)*h);
-			}
+    if (dist < radius)
+    {
+      float o = orientation*PI / 180, tanA = tan(angle*PI / 180);
+      float ah = h + (xdiff*cos(o) + zdiff*sin(o))*  tanA;
 
-			Changed = true;
-		}
+      if (BrushType == 0)//Flat
+      {
+        mVertices[i].y = remain*mVertices[i].y + (1 - remain)*ah;
+      }
+      else if (BrushType == 1)//Linear
+      {
+        nremain = 1 - (1 - remain) * (1 - dist / radius);
+        mVertices[i].y = nremain*mVertices[i].y + (1 - nremain)*ah;
+      }
+      else if (BrushType == 2)//Smooth
+      {
+        nremain = 1.0f - pow(1.0f - remain, (1.0f + dist / radius));
+        mVertices[i].y = nremain*mVertices[i].y + ((1 - nremain)*ah);
+      }
 
-		vmin.y = std::min(vmin.y, mVertices[i].y);
-		vmax.y = std::max(vmax.y, mVertices[i].y);
-	}
-	if (Changed)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, vertices);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
-	}
-	return Changed;
+      Changed = true;
+    }
+
+    vmin.y = std::min(vmin.y, mVertices[i].y);
+    vmax.y = std::max(vmax.y, mVertices[i].y);
+  }
+  if (Changed)
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, vertices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  }
+  return Changed;
 }
 
 bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int BrushType)

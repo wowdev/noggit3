@@ -92,7 +92,7 @@ public:
 
 	//! \todo implement Action stack for these
 	bool changeTerrain(float x, float z, float change, float radius, int BrushType);
-	bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
+	bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, float angle, float orientation);
 	bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
 	//! \todo implement Action stack for these
