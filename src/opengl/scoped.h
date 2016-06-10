@@ -62,7 +62,7 @@ namespace opengl
       GLboolean _was_enabled;
     };
 
-    template<GLenum texture_number, GLboolean value>
+    template<std::size_t texture_number, GLboolean value>
     class texture_setter
     {
     public:
