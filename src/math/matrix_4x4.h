@@ -79,6 +79,10 @@ namespace math
 
     vector_3d operator* (vector_3d const&) const;
     vector_4d operator* (vector_4d const&) const;
+    quaternion operator* (quaternion const& q) const
+    {
+      return quaternion {*this * static_cast<vector_4d> (q)};
+    }
     matrix_4x4 operator* (matrix_4x4 const&) const;
 
     matrix_4x4& operator* (float);
