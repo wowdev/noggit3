@@ -35,6 +35,19 @@ const std::string& WMO::filename() const
   return _filename;
 }
 
+namespace
+{
+  math::vector_3d convert_coords (math::vector_3d const& v)
+  {
+    static math::matrix_4x4 const mat { 1.0f,  0.0f, 0.0f, 0.0f
+                                      , 0.0f,  0.0f, 1.0f, 0.0f
+                                      , 0.0f, -1.0f, 0.0f, 0.0f
+                                      , 0.0f,  0.0f, 0.0f, 1.0f
+                                      };
+    return mat * v;
+  }
+}
+
 WMO::WMO (const std::string& filenameArg, World* world)
   : _filename( filenameArg )
 {
@@ -134,7 +147,7 @@ WMO::WMO (const std::string& filenameArg, World* world)
         ::math::vector_3d position;
         f.read (position, sizeof (position));
 
-        ::math::vector_4d rotation;
+        ::math::quaternion rotation;
         f.read (rotation, sizeof (rotation));
 
         float scale;
@@ -143,18 +156,17 @@ WMO::WMO (const std::string& filenameArg, World* world)
         uint32_t light;
         f.read (&light, sizeof (uint32_t));
 
+        static math::matrix_4x4 const rotmat { 0.0f, 0.0f, 0.0f, -1.0f
+                                             , 0.0f, 1.0f, 0.0f,  0.0f
+                                             , 0.0f, 0.0f, 1.0f,  0.0f
+                                             , 1.0f, 0.0f, 0.0f,  0.0f
+                                             };
+
         modelis.emplace_back
           ( world
           , ddnames + ofs
-          , ::math::vector_3d ( position.x()
-                              , position.z()
-                              , -position.y()
-                              )
-          , ::math::quaternion ( -rotation.w()
-                               , rotation.y()
-                               , rotation.z()
-                               , rotation.x()
-                               )
+          , convert_coords (position)
+          , rotmat * rotation
           , scale
           , ::math::vector_3d ( ((light & 0xff0000) >> 16) / 255.0f
                               , ((light & 0x00ff00) >> 8) / 255.0f
@@ -394,7 +406,7 @@ void WMOLight::init(noggit::mpq::file* f)
   f->read(unk, 4*5);
   f->read(&r,4);
 
-  pos = ::math::vector_3d(pos.x(), pos.z(), -pos.y());
+  pos = convert_coords (pos);
 
   // rgb? bgr? hm
   float fa = ((color & 0xff000000) >> 24) / 255.0f;
