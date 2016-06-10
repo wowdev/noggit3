@@ -291,8 +291,8 @@ void WMO::draw ( World* world
   {
     opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> const lighting;
     opengl::scoped::bool_setter<GL_FOG, GL_FALSE> const fog;
-    opengl::scoped::texture_setter<GL_TEXTURE0, GL_FALSE> const texture0;
-    opengl::scoped::texture_setter<GL_TEXTURE1, GL_FALSE> const texture1;
+    opengl::scoped::texture_setter<0, GL_FALSE> const texture0;
+    opengl::scoped::texture_setter<1, GL_FALSE> const texture1;
     opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_FALSE> const color_material;
     opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
 
