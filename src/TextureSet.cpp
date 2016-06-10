@@ -320,10 +320,11 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
         {
           float other = 255.0f - visibility[texLevel];
 
-          if (!texLevel && visibility[0] == 255.0f)
+          if (visibility[texLevel] == 255.0f && diffA < 0.0f)
           {
-            visibility[0] += diffA;
-            visibility[1] -= diffA; // nTexture > 1 else it'd have returned true at the beginning
+            visibility[texLevel] += diffA;
+            int idTex = (!texLevel) ? 1 : texLevel - 1; // nTexture > 1 else it'd have returned true at the beginning
+            visibility[idTex] -= diffA; 
           }
           else
           {
