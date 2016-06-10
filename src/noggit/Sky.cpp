@@ -438,11 +438,9 @@ void OutdoorLightStats::setupLighting()
 {
   GLfloat la[4];
   GLfloat ld[4];
-  GLfloat lp[4];
 
   la[3] = 1.0f;
   ld[3] = 1.0f;
-  lp[3] = 0.0f; // directional lights plz
 
   la[0] = la[1] = la[2] = 0.0f;
 
@@ -450,13 +448,10 @@ void OutdoorLightStats::setupLighting()
     ld[0] = dayColor.x() * dayIntensity;
     ld[1] = dayColor.y() * dayIntensity;
     ld[2] = dayColor.z() * dayIntensity;
-    lp[0] = dayDir.x();
-    lp[1] = dayDir.z();
-    lp[2] = -dayDir.y();
 
     gl.lightfv(GL_LIGHT0, GL_AMBIENT, la);
     gl.lightfv(GL_LIGHT0, GL_DIFFUSE, ld);
-    gl.lightfv(GL_LIGHT0, GL_POSITION,lp);
+    gl.lightfv(GL_LIGHT0, GL_POSITION, math::vector_4d {fixCoordSystem (dayDir), 0.0f});
     gl.enable(GL_LIGHT0);
   } else gl.disable(GL_LIGHT0);
 
@@ -464,13 +459,10 @@ void OutdoorLightStats::setupLighting()
     ld[0] = nightColor.x() * nightIntensity;
     ld[1] = nightColor.y() * nightIntensity;
     ld[2] = nightColor.z() * nightIntensity;
-    lp[0] = nightDir.x();
-    lp[1] = nightDir.z();
-    lp[2] = -nightDir.y();
 
     gl.lightfv(GL_LIGHT1, GL_AMBIENT, la);
     gl.lightfv(GL_LIGHT1, GL_DIFFUSE, ld);
-    gl.lightfv(GL_LIGHT1, GL_POSITION,lp);
+    gl.lightfv(GL_LIGHT1, GL_POSITION, math::vector_4d {fixCoordSystem (nightDir), 0.0f});
     gl.enable(GL_LIGHT1);
   } else gl.disable(GL_LIGHT1);
 
@@ -481,10 +473,9 @@ void OutdoorLightStats::setupLighting()
 
   /*
   ld[0] = ld[1] = ld[2] = 0.0f;
-  lp[0] = lp[1] = lp[2] = 0.0f;
   gl.lightfv(GL_LIGHT2, GL_AMBIENT, la);
   gl.lightfv(GL_LIGHT2, GL_DIFFUSE, ld);
-  gl.lightfv(GL_LIGHT2, GL_POSITION,lp);
+  gl.lightfv(GL_LIGHT2, GL_POSITION, math::vector_4d {0.0f, 0.0f, 0.0f, 0.0f});
   gl.enable(GL_LIGHT2);
   */
   gl.disable(GL_LIGHT2);

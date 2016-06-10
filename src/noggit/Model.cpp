@@ -174,20 +174,47 @@ bool Model::isAnimated(const noggit::mpq::file& f)
   return animGeometry || animTextures || animMisc;
 }
 
-::math::vector_3d fixCoordSystem (const ::math::vector_3d& v)
+::math::vector_3d fixCoordSystem (::math::vector_3d const& v)
 {
-  return ::math::vector_3d (v.x(), v.z(), -v.y());
+  static math::matrix_4x4 const mat { 1.0f,  0.0f, 0.0f, 0.0f
+                                    , 0.0f,  0.0f, 1.0f, 0.0f
+                                    , 0.0f, -1.0f, 0.0f, 0.0f
+                                    , 0.0f,  0.0f, 0.0f, 1.0f
+                                    };
+  return mat * v;
+}
+math::vector_3d convert_rotation (math::vector_3d const& r)
+{
+  static math::matrix_4x4 const mat { math::matrix_4x4 {  0.0f, 0.0f, 1.0f, 0.0f
+                                                       ,  0.0f, 1.0f, 0.0f, 0.0f
+                                                       , -1.0f, 0.0f, 0.0f, 0.0f
+                                                       ,  0.0f, 0.0f, 0.0f, 1.0f
+                                                       }
+                                    * math::matrix_4x4
+                                        (math::matrix_4x4::translation, {0.0f, -90.0f, 0.0f})
+                                    };
+
+  return mat * r;
+}
+math::quaternion convert_rotation (math::quaternion const& q)
+{
+  static math::matrix_4x4 const mat { -1.0f, 0.0f,  0.0f, 0.0f
+                                    ,  0.0f, 0.0f, -1.0f, 0.0f
+                                    ,  0.0f, 1.0f,  0.0f, 0.0f
+                                    ,  0.0f, 0.0f,  0.0f, 1.0f
+                                    };
+  return mat * q;
 }
 namespace
 {
-  ::math::vector_3d fixCoordSystem2 (const ::math::vector_3d& v)
+  ::math::vector_3d fixCoordSystem2 (::math::vector_3d const& v)
   {
-    return ::math::vector_3d (v.x(), v.z(), v.y());
-  }
-
-  ::math::quaternion fixCoordSystemQuat (const ::math::quaternion& v)
-  {
-    return ::math::quaternion (-v.x(), -v.z(), v.y(), v.w());
+    static math::matrix_4x4 const mat { 1.0f, 0.0f, 0.0f, 0.0f
+                                      , 0.0f, 0.0f, 1.0f, 0.0f
+                                      , 0.0f, 1.0f, 0.0f, 0.0f
+                                      , 0.0f, 0.0f, 0.0f, 1.0f
+                                      };
+    return mat * v;
   }
 }
 
@@ -1002,7 +1029,7 @@ Bone::Bone(const noggit::mpq::file& f, const ModelBoneDef &b, int *global, noggi
   , mrot (math::matrix_4x4::uninitialized)
 {
   trans.apply(fixCoordSystem);
-  rot.apply(fixCoordSystemQuat);
+  rot.apply(convert_rotation);
   scale.apply(fixCoordSystem2);
 }
 

@@ -164,11 +164,6 @@ namespace
     extents[0] = ::math::min (extents[0], new_point);
     extents[1] = ::math::max (extents[1], new_point);
   }
-
-  math::vector_3d convert_rotation (math::vector_3d in)
-  {
-    return {in.z(), in.y() - 90.0f, -in.x()};
-  }
 }
 
 void WMOInstance::recalc_extents()

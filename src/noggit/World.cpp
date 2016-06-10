@@ -621,28 +621,16 @@ World::~World()
 void World::outdoorLighting()
 {
   ::math::vector_4d black(0,0,0,0);
-  ::math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
-  gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
+  gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, math::vector_4d {skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1.0f});
 
-  float di = outdoorLightStats.dayIntensity;
-  //float ni = outdoorLightStats.nightIntensity;
-
-  ::math::vector_3d dd = outdoorLightStats.dayDir;
-  // HACK: let's just keep the light source in place for now
-  //::math::vector_4d pos(-1, 1, -1, 0);
-  ::math::vector_4d pos(-dd.x(), -dd.z(), dd.y(), 0.0f);
-  ::math::vector_4d col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1.0f);
   gl.lightfv(GL_LIGHT0, GL_AMBIENT, black);
-  gl.lightfv(GL_LIGHT0, GL_DIFFUSE, col);
-  gl.lightfv(GL_LIGHT0, GL_POSITION, pos);
+  gl.lightfv(GL_LIGHT0, GL_DIFFUSE, math::vector_4d {skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity, 1.0f});
+  gl.lightfv(GL_LIGHT0, GL_POSITION, math::vector_4d {convert_rotation (outdoorLightStats.dayDir), 0.0f});
 
   /*
-  dd = outdoorLightStats.nightDir;
-  pos(-dd.x(), -dd.z(), dd.y(), 0.0f);
-  col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * ni, 1.0f);
   gl.lightfv(GL_LIGHT1, GL_AMBIENT, black);
-  gl.lightfv(GL_LIGHT1, GL_DIFFUSE, col);
-  gl.lightfv(GL_LIGHT1, GL_POSITION, pos);*/
+  gl.lightfv(GL_LIGHT1, GL_DIFFUSE, math::vector_4d {skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.nightIntensity, 1.0f});
+  gl.lightfv(GL_LIGHT1, GL_POSITION, math::vector_4d {convert_rotation (outdoorLightStats.nightDir), 0.0f});*/
 }
 
 void World::outdoorLights(bool on)
