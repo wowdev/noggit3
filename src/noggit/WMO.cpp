@@ -1147,11 +1147,17 @@ void WMOGroup::draw ( World* world
   }
 }
 
-void WMOGroup::draw_for_selection() const
+void WMOGroup::draw_for_selection()
 {
-  for (size_t i (0); i < _batches.size (); ++i)
+  gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
+  gl.vertexPointer (3, GL_FLOAT, 0, 0);
+
+  gl.bindBuffer (GL_ARRAY_BUFFER, _normals_buffer);
+  gl.normalPointer (GL_FLOAT, 0, 0);
+
+  for (wmo_batch& batch : _batches)
   {
-    _lists[i]->render ();
+    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
   }
 }
 
@@ -1289,12 +1295,6 @@ void WMOGroup::setupFog ( World* world
 
 WMOGroup::~WMOGroup()
 {
-  for(auto it = _lists.begin (); it != _lists.end (); ++it)
-  {
-    delete *it;
-  }
-  _lists.clear();
-
   if (lq)
   {
     delete lq;
