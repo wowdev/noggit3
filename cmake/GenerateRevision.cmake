@@ -10,64 +10,47 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+find_package (Hg QUIET)
 
-execute_process(
-  COMMAND hg id -n
-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-  OUTPUT_VARIABLE hg_rev_id_str
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  ERROR_QUIET
-)
+set (hg_rev_hash_str "Archive")
+set (hg_rev_hash "0")
+set (hg_rev_id_str "0")
+set (hg_rev_id "0")
 
-
-execute_process(
-  COMMAND hg id -i
-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-  OUTPUT_VARIABLE hg_rev_hash_str
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  ERROR_QUIET
-)
-
-
-if(EXISTS ${CMAKE_SOURCE_DIR}/.hg_archival.txt)
-  file(READ
-    ${CMAKE_SOURCE_DIR}/.hg_archival.txt hg_rev_hash_str
+if (HG_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.hg")
+  execute_process (COMMAND "${HG_EXECUTABLE}" id -n
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE hg_rev_id_str
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+  execute_process (COMMAND "${HG_EXECUTABLE}" id -i
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE hg_rev_hash_str
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+elseif (EXISTS "${CMAKE_SOURCE_DIR}/.hg_archival.txt")
+  file (READ "${CMAKE_SOURCE_DIR}/.hg_archival.txt" hg_rev_hash_str
     LIMIT 10
     OFFSET 7
     NEWLINE_CONSUME
   )
-  string(STRIP ${hg_rev_hash_str} hg_rev_hash_str)
-  set(hg_rev_id_str "Archive")
-  set(hg_rev_id "0")
-  set(hg_rev_hash ${hg_rev_hash_str})
+  string (STRIP ${hg_rev_hash_str} hg_rev_hash_str)
+  set (hg_rev_id_str "Archive")
+  set (hg_rev_id "0")
+  set (hg_rev_hash ${hg_rev_hash_str})
 endif()
 
-
-# Last minute check - ensure that we have a proper revision
-# If everything above fails (means the user has erased the mercurial revisional control directory, or runs archive and erased their .hg_archival.txt)
-if(NOT hg_rev_id_str)
-  message("")
-  message(STATUS "WARNING - No revision-information found - have you been tampering with the sources?")
-
-
-  # Ok, since we have no valid ways of finding/setting the revision, let's force some defaults
-  set(hg_rev_hash_str "Archive")
-  set(hg_rev_hash "0")
-  set(hg_rev_id_str "0")
-  set(hg_rev_id "0")
+if (NOT hg_rev_id_str)
+  if (NOT HG_FOUND)
+    message (WARNING "Unable to determine revision of source tree: HG was not found (probably not in path).")
+  else()
+    message (WARNING "Unable to determine revision of source tree. Probably not building from a repository?")
+  endif()
 endif()
 
-
-# Strip off excess strings (shows when the source is actually modified)
-if(NOT hg_rev_id_str MATCHES "Archive")
-  string(REPLACE "+" "" hg_rev_id ${hg_rev_id_str})
-endif()
-string(REPLACE "+" "" hg_rev_hash ${hg_rev_hash_str})
-
-
-# Create the actual revision.h file from the above params
-configure_file(
-  "${CMAKE_SOURCE_DIR}/src/helper/repository.h.in"
+configure_file ("${CMAKE_SOURCE_DIR}/src/helper/repository.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/helper/repository.h"
   @ONLY
 )
