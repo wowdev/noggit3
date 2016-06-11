@@ -63,7 +63,6 @@ class WMOGroup {
   int32_t num;
   int32_t fog;
   Liquid *lq;
-  std::vector<opengl::call_list*> _lists;
 
   std::vector<wmo_batch> _batches;
 
@@ -108,7 +107,7 @@ public:
             , bool hasSkies
             , const float& fog_distance
             );
-  void draw_for_selection() const;
+  void draw_for_selection();
   void drawLiquid ( World* world
                   , bool draw_fog
                   , const float& fog_distance
