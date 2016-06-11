@@ -730,69 +730,29 @@ void WMOGroup::initDisplayList()
 
   for (size_t b = 0; b < _batches.size (); b++)
   {
-    wmo_batch *batch = &_batches[b];
-    WMOMaterial* mat (&wmo->_materials.at (batch->texture));
-    noggit::scoped_blp_texture_reference const& texture (wmo->_textures.at (batch->texture));
+    _lists[b] = new opengl::call_list();
 
-    bool overbright = ((mat->flags & 0x10) && !hascv);
-    bool spec_shader = (mat->specular && !hascv && !overbright);
+    _lists[b]->start_recording (GL_COMPILE);
+    {
+      wmo_batch* batch = &_batches[b];
+      noggit::scoped_blp_texture_reference const& texture (wmo->_textures.at (batch->texture));
+      scoped_material_setter const material_setter (&wmo->_materials.at (batch->texture), hascv);
+      texture->bind ();
 
-    _lists[b].first = new opengl::call_list();
-    _lists[b].second = spec_shader;
-
-    _lists[b].first->start_recording( GL_COMPILE );
-
-    texture->bind();
-
-    bool atest = (mat->transparent) != 0;
-
-    if (atest) {
-      gl.enable(GL_ALPHA_TEST);
-      float aval = 0;
-            if (mat->flags & 0x80) aval = 0.3f;
-      if (mat->flags & 0x01) aval = 0.0f;
-      gl.alphaFunc(GL_GREATER, aval);
-    }
-
-    if (mat->flags & 0x04) gl.disable(GL_CULL_FACE);
-    else gl.enable(GL_CULL_FACE);
-
-    if (spec_shader) {
-      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorFromInt(mat->col2));
-    } else {
-      ::math::vector_4d nospec(0,0,0,1);
-      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
-    }
-
-    if (overbright) {
-      //! \todo  use emissive color from the WMO Material instead of 1,1,1,1
-      GLfloat em[4] = {1,1,1,1};
-      gl.materialfv(GL_FRONT, GL_EMISSION, em);
-    }
-
-    // render
-    gl.begin(GL_TRIANGLES);
-    for (int t = 0, i = batch->index_start; t < batch->index_count; t++, ++i) {
-      int a = _indices[i];
-      if (indoor && hascv) {
-              setGLColor(_vertex_colors[a]);
+      // render
+      gl.begin (GL_TRIANGLES);
+      for (int t = 0, i = batch->index_start; t < batch->index_count; t++, ++i) {
+        int a = _indices[i];
+        if (indoor && hascv) {
+          setGLColor (_vertex_colors[a]);
+        }
+        gl.normal3f (_normals[a].x (), _normals[a].z (), -_normals[a].y ());
+        gl.texCoord2fv (_texcoords[a]);
+        gl.vertex3fv (_vertices[a]);
       }
-      gl.normal3f (_normals[a].x(), _normals[a].z(), -_normals[a].y());
-      gl.texCoord2fv (_texcoords[a]);
-      gl.vertex3fv (_vertices[a]);
+      gl.end ();
     }
-    gl.end();
-
-    if (overbright) {
-      GLfloat em[4] = {0,0,0,1};
-      gl.materialfv(GL_FRONT, GL_EMISSION, em);
-    }
-
-    if (atest) {
-      gl.disable(GL_ALPHA_TEST);
-    }
-
-    _lists[b].first->end_recording();
+    _lists[b]->end_recording ();
   }
 
   _vertices.clear ();
@@ -1181,12 +1141,12 @@ void WMOGroup::draw ( World* world
     if (wmoShader)
     {
       wmoShader->bind();
-      _lists[i].first->render();
+      _lists[i]->render ();
       wmoShader->unbind();
     }
     else
     {
-      _lists[i].first->render();
+      _lists[i]->render ();
     }
   }
 
@@ -1203,7 +1163,7 @@ void WMOGroup::draw_for_selection() const
 {
   for (size_t i (0); i < _batches.size (); ++i)
   {
-    _lists[i].first->render();
+    _lists[i]->render ();
   }
 }
 
@@ -1341,11 +1301,9 @@ void WMOGroup::setupFog ( World* world
 
 WMOGroup::~WMOGroup()
 {
-  //if (dl) gl.deleteLists(dl, 1);
-  //if (dl_light) gl.deleteLists(dl_light, 1);
-  for( std::vector< std::pair<opengl::call_list*, bool> >::iterator it = _lists.begin(); it != _lists.end(); ++it )
+  for(auto it = _lists.begin (); it != _lists.end (); ++it)
   {
-    delete it->first;
+    delete *it;
   }
   _lists.clear();
 
