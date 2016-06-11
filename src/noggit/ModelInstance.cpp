@@ -237,11 +237,9 @@ void ModelInstance::draw ( bool draw_fog
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
-  gl.translatef (pos.x(), pos.y(), pos.z());
-  gl.rotatef (dir.y() - 90.0f, 0.0f, 1.0f, 0.0f);
-  gl.rotatef (-dir.x(), 0.0f, 0.0f, 1.0f);
-  gl.rotatef (dir.z(), 1.0f, 0.0f, 0.0f);
-  gl.scalef (sc, sc, sc);
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir)).transposed());
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::scale, sc));
 
   model->draw (draw_fog, time_since_spawn());
 
@@ -283,11 +281,9 @@ void ModelInstance::draw_for_selection()
   ::opengl::scoped::matrix_pusher positioning_matrix;
   ::opengl::scoped::name_pusher name_pusher (nameID);
 
-  gl.translatef( pos.x(), pos.y(), pos.z() );
-  gl.rotatef( dir.y() - 90.0f, 0.0f, 1.0f, 0.0f );
-  gl.rotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
-  gl.rotatef( dir.z(), 1.0f, 0.0f, 0.0f );
-  gl.scalef( sc, sc, sc );
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir)).transposed());
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::scale, sc));
 
   model->drawSelect (time_since_spawn());
 }
@@ -297,9 +293,9 @@ void ModelInstance::draw2() const
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
   //! \todo This could all be done in one composed matrix.
-  gl.translatef (pos.x(), pos.y(), pos.z());
-  gl.multMatrixf (::math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_doodad_rotation));
-  gl.scalef (sc, -sc, -sc);
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_doodad_rotation));
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::scale, {sc, -sc, -sc}));
 
   model->draw (_world, time_since_spawn());
 }
@@ -308,9 +304,9 @@ void ModelInstance::draw2Select() const
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
-  gl.translatef (pos.x(), pos.y(), pos.z());
-  gl.multMatrixf (::math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_doodad_rotation));
-  gl.scalef (sc, -sc, -sc);
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_doodad_rotation));
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::scale, {sc, -sc, -sc}));
 
   model->drawSelect (time_since_spawn());
 }
@@ -337,7 +333,7 @@ std::pair<::math::vector_3d, ::math::vector_3d> ModelInstance::extents() const
   ::math::matrix_4x4 const rot
     ( ::math::matrix_4x4 (math::matrix_4x4::translation, pos)
     * ::math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir))
-    * ::math::matrix_4x4 (math::matrix_4x4::scale, {sc, sc, sc})
+    * ::math::matrix_4x4 (math::matrix_4x4::scale, sc)
     );
 
   std::pair<::math::vector_3d, ::math::vector_3d> extents
