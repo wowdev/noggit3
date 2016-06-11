@@ -19,6 +19,7 @@ namespace noggit
       disk = 1,
       sphere = 2,
       triangle = 3,
+      circle = 4,
     };
 
     void cursor_selector::set_cursor_type (int value)
@@ -62,11 +63,13 @@ namespace noggit
       QRadioButton* disk_button (new QRadioButton (tr ("Disk"), this));
       QRadioButton* sphere_button (new QRadioButton (tr ("Sphere"), this));
       QRadioButton* triangle_button (new QRadioButton (tr ("Triangle"), this));
+      QRadioButton* circle_button (new QRadioButton (tr ("Circle"), this));
       QRadioButton* none_button (new QRadioButton (tr ("None"), this));
 
       cursor_type_group->addButton (disk_button, disk);
       cursor_type_group->addButton (sphere_button, sphere);
       cursor_type_group->addButton (triangle_button, triangle);
+      cursor_type_group->addButton (circle_button, circle);
       cursor_type_group->addButton (none_button, none);
 
       cursor_type_group->button (_settings->value ("cursor/type", disk).toInt())->click();
@@ -109,6 +112,7 @@ namespace noggit
       widget_layout->addWidget (disk_button);
       widget_layout->addWidget (sphere_button);
       widget_layout->addWidget (triangle_button);
+      widget_layout->addWidget (circle_button);
       widget_layout->addWidget (none_button);
 
       widget_layout->addWidget (red_label);

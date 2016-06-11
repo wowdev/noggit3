@@ -904,6 +904,11 @@ uniform vec3 area_id_color;
 uniform vec3 shadow_color;
 uniform int layer_count;
 
+uniform bool draw_cursor_circle;
+uniform vec3 cursor_position;
+uniform float outer_cursor_radius;
+uniform vec4 cursor_color;
+
 uniform mat4 model_view;
 
 uniform sampler2D shadow_map;
@@ -996,6 +1001,11 @@ void main()
   {
     gl_FragColor = blend_by_alpha (vec4 (area_id_color, 0.7), gl_FragColor);
   }
+
+  if (draw_cursor_circle && abs (distance (vary_position.xz, cursor_position.xz) - outer_cursor_radius) <= 0.1)
+  {
+    gl_FragColor = blend_by_alpha (cursor_color, gl_FragColor);
+  }
 }
 )code"
         };
@@ -1014,6 +1024,18 @@ void main()
       mcnk_shader.uniform ("draw_area_id_overlay", !!(flags & AREAID));
       mcnk_shader.uniform ("draw_terrain_height_contour", !!(flags & HEIGHTCONTOUR));
       mcnk_shader.uniform ("mark_impassable_chunks", !!(flags & MARKIMPASSABLE));
+
+      QSettings settings;
+      mcnk_shader.uniform ("draw_cursor_circle", noggit::app().setting ("cursor/type", 1).toInt() == 4);
+      mcnk_shader.uniform ("cursor_position", _exact_terrain_selection_position);
+      mcnk_shader.uniform ("outer_cursor_radius", outer_cursor_radius);
+      mcnk_shader.uniform ( "cursor_color"
+                          , math::vector_4d ( settings.value ("cursor/red", 1.0f).toFloat()
+                                            , settings.value ("cursor/green", 1.0f).toFloat()
+                                            , settings.value ("cursor/blue", 1.0f).toFloat()
+                                            , settings.value ("cursor/alpha", 1.0f).toFloat()
+                                            )
+                          );
 
       //! \todo draw triangle selection cursor
       // selected indices = mapstrip2[noggit::selection::selected_polygon (*selected_item) + 0…2]
