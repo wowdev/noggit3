@@ -670,66 +670,28 @@ void WMOGroup::initDisplayList()
   {
     wmo_batch *batch = &_batches[b];
     WMOMaterial* mat (&wmo->mat.at (batch->texture));
-
-    bool overbright = ((mat->flags & 0x10) && !hascv);
-    bool spec_shader = (mat->specular && !hascv && !overbright);
-
+    
     _lists[b].first = std::make_unique<opengl::call_list>();
-    _lists[b].second = spec_shader;
-
     _lists[b].first->start_recording(GL_COMPILE);
+    {
+      scoped_material_setter const material_setter (mat, hascv);
+      _lists[b].second = material_setter._specular;
 
-    mat->_texture.get()->bind();
+      mat->_texture.get()->bind();
 
-    bool atest = (mat->transparent) != 0;
-
-    if (atest) {
-      gl.enable(GL_ALPHA_TEST);
-      float aval = 0;
-      if (mat->flags & 0x80) aval = 0.3f;
-      if (mat->flags & 0x01) aval = 0.0f;
-      gl.alphaFunc(GL_GREATER, aval);
-    }
-
-    if (mat->flags & 0x04) gl.disable(GL_CULL_FACE);
-    else gl.enable(GL_CULL_FACE);
-
-    if (spec_shader) {
-      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorFromInt(mat->col2));
-    }
-    else {
-      math::vector_4d nospec(0, 0, 0, 1);
-      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
-    }
-
-    if (overbright) {
-      //! \todo  use emissive color from the WMO Material instead of 1,1,1,1
-      GLfloat em[4] = { 1, 1, 1, 1 };
-      gl.materialfv(GL_FRONT, GL_EMISSION, em);
-    }
-
-    // render
-    gl.begin(GL_TRIANGLES);
-    for (int t = 0, i = batch->index_start; t < batch->index_count; t++, ++i) {
-      int a = _indices[i];
-      if (indoor && hascv) {
-              setGLColor(_vertex_colors[a]);
+      // render
+      gl.begin(GL_TRIANGLES);
+      for (int t = 0, i = batch->index_start; t < batch->index_count; t++, ++i) {
+        int a = _indices[i];
+        if (indoor && hascv) {
+                setGLColor(_vertex_colors[a]);
+        }
+        gl.normal3f (_normals[a].x, _normals[a].z, -_normals[a].y);
+        gl.texCoord2fv (_texcoords[a]);
+        gl.vertex3fv (_vertices[a]);
       }
-      gl.normal3f (_normals[a].x, _normals[a].z, -_normals[a].y);
-      gl.texCoord2fv (_texcoords[a]);
-      gl.vertex3fv (_vertices[a]);
+      gl.end();
     }
-    gl.end();
-
-    if (overbright) {
-      GLfloat em[4] = { 0, 0, 0, 1 };
-      gl.materialfv(GL_FRONT, GL_EMISSION, em);
-    }
-
-    if (atest) {
-      gl.disable(GL_ALPHA_TEST);
-    }
-
     _lists[b].first->end_recording();
   }
 
