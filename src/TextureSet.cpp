@@ -345,7 +345,13 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
           for (int n = nTextures - 2; n > k; n--)
           {
             // prevent 0 division
-            alphas[k] = (alphas[k] / std::max((255.0f - alphas[n]), 0.001f)) * 255.0f;
+            if (alphas[n] == 255.0f)
+            {
+              alphas[k] = 0.0f;
+              break;
+            }
+            else
+              alphas[k] = (alphas[k] / (255.0f - alphas[n])) * 255.0f;
           }
         }
           
