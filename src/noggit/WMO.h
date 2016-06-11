@@ -82,7 +82,7 @@ public:
   ::math::vector_3d BoundingBoxMax;
   ::math::vector_3d VertexBoxMin;
   ::math::vector_3d VertexBoxMax;
-  bool indoor, hascv;
+  bool indoor;
 
   bool outdoorLights;
   std::string name;
