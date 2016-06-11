@@ -69,13 +69,8 @@ void WMOInstance::draw ( bool draw_doodads
 {
   opengl::scoped::matrix_pusher const matrix_pusher;
 
-  gl.translatef( pos.x(), pos.y(), pos.z() );
-
-  const float roty = dir.y() - 90.0f;
-
-  gl.rotatef( roty, 0.0f, 1.0f, 0.0f );
-  gl.rotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
-  gl.rotatef( dir.z(), 1.0f, 0.0f, 0.0f );
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir)).transposed());
 
   const bool is_selected ( selected_item
                         && noggit::selection::is_the_same_as ( this
@@ -86,7 +81,7 @@ void WMOInstance::draw ( bool draw_doodads
   wmo->draw ( _world
             , doodadset
             , pos
-            , roty
+            , dir.y() - 90.0f
             , culldistance
             , is_selected
             , is_selected
@@ -108,13 +103,8 @@ void WMOInstance::drawSelect ( bool draw_doodads
 {
   opengl::scoped::matrix_pusher const matrix_pusher;
 
-  gl.translatef( pos.x(), pos.y(), pos.z() );
-
-  const float roty = dir.y() - 90.0f;
-
-  gl.rotatef( roty, 0.0f, 1.0f, 0.0f );
-  gl.rotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
-  gl.rotatef( dir.z(), 1.0f, 0.0f, 0.0f );
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir)).transposed());
 
   //mSelectionID = _world->selection_names().add( this );
   gl.pushName( mSelectionID );
@@ -122,7 +112,7 @@ void WMOInstance::drawSelect ( bool draw_doodads
   wmo->drawSelect ( _world
                   , doodadset
                   , pos
-                  , -roty
+                  , -(dir.y() - 90.0f)
                   , culldistance
                   , draw_doodads
                   , frustum
@@ -136,13 +126,8 @@ void WMOInstance::drawSelect ( bool draw_doodads
 {
   opengl::scoped::matrix_pusher const matrix_pusher;
 
-  gl.translatef( pos.x(), pos.y(), pos.z() );
-
-  const float roty = dir.y() - 90.0f;
-
-  gl.rotatef( roty, 0.0f, 1.0f, 0.0f );
-  gl.rotatef( -dir.x(), 0.0f, 0.0f, 1.0f );
-  gl.rotatef( dir.z(), 1.0f, 0.0f, 0.0f );
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir)).transposed());
 
   wmo->drawPortals();
 }*/

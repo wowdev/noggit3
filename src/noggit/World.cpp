@@ -93,7 +93,7 @@ namespace
 
     opengl::scoped::matrix_pusher matrix;
 
-    gl.translatef (position.x(), position.y(), position.z());
+    gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
 
     draw_sphere (0.3f);
     draw_sphere (radius);
@@ -142,8 +142,8 @@ namespace
       gl.colorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
       opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_TRUE> color_material;
 
-      gl.translatef (position.x(), position.y(), position.z());
-      gl.rotatef (90.0f, 1.0f, 0.0f, 0.0f);
+      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
+      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, math::vector_3d {90.0f, 0.0f, 0.0f}).transposed());
 
       //! \todo This should be passed in!
       QSettings settings;
@@ -159,7 +159,7 @@ namespace
     {
       opengl::scoped::matrix_pusher matrix;
 
-      gl.translatef (position.x(), position.y(), position.z());
+      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
 
       draw_sphere (0.3f);
     }
@@ -1587,7 +1587,7 @@ void World::drawTileMode ( bool draw_lines
 
     {
       opengl::scoped::matrix_pusher const translate_matrix;
-      gl.translatef (-camera.x() / CHUNKSIZE, -camera.z() / CHUNKSIZE, 0.0f);
+      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, {-camera.x() / CHUNKSIZE, -camera.z() / CHUNKSIZE, 0.0f}).transposed());
 
       //! \todo Only iterate over those intersecting?
       for (size_t j (0); j < 64; ++j)
@@ -1616,7 +1616,7 @@ void World::drawTileMode ( bool draw_lines
 
     if (draw_lines)
     {
-      gl.translatef(fmod(-camera.x()/CHUNKSIZE,16), fmod(-camera.z()/CHUNKSIZE,16),0);
+      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, {std::fmod (-camera.x()/CHUNKSIZE,16.0f), std::fmod (-camera.z()/CHUNKSIZE,16.0f), 0.0f}).transposed());
       for(float x = -32.0f; x <= 48.0f; x += 1.0f)
       {
         if( static_cast<int>(x) % 16 )

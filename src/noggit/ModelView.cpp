@@ -62,9 +62,8 @@ void ModelView::paintGL()
     gl.loadIdentity();
 
     gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    gl.translatef(0.0, theModel->header.VertexBoxMin.y()/2, distance);
-    gl.rotatef(xRot / 16.0, 1.0, 0.0, 0.0);
-    gl.rotatef(yRot / 16.0, 0.0, 1.0, 0.0);
+    gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, {0.0f, theModel->header.VertexBoxMin.y() / 2.0f, distance}).transposed());
+    gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, math::vector_3d (xRot / 16.0f, yRot / 16.0f, 0.0f)).transposed());
 
     if(_draw_loading)
     {

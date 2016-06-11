@@ -56,6 +56,9 @@ namespace math
                    , 0.0f, 0.0f, 0.0f, 1.0f
                    )
     {}
+    matrix_4x4 (scale_t, float sc)
+      : matrix_4x4 (scale, {sc, sc, sc})
+    {}
 
     static struct rotation_t {} rotation;
     matrix_4x4 (rotation_t, quaternion const&);

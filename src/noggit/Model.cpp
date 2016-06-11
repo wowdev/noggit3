@@ -882,13 +882,14 @@ void TextureAnim::setup(int anim)
 {
   gl.loadIdentity();
   if (trans.uses(anim)) {
-    gl.translatef(tval.x(), tval.y(), tval.z());
+    gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, tval).transposed());
   }
   if (rot.uses(anim)) {
-    gl.rotatef(rval.x(), 0, 0, 1); // this is wrong, I have no idea what I'm doing here ;)
+    // this is wrong, I have no idea what I'm doing here ;)
+    gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, math::vector_3d {rval.x(), 0.0f, 0.0f}).transposed());
   }
   if (scale.uses(anim)) {
-    gl.scalef(sval.x(), sval.y(), sval.z());
+    gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::scale, sval));
   }
 }
 
