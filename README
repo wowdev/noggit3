@@ -15,7 +15,6 @@ following libraries:
 * Qt (5.*, Core, Gui, OpenGL)
 * storm (stormlib by Ladislav Zezula)
 * Boost
-* Lua (5.1)
 
 Build in the following way. You may customize parameters to cmake. (for windows see next section)
 $ mkdir build
