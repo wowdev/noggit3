@@ -41,11 +41,11 @@ Menu::Menu (QWidget* parent)
   QListWidget* battlegrounds_table (new QListWidget (nullptr));
   QListWidget* arenas_table (new QListWidget (nullptr));
 
-  connect (continents_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
-  connect (dungeons_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
-  connect (raids_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
-  connect (battlegrounds_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
-  connect (arenas_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_map_list_item (QListWidgetItem*)));
+  connect (continents_table, &QListWidget::itemClicked, this, &Menu::show_map_list_item);
+  connect (dungeons_table, &QListWidget::itemClicked, this, &Menu::show_map_list_item);
+  connect (raids_table, &QListWidget::itemClicked, this, &Menu::show_map_list_item);
+  connect (battlegrounds_table, &QListWidget::itemClicked, this, &Menu::show_map_list_item);
+  connect (arenas_table, &QListWidget::itemClicked, this, &Menu::show_map_list_item);
 
   QListWidget* tables[5] = {continents_table, dungeons_table, raids_table, battlegrounds_table, arenas_table};
 
@@ -62,8 +62,8 @@ Menu::Menu (QWidget* parent)
 
   QListWidget* bookmarks_table (new QListWidget (nullptr));
 
-  connect (bookmarks_table, SIGNAL (itemClicked (QListWidgetItem*)), SLOT (show_bookmark_list_item (QListWidgetItem*)));
-  connect (bookmarks_table, SIGNAL (itemDoubleClicked (QListWidgetItem*)), SLOT (open_bookmark_list_item (QListWidgetItem*)));
+  connect (bookmarks_table, &QListWidget::itemClicked, this, &Menu::show_bookmark_list_item);
+  connect (bookmarks_table, &QListWidget::itemDoubleClicked, this, &Menu::open_bookmark_list_item);
 
   //! \todo The list needs to be refreshed upon adding a bookmark.
   QSettings settings;
@@ -98,7 +98,7 @@ Menu::Menu (QWidget* parent)
   entry_points_tabs->addTab (bookmarks_table, tr ("Bookmarks"));
 
   _minimap->draw_boundaries (true);
-  connect (_minimap, SIGNAL (map_clicked (const World *, const ::math::vector_3d&)), SLOT (minimap_clicked (const World *, const ::math::vector_3d&)));
+  connect (_minimap, &noggit::ui::minimap_widget::map_clicked, this, &Menu::minimap_clicked);
 
   menu_layout->addWidget (entry_points_tabs, 0, 0);
   menu_layout->addWidget (_minimap, 0, 1);

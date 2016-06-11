@@ -57,7 +57,7 @@ namespace noggit
         textureView* view  = new textureView(it.value(), scrollWidget);
         view->hide();
 
-        connect(check, SIGNAL(toggled(bool)), view, SLOT(setVisible(bool)));
+        connect(check, &QCheckBox::toggled, view, &textureView::setVisible);
 
         scrollLayout->addWidget(check);
         scrollLayout->addWidget(view);
@@ -130,7 +130,7 @@ namespace noggit
       for(int i = 0; i < textureList.count(); ++i)
         addItem(new textureItem(textureList.at(i)));
 
-      connect(this, SIGNAL(sceneRectChanged(QRectF)), this, SLOT(resized(QRectF)));
+      connect(this, &QGraphicsScene::sceneRectChanged, this, &textureScene::resized);
     }
 
     void textureScene::resized(QRectF /*rect*/)

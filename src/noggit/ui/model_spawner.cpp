@@ -120,8 +120,8 @@ namespace noggit
       _file_tree->setDragDropMode (QAbstractItemView::DragOnly);
 
 
-      connect(_file_tree,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(changeModel(QModelIndex)));
-      connect (filter_line, SIGNAL (textChanged (const QString&)), SLOT (update_filter (const QString&)));
+      connect (_file_tree, &QTreeView::doubleClicked, this, &model_spawner::changeModel);
+      connect (filter_line, &QLineEdit::textChanged, this, &model_spawner::update_filter);
 
       layout->addWidget(modelview);
       layout->addWidget (filter_line);

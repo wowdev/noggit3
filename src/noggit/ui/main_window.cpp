@@ -94,8 +94,8 @@ namespace noggit
     void main_window::maps()
     {
       this->map_selection_menu = new Menu (nullptr);
-      connect (this->map_selection_menu, SIGNAL (create_world_view_request (World*, float, float)), this, SLOT (create_world_view (World*, float, float)));
-      connect (map_selection_menu, SIGNAL (create_world_view_request (World*, float, float)), map_selection_menu, SLOT (deleteLater()));
+      connect (this->map_selection_menu, &Menu::create_world_view_request, this, &main_window::create_world_view);
+      connect (map_selection_menu, &Menu::create_world_view_request, map_selection_menu, &QObject::deleteLater);
 	    this->map_selection_menu->show();
     }
 

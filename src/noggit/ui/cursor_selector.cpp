@@ -65,7 +65,9 @@ namespace noggit
 
       cursor_type_group->button (_settings->value ("cursor/type", cursor_type::circle).toInt())->click();
 
-      connect (cursor_type_group, SIGNAL (buttonClicked (int)), SLOT (set_cursor_type (int)));
+      connect ( cursor_type_group, static_cast<void(QButtonGroup::*) (int)> (&QButtonGroup::buttonClicked)
+              , this, &cursor_selector::set_cursor_type
+              );
 
       QLabel* red_label (new QLabel (tr ("Red"), this));
       QSlider* red_slider (new QSlider (Qt::Horizontal, this));
@@ -94,10 +96,10 @@ namespace noggit
       blue_label->setBuddy (blue_slider);
       alpha_label->setBuddy (alpha_slider);
 
-      connect (red_slider, SIGNAL (valueChanged (int)), SLOT (set_red_color (int)));
-      connect (green_slider, SIGNAL (valueChanged (int)), SLOT (set_green_color (int)));
-      connect (blue_slider, SIGNAL (valueChanged (int)), SLOT (set_blue_color (int)));
-      connect (alpha_slider, SIGNAL (valueChanged (int)), SLOT (set_alpha (int)));
+      connect (red_slider, &QSlider::valueChanged, this, &cursor_selector::set_red_color);
+      connect (green_slider, &QSlider::valueChanged, this, &cursor_selector::set_green_color);
+      connect (blue_slider, &QSlider::valueChanged, this, &cursor_selector::set_blue_color);
+      connect (alpha_slider, &QSlider::valueChanged, this, &cursor_selector::set_alpha);
 
       QVBoxLayout* widget_layout (new QVBoxLayout (this));
       widget_layout->addWidget (disk_button);

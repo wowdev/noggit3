@@ -88,20 +88,22 @@ namespace noggit
       setWindowTitle(tr("configuration_settings"));
       setWindowIcon(QIcon("noggit.png"));
 
-      viewDistanceSpinBox->connect(viewDistanceSlider, SIGNAL (valueChanged (int)), SLOT (setValue (int)));
-      viewDistanceSlider->connect(viewDistanceSpinBox, SIGNAL (valueChanged (int)), SLOT (setValue (int)));
+      connect (viewDistanceSlider, &QSlider::valueChanged, viewDistanceSpinBox, &QSpinBox::setValue);
+      connect ( viewDistanceSpinBox, static_cast<void (QSpinBox::*) (int)>(&QSpinBox::valueChanged)
+              , viewDistanceSlider, &QSlider::setValue
+              );
 
-      connect(changeGamePathButton, SIGNAL (clicked()), this, SLOT (setGameAndProjectPath()));
-      connect(changeProjectPathButton, SIGNAL (clicked()), this, SLOT (setProjectPath()));
-      connect(addProjectPathCheckBox, SIGNAL (toggled (bool)), this, SLOT (toggleGameProjectDisplay (bool)));
+      connect (changeGamePathButton, &QPushButton::clicked, this, &settingsDialog::setGameAndProjectPath);
+      connect (changeProjectPathButton, &QPushButton::clicked, this, &settingsDialog::setProjectPath);
+      connect (addProjectPathCheckBox, &QCheckBox::toggled, this, &settingsDialog::toggleGameProjectDisplay);
 
-      connect(antialiasingCheckBox, SIGNAL (toggled (bool)), SLOT (setAntialiasing (bool)));
-      connect(maximizedShowCheckBox, SIGNAL (toggled (bool)), SLOT (setMaximizedShow (bool)));
-      connect(maximizedAppShowCheckBox, SIGNAL (toggled (bool)), SLOT (setMaximizedAppShow (bool)));
-      connect(projectExplorerShowCheckBox, SIGNAL (toggled (bool)), SLOT (setProjectExplorerShow (bool)));
-      connect(viewDistanceSlider, SIGNAL (valueChanged (int)), SLOT (setViewDistance (int)));
+      connect (antialiasingCheckBox, &QCheckBox::toggled, this, &settingsDialog::setAntialiasing);
+      connect (maximizedShowCheckBox, &QCheckBox::toggled, this, &settingsDialog::setMaximizedShow);
+      connect (maximizedAppShowCheckBox, &QCheckBox::toggled, this, &settingsDialog::setMaximizedAppShow);
+      connect (projectExplorerShowCheckBox, &QCheckBox::toggled, this, &settingsDialog::setProjectExplorerShow);
+      connect (viewDistanceSlider, &QSlider::valueChanged, this, &settingsDialog::setViewDistance);
 
-      connect(&noggit::app(), SIGNAL (settingChanged (const QString&, const QVariant&)), SLOT (settingChanged (const QString&, const QVariant&)));
+      connect (&noggit::app(), &noggit::application::settingChanged, this, &settingsDialog::settingChanged);
     }
 
     void settingsDialog::toggleGameProjectDisplay(bool checked)

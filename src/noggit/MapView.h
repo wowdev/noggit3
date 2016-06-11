@@ -193,10 +193,13 @@ namespace noggit
     void TEST_save_wdt();
 
   private:
-    QAction* new_toggleable_action (const QString& text, const char* slot, bool default_value, const QKeySequence& shortcut = 0);
+    template<typename Slot>
+      QAction* new_toggleable_action (const QString& text, Slot&&, bool default_value, const QKeySequence& shortcut = 0);
     QAction* new_flag_action (const QString& text, WorldFlags flag, const QKeySequence& shortcut = 0);
-    QAction* new_action (const QString& text, const char* slot, const QKeySequence& shortcut = 0);
-    QAction* new_action (const QString& text, QObject* receiver, const char* slot, const QKeySequence& shortcut = 0);
+    template<typename Slot>
+      QAction* new_action (const QString& text, Slot&&, const QKeySequence& shortcut = 0);
+    template<typename Receiver, typename Slot>
+      QAction* new_action (const QString& text, Receiver* receiver, Slot&&, const QKeySequence& shortcut = 0);
 
     void create_shaping_settings_widget();
     void create_smoothing_settings_widget();
