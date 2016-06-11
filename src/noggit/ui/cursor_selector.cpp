@@ -13,15 +13,6 @@ namespace noggit
 {
   namespace ui
   {
-    enum cursor_type
-    {
-      none = 0,
-      disk = 1,
-      sphere = 2,
-      triangle = 3,
-      circle = 4,
-    };
-
     void cursor_selector::set_cursor_type (int value)
     {
       _settings->setValue ("cursor/type", value);
@@ -66,13 +57,13 @@ namespace noggit
       QRadioButton* circle_button (new QRadioButton (tr ("Circle"), this));
       QRadioButton* none_button (new QRadioButton (tr ("None"), this));
 
-      cursor_type_group->addButton (disk_button, disk);
-      cursor_type_group->addButton (sphere_button, sphere);
-      cursor_type_group->addButton (triangle_button, triangle);
-      cursor_type_group->addButton (circle_button, circle);
-      cursor_type_group->addButton (none_button, none);
+      cursor_type_group->addButton (disk_button, cursor_type::disk);
+      cursor_type_group->addButton (sphere_button, cursor_type::sphere);
+      cursor_type_group->addButton (triangle_button, cursor_type::triangle);
+      cursor_type_group->addButton (circle_button, cursor_type::circle);
+      cursor_type_group->addButton (none_button, cursor_type::none);
 
-      cursor_type_group->button (_settings->value ("cursor/type", disk).toInt())->click();
+      cursor_type_group->button (_settings->value ("cursor/type", cursor_type::circle).toInt())->click();
 
       connect (cursor_type_group, SIGNAL (buttonClicked (int)), SLOT (set_cursor_type (int)));
 
