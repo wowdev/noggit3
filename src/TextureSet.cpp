@@ -365,7 +365,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 			return false;
 		}
 
-		for (size_t j = texLevel; j < nTextures - 1; j++)
+		for (size_t j = 0; j < nTextures - 1; j++)
 		{
 			if (j > 2)
 			{
@@ -374,11 +374,6 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 			}
 
 			alphamaps[j]->loadTexture();
-		}
-
-		if (texLevel)
-		{
-			alphamaps[texLevel - 1]->loadTexture();
 		}
 	}
 
