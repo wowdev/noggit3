@@ -1027,7 +1027,7 @@ void main()
       mcnk_shader.uniform ("mark_impassable_chunks", !!(flags & MARKIMPASSABLE));
 
       QSettings settings;
-      mcnk_shader.uniform ("draw_cursor_circle", noggit::app().setting ("cursor/type", 1).toInt() == noggit::ui::cursor_type::circle);
+      mcnk_shader.uniform ("draw_cursor_circle", selected_item && noggit::selection::is_chunk (*selected_item) && noggit::app().setting ("cursor/type", 1).toInt() == noggit::ui::cursor_type::circle);
       mcnk_shader.uniform ("cursor_position", _exact_terrain_selection_position);
       mcnk_shader.uniform ("outer_cursor_radius", outer_cursor_radius);
       mcnk_shader.uniform ( "cursor_color"
@@ -1060,45 +1060,45 @@ void main()
     }
 
     // Selection circle
+    //! \todo raycasting instead of readPixels and depth buffer
+
+    GLint viewport[4];
+    gl.getIntegerv (GL_VIEWPORT, viewport);
+
+    int const win_x (mouse_position.x());
+    int const win_y (static_cast<float> (viewport[3]) - mouse_position.y());
+    float win_z;
+
+    if (QSurfaceFormat::defaultFormat().samples() != -1)
+    {
+      QOpenGLFramebufferObject downsampled_fbo (1, 1, QOpenGLFramebufferObject::CombinedDepthStencil);
+
+      QOpenGLFramebufferObject::blitFramebuffer
+        (&downsampled_fbo, {0, 0, 1, 1}, nullptr, {win_x, win_y, 1, 1}, GL_DEPTH_BUFFER_BIT);
+
+      downsampled_fbo.bind();
+      gl.readPixels (0, 0, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
+    }
+    else
+    {
+      gl.readPixels (win_x, win_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
+    }
+
+    ::math::vector_4d const normalized_device_coords
+      ( 2.0f * (win_x - static_cast<float> (viewport[0])) / static_cast<float> (viewport[2]) - 1.0f
+      , 2.0f * (win_y - static_cast<float> (viewport[1])) / static_cast<float> (viewport[3]) - 1.0f
+      , 2.0f * win_z - 1.0f
+      , 1.0f
+      );
+
+    _exact_terrain_selection_position = ( ( opengl::matrix::model_view()
+                                          * opengl::matrix::projection()
+                                          ).inverted().transposed()
+                                        * normalized_device_coords
+                                        ).xyz_normalized_by_w();
+
     if (selected_item && noggit::selection::is_chunk (*selected_item))
     {
-      //! \todo raycasting instead of readPixels and depth buffer
-
-      GLint viewport[4];
-      gl.getIntegerv (GL_VIEWPORT, viewport);
-
-      int const win_x (mouse_position.x());
-      int const win_y (static_cast<float> (viewport[3]) - mouse_position.y());
-      float win_z;
-
-      if (QSurfaceFormat::defaultFormat().samples() != -1)
-      {
-        QOpenGLFramebufferObject downsampled_fbo (1, 1, QOpenGLFramebufferObject::CombinedDepthStencil);
-
-        QOpenGLFramebufferObject::blitFramebuffer
-          (&downsampled_fbo, {0, 0, 1, 1}, nullptr, {win_x, win_y, 1, 1}, GL_DEPTH_BUFFER_BIT);
-
-        downsampled_fbo.bind();
-        gl.readPixels (0, 0, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
-      }
-      else
-      {
-        gl.readPixels (win_x, win_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
-      }
-
-      ::math::vector_4d const normalized_device_coords
-        ( 2.0f * (win_x - static_cast<float> (viewport[0])) / static_cast<float> (viewport[2]) - 1.0f
-        , 2.0f * (win_y - static_cast<float> (viewport[1])) / static_cast<float> (viewport[3]) - 1.0f
-        , 2.0f * win_z - 1.0f
-        , 1.0f
-        );
-
-      _exact_terrain_selection_position = ( ( opengl::matrix::model_view()
-                                            * opengl::matrix::projection()
-                                            ).inverted().transposed()
-                                          * normalized_device_coords
-                                          ).xyz_normalized_by_w();
-
       if (!(flags & NOCURSOR))
       {
         QSettings settings;
