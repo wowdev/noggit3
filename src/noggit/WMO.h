@@ -129,7 +129,7 @@ struct SMOMaterial
 
 struct WMOMaterial : public SMOMaterial
 {
-  noggit::scoped_blp_texture_reference _texture;
+  std::string _texture;
 
   WMOMaterial (SMOMaterial material, std::string filename)
     : SMOMaterial (std::move (material))
@@ -191,12 +191,18 @@ class WMO : public noggit::async::object
 {
 public:
   virtual void finish_loading();
+  void upload ();
 
   bool draw_group_boundingboxes;
 
   const std::string& filename() const;
 
-  //std::string WMOName;
+  World* _world; //! \todo this shouldnt be here
+
+  bool _finished_upload;
+
+  std::vector<noggit::scoped_blp_texture_reference> _textures;
+
   std::string _filename;
   WMOGroup *groups;
   unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
@@ -233,7 +239,7 @@ public:
             , const float& fog_distance
             , const Frustum& frustum
             , const ::math::vector_3d& camera
-            ) const;
+            );
   void drawSelect (World* world
                   , int doodadset
                   , const ::math::vector_3d& ofs
@@ -242,7 +248,7 @@ public:
                   , bool draw_doodads
                   , const Frustum& frustum
                   , const ::math::vector_3d& camera
-                  ) const;
+                  );
   //void drawPortals();
   bool drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d pLower, ::math::vector_3d pUpper ) const;
 };
