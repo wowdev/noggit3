@@ -63,7 +63,7 @@ class WMOGroup {
   int32_t num;
   int32_t fog;
   Liquid *lq;
-  std::vector< std::pair<opengl::call_list*, bool> > _lists;
+  std::vector<opengl::call_list*> _lists;
 
   std::vector<wmo_batch> _batches;
 
