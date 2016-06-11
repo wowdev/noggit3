@@ -1106,7 +1106,9 @@ void WMOGroup::draw ( World* world
 
   setupFog(world, draw_fog, fog_distance);
 
-  if (_vertex_colors.size ())
+  //! \todo draw mocv for outdoor groups too.
+  //! for this to properly work we need a shader here which allows us to mix the color after our liking.
+  if (indoor && _vertex_colors.size ())
   {
     gl.enableClientState (GL_COLOR_ARRAY);
     gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
