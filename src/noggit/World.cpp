@@ -712,7 +712,7 @@ namespace
       add_row (texcoords, y, outer);
       add_row (texcoords, y, inner);
     }
-    add_row (texcoords, 9, outer);
+    add_row (texcoords, 8, outer);
 
     return texcoords;
   }
