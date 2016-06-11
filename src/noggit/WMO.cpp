@@ -61,181 +61,285 @@ void WMO::finish_loading ()
 {
   noggit::mpq::file f (QString::fromStdString (_filename));
 
+  LogDebug << "Loading WMO \"" << _filename << "\"." << std::endl;
+
   uint32_t fourcc;
   uint32_t size;
+
   float ff[3];
 
+  char *texbuf = nullptr;
   char *ddnames = nullptr;
   char *groupnames = nullptr;
 
-  char *texbuf = 0;
+  // - MVER ----------------------------------------------
 
-  while (!f.is_at_end_of_file ()) {
-    f.read (&fourcc, 4);
-    f.read (&size, 4);
+  uint32_t version;
 
-    size_t nextpos = f.getPos () + size;
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+  f.read (&version, 4);
 
-    if (fourcc == 'MOHD') {
-      unsigned int col;
-      // header
-      f.read (&nTextures, 4);
-      f.read (&nGroups, 4);
-      f.read (&nP, 4);
-      f.read (&nLights, 4);
-      f.read (&nModels, 4);
-      f.read (&nDoodads, 4);
-      f.read (&nDoodadSets, 4);
-      f.read (&col, 4);
-      f.read (&nX, 4);
-      f.read (ff, 12);
-      extents[0] = ::math::vector_3d (ff[0], ff[1], ff[2]);
-      f.read (ff, 12);
-      extents[1] = ::math::vector_3d (ff[0], ff[1], ff[2]);
+  assert (fourcc == 'MVER' && version == 17);
 
-      groups = new WMOGroup[nGroups];
-    }
-    else if (fourcc == 'MOTX') {
-      texbuf = new char[size];
-      f.read (texbuf, size);
-    }
-    else if (fourcc == 'MOMT')
-    {
-      const size_t num_materials (size / 0x40);
+  // - MOHD ----------------------------------------------
 
-      for (size_t i (0); i < num_materials; ++i)
-      {
-        SMOMaterial material;
-        f.read (&material, sizeof (material));
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
 
-        _materials.emplace_back (material, texbuf + material.nameStart);
-      }
-    }
-    else if (fourcc == 'MOGN') {
-      groupnames = reinterpret_cast<char*>(f.getPointer ());
-    }
-    else if (fourcc == 'MOGI') {
-      // group info - important information! ^_^
-      for (unsigned int i = 0; i<nGroups; ++i) {
-        groups[i].init (this, &f, i, groupnames);
+  assert (fourcc == 'MOHD');
 
-      }
-    }
-    else if (fourcc == 'MOLT') {
-      // Lights?
-      for (unsigned int i = 0; i<nLights; ++i) {
-        WMOLight l;
-        l.init (&f);
-        lights.push_back (l);
-      }
-    }
-    else if (fourcc == 'MODN') {
-      // models ...
-      // MMID would be relative offsets for MMDX filenames
-      if (size) {
+  unsigned int col;
+  // header
+  f.read (&nTextures, 4);
+  f.read (&nGroups, 4);
+  f.read (&nP, 4);
+  f.read (&nLights, 4);
+  f.read (&nModels, 4);
+  f.read (&nDoodads, 4);
+  f.read (&nDoodadSets, 4);
+  f.read (&col, 4);
+  f.read (&nX, 4);
+  f.read (ff, 12);
+  extents[0] = ::math::vector_3d (ff[0], ff[1], ff[2]);
+  f.read (ff, 12);
+  extents[1] = ::math::vector_3d (ff[0], ff[1], ff[2]);
+  f.seekRelative (4);
 
-        ddnames = reinterpret_cast<char*>(f.getPointer ());
+  groups = new WMOGroup[nGroups];
 
-        f.seekRelative (size);
-      }
-    }
-    else if (fourcc == 'MODS') {
-      for (unsigned int i = 0; i<nDoodadSets; ++i) {
-        WMODoodadSet dds;
-        f.read (&dds, 32);
-        doodadsets.push_back (dds);
-      }
-    }
-    else if (fourcc == 'MODD') {
-      nModels = size / 0x28;
-      for (unsigned int i = 0; i<nModels; ++i) {
-        uint32_t ofs;
-        f.read (&ofs, sizeof (uint32_t));
+  // - MOTX ----------------------------------------------
 
-        ::math::vector_3d position;
-        f.read (position, sizeof (position));
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
 
-        ::math::quaternion rotation;
-        f.read (rotation, sizeof (rotation));
+  assert (fourcc == 'MOTX');
 
-        float scale;
-        f.read (&scale, sizeof (float));
+  texbuf = new char[size];
+  f.read (texbuf, size);
 
-        uint32_t light;
-        f.read (&light, sizeof (uint32_t));
+  // - MOMT ----------------------------------------------
 
-        static math::matrix_4x4 const rotmat{ 0.0f, 0.0f, 0.0f, -1.0f
-          , 0.0f, 1.0f, 0.0f,  0.0f
-          , 0.0f, 0.0f, 1.0f,  0.0f
-          , 1.0f, 0.0f, 0.0f,  0.0f
-        };
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
 
-        modelis.emplace_back
-        (_world
-          , ddnames + ofs
-          , convert_coords (position)
-          , rotmat * rotation
-          , scale
-          , ::math::vector_3d (((light & 0xff0000) >> 16) / 255.0f
-            , ((light & 0x00ff00) >> 8) / 255.0f
-            , ((light & 0x0000ff)) / 255.0f
-          )
-        );
-      }
+  assert (fourcc == 'MOMT');
 
-    }
-    else if (fourcc == 'MOSB')
-    {
-      if (size>4)
-      {
-        std::string path = std::string (reinterpret_cast<char*>(f.getPointer ()));
-        if (path.length ())
-        {
-          LogDebug << "SKYBOX:" << std::endl;
+  const size_t num_materials (size / 0x40);
 
-          if (noggit::mpq::file::exists (QString::fromStdString (path)))
-          {
-            skybox = noggit::scoped_model_reference (path);
-          }
-        }
-      }
-    }
-    else if (fourcc == 'MOPV') {
-      WMOPV p;
-      for (unsigned int i = 0; i<nP; ++i) {
-        f.read (ff, 12);
-        p.a = ::math::vector_3d (ff[0], ff[2], -ff[1]);
-        f.read (ff, 12);
-        p.b = ::math::vector_3d (ff[0], ff[2], -ff[1]);
-        f.read (ff, 12);
-        p.c = ::math::vector_3d (ff[0], ff[2], -ff[1]);
-        f.read (ff, 12);
-        p.d = ::math::vector_3d (ff[0], ff[2], -ff[1]);
-        pvs.push_back (p);
-      }
-    }
-    else if (fourcc == 'MOPR') {
-      int nn = size / 8;
-      WMOPR *pr = reinterpret_cast<WMOPR*>(f.getPointer ());
-      for (int i = 0; i<nn; ++i) {
-        prs.push_back (*pr++);
-      }
-    }
-    else if (fourcc == 'MFOG') {
-      int nfogs = size / 0x30;
-      for (int i = 0; i<nfogs; ++i) {
-        WMOFog fog;
-        fog.init (&f);
-        fogs.push_back (fog);
-      }
-    }
+  for (size_t i (0); i < num_materials; ++i)
+  {
+    SMOMaterial material;
+    f.read (&material, sizeof (material));
 
-    f.seek (nextpos);
+    _materials.emplace_back (material, texbuf + material.nameStart);
   }
 
-  f.close ();
+  // - MOGN ----------------------------------------------
 
-  for (unsigned int i = 0; i < nGroups; ++i)
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOGN');
+
+  groupnames = reinterpret_cast<char*> (f.getPointer ());
+
+  f.seekRelative (size);
+
+  // - MOGI ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOGI');
+
+  for (size_t i (0); i < nGroups; ++i) {
+    groups[i].init (this, &f, i, groupnames);
+  }
+
+  // - MOSB ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOSB');
+
+  if (size > 4)
+  {
+    std::string path = std::string (reinterpret_cast<char*>(f.getPointer ()));
+    if (path.length ())
+    {
+      LogDebug << "SKYBOX:" << std::endl;
+
+      if (noggit::mpq::file::exists (QString::fromStdString (path)))
+      {
+        skybox = noggit::scoped_model_reference (path);
+      }
+    }
+  }
+
+  f.seekRelative (size);
+
+  // - MOPV ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+
+  assert (fourcc == 'MOPV');
+
+  WMOPV p;
+  for (size_t i (0); i < nP; ++i) {
+    f.read (ff, 12);
+    p.a = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    f.read (ff, 12);
+    p.b = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    f.read (ff, 12);
+    p.c = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    f.read (ff, 12);
+    p.d = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    pvs.push_back (p);
+  }
+
+  // - MOPT ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOPT');
+
+  f.seekRelative (size);
+
+  // - MOPR ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOPR');
+
+  int nn = size / 8;
+  WMOPR *pr = reinterpret_cast<WMOPR*> (f.getPointer ());
+  for (size_t i (0); i < nn; ++i) {
+    prs.push_back (*pr++);
+  }
+
+  f.seekRelative (size);
+
+  // - MOVV ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOVV');
+
+  f.seekRelative (size);
+
+  // - MOVB ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOVB');
+
+  f.seekRelative (size);
+
+  // - MOLT ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+
+  assert (fourcc == 'MOLT');
+
+  for (size_t i (0); i < nLights; ++i) {
+    WMOLight l;
+    l.init (&f);
+    lights.push_back (l);
+  }
+
+  // - MODS ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+
+  assert (fourcc == 'MODS');
+
+  for (size_t i (0); i < nDoodadSets; ++i) {
+    WMODoodadSet dds;
+    f.read (&dds, 32);
+    doodadsets.push_back (dds);
+  }
+
+  // - MODN ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MODN');
+
+  if (size)
+  {
+    ddnames = reinterpret_cast<char*> (f.getPointer ());
+    f.seekRelative (size);
+  }
+
+  // - MODD ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MODD');
+
+  nModels = size / 0x28;
+  for (size_t i (0); i < nModels; ++i) {
+    uint32_t ofs;
+    f.read (&ofs, sizeof (uint32_t));
+
+    ::math::vector_3d position;
+    f.read (position, sizeof (position));
+
+    ::math::vector_4d rotation;
+    f.read (rotation, sizeof (rotation));
+
+    float scale;
+    f.read (&scale, sizeof (float));
+
+    uint32_t light;
+    f.read (&light, sizeof (uint32_t));
+
+    modelis.emplace_back
+    (_world
+      , ddnames + ofs
+      , ::math::vector_3d (position.x ()
+        , position.z ()
+        , -position.y ()
+      )
+      , ::math::quaternion (-rotation.w ()
+        , rotation.y ()
+        , rotation.z ()
+        , rotation.x ()
+      )
+      , scale
+      , ::math::vector_3d (((light & 0xff0000) >> 16) / 255.0f
+        , ((light & 0x00ff00) >> 8) / 255.0f
+        , ((light & 0x0000ff)) / 255.0f
+      )
+    );
+  }
+
+  // - MFOG ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MFOG');
+
+  int nfogs = size / 0x30;
+  for (size_t i (0); i < nfogs; ++i) {
+    WMOFog fog;
+    fog.init (&f);
+    fogs.push_back (fog);
+  }
+
+  for (size_t i (0); i < nGroups; ++i)
   {
     groups[i].load ();
   }
