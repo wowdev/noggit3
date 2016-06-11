@@ -42,19 +42,41 @@ namespace noggit
 }
 
 class WMOGroup {
+  struct wmo_batch
+  {
+    int8_t unused[12];
+
+    uint32_t index_start;
+    uint16_t index_count;
+    uint16_t vertex_start;
+    uint16_t vertex_end;
+
+    uint8_t flags;
+    uint8_t texture;
+  };
+
   WMO *wmo;
   uint32_t flags;
   ::math::vector_3d v1,v2;
-  uint32_t nTriangles, nVertices;
   ::math::vector_3d center;
   float rad;
   int32_t num;
   int32_t fog;
   int32_t nDoodads;
-  size_t nBatches;
   int16_t *ddr;
   Liquid *lq;
   std::vector< std::pair<opengl::call_list*, bool> > _lists;
+
+  std::vector<wmo_batch> _batches;
+
+  // these are cleared in initDisplayList()
+  std::vector<::math::vector_3d> _vertices;
+  std::vector<::math::vector_3d> _normals;
+  std::vector<::math::vector_2d> _texcoords;
+  std::vector<uint32_t> _vertex_colors;
+  std::vector<uint16_t> _indices;
+
+
 public:
   ::math::vector_3d BoundingBoxMin;
   ::math::vector_3d BoundingBoxMax;
@@ -65,10 +87,11 @@ public:
   bool outdoorLights;
   std::string name;
 
-  WMOGroup():nBatches(0) {}
+  WMOGroup() {}
   ~WMOGroup();
   void init(WMO *wmo, noggit::mpq::file* f, int num, char *names);
   void initDisplayList();
+  void load ();
   void initLighting(int nLR, uint16_t *useLights);
   bool is_visible ( const ::math::vector_3d& offset
                   , const float& rotation
