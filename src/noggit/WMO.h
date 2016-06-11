@@ -62,8 +62,6 @@ class WMOGroup {
   float rad;
   int32_t num;
   int32_t fog;
-  int32_t nDoodads;
-  int16_t *ddr;
   Liquid *lq;
   std::vector< std::pair<opengl::call_list*, bool> > _lists;
 
@@ -75,6 +73,8 @@ class WMOGroup {
   std::vector<::math::vector_2d> _texcoords;
   std::vector<uint32_t> _vertex_colors;
   std::vector<uint16_t> _indices;
+
+  std::vector<int16_t> _doodads;
 
 
 public:
