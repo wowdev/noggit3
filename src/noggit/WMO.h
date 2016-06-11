@@ -120,14 +120,15 @@ struct WMOFog {
   void setup();
 };
 
-class WMO
+class WMO : public AsyncObject
 {
 public:
   bool draw_group_boundingboxes;
 
   const std::string& filename() const;
 
-  //std::string WMOName;
+  bool _finished_upload;
+
   std::string _filename;
   std::vector<WMOGroup> groups;
   unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
@@ -152,6 +153,10 @@ public:
   std::vector<float> intersect (math::ray const&) const;
   //void drawPortals();
   bool drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vector_3d pUpper) const;
+
+  void finishLoading();
+
+  void upload();
 };
 
 class WMOManager
