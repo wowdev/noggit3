@@ -67,11 +67,13 @@ class WMOGroup {
 
   std::vector<wmo_batch> _batches;
 
+  GLuint _vertices_buffer, _normals_buffer, _texcoords_buffer, _vertex_colors_buffer;
+
   // these are cleared in initDisplayList()
   std::vector<::math::vector_3d> _vertices;
   std::vector<::math::vector_3d> _normals;
   std::vector<::math::vector_2d> _texcoords;
-  std::vector<uint32_t> _vertex_colors;
+  std::vector<::math::vector_4d> _vertex_colors;
   std::vector<uint16_t> _indices;
 
   std::vector<int16_t> _doodads;
@@ -90,8 +92,10 @@ public:
   WMOGroup() {}
   ~WMOGroup();
   void init(WMO *wmo, noggit::mpq::file* f, int num, char *names);
+
   void initDisplayList();
   void load ();
+
   void initLighting(int nLR, uint16_t *useLights);
   bool is_visible ( const ::math::vector_3d& offset
                   , const float& rotation

@@ -723,46 +723,21 @@ namespace
 
 void WMOGroup::initDisplayList()
 {
-  // generate lists for each batch individually instead
-  _lists.resize( _batches.size() );
+  gl.genBuffers (1, &_vertices_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _vertices.size () * sizeof (::math::vector_3d), _vertices.data (), GL_STATIC_DRAW);
 
-  // assume that texturing is on, for unit 1
+  gl.genBuffers (1, &_normals_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _normals_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _normals.size () * sizeof (::math::vector_3d), _normals.data (), GL_STATIC_DRAW);
 
-  for (size_t b = 0; b < _batches.size (); b++)
-  {
-    _lists[b] = new opengl::call_list();
+  gl.genBuffers (1, &_texcoords_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _texcoords_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _texcoords.size () * sizeof (::math::vector_2d), _texcoords.data (), GL_STATIC_DRAW);
 
-    _lists[b]->start_recording (GL_COMPILE);
-    {
-      wmo_batch* batch = &_batches[b];
-      noggit::scoped_blp_texture_reference const& texture (wmo->_textures.at (batch->texture));
-      scoped_material_setter const material_setter (&wmo->_materials.at (batch->texture), _vertex_colors.size ());
-
-      texture->bind ();
-
-      // render
-      gl.begin (GL_TRIANGLES);
-      for (int t = 0, i = batch->index_start; t < batch->index_count; t++, ++i) {
-        int a = _indices[i];
-        if (indoor && _vertex_colors.size ()) {
-          setGLColor (_vertex_colors[a]);
-        }
-        gl.normal3f (_normals[a].x (), _normals[a].z (), -_normals[a].y ());
-        gl.texCoord2fv (_texcoords[a]);
-        gl.vertex3fv (_vertices[a]);
-      }
-      gl.end ();
-    }
-    _lists[b]->end_recording ();
-  }
-
-  _vertices.clear ();
-  _normals.clear ();
-  _texcoords.clear ();
-  _vertex_colors.clear ();
-  _indices.clear ();
-
-  indoor = false;
+  gl.genBuffers (1, &_vertex_colors_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _vertex_colors.size () * sizeof (::math::vector_4d), _vertex_colors.data (), GL_STATIC_DRAW);
 }
 
 void WMOGroup::load()
@@ -989,8 +964,15 @@ void WMOGroup::load()
 
     assert (fourcc == 'MOCV');
 
+    uint32_t* colors = reinterpret_cast<uint32_t*> (f.getPointer ());
     _vertex_colors.resize (size / sizeof (uint32_t));
-    f.read (_vertex_colors.data (), size);
+
+    for(size_t i (0); i < size / sizeof (uint32_t); ++i)
+    {
+      _vertex_colors[i] = colorFromInt (colors[i]);
+    }
+
+    f.seekRelative (size);
   }
   // - MLIQ ----------------------------------------------
   if (header.flags & 0x1000)
@@ -1113,10 +1095,23 @@ void WMOGroup::draw ( World* world
                     , const float& fog_distance
                     )
 {
+  gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
+  gl.vertexPointer (3, GL_FLOAT, 0, 0);
+
+  gl.bindBuffer (GL_ARRAY_BUFFER, _normals_buffer);
+  gl.normalPointer (GL_FLOAT, 0, 0);
+
+  gl.bindBuffer (GL_ARRAY_BUFFER, _texcoords_buffer);
+  gl.texCoordPointer (2, GL_FLOAT, 0, 0);
+
   setupFog(world, draw_fog, fog_distance);
 
   if (_vertex_colors.size ())
   {
+    gl.enableClientState (GL_COLOR_ARRAY);
+    gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
+    gl.colorPointer (4, GL_FLOAT, 0, 0);
+
     gl.disable(GL_LIGHTING);
     world->outdoorLights(false);
   }
@@ -1129,31 +1124,27 @@ void WMOGroup::draw ( World* world
     gl.disable(GL_LIGHTING);
   }
 
-
-  //gl.callList(dl);
   gl.disable(GL_BLEND);
   gl.color4f(1,1,1,1);
-  for (size_t i = 0; i < _batches.size (); ++i)
+
+  for (wmo_batch& batch : _batches)
   {
-    if (wmoShader)
-    {
-      wmoShader->bind();
-      _lists[i]->render ();
-      wmoShader->unbind();
-    }
-    else
-    {
-      _lists[i]->render ();
-    }
+    noggit::scoped_blp_texture_reference const& texture (wmo->_textures.at (batch.texture));
+    scoped_material_setter const material_setter (&wmo->_materials.at (batch.texture), _vertex_colors.size ());
+
+    texture->bind ();
+
+    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
   }
 
   gl.color4f(1,1,1,1);
   gl.enable(GL_CULL_FACE);
 
   if (_vertex_colors.size ())
-      gl.enable(GL_LIGHTING);
-
-
+  {
+    gl.disableClientState (GL_COLOR_ARRAY);
+    gl.enable (GL_LIGHTING);
+  }
 }
 
 void WMOGroup::draw_for_selection() const
