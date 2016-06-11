@@ -655,6 +655,72 @@ struct WMOGroupHeader {
   int32_t unk1, id, unk2, unk3;
 };
 
+namespace
+{
+  struct scoped_material_setter
+  {
+    scoped_material_setter (WMOMaterial* material, bool vertex_colors)
+      : _over_bright ((material->flags & 0x10) && !vertex_colors)
+      , _specular (material->specular && !vertex_colors && !_over_bright)
+      , _alpha_test ((material->transparent) != 0)
+      , _back_face_cull (material->flags & 0x04)
+    {
+      if (_alpha_test)
+      {
+        gl.enable (GL_ALPHA_TEST);
+
+        float aval = 0;
+
+        if (material->flags & 0x80) aval = 0.3f;
+        if (material->flags & 0x01) aval = 0.0f;
+
+        gl.alphaFunc (GL_GREATER, aval);
+      }
+
+      if (_back_face_cull)
+        gl.disable (GL_CULL_FACE);
+      else
+        gl.enable (GL_CULL_FACE);
+
+      if (_specular)
+      {
+        gl.materialfv (GL_FRONT_AND_BACK, GL_SPECULAR, colorFromInt(material->col2));
+      }
+      else
+      {
+        ::math::vector_4d nospec(0, 0, 0, 1);
+        gl.materialfv (GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
+      }
+
+      if (_over_bright)
+      {
+        //! \todo  use emissive color from the WMO Material instead of 1,1,1,1
+        GLfloat em[4] = {1,1,1,1};
+        gl.materialfv (GL_FRONT, GL_EMISSION, em);
+      }
+    }
+
+    ~scoped_material_setter()
+    {
+      if (_over_bright)
+      {
+        GLfloat em[4] = {0,0,0,1};
+        gl.materialfv (GL_FRONT, GL_EMISSION, em);
+      }
+
+      if (_alpha_test)
+      {
+        gl.disable (GL_ALPHA_TEST);
+      }
+    }
+
+    const bool _over_bright;
+    const bool _specular;
+    const bool _alpha_test;
+    const bool _back_face_cull;
+  };
+}
+
 void WMOGroup::initDisplayList()
 {
   // generate lists for each batch individually instead
