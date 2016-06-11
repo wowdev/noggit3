@@ -36,6 +36,7 @@
 #include <noggit/MapTile.h>
 #include <noggit/ModelManager.h>
 #include <noggit/TextureManager.h>
+#include <noggit/ui/cursor_selector.h>
 #include <noggit/UITexturingGUI.h>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/MapTile.h>
@@ -1026,7 +1027,7 @@ void main()
       mcnk_shader.uniform ("mark_impassable_chunks", !!(flags & MARKIMPASSABLE));
 
       QSettings settings;
-      mcnk_shader.uniform ("draw_cursor_circle", noggit::app().setting ("cursor/type", 1).toInt() == 4);
+      mcnk_shader.uniform ("draw_cursor_circle", noggit::app().setting ("cursor/type", 1).toInt() == noggit::ui::cursor_type::circle);
       mcnk_shader.uniform ("cursor_position", _exact_terrain_selection_position);
       mcnk_shader.uniform ("outer_cursor_radius", outer_cursor_radius);
       mcnk_shader.uniform ( "cursor_color"
@@ -1042,7 +1043,7 @@ void main()
       // mcnk_shader.uniform ( "draw_triangle_selection_cursor"
       //                     , !(flags & NOCURSOR)
       //                     //! \todo This actually should be an enum.
-      //                     && noggit::app().setting ("cursor/type", 1).toInt() == 3
+      //                     && noggit::app().setting ("cursor/type", 1).toInt() == noggit::ui::cursor_type::triangle
       //                     );
 
       for (int j (0); j < 64; ++j)
@@ -1103,11 +1104,11 @@ void main()
         QSettings settings;
         //! \todo This actually should be an enum. And should be passed into this method.
         const int cursor_type (settings.value ("cursor/type", 1).toInt());
-        if(cursor_type == 1)
+        if(cursor_type == noggit::ui::cursor_type::disk)
           renderDisk_convenient ( _exact_terrain_selection_position
                                 , outer_cursor_radius
                                 );
-        else if(cursor_type == 2)
+        else if(cursor_type == noggit::ui::cursor_type::sphere)
           renderSphere_convenient ( _exact_terrain_selection_position
                                   , outer_cursor_radius
                                   );

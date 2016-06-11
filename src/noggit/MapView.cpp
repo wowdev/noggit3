@@ -1111,7 +1111,7 @@ namespace noggit
     if (event->key() == Qt::Key_C)
     {
       _settings->setValue ( "cursor/type"
-                          , (_settings->value ("cursor/type").toInt() + 1) % 5
+                          , (_settings->value ("cursor/type").toInt() + 1) % ui::cursor_type::num_cursors
                           );
       _settings->sync();
     }
