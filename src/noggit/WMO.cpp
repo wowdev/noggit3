@@ -620,9 +620,6 @@ void WMOGroup::init(WMO *_wmo, noggit::mpq::file* f, int _num, char *names)
         name = std::string(names + nameOfs);
   } else name = "(no name)";
 
-  ddr = 0;
-  nDoodads = 0;
-
   lq = 0;
 }
 
@@ -743,11 +740,6 @@ void WMOGroup::initDisplayList()
 
 void WMOGroup::load()
 {
-  WMOGroupHeader gh;
-
-  uint16_t *useLights = 0;
-  int nLR = 0;
-
   // open group file
   std::stringstream curNum;
   curNum << "_" << std::setw (3) << std::setfill ('0') << num;
@@ -755,107 +747,282 @@ void WMOGroup::load()
   std::string fname = wmo->filename ();
   fname.insert (fname.find (".wmo"), curNum.str ());
 
-  noggit::mpq::file gf (QString::fromStdString (fname));
-
-  gf.seek (0x14);
-  // read header
-  gf.read (&gh, sizeof (WMOGroupHeader));
-  WMOFog &wf = wmo->fogs[gh.fogs[0]];
-  if (wf.r2 <= 0) fog = -1; // default outdoor fog..?
-  else fog = gh.fogs[0];
-
-  BoundingBoxMin = ::math::vector_3d (gh.box1[0], gh.box1[2], -gh.box1[1]);
-  BoundingBoxMax = ::math::vector_3d (gh.box2[0], gh.box2[2], -gh.box2[1]);
-
-  gf.seek (0x58); // first chunk
+  noggit::mpq::file f (QString::fromStdString (fname));
 
   uint32_t fourcc;
   uint32_t size;
 
   hascv = false;
 
-  while (!gf.is_at_end_of_file ()) {
-    gf.read (&fourcc, 4);
-    gf.read (&size, 4);
+  int nLR = 0;
+  uint16_t *useLights = nullptr;
 
-    size_t nextpos = gf.getPos () + size;
+  // - MVER ----------------------------------------------
 
-    // why copy stuff when I can just map it from memory ^_^
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
 
-    if (fourcc == 'MOPY') {
-      // materials per triangle
-    }
-    else if (fourcc == 'MOVI') {
-      // indices
-      _indices.resize (size / sizeof (uint16_t));
-      gf.read (_indices.data (), size);
-    }
-    else if (fourcc == 'MOVT') {
-      // let's hope it's padded to 12 bytes, not 16...
-      ::math::vector_3d *vertices = reinterpret_cast< ::math::vector_3d*>(gf.getPointer ());
-      VertexBoxMin = ::math::vector_3d (9999999.0f, 9999999.0f, 9999999.0f);
-      VertexBoxMax = ::math::vector_3d (-9999999.0f, -9999999.0f, -9999999.0f);
-      rad = 0;
-      for (size_t i = 0; i < size / sizeof(::math::vector_3d); ++i) {
-        ::math::vector_3d v (vertices[i].x (), vertices[i].z (), -vertices[i].y ());
+  uint32_t version;
 
-        if (v.x () < VertexBoxMin.x ()) VertexBoxMin.x (v.x ());
-        if (v.y () < VertexBoxMin.y ()) VertexBoxMin.y (v.y ());
-        if (v.z () < VertexBoxMin.z ()) VertexBoxMin.z (v.z ());
-        if (v.x () > VertexBoxMax.x ()) VertexBoxMax.x (v.x ());
-        if (v.y () > VertexBoxMax.y ()) VertexBoxMax.y (v.y ());
-        if (v.z () > VertexBoxMax.z ()) VertexBoxMax.z (v.z ());
+  f.read (&version, 4);
 
-        _vertices.push_back (v);
-      }
-      center = (VertexBoxMax + VertexBoxMin) * 0.5f;
-      rad = (VertexBoxMax - center).length ();
-    }
-    else if (fourcc == 'MONR') {
-      _normals.resize (size / sizeof (::math::vector_3d));
-      gf.read (_normals.data (), size);
-    }
-    else if (fourcc == 'MOTV') {
-      _texcoords.resize (size / sizeof (::math::vector_2d));
-      gf.read (_texcoords.data (), size);
-    }
-    else if (fourcc == 'MOLR') {
-      nLR = size / 2;
-      useLights = reinterpret_cast<uint16_t*>(gf.getPointer ());
-    }
-    else if (fourcc == 'MODR') {
-      nDoodads = size / 2;
-      ddr = new int16_t[nDoodads];
-      gf.read (ddr, size);
-    }
-    else if (fourcc == 'MOBA') {
-      _batches.resize (size / sizeof (wmo_batch));
-      gf.read (_batches.data (), size);
-    }
-    else if (fourcc == 'MOCV') {
-      //gLog("CV: %d\n", size);
-      hascv = true;
-      _vertex_colors.resize (size / sizeof (uint32_t));
-      gf.read (_vertex_colors.data (), size);
-    }
-    else if (fourcc == 'MLIQ') {
-      WMOLiquidHeader hlq;
-      gf.read (&hlq, sizeof (WMOLiquidHeader));
+  assert (fourcc == 'MVER' && version == 17);
 
-      //lq = new Liquid (hlq.A, hlq.B, ::math::vector_3d (hlq.pos.x (), hlq.pos.z (), -hlq.pos.y ()));
-      //lq->initFromWMO (&gf, wmo->_materials[hlq.type], flags & 0x2000);
-    }
+  // - MOGP ----------------------------------------------
 
-    //! \todo  figure out/use MFOG ?
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
 
-    gf.seek (nextpos);
+  assert (fourcc == 'MOGP');
+
+  WMOGroupHeader header;
+
+  f.read (&header, sizeof (WMOGroupHeader));
+
+  WMOFog &wf = wmo->fogs[header.fogs[0]];
+  if (wf.r2 <= 0) fog = -1; // default outdoor fog..?
+  else fog = header.fogs[0];
+
+  BoundingBoxMin = ::math::vector_3d (header.box1[0], header.box1[2], -header.box1[1]);
+  BoundingBoxMax = ::math::vector_3d (header.box2[0], header.box2[2], -header.box2[1]);
+
+  // - MOPY ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOPY');
+
+  f.seekRelative (size);
+
+  // - MOVI ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOVI');
+
+  _indices.resize (size / sizeof (uint16_t));
+
+  f.read (_indices.data (), size);
+
+  // - MOVT ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOVT');
+
+  // let's hope it's padded to 12 bytes, not 16...
+  ::math::vector_3d *vertices = reinterpret_cast< ::math::vector_3d*>(f.getPointer ());
+
+  VertexBoxMin = ::math::vector_3d (9999999.0f, 9999999.0f, 9999999.0f);
+  VertexBoxMax = ::math::vector_3d (-9999999.0f, -9999999.0f, -9999999.0f);
+
+  rad = 0;
+
+  for (size_t i = 0; i < size / sizeof (::math::vector_3d); ++i) {
+    ::math::vector_3d v (vertices[i].x (), vertices[i].z (), -vertices[i].y ());
+
+    if (v.x () < VertexBoxMin.x ()) VertexBoxMin.x (v.x ());
+    if (v.y () < VertexBoxMin.y ()) VertexBoxMin.y (v.y ());
+    if (v.z () < VertexBoxMin.z ()) VertexBoxMin.z (v.z ());
+    if (v.x () > VertexBoxMax.x ()) VertexBoxMax.x (v.x ());
+    if (v.y () > VertexBoxMax.y ()) VertexBoxMax.y (v.y ());
+    if (v.z () > VertexBoxMax.z ()) VertexBoxMax.z (v.z ());
+
+    _vertices.push_back (v);
   }
 
-  // ok, make a display list
+  center = (VertexBoxMax + VertexBoxMin) * 0.5f;
+  rad = (VertexBoxMax - center).length ();
+
+  f.seekRelative (size);
+
+  // - MONR ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MONR');
+
+  _normals.resize (size / sizeof (::math::vector_3d));
+
+  f.read (_normals.data (), size);
+
+  // - MOTV ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOTV');
+
+  _texcoords.resize (size / sizeof (::math::vector_2d));
+
+  f.read (_texcoords.data (), size);
+
+  // - MOBA ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOBA');
+
+  _batches.resize (size / sizeof (wmo_batch));
+  f.read (_batches.data (), size);
+
+  // - MOLR ----------------------------------------------
+  if (header.flags & 0x200)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MOLR');
+
+    nLR = size / 2;
+    useLights = reinterpret_cast<uint16_t*>(f.getPointer ());
+
+    f.seekRelative (size);
+  }
+  // - MODR ----------------------------------------------
+  if (header.flags & 0x800)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MODR');
+
+    _doodads.resize (size / sizeof (int16_t));
+
+    f.read (_doodads.data (), size);
+  }
+  // - MOBN ----------------------------------------------
+  if (header.flags & 0x1)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MOBN');
+
+    f.seekRelative (size);
+  }
+  // - MOBR ----------------------------------------------
+  if (header.flags & 0x1)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MOBR');
+
+    f.seekRelative (size);
+  }
+  // - MPBV ----------------------------------------------
+  if (header.flags & 0x400)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MPBV');
+
+    f.seekRelative (size);
+  }
+  // - MPBP ----------------------------------------------
+  if (header.flags & 0x400)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MPBP');
+
+    f.seekRelative (size);
+  }
+  // - MPBI ----------------------------------------------
+  if (header.flags & 0x400)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MPBI');
+
+    f.seekRelative (size);
+  }
+  // - MPBG ----------------------------------------------
+  if (header.flags & 0x400)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MPBG');
+
+    f.seekRelative (size);
+  }
+  // - MOCV ----------------------------------------------
+  if (header.flags & 0x4)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MOCV');
+
+    hascv = true;
+
+    _vertex_colors.resize (size / sizeof (uint32_t));
+    f.read (_vertex_colors.data (), size);
+  }
+  // - MLIQ ----------------------------------------------
+  if (header.flags & 0x1000)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MLIQ');
+
+    //! \todo actually use this, the _right_ way
+
+    f.seekRelative (size);
+  }
+  // - MORI ----------------------------------------------
+  if (header.flags & 0x20000)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MORI');
+
+    f.seekRelative (size);
+  }
+  // - MORB ----------------------------------------------
+  if (header.flags & 0x20000)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MORB');
+
+    f.seekRelative (size);
+  }
+  // - MOTV ----------------------------------------------
+  if (header.flags & 0x2000000)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MORI');
+
+    f.seekRelative (size);
+  }
+  // - MOCV ----------------------------------------------
+  if (header.flags & 0x1000000)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MORI');
+
+    f.seekRelative (size);
+  }
 
   indoor = flags & 8192;
-  //gLog("Lighting: %s %X\n\n", indoor?"Indoor":"Outdoor", flags);
-
   initLighting (nLR, useLights);
 }
 
@@ -863,21 +1030,24 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 {
   //dl_light = 0;
   // "real" lighting?
-  if ((flags & 0x2000) && hascv) {
-
-    ::math::vector_3d dirmin(1,1,1);
+  if ((flags & 0x2000) && hascv)
+  {
+    ::math::vector_3d dirmin(1, 1, 1);
     float lenmin;
     int lmin;
 
-    for (int i=0; i<nDoodads; ++i) {
-      lenmin = 999999.0f*999999.0f;
+    for (auto doodad : _doodads)
+    {
+      lenmin = 999999.0f * 999999.0f;
       lmin = 0;
-      ModelInstance &mi = wmo->modelis[ddr[i]];
-      for (unsigned int j=0; j<wmo->nLights; j++) {
-        WMOLight &l = wmo->lights[j];
+      ModelInstance& mi = wmo->modelis[doodad];
+      for (unsigned int j = 0; j < wmo->nLights; j++)
+      {
+        WMOLight& l = wmo->lights[j];
         ::math::vector_3d dir = l.pos - mi.pos;
-        float ll = dir.length_squared();
-        if (ll < lenmin) {
+        float ll = dir.length_squared ();
+        if (ll < lenmin)
+        {
           lenmin = ll;
           dirmin = dir;
           lmin = j;
@@ -887,7 +1057,9 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
     }
 
     outdoorLights = false;
-  } else {
+  }
+  else
+  {
     outdoorLights = true;
   }
 }
@@ -980,43 +1152,39 @@ void WMOGroup::drawDoodads ( World* world
                            , const ::math::vector_3d& camera
                            )
 {
-  if (nDoodads==0) return;
+  if (_doodads.empty ())
+    return;
 
   world->outdoorLights(outdoorLights);
   setupFog(world, draw_fog, fog_distance);
 
-  /*
-  float xr=0,xg=0,xb=0;
-  if (flags & 0x0040) xr = 1;
-  //if (flags & 0x0008) xg = 1;
-  if (flags & 0x8000) xb = 1;
-  gl.color4f(xr,xg,xb,1);
-  */
-
   // draw doodads
   gl.color4f(1,1,1,1);
-  for (int i=0; i<nDoodads; ++i) {
-    int16_t dd = ddr[i];
-    if( ! ( wmo->doodadsets.size() < doodadset ) )
-      if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {
+  for (auto doodad : _doodads)
+  {
+    if (! (wmo->doodadsets.size() < doodadset))
+    {
+      if ((doodad >= wmo->doodadsets[doodadset].start) && (doodad < (wmo->doodadsets[doodadset].start + wmo->doodadsets[doodadset].size)))
+      {
+        ModelInstance& mi = wmo->modelis[doodad];
 
-        ModelInstance &mi = wmo->modelis[dd];
-
-        if (!outdoorLights) {
-          WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
+        if (!outdoorLights)
+        {
+          WMOLight::setupOnce (GL_LIGHT2, mi.ldir, mi.lcol);
         }
-        setupFog(world, draw_fog, fog_distance);
+
+        setupFog (world, draw_fog, fog_distance);
+
         if (mi.is_visible (cull_distance, frustum, camera, ofs, rot))
         {
           mi.draw2();
         }
       }
+    }
   }
 
   gl.disable(GL_LIGHT2);
-
   gl.color4f(1,1,1,1);
-
 }
 
 
@@ -1028,33 +1196,30 @@ void WMOGroup::drawDoodadsSelect ( unsigned int doodadset
                                  , const ::math::vector_3d& camera
                                  )
 {
-  if (nDoodads==0) return;
-
-  /*
-  float xr=0,xg=0,xb=0;
-  if (flags & 0x0040) xr = 1;
-  //if (flags & 0x0008) xg = 1;
-  if (flags & 0x8000) xb = 1;
-  gl.color4f(xr,xg,xb,1);
-  */
+  if (_doodads.empty ())
+    return;
 
   // draw doodads
   gl.color4f(1,1,1,1);
-  for (int i=0; i<nDoodads; ++i) {
-    int16_t dd = ddr[i];
-    if( ! ( wmo->doodadsets.size() < doodadset ) )
-      if ((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start+wmo->doodadsets[doodadset].size))) {
+  for (auto doodad : _doodads)
+  {
+    if (! (wmo->doodadsets.size() < doodadset))
+    {
+      if ((doodad >= wmo->doodadsets[doodadset].start) && (doodad < (wmo->doodadsets[doodadset].start + wmo->doodadsets[doodadset].size)))
+      {
+        ModelInstance& mi = wmo->modelis[doodad];
 
-        ModelInstance &mi = wmo->modelis[dd];
-
-        if (!outdoorLights) {
-          WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
+        if (!outdoorLights)
+        {
+          WMOLight::setupOnce (GL_LIGHT2, mi.ldir, mi.lcol);
         }
+
         if (mi.is_visible (cull_distance, frustum, camera, ofs, rot))
         {
-          mi.draw2Select();
+          mi.draw2Select ();
         }
       }
+    }
   }
 
   gl.disable(GL_LIGHT2);
@@ -1118,10 +1283,11 @@ WMOGroup::~WMOGroup()
   }
   _lists.clear();
 
-  delete[] ddr;
-  ddr = nullptr;
-  delete lq;
-  lq = nullptr;
+  if (lq)
+  {
+    delete lq;
+    lq = nullptr;
+  }
 }
 
 
