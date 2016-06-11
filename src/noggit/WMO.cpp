@@ -51,6 +51,14 @@ const std::string& WMO::filename() const
 
 WMO::WMO(const std::string& filenameArg)
   : _filename(filenameArg)
+  , _finished_upload(false)
+{
+  finished = false;
+
+  finishLoading();
+}
+
+void WMO::finishLoading ()
 {
   MPQFile f(_filename);
   if (f.isEof()) {
@@ -71,7 +79,7 @@ WMO::WMO(const std::string& filenameArg)
     f.read(&fourcc, 4);
     f.read(&size, 4);
 
-    size_t nextpos = f.getPos() + size;
+    size_t nextpos = f.getPos () + size;
 
     if (fourcc == 'MOHD') {
       unsigned int col;
@@ -95,7 +103,7 @@ WMO::WMO(const std::string& filenameArg)
     else if (fourcc == 'MOTX') {
       // textures
       texbuf = new char[size];
-      f.read(texbuf, size);
+      f.read (texbuf, size);
     }
     else if (fourcc == 'MOMT')
     {
@@ -107,8 +115,6 @@ WMO::WMO(const std::string& filenameArg)
         f.read (&mat[i], 0x40);
 
         std::string const texpath (texbuf + mat[i].nameStart);
-
-        mat[i]._texture = texpath;
         textures.push_back (texpath);
       }
     }
@@ -119,15 +125,14 @@ WMO::WMO(const std::string& filenameArg)
       // group info - important information! ^_^
       for (unsigned int i = 0; i<nGroups; ++i) {
         groups[i].init(this, &f, i, groupnames);
-
       }
     }
     else if (fourcc == 'MOLT') {
       // Lights?
       for (unsigned int i = 0; i<nLights; ++i) {
         WMOLight l;
-        l.init(&f);
-        lights.push_back(l);
+        l.init (&f);
+        lights.push_back (l);
       }
     }
     else if (fourcc == 'MODN') {
@@ -137,14 +142,14 @@ WMO::WMO(const std::string& filenameArg)
 
         ddnames = reinterpret_cast<char*>(f.getPointer());
 
-        f.seekRelative(size);
+        f.seekRelative (size);
       }
     }
     else if (fourcc == 'MODS') {
       for (unsigned int i = 0; i<nDoodadSets; ++i) {
         WMODoodadSet dds;
-        f.read(&dds, 32);
-        doodadsets.push_back(dds);
+        f.read (&dds, 32);
+        doodadsets.push_back (dds);
       }
     }
     else if (fourcc == 'MODD') {
@@ -210,12 +215,12 @@ WMO::WMO(const std::string& filenameArg)
       int nfogs = size / 0x30;
       for (int i = 0; i<nfogs; ++i) {
         WMOFog fog;
-        fog.init(&f);
-        fogs.push_back(fog);
+        fog.init (&f);
+        fogs.push_back (fog);
       }
     }
 
-    f.seek(nextpos);
+    f.seek (nextpos);
   }
 
   f.close();
@@ -225,8 +230,18 @@ WMO::WMO(const std::string& filenameArg)
     texbuf = nullptr;
   }
 
-  for (unsigned int i = 0; i<nGroups; ++i)
-    groups[i].initDisplayList();
+  finished = true;
+}
+
+void WMO::upload()
+{
+  for (unsigned int i = 0; i < mat.size(); ++i)
+    mat[i]._texture = textures[i];
+
+  for (unsigned int i = 0; i < nGroups; ++i)
+    groups[i].initDisplayList ();
+
+  _finished_upload = true;
 }
 
 // model.cpp
@@ -234,6 +249,14 @@ void DrawABox(math::vector_3d pMin, math::vector_3d pMax, math::vector_4d pColor
 
 void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const angle, bool boundingbox, bool groupboxes, bool /*highlight*/, Frustum const& frustum)
 {
+  if (!finishedLoading ())
+    return;
+
+  if (!_finished_upload) {
+    upload ();
+    return;
+  }
+
   if (gWorld && gWorld->drawfog)
     gl.enable(GL_FOG);
   else
@@ -301,6 +324,9 @@ void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const an
 std::vector<float> WMO::intersect (math::ray const& ray) const
 {
   std::vector<float> results;
+
+  if (!finishedLoading ())
+    return results;
 
   for (size_t i (0); i < nGroups; ++i)
   {
