@@ -30,7 +30,7 @@ namespace noggit
 		Menu* map_selection_menu;
 
     public slots:
-      void create_world_view (World*);
+      void create_world_view (World*, float, float);
 
     private slots:
       void settingsClicked();

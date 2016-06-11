@@ -112,15 +112,15 @@ Menu::~Menu()
 
 void Menu::enter_world_at (World *world, const ::math::vector_3d& pos, bool auto_height, float av, float ah )
 {
-  prepare_world (world,pos, ah, av);
   world->map_index().load_tiles_around ( pos.x() / TILESIZE
                                        , pos.y() / TILESIZE
                                       //! \todo Something based on viewing distance.
                                        , 2
                                       );
 
-  emit create_world_view_request (world);
+  emit create_world_view_request (world, av, ah);
 
+  world->camera = pos;
   if(auto_height)
   {
     world->camera.y ( world->get_height (pos.x(), pos.y()).get_value_or (0.0f)
@@ -141,14 +141,7 @@ World *Menu::load_map (unsigned int map_id)
 
 void Menu::minimap_clicked (const World *world, const ::math::vector_3d& position)
 {
-  enter_world_at (const_cast<World *>(world), position, true, 0.0, 0.0);
-}
-
-void Menu::prepare_world (World *world, const ::math::vector_3d& pos, float rotation, float tilt)
-{
-  world->camera = ::math::vector_3d (pos.x(), pos.y(), pos.z());
-  //! \todo actually set lookat!
-  world->lookat = ::math::vector_3d (pos.x() + 10.0f, pos.y() + 10.0f, pos.z() + 10.0f); // ah = rotation
+  enter_world_at (const_cast<World *>(world), position);
 }
 
 void Menu::show_map_list_item (QListWidgetItem* item)
@@ -162,7 +155,9 @@ void Menu::show_bookmark_list_item (QListWidgetItem* item)
   const bookmark_entry e (item->data (Qt::UserRole).value<bookmark_entry>());
   World *world = load_map (e.map_id);
   _minimap->world(world);
-  prepare_world (world,e.position, e.rotation, e.tilt);
+  world->camera = e.position;
+  //! \todo e.rotation, e.tilt
+  world->lookat = e.position + math::vector_3d (0.0f, 1.0f, 0.0f);
   _minimap->draw_camera (true);
 }
 

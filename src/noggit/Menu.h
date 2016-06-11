@@ -39,11 +39,10 @@ private slots:
   void minimap_clicked (const World *world, const ::math::vector_3d&);
 
 signals:
-  void create_world_view_request (World*);
+  void create_world_view_request (World*, float, float);
 
 private:
   World *load_map (unsigned int mapID);
-  void prepare_world (World *world, const ::math::vector_3d& pos, float rotation, float tilt);
   void enter_world_at (World *world, const ::math::vector_3d& pos, bool auto_height = true, float av = -30.0f, float ah = -90.0f);
 
   noggit::ui::minimap_widget* _minimap;
