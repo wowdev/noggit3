@@ -358,7 +358,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
           
         for (size_t k = 0; k < nTextures - 1; k++)
         {
-          alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(alphas[k], 0.0f), 255.0f)));
+          alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(round(alphas[k]), 0.0f), 255.0f)));
         }
 
 				xPos += TEXDETAILSIZE;
