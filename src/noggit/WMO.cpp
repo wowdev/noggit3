@@ -661,47 +661,21 @@ namespace
 
 void WMOGroup::initDisplayList()
 {
-  // generate lists for each batch individually instead
-  _lists.resize( _batches.size() );
+  gl.genBuffers (1, &_vertices_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _vertices.size () * sizeof (::math::vector_3d), _vertices.data (), GL_STATIC_DRAW);
 
-  // assume that texturing is on, for unit 1
+  gl.genBuffers (1, &_normals_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _normals_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _normals.size () * sizeof (::math::vector_3d), _normals.data (), GL_STATIC_DRAW);
 
-  for (size_t b = 0; b < _batches.size (); b++)
-  {
-    wmo_batch *batch = &_batches[b];
-    WMOMaterial* mat (&wmo->mat.at (batch->texture));
-    
-    _lists[b].first = std::make_unique<opengl::call_list>();
-    _lists[b].first->start_recording(GL_COMPILE);
-    {
-      scoped_material_setter const material_setter (mat, hascv);
-      _lists[b].second = material_setter._specular;
+  gl.genBuffers (1, &_texcoords_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _texcoords_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _texcoords.size () * sizeof (::math::vector_2d), _texcoords.data (), GL_STATIC_DRAW);
 
-      mat->_texture.get()->bind();
-
-      // render
-      gl.begin(GL_TRIANGLES);
-      for (int t = 0, i = batch->index_start; t < batch->index_count; t++, ++i) {
-        int a = _indices[i];
-        if (indoor && hascv) {
-                setGLColor(_vertex_colors[a]);
-        }
-        gl.normal3f (_normals[a].x, _normals[a].z, -_normals[a].y);
-        gl.texCoord2fv (_texcoords[a]);
-        gl.vertex3fv (_vertices[a]);
-      }
-      gl.end();
-    }
-    _lists[b].first->end_recording();
-  }
-
-  _vertices.clear ();
-  _normals.clear ();
-  _texcoords.clear ();
-  _vertex_colors.clear ();
-  _indices.clear ();
-
-  indoor = false;
+  gl.genBuffers (1, &_vertex_colors_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _vertex_colors.size () * sizeof (::math::vector_4d), _vertex_colors.data (), GL_STATIC_DRAW);
 }
 
 void WMOGroup::load()
@@ -936,8 +910,15 @@ void WMOGroup::load()
 
     hascv = true;
 
+    uint32_t* colors = reinterpret_cast<uint32_t*> (f.getPointer ());
     _vertex_colors.resize (size / sizeof (uint32_t));
-    f.read (_vertex_colors.data (), size);
+
+    for(size_t i (0); i < size / sizeof (uint32_t); ++i)
+    {
+      _vertex_colors[i] = colorFromInt (colors[i]);
+    }
+
+    f.seekRelative (size);
   }
   // - MLIQ ----------------------------------------------
   if (header.flags & 0x1000)
@@ -1050,7 +1031,21 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
   visible = true;
   setupFog();
 
-  if (hascv) {
+  gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
+  gl.vertexPointer (3, GL_FLOAT, 0, 0);
+
+  gl.bindBuffer (GL_ARRAY_BUFFER, _normals_buffer);
+  gl.normalPointer (GL_FLOAT, 0, 0);
+
+  gl.bindBuffer (GL_ARRAY_BUFFER, _texcoords_buffer);
+  gl.texCoordPointer (2, GL_FLOAT, 0, 0);
+
+  if (hascv)
+  {
+    gl.enableClientState (GL_COLOR_ARRAY);
+    gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
+    gl.colorPointer (4, GL_FLOAT, 0, 0);
+
     gl.disable(GL_LIGHTING);
     gWorld->outdoorLights(false);
   }
@@ -1064,20 +1059,27 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
     else gl.disable(GL_LIGHTING);
   }
 
-
-  //gl.callList(dl);
   gl.disable(GL_BLEND);
   gl.color4f(1,1,1,1);
-  for (size_t i = 0; i < _batches.size (); ++i)
+
+  for (wmo_batch& batch : _batches)
   {
-    _lists[i].first->render();
+    WMOMaterial* mat (&wmo->mat.at (batch.texture));
+    scoped_material_setter const material_setter (mat, _vertex_colors.size ());
+
+    mat->_texture.get()->bind();
+
+    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
   }
 
   gl.color4f(1, 1, 1, 1);
   gl.enable(GL_CULL_FACE);
 
   if (hascv && gWorld->lighting)
-    gl.enable(GL_LIGHTING);
+  {
+    gl.disableClientState (GL_COLOR_ARRAY);
+    gl.enable (GL_LIGHTING);
+  }
 }
 
 void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) const

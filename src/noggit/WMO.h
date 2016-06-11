@@ -64,11 +64,13 @@ class WMOGroup {
 
   std::vector<wmo_batch> _batches;
 
+  GLuint _vertices_buffer, _normals_buffer, _texcoords_buffer, _vertex_colors_buffer;
+
   // these are cleared in initDisplayList()
   std::vector<::math::vector_3d> _vertices;
   std::vector<::math::vector_3d> _normals;
   std::vector<::math::vector_2d> _texcoords;
-  std::vector<uint32_t> _vertex_colors;
+  std::vector<::math::vector_4d> _vertex_colors;
   std::vector<uint16_t> _indices;
 
 public:
