@@ -1102,6 +1102,11 @@ void Model::drawSelect (size_t time)
   if (!finished_loading())
     return;
 
+  if (!_finished_upload) {
+    upload ();
+    return;
+  }
+
   if (animated && (!animcalc || mPerInstanceAnimation))
   {
     animate(0, time);
