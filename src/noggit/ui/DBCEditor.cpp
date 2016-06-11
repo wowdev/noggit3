@@ -25,8 +25,8 @@ DBCEditor::DBCEditor(const QString& filename, QWidget *parent)
 
     this->setLayout(layout);
 
-    connect(view, SIGNAL(customContextMenuRequested(const QPoint &)),this, SLOT(showContextMenu(const QPoint &)));
-    connect(save,SIGNAL(clicked()),model,SLOT(save()));
+    connect (view, &QTableView::customContextMenuRequested, this, &DBCEditor::showContextMenu);
+    connect (save, &QPushButton::clicked, model, &DBCTableModel::save);
 }
 
 void DBCEditor::showContextMenu(const QPoint &point)
@@ -40,7 +40,7 @@ void DBCEditor::showContextMenu(const QPoint &point)
 
         editColumn = new QAction(tr("Edit Column"),this);
         editColumn->setStatusTip(tr("Edit Column Settings"));
-        connect(editColumn, SIGNAL(triggered()), this, SLOT(editColumnSettings()));
+        connect (editColumn, &QAction::triggered, this, &DBCEditor::editColumnSettings);
         actions.append(editColumn);
 
         if (actions.count() > 0)
@@ -81,8 +81,8 @@ columnEditor::columnEditor(int column, DBCEditor *parent)
     layout->addWidget(canel,5,0);
     layout->addWidget(ok,5,1);
     this->setLayout(layout);
-    connect(ok,SIGNAL(clicked()),this,SLOT(accept()));
-    connect(canel,SIGNAL(clicked()),this,SLOT(reject()));
+    connect (ok, &QPushButton::clicked, this, &QDialog::accept);
+    connect (canel, &QPushButton::clicked, this, &QDialog::reject);
 }
 
 

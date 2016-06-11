@@ -166,31 +166,31 @@ namespace noggit
   #define NEW_TOGGLE_ACTION(__NAME__, __TEXT, __SLOT, __KEYS, __DEFAULT) QAction* __NAME__ (new_toggleable_action (__TEXT, __SLOT, __DEFAULT, __KEYS));
   #define NEW_FLAG_ACTION(__NAME__, __TEXT, __FLAG, __KEYS) QAction* __NAME__ (new_flag_action (__TEXT, __FLAG, __KEYS));
 
-    NEW_ACTION (save_current_tile, tr ("Save current tile"), SLOT (save()), Qt::CTRL + Qt::SHIFT + Qt::Key_S);
-    NEW_ACTION (save_modified_tiles, tr ("Save all modified tiles"), SLOT (save_all()), QKeySequence::Save);
-    NEW_ACTION (reload_tile, tr ("Reload current tile"), SLOT (reload_current_tile()), Qt::SHIFT + Qt::Key_J);
+    NEW_ACTION (save_current_tile, tr ("Save current tile"), &MapView::save, Qt::CTRL + Qt::SHIFT + Qt::Key_S);
+    NEW_ACTION (save_modified_tiles, tr ("Save all modified tiles"), &MapView::save_all, QKeySequence::Save);
+    NEW_ACTION (reload_tile, tr ("Reload current tile"), &MapView::reload_current_tile, Qt::SHIFT + Qt::Key_J);
 
-    NEW_ACTION (bookmark, tr ("Add bookmark for this location"), SLOT (add_bookmark()), Qt::Key_F5);
+    NEW_ACTION (bookmark, tr ("Add bookmark for this location"), &MapView::add_bookmark, Qt::Key_F5);
 
-    NEW_ACTION (export_heightmap, tr ("Export heightmap"), SLOT (export_heightmap()), 0);
-    NEW_ACTION (import_heightmap, tr ("Import heightmap"), SLOT (import_heightmap()), 0);
+    NEW_ACTION (export_heightmap, tr ("Export heightmap"), &MapView::export_heightmap, 0);
+    NEW_ACTION (import_heightmap, tr ("Import heightmap"), &MapView::import_heightmap, 0);
 
-    NEW_ACTION (to_menu, tr ("Return to menu"), SLOT (exit_to_menu()), Qt::Key_Escape);
+    NEW_ACTION (to_menu, tr ("Return to menu"), &MapView::exit_to_menu, Qt::Key_Escape);
 
 
-    NEW_ACTION (copy_object, tr ("Copy object"), SLOT (copy_selected_object()), QKeySequence::Copy);
-    NEW_ACTION (paste_object, tr ("Paste object"), SLOT (paste_object()), QKeySequence::Paste);
-    NEW_ACTION (delete_object, tr ("Delete object"), SLOT (delete_selected_object()), QKeySequence::Delete);
-    NEW_TOGGLE_ACTION (object_to_ground, tr ("Auto-object to Ground"), SLOT (toggle_object_to_ground (bool)), 0, _object_to_ground);
+    NEW_ACTION (copy_object, tr ("Copy object"), &MapView::copy_selected_object, QKeySequence::Copy);
+    NEW_ACTION (paste_object, tr ("Paste object"), &MapView::paste_object, QKeySequence::Paste);
+    NEW_ACTION (delete_object, tr ("Delete object"), &MapView::delete_selected_object, QKeySequence::Delete);
+    NEW_TOGGLE_ACTION (object_to_ground, tr ("Auto-object to Ground"), &MapView::toggle_object_to_ground, 0, _object_to_ground);
     //delete_object->setShortcuts (QList<QKeySequence>() << QKeySequence::Delete << Qt::Key_Backspace);
 
-    NEW_ACTION (reset_rotation, tr ("Reset object's rotation"), SLOT (reset_selected_object_rotation()), Qt::CTRL + Qt::Key_R);
-    NEW_ACTION (snap_object_to_ground, tr ("Snap object to ground"), SLOT (snap_selected_object_to_ground()), Qt::Key_PageDown);
+    NEW_ACTION (reset_rotation, tr ("Reset object's rotation"), &MapView::reset_selected_object_rotation, Qt::CTRL + Qt::Key_R);
+    NEW_ACTION (snap_object_to_ground, tr ("Snap object to ground"), &MapView::snap_selected_object_to_ground, Qt::Key_PageDown);
 
 
-    NEW_TOGGLE_ACTION (current_texture, tr ("Selected texture"), SLOT (toggle_current_texture_visiblity (bool)), 0, false);
-    NEW_TOGGLE_ACTION (toggle_minimap, tr ("Show minimap"), SLOT (toggle_minimap (bool)), Qt::Key_M, false);
-    NEW_TOGGLE_ACTION (detail_infos, tr ("Object information"), SLOT (toggle_detail_info_window (bool)), Qt::Key_F8, false);
+    NEW_TOGGLE_ACTION (current_texture, tr ("Selected texture"), &MapView::toggle_current_texture_visiblity, 0, false);
+    NEW_TOGGLE_ACTION (toggle_minimap, tr ("Show minimap"), &MapView::toggle_minimap, Qt::Key_M, false);
+    NEW_TOGGLE_ACTION (detail_infos, tr ("Object information"), &MapView::toggle_detail_info_window, Qt::Key_F8, false);
 
 
     NEW_FLAG_ACTION (doodad_drawing, tr ("Draw doodads"), DOODADS, Qt::Key_F1);
@@ -205,28 +205,28 @@ namespace noggit
     NEW_FLAG_ACTION (fog_drawing, tr ("Draw fog"), FOG, Qt::Key_F);
 
     //! \todo is unused atm
-    NEW_TOGGLE_ACTION (toggle_lighting, tr ("Enable Lighting"), SLOT (toggle_lighting (bool)), Qt::Key_L, _draw_lighting);
+    NEW_TOGGLE_ACTION (toggle_lighting, tr ("Enable Lighting"), &MapView::toggle_lighting, Qt::Key_L, _draw_lighting);
 
-    NEW_ACTION (turn_around, tr ("Turn camera 180 degrees"), SLOT (turn_around()), Qt::Key_R);
+    NEW_ACTION (turn_around, tr ("Turn camera 180 degrees"), &MapView::turn_around, Qt::Key_R);
 
-    NEW_ACTION_OTHER (cursor_selector, tr ("Choose selection cursor"), _cursor_selector, SLOT (show()), Qt::ALT + Qt::Key_C);
-    NEW_TOGGLE_ACTION (invert_mouse_y_axis, tr ("Invert mouse y-axis"), SLOT (invert_mouse_y_axis (bool)), Qt::Key_I, _invert_mouse_y_axis);
-    NEW_TOGGLE_ACTION (auto_selection, tr ("Automatic selection"), SLOT (toggle_auto_selecting (bool)), Qt::SHIFT + Qt::Key_F4, false);
+    NEW_ACTION_OTHER (cursor_selector, tr ("Choose selection cursor"), _cursor_selector, &QWidget::show, Qt::ALT + Qt::Key_C);
+    NEW_TOGGLE_ACTION (invert_mouse_y_axis, tr ("Invert mouse y-axis"), &MapView::invert_mouse_y_axis, Qt::Key_I, _invert_mouse_y_axis);
+    NEW_TOGGLE_ACTION (auto_selection, tr ("Automatic selection"), &MapView::toggle_auto_selecting, Qt::SHIFT + Qt::Key_F4, false);
 
-    NEW_TOGGLE_ACTION (rotation_randomization, tr ("Randomized rotation when copying"), SLOT (toggle_copy_rotation_randomization (bool)), 0, false);
-    NEW_TOGGLE_ACTION (position_randomization, tr ("Randomized position when copying"), SLOT (toggle_copy_position_randomization (bool)), 0, false);
-    NEW_TOGGLE_ACTION (size_randomization, tr ("Randomized size when copying"), SLOT (toggle_copy_size_randomization (bool)), 0, false);
+    NEW_TOGGLE_ACTION (rotation_randomization, tr ("Randomized rotation when copying"), &MapView::toggle_copy_rotation_randomization, 0, false);
+    NEW_TOGGLE_ACTION (position_randomization, tr ("Randomized position when copying"), &MapView::toggle_copy_position_randomization, 0, false);
+    NEW_TOGGLE_ACTION (size_randomization, tr ("Randomized size when copying"), &MapView::toggle_copy_size_randomization, 0, false);
 
-    NEW_ACTION (decrease_time_speed, tr ("Decrease time speed"), SLOT (decrease_time_speed()), Qt::Key_B);
-    NEW_ACTION (increase_time_speed, tr ("Increase time speed"), SLOT (increase_time_speed()), Qt::Key_N);
-    NEW_ACTION (decrease_moving_speed, tr ("Decrease movement speed"), SLOT (decrease_moving_speed()), Qt::Key_O);
-    NEW_ACTION (increase_moving_speed, tr ("Increase movement speed"), SLOT (increase_moving_speed()), Qt::Key_P);
+    NEW_ACTION (decrease_time_speed, tr ("Decrease time speed"), &MapView::decrease_time_speed, Qt::Key_B);
+    NEW_ACTION (increase_time_speed, tr ("Increase time speed"), &MapView::increase_time_speed, Qt::Key_N);
+    NEW_ACTION (decrease_moving_speed, tr ("Decrease movement speed"), &MapView::decrease_moving_speed, Qt::Key_O);
+    NEW_ACTION (increase_moving_speed, tr ("Increase movement speed"), &MapView::increase_moving_speed, Qt::Key_P);
 
-    NEW_ACTION (save_wdt, tr ("Save WDT"), SLOT (TEST_save_wdt()), 0);
-    NEW_ACTION (save_minimap, tr ("Save minimap as raw files"), SLOT (save_minimap()), Qt::Key_P + Qt::SHIFT + Qt::CTRL);
-    NEW_ACTION_OTHER (model_spawner, tr ("Add object to map"), _model_spawner, SLOT (show()), Qt::Key_T);
-    NEW_ACTION (save_current_tile_cata, tr ("Save current tile (Cata tests)"), SLOT (saveCata()), 0);
-    NEW_ACTION_OTHER (area_id_browser, tr ("Area Id Browser"), _zoneid_widget, SLOT (show()), 0);
+    NEW_ACTION (save_wdt, tr ("Save WDT"), &MapView::TEST_save_wdt, 0);
+    NEW_ACTION (save_minimap, tr ("Save minimap as raw files"), &MapView::save_minimap, Qt::Key_P + Qt::SHIFT + Qt::CTRL);
+    NEW_ACTION_OTHER (model_spawner, tr ("Add object to map"), _model_spawner, &QWidget::show, Qt::Key_T);
+    NEW_ACTION (save_current_tile_cata, tr ("Save current tile (Cata tests)"), &MapView::saveCata, 0);
+    NEW_ACTION_OTHER (area_id_browser, tr ("Area Id Browser"), _zoneid_widget, &QWidget::show, 0);
 
   #undef NEW_ACTION
   #undef NEW_ACTION_OTHER
@@ -332,10 +332,17 @@ namespace noggit
     set_terrain_editing_mode(_current_terrain_editing_mode);
   }
 
-  QAction* MapView::new_action (const QString& text, const char* slot, const QKeySequence& shortcut)
+  template<typename Slot>
+    QAction* MapView::new_action (const QString& text, Slot&& slot, const QKeySequence& shortcut)
+  {
+    return new_action (text, this, std::forward<Slot> (slot), shortcut);
+  }
+
+  template<typename Receiver, typename Slot>
+    QAction* MapView::new_action (const QString& text, Receiver* receiver, Slot&& slot, const QKeySequence& shortcut)
   {
     QAction* action (new QAction (text, this));
-    connect (action, SIGNAL (triggered()), slot);
+    connect (action, &QAction::triggered, receiver, std::forward<Slot> (slot));
     if (shortcut != QKeySequence (0))
     {
       action->setShortcuts (QList<QKeySequence>() << shortcut);
@@ -343,21 +350,11 @@ namespace noggit
     return action;
   }
 
-  QAction* MapView::new_action (const QString& text, QObject* receiver, const char* slot, const QKeySequence& shortcut)
+  template<typename Slot>
+    QAction* MapView::new_toggleable_action (const QString& text, Slot&& slot, bool default_value, const QKeySequence& shortcut)
   {
     QAction* action (new QAction (text, this));
-    receiver->connect (action, SIGNAL (triggered()), slot);
-    if (shortcut != QKeySequence (0))
-    {
-      action->setShortcuts (QList<QKeySequence>() << shortcut);
-    }
-    return action;
-  }
-
-  QAction* MapView::new_toggleable_action (const QString& text, const char* slot, bool default_value, const QKeySequence& shortcut)
-  {
-    QAction* action (new QAction (text, this));
-    connect (action, SIGNAL (toggled (bool)), slot);
+    connect (action, &QAction::toggled, this, std::forward<Slot> (slot));
     action->setCheckable (true);
     action->setChecked (default_value);
     if (shortcut != QKeySequence (0))
@@ -370,7 +367,7 @@ namespace noggit
   QAction *MapView::new_flag_action(const QString &text, WorldFlags flag, const QKeySequence &shortcut)
   {
     QAction* action (new QAction (text, this));
-    connect (action, SIGNAL(toggled(bool)), SLOT(toggle_flag(bool)) );
+    connect (action, &QAction::toggled, this, &MapView::toggle_flag);
     action->setCheckable (true);
     action->setData(flag);
     action->setChecked (flags & flag);
@@ -1104,8 +1101,8 @@ namespace noggit
     if (event->key() == Qt::Key_X)
       toggle_terrain_mode_window();
 
-  //  NEW_ACTION (snap_object_to_ground, tr ("Snap object to ground"), SLOT (snap_selected_object_to_ground()), Qt::Key_PageDown);
-  //  NEW_TOGGLE_ACTION (rotation_randomization, tr ("Randomized rotation when copying"), SLOT (toggle_copy_rotation_randomization (bool)), 0, false);
+  //  NEW_ACTION (snap_object_to_ground, tr ("Snap object to ground"), &MapView::snap_selected_object_to_ground, Qt::Key_PageDown);
+  //  NEW_TOGGLE_ACTION (rotation_randomization, tr ("Randomized rotation when copying"), &MapView::toggle_copy_rotation_randomization, 0, false);
 
 
     if (event->key() == Qt::Key_C)
@@ -1695,12 +1692,12 @@ namespace noggit
       {
       case shaping:
         shaping_radius (shaping_radius() + relative_move.x() / XSENS);
-        connect (_shaping_radius_slider, SIGNAL(valueChanged (int)), _shaping_radius_percent_label, SLOT(setNum (int)));
+        connect (_shaping_radius_slider, &QSlider::valueChanged, _shaping_radius_percent_label, static_cast<void (QLabel::*) (int)> (&QLabel::setNum));
         break;
 
       case smoothing:
         smoothing_radius (smoothing_radius() + relative_move.x() / XSENS);
-        connect (_smoothing_radius_slider, SIGNAL(valueChanged (int)), _smoothing_radius_percent_label, SLOT(setNum (int)));
+        connect (_smoothing_radius_slider, &QSlider::valueChanged, _smoothing_radius_percent_label, static_cast<void (QLabel::*) (int)> (&QLabel::setNum));
         break;
 
       case texturing:
@@ -1953,6 +1950,8 @@ namespace noggit
   #undef BRUSH_FORMULA_METHODS
   #undef BRUSH_SLIDER_METHODS
 
+  #define BRUSH_PARAM_SETTER_SLOT(x) static_cast<void (MapView::*) (int)> (&MapView::x)
+
   // --- brush settings widgets --------------------------------------------------------------------
 
   void MapView::create_shaping_settings_widget()
@@ -1971,7 +1970,7 @@ namespace noggit
     _shapingComboBox->addItem (tr ("Trigonometric"), shaping_formula_type::trigonometric);
     _shapingComboBox->addItem (tr ("Square"), shaping_formula_type::square);
 
-    connect (_shapingComboBox, SIGNAL(currentIndexChanged(int)), SLOT(shaping_formula(int)));
+    connect (_shapingComboBox, static_cast<void (QComboBox::*) (int)> (&QComboBox::currentIndexChanged), this, BRUSH_PARAM_SETTER_SLOT (shaping_formula));
 
     _shaping_settings_widget->addWidget (_shapingComboBox);
 
@@ -1979,21 +1978,21 @@ namespace noggit
     _shaping_radius_slider->setMinimum (shaping_radius_constants.minimum * shaping_radius_constants.scale);
     _shaping_radius_slider->setMaximum (shaping_radius_constants.maximum * shaping_radius_constants.scale);
     _shaping_radius_slider->setMaximumWidth (200);
-    connect (_shaping_radius_slider, SIGNAL (valueChanged (int)), SLOT (shaping_radius (int)));
+    connect (_shaping_radius_slider, &QSlider::valueChanged, this, BRUSH_PARAM_SETTER_SLOT (shaping_radius));
 
     _shaping_speed_slider = new QSlider (Qt::Horizontal, _shaping_settings_widget);
     _shaping_speed_slider->setMinimum (shaping_speed_constants.minimum * shaping_speed_constants.scale);
     _shaping_speed_slider->setMaximum (shaping_speed_constants.maximum * shaping_speed_constants.scale);
     _shaping_speed_slider->setMaximumWidth (200);
-    connect (_shaping_speed_slider, SIGNAL (valueChanged (int)), SLOT (shaping_speed (int)));
+    connect (_shaping_speed_slider, &QSlider::valueChanged, this, BRUSH_PARAM_SETTER_SLOT (shaping_speed));
 
     QLabel* radius_label (new QLabel (tr ("Brush &radius"), _shaping_settings_widget));
     QLabel* speed_label (new QLabel (tr ("Shaping &speed"), _shaping_settings_widget));
     _shaping_radius_percent_label = new QLabel (_shaping_settings_widget);
     _shaping_speed_percent_label = new QLabel (_shaping_settings_widget);
 
-    connect (_shaping_radius_slider, SIGNAL (valueChanged (int)), _shaping_radius_percent_label, SLOT (setNum (int)));
-    connect (_shaping_speed_slider,  SIGNAL (valueChanged (int)), _shaping_speed_percent_label, SLOT (setNum (int)));
+    connect (_shaping_radius_slider, &QSlider::valueChanged, _shaping_radius_percent_label, static_cast<void (QLabel::*) (int)> (&QLabel::setNum));
+    connect (_shaping_speed_slider, &QSlider::valueChanged, _shaping_speed_percent_label, static_cast<void (QLabel::*) (int)> (&QLabel::setNum));
 
     radius_label->setBuddy (_shaping_radius_slider);
     speed_label->setBuddy (_shaping_speed_slider);
@@ -2028,7 +2027,7 @@ namespace noggit
     _smoothingComboBox->addItem (tr ("Linear"), smoothing_formula_type::linear);
     _smoothingComboBox->addItem (tr ("Smooth"), smoothing_formula_type::smooth);
 
-    connect (_smoothingComboBox, SIGNAL(currentIndexChanged(int)), SLOT(shaping_formula(int)));
+    connect (_smoothingComboBox, static_cast<void (QComboBox::*) (int)> (&QComboBox::currentIndexChanged), this, BRUSH_PARAM_SETTER_SLOT (shaping_formula));
 
     _smoothing_settings_widget->addWidget (_smoothingComboBox);
 
@@ -2036,21 +2035,21 @@ namespace noggit
     _smoothing_radius_slider->setMinimum (smoothing_radius_constants.minimum * smoothing_radius_constants.scale);
     _smoothing_radius_slider->setMaximum (smoothing_radius_constants.maximum * smoothing_radius_constants.scale);
     _smoothing_radius_slider->setMaximumWidth (200);
-    connect (_smoothing_radius_slider, SIGNAL (valueChanged (int)), SLOT (smoothing_radius (int)));
+    connect (_smoothing_radius_slider, &QSlider::valueChanged, this, BRUSH_PARAM_SETTER_SLOT (smoothing_radius));
 
     _smoothing_speed_slider = new QSlider (Qt::Horizontal, _smoothing_settings_widget);
     _smoothing_speed_slider->setMinimum (smoothing_speed_constants.minimum * smoothing_speed_constants.scale);
     _smoothing_speed_slider->setMaximum (smoothing_speed_constants.maximum * smoothing_speed_constants.scale);
     _smoothing_speed_slider->setMaximumWidth (200);
-    connect (_smoothing_speed_slider, SIGNAL (valueChanged (int)), SLOT (smoothing_speed (int)));
+    connect (_smoothing_speed_slider, &QSlider::valueChanged, this, BRUSH_PARAM_SETTER_SLOT (smoothing_speed));
 
     QLabel* radius_label (new QLabel (tr ("Brush &radius"), _smoothing_settings_widget));
     QLabel* speed_label (new QLabel (tr ("Shaping &speed"), _smoothing_settings_widget));
     _smoothing_radius_percent_label = new QLabel (_smoothing_settings_widget);
     _smoothing_speed_percent_label = new QLabel (_smoothing_settings_widget);
 
-    connect (_smoothing_radius_slider, SIGNAL (valueChanged (int)), _smoothing_radius_percent_label, SLOT (setNum (int)));
-    connect (_smoothing_speed_slider,  SIGNAL (valueChanged (int)), _smoothing_speed_percent_label, SLOT (setNum (int)));
+    connect (_smoothing_radius_slider, &QSlider::valueChanged, _smoothing_radius_percent_label, static_cast<void (QLabel::*) (int)> (&QLabel::setNum));
+    connect (_smoothing_speed_slider, &QSlider::valueChanged, _smoothing_speed_percent_label, static_cast<void (QLabel::*) (int)> (&QLabel::setNum));
 
     radius_label->setBuddy (_smoothing_radius_slider);
     speed_label->setBuddy (_smoothing_speed_slider);
@@ -2096,25 +2095,25 @@ namespace noggit
     _texturing_radius_slider->setMinimum (texturing_radius_constants.minimum * texturing_radius_constants.scale);
     _texturing_radius_slider->setMaximum (texturing_radius_constants.maximum * texturing_radius_constants.scale);
     _texturing_radius_slider->setMaximumWidth(200);
-    connect (_texturing_radius_slider, SIGNAL (valueChanged (int)), SLOT (texturing_radius (int)));
+    connect (_texturing_radius_slider, &QSlider::valueChanged, this, BRUSH_PARAM_SETTER_SLOT (texturing_radius));
 
     _texturing_opacity_slider = new QSlider (Qt::Horizontal, _texturing_settings_widget);
     _texturing_opacity_slider->setMinimum (texturing_opacity_constants.minimum * texturing_opacity_constants.scale);
     _texturing_opacity_slider->setMaximum (texturing_opacity_constants.maximum * texturing_opacity_constants.scale);
     _texturing_opacity_slider->setMaximumWidth(200);
-    connect (_texturing_opacity_slider, SIGNAL (valueChanged (int)), SLOT (texturing_opacity (int)));
+    connect (_texturing_opacity_slider, &QSlider::valueChanged, this, BRUSH_PARAM_SETTER_SLOT (texturing_opacity));
 
     _texturing_hardness_slider = new QSlider (Qt::Horizontal, _texturing_settings_widget);
     _texturing_hardness_slider->setMinimum (texturing_hardness_constants.minimum * texturing_hardness_constants.scale);
     _texturing_hardness_slider->setMaximum (texturing_hardness_constants.maximum * texturing_hardness_constants.scale);
     _texturing_hardness_slider->setMaximumWidth(200);
-    connect (_texturing_hardness_slider, SIGNAL (valueChanged (int)), SLOT (texturing_hardness (int)));
+    connect (_texturing_hardness_slider, &QSlider::valueChanged, this, BRUSH_PARAM_SETTER_SLOT (texturing_hardness));
 
     _texturing_pressure_slider = new QSlider (Qt::Horizontal, _texturing_settings_widget);
     _texturing_pressure_slider->setMinimum (texturing_pressure_constants.minimum * texturing_pressure_constants.scale);
     _texturing_pressure_slider->setMaximum (texturing_pressure_constants.maximum * texturing_pressure_constants.scale);
     _texturing_pressure_slider->setMaximumWidth(200);
-    connect (_texturing_pressure_slider, SIGNAL (valueChanged (int)), SLOT (texturing_pressure (int)));
+    connect (_texturing_pressure_slider, &QSlider::valueChanged, this, BRUSH_PARAM_SETTER_SLOT (texturing_pressure));
 
     QLabel* radius_label (new QLabel (tr ("Brush &radius"), _texturing_settings_widget));
     QLabel* opacity_label (new QLabel (tr ("Brush &opacity"), _texturing_settings_widget));
@@ -2169,7 +2168,9 @@ namespace noggit
       layout->addWidget (smoothingButton);
       toolBar->addWidget (widget);
 
-      connect(_toolbar_formula_radio_group, SIGNAL(buttonClicked(int)), SLOT(set_terrain_editing_mode(int)));
+      connect ( _toolbar_formula_radio_group, static_cast<void (QButtonGroup::*) (int)> (&QButtonGroup::buttonClicked)
+              , this, &MapView::set_terrain_editing_mode
+              );
 
       toolBar->show();
   }
