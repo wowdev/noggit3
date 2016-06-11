@@ -88,12 +88,6 @@ find_package (Qt5OpenGLExtensions REQUIRED)
 find_package (storm REQUIRED)
 find_package (Boost REQUIRED COMPONENTS filesystem system)
 
-# include paths
-include_directories ( SYSTEM ${GLUT_INCLUDE_DIRS}
-                      SYSTEM ${STORM_INCLUDE_DIR}
-                      SYSTEM ${Boost_INCLUDE_DIR}
-                    )
-
 # Gather source files.
 set ( noggit_root_sources
       src/noggit/alphamap.cpp
@@ -438,12 +432,12 @@ endif (WIN32)
 
 target_link_libraries ( noggit
                         ${OPENGL_LIBRARIES}
-                        ${STORM_LIBRARIES}
                         Qt5::Widgets
                         Qt5::OpenGL
                         Qt5::OpenGLExtensions
-                        ${Boost_FILESYSTEM_LIBRARY}
-                        ${Boost_SYSTEM_LIBRARY}
+                        Boost::filesystem
+                        Boost::system
+                        StormLib
                       )
 
 if (APPLE)
