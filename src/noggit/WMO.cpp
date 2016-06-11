@@ -49,7 +49,15 @@ namespace
 }
 
 WMO::WMO (const std::string& filenameArg, World* world)
-  : _filename( filenameArg )
+  : _filename (filenameArg)
+  , _world(world)
+  , _finished_upload(false)
+{
+  _finished = false;
+  noggit::app ().async_loader ().add_object (this);
+}
+
+void WMO::finish_loading ()
 {
   noggit::mpq::file f (QString::fromStdString (_filename));
 
@@ -60,38 +68,38 @@ WMO::WMO (const std::string& filenameArg, World* world)
   char *ddnames = nullptr;
   char *groupnames = nullptr;
 
-  char *texbuf=0;
+  char *texbuf = 0;
 
-  while (!f.is_at_end_of_file()) {
-    f.read(&fourcc,4);
-    f.read(&size, 4);
+  while (!f.is_at_end_of_file ()) {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
 
-    size_t nextpos = f.getPos() + size;
+    size_t nextpos = f.getPos () + size;
 
-    if ( fourcc == 'MOHD' ) {
+    if (fourcc == 'MOHD') {
       unsigned int col;
       // header
-      f.read(&nTextures, 4);
-      f.read(&nGroups, 4);
-      f.read(&nP, 4);
-      f.read(&nLights, 4);
-      f.read(&nModels, 4);
-      f.read(&nDoodads, 4);
-      f.read(&nDoodadSets, 4);
-      f.read(&col, 4);
-      f.read(&nX, 4);
-      f.read(ff,12);
-      extents[0] = ::math::vector_3d(ff[0],ff[1],ff[2]);
-      f.read(ff,12);
-      extents[1] = ::math::vector_3d(ff[0],ff[1],ff[2]);
+      f.read (&nTextures, 4);
+      f.read (&nGroups, 4);
+      f.read (&nP, 4);
+      f.read (&nLights, 4);
+      f.read (&nModels, 4);
+      f.read (&nDoodads, 4);
+      f.read (&nDoodadSets, 4);
+      f.read (&col, 4);
+      f.read (&nX, 4);
+      f.read (ff, 12);
+      extents[0] = ::math::vector_3d (ff[0], ff[1], ff[2]);
+      f.read (ff, 12);
+      extents[1] = ::math::vector_3d (ff[0], ff[1], ff[2]);
 
       groups = new WMOGroup[nGroups];
     }
-    else if ( fourcc == 'MOTX' ) {
+    else if (fourcc == 'MOTX') {
       texbuf = new char[size];
-      f.read(texbuf, size);
+      f.read (texbuf, size);
     }
-    else if ( fourcc == 'MOMT' )
+    else if (fourcc == 'MOMT')
     {
       const size_t num_materials (size / 0x40);
 
@@ -103,44 +111,44 @@ WMO::WMO (const std::string& filenameArg, World* world)
         _materials.emplace_back (material, texbuf + material.nameStart);
       }
     }
-    else if ( fourcc == 'MOGN' ) {
-      groupnames = reinterpret_cast<char*>(f.getPointer());
+    else if (fourcc == 'MOGN') {
+      groupnames = reinterpret_cast<char*>(f.getPointer ());
     }
-    else if ( fourcc == 'MOGI' ) {
+    else if (fourcc == 'MOGI') {
       // group info - important information! ^_^
-      for (unsigned int i=0; i<nGroups; ++i) {
-        groups[i].init(this, &f, i, groupnames);
+      for (unsigned int i = 0; i<nGroups; ++i) {
+        groups[i].init (this, &f, i, groupnames);
 
       }
     }
-    else if ( fourcc == 'MOLT' ) {
+    else if (fourcc == 'MOLT') {
       // Lights?
-      for (unsigned int i=0; i<nLights; ++i) {
+      for (unsigned int i = 0; i<nLights; ++i) {
         WMOLight l;
-        l.init(&f);
-        lights.push_back(l);
+        l.init (&f);
+        lights.push_back (l);
       }
     }
-    else if ( fourcc == 'MODN' ) {
+    else if (fourcc == 'MODN') {
       // models ...
       // MMID would be relative offsets for MMDX filenames
       if (size) {
 
-        ddnames = reinterpret_cast<char*>( f.getPointer() );
+        ddnames = reinterpret_cast<char*>(f.getPointer ());
 
-        f.seekRelative(size);
+        f.seekRelative (size);
       }
     }
-    else if ( fourcc == 'MODS' ) {
-      for (unsigned int i=0; i<nDoodadSets; ++i) {
+    else if (fourcc == 'MODS') {
+      for (unsigned int i = 0; i<nDoodadSets; ++i) {
         WMODoodadSet dds;
-        f.read(&dds, 32);
-        doodadsets.push_back(dds);
+        f.read (&dds, 32);
+        doodadsets.push_back (dds);
       }
     }
-    else if ( fourcc == 'MODD' ) {
+    else if (fourcc == 'MODD') {
       nModels = size / 0x28;
-      for (unsigned int i=0; i<nModels; ++i) {
+      for (unsigned int i = 0; i<nModels; ++i) {
         uint32_t ofs;
         f.read (&ofs, sizeof (uint32_t));
 
@@ -151,87 +159,97 @@ WMO::WMO (const std::string& filenameArg, World* world)
         f.read (rotation, sizeof (rotation));
 
         float scale;
-        f.read (&scale, sizeof(float));
+        f.read (&scale, sizeof (float));
 
         uint32_t light;
         f.read (&light, sizeof (uint32_t));
 
-        static math::matrix_4x4 const rotmat { 0.0f, 0.0f, 0.0f, -1.0f
-                                             , 0.0f, 1.0f, 0.0f,  0.0f
-                                             , 0.0f, 0.0f, 1.0f,  0.0f
-                                             , 1.0f, 0.0f, 0.0f,  0.0f
-                                             };
+        static math::matrix_4x4 const rotmat{ 0.0f, 0.0f, 0.0f, -1.0f
+          , 0.0f, 1.0f, 0.0f,  0.0f
+          , 0.0f, 0.0f, 1.0f,  0.0f
+          , 1.0f, 0.0f, 0.0f,  0.0f
+        };
 
         modelis.emplace_back
-          ( world
+        (_world
           , ddnames + ofs
           , convert_coords (position)
           , rotmat * rotation
           , scale
-          , ::math::vector_3d ( ((light & 0xff0000) >> 16) / 255.0f
-                              , ((light & 0x00ff00) >> 8) / 255.0f
-                              , ((light & 0x0000ff)) / 255.0f
-                              )
-          );
+          , ::math::vector_3d (((light & 0xff0000) >> 16) / 255.0f
+            , ((light & 0x00ff00) >> 8) / 255.0f
+            , ((light & 0x0000ff)) / 255.0f
+          )
+        );
       }
 
     }
-    else if ( fourcc == 'MOSB' )
+    else if (fourcc == 'MOSB')
     {
       if (size>4)
       {
-        std::string path = std::string( reinterpret_cast<char*>( f.getPointer() ) );
-        if (path.length())
+        std::string path = std::string (reinterpret_cast<char*>(f.getPointer ()));
+        if (path.length ())
         {
           LogDebug << "SKYBOX:" << std::endl;
 
-          if( noggit::mpq::file::exists( QString::fromStdString (path) ) )
+          if (noggit::mpq::file::exists (QString::fromStdString (path)))
           {
             skybox = noggit::scoped_model_reference (path);
           }
         }
       }
     }
-    else if ( fourcc == 'MOPV' ) {
+    else if (fourcc == 'MOPV') {
       WMOPV p;
-      for (unsigned int i=0; i<nP; ++i) {
-        f.read(ff,12);
-        p.a = ::math::vector_3d(ff[0],ff[2],-ff[1]);
-        f.read(ff,12);
-        p.b = ::math::vector_3d(ff[0],ff[2],-ff[1]);
-        f.read(ff,12);
-        p.c = ::math::vector_3d(ff[0],ff[2],-ff[1]);
-        f.read(ff,12);
-        p.d = ::math::vector_3d(ff[0],ff[2],-ff[1]);
-        pvs.push_back(p);
+      for (unsigned int i = 0; i<nP; ++i) {
+        f.read (ff, 12);
+        p.a = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+        f.read (ff, 12);
+        p.b = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+        f.read (ff, 12);
+        p.c = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+        f.read (ff, 12);
+        p.d = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+        pvs.push_back (p);
       }
     }
-    else if ( fourcc == 'MOPR' ) {
+    else if (fourcc == 'MOPR') {
       int nn = size / 8;
-      WMOPR *pr = reinterpret_cast<WMOPR*>(f.getPointer());
-      for (int i=0; i<nn; ++i) {
-        prs.push_back(*pr++);
+      WMOPR *pr = reinterpret_cast<WMOPR*>(f.getPointer ());
+      for (int i = 0; i<nn; ++i) {
+        prs.push_back (*pr++);
       }
     }
-    else if ( fourcc == 'MFOG' ) {
+    else if (fourcc == 'MFOG') {
       int nfogs = size / 0x30;
-      for (int i=0; i<nfogs; ++i) {
+      for (int i = 0; i<nfogs; ++i) {
         WMOFog fog;
-        fog.init(&f);
-        fogs.push_back(fog);
+        fog.init (&f);
+        fogs.push_back (fog);
       }
     }
 
-    f.seek(nextpos);
+    f.seek (nextpos);
   }
 
-  f.close();
+  f.close ();
 
   delete[] texbuf;
   texbuf = nullptr;
 
-  for (unsigned int i=0; i<nGroups; ++i)
-    groups[i].initDisplayList();
+  _finished = true;
+}
+
+void WMO::upload()
+{
+  for (auto mat : _materials)
+    _textures.emplace_back (mat._texture);
+
+  for (unsigned int i = 0; i<nGroups; ++i)
+    groups[i].initDisplayList ();
+
+  _finished_upload = true;
 }
 
 WMO::~WMO()
@@ -256,8 +274,16 @@ void WMO::draw ( World* world
                , const float& fog_distance
                , const Frustum& frustum
                , const ::math::vector_3d& camera
-               ) const
+               )
 {
+  if (!finished_loading ())
+    return;
+
+  if (!_finished_upload) {
+    upload ();
+    return;
+  }
+
   if (draw_fog)
     gl.enable( GL_FOG );
   else
@@ -327,8 +353,16 @@ void WMO::drawSelect (World* world
                      , bool draw_doodads
                      , const Frustum& frustum
                      , const ::math::vector_3d& camera
-                     ) const
+                     )
 {
+  if (!finished_loading ())
+    return;
+
+  if (!_finished_upload) {
+    upload ();
+    return;
+  }
+
   for (unsigned int i=0; i<nGroups; ++i)
   {
     if (groups[i].is_visible (ofs, rot, culldistance, frustum, camera))
@@ -673,6 +707,7 @@ void WMOGroup::initDisplayList()
   {
     WMOBatch *batch = &batches[b];
     WMOMaterial* mat (&wmo->_materials.at (batch->texture));
+    noggit::scoped_blp_texture_reference const& texture (wmo->_textures.at (batch->texture));
 
     bool overbright = ((mat->flags & 0x10) && !hascv);
     bool spec_shader = (mat->specular && !hascv && !overbright);
@@ -682,7 +717,7 @@ void WMOGroup::initDisplayList()
 
     _lists[b].first->start_recording( GL_COMPILE );
 
-    mat->_texture->bind();
+    texture->bind();
 
     bool atest = (mat->transparent) != 0;
 
@@ -1031,10 +1066,7 @@ void WMOFog::setup()
     gl.disable(GL_FOG);
 }
 
-void WMO::finish_loading()
-{
-  _finished = true;
-}
+
 
 namespace noggit
 {
