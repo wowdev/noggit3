@@ -333,8 +333,8 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
             {
               if (k == texLevel || visibility[k] == 0)
                 continue;
-              float coef = diffA * (visibility[k] / other);
-              visibility[k] = std::max(std::min(visibility[k] - coef, 255.0f), 0.0f);
+
+              visibility[k] = visibility[k] - (diffA * (visibility[k] / other));
             }
           }          
         }
@@ -357,12 +357,6 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 				xPos += TEXDETAILSIZE;
 			}
 			zPos += TEXDETAILSIZE;
-		}
-
-		if (texLevel == -1)
-		{
-			LogDebug << "Somehow no texture got painted." << std::endl;
-			return false;
 		}
 
 		for (size_t j = 0; j < nTextures - 1; j++)
