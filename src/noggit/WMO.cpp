@@ -66,166 +66,269 @@ void WMO::finishLoading ()
     return;
   }
 
+  LogDebug << "Loading WMO \"" << _filename << "\"." << std::endl;
+
   uint32_t fourcc;
   uint32_t size;
+
   float ff[3];
 
+  char *texbuf = nullptr;
   char *ddnames = nullptr;
   char *groupnames = nullptr;
 
-  char *texbuf = 0;
+  // - MVER ----------------------------------------------
 
-  while (!f.isEof()) {
-    f.read(&fourcc, 4);
-    f.read(&size, 4);
+  uint32_t version;
 
-    size_t nextpos = f.getPos () + size;
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+  f.read (&version, 4);
 
-    if (fourcc == 'MOHD') {
-      unsigned int col;
-      // header
-      f.read(&nTextures, 4);
-      f.read(&nGroups, 4);
-      f.read(&nP, 4);
-      f.read(&nLights, 4);
-      f.read(&nModels, 4);
-      f.read(&nDoodads, 4);
-      f.read(&nDoodadSets, 4);
-      f.read(&col, 4);
-      f.read(&nX, 4);
-      f.read(ff, 12);
-      extents[0] = math::vector_3d(ff[0], ff[1], ff[2]);
-      f.read(ff, 12);
-      extents[1] = math::vector_3d(ff[0], ff[1], ff[2]);
+  assert (fourcc == 'MVER' && version == 17);
 
-      groups.resize (nGroups);
-    }
-    else if (fourcc == 'MOTX') {
-      // textures
-      texbuf = new char[size];
-      f.read (texbuf, size);
-    }
-    else if (fourcc == 'MOMT')
-    {
-      std::size_t const num_materials (size / 0x40);
-      mat.resize (num_materials);
+  // - MOHD ----------------------------------------------
 
-      for (std::size_t i (0); i < num_materials; ++i)
-      {
-        f.read (&mat[i], 0x40);
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
 
-        std::string const texpath (texbuf + mat[i].nameStart);
-        textures.push_back (texpath);
-      }
-    }
-    else if (fourcc == 'MOGN') {
-      groupnames = reinterpret_cast<char*>(f.getPointer());
-    }
-    else if (fourcc == 'MOGI') {
-      // group info - important information! ^_^
-      for (unsigned int i = 0; i<nGroups; ++i) {
-        groups[i].init(this, &f, i, groupnames);
-      }
-    }
-    else if (fourcc == 'MOLT') {
-      // Lights?
-      for (unsigned int i = 0; i<nLights; ++i) {
-        WMOLight l;
-        l.init (&f);
-        lights.push_back (l);
-      }
-    }
-    else if (fourcc == 'MODN') {
-      // models ...
-      // MMID would be relative offsets for MMDX filenames
-      if (size) {
+  assert (fourcc == 'MOHD');
 
-        ddnames = reinterpret_cast<char*>(f.getPointer());
+  unsigned int col;
+  // header
+  f.read (&nTextures, 4);
+  f.read (&nGroups, 4);
+  f.read (&nP, 4);
+  f.read (&nLights, 4);
+  f.read (&nModels, 4);
+  f.read (&nDoodads, 4);
+  f.read (&nDoodadSets, 4);
+  f.read (&col, 4);
+  f.read (&nX, 4);
+  f.read (ff, 12);
+  extents[0] = ::math::vector_3d (ff[0], ff[1], ff[2]);
+  f.read (ff, 12);
+  extents[1] = ::math::vector_3d (ff[0], ff[1], ff[2]);
+  f.seekRelative (4);
 
-        f.seekRelative (size);
-      }
-    }
-    else if (fourcc == 'MODS') {
-      for (unsigned int i = 0; i<nDoodadSets; ++i) {
-        WMODoodadSet dds;
-        f.read (&dds, 32);
-        doodadsets.push_back (dds);
-      }
-    }
-    else if (fourcc == 'MODD') {
-      nModels = size / 0x28;
-      for (unsigned int i = 0; i<nModels; ++i) {
-        struct
-        {
-          uint32_t name_offset : 24;
-          uint32_t flag_AcceptProjTex : 1;
-          uint32_t flag_0x2 : 1;
-          uint32_t flag_0x4 : 1;
-          uint32_t flag_0x8 : 1;
-          uint32_t flags_unused : 4;
-        } x;
+  groups.resize (nGroups);
 
-        size_t after_entry (f.getPos() + 0x28);
-        f.read (&x, sizeof (x));
+  // - MOTX ----------------------------------------------
 
-        modelis.push_back(ModelInstance (ddnames + x.name_offset, &f));
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
 
-        f.seek (after_entry);
-      }
+  assert (fourcc == 'MOTX');
 
-    }
-    else if (fourcc == 'MOSB')
-    {
-      if (size>4)
-      {
-        std::string path = std::string(reinterpret_cast<char*>(f.getPointer()));
-        if (path.length())
-        {
-          LogDebug << "SKYBOX:" << std::endl;
+  texbuf = new char[size];
+  f.read (texbuf, size);
 
-          if (MPQFile::exists(path))
-          {
-            skybox = scoped_model_reference (path);
-          }
-        }
-      }
-    }
-    else if (fourcc == 'MOPV') {
-      WMOPV p;
-      for (unsigned int i = 0; i<nP; ++i) {
-        f.read(ff, 12);
-        p.a = math::vector_3d(ff[0], ff[2], -ff[1]);
-        f.read(ff, 12);
-        p.b = math::vector_3d(ff[0], ff[2], -ff[1]);
-        f.read(ff, 12);
-        p.c = math::vector_3d(ff[0], ff[2], -ff[1]);
-        f.read(ff, 12);
-        p.d = math::vector_3d(ff[0], ff[2], -ff[1]);
-        pvs.push_back(p);
-      }
-    }
-    else if (fourcc == 'MOPR') {
-      int nn = size / 8;
-      WMOPR *pr = reinterpret_cast<WMOPR*>(f.getPointer());
-      for (int i = 0; i<nn; ++i) {
-        prs.push_back(*pr++);
-      }
-    }
-    else if (fourcc == 'MFOG') {
-      int nfogs = size / 0x30;
-      for (int i = 0; i<nfogs; ++i) {
-        WMOFog fog;
-        fog.init (&f);
-        fogs.push_back (fog);
-      }
-    }
+  // - MOMT ----------------------------------------------
 
-    f.seek (nextpos);
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOMT');
+
+  std::size_t const num_materials (size / 0x40);
+  mat.resize (num_materials);
+
+  for (size_t i (0); i < num_materials; ++i)
+  {
+    f.read (&mat[i], 0x40);
+
+    std::string const texpath (texbuf + mat[i].nameStart);
+    textures.push_back (texpath);
   }
 
-  f.close ();
+  // - MOGN ----------------------------------------------
 
-  for (unsigned int i = 0; i < nGroups; ++i)
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOGN');
+
+  groupnames = reinterpret_cast<char*> (f.getPointer ());
+
+  f.seekRelative (size);
+
+  // - MOGI ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOGI');
+
+  for (size_t i (0); i < nGroups; ++i) {
+    groups[i].init (this, &f, i, groupnames);
+  }
+
+  // - MOSB ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOSB');
+
+  if (size > 4)
+  {
+    std::string path = std::string (reinterpret_cast<char*>(f.getPointer ()));
+    if (path.length ())
+    {
+      LogDebug << "SKYBOX:" << std::endl;
+
+      if (MPQFile::exists(path))
+      {
+        skybox = scoped_model_reference (path);
+      }
+    }
+  }
+
+  f.seekRelative (size);
+
+  // - MOPV ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+
+  assert (fourcc == 'MOPV');
+
+  WMOPV p;
+  for (size_t i (0); i < nP; ++i) {
+    f.read (ff, 12);
+    p.a = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    f.read (ff, 12);
+    p.b = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    f.read (ff, 12);
+    p.c = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    f.read (ff, 12);
+    p.d = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    pvs.push_back (p);
+  }
+
+  // - MOPT ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOPT');
+
+  f.seekRelative (size);
+
+  // - MOPR ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOPR');
+
+  int nn = size / 8;
+  WMOPR *pr = reinterpret_cast<WMOPR*> (f.getPointer ());
+  for (size_t i (0); i < nn; ++i) {
+    prs.push_back (*pr++);
+  }
+
+  f.seekRelative (size);
+
+  // - MOVV ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOVV');
+
+  f.seekRelative (size);
+
+  // - MOVB ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOVB');
+
+  f.seekRelative (size);
+
+  // - MOLT ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+
+  assert (fourcc == 'MOLT');
+
+  for (size_t i (0); i < nLights; ++i) {
+    WMOLight l;
+    l.init (&f);
+    lights.push_back (l);
+  }
+
+  // - MODS ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+
+  assert (fourcc == 'MODS');
+
+  for (size_t i (0); i < nDoodadSets; ++i) {
+    WMODoodadSet dds;
+    f.read (&dds, 32);
+    doodadsets.push_back (dds);
+  }
+
+  // - MODN ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MODN');
+
+  if (size)
+  {
+    ddnames = reinterpret_cast<char*> (f.getPointer ());
+    f.seekRelative (size);
+  }
+
+  // - MODD ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MODD');
+
+  nModels = size / 0x28;
+  for (size_t i (0); i < nModels; ++i) {
+    struct
+    {
+      uint32_t name_offset : 24;
+      uint32_t flag_AcceptProjTex : 1;
+      uint32_t flag_0x2 : 1;
+      uint32_t flag_0x4 : 1;
+      uint32_t flag_0x8 : 1;
+      uint32_t flags_unused : 4;
+    } x;
+
+    size_t after_entry (f.getPos() + 0x28);
+    f.read (&x, sizeof (x));
+
+    modelis.push_back(ModelInstance (ddnames + x.name_offset, &f));
+
+    f.seek (after_entry);
+  }
+
+  // - MFOG ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MFOG');
+
+  int nfogs = size / 0x30;
+  for (size_t i (0); i < nfogs; ++i) {
+    WMOFog fog;
+    fog.init (&f);
+    fogs.push_back (fog);
+  }
+
+  for (size_t i (0); i < nGroups; ++i)
   {
     groups[i].load ();
   }
