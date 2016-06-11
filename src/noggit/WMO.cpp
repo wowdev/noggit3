@@ -235,6 +235,11 @@ void WMO::finish_loading ()
 
   f.close ();
 
+  for (unsigned int i = 0; i < nGroups; ++i)
+  {
+    groups[i].load ();
+  }
+
   delete[] texbuf;
   texbuf = nullptr;
 
@@ -517,14 +522,6 @@ void WMOGroup::init(WMO *_wmo, noggit::mpq::file* f, int _num, char *names)
   lq = 0;
 }
 
-
-struct WMOBatch {
-  signed char bytes[12];
-  uint32_t indexStart;
-  uint16_t indexCount, vertexStart, vertexEnd;
-  unsigned char flags, texture;
-};
-
 namespace
 {
   void setGLColor(unsigned int col)
@@ -559,153 +556,14 @@ struct WMOGroupHeader {
 
 void WMOGroup::initDisplayList()
 {
-  ::math::vector_3d *vertices = nullptr;
-  ::math::vector_3d *normals = nullptr;
-  ::math::vector_2d *texcoords = nullptr;
-  uint16_t *indices = nullptr;
-  struct SMOPoly *materials = nullptr;
-  WMOBatch *batches = nullptr;
-
-  WMOGroupHeader gh;
-
-  uint16_t *useLights = 0;
-  int nLR = 0;
-
-
-  // open group file
-
-  std::stringstream curNum;
-  curNum << "_" << std::setw(3) << std::setfill('0') << num;
-
-  std::string fname = wmo->filename();
-  fname.insert( fname.find( ".wmo" ), curNum.str() );
-
-  noggit::mpq::file gf(QString::fromStdString (fname));
-
-  /*if(!gf.isExternal())
-    gLog("    Loading WMO from MPQ %s\n", fname);
-  else
-    gLog("    Loading WMO from File %s\n", fname);
-  */
-  gf.seek(0x14);
-  // read header
-  gf.read(&gh, sizeof(WMOGroupHeader));
-  WMOFog &wf = wmo->fogs[gh.fogs[0]];
-  if (wf.r2 <= 0) fog = -1; // default outdoor fog..?
-  else fog = gh.fogs[0];
-
-  BoundingBoxMin = ::math::vector_3d(gh.box1[0], gh.box1[2], -gh.box1[1]);
-  BoundingBoxMax = ::math::vector_3d(gh.box2[0], gh.box2[2], -gh.box2[1]);
-
-  gf.seek(0x58); // first chunk
-
-  uint32_t fourcc;
-  uint32_t size;
-
-  unsigned int *cv = nullptr;
-  hascv = false;
-
-  while (!gf.is_at_end_of_file()) {
-    gf.read(&fourcc,4);
-    gf.read(&size, 4);
-
-    size_t nextpos = gf.getPos() + size;
-
-    // why copy stuff when I can just map it from memory ^_^
-
-    if ( fourcc == 'MOPY' ) {
-      // materials per triangle
-      nTriangles = size / 2;
-      materials = reinterpret_cast<SMOPoly*>(gf.getPointer());
-    }
-    else if ( fourcc == 'MOVI' ) {
-      // indices
-      indices =  reinterpret_cast<uint16_t*>(gf.getPointer());
-    }
-    else if ( fourcc == 'MOVT' ) {
-      nVertices = size / 12;
-      // let's hope it's padded to 12 bytes, not 16...
-      vertices = reinterpret_cast< ::math::vector_3d*>(gf.getPointer());
-      VertexBoxMin = ::math::vector_3d( 9999999.0f, 9999999.0f, 9999999.0f);
-      VertexBoxMax = ::math::vector_3d(-9999999.0f,-9999999.0f,-9999999.0f);
-      rad = 0;
-      for (size_t i=0; i<nVertices; ++i) {
-        ::math::vector_3d v(vertices[i].x(), vertices[i].z(), -vertices[i].y());
-        if (v.x() < VertexBoxMin.x()) VertexBoxMin.x (v.x());
-        if (v.y() < VertexBoxMin.y()) VertexBoxMin.y (v.y());
-        if (v.z() < VertexBoxMin.z()) VertexBoxMin.z (v.z());
-        if (v.x() > VertexBoxMax.x()) VertexBoxMax.x (v.x());
-        if (v.y() > VertexBoxMax.y()) VertexBoxMax.y (v.y());
-        if (v.z() > VertexBoxMax.z()) VertexBoxMax.z (v.z());
-      }
-      center = (VertexBoxMax + VertexBoxMin) * 0.5f;
-      rad = (VertexBoxMax-center).length();
-    }
-    else if ( fourcc == 'MONR' ) {
-      normals =  reinterpret_cast< ::math::vector_3d*>(gf.getPointer());
-    }
-    else if ( fourcc == 'MOTV' ) {
-      texcoords =  reinterpret_cast< ::math::vector_2d*>(gf.getPointer());
-    }
-    else if ( fourcc == 'MOLR' ) {
-      nLR = size / 2;
-      useLights =  reinterpret_cast<uint16_t*>(gf.getPointer());
-    }
-    else if ( fourcc == 'MODR' ) {
-      nDoodads = size / 2;
-      ddr = new int16_t[nDoodads];
-      gf.read(ddr,size);
-    }
-    else if ( fourcc == 'MOBA' ) {
-      nBatches = size / 24;
-      batches = reinterpret_cast<WMOBatch*>(gf.getPointer());
-    }
-    else if ( fourcc == 'MOCV' ) {
-      //gLog("CV: %d\n", size);
-      hascv = true;
-      cv = reinterpret_cast<uint32_t*>(gf.getPointer());
-    }
-    else if ( fourcc == 'MLIQ' ) {
-      WMOLiquidHeader hlq;
-      gf.read (&hlq, sizeof (WMOLiquidHeader));
-
-      lq = new Liquid (hlq.A, hlq.B, ::math::vector_3d (hlq.pos.x(), hlq.pos.z(), -hlq.pos.y()));
-      lq->initFromWMO (&gf, wmo->_materials[hlq.type], flags & 0x2000);
-    }
-
-    //! \todo  figure out/use MFOG ?
-
-     gf.seek(nextpos);
-  }
-
-  // ok, make a display list
-
-  indoor = flags & 8192;
-  //gLog("Lighting: %s %X\n\n", indoor?"Indoor":"Outdoor", flags);
-
-  initLighting(nLR,useLights);
-
-  //dl = gl.genLists(1);
-  //gl.newList(dl, GL_COMPILE);
-  //gl.disable(GL_BLEND);
-  //gl.color4f(1,1,1,1);
-
-  /*
-  float xr=0,xg=0,xb=0;
-  if (flags & 0x0040) xr = 1;
-  if (flags & 0x2000) xg = 1;
-  if (flags & 0x8000) xb = 1;
-  gl.color4f(xr,xg,xb,1);
-  */
-
   // generate lists for each batch individually instead
-  _lists.resize( nBatches );
+  _lists.resize( _batches.size() );
 
   // assume that texturing is on, for unit 1
 
-  for (size_t b=0; b<nBatches; b++)
+  for (size_t b = 0; b < _batches.size (); b++)
   {
-    WMOBatch *batch = &batches[b];
+    wmo_batch *batch = &_batches[b];
     WMOMaterial* mat (&wmo->_materials.at (batch->texture));
     noggit::scoped_blp_texture_reference const& texture (wmo->_textures.at (batch->texture));
 
@@ -747,14 +605,14 @@ void WMOGroup::initDisplayList()
 
     // render
     gl.begin(GL_TRIANGLES);
-    for (int t=0, i=batch->indexStart; t<batch->indexCount; t++,++i) {
-      int a = indices[i];
+    for (int t = 0, i = batch->index_start; t < batch->index_count; t++, ++i) {
+      int a = _indices[i];
       if (indoor && hascv) {
-              setGLColor(cv[a]);
+              setGLColor(_vertex_colors[a]);
       }
-      gl.normal3f(normals[a].x(), normals[a].z(), -normals[a].y());
-      gl.texCoord2fv(texcoords[a]);
-      gl.vertex3f(vertices[a].x(), vertices[a].z(), -vertices[a].y());
+      gl.normal3f (_normals[a].x(), _normals[a].z(), -_normals[a].y());
+      gl.texCoord2fv (_texcoords[a]);
+      gl.vertex3fv (_vertices[a]);
     }
     gl.end();
 
@@ -770,9 +628,132 @@ void WMOGroup::initDisplayList()
     _lists[b].first->end_recording();
   }
 
+  _vertices.clear ();
+  _normals.clear ();
+  _texcoords.clear ();
+  _vertex_colors.clear ();
+  _indices.clear ();
+
   indoor = false;
 }
 
+void WMOGroup::load()
+{
+  WMOGroupHeader gh;
+
+  uint16_t *useLights = 0;
+  int nLR = 0;
+
+  // open group file
+  std::stringstream curNum;
+  curNum << "_" << std::setw (3) << std::setfill ('0') << num;
+
+  std::string fname = wmo->filename ();
+  fname.insert (fname.find (".wmo"), curNum.str ());
+
+  noggit::mpq::file gf (QString::fromStdString (fname));
+
+  gf.seek (0x14);
+  // read header
+  gf.read (&gh, sizeof (WMOGroupHeader));
+  WMOFog &wf = wmo->fogs[gh.fogs[0]];
+  if (wf.r2 <= 0) fog = -1; // default outdoor fog..?
+  else fog = gh.fogs[0];
+
+  BoundingBoxMin = ::math::vector_3d (gh.box1[0], gh.box1[2], -gh.box1[1]);
+  BoundingBoxMax = ::math::vector_3d (gh.box2[0], gh.box2[2], -gh.box2[1]);
+
+  gf.seek (0x58); // first chunk
+
+  uint32_t fourcc;
+  uint32_t size;
+
+  hascv = false;
+
+  while (!gf.is_at_end_of_file ()) {
+    gf.read (&fourcc, 4);
+    gf.read (&size, 4);
+
+    size_t nextpos = gf.getPos () + size;
+
+    // why copy stuff when I can just map it from memory ^_^
+
+    if (fourcc == 'MOPY') {
+      // materials per triangle
+    }
+    else if (fourcc == 'MOVI') {
+      // indices
+      _indices.resize (size / sizeof (uint16_t));
+      gf.read (_indices.data (), size);
+    }
+    else if (fourcc == 'MOVT') {
+      // let's hope it's padded to 12 bytes, not 16...
+      ::math::vector_3d *vertices = reinterpret_cast< ::math::vector_3d*>(gf.getPointer ());
+      VertexBoxMin = ::math::vector_3d (9999999.0f, 9999999.0f, 9999999.0f);
+      VertexBoxMax = ::math::vector_3d (-9999999.0f, -9999999.0f, -9999999.0f);
+      rad = 0;
+      for (size_t i = 0; i < size / sizeof(::math::vector_3d); ++i) {
+        ::math::vector_3d v (vertices[i].x (), vertices[i].z (), -vertices[i].y ());
+
+        if (v.x () < VertexBoxMin.x ()) VertexBoxMin.x (v.x ());
+        if (v.y () < VertexBoxMin.y ()) VertexBoxMin.y (v.y ());
+        if (v.z () < VertexBoxMin.z ()) VertexBoxMin.z (v.z ());
+        if (v.x () > VertexBoxMax.x ()) VertexBoxMax.x (v.x ());
+        if (v.y () > VertexBoxMax.y ()) VertexBoxMax.y (v.y ());
+        if (v.z () > VertexBoxMax.z ()) VertexBoxMax.z (v.z ());
+
+        _vertices.push_back (v);
+      }
+      center = (VertexBoxMax + VertexBoxMin) * 0.5f;
+      rad = (VertexBoxMax - center).length ();
+    }
+    else if (fourcc == 'MONR') {
+      _normals.resize (size / sizeof (::math::vector_3d));
+      gf.read (_normals.data (), size);
+    }
+    else if (fourcc == 'MOTV') {
+      _texcoords.resize (size / sizeof (::math::vector_2d));
+      gf.read (_texcoords.data (), size);
+    }
+    else if (fourcc == 'MOLR') {
+      nLR = size / 2;
+      useLights = reinterpret_cast<uint16_t*>(gf.getPointer ());
+    }
+    else if (fourcc == 'MODR') {
+      nDoodads = size / 2;
+      ddr = new int16_t[nDoodads];
+      gf.read (ddr, size);
+    }
+    else if (fourcc == 'MOBA') {
+      _batches.resize (size / sizeof (wmo_batch));
+      gf.read (_batches.data (), size);
+    }
+    else if (fourcc == 'MOCV') {
+      //gLog("CV: %d\n", size);
+      hascv = true;
+      _vertex_colors.resize (size / sizeof (uint32_t));
+      gf.read (_vertex_colors.data (), size);
+    }
+    else if (fourcc == 'MLIQ') {
+      WMOLiquidHeader hlq;
+      gf.read (&hlq, sizeof (WMOLiquidHeader));
+
+      //lq = new Liquid (hlq.A, hlq.B, ::math::vector_3d (hlq.pos.x (), hlq.pos.z (), -hlq.pos.y ()));
+      //lq->initFromWMO (&gf, wmo->_materials[hlq.type], flags & 0x2000);
+    }
+
+    //! \todo  figure out/use MFOG ?
+
+    gf.seek (nextpos);
+  }
+
+  // ok, make a display list
+
+  indoor = flags & 8192;
+  //gLog("Lighting: %s %X\n\n", indoor?"Indoor":"Outdoor", flags);
+
+  initLighting (nLR, useLights);
+}
 
 void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 {
@@ -853,7 +834,7 @@ void WMOGroup::draw ( World* world
   //gl.callList(dl);
   gl.disable(GL_BLEND);
   gl.color4f(1,1,1,1);
-  for (size_t i=0; i<nBatches; ++i)
+  for (size_t i = 0; i < _batches.size (); ++i)
   {
     if (wmoShader)
     {
@@ -878,7 +859,7 @@ void WMOGroup::draw ( World* world
 
 void WMOGroup::draw_for_selection() const
 {
-  for (size_t i (0); i < nBatches; ++i)
+  for (size_t i (0); i < _batches.size (); ++i)
   {
     _lists[i].first->render();
   }
