@@ -1011,9 +1011,9 @@ void main()
       static auto const texcoords (make_texcoords());
       mcnk_shader.attrib ("texcoord", texcoords);
 
-      mcnk_shader.uniform ("draw_area_id_overlay", flags & AREAID);
-      mcnk_shader.uniform ("draw_terrain_height_contour", flags & HEIGHTCONTOUR);
-      mcnk_shader.uniform ("mark_impassable_chunks", flags & MARKIMPASSABLE);
+      mcnk_shader.uniform ("draw_area_id_overlay", !!(flags & AREAID));
+      mcnk_shader.uniform ("draw_terrain_height_contour", !!(flags & HEIGHTCONTOUR));
+      mcnk_shader.uniform ("mark_impassable_chunks", !!(flags & MARKIMPASSABLE));
 
       //! \todo draw triangle selection cursor
       // selected indices = mapstrip2[noggit::selection::selected_polygon (*selected_item) + 0…2]

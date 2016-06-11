@@ -635,7 +635,7 @@ void MapChunk::draw ( opengl::scoped::use_program& shader
 
   shader.uniform("textures", texture_indices);
   shader.uniform("alphamaps", alphamap_indices);
-  shader.uniform("layer_count", textures.num());
+  shader.uniform("layer_count", int (textures.num()));
 
 
   shader.attrib ("position", mVertices);
