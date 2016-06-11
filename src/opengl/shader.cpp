@@ -88,6 +88,10 @@ namespace opengl
     {
       gl.uniform1i (_program.uniform_location (name), value);
     }
+    void use_program::uniform (std::string const& name, float value)
+    {
+      gl.uniform1f (_program.uniform_location (name), value);
+    }
     void use_program::uniform (std::string const& name, std::vector<int> const& value)
     {
       gl.uniform1iv(_program.uniform_location(name), value.size(), value.data());
@@ -107,7 +111,7 @@ namespace opengl
 
     void use_program::sampler (std::string const& name, GLenum type, GLenum texture_slot, GLint id)
     {
-      uniform (name, texture_slot - GL_TEXTURE0);
+      uniform (name, int (texture_slot - GL_TEXTURE0));
       texture::enable_texture (texture_slot - GL_TEXTURE0);
       gl.bindTexture (GL_TEXTURE_2D, id);
     }
