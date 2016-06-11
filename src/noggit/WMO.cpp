@@ -736,14 +736,15 @@ void WMOGroup::initDisplayList()
     {
       wmo_batch* batch = &_batches[b];
       noggit::scoped_blp_texture_reference const& texture (wmo->_textures.at (batch->texture));
-      scoped_material_setter const material_setter (&wmo->_materials.at (batch->texture), hascv);
+      scoped_material_setter const material_setter (&wmo->_materials.at (batch->texture), _vertex_colors.size ());
+
       texture->bind ();
 
       // render
       gl.begin (GL_TRIANGLES);
       for (int t = 0, i = batch->index_start; t < batch->index_count; t++, ++i) {
         int a = _indices[i];
-        if (indoor && hascv) {
+        if (indoor && _vertex_colors.size ()) {
           setGLColor (_vertex_colors[a]);
         }
         gl.normal3f (_normals[a].x (), _normals[a].z (), -_normals[a].y ());
@@ -777,8 +778,6 @@ void WMOGroup::load()
 
   uint32_t fourcc;
   uint32_t size;
-
-  hascv = false;
 
   int nLR = 0;
   uint16_t *useLights = nullptr;
@@ -990,8 +989,6 @@ void WMOGroup::load()
 
     assert (fourcc == 'MOCV');
 
-    hascv = true;
-
     _vertex_colors.resize (size / sizeof (uint32_t));
     f.read (_vertex_colors.data (), size);
   }
@@ -1056,7 +1053,7 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 {
   //dl_light = 0;
   // "real" lighting?
-  if ((flags & 0x2000) && hascv)
+  if ((flags & 0x2000) && _vertex_colors.size ())
   {
     ::math::vector_3d dirmin(1, 1, 1);
     float lenmin;
@@ -1118,7 +1115,7 @@ void WMOGroup::draw ( World* world
 {
   setupFog(world, draw_fog, fog_distance);
 
-  if (hascv)
+  if (_vertex_colors.size ())
   {
     gl.disable(GL_LIGHTING);
     world->outdoorLights(false);
@@ -1153,7 +1150,7 @@ void WMOGroup::draw ( World* world
   gl.color4f(1,1,1,1);
   gl.enable(GL_CULL_FACE);
 
-  if (hascv)
+  if (_vertex_colors.size ())
       gl.enable(GL_LIGHTING);
 
 
