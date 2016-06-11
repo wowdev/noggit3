@@ -847,9 +847,6 @@ void World::draw ( size_t flags
 
   gl.clientActiveTexture(GL_TEXTURE0);
 
-  gl.enable(GL_FRAMEBUFFER_SRGB);
-
-
   // gosh darn alpha blended evil
   //! \note THIS SCOPE IS NEEDED FOR THE SETTINGS SAVER!
   {
