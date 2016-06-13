@@ -537,13 +537,6 @@ float MapChunk::getMinHeight() const
 	return min;
 }
 
-void MapChunk::drawPass (int anim) const
-{
-  texture_animation_setup const texture_animation (mcly_flags_type::interpret (anim));
-
-  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
-}
-
 void MapChunk::drawLines (bool draw_hole_lines) const
 {
   gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
