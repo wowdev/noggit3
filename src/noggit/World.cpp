@@ -167,6 +167,177 @@ namespace
   }
 }
 
+namespace shader
+{
+  const std::string mfbo_vert = R"code(
+#version 110
+
+attribute vec4 position;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+void main()
+{
+  gl_Position = projection * model_view * position;
+}
+)code";
+
+  const std::string mfbo_frag = R"code(
+#version 110
+
+uniform vec4 color;
+
+void main()
+{
+  gl_FragColor = color;
+}
+)code";
+
+  const std::string mcnk_vert = R"code(
+#version 110
+
+attribute vec4 position;
+attribute vec3 normal;
+attribute vec2 texcoord;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+varying vec4 vary_position;
+varying vec2 vary_texcoord;
+varying vec3 vary_normal;
+
+void main()
+{
+  gl_Position = projection * model_view * position;
+  //! \todo gl_NormalMatrix deprecated
+  vary_normal = normalize (gl_NormalMatrix * normal);
+  vary_position = position;
+  vary_texcoord = texcoord;
+}
+)code";
+
+  const std::string mcnk_frag = R"code(
+#version 110
+
+uniform bool draw_area_id_overlay;
+//! \todo draw triangle selection cursor
+// uniform bool draw_triangle_selection_cursor;
+uniform bool draw_terrain_height_contour;
+uniform bool is_impassable_chunk;
+uniform bool mark_impassable_chunks;
+uniform vec3 area_id_color;
+uniform vec3 shadow_color;
+uniform int layer_count;
+
+uniform bool draw_cursor_circle;
+uniform vec3 cursor_position;
+uniform float outer_cursor_radius;
+uniform vec4 cursor_color;
+
+uniform mat4 model_view;
+
+uniform sampler2D shadow_map;
+
+uniform sampler2D textures[4];
+uniform sampler2D alphamaps[3];
+
+varying vec4 vary_position;
+varying vec2 vary_texcoord;
+varying vec3 vary_normal;
+
+const float contour_height_delta = 2.0;
+
+// glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+vec4 blend_by_alpha (in vec4 source, in vec4 dest)
+{
+  return source * source.w + dest * (1.0 - source.w);
+}
+
+vec4 phong_lighting(in vec4 diffuse)
+{
+  // Implementing Phong Shader (for one Point-Light)
+  // https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/lighting.php
+
+  vec3 N = vary_normal;
+  vec3 v = (model_view * vary_position).xyz;
+
+  //! \todo gl_LightSource deprecated
+  vec3 L = normalize (gl_LightSource[0].position.xyz - v);
+  vec3 E = normalize (-v);
+  vec3 R = normalize (-reflect (L, N));
+
+  //! \todo gl_FrontLightProduct deprecated
+  vec4 Iamb = gl_FrontLightProduct[0].ambient;
+  vec4 Idiff = clamp (diffuse * max (dot (N, L), 0.0), 0.0, 1.0);
+  vec4 Ispec = clamp (gl_FrontLightProduct[0].specular * pow (max (dot (R, E),0.0), 0.3 * gl_FrontMaterial.shininess), 0.0, 1.0);
+
+  //! \todo gl_FrontLightModelProduct deprecated
+  return gl_FrontLightModelProduct.sceneColor + Iamb + Idiff + Ispec;
+}
+
+vec4 texture_blend() {
+  if(layer_count == 0)
+    return vec4 (1.0, 1.0, 1.0, 1.0);
+
+  vec4 color = vec4 (0.0, 0.0, 0.0, 0.0);
+
+  for (int i = 0; i < layer_count; ++i)
+  {
+    float alpha = 1.0;
+    vec4 texture_color = texture2D (textures[i], vary_texcoord * 8.0);
+
+    if (i != 0)
+    {
+      alpha = texture2D (alphamaps[i - 1], vary_texcoord).a;
+    }
+
+    color = blend_by_alpha (vec4 (texture_color.rgb, alpha), color);
+  }
+
+  return color;
+}
+
+void main()
+{
+  if (draw_terrain_height_contour && abs (mod (vary_position.y, contour_height_delta)) <= 0.25)
+  {
+    gl_FragColor = vec4 (0.0, 0.0, 0.0, 1.0);
+    return;
+  }
+
+  //! \todo is selected triangle in triangle selection cursor mode
+  // if (draw_triangle_selection_cursor && is_selected_triangle)
+  // {
+  //   gl_FragColor = vec4 (1.0, 1.0, 0.0, 1.0);
+  //   return;
+  // }
+
+  //! \todo this is quite bright. pretty sure its a gamma issue
+  gl_FragColor = phong_lighting(texture_blend());
+
+  gl_FragColor = blend_by_alpha (vec4 (shadow_color, texture2D (shadow_map, vary_texcoord).a), gl_FragColor);
+
+  if (mark_impassable_chunks && is_impassable_chunk)
+  {
+    gl_FragColor = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.6), gl_FragColor);
+  }
+
+  if (draw_area_id_overlay)
+  {
+    gl_FragColor = blend_by_alpha (vec4 (area_id_color, 0.7), gl_FragColor);
+  }
+
+  if (draw_cursor_circle && abs (distance (vary_position.xz, cursor_position.xz) - outer_cursor_radius) <= 0.1)
+  {
+    gl_FragColor = blend_by_alpha (cursor_color, gl_FragColor);
+  }
+}
+)code";
+
+}
+
 bool World::IsEditableWorld( int pMapId )
 {
   std::string lMapName;
@@ -859,155 +1030,10 @@ void World::draw ( size_t flags
       gl.bindBuffer (GL_ARRAY_BUFFER, 0);
       gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
 
-      //! \todo don't compile on every frame
-
-      opengl::shader const vertex_shader
-        { GL_VERTEX_SHADER
-        , R"code(
-#version 110
-
-attribute vec4 position;
-attribute vec3 normal;
-attribute vec2 texcoord;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-
-varying vec4 vary_position;
-varying vec2 vary_texcoord;
-varying vec3 vary_normal;
-
-void main()
-{
-  gl_Position = projection * model_view * position;
-  //! \todo gl_NormalMatrix deprecated
-  vary_normal = normalize (gl_NormalMatrix * normal);
-  vary_position = position;
-  vary_texcoord = texcoord;
-}
-)code"
-        };
-      opengl::shader const fragment_shader
-        { GL_FRAGMENT_SHADER
-        , R"code(
-#version 110
-
-uniform bool draw_area_id_overlay;
-//! \todo draw triangle selection cursor
-// uniform bool draw_triangle_selection_cursor;
-uniform bool draw_terrain_height_contour;
-uniform bool is_impassable_chunk;
-uniform bool mark_impassable_chunks;
-uniform vec3 area_id_color;
-uniform vec3 shadow_color;
-uniform int layer_count;
-
-uniform bool draw_cursor_circle;
-uniform vec3 cursor_position;
-uniform float outer_cursor_radius;
-uniform vec4 cursor_color;
-
-uniform mat4 model_view;
-
-uniform sampler2D shadow_map;
-
-uniform sampler2D textures[4];
-uniform sampler2D alphamaps[3];
-
-varying vec4 vary_position;
-varying vec2 vary_texcoord;
-varying vec3 vary_normal;
-
-const float contour_height_delta = 2.0;
-
-// glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-vec4 blend_by_alpha (in vec4 source, in vec4 dest)
-{
-  return source * source.w + dest * (1.0 - source.w);
-}
-
-vec4 phong_lighting(in vec4 diffuse)
-{
-  // Implementing Phong Shader (for one Point-Light)
-  // https://www.opengl.org/sdk/docs/tutorials/ClockworkCoders/lighting.php
-
-  vec3 N = vary_normal;
-  vec3 v = (model_view * vary_position).xyz;
-
-  //! \todo gl_LightSource deprecated
-  vec3 L = normalize (gl_LightSource[0].position.xyz - v);
-  vec3 E = normalize (-v);
-  vec3 R = normalize (-reflect (L, N));
-
-  //! \todo gl_FrontLightProduct deprecated
-  vec4 Iamb = gl_FrontLightProduct[0].ambient;
-  vec4 Idiff = clamp (diffuse * max (dot (N, L), 0.0), 0.0, 1.0);
-  vec4 Ispec = clamp (gl_FrontLightProduct[0].specular * pow (max (dot (R, E),0.0), 0.3 * gl_FrontMaterial.shininess), 0.0, 1.0);
-
-  //! \todo gl_FrontLightModelProduct deprecated
-  return gl_FrontLightModelProduct.sceneColor + Iamb + Idiff + Ispec;
-}
-
-vec4 texture_blend() {
-  if(layer_count == 0)
-    return vec4 (1.0, 1.0, 1.0, 1.0);
-
-  vec4 color = vec4 (0.0, 0.0, 0.0, 0.0);
-
-  for (int i = 0; i < layer_count; ++i)
-  {
-    float alpha = 1.0;
-    vec4 texture_color = texture2D (textures[i], vary_texcoord * 8.0);
-
-    if (i != 0)
-    {
-      alpha = texture2D (alphamaps[i - 1], vary_texcoord).a;
-    }
-
-    color = blend_by_alpha (vec4 (texture_color.rgb, alpha), color);
-  }
-
-  return color;
-}
-
-void main()
-{
-  if (draw_terrain_height_contour && abs (mod (vary_position.y, contour_height_delta)) <= 0.25)
-  {
-    gl_FragColor = vec4 (0.0, 0.0, 0.0, 1.0);
-    return;
-  }
-
-  //! \todo is selected triangle in triangle selection cursor mode
-  // if (draw_triangle_selection_cursor && is_selected_triangle)
-  // {
-  //   gl_FragColor = vec4 (1.0, 1.0, 0.0, 1.0);
-  //   return;
-  // }
-
-  //! \todo this is quite bright. pretty sure its a gamma issue
-  gl_FragColor = phong_lighting(texture_blend());
-
-  gl_FragColor = blend_by_alpha (vec4 (shadow_color, texture2D (shadow_map, vary_texcoord).a), gl_FragColor);
-
-  if (mark_impassable_chunks && is_impassable_chunk)
-  {
-    gl_FragColor = blend_by_alpha (vec4 (1.0, 1.0, 1.0, 0.6), gl_FragColor);
-  }
-
-  if (draw_area_id_overlay)
-  {
-    gl_FragColor = blend_by_alpha (vec4 (area_id_color, 0.7), gl_FragColor);
-  }
-
-  if (draw_cursor_circle && abs (distance (vary_position.xz, cursor_position.xz) - outer_cursor_radius) <= 0.1)
-  {
-    gl_FragColor = blend_by_alpha (cursor_color, gl_FragColor);
-  }
-}
-)code"
-        };
-      opengl::program const program {&vertex_shader, &fragment_shader};
+      static opengl::program const program {
+        { GL_VERTEX_SHADER,   shader::mcnk_vert },
+        { GL_FRAGMENT_SHADER, shader::mcnk_frag }
+      };
 
       opengl::scoped::use_program mcnk_shader {program};
 
@@ -1142,38 +1168,10 @@ void main()
       gl.bindBuffer (GL_ARRAY_BUFFER, 0);
       gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
 
-      //! \todo don't compile on every frame
-
-      opengl::shader const vertex_shader
-        { GL_VERTEX_SHADER
-        , R"code(
-#version 110
-
-attribute vec4 position;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-
-void main()
-{
-  gl_Position = projection * model_view * position;
-}
-)code"
-        };
-      opengl::shader const fragment_shader
-        { GL_FRAGMENT_SHADER
-        , R"code(
-#version 110
-
-uniform vec4 color;
-
-void main()
-{
-  gl_FragColor = color;
-}
-)code"
-        };
-      opengl::program const program {&vertex_shader, &fragment_shader};
+      static opengl::program const program {
+        { GL_VERTEX_SHADER,   shader::mfbo_vert },
+        { GL_FRAGMENT_SHADER, shader::mfbo_frag }
+      };
 
       opengl::scoped::use_program mfbo_shader {program};
 

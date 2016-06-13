@@ -37,7 +37,7 @@ namespace opengl
 
   struct program
   {
-    program (std::initializer_list<shader const*>);
+    program (std::initializer_list<shader>);
     ~program();
 
     program (program const&) = delete;

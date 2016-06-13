@@ -24,7 +24,7 @@ namespace opengl
     gl.deleteShader (_handle);
   }
 
-  program::program (std::initializer_list<shader const*> shaders)
+  program::program (std::initializer_list<shader> shaders)
     : _handle (gl.createProgram())
   {
     struct scoped_attach
@@ -45,9 +45,9 @@ namespace opengl
 
     std::list<scoped_attach> attachments;
 
-    for (shader const* s : shaders)
+    for (shader const& s : shaders)
     {
-      attachments.emplace_back (_handle, s->_handle);
+      attachments.emplace_back (_handle, s._handle);
     }
 
     gl.link_program (_handle);
