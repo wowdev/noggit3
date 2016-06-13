@@ -49,7 +49,7 @@ public:
             , const boost::optional<selection_type>& selected_item
             );
   void drawSelect();
-  void drawPass(int anim) const;
+
   // todo split into draw_lines and draw_hole_lines
   void drawLines (bool draw_hole_lines) const;
 
