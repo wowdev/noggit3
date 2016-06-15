@@ -169,6 +169,43 @@ namespace
 
 namespace shader
 {
+  const std::string wmo_vert = R"code(
+#version 110
+
+attribute vec4 position;
+attribute vec2 texcoord;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+varying vec2 vary_texcoord;
+
+void main()
+{
+  vary_texcoord = texcoord;
+  gl_Position = projection * model_view * position;
+}
+)code";
+
+  const std::string wmo_frag = R"code(
+#version 110
+
+uniform sampler2D texture;
+uniform float alpha_threshold;
+
+varying vec2 vary_texcoord;
+
+void main()
+{
+  vec4 diffuse = texture2D(texture, vary_texcoord);
+
+  if(diffuse.a <= alpha_threshold)
+    discard;
+
+  gl_FragColor = diffuse;
+}
+)code";
+
   const std::string mfbo_vert = R"code(
 #version 110
 
@@ -1235,8 +1272,6 @@ void World::draw ( size_t flags
           it->second->draw (flags & FOG, selected_item);
         }
       }
-
-      //drawModelList();
     }
 
 
@@ -1245,14 +1280,18 @@ void World::draw ( size_t flags
     // WMOs / map objects
     if (flags & DRAWWMO)
     {
-      ::math::vector_4d spec_color( 1.0f, 1.0f, 1.0f, 1.0f );
-      gl.materialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
-      gl.materiali( GL_FRONT_AND_BACK, GL_SHININESS, 10 );
+      static opengl::program const program {
+        { GL_VERTEX_SHADER,   shader::wmo_vert },
+        { GL_FRAGMENT_SHADER, shader::wmo_frag }
+      };
 
-      gl.lightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
+      opengl::scoped::use_program wmo_shader { program };
+
+      wmo_shader.uniform ("projection", opengl::matrix::projection ());
 
       for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
-        it->second->draw ( flags & WMODOODAS
+        it->second->draw ( wmo_shader
+                         , flags & WMODOODAS
                          , flags & FOG
                          , skies->hasSkies()
                          , (flags & FOG) ? fog_distance : mapdrawdistance
@@ -1261,31 +1300,26 @@ void World::draw ( size_t flags
                          , camera
                          , selected_item
                          );
-
-      spec_color = ::math::vector_4d( 0.0f, 0.0f, 0.0f, 1.0f );
-      gl.materialfv( GL_FRONT_AND_BACK, GL_SPECULAR, spec_color );
-      gl.materiali( GL_FRONT_AND_BACK, GL_SHININESS, 0 );
     }
 
-    outdoorLights( true );
+    outdoorLights (true);
     setupFog (flags & FOG, fog_distance);
 
-    gl.color4f( 1.0f, 1.0f, 1.0f, 1.0f );
-    gl.disable(GL_CULL_FACE);
+    gl.color4f (1.0f, 1.0f, 1.0f, 1.0f);
+    gl.disable (GL_CULL_FACE);
 
-    gl.disable(GL_BLEND);
-    gl.disable(GL_ALPHA_TEST);
-    gl.enable(GL_LIGHTING);
+    gl.disable (GL_BLEND);
+    gl.disable (GL_ALPHA_TEST);
+    gl.enable (GL_LIGHTING);
   }
 
   setupFog (flags & FOG, fog_distance);
 
-
-  gl.color4f(1,1,1,1);
-  gl.enable(GL_BLEND);
+  gl.color4f (1, 1, 1, 1);
+  gl.enable (GL_BLEND);
 
   //gl.color4f(1,1,1,1);
-  gl.disable(GL_COLOR_MATERIAL);
+  gl.disable (GL_COLOR_MATERIAL);
 
   if(flags & WATER)
   {

@@ -10,6 +10,8 @@
 
 #include <opengl/context.h>
 #include <opengl/scoped.h>
+#include <opengl/matrix.h>
+#include <opengl/shader.hpp>
 
 WMOInstance::WMOInstance(World* world, std::string const& path, noggit::mpq::file* _file )
   : wmo (world, path)
@@ -57,7 +59,8 @@ WMOInstance::WMOInstance( World* world, std::string const& path )
 {
 }
 
-void WMOInstance::draw ( bool draw_doodads
+void WMOInstance::draw ( opengl::scoped::use_program& shader
+                       , bool draw_doodads
                        , bool draw_fog
                        , bool hasSkies
                        , const float culldistance
@@ -77,8 +80,10 @@ void WMOInstance::draw ( bool draw_doodads
                                                              , *selected_item
                                                              )
                          );
+  shader.uniform ("model_view", opengl::matrix::model_view ());
 
-  wmo->draw ( _world
+  wmo->draw ( shader
+            , _world
             , doodadset
             , pos
             , dir.y() - 90.0f

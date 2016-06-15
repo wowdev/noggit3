@@ -18,6 +18,7 @@
 #include <opengl/context.h>
 #include <opengl/primitives.h>
 #include <opengl/scoped.h>
+#include <opengl/shader.hpp>
 
 #include <noggit/async/loader.h>
 #include <noggit/application.h>
@@ -369,7 +370,8 @@ WMO::~WMO()
   groups = nullptr;
 }
 
-void WMO::draw ( World* world
+void WMO::draw ( opengl::scoped::use_program& shader
+               , World* world
                , int doodadset
                , const ::math::vector_3d &ofs
                , const float rot
@@ -402,7 +404,7 @@ void WMO::draw ( World* world
   {
     if (groups[i].is_visible (ofs, rot, culldistance, frustum, camera))
     {
-      groups[i].draw (world, draw_fog, hasSkies, fog_distance);
+      groups[i].draw (shader, world, draw_fog, hasSkies, fog_distance);
 
       if (draw_doodads)
       {
@@ -659,7 +661,7 @@ namespace
 {
   struct scoped_material_setter
   {
-    scoped_material_setter (WMOMaterial* material, bool vertex_colors)
+    scoped_material_setter (opengl::scoped::use_program& shader, WMOMaterial* material, bool vertex_colors)
       : _over_bright ((material->flags & 0x10) && !vertex_colors)
       , _specular (material->specular && !vertex_colors && !_over_bright)
       , _alpha_test ((material->transparent) != 0)
@@ -667,51 +669,28 @@ namespace
     {
       if (_alpha_test)
       {
-        gl.enable (GL_ALPHA_TEST);
 
-        float aval = 0;
+        float alpha_threshold = -1.0f;
 
-        if (material->flags & 0x80) aval = 0.3f;
-        if (material->flags & 0x01) aval = 0.0f;
+        if (material->flags & 0x80)
+          alpha_threshold = 0.3f;
 
-        gl.alphaFunc (GL_GREATER, aval);
+        if (material->flags & 0x01)
+          alpha_threshold = 0.0f;
+
+        shader.uniform ("alpha_threshold", alpha_threshold);
       }
 
       if (_back_face_cull)
         gl.disable (GL_CULL_FACE);
       else
         gl.enable (GL_CULL_FACE);
-
-      if (_specular)
-      {
-        gl.materialfv (GL_FRONT_AND_BACK, GL_SPECULAR, colorFromInt(material->col2));
-      }
-      else
-      {
-        ::math::vector_4d nospec(0, 0, 0, 1);
-        gl.materialfv (GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
-      }
-
-      if (_over_bright)
-      {
-        //! \todo  use emissive color from the WMO Material instead of 1,1,1,1
-        GLfloat em[4] = {1,1,1,1};
-        gl.materialfv (GL_FRONT, GL_EMISSION, em);
-      }
     }
 
     ~scoped_material_setter()
     {
-      if (_over_bright)
-      {
-        GLfloat em[4] = {0,0,0,1};
-        gl.materialfv (GL_FRONT, GL_EMISSION, em);
-      }
-
-      if (_alpha_test)
-      {
-        gl.disable (GL_ALPHA_TEST);
-      }
+      if (!_back_face_cull)
+        gl.disable (GL_CULL_FACE);
     }
 
     const bool _over_bright;
@@ -1089,63 +1068,29 @@ bool WMOGroup::is_visible ( const ::math::vector_3d& offset
       && ((position - camera).length() < (cull_distance + radius));
 }
 
-void WMOGroup::draw ( World* world
+void WMOGroup::draw ( opengl::scoped::use_program& shader
+                    , World* world
                     , bool draw_fog
                     , bool hasSkies
                     , const float& fog_distance
                     )
 {
   gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
-  gl.vertexPointer (3, GL_FLOAT, 0, 0);
-
-  gl.bindBuffer (GL_ARRAY_BUFFER, _normals_buffer);
-  gl.normalPointer (GL_FLOAT, 0, 0);
+  shader.attrib ("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
   gl.bindBuffer (GL_ARRAY_BUFFER, _texcoords_buffer);
-  gl.texCoordPointer (2, GL_FLOAT, 0, 0);
-
-  setupFog(world, draw_fog, fog_distance);
-
-  //! \todo draw mocv for outdoor groups too.
-  //! for this to properly work we need a shader here which allows us to mix the color after our liking.
-  if (indoor && _vertex_colors.size ())
-  {
-    gl.enableClientState (GL_COLOR_ARRAY);
-    gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
-    gl.colorPointer (4, GL_FLOAT, 0, 0);
-
-    gl.disable(GL_LIGHTING);
-    world->outdoorLights(false);
-  }
-  else if (hasSkies)
-  {
-    world->outdoorLights(true);
-  }
-  else
-  {
-    gl.disable(GL_LIGHTING);
-  }
-
-  gl.disable(GL_BLEND);
-  gl.color4f(1,1,1,1);
+  shader.attrib ("texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   for (wmo_batch& batch : _batches)
   {
     noggit::scoped_blp_texture_reference const& texture (wmo->_textures.at (batch.texture));
-    scoped_material_setter const material_setter (&wmo->_materials.at (batch.texture), _vertex_colors.size ());
+    scoped_material_setter const material_setter (shader, &wmo->_materials.at (batch.texture), _vertex_colors.size ());
 
+    shader.uniform ("texture", 0);
+    texture->enable_texture (0);
     texture->bind ();
 
     gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
-  }
-
-  gl.color4f(1,1,1,1);
-  gl.enable(GL_CULL_FACE);
-
-  if (_vertex_colors.size ())
-  {
-    gl.disableClientState (GL_COLOR_ARRAY);
-    gl.enable (GL_LIGHTING);
   }
 }
 
@@ -1297,6 +1242,11 @@ void WMOGroup::setupFog ( World* world
 
 WMOGroup::~WMOGroup()
 {
+  gl.deleteBuffers (1, &_vertices_buffer);
+  gl.deleteBuffers (1, &_normals_buffer);
+  gl.deleteBuffers (1, &_vertex_colors_buffer);
+  gl.deleteBuffers (1, &_texcoords_buffer);
+
   if (lq)
   {
     delete lq;
