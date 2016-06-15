@@ -199,8 +199,11 @@ void main()
 {
   vec4 diffuse = texture2D(texture, vary_texcoord);
 
-  if(diffuse.a <= alpha_threshold)
+  if(alpha_threshold >= 0.0 && diffuse.a <= alpha_threshold)
+  {
     discard;
+    return;
+  }
 
   gl_FragColor = diffuse;
 }
@@ -1289,6 +1292,9 @@ void World::draw ( size_t flags
     // WMOs / map objects
     if (flags & DRAWWMO)
     {
+      opengl::scoped::bool_setter<GL_BLEND, GL_FALSE> const blend;
+      opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull_face;
+
       static opengl::program const program {
         { GL_VERTEX_SHADER,   shader::wmo_vert },
         { GL_FRAGMENT_SHADER, shader::wmo_frag }

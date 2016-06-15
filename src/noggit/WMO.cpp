@@ -688,19 +688,19 @@ namespace
       , _alpha_test ((material->transparent) != 0)
       , _back_face_cull (material->flags & 0x04)
     {
+      float alpha_threshold = -1.0f;
+
       if (_alpha_test)
       {
-
-        float alpha_threshold = -1.0f;
+        alpha_threshold = 0.0f;
 
         if (material->flags & 0x80)
           alpha_threshold = 0.3f;
 
-        if (material->flags & 0x01)
-          alpha_threshold = 0.0f;
-
-        shader.uniform ("alpha_threshold", alpha_threshold);
+        gl.enable (GL_BLEND);
       }
+
+      shader.uniform ("alpha_threshold", alpha_threshold);
 
       if (_back_face_cull)
         gl.disable (GL_CULL_FACE);
@@ -710,6 +710,9 @@ namespace
 
     ~scoped_material_setter()
     {
+      if (_alpha_test)
+        gl.disable (GL_BLEND);
+
       if (!_back_face_cull)
         gl.disable (GL_CULL_FACE);
     }
