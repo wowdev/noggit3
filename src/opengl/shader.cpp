@@ -130,5 +130,12 @@ namespace opengl
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data);
     }
+    void use_program::attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data)
+    {
+      GLuint const location (_program.attrib_location (name));
+      gl.enableVertexAttribArray (location);
+      _enabled_vertex_attrib_arrays.emplace (location);
+      gl.vertexAttribPointer (location, size, type, normalized, stride, data);
+    }
   }
 }

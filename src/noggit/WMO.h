@@ -20,6 +20,8 @@
 
 #include <boost/optional.hpp>
 
+#include <opengl/shader.fwd.hpp>
+
 namespace opengl
 {
   class call_list;
@@ -102,7 +104,8 @@ public:
                   , const Frustum& frustum
                   , const ::math::vector_3d& camera
                   ) const;
-  void draw ( World* world
+  void draw ( opengl::scoped::use_program& shader
+            , World* world
             , bool draw_fog
             , bool hasSkies
             , const float& fog_distance
@@ -251,7 +254,8 @@ public:
   //! \todo This only has World* for wmo-doodads. ._.
   explicit WMO(const std::string& name, World* world);
   ~WMO();
-  void draw (World* world
+  void draw ( opengl::scoped::use_program& shader
+            , World* world
             , int doodadset
             , const ::math::vector_3d& ofs
             , const float rot

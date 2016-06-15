@@ -77,6 +77,7 @@ namespace opengl
 
       void attrib (std::string const& name, std::vector<math::vector_2d> const&);
       void attrib (std::string const& name, math::vector_3d const*);
+      void attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
 
     private:
       program const& _program;

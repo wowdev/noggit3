@@ -12,6 +12,8 @@
 #include <noggit/Selection.h>
 #include <noggit/WMO.h>
 
+#include <opengl/shader.fwd.hpp>
+
 class Frustum;
 class WMO;
 class World;
@@ -48,7 +50,8 @@ public:
   explicit WMOInstance( World*, std::string const& path );
   ~WMOInstance();
 
-  void draw ( bool draw_doodads
+  void draw ( opengl::scoped::use_program& shader
+            , bool draw_doodads
             , bool draw_fog
             , bool hasSkies
             , const float culldistance
