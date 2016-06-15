@@ -60,7 +60,6 @@ WMOInstance::WMOInstance( World* world, std::string const& path )
 }
 
 void WMOInstance::draw ( opengl::scoped::use_program& shader
-                       , bool draw_doodads
                        , bool draw_fog
                        , bool hasSkies
                        , const float culldistance
@@ -84,20 +83,44 @@ void WMOInstance::draw ( opengl::scoped::use_program& shader
 
   wmo->draw ( shader
             , _world
-            , doodadset
             , pos
             , dir.y() - 90.0f
             , culldistance
             , is_selected
             , is_selected
             , is_selected
-            , draw_doodads
             , draw_fog
             , hasSkies
             , fog_distance
             , frustum
             , camera
             );
+}
+
+void WMOInstance::draw_doodads( bool draw_fog
+                              , const float culldistance
+                              , const float& fog_distance
+                              , const Frustum& frustum
+                              , const ::math::vector_3d& camera
+                              )
+{
+  opengl::scoped::matrix_pusher const matrix_pusher;
+
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed ());
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir)).transposed ());
+
+  wmo->draw_doodads ( _world
+                    , doodadset
+                    , pos
+                    , dir.y() - 90.0f
+                    , culldistance
+                    , false
+                    , draw_fog
+                    , fog_distance
+                    , frustum
+                    , camera
+                    );
+
 }
 
 void WMOInstance::drawSelect ( bool draw_doodads
