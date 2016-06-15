@@ -372,14 +372,12 @@ WMO::~WMO()
 
 void WMO::draw ( opengl::scoped::use_program& shader
                , World* world
-               , int doodadset
                , const ::math::vector_3d &ofs
                , const float rot
                , const float culldistance
                , bool boundingbox
                , bool groupboxes
                , bool /*highlight*/
-               , bool draw_doodads
                , bool draw_fog
                , bool hasSkies
                , const float& fog_distance
@@ -405,21 +403,6 @@ void WMO::draw ( opengl::scoped::use_program& shader
     if (groups[i].is_visible (ofs, rot, culldistance, frustum, camera))
     {
       groups[i].draw (shader, world, draw_fog, hasSkies, fog_distance);
-
-      if (draw_doodads)
-      {
-        groups[i].drawDoodads ( world
-                              , doodadset
-                              , ofs
-                              , rot
-                              , draw_fog
-                              , fog_distance
-                              , frustum
-                              , culldistance
-                              , camera
-                              );
-      }
-
       groups[i].drawLiquid (world, draw_fog, fog_distance);
     }
   }
@@ -452,6 +435,44 @@ void WMO::draw ( opengl::scoped::use_program& shader
       opengl::primitives::wire_box ( {extents[0][0], extents[0][2], -extents[0][1]}
                                    , {extents[1][0], extents[1][2], -extents[1][1]}
                                    ).draw (yellow, 1.0f);
+    }
+  }
+}
+
+void WMO::draw_doodads ( World* world
+                       , int doodadset
+                       , const ::math::vector_3d &ofs
+                       , const float rot
+                       , const float culldistance
+                       , bool /*highlight*/
+                       , bool draw_fog
+                       , const float& fog_distance
+                       , const Frustum& frustum
+                       , const ::math::vector_3d& camera
+                       )
+{
+  if (!finished_loading ())
+    return;
+
+  if (!_finished_upload) {
+    upload ();
+    return;
+  }
+
+  for (unsigned int i = 0; i < nGroups; ++i)
+  {
+    if (groups[i].is_visible (ofs, rot, culldistance, frustum, camera))
+    {
+      groups[i].drawDoodads ( world
+                            , doodadset
+                            , ofs
+                            , rot
+                            , draw_fog
+                            , fog_distance
+                            , frustum
+                            , culldistance
+                            , camera
+                            );
     }
   }
 }

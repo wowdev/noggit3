@@ -1275,7 +1275,16 @@ void World::draw ( size_t flags
     }
 
 
-
+    if(flags & WMODOODAS)
+    {
+      for (std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin (); it != mWMOInstances.end (); ++it)
+        it->second->draw_doodads( flags & FOG
+                                , (flags & FOG) ? fog_distance : mapdrawdistance
+                                , fog_distance
+                                , frustum
+                                , camera
+                                );
+    }
 
     // WMOs / map objects
     if (flags & DRAWWMO)
@@ -1291,7 +1300,6 @@ void World::draw ( size_t flags
 
       for( std::map<int, WMOInstance *>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it )
         it->second->draw ( wmo_shader
-                         , flags & WMODOODAS
                          , flags & FOG
                          , skies->hasSkies()
                          , (flags & FOG) ? fog_distance : mapdrawdistance

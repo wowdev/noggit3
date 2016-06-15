@@ -51,7 +51,6 @@ public:
   ~WMOInstance();
 
   void draw ( opengl::scoped::use_program& shader
-            , bool draw_doodads
             , bool draw_fog
             , bool hasSkies
             , const float culldistance
@@ -60,6 +59,12 @@ public:
             , const ::math::vector_3d& camera
             , const boost::optional<selection_type>& selected_item
             ) const;
+  void draw_doodads ( bool draw_fog
+                    , const float culldistance
+                    , const float& fog_distance
+                    , const Frustum& frustum
+                    , const ::math::vector_3d& camera
+                    );
   void drawSelect ( bool draw_doodads
                   , const float culldistance
                   , const Frustum& frustum

@@ -256,20 +256,29 @@ public:
   ~WMO();
   void draw ( opengl::scoped::use_program& shader
             , World* world
-            , int doodadset
             , const ::math::vector_3d& ofs
             , const float rot
             , const float culldistance
             , bool boundingbox
             , bool groupboxes
             , bool highlight
-            , bool draw_doodads
             , bool draw_fog
             , bool hasSkies
             , const float& fog_distance
             , const Frustum& frustum
             , const ::math::vector_3d& camera
             );
+  void draw_doodads ( World* world
+                    , int doodadset
+                    , const ::math::vector_3d &ofs
+                    , const float rot
+                    , const float culldistance
+                    , bool /*highlight*/
+                    , bool draw_fog
+                    , const float& fog_distance
+                    , const Frustum& frustum
+                    , const ::math::vector_3d& camera
+                    );
   void drawSelect (World* world
                   , int doodadset
                   , const ::math::vector_3d& ofs
