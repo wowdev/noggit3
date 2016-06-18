@@ -388,11 +388,11 @@ namespace noggit
 
       if (path.endsWith (".m2"))
       {
-        _world->addM2 (path.toStdString(), _world->_exact_terrain_selection_position);
+        _world->addM2 (path.toStdString(), selection::position (*_selection));
       }
       else if (path.endsWith (".wmo"))
       {
-        _world->addWMO (path.toStdString(), _world->_exact_terrain_selection_position);
+        _world->addWMO (path.toStdString(), selection::position (*_selection));
       }
     }
     else
@@ -618,8 +618,7 @@ namespace noggit
 
       if (_holding_left_mouse_button && selection::is_chunk (*_selection))
       {
-        const ::math::vector_3d& position
-          (_world->_exact_terrain_selection_position);
+        const ::math::vector_3d& position (selection::position(*_selection));
 
         switch(_current_terrain_editing_mode)
         {

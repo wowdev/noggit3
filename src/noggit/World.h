@@ -57,7 +57,6 @@ public:
                      , const float& time_of_day_speed_factor
                      );
 
-  ::math::vector_3d _exact_terrain_selection_position;
   ::math::vector_3d camera;
   ::math::vector_3d lookat;
 
