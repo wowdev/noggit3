@@ -49,7 +49,6 @@ public:
   void draw ( opengl::scoped::use_program& mcnk_shader
             , const boost::optional<selection_type>& selected_item
             );
-  void drawSelect();
 
   void intersect (math::ray ray, selection_result& results);
 

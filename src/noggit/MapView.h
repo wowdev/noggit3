@@ -251,7 +251,6 @@ namespace noggit
 
     void setup_tile_mode_rendering() const;
     void setup_3d_rendering() const;
-    void setup_3d_selection_rendering() const;
     void setup_2d_rendering() const;
 
     float mTimespeed;

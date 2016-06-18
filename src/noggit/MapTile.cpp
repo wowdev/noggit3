@@ -351,23 +351,6 @@ void MapTile::draw ( opengl::scoped::use_program& mcnk_shader
   }
 }
 
-void MapTile::drawSelect ( const float& cull_distance
-                         , const Frustum& frustum
-                         , const ::math::vector_3d& camera
-                         )
-{
-  for (size_t j (0); j < 16; ++j)
-  {
-    for (size_t i (0); i < 16; ++i)
-    {
-      if (mChunks[j][i]->is_visible (cull_distance, frustum, camera))
-      {
-        mChunks[j][i]->drawSelect();
-      }
-    }
-  }
-}
-
 void MapTile::intersect(math::ray ray, selection_result& results)
 {
   for (size_t j (0); j < 16; ++j)
@@ -1262,7 +1245,7 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
     lID = 0;
     for( int i = 0; i < 9; ++i )
       lMFBO_Data[lID++] = mMaximumValues[i].y();
-    
+
     for( int i = 0; i < 9; ++i )
       lMFBO_Data[lID++] = mMinimumValues[i].y();
 

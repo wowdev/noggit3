@@ -111,7 +111,6 @@ public:
             , const float& fog_distance
             );
 
-  void draw_for_selection();
   boost::optional<float> intersect (math::ray ray);
 
   void drawLiquid ( World* world
@@ -128,13 +127,6 @@ public:
                    , const float& cull_distance
                    , const ::math::vector_3d& camera
                    );
-  void drawDoodadsSelect ( unsigned int doodadset
-                         , const ::math::vector_3d& ofs
-                         , const float rot
-                         , const Frustum& frustum
-                         , const float& cull_distance
-                         , const ::math::vector_3d& camera
-                         );
   void setupFog ( World* world
                 , bool draw_fog
                 , const float& fog_distance
@@ -283,15 +275,6 @@ public:
                     , const ::math::vector_3d& camera
                     );
 
-  void drawSelect (World* world
-                  , int doodadset
-                  , const ::math::vector_3d& ofs
-                  , const float rot
-                  , const float culldistance
-                  , bool draw_doodads
-                  , const Frustum& frustum
-                  , const ::math::vector_3d& camera
-                  );
   boost::optional<float> intersect (math::ray ray);
 
   //void drawPortals();

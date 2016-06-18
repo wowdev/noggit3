@@ -477,46 +477,6 @@ void WMO::draw_doodads ( World* world
   }
 }
 
-void WMO::drawSelect (World* world
-                     , int doodadset
-                     , const ::math::vector_3d &ofs
-                     , const float rot
-                     , const float culldistance
-                     , bool draw_doodads
-                     , const Frustum& frustum
-                     , const ::math::vector_3d& camera
-                     )
-{
-  if (!finished_loading ())
-    return;
-
-  if (!_finished_upload) {
-    upload ();
-    return;
-  }
-
-  for (unsigned int i=0; i<nGroups; ++i)
-  {
-    if (groups[i].is_visible (ofs, rot, culldistance, frustum, camera))
-    {
-      groups[i].draw_for_selection();
-
-      if (draw_doodads)
-      {
-        groups[i].drawDoodadsSelect( doodadset
-                                   , ofs
-                                   , rot
-                                   , frustum
-                                   , culldistance
-                                   , camera
-                                   );
-      }
-
-      groups[i].drawLiquid (world, false, 0.0f);
-    }
-  }
-}
-
 boost::optional<float> WMO::intersect(math::ray ray)
 {
   for (size_t i (0); i < nGroups; ++i)
@@ -1129,20 +1089,6 @@ void WMOGroup::draw ( opengl::scoped::use_program& shader
   }
 }
 
-void WMOGroup::draw_for_selection()
-{
-  gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
-  gl.vertexPointer (3, GL_FLOAT, 0, 0);
-
-  gl.bindBuffer (GL_ARRAY_BUFFER, _normals_buffer);
-  gl.normalPointer (GL_FLOAT, 0, 0);
-
-  for (wmo_batch& batch : _batches)
-  {
-    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
-  }
-}
-
 boost::optional<float> WMOGroup::intersect(math::ray ray)
 {
   math::vector_3d const min (VertexBoxMin);
@@ -1211,47 +1157,6 @@ void WMOGroup::drawDoodads ( World* world
 
   gl.disable(GL_LIGHT2);
   gl.color4f(1,1,1,1);
-}
-
-
-void WMOGroup::drawDoodadsSelect ( unsigned int doodadset
-                                 , const ::math::vector_3d& ofs
-                                 , const float rot
-                                 , const Frustum& frustum
-                                 , const float& cull_distance
-                                 , const ::math::vector_3d& camera
-                                 )
-{
-  if (_doodads.empty ())
-    return;
-
-  // draw doodads
-  gl.color4f(1,1,1,1);
-  for (auto doodad : _doodads)
-  {
-    if (! (wmo->doodadsets.size() < doodadset))
-    {
-      if ((doodad >= wmo->doodadsets[doodadset].start) && (doodad < (wmo->doodadsets[doodadset].start + wmo->doodadsets[doodadset].size)))
-      {
-        ModelInstance& mi = wmo->modelis[doodad];
-
-        if (!outdoorLights)
-        {
-          WMOLight::setupOnce (GL_LIGHT2, mi.ldir, mi.lcol);
-        }
-
-        if (mi.is_visible (cull_distance, frustum, camera, ofs, rot))
-        {
-          mi.draw2Select ();
-        }
-      }
-    }
-  }
-
-  gl.disable(GL_LIGHT2);
-
-  gl.color4f(1,1,1,1);
-
 }
 
 void WMOGroup::drawLiquid ( World* world

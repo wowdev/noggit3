@@ -48,10 +48,6 @@ public:
             , const ::math::vector_3d& camera
             , const boost::optional<selection_type>& selected_item
             );
-  void drawSelect ( const float& cull_distance
-                  , const Frustum& frustum
-                  , const ::math::vector_3d& camera
-                  );
   void intersect (math::ray ray, selection_result& results);
   void drawLines ( bool draw_hole_lines
                  , const float& cull_distance

@@ -177,7 +177,6 @@ class Model: public noggit::async::object
   std::vector<RibbonEmitter> ribbons;
 
   void drawModel (int animtime);
-  void drawModelSelect (int animtime);
 
   void initCommon(const noggit::mpq::file& f);
   bool isAnimated(const noggit::mpq::file& f);
@@ -225,7 +224,6 @@ public:
   void draw (bool draw_fog, size_t time);
   void drawTileMode();
 
-  void drawSelect(size_t time);
   boost::optional<float> intersect (size_t time, math::ray ray);
 
   void updateEmitters(float dt);

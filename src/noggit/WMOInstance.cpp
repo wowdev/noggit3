@@ -127,33 +127,6 @@ void WMOInstance::draw_doodads( bool draw_fog
 
 }
 
-void WMOInstance::drawSelect ( bool draw_doodads
-                             , const float culldistance
-                             , const Frustum& frustum
-                             , const ::math::vector_3d& camera
-                             ) const
-{
-  opengl::scoped::matrix_pusher const matrix_pusher;
-
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir)).transposed());
-
-  //mSelectionID = _world->selection_names().add( this );
-  gl.pushName( mSelectionID );
-
-  wmo->drawSelect ( _world
-                  , doodadset
-                  , pos
-                  , -(dir.y() - 90.0f)
-                  , culldistance
-                  , draw_doodads
-                  , frustum
-                  , camera
-                  );
-
-  gl.popName();
-}
-
 void WMOInstance::intersect(math::ray ray, selection_result& results)
 {
   math::matrix_4x4 const translation (math::matrix_4x4::translation, pos);
