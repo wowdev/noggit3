@@ -110,7 +110,10 @@ public:
             , bool hasSkies
             , const float& fog_distance
             );
+
   void draw_for_selection();
+  boost::optional<float> intersect (math::ray ray);
+
   void drawLiquid ( World* world
                   , bool draw_fog
                   , const float& fog_distance
@@ -279,6 +282,7 @@ public:
                     , const Frustum& frustum
                     , const ::math::vector_3d& camera
                     );
+
   void drawSelect (World* world
                   , int doodadset
                   , const ::math::vector_3d& ofs
@@ -288,6 +292,8 @@ public:
                   , const Frustum& frustum
                   , const ::math::vector_3d& camera
                   );
+  boost::optional<float> intersect (math::ray ray);
+
   //void drawPortals();
   bool drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d pLower, ::math::vector_3d pUpper ) const;
 };

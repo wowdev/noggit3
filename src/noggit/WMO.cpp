@@ -517,6 +517,17 @@ void WMO::drawSelect (World* world
   }
 }
 
+boost::optional<float> WMO::intersect(math::ray ray)
+{
+  for (size_t i (0); i < nGroups; ++i)
+  {
+    if (auto distance = groups[i].intersect (ray))
+      return *distance;
+  }
+
+  return boost::none;
+}
+
 bool WMO::drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d pLower, ::math::vector_3d pUpper ) const
 {
   if(skybox && pCamera.is_inside_of (pLower, pUpper))
@@ -1130,6 +1141,30 @@ void WMOGroup::draw_for_selection()
   {
     gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
   }
+}
+
+boost::optional<float> WMOGroup::intersect(math::ray ray)
+{
+  math::vector_3d const min (VertexBoxMin);
+  math::vector_3d const max (VertexBoxMax);
+
+  if (auto distance = math::intersect_bounds (ray, min, max))
+  {
+    for (wmo_batch& batch : _batches)
+    {
+      for (size_t i (batch.index_start); i < batch.index_start + batch.index_count; i += 3)
+      {
+        math::vector_3d const v0 = _vertices[_indices[i + 0]];
+        math::vector_3d const v1 = _vertices[_indices[i + 1]];
+        math::vector_3d const v2 = _vertices[_indices[i + 2]];
+
+        if ((distance = math::intersect_triangle (ray, v0, v1, v2)))
+          return *distance;
+      }
+    }
+  }
+
+  return boost::none;
 }
 
 void WMOGroup::drawDoodads ( World* world
