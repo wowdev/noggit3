@@ -662,6 +662,27 @@ void MapChunk::drawSelect()
   }
 }
 
+void MapChunk::intersect(math::ray ray, selection_result& results)
+{
+  auto distance = math::intersect_bounds (ray, vmin, vmax);
+
+  if (!distance)
+    return;
+
+  for (int i = 0; i < striplen; i += 3)
+  {
+    math::vector_3d const v0 (mVertices[strip[i    ]]);
+    math::vector_3d const v1 (mVertices[strip[i + 1]]);
+    math::vector_3d const v2 (mVertices[strip[i + 2]]);
+
+    if ((distance = math::intersect_triangle (ray, v0, v1, v2)))
+    {
+      results.emplace_back (*distance, selected_chunk_type(this, i));
+      return;
+    }
+  }
+}
+
 void MapChunk::getSelectionCoord ( const int& selected_polygon
                                  , float* x
                                  , float* z

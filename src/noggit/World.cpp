@@ -1501,6 +1501,20 @@ selection_result World::intersect (math::ray ray, world_selection_mask flags)
 {
   selection_result results;
 
+  if (flags.terrain)
+  {
+    for (int j = 0; j < 64; ++j)
+    {
+      for (int i = 0; i < 64; ++i)
+      {
+        if (_map_index.tile_loaded (j, i))
+        {
+          _map_index.tile (j, i)->intersect (ray, results);
+        }
+      }
+    }
+  }
+
   return std::move (results);
 }
 

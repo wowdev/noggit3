@@ -368,6 +368,17 @@ void MapTile::drawSelect ( const float& cull_distance
   }
 }
 
+void MapTile::intersect(math::ray ray, selection_result& results)
+{
+  for (size_t j (0); j < 16; ++j)
+  {
+    for (size_t i (0); i < 16; ++i)
+    {
+      mChunks[j][i]->intersect(ray, results);
+    }
+  }
+}
+
 void MapTile::drawLines ( bool draw_hole_lines
                         , const float& cull_distance
                         , const Frustum& frustum

@@ -13,6 +13,7 @@
 #include <noggit/Selection.h>
 #include <noggit/TextureManager.h>
 #include <noggit/texture_set.hpp>
+#include <math/ray.hpp>
 
 namespace noggit
 {
@@ -49,6 +50,8 @@ public:
             , const boost::optional<selection_type>& selected_item
             );
   void drawSelect();
+
+  void intersect (math::ray ray, selection_result& results);
 
   // todo split into draw_lines and draw_hole_lines
   void drawLines (bool draw_hole_lines) const;
