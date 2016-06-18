@@ -107,6 +107,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 	, mt(maintile)
 	, mBigAlpha(bigAlpha)
 	, water (false)
+  , Changed (false)
 {
 	uint32_t fourcc;
 	uint32_t size;
@@ -894,12 +895,10 @@ Vec3D MapChunk::GetSelectionPosition()
 
 void MapChunk::recalcNorms()
 {
-
 	Vec3D P1, P2, P3, P4;
 	Vec3D Norm, N1, N2, N3, N4, D;
 
-
-	if (Changed == false)
+	if (!Changed)
 		return;
 	Changed = false;
 
@@ -970,14 +969,12 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
 {
 	float dist, xdiff, zdiff;
 
-	Changed = false;
-
 	xdiff = xbase - x + CHUNKSIZE / 2;
 	zdiff = zbase - z + CHUNKSIZE / 2;
 	dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
 	if (dist > (radius + MAPCHUNK_RADIUS))
-		return Changed;
+		return false;
 	vmin.y = 9999999.0f;
 	vmax.y = -9999999.0f;
 	for (int i = 0; i < mapbufsize; ++i)
@@ -1031,14 +1028,13 @@ extern float shaderBlue;
 bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool editMode)
 {
   float dist, xdiff, zdiff;
-  Changed = false;
 
   xdiff = xbase - x + CHUNKSIZE / 2;
   zdiff = zbase - z + CHUNKSIZE / 2;
   dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
   if (dist > (radius + MAPCHUNK_RADIUS))
-    return Changed;
+    return false;
 
   if (!hasMCCV)
   {
@@ -1094,7 +1090,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
   dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
   if (dist > (radius + MAPCHUNK_RADIUS))
-    return Changed;
+    return false;
 
   vmin.y = 9999999.0f;
   vmax.y = -9999999.0f;
@@ -1143,14 +1139,13 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
 	float dist, dist2, xdiff, zdiff, nremain;
-	Changed = false;
 
 	xdiff = xbase - x + CHUNKSIZE / 2;
 	zdiff = zbase - z + CHUNKSIZE / 2;
 	dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
 
 	if (dist > (radius + MAPCHUNK_RADIUS))
-		return Changed;
+		return false;
 
 	vmin.y = 9999999.0f;
 	vmax.y = -9999999.0f;
