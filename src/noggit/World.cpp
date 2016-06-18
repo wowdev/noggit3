@@ -1524,6 +1524,14 @@ selection_result World::intersect (math::ray ray, world_selection_mask flags)
     }
   }
 
+  if (flags.map_object)
+  {
+    for (auto wmo_instance : mWMOInstances)
+    {
+      wmo_instance.second->intersect (ray, results);
+    }
+  }
+
   return std::move (results);
 }
 

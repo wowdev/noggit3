@@ -71,8 +71,12 @@ void WMOInstance::draw ( opengl::scoped::use_program& shader
 {
   opengl::scoped::matrix_pusher const matrix_pusher;
 
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir)).transposed());
+  math::matrix_4x4 const translation (math::matrix_4x4::translation, pos);
+  math::matrix_4x4 const rotation (math::matrix_4x4::rotation, convert_rotation (dir));
+
+  math::matrix_4x4 const model_matrix (translation * rotation);
+
+  gl.multMatrixf (model_matrix.transposed ());
 
   const bool is_selected ( selected_item
                         && noggit::selection::is_the_same_as ( this
@@ -148,6 +152,27 @@ void WMOInstance::drawSelect ( bool draw_doodads
                   );
 
   gl.popName();
+}
+
+void WMOInstance::intersect(math::ray ray, selection_result& results)
+{
+  math::matrix_4x4 const translation (math::matrix_4x4::translation, pos);
+  math::matrix_4x4 const rotation (math::matrix_4x4::rotation, convert_rotation (dir));
+
+  math::matrix_4x4 const model_matrix ((translation * rotation).inverted ());
+
+  math::vector_3d const min (extents[0]);
+  math::vector_3d const max (extents[1]);
+
+  if (auto distance = math::intersect_bounds (ray, min, max))
+  {
+    ray.origin = (model_matrix * math::vector_4d (ray.origin, 1.0)).xyz ();
+    ray.direction = (model_matrix * math::vector_4d (ray.direction, 0.0)).xyz ().normalized ();
+
+    if ((distance = wmo->intersect (ray)))
+      results.emplace_back (*distance, selected_wmo_type (this));
+  }
+
 }
 
 /*void WMOInstance::drawPortals()
