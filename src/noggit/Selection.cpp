@@ -11,86 +11,6 @@
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 
-/**
- ** nameEntry
- **
- ** This is used for selectable objects.
- **
- **/
-
-nameEntry::nameEntry( ModelInstance *model )
-{
-  type = eEntry_Model;
-  data.model = model;
-}
-
-nameEntry::nameEntry( WMOInstance *wmo )
-{
-  type = eEntry_WMO;
-  data.wmo = wmo;
-}
-
-nameEntry::nameEntry( MapChunk *chunk )
-{
-  type = eEntry_MapChunk;
-  data.mapchunk = chunk;
-}
-
-nameEntry::nameEntry (const nameEntry& other)
-{
-  type = other.type;
-  data.___DIRTY = data.___DIRTY;
-}
-
-/**
- ** nameEntryManager
- **
- ** This is used for managing those selectable objects.
- **
- **/
-
-size_t nameEntryManager::add( ModelInstance *mod )
-{
-  _items.push_back (new nameEntry (mod));
-  return _items.size() - 1;
-}
-size_t nameEntryManager::add( WMOInstance *wmo )
-{
-  _items.push_back (new nameEntry (wmo));
-  return _items.size() - 1;
-}
-size_t nameEntryManager::add( MapChunk *chunk )
-{
-  _items.push_back (new nameEntry (chunk));
-  return _items.size() - 1;
-}
-
-nameEntry* nameEntryManager::findEntry (size_t ref) const
-{
-  assert (ref < _items.size());
-  return _items[ref];
-}
-
-void nameEntryManager::del (size_t ref)
-{
-  //! \todo This is no longer in that global _world thing, so can't be
-  //! removed  there.  We  somehow  need a  back  reference between  a
-  //! selection and  where the selection is  stored so we  are able to
-  //! unselect it. (One item can  be selected in multiple views, which
-  //! is why we can't rely on the view resetting his selection when it
-  //! is  deleted. Also, a  view might  have selected  something which
-  //! goes  out of  range and  therefore is  unloaded, ergo  no longer
-  //! selected.
-
-  // if (_world->GetCurrentSelection() == _items[ref])
-  // {
-  //   _world->mCurrentSelection = boost::none;
-  // }
-
-  delete _items[ref];
-  _items[ref] = 0;
-}
-
 namespace noggit
 {
   namespace selection
@@ -114,23 +34,6 @@ namespace noggit
         operator() (const selected_wmo_type& wmo) const
         {
           return wmo->pos;
-        }
-      };
-
-      class name_entry : public boost::static_visitor<nameEntry*>
-      {
-      public:
-        nameEntry* operator() (const selected_chunk_type& chunk) const
-        {
-          return new nameEntry (chunk.chunk);
-        }
-        nameEntry* operator() (const selected_model_type& model) const
-        {
-          return new nameEntry (model);
-        }
-        nameEntry* operator() (const selected_wmo_type& wmo) const
-        {
-          return new nameEntry (wmo);
         }
       };
 
@@ -198,6 +101,47 @@ namespace noggit
 
       private:
         World* _world_link;
+      };
+
+      class add_to_world : public boost::static_visitor<>
+      {
+      public:
+        add_to_world ( World* world_link
+                     , const math::vector_3d& position
+                     , bool size_randomization
+                     , bool position_randomization
+                     , bool rotation_randomization
+                     )
+          : _world_link (world_link)
+          , _position (position)
+          , _size_randomization (size_randomization)
+          , _position_randomization (position_randomization)
+          , _rotation_randomization (rotation_randomization)
+        {}
+
+        [[noreturn]] void operator() (const selected_chunk_type&) const
+        {
+          throw std::runtime_error ("Can't delete chunks as of now.");
+        }
+        void operator() (const selected_model_type& model) const
+        {
+          _world_link->addM2 ( model->model->_filename
+                             , _position
+                             , _size_randomization
+                             , _position_randomization
+                             , _rotation_randomization);
+        }
+        void operator() (const selected_wmo_type& wmo) const
+        {
+          _world_link->addWMO (wmo->wmo->_filename, _position);
+        }
+
+      private:
+        World* _world_link;
+        math::vector_3d _position;
+        bool _size_randomization;
+        bool _position_randomization;
+        bool _rotation_randomization;
       };
 
       class reset_rotation : public boost::static_visitor<>
@@ -397,12 +341,6 @@ namespace noggit
       return boost::apply_visitor (visitors::position(), selection);
     }
 
-    //! \note This is bullshit, as a name entry does not exist outside World.
-    nameEntry* name_entry (const selection_type& selection)
-    {
-      return boost::apply_visitor (visitors::name_entry(), selection);
-    }
-
     bool is_chunk (const selection_type& selection)
     {
       return boost::apply_visitor (visitors::is_chunk(), selection);
@@ -421,6 +359,23 @@ namespace noggit
                            )
     {
       boost::apply_visitor ( visitors::remove_from_world (world_link)
+                           , selection
+                           );
+    }
+    void add_to_world( World* world_link
+                     , const math::vector_3d& position
+                     , bool size_randomization
+                     , bool position_randomization
+                     , bool rotation_randomization
+                     , const selection_type& selection
+                     )
+    {
+      boost::apply_visitor ( visitors::add_to_world ( world_link
+                                                    , position
+                                                    , size_randomization
+                                                    , position_randomization
+                                                    , rotation_randomization
+                                                    )
                            , selection
                            );
     }

@@ -20,16 +20,13 @@
 
 ModelInstance::ModelInstance (World* world, std::string const& path)
   : model (path)
-  , nameID (0xFFFFFFFF)
   , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
-  nameID = _world->selection_names().add (this);
 }
 
 ModelInstance::ModelInstance (World* world, std::string const& path, noggit::mpq::file* f)
   : model (path)
-  , nameID (0xFFFFFFFF)
   , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
@@ -39,12 +36,10 @@ ModelInstance::ModelInstance (World* world, std::string const& path, noggit::mpq
   int16_t scale;
   f->read (&scale, sizeof (int16_t));
   sc = scale / 1024.0f;
-  nameID = _world->selection_names().add( this );
 }
 
 ModelInstance::ModelInstance (World* world, std::string const& path, ENTRY_MDDF *d)
   : model (path)
-  , nameID (0xFFFFFFFF)
   , _world (world)
   , _spawn_timestamp (clock() / CLOCKS_PER_SEC)
 {
@@ -52,7 +47,6 @@ ModelInstance::ModelInstance (World* world, std::string const& path, ENTRY_MDDF 
   pos = ::math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
   dir = ::math::vector_3d(d->rot[0], d->rot[1], d->rot[2]);
   sc = d->scale / 1024.0f;
-  nameID = _world->selection_names().add( this );
 }
 
 ModelInstance::ModelInstance ( World* world
@@ -63,7 +57,6 @@ ModelInstance::ModelInstance ( World* world
                              , const ::math::vector_3d& lighting_color
                              )
   : model (path)
-  , nameID (0xFFFFFFFF)
   , pos (position)
   , _wmo_doodad_rotation (rotation)
   , sc (scale)
@@ -74,12 +67,6 @@ ModelInstance::ModelInstance ( World* world
 
 ModelInstance::~ModelInstance()
 {
-  if( nameID != 0xFFFFFFFF )
-  {
-    LogDebug<<"Delete Item "<<nameID<<std::endl;
-    _world->selection_names().del (nameID);
-    nameID = 0xFFFFFFFF;
-  }
 }
 
 void ModelInstance::draw_selection_indicator() const

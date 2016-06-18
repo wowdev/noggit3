@@ -15,7 +15,6 @@
 
 WMOInstance::WMOInstance(World* world, std::string const& path, noggit::mpq::file* _file )
   : wmo (world, path)
-  , mSelectionID( world->selection_names().add( this ) )
   , _world (world)
 {
   _file->read( &mUniqueID, 4 );
@@ -38,7 +37,6 @@ WMOInstance::WMOInstance( World* world, std::string const& path, ENTRY_MODF* d )
   , mUnknown( d->unknown )
   , mNameset( d->nameSet )
   , doodadset( d->doodadSet )
-  , mSelectionID( world->selection_names().add( this ) )
   , _world (world)
 {
   extents[0] = ::math::vector_3d( d->extents[0][0], d->extents[0][1], d->extents[0][2] );
@@ -54,7 +52,6 @@ WMOInstance::WMOInstance( World* world, std::string const& path )
   , mUnknown( 0 )
   , mNameset( 0 )
   , doodadset( 0 )
-  , mSelectionID( world->selection_names().add( this ) )
   , _world (world)
 {
 }
@@ -165,7 +162,6 @@ void WMOInstance::resetDirection()
 
 WMOInstance::~WMOInstance()
 {
-  _world->selection_names().del( mSelectionID );
 }
 
 namespace

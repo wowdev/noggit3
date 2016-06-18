@@ -197,7 +197,6 @@ MapChunk::MapChunk(World* world, MapTile* maintile, noggit::mpq::file* f,bool bi
   }
 
   vcenter = (vmin + vmax) * 0.5f;
-  nameID = _world->selection_names().add(this);
 
   // create vertex buffers
   gl.genBuffers(1,&vertices);
@@ -459,12 +458,6 @@ MapChunk::~MapChunk()
 
   delete strip;
   strip = nullptr;
-
-  if( nameID != -1 )
-  {
-    _world->selection_names().del( nameID );
-    nameID = -1;
-  }
 }
 
 boost::optional<float> MapChunk::get_height ( const float& x

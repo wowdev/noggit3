@@ -337,7 +337,7 @@ namespace noggit
     bool _currently_holding_control;
 
     QSettings* _settings;
-    boost::optional<nameEntry*> _clipboard;
+    boost::optional<selection_type> _clipboard;
     int _selected_area_id;
 
     bool _invert_mouse_y_axis;

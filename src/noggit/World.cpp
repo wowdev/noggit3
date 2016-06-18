@@ -435,7 +435,6 @@ World::World( const std::string& name )
   , alphatexcoords( 0 )
   , mMapId( 0xFFFFFFFF )
   , basename( name )
-  , _selection_names()
   , _map_index(this, name)
 {
   for( DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i )
@@ -1939,24 +1938,6 @@ void World::deleteWMOInstance( int pUniqueID )
   std::map<int, WMOInstance *>::iterator it = mWMOInstances.find( pUniqueID );
   _map_index.set_changed( it->second->pos.x(), it->second->pos.z() );
   mWMOInstances.erase( it );
-}
-
-void World::addModel ( const nameEntry& entry
-                     , ::math::vector_3d newPos
-                     , bool size_randomization
-                     , bool position_randomization
-                     , bool rotation_randomization
-                     )
-{
-  if( entry.type == eEntry_Model )
-    addM2 ( entry.data.model->model->_filename
-          , newPos
-          , size_randomization
-          , position_randomization
-          , rotation_randomization
-          );
-  else if( entry.type == eEntry_WMO )
-    addWMO( entry.data.wmo->wmo->_filename, newPos );
 }
 
 void World::addM2 ( std::string const& path

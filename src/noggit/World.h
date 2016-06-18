@@ -125,12 +125,6 @@ public:
   void addHole (float x, float z, float h, bool whole_chunk);
   void removeHole (float x, float z, bool whole_chunk);
 
-  void addModel ( const nameEntry& entry
-                , ::math::vector_3d newPos
-                , bool size_randomization
-                , bool position_randomization
-                , bool rotation_randomization
-                );
   void addM2 ( std::string const& path
              , ::math::vector_3d newPos
              , bool size_randomization = false
@@ -149,11 +143,6 @@ public:
   void moveHeight(int x, int z, const float& heightDelta);
 
   void clearAllModelsOnADT(int x, int z);
-
-  nameEntryManager& selection_names()
-  {
-    return _selection_names;
-  }
 
   noggit::map_index& map_index()
   {
@@ -209,8 +198,6 @@ private:
   void initLowresTerrain();
 
   void outdoorLighting();
-
-  nameEntryManager _selection_names;
 
   noggit::map_index _map_index;
 };
