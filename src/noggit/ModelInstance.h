@@ -71,12 +71,10 @@ public:
   void draw ( bool draw_fog
             , const boost::optional<selection_type>& selected_item
             ) const;
-  void draw_for_selection();
 
   void intersect (math::ray ray, selection_result& results);
 
   void draw2() const;
-  void draw2Select() const;
 
 //  void drawMapTile();
 

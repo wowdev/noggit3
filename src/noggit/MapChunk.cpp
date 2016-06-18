@@ -646,27 +646,6 @@ void MapChunk::draw ( opengl::scoped::use_program& shader
   gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void MapChunk::drawSelect()
-{
-  if( nameID == -1 )
-    nameID = _world->selection_names().add( this );
-
-  //! \todo Use backface culling again? Maybe this adds problems. Idk.
-  // opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull_face;
-
-  opengl::scoped::name_pusher const name_pusher (nameID);
-
-  for( int i = 0; i < striplen - 2; ++i )
-  {
-    opengl::scoped::name_pusher const inner_name_pusher (i);
-    gl.begin( GL_TRIANGLES );
-    gl.vertex3fv( mVertices[strip[i]] );
-    gl.vertex3fv( mVertices[strip[i + 1]] );
-    gl.vertex3fv( mVertices[strip[i + 2]] );
-    gl.end();
-  }
-}
-
 void MapChunk::intersect(math::ray ray, selection_result& results)
 {
   auto distance = math::intersect_bounds (ray, vmin, vmax);

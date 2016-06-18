@@ -66,11 +66,6 @@ public:
                     , const ::math::vector_3d& camera
                     );
 
-  void drawSelect ( bool draw_doodads
-                  , const float culldistance
-                  , const Frustum& frustum
-                  , const ::math::vector_3d& camera
-                  ) const;
   void intersect (math::ray ray, selection_result& results);
 
   void resetDirection();

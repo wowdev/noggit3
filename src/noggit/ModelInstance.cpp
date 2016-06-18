@@ -275,23 +275,6 @@ void ModelInstance::draw ( bool draw_fog
   model->draw ();
 }*/
 
-void ModelInstance::draw_for_selection()
-{
-  if(!_world->selection_names().findEntry(nameID) || nameID == 0xFFFFFFFF)
-  {
-    nameID = _world->selection_names().add( this );
-  }
-
-  ::opengl::scoped::matrix_pusher positioning_matrix;
-  ::opengl::scoped::name_pusher name_pusher (nameID);
-
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir)).transposed());
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::scale, sc));
-
-  model->drawSelect (time_since_spawn());
-}
-
 void ModelInstance::intersect(math::ray ray, selection_result& results)
 {
   math::matrix_4x4 const translation (math::matrix_4x4::translation, pos);
@@ -323,17 +306,6 @@ void ModelInstance::draw2() const
   gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::scale, {sc, -sc, -sc}));
 
   model->draw (_world, time_since_spawn());
-}
-
-void ModelInstance::draw2Select() const
-{
-  ::opengl::scoped::matrix_pusher positioning_matrix;
-
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_doodad_rotation));
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::scale, {sc, -sc, -sc}));
-
-  model->drawSelect (time_since_spawn());
 }
 
 void ModelInstance::resetDirection()

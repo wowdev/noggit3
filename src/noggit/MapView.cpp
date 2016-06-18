@@ -878,28 +878,6 @@ namespace noggit
     gl.loadIdentity();
   }
 
-  void MapView::setup_3d_selection_rendering() const
-  {
-    gl.matrixMode (GL_PROJECTION);
-    gl.loadIdentity();
-
-    GLint viewport[4];
-    gl.getIntegerv (GL_VIEWPORT, viewport);
-
-    float const delta (7.0f);
-    gl.translatef ( (viewport[2] - 2.0f * (_mouse_position.x() - viewport[0])) / delta
-                 , (viewport[3] - 2.0f * ((viewport[3] - _mouse_position.y()) - viewport[1])) / delta
-                 , 0.0f
-                 );
-    gl.scalef (viewport[2] / delta, viewport[3] / delta, 1.0f);
-
-    const qreal ratio (width() / qreal (height()));
-    opengl::matrix::perspective (fov, ratio, 1.0f, _viewing_distance);
-
-    gl.matrixMode (GL_MODELVIEW);
-    gl.loadIdentity();
-  }
-
   namespace
   {
     class selection_debug_logger : public boost::static_visitor<>

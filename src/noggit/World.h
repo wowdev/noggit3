@@ -97,7 +97,6 @@ public:
             , const boost::optional<selection_type>& selected_item
             );
 
-  boost::optional<selection_type> drawSelection (size_t flags);
   selection_result intersect (math::ray ray, world_selection_mask flags);
 
   void drawTileMode (bool draw_lines, float ratio, float zoom);
