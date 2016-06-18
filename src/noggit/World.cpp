@@ -1516,6 +1516,14 @@ selection_result World::intersect (math::ray ray, world_selection_mask flags)
     }
   }
 
+  if (flags.model)
+  {
+    for(auto model_instance : mModelInstances)
+    {
+      model_instance.second->intersect (ray, results);
+    }
+  }
+
   return std::move (results);
 }
 
