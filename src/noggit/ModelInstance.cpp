@@ -237,9 +237,13 @@ void ModelInstance::draw ( bool draw_fog
 {
   ::opengl::scoped::matrix_pusher positioning_matrix;
 
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, pos).transposed());
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, convert_rotation (dir)).transposed());
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::scale, sc));
+  math::matrix_4x4 const translation (math::matrix_4x4::translation, pos);
+  math::matrix_4x4 const rotation (math::matrix_4x4::rotation, convert_rotation (dir));
+  math::matrix_4x4 const scale (math::matrix_4x4::scale, sc);
+
+  math::matrix_4x4 const model_matrix (translation * rotation * scale);
+
+  gl.multMatrixf (model_matrix.transposed ());
 
   model->draw (draw_fog, time_since_spawn());
 
@@ -286,6 +290,27 @@ void ModelInstance::draw_for_selection()
   gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::scale, sc));
 
   model->drawSelect (time_since_spawn());
+}
+
+void ModelInstance::intersect(math::ray ray, selection_result& results)
+{
+  math::matrix_4x4 const translation (math::matrix_4x4::translation, pos);
+  math::matrix_4x4 const rotation (math::matrix_4x4::rotation, convert_rotation (dir));
+  math::matrix_4x4 const scale (math::matrix_4x4::scale, sc);
+
+  math::matrix_4x4 const model_matrix (math::matrix_4x4 (translation * rotation * scale).inverted ());
+
+  ray.origin    = (model_matrix * math::vector_4d (ray.origin,    1.0)).xyz ();
+  ray.direction = (model_matrix * math::vector_4d (ray.direction, 0.0)).xyz ().normalized ();
+
+  math::vector_3d const min (fixCoordSystem (model->header.VertexBoxMin));
+  math::vector_3d const max (fixCoordSystem (model->header.VertexBoxMax));
+
+  if(auto distance = math::intersect_bounds(ray, min, max))
+  {
+    if ((distance = model->intersect (time_since_spawn (), ray)))
+      results.emplace_back (*distance * sc, selected_model_type (this));
+  }
 }
 
 void ModelInstance::draw2() const

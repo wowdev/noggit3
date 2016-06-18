@@ -6,6 +6,7 @@
 
 #include <math/vector_3d.h>
 #include <math/quaternion.h>
+#include <math/ray.hpp>
 
 #include <noggit/ModelManager.h>
 #include <noggit/Selection.h>
@@ -71,6 +72,8 @@ public:
             , const boost::optional<selection_type>& selected_item
             ) const;
   void draw_for_selection();
+
+  void intersect (math::ray ray, selection_result& results);
 
   void draw2() const;
   void draw2Select() const;

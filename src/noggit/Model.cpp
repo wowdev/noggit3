@@ -1116,6 +1116,34 @@ void Model::drawSelect (size_t time)
   drawModelSelect(time);
 }
 
+boost::optional<float> Model::intersect(size_t time, math::ray ray)
+{
+  if (!finished_loading () || !_finished_upload)
+    return boost::none;
+
+  if (animGeometry)
+  {
+    //\! todo handle animated models!
+
+    return boost::none;
+  }
+
+  for (ModelRenderPass& p : passes)
+  {
+    for (size_t i (p.indexStart); i < p.indexStart + p.indexCount; i += 3)
+    {
+      math::vector_3d const v0 = origVertices[indices[i + 0]].pos;
+      math::vector_3d const v1 = origVertices[indices[i + 1]].pos;
+      math::vector_3d const v2 = origVertices[indices[i + 2]].pos;
+
+      if (auto distance = math::intersect_triangle(ray, v0, v1, v2))
+        return *distance;
+    }
+  }
+
+  return boost::none;
+}
+
 void Model::lightsOn(opengl::light lbase, int animtime)
 {
   // setup lights

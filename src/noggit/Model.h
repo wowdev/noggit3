@@ -13,6 +13,7 @@ class Bone;
 #include <math/matrix_4x4.h>
 #include <math/vector_3d.h>
 #include <math/vector_4d.h>
+#include <math/ray.hpp>
 
 #include <noggit/async/object.h>
 #include <noggit/Animated.h> // Animation::M2Value
@@ -223,7 +224,10 @@ public:
   ~Model();
   void draw (bool draw_fog, size_t time);
   void drawTileMode();
+
   void drawSelect(size_t time);
+  boost::optional<float> intersect (size_t time, math::ray ray);
+
   void updateEmitters(float dt);
 
   friend struct ModelRenderPass;
