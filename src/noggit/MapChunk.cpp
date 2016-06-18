@@ -630,12 +630,17 @@ void MapChunk::draw ( opengl::scoped::use_program& shader
   shader.uniform("alphamaps", alphamap_indices);
   shader.uniform("layer_count", int (textures.num()));
 
-
   shader.attrib ("position", mVertices);
   shader.attrib ("normal", mNormals);
 
-  //! \todo noggit::selection::is_the_same_as (this, *selected_item)
-  // -> selected indices = mapstrip2[noggit::selection::selected_polygon (*selected_item) + 0…2]
+  if (selected_item && noggit::selection::is_the_same_as (this, *selected_item))
+  {
+    shader.uniform ("selected_triangle_id", noggit::selection::selected_polygon (*selected_item));
+  }
+  else
+  {
+    shader.uniform ("selected_triangle_id", -1);
+  }
 
   gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, indices);
   gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
@@ -677,7 +682,7 @@ void MapChunk::intersect(math::ray ray, selection_result& results)
 
     if ((distance = math::intersect_triangle (ray, v0, v1, v2)))
     {
-      results.emplace_back (*distance, selected_chunk_type(this, i));
+      results.emplace_back (*distance, selected_chunk_type(this, i / 3));
       return;
     }
   }
