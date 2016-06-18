@@ -17,6 +17,7 @@
 #include <noggit/WMO.h> // WMOManager
 #include <noggit/map_index.hpp>
 #include <noggit/MapHeaders.h> // ENTRY_MODF
+#include <math/ray.hpp>
 
 namespace OpenGL
 {
@@ -36,6 +37,12 @@ static const float mapdrawdistance = 998.0f;
 static const float modeldrawdistance = 384.0f;
 static const float doodaddrawdistance = 64.0f;
 
+struct world_selection_mask
+{
+  uint8_t terrain : 1;
+  uint8_t model : 1;
+  uint8_t map_object : 1;
+};
 
 //! \todo Split this. There should be a seperate class for WDTs.
 class World
@@ -92,6 +99,8 @@ public:
             );
 
   boost::optional<selection_type> drawSelection (size_t flags);
+  selection_result intersect (math::ray ray, world_selection_mask flags);
+
   void drawTileMode (bool draw_lines, float ratio, float zoom);
 
   void outdoorLights(bool on);

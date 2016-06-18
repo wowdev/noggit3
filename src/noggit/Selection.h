@@ -82,6 +82,9 @@ typedef boost::variant< selected_chunk_type
                       , selected_wmo_type
                       > selection_type;
 
+typedef std::pair<float, selection_type> selection_entry;
+typedef std::vector<selection_entry> selection_result;
+
 namespace noggit
 {
   namespace selection

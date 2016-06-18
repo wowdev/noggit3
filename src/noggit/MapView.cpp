@@ -901,25 +901,83 @@ namespace noggit
     gl.loadIdentity();
   }
 
+  namespace
+  {
+    class selection_debug_logger : public boost::static_visitor<>
+    {
+    public:
+      void operator() (const selected_chunk_type& chunk) const
+      {
+        LogDebug << "Hit selected_chunk_type " << chunk.first->xbase << " " << chunk.first->zbase << " Triangle " << chunk.second << std::endl;
+      }
+      void operator() (const selected_model_type& model) const
+      {
+        LogDebug << "Hit selected_model_type " << model->model->_filename << std::endl;
+      }
+      void operator() (const selected_wmo_type& wmo) const
+      {
+        LogDebug << "Hit selected_wmo_type " << wmo->wmo->_filename << std::endl;
+      }
+    };
+
+    bool sort_by_distance (const selection_entry& lhs, const selection_entry &rhs)
+    {
+      return lhs.first < rhs.first;
+    }
+  }
+
   void MapView::doSelection( bool selectTerrainOnly )
   {
-    makeCurrent();
-    opengl::context::scoped_setter const _ (::gl, context());
+    makeCurrent ();
+    opengl::context::scoped_setter const _ (::gl, context ());
 
-    setup_3d_selection_rendering();
+    setup_3d_rendering ();
+    opengl::matrix::look_at (_world->camera, _world->lookat, { 0.0f, 1.0f, 0.0f });
 
-    if (selectTerrainOnly)
+    float const win_x (_mouse_position.x ());
+    float const win_y (height () - _mouse_position.y ());
+
+    ::math::matrix_4x4 const un_project_mat ((opengl::matrix::model_view () * opengl::matrix::projection ()).transposed ().inverted ());
+
+    ::math::vector_4d const normalized_device_coords ( 2.0f * win_x /  width () - 1.0f
+                                                     , 2.0f * win_y / height () - 1.0f
+                                                     , 0.0f
+                                                     , 1.0f
+                                                     );
+
+    ::math::vector_3d const mouse_worldspace ((un_project_mat * normalized_device_coords).xyz_normalized_by_w ());
+
+    math::ray _ray;
+
+    _ray.origin = _world->camera;
+    _ray.direction = (mouse_worldspace - _world->camera).normalize ();
+
+    world_selection_mask flags;
+
+    if(selectTerrainOnly)
     {
-      _selection = _world->drawSelection ( flags & ( ~DOODADS
-                                                   & ~DRAWWMO
-                                                   & ~WMODOODAS
-                                                   )
-                                         );
+      flags.terrain = 1;
+      flags.model = 0;
+      flags.map_object = 0;
     }
     else
     {
-      _selection = _world->drawSelection (flags);
+      flags.terrain = 1;
+      flags.model = 1;
+      flags.map_object = 1;
     }
+
+    selection_result results (_world->intersect (_ray, flags));
+
+    std::sort (results.begin (), results.end (), sort_by_distance);
+
+    for (auto result : results)
+      boost::apply_visitor (selection_debug_logger (), result.second);
+
+    if (results.size ())
+      _selection = results.front ().second;
+    else
+      _selection = boost::none;
   }
 
   QPointF MapView::tile_mode_brush_position() const
