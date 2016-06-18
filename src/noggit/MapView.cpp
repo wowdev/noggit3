@@ -908,7 +908,7 @@ namespace noggit
     public:
       void operator() (const selected_chunk_type& chunk) const
       {
-        LogDebug << "Hit selected_chunk_type " << chunk.first->xbase << " " << chunk.first->zbase << " Triangle " << chunk.second << std::endl;
+        LogDebug << "Hit selected_chunk_type " << chunk.chunk->xbase << " " << chunk.chunk->zbase << " Triangle " << chunk.triangle << std::endl;
       }
       void operator() (const selected_model_type& model) const
       {

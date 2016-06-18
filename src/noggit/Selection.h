@@ -66,14 +66,22 @@ private:
   std::vector<nameEntry*> _items;
 };
 
-namespace math
-{
-  class vector_3d;
-}
-
+#include <math/vector_3d.h>
 #include <boost/variant.hpp>
 
-typedef std::pair<MapChunk*, int> selected_chunk_type;
+
+struct selected_chunk_type
+{
+  selected_chunk_type(MapChunk* _chunk, int _triangle, math::vector_3d _position)
+    : chunk(_chunk)
+    , triangle(_triangle)
+    , position(_position)
+  {}
+
+  MapChunk* chunk;
+  int triangle;
+  math::vector_3d position;
+};
 typedef ModelInstance* selected_model_type;
 typedef WMOInstance* selected_wmo_type;
 

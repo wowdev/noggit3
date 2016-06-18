@@ -103,7 +103,7 @@ namespace noggit
         ::math::vector_3d
         operator() (const selected_chunk_type& chunk) const
         {
-          return chunk.first->GetSelectionPosition (chunk.second);
+          return chunk.position;
         }
         ::math::vector_3d
         operator() (const selected_model_type& model) const
@@ -122,7 +122,7 @@ namespace noggit
       public:
         nameEntry* operator() (const selected_chunk_type& chunk) const
         {
-          return new nameEntry (chunk.first);
+          return new nameEntry (chunk.chunk);
         }
         nameEntry* operator() (const selected_model_type& model) const
         {
@@ -223,7 +223,7 @@ namespace noggit
       public:
         int operator() (const selected_chunk_type& chunk) const
         {
-          return chunk.second;
+          return chunk.triangle;
         }
         template<typename T>
           [[noreturn]] int operator() (const T&) const
@@ -237,7 +237,7 @@ namespace noggit
       public:
         int operator() (const selected_chunk_type& chunk) const
         {
-          return chunk.first->header.areaid;
+          return chunk.chunk->header.areaid;
         }
         template<typename T>
           [[noreturn]] int operator() (const T&) const
@@ -376,7 +376,7 @@ namespace noggit
 
         bool operator() (const selected_chunk_type& chunk) const
         {
-          return chunk.first == _other;
+          return chunk.chunk == _other;
         }
         bool operator() (const selected_model_type& model) const
         {

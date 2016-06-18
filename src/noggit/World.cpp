@@ -1490,6 +1490,7 @@ boost::optional<selection_type> World::drawSelection (size_t flags)
       return selection_type
         ( selected_chunk_type ( selection_names().findEntry (minEntry->stack.chunk)->data.mapchunk
                               , minEntry->stack.triangle
+                              , math::vector_3d(.0f, .0f, .0f)
                               )
         );
     }
