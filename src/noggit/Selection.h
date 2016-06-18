@@ -18,54 +18,6 @@ class WMOInstance;
 class MapChunk;
 class World;
 
-/**
- ** nameEntry
- **
- ** This is used for selectable objects.
- **
- **/
-
-class nameEntry
-{
-public:
-  eSelectionEntryTypes type;
-  union
-  {
-    ModelInstance* model;
-    WMOInstance* wmo;
-    MapChunk* mapchunk;
-    void* ___DIRTY;
-  } data;
-
-  explicit nameEntry (ModelInstance* model);
-  explicit nameEntry (WMOInstance* wmo);
-  explicit nameEntry (MapChunk* chunk);
-  explicit nameEntry (const nameEntry& other);
-};
-
-/**
- ** nameEntryManager
- **
- ** This is used for managing those selectable objects.
- **
- **/
-
-//! \todo This just is a vector, so inherit it or be one.
-class nameEntryManager
-{
-public:
-  size_t add (ModelInstance* mod);
-  size_t add (WMOInstance* wmo);
-  size_t add (MapChunk* chunk);
-
-  void del (size_t ref);
-
-  nameEntry* findEntry (size_t ref) const;
-
-private:
-  std::vector<nameEntry*> _items;
-};
-
 #include <math/vector_3d.h>
 #include <boost/variant.hpp>
 
@@ -99,15 +51,19 @@ namespace noggit
   {
     ::math::vector_3d position (const selection_type& selection);
 
-    //! \note This is bullshit, as a name entry does not exist outside World.
-    nameEntry* name_entry (const selection_type& selection);
-
     bool is_chunk (const selection_type& selection);
     bool is_model (const selection_type& selection);
     bool is_wmo (const selection_type& selection);
     void remove_from_world ( World* world_link
                            , const selection_type& selection
                            );
+    void add_to_world ( World* world_link
+                      , const math::vector_3d& position
+                      , bool size_randomization
+                      , bool position_randomization
+                      , bool rotation_randomization
+                      , const selection_type& selection
+                      );
     void reset_rotation (const selection_type& selection);
     int selected_polygon (const selection_type& selection);
     int area_id (const selection_type& selection);

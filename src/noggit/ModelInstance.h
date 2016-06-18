@@ -30,8 +30,6 @@ class ModelInstance
 public:
   noggit::scoped_model_reference model;
 
-private:
-  unsigned int nameID;
 public:
 
   ::math::vector_3d pos;

@@ -41,9 +41,6 @@ public:
   uint16_t mNameset;
   uint16_t doodadset;
 
-private:
-  unsigned int mSelectionID;
-
 public:
   WMOInstance( World*, std::string const& path, noggit::mpq::file* _file );
   WMOInstance( World*, std::string const& path, ENTRY_MODF* d );

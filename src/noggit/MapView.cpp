@@ -1256,13 +1256,13 @@ namespace noggit
       return;
     }
 
-    //! \todo Visitor to call addM2 or addWMO directly.
-    _world->addModel ( **_clipboard
-                     , selection::position (*_selection)
-                     , _copy_size_randomization
-                     , _copy_position_randomization
-                     , _copy_rotation_randomization
-                     );
+    selection::add_to_world ( _world
+                            , selection::position (*_selection)
+                            , _copy_size_randomization
+                            , _copy_position_randomization
+                            , _copy_rotation_randomization
+                            , *_selection
+                            );
   }
 
   void MapView::copy_selected_object()
@@ -1272,7 +1272,7 @@ namespace noggit
       return;
     }
 
-    _clipboard = selection::name_entry (*_selection);
+    _clipboard = _selection;
   }
 
   void MapView::increase_moving_speed()
