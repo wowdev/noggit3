@@ -1250,10 +1250,10 @@ void MapTile::saveTile ( const World::model_instances_type::const_iterator& mode
 
     lID = 0;
     for( int i = 0; i < 9; ++i )
-      lMFBO_Data[lID++] = mMinimumValues[i].y();
-
-    for( int i = 0; i < 9; ++i )
       lMFBO_Data[lID++] = mMaximumValues[i].y();
+    
+    for( int i = 0; i < 9; ++i )
+      lMFBO_Data[lID++] = mMinimumValues[i].y();
 
     lCurrentPosition += 8 + chunkSize;
   }
