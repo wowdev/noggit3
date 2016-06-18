@@ -948,8 +948,10 @@ namespace noggit
 
     std::sort (results.begin (), results.end (), sort_by_distance);
 
+#ifdef NOGGIT_LOG_SELECTION
     for (auto result : results)
       boost::apply_visitor (selection_debug_logger (), result.second);
+#endif
 
     if (results.size ())
       _selection = results.front ().second;
