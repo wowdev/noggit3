@@ -1497,6 +1497,13 @@ boost::optional<selection_type> World::drawSelection (size_t flags)
   return boost::none;
 }
 
+selection_result World::intersect (math::ray ray, world_selection_mask flags)
+{
+  selection_result results;
+
+  return std::move (results);
+}
+
 void World::advance_times ( const float& seconds
                           , const float& time_of_day_speed_factor
                           )
