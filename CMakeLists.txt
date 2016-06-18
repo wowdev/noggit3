@@ -277,6 +277,7 @@ set ( helper_headers
 set ( math_sources
       src/math/matrix_4x4.cpp
       src/math/vector_2d.cpp
+      src/math/ray.cpp
     )
 
 set ( math_headers
@@ -285,6 +286,7 @@ set ( math_headers
       src/math/interpolation.h
       src/math/matrix_4x4.h
       src/math/random.h
+      src/math/ray.hpp
       src/math/vector_2d.h
       src/math/vector_3d.h
       src/math/vector_4d.h
