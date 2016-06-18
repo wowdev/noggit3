@@ -953,11 +953,12 @@ void MapTile::saveTile()
 		int16_t *lMFBO_Data = lADTFile->GetPointer<int16_t>(lCurrentPosition + 8);
 
 		lID = 0;
-		for (int i = 0; i < 9; ++i)
-			lMFBO_Data[lID++] = (int16_t)mMinimumValues[i * 3 + 1];
 
 		for (int i = 0; i < 9; ++i)
 			lMFBO_Data[lID++] = (int16_t)mMaximumValues[i * 3 + 1];
+
+    for (int i = 0; i < 9; ++i)
+      lMFBO_Data[lID++] = (int16_t)mMinimumValues[i * 3 + 1];
 
 		lCurrentPosition += 8 + chunkSize;
 	}
