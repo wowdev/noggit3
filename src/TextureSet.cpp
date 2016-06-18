@@ -61,6 +61,13 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool 
 			alphamaps[layer - 1] = new Alphamap(f, texFlags[layer], mBigAlpha, doNotFixAlpha);
 		}
 	}
+
+  // convert big alphas to the old format to be rendered correctly in noggit
+  if (mBigAlpha)
+  {
+    convertToOldAlpha();
+  }
+    
 }
 
 int TextureSet::addTexture(OpenGL::Texture* texture)
@@ -474,4 +481,93 @@ const unsigned char *TextureSet::getAlpha(size_t id)
 OpenGL::Texture* TextureSet::texture(size_t id)
 {
 	return textures[id];
+}
+
+
+void TextureSet::convertToBigAlpha()
+{
+  // nothing to do
+  if (nTextures < 2)
+    return;
+
+  unsigned char tab[3][64 * 64];
+
+  for (size_t k = 0; k < nTextures - 1; k++)
+  {
+    memcpy(tab[k], alphamaps[k]->getAlpha(), 64 * 64);
+  }
+
+  float alphas[3] = { 0.0f, 0.0f, 0.0f };
+
+  for (int i = 0; i < 64 * 64; ++i)
+  {
+    for (size_t k = 0; k < nTextures - 1; k++)
+    {
+      float f = static_cast<float>(tab[k][i]);
+      alphas[k] = f;
+      for (size_t n = 0; n < k; n++)
+        alphas[n] = (alphas[n] * ((255.0f - f)) / 255.0f);
+    }
+
+    for (size_t k = 0; k < nTextures - 1; k++)
+    {
+      tab[k][i] = static_cast<unsigned char>(std::min(std::max(round(alphas[k]), 0.0f), 255.0f));
+    }
+  }
+
+  for (size_t k = 0; k < nTextures - 1; k++)
+  {
+    alphamaps[k]->setAlpha(tab[k]);
+    alphamaps[k]->loadTexture();
+  }
+}
+
+void TextureSet::convertToOldAlpha()
+{
+  // nothing to do
+  if (nTextures < 2)
+    return;
+
+  unsigned char tab[3][64 * 64];
+
+  for (size_t k = 0; k < nTextures - 1; k++)
+  {
+    memcpy(tab[k], alphamaps[k]->getAlpha(), 64 * 64);
+  }    
+
+  float alphas[3] = { 0.0f, 0.0f, 0.0f };
+
+  for (int i = 0; i < 64 * 64; ++i)
+  {
+    for (size_t k = 0; k < nTextures - 1; k++)
+    {
+      alphas[k] = static_cast<float>(tab[k][i]);
+    }
+
+    for (int k = nTextures - 2; k >= 0; k--)
+    {
+      for (int n = nTextures - 2; n > k; n--)
+      {
+        // prevent 0 division
+        if (alphas[n] == 255.0f)
+        {
+          alphas[k] = 0.0f;
+          break;
+        }
+        else
+          alphas[k] = (alphas[k] / (255.0f - alphas[n])) * 255.0f;
+      }
+    }
+
+    for (size_t k = 0; k < nTextures - 1; k++)
+    {
+      tab[k][i] = static_cast<unsigned char>(std::min(std::max(round(alphas[k]), 0.0f), 255.0f));
+    }
+  }
+  
+  for (size_t k = 0; k < nTextures - 1; k++)
+  {
+    alphamaps[k]->setAlpha(tab[k]);
+    alphamaps[k]->loadTexture();
+  }
 }
