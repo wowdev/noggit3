@@ -237,6 +237,8 @@ void main()
   const std::string mcnk_vert = R"code(
 #version 110
 
+#extension GL_EXT_gpu_shader4 : enable
+
 attribute vec4 position;
 attribute vec3 normal;
 attribute vec2 texcoord;
@@ -262,14 +264,16 @@ void main()
 #version 110
 
 uniform bool draw_area_id_overlay;
-//! \todo draw triangle selection cursor
-// uniform bool draw_triangle_selection_cursor;
+uniform bool draw_triangle_selection_cursor;
 uniform bool draw_terrain_height_contour;
 uniform bool is_impassable_chunk;
 uniform bool mark_impassable_chunks;
+
 uniform vec3 area_id_color;
 uniform vec3 shadow_color;
+
 uniform int layer_count;
+uniform int selected_triangle_id;
 
 uniform bool draw_cursor_circle;
 uniform vec3 cursor_position;
@@ -347,12 +351,11 @@ void main()
     return;
   }
 
-  //! \todo is selected triangle in triangle selection cursor mode
-  // if (draw_triangle_selection_cursor && is_selected_triangle)
-  // {
-  //   gl_FragColor = vec4 (1.0, 1.0, 0.0, 1.0);
-  //   return;
-  // }
+  if (draw_triangle_selection_cursor && selected_triangle_id == gl_PrimitiveID)
+  {
+     gl_FragColor = vec4 (1.0, 1.0, 0.0, 1.0);
+     return;
+  }
 
   //! \todo this is quite bright. pretty sure its a gamma issue
   gl_FragColor = phong_lighting(texture_blend());
@@ -1101,13 +1104,11 @@ void World::draw ( size_t flags
                                             )
                           );
 
-      //! \todo draw triangle selection cursor
-      // selected indices = mapstrip2[noggit::selection::selected_polygon (*selected_item) + 0…2]
-      // mcnk_shader.uniform ( "draw_triangle_selection_cursor"
-      //                     , !(flags & NOCURSOR)
-      //                     //! \todo This actually should be an enum.
-      //                     && noggit::app().setting ("cursor/type", 1).toInt() == noggit::ui::cursor_type::triangle
-      //                     );
+      mcnk_shader.uniform ( "draw_triangle_selection_cursor"
+                           , !(flags & NOCURSOR)
+                             //! \todo This actually should be an enum.
+                             && noggit::app().setting ("cursor/type", 1).toInt() == noggit::ui::cursor_type::triangle
+                           );
 
       for (int j (0); j < 64; ++j)
       {
