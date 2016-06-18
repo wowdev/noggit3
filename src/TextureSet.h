@@ -48,6 +48,9 @@ public:
 	const unsigned char getAlpha(size_t id, size_t offset);
 	const unsigned char *getAlpha(size_t id);
 
+  void convertToBigAlpha();
+  void convertToOldAlpha();
+
 	OpenGL::Texture* texture(size_t id);
 
 private:
