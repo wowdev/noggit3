@@ -1093,15 +1093,19 @@ void World::draw ( size_t flags
 
       QSettings settings;
       mcnk_shader.uniform ("draw_cursor_circle", selected_item && noggit::selection::is_chunk (*selected_item) && noggit::app().setting ("cursor/type", 1).toInt() == noggit::ui::cursor_type::circle);
-      mcnk_shader.uniform ("cursor_position", noggit::selection::position (*selected_item));
-      mcnk_shader.uniform ("outer_cursor_radius", outer_cursor_radius);
-      mcnk_shader.uniform ( "cursor_color"
-                          , math::vector_4d ( settings.value ("cursor/red", 1.0f).toFloat()
-                                            , settings.value ("cursor/green", 1.0f).toFloat()
-                                            , settings.value ("cursor/blue", 1.0f).toFloat()
-                                            , settings.value ("cursor/alpha", 1.0f).toFloat()
-                                            )
-                          );
+
+      if (selected_item)
+      {
+        mcnk_shader.uniform ("cursor_position", noggit::selection::position (*selected_item));
+        mcnk_shader.uniform ("outer_cursor_radius", outer_cursor_radius);
+        mcnk_shader.uniform ( "cursor_color"
+                            , math::vector_4d ( settings.value ("cursor/red", 1.0f).toFloat ()
+                                              , settings.value ("cursor/green", 1.0f).toFloat ()
+                                              , settings.value ("cursor/blue", 1.0f).toFloat ()
+                                              , settings.value ("cursor/alpha", 1.0f).toFloat ()
+                                              )
+                            );
+      }
 
       mcnk_shader.uniform ( "draw_triangle_selection_cursor"
                            , !(flags & NOCURSOR)
