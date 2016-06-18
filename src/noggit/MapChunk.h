@@ -63,10 +63,6 @@ public:
 
   void update_normal_vectors();
 
-  void getSelectionCoord (const int& selected_polygon, float* x, float* z) const;
-  float getSelectionHeight (const int& selected_polygon) const;
-  ::math::vector_3d GetSelectionPosition(const int& selected_polygon) const;
-
   bool changeTerrain(float x, float z, float change, float radius, int BrushType);
   bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType);
   bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
