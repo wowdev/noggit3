@@ -25,7 +25,6 @@ Model::Model(const std::string& filename, bool _forceAnim)
   memset( &header, 0, sizeof( ModelHeader ) );
 
   globalSequences = nullptr;
-  indices = nullptr;
   anims = nullptr;
 
   showGeosets = nullptr;
@@ -78,11 +77,6 @@ Model::~Model()
   if(showGeosets)
     delete[] showGeosets;
 
-  // unload all sorts of crap
-  //delete[] vertices;
-  //delete[] normals;
-  if (indices)
-    delete[] indices;
   if (anims)
     delete[] anims;
 
@@ -288,10 +282,11 @@ void Model::initCommon(const noggit::mpq::file& f)
 
     uint16_t *indexLookup = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsIndex);
     uint16_t *triangles = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsTris);
-    nIndices = view->nTris;
-    indices = new uint16_t[nIndices];
-    for (size_t i = 0; i<nIndices; ++i) {
-      indices[i] = indexLookup[triangles[i]];
+
+    _indices.resize (view->nTris);
+
+    for (size_t i (0); i < _indices.size(); ++i) {
+      _indices[i] = indexLookup[triangles[i]];
     }
 
     // render ops
@@ -761,7 +756,7 @@ void Model::drawModel(int animtime)
       //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
       // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
       // I can't notice a difference but I guess it can't hurt
-      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart);
 
       p.deinit();
     }
@@ -1019,9 +1014,9 @@ boost::optional<float> Model::intersect(size_t time, math::ray ray)
   {
     for (size_t i (p.indexStart); i < p.indexStart + p.indexCount; i += 3)
     {
-      math::vector_3d const v0 = _current_vertices[indices[i + 0]].position;
-      math::vector_3d const v1 = _current_vertices[indices[i + 1]].position;
-      math::vector_3d const v2 = _current_vertices[indices[i + 2]].position;
+      math::vector_3d const v0 = _current_vertices[_indices[i + 0]].position;
+      math::vector_3d const v1 = _current_vertices[_indices[i + 1]].position;
+      math::vector_3d const v2 = _current_vertices[_indices[i + 2]].position;
 
       if (auto distance = ray.intersect_triangle (v0, v1, v2))
         return *distance;
