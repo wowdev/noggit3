@@ -187,8 +187,6 @@ public:
   std::vector<Bone> bones;
   ModelHeader header;
 
-  bool *showGeosets;
-
   float rad;
   float trans;
   bool animcalc;
