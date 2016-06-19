@@ -439,21 +439,9 @@ void Model::initAnimated(const noggit::mpq::file& f)
     }
   }
 
-  // particle systems
-  if (header.nParticleEmitters) {
-    ModelParticleEmitterDef *pdefs = reinterpret_cast<ModelParticleEmitterDef*>(f.getBuffer() + header.ofsParticleEmitters);
-    for (size_t i=0; i<header.nParticleEmitters; ++i) {
-      particleSystems.emplace_back (this, f, pdefs[i], globalSequences);
-    }
-  }
-
-  // ribbons
-  if (header.nRibbonEmitters) {
-    ModelRibbonEmitterDef *rdefs = reinterpret_cast<ModelRibbonEmitterDef*>(f.getBuffer() + header.ofsRibbonEmitters);
-    for (size_t i=0; i<header.nRibbonEmitters; ++i) {
-      ribbons.emplace_back (this, f, rdefs[i], globalSequences);
-    }
-  }
+  //\! todo: particle systems
+  //\! todo: ribbons
+  //  see repository history for old impl.
 
   // just use the first camera, meh
   if (header.nCameras>0) {
@@ -533,15 +521,9 @@ void Model::animate(int _anim, int time)
     }
   }
 
-  for (size_t i=0; i<header.nParticleEmitters; ++i) {
-    // random time distribution for teh win ..?
-    int pt = (time + static_cast<int>(tmax*particleSystems[i].tofs)) % tmax;
-    particleSystems[i].setup(anim, pt);
-  }
 
-  for (size_t i=0; i<header.nRibbonEmitters; ++i) {
-    ribbons[i].setup(anim, time);
-  }
+  //\! todo: setup header.nParticleEmitters
+  //\! todo: setup header.nRibbonEmitters
 
   if (animTextures) {
     for (size_t i=0; i<header.nTexAnims; ++i) {
@@ -1019,12 +1001,7 @@ void Model::draw (bool draw_fog, size_t time)
   lightsOff(GL_LIGHT4);
 
 
-  // draw particle systems & ribbons
-  for (size_t i = 0; i < header.nParticleEmitters; ++i)
-    particleSystems[i].draw();
-
-  for (size_t i = 0; i < header.nRibbonEmitters; ++i)
-    ribbons[i].draw();
+  //\! todo: draw particle systems & ribbons
 }
 
 boost::optional<float> Model::intersect(size_t time, math::ray ray)
@@ -1083,7 +1060,5 @@ void Model::upload()
 
 void Model::updateEmitters(float dt)
 {
-  for (size_t i=0; i<header.nParticleEmitters; ++i) {
-    particleSystems[i].update(dt);
-  }
+  //\! todo: update the emitters
 }
