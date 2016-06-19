@@ -34,8 +34,6 @@ namespace noggit
 ::math::vector_3d fixCoordSystem(const ::math::vector_3d& v);
 math::vector_3d convert_rotation (math::vector_3d const&);
 math::quaternion convert_rotation (math::quaternion const&);
-void ModelHighlight (::math::vector_4d color);
-void ModelUnhighlight();
 
 class Bone {
   Animation::M2Value< ::math::vector_3d> trans;

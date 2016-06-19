@@ -684,32 +684,6 @@ void ModelRenderPass::deinit()
   //gl.color4f(1,1,1,1); //???
 }
 
-void ModelHighlight( ::math::vector_4d color )
-{
-  gl.disable( GL_ALPHA_TEST );
-  gl.enable( GL_BLEND );
-  gl.blendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-  gl.disable( GL_CULL_FACE );
-  gl.activeTexture( GL_TEXTURE0 );
-  gl.disable( GL_TEXTURE_2D);
-  gl.activeTexture( GL_TEXTURE1 );
-  gl.disable( GL_TEXTURE_2D );
-  gl.color4fv( color );
-  gl.materialfv( GL_FRONT, GL_EMISSION, color );
-  //  gl.depthMask( GL_FALSE );
-}
-
-void ModelUnhighlight()
-{
-  gl.enable( GL_ALPHA_TEST );
-  gl.disable( GL_BLEND );
-  gl.enable( GL_CULL_FACE );
-  gl.activeTexture( GL_TEXTURE0 );
-  gl.enable( GL_TEXTURE_2D );
-  gl.color4fv( ::math::vector_4d( 1, 1, 1, 1 ) );
-  //  gl.depthMask( GL_TRUE );
-}
-
 void Model::drawModel(int animtime)
 {
   // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
