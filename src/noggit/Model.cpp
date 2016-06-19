@@ -25,7 +25,6 @@ Model::Model(const std::string& filename, bool _forceAnim)
   memset( &header, 0, sizeof( ModelHeader ) );
 
   globalSequences = nullptr;
-  anims = nullptr;
 
   showGeosets = nullptr;
 
@@ -76,9 +75,6 @@ Model::~Model()
 
   if(showGeosets)
     delete[] showGeosets;
-
-  if (anims)
-    delete[] anims;
 
   gl.deleteBuffers (1, &_vertices_buffer);
 }
@@ -391,13 +387,15 @@ void Model::initCommon(const noggit::mpq::file& f)
 
 void Model::initAnimated(const noggit::mpq::file& f)
 {
-  if (header.nAnimations > 0) {
-    anims = new ModelAnimation[header.nAnimations];
-    memcpy(anims, f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
+  if (header.nAnimations > 0)
+  {
+    _animations.resize (header.nAnimations);
+    memcpy(_animations.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
+
     for( size_t i = 0; i < header.nAnimations; ++i )
     {
       //! \note Fix for world\kalimdor\diremaul\activedoodads\crystalcorrupter\corruptedcrystalshard.m2 having a zero length for its stand animation.
-      anims[i].length = std::max( anims[i].length, 1U );
+      _animations[i].length = std::max (_animations[i].length, 1U);
     }
 
     animfiles = new noggit::mpq::file*[header.nAnimations];
@@ -406,7 +404,7 @@ void Model::initAnimated(const noggit::mpq::file& f)
     for(size_t i=0; i<header.nAnimations; ++i)
     {
       std::string lodname = _filename.substr(0, _filename.length()-3);
-      tempname << lodname << anims[i].animID << "-" << anims[i].subAnimID;
+      tempname << lodname << _animations[i].animID << "-" << _animations[i].subAnimID;
       const QString anim_filename (QString::fromStdString (tempname.str()));
       if (noggit::mpq::file::exists (anim_filename))
       {
@@ -468,7 +466,7 @@ void Model::calcBones(int _anim, int time)
 void Model::animate(int _anim, int time)
 {
   anim = _anim;
-  ModelAnimation &a = anims[anim];
+  ModelAnimation &a = _animations[anim];
   int tmax = a.length;
   time %= tmax;
 
