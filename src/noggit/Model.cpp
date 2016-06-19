@@ -41,7 +41,7 @@ void Model::finish_loading()
 
   trans = 1.0f;
 
-  anim = 0;
+  _current_animation = 0;
   header.nParticleEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   header.nRibbonEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
 
@@ -450,13 +450,13 @@ void Model::calcBones(int _anim, int time)
 
 void Model::animate(int _anim, int time)
 {
-  anim = _anim;
-  ModelAnimation &a = _animations[anim];
+  _current_animation = _anim;
+  ModelAnimation &a = _animations[_current_animation];
   int tmax = a.length;
   time %= tmax;
 
   if (animBones) {
-    calcBones(anim, time);
+    calcBones(_current_animation, time);
   }
 
   if (animGeometry) {
@@ -505,7 +505,7 @@ void Model::animate(int _anim, int time)
 
   if (animTextures) {
     for (size_t i=0; i<header.nTexAnims; ++i) {
-      _texture_animations[i].calc(anim, time);
+      _texture_animations[i].calc(_current_animation, time);
     }
   }
 }
@@ -524,9 +524,9 @@ bool ModelRenderPass::init(Model *m, int animtime)
   if (color!=-1 && m->_colors[color].color.uses(0))
   {
     ::math::vector_3d c (m->_colors[color].color.getValue (0, animtime));
-    if (m->_colors[color].opacity.uses (m->anim))
+    if (m->_colors[color].opacity.uses (m->_current_animation))
     {
-      ocol.w (m->_colors[color].opacity.getValue (m->anim, animtime));
+      ocol.w (m->_colors[color].opacity.getValue (m->_current_animation, animtime));
     }
 
     if (unlit)
