@@ -180,13 +180,15 @@ public:
 
   virtual void finish_loading();
 
-  std::string _filename; //! \todo ManagedItem already has a name. Use that?
+
+
+  //! \todo ManagedItem already has a name. Use that?
+  std::string _filename;
   ModelHeader header;
 
   float rad;
   float trans;
   bool animcalc;
-
 
 private:
   void drawModel (int animtime);
@@ -203,6 +205,8 @@ private:
 
   void upload ();
 
+
+
   bool _has_animation;
   bool _has_geometry_animation;
   bool _has_texture_animation;
@@ -212,6 +216,7 @@ private:
   bool _force_animation;
 
   int _current_animation;
+
   bool _finished_upload;
 
   boost::optional<ModelCamera> _camera;
