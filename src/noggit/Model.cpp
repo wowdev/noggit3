@@ -40,6 +40,7 @@ void Model::finish_loading()
   _has_animation = isAnimated( f ) || _force_animation;  // isAnimated will set animGeometry and animTextures
 
   trans = 1.0f;
+  rad = header.VertexBoxRadius;
 
   _current_animation = 0;
   header.nParticleEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
@@ -202,15 +203,7 @@ void Model::initCommon(const noggit::mpq::file& f)
 
     memcpy (_vertices_parameters[i].bones, vertices[i].bones, 4 * sizeof (uint8_t));
     memcpy (_vertices_parameters[i].weights, vertices[i].weights, 4 * sizeof (uint8_t));
-
-    float len = _vertices[i].position.length_squared();
-
-    if (len > rad)
-    {
-      rad = len;
-    }
   }
-  rad = std::sqrt (rad);
 
   if (!_has_geometry_animation)
   {
