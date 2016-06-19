@@ -156,22 +156,13 @@ class Model : public AsyncObject
 
   bool _finished_upload;
 
-  std::vector<TextureAnim> texanims;
-  std::vector<ModelAnimation> anims;
-  std::vector<int> globalSequences;
-  std::vector<ModelColor> colors;
-  std::vector<ModelTransparency> transparency;
-  std::vector<ModelLight> lights;
-  std::vector<ParticleSystem> particleSystems;
-  std::vector<RibbonEmitter> ribbons;
-
   void drawModel( /*bool unlit*/);
 
   void initCommon(const MPQFile& f);
   bool isAnimated(const MPQFile& f);
   void initAnimated(const MPQFile& f);
 
-  std::vector<ModelRenderPass> passes;
+
 
   void animate(int anim);
   void calcBones(int anim, int time);
@@ -226,4 +217,15 @@ private:
   std::vector<uint16_t> _indices;
 
   std::vector<model_vertex_parameter> _vertices_parameters;
+
+  std::vector<ModelRenderPass> _passes;
+  std::vector<ModelAnimation> _animations;
+  std::vector<int> _global_sequences;
+  std::vector<TextureAnim> _texture_animations;
+  std::vector<ModelColor> _colors;
+  std::vector<ModelTransparency> _transparency;
+  std::vector<ModelLight> _lights;
+
+  std::vector<ParticleSystem> _particles;
+  std::vector<RibbonEmitter> _ribbons;
 };
