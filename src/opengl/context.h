@@ -145,11 +145,6 @@ namespace opengl
     void getProgramiv (GLuint program, GLenum pname, GLint* params);
     void programLocalParameter4f (GLenum, GLuint, GLfloat, GLfloat, GLfloat, GLfloat);
 
-    void initNames();
-    void pushName (GLuint);
-    void popName();
-    void selectBuffer (GLsizei size, GLuint* buffer);
-
     void lightf (GLenum light, GLenum pname, GLfloat param);
     void lighti (GLenum light, GLenum pname, GLint param);
     void lightfv (GLenum light, GLenum pname, GLfloat const* param);

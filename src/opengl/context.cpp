@@ -612,27 +612,6 @@ namespace opengl
     return _.extension_functions<QOpenGLExtension_ARB_vertex_program>()->glProgramLocalParameter4fARB (target, index, x, y, z, w);
   }
 
-  void context::initNames()
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glInitNames();
-  }
-  void context::pushName (GLuint name)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glPushName (name);
-  }
-  void context::popName()
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glPopName();
-  }
-  void context::selectBuffer (GLsizei size, GLuint* buffer)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _.version_functions<QOpenGLFunctions_1_0>()->glSelectBuffer (size, buffer);
-  }
-
   void context::lightf (GLenum light, GLenum pname, GLfloat param)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
@@ -773,6 +752,7 @@ namespace opengl
     {
       std::vector<char> log (get_shader (shader, GL_INFO_LOG_LENGTH));
       _current_context->functions()->glGetShaderInfoLog (shader, log.size(), nullptr, log.data());
+      LogDebug << std::string (log.data ()) << std::endl;
       throw std::runtime_error ("compiling shader failed: " + std::string (log.data()));
     }
   }
