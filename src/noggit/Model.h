@@ -177,10 +177,7 @@ class Model: public noggit::async::object
 
 
 
-  std::vector<TextureAnim> texanims;
-  std::vector<ModelColor> colors;
-  std::vector<ModelTransparency> transparency;
-  std::vector<ModelLight> lights;
+
 
   void drawModel (int animtime);
 
@@ -188,7 +185,7 @@ class Model: public noggit::async::object
   bool isAnimated(const noggit::mpq::file& f);
   void initAnimated(const noggit::mpq::file& f);
 
-  std::vector<ModelRenderPass> passes;
+
 
   void animate(int anim, int time);
   void calcBones(int anim, int time);
@@ -246,6 +243,11 @@ private:
   std::vector<noggit::scoped_blp_texture_reference> _replaceTextures;
   std::vector<bool> _useReplaceTextures;
 
+  std::vector<ModelRenderPass> _passes;
   std::vector<ModelAnimation> _animations;
   std::vector<int> _global_sequences;
+  std::vector<TextureAnim> _texture_animations;
+  std::vector<ModelColor> _colors;
+  std::vector<ModelTransparency> _transparency;
+  std::vector<ModelLight> _lights;
 };
