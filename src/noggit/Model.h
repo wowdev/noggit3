@@ -155,10 +155,21 @@ struct ModelLight {
   void setup(int time, opengl::light l);
 };
 
+struct model_vertex
+{
+  ::math::vector_3d position;
+  ::math::vector_3d normal;
+  ::math::vector_2d texcoords;
+};
+
+struct model_vertex_parameter
+{
+  uint8_t weights[4];
+  uint8_t bones[4];
+};
+
 class Model: public noggit::async::object
 {
-  GLuint vbuf, nbuf, tbuf;
-  size_t vbufsize;
   bool animated;
   bool animGeometry,animTextures,animBones;
   bool forceAnim;
@@ -182,8 +193,6 @@ class Model: public noggit::async::object
   bool isAnimated(const noggit::mpq::file& f);
   void initAnimated(const noggit::mpq::file& f);
 
-  ModelVertex *origVertices;
-  ::math::vector_3d *vertices, *normals;
   uint16_t *indices;
   size_t nIndices;
   std::vector<ModelRenderPass> passes;
@@ -231,4 +240,12 @@ public:
   friend struct ModelRenderPass;
 
   virtual void finish_loading();
+
+private:
+  GLuint _vertices_buffer;
+
+  std::vector<model_vertex> _vertices;
+  std::vector<model_vertex> _current_vertices;
+
+  std::vector<model_vertex_parameter> _vertices_parameters;
 };
