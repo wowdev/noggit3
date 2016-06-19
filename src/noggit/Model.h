@@ -131,13 +131,21 @@ struct ModelLight {
   void setup(int time, opengl::light l);
 };
 
-class Model : public AsyncObject {
+struct model_vertex
+{
+  ::math::vector_3d position;
+  ::math::vector_3d normal;
+  ::math::vector_2d texcoords;
+};
 
-  GLuint ModelDrawList;
-  //GLuint TileModeModelDrawList;
+struct model_vertex_parameter
+{
+  uint8_t weights[4];
+  uint8_t bones[4];
+};
 
-  GLuint vbuf, nbuf, tbuf;
-  size_t vbufsize;
+class Model : public AsyncObject
+{
   bool animated;
   bool animGeometry, animTextures, animBones;
   MPQFile **animfiles;
@@ -163,8 +171,6 @@ class Model : public AsyncObject {
   bool isAnimated(const MPQFile& f);
   void initAnimated(const MPQFile& f);
 
-  ModelVertex *origVertices;
-  math::vector_3d *vertices, *normals;
   uint16_t *indices;
   size_t nIndices;
   std::vector<ModelRenderPass> passes;
@@ -212,4 +218,12 @@ public:
   friend struct ModelRenderPass;
 
   virtual void finishLoading();
+
+private:
+  GLuint _vertices_buffer;
+
+  std::vector<model_vertex> _vertices;
+  std::vector<model_vertex> _current_vertices;
+
+  std::vector<model_vertex_parameter> _vertices_parameters;
 };
