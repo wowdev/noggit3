@@ -18,7 +18,6 @@ class Bone;
 #include <noggit/async/object.h>
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/ModelHeaders.h>
-#include <noggit/Particle.h>
 #include <noggit/TextureManager.h>
 
 #include <boost/optional.hpp>
@@ -175,8 +174,8 @@ class Model: public noggit::async::object
   bool forceAnim;
   noggit::mpq::file **animfiles;
 
-  std::vector<std::string> _texture_names;
-  bool _finished_upload;
+
+
 
   std::vector<TextureAnim> texanims;
   ModelAnimation *anims;
@@ -184,8 +183,6 @@ class Model: public noggit::async::object
   std::vector<ModelColor> colors;
   std::vector<ModelTransparency> transparency;
   std::vector<ModelLight> lights;
-  std::vector<ParticleSystem> particleSystems;
-  std::vector<RibbonEmitter> ribbons;
 
   void drawModel (int animtime);
 
@@ -215,12 +212,6 @@ public:
   // Toggles
   bool *showGeosets;
 
-  // ===============================
-  // Texture data
-  // ===============================
-  std::vector<noggit::scoped_blp_texture_reference> _textures;
-  std::vector<noggit::scoped_blp_texture_reference> _replaceTextures;
-  std::vector<bool> _useReplaceTextures;
 
   float rad;
   float trans;
@@ -242,10 +233,18 @@ public:
   virtual void finish_loading();
 
 private:
+  bool _finished_upload;
+
   GLuint _vertices_buffer;
 
   std::vector<model_vertex> _vertices;
   std::vector<model_vertex> _current_vertices;
 
   std::vector<model_vertex_parameter> _vertices_parameters;
+
+  std::vector<std::string> _texture_names;
+  std::vector<noggit::scoped_blp_texture_reference> _textures;
+
+  std::vector<noggit::scoped_blp_texture_reference> _replaceTextures;
+  std::vector<bool> _useReplaceTextures;
 };
