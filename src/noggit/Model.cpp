@@ -53,8 +53,8 @@ void Model::finishLoading()
   header.nRibbonEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   if (header.nGlobalSequences)
   {
-    globalSequences.resize (header.nGlobalSequences);
-    memcpy(globalSequences.data(), (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
+    _global_sequences.resize (header.nGlobalSequences);
+    memcpy(_global_sequences.data(), (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
   }
 
   //! \todo  This takes a biiiiiit long. Have a look at this.
@@ -239,13 +239,19 @@ void Model::initCommon(const MPQFile& f)
   // init colors
   if (header.nColors) {
     ModelColorDef *colorDefs = reinterpret_cast<ModelColorDef*>(f.getBuffer() + header.ofsColors);
-    for (size_t i = 0; i<header.nColors; ++i) colors.emplace_back(f, colorDefs[i], globalSequences.data());
+    for (size_t i = 0; i < header.nColors; ++i)
+    {
+      _colors.emplace_back (f, colorDefs[i], _global_sequences.data());
+    }
   }
   // init transparency
   int16_t *transLookup = reinterpret_cast<int16_t*>(f.getBuffer() + header.ofsTransparencyLookup);
   if (header.nTransparency) {
     ModelTransDef *trDefs = reinterpret_cast<ModelTransDef*>(f.getBuffer() + header.ofsTransparency);
-    for (size_t i = 0; i<header.nTransparency; ++i) transparency.emplace_back (f, trDefs[i], globalSequences.data());
+    for (size_t i = 0; i < header.nTransparency; ++i)
+    {
+      _transparency.emplace_back (f, trDefs[i], _global_sequences.data());
+    }
   }
 
 
@@ -364,11 +370,11 @@ void Model::initCommon(const MPQFile& f)
         pass.texanim = -1; // no texture animation
       }
 
-      passes.push_back(pass);
+      _passes.push_back(pass);
     }
     g.close();
     // transparent parts come later
-    std::sort(passes.begin(), passes.end());
+    std::sort(_passes.begin(), _passes.end());
   }
 
   // zomg done
@@ -377,12 +383,12 @@ void Model::initCommon(const MPQFile& f)
 void Model::initAnimated(const MPQFile& f)
 {
   if (header.nAnimations > 0) {
-    anims.resize (header.nAnimations);
-    memcpy(anims.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
+    _animations.resize (header.nAnimations);
+    memcpy(_animations.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
     for (size_t i = 0; i < header.nAnimations; ++i)
     {
       //! \note Fix for world\kalimdor\diremaul\activedoodads\crystalcorrupter\corruptedcrystalshard.m2 having a zero length for its stand animation.
-      anims[i].length = std::max(anims[i].length, 1U);
+      _animations[i].length = std::max(_animations[i].length, 1U);
     }
 
     animfiles = new MPQFile*[header.nAnimations];
@@ -391,7 +397,7 @@ void Model::initAnimated(const MPQFile& f)
     for (size_t i = 0; i<header.nAnimations; ++i)
     {
       std::string lodname = _filename.substr(0, _filename.length() - 3);
-      tempname << lodname << anims[i].animID << "-" << anims[i].subAnimID;
+      tempname << lodname << _animations[i].animID << "-" << _animations[i].subAnimID;
       if (MPQFile::exists(tempname.str()))
       {
         animfiles[i] = new MPQFile(tempname.str());
@@ -407,14 +413,14 @@ void Model::initAnimated(const MPQFile& f)
     // init bones...
     ModelBoneDef *mb = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
     for (size_t i = 0; i<header.nBones; ++i) {
-      bones.emplace_back(f, mb[i], globalSequences.data(), animfiles);
+      bones.emplace_back(f, mb[i], _global_sequences.data(), animfiles);
     }
   }
 
   if (animTextures) {
     ModelTexAnimDef *ta = reinterpret_cast<ModelTexAnimDef*>(f.getBuffer() + header.ofsTexAnims);
-    for (size_t i = 0; i<header.nTexAnims; ++i) {
-      texanims.emplace_back(f, ta[i], globalSequences.data());
+    for (size_t i=0; i<header.nTexAnims; ++i) {
+      _texture_animations.emplace_back (f, ta[i], _global_sequences.data());
     }
   }
 
@@ -422,7 +428,7 @@ void Model::initAnimated(const MPQFile& f)
   if (header.nParticleEmitters) {
     ModelParticleEmitterDef *pdefs = reinterpret_cast<ModelParticleEmitterDef*>(f.getBuffer() + header.ofsParticleEmitters);
     for (size_t i = 0; i<header.nParticleEmitters; ++i) {
-      particleSystems.emplace_back (this, f, pdefs[i], globalSequences.data());
+      _particles.emplace_back (this, f, pdefs[i], _global_sequences.data());
     }
   }
 
@@ -430,21 +436,21 @@ void Model::initAnimated(const MPQFile& f)
   if (header.nRibbonEmitters) {
     ModelRibbonEmitterDef *rdefs = reinterpret_cast<ModelRibbonEmitterDef*>(f.getBuffer() + header.ofsRibbonEmitters);
     for (size_t i = 0; i<header.nRibbonEmitters; ++i) {
-      ribbons.emplace_back(this, f, rdefs[i], globalSequences.data());
+      _ribbons.emplace_back(this, f, rdefs[i], _global_sequences.data());
     }
   }
 
   // just use the first camera, meh
   if (header.nCameras>0) {
     ModelCameraDef *camDefs = reinterpret_cast<ModelCameraDef*>(f.getBuffer() + header.ofsCameras);
-    cam = ModelCamera(f, camDefs[0], globalSequences.data());
+    cam = ModelCamera(f, camDefs[0], _global_sequences.data());
   }
 
   // init lights
   if (header.nLights) {
     ModelLightDef *lDefs = reinterpret_cast<ModelLightDef*>(f.getBuffer() + header.ofsLights);
-    for (size_t i = 0; i<header.nLights; ++i)
-      lights.emplace_back(f, lDefs[i], globalSequences.data());
+    for (size_t i=0; i<header.nLights; ++i)
+      _lights.emplace_back (f, lDefs[i], _global_sequences.data());
   }
 
   animcalc = false;
@@ -464,9 +470,9 @@ void Model::calcBones(int _anim, int time)
 void Model::animate(int _anim)
 {
   this->anim = _anim;
-  ModelAnimation &a = anims[anim];
+  ModelAnimation &a = _animations[anim];
 
-  if (anims.empty())
+  if (_animations.empty())
     return;
 
   int t = globalTime; //(int)(gWorld->animtime /* / a.playSpeed*/);
@@ -510,26 +516,26 @@ void Model::animate(int _anim)
     gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (model_vertex), _current_vertices.data(), GL_STREAM_DRAW);
   }
 
-  for (size_t i = 0; i<header.nLights; ++i) {
-    if (lights[i].parent >= 0) {
-      lights[i].tpos = bones[lights[i].parent].mat * lights[i].pos;
-      lights[i].tdir = bones[lights[i].parent].mrot * lights[i].dir;
+  for (size_t i=0; i<header.nLights; ++i) {
+    if (_lights[i].parent>=0) {
+      _lights[i].tpos = bones[_lights[i].parent].mat * _lights[i].pos;
+      _lights[i].tdir = bones[_lights[i].parent].mrot * _lights[i].dir;
     }
   }
 
   for (size_t i = 0; i<header.nParticleEmitters; ++i) {
     // random time distribution for teh win ..?
-    int pt = (t + static_cast<int>(tmax*particleSystems[i].tofs)) % tmax;
-    particleSystems[i].setup(anim, pt);
+    int pt = (t + static_cast<int>(tmax*_particles[i].tofs)) % tmax;
+    _particles[i].setup(anim, pt);
   }
 
   for (size_t i = 0; i<header.nRibbonEmitters; ++i) {
-    ribbons[i].setup(anim, t);
+    _ribbons[i].setup(anim, t);
   }
 
   if (animTextures) {
-    for (size_t i = 0; i<header.nTexAnims; ++i) {
-      texanims[i].calc(anim, t);
+    for (size_t i=0; i<header.nTexAnims; ++i) {
+      _texture_animations[i].calc(anim, t);
     }
   }
 }
@@ -548,11 +554,12 @@ bool ModelRenderPass::init(Model *m)
     //  return false;
 
     // emissive colors
-    if (color != -1 && m->colors[color].color.uses(0)) {
-      math::vector_3d c = m->colors[color].color.getValue(0, m->animtime);
-      if (m->colors[color].opacity.uses(m->anim)) {
-        float o = m->colors[color].opacity.getValue(m->anim, m->animtime);
-        ocol.w = o;
+    if (color!=-1 && m->_colors[color].color.uses(0))
+    {
+      ::math::vector_3d c (m->_colors[color].color.getValue (0, m->animtime));
+      if (m->_colors[color].opacity.uses (m->anim))
+      {
+        ocol.w = m->_colors[color].opacity.getValue (m->anim, m->animtime);
       }
 
       if (unlit) {
@@ -567,9 +574,12 @@ bool ModelRenderPass::init(Model *m)
     }
 
     // opacity
-    if (opacity != -1) {
-      if (m->transparency[opacity].trans.uses(0))
-        ocol.w *= m->transparency[opacity].trans.getValue(0, m->animtime);
+    if (opacity!=-1)
+    {
+      if (m->_transparency[opacity].trans.uses (0))
+      {
+        ocol.w = ocol.w * m->_transparency[opacity].trans.getValue (0, m->animtime);
+      }
     }
 
     // exit and return false before affecting the opengl render state
@@ -656,7 +666,7 @@ bool ModelRenderPass::init(Model *m)
       gl.matrixMode(GL_TEXTURE);
       gl.pushMatrix();
 
-      m->texanims[texanim].setup(texanim);
+      m->_texture_animations[texanim].setup(texanim);
     }
 
     // color
@@ -747,8 +757,9 @@ void Model::drawModel( /*bool unlit*/)
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   gl.alphaFunc(GL_GREATER, 0.3f);
 
-  for (size_t i = 0; i<passes.size(); ++i) {
-    ModelRenderPass &p = passes[i];
+  for (size_t i = 0; i < _passes.size(); ++i)
+  {
+    ModelRenderPass& p = _passes[i];
 
     // we don't want to render completely transparent parts
     if (p.init(this))
@@ -1006,12 +1017,12 @@ void Model::draw()
   drawModel( /*false*/);
   lightsOff(GL_LIGHT4);
 
-  // draw particle systems & ribbons
+  // draw particle systems & _ribbons
   for (size_t i = 0; i < header.nParticleEmitters; ++i)
-    particleSystems[i].draw();
+    _particles[i].draw();
 
   for (size_t i = 0; i < header.nRibbonEmitters; ++i)
-    ribbons[i].draw();
+    _ribbons[i].draw();
 }
 
 std::vector<float> Model::intersect (math::ray const& ray)
@@ -1024,7 +1035,7 @@ std::vector<float> Model::intersect (math::ray const& ray)
     animcalc = true;
   }
 
-  for (auto&& pass : passes)
+  for (auto&& pass : _passes)
   {
     for (size_t i (pass.indexStart); i < pass.indexStart + pass.indexCount; i += 3)
     {
@@ -1045,7 +1056,7 @@ std::vector<float> Model::intersect (math::ray const& ray)
 void Model::lightsOn(opengl::light lbase)
 {
   // setup lights
-  for (unsigned int i = 0, l = lbase; i<header.nLights; ++i) lights[i].setup(animtime, l++);
+  for (unsigned int i=0, l=lbase; i<header.nLights; ++i) _lights[i].setup(animtime, l++);
 }
 
 void Model::lightsOff(opengl::light lbase)
@@ -1072,6 +1083,6 @@ void Model::upload()
 void Model::updateEmitters(float dt)
 {
   for (size_t i = 0; i<header.nParticleEmitters; ++i) {
-    particleSystems[i].update(dt);
+    _particles[i].update(dt);
   }
 }
