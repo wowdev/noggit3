@@ -178,7 +178,6 @@ class Model: public noggit::async::object
 
 
   std::vector<TextureAnim> texanims;
-  int *globalSequences;
   std::vector<ModelColor> colors;
   std::vector<ModelTransparency> transparency;
   std::vector<ModelLight> lights;
@@ -248,4 +247,5 @@ private:
   std::vector<bool> _useReplaceTextures;
 
   std::vector<ModelAnimation> _animations;
+  std::vector<int> _global_sequences;
 };

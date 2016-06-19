@@ -24,8 +24,6 @@ Model::Model(const std::string& filename, bool _forceAnim)
 {
   memset( &header, 0, sizeof( ModelHeader ) );
 
-  globalSequences = nullptr;
-
   showGeosets = nullptr;
 
   _finished = false;
@@ -45,14 +43,14 @@ void Model::finish_loading()
 
   trans = 1.0f;
 
-  globalSequences = 0;
   anim = 0;
   header.nParticleEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   header.nRibbonEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
+
   if (header.nGlobalSequences)
   {
-    globalSequences = new int[header.nGlobalSequences];
-    memcpy(globalSequences, (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
+    _global_sequences.resize (header.nGlobalSequences);
+    memcpy (_global_sequences.data(), (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
   }
 
   //! \todo  This takes a biiiiiit long. Have a look at this.
@@ -69,9 +67,6 @@ void Model::finish_loading()
 Model::~Model()
 {
   LogDebug << "Unloading model \"" << _filename << "\"." << std::endl;
-
-  if( globalSequences )
-    delete[] globalSequences;
 
   if(showGeosets)
     delete[] showGeosets;
@@ -252,7 +247,7 @@ void Model::initCommon(const noggit::mpq::file& f)
     ModelColorDef *colorDefs = reinterpret_cast<ModelColorDef*>(f.getBuffer() + header.ofsColors);
     for (size_t i=0; i<header.nColors; ++i)
     {
-      colors.emplace_back (f, colorDefs[i], globalSequences);
+      colors.emplace_back (f, colorDefs[i], _global_sequences.data());
     }
   }
   // init transparency
@@ -261,7 +256,7 @@ void Model::initCommon(const noggit::mpq::file& f)
     ModelTransDef *trDefs = reinterpret_cast<ModelTransDef*>(f.getBuffer() + header.ofsTransparency);
     for (size_t i=0; i<header.nTransparency; ++i)
     {
-      transparency.emplace_back (f, trDefs[i], globalSequences);
+      transparency.emplace_back (f, trDefs[i], _global_sequences.data());
     }
   }
 
@@ -421,14 +416,14 @@ void Model::initAnimated(const noggit::mpq::file& f)
     // init bones...
     ModelBoneDef *mb = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
     for (size_t i=0; i<header.nBones; ++i) {
-      bones.emplace_back (f, mb[i], globalSequences, animfiles);
+      bones.emplace_back (f, mb[i], _global_sequences.data(), animfiles);
     }
   }
 
   if (animTextures) {
     ModelTexAnimDef *ta = reinterpret_cast<ModelTexAnimDef*>(f.getBuffer() + header.ofsTexAnims);
     for (size_t i=0; i<header.nTexAnims; ++i) {
-      texanims.emplace_back (f, ta[i], globalSequences);
+      texanims.emplace_back (f, ta[i], _global_sequences.data());
     }
   }
 
@@ -439,14 +434,14 @@ void Model::initAnimated(const noggit::mpq::file& f)
   // just use the first camera, meh
   if (header.nCameras>0) {
     ModelCameraDef *camDefs = reinterpret_cast<ModelCameraDef*>(f.getBuffer() + header.ofsCameras);
-    cam = ModelCamera (f, camDefs[0], globalSequences);
+    cam = ModelCamera (f, camDefs[0], _global_sequences.data());
   }
 
   // init lights
   if (header.nLights) {
     ModelLightDef *lDefs = reinterpret_cast<ModelLightDef*>(f.getBuffer() + header.ofsLights);
     for (size_t i=0; i<header.nLights; ++i)
-      lights.emplace_back (f, lDefs[i], globalSequences);
+      lights.emplace_back (f, lDefs[i], _global_sequences.data());
   }
 
   animcalc = false;
