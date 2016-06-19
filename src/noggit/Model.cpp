@@ -78,7 +78,7 @@ bool Model::isAnimated(const noggit::mpq::file& f)
 
   _has_geometry_animation = false;
   _has_bone_animation = false;
-  mPerInstanceAnimation = false;
+  _per_instance_animation = false;
 
   ModelVertex *verts = reinterpret_cast<ModelVertex*>(f.getBuffer() + header.ofsVertices);
   for (size_t i=0; i<header.nVertices && !_has_geometry_animation; ++i) {
@@ -88,7 +88,7 @@ bool Model::isAnimated(const noggit::mpq::file& f)
         if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & 8)) {
           if (bb.flags & 8) {
             // if we have billboarding, the model will need per-instance animation
-            mPerInstanceAnimation = true;
+            _per_instance_animation = true;
           }
           _has_geometry_animation = true;
           break;
@@ -960,7 +960,7 @@ void Model::draw (bool draw_fog, size_t time)
   else
     gl.disable( GL_FOG );
 
-  if (_has_animation && (!animcalc || mPerInstanceAnimation))
+  if (_has_animation && (!animcalc || _per_instance_animation))
   {
     animate(0, time);
     animcalc = true;
@@ -980,7 +980,7 @@ boost::optional<float> Model::intersect(size_t time, math::ray ray)
   if (!finished_loading () || !_finished_upload)
     return boost::none;
 
-  if (_has_animation && (!animcalc || mPerInstanceAnimation))
+  if (_has_animation && (!animcalc || _per_instance_animation))
   {
     animate (0, time);
     animcalc = true;

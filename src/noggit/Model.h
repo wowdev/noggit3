@@ -188,7 +188,7 @@ public:
   float rad;
   float trans;
   bool animcalc;
-  bool mPerInstanceAnimation;
+
 
 private:
   void drawModel (int animtime);
@@ -209,6 +209,8 @@ private:
   bool _has_geometry_animation;
   bool _has_texture_animation;
   bool _has_bone_animation;
+
+  bool _per_instance_animation;
   bool _force_animation;
 
   int _current_animation;
