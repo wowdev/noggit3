@@ -1271,6 +1271,9 @@ namespace noggit
       return;
     }
 
+    //\! note: is a non-owning copy, may crash when originally selected model is deleted after being added to clipboard.
+    // for more info see https://bitbucket.org/berndloerwald/noggit3/commits/531e06c041974093d385470bbe9562713d792c21#Lsrc/noggit/Selection.cppF76
+
     _clipboard = _selection;
   }
 

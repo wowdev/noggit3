@@ -121,7 +121,7 @@ namespace noggit
 
         [[noreturn]] void operator() (const selected_chunk_type&) const
         {
-          throw std::runtime_error ("Can't delete chunks as of now.");
+          throw std::runtime_error ("Can't add chunks as of now.");
         }
         void operator() (const selected_model_type& model) const
         {
