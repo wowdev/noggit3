@@ -184,7 +184,7 @@ public:
 
   std::string _filename; //! \todo ManagedItem already has a name. Use that?
 
-  std::vector<Bone> bones;
+
   ModelHeader header;
 
   float rad;
@@ -239,6 +239,7 @@ private:
   std::vector<ModelColor> _colors;
   std::vector<ModelTransparency> _transparency;
   std::vector<ModelLight> _lights;
+  std::vector<Bone> _bones;
 
   friend struct ModelRenderPass;
 };

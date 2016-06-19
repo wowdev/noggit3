@@ -406,7 +406,7 @@ void Model::initAnimated(const noggit::mpq::file& f)
     // init bones...
     ModelBoneDef *mb = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
     for (size_t i=0; i<header.nBones; ++i) {
-      bones.emplace_back (f, mb[i], _global_sequences.data(), animfiles);
+      _bones.emplace_back (f, mb[i], _global_sequences.data(), animfiles);
     }
   }
 
@@ -440,11 +440,11 @@ void Model::initAnimated(const noggit::mpq::file& f)
 void Model::calcBones(int _anim, int time)
 {
   for (size_t i=0; i<header.nBones; ++i) {
-    bones[i].calc = false;
+    _bones[i].calc = false;
   }
 
   for (size_t i=0; i<header.nBones; ++i) {
-    bones[i].calcMatrix(bones.data(), _anim, time);
+    _bones[i].calcMatrix(_bones.data(), _anim, time);
   }
 }
 
@@ -476,8 +476,8 @@ void Model::animate(int _anim, int time)
         if (param.weights[b] <= 0)
           continue;
 
-        ::math::vector_3d tv = bones[param.bones[b]].mat * vertex.position;
-        ::math::vector_3d tn = bones[param.bones[b]].mrot * vertex.normal;
+        ::math::vector_3d tv = _bones[param.bones[b]].mat * vertex.position;
+        ::math::vector_3d tn = _bones[param.bones[b]].mrot * vertex.normal;
 
         v += tv * (static_cast<float> (param.weights[b]) / 255.0f);
         n += tn * (static_cast<float> (param.weights[b]) / 255.0f);
@@ -494,8 +494,8 @@ void Model::animate(int _anim, int time)
 
   for (size_t i=0; i<header.nLights; ++i) {
     if (_lights[i].parent>=0) {
-      _lights[i].tpos = bones[_lights[i].parent].mat * _lights[i].pos;
-      _lights[i].tdir = bones[_lights[i].parent].mrot * _lights[i].dir;
+      _lights[i].tpos = _bones[_lights[i].parent].mat * _lights[i].pos;
+      _lights[i].tdir = _bones[_lights[i].parent].mrot * _lights[i].dir;
     }
   }
 
