@@ -654,9 +654,7 @@ void MapChunk::intersect(math::ray ray, selection_result& results)
 
     if ((distance = math::intersect_triangle (ray, v0, v1, v2)))
     {
-      math::vector_3d const pos (ray.origin + ray.direction * *distance);
-
-      results.emplace_back (*distance, selected_chunk_type (this, i / 3, pos));
+      results.emplace_back (*distance, selected_chunk_type (this, i / 3, ray.position (*distance)));
     }
   }
 }
