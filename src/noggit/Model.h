@@ -211,8 +211,6 @@ private:
   bool _has_bone_animation;
   bool _force_animation;
 
-  noggit::mpq::file **animfiles;
-
   int _current_animation;
   bool _finished_upload;
 
