@@ -424,7 +424,7 @@ void Model::initAnimated(const noggit::mpq::file& f)
   // just use the first camera, meh
   if (header.nCameras>0) {
     ModelCameraDef *camDefs = reinterpret_cast<ModelCameraDef*>(f.getBuffer() + header.ofsCameras);
-    cam = ModelCamera (f, camDefs[0], _global_sequences.data());
+    _camera = ModelCamera (f, camDefs[0], _global_sequences.data());
   }
 
   // init lights
