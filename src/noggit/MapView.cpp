@@ -570,7 +570,7 @@ namespace noggit
         {
           selection::scale (powf (2.0f, mv * 4.0f), *_selection);
         }
-        else
+        else if (!selection::is_chunk (*_selection))
         {
           //! \note The  commented out code  here was executed  when a
           //! model was  selected. I am  unsure, if it is  relevant as
