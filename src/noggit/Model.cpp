@@ -247,7 +247,7 @@ void Model::initCommon(const noggit::mpq::file& f)
     ModelColorDef *colorDefs = reinterpret_cast<ModelColorDef*>(f.getBuffer() + header.ofsColors);
     for (size_t i=0; i<header.nColors; ++i)
     {
-      colors.emplace_back (f, colorDefs[i], _global_sequences.data());
+      _colors.emplace_back (f, colorDefs[i], _global_sequences.data());
     }
   }
   // init transparency
@@ -256,7 +256,7 @@ void Model::initCommon(const noggit::mpq::file& f)
     ModelTransDef *trDefs = reinterpret_cast<ModelTransDef*>(f.getBuffer() + header.ofsTransparency);
     for (size_t i=0; i<header.nTransparency; ++i)
     {
-      transparency.emplace_back (f, trDefs[i], _global_sequences.data());
+      _transparency.emplace_back (f, trDefs[i], _global_sequences.data());
     }
   }
 
@@ -370,11 +370,11 @@ void Model::initCommon(const noggit::mpq::file& f)
         pass.texanim = -1; // no texture animation
       }
 
-      passes.push_back(pass);
+      _passes.push_back(pass);
     }
     g.close();
     // transparent parts come later
-    std::sort(passes.begin(), passes.end());
+    std::sort(_passes.begin(), _passes.end());
   }
 
   // zomg done
@@ -423,7 +423,7 @@ void Model::initAnimated(const noggit::mpq::file& f)
   if (animTextures) {
     ModelTexAnimDef *ta = reinterpret_cast<ModelTexAnimDef*>(f.getBuffer() + header.ofsTexAnims);
     for (size_t i=0; i<header.nTexAnims; ++i) {
-      texanims.emplace_back (f, ta[i], _global_sequences.data());
+      _texture_animations.emplace_back (f, ta[i], _global_sequences.data());
     }
   }
 
@@ -441,7 +441,7 @@ void Model::initAnimated(const noggit::mpq::file& f)
   if (header.nLights) {
     ModelLightDef *lDefs = reinterpret_cast<ModelLightDef*>(f.getBuffer() + header.ofsLights);
     for (size_t i=0; i<header.nLights; ++i)
-      lights.emplace_back (f, lDefs[i], _global_sequences.data());
+      _lights.emplace_back (f, lDefs[i], _global_sequences.data());
   }
 
   animcalc = false;
@@ -503,9 +503,9 @@ void Model::animate(int _anim, int time)
   }
 
   for (size_t i=0; i<header.nLights; ++i) {
-    if (lights[i].parent>=0) {
-      lights[i].tpos = bones[lights[i].parent].mat * lights[i].pos;
-      lights[i].tdir = bones[lights[i].parent].mrot * lights[i].dir;
+    if (_lights[i].parent>=0) {
+      _lights[i].tpos = bones[_lights[i].parent].mat * _lights[i].pos;
+      _lights[i].tdir = bones[_lights[i].parent].mrot * _lights[i].dir;
     }
   }
 
@@ -515,7 +515,7 @@ void Model::animate(int _anim, int time)
 
   if (animTextures) {
     for (size_t i=0; i<header.nTexAnims; ++i) {
-      texanims[i].calc(anim, time);
+      _texture_animations[i].calc(anim, time);
     }
   }
 }
@@ -534,12 +534,12 @@ bool ModelRenderPass::init(Model *m, int animtime)
     //  return false;
 
     // emissive colors
-    if (color!=-1 && m->colors[color].color.uses(0))
+    if (color!=-1 && m->_colors[color].color.uses(0))
     {
-      ::math::vector_3d c (m->colors[color].color.getValue (0, animtime));
-      if (m->colors[color].opacity.uses (m->anim))
+      ::math::vector_3d c (m->_colors[color].color.getValue (0, animtime));
+      if (m->_colors[color].opacity.uses (m->anim))
       {
-        ocol.w (m->colors[color].opacity.getValue (m->anim, animtime));
+        ocol.w (m->_colors[color].opacity.getValue (m->anim, animtime));
       }
 
       if (unlit)
@@ -558,10 +558,10 @@ bool ModelRenderPass::init(Model *m, int animtime)
     // opacity
     if (opacity!=-1)
     {
-      if (m->transparency[opacity].trans.uses (0))
+      if (m->_transparency[opacity].trans.uses (0))
       {
         ocol.w ( ocol.w()
-               * m->transparency[opacity].trans.getValue (0, animtime)
+               * m->_transparency[opacity].trans.getValue (0, animtime)
                );
       }
     }
@@ -647,7 +647,7 @@ bool ModelRenderPass::init(Model *m, int animtime)
       gl.matrixMode(GL_TEXTURE);
       gl.pushMatrix();
 
-      m->texanims[texanim].setup(texanim);
+      m->_texture_animations[texanim].setup(texanim);
     }
 
     // color
@@ -738,9 +738,9 @@ void Model::drawModel(int animtime)
   gl.blendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   gl.alphaFunc( GL_GREATER, 0.3f );
 
-  for (size_t i = 0; i < passes.size(); ++i)
+  for (size_t i = 0; i < _passes.size(); ++i)
   {
-    ModelRenderPass& p = passes[i];
+    ModelRenderPass& p = _passes[i];
 
     if (p.init(this, animtime))
     {
@@ -1003,7 +1003,7 @@ boost::optional<float> Model::intersect(size_t time, math::ray ray)
     animcalc = true;
   }
 
-  for (ModelRenderPass& p : passes)
+  for (ModelRenderPass& p : _passes)
   {
     for (size_t i (p.indexStart); i < p.indexStart + p.indexCount; i += 3)
     {
@@ -1022,7 +1022,7 @@ boost::optional<float> Model::intersect(size_t time, math::ray ray)
 void Model::lightsOn(opengl::light lbase, int animtime)
 {
   // setup lights
-  for (unsigned int i=0, l=lbase; i<header.nLights; ++i) lights[i].setup(animtime, l++);
+  for (unsigned int i=0, l=lbase; i<header.nLights; ++i) _lights[i].setup(animtime, l++);
 }
 
 void Model::lightsOff(opengl::light lbase)
