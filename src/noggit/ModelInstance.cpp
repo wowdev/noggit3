@@ -270,15 +270,14 @@ void ModelInstance::intersect(math::ray ray, selection_result& results)
 
   math::matrix_4x4 const model_matrix (math::matrix_4x4 (translation * rotation * scale).inverted ());
 
-  ray.origin    = (model_matrix * math::vector_4d (ray.origin,    1.0)).xyz ();
-  ray.direction = (model_matrix * math::vector_4d (ray.direction, 0.0)).xyz ().normalized ();
+  math::ray subray (model_matrix, ray);
 
   math::vector_3d const min (fixCoordSystem (model->header.VertexBoxMin));
   math::vector_3d const max (fixCoordSystem (model->header.VertexBoxMax));
 
-  if(auto distance = math::intersect_bounds(ray, min, max))
+  if (auto distance = math::intersect_bounds (subray, min, max))
   {
-    if ((distance = model->intersect (time_since_spawn (), ray)))
+    if ((distance = model->intersect (time_since_spawn(), subray)))
       results.emplace_back (*distance * sc, selected_model_type (this));
   }
 }

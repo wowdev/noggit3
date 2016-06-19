@@ -924,10 +924,7 @@ namespace noggit
 
     ::math::vector_3d const mouse_worldspace ((un_project_mat * normalized_device_coords).xyz_normalized_by_w ());
 
-    math::ray _ray;
-
-    _ray.origin = _world->camera;
-    _ray.direction = (mouse_worldspace - _world->camera).normalize ();
+    math::ray ray (_world->camera, mouse_worldspace - _world->camera);
 
     world_selection_mask flags;
 
@@ -944,7 +941,7 @@ namespace noggit
       flags.map_object = 1;
     }
 
-    selection_result results (_world->intersect (_ray, flags));
+    selection_result results (_world->intersect (ray, flags));
 
     std::sort (results.begin (), results.end (), sort_by_distance);
 
