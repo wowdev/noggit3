@@ -134,11 +134,9 @@ void WMOInstance::intersect(math::ray ray, selection_result& results)
   math::vector_3d const min (extents[0]);
   math::vector_3d const max (extents[1]);
 
-  if (auto distance = math::intersect_bounds (ray, min, max))
+  if (auto distance = ray.intersect_bounds (min, max))
   {
-    math::ray subray (model_matrix, ray);
-
-    if ((distance = wmo->intersect (subray)))
+    if ((distance = wmo->intersect (math::ray (model_matrix, ray))))
       results.emplace_back (*distance, selected_wmo_type (this));
   }
 

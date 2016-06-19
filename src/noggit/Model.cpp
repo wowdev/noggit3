@@ -1065,7 +1065,7 @@ boost::optional<float> Model::intersect(size_t time, math::ray ray)
       math::vector_3d const v1 = origVertices[indices[i + 1]].pos;
       math::vector_3d const v2 = origVertices[indices[i + 2]].pos;
 
-      if (auto distance = math::intersect_triangle(ray, v0, v1, v2))
+      if (auto distance = ray.intersect_triangle (v0, v1, v2))
         return *distance;
     }
   }

@@ -1,76 +1,85 @@
 #include <math/ray.hpp>
 
+#include <limits>
+
 namespace math
 {
-  boost::optional<float> intersect_bounds (ray const& _ray, vector_3d const& _min, vector_3d const& _max)
+  boost::optional<float> ray::intersect_bounds (vector_3d const& min, vector_3d const& max) const
   {
-    double tmin = -INFINITY, tmax = INFINITY;
+    float tmin (std::numeric_limits<float>::lowest());
+    float tmax (std::numeric_limits<float>::max());
 
-    if (_ray.direction.x () != 0.0)
+    if (_direction.x() != 0.0f)
     {
-      double tx1 = (_min.x () - _ray.origin.x ()) / _ray.direction.x ();
-      double tx2 = (_max.x () - _ray.origin.x ()) / _ray.direction.x ();
+      float const tx1 ((min.x() - _origin.x()) / _direction.x());
+      float const tx2 ((max.x() - _origin.x()) / _direction.x());
 
       tmin = std::max (tmin, std::min (tx1, tx2));
       tmax = std::min (tmax, std::max (tx1, tx2));
     }
 
-    if (_ray.direction.y () != 0.0)
+    if (_direction.y() != 0.0f)
     {
-      double ty1 = (_min.y () - _ray.origin.y ()) / _ray.direction.y ();
-      double ty2 = (_max.y () - _ray.origin.y ()) / _ray.direction.y ();
+      float const ty1 ((min.y() - _origin.y()) / _direction.y());
+      float const ty2 ((max.y() - _origin.y()) / _direction.y());
 
       tmin = std::max (tmin, std::min (ty1, ty2));
       tmax = std::min (tmax, std::max (ty1, ty2));
     }
 
-    if (_ray.direction.z () != 0.0)
+    if (_direction.z() != 0.0f)
     {
-      double tz1 = (_min.z () - _ray.origin.z ()) / _ray.direction.z ();
-      double tz2 = (_max.z () - _ray.origin.z ()) / _ray.direction.z ();
+      float const tz1 ((min.z() - _origin.z()) / _direction.z());
+      float const tz2 ((max.z() - _origin.z()) / _direction.z());
 
       tmin = std::max (tmin, std::min (tz1, tz2));
       tmax = std::min (tmax, std::max (tz1, tz2));
     }
 
     if (tmax >= tmin)
+    {
       return tmin;
+    }
 
     return boost::none;
   }
 
-  boost::optional<float> intersect_triangle(ray const& _ray, vector_3d const& _v0, vector_3d const& _v1, vector_3d const& _v2)
+  boost::optional<float> ray::intersect_triangle (vector_3d const& v0, vector_3d const& v1, vector_3d const& v2) const
   {
-    static const float EPSILON (0.000001f);
+    vector_3d const e1 (v1 - v0);
+    vector_3d const e2 (v2 - v0);
 
-    vector_3d e1 (_v1 - _v0);
-    vector_3d e2 (_v2 - _v0);
+    vector_3d const P (_direction % e2);
 
-    vector_3d P (_ray.direction % e2);
+    float const det (e1 * P);
 
-    float det (e1 * P);
-
-    if (det > -EPSILON && det < EPSILON)
+    if (det == 0.0f)
+    {
       return boost::none;
+    }
 
-    float inv_det (1.f / det);
+    vector_3d const T (_origin - v0);
+    float const u ((T * P) / det);
 
-    vector_3d T (_ray.origin - _v0);
-    float u ((T * P) * inv_det);
-
-    if (u < 0.f || u > 1.f)
+    if (u < 0.0f || u > 1.0f)
+    {
       return boost::none;
+    }
 
-    vector_3d Q (T % e1);
-    float v ((_ray.direction * Q) * inv_det);
+    vector_3d const Q (T % e1);
+    float const v ((_direction * Q) / det);
 
-    if (v < 0.f || u + v > 1.f)
+    if (v < 0.0f || u + v > 1.0f)
+    {
       return boost::none;
+    }
 
-    float t ((e2 * Q) * inv_det);
+    float const t ((e2 * Q) / det);
 
-    if (t > EPSILON)
+    if (t > std::numeric_limits<float>::min())
+    {
       return t;
+    }
 
     return boost::none;
   }

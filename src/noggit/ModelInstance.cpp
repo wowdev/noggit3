@@ -275,7 +275,7 @@ void ModelInstance::intersect(math::ray ray, selection_result& results)
   math::vector_3d const min (fixCoordSystem (model->header.VertexBoxMin));
   math::vector_3d const max (fixCoordSystem (model->header.VertexBoxMax));
 
-  if (auto distance = math::intersect_bounds (subray, min, max))
+  if (auto distance = subray.intersect_bounds (min, max))
   {
     if ((distance = model->intersect (time_since_spawn(), subray)))
       results.emplace_back (*distance * sc, selected_model_type (this));

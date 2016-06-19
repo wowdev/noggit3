@@ -1094,7 +1094,7 @@ boost::optional<float> WMOGroup::intersect(math::ray ray)
   math::vector_3d const min (VertexBoxMin);
   math::vector_3d const max (VertexBoxMax);
 
-  if (auto distance = math::intersect_bounds (ray, min, max))
+  if (auto distance = ray.intersect_bounds (min, max))
   {
     for (wmo_batch& batch : _batches)
     {
@@ -1104,7 +1104,7 @@ boost::optional<float> WMOGroup::intersect(math::ray ray)
         math::vector_3d const v1 = _vertices[_indices[i + 1]];
         math::vector_3d const v2 = _vertices[_indices[i + 2]];
 
-        if ((distance = math::intersect_triangle (ray, v0, v1, v2)))
+        if ((distance = ray.intersect_triangle (v0, v1, v2)))
           return *distance;
       }
     }
