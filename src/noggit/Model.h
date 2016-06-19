@@ -190,8 +190,6 @@ class Model: public noggit::async::object
   bool isAnimated(const noggit::mpq::file& f);
   void initAnimated(const noggit::mpq::file& f);
 
-  uint16_t *indices;
-  size_t nIndices;
   std::vector<ModelRenderPass> passes;
 
   void animate(int anim, int time);
@@ -239,6 +237,8 @@ private:
 
   std::vector<model_vertex> _vertices;
   std::vector<model_vertex> _current_vertices;
+
+  std::vector<uint16_t> _indices;
 
   std::vector<model_vertex_parameter> _vertices_parameters;
 
