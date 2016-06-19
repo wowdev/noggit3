@@ -129,17 +129,5 @@ namespace opengl
       GLint _old_mode;
     };
 
-    class name_pusher
-    {
-    public:
-      name_pusher (GLuint name_id)
-      {
-        gl.pushName (name_id);
-      }
-      ~name_pusher()
-      {
-        gl.popName();
-      }
-    };
   }
 }
