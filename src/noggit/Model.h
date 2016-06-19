@@ -183,7 +183,7 @@ public:
   virtual void finish_loading();
 
   std::string _filename; //! \todo ManagedItem already has a name. Use that?
-  boost::optional<ModelCamera> cam;
+
   std::vector<Bone> bones;
   ModelHeader header;
 
@@ -214,6 +214,8 @@ private:
   noggit::mpq::file **animfiles;
 
   bool _finished_upload;
+
+  boost::optional<ModelCamera> _camera;
 
   GLuint _vertices_buffer;
 
