@@ -171,8 +171,6 @@ class Model : public AsyncObject
   bool isAnimated(const MPQFile& f);
   void initAnimated(const MPQFile& f);
 
-  uint16_t *indices;
-  size_t nIndices;
   std::vector<ModelRenderPass> passes;
 
   void animate(int anim);
@@ -224,6 +222,8 @@ private:
 
   std::vector<model_vertex> _vertices;
   std::vector<model_vertex> _current_vertices;
+
+  std::vector<uint16_t> _indices;
 
   std::vector<model_vertex_parameter> _vertices_parameters;
 };

@@ -21,8 +21,6 @@ Model::Model(const std::string& filename)
 {
   memset(&header, 0, sizeof(ModelHeader));
 
-  indices = nullptr;
-
   showGeosets = nullptr;
 
   finished = false;
@@ -79,10 +77,6 @@ Model::~Model()
 
   if (showGeosets)
     delete[] showGeosets;
-
-  // unload all sorts of crap
-  if (indices)
-    delete[] indices;
 
   gl.deleteBuffers (1, &_vertices_buffer);
 }
@@ -271,10 +265,11 @@ void Model::initCommon(const MPQFile& f)
 
     uint16_t *indexLookup = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsIndex);
     uint16_t *triangles = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsTris);
-    nIndices = view->nTris;
-    indices = new uint16_t[nIndices];
-    for (size_t i = 0; i<nIndices; ++i) {
-      indices[i] = indexLookup[triangles[i]];
+
+    _indices.resize (view->nTris);
+
+    for (size_t i (0); i < _indices.size(); ++i) {
+      _indices[i] = indexLookup[triangles[i]];
     }
 
     // render ops
@@ -761,7 +756,7 @@ void Model::drawModel( /*bool unlit*/)
       //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
       // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
       // I can't notice a difference but I guess it can't hurt
-      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart);
 
       p.deinit();
     }
@@ -1034,9 +1029,9 @@ std::vector<float> Model::intersect (math::ray const& ray)
     for (size_t i (pass.indexStart); i < pass.indexStart + pass.indexCount; i += 3)
     {
       if ( auto distance
-          = ray.intersect_triangle( _current_vertices[indices[i + 0]].position, 
-                                    _current_vertices[indices[i + 1]].position, 
-                                    _current_vertices[indices[i + 2]].position)
+          = ray.intersect_triangle( _current_vertices[_indices[i + 0]].position, 
+                                    _current_vertices[_indices[i + 1]].position, 
+                                    _current_vertices[_indices[i + 2]].position)
           )
       {
         results.emplace_back (*distance);
