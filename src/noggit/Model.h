@@ -183,15 +183,12 @@ public:
   virtual void finish_loading();
 
   std::string _filename; //! \todo ManagedItem already has a name. Use that?
-
-
   ModelHeader header;
 
   float rad;
   float trans;
   bool animcalc;
   bool mPerInstanceAnimation;
-  int anim;
 
 private:
   void drawModel (int animtime);
@@ -213,6 +210,7 @@ private:
   bool forceAnim;
   noggit::mpq::file **animfiles;
 
+  int _current_animation;
   bool _finished_upload;
 
   boost::optional<ModelCamera> _camera;
