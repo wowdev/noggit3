@@ -24,8 +24,6 @@ Model::Model(const std::string& filename, bool _forceAnim)
 {
   memset( &header, 0, sizeof( ModelHeader ) );
 
-  showGeosets = nullptr;
-
   _finished = false;
 
   noggit::app().async_loader().add_object (this);
@@ -67,9 +65,6 @@ void Model::finish_loading()
 Model::~Model()
 {
   LogDebug << "Unloading model \"" << _filename << "\"." << std::endl;
-
-  if(showGeosets)
-    delete[] showGeosets;
 
   gl.deleteBuffers (1, &_vertices_buffer);
 }
@@ -287,11 +282,6 @@ void Model::initCommon(const noggit::mpq::file& f)
     uint16_t *texlookup = reinterpret_cast<uint16_t*>(f.getBuffer() + header.ofsTexLookup);
     uint16_t *texanimlookup = reinterpret_cast<uint16_t*>(f.getBuffer() + header.ofsTexAnimLookup);
     int16_t *texunitlookup = reinterpret_cast<int16_t*>(f.getBuffer() + header.ofsTexUnitLookup);
-
-    showGeosets = new bool[view->nSub];
-    for (size_t i=0; i<view->nSub; ++i) {
-      showGeosets[i] = true;
-    }
 
     for (size_t j = 0; j<view->nTex; j++) {
       ModelRenderPass pass;
@@ -522,149 +512,143 @@ void Model::animate(int _anim, int time)
 
 bool ModelRenderPass::init(Model *m, int animtime)
 {
-  // May aswell check that we're going to render the geoset before doing all this crap.
-  if (m->showGeosets[geoset]) {
+  // COLOUR
+  // Get the colour and transparency and check that we should even render
+  ocol = ::math::vector_4d(1.0f, 1.0f, 1.0f, m->trans);
+  ecol = ::math::vector_4d(0.0f, 0.0f, 0.0f, 0.0f);
 
-    // COLOUR
-    // Get the colour and transparency and check that we should even render
-    ocol = ::math::vector_4d(1.0f, 1.0f, 1.0f, m->trans);
-    ecol = ::math::vector_4d(0.0f, 0.0f, 0.0f, 0.0f);
+  //if (m->trans == 1.0f)
+  //  return false;
 
-    //if (m->trans == 1.0f)
-    //  return false;
-
-    // emissive colors
-    if (color!=-1 && m->_colors[color].color.uses(0))
+  // emissive colors
+  if (color!=-1 && m->_colors[color].color.uses(0))
+  {
+    ::math::vector_3d c (m->_colors[color].color.getValue (0, animtime));
+    if (m->_colors[color].opacity.uses (m->anim))
     {
-      ::math::vector_3d c (m->_colors[color].color.getValue (0, animtime));
-      if (m->_colors[color].opacity.uses (m->anim))
-      {
-        ocol.w (m->_colors[color].opacity.getValue (m->anim, animtime));
-      }
-
-      if (unlit)
-      {
-        ocol.x (c.x());
-        ocol.y (c.y());
-        ocol.z (c.z());
-      } else {
-        ocol.x (ocol.y (ocol.z (0.0f)));
-      }
-
-      ecol = ::math::vector_4d (c, ocol.w());
-      gl.materialfv (GL_FRONT, GL_EMISSION, ecol);
+      ocol.w (m->_colors[color].opacity.getValue (m->anim, animtime));
     }
 
-    // opacity
-    if (opacity!=-1)
-    {
-      if (m->_transparency[opacity].trans.uses (0))
-      {
-        ocol.w ( ocol.w()
-               * m->_transparency[opacity].trans.getValue (0, animtime)
-               );
-      }
-    }
-
-    // exit and return false before affecting the opengl render state
-    if (!((ocol.w() > 0.0f) && (color==-1 || ecol.w() > 0.0f)))
-      return false;
-
-    // TEXTURE
-    m->_textures[tex]->bind();
-
-    // TODO: Add proper support for multi-texturing.
-
-    // blend mode
-    switch (blendmode) {
-      case BM_OPAQUE:  // 0
-        break;
-      case BM_TRANSPARENT: // 1
-        gl.enable(GL_ALPHA_TEST);
-        gl.alphaFunc(GL_GEQUAL,0.7f);
-        break;
-      case BM_ALPHA_BLEND: // 2
-        gl.enable(GL_BLEND);
-        gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        break;
-      case BM_ADDITIVE: // 3
-        gl.enable(GL_BLEND);
-        gl.blendFunc(GL_SRC_COLOR, GL_ONE);
-        break;
-      case BM_ADDITIVE_ALPHA: // 4
-        gl.enable(GL_BLEND);
-        gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
-        break;
-      case BM_MODULATE: // 5
-        gl.enable(GL_BLEND);
-        gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-        break;
-      case BM_MODULATE2: // 6
-        gl.enable(GL_BLEND);
-        gl.blendFunc(GL_DST_COLOR,GL_SRC_COLOR);
-        break;
-      default:
-        LogError << "Unknown blendmode: " << blendmode << std::endl;
-        gl.enable(GL_BLEND);
-        gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    //if (cull)
-    //  gl.enable(GL_CULL_FACE);
-
-    // Texture wrapping around the geometry
-    if (swrap)
-      gl.texParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
-    if (twrap)
-      gl.texParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
-
-    // no writing to the depth buffer.
-    if (nozwrite)
-      gl.depthMask(GL_FALSE);
-
-    if (unlit) {
-      gl.disable(GL_LIGHTING);
-    }
-
-    // Environmental mapping, material, and effects
-    if (useenvmap) {
-      // Turn on the 'reflection' shine, using 18.0f as that is what WoW uses based on the reverse engineering
-      // This is now set in InitGL(); - no need to call it every render.
-      gl.materialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
-
-      // env mapping
-      gl.enable(GL_TEXTURE_GEN_S);
-      gl.enable(GL_TEXTURE_GEN_T);
-
-      const GLint maptype = GL_SPHERE_MAP;
-      //const GLint maptype = GL_REFLECTION_MAP_ARB;
-
-      gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, maptype);
-      gl.texGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
-    }
-
-    if (texanim!=-1) {
-      gl.matrixMode(GL_TEXTURE);
-      gl.pushMatrix();
-
-      m->_texture_animations[texanim].setup(texanim);
-    }
-
-    // color
-    gl.color4fv(ocol);
-    //gl.materialfv(GL_FRONT, GL_SPECULAR, ocol);
-
-    // don't use lighting on the surface
     if (unlit)
-      gl.disable(GL_LIGHTING);
+    {
+      ocol.x (c.x());
+      ocol.y (c.y());
+      ocol.z (c.z());
+    } else {
+      ocol.x (ocol.y (ocol.z (0.0f)));
+    }
 
-    if (blendmode<=1 && ocol.w()<1.0f)
-      gl.enable(GL_BLEND);
-
-    return true;
+    ecol = ::math::vector_4d (c, ocol.w());
+    gl.materialfv (GL_FRONT, GL_EMISSION, ecol);
   }
 
-  return false;
+  // opacity
+  if (opacity!=-1)
+  {
+    if (m->_transparency[opacity].trans.uses (0))
+    {
+      ocol.w ( ocol.w()
+              * m->_transparency[opacity].trans.getValue (0, animtime)
+              );
+    }
+  }
+
+  // exit and return false before affecting the opengl render state
+  if (!((ocol.w() > 0.0f) && (color==-1 || ecol.w() > 0.0f)))
+    return false;
+
+  // TEXTURE
+  m->_textures[tex]->bind();
+
+  // TODO: Add proper support for multi-texturing.
+
+  // blend mode
+  switch (blendmode) {
+    case BM_OPAQUE:  // 0
+      break;
+    case BM_TRANSPARENT: // 1
+      gl.enable(GL_ALPHA_TEST);
+      gl.alphaFunc(GL_GEQUAL,0.7f);
+      break;
+    case BM_ALPHA_BLEND: // 2
+      gl.enable(GL_BLEND);
+      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      break;
+    case BM_ADDITIVE: // 3
+      gl.enable(GL_BLEND);
+      gl.blendFunc(GL_SRC_COLOR, GL_ONE);
+      break;
+    case BM_ADDITIVE_ALPHA: // 4
+      gl.enable(GL_BLEND);
+      gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
+      break;
+    case BM_MODULATE: // 5
+      gl.enable(GL_BLEND);
+      gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+      break;
+    case BM_MODULATE2: // 6
+      gl.enable(GL_BLEND);
+      gl.blendFunc(GL_DST_COLOR,GL_SRC_COLOR);
+      break;
+    default:
+      LogError << "Unknown blendmode: " << blendmode << std::endl;
+      gl.enable(GL_BLEND);
+      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  }
+
+  //if (cull)
+  //  gl.enable(GL_CULL_FACE);
+
+  // Texture wrapping around the geometry
+  if (swrap)
+    gl.texParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+  if (twrap)
+    gl.texParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+
+  // no writing to the depth buffer.
+  if (nozwrite)
+    gl.depthMask(GL_FALSE);
+
+  if (unlit) {
+    gl.disable(GL_LIGHTING);
+  }
+
+  // Environmental mapping, material, and effects
+  if (useenvmap) {
+    // Turn on the 'reflection' shine, using 18.0f as that is what WoW uses based on the reverse engineering
+    // This is now set in InitGL(); - no need to call it every render.
+    gl.materialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
+
+    // env mapping
+    gl.enable(GL_TEXTURE_GEN_S);
+    gl.enable(GL_TEXTURE_GEN_T);
+
+    const GLint maptype = GL_SPHERE_MAP;
+    //const GLint maptype = GL_REFLECTION_MAP_ARB;
+
+    gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, maptype);
+    gl.texGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
+  }
+
+  if (texanim!=-1) {
+    gl.matrixMode(GL_TEXTURE);
+    gl.pushMatrix();
+
+    m->_texture_animations[texanim].setup(texanim);
+  }
+
+  // color
+  gl.color4fv(ocol);
+  //gl.materialfv(GL_FRONT, GL_SPECULAR, ocol);
+
+  // don't use lighting on the surface
+  if (unlit)
+    gl.disable(GL_LIGHTING);
+
+  if (blendmode<=1 && ocol.w()<1.0f)
+    gl.enable(GL_BLEND);
+
+  return true;
 }
 
 void ModelRenderPass::deinit()
