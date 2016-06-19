@@ -169,51 +169,10 @@ struct model_vertex_parameter
 
 class Model: public noggit::async::object
 {
-  bool animated;
-  bool animGeometry,animTextures,animBones;
-  bool forceAnim;
-  noggit::mpq::file **animfiles;
-
-
-
-
-
-
-  void drawModel (int animtime);
-
-  void initCommon(const noggit::mpq::file& f);
-  bool isAnimated(const noggit::mpq::file& f);
-  void initAnimated(const noggit::mpq::file& f);
-
-
-
-  void animate(int anim, int time);
-  void calcBones(int anim, int time);
-
-  void lightsOn(opengl::light lbase, int animtime);
-  void lightsOff(opengl::light lbase);
-
-  void upload();
-
 public:
-  std::string _filename; //! \todo ManagedItem already has a name. Use that?
-  boost::optional<ModelCamera> cam;
-  std::vector<Bone> bones;
-  ModelHeader header;
-
-  // ===============================
-  // Toggles
-  bool *showGeosets;
-
-
-  float rad;
-  float trans;
-  bool animcalc;
-  bool mPerInstanceAnimation;
-  int anim;
-
   Model(const std::string& name, bool forceAnim=false);
   ~Model();
+
   void draw (bool draw_fog, size_t time);
   void drawTileMode();
 
@@ -221,11 +180,41 @@ public:
 
   void updateEmitters(float dt);
 
-  friend struct ModelRenderPass;
-
   virtual void finish_loading();
 
+  std::string _filename; //! \todo ManagedItem already has a name. Use that?
+  boost::optional<ModelCamera> cam;
+  std::vector<Bone> bones;
+  ModelHeader header;
+
+  bool *showGeosets;
+
+  float rad;
+  float trans;
+  bool animcalc;
+  bool mPerInstanceAnimation;
+  int anim;
+
 private:
+  void drawModel (int animtime);
+
+  void initCommon (const noggit::mpq::file& f);
+  bool isAnimated (const noggit::mpq::file& f);
+  void initAnimated (const noggit::mpq::file& f);
+
+  void animate (int anim, int time);
+  void calcBones (int anim, int time);
+
+  void lightsOn (opengl::light lbase, int animtime);
+  void lightsOff (opengl::light lbase);
+
+  void upload ();
+
+  bool animated;
+  bool animGeometry, animTextures, animBones;
+  bool forceAnim;
+  noggit::mpq::file **animfiles;
+
   bool _finished_upload;
 
   GLuint _vertices_buffer;
@@ -250,4 +239,6 @@ private:
   std::vector<ModelColor> _colors;
   std::vector<ModelTransparency> _transparency;
   std::vector<ModelLight> _lights;
+
+  friend struct ModelRenderPass;
 };
