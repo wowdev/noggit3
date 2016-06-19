@@ -372,6 +372,9 @@ void Model::initCommon(const noggit::mpq::file& f)
 
 void Model::initAnimated(const noggit::mpq::file& f)
 {
+  //\! todo: this is some serious bullshit.
+  std::vector<noggit::mpq::file*> animation_files;
+
   if (header.nAnimations > 0)
   {
     _animations.resize (header.nAnimations);
@@ -383,7 +386,7 @@ void Model::initAnimated(const noggit::mpq::file& f)
       _animations[i].length = std::max (_animations[i].length, 1U);
     }
 
-    animfiles = new noggit::mpq::file*[header.nAnimations];
+    animation_files.resize (header.nAnimations);
 
     std::stringstream tempname;
     for(size_t i=0; i<header.nAnimations; ++i)
@@ -393,11 +396,11 @@ void Model::initAnimated(const noggit::mpq::file& f)
       const QString anim_filename (QString::fromStdString (tempname.str()));
       if (noggit::mpq::file::exists (anim_filename))
       {
-        animfiles[i] = new noggit::mpq::file (anim_filename);
+        animation_files[i] = new noggit::mpq::file (anim_filename);
       }
       else
       {
-        animfiles[i] = nullptr;
+        animation_files[i] = nullptr;
       }
     }
   }
@@ -406,7 +409,7 @@ void Model::initAnimated(const noggit::mpq::file& f)
     // init bones...
     ModelBoneDef *mb = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
     for (size_t i=0; i<header.nBones; ++i) {
-      _bones.emplace_back (f, mb[i], _global_sequences.data(), animfiles);
+      _bones.emplace_back (f, mb[i], _global_sequences.data(), animation_files.data());
     }
   }
 
@@ -433,6 +436,9 @@ void Model::initAnimated(const noggit::mpq::file& f)
     for (size_t i=0; i<header.nLights; ++i)
       _lights.emplace_back (f, lDefs[i], _global_sequences.data());
   }
+
+  for (auto file : animation_files)
+    delete file;
 
   animcalc = false;
 }
