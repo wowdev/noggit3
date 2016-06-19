@@ -18,7 +18,7 @@
 #include <opengl/matrix.h>
 
 Model::Model(const std::string& filename, bool _forceAnim)
-: forceAnim(_forceAnim)
+: _force_animation(_forceAnim)
 , _filename( filename )
 , _finished_upload(false)
 {
@@ -37,7 +37,7 @@ void Model::finish_loading()
 
   memcpy( &header, f.getBuffer(), sizeof( ModelHeader ) );
 
-  animated = isAnimated( f ) || forceAnim;  // isAnimated will set animGeometry and animTextures
+  _has_animation = isAnimated( f ) || _force_animation;  // isAnimated will set animGeometry and animTextures
 
   trans = 1.0f;
 
@@ -54,7 +54,7 @@ void Model::finish_loading()
   //! \todo  This takes a biiiiiit long. Have a look at this.
   initCommon(f);
 
-  if(animated)
+  if(_has_animation)
     initAnimated(f);
 
   f.close();
@@ -75,12 +75,12 @@ bool Model::isAnimated(const noggit::mpq::file& f)
   // see if we have any animated bones
   ModelBoneDef *bo = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
 
-  animGeometry = false;
-  animBones = false;
+  _has_geometry_animation = false;
+  _has_bone_animation = false;
   mPerInstanceAnimation = false;
 
   ModelVertex *verts = reinterpret_cast<ModelVertex*>(f.getBuffer() + header.ofsVertices);
-  for (size_t i=0; i<header.nVertices && !animGeometry; ++i) {
+  for (size_t i=0; i<header.nVertices && !_has_geometry_animation; ++i) {
     for (size_t b=0; b<4; b++) {
       if (verts[i].weights[b]>0) {
         ModelBoneDef& bb = bo[verts[i].bones[b]];
@@ -89,32 +89,32 @@ bool Model::isAnimated(const noggit::mpq::file& f)
             // if we have billboarding, the model will need per-instance animation
             mPerInstanceAnimation = true;
           }
-          animGeometry = true;
+          _has_geometry_animation = true;
           break;
         }
       }
     }
   }
 
-  if (animGeometry) animBones = true;
+  if (_has_geometry_animation) _has_bone_animation = true;
   else {
     for (size_t i=0; i<header.nBones; ++i) {
       ModelBoneDef &bb = bo[i];
       if (bb.translation.type || bb.rotation.type || bb.scaling.type) {
-        animBones = true;
+        _has_bone_animation = true;
         break;
       }
     }
   }
 
-  animTextures = header.nTexAnims > 0;
+  _has_texture_animation = header.nTexAnims > 0;
 
   bool animMisc = header.nCameras>0 || // why waste time, pretty much all models with cameras need animation
           header.nLights>0 || // same here
           header.nParticleEmitters>0 ||
           header.nRibbonEmitters>0;
 
-  if (animMisc) animBones = true;
+  if (animMisc) _has_bone_animation = true;
 
   // animated colors
   if (header.nColors) {
@@ -139,7 +139,7 @@ bool Model::isAnimated(const noggit::mpq::file& f)
   }
 
   // guess not...
-  return animGeometry || animTextures || animMisc;
+  return _has_geometry_animation || _has_texture_animation || animMisc;
 }
 
 ::math::vector_3d fixCoordSystem (::math::vector_3d const& v)
@@ -212,7 +212,7 @@ void Model::initCommon(const noggit::mpq::file& f)
   }
   rad = std::sqrt (rad);
 
-  if (!animGeometry)
+  if (!_has_geometry_animation)
   {
     _current_vertices.swap (_vertices);
   }
@@ -350,7 +350,7 @@ void Model::initCommon(const noggit::mpq::file& f)
 
       static const int TEXTUREUNIT_STATIC = 16;
 
-      if (animTextures) {
+      if (_has_texture_animation) {
         if (tex[j].flags & TEXTUREUNIT_STATIC) {
           pass.texanim = -1; // no texture animation
         } else {
@@ -402,7 +402,7 @@ void Model::initAnimated(const noggit::mpq::file& f)
     }
   }
 
-  if (animBones) {
+  if (_has_bone_animation) {
     // init bones...
     ModelBoneDef *mb = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
     for (size_t i=0; i<header.nBones; ++i) {
@@ -410,7 +410,7 @@ void Model::initAnimated(const noggit::mpq::file& f)
     }
   }
 
-  if (animTextures) {
+  if (_has_texture_animation) {
     ModelTexAnimDef *ta = reinterpret_cast<ModelTexAnimDef*>(f.getBuffer() + header.ofsTexAnims);
     for (size_t i=0; i<header.nTexAnims; ++i) {
       _texture_animations.emplace_back (f, ta[i], _global_sequences.data());
@@ -455,11 +455,11 @@ void Model::animate(int _anim, int time)
   int tmax = a.length;
   time %= tmax;
 
-  if (animBones) {
+  if (_has_bone_animation) {
     calcBones(_current_animation, time);
   }
 
-  if (animGeometry) {
+  if (_has_geometry_animation) {
 
     // transform vertices
     _current_vertices.resize (header.nVertices);
@@ -503,7 +503,7 @@ void Model::animate(int _anim, int time)
   //\! todo: setup header.nParticleEmitters
   //\! todo: setup header.nRibbonEmitters
 
-  if (animTextures) {
+  if (_has_texture_animation) {
     for (size_t i=0; i<header.nTexAnims; ++i) {
       _texture_animations[i].calc(_current_animation, time);
     }
@@ -961,7 +961,7 @@ void Model::draw (bool draw_fog, size_t time)
   else
     gl.disable( GL_FOG );
 
-  if (animated && (!animcalc || mPerInstanceAnimation))
+  if (_has_animation && (!animcalc || mPerInstanceAnimation))
   {
     animate(0, time);
     animcalc = true;
@@ -981,7 +981,7 @@ boost::optional<float> Model::intersect(size_t time, math::ray ray)
   if (!finished_loading () || !_finished_upload)
     return boost::none;
 
-  if (animated && (!animcalc || mPerInstanceAnimation))
+  if (_has_animation && (!animcalc || mPerInstanceAnimation))
   {
     animate (0, time);
     animcalc = true;
@@ -1021,7 +1021,7 @@ void Model::upload()
 
   gl.genBuffers (1, &_vertices_buffer);
 
-  if (!animGeometry)
+  if (!_has_geometry_animation)
   {
     gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
     gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (model_vertex), _current_vertices.data(), GL_STATIC_DRAW);

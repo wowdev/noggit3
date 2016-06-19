@@ -205,9 +205,12 @@ private:
 
   void upload ();
 
-  bool animated;
-  bool animGeometry, animTextures, animBones;
-  bool forceAnim;
+  bool _has_animation;
+  bool _has_geometry_animation;
+  bool _has_texture_animation;
+  bool _has_bone_animation;
+  bool _force_animation;
+
   noggit::mpq::file **animfiles;
 
   int _current_animation;
