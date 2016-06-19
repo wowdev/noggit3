@@ -656,8 +656,7 @@ void MapChunk::intersect(math::ray ray, selection_result& results)
     {
       math::vector_3d const pos (ray.origin + ray.direction * *distance);
 
-      results.emplace_back (*distance, selected_chunk_type(this, i / 3, pos));
-      return;
+      results.emplace_back (*distance, selected_chunk_type (this, i / 3, pos));
     }
   }
 }
