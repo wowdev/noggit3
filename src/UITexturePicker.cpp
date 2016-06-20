@@ -119,7 +119,6 @@ void UITexturePicker::shiftSelectedTextureRight()
 
 void UITexturePicker::update()
 {
-  _chunk->Changed = true;
   _chunk->mt->changed = true;
 
   for (size_t index = 0; index < 4U && _chunk->textureSet->num() > index; ++index)

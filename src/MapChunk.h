@@ -59,7 +59,6 @@ public:
 	int px, py;
 
 	MapChunkHeader header;
-	bool Changed;
 
 	float xbase, ybase, zbase;
 
