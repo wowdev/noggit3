@@ -195,7 +195,9 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       vmax.x = xbase + 8 * UNITSIZE;
       vmax.z = zbase + 8 * UNITSIZE;
       r = (vmax - vmin).length() * 0.5f;
-
+      // use absolute y pos in vertices
+      ybase = 0.0f;
+      header.ypos = 0.0f;
     }
     else if (fourcc == 'MCLY')
     {
@@ -1380,15 +1382,10 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   float* lHeightmap = lADTFile.GetPointer<float>(lCurrentPosition + 8);
 
-  float lMedian = 0.0f;
-  for (int i = 0; i < mapbufsize; ++i)
-    lMedian += mVertices[i].y;
-
-  lMedian = lMedian / mapbufsize;
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ypos = lMedian;
+  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ypos = 0.0f;
 
   for (int i = 0; i < mapbufsize; ++i)
-    lHeightmap[i] = mVertices[i].y - lMedian;
+    lHeightmap[i] = mVertices[i].y;
 
   lCurrentPosition += 8 + lMCVT_Size;
   lMCNK_Size += 8 + lMCVT_Size;
@@ -1625,10 +1622,55 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lADTFile.GetPointer<MCIN>(lMCIN_Position + 8)->mEntries[py * 16 + px].size = lMCNK_Size;
 }
 
-void MapChunk::ReRend()
+
+bool MapChunk::fixGapLeft(const MapChunk* chunk)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, vertices);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  if (!chunk)
+    return false;
+
+  bool changed = false;
+
+  for (size_t i = 0; i <= 136; i+= 17)
+  {
+    float h = chunk->mVertices[i + 8].y;
+    if (mVertices[i].y != h)
+    {
+      mVertices[i].y = h;
+      changed = true;
+    }
+  }
+
+  if (changed)
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, vertices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  }
+  return changed;
+}
+
+bool MapChunk::fixGapAbove(const MapChunk* chunk)
+{
+  if (!chunk)
+    return false;
+
+  bool changed = false;
+
+  for (size_t i = 0; i < 9; i++)
+  {
+    float h = chunk->mVertices[i + 136].y;
+    if (mVertices[i].y != h)
+    {
+      mVertices[i].y = h;
+      changed = true;
+    }
+  }
+
+  if (changed)
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, vertices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  }
+  return changed;
 }
 
 //! ------ unused functions -----

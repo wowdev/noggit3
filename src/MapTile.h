@@ -41,8 +41,6 @@ public:
 	bool GetVertex(float x, float z, Vec3D *V);
 
 	void saveTile();
-	void FixGapt();
-	void FixAllGapt(MapTile *next, bool a);
 	void CropWater();
 	void ClearShader();
 

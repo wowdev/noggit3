@@ -1044,28 +1044,6 @@ void MapTile::saveTile()
   delete f;
 }
 
-void MapTile::FixGapt()
-{
-  int i, j, k;
-  for (i = 0; i < 15; ++i)
-  {
-    for (j = 0; j < 15; ++j)
-    {
-      for (k = 8; k < 145; k += 17)
-      {
-        if (mChunks[i][j]->mVertices[k].y != mChunks[i][j + 1]->mVertices[k - 8].y)
-          mChunks[i][j]->mVertices[k].y = mChunks[i][j + 1]->mVertices[k - 8].y;
-      }
-      for (k = 137; k < 144; ++k)
-      {
-        if (mChunks[i][j]->mVertices[k].y != mChunks[i + 1][j]->mVertices[k - 136].y)
-          mChunks[i][j]->mVertices[k].y = mChunks[i + 1][j]->mVertices[k - 136].y;
-      }
-      mChunks[i][j]->ReRend();
-    }
-  }
-}
-
 void MapTile::ClearShader()
 {
   for (int i = 0; i < 16; ++i)
@@ -1084,35 +1062,6 @@ void MapTile::CropWater()
     for (int j = 0; j < 16; ++j)
     {
       Water->CropMiniChunk(i, j, mChunks[i][j]);
-    }
-  }
-}
-
-void MapTile::FixAllGapt(MapTile *next, bool a)
-{
-  for (size_t i = 0; i < 16; ++i)
-  {
-    if (a)
-    {
-      for (size_t k = 8; k < 145; k += 17)
-      {
-        if (mChunks[i][15]->mVertices[k].y != next->mChunks[i][0]->mVertices[k - 8].y)
-        {
-          mChunks[i][15]->mVertices[k].y = next->mChunks[i][0]->mVertices[k - 8].y;
-          mChunks[i][15]->ReRend();
-        }
-      }
-    }
-    else
-    {
-      for (size_t k = 136; k < 145; ++k)
-      {
-        if (mChunks[15][i]->mVertices[k].y != next->mChunks[0][i]->mVertices[k - 136].y)
-        {
-          mChunks[15][i]->mVertices[k].y = next->mChunks[0][i]->mVertices[k - 136].y;
-          mChunks[15][i]->ReRend();
-        }
-      }
     }
   }
 }

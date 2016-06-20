@@ -212,8 +212,6 @@ public:
 	int getWaterType(int x, int y);
 
 	void deleteWaterLayer(int x, int z);
-	void Fix(int x, int z);
-	void FixAll();
 	void ClearShader(int x, int z);
 
 	void addWaterLayer(int x, int z);
@@ -223,6 +221,8 @@ public:
 
 	void autoGenWaterTrans(int x, int y, int factor);
 	void AddWaters(int x, int y);
+
+  void fixAllGaps();
 private:
 	void getSelection();
 };
