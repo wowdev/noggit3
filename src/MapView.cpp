@@ -284,8 +284,11 @@ void SaveOrReload(UIFrame*, int pMode)
 		gWorld->mapIndex->reloadTile((int)(static_cast<int>(gWorld->camera.x) / TILESIZE), (int)(static_cast<int>(gWorld->camera.z) / TILESIZE));
 	else if (pMode == 0)
 		gWorld->mapIndex->saveTile((int)(static_cast<int>(gWorld->camera.x) / TILESIZE), (int)(static_cast<int>(gWorld->camera.z) / TILESIZE));
-	else if (pMode == 2)
-		gWorld->mapIndex->saveChanged();
+  else if (pMode == 2)
+  {
+    gWorld->fixAllGaps();
+    gWorld->mapIndex->saveChanged();
+  }
 	else if (pMode == 3)
 		static_cast<MapView*>(app.getStates().back())->quit();
 
