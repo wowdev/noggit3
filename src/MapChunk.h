@@ -120,6 +120,11 @@ public:
 	//! \todo this is ugly create a build struct or sth
 	void save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::map<int, WMOInstance> &lObjectInstances, std::map<int, ModelInstance> &lModelInstances);
 	void ReRend();
+
+  // fix the gaps with the chunk to the left
+  bool fixGapLeft(const MapChunk* chunk);
+  // fix the gaps with the chunk above
+  bool fixGapAbove(const MapChunk* chunk);
 };
 
 #endif // MAPCHUNK_H

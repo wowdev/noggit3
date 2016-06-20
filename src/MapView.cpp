@@ -743,14 +743,9 @@ void menuWater(UIFrame*, int id)
 		gWorld->deleteWaterLayer(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
 }
 
-void funcFix(UIFrame*, int id)
-{
-	gWorld->Fix(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
-}
-
 void funcAllFix(UIFrame*, int id)
 {
-	gWorld->FixAll();
+  gWorld->fixAllGaps();
 }
 
 void ClearShader(UIFrame*, int id)
@@ -1137,8 +1132,7 @@ void MapView::createGUI()
 	mbar->GetMenu("Assist")->AddMenuItemButton("Clear duplicate models", ClearDupModels, 0);
 	mbar->GetMenu("Assist")->AddMenuItemButton("Clear water", menuWater, 0);
 	mbar->GetMenu("Assist")->AddMenuItemButton("Create water", menuWater, 1);
-	mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (current adt)", funcFix, 0);
-	mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all adts)", funcAllFix, 0);
+	mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded adts)", funcAllFix, 0);
 	mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", ClearShader, 0);
 
 	mbar->GetMenu("View")->AddMenuItemSeperator("Windows");

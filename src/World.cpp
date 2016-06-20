@@ -1390,12 +1390,6 @@ void World::deleteWaterLayer(int x, int z)
   mapIndex->setChanged(z, x);
 }
 
-void World::Fix(int x, int z)
-{
-  MapTile *curTile = mapIndex->getTile((size_t)z, (size_t)x);
-  curTile->FixGapt();
-}
-
 void World::ClearShader(int x, int z)
 {
   MapTile *curTile = mapIndex->getTile((size_t)z, (size_t)x);
@@ -1407,39 +1401,6 @@ void World::CropWaterADT(int x, int z)
   MapTile *curTile = mapIndex->getTile((size_t)z, (size_t)x);
   curTile->CropWater();
   mapIndex->setChanged(z, x);
-}
-
-void World::FixAll()
-{
-  for (int i = 0; i < 64; ++i)
-    for (int j = 0; j < 64; ++j)
-    {
-      MapTile *curTile = mapIndex->getTile((size_t)i, (size_t)j);
-      if (curTile == 0)
-        continue;
-      curTile->FixGapt();
-    }
-  for (int i = 0; i < 63; ++i)
-  {
-    for (int j = 0; j < 63; ++j)
-    {
-      MapTile *curTile1 = mapIndex->getTile((size_t)i, (size_t)j);
-      MapTile *curTile2 = mapIndex->getTile((size_t)i + 1, (size_t)j);
-      if (curTile1 == 0 || curTile2 == 0)
-        continue;
-      curTile1->FixAllGapt(curTile2, false);
-    }
-    for (int j = 0; j < 63; ++j)
-    {
-      MapTile *curTile1 = mapIndex->getTile((size_t)i, (size_t)j);
-      MapTile *curTile2 = mapIndex->getTile((size_t)i, (size_t)j + 1);
-      if (curTile1 == 0 || curTile2 == 0)
-        continue;
-      curTile1->FixAllGapt(curTile2, true);
-      curTile1->changed = true;
-      curTile2->changed = true;
-    }
-  }
 }
 
 void World::addWaterLayer(int x, int z)
@@ -2380,4 +2341,102 @@ float World::HaveSelectWater(int x, int y)
           return curTile->Water->HaveWater(i, j);
   }
   return 0;
+}
+
+void World::fixAllGaps()
+{
+  std::vector<MapChunk*> chunks;
+  MapTile *current = nullptr, *left = nullptr, *above = nullptr;
+
+  for (int j = 0; j < 64; ++j)
+  {
+    for (int i = 0; i < 64; ++i)
+    {
+      if (!left)
+      {
+        left = ( mapIndex->tileLoaded(j, i - 1))
+               ? mapIndex->getTile(j, i - 1)
+               : nullptr
+               ;
+      }
+      
+      above = ( mapIndex->tileLoaded(j - 1, i))
+              ? mapIndex->getTile(j - 1, i)
+              : nullptr
+              ;
+
+      if (mapIndex->tileLoaded(j, i))
+      {
+        current = mapIndex->getTile((size_t)j, (size_t)i);
+        
+        // fix the gaps with the adt at the left of the current one
+        if (left)
+        {
+          for (size_t ty = 0; ty < 16; ty++)
+          {
+            MapChunk* chunk = current->getChunk(0, ty);
+            if (chunk->fixGapLeft(left->getChunk(15, ty)))
+            {
+              chunks.emplace_back(chunk);
+              mapIndex->setChanged(j, i);
+            }
+          }
+        }
+
+        // fix the gaps with the adt above the current one
+        if (above)
+        {
+          for (size_t tx = 0; tx < 16; tx++)
+          {
+            MapChunk* chunk = current->getChunk(tx, 0);
+            if (chunk->fixGapAbove(above->getChunk(tx, 15)))
+            {
+              chunks.emplace_back(chunk);
+              mapIndex->setChanged(j, i);
+            }
+          }
+        }
+        
+        // fix gaps within the adt
+        for (size_t ty = 0; ty < 16; ty++)
+        {
+          for (size_t tx = 0; tx < 16; tx++)
+          {
+            MapChunk* chunk = current->getChunk(tx, ty);
+            bool changed = false;
+
+            // if the chunk isn't the first of the row
+            if (tx && chunk->fixGapLeft(current->getChunk(tx - 1, ty)))
+            {
+              changed = true;
+            }
+            
+            // if the chunk isn't the first of the column
+            if (ty && chunk->fixGapAbove(current->getChunk(tx, ty - 1)))
+            {
+              changed = true;
+            }
+
+            if (changed)
+            {
+              chunks.emplace_back(chunk);
+              mapIndex->setChanged(j, i);
+            }
+          }
+        }
+        // the current adt become the next left adt
+        left = current;
+      }
+      else
+      {
+        left = nullptr;
+      }     
+    }
+    left = nullptr;
+  }
+
+  for (MapChunk* chunk : chunks)
+  {
+    chunk->recalcNorms();
+  }
 }
