@@ -111,7 +111,7 @@ public:
             , const float& fog_distance
             );
 
-  boost::optional<float> intersect (math::ray ray);
+  void intersect (math::ray ray, std::vector<float> &results);
 
   void drawLiquid ( World* world
                   , bool draw_fog
@@ -275,7 +275,7 @@ public:
                     , const ::math::vector_3d& camera
                     );
 
-  boost::optional<float> intersect (math::ray ray);
+  void intersect (math::ray ray, std::vector<float> &results);
 
   //void drawPortals();
   bool drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d pLower, ::math::vector_3d pUpper ) const;

@@ -134,12 +134,17 @@ void WMOInstance::intersect(math::ray ray, selection_result& results)
   math::vector_3d const min (extents[0]);
   math::vector_3d const max (extents[1]);
 
-  if (auto distance = ray.intersect_bounds (min, max))
-  {
-    if ((distance = wmo->intersect (math::ray (model_matrix, ray))))
-      results.emplace_back (*distance, selected_wmo_type (this));
-  }
+  if (!ray.intersect_bounds (min, max))
+    return;
 
+  std::vector<float> subresults;
+
+  wmo->intersect (math::ray (model_matrix, ray), subresults);
+
+  for (float result : subresults)
+  {
+    results.emplace_back (result, selected_model_type (this));
+  }
 }
 
 /*void WMOInstance::drawPortals()
