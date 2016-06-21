@@ -19,6 +19,7 @@ class Bone;
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/ModelHeaders.h>
 #include <noggit/TextureManager.h>
+#include <noggit/Selection.h>
 
 #include <boost/optional.hpp>
 
@@ -174,7 +175,7 @@ public:
   void draw (bool draw_fog, size_t time);
   void drawTileMode();
 
-  boost::optional<float> intersect (size_t time, math::ray ray);
+  void intersect (size_t time, math::ray ray, std::vector<float>& results);
 
   void updateEmitters(float dt);
 

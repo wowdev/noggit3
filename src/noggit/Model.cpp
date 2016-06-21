@@ -949,10 +949,10 @@ void Model::draw (bool draw_fog, size_t time)
   //\! todo: draw particle systems & ribbons
 }
 
-boost::optional<float> Model::intersect(size_t time, math::ray ray)
+void Model::intersect (size_t time, math::ray ray, std::vector<float>& results)
 {
-  if (!finished_loading () || !_finished_upload)
-    return boost::none;
+  if (!finished_loading() || !_finished_upload)
+    return;
 
   if (_has_animation && (!animcalc || _per_instance_animation))
   {
@@ -969,11 +969,11 @@ boost::optional<float> Model::intersect(size_t time, math::ray ray)
       math::vector_3d const v2 = _current_vertices[_indices[i + 2]].position;
 
       if (auto distance = ray.intersect_triangle (v0, v1, v2))
-        return *distance;
+      {
+        results.emplace_back (*distance);
+      }
     }
   }
-
-  return boost::none;
 }
 
 void Model::lightsOn(opengl::light lbase, int animtime)

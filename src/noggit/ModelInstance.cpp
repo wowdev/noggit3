@@ -275,10 +275,16 @@ void ModelInstance::intersect(math::ray ray, selection_result& results)
   math::vector_3d const min (fixCoordSystem (model->header.VertexBoxMin));
   math::vector_3d const max (fixCoordSystem (model->header.VertexBoxMax));
 
-  if (auto distance = subray.intersect_bounds (min, max))
+  if (!subray.intersect_bounds (min, max))
+    return;
+
+  std::vector<float> subresults;
+
+  model->intersect (time_since_spawn(), subray, subresults);
+
+  for(float result : subresults)
   {
-    if ((distance = model->intersect (time_since_spawn(), subray)))
-      results.emplace_back (*distance * sc, selected_model_type (this));
+    results.emplace_back (result * sc, selected_model_type (this));
   }
 }
 
