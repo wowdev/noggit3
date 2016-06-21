@@ -44,7 +44,23 @@ struct world_selection_mask
   uint8_t map_object : 1;
 };
 
-//! \todo Split this. There should be a seperate class for WDTs.
+struct low_res_batch
+{
+  low_res_batch ()
+    : vertex_start (0)
+    , vertex_count (0)
+  {}
+
+  low_res_batch (uint32_t _vertex_start, uint32_t _vertex_count)
+    : vertex_start(_vertex_start)
+    , vertex_count(_vertex_count)
+  {}
+
+  uint32_t vertex_start;
+  uint32_t vertex_count;
+};
+
+//! \todo Split this. There should be a seperate class for WDLs.
 class World
 {
 private:
@@ -179,8 +195,9 @@ private:
 
   bool _initialized_display;
 
-  //! opengl call lists for the WDL low resolution heightmaps.
-  std::unique_ptr<opengl::call_list> lowrestiles[64][64];
+  //! opengl buffer for the WDL low resolution heightmaps.
+  GLuint _low_res_vertices_buffer;
+  low_res_batch _low_res_batches[64][64];
 
   //! Vertex Buffer Objects for coordinates used for drawing.
   GLuint detailtexcoords;

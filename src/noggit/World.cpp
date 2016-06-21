@@ -450,14 +450,6 @@ World::World( const std::string& name )
 
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
 
-  for( size_t j = 0; j < 64; ++j )
-  {
-    for( size_t i = 0; i < 64; ++i )
-    {
-      lowrestiles[j][i] = nullptr;
-    }
-  }
-
   initMinimap();
 }
 
@@ -689,6 +681,8 @@ void World::initLowresTerrain()
 
   // - MARE and MAHO by offset ---------------------------
 
+  std::vector<::math::vector_3d> vertices;
+
   for (size_t y (0); y < 64; ++y)
   {
     for (size_t x (0); x < 64; ++x)
@@ -701,8 +695,8 @@ void World::initLowresTerrain()
 
         assert (fourcc == 'MARE' && size == 0x442);
 
-        ::math::vector_3d vertices_17[17][17];
-        ::math::vector_3d vertices_16[16][16];
+        //! \todo There also is MAHO giving holes into this heightmap.
+        _low_res_batches[y][x] = low_res_batch (vertices.size(), 17 * 17 + 16 * 16);
 
         const int16_t* data_17 (wdl_file.get<int16_t> (mare_offsets[y][x] + 8));
 
@@ -710,10 +704,10 @@ void World::initLowresTerrain()
         {
           for (size_t i (0); i < 17; ++i)
           {
-            vertices_17[j][i] = ::math::vector_3d ( TILESIZE * (x + i / 16.0f)
-                                      , data_17[j * 17 + i]
-                                      , TILESIZE * (y + j / 16.0f)
-                                      );
+            vertices.emplace_back ( TILESIZE * (x + i / 16.0f)
+                                  , data_17[j * 17 + i]
+                                  , TILESIZE * (y + j / 16.0f)
+                                  );
           }
         }
 
@@ -723,44 +717,21 @@ void World::initLowresTerrain()
         {
           for (size_t i (0); i < 16; ++i)
           {
-            vertices_16[j][i] = ::math::vector_3d ( TILESIZE * (x + (i + 0.5f) / 16.0f)
-                                      , data_16[j * 16 + i]
-                                      , TILESIZE * (y + (j + 0.5f) / 16.0f)
-                                      );
+            vertices.emplace_back ( TILESIZE * (x + (i + 0.5f) / 16.0f)
+                                  , data_16[j * 16 + i]
+                                  , TILESIZE * (y + (j + 0.5f) / 16.0f)
+                                  );
           }
         }
-
-        lowrestiles[y][x].reset (new opengl::call_list);
-        lowrestiles[y][x]->start_recording();
-
-        //! \todo Make a strip out of this.
-        gl.begin( GL_TRIANGLES );
-          for (size_t j (0); j < 16; ++j )
-          {
-            for (size_t i (0); i < 16; ++i )
-            {
-              gl.vertex3fv (vertices_17[j][i]);
-              gl.vertex3fv (vertices_16[j][i]);
-              gl.vertex3fv (vertices_17[j][i + 1]);
-              gl.vertex3fv (vertices_17[j][i + 1]);
-              gl.vertex3fv (vertices_16[j][i]);
-              gl.vertex3fv (vertices_17[j + 1][i + 1]);
-              gl.vertex3fv (vertices_17[j + 1][i + 1]);
-              gl.vertex3fv (vertices_16[j][i]);
-              gl.vertex3fv (vertices_17[j + 1][i]);
-              gl.vertex3fv (vertices_17[j + 1][i]);
-              gl.vertex3fv (vertices_16[j][i]);
-              gl.vertex3fv (vertices_17[j][i]);
-            }
-          }
-        gl.end();
-
-        lowrestiles[y][x]->end_recording();
-
-        //! \todo There also is MAHO giving holes into this heightmap.
       }
     }
   }
+
+  gl.genBuffers (1, &_low_res_vertices_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _low_res_vertices_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, vertices.size() * sizeof (::math::vector_3d), vertices.data(), GL_STATIC_DRAW);
+
+  gl.bindBuffer (GL_ARRAY_BUFFER, 0);
 }
 
 namespace
@@ -1004,26 +975,74 @@ void World::draw ( size_t flags
   setupFog (flags & FOG, fog_distance);
 
   // Draw verylowres heightmap
-  if ((flags & FOG) && (flags & TERRAIN)) {
-    gl.enable(GL_CULL_FACE);
-    gl.disable(GL_DEPTH_TEST);
-    gl.disable(GL_LIGHTING);
-    gl.color3fv(skies->colorSet[FOG_COLOR]);
-    //gl.color3f(0,1,0);
-    //gl.disable(GL_FOG);
-    const int lrr = 2;
-    for (int i=cx-lrr; i<=cx+lrr; ++i) {
-      for (int j=cz-lrr; j<=cz+lrr; ++j) {
-        //! \todo  some annoying visual artifacts when the verylowres terrain overlaps
-        // maptiles that are close (1-off) - figure out how to fix.
-        // still less annoying than hoels in the horizon when only 2-off verylowres tiles are drawn
-        if ( !(i==cx&&j==cz) && noggit::map_index::ok_tile(i,j) && lowrestiles[j][i])
+  if ((flags & FOG) && (flags & TERRAIN))
+  {
+    std::vector<uint32_t> indices;
+
+    for (size_t y (0); y < 64; ++y)
+    {
+      for (size_t x (0); x < 64; ++x)
+      {
+        low_res_batch const& batch = _low_res_batches[y][x];
+
+        if (batch.vertex_count == 0)
+          continue;
+
+        auto outer_index = [&batch](int y, int x)
         {
-          lowrestiles[j][i]->render();
+          return batch.vertex_start + y * 17 + x;
+        };
+
+        auto inner_index = [&batch] (int y, int x)
+        {
+          return batch.vertex_start + 17 * 17 + y * 16 + x;
+        };
+
+        for (size_t j (0); j < 16; ++j)
+        {
+          for (size_t i (0); i < 16; ++i)
+          {
+            if (_map_index.tile_loaded (y, x) && _map_index.tile (y, x)->getChunk (j, i)->is_visible (mapdrawdistance, frustum, camera))
+              continue;
+
+            indices.push_back (inner_index (j, i));
+            indices.push_back (outer_index (j, i));
+            indices.push_back (outer_index (j + 1, i));
+
+            indices.push_back (inner_index (j, i));
+            indices.push_back (outer_index (j + 1, i));
+            indices.push_back (outer_index (j + 1, i + 1));
+
+            indices.push_back (inner_index (j, i));
+            indices.push_back (outer_index (j + 1, i + 1));
+            indices.push_back (outer_index (j, i + 1));
+
+            indices.push_back (inner_index (j, i));
+            indices.push_back (outer_index (j, i + 1));
+            indices.push_back (outer_index (j, i));
+          }
         }
       }
     }
-    //gl.enable(GL_FOG);
+
+    static opengl::program const program {
+      { GL_VERTEX_SHADER,   shader::mfbo_vert },
+      { GL_FRAGMENT_SHADER, shader::mfbo_frag }
+    };
+
+    opengl::scoped::use_program shader { program };
+
+    gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
+    gl.bindBuffer (GL_ARRAY_BUFFER, _low_res_vertices_buffer);
+    shader.attrib ("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+    shader.uniform ("model_view", opengl::matrix::model_view());
+    shader.uniform ("projection", opengl::matrix::projection());
+    shader.uniform ("color", ::math::vector_4d (skies->colorSet[FOG_COLOR], 1.0f)); //
+
+    gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, indices.data());
+
+    gl.bindBuffer (GL_ARRAY_BUFFER, 0);
   }
 
   // Draw height map
