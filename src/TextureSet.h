@@ -31,7 +31,9 @@ public:
 	void bindAlphamap(size_t id, size_t activeTexture);
 
 	int addTexture(OpenGL::Texture *texture);
+  void eraseTexture(size_t id);
 	void eraseTextures();
+  void eraseUnusedTextures();
   void swapTexture(int id1, int id2);
 	void switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
 	bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture);

@@ -79,7 +79,9 @@ int TextureSet::addTexture(OpenGL::Texture* texture)
 		texLevel = nTextures;
 		nTextures++;
 
-		textures[texLevel] = texture;
+    texture->addReference();
+
+		textures[texLevel] = texture;    
 		animated[texLevel] = 0;
 		texFlags[texLevel] = 0;
 		effectID[texLevel] = 0;
@@ -174,18 +176,38 @@ void TextureSet::swapTexture(int id1, int id2)
 
 void TextureSet::eraseTextures()
 {
-	for (size_t i = 0; i < nTextures; ++i)
+	for (size_t i = nTextures-1; nTextures; --i)
 	{
-		TextureManager::delbyname(textures[i]->filename());
-		tex[i] = 0;
-
-		if (i < 1) continue;
-
-		delete alphamaps[i - 1];
-		alphamaps[i - 1] = NULL;
+    eraseTexture(i);
 	}
+}
 
-	nTextures = 0U;
+void TextureSet::eraseTexture(size_t id)
+{
+  if (id > 3)
+    return;
+
+  TextureManager::delbyname(textures[id]->filename());
+  tex[id] = 0;
+
+  if (id)
+  {
+    delete alphamaps[id - 1];
+    alphamaps[id - 1] = nullptr;
+  }
+
+  // shift textures above
+  for (size_t i = id; id < nTextures - 1; i++)
+  {
+    std::swap(alphamaps[i - 1], alphamaps[i]);
+    std::swap(textures[i], textures[i + 1]);
+    tex[i] = tex[i + 1];
+    animated[i] = animated[i + 1];
+    texFlags[i] = texFlags[i + 1];
+    effectID[i] = effectID[i + 1];
+  }
+
+  nTextures--;
 }
 
 const std::string& TextureSet::filename(size_t id)
@@ -280,9 +302,35 @@ void TextureSet::stopAnim(int id)
 	}
 }
 
+void TextureSet::eraseUnusedTextures()
+{
+  if (nTextures < 2)
+    return;
+    
+  unsigned char alpha[64 * 64];
+
+  for (size_t k = nTextures - 1; k > 0; k--)
+  {
+    bool texVisible = false;
+    memcpy(alpha, alphamaps[k-1]->getAlpha(), 64 * 64);
+    for (size_t i = 0; i < 64 * 64; i++)
+    {
+      unsigned char a = alpha[i];
+      if (a > 0)
+      {
+        texVisible = true;
+        break;
+      }
+    }
+    if (!texVisible)
+    {
+      eraseTexture(k);
+    }      
+  }
+}
+
 bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
 {
-
 	if (Environment::getInstance()->paintMode == true)
 	{
 		float zPos, xPos, change, xdiff, zdiff, dist, radius;
@@ -301,11 +349,18 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 		if (dist > (radius + MAPCHUNK_RADIUS))
 			return false;
 
+    // clear the chunk of unused textures beforehand
+    eraseUnusedTextures();
+
 		//First Lets find out do we have the texture already
 		for (size_t i = 0; i<nTextures; ++i)
 			if (textures[i] == texture)
 				texLevel = i;
 
+    if (texLevel == -1 && strength == 0)
+    {
+      return false;
+    }
 
 		if ((texLevel == -1) && (nTextures == 4))
 		{
