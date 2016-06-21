@@ -477,15 +477,12 @@ void WMO::draw_doodads ( World* world
   }
 }
 
-boost::optional<float> WMO::intersect(math::ray ray)
+void WMO::intersect (math::ray ray, std::vector<float> &results)
 {
   for (size_t i (0); i < nGroups; ++i)
   {
-    if (auto distance = groups[i].intersect (ray))
-      return *distance;
+    groups[i].intersect (ray, results);
   }
-
-  return boost::none;
 }
 
 bool WMO::drawSkybox(World* world, ::math::vector_3d pCamera, ::math::vector_3d pLower, ::math::vector_3d pUpper ) const
@@ -1089,7 +1086,7 @@ void WMOGroup::draw ( opengl::scoped::use_program& shader
   }
 }
 
-boost::optional<float> WMOGroup::intersect(math::ray ray)
+void WMOGroup::intersect(math::ray ray, std::vector<float> &results)
 {
   math::vector_3d const min (VertexBoxMin);
   math::vector_3d const max (VertexBoxMax);
@@ -1105,12 +1102,10 @@ boost::optional<float> WMOGroup::intersect(math::ray ray)
         math::vector_3d const v2 = _vertices[_indices[i + 2]];
 
         if ((distance = ray.intersect_triangle (v0, v1, v2)))
-          return *distance;
+          results.emplace_back (*distance);
       }
     }
   }
-
-  return boost::none;
 }
 
 void WMOGroup::drawDoodads ( World* world
