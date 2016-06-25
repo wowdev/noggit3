@@ -33,7 +33,8 @@ public:
 	int addTexture(OpenGL::Texture *texture);
   void eraseTexture(size_t id);
 	void eraseTextures();
-  void eraseUnusedTextures();
+  // return true if at least 1 texture has been erased
+  bool eraseUnusedTextures();
   void swapTexture(int id1, int id2);
 	void switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
 	bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture);
