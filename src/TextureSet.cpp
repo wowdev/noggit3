@@ -67,7 +67,6 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool 
   {
     convertToOldAlpha();
   }
-    
 }
 
 int TextureSet::addTexture(OpenGL::Texture* texture)
@@ -197,7 +196,7 @@ void TextureSet::eraseTexture(size_t id)
   }
 
   // shift textures above
-  for (size_t i = id; id < nTextures - 1; i++)
+  for (size_t i = id; i < nTextures - 1; i++)
   {
     std::swap(alphamaps[i - 1], alphamaps[i]);
     std::swap(textures[i], textures[i + 1]);
@@ -302,38 +301,72 @@ void TextureSet::stopAnim(int id)
 	}
 }
 
-void TextureSet::eraseUnusedTextures()
+bool TextureSet::eraseUnusedTextures()
 {
+  bool texRemoved = false;
+
   if (nTextures < 2)
-    return;
+    return texRemoved;
     
   unsigned char alpha[64 * 64];
+  bool baseVisible = false;
+  size_t texCount = nTextures;
 
   for (size_t k = nTextures - 1; k > 0; k--)
   {
     bool texVisible = false;
-    memcpy(alpha, alphamaps[k-1]->getAlpha(), 64 * 64);
-    for (size_t i = 0; i < 64 * 64; i++)
+    // use a temp variable because nTexture can be decreased at the end of the loop
+    // if the texture above is fully opaque, don't test textures bellow
+    if (k >= texCount - 1 || baseVisible)
     {
-      unsigned char a = alpha[i];
-      if (a > 0)
+      // reset baseVisible because this layer could be fully opaque
+      baseVisible = false;
+      memcpy(alpha, alphamaps[k - 1]->getAlpha(), 64 * 64);
+      for (size_t i = 0; i < 64 * 64; i++)
       {
-        texVisible = true;
-        break;
+        unsigned char a = alpha[i];
+        if (a > 0)
+        {
+          texVisible = true;
+
+          if ((baseVisible = baseVisible || a < 255))
+          {
+            break;
+          }
+        }
+        else
+        {
+          baseVisible = true;
+        }
       }
     }
+
     if (!texVisible)
     {
       eraseTexture(k);
-    }      
+      texRemoved = true;
+    }
   }
+  
+  // there will always be at least 2 textures when entering the condition
+  if (!baseVisible)
+  {
+    // swap the base layer with the layer above
+    swapTexture(0, 1);
+    eraseTexture(1);
+    texRemoved = true;
+  }
+
+  return texRemoved;
 }
 
 bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
 {
+  bool changed = false, newTex = false;
+
 	if (Environment::getInstance()->paintMode == true)
 	{
-		float zPos, xPos, change, xdiff, zdiff, dist, radius;
+		float zPos, xPos, xdiff, zdiff, dist, radius;  
 
 		//xbase, zbase mapchunk pos
 		//x, y mouse pos
@@ -347,10 +380,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 		dist = sqrt(xdiff*xdiff + zdiff*zdiff);
 
 		if (dist > (radius + MAPCHUNK_RADIUS))
-			return false;
-
-    // clear the chunk of unused textures beforehand
-    eraseUnusedTextures();
+			return changed;
 
 		//First Lets find out do we have the texture already
 		for (size_t i = 0; i<nTextures; ++i)
@@ -362,9 +392,8 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
       return false;
     }
 
-		if ((texLevel == -1) && (nTextures == 4))
+		if ((texLevel == -1) && (nTextures == 4) && !eraseUnusedTextures())
 		{
-			// Implement here auto texture slot freeing :)
 			LogDebug << "paintTexture: No free texture slot" << std::endl;
 			return false;
 		}
@@ -383,9 +412,11 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 				LogDebug << "paintTexture: Unable to add texture." << std::endl;
 				return false;
 			}
+      newTex = true;
 		}
 
 		zPos = zbase;
+    bool texVisible[4] = { false, false, false, false };
 
 		for (int j = 0; j < 64; j++)
 		{
@@ -398,6 +429,23 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
 				if (dist>radius)
 				{
+          bool baseVisible = true;
+          for (size_t k = nTextures - 1; k > 0; k--)
+          {
+            unsigned char a = alphamaps[k - 1]->getAlpha(i + j * 64);
+
+            if (a > 0)
+            {
+              texVisible[k] = true;
+              
+              if (a == 255)
+              {
+                baseVisible = false;
+              }
+            }
+          }
+          texVisible[0] = texVisible[0] || baseVisible;
+
 					xPos += TEXDETAILSIZE;
 					continue;
 				}				
@@ -418,9 +466,17 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
         // nothing to do
         if (visibility[texLevel] == strength)
         {
+          for (size_t k = 0; k < nTextures; k++)
+          {
+            texVisible[k] = texVisible[k] || (visibility[k] > 0.0f);
+          }
+
           xPos += TEXDETAILSIZE;
           continue;
         }
+
+        // at this point we know for sure that the textures will be changed
+        changed = true;
 
         // alpha delta
         float diffA = (strength - visibility[texLevel])* tPressure;
@@ -431,7 +487,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
           for (size_t k = 0; k < nTextures; k++)
           {
             visibility[k] = (k == texLevel) ? 255.0f : 0.0f;
-          }          
+          }
         }
         else
         {
@@ -472,16 +528,37 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
               alphas[k] = (alphas[k] / (255.0f - alphas[n])) * 255.0f;
           }
         }
-          
-        for (size_t k = 0; k < nTextures - 1; k++)
+
+        for (size_t k = 0; k < nTextures; k++)
         {
-          alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(round(alphas[k]), 0.0f), 255.0f)));
+          if (k < nTextures - 1)
+          {
+            alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(round(alphas[k]), 0.0f), 255.0f)));
+          }
+          texVisible[k] = texVisible[k] || (visibility[k] > 0.0f);
         }
 
 				xPos += TEXDETAILSIZE;
 			}
 			zPos += TEXDETAILSIZE;
 		}
+
+    if (!changed)
+    {
+      return false;
+    }
+
+    // stop after k=0 because k is unsigned
+    for (size_t k = nTextures - 1; k < 4; k--)
+    {
+      if (!texVisible[k])
+        eraseTexture(k);
+    }
+
+    if (nTextures < 2)
+    {
+      return changed;
+    }
 
 		for (size_t j = 0; j < nTextures - 1; j++)
 		{
@@ -495,7 +572,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 		}
 	}
 
-	return true;
+	return changed;
 }
 
 const size_t TextureSet::num()
