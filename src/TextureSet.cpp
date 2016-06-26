@@ -329,8 +329,9 @@ bool TextureSet::eraseUnusedTextures()
         {
           texVisible = true;
 
-          if ((baseVisible = baseVisible || a < 255))
+          if (a < 255)
           {
+            baseVisible = true;
             break;
           }
         }
@@ -362,7 +363,7 @@ bool TextureSet::eraseUnusedTextures()
 
 bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
 {
-  bool changed = false, newTex = false;
+  bool changed = false;
 
 	if (Environment::getInstance()->paintMode == true)
 	{
@@ -412,7 +413,6 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 				LogDebug << "paintTexture: Unable to add texture." << std::endl;
 				return false;
 			}
-      newTex = true;
 		}
 
 		zPos = zbase;
