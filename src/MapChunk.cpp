@@ -1053,9 +1053,9 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
       float edit = change * (1.0f - dist / radius);
       if (editMode)
       {
-        mccv[i].x += ((2.0f * shaderRed) - mccv[i].x)* edit;
-        mccv[i].y += ((2.0f * shaderGreen) - mccv[i].y)* edit;
-        mccv[i].z += ((2.0f * shaderBlue) - mccv[i].z)* edit;
+        mccv[i].x += (shaderRed - mccv[i].x)* edit;
+        mccv[i].y += (shaderGreen - mccv[i].y)* edit;
+        mccv[i].z += (shaderBlue - mccv[i].z)* edit;
       }
       else
       {
