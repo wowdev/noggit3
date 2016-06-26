@@ -263,6 +263,8 @@ void main()
   const std::string mcnk_frag = R"code(
 #version 110
 
+#extension GL_EXT_gpu_shader4 : enable
+
 uniform bool draw_area_id_overlay;
 uniform bool draw_triangle_selection_cursor;
 uniform bool draw_terrain_height_contour;
