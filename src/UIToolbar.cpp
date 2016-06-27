@@ -17,7 +17,7 @@
 
 
 UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
-	: UIWindow(xPos, yPos + 10.0f, 55.0f, 460, "interface\\tooltips\\ui-tooltip-border.blp")
+	: UIWindow(xPos, yPos + 10.0f, 45.0f, 365, "interface\\tooltips\\ui-tooltip-border.blp")
 	, mainGui(setGui)
 	, text(new UIText(6, -26, "TEXT", app.getArialn13(), eJustifyLeft))
 	, selectedIcon(-1)
@@ -43,7 +43,7 @@ UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
 
 void UIToolbar::SetIcon(int pIcon, const std::string& pIconFile)
 {
-	mToolbarIcons[pIcon] = new UIToolbarIcon(5.0f, (pIcon)* 50.0f + 5.0f, pIconFile, std::string("Interface\\BUTTONS\\CheckButtonGlow.blp"), pIcon, UIEventConstructorArgument(UIToolbarIcon, this, UIToolbar::IconSelect));
+	mToolbarIcons[pIcon] = new UIToolbarIcon(5.0f, (pIcon)* 40.0f + 5.0f, pIconFile, std::string("Interface\\BUTTONS\\CheckButtonGlow.blp"), pIcon, UIEventConstructorArgument(UIToolbarIcon, this, UIToolbar::IconSelect));
 	addChild(mToolbarIcons[pIcon]);
 }
 
