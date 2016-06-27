@@ -6,7 +6,7 @@
 #include "Video.h" // gl*
 
 UIToolbarIcon::UIToolbarIcon(float xPos, float yPos, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments)
-	: UIFrame(xPos, yPos, 45.0f, 45.0f)
+	: UIFrame(xPos, yPos, 35.0f, 35.0f)
 	, UIEventClassConstructorSuperCall()
 	, texture(TextureManager::newTexture(tex))
 	, textureSelected(TextureManager::newTexture(texd))
