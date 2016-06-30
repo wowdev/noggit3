@@ -17,7 +17,7 @@
 
 
 UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
-	: UIWindow(xPos, yPos + 10.0f, 45.0f, 365, "interface\\tooltips\\ui-tooltip-border.blp")
+  : UIWindow(xPos, yPos + 10.0f, 45.0f, 405, "interface\\tooltips\\ui-tooltip-border.blp")
 	, mainGui(setGui)
 	, text(new UIText(6, -26, "TEXT", app.getArialn13(), eJustifyLeft))
 	, selectedIcon(-1)
@@ -35,6 +35,7 @@ UIToolbar::UIToolbar(float xPos, float yPos, UIMapViewGUI *setGui)
 	SetIcon(6, "Interface\\ICONS\\INV_Elemental_Primal_Water.blp");			// Water editor
 	SetIcon(7, "Interface\\ICONS\\INV_Enchant_ShardBrilliantSmall.blp");	// Light editor
 	SetIcon(8, "Interface\\ICONS\\Ability_Mage_MissileBarrage.blp");		// shader editor
+  SetIcon(9, "Interface\\ICONS\\INV_Crate_04.blp");		// object editor
 
 	IconSelect(0);
 
@@ -54,16 +55,16 @@ extern int terrainMode;
 
 void UIToolbar::IconSelect(int pIcon)
 {
-	change_settings_window(selectedIcon, pIcon + 1 > 9 ? 0 : pIcon + 1);
+  change_settings_window(selectedIcon, pIcon + 1 > 10 ? 0 : pIcon + 1);
 
-	const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "AreaID Paint", "Impassible Flag", "Water edit", "Light edit", "Shader editor" };
+  const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "AreaID Paint", "Impassible Flag", "Water edit", "Light edit", "Shader editor", "Object editor" };
 	text->setText(Names[pIcon]);
 
 	terrainMode = pIcon;
 
 	Environment::getInstance()->view_holelines = (pIcon == 3);
 
-	for (int j = 0; j < 9; j++)
+	for (int j = 0; j < 10; j++)
 		if (mToolbarIcons[j])
 			mToolbarIcons[j]->selected = false;
 
