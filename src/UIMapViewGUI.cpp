@@ -63,6 +63,7 @@
 #include "UIToolbar.h" // UIToolbar
 #include "UIZoneIDBrowser.h" //
 #include "UIWater.h" //
+#include "UIObjectEditor.h"
 #include "Video.h" // video
 #include "WMOInstance.h"
 #include "World.h"
@@ -87,6 +88,12 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 	minimapWindow = new UIMinimapWindow(gWorld);
 	minimapWindow->hide();
 	addChild(minimapWindow);
+
+  objectEditor = new UIObjectEditor((float)tool_settings_x, (float)tool_settings_y);
+  objectEditor->movable(true);
+  objectEditor->hide();
+  addChild(objectEditor);
+
 
 	// UICurrentTexture
 	guiCurrentTexture = new UICurrentTexture(6.0f, 35.0f, this);

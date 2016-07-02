@@ -59,6 +59,7 @@
 #include "UIHelperModels.h"
 #include "MapIndex.h"
 #include "UIWaterTypeBrowser.h"
+#include "UIObjectEditor.h"
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -296,7 +297,7 @@ void SaveOrReload(UIFrame*, int pMode)
 
 void change_settings_window(int oldid, int newid)
 {
-	if (!setting_ground || !setting_blur || !settings_paint || !settings_shader || (!mainGui || !mainGui->guiWater))
+	if (!setting_ground || !setting_blur || !settings_paint || !settings_shader || !mainGui || !mainGui->guiWater || !mainGui->objectEditor)
 		return;
 	mainGui->guiWaterTypeSelector->hide();
 	setting_ground->hide();
@@ -305,6 +306,7 @@ void change_settings_window(int oldid, int newid)
 	settings_shader->hide();
 	mainGui->guiWater->hide();
 	mainGui->TextureSwitcher->hide();
+  mainGui->objectEditor->hide();
 	if (!mainGui || !mainGui->TexturePalette)
 		return;
 	mainGui->TexturePalette->hide();
@@ -360,6 +362,10 @@ void change_settings_window(int oldid, int newid)
 		settings_shader->y((const float)tool_settings_y);
 		settings_shader->show();
 		break;
+  case 10:
+    mainGui->objectEditor->x((const float)tool_settings_x-220.0f);
+    mainGui->objectEditor->y((const float)tool_settings_y);
+    mainGui->objectEditor->show();
 	}
 }
 
@@ -878,6 +884,7 @@ void MapView::createGUI()
 	mainGui->ZoneIDBrowser->setChangeFunc(changeZoneIDValue);
 	tool_settings_x = video.xres() - 186;
 	tool_settings_y = 38;
+
 
 	// Raise/Lower
 #ifdef _WIN32
@@ -2428,6 +2435,11 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 				terrainMode = e->keysym.sym - SDLK_1;
 				mainGui->guiToolbar->IconSelect(terrainMode);
 			}
+      else if (e->keysym.sym = SDLK_0)
+      {
+        terrainMode = 9; // object editor
+        mainGui->guiToolbar->IconSelect(terrainMode);
+      }
 		}
 
 		// add a new bookmark
