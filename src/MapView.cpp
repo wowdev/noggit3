@@ -409,7 +409,7 @@ void SnapSelectedObjectToGround(UIFrame*, int)
 	{
 		Vec3D t = Vec3D(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, 0);
 		gWorld->GetVertex(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, &t);
-		gWorld->GetCurrentSelection()->data.wmo->pos = t;
+		gWorld->GetCurrentSelection()->data.wmo->pos.y = t.y;
 		gWorld->GetCurrentSelection()->data.wmo->recalcExtents();
 		gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
 
@@ -418,7 +418,7 @@ void SnapSelectedObjectToGround(UIFrame*, int)
 	{
 		Vec3D t = Vec3D(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, 0);
 		gWorld->GetVertex(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, &t);
-		gWorld->GetCurrentSelection()->data.model->pos = t;
+    gWorld->GetCurrentSelection()->data.model->pos.y = t.y;
 		gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
 	}
 }
