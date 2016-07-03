@@ -1980,8 +1980,15 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 				InsertObject(0, 15);
 			else
 			{
-				Environment::getInstance()->cursorType++;
-				if (Environment::getInstance()->cursorType > 3) Environment::getInstance()->cursorType = 0;
+        if (terrainMode == 9)
+        {
+          mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
+        }
+        else
+        {
+          Environment::getInstance()->cursorType++;
+          Environment::getInstance()->cursorType %= 4;
+        }
 			}
 		}
 
@@ -2001,6 +2008,10 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			{
 				PasteSelectedObject(0, 0);
 			}
+      else if (terrainMode == 9)
+      {
+        mainGui->objectEditor->pasteObject(Environment::getInstance()->get_cursor_pos());
+      }
 		}
 
 
