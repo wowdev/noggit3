@@ -125,6 +125,8 @@ public:
   bool fixGapLeft(const MapChunk* chunk);
   // fix the gaps with the chunk above
   bool fixGapAbove(const MapChunk* chunk);
+
+  void toBigAlpha(){ mBigAlpha = true;}
 };
 
 #endif // MAPCHUNK_H

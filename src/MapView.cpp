@@ -762,6 +762,11 @@ void ClearShader(UIFrame*, int id)
 	gWorld->ClearShader(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
 }
 
+void toBigAlpha(UIFrame*, int)
+{
+  gWorld->convertMapToBigAlpha();
+}
+
 void changeZoneIDValue(UIFrame* /*f*/, int set)
 {
 	Environment::getInstance()->selectedAreaID = set;
@@ -1144,6 +1149,7 @@ void MapView::createGUI()
 	mbar->GetMenu("Assist")->AddMenuItemButton("Create water", menuWater, 1);
 	mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded adts)", funcAllFix, 0);
 	mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", ClearShader, 0);
+  mbar->GetMenu("Assist")->AddMenuItemButton("Map to big alpha", toBigAlpha, 0);
 
 	mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
 	mbar->GetMenu("View")->AddMenuItemToggle("Toolbar", mainGui->guiToolbar->hidden_evil(), true);
@@ -1990,6 +1996,10 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
           Environment::getInstance()->cursorType %= 4;
         }
 			}
+      else if (terrainMode == 9)
+      {
+        mainGui->objectEditor->pasteObject(Environment::getInstance()->get_cursor_pos());
+      }
 		}
 
 

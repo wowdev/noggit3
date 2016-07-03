@@ -54,6 +54,8 @@ public:
   void convertToBigAlpha();
   void convertToOldAlpha();
 
+  void toBigAlpha();
+
 	OpenGL::Texture* texture(size_t id);
 
 private:
