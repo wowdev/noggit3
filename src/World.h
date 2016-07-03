@@ -223,6 +223,8 @@ public:
 	void AddWaters(int x, int y);
 
   void fixAllGaps();
+
+  void convertMapToBigAlpha();
 private:
 	void getSelection();
 };

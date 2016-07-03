@@ -364,6 +364,18 @@ float MapTile::getMaxHeight()
   return maxHeight;
 }
 
+void MapTile::toBigAlpha()
+{
+  mBigAlpha = true;
+  for (size_t i = 0; i < 16; i++)
+  {
+    for (size_t j = 0; j < 16; j++)
+    {
+      mChunks[i][j]->toBigAlpha();
+    }
+  }
+}
+
 extern float groundBrushRadius;
 extern float blurBrushRadius;
 extern int terrainMode;

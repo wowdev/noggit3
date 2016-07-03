@@ -62,10 +62,13 @@ public:
 
 	void save();
 
-    uint32_t getHighestGUIDFromFile(const std::string& pFilename);
+  uint32_t getHighestGUIDFromFile(const std::string& pFilename);
 
 	MapTile* getTile(size_t z, size_t x);
 	uint32_t getFlag(size_t z, size_t x);
+
+  void setBigAlpha() { mBigAlpha = true; }
+  bool hasBigAlpha() const { return mBigAlpha; }
 
 private:
 	const std::string basename;
@@ -84,7 +87,7 @@ private:
 	int cx;
 	int cz;
 
-    uint32_t highestGUID;
+  uint32_t highestGUID;
 
 	ENTRY_MODF wmoEntry;
 	MPHD mphd;
