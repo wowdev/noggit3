@@ -1272,9 +1272,8 @@ void World::getSelection()
 
   if (minEntry)
   {
-    // prevent from selecting objects when trying to use a tool
-    if ((minEntry->stack.type == MapObjName || minEntry->stack.type == DoodadName)
-      && !(Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown))
+    // only select objects when using the object editor
+    if (terrainMode == 9 && (minEntry->stack.type == MapObjName || minEntry->stack.type == DoodadName))
     {
       mCurrentSelection = SelectionNames.findEntry(minEntry->stack.uniqueId);
     }
