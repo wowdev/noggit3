@@ -198,13 +198,20 @@ void TextureSet::eraseTexture(size_t id)
   // shift textures above
   for (size_t i = id; i < nTextures - 1; i++)
   {
-    std::swap(alphamaps[i - 1], alphamaps[i]);
-    std::swap(textures[i], textures[i + 1]);
+    if (i)
+    {
+      alphamaps[i - 1] = alphamaps[i];
+    }
+
     tex[i] = tex[i + 1];
+    textures[i] = textures[i + 1];
     animated[i] = animated[i + 1];
     texFlags[i] = texFlags[i + 1];
     effectID[i] = effectID[i + 1];
   }
+
+  alphamaps[nTextures - 2] = nullptr;
+  tex[nTextures - 1] = 0;
 
   nTextures--;
 }

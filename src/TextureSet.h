@@ -53,8 +53,9 @@ public:
 
   void convertToBigAlpha();
   void convertToOldAlpha();
-
-  void toBigAlpha();
+  
+  void mergeAlpha(size_t id1, size_t id2);
+  bool removeDuplicate();
 
 	OpenGL::Texture* texture(size_t id);
 
