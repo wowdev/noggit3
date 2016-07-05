@@ -2238,6 +2238,32 @@ void World::swapTexture(int x, int z, OpenGL::Texture *tex)
   mapIndex->setChanged(z, x);
 }
 
+void World::removeTexDuplicateOnADT(int x, int z)
+{
+  MapTile *tile = mapIndex->getTile((size_t)z, (size_t)x);
+  if (!tile) 
+    return;
+
+  bool changed = false;
+
+  // clear all textures on the adt and set selected texture as base texture
+  for (int j = 0; j<16; ++j)
+  {
+    for (int i = 0; i<16; ++i)
+    {
+      if (tile->getChunk((size_t)j, (size_t)i)->textureSet->removeDuplicate())
+      {
+        changed = true;
+      }
+    }
+  }
+
+  if (changed)
+  {
+    mapIndex->setChanged(z, x);
+  }  
+}
+
 void World::saveWDT()
 {
   // int lCurrentPosition = 0;
