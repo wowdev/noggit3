@@ -710,3 +710,101 @@ void TextureSet::convertToOldAlpha()
     alphamaps[k]->loadTexture();
   }
 }
+
+void TextureSet::mergeAlpha(size_t id1, size_t id2)
+{
+  if (id1 >= nTextures || id2 >= nTextures || id1 == id2)
+    return;
+
+  if (!id1)
+  {
+    eraseTexture(id2);
+    return;
+  }
+  if (!id2)
+  {
+    eraseTexture(id1);
+    return;
+  }
+
+  unsigned char tab[3][64 * 64];
+
+  for (size_t k = 0; k < nTextures - 1; k++)
+  {
+    memcpy(tab[k], alphamaps[k]->getAlpha(), 64 * 64);
+  }
+
+  float alphas[3] = { 0.0f, 0.0f, 0.0f };
+  float visibility[4] = { 255.0f, 0.0f, 0.0f, 0.0f };
+
+  for (int i = 0; i < 64 * 64; ++i)
+  {
+    for (size_t k = 0; k < nTextures - 1; k++)
+    {
+      float f = static_cast<float>(tab[k][i]);
+      alphas[k] = f;
+      for (size_t n = 0; n < k; n++)
+        alphas[n] = (alphas[n] * ((255.0f - f)) / 255.0f);
+    }
+
+    for (size_t k = 0; k < nTextures - 1; k++)
+    {
+      float f = static_cast<float>(tab[k][i]);
+      visibility[k + 1] = f;
+      for (size_t n = 0; n <= k; n++)
+        visibility[n] = (visibility[n] * ((255.0f - f)) / 255.0f);
+    }
+
+    visibility[id1] += visibility[id2];
+    visibility[id2] = 0;
+
+    for (int k = nTextures - 2; k >= 0; k--)
+    {
+      alphas[k] = visibility[k + 1];
+      for (int n = nTextures - 2; n > k; n--)
+      {
+        // prevent 0 division
+        if (alphas[n] == 255.0f)
+        {
+          alphas[k] = 0.0f;
+          break;
+        }
+        else
+          alphas[k] = (alphas[k] / (255.0f - alphas[n])) * 255.0f;
+      }
+    }
+
+    for (size_t k = 0; k < nTextures - 1; k++)
+    {
+      tab[k][i] = static_cast<unsigned char>(std::min(std::max(round(alphas[k]), 0.0f), 255.0f));
+    }
+  }
+
+
+  eraseTexture(id2);
+
+  for (size_t k = 0; k < nTextures - 1; k++)
+  {
+    alphamaps[k]->setAlpha(tab[k]);
+    alphamaps[k]->loadTexture();
+  }
+}
+
+bool TextureSet::removeDuplicate()
+{
+  bool changed = false;
+
+  for (size_t i = 0; i < nTextures; i++)
+  {
+    for (size_t j = i + 1; j < nTextures; j++)
+    {
+      if (textures[i] == textures[j])
+      {
+        mergeAlpha(i, j);
+        changed = true;
+      }
+    }
+  }
+
+  return changed;
+}

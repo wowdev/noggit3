@@ -375,6 +375,11 @@ void openSwapper(UIFrame*, int)
 	settings_paint->hide();
 }
 
+void removeTexDuplicateOnADT(UIFrame*, int)
+{
+  gWorld->removeTexDuplicateOnADT(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE), (static_cast<UITextureSwitcher *>(f->parent()))->getTextures());
+}
+
 void openHelp(UIFrame*, int)
 {
 	mainGui->showHelp();
@@ -1039,7 +1044,7 @@ void MapView::createGUI()
   setting_blur->addChild(flatten_orientation);
 
 	//3D Paint settings UIWindow
-	settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 140.0f);
+	settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 180.0f);
 	settings_paint->hide();
 	settings_paint->movable(true);
 
@@ -1084,6 +1089,9 @@ void MapView::createGUI()
 	UIButton* B1;
 	B1 = new UIButton(6.0f, 111.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1);
 	settings_paint->addChild(B1);
+
+  UIButton* rmDup = new UIButton(6.0f, 145.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", removeTexDuplicateOnADT, 0);
+  settings_paint->addChild(rmDup);
 
 
 	mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
