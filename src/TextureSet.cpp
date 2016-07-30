@@ -368,6 +368,43 @@ bool TextureSet::eraseUnusedTextures()
   return texRemoved;
 }
 
+float distance(float x1, float z1, float x2, float z2)
+{
+  float xdiff = x2 - x1, zdiff = z2 - z1;
+  return std::sqrt(xdiff*xdiff + zdiff*zdiff);
+}
+
+// return the shortest distance between the point (x, z)
+// and square at (xPos, zPos) with a size of unitSize
+float getShortestDist(float x, float z, float xPos, float zPos, float unitSize)
+{
+  float px, pz;
+  float midx = xPos + unitSize / 2, midz = zPos + unitSize / 2;
+
+  if (x >= xPos && x < xPos + unitSize)
+  {
+    px = x;
+  }
+  else
+  {
+    px = (midx < x) ? xPos + unitSize : ((midx > x) ? xPos : xPos + unitSize / 2.0f);
+  }
+
+  if (z >= zPos && z < zPos + unitSize)
+  {
+    pz = z;
+  }
+  else
+  {
+    pz = (midz < z) ? zPos + unitSize : ((midz > z) ? zPos : zPos + unitSize / 2.0f);
+  }
+
+  if (px == x && pz == z)
+    return 0.0f;
+
+  return distance(px, pz, x, z);
+}
+
 bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
 {
   bool changed = false;
@@ -380,14 +417,13 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 		//x, y mouse pos
 
 		int texLevel = -1;
-
 		radius = brush->getRadius();
 
 		xdiff = xbase - x + CHUNKSIZE / 2;
 		zdiff = zbase - z + CHUNKSIZE / 2;
-		dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+		dist = getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
 
-		if (dist > (radius + MAPCHUNK_RADIUS))
+		if (dist > radius)
 			return changed;
 
 		//First Lets find out do we have the texture already
@@ -427,12 +463,12 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
 		for (int j = 0; j < 64; j++)
 		{
-			xPos = xbase;
+      xPos = xbase;
 			for (int i = 0; i < 64; ++i)
 			{
-				xdiff = xPos - x + (TEXDETAILSIZE / 2.0f); // Use the center instead of
-				zdiff = zPos - z + (TEXDETAILSIZE / 2.0f); // the top left corner
-				dist = std::abs(std::sqrt(xdiff*xdiff + zdiff*zdiff));
+        float cx = xPos, cz = zPos;
+
+        dist = distance(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
 
 				if (dist>radius)
 				{
@@ -716,17 +752,6 @@ void TextureSet::mergeAlpha(size_t id1, size_t id2)
   if (id1 >= nTextures || id2 >= nTextures || id1 == id2)
     return;
 
-  if (!id1)
-  {
-    eraseTexture(id2);
-    return;
-  }
-  if (!id2)
-  {
-    eraseTexture(id1);
-    return;
-  }
-
   unsigned char tab[3][64 * 64];
 
   for (size_t k = 0; k < nTextures - 1; k++)
@@ -739,14 +764,6 @@ void TextureSet::mergeAlpha(size_t id1, size_t id2)
 
   for (int i = 0; i < 64 * 64; ++i)
   {
-    for (size_t k = 0; k < nTextures - 1; k++)
-    {
-      float f = static_cast<float>(tab[k][i]);
-      alphas[k] = f;
-      for (size_t n = 0; n < k; n++)
-        alphas[n] = (alphas[n] * ((255.0f - f)) / 255.0f);
-    }
-
     for (size_t k = 0; k < nTextures - 1; k++)
     {
       float f = static_cast<float>(tab[k][i]);
