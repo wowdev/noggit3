@@ -377,7 +377,7 @@ void openSwapper(UIFrame*, int)
 
 void removeTexDuplicateOnADT(UIFrame*, int)
 {
-  gWorld->removeTexDuplicateOnADT(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE), (static_cast<UITextureSwitcher *>(f->parent()))->getTextures());
+  gWorld->removeTexDuplicateOnADT(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
 }
 
 void openHelp(UIFrame*, int)
@@ -2377,8 +2377,8 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 		{
 			// write teleport cords to txt file
 			std::ofstream f("ports.txt", std::ios_base::app);
-			f << std::endl << std::endl << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID()) << " on ADT " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE) << std::endl << std::endl;
-			f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << gWorld->getMapID() << std::endl << std::endl;
+			f << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID()) << " on ADT " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE) << std::endl;
+			f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << gWorld->getMapID() << std::endl;
 			f << "ArcEmu:" << std::endl << ".worldport " << gWorld->getMapID() << " " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << std::endl << std::endl;
 			f.close();
 		}
