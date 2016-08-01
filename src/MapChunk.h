@@ -104,8 +104,10 @@ public:
 	bool isHole(int i, int j);
 	void addHole(int i, int j);
 	void addHoleBig(int i, int j);
+  void addHoleEverywhere();
 	void removeHole(int i, int j);
 	void removeHoleBig(int i, int j);
+  void removeAllHoles();
 
 	void setFlag(bool value);
 	int getFlag();
