@@ -37,7 +37,7 @@ public:
 	MapTile *loadTile(int x, int z);
 
 	void setChanged(float x, float z);
-	void setChanged(int x, int z);
+	void setChanged(int z, int x);
 
 	void unsetChanged(int x, int z);
 	void setFlag(bool to, float x, float z);
