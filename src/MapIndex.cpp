@@ -258,34 +258,34 @@ void MapIndex::setChanged(float x, float z)
 		setChanged(column, row);
 }
 
-void MapIndex::setChanged(int x, int z)
+void MapIndex::setChanged(int z, int x)
 {
 	// change the changed flag of the map tile
 	if (hasTile(x, z))
 	{
-		if (!mTiles[x][z].tile)
+		if (!mTiles[x][x].tile)
 			loadTile(x, z);
 
-		if (mTiles[x][z].tile->changed == 1)
+		if (mTiles[z][x].tile->changed == 1)
 			return;
 
-		mTiles[x][z].tile->changed = 1;
+		mTiles[z][x].tile->changed = 1;
 	}
 
 	for (int posaddx = -1; posaddx < 2; posaddx++)
 	{
 		for (int posaddz = -1; posaddz < 2; posaddz++)
 		{
-			if (!hasTile(x + posaddx, z + posaddz))
+			if (!hasTile(z + posaddx, x + posaddz))
 				continue;
 
-			if (!mTiles[x + posaddx][z + posaddz].tile)
-				loadTile(x + posaddx, z + posaddz);
+			if (!mTiles[z + posaddx][x + posaddz].tile)
+				loadTile(z + posaddx, x + posaddz);
 
-			if (mTiles[x + posaddx][z + posaddz].tile->changed == 1)
+			if (mTiles[z + posaddx][x + posaddz].tile->changed == 1)
 				continue;
 
-			mTiles[x + posaddx][z + posaddz].tile->changed = 2;
+			mTiles[z + posaddx][x + posaddz].tile->changed = 2;
 		}
 	}
 
