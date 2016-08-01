@@ -1846,6 +1846,40 @@ void World::removeHole(float x, float z, bool big)
   }
 }
 
+void World::addHoleADT(float x, float z)
+{
+  const size_t posX = (const size_t)(x / TILESIZE);
+  const size_t posZ = (const size_t)(z / TILESIZE);
+
+  MapTile* tile = mapIndex->getTile(posZ, posX);
+  mapIndex->setChanged(x, z);
+
+  for (size_t ty = 0; ty < 16; ++ty)
+  {
+    for (size_t tx = 0; tx < 16; ++tx)
+    {
+      tile->getChunk(ty, tx)->addHoleEverywhere();
+    }
+  }
+}
+
+void World::removeHoleADT(float x, float z)
+{
+  const size_t posX = (const size_t)(x / TILESIZE);
+  const size_t posZ = (const size_t)(z / TILESIZE);
+
+  MapTile* tile = mapIndex->getTile(posZ, posX);
+  mapIndex->setChanged(x, z);
+
+  for (size_t ty = 0; ty < 16; ++ty)
+  {
+    for (size_t tx = 0; tx < 16; ++tx)
+    {
+      tile->getChunk(ty, tx)->removeAllHoles();
+    }
+  }
+}
+
 void World::jumpToCords(Vec3D pos)
 {
   this->camera = pos;

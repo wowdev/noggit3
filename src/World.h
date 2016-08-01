@@ -171,6 +171,8 @@ public:
 
 	void addHole(float x, float y, float z, bool big);
 	void removeHole(float x, float z, bool big);
+  void addHoleADT(float x, float z);
+  void removeHoleADT(float x, float z);
 
 	void addModel(nameEntry entry, Vec3D newPos, bool copyit);
 	void addM2(std::string const& filename, Vec3D newPos, bool copyit);

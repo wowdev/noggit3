@@ -2099,6 +2099,18 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
         toggle_flatten->setState(!(Environment::getInstance()->flattenAngleEnabled));
         toggleFlattenAngle(!(Environment::getInstance()->flattenAngleEnabled), 0);
       }
+      else if (terrainMode == 3)
+      {
+        Vec3D cam = gWorld->camera;
+        if (Environment::getInstance()->AltDown)
+        {
+          gWorld->addHoleADT(cam.x, cam.z);
+        }
+        else
+        {
+          gWorld->removeHoleADT(cam.x, cam.z);
+        }
+      }
 		}
 
 		// clip object to ground

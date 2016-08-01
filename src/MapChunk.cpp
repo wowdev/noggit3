@@ -1258,6 +1258,12 @@ void MapChunk::addHoleBig(int i, int j)
   }
 }
 
+void MapChunk::addHoleEverywhere()
+{
+  holes = 0x7FFFFFFF;
+  initStrip();
+}
+
 void MapChunk::removeHole(int i, int j)
 {
   holes = holes & ~((1 << ((j * 4) + i)));
@@ -1273,6 +1279,12 @@ void MapChunk::removeHoleBig(int i, int j)
       removeHole(i + x, j + y);
     }
   }
+}
+
+void MapChunk::removeAllHoles()
+{
+  holes = 0x0;
+  initStrip();
 }
 
 void MapChunk::setAreaID(int ID)
