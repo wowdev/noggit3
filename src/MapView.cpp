@@ -1090,9 +1090,8 @@ void MapView::createGUI()
 	B1 = new UIButton(6.0f, 111.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1);
 	settings_paint->addChild(B1);
 
-  UIButton* rmDup = new UIButton(6.0f, 145.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", removeTexDuplicateOnADT, 0);
+  UIButton* rmDup = new UIButton(6.0f, 145.0f, 170.0f, 30.0f, "Remove texture duplicates", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", removeTexDuplicateOnADT, 0);
   settings_paint->addChild(rmDup);
-
 
 	mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
 	mainGui->TexturePalette->hide();
