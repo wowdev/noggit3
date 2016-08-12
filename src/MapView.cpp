@@ -1245,6 +1245,15 @@ MapView::MapView(float ah0, float av0)
   if (!gWorld->mapIndex->tileLoaded(z, x))
     gWorld->mapIndex->loadTile(z, x);
   gWorld->GetVertex(gWorld->camera.x, gWorld->camera.z, &t);
+
+  // min elevation according to https://wowdev.wiki/AreaTable.dbc
+  //! \ todo use the current area's MinElevation
+  if (t.y < -5000.0f)
+  {
+    //! \todo use the height of a model/wmo of the tile (or the map) ?  
+    t.y = 0.0f;
+  }
+
   gWorld->camera.y = t.y + 50.0f;
 }
 
