@@ -25,11 +25,24 @@ void addTXTModelext(UIFrame *f, int id)
 	(static_cast<UIModelImport *>(f->parent()->parent()))->addTXTModel(id);
 }
 
+void updateModelList(UIFrame *f, int id)
+{
+  (static_cast<UIModelImport *>(f->parent())->builModelList());
+}
+
+void UIModelImport__TextBoxEnter(UITextBox::Ptr textBox, const std::string& value)
+{
+  (static_cast<UIModelImport *>(textBox->parent())->builModelList());
+}
+
 UIModelImport::UIModelImport(MapView *mapview)
 	: UICloseWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f, (float)winWidth, (float)winHeight, "")
 {
-
-	addChild(new UIText(12.0f, 7.0f, "Select model.", app.getArial14(), eJustifyLeft));
+  
+	addChild(new UIText(12.0f, 10.0f, "Select model", app.getArial14(), eJustifyLeft));
+  _textBox = new UITextBox(105.0f, 7.0f, 220.0f, 40.0f, UIModelImport__TextBoxEnter);
+  addChild(_textBox);
+  addChild(new UIButton(330.0f, 7.0f, 75.0f, 30.0f, "Filter", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", updateModelList, 0));
 
 	builModelList();
 
@@ -45,12 +58,14 @@ void UIModelImport::addTXTModel(int id)
 void UIModelImport::builModelList()
 {
 	removeChild(MoldelList);
-	MoldelList = new UIListView(5, 27, width() - 8, height() - 28, 20);
+	MoldelList = new UIListView(5, 37, width() - 8, height() - 38, 20);
 	MoldelList->clickable(true);
 	addChild(MoldelList);
 	//  Read out Area List.
 	std::string line;
-	int counter = 100;
+  const std::string filter = _textBox->value();
+	int counter = 1;
+  bool filtered = filter != "";
 	std::ifstream fileReader("Import.txt");
 
 	if (fileReader.is_open())
@@ -58,20 +73,29 @@ void UIModelImport::builModelList()
 		while (!fileReader.eof())
 		{
 			getline(fileReader, line);
-			UIFrame *curFrame = new UIFrame(1, 1, 1, 1);
-			std::string diveded;
-
-			diveded = misc::explode(line, "\\");
+			
 			if (line != "")
 			{
+        std::string diveded = misc::explode(line, "\\");
+
+        if (filtered && diveded.find(filter, 0) == std::string::npos)
+        {
+          continue;
+        }
+
 				std::stringstream ss;
 				ss << counter << ": " << diveded;
-				UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", addTXTModelext, counter);
+        UIFrame *curFrame = new UIFrame(1, 1, 1, 1);
+				UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), 
+                                            "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", 
+                                            "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", 
+                                            addTXTModelext, 
+                                            counter+99
+                                           ); // first id from file = 100 
 				tempButton->setLeft();
 				curFrame->addChild(tempButton);
 				MoldelList->addElement(curFrame);
 				counter++;
-
 			}
 		}
 	}
