@@ -413,6 +413,25 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 	{
 		float zPos, xPos, xdiff, zdiff, dist, radius;  
 
+    // hacky fix to make sure textures are blended between 2 chunks
+    if (z < zbase)
+    {
+      zbase -= TEXDETAILSIZE;
+    }
+    else if (z > zbase + CHUNKSIZE)
+    {
+      zbase += TEXDETAILSIZE;
+    }
+
+    if (x < xbase)
+    {
+      xbase -= TEXDETAILSIZE;
+    }
+    else if (x > xbase + CHUNKSIZE)
+    {
+      xbase += TEXDETAILSIZE;
+    }
+
 		//xbase, zbase mapchunk pos
 		//x, y mouse pos
 
