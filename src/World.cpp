@@ -1378,6 +1378,7 @@ void World::clearAllModelsOnADT(int x, int z)
   curTile = mapIndex->getTile((size_t)z, (size_t)x);
   if (curTile == 0) return;
   curTile->clearAllModels();
+  mapIndex->setChanged(z, x);
 }
 
 void World::deleteWaterLayer(int x, int z)
@@ -1392,7 +1393,10 @@ void World::deleteWaterLayer(int x, int z)
 void World::ClearShader(int x, int z)
 {
   MapTile *curTile = mapIndex->getTile((size_t)z, (size_t)x);
+  if (!curTile) return;
+
   curTile->ClearShader();
+  mapIndex->setChanged(z, x);
 }
 
 void World::CropWaterADT(int x, int z)
@@ -2238,6 +2242,8 @@ void World::setBaseTexture(int x, int z)
   MapTile *curTile;
   curTile = mapIndex->getTile((size_t)z, (size_t)x);
   if (curTile == 0) return;
+
+  mapIndex->setChanged(z, x);
 
   // clear all textures on the adt and set selected texture as base texture
   for (int j = 0; j<16; ++j)
