@@ -965,9 +965,14 @@ void World::draw()
     else if (terrainMode == 2)
     {
       if (Environment::getInstance()->cursorType == 1)
+      {
         renderDisk_convenient((float)posX, (float)posY, (float)posZ, textureBrush.getRadius());
+        renderDisk_convenient((float)posX, (float)posY, (float)posZ, textureBrush.getRadius() * textureBrush.getHardness());
+      }
       else if (Environment::getInstance()->cursorType == 2)
+      {
         renderSphere_convenient((float)posX, (float)posY, (float)posZ, textureBrush.getRadius(), 15);
+      }      
     }
     else if (terrainMode == 8)
     {
