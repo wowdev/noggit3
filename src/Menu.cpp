@@ -293,17 +293,49 @@ void Menu::buildMenuBar()
 	mGUImenuBar->GetMenu("File")->AddMenuItemSwitch("exit ESC", &app.pop, true);
 	mGUIFrame->addChild(mGUImenuBar);
 
-	static const char* typeToName[] = { "Continent", "Dungeons", "Raid", "Battleground" };
+	static const char* typeToName[] = { "Continent", "Dungeons", "Raid", "Battleground", "Arena" };
+  static int nMapByType[] = { 0, 0, 0, 0, 0 };
 
-	for (int i = 0; i < (sizeof(typeToName) / sizeof(*typeToName)); ++i)
-		mGUImenuBar->AddMenu(typeToName[i]);
+  for (std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it)
+  {
+    nMapByType[it->areaType]++;
+  }
+
+  static const size_t nBookmarksPerMenu = 20;
+
+  for (int i = 0; i < (sizeof(typeToName) / sizeof(*typeToName)); ++i)
+  {
+    mGUImenuBar->AddMenu(typeToName[i]);
+    if (nMapByType[i] > nBookmarksPerMenu)
+    {
+      int nMenu = (nMapByType[i] / nBookmarksPerMenu) + 1;
+
+      for (int j = 2; j <= nMenu; j++)
+      {
+        stringstream name;
+        name << typeToName[i] << " (" << j << ")";
+        mGUImenuBar->AddMenu(name.str());
+      }
+    }
+
+    nMapByType[i] = 0;
+  }
+		
 
 	for (std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it)
 	{
-		mGUImenuBar->GetMenu(typeToName[it->areaType])->AddMenuItemButton(it->name, &showMap, it->mapID);
+    if (nMapByType[it->areaType]++ < nBookmarksPerMenu)
+    {
+      mGUImenuBar->GetMenu(typeToName[it->areaType])->AddMenuItemButton(it->name, &showMap, it->mapID);
+    }
+    else
+    {
+      stringstream name;
+      name << typeToName[it->areaType] << " (" << (nMapByType[it->areaType] / nBookmarksPerMenu + 1) << ")";
+      mGUImenuBar->GetMenu(name.str())->AddMenuItemButton(it->name, &showMap, it->mapID);
+    }
 	}
 
-	static const size_t nBookmarksPerMenu = 20;
 	const size_t nBookmarkMenus = (mBookmarks.size() / nBookmarksPerMenu) + 1;
 
 	if (mBookmarks.size())
@@ -346,7 +378,7 @@ void Menu::createMapList()
 		e.areaType = i->getUInt(MapDB::AreaType);
 		if (e.areaType == 3) e.name = i->getString(MapDB::InternalName);
 
-		if (e.areaType < 0 || e.areaType > 3 || !World::IsEditableWorld(e.mapID))
+		if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
 			continue;
 
 		mMaps.push_back(e);
