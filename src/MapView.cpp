@@ -1995,14 +1995,10 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			{
 				InsertObject(0, 15);
 			}
-			else if (Environment::getInstance()->CtrlDown)
+			else if (terrainMode == 9 || Environment::getInstance()->CtrlDown)
 			{
         mainGui->objectEditor->pasteObject(Environment::getInstance()->get_cursor_pos());
 			}
-      else if (terrainMode == 9)
-      {
-        mainGui->objectEditor->pasteObject(Environment::getInstance()->get_cursor_pos());
-      }
 		}
 
 
