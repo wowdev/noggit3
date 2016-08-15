@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
-//#include <string>
-#include "string.h"
+#include <string>
+#include <fstream>
 
 #include "Noggit.h" // fonts
 #include "Misc.h" // fonts
@@ -15,8 +15,7 @@
 #include "MapView.h"
 #include "UIListView.h"
 #include "UIButton.h"
-#include <fstream>
-#include <iostream>
+#include "Settings.h"
 
 #include "Log.h"
 
@@ -66,7 +65,7 @@ void UIModelImport::builModelList()
   const std::string filter = _textBox->value();
 	int counter = 1;
   bool filtered = filter != "";
-	std::ifstream fileReader("Import.txt");
+	std::ifstream fileReader(Settings::getInstance()->importFile);
 
 	if (fileReader.is_open())
 	{
