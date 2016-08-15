@@ -8,9 +8,9 @@
 Settings::Settings()
 {
 	// set hardcoded till settings get serialized
-	this->copy_rot = false;
-	this->copy_size = false;
-	this->copy_tile = false;
+	this->random_rotation = false;
+	this->random_size = false;
+	this->random_tilt = false;
 	this->AutoSelectingMode = true;
 	this->holelinesOn = false;
 	this->FarZ = 1024;

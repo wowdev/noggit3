@@ -307,6 +307,8 @@ void change_settings_window(int oldid, int newid)
 	mainGui->guiWater->hide();
 	mainGui->TextureSwitcher->hide();
   mainGui->objectEditor->hide();
+  mainGui->objectEditor->filename->hide();
+
 	if (!mainGui || !mainGui->TexturePalette)
 		return;
 	mainGui->TexturePalette->hide();
@@ -366,6 +368,7 @@ void change_settings_window(int oldid, int newid)
     mainGui->objectEditor->x((const float)tool_settings_x-220.0f);
     mainGui->objectEditor->y((const float)tool_settings_y);
     mainGui->objectEditor->show();
+    mainGui->objectEditor->filename->show();
 	}
 }
 
@@ -485,34 +488,6 @@ void showHelperModels(UIFrame*, int)
 {
 	mainGui->HelperModels->show();
 }
-
-void showImportModels(UIFrame*, int)
-{
-	mainGui->ModelImport->show();
-}
-
-void SaveObjecttoTXT(UIFrame*, int)
-{
-
-	if (!gWorld->HasSelection())
-		return;
-	string path;
-
-	if (gWorld->IsSelection(eEntry_WMO))
-	{
-		path = gWorld->GetCurrentSelection()->data.wmo->wmo->filename();
-	}
-	else if (gWorld->IsSelection(eEntry_Model))
-	{
-		path = gWorld->GetCurrentSelection()->data.model->model->_filename;
-	}
-
-	std::ofstream f("Import.txt", std::ios_base::app);
-	f << path << std::endl;
-	f.close();
-	mainGui->ModelImport->builModelList();
-}
-
 
 /*!
 \brief Import a new model form a text file or a hard coded one.
@@ -1129,11 +1104,6 @@ void MapView::createGUI()
 	mbar->GetMenu("Edit")->AddMenuItemButton("DEL delete", DeleteSelectedObject, 0);
 	mbar->GetMenu("Edit")->AddMenuItemButton("CTRL + R reset rotation", ResetSelectedObjectRotation, 0);
 	mbar->GetMenu("Edit")->AddMenuItemButton("PAGE DOWN set to ground", SnapSelectedObjectToGround, 0);
-	mbar->GetMenu("Edit")->AddMenuItemSeperator("Model copy options");
-	mbar->GetMenu("Edit")->AddMenuItemToggle("Copy random rotation", &Settings::getInstance()->copy_rot, false);
-	mbar->GetMenu("Edit")->AddMenuItemToggle("Copy random tilt", &Settings::getInstance()->copy_tile, false);
-	mbar->GetMenu("Edit")->AddMenuItemToggle("Copy random size", &Settings::getInstance()->copy_size, false);
-	mbar->GetMenu("Edit")->AddMenuItemToggle("Copy size and rotation", &Settings::getInstance()->copyModelStats, false);
 
 	mbar->GetMenu("Edit")->AddMenuItemSeperator("Options");
 	mbar->GetMenu("Edit")->AddMenuItemToggle("Auto select mode", &Settings::getInstance()->AutoSelectingMode, false);
@@ -1142,8 +1112,6 @@ void MapView::createGUI()
 	mbar->GetMenu("Assist")->AddMenuItemSeperator("Model");
 	mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", InsertObject, 14);
 	mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", InsertObject, 15);
-	mbar->GetMenu("Assist")->AddMenuItemButton("From Text File", showImportModels, 1);
-	mbar->GetMenu("Assist")->AddMenuItemButton("To Text File", SaveObjecttoTXT, 1);
 	mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", showHelperModels, 2);
 	mbar->GetMenu("Assist")->AddMenuItemSeperator("ADT");
 	mbar->GetMenu("Assist")->AddMenuItemButton("Set Area ID", adtSetAreaID, 0);
@@ -1204,10 +1172,9 @@ void MapView::createGUI()
 	mainGui->addChild(mainGui->waterSaveWarning);
 
 	// modelimport
-	mainGui->ModelImport = new UIModelImport(this);
-	mainGui->ModelImport->hide();
-	mainGui->ModelImport->movable(true);
-	mainGui->addChild(mainGui->ModelImport);
+	mainGui->objectEditor->modelImport = new UIModelImport(this);
+  mainGui->objectEditor->modelImport->hide();
+	mainGui->addChild(mainGui->objectEditor->modelImport);
 
 	// helper models
 	mainGui->HelperModels = new UIHelperModels(this);
@@ -1993,7 +1960,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 		if (e->keysym.sym == SDLK_c)
 		{
 			if (Environment::getInstance()->CtrlDown)
-				CopySelectedObject(0, 0);
+        mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
 			else if (Environment::getInstance()->AltDown && Environment::getInstance()->CtrlDown)
 				mainGui->toggleCursorSwitcher();
 			else if (Environment::getInstance()->ShiftDown)
@@ -2032,7 +1999,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			}
 			else if (Environment::getInstance()->CtrlDown)
 			{
-				PasteSelectedObject(0, 0);
+        mainGui->objectEditor->pasteObject(Environment::getInstance()->get_cursor_pos());
 			}
       else if (terrainMode == 9)
       {

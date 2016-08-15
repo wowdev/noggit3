@@ -18,7 +18,6 @@ class UIWindow;
 class UIExitWarning;
 class UICapsWarning;
 class UIWaterSaveWarning;
-class UIModelImport;
 class UIHelperModels;
 class UISlider;
 class UIGradient;
@@ -77,7 +76,6 @@ public:
 	UIExitWarning *escWarning;
 	UICapsWarning *capsWarning;
 	UIWaterSaveWarning *waterSaveWarning;
-	UIModelImport *ModelImport;
 	UIHelperModels *HelperModels;
 
 	explicit UIMapViewGUI(MapView* setMapview);

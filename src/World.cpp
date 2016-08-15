@@ -2120,18 +2120,18 @@ void World::addM2(std::string const& filename, Vec3D newPos, bool copyit)
     newModelis.ldir = Environment::getInstance()->get_clipboard().data.model->ldir;
   }
 
-  if (Settings::getInstance()->copy_rot)
+  if (Settings::getInstance()->random_rotation)
   {
     newModelis.dir.y += (rand() % 360 + 1);
   }
 
-  if (Settings::getInstance()->copy_tile)
+  if (Settings::getInstance()->random_tilt)
   {
     newModelis.dir.x += (rand() % 5 + 1);
     newModelis.dir.z += (rand() % 5 + 1);
   }
 
-  if (Settings::getInstance()->copy_size)
+  if (Settings::getInstance()->random_size)
   {
     newModelis.sc *= misc::randfloat(0.9f, 1.1f);
   }

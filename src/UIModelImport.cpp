@@ -36,9 +36,9 @@ void UIModelImport__TextBoxEnter(UITextBox::Ptr textBox, const std::string& valu
 }
 
 UIModelImport::UIModelImport(MapView *mapview)
-	: UICloseWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f, (float)winWidth, (float)winHeight, "")
+	: UICloseWindow((float)video.xres() - (float)winWidth - 5.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f, (float)winWidth, (float)winHeight, "", true)
 {
-  
+  _mapView = mapview;
 	addChild(new UIText(12.0f, 10.0f, "Select model", app.getArial14(), eJustifyLeft));
   _textBox = new UITextBox(105.0f, 7.0f, 220.0f, 40.0f, UIModelImport__TextBoxEnter);
   addChild(_textBox);
