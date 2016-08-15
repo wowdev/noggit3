@@ -190,8 +190,18 @@ void showPage(int pPage)
 
 void updateTextures()
 {
+  for (OpenGL::Texture *tex : gTexturesInList)
+  {
+    tex->removeReference();
+  }
 	gTexturesInList.clear();
 	gTexturesInList = TextureManager::getAllTexturesMatching(TextureInPalette);
+
+  for (OpenGL::Texture *tex : gTexturesInList)
+  {
+    tex->addReference();
+  }
+
 	showPage(0);
 }
 
@@ -648,6 +658,12 @@ OpenGL::Texture* UITexturingGUI::getSelectedTexture(){
 }
 
 void UITexturingGUI::setSelectedTexture(OpenGL::Texture * t){
+  if (UITexturingGUI::selectedTexture)
+  {
+    UITexturingGUI::selectedTexture->removeReference();
+  }  
+  t->addReference();
+
 	UITexturingGUI::selectedTexture = t;
 }
 //! \todo rework!
