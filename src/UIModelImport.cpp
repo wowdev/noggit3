@@ -16,6 +16,8 @@
 #include "UIListView.h"
 #include "UIButton.h"
 #include "Settings.h"
+#include "Selection.h"
+#include "ModelInstance.h"
 
 #include "Log.h"
 
@@ -50,8 +52,41 @@ UIModelImport::UIModelImport(MapView *mapview)
 void UIModelImport::addTXTModel(int id)
 {
 	// do it
-	_mapView->addModelFromTextSelection(id);
+	//_mapView->addModelFromTextSelection(id);
 
+  std::ifstream fileReader(Settings::getInstance()->importFile);
+  size_t n = 1;
+  std::string line, filepath = "";
+  id -= 99;
+
+  if (fileReader.is_open())
+  {
+    while (!fileReader.eof())
+    {
+      getline(fileReader, line);
+
+      if (id == n++)
+      {
+        filepath = line;
+        break;
+      }
+    }
+  }
+
+  if (line != "")
+  {
+    std::transform(line.begin(), line.end(), line.begin(), ::tolower);
+    std::string m2Ext = ".m2", wmoExt = ".wmo";
+
+    if (std::equal(m2Ext.rbegin(), m2Ext.rend(), line.rbegin()))
+    {
+      _mapView->selectModel(nameEntry(new ModelInstance(line)));
+    }
+    else if (std::equal(wmoExt.rbegin(), wmoExt.rend(), line.rbegin()))
+    {
+      _mapView->selectModel(nameEntry(new ModelInstance(line)));
+    }
+  }
 }
 
 void UIModelImport::builModelList()
@@ -108,3 +143,4 @@ void UIModelImport::resize()
 	x(std::max((video.xres() / 2.0f) - (winWidth / 2.0f), 0.0f));
 	y(std::max((video.yres() / 2.0f) - (winHeight / 2.0f), 0.0f));
 }
+

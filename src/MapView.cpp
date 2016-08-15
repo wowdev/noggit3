@@ -2688,6 +2688,11 @@ void MapView::addModelFromTextSelection(int id)
 	InsertObject(0, id);
 }
 
+void MapView::selectModel(nameEntry entry)
+{
+  mainGui->objectEditor->copy(entry);
+}
+
 void MapView::mouseclick(SDL_MouseButtonEvent *e)
 {
 	if (e->type == SDL_MOUSEBUTTONDOWN)
