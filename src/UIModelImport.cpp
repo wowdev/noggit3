@@ -18,6 +18,7 @@
 #include "Settings.h"
 #include "Selection.h"
 #include "ModelInstance.h"
+#include "WMOInstance.h"
 
 #include "Log.h"
 
@@ -65,10 +66,13 @@ void UIModelImport::addTXTModel(int id)
     {
       getline(fileReader, line);
 
-      if (id == n++)
+      if (line != "" && (line.find('.') != std::string::npos))
       {
-        filepath = line;
-        break;
+        if (id == n++)
+        {
+          filepath = line;
+          break;
+        }
       }
     }
   }
@@ -84,7 +88,7 @@ void UIModelImport::addTXTModel(int id)
     }
     else if (std::equal(wmoExt.rbegin(), wmoExt.rend(), line.rbegin()))
     {
-      _mapView->selectModel(nameEntry(new ModelInstance(line)));
+      _mapView->selectModel(nameEntry(new WMOInstance(line)));
     }
   }
 }
@@ -108,13 +112,14 @@ void UIModelImport::builModelList()
 		{
 			getline(fileReader, line);
 			
-			if (line != "")
+			if (line != "" && (line.find('.') != std::string::npos))
 			{
         std::transform(line.begin(), line.end(), line.begin(), ::tolower);
         std::string diveded = misc::explode(line, "\\");
 
         if (filtered && diveded.find(filter, 0) == std::string::npos)
         {
+          counter++;
           continue;
         }
 
