@@ -30,6 +30,7 @@ Settings::Settings()
       // use default import file if not found in config
       importFile = "Import.txt";
     }
+    config.readInto(this->wmvLogFile, "wmvLogFile");
 	}
 
 }

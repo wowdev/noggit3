@@ -25,6 +25,7 @@ public:
 
 	std::string wodSavePath;
   std::string importFile;
+  std::string wmvLogFile;
 
 private:
 	bool _noAntiAliasing;
