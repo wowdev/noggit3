@@ -519,7 +519,11 @@ void InsertObject(UIFrame*, int id)
 	// is a source file set in config file?
 
 
-  if ((id == 0 || id == 1 || id == 14 || id == 15 || id > 99))
+  if (id == 0 || id == 14 || id == 15 )
+  {
+    importFile = Settings::getInstance()->wmvLogFile;
+  }
+  else if (id == 1 || id > 99)
   {
     importFile = Settings::getInstance()->importFile;
   }
