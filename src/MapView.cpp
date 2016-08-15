@@ -297,8 +297,12 @@ void SaveOrReload(UIFrame*, int pMode)
 
 void change_settings_window(int oldid, int newid)
 {
-	if (!setting_ground || !setting_blur || !settings_paint || !settings_shader || !mainGui || !mainGui->guiWater || !mainGui->objectEditor)
-		return;
+  if ( oldid + 1 == newid || !setting_ground || !setting_blur || !settings_paint 
+    || !settings_shader || !mainGui || !mainGui->guiWater || !mainGui->objectEditor)
+  {
+    return;
+  }
+
 	mainGui->guiWaterTypeSelector->hide();
 	setting_ground->hide();
 	setting_blur->hide();
@@ -308,6 +312,7 @@ void change_settings_window(int oldid, int newid)
 	mainGui->TextureSwitcher->hide();
   mainGui->objectEditor->hide();
   mainGui->objectEditor->filename->hide();
+  mainGui->objectEditor->modelImport->hide();
 
 	if (!mainGui || !mainGui->TexturePalette)
 		return;
