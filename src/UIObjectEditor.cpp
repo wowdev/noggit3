@@ -37,7 +37,7 @@ void SaveObjecttoTXT(UIFrame* f, int)
     path = gWorld->GetCurrentSelection()->data.model->model->_filename;
   }
 
-  std::ofstream stream("Import.txt", std::ios_base::app);
+  std::ofstream stream(Settings::getInstance()->importFile, std::ios_base::app);
   stream << path << std::endl;
   stream.close();
 

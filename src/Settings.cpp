@@ -25,6 +25,11 @@ Settings::Settings()
 		config.readInto(_noAntiAliasing, "noAntiAliasing");
 		config.readInto(this->wodSavePath, "wodSavePath");
     config.readInto(this->tabletMode, "TabletMode");
+    if (!config.readInto(this->importFile, "ImportFile"))
+    {
+      // use default import file if not found in config
+      importFile = "Import.txt";
+    }
 	}
 
 }

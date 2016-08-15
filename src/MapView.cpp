@@ -491,7 +491,7 @@ void showHelperModels(UIFrame*, int)
 
 /*!
 \brief Import a new model form a text file or a hard coded one.
-Imports a model from the import.txt, the wowModelViewer log or just insert some hard coded testing models.
+Imports a model from the import.txt (or the ImportFile from the config), the wowModelViewer log or just insert some hard coded testing models.
 \param id the id switch the import kind
 */
 void InsertObject(UIFrame*, int id)
@@ -514,17 +514,14 @@ void InsertObject(UIFrame*, int id)
 	// is a source file set in config file?
 
 
-	if ((id == 0 || id == 14 || id == 15) && boost::filesystem::exists("noggit.conf"))
-	{
-		ConfigFile config("noggit.conf");
-		config.readInto(importFile, "ImportFile");
-	}
-	else if (id == 1)
-		importFile = "Import.txt"; //  use import.txt in noggit folder!
-	else if (id>99)
-		importFile = "Import.txt"; //  use import.txt in noggit folder!
-	else
-		m2s_to_add.push_back(filesToAdd[id]);
+  if ((id == 0 || id == 1 || id == 14 || id == 15 || id > 99))
+  {
+    importFile = Settings::getInstance()->importFile;
+  }
+  else
+  {
+    m2s_to_add.push_back(filesToAdd[id]);
+  }
 
 	LogDebug << id << "-" << importFile << std::endl;
 

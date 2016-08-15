@@ -24,6 +24,7 @@ public:
 	const bool& noAntiAliasing() const;
 
 	std::string wodSavePath;
+  std::string importFile;
 
 private:
 	bool _noAntiAliasing;
