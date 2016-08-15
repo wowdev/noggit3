@@ -5,6 +5,7 @@
 
 class UIFrame;
 class World;
+class nameEntry;
 
 enum eViewMode
 {
@@ -56,6 +57,7 @@ public:
 	void quitask();
 	void inserObjectFromExtern(int model);
 	void addModelFromTextSelection(int id);
+  void selectModel(nameEntry entry);
 };
 
 
