@@ -75,6 +75,7 @@ void UIModelImport::builModelList()
 			
 			if (line != "")
 			{
+        std::transform(line.begin(), line.end(), line.begin(), ::tolower);
         std::string diveded = misc::explode(line, "\\");
 
         if (filtered && diveded.find(filter, 0) == std::string::npos)
