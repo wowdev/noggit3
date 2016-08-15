@@ -1981,10 +1981,6 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
           Environment::getInstance()->cursorType %= 4;
         }
 			}
-      else if (terrainMode == 9)
-      {
-        mainGui->objectEditor->pasteObject(Environment::getInstance()->get_cursor_pos());
-      }
 		}
 
 
