@@ -549,46 +549,66 @@ void InsertObject(UIFrame*, int id)
 			while (!fileReader.eof())
 			{
 				getline(fileReader, line);
-				if (line.find(".m2") != std::string::npos || line.find(".M2") != std::string::npos || line.find(".MDX") != std::string::npos || line.find(".mdx") != std::string::npos)
+        std::transform(line.begin(), line.end(), line.begin(), ::tolower);
+
+				if (line.find(".m2") != std::string::npos || line.find(".mdx") != std::string::npos)
 				{
 					if (id < 99 || (id - 99) == counter)
 					{
-						// M2 inside line
-						// is it the modelviewer log then cut the log messages out
-						findThis = "Loading model: ";
-						foundString = line.find(findThis);
-						if (foundString != std::string::npos)
-						{
-							// cut path
-							line = line.substr(foundString + findThis.size());
-						}
-
+            if (id == 14)
+            {
+              // M2 inside line
+              // is it the modelviewer log then cut the log messages out
+              findThis = "loading model: ";
+              foundString = line.find(findThis);
+              if (foundString != std::string::npos)
+              {
+                // cut path
+                line = line.substr(foundString + findThis.size());
+              }
+              else
+              {
+                // invalid line
+                continue;
+              }
+            }
 						// swap mdx to m2
 						size_t found = line.rfind(".mdx");
-						if (found != std::string::npos)
-							line.replace(found, 4, ".m2");
-						found = line.rfind(".MDX");
-						if (found != std::string::npos)
-							line.replace(found, 4, ".m2");
+            if (found != std::string::npos)
+            {
+              line.replace(found, 4, ".m2");
+            }
+            
+            line = line.substr(0, line.find(".m2") + 3);
 
 						m2s_to_add.push_back(line);
 						lastModel = line;
 					}
 					counter++;
 				}
-				else if (line.find(".wmo") != std::string::npos || line.find(".WMO") != std::string::npos)
+				else if (line.find(".wmo") != std::string::npos)
 				{
 					if (id < 99 || (id - 99) == counter)
 					{
-						// WMO inside line
-						findThis = "Loading WMO ";
-						foundString = line.find(findThis);
-						// is it the modelviewer log then cut the log messages out
-						if (foundString != std::string::npos)
-						{
-							// cut path
-							line = line.substr(foundString + findThis.size());
-						}
+            if (id == 15)
+            {
+              // WMO inside line
+              findThis = "loading wmo ";
+              foundString = line.find(findThis);
+              // is it the modelviewer log then cut the log messages out
+              if (foundString != std::string::npos)
+              {
+                // cut path
+                line = line.substr(foundString + findThis.size());
+              }
+              else
+              {
+                // invalid line
+                continue;
+              }
+            }
+
+            line = line.substr(0, line.find(".wmo") + 4);
 						wmos_to_add.push_back(line);
 						lastWMO = line;
 					}
@@ -622,7 +642,7 @@ void InsertObject(UIFrame*, int id)
 
 	if (id == 14)
 	{
-		LogError << "M2 Problem 14:" << lastModel << " - " << id << std::endl;
+		LogDebug << "M2 Problem 14:" << lastModel << " - " << id << std::endl;
 		if (lastModel != "")
 		{
 			if (!MPQFile::exists(lastModel))
@@ -637,7 +657,7 @@ void InsertObject(UIFrame*, int id)
 	}
 	else if (id == 15)
 	{
-		LogError << "M2 Problem 15:" << lastModel << " - " << id << std::endl;
+    LogDebug << "Wmo Problem 15:" << lastModel << " - " << id << std::endl;
 		if (lastWMO != "")
 		{
 			if (!MPQFile::exists(lastWMO))
