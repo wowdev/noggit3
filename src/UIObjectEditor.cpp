@@ -21,9 +21,13 @@ void showImportModels(UIFrame* f, int)
   (static_cast<UIObjectEditor *>(f->parent())->modelImport->show());  
 }
 
+void pasteOnCamera(UIFrame* f, int)
+{
+  (static_cast<UIObjectEditor *>(f->parent())->pasteObject(gWorld->camera));
+}
+
 void SaveObjecttoTXT(UIFrame* f, int)
 {
-
   if (!gWorld->HasSelection())
     return;
   std::string path;
@@ -72,12 +76,16 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   filename = new UIStatusBar(0.0f, (float)video.yres() - 60.0f, (float)video.xres(), 30.0f);
   filename->hide();
   mainGui->addChild(filename);
+  
+  addChild(new UIText(190.0f, 2.0f, "Object edit", app.getArial14(), eJustifyCenter));
 
   addChild(new UICheckBox(5.0f, 15.0f, "Random rotation", toggleRandomRotation, 0));
   addChild(new UICheckBox(5.0f, 40.0f, "Random tilt", toggleRandomTilt, 0));
   addChild(new UICheckBox(5.0f, 65.0f, "Random scale", toggleRandomSize, 0)); 
   addChild(new UICheckBox(5.0f, 90.0f, "Copy model size / scale / tilt", toggleCopyModelStats, 0));
-  addChild(new UIText(190.0f, 2.0f, "Object edit", app.getArial14(), eJustifyCenter));
+  
+  addChild(new UIButton(180.0f, 95.0f, 120.0f, 30.0f, "Spawn on camera", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", pasteOnCamera, 0));
+
   addChild(new UIButton(315.0f, 70.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
   addChild(new UIButton(315.0f, 95.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
 }
