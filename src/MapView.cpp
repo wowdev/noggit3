@@ -2038,10 +2038,18 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			else
 			{
 				// toggle terrainMode window
-				if (terrainMode == 2)
-					view_texture_palette(0, 0);
-				else if (terrainMode == 4)
-					mainGui->ZoneIDBrowser->toggleVisibility();
+        if (terrainMode == 2)
+        {
+          view_texture_palette(0, 0);
+        }					
+        else if (terrainMode == 4)
+        {
+          mainGui->ZoneIDBrowser->toggleVisibility();
+        }
+        else if (terrainMode == 9)
+        {
+          mainGui->objectEditor->pasteObject(gWorld->camera);
+        }
 			}
 		}
 
