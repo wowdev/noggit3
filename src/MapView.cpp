@@ -157,6 +157,11 @@ UISlider* paint_brush;
 
 float brushPressure = 0.9f;
 float brushLevel = 255.0f;
+float brushSpraySize = 10.0f;
+float brushSprayPressure = 5.0f;
+bool sprayBrushActive = false;
+
+UICheckBox* toggleSpray;
 
 int terrainMode = 0;
 int saveterrainMode = 0;
@@ -267,6 +272,21 @@ void setTextureBrushRadius(float f)
 void setTextureBrushPressure(float f)
 {
 	brushPressure = f;
+}
+
+void toggleSprayBrush(bool b, int)
+{
+  sprayBrushActive = b;
+}
+
+void setSprayBrushSize(float f)
+{
+  brushSpraySize = std::max(f, 1.0f);
+}
+
+void setSprayBrushPressure(float f)
+{
+  brushSprayPressure = f;
 }
 
 void setTextureBrushLevel(float f)
@@ -1045,7 +1065,7 @@ void MapView::createGUI()
   setting_blur->addChild(flatten_orientation);
 
 	//3D Paint settings UIWindow
-	settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 180.0f);
+	settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 250.0f);
 	settings_paint->hide();
 	settings_paint->movable(true);
 
@@ -1087,11 +1107,26 @@ void MapView::createGUI()
 	settings_paint->addChild(mainGui->S1);
 
 
+  toggleSpray = new UICheckBox(3.0f, 108.0f, "Toggle spray", toggleSprayBrush, 0);
+  settings_paint->addChild(toggleSpray);
+
+  UISlider* spraySizeSlider = new UISlider(6.0f, 150.0f, 170.0f, 40.0f, 0.0001f);
+  spraySizeSlider->setFunc(setSprayBrushSize);
+  spraySizeSlider->setValue(brushSpraySize / 40.0f);
+  spraySizeSlider->setText("Spray size: ");
+  settings_paint->addChild(spraySizeSlider);
+
+  UISlider* sprayPressureSlider = new UISlider(6.0f, 175.0f, 170.0f, 100.0f, 0.0001f);
+  sprayPressureSlider->setFunc(setSprayBrushPressure);
+  sprayPressureSlider->setValue(brushSprayPressure / 100.0f);
+  sprayPressureSlider->setText("Spray pressure (/1k): ");
+  settings_paint->addChild(sprayPressureSlider);
+
 	UIButton* B1;
-	B1 = new UIButton(6.0f, 111.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1);
+	B1 = new UIButton(6.0f, 200.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1);
 	settings_paint->addChild(B1);
 
-  UIButton* rmDup = new UIButton(6.0f, 145.0f, 170.0f, 30.0f, "Remove texture duplicates", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", removeTexDuplicateOnADT, 0);
+  UIButton* rmDup = new UIButton(6.0f, 225.0f, 170.0f, 30.0f, "Remove texture duplicates", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", removeTexDuplicateOnADT, 0);
   settings_paint->addChild(rmDup);
 
 	mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
@@ -1566,7 +1601,17 @@ void MapView::tick(float t, float dt)
 							{
 								if (mainGui->TextureSwitcher->hidden())
 								{
-									gWorld->paintTexture(xPos, zPos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
+                  if (sprayBrushActive)
+                  {
+                    gWorld->sprayTexture(xPos, zPos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), 
+                                         brushSpraySize * TEXDETAILSIZE / 2.0f, brushSprayPressure, 
+                                         UITexturingGUI::getSelectedTexture()
+                                        );
+                  }
+                  else
+                  {
+                    gWorld->paintTexture(xPos, zPos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
+                  }
 								}
 								else
 								{
@@ -2099,6 +2144,11 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
       {
         toggle_flatten->setState(!(Environment::getInstance()->flattenAngleEnabled));
         toggleFlattenAngle(!(Environment::getInstance()->flattenAngleEnabled), 0);
+      }
+      else if (terrainMode == 2)
+      {
+        sprayBrushActive = !sprayBrushActive;
+        toggleSpray->setState(sprayBrushActive);
       }
       else if (terrainMode == 3)
       {
