@@ -1735,8 +1735,6 @@ bool World::sprayTexture(float x, float z, Brush *brush, float strength, float p
   b->setHardness(brush->getHardness());
   b->setRadius(spraySize);
 
-  LogDebug << "size=" << spraySize << std::endl;
-
   for (float pz = z - radius; pz < z + radius; pz += inc)
   {
     for (float px = x - radius; px < x + radius; px += inc)
@@ -1748,6 +1746,7 @@ bool World::sprayTexture(float x, float z, Brush *brush, float strength, float p
     }
   }
 
+  delete b;
   return true;
 }
 
