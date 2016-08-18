@@ -4,8 +4,8 @@
 #include "Noggit.h" // app.getArial14()
 #include "Video.h" // video
 
-const int winWidth = 775;
-const int winHeight = 800;
+const int winWidth = 810;
+const int winHeight = 870;
 
 UIHelp::UIHelp()
 	: UICloseWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f, (float)winWidth, (float)winHeight, "Keybindings", true)
