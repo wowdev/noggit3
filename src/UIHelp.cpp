@@ -102,6 +102,7 @@ UIHelp::UIHelp()
 		"  CTRL + SHIFT + ALT + left mouse - clear all textures on chunk\n"
 		"  SHIFT + left mouse - draw texture or fills if chunk is empty\n"
     "  CTRL + left mouse - open texture picker for the chunk\n"
+    "  T - toggle spray brush\n"
 		"\n"
 		"Holes:\n"
 		"  SHIFT + Left mouse - Add texture\n"

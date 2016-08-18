@@ -1727,6 +1727,30 @@ bool World::paintTexture(float x, float z, Brush *brush, float strength, float p
   return succ;
 }
 
+bool World::sprayTexture(float x, float z, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, OpenGL::Texture* texture)
+{
+  bool succ = false;
+  float radius = brush->getRadius(), inc = spraySize / 4.0f;
+  Brush *b = new Brush();
+  b->setHardness(brush->getHardness());
+  b->setRadius(spraySize);
+
+  LogDebug << "size=" << spraySize << std::endl;
+
+  for (float pz = z - radius; pz < z + radius; pz += inc)
+  {
+    for (float px = x - radius; px < x + radius; px += inc)
+    {
+      if ((sqrt(pow(px - x, 2) + pow(pz - z, 2)) <= radius) && ((rand() % 1000) < sprayPressure))
+      {
+        paintTexture(px, pz, b, strength, pressure, texture);
+      }
+    }
+  }
+
+  return true;
+}
+
 void World::eraseTextures(float x, float z)
 {
   mapIndex->setChanged(x, z);
