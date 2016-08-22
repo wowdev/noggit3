@@ -1922,48 +1922,30 @@ void World::convertMapToBigAlpha()
   if (mapIndex->hasBigAlpha())
     return;
 
-  for (size_t y = 0; y < 64; y++)
+  for (size_t z = 0; z < 64; z++)
   {
     for (size_t x = 0; x < 64; x++)
     {
-      MapTile* tile = mapIndex->loadTile(x, y);
+      bool unload = !mapIndex->tileLoaded(z, x);
+
+      MapTile* tile = mapIndex->loadTile(z, x);
 
       if (tile)
       {
         tile->toBigAlpha();
         tile->saveTile();
-        mapIndex->unsetChanged((int)x, (int)y);
+        mapIndex->unsetChanged((int)z, (int)x);
+
+        if (unload)
+        {
+          mapIndex->unloadTile(x, z);
+        }
       }
     }
   }
 
   mapIndex->setBigAlpha();
-  std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
-
-  MPQFile wdt(filename.str());
-  size_t value;
-  
-  wdt.seek(0xC);
-  wdt.read(&value, 4);
-  assert(value == 'MPHD');
-
-  wdt.seekRelative(0x8);
-  wdt.read(&value, 4);
-
-  value |= 0x4; // set big alpha flag
-
-  memcpy(wdt.getPointer(), &value, 4);
-
-  sExtendableArray wdtContent;
-
-  wdtContent.Extend(wdt.getSize());
-  memcpy(wdtContent.GetPointer<char>(), wdt.getBuffer(), wdt.getSize());
-  
-  *(wdtContent.GetPointer<size_t>(0x14)) = value;
-
-  wdt.setBuffer(wdtContent.GetPointer<char>(), wdt.getSize());
-  wdt.SaveFile();
+  mapIndex->save();  
   
 }
 
