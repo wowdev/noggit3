@@ -1730,24 +1730,20 @@ bool World::paintTexture(float x, float z, Brush *brush, float strength, float p
 bool World::sprayTexture(float x, float z, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, OpenGL::Texture* texture)
 {
   bool succ = false;
-  float radius = brush->getRadius(), inc = spraySize / 4.0f;
-  Brush *b = new Brush();
-  b->setHardness(brush->getHardness());
-  b->setRadius(spraySize);
+  float inc = brush->getRadius() / 4.0f;
 
-  for (float pz = z - radius; pz < z + radius; pz += inc)
+  for (float pz = z - spraySize; pz < z + spraySize; pz += inc)
   {
-    for (float px = x - radius; px < x + radius; px += inc)
+    for (float px = x - spraySize; px < x + spraySize; px += inc)
     {
-      if ((sqrt(pow(px - x, 2) + pow(pz - z, 2)) <= radius) && ((rand() % 1000) < sprayPressure))
+      if ((sqrt(pow(px - x, 2) + pow(pz - z, 2)) <= spraySize) && ((rand() % 1000) < sprayPressure))
       {
-        paintTexture(px, pz, b, strength, pressure, texture);
+        succ |= paintTexture(px, pz, brush, strength, pressure, texture);
       }
     }
   }
 
-  delete b;
-  return true;
+  return succ;
 }
 
 void World::eraseTextures(float x, float z)

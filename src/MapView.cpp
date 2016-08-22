@@ -167,6 +167,7 @@ int terrainMode = 0;
 int saveterrainMode = 0;
 
 Brush textureBrush;
+Brush sprayBrush;
 
 UICursorSwitcher* CursorSwitcher;
 
@@ -262,6 +263,7 @@ void setFlattenOrientation(float f)
 void setTextureBrushHardness(float f)
 {
 	textureBrush.setHardness(f);
+  sprayBrush.setHardness(f);
 }
 
 void setTextureBrushRadius(float f)
@@ -281,7 +283,7 @@ void toggleSprayBrush(bool b, int)
 
 void setSprayBrushSize(float f)
 {
-  brushSpraySize = std::max(f, 1.0f);
+  sprayBrush.setRadius(std::max(f, 1.0f) * TEXDETAILSIZE / 2.0f);
 }
 
 void setSprayBrushPressure(float f)
@@ -1260,6 +1262,8 @@ MapView::MapView(float ah0, float av0)
 
 	lastBrushUpdate = 0;
 	textureBrush.init();
+  sprayBrush.init();
+  setSprayBrushSize(5.0f);
 
 	look = false;
 	mViewMode = eViewMode_3D;
@@ -1603,8 +1607,8 @@ void MapView::tick(float t, float dt)
 								{
                   if (sprayBrushActive)
                   {
-                    gWorld->sprayTexture(xPos, zPos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), 
-                                         brushSpraySize * TEXDETAILSIZE / 2.0f, brushSprayPressure, 
+                    gWorld->sprayTexture(xPos, zPos, &sprayBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), 
+                                         textureBrush.getRadius(), brushSprayPressure, 
                                          UITexturingGUI::getSelectedTexture()
                                         );
                   }
