@@ -522,6 +522,13 @@ uint32_t MapIndex::getFlag(size_t z, size_t x)
 	return mTiles[z][x].flags;
 }
 
+void MapIndex::setBigAlpha() 
+{
+  mBigAlpha = true;
+  mphd.flags |= 4;
+}
+
+
 uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename)
 {
     uint32_t highGUID = 0;

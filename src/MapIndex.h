@@ -67,7 +67,7 @@ public:
 	MapTile* getTile(size_t z, size_t x);
 	uint32_t getFlag(size_t z, size_t x);
 
-  void setBigAlpha() { mBigAlpha = true; }
+  void setBigAlpha();
   bool hasBigAlpha() const { return mBigAlpha; }
 
 private:
