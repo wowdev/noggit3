@@ -154,6 +154,8 @@ UISlider* flatten_orientation;
 float flattenOrientation = 0.0f;
 
 UISlider* paint_brush;
+UISlider* spray_size;
+UISlider* spray_pressure;
 
 float brushPressure = 0.9f;
 float brushLevel = 255.0f;
@@ -283,6 +285,7 @@ void toggleSprayBrush(bool b, int)
 
 void setSprayBrushSize(float f)
 {
+  brushSpraySize = f;
   sprayBrush.setRadius(std::max(f, 1.0f) * TEXDETAILSIZE / 2.0f);
 }
 
@@ -1090,11 +1093,11 @@ void MapView::createGUI()
 
 	settings_paint->addChild(mainGui->G1);
 
-	mainGui->S1 = new UISlider(6.0f, 33.0f, 145.0f, 1.0f, 0.0f);
-	mainGui->S1->setFunc(setTextureBrushHardness);
-	mainGui->S1->setValue(textureBrush.getHardness());
-	mainGui->S1->setText("Hardness: ");
-	settings_paint->addChild(mainGui->S1);
+	mainGui->paintHardnessSlider = new UISlider(6.0f, 33.0f, 145.0f, 1.0f, 0.0f);
+	mainGui->paintHardnessSlider->setFunc(setTextureBrushHardness);
+	mainGui->paintHardnessSlider->setValue(textureBrush.getHardness());
+	mainGui->paintHardnessSlider->setText("Hardness: ");
+	settings_paint->addChild(mainGui->paintHardnessSlider);
 
 	paint_brush = new UISlider(6.0f, 59.0f, 145.0f, 100.0f, 0.00001f);
 	paint_brush->setFunc(setTextureBrushRadius);
@@ -1102,27 +1105,27 @@ void MapView::createGUI()
 	paint_brush->setText("Radius: ");
 	settings_paint->addChild(paint_brush);
 
-	mainGui->S1 = new UISlider(6.0f, 85.0f, 145.0f, 0.99f, 0.01f);
-	mainGui->S1->setFunc(setTextureBrushPressure);
-	mainGui->S1->setValue(brushPressure);
-	mainGui->S1->setText("Pressure: ");
-	settings_paint->addChild(mainGui->S1);
+	mainGui->paintPressureSlider = new UISlider(6.0f, 85.0f, 145.0f, 0.99f, 0.01f);
+	mainGui->paintPressureSlider->setFunc(setTextureBrushPressure);
+	mainGui->paintPressureSlider->setValue(brushPressure);
+	mainGui->paintPressureSlider->setText("Pressure: ");
+	settings_paint->addChild(mainGui->paintPressureSlider);
 
 
   toggleSpray = new UICheckBox(3.0f, 108.0f, "Toggle spray", toggleSprayBrush, 0);
   settings_paint->addChild(toggleSpray);
 
-  UISlider* spraySizeSlider = new UISlider(6.0f, 150.0f, 170.0f, 40.0f, 0.0001f);
-  spraySizeSlider->setFunc(setSprayBrushSize);
-  spraySizeSlider->setValue(brushSpraySize / 40.0f);
-  spraySizeSlider->setText("Spray size: ");
-  settings_paint->addChild(spraySizeSlider);
+  spray_size = new UISlider(6.0f, 150.0f, 170.0f, 40.0f, 0.0001f);
+  spray_size->setFunc(setSprayBrushSize);
+  spray_size->setValue(brushSpraySize / 40.0f);
+  spray_size->setText("Spray size: ");
+  settings_paint->addChild(spray_size);
 
-  UISlider* sprayPressureSlider = new UISlider(6.0f, 175.0f, 170.0f, 100.0f, 0.0001f);
-  sprayPressureSlider->setFunc(setSprayBrushPressure);
-  sprayPressureSlider->setValue(brushSprayPressure / 100.0f);
-  sprayPressureSlider->setText("Spray pressure (/1k): ");
-  settings_paint->addChild(sprayPressureSlider);
+  spray_pressure = new UISlider(6.0f, 175.0f, 170.0f, 100.0f, 0.0001f);
+  spray_pressure->setFunc(setSprayBrushPressure);
+  spray_pressure->setValue(brushSprayPressure / 100.0f);
+  spray_pressure->setText("Spray pressure (/1k): ");
+  settings_paint->addChild(spray_pressure);
 
 	UIButton* B1;
 	B1 = new UIButton(6.0f, 200.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1);
@@ -1263,7 +1266,7 @@ MapView::MapView(float ah0, float av0)
 	lastBrushUpdate = 0;
 	textureBrush.init();
   sprayBrush.init();
-  setSprayBrushSize(5.0f);
+  setSprayBrushSize(10.0f);
 
 	look = false;
 	mViewMode = eViewMode_3D;
@@ -1321,22 +1324,14 @@ void MapView::tick(float t, float dt)
 			case 0:
 				if (groundTabletControlSelect == 1) 
 				{
-					groundBrushRadius = (float)app.pressure / 20.48f;
-					if (groundBrushRadius > 1000.0f)
-						groundBrushRadius = 1000.0f;
-					else if (groundBrushRadius < 0.01f)
-						groundBrushRadius = 0.01f;
+          groundBrushRadius = std::max(0.0f, std::min(1000.0f, (float)app.pressure / 20.48f));
 					ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
 				}
 				break;
 			case 1:
 				if (groundTabletControlSelect == 1)
 				{
-					groundBrushSpeed = (float)app.pressure / 204.8f;
-					if (groundBrushSpeed > 10.0f)
-						groundBrushSpeed = 10.0f;
-					else if (groundBrushSpeed < 0.01f)
-						groundBrushSpeed = 0.01f;
+          groundBrushSpeed = std::max(0.0f, std::min(10.0f, (float)app.pressure / 204.8f));
 					ground_brush_speed->setValue(groundBrushSpeed / 10.0f);
 				}
 				break;
@@ -1344,29 +1339,17 @@ void MapView::tick(float t, float dt)
 			break;
 
 		case 1:
-			blurBrushRadius = app.pressure / 20;
-			if (blurBrushRadius > 1000.0f)
-				blurBrushRadius = 1000.0f;
-			else if (blurBrushRadius < 0.01f)
-				blurBrushRadius = 0.01f;
+      blurBrushRadius = std::max(0.0f, std::min(1000.0f, (float)app.pressure / 20.0f));
 			blur_brush->setValue(blurBrushRadius / 1000.0f);
 			break;
 		case 2:
-			mainGui->S1->setValue((float)app.pressure / 2048.0f);
-			if (mainGui->S1->value > 1.0f)
-				mainGui->S1->setValue(1.0f);
-			else if (mainGui->S1->value < 0.0001f)
-				mainGui->S1->setValue(0.0001f);
-			mainGui->S1->setValue(mainGui->S1->value);
+      mainGui->paintPressureSlider->setValue(std::max(0.0f, std::min(1.0f, (float)app.pressure / 2048.0f)));
+			mainGui->paintPressureSlider->setValue(mainGui->paintPressureSlider->value);
 			break;
 		case 8:
 			if (shaderTabletControlSelect == 1)
 			{
-				shaderRadius = (float)app.pressure / 20.48f;
-				if (shaderRadius > 1000.0f)
-					shaderRadius = 1000.0f;
-				else if (shaderRadius < 0.01f)
-					shaderRadius = 0.01f;
+        shaderRadius = std::max(0.0f, std::min(1000.0f, (float)app.pressure / 20.48f));
 				shader_radius->setValue(shaderRadius / 1000.0f);
 			}
 			
@@ -2311,28 +2294,16 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 				switch (terrainMode)
 				{
 				case 0:
-					groundBrushRadius += 0.01f;
-					if (groundBrushRadius > 1000.0f)
-						groundBrushRadius = 1000.0f;
-					else if (groundBrushRadius < 0.0005f)
-						groundBrushRadius = 0.0005f;
-					ground_brush_radius->setValue(groundBrushRadius / 1000);
+          groundBrushRadius = std::min(1000.0f, groundBrushRadius + 0.01f);
+					ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
 					break;
 				case 1:
-					blurBrushRadius += 0.01f;
-					if (blurBrushRadius > 1000.0f)
-						blurBrushRadius = 1000.0f;
-					else if (blurBrushRadius < 0.01f)
-						blurBrushRadius = 0.01f;
-					blur_brush->setValue(blurBrushRadius / 1000);
+          blurBrushRadius = std::min(1000.0f, blurBrushRadius + 0.01f);
+					blur_brush->setValue(blurBrushRadius / 1000.0f);
 					break;
 				case 2:
-					textureBrush.setRadius(textureBrush.getRadius() + 0.1f);
-					if (textureBrush.getRadius() > 100.0f)
-						textureBrush.setRadius(100.0f);
-					else if (textureBrush.getRadius() < 0.1f)
-						textureBrush.setRadius(0.1f);
-					paint_brush->setValue(textureBrush.getRadius() / 100);
+					textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
+					paint_brush->setValue(textureBrush.getRadius() / 100.0f);
 					break;
 				case 6:
 					int x = (int)(static_cast<int>(gWorld->camera.x) / TILESIZE);
@@ -2377,27 +2348,15 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 				switch (terrainMode)
 				{
 				case 0:
-					groundBrushRadius -= 0.01f;
-					if (groundBrushRadius > 1000.0f)
-						groundBrushRadius = 1000.0f;
-					else if (groundBrushRadius < 0.0005f)
-						groundBrushRadius = 0.0005f;
-					ground_brush_radius->setValue(groundBrushRadius / 1000);
+					groundBrushRadius = std::max(0.0f, groundBrushRadius - 0.01f);
+					ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
 					break;
 				case 1:
-					blurBrushRadius -= 0.01f;
-					if (blurBrushRadius > 1000.0f)
-						blurBrushRadius = 1000.0f;
-					else if (blurBrushRadius < 0.01f)
-						blurBrushRadius = 0.01f;
+          blurBrushRadius = std::max(0.0f, blurBrushRadius - 0.01f);
 					blur_brush->setValue(blurBrushRadius / 1000);
 					break;
 				case 2:
-					textureBrush.setRadius(textureBrush.getRadius() - 0.1f);
-					if (textureBrush.getRadius() > 100.0f)
-						textureBrush.setRadius(100.0f);
-					else if (textureBrush.getRadius() < 0.1f)
-						textureBrush.setRadius(0.1f);
+					textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
 					paint_brush->setValue(textureBrush.getRadius() / 100);
 					break;
 				case 6:
@@ -2665,40 +2624,34 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
 		rv = e->yrel / YSENS * 5.0f;
 	}
 
+  if (rightMouse && Environment::getInstance()->AltDown)
+  {
+    if (terrainMode == 2)
+    {
+      float hardness = std::max(0.0f, std::min(1.0f, textureBrush.getHardness() + e->xrel / 300.0f));
+      setTextureBrushHardness(hardness);
+      mainGui->paintHardnessSlider->setValue(hardness);
+    }
+  }
+
 	if (leftMouse && Environment::getInstance()->AltDown)
 	{
 		switch (terrainMode)
 		{
 		case 0:
-			groundBrushRadius += e->xrel / XSENS;
-			if (groundBrushRadius > 1000.0f)
-				groundBrushRadius = 1000.0f;
-			else if (groundBrushRadius < 0.01f)
-				groundBrushRadius = 0.01f;
+      groundBrushRadius = std::max(0.0f, std::min(1000.0f, groundBrushRadius + e->xrel / XSENS));
 			ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
 			break;
 		case 1:
-			blurBrushRadius += e->xrel / XSENS;
-			if (blurBrushRadius > 1000.0f)
-				blurBrushRadius = 1000.0f;
-			else if (blurBrushRadius < 0.01f)
-				blurBrushRadius = 0.01f;
+      blurBrushRadius = std::max(0.0f, std::min(1000.0f, blurBrushRadius + e->xrel / XSENS));
 			blur_brush->setValue(blurBrushRadius / 1000.0f);
 			break;
 		case 2:
-			textureBrush.setRadius(textureBrush.getRadius() + e->xrel / XSENS);
-			if (textureBrush.getRadius() > 100.0f)
-				textureBrush.setRadius(100.0f);
-			else if (textureBrush.getRadius() < 0.1f)
-				textureBrush.setRadius(0.1f);
+      textureBrush.setRadius(std::max(0.0f, std::min(100.0f, textureBrush.getRadius() + e->xrel / XSENS)));
 			paint_brush->setValue(textureBrush.getRadius() / 100.0f);
 			break;
 		case 8:
-			shaderRadius += e->xrel / XSENS;
-			if (shaderRadius > 1000.0f)
-				shaderRadius = 1000.0f;
-			else if (shaderRadius < 0.01f)
-				shaderRadius = 0.01f;
+      shaderRadius = std::max(0.0f, std::min(1000.0f, shaderRadius + e->xrel / XSENS));
 			shader_radius->setValue(shaderRadius / 1000.0f);
 			break;
 		}
@@ -2709,35 +2662,18 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
 		switch (terrainMode)
 		{
 		case 0:
-			groundBrushSpeed += e->xrel / 30.0f;
-			if (groundBrushSpeed > 10.0f)
-				groundBrushSpeed = 10.0f;
-			else if (groundBrushSpeed < 0.01f)
-				groundBrushSpeed = 0.01f;
+      groundBrushSpeed = std::max(0.0f, std::min(10.0f, groundBrushSpeed + e->xrel / 30.0f));
 			ground_brush_speed->setValue(groundBrushSpeed / 10.0f);
 			break;
 		case 1:
-			groundBlurSpeed += e->xrel / 30.0f;
-			if (groundBlurSpeed > 10.0f)
-				groundBlurSpeed = 10.0f;
-			else if (groundBlurSpeed < 0.01f)
-				groundBlurSpeed = 0.01f;
+      groundBlurSpeed = std::max(0.0f, std::min(10.0f, groundBlurSpeed + e->xrel / 30.0f));
 			ground_blur_speed->setValue(groundBlurSpeed / 10.0f);
 			break;
 		case 2:
-			mainGui->S1->setValue(mainGui->S1->value + e->xrel / 300.0f);
-			if (mainGui->S1->value > 1.0f)
-				mainGui->S1->setValue(1.0f);
-			else if (mainGui->S1->value < 0.0001f)
-				mainGui->S1->setValue(0.0001f);
-			mainGui->S1->setValue(mainGui->S1->value);
+			mainGui->paintPressureSlider->setValue(std::max(0.0f, std::min(1.0f, mainGui->paintPressureSlider->value + e->xrel / 300.0f)));
 			break;
     case 8:
-      shaderSpeed += e->xrel / 30.0f;
-      if (shaderSpeed > 10.0f)
-        shaderSpeed = 10.0f;
-      else if (shaderSpeed < 0.0f)
-        shaderSpeed = 0.0f;
+      shaderSpeed = std::max(0.0f, std::min(10.0f, shaderSpeed + e->xrel / 30.0f));
       shader_speed->setValue(shaderSpeed / 10.0f);
       break;
 		}
@@ -2813,6 +2749,24 @@ void MapView::mouseclick(SDL_MouseButtonEvent *e)
           flatten_angle->setValue(flattenAngle / 90);
         }
       }
+      else if (terrainMode == 2)
+      {
+        if (Environment::getInstance()->SpaceDown)
+        {
+          brushLevel = std::min(255.0f, brushLevel + 10.0f);
+          mainGui->G1->setValue((255.0f - brushLevel) / 255.0f);
+        }
+        else if (Environment::getInstance()->AltDown)
+        {
+          brushSpraySize = std::min(40.0f, brushSpraySize + 2.0f);
+          spray_size->setValue(brushSpraySize / 40.0f);
+        }
+        else if (Environment::getInstance()->ShiftDown)
+        {
+          brushSprayPressure = std::min(100.0f, brushSprayPressure + 2.5f);
+          spray_pressure->setValue(brushSprayPressure / 100.0f);
+        }
+      }
       break;
     case SDL_BUTTON_WHEELDOWN:
       if (terrainMode == 1)
@@ -2830,6 +2784,24 @@ void MapView::mouseclick(SDL_MouseButtonEvent *e)
           if (flattenAngle < 0.0f)
             flattenAngle = 0.0f;
           flatten_angle->setValue(flattenAngle / 90);
+        }
+      }
+      else if (terrainMode == 2)
+      {
+        if (Environment::getInstance()->SpaceDown)
+        {
+          brushLevel = std::max(0.0f, brushLevel - 10.0f);
+          mainGui->G1->setValue((255.0f - brushLevel) / 255.0f);
+        }
+        else if (Environment::getInstance()->AltDown)
+        {
+          brushSpraySize = std::max(1.0f, brushSpraySize - 2.0f);
+          spray_size->setValue(brushSpraySize / 40.0f);
+        }
+        else if (Environment::getInstance()->ShiftDown)
+        {
+          brushSprayPressure = std::max(0.0f, brushSprayPressure - 2.5f);
+          spray_pressure->setValue(brushSprayPressure / 100.0f);
         }
       }
       break;

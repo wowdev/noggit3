@@ -45,7 +45,8 @@ public:
 	// position of the tools window(s)
 	int tool_settings_x;
 	int tool_settings_y;
-	UISlider* S1;
+	UISlider* paintPressureSlider;
+  UISlider* paintHardnessSlider;
 	UIGradient *G1;
 
 	// Editor paramter
