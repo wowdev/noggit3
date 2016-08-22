@@ -5,7 +5,7 @@
 #include "Video.h" // video
 
 const int winWidth = 810;
-const int winHeight = 870;
+const int winHeight = 880;
 
 UIHelp::UIHelp()
 	: UICloseWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f, (float)winWidth, (float)winHeight, "Keybindings", true)
@@ -60,6 +60,15 @@ UIHelp::UIHelp()
 		"  B / N - slower/faster time\n"
 		"  SHIFT + +/-: fog distance when no model is selected\n"
 		"\n"
+    "Holes:\n"
+    "  SHIFT + Left mouse - Add texture\n"
+    "  CTRL + Left mouse  - Remove texture\n"
+    "  T - Remove all holes on ADT\n"
+    "  ALT + T - Remove all ground on ADT\n"
+    "\n"
+    "Impassible Flags:\n"
+    "  SHIFT + Left mouse - Paint flag\n"
+    "  CTRL + Left mouse  - Clear flag\n"
 		, app.getArial14(), eJustifyLeft)
 		);
 
@@ -103,22 +112,17 @@ UIHelp::UIHelp()
 		"  SHIFT + left mouse - draw texture or fills if chunk is empty\n"
     "  CTRL + left mouse - open texture picker for the chunk\n"
     "  T - toggle spray brush\n"
+    "  ALT + left mouse + horizontal movement - change radius\n"
+    "  ALT + right mouse + horizontal movement - change hardness\n"
+    "  SPACE + mouse wheel - change strength (gradient)\n"
+    "  ALT + mouse wheel - change spray radius\n"
+    "  SHIFT + mouse wheel - change spray pressure\n"
 		"\n"
-		"Holes:\n"
-		"  SHIFT + Left mouse - Add texture\n"
-		"  CTRL + Left mouse  - Remove texture\n"
-    "  T - Remove all holes on ADT\n"
-    "  ALT + T - Remove all ground on ADT\n"
-		"\n"
-		"AreaID:\n"
-		"  X - Show browser with existing AreaID in AreaTable.dbc\n"
-		"      Click show sub-zones\n"
-		"  CTRL + Left mouse  - Pick existing AreaID\n"
-		"  SHIFT + Left mouse - Paint selected AreaID\n"
-		"\n"
-		"Impassible Flags:\n"
-		"  SHIFT + Left mouse - Paint flag\n"
-		"  CTRL + Left mouse  - Clear flag\n"
+    "AreaID:\n"
+    "  X - Show browser with existing AreaID in AreaTable.dbc\n"
+    "      Click show sub-zones\n"
+    "  CTRL + Left mouse  - Pick existing AreaID\n"
+    "  SHIFT + Left mouse - Paint selected AreaID\n"
 		, app.getArial14(), eJustifyLeft)
 		);
 }
