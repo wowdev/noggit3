@@ -2297,9 +2297,36 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 
 
 
-		// draw fog
-		if (e->keysym.sym == SDLK_f)
-			gWorld->drawfog = !gWorld->drawfog;
+    if (e->keysym.sym == SDLK_f)
+    {
+      if (terrainMode == 9)
+      {
+        if (gWorld->HasSelection())
+        {
+          Vec3D pos = Environment::getInstance()->get_cursor_pos();
+          nameEntry* selection = gWorld->GetCurrentSelection();
+
+          if (selection->type == eEntry_Model)
+          {
+            gWorld->mapIndex->setChanged(selection->data.model->pos.x, selection->data.model->pos.z);
+            selection->data.model->pos = pos;
+            gWorld->mapIndex->setChanged(pos.x, pos.z);
+          }
+          else if(selection->type == eEntry_WMO)
+          {
+            gWorld->mapIndex->setChanged(selection->data.wmo->pos.x, selection->data.wmo->pos.z);
+            selection->data.wmo->pos = pos;
+            selection->data.wmo->recalcExtents();
+            gWorld->mapIndex->setChanged(pos.x, pos.z);
+          }
+        }
+      }
+      else // draw fog
+      {
+        gWorld->drawfog = !gWorld->drawfog;
+      }      
+    }
+			
 
 		// reload a map tile STEFF out because of UID recalc. reload could kill all.
 		//if( e->keysym.sym == SDLK_j && Environment::getInstance()->ShiftDown )
