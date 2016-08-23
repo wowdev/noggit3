@@ -1440,9 +1440,19 @@ void MapView::tick(float t, float dt)
 				if (Selection->type == eEntry_WMO)
 				{
 					gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x, Selection->data.wmo->pos.z); // before move
-					ObjPos.x = 80.0f;
-					Selection->data.wmo->pos += mv * dirUp * ObjPos.x;
-					Selection->data.wmo->pos -= mh * dirRight * ObjPos.x;
+
+          if (Environment::getInstance()->ShiftDown)
+          {
+            ObjPos.x = 80.0f;
+            Selection->data.wmo->pos += mv * dirUp * ObjPos.x;
+            Selection->data.wmo->pos -= mh * dirRight * ObjPos.x;
+          }
+          else
+          {
+            Selection->data.wmo->pos.x = Environment::getInstance()->Pos3DX;
+            Selection->data.wmo->pos.z = Environment::getInstance()->Pos3DZ;
+          }
+
 					Selection->data.wmo->recalcExtents();
 					gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x, Selection->data.wmo->pos.z); // after move. If moved to another ADT
 				}
@@ -1463,9 +1473,18 @@ void MapView::tick(float t, float dt)
 					else
 					{
 						gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z); // before move
-						ObjPos.x = 80.0f;
-						Selection->data.model->pos += mv * dirUp * ObjPos.x;
-						Selection->data.model->pos -= mh * dirRight * ObjPos.x;
+            if (Environment::getInstance()->ShiftDown)
+            {
+              ObjPos.x = 80.0f;
+              Selection->data.model->pos += mv * dirUp * ObjPos.x;
+              Selection->data.model->pos -= mh * dirRight * ObjPos.x;
+            }
+            else
+            {
+              Selection->data.model->pos.x = Environment::getInstance()->Pos3DX;
+              Selection->data.model->pos.z = Environment::getInstance()->Pos3DZ;
+            }
+
 						gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z); // after move. If moved to another ADT
 					}
 				}

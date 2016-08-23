@@ -900,39 +900,32 @@ void World::draw()
 
   glPopMatrix();
 
+  GLint viewport[4];
+  GLdouble modelview[16];
+  GLdouble projection[16];
+  GLfloat winX, winY, winZ;
+  GLdouble posX, posY, posZ;
+
+  glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+  glGetDoublev(GL_PROJECTION_MATRIX, projection);
+  glGetIntegerv(GL_VIEWPORT, viewport);
+
+
+  winX = (float)Environment::getInstance()->screenX;
+  winY = (float)viewport[3] - (float)Environment::getInstance()->screenY;
+
+  glReadPixels(Environment::getInstance()->screenX, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+  gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+
+  Environment::getInstance()->Pos3DX = (float)posX;
+  Environment::getInstance()->Pos3DY = (float)posY;
+  Environment::getInstance()->Pos3DZ = (float)posZ;
+
+
   // Selection circle
   if (this->IsSelection(eEntry_MapChunk))
   {
-    //int poly = this->GetCurrentSelectedTriangle();
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    //nameEntry * Selection = gWorld->GetCurrentSelection();
-
-    //if( !Selection->data.mapchunk->strip )
-    // Selection->data.mapchunk->initStrip();
-
-
-    GLint viewport[4];
-    GLdouble modelview[16];
-    GLdouble projection[16];
-    GLfloat winX, winY, winZ;
-    GLdouble posX, posY, posZ;
-
-    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-    glGetDoublev(GL_PROJECTION_MATRIX, projection);
-    glGetIntegerv(GL_VIEWPORT, viewport);
-
-
-    winX = (float)Environment::getInstance()->screenX;
-    winY = (float)viewport[3] - (float)Environment::getInstance()->screenY;
-
-    glReadPixels(Environment::getInstance()->screenX, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
-    gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-
-    Environment::getInstance()->Pos3DX = (float)posX;
-    Environment::getInstance()->Pos3DY = (float)posY;
-    Environment::getInstance()->Pos3DZ = (float)posZ;
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);    
 
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     glDisable(GL_CULL_FACE);
