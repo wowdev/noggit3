@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 
+#include "Environment.h"
+#include "ModelInstance.h"
 #include "Noggit.h" // fonts
 #include "Settings.h"
 #include "UIButton.h"
@@ -102,12 +104,12 @@ void UIObjectEditor::copy(nameEntry entry)
 {
   if (entry.type == eEntry_Model)
   {
-    selected = entry;
+    selected = nameEntry(new ModelInstance(entry.data.model->model->_filename));
     setModelName(entry.data.model->model->_filename);
   }
   else if (entry.type == eEntry_WMO)
   {
-    selected = entry;
+    selected = nameEntry(new WMOInstance(entry.data.wmo->wmo->_filename));
     setModelName(entry.data.wmo->wmo->_filename);
   }
 
