@@ -84,9 +84,12 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   addChild(new UICheckBox(5.0f, 15.0f, "Random rotation", toggleRandomRotation, 0));
   addChild(new UICheckBox(5.0f, 40.0f, "Random tilt", toggleRandomTilt, 0));
   addChild(new UICheckBox(5.0f, 65.0f, "Random scale", toggleRandomSize, 0)); 
-  addChild(new UICheckBox(5.0f, 90.0f, "Copy model size / scale / tilt", toggleCopyModelStats, 0));
+
+  UICheckBox* copyCB = new UICheckBox(5.0f, 90.0f, "Copy model rotation / scale / tilt", toggleCopyModelStats, 0);
+  copyCB->setState(Settings::getInstance()->copyModelStats);
+  addChild(copyCB);
   
-  addChild(new UIButton(180.0f, 95.0f, 120.0f, 30.0f, "Spawn on camera", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", pasteOnCamera, 0));
+  addChild(new UIButton(190.0f, 95.0f, 120.0f, 30.0f, "Spawn on camera", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", pasteOnCamera, 0));
 
   addChild(new UIButton(315.0f, 70.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
   addChild(new UIButton(315.0f, 95.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
@@ -105,14 +108,24 @@ void UIObjectEditor::copy(nameEntry entry)
   if (entry.type == eEntry_Model)
   {
     selected = nameEntry(new ModelInstance(entry.data.model->model->_filename));
+    selected.data.model->sc = entry.data.model->sc;
+    selected.data.model->dir = entry.data.model->dir;
+    selected.data.model->ldir = entry.data.model->ldir;
     setModelName(entry.data.model->model->_filename);
   }
   else if (entry.type == eEntry_WMO)
   {
     selected = nameEntry(new WMOInstance(entry.data.wmo->wmo->_filename));
+    selected.data.wmo->dir = entry.data.wmo->dir;
     setModelName(entry.data.wmo->wmo->_filename);
   }
+  else
+  {
+    Environment::getInstance()->clear_clipboard();
+    return;
+  }
 
+  Environment::getInstance()->set_clipboard(&selected);
 }
 
 void UIObjectEditor::setModelName(const std::string &name)

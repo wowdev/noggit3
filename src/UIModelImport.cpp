@@ -84,7 +84,9 @@ void UIModelImport::addTXTModel(int id)
 
     if (std::equal(m2Ext.rbegin(), m2Ext.rend(), line.rbegin()))
     {
-      _mapView->selectModel(nameEntry(new ModelInstance(line)));
+      ModelInstance* mi = new ModelInstance(line);
+      mi->sc = 1.0f;
+      _mapView->selectModel(nameEntry(mi));
     }
     else if (std::equal(wmoExt.rbegin(), wmoExt.rend(), line.rbegin()))
     {
