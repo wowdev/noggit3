@@ -17,7 +17,7 @@
 void updateRotationX(UITextBox::Ptr textBox, const std::string& value)
 {
   UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->getSelection())
+  if (editor->hasSelection())
   {
     float v = std::min(180.0f, std::max(-180.0f, (float)std::atof(value.c_str())));
     textBox->value(misc::floatToStr(v, 3));
@@ -29,7 +29,7 @@ void updateRotationX(UITextBox::Ptr textBox, const std::string& value)
 void updateRotationZ(UITextBox::Ptr textBox, const std::string& value)
 {
   UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->getSelection())
+  if (editor->hasSelection())
   {
     float v = std::min(180.0f, std::max(-180.0f, (float)std::atof(value.c_str())));
     textBox->value(misc::floatToStr(v, 3));
@@ -41,7 +41,7 @@ void updateRotationZ(UITextBox::Ptr textBox, const std::string& value)
 void updateRotationY(UITextBox::Ptr textBox, const std::string& value)
 {
   UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->getSelection())
+  if (editor->hasSelection())
   {
     float v = std::min(360.0f, std::max(0.0f, (float)std::atof(value.c_str())));
     textBox->value(misc::floatToStr(v, 3));
@@ -53,7 +53,7 @@ void updateRotationY(UITextBox::Ptr textBox, const std::string& value)
 void updatePosX(UITextBox::Ptr textBox, const std::string& value)
 {
   UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->getSelection())
+  if (editor->hasSelection())
   {
     float v = std::atof(value.c_str());
     textBox->value(misc::floatToStr(v, 5));
@@ -65,7 +65,7 @@ void updatePosX(UITextBox::Ptr textBox, const std::string& value)
 void updatePosZ(UITextBox::Ptr textBox, const std::string& value)
 {
   UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->getSelection())
+  if (editor->hasSelection())
   {
     float v = std::atof(value.c_str());
     textBox->value(misc::floatToStr(v, 5));
@@ -77,7 +77,7 @@ void updatePosZ(UITextBox::Ptr textBox, const std::string& value)
 void updatePosY(UITextBox::Ptr textBox, const std::string& value)
 {
   UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
-  if (editor->getSelection())
+  if (editor->hasSelection())
   {
     float v = std::atof(value.c_str());
     textBox->value(misc::floatToStr(v, 5));
@@ -86,20 +86,36 @@ void updatePosY(UITextBox::Ptr textBox, const std::string& value)
   }
 }
 
+void updateScale(UITextBox::Ptr textBox, const std::string& value)
+{
+  UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
+  if (editor->hasSelection() && !editor->isWmo())
+  {
+    float v = std::atof(value.c_str());
+    textBox->value(misc::floatToStr(v, 2));
+
+    *editor->scale = v;
+  }
+}
+
 
 UIRotationEditor::UIRotationEditor(float x, float y)
-   : UIWindow(x, y, 120.0f, 225.0f),
-   rotationVect(nullptr),
-   posVect(nullptr),
-   selection(false)
+  : UIWindow(x, y, 120.0f, 270.0f),
+  rotationVect(nullptr),
+  posVect(nullptr),
+  scale(nullptr),
+  _selection(false),
+  _wmo(false)
 { 
-  tbRotationX = new UITextBox(20.0f, 25.0f, 95.0f, 35.0f, app.getArial12(), updateRotationX);
-  tbRotationZ = new UITextBox(20.0f, 55.0f, 95.0f, 35.0f, app.getArial12(), updateRotationZ);
-  tbRotationY = new UITextBox(20.0f, 98.0f, 95.0f, 35.0f, app.getArial12(), updateRotationY);
+  _tbRotationX = new UITextBox(20.0f, 25.0f, 95.0f, 35.0f, app.getArial12(), updateRotationX);
+  _tbRotationZ = new UITextBox(20.0f, 55.0f, 95.0f, 35.0f, app.getArial12(), updateRotationZ);
+  _tbRotationY = new UITextBox(20.0f, 98.0f, 95.0f, 35.0f, app.getArial12(), updateRotationY);
 
-  tbPosX = new UITextBox(20.0f, 145.0f, 95.0f, 35.0f, app.getArial12(), updatePosX);
-  tbPosZ = new UITextBox(20.0f, 170.0f, 95.0f, 35.0f, app.getArial12(), updatePosZ);
-  tbPosY = new UITextBox(20.0f, 195.0f, 95.0f, 35.0f, app.getArial12(), updatePosY);
+  _tbPosX = new UITextBox(20.0f, 145.0f, 95.0f, 35.0f, app.getArial12(), updatePosX);
+  _tbPosZ = new UITextBox(20.0f, 170.0f, 95.0f, 35.0f, app.getArial12(), updatePosZ);
+  _tbPosY = new UITextBox(20.0f, 195.0f, 95.0f, 35.0f, app.getArial12(), updatePosY);
+
+  _tbScale = new UITextBox(20.0f, 245.0f, 95.0f, 35.0f, app.getArial12(), updateScale);
 
   addChild(new UIText(5.0f, 5.0f, "Tilt:", app.getArial12(), eJustifyLeft));
   addChild(new UIText(5.0f, 27.0f, "X", app.getArial12(), eJustifyLeft));
@@ -111,12 +127,16 @@ UIRotationEditor::UIRotationEditor(float x, float y)
   addChild(new UIText(5.0f, 172.0f, "Z", app.getArial12(), eJustifyLeft));
   addChild(new UIText(5.0f, 197.0f, "H", app.getArial12(), eJustifyLeft));
 
-  addChild(tbRotationX);
-  addChild(tbRotationZ);
-  addChild(tbRotationY);
-  addChild(tbPosX);
-  addChild(tbPosZ);
-  addChild(tbPosY);
+  _textScale = new UIText(5.0f, 225.0f, "Scale:", app.getArial12(), eJustifyLeft);
+  addChild(_textScale);
+
+  addChild(_tbRotationX);
+  addChild(_tbRotationZ);
+  addChild(_tbRotationY);
+  addChild(_tbPosX);
+  addChild(_tbPosZ);
+  addChild(_tbPosY);
+  addChild(_tbScale);
 }
 
 void UIRotationEditor::toggle()
@@ -137,43 +157,57 @@ void UIRotationEditor::select(nameEntry* entry)
   {
     rotationVect = &(entry->data.model->dir);
     posVect = &(entry->data.model->pos);
+    scale = &(entry->data.model->sc);
+    _wmo = false;
+    _textScale->show();
+    _tbScale->show();
   }
   else if (entry->type == eEntry_WMO)
   {
     rotationVect = &(entry->data.wmo->dir);
     posVect = &(entry->data.wmo->pos);
+    _wmo = true;
+    _textScale->hide();
+    _tbScale->hide();
   }
   else
   {
+    _wmo = false;
     clearSelect();
     return;
   }
 
-  selection = true;
+  _selection = true;
   updateValues();
 }
 
 void UIRotationEditor::updateValues()
 {
-  if (selection)
+  if (_selection)
   {
-    tbRotationX->value(misc::floatToStr(rotationVect->x, 3));
-    tbRotationY->value(misc::floatToStr(rotationVect->y, 3));
-    tbRotationZ->value(misc::floatToStr(rotationVect->z, 3));
-    tbPosX->value(misc::floatToStr(posVect->x, 5));
-    tbPosY->value(misc::floatToStr(posVect->y, 5));
-    tbPosZ->value(misc::floatToStr(posVect->z, 5));
+    _tbRotationX->value(misc::floatToStr(rotationVect->x, 3));
+    _tbRotationY->value(misc::floatToStr(rotationVect->y, 3));
+    _tbRotationZ->value(misc::floatToStr(rotationVect->z, 3));
+    _tbPosX->value(misc::floatToStr(posVect->x, 5));
+    _tbPosY->value(misc::floatToStr(posVect->y, 5));
+    _tbPosZ->value(misc::floatToStr(posVect->z, 5));
+
+    if (!_wmo)
+    {
+      _tbScale->value(misc::floatToStr(*scale));
+    }
   }
 }
 
 void UIRotationEditor::clearSelect()
 {
-  selection = false;
+  _selection = false;
   rotationVect = nullptr;
-  tbRotationX->value("");
-  tbRotationY->value("");
-  tbRotationZ->value("");
-  tbPosX->value("");
-  tbPosY->value("");
-  tbPosZ->value("");
+  _tbRotationX->value("");
+  _tbRotationY->value("");
+  _tbRotationZ->value("");
+  _tbPosX->value("");
+  _tbPosY->value("");
+  _tbPosZ->value("");
+  _tbScale->value("");
 }
