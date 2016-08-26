@@ -1422,6 +1422,7 @@ void MapView::tick(float t, float dt)
 
 					Selection->data.wmo->recalcExtents();
 					gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x, Selection->data.wmo->pos.z);
+          mainGui->rotationEditor->updateValues();
 				}
 
 				if (Selection->type == eEntry_Model)
@@ -1433,6 +1434,7 @@ void MapView::tick(float t, float dt)
 					Selection->data.model->dir.y += keyr * moveratio * 5;
 					Selection->data.model->sc += keys * moveratio / 50;
 					gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z);
+          mainGui->rotationEditor->updateValues();
 				}
 			}
 
@@ -1444,6 +1446,7 @@ void MapView::tick(float t, float dt)
 				rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, av * (float)PI / 180.0f);
 				rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, ah * (float)PI / 180.0f);
 				ObjPos.x = abs(ObjPos.x);
+        mainGui->rotationEditor->updateValues();
 			}
 
 			// moving and scaling objects
@@ -1468,6 +1471,7 @@ void MapView::tick(float t, float dt)
 
 					Selection->data.wmo->recalcExtents();
 					gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x, Selection->data.wmo->pos.z); // after move. If moved to another ADT
+          mainGui->rotationEditor->updateValues();
 				}
 				else if (Selection->type == eEntry_Model)
 				{
@@ -1500,6 +1504,7 @@ void MapView::tick(float t, float dt)
 
 						gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z); // after move. If moved to another ADT
 					}
+          mainGui->rotationEditor->updateValues();
 				}
 			}
 
@@ -1520,6 +1525,8 @@ void MapView::tick(float t, float dt)
 						lTarget = &Selection->data.model->dir.x;
 					else if (Environment::getInstance()->AltDown)
 						lTarget = &Selection->data.model->dir.z;
+
+          mainGui->rotationEditor->updateValues();
 				}
 				else if (Selection->type == eEntry_WMO)
 				{
@@ -1531,6 +1538,8 @@ void MapView::tick(float t, float dt)
 						lTarget = &Selection->data.wmo->dir.x;
 					else if (Environment::getInstance()->AltDown)
 						lTarget = &Selection->data.wmo->dir.z;
+
+          mainGui->rotationEditor->updateValues();
 				}
 
 				if (lModify && lTarget)
