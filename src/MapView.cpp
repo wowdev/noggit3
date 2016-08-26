@@ -1446,7 +1446,6 @@ void MapView::tick(float t, float dt)
 				rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, av * (float)PI / 180.0f);
 				rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, ah * (float)PI / 180.0f);
 				ObjPos.x = abs(ObjPos.x);
-        mainGui->rotationEditor->updateValues();
 			}
 
 			// moving and scaling objects
