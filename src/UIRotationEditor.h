@@ -3,6 +3,7 @@
 
 #include "UIWindow.h"
 
+class UIText;
 class UITextBox;
 class nameEntry;
 
@@ -15,20 +16,26 @@ public:
   void clearSelect();
   void updateValues();
   void toggle();
-  bool getSelection() const { return selection; }
+  bool hasSelection() const { return _selection; }
+  bool isWmo() const { return _wmo; }
   
   Vec3D* rotationVect;
   Vec3D* posVect;
+  float* scale;
 private:
-  bool selection;
+  bool _selection;
+  bool _wmo;
 
-  UITextBox* tbRotationX;
-  UITextBox* tbRotationY;
-  UITextBox* tbRotationZ;
+  UITextBox* _tbRotationX;
+  UITextBox* _tbRotationY;
+  UITextBox* _tbRotationZ;
 
-  UITextBox* tbPosX;
-  UITextBox* tbPosY;
-  UITextBox* tbPosZ;
+  UITextBox* _tbPosX;
+  UITextBox* _tbPosY;
+  UITextBox* _tbPosZ;
+
+  UITextBox* _tbScale;
+  UIText* _textScale;
 };
 
 #endif
