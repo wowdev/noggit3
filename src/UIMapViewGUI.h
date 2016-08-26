@@ -23,6 +23,7 @@ class UISlider;
 class UIGradient;
 class UIWater;
 class UIObjectEditor;
+class UIRotationEditor;
 
 class UIModel;
 class UIAlphamap;
@@ -73,6 +74,7 @@ public:
 	UIWindow *setting_blur;
 	UIWindow *settings_paint;
   UIObjectEditor *objectEditor;
+  UIRotationEditor *rotationEditor;
 
 	UIExitWarning *escWarning;
 	UICapsWarning *capsWarning;
