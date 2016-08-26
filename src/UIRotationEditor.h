@@ -13,6 +13,7 @@ public:
 
   void select(nameEntry* entry);
   void clearSelect();
+  void updateValues();
   void toggle();
   bool getSelection() const { return selection; }
   

@@ -20,7 +20,7 @@ void updateRotationX(UITextBox::Ptr textBox, const std::string& value)
   if (editor->getSelection())
   {
     float v = std::min(180.0f, std::max(-180.0f, (float)std::atof(value.c_str())));
-    textBox->value(misc::floatToStr(v));
+    textBox->value(misc::floatToStr(v, 3));
 
     editor->rotationVect->x = v;
   }
@@ -32,7 +32,7 @@ void updateRotationZ(UITextBox::Ptr textBox, const std::string& value)
   if (editor->getSelection())
   {
     float v = std::min(180.0f, std::max(-180.0f, (float)std::atof(value.c_str())));
-    textBox->value(misc::floatToStr(v));
+    textBox->value(misc::floatToStr(v, 3));
 
     editor->rotationVect->z = v;
   }  
@@ -44,7 +44,7 @@ void updateRotationY(UITextBox::Ptr textBox, const std::string& value)
   if (editor->getSelection())
   {
     float v = std::min(360.0f, std::max(0.0f, (float)std::atof(value.c_str())));
-    textBox->value(misc::floatToStr(v));
+    textBox->value(misc::floatToStr(v, 3));
 
     editor->rotationVect->y = v;
   }  
@@ -56,7 +56,7 @@ void updatePosX(UITextBox::Ptr textBox, const std::string& value)
   if (editor->getSelection())
   {
     float v = std::atof(value.c_str());
-    textBox->value(misc::floatToStr(v));
+    textBox->value(misc::floatToStr(v, 5));
 
     editor->posVect->x = v;
   }
@@ -68,7 +68,7 @@ void updatePosZ(UITextBox::Ptr textBox, const std::string& value)
   if (editor->getSelection())
   {
     float v = std::atof(value.c_str());
-    textBox->value(misc::floatToStr(v));
+    textBox->value(misc::floatToStr(v, 5));
 
     editor->posVect->z = v;
   }
@@ -80,7 +80,7 @@ void updatePosY(UITextBox::Ptr textBox, const std::string& value)
   if (editor->getSelection())
   {
     float v = std::atof(value.c_str());
-    textBox->value(misc::floatToStr(v));
+    textBox->value(misc::floatToStr(v, 5));
 
     editor->posVect->y = v;
   }
@@ -150,12 +150,20 @@ void UIRotationEditor::select(nameEntry* entry)
   }
 
   selection = true;
-  tbRotationX->value(misc::floatToStr(rotationVect->x, 3));
-  tbRotationY->value(misc::floatToStr(rotationVect->y, 3));
-  tbRotationZ->value(misc::floatToStr(rotationVect->z, 3));
-  tbPosX->value(misc::floatToStr(posVect->x, 3));
-  tbPosY->value(misc::floatToStr(posVect->y, 3));
-  tbPosZ->value(misc::floatToStr(posVect->z, 3));
+  updateValues();
+}
+
+void UIRotationEditor::updateValues()
+{
+  if (selection)
+  {
+    tbRotationX->value(misc::floatToStr(rotationVect->x, 3));
+    tbRotationY->value(misc::floatToStr(rotationVect->y, 3));
+    tbRotationZ->value(misc::floatToStr(rotationVect->z, 3));
+    tbPosX->value(misc::floatToStr(posVect->x, 5));
+    tbPosY->value(misc::floatToStr(posVect->y, 5));
+    tbPosZ->value(misc::floatToStr(posVect->z, 5));
+  }
 }
 
 void UIRotationEditor::clearSelect()
