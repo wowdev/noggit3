@@ -1,5 +1,7 @@
 #include "Misc.h"
 
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -39,6 +41,13 @@ namespace misc
 			found = source.rfind(find);
 		}
 	}
+
+  std::string floatToStr(float f, int precision)
+  {
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(precision) << f;
+    return ss.str();
+  }
 
 	//dirty hack
 	int FtoIround(float d)

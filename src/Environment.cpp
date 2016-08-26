@@ -14,6 +14,12 @@ Environment::Environment()
   this->flattenAngle = 0.0f;
   this->flattenOrientation = 0.0f;
   this->flattenAngleEnabled = false;
+  this->minRotation = 0.0f;
+  this->maxRotation = 360.0f;
+  this->minTilt = -5.0f;
+  this->maxTilt = 5.0f;
+  this->minScale = 0.9f;
+  this->maxScale = 1.1f;
 }
 
 Environment* Environment::instance = 0;

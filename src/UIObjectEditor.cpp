@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "Environment.h"
+#include "Misc.h"
 #include "ModelInstance.h"
 #include "Noggit.h" // fonts
 #include "Settings.h"
@@ -13,10 +14,66 @@
 #include "UIModelImport.h"
 #include "UIObjectEditor.h"
 #include "UIStatusBar.h"
+#include "UITextBox.h"
 #include "UIText.h"
 #include "Video.h" // video
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
+
+void updateMinRotation(UITextBox::Ptr textBox, const std::string& value)
+{
+  float v = std::max(0.0f, (float)std::atof(value.c_str()));
+  v = std::min(v, Environment::getInstance()->maxRotation);
+
+  Environment::getInstance()->minRotation = v;
+  textBox->value(misc::floatToStr(v));
+}
+
+void updateMaxRotation(UITextBox::Ptr textBox, const std::string& value)
+{
+  float v = std::min(360.0f, (float)std::atof(value.c_str()));
+  v = std::max(v, Environment::getInstance()->minRotation);
+
+  Environment::getInstance()->maxRotation = v;
+  textBox->value(misc::floatToStr(v));
+}
+
+void updateMinTilt(UITextBox::Ptr textBox, const std::string& value)
+{
+  float v = std::max(-180.0f, (float)std::atof(value.c_str()));
+  v = std::min(v, Environment::getInstance()->maxTilt);
+
+  Environment::getInstance()->minTilt = v;
+  textBox->value(misc::floatToStr(v));
+}
+
+void updateMaxTilt(UITextBox::Ptr textBox, const std::string& value)
+{
+  float v = std::min(180.0f, (float)std::atof(value.c_str()));
+  v = std::max(v, Environment::getInstance()->minTilt);
+
+  Environment::getInstance()->maxTilt = v;
+  textBox->value(misc::floatToStr(v));
+}
+
+void updateMinScale(UITextBox::Ptr textBox, const std::string& value)
+{
+  float v = std::max(0.01f, (float)std::atof(value.c_str()));
+  v = std::min(v, Environment::getInstance()->maxScale);
+
+  Environment::getInstance()->minScale = v;
+  textBox->value(misc::floatToStr(v));
+}
+
+void updateMaxScale(UITextBox::Ptr textBox, const std::string& value)
+{
+  float v = std::min(63.0f, (float)std::atof(value.c_str()));
+  v = std::max(v, Environment::getInstance()->minScale);
+
+  Environment::getInstance()->maxScale = v;
+  textBox->value(misc::floatToStr(v));
+}
+
 
 void showImportModels(UIFrame* f, int)
 {
@@ -72,7 +129,7 @@ void toggleCopyModelStats(bool b, int)
 
 
 UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
-   : UIWindow(x, y, 400.0f, 120.0f)
+   : UIWindow(x, y, 400.0f, 140.0f)
    , selected()
 {
   filename = new UIStatusBar(0.0f, (float)video.yres() - 60.0f, (float)video.xres(), 30.0f);
@@ -80,19 +137,42 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   mainGui->addChild(filename);
   
   addChild(new UIText(190.0f, 2.0f, "Object edit", app.getArial14(), eJustifyCenter));
+  addChild(new UIText(195.0f, 22.0f, "Min  /  Max", app.getArial12(), eJustifyCenter));
 
-  addChild(new UICheckBox(5.0f, 15.0f, "Random rotation", toggleRandomRotation, 0));
-  addChild(new UICheckBox(5.0f, 40.0f, "Random tilt", toggleRandomTilt, 0));
-  addChild(new UICheckBox(5.0f, 65.0f, "Random scale", toggleRandomSize, 0)); 
+  Environment* env = Environment::getInstance();
+  UITextBox* tb;
 
-  UICheckBox* copyCB = new UICheckBox(5.0f, 90.0f, "Copy model rotation / scale / tilt", toggleCopyModelStats, 0);
+  tb = new UITextBox(130.0f, 40.0f, 60.0f, 35.0f, app.getArial12(), updateMinRotation);
+  tb->value(misc::floatToStr(env->minRotation));
+  addChild(tb);
+  tb = new UITextBox(130.0f, 65.0f, 60.0f, 35.0f, app.getArial12(), updateMinTilt);
+  tb->value(misc::floatToStr(env->minTilt));
+  addChild(tb);
+  tb = new UITextBox(130.0f, 90.0f, 60.0f, 35.0f, app.getArial12(), updateMinScale);
+  tb->value(misc::floatToStr(env->minScale));
+  addChild(tb);
+  tb = new UITextBox(200.0f, 40.0f, 60.0f, 35.0f, app.getArial12(), updateMaxRotation);
+  tb->value(misc::floatToStr(env->maxRotation));
+  addChild(tb);
+  tb = new UITextBox(200.0f, 65.0f, 60.0f, 35.0f, app.getArial12(), updateMaxTilt);
+  tb->value(misc::floatToStr(env->maxTilt));
+  addChild(tb);
+  tb = new UITextBox(200.0f, 90.0f, 60.0f, 35.0f, app.getArial12(), updateMaxScale);
+  tb->value(misc::floatToStr(env->maxScale));
+  addChild(tb);
+
+  addChild(new UICheckBox(5.0f, 35.0f, "Random rotation", toggleRandomRotation, 0));
+  addChild(new UICheckBox(5.0f, 60.0f, "Random tilt", toggleRandomTilt, 0));
+  addChild(new UICheckBox(5.0f, 85.0f, "Random scale", toggleRandomSize, 0)); 
+
+  UICheckBox* copyCB = new UICheckBox(5.0f, 110.0f, "Copy model rotation / scale / tilt", toggleCopyModelStats, 0);
   copyCB->setState(Settings::getInstance()->copyModelStats);
   addChild(copyCB);
   
-  addChild(new UIButton(190.0f, 95.0f, 120.0f, 30.0f, "Spawn on camera", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", pasteOnCamera, 0));
+  addChild(new UIButton(190.0f, 115.0f, 120.0f, 30.0f, "Spawn on camera", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", pasteOnCamera, 0));
 
-  addChild(new UIButton(315.0f, 70.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
-  addChild(new UIButton(315.0f, 95.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
+  addChild(new UIButton(315.0f, 90.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
+  addChild(new UIButton(315.0f, 115.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
 }
 
 void UIObjectEditor::pasteObject(Vec3D pos)
