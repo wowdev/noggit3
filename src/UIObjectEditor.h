@@ -22,7 +22,6 @@ public:
 
 private:
   nameEntry selected;
-
   void setModelName(const std::string &name);
 };
 

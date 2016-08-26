@@ -13,6 +13,7 @@
 #include "UIMapViewGUI.h"
 #include "UIModelImport.h"
 #include "UIObjectEditor.h"
+#include "UIRotationEditor.h"
 #include "UIStatusBar.h"
 #include "UITextBox.h"
 #include "UIText.h"
@@ -72,6 +73,11 @@ void updateMaxScale(UITextBox::Ptr textBox, const std::string& value)
 
   Environment::getInstance()->maxScale = v;
   textBox->value(misc::floatToStr(v));
+}
+
+void toggleRotationEditor(UIFrame* f, int)
+{
+  (static_cast<UIMapViewGUI *>(f->parent()->parent()))->rotationEditor->toggle();
 }
 
 
@@ -135,7 +141,7 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   filename = new UIStatusBar(0.0f, (float)video.yres() - 60.0f, (float)video.xres(), 30.0f);
   filename->hide();
   mainGui->addChild(filename);
-  
+
   addChild(new UIText(190.0f, 2.0f, "Object edit", app.getArial14(), eJustifyCenter));
   addChild(new UIText(195.0f, 22.0f, "Min  /  Max", app.getArial12(), eJustifyCenter));
 
@@ -164,6 +170,8 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   addChild(new UICheckBox(5.0f, 35.0f, "Random rotation", toggleRandomRotation, 0));
   addChild(new UICheckBox(5.0f, 60.0f, "Random tilt", toggleRandomTilt, 0));
   addChild(new UICheckBox(5.0f, 85.0f, "Random scale", toggleRandomSize, 0)); 
+
+  addChild(new UIButton(290.0f, 40.0f, 100.0f, 30.0f, "Rotation editor", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", toggleRotationEditor, 0));
 
   UICheckBox* copyCB = new UICheckBox(5.0f, 110.0f, "Copy model rotation / scale / tilt", toggleCopyModelStats, 0);
   copyCB->setState(Settings::getInstance()->copyModelStats);

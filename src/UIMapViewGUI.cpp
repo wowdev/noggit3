@@ -25,6 +25,7 @@
 #include "UIZoneIDBrowser.h" //
 #include "UIWater.h" //
 #include "UIObjectEditor.h"
+#include "UIRotationEditor.h"
 #include "Video.h" // video
 #include "WMOInstance.h"
 #include "World.h"
@@ -50,11 +51,15 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 	minimapWindow->hide();
 	addChild(minimapWindow);
 
-  objectEditor = new UIObjectEditor((float)tool_settings_x, (float)tool_settings_y, this);
+  objectEditor = new UIObjectEditor((float)video.xres() - 410.0f, 10.0f, this);
   objectEditor->movable(true);
   objectEditor->hide();
   addChild(objectEditor);
 
+  rotationEditor = new UIRotationEditor((float)video.xres() - 520.0f, 30.0f);
+  rotationEditor->movable(true);
+  rotationEditor->hide();
+  addChild(rotationEditor);
 
 	// UICurrentTexture
 	guiCurrentTexture = new UICurrentTexture(6.0f, 35.0f, this);

@@ -31,13 +31,19 @@
 #include "Environment.h"
 #include "TextureManager.h" // TextureManager, Texture
 #include "UIAppInfo.h" // appInfo
+#include "UICapsWarning.h"
 #include "UICheckBox.h" // UICheckBox
 #include "UICursorSwitcher.h" // UICursorSwitcher
 #include "UIDetailInfos.h" // detailInfos
+#include "UIExitWarning.h"
 #include "UIGradient.h" // UIGradient
+#include "UIHelperModels.h"
 #include "UIMapViewGUI.h" // UIMapViewGUI
 #include "UIMenuBar.h" // UIMenuBar, menu items, ..
 #include "UIMinimapWindow.h" // UIMinimapWindow
+#include "UIModelImport.h"
+#include "UIObjectEditor.h"
+#include "UIRotationEditor.h"
 #include "UISlider.h" // UISlider
 #include "UIStatusBar.h" // statusBar
 #include "UIText.h" // UIText
@@ -48,18 +54,15 @@
 #include "UIToggleGroup.h" // UIToggleGroup
 #include "UIToolbar.h" // UIToolbar
 #include "UIToolbarIcon.h" // ToolbarIcon
-#include "UIZoneIDBrowser.h"
 #include "UIWater.h"
+#include "UIWaterSaveWarning.h"
+#include "UIWaterTypeBrowser.h"
+#include "UIZoneIDBrowser.h"
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
-#include "UIExitWarning.h"
-#include "UICapsWarning.h"
-#include "UIWaterSaveWarning.h"
-#include "UIModelImport.h"
-#include "UIHelperModels.h"
 #include "MapIndex.h"
-#include "UIWaterTypeBrowser.h"
-#include "UIObjectEditor.h"
+
+
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -80,6 +83,8 @@ bool MoveObj;
 
 Vec3D ObjMove;
 Vec3D ObjRot;
+
+nameEntry* lastSelected;
 
 bool TestSelection = false;
 
@@ -338,6 +343,7 @@ void change_settings_window(int oldid, int newid)
   mainGui->objectEditor->hide();
   mainGui->objectEditor->filename->hide();
   mainGui->objectEditor->modelImport->hide();
+  mainGui->rotationEditor->hide();
 
 	if (!mainGui || !mainGui->TexturePalette)
 		return;
@@ -399,6 +405,8 @@ void change_settings_window(int oldid, int newid)
     mainGui->objectEditor->y((const float)tool_settings_y);
     mainGui->objectEditor->show();
     mainGui->objectEditor->filename->show();
+    mainGui->rotationEditor->x(mainGui->objectEditor->getX() - mainGui->rotationEditor->getW() - 10.0f);
+    mainGui->rotationEditor->y((const float)tool_settings_y);
 	}
 }
 
@@ -1389,6 +1397,11 @@ void MapView::tick(float t, float dt)
 		nameEntry* Selection = gWorld->GetCurrentSelection();
 		if (Selection)
 		{
+      // update rotation editor if the selection has changed
+      if (!lastSelected || lastSelected != Selection)
+      {
+        mainGui->rotationEditor->select(Selection);
+      }
 
 			// Set move scale and rotate for numpad keys
 			if (Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown)  moveratio = 0.1f;
@@ -1786,6 +1799,8 @@ void MapView::tick(float t, float dt)
 	globalTime = static_cast<int>(gWorld->animtime);
 
 	gWorld->tick(dt);
+
+  lastSelected = gWorld->GetCurrentSelection();
 
 	if (!MapChunkWindow->hidden() && gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk)
 	{
