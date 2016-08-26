@@ -23,6 +23,7 @@ namespace misc
 	int randint(int lower, int upper);
 	int getADTCord(float cord);
 	std::string explode(std::string original, std::string exploder = ".");
+  std::string floatToStr(float f, int precision = 2);
 }
 
 //! \todo collect all lose functions/classes/structs for now, sort them later

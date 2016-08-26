@@ -2115,22 +2115,26 @@ void World::addM2(std::string const& filename, Vec3D newPos, bool copyit)
   }
 
   if (Settings::getInstance()->random_rotation)
-  {
-    newModelis.dir.y += (rand() % 360 + 1);
+  { 
+    float min = Environment::getInstance()->minRotation;
+    float max = Environment::getInstance()->maxRotation;
+    newModelis.dir.y += misc::randfloat(min, max);
   }
 
   if (Settings::getInstance()->random_tilt)
   {
-    newModelis.dir.x += (rand() % 11 - 5);
-    newModelis.dir.z += (rand() % 11 - 5);
+    float min = Environment::getInstance()->minTilt;
+    float max = Environment::getInstance()->maxTilt;
+    newModelis.dir.x += misc::randfloat(min, max);
+    newModelis.dir.z += misc::randfloat(min, max);
   }
 
   if (Settings::getInstance()->random_size)
   {
-    newModelis.sc *= misc::randfloat(0.9f, 1.1f);
+    float min = Environment::getInstance()->minScale;
+    float max = Environment::getInstance()->maxScale;
+    newModelis.sc *= misc::randfloat(min, max);
   }
-
-
 
   mModelInstances.emplace(lMaxUID, std::move(newModelis));
   mapIndex->setChanged(newPos.x, newPos.z);

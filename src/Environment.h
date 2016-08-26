@@ -45,6 +45,14 @@ public:
 	float cursorColorB;
 	float cursorColorA;
 	int cursorType;
+
+  float minRotation;
+  float maxRotation;
+  float minTilt;
+  float maxTilt;
+  float minScale;  
+  float maxScale;
+
 private:
 	Environment();
 	static Environment* instance;

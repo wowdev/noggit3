@@ -40,6 +40,30 @@ UITextBox::UITextBox(float xPos, float yPos, float w, float h, TriggerFunction e
 {
 }
 
+UITextBox::UITextBox(float xPos, float yPos, float w, float h, const freetype::font_data& pFont)
+  : UIFrame(xPos, yPos, w, h)
+  , _texture(TextureManager::newTexture(texture))
+  , _textureFocused(TextureManager::newTexture(textureFocused))
+  , _focus(false)
+  , _uiText(new UIText(8.0f, 2.5f, pFont, eJustifyLeft))
+  , _value("")
+  , _enterFunction(NULL)
+  , _updateFunction(NULL)
+{
+}
+
+UITextBox::UITextBox(float xPos, float yPos, float w, float h, const freetype::font_data& pFont, TriggerFunction enterFunction)
+  : UIFrame(xPos, yPos, w, h)
+  , _texture(TextureManager::newTexture(texture))
+  , _textureFocused(TextureManager::newTexture(textureFocused))
+  , _focus(false)
+  , _uiText(new UIText(8.0f, 2.5f, pFont, eJustifyLeft))
+  , _value("")
+  , _enterFunction(enterFunction)
+  , _updateFunction(NULL)
+{
+}
+
 UITextBox::~UITextBox()
 {
 	TextureManager::delbyname(texture);
