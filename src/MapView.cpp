@@ -1412,13 +1412,15 @@ void MapView::tick(float t, float dt)
         mainGui->rotationEditor->select(Selection);
       }
 
+      bool canMoveObj = !mainGui->rotationEditor->hasFocus();
+
 			// Set move scale and rotate for numpad keys
 			if (Environment::getInstance()->CtrlDown && Environment::getInstance()->ShiftDown)  moveratio = 0.1f;
 			else if (Environment::getInstance()->ShiftDown) moveratio = 0.01f;
 			else if (Environment::getInstance()->CtrlDown) moveratio = 0.005f;
 			else moveratio = 0.001f;
 
-			if (keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0)
+			if (canMoveObj && (keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0))
 			{
 				// Move scale and rotate with numpad keys
 				if (Selection->type == eEntry_WMO)
@@ -1458,8 +1460,8 @@ void MapView::tick(float t, float dt)
 			}
 
 			// moving and scaling objects
-			//! \todo  Alternatively automatically align it to the terrain. Also try to move it where the mouse points.
-			if (MoveObj)
+			//! \todo  Alternatively automatically align it to the terrain.
+			if (MoveObj && canMoveObj)
 			{
 				if (Selection->type == eEntry_WMO)
 				{
@@ -1518,7 +1520,7 @@ void MapView::tick(float t, float dt)
 
 
 			// rotating objects
-			if (look)
+			if (look && canMoveObj)
 			{
 				float * lTarget = NULL;
 				bool lModify = false;
@@ -1573,8 +1575,6 @@ void MapView::tick(float t, float dt)
 			if (leftMouse && Selection->type == eEntry_MapChunk)
 			{
 				float xPos, yPos, zPos;
-
-
 
 				xPos = Environment::getInstance()->Pos3DX;
 				yPos = Environment::getInstance()->Pos3DY;

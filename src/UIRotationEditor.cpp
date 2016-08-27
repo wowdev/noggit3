@@ -203,6 +203,8 @@ void UIRotationEditor::clearSelect()
 {
   _selection = false;
   rotationVect = nullptr;
+  posVect = nullptr;
+  scale = nullptr;
   _tbRotationX->value("");
   _tbRotationY->value("");
   _tbRotationZ->value("");
@@ -210,4 +212,17 @@ void UIRotationEditor::clearSelect()
   _tbPosY->value("");
   _tbPosZ->value("");
   _tbScale->value("");
+}
+
+bool UIRotationEditor::hasFocus() const
+{
+  return !_hidden &&
+         ( _tbRotationX->focus() ||
+           _tbRotationY->focus() ||
+           _tbRotationZ->focus() ||
+           _tbPosX->focus() ||
+           _tbPosY->focus() ||
+           _tbPosZ->focus() ||
+           _tbScale->focus()
+         );
 }
