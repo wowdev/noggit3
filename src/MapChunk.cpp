@@ -10,6 +10,7 @@
 #include "Misc.h"
 #include "Quaternion.h"
 #include "TextureSet.h"
+#include "UITexturingGUI.h"
 #include "Vec3D.h"
 #include "World.h"
 #include "Alphamap.h"
@@ -80,6 +81,8 @@ void CreateStrips()
     else
       LineStrip[i] = (32 - i) * 17;
   }
+
+  LineStrip[31] = 0;
 
   int iferget = 0;
 
@@ -555,6 +558,11 @@ void MapChunk::drawLines()
   if (!gWorld->frustum.intersects(vmin, vmax))
     return;
 
+  bool canPaint = canPaintTexture(UITexturingGUI::getSelectedTexture());
+
+  if (!gWorld->drawlines && !canPaint)
+    return;
+
   float mydist = (gWorld->camera - vcenter).length() - r;
 
   if (mydist > (mapdrawdistance * mapdrawdistance))
@@ -565,35 +573,47 @@ void MapChunk::drawLines()
 
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_LIGHTING);
-
   glPushMatrix();
-  glColor4f(1.0, 0.0, 0.0f, 0.5f);
-  glTranslatef(0.0f, 0.05f, 0.0f);
+
   glEnable(GL_LINE_SMOOTH);
-  glLineWidth(1.5);
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-  if ((px != 15) && (py != 0))
+  if ( terrainMode == 2 && canPaint && Environment::getInstance()->highlightPaintableChunks)
   {
-    glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
+    glTranslatef(0.0f, 0.1f, 0.0f);
+    glLineWidth(2.0);
+    glColor4f(0.0, 1.0f, 1.0f, 0.5f);
+    glDrawElements(GL_LINE_STRIP, 32, GL_UNSIGNED_SHORT, LineStrip);
+    glLineWidth(1.5);
   }
-  else if ((px == 15) && (py == 0))
+  else
   {
-    glColor4f(0.0, 1.0, 0.0f, 0.5f);
-    glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
-  }
-  else if (px == 15)
-  {
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
-    glColor4f(0.0, 1.0, 0.0f, 0.5f);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
-  }
-  else if (py == 0)
-  {
-    glColor4f(0.0, 1.0, 0.0f, 0.5f);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
+    glTranslatef(0.0f, 0.05f, 0.0f);
+    glLineWidth(1.5);
     glColor4f(1.0, 0.0, 0.0f, 0.5f);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
+
+    if ((px != 15) && (py != 0))
+    {
+      glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
+    }
+    else if ((px == 15) && (py == 0))
+    {
+      glColor4f(0.0, 1.0, 0.0f, 0.5f);
+      glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
+    }
+    else if (px == 15)
+    {
+      glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
+      glColor4f(0.0, 1.0, 0.0f, 0.5f);
+      glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
+    }
+    else if (py == 0)
+    {
+      glColor4f(0.0, 1.0, 0.0f, 0.5f);
+      glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
+      glColor4f(1.0, 0.0, 0.0f, 0.5f);
+      glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
+    }
   }
 
   if (Environment::getInstance()->view_holelines)
@@ -1234,6 +1254,11 @@ void MapChunk::switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTe
 bool MapChunk::paintTexture(float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
 {
   return textureSet->paintTexture(xbase, zbase, x, z, brush, strength, pressure, texture);
+}
+
+bool MapChunk::canPaintTexture(OpenGL::Texture* texture)
+{
+  return textureSet->canPaintTexture(texture);
 }
 
 bool MapChunk::isHole(int i, int j)

@@ -28,6 +28,7 @@ public:
 	bool SpaceDown;
 
 	bool paintMode;
+  bool highlightPaintableChunks;
 	int flagPaintMode;
 	int screenX;
 	int screenY;

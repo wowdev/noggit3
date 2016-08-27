@@ -288,6 +288,11 @@ void toggleSprayBrush(bool b, int)
   sprayBrushActive = b;
 }
 
+void toggleHighlightPaintable(bool b, int)
+{
+  Environment::getInstance()->highlightPaintableChunks = b;
+}
+
 void setSprayBrushSize(float f)
 {
   brushSpraySize = f;
@@ -1078,7 +1083,7 @@ void MapView::createGUI()
   setting_blur->addChild(flatten_orientation);
 
 	//3D Paint settings UIWindow
-	settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 250.0f);
+	settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 280.0f);
 	settings_paint->hide();
 	settings_paint->movable(true);
 
@@ -1119,27 +1124,31 @@ void MapView::createGUI()
 	mainGui->paintPressureSlider->setText("Pressure: ");
 	settings_paint->addChild(mainGui->paintPressureSlider);
 
+  UICheckBox* toggleHighlight = new UICheckBox(3.0f, 105.0f, "Hightligh paintable chunks", toggleHighlightPaintable, 0);
+  toggleHighlight->setState(Environment::getInstance()->highlightPaintableChunks);
+  settings_paint->addChild(toggleHighlight);
 
-  toggleSpray = new UICheckBox(3.0f, 108.0f, "Toggle spray", toggleSprayBrush, 0);
+
+  toggleSpray = new UICheckBox(3.0f, 138.0f, "Toggle spray", toggleSprayBrush, 0);
   settings_paint->addChild(toggleSpray);
 
-  spray_size = new UISlider(6.0f, 150.0f, 170.0f, 40.0f, 0.0001f);
+  spray_size = new UISlider(6.0f, 180.0f, 170.0f, 40.0f, 0.0001f);
   spray_size->setFunc(setSprayBrushSize);
   spray_size->setValue(brushSpraySize / 40.0f);
   spray_size->setText("Spray size: ");
   settings_paint->addChild(spray_size);
 
-  spray_pressure = new UISlider(6.0f, 175.0f, 170.0f, 100.0f, 0.0001f);
+  spray_pressure = new UISlider(6.0f, 205.0f, 170.0f, 100.0f, 0.0001f);
   spray_pressure->setFunc(setSprayBrushPressure);
   spray_pressure->setValue(brushSprayPressure / 100.0f);
   spray_pressure->setText("Spray pressure (/1k): ");
   settings_paint->addChild(spray_pressure);
 
 	UIButton* B1;
-	B1 = new UIButton(6.0f, 200.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1);
+	B1 = new UIButton(6.0f, 230.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1);
 	settings_paint->addChild(B1);
 
-  UIButton* rmDup = new UIButton(6.0f, 225.0f, 170.0f, 30.0f, "Remove texture duplicates", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", removeTexDuplicateOnADT, 0);
+  UIButton* rmDup = new UIButton(6.0f, 255.0f, 170.0f, 30.0f, "Remove texture duplicates", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", removeTexDuplicateOnADT, 0);
   settings_paint->addChild(rmDup);
 
 	mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));

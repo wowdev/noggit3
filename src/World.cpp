@@ -984,7 +984,7 @@ void World::draw()
   }
 
 
-  if (drawlines)
+  if (drawlines || (terrainMode == 2 && Environment::getInstance()->highlightPaintableChunks))
   {
     glDisable(GL_COLOR_MATERIAL);
     glActiveTexture(GL_TEXTURE0);
