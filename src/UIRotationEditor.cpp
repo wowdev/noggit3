@@ -23,6 +23,11 @@ void updateRotationX(UITextBox::Ptr textBox, const std::string& value)
     textBox->value(misc::floatToStr(v, 3));
 
     editor->rotationVect->x = v;
+    
+    if (editor->isWmo())
+    {
+      editor->updateWMO();
+    }
   }
 }
 
@@ -35,6 +40,11 @@ void updateRotationZ(UITextBox::Ptr textBox, const std::string& value)
     textBox->value(misc::floatToStr(v, 3));
 
     editor->rotationVect->z = v;
+
+    if (editor->isWmo())
+    {
+      editor->updateWMO();
+    }
   }  
 }
 
@@ -47,6 +57,11 @@ void updateRotationY(UITextBox::Ptr textBox, const std::string& value)
     textBox->value(misc::floatToStr(v, 3));
 
     editor->rotationVect->y = v;
+
+    if (editor->isWmo())
+    {
+      editor->updateWMO();
+    }
   }  
 }
 
@@ -59,6 +74,11 @@ void updatePosX(UITextBox::Ptr textBox, const std::string& value)
     textBox->value(misc::floatToStr(v, 5));
 
     editor->posVect->x = v;
+
+    if (editor->isWmo())
+    {
+      editor->updateWMO();
+    }
   }
 }
 
@@ -71,6 +91,11 @@ void updatePosZ(UITextBox::Ptr textBox, const std::string& value)
     textBox->value(misc::floatToStr(v, 5));
 
     editor->posVect->z = v;
+
+    if (editor->isWmo())
+    {
+      editor->updateWMO();
+    }
   }
 }
 
@@ -83,6 +108,11 @@ void updatePosY(UITextBox::Ptr textBox, const std::string& value)
     textBox->value(misc::floatToStr(v, 5));
 
     editor->posVect->y = v;
+
+    if (editor->isWmo())
+    {
+      editor->updateWMO();
+    }
   }
 }
 
@@ -104,6 +134,7 @@ UIRotationEditor::UIRotationEditor(float x, float y)
   rotationVect(nullptr),
   posVect(nullptr),
   scale(nullptr),
+  _wmoInstance(nullptr),
   _selection(false),
   _wmo(false)
 { 
@@ -159,13 +190,15 @@ void UIRotationEditor::select(nameEntry* entry)
     posVect = &(entry->data.model->pos);
     scale = &(entry->data.model->sc);
     _wmo = false;
+    _wmoInstance = nullptr;
     _textScale->show();
     _tbScale->show();
   }
   else if (entry->type == eEntry_WMO)
   {
-    rotationVect = &(entry->data.wmo->dir);
-    posVect = &(entry->data.wmo->pos);
+    _wmoInstance = entry->data.wmo;
+    rotationVect = &(_wmoInstance->dir);
+    posVect = &(_wmoInstance->pos);
     _wmo = true;
     _textScale->hide();
     _tbScale->hide();
@@ -173,6 +206,7 @@ void UIRotationEditor::select(nameEntry* entry)
   else
   {
     _wmo = false;
+    _wmoInstance = nullptr;
     clearSelect();
     return;
   }
@@ -225,4 +259,9 @@ bool UIRotationEditor::hasFocus() const
            _tbPosZ->focus() ||
            _tbScale->focus()
          );
+}
+
+void UIRotationEditor::updateWMO()
+{
+  _wmoInstance->recalcExtents();
 }

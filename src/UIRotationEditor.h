@@ -6,6 +6,7 @@
 class UIText;
 class UITextBox;
 class nameEntry;
+class WMOInstance;
 
 class UIRotationEditor : public UIWindow
 {
@@ -17,7 +18,9 @@ public:
   void updateValues();
   void toggle();
   bool hasSelection() const { return _selection; }
+  
   bool isWmo() const { return _wmo; }
+  void updateWMO();
 
   // check if any checkbox is focused
   bool hasFocus() const;
@@ -28,6 +31,7 @@ public:
 private:
   bool _selection;
   bool _wmo;
+  WMOInstance* _wmoInstance;
 
   UITextBox* _tbRotationX;
   UITextBox* _tbRotationY;
