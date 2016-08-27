@@ -96,6 +96,7 @@ public:
 
 	//! \todo implement Action stack for these
 	bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
+  bool canPaintTexture(OpenGL::Texture* texture);
 	int addTexture(OpenGL::Texture* texture);
 	void switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
 	void eraseTextures();

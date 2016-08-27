@@ -11,6 +11,7 @@ Environment::Environment()
 	this->clipboard = nameEntry();
 	this->flagPaintMode = FLAG_IMPASS;
 	this->paintMode = true;
+  this->highlightPaintableChunks = true;
   this->flattenAngle = 0.0f;
   this->flattenOrientation = 0.0f;
   this->flattenAngleEnabled = false;

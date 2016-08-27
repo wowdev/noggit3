@@ -38,6 +38,7 @@ public:
   void swapTexture(int id1, int id2);
 	void switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
 	bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture);
+  bool canPaintTexture(OpenGL::Texture* texture);
 
 	const std::string& filename(size_t id);
 

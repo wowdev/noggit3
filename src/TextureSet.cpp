@@ -216,6 +216,24 @@ void TextureSet::eraseTexture(size_t id)
   nTextures--;
 }
 
+bool TextureSet::canPaintTexture(OpenGL::Texture* texture)
+{
+  if (nTextures)
+  {
+    for (size_t k = 0; k < nTextures; ++k)
+    {
+      if (textures[k] == texture)
+      {
+        return true;
+      }
+    }
+
+    return nTextures < 4;
+  }
+
+  return false;
+}
+
 const std::string& TextureSet::filename(size_t id)
 {
 	return textures[id]->filename();
