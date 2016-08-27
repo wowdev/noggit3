@@ -121,7 +121,7 @@ void updateScale(UITextBox::Ptr textBox, const std::string& value)
   UIRotationEditor* editor = (static_cast<UIRotationEditor *>(textBox->parent()));
   if (editor->hasSelection() && !editor->isWmo())
   {
-    float v = std::atof(value.c_str());
+    float v = std::max(0.01f, std::min(63.0f, (float)std::atof(value.c_str())));
     textBox->value(misc::floatToStr(v, 2));
 
     *editor->scale = v;
