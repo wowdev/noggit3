@@ -18,6 +18,9 @@ public:
   void toggle();
   bool hasSelection() const { return _selection; }
   bool isWmo() const { return _wmo; }
+
+  // check if any checkbox is focused
+  bool hasFocus() const;
   
   Vec3D* rotationVect;
   Vec3D* posVect;

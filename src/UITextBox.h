@@ -42,6 +42,7 @@ public:
 
 	void value(const std::string& pText);
 	const std::string& value() const;
+  bool focus() const { return _focus; }
 
 	void clear();
 };
