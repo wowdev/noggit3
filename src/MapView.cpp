@@ -325,8 +325,8 @@ void SaveOrReload(UIFrame*, int pMode)
     gWorld->fixAllGaps();
     gWorld->mapIndex->saveChanged();
   }
-	else if (pMode == 3)
-		static_cast<MapView*>(app.getStates().back())->quit();
+  else if (pMode == 3)
+    mainGui->escWarning->show();
 
 }
 

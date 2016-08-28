@@ -431,7 +431,11 @@ void Noggit::mainLoop()
 		{
 			if (event.type == SDL_QUIT)
 			{
-				done = true;
+        SDL_KeyboardEvent e;
+        e.type = SDL_KEYDOWN;
+        e.keysym.sym = SDLK_ESCAPE;
+        e.keysym.mod = KMOD_NONE;
+        activeAppState->keypressed(&e);
 			}
 			else if (event.type == SDL_VIDEORESIZE)
 			{
