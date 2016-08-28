@@ -138,7 +138,7 @@ UISlider* ground_brush_speed;
 float groundBrushSpeed = 1.0f;
 UISlider* ground_blur_speed;
 float groundBlurSpeed = 2.0f;
-int    groundBrushType = 1;
+
 #ifdef _WIN32
 int		groundTabletControlSelect = 1;
 int    groundTabletSelect = 1;
@@ -948,7 +948,7 @@ void MapView::createGUI()
 
 	setting_ground->addChild(new UIText(78.5f, 2.0f, "Raise / Lower", app.getArial14(), eJustifyCenter));
 
-	gGroundToggleGroup = new UIToggleGroup(&groundBrushType);
+	gGroundToggleGroup = new UIToggleGroup(&Environment::getInstance()->groundBrushType);
 	setting_ground->addChild(new UICheckBox(6.0f, 15.0f, "Flat", gGroundToggleGroup, 0));
 	setting_ground->addChild(new UICheckBox(85.0f, 15.0f, "Linear", gGroundToggleGroup, 1));
 	setting_ground->addChild(new UICheckBox(6.0f, 40.0f, "Smooth", gGroundToggleGroup, 2));
@@ -1586,12 +1586,12 @@ void MapView::tick(float t, float dt)
 					if (Environment::getInstance()->ShiftDown)
 					{
 						if (mViewMode == eViewMode_3D) 
-							gWorld->changeTerrain(xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType);
+							gWorld->changeTerrain(xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, Environment::getInstance()->groundBrushType);
 					}
 					else if (Environment::getInstance()->CtrlDown)
 					{
 						if (mViewMode == eViewMode_3D) 
-							gWorld->changeTerrain(xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, groundBrushType);
+							gWorld->changeTerrain(xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, Environment::getInstance()->groundBrushType);
 					}
 					break;
 				case 1:
@@ -2494,9 +2494,9 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			switch (terrainMode)
 			{
 				case 0:
-					groundBrushType++;
-					groundBrushType = groundBrushType % 6;
-					gGroundToggleGroup->Activate(groundBrushType);
+					Environment::getInstance()->groundBrushType++;
+					Environment::getInstance()->groundBrushType = Environment::getInstance()->groundBrushType % 6;
+					gGroundToggleGroup->Activate(Environment::getInstance()->groundBrushType);
 					break;
 
 				case 1:
