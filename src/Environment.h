@@ -47,6 +47,8 @@ public:
 	float cursorColorA;
 	int cursorType;
 
+  int groundBrushType;
+
   float minRotation;
   float maxRotation;
   float minTilt;

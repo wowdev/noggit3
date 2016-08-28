@@ -21,6 +21,7 @@ Environment::Environment()
   this->maxTilt = 5.0f;
   this->minScale = 0.9f;
   this->maxScale = 1.1f;
+  this->groundBrushType = 1;
 }
 
 Environment* Environment::instance = 0;

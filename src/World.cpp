@@ -43,11 +43,6 @@ void renderLine(float x1, float y1, float z1, float x2, float y2, float z2)
 {
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_LIGHTING);
-  glColor4f(Environment::getInstance()->cursorColorR
-    , Environment::getInstance()->cursorColorG
-    , Environment::getInstance()->cursorColorB
-    , Environment::getInstance()->cursorColorA
-  );
 
   glPushMatrix();
 
@@ -60,6 +55,30 @@ void renderLine(float x1, float y1, float z1, float x2, float y2, float z2)
   glFlush();
 
   glEnable(GL_LIGHTING);
+  glEnable(GL_DEPTH_TEST);
+
+  glPopMatrix();
+}
+
+void renderSquare(float x, float y, float z, float size, float orientation)
+{
+  float dx1 = size*cos(orientation) - size*sin(orientation);
+  float dx2 = size*cos(orientation + PI / 2) - size*sin(orientation + PI / 2);
+  float dz1 = size*sin(orientation) + size*cos(orientation);
+  float dz2 = size*sin(orientation + PI / 2) + size*cos(orientation + PI / 2);
+
+  glDisable(GL_DEPTH_TEST);
+  glPushMatrix();
+
+  glBegin(GL_QUADS);
+  glVertex3f(x + dx1, y, z + dz1);
+  glVertex3f(x + dx2, y, z + dz2);
+  glVertex3f(x - dx1, y, z - dz1);
+  glVertex3f(x - dx2, y, z - dz2);
+  glVertex3f(x + dx1, y, z + dz1);
+  glEnd();
+  glFlush();
+
   glEnable(GL_DEPTH_TEST);
 
   glPopMatrix();
@@ -934,10 +953,19 @@ void World::draw()
 
     if (terrainMode == 0)
     {
-      if (Environment::getInstance()->cursorType == 1)
+      // quadratic
+      if (Environment::getInstance()->groundBrushType == 5)
+      {
+        renderSquare(posX, posY, posZ, groundBrushRadius / 2.0f, 0.0f);
+      }
+      else if (Environment::getInstance()->cursorType == 1)
+      {
         renderDisk_convenient((float)posX, (float)posY, (float)posZ, groundBrushRadius);
+      }        
       else if (Environment::getInstance()->cursorType == 2)
+      {
         renderSphere_convenient((float)posX, (float)posY, (float)posZ, groundBrushRadius, 15);
+      }        
     }
     else if (terrainMode == 1)
     {
