@@ -9,7 +9,8 @@ ChunkWater::ChunkWater(float pX, float pY)
 	: x(pX)
 	, y(pY)
 {
-	Liquids[0] = NULL;
+  for (int i = 0; i < 5; i++)
+    Liquids[i] = nullptr;
 }
 
 ChunkWater::~ChunkWater()
@@ -18,26 +19,39 @@ ChunkWater::~ChunkWater()
 void ChunkWater::reloadRendering()
 {
 	if (!Header.nLayers) return;
-	if (!Liquids[0]) Liquids[0] = new Liquid(Info[0].width, Info[0].height, Vec3D(x, Info[0].minHeight, y));
 
-	MH2O_Tile lTile;
-	lTile.mLiquidType = Info[0].LiquidType;
-	lTile.mMaximum = Info[0].maxHeight;
-	lTile.mMinimum = Info[0].minHeight;
-	lTile.mFlags = Info[0].Flags;
+  for (size_t k = 0; k < Header.nLayers; ++k)
+  {
+    if (!Liquids[k])
+    {
+      Liquids[k] = new Liquid(Info[k].width, Info[k].height, Vec3D(x, Info[k].minHeight, y));
+    }      
 
-	for (int x = 0; x < 9; ++x)
-	{
-		for (int y = 0; y < 9; ++y)
-		{
-			lTile.mHeightmap[x][y] = HeightData[0].mHeightValues[x][y];
-			lTile.mDepth[x][y] = (HeightData[0].mTransparency[x][y] / 255.0f);
-		}
-	}
+    MH2O_Tile lTile;
+    lTile.mLiquidType = Info[k].LiquidType;
+    lTile.mMaximum = Info[k].maxHeight;
+    lTile.mMinimum = Info[k].minHeight;
+    lTile.mFlags = Info[k].Flags;
 
-	memcpy(lTile.mRender, existsTable, 8 * 8);
+    for (int x = 0; x < 9; ++x)
+    {
+      for (int y = 0; y < 9; ++y)
+      {
+        lTile.mHeightmap[x][y] = HeightData[k].mHeightValues[x][y];
+        lTile.mDepth[x][y] = (HeightData[k].mTransparency[x][y] / 255.0f);
+      }
+    }
 
-	Liquids[0]->initFromMH2O(lTile);
+    for (size_t i = 0; i < 8; ++i)
+    {
+      for (size_t j = 0; j < 8; ++j)
+      {
+        lTile.mRender[i][j] |= existsTable[k][i][j];
+      }
+    }
+
+    Liquids[k]->initFromMH2O(lTile);
+  }
 }
 
 void ChunkWater::fromFile(MPQFile &f, size_t basePos)
@@ -45,21 +59,21 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 	f.read(&Header, sizeof(MH2O_Header));
 	if (!Header.nLayers) return;
 
+  size_t infoMaskPos, heightDataPos;
+
 	for (int k = 0; k < (int)Header.nLayers; ++k)
 	{
-		if (k > 0) break; //Temporary only for 1 layer
-
 		memset(existsTable[k], 0, 8 * 8);
 		memset(InfoMask, 0, 8);
 
 		//info
-		f.seek(basePos + Header.ofsInformation);
+		f.seek(basePos + Header.ofsInformation + sizeof(MH2O_Information)* k);
 		f.read(&Info[k], sizeof(MH2O_Information));
 
 		//render
 		if (Header.ofsRenderMask)
 		{
-			f.seek(basePos + Header.ofsRenderMask);
+			f.seek(basePos + Header.ofsRenderMask + sizeof(MH2O_Render)* k);
 			f.read(&Render[k], sizeof(MH2O_Render));
 		}
 		else
@@ -93,8 +107,6 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 			}
 		}
 
-
-
 		for (int h = 0; h < 9; ++h)
 		{
 			for (int w = 0; w < 9; ++w)
@@ -104,11 +116,12 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 			}
 		}
 
+    if (!Info[k].ofsHeightMap)
+    {
+      continue;
+    }			
 
-		if (!Info[k].ofsHeightMap)
-			return;
-
-		f.seek(basePos + Info[k].ofsHeightMap);
+    f.seek(basePos + Info[k].ofsHeightMap);
 
 		if (Info[k].Flags != 2)
 		{
@@ -437,6 +450,13 @@ bool ChunkWater::hasData()
 
 void ChunkWater::draw()
 {
-	if (!hasData()) return;
-	Liquids[0]->draw();
+  if (!hasData())
+  {
+    return;
+  }    
+  
+  for (size_t i = 0; i < Header.nLayers; ++i)
+  {
+    Liquids[i]->draw();
+  }	
 }
