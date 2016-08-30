@@ -154,7 +154,10 @@ void ChunkWater::writeHeader(sExtendableArray &lADTFile, int &lCurrentPosition)
 
 void ChunkWater::writeInfo(sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
 {
-	if (!hasData()) return;
+  if (!hasData(0))
+  {
+    return;
+  }
 
   Header.ofsInformation = lCurrentPosition - basePos; //setting offset to this info at the header
 
@@ -167,7 +170,10 @@ void ChunkWater::writeInfo(sExtendableArray &lADTFile, size_t basePos, int &lCur
 
 void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
 {
-	if (!hasData()) return;
+  if (!hasData(0))
+  {
+    return;
+  }
 
   Header.ofsRenderMask = lCurrentPosition - basePos;
   
@@ -260,36 +266,40 @@ void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t 
 
 void ChunkWater::autoGen(MapChunk *chunk, int factor)
 {
-	for (size_t y = 0; y < 9; ++y)
-	{
-		for (size_t x = 0; x < 9; ++x)
-		{
-			float terrainHeight(chunk->getHeight(y, x));
-			float waterHeight(HeightData[0].mHeightValues[y][x]);
+  for (size_t k = 0; k < Header.nLayers; ++k)
+  {
+    for (size_t y = 0; y < 9; ++y)
+	  {
+		  for (size_t x = 0; x < 9; ++x)
+		  {
+			  float terrainHeight(chunk->getHeight(y, x));
+			  float waterHeight(HeightData[0].mHeightValues[y][x]);
 
-			int diff(factor * (int)std::log(std::abs(waterHeight - terrainHeight) + 1.0f));
-			diff = std::min(std::max(diff, 0), 255);
+			  int diff(factor * (int)std::log(std::abs(waterHeight - terrainHeight) + 1.0f));
+			  diff = std::min(std::max(diff, 0), 255);
 
-			HeightData[0].mTransparency[y][x] = diff;
-		}
-	}
+			  HeightData[0].mTransparency[y][x] = diff;
+		  }
+	  }
+  }
+	
 	reloadRendering();
 }
 
-bool ChunkWater::hasLayer(size_t x, size_t y)
+bool ChunkWater::subchunkHasWater(size_t x, size_t y, size_t layer)
 {
-	if (!hasData()) return false;
+	if (layer >= Header.nLayers) return false;
 	if (x > 8 || y > 8) return false;
-	return existsTable[0][y][x];
+	return existsTable[layer][y][x];
 }
 
-void ChunkWater::addLayer()
+void ChunkWater::addLayer(size_t layer)
 {
 	for (size_t y = 0; y < 8; ++y)
 	{
 		for (size_t x = 0; x < 8; ++x)
 		{
-			addLayer(x, y);
+			addLayer(x, y, layer);
 		}
 	}
 }
@@ -297,53 +307,77 @@ void ChunkWater::addLayer()
 void ChunkWater::CropWater(MapChunk* chunkTerrain)
 {
 	int k = 0;
-	for (int i = 0; i < 8; ++i)
-	{
-		for (int j = 0; j < 8; ++j)
-		{
-			if (hasLayer(j, i))
-			{
-				if (chunkTerrain->mVertices[k].y > getHeight(j, i))
-					if (chunkTerrain->mVertices[k + 1].y > getHeight(j, i))
-						if (chunkTerrain->mVertices[k + 17].y > getHeight(j, i))
-							if (chunkTerrain->mVertices[k + 18].y > getHeight(j, i))
-								deleteLayer(j, i);
-			}
-			++k;
-		}
-		k += 9;
-	}
+
+  for (size_t k = 0; k < Header.nLayers; ++k)
+  {
+    for (int i = 0; i < 8; ++i)
+    {
+      for (int j = 0; j < 8; ++j)
+      {
+        if (subchunkHasWater(j, i, k))
+        {
+          float h = getHeight(j, i, k);
+          if (chunkTerrain->mVertices[k].y > h &&
+              chunkTerrain->mVertices[k + 1].y > h &&
+              chunkTerrain->mVertices[k + 17].y > h &&
+              chunkTerrain->mVertices[k + 18].y > h
+            )
+          {
+            deleteLayer(j, i, k);
+          }
+            
+        }
+        ++k;
+      }
+      k += 9;
+    }
+    cleanLayer(k);
+  }
+	
 	reloadRendering();
-	DelLayer();
+
 }
 
-void ChunkWater::DelLayer()
+void ChunkWater::cleanLayer(size_t layer)
 {
-	for (int i = 0; i < 8; ++i)
-		for (int j = 0; j < 8; ++j)
-			if (hasLayer(j, i))
-				return;
-	deleteLayer();
+  if (layer >= Header.nLayers)
+  {
+    return;
+  }
+
+  for (int i = 0; i < 8; ++i)
+  {
+    for (int j = 0; j < 8; ++j)
+    {
+      if (subchunkHasWater(j, i, layer))
+      {
+        return;
+      }
+    }
+  }
+				
+	deleteLayer(layer);
 }
 
-void ChunkWater::addLayer(size_t x, size_t y)
+void ChunkWater::addLayer(size_t x, size_t y, size_t layer)
 {
-	if (hasLayer(x, y)) return;
-	if (!hasData())
+	if (subchunkHasWater(x, y, layer)) return;
+
+	if (!hasData(layer))
 	{
-		Header.nLayers = 1;
+		Header.nLayers = layer+1;
 		reloadRendering();
 	}
-	existsTable[0][y][x] = true;
+	existsTable[layer][y][x] = true;
 }
 
-void ChunkWater::deleteLayer()
+void ChunkWater::deleteLayer(size_t layer)
 {
 	for (size_t y = 0; y < 8; ++y)
 	{
 		for (size_t x = 0; x < 8; ++x)
 		{
-			deleteLayer(x, y);
+			deleteLayer(x, y, layer);
 		}
 	}
 	Header.nLayers = 0;
@@ -354,119 +388,127 @@ void ChunkWater::deleteLayer()
 	Liquids[0] = NULL;
 }
 
-void ChunkWater::deleteLayer(size_t x, size_t y)
+void ChunkWater::deleteLayer(size_t x, size_t y, size_t layer)
 {
-	if (!hasLayer(x, y)) return;
-	existsTable[0][y][x] = false;
+  if (subchunkHasWater(x, y, layer))
+  {
+    existsTable[layer][y][x] = false;
+  }	
 }
 
-void ChunkWater::setHeight(float height)
+void ChunkWater::setHeight(float height, size_t layer)
 {
 	for (size_t y = 0; y < 9; ++y)
 	{
 		for (size_t x = 0; x < 9; ++x)
 		{
-			HeightData[0].mHeightValues[y][x] = height;
+			HeightData[layer].mHeightValues[y][x] = height;
 		}
 	}
 	reloadRendering();
 }
 
-void ChunkWater::setHeight(size_t x, size_t y, float height)
+void ChunkWater::setHeight(size_t x, size_t y, float height, size_t layer)
 {
-	if (x > 8 || y > 8) return;
-	if (!hasLayer(x, y)) return;
+  if (x > 8 || y > 8 || !subchunkHasWater(x, y, layer))
+  {
+    return;
+  }
 
-	HeightData[0].mHeightValues[y][x] = height;
-	HeightData[0].mHeightValues[y + 1][x] = height;
-	HeightData[0].mHeightValues[y][x + 1] = height;
-	HeightData[0].mHeightValues[y + 1][x + 1] = height;
+	HeightData[layer].mHeightValues[y][x] = height;
+	HeightData[layer].mHeightValues[y + 1][x] = height;
+	HeightData[layer].mHeightValues[y][x + 1] = height;
+	HeightData[layer].mHeightValues[y + 1][x + 1] = height;
 
 	reloadRendering();
 }
 
-float ChunkWater::getHeight()
+float ChunkWater::getHeight(size_t layer)
 {
 	for (size_t y = 0; y < 9; ++y)
 	{
 		for (size_t x = 0; x < 9; ++x)
 		{
-			if (hasLayer(x, y)) return getHeight(x, y);
+      if (subchunkHasWater(x, y, layer))
+      {
+        return getHeight(x, y, layer);
+      }
 		}
 	}
 	return -1;
 }
 
-float ChunkWater::getHeight(size_t x, size_t y)
+float ChunkWater::getHeight(size_t x, size_t y, size_t layer)
 {
-	if (!hasLayer(x, y)) return -1;
-	return HeightData[0].mHeightValues[y][x];
+	if (!subchunkHasWater(x, y, layer)) return -1;
+	return HeightData[layer].mHeightValues[y][x];
 }
 
-int ChunkWater::getType()
+int ChunkWater::getType(size_t layer)
 {
-	if (!hasData()) return 0;
-	return Info[0].LiquidType;
+	return hasData(layer) ? Info[0].LiquidType : 0;
 }
 
-void ChunkWater::setType(int type)
+void ChunkWater::setType(int type, size_t layer)
 {
-	if (!hasData()) return;
-	Info[0].LiquidType = type;
+	if (!hasData(layer)) return;
+	Info[layer].LiquidType = type;
 	reloadRendering();
 }
 
-unsigned char ChunkWater::getTrans()
+unsigned char ChunkWater::getTrans(size_t layer)
 {
 	for (size_t y = 0; y < 9; ++y)
 	{
 		for (size_t x = 0; x < 9; ++x)
 		{
-			if (hasLayer(x, y)) return getTrans(x, y);
+      if (subchunkHasWater(x, y, layer))
+      {
+        return getTrans(x, y, layer);
+      }
 		}
 	}
-	return 255;
+	return 0;
 }
 
-unsigned char ChunkWater::getTrans(size_t x, size_t y)
+unsigned char ChunkWater::getTrans(size_t x, size_t y, size_t layer)
 {
-	if (!hasLayer(x, y)) return 0;
-	return HeightData[0].mTransparency[y][x];
+  return subchunkHasWater(x, y, layer) ? HeightData[layer].mTransparency[y][x] : 0;
 }
 
-void ChunkWater::setTrans(size_t x, size_t y, unsigned char trans)
+void ChunkWater::setTrans(size_t x, size_t y, unsigned char trans, size_t layer)
 {
-	if (!hasLayer(x, y)) return;
+	if (!subchunkHasWater(x, y, layer)) return;
 
-	HeightData[0].mTransparency[y][x] = trans;
-	HeightData[0].mTransparency[y + 1][x] = trans;
-	HeightData[0].mTransparency[y][x + 1] = trans;
-	HeightData[0].mTransparency[y + 1][x + 1] = trans;
+	HeightData[layer].mTransparency[y][x] = trans;
+	HeightData[layer].mTransparency[y + 1][x] = trans;
+	HeightData[layer].mTransparency[y][x + 1] = trans;
+	HeightData[layer].mTransparency[y + 1][x + 1] = trans;
 
 	reloadRendering();
 }
 
-void ChunkWater::setTrans(unsigned char trans)
+void ChunkWater::setTrans(unsigned char trans, size_t layer)
 {
 	for (size_t y = 0; y < 9; ++y)
 	{
 		for (size_t x = 0; x < 9; ++x)
 		{
-			HeightData[0].mTransparency[y][x] = trans;
+			HeightData[layer].mTransparency[y][x] = trans;
 		}
 	}
 
 	reloadRendering();
 }
 
-bool ChunkWater::hasData()
+bool ChunkWater::hasData(size_t layer)
 {
-	return (Header.nLayers > 0);
+	return (Header.nLayers > layer);
 }
 
 void ChunkWater::draw()
 {
-  if (!hasData())
+  if (!hasData(0))
   {
     return;
   }    
