@@ -61,6 +61,17 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 
   size_t infoMaskPos, heightDataPos;
 
+  //render
+  if (Header.ofsRenderMask)
+  {
+    f.seek(basePos + Header.ofsRenderMask + sizeof(MH2O_Render));
+    f.read(&Render, sizeof(MH2O_Render));
+  }
+  else
+  {
+    memset(&Render.mask, 255, 8);
+  }
+
 	for (int k = 0; k < (int)Header.nLayers; ++k)
 	{
 		memset(existsTable[k], 0, 8 * 8);
@@ -70,17 +81,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 		f.seek(basePos + Header.ofsInformation + sizeof(MH2O_Information)* k);
 		f.read(&Info[k], sizeof(MH2O_Information));
 
-		//render
-		if (Header.ofsRenderMask)
-		{
-			f.seek(basePos + Header.ofsRenderMask + sizeof(MH2O_Render)* k);
-			f.read(&Render[k], sizeof(MH2O_Render));
-		}
-		else
-		{
-			memset(&Render[k].mask, 255, 8);
-		}
-
+		
 		//mask
 		if (Info[k].ofsInfoMask > 0 && Info[k].height > 0)
 		{
@@ -168,6 +169,10 @@ void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t 
 	if (!hasData()) return;
 
   Header.ofsRenderMask = lCurrentPosition - basePos;
+  
+  //render
+  lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render));
+  lCurrentPosition += sizeof(MH2O_Render);
 
   for (size_t i = 0; i < Header.nLayers; ++i)
   {
@@ -178,11 +183,6 @@ void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t 
     Info[i].minHeight = HeightData[i].mHeightValues[0][0];
     Info[i].maxHeight = HeightData[i].mHeightValues[0][0];
     Info[i].ofsHeightMap = 0;
-
-    //render
-
-    lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render[i]));
-    lCurrentPosition += sizeof(MH2O_Render);
 
     for (int h = 0; h < 8; ++h)
     {
@@ -348,7 +348,7 @@ void ChunkWater::deleteLayer()
 	Header.nLayers = 0;
 	Info[0] = MH2O_Information();
 	HeightData[0] = MH2O_HeightMask();
-	Render[0] = MH2O_Render();
+	Render = MH2O_Render();
 	delete Liquids[0];
 	Liquids[0] = NULL;
 }
