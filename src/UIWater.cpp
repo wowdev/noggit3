@@ -4,10 +4,12 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 
+#include "Environment.h"
 #include "Noggit.h" // fonts
 #include "revision.h"
 #include "UIText.h"
 #include "UIButton.h"
+#include "UICheckBox.h"
 #include "UITexture.h"
 #include "UISlider.h"
 #include "UIMapViewGUI.h"
@@ -20,10 +22,10 @@
 
 #include "Log.h"
 
-
+void toggleDisplayAllLayers(bool b, int);
 
 UIWater::UIWater(UIMapViewGUI *setGui)
-	: UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f - (float)(video.yres() / 4), (float)winWidth, (float)winHeight + 50), mainGui(setGui)
+	: UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f - (float)(video.yres() / 4), (float)winWidth, (float)winHeight), mainGui(setGui)
 {
 	addChild(new UIText(78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter));
 
@@ -127,6 +129,48 @@ UIWater::UIWater(UIMapViewGUI *setGui)
 		100);
 	addChild(cropWater);
 
+  displayAllLayers = new UICheckBox(5.0f, 270.0f, "Show all layers", [] (bool b, int)
+  {
+    Environment::getInstance()->displayAllWaterLayers = b;
+  }, 0);
+  displayAllLayers->setState(Environment::getInstance()->displayAllWaterLayers);
+  addChild(displayAllLayers);
+
+  UIText *txt = new UIText(5.0f, 300.0f, app.getArial12(), eJustifyLeft);
+  txt->setText("Current layer:");
+  addChild(txt);
+
+
+  waterLayer = new UIText(90.0f, 322.0f, app.getArial12(), eJustifyCenter);
+  waterLayer->setText(std::to_string(Environment::getInstance()->currentWaterLayer + 1));
+  addChild(waterLayer);
+
+  addChild(new UIButton(28.0f, 320.0f, 50.0f, 30.0f,
+    "<<",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    [this] (UIFrame::Ptr, int) 
+    {
+      size_t layer = std::max(0, Environment::getInstance()->currentWaterLayer - 1);
+      waterLayer->setText(std::to_string(layer + 1));
+      Environment::getInstance()->currentWaterLayer = layer;
+    },
+    0)
+    );
+
+  addChild(new UIButton(102.0f, 320.0f, 50.0f, 30.0f,
+    ">>",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    [this](UIFrame::Ptr, int)
+    {
+      size_t layer = std::min(4, Environment::getInstance()->currentWaterLayer + 1);
+      waterLayer->setText(std::to_string(layer + 1));
+      Environment::getInstance()->currentWaterLayer = layer;
+    },
+    0)
+  );
+
 	updateData();
 }
 
@@ -226,4 +270,9 @@ void UIWater::CropWater(UIFrame::Ptr ptr, int someint)
 {
 	gWorld->CropWaterADT(tileX, tileY);
 	updateData();
+}
+
+void toggleDisplayAllLayers(bool b, int)
+{
+  Environment::getInstance()->displayAllWaterLayers = b;
 }

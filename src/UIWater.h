@@ -6,6 +6,7 @@
 class UISlider;
 class UIText;
 class UIButton;
+class UICheckBox;
 class UIMapViewGUI;
 
 class UIWater : public UIWindow
@@ -30,10 +31,9 @@ public:
 	void AddWater(UIFrame::Ptr ptr, int someint);
 	void CropWater(UIFrame::Ptr ptr, int someint);
 
-
 private:
 	static const int winWidth = 180;
-	static const int winHeight = 230;
+	static const int winHeight = 350;
 
 	UIMapViewGUI *mainGui;
 	UISlider *waterOpacity;
@@ -43,6 +43,8 @@ private:
 	UIButton *addWater;
 	UIButton *cropWater;
 	UISlider *waterGenFactor;
+  UICheckBox *displayAllLayers;
+  UIText *waterLayer;
 
 	int tileX;
 	int tileY;

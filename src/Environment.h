@@ -56,6 +56,9 @@ public:
   float minScale;  
   float maxScale;
 
+  bool displayAllWaterLayers;
+  int currentWaterLayer;
+
 private:
 	Environment();
 	static Environment* instance;

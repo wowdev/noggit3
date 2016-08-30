@@ -22,6 +22,8 @@ Environment::Environment()
   this->minScale = 0.9f;
   this->maxScale = 1.1f;
   this->groundBrushType = 1;
+  this->currentWaterLayer = 0;
+  this->displayAllWaterLayers = true;
 }
 
 Environment* Environment::instance = 0;

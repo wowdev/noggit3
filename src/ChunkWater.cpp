@@ -1,5 +1,6 @@
 #include "ChunkWater.h"
 
+#include "Environment.h"
 #include "MPQ.h"
 #include "Liquid.h"
 #include "Misc.h"
@@ -470,8 +471,15 @@ void ChunkWater::draw()
     return;
   }    
   
-  for (size_t i = 0; i < Header.nLayers; ++i)
+  if (Environment::getInstance()->displayAllWaterLayers)
   {
-    Liquids[i]->draw();
-  }	
+    for (size_t i = 0; i < Header.nLayers; ++i)
+    {
+      Liquids[i]->draw();
+    }
+  } 
+  else if (Environment::getInstance()->currentWaterLayer < Header.nLayers)
+  {
+    Liquids[Environment::getInstance()->currentWaterLayer]->draw();
+  }
 }
