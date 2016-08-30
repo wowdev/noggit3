@@ -53,7 +53,7 @@ private:
 	MH2O_Header Header;
 	MH2O_Information Info[5];
 	MH2O_HeightMask HeightData[5];
-	MH2O_Render Render[5];
+	MH2O_Render Render;
 
 	Liquid * Liquids[5];
 
