@@ -1412,7 +1412,7 @@ void World::deleteWaterLayer(int x, int z)
   MapTile *curTile = mapIndex->getTile((size_t)z, (size_t)x);
   if (!curTile) return;
 
-  curTile->Water->deleteLayer();
+  curTile->Water->deleteLayer(Environment::getInstance()->currentWaterLayer);
   mapIndex->setChanged(z, x);
 }
 
@@ -1437,7 +1437,7 @@ void World::addWaterLayer(int x, int z)
   MapTile *curTile = mapIndex->getTile((size_t)z, (size_t)x);
   if (!curTile) return;
 
-  curTile->Water->addLayer(1.0f, (unsigned char)255);
+  curTile->Water->addLayer(1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer);
   mapIndex->setChanged(z, x);
 }
 
@@ -1445,7 +1445,7 @@ void World::addWaterLayerChunk(int x, int z, int i, int j)
 {
   MapTile *curTile = mapIndex->getTile((size_t)z, (size_t)x);
   if (!curTile) return;
-  curTile->Water->addLayer(i, j, 1.0f, (unsigned char)255);
+  curTile->Water->addLayer(i, j, 1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer);
   mapIndex->setChanged(z, x);
 }
 
@@ -1453,7 +1453,7 @@ void World::delWaterLayerChunk(int x, int z, int i, int j)
 {
   MapTile *curTile = mapIndex->getTile((size_t)z, (size_t)x);
   if (!curTile) return;
-  curTile->Water->deleteLayer(i, j);
+  curTile->Water->deleteLayer(i, j, Environment::getInstance()->currentWaterLayer);
   mapIndex->setChanged(z, x);
 }
 
@@ -1462,7 +1462,7 @@ void World::addWaterLayer(int x, int z, float height, unsigned char trans)
   MapTile *curTile = mapIndex->getTile((size_t)z, (size_t)x);
   if (!curTile) return;
 
-  curTile->Water->addLayer(height, trans);
+  curTile->Water->addLayer(height, trans, Environment::getInstance()->currentWaterLayer);
   mapIndex->setChanged(z, x);
 }
 
@@ -2360,65 +2360,65 @@ bool World::canWaterSave(int x, int y)
 void World::setWaterHeight(int x, int y, float h)
 {
   MapTile *curTile = mapIndex->getTile((size_t)y, (size_t)x);
-  if (!curTile) return;
+  if (!curTile)
+  {
+    return;
+  }
+  size_t currentLayer = Environment::getInstance()->currentWaterLayer;
   int i, j, k = 0;
   float newh = 0.0f;
   for (i = 0; i < 16; ++i)
+  {
     for (j = 0; j < 16; ++j)
     {
       if (curTile->getChunk((size_t)i, (size_t)j)->GetWater())
       {
-        if (curTile->Water->getHeightChunk(j, i))
+        if (curTile->Water->getHeightChunk(j, i, currentLayer))
         {
           if (!k)
           {
-            newh = curTile->Water->getHeightChunk(j, i) + h;
+            newh = curTile->Water->getHeightChunk(j, i, currentLayer) + h;
           }
           ++k;
         }
       }
     }
+  }
+
   if (k == 0)
   {
     if (mapIndex->tileLoaded(y, x))
     {
-      mapIndex->getTile((size_t)y, (size_t)x)->Water->setHeight(gWorld->getWaterHeight(x, y) + h);
+      mapIndex->getTile((size_t)y, (size_t)x)->Water->setHeight(gWorld->getWaterHeight(x, y) + h, currentLayer);
       mapIndex->setChanged(y, x);
     }
   }
   else
   {
     for (i = 0; i < 16; ++i)
+    {
       for (j = 0; j < 16; ++j)
+      {
         if (curTile->getChunk((size_t)i, (size_t)j)->GetWater())
         {
-          curTile->Water->setHeight(j, i, newh);
+          curTile->Water->setHeight(j, i, newh, currentLayer);
         }
+      }
+    }
     mapIndex->setChanged(y, x);
   }
-  /*	for (i = 0; i < 16; ++i)
-  {
-  for (j = 0; j < 16; ++j)
-  _cprintf("%i ", curTile->getChunk(i, j)->getFlag());
-  _cprintf("\n");
-  }*/
 }
 
 float World::getWaterHeight(int x, int y)
 {
-  if (mapIndex->tileLoaded(y, x))
-  {
-    return mapIndex->getTile((size_t)y, (size_t)x)->Water->getHeight();
-  }
-  else return 0;
+  return mapIndex->tileLoaded(y, x) ? mapIndex->getTile((size_t)y, (size_t)x)->Water->getHeight(Environment::getInstance()->currentWaterLayer) : 0;
 }
 
 void World::setWaterTrans(int x, int y, unsigned char value)
 {
-
   if (mapIndex->tileLoaded(y, x))
   {
-    mapIndex->getTile((size_t)y, (size_t)x)->Water->setTrans(value);
+    mapIndex->getTile((size_t)y, (size_t)x)->Water->setTrans(value, Environment::getInstance()->currentWaterLayer);
     mapIndex->setChanged(y, x);
   }
 }
@@ -2427,30 +2427,33 @@ unsigned char World::getWaterTrans(int x, int y)
 {
   if (mapIndex->tileLoaded(y, x))
   {
-    return mapIndex->getTile((size_t)y, (size_t)x)->Water->getOpacity();
+    return mapIndex->getTile((size_t)y, (size_t)x)->Water->getOpacity(Environment::getInstance()->currentWaterLayer);
   }
-  else return 255;
+  else
+  {
+    return 255;
+  }
 }
 
 void World::setWaterType(int x, int y, int type)
 {
-
   if (mapIndex->tileLoaded(y, x))
   {
-    mapIndex->getTile((size_t)y, (size_t)x)->Water->setType(type);
+    mapIndex->getTile((size_t)y, (size_t)x)->Water->setType(type, Environment::getInstance()->currentWaterLayer);
     mapIndex->setChanged(y, x);
   }
-
 }
 
 int World::getWaterType(int x, int y)
 {
   if (mapIndex->tileLoaded(y, x))
   {
-    return mapIndex->getTile((size_t)y, (size_t)x)->Water->getType();
-    //mapIndex->setChanged(y,x); Should only change if you change something :)
+    return mapIndex->getTile((size_t)y, (size_t)x)->Water->getType(Environment::getInstance()->currentWaterLayer);
   }
-  else return false;
+  else
+  {
+    return false;
+  }
 }
 
 void World::autoGenWaterTrans(int x, int y, int factor)
@@ -2468,9 +2471,16 @@ void World::AddWaters(int x, int y)
   {
     MapTile *curTile = mapIndex->getTile((size_t)y, (size_t)x);
     for (int i = 0; i < 16; ++i)
+    {
       for (int j = 0; j < 16; ++j)
+      {
         if (curTile->getChunk((size_t)i, (size_t)j)->GetWater())
-          curTile->Water->addLayer(i, j, 1.0f, (unsigned char)255);
+        {
+          curTile->Water->addLayer(i, j, 1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer);
+        }
+      }
+    }        
+          
     mapIndex->setChanged(y, x);
   }
 }

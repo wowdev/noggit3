@@ -436,7 +436,10 @@ void MapTile::drawMFBO()
 
 void MapTile::drawWater()
 {
-  if (!Water->hasData()) return; //no need to draw water on tile without water =)
+  if (!Water->hasData(0))
+  {
+    return; //no need to draw water on tile without water =)
+  }
 
   glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_LIGHTING);
