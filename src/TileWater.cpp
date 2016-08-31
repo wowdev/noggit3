@@ -70,7 +70,11 @@ void TileWater::autoGen(int factor)
 
 void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition)
 {
-	if (!hasData()) return;
+  if (!hasData(0))
+  {
+    return;
+  }
+
 	size_t ofsW = lCurrentPosition + 0x8; //water Header pos
 
 	lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mh2o = lCurrentPosition - 0x14; //setting offset to MH2O data in Header
@@ -110,58 +114,67 @@ void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int 
 	lCurrentPosition += 8;
 }
 
-bool TileWater::hasData()
+bool TileWater::hasData(size_t layer)
 {
 	for (int i = 0; i < 16; ++i)
 	{
 		for (int j = 0; j < 16; ++j)
 		{
-			if (chunks[i][j]->hasData(0)) return true;
+      if (chunks[i][j]->hasData(layer))
+      {
+        return true;
+      }
 		}
 	}
 
 	return false;
 }
 
-void TileWater::deleteLayer()
+void TileWater::deleteLayer(size_t layer)
 {
 	for (int i = 0; i < 16; ++i)
 	{
 		for (int j = 0; j < 16; ++j)
 		{
-			chunks[i][j]->deleteLayer(0);
+			chunks[i][j]->deleteLayer(layer);
 		}
 	}
 }
 
-void TileWater::deleteLayer(int i, int j)
+void TileWater::deleteLayer(int i, int j, size_t layer)
 {
-	chunks[i][j]->deleteLayer(0);
+	chunks[i][j]->deleteLayer(layer);
 }
 
-void TileWater::addLayer(float height, unsigned char trans)
+
+void TileWater::addLayer(float height, unsigned char trans, size_t layer)
 {
-	addLayer();
-	setHeight(height);
-	setTrans(trans);
+	addLayer(layer);
+	setHeight(height, layer);
+	setTrans(trans, layer);
 }
 
-void TileWater::addLayer()
+void TileWater::addLayer(size_t layer)
 {
 	for (int i = 0; i < 16; ++i)
 	{
 		for (int j = 0; j < 16; ++j)
 		{
-			chunks[i][j]->addLayer(0);
+			chunks[i][j]->addLayer(layer);
 		}
 	}
 }
 
-void TileWater::addLayer(int i, int j, float height, unsigned char trans)
+void TileWater::addLayer(int i, int j, size_t layer)
 {
-	chunks[i][j]->addLayer(0);
-	chunks[i][j]->setHeight(height, 0);
-	chunks[i][j]->setTrans(trans, 0);
+  chunks[i][j]->addLayer(layer);
+}
+
+void TileWater::addLayer(int i, int j, float height, unsigned char trans, size_t layer)
+{
+	chunks[i][j]->addLayer(layer);
+	chunks[i][j]->setHeight(height, layer);
+	chunks[i][j]->setTrans(trans, layer);
 }
 
 void TileWater::CropMiniChunk(int i, int j, MapChunk* chunkTerrain)
@@ -176,90 +189,87 @@ float TileWater::HaveWater(int i, int j)
 	return 0;
 }
 
-void TileWater::addLayer(int i, int j)
-{
-	chunks[i][j]->addLayer(0);
-}
-
-void TileWater::setHeight(float height)
+void TileWater::setHeight(float height, size_t layer)
 {
 	for (int i = 0; i < 16; ++i)
 	{
 		for (int j = 0; j < 16; ++j)
 		{
-			chunks[i][j]->setHeight(height, 0);
+			chunks[i][j]->setHeight(height, layer);
 		}
 	}
 }
 
-void TileWater::setHeight(int i, int j, float height)
+void TileWater::setHeight(int i, int j, float height, size_t layer)
 {
-	chunks[i][j]->setHeight(height, 0);
+	chunks[i][j]->setHeight(height, layer);
 }
 
-float TileWater::getHeight()
+float TileWater::getHeight(size_t layer)
 {
 	for (int i = 0; i < 16; ++i)
 	{
 		for (int j = 0; j < 16; ++j)
 		{
-			if (chunks[i][j]->hasData(0))
-				return chunks[i][j]->getHeight(0);
+      if (chunks[i][j]->hasData(layer))
+      {
+        return chunks[i][j]->getHeight(layer);
+      }			
 		}
 	}
 	return 0;
 }
 
-float TileWater::getHeightChunk(int i, int j)
+float TileWater::getHeightChunk(int i, int j, size_t layer)
 {
-	if (chunks[i][j]->hasData(0))
-		return chunks[i][j]->getHeight(0);
-	return 0;
+  return chunks[i][j]->hasData(layer) ? chunks[i][j]->getHeight(layer) : 0;
 }
 
-void TileWater::setTrans(unsigned char opacity)
+void TileWater::setTrans(unsigned char opacity, size_t layer)
 {
 	for (int i = 0; i < 16; ++i)
 	{
 		for (int j = 0; j < 16; ++j)
 		{
-			chunks[i][j]->setTrans(opacity, 0);
+			chunks[i][j]->setTrans(opacity, layer);
 		}
 	}
 }
 
-unsigned char TileWater::getOpacity()
+unsigned char TileWater::getOpacity(size_t layer)
 {
 	for (int i = 0; i < 16; ++i)
 	{
 		for (int j = 0; j < 16; ++j)
 		{
-			if (chunks[i][j]->hasData(0))
-				return chunks[i][j]->getTrans(0);
+			if (chunks[i][j]->hasData(layer))
+				return chunks[i][j]->getTrans(layer);
 		}
 	}
 	return 255;
 }
 
-void TileWater::setType(int type)
+void TileWater::setType(int type, size_t layer)
 {
 	for (int i = 0; i < 16; ++i)
 	{
 		for (int j = 0; j < 16; ++j)
 		{
-			chunks[i][j]->setType(type, 0);
+			chunks[i][j]->setType(type, layer);
 		}
 	}
 }
 
-int TileWater::getType()
+int TileWater::getType(size_t layer)
 {
 	for (int i = 0; i < 16; ++i)
 	{
 		for (int j = 0; j < 16; ++j)
 		{
-			if (chunks[i][j]->hasData(0))
-				return chunks[i][j]->getType(0);
+      if (chunks[i][j]->hasData(layer))
+      {
+        return chunks[i][j]->getType(layer);
+      }				
 		}
 	}
 	return 0;

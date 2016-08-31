@@ -21,30 +21,30 @@ public:
 	void saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
 
 	void draw();
-	bool hasData();
+  bool hasData(size_t layer);
 	float HaveWater(int i, int j);
 	void CropMiniChunk(int i, int j, MapChunk* chunkTerrain);
 
 	void autoGen(int factor);
 
-	void setHeight(float height);
-	void setHeight(int i, int j, float height);
-	float getHeight();
-	float getHeightChunk(int i, int j);
+	void setHeight(float height, size_t layer);
+	void setHeight(int i, int j, float height, size_t layer);
+	float getHeight(size_t layer);
+	float getHeightChunk(int i, int j, size_t layer);
 
-	void setTrans(unsigned char opacity);
-	unsigned char getOpacity();
+	void setTrans(unsigned char opacity, size_t layer);
+	unsigned char getOpacity(size_t layer);
 
-	void setType(int type);
-	int getType();
+	void setType(int type, size_t layer);
+	int getType(size_t layer);
 
-	void addLayer();
-	void addLayer(int i, int j);
-	void addLayer(float height, unsigned char trans);
-	void addLayer(int i, int j, float height, unsigned char trans);
+	void addLayer(size_t layer);
+	void addLayer(int i, int j, size_t layer);
+	void addLayer(float height, unsigned char trans, size_t layer);
+	void addLayer(int i, int j, float height, unsigned char trans, size_t layer);
 
-	void deleteLayer();
-	void deleteLayer(int i, int j);
+	void deleteLayer(size_t layer);
+	void deleteLayer(int i, int j, size_t layer);
 
 private:
 	void reload();
