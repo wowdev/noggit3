@@ -373,6 +373,11 @@ void ChunkWater::addLayer(size_t x, size_t y, size_t layer)
 
 void ChunkWater::deleteLayer(size_t layer)
 {
+  if (!hasData(layer))
+  {
+    return;
+  }
+
 	for (size_t y = 0; y < 8; ++y)
 	{
 		for (size_t x = 0; x < 8; ++x)
@@ -380,12 +385,34 @@ void ChunkWater::deleteLayer(size_t layer)
 			deleteLayer(x, y, layer);
 		}
 	}
-	Header.nLayers = 0;
-	Info[0] = MH2O_Information();
-	HeightData[0] = MH2O_HeightMask();
-	Render = MH2O_Render();
-	delete Liquids[0];
-	Liquids[0] = NULL;
+
+  delete Liquids[layer];
+  
+  for (size_t k = layer; k < Header.nLayers; ++k)
+  {
+    Liquids[k] = Liquids[k + 1];
+    Info[k] = Info[k + 1];
+    HeightData[k] = HeightData[k + 1];
+    memcpy(existsTable[k], existsTable[k + 1], 64);
+  }
+  
+  Header.nLayers--;
+  Liquids[Header.nLayers] = nullptr;
+
+  for (size_t i = 0; i < 8; ++i)
+  {
+    for (size_t j = 0; j < 8; j++)
+    {
+      existsTable[Header.nLayers][i][j] = false;
+    }
+  }
+
+  if (Header.nLayers == 0)
+  {
+    Info[0] = MH2O_Information();
+    HeightData[0] = MH2O_HeightMask();
+    Render = MH2O_Render();
+  }  
 }
 
 void ChunkWater::deleteLayer(size_t x, size_t y, size_t layer)
