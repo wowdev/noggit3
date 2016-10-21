@@ -407,7 +407,7 @@ void change_settings_window(int oldid, int newid)
 		settings_shader->show();
 		break;
   case 10:
-    mainGui->objectEditor->x((const float)tool_settings_x-220.0f);
+    mainGui->objectEditor->x((const float)tool_settings_x-90.0f);
     mainGui->objectEditor->y((const float)tool_settings_y);
     mainGui->objectEditor->show();
     mainGui->objectEditor->filename->show();
@@ -2109,7 +2109,20 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			}
 			else if (terrainMode == 9 || Environment::getInstance()->CtrlDown)
 			{
-        mainGui->objectEditor->pasteObject(Environment::getInstance()->get_cursor_pos());
+        Vec3D pos = Environment::getInstance()->get_cursor_pos();
+        if (Environment::getInstance()->pasteOnSelection && gWorld->HasSelection())
+        {
+          nameEntry* selection = gWorld->GetCurrentSelection();
+          if (selection->type == eEntry_Model)
+          {
+            pos = selection->data.model->pos;
+          }
+          else if (selection->type == eEntry_WMO)
+          {
+            pos = selection->data.wmo->pos;
+          }
+        }
+        mainGui->objectEditor->pasteObject(pos);
 			}
 		}
 
