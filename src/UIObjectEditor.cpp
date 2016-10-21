@@ -133,16 +133,21 @@ void toggleCopyModelStats(bool b, int)
   Settings::getInstance()->copyModelStats = b;
 }
 
+void togglePasteOnSelection(bool b, int)
+{
+  Environment::getInstance()->pasteOnSelection = b;
+}
+
 
 UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
-   : UIWindow(x, y, 400.0f, 140.0f)
+   : UIWindow(x, y, 270.0f, 250.0f)
    , selected()
 {
   filename = new UIStatusBar(0.0f, (float)video.yres() - 60.0f, (float)video.xres(), 30.0f);
   filename->hide();
   mainGui->addChild(filename);
 
-  addChild(new UIText(190.0f, 2.0f, "Object edit", app.getArial14(), eJustifyCenter));
+  addChild(new UIText(120.0f, 2.0f, "Object edit", app.getArial14(), eJustifyCenter));
   addChild(new UIText(195.0f, 22.0f, "Min  /  Max", app.getArial12(), eJustifyCenter));
 
   Environment* env = Environment::getInstance();
@@ -171,16 +176,21 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   addChild(new UICheckBox(5.0f, 60.0f, "Random tilt", toggleRandomTilt, 0));
   addChild(new UICheckBox(5.0f, 85.0f, "Random scale", toggleRandomSize, 0)); 
 
-  addChild(new UIButton(290.0f, 40.0f, 100.0f, 30.0f, "Rotation editor", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", toggleRotationEditor, 0));
+  addChild(new UIButton(5.0f, 225.0f, 100.0f, 30.0f, "Rotation editor", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", toggleRotationEditor, 0));
 
   UICheckBox* copyCB = new UICheckBox(5.0f, 110.0f, "Copy model rotation / scale / tilt", toggleCopyModelStats, 0);
   copyCB->setState(Settings::getInstance()->copyModelStats);
   addChild(copyCB);
-  
-  addChild(new UIButton(190.0f, 115.0f, 120.0f, 30.0f, "Spawn on camera", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", pasteOnCamera, 0));
 
-  addChild(new UIButton(315.0f, 90.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
-  addChild(new UIButton(315.0f, 115.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
+  UICheckBox* pasteOnSelectCB = new UICheckBox(5.0f, 135.0f, "Paste on selection", togglePasteOnSelection, 0);
+  pasteOnSelectCB->setState(Environment::getInstance()->pasteOnSelection);
+  addChild(pasteOnSelectCB);
+  
+  addChild(new UIButton(145.0f, 140.0f, 120.0f, 30.0f, "Spawn on camera", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", pasteOnCamera, 0));
+
+  addChild(new UIText(190.0f, 175.0f, "Import:", app.getArial14(), eJustifyLeft));
+  addChild(new UIButton(190.0f, 200.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
+  addChild(new UIButton(190.0f, 225.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
 }
 
 void UIObjectEditor::pasteObject(Vec3D pos)

@@ -24,6 +24,7 @@ Environment::Environment()
   this->groundBrushType = 1;
   this->currentWaterLayer = 0;
   this->displayAllWaterLayers = true;
+  this->pasteOnSelection = true;
 }
 
 Environment* Environment::instance = 0;
