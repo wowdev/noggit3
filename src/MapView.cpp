@@ -1580,26 +1580,29 @@ void MapView::tick(float t, float dt)
 				yPos = Environment::getInstance()->Pos3DY;
 				zPos = Environment::getInstance()->Pos3DZ;
 
-				switch (terrainMode)
-				{
-				case 0:
-					if (Environment::getInstance()->ShiftDown)
-					{
-						if (mViewMode == eViewMode_3D) 
-							gWorld->changeTerrain(xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, Environment::getInstance()->groundBrushType);
-					}
-					else if (Environment::getInstance()->CtrlDown)
-					{
-						if (mViewMode == eViewMode_3D) 
-							gWorld->changeTerrain(xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, Environment::getInstance()->groundBrushType);
-					}
-					break;
-				case 1:
-          if (mViewMode == eViewMode_3D)
+        bool underMap = gWorld->isUnderMap(xPos, zPos, yPos);
+
+        switch (terrainMode)
+        {
+        case 0:
+          if (mViewMode == eViewMode_3D && !underMap)
           {
             if (Environment::getInstance()->ShiftDown)
             {
-              if(Environment::getInstance()->flattenAngleEnabled)
+              gWorld->changeTerrain(xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, Environment::getInstance()->groundBrushType);
+            }
+            else if (Environment::getInstance()->CtrlDown)
+            {
+              gWorld->changeTerrain(xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, Environment::getInstance()->groundBrushType);
+            }
+          }
+          break;
+        case 1:
+          if (mViewMode == eViewMode_3D && !underMap)
+          {
+            if (Environment::getInstance()->ShiftDown)
+            {
+              if (Environment::getInstance()->flattenAngleEnabled)
                 gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenAngle, flattenOrientation);
               else
                 gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType);
@@ -1609,112 +1612,113 @@ void MapView::tick(float t, float dt)
               gWorld->blurTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), std::min(blurBrushRadius, 30.0f), blurBrushType);
             }
           }
-					break;
-				case 2:
-					if (Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown && Environment::getInstance()->AltDown)
-					{
-						// clear chunk texture
-						if (mViewMode == eViewMode_3D)
-							gWorld->eraseTextures(xPos, zPos);
-						else if (mViewMode == eViewMode_2D)
-							gWorld->eraseTextures(CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z);
-					}
-					else if (Environment::getInstance()->CtrlDown)
-					{
-						// Pick texture
-						mainGui->TexturePicker->getTextures(gWorld->GetCurrentSelection());
-					}
-					else  if (Environment::getInstance()->ShiftDown)
-					{
-						// Paint 3d if shift down.
-						if (UITexturingGUI::getSelectedTexture())
-						{
-							if (textureBrush.needUpdate())
-							{
-								textureBrush.GenerateTexture();
-							}
-							if (mViewMode == eViewMode_3D)
-							{
-								if (mainGui->TextureSwitcher->hidden())
-								{
+          break;
+        case 2:
+          if (Environment::getInstance()->ShiftDown && Environment::getInstance()->CtrlDown && Environment::getInstance()->AltDown)
+          {
+            // clear chunk texture
+            if (mViewMode == eViewMode_3D && !underMap)
+              gWorld->eraseTextures(xPos, zPos);
+            else if (mViewMode == eViewMode_2D)
+              gWorld->eraseTextures(CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z);
+          }
+          else if (Environment::getInstance()->CtrlDown)
+          {
+            // Pick texture
+            mainGui->TexturePicker->getTextures(gWorld->GetCurrentSelection());
+          }
+          else  if (Environment::getInstance()->ShiftDown)
+          {
+            // Paint 3d if shift down.
+            if (UITexturingGUI::getSelectedTexture())
+            {
+              if (textureBrush.needUpdate())
+              {
+                textureBrush.GenerateTexture();
+              }
+              if (mViewMode == eViewMode_3D && !underMap)
+              {
+                if (mainGui->TextureSwitcher->hidden())
+                {
                   if (sprayBrushActive)
                   {
-                    gWorld->sprayTexture(xPos, zPos, &sprayBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), 
-                                         textureBrush.getRadius(), brushSprayPressure, 
-                                         UITexturingGUI::getSelectedTexture()
-                                        );
+                    gWorld->sprayTexture(xPos, zPos, &sprayBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f),
+                      textureBrush.getRadius(), brushSprayPressure,
+                      UITexturingGUI::getSelectedTexture()
+                    );
                   }
                   else
                   {
                     gWorld->paintTexture(xPos, zPos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
                   }
-								}
-								else
-								{
-									gWorld->overwriteTextureAtCurrentChunk(xPos, zPos, mainGui->TextureSwitcher->getTextures(), UITexturingGUI::getSelectedTexture());
-								}
-							}
-						}
-						// paint 2d if nothing is pressed.
-						if (textureBrush.needUpdate())
-						{
-							textureBrush.GenerateTexture();
-						}
-						if (mViewMode == eViewMode_2D)
-							gWorld->paintTexture(CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
-					}
-					break;
+                }
+                else
+                {
+                  gWorld->overwriteTextureAtCurrentChunk(xPos, zPos, mainGui->TextureSwitcher->getTextures(), UITexturingGUI::getSelectedTexture());
+                }
+              }
+            }
+            // paint 2d if nothing is pressed.
+            if (textureBrush.needUpdate())
+            {
+              textureBrush.GenerateTexture();
+            }
+            if (mViewMode == eViewMode_2D)
+              gWorld->paintTexture(CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
+          }
+          break;
 
-				case 3:
-					if (mViewMode == eViewMode_3D)
-					{
-						if (Environment::getInstance()->ShiftDown)
-						{
-							Selection->data.mapchunk->getSelectionCoord(&xPos, &zPos);
-							gWorld->removeHole(xPos, zPos, Environment::getInstance()->AltDown);
-						}
-						else if (Environment::getInstance()->CtrlDown)
-							gWorld->addHole(xPos, yPos, zPos, Environment::getInstance()->AltDown);
-					}
-					break;
-				case 4:
-					if (Environment::getInstance()->ShiftDown)
-					{
-						if (mViewMode == eViewMode_3D)
-						{
-							// draw the selected AreaId on current selected chunk
-							nameEntry * lSelection = gWorld->GetCurrentSelection();
-							int mtx, mtz, mcx, mcy;
-							mtx = lSelection->data.mapchunk->mt->mPositionX;
-							mtz = lSelection->data.mapchunk->mt->mPositionZ;
-							mcx = lSelection->data.mapchunk->px;
-							mcy = lSelection->data.mapchunk->py;
-							gWorld->setAreaID(Environment::getInstance()->selectedAreaID, mtx, mtz, mcx, mcy);
-						}
-					}
-					else if (Environment::getInstance()->CtrlDown)
-					{
-						if (mViewMode == eViewMode_3D)
-						{
-							// pick areaID from chunk
-							int newID = gWorld->GetCurrentSelection()->data.mapchunk->getAreaID();
-							Environment::getInstance()->selectedAreaID = newID;
-							mainGui->ZoneIDBrowser->setZoneID(newID);
-						}
-					}
+        case 3:
+          if (mViewMode == eViewMode_3D)
+          {
+            // no undermap check here, else it's impossible to remove holes
+            if (Environment::getInstance()->ShiftDown)
+            {
+              Selection->data.mapchunk->getSelectionCoord(&xPos, &zPos);
+              gWorld->removeHole(xPos, zPos, Environment::getInstance()->AltDown);
+            }
+            else if (Environment::getInstance()->CtrlDown && !underMap)
+              gWorld->addHole(xPos, zPos, Environment::getInstance()->AltDown);
+          }
+          break;
+        case 4:
+          if (mViewMode == eViewMode_3D && !underMap)
+          {
+            if (Environment::getInstance()->ShiftDown)
+            {
+              // draw the selected AreaId on current selected chunk
+              nameEntry * lSelection = gWorld->GetCurrentSelection();
+              int mtx, mtz, mcx, mcy;
+              mtx = lSelection->data.mapchunk->mt->mPositionX;
+              mtz = lSelection->data.mapchunk->mt->mPositionZ;
+              mcx = lSelection->data.mapchunk->px;
+              mcy = lSelection->data.mapchunk->py;
+              gWorld->setAreaID(Environment::getInstance()->selectedAreaID, mtx, mtz, mcx, mcy);
+            }
+            else if (Environment::getInstance()->CtrlDown)
+            {
+              // pick areaID from chunk
+              int newID = gWorld->GetCurrentSelection()->data.mapchunk->getAreaID();
+              Environment::getInstance()->selectedAreaID = newID;
+              mainGui->ZoneIDBrowser->setZoneID(newID);
+            }
+          }
 					break;
 				case 5:
-					if (Environment::getInstance()->ShiftDown)
-					{
-						if (mViewMode == eViewMode_3D) gWorld->mapIndex->setFlag(true, xPos, zPos);
-					}
-					else if (Environment::getInstance()->CtrlDown)
-					{
-						if (mViewMode == eViewMode_3D) gWorld->mapIndex->setFlag(false, xPos, zPos);
-					}
+          if (mViewMode == eViewMode_3D && !underMap)
+          {
+            if (Environment::getInstance()->ShiftDown)
+            {
+              gWorld->mapIndex->setFlag(true, xPos, zPos);
+            }
+            else if (Environment::getInstance()->CtrlDown)
+            {
+              gWorld->mapIndex->setFlag(false, xPos, zPos);
+            }
+          }
 					break;
 				case 6:
-					if (mViewMode == eViewMode_3D)
+					if (mViewMode == eViewMode_3D && !underMap)
 					{
 						nameEntry* lSelection = gWorld->GetCurrentSelection();
 						int mtx, mtz, mcx, mcy;
@@ -1739,7 +1743,7 @@ void MapView::tick(float t, float dt)
 					}
 					break;
 				case 8:
-					if (mViewMode == eViewMode_3D)
+					if (mViewMode == eViewMode_3D && !underMap)
 					{
 						if (Environment::getInstance()->ShiftDown)
 							gWorld->changeShader(xPos, zPos, dt*shaderSpeed*2, shaderRadius, true);

@@ -161,6 +161,9 @@ public:
 
 	bool GetVertex(float x, float z, Vec3D *V);
 
+  // check if the cursor is under map or in an unloaded tile
+  bool isUnderMap(float x, float z, float h);
+
 	void changeTerrain(float x, float z, float change, float radius, int BrushType);
 	void changeShader(float x, float z, float change, float radius, bool editMode);
   void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, float angle = 0.0f, float orientation = 0.0f);
@@ -170,7 +173,7 @@ public:
 	void eraseTextures(float x, float z);
 	void overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
 
-	void addHole(float x, float y, float z, bool big);
+	void addHole(float x, float z, bool big);
 	void removeHole(float x, float z, bool big);
   void addHoleADT(float x, float z);
   void removeHoleADT(float x, float z);
