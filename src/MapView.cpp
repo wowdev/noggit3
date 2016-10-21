@@ -81,8 +81,9 @@ int tool_settings_y;
 
 bool MoveObj;
 
-Vec3D ObjMove;
-Vec3D ObjRot;
+Vec3D objMove;
+Vec3D objMoveOffset;
+Vec3D objRot;
 
 nameEntry* lastSelected;
 
@@ -1475,8 +1476,8 @@ void MapView::tick(float t, float dt)
           }
           else
           {
-            Selection->data.wmo->pos.x = Environment::getInstance()->Pos3DX;
-            Selection->data.wmo->pos.z = Environment::getInstance()->Pos3DZ;
+            Selection->data.wmo->pos.x = Environment::getInstance()->Pos3DX - objMoveOffset.x;
+            Selection->data.wmo->pos.z = Environment::getInstance()->Pos3DZ - objMoveOffset.z;
           }
 
 					Selection->data.wmo->recalcExtents();
@@ -1508,8 +1509,8 @@ void MapView::tick(float t, float dt)
             }
             else
             {
-              Selection->data.model->pos.x = Environment::getInstance()->Pos3DX;
-              Selection->data.model->pos.z = Environment::getInstance()->Pos3DZ;
+              Selection->data.model->pos.x = Environment::getInstance()->Pos3DX - objMoveOffset.x;
+              Selection->data.model->pos.z = Environment::getInstance()->Pos3DZ - objMoveOffset.z;
             }
 
 						gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z); // after move. If moved to another ADT
@@ -2809,8 +2810,23 @@ void MapView::mouseclick(SDL_MouseButtonEvent *e)
 			break;
 
 		case SDL_BUTTON_MIDDLE:
-			if (gWorld->HasSelection())
-				MoveObj = true;
+      if (gWorld->HasSelection())
+      {
+        MoveObj = true;
+        nameEntry* selection = gWorld->GetCurrentSelection();
+        Vec3D objPos;
+        if (selection->type == eEntry_WMO)
+        {
+          objPos = selection->data.wmo->pos;
+        }
+        else if (selection->type == eEntry_Model)
+        {
+          objPos = selection->data.model->pos;
+        }
+
+        objMoveOffset = Environment::getInstance()->get_cursor_pos() - objPos;
+      }
+				
 			break;
 
     case SDL_BUTTON_WHEELUP:
