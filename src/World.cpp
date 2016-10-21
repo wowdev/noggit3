@@ -1827,7 +1827,7 @@ void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* ol
   }
 }
 
-void World::addHole(float x, float y, float z, bool big)
+void World::addHole(float x, float z, bool big)
 {
   const size_t newX = (const size_t)(x / TILESIZE);
   const size_t newZ = (const size_t)(z / TILESIZE);
@@ -1844,7 +1844,7 @@ void World::addHole(float x, float y, float z, bool big)
           {
             MapChunk* chunk = mapIndex->getTile(j, i)->getChunk(ty, tx);
             // check if the cursor is not undermap 
-            if (chunk->getMinHeight() < y + 1.0f && chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
+            if (chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
             {
               mapIndex->setChanged(x, z);
               int k = (int)((x - chunk->xbase) / MINICHUNKSIZE);
@@ -2595,4 +2595,20 @@ void World::fixAllGaps()
   {
     chunk->recalcNorms();
   }
+}
+
+bool World::isUnderMap(float x, float z, float h)
+{
+  size_t tx = x / TILESIZE, tz = z / TILESIZE;
+
+  if (mapIndex->tileLoaded(tz, tx))
+  {
+    size_t chnkX = (x / CHUNKSIZE) - tx * 16;
+    size_t chnkZ = (z / CHUNKSIZE) - tz * 16;
+
+    // check using the cursor height + 0.5 
+    return (mapIndex->getTile(tz, tx)->getChunk(chnkX, chnkZ)->getMinHeight()) > h + 0.5f;
+  }
+
+  return true;
 }
