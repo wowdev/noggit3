@@ -187,7 +187,6 @@ void TextureSet::eraseTexture(size_t id)
     return;
 
   TextureManager::delbyname(textures[id]->filename());
-  tex[id] = 0;
 
   if (id)
   {
@@ -203,7 +202,6 @@ void TextureSet::eraseTexture(size_t id)
       alphamaps[i - 1] = alphamaps[i];
     }
 
-    tex[i] = tex[i + 1];
     textures[i] = textures[i + 1];
     animated[i] = animated[i + 1];
     texFlags[i] = texFlags[i + 1];
@@ -211,7 +209,7 @@ void TextureSet::eraseTexture(size_t id)
   }
 
   alphamaps[nTextures - 2] = nullptr;
-  tex[nTextures - 1] = 0;
+  textures[nTextures - 1] = nullptr;
 
   nTextures--;
 }
@@ -834,14 +832,13 @@ void TextureSet::mergeAlpha(size_t id1, size_t id2)
     }
   }
 
-
-  eraseTexture(id2);
-
   for (size_t k = 0; k < nTextures - 1; k++)
   {
     alphamaps[k]->setAlpha(tab[k]);
     alphamaps[k]->loadTexture();
   }
+
+  eraseTexture(id2);
 }
 
 bool TextureSet::removeDuplicate()
