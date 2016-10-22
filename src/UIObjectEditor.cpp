@@ -138,6 +138,11 @@ void togglePasteOnSelection(bool b, int)
   Environment::getInstance()->pasteOnSelection = b;
 }
 
+void toggleMoveModelToCursorPos(bool b, int)
+{
+  Environment::getInstance()->moveModelToCursorPos = b;
+}
+
 
 UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
    : UIWindow(x, y, 270.0f, 250.0f)
@@ -185,10 +190,14 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   UICheckBox* pasteOnSelectCB = new UICheckBox(5.0f, 135.0f, "Paste on selection", togglePasteOnSelection, 0);
   pasteOnSelectCB->setState(Environment::getInstance()->pasteOnSelection);
   addChild(pasteOnSelectCB);
+
+  UICheckBox* moveToCursorCB = new UICheckBox(5.0f, 160.0f, "Model movement mode: to cursor pos", toggleMoveModelToCursorPos, 0);
+  pasteOnSelectCB->setState(Environment::getInstance()->moveModelToCursorPos);
+  addChild(moveToCursorCB);
   
   addChild(new UIButton(145.0f, 140.0f, 120.0f, 30.0f, "Spawn on camera", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", pasteOnCamera, 0));
 
-  addChild(new UIText(190.0f, 175.0f, "Import:", app.getArial14(), eJustifyLeft));
+  addChild(new UIText(190.0f, 185.0f, "Import:", app.getArial12(), eJustifyLeft));
   addChild(new UIButton(190.0f, 200.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
   addChild(new UIButton(190.0f, 225.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
 }

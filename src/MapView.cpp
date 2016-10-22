@@ -1427,20 +1427,28 @@ void MapView::tick(float t, float dt)
 			//! \todo  Alternatively automatically align it to the terrain.
 			if (MoveObj && canMoveObj)
 			{
+        ObjPos.x = 80.0f;
 				if (Selection->type == eEntry_WMO)
 				{
 					gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x, Selection->data.wmo->pos.z); // before move
 
           if (Environment::getInstance()->ShiftDown)
           {
-            ObjPos.x = 80.0f;
             Selection->data.wmo->pos += mv * dirUp * ObjPos.x;
             Selection->data.wmo->pos -= mh * dirRight * ObjPos.x;
           }
           else
           {
-            Selection->data.wmo->pos.x = Environment::getInstance()->Pos3DX - objMoveOffset.x;
-            Selection->data.wmo->pos.z = Environment::getInstance()->Pos3DZ - objMoveOffset.z;
+            if (Environment::getInstance()->moveModelToCursorPos)
+            {
+              Selection->data.wmo->pos.x = Environment::getInstance()->Pos3DX - objMoveOffset.x;
+              Selection->data.wmo->pos.z = Environment::getInstance()->Pos3DZ - objMoveOffset.z;
+            }
+            else
+            {
+              Selection->data.wmo->pos += mv * dirUp * ObjPos.x;
+              Selection->data.wmo->pos -= mh * dirRight * ObjPos.x;
+            }            
           }
 
 					Selection->data.wmo->recalcExtents();
@@ -1466,14 +1474,22 @@ void MapView::tick(float t, float dt)
 						gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z); // before move
             if (Environment::getInstance()->ShiftDown)
             {
-              ObjPos.x = 80.0f;
               Selection->data.model->pos += mv * dirUp * ObjPos.x;
               Selection->data.model->pos -= mh * dirRight * ObjPos.x;
             }
             else
             {
-              Selection->data.model->pos.x = Environment::getInstance()->Pos3DX - objMoveOffset.x;
-              Selection->data.model->pos.z = Environment::getInstance()->Pos3DZ - objMoveOffset.z;
+              if (Environment::getInstance()->moveModelToCursorPos)
+              {
+                Selection->data.model->pos.x = Environment::getInstance()->Pos3DX - objMoveOffset.x;
+                Selection->data.model->pos.z = Environment::getInstance()->Pos3DZ - objMoveOffset.z;
+              }
+              else
+              {
+                Selection->data.model->pos += mv * dirUp * ObjPos.x;
+                Selection->data.model->pos -= mh * dirRight * ObjPos.x;
+              }
+              
             }
 
 						gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z); // after move. If moved to another ADT

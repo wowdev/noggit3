@@ -56,6 +56,7 @@ public:
   float minScale;  
   float maxScale;
   bool pasteOnSelection;
+  bool moveModelToCursorPos;
 
   bool displayAllWaterLayers;
   int currentWaterLayer;
