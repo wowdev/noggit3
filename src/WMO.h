@@ -162,12 +162,15 @@ public:
 	void drawSelect(int doodadset, const Vec3D& ofs, const float rot) const;
 	//void drawPortals();
 	bool drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const;
+
+  bool hidden;
 };
 
 class WMOManager
 {
 public:
 	static void report();
+  static void showHiddenWMOs();
 
 private:
 	friend struct scoped_wmo_reference;

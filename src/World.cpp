@@ -1080,7 +1080,13 @@ void World::draw()
 
     glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
     for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
-      it->second.draw();
+    {
+      if (!it->second.model->hidden)
+      {
+        it->second.draw();
+      }
+    }
+      
 
     //drawModelList();
   }
@@ -1100,7 +1106,13 @@ void World::draw()
       glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 
       for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
-        it->second.draw();
+      {
+        if (!it->second.wmo->hidden)
+        {
+          it->second.draw();
+        }
+      }
+        
 
       spec_color = Vec4D(0.0f, 0.0f, 0.0f, 1.0f);
       glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
@@ -1109,7 +1121,12 @@ void World::draw()
     else
     {
       for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
-        it->second.draw();
+      {
+        if (!it->second.wmo->hidden)
+        {
+          it->second.draw();
+        }
+      }
     }
   }
 

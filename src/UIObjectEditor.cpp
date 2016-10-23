@@ -143,6 +143,12 @@ void toggleMoveModelToCursorPos(bool b, int)
   Environment::getInstance()->moveModelToCursorPos = b;
 }
 
+void showHiddenModels(UIFrame*, int)
+{
+  ModelManager::showHiddenModels();
+  WMOManager::showHiddenWMOs();
+}
+
 
 UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
    : UIWindow(x, y, 270.0f, 250.0f)
@@ -181,8 +187,6 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   addChild(new UICheckBox(5.0f, 60.0f, "Random tilt", toggleRandomTilt, 0));
   addChild(new UICheckBox(5.0f, 85.0f, "Random scale", toggleRandomSize, 0)); 
 
-  addChild(new UIButton(5.0f, 225.0f, 100.0f, 30.0f, "Rotation editor", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", toggleRotationEditor, 0));
-
   UICheckBox* copyCB = new UICheckBox(5.0f, 110.0f, "Copy model rotation / scale / tilt", toggleCopyModelStats, 0);
   copyCB->setState(Settings::getInstance()->copyModelStats);
   addChild(copyCB);
@@ -200,6 +204,9 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   addChild(new UIText(190.0f, 185.0f, "Import:", app.getArial12(), eJustifyLeft));
   addChild(new UIButton(190.0f, 200.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
   addChild(new UIButton(190.0f, 225.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
+
+  addChild(new UIButton(5.0f, 200.0f, 150.0f, 30.0f, "Show hidden models", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showHiddenModels, 0));
+  addChild(new UIButton(5.0f, 225.0f, 100.0f, 30.0f, "Rotation editor", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", toggleRotationEditor, 0));
 }
 
 void UIObjectEditor::pasteObject(Vec3D pos)

@@ -13,6 +13,7 @@ public:
 	static void updateEmitters(float dt);
 
 	static void report();
+  static void showHiddenModels();
 
 private:
   friend struct scoped_model_reference;

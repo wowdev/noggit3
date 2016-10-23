@@ -2321,7 +2321,27 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 		// toggle help window
 		if (e->keysym.sym == SDLK_h)
 		{
-			mainGui->toggleHelp();
+      if (terrainMode == 9 && Environment::getInstance()->AltDown)
+      {
+        if (gWorld->HasSelection())
+        {
+          nameEntry* selection = gWorld->GetCurrentSelection();
+          if (selection->type == eEntry_Model)
+          {
+            selection->data.model->model->hidden = true;
+            gWorld->ResetSelection();
+          }
+          else if (selection->type == eEntry_WMO)
+          {
+            selection->data.wmo->wmo->hidden = true;
+            gWorld->ResetSelection();
+          }
+        }
+      }
+      else
+      {
+        mainGui->toggleHelp();
+      }
 		}
 
 

@@ -15,6 +15,7 @@ Model::Model(const std::string& filename, bool _forceAnim)
 	: ManagedItem()
 	, forceAnim(_forceAnim)
 	, _filename(filename)
+  , hidden(false)
 {
 	memset(&header, 0, sizeof(ModelHeader));
 
