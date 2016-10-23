@@ -95,6 +95,7 @@ UIHelp::UIHelp()
 		"  SHIFT / CTRL / ALT + Hold left mouse - rotate object\n"
 		"  0 - 9 - change doodads set of selected WMO\n"
 		"  CTRL + R - Reset rotation\n"
+    "  ALT + h - Hide selected model/wmo\n"
 		"  PageDown - Set object to Groundlevel\n"
 		"  CTRL + C or C - Copy object to clipboard\n"
 		"  CTRL + V or V - Paste object on mouse position\n"

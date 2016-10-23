@@ -86,3 +86,11 @@ void ModelManager::updateEmitters(float dt)
 	for (ModelManager::mapType::iterator it = items.begin(); it != items.end(); ++it)
 		it->second->updateEmitters(dt);
 }
+
+void ModelManager::showHiddenModels()
+{
+  for (ModelManager::mapType::iterator it = items.begin(); it != items.end(); ++it)
+  {
+    it->second->hidden = false;
+  }
+}

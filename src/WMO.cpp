@@ -50,6 +50,7 @@ const std::string& WMO::filename() const
 WMO::WMO(const std::string& filenameArg)
 	: ManagedItem()
 	, _filename(filenameArg)
+  , hidden(false)
 {
 	MPQFile f(_filename);
 	if (f.isEof()) {
@@ -1207,3 +1208,10 @@ void WMOManager::delbyname(std::string name)
 	}
 }
 
+void WMOManager::showHiddenWMOs()
+{
+  for (mapType::iterator it = items.begin(); it != items.end(); ++it)
+  {
+    it->second->hidden = false;
+  }
+}
