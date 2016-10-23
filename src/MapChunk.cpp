@@ -558,9 +558,7 @@ void MapChunk::drawLines()
   if (!gWorld->frustum.intersects(vmin, vmax))
     return;
 
-  bool canPaint = canPaintTexture(UITexturingGUI::getSelectedTexture());
-
-  if (!gWorld->drawlines && !canPaint)
+  if (!gWorld->drawlines)
     return;
 
   float mydist = (gWorld->camera - vcenter).length() - r;
@@ -578,42 +576,31 @@ void MapChunk::drawLines()
   glEnable(GL_LINE_SMOOTH);
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-  if ( terrainMode == 2 && canPaint && Environment::getInstance()->highlightPaintableChunks)
-  {
-    glTranslatef(0.0f, 0.1f, 0.0f);
-    glLineWidth(2.0);
-    glColor4f(0.0, 1.0f, 1.0f, 0.5f);
-    glDrawElements(GL_LINE_STRIP, 32, GL_UNSIGNED_SHORT, LineStrip);
-    glLineWidth(1.5);
-  }
-  else
-  {
-    glTranslatef(0.0f, 0.05f, 0.0f);
-    glLineWidth(1.5);
-    glColor4f(1.0, 0.0, 0.0f, 0.5f);
+  glTranslatef(0.0f, 0.05f, 0.0f);
+  glLineWidth(1.5);
+  glColor4f(1.0, 0.0, 0.0f, 0.5f);
 
-    if ((px != 15) && (py != 0))
-    {
-      glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
-    }
-    else if ((px == 15) && (py == 0))
-    {
-      glColor4f(0.0, 1.0, 0.0f, 0.5f);
-      glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
-    }
-    else if (px == 15)
-    {
-      glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
-      glColor4f(0.0, 1.0, 0.0f, 0.5f);
-      glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
-    }
-    else if (py == 0)
-    {
-      glColor4f(0.0, 1.0, 0.0f, 0.5f);
-      glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
-      glColor4f(1.0, 0.0, 0.0f, 0.5f);
-      glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
-    }
+  if ((px != 15) && (py != 0))
+  {
+    glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
+  }
+  else if ((px == 15) && (py == 0))
+  {
+    glColor4f(0.0, 1.0, 0.0f, 0.5f);
+    glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
+  }
+  else if (px == 15)
+  {
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
+    glColor4f(0.0, 1.0, 0.0f, 0.5f);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
+  }
+  else if (py == 0)
+  {
+    glColor4f(0.0, 1.0, 0.0f, 0.5f);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
+    glColor4f(1.0, 0.0, 0.0f, 0.5f);
+    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
   }
 
   if (Environment::getInstance()->view_holelines)
@@ -666,6 +653,15 @@ void MapChunk::draw()
 
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
+
+  bool cantPaint = !canPaintTexture(UITexturingGUI::getSelectedTexture()) 
+                 && Environment::getInstance()->highlightPaintableChunks
+                 && terrainMode == 2;
+
+  if (cantPaint)
+  {
+    glColor4f(1, 0, 0, 1);
+  }
 
   // setup vertex buffers  
   glBindBuffer(GL_ARRAY_BUFFER, vertices);
@@ -728,6 +724,11 @@ void MapChunk::draw()
 
   if (hasMCCV)
     glDisableClientState(GL_COLOR_ARRAY);
+
+  if (cantPaint)
+  {
+    glColor4f(1, 1, 1, 1);
+  }
 
   // shadow map
   glActiveTexture(GL_TEXTURE0);
