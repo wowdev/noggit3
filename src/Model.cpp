@@ -1270,3 +1270,8 @@ void Model::updateEmitters(float dt)
 		particleSystems[i].update(dt);
 	}
 }
+
+void Model::toggleVisibility()
+{
+  ModelManager::toggleModelVisibility(this);
+}

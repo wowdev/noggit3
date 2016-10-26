@@ -79,7 +79,8 @@ void WMOInstance::draw()
 
 	glPopMatrix();
 
-	if (gWorld->IsSelection(eEntry_WMO) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID)
+  // no need to check showModelFromHiddenList in Environment as it's done beforehand in World::draw()
+	if (wmo->hidden || ( gWorld->IsSelection(eEntry_WMO) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID))
 	{
 		glDisable(GL_LIGHTING);
 
@@ -91,7 +92,8 @@ void WMOInstance::draw()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		DrawABox(extents[0], extents[1], Vec4D(0.0f, 1.0f, 0.0f, 1.0f), 1.0f);
+    Vec4D color = wmo->hidden ? Vec4D(0.0f, 0.0f, 1.0f, 1.0f) : Vec4D(0.0f, 1.0f, 0.0f, 1.0f);
+		DrawABox(extents[0], extents[1], color, 1.0f);
 
 		glActiveTexture(GL_TEXTURE1);
 		glDisable(GL_TEXTURE_2D);

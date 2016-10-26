@@ -107,7 +107,10 @@ void ModelInstance::draw()
 
 	model->draw();
 
-	if (gWorld->IsSelection(eEntry_Model) && gWorld->GetCurrentSelection()->data.model->d1 == d1)
+  bool currentSelection = gWorld->IsSelection(eEntry_Model) && gWorld->GetCurrentSelection()->data.model->d1 == d1;
+  
+  // no need to check Environment::showModelFromHiddenList as it's done beforehand in World::draw()
+	if (currentSelection || model->hidden)
 	{
 		if (gWorld && gWorld->drawfog)
 			glDisable(GL_FOG);
@@ -122,26 +125,32 @@ void ModelInstance::draw()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		DrawABox(TransformCoordsForModel(model->header.VertexBoxMin), TransformCoordsForModel(model->header.VertexBoxMax), Vec4D(1.0f, 1.0f, 1.0f, 1.0f), 1.0f);
-		DrawABox(TransformCoordsForModel(model->header.BoundingBoxMin), TransformCoordsForModel(model->header.BoundingBoxMax), Vec4D(1.0f, 1.0f, 0.0f, 1.0f), 1.0f);
+    Vec4D color = model->hidden ? Vec4D(0.0f, 0.0f, 1.0f, 1.0f) : Vec4D(1.0f, 1.0f, 0.0f, 1.0f);
 
-		glColor4fv(Vec4D(1.0f, 0.0f, 0.0f, 1.0f));
-		glBegin(GL_LINES);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f);
-		glEnd();
+    DrawABox(TransformCoordsForModel(model->header.BoundingBoxMin), TransformCoordsForModel(model->header.BoundingBoxMax), color, 1.0f);
 
-		glColor4fv(Vec4D(0.0f, 1.0f, 0.0f, 1.0f));
-		glBegin(GL_LINES);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f);
-		glEnd();
+    if (currentSelection)
+    {
+      DrawABox(TransformCoordsForModel(model->header.VertexBoxMin), TransformCoordsForModel(model->header.VertexBoxMax), Vec4D(1.0f, 1.0f, 1.0f, 1.0f), 1.0f);
 
-		glColor4fv(Vec4D(0.0f, 0.0f, 1.0f, 1.0f));
-		glBegin(GL_LINES);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glVertex3f(0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f);
-		glEnd();
+      glColor4fv(Vec4D(1.0f, 0.0f, 0.0f, 1.0f));
+      glBegin(GL_LINES);
+      glVertex3f(0.0f, 0.0f, 0.0f);
+      glVertex3f(model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f);
+      glEnd();
+
+      glColor4fv(Vec4D(0.0f, 1.0f, 0.0f, 1.0f));
+      glBegin(GL_LINES);
+      glVertex3f(0.0f, 0.0f, 0.0f);
+      glVertex3f(0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f);
+      glEnd();
+
+      glColor4fv(Vec4D(0.0f, 0.0f, 1.0f, 1.0f));
+      glBegin(GL_LINES);
+      glVertex3f(0.0f, 0.0f, 0.0f);
+      glVertex3f(0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f);
+      glEnd();
+    }
 
 		glActiveTexture(GL_TEXTURE1);
 		glDisable(GL_TEXTURE_2D);

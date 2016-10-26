@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <iostream>
 
+#include "Environment.h"
 #include "Liquid.h"
 #include "Log.h" // LogDebug
 #include "ModelManager.h" // ModelManager
@@ -40,6 +41,11 @@ void WMOUnhighlight()
 	glEnable(GL_TEXTURE_2D);
 	glColor4fv(Vec4D(1, 1, 1, 1));
 	glDepthMask(GL_TRUE);
+}
+
+void WMO::toggleVisibility()
+{
+  WMOManager::toggleWMOvisibility(this);
 }
 
 const std::string& WMO::filename() const
@@ -1165,6 +1171,7 @@ void WMOFog::setup()
 }
 
 WMOManager::mapType WMOManager::items;
+WMOManager::vectorType WMOManager::hiddenItems;
 
 void WMOManager::report()
 {
@@ -1208,10 +1215,27 @@ void WMOManager::delbyname(std::string name)
 	}
 }
 
-void WMOManager::showHiddenWMOs()
+void WMOManager::clearHiddenWMOList()
 {
-  for (mapType::iterator it = items.begin(); it != items.end(); ++it)
+  for (WMOManager::vectorType::iterator it = hiddenItems.begin(); it != hiddenItems.end(); ++it)
   {
-    it->second->hidden = false;
+    (*it)->hidden = false;
+  }
+
+  hiddenItems.clear();
+}
+
+void WMOManager::toggleWMOvisibility(WMO* wmo)
+{
+  auto it = std::find(hiddenItems.begin(), hiddenItems.end(), wmo);
+  if (it != hiddenItems.end())
+  {
+    hiddenItems.erase(it);
+    wmo->hidden = false;
+  }
+  else
+  {
+    hiddenItems.push_back(wmo);
+    wmo->hidden = true;
   }
 }

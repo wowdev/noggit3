@@ -164,13 +164,15 @@ public:
 	bool drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const;
 
   bool hidden;
+  void toggleVisibility();
 };
 
 class WMOManager
 {
 public:
 	static void report();
-  static void showHiddenWMOs();
+  static void clearHiddenWMOList();
+  static void toggleWMOvisibility(WMO* wmo);
 
 private:
 	friend struct scoped_wmo_reference;
@@ -179,6 +181,8 @@ private:
 
 	typedef std::map<std::string, WMO*> mapType;
 	static mapType items;
+  typedef std::vector<WMO*> vectorType;
+  static vectorType hiddenItems;
 };
 
 struct scoped_wmo_reference

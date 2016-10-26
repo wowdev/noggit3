@@ -213,6 +213,7 @@ public:
 	virtual void finishLoading();
 
   bool hidden;
+  void toggleVisibility();
 };
 
 #endif
