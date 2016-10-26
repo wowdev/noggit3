@@ -3,11 +3,13 @@
 #include <algorithm>
 
 #include "AsyncLoader.h"// AsyncLoader
+#include "Environment.h"
 #include "Noggit.h" // app.loader()
 #include "Model.h" // Model
 #include "Log.h" // LogDebug
 
 ModelManager::mapType ModelManager::items;
+ModelManager::vectorType ModelManager::hiddenItems;
 
 void ModelManager::report()
 {
@@ -87,10 +89,28 @@ void ModelManager::updateEmitters(float dt)
 		it->second->updateEmitters(dt);
 }
 
-void ModelManager::showHiddenModels()
+void ModelManager::clearHiddenModelList()
 {
-  for (ModelManager::mapType::iterator it = items.begin(); it != items.end(); ++it)
+  for (ModelManager::vectorType::iterator it = hiddenItems.begin(); it != hiddenItems.end(); ++it)
   {
-    it->second->hidden = false;
+    (*it)->hidden = false;
   }
+
+  hiddenItems.clear();
+}
+
+void ModelManager::toggleModelVisibility(Model* model)
+{
+  auto it = std::find(hiddenItems.begin(), hiddenItems.end(), model);
+
+  if (it != hiddenItems.end())
+  {
+    hiddenItems.erase(it);
+    model->hidden = false;
+  }
+  else
+  {
+    hiddenItems.push_back(model);
+    model->hidden = true;
+  }  
 }

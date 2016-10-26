@@ -143,15 +143,19 @@ void toggleMoveModelToCursorPos(bool b, int)
   Environment::getInstance()->moveModelToCursorPos = b;
 }
 
-void showHiddenModels(UIFrame*, int)
+void updateHiddenModelsVisibility(UIFrame*, int)
 {
-  ModelManager::showHiddenModels();
-  WMOManager::showHiddenWMOs();
+  Environment::getInstance()->showModelFromHiddenList = !Environment::getInstance()->showModelFromHiddenList;
 }
 
 
+void clearHiddenModels(UIFrame*, int)
+{
+  gWorld->clearHiddenModelList();
+}
+
 UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
-   : UIWindow(x, y, 270.0f, 250.0f)
+   : UIWindow(x, y, 270.0f, 280.0f)
    , selected()
 {
   filename = new UIStatusBar(0.0f, (float)video.yres() - 60.0f, (float)video.xres(), 30.0f);
@@ -205,8 +209,11 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   addChild(new UIButton(190.0f, 200.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
   addChild(new UIButton(190.0f, 225.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
 
-  addChild(new UIButton(5.0f, 200.0f, 150.0f, 30.0f, "Show hidden models", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showHiddenModels, 0));
-  addChild(new UIButton(5.0f, 225.0f, 100.0f, 30.0f, "Rotation editor", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", toggleRotationEditor, 0));
+  addChild(new UIButton(5.0f, 185.0f, 100.0f, 30.0f, "Rotation editor", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", toggleRotationEditor, 0));
+
+  addChild(new UIText(5.0f, 205.0f, "Import:", app.getArial12(), eJustifyLeft));
+  addChild(new UIButton(5.0f, 225.0f, 150.0f, 30.0f, "Toggle visibility", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", updateHiddenModelsVisibility, 0));
+  addChild(new UIButton(5.0f, 250.0f, 150.0f, 30.0f, "Clear list", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", clearHiddenModels, 0));
 }
 
 void UIObjectEditor::pasteObject(Vec3D pos)

@@ -26,6 +26,7 @@ Environment::Environment()
   this->displayAllWaterLayers = true;
   this->pasteOnSelection = true;
   this->moveModelToCursorPos = false;
+  this->showModelFromHiddenList = true;
 }
 
 Environment* Environment::instance = 0;

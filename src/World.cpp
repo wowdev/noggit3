@@ -1072,7 +1072,7 @@ void World::draw()
 
 
 
-
+  bool renderHidden = Environment::getInstance()->showModelFromHiddenList;
   // M2s / models
   if (drawmodels)
   {
@@ -1081,14 +1081,11 @@ void World::draw()
     glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
     for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
     {
-      if (!it->second.model->hidden)
+      if (!it->second.model->hidden || renderHidden)
       {
         it->second.draw();
       }
-    }
-      
-
-    //drawModelList();
+    }   
   }
 
 
@@ -1107,7 +1104,7 @@ void World::draw()
 
       for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
       {
-        if (!it->second.wmo->hidden)
+        if (!it->second.wmo->hidden || renderHidden)
         {
           it->second.draw();
         }
@@ -2628,4 +2625,11 @@ bool World::isUnderMap(float x, float z, float h)
   }
 
   return true;
+}
+
+void World::clearHiddenModelList()
+{
+  Environment::getInstance()->showModelFromHiddenList = true;
+  ModelManager::clearHiddenModelList();
+  WMOManager::clearHiddenWMOList();
 }

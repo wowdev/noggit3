@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 class Model;
 
@@ -13,7 +14,8 @@ public:
 	static void updateEmitters(float dt);
 
 	static void report();
-  static void showHiddenModels();
+  static void toggleModelVisibility(Model* model);
+  static void clearHiddenModelList();
 
 private:
   friend struct scoped_model_reference;
@@ -22,6 +24,8 @@ private:
 
 	typedef std::map<std::string, Model*> mapType;
 	static mapType items;
+  typedef std::vector<Model*> vectorType;
+  static vectorType hiddenItems;
 };
 
 struct scoped_model_reference

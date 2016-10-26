@@ -2321,22 +2321,34 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 		// toggle help window
 		if (e->keysym.sym == SDLK_h)
 		{
-      if (terrainMode == 9 && Environment::getInstance()->AltDown)
+      if (terrainMode == 9)
       {
-        if (gWorld->HasSelection())
+        // toggle hidden models visibility
+        if (Environment::getInstance()->SpaceDown)
         {
-          nameEntry* selection = gWorld->GetCurrentSelection();
-          if (selection->type == eEntry_Model)
+          Environment::getInstance()->showModelFromHiddenList = !Environment::getInstance()->showModelFromHiddenList;
+        }
+        else if (Environment::getInstance()->ShiftDown)
+        {
+          gWorld->clearHiddenModelList();
+        }
+        else
+        {
+          // toggle selected model visibility
+          if (gWorld->HasSelection())
           {
-            selection->data.model->model->hidden = true;
-            gWorld->ResetSelection();
-          }
-          else if (selection->type == eEntry_WMO)
-          {
-            selection->data.wmo->wmo->hidden = true;
-            gWorld->ResetSelection();
+            nameEntry* selection = gWorld->GetCurrentSelection();
+            if (selection->type == eEntry_Model)
+            {
+              selection->data.model->model->toggleVisibility();
+            }
+            else if (selection->type == eEntry_WMO)
+            {
+              selection->data.wmo->wmo->toggleVisibility();
+            }
           }
         }
+        
       }
       else
       {

@@ -182,6 +182,8 @@ public:
 	void addM2(std::string const& filename, Vec3D newPos, bool copyit);
 	void addWMO(std::string const& filename, Vec3D newPos, bool copyit);
 
+  void clearHiddenModelList();
+
 	void jumpToCords(Vec3D pos);
 	void saveMap();
 
