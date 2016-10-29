@@ -5,7 +5,7 @@
 #include "Video.h" // video
 
 const int winWidth = 810;
-const int winHeight = 880;
+const int winHeight = 920;
 
 UIHelp::UIHelp()
 	: UICloseWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f, (float)winWidth, (float)winHeight, "Keybindings", true)
@@ -88,6 +88,9 @@ UIHelp::UIHelp()
     "  SHIFT + mouse wheel - change angle\n"
     "  ALT + mouse wheel - change orientation\n"
     "  Y - switch to next type\n"
+    "  F - set relative point\n"
+    "  SPACE + F - toggle flatten relative mode\n"
+    "  SPACE + mouse wheel - change height\n"
 		"\n"
     "Edit objects if a model is selected with left click (in object editor):\n"
 		"  Hold middle mouse - move object\n"

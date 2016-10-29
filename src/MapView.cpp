@@ -159,6 +159,13 @@ float flattenAngle = 0.0f;
 UISlider* flatten_orientation;
 float flattenOrientation = 0.0f;
 
+Vec3D flattenRelativePos(0, 0, 0);
+bool flattenRelativeMode = false;
+UITextBox* flatten_relative_x;
+UITextBox* flatten_relative_y;
+UITextBox* flatten_relative_z;
+UICheckBox* toggle_flatten_relative;
+
 UISlider* paint_brush;
 UISlider* spray_size;
 UISlider* spray_pressure;
@@ -203,8 +210,52 @@ UIWindow *setting_blur;
 UIWindow *settings_paint;
 UIWindow *settings_shader;
 
+void toggleFlattenLock(bool b, int)
+{
+  flattenRelativeMode = b;
+}
 
-//TextBox * textbox;
+void updateFlattenRelativeX(UITextBox::Ptr textBox, const std::string& value)
+{
+  try 
+  {
+    float val = std::atof(value.c_str());
+    flattenRelativePos.x = val;
+    flatten_relative_x->value(misc::floatToStr(val));
+  }
+  catch(std::exception const & e) 
+  {
+    flatten_relative_x->value(misc::floatToStr(flattenRelativePos.x));
+  }
+}
+
+void updateFlattenRelativeY(UITextBox::Ptr textBox, const std::string& value)
+{
+  try
+  {
+    float val = std::atof(value.c_str());
+    flattenRelativePos.y = val;
+    flatten_relative_y->value(misc::floatToStr(val));
+  }
+  catch (std::exception const & e)
+  {
+    flatten_relative_x->value(misc::floatToStr(flattenRelativePos.y));
+  }
+}
+
+void updateFlattenRelativeZ(UITextBox::Ptr textBox, const std::string& value)
+{
+  try
+  {
+    float val = std::atof(value.c_str());
+    flattenRelativePos.z = val;
+    flatten_relative_z->value(misc::floatToStr(val));
+  }
+  catch (std::exception const & e)
+  {
+    flatten_relative_x->value(misc::floatToStr(flattenRelativePos.z));
+  }
+}
 
 void setGroundBrushRadius(float f)
 {
@@ -1007,7 +1058,7 @@ void MapView::createGUI()
 #endif
 
 	// flatten/blur
-	setting_blur = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 220.0f);
+	setting_blur = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 320.0f);
 	setting_blur->movable(true);
 	setting_blur->hide();
 	mainGui->addChild(setting_blur);
@@ -1036,7 +1087,7 @@ void MapView::createGUI()
   toggle_flatten->setState(Environment::getInstance()->flattenAngleEnabled);
   setting_blur->addChild(toggle_flatten);
 
-  flatten_angle = new UISlider(6.0f, 175.0f, 167.0f, 90.0f, 0.00001f);
+  flatten_angle = new UISlider(6.0f, 170.0f, 167.0f, 90.0f, 0.00001f);
   flatten_angle->setValue(flattenAngle / 10);
   flatten_angle->setText("Angle: ");
   flatten_angle->setFunc(setFlattenAngle);
@@ -1047,6 +1098,26 @@ void MapView::createGUI()
   flatten_orientation->setText("Orientation: ");
   flatten_orientation->setFunc(setFlattenOrientation);
   setting_blur->addChild(flatten_orientation);
+
+  toggle_flatten_relative = new UICheckBox(5.0f, 215.0f, "flatten relative to:", toggleFlattenLock, 0);
+  toggle_flatten_relative->setState(flattenRelativeMode);
+  setting_blur->addChild(toggle_flatten_relative);
+
+  setting_blur->addChild(new UIText(5.0f, 245.0f, "X:", app.getArial12(), eJustifyLeft));
+  flatten_relative_x = new UITextBox(50.0f, 245.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeX);
+  flatten_relative_x->value(misc::floatToStr(flattenRelativePos.x));
+  setting_blur->addChild(flatten_relative_x);
+
+  setting_blur->addChild(new UIText(5.0f, 265.0f, "Z:", app.getArial12(), eJustifyLeft));
+  flatten_relative_z = new UITextBox(50.0f, 265.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeZ);
+  flatten_relative_z->value(misc::floatToStr(flattenRelativePos.z));
+  setting_blur->addChild(flatten_relative_z);
+
+  setting_blur->addChild(new UIText(5.0f, 285.0f, "Height:", app.getArial12(), eJustifyLeft));
+  flatten_relative_y = new UITextBox(50.0f, 285.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeY);
+  flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
+  setting_blur->addChild(flatten_relative_y);
+
 
 	//3D Paint settings UIWindow
 	settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 280.0f);
@@ -1582,10 +1653,29 @@ void MapView::tick(float t, float dt)
           {
             if (Environment::getInstance()->ShiftDown)
             {
-              if (Environment::getInstance()->flattenAngleEnabled)
-                gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenAngle, flattenOrientation);
+              if (flattenRelativeMode)
+              {
+                if (Environment::getInstance()->flattenAngleEnabled)
+                {
+                  gWorld->flattenTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenRelativePos, flattenAngle, flattenOrientation);
+                }
+                else
+                {
+                  gWorld->flattenTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenRelativePos);
+                }
+              }
               else
-                gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType);
+              {
+                if (Environment::getInstance()->flattenAngleEnabled)
+                {
+                  gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenAngle, flattenOrientation);
+                }
+                else
+                {
+                  gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType);
+                }
+              }
+              
             }
             else if (Environment::getInstance()->CtrlDown)
             {
@@ -2360,7 +2450,22 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 
     if (e->keysym.sym == SDLK_f)
     {
-      if (terrainMode == 9)
+      if (terrainMode == 1)
+      {
+        if (Environment::getInstance()->SpaceDown)
+        {
+          toggleFlattenLock(!flattenRelativeMode, 0);
+          toggle_flatten_relative->setState(flattenRelativeMode);
+        }
+        else
+        {
+          flattenRelativePos = Environment::getInstance()->get_cursor_pos();
+          flatten_relative_x->value(misc::floatToStr(flattenRelativePos.x));
+          flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
+          flatten_relative_z->value(misc::floatToStr(flattenRelativePos.z));
+        }
+      }
+      else if (terrainMode == 9)
       {
         if (gWorld->HasSelection())
         {
@@ -2870,6 +2975,11 @@ void MapView::mouseclick(SDL_MouseButtonEvent *e)
             flattenAngle = 89.0f;
           flatten_angle->setValue(flattenAngle / 90);
         }
+        else if (Environment::getInstance()->SpaceDown)
+        {
+          flattenRelativePos.y += 1;
+          flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
+        }
       }
       else if (terrainMode == 2)
       {
@@ -2906,6 +3016,11 @@ void MapView::mouseclick(SDL_MouseButtonEvent *e)
           if (flattenAngle < 0.0f)
             flattenAngle = 0.0f;
           flatten_angle->setValue(flattenAngle / 90);
+        }
+        else if (Environment::getInstance()->SpaceDown)
+        {
+          flattenRelativePos.y -= 1;
+          flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
         }
       }
       else if (terrainMode == 2)
