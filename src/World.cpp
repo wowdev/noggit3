@@ -1687,6 +1687,39 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
   }
 }
 
+void World::flattenTerrain(float x, float z, float remain, float radius, int BrushType, const Vec3D& origin, float angle, float orientation)
+{
+  std::vector<MapChunk*> chunks;
+
+  for (int j = 0; j < 64; ++j)
+  {
+    for (int i = 0; i < 64; ++i)
+    {
+      if (mapIndex->tileLoaded(j, i))
+      {
+        MapTile* tile = mapIndex->getTile((size_t)j, (size_t)i);
+        for (size_t ty = 0; ty < 16; ++ty)
+        {
+          for (size_t tx = 0; tx < 16; ++tx)
+          {
+            MapChunk* chunk = tile->getChunk(ty, tx);
+            if (chunk->flattenTerrain(x, z, remain, radius, BrushType, origin, angle, orientation))
+            {
+              chunks.emplace_back(chunk);
+              mapIndex->setChanged(j, i);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (MapChunk* chunk : chunks)
+  {
+    chunk->recalcNorms();
+  }
+}
+
 void World::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
   std::vector<MapChunk*> chunks;
