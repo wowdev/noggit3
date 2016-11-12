@@ -236,7 +236,8 @@ public:
 
   void convertMapToBigAlpha();
 
-  Vec3D getClosestPoint();
+  // get the real cursor pos in the world, TODO: get the correct pos on models/wmos
+  Vec3D getCursorPosOnModel();
 private:
 	void getSelection();
 };
