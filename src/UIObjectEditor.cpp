@@ -200,7 +200,7 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   addChild(pasteOnSelectCB);
 
   UICheckBox* moveToCursorCB = new UICheckBox(5.0f, 160.0f, "Model movement mode: to cursor pos", toggleMoveModelToCursorPos, 0);
-  pasteOnSelectCB->setState(Environment::getInstance()->moveModelToCursorPos);
+  moveToCursorCB->setState(Environment::getInstance()->moveModelToCursorPos);
   addChild(moveToCursorCB);
   
   addChild(new UIButton(145.0f, 140.0f, 120.0f, 30.0f, "Spawn on camera", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", pasteOnCamera, 0));
