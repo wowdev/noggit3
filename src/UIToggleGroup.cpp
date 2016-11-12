@@ -20,17 +20,15 @@ void UIToggleGroup::Activate(UICheckBox::Ptr pFrame)
 	for (Frames::iterator it(mFrames.begin()), end(mFrames.end()); it != end
 		; ++it)
 	{
-		it->second->setState(false);
-	}
-
-	for (Frames::iterator it(mFrames.begin()), end(mFrames.end()); it != end
-		; ++it)
-	{
-		if (it->second == pFrame)
-		{
-			*mTarget = it->first;
-			it->second->setState(true);
-		}
+    if (it->second == pFrame)
+    {
+      *mTarget = it->first;
+      it->second->setState(true);
+    }
+    else
+    {
+      it->second->setState(false);
+    }
 	}
 }
 
@@ -44,7 +42,7 @@ void UIToggleGroup::Activate(int pID)
 		{
 			it->second->setState(false);
 		}
-
+    *mTarget = pID;
 		pFrame->second->setState(true);
 	}
 }
