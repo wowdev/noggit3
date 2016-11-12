@@ -226,12 +226,7 @@ void UIObjectEditor::pasteObject()
     case PASTE_ON_TERRAIN: // use cursor pos
       break;
     case PASTE_ON_MODEL:
-      gWorld->drawSelection( Environment::getInstance()->screenX
-                           , Environment::getInstance()->screenY
-                           , false
-                           , false
-                           );
-      pos = gWorld->getClosestPoint();
+      pos = gWorld->getCursorPosOnModel();
       break;
     case PASTE_ON_SELECTION:
       if (gWorld->HasSelection())

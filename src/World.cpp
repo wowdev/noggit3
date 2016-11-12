@@ -1288,10 +1288,16 @@ struct GLNameEntry
   } stack;
 };
 
-Vec3D World::getClosestPoint()
+Vec3D World::getCursorPosOnModel()
 {
   if (terrainMode == 9)
   {
+    drawSelection( Environment::getInstance()->screenX
+                 , Environment::getInstance()->screenY
+                 , false
+                 , false
+                 );
+
     GLuint minDist = 0xFFFFFFFF;
     GLNameEntry* minEntry = NULL;
     GLuint hits = (GLuint)glRenderMode(GL_RENDER);
