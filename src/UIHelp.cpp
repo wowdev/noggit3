@@ -104,7 +104,7 @@ UIHelp::UIHelp()
 		"  PageDown - Set object to Groundlevel\n"
 		"  CTRL + C or C - Copy object to clipboard\n"
 		"  CTRL + V or V - Paste object on mouse position\n"
-    "  X - Paste object on camera position\n"
+    "  T - Toggle between paste modes\n"
     "  F - Move selection to cursor position\n"
 		"  SHIFT + C - Insert last M2 from MV\n"
 		"  ALT + C - Insert last WMO from MV\n"

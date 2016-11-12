@@ -146,7 +146,7 @@ public:
 	//void drawSelectionChunk(int cursorX,int cursorY); does not exist
 	//bool hasAdt(); does not exist
 
-	void drawSelection(int cursorX, int cursorY, bool pOnlyMap = false);
+	void drawSelection(int cursorX, int cursorY, bool pOnlyMap = false, bool doSelection = true);
 	void drawTileMode(float ah);
 
 	void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
@@ -235,6 +235,8 @@ public:
   void fixAllGaps();
 
   void convertMapToBigAlpha();
+
+  Vec3D getClosestPoint();
 private:
 	void getSelection();
 };

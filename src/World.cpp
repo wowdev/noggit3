@@ -1190,7 +1190,7 @@ static const GLuint MapObjName = 1;
 static const GLuint DoodadName = 2;
 static const GLuint MapTileName = 3;
 
-void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap)
+void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap, bool doSelection)
 {
   glSelectBuffer(sizeof(selectionBuffer) / sizeof(GLuint), selectionBuffer);
   glRenderMode(GL_SELECT);
@@ -1261,7 +1261,10 @@ void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap)
     }
   }
 
-  getSelection();
+  if (doSelection)
+  {
+    getSelection();
+  }  
 }
 
 struct GLNameEntry
@@ -1284,6 +1287,52 @@ struct GLNameEntry
     };
   } stack;
 };
+
+Vec3D World::getClosestPoint()
+{
+  if (terrainMode == 9)
+  {
+    GLuint minDist = 0xFFFFFFFF;
+    GLNameEntry* minEntry = NULL;
+    GLuint hits = (GLuint)glRenderMode(GL_RENDER);
+
+    size_t offset = 0;
+
+    //! \todo Isn't the closest one always the first? Iterating would be worthless then.
+    while (hits-- > 0U)
+    {
+      GLNameEntry* entry = reinterpret_cast<GLNameEntry*>(&selectionBuffer[offset]);
+
+      // We always push { MapObjName | DoodadName | MapTileName }, { 0, 0, MapTile }, { UID, UID, triangle }
+      assert(entry->stackSize == 3);
+
+      if (entry->nearZ < minDist)
+      {
+        minDist = entry->nearZ;
+        minEntry = entry;
+      }
+
+      offset += sizeof(GLNameEntry) / sizeof(GLuint);
+    }
+
+    if (minEntry)
+    {
+      // only select objects when using the object editor
+      if (minEntry->stack.type == MapObjName)
+      {
+        WMOInstance* wmo = SelectionNames.findEntry(minEntry->stack.uniqueId)->data.wmo;
+        return wmo->pos;
+      }
+      else if (minEntry->stack.type == DoodadName)
+      {
+        ModelInstance* model = SelectionNames.findEntry(minEntry->stack.uniqueId)->data.model;
+        return model->pos;
+      }
+    }
+  }
+
+  return Environment::getInstance()->get_cursor_pos();
+}
 
 void World::getSelection()
 {
