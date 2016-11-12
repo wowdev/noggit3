@@ -2178,20 +2178,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			}
 			else if (terrainMode == 9 || Environment::getInstance()->CtrlDown)
 			{
-        Vec3D pos = Environment::getInstance()->get_cursor_pos();
-        if (Environment::getInstance()->pasteOnSelection && gWorld->HasSelection())
-        {
-          nameEntry* selection = gWorld->GetCurrentSelection();
-          if (selection->type == eEntry_Model)
-          {
-            pos = selection->data.model->pos;
-          }
-          else if (selection->type == eEntry_WMO)
-          {
-            pos = selection->data.wmo->pos;
-          }
-        }
-        mainGui->objectEditor->pasteObject(pos);
+        mainGui->objectEditor->pasteObject();
 			}
 		}
 
@@ -2215,10 +2202,6 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
         else if (terrainMode == 4)
         {
           mainGui->ZoneIDBrowser->toggleVisibility();
-        }
-        else if (terrainMode == 9)
-        {
-          mainGui->objectEditor->pasteObject(gWorld->camera);
         }
 			}
 		}
@@ -2286,6 +2269,10 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
         {
           gWorld->removeHoleADT(cam.x, cam.z);
         }
+      }
+      else if (terrainMode == 9)
+      {
+        mainGui->objectEditor->togglePasteMode();
       }
 		}
 

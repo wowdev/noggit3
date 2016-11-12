@@ -86,11 +86,6 @@ void showImportModels(UIFrame* f, int)
   (static_cast<UIObjectEditor *>(f->parent())->modelImport->show());  
 }
 
-void pasteOnCamera(UIFrame* f, int)
-{
-  (static_cast<UIObjectEditor *>(f->parent())->pasteObject(gWorld->camera));
-}
-
 void SaveObjecttoTXT(UIFrame* f, int)
 {
   if (!gWorld->HasSelection())
@@ -133,11 +128,6 @@ void toggleCopyModelStats(bool b, int)
   Settings::getInstance()->copyModelStats = b;
 }
 
-void togglePasteOnSelection(bool b, int)
-{
-  Environment::getInstance()->pasteOnSelection = b;
-}
-
 void toggleMoveModelToCursorPos(bool b, int)
 {
   Environment::getInstance()->moveModelToCursorPos = b;
@@ -155,8 +145,9 @@ void clearHiddenModels(UIFrame*, int)
 }
 
 UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
-   : UIWindow(x, y, 270.0f, 280.0f)
+   : UIWindow(x, y, 270.0f, 320.0f)
    , selected()
+   , pasteMode(PASTE_ON_TERRAIN)
 {
   filename = new UIStatusBar(0.0f, (float)video.yres() - 60.0f, (float)video.xres(), 30.0f);
   filename->hide();
@@ -195,33 +186,81 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   copyCB->setState(Settings::getInstance()->copyModelStats);
   addChild(copyCB);
 
-  UICheckBox* pasteOnSelectCB = new UICheckBox(5.0f, 135.0f, "Paste on selection", togglePasteOnSelection, 0);
-  pasteOnSelectCB->setState(Environment::getInstance()->pasteOnSelection);
-  addChild(pasteOnSelectCB);
+  addChild(new UIText(5.0f, 137.5f, "Paste Mode:", app.getArial14(), eJustifyLeft));
 
-  UICheckBox* moveToCursorCB = new UICheckBox(5.0f, 160.0f, "Model movement mode: to cursor pos", toggleMoveModelToCursorPos, 0);
+  pasteModeGroup = new UIToggleGroup(&pasteMode);
+
+  addChild(new UICheckBox(5.0f, 155.0f, "Terrain", pasteModeGroup, PASTE_ON_TERRAIN));
+  addChild(new UICheckBox(105.0f, 155.0f, "Selection", pasteModeGroup, PASTE_ON_SELECTION));
+  addChild(new UICheckBox(5.0f, 180.0f, "Model", pasteModeGroup, PASTE_ON_MODEL));
+  addChild(new UICheckBox(105.0f, 180.0f, "Camera", pasteModeGroup, PASTE_ON_CAMERA));
+
+  pasteModeGroup->Activate(pasteMode);
+
+  UICheckBox* moveToCursorCB = new UICheckBox(5.0f, 215.0f, "Model movement mode: to cursor pos", toggleMoveModelToCursorPos, 0);
   moveToCursorCB->setState(Environment::getInstance()->moveModelToCursorPos);
   addChild(moveToCursorCB);
-  
-  addChild(new UIButton(145.0f, 140.0f, 120.0f, 30.0f, "Spawn on camera", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", pasteOnCamera, 0));
 
-  addChild(new UIText(190.0f, 185.0f, "Import:", app.getArial12(), eJustifyLeft));
-  addChild(new UIButton(190.0f, 200.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
-  addChild(new UIButton(190.0f, 225.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
+  addChild(new UIText(190.0f, 250.0f, "Import:", app.getArial14(), eJustifyLeft));
+  addChild(new UIButton(190.0f, 270.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
+  addChild(new UIButton(190.0f, 295.0f, 75.0f, 30.0f, "From txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", showImportModels, 0));
 
-  addChild(new UIButton(5.0f, 185.0f, 100.0f, 30.0f, "Rotation editor", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", toggleRotationEditor, 0));
+  addChild(new UIButton(5.0f, 245.0f, 150.0f, 30.0f, "Rotation editor", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", toggleRotationEditor, 0));
 
-  addChild(new UIText(5.0f, 205.0f, "Import:", app.getArial12(), eJustifyLeft));
-  addChild(new UIButton(5.0f, 225.0f, 150.0f, 30.0f, "Toggle visibility", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", updateHiddenModelsVisibility, 0));
-  addChild(new UIButton(5.0f, 250.0f, 150.0f, 30.0f, "Clear list", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", clearHiddenModels, 0));
+  addChild(new UIButton(5.0f, 270.0f, 150.0f, 30.0f, "Toggle visibility", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", updateHiddenModelsVisibility, 0));
+  addChild(new UIButton(5.0f, 295.0f, 150.0f, 30.0f, "Clear list", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", clearHiddenModels, 0));
 }
 
-void UIObjectEditor::pasteObject(Vec3D pos)
+void UIObjectEditor::pasteObject()
 {
-  if (selected.type == eEntry_Model || selected.type == eEntry_WMO)
+  if (selected.type != eEntry_Model && selected.type != eEntry_WMO)
   {
-    gWorld->addModel(selected, pos, true);
+    return;
   }
+
+  // default value
+  Vec3D pos = Environment::getInstance()->get_cursor_pos();
+
+  switch (pasteMode)
+  {
+    case PASTE_ON_TERRAIN: // use cursor pos
+      break;
+    case PASTE_ON_MODEL:
+      gWorld->drawSelection( Environment::getInstance()->screenX
+                           , Environment::getInstance()->screenY
+                           , false
+                           , false
+                           );
+      pos = gWorld->getClosestPoint();
+      break;
+    case PASTE_ON_SELECTION:
+      if (gWorld->HasSelection())
+      {
+        nameEntry* selection = gWorld->GetCurrentSelection();
+        if (selection->type == eEntry_Model)
+        {
+          pos = selection->data.model->pos;
+        }
+        else if (selection->type == eEntry_WMO)
+        {
+          pos = selection->data.wmo->pos;
+        }
+      } // else: use cursor pos
+      break;
+    case PASTE_ON_CAMERA:
+      pos = gWorld->camera;
+      break;
+    default:
+      LogDebug << "UIObjectEditor::pasteObject: Unknown pasteMode " << pasteMode << std::endl;
+      break;
+  }
+
+  gWorld->addModel(selected, pos, true);
+}
+
+void UIObjectEditor::togglePasteMode()
+{
+  pasteModeGroup->Activate((pasteMode + 1) % PASTE_MODE_COUNT);
 }
 
 void UIObjectEditor::copy(nameEntry entry)
