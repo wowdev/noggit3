@@ -14,6 +14,14 @@ enum eViewMode
 	eViewMode_3D
 };
 
+enum eFlattenMode
+{
+  eFlattenMode_Both,
+  eFlattenMode_Raise,
+  eFlattenMode_Lower,
+  eFlattenMode_Count
+};
+
 class MapView : public AppState, public HotKeyReceiver
 {
 private:

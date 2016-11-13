@@ -150,6 +150,7 @@ UISlider* blur_brush;
 float blurBrushRadius = 10.0f;
 int    blurBrushType = 1;
 
+int flattenType = eFlattenMode_Both;
 
 UICheckBox* toggle_flatten;
 
@@ -195,6 +196,7 @@ UIMapViewGUI* mainGui;
 
 UIFrame* MapChunkWindow;
 
+UIToggleGroup * gFlattenTypeGroup;
 UIToggleGroup * gBlurToggleGroup;
 UIToggleGroup * gGroundToggleGroup;
 UIToggleGroup * gFlagsToggleGroup;
@@ -1058,7 +1060,7 @@ void MapView::createGUI()
 #endif
 
 	// flatten/blur
-	setting_blur = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 320.0f);
+	setting_blur = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 400.0f);
 	setting_blur->movable(true);
 	setting_blur->hide();
 	mainGui->addChild(setting_blur);
@@ -1083,41 +1085,53 @@ void MapView::createGUI()
 	ground_blur_speed->setText("Brush Speed: ");
 	setting_blur->addChild(ground_blur_speed);
 
-  toggle_flatten = new UICheckBox(6.0f, 130.0f, "Flatten Angle", toggleFlattenAngle, 0);
+  setting_blur->addChild(new UIText(5.0f, 130.0f, "Flatten options:", app.getArial14(), eJustifyLeft));
+
+  toggle_flatten = new UICheckBox(6.0f, 150.0f, "Flatten Angle", toggleFlattenAngle, 0);
   toggle_flatten->setState(Environment::getInstance()->flattenAngleEnabled);
   setting_blur->addChild(toggle_flatten);
 
-  flatten_angle = new UISlider(6.0f, 170.0f, 167.0f, 90.0f, 0.00001f);
+  flatten_angle = new UISlider(6.0f, 190.0f, 167.0f, 90.0f, 0.00001f);
   flatten_angle->setValue(flattenAngle / 10);
   flatten_angle->setText("Angle: ");
   flatten_angle->setFunc(setFlattenAngle);
   setting_blur->addChild(flatten_angle);
 
-  flatten_orientation = new UISlider(6.0f, 200.0f, 167.0f, 360.0f, 0.00001f);
+  flatten_orientation = new UISlider(6.0f, 220.0f, 167.0f, 360.0f, 0.00001f);
   flatten_orientation->setValue(flattenOrientation / 10);
   flatten_orientation->setText("Orientation: ");
   flatten_orientation->setFunc(setFlattenOrientation);
   setting_blur->addChild(flatten_orientation);
 
-  toggle_flatten_relative = new UICheckBox(5.0f, 215.0f, "flatten relative to:", toggleFlattenLock, 0);
+  toggle_flatten_relative = new UICheckBox(5.0f, 235.0f, "flatten relative to:", toggleFlattenLock, 0);
   toggle_flatten_relative->setState(flattenRelativeMode);
   setting_blur->addChild(toggle_flatten_relative);
 
-  setting_blur->addChild(new UIText(5.0f, 245.0f, "X:", app.getArial12(), eJustifyLeft));
-  flatten_relative_x = new UITextBox(50.0f, 245.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeX);
+  setting_blur->addChild(new UIText(5.0f, 265.0f, "X:", app.getArial12(), eJustifyLeft));
+  flatten_relative_x = new UITextBox(50.0f, 265.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeX);
   flatten_relative_x->value(misc::floatToStr(flattenRelativePos.x));
   setting_blur->addChild(flatten_relative_x);
 
-  setting_blur->addChild(new UIText(5.0f, 265.0f, "Z:", app.getArial12(), eJustifyLeft));
-  flatten_relative_z = new UITextBox(50.0f, 265.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeZ);
+  setting_blur->addChild(new UIText(5.0f, 285.0f, "Z:", app.getArial12(), eJustifyLeft));
+  flatten_relative_z = new UITextBox(50.0f, 285.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeZ);
   flatten_relative_z->value(misc::floatToStr(flattenRelativePos.z));
   setting_blur->addChild(flatten_relative_z);
 
-  setting_blur->addChild(new UIText(5.0f, 285.0f, "Height:", app.getArial12(), eJustifyLeft));
-  flatten_relative_y = new UITextBox(50.0f, 285.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeY);
+  setting_blur->addChild(new UIText(5.0f, 305.0f, "Height:", app.getArial12(), eJustifyLeft));
+  flatten_relative_y = new UITextBox(50.0f, 305.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeY);
   flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
   setting_blur->addChild(flatten_relative_y);
 
+  setting_blur->addChild(new UIText(5.0f, 330.0, "Flatten Type:", app.getArial14(), eJustifyLeft));
+
+  gFlattenTypeGroup = new UIToggleGroup(&flattenType);
+
+  setting_blur->addChild(new UICheckBox(5.0f, 345.0f, "Raise/Lower", gFlattenTypeGroup, eFlattenMode_Both));
+  setting_blur->addChild(new UICheckBox(105.0f, 345.0f, "Raise", gFlattenTypeGroup, eFlattenMode_Raise));
+  setting_blur->addChild(new UICheckBox(5.0f, 370.0f, "Lower", gFlattenTypeGroup, eFlattenMode_Lower));
+
+  gFlattenTypeGroup->Activate(flattenType);
+  
 
 	//3D Paint settings UIWindow
 	settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 280.0f);
@@ -1657,22 +1671,22 @@ void MapView::tick(float t, float dt)
               {
                 if (Environment::getInstance()->flattenAngleEnabled)
                 {
-                  gWorld->flattenTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenRelativePos, flattenAngle, flattenOrientation);
+                  gWorld->flattenTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenType, flattenRelativePos, flattenAngle, flattenOrientation);
                 }
                 else
                 {
-                  gWorld->flattenTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenRelativePos);
+                  gWorld->flattenTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenType, flattenRelativePos);
                 }
               }
               else
               {
                 if (Environment::getInstance()->flattenAngleEnabled)
                 {
-                  gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenAngle, flattenOrientation);
+                  gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenType, flattenAngle, flattenOrientation);
                 }
                 else
                 {
-                  gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType);
+                  gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenType);
                 }
               }
               
@@ -2250,8 +2264,15 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
       // toggle flatten angle mode
       if (terrainMode == 1)
       {
-        toggle_flatten->setState(!(Environment::getInstance()->flattenAngleEnabled));
-        toggleFlattenAngle(!(Environment::getInstance()->flattenAngleEnabled), 0);
+        if (Environment::getInstance()->SpaceDown)
+        {
+          gFlattenTypeGroup->Activate((flattenType + 1) % eFlattenMode_Count);
+        }
+        else
+        {
+          toggle_flatten->setState(!(Environment::getInstance()->flattenAngleEnabled));
+          toggleFlattenAngle(!(Environment::getInstance()->flattenAngleEnabled), 0);
+        }
       }
       else if (terrainMode == 2)
       {
@@ -2615,15 +2636,11 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			switch (terrainMode)
 			{
 				case 0:
-					Environment::getInstance()->groundBrushType++;
-					Environment::getInstance()->groundBrushType = Environment::getInstance()->groundBrushType % 6;
-					gGroundToggleGroup->Activate(Environment::getInstance()->groundBrushType);
+					gGroundToggleGroup->Activate((Environment::getInstance()->groundBrushType + 1) % 6);
 					break;
 
 				case 1:
-					blurBrushType++;
-					blurBrushType = blurBrushType % 3;
-					gBlurToggleGroup->Activate(blurBrushType);
+					gBlurToggleGroup->Activate((blurBrushType+1)%3);
 					break;
 			}
 		}

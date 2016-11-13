@@ -85,6 +85,7 @@ UIHelp::UIHelp()
 		"  SHIFT + Left mouse click - flatten terrain\n"
 		"  CTRL + Left mouse  click - blur terrain\n"
     "  T - Toggle flatten angle\n"
+    "  SPACE + T - Toggle flatten type\n"
     "  SHIFT + mouse wheel - change angle\n"
     "  ALT + mouse wheel - change orientation\n"
     "  Y - switch to next type\n"
