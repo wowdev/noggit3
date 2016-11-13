@@ -1100,7 +1100,7 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
   return changed;
 }
 
-bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, float angle, float orientation)
+bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, int flattenType, float angle, float orientation)
 {
   float speed = 1.00f;
   float dist, xdiff, zdiff, nremain;
@@ -1127,6 +1127,12 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
     {
       float o = orientation*PI / 180, tanA = tan(angle*PI / 180);
       float ah = h + (xdiff*cos(o) + zdiff*sin(o))*  tanA;
+
+      // 1 = raise only, 2 = lower only
+      if ((flattenType == 1 && ah < mVertices[i].y) || (flattenType == 2 && ah > mVertices[i].y))
+      {
+        continue;
+      }
 
       if (BrushType == 0)//Flat
       {
@@ -1157,7 +1163,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
   return changed;
 }
 
-bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int BrushType, const Vec3D& origin, float angle, float orientation)
+bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const Vec3D& origin, float angle, float orientation)
 {
   float speed = 1.00f;
   float dist, xdiff, zdiff, nremain;
@@ -1184,6 +1190,11 @@ bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int 
     {
       float o = orientation*PI / 180, tanA = tan(angle*PI / 180);
       float ah = origin.y + ((mVertices[i].x - origin.x)*cos(o) + (mVertices[i].z - origin.z)*sin(o))*  tanA;
+      // 1 = raise only, 2 = lower only
+      if ((flattenType == 1 && ah < mVertices[i].y) || (flattenType == 2 && ah > mVertices[i].y))
+      {
+        continue;
+      }
 
       if (BrushType == 0)//Flat
       {

@@ -91,8 +91,8 @@ public:
 
 	//! \todo implement Action stack for these
 	bool changeTerrain(float x, float z, float change, float radius, int BrushType);
-	bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, float angle, float orientation);
-  bool flattenTerrain(float x, float z, float remain, float radius, int BrushType, const Vec3D& origin, float angle, float orientation);
+	bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, int flattenType, float angle, float orientation);
+  bool flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const Vec3D& origin, float angle, float orientation);
 	bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
 	//! \todo implement Action stack for these
