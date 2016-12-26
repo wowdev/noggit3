@@ -16,7 +16,8 @@ Settings::Settings()
 	this->FarZ = 1024;
 	this->_noAntiAliasing = false;
 	this->copyModelStats = true;
-  this->tabletMode = false;
+    this->tabletMode = false;
+	this->renderModelsWithBox = false;
 
 	if (boost::filesystem::exists("noggit.conf"))
 	{

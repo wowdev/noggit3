@@ -4,6 +4,7 @@
 #include "Misc.h" // checkinside
 #include "Model.h" // Model, etc.
 #include "World.h" // gWorld
+#include "Settings.h" // gWorld
 
 Vec3D TransformCoordsForModel(Vec3D pIn)
 {
@@ -105,7 +106,24 @@ void ModelInstance::draw()
 	glRotatef(dir.z, 1.0f, 0.0f, 0.0f);
 	glScalef(sc, sc, sc);
 
-	model->draw();
+	if (Settings::getInstance()->renderModelsWithBox)
+	{
+		glDisable(GL_LIGHTING);
+		glDisable(GL_COLOR_MATERIAL);
+		glActiveTexture(GL_TEXTURE0);
+		glDisable(GL_TEXTURE_2D);
+		glActiveTexture(GL_TEXTURE1);
+		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		DrawABox(TransformCoordsForModel(model->header.VertexBoxMin), TransformCoordsForModel(model->header.VertexBoxMax), Vec4D(0.5f, 0.5f, 0.5f, 1.0f), 3.0f);
+		glActiveTexture(GL_TEXTURE1);
+		glDisable(GL_TEXTURE_2D);
+		glActiveTexture(GL_TEXTURE0);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_LIGHTING);
+	}
+		model->draw();
 
   bool currentSelection = gWorld->IsSelection(eEntry_Model) && gWorld->GetCurrentSelection()->data.model->d1 == d1;
   

@@ -20,6 +20,7 @@ public:
 	bool holelinesOn;    // If true show the blue subchunk lines always. Not only in holemode is on.
 
   bool tabletMode;
+  bool renderModelsWithBox;
 
 	const bool& noAntiAliasing() const;
 
