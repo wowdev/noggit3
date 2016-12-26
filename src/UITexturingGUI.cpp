@@ -6,6 +6,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "DBC.h"
 #include "Log.h"
@@ -22,6 +23,7 @@
 #include "UITexture.h" // UITexture
 #include "UIToolbar.h" // Toolbar
 #include "Video.h"
+#include "Log.h"
 
 //! \todo  Get this whole thing in a seperate class.
 
@@ -40,6 +42,8 @@ std::map<int, std::string> gFilenameFilters;
 std::vector<std::string> gActiveFilenameFilters;
 std::vector<std::string> gActiveDirectoryFilters;
 std::vector<std::string> textureNames;
+std::vector<std::string> specularTextureNames;
+bool showOnlySpecularTextures = true;
 std::vector<std::string> tilesetDirectories;
 std::vector<OpenGL::Texture*> gTexturesInList;
 
@@ -97,6 +101,12 @@ void LoadTextureNames()
 			{
 				textureNames.push_back(*it);
 			}
+			else
+			{
+				it->replace(it->find("_s"), sizeof("_s") - 1, "");
+				LogError << *it << std::endl;
+				specularTextureNames.push_back(*it);
+			}
 		}
 		else
 		{
@@ -124,6 +134,10 @@ bool TextureInPalette(const std::string& pFName)
 	{
 		return false;
 	}
+
+	if (showOnlySpecularTextures)
+		if (!std::any_of(std::begin(specularTextureNames), std::end(specularTextureNames), [&](string i) { return i == pFName; }))
+			return false;
 
 	if (gActiveFilenameFilters.size())
 	{
@@ -191,18 +205,15 @@ void showPage(int pPage)
 void updateTextures()
 {
   for (OpenGL::Texture *tex : gTexturesInList)
-  {
     tex->removeReference();
-  }
+
 	gTexturesInList.clear();
 	gTexturesInList = TextureManager::getAllTexturesMatching(TextureInPalette);
 
   for (OpenGL::Texture *tex : gTexturesInList)
-  {
-    tex->addReference();
-  }
+	tex->addReference();
 
-	showPage(0);
+  showPage(0);
 }
 
 void changePage(UIFrame*, int direction)
@@ -330,24 +341,33 @@ void clickFilterTexture(bool value, int id)
 
 void clickFileFilterTexture(bool value, int id)
 {
-	if (value)
+	if (id == 999)
 	{
-		std::transform(gFilenameFilters[id].begin(), gFilenameFilters[id].end(), gFilenameFilters[id].begin(), ::tolower);
-		gActiveFilenameFilters.push_back(gFilenameFilters[id]);
+		showOnlySpecularTextures = !showOnlySpecularTextures;
 	}
 	else
 	{
-		for (std::vector<std::string>::iterator it = gActiveFilenameFilters.begin(); it != gActiveFilenameFilters.end(); ++it)
+		if (value)
 		{
-			if (*it == gFilenameFilters[id])
+			std::transform(gFilenameFilters[id].begin(), gFilenameFilters[id].end(), gFilenameFilters[id].begin(), ::tolower);
+			gActiveFilenameFilters.push_back(gFilenameFilters[id]);
+		}
+		else
+		{
+			for (std::vector<std::string>::iterator it = gActiveFilenameFilters.begin(); it != gActiveFilenameFilters.end(); ++it)
 			{
-				gActiveFilenameFilters.erase(it);
-				break;
+				if (*it == gFilenameFilters[id])
+				{
+					gActiveFilenameFilters.erase(it);
+					break;
+				}
 			}
 		}
 	}
 	updateTextures();
 }
+
+
 
 
 //! \todo  Make this cleaner.
@@ -462,7 +482,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
 	InitFilenameFilterList();
 
 	LoadTextureNames();
-	windowTextureFilter = new UICloseWindow(video.xres() / 2.0f - 450.0f, video.yres() / 2.0f - 300.0f, 1000.0f, 755.0f, "", true);
+	windowTextureFilter = new UICloseWindow(video.xres() / 2.0f - 450.0f, video.yres() / 2.0f - 300.0f, 1200.0f, 855.0f, "", true);
 	windowTextureFilter->hide();
 
 	//Filename Filters
@@ -470,10 +490,14 @@ UIFrame* UITexturingGUI::createTextureFilter()
 
 	for (std::map<int, std::string>::iterator it = gFilenameFilters.begin(); it != gFilenameFilters.end(); ++it)
 	{
-		windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * (it->first / 5), 30.0f + 30.0f * (it->first % 5), it->second, clickFileFilterTexture, it->first));
+		windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * (it->first / 5), 30.0f + 30.0f * (it->first % 4), it->second, clickFileFilterTexture, it->first));
 	}
 
-	windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * 4, 30.0f + 30.0f * 4, "Misc (Everything Else)", clickFileFilterTexture, 24));
+	windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * 5, 30.0f + 30.0f * 0, "Misc (Everything Else)", clickFileFilterTexture, 24));
+	UICheckBox *specTogggle = new UICheckBox(15.0f + 200.0f * 5, 30.0f + 30.0f * 1, "Only specular textures (_s)", clickFileFilterTexture, 999);
+	specTogggle->setState(true);
+	windowTextureFilter->addChild(specTogggle);
+
 
 	//Tileset Filters
 	windowTextureFilter->addChild(new UIText(70.0f, 190.0f, "Tileset Filters", app.getArial14(), eJustifyCenter));
@@ -489,7 +513,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
 		misc::find_and_replace(name, "expansion05\\", "");
 		misc::find_and_replace(name, "expansion06\\", "");
 		misc::find_and_replace(name, "expansion07\\", "");
-		windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * (i / 18), 210.0f + 30.0f * (i % 18), name, clickFilterTexture, i));
+		windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * (i / 20), 210.0f + 30.0f * (i % 20), name, clickFilterTexture, i));
 	}
 
 	return windowTextureFilter;
@@ -616,41 +640,9 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
 	if (chunk->Flags & FLAG_LQ_MAGMA)
 		chunkFlagChecks[4]->setState(true);
 
-	//sprintf(Temp,"EffectID: %d",chunk->header.effectId);
-	//chunkEffectID->setText(Temp);///
-
 	std::stringstream ss;
 	ss << "Num Effects: " << chunk->header.nEffectDoodad;
 	chunkNumEffects->setText(ss.str().c_str());///
-
-	//! \todo rework texture reading
-	/*
-	int pl=0;
-	for(pl=0;pl<(chunk->nTextures);pl++)
-	{
-	chunkTexture[pl]->show();
-	chunkTextureNames[pl]->show();
-	chunkTextureFlags[pl]->show();
-	chunkTextureEffectID[pl]->show();
-
-	sprintf(Temp,"Flags- %d",chunk->texFlags[pl]);
-	chunkTextureFlags[pl]->setText(Temp);
-
-	sprintf(Temp,"EffectID- %d",chunk->effectID[pl]);
-	chunkTextureEffectID[pl]->setText(Temp);
-
-	chunkTexture[pl]->setTexture(TextureManager::items[chunk->textures[pl]]->name);
-
-	chunkTextureNames[pl]->setText(TextureManager::items[chunk->textures[pl]]->name);
-	}
-	for(;pl<4;pl++)
-	{
-	chunkTexture[pl]->hide();
-	chunkTextureNames[pl]->hide();
-	chunkTextureFlags[pl]->hide();
-	chunkTextureEffectID[pl]->hide();
-	}*/
-
 }
 
 OpenGL::Texture* UITexturingGUI::getSelectedTexture(){
@@ -666,17 +658,3 @@ void UITexturingGUI::setSelectedTexture(OpenGL::Texture * t){
 
 	UITexturingGUI::selectedTexture = t;
 }
-//! \todo rework!
-/*
-void setChunk(MapChunk *chunk)//I dont remember, but is is maybe mine ground texture changing function
-{
-int i;
-for(i=0;i<4;i++)
-{
-if((chunk->textures[i]==textureChunkSelected->texture)&&(selectedTexture!=0))
-{
-chunk->textures[i]=video.textures.add(selectedTexture->name.c_str());
-}
-};
-}
-*/
