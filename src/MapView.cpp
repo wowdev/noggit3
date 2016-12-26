@@ -1276,6 +1276,7 @@ void MapView::createGUI()
 	mbar->GetMenu("View")->AddMenuItemToggle("F Fog", &gWorld->drawfog);
 	mbar->GetMenu("View")->AddMenuItemToggle("Hole lines always on", &Settings::getInstance()->holelinesOn, false);
 	mbar->GetMenu("View")->AddMenuItemToggle("Wireframe", &gWorld->drawwireframe);
+	mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &Settings::getInstance()->renderModelsWithBox);
 
 	mbar->GetMenu("Help")->AddMenuItemButton("Key Bindings F10", openHelp, 0);
 	mbar->GetMenu("Help")->AddMenuItemButton("Manual online", openURL, 2);
