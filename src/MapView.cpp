@@ -399,10 +399,11 @@ void change_settings_window(int oldid, int newid)
 	settings_shader->hide();
 	mainGui->guiWater->hide();
 	mainGui->TextureSwitcher->hide();
-  mainGui->objectEditor->hide();
-  mainGui->objectEditor->filename->hide();
-  mainGui->objectEditor->modelImport->hide();
-  mainGui->rotationEditor->hide();
+    mainGui->objectEditor->hide();
+    mainGui->objectEditor->filename->hide();
+    mainGui->objectEditor->modelImport->hide();
+    mainGui->rotationEditor->hide();
+    mainGui->ZoneIDBrowser->hide();
 
 	if (!mainGui || !mainGui->TexturePalette)
 		return;
@@ -421,6 +422,10 @@ void change_settings_window(int oldid, int newid)
 	case 3:
 		tool_settings_x = (int)settings_paint->x();
 		tool_settings_y = (int)settings_paint->y();
+		break;
+	case 5:
+		tool_settings_x = (int)mainGui->ZoneIDBrowser->x()+230;
+		tool_settings_y = (int)mainGui->ZoneIDBrowser->y();
 		break;
 	case 7:
 		tool_settings_x = (int)mainGui->guiWater->x();
@@ -448,6 +453,11 @@ void change_settings_window(int oldid, int newid)
 		settings_paint->x((const float)tool_settings_x);
 		settings_paint->y((const float)tool_settings_y);
 		settings_paint->show();
+		break;
+	case 5:
+		mainGui->ZoneIDBrowser->x((const float)tool_settings_x-230);
+		mainGui->ZoneIDBrowser->y((const float)tool_settings_y);
+		mainGui->ZoneIDBrowser->show();
 		break;
 	case 7:
 		mainGui->guiWater->x((const float)tool_settings_x);
@@ -2023,10 +2033,6 @@ void MapView::display(float t, float dt)
 void MapView::save()
 {
 	gWorld->mapIndex->saveChanged();
-	//ConfigFile::add("RedColor", RedColor);
-	//ConfigFile::add("GreenColor", GreenColor);
-	//ConfigFile::add("BlueColor", BlueColor);
-	//ConfigFile::add("AlphaColor", AlphaColor);
 }
 
 void MapView::quit()
@@ -2214,10 +2220,8 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
         {
           view_texture_palette(0, 0);
         }					
-        else if (terrainMode == 4)
-        {
-          mainGui->ZoneIDBrowser->toggleVisibility();
-        }
+
+		
 			}
 		}
 
@@ -2296,6 +2300,8 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
       {
         mainGui->objectEditor->togglePasteMode();
       }
+
+
 		}
 
 		// clip object to ground

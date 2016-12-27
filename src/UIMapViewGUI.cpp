@@ -81,7 +81,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 	addChild(guidetailInfos);
 
 	// ZoneIDBrowser
-	ZoneIDBrowser = new UIZoneIDBrowser(200, 200, 435, 400, this);
+	ZoneIDBrowser = new UIZoneIDBrowser(200, 200, 410, 400, this);
 	ZoneIDBrowser->movable(true);
 	ZoneIDBrowser->hide();
 	addChild(ZoneIDBrowser);

@@ -10,7 +10,7 @@
 class UIMapViewGUI;
 class UIListView;
 
-class UIZoneIDBrowser : public UICloseWindow
+class UIZoneIDBrowser : public UIWindow
 {
 public:
 	typedef UIZoneIDBrowser* Ptr;
