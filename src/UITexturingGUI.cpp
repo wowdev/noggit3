@@ -281,31 +281,55 @@ void InitFilenameFilterList()
 		return;
 
 	gFilenameFiltersInited = true;
+	int counter = 0;
 
-	gFilenameFilters.insert(std::pair<int, std::string>(0, "Base"));
-	gFilenameFilters.insert(std::pair<int, std::string>(1, "Brick"));
-	gFilenameFilters.insert(std::pair<int, std::string>(2, "Brush"));
-	gFilenameFilters.insert(std::pair<int, std::string>(3, "Cobblestone"));
-	gFilenameFilters.insert(std::pair<int, std::string>(4, "Cracked"));
-	gFilenameFilters.insert(std::pair<int, std::string>(5, "Creep"));
-	gFilenameFilters.insert(std::pair<int, std::string>(6, "Crop"));
-	gFilenameFilters.insert(std::pair<int, std::string>(7, "Dirt"));
-	gFilenameFilters.insert(std::pair<int, std::string>(8, "Fern"));
-	gFilenameFilters.insert(std::pair<int, std::string>(9, "Flower"));
-	gFilenameFilters.insert(std::pair<int, std::string>(10, "Footprints"));
-	gFilenameFilters.insert(std::pair<int, std::string>(11, "Grass"));
-	gFilenameFilters.insert(std::pair<int, std::string>(12, "Ice"));
-	gFilenameFilters.insert(std::pair<int, std::string>(13, "Leaf"));
-	gFilenameFilters.insert(std::pair<int, std::string>(14, "Mud"));
-	gFilenameFilters.insert(std::pair<int, std::string>(15, "Moss"));
-	gFilenameFilters.insert(std::pair<int, std::string>(16, "Road"));
-	gFilenameFilters.insert(std::pair<int, std::string>(17, "Rock"));
-	gFilenameFilters.insert(std::pair<int, std::string>(18, "Root"));
-	gFilenameFilters.insert(std::pair<int, std::string>(19, "Rubble"));
-	gFilenameFilters.insert(std::pair<int, std::string>(20, "Sand"));
-	gFilenameFilters.insert(std::pair<int, std::string>(21, "Shore"));
-	gFilenameFilters.insert(std::pair<int, std::string>(22, "Straw"));
-	gFilenameFilters.insert(std::pair<int, std::string>(23, "Weed"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Base"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Brick"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Brush"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Bush"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Clover"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Cobblestone"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Coral"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Crack"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Creep"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Crystal"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Crop"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Dark"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Dead"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Dirt"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Fern"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Flower"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Floor"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Footprints"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Grass"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Ice"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Ivy"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Jungle"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Lava"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Leaf"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Light"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Mud"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Moss"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Mineral"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Needle"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Pebbl"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Road"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Rock"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Root"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Rubble"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Sand"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Slime"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Smooth"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Snow"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Shore"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Water"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Waves"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Web"));
+	gFilenameFilters.insert(std::pair<int, std::string>(counter++, "Weed"));
+
+
+
+
 }
 
 // -----------------------------------------------
@@ -484,7 +508,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
 	InitFilenameFilterList();
 
 	LoadTextureNames();
-	windowTextureFilter = new UICloseWindow(video.xres() / 2.0f - 450.0f, video.yres() / 2.0f - 300.0f, 1200.0f, 855.0f, "", true);
+	windowTextureFilter = new UICloseWindow(video.xres() / 2.0f - 610.0f, video.yres() / 2.0f - 450.0f, 1220.0f, 905.0f, "", true);
 	windowTextureFilter->hide();
 
 	//Filename Filters
@@ -492,17 +516,17 @@ UIFrame* UITexturingGUI::createTextureFilter()
 
 	for (std::map<int, std::string>::iterator it = gFilenameFilters.begin(); it != gFilenameFilters.end(); ++it)
 	{
-		windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * (it->first / 5), 30.0f + 30.0f * (it->first % 4), it->second, clickFileFilterTexture, it->first));
+		windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * (it->first / 8), 30.0f + 30.0f * (it->first % 8), it->second, clickFileFilterTexture, it->first));
 	}
 
-	windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * 5, 30.0f + 30.0f * 0, "Misc (Everything Else)", clickFileFilterTexture, 24));
-	UICheckBox *specTogggle = new UICheckBox(15.0f + 200.0f * 5, 30.0f + 30.0f * 1, "Only specular textures (_s)", clickFileFilterTexture, 999);
+	windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * 5, 30.0f + 30.0f * 3, "Misc (Everything Else)", clickFileFilterTexture, 24));
+	UICheckBox *specTogggle = new UICheckBox(15.0f + 200.0f * 5, 30.0f + 30.0f * 4, "Only specular textures (_s)", clickFileFilterTexture, 999);
 	specTogggle->setState(true);
 	windowTextureFilter->addChild(specTogggle);
 
 
 	//Tileset Filters
-	windowTextureFilter->addChild(new UIText(70.0f, 190.0f, "Tileset Filters", app.getArial14(), eJustifyCenter));
+	windowTextureFilter->addChild(new UIText(70.0f, 280.0f, "Tileset Filters", app.getArial14(), eJustifyCenter));
 
 	for (unsigned int i = 0; i < tilesetDirectories.size(); ++i)
 	{
@@ -515,7 +539,7 @@ UIFrame* UITexturingGUI::createTextureFilter()
 		misc::find_and_replace(name, "expansion05\\", "");
 		misc::find_and_replace(name, "expansion06\\", "");
 		misc::find_and_replace(name, "expansion07\\", "");
-		windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * (i / 20), 210.0f + 30.0f * (i % 20), name, clickFilterTexture, i));
+		windowTextureFilter->addChild(new UICheckBox(15.0f + 200.0f * (i / 20), 300.0f + 30.0f * (i % 20), name, clickFilterTexture, i));
 	}
 
 	return windowTextureFilter;
