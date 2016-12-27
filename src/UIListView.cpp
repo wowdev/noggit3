@@ -26,13 +26,6 @@ UIListView::UIListView(float xPos, float yPos, float w, float h, int elementHeig
 void UIListView::clear()
 {
 	_children.erase(_children.begin(), _children.end() - 1);
-	/*
-	for( Children::iterator child( children.begin() ), end( children.end() )
-	; child != end && children.size() != 1; ++child )
-	{
-	children.erase( child );
-	}
-	*/
 	scrollbar->setNum(0);
 }
 
@@ -54,6 +47,14 @@ int UIListView::getElementsCount()
 
 void UIListView::recalcElements(unsigned int value)
 {
+	if (this->getElementsCount() < 19)
+	{
+		this->scrollbar->hide();
+	}
+	else
+	{
+		this->scrollbar->show();
+	}
 	elements_start = value;
 	// recalculate the position and the hide value off all child.
 	int rowCount(0);
