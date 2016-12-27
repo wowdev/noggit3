@@ -6,10 +6,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #include "DBC.h"
-#include "Log.h"
 #include "MapChunk.h"
 #include "Misc.h"
 #include "MPQ.h"
@@ -23,7 +21,6 @@
 #include "UITexture.h" // UITexture
 #include "UIToolbar.h" // Toolbar
 #include "Video.h"
-#include "Log.h"
 
 //! \todo  Get this whole thing in a seperate class.
 
@@ -104,7 +101,6 @@ void LoadTextureNames()
 			else
 			{
 				it->replace(it->find("_s"), sizeof("_s") - 1, "");
-				LogError << *it << std::endl;
 				specularTextureNames.push_back(*it);
 			}
 		}
@@ -136,8 +132,10 @@ bool TextureInPalette(const std::string& pFName)
 	}
 
 	if (showOnlySpecularTextures)
-		if (!std::any_of(std::begin(specularTextureNames), std::end(specularTextureNames), [&](string i) { return i == pFName; }))
-			return false;
+	{
+		if (!std::any_of(std::begin(specularTextureNames), std::end(specularTextureNames), [&](string i) { return i == pFName; })) return false;
+	}
+
 
 	if (gActiveFilenameFilters.size())
 	{
@@ -204,14 +202,18 @@ void showPage(int pPage)
 
 void updateTextures()
 {
-  for (OpenGL::Texture *tex : gTexturesInList)
-    tex->removeReference();
+	for (OpenGL::Texture *tex : gTexturesInList)
+	{
+		tex->removeReference();
+	}
 
 	gTexturesInList.clear();
 	gTexturesInList = TextureManager::getAllTexturesMatching(TextureInPalette);
 
-  for (OpenGL::Texture *tex : gTexturesInList)
-	tex->addReference();
+	for (OpenGL::Texture *tex : gTexturesInList)
+	{
+		tex->addReference();
+	}
 
   showPage(0);
 }
