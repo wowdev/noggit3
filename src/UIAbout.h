@@ -3,7 +3,7 @@
 
 #include "UICloseWindow.h"
 
-class UIAbout : public UICloseWindow
+class UIAbout : public UIWindow
 {
 private:
 	static const int winWidth = 400;

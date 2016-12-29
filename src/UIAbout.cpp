@@ -11,7 +11,7 @@
 #include "Log.h"
 
 UIAbout::UIAbout()
-	: UICloseWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f, (float)winWidth, (float)winHeight, "")
+	: UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f  , (float)winWidth, (float)winHeight)
 {
 	addChild(new UITexture(20.0f, 20.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Potion_83.blp"));
 	addChild(new UIText(73.0f, 24.0f, "Noggit Studio", app.getSkurri32(), eJustifyLeft));
