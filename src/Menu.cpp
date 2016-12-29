@@ -203,6 +203,7 @@ void Menu::keypressed(SDL_KeyboardEvent* e)
 		if (gWorld)
 		{
 			mGUIMinimapWindow->hide();
+			mGUICreditsWindow->show();
 			delete gWorld;
 			gWorld = NULL;
 		}
@@ -217,7 +218,7 @@ UIFrame::Ptr LastClickedMenu = NULL;
 
 void Menu::mouseclick(SDL_MouseButtonEvent* e)
 {
-	mGUICreditsWindow->hide();
+
 
 	if (e->button != SDL_BUTTON_LEFT)
 	{
@@ -264,6 +265,7 @@ void Menu::loadMap(int mapID)
 		if (it->getInt(MapDB::MapID) == mapID)
 		{
 			gWorld = new World(it->getString(MapDB::InternalName));
+			mGUICreditsWindow->hide();
 			mGUIMinimapWindow->show();
 			return;
 		}
