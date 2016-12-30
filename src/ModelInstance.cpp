@@ -126,7 +126,7 @@ void ModelInstance::draw()
 		model->draw();
 
   bool currentSelection = gWorld->IsSelection(eEntry_Model) && gWorld->GetCurrentSelection()->data.model->d1 == d1;
-  
+
   // no need to check Environment::showModelFromHiddenList as it's done beforehand in World::draw()
 	if (currentSelection || model->hidden)
 	{
@@ -257,11 +257,11 @@ void glQuaternionRotate(const Vec3D& vdir, float w)
 	glMultMatrixf(m);
 }
 
-void ModelInstance::draw2(const Vec3D& ofs, const float rot)
+void ModelInstance::draw2(const Vec3D& ofs, const math::degrees rotation)
 {
 	Vec3D tpos(ofs + pos);
-	rotate(ofs.x, ofs.z, &tpos.x, &tpos.z, rot*(float)PI / 180.0f);
-	//if ( (tpos - gWorld->camera).lengthSquared() > (gWorld->doodaddrawdistance2*model->rad*sc) ) return;
+  math::rotate (ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
+	//if ( (tpos - gWorld->camera).length_squared() > (gWorld->doodaddrawdistance2*model->rad*sc) ) return;
 	if (!gWorld->frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
 	glPushMatrix();
@@ -275,11 +275,11 @@ void ModelInstance::draw2(const Vec3D& ofs, const float rot)
 	glPopMatrix();
 }
 
-void ModelInstance::draw2Select(const Vec3D& ofs, const float rot)
+void ModelInstance::draw2Select(const Vec3D& ofs, const math::degrees rotation)
 {
 	Vec3D tpos(ofs + pos);
-	rotate(ofs.x, ofs.z, &tpos.x, &tpos.z, rot*(float)PI / 180.0f);
-	if ((tpos - gWorld->camera).lengthSquared() > ((doodaddrawdistance*doodaddrawdistance)*model->rad*sc)) return;
+  math::rotate(ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
+	if ((tpos - gWorld->camera).length_squared() > ((doodaddrawdistance*doodaddrawdistance)*model->rad*sc)) return;
 	if (!gWorld->frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
 	glPushMatrix();

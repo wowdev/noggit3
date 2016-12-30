@@ -1440,8 +1440,8 @@ void MapView::tick(float t, float dt)
 		Vec3D dir(1.0f, 0.0f, 0.0f);
 		Vec3D dirUp(1.0f, 0.0f, 0.0f);
 		Vec3D dirRight(0.0f, 0.0f, 1.0f);
-		rotate(0.0f, 0.0f, &dir.x, &dir.y, av * (float)PI / 180.0f);
-		rotate(0.0f, 0.0f, &dir.x, &dir.z, ah * (float)PI / 180.0f);
+    math::rotate(0.0f, 0.0f, &dir.x, &dir.y, math::degrees (av));
+    math::rotate(0.0f, 0.0f, &dir.x, &dir.z, math::degrees (ah));
 
 		if (Environment::getInstance()->ShiftDown)
 		{
@@ -1453,15 +1453,15 @@ void MapView::tick(float t, float dt)
 		{
 			dirUp.x = 0.0f;
 			dirUp.y = 1.0f;
-			rotate(0.0f, 0.0f, &dirUp.x, &dirUp.y, av * (float)PI / 180.0f);
-			rotate(0.0f, 0.0f, &dirRight.x, &dirRight.y, av * (float)PI / 180.0f);
-			rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, ah * (float)PI / 180.0f);
-			rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, ah * (float)PI / 180.0f);
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.y, math::degrees (av));
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.y, math::degrees (av));
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees (ah));
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees (ah));
 		}
 		else
 		{
-			rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, ah * (float)PI / 180.0f);
-			rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, ah * (float)PI / 180.0f);
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees (ah));
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees (ah));
 		}
 		nameEntry* Selection = gWorld->GetCurrentSelection();
 		if (Selection)
@@ -1514,8 +1514,8 @@ void MapView::tick(float t, float dt)
 			{
 				//! \todo  Tell me what this is.
 				ObjPos = Selection->data.model->pos - gWorld->camera;
-				rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, av * (float)PI / 180.0f);
-				rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, ah * (float)PI / 180.0f);
+        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, math::degrees (av));
+        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, math::degrees (ah));
 				ObjPos.x = abs(ObjPos.x);
 			}
 

@@ -784,7 +784,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 		p.pos = sys->pos + bdir;
 		p.pos = sys->parent->mat * p.pos;
 
-		if (bdir.lengthSquared() == 0)
+		if (bdir.length_squared() == 0)
 			p.speed = Vec3D(0, 0, 0);
 		else {
 			dir = sys->parent->mrot * (bdir.normalize());//mrot * Vec3D(0, 1.0f,0);
@@ -808,7 +808,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 		//p.pos = sys->parent->mat * p.pos;
 
 
-		if (!bdir.lengthSquared() && !(sys->flags & 0x100))
+		if (!bdir.length_squared() && !(sys->flags & 0x100))
 		{
 			p.speed = Vec3D(0, 0, 0);
 			dir = sys->parent->mrot * Vec3D(0, 1, 0);
@@ -973,4 +973,3 @@ void RibbonEmitter::draw()
 	glDepthMask(GL_TRUE);
 	//  glPopName();
 }
-
