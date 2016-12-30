@@ -246,7 +246,7 @@ void Noggit::parseArgs(int argc, char *argv[])
 	}
 }
 
-std::string Noggit::getGamePath()
+boost::filesystem::path Noggit::getGamePath()
 {
 	if (!boost::filesystem::exists("noggit.conf"))
 	{
@@ -327,9 +327,7 @@ void Noggit::loadMPQs()
 	// Find locale, take first one.
 	for (int i(0); i < 10; ++i)
 	{
-		std::string path(wowpath);
-		path.append("Data/").append(locales[i]).append("/realmlist.wtf");
-		if (boost::filesystem::exists(path))
+		if (boost::filesystem::exists (wowpath / "Data" / locales[i] / "realmlist.wtf"))
 		{
 			locale = locales[i];
 			Log << "Locale: " << locale << std::endl;
@@ -345,8 +343,7 @@ void Noggit::loadMPQs()
 	//! \todo  This may be done faster. Maybe.
 	for (size_t i(0); i < archiveNames.size(); ++i)
 	{
-		std::string path(wowpath);
-		path.append("Data/").append(archiveNames[i]);
+    std::string path((wowpath / "Data" / archiveNames[i]).string());
 		std::string::size_type location(std::string::npos);
 
 		do
@@ -502,7 +499,7 @@ int Noggit::start(int argc, char *argv[])
 	Log << "Game path: " << wowpath << std::endl;
 
 	if (Project::getInstance()->getPath() == "")
-		Project::getInstance()->setPath(wowpath);
+		Project::getInstance()->setPath(wowpath.string());
 	Log << "Project path: " << Project::getInstance()->getPath() << std::endl;
 
 	CreateStrips();

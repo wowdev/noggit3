@@ -7,6 +7,8 @@
 #include "DBC.h"
 #include "FreeType.h" // fonts.
 
+#include <boost/filesystem/path.hpp>
+
 class AppState;
 class AsyncLoader;
 
@@ -86,8 +88,8 @@ private:
 	void loadMPQs();
 	void mainLoop();
 
-	std::string getGamePath();
-	std::string wowpath;
+  boost::filesystem::path getGamePath();
+  boost::filesystem::path wowpath;
 
 	AreaDB areaDB;
 	AsyncLoader* asyncLoader;
