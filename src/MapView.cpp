@@ -2713,7 +2713,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 				terrainMode = e->keysym.sym - SDLK_1;
 				mainGui->guiToolbar->IconSelect(terrainMode);
 			}
-      else if (e->keysym.sym = SDLK_0)
+      else if (e->keysym.sym == SDLK_0)
       {
         terrainMode = 9; // object editor
         mainGui->guiToolbar->IconSelect(terrainMode);
