@@ -42,7 +42,7 @@ namespace Animation
 		template<>
 		inline Quaternion Linear::operator()(const float& percentage, const Quaternion& start, const Quaternion& end)
 		{
-			return Quaternion::slerp(percentage, start, end);
+			return math::interpolation::slerp (percentage, start, end);
 		}
 
 		struct Hermite

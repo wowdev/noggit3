@@ -43,7 +43,7 @@ macro(includePlattform SUFFIX)
 endmacro(includePlattform)
 
 #find all src files
-file(GLOB SourceFiles "src/*.h" "src/*.cpp")
+file(GLOB SourceFiles "src/*.h" "src/*.cpp" "src/*/*.cpp")
 
 includePlattform("prefind")
 
@@ -78,7 +78,7 @@ include( "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake" )
 SET(IncludeDirectories ${IncludeDirectories} "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
 # And do the job.
-INCLUDE_DIRECTORIES( ${IncludeDirectories} )
+INCLUDE_DIRECTORIES( ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/src" )
 ADD_EXECUTABLE( noggit WIN32 MACOSX_BUNDLE ${SourceFiles} ${ResFiles})
 TARGET_LINK_LIBRARIES( noggit ${OPENGL_LIBRARIES} ${FREETYPE_LIBRARIES} ${SDL_LIBRARY} ${STORMLIB_LIBRARIES} ${Boost_LIBRARIES} ${GLEW_LIBRARY} )
 
