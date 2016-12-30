@@ -159,8 +159,8 @@ void Skies::draw()
 	for (int h = 0; h<hseg; h++) {
 		for (int i = 0; i<cnum; ++i) {
 			basepos1[i] = basepos2[i] = Vec3D(cosf(angles[i] * (float)PI / 180.0f)*rad, sinf(angles[i] * (float)PI / 180.0f)*rad, 0);
-			rotate(0, 0, &basepos1[i].x, &basepos1[i].z, (float)PI*2.0f / hseg*h);
-			rotate(0, 0, &basepos2[i].x, &basepos2[i].z, (float)PI*2.0f / hseg*(h + 1));
+      math::rotate(0, 0, &basepos1[i].x, &basepos1[i].z, math::radians (M_PI*2.0f / hseg*h));
+      math::rotate(0, 0, &basepos2[i].x, &basepos2[i].z, math::radians (M_PI*2.0f / hseg*(h + 1)));
 		}
 
 		for (int v = 0; v<cnum - 1; v++) {

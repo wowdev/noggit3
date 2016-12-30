@@ -246,7 +246,7 @@ void Model::initCommon(const MPQFile& f)
 			normals[i] = origVertices[i].normal.normalize();
 		}
 
-		float len = origVertices[i].pos.lengthSquared();
+		float len = origVertices[i].pos.length_squared();
 		if (len > rad){
 			rad = len;
 		}

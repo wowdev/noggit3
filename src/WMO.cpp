@@ -246,7 +246,7 @@ WMO::~WMO()
 // model.cpp
 void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth);
 
-void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbox, bool groupboxes, bool /*highlight*/) const
+void WMO::draw(int doodadset, const Vec3D &ofs, math::degrees const angle, bool boundingbox, bool groupboxes, bool /*highlight*/) const
 {
 	if (gWorld && gWorld->drawfog)
 		glEnable(GL_FOG);
@@ -255,11 +255,11 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 
 	for (unsigned int i = 0; i<nGroups; ++i)
 	{
-		groups[i].draw(ofs, rot, false);
+		groups[i].draw(ofs, angle, false);
 
 		if (gWorld->drawdoodads)
 		{
-			groups[i].drawDoodads(doodadset, ofs, rot);
+			groups[i].drawDoodads(doodadset, ofs, angle);
 		}
 
 		groups[i].drawLiquid();
@@ -494,13 +494,13 @@ void WMO::draw(int doodadset, const Vec3D &ofs, const float rot, bool boundingbo
 	*/
 }
 
-void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot) const
+void WMO::drawSelect(int doodadset, const Vec3D &ofs, math::degrees const angle) const
 {
 	for (unsigned int i = 0; i<nGroups; ++i) {
-		groups[i].draw(ofs, rot, true);
+		groups[i].draw(ofs, angle, true);
 
 		if (gWorld->drawdoodads) {
-			groups[i].drawDoodadsSelect(doodadset, ofs, rot);
+			groups[i].drawDoodadsSelect(doodadset, ofs, angle);
 		}
 
 		groups[i].drawLiquid();
@@ -509,7 +509,7 @@ void WMO::drawSelect(int doodadset, const Vec3D &ofs, const float rot) const
 
 bool WMO::drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const
 {
-	if (skybox && pCamera.IsInsideOf(pLower, pUpper))
+	if (skybox && pCamera.is_inside_of(pLower, pUpper))
 	{
 		//! \todo  only draw sky if we are "inside" the WMO... ?
 
@@ -922,7 +922,7 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 			for (unsigned int j = 0; j<wmo->nLights; j++) {
 				WMOLight &l = wmo->lights[j];
 				Vec3D dir = l.pos - mi.pos;
-				float ll = dir.lengthSquared();
+				float ll = dir.length_squared();
 				if (ll < lenmin) {
 					lenmin = ll;
 					dirmin = dir;
@@ -939,14 +939,14 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 	}
 }
 
-void WMOGroup::draw(const Vec3D& ofs, const float rot, bool selection)
+void WMOGroup::draw(const Vec3D& ofs, const math::degrees angle, bool selection)
 {
 	visible = false;
 	// view frustum culling
 
 	Vec3D pos = center + ofs;
 
-	rotate(ofs.x, ofs.z, &pos.x, &pos.z, rot*(float)PI / 180.0f);
+  math::rotate(ofs.x, ofs.z, &pos.x, &pos.z, angle);
 
 	if (!gWorld->frustum.intersectsSphere(pos, rad)) return;
 
@@ -996,7 +996,7 @@ void WMOGroup::draw(const Vec3D& ofs, const float rot, bool selection)
 
 }
 
-void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float rot)
+void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, math::degrees const angle)
 {
 
 	if (!visible) return;
@@ -1029,7 +1029,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float
         WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
       }
       setupFog();
-      wmo->modelis[dd].draw2(ofs, rot);
+      wmo->modelis[dd].draw2(ofs, angle);
     }
 	}
 
@@ -1040,7 +1040,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, const float
 }
 
 
-void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const float rot)
+void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, math::degrees const angle)
 {
 	if (!visible) return;
 	if (nDoodads == 0) return;
@@ -1070,7 +1070,7 @@ void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, const
 			if (!outdoorLights) {
 				WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
 			}
-			wmo->modelis[dd].draw2Select(ofs, rot);
+			wmo->modelis[dd].draw2Select(ofs, angle);
 		}
 	}
 
@@ -1188,7 +1188,7 @@ WMO* WMOManager::add(std::string name)
 	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
 	if (items.find(name) == items.end())
-	{     
+	{
 		items[name] = new WMO(name);
 		//! \todo Uncomment this, if loading is threaded.
 		//items[name]->finishLoading();

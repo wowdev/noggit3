@@ -1,152 +1,33 @@
-#ifndef QUATERNION_H
-#define QUATERNION_H
+#pragma once
 
 #include <cmath>
-#include <stdint.h> // int16_t
 
-#include "Vec3D.h"
+#include <math/quaternion.hpp>
+#include <math/vector_4d.hpp>
+#include <Vec3D.h>
 
-class Vec4D {
-public:
-	float x, y, z, w;
-
-	Vec4D(float x0 = 0.0f, float y0 = 0.0f, float z0 = 0.0f, float w0 = 0.0f) : x(x0), y(y0), z(z0), w(w0) {}
-
-	Vec4D(const Vec4D& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
-
-	Vec4D(const Vec3D& v, const float w0) : x(v.x), y(v.y), z(v.z), w(w0) {}
-
-	Vec4D& operator= (const Vec4D &v) {
-		x = v.x;
-		y = v.y;
-		z = v.z;
-		w = v.w;
-		return *this;
-	}
-
-	const Vec4D operator+ (const Vec4D &v) const
-	{
-		Vec4D r(x + v.x, y + v.y, z + v.z, w + v.w);
-		return r;
-	}
-
-	const Vec4D operator- (const Vec4D &v) const
-	{
-		Vec4D r(x - v.x, y - v.y, z - v.z, w - v.w);
-		return r;
-	}
-
-	const Vec4D operator* (float d) const
-	{
-		Vec4D r(x*d, y*d, z*d, w*d);
-		return r;
-	}
-
-	friend Vec4D operator* (float d, const Vec4D& v)
-	{
-		return v * d;
-	}
-
-	Vec4D& operator+= (const Vec4D &v)
-	{
-		x += v.x;
-		y += v.y;
-		z += v.z;
-		w += v.w;
-		return *this;
-	}
-
-	Vec4D& operator-= (const Vec4D &v)
-	{
-		x -= v.x;
-		y -= v.y;
-		z -= v.z;
-		w -= v.w;
-		return *this;
-	}
-
-	Vec4D& operator*= (float d)
-	{
-		x *= d;
-		y *= d;
-		z *= d;
-		w *= d;
-		return *this;
-	}
-
-	float operator* (const Vec4D &v) const
-	{
-		return x*v.x + y*v.y + z*v.z + w*v.w;
-	}
-
-	float lengthSquared() const
-	{
-		return x*x + y*y + z*z + w*w;
-	}
-
-	float length() const
-	{
-		return std::sqrt (lengthSquared());
-	}
-
-	Vec4D& normalize()
-	{
-		this->operator*= (1.0f / length());
-		return *this;
-	}
-
-	operator float*()
-	{
-		return reinterpret_cast<float*>(this);
-	}
-
-	Vec3D xyz() const
-	{
-		return Vec3D(x, y, z);
-	}
-};
-
-class Quaternion : public Vec4D {
-public:
-	Quaternion(float x0 = 0.0f, float y0 = 0.0f, float z0 = 0.0f, float w0 = 1.0f) : Vec4D(x0, y0, z0, w0) {}
-
-	explicit Quaternion(const Vec4D& v) : Vec4D(v) {}
-
-	Quaternion(const Vec3D& v, const float w0) : Vec4D(v, w0) {}
-
-	static const Quaternion slerp(const float r, const Quaternion &v1, const Quaternion &v2)
-	{
-		// SLERP
-		float dot = v1*v2;
-
-		if (std::abs (dot) > 0.9995f) {
-			// fall back to LERP
-			return Quaternion::lerp(r, v1, v2);
-		}
-
-		float a = acosf(dot) * r;
-		Quaternion q = Quaternion((v2 - v1 * dot));
-		q.normalize();
-
-		return Quaternion(v1 * cosf(a) + q * sinf(a));
-	}
-
-	static const Quaternion lerp(const float r, const Quaternion &v1, const Quaternion &v2)
-	{
-		return Quaternion(v1*(1.0f - r) + v2*r);
-	}
-
-};
-
-
-//! \note In WoW 2.0+ Blizzard is now storing rotation data in 16bit values instead of 32bit. I don't really understand why as its only a very minor saving in model sizes and adds extra overhead in processing the models. Need this structure to read the data into.
-struct PackedQuaternion
+struct Vec4D : math::vector_4d
 {
-	int16_t x;
-	int16_t y;
-	int16_t z;
-	int16_t w;
+  using math::vector_4d::vector_4d;
+  Vec4D (math::vector_4d x) : math::vector_4d (x) {}
+  Vec4D() : math::vector_4d() {}
 };
 
-#endif
 
+struct Quaternion : math::quaternion
+{
+  using math::quaternion::quaternion;
+  Quaternion (math::quaternion x) : math::quaternion (x) {}
+  Quaternion() : math::quaternion() {}
+};
+
+//! \note In WoW 2.0+ Blizzard is now storing rotation data in 16bit
+//! values instead of 32bit. I don't really understand why as its only
+//! a very minor saving in model sizes and adds extra overhead in
+//! processing the models. Need this structure to read the data into.
+struct PackedQuaternion : math::packed_quaternion
+{
+  using math::packed_quaternion::packed_quaternion;
+  PackedQuaternion (math::packed_quaternion x) : math::packed_quaternion (x) {}
+  PackedQuaternion() : math::packed_quaternion() {}
+};

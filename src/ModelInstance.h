@@ -71,8 +71,8 @@ public:
 	void drawMapTile();
 	//  void drawHighlight();
 	void drawSelect();
-	void draw2(const Vec3D& ofs, const float rot);
-	void draw2Select(const Vec3D& ofs, const float rot);
+	void draw2(const Vec3D& ofs, const math::degrees);
+	void draw2Select(const Vec3D& ofs, const math::degrees);
 
 	void resetDirection();
 

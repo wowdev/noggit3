@@ -73,9 +73,9 @@ void WMOInstance::draw()
 	glRotatef(dir.z, 1.0f, 0.0f, 0.0f);
 
 	if (gWorld->IsSelection(eEntry_WMO) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID)
-		wmo->draw(doodadset, pos, roty, true, true, true);
+		wmo->draw(doodadset, pos, math::degrees (roty), true, true, true);
 	else
-		wmo->draw(doodadset, pos, roty, false, false, false);
+		wmo->draw(doodadset, pos, math::degrees (roty), false, false, false);
 
 	glPopMatrix();
 
@@ -226,7 +226,7 @@ void WMOInstance::drawSelect()
 	mSelectionID = SelectionNames.add(this);
 	glPushName(mSelectionID);
 
-	wmo->drawSelect(doodadset, pos, -roty);
+	wmo->drawSelect(doodadset, pos, math::degrees (-roty));
 
 	glPopName();
 
