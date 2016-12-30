@@ -250,16 +250,16 @@ boost::filesystem::path Noggit::getGamePath()
 {
 	if (!boost::filesystem::exists("noggit.conf"))
 	{
-		Log << "DON NOT find a config file." << std::endl;
+		Log << "Did not find config file, guessing game path..." << std::endl;
 
 		if (boost::filesystem::exists("noggit.conf.conf"))
 		{
-			Log << "Error: You have named your config file noggit.conf.conf!" << std::endl;
-			Log << "Erase the second .conf!" << std::endl;
+			LogError << "You have named your config file noggit.conf.conf!" << std::endl;
+			LogError << "Erase the second .conf!" << std::endl;
 		}
 		else if (boost::filesystem::exists("noggit_template.conf"))
 		{
-			Log << "You must rename noggit_template.conf to noggit.conf if noggit should use the config file!" << std::endl;
+			LogError << "You must rename noggit_template.conf to noggit.conf if noggit should use the config file!" << std::endl;
 		}
 
 
