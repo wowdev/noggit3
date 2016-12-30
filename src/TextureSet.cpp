@@ -588,7 +588,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
               visibility[k] = visibility[k] - (diffA * (visibility[k] / other));
             }
-          }          
+          }
         }
 
         for (int k = nTextures - 2; k >= 0; k--)
@@ -611,7 +611,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
         {
           if (k < nTextures - 1)
           {
-            alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(round(alphas[k]), 0.0f), 255.0f)));
+            alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f)));
           }
           texVisible[k] = texVisible[k] || (visibility[k] > 0.0f);
         }
@@ -721,7 +721,7 @@ void TextureSet::convertToBigAlpha()
 
     for (size_t k = 0; k < nTextures - 1; k++)
     {
-      tab[k][i] = static_cast<unsigned char>(std::min(std::max(round(alphas[k]), 0.0f), 255.0f));
+      tab[k][i] = static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
     }
   }
 
@@ -771,7 +771,7 @@ void TextureSet::convertToOldAlpha()
 
     for (size_t k = 0; k < nTextures - 1; k++)
     {
-      tab[k][i] = static_cast<unsigned char>(std::min(std::max(round(alphas[k]), 0.0f), 255.0f));
+      tab[k][i] = static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
     }
   }
   
@@ -828,7 +828,7 @@ void TextureSet::mergeAlpha(size_t id1, size_t id2)
 
     for (size_t k = 0; k < nTextures - 1; k++)
     {
-      tab[k][i] = static_cast<unsigned char>(std::min(std::max(round(alphas[k]), 0.0f), 255.0f));
+      tab[k][i] = static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
     }
   }
 
