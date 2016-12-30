@@ -88,16 +88,19 @@ void RegisterErrorHandlers()
 
 void printStacktrace()
 {
-	static const int nframes(30);
+  std::vector<void*> frames (32);
 
-	void* array[nframes];
+  std::size_t actual (0);
+  while ((actual = backtrace (frames.data(), frames.size())) == frames.size())
+  {
+    frames.resize (frames.size() * 2);
+  }
+  frames.resize (actual);
+	char** strings(backtrace_symbols(frames.data(), frames.size()));
 
-	const size_t size(backtrace(array, nframes));
-	char** strings(backtrace_symbols(array, size));
+	LogError << "Obtained " << frames.size() << " stack frames." << std::endl;
 
-	LogError << "Obtained " << size << " stack frames." << std::endl;
-
-	for (size_t i(0); i < size; ++i)
+	for (size_t i(0); i < frames.size(); ++i)
 		LogError << "- " << strings[i] << std::endl;
 
 	free(strings);
