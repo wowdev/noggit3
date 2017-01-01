@@ -39,30 +39,30 @@ void UIText::render() const
 {
 	if (background)
 	{
-		glColor4fv(bgColor);
-		glBegin(GL_TRIANGLE_STRIP);
+		gl.color4fv(bgColor);
+		gl.begin(GL_TRIANGLE_STRIP);
 		switch (justify)
 		{
 		case eJustifyLeft:
-			glVertex2f(x() - 2.0f, y() - 1.0f);
-			glVertex2f(x() + 2.0f + width(), y() - 1.0f);
-			glVertex2f(x() - 2.0f, y() + font.h + 3.0f);
-			glVertex2f(x() + 2.0f + width(), y() + font.h + 3.0f);
+			gl.vertex2f(x() - 2.0f, y() - 1.0f);
+			gl.vertex2f(x() + 2.0f + width(), y() - 1.0f);
+			gl.vertex2f(x() - 2.0f, y() + font.h + 3.0f);
+			gl.vertex2f(x() + 2.0f + width(), y() + font.h + 3.0f);
 			break;
 		case eJustifyCenter:
-			glVertex2f(x() - 2.0f - width() / 2.0f, y() - 1.0f);
-			glVertex2f(x() + 2.0f + width() / 2.0f, y() - 1.0f);
-			glVertex2f(x() - 2.0f - width() / 2.0f, y() + font.h + 3.0f);
-			glVertex2f(x() + 2.0f + width() / 2.0f, y() + font.h + 3.0f);
+			gl.vertex2f(x() - 2.0f - width() / 2.0f, y() - 1.0f);
+			gl.vertex2f(x() + 2.0f + width() / 2.0f, y() - 1.0f);
+			gl.vertex2f(x() - 2.0f - width() / 2.0f, y() + font.h + 3.0f);
+			gl.vertex2f(x() + 2.0f + width() / 2.0f, y() + font.h + 3.0f);
 			break;
 		case eJustifyRight:
-			glVertex2f(x() - 2.0f - width(), y() - 1.0f);
-			glVertex2f(x() + 2.0f, y() - 1.0f);
-			glVertex2f(x() - 2.0f - width(), y() + font.h + 3.0f);
-			glVertex2f(x() + 2.0f, y() + font.h + 3.0f);
+			gl.vertex2f(x() - 2.0f - width(), y() - 1.0f);
+			gl.vertex2f(x() + 2.0f, y() - 1.0f);
+			gl.vertex2f(x() - 2.0f - width(), y() + font.h + 3.0f);
+			gl.vertex2f(x() + 2.0f, y() + font.h + 3.0f);
 			break;
 		}
-		glEnd();
+		gl.end();
 	}
 
 	switch (justify)

@@ -26,8 +26,8 @@ void UIAlphamap::render() const
 	if (!gWorld->mapIndex->tileLoaded(pz, px))
 		return;
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	gl.enable(GL_BLEND);
+	gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
 	for (size_t j = 0; j < 16; ++j)
@@ -39,7 +39,7 @@ void UIAlphamap::render() const
 				memset(colorf, 0, 3 * sizeof(float));
 				colorf[t] = 1.0f;
 
-				glColor3fv(colorf);
+				gl.color3fv(colorf);
 
 				gWorld->mapIndex->getTile(pz, px)->getChunk(i, j)->textureSet->bindAlphamap(t, 0);
 				drawQuad(i, j);
@@ -56,17 +56,17 @@ void UIAlphamap::drawQuad(size_t i, size_t j) const
 	int unit = size / 16;
 	int border = (int)((width() - size) / 2);
 
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(x() + border + i*unit, y() + border + j*unit);
+	gl.begin(GL_QUADS);
+	gl.texCoord2f(0.0f, 0.0f);
+	gl.vertex2f(x() + border + i*unit, y() + border + j*unit);
 
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex2f(x() + border + i*unit + unit, y() + border + j*unit);
+	gl.texCoord2f(1.0f, 0.0f);
+	gl.vertex2f(x() + border + i*unit + unit, y() + border + j*unit);
 
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2f(x() + border + i*unit + unit, y() + border + j*unit + unit);
+	gl.texCoord2f(1.0f, 1.0f);
+	gl.vertex2f(x() + border + i*unit + unit, y() + border + j*unit + unit);
 
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex2f(x() + border + i*unit, y() + border + j*unit + unit);
-	glEnd();
+	gl.texCoord2f(0.0f, 1.0f);
+	gl.vertex2f(x() + border + i*unit, y() + border + j*unit + unit);
+	gl.end();
 }

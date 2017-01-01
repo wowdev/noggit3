@@ -39,20 +39,20 @@ UIFrame::Ptr UIWindow::processLeftClick(float mx, float my)
 
 void UIWindow::render() const
 {
-	glPushMatrix();
-	glTranslatef(x(), y(), 0.0f);
+	gl.pushMatrix();
+	gl.translatef(x(), y(), 0.0f);
 
-	glColor4f(0.2f, 0.2f, 0.2f, 0.8f);
-	glBegin(GL_TRIANGLE_STRIP);
-	glVertex2f(0.0f, 0.0f);
-	glVertex2f(width(), 0.0f);
-	glVertex2f(0.0f, height());
-	glVertex2f(width(), height());
-	glEnd();
+	gl.color4f(0.2f, 0.2f, 0.2f, 0.8f);
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.vertex2f(0.0f, 0.0f);
+	gl.vertex2f(width(), 0.0f);
+	gl.vertex2f(0.0f, height());
+	gl.vertex2f(width(), height());
+	gl.end();
 
 	renderChildren();
 
-	glColor3f(1.0f, 1.0f, 1.0f);
+	gl.color3f(1.0f, 1.0f, 1.0f);
 
 	opengl::texture::set_active_texture();
 	opengl::texture::enable_texture();
@@ -60,104 +60,104 @@ void UIWindow::render() const
 	texture->bind();
 
 	//Draw Bottom left Corner First
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.75f, 1.0f);
-	glVertex2f(-3.0f, height() + 3.0f);
-	glTexCoord2f(0.875f, 1.0f);
-	glVertex2f(13.0f, height() + 3.0f);
-	glTexCoord2f(0.75f, 0.0f);
-	glVertex2f(-3.0f, height() - 13.0f);
-	glTexCoord2f(0.875f, 0.0f);
-	glVertex2f(13.0f, height() - 13.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.75f, 1.0f);
+	gl.vertex2f(-3.0f, height() + 3.0f);
+	gl.texCoord2f(0.875f, 1.0f);
+	gl.vertex2f(13.0f, height() + 3.0f);
+	gl.texCoord2f(0.75f, 0.0f);
+	gl.vertex2f(-3.0f, height() - 13.0f);
+	gl.texCoord2f(0.875f, 0.0f);
+	gl.vertex2f(13.0f, height() - 13.0f);
+	gl.end();
 
 	//Draw Bottom Right Corner
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.875f, 1.0f);
-	glVertex2f(width() - 13.0f, height() + 3.0f);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2f(width() + 3.0f, height() + 3.0f);
-	glTexCoord2f(0.875f, 0.0f);
-	glVertex2f(width() - 13.0f, height() - 13.0f);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex2f(width() + 3.0f, height() - 13.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.875f, 1.0f);
+	gl.vertex2f(width() - 13.0f, height() + 3.0f);
+	gl.texCoord2f(1.0f, 1.0f);
+	gl.vertex2f(width() + 3.0f, height() + 3.0f);
+	gl.texCoord2f(0.875f, 0.0f);
+	gl.vertex2f(width() - 13.0f, height() - 13.0f);
+	gl.texCoord2f(1.0f, 0.0f);
+	gl.vertex2f(width() + 3.0f, height() - 13.0f);
+	gl.end();
 
 	//Draw Top Left Corner
 
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.5f, 1.0f);
-	glVertex2f(-3.0f, 13.0f);
-	glTexCoord2f(0.625f, 1.0f);
-	glVertex2f(13.0f, 13.0f);
-	glTexCoord2f(0.5f, 0.0f);
-	glVertex2f(-3.0f, -3.0f);
-	glTexCoord2f(0.625f, 0.0f);
-	glVertex2f(13.0f, -3.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.5f, 1.0f);
+	gl.vertex2f(-3.0f, 13.0f);
+	gl.texCoord2f(0.625f, 1.0f);
+	gl.vertex2f(13.0f, 13.0f);
+	gl.texCoord2f(0.5f, 0.0f);
+	gl.vertex2f(-3.0f, -3.0f);
+	gl.texCoord2f(0.625f, 0.0f);
+	gl.vertex2f(13.0f, -3.0f);
+	gl.end();
 
 	//Draw Top Right Corner
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.625f, 1.0f);
-	glVertex2f(width() - 13.0f, 13.0f);
-	glTexCoord2f(0.75f, 1.0f);
-	glVertex2f(width() + 3.0f, 13.0f);
-	glTexCoord2f(0.625f, 0.0f);
-	glVertex2f(width() - 13.0f, -3.0f);
-	glTexCoord2f(0.75f, 0.0f);
-	glVertex2f(width() + 3.0f, -3.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.625f, 1.0f);
+	gl.vertex2f(width() - 13.0f, 13.0f);
+	gl.texCoord2f(0.75f, 1.0f);
+	gl.vertex2f(width() + 3.0f, 13.0f);
+	gl.texCoord2f(0.625f, 0.0f);
+	gl.vertex2f(width() - 13.0f, -3.0f);
+	gl.texCoord2f(0.75f, 0.0f);
+	gl.vertex2f(width() + 3.0f, -3.0f);
+	gl.end();
 
 	//Draw Left Side
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex2f(-3.0f, height() - 13.0f);
-	glTexCoord2f(0.125f, 1.0f);
-	glVertex2f(13.0f, height() - 13.0f);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(-3.0f, 13.0f);
-	glTexCoord2f(0.125f, 0.0f);
-	glVertex2f(13, 13.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.0f, 1.0f);
+	gl.vertex2f(-3.0f, height() - 13.0f);
+	gl.texCoord2f(0.125f, 1.0f);
+	gl.vertex2f(13.0f, height() - 13.0f);
+	gl.texCoord2f(0.0f, 0.0f);
+	gl.vertex2f(-3.0f, 13.0f);
+	gl.texCoord2f(0.125f, 0.0f);
+	gl.vertex2f(13, 13.0f);
+	gl.end();
 
 	//Draw Right Side
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.125f, 1.0f);
-	glVertex2f(width() - 13.0f, height() - 13.0f);
-	glTexCoord2f(0.25f, 1.0f);
-	glVertex2f(width() + 3.0f, height() - 13.0f);
-	glTexCoord2f(0.125f, 0.0f);
-	glVertex2f(width() - 13.0f, 13.0f);
-	glTexCoord2f(0.25f, 0.0f);
-	glVertex2f(width() + 3.0f, 13.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.125f, 1.0f);
+	gl.vertex2f(width() - 13.0f, height() - 13.0f);
+	gl.texCoord2f(0.25f, 1.0f);
+	gl.vertex2f(width() + 3.0f, height() - 13.0f);
+	gl.texCoord2f(0.125f, 0.0f);
+	gl.vertex2f(width() - 13.0f, 13.0f);
+	gl.texCoord2f(0.25f, 0.0f);
+	gl.vertex2f(width() + 3.0f, 13.0f);
+	gl.end();
 
 	//Draw Top Side
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.5f, 1.0f);
-	glVertex2f(13.0f, height() + 3.0f);
-	glTexCoord2f(0.5f, 0.0f);
-	glVertex2f(width() - 13.0f, height() + 3.0f);
-	glTexCoord2f(0.375f, 1.0f);
-	glVertex2f(13, height() - 13.0f);
-	glTexCoord2f(0.375f, 0.0f);
-	glVertex2f(width() - 13.0f, height() - 13.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.5f, 1.0f);
+	gl.vertex2f(13.0f, height() + 3.0f);
+	gl.texCoord2f(0.5f, 0.0f);
+	gl.vertex2f(width() - 13.0f, height() + 3.0f);
+	gl.texCoord2f(0.375f, 1.0f);
+	gl.vertex2f(13, height() - 13.0f);
+	gl.texCoord2f(0.375f, 0.0f);
+	gl.vertex2f(width() - 13.0f, height() - 13.0f);
+	gl.end();
 
 	//Draw Bottom Side
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.375f, 1.0f);
-	glVertex2f(13.0f, 13.0f);
-	glTexCoord2f(0.375f, 0.0f);
-	glVertex2f(width() - 13.0f, 13.0f);
-	glTexCoord2f(0.25f, 1.0f);
-	glVertex2f(13.0f, -3.0f);
-	glTexCoord2f(0.25f, 0.0f);
-	glVertex2f(width() - 13.0f, -3.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.375f, 1.0f);
+	gl.vertex2f(13.0f, 13.0f);
+	gl.texCoord2f(0.375f, 0.0f);
+	gl.vertex2f(width() - 13.0f, 13.0f);
+	gl.texCoord2f(0.25f, 1.0f);
+	gl.vertex2f(13.0f, -3.0f);
+	gl.texCoord2f(0.25f, 0.0f);
+	gl.vertex2f(width() - 13.0f, -3.0f);
+	gl.end();
 
 	opengl::texture::disable_texture();
 
-	glPopMatrix();
+	gl.popMatrix();
 }
 

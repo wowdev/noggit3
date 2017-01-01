@@ -32,26 +32,26 @@ UIFrame* UIToolbarIcon::processLeftClick(float /*mx*/, float /*my*/)
 
 void UIToolbarIcon::render() const
 {
-	glPushMatrix();
-	glTranslatef(x(), y(), 0.0f);
+	gl.pushMatrix();
+	gl.translatef(x(), y(), 0.0f);
 
-	glColor3f(1.0f, 1.0f, 1.0f);
+	gl.color3f(1.0f, 1.0f, 1.0f);
 
 	opengl::texture::set_active_texture();
 	opengl::texture::enable_texture();
 
 	texture->bind();
 
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(0.0f, 0.0f);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex2f(width(), 0.0f);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex2f(0.0f, height());
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2f(width(), height());
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.0f, 0.0f);
+	gl.vertex2f(0.0f, 0.0f);
+	gl.texCoord2f(1.0f, 0.0f);
+	gl.vertex2f(width(), 0.0f);
+	gl.texCoord2f(0.0f, 1.0f);
+	gl.vertex2f(0.0f, height());
+	gl.texCoord2f(1.0f, 1.0f);
+	gl.vertex2f(width(), height());
+	gl.end();
 
 	opengl::texture::disable_texture();
 
@@ -63,19 +63,19 @@ void UIToolbarIcon::render() const
 
 		textureSelected->bind();
 
-		glBegin(GL_TRIANGLE_STRIP);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex2f(-sizer, -sizer);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex2f(width() + sizer, -sizer);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex2f(-sizer, height() + sizer);
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex2f(width() + sizer, height() + sizer);
-		glEnd();
+		gl.begin(GL_TRIANGLE_STRIP);
+		gl.texCoord2f(0.0f, 0.0f);
+		gl.vertex2f(-sizer, -sizer);
+		gl.texCoord2f(1.0f, 0.0f);
+		gl.vertex2f(width() + sizer, -sizer);
+		gl.texCoord2f(0.0f, 1.0f);
+		gl.vertex2f(-sizer, height() + sizer);
+		gl.texCoord2f(1.0f, 1.0f);
+		gl.vertex2f(width() + sizer, height() + sizer);
+		gl.end();
 
 		opengl::texture::disable_texture();
 	}
 
-	glPopMatrix();
+	gl.popMatrix();
 }

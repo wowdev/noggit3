@@ -17,16 +17,16 @@ void Frustum::retrieve()
 {
 	float mat[16];
 
-	glGetFloatv(GL_MODELVIEW_MATRIX, mat);
-	glMatrixMode(GL_PROJECTION);
+	gl.getFloatv(GL_MODELVIEW_MATRIX, mat);
+	gl.matrixMode(GL_PROJECTION);
 
-	glPushMatrix();
+	gl.pushMatrix();
 
-	glMultMatrixf(mat);
-	glGetFloatv(GL_PROJECTION_MATRIX, mat);
+	gl.multMatrixf(mat);
+	gl.getFloatv(GL_PROJECTION_MATRIX, mat);
 
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
+	gl.popMatrix();
+	gl.matrixMode(GL_MODELVIEW);
 
 	planes[RIGHT].a = mat[3] - mat[0];
 	planes[RIGHT].b = mat[7] - mat[4];

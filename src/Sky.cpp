@@ -153,9 +153,9 @@ const int hseg = 32;
 void Skies::draw()
 {
 	// draw sky sphere?
-	//! \todo  do this as a vertex array and use glColorPointer? :|
+	//! \todo  do this as a vertex array and use gl.colorPointer? :|
 	Vec3D basepos1[cnum], basepos2[cnum];
-	glBegin(GL_QUADS);
+	gl.begin(GL_QUADS);
 	for (int h = 0; h<hseg; h++) {
 		for (int i = 0; i<cnum; ++i) {
 			basepos1[i] = basepos2[i] = Vec3D(cosf(angles[i] * (float)PI / 180.0f)*rad, sinf(angles[i] * (float)PI / 180.0f)*rad, 0);
@@ -164,15 +164,15 @@ void Skies::draw()
 		}
 
 		for (int v = 0; v<cnum - 1; v++) {
-			glColor3fv(colorSet[skycolors[v]]);
-			glVertex3fv(basepos2[v]);
-			glVertex3fv(basepos1[v]);
-			glColor3fv(colorSet[skycolors[v + 1]]);
-			glVertex3fv(basepos1[v + 1]);
-			glVertex3fv(basepos2[v + 1]);
+			gl.color3fv(colorSet[skycolors[v]]);
+			gl.vertex3fv(basepos2[v]);
+			gl.vertex3fv(basepos1[v]);
+			gl.color3fv(colorSet[skycolors[v + 1]]);
+			gl.vertex3fv(basepos1[v + 1]);
+			gl.vertex3fv(basepos2[v + 1]);
 		}
 	}
-	glEnd();
+	gl.end();
 }
 
 Skies::Skies(unsigned int mapid)
@@ -268,7 +268,7 @@ void Skies::initSky(Vec3D pos, int t)
 void drawCircle(unsigned int *buf, int dim, float x, float y, float r, unsigned int col)
 {
 	float circ = 2 * r*(float)PI;
-	glBegin(GL_LINES);
+	gl.begin(GL_LINES);
 	for (int i = 0; i<circ; ++i) {
 		float phi = 2 * (float)PI*i / circ;
 		int px = (int)(x + r * cosf(phi));
@@ -298,8 +298,8 @@ bool Skies::drawSky(const Vec3D &pos)
 	if (numSkies == 0) return false;
 
 	// drawing the sky: we'll undo the camera translation
-	glPushMatrix();
-	glTranslatef(pos.x, pos.y, pos.z);
+	gl.pushMatrix();
+	gl.translatef(pos.x, pos.y, pos.z);
 
 	draw();
 
@@ -307,13 +307,13 @@ bool Skies::drawSky(const Vec3D &pos)
 	float ni = gWorld->outdoorLightStats.nightIntensity;
 	if (ni > 0) {
 		const float sc = 0.1f;
-		glScalef(sc, sc, sc);
+		gl.scalef(sc, sc, sc);
 		opengl::texture::enable_texture();
 		stars->trans = ni;
 		stars->draw();
 	}
 
-	glPopMatrix();
+	gl.popMatrix();
 
 	return true;
 }
@@ -431,12 +431,12 @@ void OutdoorLightStats::setupLighting()
 		lp[1] = dayDir.z;
 		lp[2] = -dayDir.y;
 
-		glLightfv(GL_LIGHT0, GL_AMBIENT, la);
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, ld);
-		glLightfv(GL_LIGHT0, GL_POSITION, lp);
-		glEnable(GL_LIGHT0);
+		gl.lightfv(GL_LIGHT0, GL_AMBIENT, la);
+		gl.lightfv(GL_LIGHT0, GL_DIFFUSE, ld);
+		gl.lightfv(GL_LIGHT0, GL_POSITION, lp);
+		gl.enable(GL_LIGHT0);
 	}
-	else glDisable(GL_LIGHT0);
+	else gl.disable(GL_LIGHT0);
 
 	if (nightIntensity > 0) {
 		ld[0] = nightColor.x * nightIntensity;
@@ -446,12 +446,12 @@ void OutdoorLightStats::setupLighting()
 		lp[1] = nightDir.z;
 		lp[2] = -nightDir.y;
 
-		glLightfv(GL_LIGHT1, GL_AMBIENT, la);
-		glLightfv(GL_LIGHT1, GL_DIFFUSE, ld);
-		glLightfv(GL_LIGHT1, GL_POSITION, lp);
-		glEnable(GL_LIGHT1);
+		gl.lightfv(GL_LIGHT1, GL_AMBIENT, la);
+		gl.lightfv(GL_LIGHT1, GL_DIFFUSE, ld);
+		gl.lightfv(GL_LIGHT1, GL_POSITION, lp);
+		gl.enable(GL_LIGHT1);
 	}
-	else glDisable(GL_LIGHT1);
+	else gl.disable(GL_LIGHT1);
 
 	// light 2 will be ambient -> max. 3 lights for outdoors...
 	la[0] = ambientColor.x * ambientIntensity;
@@ -461,20 +461,20 @@ void OutdoorLightStats::setupLighting()
 	/*
 	ld[0] = ld[1] = ld[2] = 0.0f;
 	lp[0] = lp[1] = lp[2] = 0.0f;
-	glLightfv(GL_LIGHT2, GL_AMBIENT, la);
-	glLightfv(GL_LIGHT2, GL_DIFFUSE, ld);
-	glLightfv(GL_LIGHT2, GL_POSITION,lp);
-	glEnable(GL_LIGHT2);
+	gl.lightfv(GL_LIGHT2, GL_AMBIENT, la);
+	gl.lightfv(GL_LIGHT2, GL_DIFFUSE, ld);
+	gl.lightfv(GL_LIGHT2, GL_POSITION,lp);
+	gl.enable(GL_LIGHT2);
 	*/
-	glDisable(GL_LIGHT2);
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
+	gl.disable(GL_LIGHT2);
+	gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
 
 	// not using the rest
-	glDisable(GL_LIGHT3);
-	glDisable(GL_LIGHT4);
-	glDisable(GL_LIGHT5);
-	glDisable(GL_LIGHT6);
-	glDisable(GL_LIGHT7);
+	gl.disable(GL_LIGHT3);
+	gl.disable(GL_LIGHT4);
+	gl.disable(GL_LIGHT5);
+	gl.disable(GL_LIGHT6);
+	gl.disable(GL_LIGHT7);
 	// should really loop to GL_MAX_LIGHTS lol
 }
 

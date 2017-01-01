@@ -4,7 +4,7 @@
 #include <string>
 #include <stack>
 
-#include <opengl/types.hpp>
+#include <opengl/context.hpp>
 #include <opengl/texture.hpp>
 
 class Video;
@@ -174,6 +174,5 @@ namespace OpenGL
 extern Video video;
 
 //bool isExtensionSupported(const char *search);
-void CheckForGLError(const std::string& pLocation);
 
 #endif

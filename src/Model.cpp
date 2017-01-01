@@ -118,10 +118,10 @@ Model::~Model()
 		if (bones)
 			delete[] bones;
 		if (!animGeometry) {
-			glDeleteBuffers(1, &nbuf);
+			gl.deleteBuffers(1, &nbuf);
 		}
-		glDeleteBuffers(1, &vbuf);
-		glDeleteBuffers(1, &tbuf);
+		gl.deleteBuffers(1, &vbuf);
+		gl.deleteBuffers(1, &tbuf);
 
 		if (animTextures && texanims)
 			delete[] texanims;
@@ -134,7 +134,7 @@ Model::~Model()
 			delete[] ribbons;
 	}
 	else {
-		glDeleteLists(ModelDrawList, 1);
+		gl.deleteLists(ModelDrawList, 1);
 	}
 }
 
@@ -435,15 +435,15 @@ void Model::initStatic(const MPQFile& f)
 
 	initCommon(f);
 
-	ModelDrawList = glGenLists(1);
-	glNewList(ModelDrawList, GL_COMPILE);
+	ModelDrawList = gl.genLists(1);
+	gl.newList(ModelDrawList, GL_COMPILE);
 	drawModel( /*false*/);
-	glEndList();
+	gl.endList();
 
-	SelectModelDrawList = glGenLists(1);
-	glNewList(SelectModelDrawList, GL_COMPILE);
+	SelectModelDrawList = gl.genLists(1);
+	gl.newList(SelectModelDrawList, GL_COMPILE);
 	drawModelSelect();
-	glEndList();
+	gl.endList();
 
 	// clean up vertices, indices etc
 	if (vertices)
@@ -463,8 +463,8 @@ void Model::initAnimated(const MPQFile& f)
 	origVertices = new ModelVertex[header.nVertices];
 	memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
 
-	glGenBuffersARB(1, &vbuf);
-	glGenBuffersARB(1, &tbuf);
+	gl.genBuffers(1, &vbuf);
+	gl.genBuffers(1, &tbuf);
 	const size_t size = header.nVertices * sizeof(float);
 	vbufsize = 3 * size;
 
@@ -507,19 +507,19 @@ void Model::initAnimated(const MPQFile& f)
 	}
 
 	if (!animGeometry) {
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
-		glGenBuffersARB(1, &nbuf);
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
+		gl.bindBuffer(GL_ARRAY_BUFFER_ARB, vbuf);
+		gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
+		gl.genBuffers(1, &nbuf);
+		gl.bindBuffer(GL_ARRAY_BUFFER_ARB, nbuf);
+		gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
 		delete[] vertices;
 		delete[] normals;
 	}
 	Vec2D *texcoords = new Vec2D[header.nVertices];
 	for (size_t i = 0; i<header.nVertices; ++i)
 		texcoords[i] = origVertices[i].texcoords;
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * size, texcoords, GL_STATIC_DRAW_ARB);
+	gl.bindBuffer(GL_ARRAY_BUFFER_ARB, tbuf);
+	gl.bufferData(GL_ARRAY_BUFFER_ARB, 2 * size, texcoords, GL_STATIC_DRAW_ARB);
 	delete[] texcoords;
 
 	if (animTextures) {
@@ -597,9 +597,9 @@ void Model::animate(int _anim)
 
 	if (animGeometry) {
 
-		glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-		glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, NULL, GL_STREAM_DRAW_ARB);
-		vertices = reinterpret_cast<Vec3D*>(glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
+		gl.bindBuffer(GL_ARRAY_BUFFER_ARB, vbuf);
+		gl.bufferData(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, NULL, GL_STREAM_DRAW_ARB);
+		vertices = reinterpret_cast<Vec3D*>(gl.mapBuffer(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
 
 		// transform vertices
 		ModelVertex *ov = origVertices;
@@ -623,7 +623,7 @@ void Model::animate(int _anim)
 			vertices[header.nVertices + i] = n.normalize(); // shouldn't these be normal by default?
 		}
 
-		glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
+		gl.unmapBuffer(GL_ARRAY_BUFFER_ARB);
 
 	}
 
@@ -680,7 +680,7 @@ bool ModelRenderPass::init(Model *m)
 			}
 
 			ecol = Vec4D(c, ocol.w);
-			glMaterialfv(GL_FRONT, GL_EMISSION, ecol);
+			gl.materialfv(GL_FRONT, GL_EMISSION, ecol);
 		}
 
 		// opacity
@@ -706,86 +706,86 @@ bool ModelRenderPass::init(Model *m)
 		case BM_OPAQUE:  // 0
 			break;
 		case BM_TRANSPARENT: // 1
-			glEnable(GL_ALPHA_TEST);
-			glAlphaFunc(GL_GEQUAL, 0.7f);
+			gl.enable(GL_ALPHA_TEST);
+			gl.alphaFunc(GL_GEQUAL, 0.7f);
 			break;
 		case BM_ALPHA_BLEND: // 2
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			gl.enable(GL_BLEND);
+			gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			break;
 		case BM_ADDITIVE: // 3
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_COLOR, GL_ONE);
+			gl.enable(GL_BLEND);
+			gl.blendFunc(GL_SRC_COLOR, GL_ONE);
 			break;
 		case BM_ADDITIVE_ALPHA: // 4
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+			gl.enable(GL_BLEND);
+			gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
 			break;
 		case BM_MODULATE: // 5
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+			gl.enable(GL_BLEND);
+			gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
 			break;
 		case BM_MODULATE2: // 6
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+			gl.enable(GL_BLEND);
+			gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
 			break;
 		default:
 			LogError << "Unknown blendmode: " << blendmode << std::endl;
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			gl.enable(GL_BLEND);
+			gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		//if (cull)
-		//  glEnable(GL_CULL_FACE);
+		//  gl.enable(GL_CULL_FACE);
 
 		// Texture wrapping around the geometry
 		if (swrap)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		if (twrap)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		// no writing to the depth buffer.
 		if (nozwrite)
-			glDepthMask(GL_FALSE);
+			gl.depthMask(GL_FALSE);
 
 		if (unlit) {
-			glDisable(GL_LIGHTING);
+			gl.disable(GL_LIGHTING);
 		}
 
 		// Environmental mapping, material, and effects
 		if (useenvmap) {
 			// Turn on the 'reflection' shine, using 18.0f as that is what WoW uses based on the reverse engineering
 			// This is now set in InitGL(); - no need to call it every render.
-			glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
+			gl.materialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
 
 			// env mapping
-			glEnable(GL_TEXTURE_GEN_S);
-			glEnable(GL_TEXTURE_GEN_T);
+			gl.enable(GL_TEXTURE_GEN_S);
+			gl.enable(GL_TEXTURE_GEN_T);
 
 			const GLint maptype = GL_SPHERE_MAP;
-			//const GLint maptype = GL_REFLECTION_MAP_ARB;
+			//const GLint maptype = GL_REFLECTION_MAP_;
 
-			glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, maptype);
-			glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
+			gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, maptype);
+			gl.texGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
 		}
 
 		if (texanim != -1) {
-			glMatrixMode(GL_TEXTURE);
-			glPushMatrix();
+			gl.matrixMode(GL_TEXTURE);
+			gl.pushMatrix();
 
 			m->texanims[texanim].setup(texanim);
 		}
 
 		// color
-		glColor4fv(ocol);
-		//glMaterialfv(GL_FRONT, GL_SPECULAR, ocol);
+		gl.color4fv(ocol);
+		//gl.materialfv(GL_FRONT, GL_SPECULAR, ocol);
 
 		// don't use lighting on the surface
 		if (unlit)
-			glDisable(GL_LIGHTING);
+			gl.disable(GL_LIGHTING);
 
 		if (blendmode <= 1 && ocol.w<1.0f)
-			glEnable(GL_BLEND);
+			gl.enable(GL_BLEND);
 
 		return true;
 	}
@@ -801,56 +801,56 @@ void ModelRenderPass::deinit()
 	case BM_TRANSPARENT:
 		break;
 	case BM_ALPHA_BLEND:
-		//glDepthMask(GL_TRUE);
+		//gl.depthMask(GL_TRUE);
 		break;
 	default:
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // default blend func
+		gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // default blend func
 	}
 	if (nozwrite) {
-		glDepthMask(GL_TRUE);
+		gl.depthMask(GL_TRUE);
 	}
 	if (texanim != -1) {
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
+		gl.popMatrix();
+		gl.matrixMode(GL_MODELVIEW);
 	}
 	if (unlit) {
-		glEnable(GL_LIGHTING);
+		gl.enable(GL_LIGHTING);
 	}
 	if (useenvmap) {
-		glDisable(GL_TEXTURE_GEN_S);
-		glDisable(GL_TEXTURE_GEN_T);
+		gl.disable(GL_TEXTURE_GEN_S);
+		gl.disable(GL_TEXTURE_GEN_T);
 	}
 	if (usetex2) {
 		opengl::texture::disable_texture();
 		opengl::texture::set_active_texture (0);
 	}
-	//glColor4f(1,1,1,1); //???
+	//gl.color4f(1,1,1,1); //???
 }
 
 void ModelHighlight(Vec4D color)
 {
-	glDisable(GL_ALPHA_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_CULL_FACE);
+	gl.disable(GL_ALPHA_TEST);
+	gl.enable(GL_BLEND);
+	gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	gl.disable(GL_CULL_FACE);
 	opengl::texture::set_active_texture (0);
 	opengl::texture::disable_texture();
 	opengl::texture::set_active_texture (1);
 	opengl::texture::disable_texture();
-	glColor4fv(color);
-	glMaterialfv(GL_FRONT, GL_EMISSION, color);
-	//  glDepthMask( GL_FALSE );
+	gl.color4fv(color);
+	gl.materialfv(GL_FRONT, GL_EMISSION, color);
+	//  gl.depthMask( GL_FALSE );
 }
 
 void ModelUnhighlight()
 {
-	glEnable(GL_ALPHA_TEST);
-	glDisable(GL_BLEND);
-	glEnable(GL_CULL_FACE);
+	gl.enable(GL_ALPHA_TEST);
+	gl.disable(GL_BLEND);
+	gl.enable(GL_CULL_FACE);
 	opengl::texture::set_active_texture (0);
 	opengl::texture::enable_texture();
-	glColor4fv(Vec4D(1, 1, 1, 1));
-	//  glDepthMask( GL_TRUE );
+	gl.color4fv(Vec4D(1, 1, 1, 1));
+	//  gl.depthMask( GL_TRUE );
 }
 
 void Model::drawModel( /*bool unlit*/)
@@ -861,24 +861,24 @@ void Model::drawModel( /*bool unlit*/)
 	{
 		if (animGeometry)
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, vbuf);
-			glVertexPointer(3, GL_FLOAT, 0, 0);
-			glNormalPointer(GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize));
+			gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
+			gl.vertexPointer(3, GL_FLOAT, 0, 0);
+			gl.normalPointer(GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize));
 		}
 		else
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, vbuf);
-			glVertexPointer(3, GL_FLOAT, 0, 0);
-			glBindBuffer(GL_ARRAY_BUFFER, nbuf);
-			glNormalPointer(GL_FLOAT, 0, 0);
+			gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
+			gl.vertexPointer(3, GL_FLOAT, 0, 0);
+			gl.bindBuffer(GL_ARRAY_BUFFER, nbuf);
+			gl.normalPointer(GL_FLOAT, 0, 0);
 		}
 
-		glBindBuffer(GL_ARRAY_BUFFER, tbuf);
-		glTexCoordPointer(2, GL_FLOAT, 0, 0);
+		gl.bindBuffer(GL_ARRAY_BUFFER, tbuf);
+		gl.texCoordPointer(2, GL_FLOAT, 0, 0);
 	}
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glAlphaFunc(GL_GREATER, 0.3f);
+	gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	gl.alphaFunc(GL_GREATER, 0.3f);
 
 	for (size_t i = 0; i<passes.size(); ++i) {
 		ModelRenderPass &p = passes[i];
@@ -888,21 +888,21 @@ void Model::drawModel( /*bool unlit*/)
 
 			// render
 			if (animated) {
-				//glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-				// a GDC OpenGL Performace Tuning paper recommended glDrawRangeElements over glDrawElements
+				//gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+				// a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
 				// I can't notice a difference but I guess it can't hurt
-				glDrawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+				gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
 
 			}
 			else {
-				glBegin(GL_TRIANGLES);
+				gl.begin(GL_TRIANGLES);
 				for (size_t k = 0, b = p.indexStart; k<p.indexCount; ++k, ++b) {
 					uint16_t a = indices[b];
-					glNormal3fv(normals[a]);
-					glTexCoord2fv(origVertices[a].texcoords);
-					glVertex3fv(vertices[a]);
+					gl.normal3fv(normals[a]);
+					gl.texCoord2fv(origVertices[a].texcoords);
+					gl.vertex3fv(vertices[a]);
 				}
-				glEnd();
+				gl.end();
 			}
 
 			p.deinit();
@@ -911,13 +911,13 @@ void Model::drawModel( /*bool unlit*/)
 	}
 	// done with all render ops
 
-	glAlphaFunc(GL_GREATER, 0.0f);
-	glDisable(GL_ALPHA_TEST);
+	gl.alphaFunc(GL_GREATER, 0.0f);
+	gl.disable(GL_ALPHA_TEST);
 
 	GLfloat czero[4] = { 0, 0, 0, 1 };
-	glMaterialfv(GL_FRONT, GL_EMISSION, czero);
-	glColor4f(1, 1, 1, 1);
-	glDepthMask(GL_TRUE);
+	gl.materialfv(GL_FRONT, GL_EMISSION, czero);
+	gl.color4f(1, 1, 1, 1);
+	gl.depthMask(GL_TRUE);
 }
 
 void Model::drawModelSelect()
@@ -928,24 +928,24 @@ void Model::drawModelSelect()
 	{
 		if (animGeometry)
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, vbuf);
-			glVertexPointer(3, GL_FLOAT, 0, 0);
-			glNormalPointer(GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize));
+			gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
+			gl.vertexPointer(3, GL_FLOAT, 0, 0);
+			gl.normalPointer(GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize));
 		}
 		else
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, vbuf);
-			glVertexPointer(3, GL_FLOAT, 0, 0);
-			glBindBuffer(GL_ARRAY_BUFFER, nbuf);
-			glNormalPointer(GL_FLOAT, 0, 0);
+			gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
+			gl.vertexPointer(3, GL_FLOAT, 0, 0);
+			gl.bindBuffer(GL_ARRAY_BUFFER, nbuf);
+			gl.normalPointer(GL_FLOAT, 0, 0);
 		}
 
-		glBindBuffer(GL_ARRAY_BUFFER, tbuf);
-		glTexCoordPointer(2, GL_FLOAT, 0, 0);
+		gl.bindBuffer(GL_ARRAY_BUFFER, tbuf);
+		gl.texCoordPointer(2, GL_FLOAT, 0, 0);
 	}
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glAlphaFunc(GL_GREATER, 0.3f);
+	gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	gl.alphaFunc(GL_GREATER, 0.3f);
 
 	for (size_t i = 0; i<passes.size(); ++i) {
 		ModelRenderPass &p = passes[i];
@@ -955,23 +955,23 @@ void Model::drawModelSelect()
 
 			// render
 			if (animated) {
-				//glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-				// a GDC OpenGL Performace Tuning paper recommended glDrawRangeElements over glDrawElements
+				//gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+				// a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
 				// I can't notice a difference but I guess it can't hurt
-				glDrawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+				gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
 
 			}
 			else
 			{
-				glBegin(GL_TRIANGLES);
+				gl.begin(GL_TRIANGLES);
 				for (size_t k = 0, b = p.indexStart; k<p.indexCount; ++k, ++b)
 				{
 					uint16_t a = indices[b];
-					glNormal3fv(normals[a]);
-					glTexCoord2fv(origVertices[a].texcoords);
-					glVertex3fv(vertices[a]);
+					gl.normal3fv(normals[a]);
+					gl.texCoord2fv(origVertices[a].texcoords);
+					gl.vertex3fv(vertices[a]);
 				}
-				glEnd();
+				gl.end();
 			}
 
 			p.deinit();
@@ -980,13 +980,13 @@ void Model::drawModelSelect()
 	}
 	// done with all render ops
 
-	glAlphaFunc(GL_GREATER, 0.0f);
-	glDisable(GL_ALPHA_TEST);
+	gl.alphaFunc(GL_GREATER, 0.0f);
+	gl.disable(GL_ALPHA_TEST);
 
 	GLfloat czero[4] = { 0, 0, 0, 1 };
-	glMaterialfv(GL_FRONT, GL_EMISSION, czero);
-	glColor4f(1, 1, 1, 1);
-	glDepthMask(GL_TRUE);
+	gl.materialfv(GL_FRONT, GL_EMISSION, czero);
+	gl.color4f(1, 1, 1, 1);
+	gl.depthMask(GL_TRUE);
 
 }
 
@@ -1005,15 +1005,15 @@ void TextureAnim::calc(int anim, int time)
 
 void TextureAnim::setup(int anim)
 {
-	glLoadIdentity();
+	gl.loadIdentity();
 	if (trans.uses(anim)) {
-		glTranslatef(tval.x, tval.y, tval.z);
+		gl.translatef(tval.x, tval.y, tval.z);
 	}
 	if (rot.uses(anim)) {
-		glRotatef(rval.x, 0, 0, 1); // this is wrong, I have no idea what I'm doing here ;)
+		gl.rotatef(rval.x, 0, 0, 1); // this is wrong, I have no idea what I'm doing here ;)
 	}
 	if (scale.uses(anim)) {
-		glScalef(sval.x, sval.y, sval.z);
+		gl.scalef(sval.x, sval.y, sval.z);
 	}
 }
 
@@ -1097,10 +1097,10 @@ void ModelLight::setup(int time, OpenGL::Light l)
 		LogError << "Light type " << type << " is unknown." << std::endl;
 	}
 	//gLog("Light %d (%f,%f,%f) (%f,%f,%f) [%f,%f,%f]\n", l-GL_LIGHT4, ambcol.x, ambcol.y, ambcol.z, diffcol.x, diffcol.y, diffcol.z, p.x, p.y, p.z);
-	glLightfv(l, GL_POSITION, p);
-	glLightfv(l, GL_DIFFUSE, diffcol);
-	glLightfv(l, GL_AMBIENT, ambcol);
-	glEnable(l);
+	gl.lightfv(l, GL_POSITION, p);
+	gl.lightfv(l, GL_DIFFUSE, diffcol);
+	gl.lightfv(l, GL_AMBIENT, ambcol);
+	gl.enable(l);
 }
 
 void TextureAnim::init(const MPQFile& f, const ModelTexAnimDef &mta, int *global)
@@ -1149,7 +1149,7 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 		}
 		if (billboard) {
 			float modelview[16];
-			glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+			gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
 
 			Vec3D vRight = Vec3D(modelview[0], modelview[4], modelview[8]);
 			Vec3D vUp = Vec3D(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
@@ -1195,14 +1195,13 @@ void Model::draw()
 		return;
 
 	if (gWorld && gWorld->drawfog)
-		glEnable(GL_FOG);
+		gl.enable(GL_FOG);
 	else
-		glDisable(GL_FOG);
+		gl.disable(GL_FOG);
 
 	if (!animated)
 	{
-		glCallList(ModelDrawList);
-		CheckForGLError("Model::draw:: after the draw list");
+		gl.callList(ModelDrawList);
 	}
 	else
 	{
@@ -1230,7 +1229,7 @@ void Model::draw()
 void Model::drawSelect()
 {
 	if (!animated)
-		glCallList(SelectModelDrawList);
+		gl.callList(SelectModelDrawList);
 	else
 	{
 		if (!animcalc || mPerInstanceAnimation)
@@ -1261,7 +1260,7 @@ void Model::lightsOn(OpenGL::Light lbase)
 
 void Model::lightsOff(OpenGL::Light lbase)
 {
-	for (unsigned int i = 0, l = lbase; i<header.nLights; ++i) glDisable(l++);
+	for (unsigned int i = 0, l = lbase; i<header.nLights; ++i) gl.disable(l++);
 }
 
 void Model::updateEmitters(float dt)

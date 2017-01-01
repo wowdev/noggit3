@@ -115,24 +115,24 @@ void UIMinimapWindow::render() const
 
 	UIWindow::render();
 
-	glPushMatrix();
-	glTranslatef(x() + borderwidth, y() + borderwidth, 0.0f);
+	gl.pushMatrix();
+	gl.translatef(x() + borderwidth, y() + borderwidth, 0.0f);
 
 	if (gWorld->minimap)
 	{
 		opengl::texture::enable_texture();
-		glBindTexture(GL_TEXTURE_2D, gWorld->minimap);
+		gl.bindTexture(GL_TEXTURE_2D, gWorld->minimap);
 
-		glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex2i((GLint)0.0f, (GLint)0.0f);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex2i((GLint)(tilesize * 64.0f), (GLint)0.0f);
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex2i((GLint)(tilesize * 64.0f), (GLint)(tilesize * 64.0f));
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex2i((GLint)0.0f, (GLint)(tilesize * 64.0f));
-		glEnd();
+		gl.begin(GL_QUADS);
+		gl.texCoord2f(0.0f, 0.0f);
+		gl.vertex2f(0.0f, 0.0f);
+		gl.texCoord2f(1.0f, 0.0f);
+		gl.vertex2f(tilesize * 64.0f, 0.0f);
+		gl.texCoord2f(1.0f, 1.0f);
+		gl.vertex2f(tilesize * 64.0f, tilesize * 64.0f);
+		gl.texCoord2f(0.0f, 1.0f);
+		gl.vertex2f(0.0f, tilesize * 64.0f);
+		gl.end();
 
 		opengl::texture::disable_texture();
 	}
@@ -149,41 +149,41 @@ void UIMinimapWindow::render() const
 			if (gWorld->mapIndex->hasTile(j, i))
 			{
 				if (gWorld->mapIndex->isTileExternal(i, j))
-					glColor4f(1.0f, 0.7f, 0.5f, 0.6f);
+					gl.color4f(1.0f, 0.7f, 0.5f, 0.6f);
 				else
-					glColor4f(0.8f, 0.8f, 0.8f, 0.4f);
+					gl.color4f(0.8f, 0.8f, 0.8f, 0.4f);
 			}
 			else
-				glColor4f(1.0f, 1.0f, 1.0f, 0.05f);
+				gl.color4f(1.0f, 1.0f, 1.0f, 0.05f);
 
-			glBegin(GL_QUADS);
-			glVertex2i((GLint)(i * tilesize), (GLint)(j * tilesize));
-			glVertex2i((GLint)(((i + 1) * tilesize) - 1), (GLint)(j * tilesize));
-			glVertex2i((GLint)(((i + 1) * tilesize) - 1), (GLint)(((j + 1) * tilesize) - 1));
-			glVertex2i((GLint)(i * tilesize), (GLint)(((j + 1) * tilesize) - 1));
-			glEnd();
+			gl.begin(GL_QUADS);
+			gl.vertex2f(i * tilesize, j * tilesize);
+			gl.vertex2f(((i + 1) * tilesize) - 1, j * tilesize);
+			gl.vertex2f(((i + 1) * tilesize) - 1, ((j + 1) * tilesize) - 1);
+			gl.vertex2f(i * tilesize, ((j + 1) * tilesize) - 1);
+			gl.end();
 
 			if (map)
 			{
 				if (map->mapIndex->getChanged(j, i) > 0 || gWorld->mapIndex->tileLoaded(j, i))
 				{
 					if (map->mapIndex->getChanged(j, i) == 1)
-						glColor4f(1.0f, 1.0f, 1.0f, 0.6f);
+						gl.color4f(1.0f, 1.0f, 1.0f, 0.6f);
 					else if (gWorld->mapIndex->tileLoaded(j, i))
-						glColor4f(0.0f, 1.0f, 0.4f, 0.2f);
+						gl.color4f(0.0f, 1.0f, 0.4f, 0.2f);
 					else
-						glColor4f(0.7f, 0.7f, 0.7f, 0.6f);
+						gl.color4f(0.7f, 0.7f, 0.7f, 0.6f);
 
-					glBegin(GL_LINES);
-					glVertex2i((GLint)(i * tilesize), (GLint)(j * tilesize));
-					glVertex2i((GLint)(((i + 1) * tilesize)), (GLint)(j * tilesize));
-					glVertex2i((GLint)(((i + 1) * tilesize)), (GLint)(j * tilesize));
-					glVertex2i((GLint)(((i + 1) * tilesize)), (GLint)(((j + 1) * tilesize) - 1));
-					glVertex2i((GLint)(((i + 1) * tilesize)), (GLint)(((j + 1) * tilesize) - 1));
-					glVertex2i((GLint)(i * tilesize), (GLint)(((j + 1) * tilesize) - 1));
-					glVertex2i((GLint)(i * tilesize), (GLint)(((j + 1) * tilesize) - 1));
-					glVertex2i((GLint)(i * tilesize), (GLint)(j * tilesize));
-					glEnd();
+					gl.begin(GL_LINES);
+					gl.vertex2f(i * tilesize, j * tilesize);
+					gl.vertex2f(((i + 1) * tilesize), j * tilesize);
+					gl.vertex2f(((i + 1) * tilesize), j * tilesize);
+					gl.vertex2f(((i + 1) * tilesize), ((j + 1) * tilesize) - 1);
+					gl.vertex2f(((i + 1) * tilesize), ((j + 1) * tilesize) - 1);
+					gl.vertex2f(i * tilesize, ((j + 1) * tilesize) - 1);
+					gl.vertex2f(i * tilesize, ((j + 1) * tilesize) - 1);
+					gl.vertex2f(i * tilesize, j * tilesize);
+					gl.end();
 				}
 			}
 		}
@@ -194,31 +194,31 @@ void UIMinimapWindow::render() const
 	//! \todo Change it from a simple line to an arrow
 	if (map)
 	{
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		glBegin(GL_LINES);
+		gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+		gl.begin(GL_LINES);
 		const float fx(map->camera.x / TILESIZE * tilesize);
 		const float fz(map->camera.z / TILESIZE * tilesize);
-		glVertex2f(fx, fz);
-		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-		glVertex2f(fx + 10.0f * cosf(lookAt / 180.0f * (float)PI), fz + 10.0f * sinf(lookAt / 180.0f * (float)PI));
-		glEnd();
+		gl.vertex2f(fx, fz);
+		gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+		gl.vertex2f(fx + 10.0f * cosf(lookAt / 180.0f * (float)PI), fz + 10.0f * sinf(lookAt / 180.0f * (float)PI));
+		gl.end();
 
 		int skycount = map->skies->skies.size();
 
 
 		for (int j = 0; j < skycount; j++)
 		{
-			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 			float x_ = map->skies->skies[j].pos.x / TILESIZE * tilesize;
 			float z_ = map->skies->skies[j].pos.z / TILESIZE * tilesize;
-			glBegin(GL_QUADS);
-			glVertex2i((GLint)x_, (GLint)z_);
-			glVertex2i((GLint)(x_ + 3), (GLint)z_);
-			glVertex2i((GLint)(x_ + 3), (GLint)(z_ + 3));
-			glVertex2i((GLint)x_, (GLint)(z_ + 3));
-			glEnd();
+			gl.begin(GL_QUADS);
+			gl.vertex2f(x_, z_);
+			gl.vertex2f(x_ + 3, z_);
+			gl.vertex2f(x_ + 3, z_ + 3);
+			gl.vertex2f(x_, z_ + 3);
+			gl.end();
 		}
 	}
 
-	glPopMatrix();
+	gl.popMatrix();
 }

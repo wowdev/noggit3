@@ -63,34 +63,34 @@ void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth);
 void WMOInstance::draw()
 {
 
-	glPushMatrix();
-	glTranslatef(pos.x, pos.y, pos.z);
+	gl.pushMatrix();
+	gl.translatef(pos.x, pos.y, pos.z);
 
 	const float roty = dir.y - 90.0f;
 
-	glRotatef(roty, 0.0f, 1.0f, 0.0f);
-	glRotatef(-dir.x, 0.0f, 0.0f, 1.0f);
-	glRotatef(dir.z, 1.0f, 0.0f, 0.0f);
+	gl.rotatef(roty, 0.0f, 1.0f, 0.0f);
+	gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
+	gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
 
 	if (gWorld->IsSelection(eEntry_WMO) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID)
 		wmo->draw(doodadset, pos, math::degrees (roty), true, true, true);
 	else
 		wmo->draw(doodadset, pos, math::degrees (roty), false, false, false);
 
-	glPopMatrix();
+	gl.popMatrix();
 
   // no need to check showModelFromHiddenList in Environment as it's done beforehand in World::draw()
 	if (wmo->hidden || ( gWorld->IsSelection(eEntry_WMO) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID))
 	{
-		glDisable(GL_LIGHTING);
+		gl.disable(GL_LIGHTING);
 
-		glDisable(GL_COLOR_MATERIAL);
+		gl.disable(GL_COLOR_MATERIAL);
 		opengl::texture::set_active_texture (0);
 		opengl::texture::disable_texture();
 		opengl::texture::set_active_texture (1);
 		opengl::texture::disable_texture();
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		gl.enable(GL_BLEND);
+		gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     Vec4D color = wmo->hidden ? Vec4D(0.0f, 0.0f, 1.0f, 1.0f) : Vec4D(0.0f, 1.0f, 0.0f, 1.0f);
 		DrawABox(extents[0], extents[1], color, 1.0f);
@@ -100,7 +100,7 @@ void WMOInstance::draw()
 		opengl::texture::set_active_texture (0);
 		opengl::texture::enable_texture();
 
-		glEnable(GL_LIGHTING);
+		gl.enable(GL_LIGHTING);
 	}
 }
 
@@ -213,41 +213,41 @@ bool WMOInstance::isInsideChunk(Vec3D lTileExtents[2])
 
 void WMOInstance::drawSelect()
 {
-	glPushMatrix();
+	gl.pushMatrix();
 
-	glTranslatef(pos.x, pos.y, pos.z);
+	gl.translatef(pos.x, pos.y, pos.z);
 
 	const float roty = dir.y - 90.0f;
 
-	glRotatef(roty, 0.0f, 1.0f, 0.0f);
-	glRotatef(-dir.x, 0.0f, 0.0f, 1.0f);
-	glRotatef(dir.z, 1.0f, 0.0f, 0.0f);
+	gl.rotatef(roty, 0.0f, 1.0f, 0.0f);
+	gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
+	gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
 
 	mSelectionID = SelectionNames.add(this);
-	glPushName(mSelectionID);
+	gl.pushName(mSelectionID);
 
 	wmo->drawSelect(doodadset, pos, math::degrees (-roty));
 
-	glPopName();
+	gl.popName();
 
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 /*void WMOInstance::drawPortals()
 {
-glPushMatrix();
+gl.pushMatrix();
 
-glTranslatef( pos.x, pos.y, pos.z );
+gl.translatef( pos.x, pos.y, pos.z );
 
 const float roty = dir.y - 90.0f;
 
-glRotatef( roty, 0.0f, 1.0f, 0.0f );
-glRotatef( -dir.x, 0.0f, 0.0f, 1.0f );
-glRotatef( dir.z, 1.0f, 0.0f, 0.0f );
+gl.rotatef( roty, 0.0f, 1.0f, 0.0f );
+gl.rotatef( -dir.x, 0.0f, 0.0f, 1.0f );
+gl.rotatef( dir.z, 1.0f, 0.0f, 0.0f );
 
 wmo->drawPortals();
 
-glPopMatrix();
+gl.popMatrix();
 }*/
 
 void WMOInstance::resetDirection()

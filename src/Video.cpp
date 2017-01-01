@@ -15,7 +15,7 @@ namespace OpenGL
 	{
 		GLSettings settings;
 
-#define SAVE( NAME, VARNAME ) settings.VARNAME = glIsEnabled( NAME )
+#define SAVE( NAME, VARNAME ) settings.VARNAME = gl.isEnabled( NAME )
 		SAVE(GL_ALPHA_TEST, alphaTesting);
 		SAVE(GL_BLEND, blend);
 		SAVE(GL_COLOR_MATERIAL, colorMaterial);
@@ -42,7 +42,7 @@ namespace OpenGL
 		GLSettings settings = _savedSettings.top();
 		_savedSettings.pop();
 
-#define LOAD( NAME, VARNAME ) if( glIsEnabled( NAME ) != settings.VARNAME ) { if( settings.VARNAME == GL_TRUE ) { glEnable( NAME ); } else { glDisable( NAME ); } }
+#define LOAD( NAME, VARNAME ) if( gl.isEnabled( NAME ) != settings.VARNAME ) { if( settings.VARNAME == GL_TRUE ) { gl.enable( NAME ); } else { gl.disable( NAME ); } }
 		LOAD(GL_ALPHA_TEST, alphaTesting);
 		LOAD(GL_BLEND, blend);
 		LOAD(GL_COLOR_MATERIAL, colorMaterial);
@@ -66,12 +66,12 @@ Video video;
 
 void Video::updateProjectionMatrix()
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glViewport(0.0f, 0.0f, xres(), yres());
+	gl.matrixMode(GL_PROJECTION);
+	gl.loadIdentity();
+	gl.viewport(0.0f, 0.0f, xres(), yres());
 	gluPerspective(fov(), ratio(), nearclip(), farclip());
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	gl.matrixMode(GL_MODELVIEW);
+	gl.loadIdentity();
 }
 
 void Video::resize(int xres_, int yres_)
@@ -140,18 +140,18 @@ bool Video::init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_)
 		return false;
 	}
 
-	glViewport(0.0f, 0.0f, xres(), yres());
+	gl.viewport(0.0f, 0.0f, xres(), yres());
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	gl.enableClientState(GL_VERTEX_ARRAY);
+	gl.enableClientState(GL_NORMAL_ARRAY);
+	gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	mSupportCompression = GLEW_ARB_texture_compression;
 	mSupportShaders = GLEW_ARB_vertex_program && GLEW_ARB_fragment_program;
 
-	LogDebug << "GL: Version: " << glGetString(GL_VERSION) << std::endl;
-	LogDebug << "GL: Vendor: " << glGetString(GL_VENDOR) << std::endl;
-	LogDebug << "GL: Renderer: " << glGetString(GL_RENDERER) << std::endl;
+	LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
+	LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
+	LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
 
 	return mSupportCompression;
 }
@@ -169,92 +169,52 @@ void Video::flip() const
 
 void Video::clearScreen() const
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	gl.clearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Video::set3D() const
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	gl.matrixMode(GL_PROJECTION);
+	gl.loadIdentity();
 	gluPerspective(fov(), ratio(), nearclip(), farclip());
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	gl.matrixMode(GL_MODELVIEW);
+	gl.loadIdentity();
 	if (doAntiAliasing())
-		glEnable(GL_MULTISAMPLE);
+		gl.enable(GL_MULTISAMPLE);
 }
 
 void Video::set3D_select() const
 {
-	glMatrixMode(GL_PROJECTION);
+	gl.matrixMode(GL_PROJECTION);
 	gluPerspective(fov(), ratio(), nearclip(), farclip());
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	gl.matrixMode(GL_MODELVIEW);
+	gl.loadIdentity();
 	if (doAntiAliasing())
-		glDisable(GL_MULTISAMPLE);
+		gl.disable(GL_MULTISAMPLE);
 }
 
 void Video::set2D() const
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0f, xres(), yres(), 0.0f, -1.0f, 1.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	gl.matrixMode(GL_PROJECTION);
+	gl.loadIdentity();
+	gl.ortho(0.0f, xres(), yres(), 0.0f, -1.0f, 1.0f);
+	gl.matrixMode(GL_MODELVIEW);
+	gl.loadIdentity();
 	if (doAntiAliasing())
-		glDisable(GL_MULTISAMPLE);
+		gl.disable(GL_MULTISAMPLE);
 }
 
 void Video::setTileMode() const
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(-2.0f * ratio(), 2.0f * ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	gl.matrixMode(GL_PROJECTION);
+	gl.loadIdentity();
+	gl.ortho(-2.0f * ratio(), 2.0f * ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
+	gl.matrixMode(GL_MODELVIEW);
+	gl.loadIdentity();
 	if (doAntiAliasing())
-		glEnable(GL_MULTISAMPLE);
+		gl.enable(GL_MULTISAMPLE);
 }
-
-void CheckForGLError(const std::string& pLocation)
-{
-	int ErrorNum = glGetError();
-	while (ErrorNum)
-	{
-		switch (ErrorNum)
-		{
-		case GL_INVALID_ENUM:
-			LogError << "OpenGL: (at " << pLocation << "): GL_INVALID_ENUM" << std::endl;
-			break;
-		case GL_INVALID_VALUE:
-			LogError << "OpenGL: (at " << pLocation << "): GL_INVALID_VALUE" << std::endl;
-			break;
-		case GL_INVALID_OPERATION:
-			LogError << "OpenGL: (at " << pLocation << "): GL_INVALID_OPERATION" << std::endl;
-			break;
-		case GL_STACK_OVERFLOW:
-			LogError << "OpenGL: (at " << pLocation << "): GL_STACK_OVERFLOW" << std::endl;
-			break;
-		case GL_STACK_UNDERFLOW:
-			LogError << "OpenGL: (at " << pLocation << "): GL_STACK_UNDERFLOW" << std::endl;
-			break;
-		case GL_OUT_OF_MEMORY:
-			LogError << "OpenGL: (at " << pLocation << "): GL_OUT_OF_MEMORY" << std::endl;
-			break;
-		case GL_TABLE_TOO_LARGE:
-			LogError << "OpenGL: (at " << pLocation << "): GL_TABLE_TOO_LARGE" << std::endl;
-			break;
-		case GL_NO_ERROR:
-			//! \todo  Add the missing ones.
-		default:
-			LogError << "OpenGL: (at " << pLocation << "): GL_NO_ERROR (wat?)" << std::endl;
-		}
-
-		ErrorNum = glGetError();
-	}
-}
-
-
 
 #include <stdint.h>
 //! \todo Cross-platform syntax for packed structs.
@@ -281,24 +241,24 @@ namespace OpenGL
 {
 	CallList::CallList()
 	{
-		list = glGenLists(1);
+		list = gl.genLists(1);
 	}
 	CallList::~CallList()
 	{
-		glDeleteLists(list, 1);
+		gl.deleteLists(list, 1);
 	}
 
 	void CallList::startRecording(ModeEnum mode)
 	{
-		glNewList(list, mode);
+		gl.newList(list, mode);
 	}
 	void CallList::endRecording()
 	{
-		glEndList();
+		gl.endList();
 	}
 	void CallList::render()
 	{
-		glCallList(list);
+		gl.callList(list);
 	}
 
 	Texture::Texture()
@@ -363,7 +323,7 @@ namespace OpenGL
 					}
 				}
 
-				glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA8, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf2);
+				gl.texImage2D(GL_TEXTURE_2D, i, GL_RGBA8, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf2);
 
 			}
 			else
@@ -398,7 +358,7 @@ namespace OpenGL
 
 			if (lHeader->offsets[i] && lHeader->sizes[i])
 			{
-				glCompressedTexImage2D(GL_TEXTURE_2D, i, format, _width, _height, 0, ((_width + 3) / 4) * ((_height + 3) / 4) * blocksize, reinterpret_cast<char*>(lData + lHeader->offsets[i]));
+				gl.compressedTexImage2D(GL_TEXTURE_2D, i, format, _width, _height, 0, ((_width + 3) / 4) * ((_height + 3) / 4) * blocksize, reinterpret_cast<char*>(lData + lHeader->offsets[i]));
 			}
 			else
 			{
@@ -444,7 +404,7 @@ namespace OpenGL
 
 		f.close();
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 }

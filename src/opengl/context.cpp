@@ -835,4 +835,100 @@ namespace opengl
     verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
     return glUniformMatrix4fv (location, count, transpose, value);
   }
+
+  void context::initNames()
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glInitNames();
+  }
+  void context::pushName (GLuint name)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glPushName (name);
+  }
+  void context::popName()
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glPopName();
+  }
+  void context::selectBuffer (GLsizei size, GLuint* buffer)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glSelectBuffer (size, buffer);
+  }
+
+  void context::clearStencil (GLint s)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glClearStencil (s);
+  }
+  void context::stencilFunc (GLenum func, GLint ref, GLuint mask)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glStencilFunc (func, ref, mask);
+  }
+  void context::stencilOp (GLenum sfail, GLenum dpfail, GLenum dppass)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glStencilOp (sfail, dpfail, dppass);
+  }
+  void context::colorMask (GLboolean r, GLboolean g, GLboolean b, GLboolean a)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glColorMask (r, g, b, a);
+  }
+
+  void context::polygonOffset (GLfloat factor, GLfloat units)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glPolygonOffset (factor, units);
+  }
+
+  void context::pushAttrib (GLbitfield mask)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glPushAttrib (mask);
+  }
+  void context::popAttrib()
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glPopAttrib();
+  }
+
+  void context::genFramebuffers (GLsizei n, GLuint *ids)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glGenFramebuffers (n, ids);
+  }
+  void context::bindFramebuffer (GLenum target, GLuint framebuffer)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glBindFramebuffer (target, framebuffer);
+  }
+  void context::framebufferTexture2D (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glFramebufferTexture2D (target, attachment, textarget, texture, level);
+  }
+
+  void context::genRenderbuffers (GLsizei n, GLuint *ids)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glGenRenderbuffers (n, ids);
+  }
+  void context::bindRenderbuffer (GLenum target, GLuint renderbuffer)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glBindRenderbuffer (target, renderbuffer);
+  }
+  void context::renderbufferStorage (GLenum target, GLenum internalformat, GLsizei width, GLsizei height)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glRenderbufferStorage (target, internalformat, width, height);
+  }
+  void context::framebufferRenderbuffer (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glFramebufferRenderbuffer (target, attachment, renderbuffertarget, renderbuffer);
+  }
 }

@@ -416,7 +416,6 @@ void Liquid::draw()
 	{
 		//! \todo THIS LINE THROWS GL_INVALID_OPERATION! Steff. It donwt do in anymore now. Perhaps because water rendering was called double in maptile::draw()
 		mDrawList->render();
-		CheckForGLError("Liquid::draw:: after the draw list");
 	}
 
 	opengl::texture::set_active_texture (1);

@@ -12,55 +12,55 @@ void UIGradient::render() const
 		// return;
 	}
 
-	glPushMatrix();
-	glTranslatef(x(), y(), 0.0f);
+	gl.pushMatrix();
+	gl.translatef(x(), y(), 0.0f);
 
 	if (horiz)
 	{
-		glBegin(GL_TRIANGLE_STRIP);
-		glColor4fv(&MinColor.x);
-		glVertex2f(0.0f, 0.0f);
-		glVertex2f(0.0f, height());
-		glColor4fv(&MaxColor.x);
-		glVertex2f(width(), 0.0f);
-		glVertex2f(width(), height());
-		glEnd();
+		gl.begin(GL_TRIANGLE_STRIP);
+		gl.color4fv(&MinColor.x);
+		gl.vertex2f(0.0f, 0.0f);
+		gl.vertex2f(0.0f, height());
+		gl.color4fv(&MaxColor.x);
+		gl.vertex2f(width(), 0.0f);
+		gl.vertex2f(width(), height());
+		gl.end();
 
 		if (clickable())
 		{
-			glColor4fv(&ClickColor.x);
-			glBegin(GL_LINE);
-			glVertex2f(width() * value, 0.0f);
-			glVertex2f(width() * value, height());
-			glEnd();
+			gl.color4fv(&ClickColor.x);
+			gl.begin(GL_LINE);
+			gl.vertex2f(width() * value, 0.0f);
+			gl.vertex2f(width() * value, height());
+			gl.end();
 		}
 	}
 	else
 	{
-		glBegin(GL_TRIANGLE_STRIP);
-		glColor4fv(&MinColor.x);
-		glVertex2f(width(), 0.0f);
-		glVertex2f(0.0f, 0.0f);
-		glColor4fv(&MaxColor.x);
-		glVertex2f(width(), height());
-		glVertex2f(0.0f, height());
-		glEnd();
+		gl.begin(GL_TRIANGLE_STRIP);
+		gl.color4fv(&MinColor.x);
+		gl.vertex2f(width(), 0.0f);
+		gl.vertex2f(0.0f, 0.0f);
+		gl.color4fv(&MaxColor.x);
+		gl.vertex2f(width(), height());
+		gl.vertex2f(0.0f, height());
+		gl.end();
 
 
 
 		if (clickable())
 		{
-			glBegin(GL_TRIANGLE_STRIP);
-			glColor4fv(&ClickColor.x);
-			glVertex2f(width(), (height() * value));
-			glVertex2f(0.0f, (height() * value));
-			glVertex2f(width(), (height() * value - 1.5f));
-			glVertex2f(0.0f, (height() * value - 1.5f));
-			glEnd();
+			gl.begin(GL_TRIANGLE_STRIP);
+			gl.color4fv(&ClickColor.x);
+			gl.vertex2f(width(), (height() * value));
+			gl.vertex2f(0.0f, (height() * value));
+			gl.vertex2f(width(), (height() * value - 1.5f));
+			gl.vertex2f(0.0f, (height() * value - 1.5f));
+			gl.end();
 		}
 	}
 
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 void UIGradient::setMaxColor(float r, float g, float b, float a)
