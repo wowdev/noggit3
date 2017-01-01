@@ -98,8 +98,8 @@ void UISlider::render() const
 
 	glPushMatrix();
 
-	OpenGL::Texture::setActiveTexture();
-	OpenGL::Texture::enableTexture();
+	opengl::texture::set_active_texture();
+	opengl::texture::enable_texture();
 
 	texture->bind();
 
@@ -228,7 +228,7 @@ void UISlider::render() const
 	glVertex2f(sliderpos_x + 16.0f, sliderpos_y + 16.0f);
 	glEnd();
 
-	OpenGL::Texture::disableTexture();
+	opengl::texture::disable_texture();
 
 
 	glPopMatrix();

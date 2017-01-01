@@ -5,6 +5,7 @@
 #include <stack>
 
 #include <opengl/types.hpp>
+#include <opengl/texture.hpp>
 
 class Video;
 
@@ -149,35 +150,21 @@ namespace OpenGL
 		InternalRepresentation list;
 	};
 
-	class Texture : public ManagedItem
+	class Texture : public ManagedItem, public opengl::texture
 	{
 	public:
-		typedef GLuint InternalRepresentation;
-
 		Texture();
-		~Texture();
-
-		void invalidate();
 
 		void loadFromBLP(const std::string& filename);
 		void loadFromUncompressedData(BLPHeader* lHeader, char* lData);
 		void loadFromCompressedData(BLPHeader* lHeader, char* lData);
-
-		void bind() const;
-
-		static void enableTexture();
-		static void enableTexture(size_t num);
-		static void disableTexture();
-		static void disableTexture(size_t num);
-		static void setActiveTexture(size_t num = 0);
 
 		const std::string& filename();
 
 	private:
 		int _width;
 		int _height;
-		InternalRepresentation _id;
-		std::string _filename;
+    std::string _filename;
 	};
 
 	typedef GLuint Shader;

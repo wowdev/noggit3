@@ -29,8 +29,8 @@ void UIMenuBar::render() const
 
 	glColor3f(1.0f, 1.0f, 1.0f);
 
-	OpenGL::Texture::setActiveTexture();
-	OpenGL::Texture::enableTexture();
+	opengl::texture::set_active_texture();
+	opengl::texture::enable_texture();
 
 	texture->bind();
 
@@ -46,7 +46,7 @@ void UIMenuBar::render() const
 	glVertex2f(static_cast<float>(video.xres()), 17.0f);
 	glEnd();
 
-	OpenGL::Texture::disableTexture();
+	opengl::texture::disable_texture();
 }
 
 void UIMenuBar::resize()
@@ -171,8 +171,8 @@ void MenuItemToggle::render() const
 	glPushMatrix();
 	glTranslatef(x(), y(), 0.0f);
 
-	OpenGL::Texture::setActiveTexture();
-	OpenGL::Texture::enableTexture();
+	opengl::texture::set_active_texture();
+	opengl::texture::enable_texture();
 
 	if (!clicked)
 		texture->bind();
@@ -190,7 +190,7 @@ void MenuItemToggle::render() const
 	glVertex2f(width(), height());
 	glEnd();
 
-	OpenGL::Texture::disableTexture();
+	opengl::texture::disable_texture();
 
 	text->render();
 	mMyCheckbox->render();

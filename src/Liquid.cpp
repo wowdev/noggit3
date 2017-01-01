@@ -366,8 +366,8 @@ void Liquid::draw()
 	glDepthFunc(GL_LESS);
 	size_t texidx = (size_t)(gWorld->animtime / 60.0f) % textures.size();
 
-	//glActiveTexture(GL_TEXTURE0);
-	//glDisable(GL_TEXTURE_2D);
+	//opengl::texture::set_active_texture (0);
+	//opengl::texture::disable_texture();
 	//glBindTexture(GL_TEXTURE_2D, textures[texidx]);
 
 	const float tcol = mTransparency ? 0.85f : 1.0f;
@@ -404,13 +404,13 @@ void Liquid::draw()
 	glColor4f(col.x, col.y, col.z, tcol);
 	glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0, col2.x, col2.y, col2.z, tcol);
 #endif
-	OpenGL::Texture::setActiveTexture(0);
-	OpenGL::Texture::enableTexture();
+	opengl::texture::set_active_texture (0);
+	opengl::texture::enable_texture();
 
 	textures[texidx]->bind();
 
-	OpenGL::Texture::setActiveTexture(1);
-	OpenGL::Texture::enableTexture();
+	opengl::texture::set_active_texture (1);
+	opengl::texture::enable_texture();
 
 	if (mDrawList)
 	{
@@ -419,9 +419,9 @@ void Liquid::draw()
 		CheckForGLError("Liquid::draw:: after the draw list");
 	}
 
-	OpenGL::Texture::setActiveTexture(1);
-	OpenGL::Texture::disableTexture();
-	OpenGL::Texture::setActiveTexture(0);
+	opengl::texture::set_active_texture (1);
+	opengl::texture::disable_texture();
+	opengl::texture::set_active_texture (0);
 
 	glColor4f(1, 1, 1, 0.4f);
 	if (mTransparency)

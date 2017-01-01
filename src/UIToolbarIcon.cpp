@@ -37,8 +37,8 @@ void UIToolbarIcon::render() const
 
 	glColor3f(1.0f, 1.0f, 1.0f);
 
-	OpenGL::Texture::setActiveTexture();
-	OpenGL::Texture::enableTexture();
+	opengl::texture::set_active_texture();
+	opengl::texture::enable_texture();
 
 	texture->bind();
 
@@ -53,13 +53,13 @@ void UIToolbarIcon::render() const
 	glVertex2f(width(), height());
 	glEnd();
 
-	OpenGL::Texture::disableTexture();
+	opengl::texture::disable_texture();
 
 	if (selected)
 	{
 		static const float sizer = 18.0f;
 
-		OpenGL::Texture::enableTexture();
+		opengl::texture::enable_texture();
 
 		textureSelected->bind();
 
@@ -74,7 +74,7 @@ void UIToolbarIcon::render() const
 		glVertex2f(width() + sizer, height() + sizer);
 		glEnd();
 
-		OpenGL::Texture::disableTexture();
+		opengl::texture::disable_texture();
 	}
 
 	glPopMatrix();

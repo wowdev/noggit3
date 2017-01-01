@@ -120,7 +120,7 @@ void UIMinimapWindow::render() const
 
 	if (gWorld->minimap)
 	{
-		OpenGL::Texture::enableTexture();
+		opengl::texture::enable_texture();
 		glBindTexture(GL_TEXTURE_2D, gWorld->minimap);
 
 		glBegin(GL_QUADS);
@@ -134,7 +134,7 @@ void UIMinimapWindow::render() const
 		glVertex2i((GLint)0.0f, (GLint)(tilesize * 64.0f));
 		glEnd();
 
-		OpenGL::Texture::disableTexture();
+		opengl::texture::disable_texture();
 	}
 
 	// draw the ADTs that are existing in the WDT with

@@ -25,9 +25,9 @@ namespace OpenGL
 		SAVE(GL_FRAGMENT_PROGRAM_ARB, fragmentProgram);
 		SAVE(GL_LIGHTING, lighting);
 		SAVE(GL_LINE_SMOOTH, lineSmooth);
-		Texture::setActiveTexture(0);
+    opengl::texture::set_active_texture (0);
 		SAVE(GL_TEXTURE_2D, texture0);
-		Texture::setActiveTexture(1);
+    opengl::texture::set_active_texture (1);
 		SAVE(GL_TEXTURE_2D, texture1);
 		SAVE(GL_TEXTURE_GEN_S, textureGenS);
 		SAVE(GL_TEXTURE_GEN_T, textureGenT);
@@ -52,9 +52,9 @@ namespace OpenGL
 		LOAD(GL_FRAGMENT_PROGRAM_ARB, fragmentProgram);
 		LOAD(GL_LIGHTING, lighting);
 		LOAD(GL_LINE_SMOOTH, lineSmooth);
-		Texture::setActiveTexture(0);
+    opengl::texture::set_active_texture (0);
 		LOAD(GL_TEXTURE_2D, texture0);
-		Texture::setActiveTexture(1);
+    opengl::texture::set_active_texture (1);
 		LOAD(GL_TEXTURE_2D, texture1);
 		LOAD(GL_TEXTURE_GEN_S, textureGenS);
 		LOAD(GL_TEXTURE_GEN_T, textureGenT);
@@ -303,52 +303,11 @@ namespace OpenGL
 
 	Texture::Texture()
 		: ManagedItem()
+    , opengl::texture()
 		, _width(0)
 		, _height(0)
-		, _id(0)
 		, _filename("")
-	{
-		glGenTextures(1, &_id);
-	}
-
-	Texture::~Texture()
-	{
-		invalidate();
-	}
-
-	void Texture::invalidate()
-	{
-		glDeleteTextures(1, &_id);
-		_id = 0;
-	}
-
-	void Texture::bind() const
-	{
-		glBindTexture(GL_TEXTURE_2D, _id);
-	}
-
-	void Texture::enableTexture()
-	{
-		glEnable(GL_TEXTURE_2D);
-	}
-	void Texture::enableTexture(size_t num)
-	{
-		setActiveTexture(num);
-		enableTexture();
-	}
-	void Texture::disableTexture()
-	{
-		glDisable(GL_TEXTURE_2D);
-	}
-	void Texture::disableTexture(size_t num)
-	{
-		setActiveTexture(num);
-		disableTexture();
-	}
-	void Texture::setActiveTexture(size_t num)
-	{
-		glActiveTexture(GL_TEXTURE0 + num);
-	}
+	{}
 
 	void Texture::loadFromUncompressedData(BLPHeader* lHeader, char* lData)
 	{
@@ -466,8 +425,7 @@ namespace OpenGL
 		MPQFile f(_filename);
 		if (f.isEof())
 		{
-			invalidate();
-			return;
+      throw std::runtime_error ("bad filename");
 		}
 
 		char* lData = f.getPointer();

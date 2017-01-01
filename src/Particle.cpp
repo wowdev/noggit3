@@ -213,7 +213,7 @@ void ParticleSystem::draw()
 {
 	/*
 	// just draw points:
-	glDisable(GL_TEXTURE_2D);
+	opengl::texture::disable_texture();
 	glDisable(GL_LIGHTING);
 	glColor4f(1,1,1,1);
 	glBegin(GL_POINTS);
@@ -222,7 +222,7 @@ void ParticleSystem::draw()
 	}
 	glEnd();
 	glEnable(GL_LIGHTING);
-	glEnable(GL_TEXTURE_2D);
+	opengl::texture::enable_texture();
 	*/
 
 	// setup blend mode
@@ -430,7 +430,7 @@ void ParticleSystem::drawHighlight()
 {
 	/*
 	// just draw points:
-	glDisable(GL_TEXTURE_2D);
+	opengl::texture::disable_texture();
 	glDisable(GL_LIGHTING);
 	glColor4f(1,1,1,1);
 	glBegin(GL_POINTS);
@@ -439,7 +439,7 @@ void ParticleSystem::drawHighlight()
 	}
 	glEnd();
 	glEnable(GL_LIGHTING);
-	glEnable(GL_TEXTURE_2D);
+	opengl::texture::enable_texture();
 	*/
 
 	Vec3D bv0, bv1, bv2, bv3;
@@ -921,7 +921,7 @@ void RibbonEmitter::draw()
 {
 	/*
 	// placeholders
-	glDisable(GL_TEXTURE_2D);
+	opengl::texture::disable_texture();
 	glDisable(GL_LIGHTING);
 	glColor4f(1,1,1,1);
 	glBegin(GL_TRIANGLES);
@@ -929,7 +929,7 @@ void RibbonEmitter::draw()
 	glVertex3fv(tpos + Vec3D(1,1,0));
 	glVertex3fv(tpos + Vec3D(-1,1,0));
 	glEnd();
-	glEnable(GL_TEXTURE_2D);
+	opengl::texture::enable_texture();
 	glEnable(GL_LIGHTING);
 	*/
 

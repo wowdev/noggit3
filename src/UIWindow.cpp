@@ -54,8 +54,8 @@ void UIWindow::render() const
 
 	glColor3f(1.0f, 1.0f, 1.0f);
 
-	OpenGL::Texture::setActiveTexture();
-	OpenGL::Texture::enableTexture();
+	opengl::texture::set_active_texture();
+	opengl::texture::enable_texture();
 
 	texture->bind();
 
@@ -156,7 +156,7 @@ void UIWindow::render() const
 	glVertex2f(width() - 13.0f, -3.0f);
 	glEnd();
 
-	OpenGL::Texture::disableTexture();
+	opengl::texture::disable_texture();
 
 	glPopMatrix();
 }

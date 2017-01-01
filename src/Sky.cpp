@@ -308,7 +308,7 @@ bool Skies::drawSky(const Vec3D &pos)
 	if (ni > 0) {
 		const float sc = 0.1f;
 		glScalef(sc, sc, sc);
-		glEnable(GL_TEXTURE_2D);
+		opengl::texture::enable_texture();
 		stars->trans = ni;
 		stars->draw();
 	}

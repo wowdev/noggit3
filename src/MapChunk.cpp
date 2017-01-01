@@ -223,8 +223,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
           }
         }
       }
-      glGenTextures(1, &shadow);
-      glBindTexture(GL_TEXTURE_2D, shadow);
+      shadow.bind();
       glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -301,8 +300,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     for (size_t j = 0; j < 4096; ++j)
       sbuf[j] = 0;
 
-    glGenTextures(1, &shadow);
-    glBindTexture(GL_TEXTURE_2D, shadow);
+    shadow.bind();
     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -358,16 +356,16 @@ void MapChunk::drawTextures()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    OpenGL::Texture::setActiveTexture(1);
-    OpenGL::Texture::disableTexture();
+    opengl::texture::set_active_texture (1);
+    opengl::texture::disable_texture();
   }
   else
   {
-    OpenGL::Texture::setActiveTexture(0);
-    OpenGL::Texture::disableTexture();
+    opengl::texture::set_active_texture (0);
+    opengl::texture::disable_texture();
 
-    OpenGL::Texture::setActiveTexture(1);
-    OpenGL::Texture::disableTexture();
+    opengl::texture::set_active_texture (1);
+    opengl::texture::disable_texture();
   }
 
   textureSet->start2DAnim(0);
@@ -419,11 +417,11 @@ void MapChunk::drawTextures()
     textureSet->start2DAnim(i);
   }
 
-  OpenGL::Texture::setActiveTexture(0);
-  OpenGL::Texture::disableTexture();
+  opengl::texture::set_active_texture (0);
+  opengl::texture::disable_texture();
 
-  OpenGL::Texture::setActiveTexture(1);
-  OpenGL::Texture::disableTexture();
+  opengl::texture::set_active_texture (1);
+  opengl::texture::disable_texture();
 
   glBindBuffer(GL_ARRAY_BUFFER, minimap);
   glVertexPointer(3, GL_FLOAT, 0, 0);
@@ -487,9 +485,6 @@ MapChunk::~MapChunk()
   */
 
   delete textureSet;
-
-  // shadow maps, too
-  glDeleteTextures(1, &shadow);
 
   // delete VBOs
   glDeleteBuffers(1, &vertices);
@@ -569,7 +564,7 @@ void MapChunk::drawLines()
   glBindBuffer(GL_ARRAY_BUFFER, vertices);
   glVertexPointer(3, GL_FLOAT, 0, 0);
 
-  glDisable(GL_TEXTURE_2D);
+  opengl::texture::disable_texture();
   glDisable(GL_LIGHTING);
   glPushMatrix();
 
@@ -625,8 +620,8 @@ void MapChunk::drawContour()
   if (!DrawMapContour)
     return;
   glColor4f(1, 1, 1, 1);
-  glActiveTexture(GL_TEXTURE0);
-  glEnable(GL_TEXTURE_2D);
+  opengl::texture::set_active_texture (0);
+  opengl::texture::enable_texture();
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDisable(GL_ALPHA_TEST);
@@ -639,7 +634,7 @@ void MapChunk::drawContour()
   glTexGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
 
   drawPass(-1);
-  glDisable(GL_TEXTURE_2D);
+  opengl::texture::disable_texture();
   glDisable(GL_TEXTURE_GEN_S);
 }
 
@@ -682,11 +677,11 @@ void MapChunk::draw()
 
   if (textureSet->num() == 0U)
   {
-    OpenGL::Texture::setActiveTexture(0);
-    OpenGL::Texture::disableTexture();
+    opengl::texture::set_active_texture (0);
+    opengl::texture::disable_texture();
 
-    OpenGL::Texture::setActiveTexture(1);
-    OpenGL::Texture::disableTexture();
+    opengl::texture::set_active_texture (1);
+    opengl::texture::disable_texture();
 
     glColor3f(1.0f, 1.0f, 1.0f);
   }
@@ -694,8 +689,8 @@ void MapChunk::draw()
   {
     textureSet->bindTexture(0, 0);
 
-    OpenGL::Texture::setActiveTexture(1);
-    OpenGL::Texture::disableTexture();
+    opengl::texture::set_active_texture (1);
+    opengl::texture::disable_texture();
   }
 
   glEnable(GL_LIGHTING);
@@ -731,8 +726,8 @@ void MapChunk::draw()
   }
 
   // shadow map
-  glActiveTexture(GL_TEXTURE0);
-  glDisable(GL_TEXTURE_2D);
+  opengl::texture::set_active_texture (0);
+  opengl::texture::disable_texture();
   glDisable(GL_LIGHTING);
 
   Vec3D shc = gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.3f;
@@ -740,13 +735,12 @@ void MapChunk::draw()
 
   //glColor4f(1,1,1,1);
 
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, shadow);
-  glEnable(GL_TEXTURE_2D);
+  opengl::texture::enable_texture (1);
+  shadow.bind();
 
   drawPass(-1);
 
-  glDisable(GL_TEXTURE_2D);
+  opengl::texture::disable_texture();
   glDisable(GL_LIGHTING);
 
   drawContour();
@@ -812,7 +806,7 @@ void MapChunk::draw()
     glLineWidth(1);
     glEnable(GL_POLYGON_OFFSET_LINE);
     glPolygonOffset(-1, -1);
-    glDisable(GL_TEXTURE_2D);
+    opengl::texture::disable_texture();
     glDisable(GL_LIGHTING);
     glColor4f(1, 1, 1, 0.2f);
     drawPass(-1);
@@ -1784,10 +1778,10 @@ bool MapChunk::fixGapAbove(const MapChunk* chunk)
 /*
 void MapChunk::drawNoDetail()
 {
-glActiveTexture( GL_TEXTURE1 );
-glDisable( GL_TEXTURE_2D );
-glActiveTexture(GL_TEXTURE0 );
-glDisable( GL_TEXTURE_2D );
+opengl::texture::set_active_texture (1);
+opengl::texture::disable_texture();
+opengl::texture::set_active_texture (0);
+opengl::texture::disable_texture();
 glDisable( GL_LIGHTING );
 
 //glColor3fv(gWorld->skies->colorSet[FOG_COLOR]);
@@ -1805,10 +1799,10 @@ glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 //glEnable(GL_FOG);
 
 glEnable( GL_LIGHTING );
-glActiveTexture( GL_TEXTURE1 );
-glEnable( GL_TEXTURE_2D );
-glActiveTexture( GL_TEXTURE0 );
-glEnable( GL_TEXTURE_2D );
+opengl::texture::set_active_texture (1);
+opengl::texture::enable_texture();
+opengl::texture::set_active_texture (0);
+opengl::texture::enable_texture();
 }
 */
 
@@ -1829,11 +1823,11 @@ if (gWorld->drawfog) this->drawNoDetail();
 return;
 }
 
-glActiveTexture(GL_TEXTURE1);
-glDisable(GL_TEXTURE_2D);
+opengl::texture::set_active_texture (1);
+opengl::texture::disable_texture();
 
-glActiveTexture(GL_TEXTURE0);
-glDisable(GL_TEXTURE_2D);
+opengl::texture::set_active_texture (0);
+opengl::texture::disable_texture();
 //glDisable(GL_LIGHTING);
 
 Vec3D Color;

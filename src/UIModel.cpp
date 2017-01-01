@@ -15,7 +15,7 @@ UIModel::UIModel(float xPos, float yPos, float w, float h)
 	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, (GLsizei)width(), (GLsizei)height());
 
-	OpenGL::Texture::enableTexture(0);
+	opengl::texture::enable_texture (0);
 	glBindTexture(GL_TEXTURE_2D, modelTexture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -56,7 +56,7 @@ void UIModel::drawFBO() const
 	glTranslatef(0.0f, 0.0f, -50.0f);
 	glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
 
-	OpenGL::Texture::enableTexture(0);
+	opengl::texture::enable_texture (0);
 	glEnable(GL_NORMALIZE);
 
 	model.get()->draw();
@@ -76,7 +76,7 @@ void UIModel::drawTexture() const
 	glPushMatrix();
 	glTranslatef(x(), y(), 0.0f);
 
-	OpenGL::Texture::enableTexture(0);
+	opengl::texture::enable_texture (0);
 	glBindTexture(GL_TEXTURE_2D, modelTexture);
 
 	glBegin(GL_QUADS);
@@ -92,7 +92,7 @@ void UIModel::drawTexture() const
 
 	CheckForGLError("UIModel::draw:: after quads");
 
-	OpenGL::Texture::disableTexture(0);
+	opengl::texture::disable_texture (0);
 	glPopMatrix();
 }
 

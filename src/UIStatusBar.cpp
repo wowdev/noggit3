@@ -33,8 +33,8 @@ void UIStatusBar::render() const
 
 	glColor3f(0.7f, 0.7f, 0.7f);
 
-	OpenGL::Texture::setActiveTexture();
-	OpenGL::Texture::enableTexture();
+	opengl::texture::set_active_texture();
+	opengl::texture::enable_texture();
 
 	texture->bind();
 
@@ -50,7 +50,7 @@ void UIStatusBar::render() const
 	glVertex2f(width(), -3.0f);
 	glEnd();
 
-	OpenGL::Texture::disableTexture();
+	opengl::texture::disable_texture();
 
 	glPopMatrix();
 }
