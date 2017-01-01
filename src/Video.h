@@ -4,11 +4,9 @@
 #include <string>
 #include <stack>
 
-class Video;
+#include <opengl/types.hpp>
 
-#define GL_GLEXT_PROTOTYPES 1
-#include <GL/glew.h>
-//#include <SDL/SDL.h>
+class Video;
 
 struct SDL_Surface;
 
