@@ -239,14 +239,14 @@ const std::string& TextureSet::filename(size_t id)
 
 void TextureSet::bindAlphamap(size_t id, size_t activeTexture)
 {
-	OpenGL::Texture::enableTexture(activeTexture);
+	opengl::texture::enable_texture (activeTexture);
 
 	alphamaps[id]->bind();
 }
 
 void TextureSet::bindTexture(size_t id, size_t activeTexture)
 {
-	OpenGL::Texture::enableTexture(activeTexture);
+	opengl::texture::enable_texture (activeTexture);
 
 	textures[id]->bind();
 }
@@ -258,7 +258,7 @@ void TextureSet::start2DAnim(int id)
 
 	if (animated[id])
 	{
-		OpenGL::Texture::setActiveTexture(0);
+		opengl::texture::set_active_texture (0);
 		glMatrixMode(GL_TEXTURE);
 		glPushMatrix();
 
@@ -283,7 +283,7 @@ void TextureSet::stop2DAnim(int id)
 	{
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
-		OpenGL::Texture::setActiveTexture(1);
+		opengl::texture::set_active_texture (1);
 	}
 }
 
@@ -295,7 +295,7 @@ void TextureSet::startAnim(int id)
 
 	if (animated[id])
 	{
-		OpenGL::Texture::setActiveTexture(0);
+		opengl::texture::set_active_texture (0);
 		glMatrixMode(GL_TEXTURE);
 		glPushMatrix();
 
@@ -320,7 +320,7 @@ void TextureSet::stopAnim(int id)
 	{
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
-		OpenGL::Texture::setActiveTexture(1);
+		opengl::texture::set_active_texture (1);
 	}
 }
 

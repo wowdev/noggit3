@@ -812,7 +812,7 @@ void World::draw()
 
   glEnable(GL_CULL_FACE);
   glDisable(GL_BLEND);
-  glDisable(GL_TEXTURE_2D);
+  opengl::texture::disable_texture();
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_FOG);
 
@@ -829,7 +829,7 @@ void World::draw()
   if (!hadSky)   clearmask |= GL_COLOR_BUFFER_BIT;
   glClear(clearmask);
 
-  glDisable(GL_TEXTURE_2D);
+  opengl::texture::disable_texture();
 
   outdoorLighting();
   outdoorLights(true);
@@ -1015,10 +1015,10 @@ void World::draw()
   if (drawlines || (terrainMode == 2 && Environment::getInstance()->highlightPaintableChunks))
   {
     glDisable(GL_COLOR_MATERIAL);
-    glActiveTexture(GL_TEXTURE0);
-    glDisable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE1);
-    glDisable(GL_TEXTURE_2D);
+    opengl::texture::set_active_texture (0);
+    opengl::texture::disable_texture();
+    opengl::texture::set_active_texture (1);
+    opengl::texture::disable_texture();
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -1036,10 +1036,10 @@ void World::draw()
     }
   }
 
-  glActiveTexture(GL_TEXTURE1);
-  glDisable(GL_TEXTURE_2D);
-  glActiveTexture(GL_TEXTURE0);
-  glEnable(GL_TEXTURE_2D);
+  opengl::texture::set_active_texture (1);
+  opengl::texture::disable_texture();
+  opengl::texture::set_active_texture (0);
+  opengl::texture::enable_texture();
 
   glColor4f(1, 1, 1, 1);
   glEnable(GL_BLEND);
@@ -1148,7 +1148,7 @@ void World::draw()
   /*
   // temp frustum code
   glDisable(GL_LIGHTING);
-  glDisable(GL_TEXTURE_2D);
+  opengl::texture::disable_texture();
   glDisable(GL_CULL_FACE);
   glEnable(GL_BLEND);
   glBegin(GL_TRIANGLES);

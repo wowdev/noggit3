@@ -85,20 +85,20 @@ void WMOInstance::draw()
 		glDisable(GL_LIGHTING);
 
 		glDisable(GL_COLOR_MATERIAL);
-		glActiveTexture(GL_TEXTURE0);
-		glDisable(GL_TEXTURE_2D);
-		glActiveTexture(GL_TEXTURE1);
-		glDisable(GL_TEXTURE_2D);
+		opengl::texture::set_active_texture (0);
+		opengl::texture::disable_texture();
+		opengl::texture::set_active_texture (1);
+		opengl::texture::disable_texture();
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     Vec4D color = wmo->hidden ? Vec4D(0.0f, 0.0f, 1.0f, 1.0f) : Vec4D(0.0f, 1.0f, 0.0f, 1.0f);
 		DrawABox(extents[0], extents[1], color, 1.0f);
 
-		glActiveTexture(GL_TEXTURE1);
-		glDisable(GL_TEXTURE_2D);
-		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
+		opengl::texture::set_active_texture (1);
+		opengl::texture::disable_texture();
+		opengl::texture::set_active_texture (0);
+		opengl::texture::enable_texture();
 
 		glEnable(GL_LIGHTING);
 	}

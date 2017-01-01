@@ -47,7 +47,7 @@ void UIAlphamap::render() const
 		}
 	}
 
-	OpenGL::Texture::disableTexture(0);
+	opengl::texture::disable_texture (0);
 }
 
 void UIAlphamap::drawQuad(size_t i, size_t j) const

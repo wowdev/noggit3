@@ -77,8 +77,8 @@ void UITextBox::render() const
 
 	glColor3f(1.0f, 1.0f, 1.0f);
 
-	OpenGL::Texture::setActiveTexture();
-	OpenGL::Texture::enableTexture();
+	opengl::texture::set_active_texture();
+	opengl::texture::enable_texture();
 
 	if (_focus)
 		_textureFocused->bind();
@@ -96,7 +96,7 @@ void UITextBox::render() const
 	glVertex2f(width(), height());
 	glEnd();
 
-	OpenGL::Texture::disableTexture();
+	opengl::texture::disable_texture();
 
 	_uiText->render();
 

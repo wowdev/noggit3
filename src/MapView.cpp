@@ -1939,20 +1939,20 @@ void MapView::displayGUIIfEnabled()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		OpenGL::Texture::disableTexture(1);
-		OpenGL::Texture::enableTexture(0);
+		opengl::texture::disable_texture (1);
+		opengl::texture::enable_texture (0);
 
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_LIGHTING);
 		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-		OpenGL::Texture::disableTexture(0);
+		opengl::texture::disable_texture (0);
 
 		mainGui->setTilemode(mViewMode != eViewMode_3D);
 		mainGui->render();
 
-		OpenGL::Texture::enableTexture(0);
+		opengl::texture::enable_texture (0);
 	}
 }
 
@@ -1970,10 +1970,10 @@ void MapView::displayViewMode_2D(float /*t*/, float /*dt*/)
 	glTranslatef(-gWorld->camera.x / CHUNKSIZE, -gWorld->camera.z / CHUNKSIZE, 0);
 
 	glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-	glActiveTexture(GL_TEXTURE1);
-	glDisable(GL_TEXTURE_2D);
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	opengl::texture::set_active_texture (1);
+	opengl::texture::disable_texture();
+	opengl::texture::set_active_texture (0);
+	opengl::texture::enable_texture();
 
 	textureBrush.getTexture()->bind();
 

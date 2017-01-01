@@ -177,12 +177,12 @@ void Menu::display(float /*t*/, float /*dt*/)
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_LIGHTING);
-	glEnable(GL_TEXTURE_2D);
+	opengl::texture::enable_texture();
 
 	mBackgroundModel.get()->cam.setup(globalTime);
 	mBackgroundModel.get()->draw();
 
-	glDisable(GL_TEXTURE_2D);
+	opengl::texture::disable_texture();
 	glDisable(GL_LIGHTING);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);

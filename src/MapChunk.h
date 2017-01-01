@@ -6,6 +6,8 @@
 #include "WMOInstance.h"
 #include "ModelInstance.h"
 
+#include <opengl/texture.hpp>
+
 class MPQFile;
 class Vec4D;
 class Brush;
@@ -31,7 +33,7 @@ private:
 	unsigned int areaID;
 
 	unsigned char mShadowMap[8 * 64];
-	GLuint shadow;
+  opengl::texture shadow;
 
 	StripType *strip;
 	int striplen;

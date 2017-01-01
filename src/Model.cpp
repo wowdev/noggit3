@@ -821,8 +821,8 @@ void ModelRenderPass::deinit()
 		glDisable(GL_TEXTURE_GEN_T);
 	}
 	if (usetex2) {
-		glDisable(GL_TEXTURE_2D);
-		glActiveTextureARB(GL_TEXTURE0);
+		opengl::texture::disable_texture();
+		opengl::texture::set_active_texture (0);
 	}
 	//glColor4f(1,1,1,1); //???
 }
@@ -833,10 +833,10 @@ void ModelHighlight(Vec4D color)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_CULL_FACE);
-	glActiveTexture(GL_TEXTURE0);
-	glDisable(GL_TEXTURE_2D);
-	glActiveTexture(GL_TEXTURE1);
-	glDisable(GL_TEXTURE_2D);
+	opengl::texture::set_active_texture (0);
+	opengl::texture::disable_texture();
+	opengl::texture::set_active_texture (1);
+	opengl::texture::disable_texture();
 	glColor4fv(color);
 	glMaterialfv(GL_FRONT, GL_EMISSION, color);
 	//  glDepthMask( GL_FALSE );
@@ -847,8 +847,8 @@ void ModelUnhighlight()
 	glEnable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+	opengl::texture::set_active_texture (0);
+	opengl::texture::enable_texture();
 	glColor4fv(Vec4D(1, 1, 1, 1));
 	//  glDepthMask( GL_TRUE );
 }

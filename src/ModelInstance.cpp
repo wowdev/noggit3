@@ -110,17 +110,17 @@ void ModelInstance::draw()
 	{
 		glDisable(GL_LIGHTING);
 		glDisable(GL_COLOR_MATERIAL);
-		glActiveTexture(GL_TEXTURE0);
-		glDisable(GL_TEXTURE_2D);
-		glActiveTexture(GL_TEXTURE1);
-		glDisable(GL_TEXTURE_2D);
+		opengl::texture::set_active_texture (0);
+		opengl::texture::disable_texture();
+		opengl::texture::set_active_texture (1);
+		opengl::texture::disable_texture();
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		DrawABox(TransformCoordsForModel(model->header.VertexBoxMin), TransformCoordsForModel(model->header.VertexBoxMax), Vec4D(0.5f, 0.5f, 0.5f, 1.0f), 3.0f);
-		glActiveTexture(GL_TEXTURE1);
-		glDisable(GL_TEXTURE_2D);
-		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
+		opengl::texture::set_active_texture (1);
+		opengl::texture::disable_texture();
+		opengl::texture::set_active_texture (0);
+		opengl::texture::enable_texture();
 		glEnable(GL_LIGHTING);
 	}
 		model->draw();
@@ -136,10 +136,10 @@ void ModelInstance::draw()
 		glDisable(GL_LIGHTING);
 
 		glDisable(GL_COLOR_MATERIAL);
-		glActiveTexture(GL_TEXTURE0);
-		glDisable(GL_TEXTURE_2D);
-		glActiveTexture(GL_TEXTURE1);
-		glDisable(GL_TEXTURE_2D);
+		opengl::texture::set_active_texture (0);
+		opengl::texture::disable_texture();
+		opengl::texture::set_active_texture (1);
+		opengl::texture::disable_texture();
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -170,10 +170,10 @@ void ModelInstance::draw()
       glEnd();
     }
 
-		glActiveTexture(GL_TEXTURE1);
-		glDisable(GL_TEXTURE_2D);
-		glActiveTexture(GL_TEXTURE0);
-		glEnable(GL_TEXTURE_2D);
+		opengl::texture::set_active_texture (1);
+		opengl::texture::disable_texture();
+		opengl::texture::set_active_texture (0);
+		opengl::texture::enable_texture();
 
 		glEnable(GL_LIGHTING);
 

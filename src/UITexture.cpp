@@ -54,8 +54,8 @@ void UITexture::render() const
 
 	glColor3f(1.0f, 1.0f, 1.0f);
 
-	OpenGL::Texture::setActiveTexture();
-	OpenGL::Texture::enableTexture();
+	opengl::texture::set_active_texture();
+	opengl::texture::enable_texture();
 
 	texture->bind();
 
@@ -70,7 +70,7 @@ void UITexture::render() const
 	glVertex2f(width(), height());
 	glEnd();
 
-	OpenGL::Texture::disableTexture();
+	opengl::texture::disable_texture();
 
 	if (highlight)
 	{
