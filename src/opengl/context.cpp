@@ -60,7 +60,7 @@ namespace opengl
         if (!errors.empty())
         {
           errors += _extra_info();
-#ifndef NOGGIT_DO_NOT_THROW_ON_OPENGL_ERRORS
+#ifndef NOGGIT_THROW_ON_OPENGL_ERRORS
           LogError << _function + ":" + errors << "\n";
 #else
           throw std::runtime_error (_function + ":" + errors);
