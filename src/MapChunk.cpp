@@ -54,18 +54,18 @@ void GenerateContourMap()
   CTexture[7 + CONTOUR_WIDTH / 2] = 0xff;
   CTexture[11 + CONTOUR_WIDTH / 2] = 0xff;
 
-  glGenTextures(1, &Contour);
-  glBindTexture(GL_TEXTURE_2D, Contour);
+  gl.genTextures(1, &Contour);
+  gl.bindTexture(GL_TEXTURE_2D, Contour);
 
   gluBuild2DMipmaps(GL_TEXTURE_2D, 4, CONTOUR_WIDTH, 1, GL_RGBA, GL_UNSIGNED_BYTE, CTexture);
 
-  glEnable(GL_TEXTURE_GEN_S);
-  glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-  glTexGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
+  gl.enable(GL_TEXTURE_GEN_S);
+  gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+  gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 }
 
 void CreateStrips()
@@ -224,11 +224,11 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
         }
       }
       shadow.bind();
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
+      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     }
     else if (fourcc == 'MCAL')
@@ -253,18 +253,18 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   }
 
   // create vertex buffers
-  glGenBuffers(1, &vertices);
-  glGenBuffers(1, &normals);
-  glGenBuffers(1, &mccvEntry);
+  gl.genBuffers(1, &vertices);
+  gl.genBuffers(1, &normals);
+  gl.genBuffers(1, &mccvEntry);
 
-  glBindBuffer(GL_ARRAY_BUFFER, vertices);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
+  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ARRAY_BUFFER, normals);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+  gl.bindBuffer(GL_ARRAY_BUFFER, normals);
+  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
+  gl.bindBuffer(GL_ARRAY_BUFFER, mccvEntry);
+  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
 
   initStrip();
 
@@ -301,11 +301,11 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       sbuf[j] = 0;
 
     shadow.bind();
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   }
 
   float ShadowAmount;
@@ -325,14 +325,14 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     mFakeShadows[j].w = ShadowAmount;
   }
 
-  glGenBuffers(1, &minimap);
-  glGenBuffers(1, &minishadows);
+  gl.genBuffers(1, &minimap);
+  gl.genBuffers(1, &minishadows);
 
-  glBindBuffer(GL_ARRAY_BUFFER, minimap);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mMinimap), mMinimap, GL_STATIC_DRAW);
+  gl.bindBuffer(GL_ARRAY_BUFFER, minimap);
+  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mMinimap), mMinimap, GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ARRAY_BUFFER, minishadows);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
+  gl.bindBuffer(GL_ARRAY_BUFFER, minishadows);
+  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 }
 
 void MapChunk::ClearShader()
@@ -342,19 +342,19 @@ void MapChunk::ClearShader()
     mccv[i] = Vec3D(1.0f, 1.0f, 1.0f);
   }
 
-  glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
+  gl.bindBuffer(GL_ARRAY_BUFFER, mccvEntry);
+  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
 }
 
 void MapChunk::drawTextures()
 {
-  glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 
   if (textureSet->num() > 0U)
   {
     textureSet->bindTexture(0, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     opengl::texture::set_active_texture (1);
     opengl::texture::disable_texture();
@@ -369,50 +369,50 @@ void MapChunk::drawTextures()
   }
 
   textureSet->start2DAnim(0);
-  glBegin(GL_TRIANGLE_STRIP);
-  glTexCoord2f(0.0f, texDetail);
-  glVertex3f(static_cast<float>(px), py + 1.0f, -2.0f);
-  glTexCoord2f(0.0f, 0.0f);
-  glVertex3f(static_cast<float>(px), static_cast<float>(py), -2.0f);
-  glTexCoord2f(texDetail, texDetail);
-  glVertex3f(px + 1.0f, py + 1.0f, -2.0f);
-  glTexCoord2f(texDetail, 0.0f);
-  glVertex3f(px + 1.0f, static_cast<float>(py), -2.0f);
-  glEnd();
+  gl.begin(GL_TRIANGLE_STRIP);
+  gl.texCoord2f(0.0f, texDetail);
+  gl.vertex3f(static_cast<float>(px), py + 1.0f, -2.0f);
+  gl.texCoord2f(0.0f, 0.0f);
+  gl.vertex3f(static_cast<float>(px), static_cast<float>(py), -2.0f);
+  gl.texCoord2f(texDetail, texDetail);
+  gl.vertex3f(px + 1.0f, py + 1.0f, -2.0f);
+  gl.texCoord2f(texDetail, 0.0f);
+  gl.vertex3f(px + 1.0f, static_cast<float>(py), -2.0f);
+  gl.end();
   textureSet->stop2DAnim(0);
 
   if (textureSet->num() > 1U)
   {
-    //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
-    //glDepthMask(GL_FALSE);
+    //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
+    //gl.depthMask(GL_FALSE);
   }
 
   for (size_t i = 1; i < textureSet->num(); ++i)
   {
     textureSet->bindTexture(i, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     textureSet->bindAlphamap(i - 1, 1);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     textureSet->start2DAnim(i);
 
-    glBegin(GL_TRIANGLE_STRIP);
-    glMultiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
-    glMultiTexCoord2f(GL_TEXTURE1, TEX_RANGE, 0.0f);
-    glVertex3f(px + 1.0f, static_cast<float>(py), -2.0f);
-    glMultiTexCoord2f(GL_TEXTURE0, 0.0f, 0.0f);
-    glMultiTexCoord2f(GL_TEXTURE1, 0.0f, 0.0f);
-    glVertex3f(static_cast<float>(px), static_cast<float>(py), -2.0f);
-    glMultiTexCoord2f(GL_TEXTURE0, texDetail, texDetail);
-    glMultiTexCoord2f(GL_TEXTURE1, TEX_RANGE, TEX_RANGE);
-    glVertex3f(px + 1.0f, py + 1.0f, -2.0f);
-    glMultiTexCoord2f(GL_TEXTURE0, 0.0f, texDetail);
-    glMultiTexCoord2f(GL_TEXTURE1, 0.0f, TEX_RANGE);
-    glVertex3f(static_cast<float>(px), py + 1.0f, -2.0f);
-    glEnd();
+    gl.begin(GL_TRIANGLE_STRIP);
+    gl.multiTexCoord2f(GL_TEXTURE0, texDetail, 0.0f);
+    gl.multiTexCoord2f(GL_TEXTURE1, TEX_RANGE, 0.0f);
+    gl.vertex3f(px + 1.0f, static_cast<float>(py), -2.0f);
+    gl.multiTexCoord2f(GL_TEXTURE0, 0.0f, 0.0f);
+    gl.multiTexCoord2f(GL_TEXTURE1, 0.0f, 0.0f);
+    gl.vertex3f(static_cast<float>(px), static_cast<float>(py), -2.0f);
+    gl.multiTexCoord2f(GL_TEXTURE0, texDetail, texDetail);
+    gl.multiTexCoord2f(GL_TEXTURE1, TEX_RANGE, TEX_RANGE);
+    gl.vertex3f(px + 1.0f, py + 1.0f, -2.0f);
+    gl.multiTexCoord2f(GL_TEXTURE0, 0.0f, texDetail);
+    gl.multiTexCoord2f(GL_TEXTURE1, 0.0f, TEX_RANGE);
+    gl.vertex3f(static_cast<float>(px), py + 1.0f, -2.0f);
+    gl.end();
 
     textureSet->start2DAnim(i);
   }
@@ -423,13 +423,13 @@ void MapChunk::drawTextures()
   opengl::texture::set_active_texture (1);
   opengl::texture::disable_texture();
 
-  glBindBuffer(GL_ARRAY_BUFFER, minimap);
-  glVertexPointer(3, GL_FLOAT, 0, 0);
+  gl.bindBuffer(GL_ARRAY_BUFFER, minimap);
+  gl.vertexPointer(3, GL_FLOAT, 0, 0);
 
-  glBindBuffer(GL_ARRAY_BUFFER, minishadows);
-  glColorPointer(4, GL_FLOAT, 0, 0);
+  gl.bindBuffer(GL_ARRAY_BUFFER, minishadows);
+  gl.colorPointer(4, GL_FLOAT, 0, 0);
 
-  glDrawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, gWorld->mapstrip2);
+  gl.drawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, gWorld->mapstrip2);
 }
 
 int MapChunk::indexLoD(int x, int y)
@@ -487,9 +487,9 @@ MapChunk::~MapChunk()
   delete textureSet;
 
   // delete VBOs
-  glDeleteBuffers(1, &vertices);
-  glDeleteBuffers(1, &normals);
-  glDeleteBuffers(1, &mccvEntry);
+  gl.deleteBuffers(1, &vertices);
+  gl.deleteBuffers(1, &normals);
+  gl.deleteBuffers(1, &mccvEntry);
 
   if (strip)
   {
@@ -544,7 +544,7 @@ float MapChunk::getMinHeight()
 void MapChunk::drawPass(int id)
 {
   textureSet->startAnim(id);
-  glDrawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
+  gl.drawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
   textureSet->stopAnim(id);
 }
 
@@ -561,81 +561,81 @@ void MapChunk::drawLines()
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
 
-  glBindBuffer(GL_ARRAY_BUFFER, vertices);
-  glVertexPointer(3, GL_FLOAT, 0, 0);
+  gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
+  gl.vertexPointer(3, GL_FLOAT, 0, 0);
 
   opengl::texture::disable_texture();
-  glDisable(GL_LIGHTING);
-  glPushMatrix();
+  gl.disable(GL_LIGHTING);
+  gl.pushMatrix();
 
-  glEnable(GL_LINE_SMOOTH);
-  glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+  gl.enable(GL_LINE_SMOOTH);
+  gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-  glTranslatef(0.0f, 0.05f, 0.0f);
-  glLineWidth(1.5);
-  glColor4f(1.0, 0.0, 0.0f, 0.5f);
+  gl.translatef(0.0f, 0.05f, 0.0f);
+  gl.lineWidth(1.5);
+  gl.color4f(1.0, 0.0, 0.0f, 0.5f);
 
   if ((px != 15) && (py != 0))
   {
-    glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
+    gl.drawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
   }
   else if ((px == 15) && (py == 0))
   {
-    glColor4f(0.0, 1.0, 0.0f, 0.5f);
-    glDrawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
+    gl.color4f(0.0, 1.0, 0.0f, 0.5f);
+    gl.drawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
   }
   else if (px == 15)
   {
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
-    glColor4f(0.0, 1.0, 0.0f, 0.5f);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
+    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
+    gl.color4f(0.0, 1.0, 0.0f, 0.5f);
+    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
   }
   else if (py == 0)
   {
-    glColor4f(0.0, 1.0, 0.0f, 0.5f);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
-    glColor4f(1.0, 0.0, 0.0f, 0.5f);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
+    gl.color4f(0.0, 1.0, 0.0f, 0.5f);
+    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
+    gl.color4f(1.0, 0.0, 0.0f, 0.5f);
+    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
   }
 
   if (Environment::getInstance()->view_holelines)
   {
     // Draw hole lines if view_subchunk_lines is true
-    glColor4f(0.0, 0.0, 1.0f, 0.5f);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, HoleStrip);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[9]);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[18]);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[27]);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[36]);
-    glDrawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);
+    gl.color4f(0.0, 0.0, 1.0f, 0.5f);
+    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, HoleStrip);
+    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[9]);
+    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[18]);
+    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[27]);
+    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[36]);
+    gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);
   }
 
-  glPopMatrix();
-  glEnable(GL_LIGHTING);
-  glColor4f(1, 1, 1, 1);
+  gl.popMatrix();
+  gl.enable(GL_LIGHTING);
+  gl.color4f(1, 1, 1, 1);
 }
 
 void MapChunk::drawContour()
 {
   if (!DrawMapContour)
     return;
-  glColor4f(1, 1, 1, 1);
+  gl.color4f(1, 1, 1, 1);
   opengl::texture::set_active_texture (0);
   opengl::texture::enable_texture();
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glDisable(GL_ALPHA_TEST);
+  gl.enable(GL_BLEND);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.disable(GL_ALPHA_TEST);
   if (Contour == 0)
     GenerateContourMap();
-  glBindTexture(GL_TEXTURE_2D, Contour);
+  gl.bindTexture(GL_TEXTURE_2D, Contour);
 
-  glEnable(GL_TEXTURE_GEN_S);
-  glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-  glTexGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
+  gl.enable(GL_TEXTURE_GEN_S);
+  gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+  gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
 
   drawPass(-1);
   opengl::texture::disable_texture();
-  glDisable(GL_TEXTURE_GEN_S);
+  gl.disable(GL_TEXTURE_GEN_S);
 }
 
 void MapChunk::draw()
@@ -649,26 +649,26 @@ void MapChunk::draw()
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
 
-  bool cantPaint = !canPaintTexture(UITexturingGUI::getSelectedTexture()) 
+  bool cantPaint = !canPaintTexture(UITexturingGUI::getSelectedTexture())
                  && Environment::getInstance()->highlightPaintableChunks
                  && terrainMode == 2;
 
   if (cantPaint)
   {
-    glColor4f(1, 0, 0, 1);
+    gl.color4f(1, 0, 0, 1);
   }
 
-  // setup vertex buffers  
-  glBindBuffer(GL_ARRAY_BUFFER, vertices);
-  glVertexPointer(3, GL_FLOAT, 0, 0);
-  glBindBuffer(GL_ARRAY_BUFFER, normals);
-  glNormalPointer(GL_FLOAT, 0, 0);
+  // setup vertex buffers
+  gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
+  gl.vertexPointer(3, GL_FLOAT, 0, 0);
+  gl.bindBuffer(GL_ARRAY_BUFFER, normals);
+  gl.normalPointer(GL_FLOAT, 0, 0);
 
   if (hasMCCV)
   {
-    glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-    glColorPointer(3, GL_FLOAT, 0, 0);
-    glEnableClientState(GL_COLOR_ARRAY);
+    gl.bindBuffer(GL_ARRAY_BUFFER, mccvEntry);
+    gl.colorPointer(3, GL_FLOAT, 0, 0);
+    gl.enableClientState(GL_COLOR_ARRAY);
   }
 
   // ASSUME: texture coordinates set up already
@@ -683,7 +683,7 @@ void MapChunk::draw()
     opengl::texture::set_active_texture (1);
     opengl::texture::disable_texture();
 
-    glColor3f(1.0f, 1.0f, 1.0f);
+    gl.color3f(1.0f, 1.0f, 1.0f);
   }
   else
   {
@@ -693,12 +693,12 @@ void MapChunk::draw()
     opengl::texture::disable_texture();
   }
 
-  glEnable(GL_LIGHTING);
+  gl.enable(GL_LIGHTING);
   drawPass(-1);
 
   if (textureSet->num() > 1U) {
-    //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
-    glDepthMask(GL_FALSE);
+    //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
+    gl.depthMask(GL_FALSE);
   }
 
   // additional passes: if required
@@ -713,27 +713,27 @@ void MapChunk::draw()
 
   if (textureSet->num() > 1U)
   {
-    //glDepthFunc(GL_LEQUAL);
-    glDepthMask(GL_TRUE);
+    //gl.depthFunc(GL_LEQUAL);
+    gl.depthMask(GL_TRUE);
   }
 
   if (hasMCCV)
-    glDisableClientState(GL_COLOR_ARRAY);
+    gl.disableClientState(GL_COLOR_ARRAY);
 
   if (cantPaint)
   {
-    glColor4f(1, 1, 1, 1);
+    gl.color4f(1, 1, 1, 1);
   }
 
   // shadow map
   opengl::texture::set_active_texture (0);
   opengl::texture::disable_texture();
-  glDisable(GL_LIGHTING);
+  gl.disable(GL_LIGHTING);
 
   Vec3D shc = gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.3f;
-  glColor4f(shc.x, shc.y, shc.z, 1);
+  gl.color4f(shc.x, shc.y, shc.z, 1);
 
-  //glColor4f(1,1,1,1);
+  //gl.color4f(1,1,1,1);
 
   opengl::texture::enable_texture (1);
   shadow.bind();
@@ -741,7 +741,7 @@ void MapChunk::draw()
   drawPass(-1);
 
   opengl::texture::disable_texture();
-  glDisable(GL_LIGHTING);
+  gl.disable(GL_LIGHTING);
 
   drawContour();
 
@@ -750,7 +750,7 @@ void MapChunk::draw()
     // draw chunk white if impassible flag is set
     if (Flags & FLAG_IMPASS)
     {
-      glColor4f(1, 1, 1, 0.6f);
+      gl.color4f(1, 1, 1, 0.6f);
       drawPass(-1);
     }
   }
@@ -758,7 +758,7 @@ void MapChunk::draw()
   {
     if (water)
     {
-      glColor4f(0.2f, 0.2f, 0.8f, 0.6f);
+      gl.color4f(0.2f, 0.2f, 0.8f, 0.6f);
       drawPass(-1);
     }
   }
@@ -769,7 +769,7 @@ void MapChunk::draw()
     if (Environment::getInstance()->areaIDColors.find(areaID) != Environment::getInstance()->areaIDColors.end())
     {
       Vec3D colorValues = Environment::getInstance()->areaIDColors.find(areaID)->second;
-      glColor4f(colorValues.x, colorValues.y, colorValues.z, 0.7f);
+      gl.color4f(colorValues.x, colorValues.y, colorValues.z, 0.7f);
       drawPass(-1);
     }
   }
@@ -780,51 +780,51 @@ void MapChunk::draw()
     {
       int poly = gWorld->GetCurrentSelectedTriangle();
 
-      glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
+      gl.color4f(1.0f, 1.0f, 0.0f, 1.0f);
 
-      glPushMatrix();
+      gl.pushMatrix();
 
-      glDisable(GL_CULL_FACE);
-      glDepthMask(false);
-      glDisable(GL_DEPTH_TEST);
-      glBegin(GL_TRIANGLES);
-      glVertex3fv(mVertices[gWorld->mapstrip2[poly + 0]]);
-      glVertex3fv(mVertices[gWorld->mapstrip2[poly + 1]]);
-      glVertex3fv(mVertices[gWorld->mapstrip2[poly + 2]]);
-      glEnd();
-      glEnable(GL_CULL_FACE);
-      glEnable(GL_DEPTH_TEST);
-      glDepthMask(true);
+      gl.disable(GL_CULL_FACE);
+      gl.depthMask(false);
+      gl.disable(GL_DEPTH_TEST);
+      gl.begin(GL_TRIANGLES);
+      gl.vertex3fv(mVertices[gWorld->mapstrip2[poly + 0]]);
+      gl.vertex3fv(mVertices[gWorld->mapstrip2[poly + 1]]);
+      gl.vertex3fv(mVertices[gWorld->mapstrip2[poly + 2]]);
+      gl.end();
+      gl.enable(GL_CULL_FACE);
+      gl.enable(GL_DEPTH_TEST);
+      gl.depthMask(true);
 
-      glPopMatrix();
+      gl.popMatrix();
     }
   }
 
   if (gWorld->drawwireframe)
   {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glLineWidth(1);
-    glEnable(GL_POLYGON_OFFSET_LINE);
-    glPolygonOffset(-1, -1);
+    gl.polygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    gl.lineWidth(1);
+    gl.enable(GL_POLYGON_OFFSET_LINE);
+    gl.polygonOffset(-1, -1);
     opengl::texture::disable_texture();
-    glDisable(GL_LIGHTING);
-    glColor4f(1, 1, 1, 0.2f);
+    gl.disable(GL_LIGHTING);
+    gl.color4f(1, 1, 1, 0.2f);
     drawPass(-1);
-    glDisable(GL_POLYGON_OFFSET_LINE);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-    glPointSize(2);
-    glEnable(GL_POLYGON_OFFSET_POINT);
-    glPolygonOffset(-1, -1);
-    glColor4f(1, 1, 1, 0.5f);
+    gl.disable(GL_POLYGON_OFFSET_LINE);
+    gl.polygonMode(GL_FRONT_AND_BACK, GL_POINT);
+    gl.pointSize(2);
+    gl.enable(GL_POLYGON_OFFSET_POINT);
+    gl.polygonOffset(-1, -1);
+    gl.color4f(1, 1, 1, 0.5f);
     drawPass(-1);
-    glDisable(GL_POLYGON_OFFSET_POINT);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    gl.disable(GL_POLYGON_OFFSET_POINT);
+    gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
 
-  glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-  glEnable(GL_LIGHTING);
-  glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+  gl.enable(GL_LIGHTING);
+  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void MapChunk::SetWater(bool w)
@@ -851,22 +851,22 @@ void MapChunk::drawSelect()
     nameID = SelectionNames.add(this);
 
   //! \todo Use backface culling again? Maybe this adds problems. Idk.
-  //glDisable( GL_CULL_FACE );
-  glPushName(nameID);
+  //gl.disable( GL_CULL_FACE );
+  gl.pushName(nameID);
 
   for (int i = 0; i < stripsize2 - 2; ++i)
   {
-    glPushName(i);
-    glBegin(GL_TRIANGLES);
-    glVertex3fv(mVertices[gWorld->mapstrip2[i]]);
-    glVertex3fv(mVertices[gWorld->mapstrip2[i + 1]]);
-    glVertex3fv(mVertices[gWorld->mapstrip2[i + 2]]);
-    glEnd();
-    glPopName();
+    gl.pushName(i);
+    gl.begin(GL_TRIANGLES);
+    gl.vertex3fv(mVertices[gWorld->mapstrip2[i]]);
+    gl.vertex3fv(mVertices[gWorld->mapstrip2[i + 1]]);
+    gl.vertex3fv(mVertices[gWorld->mapstrip2[i + 2]]);
+    gl.end();
+    gl.popName();
   }
 
-  glPopName();
-  //glEnable( GL_CULL_FACE );
+  gl.popName();
+  //gl.enable( GL_CULL_FACE );
 }
 
 void MapChunk::getSelectionCoord(float *x, float *z)
@@ -953,8 +953,8 @@ void MapChunk::recalcNorms()
     Norm.normalize();
     mNormals[i] = Norm;
   }
-  glBindBuffer(GL_ARRAY_BUFFER, normals);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+  gl.bindBuffer(GL_ARRAY_BUFFER, normals);
+  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
   float ShadowAmount;
   for (int j = 0; j<mapbufsize; ++j)
@@ -973,8 +973,8 @@ void MapChunk::recalcNorms()
     mFakeShadows[j].w = ShadowAmount;
   }
 
-  glBindBuffer(GL_ARRAY_BUFFER, minishadows);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
+  gl.bindBuffer(GL_ARRAY_BUFFER, minishadows);
+  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 }
 
 bool MapChunk::changeTerrain(float x, float z, float change, float radius, int BrushType)
@@ -1028,8 +1028,8 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
   }
   if (changed)
   {
-    glBindBuffer(GL_ARRAY_BUFFER, vertices);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
+    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1088,8 +1088,8 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
   }
   if (changed)
   {
-    glBindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
+    gl.bindBuffer(GL_ARRAY_BUFFER, mccvEntry);
+    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1151,8 +1151,8 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
   }
   if (changed)
   {
-    glBindBuffer(GL_ARRAY_BUFFER, vertices);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
+    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1213,8 +1213,8 @@ bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int 
   }
   if (changed)
   {
-    glBindBuffer(GL_ARRAY_BUFFER, vertices);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
+    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1292,8 +1292,8 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
   }
   if (changed)
   {
-    glBindBuffer(GL_ARRAY_BUFFER, vertices);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
+    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1742,8 +1742,8 @@ bool MapChunk::fixGapLeft(const MapChunk* chunk)
 
   if (changed)
   {
-    glBindBuffer(GL_ARRAY_BUFFER, vertices);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
+    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1767,8 +1767,8 @@ bool MapChunk::fixGapAbove(const MapChunk* chunk)
 
   if (changed)
   {
-    glBindBuffer(GL_ARRAY_BUFFER, vertices);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
+    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1782,23 +1782,23 @@ opengl::texture::set_active_texture (1);
 opengl::texture::disable_texture();
 opengl::texture::set_active_texture (0);
 opengl::texture::disable_texture();
-glDisable( GL_LIGHTING );
+gl.disable( GL_LIGHTING );
 
-//glColor3fv(gWorld->skies->colorSet[FOG_COLOR]);
-//glColor3f(1,0,0);
-//glDisable(GL_FOG);
+//gl.color3fv(gWorld->skies->colorSet[FOG_COLOR]);
+//gl.color3f(1,0,0);
+//gl.disable(GL_FOG);
 
 // low detail version
-glBindBuffer( GL_ARRAY_BUFFER, vertices );
-glVertexPointer( 3, GL_FLOAT, 0, 0 );
-glDisableClientState( GL_NORMAL_ARRAY );
-glDrawElements( GL_TRIANGLE_STRIP, stripsize, GL_UNSIGNED_SHORT, gWorld->mapstrip );
-glEnableClientState( GL_NORMAL_ARRAY );
+gl.bindBuffer( GL_ARRAY_BUFFER, vertices );
+gl.vertexPointer( 3, GL_FLOAT, 0, 0 );
+gl.disableClientState( GL_NORMAL_ARRAY );
+gl.drawElements( GL_TRIANGLE_STRIP, stripsize, GL_UNSIGNED_SHORT, gWorld->mapstrip );
+gl.enableClientState( GL_NORMAL_ARRAY );
 
-glColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-//glEnable(GL_FOG);
+gl.color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+//gl.enable(GL_FOG);
 
-glEnable( GL_LIGHTING );
+gl.enable( GL_LIGHTING );
 opengl::texture::set_active_texture (1);
 opengl::texture::enable_texture();
 opengl::texture::set_active_texture (0);
@@ -1828,19 +1828,19 @@ opengl::texture::disable_texture();
 
 opengl::texture::set_active_texture (0);
 opengl::texture::disable_texture();
-//glDisable(GL_LIGHTING);
+//gl.disable(GL_LIGHTING);
 
 Vec3D Color;
-glBegin(GL_TRIANGLE_STRIP);
+gl.begin(GL_TRIANGLE_STRIP);
 for(int i=0; i < striplen; ++i)
 {
 HeightColor( mVertices[strip[i]].y, &Color);
-glColor3fv(&Color.x);
-glNormal3fv(&mNormals[strip[i]].x);
-glVertex3fv(&mVertices[strip[i]].x);
+gl.color3fv(&Color.x);
+gl.normal3fv(&mNormals[strip[i]].x);
+gl.vertex3fv(&mVertices[strip[i]].x);
 }
-glEnd();
-//glEnable(GL_LIGHTING);
+gl.end();
+//gl.enable(GL_LIGHTING);
 }
 */
 
@@ -1914,4 +1914,3 @@ else
 (*Color)*=0.0f;
 
 }*/
-

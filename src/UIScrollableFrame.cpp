@@ -64,43 +64,43 @@ void UIScrollableFrame::render() const
 		return;
 	}
 
-	glPushMatrix();
-	glTranslatef(x(), y(), 0.0f);
+	gl.pushMatrix();
+	gl.translatef(x(), y(), 0.0f);
 
-	glClearStencil(0);
-	glClear(GL_STENCIL_BUFFER_BIT);
+	gl.clearStencil(0);
+	gl.clear(GL_STENCIL_BUFFER_BIT);
 
-	glColorMask(false, false, false, false);
+	gl.colorMask(false, false, false, false);
 
-	glEnable(GL_STENCIL_TEST);
+	gl.enable(GL_STENCIL_TEST);
 
-	glStencilFunc(GL_ALWAYS, 1, 1);
-	glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+	gl.stencilFunc(GL_ALWAYS, 1, 1);
+	gl.stencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
 
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glBegin(GL_TRIANGLE_STRIP);
-	glVertex2f(0.0f, 0.0f);
-	glVertex2f(width() - _scrollbarVertical->width(), 0.0f);
-	glVertex2f(0.0f, height() - _scrollbarHorizontal->height());
-	glVertex2f(width() - _scrollbarVertical->width(), height() - _scrollbarHorizontal->height());
-	glEnd();
+	gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.vertex2f(0.0f, 0.0f);
+	gl.vertex2f(width() - _scrollbarVertical->width(), 0.0f);
+	gl.vertex2f(0.0f, height() - _scrollbarHorizontal->height());
+	gl.vertex2f(width() - _scrollbarVertical->width(), height() - _scrollbarHorizontal->height());
+	gl.end();
 
-	glColorMask(true, true, true, true);
+	gl.colorMask(true, true, true, true);
 
-	glStencilFunc(GL_EQUAL, 1, 1);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	gl.stencilFunc(GL_EQUAL, 1, 1);
+	gl.stencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-	glPushMatrix();
-	glTranslatef(-_scrollPositionX, -_scrollPositionY, 0.0f);
+	gl.pushMatrix();
+	gl.translatef(-_scrollPositionX, -_scrollPositionY, 0.0f);
 
 	_content->render();
 
-	glPopMatrix();
+	gl.popMatrix();
 
-	glDisable(GL_STENCIL_TEST);
+	gl.disable(GL_STENCIL_TEST);
 
 	_scrollbarHorizontal->render();
 	_scrollbarVertical->render();
 
-	glPopMatrix();
+	gl.popMatrix();
 }

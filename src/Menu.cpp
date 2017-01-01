@@ -155,43 +155,43 @@ void Menu::display(float /*t*/, float /*dt*/)
 
 	video.set3D();
 
-	glDisable(GL_FOG);
+	gl.disable(GL_FOG);
 
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 
 	Vec4D la(0.1f, 0.1f, 0.1f, 1.0f);
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
+	gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
 
-	glEnable(GL_COLOR_MATERIAL);
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	gl.enable(GL_COLOR_MATERIAL);
+	gl.colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 	for (OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
 	{
-		glLightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
-		glLightf(light, GL_LINEAR_ATTENUATION, 0.7f);
-		glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
-		glDisable(light);
+		gl.lightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
+		gl.lightf(light, GL_LINEAR_ATTENUATION, 0.7f);
+		gl.lightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
+		gl.disable(light);
 	}
 
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_LIGHTING);
+	gl.enable(GL_CULL_FACE);
+	gl.enable(GL_DEPTH_TEST);
+	gl.depthFunc(GL_LEQUAL);
+	gl.enable(GL_LIGHTING);
 	opengl::texture::enable_texture();
 
 	mBackgroundModel.get()->cam.setup(globalTime);
 	mBackgroundModel.get()->draw();
 
 	opengl::texture::disable_texture();
-	glDisable(GL_LIGHTING);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
+	gl.disable(GL_LIGHTING);
+	gl.disable(GL_DEPTH_TEST);
+	gl.disable(GL_CULL_FACE);
 
 	// 2D: UI.
 
 	video.set2D();
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	gl.enable(GL_BLEND);
+	gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	mGUIFrame->render();
 }

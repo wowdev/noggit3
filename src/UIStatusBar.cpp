@@ -18,20 +18,20 @@ UIStatusBar::UIStatusBar(float xPos, float yPos, float w, float h)
 
 void UIStatusBar::render() const
 {
-	glPushMatrix();
-	glTranslatef(x(), y(), 0.0f);
+	gl.pushMatrix();
+	gl.translatef(x(), y(), 0.0f);
 
-	glColor4f(0.2f, 0.2f, 0.2f, 0.8f);
-	glBegin(GL_TRIANGLE_STRIP);
-	glVertex2f(0.0f, 0.0f);
-	glVertex2f(width(), 0.0f);
-	glVertex2f(0.0f, height());
-	glVertex2f(width(), height());
-	glEnd();
+	gl.color4f(0.2f, 0.2f, 0.2f, 0.8f);
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.vertex2f(0.0f, 0.0f);
+	gl.vertex2f(width(), 0.0f);
+	gl.vertex2f(0.0f, height());
+	gl.vertex2f(width(), height());
+	gl.end();
 
 	UIFrame::renderChildren();
 
-	glColor3f(0.7f, 0.7f, 0.7f);
+	gl.color3f(0.7f, 0.7f, 0.7f);
 
 	opengl::texture::set_active_texture();
 	opengl::texture::enable_texture();
@@ -39,20 +39,20 @@ void UIStatusBar::render() const
 	texture->bind();
 
 	//Draw Top Side
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.375f, 1.0f);
-	glVertex2f(0.0f, 13.0f);
-	glTexCoord2f(0.375f, 0.0f);
-	glVertex2f(width(), 13.0f);
-	glTexCoord2f(0.25f, 1.0f);
-	glVertex2f(0.0f, -3.0f);
-	glTexCoord2f(0.25f, 0.0f);
-	glVertex2f(width(), -3.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.375f, 1.0f);
+	gl.vertex2f(0.0f, 13.0f);
+	gl.texCoord2f(0.375f, 0.0f);
+	gl.vertex2f(width(), 13.0f);
+	gl.texCoord2f(0.25f, 1.0f);
+	gl.vertex2f(0.0f, -3.0f);
+	gl.texCoord2f(0.25f, 0.0f);
+	gl.vertex2f(width(), -3.0f);
+	gl.end();
 
 	opengl::texture::disable_texture();
 
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 void UIStatusBar::resize()

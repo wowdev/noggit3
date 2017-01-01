@@ -177,6 +177,30 @@ namespace opengl
     void uniform3fv (GLint location, GLsizei count, GLfloat const* value);
     void uniform4fv (GLint location, GLsizei count, GLfloat const* value);
     void uniformMatrix4fv (GLint location, GLsizei count, GLboolean transpose, GLfloat const* value);
+
+    void initNames();
+    void pushName (GLuint);
+    void popName();
+    void selectBuffer (GLsizei size, GLuint* buffer);
+
+    void clearStencil (GLint);
+    void stencilFunc (GLenum func, GLint ref, GLuint mask);
+    void stencilOp (GLenum sfail, GLenum dpfail, GLenum dppass);
+    void colorMask (GLboolean r, GLboolean g, GLboolean b, GLboolean a);
+
+    void polygonOffset (GLfloat factor, GLfloat units);
+
+    void pushAttrib (GLbitfield);
+    void popAttrib();
+
+    void genFramebuffers (GLsizei n, GLuint *ids);
+    void bindFramebuffer (GLenum target, GLuint framebuffer);
+    void framebufferTexture2D (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+
+    void genRenderbuffers (GLsizei n, GLuint *renderbuffers);
+    void bindRenderbuffer (GLenum target, GLuint renderbuffer);
+    void renderbufferStorage (GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+    void framebufferRenderbuffer (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
   };
 }
 

@@ -8,92 +8,90 @@ UIModel::UIModel(float xPos, float yPos, float w, float h)
 	: UIFrame(xPos, yPos, w, h)
 	, model(boost::none)
 {
-	glGenFramebuffers(1, &fbo);
-	glGenRenderbuffers(1, &depthBuffer);
-	glGenTextures(1, &modelTexture);
+	gl.genFramebuffers(1, &fbo);
+	gl.genRenderbuffers(1, &depthBuffer);
+	gl.genTextures(1, &modelTexture);
 
-	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, (GLsizei)width(), (GLsizei)height());
+	gl.bindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+	gl.renderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, (GLsizei)width(), (GLsizei)height());
 
 	opengl::texture::enable_texture (0);
-	glBindTexture(GL_TEXTURE_2D, modelTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, (GLsizei)width(), (GLsizei)height(), 0, GL_RGBA, GL_FLOAT, NULL);
+	gl.bindTexture(GL_TEXTURE_2D, modelTexture);
+	gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, (GLsizei)width(), (GLsizei)height(), 0, GL_RGBA, GL_FLOAT, NULL);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, modelTexture, 0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+	gl.bindFramebuffer(GL_FRAMEBUFFER, fbo);
+	gl.framebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, modelTexture, 0);
+	gl.framebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	gl.bindFramebuffer(GL_FRAMEBUFFER, 0);
+	gl.bindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
 void UIModel::drawFBO() const
 {
-	glPushMatrix();
-	glPushAttrib(GL_VIEWPORT_BIT);
-	glViewport(0, 0, (GLsizei)width(), (GLsizei)height());
+	gl.pushMatrix();
+	gl.pushAttrib(GL_VIEWPORT_BIT);
+	gl.viewport(0, 0, (GLsizei)width(), (GLsizei)height());
 
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	gl.bindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	gl.clearColor(1.0f, 1.0f, 1.0f, 0.0f);
+	gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	gl.matrixMode(GL_PROJECTION);
+	gl.loadIdentity();
 	gluPerspective(video.fov(), width() / height(), video.nearclip(), video.farclip());
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	gl.matrixMode(GL_MODELVIEW);
+	gl.loadIdentity();
 
 	gluLookAt(0.0f, 0.0f, 1.0f,
 		0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f);
 
 
-	glPushMatrix();
-	glTranslatef(0.0f, 0.0f, -50.0f);
-	glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
+	gl.pushMatrix();
+	gl.translatef(0.0f, 0.0f, -50.0f);
+	gl.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
 
 	opengl::texture::enable_texture (0);
-	glEnable(GL_NORMALIZE);
+	gl.enable(GL_NORMALIZE);
 
 	model.get()->draw();
-	glPopMatrix();
+	gl.popMatrix();
 
-	glPopAttrib();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glPopMatrix();
+	gl.popAttrib();
+	gl.bindFramebuffer(GL_FRAMEBUFFER, 0);
+	gl.popMatrix();
 }
 
 void UIModel::drawTexture() const
 {
-	glPushMatrix();
+	gl.pushMatrix();
 	video.set2D();
-	glPopMatrix();
+	gl.popMatrix();
 
-	glPushMatrix();
-	glTranslatef(x(), y(), 0.0f);
+	gl.pushMatrix();
+	gl.translatef(x(), y(), 0.0f);
 
 	opengl::texture::enable_texture (0);
-	glBindTexture(GL_TEXTURE_2D, modelTexture);
+	gl.bindTexture(GL_TEXTURE_2D, modelTexture);
 
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(0.0f, 0.0f);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex2f(width(), 0.0f);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2f(width(), height());
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex2f(0.0f, height());
-	glEnd();
-
-	CheckForGLError("UIModel::draw:: after quads");
+	gl.begin(GL_QUADS);
+	gl.texCoord2f(0.0f, 0.0f);
+	gl.vertex2f(0.0f, 0.0f);
+	gl.texCoord2f(1.0f, 0.0f);
+	gl.vertex2f(width(), 0.0f);
+	gl.texCoord2f(1.0f, 1.0f);
+	gl.vertex2f(width(), height());
+	gl.texCoord2f(0.0f, 1.0f);
+	gl.vertex2f(0.0f, height());
+	gl.end();
 
 	opengl::texture::disable_texture (0);
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 void UIModel::render() const
@@ -111,7 +109,7 @@ void UIModel::setModel(const std::string &name)
 
 //! \todo create class for framebuffers and implement this check
 /*
-GLenum fboStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+GLenum fboStatus = gl.checkFramebufferStatus(GL_FRAMEBUFFER);
 if(fboStatus != GL_FRAMEBUFFER_COMPLETE)
 {
 switch(fboStatus)

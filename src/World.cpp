@@ -41,23 +41,22 @@ GLuint selectionBuffer[8192];
 
 void renderLine(float x1, float y1, float z1, float x2, float y2, float z2)
 {
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_LIGHTING);
+  gl.disable(GL_DEPTH_TEST);
+  gl.disable(GL_LIGHTING);
 
-  glPushMatrix();
+  gl.pushMatrix();
 
-  glLineWidth(2.5);
+  gl.lineWidth(2.5);
 
-  glBegin(GL_LINES);
-  glVertex3f(x1, y1, z1);
-  glVertex3f(x2, y2, z2);
-  glEnd();
-  glFlush();
+  gl.begin(GL_LINES);
+  gl.vertex3f(x1, y1, z1);
+  gl.vertex3f(x2, y2, z2);
+  gl.end();
 
-  glEnable(GL_LIGHTING);
-  glEnable(GL_DEPTH_TEST);
+  gl.enable(GL_LIGHTING);
+  gl.enable(GL_DEPTH_TEST);
 
-  glPopMatrix();
+  gl.popMatrix();
 }
 
 void renderSquare(float x, float y, float z, float size, float orientation)
@@ -67,21 +66,20 @@ void renderSquare(float x, float y, float z, float size, float orientation)
   float dz1 = size*sin(orientation) + size*cos(orientation);
   float dz2 = size*sin(orientation + PI / 2) + size*cos(orientation + PI / 2);
 
-  glDisable(GL_DEPTH_TEST);
-  glPushMatrix();
+  gl.disable(GL_DEPTH_TEST);
+  gl.pushMatrix();
 
-  glBegin(GL_QUADS);
-  glVertex3f(x + dx1, y, z + dz1);
-  glVertex3f(x + dx2, y, z + dz2);
-  glVertex3f(x - dx1, y, z - dz1);
-  glVertex3f(x - dx2, y, z - dz2);
-  glVertex3f(x + dx1, y, z + dz1);
-  glEnd();
-  glFlush();
+  gl.begin(GL_QUADS);
+  gl.vertex3f(x + dx1, y, z + dz1);
+  gl.vertex3f(x + dx2, y, z + dz2);
+  gl.vertex3f(x - dx1, y, z - dz1);
+  gl.vertex3f(x - dx2, y, z - dz2);
+  gl.vertex3f(x + dx1, y, z + dz1);
+  gl.end();
 
-  glEnable(GL_DEPTH_TEST);
+  gl.enable(GL_DEPTH_TEST);
 
-  glPopMatrix();
+  gl.popMatrix();
 }
 
 void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
@@ -100,16 +98,16 @@ void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, fl
     ax = -ax;
   float rx = -vy*vz;
   float ry = vx*vz;
-  glPushMatrix();
+  gl.pushMatrix();
 
   //draw the quadric
-  glTranslatef(x1, y1, z1);
-  glRotatef(ax, rx, ry, 0.0);
+  gl.translatef(x1, y1, z1);
+  gl.rotatef(ax, rx, ry, 0.0);
 
   gluQuadricOrientation(quadric, GLU_OUTSIDE);
   gluSphere(quadric, radius, subdivisions, subdivisions);
 
-  glPopMatrix();
+  gl.popMatrix();
 }
 
 void renderSphere_convenient(float x, float y, float z, float radius, int subdivisions)
@@ -117,14 +115,14 @@ void renderSphere_convenient(float x, float y, float z, float radius, int subdiv
   if (Environment::getInstance()->screenX>0 && Environment::getInstance()->screenY>0)
   {
     //the same quadric can be re-used for drawing many objects
-    glDisable(GL_LIGHTING);
-    glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA);
+    gl.disable(GL_LIGHTING);
+    gl.color4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA);
     GLUquadricObj *quadric = gluNewQuadric();
     gluQuadricNormals(quadric, GLU_SMOOTH);
     renderSphere(x, y, z, x, y, z, 0.3f, 15, quadric);
     renderSphere(x, y, z, x, y, z, radius, subdivisions, quadric);
     gluDeleteQuadric(quadric);
-    glEnable(GL_LIGHTING);
+    gl.enable(GL_LIGHTING);
   }
 }
 
@@ -146,41 +144,41 @@ void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, floa
   float rx = -vy * vz;
   float ry = vx * vz;
 
-  glLineWidth(2.0);
-  //   glEnable (GL_LINE_STIPPLE);
-  //   glLineStipple(2, 0x00FF);
-  glPushMatrix();
-  glDisable(GL_DEPTH_TEST);
-  glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-  glEnable(GL_COLOR_MATERIAL);
+  gl.lineWidth(2.0);
+  //   gl.enable (GL_LINE_STIPPLE);
+  //   gl.lineStipple(2, 0x00FF);
+  gl.pushMatrix();
+  gl.disable(GL_DEPTH_TEST);
+  gl.colorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+  gl.enable(GL_COLOR_MATERIAL);
 
   //draw the quadric
-  glTranslatef(x1, y1, z1);
-  glRotatef(ax, rx, ry, 0.0f);
-  glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-  glColor4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA);
+  gl.translatef(x1, y1, z1);
+  gl.rotatef(ax, rx, ry, 0.0f);
+  gl.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
+  gl.color4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA);
 
   gluQuadricOrientation(quadric, GLU_OUTSIDE);
   gluDisk(quadric, radius, radius + 0.01f, subdivisions, 1);
 
-  //glColor4f(0.0f, 0.8f, 0.1f, 0.9f);
+  //gl.color4f(0.0f, 0.8f, 0.1f, 0.9f);
   //gluDisk(quadric, (radius * 1.5) - 2, (radius * 1.5) + 2, 0, 1);
-  glEnable(GL_DEPTH_TEST);
-  glPopMatrix();
+  gl.enable(GL_DEPTH_TEST);
+  gl.popMatrix();
 }
 
 void renderDisk_convenient(float x, float y, float z, float radius)
 {
   int subdivisions = (int)((int)radius * 3.5);
   if (subdivisions < 35) subdivisions = 35;
-  glDisable(GL_LIGHTING);
+  gl.disable(GL_LIGHTING);
   GLUquadricObj *quadric = gluNewQuadric();
   gluQuadricDrawStyle(quadric, GLU_LINE);
   gluQuadricNormals(quadric, GLU_SMOOTH);
   renderDisk(x, y, z, x, y, z, radius, subdivisions, quadric);
   renderSphere(x, y, z, x, y, z, 0.05f, 15, quadric);
   gluDeleteQuadric(quadric);
-  glEnable(GL_LIGHTING);
+  gl.enable(GL_LIGHTING);
 }
 
 bool World::IsEditableWorld(int pMapId)
@@ -334,7 +332,7 @@ void World::initMinimap()
     }
     else if (fourcc == 'MARE')
     {
-      glGenTextures(1, &minimap);
+      gl.genTextures(1, &minimap);
 
       unsigned int *texbuf = new unsigned int[512 * 512];
       memset(texbuf, 0, 512 * 512 * 4);
@@ -422,10 +420,10 @@ void World::initMinimap()
         }
       }
 
-      glBindTexture(GL_TEXTURE_2D, minimap);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, texbuf);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      gl.bindTexture(GL_TEXTURE_2D, minimap);
+      gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, texbuf);
+      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
       delete[] texbuf;
       f.close();
@@ -516,43 +514,43 @@ void World::initLowresTerrain()
             lowrestiles[j][i] = new OpenGL::CallList();
             lowrestiles[j][i]->startRecording();
 
-            glBegin(GL_TRIANGLES);
+            gl.begin(GL_TRIANGLES);
             for (size_t y = 0; y < 16; y++)
             {
               for (size_t x = 0; x < 16; x++)
               {
-                glVertex3fv(lowres[y][x]);
-                glVertex3fv(lowsub[y][x]);
-                glVertex3fv(lowres[y][x + 1]);
-                glVertex3fv(lowres[y][x + 1]);
-                glVertex3fv(lowsub[y][x]);
-                glVertex3fv(lowres[y + 1][x + 1]);
-                glVertex3fv(lowres[y + 1][x + 1]);
-                glVertex3fv(lowsub[y][x]);
-                glVertex3fv(lowres[y + 1][x]);
-                glVertex3fv(lowres[y + 1][x]);
-                glVertex3fv(lowsub[y][x]);
-                glVertex3fv(lowres[y][x]);
+                gl.vertex3fv(lowres[y][x]);
+                gl.vertex3fv(lowsub[y][x]);
+                gl.vertex3fv(lowres[y][x + 1]);
+                gl.vertex3fv(lowres[y][x + 1]);
+                gl.vertex3fv(lowsub[y][x]);
+                gl.vertex3fv(lowres[y + 1][x + 1]);
+                gl.vertex3fv(lowres[y + 1][x + 1]);
+                gl.vertex3fv(lowsub[y][x]);
+                gl.vertex3fv(lowres[y + 1][x]);
+                gl.vertex3fv(lowres[y + 1][x]);
+                gl.vertex3fv(lowsub[y][x]);
+                gl.vertex3fv(lowres[y][x]);
               }
             }
-            glEnd();
+            gl.end();
 
             lowrestiles[j][i]->endRecording();
 
             /* OLD:
             // draw tiles 16x16?
-            glBegin(GL_TRIANGLE_STRIP);
+            gl.begin(GL_TRIANGLE_STRIP);
             for (int y=0; y<16; y++) {
             // end jump
-            if (y>0) glVertex3fv(lowres[y][0]);
+            if (y>0) gl.vertex3fv(lowres[y][0]);
             for (int x=0; x<17; x++) {
-            glVertex3fv(lowres[y][x]);
-            glVertex3fv(lowres[y+1][x]);
+            gl.vertex3fv(lowres[y][x]);
+            gl.vertex3fv(lowres[y+1][x]);
             }
             // start jump
-            if (y<15) glVertex3fv(lowres[y+1][16]);
+            if (y<15) gl.vertex3fv(lowres[y+1][16]);
             }
-            glEnd();
+            gl.end();
             */
             // draw tiles 17*17+16*16
           }
@@ -590,9 +588,9 @@ void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
       }
     }
 
-    glGenBuffers(1, pDetailTexCoords);
-    glBindBuffer(GL_ARRAY_BUFFER, *pDetailTexCoords);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
+    gl.genBuffers(1, pDetailTexCoords);
+    gl.bindBuffer(GL_ARRAY_BUFFER, *pDetailTexCoords);
+    gl.bufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
 
     // init texture coordinates for alpha map:
     vt = temp;
@@ -610,11 +608,11 @@ void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
       }
     }
 
-    glGenBuffers(1, pAlphaTexCoords);
-    glBindBuffer(GL_ARRAY_BUFFER, *pAlphaTexCoords);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
+    gl.genBuffers(1, pAlphaTexCoords);
+    gl.bindBuffer(GL_ARRAY_BUFFER, *pAlphaTexCoords);
+    gl.bufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    gl.bindBuffer(GL_ARRAY_BUFFER, 0);
   }
 }
 
@@ -660,7 +658,7 @@ World::~World()
 
   if (minimap)
   {
-    glDeleteTextures(1, &minimap);
+    gl.deleteTextures(1, &minimap);
     minimap = 0;
   }
 
@@ -708,7 +706,7 @@ void World::outdoorLighting()
 {
   Vec4D black(0, 0, 0, 0);
   Vec4D ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
+  gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
 
   float di = outdoorLightStats.dayIntensity;
   //float ni = outdoorLightStats.nightIntensity;
@@ -718,9 +716,9 @@ void World::outdoorLighting()
   //Vec4D pos(-1, 1, -1, 0);
   Vec4D pos(-dd.x, -dd.z, dd.y, 0.0f);
   Vec4D col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1.0f);
-  glLightfv(GL_LIGHT0, GL_AMBIENT, black);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
-  glLightfv(GL_LIGHT0, GL_POSITION, pos);
+  gl.lightfv(GL_LIGHT0, GL_AMBIENT, black);
+  gl.lightfv(GL_LIGHT0, GL_DIFFUSE, col);
+  gl.lightfv(GL_LIGHT0, GL_POSITION, pos);
 }
 
 void World::outdoorLights(bool on)
@@ -730,25 +728,25 @@ void World::outdoorLights(bool on)
 
   if (on) {
     Vec4D ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
+    gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
     if (di>0) {
-      glEnable(GL_LIGHT0);
+      gl.enable(GL_LIGHT0);
     }
     else {
-      glDisable(GL_LIGHT0);
+      gl.disable(GL_LIGHT0);
     }
     if (ni>0) {
-      glEnable(GL_LIGHT1);
+      gl.enable(GL_LIGHT1);
     }
     else {
-      glDisable(GL_LIGHT1);
+      gl.disable(GL_LIGHT1);
     }
   }
   else {
     Vec4D ambient(0, 0, 0, 1);
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
-    glDisable(GL_LIGHT0);
-    glDisable(GL_LIGHT1);
+    gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
+    gl.disable(GL_LIGHT0);
+    gl.disable(GL_LIGHT1);
   }
 }
 
@@ -766,15 +764,15 @@ void World::setupFog()
 
     //FOG_COLOR
     Vec4D fogcolor(skies->colorSet[FOG_COLOR], 1);
-    glFogfv(GL_FOG_COLOR, fogcolor);
+    gl.fogfv(GL_FOG_COLOR, fogcolor);
     //! \todo  retreive fogstart and fogend from lights.lit somehow
-    glFogf(GL_FOG_END, fogdist);
-    glFogf(GL_FOG_START, fogdist * fogstart);
+    gl.fogf(GL_FOG_END, fogdist);
+    gl.fogf(GL_FOG_START, fogdist * fogstart);
 
-    glEnable(GL_FOG);
+    gl.enable(GL_FOG);
   }
   else {
-    glDisable(GL_FOG);
+    gl.disable(GL_FOG);
     culldistance = mapdrawdistance;
   }
 }
@@ -788,14 +786,14 @@ extern Brush textureBrush;
 
 void World::draw()
 {
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  gl.bindBuffer(GL_ARRAY_BUFFER, 0);
 
   gluLookAt(camera.x, camera.y, camera.z, lookat.x, lookat.y, lookat.z, 0, 1, 0);
 
   frustum.retrieve();
 
-  ///glDisable(GL_LIGHTING);
-  ///glColor4f(1,1,1,1);World::draw()
+  ///gl.disable(GL_LIGHTING);
+  ///gl.color4f(1,1,1,1);World::draw()
 
   bool hadSky = false;
   if (drawwmo || mapIndex->hasAGlobalWMO())
@@ -810,11 +808,11 @@ void World::draw()
     }
   }
 
-  glEnable(GL_CULL_FACE);
-  glDisable(GL_BLEND);
+  gl.enable(GL_CULL_FACE);
+  gl.disable(GL_BLEND);
   opengl::texture::disable_texture();
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_FOG);
+  gl.disable(GL_DEPTH_TEST);
+  gl.disable(GL_FOG);
 
   int daytime = static_cast<int>(time) % 2880;
   outdoorLightStats = ol->getLightStats(daytime);
@@ -827,24 +825,24 @@ void World::draw()
   // unless there is no sky OR skybox
   GLbitfield clearmask = GL_DEPTH_BUFFER_BIT;
   if (!hadSky)   clearmask |= GL_COLOR_BUFFER_BIT;
-  glClear(clearmask);
+  gl.clear(clearmask);
 
   opengl::texture::disable_texture();
 
   outdoorLighting();
   outdoorLights(true);
 
-  glFogi(GL_FOG_MODE, GL_LINEAR);
+  gl.fogi(GL_FOG_MODE, GL_LINEAR);
   setupFog();
 
   // Draw verylowres heightmap
   if (drawfog && drawterrain) {
-    glEnable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glColor3fv(this->skies->colorSet[FOG_COLOR]);
-    //glColor3f(0,1,0);
-    //glDisable(GL_FOG);
+    gl.enable(GL_CULL_FACE);
+    gl.disable(GL_DEPTH_TEST);
+    gl.disable(GL_LIGHTING);
+    gl.color3fv(this->skies->colorSet[FOG_COLOR]);
+    //gl.color3f(0,1,0);
+    //gl.disable(GL_FOG);
     const int lrr = 2;
     for (int i = cx - lrr; i <= cx + lrr; ++i) { //! \todo maybe broke this, investigate
       for (int j = cz - lrr; j <= cz + lrr; ++j) {
@@ -857,51 +855,51 @@ void World::draw()
         }
       }
     }
-    //glEnable(GL_FOG);
+    //gl.enable(GL_FOG);
   }
 
   // Draw height map
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
+  gl.enableClientState(GL_VERTEX_ARRAY);
+  gl.enableClientState(GL_NORMAL_ARRAY);
 
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
-  glEnable(GL_LIGHTING);
+  gl.enable(GL_DEPTH_TEST);
+  gl.depthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
+  gl.enable(GL_LIGHTING);
 
-  glEnable(GL_COLOR_MATERIAL);
-  //glColorMaterial(GL_FRONT, GL_DIFFUSE);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  glColor4f(1, 1, 1, 1);
+  gl.enable(GL_COLOR_MATERIAL);
+  //gl.colorMaterial(GL_FRONT, GL_DIFFUSE);
+  gl.colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+  gl.color4f(1, 1, 1, 1);
   // if we're using shaders let's give it some specular
   if (video.mSupportShaders) {
     Vec4D spec_color(0.1f, 0.1f, 0.1f, 0.1f);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 5);
+    gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
+    gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 5);
 
-    glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+    gl.lightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
   }
 
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.enable(GL_BLEND);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  glClientActiveTexture(GL_TEXTURE0);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glBindBuffer(GL_ARRAY_BUFFER, detailtexcoords);
-  glTexCoordPointer(2, GL_FLOAT, 0, 0);
+  gl.clientActiveTexture(GL_TEXTURE0);
+  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
+  gl.bindBuffer(GL_ARRAY_BUFFER, detailtexcoords);
+  gl.texCoordPointer(2, GL_FLOAT, 0, 0);
 
-  glClientActiveTexture(GL_TEXTURE1);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glBindBuffer(GL_ARRAY_BUFFER, alphatexcoords);
-  glTexCoordPointer(2, GL_FLOAT, 0, 0);
+  gl.clientActiveTexture(GL_TEXTURE1);
+  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
+  gl.bindBuffer(GL_ARRAY_BUFFER, alphatexcoords);
+  gl.texCoordPointer(2, GL_FLOAT, 0, 0);
 
-  glClientActiveTexture(GL_TEXTURE0);
+  gl.clientActiveTexture(GL_TEXTURE0);
 
   OpenGL::SettingsSaver::save();
 
   // height map w/ a zillion texture passes
   //! \todo  Do we need to push the matrix here?
 
-  glPushMatrix();
+  gl.pushMatrix();
 
   if (drawterrain)
   {
@@ -917,7 +915,7 @@ void World::draw()
     }
   }
 
-  glPopMatrix();
+  gl.popMatrix();
 
   GLint viewport[4];
   GLdouble modelview[16];
@@ -925,15 +923,15 @@ void World::draw()
   GLfloat winX, winY, winZ;
   GLdouble posX, posY, posZ;
 
-  glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-  glGetDoublev(GL_PROJECTION_MATRIX, projection);
-  glGetIntegerv(GL_VIEWPORT, viewport);
+  gl.getDoublev(GL_MODELVIEW_MATRIX, modelview);
+  gl.getDoublev(GL_PROJECTION_MATRIX, projection);
+  gl.getIntegerv(GL_VIEWPORT, viewport);
 
 
   winX = (float)Environment::getInstance()->screenX;
   winY = (float)viewport[3] - (float)Environment::getInstance()->screenY;
 
-  glReadPixels(Environment::getInstance()->screenX, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+  gl.readPixels(Environment::getInstance()->screenX, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
   gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
 
   Environment::getInstance()->Pos3DX = (float)posX;
@@ -944,12 +942,12 @@ void World::draw()
   // Selection circle
   if (this->IsSelection(eEntry_MapChunk))
   {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);    
+    gl.polygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    glDisable(GL_CULL_FACE);
-    //glDepthMask(false);
-    //glDisable(GL_DEPTH_TEST);
+    gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+    gl.disable(GL_CULL_FACE);
+    //gl.depthMask(false);
+    //gl.disable(GL_DEPTH_TEST);
 
     if (terrainMode == 0)
     {
@@ -961,11 +959,11 @@ void World::draw()
       else if (Environment::getInstance()->cursorType == 1)
       {
         renderDisk_convenient((float)posX, (float)posY, (float)posZ, groundBrushRadius);
-      }        
+      }
       else if (Environment::getInstance()->cursorType == 2)
       {
         renderSphere_convenient((float)posX, (float)posY, (float)posZ, groundBrushRadius, 15);
-      }        
+      }
     }
     else if (terrainMode == 1)
     {
@@ -1004,23 +1002,23 @@ void World::draw()
     }
     else renderSphere_convenient((float)posX, (float)posY, (float)posZ, 0.3f, 15);
 
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
+    gl.enable(GL_CULL_FACE);
+    gl.enable(GL_DEPTH_TEST);
     //GlDepthMask(true);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   }
 
 
   if (drawlines || (terrainMode == 2 && Environment::getInstance()->highlightPaintableChunks))
   {
-    glDisable(GL_COLOR_MATERIAL);
+    gl.disable(GL_COLOR_MATERIAL);
     opengl::texture::set_active_texture (0);
     opengl::texture::disable_texture();
     opengl::texture::set_active_texture (1);
     opengl::texture::disable_texture();
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     setupFog();
     for (int j = 0; j < 64; ++j)
@@ -1041,32 +1039,32 @@ void World::draw()
   opengl::texture::set_active_texture (0);
   opengl::texture::enable_texture();
 
-  glColor4f(1, 1, 1, 1);
-  glEnable(GL_BLEND);
+  gl.color4f(1, 1, 1, 1);
+  gl.enable(GL_BLEND);
 
   if (video.mSupportShaders) {
     Vec4D spec_color(0, 0, 0, 1);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-    glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
+    gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
+    gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
   }
 
   // unbind hardware buffers
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  gl.bindBuffer(GL_ARRAY_BUFFER, 0);
 
 
 
 
-  glEnable(GL_CULL_FACE);
+  gl.enable(GL_CULL_FACE);
 
-  glDisable(GL_BLEND);
-  glDisable(GL_ALPHA_TEST);
+  gl.disable(GL_BLEND);
+  gl.disable(GL_ALPHA_TEST);
 
   // TEMP: for fucking around with lighting
   for (OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
   {
-    glLightf(light, GL_CONSTANT_ATTENUATION, l_const);
-    glLightf(light, GL_LINEAR_ATTENUATION, l_linear);
-    glLightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
+    gl.lightf(light, GL_CONSTANT_ATTENUATION, l_const);
+    gl.lightf(light, GL_LINEAR_ATTENUATION, l_linear);
+    gl.lightf(light, GL_QUADRATIC_ATTENUATION, l_quadratic);
   }
 
 
@@ -1078,7 +1076,7 @@ void World::draw()
   {
     if (renderAnimations)ModelManager::resetAnim();
 
-    glEnable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
+    gl.enable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
     for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
     {
       if (!it->second.model->hidden || renderHidden)
@@ -1097,10 +1095,10 @@ void World::draw()
     if (video.mSupportShaders)
     {
       Vec4D spec_color(1.0f, 1.0f, 1.0f, 1.0f);
-      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-      glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 10);
+      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
+      gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 10);
 
-      glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+      gl.lightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 
       for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
       {
@@ -1112,8 +1110,8 @@ void World::draw()
         
 
       spec_color = Vec4D(0.0f, 0.0f, 0.0f, 1.0f);
-      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-      glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
+      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
+      gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
     }
     else
     {
@@ -1130,42 +1128,42 @@ void World::draw()
   outdoorLights(true);
   setupFog();
 
-  glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-  glDisable(GL_CULL_FACE);
+  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+  gl.disable(GL_CULL_FACE);
 
-  glDisable(GL_BLEND);
-  glDisable(GL_ALPHA_TEST);
-  glEnable(GL_LIGHTING);
+  gl.disable(GL_BLEND);
+  gl.disable(GL_ALPHA_TEST);
+  gl.enable(GL_LIGHTING);
 
   // gosh darn alpha blended evil
 
   OpenGL::SettingsSaver::restore();
   setupFog();
 
-  glColor4f(1, 1, 1, 1);
-  glEnable(GL_BLEND);
+  gl.color4f(1, 1, 1, 1);
+  gl.enable(GL_BLEND);
 
   /*
   // temp frustum code
-  glDisable(GL_LIGHTING);
+  gl.disable(GL_LIGHTING);
   opengl::texture::disable_texture();
-  glDisable(GL_CULL_FACE);
-  glEnable(GL_BLEND);
-  glBegin(GL_TRIANGLES);
-  glColor4f(0,1,0,0.5);
-  glVertex3fv(camera);
-  glVertex3fv(fp - rt * fl * 1.33f - up * fl);
-  glVertex3fv(fp + rt * fl * 1.33f - up * fl);
-  glColor4f(0,0,1,0.5);
-  glVertex3fv(camera);
+  gl.disable(GL_CULL_FACE);
+  gl.enable(GL_BLEND);
+  gl.begin(GL_TRIANGLES);
+  gl.color4f(0,1,0,0.5);
+  gl.vertex3fv(camera);
+  gl.vertex3fv(fp - rt * fl * 1.33f - up * fl);
+  gl.vertex3fv(fp + rt * fl * 1.33f - up * fl);
+  gl.color4f(0,0,1,0.5);
+  gl.vertex3fv(camera);
   fl *= 0.5f;
-  glVertex3fv(fp - rt * fl * 1.33f + up * fl);
-  glVertex3fv(fp + rt * fl * 1.33f + up * fl);
-  glEnd();
+  gl.vertex3fv(fp - rt * fl * 1.33f + up * fl);
+  gl.vertex3fv(fp + rt * fl * 1.33f + up * fl);
+  gl.end();
   */
 
-  //glColor4f(1,1,1,1);
-  //glDisable(GL_COLOR_MATERIAL);
+  //gl.color4f(1,1,1,1);
+  //gl.disable(GL_COLOR_MATERIAL);
 
   if (this->drawwater)
   {
@@ -1192,29 +1190,29 @@ static const GLuint MapTileName = 3;
 
 void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap, bool doSelection)
 {
-  glSelectBuffer(sizeof(selectionBuffer) / sizeof(GLuint), selectionBuffer);
-  glRenderMode(GL_SELECT);
+  gl.selectBuffer(sizeof(selectionBuffer) / sizeof(GLuint), selectionBuffer);
+  gl.renderMode(GL_SELECT);
 
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
+  gl.matrixMode(GL_PROJECTION);
+  gl.loadIdentity();
 
   GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT, viewport);
+  gl.getIntegerv(GL_VIEWPORT, viewport);
   gluPickMatrix(cursorX, viewport[3] - cursorY, 7, 7, viewport);
 
   video.set3D_select();
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  gl.bindBuffer(GL_ARRAY_BUFFER, 0);
 
   gluLookAt(camera.x, camera.y, camera.z, lookat.x, lookat.y, lookat.z, 0, 1, 0);
 
   frustum.retrieve();
 
-  glClear(GL_DEPTH_BUFFER_BIT);
+  gl.clear(GL_DEPTH_BUFFER_BIT);
 
-  glInitNames();
+  gl.initNames();
 
-  glPushName(MapTileName);
+  gl.pushName(MapTileName);
   if (drawterrain)
   {
     for (int j = 0; j < 64; ++j)
@@ -1228,21 +1226,21 @@ void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap, bool doSelect
       }
     }
   }
-  glPopName();
+  gl.popName();
 
   if (!pOnlyMap)
   {
     // WMOs / map objects
     if (drawwmo)
     {
-      glPushName(MapObjName);
-      glPushName(0);
+      gl.pushName(MapObjName);
+      gl.pushName(0);
       for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
       {
         it->second.drawSelect();
       }
-      glPopName();
-      glPopName();
+      gl.popName();
+      gl.popName();
     }
 
     // M2s / models
@@ -1250,21 +1248,21 @@ void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap, bool doSelect
     {
       if (renderAnimations)ModelManager::resetAnim();
 
-      glPushName(DoodadName);
-      glPushName(0);
+      gl.pushName(DoodadName);
+      gl.pushName(0);
       for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
       {
         it->second.drawSelect();
       }
-      glPopName();
-      glPopName();
+      gl.popName();
+      gl.popName();
     }
   }
 
   if (doSelection)
   {
     getSelection();
-  }  
+  }
 }
 
 struct GLNameEntry
@@ -1300,7 +1298,7 @@ Vec3D World::getCursorPosOnModel()
 
     GLuint minDist = 0xFFFFFFFF;
     GLNameEntry* minEntry = NULL;
-    GLuint hits = (GLuint)glRenderMode(GL_RENDER);
+    GLuint hits = (GLuint)gl.renderMode(GL_RENDER);
 
     size_t offset = 0;
 
@@ -1344,7 +1342,7 @@ void World::getSelection()
 {
   GLuint minDist = 0xFFFFFFFF;
   GLNameEntry* minEntry = NULL;
-  GLuint hits = (GLuint)glRenderMode(GL_RENDER);
+  GLuint hits = (GLuint)gl.renderMode(GL_RENDER);
 
   size_t offset = 0;
 
@@ -1460,8 +1458,8 @@ void World::clearHeight(int /*id*/, int x, int z, int _cx, int _cz)
     curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
   }
 
-  glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
+  gl.bindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
+  gl.bufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
 
   curChunk->recalcNorms();
 }
@@ -1564,27 +1562,27 @@ void World::setAreaID(int id, int x, int z, int _cx, int _cz)
 
 void World::drawTileMode(float /*ah*/)
 {
-  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-  glEnable(GL_BLEND);
+  gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+  gl.enable(GL_BLEND);
 
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  glPushMatrix();
-  glScalef(zoom, zoom, 1.0f);
+  gl.pushMatrix();
+  gl.scalef(zoom, zoom, 1.0f);
 
-  glPushMatrix();
-  glTranslatef(-camera.x / CHUNKSIZE, -camera.z / CHUNKSIZE, 0);
+  gl.pushMatrix();
+  gl.translatef(-camera.x / CHUNKSIZE, -camera.z / CHUNKSIZE, 0);
 
   minX = camera.x / CHUNKSIZE - 2.0f*video.ratio() / zoom;
   maxX = camera.x / CHUNKSIZE + 2.0f*video.ratio() / zoom;
   minY = camera.z / CHUNKSIZE - 2.0f / zoom;
   maxY = camera.z / CHUNKSIZE + 2.0f / zoom;
 
-  glEnableClientState(GL_COLOR_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  glDisable(GL_CULL_FACE);
-  glDepthMask(GL_FALSE);
+  gl.enableClientState(GL_COLOR_ARRAY);
+  gl.disableClientState(GL_NORMAL_ARRAY);
+  gl.disableClientState(GL_TEXTURE_COORD_ARRAY);
+  gl.disable(GL_CULL_FACE);
+  gl.depthMask(GL_FALSE);
 
   for (int j = 0; j < 64; ++j)
   {
@@ -1597,46 +1595,46 @@ void World::drawTileMode(float /*ah*/)
     }
   }
 
-  glDisableClientState(GL_COLOR_ARRAY);
+  gl.disableClientState(GL_COLOR_ARRAY);
 
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  gl.enableClientState(GL_NORMAL_ARRAY);
+  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
 
 
 
-  glPopMatrix();
+  gl.popMatrix();
   if (drawlines) {
-    glTranslatef((GLfloat)fmod(-camera.x / CHUNKSIZE, 16), (GLfloat)fmod(-camera.z / CHUNKSIZE, 16), 0);
+    gl.translatef((GLfloat)fmod(-camera.x / CHUNKSIZE, 16), (GLfloat)fmod(-camera.z / CHUNKSIZE, 16), 0);
     /*  for(int x=-32;x<=48;x++)
     {
     if(x%16==0)
-    glColor4f(0.0f,1.0f,0.0f,0.5f);
+    gl.color4f(0.0f,1.0f,0.0f,0.5f);
     else
-    glColor4f(1.0f,0.0f,0.0f,0.5f);
-    glBegin(GL_LINES);
-    glVertex3f(-32.0f,(float)x,-1);
-    glVertex3f(48.0f,(float)x,-1);
-    glVertex3f((float)x,-32.0f,-1);
-    glVertex3f((float)x,48.0f,-1);
-    glEnd();
+    gl.color4f(1.0f,0.0f,0.0f,0.5f);
+    gl.begin(GL_LINES);
+    gl.vertex3f(-32.0f,(float)x,-1);
+    gl.vertex3f(48.0f,(float)x,-1);
+    gl.vertex3f((float)x,-32.0f,-1);
+    gl.vertex3f((float)x,48.0f,-1);
+    gl.end();
     }*/
 
     for (float x = -32.0f; x <= 48.0f; x += 1.0f)
     {
       if (static_cast<int>(x) % 16)
-        glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
+        gl.color4f(1.0f, 0.0f, 0.0f, 0.5f);
       else
-        glColor4f(0.0f, 1.0f, 0.0f, 0.5f);
-      glBegin(GL_LINES);
-      glVertex3f(-32.0f, x, -1);
-      glVertex3f(48.0f, x, -1);
-      glVertex3f(x, -32.0f, -1);
-      glVertex3f(x, 48.0f, -1);
-      glEnd();
+        gl.color4f(0.0f, 1.0f, 0.0f, 0.5f);
+      gl.begin(GL_LINES);
+      gl.vertex3f(-32.0f, x, -1);
+      gl.vertex3f(48.0f, x, -1);
+      gl.vertex3f(x, -32.0f, -1);
+      gl.vertex3f(x, 48.0f, -1);
+      gl.end();
     }
   }
 
-  glPopMatrix();
+  gl.popMatrix();
 
   ex = (int)(camera.x / TILESIZE);
   ez = (int)(camera.z / TILESIZE);
@@ -2074,18 +2072,18 @@ void World::saveMap()
   unsigned char image[256 * 256 * 3];
   MapTile *ATile;
   FILE *fid;
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glReadBuffer(GL_BACK);
+  gl.enable(GL_BLEND);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.readBuffer(GL_BACK);
 
   minX = -64 * 16;
   maxX = 64 * 16;
   minY = -64 * 16;
   maxY = 64 * 16;
 
-  glEnableClientState(GL_COLOR_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  gl.enableClientState(GL_COLOR_ARRAY);
+  gl.disableClientState(GL_NORMAL_ARRAY);
+  gl.disableClientState(GL_TEXTURE_COORD_ARRAY);
 
   for (int y = 0; y<64; y++)
   {
@@ -2095,17 +2093,17 @@ void World::saveMap()
         continue;
 
       ATile = mapIndex->loadTile(x, y);
-      glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+      gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-      glPushMatrix();
-      glScalef(0.08333333f, 0.08333333f, 1.0f);
+      gl.pushMatrix();
+      gl.scalef(0.08333333f, 0.08333333f, 1.0f);
 
-      //glTranslatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
-      glTranslatef(x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f);
+      //gl.translatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
+      gl.translatef(x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f);
 
       ATile->drawTextures();
-      glPopMatrix();
-      glReadPixels(video.xres() / 2 - 128, video.yres() / 2 - 128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
+      gl.popMatrix();
+      gl.readPixels(video.xres() / 2 - 128, video.yres() / 2 - 128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
       video.flip();
       std::stringstream ss;
       ss << basename.c_str() << "_map_" << x << "_" << y << ".raw";
@@ -2115,10 +2113,10 @@ void World::saveMap()
     }
   }
 
-  glDisableClientState(GL_COLOR_ARRAY);
+  gl.disableClientState(GL_COLOR_ARRAY);
 
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  gl.enableClientState(GL_NORMAL_ARRAY);
+  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void World::deleteModelInstance(int pUniqueID)
@@ -2363,8 +2361,8 @@ void World::moveHeight(int /*id*/, int x, int z, int _cx, int _cz)
     curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
   }
 
-  glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
+  gl.bindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
+  gl.bufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
 
   curChunk->recalcNorms();
 }

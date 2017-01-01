@@ -387,7 +387,7 @@ void MapTile::draw()
 {
 
 
-  glColor4f(1, 1, 1, 1);
+  gl.color4f(1, 1, 1, 1);
 
   for (int j = 0; j<16; ++j)
     for (int i = 0; i<16; ++i)
@@ -404,34 +404,34 @@ void MapTile::drawSelect()
 
 void MapTile::drawLines()//draw red lines around the square of a chunk
 {
-  glDisable(GL_COLOR_MATERIAL);
+  gl.disable(GL_COLOR_MATERIAL);
 
   for (int j = 0; j<16; ++j)
     for (int i = 0; i<16; ++i)
       mChunks[j][i]->drawLines();
 
-  glEnable(GL_COLOR_MATERIAL);
+  gl.enable(GL_COLOR_MATERIAL);
 }
 
 void MapTile::drawMFBO()
 {
   static const GLshort lIndices[] = { 4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1 };
 
-  glColor4f(0, 1, 1, 0.2f);
-  glBegin(GL_TRIANGLE_FAN);
+  gl.color4f(0, 1, 1, 0.2f);
+  gl.begin(GL_TRIANGLE_FAN);
   for (int i = 0; i < 18; ++i)
   {
-    glVertex3f(mMinimumValues[lIndices[i] * 3 + 0], mMinimumValues[lIndices[i] * 3 + 1], mMinimumValues[lIndices[i] * 3 + 2]);
+    gl.vertex3f(mMinimumValues[lIndices[i] * 3 + 0], mMinimumValues[lIndices[i] * 3 + 1], mMinimumValues[lIndices[i] * 3 + 2]);
   }
-  glEnd();
+  gl.end();
 
-  glColor4f(1, 1, 0, 0.2f);
-  glBegin(GL_TRIANGLE_FAN);
+  gl.color4f(1, 1, 0, 0.2f);
+  gl.begin(GL_TRIANGLE_FAN);
   for (int i = 0; i < 18; ++i)
   {
-    glVertex3f(mMaximumValues[lIndices[i] * 3 + 0], mMaximumValues[lIndices[i] * 3 + 1], mMaximumValues[lIndices[i] * 3 + 2]);
+    gl.vertex3f(mMaximumValues[lIndices[i] * 3 + 0], mMaximumValues[lIndices[i] * 3 + 1], mMaximumValues[lIndices[i] * 3 + 2]);
   }
-  glEnd();
+  gl.end();
 }
 
 void MapTile::drawWater()
@@ -441,13 +441,13 @@ void MapTile::drawWater()
     return; //no need to draw water on tile without water =)
   }
 
-  glDisable(GL_COLOR_MATERIAL);
-  glDisable(GL_LIGHTING);
+  gl.disable(GL_COLOR_MATERIAL);
+  gl.disable(GL_LIGHTING);
 
   Water->draw();
 
-  glEnable(GL_LIGHTING);
-  glEnable(GL_COLOR_MATERIAL);
+  gl.enable(GL_LIGHTING);
+  gl.enable(GL_COLOR_MATERIAL);
 }
 
 void MapTile::addChunksLiquid(TileWater *lq)
@@ -492,12 +492,12 @@ void MapTile::drawTextures()
 {
   float xOffset, yOffset;
 
-  glPushMatrix();
+  gl.pushMatrix();
   yOffset = zbase / CHUNKSIZE;
   xOffset = xbase / CHUNKSIZE;
-  glTranslatef(xOffset, yOffset, 0);
+  gl.translatef(xOffset, yOffset, 0);
 
-  //glTranslatef(-8,-8,0);
+  //gl.translatef(-8,-8,0);
 
   for (int j = 0; j<16; ++j) {
     for (int i = 0; i<16; ++i) {
@@ -505,7 +505,7 @@ void MapTile::drawTextures()
         mChunks[j][i]->drawTextures();
     }
   }
-  glPopMatrix();
+  gl.popMatrix();
 
 
 }

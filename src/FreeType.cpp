@@ -70,11 +70,11 @@ namespace freetype
 		glyphData._texture = new OpenGL::Texture();
 		glyphData._texture->bind();
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data);
+		gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		gl.texImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data);
 
 		delete[] expanded_data;
 		expanded_data = NULL;
@@ -89,18 +89,18 @@ namespace freetype
 		const float yl((const float)h - bitmap_glyph->top);
 		const float yh(yl + height);
 
-		glBegin(GL_TRIANGLE_STRIP);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex2f(xl, yl);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex2f(xl, yh);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex2f(xh, yl);
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex2f(xh, yh);
-		glEnd();
+		gl.begin(GL_TRIANGLE_STRIP);
+		gl.texCoord2f(0.0f, 0.0f);
+		gl.vertex2f(xl, yl);
+		gl.texCoord2f(0.0f, 1.0f);
+		gl.vertex2f(xl, yh);
+		gl.texCoord2f(1.0f, 0.0f);
+		gl.vertex2f(xh, yl);
+		gl.texCoord2f(1.0f, 1.0f);
+		gl.vertex2f(xh, yh);
+		gl.end();
 
-		glTranslatef(static_cast<float>(glyphData._width), 0.0f, 0.0f);
+		gl.translatef(static_cast<float>(glyphData._width), 0.0f, 0.0f);
 
 		glyphData._callList->endRecording();
 
@@ -173,22 +173,22 @@ namespace freetype
 
 		boost::split(lines, text, boost::is_any_of("\n\r"));
 
-		glColor3f(colorR, colorG, colorB);
+		gl.color3f(colorR, colorG, colorB);
 
-		glPushAttrib(GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT);
-		glMatrixMode(GL_MODELVIEW);
-		glDisable(GL_LIGHTING);
+		gl.pushAttrib(GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT);
+		gl.matrixMode(GL_MODELVIEW);
+		gl.disable(GL_LIGHTING);
 		opengl::texture::enable_texture();
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		gl.disable(GL_DEPTH_TEST);
+		gl.enable(GL_BLEND);
+		gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		int verticalPosition((int)y);
 
 		for (linesType::const_iterator line(lines.begin()), end(lines.end()); line != end; ++line)
 		{
-			glPushMatrix();
-			glTranslatef(x, (float)verticalPosition, 0.0f);
+			gl.pushMatrix();
+			gl.translatef(x, (float)verticalPosition, 0.0f);
 
 			const char* lineBegin = line->c_str();
 			const char* lineEnd = lineBegin + line->length();
@@ -206,10 +206,10 @@ namespace freetype
 			}
 
 			verticalPosition += (int)height;
-			glPopMatrix();
+			gl.popMatrix();
 		}
 
-		glPopAttrib();
+		gl.popAttrib();
 	}
 
 	void font_data::shprint(float x, float y, const std::string& text, float colorR, float colorG, float colorB) const

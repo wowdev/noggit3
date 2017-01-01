@@ -17,17 +17,17 @@ UIMenuBar::UIMenuBar()
 
 void UIMenuBar::render() const
 {
-	glColor4f(0.2f, 0.2f, 0.2f, 0.5f);
-	glBegin(GL_TRIANGLE_STRIP);
-	glVertex2f(0.0f, 0.0f);
-	glVertex2f(static_cast<float>(video.xres()), 0.0f);
-	glVertex2f(0.0f, 30.0f);
-	glVertex2f(static_cast<float>(video.xres()), 30.0f);
-	glEnd();
+	gl.color4f(0.2f, 0.2f, 0.2f, 0.5f);
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.vertex2f(0.0f, 0.0f);
+	gl.vertex2f(static_cast<float>(video.xres()), 0.0f);
+	gl.vertex2f(0.0f, 30.0f);
+	gl.vertex2f(static_cast<float>(video.xres()), 30.0f);
+	gl.end();
 
 	UIFrame::render();
 
-	glColor3f(1.0f, 1.0f, 1.0f);
+	gl.color3f(1.0f, 1.0f, 1.0f);
 
 	opengl::texture::set_active_texture();
 	opengl::texture::enable_texture();
@@ -35,16 +35,16 @@ void UIMenuBar::render() const
 	texture->bind();
 
 	//Draw Top Side
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.5f, 1.0f);
-	glVertex2f(0.0f, 33.0f);
-	glTexCoord2f(0.5f, 0.0f);
-	glVertex2f(static_cast<float>(video.xres()), 33.0f);
-	glTexCoord2f(0.375f, 1.0f);
-	glVertex2f(0.0f, 17.0f);
-	glTexCoord2f(0.375f, 0.0f);
-	glVertex2f(static_cast<float>(video.xres()), 17.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.5f, 1.0f);
+	gl.vertex2f(0.0f, 33.0f);
+	gl.texCoord2f(0.5f, 0.0f);
+	gl.vertex2f(static_cast<float>(video.xres()), 33.0f);
+	gl.texCoord2f(0.375f, 1.0f);
+	gl.vertex2f(0.0f, 17.0f);
+	gl.texCoord2f(0.375f, 0.0f);
+	gl.vertex2f(static_cast<float>(video.xres()), 17.0f);
+	gl.end();
 
 	opengl::texture::disable_texture();
 }
@@ -166,10 +166,10 @@ void MenuItemToggle::render() const
 	else
 		mMyCheckbox->setState(*mMyState);
 
-	glColor3f(1.0f, 1.0f, 1.0f);
+	gl.color3f(1.0f, 1.0f, 1.0f);
 
-	glPushMatrix();
-	glTranslatef(x(), y(), 0.0f);
+	gl.pushMatrix();
+	gl.translatef(x(), y(), 0.0f);
 
 	opengl::texture::set_active_texture();
 	opengl::texture::enable_texture();
@@ -179,23 +179,23 @@ void MenuItemToggle::render() const
 	else
 		textureDown->bind();
 
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(0.0f, 0.0f);
-	glTexCoord2f(1.0f, .0f);
-	glVertex2f(width(), 0.0f);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex2f(0.0f, height());
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2f(width(), height());
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.0f, 0.0f);
+	gl.vertex2f(0.0f, 0.0f);
+	gl.texCoord2f(1.0f, .0f);
+	gl.vertex2f(width(), 0.0f);
+	gl.texCoord2f(0.0f, 1.0f);
+	gl.vertex2f(0.0f, height());
+	gl.texCoord2f(1.0f, 1.0f);
+	gl.vertex2f(width(), height());
+	gl.end();
 
 	opengl::texture::disable_texture();
 
 	text->render();
 	mMyCheckbox->render();
 
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 MenuItemSwitch::MenuItemSwitch(MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert)

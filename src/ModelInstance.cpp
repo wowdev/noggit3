@@ -16,36 +16,36 @@ Vec3D TransformCoordsForModel(Vec3D pIn)
 
 void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth)
 {
-	glEnable(GL_LINE_SMOOTH);
-	glLineWidth(pLineWidth);
-	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+	gl.enable(GL_LINE_SMOOTH);
+	gl.lineWidth(pLineWidth);
+	gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-	glColor4fv(pColor);
+	gl.color4fv(pColor);
 
-	glBegin(GL_LINE_STRIP);
-	glVertex3f(pMin.x, pMax.y, pMin.z);
-	glVertex3f(pMin.x, pMin.y, pMin.z);
-	glVertex3f(pMax.x, pMin.y, pMin.z);
-	glVertex3f(pMax.x, pMin.y, pMax.z);
-	glVertex3f(pMax.x, pMax.y, pMax.z);
-	glVertex3f(pMax.x, pMax.y, pMin.z);
-	glVertex3f(pMin.x, pMax.y, pMin.z);
-	glVertex3f(pMin.x, pMax.y, pMax.z);
-	glVertex3f(pMin.x, pMin.y, pMax.z);
-	glVertex3f(pMin.x, pMin.y, pMin.z);
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex3f(pMin.x, pMin.y, pMax.z);
-	glVertex3f(pMax.x, pMin.y, pMax.z);
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex3f(pMax.x, pMax.y, pMin.z);
-	glVertex3f(pMax.x, pMin.y, pMin.z);
-	glEnd();
-	glBegin(GL_LINES);
-	glVertex3f(pMin.x, pMax.y, pMax.z);
-	glVertex3f(pMax.x, pMax.y, pMax.z);
-	glEnd();
+	gl.begin(GL_LINE_STRIP);
+	gl.vertex3f(pMin.x, pMax.y, pMin.z);
+	gl.vertex3f(pMin.x, pMin.y, pMin.z);
+	gl.vertex3f(pMax.x, pMin.y, pMin.z);
+	gl.vertex3f(pMax.x, pMin.y, pMax.z);
+	gl.vertex3f(pMax.x, pMax.y, pMax.z);
+	gl.vertex3f(pMax.x, pMax.y, pMin.z);
+	gl.vertex3f(pMin.x, pMax.y, pMin.z);
+	gl.vertex3f(pMin.x, pMax.y, pMax.z);
+	gl.vertex3f(pMin.x, pMin.y, pMax.z);
+	gl.vertex3f(pMin.x, pMin.y, pMin.z);
+	gl.end();
+	gl.begin(GL_LINES);
+	gl.vertex3f(pMin.x, pMin.y, pMax.z);
+	gl.vertex3f(pMax.x, pMin.y, pMax.z);
+	gl.end();
+	gl.begin(GL_LINES);
+	gl.vertex3f(pMax.x, pMax.y, pMin.z);
+	gl.vertex3f(pMax.x, pMin.y, pMin.z);
+	gl.end();
+	gl.begin(GL_LINES);
+	gl.vertex3f(pMin.x, pMax.y, pMax.z);
+	gl.vertex3f(pMax.x, pMax.y, pMax.z);
+	gl.end();
 }
 
 ModelInstance::ModelInstance(std::string const& filename)
@@ -98,30 +98,30 @@ void ModelInstance::draw()
 	if (!gWorld->frustum.intersectsSphere(pos, model->rad * sc))
 		return;
 
-	glPushMatrix();
+	gl.pushMatrix();
 
-	glTranslatef(pos.x, pos.y, pos.z);
-	glRotatef(dir.y - 90.0f, 0.0f, 1.0f, 0.0f);
-	glRotatef(-dir.x, 0.0f, 0.0f, 1.0f);
-	glRotatef(dir.z, 1.0f, 0.0f, 0.0f);
-	glScalef(sc, sc, sc);
+	gl.translatef(pos.x, pos.y, pos.z);
+	gl.rotatef(dir.y - 90.0f, 0.0f, 1.0f, 0.0f);
+	gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
+	gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
+	gl.scalef(sc, sc, sc);
 
 	if (Settings::getInstance()->renderModelsWithBox)
 	{
-		glDisable(GL_LIGHTING);
-		glDisable(GL_COLOR_MATERIAL);
+		gl.disable(GL_LIGHTING);
+		gl.disable(GL_COLOR_MATERIAL);
 		opengl::texture::set_active_texture (0);
 		opengl::texture::disable_texture();
 		opengl::texture::set_active_texture (1);
 		opengl::texture::disable_texture();
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		gl.enable(GL_BLEND);
+		gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		DrawABox(TransformCoordsForModel(model->header.VertexBoxMin), TransformCoordsForModel(model->header.VertexBoxMax), Vec4D(0.5f, 0.5f, 0.5f, 1.0f), 3.0f);
 		opengl::texture::set_active_texture (1);
 		opengl::texture::disable_texture();
 		opengl::texture::set_active_texture (0);
 		opengl::texture::enable_texture();
-		glEnable(GL_LIGHTING);
+		gl.enable(GL_LIGHTING);
 	}
 		model->draw();
 
@@ -131,17 +131,17 @@ void ModelInstance::draw()
 	if (currentSelection || model->hidden)
 	{
 		if (gWorld && gWorld->drawfog)
-			glDisable(GL_FOG);
+			gl.disable(GL_FOG);
 
-		glDisable(GL_LIGHTING);
+		gl.disable(GL_LIGHTING);
 
-		glDisable(GL_COLOR_MATERIAL);
+		gl.disable(GL_COLOR_MATERIAL);
 		opengl::texture::set_active_texture (0);
 		opengl::texture::disable_texture();
 		opengl::texture::set_active_texture (1);
 		opengl::texture::disable_texture();
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		gl.enable(GL_BLEND);
+		gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     Vec4D color = model->hidden ? Vec4D(0.0f, 0.0f, 1.0f, 1.0f) : Vec4D(1.0f, 1.0f, 0.0f, 1.0f);
 
@@ -151,23 +151,23 @@ void ModelInstance::draw()
     {
       DrawABox(TransformCoordsForModel(model->header.VertexBoxMin), TransformCoordsForModel(model->header.VertexBoxMax), Vec4D(1.0f, 1.0f, 1.0f, 1.0f), 1.0f);
 
-      glColor4fv(Vec4D(1.0f, 0.0f, 0.0f, 1.0f));
-      glBegin(GL_LINES);
-      glVertex3f(0.0f, 0.0f, 0.0f);
-      glVertex3f(model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f);
-      glEnd();
+      gl.color4fv(Vec4D(1.0f, 0.0f, 0.0f, 1.0f));
+      gl.begin(GL_LINES);
+      gl.vertex3f(0.0f, 0.0f, 0.0f);
+      gl.vertex3f(model->header.VertexBoxMax.x + model->header.VertexBoxMax.x / 5.0f, 0.0f, 0.0f);
+      gl.end();
 
-      glColor4fv(Vec4D(0.0f, 1.0f, 0.0f, 1.0f));
-      glBegin(GL_LINES);
-      glVertex3f(0.0f, 0.0f, 0.0f);
-      glVertex3f(0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f);
-      glEnd();
+      gl.color4fv(Vec4D(0.0f, 1.0f, 0.0f, 1.0f));
+      gl.begin(GL_LINES);
+      gl.vertex3f(0.0f, 0.0f, 0.0f);
+      gl.vertex3f(0.0f, model->header.VertexBoxMax.z + model->header.VertexBoxMax.z / 5.0f, 0.0f);
+      gl.end();
 
-      glColor4fv(Vec4D(0.0f, 0.0f, 1.0f, 1.0f));
-      glBegin(GL_LINES);
-      glVertex3f(0.0f, 0.0f, 0.0f);
-      glVertex3f(0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f);
-      glEnd();
+      gl.color4fv(Vec4D(0.0f, 0.0f, 1.0f, 1.0f));
+      gl.begin(GL_LINES);
+      gl.vertex3f(0.0f, 0.0f, 0.0f);
+      gl.vertex3f(0.0f, 0.0f, model->header.VertexBoxMax.y + model->header.VertexBoxMax.y / 5.0f);
+      gl.end();
     }
 
 		opengl::texture::set_active_texture (1);
@@ -175,13 +175,13 @@ void ModelInstance::draw()
 		opengl::texture::set_active_texture (0);
 		opengl::texture::enable_texture();
 
-		glEnable(GL_LIGHTING);
+		gl.enable(GL_LIGHTING);
 
 		if (gWorld && gWorld->drawfog)
-			glEnable(GL_FOG);
+			gl.enable(GL_FOG);
 	}
 
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 //! \todo  Get this drawn on the 2D view.
@@ -190,19 +190,19 @@ void ModelInstance::draw()
 if(CheckUniques(d1))
 return;
 
-glPushMatrix();
+gl.pushMatrix();
 
-glTranslatef(pos.x/CHUNKSIZE, pos.z/CHUNKSIZE, pos.y);
-glRotatef(-90.0f, 1, 0, 0);
-glRotatef(dir.y - 90.0f, 0, 1, 0);
-glRotatef(-dir.x, 0, 0, 1);
-glRotatef(dir.z, 1, 0, 0);
-glScalef(1/CHUNKSIZE,1/CHUNKSIZE,1/CHUNKSIZE);
-glScalef(sc,sc,sc);
+gl.translatef(pos.x/CHUNKSIZE, pos.z/CHUNKSIZE, pos.y);
+gl.rotatef(-90.0f, 1, 0, 0);
+gl.rotatef(dir.y - 90.0f, 0, 1, 0);
+gl.rotatef(-dir.x, 0, 0, 1);
+gl.rotatef(dir.z, 1, 0, 0);
+gl.scalef(1/CHUNKSIZE,1/CHUNKSIZE,1/CHUNKSIZE);
+gl.scalef(sc,sc,sc);
 
 model->draw();
 
-glPopMatrix();
+gl.popMatrix();
 }*/
 
 void ModelInstance::drawSelect()
@@ -217,24 +217,24 @@ void ModelInstance::drawSelect()
 	if (!gWorld->frustum.intersectsSphere(pos, model->rad * sc))
 		return;
 
-	glPushMatrix();
+	gl.pushMatrix();
 
-	glTranslatef(pos.x, pos.y, pos.z);
-	glRotatef(dir.y - 90.0f, 0.0f, 1.0f, 0.0f);
-	glRotatef(-dir.x, 0.0f, 0.0f, 1.0f);
-	glRotatef(dir.z, 1.0f, 0.0f, 0.0f);
-	glScalef(sc, sc, sc);
+	gl.translatef(pos.x, pos.y, pos.z);
+	gl.rotatef(dir.y - 90.0f, 0.0f, 1.0f, 0.0f);
+	gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
+	gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
+	gl.scalef(sc, sc, sc);
 
 	//if( nameID == 0xFFFFFFFF ) //for what is this line? It cracks model selection after map save! Temporary commenting...
 	nameID = SelectionNames.add(this);
 
-	glPushName(nameID);
+	gl.pushName(nameID);
 
 	model->drawSelect();
 
-	glPopName();
+	gl.popName();
 
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 
@@ -249,12 +249,12 @@ ModelInstance::~ModelInstance()
 	}
 }
 
-void glQuaternionRotate(const Vec3D& vdir, float w)
+void quaternionRotate(const Vec3D& vdir, float w)
 {
 	Matrix m;
 	Quaternion q(vdir, w);
 	m.quaternionRotate(q);
-	glMultMatrixf(m);
+	gl.multMatrixf(m);
 }
 
 void ModelInstance::draw2(const Vec3D& ofs, const math::degrees rotation)
@@ -264,15 +264,15 @@ void ModelInstance::draw2(const Vec3D& ofs, const math::degrees rotation)
 	//if ( (tpos - gWorld->camera).length_squared() > (gWorld->doodaddrawdistance2*model->rad*sc) ) return;
 	if (!gWorld->frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
-	glPushMatrix();
+	gl.pushMatrix();
 
-	glTranslatef(pos.x, pos.y, pos.z);
+	gl.translatef(pos.x, pos.y, pos.z);
 	Vec3D vdir(-dir.z, dir.x, dir.y);
-	glQuaternionRotate(vdir, w);
-	glScalef(sc, -sc, -sc);
+	quaternionRotate(vdir, w);
+	gl.scalef(sc, -sc, -sc);
 
 	model->draw();
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 void ModelInstance::draw2Select(const Vec3D& ofs, const math::degrees rotation)
@@ -282,15 +282,15 @@ void ModelInstance::draw2Select(const Vec3D& ofs, const math::degrees rotation)
 	if ((tpos - gWorld->camera).length_squared() > ((doodaddrawdistance*doodaddrawdistance)*model->rad*sc)) return;
 	if (!gWorld->frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
-	glPushMatrix();
+	gl.pushMatrix();
 
-	glTranslatef(pos.x, pos.y, pos.z);
+	gl.translatef(pos.x, pos.y, pos.z);
 	Vec3D vdir(-dir.z, dir.x, dir.y);
-	glQuaternionRotate(vdir, w);
-	glScalef(sc, -sc, -sc);
+	quaternionRotate(vdir, w);
+	gl.scalef(sc, -sc, -sc);
 
 	model->drawSelect();
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 void ModelInstance::resetDirection(){

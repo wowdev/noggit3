@@ -86,17 +86,17 @@ void UISlider::render() const
 	if (hidden())
 		return;
 
-	glPushMatrix();
-	glTranslatef(x(), y(), 0.0f);
+	gl.pushMatrix();
+	gl.translatef(x(), y(), 0.0f);
 
-	glColor3f(1.0f, 1.0f, 1.0f);
+	gl.color3f(1.0f, 1.0f, 1.0f);
 
 	std::stringstream temp;
 	temp << text << std::fixed << std::setprecision(2) << (value * scale + offset);
 	const std::string tempStr = temp.str();
 	app.getArial12().shprint(width() / 2.0f - app.getArial12().width(tempStr) / 2.0f, -16.0f, tempStr);
 
-	glPushMatrix();
+	gl.pushMatrix();
 
 	opengl::texture::set_active_texture();
 	opengl::texture::enable_texture();
@@ -109,127 +109,127 @@ void UISlider::render() const
 	const float width_minus = width() - 7.0f;
 
 	//Draw Bottom left Corner First
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.75f, 1.0f);
-	glVertex2f(-1.0f, height_plus);
-	glTexCoord2f(0.875f, 1.0f);
-	glVertex2f(7.0f, height_plus);
-	glTexCoord2f(0.75f, 0.0f);
-	glVertex2f(-1.0f, height_minus);
-	glTexCoord2f(0.875f, 0.0f);
-	glVertex2f(7.0f, height_minus);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.75f, 1.0f);
+	gl.vertex2f(-1.0f, height_plus);
+	gl.texCoord2f(0.875f, 1.0f);
+	gl.vertex2f(7.0f, height_plus);
+	gl.texCoord2f(0.75f, 0.0f);
+	gl.vertex2f(-1.0f, height_minus);
+	gl.texCoord2f(0.875f, 0.0f);
+	gl.vertex2f(7.0f, height_minus);
+	gl.end();
 
 	//Draw Bottom Right Corner
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.875f, 1.0f);
-	glVertex2f(width_minus, height_plus);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2f(width_plus, height_plus);
-	glTexCoord2f(0.875f, 0.0f);
-	glVertex2f(width_minus, height_minus);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex2f(width_plus, height_minus);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.875f, 1.0f);
+	gl.vertex2f(width_minus, height_plus);
+	gl.texCoord2f(1.0f, 1.0f);
+	gl.vertex2f(width_plus, height_plus);
+	gl.texCoord2f(0.875f, 0.0f);
+	gl.vertex2f(width_minus, height_minus);
+	gl.texCoord2f(1.0f, 0.0f);
+	gl.vertex2f(width_plus, height_minus);
+	gl.end();
 
 	//Draw Top Left Corner
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.5f, 1.0f);
-	glVertex2f(-1.0f, 4.0f);
-	glTexCoord2f(0.625f, 1.0f);
-	glVertex2f(7.0f, 4.0f);
-	glTexCoord2f(0.5f, 0.0f);
-	glVertex2f(-1.0f, -4.0f);
-	glTexCoord2f(0.625f, 0.0f);
-	glVertex2f(7.0f, -4.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.5f, 1.0f);
+	gl.vertex2f(-1.0f, 4.0f);
+	gl.texCoord2f(0.625f, 1.0f);
+	gl.vertex2f(7.0f, 4.0f);
+	gl.texCoord2f(0.5f, 0.0f);
+	gl.vertex2f(-1.0f, -4.0f);
+	gl.texCoord2f(0.625f, 0.0f);
+	gl.vertex2f(7.0f, -4.0f);
+	gl.end();
 
 	//Draw Top Right Corner
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.625f, 1.0f);
-	glVertex2f(width_minus, 4.0f);
-	glTexCoord2f(0.75f, 1.0f);
-	glVertex2f(width_plus, 4.0f);
-	glTexCoord2f(0.625f, 0.0f);
-	glVertex2f(width_minus, -4.0f);
-	glTexCoord2f(0.75f, 0.0f);
-	glVertex2f(width_plus, -4.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.625f, 1.0f);
+	gl.vertex2f(width_minus, 4.0f);
+	gl.texCoord2f(0.75f, 1.0f);
+	gl.vertex2f(width_plus, 4.0f);
+	gl.texCoord2f(0.625f, 0.0f);
+	gl.vertex2f(width_minus, -4.0f);
+	gl.texCoord2f(0.75f, 0.0f);
+	gl.vertex2f(width_plus, -4.0f);
+	gl.end();
 
 	if (height() > 8.0f)
 	{
 		//Draw Left Side
-		glBegin(GL_TRIANGLE_STRIP);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex2f(-1.0f, height_minus);
-		glTexCoord2f(0.125f, 1.0f);
-		glVertex2f(7.0f, height_minus);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex2f(-1.0f, 4.0f);
-		glTexCoord2f(0.125f, 0.0f);
-		glVertex2f(7.0f, 4.0f);
-		glEnd();
+		gl.begin(GL_TRIANGLE_STRIP);
+		gl.texCoord2f(0.0f, 1.0f);
+		gl.vertex2f(-1.0f, height_minus);
+		gl.texCoord2f(0.125f, 1.0f);
+		gl.vertex2f(7.0f, height_minus);
+		gl.texCoord2f(0.0f, 0.0f);
+		gl.vertex2f(-1.0f, 4.0f);
+		gl.texCoord2f(0.125f, 0.0f);
+		gl.vertex2f(7.0f, 4.0f);
+		gl.end();
 
 		//Draw Right Side
-		glBegin(GL_TRIANGLE_STRIP);
-		glTexCoord2f(0.125f, 1.0f);
-		glVertex2f(width_minus, height_minus);
-		glTexCoord2f(0.25f, 1.0f);
-		glVertex2f(width_plus, height_minus);
-		glTexCoord2f(0.125f, 0.0f);
-		glVertex2f(width_minus, 4.0f);
-		glTexCoord2f(0.25f, 0.0f);
-		glVertex2f(width_plus, 4.0f);
-		glEnd();
+		gl.begin(GL_TRIANGLE_STRIP);
+		gl.texCoord2f(0.125f, 1.0f);
+		gl.vertex2f(width_minus, height_minus);
+		gl.texCoord2f(0.25f, 1.0f);
+		gl.vertex2f(width_plus, height_minus);
+		gl.texCoord2f(0.125f, 0.0f);
+		gl.vertex2f(width_minus, 4.0f);
+		gl.texCoord2f(0.25f, 0.0f);
+		gl.vertex2f(width_plus, 4.0f);
+		gl.end();
 	}
 
 	if (width() > 14.0f)
 	{
 		//Draw Top Side
-		glBegin(GL_TRIANGLE_STRIP);
-		glTexCoord2f(0.5f, 1.0f);
-		glVertex2f(7.0f, height_plus);
-		glTexCoord2f(0.5f, 0.0f);
-		glVertex2f(width_minus, height_plus);
-		glTexCoord2f(0.375f, 1.0f);
-		glVertex2f(7.0f, height_minus);
-		glTexCoord2f(0.375f, 0.0f);
-		glVertex2f(width_minus, height_minus);
-		glEnd();
+		gl.begin(GL_TRIANGLE_STRIP);
+		gl.texCoord2f(0.5f, 1.0f);
+		gl.vertex2f(7.0f, height_plus);
+		gl.texCoord2f(0.5f, 0.0f);
+		gl.vertex2f(width_minus, height_plus);
+		gl.texCoord2f(0.375f, 1.0f);
+		gl.vertex2f(7.0f, height_minus);
+		gl.texCoord2f(0.375f, 0.0f);
+		gl.vertex2f(width_minus, height_minus);
+		gl.end();
 
 		//Draw Bottom Side
-		glBegin(GL_TRIANGLE_STRIP);
-		glTexCoord2f(0.375f, 1.0f);
-		glVertex2f(7.0f, 4.0f);
-		glTexCoord2f(0.375f, 0.0f);
-		glVertex2f(width_minus, 4.0f);
-		glTexCoord2f(0.25f, 1.0f);
-		glVertex2f(7.0f, -4.0f);
-		glTexCoord2f(0.25f, 0.0f);
-		glVertex2f(width_minus, -4.0f);
-		glEnd();
+		gl.begin(GL_TRIANGLE_STRIP);
+		gl.texCoord2f(0.375f, 1.0f);
+		gl.vertex2f(7.0f, 4.0f);
+		gl.texCoord2f(0.375f, 0.0f);
+		gl.vertex2f(width_minus, 4.0f);
+		gl.texCoord2f(0.25f, 1.0f);
+		gl.vertex2f(7.0f, -4.0f);
+		gl.texCoord2f(0.25f, 0.0f);
+		gl.vertex2f(width_minus, -4.0f);
+		gl.end();
 	}
 
-	glPopMatrix();
+	gl.popMatrix();
 
 	sliderTexture->bind();
 
 	const float sliderpos_x = width() * value;
 	const float sliderpos_y = height() / 2.0f;
 
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(sliderpos_x - 16.0f, sliderpos_y - 16.0f);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex2f(sliderpos_x + 16.0f, sliderpos_y - 16.0f);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex2f(sliderpos_x - 16.0f, sliderpos_y + 16.0f);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2f(sliderpos_x + 16.0f, sliderpos_y + 16.0f);
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.0f, 0.0f);
+	gl.vertex2f(sliderpos_x - 16.0f, sliderpos_y - 16.0f);
+	gl.texCoord2f(1.0f, 0.0f);
+	gl.vertex2f(sliderpos_x + 16.0f, sliderpos_y - 16.0f);
+	gl.texCoord2f(0.0f, 1.0f);
+	gl.vertex2f(sliderpos_x - 16.0f, sliderpos_y + 16.0f);
+	gl.texCoord2f(1.0f, 1.0f);
+	gl.vertex2f(sliderpos_x + 16.0f, sliderpos_y + 16.0f);
+	gl.end();
 
 	opengl::texture::disable_texture();
 
 
-	glPopMatrix();
+	gl.popMatrix();
 }

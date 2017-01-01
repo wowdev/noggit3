@@ -11,12 +11,12 @@ void UIFrame::render() const
 	if (hidden())
 		return;
 
-	glPushMatrix();
-	glTranslatef(x(), y(), 0.0f);
+	gl.pushMatrix();
+	gl.translatef(x(), y(), 0.0f);
 
 	renderChildren();
 
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 void UIFrame::renderChildren() const

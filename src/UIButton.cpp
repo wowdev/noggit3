@@ -97,10 +97,10 @@ void UIButton::setText(const std::string& pText)
 
 void UIButton::render() const
 {
-	glPushMatrix();
-	glTranslatef(x(), y(), 0.0f);
+	gl.pushMatrix();
+	gl.translatef(x(), y(), 0.0f);
 
-	glColor3f(1.0f, 1.0f, 1.0f);
+	gl.color3f(1.0f, 1.0f, 1.0f);
 
 	opengl::texture::set_active_texture();
 	opengl::texture::enable_texture();
@@ -110,22 +110,22 @@ void UIButton::render() const
 	else
 		textureDown->bind();
 
-	glBegin(GL_TRIANGLE_STRIP);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(0.0f, 0.0f);
-	glTexCoord2f(1.0f, 0.0f);
-	glVertex2f(width(), 0.0f);
-	glTexCoord2f(0.0f, 1.0f);
-	glVertex2f(0.0f, height());
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2f(width(), height());
-	glEnd();
+	gl.begin(GL_TRIANGLE_STRIP);
+	gl.texCoord2f(0.0f, 0.0f);
+	gl.vertex2f(0.0f, 0.0f);
+	gl.texCoord2f(1.0f, 0.0f);
+	gl.vertex2f(width(), 0.0f);
+	gl.texCoord2f(0.0f, 1.0f);
+	gl.vertex2f(0.0f, height());
+	gl.texCoord2f(1.0f, 1.0f);
+	gl.vertex2f(width(), height());
+	gl.end();
 
 	opengl::texture::disable_texture();
 
 	text->render();
 
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 UIFrame* UIButton::processLeftClick(float /*mx*/, float /*my*/)

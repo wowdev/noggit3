@@ -1,9 +1,11 @@
 #include "Alphamap.h"
 
+#include <opengl/context.hpp>
+
 Alphamap::Alphamap()
   : map(0)
 {
-  glGenTextures(1, &map);
+  gl.genTextures(1, &map);
   createNew();
   genTexture();
 }
@@ -12,7 +14,7 @@ Alphamap::Alphamap(MPQFile *f, unsigned int &flags, bool mBigAlpha, bool doNotFi
   : map(0)
 {
   createNew();
-  glGenTextures(1, &map);
+  gl.genTextures(1, &map);
 
   if(flags & 0x200 )
     readCompressed(f);
@@ -26,7 +28,7 @@ Alphamap::Alphamap(MPQFile *f, unsigned int &flags, bool mBigAlpha, bool doNotFi
 
 Alphamap::~Alphamap()
 {
-  glDeleteTextures(1, &map);
+  gl.deleteTextures(1, &map);
 }
 
 void Alphamap::readCompressed(MPQFile *f)
@@ -97,22 +99,22 @@ void Alphamap::createNew()
 
 void Alphamap::loadTexture()
 {
-  glBindTexture(GL_TEXTURE_2D, map);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap);
+  gl.bindTexture(GL_TEXTURE_2D, map);
+  gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap);
 }
 
 void Alphamap::genTexture()
 {
   loadTexture();
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void Alphamap::bind()
 {
-  glBindTexture(GL_TEXTURE_2D, map);
+  gl.bindTexture(GL_TEXTURE_2D, map);
 }
 
 bool Alphamap::isValid()

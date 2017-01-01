@@ -80,7 +80,7 @@ int TextureSet::addTexture(OpenGL::Texture* texture)
 
     texture->addReference();
 
-		textures[texLevel] = texture;    
+		textures[texLevel] = texture;
 		animated[texLevel] = 0;
 		texFlags[texLevel] = 0;
 		effectID[texLevel] = 0;
@@ -259,8 +259,8 @@ void TextureSet::start2DAnim(int id)
 	if (animated[id])
 	{
 		opengl::texture::set_active_texture (0);
-		glMatrixMode(GL_TEXTURE);
-		glPushMatrix();
+		gl.matrixMode(GL_TEXTURE);
+		gl.pushMatrix();
 
 		// note: this is ad hoc and probably completely wrong
 		const int spd = (animated[id] & 0x08) | ((animated[id] & 0x10) >> 2) | ((animated[id] & 0x20) >> 4) | ((animated[id] & 0x40) >> 6);
@@ -270,7 +270,7 @@ void TextureSet::start2DAnim(int id)
 		const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
 
 		const float f = (static_cast<int>(gWorld->animtime * (spd / 15.0f)) % 1600) / 1600.0f;
-		glTranslatef(f*fdx, f*fdy, 0);
+		gl.translatef(f*fdx, f*fdy, 0);
 	}
 }
 
@@ -281,8 +281,8 @@ void TextureSet::stop2DAnim(int id)
 
 	if (animated[id])
 	{
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
+		gl.popMatrix();
+		gl.matrixMode(GL_MODELVIEW);
 		opengl::texture::set_active_texture (1);
 	}
 }
@@ -296,8 +296,8 @@ void TextureSet::startAnim(int id)
 	if (animated[id])
 	{
 		opengl::texture::set_active_texture (0);
-		glMatrixMode(GL_TEXTURE);
-		glPushMatrix();
+		gl.matrixMode(GL_TEXTURE);
+		gl.pushMatrix();
 
 		// note: this is ad hoc and probably completely wrong
 		const int spd = (animated[id] & 0x08) | ((animated[id] & 0x10) >> 2) | ((animated[id] & 0x20) >> 4) | ((animated[id] & 0x40) >> 6);
@@ -307,7 +307,7 @@ void TextureSet::startAnim(int id)
 		const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
 		const int animspd = (const int)(200 * detail_size);
 		float f = ((static_cast<int>(gWorld->animtime*(spd / 15.0f))) % animspd) / static_cast<float>(animspd);
-		glTranslatef(f*fdx, f*fdy, 0);
+		gl.translatef(f*fdx, f*fdy, 0);
 	}
 }
 
@@ -318,8 +318,8 @@ void TextureSet::stopAnim(int id)
 
 	if (animated[id])
 	{
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
+		gl.popMatrix();
+		gl.matrixMode(GL_MODELVIEW);
 		opengl::texture::set_active_texture (1);
 	}
 }

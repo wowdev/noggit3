@@ -130,8 +130,8 @@ void UITreeView::render() const
 	if (hidden())
 		return;
 
-	glPushMatrix();
-	glTranslatef(x(), y(), 0);
+	gl.pushMatrix();
+	gl.translatef(x(), y(), 0);
 	mMyButton->render();
 	mMyText->render();
 
@@ -149,7 +149,7 @@ void UITreeView::render() const
 		}
 	}
 
-	glPopMatrix();
+	gl.popMatrix();
 }
 
 void UITreeView::SetSelectFunction(void(*pSelectFunction)(const std::string&))
