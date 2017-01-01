@@ -1,7 +1,7 @@
 #ifndef ALPHAMAP_H
 #define ALPHAMAP_H
 
-#include <GL/glew.h>
+#include <opengl/types.hpp>
 
 #include "MPQ.h"
 #include "Log.h"
