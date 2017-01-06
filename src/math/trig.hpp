@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <math/vector_3d.hpp>
+
 #include <cmath>
 
 namespace math
@@ -14,6 +16,8 @@ namespace math
     degrees (radians);
 
     float _;
+
+    using vec3 = vector_3d_base<degrees>;
   };
 
   struct radians
@@ -22,6 +26,8 @@ namespace math
     radians (degrees);
 
     float _;
+
+    using vec3 = vector_3d_base<radians>;
   };
 
   inline degrees::degrees (radians x) : _ (x._ * 180.0f / M_PI) {}

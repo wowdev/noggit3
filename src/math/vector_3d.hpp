@@ -8,35 +8,38 @@
 
 namespace math
 {
-  struct vector_3d
+  class vector_3d;
+
+  template<typename T>
+    struct vector_3d_base
   {
     union
     {
-      float _data[3];
+      T _data[3];
       struct
       {
-        float x;
-        float y;
-        float z;
+        T x;
+        T y;
+        T z;
       };
     };
 
-    vector_3d (float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f)
+    vector_3d_base<T> (T x_ = 0.0f, T y_ = 0.0f, T z_ = 0.0f)
       : x (x_)
       , y (y_)
       , z (z_)
     {}
 
-    inline static vector_3d min()
+    inline static vector_3d_base<T> min()
     {
-      return {std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()};
+      return {std::numeric_limits<T>::lowest(), std::numeric_limits<T>::lowest(), std::numeric_limits<T>::lowest()};
     }
-    inline static vector_3d max()
+    inline static vector_3d_base<T> max()
     {
-      return {std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()};
+      return {std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), std::numeric_limits<T>::max()};
     }
 
-    inline vector_3d& operator= (const vector_3d &v)
+    inline vector_3d_base<T>& operator= (const vector_3d_base<T> &v)
     {
       x = v.x;
       y = v.y;
@@ -44,45 +47,45 @@ namespace math
       return *this;
     }
 
-    inline vector_3d operator+ (const vector_3d &v) const
+    inline vector_3d_base<T> operator+ (const vector_3d_base<T> &v) const
     {
-      return vector_3d (x + v.x, y + v.y, z + v.z);
+      return vector_3d_base<T> (x + v.x, y + v.y, z + v.z);
     }
 
-    inline vector_3d operator- (const vector_3d &v) const
+    inline vector_3d_base<T> operator- (const vector_3d_base<T> &v) const
     {
-      return vector_3d (x - v.x, y - v.y, z - v.z);
+      return vector_3d_base<T> (x - v.x, y - v.y, z - v.z);
     }
 
-    inline vector_3d operator-() const
+    inline vector_3d_base<T> operator-() const
     {
-      return vector_3d (-x, -y, -z);
+      return vector_3d_base<T> (-x, -y, -z);
     }
 
-    inline float operator* (const vector_3d &v) const
+    inline T operator* (const vector_3d_base<T> &v) const
     {
       return x * v.x + y * v.y + z * v.z;
     }
 
-    inline vector_3d operator* (const float& d) const
+    inline vector_3d_base<T> operator* (const T& d) const
     {
-      return vector_3d (x * d, y * d, z * d);
+      return vector_3d_base<T> (x * d, y * d, z * d);
     }
 
-    friend vector_3d operator* (const float& d, const vector_3d& v)
+    friend vector_3d_base<T> operator* (const T& d, const vector_3d_base<T>& v)
     {
       return v * d;
     }
 
-    inline vector_3d operator% (const vector_3d& v) const
+    inline vector_3d_base<T> operator% (const vector_3d_base<T>& v) const
     {
-      return vector_3d ( y * v.z - z * v.y
+      return vector_3d_base<T> ( y * v.z - z * v.y
                        , z * v.x - x * v.z
                        , x * v.y - y * v.x
                        );
     }
 
-    inline vector_3d& operator+= (const vector_3d& v)
+    inline vector_3d_base<T>& operator+= (const vector_3d_base<T>& v)
     {
       x += v.x;
       y += v.y;
@@ -90,7 +93,7 @@ namespace math
       return *this;
     }
 
-    inline vector_3d& operator-= (const vector_3d& v)
+    inline vector_3d_base<T>& operator-= (const vector_3d_base<T>& v)
     {
       x -= v.x;
       y -= v.y;
@@ -98,7 +101,7 @@ namespace math
       return *this;
     }
 
-    inline vector_3d& operator*= (float d)
+    inline vector_3d_base<T>& operator*= (T d)
     {
       x *= d;
       y *= d;
@@ -106,37 +109,37 @@ namespace math
       return *this;
     }
 
-    inline float length_squared() const
+    inline T length_squared() const
     {
       return x * x + y * y + z * z;
     }
 
-    inline float length() const
+    inline T length() const
     {
       return std::sqrt (length_squared());
     }
 
-    inline vector_3d& normalize()
+    inline vector_3d_base<T>& normalize()
     {
       return operator *= (1.0f / length());
     }
 
-    vector_3d normalized() const
+    vector_3d_base<T> normalized() const
     {
       return *this * (1.0f / length());
     }
 
-    inline operator float*()
+    inline operator T*()
     {
       return _data;
     }
 
-    inline operator const float*() const
+    inline operator const T*() const
     {
       return _data;
     }
 
-    inline bool is_inside_of (const vector_3d& a, const vector_3d& b ) const
+    inline bool is_inside_of (const vector_3d_base<T>& a, const vector_3d_base<T>& b ) const
     {
       return a.x < x && b.x > x
           && a.y < y && b.y > y
@@ -144,18 +147,28 @@ namespace math
     }
   };
 
-  inline vector_3d min (vector_3d const& lhs, vector_3d const& rhs)
+  template<typename T>
+    inline vector_3d_base<T> min (vector_3d_base<T> const& lhs, vector_3d_base<T> const& rhs)
   {
     return { std::min (lhs.x, rhs.x)
            , std::min (lhs.y, rhs.y)
            , std::min (lhs.z, rhs.z)
            };
   }
-  inline vector_3d max (vector_3d const& lhs, vector_3d const& rhs)
+  template<typename T>
+    inline vector_3d_base<T> max (vector_3d_base<T> const& lhs, vector_3d_base<T> const& rhs)
   {
     return { std::max (lhs.x, rhs.x)
            , std::max (lhs.y, rhs.y)
            , std::max (lhs.z, rhs.z)
            };
   }
+
+  class vector_3d : public vector_3d_base<float>
+  {
+  public:
+    using vector_3d_base<float>::vector_3d_base;
+    vector_3d (vector_3d_base<float> x) : vector_3d_base<float> (std::move (x)) {}
+    vector_3d() : vector_3d_base<float>() {}
+  };
 }
