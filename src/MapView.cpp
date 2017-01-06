@@ -60,7 +60,6 @@
 #include "UIZoneIDBrowser.h"
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
-#include "MapIndex.h"
 
 
 
@@ -370,10 +369,10 @@ void toggleFlattenAngle(bool state, int)
 
 void SaveOrReload(UIFrame*, int pMode)
 {
-	if (pMode == 1)
-		gWorld->mapIndex->reloadTile((int)(static_cast<int>(gWorld->camera.x) / TILESIZE), (int)(static_cast<int>(gWorld->camera.z) / TILESIZE));
+  if (pMode == 1)
+    gWorld->mapIndex->reloadTile(tile_index(gWorld->camera));
 	else if (pMode == 0)
-		gWorld->mapIndex->saveTile((int)(static_cast<int>(gWorld->camera.x) / TILESIZE), (int)(static_cast<int>(gWorld->camera.z) / TILESIZE));
+		gWorld->mapIndex->saveTile(tile_index(gWorld->camera));
   else if (pMode == 2)
   {
     gWorld->fixAllGaps();
@@ -477,7 +476,7 @@ void openSwapper(UIFrame*, int)
 
 void removeTexDuplicateOnADT(UIFrame*, int)
 {
-  gWorld->removeTexDuplicateOnADT(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
+  gWorld->removeTexDuplicateOnADT(tile_index(gWorld->camera));
 }
 
 void openHelp(UIFrame*, int)
@@ -776,29 +775,35 @@ void test_menu_action(UIFrame*, int)
 void moveHeightmap(UIFrame*, int)
 {
 	// set areaid on all chunks of the current ADT
-	if (Environment::getInstance()->selectedAreaID)
-		gWorld->moveHeight(Environment::getInstance()->selectedAreaID, misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
+  if (Environment::getInstance()->selectedAreaID)
+  {
+    gWorld->moveHeight(Environment::getInstance()->selectedAreaID, tile_index(gWorld->camera));
+  }
 }
 
 void clearHeightmap(UIFrame*, int)
 {
 	// set areaid on all chunks of the current ADT
-	if (Environment::getInstance()->selectedAreaID)
-		gWorld->clearHeight(Environment::getInstance()->selectedAreaID, misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
+  if (Environment::getInstance()->selectedAreaID)
+  {
+    gWorld->clearHeight(Environment::getInstance()->selectedAreaID, tile_index(gWorld->camera));
+  }
 
 }
 
 void adtSetAreaID(UIFrame*, int)
 {
 	// set areaid on all chunks of the current ADT
-	if (Environment::getInstance()->selectedAreaID)
-		gWorld->setAreaID(Environment::getInstance()->selectedAreaID, misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
+  if (Environment::getInstance()->selectedAreaID)
+  {
+    gWorld->setAreaID(Environment::getInstance()->selectedAreaID, tile_index(gWorld->camera));
+  }
 }
 
 void clearAllModels(UIFrame*, int)
 {
 	// call the clearAllModelsOnADT method to clear them all on current ADT
-	gWorld->clearAllModelsOnADT(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
+	gWorld->clearAllModelsOnADT(tile_index(gWorld->camera));
 }
 
 void ClearDupModels(UIFrame*, int)
@@ -809,10 +814,14 @@ void ClearDupModels(UIFrame*, int)
 void menuWater(UIFrame*, int id)
 {
 	// call the clearAllModelsOnADT method to clear them all on current ADT
-	if (id == 1)
-		gWorld->addWaterLayer(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
-	else if (id == 0)
-		gWorld->deleteWaterLayer(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
+  if (id == 1)
+  {
+    gWorld->addWaterLayer(tile_index(gWorld->camera));
+  }
+  else if (id == 0)
+  {
+    gWorld->deleteWaterLayer(tile_index(gWorld->camera));
+  }
 }
 
 void funcAllFix(UIFrame*, int id)
@@ -822,7 +831,7 @@ void funcAllFix(UIFrame*, int id)
 
 void ClearShader(UIFrame*, int id)
 {
-	gWorld->ClearShader(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
+	gWorld->ClearShader(tile_index(gWorld->camera));
 }
 
 void toBigAlpha(UIFrame*, int)
@@ -862,7 +871,7 @@ std::string getCurrentHeightmapPath()
 void clearTexture(UIFrame* /*f*/, int /*set*/)
 {
 	// set areaid on all chunks of the current ADT
-	gWorld->setBaseTexture(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
+	gWorld->setBaseTexture(tile_index(gWorld->camera));
 }
 
 
@@ -1341,10 +1350,12 @@ MapView::MapView(float ah0, float av0)
 
 	// Set camera y (height) position to current ground height plus some space.
   Vec3D t = Vec3D(0, 0, 0);
-  const int x = (const int)(gWorld->camera.x / TILESIZE);
-  const int z = (const int)(gWorld->camera.z / TILESIZE);
-  if (!gWorld->mapIndex->tileLoaded(z, x))
-    gWorld->mapIndex->loadTile(z, x);
+  tile_index tile(gWorld->camera);
+  if (!gWorld->mapIndex->tileLoaded(tile))
+  {
+    gWorld->mapIndex->loadTile(tile);
+  }
+    
   gWorld->GetVertex(gWorld->camera.x, gWorld->camera.z, &t);
 
   // min elevation according to https://wowdev.wiki/AreaTable.dbc
@@ -1370,7 +1381,7 @@ void MapView::tick(float t, float dt)
 {
 
 	// start unloading tiles
-	gWorld->mapIndex->unloadTiles(static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE);
+	gWorld->mapIndex->unloadTiles(tile_index(gWorld->camera));
 
 	dt = std::min(dt, 1.0f);
 
@@ -1772,12 +1783,9 @@ void MapView::tick(float t, float dt)
             {
               // draw the selected AreaId on current selected chunk
               nameEntry * lSelection = gWorld->GetCurrentSelection();
-              int mtx, mtz, mcx, mcy;
-              mtx = lSelection->data.mapchunk->mt->mPositionX;
-              mtz = lSelection->data.mapchunk->mt->mPositionZ;
-              mcx = lSelection->data.mapchunk->px;
-              mcy = lSelection->data.mapchunk->py;
-              gWorld->setAreaID(Environment::getInstance()->selectedAreaID, mtx, mtz, mcx, mcy);
+              MapChunk* chnk = lSelection->data.mapchunk;
+              tile_index tile(chnk->mt->mPositionX, chnk->mt->mPositionZ);
+              gWorld->setAreaID(Environment::getInstance()->selectedAreaID, tile, chnk->px, chnk->py);
             }
             else if (Environment::getInstance()->CtrlDown)
             {
@@ -1804,19 +1812,17 @@ void MapView::tick(float t, float dt)
 				case 6:
 					if (mViewMode == eViewMode_3D && !underMap)
 					{
-						nameEntry* lSelection = gWorld->GetCurrentSelection();
-						int mtx, mtz, mcx, mcy;
-						mtx = lSelection->data.mapchunk->mt->mPositionX;
-						mtz = lSelection->data.mapchunk->mt->mPositionZ;
-						mcx = lSelection->data.mapchunk->px;
-						mcy = lSelection->data.mapchunk->py;
+            nameEntry* lSelection = gWorld->GetCurrentSelection();
+            MapChunk* chnk = lSelection->data.mapchunk;
+            tile_index tile(chnk->mt->mPositionX, chnk->mt->mPositionZ);
+
 						if (Environment::getInstance()->ShiftDown)
 						{
-							gWorld->addWaterLayerChunk(mtx, mtz, mcy, mcx);
+							gWorld->addWaterLayerChunk(tile, chnk->px, chnk->py);
 						}
 						if (Environment::getInstance()->CtrlDown && !Environment::getInstance()->AltDown)
 						{
-							gWorld->delWaterLayerChunk(mtx, mtz, mcy, mcx);
+							gWorld->delWaterLayerChunk(tile, chnk->px, chnk->py);
 						}
 						if (Environment::getInstance()->AltDown && !Environment::getInstance()->CtrlDown)
 						{
@@ -2141,12 +2147,14 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 		if (e->keysym.sym == SDLK_KP9)
 			keyr = -1;
 
-		if (e->keysym.sym == SDLK_KP0)
-			if (terrainMode == 6)
-			{
-				gWorld->setWaterHeight(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE), 0.0f);
-				mainGui->guiWater->updateData();
-			}
+    if (e->keysym.sym == SDLK_KP0)
+    {
+      if (terrainMode == 6)
+      {
+        gWorld->setWaterHeight(tile_index(gWorld->camera), 0.0f);
+        mainGui->guiWater->updateData();
+      }
+    }
 
 
 		// delete object
@@ -2526,9 +2534,8 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 					paint_brush->setValue(textureBrush.getRadius() / 100.0f);
 					break;
 				case 6:
-					int x = (int)(static_cast<int>(gWorld->camera.x) / TILESIZE);
-					int z = (int)(static_cast<int>(gWorld->camera.z) / TILESIZE);
-					gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) + 2.0f));
+          tile_index tile(gWorld->camera);
+					gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 2.0f));
 					mainGui->guiWater->updateData();
 					break;
 				}
@@ -2537,15 +2544,14 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			{
 				if (terrainMode == 6)
 				{
-					int x = (int)(static_cast<int>(gWorld->camera.x) / TILESIZE);
-					int z = (int)(static_cast<int>(gWorld->camera.z) / TILESIZE);
+          tile_index tile(gWorld->camera);
 
 					if (Environment::getInstance()->ShiftDown)
-						gWorld->setWaterTrans(x, z, static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(x, z)) + 1)));
+						gWorld->setWaterTrans(tile, static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(tile)) + 1)));
 					else if (Environment::getInstance()->CtrlDown)
-						gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) + 5.0f));
+						gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 5.0f));
 					else
-						gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) + 1.0f));
+						gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 1.0f));
 
 					mainGui->guiWater->updateData();
 				}
@@ -2580,9 +2586,8 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 					paint_brush->setValue(textureBrush.getRadius() / 100);
 					break;
 				case 6:
-					int x = (int)(static_cast<int>(gWorld->camera.x) / TILESIZE);
-					int z = (int)(static_cast<int>(gWorld->camera.z) / TILESIZE);
-					gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 2.0f));
+          tile_index tile(gWorld->camera);
+					gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 2.0f));
 					mainGui->guiWater->updateData();
 					break;
 				}
@@ -2591,14 +2596,13 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 			{
 				if (terrainMode == 6)
 				{
-					int x = (int)(static_cast<int>(gWorld->camera.x) / TILESIZE);
-					int z = (int)(static_cast<int>(gWorld->camera.z) / TILESIZE);
+          tile_index tile(gWorld->camera);
 					if (Environment::getInstance()->ShiftDown)
-						gWorld->setWaterTrans(x, z, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(x, z))) - 1));
+						gWorld->setWaterTrans(tile, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(tile))) - 1));
 					else if (Environment::getInstance()->CtrlDown)
-						gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 5.0f));
+						gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 5.0f));
 					else
-						gWorld->setWaterHeight(x, z, std::ceil(gWorld->getWaterHeight(x, z) - 1.0f));
+						gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 1.0f));
 
 					mainGui->guiWater->updateData();
 				}
@@ -3114,8 +3118,12 @@ void MapView::mouseclick(SDL_MouseButtonEvent *e)
 }
 
 void MapView::checkWaterSave(){
-	if (gWorld->canWaterSave((int)(static_cast<int>(gWorld->camera.x) / TILESIZE), (int)(static_cast<int>(gWorld->camera.z) / TILESIZE)))
-		mainGui->waterSaveWarning->hide();
-	else
-		mainGui->waterSaveWarning->show();
+  if (gWorld->canWaterSave(tile_index(gWorld->camera)))
+  {
+    mainGui->waterSaveWarning->hide();
+  }
+  else
+  {
+    mainGui->waterSaveWarning->show();
+  }		
 }

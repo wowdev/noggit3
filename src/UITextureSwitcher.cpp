@@ -7,6 +7,7 @@
 #include "UITexturingGUI.h"
 #include "UIButton.h"
 #include "UIText.h"
+#include "MapIndex.h"
 #include "MapView.h"
 #include "Misc.h"
 #include "TextureSet.h"
@@ -17,7 +18,7 @@ extern World *gWorld;
 
 void swapADT(UIFrame *f, int id)
 {
-	gWorld->swapTexture(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE), (static_cast<UITextureSwitcher *>(f->parent()))->getTextures());
+	gWorld->swapTexture(tile_index(gWorld->camera), (static_cast<UITextureSwitcher *>(f->parent()))->getTextures());
 }
 
 

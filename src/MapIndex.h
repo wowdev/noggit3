@@ -1,6 +1,7 @@
 #ifndef MAPINDEX_H
 #define MAPINDEX_H
 
+#include <assert.h>
 #include <string>
 #include <stdint.h>
 #include <sstream>
@@ -8,6 +9,7 @@
 #include <ctime>
 
 #include "MapHeaders.h"
+#include "Vec3D.h"
 
 class MapTile;
 
@@ -27,35 +29,127 @@ private:
 	friend class MapIndex;
 };
 
+struct tile_index
+{
+  tile_index(const Vec3D& pos) : tile_index(pos.x / TILESIZE, pos.z / TILESIZE) { }
+  tile_index(size_t tileX, size_t tileZ) : x(tileX), z(tileZ)
+  {  
+    assert(x < 64);
+    assert(z < 64);
+  }
+
+  int x;
+  int z;
+};
+
 class MapIndex
 {
 public:
+  struct loaded_tiles
+  {
+    struct loaded_tile_iterator
+    {
+      loaded_tile_iterator(MapIndex const* map_index, std::size_t x, std::size_t y)
+        : _map_index(map_index)
+        , _x(x)
+        , _y(y)
+      {
+        if (_y != 64 && !is_loaded())
+        {
+          ++(*this);
+        }
+      }
+
+      bool operator!= (loaded_tile_iterator const& other) const
+      {
+        //! \note end() only uses _y.
+        return _y != other._y;
+      }
+
+      loaded_tile_iterator& operator++()
+      {
+        if (_y == 64)
+        {
+          return *this;
+        }
+
+        do
+        {
+          _x = (_x + 1) % 64;
+          _y += _x == 0;
+        } while (_y != 64 && !is_loaded());
+
+        return *this;
+      }
+
+      MapTile* operator*() const
+      {
+        return _map_index->getTile(make_index());
+      }
+
+      MapTile* operator->() const
+      {
+        return operator*();
+      }
+
+      tile_index make_index() const
+      {
+        return tile_index(_x, _y);
+      }
+
+      bool is_loaded() const
+      {
+        return _map_index->tileLoaded(make_index());
+      }
+
+      MapIndex const* _map_index;
+      std::size_t _x;
+      std::size_t _y;
+    };
+
+    MapIndex const* _map_index;
+
+    loaded_tile_iterator begin() const
+    {
+      return{ _map_index, 0, 0 };
+    }
+    loaded_tile_iterator end() const
+    {
+      return{ nullptr, 64, 64 };
+    }
+  };
+
+  loaded_tiles loaded_tiles() const
+  {
+    return{ this };
+  }
+
 	MapIndex(const std::string& pBasename);
 	~MapIndex();
 
-	void enterTile(int x, int z);
-	MapTile *loadTile(int x, int z);
+	void enterTile(const tile_index& tile);
+	MapTile *loadTile(const tile_index& tile);
 
 	void setChanged(float x, float z);
-	void setChanged(int z, int x);
+	void setChanged(const tile_index& tile);
+  void setChanged(MapTile* tile);
 
-	void unsetChanged(int x, int z);
+	void unsetChanged(const tile_index& tile);
 	void setFlag(bool to, float x, float z);
 	void setWater(bool to, float x, float z);
-	int getChanged(int x, int z);
+	int getChanged(const tile_index& tile);
 
-	void saveTile(int x, int z);
+	void saveTile(const tile_index& tile);
 	void saveChanged();
-	void reloadTile(int x, int z);					
-	void unloadTiles(int x, int z);					// unloads all tiles more then x adts away fr0m given
-	void unloadTile(int x, int z);					// unload given tile
-	void markOnDisc(int x, int z, bool mto);
-	bool isTileExternal(int x, int z);
+	void reloadTile(const tile_index& tile);
+	void unloadTiles(const tile_index& tile);	// unloads all tiles more then x adts away from given
+	void unloadTile(const tile_index& tile);	// unload given tile
+	void markOnDisc(const tile_index& tile, bool mto);
+	bool isTileExternal(const tile_index& tile);
 
 	bool hasAGlobalWMO();
-	bool oktile(int z, int x);
-	bool hasTile(int pZ, int pX);
-	bool tileLoaded(int z, int x);
+	bool hasTile(const tile_index& index) const;
+	bool tileLoaded(const tile_index& tile) const;
 
 	bool hasAdt();
 	void setAdt(bool value);
@@ -64,13 +158,16 @@ public:
 
   uint32_t getHighestGUIDFromFile(const std::string& pFilename);
 
-	MapTile* getTile(size_t z, size_t x);
-	uint32_t getFlag(size_t z, size_t x);
+	MapTile* getTile(const tile_index& tile) const;
+	uint32_t getFlag(const tile_index& tile) const;
 
   void setBigAlpha();
   bool hasBigAlpha() const { return mBigAlpha; }
 
 private:
+  bool hasTile(int tileX, int tileZ) const;
+  bool tileLoaded(int tileX, int tileZ) const;
+
 	const std::string basename;
 	std::string globalWMOName;
 

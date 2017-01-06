@@ -1050,7 +1050,7 @@ void MapTile::saveTile()
     f5->close();
   }
 
-  gWorld->mapIndex->markOnDisc(this->mPositionX, this->mPositionZ, true);
+  gWorld->mapIndex->markOnDisc(tile_index(this->mPositionX, this->mPositionZ), true);
 
   lObjectInstances.clear();
   lModelInstances.clear();

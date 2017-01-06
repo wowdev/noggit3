@@ -2,6 +2,7 @@
 #define __UI_WATER_H
 
 #include "UICloseWindow.h"
+#include "MapIndex.h"
 
 class UISlider;
 class UIText;
@@ -16,7 +17,7 @@ public:
 
 	void resize();
 
-	void updatePos(int newTileX, int newTileY);
+	void updatePos(int tileX, int tileZ);
 	void updateData();
 
 	void setWaterTrans(float val);
@@ -46,8 +47,7 @@ private:
   UICheckBox *displayAllLayers;
   UIText *waterLayer;
 
-	int tileX;
-	int tileY;
+  tile_index tile;
 };
 
 #endif
