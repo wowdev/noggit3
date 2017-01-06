@@ -669,7 +669,7 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
 	if (sys->flags == 1041) { // Trans Halo
 		p.pos = sys->parent->mat * (sys->pos + Vec3D(misc::randfloat(-l, l), 0, misc::randfloat(-w, w)));
 
-		const float t = misc::randfloat(0.0f, 2.0f * (float)PI);
+		const float t = misc::randfloat(0.0f, 2.0f * (float)M_PI);
 
 		p.pos = Vec3D(0.0f, sys->pos.y + 0.15f, sys->pos.z) + Vec3D(cos(t) / 8, 0.0f, sin(t) / 8); // Need to manually correct for the halo - why?
 
@@ -738,13 +738,13 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 	radius = misc::randfloat(0, 1);
 
 	// Old method
-	//float t = misc::randfloat(0,2*PI);
+	//float t = misc::randfloat(0,2*M_PI);
 
 	// New
 	// Spread should never be zero for sphere particles ?
 	float t = 0;
 	if (spr == 0)
-		t = misc::randfloat((float)-PI, (float)PI);
+		t = misc::randfloat((float)-M_PI, (float)M_PI);
 	else
 		t = misc::randfloat(-spr, spr);
 

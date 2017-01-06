@@ -1119,7 +1119,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 
     if (dist < radius)
     {
-      float o = orientation*PI / 180, tanA = tan(angle*PI / 180);
+      float o = orientation*M_PI / 180, tanA = tan(angle*M_PI / 180);
       float ah = h + (xdiff*cos(o) + zdiff*sin(o))*  tanA;
 
       // 1 = raise only, 2 = lower only
@@ -1182,7 +1182,7 @@ bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int 
 
     if (dist < radius)
     {
-      float o = orientation*PI / 180, tanA = tan(angle*PI / 180);
+      float o = orientation*M_PI / 180, tanA = tan(angle*M_PI / 180);
       float ah = origin.y + ((mVertices[i].x - origin.x)*cos(o) + (mVertices[i].z - origin.z)*sin(o))*  tanA;
       // 1 = raise only, 2 = lower only
       if ((flattenType == 1 && ah < mVertices[i].y) || (flattenType == 2 && ah > mVertices[i].y))

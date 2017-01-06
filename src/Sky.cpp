@@ -158,7 +158,7 @@ void Skies::draw()
 	gl.begin(GL_QUADS);
 	for (int h = 0; h<hseg; h++) {
 		for (int i = 0; i<cnum; ++i) {
-			basepos1[i] = basepos2[i] = Vec3D(cosf(angles[i] * (float)PI / 180.0f)*rad, sinf(angles[i] * (float)PI / 180.0f)*rad, 0);
+			basepos1[i] = basepos2[i] = Vec3D(cosf(angles[i] * (float)M_PI / 180.0f)*rad, sinf(angles[i] * (float)M_PI / 180.0f)*rad, 0);
       math::rotate(0, 0, &basepos1[i].x, &basepos1[i].z, math::radians (M_PI*2.0f / hseg*h));
       math::rotate(0, 0, &basepos2[i].x, &basepos2[i].z, math::radians (M_PI*2.0f / hseg*(h + 1)));
 		}
@@ -267,10 +267,10 @@ void Skies::initSky(Vec3D pos, int t)
 
 void drawCircle(unsigned int *buf, int dim, float x, float y, float r, unsigned int col)
 {
-	float circ = 2 * r*(float)PI;
+	float circ = 2 * r*(float)M_PI;
 	gl.begin(GL_LINES);
 	for (int i = 0; i<circ; ++i) {
-		float phi = 2 * (float)PI*i / circ;
+		float phi = 2 * (float)M_PI*i / circ;
 		int px = (int)(x + r * cosf(phi));
 		int py = (int)(y + r * sinf(phi));
 		if (px >= 0 && px<dim && py >= 0 && py<dim) {
