@@ -1,5 +1,6 @@
 #include "ModelInstance.h"
 
+#include "Frustum.h"
 #include "Log.h"
 #include "Misc.h" // checkinside
 #include "Model.h" // Model, etc.
@@ -86,7 +87,7 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
 	sc = d->scale / 1024.0f;
 }
 
-void ModelInstance::draw()
+void ModelInstance::draw (Frustum const& frustum)
 {
 	/*  float dist = ( pos - gWorld->camera ).length() - model->rad;
 
@@ -95,7 +96,7 @@ void ModelInstance::draw()
 	if( CheckUniques( d1 ) )
 	return;*/
 
-	if (!gWorld->frustum.intersectsSphere(pos, model->rad * sc))
+	if (!frustum.intersectsSphere(pos, model->rad * sc))
 		return;
 
 	gl.pushMatrix();
@@ -205,7 +206,7 @@ model->draw();
 gl.popMatrix();
 }*/
 
-void ModelInstance::drawSelect()
+void ModelInstance::drawSelect (Frustum const& frustum)
 {
 	/*float dist = ( pos - gWorld->camera ).length() - model->rad;
 
@@ -214,7 +215,7 @@ void ModelInstance::drawSelect()
 	if( CheckUniques( d1 ) )
 	return;*/
 
-	if (!gWorld->frustum.intersectsSphere(pos, model->rad * sc))
+	if (!frustum.intersectsSphere(pos, model->rad * sc))
 		return;
 
 	gl.pushMatrix();
@@ -254,12 +255,12 @@ void quaternionRotate(const Vec3D& vdir, float w)
 	gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, math::quaternion (vdir, w)));
 }
 
-void ModelInstance::draw2(const Vec3D& ofs, const math::degrees rotation)
+void ModelInstance::draw2(const Vec3D& ofs, const math::degrees rotation, Frustum const& frustum)
 {
 	Vec3D tpos(ofs + pos);
   math::rotate (ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
 	//if ( (tpos - gWorld->camera).length_squared() > (gWorld->doodaddrawdistance2*model->rad*sc) ) return;
-	if (!gWorld->frustum.intersectsSphere(tpos, model->rad*sc)) return;
+	if (!frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
 	gl.pushMatrix();
 
@@ -272,12 +273,12 @@ void ModelInstance::draw2(const Vec3D& ofs, const math::degrees rotation)
 	gl.popMatrix();
 }
 
-void ModelInstance::draw2Select(const Vec3D& ofs, const math::degrees rotation)
+void ModelInstance::draw2Select(const Vec3D& ofs, const math::degrees rotation, Frustum const& frustum)
 {
 	Vec3D tpos(ofs + pos);
   math::rotate(ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
 	if ((tpos - gWorld->camera).length_squared() > ((doodaddrawdistance*doodaddrawdistance)*model->rad*sc)) return;
-	if (!gWorld->frustum.intersectsSphere(tpos, model->rad*sc)) return;
+	if (!frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
 	gl.pushMatrix();
 

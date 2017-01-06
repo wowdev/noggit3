@@ -1,27 +1,64 @@
-#ifndef FRUSTUM_H
-#define FRUSTUM_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "Vec3D.h"
+#pragma once
 
-struct Plane {
-	float a, b, c, d;
-	void normalize();
+#include <math/vector_3d.hpp>
+#include <math/vector_4d.hpp>
+
+enum SIDES
+{
+  RIGHT,
+  LEFT,
+  BOTTOM,
+  TOP,
+  BACK,
+  FRONT,
+  SIDES_MAX,
 };
 
-enum Directions {
-	RIGHT, LEFT, BOTTOM, TOP, BACK, FRONT
+class Frustum
+{
+  class plane
+  {
+  public:
+    plane() = default;
+    plane (math::vector_4d const& vec)
+      : _normal (vec.xyz())
+      , _distance (vec.w)
+    {
+      normalize();
+    }
+
+    void normalize()
+    {
+      const float recip (1.0f / _normal.length());
+      _normal *= recip;
+      _distance *= recip;
+    }
+
+    const float& distance() const
+    {
+      return _distance;
+    }
+
+    const ::math::vector_3d& normal() const
+    {
+      return _normal;
+    }
+
+  private:
+    ::math::vector_3d _normal;
+    float _distance;
+  } _planes[SIDES_MAX];
+
+public:
+  Frustum();
+
+  bool contains (const ::math::vector_3d& point) const;
+  bool intersects ( const ::math::vector_3d& v1
+                  , const ::math::vector_3d& v2
+                  ) const;
+  bool intersectsSphere ( const ::math::vector_3d& position
+                        , const float& radius
+                        ) const;
 };
-
-struct Frustum {
-	Plane planes[6];
-
-	void retrieve();
-
-	bool contains(const Vec3D &v) const;
-	bool intersects(const Vec3D &v1, const Vec3D &v2) const;
-	bool intersectsSphere(const Vec3D& v, const float rad) const;
-};
-
-
-#endif
-

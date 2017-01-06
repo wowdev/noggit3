@@ -60,7 +60,7 @@ WMOInstance::~WMOInstance()
 
 void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth);
 
-void WMOInstance::draw()
+void WMOInstance::draw (Frustum const& frustum)
 {
 
 	gl.pushMatrix();
@@ -73,9 +73,9 @@ void WMOInstance::draw()
 	gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
 
 	if (gWorld->IsSelection(eEntry_WMO) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID)
-		wmo->draw(doodadset, pos, math::degrees (roty), true, true, true);
+		wmo->draw(doodadset, pos, math::degrees (roty), true, true, true, frustum);
 	else
-		wmo->draw(doodadset, pos, math::degrees (roty), false, false, false);
+		wmo->draw(doodadset, pos, math::degrees (roty), false, false, false, frustum);
 
 	gl.popMatrix();
 
@@ -219,7 +219,7 @@ bool WMOInstance::isInsideChunk(Vec3D lTileExtents[2])
 	return false;
 }
 
-void WMOInstance::drawSelect()
+void WMOInstance::drawSelect (Frustum const& frustum)
 {
 	gl.pushMatrix();
 
@@ -234,7 +234,7 @@ void WMOInstance::drawSelect()
 	mSelectionID = SelectionNames.add(this);
 	gl.pushName(mSelectionID);
 
-	wmo->drawSelect(doodadset, pos, math::degrees (-roty));
+	wmo->drawSelect(doodadset, pos, math::degrees (-roty), frustum);
 
 	gl.popName();
 

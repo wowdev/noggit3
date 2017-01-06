@@ -4,6 +4,7 @@
 #include <map>
 #include "Brush.h"
 #include "Environment.h"
+#include "Frustum.h"
 #include "Liquid.h"
 #include "Log.h"
 #include "MapHeaders.h"
@@ -548,9 +549,9 @@ void MapChunk::drawPass(int id)
   textureSet->stopAnim(id);
 }
 
-void MapChunk::drawLines()
+void MapChunk::drawLines (Frustum const& frustum)
 {
-  if (!gWorld->frustum.intersects(vmin, vmax))
+  if (!frustum.intersects(vmin, vmax))
     return;
 
   if (!gWorld->drawlines)
@@ -638,10 +639,9 @@ void MapChunk::drawContour()
   gl.disable(GL_TEXTURE_GEN_S);
 }
 
-void MapChunk::draw()
+void MapChunk::draw (Frustum const& frustum)
 {
-
-  if (!gWorld->frustum.intersects(vmin, vmax))
+  if (!frustum.intersects(vmin, vmax))
     return;
 
   float mydist = (gWorld->camera - vcenter).length() - r;
@@ -837,9 +837,9 @@ bool MapChunk::GetWater()
   return this->water;
 }
 
-void MapChunk::drawSelect()
+void MapChunk::drawSelect (Frustum const& frustum)
 {
-  if (!gWorld->frustum.intersects(vmin, vmax))
+  if (!frustum.intersects(vmin, vmax))
     return;
 
   float mydist = (gWorld->camera - vcenter).length() - r;
