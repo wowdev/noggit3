@@ -15,6 +15,7 @@
 
 #include "DBC.h"
 #include "Environment.h"
+#include "Frustum.h"
 #include "Log.h"
 #include "MapChunk.h"
 #include "TextureSet.h"
@@ -273,7 +274,6 @@ World::World(const std::string& name)
   , mapstrip2(NULL)
   , camera(Vec3D(0.0f, 0.0f, 0.0f))
   , lookat(Vec3D(0.0f, 0.0f, 0.0f))
-  , frustum(Frustum())
 {
   for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
   {
@@ -790,7 +790,7 @@ void World::draw()
 
   gluLookAt(camera.x, camera.y, camera.z, lookat.x, lookat.y, lookat.z, 0, 1, 0);
 
-  frustum.retrieve();
+  Frustum const frustum;
 
   ///gl.disable(GL_LIGHTING);
   ///gl.color4f(1,1,1,1);World::draw()
@@ -907,7 +907,7 @@ void World::draw()
       {
         if (mapIndex->tileLoaded(j, i))
         {
-          mapIndex->getTile((size_t)j, (size_t)i)->draw();
+          mapIndex->getTile((size_t)j, (size_t)i)->draw (frustum);
         }
       }
     }
@@ -989,7 +989,7 @@ void World::draw()
       else if (Environment::getInstance()->cursorType == 2)
       {
         renderSphere_convenient((float)posX, (float)posY, (float)posZ, textureBrush.getRadius(), 15);
-      }      
+      }
     }
     else if (terrainMode == 8)
     {
@@ -1025,7 +1025,7 @@ void World::draw()
       {
         if (mapIndex->tileLoaded(j, i))
         {
-          mapIndex->getTile((size_t)j, (size_t)i)->drawLines();
+          mapIndex->getTile((size_t)j, (size_t)i)->drawLines (frustum);
           // mTiles[j][i].tile->drawMFBO();
         }
       }
@@ -1079,7 +1079,7 @@ void World::draw()
     {
       if (!it->second.model->hidden || renderHidden)
       {
-        it->second.draw();
+        it->second.draw (frustum);
       }
     }   
   }
@@ -1102,7 +1102,7 @@ void World::draw()
       {
         if (!it->second.wmo->hidden || renderHidden)
         {
-          it->second.draw();
+          it->second.draw (frustum);
         }
       }
         
@@ -1117,7 +1117,7 @@ void World::draw()
       {
         if (!it->second.wmo->hidden)
         {
-          it->second.draw();
+          it->second.draw (frustum);
         }
       }
     }
@@ -1170,7 +1170,7 @@ void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap, bool doSelect
 
   gluLookAt(camera.x, camera.y, camera.z, lookat.x, lookat.y, lookat.z, 0, 1, 0);
 
-  frustum.retrieve();
+  Frustum const frustum;
 
   gl.clear(GL_DEPTH_BUFFER_BIT);
 
@@ -1185,7 +1185,7 @@ void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap, bool doSelect
       {
         if (mapIndex->tileLoaded(j, i))
         {
-          mapIndex->getTile((size_t)j, (size_t)i)->drawSelect();
+          mapIndex->getTile((size_t)j, (size_t)i)->drawSelect (frustum);
         }
       }
     }
@@ -1201,7 +1201,7 @@ void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap, bool doSelect
       gl.pushName(0);
       for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
       {
-        it->second.drawSelect();
+        it->second.drawSelect (frustum);
       }
       gl.popName();
       gl.popName();
@@ -1216,7 +1216,7 @@ void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap, bool doSelect
       gl.pushName(0);
       for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
       {
-        it->second.drawSelect();
+        it->second.drawSelect (frustum);
       }
       gl.popName();
       gl.popName();

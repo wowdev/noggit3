@@ -54,10 +54,10 @@ public:
 	void init(WMO *wmo, MPQFile* f, int num, char *names);
 	void initDisplayList();
 	void initLighting(int nLR, uint16_t *useLights);
-	void draw(const Vec3D& ofs, math::degrees const, bool selection);
+	void draw(const Vec3D& ofs, math::degrees const, bool selection, Frustum const&);
 	void drawLiquid();
-	void drawDoodads(unsigned int doodadset, const Vec3D& ofs, math::degrees const);
-	void drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, math::degrees const);
+	void drawDoodads(unsigned int doodadset, const Vec3D& ofs, math::degrees const, Frustum const&);
+	void drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, math::degrees const, Frustum const&);
 	void setupFog();
 };
 
@@ -159,8 +159,8 @@ public:
 
 	explicit WMO(const std::string& name);
 	~WMO();
-	void draw(int doodadset, const Vec3D& ofs, math::degrees const, bool boundingbox, bool groupboxes, bool highlight) const;
-	void drawSelect(int doodadset, const Vec3D& ofs, math::degrees const) const;
+	void draw(int doodadset, const Vec3D& ofs, math::degrees const, bool boundingbox, bool groupboxes, bool highlight, Frustum const&) const;
+	void drawSelect(int doodadset, const Vec3D& ofs, math::degrees const, Frustum const&) const;
 	//void drawPortals();
 	bool drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const;
 

@@ -67,8 +67,8 @@ public:
 	  return *this;
   }
 
-	void draw();
-	void drawSelect();
+	void draw (Frustum const&);
+	void drawSelect (Frustum const&);
 
 	void recalcExtents();
 	void resetDirection();

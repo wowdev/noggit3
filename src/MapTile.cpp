@@ -383,32 +383,30 @@ extern Brush textureBrush;
 
 
 
-void MapTile::draw()
+void MapTile::draw (Frustum const& frustum)
 {
-
-
   gl.color4f(1, 1, 1, 1);
 
   for (int j = 0; j<16; ++j)
     for (int i = 0; i<16; ++i)
-      mChunks[j][i]->draw();
+      mChunks[j][i]->draw(frustum);
 
 }
 
-void MapTile::drawSelect()
+void MapTile::drawSelect (Frustum const& frustum)
 {
   for (int j = 0; j<16; ++j)
     for (int i = 0; i<16; ++i)
-      mChunks[j][i]->drawSelect();
+      mChunks[j][i]->drawSelect (frustum);
 }
 
-void MapTile::drawLines()//draw red lines around the square of a chunk
+void MapTile::drawLines (Frustum const& frustum)//draw red lines around the square of a chunk
 {
   gl.disable(GL_COLOR_MATERIAL);
 
   for (int j = 0; j<16; ++j)
     for (int i = 0; i<16; ++i)
-      mChunks[j][i]->drawLines();
+      mChunks[j][i]->drawLines (frustum);
 
   gl.enable(GL_COLOR_MATERIAL);
 }

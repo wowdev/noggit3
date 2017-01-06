@@ -4,7 +4,6 @@
 #include <map>
 #include <string>
 
-#include "Frustum.h" // Frustum
 #include "Model.h" // ModelManager
 #include "Selection.h" // nameEntryManager
 #include "Sky.h" // Skies, OutdoorLighting, OutdoorLightStats
@@ -126,7 +125,6 @@ public:
 
 	Vec3D camera;
 	Vec3D lookat;
-	Frustum frustum;
 
 	explicit World(const std::string& name);
 	~World();

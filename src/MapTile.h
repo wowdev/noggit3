@@ -8,9 +8,10 @@
 #include "MapHeaders.h"
 #include "Video.h" // GLfloat, GLshort, ...
 
-class Vec3D;
-class TileWater;
+class Frustum;
 class MapChunk;
+class TileWater;
+class Vec3D;
 
 class MapTile
 {
@@ -33,9 +34,9 @@ public:
 
 	int changed;
 
-	void draw();
-	void drawSelect();
-	void drawLines();
+	void draw (Frustum const&);
+	void drawSelect (Frustum const&);
+	void drawLines (Frustum const&);
 	void drawWater();
 	void drawTextures();
 	void drawMFBO();

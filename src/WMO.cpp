@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "Environment.h"
+#include "Frustum.h"
 #include "Liquid.h"
 #include "Log.h" // LogDebug
 #include "ModelManager.h" // ModelManager
@@ -246,7 +247,7 @@ WMO::~WMO()
 // model.cpp
 void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth);
 
-void WMO::draw(int doodadset, const Vec3D &ofs, math::degrees const angle, bool boundingbox, bool groupboxes, bool /*highlight*/) const
+void WMO::draw(int doodadset, const Vec3D &ofs, math::degrees const angle, bool boundingbox, bool groupboxes, bool /*highlight*/, Frustum const& frustum) const
 {
 	if (gWorld && gWorld->drawfog)
 		gl.enable(GL_FOG);
@@ -255,11 +256,11 @@ void WMO::draw(int doodadset, const Vec3D &ofs, math::degrees const angle, bool 
 
 	for (unsigned int i = 0; i<nGroups; ++i)
 	{
-		groups[i].draw(ofs, angle, false);
+		groups[i].draw(ofs, angle, false, frustum);
 
 		if (gWorld->drawdoodads)
 		{
-			groups[i].drawDoodads(doodadset, ofs, angle);
+			groups[i].drawDoodads(doodadset, ofs, angle, frustum);
 		}
 
 		groups[i].drawLiquid();
@@ -494,13 +495,13 @@ void WMO::draw(int doodadset, const Vec3D &ofs, math::degrees const angle, bool 
 	*/
 }
 
-void WMO::drawSelect(int doodadset, const Vec3D &ofs, math::degrees const angle) const
+void WMO::drawSelect(int doodadset, const Vec3D &ofs, math::degrees const angle, Frustum const& frustum) const
 {
 	for (unsigned int i = 0; i<nGroups; ++i) {
-		groups[i].draw(ofs, angle, true);
+		groups[i].draw(ofs, angle, true, frustum);
 
 		if (gWorld->drawdoodads) {
-			groups[i].drawDoodadsSelect(doodadset, ofs, angle);
+			groups[i].drawDoodadsSelect(doodadset, ofs, angle, frustum);
 		}
 
 		groups[i].drawLiquid();
@@ -939,7 +940,7 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 	}
 }
 
-void WMOGroup::draw(const Vec3D& ofs, const math::degrees angle, bool selection)
+void WMOGroup::draw(const Vec3D& ofs, const math::degrees angle, bool selection, Frustum const& frustum)
 {
 	visible = false;
 	// view frustum culling
@@ -948,7 +949,7 @@ void WMOGroup::draw(const Vec3D& ofs, const math::degrees angle, bool selection)
 
   math::rotate(ofs.x, ofs.z, &pos.x, &pos.z, angle);
 
-	if (!gWorld->frustum.intersectsSphere(pos, rad)) return;
+	if (!frustum.intersectsSphere(pos, rad)) return;
 
 	float dist = (pos - gWorld->camera).length() - rad;
 	if (dist >= gWorld->culldistance) return;
@@ -996,7 +997,7 @@ void WMOGroup::draw(const Vec3D& ofs, const math::degrees angle, bool selection)
 
 }
 
-void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, math::degrees const angle)
+void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, math::degrees const angle, Frustum const& frustum)
 {
 
 	if (!visible) return;
@@ -1029,7 +1030,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, math::degre
         WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
       }
       setupFog();
-      wmo->modelis[dd].draw2(ofs, angle);
+      wmo->modelis[dd].draw2(ofs, angle, frustum);
     }
 	}
 
@@ -1040,7 +1041,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, math::degre
 }
 
 
-void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, math::degrees const angle)
+void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, math::degrees const angle, Frustum const& frustum)
 {
 	if (!visible) return;
 	if (nDoodads == 0) return;
@@ -1070,7 +1071,7 @@ void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, math:
 			if (!outdoorLights) {
 				WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
 			}
-			wmo->modelis[dd].draw2Select(ofs, angle);
+			wmo->modelis[dd].draw2Select(ofs, angle, frustum);
 		}
 	}
 

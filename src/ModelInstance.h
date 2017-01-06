@@ -6,6 +6,7 @@
 #include "MPQ.h" // MPQFile
 #include "Vec3D.h" // Vec3D
 
+class Frustum;
 class Model;
 
 class ModelInstance
@@ -67,12 +68,12 @@ public:
     return *this;
   }
 
-	void draw();
+	void draw (Frustum const&);
 	void drawMapTile();
 	//  void drawHighlight();
-	void drawSelect();
-	void draw2(const Vec3D& ofs, const math::degrees);
-	void draw2Select(const Vec3D& ofs, const math::degrees);
+	void drawSelect (Frustum const&);
+	void draw2(const Vec3D& ofs, const math::degrees, Frustum const&);
+  void draw2Select(const Vec3D& ofs, const math::degrees, Frustum const&);
 
 	void resetDirection();
 

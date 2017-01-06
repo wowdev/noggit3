@@ -14,6 +14,7 @@ class Brush;
 class Alphamap;
 class TextureSet;
 class sExtendableArray;
+class Frustum;
 
 typedef unsigned short StripType;
 static const int mapbufsize = 9 * 9 + 8 * 8; // chunk size
@@ -73,11 +74,11 @@ public:
 
 	Vec3D mVertices[mapbufsize];
 
-	void draw(); //! \todo only this function should be public, all others should be called from it
+	void draw (Frustum const&); //! \todo only this function should be public, all others should be called from it
 
 	void drawContour();
-	void drawSelect();
-	void drawLines();
+	void drawSelect (Frustum const&);
+	void drawLines (Frustum const&);
 	void drawTextures();
 	bool ChangeMCCV(float x, float z, float change, float radius, bool editMode);
 	void ClearShader();
