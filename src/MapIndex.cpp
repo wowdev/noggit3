@@ -84,9 +84,8 @@ MapIndex::MapIndex(const std::string &pBasename)
 			{
 				mTiles[j][i].flags |= 1;
 				changed = true;
-
-                // get highest GUID
-                highestGUID = getHighestGUIDFromFile(filename.str());
+        // get highest GUID
+        highestGUID = getHighestGUIDFromFile(filename.str());
 			}
 		}
 	}
@@ -126,17 +125,11 @@ MapIndex::MapIndex(const std::string &pBasename)
 
 MapIndex::~MapIndex()
 {
-	for (int j = 0; j < 64; ++j)
-	{
-		for (int i = 0; i < 64; ++i)
-		{
-			if (tileLoaded(j, i))
-			{
-				delete mTiles[j][i].tile;
-				mTiles[j][i].tile = NULL;
-			}
-		}
-	}
+  for (MapTile* tile : loaded_tiles())
+  {
+    delete tile;
+    tile = nullptr;
+  }
 }
 
 void MapIndex::save()
@@ -218,27 +211,27 @@ void MapIndex::save()
 	changed = false;
 }
 
-void MapIndex::enterTile(int x, int z)
+void MapIndex::enterTile(const tile_index& tile)
 {
-	if (!hasTile(z, x))
+	if (!hasTile(tile))
 	{
 		noadt = true;
 		return;
 	}
 
 	noadt = false;
+	cx = tile.x;
+	cz = tile.z;
 
-	cx = x;
-	cz = z;
-	for (int i = std::max(cz - 2, 0); i < std::min(cz + 2, 64); ++i)
+	for (int pz = std::max(cz - 1, 0); pz < std::min(cz + 2, 63); ++pz)
 	{
-		for (int j = std::max(cx - 2, 0); j < std::min(cx + 2, 64); ++j)
+		for (int px = std::max(cx - 1, 0); px < std::min(cx + 2, 63); ++px)
 		{
-			mTiles[i][j].tile = loadTile(i, j);
+			mTiles[pz][px].tile = loadTile(tile_index(px, pz));
 		}
 	}
 
-	if (autoheight && tileLoaded(cz, cx)) //ZX STEFF HERE SWAP!
+	if (autoheight && tileLoaded(tile)) //ZX STEFF HERE SWAP!
 	{
 		float maxHeight = mTiles[cz][cx].tile->getMaxHeight();
 		maxHeight = std::max(maxHeight, 0.0f);
@@ -251,213 +244,200 @@ void MapIndex::enterTile(int x, int z)
 void MapIndex::setChanged(float x, float z)
 {
 	// change the changed flag of the map tile
-	int row = misc::FtoIround((x - (TILESIZE / 2)) / TILESIZE);
-	int column = misc::FtoIround((z - (TILESIZE / 2)) / TILESIZE);
-
-	if (row >= 0 && row <= 64 && column >= 0 && column <= 64)
-		setChanged(column, row);
+  setChanged(tile_index(Vec3D(x, 0.0f, z)));
 }
 
-void MapIndex::setChanged(int z, int x)
+void MapIndex::setChanged(const tile_index& tile)
 {
 	// change the changed flag of the map tile
-	if (hasTile(x, z))
-	{
-		if (!mTiles[x][x].tile)
-			loadTile(x, z);
+  MapTile* mTile = loadTile(tile);
 
-		if (mTiles[z][x].tile->changed == 1)
-			return;
+  if (!mTile || mTile->changed == 1)
+  {
+    return;
+  }
 
-		mTiles[z][x].tile->changed = 1;
-	}
+	mTile->changed = 1;
+  
+  for (int pz = std::max(tile.z - 1, 0); pz < std::min(tile.z + 2, 63); ++pz)
+  {
+    for (int px = std::max(tile.x - 1, 0); px < std::min(tile.x + 2, 63); ++px)
+    {
+      tile_index index(px, pz);
 
-	for (int posaddx = -1; posaddx < 2; posaddx++)
-	{
-		for (int posaddz = -1; posaddz < 2; posaddz++)
-		{
-			if (!hasTile(z + posaddx, x + posaddz))
-				continue;
+      if (!hasTile(index))
+      {
+        continue;
+      }				
 
-			if (!mTiles[z + posaddx][x + posaddz].tile)
-				loadTile(z + posaddx, x + posaddz);
+      mTile = loadTile(index);
 
-			if (mTiles[z + posaddx][x + posaddz].tile->changed == 1)
-				continue;
-
-			mTiles[z + posaddx][x + posaddz].tile->changed = 2;
+      if (!mTile || mTile->changed == 1)
+      {
+        continue;
+      }
+			mTile->changed = 2;
 		}
 	}
-
 }
 
-void MapIndex::unsetChanged(int x, int z)
+void MapIndex::setChanged(MapTile* tile)
+{
+  setChanged(tile_index(tile->mPositionX, tile->mPositionZ));
+}
+
+void MapIndex::unsetChanged(const tile_index& tile)
 {
 	// change the changed flag of the map tile
-	if (mTiles[x][z].tile)
-		mTiles[x][z].tile->changed = 0;
+  if (mTiles[tile.z][tile.x].tile)
+  {
+    mTiles[tile.z][tile.x].tile->changed = 0;
+  }
 }
 
-int MapIndex::getChanged(int x, int z)
+int MapIndex::getChanged(const tile_index& tile)
 {
-	// Changed 2 are adts around the changed one that have 1 in changed. You must save them also IF you do any UID recalculation on changed 1 adts. Because the new UIDs MUST also get saved in surrounding adts to ahve no model duplucation. So to avoid unnneeded save you can also skip changed 2 adts IF no models get added or moved around. This would be stepp to IF uid workes. Steff
-	if (mTiles[x][z].tile) // why do we need to save tile with changed=2? What "2" means? its adts which have models with new adts, and who ever added this here broke everything, thanks
-		return mTiles[x][z].tile->changed;
+	// Changed 2 are adts around the changed one that have 1 in changed. 
+  // You must save them also IF you do any UID recalculation on changed 1 adts. 
+  // Because the new UIDs MUST also get saved in surrounding adts to ahve no model duplucation. 
+  // So to avoid unnneeded save you can also skip changed 2 adts IF no models get added or moved around. 
+  // This would be stepp to IF uid workes. Steff
+	if (mTiles[tile.z][tile.x].tile) // why do we need to save tile with changed=2? What "2" means? its adts which have models with new adts, and who ever added this here broke everything, thanks
+		return mTiles[tile.z][tile.x].tile->changed;
 	else
 		return 0;
 }
 
 void MapIndex::setFlag(bool to, float x, float z)
 {
-	// set the inpass flag to selected chunk
-	this->setChanged(x, z);
-	const int newX = (const int)(x / TILESIZE);
-	const int newZ = (const int)(z / TILESIZE);
+  tile_index tile(Vec3D(x, 0.0f, z));
+  
+  if (tileLoaded(tile))
+  {
+    setChanged(tile);
 
-	for (int j = newZ - 1; j < newZ + 1; ++j)
-	{
-		for (int i = newX - 1; i < newX + 1; ++i)
-		{
-			if (tileLoaded(j, i))
-			{
-				for (int ty = 0; ty < 16; ++ty)
-				{
-					for (int tx = 0; tx < 16; ++tx)
-					{
-						MapChunk* chunk = mTiles[j][i].tile->getChunk(ty, tx);
-						if (chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
-						{
-							chunk->setFlag(to);
-						}
-					}
-				}
-			}
-		}
-	}
+    int cx = (x - tile.x * TILESIZE) / CHUNKSIZE;
+    int cz = (z - tile.z * TILESIZE) / CHUNKSIZE;
+
+    getTile(tile)->getChunk(cx, cz)->setFlag(to);
+  }
 }
 
 void MapIndex::setWater(bool to, float x, float z)
 {
-	// set the inpass flag to selected chunk
-	this->setChanged(x, z);
-	const int newX = (const int)(x / TILESIZE);
-	const int newZ = (const int)(z / TILESIZE);
+  tile_index tile(Vec3D(x, 0.0f, z));
 
-	for (int j = newZ - 1; j < newZ + 1; ++j)
-	{
-		for (int i = newX - 1; i < newX + 1; ++i)
-		{
-			if (tileLoaded(j, i))
-			{
-				for (int ty = 0; ty < 16; ++ty)
-				{
-					for (int tx = 0; tx < 16; ++tx)
-					{
-						MapChunk* chunk = mTiles[j][i].tile->getChunk(ty, tx);
-						if (chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
-						{
-							chunk->SetWater(to);
-						}
-					}
-				}
-			}
-		}
-	}
+  if (tileLoaded(tile))
+  {
+    setChanged(tile);
+
+    int cx = (x - tile.x * TILESIZE) / CHUNKSIZE;
+    int cz = (z - tile.z * TILESIZE) / CHUNKSIZE;
+
+    getTile(tile)->getChunk(cx, cz)->SetWater(to);
+  }
 }
 
-MapTile* MapIndex::loadTile(int z, int x)
+MapTile* MapIndex::loadTile(const tile_index& tile)
 {
-	if (!hasTile(z, x))
+	if (!hasTile(tile))
 	{
-		return NULL;
+		return nullptr;
 	}
 
-	if (tileLoaded(z, x))
+	if (tileLoaded(tile))
 	{
-		return mTiles[z][x].tile;
+		return mTiles[tile.z][tile.x].tile;
 	}
 
 	std::stringstream filename;
-	filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+	filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
 	if (!MPQFile::exists(filename.str()))
 	{
 		LogError << "The requested tile \"" << filename.str() << "\" does not exist! Oo" << std::endl;
-		return NULL;
+		return nullptr;
 	}
 
-	if (mTiles[z][x].tile) //just to sure
+  MapTile* mTile = mTiles[tile.z][tile.x].tile;
+
+	if (mTile) //just to be sure
 	{
-		delete mTiles[z][x].tile;
-		mTiles[z][x].tile = NULL;
+    delete mTile;
 	}
 
-	mTiles[z][x].tile = new MapTile(x, z, filename.str(), mBigAlpha, &highestGUID);// XZ STEFF Swap MapTile( z, x, file
-	return mTiles[z][x].tile;
+	mTile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha, &highestGUID);// XZ STEFF Swap MapTile( z, x, file
+  return mTile;
 }
 
-void MapIndex::reloadTile(int x, int z)
+void MapIndex::reloadTile(const tile_index& tile)
 {
-	if (tileLoaded(z, x))
+	if (tileLoaded(tile))
 	{
-		delete mTiles[z][x].tile;
-		mTiles[z][x].tile = NULL;
+		delete mTiles[tile.z][tile.x].tile;
+		mTiles[tile.z][tile.x].tile = nullptr;
 
 		std::stringstream filename;
-		filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+		filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
-		mTiles[z][x].tile = new MapTile(x, z, filename.str(), mBigAlpha, &highestGUID);
-		enterTile(cx, cz);
+		mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha, &highestGUID);
+		enterTile(tile_index(cx, cz));
 	}
 }
 
-void MapIndex::unloadTiles(int x, int z)
+void MapIndex::unloadTiles(const tile_index& tile)
 {
 	if ( ((clock() / CLOCKS_PER_SEC) - this->lastUnloadTime) > 5) // only unload every 5 seconds
 	{
 		int unloadBoundery = 6; // means noggit hold always plus X adts in all direction in ram - perhaps move this into settings file?
-		for (int j = 0; j < 64; ++j)
+		for (int pz = 0; pz < 64; ++pz)
 		{
-			for (int i = 0; i < 64; ++i)
+			for (int px = 0; px < 64; ++px)
 			{
-					if (!((j > (x - unloadBoundery)) && (j < (x + unloadBoundery)) && (i >(z - unloadBoundery)) && (i < (z + unloadBoundery))))
-					{
-						if (getChanged(j, i) == 0) unloadTile(j, i); //Only unload adts not marked to save
-					}
+				if (std::abs(px - tile.x) > unloadBoundery || std::abs(pz - tile.z) > unloadBoundery)
+				{
+          tile_index id(px, pz);
+
+          //Only unload adts not marked to save
+          if (getChanged(id) == 0)
+          {
+            unloadTile(id); 
+          }
+				}
 			}
 		}
 		this->lastUnloadTime = clock() / CLOCKS_PER_SEC;
 	}
 }
 
-void MapIndex::unloadTile(int x, int z)
+void MapIndex::unloadTile(const tile_index& tile)
 {
 	// unloads a tile with givn cords
-	if (tileLoaded(z, x))
+	if (tileLoaded(tile))
 	{
-		delete mTiles[z][x].tile;
-		mTiles[z][x].tile = NULL;
-		Log << "Unload Tile " << x << "-" << z << "\n";
+		delete mTiles[tile.z][tile.x].tile;
+		mTiles[tile.z][tile.x].tile = nullptr;
+		Log << "Unload Tile " << tile.x << "-" << tile.z << "\n";
 	}
 }
 
-void MapIndex::markOnDisc(int x, int z, bool mto)
+void MapIndex::markOnDisc(const tile_index& tile, bool mto)
 {
-	mTiles[z][x].onDisc = mto;
+	mTiles[tile.z][tile.x].onDisc = mto;
 }
 
-bool MapIndex::isTileExternal(int x, int z)
+bool MapIndex::isTileExternal(const tile_index& tile)
 {
 	// is onDisc
-	return mTiles[z][x].onDisc;
+	return mTiles[tile.z][tile.x].onDisc;
 }
 
-void MapIndex::saveTile(int x, int z)
+void MapIndex::saveTile(const tile_index& tile)
 {
 	// save goven tile
-	if (tileLoaded(z, x))
+	if (tileLoaded(tile))
 	{
-		mTiles[z][x].tile->saveTile();
+		mTiles[tile.z][tile.x].tile->saveTile();
 	}
 }
 
@@ -467,16 +447,13 @@ void MapIndex::saveChanged()
 		save();
 
 	// Now save all marked as 1 and 2 because UIDs now fits.
-	for (int j = 0; j < 64; ++j)
-	{
-		for (int i = 0; i < 64; ++i)
-		{
-			if (!tileLoaded(j, i)) continue;
-			if (!getChanged(j, i)) continue;
-
-			mTiles[j][i].tile->saveTile();
-			unsetChanged(j, i);
-		}
+  for (MapTile* tile : loaded_tiles())
+  {
+    if (tile->changed)
+    {
+      tile->saveTile();
+      tile->changed = 0;
+    }
 	}
 
 	gWorld->ensure_instance_maps_having_correct_keys_and_unlock_uids();
@@ -487,19 +464,25 @@ bool MapIndex::hasAGlobalWMO()
 	return mHasAGlobalWMO;
 }
 
-bool MapIndex::oktile(int z, int x)
+
+bool MapIndex::hasTile(const tile_index& tile) const
 {
-	return !(z < 0 || x < 0 || z > 64 || x > 64);
+	return (mTiles[tile.z][tile.x].flags & 1);
 }
 
-bool MapIndex::hasTile(int pZ, int pX)
+bool MapIndex::hasTile(int tileX, int tileZ) const
 {
-	return oktile(pZ, pX) && (mTiles[pZ][pX].flags & 1);
+  return (mTiles[tileZ][tileX].flags & 1);
 }
 
-bool MapIndex::tileLoaded(int z, int x)
+bool MapIndex::tileLoaded(const tile_index& tile) const
 {
-	return hasTile(z, x) && mTiles[z][x].tile;
+	return hasTile(tile) && mTiles[tile.z][tile.x].tile;
+}
+
+bool MapIndex::tileLoaded(int tileX, int tileZ) const
+{
+  return hasTile(tileX, tileZ) && mTiles[tileZ][tileX].tile;
 }
 
 bool MapIndex::hasAdt()
@@ -512,14 +495,14 @@ void MapIndex::setAdt(bool value)
 	noadt = value;
 }
 
-MapTile* MapIndex::getTile(size_t z, size_t x)
+MapTile* MapIndex::getTile(const tile_index& tile) const
 {
-	return mTiles[z][x].tile;
+	return mTiles[tile.z][tile.x].tile;
 }
 
-uint32_t MapIndex::getFlag(size_t z, size_t x)
+uint32_t MapIndex::getFlag(const tile_index& tile) const
 {
-	return mTiles[z][x].flags;
+	return mTiles[tile.z][tile.x].flags;
 }
 
 void MapIndex::setBigAlpha() 

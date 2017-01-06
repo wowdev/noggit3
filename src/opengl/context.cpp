@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include <string>
 
 opengl::context gl;
 

@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 
+#include "Frustum.h" // Frustum
+#include "MapIndex.h"
 #include "Model.h" // ModelManager
 #include "Selection.h" // nameEntryManager
 #include "Sky.h" // Skies, OutdoorLighting, OutdoorLightStats
@@ -21,6 +23,7 @@ namespace opengl
 class Brush;
 class MapTile;
 class MapIndex;
+class tile_index;
 
 extern nameEntryManager SelectionNames;
 
@@ -139,9 +142,9 @@ public:
 
 	//! \brief Get the area ID of the tile on which the camera currently is on.
 	unsigned int getAreaID();
-	void setAreaID(int id, int x, int z);
-	void setAreaID(int id, int x, int z, int cx, int cz);
-	void setBaseTexture(int x, int z);
+	void setAreaID(int id, const tile_index& tile);
+	void setAreaID(int id, const tile_index& tile, int cx, int cz);
+	void setBaseTexture(const tile_index& tile);
 
 	//void moveADT(); does not exist
 	//void drawSelectionChunk(int cursorX,int cursorY); does not exist
@@ -189,9 +192,6 @@ public:
 	void jumpToCords(Vec3D pos);
 	void saveMap();
 
-	//void unsetChanged(int x, int z); does not exist
-	//int getChanged(int x, int z); does not exist
-
 	void deleteModelInstance(int pUniqueID);
 	void deleteWMOInstance(int pUniqueID);
 
@@ -200,38 +200,38 @@ public:
   void ensure_instance_maps_having_correct_keys_and_unlock_uids();
 
 	static bool IsEditableWorld(int pMapId);
-	void clearHeight(int id, int x, int z);
-	void clearHeight(int id, int x, int z, int _cx, int _cz);
-	void moveHeight(int id, int x, int z);
-	void moveHeight(int id, int x, int z, int _cx, int _cz);
+	void clearHeight(int id, const tile_index& tile);
+	void clearHeight(int id, const tile_index& tile, int _cx, int _cz);
+	void moveHeight(int id, const tile_index& tile);
+	void moveHeight(int id, const tile_index& tile, int _cx, int _cz);
 
 	void saveWDT();
-	void clearAllModelsOnADT(int x, int z);
-	void swapTexture(int x, int z, OpenGL::Texture *tex);
-  void removeTexDuplicateOnADT(int x, int z);
+	void clearAllModelsOnADT(const tile_index& tile);
+	void swapTexture(const tile_index& tile, OpenGL::Texture *tex);
+  void removeTexDuplicateOnADT(const tile_index& tile);
 
-	bool canWaterSave(int x, int y);
+	bool canWaterSave(const tile_index& tile);
 
-	void setWaterHeight(int x, int y, float h);
-	float getWaterHeight(int x, int y);
-	float HaveSelectWater(int x, int y);
-	void CropWaterADT(int x, int z);
-	void setWaterTrans(int x, int y, unsigned char value);
-	unsigned char getWaterTrans(int x, int y);
+	void setWaterHeight(const tile_index& tile, float h);
+	float getWaterHeight(const tile_index& tile);
+	float HaveSelectWater(const tile_index& tile);
+	void CropWaterADT(const tile_index& tile);
+	void setWaterTrans(const tile_index& tile, unsigned char value);
+	unsigned char getWaterTrans(const tile_index& tile);
 
-	void setWaterType(int x, int y, int type);
-	int getWaterType(int x, int y);
+	void setWaterType(const tile_index& tile, int type);
+	int getWaterType(const tile_index& tile);
 
-	void deleteWaterLayer(int x, int z);
-	void ClearShader(int x, int z);
+	void deleteWaterLayer(const tile_index& tile);
+	void ClearShader(const tile_index& tile);
 
-	void addWaterLayer(int x, int z);
-	void addWaterLayer(int x, int z, float height, unsigned char trans);
-	void addWaterLayerChunk(int x, int z, int i, int j);
-	void delWaterLayerChunk(int x, int z, int i, int j);
+	void addWaterLayer(const tile_index& tile);
+	void addWaterLayer(const tile_index& tile, float height, unsigned char trans);
+	void addWaterLayerChunk(const tile_index& tile, int i, int j);
+	void delWaterLayerChunk(const tile_index& tile, int i, int j);
 
-	void autoGenWaterTrans(int x, int y, int factor);
-	void AddWaters(int x, int y);
+	void autoGenWaterTrans(const tile_index& tile, int factor);
+	void AddWaters(const tile_index& tile);
 
   void fixAllGaps();
 

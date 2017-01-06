@@ -74,16 +74,24 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
 		my < borderwidth || my > height() - borderwidth)
 		return NULL;
 
-	// is there a tile?
-	int i = (int)(static_cast<int>(mx - borderwidth) / tilesize);
-	int j = (int)(static_cast<int>(my - borderwidth) / tilesize);
-	if (!gWorld->mapIndex->hasTile(j, i))
+  Vec3D pos((mx - borderwidth), 0.0f, (my - borderwidth));
+  pos *= TILESIZE / tilesize; // minimap pos => real pos
+	
+  // is there a tile?
+	if (!gWorld->mapIndex->hasTile(tile_index(pos)))
 		return NULL;
 
-	if (mMenuLink)
-		mMenuLink->enterMapAt(Vec3D(((mx - borderwidth) / tilesize) * TILESIZE, 0.0f, ((my - borderwidth) / tilesize) * TILESIZE));
-	else if (map)
-		map->jumpToCords(Vec3D(((mx - borderwidth) / tilesize) * TILESIZE, 50.0f, ((my - borderwidth) / tilesize) * TILESIZE));
+  if (mMenuLink)
+  {
+    mMenuLink->enterMapAt(pos);
+  }		
+  else if (map)
+  {
+    gWorld->GetVertex(pos.x, pos.z, &pos);
+    pos.y += 50;
+    map->jumpToCords(pos);
+  }
+		
 
 	return this;
 }
@@ -146,15 +154,21 @@ void UIMinimapWindow::render() const
 	{
 		for (int i = 0; i < 64; ++i)
 		{
-			if (gWorld->mapIndex->hasTile(j, i))
-			{
-				if (gWorld->mapIndex->isTileExternal(i, j))
-					gl.color4f(1.0f, 0.7f, 0.5f, 0.6f);
-				else
-					gl.color4f(0.8f, 0.8f, 0.8f, 0.4f);
-			}
-			else
-				gl.color4f(1.0f, 1.0f, 1.0f, 0.05f);
+      tile_index tile(i, j);
+
+      if (gWorld->mapIndex->isTileExternal(tile))
+      {
+        glColor4f(1.0f, 0.7f, 0.5f, 0.6f);
+      }					
+      else if (gWorld->mapIndex->tileLoaded(tile))
+      {
+        gl.color4f(0.0f, 1.0f, 1.0f, 0.4f);
+      }
+      else
+      {
+        gl.color4f(1.0f, 1.0f, 1.0f, 0.05f);
+      }
+				
 
 			gl.begin(GL_QUADS);
 			gl.vertex2f(i * tilesize, j * tilesize);
@@ -165,26 +179,29 @@ void UIMinimapWindow::render() const
 
 			if (map)
 			{
-				if (map->mapIndex->getChanged(j, i) > 0 || gWorld->mapIndex->tileLoaded(j, i))
-				{
-					if (map->mapIndex->getChanged(j, i) == 1)
-						gl.color4f(1.0f, 1.0f, 1.0f, 0.6f);
-					else if (gWorld->mapIndex->tileLoaded(j, i))
-						gl.color4f(0.0f, 1.0f, 0.4f, 0.2f);
-					else
-						gl.color4f(0.7f, 0.7f, 0.7f, 0.6f);
+        if (map->mapIndex->getChanged(tile) == 1)
+        {
+          gl.color4f(1.0f, 1.0f, 1.0f, 0.6f);
+        }					
+        else if (gWorld->mapIndex->tileLoaded(tile))
+        {
+          gl.color4f(0.0f, 1.0f, 0.4f, 0.2f);
+        }
+        else
+        {
+          gl.color4f(0.7f, 0.7f, 0.7f, 0.6f);
+        }
 
-					gl.begin(GL_LINES);
-					gl.vertex2f(i * tilesize, j * tilesize);
-					gl.vertex2f(((i + 1) * tilesize), j * tilesize);
-					gl.vertex2f(((i + 1) * tilesize), j * tilesize);
-					gl.vertex2f(((i + 1) * tilesize), ((j + 1) * tilesize) - 1);
-					gl.vertex2f(((i + 1) * tilesize), ((j + 1) * tilesize) - 1);
-					gl.vertex2f(i * tilesize, ((j + 1) * tilesize) - 1);
-					gl.vertex2f(i * tilesize, ((j + 1) * tilesize) - 1);
-					gl.vertex2f(i * tilesize, j * tilesize);
-					gl.end();
-				}
+				gl.begin(GL_LINES);
+				gl.vertex2f(i * tilesize, j * tilesize);
+				gl.vertex2f(((i + 1) * tilesize), j * tilesize);
+				gl.vertex2f(((i + 1) * tilesize), j * tilesize);
+				gl.vertex2f(((i + 1) * tilesize), ((j + 1) * tilesize) - 1);
+				gl.vertex2f(((i + 1) * tilesize), ((j + 1) * tilesize) - 1);
+				gl.vertex2f(i * tilesize, ((j + 1) * tilesize) - 1);
+				gl.vertex2f(i * tilesize, ((j + 1) * tilesize) - 1);
+				gl.vertex2f(i * tilesize, j * tilesize);
+				gl.end();
 			}
 		}
 
