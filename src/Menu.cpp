@@ -117,7 +117,6 @@ void Menu::randBackground()
 void Menu::enterMapAt(Vec3D pos, bool pAutoHeight, float av, float ah)
 {
 	video.farclip((const float)Settings::getInstance()->FarZ);
-	Vec2D tile(pos.x / TILESIZE, pos.y / TILESIZE);
 
 	gWorld->autoheight = pAutoHeight;
 
@@ -125,7 +124,7 @@ void Menu::enterMapAt(Vec3D pos, bool pAutoHeight, float av, float ah)
 	gWorld->lookat = Vec3D(pos.x, pos.y, pos.z - 1.0f);
 
 	gWorld->initDisplay();
-	gWorld->mapIndex->enterTile((int)tile.x, (int)tile.y);
+	gWorld->mapIndex->enterTile(tile_index(pos));
 
 	app.getStates().push_back(new MapView(ah, av)); // on gPop, MapView is deleted.
 

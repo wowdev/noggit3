@@ -74,16 +74,24 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
 		my < borderwidth || my > height() - borderwidth)
 		return NULL;
 
-	// is there a tile?
-	int i = (int)(static_cast<int>(mx - borderwidth) / tilesize);
-	int j = (int)(static_cast<int>(my - borderwidth) / tilesize);
-	if (!gWorld->mapIndex->hasTile(j, i))
+  Vec3D pos((mx - borderwidth), 0.0f, (my - borderwidth));
+  pos *= TILESIZE / tilesize; // minimap pos => real pos
+	
+  // is there a tile?
+	if (!gWorld->mapIndex->hasTile(tile_index(pos)))
 		return NULL;
 
-	if (mMenuLink)
-		mMenuLink->enterMapAt(Vec3D(((mx - borderwidth) / tilesize) * TILESIZE, 0.0f, ((my - borderwidth) / tilesize) * TILESIZE));
-	else if (map)
-		map->jumpToCords(Vec3D(((mx - borderwidth) / tilesize) * TILESIZE, 50.0f, ((my - borderwidth) / tilesize) * TILESIZE));
+  if (mMenuLink)
+  {
+    mMenuLink->enterMapAt(pos);
+  }		
+  else if (map)
+  {
+    gWorld->GetVertex(pos.x, pos.z, &pos);
+    pos.y += 50;
+    map->jumpToCords(pos);
+  }
+		
 
 	return this;
 }
@@ -146,17 +154,27 @@ void UIMinimapWindow::render() const
 	{
 		for (int i = 0; i < 64; ++i)
 		{
-			if (gWorld->mapIndex->hasTile(j, i))
+      tile_index tile(i, j);
+			if (gWorld->mapIndex->hasTile(tile))
 			{
-				if (gWorld->mapIndex->isTileExternal(i, j))
-					glColor4f(1.0f, 0.7f, 0.5f, 0.6f);
-				else if (gWorld->mapIndex->tileLoaded(j, i))
-					glColor4f(0.0f, 1.0f, 1.0f, 0.4f);
-				else
-					glColor4f(0.8f, 0.8f, 0.8f, 0.4f);
+        if (gWorld->mapIndex->isTileExternal(tile))
+        {
+          glColor4f(1.0f, 0.7f, 0.5f, 0.6f);
+        }					
+        else if (gWorld->mapIndex->tileLoaded(tile))
+        {
+          glColor4f(0.0f, 1.0f, 1.0f, 0.4f);
+        }					
+        else
+        {
+          glColor4f(0.8f, 0.8f, 0.8f, 0.4f);
+        }					
 			}
-			else
-				glColor4f(1.0f, 1.0f, 1.0f, 0.05f);
+      else
+      {
+        glColor4f(1.0f, 1.0f, 1.0f, 0.05f);
+      }
+				
 
 			glBegin(GL_QUADS);
 			glVertex2i((GLint)(i * tilesize), (GLint)(j * tilesize));
@@ -167,12 +185,17 @@ void UIMinimapWindow::render() const
 
 			if (map)
 			{
-				if (map->mapIndex->getChanged(j, i) > 0)
+				if (map->mapIndex->getChanged(tile) > 0)
 				{
-					if (map->mapIndex->getChanged(j, i) == 1)
-						glColor4f(1.0f, 1.0f, 1.0f, 0.6f);
-					else
-						glColor4f(0.7f, 0.7f, 0.7f, 0.6f);
+          if (map->mapIndex->getChanged(tile) == 1)
+          {
+            glColor4f(1.0f, 1.0f, 1.0f, 0.6f);
+          }
+          else
+          {
+            glColor4f(0.7f, 0.7f, 0.7f, 0.6f);
+          }
+						
 
 					glBegin(GL_LINES);
 					glVertex2i((GLint)(i * tilesize), (GLint)(j * tilesize));

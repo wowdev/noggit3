@@ -19,11 +19,10 @@ void UIAlphamap::render() const
 {
 	UICloseWindow::render();
 
-	int px = (int)std::floor(gWorld->camera.x / TILESIZE);
-	int pz = (int)std::floor(gWorld->camera.z / TILESIZE);
+  tile_index tile(gWorld->camera);
 	float colorf[3];
 
-	if (!gWorld->mapIndex->tileLoaded(pz, px))
+	if (!gWorld->mapIndex->tileLoaded(tile))
 		return;
 
 	glEnable(GL_BLEND);
@@ -34,14 +33,15 @@ void UIAlphamap::render() const
 	{
 		for (size_t i = 0; i < 16; ++i)
 		{
-			for (size_t t = 0; t < gWorld->mapIndex->getTile(pz, px)->getChunk(i, j)->textureSet->num() - 1; ++t)
+      TextureSet* tex = gWorld->mapIndex->getTile(tile)->getChunk(i, j)->textureSet;
+			for (size_t t = 0; t < tex->num() - 1; ++t)
 			{
 				memset(colorf, 0, 3 * sizeof(float));
 				colorf[t] = 1.0f;
 
 				glColor3fv(colorf);
 
-				gWorld->mapIndex->getTile(pz, px)->getChunk(i, j)->textureSet->bindAlphamap(t, 0);
+				tex->bindAlphamap(t, 0);
 				drawQuad(i, j);
 			}
 		}
