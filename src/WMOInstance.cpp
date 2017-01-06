@@ -108,11 +108,15 @@ void WMOInstance::recalcExtents()
 {
 	Vec3D min(100000, 100000, 100000);
 	Vec3D max(-100000, -100000, -100000);
-	Matrix rot(Matrix::newTranslation(pos)
-		* Matrix::newRotate((dir.y - 90.0f) * (float)PI / 180.0f, Vec3D(0, 1, 0))
-		* Matrix::newRotate(dir.x * -1.0f * (float)PI / 180.0f, Vec3D(0, 0, 1))
-		* Matrix::newRotate(dir.z * (float)PI / 180.0f, Vec3D(1, 0, 0))
-		);
+  math::matrix_4x4 rot
+    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation
+                       , { math::degrees (dir.z)
+                         , math::degrees (dir.y - 90.0f)
+                         , math::degrees (-dir.x)
+                         }
+                       )
+    );
 
 	std::vector<Vec3D> bounds (8 * (wmo->nGroups + 1));
 	Vec3D *ptr = bounds.data();
@@ -158,11 +162,15 @@ void WMOInstance::recalcExtents()
 
 bool WMOInstance::isInsideTile(Vec3D lTileExtents[2])
 {
-	Matrix rot(Matrix::newTranslation(pos)
-		* Matrix::newRotate((dir.y - 90.0f) * (float)PI / 180.0f, Vec3D(0, 1, 0))
-		* Matrix::newRotate(dir.x * -1.0f * (float)PI / 180.0f, Vec3D(0, 0, 1))
-		* Matrix::newRotate(dir.z * (float)PI / 180.0f, Vec3D(1, 0, 0))
-		);
+  math::matrix_4x4 rot
+    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation
+                       , { math::degrees (dir.z)
+                         , math::degrees (dir.y - 90.0f)
+                         , math::degrees (-dir.x)
+                         }
+                       )
+    );
 
 	std::vector<Vec3D> bounds (4 * (wmo->nGroups) + 5);
 	Vec3D *ptr = bounds.data();

@@ -1130,60 +1130,55 @@ void Bone::init(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **
 void Bone::calcMatrix(Bone *allbones, int anim, int time)
 {
 	if (calc) return;
-	Matrix m;
-	Quaternion q;
 
-	bool tr = rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard;
-	if (tr) {
-		m.translation(pivot);
+	if (parent != -1)
+  {
+		allbones[parent].calcMatrix (allbones, anim, time);
 
-		if (trans.uses(anim)) {
-			m *= Matrix::newTranslation(trans.getValue(anim, time));
-		}
-		if (rot.uses(anim)) {
-			q = rot.getValue(anim, time);
-			m *= Matrix::newQuatRotate(q);
-		}
-		if (scale.uses(anim)) {
-			m *= Matrix::newScale(scale.getValue(anim, time));
-		}
-		if (billboard) {
-			float modelview[16];
-			gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
+		mat = allbones[parent].mat;
+    mrot = allbones[parent].mrot;
+  }
+  else
+  {
+    mat = math::matrix_4x4::unit;
+    mrot = math::matrix_4x4::unit;
+  }
 
-			Vec3D vRight = Vec3D(modelview[0], modelview[4], modelview[8]);
-			Vec3D vUp = Vec3D(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
-			//Vec3D vUp = Vec3D(0,1,0); // Cylindrical billboarding
-			vRight = vRight * -1;
-			m.m[0][2] = vRight.x;
-			m.m[1][2] = vRight.y;
-			m.m[2][2] = vRight.z;
-			m.m[0][1] = vUp.x;
-			m.m[1][1] = vUp.y;
-			m.m[2][1] = vUp.z;
-		}
+  mat = {math::matrix_4x4::translation, pivot};
 
-		m *= Matrix::newTranslation(pivot*-1.0f);
+  if (trans.uses(anim))
+  {
+    mat *= math::matrix_4x4 (math::matrix_4x4::translation, trans.getValue(anim, time));
+  }
 
-	}
-	else m.unit();
+  mrot = math::matrix_4x4::unit;
 
-	if (parent >= 0) {
-		allbones[parent].calcMatrix(allbones, anim, time);
-		mat = allbones[parent].mat * m;
-	}
-	else mat = m;
+  if (rot.uses(anim)) {
+    mrot = math::matrix_4x4 (math::matrix_4x4::rotation, rot.getValue(anim, time));
+    mat *= mrot;
+  }
 
-	// transform matrix for normal vectors ... ??
-	if (rot.uses(anim)) {
-		if (parent >= 0) {
-			mrot = allbones[parent].mrot * Matrix::newQuatRotate(q);
-		}
-		else mrot = Matrix::newQuatRotate(q);
-	}
-	else mrot.unit();
+  if (scale.uses(anim)) {
+    mat *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue(anim, time));
+  }
 
-	transPivot = mat * pivot;
+  if (billboard) {
+    float modelview[16];
+    gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
+
+    Vec3D vRight = Vec3D(modelview[0], modelview[4], modelview[8]);
+    Vec3D vUp = Vec3D(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+    //Vec3D vUp = Vec3D(0,1,0); // Cylindrical billboarding
+    vRight = vRight * -1;
+    mat (0, 2, vRight.x);
+    mat(1, 2, vRight.y);
+    mat (2, 2, vRight.z);
+    mat (0, 1, vUp.x);
+    mat (1, 1, vUp.y);
+    mat (2, 1, vUp.z);
+  }
+
+  mat *= math::matrix_4x4 (math::matrix_4x4::translation, -pivot);
 
 	calc = true;
 }

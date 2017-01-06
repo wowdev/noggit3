@@ -251,10 +251,7 @@ ModelInstance::~ModelInstance()
 
 void quaternionRotate(const Vec3D& vdir, float w)
 {
-	Matrix m;
-	Quaternion q(vdir, w);
-	m.quaternionRotate(q);
-	gl.multMatrixf(m);
+	gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, math::quaternion (vdir, w)));
 }
 
 void ModelInstance::draw2(const Vec3D& ofs, const math::degrees rotation)
@@ -316,12 +313,16 @@ bool ModelInstance::hasUIDLock()
 
 bool ModelInstance::isInsideTile(Vec3D lTileExtents[2])
 {
-	Matrix rot(Matrix::newTranslation(pos)
-		* Matrix::newRotate((dir.y - 90.0f) * (float)PI / 180.0f, Vec3D(0, 1, 0))
-		* Matrix::newRotate(dir.x * -1.0f * (float)PI / 180.0f, Vec3D(0, 0, 1))
-		* Matrix::newRotate(dir.z * (float)PI / 180.0f, Vec3D(1, 0, 0))
-		* Matrix::newScale(Vec3D(sc, sc, sc))
-		);
+  math::matrix_4x4 rot
+    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation
+                       , { math::degrees (dir.z)
+                         , math::degrees (dir.y - 90.0f)
+                         , math::degrees (-dir.x)
+                         }
+                       )
+    * math::matrix_4x4 (math::matrix_4x4::scale, sc)
+    );
 
 	Vec3D bounds[9];
 	Vec3D *ptr = bounds;
@@ -368,11 +369,16 @@ void ModelInstance::recalcExtents()
 {
 	Vec3D min(100000, 100000, 100000);
 	Vec3D max(-100000, -100000, -100000);
-	Matrix rot(Matrix::newTranslation(pos)
-		* Matrix::newRotate((dir.y - 90.0f) * (float)PI / 180.0f, Vec3D(0, 1, 0))
-		* Matrix::newRotate(dir.x * -1.0f * (float)PI / 180.0f, Vec3D(0, 0, 1))
-		* Matrix::newRotate(dir.z * (float)PI / 180.0f, Vec3D(1, 0, 0))
-		);
+  math::matrix_4x4 rot
+    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation
+                       , { math::degrees (dir.z)
+                         , math::degrees (dir.y - 90.0f)
+                         , math::degrees (-dir.x)
+                         }
+                       )
+    * math::matrix_4x4 (math::matrix_4x4::scale, sc)
+    );
 
 	Vec3D bounds[8 * 2];
 	Vec3D *ptr = bounds;

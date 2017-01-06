@@ -478,31 +478,30 @@ void ParticleSystem::drawHighlight()
 	//  gl.pushName(texture);
 	_texture->bind();
 
-	Matrix mbb;
-	mbb.unit();
+  math::matrix_4x4 mbb (math::matrix_4x4::unit);
 
 	ModelHighlight(Vec4D(1.00, 0.25, 0.25, 0.50));
 	if (billboard) {
 		// get a billboard matrix
-		Matrix mtrans;
-		gl.getFloatv(GL_MODELVIEW_MATRIX, &(mtrans.m[0][0]));
-		mtrans.transpose();
-		mtrans.invert();
+    math::matrix_4x4 mtrans (math::matrix_4x4::uninitialized);
+		gl.getFloatv(GL_MODELVIEW_MATRIX, mtrans);
+		mtrans = mtrans.transposed();
+		mtrans = mtrans.inverted();
 		Vec3D camera = mtrans * Vec3D(0, 0, 0);
 		Vec3D look = (camera - pos).normalize();
 		Vec3D up = ((mtrans * Vec3D(0, 1, 0)) - camera).normalize();
 		Vec3D right = (up % look).normalize();
 		up = (look % right).normalize();
 		// calculate the billboard matrix
-		mbb.m[0][1] = right.x;
-		mbb.m[1][1] = right.y;
-		mbb.m[2][1] = right.z;
-		mbb.m[0][2] = up.x;
-		mbb.m[1][2] = up.y;
-		mbb.m[2][2] = up.z;
-		mbb.m[0][0] = look.x;
-		mbb.m[1][0] = look.y;
-		mbb.m[2][0] = look.z;
+		mbb (0, 1, right.x);
+    mbb (1, 1, right.y);
+    mbb (2, 1, right.z);
+    mbb (0, 2, up.x);
+    mbb (1, 2, up.y);
+    mbb (2, 2, up.z);
+    mbb (0, 0, look.x);
+    mbb (1, 0, look.y);
+    mbb (2, 0, look.z);
 	}
 
 	if (type == 0 || type == 2) {
@@ -574,14 +573,12 @@ void ParticleSystem::drawHighlight()
 	//  gl.popName();
 }
 //Generates the rotation matrix based on spread
-Matrix  SpreadMat;
-void CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
+math::matrix_4x4 CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
 {
 	int i, j;
 	float a[2], c[2], s[2];
-	Matrix  Temp;
 
-	SpreadMat.unit();
+  math::matrix_4x4 SpreadMat (math::matrix_4x4::unit);
 
 	a[0] = misc::randfloat(-Spread1, Spread1) / 2.0f;
 	a[1] = misc::randfloat(-Spread2, Spread2) / 2.0f;
@@ -595,26 +592,33 @@ void CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
 		c[i] = cos(a[i]);
 		s[i] = sin(a[i]);
 	}
-	Temp.unit();
-	Temp.m[1][1] = c[0];
-	Temp.m[2][1] = s[0];
-	Temp.m[2][2] = c[0];
-	Temp.m[1][2] = -s[0];
 
-	SpreadMat = SpreadMat*Temp;
+  {
+    math::matrix_4x4 Temp (math::matrix_4x4::unit);
+    Temp (1, 1, c[0]);
+    Temp (2, 1, s[0]);
+    Temp (2, 2, c[0]);
+    Temp (1, 2, -s[0]);
 
-	Temp.unit();
-	Temp.m[0][0] = c[1];
-	Temp.m[1][0] = s[1];
-	Temp.m[1][1] = c[1];
-	Temp.m[0][1] = -s[1];
+    SpreadMat = SpreadMat*Temp;
+  }
 
-	SpreadMat = SpreadMat*Temp;
+  {
+    math::matrix_4x4 Temp (math::matrix_4x4::unit);
+    Temp (0, 0, c[1]);
+    Temp (1, 0, s[1]);
+    Temp (1, 1, c[1]);
+    Temp (0, 1, -s[1]);
+
+    SpreadMat = SpreadMat*Temp;
+  }
 
 	float Size = std::abs(c[0])*l + std::abs(s[0])*w;
 	for (i = 0; i<3; ++i)
 		for (j = 0; j<3; j++)
-			SpreadMat.m[i][j] *= Size;
+			SpreadMat (i, j, SpreadMat (i, j) * Size);
+
+  return SpreadMat;
 }
 
 Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l, float spd, float var, float spr, float /*spr2*/)
@@ -661,10 +665,7 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
 	Particle p;
 
 	//Spread Calculation
-	Matrix mrot;
-
-	CalcSpreadMatrix(spr, spr, 1.0f, 1.0f);
-	mrot = sys->parent->mrot*SpreadMat;
+	auto mrot = sys->parent->mrot*CalcSpreadMatrix(spr, spr, 1.0f, 1.0f);
 
 	if (sys->flags == 1041) { // Trans Halo
 		p.pos = sys->parent->mat * (sys->pos + Vec3D(misc::randfloat(-l, l), 0, misc::randfloat(-w, w)));
@@ -691,7 +692,7 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
 	}
 	else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
 		p.pos = sys->parent->mat * (sys->pos + Vec3D(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
-		Vec3D dir = Vec3D(sys->parent->mat.m[1][0], sys->parent->mat.m[1][1], sys->parent->mat.m[1][2]) * Vec3D(0.0f, 1.0f, 0.0f);
+		Vec3D dir = Vec3D(sys->parent->mat (1, 0), sys->parent->mat (1, 1), sys->parent->mat (1, 2)) * Vec3D(0.0f, 1.0f, 0.0f);
 		p.speed = dir.normalize() * spd * misc::randfloat(0, var * 2);
 
 	}
@@ -749,10 +750,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 		t = misc::randfloat(-spr, spr);
 
 	//Spread Calculation
-	Matrix mrot;
-
-	CalcSpreadMatrix(spr * 2, spr2 * 2, w, l);
-	mrot = sys->parent->mrot*SpreadMat;
+	auto mrot =  sys->parent->mrot*CalcSpreadMatrix(spr * 2, spr2 * 2, w, l);
 
 	// New
 	// Length should never technically be zero ?

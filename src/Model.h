@@ -10,7 +10,7 @@ class Bone;
 #include "Animated.h" // Animation::M2Value
 #include "AsyncObject.h" // AsyncObject
 #include "Manager.h" // ManagedItem
-#include "Matrix.h"
+#include <math/matrix_4x4.hpp>
 #include "ModelHeaders.h"
 #include "MPQ.h"
 #include "Particle.h"
@@ -26,12 +26,12 @@ class Bone {
 	Animation::M2Value<Vec3D> scale;
 
 public:
-	Vec3D pivot, transPivot;
+	Vec3D pivot;
 	int parent;
 
 	bool billboard;
-	Matrix mat;
-	Matrix mrot;
+  math::matrix_4x4 mat = math::matrix_4x4::uninitialized;
+  math::matrix_4x4 mrot = math::matrix_4x4::uninitialized;
 
 	bool calc;
 	void calcMatrix(Bone* allbones, int anim, int time);
