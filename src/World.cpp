@@ -894,8 +894,6 @@ void World::draw()
 
   gl.clientActiveTexture(GL_TEXTURE0);
 
-  OpenGL::SettingsSaver::save();
-
   // height map w/ a zillion texture passes
   //! \todo  Do we need to push the matrix here?
 
@@ -1128,42 +1126,8 @@ void World::draw()
   outdoorLights(true);
   setupFog();
 
-  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-  gl.disable(GL_CULL_FACE);
-
-  gl.disable(GL_BLEND);
-  gl.disable(GL_ALPHA_TEST);
-  gl.enable(GL_LIGHTING);
-
-  // gosh darn alpha blended evil
-
-  OpenGL::SettingsSaver::restore();
-  setupFog();
-
   gl.color4f(1, 1, 1, 1);
   gl.enable(GL_BLEND);
-
-  /*
-  // temp frustum code
-  gl.disable(GL_LIGHTING);
-  opengl::texture::disable_texture();
-  gl.disable(GL_CULL_FACE);
-  gl.enable(GL_BLEND);
-  gl.begin(GL_TRIANGLES);
-  gl.color4f(0,1,0,0.5);
-  gl.vertex3fv(camera);
-  gl.vertex3fv(fp - rt * fl * 1.33f - up * fl);
-  gl.vertex3fv(fp + rt * fl * 1.33f - up * fl);
-  gl.color4f(0,0,1,0.5);
-  gl.vertex3fv(camera);
-  fl *= 0.5f;
-  gl.vertex3fv(fp - rt * fl * 1.33f + up * fl);
-  gl.vertex3fv(fp + rt * fl * 1.33f + up * fl);
-  gl.end();
-  */
-
-  //gl.color4f(1,1,1,1);
-  //gl.disable(GL_COLOR_MATERIAL);
 
   if (this->drawwater)
   {

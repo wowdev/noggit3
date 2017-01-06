@@ -105,33 +105,6 @@ struct BLPHeader;
 
 namespace OpenGL
 {
-	class SettingsSaver
-	{
-	private:
-		struct GLSettings
-		{
-			GLboolean alphaTesting;
-			GLboolean blend;
-			GLboolean colorMaterial;
-			GLboolean cullFace;
-			GLboolean depthTest;
-			GLboolean fog;
-			GLboolean fragmentProgram;
-			GLboolean lighting;
-			GLboolean lineSmooth;
-			GLboolean texture0;
-			GLboolean texture1;
-			GLboolean textureGenS;
-			GLboolean textureGenT;
-		};
-
-		static std::stack<GLSettings> _savedSettings;
-
-	public:
-		static void save();
-		static void restore();
-	};
-
 	class CallList
 	{
 	public:

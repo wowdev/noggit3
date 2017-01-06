@@ -7,61 +7,6 @@
 #include "Settings.h"
 #include "Log.h"
 
-namespace OpenGL
-{
-	std::stack<SettingsSaver::GLSettings> SettingsSaver::_savedSettings;
-
-	void SettingsSaver::save()
-	{
-		GLSettings settings;
-
-#define SAVE( NAME, VARNAME ) settings.VARNAME = gl.isEnabled( NAME )
-		SAVE(GL_ALPHA_TEST, alphaTesting);
-		SAVE(GL_BLEND, blend);
-		SAVE(GL_COLOR_MATERIAL, colorMaterial);
-		SAVE(GL_CULL_FACE, cullFace);
-		SAVE(GL_DEPTH_TEST, depthTest);
-		SAVE(GL_FOG, fog);
-		SAVE(GL_FRAGMENT_PROGRAM_ARB, fragmentProgram);
-		SAVE(GL_LIGHTING, lighting);
-		SAVE(GL_LINE_SMOOTH, lineSmooth);
-    opengl::texture::set_active_texture (0);
-		SAVE(GL_TEXTURE_2D, texture0);
-    opengl::texture::set_active_texture (1);
-		SAVE(GL_TEXTURE_2D, texture1);
-		SAVE(GL_TEXTURE_GEN_S, textureGenS);
-		SAVE(GL_TEXTURE_GEN_T, textureGenT);
-#undef SAVE
-
-		_savedSettings.push(settings);
-	}
-
-	void SettingsSaver::restore()
-	{
-		assert(!_savedSettings.empty());
-		GLSettings settings = _savedSettings.top();
-		_savedSettings.pop();
-
-#define LOAD( NAME, VARNAME ) if( gl.isEnabled( NAME ) != settings.VARNAME ) { if( settings.VARNAME == GL_TRUE ) { gl.enable( NAME ); } else { gl.disable( NAME ); } }
-		LOAD(GL_ALPHA_TEST, alphaTesting);
-		LOAD(GL_BLEND, blend);
-		LOAD(GL_COLOR_MATERIAL, colorMaterial);
-		LOAD(GL_CULL_FACE, cullFace);
-		LOAD(GL_DEPTH_TEST, depthTest);
-		LOAD(GL_FOG, fog);
-		LOAD(GL_FRAGMENT_PROGRAM_ARB, fragmentProgram);
-		LOAD(GL_LIGHTING, lighting);
-		LOAD(GL_LINE_SMOOTH, lineSmooth);
-    opengl::texture::set_active_texture (0);
-		LOAD(GL_TEXTURE_2D, texture0);
-    opengl::texture::set_active_texture (1);
-		LOAD(GL_TEXTURE_2D, texture1);
-		LOAD(GL_TEXTURE_GEN_S, textureGenS);
-		LOAD(GL_TEXTURE_GEN_T, textureGenT);
-#undef LOAD
-	}
-};
-
 Video video;
 
 void Video::updateProjectionMatrix()
