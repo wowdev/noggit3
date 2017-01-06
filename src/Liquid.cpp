@@ -216,8 +216,8 @@ void Liquid::initGeometry(MPQFile* f)
 		}
 	}
 
-	mDrawList = new OpenGL::CallList();
-	mDrawList->startRecording();
+	mDrawList = new opengl::call_list();
+	mDrawList->start_recording();
 
 	//! \todo  handle light/dark liquid colors
 
@@ -259,7 +259,7 @@ void Liquid::initGeometry(MPQFile* f)
 	}
 	glEnd();
 
-	mDrawList->endRecording();
+	mDrawList->end_recording();
 	if (lVertices)
 	{
 		delete[] lVertices;
@@ -306,8 +306,8 @@ void Liquid::initFromMH2O(MH2O_Tile &pTileInfo)
 		}
 	}
 
-	mDrawList = new OpenGL::CallList();
-	mDrawList->startRecording();
+	mDrawList = new opengl::call_list();
+	mDrawList->start_recording();
 
 	glBegin(GL_QUADS);
 
@@ -346,7 +346,7 @@ void Liquid::initFromMH2O(MH2O_Tile &pTileInfo)
 
 	glEnd();
 
-	mDrawList->endRecording();
+	mDrawList->end_recording();
 }
 
 void Liquid::draw()

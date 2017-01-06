@@ -7,6 +7,7 @@
 #include <map>
 #include <string>
 
+#include <opengl/call_list.hpp>
 #include "Video.h"
 #include "MPQ.h"
 
@@ -14,7 +15,7 @@ namespace freetype
 {
 	struct GlyphData
 	{
-		OpenGL::CallList* _callList;
+    opengl::call_list* _callList;
 		OpenGL::Texture* _texture;
 		int _width;
 

@@ -79,8 +79,8 @@ namespace freetype
 		delete[] expanded_data;
 		expanded_data = NULL;
 
-		glyphData._callList = new OpenGL::CallList();
-		glyphData._callList->startRecording();
+		glyphData._callList = new opengl::call_list();
+		glyphData._callList->start_recording();
 
 		glyphData._texture->bind();
 
@@ -102,7 +102,7 @@ namespace freetype
 
 		gl.translatef(static_cast<float>(glyphData._width), 0.0f, 0.0f);
 
-		glyphData._callList->endRecording();
+		glyphData._callList->end_recording();
 
 		_cachedGlyphs[charCode] = glyphData;
 	}
