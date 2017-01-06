@@ -25,7 +25,9 @@
 void toggleDisplayAllLayers(bool b, int);
 
 UIWater::UIWater(UIMapViewGUI *setGui)
-	: UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f - (float)(video.yres() / 4), (float)winWidth, (float)winHeight), mainGui(setGui)
+	: UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f - (float)(video.yres() / 4), (float)winWidth, (float)winHeight)
+  , mainGui(setGui)
+  , tile(0, 0)
 {
 	addChild(new UIText(78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter));
 
@@ -174,19 +176,18 @@ UIWater::UIWater(UIMapViewGUI *setGui)
 	updateData();
 }
 
-void UIWater::updatePos(int newTileX, int newTileY)
+void UIWater::updatePos(int tileX, int tileZ)
 {
-	if (tileX == newTileX && tileY == newTileY) return;
+	if (tile.x == tileX && tile.z == tileZ) return;
 
-	tileX = newTileX;
-	tileY = newTileY;
+  tile = tile_index(tileX, tileZ);
 
 	updateData();
 }
 
 void UIWater::updateData()
 {
-	float h = gWorld->HaveSelectWater(tileX, tileY);
+  float h = gWorld->HaveSelectWater(tile);
 	if (h)
 	{
 		std::stringstream ms;
@@ -196,13 +197,13 @@ void UIWater::updateData()
 	else
 	{
 		std::stringstream ms;
-		ms << gWorld->getWaterHeight(tileX, tileY);
+    ms << gWorld->getWaterHeight(tile);
 		waterLevel->setText(ms.str());
 	}
-	waterOpacity->value = (gWorld->getWaterTrans(tileX, tileY) / 255.0f);
+	waterOpacity->value = (gWorld->getWaterTrans(tile) / 255.0f);
 
 	std::stringstream mt;
-	mt << gWorld->getWaterType(tileX, tileY) << " - " << LiquidTypeDB::getLiquidName(gWorld->getWaterType(tileX, tileY));
+	mt << gWorld->getWaterType(tile) << " - " << LiquidTypeDB::getLiquidName(gWorld->getWaterType(tile));
 
 	waterType->setText(mt.str());
 }
@@ -215,28 +216,28 @@ void UIWater::resize()
 void UIWater::setWaterTrans(float val)
 {
 	if (std::fmod(val, 0.1f) > 0.1f) return; //reduce performence hit
-	gWorld->setWaterTrans(tileX, tileY, (unsigned char)val);
+	gWorld->setWaterTrans(tile, (unsigned char)val);
 }
 
 void UIWater::addWaterLayer(UIFrame::Ptr /*ptr*/, int /*someint*/)
 {
-	gWorld->addWaterLayer(tileX, tileY, 0.0f, (unsigned char)(waterOpacity->value * 255));
+	gWorld->addWaterLayer(tile, 0.0f, (unsigned char)(waterOpacity->value * 255));
 }
 
 void UIWater::deleteWaterLayer(UIFrame::Ptr /*ptr*/, int /*someint*/)
 {
-	gWorld->deleteWaterLayer(tileX, tileY);
+	gWorld->deleteWaterLayer(tile);
 }
 
 void UIWater::setWaterHeight(float val)
 {
 	if (std::fmod(val, 0.1f) > 0.1f) return; //reduce performence hit
-	gWorld->setWaterHeight(tileX, tileY, val);
+	gWorld->setWaterHeight(tile, val);
 }
 
 void UIWater::changeWaterHeight(UIFrame::Ptr /*ptr*/, int someint)
 {
-	gWorld->setWaterHeight(tileX, tileY, ((float)someint));
+	gWorld->setWaterHeight(tile, ((float)someint));
 	updateData();
 }
 
@@ -250,25 +251,25 @@ void UIWater::openWaterTypeBrowser(UIFrame::Ptr /*ptr*/, int someint)
 
 void UIWater::changeWaterType(int waterint)
 {
-	gWorld->setWaterType(tileX, tileY, waterint);
+	gWorld->setWaterType(tile, waterint);
 	updateData();
 }
 
 void UIWater::autoGen(UIFrame::Ptr ptr, int someint)
 {
-	gWorld->autoGenWaterTrans(tileX, tileY, (int)waterGenFactor->value * 100);
+	gWorld->autoGenWaterTrans(tile, (int)waterGenFactor->value * 100);
 	updateData();
 }
 
 void UIWater::AddWater(UIFrame::Ptr ptr, int someint)
 {
-	gWorld->AddWaters(tileX, tileY);
+	gWorld->AddWaters(tile);
 	updateData();
 }
 
 void UIWater::CropWater(UIFrame::Ptr ptr, int someint)
 {
-	gWorld->CropWaterADT(tileX, tileY);
+	gWorld->CropWaterADT(tile);
 	updateData();
 }
 
