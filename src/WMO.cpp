@@ -842,10 +842,10 @@ void WMOGroup::initDisplayList()
 		bool overbright = ((mat->flags & 0x10) && !hascv);
 		bool spec_shader = (mat->specular && !hascv && !overbright);
 
-		_lists[b].first = new OpenGL::CallList();
+		_lists[b].first = new opengl::call_list();
 		_lists[b].second = spec_shader;
 
-		_lists[b].first->startRecording(GL_COMPILE);
+		_lists[b].first->start_recording(GL_COMPILE);
 
 		mat->_texture->bind();
 
@@ -898,7 +898,7 @@ void WMOGroup::initDisplayList()
 			gl.disable(GL_ALPHA_TEST);
 		}
 
-		_lists[b].first->endRecording();
+		_lists[b].first->end_recording();
 	}
 
 	indoor = false;
@@ -1124,7 +1124,7 @@ WMOGroup::~WMOGroup()
 {
 	//if (dl) gl.deleteLists(dl, 1);
 	//if (dl_light) gl.deleteLists(dl_light, 1);
-	for (std::vector< std::pair<OpenGL::CallList*, bool> >::iterator it = _lists.begin(); it != _lists.end(); ++it)
+	for (auto it = _lists.begin(); it != _lists.end(); ++it)
 	{
 		delete it->first;
 	}

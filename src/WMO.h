@@ -14,6 +14,7 @@
 #include "Quaternion.h"
 #include "Vec3D.h"
 #include "Video.h"
+#include <opengl/call_list.hpp>
 
 #include <boost/optional.hpp>
 
@@ -36,7 +37,7 @@ class WMOGroup {
 	int32_t nDoodads, nBatches;
 	int16_t *ddr;
 	Liquid *lq;
-	std::vector< std::pair<OpenGL::CallList*, bool> > _lists;
+	std::vector< std::pair<opengl::call_list*, bool> > _lists;
 public:
 	Vec3D BoundingBoxMin;
 	Vec3D BoundingBoxMax;

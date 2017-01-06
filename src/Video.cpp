@@ -184,28 +184,6 @@ struct BLPHeader
 
 namespace OpenGL
 {
-	CallList::CallList()
-	{
-		list = gl.genLists(1);
-	}
-	CallList::~CallList()
-	{
-		gl.deleteLists(list, 1);
-	}
-
-	void CallList::startRecording(ModeEnum mode)
-	{
-		gl.newList(list, mode);
-	}
-	void CallList::endRecording()
-	{
-		gl.endList();
-	}
-	void CallList::render()
-	{
-		gl.callList(list);
-	}
-
 	Texture::Texture()
 		: ManagedItem()
     , opengl::texture()

@@ -12,9 +12,12 @@
 
 namespace OpenGL
 {
-	class CallList;
 	class Texture;
 };
+namespace opengl
+{
+  class call_list;
+}
 
 class Brush;
 class MapTile;
@@ -47,7 +50,7 @@ public:
 	bool SelectionMode;
 
 	// Call lists for the low resolution heightmaps.
-	OpenGL::CallList *lowrestiles[64][64];
+  opengl::call_list *lowrestiles[64][64];
 
 	// Temporary variables for loading a WMO, if we have a global WMO.
 	std::string mWmoFilename;

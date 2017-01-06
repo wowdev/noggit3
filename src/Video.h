@@ -105,24 +105,6 @@ struct BLPHeader;
 
 namespace OpenGL
 {
-	class CallList
-	{
-	public:
-		CallList();
-		~CallList();
-
-		typedef GLuint ModeEnum;
-
-		void startRecording(ModeEnum mode = GL_COMPILE);
-		void endRecording();
-		void render();
-
-	private:
-		typedef GLuint InternalRepresentation;
-
-		InternalRepresentation list;
-	};
-
 	class Texture : public ManagedItem, public opengl::texture
 	{
 	public:

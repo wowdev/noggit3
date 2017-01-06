@@ -20,9 +20,12 @@ class Liquid;
 
 namespace OpenGL
 {
-	class CallList;
 	class Texture;
 };
+namespace opengl
+{
+  class call_list;
+}
 
 //static int lCount = 0;
 
@@ -85,7 +88,7 @@ private:
 	bool mTransparency;
 
 	int xtiles, ytiles;
-	OpenGL::CallList* mDrawList;
+  opengl::call_list* mDrawList;
 
 	Vec3D pos;
 

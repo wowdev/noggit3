@@ -511,8 +511,8 @@ void World::initLowresTerrain()
               }
             }
 
-            lowrestiles[j][i] = new OpenGL::CallList();
-            lowrestiles[j][i]->startRecording();
+            lowrestiles[j][i] = new opengl::call_list();
+            lowrestiles[j][i]->start_recording();
 
             gl.begin(GL_TRIANGLES);
             for (size_t y = 0; y < 16; y++)
@@ -535,7 +535,7 @@ void World::initLowresTerrain()
             }
             gl.end();
 
-            lowrestiles[j][i]->endRecording();
+            lowrestiles[j][i]->end_recording();
 
             /* OLD:
             // draw tiles 16x16?
