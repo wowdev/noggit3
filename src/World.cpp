@@ -62,9 +62,9 @@ void renderLine(float x1, float y1, float z1, float x2, float y2, float z2)
 void renderSquare(float x, float y, float z, float size, float orientation)
 {
   float dx1 = size*cos(orientation) - size*sin(orientation);
-  float dx2 = size*cos(orientation + PI / 2) - size*sin(orientation + PI / 2);
+  float dx2 = size*cos(orientation + M_PI / 2) - size*sin(orientation + M_PI / 2);
   float dz1 = size*sin(orientation) + size*cos(orientation);
-  float dz2 = size*sin(orientation + PI / 2) + size*cos(orientation + PI / 2);
+  float dz2 = size*sin(orientation + M_PI / 2) + size*cos(orientation + M_PI / 2);
 
   gl.disable(GL_DEPTH_TEST);
   gl.pushMatrix();

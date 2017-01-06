@@ -200,7 +200,7 @@ void UIMinimapWindow::render() const
 		const float fz(map->camera.z / TILESIZE * tilesize);
 		gl.vertex2f(fx, fz);
 		gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-		gl.vertex2f(fx + 10.0f * cosf(lookAt / 180.0f * (float)PI), fz + 10.0f * sinf(lookAt / 180.0f * (float)PI));
+		gl.vertex2f(fx + 10.0f * cosf(lookAt / 180.0f * (float)M_PI), fz + 10.0f * sinf(lookAt / 180.0f * (float)M_PI));
 		gl.end();
 
 		int skycount = map->skies->skies.size();

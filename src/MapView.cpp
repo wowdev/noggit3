@@ -317,7 +317,7 @@ void setFlattenAngle(float f)
 void setFlattenOrientation(float f)
 {
   flattenOrientation = f;
-  Environment::getInstance()->flattenOrientation = (PI*f) / 180;
+  Environment::getInstance()->flattenOrientation = (M_PI*f) / 180;
 }
 
 
