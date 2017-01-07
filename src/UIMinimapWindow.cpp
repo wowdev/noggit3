@@ -156,13 +156,20 @@ void UIMinimapWindow::render() const
 		{
       tile_index tile(i, j);
 
-      if (gWorld->mapIndex->isTileExternal(tile))
+      if (gWorld->mapIndex->hasTile(tile))
       {
-        glColor4f(1.0f, 0.7f, 0.5f, 0.6f);
-      }					
-      else if (gWorld->mapIndex->tileLoaded(tile))
-      {
-        gl.color4f(0.0f, 1.0f, 1.0f, 0.4f);
+        if (gWorld->mapIndex->isTileExternal(tile))
+        {
+          glColor4f(1.0f, 0.7f, 0.5f, 0.6f);
+        }
+        else if (gWorld->mapIndex->tileLoaded(tile))
+        {
+          gl.color4f(0.0f, 1.0f, 1.0f, 0.4f);
+        }
+        else
+        {
+          glColor4f(0.8f, 0.8f, 0.8f, 0.4f);
+        }        
       }
       else
       {
@@ -177,15 +184,11 @@ void UIMinimapWindow::render() const
 			gl.vertex2f(i * tilesize, ((j + 1) * tilesize) - 1);
 			gl.end();
 
-			if (map)
+			if (map && map->mapIndex->getChanged(tile) > 0)
 			{
         if (map->mapIndex->getChanged(tile) == 1)
         {
           gl.color4f(1.0f, 1.0f, 1.0f, 0.6f);
-        }					
-        else if (gWorld->mapIndex->tileLoaded(tile))
-        {
-          gl.color4f(0.0f, 1.0f, 0.4f, 0.2f);
         }
         else
         {
