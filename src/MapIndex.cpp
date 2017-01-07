@@ -359,15 +359,9 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
 		return nullptr;
 	}
 
-  MapTile* mTile = mTiles[tile.z][tile.x].tile;
-
-	if (mTile) //just to be sure
-	{
-    delete mTile;
-	}
-
-	mTile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha, &highestGUID);// XZ STEFF Swap MapTile( z, x, file
-  return mTile;
+  mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha, &highestGUID);
+  
+  return mTiles[tile.z][tile.x].tile;
 }
 
 void MapIndex::reloadTile(const tile_index& tile)
