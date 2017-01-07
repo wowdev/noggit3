@@ -32,7 +32,7 @@ private:
 struct tile_index
 {
   tile_index(const Vec3D& pos) : tile_index(pos.x / TILESIZE, pos.z / TILESIZE) { }
-  tile_index(size_t tileX, size_t tileZ) : x(tileX), z(tileZ)
+  tile_index(std::size_t tileX, std::size_t tileZ) : x(tileX), z(tileZ)
   {  
     assert(x < 64);
     assert(z < 64);
@@ -45,6 +45,100 @@ struct tile_index
 class MapIndex
 {
 public:
+  struct tiles_in_range
+  {
+    struct tiles_in_range_iterator
+    {
+      tiles_in_range_iterator(MapIndex* map_index, tiles_in_range const* range, std::size_t x, std::size_t y)
+        : _map_index(map_index)
+        , _range(range)
+        , _x(x)
+        , _y(y)
+      {
+        if (_y != _range->_end_y && !has_tile())
+        {
+          ++(*this);
+        }
+      }
+
+      bool operator!= (tiles_in_range_iterator const& other) const
+      {
+        //! \note end() only uses _y.
+        return _y != other._y;
+      }
+
+      tiles_in_range_iterator& operator++()
+      {
+        if (_y == _range->_end_y)
+        {
+          return *this;
+        }
+
+        do
+        {
+          _x++;
+          if (_x == _range->_end_x)
+          {
+            _y++;
+            _x = _range->_start_x;
+          }
+        } while (_y != _range->_end_y && !has_tile());
+
+        return *this;
+      }
+
+      MapTile* operator*() const
+      {
+        return _map_index->loadTile(make_index());
+      }
+
+      MapTile* operator->() const
+      {
+        return operator*();
+      }
+
+      tile_index make_index() const
+      {
+        return tile_index(_x, _y);
+      }
+
+      bool has_tile() const
+      {
+        return _map_index->hasTile(make_index());
+      }      
+
+      MapIndex* _map_index;
+      tiles_in_range const* _range;
+      std::size_t _x;
+      std::size_t _y;
+    };
+
+    MapIndex* _map_index;
+    std::size_t _start_x;
+    std::size_t _start_y;
+    std::size_t _end_x;
+    std::size_t _end_y;
+
+    tiles_in_range_iterator begin() const
+    {
+      return { _map_index, this, _start_x, _start_y };
+    }
+    tiles_in_range_iterator end() const
+    {
+      return{ nullptr, this, _end_x, _end_y };
+    }
+  };
+
+  tiles_in_range tiles_in_range(float x, float z, float radius)
+  {
+    return{ this
+          , (std::size_t)(std::max(0.0f, (x - radius)) / TILESIZE)
+          , (std::size_t)(std::max(0.0f, (z - radius)) / TILESIZE)
+          , (std::size_t)((x + radius + TILESIZE) / TILESIZE)
+          , (std::size_t)((z + radius + TILESIZE) / TILESIZE)
+          };
+  }
+
   struct loaded_tiles
   {
     struct loaded_tile_iterator
