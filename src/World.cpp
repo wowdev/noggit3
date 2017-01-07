@@ -1610,7 +1610,7 @@ bool World::GetVertex(float x, float z, Vec3D *V)
 
 void World::changeShader(float x, float z, float change, float radius, bool editMode)
 {
-  for (MapTile* tile : mapIndex->loaded_tiles())
+  for (MapTile* tile : mapIndex->tiles_in_range(x, z, radius))
   {
     for (size_t ty = 0; ty < 16; ++ty)
     {
@@ -1629,7 +1629,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
 {
   std::vector<MapChunk*> chunks;
 
-  for (MapTile* tile : mapIndex->loaded_tiles())
+  for (MapTile* tile : mapIndex->tiles_in_range(x, z, radius))
   {
     for (size_t ty = 0; ty < 16; ++ty)
     {
@@ -1655,7 +1655,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
 {
   std::vector<MapChunk*> chunks;
 
-  for (MapTile* tile : mapIndex->loaded_tiles())
+  for (MapTile* tile : mapIndex->tiles_in_range(x, z, radius))
   {
     for (size_t ty = 0; ty < 16; ++ty)
     {
@@ -1681,7 +1681,7 @@ void World::flattenTerrain(float x, float z, float remain, float radius, int Bru
 {
   std::vector<MapChunk*> chunks;
 
-  for (MapTile* tile : mapIndex->loaded_tiles())
+  for (MapTile* tile : mapIndex->tiles_in_range(x, z, radius))
   {
     for (size_t ty = 0; ty < 16; ++ty)
     {
@@ -1707,7 +1707,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
 {
   std::vector<MapChunk*> chunks;
 
-  for (MapTile* tile : mapIndex->loaded_tiles())
+  for (MapTile* tile : mapIndex->tiles_in_range(x, z, radius))
   {
     for (size_t ty = 0; ty < 16; ++ty)
     {
@@ -2697,7 +2697,7 @@ bool World::isUnderMap(float x, float z, float h)
     size_t chnkZ = (z / CHUNKSIZE) - tile.z * 16;
 
     // check using the cursor height + 0.5 
-    return (mapIndex->getTile(tile)->getChunk(chnkX, chnkZ)->getMinHeight()) > h + 0.5f;
+    return (mapIndex->getTile(tile)->getChunk(chnkX, chnkZ)->getMinHeight()) > h + 1.0f;
   }
 
   return true;
