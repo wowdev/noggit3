@@ -11,6 +11,7 @@
 
 #include <utf8.h>
 
+#include <opengl/scoped.hpp>
 #include "MPQ.h"
 #include "Log.h"
 #include "Video.h"
@@ -187,7 +188,7 @@ namespace freetype
 
 		for (linesType::const_iterator line(lines.begin()), end(lines.end()); line != end; ++line)
 		{
-			gl.pushMatrix();
+      opengl::scoped::matrix_pusher matrix;
 			gl.translatef(x, (float)verticalPosition, 0.0f);
 
 			const char* lineBegin = line->c_str();
@@ -206,7 +207,6 @@ namespace freetype
 			}
 
 			verticalPosition += (int)height;
-			gl.popMatrix();
 		}
 
 		gl.popAttrib();

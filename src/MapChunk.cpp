@@ -15,6 +15,7 @@
 #include "Vec3D.h"
 #include "World.h"
 #include "Alphamap.h"
+#include <opengl/scoped.hpp>
 
 extern int terrainMode;
 
@@ -566,10 +567,11 @@ void MapChunk::drawLines (Frustum const& frustum)
   gl.vertexPointer(3, GL_FLOAT, 0, 0);
 
   opengl::texture::disable_texture();
-  gl.disable(GL_LIGHTING);
-  gl.pushMatrix();
 
-  gl.enable(GL_LINE_SMOOTH);
+  opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> const lighting;
+  opengl::scoped::matrix_pusher const matrix;
+
+  opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
   gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
   gl.translatef(0.0f, 0.05f, 0.0f);
@@ -611,8 +613,6 @@ void MapChunk::drawLines (Frustum const& frustum)
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);
   }
 
-  gl.popMatrix();
-  gl.enable(GL_LIGHTING);
   gl.color4f(1, 1, 1, 1);
 }
 
@@ -621,22 +621,19 @@ void MapChunk::drawContour()
   if (!DrawMapContour)
     return;
   gl.color4f(1, 1, 1, 1);
-  opengl::texture::set_active_texture (0);
-  opengl::texture::enable_texture();
-  gl.enable(GL_BLEND);
+  opengl::scoped::texture_setter<0, GL_TRUE> const texture;
+  opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.disable(GL_ALPHA_TEST);
+  opengl::scoped::bool_setter<GL_ALPHA_TEST, GL_FALSE> const alpha_test;
   if (Contour == 0)
     GenerateContourMap();
   gl.bindTexture(GL_TEXTURE_2D, Contour);
 
-  gl.enable(GL_TEXTURE_GEN_S);
+  opengl::scoped::bool_setter<GL_TEXTURE_GEN_S, GL_TRUE> const texture_gen_s;
   gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
   gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
 
   drawPass(-1);
-  opengl::texture::disable_texture();
-  gl.disable(GL_TEXTURE_GEN_S);
 }
 
 void MapChunk::draw (Frustum const& frustum)
@@ -782,46 +779,42 @@ void MapChunk::draw (Frustum const& frustum)
 
       gl.color4f(1.0f, 1.0f, 0.0f, 1.0f);
 
-      gl.pushMatrix();
+      opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull_face;
+      opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+      opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const depth_test;
 
-      gl.disable(GL_CULL_FACE);
-      gl.depthMask(false);
-      gl.disable(GL_DEPTH_TEST);
       gl.begin(GL_TRIANGLES);
       gl.vertex3fv(mVertices[gWorld->mapstrip2[poly + 0]]);
       gl.vertex3fv(mVertices[gWorld->mapstrip2[poly + 1]]);
       gl.vertex3fv(mVertices[gWorld->mapstrip2[poly + 2]]);
       gl.end();
-      gl.enable(GL_CULL_FACE);
-      gl.enable(GL_DEPTH_TEST);
-      gl.depthMask(true);
-
-      gl.popMatrix();
     }
   }
 
   if (gWorld->drawwireframe)
   {
-    gl.polygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    gl.lineWidth(1);
-    gl.enable(GL_POLYGON_OFFSET_LINE);
-    gl.polygonOffset(-1, -1);
+    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> const lighting;
     opengl::texture::disable_texture();
-    gl.disable(GL_LIGHTING);
-    gl.color4f(1, 1, 1, 0.2f);
-    drawPass(-1);
-    gl.disable(GL_POLYGON_OFFSET_LINE);
-    gl.polygonMode(GL_FRONT_AND_BACK, GL_POINT);
-    gl.pointSize(2);
-    gl.enable(GL_POLYGON_OFFSET_POINT);
-    gl.polygonOffset(-1, -1);
-    gl.color4f(1, 1, 1, 0.5f);
-    drawPass(-1);
-    gl.disable(GL_POLYGON_OFFSET_POINT);
+
+    {
+      opengl::scoped::bool_setter<GL_POLYGON_OFFSET_LINE, GL_TRUE> const polygon_offset_line;
+      gl.polygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      gl.lineWidth(1);
+      gl.polygonOffset(-1, -1);
+      gl.color4f(1, 1, 1, 0.2f);
+      drawPass(-1);
+    }
+    {
+      opengl::scoped::bool_setter<GL_POLYGON_OFFSET_POINT, GL_TRUE> const polygon_offset_point;
+      gl.polygonMode(GL_FRONT_AND_BACK, GL_POINT);
+      gl.pointSize(2);
+      gl.polygonOffset(-1, -1);
+      gl.color4f(1, 1, 1, 0.5f);
+      drawPass(-1);
+    }
+
     gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
-
-  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 
   gl.enable(GL_LIGHTING);
   gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
