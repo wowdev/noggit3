@@ -33,6 +33,7 @@
 #include "ConfigFile.h"
 #include "MapIndex.h"
 #include "TileWater.h"// tile water
+#include <opengl/scoped.hpp>
 
 #include <unordered_set>
 
@@ -40,146 +41,159 @@ World *gWorld = NULL;
 
 GLuint selectionBuffer[8192];
 
-void renderLine(float x1, float y1, float z1, float x2, float y2, float z2)
+namespace
 {
-  gl.disable(GL_DEPTH_TEST);
-  gl.disable(GL_LIGHTING);
-
-  gl.pushMatrix();
-
-  gl.lineWidth(2.5);
-
-  gl.begin(GL_LINES);
-  gl.vertex3f(x1, y1, z1);
-  gl.vertex3f(x2, y2, z2);
-  gl.end();
-
-  gl.enable(GL_LIGHTING);
-  gl.enable(GL_DEPTH_TEST);
-
-  gl.popMatrix();
-}
-
-void renderSquare(float x, float y, float z, float size, float orientation)
-{
-  float dx1 = size*cos(orientation) - size*sin(orientation);
-  float dx2 = size*cos(orientation + M_PI / 2) - size*sin(orientation + M_PI / 2);
-  float dz1 = size*sin(orientation) + size*cos(orientation);
-  float dz2 = size*sin(orientation + M_PI / 2) + size*cos(orientation + M_PI / 2);
-
-  gl.disable(GL_DEPTH_TEST);
-  gl.pushMatrix();
-
-  gl.begin(GL_QUADS);
-  gl.vertex3f(x + dx1, y, z + dz1);
-  gl.vertex3f(x + dx2, y, z + dz2);
-  gl.vertex3f(x - dx1, y, z - dz1);
-  gl.vertex3f(x - dx2, y, z - dz2);
-  gl.vertex3f(x + dx1, y, z + dz1);
-  gl.end();
-
-  gl.enable(GL_DEPTH_TEST);
-
-  gl.popMatrix();
-}
-
-void renderSphere(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
-{
-  float vx = x2 - x1;
-  float vy = y2 - y1;
-  float vz = z2 - z1;
-
-  //handle the degenerate case of z1 == z2 with an approximation
-  if (vz == 0.0f)
-    vz = .0001f;
-
-  float v = sqrt(vx*vx + vy*vy + vz*vz);
-  float ax = 57.2957795f*acos(vz / v);
-  if (vz < 0.0f)
-    ax = -ax;
-  float rx = -vy*vz;
-  float ry = vx*vz;
-  gl.pushMatrix();
-
-  //draw the quadric
-  gl.translatef(x1, y1, z1);
-  gl.rotatef(ax, rx, ry, 0.0);
-
-  gluQuadricOrientation(quadric, GLU_OUTSIDE);
-  gluSphere(quadric, radius, subdivisions, subdivisions);
-
-  gl.popMatrix();
-}
-
-void renderSphere_convenient(float x, float y, float z, float radius, int subdivisions)
-{
-  if (Environment::getInstance()->screenX>0 && Environment::getInstance()->screenY>0)
+  void render_line (math::vector_3d const& p1, math::vector_3d const& p2)
   {
-    //the same quadric can be re-used for drawing many objects
-    gl.disable(GL_LIGHTING);
-    gl.color4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA);
-    GLUquadricObj *quadric = gluNewQuadric();
-    gluQuadricNormals(quadric, GLU_SMOOTH);
-    renderSphere(x, y, z, x, y, z, 0.3f, 15, quadric);
-    renderSphere(x, y, z, x, y, z, radius, subdivisions, quadric);
-    gluDeleteQuadric(quadric);
-    gl.enable(GL_LIGHTING);
+    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
+    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
+
+    gl.lineWidth(2.5);
+
+    gl.begin(GL_LINES);
+    gl.vertex3fv (p1);
+    gl.vertex3fv (p2);
+    gl.end();
   }
-}
 
-void renderDisk(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int subdivisions, GLUquadricObj *quadric)
-{
-  float vx = x2 - x1;
-  float vy = y2 - y1;
-  float vz = z2 - z1;
+  void render_square(math::vector_3d const& pos, float size, float orientation)
+  {
+    float dx1 = size*cos(orientation) - size*sin(orientation);
+    float dx2 = size*cos(orientation + M_PI / 2) - size*sin(orientation + M_PI / 2);
+    float dz1 = size*sin(orientation) + size*cos(orientation);
+    float dz2 = size*sin(orientation + M_PI / 2) + size*cos(orientation + M_PI / 2);
+    
+    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
 
-  //handle the degenerate case of z1 == z2 with an approximation
-  if (vz == 0.0f)
-    vz = .0001f;
+    gl.begin(GL_QUADS);
+    gl.vertex3f(pos.x + dx1, pos.y, pos.z + dz1);
+    gl.vertex3f(pos.x + dx2, pos.y, pos.z + dz2);
+    gl.vertex3f(pos.x - dx1, pos.y, pos.z - dz1);
+    gl.vertex3f(pos.x - dx2, pos.y, pos.z - dz2);
+    gl.vertex3f(pos.x + dx1, pos.y, pos.z + dz1);
+    gl.end();
+  }
 
-  float v = sqrt(vx*vx + vy*vy + vz*vz);
-  float ax = 57.2957795f*acos(vz / v);
-  if (vz < 0.0f)
-    ax = -ax;
 
-  float rx = -vy * vz;
-  float ry = vx * vz;
+  std::size_t const sphere_segments (15);
+  void draw_sphere_point (int i, int j, float radius)
+  {
+    static float const drho (M_PI / sphere_segments);
+    static float const dtheta (2.0f * drho);
 
-  gl.lineWidth(2.0);
-  //   gl.enable (GL_LINE_STIPPLE);
-  //   gl.lineStipple(2, 0x00FF);
-  gl.pushMatrix();
-  gl.disable(GL_DEPTH_TEST);
-  gl.colorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-  gl.enable(GL_COLOR_MATERIAL);
+    float const rho (i * drho);
+    float const theta (j * dtheta);
+    gl.vertex3f ( std::cos (theta) * std::sin (rho) * radius
+                , std::sin (theta) * std::sin (rho) * radius
+                , std::cos (rho) * radius
+                );
+  }
+  void draw_sphere (float radius)
+  {
+    for (int i = 1; i < sphere_segments; i++)
+    {
+      gl.begin (GL_LINE_LOOP);
+      for (int j = 0; j < sphere_segments; j++)
+      {
+        draw_sphere_point (i, j, radius);
+      }
+      gl.end();
+    }
 
-  //draw the quadric
-  gl.translatef(x1, y1, z1);
-  gl.rotatef(ax, rx, ry, 0.0f);
-  gl.rotatef(90.0f, 1.0f, 0.0f, 0.0f);
-  gl.color4f(Environment::getInstance()->cursorColorR, Environment::getInstance()->cursorColorG, Environment::getInstance()->cursorColorB, Environment::getInstance()->cursorColorA);
+    for (int j = 0; j < sphere_segments; j++)
+    {
+      gl.begin(GL_LINE_STRIP);
+      for (int i = 0; i <= sphere_segments; i++)
+      {
+        draw_sphere_point (i, j, radius);
+      }
+      gl.end();
+    }
+  }
+  void render_sphere (::math::vector_3d const& position, float radius)
+  {
+    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
+    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
 
-  gluQuadricOrientation(quadric, GLU_OUTSIDE);
-  gluDisk(quadric, radius, radius + 0.01f, subdivisions, 1);
+    //! \todo This should be passed in!
+    gl.color4f ( Environment::getInstance()->cursorColorR
+               , Environment::getInstance()->cursorColorG
+               , Environment::getInstance()->cursorColorB
+               , Environment::getInstance()->cursorColorA
+               );
 
-  //gl.color4f(0.0f, 0.8f, 0.1f, 0.9f);
-  //gluDisk(quadric, (radius * 1.5) - 2, (radius * 1.5) + 2, 0, 1);
-  gl.enable(GL_DEPTH_TEST);
-  gl.popMatrix();
-}
+    opengl::scoped::matrix_pusher matrix;
 
-void renderDisk_convenient(float x, float y, float z, float radius)
-{
-  int subdivisions = (int)((int)radius * 3.5);
-  if (subdivisions < 35) subdivisions = 35;
-  gl.disable(GL_LIGHTING);
-  GLUquadricObj *quadric = gluNewQuadric();
-  gluQuadricDrawStyle(quadric, GLU_LINE);
-  gluQuadricNormals(quadric, GLU_SMOOTH);
-  renderDisk(x, y, z, x, y, z, radius, subdivisions, quadric);
-  renderSphere(x, y, z, x, y, z, 0.05f, 15, quadric);
-  gluDeleteQuadric(quadric);
-  gl.enable(GL_LIGHTING);
+    gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
+
+    draw_sphere (0.3f);
+    draw_sphere (radius);
+  }
+
+  void draw_disk_point (float radius, float arc)
+  {
+    gl.vertex3f (radius * std::sin (arc), radius * std::cos (arc), 0.0f);
+  }
+  void draw_disk (float radius)
+  {
+    int const slices (std::max (15.0f, radius * 1.5f));
+    static float const max (2.0f * M_PI);
+    float const stride (max / slices);
+
+    gl.begin (GL_LINE_LOOP);
+    for (float arc (0.0f); arc < max; arc += stride)
+    {
+      draw_disk_point (radius, arc);
+    }
+    gl.end();
+
+    gl.begin (GL_LINE_LOOP);
+    for (float arc (0.0f); arc < max; arc += stride)
+    {
+      draw_disk_point (radius + 1.0f, arc);
+    }
+    gl.end();
+
+    for (float arc (0.0f); arc < max; arc += stride)
+    {
+      gl.begin (GL_LINES);
+      draw_disk_point (radius, arc);
+      draw_disk_point (radius + 1.0f, arc);
+      gl.end();
+    }
+  }
+
+  void render_disk (::math::vector_3d const& position, float radius)
+  {
+    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
+
+    {
+      opengl::scoped::matrix_pusher matrix;
+      opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
+      gl.colorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+      opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_TRUE> color_material;
+
+      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
+      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, math::degrees::vec3 {math::degrees (90.0f), math::degrees (0.0f), math::degrees (0.0f)}).transposed());
+
+      //! \todo This should be passed in!
+      gl.color4f ( Environment::getInstance()->cursorColorR
+                 , Environment::getInstance()->cursorColorG
+                 , Environment::getInstance()->cursorColorB
+                 , Environment::getInstance()->cursorColorA
+                 );
+
+      draw_disk (radius);
+    }
+
+    {
+      opengl::scoped::matrix_pusher matrix;
+
+      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
+
+      draw_sphere (0.3f);
+    }
+  }
 }
 
 bool World::IsEditableWorld(int pMapId)
@@ -930,6 +944,8 @@ void World::draw()
   Environment::getInstance()->Pos3DY = (float)posY;
   Environment::getInstance()->Pos3DZ = (float)posZ;
 
+  math::vector_3d const pos (posX, posY, posZ);
+
 
   // Selection circle
   if (this->IsSelection(eEntry_MapChunk))
@@ -946,53 +962,51 @@ void World::draw()
       // quadratic
       if (Environment::getInstance()->groundBrushType == 5)
       {
-        renderSquare(posX, posY, posZ, groundBrushRadius / 2.0f, 0.0f);
+        render_square (pos, groundBrushRadius / 2.0f, 0.0f);
       }
       else if (Environment::getInstance()->cursorType == 1)
       {
-        renderDisk_convenient((float)posX, (float)posY, (float)posZ, groundBrushRadius);
+        render_disk (pos, groundBrushRadius);
       }
       else if (Environment::getInstance()->cursorType == 2)
       {
-        renderSphere_convenient((float)posX, (float)posY, (float)posZ, groundBrushRadius, 15);
+        render_sphere (pos, groundBrushRadius);
       }
     }
     else if (terrainMode == 1)
     {
 
       if (Environment::getInstance()->cursorType == 1)
-        renderDisk_convenient((float)posX, (float)posY, (float)posZ, blurBrushRadius);
+        render_disk (pos, blurBrushRadius);
       else if (Environment::getInstance()->cursorType == 2)
-        renderSphere_convenient((float)posX, (float)posY, (float)posZ, blurBrushRadius, 15);
+        render_sphere (pos, blurBrushRadius);
 
       if (Environment::getInstance()->flattenAngleEnabled)
       {
-        float r = blurBrushRadius / 2, o = Environment::getInstance()->flattenOrientation;
-        float x = posX + blurBrushRadius*cos(o);
-        float z = posZ + blurBrushRadius*sin(o);
-        renderLine(posX, posY, posZ, x, posY, z);
+        float const o = Environment::getInstance()->flattenOrientation;
+        render_line(pos, pos + math::vector_3d (blurBrushRadius * cos (o), 0.0f, blurBrushRadius * sin(o)));
       }
     }
     else if (terrainMode == 2)
     {
       if (Environment::getInstance()->cursorType == 1)
       {
-        renderDisk_convenient((float)posX, (float)posY, (float)posZ, textureBrush.getRadius());
-        renderDisk_convenient((float)posX, (float)posY, (float)posZ, textureBrush.getRadius() * textureBrush.getHardness());
+        render_disk (pos, textureBrush.getRadius());
+        render_disk (pos, textureBrush.getRadius() * textureBrush.getHardness());
       }
       else if (Environment::getInstance()->cursorType == 2)
       {
-        renderSphere_convenient((float)posX, (float)posY, (float)posZ, textureBrush.getRadius(), 15);
+        render_sphere (pos, textureBrush.getRadius());
       }
     }
     else if (terrainMode == 8)
     {
       if (Environment::getInstance()->cursorType == 1)
-        renderDisk_convenient((float)posX, (float)posY, (float)posZ, shaderRadius);
+        render_disk (pos, shaderRadius);
       else if (Environment::getInstance()->cursorType == 2)
-        renderSphere_convenient((float)posX, (float)posY, (float)posZ, shaderRadius, 15);
+        render_sphere (pos, shaderRadius);
     }
-    else renderSphere_convenient((float)posX, (float)posY, (float)posZ, 0.3f, 15);
+    else render_sphere (pos, 0.3f);
 
     gl.enable(GL_CULL_FACE);
     gl.enable(GL_DEPTH_TEST);
