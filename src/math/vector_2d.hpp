@@ -39,4 +39,9 @@ namespace math
   };
 
   void rotate (float x0, float y0, float* x, float* y, radians);
+  inline vector_2d rotate (vector_2d const& around, vector_2d point, radians angle)
+  {
+    rotate (around.x, around.y, &point.x, &point.y, angle);
+    return point;
+  }
 }
