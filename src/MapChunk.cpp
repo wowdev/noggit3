@@ -56,12 +56,13 @@ void GenerateContourMap()
   CTexture[7 + CONTOUR_WIDTH / 2] = 0xff;
   CTexture[11 + CONTOUR_WIDTH / 2] = 0xff;
 
+  opengl::scoped::bool_setter<GL_TEXTURE_2D, GL_TRUE> const texture_2d;
   gl.genTextures(1, &Contour);
   gl.bindTexture(GL_TEXTURE_2D, Contour);
 
   gluBuild2DMipmaps(GL_TEXTURE_2D, 4, CONTOUR_WIDTH, 1, GL_RGBA, GL_UNSIGNED_BYTE, CTexture);
 
-  gl.enable(GL_TEXTURE_GEN_S);
+  opengl::scoped::bool_setter<GL_TEXTURE_GEN_S, GL_TRUE> const texture_gen_s;
   gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
   gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
 
