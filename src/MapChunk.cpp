@@ -60,7 +60,8 @@ void GenerateContourMap()
   gl.genTextures(1, &Contour);
   gl.bindTexture(GL_TEXTURE_2D, Contour);
 
-  gluBuild2DMipmaps(GL_TEXTURE_2D, 4, CONTOUR_WIDTH, 1, GL_RGBA, GL_UNSIGNED_BYTE, CTexture);
+  gl.texImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, CONTOUR_WIDTH, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, CTexture);
+  gl.generateMipmap (GL_TEXTURE_2D);
 
   opengl::scoped::bool_setter<GL_TEXTURE_GEN_S, GL_TRUE> const texture_gen_s;
   gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
