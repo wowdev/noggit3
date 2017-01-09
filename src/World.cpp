@@ -33,6 +33,7 @@
 #include "ConfigFile.h"
 #include "MapIndex.h"
 #include "TileWater.h"// tile water
+#include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 
 #include <unordered_set>
@@ -802,7 +803,7 @@ void World::draw()
 {
   gl.bindBuffer(GL_ARRAY_BUFFER, 0);
 
-  gluLookAt(camera.x, camera.y, camera.z, lookat.x, lookat.y, lookat.z, 0, 1, 0);
+  opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
   Frustum const frustum;
 
@@ -1163,7 +1164,7 @@ void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap, bool doSelect
 
   gl.bindBuffer(GL_ARRAY_BUFFER, 0);
 
-  gluLookAt(camera.x, camera.y, camera.z, lookat.x, lookat.y, lookat.z, 0, 1, 0);
+  opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
   Frustum const frustum;
 

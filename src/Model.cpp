@@ -8,6 +8,7 @@
 #include "Model.h"
 #include "TextureManager.h" // TextureManager, Texture
 #include "World.h"
+#include <opengl/matrix.hpp>
 
 int globalTime = 0;
 
@@ -1044,10 +1045,10 @@ void ModelCamera::setup(int time)
 	video.farclip(farclip);
 	video.updateProjectionMatrix();
 
-	Vec3D p = pos + tPos.getValue(0, time);
-	Vec3D t = target + tTarget.getValue(0, time);
-	Vec3D u(0.0f, 1.0f, 0.0f);
-	gluLookAt(p.x, p.y, p.z, t.x, t.y, t.z, u.x, u.y, u.z);
+  opengl::matrix::look_at ( pos + tPos.getValue( 0, time )
+                          , target + tTarget.getValue( 0, time )
+                          , {0.0f, 1.0f, 0.0f}
+                          );
 }
 
 void ModelColor::init(const MPQFile& f, const ModelColorDef &mcd, int *global)
