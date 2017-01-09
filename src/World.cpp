@@ -1158,7 +1158,13 @@ void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap, bool doSelect
 
   GLint viewport[4];
   gl.getIntegerv(GL_VIEWPORT, viewport);
-  gluPickMatrix(cursorX, viewport[3] - cursorY, 7, 7, viewport);
+
+  float const delta (7.0f);
+  gl.translatef ( (viewport[2] - 2.0f * (cursorX - viewport[0])) / delta
+                , (viewport[3] - 2.0f * ((viewport[3] - cursorY) - viewport[1])) / delta
+                , 0.0f
+                );
+  gl.scalef (viewport[2] / delta, viewport[3] / delta, 1.0f);
 
   video.set3D_select();
 
