@@ -26,9 +26,8 @@ Vec4D fromBGRA(uint32_t color)
 template<class T>
 T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
 {
-	Animation::Interpolation::Linear interpolation;
-	if (life <= mid) return interpolation(life / mid, a, b);
-	else return interpolation((life - mid) / (1.0f - mid), b, c);
+	if (life <= mid) return math::interpolation::linear(life / mid, a, b);
+	else return math::interpolation::linear((life - mid) / (1.0f - mid), b, c);
 }
 
 

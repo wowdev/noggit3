@@ -28,42 +28,7 @@ namespace Animation
 				HERMITE
 			};
 		}
-
-		struct Linear
-		{
-			template<class AnimatedType>
-			inline AnimatedType operator()(const float& percentage, const AnimatedType& start, const AnimatedType& end)
-			{
-				return (start * (unsigned char)(1.0f - percentage) + end * (unsigned char)percentage);
-			}
-		};
-
-		//! \note "linear" interpolation for quaternions should be slerp by default.
-		template<>
-		inline Quaternion Linear::operator()(const float& percentage, const Quaternion& start, const Quaternion& end)
-		{
-			return math::interpolation::slerp (percentage, start, end);
-		}
-
-		struct Hermite
-		{
-			template<class AnimatedType>
-			inline AnimatedType operator()(const float& percentage, const AnimatedType& start, const AnimatedType& end, const AnimatedType& in, const AnimatedType& out)
-			{
-				const float percentage_2 = percentage * percentage;
-				const float percentage_3 = percentage_2 * percentage;
-				const float _2_percentage_3 = 2.0f * percentage_3;
-				const float _3_percentage_2 = 3.0f * percentage_2;
-
-				const float h1 = _2_percentage_3 - _3_percentage_2 + 1.0f;
-				const float h2 = _3_percentage_2 - _2_percentage_3;
-				const float h3 = percentage_3 - 2.0f * percentage_2 + percentage;
-				const float h4 = percentage_3 - percentage_2;
-
-				return AnimatedType(start * h1 + end * h2 + in * h3 + out * h4);
-			}
-		};
-	};
+	}
 
 	template<class FROM, class TO>
 	struct Conversion
@@ -193,15 +158,13 @@ namespace Animation
 					{
 					case Animation::Interpolation::Type::LINEAR:
 					{
-						Animation::Interpolation::Linear interpolation;
-						result = interpolation(percentage, dataVector[pos], dataVector[pos + 1]);
+						result = math::interpolation::linear (percentage, dataVector[pos], dataVector[pos + 1]);
 					}
 						break;
 
 					case Animation::Interpolation::Type::HERMITE:
 					{
-						Animation::Interpolation::Hermite interpolation;
-						result = interpolation(percentage, dataVector[pos], dataVector[pos + 1], inVector[pos], outVector[pos]);
+            result = math::interpolation::hermite(percentage, dataVector[pos], dataVector[pos + 1], inVector[pos], outVector[pos]);
 					}
 						break;
 					}
