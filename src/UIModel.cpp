@@ -3,6 +3,7 @@
 #include "Video.h"
 
 #include "ModelManager.h"
+#include <opengl/matrix.hpp>
 
 UIModel::UIModel(float xPos, float yPos, float w, float h)
 	: UIFrame(xPos, yPos, w, h)
@@ -47,10 +48,7 @@ void UIModel::drawFBO() const
 	gl.matrixMode(GL_MODELVIEW);
 	gl.loadIdentity();
 
-	gluLookAt(0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f);
-
+  opengl::matrix::look_at ({0.f, 0.f, 1.f}, {0.f, 0.f, 0.f}, {0.0f, 1.0f, 0.0f});
 
 	gl.pushMatrix();
 	gl.translatef(0.0f, 0.0f, -50.0f);
