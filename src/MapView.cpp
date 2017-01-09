@@ -2172,7 +2172,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
     // copy model to clipboard
     if (e->keysym.sym == SDLK_c)
     {
-      if (Environment::getInstance()->CtrlDown)
+      if (Environment::getInstance()->CtrlDown && gWorld->GetCurrentSelection())
         mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
       else if (Environment::getInstance()->AltDown && Environment::getInstance()->CtrlDown)
         mainGui->toggleCursorSwitcher();
