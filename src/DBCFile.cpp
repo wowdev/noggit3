@@ -5,14 +5,13 @@
 #include "MPQ.h"
 #include "Log.h"
 
-DBCFile::DBCFile(const std::string& _filename) :
-filename(_filename),
-data(NULL)
-{
-}
+DBCFile::DBCFile(const std::string& _filename)
+  : filename(_filename)
+{}
+
 void DBCFile::open()
 {
-	MPQFile f(filename);
+	MPQFile f (filename);
 
 	if (f.isEof())
 	{
@@ -22,34 +21,24 @@ void DBCFile::open()
 	LogDebug << "Opening DBC \"" << filename << "\"" << std::endl;
 
 	char header[4];
-	unsigned int na, nb, es, ss;
 
 	f.read(header, 4); // Number of records
 	assert(header[0] == 'W' && header[1] == 'D' && header[2] == 'B' && header[3] == 'C');
-	f.read(&na, 4); // Number of records
-	f.read(&nb, 4); // Number of fields
-	f.read(&es, 4); // Size of a record
-	f.read(&ss, 4); // String size
+	f.read(&recordCount, 4);
+	f.read(&fieldCount, 4);
+	f.read(&recordSize, 4);
+	f.read(&stringSize, 4);
 
-	recordSize = es;
-	recordCount = na;
-	fieldCount = nb;
-	stringSize = ss;
-	assert(fieldCount * 4 == recordSize);
+  if (fieldCount * 4 != recordSize)
+  {
+    throw std::logic_error ("non four-byte-columns not supported");
+  }
 
-	data = new unsigned char[recordSize*recordCount + stringSize];
-	stringTable = data + recordSize*recordCount;
-	f.read(data, recordSize*recordCount + stringSize);
-	f.close();
+	data.resize (recordSize * recordCount);
+	f.read (data.data(), data.size());
+
+	stringTable.resize (stringSize);
+	f.read (stringTable.data(), stringTable.size());
+
+  f.close();
 }
-
-DBCFile::~DBCFile()
-{
-	if (data)
-	{
-		delete[] data;
-		data = NULL;
-	}
-}
-
-
