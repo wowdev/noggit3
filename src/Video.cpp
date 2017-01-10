@@ -6,6 +6,7 @@
 
 #include "Settings.h"
 #include "Log.h"
+#include <opengl/matrix.hpp>
 
 Video video;
 
@@ -14,7 +15,7 @@ void Video::updateProjectionMatrix()
 	gl.matrixMode(GL_PROJECTION);
 	gl.loadIdentity();
 	gl.viewport(0.0f, 0.0f, xres(), yres());
-	gluPerspective(fov(), ratio(), nearclip(), farclip());
+  opengl::matrix::perspective (fov(), ratio(), nearclip(), farclip());
 	gl.matrixMode(GL_MODELVIEW);
 	gl.loadIdentity();
 }
@@ -37,7 +38,7 @@ bool Video::init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_)
 	_yres = yres_;
 	_ratio = static_cast<float>(xres()) / static_cast<float>(yres());
 
-	_fov = 45.0f;
+	_fov = math::degrees (45.0f);
 	_nearclip = 1.0f;
 	_farclip = Settings::getInstance()->FarZ;
 
@@ -122,7 +123,7 @@ void Video::set3D() const
 {
 	gl.matrixMode(GL_PROJECTION);
 	gl.loadIdentity();
-	gluPerspective(fov(), ratio(), nearclip(), farclip());
+  opengl::matrix::perspective (fov(), ratio(), nearclip(), farclip());
 	gl.matrixMode(GL_MODELVIEW);
 	gl.loadIdentity();
 	if (doAntiAliasing())
@@ -132,7 +133,7 @@ void Video::set3D() const
 void Video::set3D_select() const
 {
 	gl.matrixMode(GL_PROJECTION);
-	gluPerspective(fov(), ratio(), nearclip(), farclip());
+  opengl::matrix::perspective (fov(), ratio(), nearclip(), farclip());
 	gl.matrixMode(GL_MODELVIEW);
 	gl.loadIdentity();
 	if (doAntiAliasing())

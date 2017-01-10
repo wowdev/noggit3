@@ -4,6 +4,8 @@
 #include <string>
 #include <stack>
 
+#include <math/trig.hpp>
+
 #include <opengl/context.hpp>
 #include <opengl/texture.hpp>
 
@@ -46,7 +48,7 @@ public:
 	{
 		return _doAntiAliasing;
 	}
-	float fov() const
+  math::degrees fov() const
 	{
 		return _fov;
 	}
@@ -63,7 +65,7 @@ public:
 	{
 		_doAntiAliasing = doAntiAliasing_;
 	}
-	void fov(float fov_)
+	void fov(math::degrees fov_)
 	{
 		_fov = fov_;
 	}
@@ -87,7 +89,7 @@ private:
 	int _yres;
 	float _ratio;
 
-	float _fov;
+  math::degrees _fov = math::degrees (45.0f);
 	float _nearclip;
 	float _farclip;
 

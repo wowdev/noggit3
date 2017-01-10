@@ -41,4 +41,8 @@ namespace math
   {
     return std::cos (x._);
   }
+  inline float tan (radians x)
+  {
+    return std::tan (x._);
+  }
 }

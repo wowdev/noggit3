@@ -44,7 +44,7 @@ void UIModel::drawFBO() const
 
 	gl.matrixMode(GL_PROJECTION);
 	gl.loadIdentity();
-	gluPerspective(video.fov(), width() / height(), video.nearclip(), video.farclip());
+  opengl::matrix::perspective (video.fov(), width() / height(), video.nearclip(), video.farclip());
 	gl.matrixMode(GL_MODELVIEW);
 	gl.loadIdentity();
 
