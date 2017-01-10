@@ -925,28 +925,30 @@ void World::draw()
   gl.popMatrix();
 
   GLint viewport[4];
-  GLdouble modelview[16];
-  GLdouble projection[16];
-  GLfloat winX, winY, winZ;
-  GLdouble posX, posY, posZ;
-
-  gl.getDoublev(GL_MODELVIEW_MATRIX, modelview);
-  gl.getDoublev(GL_PROJECTION_MATRIX, projection);
   gl.getIntegerv(GL_VIEWPORT, viewport);
 
+  float win_x (Environment::getInstance()->screenX);
+  float win_y (viewport[3] - Environment::getInstance()->screenY);
+  float win_z;
+  gl.readPixels (win_x, win_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
 
-  winX = (float)Environment::getInstance()->screenX;
-  winY = (float)viewport[3] - (float)Environment::getInstance()->screenY;
+  math::vector_4d const normalized_device_coords
+    ( 2.0f * (win_x - static_cast<float> (viewport[0])) / static_cast<float> (viewport[2]) - 1.0f
+    , 2.0f * (win_y - static_cast<float> (viewport[1])) / static_cast<float> (viewport[3]) - 1.0f
+    , 2.0f * win_z - 1.0f
+    , 1.0f
+    );
 
-  gl.readPixels(Environment::getInstance()->screenX, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
-  gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+  math::vector_3d const pos ( ( ( opengl::matrix::model_view()
+                                * opengl::matrix::projection()
+                                ).inverted().transposed()
+                              * normalized_device_coords
+                              ).xyz_normalized_by_w()
+                            );
 
-  Environment::getInstance()->Pos3DX = (float)posX;
-  Environment::getInstance()->Pos3DY = (float)posY;
-  Environment::getInstance()->Pos3DZ = (float)posZ;
-
-  math::vector_3d const pos (posX, posY, posZ);
-
+  Environment::getInstance()->Pos3DX = pos.x;
+  Environment::getInstance()->Pos3DY = pos.y;
+  Environment::getInstance()->Pos3DZ = pos.z;
 
   // Selection circle
   if (this->IsSelection(eEntry_MapChunk))
