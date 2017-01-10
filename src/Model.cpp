@@ -1040,7 +1040,7 @@ void ModelCamera::setup(int time)
 		return;
 	}
 
-	video.fov(fov * 34.5f);
+	video.fov(math::radians (fov / 2));
 	video.nearclip(nearclip);
 	video.farclip(farclip);
 	video.updateProjectionMatrix();

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <math/matrix_4x4.hpp>
+#include <math/trig.hpp>
 #include <math/vector_3d.hpp>
 
 #include <opengl/context.hpp>
@@ -26,6 +27,12 @@ namespace opengl
     inline ::math::matrix_4x4 projection()
     {
       return from<GL_PROJECTION_MATRIX>();
+    }
+
+    inline void perspective (math::degrees fovy, float aspect, float zNear, float zFar)
+    {
+      float const ymax (zNear * math::tan (fovy) / 2.0f);
+      gl.frustum (-ymax * aspect, ymax * aspect, -ymax, ymax, zNear, zFar);
     }
 
     inline void look_at ( ::math::vector_3d const& eye
