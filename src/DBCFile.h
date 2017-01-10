@@ -3,17 +3,16 @@
 
 #include <cassert>
 #include <string>
+#include <vector>
 
 class DBCFile
 {
 public:
 	explicit DBCFile(const std::string& filename);
-	virtual ~DBCFile();
 
 	// Open database. It must be openened before it can be used.
 	void open();
 
-	// Database exceptions
 	class Exception
 	{
 	public:
@@ -31,7 +30,7 @@ public:
 		NotFound() : Exception("Key was not found")
 		{ }
 	};
-	// Iteration over database
+
 	class Iterator;
 	class Record
 	{
@@ -56,7 +55,7 @@ public:
 			assert(field < file.fieldCount);
 			size_t stringOffset = getUInt(field);
 			assert(stringOffset < file.stringSize);
-			return reinterpret_cast<char*>(file.stringTable + stringOffset);
+			return file.stringTable.data() + stringOffset;
 		}
 		const char *getLocalizedString(size_t field, int locale = -1) const
 		{
@@ -75,7 +74,7 @@ public:
 			assert(field + loc < file.fieldCount);
 			size_t stringOffset = getUInt(field + loc);
 			assert(stringOffset < file.stringSize);
-			return reinterpret_cast<char*>(file.stringTable + stringOffset);
+			return file.stringTable.data() + stringOffset;
 		}
 	private:
 		Record(const DBCFile &pfile, unsigned char *poffset) : file(pfile), offset(poffset) {}
@@ -117,21 +116,18 @@ public:
 
 	inline Record getRecord(size_t id)
 	{
-		//  assert(data);
-		return Record(*this, data + id*recordSize);
+		return Record(*this, data.data() + id*recordSize);
 	}
 
 	inline Iterator begin()
 	{
-		//  assert(data);
-		return Iterator(*this, data);
+		return Iterator(*this, data.data());
 	}
 	inline Iterator end()
 	{
-		//  assert(data);
-		return Iterator(*this, stringTable);
+		return Iterator(*this, data.data() + data.size());
 	}
-	/// Trivial
+
 	inline size_t getRecordCount() const { return recordCount; }
 	inline size_t getFieldCount() const { return fieldCount; }
 	inline Record getByID(unsigned int id, size_t field = 0)
@@ -150,8 +146,8 @@ private:
 	size_t recordCount;
 	size_t fieldCount;
 	size_t stringSize;
-	unsigned char *data;
-	unsigned char *stringTable;
+  std::vector<unsigned char> data;
+  std::vector<char> stringTable;
 };
 
 #endif
