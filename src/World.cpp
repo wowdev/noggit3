@@ -2642,8 +2642,8 @@ bool World::isUnderMap(float x, float z, float h)
     size_t chnkX = (x / CHUNKSIZE) - tile.x * 16;
     size_t chnkZ = (z / CHUNKSIZE) - tile.z * 16;
 
-    // check using the cursor height + 0.5 
-    return (mapIndex->getTile(tile)->getChunk(chnkX, chnkZ)->getMinHeight()) > h + 1.0f;
+    // check using the cursor height
+    return (mapIndex->getTile(tile)->getChunk(chnkX, chnkZ)->getMinHeight()) > h + 2.0f;
   }
 
   return true;
