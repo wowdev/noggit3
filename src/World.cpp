@@ -885,14 +885,11 @@ void World::draw()
   //gl.colorMaterial(GL_FRONT, GL_DIFFUSE);
   gl.colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
   gl.color4f(1, 1, 1, 1);
-  // if we're using shaders let's give it some specular
-  if (video.mSupportShaders) {
-    Vec4D spec_color(0.1f, 0.1f, 0.1f, 0.1f);
-    gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-    gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 5);
 
-    gl.lightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
-  }
+  gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (0.1f, 0.1f, 0.1f, 0.1f));
+  gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 64);
+
+  gl.lightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1044,11 +1041,8 @@ void World::draw()
   gl.color4f(1, 1, 1, 1);
   gl.enable(GL_BLEND);
 
-  if (video.mSupportShaders) {
-    Vec4D spec_color(0, 0, 0, 1);
-    gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-    gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
-  }
+  gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (0.0f, 0.0f, 0.0f, 1.0f));
+  gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
 
   // unbind hardware buffers
   gl.bindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1094,37 +1088,21 @@ void World::draw()
   // WMOs / map objects
   if (drawwmo || mapIndex->hasAGlobalWMO())
   {
-    if (video.mSupportShaders)
+    gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (1.0f, 1.0f, 1.0f, 1.0f));
+    gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 10);
+
+    gl.lightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+
+    for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
     {
-      Vec4D spec_color(1.0f, 1.0f, 1.0f, 1.0f);
-      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-      gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 10);
-
-      gl.lightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
-
-      for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
+      if (!it->second.wmo->hidden || renderHidden)
       {
-        if (!it->second.wmo->hidden || renderHidden)
-        {
-          it->second.draw (frustum);
-        }
-      }
-        
-
-      spec_color = Vec4D(0.0f, 0.0f, 0.0f, 1.0f);
-      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
-      gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
-    }
-    else
-    {
-      for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
-      {
-        if (!it->second.wmo->hidden)
-        {
-          it->second.draw (frustum);
-        }
+        it->second.draw (frustum);
       }
     }
+
+    gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (0.0f, 0.0f, 0.0f, 1.0f));
+    gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
   }
 
   outdoorLights(true);
