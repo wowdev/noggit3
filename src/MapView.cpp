@@ -380,7 +380,6 @@ void SaveOrReload(UIFrame*, int pMode)
   }
   else if (pMode == 2)
   {
-    gWorld->fixAllGaps();
     gWorld->mapIndex->saveChanged();
   }
   else if (pMode == 3)
