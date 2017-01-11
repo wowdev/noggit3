@@ -133,8 +133,8 @@ public:
       , _radius(radius)
       , _start_x(std::max(0.0f, (x - radius)) / TILESIZE)
       , _start_y(std::max(0.0f, (y - radius)) / TILESIZE)
-      , _end_x((x + radius) / TILESIZE + 1)
-      , _end_y((y + radius) / TILESIZE + 1)
+      , _end_x(std::min(63.0f, (x + radius) / TILESIZE) + 1)
+      , _end_y(std::min(63.0f, (y + radius) / TILESIZE) + 1)
     {}
 
     tiles_in_range_iterator begin() const
