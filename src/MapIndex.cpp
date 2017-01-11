@@ -241,13 +241,13 @@ void MapIndex::enterTile(const tile_index& tile)
 	}
 }
 
-void MapIndex::setChanged(float x, float z, bool loadAdjacentTiles)
+void MapIndex::setChanged(float x, float z, bool setAdjacentTiles)
 {
 	// change the changed flag of the map tile
-  setChanged(tile_index(Vec3D(x, 0.0f, z)), loadAdjacentTiles);
+  setChanged(tile_index(Vec3D(x, 0.0f, z)), setAdjacentTiles);
 }
 
-void MapIndex::setChanged(const tile_index& tile, bool loadAdjacentTiles)
+void MapIndex::setChanged(const tile_index& tile, bool setAdjacentTiles)
 {
 	// change the changed flag of the map tile
   MapTile* mTile = loadTile(tile);
@@ -258,6 +258,11 @@ void MapIndex::setChanged(const tile_index& tile, bool loadAdjacentTiles)
   }
 
 	mTile->changed = 1;
+
+  if (!setAdjacentTiles)
+  {
+    return;
+  }
   
   for (int pz = std::max(tile.z - 1, 0); pz < std::min(tile.z + 2, 63); ++pz)
   {
@@ -265,7 +270,7 @@ void MapIndex::setChanged(const tile_index& tile, bool loadAdjacentTiles)
     {
       tile_index index(px, pz);
 
-      if (!hasTile(index) || !(loadAdjacentTiles || tileLoaded(index)))
+      if (!hasTile(index))
       {
         continue;
       }				
@@ -281,9 +286,9 @@ void MapIndex::setChanged(const tile_index& tile, bool loadAdjacentTiles)
 	}
 }
 
-void MapIndex::setChanged(MapTile* tile, bool loadAdjacentTiles)
+void MapIndex::setChanged(MapTile* tile, bool setAdjacentTiles)
 {
-  setChanged(tile_index(tile->mPositionX, tile->mPositionZ), loadAdjacentTiles);
+  setChanged(tile_index(tile->mPositionX, tile->mPositionZ), setAdjacentTiles);
 }
 
 void MapIndex::unsetChanged(const tile_index& tile)
