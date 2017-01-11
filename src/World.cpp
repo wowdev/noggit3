@@ -2596,109 +2596,72 @@ float World::HaveSelectWater(const tile_index& tile)
 void World::fixAllGaps()
 {
   std::vector<MapChunk*> chunks;
-  MapTile *current = nullptr, *left = nullptr, *above = nullptr;
-
-  tile_index tile(0, 0);
-
-  for (int j = 0; j < 64; ++j)
+  
+  for (MapTile* tile : mapIndex->loaded_tiles())
   {
-    tile.x = 0;
+    MapTile* left = mapIndex->getTileLeft(tile);
+    MapTile* above = mapIndex->getTileAbove(tile);
+    bool tileChanged = false;
 
-    for (int i = 0; i < 64; ++i)
+    // fix the gaps with the adt at the left of the current one
+    if (left)
     {
-      bool tileChanged = false;
-
-      if (!left)
+      for (size_t ty = 0; ty < 16; ty++)
       {
-        tile_index leftTile(j, i - 1);
-        left = ( mapIndex->tileLoaded(leftTile))
-               ? mapIndex->getTile(leftTile)
-               : nullptr
-               ;
+        MapChunk* chunk = tile->getChunk(0, ty);
+        if (chunk->fixGapLeft(left->getChunk(15, ty)))
+        {
+          chunks.emplace_back(chunk);
+          tileChanged = true;
+        }
       }
-      
-      tile_index aboveTile(j - 1, i);
-      above = ( mapIndex->tileLoaded(aboveTile))
-              ? mapIndex->getTile(aboveTile)
-              : nullptr
-              ;
-
-      if (mapIndex->tileLoaded(tile))
-      {
-        current = mapIndex->getTile(tile);
-        
-        // fix the gaps with the adt at the left of the current one
-        if (left)
-        {
-          for (size_t ty = 0; ty < 16; ty++)
-          {
-            MapChunk* chunk = current->getChunk(0, ty);
-            if (chunk->fixGapLeft(left->getChunk(15, ty)))
-            {
-              chunks.emplace_back(chunk);
-              tileChanged = true;
-            }
-          }
-        }
-
-        // fix the gaps with the adt above the current one
-        if (above)
-        {
-          for (size_t tx = 0; tx < 16; tx++)
-          {
-            MapChunk* chunk = current->getChunk(tx, 0);
-            if (chunk->fixGapAbove(above->getChunk(tx, 15)))
-            {
-              chunks.emplace_back(chunk);
-              tileChanged = true;
-            }
-          }
-        }
-        
-        // fix gaps within the adt
-        for (size_t ty = 0; ty < 16; ty++)
-        {
-          for (size_t tx = 0; tx < 16; tx++)
-          {
-            MapChunk* chunk = current->getChunk(tx, ty);
-            bool changed = false;
-
-            // if the chunk isn't the first of the row
-            if (tx && chunk->fixGapLeft(current->getChunk(tx - 1, ty)))
-            {
-              changed = true;
-            }
-            
-            // if the chunk isn't the first of the column
-            if (ty && chunk->fixGapAbove(current->getChunk(tx, ty - 1)))
-            {
-              changed = true;
-            }
-
-            if (changed)
-            {
-              chunks.emplace_back(chunk);
-              tileChanged = true;
-            }
-          }
-        }
-        if (tileChanged)
-        {
-          mapIndex->setChanged(tile, false);
-        }
-        // the current adt become the next left adt
-        left = current;
-      }
-      else
-      {
-        left = nullptr;
-      }
-
-      tile.x++;
     }
 
-    left = nullptr;
-    tile.z++;
+    // fix the gaps with the adt above the current one
+    if (above)
+    {
+      for (size_t tx = 0; tx < 16; tx++)
+      {
+        MapChunk* chunk = tile->getChunk(tx, 0);
+        if (chunk->fixGapAbove(above->getChunk(tx, 15)))
+        {
+          chunks.emplace_back(chunk);
+          tileChanged = true;
+        }
+      }
+    }
+
+    // fix gaps within the adt
+    for (size_t ty = 0; ty < 16; ty++)
+    {
+      for (size_t tx = 0; tx < 16; tx++)
+      {
+        MapChunk* chunk = tile->getChunk(tx, ty);
+        bool changed = false;
+
+        // if the chunk isn't the first of the row
+        if (tx && chunk->fixGapLeft(tile->getChunk(tx - 1, ty)))
+        {
+          changed = true;
+        }
+
+        // if the chunk isn't the first of the column
+        if (ty && chunk->fixGapAbove(tile->getChunk(tx, ty - 1)))
+        {
+          changed = true;
+        }
+
+        if (changed)
+        {
+          chunks.emplace_back(chunk);
+          tileChanged = true;
+        }
+      }
+    }
+    if (tileChanged)
+    {
+      mapIndex->setChanged(tile_index(tile->mPositionX, tile->mPositionZ), false);
+    }
   }
 
   for (MapChunk* chunk : chunks)

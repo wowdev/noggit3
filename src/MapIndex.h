@@ -253,6 +253,8 @@ public:
   uint32_t getHighestGUIDFromFile(const std::string& pFilename);
 
 	MapTile* getTile(const tile_index& tile) const;
+  MapTile* getTileAbove(MapTile* tile) const;
+  MapTile* getTileLeft(MapTile* tile) const;
 	uint32_t getFlag(const tile_index& tile) const;
 
   void setBigAlpha();

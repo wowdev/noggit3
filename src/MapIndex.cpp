@@ -494,6 +494,26 @@ MapTile* MapIndex::getTile(const tile_index& tile) const
 	return mTiles[tile.z][tile.x].tile;
 }
 
+MapTile* MapIndex::getTileAbove(MapTile* tile) const
+{
+  if (tile->mPositionZ == 0 || !tileLoaded(tile->mPositionX, tile->mPositionZ - 1))
+  {
+    return nullptr;
+  }
+
+  return mTiles[tile->mPositionZ - 1][tile->mPositionX].tile;
+}
+
+MapTile* MapIndex::getTileLeft(MapTile* tile) const
+{
+  if (tile->mPositionX == 0 || !tileLoaded(tile->mPositionX - 1, tile->mPositionZ))
+  {
+    return nullptr;
+  }
+
+  return mTiles[tile->mPositionZ][tile->mPositionX - 1].tile;
+}
+
 uint32_t MapIndex::getFlag(const tile_index& tile) const
 {
 	return mTiles[tile.z][tile.x].flags;
