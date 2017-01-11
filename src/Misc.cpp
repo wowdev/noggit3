@@ -87,6 +87,40 @@ namespace misc
 	{
 		return (int)(cord / 533.33333f);
 	}
+
+  float dist(float x1, float z1, float x2, float z2)
+  {
+    float xdiff = x2 - x1, zdiff = z2 - z1;
+    return std::sqrt(xdiff*xdiff + zdiff*zdiff);
+  }
+
+  // return the shortest distance between the point (x, z)
+  // and square at (squareX, squareZ) with a size of unitSize
+  float getShortestDist(float x, float z, float squareX, float squareZ, float unitSize)
+  {
+    float px, pz;
+    float midx = squareX + unitSize / 2, midz = squareZ + unitSize / 2;
+
+    if (x >= squareX && x < squareX + unitSize)
+    {
+      px = x;
+    }
+    else
+    {
+      px = (squareX < x) ? squareX + unitSize : squareX;
+    }
+
+    if (z >= squareZ && z < squareZ + unitSize)
+    {
+      pz = z;
+    }
+    else
+    {
+      pz = (squareZ < z) ? squareZ + unitSize : squareZ;
+    }
+
+    return (px == x && pz == z) ? 0.0f : dist(x, z, px, pz);
+  }
 }
 
 void SetChunkHeader(sExtendableArray pArray, int pPosition, int pMagix, int pSize)
