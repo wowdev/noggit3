@@ -9,6 +9,7 @@
 #include <ctime>
 
 #include "MapHeaders.h"
+#include "Misc.h"
 #include "Vec3D.h"
 
 class MapTile;
@@ -82,7 +83,7 @@ public:
             _y++;
             _x = _range->_start_x;
           }
-        } while (_y != _range->_end_y && !has_tile());
+        } while (_y != _range->_end_y && !has_tile() && !is_in_range());
 
         return *this;
       }
@@ -105,7 +106,18 @@ public:
       bool has_tile() const
       {
         return _map_index->hasTile(make_index());
-      }      
+      }
+
+      bool is_in_range() const
+      {
+        float dist = misc::getShortestDist( _range->_x
+                                          , _range->_y
+                                          , _x * TILESIZE
+                                          , _y * TILESIZE
+                                          , TILESIZE
+                                          );
+        return dist < _range->_radius;
+      }
 
       MapIndex* _map_index;
       tiles_in_range const* _range;
@@ -113,11 +125,17 @@ public:
       std::size_t _y;
     };
 
-    MapIndex* _map_index;
-    std::size_t _start_x;
-    std::size_t _start_y;
-    std::size_t _end_x;
-    std::size_t _end_y;
+
+    tiles_in_range(MapIndex* map_index, float x, float y, float radius)
+      : _map_index(map_index)
+      , _x(x)
+      , _y(y)
+      , _radius(radius)
+      , _start_x(std::max(0.0f, (x - radius)) / TILESIZE)
+      , _start_y(std::max(0.0f, (y - radius)) / TILESIZE)
+      , _end_x((x + radius) / TILESIZE + 1)
+      , _end_y((y + radius) / TILESIZE + 1)
+    {}
 
     tiles_in_range_iterator begin() const
     {
@@ -127,16 +145,20 @@ public:
     {
       return{ nullptr, this, _end_x, _end_y };
     }
+
+    MapIndex* _map_index;
+    float _x;
+    float _y;
+    float _radius;
+    std::size_t _start_x;
+    std::size_t _start_y;
+    std::size_t _end_x;
+    std::size_t _end_y;
   };
 
   tiles_in_range tiles_in_range(float x, float z, float radius)
   {
-    return{ this
-          , (std::size_t)(std::max(0.0f, (x - radius)) / TILESIZE)
-          , (std::size_t)(std::max(0.0f, (z - radius)) / TILESIZE)
-          , (std::size_t)((x + radius + TILESIZE) / TILESIZE)
-          , (std::size_t)((z + radius + TILESIZE) / TILESIZE)
-          };
+    return{ this, x, z, radius };
   }
 
   struct loaded_tiles
