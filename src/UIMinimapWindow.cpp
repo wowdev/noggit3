@@ -9,6 +9,7 @@
 #include "UIText.h"
 #include "Noggit.h"
 #include "MapIndex.h"
+#include <opengl/scoped.hpp>
 
 #include <sstream>
 #include <string>
@@ -123,7 +124,7 @@ void UIMinimapWindow::render() const
 
 	UIWindow::render();
 
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x() + borderwidth, y() + borderwidth, 0.0f);
 
 	if (gWorld->minimap)
@@ -239,6 +240,4 @@ void UIMinimapWindow::render() const
 			gl.end();
 		}
 	}
-
-	gl.popMatrix();
 }

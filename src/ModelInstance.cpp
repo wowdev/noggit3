@@ -6,6 +6,7 @@
 #include "Model.h" // Model, etc.
 #include "World.h" // gWorld
 #include "Settings.h" // gWorld
+#include <opengl/scoped.hpp>
 
 Vec3D TransformCoordsForModel(Vec3D pIn)
 {
@@ -99,7 +100,7 @@ void ModelInstance::draw (Frustum const& frustum)
 	if (!frustum.intersectsSphere(pos, model->rad * sc))
 		return;
 
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 
 	gl.translatef(pos.x, pos.y, pos.z);
 	gl.rotatef(dir.y - 90.0f, 0.0f, 1.0f, 0.0f);
@@ -181,8 +182,6 @@ void ModelInstance::draw (Frustum const& frustum)
 		if (gWorld && gWorld->drawfog)
 			gl.enable(GL_FOG);
 	}
-
-	gl.popMatrix();
 }
 
 //! \todo  Get this drawn on the 2D view.
@@ -191,7 +190,7 @@ void ModelInstance::draw (Frustum const& frustum)
 if(CheckUniques(d1))
 return;
 
-gl.pushMatrix();
+opengl::scoped::matrix_pusher const matrix;
 
 gl.translatef(pos.x/CHUNKSIZE, pos.z/CHUNKSIZE, pos.y);
 gl.rotatef(-90.0f, 1, 0, 0);
@@ -202,8 +201,6 @@ gl.scalef(1/CHUNKSIZE,1/CHUNKSIZE,1/CHUNKSIZE);
 gl.scalef(sc,sc,sc);
 
 model->draw();
-
-gl.popMatrix();
 }*/
 
 void ModelInstance::drawSelect (Frustum const& frustum)
@@ -218,7 +215,7 @@ void ModelInstance::drawSelect (Frustum const& frustum)
 	if (!frustum.intersectsSphere(pos, model->rad * sc))
 		return;
 
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 
 	gl.translatef(pos.x, pos.y, pos.z);
 	gl.rotatef(dir.y - 90.0f, 0.0f, 1.0f, 0.0f);
@@ -234,8 +231,6 @@ void ModelInstance::drawSelect (Frustum const& frustum)
 	model->drawSelect();
 
 	gl.popName();
-
-	gl.popMatrix();
 }
 
 
@@ -262,7 +257,7 @@ void ModelInstance::draw2(const Vec3D& ofs, const math::degrees rotation, Frustu
 	//if ( (tpos - gWorld->camera).length_squared() > (gWorld->doodaddrawdistance2*model->rad*sc) ) return;
 	if (!frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 
 	gl.translatef(pos.x, pos.y, pos.z);
 	Vec3D vdir(-dir.z, dir.x, dir.y);
@@ -270,7 +265,6 @@ void ModelInstance::draw2(const Vec3D& ofs, const math::degrees rotation, Frustu
 	gl.scalef(sc, -sc, -sc);
 
 	model->draw();
-	gl.popMatrix();
 }
 
 void ModelInstance::draw2Select(const Vec3D& ofs, const math::degrees rotation, Frustum const& frustum)
@@ -280,7 +274,7 @@ void ModelInstance::draw2Select(const Vec3D& ofs, const math::degrees rotation, 
 	if ((tpos - gWorld->camera).length_squared() > ((doodaddrawdistance*doodaddrawdistance)*model->rad*sc)) return;
 	if (!frustum.intersectsSphere(tpos, model->rad*sc)) return;
 
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 
 	gl.translatef(pos.x, pos.y, pos.z);
 	Vec3D vdir(-dir.z, dir.x, dir.y);
@@ -288,7 +282,6 @@ void ModelInstance::draw2Select(const Vec3D& ofs, const math::degrees rotation, 
 	gl.scalef(sc, -sc, -sc);
 
 	model->drawSelect();
-	gl.popMatrix();
 }
 
 void ModelInstance::resetDirection(){

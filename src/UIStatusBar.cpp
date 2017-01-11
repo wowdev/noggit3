@@ -6,6 +6,7 @@
 #include "Noggit.h" // app.getArial16()
 #include "UIText.h"
 #include "Video.h"
+#include <opengl/scoped.hpp>
 
 UIStatusBar::UIStatusBar(float xPos, float yPos, float w, float h)
 	: UIWindow(xPos, yPos, w, h)
@@ -18,7 +19,8 @@ UIStatusBar::UIStatusBar(float xPos, float yPos, float w, float h)
 
 void UIStatusBar::render() const
 {
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
+
 	gl.translatef(x(), y(), 0.0f);
 
 	gl.color4f(0.2f, 0.2f, 0.2f, 0.8f);
@@ -51,8 +53,6 @@ void UIStatusBar::render() const
 	gl.end();
 
 	opengl::texture::disable_texture();
-
-	gl.popMatrix();
 }
 
 void UIStatusBar::resize()

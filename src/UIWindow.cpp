@@ -5,6 +5,7 @@
 
 #include "TextureManager.h" // TextureManager, Texture
 #include "Video.h"
+#include <opengl/scoped.hpp>
 
 UIWindow::UIWindow(float xPos, float yPos, float w, float h)
 	: UIFrame(xPos, yPos, w, h)
@@ -39,7 +40,7 @@ UIFrame::Ptr UIWindow::processLeftClick(float mx, float my)
 
 void UIWindow::render() const
 {
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x(), y(), 0.0f);
 
 	gl.color4f(0.2f, 0.2f, 0.2f, 0.8f);
@@ -157,7 +158,4 @@ void UIWindow::render() const
 	gl.end();
 
 	opengl::texture::disable_texture();
-
-	gl.popMatrix();
 }
-

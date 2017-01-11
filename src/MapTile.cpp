@@ -21,6 +21,7 @@
 #include "TextureSet.h"
 #include "MapIndex.h"
 #include "Settings.h"
+#include <opengl/scoped.hpp>
 
 int indexMapBuf(int x, int y)
 {
@@ -490,7 +491,8 @@ void MapTile::drawTextures()
 {
   float xOffset, yOffset;
 
-  gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
+
   yOffset = zbase / CHUNKSIZE;
   xOffset = xbase / CHUNKSIZE;
   gl.translatef(xOffset, yOffset, 0);
@@ -503,9 +505,6 @@ void MapTile::drawTextures()
         mChunks[j][i]->drawTextures();
     }
   }
-  gl.popMatrix();
-
-
 }
 
 MapChunk* MapTile::getChunk(unsigned int x, unsigned int z)

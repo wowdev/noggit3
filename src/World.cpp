@@ -909,17 +909,14 @@ void World::draw()
   // height map w/ a zillion texture passes
   //! \todo  Do we need to push the matrix here?
 
-  gl.pushMatrix();
-
   if (drawterrain)
   {
+    opengl::scoped::matrix_pusher const matrix;
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
       tile->draw(frustum);
     }
   }
-
-  gl.popMatrix();
 
   GLint viewport[4];
   gl.getIntegerv(GL_VIEWPORT, viewport);
@@ -1530,36 +1527,35 @@ void World::drawTileMode(float /*ah*/)
 
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_outer;
   gl.scalef(zoom, zoom, 1.0f);
 
-  gl.pushMatrix();
-  gl.translatef(-camera.x / CHUNKSIZE, -camera.z / CHUNKSIZE, 0);
-
-  minX = camera.x / CHUNKSIZE - 2.0f*video.ratio() / zoom;
-  maxX = camera.x / CHUNKSIZE + 2.0f*video.ratio() / zoom;
-  minY = camera.z / CHUNKSIZE - 2.0f / zoom;
-  maxY = camera.z / CHUNKSIZE + 2.0f / zoom;
-
-  gl.enableClientState(GL_COLOR_ARRAY);
-  gl.disableClientState(GL_NORMAL_ARRAY);
-  gl.disableClientState(GL_TEXTURE_COORD_ARRAY);
-  gl.disable(GL_CULL_FACE);
-  gl.depthMask(GL_FALSE);
-
-  for (MapTile* tile : mapIndex->loaded_tiles())
   {
-    tile->drawTextures();
+    opengl::scoped::matrix_pusher const matrix;
+    gl.translatef(-camera.x / CHUNKSIZE, -camera.z / CHUNKSIZE, 0);
+
+    minX = camera.x / CHUNKSIZE - 2.0f*video.ratio() / zoom;
+    maxX = camera.x / CHUNKSIZE + 2.0f*video.ratio() / zoom;
+    minY = camera.z / CHUNKSIZE - 2.0f / zoom;
+    maxY = camera.z / CHUNKSIZE + 2.0f / zoom;
+
+    gl.enableClientState(GL_COLOR_ARRAY);
+    gl.disableClientState(GL_NORMAL_ARRAY);
+    gl.disableClientState(GL_TEXTURE_COORD_ARRAY);
+    gl.disable(GL_CULL_FACE);
+    gl.depthMask(GL_FALSE);
+
+    for (MapTile* tile : mapIndex->loaded_tiles())
+    {
+      tile->drawTextures();
+    }
+
+    gl.disableClientState(GL_COLOR_ARRAY);
+
+    gl.enableClientState(GL_NORMAL_ARRAY);
+    gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
   }
 
-  gl.disableClientState(GL_COLOR_ARRAY);
-
-  gl.enableClientState(GL_NORMAL_ARRAY);
-  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
-
-
-
-  gl.popMatrix();
   if (drawlines) {
     gl.translatef((GLfloat)fmod(-camera.x / CHUNKSIZE, 16), (GLfloat)fmod(-camera.z / CHUNKSIZE, 16), 0);
     /*  for(int x=-32;x<=48;x++)
@@ -1590,8 +1586,6 @@ void World::drawTileMode(float /*ah*/)
       gl.end();
     }
   }
-
-  gl.popMatrix();
 
   ex = (int)(camera.x / TILESIZE);
   ez = (int)(camera.z / TILESIZE);
@@ -2040,7 +2034,7 @@ void World::saveMap()
       ATile = mapIndex->loadTile(tile);
       gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-      gl.pushMatrix();
+      opengl::scoped::matrix_pusher const matrix;
       gl.scalef(0.08333333f, 0.08333333f, 1.0f);
 
       //gl.translatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
@@ -2048,7 +2042,6 @@ void World::saveMap()
 
 
       ATile->drawTextures();
-      gl.popMatrix();
       gl.readPixels(video.xres() / 2 - 128, video.yres() / 2 - 128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
       video.flip();
       std::stringstream ss;

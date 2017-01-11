@@ -1,6 +1,7 @@
 #include "UIGradient.h"
 
 #include "Video.h" // gl*
+#include <opengl/scoped.hpp>
 
 #include <iostream>     // std::cout
 #include <algorithm>    // std::min
@@ -12,7 +13,7 @@ void UIGradient::render() const
 		// return;
 	}
 
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x(), y(), 0.0f);
 
 	if (horiz)
@@ -59,8 +60,6 @@ void UIGradient::render() const
 			gl.end();
 		}
 	}
-
-	gl.popMatrix();
 }
 
 void UIGradient::setMaxColor(float r, float g, float b, float a)

@@ -5,18 +5,17 @@
 #include <vector>
 
 #include "Video.h" // gl*
+#include <opengl/scoped.hpp>
 
 void UIFrame::render() const
 {
 	if (hidden())
 		return;
 
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x(), y(), 0.0f);
 
 	renderChildren();
-
-	gl.popMatrix();
 }
 
 void UIFrame::renderChildren() const

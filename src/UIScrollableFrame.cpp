@@ -2,6 +2,7 @@
 
 #include "Video.h"
 #include "Log.h"
+#include <opengl/scoped.hpp>
 
 #include <iostream>     // std::cout
 #include <algorithm>    // std::min
@@ -64,7 +65,7 @@ void UIScrollableFrame::render() const
 		return;
 	}
 
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_outer;
 	gl.translatef(x(), y(), 0.0f);
 
 	gl.clearStencil(0);
@@ -90,17 +91,15 @@ void UIScrollableFrame::render() const
 	gl.stencilFunc(GL_EQUAL, 1, 1);
 	gl.stencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-	gl.pushMatrix();
-	gl.translatef(-_scrollPositionX, -_scrollPositionY, 0.0f);
+  {
+    opengl::scoped::matrix_pusher const matrix;
+    gl.translatef(-_scrollPositionX, -_scrollPositionY, 0.0f);
 
-	_content->render();
-
-	gl.popMatrix();
+    _content->render();
+  }
 
 	gl.disable(GL_STENCIL_TEST);
 
 	_scrollbarHorizontal->render();
 	_scrollbarVertical->render();
-
-	gl.popMatrix();
 }

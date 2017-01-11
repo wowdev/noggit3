@@ -9,6 +9,7 @@
 #include "Noggit.h" // app.getArial12()
 #include "UIText.h"
 #include "Video.h"
+#include <opengl/scoped.hpp>
 
 UITreeViewButton::UITreeViewButton(float _x, float _y, UITreeView::Ptr pTreeView)
 	: UIButton(_x, _y, 12.0f, 12.0f, "Interface\\Buttons\\UI-PlusButton-Up.blp", "Interface\\Buttons\\UI-PlusButton-Down.blp")
@@ -130,7 +131,7 @@ void UITreeView::render() const
 	if (hidden())
 		return;
 
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x(), y(), 0);
 	mMyButton->render();
 	mMyText->render();
@@ -148,8 +149,6 @@ void UITreeView::render() const
 			(*childfiles)->render();
 		}
 	}
-
-	gl.popMatrix();
 }
 
 void UITreeView::SetSelectFunction(void(*pSelectFunction)(const std::string&))

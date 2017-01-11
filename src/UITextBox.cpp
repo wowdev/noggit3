@@ -10,6 +10,7 @@
 #include "UIText.h"
 #include "UITexture.h"
 #include "Video.h"
+#include <opengl/scoped.hpp>
 
 //! \todo Handle Selection, Handle Clipboard ( CTRL + C / CTRL + V / CTRL + X ), Handle the Backspace staying down. Details, but better like that.
 
@@ -72,7 +73,7 @@ UITextBox::~UITextBox()
 
 void UITextBox::render() const
 {
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x(), y(), 0.0f);
 
 	gl.color3f(1.0f, 1.0f, 1.0f);
@@ -99,8 +100,6 @@ void UITextBox::render() const
 	opengl::texture::disable_texture();
 
 	_uiText->render();
-
-	gl.popMatrix();
 }
 
 UIFrame::Ptr UITextBox::processLeftClick(float /*mx*/, float /*my*/)
