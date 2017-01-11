@@ -264,9 +264,9 @@ void MapIndex::setChanged(const tile_index& tile, bool setAdjacentTiles)
     return;
   }
   
-  for (int pz = std::max(tile.z - 1, 0); pz < std::min(tile.z + 2, 63); ++pz)
+  for (int pz = std::max(tile.z - 1, 0); pz < std::min(tile.z + 2, 64); ++pz)
   {
-    for (int px = std::max(tile.x - 1, 0); px < std::min(tile.x + 2, 63); ++px)
+    for (int px = std::max(tile.x - 1, 0); px < std::min(tile.x + 2, 64); ++px)
     {
       tile_index index(px, pz);
 
