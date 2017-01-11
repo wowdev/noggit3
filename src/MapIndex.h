@@ -224,9 +224,9 @@ public:
 	void enterTile(const tile_index& tile);
 	MapTile *loadTile(const tile_index& tile);
 
-	void setChanged(float x, float z);
+	void setChanged(float x, float z, bool loadAdjacentTiles = true);
 	void setChanged(const tile_index& tile, bool loadAdjacentTiles = true);
-  void setChanged(MapTile* tile);
+  void setChanged(MapTile* tile, bool loadAdjacentTiles = true);
 
 	void unsetChanged(const tile_index& tile);
 	void setFlag(bool to, float x, float z);

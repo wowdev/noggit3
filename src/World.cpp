@@ -2640,7 +2640,7 @@ void World::fixAllGaps()
     }
     if (tileChanged)
     {
-      mapIndex->setChanged(tile_index(tile->mPositionX, tile->mPositionZ), false);
+      mapIndex->setChanged(tile, false);
     }
   }
 

@@ -241,10 +241,10 @@ void MapIndex::enterTile(const tile_index& tile)
 	}
 }
 
-void MapIndex::setChanged(float x, float z)
+void MapIndex::setChanged(float x, float z, bool loadAdjacentTiles)
 {
 	// change the changed flag of the map tile
-  setChanged(tile_index(Vec3D(x, 0.0f, z)));
+  setChanged(tile_index(Vec3D(x, 0.0f, z)), loadAdjacentTiles);
 }
 
 void MapIndex::setChanged(const tile_index& tile, bool loadAdjacentTiles)
@@ -281,9 +281,9 @@ void MapIndex::setChanged(const tile_index& tile, bool loadAdjacentTiles)
 	}
 }
 
-void MapIndex::setChanged(MapTile* tile)
+void MapIndex::setChanged(MapTile* tile, bool loadAdjacentTiles)
 {
-  setChanged(tile_index(tile->mPositionX, tile->mPositionZ));
+  setChanged(tile_index(tile->mPositionX, tile->mPositionZ), loadAdjacentTiles);
 }
 
 void MapIndex::unsetChanged(const tile_index& tile)
