@@ -246,9 +246,9 @@ public:
 	void enterTile(const tile_index& tile);
 	MapTile *loadTile(const tile_index& tile);
 
-	void setChanged(float x, float z, bool loadAdjacentTiles = true);
-	void setChanged(const tile_index& tile, bool loadAdjacentTiles = true);
-  void setChanged(MapTile* tile, bool loadAdjacentTiles = true);
+	void setChanged(float x, float z, bool setAdjacentTiles = true);
+	void setChanged(const tile_index& tile, bool setAdjacentTiles = true);
+  void setChanged(MapTile* tile, bool setAdjacentTiles = true);
 
 	void unsetChanged(const tile_index& tile);
 	void setFlag(bool to, float x, float z);
