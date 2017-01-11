@@ -2606,6 +2606,8 @@ void World::fixAllGaps()
 
     for (int i = 0; i < 64; ++i)
     {
+      bool tileChanged = false;
+
       if (!left)
       {
         tile_index leftTile(j, i - 1);
@@ -2634,7 +2636,7 @@ void World::fixAllGaps()
             if (chunk->fixGapLeft(left->getChunk(15, ty)))
             {
               chunks.emplace_back(chunk);
-              mapIndex->setChanged(tile);
+              tileChanged = true;
             }
           }
         }
@@ -2648,7 +2650,7 @@ void World::fixAllGaps()
             if (chunk->fixGapAbove(above->getChunk(tx, 15)))
             {
               chunks.emplace_back(chunk);
-              mapIndex->setChanged(tile);
+              tileChanged = true;
             }
           }
         }
@@ -2676,9 +2678,13 @@ void World::fixAllGaps()
             if (changed)
             {
               chunks.emplace_back(chunk);
-              mapIndex->setChanged(tile);
+              tileChanged = true;
             }
           }
+        }
+        if (tileChanged)
+        {
+          mapIndex->setChanged(tile, false);
         }
         // the current adt become the next left adt
         left = current;
