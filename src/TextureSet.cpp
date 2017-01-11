@@ -6,6 +6,7 @@
 #include "Video.h"
 #include "MapHeaders.h"
 #include "MapTile.h"
+#include "Misc.h"
 #include "Log.h"
 #include "World.h"
 
@@ -384,50 +385,13 @@ bool TextureSet::eraseUnusedTextures()
   return texRemoved;
 }
 
-float distance(float x1, float z1, float x2, float z2)
-{
-  float xdiff = x2 - x1, zdiff = z2 - z1;
-  return std::sqrt(xdiff*xdiff + zdiff*zdiff);
-}
-
-// return the shortest distance between the point (x, z)
-// and square at (xPos, zPos) with a size of unitSize
-float getShortestDist(float x, float z, float xPos, float zPos, float unitSize)
-{
-  float px, pz;
-  float midx = xPos + unitSize / 2, midz = zPos + unitSize / 2;
-
-  if (x >= xPos && x < xPos + unitSize)
-  {
-    px = x;
-  }
-  else
-  {
-    px = (midx < x) ? xPos + unitSize : ((midx > x) ? xPos : xPos + unitSize / 2.0f);
-  }
-
-  if (z >= zPos && z < zPos + unitSize)
-  {
-    pz = z;
-  }
-  else
-  {
-    pz = (midz < z) ? zPos + unitSize : ((midz > z) ? zPos : zPos + unitSize / 2.0f);
-  }
-
-  if (px == x && pz == z)
-    return 0.0f;
-
-  return distance(px, pz, x, z);
-}
-
 bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
 {
   bool changed = false;
 
 	if (Environment::getInstance()->paintMode == true)
 	{
-		float zPos, xPos, xdiff, zdiff, dist, radius;  
+		float zPos, xPos, dist, radius;
 
     // hacky fix to make sure textures are blended between 2 chunks
     if (z < zbase)
@@ -453,10 +417,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
 		int texLevel = -1;
 		radius = brush->getRadius();
-
-		xdiff = xbase - x + CHUNKSIZE / 2;
-		zdiff = zbase - z + CHUNKSIZE / 2;
-		dist = getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
+		dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
 
 		if (dist > radius)
 			return changed;
@@ -503,7 +464,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 			{
         float cx = xPos, cz = zPos;
 
-        dist = distance(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
+        dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
 
 				if (dist>radius)
 				{

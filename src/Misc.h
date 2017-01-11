@@ -24,6 +24,8 @@ namespace misc
 	int getADTCord(float cord);
 	std::string explode(std::string original, std::string exploder = ".");
   std::string floatToStr(float f, int precision = 2);
+  float dist(float x1, float z1, float x2, float z2);
+  float getShortestDist(float x, float z, float squareX, float squareZ, float unitSize);
 }
 
 //! \todo collect all lose functions/classes/structs for now, sort them later
