@@ -225,7 +225,7 @@ public:
 	MapTile *loadTile(const tile_index& tile);
 
 	void setChanged(float x, float z);
-	void setChanged(const tile_index& tile);
+	void setChanged(const tile_index& tile, bool loadAdjacentTiles = true);
   void setChanged(MapTile* tile);
 
 	void unsetChanged(const tile_index& tile);

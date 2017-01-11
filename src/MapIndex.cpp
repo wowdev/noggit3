@@ -247,7 +247,7 @@ void MapIndex::setChanged(float x, float z)
   setChanged(tile_index(Vec3D(x, 0.0f, z)));
 }
 
-void MapIndex::setChanged(const tile_index& tile)
+void MapIndex::setChanged(const tile_index& tile, bool loadAdjacentTiles)
 {
 	// change the changed flag of the map tile
   MapTile* mTile = loadTile(tile);
@@ -265,7 +265,7 @@ void MapIndex::setChanged(const tile_index& tile)
     {
       tile_index index(px, pz);
 
-      if (!hasTile(index))
+      if (!hasTile(index) || !(loadAdjacentTiles || tileLoaded(index)))
       {
         continue;
       }				
