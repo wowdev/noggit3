@@ -5,6 +5,7 @@
 #include "WMO.h" // WMO
 #include "World.h" // gWorld
 #include "Misc.h" // checkinside
+#include <opengl/scoped.hpp>
 
 WMOInstance::WMOInstance(std::string const& filename, MPQFile* _file)
 	: wmo(filename)
@@ -62,22 +63,21 @@ void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth);
 
 void WMOInstance::draw (Frustum const& frustum)
 {
+  {
+    opengl::scoped::matrix_pusher const matrix;
+    gl.translatef(pos.x, pos.y, pos.z);
 
-	gl.pushMatrix();
-	gl.translatef(pos.x, pos.y, pos.z);
+    const float roty = dir.y - 90.0f;
 
-	const float roty = dir.y - 90.0f;
+    gl.rotatef(roty, 0.0f, 1.0f, 0.0f);
+    gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
+    gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
 
-	gl.rotatef(roty, 0.0f, 1.0f, 0.0f);
-	gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
-	gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
-
-	if (gWorld->IsSelection(eEntry_WMO) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID)
-		wmo->draw(doodadset, pos, math::degrees (roty), true, true, true, frustum);
-	else
-		wmo->draw(doodadset, pos, math::degrees (roty), false, false, false, frustum);
-
-	gl.popMatrix();
+    if (gWorld->IsSelection(eEntry_WMO) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID)
+      wmo->draw(doodadset, pos, math::degrees (roty), true, true, true, frustum);
+    else
+      wmo->draw(doodadset, pos, math::degrees (roty), false, false, false, frustum);
+  }
 
   // no need to check showModelFromHiddenList in Environment as it's done beforehand in World::draw()
 	if (wmo->hidden || ( gWorld->IsSelection(eEntry_WMO) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID))
@@ -221,7 +221,7 @@ bool WMOInstance::isInsideChunk(Vec3D lTileExtents[2])
 
 void WMOInstance::drawSelect (Frustum const& frustum)
 {
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 
 	gl.translatef(pos.x, pos.y, pos.z);
 
@@ -237,13 +237,11 @@ void WMOInstance::drawSelect (Frustum const& frustum)
 	wmo->drawSelect(doodadset, pos, math::degrees (-roty), frustum);
 
 	gl.popName();
-
-	gl.popMatrix();
 }
 
 /*void WMOInstance::drawPortals()
 {
-gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 
 gl.translatef( pos.x, pos.y, pos.z );
 
@@ -254,8 +252,6 @@ gl.rotatef( -dir.x, 0.0f, 0.0f, 1.0f );
 gl.rotatef( dir.z, 1.0f, 0.0f, 0.0f );
 
 wmo->drawPortals();
-
-gl.popMatrix();
 }*/
 
 void WMOInstance::resetDirection()

@@ -8,6 +8,7 @@
 #include "Model.h" // Model
 #include "ModelManager.h" // ModelManager
 #include "World.h"
+#include <opengl/scoped.hpp>
 
 const float skymul = 36.0f;
 
@@ -298,7 +299,7 @@ bool Skies::drawSky(const Vec3D &pos)
 	if (numSkies == 0) return false;
 
 	// drawing the sky: we'll undo the camera translation
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(pos.x, pos.y, pos.z);
 
 	draw();
@@ -312,8 +313,6 @@ bool Skies::drawSky(const Vec3D &pos)
 		stars->trans = ni;
 		stars->draw();
 	}
-
-	gl.popMatrix();
 
 	return true;
 }

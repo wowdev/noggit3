@@ -4,6 +4,7 @@
 
 #include "TextureManager.h" // TextureManager
 #include "Video.h" // Texture
+#include <opengl/scoped.hpp>
 
 UITexture::UITexture(float xPos, float yPos, float w, float h, const std::string& tex)
 	: UIFrame(xPos, yPos, w, h)
@@ -49,7 +50,7 @@ OpenGL::Texture* UITexture::getTexture()
 
 void UITexture::render() const
 {
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x(), y(), 0.0f);
 
 	gl.color3f(1.0f, 1.0f, 1.0f);
@@ -82,8 +83,6 @@ void UITexture::render() const
 		gl.vertex2f(-1.0f, height());
 		gl.end();
 	}
-
-	gl.popMatrix();
 }
 
 UIFrame *UITexture::processLeftClick(float /*mx*/, float /*my*/)

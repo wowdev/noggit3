@@ -4,6 +4,7 @@
 
 #include "ModelManager.h"
 #include <opengl/matrix.hpp>
+#include <opengl/scoped.hpp>
 
 UIModel::UIModel(float xPos, float yPos, float w, float h)
 	: UIFrame(xPos, yPos, w, h)
@@ -33,7 +34,7 @@ UIModel::UIModel(float xPos, float yPos, float w, float h)
 
 void UIModel::drawFBO() const
 {
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix_outer;
 	gl.pushAttrib(GL_VIEWPORT_BIT);
 	gl.viewport(0, 0, (GLsizei)width(), (GLsizei)height());
 
@@ -50,28 +51,26 @@ void UIModel::drawFBO() const
 
   opengl::matrix::look_at ({0.f, 0.f, 1.f}, {0.f, 0.f, 0.f}, {0.0f, 1.0f, 0.0f});
 
-	gl.pushMatrix();
-	gl.translatef(0.0f, 0.0f, -50.0f);
-	gl.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
+  {
+    opengl::scoped::matrix_pusher const matrix;
+    gl.translatef(0.0f, 0.0f, -50.0f);
+    gl.rotatef(180.0f, 0.0f, 0.0f, 1.0f);
 
-	opengl::texture::enable_texture (0);
-	gl.enable(GL_NORMALIZE);
+    opengl::texture::enable_texture (0);
+    gl.enable(GL_NORMALIZE);
 
-	model.get()->draw();
-	gl.popMatrix();
+    model.get()->draw();
+  }
 
 	gl.popAttrib();
 	gl.bindFramebuffer(GL_FRAMEBUFFER, 0);
-	gl.popMatrix();
 }
 
 void UIModel::drawTexture() const
 {
-	gl.pushMatrix();
-	video.set2D();
-	gl.popMatrix();
+  video.set2D();
 
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x(), y(), 0.0f);
 
 	opengl::texture::enable_texture (0);
@@ -89,7 +88,6 @@ void UIModel::drawTexture() const
 	gl.end();
 
 	opengl::texture::disable_texture (0);
-	gl.popMatrix();
 }
 
 void UIModel::render() const

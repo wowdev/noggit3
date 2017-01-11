@@ -8,6 +8,7 @@
 #include "UICheckBox.h"
 #include "UIText.h"
 #include "Video.h"
+#include <opengl/scoped.hpp>
 
 UIMenuBar::UIMenuBar()
 	: UIWindow(0.0f, 0.0f, static_cast<float>(video.xres()), static_cast<float>(video.yres()))
@@ -168,7 +169,7 @@ void MenuItemToggle::render() const
 
 	gl.color3f(1.0f, 1.0f, 1.0f);
 
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x(), y(), 0.0f);
 
 	opengl::texture::set_active_texture();
@@ -194,8 +195,6 @@ void MenuItemToggle::render() const
 
 	text->render();
 	mMyCheckbox->render();
-
-	gl.popMatrix();
 }
 
 MenuItemSwitch::MenuItemSwitch(MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, bool * pMyState, bool pInvert)

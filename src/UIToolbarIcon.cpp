@@ -4,6 +4,7 @@
 
 #include "TextureManager.h" // TextureManager, Texture
 #include "Video.h" // gl*
+#include <opengl/scoped.hpp>
 
 UIToolbarIcon::UIToolbarIcon(float xPos, float yPos, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments)
 	: UIFrame(xPos, yPos, 35.0f, 35.0f)
@@ -32,7 +33,7 @@ UIFrame* UIToolbarIcon::processLeftClick(float /*mx*/, float /*my*/)
 
 void UIToolbarIcon::render() const
 {
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x(), y(), 0.0f);
 
 	gl.color3f(1.0f, 1.0f, 1.0f);
@@ -76,6 +77,4 @@ void UIToolbarIcon::render() const
 
 		opengl::texture::disable_texture();
 	}
-
-	gl.popMatrix();
 }

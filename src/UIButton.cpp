@@ -7,6 +7,7 @@
 #include "TextureManager.h" // TextureManager
 #include "UIText.h"
 #include "Video.h" // Texture
+#include <opengl/scoped.hpp>
 
 UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pTexNormal, const std::string& pTexDown)
 	: UIFrame(pX, pY, w, h)
@@ -97,7 +98,7 @@ void UIButton::setText(const std::string& pText)
 
 void UIButton::render() const
 {
-	gl.pushMatrix();
+  opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x(), y(), 0.0f);
 
 	gl.color3f(1.0f, 1.0f, 1.0f);
@@ -124,8 +125,6 @@ void UIButton::render() const
 	opengl::texture::disable_texture();
 
 	text->render();
-
-	gl.popMatrix();
 }
 
 UIFrame* UIButton::processLeftClick(float /*mx*/, float /*my*/)

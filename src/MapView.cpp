@@ -61,8 +61,7 @@
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
 #include "MapIndex.h"
-
-
+#include <opengl/scoped.hpp>
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -1974,30 +1973,32 @@ void MapView::displayViewMode_2D(float /*t*/, float /*dt*/)
   const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z) / CHUNKSIZE;
 
   // draw brush
-  gl.pushMatrix();
-  gl.scalef(gWorld->zoom, gWorld->zoom, 1.0f);
-  gl.translatef(-gWorld->camera.x / CHUNKSIZE, -gWorld->camera.z / CHUNKSIZE, 0);
+  {
+    opengl::scoped::matrix_pusher const matrix;
 
-  gl.color4f(1.0f, 1.0f, 1.0f, 0.5f);
-  opengl::texture::set_active_texture(1);
-  opengl::texture::disable_texture();
-  opengl::texture::set_active_texture(0);
-  opengl::texture::enable_texture();
+    gl.scalef(gWorld->zoom, gWorld->zoom, 1.0f);
+    gl.translatef(-gWorld->camera.x / CHUNKSIZE, -gWorld->camera.z / CHUNKSIZE, 0);
 
-  textureBrush.getTexture()->bind();
+    gl.color4f(1.0f, 1.0f, 1.0f, 0.5f);
+    opengl::texture::set_active_texture(1);
+    opengl::texture::disable_texture();
+    opengl::texture::set_active_texture(0);
+    opengl::texture::enable_texture();
 
-  const float tRadius = textureBrush.getRadius() / CHUNKSIZE;// *gWorld->zoom;
-  gl.begin(GL_QUADS);
-  gl.texCoord2f(0.0f, 0.0f);
-  gl.vertex3f(mX - tRadius, mY + tRadius, 0);
-  gl.texCoord2f(1.0f, 0.0f);
-  gl.vertex3f(mX + tRadius, mY + tRadius, 0);
-  gl.texCoord2f(1.0f, 1.0f);
-  gl.vertex3f(mX + tRadius, mY - tRadius, 0);
-  gl.texCoord2f(0.0f, 1.0f);
-  gl.vertex3f(mX - tRadius, mY - tRadius, 0);
-  gl.end();
-  gl.popMatrix();
+    textureBrush.getTexture()->bind();
+
+    const float tRadius = textureBrush.getRadius() / CHUNKSIZE;// *gWorld->zoom;
+    gl.begin(GL_QUADS);
+    gl.texCoord2f(0.0f, 0.0f);
+    gl.vertex3f(mX - tRadius, mY + tRadius, 0);
+    gl.texCoord2f(1.0f, 0.0f);
+    gl.vertex3f(mX + tRadius, mY + tRadius, 0);
+    gl.texCoord2f(1.0f, 1.0f);
+    gl.vertex3f(mX + tRadius, mY - tRadius, 0);
+    gl.texCoord2f(0.0f, 1.0f);
+    gl.vertex3f(mX - tRadius, mY - tRadius, 0);
+    gl.end();
+  }
 
   displayGUIIfEnabled();
 }

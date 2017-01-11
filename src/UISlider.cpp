@@ -11,6 +11,7 @@
 #include "Noggit.h" // app.getArial12()
 #include "TextureManager.h" // TextureManager, Texture
 #include "Video.h"
+#include <opengl/scoped.hpp>
 
 UISlider::UISlider(float xPos, float yPos, float w, float s, float o)
 	: UIFrame(xPos, yPos, w, 10.0f)
@@ -86,7 +87,7 @@ void UISlider::render() const
 	if (hidden())
 		return;
 
-	gl.pushMatrix();
+	opengl::scoped::matrix_pusher const matrix;
 	gl.translatef(x(), y(), 0.0f);
 
 	gl.color3f(1.0f, 1.0f, 1.0f);
@@ -95,8 +96,6 @@ void UISlider::render() const
 	temp << text << std::fixed << std::setprecision(2) << (value * scale + offset);
 	const std::string tempStr = temp.str();
 	app.getArial12().shprint(width() / 2.0f - app.getArial12().width(tempStr) / 2.0f, -16.0f, tempStr);
-
-	gl.pushMatrix();
 
 	opengl::texture::set_active_texture();
 	opengl::texture::enable_texture();
@@ -210,8 +209,6 @@ void UISlider::render() const
 		gl.end();
 	}
 
-	gl.popMatrix();
-
 	sliderTexture->bind();
 
 	const float sliderpos_x = width() * value;
@@ -229,7 +226,4 @@ void UISlider::render() const
 	gl.end();
 
 	opengl::texture::disable_texture();
-
-
-	gl.popMatrix();
 }

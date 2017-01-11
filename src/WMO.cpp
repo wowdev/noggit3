@@ -17,6 +17,7 @@
 #include "Shaders.h"
 #include "TextureManager.h" // TextureManager, Texture
 #include "World.h"
+#include <opengl/scoped.hpp>
 
 void WMOHighlight(Vec4D color)
 {
@@ -524,13 +525,12 @@ bool WMO::drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const
 
 		gl.disable(GL_CULL_FACE);
 		gl.disable(GL_DEPTH_TEST);
-		gl.pushMatrix();
+    opengl::scoped::matrix_pusher const matrix;
 		Vec3D o = gWorld->camera;
 		gl.translatef(o.x, o.y, o.z);
 		const float sc = 2.0f;
 		gl.scalef(sc, sc, sc);
 		skybox.get()->draw();
-		gl.popMatrix();
 		gl.enable(GL_DEPTH_TEST);
 
 		return true;
