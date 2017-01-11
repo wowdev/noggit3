@@ -56,7 +56,7 @@ public:
         , _x(x)
         , _y(y)
       {
-        if (_y != _range->_end_y && !has_tile())
+        if (_y != _range->_end_y && !(has_tile() && is_in_range()))
         {
           ++(*this);
         }
@@ -83,7 +83,7 @@ public:
             _y++;
             _x = _range->_start_x;
           }
-        } while (_y != _range->_end_y && !has_tile() && !is_in_range());
+        } while (_y != _range->_end_y && !(has_tile() && is_in_range()));
 
         return *this;
       }
