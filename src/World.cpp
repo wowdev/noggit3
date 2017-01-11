@@ -1613,7 +1613,7 @@ void World::changeShader(float x, float z, float change, float radius, bool edit
       {
         if (tile->getChunk(ty, tx)->ChangeMCCV(x, z, change, radius, editMode))
         {
-          mapIndex->setChanged(tile);
+          mapIndex->setChanged(tile, false);
         }          
       }
     }
@@ -1634,7 +1634,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
         if (chunk->changeTerrain(x, z, change, radius, BrushType))
         {
           chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile);
+          mapIndex->setChanged(tile, false);
         }
       }
     }
@@ -1660,7 +1660,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
         if (chunk->flattenTerrain(x, z, h, remain, radius, BrushType, flattenType, angle, orientation))
         {
           chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile);
+          mapIndex->setChanged(tile, false);
         }
       }
     }
@@ -1686,7 +1686,7 @@ void World::flattenTerrain(float x, float z, float remain, float radius, int Bru
         if (chunk->flattenTerrain(x, z, remain, radius, BrushType, flattenType, origin, angle, orientation))
         {
           chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile);
+          mapIndex->setChanged(tile, false);
         }
       }
     }
@@ -1712,7 +1712,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
         if (chunk->blurTerrain(x, z, remain, radius, BrushType))
         {
           chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile);
+          mapIndex->setChanged(tile, false);
         }
       }
     }
@@ -1726,35 +1726,18 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
 
 bool World::paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture)
 {
-  const int xLower = (int)((x - brush->getRadius()) / TILESIZE);
-  const int xUper = (int)((x + brush->getRadius()) / TILESIZE) + 1;
-  const int zLower = (int)((z - brush->getRadius()) / TILESIZE);
-  const int zUper = (int)((z + brush->getRadius()) / TILESIZE) + 1;
   bool succ = false;
 
-  for (int j = zLower; j < zUper; ++j)
+  for (MapTile* tile : mapIndex->tiles_in_range(x, z, brush->getRadius()))
   {
-    for (int i = xLower; i < xUper; ++i)
+    for (size_t ty = 0; ty < 16; ++ty)
     {
-      tile_index tile(i, j);
-      if (mapIndex->tileLoaded(tile))
+      for (size_t tx = 0; tx < 16; ++tx)
       {
-        MapTile* mTile = mapIndex->getTile(tile);
-        int chunkLowerX = std::max(0, (int)((x - brush->getRadius()) / CHUNKSIZE) - i * 16);
-        int chunkUperX = std::min(16, (int)((x + brush->getRadius()) / CHUNKSIZE) - i * 16 + 1);
-        int chunkLowerZ = std::max(0, (int)((z - brush->getRadius()) / CHUNKSIZE) - j * 16);
-        int chunkUperZ = std::min(16, (int)((z + brush->getRadius()) / CHUNKSIZE) - j * 16 + 1);
-
-        for (size_t ty = (size_t)chunkLowerX; ty < (size_t)chunkUperX; ++ty)
+        if (tile->getChunk(ty, tx)->paintTexture(x, z, brush, strength, pressure, texture))
         {
-          for (size_t tx = (size_t)chunkLowerZ; tx < (size_t)chunkUperZ; ++tx)
-          {
-            if (mTile->getChunk(ty, tx)->paintTexture(x, z, brush, strength, pressure, texture))
-            {
-              succ |= true;
-              mapIndex->setChanged(tile);
-            }
-          }
+          succ |= true;
+          mapIndex->setChanged(tile, false);
         }
       }
     }
