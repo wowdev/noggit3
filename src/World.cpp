@@ -2046,7 +2046,7 @@ void World::deleteModelInstance(int pUniqueID)
   std::map<int, ModelInstance>::iterator it = mModelInstances.find(pUniqueID);
   if (it == mModelInstances.end()) return;
 
-  mapIndex->setChanged(it->second.pos.x, it->second.pos.z);
+  updateTilesModel(&it->second);
   mModelInstances.erase(it);
   ResetSelection();
 }
@@ -2056,7 +2056,7 @@ void World::deleteWMOInstance(int pUniqueID)
   std::map<int, WMOInstance>::iterator it = mWMOInstances.find(pUniqueID);
   if (it == mWMOInstances.end()) return;
 
-  mapIndex->setChanged(it->second.pos.x, it->second.pos.z);
+  updateTilesWMO(&it->second);
   mWMOInstances.erase(it);
   ResetSelection();
 }
@@ -2186,8 +2186,9 @@ void World::addM2(std::string const& filename, Vec3D newPos, bool copyit)
     newModelis.sc *= misc::randfloat(min, max);
   }
 
+  newModelis.recalcExtents();
+  updateTilesModel(&newModelis);
   mModelInstances.emplace(lMaxUID, std::move(newModelis));
-  mapIndex->setChanged(newPos.x, newPos.z);
 }
 
 void World::addWMO(std::string const& filename, Vec3D newPos, bool copyit)
@@ -2210,10 +2211,45 @@ void World::addWMO(std::string const& filename, Vec3D newPos, bool copyit)
 
   // recalc the extends
   newWMOis.recalcExtents();
+  updateTilesWMO(&newWMOis);
 
   mWMOInstances.emplace(lMaxUID, std::move(newWMOis));
-  mapIndex->setChanged(newPos.x, newPos.z);
+}
 
+void World::updateTilesEntry(nameEntry& entry)
+{
+  if (entry.type == eEntry_WMO)
+  {
+    updateTilesWMO(entry.data.wmo);
+  }
+  else if (entry.type == eEntry_Model)
+  {
+    updateTilesModel(entry.data.model);
+  }
+}
+
+void World::updateTilesWMO(WMOInstance* wmo)
+{
+  tile_index start(wmo->extents[0]), end(wmo->extents[1]);
+  for (int z = start.z; z <= end.z; ++z)
+  {
+    for (int x = start.x; x <= end.x; ++x)
+    {
+      mapIndex->setChanged(tile_index(x, z), false);
+    }
+  }
+}
+
+void World::updateTilesModel(ModelInstance* m2)
+{
+  tile_index start(m2->extents[0]), end(m2->extents[1]);
+  for (int z = start.z; z <= end.z; ++z)
+  {
+    for (int x = start.x; x <= end.x; ++x)
+    {
+      mapIndex->setChanged(tile_index(x, z), false);
+    }
+  }
 }
 
 unsigned int World::getMapID()
