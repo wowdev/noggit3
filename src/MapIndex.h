@@ -11,8 +11,9 @@
 #include "MapHeaders.h"
 #include "Misc.h"
 #include "Vec3D.h"
+#include "MapTile.h"
 
-class MapTile;
+#include <boost/range/iterator_range.hpp>
 
 /*!
 \brief This class is only a holder to have easier access to MapTiles and their flags for easier WDT parsing. This is private and for the class World only.
@@ -39,6 +40,11 @@ struct tile_index
     assert(z < 64);
   }
 
+  friend bool operator== (tile_index const& lhs, tile_index const& rhs)
+  {
+    return std::tie (lhs.x, lhs.z) == std::tie (rhs.x, rhs.z);
+  }
+
   int x;
   int z;
 };
@@ -46,198 +52,107 @@ struct tile_index
 class MapIndex
 {
 public:
-  struct tiles_in_range
+  template<bool Load>
+    struct tile_iterator
+      : std::iterator<std::forward_iterator_tag, MapTile*, std::ptrdiff_t, MapTile**, MapTile* const&>
   {
-    struct tiles_in_range_iterator
+    template<typename Pred>
+      tile_iterator (MapIndex* index, tile_index tile, Pred pred)
+        : _index (index)
+        , _tile (std::move (tile))
+        , _pred (std::move (pred))
     {
-      tiles_in_range_iterator(MapIndex* map_index, tiles_in_range const* range, std::size_t x, std::size_t y)
-        : _map_index(map_index)
-        , _range(range)
-        , _x(x)
-        , _y(y)
+      if (!_pred (_tile, _index->getTile (_tile)))
       {
-        if (_y != _range->_end_y && !(has_tile() && is_in_range()))
-        {
-          ++(*this);
-        }
+        ++(*this);
       }
+    }
 
-      bool operator!= (tiles_in_range_iterator const& other) const
-      {
-        //! \note end() only uses _y.
-        return _y != other._y;
-      }
-
-      tiles_in_range_iterator& operator++()
-      {
-        if (_y == _range->_end_y)
-        {
-          return *this;
-        }
-
-        do
-        {
-          _x++;
-          if (_x == _range->_end_x)
-          {
-            _y++;
-            _x = _range->_start_x;
-          }
-        } while (_y != _range->_end_y && !(has_tile() && is_in_range()));
-
-        return *this;
-      }
-
-      MapTile* operator*() const
-      {
-        return _map_index->loadTile(make_index());
-      }
-
-      MapTile* operator->() const
-      {
-        return operator*();
-      }
-
-      tile_index make_index() const
-      {
-        return tile_index(_x, _y);
-      }
-
-      bool has_tile() const
-      {
-        return _map_index->hasTile(make_index());
-      }
-
-      bool is_in_range() const
-      {
-        float dist = misc::getShortestDist( _range->_x
-                                          , _range->_y
-                                          , _x * TILESIZE
-                                          , _y * TILESIZE
-                                          , TILESIZE
-                                          );
-        return dist < _range->_radius;
-      }
-
-      MapIndex* _map_index;
-      tiles_in_range const* _range;
-      std::size_t _x;
-      std::size_t _y;
-    };
-
-
-    tiles_in_range(MapIndex* map_index, float x, float y, float radius)
-      : _map_index(map_index)
-      , _x(x)
-      , _y(y)
-      , _radius(radius)
-      , _start_x(std::max(0.0f, (x - radius)) / TILESIZE)
-      , _start_y(std::max(0.0f, (y - radius)) / TILESIZE)
-      , _end_x(std::min(63.0f, (x + radius) / TILESIZE) + 1)
-      , _end_y(std::min(63.0f, (y + radius) / TILESIZE) + 1)
+    tile_iterator()
+      : _index (nullptr)
+      , _tile (0, 0)
+      , _pred ([] (tile_index const&, MapTile*) { return false; })
     {}
 
-    tiles_in_range_iterator begin() const
+    bool operator== (tile_iterator const& other) const
     {
-      return { _map_index, this, _start_x, _start_y };
+      return std::tie (_index, _tile) == std::tie (other._index, other._tile);
     }
-    tiles_in_range_iterator end() const
+    bool operator!= (tile_iterator const& other) const
     {
-      return{ nullptr, this, _end_x, _end_y };
+      return !operator== (other);
     }
 
-    MapIndex* _map_index;
-    float _x;
-    float _y;
-    float _radius;
-    std::size_t _start_x;
-    std::size_t _start_y;
-    std::size_t _end_x;
-    std::size_t _end_y;
+    tile_iterator& operator++()
+    {
+      do
+      {
+        ++_tile.x;
+
+        if (_tile.x == 64)
+        {
+          _tile.x = 0;
+          ++_tile.z;
+
+          if (_tile.z == 64)
+          {
+            _tile.x = 0;
+            _tile.z = 0;
+            _index = nullptr;
+            break;
+          }
+        }
+      }
+      while (!_pred (_tile, _index->getTile (_tile)));
+
+      return *this;
+    }
+
+    tile_iterator operator++ (int) const
+    {
+      tile_iterator it (*this);
+      ++it;
+      return it;
+    }
+
+    MapTile* operator*() const
+    {
+      return Load ? _index->loadTile (_tile) : _index->getTile (_tile);
+    }
+    MapTile* operator->() const
+    {
+      return operator*();
+    }
+
+    MapIndex* _index;
+    tile_index _tile;
+    std::function<bool (tile_index const&, MapTile*)> _pred;
   };
 
-  tiles_in_range tiles_in_range(float x, float z, float radius)
+  template<bool Load>
+    auto tiles ( std::function<bool (tile_index const&, MapTile*)> pred
+               = [] (tile_index const&, MapTile*) { return true; }
+               )
   {
-    return{ this, x, z, radius };
+    return boost::make_iterator_range
+      (tile_iterator<Load> {this, {0, 0}, pred}, tile_iterator<Load>{});
   }
 
-  struct loaded_tiles
+  auto loaded_tiles()
   {
-    struct loaded_tile_iterator
-    {
-      loaded_tile_iterator(MapIndex const* map_index, std::size_t x, std::size_t y)
-        : _map_index(map_index)
-        , _x(x)
-        , _y(y)
-      {
-        if (_y != 64 && !is_loaded())
-        {
-          ++(*this);
-        }
-      }
+    return tiles<false>
+      ([] (tile_index const&, MapTile* tile) { return !!tile; });
+  }
 
-      bool operator!= (loaded_tile_iterator const& other) const
-      {
-        //! \note end() only uses _y.
-        return _y != other._y;
-      }
-
-      loaded_tile_iterator& operator++()
-      {
-        if (_y == 64)
-        {
-          return *this;
-        }
-
-        do
-        {
-          _x = (_x + 1) % 64;
-          _y += _x == 0;
-        } while (_y != 64 && !is_loaded());
-
-        return *this;
-      }
-
-      MapTile* operator*() const
-      {
-        return _map_index->getTile(make_index());
-      }
-
-      MapTile* operator->() const
-      {
-        return operator*();
-      }
-
-      tile_index make_index() const
-      {
-        return tile_index(_x, _y);
-      }
-
-      bool is_loaded() const
-      {
-        return _map_index->tileLoaded(make_index());
-      }
-
-      MapIndex const* _map_index;
-      std::size_t _x;
-      std::size_t _y;
-    };
-
-    MapIndex const* _map_index;
-
-    loaded_tile_iterator begin() const
-    {
-      return{ _map_index, 0, 0 };
-    }
-    loaded_tile_iterator end() const
-    {
-      return{ nullptr, 64, 64 };
-    }
-  };
-
-  loaded_tiles loaded_tiles() const
+  auto tiles_in_range (float x, float z, float radius)
   {
-    return{ this };
+    return tiles<true>
+      ( [x, z, radius] (tile_index const& index, MapTile*)
+        {
+          return misc::getShortestDist
+            (x, z, index.x * TILESIZE, index.z * TILESIZE, TILESIZE) <= radius;
+        }
+      );
   }
 
 	MapIndex(const std::string& pBasename);
