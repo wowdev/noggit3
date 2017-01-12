@@ -257,7 +257,7 @@ void WMO::draw(int doodadset, const Vec3D &ofs, math::degrees const angle, bool 
 
 	for (unsigned int i = 0; i<nGroups; ++i)
 	{
-		groups[i].draw(ofs, angle, false, frustum);
+		groups[i].draw(ofs, angle, frustum);
 
 		if (gWorld->drawdoodads)
 		{
@@ -496,17 +496,18 @@ void WMO::draw(int doodadset, const Vec3D &ofs, math::degrees const angle, bool 
 	*/
 }
 
-void WMO::drawSelect(int doodadset, const Vec3D &ofs, math::degrees const angle, Frustum const& frustum) const
+std::vector<float> WMO::intersect (math::ray const& ray) const
 {
-	for (unsigned int i = 0; i<nGroups; ++i) {
-		groups[i].draw(ofs, angle, true, frustum);
+  std::vector<float> results;
 
-		if (gWorld->drawdoodads) {
-			groups[i].drawDoodadsSelect(doodadset, ofs, angle, frustum);
-		}
+  for (size_t i (0); i < nGroups; ++i)
+  {
+    groups[i].intersect (ray, &results);
+  }
 
-		groups[i].drawLiquid();
-	}
+  std::cout << _filename << " " << results.size() << "\n";
+
+  return results;
 }
 
 bool WMO::drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const
@@ -645,14 +646,6 @@ void WMOGroup::init(WMO *_wmo, MPQFile* f, int _num, char *names)
 	lq = 0;
 }
 
-
-struct WMOBatch {
-	signed char bytes[12];
-	uint32_t indexStart;
-	uint16_t indexCount, vertexStart, vertexEnd;
-	unsigned char flags, texture;
-};
-
 void setGLColor(unsigned int col)
 {
 	//gl.color4ubv((GLubyte*)(&col));
@@ -683,12 +676,9 @@ struct WMOGroupHeader {
 
 void WMOGroup::initDisplayList()
 {
-	Vec3D *vertices = NULL;
 	Vec3D *normals = NULL;
 	Vec2D *texcoords = NULL;
-	uint16_t *indices = NULL;
 	struct SMOPoly *materials = NULL;
-	WMOBatch *batches = NULL;
 
 	WMOGroupHeader gh;
 
@@ -748,13 +738,16 @@ void WMOGroup::initDisplayList()
 		}
 		else if (fourcc == 'MOVI') {
 			// indices
-			indices = reinterpret_cast<uint16_t*>(gf.getPointer());
+      auto nIndices (size / 2);
+      auto indices_raw = reinterpret_cast<uint16_t*>(gf.getPointer());
+      indices.insert (indices.end(), indices_raw, indices_raw + nIndices);
 		}
 		else if (fourcc == 'MOVT') {
 			nVertices = size / 12;
 			// let's hope it's padded to 12 bytes, not 16...
-			vertices = reinterpret_cast<Vec3D*>(gf.getPointer());
-			VertexBoxMin = Vec3D(9999999.0f, 9999999.0f, 9999999.0f);
+      auto vertices_raw = reinterpret_cast<Vec3D*>(gf.getPointer());
+			vertices.insert (vertices.end(), vertices_raw, vertices_raw + nVertices);
+      VertexBoxMin = Vec3D(9999999.0f, 9999999.0f, 9999999.0f);
 			VertexBoxMax = Vec3D(-9999999.0f, -9999999.0f, -9999999.0f);
 			rad = 0;
 			for (size_t i = 0; i<nVertices; ++i) {
@@ -786,8 +779,9 @@ void WMOGroup::initDisplayList()
 		}
 		else if (fourcc == 'MOBA') {
 			nBatches = size / 24;
-			batches = reinterpret_cast<WMOBatch*>(gf.getPointer());
-		}
+			auto batches_raw = reinterpret_cast<WMOBatch*>(gf.getPointer());
+      batches.insert (batches.end(), batches_raw, batches_raw + nBatches);
+    }
 		else if (fourcc == 'MOCV') {
 			//gLog("CV: %d\n", size);
 			hascv = true;
@@ -940,7 +934,7 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 	}
 }
 
-void WMOGroup::draw(const Vec3D& ofs, const math::degrees angle, bool selection, Frustum const& frustum)
+void WMOGroup::draw(const Vec3D& ofs, const math::degrees angle, Frustum const& frustum)
 {
 	visible = false;
 	// view frustum culling
@@ -991,10 +985,33 @@ void WMOGroup::draw(const Vec3D& ofs, const math::degrees angle, bool selection,
 	gl.color4f(1, 1, 1, 1);
 	gl.enable(GL_CULL_FACE);
 
-	if (hascv && !selection && gWorld->lighting)
+	if (hascv && gWorld->lighting)
 		gl.enable(GL_LIGHTING);
+}
 
+void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) const
+{
+  if (!ray.intersect_bounds (VertexBoxMin, VertexBoxMax))
+  {
+    return;
+  }
 
+  //! \todo Also allow clicking on doodads and liquids.
+  for (auto&& batch : batches)
+  {
+    for (size_t i (batch.indexStart); i < batch.indexStart + batch.indexCount; i += 3)
+    {
+      if ( auto&& distance
+         = ray.intersect_triangle ( vertices[indices[i + 0]]
+                                  , vertices[indices[i + 1]]
+                                  , vertices[indices[i + 2]]
+                                  )
+         )
+      {
+        results->emplace_back (*distance);
+      }
+    }
+  }
 }
 
 void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, math::degrees const angle, Frustum const& frustum)
@@ -1032,47 +1049,6 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const Vec3D& ofs, math::degre
       setupFog();
       wmo->modelis[dd].draw2(ofs, angle, frustum);
     }
-	}
-
-	gl.disable(GL_LIGHT2);
-
-	gl.color4f(1, 1, 1, 1);
-
-}
-
-
-void WMOGroup::drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, math::degrees const angle, Frustum const& frustum)
-{
-	if (!visible) return;
-	if (nDoodads == 0) return;
-  if (doodadset >= wmo->doodadsets.size()) return;
-
-	gWorld->outdoorLights(outdoorLights);
-	setupFog();
-
-	/*
-	float xr=0,xg=0,xb=0;
-	if (flags & 0x0040) xr = 1;
-	//if (flags & 0x0008) xg = 1;
-	if (flags & 0x8000) xb = 1;
-	gl.color4f(xr,xg,xb,1);
-	*/
-
-	// draw doodads
-	gl.color4f(1, 1, 1, 1);
-	for (int i = 0; i<nDoodads; ++i) {
-		int16_t dd = ddr[i];
-    if ( dd >= wmo->doodadsets[doodadset].start
-      && dd < (wmo->doodadsets[doodadset].start + wmo->doodadsets[doodadset].size)
-      && dd < wmo->modelis.size()
-      )
-    {
-      ModelInstance &mi = wmo->modelis[dd];
-			if (!outdoorLights) {
-				WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
-			}
-			wmo->modelis[dd].draw2Select(ofs, angle, frustum);
-		}
 	}
 
 	gl.disable(GL_LIGHT2);

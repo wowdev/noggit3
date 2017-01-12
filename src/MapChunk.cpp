@@ -274,8 +274,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
   vcenter = (vmin + vmax) * 0.5f;
 
-  nameID = SelectionNames.add(this);
-
   Vec3D *ttv = mMinimap;
 
   // vertices
@@ -499,12 +497,6 @@ MapChunk::~MapChunk()
   {
     delete strip;
     strip = NULL;
-  }
-
-  if (nameID != -1)
-  {
-    SelectionNames.del(nameID);
-    nameID = -1;
   }
 }
 
@@ -775,9 +767,9 @@ void MapChunk::draw (Frustum const& frustum)
 
   if (Environment::getInstance()->cursorType == 3)
   {
-    if (gWorld->IsSelection(eEntry_MapChunk) && gWorld->GetCurrentSelection()->data.mapchunk == this && terrainMode != 3)
+    if (gWorld->IsSelection(eEntry_MapChunk) && boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk == this && terrainMode != 3)
     {
-      int poly = gWorld->GetCurrentSelectedTriangle();
+      int poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
 
       gl.color4f(1.0f, 1.0f, 0.0f, 1.0f);
 
@@ -832,41 +824,30 @@ bool MapChunk::GetWater()
   return this->water;
 }
 
-void MapChunk::drawSelect (Frustum const& frustum)
+void MapChunk::intersect (math::ray const& ray, selection_result* results)
 {
-  if (!frustum.intersects(vmin, vmax))
-    return;
-
-  float mydist = (gWorld->camera - vcenter).length() - r;
-  if (mydist > (mapdrawdistance * mapdrawdistance)) return;
-  if (mydist > gWorld->culldistance)
-    return;
-
-  if (nameID == -1)
-    nameID = SelectionNames.add(this);
-
-  //! \todo Use backface culling again? Maybe this adds problems. Idk.
-  //gl.disable( GL_CULL_FACE );
-  gl.pushName(nameID);
-
-  for (int i = 0; i < stripsize2 - 2; ++i)
+  if (!ray.intersect_bounds (vmin, vmax))
   {
-    gl.pushName(i);
-    gl.begin(GL_TRIANGLES);
-    gl.vertex3fv(mVertices[gWorld->mapstrip2[i]]);
-    gl.vertex3fv(mVertices[gWorld->mapstrip2[i + 1]]);
-    gl.vertex3fv(mVertices[gWorld->mapstrip2[i + 2]]);
-    gl.end();
-    gl.popName();
+    return;
   }
 
-  gl.popName();
-  //gl.enable( GL_CULL_FACE );
+  for (int i (0); i < striplen; i += 3)
+  {
+    if ( auto&& distance = ray.intersect_triangle ( mVertices[strip[i + 0]]
+                                                  , mVertices[strip[i + 1]]
+                                                  , mVertices[strip[i + 2]]
+                                                  )
+       )
+    {
+      results->emplace_back
+        (*distance, selected_chunk_type (this, i / 3, ray.position (*distance)));
+    }
+  }
 }
 
 void MapChunk::getSelectionCoord(float *x, float *z)
 {
-  int Poly = gWorld->GetCurrentSelectedTriangle();
+  int Poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
   if (Poly + 2 > stripsize2)
   {
     *x = -1000000.0f;
@@ -879,7 +860,7 @@ void MapChunk::getSelectionCoord(float *x, float *z)
 
 float MapChunk::getSelectionHeight()
 {
-  int Poly = gWorld->GetCurrentSelectedTriangle();
+  int Poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
   if (Poly + 2 < stripsize2)
     return (mVertices[gWorld->mapstrip2[Poly + 0]].y + mVertices[gWorld->mapstrip2[Poly + 1]].y + mVertices[gWorld->mapstrip2[Poly + 2]].y) / 3;
   LogError << "Getting selection height fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
@@ -888,7 +869,7 @@ float MapChunk::getSelectionHeight()
 
 Vec3D MapChunk::GetSelectionPosition()
 {
-  int Poly = gWorld->GetCurrentSelectedTriangle();
+  int Poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
   if (Poly + 2 > stripsize2)
   {
     LogError << "Getting selection position fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;

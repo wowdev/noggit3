@@ -40,8 +40,6 @@
 
 World *gWorld = NULL;
 
-GLuint selectionBuffer[8192];
-
 namespace
 {
   void render_line (math::vector_3d const& p1, math::vector_3d const& p2)
@@ -248,8 +246,7 @@ World::World(const std::string& name)
   , ez(-1)
   , cx(-1)
   , cz(-1)
-  , mCurrentSelection(NULL)
-  , mCurrentSelectedTriangle(0)
+  , mCurrentSelection()
   , SelectionMode(false)
   , mWmoFilename("")
   , mWmoEntry(ENTRY_MODF())
@@ -457,16 +454,12 @@ void World::initMinimap()
 
 bool World::IsSelection(int pSelectionType)
 {
-  if (HasSelection() && mCurrentSelection->type == pSelectionType)
-    return true;
-  return false;
+  return HasSelection() && mCurrentSelection->which() == pSelectionType;
 }
 
 bool World::HasSelection()
 {
-  if (mCurrentSelection != 0)
-    return true;
-  return false;
+  return !!mCurrentSelection;
 }
 
 void World::initLowresTerrain()
@@ -1076,7 +1069,7 @@ void World::draw()
       {
         it->second.draw (frustum);
       }
-    }   
+    }
   }
 
 
@@ -1125,194 +1118,55 @@ static const GLuint MapObjName = 1;
 static const GLuint DoodadName = 2;
 static const GLuint MapTileName = 3;
 
-void World::drawSelection(int cursorX, int cursorY, bool pOnlyMap, bool doSelection)
+selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
 {
-  gl.selectBuffer(sizeof(selectionBuffer) / sizeof(GLuint), selectionBuffer);
-  gl.renderMode(GL_SELECT);
+  selection_result results;
 
-  gl.matrixMode(GL_PROJECTION);
-  gl.loadIdentity();
-
-  GLint viewport[4];
-  gl.getIntegerv(GL_VIEWPORT, viewport);
-
-  float const delta (7.0f);
-  gl.translatef ( (viewport[2] - 2.0f * (cursorX - viewport[0])) / delta
-                , (viewport[3] - 2.0f * ((viewport[3] - cursorY) - viewport[1])) / delta
-                , 0.0f
-                );
-  gl.scalef (viewport[2] / delta, viewport[3] / delta, 1.0f);
-
-  video.set3D_select();
-
-  gl.bindBuffer(GL_ARRAY_BUFFER, 0);
-
-  opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
-
-  Frustum const frustum;
-
-  gl.clear(GL_DEPTH_BUFFER_BIT);
-
-  gl.initNames();
-
-  gl.pushName(MapTileName);
   if (drawterrain)
   {
-    for (MapTile* tile : mapIndex->loaded_tiles())
+    for (auto&& tile : mapIndex->loaded_tiles())
     {
-      tile->drawSelect(frustum);
+      tile->intersect (ray, &results);
     }
   }
-  gl.popName();
 
   if (!pOnlyMap)
   {
-    // WMOs / map objects
-    if (drawwmo)
-    {
-      gl.pushName(MapObjName);
-      gl.pushName(0);
-      for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
-      {
-        it->second.drawSelect (frustum);
-      }
-      gl.popName();
-      gl.popName();
-    }
-
-    // M2s / models
     if (drawmodels)
     {
-      if (renderAnimations)ModelManager::resetAnim();
-
-      gl.pushName(DoodadName);
-      gl.pushName(0);
-      for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
+      for (auto&& model_instance : mModelInstances)
       {
-        it->second.drawSelect (frustum);
+        model_instance.second.intersect (ray, &results);
       }
-      gl.popName();
-      gl.popName();
+    }
+
+    if (drawwmo)
+    {
+      for (auto&& wmo_instance : mWMOInstances)
+      {
+        wmo_instance.second.intersect (ray, &results);
+      }
     }
   }
 
-  if (doSelection)
-  {
-    getSelection();
-  }
+  return results;
 }
-
-struct GLNameEntry
-{
-  GLuint stackSize;
-  GLuint nearZ;
-  GLuint farZ;
-  struct
-  {
-    GLuint type;
-    union
-    {
-      GLuint dummy;
-      GLuint chunk;
-    };
-    union
-    {
-      GLuint uniqueId;
-      GLuint triangle;
-    };
-  } stack;
-};
 
 Vec3D World::getCursorPosOnModel()
 {
   if (terrainMode == 9)
   {
-    drawSelection( Environment::getInstance()->screenX
-                 , Environment::getInstance()->screenY
-                 , false
-                 , false
-                 );
-
-    GLuint minDist = 0xFFFFFFFF;
-    GLNameEntry* minEntry = NULL;
-    GLuint hits = (GLuint)gl.renderMode(GL_RENDER);
-
-    size_t offset = 0;
-
-    //! \todo Isn't the closest one always the first? Iterating would be worthless then.
-    while (hits-- > 0U)
+    if (IsSelection (eEntry_Model))
     {
-      GLNameEntry* entry = reinterpret_cast<GLNameEntry*>(&selectionBuffer[offset]);
-
-      // We always push { MapObjName | DoodadName | MapTileName }, { 0, 0, MapTile }, { UID, UID, triangle }
-      assert(entry->stackSize == 3);
-
-      if (entry->nearZ < minDist)
-      {
-        minDist = entry->nearZ;
-        minEntry = entry;
-      }
-
-      offset += sizeof(GLNameEntry) / sizeof(GLuint);
+      return boost::get<selected_model_type> (*GetCurrentSelection())->pos;
     }
-
-    if (minEntry)
+    else if (IsSelection (eEntry_WMO))
     {
-      // only select objects when using the object editor
-      if (minEntry->stack.type == MapObjName)
-      {
-        WMOInstance* wmo = SelectionNames.findEntry(minEntry->stack.uniqueId)->data.wmo;
-        return wmo->pos;
-      }
-      else if (minEntry->stack.type == DoodadName)
-      {
-        ModelInstance* model = SelectionNames.findEntry(minEntry->stack.uniqueId)->data.model;
-        return model->pos;
-      }
+      return boost::get<selected_wmo_type> (*GetCurrentSelection())->pos;
     }
   }
 
   return Environment::getInstance()->get_cursor_pos();
-}
-
-void World::getSelection()
-{
-  GLuint minDist = 0xFFFFFFFF;
-  GLNameEntry* minEntry = NULL;
-  GLuint hits = (GLuint)gl.renderMode(GL_RENDER);
-
-  size_t offset = 0;
-
-  //! \todo Isn't the closest one always the first? Iterating would be worthless then.
-  while (hits-- > 0U)
-  {
-    GLNameEntry* entry = reinterpret_cast<GLNameEntry*>(&selectionBuffer[offset]);
-
-    // We always push { MapObjName | DoodadName | MapTileName }, { 0, 0, MapTile }, { UID, UID, triangle }
-    assert(entry->stackSize == 3);
-
-    if (entry->nearZ < minDist)
-    {
-      minDist = entry->nearZ;
-      minEntry = entry;
-    }
-
-    offset += sizeof(GLNameEntry) / sizeof(GLuint);
-  }
-
-  if (minEntry)
-  {
-    // only select objects when using the object editor
-    if (terrainMode == 9 && (minEntry->stack.type == MapObjName || minEntry->stack.type == DoodadName))
-    {
-      mCurrentSelection = SelectionNames.findEntry(minEntry->stack.uniqueId);
-    }
-    else if (minEntry->stack.type == MapTileName)
-    {
-      mCurrentSelection = SelectionNames.findEntry(minEntry->stack.chunk);
-      mCurrentSelectedTriangle = (int)minEntry->stack.triangle;
-    }
-  }
 }
 
 void World::tick(float dt)
@@ -1365,7 +1219,7 @@ void World::clearHeight(int id, const tile_index& tile)
   {
     for (int i = 0; i<16; ++i)
     {
-      // set the Area ID on a tile x,z on the chunk cx,cz      
+      // set the Area ID on a tile x,z on the chunk cx,cz
       MapChunk *curChunk = curTile->getChunk((unsigned int)j, (unsigned int)i);
       curChunk->recalcNorms();
     }
@@ -1377,7 +1231,7 @@ void World::clearHeight(int /*id*/, const tile_index& tile, int _cx, int _cz)
 {
   // set the Area ID on a tile x,z on the chunk cx,cz
   MapTile* curTile = mapIndex->getTile(tile);
-  
+
   if (!curTile)
   {
     return;
@@ -1390,7 +1244,7 @@ void World::clearHeight(int /*id*/, const tile_index& tile, int _cx, int _cz)
   {
     return;
   }
-    
+
 
   curChunk->vmin.y = 9999999.0f;
   curChunk->vmax.y = -9999999.0f;
@@ -1412,7 +1266,7 @@ void World::clearHeight(int /*id*/, const tile_index& tile, int _cx, int _cz)
 void World::clearAllModelsOnADT(const tile_index& tile)
 {
   MapTile* curTile = mapIndex->getTile(tile);
-    
+
   if (curTile)
   {
     curTile->clearAllModels();
@@ -1453,7 +1307,7 @@ void World::CropWaterADT(const tile_index& tile)
 void World::addWaterLayer(const tile_index& tile)
 {
   MapTile* curTile = mapIndex->getTile(tile);
-  
+
   if (curTile)
   {
     curTile->Water->addLayer(1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer);
@@ -1516,7 +1370,7 @@ void World::setAreaID(int id, const tile_index& tile, int _cx, int _cz)
     if (curChunk)
     {
       curChunk->setAreaID(id);
-    }    
+    }
   }
 }
 
@@ -1614,7 +1468,7 @@ void World::changeShader(float x, float z, float change, float radius, bool edit
         if (tile->getChunk(ty, tx)->ChangeMCCV(x, z, change, radius, editMode))
         {
           mapIndex->setChanged(tile, false);
-        }          
+        }
       }
     }
   }
@@ -1639,7 +1493,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
       }
     }
   }
-  
+
   for (MapChunk* chunk : chunks)
   {
     chunk->recalcNorms();
@@ -1797,7 +1651,7 @@ void World::eraseTextures(float x, float z)
     }
   }
 
-  
+
 }
 
 void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
@@ -1851,7 +1705,7 @@ void World::addHole(float x, float z, bool big)
           for (size_t tx = 0; tx < 16; ++tx)
           {
             MapChunk* chunk = mTile->getChunk(ty, tx);
-            // check if the cursor is not undermap 
+            // check if the cursor is not undermap
             if (chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
             {
               mapIndex->setChanged(curTile);
@@ -1864,7 +1718,7 @@ void World::addHole(float x, float z, bool big)
               else
               {
                 chunk->addHole(k, l);
-              }                
+              }
             }
           }
         }
@@ -1905,7 +1759,7 @@ void World::removeHole(float x, float z, bool big)
               else
               {
                 chunk->removeHole(k, l);
-              }                
+              }
             }
           }
         }
@@ -1981,7 +1835,7 @@ void World::convertMapToBigAlpha()
   }
 
   mapIndex->setBigAlpha();
-  mapIndex->save();  
+  mapIndex->save();
 }
 
 void World::saveMap()
@@ -2128,12 +1982,12 @@ void World::ensure_instance_maps_having_correct_keys_and_unlock_uids()
   }
 }
 
-void World::addModel(nameEntry entry, Vec3D newPos, bool copyit)
+void World::addModel(selection_type entry, Vec3D newPos, bool copyit)
 {
-  if (entry.type == eEntry_Model)
-    this->addM2(entry.data.model->model->_filename, newPos, copyit);
-  else if (entry.type == eEntry_WMO)
-    this->addWMO(entry.data.wmo->wmo->_filename, newPos, copyit);
+  if (entry.which() == eEntry_Model)
+    this->addM2(boost::get<selected_model_type> (entry)->model->_filename, newPos, copyit);
+  else if (entry.which() == eEntry_WMO)
+    this->addWMO(boost::get<selected_wmo_type> (entry)->wmo->_filename, newPos, copyit);
 }
 
 void World::addM2(std::string const& filename, Vec3D newPos, bool copyit)
@@ -2156,16 +2010,16 @@ void World::addM2(std::string const& filename, Vec3D newPos, bool copyit)
 
   if (Settings::getInstance()->copyModelStats
     && copyit
-    && Environment::getInstance()->get_clipboard().type == eEntry_Model)
+    && Environment::getInstance()->get_clipboard().which() == eEntry_Model)
   {
     // copy rot size from original model. Dirty but woring
-    newModelis.sc = Environment::getInstance()->get_clipboard().data.model->sc;
-    newModelis.dir = Environment::getInstance()->get_clipboard().data.model->dir;
-    newModelis.ldir = Environment::getInstance()->get_clipboard().data.model->ldir;
+    newModelis.sc = boost::get<selected_model_type> (Environment::getInstance()->get_clipboard())->sc;
+    newModelis.dir = boost::get<selected_model_type> (Environment::getInstance()->get_clipboard())->dir;
+    newModelis.ldir = boost::get<selected_model_type> (Environment::getInstance()->get_clipboard())->ldir;
   }
 
   if (Settings::getInstance()->random_rotation)
-  { 
+  {
     float min = Environment::getInstance()->minRotation;
     float max = Environment::getInstance()->maxRotation;
     newModelis.dir.y += misc::randfloat(min, max);
@@ -2203,10 +2057,10 @@ void World::addWMO(std::string const& filename, Vec3D newPos, bool copyit)
 
   if (Settings::getInstance()->copyModelStats
     && copyit
-    && Environment::getInstance()->get_clipboard().type == eEntry_WMO)
+    && Environment::getInstance()->get_clipboard().which() == eEntry_WMO)
   {
     // copy rot from original model. Dirty but working
-    newWMOis.dir = Environment::getInstance()->get_clipboard().data.wmo->dir;
+    newWMOis.dir = boost::get<selected_wmo_type> (Environment::getInstance()->get_clipboard())->dir;
   }
 
   // recalc the extends
@@ -2216,15 +2070,15 @@ void World::addWMO(std::string const& filename, Vec3D newPos, bool copyit)
   mWMOInstances.emplace(lMaxUID, std::move(newWMOis));
 }
 
-void World::updateTilesEntry(nameEntry& entry)
+void World::updateTilesEntry(selection_type const& entry)
 {
-  if (entry.type == eEntry_WMO)
+  if (entry.which() == eEntry_WMO)
   {
-    updateTilesWMO(entry.data.wmo);
+    updateTilesWMO (boost::get<selected_wmo_type> (entry));
   }
-  else if (entry.type == eEntry_Model)
+  else if (entry.which() == eEntry_Model)
   {
-    updateTilesModel(entry.data.model);
+    updateTilesModel (boost::get<selected_model_type> (entry));
   }
 }
 
@@ -2299,7 +2153,7 @@ void World::moveHeight(int /*id*/, const tile_index& tile, int _cx, int _cz)
   {
     return;
   }
-  
+
   mapIndex->setChanged(tile);
   MapChunk* curChunk = curTile->getChunk((size_t)_cx, (size_t)_cz);
   if (!curChunk)
@@ -2311,14 +2165,14 @@ void World::moveHeight(int /*id*/, const tile_index& tile, int _cx, int _cz)
   curChunk->vmax.y = -9999999.0f;
 
   float heightDelta = 0.0f;
-  nameEntry *selection = gWorld->GetCurrentSelection();
+  auto&& selection = gWorld->GetCurrentSelection();
 
   if (selection)
   {
-    if (selection->type == eEntry_MapChunk)
+    if (selection->which() == eEntry_MapChunk)
     {
       // chunk selected
-      heightDelta = gWorld->camera.y - selection->data.mapchunk->py;
+      heightDelta = gWorld->camera.y - boost::get<selected_chunk_type> (*selection).chunk->py;
     }
   }
   if (heightDelta * heightDelta <= 0.1f) return;
@@ -2419,7 +2273,7 @@ void World::removeTexDuplicateOnADT(const tile_index& tile)
   if (changed)
   {
     mapIndex->setChanged(tile);
-  }  
+  }
 }
 
 void World::saveWDT()
@@ -2501,8 +2355,8 @@ void World::setWaterHeight(const tile_index& tile, float h)
 
 float World::getWaterHeight(const tile_index& tile)
 {
-  return mapIndex->tileLoaded(tile) 
-       ? mapIndex->getTile(tile)->Water->getHeight(Environment::getInstance()->currentWaterLayer) 
+  return mapIndex->tileLoaded(tile)
+       ? mapIndex->getTile(tile)->Water->getHeight(Environment::getInstance()->currentWaterLayer)
        : 0
        ;
 }
@@ -2572,8 +2426,8 @@ void World::AddWaters(const tile_index& tile)
           curTile->Water->addLayer(i, j, 1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer);
         }
       }
-    }        
-          
+    }
+
     mapIndex->setChanged(tile);
   }
 }
@@ -2595,7 +2449,7 @@ float World::HaveSelectWater(const tile_index& tile)
 void World::fixAllGaps()
 {
   std::vector<MapChunk*> chunks;
-  
+
   for (MapTile* tile : mapIndex->loaded_tiles())
   {
     MapTile* left = mapIndex->getTileLeft(tile);

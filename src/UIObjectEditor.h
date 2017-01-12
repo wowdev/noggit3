@@ -23,7 +23,7 @@ class UIObjectEditor : public UIWindow
 public:
   UIObjectEditor(float x, float y, UIMapViewGUI* mainGui);
 
-  void copy(nameEntry entry);
+  void copy(selection_type entry);
   void pasteObject();
   void togglePasteMode();
 
@@ -32,7 +32,7 @@ public:
 private:
   UIToggleGroup *pasteModeGroup;
 
-  nameEntry selected;
+  selection_type selected;
   void setModelName(const std::string &name);
   int pasteMode;
 };

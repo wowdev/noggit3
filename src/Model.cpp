@@ -441,11 +441,6 @@ void Model::initStatic(const MPQFile& f)
 	drawModel( /*false*/);
 	gl.endList();
 
-	SelectModelDrawList = gl.genLists(1);
-	gl.newList(SelectModelDrawList, GL_COMPILE);
-	drawModelSelect();
-	gl.endList();
-
 	// clean up vertices, indices etc
 	if (vertices)
 		delete[] vertices;
@@ -921,76 +916,6 @@ void Model::drawModel( /*bool unlit*/)
 	gl.depthMask(GL_TRUE);
 }
 
-void Model::drawModelSelect()
-{
-	// assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
-
-	if (animated)
-	{
-		if (animGeometry)
-		{
-			gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
-			gl.vertexPointer(3, GL_FLOAT, 0, 0);
-			gl.normalPointer(GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize));
-		}
-		else
-		{
-			gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
-			gl.vertexPointer(3, GL_FLOAT, 0, 0);
-			gl.bindBuffer(GL_ARRAY_BUFFER, nbuf);
-			gl.normalPointer(GL_FLOAT, 0, 0);
-		}
-
-		gl.bindBuffer(GL_ARRAY_BUFFER, tbuf);
-		gl.texCoordPointer(2, GL_FLOAT, 0, 0);
-	}
-
-	gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	gl.alphaFunc(GL_GREATER, 0.3f);
-
-	for (size_t i = 0; i<passes.size(); ++i) {
-		ModelRenderPass &p = passes[i];
-
-		if (p.init(this)) {
-			// we don't want to render completely transparent parts
-
-			// render
-			if (animated) {
-				//gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-				// a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
-				// I can't notice a difference but I guess it can't hurt
-				gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-
-			}
-			else
-			{
-				gl.begin(GL_TRIANGLES);
-				for (size_t k = 0, b = p.indexStart; k<p.indexCount; ++k, ++b)
-				{
-					uint16_t a = indices[b];
-					gl.normal3fv(normals[a]);
-					gl.texCoord2fv(origVertices[a].texcoords);
-					gl.vertex3fv(vertices[a]);
-				}
-				gl.end();
-			}
-
-			p.deinit();
-		}
-
-	}
-	// done with all render ops
-
-	gl.alphaFunc(GL_GREATER, 0.0f);
-	gl.disable(GL_ALPHA_TEST);
-
-	GLfloat czero[4] = { 0, 0, 0, 1 };
-	gl.materialfv(GL_FRONT, GL_EMISSION, czero);
-	gl.color4f(1, 1, 1, 1);
-	gl.depthMask(GL_TRUE);
-
-}
-
 void TextureAnim::calc(int anim, int time)
 {
 	if (trans.uses(anim)) {
@@ -1222,30 +1147,34 @@ void Model::draw()
 	}
 }
 
-void Model::drawSelect()
+std::vector<float> Model::intersect (math::ray const& ray)
 {
-	if (!animated)
-		gl.callList(SelectModelDrawList);
-	else
-	{
-		if (!animcalc || mPerInstanceAnimation)
-		{
-			animate(0);
-			animcalc = true;
-		}
+  std::vector<float> results;
 
-		drawModelSelect();
+  if (finishedLoading())
+  {
+    if (animated && (!animcalc || mPerInstanceAnimation))
+    {
+      animate (0);
+      animcalc = true;
+    }
 
-		//QUESTION: Do we need to drow this stuff for selectio??
-		// draw particle systems
-		// for( size_t i = 0; i < header.nParticleEmitters; ++i )
-		// particleSystems[i].draw();
+    for (auto&& pass : passes)
+    {
+      for (size_t i (pass.indexStart); i < pass.indexStart + pass.indexCount; i += 3)
+      {
+        if ( auto distance
+           = ray.intersect_triangle
+               (vertices[indices[i + 0]], vertices[indices[i + 1]], vertices[indices[i + 2]])
+           )
+        {
+          results.emplace_back (*distance);
+        }
+      }
+    }
+  }
 
-		//QUESTION: Do we need to drow this stuff for selectio??
-		// draw ribbons
-		// for( size_t i = 0; i < header.nRibbonEmitters; ++i )
-		//ribbons[i].draw();
-	}
+  return results;
 }
 
 void Model::lightsOn(OpenGL::Light lbase)

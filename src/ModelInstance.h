@@ -5,6 +5,8 @@
 #include "ModelManager.h"
 #include "MPQ.h" // MPQFile
 #include "Vec3D.h" // Vec3D
+#include <math/ray.hpp>
+#include "Selection.h"
 
 class Frustum;
 class Model;
@@ -14,8 +16,6 @@ class ModelInstance
 public:
 	scoped_model_reference model;
 	Vec3D extents[2];
-
-	unsigned int nameID;
 
 	Vec3D pos, dir;
 
@@ -27,7 +27,6 @@ public:
 	Vec3D ldir;
 	Vec3D lcol;
 
-	~ModelInstance();
 	explicit ModelInstance(std::string const& filename);
 	explicit ModelInstance(std::string const& filename, MPQFile* f);
 	explicit ModelInstance(std::string const& filename, ENTRY_MDDF *d);
@@ -38,7 +37,6 @@ public:
   ModelInstance (ModelInstance&& other)
     : model (std::move (other.model))
     // , extents (other.extents)
-    , nameID (other.nameID)
     , pos (other.pos)
     , dir (other.dir)
     , d1 (other.d1)
@@ -49,13 +47,11 @@ public:
     , uidLock (other.uidLock)
   {
     std::swap (extents, other.extents);
-    other.nameID = -1;
   }
   ModelInstance& operator= (ModelInstance&& other)
   {
   	std::swap (model, other.model);
     std::swap (extents, other.extents);
-    std::swap (nameID, other.nameID);
     std::swap (pos, other.pos);
     std::swap (dir, other.dir);
     std::swap (d1, other.d1);
@@ -64,16 +60,14 @@ public:
     std::swap (ldir, other.ldir);
     std::swap (lcol, other.lcol);
     std::swap (uidLock, other.uidLock);
-    other.nameID = -1;
     return *this;
   }
 
 	void draw (Frustum const&);
 	void drawMapTile();
 	//  void drawHighlight();
-	void drawSelect (Frustum const&);
+  void intersect (math::ray const&, selection_result*);
 	void draw2(const Vec3D& ofs, const math::degrees, Frustum const&);
-  void draw2Select(const Vec3D& ofs, const math::degrees, Frustum const&);
 
 	void resetDirection();
 

@@ -217,95 +217,102 @@ void UIMapViewGUI::render() const
 
 	if (!_tilemode && !guidetailInfos->hidden())
 	{
-		nameEntry * lSelection = gWorld->GetCurrentSelection();
+		auto lSelection = gWorld->GetCurrentSelection();
 		if (lSelection)
 		{
-			guiStatusbar->setRightInfo(lSelection->returnName());
-
 			std::stringstream detailInfo;
 
-			switch (lSelection->type)
+			switch (lSelection->which())
 			{
 			case eEntry_Model:
-				detailInfo << "filename: " << lSelection->data.model->model->_filename
-					<< "\nunique ID: " << lSelection->data.model->d1
-					<< "\nposition X/Y/Z: " << lSelection->data.model->pos.x << " / " << lSelection->data.model->pos.y << " / " << lSelection->data.model->pos.z
-					<< "\nrotation X/Y/Z: " << lSelection->data.model->dir.x << " / " << lSelection->data.model->dir.y << " / " << lSelection->data.model->dir.z
-					<< "\nscale: " << lSelection->data.model->sc
-					<< "\ntextures Used: " << lSelection->data.model->model->header.nTextures;
+        {
+          auto instance (boost::get<selected_model_type> (*lSelection));
+          guiStatusbar->setRightInfo (std::to_string (instance->d1) + ": " + instance->model->_filename);
+          detailInfo << "filename: " << instance->model->_filename
+                     << "\nunique ID: " << instance->d1
+                     << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
+                     << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
+                     << "\nscale: " << instance->sc
+                     << "\ntextures Used: " << instance->model->header.nTextures;
 
-				for (unsigned int j = 0; j < std::min(lSelection->data.model->model->header.nTextures, 6U); j++)
-				{
-					detailInfo << "\n " << (j + 1) << ": " << lSelection->data.model->model->_textures[j]->filename();
-				}
-				if (lSelection->data.model->model->header.nTextures > 25)
-				{
-					detailInfo << "\n and more.";
-				}
+          for (unsigned int j = 0; j < std::min(instance->model->header.nTextures, 6U); j++)
+          {
+            detailInfo << "\n " << (j + 1) << ": " << instance->model->_textures[j]->filename();
+          }
+          if (instance->model->header.nTextures > 25)
+          {
+            detailInfo << "\n and more.";
+          }
 
-				detailInfo << "\n";
-				break;
-
+          detailInfo << "\n";
+          break;
+        }
 			case eEntry_WMO:
-				detailInfo << "filename: " << lSelection->data.wmo->wmo->_filename
-					<< "\nunique ID: " << lSelection->data.wmo->mUniqueID
-					<< "\nposition X/Y/Z: " << lSelection->data.wmo->pos.x << " / " << lSelection->data.wmo->pos.y << " / " << lSelection->data.wmo->pos.z
-					<< "\nrotation X/Y/Z: " << lSelection->data.wmo->dir.x << " / " << lSelection->data.wmo->dir.y << " / " << lSelection->data.wmo->dir.z
-					<< "\ndoodad set: " << lSelection->data.wmo->doodadset
-					<< "\ntextures used: " << lSelection->data.wmo->wmo->nTextures;
+        {
+          auto instance (boost::get<selected_wmo_type> (*lSelection));
+          guiStatusbar->setRightInfo (std::to_string (instance->mUniqueID) + ": " + instance->wmo->_filename);
+          detailInfo << "filename: " << instance->wmo->_filename
+                     << "\nunique ID: " << instance->mUniqueID
+                     << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
+                     << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
+                     << "\ndoodad set: " << instance->doodadset
+                     << "\ntextures used: " << instance->wmo->nTextures;
 
-				for (unsigned int j = 0; j < std::min(lSelection->data.wmo->wmo->nTextures, 8U); j++)
-				{
-					detailInfo << "\n " << (j + 1) << ": " << lSelection->data.wmo->wmo->textures[j];
-				}
-				if (lSelection->data.wmo->wmo->nTextures > 25)
-				{
-					detailInfo << "\n and more.";
-				}
+          for (unsigned int j = 0; j < std::min(instance->wmo->nTextures, 8U); j++)
+          {
+            detailInfo << "\n " << (j + 1) << ": " << instance->wmo->textures[j];
+          }
+          if (instance->wmo->nTextures > 25)
+          {
+            detailInfo << "\n and more.";
+          }
 
-				detailInfo << "\n";
-				break;
-
+          detailInfo << "\n";
+          break;
+        }
 			case eEntry_MapChunk:
+        {
+          auto chunk (boost::get<selected_chunk_type> (*lSelection).chunk);
+          guiStatusbar->setRightInfo (std::to_string (chunk->px) + ", " + std::to_string (chunk->py));
+          int flags = chunk->Flags;
 
-				int flags = lSelection->data.mapchunk->Flags;
+          detailInfo << "MCNK " << chunk->px << ", " << chunk->py << " (" << chunk->py * 16 + chunk->px
+                     << ") of tile (" << chunk->mt->mPositionX << " " << chunk->mt->mPositionZ << ")"
+                     << "\narea ID: " << chunk->getAreaID() << " (\"" << gAreaDB.getAreaName(chunk->getAreaID()) << "\")"
+                     << "\nflags: "
+                     << (flags & FLAG_SHADOW ? "shadows " : "")
+                     << (flags & FLAG_IMPASS ? "impassable " : "")
+                     << (flags & FLAG_LQ_RIVER ? "river " : "")
+                     << (flags & FLAG_LQ_OCEAN ? "ocean " : "")
+                     << (flags & FLAG_LQ_MAGMA ? "lava" : "")
+                     << "\ntextures used: " << chunk->textureSet->num();
 
-				detailInfo << "MCNK " << lSelection->data.mapchunk->px << ", " << lSelection->data.mapchunk->py << " (" << lSelection->data.mapchunk->py * 16 + lSelection->data.mapchunk->px
-					<< ") of tile (" << lSelection->data.mapchunk->mt->mPositionX << " " << lSelection->data.mapchunk->mt->mPositionZ << ")"
-					<< "\narea ID: " << lSelection->data.mapchunk->getAreaID() << " (\"" << gAreaDB.getAreaName(lSelection->data.mapchunk->getAreaID()) << "\")"
-					<< "\nflags: "
-					<< (flags & FLAG_SHADOW ? "shadows " : "")
-					<< (flags & FLAG_IMPASS ? "impassable " : "")
-					<< (flags & FLAG_LQ_RIVER ? "river " : "")
-					<< (flags & FLAG_LQ_OCEAN ? "ocean " : "")
-					<< (flags & FLAG_LQ_MAGMA ? "lava" : "")
-					<< "\ntextures used: " << lSelection->data.mapchunk->textureSet->num();
+          //! \todo get a list of textures and their flags as well as detail doodads.
+          /*
+            for( int q = 0; q < chunk->nTextures; q++ )
+            {
+            //s << " ";
+            //s "  Flags - " << chunk->texFlags[q] << " Effect ID - " << chunk->effectID[q] << std::endl;
 
-				//! \todo get a list of textures and their flags as well as detail doodads.
-				/*
-				for( int q = 0; q < lSelection->data.mapchunk->nTextures; q++ )
-				{
-				//s << " ";
-				//s "  Flags - " << lSelection->data.mapchunk->texFlags[q] << " Effect ID - " << lSelection->data.mapchunk->effectID[q] << std::endl;
+            if( chunk->effectID[q] != 0 )
+            for( int r = 0; r < 4; r++ )
+            {
+            const char *EffectModel = getGroundEffectDoodad( chunk->effectID[q], r );
+            if( EffectModel )
+            {
+            s << r << " - World\\NoDXT\\" << EffectModel << endl;
+            //freetype::shprint( app.getArial16(), 30, 103 + TextOffset, "%d - World\\NoDXT\\%s", r, EffectModel );
+            TextOffset += 20;
+            }
+            }
 
-				if( lSelection->data.mapchunk->effectID[q] != 0 )
-				for( int r = 0; r < 4; r++ )
-				{
-				const char *EffectModel = getGroundEffectDoodad( lSelection->data.mapchunk->effectID[q], r );
-				if( EffectModel )
-				{
-				s << r << " - World\\NoDXT\\" << EffectModel << endl;
-				//freetype::shprint( app.getArial16(), 30, 103 + TextOffset, "%d - World\\NoDXT\\%s", r, EffectModel );
-				TextOffset += 20;
-				}
-				}
+            }
+          */
 
-				}
-				*/
+          detailInfo << "\n";
 
-				detailInfo << "\n";
-
-				break;
+          break;
+        }
 			}
 			guidetailInfos->setText(detailInfo.str());
 		}

@@ -2,10 +2,10 @@
 #define MAPVIEW_H
 
 #include "AppState.h"
+#include "Selection.h"
 
 class UIFrame;
 class World;
-class nameEntry;
 
 enum eViewMode
 {
@@ -65,7 +65,7 @@ public:
 	void quitask();
 	void inserObjectFromExtern(int model);
 	void addModelFromTextSelection(int id);
-  void selectModel(nameEntry entry);
+  void selectModel(selection_type entry);
 };
 
 

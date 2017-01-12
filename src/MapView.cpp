@@ -62,6 +62,7 @@
 #include "World.h"
 #include "MapIndex.h"
 #include <opengl/scoped.hpp>
+#include <opengl/matrix.hpp>
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -84,14 +85,12 @@ Vec3D objMove;
 Vec3D objMoveOffset;
 Vec3D objRot;
 
-nameEntry* lastSelected;
+boost::optional<selection_type> lastSelected;
 
 bool TestSelection = false;
 
 extern bool DrawMapContour;
 extern bool drawFlags;
-
-extern nameEntryManager SelectionNames;
 
 // extern row and col form Palette UI
 
@@ -511,14 +510,14 @@ void ResetSelectedObjectRotation(UIFrame*, int)
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
-    WMOInstance* wmo = gWorld->GetCurrentSelection()->data.wmo;
+    WMOInstance* wmo = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection());
     gWorld->updateTilesWMO(wmo);
     wmo->resetDirection();
     gWorld->updateTilesWMO(wmo);
   }
   else if (gWorld->IsSelection(eEntry_Model))
   {
-    ModelInstance* m2 = gWorld->GetCurrentSelection()->data.model;
+    ModelInstance* m2 = boost::get<selected_model_type> (*gWorld->GetCurrentSelection());
     gWorld->updateTilesModel(m2);
     m2->resetDirection();
     m2->recalcExtents();
@@ -530,7 +529,7 @@ void SnapSelectedObjectToGround(UIFrame*, int)
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
-    WMOInstance* wmo = gWorld->GetCurrentSelection()->data.wmo;
+    WMOInstance* wmo = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection());
     Vec3D t = Vec3D(wmo->pos.x, wmo->pos.z, 0);
     gWorld->GetVertex(wmo->pos.x, wmo->pos.z, &t);
     wmo->pos.y = t.y;
@@ -538,7 +537,7 @@ void SnapSelectedObjectToGround(UIFrame*, int)
   }
   else if (gWorld->IsSelection(eEntry_Model))
   {
-    ModelInstance* m2 = gWorld->GetCurrentSelection()->data.model;
+    ModelInstance* m2 = boost::get<selected_model_type> (*gWorld->GetCurrentSelection());
     Vec3D t = Vec3D(m2->pos.x, m2->pos.z, 0);
     gWorld->GetVertex(m2->pos.x, m2->pos.z, &t);
     m2->pos.y = t.y;
@@ -551,16 +550,16 @@ void DeleteSelectedObject(UIFrame*, int)
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
-    if (Environment::getInstance()->get_clipboard().data.wmo == gWorld->GetCurrentSelection()->data.wmo)
+    if (boost::get<selected_wmo_type> (Environment::getInstance()->get_clipboard()) == boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection()))
       Environment::getInstance()->clear_clipboard();
-    gWorld->deleteWMOInstance(gWorld->GetCurrentSelection()->data.wmo->mUniqueID);
+    gWorld->deleteWMOInstance(boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->mUniqueID);
 
   }
   else if (gWorld->IsSelection(eEntry_Model))
   {
-    if (Environment::getInstance()->get_clipboard().data.model == gWorld->GetCurrentSelection()->data.model)
+    if (boost::get<selected_model_type> (Environment::getInstance()->get_clipboard()) == boost::get<selected_model_type> (*gWorld->GetCurrentSelection()))
       Environment::getInstance()->clear_clipboard();
-    gWorld->deleteModelInstance(gWorld->GetCurrentSelection()->data.model->d1);
+    gWorld->deleteModelInstance(boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->d1);
   }
 }
 
@@ -701,16 +700,16 @@ void InsertObject(UIFrame*, int id)
 
 
   Vec3D selectionPosition;
-  switch (gWorld->GetCurrentSelection()->type)
+  switch (gWorld->GetCurrentSelection()->which())
   {
   case eEntry_Model:
-    selectionPosition = gWorld->GetCurrentSelection()->data.model->pos;
+    selectionPosition = boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->pos;
     break;
   case eEntry_WMO:
-    selectionPosition = gWorld->GetCurrentSelection()->data.wmo->pos;
+    selectionPosition = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->pos;
     break;
   case eEntry_MapChunk:
-    selectionPosition = gWorld->GetCurrentSelection()->data.mapchunk->GetSelectionPosition();
+    selectionPosition = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).position;
     break;
   }
 
@@ -1380,7 +1379,7 @@ MapView::MapView(float ah0, float av0)
   //! \ todo use the current area's MinElevation
   if (t.y < -5000.0f)
   {
-    //! \todo use the height of a model/wmo of the tile (or the map) ?  
+    //! \todo use the height of a model/wmo of the tile (or the map) ?
     t.y = 0.0f;
   }
 
@@ -1481,13 +1480,13 @@ void MapView::tick(float t, float dt)
       math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees(ah));
       math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees(ah));
     }
-    nameEntry* Selection = gWorld->GetCurrentSelection();
+    auto Selection = gWorld->GetCurrentSelection();
     if (Selection)
     {
       // update rotation editor if the selection has changed
       if (!lastSelected || lastSelected != Selection)
       {
-        mainGui->rotationEditor->select(Selection);
+        mainGui->rotationEditor->select(*Selection);
       }
 
       bool canMoveObj = !mainGui->rotationEditor->hasFocus();
@@ -1501,29 +1500,29 @@ void MapView::tick(float t, float dt)
       if (canMoveObj && (keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0))
       {
         // Move scale and rotate with numpad keys
-        if (Selection->type == eEntry_WMO)
+        if (Selection->which() == eEntry_WMO)
         {
-          gWorld->updateTilesWMO(Selection->data.wmo);
-          Selection->data.wmo->pos.x += keyx * moveratio;
-          Selection->data.wmo->pos.y += keyy * moveratio;
-          Selection->data.wmo->pos.z += keyz * moveratio;
-          Selection->data.wmo->dir.y += keyr * moveratio * 5;
+          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
+          boost::get<selected_wmo_type> (*Selection)->pos.x += keyx * moveratio;
+          boost::get<selected_wmo_type> (*Selection)->pos.y += keyy * moveratio;
+          boost::get<selected_wmo_type> (*Selection)->pos.z += keyz * moveratio;
+          boost::get<selected_wmo_type> (*Selection)->dir.y += keyr * moveratio * 5;
 
-          Selection->data.wmo->recalcExtents();
-          gWorld->updateTilesWMO(Selection->data.wmo);
+          boost::get<selected_wmo_type> (*Selection)->recalcExtents();
+          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
           mainGui->rotationEditor->updateValues();
         }
 
-        if (Selection->type == eEntry_Model)
+        if (Selection->which() == eEntry_Model)
         {
-          gWorld->updateTilesModel(Selection->data.model);
-          Selection->data.model->pos.x += keyx * moveratio;
-          Selection->data.model->pos.y += keyy * moveratio;
-          Selection->data.model->pos.z += keyz * moveratio;
-          Selection->data.model->dir.y += keyr * moveratio * 5;
-          Selection->data.model->sc += keys * moveratio / 50;
-          Selection->data.model->recalcExtents();
-          gWorld->updateTilesModel(Selection->data.model);
+          gWorld->updateTilesModel(boost::get<selected_model_type> (*Selection));
+          boost::get<selected_model_type> (*Selection)->pos.x += keyx * moveratio;
+          boost::get<selected_model_type> (*Selection)->pos.y += keyy * moveratio;
+          boost::get<selected_model_type> (*Selection)->pos.z += keyz * moveratio;
+          boost::get<selected_model_type> (*Selection)->dir.y += keyr * moveratio * 5;
+          boost::get<selected_model_type> (*Selection)->sc += keys * moveratio / 50;
+          boost::get<selected_model_type> (*Selection)->recalcExtents();
+          gWorld->updateTilesModel(boost::get<selected_model_type> (*Selection));
           mainGui->rotationEditor->updateValues();
         }
       }
@@ -1532,7 +1531,7 @@ void MapView::tick(float t, float dt)
       if (gWorld->IsSelection(eEntry_Model))
       {
         //! \todo  Tell me what this is.
-        ObjPos = Selection->data.model->pos - gWorld->camera;
+        ObjPos = boost::get<selected_model_type> (*Selection)->pos - gWorld->camera;
         math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, math::degrees(av));
         math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, math::degrees(ah));
         ObjPos.x = abs(ObjPos.x);
@@ -1543,72 +1542,72 @@ void MapView::tick(float t, float dt)
       if (MoveObj && canMoveObj)
       {
         ObjPos.x = 80.0f;
-        if (Selection->type == eEntry_WMO)
+        if (Selection->which() == eEntry_WMO)
         {
-          gWorld->updateTilesWMO(Selection->data.wmo);
+          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
 
           if (Environment::getInstance()->ShiftDown)
           {
-            Selection->data.wmo->pos += mv * dirUp * ObjPos.x;
-            Selection->data.wmo->pos -= mh * dirRight * ObjPos.x;
+            boost::get<selected_wmo_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
+            boost::get<selected_wmo_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
           }
           else
           {
             if (Environment::getInstance()->moveModelToCursorPos)
             {
-              Selection->data.wmo->pos.x = Environment::getInstance()->Pos3DX - objMoveOffset.x;
-              Selection->data.wmo->pos.z = Environment::getInstance()->Pos3DZ - objMoveOffset.z;
+              boost::get<selected_wmo_type> (*Selection)->pos.x = Environment::getInstance()->Pos3DX - objMoveOffset.x;
+              boost::get<selected_wmo_type> (*Selection)->pos.z = Environment::getInstance()->Pos3DZ - objMoveOffset.z;
             }
             else
             {
-              Selection->data.wmo->pos += mv * dirUp * ObjPos.x;
-              Selection->data.wmo->pos -= mh * dirRight * ObjPos.x;
+              boost::get<selected_wmo_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
+              boost::get<selected_wmo_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
             }
           }
 
-          Selection->data.wmo->recalcExtents();
-          gWorld->updateTilesWMO(Selection->data.wmo);
+          boost::get<selected_wmo_type> (*Selection)->recalcExtents();
+          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
           mainGui->rotationEditor->updateValues();
         }
-        else if (Selection->type == eEntry_Model)
+        else if (Selection->which() == eEntry_Model)
         {
-          gWorld->updateTilesModel(Selection->data.model);
+          gWorld->updateTilesModel(boost::get<selected_model_type> (*Selection));
           if (Environment::getInstance()->AltDown)
           {
             float ScaleAmount = pow(2.0f, mv * 4.0f);
 
-            Selection->data.model->sc *= ScaleAmount;
-            if (Selection->data.model->sc > 63.9f)
-              Selection->data.model->sc = 63.9f;
-            else if (Selection->data.model->sc < 0.00098f)
-              Selection->data.model->sc = 0.00098f;
+            boost::get<selected_model_type> (*Selection)->sc *= ScaleAmount;
+            if (boost::get<selected_model_type> (*Selection)->sc > 63.9f)
+              boost::get<selected_model_type> (*Selection)->sc = 63.9f;
+            else if (boost::get<selected_model_type> (*Selection)->sc < 0.00098f)
+              boost::get<selected_model_type> (*Selection)->sc = 0.00098f;
           }
           else
           {
             if (Environment::getInstance()->ShiftDown)
             {
-              Selection->data.model->pos += mv * dirUp * ObjPos.x;
-              Selection->data.model->pos -= mh * dirRight * ObjPos.x;
+              boost::get<selected_model_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
+              boost::get<selected_model_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
             }
             else
             {
               if (Environment::getInstance()->moveModelToCursorPos)
               {
-                Selection->data.model->pos.x = Environment::getInstance()->Pos3DX - objMoveOffset.x;
-                Selection->data.model->pos.z = Environment::getInstance()->Pos3DZ - objMoveOffset.z;
+                boost::get<selected_model_type> (*Selection)->pos.x = Environment::getInstance()->Pos3DX - objMoveOffset.x;
+                boost::get<selected_model_type> (*Selection)->pos.z = Environment::getInstance()->Pos3DZ - objMoveOffset.z;
               }
               else
               {
-                Selection->data.model->pos += mv * dirUp * ObjPos.x;
-                Selection->data.model->pos -= mh * dirRight * ObjPos.x;
+                boost::get<selected_model_type> (*Selection)->pos += mv * dirUp * ObjPos.x;
+                boost::get<selected_model_type> (*Selection)->pos -= mh * dirRight * ObjPos.x;
               }
 
             }
           }
-          
+
           mainGui->rotationEditor->updateValues();
-          Selection->data.model->recalcExtents();
-          gWorld->updateTilesModel(Selection->data.model);
+          boost::get<selected_model_type> (*Selection)->recalcExtents();
+          gWorld->updateTilesModel(boost::get<selected_model_type> (*Selection));
         }
       }
 
@@ -1619,26 +1618,26 @@ void MapView::tick(float t, float dt)
         float * lTarget = NULL;
         bool lModify = false;
 
-        if (Selection->type == eEntry_Model)
+        if (Selection->which() == eEntry_Model)
         {
           lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
           if (Environment::getInstance()->ShiftDown)
-            lTarget = &Selection->data.model->dir.y;
+            lTarget = &boost::get<selected_model_type> (*Selection)->dir.y;
           else if (Environment::getInstance()->CtrlDown)
-            lTarget = &Selection->data.model->dir.x;
+            lTarget = &boost::get<selected_model_type> (*Selection)->dir.x;
           else if (Environment::getInstance()->AltDown)
-            lTarget = &Selection->data.model->dir.z;
+            lTarget = &boost::get<selected_model_type> (*Selection)->dir.z;
 
         }
-        else if (Selection->type == eEntry_WMO)
+        else if (Selection->which() == eEntry_WMO)
         {
           lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
           if (Environment::getInstance()->ShiftDown)
-            lTarget = &Selection->data.wmo->dir.y;
+            lTarget = &boost::get<selected_wmo_type> (*Selection)->dir.y;
           else if (Environment::getInstance()->CtrlDown)
-            lTarget = &Selection->data.wmo->dir.x;
+            lTarget = &boost::get<selected_wmo_type> (*Selection)->dir.x;
           else if (Environment::getInstance()->AltDown)
-            lTarget = &Selection->data.wmo->dir.z;
+            lTarget = &boost::get<selected_wmo_type> (*Selection)->dir.z;
 
         }
 
@@ -1655,15 +1654,15 @@ void MapView::tick(float t, float dt)
 
           mainGui->rotationEditor->updateValues();
 
-          if (Selection->type == eEntry_WMO)
+          if (Selection->which() == eEntry_WMO)
           {
-            Selection->data.wmo->recalcExtents();
-            gWorld->updateTilesWMO(Selection->data.wmo);
+            boost::get<selected_wmo_type> (*Selection)->recalcExtents();
+            gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*Selection));
           }
-          else if (Selection->type == eEntry_Model)
+          else if (Selection->which() == eEntry_Model)
           {
-            Selection->data.model->recalcExtents();
-            gWorld->updateTilesModel(Selection->data.model);
+            boost::get<selected_model_type> (*Selection)->recalcExtents();
+            gWorld->updateTilesModel(boost::get<selected_model_type> (*Selection));
           }
         }
       }
@@ -1674,7 +1673,7 @@ void MapView::tick(float t, float dt)
       rv = 0;
 
 
-      if (leftMouse && Selection->type == eEntry_MapChunk)
+      if (leftMouse && Selection->which() == eEntry_MapChunk)
       {
         float xPos, yPos, zPos;
 
@@ -1746,7 +1745,7 @@ void MapView::tick(float t, float dt)
           else if (Environment::getInstance()->CtrlDown)
           {
             // Pick texture
-            mainGui->TexturePicker->getTextures(gWorld->GetCurrentSelection());
+            mainGui->TexturePicker->getTextures(*gWorld->GetCurrentSelection());
           }
           else  if (Environment::getInstance()->ShiftDown)
           {
@@ -1795,7 +1794,7 @@ void MapView::tick(float t, float dt)
             // no undermap check here, else it's impossible to remove holes
             if (Environment::getInstance()->ShiftDown)
             {
-              Selection->data.mapchunk->getSelectionCoord(&xPos, &zPos);
+              boost::get<selected_chunk_type> (*Selection).chunk->getSelectionCoord(&xPos, &zPos);
               gWorld->removeHole(xPos, zPos, Environment::getInstance()->AltDown);
             }
             else if (Environment::getInstance()->CtrlDown && !underMap)
@@ -1808,15 +1807,15 @@ void MapView::tick(float t, float dt)
             if (Environment::getInstance()->ShiftDown)
             {
               // draw the selected AreaId on current selected chunk
-              nameEntry * lSelection = gWorld->GetCurrentSelection();
-              MapChunk* chnk = lSelection->data.mapchunk;
+              MapChunk* chnk (boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk);
               tile_index tile(chnk->mt->mPositionX, chnk->mt->mPositionZ);
               gWorld->setAreaID(Environment::getInstance()->selectedAreaID, tile, chnk->px, chnk->py);
             }
             else if (Environment::getInstance()->CtrlDown)
             {
               // pick areaID from chunk
-              int newID = gWorld->GetCurrentSelection()->data.mapchunk->getAreaID();
+              MapChunk* chnk (boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk);
+              int newID = chnk->getAreaID();
               Environment::getInstance()->selectedAreaID = newID;
               mainGui->ZoneIDBrowser->setZoneID(newID);
             }
@@ -1838,8 +1837,8 @@ void MapView::tick(float t, float dt)
         case 6:
           if (mViewMode == eViewMode_3D && !underMap)
           {
-            nameEntry* lSelection = gWorld->GetCurrentSelection();
-            MapChunk* chnk = lSelection->data.mapchunk;
+            auto lSelection = gWorld->GetCurrentSelection();
+            MapChunk* chnk = boost::get<selected_chunk_type> (*Selection).chunk;
             tile_index tile(chnk->mt->mPositionX, chnk->mt->mPositionZ);
 
             if (Environment::getInstance()->ShiftDown)
@@ -1939,15 +1938,54 @@ void MapView::tick(float t, float dt)
 
   lastSelected = gWorld->GetCurrentSelection();
 
-  if (!MapChunkWindow->hidden() && gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk)
+  if (!MapChunkWindow->hidden() && gWorld->GetCurrentSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)
   {
-    UITexturingGUI::setChunkWindow(gWorld->GetCurrentSelection()->data.mapchunk);
+    UITexturingGUI::setChunkWindow(boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk);
   }
 }
 
-void MapView::doSelection(bool selectTerrainOnly)
+void MapView::doSelection (bool selectTerrainOnly)
 {
-  gWorld->drawSelection(MouseX, MouseY, selectTerrainOnly);
+  video.set3D();
+  opengl::matrix::look_at (gWorld->camera, gWorld->lookat, {0.0f, 1.0f, 0.0f});
+
+  GLint viewport[4];
+  gl.getIntegerv(GL_VIEWPORT, viewport);
+
+  float win_x (Environment::getInstance()->screenX);
+  float win_y (viewport[3] - Environment::getInstance()->screenY);
+
+  math::vector_4d const normalized_device_coords
+    ( 2.0f * (win_x - static_cast<float> (viewport[0])) / static_cast<float> (viewport[2]) - 1.0f
+    , 2.0f * (win_y - static_cast<float> (viewport[1])) / static_cast<float> (viewport[3]) - 1.0f
+    , 0.0f
+    , 1.0f
+    );
+
+  math::vector_3d const pos ( ( ( opengl::matrix::model_view()
+                                * opengl::matrix::projection()
+                                ).inverted().transposed()
+                              * normalized_device_coords
+                              ).xyz_normalized_by_w()
+                            );
+
+  math::ray ray (gWorld->camera, pos - gWorld->camera);
+
+  selection_result results (gWorld->intersect (ray, selectTerrainOnly));
+
+  std::sort ( results.begin()
+            , results.end()
+            , [] (selection_entry const& lhs, selection_entry const& rhs)
+              {
+                return lhs.first < rhs.first;
+              }
+            );
+
+  gWorld->SetCurrentSelection
+    ( results.empty()
+    ? boost::optional<selection_type>()
+    : boost::optional<selection_type> (results.front().second)
+    );
 }
 
 
@@ -2465,14 +2503,14 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
           // toggle selected model visibility
           if (gWorld->HasSelection())
           {
-            nameEntry* selection = gWorld->GetCurrentSelection();
-            if (selection->type == eEntry_Model)
+            auto selection = gWorld->GetCurrentSelection();
+            if (selection->which() == eEntry_Model)
             {
-              selection->data.model->model->toggleVisibility();
+              boost::get<selected_model_type> (*selection)->model->toggleVisibility();
             }
-            else if (selection->type == eEntry_WMO)
+            else if (selection->which() == eEntry_WMO)
             {
-              selection->data.wmo->wmo->toggleVisibility();
+              boost::get<selected_wmo_type> (*selection)->wmo->toggleVisibility();
             }
           }
         }
@@ -2508,21 +2546,21 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
         if (gWorld->HasSelection())
         {
           Vec3D pos = Environment::getInstance()->get_cursor_pos();
-          nameEntry* selection = gWorld->GetCurrentSelection();
+          auto selection = gWorld->GetCurrentSelection();
 
-          if (selection->type == eEntry_Model)
+          if (selection->which() == eEntry_Model)
           {
-            gWorld->updateTilesModel(selection->data.model);
-            selection->data.model->pos = pos;
-            selection->data.model->recalcExtents();
-            gWorld->updateTilesModel(selection->data.model);
+            gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
+            boost::get<selected_model_type> (*selection)->pos = pos;
+            boost::get<selected_model_type> (*selection)->recalcExtents();
+            gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
           }
-          else if (selection->type == eEntry_WMO)
+          else if (selection->which() == eEntry_WMO)
           {
-            gWorld->updateTilesWMO(selection->data.wmo);
-            selection->data.wmo->pos = pos;
-            selection->data.wmo->recalcExtents();
-            gWorld->updateTilesWMO(selection->data.wmo);
+            gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+            boost::get<selected_wmo_type> (*selection)->pos = pos;
+            boost::get<selected_wmo_type> (*selection)->recalcExtents();
+            gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
           }
         }
       }
@@ -2563,7 +2601,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
           break;
         }
       }
-      else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk)))
+      else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
       {
         if (terrainMode == 6)
         {
@@ -2621,7 +2659,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
           break;
         }
       }
-      else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->type == eEntry_MapChunk)))
+      else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
       {
         if (terrainMode == 6)
         {
@@ -2714,7 +2752,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
     {
       if (gWorld->IsSelection(eEntry_WMO))
       {
-        gWorld->GetCurrentSelection()->data.wmo->doodadset = e->keysym.sym - SDLK_0;
+        boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = e->keysym.sym - SDLK_0;
       }
       else if (Environment::getInstance()->ShiftDown)
       {
@@ -2962,7 +3000,7 @@ void MapView::addModelFromTextSelection(int id)
   InsertObject(0, id);
 }
 
-void MapView::selectModel(nameEntry entry)
+void MapView::selectModel(selection_type entry)
 {
   mainGui->objectEditor->copy(entry);
 }
@@ -2985,15 +3023,15 @@ void MapView::mouseclick(SDL_MouseButtonEvent *e)
       if (gWorld->HasSelection())
       {
         MoveObj = true;
-        nameEntry* selection = gWorld->GetCurrentSelection();
+        auto selection = gWorld->GetCurrentSelection();
         Vec3D objPos;
-        if (selection->type == eEntry_WMO)
+        if (selection->which() == eEntry_WMO)
         {
-          objPos = selection->data.wmo->pos;
+          objPos = boost::get<selected_wmo_type> (*selection)->pos;
         }
-        else if (selection->type == eEntry_Model)
+        else if (selection->which() == eEntry_Model)
         {
-          objPos = selection->data.model->pos;
+          objPos = boost::get<selected_model_type> (*selection)->pos;
         }
 
         objMoveOffset = Environment::getInstance()->get_cursor_pos() - objPos;
@@ -3152,7 +3190,7 @@ void MapView::mouseclick(SDL_MouseButtonEvent *e)
   }
 }
 
-void MapView::checkWaterSave() 
+void MapView::checkWaterSave()
 {
   if (gWorld->canWaterSave(tile_index(gWorld->camera)))
   {

@@ -94,11 +94,11 @@ void SaveObjecttoTXT(UIFrame* f, int)
 
   if (gWorld->IsSelection(eEntry_WMO))
   {
-    path = gWorld->GetCurrentSelection()->data.wmo->wmo->filename();
+    path = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->wmo->filename();
   }
   else if (gWorld->IsSelection(eEntry_Model))
   {
-    path = gWorld->GetCurrentSelection()->data.model->model->_filename;
+    path = boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->model->_filename;
   }
 
   std::ofstream stream(Settings::getInstance()->importFile, std::ios_base::app);
@@ -213,7 +213,7 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
 
 void UIObjectEditor::pasteObject()
 {
-  if (selected.type != eEntry_Model && selected.type != eEntry_WMO)
+  if (selected.which() != eEntry_Model && selected.which() != eEntry_WMO)
   {
     return;
   }
@@ -231,14 +231,14 @@ void UIObjectEditor::pasteObject()
     case PASTE_ON_SELECTION:
       if (gWorld->HasSelection())
       {
-        nameEntry* selection = gWorld->GetCurrentSelection();
-        if (selection->type == eEntry_Model)
+        auto selection = *gWorld->GetCurrentSelection();
+        if (selection.which() == eEntry_Model)
         {
-          pos = selection->data.model->pos;
+          pos = boost::get<selected_model_type> (selection)->pos;
         }
-        else if (selection->type == eEntry_WMO)
+        else if (selection.which() == eEntry_WMO)
         {
-          pos = selection->data.wmo->pos;
+          pos = boost::get<selected_wmo_type> (selection)->pos;
         }
       } // else: use cursor pos
       break;
@@ -258,21 +258,23 @@ void UIObjectEditor::togglePasteMode()
   pasteModeGroup->Activate((pasteMode + 1) % PASTE_MODE_COUNT);
 }
 
-void UIObjectEditor::copy(nameEntry entry)
+void UIObjectEditor::copy(selection_type entry)
 {
-  if (entry.type == eEntry_Model)
+  if (entry.which() == eEntry_Model)
   {
-    selected = nameEntry(new ModelInstance(entry.data.model->model->_filename));
-    selected.data.model->sc = entry.data.model->sc;
-    selected.data.model->dir = entry.data.model->dir;
-    selected.data.model->ldir = entry.data.model->ldir;
-    setModelName(entry.data.model->model->_filename);
+    auto clone = new ModelInstance(boost::get<selected_model_type> (entry)->model->_filename);
+    clone->sc = boost::get<selected_model_type> (entry)->sc;
+    clone->dir = boost::get<selected_model_type> (entry)->dir;
+    clone->ldir = boost::get<selected_model_type> (entry)->ldir;
+    selected = clone;
+    setModelName (boost::get<selected_model_type> (entry)->model->_filename);
   }
-  else if (entry.type == eEntry_WMO)
+  else if (entry.which() == eEntry_WMO)
   {
-    selected = nameEntry(new WMOInstance(entry.data.wmo->wmo->_filename));
-    selected.data.wmo->dir = entry.data.wmo->dir;
-    setModelName(entry.data.wmo->wmo->_filename);
+    auto clone = new WMOInstance(boost::get<selected_wmo_type> (entry)->wmo->_filename);
+    clone->dir = boost::get<selected_wmo_type> (entry)->dir;
+    selected = clone;
+    setModelName(boost::get<selected_wmo_type> (entry)->wmo->_filename);
   }
   else
   {
@@ -280,7 +282,7 @@ void UIObjectEditor::copy(nameEntry entry)
     return;
   }
 
-  Environment::getInstance()->set_clipboard(&selected);
+  Environment::getInstance()->set_clipboard(selected);
 }
 
 void UIObjectEditor::setModelName(const std::string &name)

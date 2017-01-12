@@ -182,21 +182,21 @@ void UIRotationEditor::toggle()
   }
 }
 
-void UIRotationEditor::select(nameEntry* entry)
+void UIRotationEditor::select(selection_type entry)
 {
-  if (entry->type == eEntry_Model)
+  if (entry.which() == eEntry_Model)
   {
-    rotationVect = &(entry->data.model->dir);
-    posVect = &(entry->data.model->pos);
-    scale = &(entry->data.model->sc);
+    rotationVect = &(boost::get<selected_model_type> (entry)->dir);
+    posVect = &(boost::get<selected_model_type> (entry)->pos);
+    scale = &(boost::get<selected_model_type> (entry)->sc);
     _wmo = false;
     _wmoInstance = nullptr;
     _textScale->show();
     _tbScale->show();
   }
-  else if (entry->type == eEntry_WMO)
+  else if (entry.which() == eEntry_WMO)
   {
-    _wmoInstance = entry->data.wmo;
+    _wmoInstance = boost::get<selected_wmo_type> (entry);
     rotationVect = &(_wmoInstance->dir);
     posVect = &(_wmoInstance->pos);
     _wmo = true;

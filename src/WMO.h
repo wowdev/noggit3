@@ -15,6 +15,7 @@
 #include "Vec3D.h"
 #include "Video.h"
 #include <opengl/call_list.hpp>
+#include <math/ray.hpp>
 
 #include <boost/optional.hpp>
 
@@ -24,6 +25,13 @@ class WMOInstance;
 class WMOManager;
 class Liquid;
 class Model;
+
+struct WMOBatch {
+	signed char bytes[12];
+	uint32_t indexStart;
+	uint16_t indexCount, vertexStart, vertexEnd;
+	unsigned char flags, texture;
+};
 
 class WMOGroup {
 	WMO *wmo;
@@ -37,7 +45,12 @@ class WMOGroup {
 	int32_t nDoodads, nBatches;
 	int16_t *ddr;
 	Liquid *lq;
-	std::vector< std::pair<opengl::call_list*, bool> > _lists;
+  std::vector< std::pair<opengl::call_list*, bool> > _lists;
+
+  std::vector<Vec3D> vertices;
+  std::vector<WMOBatch> batches;
+  std::vector<uint16_t> indices;
+
 public:
 	Vec3D BoundingBoxMin;
 	Vec3D BoundingBoxMax;
@@ -54,11 +67,11 @@ public:
 	void init(WMO *wmo, MPQFile* f, int num, char *names);
 	void initDisplayList();
 	void initLighting(int nLR, uint16_t *useLights);
-	void draw(const Vec3D& ofs, math::degrees const, bool selection, Frustum const&);
+	void draw(const Vec3D& ofs, math::degrees const, Frustum const&);
 	void drawLiquid();
 	void drawDoodads(unsigned int doodadset, const Vec3D& ofs, math::degrees const, Frustum const&);
-	void drawDoodadsSelect(unsigned int doodadset, const Vec3D& ofs, math::degrees const, Frustum const&);
 	void setupFog();
+  void intersect (math::ray const&, std::vector<float>* results) const;
 };
 
 struct WMOMaterial {
@@ -160,7 +173,7 @@ public:
 	explicit WMO(const std::string& name);
 	~WMO();
 	void draw(int doodadset, const Vec3D& ofs, math::degrees const, bool boundingbox, bool groupboxes, bool highlight, Frustum const&) const;
-	void drawSelect(int doodadset, const Vec3D& ofs, math::degrees const, Frustum const&) const;
+  std::vector<float> intersect (math::ray const&) const;
 	//void drawPortals();
 	bool drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const;
 

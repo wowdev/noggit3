@@ -8,7 +8,6 @@ Environment::Environment()
 	this->AltDown = false;
 	this->CtrlDown = false;
 	this->SpaceDown = false;
-	this->clipboard = nameEntry();
 	this->flagPaintMode = FLAG_IMPASS;
 	this->paintMode = true;
   this->highlightPaintableChunks = true;
@@ -37,29 +36,27 @@ Environment* Environment::getInstance()
 	return instance;
 }
 
-nameEntry Environment::get_clipboard()
+selection_type Environment::get_clipboard()
 {
-	return clipboard;
+	return *clipboard;
 }
 
-void Environment::set_clipboard(nameEntry* set)
+void Environment::set_clipboard(boost::optional<selection_type> set)
 {
-	clipboard = *set;
-	clipboard_filled = true;
+	clipboard = set;
 }
 
 void Environment::clear_clipboard()
 {
-	clipboard_filled = false;
+  clipboard.reset();
 }
 
 bool Environment::is_clipboard()
 {
-	return clipboard_filled;
+	return !!clipboard;
 }
 
 Vec3D Environment::get_cursor_pos()
 {
   return Vec3D(Pos3DX, Pos3DY, Pos3DZ);
 }
-

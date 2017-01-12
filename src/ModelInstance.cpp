@@ -53,14 +53,12 @@ void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth)
 ModelInstance::ModelInstance(std::string const& filename)
 	: model (filename)
 	, uidLock(false)
-	, nameID(0xFFFFFFFF)
 {
 }
 
 ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
 	: model (filename)
 	, uidLock(false)
-	, nameID(SelectionNames.add(this))
 {
 	float ff[3], temp;
 	f->read(ff, 12);
@@ -79,7 +77,6 @@ ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
 ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
 	: model (filename)
 	, uidLock(false)
-	, nameID(0xFFFFFFFF)
 {
 	d1 = d->uniqueID;
 	pos = Vec3D(d->pos[0], d->pos[1], d->pos[2]);
@@ -127,7 +124,7 @@ void ModelInstance::draw (Frustum const& frustum)
 	}
 		model->draw();
 
-  bool currentSelection = gWorld->IsSelection(eEntry_Model) && gWorld->GetCurrentSelection()->data.model->d1 == d1;
+  bool currentSelection = gWorld->IsSelection(eEntry_Model) && boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->d1 == d1;
 
   // no need to check Environment::showModelFromHiddenList as it's done beforehand in World::draw()
 	if (currentSelection || model->hidden)
@@ -203,46 +200,35 @@ gl.scalef(sc,sc,sc);
 model->draw();
 }*/
 
-void ModelInstance::drawSelect (Frustum const& frustum)
+void ModelInstance::intersect (math::ray const& ray, selection_result* results)
 {
-	/*float dist = ( pos - gWorld->camera ).length() - model->rad;
+  math::matrix_4x4 const model_matrix
+    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation
+                       , { math::degrees (dir.z)
+                         , math::degrees (dir.y - 90.0f)
+                         , math::degrees (-dir.x)
+                         }
+                       )
+    * math::matrix_4x4 (math::matrix_4x4::scale, sc)
+    );
 
-	if( dist > 2.0f * gWorld->modeldrawdistance )
-	return;
-	if( CheckUniques( d1 ) )
-	return;*/
+  math::ray subray (model_matrix.inverted(), ray);
 
-	if (!frustum.intersectsSphere(pos, model->rad * sc))
-		return;
+  if ( !subray.intersect_bounds ( fixCoordSystem (model->header.VertexBoxMin)
+                                , fixCoordSystem (model->header.VertexBoxMax)
+                                )
+     )
+  {
+    return;
+  }
 
-  opengl::scoped::matrix_pusher const matrix;
-
-	gl.translatef(pos.x, pos.y, pos.z);
-	gl.rotatef(dir.y - 90.0f, 0.0f, 1.0f, 0.0f);
-	gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
-	gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
-	gl.scalef(sc, sc, sc);
-
-	//if( nameID == 0xFFFFFFFF ) //for what is this line? It cracks model selection after map save! Temporary commenting...
-	nameID = SelectionNames.add(this);
-
-	gl.pushName(nameID);
-
-	model->drawSelect();
-
-	gl.popName();
-}
-
-
-
-ModelInstance::~ModelInstance()
-{
-	if (nameID != 0xFFFFFFFF)
-	{
-		//Log << "Destroying Selection " << nameID << "\n";
-		SelectionNames.del(nameID);
-		nameID = 0xFFFFFFFF;
-	}
+  for (auto&& result : model->intersect (subray))
+  {
+    //! \todo why is only sc important? these are relative to subray,
+    //! so should be inverted by model_matrix?
+    results->emplace_back (result * sc, selected_model_type (this));
+  }
 }
 
 void quaternionRotate(const Vec3D& vdir, float w)
@@ -265,23 +251,6 @@ void ModelInstance::draw2(const Vec3D& ofs, const math::degrees rotation, Frustu
 	gl.scalef(sc, -sc, -sc);
 
 	model->draw();
-}
-
-void ModelInstance::draw2Select(const Vec3D& ofs, const math::degrees rotation, Frustum const& frustum)
-{
-	Vec3D tpos(ofs + pos);
-  math::rotate(ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
-	if ((tpos - gWorld->camera).length_squared() > ((doodaddrawdistance*doodaddrawdistance)*model->rad*sc)) return;
-	if (!frustum.intersectsSphere(tpos, model->rad*sc)) return;
-
-  opengl::scoped::matrix_pusher const matrix;
-
-	gl.translatef(pos.x, pos.y, pos.z);
-	Vec3D vdir(-dir.z, dir.x, dir.y);
-	quaternionRotate(vdir, w);
-	gl.scalef(sc, -sc, -sc);
-
-	model->drawSelect();
 }
 
 void ModelInstance::resetDirection(){

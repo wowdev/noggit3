@@ -394,11 +394,15 @@ void MapTile::draw (Frustum const& frustum)
 
 }
 
-void MapTile::drawSelect (Frustum const& frustum)
+void MapTile::intersect (math::ray const& ray, selection_result* results) const
 {
-  for (int j = 0; j<16; ++j)
-    for (int i = 0; i<16; ++i)
-      mChunks[j][i]->drawSelect (frustum);
+  for (size_t j (0); j < 16; ++j)
+  {
+    for (size_t i (0); i < 16; ++i)
+    {
+      mChunks[j][i]->intersect (ray, results);
+    }
+  }
 }
 
 void MapTile::drawLines (Frustum const& frustum)//draw red lines around the square of a chunk
