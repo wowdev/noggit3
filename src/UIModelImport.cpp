@@ -86,11 +86,11 @@ void UIModelImport::addTXTModel(int id)
     {
       ModelInstance* mi = new ModelInstance(line);
       mi->sc = 1.0f;
-      _mapView->selectModel(nameEntry(mi));
+      _mapView->selectModel(mi);
     }
     else if (std::equal(wmoExt.rbegin(), wmoExt.rend(), line.rbegin()))
     {
-      _mapView->selectModel(nameEntry(new WMOInstance(line)));
+      _mapView->selectModel(new WMOInstance(line));
     }
   }
 }

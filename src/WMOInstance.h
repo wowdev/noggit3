@@ -6,6 +6,7 @@
 
 #include "Vec3D.h" // Vec3D
 #include "WMO.h"
+#include <math/ray.hpp>
 
 class MPQFile;
 struct ENTRY_MODF;
@@ -27,7 +28,6 @@ public:
 	WMOInstance(std::string const& filename, MPQFile* _file);
 	WMOInstance(std::string const& filename, ENTRY_MODF* d);
 	explicit WMOInstance(std::string const& filename);
-	~WMOInstance();
 
   WMOInstance(WMOInstance const& other) = default;
   WMOInstance& operator=(WMOInstance const& other) = default;
@@ -43,11 +43,9 @@ public:
     , mNameset (other.mNameset)
     , doodadset (other.doodadset)
     , uidLock (other.uidLock)
-    , mSelectionID (other.mSelectionID)
   {
 	//  std::move(std::begin(other.extents), std::end(other.extents), extents);
     std::swap (extents, other.extents);
-    other.mSelectionID = -1;
   }
 
   WMOInstance& operator= (WMOInstance&& other)
@@ -62,13 +60,11 @@ public:
 	  std::swap(mNameset, other.mNameset);
 	  std::swap(doodadset, other.doodadset);
 	  std::swap(uidLock, other.uidLock);
-	  std::swap(mSelectionID, other.mSelectionID);
-	  other.mSelectionID = -1;
 	  return *this;
   }
 
 	void draw (Frustum const&);
-	void drawSelect (Frustum const&);
+  void intersect (math::ray const&, selection_result*);
 
 	void recalcExtents();
 	void resetDirection();
@@ -82,7 +78,6 @@ public:
 
 private:
 	bool uidLock;
-	unsigned int mSelectionID;
 };
 
 

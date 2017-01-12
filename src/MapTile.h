@@ -7,6 +7,8 @@
 
 #include "MapHeaders.h"
 #include "Video.h" // GLfloat, GLshort, ...
+#include <math/ray.hpp>
+#include "Selection.h"
 
 class Frustum;
 class MapChunk;
@@ -35,7 +37,7 @@ public:
 	int changed;
 
 	void draw (Frustum const&);
-	void drawSelect (Frustum const&);
+  void intersect (math::ray const&, selection_result*) const;
 	void drawLines (Frustum const&);
 	void drawWater();
 	void drawTextures();

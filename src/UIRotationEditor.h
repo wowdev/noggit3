@@ -2,10 +2,10 @@
 #define __UIROTATIONEDITOR_H
 
 #include "UIWindow.h"
+#include "Selection.h"
 
 class UIText;
 class UITextBox;
-class nameEntry;
 class WMOInstance;
 
 class UIRotationEditor : public UIWindow
@@ -13,7 +13,7 @@ class UIRotationEditor : public UIWindow
 public:
   UIRotationEditor(float x, float y);
 
-  void select(nameEntry* entry);
+  void select(selection_type entry);
   void clearSelect();
   void updateValues();
   void toggle();

@@ -7,12 +7,14 @@
 #include "Selection.h"
 #include "Vec3D.h"
 
+#include <boost/optional.hpp>
+
 class Environment
 {
 public:
 	static Environment* getInstance();
-	nameEntry get_clipboard();
-	void set_clipboard(nameEntry* entry);
+	selection_type get_clipboard();
+	void set_clipboard(boost::optional<selection_type> entry);
 	void clear_clipboard();
 	bool is_clipboard();
   Vec3D get_cursor_pos();
@@ -53,7 +55,7 @@ public:
   float maxRotation;
   float minTilt;
   float maxTilt;
-  float minScale;  
+  float minScale;
   float maxScale;
   bool moveModelToCursorPos;
 
@@ -66,9 +68,7 @@ private:
 	Environment();
 	static Environment* instance;
 
-	nameEntry clipboard;
-	bool clipboard_filled;
-
+  boost::optional<selection_type> clipboard;
 };
 
 #endif

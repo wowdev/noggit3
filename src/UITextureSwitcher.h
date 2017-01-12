@@ -3,7 +3,6 @@
 
 #include "UIWindow.h"
 
-class nameEntry;
 class UITexture;
 class UIButton;
 

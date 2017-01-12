@@ -3,8 +3,8 @@
 
 #include "UICloseWindow.h"
 #include "MapChunk.h"
+#include "Selection.h"
 
-class nameEntry;
 class UITexture;
 
 class UITexturePicker : public UICloseWindow
@@ -12,7 +12,7 @@ class UITexturePicker : public UICloseWindow
 public:
 	UITexturePicker(float x, float y, float w, float h);
 
-	void getTextures(nameEntry* lSelection);
+	void getTextures(selection_type lSelection);
 	void setTexture(size_t id);
   void shiftSelectedTextureLeft();
   void shiftSelectedTextureRight();
@@ -22,7 +22,7 @@ private:
 
 	UITexture* _textures[4];
   MapChunk* _chunk;
-  nameEntry* _select;
+  selection_type _select;
 };
 
 #endif

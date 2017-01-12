@@ -54,15 +54,13 @@ UITexturePicker::UITexturePicker(float x, float y, float w, float h)
   addChild(bright);
 }
 
-void UITexturePicker::getTextures(nameEntry* lSelection)
+void UITexturePicker::getTextures(selection_type lSelection)
 {
-	assert(lSelection);
-
 	show();
 
-	if (lSelection && lSelection->type == eEntry_MapChunk)
+	if (lSelection.which() == eEntry_MapChunk)
 	{
-		MapChunk* chunk = lSelection->data.mapchunk;
+		MapChunk* chunk = boost::get<selected_chunk_type> (lSelection).chunk;
     _chunk = chunk;
 		size_t index = 0;
 

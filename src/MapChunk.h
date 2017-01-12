@@ -5,6 +5,7 @@
 #include "Video.h" // GLuint
 #include "WMOInstance.h"
 #include "ModelInstance.h"
+#include "Selection.h"
 
 #include <opengl/texture.hpp>
 
@@ -28,7 +29,6 @@ private:
 	bool haswater;
 	bool hasMCCV;
 
-	int nameID;
 	int holes;
 
 	unsigned int areaID;
@@ -77,7 +77,7 @@ public:
 	void draw (Frustum const&); //! \todo only this function should be public, all others should be called from it
 
 	void drawContour();
-	void drawSelect (Frustum const&);
+  void intersect (math::ray const&, selection_result*);
 	void drawLines (Frustum const&);
 	void drawTextures();
 	bool ChangeMCCV(float x, float z, float change, float radius, bool editMode);

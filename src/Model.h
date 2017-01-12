@@ -11,6 +11,7 @@ class Bone;
 #include "AsyncObject.h" // AsyncObject
 #include "Manager.h" // ManagedItem
 #include <math/matrix_4x4.hpp>
+#include <math/ray.hpp>
 #include "ModelHeaders.h"
 #include "MPQ.h"
 #include "Particle.h"
@@ -133,7 +134,6 @@ struct ModelLight {
 class Model : public ManagedItem, public AsyncObject {
 
 	GLuint ModelDrawList;
-	GLuint SelectModelDrawList;
 	//GLuint TileModeModelDrawList;
 
 	GLuint vbuf, nbuf, tbuf;
@@ -157,7 +157,6 @@ class Model : public ManagedItem, public AsyncObject {
 	RibbonEmitter *ribbons;
 
 	void drawModel( /*bool unlit*/);
-	void drawModelSelect();
 
 	void initCommon(const MPQFile& f);
 	bool isAnimated(const MPQFile& f);
@@ -205,7 +204,7 @@ public:
 	~Model();
 	void draw();
 	void drawTileMode();
-	void drawSelect();
+  std::vector<float> intersect (math::ray const&);
 	void updateEmitters(float dt);
 
 	friend struct ModelRenderPass;

@@ -9,7 +9,6 @@
 
 WMOInstance::WMOInstance(std::string const& filename, MPQFile* _file)
 	: wmo(filename)
-	, mSelectionID(SelectionNames.add(this))
 	, uidLock(false)
 {
 	_file->read(&mUniqueID, 4);
@@ -30,7 +29,6 @@ WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF* d)
 	, mUniqueID(d->uniqueID), mFlags(d->flags)
 	, mUnknown(d->unknown), mNameset(d->nameSet)
 	, doodadset(d->doodadSet)
-	, mSelectionID(SelectionNames.add(this))
 	, uidLock(false)
 {
 	extents[0] = Vec3D(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
@@ -46,17 +44,8 @@ WMOInstance::WMOInstance(std::string const& filename)
 	, mUnknown(0)
 	, mNameset(0)
 	, doodadset(0)
-	, mSelectionID(SelectionNames.add(this))
 	, uidLock(false)
 {
-}
-
-WMOInstance::~WMOInstance()
-{
-  if (mSelectionID != -1)
-  {
-    SelectionNames.del(mSelectionID);
-  }
 }
 
 void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth);
@@ -73,14 +62,14 @@ void WMOInstance::draw (Frustum const& frustum)
     gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
     gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
 
-    if (gWorld->IsSelection(eEntry_WMO) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID)
+    if (gWorld->IsSelection(eEntry_WMO) && boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->mUniqueID == this->mUniqueID)
       wmo->draw(doodadset, pos, math::degrees (roty), true, true, true, frustum);
     else
       wmo->draw(doodadset, pos, math::degrees (roty), false, false, false, frustum);
   }
 
   // no need to check showModelFromHiddenList in Environment as it's done beforehand in World::draw()
-	if (wmo->hidden || ( gWorld->IsSelection(eEntry_WMO) && gWorld->GetCurrentSelection()->data.wmo->mUniqueID == this->mUniqueID))
+  if (wmo->hidden || ( gWorld->IsSelection(eEntry_WMO) && boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->mUniqueID == this->mUniqueID))
 	{
 		gl.disable(GL_LIGHTING);
 
@@ -102,6 +91,29 @@ void WMOInstance::draw (Frustum const& frustum)
 
 		gl.enable(GL_LIGHTING);
 	}
+}
+
+void WMOInstance::intersect (math::ray const& ray, selection_result* results)
+{
+  if (!ray.intersect_bounds (extents[0], extents[1]))
+  {
+    return;
+  }
+
+  math::matrix_4x4 const model_matrix
+    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation
+                       , { math::degrees (dir.z)
+                         , math::degrees (dir.y - 90.0f)
+                         , math::degrees (-dir.x)
+                         }
+                       )
+    );
+
+  for (auto&& result : wmo->intersect ({model_matrix.inverted(), ray}))
+  {
+    results->emplace_back (result, selected_wmo_type (this));
+  }
 }
 
 void WMOInstance::recalcExtents()
@@ -217,26 +229,6 @@ bool WMOInstance::isInsideChunk(Vec3D lTileExtents[2])
 			return true;
 
 	return false;
-}
-
-void WMOInstance::drawSelect (Frustum const& frustum)
-{
-  opengl::scoped::matrix_pusher const matrix;
-
-	gl.translatef(pos.x, pos.y, pos.z);
-
-	const float roty = dir.y - 90.0f;
-
-	gl.rotatef(roty, 0.0f, 1.0f, 0.0f);
-	gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
-	gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
-
-	mSelectionID = SelectionNames.add(this);
-	gl.pushName(mSelectionID);
-
-	wmo->drawSelect(doodadset, pos, math::degrees (-roty), frustum);
-
-	gl.popName();
 }
 
 /*void WMOInstance::drawPortals()

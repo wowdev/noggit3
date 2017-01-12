@@ -7,7 +7,7 @@
 #include "Frustum.h" // Frustum
 #include "MapIndex.h"
 #include "Model.h" // ModelManager
-#include "Selection.h" // nameEntryManager
+#include "Selection.h"
 #include "Sky.h" // Skies, OutdoorLighting, OutdoorLightStats
 #include "WMO.h" // WMOManager
 
@@ -24,8 +24,6 @@ class Brush;
 class MapTile;
 class MapIndex;
 class tile_index;
-
-extern nameEntryManager SelectionNames;
 
 static const float detail_size = 8.0f;
 static const float highresdistance = 384.0f;
@@ -47,8 +45,7 @@ public:
 	MapIndex *mapIndex;
 
 	// Information about the currently selected model / WMO / triangle.
-	nameEntry *mCurrentSelection;
-	int mCurrentSelectedTriangle;
+  boost::optional<selection_type> mCurrentSelection;
 	bool SelectionMode;
 
 	// Call lists for the low resolution heightmaps.
@@ -150,7 +147,7 @@ public:
 	//void drawSelectionChunk(int cursorX,int cursorY); does not exist
 	//bool hasAdt(); does not exist
 
-	void drawSelection(int cursorX, int cursorY, bool pOnlyMap = false, bool doSelection = true);
+  selection_result intersect (math::ray const&, bool only_map);
 	void drawTileMode(float ah);
 
 	void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
@@ -159,9 +156,9 @@ public:
 
 	// Selection related methods.
 	bool IsSelection(int pSelectionType);
-	nameEntry * GetCurrentSelection() { return mCurrentSelection; }
-	void ResetSelection() { mCurrentSelection = NULL; }
-	GLuint GetCurrentSelectedTriangle() { return (unsigned int)mCurrentSelectedTriangle; }
+  boost::optional<selection_type> GetCurrentSelection() { return mCurrentSelection; }
+	void SetCurrentSelection (boost::optional<selection_type> entry) { mCurrentSelection = entry; }
+	void ResetSelection() { mCurrentSelection.reset(); }
 
 	bool GetVertex(float x, float z, Vec3D *V);
 
@@ -183,12 +180,12 @@ public:
   void addHoleADT(float x, float z);
   void removeHoleADT(float x, float z);
 
-	void addModel(nameEntry entry, Vec3D newPos, bool copyit);
+	void addModel(selection_type, Vec3D newPos, bool copyit);
 	void addM2(std::string const& filename, Vec3D newPos, bool copyit);
 	void addWMO(std::string const& filename, Vec3D newPos, bool copyit);
 
 
-  void updateTilesEntry(nameEntry& entry);
+  void updateTilesEntry(selection_type const& entry);
   void updateTilesWMO(WMOInstance* wmo);
   void updateTilesModel(ModelInstance* m2);
 
