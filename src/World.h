@@ -187,6 +187,11 @@ public:
 	void addM2(std::string const& filename, Vec3D newPos, bool copyit);
 	void addWMO(std::string const& filename, Vec3D newPos, bool copyit);
 
+
+  void updateTilesEntry(nameEntry& entry);
+  void updateTilesWMO(WMOInstance* wmo);
+  void updateTilesModel(ModelInstance* m2);
+
   void clearHiddenModelList();
 
 	void jumpToCords(Vec3D pos);

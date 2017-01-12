@@ -511,13 +511,18 @@ void ResetSelectedObjectRotation(UIFrame*, int)
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
-    gWorld->GetCurrentSelection()->data.wmo->resetDirection();
-    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
+    WMOInstance* wmo = gWorld->GetCurrentSelection()->data.wmo;
+    gWorld->updateTilesWMO(wmo);
+    wmo->resetDirection();
+    gWorld->updateTilesWMO(wmo);
   }
   else if (gWorld->IsSelection(eEntry_Model))
   {
-    gWorld->GetCurrentSelection()->data.model->resetDirection();
-    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
+    ModelInstance* m2 = gWorld->GetCurrentSelection()->data.model;
+    gWorld->updateTilesModel(m2);
+    m2->resetDirection();
+    m2->recalcExtents();
+    gWorld->updateTilesModel(m2);
   }
 }
 
@@ -525,19 +530,19 @@ void SnapSelectedObjectToGround(UIFrame*, int)
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
-    Vec3D t = Vec3D(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, 0);
-    gWorld->GetVertex(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z, &t);
-    gWorld->GetCurrentSelection()->data.wmo->pos.y = t.y;
-    gWorld->GetCurrentSelection()->data.wmo->recalcExtents();
-    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.wmo->pos.x, gWorld->GetCurrentSelection()->data.wmo->pos.z);
-
+    WMOInstance* wmo = gWorld->GetCurrentSelection()->data.wmo;
+    Vec3D t = Vec3D(wmo->pos.x, wmo->pos.z, 0);
+    gWorld->GetVertex(wmo->pos.x, wmo->pos.z, &t);
+    wmo->pos.y = t.y;
+    gWorld->updateTilesWMO(wmo);
   }
   else if (gWorld->IsSelection(eEntry_Model))
   {
-    Vec3D t = Vec3D(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, 0);
-    gWorld->GetVertex(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z, &t);
-    gWorld->GetCurrentSelection()->data.model->pos.y = t.y;
-    gWorld->mapIndex->setChanged(gWorld->GetCurrentSelection()->data.model->pos.x, gWorld->GetCurrentSelection()->data.model->pos.z);
+    ModelInstance* m2 = gWorld->GetCurrentSelection()->data.model;
+    Vec3D t = Vec3D(m2->pos.x, m2->pos.z, 0);
+    gWorld->GetVertex(m2->pos.x, m2->pos.z, &t);
+    m2->pos.y = t.y;
+    gWorld->updateTilesModel(m2);
   }
 }
 
@@ -1498,26 +1503,27 @@ void MapView::tick(float t, float dt)
         // Move scale and rotate with numpad keys
         if (Selection->type == eEntry_WMO)
         {
-          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x, Selection->data.wmo->pos.z);
+          gWorld->updateTilesWMO(Selection->data.wmo);
           Selection->data.wmo->pos.x += keyx * moveratio;
           Selection->data.wmo->pos.y += keyy * moveratio;
           Selection->data.wmo->pos.z += keyz * moveratio;
           Selection->data.wmo->dir.y += keyr * moveratio * 5;
 
           Selection->data.wmo->recalcExtents();
-          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x, Selection->data.wmo->pos.z);
+          gWorld->updateTilesWMO(Selection->data.wmo);
           mainGui->rotationEditor->updateValues();
         }
 
         if (Selection->type == eEntry_Model)
         {
-          gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z);
+          gWorld->updateTilesModel(Selection->data.model);
           Selection->data.model->pos.x += keyx * moveratio;
           Selection->data.model->pos.y += keyy * moveratio;
           Selection->data.model->pos.z += keyz * moveratio;
           Selection->data.model->dir.y += keyr * moveratio * 5;
           Selection->data.model->sc += keys * moveratio / 50;
-          gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z);
+          Selection->data.model->recalcExtents();
+          gWorld->updateTilesModel(Selection->data.model);
           mainGui->rotationEditor->updateValues();
         }
       }
@@ -1539,7 +1545,7 @@ void MapView::tick(float t, float dt)
         ObjPos.x = 80.0f;
         if (Selection->type == eEntry_WMO)
         {
-          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x, Selection->data.wmo->pos.z); // before move
+          gWorld->updateTilesWMO(Selection->data.wmo);
 
           if (Environment::getInstance()->ShiftDown)
           {
@@ -1561,17 +1567,16 @@ void MapView::tick(float t, float dt)
           }
 
           Selection->data.wmo->recalcExtents();
-          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x, Selection->data.wmo->pos.z); // after move. If moved to another ADT
+          gWorld->updateTilesWMO(Selection->data.wmo);
           mainGui->rotationEditor->updateValues();
         }
         else if (Selection->type == eEntry_Model)
         {
+          gWorld->updateTilesModel(Selection->data.model);
           if (Environment::getInstance()->AltDown)
           {
-            gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z);
-            float ScaleAmount;
+            float ScaleAmount = pow(2.0f, mv * 4.0f);
 
-            ScaleAmount = pow(2.0f, mv * 4.0f);
             Selection->data.model->sc *= ScaleAmount;
             if (Selection->data.model->sc > 63.9f)
               Selection->data.model->sc = 63.9f;
@@ -1580,7 +1585,6 @@ void MapView::tick(float t, float dt)
           }
           else
           {
-            gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z); // before move
             if (Environment::getInstance()->ShiftDown)
             {
               Selection->data.model->pos += mv * dirUp * ObjPos.x;
@@ -1600,10 +1604,11 @@ void MapView::tick(float t, float dt)
               }
 
             }
-
-            gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z); // after move. If moved to another ADT
           }
+          
           mainGui->rotationEditor->updateValues();
+          Selection->data.model->recalcExtents();
+          gWorld->updateTilesModel(Selection->data.model);
         }
       }
 
@@ -1616,7 +1621,6 @@ void MapView::tick(float t, float dt)
 
         if (Selection->type == eEntry_Model)
         {
-          gWorld->mapIndex->setChanged(Selection->data.model->pos.x, Selection->data.model->pos.z);
           lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
           if (Environment::getInstance()->ShiftDown)
             lTarget = &Selection->data.model->dir.y;
@@ -1625,11 +1629,9 @@ void MapView::tick(float t, float dt)
           else if (Environment::getInstance()->AltDown)
             lTarget = &Selection->data.model->dir.z;
 
-          mainGui->rotationEditor->updateValues();
         }
         else if (Selection->type == eEntry_WMO)
         {
-          gWorld->mapIndex->setChanged(Selection->data.wmo->pos.x, Selection->data.wmo->pos.z);
           lModify = Environment::getInstance()->ShiftDown | Environment::getInstance()->CtrlDown | Environment::getInstance()->AltDown;
           if (Environment::getInstance()->ShiftDown)
             lTarget = &Selection->data.wmo->dir.y;
@@ -1638,11 +1640,12 @@ void MapView::tick(float t, float dt)
           else if (Environment::getInstance()->AltDown)
             lTarget = &Selection->data.wmo->dir.z;
 
-          mainGui->rotationEditor->updateValues();
         }
 
         if (lModify && lTarget)
         {
+          gWorld->updateTilesEntry(*Selection);
+
           *lTarget = *lTarget + rh + rv;
 
           if (*lTarget > 360.0f)
@@ -1650,8 +1653,18 @@ void MapView::tick(float t, float dt)
           else if (*lTarget < -360.0f)
             *lTarget = *lTarget + 360.0f;
 
+          mainGui->rotationEditor->updateValues();
+
           if (Selection->type == eEntry_WMO)
+          {
             Selection->data.wmo->recalcExtents();
+            gWorld->updateTilesWMO(Selection->data.wmo);
+          }
+          else if (Selection->type == eEntry_Model)
+          {
+            Selection->data.model->recalcExtents();
+            gWorld->updateTilesModel(Selection->data.model);
+          }
         }
       }
 
@@ -2499,16 +2512,17 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 
           if (selection->type == eEntry_Model)
           {
-            gWorld->mapIndex->setChanged(selection->data.model->pos.x, selection->data.model->pos.z);
+            gWorld->updateTilesModel(selection->data.model);
             selection->data.model->pos = pos;
-            gWorld->mapIndex->setChanged(pos.x, pos.z);
+            selection->data.model->recalcExtents();
+            gWorld->updateTilesModel(selection->data.model);
           }
           else if (selection->type == eEntry_WMO)
           {
-            gWorld->mapIndex->setChanged(selection->data.wmo->pos.x, selection->data.wmo->pos.z);
+            gWorld->updateTilesWMO(selection->data.wmo);
             selection->data.wmo->pos = pos;
             selection->data.wmo->recalcExtents();
-            gWorld->mapIndex->setChanged(pos.x, pos.z);
+            gWorld->updateTilesWMO(selection->data.wmo);
           }
         }
       }
