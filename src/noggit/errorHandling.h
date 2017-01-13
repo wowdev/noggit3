@@ -1,14 +1,6 @@
-/*
-* ErrorHandling.h
-*
-* Description: Simple implementation of signal handlers. Include this and call RegisterErrorHandlers(); in main() once.
-*
-*  Created on: Apr 26, 2010
-*      Author: loerwald
-*/
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#ifndef ERRORHANDLING_H_
-#define ERRORHANDLING_H_
+#pragma once
 
 #include <csignal>
 #include <string>
@@ -115,7 +107,5 @@ void printStacktrace()
 	StackWalker sw;
 	sw.ShowCallstack();
 }
-
-#endif
 
 #endif

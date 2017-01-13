@@ -1,5 +1,6 @@
-#ifndef MAPTILE_H
-#define MAPTILE_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <vector>
 #include <map>
@@ -138,7 +139,3 @@ void stripify2(V *in, V *out)
 		if (row<7) *out++ = overrow[8];// jump start
 	}
 }
-
-
-
-#endif

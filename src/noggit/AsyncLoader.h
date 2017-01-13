@@ -1,5 +1,6 @@
-#ifndef ASYNCLOADER_H
-#define ASYNCLOADER_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <boost/thread.hpp>
 #include <list>
@@ -27,5 +28,3 @@ private:
 	boost::thread_group m_threads;
 	boost::mutex m_loadingMutex;
 };
-
-#endif //ASYNCLOADER_H

@@ -1,5 +1,6 @@
-#ifndef __UI_WATERSAVEWARNING_H
-#define __UI_WATERSAVEWARNING_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "UIWindow.h"
 #include "MapView.h"
@@ -14,6 +15,3 @@ public:
 	UIWaterSaveWarning(MapView *mapView);
 	void resize();
 };
-
-
-#endif

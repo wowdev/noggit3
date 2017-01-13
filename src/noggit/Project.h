@@ -1,5 +1,6 @@
-#ifndef __PROJECT_H
-#define __PROJECT_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <string>
 
@@ -15,5 +16,3 @@ private:
 	static Project* instance;
 	std::string path;
 };
-
-#endif

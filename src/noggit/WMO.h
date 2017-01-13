@@ -1,5 +1,6 @@
-#ifndef WMO_H
-#define WMO_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <set>
 #include <string>
@@ -255,6 +256,3 @@ private:
   std::string _filename;
   WMO* _wmo;
 };
-
-
-#endif

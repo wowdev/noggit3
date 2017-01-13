@@ -1,5 +1,6 @@
-#ifndef CURSORSWITCHER_H
-#define CURSORSWITCHER_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "UICloseWindow.h"
 #include "UIToggleGroup.h"
@@ -11,5 +12,3 @@ public:
 
 	void changeCursor(int Type);
 };
-
-#endif

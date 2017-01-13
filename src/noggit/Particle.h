@@ -1,5 +1,6 @@
-#ifndef PARTICLE_H
-#define PARTICLE_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <list>
 #include <vector>
@@ -142,7 +143,3 @@ public:
 	void setup(int anim, int time);
 	void draw();
 };
-
-
-
-#endif

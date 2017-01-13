@@ -1,5 +1,6 @@
-#ifndef __UIBUTTON_H
-#define __UIBUTTON_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <string>
 #include <boost/function.hpp>
@@ -46,4 +47,3 @@ public:
 	void setClickFunc(ClickFunction f, int num);
 	void processUnclick();
 };
-#endif

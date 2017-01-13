@@ -1,5 +1,6 @@
-#ifndef FREE_TYPE_H
-#define FREE_TYPE_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -61,5 +62,3 @@ namespace freetype
 		const GlyphData& getGlyphData(CharacterCode charCode) const;
 	};
 }
-
-#endif

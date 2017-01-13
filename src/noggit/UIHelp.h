@@ -1,5 +1,6 @@
-#ifndef UIHELP_H
-#define UIHELP_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "UICloseWindow.h"
 
@@ -8,5 +9,3 @@ class UIHelp : public UICloseWindow
 public:
 	UIHelp();
 };
-
-#endif

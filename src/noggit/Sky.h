@@ -1,5 +1,6 @@
-#ifndef SKY_H
-#define SKY_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <vector>
 #include <string>
@@ -124,9 +125,3 @@ public:
 	OutdoorLightStats getLightStats(int time);
 
 };
-
-
-
-
-#endif
-

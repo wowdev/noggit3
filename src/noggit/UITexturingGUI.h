@@ -1,5 +1,6 @@
-#ifndef __TEXTURINGUI_H
-#define __TEXTURINGUI_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 class MapChunk;
 class UIFrame;
@@ -22,5 +23,3 @@ public:
 	static void updateSelectedTexture();
 	static OpenGL::Texture* selectedTexture;
 };
-
-#endif

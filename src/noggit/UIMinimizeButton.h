@@ -1,5 +1,6 @@
-#ifndef __MINIMIZEBUTTON_H
-#define __MINIMIZEBUTTON_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "UIButton.h"
 
@@ -12,4 +13,3 @@ public:
 
 	UIFrame::Ptr processLeftClick(float mx, float my);
 };
-#endif

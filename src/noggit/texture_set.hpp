@@ -1,5 +1,6 @@
-#ifndef TEXTURESET_H
-#define TEXTURESET_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "MPQ.h"
 #include "alphamap.hpp"
@@ -72,5 +73,3 @@ private:
 	unsigned int effectID[4];
 	unsigned int MCALoffset[4];
 };
-
-#endif //TEXTURESET_H

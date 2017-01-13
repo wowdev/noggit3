@@ -1,3 +1,4 @@
+# This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 # Set this to more paths you windows guys need.
 # this shouldnt be here....steff pls try to use the vars *_DIR or LIB_ROOT
