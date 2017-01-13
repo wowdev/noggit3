@@ -31,7 +31,7 @@ static const float mapdrawdistance = 998.0f;
 static const float modeldrawdistance = 384.0f;
 static const float doodaddrawdistance = 64.0f;
 
-typedef unsigned short StripType;
+using StripType = uint16_t;
 
 class World
 {

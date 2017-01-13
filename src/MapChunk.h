@@ -17,7 +17,7 @@ class TextureSet;
 class sExtendableArray;
 class Frustum;
 
-typedef unsigned short StripType;
+using StripType = uint16_t;
 static const int mapbufsize = 9 * 9 + 8 * 8; // chunk size
 
 class MapChunk
@@ -70,7 +70,7 @@ public:
 
 	TextureSet* textureSet;
 
-	GLuint vertices, normals, minimap, minishadows, mccvEntry;
+	GLuint vertices, normals, indices, minimap, minishadows, mccvEntry;
 
 	Vec3D mVertices[mapbufsize];
 
