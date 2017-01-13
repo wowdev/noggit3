@@ -23,3 +23,11 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(StormLib DEFAULT_MSG STORMLIB_LIBRARY STORMLIB_INCLUDE_DIR)
 
 mark_as_advanced(STORMLIB_INCLUDE_DIR STORMLIB_LIBRARYRAD STORMLIB_LIBRARYDAD)
+
+add_library (StormLib INTERFACE)
+target_link_libraries (StormLib INTERFACE ${STORMLIB_LIBRARIES})
+set_property  (TARGET StormLib APPEND PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${STORMLIB_INCLUDE_DIR})
+set_property  (TARGET StormLib APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${STORMLIB_INCLUDE_DIR})
+
+#! \note on Windows, storm tries to auto-link. There is no proper flag to disable that, so abuse this one.
+target_compile_definitions (StormLib INTERFACE -D__STORMLIB_SELF__)
