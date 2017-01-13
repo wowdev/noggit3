@@ -51,8 +51,6 @@ private:
 	int indexNoLoD(int x, int y);
 	int indexLoD(int x, int y);
 
-	void drawPass(int id);
-
 public:
 	MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha);
 	~MapChunk();

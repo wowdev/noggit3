@@ -541,13 +541,6 @@ float MapChunk::getMinHeight()
   return min;
 }
 
-void MapChunk::drawPass(int id)
-{
-  textureSet->startAnim(id);
-  gl.drawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
-  textureSet->stopAnim(id);
-}
-
 void MapChunk::drawLines (Frustum const& frustum)
 {
   if (!frustum.intersects(vmin, vmax))
@@ -631,7 +624,7 @@ void MapChunk::drawContour()
   gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
   gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
 
-  drawPass(-1);
+  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
 }
 
 void MapChunk::draw (Frustum const& frustum)
@@ -690,7 +683,7 @@ void MapChunk::draw (Frustum const& frustum)
   }
 
   gl.enable(GL_LIGHTING);
-  drawPass(-1);
+  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
 
   if (textureSet->num() > 1U) {
     //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
@@ -704,7 +697,9 @@ void MapChunk::draw (Frustum const& frustum)
     textureSet->bindTexture(i, 0);
     textureSet->bindAlphamap(i - 1, 1);
 
-    drawPass(i);
+    textureSet->startAnim (i);
+    gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
+    textureSet->stopAnim (i);
   }
 
   if (textureSet->num() > 1U)
@@ -734,7 +729,7 @@ void MapChunk::draw (Frustum const& frustum)
   opengl::texture::enable_texture (1);
   shadow.bind();
 
-  drawPass(-1);
+  gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
 
   gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
   opengl::texture::disable_texture();
@@ -748,7 +743,7 @@ void MapChunk::draw (Frustum const& frustum)
     if (Flags & FLAG_IMPASS)
     {
       gl.color4f(1, 1, 1, 0.6f);
-      drawPass(-1);
+      gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
     }
   }
   if (terrainMode == 6)
@@ -756,7 +751,7 @@ void MapChunk::draw (Frustum const& frustum)
     if (water)
     {
       gl.color4f(0.2f, 0.2f, 0.8f, 0.6f);
-      drawPass(-1);
+      gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
     }
   }
 
@@ -767,7 +762,7 @@ void MapChunk::draw (Frustum const& frustum)
     {
       Vec3D colorValues = Environment::getInstance()->areaIDColors.find(areaID)->second;
       gl.color4f(colorValues.x, colorValues.y, colorValues.z, 0.7f);
-      drawPass(-1);
+      gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
     }
   }
 
@@ -802,7 +797,7 @@ void MapChunk::draw (Frustum const& frustum)
       gl.lineWidth(1);
       gl.polygonOffset(-1, -1);
       gl.color4f(1, 1, 1, 0.2f);
-      drawPass(-1);
+      gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
     }
     {
       opengl::scoped::bool_setter<GL_POLYGON_OFFSET_POINT, GL_TRUE> const polygon_offset_point;
@@ -810,7 +805,7 @@ void MapChunk::draw (Frustum const& frustum)
       gl.pointSize(2);
       gl.polygonOffset(-1, -1);
       gl.color4f(1, 1, 1, 0.5f);
-      drawPass(-1);
+      gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
     }
 
     gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
