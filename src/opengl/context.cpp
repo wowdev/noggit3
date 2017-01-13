@@ -2,7 +2,7 @@
 
 #include <opengl/context.hpp>
 
-#include <Log.h>
+#include <noggit/Log.h>
 
 #include <boost/current_function.hpp>
 
