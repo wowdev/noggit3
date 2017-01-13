@@ -111,9 +111,9 @@ void TextureSet::switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* new
 		if (textures[i] == oldTexture)
 			texLevel = i;
 		// prevent texture duplication
-		if (textures[i] == newTexture) 
+		if (textures[i] == newTexture)
 			return;
-	}		
+	}
 
 	if (texLevel != -1)
 	{
@@ -333,7 +333,7 @@ bool TextureSet::eraseUnusedTextures()
 
   if (nTextures < 2)
     return texRemoved;
-    
+
   unsigned char alpha[64 * 64];
   bool baseVisible = false;
   size_t texCount = nTextures;
@@ -374,7 +374,7 @@ bool TextureSet::eraseUnusedTextures()
       texRemoved = true;
     }
   }
-  
+
   // there will always be at least 2 textures when entering the condition
   if (!baseVisible)
   {
@@ -478,7 +478,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
             if (a > 0)
             {
               texVisible[k] = true;
-              
+
               if (a == 255)
               {
                 baseVisible = false;
@@ -489,12 +489,12 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
 					xPos += TEXDETAILSIZE;
 					continue;
-				}				
+				}
 
         float tPressure = pressure*brush->getValue(dist);
         float alphas[3] = { 0.0f, 0.0f, 0.0f };
         float visibility[4] = { 255.0f, 0.0f, 0.0f, 0.0f };
-        
+
         for (size_t k = 0; k < nTextures - 1; k++)
         {
           float f = static_cast<float>(alphamaps[k]->getAlpha(i + j * 64));
@@ -538,7 +538,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
           {
             visibility[texLevel] += diffA;
             int idTex = (!texLevel) ? 1 : texLevel - 1; // nTexture > 1 else it'd have returned true at the beginning
-            visibility[idTex] -= diffA; 
+            visibility[idTex] -= diffA;
           }
           else
           {
@@ -706,7 +706,7 @@ void TextureSet::convertToOldAlpha()
   for (size_t k = 0; k < nTextures - 1; k++)
   {
     memcpy(tab[k], alphamaps[k]->getAlpha(), 64 * 64);
-  }    
+  }
 
   float alphas[3] = { 0.0f, 0.0f, 0.0f };
 
@@ -737,7 +737,7 @@ void TextureSet::convertToOldAlpha()
       tab[k][i] = static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f));
     }
   }
-  
+
   for (size_t k = 0; k < nTextures - 1; k++)
   {
     alphamaps[k]->setAlpha(tab[k]);

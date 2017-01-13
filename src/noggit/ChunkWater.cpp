@@ -28,7 +28,7 @@ void ChunkWater::reloadRendering()
     if (!Liquids[k])
     {
       Liquids[k] = new Liquid(Info[k].width, Info[k].height, math::vector_3d(x, Info[k].minHeight, y));
-    }      
+    }
 
     MH2O_Tile lTile;
     lTile.mLiquidType = Info[k].LiquidType;
@@ -84,7 +84,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 		f.seek(basePos + Header.ofsInformation + sizeof(MH2O_Information)* k);
 		f.read(&Info[k], sizeof(MH2O_Information));
 
-		
+
 		//mask
 		if (Info[k].ofsInfoMask > 0 && Info[k].height > 0)
 		{
@@ -123,7 +123,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
     if (!Info[k].ofsHeightMap)
     {
       continue;
-    }			
+    }
 
     f.seek(basePos + Info[k].ofsHeightMap);
 
@@ -167,7 +167,7 @@ void ChunkWater::writeInfo(sExtendableArray &lADTFile, size_t basePos, int &lCur
   {
     lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Information), reinterpret_cast<char*>(&Info[i])); //insert MH2O_Information
     lCurrentPosition += sizeof(MH2O_Information);
-  }	
+  }
 }
 
 void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
@@ -178,7 +178,7 @@ void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t 
   }
 
   Header.ofsRenderMask = lCurrentPosition - basePos;
-  
+
   //render
   lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render));
   lCurrentPosition += sizeof(MH2O_Render);
@@ -284,7 +284,7 @@ void ChunkWater::autoGen(MapChunk *chunk, int factor)
 		  }
 	  }
   }
-	
+
 	reloadRendering();
 }
 
@@ -327,7 +327,7 @@ void ChunkWater::CropWater(MapChunk* chunkTerrain)
           {
             deleteLayer(j, i, k);
           }
-            
+
         }
         ++k;
       }
@@ -335,7 +335,7 @@ void ChunkWater::CropWater(MapChunk* chunkTerrain)
     }
     cleanLayer(k);
   }
-	
+
 	reloadRendering();
 
 }
@@ -357,7 +357,7 @@ void ChunkWater::cleanLayer(size_t layer)
       }
     }
   }
-				
+
 	deleteLayer(layer);
 }
 
@@ -389,7 +389,7 @@ void ChunkWater::deleteLayer(size_t layer)
 	}
 
   delete Liquids[layer];
-  
+
   for (size_t k = layer; k < Header.nLayers; ++k)
   {
     Liquids[k] = Liquids[k + 1];
@@ -397,7 +397,7 @@ void ChunkWater::deleteLayer(size_t layer)
     HeightData[k] = HeightData[k + 1];
     memcpy(existsTable[k], existsTable[k + 1], 64);
   }
-  
+
   Header.nLayers--;
   Liquids[Header.nLayers] = nullptr;
 
@@ -414,7 +414,7 @@ void ChunkWater::deleteLayer(size_t layer)
     Info[0] = MH2O_Information();
     HeightData[0] = MH2O_HeightMask();
     Render = MH2O_Render();
-  }  
+  }
 }
 
 void ChunkWater::deleteLayer(size_t x, size_t y, size_t layer)
@@ -422,7 +422,7 @@ void ChunkWater::deleteLayer(size_t x, size_t y, size_t layer)
   if (subchunkHasWater(x, y, layer))
   {
     existsTable[layer][y][x] = false;
-  }	
+  }
 }
 
 void ChunkWater::setHeight(float height, size_t layer)
@@ -540,15 +540,15 @@ void ChunkWater::draw()
   if (!hasData(0))
   {
     return;
-  }    
-  
+  }
+
   if (Environment::getInstance()->displayAllWaterLayers)
   {
     for (size_t i = 0; i < Header.nLayers; ++i)
     {
       Liquids[i]->draw();
     }
-  } 
+  }
   else if (Environment::getInstance()->currentWaterLayer < Header.nLayers)
   {
     Liquids[Environment::getInstance()->currentWaterLayer]->draw();

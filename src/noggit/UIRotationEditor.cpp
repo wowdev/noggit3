@@ -25,7 +25,7 @@ void updateRotationX(UITextBox::Ptr textBox, const std::string& value)
     textBox->value(misc::floatToStr(v, 3));
 
     editor->rotationVect->x = v;
-    
+
     if (editor->isWmo())
     {
       editor->updateWMO();
@@ -47,7 +47,7 @@ void updateRotationZ(UITextBox::Ptr textBox, const std::string& value)
     {
       editor->updateWMO();
     }
-  }  
+  }
 }
 
 void updateRotationY(UITextBox::Ptr textBox, const std::string& value)
@@ -64,7 +64,7 @@ void updateRotationY(UITextBox::Ptr textBox, const std::string& value)
     {
       editor->updateWMO();
     }
-  }  
+  }
 }
 
 void updatePosX(UITextBox::Ptr textBox, const std::string& value)

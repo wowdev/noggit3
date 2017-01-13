@@ -81,5 +81,3 @@ void UIModelSelectorFromTxt::buildModelList()
 	}
 	ZoneIdList->recalcElements(1);
 }
-
-

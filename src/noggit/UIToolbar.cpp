@@ -59,7 +59,7 @@ void UIToolbar::IconSelect(int pIcon)
 {
   change_settings_window(selectedIcon, pIcon + 1 > 10 ? 0 : pIcon + 1);
 
- 
+
   const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "AreaID Paint", "Impassible Flag", "Water edit", "Light edit", "Shader editor", "Object editor" };
 	text->setText(Names[pIcon]);
 

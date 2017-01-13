@@ -681,7 +681,7 @@ void UITexturingGUI::setSelectedTexture(OpenGL::Texture * t){
   if (UITexturingGUI::selectedTexture)
   {
     UITexturingGUI::selectedTexture->removeReference();
-  }  
+  }
   t->addReference();
 
 	UITexturingGUI::selectedTexture = t;

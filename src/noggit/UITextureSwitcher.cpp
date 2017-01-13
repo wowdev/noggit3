@@ -67,6 +67,3 @@ void UITextureSwitcher::setPosition(float setX, float setY)
 	this->_x = setX;
 	this->_y = setY;
 }
-
-
-

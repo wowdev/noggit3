@@ -19,13 +19,13 @@ public:
   void updateValues();
   void toggle();
   bool hasSelection() const { return _selection; }
-  
+
   bool isWmo() const { return _wmo; }
   void updateWMO();
 
   // check if any checkbox is focused
   bool hasFocus() const;
-  
+
   math::vector_3d* rotationVect;
   math::vector_3d* posVect;
   float* scale;

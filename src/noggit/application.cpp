@@ -396,7 +396,7 @@ void Noggit::mainLoop()
 	SDL_EnableUNICODE(true);
 
 	SDL_Event event;
-	 
+
 	while (!states.empty() && !done)
 	{
 		timeA = SDL_GetTicks();

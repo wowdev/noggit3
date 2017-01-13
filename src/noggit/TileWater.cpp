@@ -220,7 +220,7 @@ float TileWater::getHeight(size_t layer)
       if (chunks[z][x]->hasData(layer))
       {
         return chunks[z][x]->getHeight(layer);
-      }			
+      }
 		}
 	}
 	return 0;
@@ -275,7 +275,7 @@ int TileWater::getType(size_t layer)
       if (chunks[z][x]->hasData(layer))
       {
         return chunks[z][x]->getType(layer);
-      }				
+      }
 		}
 	}
 	return 0;

@@ -46,5 +46,3 @@ void UIExitWarning::exitNow()
 {
 	_MapView->quit();
 }
-
-

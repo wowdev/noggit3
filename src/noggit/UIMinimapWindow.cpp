@@ -79,7 +79,7 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
 
   math::vector_3d pos((mx - borderwidth), 0.0f, (my - borderwidth));
   pos *= TILESIZE / tilesize; // minimap pos => real pos
-	
+
   // is there a tile?
 	if (!gWorld->mapIndex->hasTile(tile_index(pos)))
 		return NULL;
@@ -87,14 +87,14 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
   if (mMenuLink)
   {
     mMenuLink->enterMapAt(pos);
-  }		
+  }
   else if (map)
   {
     gWorld->GetVertex(pos.x, pos.z, &pos);
     pos.y += 50;
     map->jumpToCords(pos);
   }
-		
+
 
 	return this;
 }
@@ -172,13 +172,13 @@ void UIMinimapWindow::render() const
         else
         {
           glColor4f(0.8f, 0.8f, 0.8f, 0.4f);
-        }        
+        }
       }
       else
       {
         gl.color4f(1.0f, 1.0f, 1.0f, 0.05f);
       }
-				
+
 
 			gl.begin(GL_QUADS);
 			gl.vertex2f(i * tilesize, j * tilesize);

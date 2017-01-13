@@ -115,7 +115,7 @@ void UIModelImport::builModelList()
 		while (!fileReader.eof())
 		{
 			getline(fileReader, line);
-			
+
 			if (line != "" && (line.find('.') != std::string::npos))
 			{
         std::transform(line.begin(), line.end(), line.begin(), ::tolower);
@@ -130,12 +130,12 @@ void UIModelImport::builModelList()
 				std::stringstream ss;
 				ss << counter << ": " << diveded;
         UIFrame *curFrame = new UIFrame(1, 1, 1, 1);
-				UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), 
-                                            "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", 
-                                            "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", 
-                                            addTXTModelext, 
+				UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(),
+                                            "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp",
+                                            "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp",
+                                            addTXTModelext,
                                             counter+99
-                                           ); // first id from file = 100 
+                                           ); // first id from file = 100
 				tempButton->setLeft();
 				curFrame->addChild(tempButton);
 				MoldelList->addElement(curFrame);
@@ -152,4 +152,3 @@ void UIModelImport::resize()
 	x(std::max((video.xres() / 2.0f) - (winWidth / 2.0f), 0.0f));
 	y(std::max((video.yres() / 2.0f) - (winHeight / 2.0f), 0.0f));
 }
-

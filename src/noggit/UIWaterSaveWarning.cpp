@@ -29,4 +29,3 @@ void UIWaterSaveWarning::resize()
 	x(std::max((video.xres() / 2.0f) - (winWidth / 2.0f), 0.0f));
 	y(std::max((video.yres() / 2.0f) - (winHeight / 2.0f), 0.0f) - (video.yres() / 4));
 }
-

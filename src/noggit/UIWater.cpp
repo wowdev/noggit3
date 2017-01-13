@@ -153,7 +153,7 @@ UIWater::UIWater(UIMapViewGUI *setGui)
     "<<",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this] (UIFrame::Ptr, int) 
+    [this] (UIFrame::Ptr, int)
     {
       size_t layer = std::max(0, Environment::getInstance()->currentWaterLayer - 1);
       waterLayer->setText(std::to_string(layer + 1));

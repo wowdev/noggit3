@@ -114,5 +114,5 @@ void ModelManager::toggleModelVisibility(Model* model)
   {
     hiddenItems.push_back(model);
     model->hidden = true;
-  }  
+  }
 }
