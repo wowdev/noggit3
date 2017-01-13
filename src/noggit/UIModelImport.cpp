@@ -6,7 +6,7 @@
 #include <string>
 #include <fstream>
 
-#include "Noggit.h" // fonts
+#include "application.h" // fonts
 #include "Misc.h" // fonts
 #include "revision.h"
 #include "UIText.h"

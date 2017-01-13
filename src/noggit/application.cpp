@@ -1,4 +1,4 @@
-#include "Noggit.h"
+#include "application.h"
 
 #ifdef _WIN32
 #include <direct.h>

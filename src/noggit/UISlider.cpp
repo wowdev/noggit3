@@ -8,7 +8,7 @@
 #include <sstream>
 
 #include "FreeType.h" // freetype::
-#include "Noggit.h" // app.getArial12()
+#include "application.h" // app.getArial12()
 #include "TextureManager.h" // TextureManager, Texture
 #include "Video.h"
 #include <opengl/scoped.hpp>

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Noggit.h" // app.getArialn13()
+#include "application.h" // app.getArialn13()
 #include "UIText.h"
 #include "UITexture.h"
 #include "UIToggleGroup.h"

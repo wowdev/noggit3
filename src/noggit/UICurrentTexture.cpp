@@ -5,7 +5,7 @@
 #include "FreeType.h" // fonts.
 #include "Log.h"
 #include "MapView.h" // MapView
-#include "Noggit.h" // app.getapp.getArialn13()()
+#include "application.h" // app.getapp.getArialn13()()
 #include "UIMapViewGUI.h"
 #include "UITexture.h"
 

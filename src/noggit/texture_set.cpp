@@ -1,4 +1,4 @@
-#include "TextureSet.h"
+#include "texture_set.hpp"
 
 #include "Brush.h"
 #include "Environment.h"

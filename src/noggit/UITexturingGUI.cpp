@@ -11,7 +11,7 @@
 #include "MapChunk.h"
 #include "Misc.h"
 #include "MPQ.h"
-#include "Noggit.h" // app.getArial14(), app.getapp.getArialn13()()
+#include "application.h" // app.getArial14(), app.getapp.getArialn13()()
 #include "TextureManager.h" // TextureManager, Texture
 #include "UIButton.h" // UIButton
 #include "UICheckBox.h" // UICheckBox

@@ -6,7 +6,7 @@
 #include "Environment.h"
 #include "Misc.h"
 #include "ModelInstance.h"
-#include "Noggit.h" // fonts
+#include "application.h" // fonts
 #include "Selection.h"
 #include "UIRotationEditor.h"
 #include "UITextBox.h"

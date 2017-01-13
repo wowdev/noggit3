@@ -9,7 +9,7 @@
 #include "Environment.h"
 #include "MapChunk.h"
 #include "MapView.h"
-#include "Noggit.h" // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
+#include "application.h" // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
 #include "Project.h"
 #include "UIAppInfo.h" // UIAppInfo
 #include "UICursorSwitcher.h" // UICursorSwitcher
@@ -29,8 +29,8 @@
 #include "Video.h" // video
 #include "WMOInstance.h"
 #include "World.h"
-#include "TextureSet.h"
-#include "MapIndex.h"
+#include "texture_set.hpp"
+#include "map_index.hpp"
 #include "Misc.h"
 #include "UIWaterTypeBrowser.h"
 

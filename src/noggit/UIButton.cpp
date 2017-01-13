@@ -3,7 +3,7 @@
 #include <string>
 
 #include "FreeType.h"
-#include "Noggit.h" // app.getArial12()
+#include "application.h" // app.getArial12()
 #include "TextureManager.h" // TextureManager
 #include "UIText.h"
 #include "Video.h" // Texture

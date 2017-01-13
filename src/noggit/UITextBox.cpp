@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include "Noggit.h" // arial12
+#include "application.h" // arial12
 #include "TextureManager.h" // TextureManager, Texture
 #include "UIText.h"
 #include "UITexture.h"

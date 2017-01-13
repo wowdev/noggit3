@@ -4,7 +4,7 @@
 
 #include "Model.h" // Model
 #include "ModelManager.h" // ModelManager
-#include "Noggit.h" // app.getArial14()
+#include "application.h" // app.getArial14()
 #include "UIMapViewGUI.h" // UIMapViewGUI
 #include "UIModel.h" // UIModel
 #include "UIText.h" // UIText

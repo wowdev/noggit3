@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "Environment.h"
-#include "TileWater.h"
+#include "TileWater.hpp"
 #include "Log.h"
 #include "MapChunk.h"
 #include "Misc.h"
@@ -17,9 +17,9 @@
 #include "ModelManager.h" // ModelManager
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
-#include "Alphamap.h"
-#include "TextureSet.h"
-#include "MapIndex.h"
+#include "alphamap.hpp"
+#include "texture_set.hpp"
+#include "map_index.hpp"
 #include "Settings.h"
 #include <opengl/scoped.hpp>
 

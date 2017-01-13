@@ -4,10 +4,10 @@
 
 #include "Video.h"
 #include "World.h"
-#include "MapIndex.h"
+#include "map_index.hpp"
 #include "MapTile.h"
 #include "MapChunk.h"
-#include "TextureSet.h"
+#include "texture_set.hpp"
 
 UIAlphamap::UIAlphamap(float xPos, float yPos)
 	: UICloseWindow(xPos, yPos, 600, 600, "Alphamap", true)

@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "Directory.h"
-#include "Noggit.h" // app.getArial12()
+#include "application.h" // app.getArial12()
 #include "UIText.h"
 #include "Video.h"
 #include <opengl/scoped.hpp>

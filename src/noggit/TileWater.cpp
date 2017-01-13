@@ -1,8 +1,8 @@
-#include "TileWater.h"
+#include "TileWater.hpp"
 
 #include "Log.h"
 #include "Misc.h"
-#include "ChunkWater.h"
+#include "ChunkWater.hpp"
 
 TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase)
 	: tile(pTile)

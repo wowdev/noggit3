@@ -2,7 +2,7 @@
 #define __UI_WATER_H
 
 #include "UICloseWindow.h"
-#include "MapIndex.h"
+#include "map_index.hpp"
 
 class UISlider;
 class UIText;

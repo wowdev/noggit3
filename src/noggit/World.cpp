@@ -18,7 +18,7 @@
 #include "Frustum.h"
 #include "Log.h"
 #include "MapChunk.h"
-#include "TextureSet.h"
+#include "texture_set.hpp"
 #include "MapTile.h"
 #include "Misc.h"
 #include "ModelManager.h" // ModelManager
@@ -31,8 +31,8 @@
 #include "MapTile.h"
 #include "Brush.h" // brush
 #include "ConfigFile.h"
-#include "MapIndex.h"
-#include "TileWater.h"// tile water
+#include "map_index.hpp"
+#include "TileWater.hpp"// tile water
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 
