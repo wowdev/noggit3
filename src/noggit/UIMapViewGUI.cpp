@@ -200,7 +200,7 @@ void UIMapViewGUI::render() const
 		timestrs << "Time: " << (time / 120) << ":" << (time % 120) << ", FPS: " << (int)app.FPS;
 		app.getArial16().shprint(video.xres() - 200.0f, 5.0f, timestrs.str());
 	}
-		
+
 	if (gWorld->loading)
 	{
 		std::string toDisplay(gWorld->mapIndex->hasAdt() ? "No ADT at this Point" : "Loading...");

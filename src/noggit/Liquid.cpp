@@ -399,7 +399,7 @@ void Liquid::draw()
 
 		//glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); //! \todo  check if ARB_texture_env_add is supported? :(
 	}
-#else 
+#else
 	col = gWorld->skies->colorSet[WATER_COLOR_LIGHT] * 0.7f; //! \todo  add variable water color
 	col2 = gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.2f;
 
@@ -443,6 +443,3 @@ void Liquid::initTextures(const std::string& pFilename)
 		textures.push_back(TextureManager::newTexture(filename));
 	}
 }
-
-
-

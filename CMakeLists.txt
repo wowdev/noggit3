@@ -76,14 +76,14 @@ macro(includePlattform SUFFIX)
       set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Glew/include/")
       #storm lib
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/DebugAD/" "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/ReleaseAD/" "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/Release/")
-      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/include/")	
+      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/include/")
       #SDL
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/SDL/lib/x86/")
       set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/SDL/include/")
         #boost
       SET(IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/libs/")
-      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")		  
+      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
 	  endif(WIN32)
   endif(UNIX)
 endmacro(includePlattform)

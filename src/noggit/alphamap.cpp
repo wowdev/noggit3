@@ -143,5 +143,3 @@ const unsigned char *Alphamap::getAlpha()
 {
   return amap;
 }
-
-

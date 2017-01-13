@@ -265,7 +265,7 @@ void MapIndex::setChanged(const tile_index& tile, bool setAdjacentTiles)
   {
     return;
   }
-  
+
   for (int pz = std::max(tile.z - 1, 0); pz < std::min(tile.z + 2, 64); ++pz)
   {
     for (int px = std::max(tile.x - 1, 0); px < std::min(tile.x + 2, 64); ++px)
@@ -275,7 +275,7 @@ void MapIndex::setChanged(const tile_index& tile, bool setAdjacentTiles)
       if (!hasTile(index))
       {
         continue;
-      }				
+      }
 
       mTile = loadTile(index);
 
@@ -304,10 +304,10 @@ void MapIndex::unsetChanged(const tile_index& tile)
 
 int MapIndex::getChanged(const tile_index& tile)
 {
-	// Changed 2 are adts around the changed one that have 1 in changed. 
-  // You must save them also IF you do any UID recalculation on changed 1 adts. 
-  // Because the new UIDs MUST also get saved in surrounding adts to ahve no model duplucation. 
-  // So to avoid unnneeded save you can also skip changed 2 adts IF no models get added or moved around. 
+	// Changed 2 are adts around the changed one that have 1 in changed.
+  // You must save them also IF you do any UID recalculation on changed 1 adts.
+  // Because the new UIDs MUST also get saved in surrounding adts to ahve no model duplucation.
+  // So to avoid unnneeded save you can also skip changed 2 adts IF no models get added or moved around.
   // This would be stepp to IF uid workes. Steff
 	if (mTiles[tile.z][tile.x].tile) // why do we need to save tile with changed=2? What "2" means? its adts which have models with new adts, and who ever added this here broke everything, thanks
 		return mTiles[tile.z][tile.x].tile->changed;
@@ -318,7 +318,7 @@ int MapIndex::getChanged(const tile_index& tile)
 void MapIndex::setFlag(bool to, float x, float z)
 {
   tile_index tile(math::vector_3d(x, 0.0f, z));
-  
+
   if (tileLoaded(tile))
   {
     setChanged(tile);
@@ -367,7 +367,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
 	}
 
   mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha, &highestGUID);
-  
+
   return mTiles[tile.z][tile.x].tile;
 }
 
@@ -402,7 +402,7 @@ void MapIndex::unloadTiles(const tile_index& tile)
           //Only unload adts not marked to save
           if (getChanged(id) == 0)
           {
-            unloadTile(id); 
+            unloadTile(id);
           }
 				}
 			}
@@ -526,7 +526,7 @@ uint32_t MapIndex::getFlag(const tile_index& tile) const
 	return mTiles[tile.z][tile.x].flags;
 }
 
-void MapIndex::setBigAlpha() 
+void MapIndex::setBigAlpha()
 {
   mBigAlpha = true;
   mphd.flags |= 4;

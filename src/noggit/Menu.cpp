@@ -323,7 +323,7 @@ void Menu::buildMenuBar()
 
     nMapByType[i] = 0;
   }
-		
+
 
 	for (std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it)
 	{

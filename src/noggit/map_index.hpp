@@ -36,7 +36,7 @@ struct tile_index
 {
   tile_index(const math::vector_3d& pos) : tile_index(pos.x / TILESIZE, pos.z / TILESIZE) { }
   tile_index(std::size_t tileX, std::size_t tileZ) : x(tileX), z(tileZ)
-  {  
+  {
     assert(x < 64);
     assert(z < 64);
   }

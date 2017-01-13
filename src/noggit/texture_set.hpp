@@ -55,7 +55,7 @@ public:
 
   void convertToBigAlpha();
   void convertToOldAlpha();
-  
+
   void mergeAlpha(size_t id1, size_t id2);
   bool removeDuplicate();
 

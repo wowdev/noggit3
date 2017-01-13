@@ -222,7 +222,7 @@ MPQFile::MPQFile(const std::string& pFilename, const std::string& alternateSaveP
 	LogDebug << "WEITER!!! " << std::endl;
 
 	fname = getAlternateDiskPath(pFilename, alternateSavePath);
-	
+
 
 	std::ifstream input(fname.c_str(), std::ios_base::binary | std::ios_base::in);
 	if (input.is_open())
@@ -489,5 +489,3 @@ void MPQFile::SaveFile()
 		//save(lFilename.c_str());
 	}
 }
-
-

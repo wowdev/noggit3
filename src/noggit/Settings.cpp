@@ -51,4 +51,3 @@ Settings* Settings::getInstance()
 		instance = new Settings();
 	return instance;
 }
-
