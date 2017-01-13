@@ -1,4 +1,4 @@
-#include "MapIndex.h"
+#include "map_index.hpp"
 
 #include "MPQ.h"
 #include "MapTile.h"

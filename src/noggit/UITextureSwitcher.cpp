@@ -1,16 +1,16 @@
 #include "UITextureSwitcher.h"
 
-#include "Noggit.h" // app.getArial16()
+#include "application.h" // app.getArial16()
 #include "World.h"
 
 #include "UITexture.h"
 #include "UITexturingGUI.h"
 #include "UIButton.h"
 #include "UIText.h"
-#include "MapIndex.h"
+#include "map_index.hpp"
 #include "MapView.h"
 #include "Misc.h"
-#include "TextureSet.h"
+#include "texture_set.hpp"
 
 extern UIWindow *settings_paint;
 extern UIWindow *settings_paint;

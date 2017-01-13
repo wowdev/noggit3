@@ -25,7 +25,7 @@
 #include "MapView.h"
 #include "Misc.h"
 #include "ModelManager.h" // ModelManager
-#include "Noggit.h" // app.getStates(), gPop, gFPS, app.getArial14(), morpheus40, arial...
+#include "application.h" // app.getStates(), gPop, gFPS, app.getArial14(), morpheus40, arial...
 #include "Project.h"
 #include "Settings.h"
 #include "Environment.h"
@@ -60,7 +60,7 @@
 #include "UIZoneIDBrowser.h"
 #include "WMOInstance.h" // WMOInstance
 #include "World.h"
-#include "MapIndex.h"
+#include "map_index.hpp"
 #include <opengl/scoped.hpp>
 #include <opengl/matrix.hpp>
 

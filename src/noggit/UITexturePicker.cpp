@@ -1,7 +1,7 @@
 #include "UITexturePicker.h"
 
 #include "Selection.h"
-#include "TextureSet.h"
+#include "texture_set.hpp"
 #include "UITexture.h"
 #include "UITexturingGUI.h"
 #include "UIButton.h"

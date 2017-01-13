@@ -7,8 +7,8 @@
 #include "Video.h"
 #include "World.h"
 #include "UIText.h"
-#include "Noggit.h"
-#include "MapIndex.h"
+#include "application.h"
+#include "map_index.hpp"
 #include <opengl/scoped.hpp>
 
 #include <sstream>

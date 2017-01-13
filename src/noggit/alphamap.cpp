@@ -1,4 +1,4 @@
-#include "Alphamap.h"
+#include "alphamap.hpp"
 
 #include <opengl/context.hpp>
 

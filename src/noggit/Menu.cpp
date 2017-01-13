@@ -16,7 +16,7 @@
 #include "Misc.h"
 #include "ModelManager.h" // ModelManager
 #include "MPQ.h"
-#include "Noggit.h" // fonts, APP_*
+#include "application.h" // fonts, APP_*
 #include "TextureManager.h" // TextureManager, Texture
 #include "UIAbout.h" // UIAbout
 #include "UIFrame.h" // UIFrame
@@ -26,7 +26,7 @@
 #include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
 #include "World.h"
 #include "Settings.h"
-#include "MapIndex.h"
+#include "map_index.hpp"
 
 Menu* theMenu = NULL;
 

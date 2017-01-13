@@ -17,7 +17,7 @@
 #include "Log.h"
 #include "Project.h"
 #include "AsyncLoader.h" // AsyncLoader
-#include "Noggit.h" // app.loader()
+#include "application.h" // app.loader()
 
 typedef std::pair<std::string, MPQArchive*> ArchiveEntry;
 typedef std::list<ArchiveEntry> ArchivesMap;

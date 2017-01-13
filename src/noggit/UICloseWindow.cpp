@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Noggit.h" // arial16
+#include "application.h" // arial16
 #include "UIMinimizeButton.h"
 #include "UIText.h"
 

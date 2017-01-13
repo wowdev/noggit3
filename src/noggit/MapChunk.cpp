@@ -10,11 +10,11 @@
 #include "MapHeaders.h"
 #include "Misc.h"
 #include "math/quaternion.hpp"
-#include "TextureSet.h"
+#include "texture_set.hpp"
 #include "UITexturingGUI.h"
 #include "math/vector_3d.hpp"
 #include "World.h"
-#include "Alphamap.h"
+#include "alphamap.hpp"
 #include <opengl/scoped.hpp>
 
 extern int terrainMode;

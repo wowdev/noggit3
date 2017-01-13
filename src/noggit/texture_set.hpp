@@ -2,7 +2,7 @@
 #define TEXTURESET_H
 
 #include "MPQ.h"
-#include "Alphamap.h"
+#include "alphamap.hpp"
 #include <stdint.h>
 
 namespace OpenGL

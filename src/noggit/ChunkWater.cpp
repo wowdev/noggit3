@@ -1,4 +1,4 @@
-#include "ChunkWater.h"
+#include "ChunkWater.hpp"
 
 #include "Environment.h"
 #include "MPQ.h"

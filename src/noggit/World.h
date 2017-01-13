@@ -5,7 +5,7 @@
 #include <string>
 
 #include "Frustum.h" // Frustum
-#include "MapIndex.h"
+#include "map_index.hpp"
 #include "Model.h" // ModelManager
 #include "Selection.h"
 #include "Sky.h" // Skies, OutdoorLighting, OutdoorLightStats

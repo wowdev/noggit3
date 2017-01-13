@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Noggit.h" // app.getArial14()
+#include "application.h" // app.getArial14()
 #include "UIMapViewGUI.h"
 #include "UIMinimizeButton.h"
 #include "UIText.h"

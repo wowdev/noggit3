@@ -1,7 +1,7 @@
 #include "UIHelp.h"
 
 #include "UIText.h" // UIText
-#include "Noggit.h" // app.getArial14()
+#include "application.h" // app.getArial14()
 #include "Video.h" // video
 
 const int winWidth = 810;
