@@ -89,7 +89,7 @@ macro(includePlattform SUFFIX)
 endmacro(includePlattform)
 
 #find all src files
-file(GLOB SourceFiles "src/*/*.h" "src/*/*.cpp")
+file(GLOB SourceFiles "src/*/*.h" "src/*/*.hpp" "src/*/*.cpp")
 
 includePlattform("prefind")
 
