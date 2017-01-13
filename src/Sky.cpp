@@ -31,9 +31,9 @@ Sky::Sky(DBCFile::Iterator data)
 
 	global = (pos.x == 0.0f && pos.y == 0.0f && pos.z == 0.0f);
 
-	int FirstId = data->getInt(LightDB::DataIDs) * 18 - 17; // cromons light fix ;) Thanks
+	int FirstId = data->getInt(LightDB::DataIDs) * NUM_SkyColorNames - 17; // cromons light fix ;) Thanks
 
-	for (int i = 0; i < 18; ++i)
+	for (int i = 0; i < NUM_SkyColorNames; ++i)
 	{
 		try
 		{
@@ -251,13 +251,13 @@ void Skies::initSky(Vec3D pos, int t)
 
 	findSkyWeights(pos);
 
-	for (int i = 0; i<18; ++i) colorSet[i] = Vec3D(1, 1, 1);
+	for (int i = 0; i<NUM_SkyColorNames; ++i) colorSet[i] = Vec3D(1, 1, 1);
 
 	// interpolation
 	for (size_t j = 0; j<skies.size(); j++) {
 		if (skies[j].weight>0) {
 			// now calculate the color rows
-			for (int i = 0; i<18; ++i) {
+			for (int i = 0; i<NUM_SkyColorNames; ++i) {
 				if ((skies[j].colorFor(i, t).x>1.0f) || (skies[j].colorFor(i, t).y>1.0f) || (skies[j].colorFor(i, t).z>1.0f))
 				{
 					LogDebug << "Sky " << j << " " << i << " is out of bounds!" << std::endl;
@@ -267,7 +267,7 @@ void Skies::initSky(Vec3D pos, int t)
 			}
 		}
 	}
-	for (int i = 0; i<18; ++i)
+	for (int i = 0; i<NUM_SkyColorNames; ++i)
 	{
 		colorSet[i] -= Vec3D(1, 1, 1);
 	}
