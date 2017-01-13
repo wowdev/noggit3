@@ -80,7 +80,7 @@ namespace freetype
 		gl.texImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data);
 
 		delete[] expanded_data;
-		expanded_data = NULL;
+		expanded_data = nullptr;
 
 		glyphData._callList = new opengl::call_list();
 		glyphData._callList->start_recording();

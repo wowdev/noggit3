@@ -16,13 +16,13 @@ protected:
 	OpenGL::Texture* sliderTexture;
 	float scale;
 	float offset;
-	boost::function<void(float)> func;
+	std::function<void(float)> func;
 	std::string text;
 
 public:
 	float value;
 	void setFunc(void(*f)(float value));
-	void setFunc(boost::function<void(float value)> pFunc);
+	void setFunc(std::function<void(float value)> pFunc);
 	void setValue(float f);
 	void setText(const std::string& text);
 	UISlider(float x, float y, float width, float s, float o);

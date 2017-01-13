@@ -51,5 +51,5 @@ public:
 	explicit UIEventSender(UIEventClassConstructorArguments) : eventHandler(_eventHandler), listener(_listener) {
 		assert(eventHandler && listener);
 	}
-	//UIEventSender() : eventHandler(NULL), listener(NULL) { }
+	//UIEventSender() : eventHandler(nullptr), listener(nullptr) { }
 };

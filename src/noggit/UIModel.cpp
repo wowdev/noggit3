@@ -24,7 +24,7 @@ UIModel::UIModel(float xPos, float yPos, float w, float h)
 	gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, (GLsizei)width(), (GLsizei)height(), 0, GL_RGBA, GL_FLOAT, NULL);
+	gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, (GLsizei)width(), (GLsizei)height(), 0, GL_RGBA, GL_FLOAT, nullptr);
 
 	gl.bindFramebuffer(GL_FRAMEBUFFER, fbo);
 	gl.framebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, modelTexture, 0);

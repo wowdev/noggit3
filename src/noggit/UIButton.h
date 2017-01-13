@@ -24,7 +24,7 @@ protected:
 	std::string _textureDownFilename;
 
 
-	boost::function<void(UIFrame::Ptr, int)> clickFunc;
+	std::function<void(UIFrame::Ptr, int)> clickFunc;
 	int id;
 
 	bool clicked;
@@ -35,7 +35,7 @@ public:
 	explicit UIButton(float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown);
 	explicit UIButton(float x, float y, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown);
 	explicit UIButton(float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, ClickFunction pFunc, int pFuncParam);
-	explicit UIButton(float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, boost::function<void(UIFrame::Ptr, int)> pFunc, int pFuncParam);
+	explicit UIButton(float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, std::function<void(UIFrame::Ptr, int)> pFunc, int pFuncParam);
 	~UIButton();
 
 	void render() const;

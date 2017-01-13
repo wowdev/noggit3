@@ -101,7 +101,7 @@ UIFrame::Ptr UIGradient::processLeftClick(float mx, float my)
 		return this;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 bool UIGradient::processLeftDrag(float mx, float my, float xDrag, float yDrag)

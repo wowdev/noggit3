@@ -79,7 +79,7 @@ MapIndex::MapIndex(const std::string &pBasename)
 			std::stringstream filename;
 			filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
 
-			mTiles[j][i].tile = NULL;
+			mTiles[j][i].tile = nullptr;
 			mTiles[j][i].onDisc = MPQFile::existsOnDisk(filename.str());
 
 			if (mTiles[j][i].onDisc && !(mTiles[j][i].flags & 1))

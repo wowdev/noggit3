@@ -30,7 +30,7 @@
 #include "Settings.h"
 #include "map_index.hpp"
 
-Menu* theMenu = NULL;
+Menu* theMenu = nullptr;
 
 void showMap(UIFrame *, int mapID)
 {
@@ -49,15 +49,15 @@ void showBookmark(UIFrame *, int bookmarkID)
 }
 
 Menu::Menu()
-	: mGUIFrame(NULL)
-	, mGUIStatusbar(NULL)
-	, mGUICreditsWindow(NULL)
-	, mGUIMinimapWindow(NULL)
-	, mGUImenuBar(NULL)
+	: mGUIFrame(nullptr)
+	, mGUIStatusbar(nullptr)
+	, mGUICreditsWindow(nullptr)
+	, mGUIMinimapWindow(nullptr)
+	, mGUImenuBar(nullptr)
 	, mBackgroundModel(boost::none)
 	, mLastBackgroundId(-1)
 {
-	gWorld = NULL;
+	gWorld = nullptr;
 	theMenu = this;
 
 	mGUIFrame = new UIFrame(0.0f, 0.0f, (float)video.xres(), (float)video.yres());
@@ -93,10 +93,10 @@ std::string buildModelPath(size_t index)
 Menu::~Menu()
 {
 	delete mGUIFrame;
-	mGUIFrame = NULL;
+	mGUIFrame = nullptr;
 
 	delete gWorld;
-	gWorld = NULL;
+	gWorld = nullptr;
 }
 
 void Menu::randBackground()
@@ -206,7 +206,7 @@ void Menu::keypressed(SDL_KeyboardEvent* e)
 			mGUIMinimapWindow->hide();
 			mGUICreditsWindow->show();
 			delete gWorld;
-			gWorld = NULL;
+			gWorld = nullptr;
 		}
 		else
 		{
@@ -215,7 +215,7 @@ void Menu::keypressed(SDL_KeyboardEvent* e)
 	}
 }
 
-UIFrame::Ptr LastClickedMenu = NULL;
+UIFrame::Ptr LastClickedMenu = nullptr;
 
 void Menu::mouseclick(SDL_MouseButtonEvent* e)
 {
@@ -237,7 +237,7 @@ void Menu::mouseclick(SDL_MouseButtonEvent* e)
 			LastClickedMenu->processUnclick();
 		}
 
-		LastClickedMenu = NULL;
+		LastClickedMenu = nullptr;
 	}
 }
 
@@ -259,7 +259,7 @@ void Menu::resizewindow()
 void Menu::loadMap(int mapID)
 {
 	delete gWorld;
-	gWorld = NULL;
+	gWorld = nullptr;
 
 	for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
 	{
@@ -288,7 +288,7 @@ void Menu::buildMenuBar()
 	{
 		mGUIFrame->removeChild(mGUImenuBar);
 		delete mGUImenuBar;
-		mGUImenuBar = NULL;
+		mGUImenuBar = nullptr;
 	}
 
 	mGUImenuBar = new UIMenuBar();

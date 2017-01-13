@@ -36,7 +36,7 @@ namespace freetype
 		unsigned int h;
 
 		font_data()
-			: _mpqFile(NULL)
+			: _mpqFile(nullptr)
 		{
 		}
 		~font_data();

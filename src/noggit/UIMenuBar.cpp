@@ -93,7 +93,7 @@ UIFrame::Ptr UIMenuBar::processLeftClick(float mx, float my)
 	}
 
 	CloseAll();
-	return NULL;
+	return nullptr;
 }
 
 MenuButton::MenuButton(MenuPane::Ptr pPane, float pX, float pY, const std::string& pText)
@@ -242,7 +242,7 @@ MenuItemSeperator::MenuItemSeperator(MenuPane::Ptr pParent, float pX, float pY, 
 
 UIFrame::Ptr MenuItemSeperator::processLeftClick(float /*pX*/, float /*pY*/)
 {
-	return NULL;
+	return nullptr;
 }
 
 MenuPane::MenuPane(float pX, float pY)

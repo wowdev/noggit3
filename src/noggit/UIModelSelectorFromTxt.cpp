@@ -21,9 +21,9 @@
 
 UIModelSelectorFromTxt::UIModelSelectorFromTxt(float xPos, float yPos, float w, float h, UIMapViewGUI *setGui)
 	: UICloseWindow(xPos, yPos, w, h, "", true)
-	, changeFunc(NULL)
+	, changeFunc(nullptr)
 	, mainGui(setGui)
-	, ZoneIdList(NULL)
+	, ZoneIdList(nullptr)
 	, mapID(-1)
 	, zoneID(-1)
 	, subZoneID(-1)
@@ -31,7 +31,7 @@ UIModelSelectorFromTxt::UIModelSelectorFromTxt(float xPos, float yPos, float w, 
 	, MapName("")
 	, ZoneName("")
 	, SubZoneName("")
-	, backZone(new UIButton(387.5f, 4.0f, 24.0f, 24.0f, "", "Interface\\BUTTONS\\UI-RotationLeft-Button-Up.blp", "Interface\\BUTTONS\\UI-RotationLeft-Button-Down.blp", NULL, 0))
+	, backZone(new UIButton(387.5f, 4.0f, 24.0f, 24.0f, "", "Interface\\BUTTONS\\UI-RotationLeft-Button-Up.blp", "Interface\\BUTTONS\\UI-RotationLeft-Button-Down.blp", nullptr, 0))
 	, ZoneIDPath(new UIText(10.0f, 6.0f, "", app.getArial12(), eJustifyLeft))
 {
 	addChild(ZoneIDPath);
@@ -57,7 +57,7 @@ void UIModelSelectorFromTxt::buildModelList()
 					UIFrame *curFrame = new UIFrame(1, 1, 1, 1);
 					std::stringstream ss;
 					ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
-					UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", NULL, i->getInt(AreaDB::AreaID));
+					UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", nullptr, i->getInt(AreaDB::AreaID));
 					tempButton->setLeft();
 					curFrame->addChild(tempButton);
 					ZoneIdList->addElement(curFrame);
@@ -70,7 +70,7 @@ void UIModelSelectorFromTxt::buildModelList()
 					UIFrame *curFrame = new UIFrame(1, 1, 1, 1);
 					std::stringstream ss;
 					ss << i->getInt(AreaDB::AreaID) << "-" << gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
-					UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", NULL, i->getInt(AreaDB::AreaID));
+					UIButton *tempButton = new UIButton(0.0f, 0.0f, 400.0f, 28.0f, ss.str(), "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp", nullptr, i->getInt(AreaDB::AreaID));
 					tempButton->setLeft();
 					curFrame->addChild(tempButton);
 					ZoneIdList->addElement(curFrame);

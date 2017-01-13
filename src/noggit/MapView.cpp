@@ -503,8 +503,8 @@ void openHelp(UIFrame*, int)
 void openURL(UIFrame*, int target)
 {
 #if defined(_WIN32) || defined(WIN32)
-  if (target == 1)  ShellExecute(NULL, "open", "http://modcraft.superparanoid.de", NULL, NULL, SW_SHOWNORMAL);
-  if (target == 2)  ShellExecute(NULL, "open", "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual", NULL, NULL, SW_SHOWNORMAL);
+  if (target == 1)  ShellExecute(nullptr, "open", "http://modcraft.superparanoid.de", nullptr, nullptr, SW_SHOWNORMAL);
+  if (target == 2)  ShellExecute(nullptr, "open", "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual", nullptr, nullptr, SW_SHOWNORMAL);
 #endif
 }
 
@@ -927,7 +927,7 @@ void exportPNG(UIFrame *f, int set)
   ILuint ImageName; // The image name.
   ilGenImages(1, &ImageName); // Grab a new image name.
   ilBindImage(ImageName); // bind it
-  ilTexImage(width, height, 1, bytesToUsePerPixel, GL_LUMINANCE, IL_UNSIGNED_BYTE, NULL);
+  ilTexImage(width, height, 1, bytesToUsePerPixel, GL_LUMINANCE, IL_UNSIGNED_BYTE, nullptr);
   ilSetData(imData);
   ilEnable(IL_FILE_OVERWRITE);
   //ilSave(IL_PNG, getCurrentHeightmapPath().c_str());
@@ -1349,7 +1349,7 @@ MapView::MapView(float ah0, float av0)
   , _GUIDisplayingEnabled(true)
   , mTimespeed(0.0f)
 {
-  LastClicked = NULL;
+  LastClicked = nullptr;
 
   moving = strafing = updown = lookat = turn = 0.0f;
 
@@ -1391,9 +1391,9 @@ MapView::MapView(float ah0, float av0)
 MapView::~MapView()
 {
   delete mainGui;
-  mainGui = NULL;
+  mainGui = nullptr;
   delete gWorld;
-  gWorld = NULL;
+  gWorld = nullptr;
 }
 
 void MapView::tick(float t, float dt)
@@ -1617,7 +1617,7 @@ void MapView::tick(float t, float dt)
       // rotating objects
       if (look && canMoveObj)
       {
-        float * lTarget = NULL;
+        float * lTarget = nullptr;
         bool lModify = false;
 
         if (Selection->which() == eEntry_Model)

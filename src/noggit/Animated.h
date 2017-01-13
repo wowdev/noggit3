@@ -176,7 +176,7 @@ namespace Animation
 		}
 
 		//! \todo Use a vector of MPQFile& for the anim files instead for safety.
-		void init(const AnimationBlock& animationBlock, const MPQFile& file, int32_t* globalSequences, MPQFile** animfiles = NULL)
+		void init(const AnimationBlock& animationBlock, const MPQFile& file, int32_t* globalSequences, MPQFile** animfiles = nullptr)
 		{
 			assert(animationBlock.nTimes == animationBlock.nKeys);
 
@@ -186,7 +186,7 @@ namespace Animation
 			_globalSequenceID = animationBlock.seq;
 			if (_globalSequenceID != NO_GLOBAL_SEQUENCE)
 			{
-				assert(_globalSequences && "Animation said to have global sequence, but pointer to global sequence data is NULL");
+				assert(_globalSequences && "Animation said to have global sequence, but pointer to global sequence data is nullptr");
 			}
 
 			const AnimationBlockHeader* timestampHeaders = file.get<AnimationBlockHeader>(animationBlock.ofsTimes);

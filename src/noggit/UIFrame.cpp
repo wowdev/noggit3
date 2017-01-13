@@ -62,7 +62,7 @@ UIFrame::Ptr UIFrame::processLeftClick(float mx, float my)
 				return lTemp;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool UIFrame::processLeftDrag(float /*mx*/, float /*my*/, float xDrag, float yDrag)

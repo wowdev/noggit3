@@ -131,13 +131,13 @@ void Noggit::initEnv()
 	SDL_GetWMInfo(&SysInfo);
 	WindowHandle = SysInfo.window;
 	hInst = (HINSTANCE)GetWindowLong(WindowHandle, GWL_HINSTANCE);
-	hCtx = NULL;
+	hCtx = nullptr;
 	tabletActive = FALSE;
 
 	if (LoadWintab())
 	{
 		/* check if WinTab available. */
-		if (gpWTInfoA(0, 0, NULL))
+		if (gpWTInfoA(0, 0, nullptr))
 		{
 			hCtx = TabletInit(WindowHandle);
 			gpWTEnable(hCtx, TRUE);
@@ -390,7 +390,7 @@ void Noggit::mainLoop()
 	uint32_t timeA, timeB, diff;
 	bool done(false);
 	Uint32 ticks(SDL_GetTicks());
-	AppState* activeAppState(NULL);
+	AppState* activeAppState(nullptr);
 	Uint32 time(0);
 
 	SDL_EnableUNICODE(true);
@@ -465,7 +465,7 @@ void Noggit::mainLoop()
 			pop = false;
 			states.pop_back();
 			delete activeAppState;
-			activeAppState = NULL;
+			activeAppState = nullptr;
 		}
 #ifdef _WIN32
 		if (tabletActive)
@@ -493,7 +493,7 @@ int Noggit::start(int argc, char *argv[])
 
 	initEnv();
 	parseArgs(argc, argv);
-	srand((unsigned int)time(NULL));
+	srand((unsigned int)time(nullptr));
 	wowpath = getGamePath();
 
 	if (wowpath == "")
@@ -591,7 +591,7 @@ gFileList->AddFile( *it );
 #ifdef _WIN32
 HCTX static NEAR TabletInit(HWND hWnd)
 {
-	HCTX hctx = NULL;
+	HCTX hctx = nullptr;
 	UINT wDevice = 0;
 	UINT wExtX = 0;
 	UINT wExtY = 0;

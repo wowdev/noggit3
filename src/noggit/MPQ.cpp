@@ -37,7 +37,7 @@ void MPQArchive::loadMPQ(const std::string& filename, bool doListfile)
 }
 
 MPQArchive::MPQArchive(const std::string& filename, bool doListfile)
-	: _archiveHandle(NULL)
+	: _archiveHandle(nullptr)
 {
 	if (!SFileOpenArchive(filename.c_str(), 0, MPQ_OPEN_NO_LISTFILE | STREAM_FLAG_READ_ONLY, &_archiveHandle))
 	{
@@ -64,10 +64,10 @@ void MPQArchive::finishLoading()
 
 	if (SFileOpenFileEx(_archiveHandle, "(listfile)", 0, &fh))
 	{
-		size_t filesize = SFileGetFileSize(fh, NULL); //last NULL for newer version of StormLib
+		size_t filesize = SFileGetFileSize(fh, nullptr); //last nullptr for newer version of StormLib
 
         char* readbuffer = new char[filesize];
-		SFileReadFile(fh, readbuffer, filesize, NULL, NULL); //last NULLs for newer version of StormLib
+		SFileReadFile(fh, readbuffer, filesize, nullptr, nullptr); //last nullptrs for newer version of StormLib
 		SFileCloseFile(fh);
 
         std::string list(readbuffer);
@@ -150,7 +150,7 @@ bool MPQArchive::openFile(const std::string& filename, HANDLE* fileHandle) const
 */
 MPQFile::MPQFile(const std::string& pFilename)
 	: eof(true)
-	, buffer(NULL)
+	, buffer(nullptr)
 	, pointer(0)
 	, size(0)
 	, External(false)
@@ -190,11 +190,11 @@ MPQFile::MPQFile(const std::string& pFilename)
 		if (!i->second->openFile(filename, &fileHandle))
 			continue;
 
-		size = SFileGetFileSize(fileHandle, NULL); //last NULL for newer version of StormLib
+		size = SFileGetFileSize(fileHandle, nullptr); //last nullptr for newer version of StormLib
 
 		eof = false;
 		buffer = new char[size];
-		SFileReadFile(fileHandle, buffer, size, NULL, NULL); //last NULLs for newer version of StormLib
+		SFileReadFile(fileHandle, buffer, size, nullptr, nullptr); //last nullptrs for newer version of StormLib
 		SFileCloseFile(fileHandle);
 
 		return;
@@ -205,7 +205,7 @@ MPQFile::MPQFile(const std::string& pFilename)
 */
 MPQFile::MPQFile(const std::string& pFilename, const std::string& alternateSavePath)
 	: eof(true)
-	, buffer(NULL)
+	, buffer(nullptr)
 	, pointer(0)
 	, size(0)
 	, External(false)
@@ -250,11 +250,11 @@ MPQFile::MPQFile(const std::string& pFilename, const std::string& alternateSaveP
 		if (!i->second->openFile(filename, &fileHandle))
 			continue;
 
-		size = SFileGetFileSize(fileHandle, NULL); //last NULL for newer version of StormLib
+		size = SFileGetFileSize(fileHandle, nullptr); //last nullptr for newer version of StormLib
 
 		eof = false;
 		buffer = new char[size];
-		SFileReadFile(fileHandle, buffer, size, NULL, NULL); //last NULLs for newer version of StormLib
+		SFileReadFile(fileHandle, buffer, size, nullptr, nullptr); //last nullptrs for newer version of StormLib
 		SFileCloseFile(fileHandle);
 
 		return;
@@ -351,8 +351,8 @@ void MPQFile::save(const char* filename)  //save to MPQ
 		SFileCreateArchive(newmodmpq.c_str(), MPQ_CREATE_ARCHIVE_V2 | MPQ_CREATE_ATTRIBUTES, 0x40, &mpq_a);
 		//! \note Is locale setting needed? LOCALE_NEUTRAL is windows only.
 		SFileSetFileLocale(mpq_a, 0); // 0 = LOCALE_NEUTRAL.
-		SFileAddFileEx(mpq_a, "shaders\\terrain1.fs", "myworld", MPQ_FILE_COMPRESS, MPQ_COMPRESSION_ZLIB, 0);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld". Last NULLs for newer version of StormLib
-		SFileCompactArchive(mpq_a, nullptr, false); //last NULLs for newer version of StormLib
+		SFileAddFileEx(mpq_a, "shaders\\terrain1.fs", "myworld", MPQ_FILE_COMPRESS, MPQ_COMPRESSION_ZLIB, 0);//I must to add any file with name "myworld" so I decided to add terrain shader as "myworld". Last nullptrs for newer version of StormLib
+		SFileCompactArchive(mpq_a, nullptr, false); //last nullptrs for newer version of StormLib
 		SFileCloseArchive(mpq_a);
 		modmpqpath = newmodmpq;
 	}
@@ -369,12 +369,12 @@ void MPQFile::save(const char* filename)  //save to MPQ
 		nameInMPQ.replace(found, 1, "\\");
 		found = nameInMPQ.find("/");
 	}
-	if (SFileAddFileEx(mpq_a, filename, nameInMPQ.c_str(), MPQ_FILE_COMPRESS | MPQ_FILE_ENCRYPTED | MPQ_FILE_REPLACEEXISTING, MPQ_COMPRESSION_ZLIB, 0)) //last NULL for newer version of StormLib
+	if (SFileAddFileEx(mpq_a, filename, nameInMPQ.c_str(), MPQ_FILE_COMPRESS | MPQ_FILE_ENCRYPTED | MPQ_FILE_REPLACEEXISTING, MPQ_COMPRESSION_ZLIB, 0)) //last nullptr for newer version of StormLib
 	{
 		LogDebug << "Added file " << fname.c_str() << " to archive \n";
 	}
 	else LogDebug << "Error " << GetLastError() << " on adding file to archive! Report this message \n";
-	SFileCompactArchive(mpq_a, nullptr, false);//recompact our archive to avoid fragmentation. Last NULLs for newer version of StormLib
+	SFileCompactArchive(mpq_a, nullptr, false);//recompact our archive to avoid fragmentation. Last nullptrs for newer version of StormLib
 	SFileCloseArchive(mpq_a);
 	new MPQArchive(modmpqpath, true);//now load edited archive to memory again
 }
@@ -417,7 +417,7 @@ void MPQFile::seekRelative(size_t offset)
 void MPQFile::close()
 {
 	delete[] buffer;
-	buffer = NULL;
+	buffer = nullptr;
 
 	eof = true;
 }

@@ -502,7 +502,7 @@ MapChunk::~MapChunk()
   if (strip)
   {
     delete strip;
-    strip = NULL;
+    strip = nullptr;
   }
 }
 

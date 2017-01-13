@@ -21,7 +21,7 @@ UISlider::UISlider(float xPos, float yPos, float w, float s, float o)
 	, sliderTexture(TextureManager::newTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal.blp"))
 	, scale(s)
 	, offset(o)
-	, func(NULL)
+	, func(nullptr)
 	, text("")
 	, value(0.5f)
 {
@@ -39,7 +39,7 @@ void UISlider::setFunc(void(*f)(float val))
 	func = f;
 }
 
-void UISlider::setFunc(boost::function<void(float)> pFunc)
+void UISlider::setFunc(std::function<void(float)> pFunc)
 {
 	func = pFunc;
 }

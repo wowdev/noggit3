@@ -138,7 +138,7 @@ Liquid::Liquid(int x, int y, math::vector_3d base, float ptilesize)
 	, pos(base)
 	, tilesize(ptilesize)
 	, ydir(1.0f)
-	, mDrawList(NULL)
+	, mDrawList(nullptr)
 {}
 
 Liquid::~Liquid()
@@ -146,7 +146,7 @@ Liquid::~Liquid()
 	if (mDrawList)
 	{
 		delete mDrawList;
-		mDrawList = NULL;
+		mDrawList = nullptr;
 	}
 
 	delTextures();
@@ -265,7 +265,7 @@ void Liquid::initGeometry(MPQFile* f)
 	if (lVertices)
 	{
 		delete[] lVertices;
-		lVertices = NULL;
+		lVertices = nullptr;
 	}
 }
 
@@ -274,7 +274,7 @@ void Liquid::initFromMH2O(MH2O_Tile &pTileInfo)
 	if (mDrawList)
 	{
 		delete mDrawList;
-		mDrawList = NULL;
+		mDrawList = nullptr;
 	}
 
 	texRepeats = 4.0f;

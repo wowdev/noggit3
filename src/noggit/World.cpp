@@ -40,7 +40,7 @@
 
 #include <unordered_set>
 
-World *gWorld = NULL;
+World *gWorld = nullptr;
 
 namespace
 {
@@ -255,7 +255,7 @@ World::World(const std::string& name)
   , detailtexcoords(0)
   , alphatexcoords(0)
   , mMapId(0xFFFFFFFF)
-  , ol(NULL)
+  , ol(nullptr)
   , l_const(0.0f)
   , l_linear(0.7f)
   , l_quadratic(0.03f)
@@ -280,12 +280,12 @@ World::World(const std::string& name)
   , minY(0.0f)
   , maxY(0.0f)
   , zoom(0.25f)
-  , skies(NULL)
+  , skies(nullptr)
   , loading(false)
   , outdoorLightStats(OutdoorLightStats())
   , minimap(0)
-  , mapstrip(NULL)
-  , mapstrip2(NULL)
+  , mapstrip(nullptr)
+  , mapstrip2(nullptr)
   , camera(math::vector_3d(0.0f, 0.0f, 0.0f))
   , lookat(math::vector_3d(0.0f, 0.0f, 0.0f))
 {
@@ -306,7 +306,7 @@ World::World(const std::string& name)
   {
     for (size_t i = 0; i < 64; ++i)
     {
-      lowrestiles[j][i] = NULL;
+      lowrestiles[j][i] = nullptr;
     }
   }
 
@@ -661,7 +661,7 @@ World::~World()
       if (lowrestiles[j][i])
       {
         delete lowrestiles[j][i];
-        lowrestiles[j][i] = NULL;
+        lowrestiles[j][i] = nullptr;
       }
     }
   }
@@ -675,37 +675,37 @@ World::~World()
   if (skies)
   {
     delete skies;
-    skies = NULL;
+    skies = nullptr;
   }
 
   if (ol)
   {
     delete ol;
-    ol = NULL;
+    ol = nullptr;
   }
 
   if (mapstrip)
   {
     delete[] mapstrip;
-    mapstrip = NULL;
+    mapstrip = nullptr;
   }
   if (mapstrip2)
   {
     delete[] mapstrip2;
-    mapstrip2 = NULL;
+    mapstrip2 = nullptr;
   }
 
   /*
   if (mCurrentSelection)
   {
   delete mCurrentSelection;
-  mCurrentSelection = NULL;
+  mCurrentSelection = nullptr;
   }
 
   if (mapIndex)
   {
   delete mapIndex;
-  mapIndex = NULL;
+  mapIndex = nullptr;
   }
   */
 

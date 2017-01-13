@@ -21,7 +21,7 @@
 static const float winWidth(1000.0f);
 static const float winHeight(500.0f);
 
-static UIDoodadSpawner* global_doodadSpawner_evil(NULL);
+static UIDoodadSpawner* global_doodadSpawner_evil(nullptr);
 
 void UIDoodadSpawner__TreeSelect(const std::string& value)
 {

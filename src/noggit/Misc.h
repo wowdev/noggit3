@@ -42,7 +42,7 @@ public:
 		mSize = pSize;
 		mData = static_cast<char*>(realloc(mData, mSize));
 		memset(mData, 0, mSize);
-		return(mData != NULL);
+		return(mData != nullptr);
 	}
 
 	bool Extend(int pAddition)
@@ -51,7 +51,7 @@ public:
 		mData = static_cast<char*>(realloc(mData, mSize));
 		if (pAddition > 0)
 			memset(mData + mSize - pAddition, 0, pAddition);
-		return(mData != NULL);
+		return(mData != nullptr);
 	}
 
 	bool Insert(int pPosition, int pAddition)
@@ -105,7 +105,7 @@ public:
 	sExtendableArray()
 	{
 		mSize = 0;
-		mData = NULL;
+		mData = nullptr;
 	}
 
 	sExtendableArray(int pSize, const char *pData)

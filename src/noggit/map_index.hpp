@@ -27,7 +27,7 @@ private:
 	bool onDisc;
 
 
-	MapTileEntry() : flags(0), tile(NULL) {}
+	MapTileEntry() : flags(0), tile(nullptr) {}
 
 	friend class MapIndex;
 };
