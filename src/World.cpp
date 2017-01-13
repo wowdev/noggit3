@@ -1130,7 +1130,8 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
     }
   }
 
-  if (!pOnlyMap)
+  // only check when using the ObjectEditor
+  if (!pOnlyMap && terrainMode != 9)
   {
     if (drawmodels)
     {
