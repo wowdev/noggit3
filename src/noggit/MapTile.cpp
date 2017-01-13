@@ -48,7 +48,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, u
   {
     for (int j = 0; j < 16; j++)
     {
-      mChunks[i][j] = NULL;
+      mChunks[i][j] = nullptr;
     }
   }
 
@@ -313,7 +313,7 @@ MapTile::~MapTile()
       if (mChunks[j][i])
       {
         delete mChunks[j][i];
-        mChunks[j][i] = NULL;
+        mChunks[j][i] = nullptr;
       }
     }
   }
@@ -339,7 +339,7 @@ MapTile::~MapTile()
   if( *it )
   {
   delete *it;
-  *it  = NULL;
+  *it  = nullptr;
   }
   }
 
@@ -516,7 +516,7 @@ MapChunk* MapTile::getChunk(unsigned int x, unsigned int z)
   }
   else
   {
-    return NULL;
+    return nullptr;
   }
 }
 

@@ -53,7 +53,7 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool 
 
 	for (size_t i = 0; i < 3; ++i)
 	{
-		alphamaps[i] = NULL;
+		alphamaps[i] = nullptr;
 	}
 
 	for (unsigned int layer = 0; layer < nLayers; ++layer)

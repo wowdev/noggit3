@@ -83,7 +83,7 @@ public:
 		if (buffer)
 		{
 			delete buffer;
-			buffer = NULL;
+			buffer = nullptr;
 		}
 		buffer = Buf;
 		size = Size;

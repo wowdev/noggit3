@@ -26,8 +26,8 @@ UITextBox::UITextBox(float xPos, float yPos, float w, float h)
 	, _focus(false)
 	, _uiText(new UIText(8.0f, 2.5f, app.getArial16(), eJustifyLeft))
 	, _value("")
-	, _enterFunction(NULL)
-	, _updateFunction(NULL)
+	, _enterFunction(nullptr)
+	, _updateFunction(nullptr)
 {
 }
 
@@ -39,7 +39,7 @@ UITextBox::UITextBox(float xPos, float yPos, float w, float h, TriggerFunction e
 	, _uiText(new UIText(8.0f, 2.5f, app.getArial16(), eJustifyLeft))
 	, _value("")
 	, _enterFunction(enterFunction)
-	, _updateFunction(NULL)
+	, _updateFunction(nullptr)
 {
 }
 
@@ -50,8 +50,8 @@ UITextBox::UITextBox(float xPos, float yPos, float w, float h, const freetype::f
   , _focus(false)
   , _uiText(new UIText(8.0f, 2.5f, pFont, eJustifyLeft))
   , _value("")
-  , _enterFunction(NULL)
-  , _updateFunction(NULL)
+  , _enterFunction(nullptr)
+  , _updateFunction(nullptr)
 {
 }
 
@@ -63,7 +63,7 @@ UITextBox::UITextBox(float xPos, float yPos, float w, float h, const freetype::f
   , _uiText(new UIText(8.0f, 2.5f, pFont, eJustifyLeft))
   , _value("")
   , _enterFunction(enterFunction)
-  , _updateFunction(NULL)
+  , _updateFunction(nullptr)
 {
 }
 

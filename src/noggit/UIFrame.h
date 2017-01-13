@@ -77,7 +77,7 @@ public:
 #undef evilgetter
 
 		UIFrame()
-		: _parent(NULL)
+		: _parent(nullptr)
 		, _children()
 		, _x(0.0f)
 		, _y(0.0f)
@@ -90,7 +90,7 @@ public:
 	}
 
 	UIFrame(float pX, float pY, float w, float h)
-		: _parent(NULL)
+		: _parent(nullptr)
 		, _children()
 		, _x(pX)
 		, _y(pY)
@@ -110,7 +110,7 @@ public:
 			if (*it)
 			{
 				delete *it;
-				*it = NULL;
+				*it = nullptr;
 			}
 		}
 		_children.clear();

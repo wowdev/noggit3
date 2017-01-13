@@ -22,19 +22,19 @@ Model::Model(const std::string& filename, bool _forceAnim)
 {
 	memset(&header, 0, sizeof(ModelHeader));
 
-	globalSequences = NULL;
-	indices = NULL;
-	anims = NULL;
-	origVertices = NULL;
-	bones = NULL;
-	texanims = NULL;
-	colors = NULL;
-	transparency = NULL;
-	lights = NULL;
-	particleSystems = NULL;
-	ribbons = NULL;
+	globalSequences = nullptr;
+	indices = nullptr;
+	anims = nullptr;
+	origVertices = nullptr;
+	bones = nullptr;
+	texanims = nullptr;
+	colors = nullptr;
+	transparency = nullptr;
+	lights = nullptr;
+	particleSystems = nullptr;
+	ribbons = nullptr;
 
-	showGeosets = NULL;
+	showGeosets = nullptr;
 
 	finished = false;
 }
@@ -279,7 +279,7 @@ void Model::initCommon(const MPQFile& f)
 			//! \todo Check if this is actually correct. Or just remove it.
 			throw std::exception(); //this just fucks things up, dont load them for now
 
-			_textures[i] = NULL;
+			_textures[i] = nullptr;
 			_specialTextures[i] = texdef[i].type;
 
 			_useReplaceTextures[texdef[i].type] = true;
@@ -490,7 +490,7 @@ void Model::initAnimated(const MPQFile& f)
 			}
 			else
 			{
-				animfiles[i] = NULL;
+				animfiles[i] = nullptr;
 			}
 		}
 	}
@@ -596,7 +596,7 @@ void Model::animate(int _anim)
 	if (animGeometry) {
 
 		gl.bindBuffer(GL_ARRAY_BUFFER_ARB, vbuf);
-		gl.bufferData(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, NULL, GL_STREAM_DRAW_ARB);
+		gl.bufferData(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, nullptr, GL_STREAM_DRAW_ARB);
 		vertices = reinterpret_cast<math::vector_3d*>(gl.mapBuffer(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
 
 		// transform vertices

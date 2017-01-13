@@ -77,7 +77,7 @@ public:
 	Model *model;
 	float tofs;
 
-	ParticleSystem() : emitter(NULL), mid(0), rem(0)
+	ParticleSystem() : emitter(nullptr), mid(0), rem(0)
 	{
 		blend = 0;
 		order = 0;
@@ -89,13 +89,13 @@ public:
 
 		model = 0;
 		parent = 0;
-		_texture = NULL;
+		_texture = nullptr;
 
 		slowdown = 0;
 		rotation = 0;
 		tofs = 0;
 	}
-	~ParticleSystem() { if (emitter) { delete emitter; emitter = NULL; } }
+	~ParticleSystem() { if (emitter) { delete emitter; emitter = nullptr; } }
 
 	void init(const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals);
 	void update(float dt);

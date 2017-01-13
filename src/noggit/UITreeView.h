@@ -30,12 +30,12 @@ private:
 	UIText * mMyText;
 	const std::string _directoryName;
 
-	boost::function<void(const std::string&)> mSelectFunction;
+	std::function<void(const std::string&)> mSelectFunction;
 
 	bool mExpanded;
 
 public:
-	UITreeView(float pX, float pY, const std::string& directoryName, Directory::Ptr pDirectory, UITreeView::Ptr pParent, boost::function<void(const std::string&)> pSelectFunction);
+	UITreeView(float pX, float pY, const std::string& directoryName, Directory::Ptr pDirectory, UITreeView::Ptr pParent, std::function<void(const std::string&)> pSelectFunction);
 
 	void Expand();
 	void Minimize();

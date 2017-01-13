@@ -72,8 +72,8 @@ WMO::WMO(const std::string& filenameArg)
 	uint32_t size;
 	float ff[3];
 
-	char *ddnames = NULL;
-	char *groupnames = NULL;
+	char *ddnames = nullptr;
+	char *groupnames = nullptr;
 
 	char *texbuf = 0;
 
@@ -220,7 +220,7 @@ WMO::WMO(const std::string& filenameArg)
 	if (texbuf)
 	{
 		delete[] texbuf;
-		texbuf = NULL;
+		texbuf = nullptr;
 	}
 
 	for (unsigned int i = 0; i<nGroups; ++i)
@@ -233,7 +233,7 @@ WMO::~WMO()
 	if (groups)
 	{
 		delete[] groups;
-		groups = NULL;
+		groups = nullptr;
 	}
 
 	for (std::vector<std::string>::iterator it = textures.begin(); it != textures.end(); ++it) {
@@ -243,7 +243,7 @@ WMO::~WMO()
 	if (mat)
 	{
 		delete[] mat;
-		mat = NULL;
+		mat = nullptr;
 	}
 }
 
@@ -678,9 +678,9 @@ struct WMOGroupHeader {
 
 void WMOGroup::initDisplayList()
 {
-	math::vector_3d *normals = NULL;
-	math::vector_2d *texcoords = NULL;
-	struct SMOPoly *materials = NULL;
+	math::vector_3d *normals = nullptr;
+	math::vector_2d *texcoords = nullptr;
+	struct SMOPoly *materials = nullptr;
 
 	WMOGroupHeader gh;
 
@@ -722,7 +722,7 @@ void WMOGroup::initDisplayList()
 	uint32_t fourcc;
 	uint32_t size;
 
-	unsigned int *cv = NULL;
+	unsigned int *cv = nullptr;
 	hascv = false;
 
 	while (!gf.isEof()) {
@@ -1112,12 +1112,12 @@ WMOGroup::~WMOGroup()
 	if (nDoodads)
 	{
 		delete[] ddr;
-		ddr = NULL;
+		ddr = nullptr;
 	}
 	if (lq)
 	{
 		delete lq;
-		lq = NULL;
+		lq = nullptr;
 	}
 }
 

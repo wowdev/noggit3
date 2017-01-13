@@ -37,7 +37,7 @@ AsyncObject* AsyncLoader::nextObjectToLoad()
 
 	if (it == m_objects.end())
 	{
-		return NULL;
+		return nullptr;
 	}
 	else
 	{

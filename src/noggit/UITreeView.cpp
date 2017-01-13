@@ -31,7 +31,7 @@ void UITreeViewButton::SetClicked(bool pClicked)
 	clicked = pClicked;
 }
 
-UITreeView::UITreeView(float pX, float pY, const std::string& directoryName, Directory::Ptr pDirectory, UITreeView::Ptr pParent, boost::function<void(const std::string&)> pSelectFunction)
+UITreeView::UITreeView(float pX, float pY, const std::string& directoryName, Directory::Ptr pDirectory, UITreeView::Ptr pParent, std::function<void(const std::string&)> pSelectFunction)
 	: UIFrame(pX, pY, 500.0f, 500.0f)
 	, mParent(pParent)
 	, mMyDir(pDirectory)
@@ -161,7 +161,7 @@ void UITreeView::SetSelectFunction(void(*pSelectFunction)(const std::string&))
 UIFrame::Ptr UITreeView::processLeftClick(float mx, float my)
 {
 	if (hidden())
-		return NULL;
+		return nullptr;
 
 	//  mx -= ;
 	//  my -= y();

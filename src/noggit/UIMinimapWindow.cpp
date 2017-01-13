@@ -22,7 +22,7 @@ UIMinimapWindow::UIMinimapWindow(Menu* menuLink)
 	, tilesize(0.0f)
 	, lookAt(0.0f)
 	, mMenuLink(menuLink)
-	, map(NULL)
+	, map(nullptr)
 {
 	this->cursor_position = new UIText(10, height() - 20.0f, "Maptile: ", app.getArial14(), eJustifyLeft);
 	this->addChild(cursor_position);
@@ -35,7 +35,7 @@ UIMinimapWindow::UIMinimapWindow(World* setMap)
 	, bottomspace(20.0f)
 	, tilesize(0.0f)
 	, lookAt(0.0f)
-	, mMenuLink(NULL)
+	, mMenuLink(nullptr)
 	, map(setMap)
 {
 	this->cursor_position = new UIText(10, height() - 20.0f, "Maptile: ", app.getArial14(), eJustifyLeft);
@@ -75,14 +75,14 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
 	if (!gWorld ||
 		mx < borderwidth || mx > height() - borderwidth ||
 		my < borderwidth || my > height() - borderwidth)
-		return NULL;
+		return nullptr;
 
   math::vector_3d pos((mx - borderwidth), 0.0f, (my - borderwidth));
   pos *= TILESIZE / tilesize; // minimap pos => real pos
 
   // is there a tile?
 	if (!gWorld->mapIndex->hasTile(tile_index(pos)))
-		return NULL;
+		return nullptr;
 
   if (mMenuLink)
   {

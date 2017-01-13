@@ -25,13 +25,13 @@ UIScrollBar::UIScrollBar(float xpos, float ypos, float h, int n, Orientation ori
 	, mTarget()
 	, num(n)
 	, value(0)
-	, changeFunc(NULL)
-	, ScrollKnob(NULL)
+	, changeFunc(nullptr)
+	, ScrollKnob(nullptr)
 	, _orientation(orientation)
 	, extValue()
 {
-	UIButton::Ptr ScrollUp(NULL);
-	UIButton::Ptr ScrollDown(NULL);
+	UIButton::Ptr ScrollUp(nullptr);
+	UIButton::Ptr ScrollDown(nullptr);
 
 	if (_orientation == Vertical)
 	{

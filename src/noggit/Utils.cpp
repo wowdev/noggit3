@@ -19,32 +19,32 @@
 #ifdef _WIN32
 
 //////////////////////////////////////////////////////////////////////////////
-HINSTANCE ghWintab = NULL;
+HINSTANCE ghWintab = nullptr;
 
-WTINFOA gpWTInfoA = NULL;
-WTOPENA gpWTOpenA = NULL;
-WTGETA gpWTGetA = NULL;
-WTSETA gpWTSetA = NULL;
-WTCLOSE gpWTClose = NULL;
-WTPACKET gpWTPacket = NULL;
-WTENABLE gpWTEnable = NULL;
-WTOVERLAP gpWTOverlap = NULL;
-WTSAVE gpWTSave = NULL;
-WTCONFIG gpWTConfig = NULL;
-WTRESTORE gpWTRestore = NULL;
-WTEXTSET gpWTExtSet = NULL;
-WTEXTGET gpWTExtGet = NULL;
-WTQUEUESIZESET gpWTQueueSizeSet = NULL;
-WTDATAPEEK gpWTDataPeek = NULL;
-WTPACKETSGET gpWTPacketsGet = NULL;
-WTMGROPEN gpWTMgrOpen = NULL;
-WTMGRCLOSE gpWTMgrClose = NULL;
-WTMGRDEFCONTEXT gpWTMgrDefContext = NULL;
-WTMGRDEFCONTEXTEX gpWTMgrDefContextEx = NULL;
+WTINFOA gpWTInfoA = nullptr;
+WTOPENA gpWTOpenA = nullptr;
+WTGETA gpWTGetA = nullptr;
+WTSETA gpWTSetA = nullptr;
+WTCLOSE gpWTClose = nullptr;
+WTPACKET gpWTPacket = nullptr;
+WTENABLE gpWTEnable = nullptr;
+WTOVERLAP gpWTOverlap = nullptr;
+WTSAVE gpWTSave = nullptr;
+WTCONFIG gpWTConfig = nullptr;
+WTRESTORE gpWTRestore = nullptr;
+WTEXTSET gpWTExtSet = nullptr;
+WTEXTGET gpWTExtGet = nullptr;
+WTQUEUESIZESET gpWTQueueSizeSet = nullptr;
+WTDATAPEEK gpWTDataPeek = nullptr;
+WTPACKETSGET gpWTPacketsGet = nullptr;
+WTMGROPEN gpWTMgrOpen = nullptr;
+WTMGRCLOSE gpWTMgrClose = nullptr;
+WTMGRDEFCONTEXT gpWTMgrDefContext = nullptr;
+WTMGRDEFCONTEXTEX gpWTMgrDefContextEx = nullptr;
 
 // TODO - add more wintab32 function pointers as needed
 
-char* pszProgramName = NULL;
+char* pszProgramName = nullptr;
 
 #define GETPROCADDRESS(type, func) \
 	gp##func = (type)GetProcAddress(ghWintab, #func); \
@@ -65,7 +65,7 @@ BOOL LoadWintab( void )
 //	ghWintab = LoadLibraryA(  "C:\\dev\\mainline\\Wacom\\Win\\Win32\\Debug\\Wintab32.dll" );
 	ghWintab = LoadLibraryA( "Wintab32.dll" );
 
-	if ( FAILED(ghWintab) || ghWintab == NULL)
+	if ( FAILED(ghWintab) || ghWintab == nullptr)
 	{
 		DWORD err = GetLastError();
 		WACOM_TRACE("LoadLibrary error: %i\n", err);
@@ -96,7 +96,7 @@ BOOL LoadWintab( void )
 	GETPROCADDRESS( WTMGRDEFCONTEXTEX, WTMgrDefContextEx );
 
 
-	// TODO - don't forget to NULL out pointers in UnloadWintab().
+	// TODO - don't forget to nullptr out pointers in UnloadWintab().
 	return TRUE;
 }
 
@@ -116,29 +116,29 @@ void UnloadWintab( void )
 	if ( ghWintab )
 	{
 		FreeLibrary( ghWintab );
-		ghWintab = NULL;
+		ghWintab = nullptr;
 	}
 
-	gpWTOpenA			= NULL;
-	gpWTClose			= NULL;
-	gpWTInfoA			= NULL;
-	gpWTPacket			= NULL;
-	gpWTEnable			= NULL;
-	gpWTOverlap			= NULL;
-	gpWTSave				= NULL;
-	gpWTConfig			= NULL;
-	gpWTGetA				= NULL;
-	gpWTSetA				= NULL;
-	gpWTRestore			= NULL;
-	gpWTExtSet			= NULL;
-	gpWTExtGet			= NULL;
-	gpWTQueueSizeSet	= NULL;
-	gpWTDataPeek		= NULL;
-	gpWTPacketsGet		= NULL;
-	gpWTMgrOpen			= NULL;
-	gpWTMgrClose		= NULL;
-	gpWTMgrDefContext = NULL;
-	gpWTMgrDefContextEx = NULL;
+	gpWTOpenA			= nullptr;
+	gpWTClose			= nullptr;
+	gpWTInfoA			= nullptr;
+	gpWTPacket			= nullptr;
+	gpWTEnable			= nullptr;
+	gpWTOverlap			= nullptr;
+	gpWTSave				= nullptr;
+	gpWTConfig			= nullptr;
+	gpWTGetA				= nullptr;
+	gpWTSetA				= nullptr;
+	gpWTRestore			= nullptr;
+	gpWTExtSet			= nullptr;
+	gpWTExtGet			= nullptr;
+	gpWTQueueSizeSet	= nullptr;
+	gpWTDataPeek		= nullptr;
+	gpWTPacketsGet		= nullptr;
+	gpWTMgrOpen			= nullptr;
+	gpWTMgrClose		= nullptr;
+	gpWTMgrDefContext = nullptr;
+	gpWTMgrDefContextEx = nullptr;
 }
 
 
@@ -153,7 +153,7 @@ void ShowError( char *pszErrorMessage )
 
 	WACOM_ASSERT( pszErrorMessage );
 
-	MessageBoxA( NULL, pszErrorMessage, gpszProgramName, MB_OK | MB_ICONHAND );
+	MessageBoxA( nullptr, pszErrorMessage, gpszProgramName, MB_OK | MB_ICONHAND );
 }
 
 
