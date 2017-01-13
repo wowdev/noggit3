@@ -147,9 +147,9 @@ public:
   auto tiles_in_range (float x, float z, float radius)
   {
     return tiles<true>
-      ( [x, z, radius] (tile_index const& index, MapTile*)
+      ( [this, x, z, radius] (tile_index const& index, MapTile*)
         {
-          return misc::getShortestDist
+          return hasTile(index) && misc::getShortestDist
             (x, z, index.x * TILESIZE, index.z * TILESIZE, TILESIZE) <= radius;
         }
       );
