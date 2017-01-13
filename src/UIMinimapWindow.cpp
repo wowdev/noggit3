@@ -110,7 +110,7 @@ void UIMinimapWindow::resize()
 	this->cursor_position->y(height() - 20.0f);
 }
 
-void UIMinimapWindow::changePlayerLookAt(float ah)
+void UIMinimapWindow::changePlayerLookAt(math::degrees ah)
 {
 	lookAt = ah;
 }
@@ -215,13 +215,12 @@ void UIMinimapWindow::render() const
 	//! \todo Change it from a simple line to an arrow
 	if (map)
 	{
-		gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 		gl.begin(GL_LINES);
+		gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 		const float fx(map->camera.x / TILESIZE * tilesize);
 		const float fz(map->camera.z / TILESIZE * tilesize);
 		gl.vertex2f(fx, fz);
-		gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-		gl.vertex2f(fx + 10.0f * cosf(lookAt / 180.0f * (float)M_PI), fz + 10.0f * sinf(lookAt / 180.0f * (float)M_PI));
+		gl.vertex2f(fx + 10.0f * math::cos(lookAt), fz + 10.0f * math::sin(lookAt));
 		gl.end();
 
 		int skycount = map->skies->skies.size();

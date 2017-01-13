@@ -77,14 +77,14 @@ namespace
   std::size_t const sphere_segments (15);
   void draw_sphere_point (int i, int j, float radius)
   {
-    static float const drho (M_PI / sphere_segments);
-    static float const dtheta (2.0f * drho);
+    static math::radians const drho (M_PI / sphere_segments);
+    static math::radians const dtheta (2.0f * drho._);
 
-    float const rho (i * drho);
-    float const theta (j * dtheta);
-    gl.vertex3f ( std::cos (theta) * std::sin (rho) * radius
-                , std::sin (theta) * std::sin (rho) * radius
-                , std::cos (rho) * radius
+    math::radians const rho (i * drho._);
+    math::radians const theta (j * dtheta._);
+    gl.vertex3f ( math::cos (theta) * math::sin (rho) * radius
+                , math::sin (theta) * math::sin (rho) * radius
+                , math::cos (rho) * radius
                 );
   }
   void draw_sphere (float radius)
@@ -129,31 +129,31 @@ namespace
     draw_sphere (radius);
   }
 
-  void draw_disk_point (float radius, float arc)
+  void draw_disk_point (float radius, math::radians arc)
   {
-    gl.vertex3f (radius * std::sin (arc), radius * std::cos (arc), 0.0f);
+    gl.vertex3f (radius * math::sin (arc), radius * math::cos (arc), 0.0f);
   }
   void draw_disk (float radius)
   {
     int const slices (std::max (15.0f, radius * 1.5f));
-    static float const max (2.0f * M_PI);
-    float const stride (max / slices);
+    static math::radians const max (2.0f * M_PI);
+    float const stride (max._ / slices);
 
     gl.begin (GL_LINE_LOOP);
-    for (float arc (0.0f); arc < max; arc += stride)
+    for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
     {
       draw_disk_point (radius, arc);
     }
     gl.end();
 
     gl.begin (GL_LINE_LOOP);
-    for (float arc (0.0f); arc < max; arc += stride)
+    for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
     {
       draw_disk_point (radius + 1.0f, arc);
     }
     gl.end();
 
-    for (float arc (0.0f); arc < max; arc += stride)
+    for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
     {
       gl.begin (GL_LINES);
       draw_disk_point (radius, arc);

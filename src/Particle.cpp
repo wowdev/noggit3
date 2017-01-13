@@ -742,11 +742,11 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 
 	// New
 	// Spread should never be zero for sphere particles ?
-	float t = 0;
+  math::radians t (0);
 	if (spr == 0)
-		t = misc::randfloat((float)-M_PI, (float)M_PI);
+		t._ = misc::randfloat((float)-M_PI, (float)M_PI);
 	else
-		t = misc::randfloat(-spr, spr);
+		t._ = misc::randfloat(-spr, spr);
 
 	//Spread Calculation
 	auto mrot =  sys->parent->mrot*CalcSpreadMatrix(spr * 2, spr2 * 2, w, l);
@@ -757,18 +757,18 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 	//  l = w;
 
 	// New method
-	// Vec3D bdir(w*cosf(t), 0.0f, l*sinf(t));
+	// Vec3D bdir(w*math::cos(t), 0.0f, l*math::sin(t));
 	// --
 
 	//! \todo fix shpere emitters to work properly
 	/* // Old Method
-	//Vec3D bdir(l*cosf(t), 0, w*sinf(t));
-	//Vec3D bdir(0, w*cosf(t), l*sinf(t));
+	//Vec3D bdir(l*math::cos(t), 0, w*math::sin(t));
+	//Vec3D bdir(0, w*math::cos(t), l*math::sin(t));
 
 
 	float theta_range = sys->spread.getValue(anim, time);
 	float theta = -0.5f* theta_range + misc::randfloat(0, theta_range);
-	Vec3D bdir(0, l*cosf(theta), w*sinf(theta));
+	Vec3D bdir(0, l*math::cos(theta), w*math::sin(theta));
 
 	float phi_range = sys->lat.getValue(anim, time);
 	float phi = misc::randfloat(0, phi_range);
@@ -776,7 +776,7 @@ Particle SphereParticleEmitter::newParticle(int anim, int time, float w, float l
 	*/
 
 	if (sys->flags == 57 || sys->flags == 313) { // Faith Halo
-		Vec3D bdir(w*cosf(t)*1.6f, 0.0f, l*sinf(t)*1.6f);
+		Vec3D bdir(w*math::cos(t)*1.6f, 0.0f, l*math::sin(t)*1.6f);
 
 		p.pos = sys->pos + bdir;
 		p.pos = sys->parent->mat * p.pos;

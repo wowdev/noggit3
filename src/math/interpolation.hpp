@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <cmath>
+#include <math/trig.hpp>
 
 namespace math
 {
@@ -25,9 +25,9 @@ namespace math
         return T (start * (1.0f - percentage) + end * percentage);
       }
 
-      const float a (acosf (dot) * percentage);
+      radians const a (acos (radians (dot)) * percentage);
 
-      return T (start * cosf (a) + T (end - start * dot).normalize() * sinf (a));
+      return T (start * cos (a) + T (end - start * dot).normalize() * sin (a));
     }
 
     template<typename T>
