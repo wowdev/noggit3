@@ -730,7 +730,6 @@ void MapChunk::draw (Frustum const& frustum)
 
   gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
 
-  gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
   opengl::texture::disable_texture();
   gl.disable(GL_LIGHTING);
 
@@ -810,6 +809,7 @@ void MapChunk::draw (Frustum const& frustum)
     gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
 
+  gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
   gl.enable(GL_LIGHTING);
   gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
