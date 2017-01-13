@@ -45,4 +45,8 @@ namespace math
   {
     return std::tan (x._);
   }
+  inline float acos (radians x)
+  {
+    return std::acos (x._);
+  }
 }

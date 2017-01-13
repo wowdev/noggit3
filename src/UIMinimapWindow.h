@@ -14,7 +14,7 @@ private:
 	float borderwidth;
 	float bottomspace;
 	float tilesize;
-	float lookAt;
+  math::degrees lookAt;
 	Menu* mMenuLink;
 	World* map;
 	UIText::Ptr cursor_position;
@@ -26,7 +26,7 @@ public:
 	void mousemove(SDL_MouseMotionEvent *e);
 	void resize();
 	void render() const;
-	void changePlayerLookAt(float ah);
+	void changePlayerLookAt(math::degrees ah);
 };
 
 #endif

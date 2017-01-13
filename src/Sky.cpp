@@ -143,8 +143,15 @@ Vec3D Sky::colorFor(int r, int t) const
 
 const float rad = 400.0f;
 
-//.......................top....med....medh........horiz..........bottom
-const float angles[] = { 90.0f, 30.0f, 15.0f, 5.0f, 0.0f, -30.0f, -90.0f };
+//...............................top....med....medh........horiz..........bottom
+const math::degrees angles[] = { math::degrees (90.0f)
+                               , math::degrees (30.0f)
+                               , math::degrees (15.0f)
+                               , math::degrees (5.0f)
+                               , math::degrees (0.0f)
+                               , math::degrees (-30.0f)
+                               , math::degrees (-90.0f)
+                               };
 const int skycolors[] = { 2, 3, 4, 5, 6, 7, 7 };
 const int cnum = 7;
 
@@ -159,7 +166,7 @@ void Skies::draw()
 	gl.begin(GL_QUADS);
 	for (int h = 0; h<hseg; h++) {
 		for (int i = 0; i<cnum; ++i) {
-			basepos1[i] = basepos2[i] = Vec3D(cosf(angles[i] * (float)M_PI / 180.0f)*rad, sinf(angles[i] * (float)M_PI / 180.0f)*rad, 0);
+			basepos1[i] = basepos2[i] = Vec3D(math::cos(angles[i])*rad, math::sin(angles[i])*rad, 0);
       math::rotate(0, 0, &basepos1[i].x, &basepos1[i].z, math::radians (M_PI*2.0f / hseg*h));
       math::rotate(0, 0, &basepos2[i].x, &basepos2[i].z, math::radians (M_PI*2.0f / hseg*(h + 1)));
 		}
@@ -271,9 +278,9 @@ void drawCircle(unsigned int *buf, int dim, float x, float y, float r, unsigned 
 	float circ = 2 * r*(float)M_PI;
 	gl.begin(GL_LINES);
 	for (int i = 0; i<circ; ++i) {
-		float phi = 2 * (float)M_PI*i / circ;
-		int px = (int)(x + r * cosf(phi));
-		int py = (int)(y + r * sinf(phi));
+    math::radians phi (2 * (float)M_PI*i / circ);
+		int px = (int)(x + r * math::cos(phi));
+		int py = (int)(y + r * math::sin(phi));
 		if (px >= 0 && px<dim && py >= 0 && py<dim) {
 			buf[py*dim + px] = col;
 		}

@@ -1875,7 +1875,7 @@ void MapView::tick(float t, float dt)
       if (turn != 0.0f)
       {
         ah += turn;
-        mainGui->minimapWindow->changePlayerLookAt(ah);
+        mainGui->minimapWindow->changePlayerLookAt(math::degrees (ah));
       }
       if (lookat)
       {
@@ -1884,7 +1884,7 @@ void MapView::tick(float t, float dt)
           av = -80.0f;
         else if (av > 80.0f)
           av = 80.0f;
-        mainGui->minimapWindow->changePlayerLookAt(ah);
+        mainGui->minimapWindow->changePlayerLookAt(math::degrees (ah));
       }
       if (moving)
         gWorld->camera += dir * dt * movespd * moving;
@@ -2897,7 +2897,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
     else if (av > 80.0f)
       av = 80.0f;
 
-    mainGui->minimapWindow->changePlayerLookAt(ah);
+    mainGui->minimapWindow->changePlayerLookAt(math::degrees (ah));
   }
 
   if (MoveObj)
