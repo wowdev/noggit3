@@ -1,5 +1,6 @@
-#ifndef MPQ_H
-#define MPQ_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <set>
 #include <StormLib.h>
@@ -101,6 +102,3 @@ private:
 	static std::string getAlternateDiskPath(const std::string& pFilename, const std::string& pDiscpath);
 	static std::string getMPQPath(const std::string& pFilename);
 };
-
-#endif
-

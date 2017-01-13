@@ -1,5 +1,6 @@
-#ifndef __LOG_H
-#define __LOG_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <iostream>
 
@@ -12,5 +13,3 @@ std::ostream& _Log(const char * pFile, int pLine);
 #define Log _Log( __FILE__, __LINE__ )
 
 void InitLogging();
-
-#endif

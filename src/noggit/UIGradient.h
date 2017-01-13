@@ -1,5 +1,6 @@
-#ifndef __GRADIENT_H
-#define __GRADIENT_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "math/quaternion.hpp" // math::vector_4d
 #include "UIFrame.h" // UIFrame
@@ -25,4 +26,3 @@ public:
 	bool  processLeftDrag(float mx, float my, float xChange, float yChange);
 	void  render() const;
 };
-#endif

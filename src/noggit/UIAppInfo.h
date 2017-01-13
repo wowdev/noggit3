@@ -1,5 +1,6 @@
-#ifndef __APPINFO_H
-#define __APPINFO_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <string>
 
@@ -22,4 +23,3 @@ public:
 	UIAppInfo(float x, float y, float width, float height, UIMapViewGUI* setGui);
 	void setText(const std::string& t);
 };
-#endif

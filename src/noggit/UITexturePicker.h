@@ -1,5 +1,6 @@
-#ifndef __TEXTUREPICKER_H
-#define __TEXTUREPICKER_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "UICloseWindow.h"
 #include "MapChunk.h"
@@ -24,5 +25,3 @@ private:
   MapChunk* _chunk;
   selection_type _select;
 };
-
-#endif

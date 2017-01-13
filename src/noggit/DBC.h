@@ -1,5 +1,6 @@
-#ifndef AREADB_H
-#define AREADB_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <string>
 
@@ -184,5 +185,3 @@ extern LightFloatBandDB gLightFloatBandDB;
 extern GroundEffectDoodadDB gGroundEffectDoodadDB;
 extern GroundEffectTextureDB gGroundEffectTextureDB;
 extern LiquidTypeDB gLiquidTypeDB;
-
-#endif

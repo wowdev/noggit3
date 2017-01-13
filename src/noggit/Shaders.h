@@ -1,5 +1,6 @@
-#ifndef __SHADERS_H
-#define __SHADERS_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <string>
 
@@ -60,5 +61,3 @@ public:
 };
 
 extern ShaderPair *terrainShaders[4], *wmoShader, *waterShaders[1];
-
-#endif

@@ -1,3 +1,5 @@
+# This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
 #find STORMLIB
 # STORMLIB_LIBRARIES, the name of the library to link against
 # STORMLIB_FOUND, if false, do not try to link

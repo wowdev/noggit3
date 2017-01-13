@@ -1,5 +1,6 @@
-#ifndef __TEXTUREMANAGER_H
-#define __TEXTUREMANAGER_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <map>
 #include <string>
@@ -26,5 +27,3 @@ private:
 	typedef std::map<std::string, OpenGL::Texture*> mapType;
 	static mapType items;
 };
-
-#endif

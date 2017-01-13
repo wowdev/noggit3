@@ -1,5 +1,7 @@
-#ifndef MAPCHUNK_H
-#define MAPCHUNK_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
+
 #include "MapTile.h" // MapTile
 #include "math/quaternion.hpp" // math::vector_4d
 #include "Video.h" // GLuint
@@ -135,5 +137,3 @@ public:
 
   void toBigAlpha(){ mBigAlpha = true;}
 };
-
-#endif // MAPCHUNK_H

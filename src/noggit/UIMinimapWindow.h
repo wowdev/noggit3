@@ -1,5 +1,6 @@
-#ifndef __MINIMAPWINDOWUI_H
-#define __MINIMAPWINDOWUI_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "UIWindow.h"
 #include "UIText.h"
@@ -28,5 +29,3 @@ public:
 	void render() const;
 	void changePlayerLookAt(math::degrees ah);
 };
-
-#endif

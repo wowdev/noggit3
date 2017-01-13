@@ -1,5 +1,6 @@
-#ifndef UIALPHAMAP_H
-#define UIALPHAMAP_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "UICloseWindow.h"
 
@@ -14,4 +15,3 @@ private:
 	void drawQuad(size_t i, size_t j) const;
 
 };
-#endif

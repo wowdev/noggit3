@@ -1,5 +1,6 @@
-#ifndef MISC_H
-#define MISC_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <string>
 #include <algorithm>
@@ -140,5 +141,3 @@ void minmax(math::vector_3d* a, math::vector_3d* b);
 
 bool checkInside(math::vector_3d extentA[2], math::vector_3d extentB[2]);
 bool checkOriginInside(math::vector_3d extentA[2], math::vector_3d modelPos);
-
-#endif

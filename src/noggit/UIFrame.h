@@ -1,5 +1,6 @@
-#ifndef __FRAME_H
-#define __FRAME_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <vector>
 #include <cstddef>
@@ -141,5 +142,3 @@ public:
 		return x() < pX && x() + width() > pX && y() < pY && y() + height() > pY;
 	}
 };
-
-#endif

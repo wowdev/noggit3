@@ -1,5 +1,6 @@
-#ifndef __TEXTURESWITCHER_H
-#define __TEXTURESWITCHER_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "UIWindow.h"
 
@@ -23,5 +24,3 @@ private:
 	UIButton *_setToButton;
 	float xPos, zPos;
 };
-
-#endif

@@ -1,5 +1,6 @@
-#ifndef __UIOBJECTEDITOR_H
-#define __UIOBJECTEDITOR_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "UIWindow.h"
 #include "Selection.h"
@@ -36,6 +37,3 @@ private:
   void setModelName(const std::string &name);
   int pasteMode;
 };
-
-
-#endif

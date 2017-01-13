@@ -1,5 +1,6 @@
-#ifndef WMOINSTANCE_H
-#define WMOINSTANCE_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <set>
 #include <stdint.h>
@@ -79,6 +80,3 @@ public:
 private:
 	bool uidLock;
 };
-
-
-#endif // WMOINSTANCE_H

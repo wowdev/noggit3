@@ -1,5 +1,6 @@
-#ifndef ASYNCOBJECT_H
-#define ASYNCOBJECT_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 class AsyncObject
 {
@@ -14,5 +15,3 @@ public:
 	}
 	virtual void finishLoading() = 0;
 };
-
-#endif //ASYNCOBJECT_H

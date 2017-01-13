@@ -1,5 +1,6 @@
-#ifndef MODELINSTANCE_H
-#define MODELINSTANCE_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "MapHeaders.h" // ENTRY_MDDF
 #include "ModelManager.h"
@@ -83,5 +84,3 @@ public:
 private:
 	bool uidLock;
 };
-
-#endif // MODELINSTANCE_H

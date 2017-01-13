@@ -1,5 +1,6 @@
-#ifndef __BRUSH_H
-#define __BRUSH_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 namespace OpenGL
 {
@@ -28,5 +29,3 @@ public:
 	bool needUpdate();
 	void init();
 };
-
-#endif

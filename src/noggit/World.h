@@ -1,5 +1,6 @@
-#ifndef WORLD_H
-#define WORLD_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <map>
 #include <string>
@@ -246,8 +247,3 @@ private:
 };
 
 extern World *gWorld;
-
-//void lightingDefaults(); not used
-//void myFakeLighting(); not used
-
-#endif

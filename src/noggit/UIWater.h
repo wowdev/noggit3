@@ -1,5 +1,6 @@
-#ifndef __UI_WATER_H
-#define __UI_WATER_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "UICloseWindow.h"
 #include "map_index.hpp"
@@ -49,5 +50,3 @@ private:
 
   tile_index tile;
 };
-
-#endif

@@ -1,3 +1,5 @@
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
 #ifdef _WIN32
 #define NOMINMAX
 #endif // win32

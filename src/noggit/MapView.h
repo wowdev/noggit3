@@ -1,5 +1,6 @@
-#ifndef MAPVIEW_H
-#define MAPVIEW_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "AppState.h"
 #include "Selection.h"
@@ -67,6 +68,3 @@ public:
 	void addModelFromTextSelection(int id);
   void selectModel(selection_type entry);
 };
-
-
-#endif

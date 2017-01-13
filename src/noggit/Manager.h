@@ -1,5 +1,6 @@
-#ifndef MANAGER_H
-#define MANAGER_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 // base class for manager objects
 
@@ -35,5 +36,3 @@ public:
 		return _referenceCount == 0;
 	}
 };
-
-#endif

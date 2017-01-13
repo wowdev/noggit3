@@ -1,7 +1,8 @@
-// #define USEBLSFILES
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#ifndef LIQUID_H
-#define LIQUID_H
+#pragma once
+
+// #define USEBLSFILES
 
 class Liquid;
 
@@ -111,5 +112,3 @@ private:
 	MH2O_Tile mTileData;
 
 };
-
-#endif

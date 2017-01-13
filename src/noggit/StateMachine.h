@@ -1,5 +1,6 @@
-#ifndef STATEMACHINE_H
-#define STATEMACHINE_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 enum DrawOptions {
 	TERRAIN = 0x01,
@@ -24,5 +25,3 @@ public:
 private:
 	int state;
 };
-
-#endif //STATEMACHINE_H

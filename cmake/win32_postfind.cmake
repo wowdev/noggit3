@@ -1,3 +1,5 @@
+# This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
 STRING(REGEX REPLACE "/[^/]*$" "" Boost_STRIPPED_LIB_DIR "${Boost_THREAD_LIBRARY_DEBUG}")
 LINK_DIRECTORIES(${Boost_STRIPPED_LIB_DIR} ${STORMLIB_LIBRARY_DIR})
 

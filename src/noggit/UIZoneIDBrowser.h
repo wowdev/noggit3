@@ -1,5 +1,6 @@
-#ifndef __ZONEIDBROWSER_H
-#define __ZONEIDBROWSER_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <string>
 
@@ -42,5 +43,3 @@ public:
 	void refreshMapPath();
 	void setChangeFunc(void(*f)(UIFrame *, int));
 };
-
-#endif

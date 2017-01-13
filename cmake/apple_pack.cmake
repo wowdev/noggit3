@@ -1,3 +1,5 @@
+# This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
 # Also link against libz for static's sake.
 SET(FREETYPE_LIBRARIES ${FREETYPE_LIBRARIES} z)
 set_target_properties ( noggit

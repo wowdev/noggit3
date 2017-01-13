@@ -1,5 +1,6 @@
-#ifndef APPSTATE_H
-#define APPSTATE_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <list>
 #include <SDL.h>
@@ -123,5 +124,3 @@ public:
 	*/
 	virtual void resizewindow() {}
 };
-
-#endif

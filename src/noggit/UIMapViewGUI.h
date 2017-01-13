@@ -1,5 +1,6 @@
-#ifndef __GUI_H
-#define __GUI_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 class UIToolbar;
 class UIStatusBar;
@@ -97,5 +98,3 @@ public:
 	void hideTest();
 	void toggleTest();
 };
-
-#endif

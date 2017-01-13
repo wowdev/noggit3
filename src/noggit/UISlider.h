@@ -1,5 +1,6 @@
-#ifndef __SLIDER_H
-#define __SLIDER_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <string>
 #include <boost/function.hpp>
@@ -30,4 +31,3 @@ public:
 	bool processLeftDrag(float mx, float my, float xChange, float yChange);
 	void render() const;
 };
-#endif

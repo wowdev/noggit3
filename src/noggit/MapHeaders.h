@@ -1,5 +1,6 @@
-#ifndef MAPHEADERS
-#define MAPHEADERS
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include <stdint.h>
 
@@ -222,5 +223,3 @@ struct MPHD
 	uint32_t something;
 	uint32_t unused[6];
 };
-
-#endif

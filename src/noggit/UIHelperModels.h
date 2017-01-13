@@ -1,5 +1,6 @@
-#ifndef __HELPER_MODELS_H
-#define __HELPER_MODELS_H
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#pragma once
 
 #include "UICloseWindow.h"
 #include "MapView.h"
@@ -17,5 +18,3 @@ public:
 	void addModelNow(int model);
 	MapView *_mapView;
 };
-
-#endif
