@@ -1,7 +1,7 @@
 #ifndef MAPCHUNK_H
 #define MAPCHUNK_H
 #include "MapTile.h" // MapTile
-#include "Quaternion.h" // Vec4D
+#include "math/quaternion.hpp" // math::vector_4d
 #include "Video.h" // GLuint
 #include "WMOInstance.h"
 #include "ModelInstance.h"
@@ -10,7 +10,10 @@
 #include <opengl/texture.hpp>
 
 class MPQFile;
-class Vec4D;
+namespace math
+{
+  class vector_4d;
+}
 class Brush;
 class Alphamap;
 class TextureSet;
@@ -41,10 +44,10 @@ private:
 
 	bool water;
 
-	Vec3D mNormals[mapbufsize];
-	Vec3D mMinimap[mapbufsize];
-	Vec4D mFakeShadows[mapbufsize];
-  Vec3D mccv[mapbufsize];
+	math::vector_3d mNormals[mapbufsize];
+	math::vector_3d mMinimap[mapbufsize];
+	math::vector_4d mFakeShadows[mapbufsize];
+  math::vector_3d mccv[mapbufsize];
 
 	void initStrip();
 
@@ -56,7 +59,7 @@ public:
 	~MapChunk();
 
 	MapTile *mt;
-	Vec3D vmin, vmax, vcenter;
+	math::vector_3d vmin, vmax, vcenter;
 	int px, py;
 
 	MapChunkHeader header;
@@ -70,7 +73,7 @@ public:
 
 	GLuint vertices, normals, indices, minimap, minishadows, mccvEntry;
 
-	Vec3D mVertices[mapbufsize];
+	math::vector_3d mVertices[mapbufsize];
 
 	void draw (Frustum const&); //! \todo only this function should be public, all others should be called from it
 
@@ -88,12 +91,12 @@ public:
 	void getSelectionCoord(float *x, float *z);
 	float getSelectionHeight();
 
-	Vec3D GetSelectionPosition();
+	math::vector_3d GetSelectionPosition();
 
 	//! \todo implement Action stack for these
 	bool changeTerrain(float x, float z, float change, float radius, int BrushType);
 	bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, int flattenType, float angle, float orientation);
-  bool flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const Vec3D& origin, float angle, float orientation);
+  bool flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, float angle, float orientation);
 	bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
 	//! \todo implement Action stack for these
@@ -118,7 +121,7 @@ public:
 	int getAreaID();
 	void setAreaID(int ID);
 
-	bool GetVertex(float x, float z, Vec3D *V);
+	bool GetVertex(float x, float z, math::vector_3d *V);
 	float getHeight(int x, int z);
 	float getMinHeight();
 

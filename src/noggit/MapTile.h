@@ -13,7 +13,10 @@
 class Frustum;
 class MapChunk;
 class TileWater;
-class Vec3D;
+namespace math
+{
+  class vector_3d;
+}
 
 class MapTile
 {
@@ -43,7 +46,7 @@ public:
 	void drawTextures();
 	void drawMFBO();
 
-	bool GetVertex(float x, float z, Vec3D *V);
+	bool GetVertex(float x, float z, math::vector_3d *V);
 
 	void saveTile();
 	void CropWater();

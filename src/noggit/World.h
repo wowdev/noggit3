@@ -123,8 +123,8 @@ public:
 	StripType *mapstrip;
 	StripType *mapstrip2;
 
-	Vec3D camera;
-	Vec3D lookat;
+	math::vector_3d camera;
+	math::vector_3d lookat;
 
 	explicit World(const std::string& name);
 	~World();
@@ -160,7 +160,7 @@ public:
 	void SetCurrentSelection (boost::optional<selection_type> entry) { mCurrentSelection = entry; }
 	void ResetSelection() { mCurrentSelection.reset(); }
 
-	bool GetVertex(float x, float z, Vec3D *V);
+	bool GetVertex(float x, float z, math::vector_3d *V);
 
   // check if the cursor is under map or in an unloaded tile
   bool isUnderMap(float x, float z, float h);
@@ -168,7 +168,7 @@ public:
 	void changeTerrain(float x, float z, float change, float radius, int BrushType);
 	void changeShader(float x, float z, float change, float radius, bool editMode);
   void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, int flattenType, float angle = 0.0f, float orientation = 0.0f);
-  void flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const Vec3D& origin, float angle = 0.0f, float orientation = 0.0f);
+  void flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, float angle = 0.0f, float orientation = 0.0f);
 	void blurTerrain(float x, float z, float remain, float radius, int BrushType);
 	bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
   bool sprayTexture(float x, float z, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, OpenGL::Texture* texture);
@@ -180,9 +180,9 @@ public:
   void addHoleADT(float x, float z);
   void removeHoleADT(float x, float z);
 
-	void addModel(selection_type, Vec3D newPos, bool copyit);
-	void addM2(std::string const& filename, Vec3D newPos, bool copyit);
-	void addWMO(std::string const& filename, Vec3D newPos, bool copyit);
+	void addModel(selection_type, math::vector_3d newPos, bool copyit);
+	void addM2(std::string const& filename, math::vector_3d newPos, bool copyit);
+	void addWMO(std::string const& filename, math::vector_3d newPos, bool copyit);
 
 
   void updateTilesEntry(selection_type const& entry);
@@ -191,7 +191,7 @@ public:
 
   void clearHiddenModelList();
 
-	void jumpToCords(Vec3D pos);
+	void jumpToCords(math::vector_3d pos);
 	void saveMap();
 
 	void deleteModelInstance(int pUniqueID);
@@ -240,7 +240,7 @@ public:
   void convertMapToBigAlpha();
 
   // get the real cursor pos in the world, TODO: get the correct pos on models/wmos
-  Vec3D getCursorPosOnModel();
+  math::vector_3d getCursorPosOnModel();
 private:
 	void getSelection();
 };

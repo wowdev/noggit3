@@ -244,7 +244,7 @@ void MapIndex::enterTile(const tile_index& tile)
 void MapIndex::setChanged(float x, float z, bool setAdjacentTiles)
 {
 	// change the changed flag of the map tile
-  setChanged(tile_index(Vec3D(x, 0.0f, z)), setAdjacentTiles);
+  setChanged(tile_index(math::vector_3d(x, 0.0f, z)), setAdjacentTiles);
 }
 
 void MapIndex::setChanged(const tile_index& tile, bool setAdjacentTiles)
@@ -315,7 +315,7 @@ int MapIndex::getChanged(const tile_index& tile)
 
 void MapIndex::setFlag(bool to, float x, float z)
 {
-  tile_index tile(Vec3D(x, 0.0f, z));
+  tile_index tile(math::vector_3d(x, 0.0f, z));
   
   if (tileLoaded(tile))
   {
@@ -330,7 +330,7 @@ void MapIndex::setFlag(bool to, float x, float z)
 
 void MapIndex::setWater(bool to, float x, float z)
 {
-  tile_index tile(Vec3D(x, 0.0f, z));
+  tile_index tile(math::vector_3d(x, 0.0f, z));
 
   if (tileLoaded(tile))
   {

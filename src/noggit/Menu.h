@@ -6,7 +6,7 @@
 
 #include "AppState.h"
 #include "ModelManager.h"
-#include "Vec3D.h"
+#include "math/vector_3d.hpp"
 
 #include <boost/optional.hpp>
 
@@ -32,7 +32,7 @@ struct BookmarkEntry
 {
 	int mapID;
 	std::string name;
-	Vec3D pos;
+	math::vector_3d pos;
 	float ah;
 	float av;
 };
@@ -55,7 +55,7 @@ public:
 	void loadBookmark(int bookmarkID);
 
 	//! \brief Enter the the map on the given location.
-	void enterMapAt(Vec3D pos, bool pAutoHeight = true, float av = -30.0f, float ah = -90.0f);
+	void enterMapAt(math::vector_3d pos, bool pAutoHeight = true, float av = -30.0f, float ah = -90.0f);
 
 private:
 	UIFrame* mGUIFrame;

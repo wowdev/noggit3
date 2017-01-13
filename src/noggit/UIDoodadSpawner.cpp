@@ -73,7 +73,7 @@ UIDoodadSpawner::UIDoodadSpawner()
 
 void UIDoodadSpawner::AddM2(const std::string& filename)
 {
-	Vec3D selectionPosition;
+	math::vector_3d selectionPosition;
 	if (!gWorld->GetCurrentSelection())
 		return;
 

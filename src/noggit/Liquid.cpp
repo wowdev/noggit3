@@ -130,7 +130,7 @@ void enableWaterShader()
 }
 #endif
 
-Liquid::Liquid(int x, int y, Vec3D base, float ptilesize)
+Liquid::Liquid(int x, int y, math::vector_3d base, float ptilesize)
 	: xtiles(x)
 	, ytiles(y)
 	, pos(base)
@@ -188,7 +188,7 @@ void Liquid::initFromWMO(MPQFile* f, const WMOMaterial &mat, bool indoor)
 		if (indoor) {
 			trans = true;
 			type = 1;
-			col = Vec3D(((mat.col2 & 0xFF0000) >> 16) / 255.0f, ((mat.col2 & 0xFF00) >> 8) / 255.0f, (mat.col2 & 0xFF) / 255.0f);
+			col = math::vector_3d(((mat.col2 & 0xFF0000) >> 16) / 255.0f, ((mat.col2 & 0xFF00) >> 8) / 255.0f, (mat.col2 & 0xFF) / 255.0f);
 		}
 		else {
 			trans = true;
@@ -206,13 +206,13 @@ void Liquid::initGeometry(MPQFile* f)
 	unsigned char *flags = reinterpret_cast<unsigned char*>(f->getPointer() + (xtiles + 1)*(ytiles + 1)*sizeof(LiquidVertex));
 
 	// generate vertices
-	Vec3D * lVertices = new Vec3D[(xtiles + 1)*(ytiles + 1)];
+	math::vector_3d * lVertices = new math::vector_3d[(xtiles + 1)*(ytiles + 1)];
 	for (int j = 0; j<ytiles + 1; j++) {
 		for (int i = 0; i<xtiles + 1; ++i) {
 			size_t p = j*(xtiles + 1) + i;
 			float h = map[p].h;
 			if (h > 100000) h = pos.y;
-			lVertices[p] = Vec3D(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
+			lVertices[p] = math::vector_3d(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
 		}
 	}
 
@@ -297,12 +297,12 @@ void Liquid::initFromMH2O(MH2O_Tile &pTileInfo)
 	mTransparency = mShaderType & 1;
 
 	// generate vertices
-	Vec3D lVertices[9][9];
+	math::vector_3d lVertices[9][9];
 	for (int j = 0; j < 9; ++j)
 	{
 		for (int i = 0; i < 9; ++i)
 		{
-			lVertices[j][i] = Vec3D(pos.x + tilesize * i, pTileInfo.mHeightmap[j][i], pos.z + ydir * tilesize * j);
+			lVertices[j][i] = math::vector_3d(pos.x + tilesize * i, pTileInfo.mHeightmap[j][i], pos.z + ydir * tilesize * j);
 		}
 	}
 
@@ -361,7 +361,7 @@ void Liquid::draw()
 	enableWaterShader();
 #endif
 
-	Vec3D col2;
+	math::vector_3d col2;
 	glDisable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);
 	size_t texidx = (size_t)(gWorld->animtime / 60.0f) % textures.size();

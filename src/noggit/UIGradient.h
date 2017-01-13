@@ -1,15 +1,15 @@
 #ifndef __GRADIENT_H
 #define __GRADIENT_H
 
-#include "Quaternion.h" // Vec4D
+#include "math/quaternion.hpp" // math::vector_4d
 #include "UIFrame.h" // UIFrame
 
 class UIGradient : public UIFrame
 {
 protected:
-	Vec4D  MinColor;
-	Vec4D  MaxColor;
-	Vec4D  ClickColor;
+	math::vector_4d  MinColor;
+	math::vector_4d  MaxColor;
+	math::vector_4d  ClickColor;
 	float  value;
 	void(*clickFunc)(float val);
 

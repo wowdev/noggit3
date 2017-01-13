@@ -9,10 +9,10 @@
 #include "Log.h"
 #include "MapHeaders.h"
 #include "Misc.h"
-#include "Quaternion.h"
+#include "math/quaternion.hpp"
 #include "TextureSet.h"
 #include "UITexturingGUI.h"
-#include "Vec3D.h"
+#include "math/vector_3d.hpp"
 #include "World.h"
 #include "Alphamap.h"
 #include <opengl/scoped.hpp>
@@ -133,8 +133,8 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
   if (Environment::getInstance()->areaIDColors.find(areaID) == Environment::getInstance()->areaIDColors.end())
   {
-    Vec3D newColor = Vec3D(misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f));
-    Environment::getInstance()->areaIDColors.insert(std::pair<int, Vec3D>(areaID, newColor));
+    math::vector_3d newColor = math::vector_3d(misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f));
+    Environment::getInstance()->areaIDColors.insert(std::pair<int, math::vector_3d>(areaID, newColor));
   }
 
   Environment::getInstance()->selectedAreaID = areaID; //The last loaded is selected on start.
@@ -152,8 +152,8 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   zbase = zbase*-1.0f + ZEROPOINT;
   xbase = xbase*-1.0f + ZEROPOINT;
 
-  vmin = Vec3D(9999999.0f, 9999999.0f, 9999999.0f);
-  vmax = Vec3D(-9999999.0f, -9999999.0f, -9999999.0f);
+  vmin = math::vector_3d(9999999.0f, 9999999.0f, 9999999.0f);
+  vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
 
   while (f->getPos() < lastpos)
   {
@@ -166,19 +166,19 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       nextpos = f->getPos() + 0x1C0; // size fix
                                      // normal vectors
       char nor[3];
-      Vec3D *ttn = mNormals;
+      math::vector_3d *ttn = mNormals;
       for (int j = 0; j<17; ++j) {
         for (int i = 0; i<((j % 2) ? 8 : 9); ++i) {
           f->read(nor, 3);
           // order X,Z,Y
-          // *ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
-          *ttn++ = Vec3D(-nor[1] / 127.0f, nor[2] / 127.0f, -nor[0] / 127.0f);
+          // *ttn++ = math::vector_3d((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
+          *ttn++ = math::vector_3d(-nor[1] / 127.0f, nor[2] / 127.0f, -nor[0] / 127.0f);
         }
       }
     }
     else if (fourcc == 'MCVT')
     {
-      Vec3D *ttv = mVertices;
+      math::vector_3d *ttv = mVertices;
 
       // vertices
       for (int j = 0; j < 17; ++j) {
@@ -190,7 +190,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
           if (j % 2) {
             xpos += UNITSIZE*0.5f;
           }
-          Vec3D v = Vec3D(xbase + xpos, ybase + h, zbase + zpos);
+          math::vector_3d v = math::vector_3d(xbase + xpos, ybase + h, zbase + zpos);
           *ttv++ = v;
           vmin.y = std::min(vmin.y, v.y);
           vmax.y = std::max(vmax.y, v.y);
@@ -250,7 +250,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       for (int i = 0; i < mapbufsize; ++i)
       {
         f->read(t, 4);
-        mccv[i] = Vec3D((float)t[2] / 127.0f, (float)t[1] / 127.0f, (float)t[0] / 127.0f);
+        mccv[i] = math::vector_3d((float)t[2] / 127.0f, (float)t[1] / 127.0f, (float)t[0] / 127.0f);
       }
     }
     f->seek(nextpos);
@@ -275,7 +275,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 
   vcenter = (vmin + vmax) * 0.5f;
 
-  Vec3D *ttv = mMinimap;
+  math::vector_3d *ttv = mMinimap;
 
   // vertices
   for (int j = 0; j<17; ++j) {
@@ -287,7 +287,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       if (j % 2) {
         xpos += 0.125f*0.5f;
       }
-      Vec3D v = Vec3D(xpos + px, zpos + py, -1);
+      math::vector_3d v = math::vector_3d(xpos + px, zpos + py, -1);
       *ttv++ = v;
     }
   }
@@ -342,7 +342,7 @@ void MapChunk::ClearShader()
 {
   for (int i = 0; i < mapbufsize; ++i)
   {
-    mccv[i] = Vec3D(1.0f, 1.0f, 1.0f);
+    mccv[i] = math::vector_3d(1.0f, 1.0f, 1.0f);
   }
 
   gl.bindBuffer(GL_ARRAY_BUFFER, mccvEntry);
@@ -504,7 +504,7 @@ MapChunk::~MapChunk()
   }
 }
 
-bool MapChunk::GetVertex(float x, float z, Vec3D *V)
+bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
 {
   float xdiff, zdiff;
 
@@ -718,7 +718,7 @@ void MapChunk::draw (Frustum const& frustum)
   opengl::texture::disable_texture();
   gl.disable(GL_LIGHTING);
 
-  Vec3D shc = gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.3f;
+  math::vector_3d shc = gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.3f;
   gl.color4f(shc.x, shc.y, shc.z, 1);
 
   //gl.color4f(1,1,1,1);
@@ -757,7 +757,7 @@ void MapChunk::draw (Frustum const& frustum)
     // draw chunks in color depending on AreaID and list color from environment
     if (Environment::getInstance()->areaIDColors.find(areaID) != Environment::getInstance()->areaIDColors.end())
     {
-      Vec3D colorValues = Environment::getInstance()->areaIDColors.find(areaID)->second;
+      math::vector_3d colorValues = Environment::getInstance()->areaIDColors.find(areaID)->second;
       gl.color4f(colorValues.x, colorValues.y, colorValues.z, 0.7f);
       gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
     }
@@ -865,19 +865,19 @@ float MapChunk::getSelectionHeight()
   return 0.0f;
 }
 
-Vec3D MapChunk::GetSelectionPosition()
+math::vector_3d MapChunk::GetSelectionPosition()
 {
   int Poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
   if (Poly + 2 > stripsize2)
   {
     LogError << "Getting selection position fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
-    return Vec3D(-1000000.0f, -1000000.0f, -1000000.0f);
+    return math::vector_3d(-1000000.0f, -1000000.0f, -1000000.0f);
   }
 
-  Vec3D lPosition;
-  lPosition = Vec3D(mVertices[gWorld->mapstrip2[Poly + 0]]);
-  lPosition += Vec3D(mVertices[gWorld->mapstrip2[Poly + 1]]);
-  lPosition += Vec3D(mVertices[gWorld->mapstrip2[Poly + 2]]);
+  math::vector_3d lPosition;
+  lPosition = math::vector_3d(mVertices[gWorld->mapstrip2[Poly + 0]]);
+  lPosition += math::vector_3d(mVertices[gWorld->mapstrip2[Poly + 1]]);
+  lPosition += math::vector_3d(mVertices[gWorld->mapstrip2[Poly + 2]]);
   lPosition *= 0.3333333f;
 
   return lPosition;
@@ -885,8 +885,8 @@ Vec3D MapChunk::GetSelectionPosition()
 
 void MapChunk::recalcNorms()
 {
-  Vec3D P1, P2, P3, P4;
-  Vec3D Norm, N1, N2, N3, N4, D;
+  math::vector_3d P1, P2, P3, P4;
+  math::vector_3d Norm, N1, N2, N3, N4, D;
 
   for (int i = 0; i<mapbufsize; ++i)
   {
@@ -1131,7 +1131,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
   return changed;
 }
 
-bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const Vec3D& origin, float angle, float orientation)
+bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, float angle, float orientation)
 {
   float speed = 1.00f;
   float dist, xdiff, zdiff, nremain;
@@ -1219,7 +1219,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
       float TotalHeight;
       float TotalWeight;
       float tx, tz, h;
-      Vec3D TempVec;
+      math::vector_3d TempVec;
       int Rad = (int)(radius / UNITSIZE);
 
       TotalHeight = 0;
@@ -1556,9 +1556,9 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   std::list<int> lDoodadIDs;
   std::list<int> lObjectIDs;
 
-  Vec3D lChunkExtents[2];
-  lChunkExtents[0] = Vec3D(xbase, 0.0f, zbase);
-  lChunkExtents[1] = Vec3D(xbase + CHUNKSIZE, 0.0f, zbase + CHUNKSIZE);
+  math::vector_3d lChunkExtents[2];
+  lChunkExtents[0] = math::vector_3d(xbase, 0.0f, zbase);
+  lChunkExtents[1] = math::vector_3d(xbase + CHUNKSIZE, 0.0f, zbase + CHUNKSIZE);
 
   // search all wmos that are inside this chunk
   lID = 0;
@@ -1804,7 +1804,7 @@ opengl::texture::set_active_texture (0);
 opengl::texture::disable_texture();
 //gl.disable(GL_LIGHTING);
 
-Vec3D Color;
+math::vector_3d Color;
 gl.begin(GL_TRIANGLE_STRIP);
 for(int i=0; i < striplen; ++i)
 {
@@ -1830,7 +1830,7 @@ _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
 
 
 
-/*void HeightColor(float height, Vec3D *Color)
+/*void HeightColor(float height, math::vector_3d *Color)
 {
 White  1.00  1.00  1.00
 Brown  0.75  0.50  0.00

@@ -24,21 +24,21 @@ WMOInstance::WMOInstance(std::string const& filename, MPQFile* _file)
 
 WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF* d)
 	: wmo(filename)
-	, pos(Vec3D(d->pos[0], d->pos[1], d->pos[2]))
-	, dir(Vec3D(d->rot[0], d->rot[1], d->rot[2]))
+	, pos(math::vector_3d(d->pos[0], d->pos[1], d->pos[2]))
+	, dir(math::vector_3d(d->rot[0], d->rot[1], d->rot[2]))
 	, mUniqueID(d->uniqueID), mFlags(d->flags)
 	, mUnknown(d->unknown), mNameset(d->nameSet)
 	, doodadset(d->doodadSet)
 	, uidLock(false)
 {
-	extents[0] = Vec3D(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
-	extents[1] = Vec3D(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
+	extents[0] = math::vector_3d(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
+	extents[1] = math::vector_3d(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
 }
 
 WMOInstance::WMOInstance(std::string const& filename)
 	: wmo(filename)
-	, pos(Vec3D(0.0f, 0.0f, 0.0f))
-	, dir(Vec3D(0.0f, 0.0f, 0.0f))
+	, pos(math::vector_3d(0.0f, 0.0f, 0.0f))
+	, dir(math::vector_3d(0.0f, 0.0f, 0.0f))
 	, mUniqueID(0)
 	, mFlags(0)
 	, mUnknown(0)
@@ -48,7 +48,7 @@ WMOInstance::WMOInstance(std::string const& filename)
 {
 }
 
-void DrawABox(Vec3D pMin, Vec3D pMax, Vec4D pColor, float pLineWidth);
+void DrawABox(math::vector_3d pMin, math::vector_3d pMax, math::vector_4d pColor, float pLineWidth);
 
 void WMOInstance::draw (Frustum const& frustum)
 {
@@ -81,7 +81,7 @@ void WMOInstance::draw (Frustum const& frustum)
 		gl.enable(GL_BLEND);
 		gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Vec4D color = wmo->hidden ? Vec4D(0.0f, 0.0f, 1.0f, 1.0f) : Vec4D(0.0f, 1.0f, 0.0f, 1.0f);
+    math::vector_4d color = wmo->hidden ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f);
 		DrawABox(extents[0], extents[1], color, 1.0f);
 
 		opengl::texture::set_active_texture (1);
@@ -118,8 +118,8 @@ void WMOInstance::intersect (math::ray const& ray, selection_result* results)
 
 void WMOInstance::recalcExtents()
 {
-	Vec3D min(100000, 100000, 100000);
-	Vec3D max(-100000, -100000, -100000);
+	math::vector_3d min(100000, 100000, 100000);
+	math::vector_3d max(-100000, -100000, -100000);
   math::matrix_4x4 rot
     ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
     * math::matrix_4x4 ( math::matrix_4x4::rotation
@@ -130,30 +130,30 @@ void WMOInstance::recalcExtents()
                        )
     );
 
-	std::vector<Vec3D> bounds (8 * (wmo->nGroups + 1));
-	Vec3D *ptr = bounds.data();
-	Vec3D wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
-	Vec3D wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
+	std::vector<math::vector_3d> bounds (8 * (wmo->nGroups + 1));
+	math::vector_3d *ptr = bounds.data();
+	math::vector_3d wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
+	math::vector_3d wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
 
-	*ptr++ = rot * Vec3D(wmoMax.x, wmoMax.y, wmoMin.z);
-	*ptr++ = rot * Vec3D(wmoMin.x, wmoMax.y, wmoMin.z);
-	*ptr++ = rot * Vec3D(wmoMin.x, wmoMin.y, wmoMin.z);
-	*ptr++ = rot * Vec3D(wmoMax.x, wmoMin.y, wmoMin.z);
-	*ptr++ = rot * Vec3D(wmoMax.x, wmoMin.y, wmoMax.z);
-	*ptr++ = rot * Vec3D(wmoMax.x, wmoMax.y, wmoMax.z);
-	*ptr++ = rot * Vec3D(wmoMin.x, wmoMax.y, wmoMax.z);
-	*ptr++ = rot * Vec3D(wmoMin.x, wmoMin.y, wmoMax.z);
+	*ptr++ = rot * math::vector_3d(wmoMax.x, wmoMax.y, wmoMin.z);
+	*ptr++ = rot * math::vector_3d(wmoMin.x, wmoMax.y, wmoMin.z);
+	*ptr++ = rot * math::vector_3d(wmoMin.x, wmoMin.y, wmoMin.z);
+	*ptr++ = rot * math::vector_3d(wmoMax.x, wmoMin.y, wmoMin.z);
+	*ptr++ = rot * math::vector_3d(wmoMax.x, wmoMin.y, wmoMax.z);
+	*ptr++ = rot * math::vector_3d(wmoMax.x, wmoMax.y, wmoMax.z);
+	*ptr++ = rot * math::vector_3d(wmoMin.x, wmoMax.y, wmoMax.z);
+	*ptr++ = rot * math::vector_3d(wmoMin.x, wmoMin.y, wmoMax.z);
 
 	for (int i = 0; i < (int)wmo->nGroups; ++i)
 	{
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMin.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMax.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMin.y, wmo->groups[i].BoundingBoxMax.z);
 	}
 
 
@@ -172,7 +172,7 @@ void WMOInstance::recalcExtents()
 	extents[1] = max;
 }
 
-bool WMOInstance::isInsideTile(Vec3D lTileExtents[2])
+bool WMOInstance::isInsideTile(math::vector_3d lTileExtents[2])
 {
   math::matrix_4x4 rot
     ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
@@ -184,24 +184,24 @@ bool WMOInstance::isInsideTile(Vec3D lTileExtents[2])
                        )
     );
 
-	std::vector<Vec3D> bounds (4 * (wmo->nGroups) + 5);
-	Vec3D *ptr = bounds.data();
-	Vec3D wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
-	Vec3D wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
+	std::vector<math::vector_3d> bounds (4 * (wmo->nGroups) + 5);
+	math::vector_3d *ptr = bounds.data();
+	math::vector_3d wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
+	math::vector_3d wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
 
 	*ptr++ = pos;
 
-	*ptr++ = rot * Vec3D(wmoMax.x, 0, wmoMax.z);
-	*ptr++ = rot * Vec3D(wmoMax.x, 0, wmoMin.z);
-	*ptr++ = rot * Vec3D(wmoMin.x, 0, wmoMax.z);
-	*ptr++ = rot * Vec3D(wmoMin.x, 0, wmoMin.z);
+	*ptr++ = rot * math::vector_3d(wmoMax.x, 0, wmoMax.z);
+	*ptr++ = rot * math::vector_3d(wmoMax.x, 0, wmoMin.z);
+	*ptr++ = rot * math::vector_3d(wmoMin.x, 0, wmoMax.z);
+	*ptr++ = rot * math::vector_3d(wmoMin.x, 0, wmoMin.z);
 
 	for (int i = 0; i < (int)wmo->nGroups; ++i)
 	{
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMax.x, 0, wmo->groups[i].BoundingBoxMax.z);
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMax.x, 0, wmo->groups[i].BoundingBoxMin.z);
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMin.x, 0, wmo->groups[i].BoundingBoxMax.z);
-		*ptr++ = rot * Vec3D(wmo->groups[i].BoundingBoxMin.x, 0, wmo->groups[i].BoundingBoxMin.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, 0, wmo->groups[i].BoundingBoxMax.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, 0, wmo->groups[i].BoundingBoxMin.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, 0, wmo->groups[i].BoundingBoxMax.z);
+		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, 0, wmo->groups[i].BoundingBoxMin.z);
 	}
 
 
@@ -216,7 +216,7 @@ bool WMOInstance::isInsideTile(Vec3D lTileExtents[2])
 	return false;
 }
 
-bool WMOInstance::isInsideChunk(Vec3D lTileExtents[2])
+bool WMOInstance::isInsideChunk(math::vector_3d lTileExtents[2])
 {
 	if (isInsideTile(lTileExtents))
 		return true;
@@ -248,7 +248,7 @@ wmo->drawPortals();
 
 void WMOInstance::resetDirection()
 {
-	dir = Vec3D(0.0f, dir.y, 0.0f);
+	dir = math::vector_3d(0.0f, dir.y, 0.0f);
 }
 
 

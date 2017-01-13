@@ -64,17 +64,17 @@ void UIGradient::render() const
 
 void UIGradient::setMaxColor(float r, float g, float b, float a)
 {
-	MaxColor = Vec4D(r, g, b, a);
+	MaxColor = math::vector_4d(r, g, b, a);
 }
 
 void UIGradient::setMinColor(float r, float g, float b, float a)
 {
-	MinColor = Vec4D(r, g, b, a);
+	MinColor = math::vector_4d(r, g, b, a);
 }
 
 void UIGradient::setClickColor(float r, float g, float b, float a)
 {
-	ClickColor = Vec4D(r, g, b, a);
+	ClickColor = math::vector_4d(r, g, b, a);
 }
 
 void UIGradient::setClickFunc(void(*f)(float val))

@@ -284,8 +284,8 @@ World::World(const std::string& name)
   , minimap(0)
   , mapstrip(NULL)
   , mapstrip2(NULL)
-  , camera(Vec3D(0.0f, 0.0f, 0.0f))
-  , lookat(Vec3D(0.0f, 0.0f, 0.0f))
+  , camera(math::vector_3d(0.0f, 0.0f, 0.0f))
+  , lookat(math::vector_3d(0.0f, 0.0f, 0.0f))
 {
   for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
   {
@@ -471,8 +471,8 @@ void World::initLowresTerrain()
 
   int16_t tilebuf[17 * 17];
   int16_t tilebuf2[16 * 16];
-  Vec3D lowres[17][17];
-  Vec3D lowsub[16][16];
+  math::vector_3d lowres[17][17];
+  math::vector_3d lowsub[16][16];
   int32_t ofsbuf[64][64];
 
   MPQFile f(filename.str());
@@ -508,14 +508,14 @@ void World::initLowresTerrain()
             {
               for (size_t x = 0; x<17; x++)
               {
-                lowres[y][x] = Vec3D(TILESIZE*(i + x / 16.0f), tilebuf[y * 17 + x], TILESIZE*(j + y / 16.0f));
+                lowres[y][x] = math::vector_3d(TILESIZE*(i + x / 16.0f), tilebuf[y * 17 + x], TILESIZE*(j + y / 16.0f));
               }
             }
             for (size_t y = 0; y<16; y++)
             {
               for (size_t x = 0; x<16; x++)
               {
-                lowsub[y][x] = Vec3D(TILESIZE*(i + (x + 0.5f) / 16.0f), tilebuf2[y * 16 + x], TILESIZE*(j + (y + 0.5f) / 16.0f));
+                lowsub[y][x] = math::vector_3d(TILESIZE*(i + (x + 0.5f) / 16.0f), tilebuf2[y * 16 + x], TILESIZE*(j + (y + 0.5f) / 16.0f));
               }
             }
 
@@ -578,7 +578,7 @@ void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
 {
   if (!*pDetailTexCoords && !*pAlphaTexCoords)
   {
-    Vec2D temp[mapbufsize], *vt;
+    math::vector_2d temp[mapbufsize], *vt;
     float tx, ty;
 
     // init texture coordinates for detail map:
@@ -592,7 +592,7 @@ void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
           // offset by half
           tx += detail_half;
         }
-        *vt++ = Vec2D(tx, ty);
+        *vt++ = math::vector_2d(tx, ty);
       }
     }
 
@@ -612,7 +612,7 @@ void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
           // offset by half
           tx += alpha_half;
         }
-        *vt++ = Vec2D(tx, ty);
+        *vt++ = math::vector_2d(tx, ty);
       }
     }
 
@@ -712,18 +712,18 @@ World::~World()
 
 void World::outdoorLighting()
 {
-  Vec4D black(0, 0, 0, 0);
-  Vec4D ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
+  math::vector_4d black(0, 0, 0, 0);
+  math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
   gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
 
   float di = outdoorLightStats.dayIntensity;
   //float ni = outdoorLightStats.nightIntensity;
 
-  Vec3D dd = outdoorLightStats.dayDir;
+  math::vector_3d dd = outdoorLightStats.dayDir;
   // HACK: let's just keep the light source in place for now
-  //Vec4D pos(-1, 1, -1, 0);
-  Vec4D pos(-dd.x, -dd.z, dd.y, 0.0f);
-  Vec4D col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1.0f);
+  //math::vector_4d pos(-1, 1, -1, 0);
+  math::vector_4d pos(-dd.x, -dd.z, dd.y, 0.0f);
+  math::vector_4d col(skies->colorSet[LIGHT_GLOBAL_DIFFUSE] * di, 1.0f);
   gl.lightfv(GL_LIGHT0, GL_AMBIENT, black);
   gl.lightfv(GL_LIGHT0, GL_DIFFUSE, col);
   gl.lightfv(GL_LIGHT0, GL_POSITION, pos);
@@ -735,7 +735,7 @@ void World::outdoorLights(bool on)
   float ni = outdoorLightStats.nightIntensity;
 
   if (on) {
-    Vec4D ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
+    math::vector_4d ambient(skies->colorSet[LIGHT_GLOBAL_AMBIENT], 1);
     gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
     if (di>0) {
       gl.enable(GL_LIGHT0);
@@ -751,7 +751,7 @@ void World::outdoorLights(bool on)
     }
   }
   else {
-    Vec4D ambient(0, 0, 0, 1);
+    math::vector_4d ambient(0, 0, 0, 1);
     gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
     gl.disable(GL_LIGHT0);
     gl.disable(GL_LIGHT1);
@@ -771,7 +771,7 @@ void World::setupFog()
     culldistance = fogdist;
 
     //FOG_COLOR
-    Vec4D fogcolor(skies->colorSet[FOG_COLOR], 1);
+    math::vector_4d fogcolor(skies->colorSet[FOG_COLOR], 1);
     gl.fogfv(GL_FOG_COLOR, fogcolor);
     //! \todo  retreive fogstart and fogend from lights.lit somehow
     gl.fogf(GL_FOG_END, fogdist);
@@ -1153,7 +1153,7 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
   return results;
 }
 
-Vec3D World::getCursorPosOnModel()
+math::vector_3d World::getCursorPosOnModel()
 {
   if (terrainMode == 9)
   {
@@ -1446,9 +1446,9 @@ void World::drawTileMode(float /*ah*/)
   ez = (int)(camera.z / TILESIZE);
 }
 
-bool World::GetVertex(float x, float z, Vec3D *V)
+bool World::GetVertex(float x, float z, math::vector_3d *V)
 {
-  tile_index tile(Vec3D(x, 0, z));
+  tile_index tile(math::vector_3d(x, 0, z));
 
   if (!mapIndex->tileLoaded(tile))
   {
@@ -1527,7 +1527,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
   }
 }
 
-void World::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const Vec3D& origin, float angle, float orientation)
+void World::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, float angle, float orientation)
 {
   std::vector<MapChunk*> chunks;
 
@@ -1622,7 +1622,7 @@ bool World::sprayTexture(float x, float z, Brush *brush, float strength, float p
 
 void World::eraseTextures(float x, float z)
 {
-  tile_index tile(Vec3D(x, 0, z));
+  tile_index tile(math::vector_3d(x, 0, z));
   mapIndex->setChanged(tile);
 
   LogDebug << "Erasing Textures at " << x << " and " << z << std::endl;
@@ -1657,7 +1657,7 @@ void World::eraseTextures(float x, float z)
 
 void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
 {
-  tile_index tile(Vec3D(x, 0, z));
+  tile_index tile(math::vector_3d(x, 0, z));
   mapIndex->setChanged(tile);
 
   LogDebug << "Switching Textures at " << x << " and " << z << std::endl;
@@ -1690,7 +1690,7 @@ void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* ol
 
 void World::addHole(float x, float z, bool big)
 {
-  tile_index tile(Vec3D(x, 0, z));
+  tile_index tile(math::vector_3d(x, 0, z));
 
   for (size_t j = tile.z - 1; j < tile.z + 1; ++j)
   {
@@ -1730,7 +1730,7 @@ void World::addHole(float x, float z, bool big)
 
 void World::removeHole(float x, float z, bool big)
 {
-  tile_index tile(Vec3D(x, 0, z));
+  tile_index tile(math::vector_3d(x, 0, z));
 
   for (size_t j = tile.z - 1; j < tile.z + 1; ++j)
   {
@@ -1771,7 +1771,7 @@ void World::removeHole(float x, float z, bool big)
 
 void World::addHoleADT(float x, float z)
 {
-  tile_index tile(Vec3D(x, 0, z));
+  tile_index tile(math::vector_3d(x, 0, z));
 
   MapTile* mTile = mapIndex->getTile(tile);
   mapIndex->setChanged(tile);
@@ -1787,7 +1787,7 @@ void World::addHoleADT(float x, float z)
 
 void World::removeHoleADT(float x, float z)
 {
-  tile_index tile(Vec3D(x, 0, z));
+  tile_index tile(math::vector_3d(x, 0, z));
 
   MapTile* mTile = mapIndex->getTile(tile);
   mapIndex->setChanged(x, z);
@@ -1801,7 +1801,7 @@ void World::removeHoleADT(float x, float z)
   }
 }
 
-void World::jumpToCords(Vec3D pos)
+void World::jumpToCords(math::vector_3d pos)
 {
   this->camera = pos;
 }
@@ -1983,7 +1983,7 @@ void World::ensure_instance_maps_having_correct_keys_and_unlock_uids()
   }
 }
 
-void World::addModel(selection_type entry, Vec3D newPos, bool copyit)
+void World::addModel(selection_type entry, math::vector_3d newPos, bool copyit)
 {
   if (entry.which() == eEntry_Model)
     this->addM2(boost::get<selected_model_type> (entry)->model->_filename, newPos, copyit);
@@ -1991,7 +1991,7 @@ void World::addModel(selection_type entry, Vec3D newPos, bool copyit)
     this->addWMO(boost::get<selected_wmo_type> (entry)->wmo->_filename, newPos, copyit);
 }
 
-void World::addM2(std::string const& filename, Vec3D newPos, bool copyit)
+void World::addM2(std::string const& filename, math::vector_3d newPos, bool copyit)
 {
   int temp = 0;
   if (mModelInstances.empty()) {
@@ -2046,7 +2046,7 @@ void World::addM2(std::string const& filename, Vec3D newPos, bool copyit)
   mModelInstances.emplace(lMaxUID, std::move(newModelis));
 }
 
-void World::addWMO(std::string const& filename, Vec3D newPos, bool copyit)
+void World::addWMO(std::string const& filename, math::vector_3d newPos, bool copyit)
 {
 
   const int lMaxUID = std::max((mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1),
@@ -2526,7 +2526,7 @@ void World::fixAllGaps()
 
 bool World::isUnderMap(float x, float z, float h)
 {
-  tile_index tile(Vec3D(x, 0, z));
+  tile_index tile(math::vector_3d(x, 0, z));
 
   if (mapIndex->tileLoaded(tile))
   {

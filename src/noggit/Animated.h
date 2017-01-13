@@ -7,7 +7,7 @@
 
 #include "ModelHeaders.h"
 #include "MPQ.h"
-#include "Quaternion.h"
+#include "math/quaternion.hpp"
 
 //! \todo Pass this in somehow and don't define as extern.
 // global time for global sequences
@@ -40,10 +40,10 @@ namespace Animation
 	};
 
 	template<>
-	inline Quaternion Conversion<PackedQuaternion, Quaternion>::operator()(const PackedQuaternion& value)
+	inline math::quaternion Conversion<math::packed_quaternion, math::quaternion>::operator()(const math::packed_quaternion& value)
 	{
 		//! \todo Check if this is really correct.
-		return Quaternion(
+		return math::quaternion(
 			static_cast<float>((value.x > 0 ? value.x - 32767 : value.x + 32767) / 32767.0f),
 			static_cast<float>((value.y > 0 ? value.y - 32767 : value.y + 32767) / 32767.0f),
 			static_cast<float>((value.z > 0 ? value.z - 32767 : value.z + 32767) / 32767.0f),

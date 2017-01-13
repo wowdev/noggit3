@@ -5,7 +5,7 @@
 #include <map>
 
 #include "Selection.h"
-#include "Vec3D.h"
+#include "math/vector_3d.hpp"
 
 #include <boost/optional.hpp>
 
@@ -17,12 +17,12 @@ public:
 	void set_clipboard(boost::optional<selection_type> entry);
 	void clear_clipboard();
 	bool is_clipboard();
-  Vec3D get_cursor_pos();
+  math::vector_3d get_cursor_pos();
 
 	bool view_holelines;
 	// values for areaID painting
 	int selectedAreaID;
-	std::map<int, Vec3D> areaIDColors; // List of all area IDs to draw them with different colors
+	std::map<int, math::vector_3d> areaIDColors; // List of all area IDs to draw them with different colors
 	// hold keys
 	bool ShiftDown;
 	bool AltDown;
