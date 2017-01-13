@@ -260,6 +260,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   gl.genBuffers(1, &vertices);
   gl.genBuffers(1, &normals);
   gl.genBuffers(1, &mccvEntry);
+  gl.genBuffers (1, &indices);
 
   gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
   gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
@@ -471,8 +472,10 @@ void MapChunk::initStrip()
     }
   }
   striplen = static_cast<int>(s - strip);
-}
 
+  gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, indices);
+  gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, striplen * sizeof (StripType), strip, GL_STATIC_DRAW);
+}
 
 MapChunk::~MapChunk()
 {
@@ -492,6 +495,7 @@ MapChunk::~MapChunk()
   gl.deleteBuffers(1, &vertices);
   gl.deleteBuffers(1, &normals);
   gl.deleteBuffers(1, &mccvEntry);
+  gl.deleteBuffers (1, &indices);
 
   if (strip)
   {
@@ -540,7 +544,7 @@ float MapChunk::getMinHeight()
 void MapChunk::drawPass(int id)
 {
   textureSet->startAnim(id);
-  gl.drawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, strip);
+  gl.drawElements(GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
   textureSet->stopAnim(id);
 }
 
@@ -654,6 +658,7 @@ void MapChunk::draw (Frustum const& frustum)
   gl.vertexPointer(3, GL_FLOAT, 0, 0);
   gl.bindBuffer(GL_ARRAY_BUFFER, normals);
   gl.normalPointer(GL_FLOAT, 0, 0);
+  gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
 
   if (hasMCCV)
   {
@@ -731,6 +736,7 @@ void MapChunk::draw (Frustum const& frustum)
 
   drawPass(-1);
 
+  gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
   opengl::texture::disable_texture();
   gl.disable(GL_LIGHTING);
 
