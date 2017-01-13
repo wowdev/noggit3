@@ -11,8 +11,8 @@
 #include "ModelInstance.h" // ModelInstance
 #include "ModelManager.h"
 #include "MPQ.h"
-#include "Quaternion.h"
-#include "Vec3D.h"
+#include "math/quaternion.hpp"
+#include "math/vector_3d.hpp"
 #include "Video.h"
 #include <opengl/call_list.hpp>
 #include <math/ray.hpp>
@@ -36,9 +36,9 @@ struct WMOBatch {
 class WMOGroup {
 	WMO *wmo;
 	uint32_t flags;
-	Vec3D v1, v2;
+	math::vector_3d v1, v2;
 	uint32_t nTriangles, nVertices;
-	Vec3D center;
+	math::vector_3d center;
 	float rad;
 	int32_t num;
 	int32_t fog;
@@ -47,15 +47,15 @@ class WMOGroup {
 	Liquid *lq;
   std::vector< std::pair<opengl::call_list*, bool> > _lists;
 
-  std::vector<Vec3D> vertices;
+  std::vector<math::vector_3d> vertices;
   std::vector<WMOBatch> batches;
   std::vector<uint16_t> indices;
 
 public:
-	Vec3D BoundingBoxMin;
-	Vec3D BoundingBoxMax;
-	Vec3D VertexBoxMin;
-	Vec3D VertexBoxMax;
+	math::vector_3d BoundingBoxMin;
+	math::vector_3d BoundingBoxMax;
+	math::vector_3d VertexBoxMin;
+	math::vector_3d VertexBoxMax;
 	bool indoor, hascv;
 	bool visible;
 
@@ -67,9 +67,9 @@ public:
 	void init(WMO *wmo, MPQFile* f, int num, char *names);
 	void initDisplayList();
 	void initLighting(int nLR, uint16_t *useLights);
-	void draw(const Vec3D& ofs, math::degrees const, Frustum const&);
+	void draw(const math::vector_3d& ofs, math::degrees const, Frustum const&);
 	void drawLiquid();
-	void drawDoodads(unsigned int doodadset, const Vec3D& ofs, math::degrees const, Frustum const&);
+	void drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const, Frustum const&);
 	void setupFog();
   void intersect (math::ray const&, std::vector<float>* results) const;
 };
@@ -95,21 +95,21 @@ struct WMOMaterial {
 
 struct WMOLight {
 	uint32_t flags, color;
-	Vec3D pos;
+	math::vector_3d pos;
 	float intensity;
 	float unk[5];
 	float r;
 
-	Vec4D fcolor;
+	math::vector_4d fcolor;
 
 	void init(MPQFile* f);
 	void setup(GLint light);
 
-	static void setupOnce(GLint light, Vec3D dir, Vec3D lcol);
+	static void setupOnce(GLint light, math::vector_3d dir, math::vector_3d lcol);
 };
 
 struct WMOPV {
-	Vec3D a, b, c, d;
+	math::vector_3d a, b, c, d;
 };
 
 struct WMOPR {
@@ -125,20 +125,20 @@ struct WMODoodadSet {
 
 struct WMOLiquidHeader {
 	int32_t X, Y, A, B;
-	Vec3D pos;
+	math::vector_3d pos;
 	int16_t type;
 };
 
 struct WMOFog {
 	unsigned int flags;
-	Vec3D pos;
+	math::vector_3d pos;
 	float r1, r2, fogend, fogstart;
 	unsigned int color1;
 	float f2;
 	float f3;
 	unsigned int color2;
 	// read to here (0x30 bytes)
-	Vec4D color;
+	math::vector_4d color;
 	void init(MPQFile* f);
 	void setup();
 };
@@ -155,7 +155,7 @@ public:
 	WMOGroup *groups;
 	unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
 	WMOMaterial *mat;
-	Vec3D extents[2];
+	math::vector_3d extents[2];
 	std::vector<std::string> textures;
 	std::vector<std::string> models;
 	std::vector<ModelInstance> modelis;
@@ -172,10 +172,10 @@ public:
 
 	explicit WMO(const std::string& name);
 	~WMO();
-	void draw(int doodadset, const Vec3D& ofs, math::degrees const, bool boundingbox, bool groupboxes, bool highlight, Frustum const&) const;
+	void draw(int doodadset, const math::vector_3d& ofs, math::degrees const, bool boundingbox, bool groupboxes, bool highlight, Frustum const&) const;
   std::vector<float> intersect (math::ray const&) const;
 	//void drawPortals();
-	bool drawSkybox(Vec3D pCamera, Vec3D pLower, Vec3D pUpper) const;
+	bool drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vector_3d pUpper) const;
 
   bool hidden;
   void toggleVisibility();

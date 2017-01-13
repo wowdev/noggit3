@@ -56,7 +56,7 @@ bool Environment::is_clipboard()
 	return !!clipboard;
 }
 
-Vec3D Environment::get_cursor_pos()
+math::vector_3d Environment::get_cursor_pos()
 {
-  return Vec3D(Pos3DX, Pos3DY, Pos3DZ);
+  return math::vector_3d(Pos3DX, Pos3DY, Pos3DZ);
 }

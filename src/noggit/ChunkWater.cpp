@@ -25,7 +25,7 @@ void ChunkWater::reloadRendering()
   {
     if (!Liquids[k])
     {
-      Liquids[k] = new Liquid(Info[k].width, Info[k].height, Vec3D(x, Info[k].minHeight, y));
+      Liquids[k] = new Liquid(Info[k].width, Info[k].height, math::vector_3d(x, Info[k].minHeight, y));
     }      
 
     MH2O_Tile lTile;

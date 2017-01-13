@@ -518,7 +518,7 @@ MapChunk* MapTile::getChunk(unsigned int x, unsigned int z)
   }
 }
 
-bool MapTile::GetVertex(float x, float z, Vec3D *V)
+bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 {
   int xcol = (int)((x - xbase) / CHUNKSIZE);
   int ycol = (int)((z - zbase) / CHUNKSIZE);
@@ -533,9 +533,9 @@ void MapTile::clearAllModels()
   Log << "Clear all models from ADT \"" << mFilename << "\"." << std::endl;
 
   // Check which doodads and WMOs are on this ADT.
-  Vec3D lTileExtents[2];
-  lTileExtents[0] = Vec3D(this->xbase, 0.0f, this->zbase);
-  lTileExtents[1] = Vec3D(this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE);
+  math::vector_3d lTileExtents[2];
+  lTileExtents[0] = math::vector_3d(this->xbase, 0.0f, this->zbase);
+  lTileExtents[1] = math::vector_3d(this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE);
 
   for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
     if (it->second.isInsideTile(lTileExtents))
@@ -567,13 +567,13 @@ void MapTile::saveTile()
   // Collect some information we need later.
 
   // Check which doodads and WMOs are on this ADT.
-  Vec3D lTileExtents[2];
+  math::vector_3d lTileExtents[2];
   // unsigned int UID(0);
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
 
-  lTileExtents[0] = Vec3D(this->xbase, 0.0f, this->zbase);
-  lTileExtents[1] = Vec3D(this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE);
+  lTileExtents[0] = math::vector_3d(this->xbase, 0.0f, this->zbase);
+  lTileExtents[1] = math::vector_3d(this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE);
 
   // TODO: Steff > needs to reimplement UID recalculation
   // UID += mPositionX * 10000000;

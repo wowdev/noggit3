@@ -4,7 +4,7 @@
 #include <set>
 #include <stdint.h>
 
-#include "Vec3D.h" // Vec3D
+#include "math/vector_3d.hpp" // math::vector_3d
 #include "WMO.h"
 #include <math/ray.hpp>
 
@@ -15,9 +15,9 @@ class WMOInstance
 {
 public:
 	scoped_wmo_reference wmo;
-	Vec3D pos;
-	Vec3D  extents[2];
-	Vec3D  dir;
+	math::vector_3d pos;
+	math::vector_3d  extents[2];
+	math::vector_3d  dir;
 	unsigned int mUniqueID;
 	uint16_t mFlags;
 	uint16_t mUnknown;
@@ -69,8 +69,8 @@ public:
 	void recalcExtents();
 	void resetDirection();
 
-	bool isInsideTile(Vec3D lTileExtents[2]);
-	bool isInsideChunk(Vec3D lTileExtents[2]);
+	bool isInsideTile(math::vector_3d lTileExtents[2]);
+	bool isInsideChunk(math::vector_3d lTileExtents[2]);
 
 	bool hasUIDLock();
 	void lockUID();

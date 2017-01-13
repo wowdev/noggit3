@@ -9,7 +9,7 @@
 #include <cstring>
 
 #include "Log.h"
-#include "Vec3D.h"
+#include "math/vector_3d.hpp"
 
 // namespace for static helper functions.
 
@@ -135,10 +135,10 @@ struct filenameOffsetThing
 
 void SetChunkHeader(sExtendableArray pArray, int pPosition, int pMagix, int pSize = 0);
 
-bool pointInside(Vec3D point, Vec3D extents[2]);
-void minmax(Vec3D* a, Vec3D* b);
+bool pointInside(math::vector_3d point, math::vector_3d extents[2]);
+void minmax(math::vector_3d* a, math::vector_3d* b);
 
-bool checkInside(Vec3D extentA[2], Vec3D extentB[2]);
-bool checkOriginInside(Vec3D extentA[2], Vec3D modelPos);
+bool checkInside(math::vector_3d extentA[2], math::vector_3d extentB[2]);
+bool checkOriginInside(math::vector_3d extentA[2], math::vector_3d modelPos);
 
 #endif

@@ -75,7 +75,7 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
 		my < borderwidth || my > height() - borderwidth)
 		return NULL;
 
-  Vec3D pos((mx - borderwidth), 0.0f, (my - borderwidth));
+  math::vector_3d pos((mx - borderwidth), 0.0f, (my - borderwidth));
   pos *= TILESIZE / tilesize; // minimap pos => real pos
 	
   // is there a tile?

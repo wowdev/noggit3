@@ -4,7 +4,7 @@
 #include "MPQ.h"
 #include "MapHeaders.h"
 #include "MapTile.h"
-#include "Vec3D.h"
+#include "math/vector_3d.hpp"
 
 class ChunkWater;
 class sExtendableArray;

@@ -81,9 +81,9 @@ int tool_settings_y;
 
 bool MoveObj;
 
-Vec3D objMove;
-Vec3D objMoveOffset;
-Vec3D objRot;
+math::vector_3d objMove;
+math::vector_3d objMoveOffset;
+math::vector_3d objRot;
 
 boost::optional<selection_type> lastSelected;
 
@@ -158,7 +158,7 @@ float flattenAngle = 0.0f;
 UISlider* flatten_orientation;
 float flattenOrientation = 0.0f;
 
-Vec3D flattenRelativePos(0, 0, 0);
+math::vector_3d flattenRelativePos(0, 0, 0);
 bool flattenRelativeMode = false;
 UITextBox* flatten_relative_x;
 UITextBox* flatten_relative_y;
@@ -530,7 +530,7 @@ void SnapSelectedObjectToGround(UIFrame*, int)
   if (gWorld->IsSelection(eEntry_WMO))
   {
     WMOInstance* wmo = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection());
-    Vec3D t = Vec3D(wmo->pos.x, wmo->pos.z, 0);
+    math::vector_3d t = math::vector_3d(wmo->pos.x, wmo->pos.z, 0);
     gWorld->GetVertex(wmo->pos.x, wmo->pos.z, &t);
     wmo->pos.y = t.y;
     gWorld->updateTilesWMO(wmo);
@@ -538,7 +538,7 @@ void SnapSelectedObjectToGround(UIFrame*, int)
   else if (gWorld->IsSelection(eEntry_Model))
   {
     ModelInstance* m2 = boost::get<selected_model_type> (*gWorld->GetCurrentSelection());
-    Vec3D t = Vec3D(m2->pos.x, m2->pos.z, 0);
+    math::vector_3d t = math::vector_3d(m2->pos.x, m2->pos.z, 0);
     gWorld->GetVertex(m2->pos.x, m2->pos.z, &t);
     m2->pos.y = t.y;
     gWorld->updateTilesModel(m2);
@@ -699,7 +699,7 @@ void InsertObject(UIFrame*, int id)
   }
 
 
-  Vec3D selectionPosition;
+  math::vector_3d selectionPosition;
   switch (gWorld->GetCurrentSelection()->which())
   {
   case eEntry_Model:
@@ -860,8 +860,8 @@ void changeZoneIDValue(UIFrame* /*f*/, int set)
   Environment::getInstance()->selectedAreaID = set;
   if (Environment::getInstance()->areaIDColors.find(set) == Environment::getInstance()->areaIDColors.end())
   {
-    Vec3D newColor = Vec3D(misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f));
-    Environment::getInstance()->areaIDColors.insert(std::pair<int, Vec3D>(set, newColor));
+    math::vector_3d newColor = math::vector_3d(misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f));
+    Environment::getInstance()->areaIDColors.insert(std::pair<int, math::vector_3d>(set, newColor));
   }
 }
 
@@ -1366,7 +1366,7 @@ MapView::MapView(float ah0, float av0)
   createGUI();
 
   // Set camera y (height) position to current ground height plus some space.
-  Vec3D t = Vec3D(0, 0, 0);
+  math::vector_3d t = math::vector_3d(0, 0, 0);
   tile_index tile(gWorld->camera);
   if (!gWorld->mapIndex->tileLoaded(tile))
   {
@@ -1454,9 +1454,9 @@ void MapView::tick(float t, float dt)
 
   if (SDL_GetAppState() & SDL_APPINPUTFOCUS)
   {
-    Vec3D dir(1.0f, 0.0f, 0.0f);
-    Vec3D dirUp(1.0f, 0.0f, 0.0f);
-    Vec3D dirRight(0.0f, 0.0f, 1.0f);
+    math::vector_3d dir(1.0f, 0.0f, 0.0f);
+    math::vector_3d dirUp(1.0f, 0.0f, 0.0f);
+    math::vector_3d dirRight(0.0f, 0.0f, 1.0f);
     math::rotate(0.0f, 0.0f, &dir.x, &dir.y, math::degrees(av));
     math::rotate(0.0f, 0.0f, &dir.x, &dir.z, math::degrees(ah));
 
@@ -1527,7 +1527,7 @@ void MapView::tick(float t, float dt)
         }
       }
 
-      Vec3D ObjPos;
+      math::vector_3d ObjPos;
       if (gWorld->IsSelection(eEntry_Model))
       {
         //! \todo  Tell me what this is.
@@ -1890,12 +1890,12 @@ void MapView::tick(float t, float dt)
         gWorld->camera += dir * dt * movespd * moving;
       if (strafing)
       {
-        Vec3D right = dir % Vec3D(0.0f, 1.0f, 0.0f);
+        math::vector_3d right = dir % math::vector_3d(0.0f, 1.0f, 0.0f);
         right.normalize();
         gWorld->camera += right * dt * movespd * strafing;
       }
       if (updown)
-        gWorld->camera += Vec3D(0.0f, dt * movespd * updown, 0.0f);
+        gWorld->camera += math::vector_3d(0.0f, dt * movespd * updown, 0.0f);
 
       gWorld->lookat = gWorld->camera + dir;
     }
@@ -2347,7 +2347,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
       }
       else if (terrainMode == 3)
       {
-        Vec3D cam = gWorld->camera;
+        math::vector_3d cam = gWorld->camera;
         if (Environment::getInstance()->AltDown)
         {
           gWorld->addHoleADT(cam.x, cam.z);
@@ -2545,7 +2545,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
       {
         if (gWorld->HasSelection())
         {
-          Vec3D pos = Environment::getInstance()->get_cursor_pos();
+          math::vector_3d pos = Environment::getInstance()->get_cursor_pos();
           auto selection = gWorld->GetCurrentSelection();
 
           if (selection->which() == eEntry_Model)
@@ -3024,7 +3024,7 @@ void MapView::mouseclick(SDL_MouseButtonEvent *e)
       {
         MoveObj = true;
         auto selection = gWorld->GetCurrentSelection();
-        Vec3D objPos;
+        math::vector_3d objPos;
         if (selection->which() == eEntry_WMO)
         {
           objPos = boost::get<selected_wmo_type> (*selection)->pos;

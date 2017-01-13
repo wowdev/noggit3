@@ -72,7 +72,7 @@ class Liquid
 {
 public:
 
-	Liquid(int x, int y, Vec3D base, float ptilesize = LQ_DEFAULT_TILESIZE);
+	Liquid(int x, int y, math::vector_3d base, float ptilesize = LQ_DEFAULT_TILESIZE);
 	~Liquid();
 
 	void initFromWMO(MPQFile* f, const WMOMaterial &mat, bool indoor);
@@ -90,7 +90,7 @@ private:
 	int xtiles, ytiles;
   opengl::call_list* mDrawList;
 
-	Vec3D pos;
+	math::vector_3d pos;
 
 	float tilesize;
 	float ydir;
@@ -103,7 +103,7 @@ private:
 
 	int type;
 	std::vector<OpenGL::Texture*> textures;
-	Vec3D col;
+	math::vector_3d col;
 	int tmpflag;
 	bool trans;
 

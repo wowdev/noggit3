@@ -3,7 +3,7 @@
 
 #include "UIWindow.h"
 #include "Selection.h"
-#include "Vec3D.h"
+#include "math/vector_3d.hpp"
 
 class UIModelImport;
 class UIStatusBar;

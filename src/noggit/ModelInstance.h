@@ -4,7 +4,7 @@
 #include "MapHeaders.h" // ENTRY_MDDF
 #include "ModelManager.h"
 #include "MPQ.h" // MPQFile
-#include "Vec3D.h" // Vec3D
+#include "math/vector_3d.hpp" // math::vector_3d
 #include <math/ray.hpp>
 #include "Selection.h"
 
@@ -15,17 +15,17 @@ class ModelInstance
 {
 public:
 	scoped_model_reference model;
-	Vec3D extents[2];
+	math::vector_3d extents[2];
 
-	Vec3D pos, dir;
+	math::vector_3d pos, dir;
 
 	//! \todo  Get this out and do somehow else.
 	unsigned int d1;
 
 	float w, sc;
 
-	Vec3D ldir;
-	Vec3D lcol;
+	math::vector_3d ldir;
+	math::vector_3d lcol;
 
 	explicit ModelInstance(std::string const& filename);
 	explicit ModelInstance(std::string const& filename, MPQFile* f);
@@ -67,7 +67,7 @@ public:
 	void drawMapTile();
 	//  void drawHighlight();
   void intersect (math::ray const&, selection_result*);
-	void draw2(const Vec3D& ofs, const math::degrees, Frustum const&);
+	void draw2(const math::vector_3d& ofs, const math::degrees, Frustum const&);
 
 	void resetDirection();
 
@@ -75,8 +75,8 @@ public:
 	void lockUID();
 	void unlockUID();
 
-	bool isInsideTile(Vec3D lTileExtents[2]);
-	bool isInsideChunk(Vec3D lTileExtents[2]);
+	bool isInsideTile(math::vector_3d lTileExtents[2]);
+	bool isInsideChunk(math::vector_3d lTileExtents[2]);
 
 	void recalcExtents();
 

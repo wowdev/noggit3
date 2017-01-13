@@ -114,14 +114,14 @@ void Menu::randBackground()
 }
 
 
-void Menu::enterMapAt(Vec3D pos, bool pAutoHeight, float av, float ah)
+void Menu::enterMapAt(math::vector_3d pos, bool pAutoHeight, float av, float ah)
 {
 	video.farclip((const float)Settings::getInstance()->FarZ);
 
 	gWorld->autoheight = pAutoHeight;
 
-	gWorld->camera = Vec3D(pos.x, pos.y, pos.z);
-	gWorld->lookat = Vec3D(pos.x, pos.y, pos.z - 1.0f);
+	gWorld->camera = math::vector_3d(pos.x, pos.y, pos.z);
+	gWorld->lookat = math::vector_3d(pos.x, pos.y, pos.z - 1.0f);
 
 	gWorld->initDisplay();
 	gWorld->mapIndex->enterTile(tile_index(pos));
@@ -158,7 +158,7 @@ void Menu::display(float /*t*/, float /*dt*/)
 
 	gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	Vec4D la(0.1f, 0.1f, 0.1f, 1.0f);
+	math::vector_4d la(0.1f, 0.1f, 0.1f, 1.0f);
 	gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
 
 	gl.enable(GL_COLOR_MATERIAL);

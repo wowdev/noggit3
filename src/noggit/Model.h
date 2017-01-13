@@ -15,19 +15,19 @@ class Bone;
 #include "ModelHeaders.h"
 #include "MPQ.h"
 #include "Particle.h"
-#include "Quaternion.h"
-#include "Vec3D.h"
+#include "math/quaternion.hpp"
+#include "math/vector_3d.hpp"
 #include "Video.h" // GLuint
 
-Vec3D fixCoordSystem(Vec3D v);
+math::vector_3d fixCoordSystem(math::vector_3d v);
 
 class Bone {
-	Animation::M2Value<Vec3D> trans;
-	Animation::M2Value<Quaternion, PackedQuaternion> rot;
-	Animation::M2Value<Vec3D> scale;
+	Animation::M2Value<math::vector_3d> trans;
+	Animation::M2Value<math::quaternion, math::packed_quaternion> rot;
+	Animation::M2Value<math::vector_3d> scale;
 
 public:
-	Vec3D pivot;
+	math::vector_3d pivot;
 	int parent;
 
 	bool billboard;
@@ -42,10 +42,10 @@ public:
 
 
 class TextureAnim {
-	Animation::M2Value<Vec3D> trans, rot, scale;
+	Animation::M2Value<math::vector_3d> trans, rot, scale;
 
 public:
-	Vec3D tval, rval, sval;
+	math::vector_3d tval, rval, sval;
 
 	void calc(int anim, int time);
 	void init(const MPQFile& f, const ModelTexAnimDef &mta, int *global);
@@ -53,7 +53,7 @@ public:
 };
 
 struct ModelColor {
-	Animation::M2Value<Vec3D> color;
+	Animation::M2Value<math::vector_3d> color;
 	Animation::M2Value<float, int16_t> opacity;
 
 	void init(const MPQFile& f, const ModelColorDef &mcd, int *global);
@@ -91,7 +91,7 @@ struct ModelRenderPass {
 	bool swrap, twrap;
 
 	// colours
-	Vec4D ocol, ecol;
+	math::vector_4d ocol, ecol;
 
 	bool init(Model *m);
 	void deinit();
@@ -108,9 +108,9 @@ struct ModelRenderPass {
 struct ModelCamera {
 	bool ok;
 
-	Vec3D pos, target;
+	math::vector_3d pos, target;
 	float nearclip, farclip, fov;
-	Animation::M2Value<Vec3D> tPos, tTarget;
+	Animation::M2Value<math::vector_3d> tPos, tTarget;
 	Animation::M2Value<float> rot;
 
 	void init(const MPQFile& f, const ModelCameraDef &mcd, int *global);
@@ -121,8 +121,8 @@ struct ModelCamera {
 
 struct ModelLight {
 	int type, parent;
-	Vec3D pos, tpos, dir, tdir;
-	Animation::M2Value<Vec3D> diffColor, ambColor;
+	math::vector_3d pos, tpos, dir, tdir;
+	Animation::M2Value<math::vector_3d> diffColor, ambColor;
 	Animation::M2Value<float> diffIntensity, ambIntensity;
 	//Animation::M2Value<float> attStart,attEnd;
 	//Animation::M2Value<bool> Enabled;
@@ -164,7 +164,7 @@ class Model : public ManagedItem, public AsyncObject {
 	void initStatic(const MPQFile& f);
 
 	ModelVertex *origVertices;
-	Vec3D *vertices, *normals;
+	math::vector_3d *vertices, *normals;
 	uint16_t *indices;
 	size_t nIndices;
 	std::vector<ModelRenderPass> passes;

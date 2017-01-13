@@ -25,8 +25,8 @@ public:
   // check if any checkbox is focused
   bool hasFocus() const;
   
-  Vec3D* rotationVect;
-  Vec3D* posVect;
+  math::vector_3d* rotationVect;
+  math::vector_3d* posVect;
   float* scale;
 private:
   bool _selection;

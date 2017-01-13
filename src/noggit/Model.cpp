@@ -213,19 +213,19 @@ bool Model::isAnimated(const MPQFile& f)
 }
 
 
-Vec3D fixCoordSystem(Vec3D v)
+math::vector_3d fixCoordSystem(math::vector_3d v)
 {
-	return Vec3D(v.x, v.z, -v.y);
+	return math::vector_3d(v.x, v.z, -v.y);
 }
 
-Vec3D fixCoordSystem2(Vec3D v)
+math::vector_3d fixCoordSystem2(math::vector_3d v)
 {
-	return Vec3D(v.x, v.z, v.y);
+	return math::vector_3d(v.x, v.z, v.y);
 }
 
-Quaternion fixCoordSystemQuat(Quaternion v)
+math::quaternion fixCoordSystemQuat(math::quaternion v)
 {
-	return Quaternion(-v.x, -v.z, v.y, v.w);
+	return math::quaternion(-v.x, -v.z, v.y, v.w);
 }
 
 
@@ -233,8 +233,8 @@ void Model::initCommon(const MPQFile& f)
 {
 	// assume: origVertices already set
 	if (!animGeometry) {
-		vertices = new Vec3D[header.nVertices];
-		normals = new Vec3D[header.nVertices];
+		vertices = new math::vector_3d[header.nVertices];
+    normals = new math::vector_3d[header.nVertices];
 	}
 
 	// vertices, normals
@@ -511,7 +511,7 @@ void Model::initAnimated(const MPQFile& f)
 		delete[] vertices;
 		delete[] normals;
 	}
-	Vec2D *texcoords = new Vec2D[header.nVertices];
+	math::vector_2d *texcoords = new math::vector_2d[header.nVertices];
 	for (size_t i = 0; i<header.nVertices; ++i)
 		texcoords[i] = origVertices[i].texcoords;
 	gl.bindBuffer(GL_ARRAY_BUFFER_ARB, tbuf);
@@ -595,17 +595,17 @@ void Model::animate(int _anim)
 
 		gl.bindBuffer(GL_ARRAY_BUFFER_ARB, vbuf);
 		gl.bufferData(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, NULL, GL_STREAM_DRAW_ARB);
-		vertices = reinterpret_cast<Vec3D*>(gl.mapBuffer(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
+		vertices = reinterpret_cast<math::vector_3d*>(gl.mapBuffer(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
 
 		// transform vertices
 		ModelVertex *ov = origVertices;
 		for (size_t i = 0; i<header.nVertices; ++i, ++ov) {
-			Vec3D v(0, 0, 0), n(0, 0, 0);
+			math::vector_3d v(0, 0, 0), n(0, 0, 0);
 
 			for (size_t b = 0; b<4; ++b) {
 				if (ov->weights[b]>0) {
-					Vec3D tv = bones[ov->bones[b]].mat * ov->pos;
-					Vec3D tn = bones[ov->bones[b]].mrot * ov->normal;
+					math::vector_3d tv = bones[ov->bones[b]].mat * ov->pos;
+					math::vector_3d tn = bones[ov->bones[b]].mrot * ov->normal;
 					v += tv * (static_cast<float>(ov->weights[b]) / 255.0f);
 					n += tn * (static_cast<float>(ov->weights[b]) / 255.0f);
 				}
@@ -654,15 +654,15 @@ bool ModelRenderPass::init(Model *m)
 
 		// COLOUR
 		// Get the colour and transparency and check that we should even render
-		ocol = Vec4D(1.0f, 1.0f, 1.0f, m->trans);
-		ecol = Vec4D(0.0f, 0.0f, 0.0f, 0.0f);
+		ocol = math::vector_4d(1.0f, 1.0f, 1.0f, m->trans);
+		ecol = math::vector_4d(0.0f, 0.0f, 0.0f, 0.0f);
 
 		//if (m->trans == 1.0f)
 		//  return false;
 
 		// emissive colors
 		if (color != -1 && m->colors[color].color.uses(0)) {
-			Vec3D c = m->colors[color].color.getValue(0, m->animtime);
+			math::vector_3d c = m->colors[color].color.getValue(0, m->animtime);
 			if (m->colors[color].opacity.uses(m->anim)) {
 				float o = m->colors[color].opacity.getValue(m->anim, m->animtime);
 				ocol.w = o;
@@ -675,7 +675,7 @@ bool ModelRenderPass::init(Model *m)
 				ocol.x = ocol.y = ocol.z = 0;
 			}
 
-			ecol = Vec4D(c, ocol.w);
+			ecol = math::vector_4d(c, ocol.w);
 			gl.materialfv(GL_FRONT, GL_EMISSION, ecol);
 		}
 
@@ -823,7 +823,7 @@ void ModelRenderPass::deinit()
 	//gl.color4f(1,1,1,1); //???
 }
 
-void ModelHighlight(Vec4D color)
+void ModelHighlight(math::vector_4d color)
 {
 	gl.disable(GL_ALPHA_TEST);
 	gl.enable(GL_BLEND);
@@ -845,7 +845,7 @@ void ModelUnhighlight()
 	gl.enable(GL_CULL_FACE);
 	opengl::texture::set_active_texture (0);
 	opengl::texture::enable_texture();
-	gl.color4fv(Vec4D(1, 1, 1, 1));
+	gl.color4fv(math::vector_4d(1, 1, 1, 1));
 	//  gl.depthMask( GL_TRUE );
 }
 
@@ -990,7 +990,7 @@ void ModelTransparency::init(const MPQFile& f, const ModelTransDef &mcd, int *gl
 void ModelLight::init(const MPQFile& f, const ModelLightDef &mld, int *global)
 {
 	tpos = pos = fixCoordSystem(mld.pos);
-	tdir = dir = Vec3D(0, 1, 0); // no idea
+	tdir = dir = math::vector_3d(0, 1, 0); // no idea
 	type = mld.type;
 	parent = mld.bone;
 	ambColor.init(mld.ambColor, f, global);
@@ -1001,9 +1001,9 @@ void ModelLight::init(const MPQFile& f, const ModelLightDef &mld, int *global)
 
 void ModelLight::setup(int time, OpenGL::Light l)
 {
-	Vec4D ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
-	Vec4D diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
-	Vec4D p;
+	math::vector_4d ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
+	math::vector_4d diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
+	math::vector_4d p;
 
 	enum ModelLightTypes {
 		MODELLIGHT_DIRECTIONAL = 0,
@@ -1012,14 +1012,14 @@ void ModelLight::setup(int time, OpenGL::Light l)
 
 	if (type == MODELLIGHT_DIRECTIONAL) {
 		// directional
-		p = Vec4D(tdir, 0.0f);
+		p = math::vector_4d(tdir, 0.0f);
 	}
 	else if (type == MODELLIGHT_POINT) {
 		// point
-		p = Vec4D(tpos, 1.0f);
+		p = math::vector_4d(tpos, 1.0f);
 	}
 	else {
-		p = Vec4D(tpos, 1.0f);
+		p = math::vector_4d(tpos, 1.0f);
 		LogError << "Light type " << type << " is unknown." << std::endl;
 	}
 	//gLog("Light %d (%f,%f,%f) (%f,%f,%f) [%f,%f,%f]\n", l-GL_LIGHT4, ambcol.x, ambcol.y, ambcol.z, diffcol.x, diffcol.y, diffcol.z, p.x, p.y, p.z);
@@ -1092,9 +1092,9 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
     float modelview[16];
     gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
 
-    Vec3D vRight = Vec3D(modelview[0], modelview[4], modelview[8]);
-    Vec3D vUp = Vec3D(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
-    //Vec3D vUp = Vec3D(0,1,0); // Cylindrical billboarding
+    math::vector_3d vRight = math::vector_3d(modelview[0], modelview[4], modelview[8]);
+    math::vector_3d vUp = math::vector_3d(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+    //math::vector_3d vUp = math::vector_3d(0,1,0); // Cylindrical billboarding
     vRight = vRight * -1;
     mat (0, 2, vRight.x);
     mat(1, 2, vRight.y);

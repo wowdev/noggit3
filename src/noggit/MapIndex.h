@@ -10,7 +10,7 @@
 
 #include "MapHeaders.h"
 #include "Misc.h"
-#include "Vec3D.h"
+#include "math/vector_3d.hpp"
 #include "MapTile.h"
 
 #include <boost/range/iterator_range.hpp>
@@ -33,7 +33,7 @@ private:
 
 struct tile_index
 {
-  tile_index(const Vec3D& pos) : tile_index(pos.x / TILESIZE, pos.z / TILESIZE) { }
+  tile_index(const math::vector_3d& pos) : tile_index(pos.x / TILESIZE, pos.z / TILESIZE) { }
   tile_index(std::size_t tileX, std::size_t tileZ) : x(tileX), z(tileZ)
   {  
     assert(x < 64);

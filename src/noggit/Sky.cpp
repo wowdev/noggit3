@@ -22,7 +22,7 @@ SkyColor::SkyColor(int t, int col)
 
 Sky::Sky(DBCFile::Iterator data)
 {
-	pos = Vec3D(data->getFloat(LightDB::PositionX) / skymul, data->getFloat(LightDB::PositionY) / skymul, data->getFloat(LightDB::PositionZ) / skymul);
+	pos = math::vector_3d(data->getFloat(LightDB::PositionX) / skymul, data->getFloat(LightDB::PositionY) / skymul, data->getFloat(LightDB::PositionZ) / skymul);
 	r1 = data->getFloat(LightDB::RadiusInner) / skymul;
 	r2 = data->getFloat(LightDB::RadiusOuter) / skymul;
 
@@ -94,13 +94,13 @@ Sky::Sky(DBCFile::Iterator data)
 
 }
 
-Vec3D Sky::colorFor(int r, int t) const
+math::vector_3d Sky::colorFor(int r, int t) const
 {
 	if (mmin[r]<0)
 	{
-		return Vec3D(0, 0, 0);
+		return math::vector_3d(0, 0, 0);
 	}
-	Vec3D c1, c2;
+	math::vector_3d c1, c2;
 	int t1, t2;
 	size_t last = colorRows[r].size() - 1;
 
@@ -162,11 +162,11 @@ void Skies::draw()
 {
 	// draw sky sphere?
 	//! \todo  do this as a vertex array and use gl.colorPointer? :|
-	Vec3D basepos1[cnum], basepos2[cnum];
+	math::vector_3d basepos1[cnum], basepos2[cnum];
 	gl.begin(GL_QUADS);
 	for (int h = 0; h<hseg; h++) {
 		for (int i = 0; i<cnum; ++i) {
-			basepos1[i] = basepos2[i] = Vec3D(math::cos(angles[i])*rad, math::sin(angles[i])*rad, 0);
+			basepos1[i] = basepos2[i] = math::vector_3d(math::cos(angles[i])*rad, math::sin(angles[i])*rad, 0);
       math::rotate(0, 0, &basepos1[i].x, &basepos1[i].z, math::radians (M_PI*2.0f / hseg*h));
       math::rotate(0, 0, &basepos2[i].x, &basepos2[i].z, math::radians (M_PI*2.0f / hseg*(h + 1)));
 		}
@@ -220,7 +220,7 @@ Skies::Skies(unsigned int mapid)
 	std::sort(skies.begin(), skies.end());
 }
 
-void Skies::findSkyWeights(Vec3D pos)
+void Skies::findSkyWeights(math::vector_3d pos)
 {
 	int maxsky = skies.size() - 1;
 	skies[maxsky].weight = 1.0f;
@@ -245,13 +245,13 @@ void Skies::findSkyWeights(Vec3D pos)
 	// weights are all normalized at this point :D
 }
 
-void Skies::initSky(Vec3D pos, int t)
+void Skies::initSky(math::vector_3d pos, int t)
 {
 	if (numSkies == 0) return;
 
 	findSkyWeights(pos);
 
-	for (int i = 0; i<NUM_SkyColorNames; ++i) colorSet[i] = Vec3D(1, 1, 1);
+	for (int i = 0; i<NUM_SkyColorNames; ++i) colorSet[i] = math::vector_3d(1, 1, 1);
 
 	// interpolation
 	for (size_t j = 0; j<skies.size(); j++) {
@@ -269,7 +269,7 @@ void Skies::initSky(Vec3D pos, int t)
 	}
 	for (int i = 0; i<NUM_SkyColorNames; ++i)
 	{
-		colorSet[i] -= Vec3D(1, 1, 1);
+		colorSet[i] -= math::vector_3d(1, 1, 1);
 	}
 }
 
@@ -301,7 +301,7 @@ void Skies::debugDraw(unsigned int *buf, int dim)
 	}
 }
 
-bool Skies::drawSky(const Vec3D &pos)
+bool Skies::drawSky(const math::vector_3d &pos)
 {
 	if (numSkies == 0) return false;
 

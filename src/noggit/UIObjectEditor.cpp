@@ -219,7 +219,7 @@ void UIObjectEditor::pasteObject()
   }
 
   // default value
-  Vec3D pos = Environment::getInstance()->get_cursor_pos();
+  math::vector_3d pos = Environment::getInstance()->get_cursor_pos();
 
   switch (pasteMode)
   {
