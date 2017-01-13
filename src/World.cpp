@@ -1131,7 +1131,7 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
   }
 
   // only check when using the ObjectEditor
-  if (!pOnlyMap && terrainMode != 9)
+  if (!pOnlyMap && terrainMode == 9)
   {
     if (drawmodels)
     {
