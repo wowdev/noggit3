@@ -230,13 +230,8 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, u
       for (int x = 0; x < 3; x++)
       {
         int pos = x + y * 3;
-        mMinimumValues[pos * 3 + 0] = xPositions[x];
-        mMinimumValues[pos * 3 + 1] = mMinimum[pos];
-        mMinimumValues[pos * 3 + 2] = yPositions[y];
-
-        mMaximumValues[pos * 3 + 0] = xPositions[x];
-        mMaximumValues[pos * 3 + 1] = mMaximum[pos];
-        mMaximumValues[pos * 3 + 2] = yPositions[y];
+        mMinimumValues[pos] = {xPositions[x], static_cast<float> (mMinimum[pos]), yPositions[y]};
+        mMaximumValues[pos] = {xPositions[x], static_cast<float> (mMaximum[pos]), yPositions[y]};
       }
     }
   }
@@ -424,7 +419,7 @@ void MapTile::drawMFBO()
   gl.begin(GL_TRIANGLE_FAN);
   for (int i = 0; i < 18; ++i)
   {
-    gl.vertex3f(mMinimumValues[lIndices[i] * 3 + 0], mMinimumValues[lIndices[i] * 3 + 1], mMinimumValues[lIndices[i] * 3 + 2]);
+    gl.vertex3fv(mMinimumValues[lIndices[i]]);
   }
   gl.end();
 
@@ -432,7 +427,7 @@ void MapTile::drawMFBO()
   gl.begin(GL_TRIANGLE_FAN);
   for (int i = 0; i < 18; ++i)
   {
-    gl.vertex3f(mMaximumValues[lIndices[i] * 3 + 0], mMaximumValues[lIndices[i] * 3 + 1], mMaximumValues[lIndices[i] * 3 + 2]);
+    gl.vertex3fv(mMaximumValues[lIndices[i]]);
   }
   gl.end();
 }
@@ -971,10 +966,10 @@ void MapTile::saveTile()
     lID = 0;
 
     for (int i = 0; i < 9; ++i)
-      lMFBO_Data[lID++] = (int16_t)mMaximumValues[i * 3 + 1];
+      lMFBO_Data[lID++] = (int16_t)mMaximumValues[i].y;
 
     for (int i = 0; i < 9; ++i)
-      lMFBO_Data[lID++] = (int16_t)mMinimumValues[i * 3 + 1];
+      lMFBO_Data[lID++] = (int16_t)mMinimumValues[i].y;
 
     lCurrentPosition += 8 + chunkSize;
   }
