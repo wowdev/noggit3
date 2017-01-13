@@ -528,17 +528,14 @@ float MapChunk::getHeight(int x, int z)
 
 float MapChunk::getMinHeight()
 {
-  float min = mVertices[indexNoLoD(0, 0)].y;
+  float min (mVertices[0].y);
 
-  for (int j = 0; j < 9; ++j)
+  for (auto&& vertex : mVertices)
   {
-    for (int i = 0; i < 9; ++i)
-    {
-      min = std::fmin(mVertices[indexNoLoD(i, j)].y, min);
-    }
+    min = std::min (min, vertex.y);
   }
 
-  return min;
+	return min;
 }
 
 void MapChunk::drawLines (Frustum const& frustum)
