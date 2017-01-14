@@ -1810,8 +1810,7 @@ void MapView::tick(float t, float dt)
             {
               // draw the selected AreaId on current selected chunk
               MapChunk* chnk (boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk);
-              tile_index tile(chnk->mt->mPositionX, chnk->mt->mPositionZ);
-              gWorld->setAreaID(Environment::getInstance()->selectedAreaID, tile, chnk->px, chnk->py);
+              gWorld->setAreaID(Environment::getInstance()->selectedAreaID, chnk->mt->index, chnk->px, chnk->py);
             }
             else if (Environment::getInstance()->CtrlDown)
             {
@@ -1841,15 +1840,14 @@ void MapView::tick(float t, float dt)
           {
             auto lSelection = gWorld->GetCurrentSelection();
             MapChunk* chnk = boost::get<selected_chunk_type> (*Selection).chunk;
-            tile_index tile(chnk->mt->mPositionX, chnk->mt->mPositionZ);
 
             if (Environment::getInstance()->ShiftDown)
             {
-              gWorld->addWaterLayerChunk(tile, chnk->px, chnk->py);
+              gWorld->addWaterLayerChunk(chnk->mt->index, chnk->px, chnk->py);
             }
             if (Environment::getInstance()->CtrlDown && !Environment::getInstance()->AltDown)
             {
-              gWorld->delWaterLayerChunk(tile, chnk->px, chnk->py);
+              gWorld->delWaterLayerChunk(chnk->mt->index, chnk->px, chnk->py);
             }
             if (Environment::getInstance()->AltDown && !Environment::getInstance()->CtrlDown)
             {

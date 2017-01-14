@@ -31,18 +31,15 @@ int indexMapBuf(int x, int y)
 }
 
 MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, uint32_t* highGUID)
+  : modelCount(0)
+  , index(tile_index(pX, pZ))
+  , changed(0)
+  , xbase(pX * TILESIZE)
+  , zbase(pZ * TILESIZE)
+  , mBigAlpha(pBigAlpha)
+  , highestGUID(highGUID)
+  , mFilename(pFilename)
 {
-  this->modelCount = 0;
-  this->mPositionX = pX;
-  this->mPositionZ = pZ;
-
-  this->changed = 0;
-  this->xbase = mPositionX * TILESIZE;
-  this->zbase = mPositionZ * TILESIZE;
-
-  this->mBigAlpha = pBigAlpha;
-
-  this->highestGUID = highGUID;
 
   for (int i = 0; i < 16; ++i)
   {
@@ -52,11 +49,9 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, u
     }
   }
 
-  mFilename = pFilename;
-
   MPQFile theFile(mFilename);
 
-  Log << "Opening tile " << mPositionX << ", " << mPositionZ << " (\"" << mFilename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
+  Log << "Opening tile " << index.x << ", " << index.z << " (\"" << mFilename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
 
   // - Parsing the file itself. --------------------------
 
@@ -299,12 +294,12 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, u
 
   // - Really done. --------------------------------------
 
-  LogDebug << "Done loading tile " << mPositionX << "," << mPositionZ << "." << std::endl;
+  LogDebug << "Done loading tile " << index.x << "," << index.z << "." << std::endl;
 }
 
 MapTile::~MapTile()
 {
-  LogDebug << "Unloading tile " << mPositionX << "," << mPositionZ << "." << std::endl;
+  LogDebug << "Unloading tile " << index.x << "," << index.z << "." << std::endl;
 
   for (int j = 0; j < 16; ++j)
   {
@@ -349,7 +344,7 @@ MapTile::~MapTile()
 
 bool MapTile::isTile(int pX, int pZ)
 {
-  return pX == mPositionX && pZ == mPositionZ;
+  return pX == index.x && pZ == index.z;
 }
 
 float MapTile::getMaxHeight()
@@ -578,8 +573,8 @@ void MapTile::saveTile()
   lTileExtents[1] = math::vector_3d(this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE);
 
   // TODO: Steff > needs to reimplement UID recalculation
-  // UID += mPositionX * 10000000;
-  // UID += mPositionZ *   100000;
+  // UID += index.x * 10000000;
+  // UID += index.z *   100000;
 
   for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
   {
@@ -1048,7 +1043,7 @@ void MapTile::saveTile()
     f5->close();
   }
 
-  gWorld->mapIndex->markOnDisc(tile_index(this->mPositionX, this->mPositionZ), true);
+  gWorld->mapIndex->markOnDisc(tile_index(this->index.x, this->index.z), true);
 
   lObjectInstances.clear();
   lModelInstances.clear();

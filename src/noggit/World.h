@@ -6,10 +6,10 @@
 #include <string>
 
 #include "Frustum.h" // Frustum
-#include "map_index.hpp"
 #include "Model.h" // ModelManager
 #include "Selection.h"
 #include "Sky.h" // Skies, OutdoorLighting, OutdoorLightStats
+#include "tile_index.hpp"
 #include "WMO.h" // WMOManager
 
 namespace OpenGL
@@ -24,7 +24,6 @@ namespace opengl
 class Brush;
 class MapTile;
 class MapIndex;
-class tile_index;
 
 static const float detail_size = 8.0f;
 static const float highresdistance = 384.0f;

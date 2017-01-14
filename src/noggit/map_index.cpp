@@ -290,7 +290,7 @@ void MapIndex::setChanged(const tile_index& tile, bool setAdjacentTiles)
 
 void MapIndex::setChanged(MapTile* tile, bool setAdjacentTiles)
 {
-  setChanged(tile_index(tile->mPositionX, tile->mPositionZ), setAdjacentTiles);
+  setChanged(tile->index, setAdjacentTiles);
 }
 
 void MapIndex::unsetChanged(const tile_index& tile)
@@ -503,22 +503,22 @@ MapTile* MapIndex::getTile(const tile_index& tile) const
 
 MapTile* MapIndex::getTileAbove(MapTile* tile) const
 {
-  if (tile->mPositionZ == 0 || !tileLoaded(tile->mPositionX, tile->mPositionZ - 1))
+  if (tile->index.z == 0 || !tileLoaded(tile->index.x, tile->index.z - 1))
   {
     return nullptr;
   }
 
-  return mTiles[tile->mPositionZ - 1][tile->mPositionX].tile;
+  return mTiles[tile->index.z - 1][tile->index.x].tile;
 }
 
 MapTile* MapIndex::getTileLeft(MapTile* tile) const
 {
-  if (tile->mPositionX == 0 || !tileLoaded(tile->mPositionX - 1, tile->mPositionZ))
+  if (tile->index.x == 0 || !tileLoaded(tile->index.x - 1, tile->index.z))
   {
     return nullptr;
   }
 
-  return mTiles[tile->mPositionZ][tile->mPositionX - 1].tile;
+  return mTiles[tile->index.z][tile->index.x - 1].tile;
 }
 
 uint32_t MapIndex::getFlag(const tile_index& tile) const
