@@ -279,7 +279,7 @@ void UIMapViewGUI::render() const
           int flags = chunk->Flags;
 
           detailInfo << "MCNK " << chunk->px << ", " << chunk->py << " (" << chunk->py * 16 + chunk->px
-                     << ") of tile (" << chunk->mt->mPositionX << " " << chunk->mt->mPositionZ << ")"
+                     << ") of tile (" << chunk->mt->index.x << " " << chunk->mt->index.z << ")"
                      << "\narea ID: " << chunk->getAreaID() << " (\"" << gAreaDB.getAreaName(chunk->getAreaID()) << "\")"
                      << "\nflags: "
                      << (flags & FLAG_SHADOW ? "shadows " : "")

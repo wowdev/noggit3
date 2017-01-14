@@ -3,7 +3,7 @@
 #pragma once
 
 #include "UICloseWindow.h"
-#include "map_index.hpp"
+#include "tile_index.hpp"
 
 class UISlider;
 class UIText;

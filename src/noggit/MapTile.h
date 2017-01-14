@@ -10,6 +10,7 @@
 #include "Video.h" // GLfloat, GLshort, ...
 #include <math/ray.hpp>
 #include "Selection.h"
+#include "tile_index.hpp"
 
 class Frustum;
 class MapChunk;
@@ -34,8 +35,7 @@ public:
 	MapChunk* getChunk(unsigned int x, unsigned int z);
 
 	int modelCount;
-	int mPositionX;
-	int mPositionZ;
+  const tile_index index;
 	float xbase, zbase;
 
 	int changed;
@@ -83,7 +83,7 @@ private:
 	std::vector<TileWater*> mLiquids;
 	std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
 
-    uint32_t* highestGUID;
+  uint32_t* highestGUID;
 
 	friend class MapChunk;
 	friend class TextureSet;
