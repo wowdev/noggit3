@@ -552,15 +552,10 @@ void DeleteSelectedObject(UIFrame*, int)
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
-    if (boost::get<selected_wmo_type> (Environment::getInstance()->get_clipboard()) == boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection()))
-      Environment::getInstance()->clear_clipboard();
     gWorld->deleteWMOInstance(boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->mUniqueID);
-
   }
   else if (gWorld->IsSelection(eEntry_Model))
   {
-    if (boost::get<selected_model_type> (Environment::getInstance()->get_clipboard()) == boost::get<selected_model_type> (*gWorld->GetCurrentSelection()))
-      Environment::getInstance()->clear_clipboard();
     gWorld->deleteModelInstance(boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->d1);
   }
 }
