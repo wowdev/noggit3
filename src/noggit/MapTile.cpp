@@ -533,7 +533,7 @@ void MapTile::clearAllModels()
 
   for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
   {
-    if (it->second.isInsideTile(index))
+    if (tile_index(it->second.pos) == index)
     {
       gWorld->deleteWMOInstance(it->second.mUniqueID);
     }
@@ -541,7 +541,7 @@ void MapTile::clearAllModels()
 
   for (std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it)
   {
-    if (it->second.isInsideTile(index))
+    if (tile_index(it->second.pos) == index)
     {
       gWorld->deleteModelInstance(it->second.d1);
     }
