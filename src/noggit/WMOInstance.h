@@ -43,7 +43,7 @@ public:
     , mUnknown (other.mUnknown)
     , mNameset (other.mNameset)
     , doodadset (other.doodadset)
-    , uidLock (other.uidLock)
+
   {
 	//  std::move(std::begin(other.extents), std::end(other.extents), extents);
     std::swap (extents, other.extents);
@@ -60,7 +60,6 @@ public:
 	  std::swap(mUnknown, other.mUnknown);
 	  std::swap(mNameset, other.mNameset);
 	  std::swap(doodadset, other.doodadset);
-	  std::swap(uidLock, other.uidLock);
 	  return *this;
   }
 
@@ -71,11 +70,4 @@ public:
 	void resetDirection();
 
   bool isInsideRect(math::vector_3d rect[2]);
-
-	bool hasUIDLock();
-	void lockUID();
-	void unlockUID();
-
-private:
-	bool uidLock;
 };

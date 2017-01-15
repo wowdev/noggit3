@@ -11,7 +11,6 @@
 
 WMOInstance::WMOInstance(std::string const& filename, MPQFile* _file)
 	: wmo(filename)
-	, uidLock(false)
 {
 	_file->read(&mUniqueID, 4);
 	_file->read(&pos, 12);
@@ -31,7 +30,6 @@ WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF* d)
 	, mUniqueID(d->uniqueID), mFlags(d->flags)
 	, mUnknown(d->unknown), mNameset(d->nameSet)
 	, doodadset(d->doodadSet)
-	, uidLock(false)
 {
 	extents[0] = math::vector_3d(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
 	extents[1] = math::vector_3d(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
@@ -46,7 +44,6 @@ WMOInstance::WMOInstance(std::string const& filename)
 	, mUnknown(0)
 	, mNameset(0)
 	, doodadset(0)
-	, uidLock(false)
 {
 }
 
@@ -197,21 +194,4 @@ wmo->drawPortals();
 void WMOInstance::resetDirection()
 {
 	dir = math::vector_3d(0.0f, dir.y, 0.0f);
-}
-
-
-
-void WMOInstance::lockUID()
-{
-	uidLock = true;
-}
-
-void WMOInstance::unlockUID()
-{
-	uidLock = false;
-}
-
-bool WMOInstance::hasUIDLock()
-{
-	return uidLock;
 }

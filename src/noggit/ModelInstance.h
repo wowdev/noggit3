@@ -46,7 +46,6 @@ public:
     , sc (other.sc)
     , ldir (other.ldir)
     , lcol (other.lcol)
-    , uidLock (other.uidLock)
   {
     std::swap (extents, other.extents);
   }
@@ -61,7 +60,6 @@ public:
     std::swap (sc, other.sc);
     std::swap (ldir, other.ldir);
     std::swap (lcol, other.lcol);
-    std::swap (uidLock, other.uidLock);
     return *this;
   }
 
@@ -73,14 +71,7 @@ public:
 
 	void resetDirection();
 
-	bool hasUIDLock();
-	void lockUID();
-	void unlockUID();
-
 	bool isInsideRect(math::vector_3d rect[2]);
 
 	void recalcExtents();
-
-private:
-	bool uidLock;
 };
