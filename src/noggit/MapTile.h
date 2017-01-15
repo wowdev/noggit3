@@ -24,7 +24,7 @@ class MapTile
 {
 
 public:
-	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha, uint32_t* highGUID);
+	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha);
 	~MapTile();
 	//! \brief Get the maximum height of terrain on this map tile.
 	float getMaxHeight();
@@ -82,8 +82,6 @@ private:
 	MapChunk* mChunks[16][16];
 	std::vector<TileWater*> mLiquids;
 	std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
-
-  uint32_t* highestGUID;
 
 	friend class MapChunk;
 	friend class TextureSet;

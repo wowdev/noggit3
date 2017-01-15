@@ -366,7 +366,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
 		return nullptr;
 	}
 
-  mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha, &highestGUID);
+  mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha);
 
   return mTiles[tile.z][tile.x].tile;
 }
@@ -381,7 +381,7 @@ void MapIndex::reloadTile(const tile_index& tile)
 		std::stringstream filename;
 		filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
-		mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha, &highestGUID);
+		mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha);
 		enterTile(tile_index(cx, cz));
 	}
 }
