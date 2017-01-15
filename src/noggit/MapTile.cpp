@@ -30,14 +30,13 @@ int indexMapBuf(int x, int y)
   return ((y + 1) / 2) * 9 + (y / 2) * 8 + x;
 }
 
-MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, uint32_t* highGUID)
+MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
   : modelCount(0)
   , index(tile_index(pX, pZ))
   , changed(0)
   , xbase(pX * TILESIZE)
   , zbase(pZ * TILESIZE)
   , mBigAlpha(pBigAlpha)
-  , highestGUID(highGUID)
   , mFilename(pFilename)
 {
 
@@ -577,16 +576,18 @@ void MapTile::saveTile()
 
   for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
   {
-    if (!it->second.isInsideRect(lTileExtents)) continue;
-    if (!lObjectInstances.emplace(it->second.mUniqueID, it->second).second)
-      lObjectInstances.emplace(++*highestGUID, it->second);
+    if (it->second.isInsideRect(lTileExtents))
+    {
+      lObjectInstances.emplace(it->second.mUniqueID, it->second);
+    }    
   }
 
   for (std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it)
   {
-    if (!it->second.isInsideRect(lTileExtents)) continue;
-    if (!lModelInstances.emplace(it->second.d1, it->second).second)
-      lModelInstances.emplace(++*highestGUID, it->second);
+    if (it->second.isInsideRect(lTileExtents))
+    {
+      lModelInstances.emplace(it->second.d1, it->second);
+    }    
   }
 
   filenameOffsetThing nullyThing = { 0, 0 };
