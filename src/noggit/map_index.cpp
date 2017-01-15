@@ -509,6 +509,10 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename)
     uint32_t highGUID = 0;
 
     MPQFile theFile(pFilename);
+    if (theFile.isEof())
+    {
+      return highGUID;
+    }
 
     uint32_t fourcc;
     uint32_t size;
