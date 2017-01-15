@@ -1980,19 +1980,8 @@ void World::addModel(selection_type entry, math::vector_3d newPos, bool copyit)
 
 void World::addM2(std::string const& filename, math::vector_3d newPos, bool copyit)
 {
-  int temp = 0;
-  if (mModelInstances.empty()) {
-    temp = 0;
-  }
-  else {
-    temp = mModelInstances.rbegin()->first + 1;
-  }
-  const int lMaxUID = temp;
-  //  ( ( mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1 ),
-  //                           ( mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1 ) );
-
   ModelInstance newModelis = ModelInstance(filename);
-  newModelis.d1 = (unsigned int)lMaxUID;
+  newModelis.d1 = mapIndex->newGUID();
   newModelis.pos = newPos;
   newModelis.sc = 1;
 
@@ -2030,18 +2019,14 @@ void World::addM2(std::string const& filename, math::vector_3d newPos, bool copy
 
   newModelis.recalcExtents();
   updateTilesModel(&newModelis);
-  mModelInstances.emplace(lMaxUID, std::move(newModelis));
+  mModelInstances.emplace(newModelis.d1, std::move(newModelis));
 }
 
 void World::addWMO(std::string const& filename, math::vector_3d newPos, bool copyit)
 {
-
-  const int lMaxUID = std::max((mModelInstances.empty() ? 0 : mModelInstances.rbegin()->first + 1),
-    (mWMOInstances.empty() ? 0 : mWMOInstances.rbegin()->first + 1));
-
   WMOInstance newWMOis(filename);
   newWMOis.pos = newPos;
-  newWMOis.mUniqueID = (unsigned int)lMaxUID;
+  newWMOis.mUniqueID = mapIndex->newGUID();
 
   if (Settings::getInstance()->copyModelStats
     && copyit
@@ -2055,7 +2040,7 @@ void World::addWMO(std::string const& filename, math::vector_3d newPos, bool cop
   newWMOis.recalcExtents();
   updateTilesWMO(&newWMOis);
 
-  mWMOInstances.emplace(lMaxUID, std::move(newWMOis));
+  mWMOInstances.emplace(newWMOis.mUniqueID, std::move(newWMOis));
 }
 
 void World::updateTilesEntry(selection_type const& entry)
