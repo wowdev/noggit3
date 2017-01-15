@@ -141,7 +141,6 @@ class Model : public ManagedItem, public AsyncObject {
 	size_t vbufsize;
 	bool animated;
 	bool animGeometry, animTextures, animBones;
-	bool forceAnim;
 	MPQFile **animfiles;
 
 
@@ -201,7 +200,7 @@ public:
 	bool mPerInstanceAnimation;
 	int anim, animtime;
 
-	Model(const std::string& name, bool forceAnim = false);
+	Model(const std::string& name);
 	~Model();
 	void draw();
 	void drawTileMode();
