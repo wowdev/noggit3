@@ -438,6 +438,7 @@ void MapIndex::saveTile(const tile_index& tile)
 	// save goven tile
 	if (tileLoaded(tile))
 	{
+    gWorld->ensureModelIdUniqueness();
 		mTiles[tile.z][tile.x].tile->saveTile();
 	}
 }
@@ -446,6 +447,8 @@ void MapIndex::saveChanged()
 {
 	if (changed)
 		save();
+
+  gWorld->ensureModelIdUniqueness();
 
 	// Now save all marked as 1 and 2 because UIDs now fits.
   for (MapTile* tile : loaded_tiles())
@@ -456,8 +459,6 @@ void MapIndex::saveChanged()
       tile->changed = 0;
     }
 	}
-
-	gWorld->ensure_instance_maps_having_correct_keys_and_unlock_uids();
 }
 
 bool MapIndex::hasAGlobalWMO()
@@ -595,4 +596,10 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename)
     theFile.close();
 
     return highGUID;
+}
+
+std::size_t MapIndex::newGUID()
+{ 
+  std::size_t id = ++highestGUID;
+  return id; 
 }
