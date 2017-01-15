@@ -187,16 +187,9 @@ void UIMinimapWindow::render() const
 			gl.vertex2f(i * tilesize, ((j + 1) * tilesize) - 1);
 			gl.end();
 
-			if (map && map->mapIndex->getChanged(tile) > 0)
+			if (map && map->mapIndex->getChanged(tile))
 			{
-        if (map->mapIndex->getChanged(tile) == 1)
-        {
-          gl.color4f(1.0f, 1.0f, 1.0f, 0.6f);
-        }
-        else
-        {
-          gl.color4f(0.7f, 0.7f, 0.7f, 0.6f);
-        }
+        gl.color4f(1.0f, 1.0f, 1.0f, 0.6f);
 
 				gl.begin(GL_LINES);
 				gl.vertex2f(i * tilesize, j * tilesize);
