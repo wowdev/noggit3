@@ -54,13 +54,11 @@ void DrawABox(math::vector_3d pMin, math::vector_3d pMax, math::vector_4d pColor
 
 ModelInstance::ModelInstance(std::string const& filename)
 	: model (filename)
-	, uidLock(false)
 {
 }
 
 ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
 	: model (filename)
-	, uidLock(false)
 {
 	float ff[3], temp;
 	f->read(ff, 12);
@@ -78,7 +76,6 @@ ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
 
 ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
 	: model (filename)
-	, uidLock(false)
 {
 	d1 = d->uniqueID;
 	pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
@@ -259,21 +256,6 @@ void ModelInstance::resetDirection(){
 	dir.x = 0;
 	//dir.y=0; only reset incline
 	dir.z = 0;
-}
-
-void ModelInstance::lockUID()
-{
-	uidLock = true;
-}
-
-void ModelInstance::unlockUID()
-{
-	uidLock = false;
-}
-
-bool ModelInstance::hasUIDLock()
-{
-	return uidLock;
 }
 
 bool ModelInstance::isInsideRect(math::vector_3d rect[2])

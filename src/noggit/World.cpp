@@ -1969,28 +1969,6 @@ void World::delete_duplicate_model_and_wmo_instances()
   Log << "Deleted " << models_to_remove.size() << " duplicate models" << std::endl;
 }
 
-void World::ensure_instance_maps_having_correct_keys_and_unlock_uids()
-{
-  {
-    std::map<int, WMOInstance> tmp;
-    std::swap(mWMOInstances, tmp);
-
-    for (WMOInstance& instance : tmp | boost::adaptors::map_values)
-    {
-      mWMOInstances.emplace(instance.mUniqueID, std::move(instance)).first->second.unlockUID();
-    }
-  }
-
-  {
-    std::map<int, ModelInstance> tmp;
-    std::swap(mModelInstances, tmp);
-
-    for (ModelInstance& instance : tmp | boost::adaptors::map_values)
-    {
-      mModelInstances.emplace(instance.d1, std::move(instance)).first->second.unlockUID();
-    }
-  }
-}
 
 void World::addModel(selection_type entry, math::vector_3d newPos, bool copyit)
 {
@@ -2570,7 +2548,7 @@ void World::ensureModelIdUniqueness()
       instance.mUniqueID = mapIndex->newGUID();
       ids.emplace(instance.mUniqueID);
     }
-    mWMOInstances.emplace(instance.mUniqueID, std::move(instance)).first->second.unlockUID();
+    mWMOInstances.emplace(instance.mUniqueID, std::move(instance));
   }
 
   std::map<int, ModelInstance> m2s;
@@ -2583,6 +2561,6 @@ void World::ensureModelIdUniqueness()
       instance.d1 = mapIndex->newGUID();
       ids.emplace(instance.d1);
     }
-    mWMOInstances.emplace(instance.d1, std::move(instance)).first->second.unlockUID();
+    mModelInstances.emplace(instance.d1, std::move(instance));
   }
 }
