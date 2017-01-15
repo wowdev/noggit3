@@ -218,7 +218,7 @@ namespace opengl
     verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
     return glRotatef (x, y, z, w);
   }
-  void context::multMatrixf (GLfloat const data[4])
+  void context::multMatrixf (GLfloat const* data)
   {
     verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
     return glMultMatrixf (data);

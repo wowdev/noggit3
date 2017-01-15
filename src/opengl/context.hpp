@@ -43,7 +43,7 @@ namespace opengl
     void translatef (GLfloat, GLfloat, GLfloat);
     void scalef (GLfloat, GLfloat, GLfloat);
     void rotatef (GLfloat, GLfloat, GLfloat, GLfloat);
-    void multMatrixf (GLfloat const[4]);
+    void multMatrixf (GLfloat const*);
 
     void ortho (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble nearVal, GLdouble farVal);
     void frustum (GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble nearVal, GLdouble farVal);
