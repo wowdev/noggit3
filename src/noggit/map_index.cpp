@@ -19,7 +19,7 @@ MapIndex::MapIndex(const std::string &pBasename)
 	, cx(-1)
 	, cz(-1)
 	, basename(pBasename)
-    , highestGUID(0)
+  , highestGUID(0)
 {
 
 	std::stringstream filename;
@@ -86,9 +86,9 @@ MapIndex::MapIndex(const std::string &pBasename)
 			{
 				mTiles[j][i].flags |= 1;
 				changed = true;
-        // get highest GUID
-        highestGUID = std::max(highestGUID, getHighestGUIDFromFile(filename.str()));
 			}
+
+      highestGUID = std::max(highestGUID, getHighestGUIDFromFile(filename.str()));
 		}
 	}
 
