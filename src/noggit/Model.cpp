@@ -103,16 +103,20 @@ Model::~Model()
 	if (showGeosets)
 		delete[] showGeosets;
 
+  //! \note if animated geometry, these are a mapped GPU buffer
+  if (!animGeometry)
+  {
+    delete[] vertices;
+  }
+  delete[] indices;
+
 	if (animated) {
 		// unload all sorts of crap
-		//delete[] vertices;
 		//delete[] normals;
 		if (colors)
 			delete[] colors;
 		if (transparency)
 			delete[] transparency;
-		if (indices)
-			delete[] indices;
 		if (anims)
 			delete[] anims;
 		if (origVertices)
@@ -443,12 +447,8 @@ void Model::initStatic(const MPQFile& f)
 	gl.endList();
 
 	// clean up vertices, indices etc
-	if (vertices)
-		delete[] vertices;
 	if (normals)
 		delete[] normals;
-	if (indices)
-		delete[] indices;
 	if (colors)
 		delete[] colors;
 	if (transparency)
@@ -509,7 +509,6 @@ void Model::initAnimated(const MPQFile& f)
 		gl.genBuffers(1, &nbuf);
 		gl.bindBuffer(GL_ARRAY_BUFFER_ARB, nbuf);
 		gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
-		delete[] vertices;
 		delete[] normals;
 	}
 	math::vector_2d *texcoords = new math::vector_2d[header.nVertices];
