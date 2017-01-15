@@ -87,7 +87,7 @@ MapIndex::MapIndex(const std::string &pBasename)
 				mTiles[j][i].flags |= 1;
 				changed = true;
         // get highest GUID
-        highestGUID = getHighestGUIDFromFile(filename.str());
+        highestGUID = std::max(highestGUID, getHighestGUIDFromFile(filename.str()));
 			}
 		}
 	}
