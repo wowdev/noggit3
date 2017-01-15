@@ -70,8 +70,7 @@ public:
 	void recalcExtents();
 	void resetDirection();
 
-	bool isInsideTile(math::vector_3d lTileExtents[2]);
-	bool isInsideChunk(math::vector_3d lTileExtents[2]);
+  bool isInsideRect(math::vector_3d rect[2]);
 
 	bool hasUIDLock();
 	void lockUID();

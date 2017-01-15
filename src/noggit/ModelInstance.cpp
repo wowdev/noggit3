@@ -276,58 +276,9 @@ bool ModelInstance::hasUIDLock()
 	return uidLock;
 }
 
-bool ModelInstance::isInsideTile(math::vector_3d lTileExtents[2])
+bool ModelInstance::isInsideRect(math::vector_3d rect[2])
 {
-  math::matrix_4x4 rot
-    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation
-                       , { math::degrees (dir.z)
-                         , math::degrees (dir.y - 90.0f)
-                         , math::degrees (-dir.x)
-                         }
-                       )
-    * math::matrix_4x4 (math::matrix_4x4::scale, sc)
-    );
-
-	math::vector_3d bounds[9];
-	math::vector_3d *ptr = bounds;
-
-	*ptr++ = pos;
-
-	*ptr++ = rot * math::vector_3d(model->header.BoundingBoxMax.x, 0, -model->header.BoundingBoxMax.y);
-	*ptr++ = rot * math::vector_3d(model->header.BoundingBoxMin.x, 0, -model->header.BoundingBoxMax.y);
-	*ptr++ = rot * math::vector_3d(model->header.BoundingBoxMax.x, 0, -model->header.BoundingBoxMin.y);
-	*ptr++ = rot * math::vector_3d(model->header.BoundingBoxMin.x, 0, -model->header.BoundingBoxMin.y);
-
-	*ptr++ = rot * math::vector_3d(model->header.VertexBoxMax.x, 0, -model->header.VertexBoxMax.y);
-	*ptr++ = rot * math::vector_3d(model->header.VertexBoxMin.x, 0, -model->header.VertexBoxMax.y);
-	*ptr++ = rot * math::vector_3d(model->header.VertexBoxMax.x, 0, -model->header.VertexBoxMin.y);
-	*ptr++ = rot * math::vector_3d(model->header.VertexBoxMin.x, 0, -model->header.VertexBoxMin.y);
-
-	for (int i = 0; i < 9; ++i)
-	{
-		if (pointInside(bounds[i], lTileExtents))
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool ModelInstance::isInsideChunk(math::vector_3d lTileExtents[2])
-{
-	if (isInsideTile(lTileExtents))
-		return true;
-
-	//maybe model > chunk || tile
-	recalcExtents();
-
-	for (int i = 0; i < 2; ++i)
-		if (pointInside(lTileExtents[i], extents))
-			return true;
-
-	return false;
+  return misc::rectOverlap(extents, rect);
 }
 
 void ModelInstance::recalcExtents()

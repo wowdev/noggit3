@@ -530,18 +530,22 @@ void MapTile::clearAllModels()
   Log << "Clear all models from ADT \"" << mFilename << "\"." << std::endl;
 
   // Check which doodads and WMOs are on this ADT.
-  math::vector_3d lTileExtents[2];
-  lTileExtents[0] = math::vector_3d(this->xbase, 0.0f, this->zbase);
-  lTileExtents[1] = math::vector_3d(this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE);
 
   for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
-    if (it->second.isInsideTile(lTileExtents))
+  {
+    if (it->second.isInsideTile(index))
+    {
       gWorld->deleteWMOInstance(it->second.mUniqueID);
-
+    }
+  }
 
   for (std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it)
-    if (it->second.isInsideTile(lTileExtents))
+  {
+    if (it->second.isInsideTile(index))
+    {
       gWorld->deleteModelInstance(it->second.d1);
+    }
+  }
 }
 
 void MapTile::saveTile()
@@ -565,27 +569,22 @@ void MapTile::saveTile()
 
   // Check which doodads and WMOs are on this ADT.
   math::vector_3d lTileExtents[2];
+  lTileExtents[0] = math::vector_3d(xbase, 0.0f, zbase);
+  lTileExtents[1] = math::vector_3d(xbase + TILESIZE, 0.0f, zbase + TILESIZE);
   // unsigned int UID(0);
   std::map<int, WMOInstance> lObjectInstances;
   std::map<int, ModelInstance> lModelInstances;
 
-  lTileExtents[0] = math::vector_3d(this->xbase, 0.0f, this->zbase);
-  lTileExtents[1] = math::vector_3d(this->xbase + TILESIZE, 0.0f, this->zbase + TILESIZE);
-
-  // TODO: Steff > needs to reimplement UID recalculation
-  // UID += index.x * 10000000;
-  // UID += index.z *   100000;
-
   for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
   {
-    if (!it->second.isInsideTile(lTileExtents)) continue;
+    if (!it->second.isInsideRect(lTileExtents)) continue;
     if (!lObjectInstances.emplace(it->second.mUniqueID, it->second).second)
       lObjectInstances.emplace(++*highestGUID, it->second);
   }
 
   for (std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it)
   {
-    if (!it->second.isInsideTile(lTileExtents)) continue;
+    if (!it->second.isInsideRect(lTileExtents)) continue;
     if (!lModelInstances.emplace(it->second.d1, it->second).second)
       lModelInstances.emplace(++*highestGUID, it->second);
   }
