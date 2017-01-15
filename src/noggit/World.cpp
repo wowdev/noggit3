@@ -1470,7 +1470,7 @@ void World::changeShader(float x, float z, float change, float radius, bool edit
       {
         if (tile->getChunk(ty, tx)->ChangeMCCV(x, z, change, radius, editMode))
         {
-          mapIndex->setChanged(tile, false);
+          mapIndex->setChanged(tile);
         }
       }
     }
@@ -1491,7 +1491,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
         if (chunk->changeTerrain(x, z, change, radius, BrushType))
         {
           chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile, false);
+          mapIndex->setChanged(tile);
         }
       }
     }
@@ -1517,7 +1517,7 @@ void World::flattenTerrain(float x, float z, float h, float remain, float radius
         if (chunk->flattenTerrain(x, z, h, remain, radius, BrushType, flattenType, angle, orientation))
         {
           chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile, false);
+          mapIndex->setChanged(tile);
         }
       }
     }
@@ -1543,7 +1543,7 @@ void World::flattenTerrain(float x, float z, float remain, float radius, int Bru
         if (chunk->flattenTerrain(x, z, remain, radius, BrushType, flattenType, origin, angle, orientation))
         {
           chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile, false);
+          mapIndex->setChanged(tile);
         }
       }
     }
@@ -1569,7 +1569,7 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
         if (chunk->blurTerrain(x, z, remain, radius, BrushType))
         {
           chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile, false);
+          mapIndex->setChanged(tile);
         }
       }
     }
@@ -1594,7 +1594,7 @@ bool World::paintTexture(float x, float z, Brush *brush, float strength, float p
         if (tile->getChunk(ty, tx)->paintTexture(x, z, brush, strength, pressure, texture))
         {
           succ |= true;
-          mapIndex->setChanged(tile, false);
+          mapIndex->setChanged(tile);
         }
       }
     }
@@ -2077,7 +2077,7 @@ void World::updateTilesWMO(WMOInstance* wmo)
   {
     for (int x = start.x; x <= end.x; ++x)
     {
-      mapIndex->setChanged(tile_index(x, z), false);
+      mapIndex->setChanged(tile_index(x, z));
     }
   }
 }
@@ -2089,7 +2089,7 @@ void World::updateTilesModel(ModelInstance* m2)
   {
     for (int x = start.x; x <= end.x; ++x)
     {
-      mapIndex->setChanged(tile_index(x, z), false);
+      mapIndex->setChanged(tile_index(x, z));
     }
   }
 }
@@ -2501,7 +2501,7 @@ void World::fixAllGaps()
     }
     if (tileChanged)
     {
-      mapIndex->setChanged(tile, false);
+      mapIndex->setChanged(tile);
     }
   }
 

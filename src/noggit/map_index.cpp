@@ -233,7 +233,7 @@ void MapIndex::enterTile(const tile_index& tile)
 		}
 	}
 
-	if (autoheight && tileLoaded(tile)) //ZX STEFF HERE SWAP!
+	if (autoheight && tileLoaded(tile))
 	{
 		float maxHeight = mTiles[cz][cx].tile->getMaxHeight();
 		maxHeight = std::max(maxHeight, 0.0f);
@@ -243,54 +243,24 @@ void MapIndex::enterTile(const tile_index& tile)
 	}
 }
 
-void MapIndex::setChanged(float x, float z, bool setAdjacentTiles)
+void MapIndex::setChanged(float x, float z)
 {
-	// change the changed flag of the map tile
-  setChanged(tile_index(math::vector_3d(x, 0.0f, z)), setAdjacentTiles);
+  setChanged(tile_index(math::vector_3d(x, 0.0f, z)));
 }
 
-void MapIndex::setChanged(const tile_index& tile, bool setAdjacentTiles)
+void MapIndex::setChanged(const tile_index& tile)
 {
-	// change the changed flag of the map tile
   MapTile* mTile = loadTile(tile);
 
-  if (!mTile || mTile->changed == 1)
+  if (!!mTile)
   {
-    return;
+    mTile->changed = 1;
   }
-
-	mTile->changed = 1;
-
-  if (!setAdjacentTiles)
-  {
-    return;
-  }
-
-  for (int pz = std::max(tile.z - 1, 0); pz < std::min(tile.z + 2, 64); ++pz)
-  {
-    for (int px = std::max(tile.x - 1, 0); px < std::min(tile.x + 2, 64); ++px)
-    {
-      tile_index index(px, pz);
-
-      if (!hasTile(index))
-      {
-        continue;
-      }
-
-      mTile = loadTile(index);
-
-      if (!mTile || mTile->changed == 1)
-      {
-        continue;
-      }
-			mTile->changed = 2;
-		}
-	}
 }
 
-void MapIndex::setChanged(MapTile* tile, bool setAdjacentTiles)
+void MapIndex::setChanged(MapTile* tile)
 {
-  setChanged(tile->index, setAdjacentTiles);
+  setChanged(tile->index);
 }
 
 void MapIndex::unsetChanged(const tile_index& tile)
