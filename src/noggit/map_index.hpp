@@ -180,6 +180,8 @@ public:
   void setBigAlpha();
   bool hasBigAlpha() const { return mBigAlpha; }
 
+  uint32_t newGUID();
+
 private:
   bool hasTile(int tileX, int tileZ) const;
   bool tileLoaded(int tileX, int tileZ) const;
