@@ -1929,7 +1929,10 @@ void World::delete_duplicate_model_and_wmo_instances()
     {
       assert(lhs->first != rhs->first);
 
-      if (lhs->second.pos == rhs->second.pos)
+      if ( lhs->second.pos == rhs->second.pos
+        && lhs->second.dir == rhs->second.dir
+        && lhs->second.wmo->_filename == rhs->second.wmo->_filename
+         )
       {
         wmos_to_remove.emplace(rhs->second.mUniqueID);
       }
@@ -1942,7 +1945,11 @@ void World::delete_duplicate_model_and_wmo_instances()
     {
       assert(lhs->first != rhs->first);
 
-      if (lhs->second.pos == rhs->second.pos)
+      if ( lhs->second.pos == rhs->second.pos
+        && lhs->second.dir == rhs->second.dir
+        && lhs->second.sc == rhs->second.sc
+        && lhs->second.model->_filename == rhs->second.model->_filename
+        )
       {
         models_to_remove.emplace(rhs->second.d1);
       }
