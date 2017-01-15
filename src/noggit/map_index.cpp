@@ -568,8 +568,7 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename)
     return highGUID;
 }
 
-std::size_t MapIndex::newGUID()
-{ 
-  std::size_t id = ++highestGUID;
-  return id; 
+uint32_t MapIndex::newGUID()
+{
+  return ++highestGUID;
 }
