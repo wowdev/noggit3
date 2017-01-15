@@ -14,9 +14,8 @@
 
 int globalTime = 0;
 
-Model::Model(const std::string& filename, bool _forceAnim)
+Model::Model(const std::string& filename)
 	: ManagedItem()
-	, forceAnim(_forceAnim)
 	, _filename(filename)
   , hidden(false)
 {
@@ -54,7 +53,7 @@ void Model::finishLoading()
 
 	memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
 
-	animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry and animTextures
+	animated = isAnimated(f);  // isAnimated will set animGeometry and animTextures
 
 	trans = 1.0f;
 
