@@ -123,6 +123,14 @@ namespace misc
 
     return (px == x && pz == z) ? 0.0f : dist(x, z, px, pz);
   }
+
+  bool rectOverlap(math::vector_3d *r1, math::vector_3d *r2)
+  {
+    return r1[0].x <= r2[1].x
+      && r2[0].x <= r1[1].x
+      && r1[0].z <= r2[1].z
+      && r2[0].z <= r1[1].z;
+  }
 }
 
 void SetChunkHeader(sExtendableArray pArray, int pPosition, int pMagix, int pSize)

@@ -27,6 +27,7 @@ namespace misc
   std::string floatToStr(float f, int precision = 2);
   float dist(float x1, float z1, float x2, float z2);
   float getShortestDist(float x, float z, float squareX, float squareZ, float unitSize);
+  bool rectOverlap(math::vector_3d *r1, math::vector_3d *r2);
 }
 
 //! \todo collect all lose functions/classes/structs for now, sort them later

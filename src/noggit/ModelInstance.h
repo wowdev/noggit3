@@ -8,6 +8,7 @@
 #include "math/vector_3d.hpp" // math::vector_3d
 #include <math/ray.hpp>
 #include "Selection.h"
+#include "tile_index.hpp"
 
 class Frustum;
 class Model;
@@ -76,8 +77,7 @@ public:
 	void lockUID();
 	void unlockUID();
 
-	bool isInsideTile(math::vector_3d lTileExtents[2]);
-	bool isInsideChunk(math::vector_3d lTileExtents[2]);
+	bool isInsideRect(math::vector_3d rect[2]);
 
 	void recalcExtents();
 

@@ -1566,7 +1566,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lID = 0;
   for (std::map<int, WMOInstance>::iterator it = lObjectInstances.begin(); it != lObjectInstances.end(); ++it)
   {
-    if (it->second.isInsideChunk(lChunkExtents))
+    if (it->second.isInsideRect(lChunkExtents))
       lObjectIDs.push_back(lID);
 
     lID++;
@@ -1576,7 +1576,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lID = 0;
   for (std::map<int, ModelInstance>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it)
   {
-    if (it->second.isInsideChunk(lChunkExtents))
+    if (it->second.isInsideRect(lChunkExtents))
       lDoodadIDs.push_back(lID);
 
     lID++;

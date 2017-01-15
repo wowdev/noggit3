@@ -174,63 +174,9 @@ void WMOInstance::recalcExtents()
 	extents[1] = max;
 }
 
-bool WMOInstance::isInsideTile(math::vector_3d lTileExtents[2])
+bool WMOInstance::isInsideRect(math::vector_3d rect[2])
 {
-  math::matrix_4x4 rot
-    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation
-                       , { math::degrees (dir.z)
-                         , math::degrees (dir.y - 90.0f)
-                         , math::degrees (-dir.x)
-                         }
-                       )
-    );
-
-	std::vector<math::vector_3d> bounds (4 * (wmo->nGroups) + 5);
-	math::vector_3d *ptr = bounds.data();
-	math::vector_3d wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
-	math::vector_3d wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
-
-	*ptr++ = pos;
-
-	*ptr++ = rot * math::vector_3d(wmoMax.x, 0, wmoMax.z);
-	*ptr++ = rot * math::vector_3d(wmoMax.x, 0, wmoMin.z);
-	*ptr++ = rot * math::vector_3d(wmoMin.x, 0, wmoMax.z);
-	*ptr++ = rot * math::vector_3d(wmoMin.x, 0, wmoMin.z);
-
-	for (int i = 0; i < (int)wmo->nGroups; ++i)
-	{
-		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, 0, wmo->groups[i].BoundingBoxMax.z);
-		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, 0, wmo->groups[i].BoundingBoxMin.z);
-		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, 0, wmo->groups[i].BoundingBoxMax.z);
-		*ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, 0, wmo->groups[i].BoundingBoxMin.z);
-	}
-
-
-	for (int i = 0; i < 4 * ((int)wmo->nGroups) + 5; ++i)
-	{
-		if (pointInside(bounds[i], lTileExtents))
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool WMOInstance::isInsideChunk(math::vector_3d lTileExtents[2])
-{
-	if (isInsideTile(lTileExtents))
-		return true;
-
-	//maybe model > chunk || tile
-	recalcExtents();
-
-	for (int i = 0; i < 2; ++i)
-		if (pointInside(lTileExtents[i], extents))
-			return true;
-
-	return false;
+  return misc::rectOverlap(extents, rect);
 }
 
 /*void WMOInstance::drawPortals()
