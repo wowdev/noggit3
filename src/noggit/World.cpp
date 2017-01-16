@@ -461,7 +461,7 @@ bool World::IsSelection(int pSelectionType)
 
 bool World::HasSelection()
 {
-  return !!mCurrentSelection;
+  return !!mCurrentSelection && !mCurrentSelection->empty();
 }
 
 void World::initLowresTerrain()
