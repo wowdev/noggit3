@@ -82,8 +82,6 @@ public:
 
   math::vector_4d normalized_device_coords (int x, int y) const;
 
-	void updateProjectionMatrix();
-
 	/// is * supported:
 	bool mSupportShaders;
 	bool mSupportCompression;
