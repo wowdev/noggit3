@@ -89,6 +89,11 @@ bool Video::init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_)
 	gl.enableClientState(GL_NORMAL_ARRAY);
 	gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
 
+	if (doAntiAliasing())
+  {
+		gl.enable(GL_MULTISAMPLE);
+  }
+
 	mSupportCompression = GLEW_ARB_texture_compression;
 	mSupportShaders = GLEW_ARB_vertex_program && GLEW_ARB_fragment_program;
 
@@ -123,8 +128,6 @@ void Video::set3D() const
   opengl::matrix::perspective (fov(), ratio(), nearclip(), farclip());
 	gl.matrixMode(GL_MODELVIEW);
 	gl.loadIdentity();
-	if (doAntiAliasing())
-		gl.enable(GL_MULTISAMPLE);
 }
 
 void Video::set2D() const
@@ -134,8 +137,6 @@ void Video::set2D() const
 	gl.ortho(0.0f, xres(), yres(), 0.0f, -1.0f, 1.0f);
 	gl.matrixMode(GL_MODELVIEW);
 	gl.loadIdentity();
-	if (doAntiAliasing())
-		gl.disable(GL_MULTISAMPLE);
 }
 
 void Video::setTileMode() const
@@ -145,8 +146,6 @@ void Video::setTileMode() const
 	gl.ortho(-2.0f * ratio(), 2.0f * ratio(), 2.0f, -2.0f, -100.0f, 300.0f);
 	gl.matrixMode(GL_MODELVIEW);
 	gl.loadIdentity();
-	if (doAntiAliasing())
-		gl.enable(GL_MULTISAMPLE);
 }
 
 #include <stdint.h>
