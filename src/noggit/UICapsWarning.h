@@ -2,16 +2,14 @@
 
 #pragma once
 
-#include "UIWindow.h"
-#include "MapView.h"
+#include <noggit/UIWindow.h>
 
 class UICapsWarning : public UIWindow
 {
 private:
 	static const int winWidth = 320;
 	static const int winHeight = 80;
-	MapView *_MapView;
 public:
-	UICapsWarning(MapView *mapView);
+	UICapsWarning();
 	void resize();
 };

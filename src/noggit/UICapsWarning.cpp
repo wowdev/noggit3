@@ -1,22 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UICapsWarning.h"
+#include <noggit/UICapsWarning.h>
 
-#include <algorithm>
+#include <noggit/application.h> // fonts
+#include <noggit/UIText.h>
+#include <noggit/UITexture.h>
+#include <noggit/Video.h> // video
 
-#include "application.h" // fonts
-#include "revision.h"
-#include "UIText.h"
-#include "UIButton.h"
-#include "UITexture.h"
-#include "MapView.h"
-#include "Video.h" // video
-
-#include "Log.h"
-
-
-
-UICapsWarning::UICapsWarning(MapView *mapview)
+UICapsWarning::UICapsWarning()
 	: UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f - (video.yres() / 4), (float)winWidth, (float)winHeight)
 {
 	addChild(new UITexture(10.0f, 10.0f, 64.0f, 64.0f, "Interface\\ICONS\\INV_Sigil_Thorim.blp"));
