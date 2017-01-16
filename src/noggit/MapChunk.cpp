@@ -13,7 +13,7 @@
 #include <noggit/Misc.h>
 #include <math/quaternion.hpp>
 #include <noggit/texture_set.hpp>
-#include <noggit/UITexturingGUI.h>
+#include <noggit/ui/TexturingGUI.h>
 #include <math/vector_3d.hpp>
 #include <noggit/World.h>
 #include <noggit/alphamap.hpp>
