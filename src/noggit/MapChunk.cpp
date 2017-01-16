@@ -777,9 +777,9 @@ void MapChunk::draw (Frustum const& frustum)
       opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const depth_test;
 
       gl.begin(GL_TRIANGLES);
-      gl.vertex3fv(mVertices[gWorld->mapstrip2[poly + 0]]);
-      gl.vertex3fv(mVertices[gWorld->mapstrip2[poly + 1]]);
-      gl.vertex3fv(mVertices[gWorld->mapstrip2[poly + 2]]);
+      gl.vertex3fv(mVertices[strip[poly + 0]]);
+      gl.vertex3fv(mVertices[strip[poly + 1]]);
+      gl.vertex3fv(mVertices[strip[poly + 2]]);
       gl.end();
     }
   }
@@ -840,7 +840,7 @@ void MapChunk::intersect (math::ray const& ray, selection_result* results)
        )
     {
       results->emplace_back
-        (*distance, selected_chunk_type (this, i / 3, ray.position (*distance)));
+        (*distance, selected_chunk_type (this, i, ray.position (*distance)));
     }
   }
 }
