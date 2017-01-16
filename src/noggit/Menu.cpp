@@ -20,11 +20,11 @@
 #include <noggit/MPQ.h>
 #include <noggit/application.h> // fonts, APP_*
 #include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/UIAbout.h> // UIAbout
-#include <noggit/UIFrame.h> // UIFrame
-#include <noggit/UIMenuBar.h> // UIMenuBar, menu items, ..
-#include <noggit/UIMinimapWindow.h> // UIMinimapWindow
-#include <noggit/UIStatusBar.h> // UIStatusBar
+#include <noggit/ui/About.h> // UIAbout
+#include <noggit/ui/Frame.h> // UIFrame
+#include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
+#include <noggit/ui/MinimapWindow.h> // UIMinimapWindow
+#include <noggit/ui/StatusBar.h> // UIStatusBar
 #include <noggit/WMOInstance.h> // WMOInstance (only for loading WMO only maps, we never load..)
 #include <noggit/World.h>
 #include <noggit/Settings.h>

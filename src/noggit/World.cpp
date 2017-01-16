@@ -27,7 +27,7 @@
 #include <noggit/Project.h>
 #include <noggit/Settings.h>
 #include <noggit/TextureManager.h>
-#include <noggit/UITexturingGUI.h>
+#include <noggit/ui/TexturingGUI.h>
 #include <noggit/Video.h>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/MapTile.h>

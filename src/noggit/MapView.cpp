@@ -32,34 +32,34 @@
 #include <noggit/Settings.h>
 #include <noggit/Environment.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/UIAppInfo.h> // appInfo
-#include <noggit/UICapsWarning.h>
-#include <noggit/UICheckBox.h> // UICheckBox
-#include <noggit/UICursorSwitcher.h> // UICursorSwitcher
-#include <noggit/UIDetailInfos.h> // detailInfos
-#include <noggit/UIExitWarning.h>
-#include <noggit/UIGradient.h> // UIGradient
-#include <noggit/UIHelperModels.h>
-#include <noggit/UIMapViewGUI.h> // UIMapViewGUI
-#include <noggit/UIMenuBar.h> // UIMenuBar, menu items, ..
-#include <noggit/UIMinimapWindow.h> // UIMinimapWindow
-#include <noggit/UIModelImport.h>
-#include <noggit/UIObjectEditor.h>
-#include <noggit/UIRotationEditor.h>
-#include <noggit/UISlider.h> // UISlider
-#include <noggit/UIStatusBar.h> // statusBar
-#include <noggit/UIText.h> // UIText
-#include <noggit/UITexture.h> // textureUI
-#include <noggit/UITexturePicker.h>
-#include <noggit/UITextureSwitcher.h>
-#include <noggit/UITexturingGUI.h>
-#include <noggit/UIToggleGroup.h> // UIToggleGroup
-#include <noggit/UIToolbar.h> // UIToolbar
-#include <noggit/UIToolbarIcon.h> // ToolbarIcon
-#include <noggit/UIWater.h>
-#include <noggit/UIWaterSaveWarning.h>
-#include <noggit/UIWaterTypeBrowser.h>
-#include <noggit/UIZoneIDBrowser.h>
+#include <noggit/ui/AppInfo.h> // appInfo
+#include <noggit/ui/CapsWarning.h>
+#include <noggit/ui/CheckBox.h> // UICheckBox
+#include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
+#include <noggit/ui/DetailInfos.h> // detailInfos
+#include <noggit/ui/ExitWarning.h>
+#include <noggit/ui/Gradient.h> // UIGradient
+#include <noggit/ui/HelperModels.h>
+#include <noggit/ui/MapViewGUI.h> // UIMapViewGUI
+#include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
+#include <noggit/ui/MinimapWindow.h> // UIMinimapWindow
+#include <noggit/ui/ModelImport.h>
+#include <noggit/ui/ObjectEditor.h>
+#include <noggit/ui/RotationEditor.h>
+#include <noggit/ui/Slider.h> // UISlider
+#include <noggit/ui/StatusBar.h> // statusBar
+#include <noggit/ui/Text.h> // UIText
+#include <noggit/ui/Texture.h> // textureUI
+#include <noggit/ui/TexturePicker.h>
+#include <noggit/ui/TextureSwitcher.h>
+#include <noggit/ui/TexturingGUI.h>
+#include <noggit/ui/ToggleGroup.h> // UIToggleGroup
+#include <noggit/ui/Toolbar.h> // UIToolbar
+#include <noggit/ui/ToolbarIcon.h> // ToolbarIcon
+#include <noggit/ui/Water.h>
+#include <noggit/ui/WaterSaveWarning.h>
+#include <noggit/ui/WaterTypeBrowser.h>
+#include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 #include <noggit/map_index.hpp>
