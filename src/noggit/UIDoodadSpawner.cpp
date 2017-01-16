@@ -88,7 +88,7 @@ void UIDoodadSpawner::AddM2(const std::string& filename)
 		selectionPosition = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->pos;
 		break;
 	case eEntry_MapChunk:
-		selectionPosition = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk->GetSelectionPosition();
+		selectionPosition = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).position;
 		break;
 	}
 

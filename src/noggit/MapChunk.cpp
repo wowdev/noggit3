@@ -845,46 +845,6 @@ void MapChunk::intersect (math::ray const& ray, selection_result* results)
   }
 }
 
-void MapChunk::getSelectionCoord(float *x, float *z)
-{
-  int Poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
-  if (Poly + 2 > stripsize2)
-  {
-    *x = -1000000.0f;
-    *z = -1000000.0f;
-    return;
-  }
-  *x = (mVertices[gWorld->mapstrip2[Poly + 0]].x + mVertices[gWorld->mapstrip2[Poly + 1]].x + mVertices[gWorld->mapstrip2[Poly + 2]].x) / 3;
-  *z = (mVertices[gWorld->mapstrip2[Poly + 0]].z + mVertices[gWorld->mapstrip2[Poly + 1]].z + mVertices[gWorld->mapstrip2[Poly + 2]].z) / 3;
-}
-
-float MapChunk::getSelectionHeight()
-{
-  int Poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
-  if (Poly + 2 < stripsize2)
-    return (mVertices[gWorld->mapstrip2[Poly + 0]].y + mVertices[gWorld->mapstrip2[Poly + 1]].y + mVertices[gWorld->mapstrip2[Poly + 2]].y) / 3;
-  LogError << "Getting selection height fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
-  return 0.0f;
-}
-
-math::vector_3d MapChunk::GetSelectionPosition()
-{
-  int Poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
-  if (Poly + 2 > stripsize2)
-  {
-    LogError << "Getting selection position fucked up because the selection was bad. " << Poly << "%i with striplen of " << stripsize2 << "." << std::endl;
-    return math::vector_3d(-1000000.0f, -1000000.0f, -1000000.0f);
-  }
-
-  math::vector_3d lPosition;
-  lPosition = math::vector_3d(mVertices[gWorld->mapstrip2[Poly + 0]]);
-  lPosition += math::vector_3d(mVertices[gWorld->mapstrip2[Poly + 1]]);
-  lPosition += math::vector_3d(mVertices[gWorld->mapstrip2[Poly + 2]]);
-  lPosition *= 0.3333333f;
-
-  return lPosition;
-}
-
 void MapChunk::recalcNorms()
 {
   math::vector_3d P1, P2, P3, P4;
