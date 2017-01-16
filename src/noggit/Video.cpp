@@ -24,24 +24,7 @@ void Video::updateProjectionMatrix()
 
 math::vector_4d Video::normalized_device_coords (int x, int y) const
 {
-  union
-  {
-    GLint viewport[4];
-    struct
-    {
-      GLint x;
-      GLint y;
-      GLint width;
-      GLint height;
-    } view;
-  };
-  gl.getIntegerv (GL_VIEWPORT, viewport);
-
-  return { 2.0f * (x - static_cast<float> (view.x)) / static_cast<float> (view.width) - 1.0f
-         , 2.0f * (view.height - y - static_cast<float> (view.y)) / static_cast<float> (view.height) - 1.0f
-         , 0.0f
-         , 1.0f
-         };
+  return {2.0f * x / xres() - 1.0f, 1.0f - 2.0f * y / yres(), 0.0f, 1.0f};
 }
 
 void Video::resize(int xres_, int yres_)
