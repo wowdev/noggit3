@@ -4,6 +4,7 @@
 
 #include <math/matrix_4x4.hpp>
 #include <math/trig.hpp>
+#include <math/projection.hpp>
 #include <math/vector_3d.hpp>
 
 #include <opengl/context.hpp>
@@ -31,8 +32,7 @@ namespace opengl
 
     inline void perspective (math::degrees fovy, float aspect, float zNear, float zFar)
     {
-      float const ymax (zNear * math::tan (fovy) / 2.0f);
-      gl.frustum (-ymax * aspect, ymax * aspect, -ymax, ymax, zNear, zFar);
+      gl.multMatrixf (math::perspective (fovy, aspect, zNear, zFar).transposed());
     }
 
     inline void look_at ( ::math::vector_3d const& eye
@@ -40,16 +40,7 @@ namespace opengl
                         , ::math::vector_3d const& up
                         )
     {
-      ::math::vector_3d const z ((eye - center).normalized());
-      ::math::vector_3d const x ((up % z).normalized());
-      ::math::vector_3d const y ((z % x).normalized());
-      ::math::matrix_4x4 const matrix ( x.x,      y.x,      z.x,       0.0f
-                                      , x.y,      y.y,      z.y,       0.0f
-                                      , x.z,      y.z,      z.z,       0.0f
-                                      , x * -eye, y * -eye, z * -eye,  1.0f
-                                      );
-
-      gl.multMatrixf (matrix);
+      gl.multMatrixf (math::look_at (eye, center, up).transposed());
     }
   }
 }
