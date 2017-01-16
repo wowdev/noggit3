@@ -6,6 +6,7 @@
 #include <stack>
 
 #include <math/trig.hpp>
+#include <math/vector_4d.hpp>
 
 #include <opengl/context.hpp>
 #include <opengl/texture.hpp>
@@ -78,6 +79,8 @@ public:
 	{
 		_farclip = farclip_;
 	}
+
+  math::vector_4d normalized_device_coords (int x, int y) const;
 
 	void updateProjectionMatrix();
 
