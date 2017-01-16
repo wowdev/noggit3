@@ -24,7 +24,7 @@
 #include	<assert.h>
 #include	<stdarg.h>
 
-#include	"wintab.h"		// NOTE: get from wactab header package
+#include	<external/wacom/wintab.h>		// NOTE: get from wactab header package
 
 
 //////////////////////////////////////////////////////////////////////////////

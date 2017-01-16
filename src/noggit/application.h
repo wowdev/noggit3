@@ -14,12 +14,12 @@ class AppState;
 class AsyncLoader;
 
 #ifdef _WIN32
-#include <noggit/MSGPACK.H>
-#include <noggit/WINTAB.h>
+#include <external/wacom/MSGPACK.H>
+#include <external/wacom/WINTAB.h>
 #define PACKETDATA	(PK_BUTTONS | PK_NORMAL_PRESSURE)
 #define PACKETMODE	PK_BUTTONS
-#include <noggit/PKTDEF.H>
-#include <noggit/Utils.h>
+#include <external/wacom/PKTDEF.H>
+#include <external/wacom/Utils.h>
 HWND static WindowHandle;
 HCTX static NEAR TabletInit(HWND hWnd);
 #endif
