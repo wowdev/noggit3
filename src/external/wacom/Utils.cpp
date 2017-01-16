@@ -14,7 +14,7 @@
 		copied, or distributed without compensation or licensing restrictions.
 
 ---------------------------------------------------------------------------- */
-#include <noggit/Utils.h>
+#include <external/wacom/Utils.h>
 
 #ifdef _WIN32
 
