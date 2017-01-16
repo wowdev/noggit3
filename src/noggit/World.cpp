@@ -913,31 +913,10 @@ void World::draw()
     }
   }
 
-  GLint viewport[4];
-  gl.getIntegerv(GL_VIEWPORT, viewport);
-
-  float win_x (Environment::getInstance()->screenX);
-  float win_y (viewport[3] - Environment::getInstance()->screenY);
-  float win_z;
-  gl.readPixels (win_x, win_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &win_z);
-
-  math::vector_4d const normalized_device_coords
-    ( 2.0f * (win_x - static_cast<float> (viewport[0])) / static_cast<float> (viewport[2]) - 1.0f
-    , 2.0f * (win_y - static_cast<float> (viewport[1])) / static_cast<float> (viewport[3]) - 1.0f
-    , 2.0f * win_z - 1.0f
-    , 1.0f
-    );
-
-  math::vector_3d const pos ( ( ( opengl::matrix::model_view()
-                                * opengl::matrix::projection()
-                                ).inverted().transposed()
-                              * normalized_device_coords
-                              ).xyz_normalized_by_w()
+  math::vector_3d const pos ( Environment::getInstance()->Pos3DX
+                            , Environment::getInstance()->Pos3DY
+                            , Environment::getInstance()->Pos3DZ
                             );
-
-  Environment::getInstance()->Pos3DX = pos.x;
-  Environment::getInstance()->Pos3DY = pos.y;
-  Environment::getInstance()->Pos3DZ = pos.z;
 
   // Selection circle
   if (this->IsSelection(eEntry_MapChunk))

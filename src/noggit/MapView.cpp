@@ -1941,28 +1941,15 @@ void MapView::tick(float t, float dt)
 
 void MapView::doSelection (bool selectTerrainOnly)
 {
-  video.set3D();
-  opengl::matrix::look_at (gWorld->camera, gWorld->lookat, {0.0f, 1.0f, 0.0f});
-
-  GLint viewport[4];
-  gl.getIntegerv(GL_VIEWPORT, viewport);
-
-  float win_x (Environment::getInstance()->screenX);
-  float win_y (viewport[3] - Environment::getInstance()->screenY);
-
-  math::vector_4d const normalized_device_coords
-    ( 2.0f * (win_x - static_cast<float> (viewport[0])) / static_cast<float> (viewport[2]) - 1.0f
-    , 2.0f * (win_y - static_cast<float> (viewport[1])) / static_cast<float> (viewport[3]) - 1.0f
-    , 0.0f
-    , 1.0f
+  math::vector_3d const pos
+    ( ( ( math::look_at (gWorld->camera, gWorld->lookat, {0.0f, 1.0f, 0.0f}).transposed()
+        * math::perspective (video.fov(), video.ratio(), video.nearclip(), video.farclip()).transposed()
+        ).inverted().transposed()
+      * video.normalized_device_coords ( Environment::getInstance()->screenX
+                                       , Environment::getInstance()->screenY
+                                       )
+      ).xyz_normalized_by_w()
     );
-
-  math::vector_3d const pos ( ( ( opengl::matrix::model_view()
-                                * opengl::matrix::projection()
-                                ).inverted().transposed()
-                              * normalized_device_coords
-                              ).xyz_normalized_by_w()
-                            );
 
   math::ray ray (gWorld->camera, pos - gWorld->camera);
 
@@ -1976,11 +1963,24 @@ void MapView::doSelection (bool selectTerrainOnly)
               }
             );
 
-  gWorld->SetCurrentSelection
-    ( results.empty()
-    ? boost::optional<selection_type>()
-    : boost::optional<selection_type> (results.front().second)
-    );
+  if (results.empty())
+  {
+    gWorld->SetCurrentSelection (boost::none);
+  }
+  else
+  {
+    auto const& hit (results.front().second);
+    gWorld->SetCurrentSelection (hit);
+
+    auto const pos ( hit.which() == eEntry_Model ? boost::get<selected_model_type> (hit)->pos
+                   : hit.which() == eEntry_WMO ? boost::get<selected_wmo_type> (hit)->pos
+                   : hit.which() == eEntry_MapChunk ? boost::get<selected_chunk_type> (hit).position
+                   : throw std::logic_error ("bad variant")
+                   );
+    Environment::getInstance()->Pos3DX = pos.x;
+    Environment::getInstance()->Pos3DY = pos.y;
+    Environment::getInstance()->Pos3DZ = pos.z;
+  }
 }
 
 
