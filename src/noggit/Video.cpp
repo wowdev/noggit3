@@ -36,7 +36,7 @@ void Video::resize(int xres_, int yres_)
 	LogDebug << "resize(" << xres() << ", " << yres() << ");" << std::endl;
 
 	_primary = SDL_SetVideoMode(xres(), yres(), 0, _primary->flags);
-	updateProjectionMatrix();
+	gl.viewport(0.0f, 0.0f, xres(), yres());
 }
 
 bool Video::init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_)
