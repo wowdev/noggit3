@@ -1791,8 +1791,8 @@ void MapView::tick(float t, float dt)
             // no undermap check here, else it's impossible to remove holes
             if (Environment::getInstance()->ShiftDown)
             {
-              boost::get<selected_chunk_type> (*Selection).chunk->getSelectionCoord(&xPos, &zPos);
-              gWorld->removeHole(xPos, zPos, Environment::getInstance()->AltDown);
+              auto pos (boost::get<selected_chunk_type> (*Selection).position);
+              gWorld->removeHole(pos.x, pos.z, Environment::getInstance()->AltDown);
             }
             else if (Environment::getInstance()->CtrlDown && !underMap)
               gWorld->addHole(xPos, zPos, Environment::getInstance()->AltDown);

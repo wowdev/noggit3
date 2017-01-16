@@ -90,11 +90,6 @@ public:
 
 	void recalcNorms();
 
-	void getSelectionCoord(float *x, float *z);
-	float getSelectionHeight();
-
-	math::vector_3d GetSelectionPosition();
-
 	//! \todo implement Action stack for these
 	bool changeTerrain(float x, float z, float change, float radius, int BrushType);
 	bool flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, int flattenType, float angle, float orientation);
