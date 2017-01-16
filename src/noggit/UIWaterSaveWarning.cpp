@@ -1,22 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIWaterSaveWarning.h"
+#include <noggit/UIWaterSaveWarning.h>
 
-#include <algorithm>
+#include <noggit/application.h> // fonts
+#include <noggit/UIText.h>
+#include <noggit/UITexture.h>
+#include <noggit/Video.h> // video
 
-#include "application.h" // fonts
-#include "revision.h"
-#include "UIText.h"
-#include "UIButton.h"
-#include "UITexture.h"
-#include "MapView.h"
-#include "Video.h" // video
-
-#include "Log.h"
-
-
-
-UIWaterSaveWarning::UIWaterSaveWarning(MapView *mapview)
+UIWaterSaveWarning::UIWaterSaveWarning()
 	: UIWindow(video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f - (video.yres() / 2.5f), winWidth, winHeight)
 {
 	addChild(new UITexture(10.0f, 10.0f, 64.0f, 64.0f, "Interface\\ICONS\\Ability_Creature_Poison_06.blp"));

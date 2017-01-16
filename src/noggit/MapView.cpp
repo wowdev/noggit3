@@ -1317,12 +1317,12 @@ void MapView::createGUI()
   mainGui->addChild(mainGui->escWarning);
 
   // CAPS warning
-  mainGui->capsWarning = new UICapsWarning(this);
+  mainGui->capsWarning = new UICapsWarning;
   mainGui->capsWarning->hide();
   mainGui->addChild(mainGui->capsWarning);
 
   // Water unable to save warning
-  mainGui->waterSaveWarning = new UIWaterSaveWarning(this);
+  mainGui->waterSaveWarning = new UIWaterSaveWarning;
   mainGui->waterSaveWarning->hide();
   mainGui->addChild(mainGui->waterSaveWarning);
 

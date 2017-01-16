@@ -2,16 +2,14 @@
 
 #pragma once
 
-#include "UIWindow.h"
-#include "MapView.h"
+#include <noggit/UIWindow.h>
 
 class UIWaterSaveWarning : public UIWindow
 {
 private:
 	static const int winWidth = 320;
 	static const int winHeight = 80;
-	MapView *_MapView;
 public:
-	UIWaterSaveWarning(MapView *mapView);
+	UIWaterSaveWarning();
 	void resize();
 };

@@ -1,19 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIExitWarning.h"
+#include <noggit/UIExitWarning.h>
 
-#include <algorithm>
-
-#include "application.h" // fonts
-#include "revision.h"
-#include "UIText.h"
-#include "UIButton.h"
-#include "UITexture.h"
-#include "MapView.h"
-#include "Video.h" // video
-
-#include "Log.h"
-
+#include <noggit/application.h> // fonts
+#include <noggit/UIText.h>
+#include <noggit/UIButton.h>
+#include <noggit/UITexture.h>
+#include <noggit/Video.h> // video
 
 void exitMeNow(UIFrame *f, int /*set*/)
 {
