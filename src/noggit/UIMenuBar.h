@@ -5,9 +5,9 @@
 #include <map>
 #include <string>
 
-#include "UIButton.h"
-#include "UIWindow.h"
-#include "UICheckBox.h"
+#include <noggit/UIButton.h>
+#include <noggit/UIWindow.h>
+#include <noggit/UICheckBox.h>
 
 // This file contains more than one class as they are needed together.
 

@@ -9,15 +9,15 @@ class Liquid;
 #include <string>
 #include <vector>
 
-#include "Video.h"
-#include "MPQ.h"
+#include <noggit/Video.h>
+#include <noggit/MPQ.h>
 #ifdef USEBLSFILES
-#include "Shaders.h"
+#include <noggit/Shaders.h>
 #endif
-#include "MapTile.h"
-#include "WMO.h"
+#include <noggit/MapTile.h>
+#include <noggit/WMO.h>
 
-//#include "Log.h"
+//#include <noggit/Log.h>
 
 namespace OpenGL
 {

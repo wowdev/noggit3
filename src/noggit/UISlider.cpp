@@ -4,15 +4,15 @@
 #define NOMINMAX
 #endif // win32
 
-#include "UISlider.h"
+#include <noggit/UISlider.h>
 
 #include <iomanip>
 #include <sstream>
 
-#include "FreeType.h" // freetype::
-#include "application.h" // app.getArial12()
-#include "TextureManager.h" // TextureManager, Texture
-#include "Video.h"
+#include <noggit/FreeType.h> // freetype::
+#include <noggit/application.h> // app.getArial12()
+#include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/Video.h>
 #include <opengl/scoped.hpp>
 
 UISlider::UISlider(float xPos, float yPos, float w, float s, float o)

@@ -1,11 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIToolbarIcon.h"
+#include <noggit/UIToolbarIcon.h>
 
 #include <string>
 
-#include "TextureManager.h" // TextureManager, Texture
-#include "Video.h" // gl*
+#include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/Video.h> // gl*
 #include <opengl/scoped.hpp>
 
 UIToolbarIcon::UIToolbarIcon(float xPos, float yPos, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments)

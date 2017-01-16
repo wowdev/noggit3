@@ -102,7 +102,7 @@ private:
 	SDL_Surface* _primary;
 };
 
-#include "Manager.h" // ManagedItem
+#include <noggit/Manager.h> // ManagedItem
 
 struct BLPHeader;
 

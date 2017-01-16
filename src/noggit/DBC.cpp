@@ -1,11 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "DBC.h"
+#include <noggit/DBC.h>
 
 #include <string>
 
-#include "Misc.h"
-#include "Log.h"
+#include <noggit/Misc.h>
+#include <noggit/Log.h>
 
 AreaDB gAreaDB;
 MapDB gMapDB;

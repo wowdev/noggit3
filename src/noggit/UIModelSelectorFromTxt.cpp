@@ -1,22 +1,22 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIModelSelectorFromTxt.h"
+#include <noggit/UIModelSelectorFromTxt.h>
 
 #include <iostream>
 #include <sstream>
 #include <string>
 
-#include "DBC.h"
-#include "Log.h"
-#include "Misc.h"
-#include "application.h" // app.getArial14(), arialn13
-#include "UIButton.h"
-#include "UIListView.h"
-#include "UIMapViewGUI.h"
-#include "UIScrollBar.h"
-#include "UIText.h" // UIText
-#include "UICloseWindow.h" // UICloseWindow
-#include "UIZoneIDBrowser.h"
+#include <noggit/DBC.h>
+#include <noggit/Log.h>
+#include <noggit/Misc.h>
+#include <noggit/application.h> // app.getArial14(), arialn13
+#include <noggit/UIButton.h>
+#include <noggit/UIListView.h>
+#include <noggit/UIMapViewGUI.h>
+#include <noggit/UIScrollBar.h>
+#include <noggit/UIText.h> // UIText
+#include <noggit/UICloseWindow.h> // UICloseWindow
+#include <noggit/UIZoneIDBrowser.h>
 
 
 UIModelSelectorFromTxt::UIModelSelectorFromTxt(float xPos, float yPos, float w, float h, UIMapViewGUI *setGui)

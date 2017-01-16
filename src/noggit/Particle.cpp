@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "Particle.h"
+#include <noggit/Particle.h>
 
 #include <list>
 
-#include "Misc.h"
+#include <noggit/Misc.h>
 
 static const unsigned int MAX_PARTICLES = 10000;
 

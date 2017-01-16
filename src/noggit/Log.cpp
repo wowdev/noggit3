@@ -4,7 +4,7 @@
 #include <ctime>
 #include <cstring>
 
-#include "Log.h"
+#include <noggit/Log.h>
 
 std::ofstream gLogStream;
 

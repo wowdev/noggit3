@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "UICloseWindow.h"
-#include "tile_index.hpp"
+#include <noggit/UICloseWindow.h>
+#include <noggit/tile_index.hpp>
 
 class UISlider;
 class UIText;

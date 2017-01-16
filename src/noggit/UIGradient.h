@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "math/quaternion.hpp" // math::vector_4d
-#include "UIFrame.h" // UIFrame
+#include <math/quaternion.hpp> // math::vector_4d
+#include <noggit/UIFrame.h> // UIFrame
 
 class UIGradient : public UIFrame
 {

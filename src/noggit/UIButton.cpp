@@ -1,14 +1,14 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIButton.h"
+#include <noggit/UIButton.h>
 
 #include <string>
 
-#include "FreeType.h"
-#include "application.h" // app.getArial12()
-#include "TextureManager.h" // TextureManager
-#include "UIText.h"
-#include "Video.h" // Texture
+#include <noggit/FreeType.h>
+#include <noggit/application.h> // app.getArial12()
+#include <noggit/TextureManager.h> // TextureManager
+#include <noggit/UIText.h>
+#include <noggit/Video.h> // Texture
 #include <opengl/scoped.hpp>
 
 UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pTexNormal, const std::string& pTexDown)

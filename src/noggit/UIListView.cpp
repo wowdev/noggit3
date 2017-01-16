@@ -1,12 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIListView.h"
+#include <noggit/UIListView.h>
 
 #include <vector>
 
-#include "Log.h"
-#include "Misc.h"
-#include "UIScrollBar.h"
+#include <noggit/Log.h>
+#include <noggit/Misc.h>
+#include <noggit/UIScrollBar.h>
 
 void changeValue(UIFrame::Ptr f, int set)
 {

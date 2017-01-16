@@ -3,7 +3,7 @@
 #pragma once
 
 #include <string>
-#include "UIFrame.h"
+#include <noggit/UIFrame.h>
 
 using namespace std;
 namespace freetype { class font_data; }

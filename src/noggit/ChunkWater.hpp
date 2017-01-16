@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MapHeaders.h"
+#include <noggit/MapHeaders.h>
 
 class MPQFile;
 class Liquid;

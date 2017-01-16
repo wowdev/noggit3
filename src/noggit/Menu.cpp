@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "Menu.h"
+#include <noggit/Menu.h>
 
 #include <cstdlib>
 #include <ctime>
@@ -11,24 +11,24 @@
 #include <string>
 #include <vector>
 
-#include "DBC.h"
-#include "DBCFile.h"
-#include "Log.h"
-#include "MapView.h"
-#include "Misc.h"
-#include "ModelManager.h" // ModelManager
-#include "MPQ.h"
-#include "application.h" // fonts, APP_*
-#include "TextureManager.h" // TextureManager, Texture
-#include "UIAbout.h" // UIAbout
-#include "UIFrame.h" // UIFrame
-#include "UIMenuBar.h" // UIMenuBar, menu items, ..
-#include "UIMinimapWindow.h" // UIMinimapWindow
-#include "UIStatusBar.h" // UIStatusBar
-#include "WMOInstance.h" // WMOInstance (only for loading WMO only maps, we never load..)
-#include "World.h"
-#include "Settings.h"
-#include "map_index.hpp"
+#include <noggit/DBC.h>
+#include <noggit/DBCFile.h>
+#include <noggit/Log.h>
+#include <noggit/MapView.h>
+#include <noggit/Misc.h>
+#include <noggit/ModelManager.h> // ModelManager
+#include <noggit/MPQ.h>
+#include <noggit/application.h> // fonts, APP_*
+#include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/UIAbout.h> // UIAbout
+#include <noggit/UIFrame.h> // UIFrame
+#include <noggit/UIMenuBar.h> // UIMenuBar, menu items, ..
+#include <noggit/UIMinimapWindow.h> // UIMinimapWindow
+#include <noggit/UIStatusBar.h> // UIStatusBar
+#include <noggit/WMOInstance.h> // WMOInstance (only for loading WMO only maps, we never load..)
+#include <noggit/World.h>
+#include <noggit/Settings.h>
+#include <noggit/map_index.hpp>
 
 Menu* theMenu = nullptr;
 

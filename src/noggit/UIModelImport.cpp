@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIModelImport.h"
+#include <noggit/UIModelImport.h>
 
 #include <algorithm>
 #include <iostream>
@@ -8,21 +8,20 @@
 #include <string>
 #include <fstream>
 
-#include "application.h" // fonts
-#include "Misc.h" // fonts
-#include "revision.h"
-#include "UIText.h"
-#include "UITexture.h"
-#include "Video.h" // video
-#include "MapView.h"
-#include "UIListView.h"
-#include "UIButton.h"
-#include "Settings.h"
-#include "Selection.h"
-#include "ModelInstance.h"
-#include "WMOInstance.h"
+#include <noggit/application.h> // fonts
+#include <noggit/Misc.h> // fonts
+#include <noggit/UIText.h>
+#include <noggit/UITexture.h>
+#include <noggit/Video.h> // video
+#include <noggit/MapView.h>
+#include <noggit/UIListView.h>
+#include <noggit/UIButton.h>
+#include <noggit/Settings.h>
+#include <noggit/Selection.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/WMOInstance.h>
 
-#include "Log.h"
+#include <noggit/Log.h>
 
 void addTXTModelext(UIFrame *f, int id)
 {

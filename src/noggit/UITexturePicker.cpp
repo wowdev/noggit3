@@ -1,13 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UITexturePicker.h"
+#include <noggit/UITexturePicker.h>
 
-#include "Selection.h"
-#include "texture_set.hpp"
-#include "UITexture.h"
-#include "UITexturingGUI.h"
-#include "UIButton.h"
-#include "World.h"
+#include <noggit/Selection.h>
+#include <noggit/texture_set.hpp>
+#include <noggit/UITexture.h>
+#include <noggit/UITexturingGUI.h>
+#include <noggit/UIButton.h>
+#include <noggit/World.h>
 
 #include <cassert>
 

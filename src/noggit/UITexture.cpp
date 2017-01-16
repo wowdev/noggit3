@@ -1,11 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UITexture.h"
+#include <noggit/UITexture.h>
 
 #include <string>
 
-#include "TextureManager.h" // TextureManager
-#include "Video.h" // Texture
+#include <noggit/TextureManager.h> // TextureManager
+#include <noggit/Video.h> // Texture
 #include <opengl/scoped.hpp>
 
 UITexture::UITexture(float xPos, float yPos, float w, float h, const std::string& tex)

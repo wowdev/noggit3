@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "MPQ.h"
-#include "MapHeaders.h"
-#include "MapTile.h"
-#include "math/vector_3d.hpp"
+#include <noggit/MPQ.h>
+#include <noggit/MapHeaders.h>
+#include <noggit/MapTile.h>
+#include <math/vector_3d.hpp>
 
 class ChunkWater;
 class sExtendableArray;

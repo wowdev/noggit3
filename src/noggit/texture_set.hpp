@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "MPQ.h"
-#include "alphamap.hpp"
+#include <noggit/MPQ.h>
+#include <noggit/alphamap.hpp>
 #include <stdint.h>
 
 namespace OpenGL

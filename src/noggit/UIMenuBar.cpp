@@ -1,15 +1,15 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIMenuBar.h"
+#include <noggit/UIMenuBar.h>
 
 #include <map>
 #include <string>
 #include <vector>
 
-#include "Environment.h" // CtrlDown
-#include "UICheckBox.h"
-#include "UIText.h"
-#include "Video.h"
+#include <noggit/Environment.h> // CtrlDown
+#include <noggit/UICheckBox.h>
+#include <noggit/UIText.h>
+#include <noggit/Video.h>
 #include <opengl/scoped.hpp>
 
 UIMenuBar::UIMenuBar()

@@ -9,10 +9,10 @@
 #include <fstream>
 #include <ctime>
 
-#include "MapHeaders.h"
-#include "MapTile.h"
-#include "Misc.h"
-#include "tile_index.hpp"
+#include <noggit/MapHeaders.h>
+#include <noggit/MapTile.h>
+#include <noggit/Misc.h>
+#include <noggit/tile_index.hpp>
 
 #include <boost/range/iterator_range.hpp>
 

@@ -1,8 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIGradient.h"
+#include <noggit/UIGradient.h>
 
-#include "Video.h" // gl*
+#include <noggit/Video.h> // gl*
 #include <opengl/scoped.hpp>
 
 #include <iostream>     // std::cout

@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIHelp.h"
+#include <noggit/UIHelp.h>
 
-#include "UIText.h" // UIText
-#include "application.h" // app.getArial14()
-#include "Video.h" // video
+#include <noggit/UIText.h> // UIText
+#include <noggit/application.h> // app.getArial14()
+#include <noggit/Video.h> // video
 
 const int winWidth = 810;
 const int winHeight = 920;

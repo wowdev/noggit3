@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "UICloseWindow.h"
-#include "MapChunk.h"
-#include "Selection.h"
+#include <noggit/UICloseWindow.h>
+#include <noggit/MapChunk.h>
+#include <noggit/Selection.h>
 
 class UITexture;
 

@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "MPQ.h"
+#include <noggit/MPQ.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -16,10 +16,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
-#include "Log.h"
-#include "Project.h"
-#include "AsyncLoader.h" // AsyncLoader
-#include "application.h" // app.loader()
+#include <noggit/Log.h>
+#include <noggit/Project.h>
+#include <noggit/AsyncLoader.h> // AsyncLoader
+#include <noggit/application.h> // app.loader()
 
 typedef std::pair<std::string, MPQArchive*> ArchiveEntry;
 typedef std::list<ArchiveEntry> ArchivesMap;

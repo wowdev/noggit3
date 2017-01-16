@@ -1,17 +1,17 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UITextBox.h"
+#include <noggit/UITextBox.h>
 
 #include <SDL.h>
 #include <utf8.h>
 
 #include <string>
 
-#include "application.h" // arial12
-#include "TextureManager.h" // TextureManager, Texture
-#include "UIText.h"
-#include "UITexture.h"
-#include "Video.h"
+#include <noggit/application.h> // arial12
+#include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/UIText.h>
+#include <noggit/UITexture.h>
+#include <noggit/Video.h>
 #include <opengl/scoped.hpp>
 
 //! \todo Handle Selection, Handle Clipboard ( CTRL + C / CTRL + V / CTRL + X ), Handle the Backspace staying down. Details, but better like that.

@@ -1,13 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UICheckBox.h"
+#include <noggit/UICheckBox.h>
 
 #include <string>
 
-#include "application.h" // app.getArialn13()
-#include "UIText.h"
-#include "UITexture.h"
-#include "UIToggleGroup.h"
+#include <noggit/application.h> // app.getArialn13()
+#include <noggit/UIText.h>
+#include <noggit/UITexture.h>
+#include <noggit/UIToggleGroup.h>
 
 UICheckBox::UICheckBox(float xPos, float yPos, const std::string& pText)
 	: UIFrame(xPos, yPos, 30.0f, 30.0f)

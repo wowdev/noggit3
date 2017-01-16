@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "AsyncObject.h"
+#include <noggit/AsyncObject.h>
 
 class MPQArchive;
 class MPQFile;

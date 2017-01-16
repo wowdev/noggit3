@@ -1,13 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "ModelInstance.h"
+#include <noggit/ModelInstance.h>
 
-#include "Frustum.h"
-#include "Log.h"
-#include "Misc.h" // checkinside
-#include "Model.h" // Model, etc.
-#include "World.h" // gWorld
-#include "Settings.h" // gWorld
+#include <noggit/Frustum.h>
+#include <noggit/Log.h>
+#include <noggit/Misc.h> // checkinside
+#include <noggit/Model.h> // Model, etc.
+#include <noggit/World.h> // gWorld
+#include <noggit/Settings.h> // gWorld
 #include <opengl/scoped.hpp>
 
 math::vector_3d TransformCoordsForModel(math::vector_3d pIn)

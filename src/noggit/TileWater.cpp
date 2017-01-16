@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "TileWater.hpp"
+#include <noggit/TileWater.hpp>
 
-#include "Log.h"
-#include "Misc.h"
-#include "ChunkWater.hpp"
+#include <noggit/Log.h>
+#include <noggit/Misc.h>
+#include <noggit/ChunkWater.hpp>
 
 TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase)
 	: tile(pTile)

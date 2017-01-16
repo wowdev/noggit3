@@ -4,9 +4,9 @@
 
 #include <string>
 
-#include "Video.h"
+#include <noggit/Video.h>
 
-#include "MPQ.h"
+#include <noggit/MPQ.h>
 
 #ifdef USEBLSSHADER
 class BLSShader

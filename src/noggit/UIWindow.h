@@ -4,8 +4,8 @@
 
 #include <string>
 
-#include "FreeType.h" // fonts.
-#include "UIFrame.h"
+#include <noggit/FreeType.h> // fonts.
+#include <noggit/UIFrame.h>
 
 namespace OpenGL { class Texture; }
 

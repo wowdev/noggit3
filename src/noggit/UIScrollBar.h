@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "UIFrame.h"
-#include "UITexture.h"
+#include <noggit/UIFrame.h>
+#include <noggit/UITexture.h>
 
 class UIScrollBar : public UIFrame
 {

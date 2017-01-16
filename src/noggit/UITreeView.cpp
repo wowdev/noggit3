@@ -1,16 +1,16 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UITreeView.h"
+#include <noggit/UITreeView.h>
 
 #include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
 
-#include "Directory.h"
-#include "application.h" // app.getArial12()
-#include "UIText.h"
-#include "Video.h"
+#include <noggit/Directory.h>
+#include <noggit/application.h> // app.getArial12()
+#include <noggit/UIText.h>
+#include <noggit/Video.h>
 #include <opengl/scoped.hpp>
 
 UITreeViewButton::UITreeViewButton(float _x, float _y, UITreeView::Ptr pTreeView)

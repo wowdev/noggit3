@@ -1,16 +1,15 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIAbout.h"
+#include <noggit/UIAbout.h>
 
 #include <algorithm>
 
-#include "application.h" // fonts
-#include "revision.h"
-#include "UIText.h"
-#include "UITexture.h"
-#include "Video.h" // video
+#include <noggit/application.h> // fonts
+#include <noggit/UIText.h>
+#include <noggit/UITexture.h>
+#include <noggit/Video.h> // video
 
-#include "Log.h"
+#include "revision.h"
 
 UIAbout::UIAbout()
 	: UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f  , (float)winWidth, (float)winHeight)

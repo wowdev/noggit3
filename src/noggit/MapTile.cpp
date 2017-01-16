@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "MapTile.h"
+#include <noggit/MapTile.h>
 
 #include <algorithm>
 #include <cassert>
@@ -10,19 +10,19 @@
 #include <utility>
 #include <vector>
 
-#include "Environment.h"
-#include "TileWater.hpp"
-#include "Log.h"
-#include "MapChunk.h"
-#include "Misc.h"
-#include "ModelInstance.h" // ModelInstance
-#include "ModelManager.h" // ModelManager
-#include "WMOInstance.h" // WMOInstance
-#include "World.h"
-#include "alphamap.hpp"
-#include "texture_set.hpp"
-#include "map_index.hpp"
-#include "Settings.h"
+#include <noggit/Environment.h>
+#include <noggit/TileWater.hpp>
+#include <noggit/Log.h>
+#include <noggit/MapChunk.h>
+#include <noggit/Misc.h>
+#include <noggit/ModelInstance.h> // ModelInstance
+#include <noggit/ModelManager.h> // ModelManager
+#include <noggit/WMOInstance.h> // WMOInstance
+#include <noggit/World.h>
+#include <noggit/alphamap.hpp>
+#include <noggit/texture_set.hpp>
+#include <noggit/map_index.hpp>
+#include <noggit/Settings.h>
 #include <opengl/scoped.hpp>
 
 int indexMapBuf(int x, int y)

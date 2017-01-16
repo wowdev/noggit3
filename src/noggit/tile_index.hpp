@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "math/vector_3d.hpp"
-#include "MapHeaders.h"
+#include <math/vector_3d.hpp>
+#include <noggit/MapHeaders.h>
 
 struct tile_index
 {

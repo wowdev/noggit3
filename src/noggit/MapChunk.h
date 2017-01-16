@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "MapTile.h" // MapTile
-#include "math/quaternion.hpp" // math::vector_4d
-#include "Video.h" // GLuint
-#include "WMOInstance.h"
-#include "ModelInstance.h"
-#include "Selection.h"
+#include <noggit/MapTile.h> // MapTile
+#include <math/quaternion.hpp> // math::vector_4d
+#include <noggit/Video.h> // GLuint
+#include <noggit/WMOInstance.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/Selection.h>
 
 #include <opengl/texture.hpp>
 

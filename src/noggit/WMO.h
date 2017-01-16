@@ -8,13 +8,13 @@
 #include <vector>
 #include <map>
 
-#include "Manager.h"
-#include "ModelInstance.h" // ModelInstance
-#include "ModelManager.h"
-#include "MPQ.h"
-#include "math/quaternion.hpp"
-#include "math/vector_3d.hpp"
-#include "Video.h"
+#include <noggit/Manager.h>
+#include <noggit/ModelInstance.h> // ModelInstance
+#include <noggit/ModelManager.h>
+#include <noggit/MPQ.h>
+#include <math/quaternion.hpp>
+#include <math/vector_3d.hpp>
+#include <noggit/Video.h>
 #include <opengl/call_list.hpp>
 #include <math/ray.hpp>
 

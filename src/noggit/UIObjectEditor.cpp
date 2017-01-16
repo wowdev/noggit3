@@ -5,23 +5,23 @@
 #include <string>
 #include <sstream>
 
-#include "Environment.h"
-#include "Misc.h"
-#include "ModelInstance.h"
-#include "application.h" // fonts
-#include "Settings.h"
-#include "UIButton.h"
-#include "UICheckBox.h"
-#include "UIMapViewGUI.h"
-#include "UIModelImport.h"
-#include "UIObjectEditor.h"
-#include "UIRotationEditor.h"
-#include "UIStatusBar.h"
-#include "UITextBox.h"
-#include "UIText.h"
-#include "Video.h" // video
-#include "WMOInstance.h" // WMOInstance
-#include "World.h"
+#include <noggit/Environment.h>
+#include <noggit/Misc.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/application.h> // fonts
+#include <noggit/Settings.h>
+#include <noggit/UIButton.h>
+#include <noggit/UICheckBox.h>
+#include <noggit/UIMapViewGUI.h>
+#include <noggit/UIModelImport.h>
+#include <noggit/UIObjectEditor.h>
+#include <noggit/UIRotationEditor.h>
+#include <noggit/UIStatusBar.h>
+#include <noggit/UITextBox.h>
+#include <noggit/UIText.h>
+#include <noggit/Video.h> // video
+#include <noggit/WMOInstance.h> // WMOInstance
+#include <noggit/World.h>
 
 void updateMinRotation(UITextBox::Ptr textBox, const std::string& value)
 {

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "UIWindow.h"
-#include "UIText.h"
+#include <noggit/UIWindow.h>
+#include <noggit/UIText.h>
 
 class Menu;
 class World;

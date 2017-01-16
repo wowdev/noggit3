@@ -1,18 +1,18 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #define _CRT_SECURE_NO_WARNINGS
-#include "Liquid.h"
+#include <noggit/Liquid.h>
 
 #include <algorithm>
 #include <string>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
-#include "DBC.h"
-#include "Log.h"
-#include "Shaders.h"
-#include "TextureManager.h" // TextureManager, Texture
-#include "World.h"
+#include <noggit/DBC.h>
+#include <noggit/Log.h>
+#include <noggit/Shaders.h>
+#include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/World.h>
 
 
 #ifdef USEBLSFILES

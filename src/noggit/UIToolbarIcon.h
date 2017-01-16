@@ -4,8 +4,8 @@
 
 #include <string>
 
-#include "UIEventClasses.h"
-#include "UIFrame.h"
+#include <noggit/UIEventClasses.h>
+#include <noggit/UIFrame.h>
 
 namespace OpenGL { class Texture; };
 

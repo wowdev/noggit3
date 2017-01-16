@@ -4,11 +4,11 @@
 
 #include <string>
 
-#include "UIFrame.h"
+#include <noggit/UIFrame.h>
 
-#include "UITexture.h"
-#include "UIText.h"
-#include "UIToggleGroup.h"
+#include <noggit/UITexture.h>
+#include <noggit/UIText.h>
+#include <noggit/UIToggleGroup.h>
 
 class UICheckBox : public UIFrame
 {

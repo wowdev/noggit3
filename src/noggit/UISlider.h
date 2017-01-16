@@ -5,7 +5,7 @@
 #include <string>
 #include <boost/function.hpp>
 
-#include "UIFrame.h"
+#include <noggit/UIFrame.h>
 
 namespace OpenGL { class Texture; }
 

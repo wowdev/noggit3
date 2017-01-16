@@ -1,20 +1,20 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIDoodadSpawner.h"
+#include <noggit/UIDoodadSpawner.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/bind.hpp>
 
-#include "MapChunk.h"
-#include "ModelManager.h" // ModelManager
-#include "application.h" // app.getArial14()
-#include "UIButton.h"
-#include "UITextBox.h"
-#include "Video.h" // video
-#include "WMOInstance.h" // WMOInstance
-#include "World.h"
+#include <noggit/MapChunk.h>
+#include <noggit/ModelManager.h> // ModelManager
+#include <noggit/application.h> // app.getArial14()
+#include <noggit/UIButton.h>
+#include <noggit/UITextBox.h>
+#include <noggit/Video.h> // video
+#include <noggit/WMOInstance.h> // WMOInstance
+#include <noggit/World.h>
 
-#include "Log.h"
+#include <noggit/Log.h>
 
 //! \todo Add TreeView. Add ScrollBar. Add ModelPreview
 

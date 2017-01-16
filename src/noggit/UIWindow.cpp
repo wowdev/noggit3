@@ -1,12 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIWindow.h"
+#include <noggit/UIWindow.h>
 
 #include <vector>
 #include <string>
 
-#include "TextureManager.h" // TextureManager, Texture
-#include "Video.h"
+#include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/Video.h>
 #include <opengl/scoped.hpp>
 
 UIWindow::UIWindow(float xPos, float yPos, float w, float h)

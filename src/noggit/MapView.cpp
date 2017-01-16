@@ -17,52 +17,52 @@
 #include <IL/il.h>
 #endif
 
-#include "Brush.h" // brush
-#include "ConfigFile.h"
-#include "DBC.h"
-#include "Environment.h"
-#include "FreeType.h" // freetype::
-#include "Log.h"
-#include "MapChunk.h"
-#include "MapView.h"
-#include "Misc.h"
-#include "ModelManager.h" // ModelManager
-#include "application.h" // app.getStates(), gPop, gFPS, app.getArial14(), morpheus40, arial...
-#include "Project.h"
-#include "Settings.h"
-#include "Environment.h"
-#include "TextureManager.h" // TextureManager, Texture
-#include "UIAppInfo.h" // appInfo
-#include "UICapsWarning.h"
-#include "UICheckBox.h" // UICheckBox
-#include "UICursorSwitcher.h" // UICursorSwitcher
-#include "UIDetailInfos.h" // detailInfos
-#include "UIExitWarning.h"
-#include "UIGradient.h" // UIGradient
-#include "UIHelperModels.h"
-#include "UIMapViewGUI.h" // UIMapViewGUI
-#include "UIMenuBar.h" // UIMenuBar, menu items, ..
-#include "UIMinimapWindow.h" // UIMinimapWindow
-#include "UIModelImport.h"
-#include "UIObjectEditor.h"
-#include "UIRotationEditor.h"
-#include "UISlider.h" // UISlider
-#include "UIStatusBar.h" // statusBar
-#include "UIText.h" // UIText
-#include "UITexture.h" // textureUI
-#include "UITexturePicker.h"
-#include "UITextureSwitcher.h"
-#include "UITexturingGUI.h"
-#include "UIToggleGroup.h" // UIToggleGroup
-#include "UIToolbar.h" // UIToolbar
-#include "UIToolbarIcon.h" // ToolbarIcon
-#include "UIWater.h"
-#include "UIWaterSaveWarning.h"
-#include "UIWaterTypeBrowser.h"
-#include "UIZoneIDBrowser.h"
-#include "WMOInstance.h" // WMOInstance
-#include "World.h"
-#include "map_index.hpp"
+#include <noggit/Brush.h> // brush
+#include <noggit/ConfigFile.h>
+#include <noggit/DBC.h>
+#include <noggit/Environment.h>
+#include <noggit/FreeType.h> // freetype::
+#include <noggit/Log.h>
+#include <noggit/MapChunk.h>
+#include <noggit/MapView.h>
+#include <noggit/Misc.h>
+#include <noggit/ModelManager.h> // ModelManager
+#include <noggit/application.h> // app.getStates(), gPop, gFPS, app.getArial14(), morpheus40, arial...
+#include <noggit/Project.h>
+#include <noggit/Settings.h>
+#include <noggit/Environment.h>
+#include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/UIAppInfo.h> // appInfo
+#include <noggit/UICapsWarning.h>
+#include <noggit/UICheckBox.h> // UICheckBox
+#include <noggit/UICursorSwitcher.h> // UICursorSwitcher
+#include <noggit/UIDetailInfos.h> // detailInfos
+#include <noggit/UIExitWarning.h>
+#include <noggit/UIGradient.h> // UIGradient
+#include <noggit/UIHelperModels.h>
+#include <noggit/UIMapViewGUI.h> // UIMapViewGUI
+#include <noggit/UIMenuBar.h> // UIMenuBar, menu items, ..
+#include <noggit/UIMinimapWindow.h> // UIMinimapWindow
+#include <noggit/UIModelImport.h>
+#include <noggit/UIObjectEditor.h>
+#include <noggit/UIRotationEditor.h>
+#include <noggit/UISlider.h> // UISlider
+#include <noggit/UIStatusBar.h> // statusBar
+#include <noggit/UIText.h> // UIText
+#include <noggit/UITexture.h> // textureUI
+#include <noggit/UITexturePicker.h>
+#include <noggit/UITextureSwitcher.h>
+#include <noggit/UITexturingGUI.h>
+#include <noggit/UIToggleGroup.h> // UIToggleGroup
+#include <noggit/UIToolbar.h> // UIToolbar
+#include <noggit/UIToolbarIcon.h> // ToolbarIcon
+#include <noggit/UIWater.h>
+#include <noggit/UIWaterSaveWarning.h>
+#include <noggit/UIWaterTypeBrowser.h>
+#include <noggit/UIZoneIDBrowser.h>
+#include <noggit/WMOInstance.h> // WMOInstance
+#include <noggit/World.h>
+#include <noggit/map_index.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/matrix.hpp>
 

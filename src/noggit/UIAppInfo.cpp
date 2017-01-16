@@ -1,15 +1,15 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIAppInfo.h"
+#include <noggit/UIAppInfo.h>
 
 #include <string>
 
-#include "Model.h" // Model
-#include "ModelManager.h" // ModelManager
-#include "application.h" // app.getArial14()
-#include "UIMapViewGUI.h" // UIMapViewGUI
-#include "UIModel.h" // UIModel
-#include "UIText.h" // UIText
+#include <noggit/Model.h> // Model
+#include <noggit/ModelManager.h> // ModelManager
+#include <noggit/application.h> // app.getArial14()
+#include <noggit/UIMapViewGUI.h> // UIMapViewGUI
+#include <noggit/UIModel.h> // UIModel
+#include <noggit/UIText.h> // UIText
 
 UIAppInfo::UIAppInfo(float xPos, float yPos, float w, float h, UIMapViewGUI* setGui)
 	: UICloseWindow(xPos, yPos, w, h, "Application Info", true)

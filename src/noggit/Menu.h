@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-#include "AppState.h"
-#include "ModelManager.h"
-#include "math/vector_3d.hpp"
+#include <noggit/AppState.h>
+#include <noggit/ModelManager.h>
+#include <math/vector_3d.hpp>
 
 #include <boost/optional.hpp>
 

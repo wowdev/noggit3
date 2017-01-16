@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "UICloseWindow.h"
-#include "MapView.h"
+#include <noggit/UICloseWindow.h>
+#include <noggit/MapView.h>
 
 class UIHelperModels : public UICloseWindow
 {

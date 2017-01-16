@@ -6,10 +6,10 @@
 #include <sstream>
 #include <string>
 
-#include "Log.h"
-#include "Model.h"
-#include "TextureManager.h" // TextureManager, Texture
-#include "World.h"
+#include <noggit/Log.h>
+#include <noggit/Model.h>
+#include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/World.h>
 #include <opengl/matrix.hpp>
 
 int globalTime = 0;

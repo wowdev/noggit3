@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #define _CRT_SECURE_NO_WARNINGS
-#include "World.h"
+#include <noggit/World.h>
 #include <algorithm>
 #include <cassert>
 #include <iostream>
@@ -15,26 +15,26 @@
 #include <boost/range/adaptor/map.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "DBC.h"
-#include "Environment.h"
-#include "Frustum.h"
-#include "Log.h"
-#include "MapChunk.h"
-#include "texture_set.hpp"
-#include "MapTile.h"
-#include "Misc.h"
-#include "ModelManager.h" // ModelManager
-#include "Project.h"
-#include "Settings.h"
-#include "TextureManager.h"
-#include "UITexturingGUI.h"
-#include "Video.h"
-#include "WMOInstance.h" // WMOInstance
-#include "MapTile.h"
-#include "Brush.h" // brush
-#include "ConfigFile.h"
-#include "map_index.hpp"
-#include "TileWater.hpp"// tile water
+#include <noggit/DBC.h>
+#include <noggit/Environment.h>
+#include <noggit/Frustum.h>
+#include <noggit/Log.h>
+#include <noggit/MapChunk.h>
+#include <noggit/texture_set.hpp>
+#include <noggit/MapTile.h>
+#include <noggit/Misc.h>
+#include <noggit/ModelManager.h> // ModelManager
+#include <noggit/Project.h>
+#include <noggit/Settings.h>
+#include <noggit/TextureManager.h>
+#include <noggit/UITexturingGUI.h>
+#include <noggit/Video.h>
+#include <noggit/WMOInstance.h> // WMOInstance
+#include <noggit/MapTile.h>
+#include <noggit/Brush.h> // brush
+#include <noggit/ConfigFile.h>
+#include <noggit/map_index.hpp>
+#include <noggit/TileWater.hpp>// tile water
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 

@@ -30,8 +30,8 @@ class UIModel;
 class UIAlphamap;
 class UIWaterTypeBrowser;
 
-#include "UIFrame.h"
-#include "UICurrentTexture.h"
+#include <noggit/UIFrame.h>
+#include <noggit/UICurrentTexture.h>
 
 //! \todo Give better name.
 class UIMapViewGUI : public UIFrame

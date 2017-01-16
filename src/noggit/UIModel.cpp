@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "Model.h"
-#include "UIModel.h"
-#include "Video.h"
+#include <noggit/Model.h>
+#include <noggit/UIModel.h>
+#include <noggit/Video.h>
 
-#include "ModelManager.h"
+#include <noggit/ModelManager.h>
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 

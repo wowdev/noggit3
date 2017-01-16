@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "Brush.h"
+#include <noggit/Brush.h>
 
 #include <cmath>
 
-#include "Video.h" // OpenGL::Texture
+#include <noggit/Video.h> // OpenGL::Texture
 
 void Brush::init()
 {

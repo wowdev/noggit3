@@ -1,11 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "TextureManager.h"
+#include <noggit/TextureManager.h>
 
 #include <algorithm>
 
-#include "Video.h" // OpenGL::Texture
-#include "Log.h" // LogDebug
+#include <noggit/Video.h> // OpenGL::Texture
+#include <noggit/Log.h> // LogDebug
 
 TextureManager::mapType TextureManager::items;
 

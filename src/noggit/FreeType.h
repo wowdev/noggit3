@@ -9,8 +9,8 @@
 #include <string>
 
 #include <opengl/call_list.hpp>
-#include "Video.h"
-#include "MPQ.h"
+#include <noggit/Video.h>
+#include <noggit/MPQ.h>
 
 namespace freetype
 {

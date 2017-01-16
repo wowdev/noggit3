@@ -1,19 +1,19 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIToolbar.h"
+#include <noggit/UIToolbar.h>
 
 #include <string>
 
-#include "Environment.h" // Environment
-#include "FreeType.h" // fonts.
-#include "Log.h"
-#include "MapView.h" // MapView
-#include "application.h" // app.getapp.getArialn13()()
-#include "UIMapViewGUI.h"
-#include "UIMinimizeButton.h"
-#include "UIText.h"
-#include "UITexture.h"
-#include "UIToolbarIcon.h"
+#include <noggit/Environment.h> // Environment
+#include <noggit/FreeType.h> // fonts.
+#include <noggit/Log.h>
+#include <noggit/MapView.h> // MapView
+#include <noggit/application.h> // app.getapp.getArialn13()()
+#include <noggit/UIMapViewGUI.h>
+#include <noggit/UIMinimizeButton.h>
+#include <noggit/UIText.h>
+#include <noggit/UITexture.h>
+#include <noggit/UIToolbarIcon.h>
 
 
 

@@ -2,15 +2,15 @@
 
 #include <vector>
 
-#include "Log.h"
-#include "Menu.h"
-#include "Sky.h"
-#include "UIMinimapWindow.h"
-#include "Video.h"
-#include "World.h"
-#include "UIText.h"
-#include "application.h"
-#include "map_index.hpp"
+#include <noggit/Log.h>
+#include <noggit/Menu.h>
+#include <noggit/Sky.h>
+#include <noggit/UIMinimapWindow.h>
+#include <noggit/Video.h>
+#include <noggit/World.h>
+#include <noggit/UIText.h>
+#include <noggit/application.h>
+#include <noggit/map_index.hpp>
 #include <opengl/scoped.hpp>
 
 #include <sstream>

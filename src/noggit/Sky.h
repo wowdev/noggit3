@@ -5,10 +5,10 @@
 #include <vector>
 #include <string>
 
-#include "DBCFile.h"
-#include "ModelManager.h"
-#include "MPQ.h"
-#include "math/vector_3d.hpp"
+#include <noggit/DBCFile.h>
+#include <noggit/ModelManager.h>
+#include <noggit/MPQ.h>
+#include <math/vector_3d.hpp>
 
 class Model;
 

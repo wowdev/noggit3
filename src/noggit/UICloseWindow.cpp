@@ -1,12 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UICloseWindow.h"
+#include <noggit/UICloseWindow.h>
 
 #include <string>
 
-#include "application.h" // arial16
-#include "UIMinimizeButton.h"
-#include "UIText.h"
+#include <noggit/application.h> // arial16
+#include <noggit/UIMinimizeButton.h>
+#include <noggit/UIText.h>
 
 UICloseWindow::UICloseWindow(float px, float py, float w, float h, const std::string& pTitle, bool pMoveable)
 	: UIWindow(px, py, w, h)

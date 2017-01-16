@@ -5,7 +5,7 @@
 #include <csignal>
 #include <string>
 
-#include "Log.h"
+#include <noggit/Log.h>
 
 void printStacktrace();
 
@@ -100,7 +100,7 @@ void printStacktrace()
 
 #else
 
-#include "StackWalker.h"
+#include <noggit/StackWalker.h>
 
 void printStacktrace()
 {

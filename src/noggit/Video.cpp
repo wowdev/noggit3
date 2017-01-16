@@ -1,13 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "Video.h"
+#include <noggit/Video.h>
 
 #include <cassert>
 #include <SDL.h>
 #include <string>
 
-#include "Settings.h"
-#include "Log.h"
+#include <noggit/Settings.h>
+#include <noggit/Log.h>
 #include <opengl/matrix.hpp>
 
 Video video;
@@ -167,7 +167,7 @@ struct BLPHeader
 #pragma pack(pop)
 
 #include <boost/thread.hpp>
-#include "MPQ.h"
+#include <noggit/MPQ.h>
 
 namespace OpenGL
 {

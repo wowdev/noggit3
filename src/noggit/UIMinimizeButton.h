@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "UIButton.h"
+#include <noggit/UIButton.h>
 
 class UIMinimizeButton : public UIButton
 {

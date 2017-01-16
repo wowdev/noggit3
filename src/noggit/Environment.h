@@ -5,8 +5,8 @@
 #include <string>
 #include <map>
 
-#include "Selection.h"
-#include "math/vector_3d.hpp"
+#include <noggit/Selection.h>
+#include <math/vector_3d.hpp>
 
 #include <boost/optional.hpp>
 
