@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "AppState.h"
-#include "Selection.h"
+#include <noggit/AppState.h>
+#include <noggit/Selection.h>
 
 class UIFrame;
 class World;

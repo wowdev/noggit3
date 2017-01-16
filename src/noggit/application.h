@@ -5,8 +5,8 @@
 #include <vector>
 #include <string>
 
-#include "DBC.h"
-#include "FreeType.h" // fonts.
+#include <noggit/DBC.h>
+#include <noggit/FreeType.h> // fonts.
 
 #include <boost/filesystem/path.hpp>
 
@@ -14,12 +14,12 @@ class AppState;
 class AsyncLoader;
 
 #ifdef _WIN32
-#include "MSGPACK.H"
-#include "WINTAB.h"
+#include <noggit/MSGPACK.H>
+#include <noggit/WINTAB.h>
 #define PACKETDATA	(PK_BUTTONS | PK_NORMAL_PRESSURE)
 #define PACKETMODE	PK_BUTTONS
-#include "PKTDEF.H"
-#include "Utils.h"
+#include <noggit/PKTDEF.H>
+#include <noggit/Utils.h>
 HWND static WindowHandle;
 HCTX static NEAR TabletInit(HWND hWnd);
 #endif

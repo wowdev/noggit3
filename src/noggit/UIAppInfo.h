@@ -4,8 +4,8 @@
 
 #include <string>
 
-#include "UICloseWindow.h"
-#include "UIText.h"
+#include <noggit/UICloseWindow.h>
+#include <noggit/UIText.h>
 
 class UIMapViewGUI;
 

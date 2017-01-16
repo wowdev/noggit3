@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "FreeType.h"
+#include <noggit/FreeType.h>
 
 #include FT_GLYPH_H
 #include FT_OUTLINE_H
@@ -14,9 +14,9 @@
 #include <utf8.h>
 
 #include <opengl/scoped.hpp>
-#include "MPQ.h"
-#include "Log.h"
-#include "Video.h"
+#include <noggit/MPQ.h>
+#include <noggit/Log.h>
+#include <noggit/Video.h>
 
 namespace freetype
 {

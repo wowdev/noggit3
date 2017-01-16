@@ -1,13 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "map_index.hpp"
+#include <noggit/map_index.hpp>
 
-#include "MPQ.h"
-#include "MapTile.h"
-#include "Project.h"
-#include "Misc.h"
-#include "World.h"
-#include "MapChunk.h"
+#include <noggit/MPQ.h>
+#include <noggit/MapTile.h>
+#include <noggit/Project.h>
+#include <noggit/Misc.h>
+#include <noggit/World.h>
+#include <noggit/MapChunk.h>
 
 #include <boost/range/adaptor/map.hpp>
 

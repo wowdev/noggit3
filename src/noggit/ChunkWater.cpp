@@ -1,12 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "ChunkWater.hpp"
+#include <noggit/ChunkWater.hpp>
 
-#include "Environment.h"
-#include "MPQ.h"
-#include "Liquid.h"
-#include "Misc.h"
-#include "MapChunk.h"
+#include <noggit/Environment.h>
+#include <noggit/MPQ.h>
+#include <noggit/Liquid.h>
+#include <noggit/Misc.h>
+#include <noggit/MapChunk.h>
 
 ChunkWater::ChunkWater(float pX, float pY)
 	: x(pX)

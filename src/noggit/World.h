@@ -5,12 +5,12 @@
 #include <map>
 #include <string>
 
-#include "Frustum.h" // Frustum
-#include "Model.h" // ModelManager
-#include "Selection.h"
-#include "Sky.h" // Skies, OutdoorLighting, OutdoorLightStats
-#include "tile_index.hpp"
-#include "WMO.h" // WMOManager
+#include <noggit/Frustum.h> // Frustum
+#include <noggit/Model.h> // ModelManager
+#include <noggit/Selection.h>
+#include <noggit/Sky.h> // Skies, OutdoorLighting, OutdoorLightStats
+#include <noggit/tile_index.hpp>
+#include <noggit/WMO.h> // WMOManager
 
 namespace OpenGL
 {

@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "UIWindow.h"
-#include "Selection.h"
-#include "math/vector_3d.hpp"
+#include <noggit/UIWindow.h>
+#include <noggit/Selection.h>
+#include <math/vector_3d.hpp>
 
 class UIModelImport;
 class UIStatusBar;

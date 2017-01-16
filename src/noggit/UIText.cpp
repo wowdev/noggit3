@@ -1,12 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIText.h"
+#include <noggit/UIText.h>
 
 #include <string>
 
-#include "FreeType.h"
-#include "Video.h"
-#include "Log.h"
+#include <noggit/FreeType.h>
+#include <noggit/Video.h>
+#include <noggit/Log.h>
 
 UIText::UIText(float pX, float pY, const std::string& pText, const freetype::font_data& pFont, eJustify pJustify)
 	: UIFrame(pX, pY, (float)pFont.width(pText), (float)pFont.h)

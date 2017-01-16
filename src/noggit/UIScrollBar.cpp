@@ -1,17 +1,17 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIScrollBar.h"
+#include <noggit/UIScrollBar.h>
 
 #include <iostream>
 #include <sstream>
 #include <vector>
 
-#include "Log.h"
-#include "Misc.h"
-#include "application.h" // app.getArial14(), arialn13
-#include "UIButton.h"
-#include "UIText.h"
-#include "UITexture.h"
+#include <noggit/Log.h>
+#include <noggit/Misc.h>
+#include <noggit/application.h> // app.getArial14(), arialn13
+#include <noggit/UIButton.h>
+#include <noggit/UIText.h>
+#include <noggit/UITexture.h>
 
 const float UIScrollBar::WIDTH = 16.0f;
 

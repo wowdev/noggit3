@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "UICloseWindow.h"
+#include <noggit/UICloseWindow.h>
 
 class UIAlphamap : public UICloseWindow
 {

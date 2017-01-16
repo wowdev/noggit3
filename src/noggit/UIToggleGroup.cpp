@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIToggleGroup.h"
+#include <noggit/UIToggleGroup.h>
 
 #include <map>
 
-#include "UICheckBox.h"
+#include <noggit/UICheckBox.h>
 
 UIToggleGroup::UIToggleGroup(int * pTarget)
 	: mTarget(pTarget)

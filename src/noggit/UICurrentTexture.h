@@ -4,8 +4,8 @@
 
 #include <string>
 
-#include "UIEventClasses.h"
-#include "UIWindow.h"
+#include <noggit/UIEventClasses.h>
+#include <noggit/UIWindow.h>
 
 class UIMapViewGUI;
 class UITexture;

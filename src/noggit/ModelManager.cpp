@@ -1,14 +1,14 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "ModelManager.h" // ModelManager
+#include <noggit/ModelManager.h> // ModelManager
 
 #include <algorithm>
 
-#include "AsyncLoader.h"// AsyncLoader
-#include "Environment.h"
-#include "application.h" // app.loader()
-#include "Model.h" // Model
-#include "Log.h" // LogDebug
+#include <noggit/AsyncLoader.h>// AsyncLoader
+#include <noggit/Environment.h>
+#include <noggit/application.h> // app.loader()
+#include <noggit/Model.h> // Model
+#include <noggit/Log.h> // LogDebug
 
 ModelManager::mapType ModelManager::items;
 ModelManager::vectorType ModelManager::hiddenItems;

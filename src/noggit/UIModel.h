@@ -4,8 +4,8 @@
 
 #include <string>
 
-#include "ModelManager.h"
-#include "UIFrame.h"
+#include <noggit/ModelManager.h>
+#include <noggit/UIFrame.h>
 
 #include <boost/optional.hpp>
 

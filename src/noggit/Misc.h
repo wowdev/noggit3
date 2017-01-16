@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include <cstring>
 
-#include "Log.h"
-#include "math/vector_3d.hpp"
+#include <noggit/Log.h>
+#include <math/vector_3d.hpp>
 
 // namespace for static helper functions.
 

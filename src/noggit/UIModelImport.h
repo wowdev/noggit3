@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "UICloseWindow.h"
-#include "UITextBox.h"
-#include "MapView.h"
+#include <noggit/UICloseWindow.h>
+#include <noggit/UITextBox.h>
+#include <noggit/MapView.h>
 
 class UIListView;
 

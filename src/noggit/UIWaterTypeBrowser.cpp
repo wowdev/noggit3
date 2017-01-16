@@ -5,19 +5,19 @@
 #include <string>
 #include <boost/bind.hpp>
 
-#include "DBC.h"
-#include "Log.h"
-#include "Misc.h"
-#include "application.h" // app.getArial14(), arialn13
-#include "World.h"
-#include "UIButton.h"
-#include "UIListView.h"
-#include "UIMapViewGUI.h"
-#include "UIScrollBar.h"
-#include "UIText.h" // UIText
-#include "UICloseWindow.h" // UICloseWindow
-#include "UIWaterTypeBrowser.h"
-#include "UIWater.h"
+#include <noggit/DBC.h>
+#include <noggit/Log.h>
+#include <noggit/Misc.h>
+#include <noggit/application.h> // app.getArial14(), arialn13
+#include <noggit/World.h>
+#include <noggit/UIButton.h>
+#include <noggit/UIListView.h>
+#include <noggit/UIMapViewGUI.h>
+#include <noggit/UIScrollBar.h>
+#include <noggit/UIText.h> // UIText
+#include <noggit/UICloseWindow.h> // UICloseWindow
+#include <noggit/UIWaterTypeBrowser.h>
+#include <noggit/UIWater.h>
 
 UIWaterTypeBrowser::UIWaterTypeBrowser(float xPos, float yPos, float w, float h, UIMapViewGUI *setGui)
 	: UICloseWindow(xPos, yPos, w, h, "", true)

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "UIWindow.h"
+#include <noggit/UIWindow.h>
 
 class UITexture;
 class UIButton;

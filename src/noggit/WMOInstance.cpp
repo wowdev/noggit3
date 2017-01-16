@@ -1,12 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "WMOInstance.h"
+#include <noggit/WMOInstance.h>
 
-#include "Log.h"
-#include "MapHeaders.h"
-#include "WMO.h" // WMO
-#include "World.h" // gWorld
-#include "Misc.h" // checkinside
+#include <noggit/Log.h>
+#include <noggit/MapHeaders.h>
+#include <noggit/WMO.h> // WMO
+#include <noggit/World.h> // gWorld
+#include <noggit/Misc.h> // checkinside
 #include <opengl/scoped.hpp>
 
 WMOInstance::WMOInstance(std::string const& filename, MPQFile* _file)

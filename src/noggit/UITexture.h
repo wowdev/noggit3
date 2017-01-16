@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "UIFrame.h"
+#include <noggit/UIFrame.h>
 
 namespace OpenGL
 {

@@ -5,16 +5,16 @@
 #include <string>
 #include <sstream>
 
-#include "Environment.h"
-#include "Misc.h"
-#include "ModelInstance.h"
-#include "application.h" // fonts
-#include "Selection.h"
-#include "UIRotationEditor.h"
-#include "UITextBox.h"
-#include "UIText.h"
-#include "Video.h" // video
-#include "WMOInstance.h"
+#include <noggit/Environment.h>
+#include <noggit/Misc.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/application.h> // fonts
+#include <noggit/Selection.h>
+#include <noggit/UIRotationEditor.h>
+#include <noggit/UITextBox.h>
+#include <noggit/UIText.h>
+#include <noggit/Video.h> // video
+#include <noggit/WMOInstance.h>
 
 void updateRotationX(UITextBox::Ptr textBox, const std::string& value)
 {

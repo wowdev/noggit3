@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UITexturingGUI.h"
+#include <noggit/UITexturingGUI.h>
 
 #include <algorithm>
 #include <list>
@@ -9,20 +9,20 @@
 #include <string>
 #include <vector>
 
-#include "DBC.h"
-#include "MapChunk.h"
-#include "Misc.h"
-#include "MPQ.h"
-#include "application.h" // app.getArial14(), app.getapp.getArialn13()()
-#include "TextureManager.h" // TextureManager, Texture
-#include "UIButton.h" // UIButton
-#include "UICheckBox.h" // UICheckBox
-#include "UICloseWindow.h" // UICloseWindow
-#include "UIMapViewGUI.h" // UIMapViewGUI
-#include "UIText.h" // UIText
-#include "UITexture.h" // UITexture
-#include "UIToolbar.h" // Toolbar
-#include "Video.h"
+#include <noggit/DBC.h>
+#include <noggit/MapChunk.h>
+#include <noggit/Misc.h>
+#include <noggit/MPQ.h>
+#include <noggit/application.h> // app.getArial14(), app.getapp.getArialn13()()
+#include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/UIButton.h> // UIButton
+#include <noggit/UICheckBox.h> // UICheckBox
+#include <noggit/UICloseWindow.h> // UICloseWindow
+#include <noggit/UIMapViewGUI.h> // UIMapViewGUI
+#include <noggit/UIText.h> // UIText
+#include <noggit/UITexture.h> // UITexture
+#include <noggit/UIToolbar.h> // Toolbar
+#include <noggit/Video.h>
 
 //! \todo  Get this whole thing in a seperate class.
 

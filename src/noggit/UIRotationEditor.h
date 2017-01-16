@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "UIWindow.h"
-#include "Selection.h"
+#include <noggit/UIWindow.h>
+#include <noggit/Selection.h>
 
 class UIText;
 class UITextBox;

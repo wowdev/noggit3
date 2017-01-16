@@ -1,9 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIScrollableFrame.h"
+#include <noggit/UIScrollableFrame.h>
 
-#include "Video.h"
-#include "Log.h"
+#include <noggit/Video.h>
+#include <noggit/Log.h>
 #include <opengl/scoped.hpp>
 
 #include <iostream>     // std::cout

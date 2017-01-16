@@ -1,12 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIFrame.h"
+#include <noggit/UIFrame.h>
 
 #include <SDL.h>
 #include <algorithm>
 #include <vector>
 
-#include "Video.h" // gl*
+#include <noggit/Video.h> // gl*
 #include <opengl/scoped.hpp>
 
 void UIFrame::render() const

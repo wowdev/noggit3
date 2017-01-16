@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "UIWindow.h"
+#include <noggit/UIWindow.h>
 
 class UICloseWindow : public UIWindow
 {

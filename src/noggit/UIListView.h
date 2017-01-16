@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "UIFrame.h"
-#include "UIScrollBar.h"
+#include <noggit/UIFrame.h>
+#include <noggit/UIScrollBar.h>
 
 class UIListView : public UIFrame
 {

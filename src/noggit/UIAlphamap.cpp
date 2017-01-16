@@ -1,15 +1,15 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIAlphamap.h"
+#include <noggit/UIAlphamap.h>
 
 #include <cstring>
 
-#include "Video.h"
-#include "World.h"
-#include "map_index.hpp"
-#include "MapTile.h"
-#include "MapChunk.h"
-#include "texture_set.hpp"
+#include <noggit/Video.h>
+#include <noggit/World.h>
+#include <noggit/map_index.hpp>
+#include <noggit/MapTile.h>
+#include <noggit/MapChunk.h>
+#include <noggit/texture_set.hpp>
 
 UIAlphamap::UIAlphamap(float xPos, float yPos)
 	: UICloseWindow(xPos, yPos, 600, 600, "Alphamap", true)

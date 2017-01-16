@@ -1,22 +1,22 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "MapChunk.h"
+#include <noggit/MapChunk.h>
 #include <algorithm>
 #include <iostream>
 #include <map>
-#include "Brush.h"
-#include "Environment.h"
-#include "Frustum.h"
-#include "Liquid.h"
-#include "Log.h"
-#include "MapHeaders.h"
-#include "Misc.h"
-#include "math/quaternion.hpp"
-#include "texture_set.hpp"
-#include "UITexturingGUI.h"
-#include "math/vector_3d.hpp"
-#include "World.h"
-#include "alphamap.hpp"
+#include <noggit/Brush.h>
+#include <noggit/Environment.h>
+#include <noggit/Frustum.h>
+#include <noggit/Liquid.h>
+#include <noggit/Log.h>
+#include <noggit/MapHeaders.h>
+#include <noggit/Misc.h>
+#include <math/quaternion.hpp>
+#include <noggit/texture_set.hpp>
+#include <noggit/UITexturingGUI.h>
+#include <math/vector_3d.hpp>
+#include <noggit/World.h>
+#include <noggit/alphamap.hpp>
 #include <opengl/scoped.hpp>
 
 extern int terrainMode;

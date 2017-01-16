@@ -4,8 +4,8 @@
 
 #include <opengl/types.hpp>
 
-#include "MPQ.h"
-#include "Log.h"
+#include <noggit/MPQ.h>
+#include <noggit/Log.h>
 
 class Alphamap
 {

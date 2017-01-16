@@ -1,13 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIStatusBar.h"
+#include <noggit/UIStatusBar.h>
 
 #include <vector>
 #include <string>
 
-#include "application.h" // app.getArial16()
-#include "UIText.h"
-#include "Video.h"
+#include <noggit/application.h> // app.getArial16()
+#include <noggit/UIText.h>
+#include <noggit/Video.h>
 #include <opengl/scoped.hpp>
 
 UIStatusBar::UIStatusBar(float xPos, float yPos, float w, float h)

@@ -4,8 +4,8 @@
 
 #include <stdint.h>
 
-#include "math/vector_2d.hpp"
-#include "math/vector_3d.hpp"
+#include <math/vector_2d.hpp>
+#include <math/vector_3d.hpp>
 
 #pragma pack(push,1)
 

@@ -5,8 +5,8 @@
 #include <string>
 #include <boost/function.hpp>
 
-#include "UIFrame.h"
-#include "UIText.h"
+#include <noggit/UIFrame.h>
+#include <noggit/UIText.h>
 
 namespace OpenGL { class Texture; };
 namespace freetype { class font_data; };

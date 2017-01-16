@@ -8,9 +8,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
-#include "UIButton.h"
-#include "UIFrame.h"
-#include "Directory.h"
+#include <noggit/UIButton.h>
+#include <noggit/UIFrame.h>
+#include <noggit/Directory.h>
 
 class UIText;
 class UITreeViewButton;

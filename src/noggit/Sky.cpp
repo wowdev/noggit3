@@ -1,15 +1,15 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "Sky.h"
+#include <noggit/Sky.h>
 
 #include <algorithm>
 #include <string>
 
-#include "DBC.h"
-#include "Log.h"
-#include "Model.h" // Model
-#include "ModelManager.h" // ModelManager
-#include "World.h"
+#include <noggit/DBC.h>
+#include <noggit/Log.h>
+#include <noggit/Model.h> // Model
+#include <noggit/ModelManager.h> // ModelManager
+#include <noggit/World.h>
 #include <opengl/scoped.hpp>
 
 const float skymul = 36.0f;

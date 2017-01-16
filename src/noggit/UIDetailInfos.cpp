@@ -1,13 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIDetailInfos.h"
+#include <noggit/UIDetailInfos.h>
 
 #include <string>
 
-#include "application.h" // app.getArial14()
-#include "UIMapViewGUI.h"
-#include "UIMinimizeButton.h"
-#include "UIText.h"
+#include <noggit/application.h> // app.getArial14()
+#include <noggit/UIMapViewGUI.h>
+#include <noggit/UIMinimizeButton.h>
+#include <noggit/UIText.h>
 
 UIDetailInfos::UIDetailInfos(float xPos, float yPos, float w, float h, UIMapViewGUI *setGui)
 	: UIWindow(xPos, yPos, w, h)

@@ -1,11 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UICursorSwitcher.h"
-#include "UICheckBox.h"
-#include "UISlider.h"
-#include "Environment.h"
+#include <noggit/UICursorSwitcher.h>
+#include <noggit/UICheckBox.h>
+#include <noggit/UISlider.h>
+#include <noggit/Environment.h>
 
-#include "World.h"
+#include <noggit/World.h>
 
 UISlider* RedColorSlider;
 UISlider* GreenColorSlider;

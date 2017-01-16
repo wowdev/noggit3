@@ -1,11 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "Project.h"
+#include <noggit/Project.h>
 
 #include <string>
 #include <boost/filesystem.hpp>
 
-#include "ConfigFile.h"
+#include <noggit/ConfigFile.h>
 
 Project::Project()
 {

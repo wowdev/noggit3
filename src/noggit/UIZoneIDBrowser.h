@@ -4,9 +4,9 @@
 
 #include <string>
 
-#include "UIButton.h"
-#include "UIWindow.h"
-#include "UICloseWindow.h"
+#include <noggit/UIButton.h>
+#include <noggit/UIWindow.h>
+#include <noggit/UICloseWindow.h>
 
 class UIMapViewGUI;
 class UIListView;

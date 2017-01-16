@@ -1,28 +1,27 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIWater.h"
+#include <noggit/UIWater.h>
 
 #include <algorithm>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 
-#include "Environment.h"
-#include "application.h" // fonts
-#include "revision.h"
-#include "UIText.h"
-#include "UIButton.h"
-#include "UICheckBox.h"
-#include "UITexture.h"
-#include "UISlider.h"
-#include "UIMapViewGUI.h"
-#include "Misc.h"
-#include "World.h"
-#include "Video.h" // video
+#include <noggit/Environment.h>
+#include <noggit/application.h> // fonts
+#include <noggit/UIText.h>
+#include <noggit/UIButton.h>
+#include <noggit/UICheckBox.h>
+#include <noggit/UITexture.h>
+#include <noggit/UISlider.h>
+#include <noggit/UIMapViewGUI.h>
+#include <noggit/Misc.h>
+#include <noggit/World.h>
+#include <noggit/Video.h> // video
 #include <iostream>
 #include <sstream>
-#include "UIWaterTypeBrowser.h"
+#include <noggit/UIWaterTypeBrowser.h>
 
-#include "Log.h"
+#include <noggit/Log.h>
 
 void toggleDisplayAllLayers(bool b, int);
 

@@ -8,17 +8,17 @@
 class Model;
 class Bone;
 
-#include "Animated.h" // Animation::M2Value
-#include "AsyncObject.h" // AsyncObject
-#include "Manager.h" // ManagedItem
+#include <noggit/Animated.h> // Animation::M2Value
+#include <noggit/AsyncObject.h> // AsyncObject
+#include <noggit/Manager.h> // ManagedItem
 #include <math/matrix_4x4.hpp>
 #include <math/ray.hpp>
-#include "ModelHeaders.h"
-#include "MPQ.h"
-#include "Particle.h"
-#include "math/quaternion.hpp"
-#include "math/vector_3d.hpp"
-#include "Video.h" // GLuint
+#include <noggit/ModelHeaders.h>
+#include <noggit/MPQ.h>
+#include <noggit/Particle.h>
+#include <math/quaternion.hpp>
+#include <math/vector_3d.hpp>
+#include <noggit/Video.h> // GLuint
 
 math::vector_3d fixCoordSystem(math::vector_3d v);
 

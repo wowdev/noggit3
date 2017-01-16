@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "Frustum.h"
+#include <noggit/Frustum.h>
 
 #include <opengl/matrix.hpp>
 #include <opengl/types.hpp>

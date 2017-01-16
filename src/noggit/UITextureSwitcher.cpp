@@ -1,18 +1,18 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UITextureSwitcher.h"
+#include <noggit/UITextureSwitcher.h>
 
-#include "application.h" // app.getArial16()
-#include "World.h"
+#include <noggit/application.h> // app.getArial16()
+#include <noggit/World.h>
 
-#include "UITexture.h"
-#include "UITexturingGUI.h"
-#include "UIButton.h"
-#include "UIText.h"
-#include "map_index.hpp"
-#include "MapView.h"
-#include "Misc.h"
-#include "texture_set.hpp"
+#include <noggit/UITexture.h>
+#include <noggit/UITexturingGUI.h>
+#include <noggit/UIButton.h>
+#include <noggit/UIText.h>
+#include <noggit/map_index.hpp>
+#include <noggit/MapView.h>
+#include <noggit/Misc.h>
+#include <noggit/texture_set.hpp>
 
 extern UIWindow *settings_paint;
 extern UIWindow *settings_paint;

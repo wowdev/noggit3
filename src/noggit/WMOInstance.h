@@ -5,8 +5,8 @@
 #include <set>
 #include <stdint.h>
 
-#include "math/vector_3d.hpp" // math::vector_3d
-#include "WMO.h"
+#include <math/vector_3d.hpp> // math::vector_3d
+#include <noggit/WMO.h>
 #include <math/ray.hpp>
 
 class MPQFile;

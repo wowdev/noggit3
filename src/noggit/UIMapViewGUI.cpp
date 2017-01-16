@@ -1,46 +1,46 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UIMapViewGUI.h"
+#include <noggit/UIMapViewGUI.h>
 
 #include <sstream>
 #include <algorithm>
 #include <vector>
 #include <SDL.h>
 
-#include "DBC.h"
-#include "Environment.h"
-#include "MapChunk.h"
-#include "MapView.h"
-#include "application.h" // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
-#include "Project.h"
-#include "UIAppInfo.h" // UIAppInfo
-#include "UICursorSwitcher.h" // UICursorSwitcher
-#include "UIDetailInfos.h" // UIDetailInfos
-#include "UIDoodadSpawner.h"
-#include "UIHelp.h"
-#include "UIMinimapWindow.h"
-#include "UIStatusBar.h" // UIStatusBar
-#include "UITexturePicker.h" //
-#include "UITextureSwitcher.h"
-#include "UITexturingGUI.h"
-#include "UIToolbar.h" // UIToolbar
-#include "UIZoneIDBrowser.h" //
-#include "UIWater.h" //
-#include "UIObjectEditor.h"
-#include "UIRotationEditor.h"
-#include "Video.h" // video
-#include "WMOInstance.h"
-#include "World.h"
-#include "texture_set.hpp"
-#include "map_index.hpp"
-#include "Misc.h"
-#include "UIWaterTypeBrowser.h"
+#include <noggit/DBC.h>
+#include <noggit/Environment.h>
+#include <noggit/MapChunk.h>
+#include <noggit/MapView.h>
+#include <noggit/application.h> // app.getStates(), gPop, app.getArial14(), morpheus40, arial...
+#include <noggit/Project.h>
+#include <noggit/UIAppInfo.h> // UIAppInfo
+#include <noggit/UICursorSwitcher.h> // UICursorSwitcher
+#include <noggit/UIDetailInfos.h> // UIDetailInfos
+#include <noggit/UIDoodadSpawner.h>
+#include <noggit/UIHelp.h>
+#include <noggit/UIMinimapWindow.h>
+#include <noggit/UIStatusBar.h> // UIStatusBar
+#include <noggit/UITexturePicker.h> //
+#include <noggit/UITextureSwitcher.h>
+#include <noggit/UITexturingGUI.h>
+#include <noggit/UIToolbar.h> // UIToolbar
+#include <noggit/UIZoneIDBrowser.h> //
+#include <noggit/UIWater.h> //
+#include <noggit/UIObjectEditor.h>
+#include <noggit/UIRotationEditor.h>
+#include <noggit/Video.h> // video
+#include <noggit/WMOInstance.h>
+#include <noggit/World.h>
+#include <noggit/texture_set.hpp>
+#include <noggit/map_index.hpp>
+#include <noggit/Misc.h>
+#include <noggit/UIWaterTypeBrowser.h>
 
-#include "UIModel.h"
-#include "ModelManager.h"
+#include <noggit/UIModel.h>
+#include <noggit/ModelManager.h>
 
-#include "UIAlphamap.h"
-#include "Settings.h"
+#include <noggit/UIAlphamap.h>
+#include <noggit/Settings.h>
 
 
 

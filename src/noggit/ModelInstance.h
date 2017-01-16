@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "MapHeaders.h" // ENTRY_MDDF
-#include "ModelManager.h"
-#include "MPQ.h" // MPQFile
-#include "math/vector_3d.hpp" // math::vector_3d
+#include <noggit/MapHeaders.h> // ENTRY_MDDF
+#include <noggit/ModelManager.h>
+#include <noggit/MPQ.h> // MPQFile
+#include <math/vector_3d.hpp> // math::vector_3d
 #include <math/ray.hpp>
-#include "Selection.h"
-#include "tile_index.hpp"
+#include <noggit/Selection.h>
+#include <noggit/tile_index.hpp>
 
 class Frustum;
 class Model;

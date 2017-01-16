@@ -4,8 +4,8 @@
 
 #include <string>
 
-#include "UIFrame.h"
-#include "UIText.h"
+#include <noggit/UIFrame.h>
+#include <noggit/UIText.h>
 
 struct SDL_KeyboardEvent;
 namespace OpenGL { class Texture; };

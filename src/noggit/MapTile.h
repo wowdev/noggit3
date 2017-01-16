@@ -6,11 +6,11 @@
 #include <map>
 #include <string>
 
-#include "MapHeaders.h"
-#include "Video.h" // GLfloat, GLshort, ...
+#include <noggit/MapHeaders.h>
+#include <noggit/Video.h> // GLfloat, GLshort, ...
 #include <math/ray.hpp>
-#include "Selection.h"
-#include "tile_index.hpp"
+#include <noggit/Selection.h>
+#include <noggit/tile_index.hpp>
 
 class Frustum;
 class MapChunk;

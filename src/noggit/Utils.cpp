@@ -14,7 +14,7 @@
 		copied, or distributed without compensation or licensing restrictions.
 
 ---------------------------------------------------------------------------- */
-#include "Utils.h"
+#include <noggit/Utils.h>
 
 #ifdef _WIN32
 

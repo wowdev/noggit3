@@ -8,9 +8,9 @@
 class ParticleSystem;
 class RibbonEmitter;
 
-#include "Animated.h" // Animation::M2Value
-#include "Model.h"
-#include "Video.h"
+#include <noggit/Animated.h> // Animation::M2Value
+#include <noggit/Model.h>
+#include <noggit/Video.h>
 
 struct Particle {
 	math::vector_3d pos, speed, down, origin, dir;

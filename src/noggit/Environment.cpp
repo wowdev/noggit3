@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "Environment.h"
-#include "MapHeaders.h"
+#include <noggit/Environment.h>
+#include <noggit/MapHeaders.h>
 
 Environment::Environment()
 {

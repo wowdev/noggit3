@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "DBCFile.h"
+#include <noggit/DBCFile.h>
 
 class AreaDB : public DBCFile
 {

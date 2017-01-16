@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "UICloseWindow.h"
-#include "UIToggleGroup.h"
+#include <noggit/UICloseWindow.h>
+#include <noggit/UIToggleGroup.h>
 
 class UICursorSwitcher : public UICloseWindow
 {

@@ -1,15 +1,15 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "UICurrentTexture.h"
+#include <noggit/UICurrentTexture.h>
 
 
-#include "Environment.h" // Environment
-#include "FreeType.h" // fonts.
-#include "Log.h"
-#include "MapView.h" // MapView
-#include "application.h" // app.getapp.getArialn13()()
-#include "UIMapViewGUI.h"
-#include "UITexture.h"
+#include <noggit/Environment.h> // Environment
+#include <noggit/FreeType.h> // fonts.
+#include <noggit/Log.h>
+#include <noggit/MapView.h> // MapView
+#include <noggit/application.h> // app.getapp.getArialn13()()
+#include <noggit/UIMapViewGUI.h>
+#include <noggit/UITexture.h>
 
 
 UICurrentTexture::UICurrentTexture(float xPos, float yPos, UIMapViewGUI *setGui)

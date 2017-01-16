@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "UICloseWindow.h"
-#include "UITextBox.h"
-#include "UIButton.h"
-#include "UITreeView.h"
-#include "UIModel.h"
+#include <noggit/UICloseWindow.h>
+#include <noggit/UITextBox.h>
+#include <noggit/UIButton.h>
+#include <noggit/UITreeView.h>
+#include <noggit/UIModel.h>
 
 class UIDoodadSpawner : public UICloseWindow
 {
