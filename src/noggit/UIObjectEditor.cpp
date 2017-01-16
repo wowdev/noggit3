@@ -215,7 +215,7 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
 
 void UIObjectEditor::pasteObject()
 {
-  if (selected.which() != eEntry_Model && selected.which() != eEntry_WMO)
+  if (!hasSelection() || selected->which() == eEntry_MapChunk)
   {
     return;
   }
@@ -252,12 +252,17 @@ void UIObjectEditor::pasteObject()
       break;
   }
 
-  gWorld->addModel(selected, pos, true);
+  gWorld->addModel(selected.get(), pos, true);
 }
 
 void UIObjectEditor::togglePasteMode()
 {
   pasteModeGroup->Activate((pasteMode + 1) % PASTE_MODE_COUNT);
+}
+
+bool UIObjectEditor::hasSelection() const
+{
+  return !!selected && !selected->empty();
 }
 
 void UIObjectEditor::copy(selection_type entry)

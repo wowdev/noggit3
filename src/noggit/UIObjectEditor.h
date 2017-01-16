@@ -24,6 +24,7 @@ class UIObjectEditor : public UIWindow
 public:
   UIObjectEditor(float x, float y, UIMapViewGUI* mainGui);
 
+  bool hasSelection() const;
   void copy(selection_type entry);
   void pasteObject();
   void togglePasteMode();
@@ -33,7 +34,7 @@ public:
 private:
   UIToggleGroup *pasteModeGroup;
 
-  selection_type selected;
+  boost::optional<selection_type> selected;
   void setModelName(const std::string &name);
   int pasteMode;
 };
