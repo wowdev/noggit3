@@ -25,7 +25,6 @@ public:
 	void flip() const;
 	void clearScreen() const;
 	void set3D() const;
-	void set3D_select() const;
 	void set2D() const;
 	void setTileMode() const;
 	void resize(int w, int h);
