@@ -968,8 +968,8 @@ void ModelCamera::setup(int time)
 	video.fov(math::radians (fov / 2));
 	video.nearclip(nearclip);
 	video.farclip(farclip);
-	video.updateProjectionMatrix();
 
+	video.set3D();
   opengl::matrix::look_at ( pos + tPos.getValue( 0, time )
                           , target + tTarget.getValue( 0, time )
                           , {0.0f, 1.0f, 0.0f}
