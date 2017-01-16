@@ -262,7 +262,7 @@ void UIObjectEditor::togglePasteMode()
 
 bool UIObjectEditor::hasSelection() const
 {
-  return !!selected && !selected->empty();
+  return !!selected;
 }
 
 void UIObjectEditor::copy(selection_type entry)

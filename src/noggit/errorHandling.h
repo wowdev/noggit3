@@ -100,7 +100,7 @@ void printStacktrace()
 
 #else
 
-#include <noggit/StackWalker.h>
+#include <StackWalker.h>
 
 void printStacktrace()
 {
