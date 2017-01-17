@@ -11,6 +11,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 find_package (Hg QUIET)
+find_package (Git QUIET)
 
 set (hg_rev_hash_str "Archive")
 set (hg_rev_hash "0")
@@ -40,6 +41,32 @@ elseif (EXISTS "${CMAKE_SOURCE_DIR}/.hg_archival.txt")
   set (hg_rev_id_str "Archive")
   set (hg_rev_id "0")
   set (hg_rev_hash ${hg_rev_hash_str})
+elseif (GIT_FOUND AND HG_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git/hg")
+  execute_process (COMMAND "${HG_EXECUTABLE}" -R "${CMAKE_SOURCE_DIR}/.git/hg" tags
+                   COMMAND grep ^tip
+                   COMMAND sed -e s,tip[[:space:]]*,, -e s,:.*,,
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE hg_rev_id_str
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+  execute_process (COMMAND "${HG_EXECUTABLE}" -R "${CMAKE_SOURCE_DIR}/.git/hg" tags
+                   COMMAND grep ^tip
+                   COMMAND sed -e s,tip[[:space:]]*,, -e s,.*:,,
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE hg_rev_hash_str
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+  execute_process (COMMAND "${GIT_EXECUTABLE}" diff --name-only
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    OUTPUT_VARIABLE git_diff_files
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+    )
+  if (NOT "${git_diff_files}" STREQUAL "")
+    set (hg_rev_id_str "${hg_rev_id_str}+")
+  endif()
 endif()
 
 if (NOT hg_rev_id_str)
