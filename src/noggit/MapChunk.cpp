@@ -477,6 +477,7 @@ void MapChunk::initStrip()
 
   gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, indices);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, striplen * sizeof (StripType), strip, GL_STATIC_DRAW);
+  gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 MapChunk::~MapChunk()
