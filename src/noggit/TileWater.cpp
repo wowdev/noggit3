@@ -21,7 +21,16 @@ TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase)
 }
 
 TileWater::~TileWater(void)
-{}
+{
+  for (int z = 0; z < 16; ++z)
+  {
+    for (int x = 0; x < 16; ++x)
+    {
+      delete chunks[z][x];
+      chunks[z][x] = nullptr;
+    }
+  }
+}
 
 void TileWater::readFromFile(MPQFile &theFile, size_t basePos)
 {
