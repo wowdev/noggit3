@@ -321,6 +321,9 @@ MapTile::~MapTile()
     }
   }
 
+  delete Water;
+  Water = nullptr;
+
   mTextureFilenames.clear();
 
   //! \todo unload ModelInstances and WMOInstances on this tile:
