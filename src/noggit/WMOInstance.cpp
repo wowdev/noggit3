@@ -7,6 +7,7 @@
 #include <noggit/WMO.h> // WMO
 #include <noggit/World.h> // gWorld
 #include <noggit/Misc.h> // checkinside
+#include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 
 WMOInstance::WMOInstance(std::string const& filename, MPQFile* _file)
@@ -47,8 +48,6 @@ WMOInstance::WMOInstance(std::string const& filename)
 {
 }
 
-void DrawABox(math::vector_3d pMin, math::vector_3d pMax, math::vector_4d pColor, float pLineWidth);
-
 void WMOInstance::draw (Frustum const& frustum)
 {
   {
@@ -81,7 +80,7 @@ void WMOInstance::draw (Frustum const& frustum)
 		gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     math::vector_4d color = wmo->hidden ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f);
-		DrawABox(extents[0], extents[1], color, 1.0f);
+    opengl::primitives::wire_box (extents[0], extents[1]).draw (color, 1.0f);
 
 		opengl::texture::set_active_texture (1);
 		opengl::texture::disable_texture();

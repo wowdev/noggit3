@@ -8,6 +8,7 @@
 #include <noggit/Model.h> // Model, etc.
 #include <noggit/World.h> // gWorld
 #include <noggit/Settings.h> // gWorld
+#include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 
 math::vector_3d TransformCoordsForModel(math::vector_3d pIn)
@@ -18,39 +19,6 @@ math::vector_3d TransformCoordsForModel(math::vector_3d pIn)
 	return lTemp;
 }
 
-void DrawABox(math::vector_3d pMin, math::vector_3d pMax, math::vector_4d pColor, float pLineWidth)
-{
-	gl.enable(GL_LINE_SMOOTH);
-	gl.lineWidth(pLineWidth);
-	gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-	gl.color4fv(pColor);
-
-	gl.begin(GL_LINE_STRIP);
-	gl.vertex3f(pMin.x, pMax.y, pMin.z);
-	gl.vertex3f(pMin.x, pMin.y, pMin.z);
-	gl.vertex3f(pMax.x, pMin.y, pMin.z);
-	gl.vertex3f(pMax.x, pMin.y, pMax.z);
-	gl.vertex3f(pMax.x, pMax.y, pMax.z);
-	gl.vertex3f(pMax.x, pMax.y, pMin.z);
-	gl.vertex3f(pMin.x, pMax.y, pMin.z);
-	gl.vertex3f(pMin.x, pMax.y, pMax.z);
-	gl.vertex3f(pMin.x, pMin.y, pMax.z);
-	gl.vertex3f(pMin.x, pMin.y, pMin.z);
-	gl.end();
-	gl.begin(GL_LINES);
-	gl.vertex3f(pMin.x, pMin.y, pMax.z);
-	gl.vertex3f(pMax.x, pMin.y, pMax.z);
-	gl.end();
-	gl.begin(GL_LINES);
-	gl.vertex3f(pMax.x, pMax.y, pMin.z);
-	gl.vertex3f(pMax.x, pMin.y, pMin.z);
-	gl.end();
-	gl.begin(GL_LINES);
-	gl.vertex3f(pMin.x, pMax.y, pMax.z);
-	gl.vertex3f(pMax.x, pMax.y, pMax.z);
-	gl.end();
-}
 
 ModelInstance::ModelInstance(std::string const& filename)
 	: model (filename)
@@ -106,22 +74,11 @@ void ModelInstance::draw (Frustum const& frustum)
 
 	if (Settings::getInstance()->renderModelsWithBox)
 	{
-		gl.disable(GL_LIGHTING);
-		gl.disable(GL_COLOR_MATERIAL);
-		opengl::texture::set_active_texture (0);
-		opengl::texture::disable_texture();
-		opengl::texture::set_active_texture (1);
-		opengl::texture::disable_texture();
-		gl.enable(GL_BLEND);
-		gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		DrawABox(TransformCoordsForModel(model->header.VertexBoxMin), TransformCoordsForModel(model->header.VertexBoxMax), math::vector_4d(0.5f, 0.5f, 0.5f, 1.0f), 3.0f);
-		opengl::texture::set_active_texture (1);
-		opengl::texture::disable_texture();
-		opengl::texture::set_active_texture (0);
-		opengl::texture::enable_texture();
-		gl.enable(GL_LIGHTING);
+    opengl::primitives::wire_box ( TransformCoordsForModel(model->header.VertexBoxMin)
+                                 , TransformCoordsForModel(model->header.VertexBoxMax)
+                                 ).draw ({0.5f, 0.5f, 0.5f, 1.0f}, 3.0f);
 	}
-		model->draw();
+  model->draw();
 
   bool currentSelection = gWorld->IsSelection(eEntry_Model) && boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->d1 == d1;
 
@@ -143,11 +100,15 @@ void ModelInstance::draw (Frustum const& frustum)
 
     math::vector_4d color = model->hidden ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(1.0f, 1.0f, 0.0f, 1.0f);
 
-    DrawABox(TransformCoordsForModel(model->header.BoundingBoxMin), TransformCoordsForModel(model->header.BoundingBoxMax), color, 1.0f);
+    opengl::primitives::wire_box ( TransformCoordsForModel(model->header.BoundingBoxMin)
+                                 , TransformCoordsForModel(model->header.BoundingBoxMax)
+                                 ).draw (color, 1.0f);
 
     if (currentSelection)
     {
-      DrawABox(TransformCoordsForModel(model->header.VertexBoxMin), TransformCoordsForModel(model->header.VertexBoxMax), math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f), 1.0f);
+      opengl::primitives::wire_box ( TransformCoordsForModel(model->header.VertexBoxMin)
+                                   , TransformCoordsForModel(model->header.VertexBoxMax)
+                                   ).draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
 
       gl.color4fv(math::vector_4d(1.0f, 0.0f, 0.0f, 1.0f));
       gl.begin(GL_LINES);

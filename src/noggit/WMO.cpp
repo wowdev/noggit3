@@ -19,6 +19,7 @@
 #include <noggit/Shaders.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
+#include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 
 void WMOHighlight(math::vector_4d color)
@@ -282,9 +283,12 @@ void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const an
 		gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		for (unsigned int i = 0; i < nGroups; ++i)
-			DrawABox(groups[i].BoundingBoxMin, groups[i].BoundingBoxMax, math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f), 1.0f);
+      opengl::primitives::wire_box (groups[i].BoundingBoxMin, groups[i].BoundingBoxMax)
+        .draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
 
-		DrawABox(math::vector_3d(extents[0].x, extents[0].z, -extents[0].y), math::vector_3d(extents[1].x, extents[1].z, -extents[1].y), math::vector_4d(1.0f, 0.0f, 0.0f, 1.0f), 2.0f);
+    opengl::primitives::wire_box ( math::vector_3d(extents[0].x, extents[0].z, -extents[0].y)
+                                 , math::vector_3d(extents[1].x, extents[1].z, -extents[1].y)
+                                 ).draw ({1.0f, 0.0f, 0.0f, 1.0f}, 2.0f);
 
 		/*gl.color4fv( math::vector_4d( 1.0f, 0.0f, 0.0f, 1.0f ) );
 		gl.begin( GL_LINES );
