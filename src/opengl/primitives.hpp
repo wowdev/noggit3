@@ -2,10 +2,11 @@
 
 #pragma once
 
-#include <math/vector_3d.hpp>
+#include <opengl/shader.hpp>
 
 namespace math
 {
+  class vector_3d;
   class vector_4d;
 }
 
@@ -16,15 +17,23 @@ namespace opengl
     class wire_box
     {
     public:
-      wire_box ( const ::math::vector_3d& min_point
-               , const ::math::vector_3d& max_point
+      wire_box ( math::vector_3d const& min_point
+               , math::vector_3d const& max_point
                );
 
-      void draw (const ::math::vector_4d& color, const float& line_width) const;
+      void draw (math::vector_4d const& color, float line_width) const;
 
     private:
-      const ::math::vector_3d _min_point;
-      const ::math::vector_3d _max_point;
+      union
+      {
+        GLuint _buffers[2];
+        struct
+        {
+          GLuint _positions;
+          GLuint _indices;
+        };
+      };
+      opengl::program _program;
     };
   }
 }

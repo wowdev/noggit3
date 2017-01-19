@@ -5,57 +5,101 @@
 #include <math/vector_4d.hpp>
 
 #include <opengl/context.hpp>
+#include <opengl/matrix.hpp>
+#include <opengl/scoped.hpp>
 #include <opengl/types.hpp>
+
+#include <array>
 
 namespace opengl
 {
   namespace primitives
   {
-    wire_box::wire_box ( const ::math::vector_3d& min_point
-             , const ::math::vector_3d& max_point
-             )
-      : _min_point (min_point)
-      , _max_point (max_point)
-    { }
+    wire_box::wire_box ( math::vector_3d const& min_point
+                       , math::vector_3d const& max_point
+                       )
+      : _program { { GL_VERTEX_SHADER
+                   , R"code(
+#version 110
 
-    void wire_box::draw ( const ::math::vector_4d& color
-                        , const float& line_width
-                        ) const
+attribute vec4 position;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+void main()
+{
+  gl_Position = projection * model_view * position;
+}
+)code"
+                   }
+                 , { GL_FRAGMENT_SHADER
+                   , R"code(
+#version 110
+
+uniform vec4 color;
+
+void main()
+{
+  gl_FragColor = color;
+}
+)code"
+                   }
+                 }
     {
+      std::vector<math::vector_3d> positions;
+      positions.reserve (8);
+      positions.emplace_back (max_point.x, max_point.y, max_point.z);
+      positions.emplace_back (max_point.x, max_point.y, min_point.z);
+      positions.emplace_back (max_point.x, min_point.y, max_point.z);
+      positions.emplace_back (max_point.x, min_point.y, min_point.z);
+      positions.emplace_back (min_point.x, max_point.y, max_point.z);
+      positions.emplace_back (min_point.x, max_point.y, min_point.z);
+      positions.emplace_back (min_point.x, min_point.y, max_point.z);
+      positions.emplace_back (min_point.x, min_point.y, min_point.z);
+
+      static std::array<unsigned char, 16> const indices
+        {5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7};
+
+      gl.genBuffers (sizeof (_buffers) / sizeof (*_buffers), _buffers);
+
+      {
+        scoped::buffer_binder<GL_ARRAY_BUFFER> const buffer (_positions);
+        gl.bufferData ( GL_ARRAY_BUFFER
+                      , positions.size() * sizeof (*positions.data())
+                      , positions.data()
+                      , GL_STATIC_DRAW
+                      );
+      }
+
+      {
+        scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const buffer (_indices);
+        gl.bufferData ( GL_ELEMENT_ARRAY_BUFFER
+                      , indices.size() * sizeof (*indices.data())
+                      , indices.data()
+                      , GL_STATIC_DRAW
+                      );
+      }
+    }
+
+    void wire_box::draw (math::vector_4d const& color, float line_width) const
+    {
+      opengl::scoped::use_program wire_box_shader {_program};
+
       gl.enable (GL_LINE_SMOOTH);
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
       gl.lineWidth (line_width);
 
-      gl.color4fv (color);
+      wire_box_shader.uniform ("model_view", opengl::matrix::model_view());
+      wire_box_shader.uniform ("projection", opengl::matrix::projection());
 
-      gl.begin (GL_LINE_STRIP);
-      gl.vertex3f (_min_point.x, _max_point.y, _min_point.z);
-      gl.vertex3f (_min_point.x, _min_point.y, _min_point.z);
-      gl.vertex3f (_max_point.x, _min_point.y, _min_point.z);
-      gl.vertex3f (_max_point.x, _min_point.y, _max_point.z);
-      gl.vertex3f (_max_point.x, _max_point.y, _max_point.z);
-      gl.vertex3f (_max_point.x, _max_point.y, _min_point.z);
-      gl.vertex3f (_min_point.x, _max_point.y, _min_point.z);
-      gl.vertex3f (_min_point.x, _max_point.y, _max_point.z);
-      gl.vertex3f (_min_point.x, _min_point.y, _max_point.z);
-      gl.vertex3f (_min_point.x, _min_point.y, _min_point.z);
-      gl.end();
+      scoped::buffer_binder<GL_ARRAY_BUFFER> const positions (_positions);
+      wire_box_shader.attrib ("position", 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-      gl.begin (GL_LINES);
-      gl.vertex3f (_min_point.x, _min_point.y, _max_point.z);
-      gl.vertex3f (_max_point.x, _min_point.y, _max_point.z);
-      gl.end();
+      wire_box_shader.uniform ("color", color);
 
-      gl.begin (GL_LINES);
-      gl.vertex3f (_max_point.x, _max_point.y, _min_point.z);
-      gl.vertex3f (_max_point.x, _min_point.y, _min_point.z);
-      gl.end();
-
-      gl.begin (GL_LINES);
-      gl.vertex3f (_min_point.x, _max_point.y, _max_point.z);
-      gl.vertex3f (_max_point.x, _max_point.y, _max_point.z);
-      gl.end();
-
+      scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices (_indices);
+      gl.drawElements (GL_LINE_STRIP, 16, GL_UNSIGNED_BYTE, 0);
     }
   }
 }

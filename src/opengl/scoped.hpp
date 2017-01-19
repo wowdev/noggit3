@@ -129,5 +129,17 @@ namespace opengl
       GLint _old_mode;
     };
 
+    template<GLenum type>
+      struct buffer_binder
+    {
+      buffer_binder (GLuint buffer)
+      {
+        gl.bindBuffer (type, buffer);
+      }
+      ~buffer_binder()
+      {
+        gl.bindBuffer (type, 0);
+      }
+    };
   }
 }
