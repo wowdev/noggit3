@@ -1043,6 +1043,9 @@ void main()
       };
     opengl::scoped::use_program mfbo_shader {program};
 
+    mfbo_shader.uniform ("model_view", opengl::matrix::model_view());
+    mfbo_shader.uniform ("projection", opengl::matrix::projection());
+
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
       tile->drawMFBO (mfbo_shader);
