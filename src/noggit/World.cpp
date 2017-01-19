@@ -268,6 +268,7 @@ World::World(const std::string& name)
   , drawwater(true)
   , drawwmo(true)
   , drawwireframe(false)
+  , draw_mfbo (false)
   , lighting(true)
   , animtime(0)
   , time(1450)
@@ -1001,6 +1002,14 @@ void World::draw()
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
       tile->drawLines(frustum);
+    }
+  }
+
+  if (draw_mfbo)
+  {
+    for (MapTile* tile : mapIndex->loaded_tiles())
+    {
+      tile->drawMFBO();
     }
   }
 
