@@ -218,8 +218,8 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
     theFile.read(mMaximum, sizeof(mMaximum));
     theFile.read(mMinimum, sizeof(mMinimum));
 
-    static const float xPositions[] = { this->xbase, this->xbase + 266.0f, this->xbase + 533.0f };
-    static const float yPositions[] = { this->zbase, this->zbase + 266.0f, this->zbase + 533.0f };
+    const float xPositions[] = { this->xbase, this->xbase + 266.0f, this->xbase + 533.0f };
+    const float yPositions[] = { this->zbase, this->zbase + 266.0f, this->zbase + 533.0f };
 
     for (int y = 0; y < 3; y++)
     {
