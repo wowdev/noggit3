@@ -1295,6 +1295,7 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemToggle("F8 Detail infos", mainGui->guidetailInfos->hidden_evil(), true);
   mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &DrawMapContour);
   mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &gWorld->renderAnimations);
+  mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &gWorld->draw_mfbo);
   mbar->GetMenu("View")->AddMenuItemToggle("F Fog", &gWorld->drawfog);
   mbar->GetMenu("View")->AddMenuItemToggle("Hole lines always on", &Settings::getInstance()->holelinesOn, false);
   mbar->GetMenu("View")->AddMenuItemToggle("Wireframe", &gWorld->drawwireframe);

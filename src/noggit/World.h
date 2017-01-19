@@ -87,6 +87,7 @@ public:
 	bool drawwater;
 	bool drawwmo;
 	bool drawwireframe;
+  bool draw_mfbo;
 	bool lighting;
 	bool renderAnimations;
 	// Time of the day.
