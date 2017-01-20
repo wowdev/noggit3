@@ -5,6 +5,8 @@
 #include <opengl/context.hpp>
 #include <opengl/texture.hpp>
 
+#include <stdexcept>
+
 namespace opengl
 {
   namespace scoped
@@ -132,13 +134,29 @@ namespace opengl
     template<GLenum type>
       struct buffer_binder
     {
+      GLint _old;
       buffer_binder (GLuint buffer)
       {
+        gl.getIntegerv ( type == GL_ARRAY_BUFFER ? GL_ARRAY_BUFFER_BINDING
+                       : type == GL_ATOMIC_COUNTER_BUFFER ? GL_ATOMIC_COUNTER_BUFFER_BINDING
+                       : type == GL_COPY_READ_BUFFER ? GL_COPY_READ_BUFFER_BINDING
+                       : type == GL_COPY_WRITE_BUFFER ? GL_COPY_WRITE_BUFFER_BINDING
+                       : type == GL_DRAW_INDIRECT_BUFFER ? GL_DRAW_INDIRECT_BUFFER_BINDING
+                       : type == GL_DISPATCH_INDIRECT_BUFFER ? GL_DISPATCH_INDIRECT_BUFFER_BINDING
+                       : type == GL_ELEMENT_ARRAY_BUFFER ? GL_ELEMENT_ARRAY_BUFFER_BINDING
+                       : type == GL_PIXEL_PACK_BUFFER ? GL_PIXEL_PACK_BUFFER_BINDING
+                       : type == GL_PIXEL_UNPACK_BUFFER ? GL_PIXEL_UNPACK_BUFFER_BINDING
+                       : type == GL_SHADER_STORAGE_BUFFER ? GL_SHADER_STORAGE_BUFFER_BINDING
+                       : type == GL_TRANSFORM_FEEDBACK_BUFFER ? GL_TRANSFORM_FEEDBACK_BUFFER_BINDING
+                       : type == GL_UNIFORM_BUFFER ? GL_UNIFORM_BUFFER_BINDING
+                       : throw std::logic_error ("bad bind target")
+                       , &_old
+                       );
         gl.bindBuffer (type, buffer);
       }
       ~buffer_binder()
       {
-        gl.bindBuffer (type, 0);
+        gl.bindBuffer (type, _old);
       }
     };
   }
