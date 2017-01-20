@@ -90,8 +90,6 @@ public:
 	bool hasSkies() { return numSkies > 0; }
 
 	void setupLighting();
-
-	void debugDraw(unsigned int *buf, int dim);
 };
 
 

@@ -275,34 +275,6 @@ void Skies::initSky(math::vector_3d pos, int t)
 	}
 }
 
-void drawCircle(unsigned int *buf, int dim, float x, float y, float r, unsigned int col)
-{
-	float circ = 2 * r*(float)M_PI;
-	gl.begin(GL_LINES);
-	for (int i = 0; i<circ; ++i) {
-    math::radians phi (2 * (float)M_PI*i / circ);
-		int px = (int)(x + r * math::cos(phi));
-		int py = (int)(y + r * math::sin(phi));
-		if (px >= 0 && px<dim && py >= 0 && py<dim) {
-			buf[py*dim + px] = col;
-		}
-	}
-}
-
-void Skies::debugDraw(unsigned int *buf, int dim)
-{
-	float worldSize = 64.0f*533.333333f;
-	for (size_t i = 1; i<skies.size(); ++i) {
-		Sky &s = skies[i];
-		float cx = dim * s.pos.x / worldSize;
-		float cy = dim * s.pos.z / worldSize;
-		float r1 = dim * s.r1 / worldSize;
-		float r2 = dim * s.r2 / worldSize;
-		drawCircle(buf, dim, cx, cy, r1, 0xFFFF0000);
-		drawCircle(buf, dim, cx, cy, r2, 0xFFFFFF00);
-	}
-}
-
 bool Skies::drawSky(const math::vector_3d &pos)
 {
 	if (numSkies == 0) return false;
