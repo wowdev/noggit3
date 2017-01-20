@@ -93,13 +93,11 @@ void main()
       wire_box_shader.uniform ("model_view", opengl::matrix::model_view());
       wire_box_shader.uniform ("projection", opengl::matrix::projection());
 
-      scoped::buffer_binder<GL_ARRAY_BUFFER> const positions (_positions);
-      wire_box_shader.attrib ("position", 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+      wire_box_shader.attrib ("position", _positions, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
       wire_box_shader.uniform ("color", color);
 
-      scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices (_indices);
-      gl.drawElements (GL_LINE_STRIP, 16, GL_UNSIGNED_BYTE, 0);
+      gl.drawElements (GL_LINE_STRIP, _indices, 16, GL_UNSIGNED_BYTE, 0);
     }
   }
 }
