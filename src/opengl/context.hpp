@@ -204,6 +204,8 @@ namespace opengl
     void colorPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
     void texCoordPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
     void normalPointer (GLuint buffer, GLenum type, GLsizei stride, GLvoid const* pointer);
+
+    void drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices);
   };
 }
 

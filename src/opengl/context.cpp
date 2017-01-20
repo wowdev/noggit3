@@ -941,4 +941,10 @@ namespace opengl
     scoped::buffer_binder<GL_ARRAY_BUFFER> const _ (buffer);
     return normalPointer (type, stride, pointer);
   }
+
+  void context::drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices)
+  {
+    scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (index_buffer);
+    return drawElements (mode, count, type, indices);
+  }
 }
