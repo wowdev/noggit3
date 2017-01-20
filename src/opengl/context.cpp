@@ -838,27 +838,6 @@ namespace opengl
     return glUniformMatrix4fv (location, count, transpose, value);
   }
 
-  void context::initNames()
-  {
-    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
-    return glInitNames();
-  }
-  void context::pushName (GLuint name)
-  {
-    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
-    return glPushName (name);
-  }
-  void context::popName()
-  {
-    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
-    return glPopName();
-  }
-  void context::selectBuffer (GLsizei size, GLuint* buffer)
-  {
-    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
-    return glSelectBuffer (size, buffer);
-  }
-
   void context::clearStencil (GLint s)
   {
     verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
