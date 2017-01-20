@@ -8,6 +8,7 @@
 #include <math/vector_4d.hpp>
 
 #include <opengl/context.hpp>
+#include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
 
 #include <list>
@@ -137,6 +138,14 @@ namespace opengl
       GLuint const location (_program.attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
+      gl.vertexAttribPointer (location, size, type, normalized, stride, data);
+    }
+    void use_program::attrib (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data)
+    {
+      GLuint const location (_program.attrib_location (name));
+      gl.enableVertexAttribArray (location);
+      _enabled_vertex_attrib_arrays.emplace (location);
+      scoped::buffer_binder<GL_ARRAY_BUFFER> const bind (buffer);
       gl.vertexAttribPointer (location, size, type, normalized, stride, data);
     }
   }
