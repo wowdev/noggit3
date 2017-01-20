@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <opengl/context.hpp>
+#include <opengl/scoped.hpp>
 
 #include <noggit/Log.h>
 
@@ -931,5 +932,34 @@ namespace opengl
   {
     verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
     return glFramebufferRenderbuffer (target, attachment, renderbuffertarget, renderbuffer);
+  }
+
+  template<GLenum target>
+    void context::bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage)
+  {
+    scoped::buffer_binder<target> const _  (buffer);
+    return bufferData (target, size, data, usage);
+  }
+  template void context::bufferData<GL_ARRAY_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
+
+  void context::vertexPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer)
+  {
+    scoped::buffer_binder<GL_ARRAY_BUFFER> const _  (buffer);
+    return vertexPointer (size, type, stride, pointer);
+  }
+  void context::colorPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer)
+  {
+    scoped::buffer_binder<GL_ARRAY_BUFFER> const _  (buffer);
+    return colorPointer (size, type, stride, pointer);
+  }
+  void context::texCoordPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer)
+  {
+    scoped::buffer_binder<GL_ARRAY_BUFFER> const _  (buffer);
+    return texCoordPointer (size, type, stride, pointer);
+  }
+  void context::normalPointer (GLuint buffer, GLenum type, GLsizei stride, GLvoid const* pointer)
+  {
+    scoped::buffer_binder<GL_ARRAY_BUFFER> const _  (buffer);
+    return normalPointer (type, stride, pointer);
   }
 }

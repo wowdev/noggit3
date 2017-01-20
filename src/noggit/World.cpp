@@ -601,8 +601,7 @@ void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
     }
 
     gl.genBuffers(1, pDetailTexCoords);
-    gl.bindBuffer(GL_ARRAY_BUFFER, *pDetailTexCoords);
-    gl.bufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER> (*pDetailTexCoords, sizeof(temp), temp, GL_STATIC_DRAW);
 
     // init texture coordinates for alpha map:
     vt = temp;
@@ -621,10 +620,7 @@ void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
     }
 
     gl.genBuffers(1, pAlphaTexCoords);
-    gl.bindBuffer(GL_ARRAY_BUFFER, *pAlphaTexCoords);
-    gl.bufferData(GL_ARRAY_BUFFER, sizeof(temp), temp, GL_STATIC_DRAW);
-
-    gl.bindBuffer(GL_ARRAY_BUFFER, 0);
+    gl.bufferData<GL_ARRAY_BUFFER> (*pAlphaTexCoords, sizeof(temp), temp, GL_STATIC_DRAW);
   }
 }
 
@@ -798,8 +794,6 @@ extern Brush textureBrush;
 
 void World::draw()
 {
-  gl.bindBuffer(GL_ARRAY_BUFFER, 0);
-
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
   Frustum const frustum;
@@ -893,13 +887,11 @@ void World::draw()
 
   gl.clientActiveTexture(GL_TEXTURE0);
   gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
-  gl.bindBuffer(GL_ARRAY_BUFFER, detailtexcoords);
-  gl.texCoordPointer(2, GL_FLOAT, 0, 0);
+  gl.texCoordPointer (detailtexcoords, 2, GL_FLOAT, 0, 0);
 
   gl.clientActiveTexture(GL_TEXTURE1);
   gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
-  gl.bindBuffer(GL_ARRAY_BUFFER, alphatexcoords);
-  gl.texCoordPointer(2, GL_FLOAT, 0, 0);
+  gl.texCoordPointer (alphatexcoords, 2, GL_FLOAT, 0, 0);
 
   gl.clientActiveTexture(GL_TEXTURE0);
 
@@ -1008,9 +1000,6 @@ void World::draw()
 
   if (draw_mfbo)
   {
-    gl.bindBuffer (GL_ARRAY_BUFFER, 0);
-    gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
-
     //! \todo don't compile on every frame
     opengl::program const program
       { { GL_VERTEX_SHADER
@@ -1062,12 +1051,6 @@ void main()
 
   gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (0.0f, 0.0f, 0.0f, 1.0f));
   gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 0);
-
-  // unbind hardware buffers
-  gl.bindBuffer(GL_ARRAY_BUFFER, 0);
-
-
-
 
   gl.enable(GL_CULL_FACE);
 
@@ -1287,8 +1270,8 @@ void World::clearHeight(int /*id*/, const tile_index& tile, int _cx, int _cz)
     curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
   }
 
-  glBindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER>
+    (curChunk->vertices, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
 
   curChunk->recalcNorms();
 }
@@ -2185,8 +2168,8 @@ void World::moveHeight(int /*id*/, const tile_index& tile, int _cx, int _cz)
     curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
   }
 
-  gl.bindBuffer(GL_ARRAY_BUFFER, curChunk->vertices);
-  gl.bufferData(GL_ARRAY_BUFFER, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER>
+    (curChunk->vertices, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
 
   curChunk->recalcNorms();
 }
