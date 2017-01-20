@@ -178,11 +178,6 @@ namespace opengl
     void uniform4fv (GLint location, GLsizei count, GLfloat const* value);
     void uniformMatrix4fv (GLint location, GLsizei count, GLboolean transpose, GLfloat const* value);
 
-    void initNames();
-    void pushName (GLuint);
-    void popName();
-    void selectBuffer (GLsizei size, GLuint* buffer);
-
     void clearStencil (GLint);
     void stencilFunc (GLenum func, GLint ref, GLuint mask);
     void stencilOp (GLenum sfail, GLenum dpfail, GLenum dppass);
