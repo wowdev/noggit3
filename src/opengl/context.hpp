@@ -201,6 +201,14 @@ namespace opengl
     void bindRenderbuffer (GLenum target, GLuint renderbuffer);
     void renderbufferStorage (GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
     void framebufferRenderbuffer (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
+
+    template<GLenum target>
+      void bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
+
+    void vertexPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
+    void colorPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
+    void texCoordPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer);
+    void normalPointer (GLuint buffer, GLenum type, GLsizei stride, GLvoid const* pointer);
   };
 }
 

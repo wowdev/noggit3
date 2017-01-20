@@ -264,14 +264,9 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   gl.genBuffers(1, &mccvEntry);
   gl.genBuffers (1, &indices);
 
-  gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
-  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
-
-  gl.bindBuffer(GL_ARRAY_BUFFER, normals);
-  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
-
-  gl.bindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (mccvEntry, sizeof(mccv), mccv, GL_STATIC_DRAW);
 
   initStrip();
 
@@ -333,11 +328,8 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   gl.genBuffers(1, &minimap);
   gl.genBuffers(1, &minishadows);
 
-  gl.bindBuffer(GL_ARRAY_BUFFER, minimap);
-  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mMinimap), mMinimap, GL_STATIC_DRAW);
-
-  gl.bindBuffer(GL_ARRAY_BUFFER, minishadows);
-  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (minimap, sizeof(mMinimap), mMinimap, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 }
 
 void MapChunk::ClearShader()
@@ -347,8 +339,7 @@ void MapChunk::ClearShader()
     mccv[i] = math::vector_3d(1.0f, 1.0f, 1.0f);
   }
 
-  gl.bindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (mccvEntry, sizeof(mccv), mccv, GL_STATIC_DRAW);
 }
 
 void MapChunk::drawTextures()
@@ -428,11 +419,8 @@ void MapChunk::drawTextures()
   opengl::texture::set_active_texture (1);
   opengl::texture::disable_texture();
 
-  gl.bindBuffer(GL_ARRAY_BUFFER, minimap);
-  gl.vertexPointer(3, GL_FLOAT, 0, 0);
-
-  gl.bindBuffer(GL_ARRAY_BUFFER, minishadows);
-  gl.colorPointer(4, GL_FLOAT, 0, 0);
+  gl.vertexPointer (minimap, 3, GL_FLOAT, 0, 0);
+  gl.colorPointer (minishadows, 4, GL_FLOAT, 0, 0);
 
   gl.drawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, gWorld->mapstrip2);
 }
@@ -475,9 +463,8 @@ void MapChunk::initStrip()
   }
   striplen = static_cast<int>(s - strip);
 
-  gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, indices);
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, striplen * sizeof (StripType), strip, GL_STATIC_DRAW);
-  gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 MapChunk::~MapChunk()
@@ -554,8 +541,7 @@ void MapChunk::drawLines (Frustum const& frustum)
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
 
-  gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
-  gl.vertexPointer(3, GL_FLOAT, 0, 0);
+  gl.vertexPointer (vertices, 3, GL_FLOAT, 0, 0);
 
   opengl::texture::disable_texture();
 
@@ -647,16 +633,14 @@ void MapChunk::draw (Frustum const& frustum)
   }
 
   // setup vertex buffers
-  gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
-  gl.vertexPointer(3, GL_FLOAT, 0, 0);
-  gl.bindBuffer(GL_ARRAY_BUFFER, normals);
-  gl.normalPointer(GL_FLOAT, 0, 0);
-  gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
+  gl.vertexPointer (vertices, 3, GL_FLOAT, 0, 0);
+  gl.normalPointer (normals, GL_FLOAT, 0, 0);
+
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (indices);
 
   if (hasMCCV)
   {
-    gl.bindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-    gl.colorPointer(3, GL_FLOAT, 0, 0);
+    gl.colorPointer (mccvEntry, 3, GL_FLOAT, 0, 0);
     gl.enableClientState(GL_COLOR_ARRAY);
   }
 
@@ -810,7 +794,6 @@ void MapChunk::draw (Frustum const& frustum)
     gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
 
-  gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, 0);
   gl.enable(GL_LIGHTING);
   gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
@@ -890,8 +873,7 @@ void MapChunk::recalcNorms()
     Norm.normalize();
     mNormals[i] = Norm;
   }
-  gl.bindBuffer(GL_ARRAY_BUFFER, normals);
-  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
 
   float ShadowAmount;
   for (int j = 0; j<mapbufsize; ++j)
@@ -910,8 +892,7 @@ void MapChunk::recalcNorms()
     mFakeShadows[j].w = ShadowAmount;
   }
 
-  gl.bindBuffer(GL_ARRAY_BUFFER, minishadows);
-  gl.bufferData(GL_ARRAY_BUFFER, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 }
 
 bool MapChunk::changeTerrain(float x, float z, float change, float radius, int BrushType)
@@ -965,8 +946,7 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
   }
   if (changed)
   {
-    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
-    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1025,8 +1005,7 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
   }
   if (changed)
   {
-    gl.bindBuffer(GL_ARRAY_BUFFER, mccvEntry);
-    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mccv), mccv, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER> (mccvEntry, sizeof(mccv), mccv, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1088,8 +1067,7 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
   }
   if (changed)
   {
-    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
-    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1150,8 +1128,7 @@ bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int 
   }
   if (changed)
   {
-    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
-    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1229,8 +1206,7 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
   }
   if (changed)
   {
-    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
-    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1679,8 +1655,7 @@ bool MapChunk::fixGapLeft(const MapChunk* chunk)
 
   if (changed)
   {
-    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
-    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1704,8 +1679,7 @@ bool MapChunk::fixGapAbove(const MapChunk* chunk)
 
   if (changed)
   {
-    gl.bindBuffer(GL_ARRAY_BUFFER, vertices);
-    gl.bufferData(GL_ARRAY_BUFFER, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
   return changed;
 }
@@ -1726,8 +1700,7 @@ gl.disable( GL_LIGHTING );
 //gl.disable(GL_FOG);
 
 // low detail version
-gl.bindBuffer( GL_ARRAY_BUFFER, vertices );
-gl.vertexPointer( 3, GL_FLOAT, 0, 0 );
+gl.vertexPointer (vertices, 3, GL_FLOAT, 0, 0 );
 gl.disableClientState( GL_NORMAL_ARRAY );
 gl.drawElements( GL_TRIANGLE_STRIP, stripsize, GL_UNSIGNED_SHORT, gWorld->mapstrip );
 gl.enableClientState( GL_NORMAL_ARRAY );

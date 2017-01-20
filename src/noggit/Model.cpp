@@ -11,6 +11,7 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <opengl/matrix.hpp>
+#include <opengl/scoped.hpp>
 
 int globalTime = 0;
 
@@ -504,18 +505,15 @@ void Model::initAnimated(const MPQFile& f)
 	}
 
 	if (!animGeometry) {
-		gl.bindBuffer(GL_ARRAY_BUFFER_ARB, vbuf);
-		gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
+		gl.bufferData<GL_ARRAY_BUFFER> (vbuf, vbufsize, vertices, GL_STATIC_DRAW);
 		gl.genBuffers(1, &nbuf);
-		gl.bindBuffer(GL_ARRAY_BUFFER_ARB, nbuf);
-		gl.bufferData(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
+		gl.bufferData<GL_ARRAY_BUFFER> (nbuf, vbufsize, normals, GL_STATIC_DRAW);
 		delete[] normals;
 	}
 	math::vector_2d *texcoords = new math::vector_2d[header.nVertices];
 	for (size_t i = 0; i<header.nVertices; ++i)
 		texcoords[i] = origVertices[i].texcoords;
-	gl.bindBuffer(GL_ARRAY_BUFFER_ARB, tbuf);
-	gl.bufferData(GL_ARRAY_BUFFER_ARB, 2 * size, texcoords, GL_STATIC_DRAW_ARB);
+	gl.bufferData<GL_ARRAY_BUFFER> (tbuf, 2 * size, texcoords, GL_STATIC_DRAW);
 	delete[] texcoords;
 
 	if (animTextures) {
@@ -592,10 +590,9 @@ void Model::animate(int _anim)
 	}
 
 	if (animGeometry) {
-
-		gl.bindBuffer(GL_ARRAY_BUFFER_ARB, vbuf);
-		gl.bufferData(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, nullptr, GL_STREAM_DRAW_ARB);
-		vertices = reinterpret_cast<math::vector_3d*>(gl.mapBuffer(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (vbuf);
+    gl.bufferData (GL_ARRAY_BUFFER, 2 * vbufsize, nullptr, GL_STREAM_DRAW);
+		vertices = reinterpret_cast<math::vector_3d*>(gl.mapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
 
 		// transform vertices
 		ModelVertex *ov = origVertices;
@@ -619,8 +616,7 @@ void Model::animate(int _anim)
 			vertices[header.nVertices + i] = n.normalize(); // shouldn't these be normal by default?
 		}
 
-		gl.unmapBuffer(GL_ARRAY_BUFFER_ARB);
-
+		gl.unmapBuffer(GL_ARRAY_BUFFER);
 	}
 
 	for (size_t i = 0; i<header.nLights; ++i) {
@@ -857,20 +853,17 @@ void Model::drawModel( /*bool unlit*/)
 	{
 		if (animGeometry)
 		{
-			gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
-			gl.vertexPointer(3, GL_FLOAT, 0, 0);
-			gl.normalPointer(GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize));
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (vbuf);
+			gl.vertexPointer (3, GL_FLOAT, 0, 0);
+			gl.normalPointer (GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize));
 		}
 		else
 		{
-			gl.bindBuffer(GL_ARRAY_BUFFER, vbuf);
-			gl.vertexPointer(3, GL_FLOAT, 0, 0);
-			gl.bindBuffer(GL_ARRAY_BUFFER, nbuf);
-			gl.normalPointer(GL_FLOAT, 0, 0);
+			gl.vertexPointer (vbuf, 3, GL_FLOAT, 0, 0);
+			gl.normalPointer (nbuf, GL_FLOAT, 0, 0);
 		}
 
-		gl.bindBuffer(GL_ARRAY_BUFFER, tbuf);
-		gl.texCoordPointer(2, GL_FLOAT, 0, 0);
+		gl.texCoordPointer (tbuf, 2, GL_FLOAT, 0, 0);
 	}
 
 	gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
