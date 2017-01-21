@@ -132,14 +132,14 @@ void updateScale(UITextBox::Ptr textBox, const std::string& value)
 
 
 UIRotationEditor::UIRotationEditor(float x, float y)
-  : UIWindow(x, y, 120.0f, 270.0f),
-  rotationVect(nullptr),
-  posVect(nullptr),
-  scale(nullptr),
-  _wmoInstance(nullptr),
-  _selection(false),
-  _wmo(false)
-{ 
+  : UIWindow(x, y, 120.0f, 270.0f)
+  , rotationVect(nullptr)
+  , posVect(nullptr)
+  , scale(nullptr)
+  , _selection(false)
+  , _wmo(false)
+  , _wmoInstance(nullptr)
+{
   _tbRotationX = new UITextBox(20.0f, 25.0f, 95.0f, 35.0f, app.getArial12(), updateRotationX);
   _tbRotationZ = new UITextBox(20.0f, 55.0f, 95.0f, 35.0f, app.getArial12(), updateRotationZ);
   _tbRotationY = new UITextBox(20.0f, 98.0f, 95.0f, 35.0f, app.getArial12(), updateRotationY);

@@ -135,10 +135,10 @@ void enableWaterShader()
 Liquid::Liquid(int x, int y, math::vector_3d base, float ptilesize)
   : xtiles(x)
   , ytiles(y)
+  , mDrawList(nullptr)
   , pos(base)
   , tilesize(ptilesize)
   , ydir(1.0f)
-  , mDrawList(nullptr)
 {}
 
 Liquid::~Liquid()

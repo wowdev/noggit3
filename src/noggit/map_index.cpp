@@ -12,13 +12,13 @@
 #include <boost/range/adaptor/map.hpp>
 
 MapIndex::MapIndex(const std::string &pBasename)
-  : mHasAGlobalWMO(false)
+  : basename(pBasename)
   , mBigAlpha(false)
+  , mHasAGlobalWMO(false)
   , noadt(false)
   , changed(false)
   , cx(-1)
   , cz(-1)
-  , basename(pBasename)
   , highestGUID(0)
 {
 
