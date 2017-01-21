@@ -200,8 +200,6 @@ public:
 
 	void delete_duplicate_model_and_wmo_instances();
 
-  void ensureModelIdUniqueness();
-
 	static bool IsEditableWorld(int pMapId);
 	void clearHeight(int id, const tile_index& tile);
 	void clearHeight(int id, const tile_index& tile, int _cx, int _cz);
