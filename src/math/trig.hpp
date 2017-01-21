@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <math/constants.hpp>
 #include <math/vector_3d.hpp>
 
 #include <cmath>
@@ -30,8 +31,8 @@ namespace math
     using vec3 = vector_3d_base<radians>;
   };
 
-  inline degrees::degrees (radians x) : _ (x._ * 180.0f / M_PI) {}
-  inline radians::radians (degrees x) : _ (x._ * M_PI / 180.0f) {}
+  inline degrees::degrees (radians x) : _ (x._ * 180.0f / math::constants::pi) {}
+  inline radians::radians (degrees x) : _ (x._ * math::constants::pi / 180.0f) {}
 
   inline float sin (radians x)
   {

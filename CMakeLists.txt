@@ -67,7 +67,6 @@ macro(includePlattform SUFFIX)
     endif(APPLE)
   else(UNIX)
     if(WIN32)
-      add_definitions(/DM_PI=3.14159265358979323846f)
       include("${CMAKE_SOURCE_DIR}/cmake/win32_${SUFFIX}.cmake")
       # adds for library repo
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/lib/")

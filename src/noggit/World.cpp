@@ -61,9 +61,9 @@ namespace
   void render_square(math::vector_3d const& pos, float size, float orientation)
   {
     float dx1 = size*cos(orientation) - size*sin(orientation);
-    float dx2 = size*cos(orientation + M_PI / 2) - size*sin(orientation + M_PI / 2);
+    float dx2 = size*cos(orientation + math::constants::pi / 2) - size*sin(orientation + math::constants::pi / 2);
     float dz1 = size*sin(orientation) + size*cos(orientation);
-    float dz2 = size*sin(orientation + M_PI / 2) + size*cos(orientation + M_PI / 2);
+    float dz2 = size*sin(orientation + math::constants::pi / 2) + size*cos(orientation + math::constants::pi / 2);
     
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
 
@@ -80,7 +80,7 @@ namespace
   std::size_t const sphere_segments (15);
   void draw_sphere_point (int i, int j, float radius)
   {
-    static math::radians const drho (M_PI / sphere_segments);
+    static math::radians const drho (math::constants::pi / sphere_segments);
     static math::radians const dtheta (2.0f * drho._);
 
     math::radians const rho (i * drho._);
@@ -139,7 +139,7 @@ namespace
   void draw_disk (float radius)
   {
     int const slices (std::max (15.0f, radius * 1.5f));
-    static math::radians const max (2.0f * M_PI);
+    static math::radians const max (2.0f * math::constants::pi);
     float const stride (max._ / slices);
 
     gl.begin (GL_LINE_LOOP);
