@@ -12,10 +12,10 @@
 
 namespace math
 {
-  class matrix_4x4;
-  class vector_2d;
-  class vector_3d;
-  class vector_4d;
+  struct matrix_4x4;
+  struct vector_2d;
+  struct vector_3d;
+  struct vector_4d;
 }
 
 namespace opengl

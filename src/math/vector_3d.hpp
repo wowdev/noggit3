@@ -8,7 +8,7 @@
 
 namespace math
 {
-  class vector_3d;
+  struct vector_3d;
 
   template<typename T>
     struct vector_3d_base
@@ -164,7 +164,7 @@ namespace math
            };
   }
 
-  class vector_3d : public vector_3d_base<float>
+  struct vector_3d : public vector_3d_base<float>
   {
   public:
     using vector_3d_base<float>::vector_3d_base;

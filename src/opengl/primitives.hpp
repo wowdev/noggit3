@@ -6,8 +6,8 @@
 
 namespace math
 {
-  class vector_3d;
-  class vector_4d;
+  struct vector_3d;
+  struct vector_4d;
 }
 
 namespace opengl
