@@ -16,14 +16,14 @@
 
 namespace misc
 {
-	void find_and_replace(std::string& source, const std::string& find, const std::string& replace);
-	int FtoIround(float d);
-	char roundc(float a);
-	float frand();
-	float randfloat(float lower, float upper);
-	int randint(int lower, int upper);
-	int getADTCord(float cord);
-	std::string explode(std::string original, std::string exploder = ".");
+  void find_and_replace(std::string& source, const std::string& find, const std::string& replace);
+  int FtoIround(float d);
+  char roundc(float a);
+  float frand();
+  float randfloat(float lower, float upper);
+  int randint(int lower, int upper);
+  int getADTCord(float cord);
+  std::string explode(std::string original, std::string exploder = ".");
   std::string floatToStr(float f, int precision = 2);
   float dist(float x1, float z1, float x2, float z2);
   float getShortestDist(float x, float z, float squareX, float squareZ, float unitSize);
@@ -35,104 +35,104 @@ namespace misc
 class sExtendableArray
 {
 public:
-	int mSize;
-	char* mData;
+  int mSize;
+  char* mData;
 
-	bool Allocate(int pSize)
-	{
-		mSize = pSize;
-		mData = static_cast<char*>(realloc(mData, mSize));
-		memset(mData, 0, mSize);
-		return(mData != nullptr);
-	}
+  bool Allocate(int pSize)
+  {
+    mSize = pSize;
+    mData = static_cast<char*>(realloc(mData, mSize));
+    memset(mData, 0, mSize);
+    return(mData != nullptr);
+  }
 
-	bool Extend(int pAddition)
-	{
-		mSize = mSize + pAddition;
-		mData = static_cast<char*>(realloc(mData, mSize));
-		if (pAddition > 0)
-			memset(mData + mSize - pAddition, 0, pAddition);
-		return(mData != nullptr);
-	}
+  bool Extend(int pAddition)
+  {
+    mSize = mSize + pAddition;
+    mData = static_cast<char*>(realloc(mData, mSize));
+    if (pAddition > 0)
+      memset(mData + mSize - pAddition, 0, pAddition);
+    return(mData != nullptr);
+  }
 
-	bool Insert(int pPosition, int pAddition)
-	{
-		const int lPostSize = mSize - pPosition;
+  bool Insert(int pPosition, int pAddition)
+  {
+    const int lPostSize = mSize - pPosition;
 
-		char *lPost = static_cast<char*>(malloc(lPostSize));
-		memcpy(lPost, mData + pPosition, lPostSize);
+    char *lPost = static_cast<char*>(malloc(lPostSize));
+    memcpy(lPost, mData + pPosition, lPostSize);
 
-		if (!Extend(pAddition))
-			return false;
+    if (!Extend(pAddition))
+      return false;
 
-		memcpy(mData + pPosition + pAddition, lPost, lPostSize);
-		memset(mData + pPosition, 0, pAddition);
+    memcpy(mData + pPosition + pAddition, lPost, lPostSize);
+    memset(mData + pPosition, 0, pAddition);
 
-		free(lPost);
+    free(lPost);
 
-		return true;
-	}
+    return true;
+  }
 
-	bool Insert(int pPosition, int pAddition, const char * pAdditionalData)
-	{
-		const int lPostSize = mSize - pPosition;
+  bool Insert(int pPosition, int pAddition, const char * pAdditionalData)
+  {
+    const int lPostSize = mSize - pPosition;
 
-		char *lPost = static_cast<char*>(malloc(lPostSize));
-		memcpy(lPost, mData + pPosition, lPostSize);
+    char *lPost = static_cast<char*>(malloc(lPostSize));
+    memcpy(lPost, mData + pPosition, lPostSize);
 
-		if (!Extend(pAddition))
-			return false;
+    if (!Extend(pAddition))
+      return false;
 
-		memcpy(mData + pPosition + pAddition, lPost, lPostSize);
-		memcpy(mData + pPosition, pAdditionalData, pAddition);
+    memcpy(mData + pPosition + pAddition, lPost, lPostSize);
+    memcpy(mData + pPosition, pAdditionalData, pAddition);
 
-		free(lPost);
+    free(lPost);
 
-		return true;
-	}
+    return true;
+  }
 
-	template<typename To>
-	To * GetPointer()
-	{
-		return(reinterpret_cast<To*>(mData));
-	}
+  template<typename To>
+  To * GetPointer()
+  {
+    return(reinterpret_cast<To*>(mData));
+  }
 
-	template<typename To>
-	To * GetPointer(unsigned int pPosition)
-	{
-		return(reinterpret_cast<To*>(mData + pPosition));
-	}
+  template<typename To>
+  To * GetPointer(unsigned int pPosition)
+  {
+    return(reinterpret_cast<To*>(mData + pPosition));
+  }
 
-	sExtendableArray()
-	{
-		mSize = 0;
-		mData = nullptr;
-	}
+  sExtendableArray()
+  {
+    mSize = 0;
+    mData = nullptr;
+  }
 
-	sExtendableArray(int pSize, const char *pData)
-	{
-		if (Allocate(pSize))
-			memcpy(mData, pData, pSize);
-		else
-			LogError << "Allocating " << pSize << " bytes failed. This may crash soon." << std::endl;
-	}
+  sExtendableArray(int pSize, const char *pData)
+  {
+    if (Allocate(pSize))
+      memcpy(mData, pData, pSize);
+    else
+      LogError << "Allocating " << pSize << " bytes failed. This may crash soon." << std::endl;
+  }
 
-	void Destroy()
-	{
-		free(mData);
-	}
+  void Destroy()
+  {
+    free(mData);
+  }
 };
 
 struct sChunkHeader
 {
-	int mMagic;
-	int mSize;
+  int mMagic;
+  int mSize;
 };
 
 struct filenameOffsetThing
 {
-	int nameID;
-	int filenamePosition;
+  int nameID;
+  int filenamePosition;
 };
 
 void SetChunkHeader(sExtendableArray pArray, int pPosition, int pMagix, int pSize = 0);

@@ -10,14 +10,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /vmg /D NOMINMAX")
 
 # warnings?
 if( NOGGIT_ALL_WARNINGS )
-  	MESSAGE( STATUS "Spilling out mass warnings." )
-  	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /Wall /Wp64")
+    MESSAGE( STATUS "Spilling out mass warnings." )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /Wall /Wp64")
 endif( NOGGIT_ALL_WARNINGS )
 
 # mark 32 bit executables large address aware so they can use > 2GB address space
 if(CMAKE_SIZEOF_VOID_P MATCHES 4)
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
-	message(STATUS "- MSVC: Enabled large address awareness!")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
+  message(STATUS "- MSVC: Enabled large address awareness!")
 endif()
 
 set(ResFiles media/res.rc)

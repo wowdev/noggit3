@@ -141,7 +141,7 @@ UISlider* ground_blur_speed;
 float groundBlurSpeed = 2.0f;
 
 #ifdef _WIN32
-int		groundTabletControlSelect = 1;
+int    groundTabletControlSelect = 1;
 int    groundTabletSelect = 1;
 int shaderTabletControlSelect = 0;//Defaulting to off
 #endif

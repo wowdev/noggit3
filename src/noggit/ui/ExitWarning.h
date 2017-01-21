@@ -8,11 +8,11 @@
 class UIExitWarning : public UICloseWindow
 {
 private:
-	static const int winWidth = 320;
-	static const int winHeight = 120;
-	MapView *_MapView;
+  static const int winWidth = 320;
+  static const int winHeight = 120;
+  MapView *_MapView;
 public:
-	UIExitWarning(MapView *mapView);
-	void resize();
-	void exitNow();
+  UIExitWarning(MapView *mapView);
+  void resize();
+  void exitNow();
 };

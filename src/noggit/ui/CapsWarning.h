@@ -7,9 +7,9 @@
 class UICapsWarning : public UIWindow
 {
 private:
-	static const int winWidth = 320;
-	static const int winHeight = 80;
+  static const int winWidth = 320;
+  static const int winHeight = 80;
 public:
-	UICapsWarning();
-	void resize();
+  UICapsWarning();
+  void resize();
 };

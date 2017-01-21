@@ -1,17 +1,17 @@
 /*----------------------------------------------------------------------------
 
-	NAME
-		Utils.h
+  NAME
+    Utils.h
 
-	PURPOSE
-		Defines for the general-purpose functions for the WinTab demos.
+  PURPOSE
+    Defines for the general-purpose functions for the WinTab demos.
 
-	COPYRIGHT
-		Copyright (c) Wacom Company, Ltd. 2014 All Rights Reserved
-		All rights reserved.
+  COPYRIGHT
+    Copyright (c) Wacom Company, Ltd. 2014 All Rights Reserved
+    All rights reserved.
 
-		The text and information contained in this file may be freely used,
-		copied, or distributed without compensation or licensing restrictions.
+    The text and information contained in this file may be freely used,
+    copied, or distributed without compensation or licensing restrictions.
 
 ---------------------------------------------------------------------------- */
 #pragma once
@@ -19,12 +19,12 @@
 
 #ifdef _WIN32
 
-#include	<windows.h>
-#include	<stdio.h>
-#include	<assert.h>
-#include	<stdarg.h>
+#include  <windows.h>
+#include  <stdio.h>
+#include  <assert.h>
+#include  <stdarg.h>
 
-#include	<external/wacom/wintab.h>		// NOTE: get from wactab header package
+#include  <external/wacom/wintab.h>    // NOTE: get from wactab header package
 
 
 //////////////////////////////////////////////////////////////////////////////

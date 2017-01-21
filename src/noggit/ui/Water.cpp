@@ -26,111 +26,111 @@
 void toggleDisplayAllLayers(bool b, int);
 
 UIWater::UIWater(UIMapViewGUI *setGui)
-	: UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f - (float)(video.yres() / 4), (float)winWidth, (float)winHeight)
+  : UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f - (float)(video.yres() / 4), (float)winWidth, (float)winHeight)
   , mainGui(setGui)
   , tile(0, 0)
 {
-	addChild(new UIText(78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter));
+  addChild(new UIText(78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter));
 
 
-	waterOpacity = new UISlider(5.0f, 40.0f, 169.0f, 255.0f, 0.0f);
-	waterOpacity->setValue(1);
-	waterOpacity->setText("Opacity: ");
-	waterOpacity->setFunc(boost::bind(&UIWater::setWaterTrans, this, _1));
-	addChild(waterOpacity);
-	addChild(new UIText(5.0f, 50.0f, "shift + numpad +/-", app.getArial12(), eJustifyLeft));
+  waterOpacity = new UISlider(5.0f, 40.0f, 169.0f, 255.0f, 0.0f);
+  waterOpacity->setValue(1);
+  waterOpacity->setText("Opacity: ");
+  waterOpacity->setFunc(boost::bind(&UIWater::setWaterTrans, this, _1));
+  addChild(waterOpacity);
+  addChild(new UIText(5.0f, 50.0f, "shift + numpad +/-", app.getArial12(), eJustifyLeft));
 
-	addChild(new UIText(60.0f, 74.0f, "Level: ", app.getArial12(), eJustifyLeft));
-	waterLevel = new UIText(95.0f, 74.0f, "0.0", app.getArial12(), eJustifyLeft);
-	addChild(waterLevel);
+  addChild(new UIText(60.0f, 74.0f, "Level: ", app.getArial12(), eJustifyLeft));
+  waterLevel = new UIText(95.0f, 74.0f, "0.0", app.getArial12(), eJustifyLeft);
+  addChild(waterLevel);
 
-	addChild(new UIButton(5.0f, 90.0f, 38.0f, 30.0f,
-		"-100",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-		boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
-		-100)
-		);
+  addChild(new UIButton(5.0f, 90.0f, 38.0f, 30.0f,
+    "-100",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    -100)
+    );
 
-	addChild(new UIButton(45.0f, 90.0f, 23.0f, 30.0f,
-		"-10",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-		boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
-		-10)
-		);
+  addChild(new UIButton(45.0f, 90.0f, 23.0f, 30.0f,
+    "-10",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    -10)
+    );
 
-	addChild(new UIButton(70.0f, 90.0f, 19.0f, 30.0f,
-		"-1",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-		boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
-		-1)
-		);
+  addChild(new UIButton(70.0f, 90.0f, 19.0f, 30.0f,
+    "-1",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    -1)
+    );
 
-	addChild(new UIButton(91.0f, 90.0f, 19.0f, 30.0f,
-		"+1",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-		boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
-		1)
-		);
+  addChild(new UIButton(91.0f, 90.0f, 19.0f, 30.0f,
+    "+1",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    1)
+    );
 
-	addChild(new UIButton(112.0f, 90.0f, 23.0f, 30.0f,
-		"+10",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-		boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
-		10)
-		);
+  addChild(new UIButton(112.0f, 90.0f, 23.0f, 30.0f,
+    "+10",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    10)
+    );
 
-	addChild(new UIButton(137.0f, 90.0f, 38.0f, 30.0f,
-		"+100",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-		boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
-		100)
-		);
-	addChild(new UIText(5.0f, 108.f, "numpad +/- (alt *2, ctrl *5)", app.getArial12(), eJustifyLeft));
+  addChild(new UIButton(137.0f, 90.0f, 38.0f, 30.0f,
+    "+100",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::changeWaterHeight, this, _1, _2),
+    100)
+    );
+  addChild(new UIText(5.0f, 108.f, "numpad +/- (alt *2, ctrl *5)", app.getArial12(), eJustifyLeft));
 
-	waterType = new UIButton(5.0f, 135.0f, 170.0f, 30.0f,
-		"Type: none",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-		boost::bind(&UIWater::openWaterTypeBrowser, this, _1, _2),
-		100);
+  waterType = new UIButton(5.0f, 135.0f, 170.0f, 30.0f,
+    "Type: none",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::openWaterTypeBrowser, this, _1, _2),
+    100);
 
-	addChild(waterType);
+  addChild(waterType);
 
-	waterGenFactor = new UISlider(5.0f, 185.0f, 169.0f, 100.0f, 0.0f);
-	waterGenFactor->setValue(0.5f);
-	waterGenFactor->setText("Opacity Gen Factor: ");
-	addChild(waterGenFactor);
+  waterGenFactor = new UISlider(5.0f, 185.0f, 169.0f, 100.0f, 0.0f);
+  waterGenFactor->setValue(0.5f);
+  waterGenFactor->setText("Opacity Gen Factor: ");
+  addChild(waterGenFactor);
 
-	waterGen = new UIButton(5.0f, 205.0f, 170.0f, 30.0f,
-		"Auto Opacity",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-		boost::bind(&UIWater::autoGen, this, _1, _2),
-		100);
+  waterGen = new UIButton(5.0f, 205.0f, 170.0f, 30.0f,
+    "Auto Opacity",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::autoGen, this, _1, _2),
+    100);
 
-	addChild(waterGen);
+  addChild(waterGen);
 
-	addWater = new UIButton(5.0f, 225.0f, 170.0f, 30.0f,
-		"Fill with water",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-		boost::bind(&UIWater::AddWater, this, _1, _2),
-		100);
-	addChild(addWater);
+  addWater = new UIButton(5.0f, 225.0f, 170.0f, 30.0f,
+    "Fill with water",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::AddWater, this, _1, _2),
+    100);
+  addChild(addWater);
 
-	cropWater = new UIButton(5.0f, 245.0f, 170.0f, 30.0f,
-		"Crop water",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-		"Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-		boost::bind(&UIWater::CropWater, this, _1, _2),
-		100);
-	addChild(cropWater);
+  cropWater = new UIButton(5.0f, 245.0f, 170.0f, 30.0f,
+    "Crop water",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
+    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
+    boost::bind(&UIWater::CropWater, this, _1, _2),
+    100);
+  addChild(cropWater);
 
   displayAllLayers = new UICheckBox(5.0f, 270.0f, "Show all layers", [] (bool b, int)
   {
@@ -174,104 +174,104 @@ UIWater::UIWater(UIMapViewGUI *setGui)
     0)
   );
 
-	updateData();
+  updateData();
 }
 
 void UIWater::updatePos(int tileX, int tileZ)
 {
-	if (tile.x == tileX && tile.z == tileZ) return;
+  if (tile.x == tileX && tile.z == tileZ) return;
 
   tile = tile_index(tileX, tileZ);
 
-	updateData();
+  updateData();
 }
 
 void UIWater::updateData()
 {
   float h = gWorld->HaveSelectWater(tile);
-	if (h)
-	{
-		std::stringstream ms;
-		ms << h;
-		waterLevel->setText(ms.str());
-	}
-	else
-	{
-		std::stringstream ms;
+  if (h)
+  {
+    std::stringstream ms;
+    ms << h;
+    waterLevel->setText(ms.str());
+  }
+  else
+  {
+    std::stringstream ms;
     ms << gWorld->getWaterHeight(tile);
-		waterLevel->setText(ms.str());
-	}
-	waterOpacity->value = (gWorld->getWaterTrans(tile) / 255.0f);
+    waterLevel->setText(ms.str());
+  }
+  waterOpacity->value = (gWorld->getWaterTrans(tile) / 255.0f);
 
-	std::stringstream mt;
-	mt << gWorld->getWaterType(tile) << " - " << LiquidTypeDB::getLiquidName(gWorld->getWaterType(tile));
+  std::stringstream mt;
+  mt << gWorld->getWaterType(tile) << " - " << LiquidTypeDB::getLiquidName(gWorld->getWaterType(tile));
 
-	waterType->setText(mt.str());
+  waterType->setText(mt.str());
 }
 
 void UIWater::resize()
 {
-	// fixed so no resize
+  // fixed so no resize
 }
 
 void UIWater::setWaterTrans(float val)
 {
-	if (std::fmod(val, 0.1f) > 0.1f) return; //reduce performence hit
-	gWorld->setWaterTrans(tile, (unsigned char)val);
+  if (std::fmod(val, 0.1f) > 0.1f) return; //reduce performence hit
+  gWorld->setWaterTrans(tile, (unsigned char)val);
 }
 
 void UIWater::addWaterLayer(UIFrame::Ptr /*ptr*/, int /*someint*/)
 {
-	gWorld->addWaterLayer(tile, 0.0f, (unsigned char)(waterOpacity->value * 255));
+  gWorld->addWaterLayer(tile, 0.0f, (unsigned char)(waterOpacity->value * 255));
 }
 
 void UIWater::deleteWaterLayer(UIFrame::Ptr /*ptr*/, int /*someint*/)
 {
-	gWorld->deleteWaterLayer(tile);
+  gWorld->deleteWaterLayer(tile);
 }
 
 void UIWater::setWaterHeight(float val)
 {
-	if (std::fmod(val, 0.1f) > 0.1f) return; //reduce performence hit
-	gWorld->setWaterHeight(tile, val);
+  if (std::fmod(val, 0.1f) > 0.1f) return; //reduce performence hit
+  gWorld->setWaterHeight(tile, val);
 }
 
 void UIWater::changeWaterHeight(UIFrame::Ptr /*ptr*/, int someint)
 {
-	gWorld->setWaterHeight(tile, ((float)someint));
-	updateData();
+  gWorld->setWaterHeight(tile, ((float)someint));
+  updateData();
 }
 
 void UIWater::openWaterTypeBrowser(UIFrame::Ptr /*ptr*/, int someint)
 {
-	if (this->mainGui->guiWaterTypeSelector->hidden())
-		this->mainGui->guiWaterTypeSelector->show();
-	else
-		this->mainGui->guiWaterTypeSelector->hide();
+  if (this->mainGui->guiWaterTypeSelector->hidden())
+    this->mainGui->guiWaterTypeSelector->show();
+  else
+    this->mainGui->guiWaterTypeSelector->hide();
 }
 
 void UIWater::changeWaterType(int waterint)
 {
-	gWorld->setWaterType(tile, waterint);
-	updateData();
+  gWorld->setWaterType(tile, waterint);
+  updateData();
 }
 
 void UIWater::autoGen(UIFrame::Ptr ptr, int someint)
 {
-	gWorld->autoGenWaterTrans(tile, (int)waterGenFactor->value * 100);
-	updateData();
+  gWorld->autoGenWaterTrans(tile, (int)waterGenFactor->value * 100);
+  updateData();
 }
 
 void UIWater::AddWater(UIFrame::Ptr ptr, int someint)
 {
-	gWorld->AddWaters(tile);
-	updateData();
+  gWorld->AddWaters(tile);
+  updateData();
 }
 
 void UIWater::CropWater(UIFrame::Ptr ptr, int someint)
 {
-	gWorld->CropWaterADT(tile);
-	updateData();
+  gWorld->CropWaterADT(tile);
+  updateData();
 }
 
 void toggleDisplayAllLayers(bool b, int)

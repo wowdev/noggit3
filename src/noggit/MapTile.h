@@ -25,67 +25,67 @@ class MapTile
 {
 
 public:
-	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha);
-	~MapTile();
-	//! \brief Get the maximum height of terrain on this map tile.
-	float getMaxHeight();
+  MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha);
+  ~MapTile();
+  //! \brief Get the maximum height of terrain on this map tile.
+  float getMaxHeight();
 
   void toBigAlpha();
 
-	//! \brief Get chunk for sub offset x,z.
-	MapChunk* getChunk(unsigned int x, unsigned int z);
+  //! \brief Get chunk for sub offset x,z.
+  MapChunk* getChunk(unsigned int x, unsigned int z);
 
-	int modelCount;
+  int modelCount;
   const tile_index index;
-	float xbase, zbase;
+  float xbase, zbase;
 
-	int changed;
+  int changed;
 
-	void draw (Frustum const&);
+  void draw (Frustum const&);
   void intersect (math::ray const&, selection_result*) const;
-	void drawLines (Frustum const&);
-	void drawWater();
-	void drawTextures();
+  void drawLines (Frustum const&);
+  void drawWater();
+  void drawTextures();
   void drawMFBO (opengl::scoped::use_program&);
 
-	bool GetVertex(float x, float z, math::vector_3d *V);
+  bool GetVertex(float x, float z, math::vector_3d *V);
 
-	void saveTile();
-	void CropWater();
-	void ClearShader();
+  void saveTile();
+  void CropWater();
+  void ClearShader();
 
-	bool isTile(int pX, int pZ);
-	void clearAllModels();
-	void addChunksLiquid(TileWater *lq);
+  bool isTile(int pX, int pZ);
+  void clearAllModels();
+  void addChunksLiquid(TileWater *lq);
 
-	bool canWaterSave();
+  bool canWaterSave();
 
-	void getAlpha(size_t id, unsigned char *amap);
+  void getAlpha(size_t id, unsigned char *amap);
 
-	TileWater * Water;
+  TileWater * Water;
 private:
 
-	// MFBO:
+  // MFBO:
   math::vector_3d mMinimumValues[3 * 3];
   math::vector_3d mMaximumValues[3 * 3];
 
-	// MHDR:
-	int mFlags;
-	bool mBigAlpha;
+  // MHDR:
+  int mFlags;
+  bool mBigAlpha;
 
-	// Data to be loaded and later unloaded.
-	std::vector<std::string> mTextureFilenames;
-	std::vector<std::string> mModelFilenames;
-	std::vector<std::string> mWMOFilenames;
+  // Data to be loaded and later unloaded.
+  std::vector<std::string> mTextureFilenames;
+  std::vector<std::string> mModelFilenames;
+  std::vector<std::string> mWMOFilenames;
 
-	std::string mFilename;
+  std::string mFilename;
 
-	MapChunk* mChunks[16][16];
-	std::vector<TileWater*> mLiquids;
-	std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
+  MapChunk* mChunks[16][16];
+  std::vector<TileWater*> mLiquids;
+  std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
 
-	friend class MapChunk;
-	friend class TextureSet;
+  friend class MapChunk;
+  friend class TextureSet;
 };
 
 int indexMapBuf(int x, int y);
@@ -115,26 +115,26 @@ const int stripsize2 = 16 * 18 + 7 * 2 + 8 * 2;
 template <class V>
 void stripify2(V *in, V *out)
 {
-	for (int row = 0; row<8; row++) {
-		V *thisrow = &in[indexMapBuf(0, row * 2)];
-		V *nextrow = &in[indexMapBuf(0, row * 2 + 1)];
-		V *overrow = &in[indexMapBuf(0, (row + 1) * 2)];
+  for (int row = 0; row<8; row++) {
+    V *thisrow = &in[indexMapBuf(0, row * 2)];
+    V *nextrow = &in[indexMapBuf(0, row * 2 + 1)];
+    V *overrow = &in[indexMapBuf(0, (row + 1) * 2)];
 
-		if (row>0) *out++ = thisrow[0];// jump end
-		for (int col = 0; col<8; col++) {
-			*out++ = thisrow[col];
-			*out++ = nextrow[col];
-		}
-		*out++ = thisrow[8];
-		*out++ = overrow[8];
-		*out++ = overrow[8];// jump start
-		*out++ = thisrow[0];// jump end
-		*out++ = thisrow[0];
-		for (int col = 0; col<8; col++) {
-			*out++ = overrow[col];
-			*out++ = nextrow[col];
-		}
-		if (row<8) *out++ = overrow[8];
-		if (row<7) *out++ = overrow[8];// jump start
-	}
+    if (row>0) *out++ = thisrow[0];// jump end
+    for (int col = 0; col<8; col++) {
+      *out++ = thisrow[col];
+      *out++ = nextrow[col];
+    }
+    *out++ = thisrow[8];
+    *out++ = overrow[8];
+    *out++ = overrow[8];// jump start
+    *out++ = thisrow[0];// jump end
+    *out++ = thisrow[0];
+    for (int col = 0; col<8; col++) {
+      *out++ = overrow[col];
+      *out++ = nextrow[col];
+    }
+    if (row<8) *out++ = overrow[8];
+    if (row<7) *out++ = overrow[8];// jump start
+  }
 }

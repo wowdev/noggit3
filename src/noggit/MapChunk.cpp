@@ -525,7 +525,7 @@ float MapChunk::getMinHeight()
     min = std::min (min, vertex.y);
   }
 
-	return min;
+  return min;
 }
 
 void MapChunk::drawLines (Frustum const& frustum)

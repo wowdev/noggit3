@@ -20,50 +20,50 @@ TextureSet::TextureSet()
 
 TextureSet::~TextureSet()
 {
-	for (size_t i = 1; i < nTextures; ++i)
-		delete alphamaps[i - 1];
+  for (size_t i = 1; i < nTextures; ++i)
+    delete alphamaps[i - 1];
 }
 
 void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
 {
-	// texture info
-	nTextures = size / 16U;
+  // texture info
+  nTextures = size / 16U;
 
-	for (size_t i = 0; i<nTextures; ++i) {
-		f->read(&tex[i], 4);
-		f->read(&texFlags[i], 4);
-		f->read(&MCALoffset[i], 4);
-		f->read(&effectID[i], 4);
+  for (size_t i = 0; i<nTextures; ++i) {
+    f->read(&tex[i], 4);
+    f->read(&texFlags[i], 4);
+    f->read(&MCALoffset[i], 4);
+    f->read(&effectID[i], 4);
 
-		if (texFlags[i] & FLAG_ANIMATE)
-		{
-			animated[i] = texFlags[i];
-		}
-		else
-		{
-			animated[i] = 0;
-		}
-		textures[i] = TextureManager::newTexture(maintile->mTextureFilenames[tex[i]]);
-	}
+    if (texFlags[i] & FLAG_ANIMATE)
+    {
+      animated[i] = texFlags[i];
+    }
+    else
+    {
+      animated[i] = 0;
+    }
+    textures[i] = TextureManager::newTexture(maintile->mTextureFilenames[tex[i]]);
+  }
 }
 
 void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool doNotFixAlpha)
 {
-	unsigned int MCALbase = f->getPos();
+  unsigned int MCALbase = f->getPos();
 
-	for (size_t i = 0; i < 3; ++i)
-	{
-		alphamaps[i] = nullptr;
-	}
+  for (size_t i = 0; i < 3; ++i)
+  {
+    alphamaps[i] = nullptr;
+  }
 
-	for (unsigned int layer = 0; layer < nLayers; ++layer)
-	{
-		if (texFlags[layer] & 0x100)
-		{
-			f->seek(MCALbase + MCALoffset[layer]);
-			alphamaps[layer - 1] = new Alphamap(f, texFlags[layer], mBigAlpha, doNotFixAlpha);
-		}
-	}
+  for (unsigned int layer = 0; layer < nLayers; ++layer)
+  {
+    if (texFlags[layer] & 0x100)
+    {
+      f->seek(MCALbase + MCALoffset[layer]);
+      alphamaps[layer - 1] = new Alphamap(f, texFlags[layer], mBigAlpha, doNotFixAlpha);
+    }
+  }
 
   // convert big alphas to the old format to be rendered correctly in noggit
   if (mBigAlpha)
@@ -74,51 +74,51 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool 
 
 int TextureSet::addTexture(OpenGL::Texture* texture)
 {
-	int texLevel = -1;
+  int texLevel = -1;
 
-	if (nTextures < 4U)
-	{
-		texLevel = nTextures;
-		nTextures++;
+  if (nTextures < 4U)
+  {
+    texLevel = nTextures;
+    nTextures++;
 
     texture->addReference();
 
-		textures[texLevel] = texture;
-		animated[texLevel] = 0;
-		texFlags[texLevel] = 0;
-		effectID[texLevel] = 0;
+    textures[texLevel] = texture;
+    animated[texLevel] = 0;
+    texFlags[texLevel] = 0;
+    effectID[texLevel] = 0;
 
-		if (texLevel)
-		{
-			if (alphamaps[texLevel - 1])
-			{
-				LogError << "Alpha Map has invalid texture binding" << std::endl;
-				nTextures--;
-				return -1;
-			}
-			alphamaps[texLevel - 1] = new Alphamap();
-		}
-	}
+    if (texLevel)
+    {
+      if (alphamaps[texLevel - 1])
+      {
+        LogError << "Alpha Map has invalid texture binding" << std::endl;
+        nTextures--;
+        return -1;
+      }
+      alphamaps[texLevel - 1] = new Alphamap();
+    }
+  }
 
-	return texLevel;
+  return texLevel;
 }
 
 void TextureSet::switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
 {
-	int texLevel = -1;
-	for (size_t i = 0; i < nTextures; ++i)
-	{
-		if (textures[i] == oldTexture)
-			texLevel = i;
-		// prevent texture duplication
-		if (textures[i] == newTexture)
-			return;
-	}
+  int texLevel = -1;
+  for (size_t i = 0; i < nTextures; ++i)
+  {
+    if (textures[i] == oldTexture)
+      texLevel = i;
+    // prevent texture duplication
+    if (textures[i] == newTexture)
+      return;
+  }
 
-	if (texLevel != -1)
-	{
-		textures[texLevel] = newTexture;
-	}
+  if (texLevel != -1)
+  {
+    textures[texLevel] = newTexture;
+  }
 }
 
 // swap 2 textures of a chunk with their alpha
@@ -178,10 +178,10 @@ void TextureSet::swapTexture(int id1, int id2)
 
 void TextureSet::eraseTextures()
 {
-	for (size_t i = nTextures-1; nTextures; --i)
-	{
+  for (size_t i = nTextures-1; nTextures; --i)
+  {
     eraseTexture(i);
-	}
+  }
 }
 
 void TextureSet::eraseTexture(size_t id)
@@ -237,94 +237,94 @@ bool TextureSet::canPaintTexture(OpenGL::Texture* texture)
 
 const std::string& TextureSet::filename(size_t id)
 {
-	return textures[id]->filename();
+  return textures[id]->filename();
 }
 
 void TextureSet::bindAlphamap(size_t id, size_t activeTexture)
 {
-	opengl::texture::enable_texture (activeTexture);
+  opengl::texture::enable_texture (activeTexture);
 
-	alphamaps[id]->bind();
+  alphamaps[id]->bind();
 }
 
 void TextureSet::bindTexture(size_t id, size_t activeTexture)
 {
-	opengl::texture::enable_texture (activeTexture);
+  opengl::texture::enable_texture (activeTexture);
 
-	textures[id]->bind();
+  textures[id]->bind();
 }
 
 void TextureSet::start2DAnim(int id)
 {
-	if (id < 0)
-		return;
+  if (id < 0)
+    return;
 
-	if (animated[id])
-	{
-		opengl::texture::set_active_texture (0);
-		gl.matrixMode(GL_TEXTURE);
-		gl.pushMatrix();
+  if (animated[id])
+  {
+    opengl::texture::set_active_texture (0);
+    gl.matrixMode(GL_TEXTURE);
+    gl.pushMatrix();
 
-		// note: this is ad hoc and probably completely wrong
-		const int spd = (animated[id] & 0x08) | ((animated[id] & 0x10) >> 2) | ((animated[id] & 0x20) >> 4) | ((animated[id] & 0x40) >> 6);
-		const int dir = animated[id] & 0x07;
-		const float texanimxtab[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
-		const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
-		const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
+    // note: this is ad hoc and probably completely wrong
+    const int spd = (animated[id] & 0x08) | ((animated[id] & 0x10) >> 2) | ((animated[id] & 0x20) >> 4) | ((animated[id] & 0x40) >> 6);
+    const int dir = animated[id] & 0x07;
+    const float texanimxtab[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+    const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
+    const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
 
-		const float f = (static_cast<int>(gWorld->animtime * (spd / 15.0f)) % 1600) / 1600.0f;
-		gl.translatef(f*fdx, f*fdy, 0);
-	}
+    const float f = (static_cast<int>(gWorld->animtime * (spd / 15.0f)) % 1600) / 1600.0f;
+    gl.translatef(f*fdx, f*fdy, 0);
+  }
 }
 
 void TextureSet::stop2DAnim(int id)
 {
-	if (id < 0)
-		return;
+  if (id < 0)
+    return;
 
-	if (animated[id])
-	{
-		gl.popMatrix();
-		gl.matrixMode(GL_MODELVIEW);
-		opengl::texture::set_active_texture (1);
-	}
+  if (animated[id])
+  {
+    gl.popMatrix();
+    gl.matrixMode(GL_MODELVIEW);
+    opengl::texture::set_active_texture (1);
+  }
 }
 
 //! \todo do they really differ? investigate
 void TextureSet::startAnim(int id)
 {
-	if (id < 0)
-		return;
+  if (id < 0)
+    return;
 
-	if (animated[id])
-	{
-		opengl::texture::set_active_texture (0);
-		gl.matrixMode(GL_TEXTURE);
-		gl.pushMatrix();
+  if (animated[id])
+  {
+    opengl::texture::set_active_texture (0);
+    gl.matrixMode(GL_TEXTURE);
+    gl.pushMatrix();
 
-		// note: this is ad hoc and probably completely wrong
-		const int spd = (animated[id] & 0x08) | ((animated[id] & 0x10) >> 2) | ((animated[id] & 0x20) >> 4) | ((animated[id] & 0x40) >> 6);
-		const int dir = animated[id] & 0x07;
-		const float texanimxtab[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
-		const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
-		const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
-		const int animspd = (const int)(200 * detail_size);
-		float f = ((static_cast<int>(gWorld->animtime*(spd / 15.0f))) % animspd) / static_cast<float>(animspd);
-		gl.translatef(f*fdx, f*fdy, 0);
-	}
+    // note: this is ad hoc and probably completely wrong
+    const int spd = (animated[id] & 0x08) | ((animated[id] & 0x10) >> 2) | ((animated[id] & 0x20) >> 4) | ((animated[id] & 0x40) >> 6);
+    const int dir = animated[id] & 0x07;
+    const float texanimxtab[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+    const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
+    const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
+    const int animspd = (const int)(200 * detail_size);
+    float f = ((static_cast<int>(gWorld->animtime*(spd / 15.0f))) % animspd) / static_cast<float>(animspd);
+    gl.translatef(f*fdx, f*fdy, 0);
+  }
 }
 
 void TextureSet::stopAnim(int id)
 {
-	if (id < 0)
-		return;
+  if (id < 0)
+    return;
 
-	if (animated[id])
-	{
-		gl.popMatrix();
-		gl.matrixMode(GL_MODELVIEW);
-		opengl::texture::set_active_texture (1);
-	}
+  if (animated[id])
+  {
+    gl.popMatrix();
+    gl.matrixMode(GL_MODELVIEW);
+    opengl::texture::set_active_texture (1);
+  }
 }
 
 bool TextureSet::eraseUnusedTextures()
@@ -391,9 +391,9 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 {
   bool changed = false;
 
-	if (Environment::getInstance()->paintMode == true)
-	{
-		float zPos, xPos, dist, radius;
+  if (Environment::getInstance()->paintMode == true)
+  {
+    float zPos, xPos, dist, radius;
 
     // hacky fix to make sure textures are blended between 2 chunks
     if (z < zbase)
@@ -414,62 +414,62 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
       xbase += TEXDETAILSIZE;
     }
 
-		//xbase, zbase mapchunk pos
-		//x, y mouse pos
+    //xbase, zbase mapchunk pos
+    //x, y mouse pos
 
-		int texLevel = -1;
-		radius = brush->getRadius();
-		dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
+    int texLevel = -1;
+    radius = brush->getRadius();
+    dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
 
-		if (dist > radius)
-			return changed;
+    if (dist > radius)
+      return changed;
 
-		//First Lets find out do we have the texture already
-		for (size_t i = 0; i<nTextures; ++i)
-			if (textures[i] == texture)
-				texLevel = i;
+    //First Lets find out do we have the texture already
+    for (size_t i = 0; i<nTextures; ++i)
+      if (textures[i] == texture)
+        texLevel = i;
 
     if (texLevel == -1 && strength == 0)
     {
       return false;
     }
 
-		if ((texLevel == -1) && (nTextures == 4) && !eraseUnusedTextures())
-		{
-			LogDebug << "paintTexture: No free texture slot" << std::endl;
-			return false;
-		}
+    if ((texLevel == -1) && (nTextures == 4) && !eraseUnusedTextures())
+    {
+      LogDebug << "paintTexture: No free texture slot" << std::endl;
+      return false;
+    }
 
-		//Only 1 layer and its that layer
-		if ((texLevel != -1) && (nTextures == 1))
-			return true;
+    //Only 1 layer and its that layer
+    if ((texLevel != -1) && (nTextures == 1))
+      return true;
 
-		if (texLevel == -1)
-		{
-			texLevel = addTexture(texture);
-			if (texLevel == 0)
-				return true;
-			if (texLevel == -1)
-			{
-				LogDebug << "paintTexture: Unable to add texture." << std::endl;
-				return false;
-			}
-		}
+    if (texLevel == -1)
+    {
+      texLevel = addTexture(texture);
+      if (texLevel == 0)
+        return true;
+      if (texLevel == -1)
+      {
+        LogDebug << "paintTexture: Unable to add texture." << std::endl;
+        return false;
+      }
+    }
 
-		zPos = zbase;
+    zPos = zbase;
     bool texVisible[4] = { false, false, false, false };
 
-		for (int j = 0; j < 64; j++)
-		{
+    for (int j = 0; j < 64; j++)
+    {
       xPos = xbase;
-			for (int i = 0; i < 64; ++i)
-			{
+      for (int i = 0; i < 64; ++i)
+      {
         float cx = xPos, cz = zPos;
 
         dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
 
-				if (dist>radius)
-				{
+        if (dist>radius)
+        {
           bool baseVisible = true;
           for (size_t k = nTextures - 1; k > 0; k--)
           {
@@ -487,9 +487,9 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
           }
           texVisible[0] = texVisible[0] || baseVisible;
 
-					xPos += TEXDETAILSIZE;
-					continue;
-				}
+          xPos += TEXDETAILSIZE;
+          continue;
+        }
 
         float tPressure = pressure*brush->getValue(dist);
         float alphas[3] = { 0.0f, 0.0f, 0.0f };
@@ -579,10 +579,10 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
           texVisible[k] = texVisible[k] || (visibility[k] > 0.0f);
         }
 
-				xPos += TEXDETAILSIZE;
-			}
-			zPos += TEXDETAILSIZE;
-		}
+        xPos += TEXDETAILSIZE;
+      }
+      zPos += TEXDETAILSIZE;
+    }
 
     if (!changed)
     {
@@ -601,59 +601,59 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
       return changed;
     }
 
-		for (size_t j = 0; j < nTextures - 1; j++)
-		{
-			if (j > 2)
-			{
-				LogError << "WTF how did you get here??? Get a cookie." << std::endl;
-				continue;
-			}
+    for (size_t j = 0; j < nTextures - 1; j++)
+    {
+      if (j > 2)
+      {
+        LogError << "WTF how did you get here??? Get a cookie." << std::endl;
+        continue;
+      }
 
-			alphamaps[j]->loadTexture();
-		}
-	}
+      alphamaps[j]->loadTexture();
+    }
+  }
 
-	return changed;
+  return changed;
 }
 
 const size_t TextureSet::num()
 {
-	return nTextures;
+  return nTextures;
 }
 
 const unsigned int TextureSet::flag(size_t id)
 {
-	return texFlags[id];
+  return texFlags[id];
 }
 
 const unsigned int TextureSet::effect(size_t id)
 {
-	return effectID[id];
+  return effectID[id];
 }
 
 void TextureSet::setAlpha(size_t id, size_t offset, unsigned char value)
 {
-	alphamaps[id]->setAlpha(offset, value);
+  alphamaps[id]->setAlpha(offset, value);
 }
 
 void TextureSet::setAlpha(size_t id, unsigned char *amap)
 {
-	alphamaps[id]->setAlpha(amap);
+  alphamaps[id]->setAlpha(amap);
 }
 
 const unsigned char TextureSet::getAlpha(size_t id, size_t offset)
 {
-	return alphamaps[id]->getAlpha(offset);
+  return alphamaps[id]->getAlpha(offset);
 }
 
 const unsigned char *TextureSet::getAlpha(size_t id)
 {
-	return alphamaps[id]->getAlpha();
+  return alphamaps[id]->getAlpha();
 }
 
 OpenGL::Texture* TextureSet::texture(size_t id)
 {
-	return textures[id];
+  return textures[id];
 }
 
 

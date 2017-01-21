@@ -43,13 +43,13 @@ UIEventEventHandlerCall(1);
 
 class UIEventSender {
 public:
-	UIEventEventHandlerDefinition();
+  UIEventEventHandlerDefinition();
 protected:
-	EventHandlerType eventHandler;
-	UIEventListener* listener;
+  EventHandlerType eventHandler;
+  UIEventListener* listener;
 public:
-	explicit UIEventSender(UIEventClassConstructorArguments) : eventHandler(_eventHandler), listener(_listener) {
-		assert(eventHandler && listener);
-	}
-	//UIEventSender() : eventHandler(nullptr), listener(nullptr) { }
+  explicit UIEventSender(UIEventClassConstructorArguments) : eventHandler(_eventHandler), listener(_listener) {
+    assert(eventHandler && listener);
+  }
+  //UIEventSender() : eventHandler(nullptr), listener(nullptr) { }
 };

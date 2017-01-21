@@ -7,9 +7,9 @@
 class UIMinimizeButton : public UIButton
 {
 public:
-	typedef UIMinimizeButton* Ptr;
+  typedef UIMinimizeButton* Ptr;
 
-	UIMinimizeButton(float pWidth);
+  UIMinimizeButton(float pWidth);
 
-	UIFrame::Ptr processLeftClick(float mx, float my);
+  UIFrame::Ptr processLeftClick(float mx, float my);
 };

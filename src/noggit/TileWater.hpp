@@ -13,46 +13,46 @@ class sExtendableArray;
 class TileWater
 {
 public:
-	TileWater(MapTile *pTile, float pXbase, float pZbase);
-	~TileWater(void);
+  TileWater(MapTile *pTile, float pXbase, float pZbase);
+  ~TileWater(void);
 
-	ChunkWater* getChunk(int x, int z);
+  ChunkWater* getChunk(int x, int z);
 
-	void readFromFile(MPQFile &theFile, size_t basePos);
-	void saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
+  void readFromFile(MPQFile &theFile, size_t basePos);
+  void saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
 
-	void draw();
+  void draw();
   bool hasData(size_t layer);
-	float HaveWater(int x, int z);
-	void CropMiniChunk(int x, int z, MapChunk* chunkTerrain);
+  float HaveWater(int x, int z);
+  void CropMiniChunk(int x, int z, MapChunk* chunkTerrain);
 
-	void autoGen(int factor);
+  void autoGen(int factor);
 
-	void setHeight(float height, size_t layer);
-	void setHeight(int x, int z, float height, size_t layer);
-	float getHeight(size_t layer);
-	float getHeightChunk(int x, int z, size_t layer);
+  void setHeight(float height, size_t layer);
+  void setHeight(int x, int z, float height, size_t layer);
+  float getHeight(size_t layer);
+  float getHeightChunk(int x, int z, size_t layer);
 
-	void setTrans(unsigned char opacity, size_t layer);
-	unsigned char getOpacity(size_t layer);
+  void setTrans(unsigned char opacity, size_t layer);
+  unsigned char getOpacity(size_t layer);
 
-	void setType(int type, size_t layer);
-	int getType(size_t layer);
+  void setType(int type, size_t layer);
+  int getType(size_t layer);
 
-	void addLayer(size_t layer);
-	void addLayer(int x, int z, size_t layer);
-	void addLayer(float height, unsigned char trans, size_t layer);
-	void addLayer(int x, int z, float height, unsigned char trans, size_t layer);
+  void addLayer(size_t layer);
+  void addLayer(int x, int z, size_t layer);
+  void addLayer(float height, unsigned char trans, size_t layer);
+  void addLayer(int x, int z, float height, unsigned char trans, size_t layer);
 
-	void deleteLayer(size_t layer);
-	void deleteLayer(int x, int z, size_t layer);
+  void deleteLayer(size_t layer);
+  void deleteLayer(int x, int z, size_t layer);
 
 private:
-	void reload();
+  void reload();
 
-	MapTile *tile;
-	ChunkWater *chunks[16][16];
+  MapTile *tile;
+  ChunkWater *chunks[16][16];
 
-	float xbase;
-	float zbase;
+  float xbase;
+  float zbase;
 };

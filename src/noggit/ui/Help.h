@@ -7,5 +7,5 @@
 class UIHelp : public UICloseWindow
 {
 public:
-	UIHelp();
+  UIHelp();
 };
