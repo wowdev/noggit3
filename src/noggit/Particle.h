@@ -71,7 +71,6 @@ class ParticleSystem {
   // unknown parameters omitted for now ...
   Bone *parent;
   int32_t flags;
-  int16_t pType;
 
 public:
   Model *model;
@@ -120,7 +119,6 @@ class RibbonEmitter {
   Animation::M2Value<float> above, below;
 
   Bone *parent;
-  float f1, f2;
 
   math::vector_3d pos;
 

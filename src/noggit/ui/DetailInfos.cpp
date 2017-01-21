@@ -9,9 +9,8 @@
 #include <noggit/ui/MinimizeButton.h>
 #include <noggit/ui/Text.h>
 
-UIDetailInfos::UIDetailInfos(float xPos, float yPos, float w, float h, UIMapViewGUI *setGui)
+UIDetailInfos::UIDetailInfos(float xPos, float yPos, float w, float h)
   : UIWindow(xPos, yPos, w, h)
-  , mainGui(setGui)
   , theInfos(new UIText(8.0f, 7.0f, "", app.getArial14(), eJustifyLeft))
 {
   addChild(new UIMinimizeButton(width()));

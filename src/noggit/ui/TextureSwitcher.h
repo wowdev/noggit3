@@ -18,9 +18,6 @@ public:
 
 private:
   UITexture *_textureFrom;
-  UITexture *_textureTo;
 
   UIButton *_setFromButton;
-  UIButton *_setToButton;
-  float xPos, zPos;
 };

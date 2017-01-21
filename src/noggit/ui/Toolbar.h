@@ -14,7 +14,6 @@ class UIToolbarIcon;
 class UIToolbar : public UIWindow, public UIEventListener
 {
 private:
-  UIMapViewGUI* mainGui;
   void SetIcon(int pIcon, const std::string& pIconFile);
 
 public:
@@ -23,6 +22,6 @@ public:
   // current selected Icon
   int selectedIcon;
 
-  UIToolbar(float x, float y, UIMapViewGUI *setGui);
+  UIToolbar(float x, float y);
   void IconSelect(int i);
 };

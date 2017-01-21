@@ -15,11 +15,10 @@ public:
   typedef UIAppInfo* Ptr;
 
 private:
-  UIMapViewGUI* mainGui;
   UIText::Ptr theInfos;
   std::string mModelToLoad;
 
 public:
-  UIAppInfo(float x, float y, float width, float height, UIMapViewGUI* setGui);
+  UIAppInfo(float x, float y, float width, float height);
   void setText(const std::string& t);
 };

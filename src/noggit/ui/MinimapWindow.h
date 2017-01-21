@@ -13,7 +13,6 @@ class UIMinimapWindow : public UIWindow
 {
 private:
   float borderwidth;
-  float bottomspace;
   float tilesize;
   math::degrees lookAt;
   Menu* mMenuLink;

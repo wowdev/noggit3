@@ -97,8 +97,6 @@ private:
   bool _fullscreen;
   bool _doAntiAliasing;
 
-  int _status;
-
   SDL_Surface* _primary;
 };
 
