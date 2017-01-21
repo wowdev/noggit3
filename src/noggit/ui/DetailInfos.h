@@ -13,10 +13,9 @@ class UIText;
 class UIDetailInfos : public UIWindow
 {
 private:
-  UIMapViewGUI* mainGui;
   UIText* theInfos;
 
 public:
-  UIDetailInfos(float x, float y, float width, float height, UIMapViewGUI *setGui);
+  UIDetailInfos(float x, float y, float width, float height);
   void setText(const std::string& t);
 };

@@ -31,7 +31,6 @@ private:
   float r;
 
   bool mBigAlpha;
-  bool haswater;
   bool hasMCCV;
 
   int holes;

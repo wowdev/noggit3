@@ -68,7 +68,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   addChild(guiCurrentTexture);
 
   // UIToolbar
-  guiToolbar = new UIToolbar(6.0f, 145.0f, this);
+  guiToolbar = new UIToolbar(6.0f, 145.0f);
   addChild(guiToolbar);
 
 
@@ -77,7 +77,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   addChild(guiStatusbar);
 
   // DetailInfoWindow
-  guidetailInfos = new UIDetailInfos(1.0f, video.yres() - 282.0f, 600.0f, 250.0f, this);
+  guidetailInfos = new UIDetailInfos(1.0f, video.yres() - 282.0f, 600.0f, 250.0f);
   guidetailInfos->movable(true);
   guidetailInfos->hide();
   addChild(guidetailInfos);
@@ -89,7 +89,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   addChild(ZoneIDBrowser);
 
   // AppInfosWindow
-  guiappInfo = new UIAppInfo(1.0f, video.yres() - 440.0f, 420.0f, 410.0f, this);
+  guiappInfo = new UIAppInfo(1.0f, video.yres() - 440.0f, 420.0f, 410.0f);
   guiappInfo->movable(true);
   guiappInfo->hide();
   std::stringstream appinfoText;

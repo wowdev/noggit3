@@ -11,9 +11,8 @@
 #include <noggit/ui/Model.h> // UIModel
 #include <noggit/ui/Text.h> // UIText
 
-UIAppInfo::UIAppInfo(float xPos, float yPos, float w, float h, UIMapViewGUI* setGui)
+UIAppInfo::UIAppInfo(float xPos, float yPos, float w, float h)
   : UICloseWindow(xPos, yPos, w, h, "Application Info", true)
-  , mainGui(setGui)
   , theInfos(new UIText(8.0f, 20.0f, app.getArial14(), eJustifyLeft))
   , mModelToLoad("World\\AZEROTH\\ELWYNN\\PASSIVEDOODADS\\Trees\\CanopylessTree01.m2")
 {
