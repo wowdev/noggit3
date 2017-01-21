@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <fstream>
-#include <ctime>
-#include <cstring>
-
 #include <noggit/Log.h>
+
+#include <cstring>
+#include <ctime>
+#include <fstream>
 
 std::ofstream gLogStream;
 

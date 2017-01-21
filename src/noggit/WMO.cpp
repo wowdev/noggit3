@@ -1,16 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/WMO.h>
-
-#include <algorithm>
-#include <map>
-#include <string>
-#include <vector>
-
-#include <sstream>
-#include <iomanip>
-#include <iostream>
-
 #include <noggit/Environment.h>
 #include <noggit/Frustum.h>
 #include <noggit/Liquid.h>
@@ -18,9 +7,18 @@
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/Shaders.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/WMO.h>
 #include <noggit/World.h>
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
+
+#include <algorithm>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 
 void WMOHighlight(math::vector_4d color)
 {

@@ -2,13 +2,13 @@
 
 #pragma once
 
+#include <math/quaternion.hpp>
+#include <noggit/MPQ.h>
+#include <noggit/ModelHeaders.h>
+
 #include <cassert>
 #include <map>
 #include <vector>
-
-#include <noggit/ModelHeaders.h>
-#include <noggit/MPQ.h>
-#include <math/quaternion.hpp>
 
 //! \todo Pass this in somehow and don't define as extern.
 // global time for global sequences

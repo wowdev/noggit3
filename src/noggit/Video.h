@@ -2,14 +2,13 @@
 
 #pragma once
 
-#include <string>
-#include <stack>
-
 #include <math/trig.hpp>
 #include <math/vector_4d.hpp>
-
 #include <opengl/context.hpp>
 #include <opengl/texture.hpp>
+
+#include <stack>
+#include <string>
 
 class Video;
 

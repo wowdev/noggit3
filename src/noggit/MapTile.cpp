@@ -1,6 +1,22 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/Environment.h>
+#include <noggit/Log.h>
+#include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
+#include <noggit/Misc.h>
+#include <noggit/ModelInstance.h> // ModelInstance
+#include <noggit/ModelManager.h> // ModelManager
+#include <noggit/Settings.h>
+#include <noggit/TileWater.hpp>
+#include <noggit/WMOInstance.h> // WMOInstance
+#include <noggit/World.h>
+#include <noggit/alphamap.hpp>
+#include <noggit/map_index.hpp>
+#include <noggit/texture_set.hpp>
+#include <opengl/matrix.hpp>
+#include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -9,23 +25,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <noggit/Environment.h>
-#include <noggit/TileWater.hpp>
-#include <noggit/Log.h>
-#include <noggit/MapChunk.h>
-#include <noggit/Misc.h>
-#include <noggit/ModelInstance.h> // ModelInstance
-#include <noggit/ModelManager.h> // ModelManager
-#include <noggit/WMOInstance.h> // WMOInstance
-#include <noggit/World.h>
-#include <noggit/alphamap.hpp>
-#include <noggit/texture_set.hpp>
-#include <noggit/map_index.hpp>
-#include <noggit/Settings.h>
-#include <opengl/matrix.hpp>
-#include <opengl/scoped.hpp>
-#include <opengl/shader.hpp>
 
 int indexMapBuf(int x, int y)
 {

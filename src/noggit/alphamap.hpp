@@ -2,10 +2,9 @@
 
 #pragma once
 
-#include <opengl/types.hpp>
-
-#include <noggit/MPQ.h>
 #include <noggit/Log.h>
+#include <noggit/MPQ.h>
+#include <opengl/types.hpp>
 
 class Alphamap
 {

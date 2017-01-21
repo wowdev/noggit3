@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include <string>
-#include <map>
-
-#include <noggit/Selection.h>
 #include <math/vector_3d.hpp>
+#include <noggit/Selection.h>
 
 #include <boost/optional.hpp>
+
+#include <map>
+#include <string>
 
 class Environment
 {

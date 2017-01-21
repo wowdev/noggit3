@@ -2,15 +2,15 @@
 
 #pragma once
 
-#include <map>
-#include <string>
-
 #include <noggit/Frustum.h> // Frustum
 #include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h>
 #include <noggit/Sky.h> // Skies, OutdoorLighting, OutdoorLightStats
-#include <noggit/tile_index.hpp>
 #include <noggit/WMO.h> // WMOManager
+#include <noggit/tile_index.hpp>
+
+#include <map>
+#include <string>
 
 namespace OpenGL
 {

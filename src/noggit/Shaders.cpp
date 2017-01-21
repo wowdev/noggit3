@@ -1,9 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#define _CRT_SECURE_NO_WARNINGS
-#include <noggit/Shaders.h>
-#include <string>
 #include <noggit/Log.h>
+#include <noggit/Shaders.h>
+
+#include <string>
 
 #ifdef USEBLSSHADER
 BLSShader::BLSShader(const std::string& pFilename)

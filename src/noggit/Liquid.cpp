@@ -1,19 +1,17 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#define _CRT_SECURE_NO_WARNINGS
-#include <noggit/Liquid.h>
-
-#include <algorithm>
-#include <string>
-#include <boost/filesystem.hpp>
-#include <boost/format.hpp>
-
 #include <noggit/DBC.h>
+#include <noggit/Liquid.h>
 #include <noggit/Log.h>
 #include <noggit/Shaders.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 
+#include <boost/filesystem.hpp>
+#include <boost/format.hpp>
+
+#include <algorithm>
+#include <string>
 
 #ifdef USEBLSFILES
 BLSShader * mWaterShader;

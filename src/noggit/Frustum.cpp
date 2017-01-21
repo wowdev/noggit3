@@ -1,11 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/matrix_4x4.hpp>
 #include <noggit/Frustum.h>
-
 #include <opengl/matrix.hpp>
 #include <opengl/types.hpp>
-
-#include <math/matrix_4x4.hpp>
 
 Frustum::Frustum()
 {

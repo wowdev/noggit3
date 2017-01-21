@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-
-#include <noggit/DBCFile.h>
-#include <noggit/ModelManager.h>
-#include <noggit/MPQ.h>
 #include <math/vector_3d.hpp>
+#include <noggit/DBCFile.h>
+#include <noggit/MPQ.h>
+#include <noggit/ModelManager.h>
+
+#include <string>
+#include <vector>
 
 class Model;
 

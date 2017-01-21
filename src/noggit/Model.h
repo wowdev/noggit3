@@ -2,23 +2,25 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-
-class Model;
-class Bone;
-
+#include <math/matrix_4x4.hpp>
+#include <math/quaternion.hpp>
+#include <math/ray.hpp>
+#include <math/vector_3d.hpp>
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/AsyncObject.h> // AsyncObject
-#include <noggit/Manager.h> // ManagedItem
-#include <math/matrix_4x4.hpp>
-#include <math/ray.hpp>
-#include <noggit/ModelHeaders.h>
 #include <noggit/MPQ.h>
+#include <noggit/Manager.h> // ManagedItem
+#include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
-#include <math/quaternion.hpp>
-#include <math/vector_3d.hpp>
 #include <noggit/Video.h> // GLuint
+
+#include <string>
+#include <vector>
+
+class Bone;
+class Model;
+class ParticleSystem;
+class RibbonEmitter;
 
 math::vector_3d fixCoordSystem(math::vector_3d v);
 

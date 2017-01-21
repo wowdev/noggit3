@@ -1,25 +1,24 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/AsyncLoader.h> // AsyncLoader
+#include <noggit/Log.h>
 #include <noggit/MPQ.h>
-
-#include <algorithm>
-#include <cstdio>
-#include <cstring>
-#include <list>
-#include <sstream>
-#include <stdint.h>
-#include <string>
-#include <vector>
-#include <fstream>
+#include <noggit/Project.h>
+#include <noggit/application.h> // app.loader()
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
-#include <noggit/Log.h>
-#include <noggit/Project.h>
-#include <noggit/AsyncLoader.h> // AsyncLoader
-#include <noggit/application.h> // app.loader()
+#include <algorithm>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <fstream>
+#include <list>
+#include <sstream>
+#include <string>
+#include <vector>
 
 typedef std::pair<std::string, MPQArchive*> ArchiveEntry;
 typedef std::list<ArchiveEntry> ArchivesMap;

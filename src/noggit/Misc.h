@@ -2,15 +2,15 @@
 
 #pragma once
 
-#include <string>
+#include <math/vector_3d.hpp>
+#include <noggit/Log.h>
+
 #include <algorithm>
 #include <cassert>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
-
-#include <noggit/Log.h>
-#include <math/vector_3d.hpp>
+#include <string>
 
 // namespace for static helper functions.
 

@@ -1,11 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/DBCFile.h>
+#include <noggit/Log.h>
+#include <noggit/MPQ.h>
 
 #include <string>
-
-#include <noggit/MPQ.h>
-#include <noggit/Log.h>
 
 DBCFile::DBCFile(const std::string& _filename)
   : filename(_filename)

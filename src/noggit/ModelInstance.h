@@ -2,11 +2,11 @@
 
 #pragma once
 
+#include <math/ray.hpp>
+#include <math/vector_3d.hpp> // math::vector_3d
+#include <noggit/MPQ.h> // MPQFile
 #include <noggit/MapHeaders.h> // ENTRY_MDDF
 #include <noggit/ModelManager.h>
-#include <noggit/MPQ.h> // MPQFile
-#include <math/vector_3d.hpp> // math::vector_3d
-#include <math/ray.hpp>
 #include <noggit/Selection.h>
 #include <noggit/tile_index.hpp>
 

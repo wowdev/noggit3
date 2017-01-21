@@ -1,12 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/WMOInstance.h>
-
 #include <noggit/Log.h>
 #include <noggit/MapHeaders.h>
-#include <noggit/WMO.h> // WMO
-#include <noggit/World.h> // gWorld
 #include <noggit/Misc.h> // checkinside
+#include <noggit/WMO.h> // WMO
+#include <noggit/WMOInstance.h>
+#include <noggit/World.h> // gWorld
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 

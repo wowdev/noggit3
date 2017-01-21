@@ -2,23 +2,23 @@
 
 #pragma once
 
+#include <math/quaternion.hpp>
+#include <math/ray.hpp>
+#include <math/vector_3d.hpp>
+#include <noggit/MPQ.h>
+#include <noggit/Manager.h>
+#include <noggit/ModelInstance.h> // ModelInstance
+#include <noggit/ModelManager.h>
+#include <noggit/Video.h>
+#include <opengl/call_list.hpp>
+
+#include <boost/optional.hpp>
+
+#include <map>
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
-#include <map>
-
-#include <noggit/Manager.h>
-#include <noggit/ModelInstance.h> // ModelInstance
-#include <noggit/ModelManager.h>
-#include <noggit/MPQ.h>
-#include <math/quaternion.hpp>
-#include <math/vector_3d.hpp>
-#include <noggit/Video.h>
-#include <opengl/call_list.hpp>
-#include <math/ray.hpp>
-
-#include <boost/optional.hpp>
 
 class WMO;
 class WMOGroup;

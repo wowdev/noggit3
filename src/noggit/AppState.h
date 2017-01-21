@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include <list>
 #include <SDL.h>
+
+#include <list>
 
 class HotKeyReceiver
 {

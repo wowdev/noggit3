@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-
 #include <noggit/DBC.h>
 #include <noggit/FreeType.h> // fonts.
 
 #include <boost/filesystem/path.hpp>
+
+#include <string>
+#include <vector>
 
 class AppState;
 class AsyncLoader;
