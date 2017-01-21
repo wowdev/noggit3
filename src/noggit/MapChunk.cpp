@@ -112,10 +112,10 @@ void CreateStrips()
 }
 
 MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
-  : textureSet(new TextureSet)
-  , mt(maintile)
-  , mBigAlpha(bigAlpha)
+  : mBigAlpha(bigAlpha)
   , water(false)
+  , mt(maintile)
+  , textureSet(new TextureSet)
 {
   uint32_t fourcc;
   uint32_t size;

@@ -43,8 +43,8 @@ extern std::list<std::string> gListfile;
 
 UIDoodadSpawner::UIDoodadSpawner()
   : UICloseWindow(video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Test", true)
-  , _button(new UIButton(145.0f, winHeight - 24.0f, 132.0f, 28.0f, "Test", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", AddM2Click, 0))
   , _tbox(new UITextBox(30.0f, 30.0f, 400.0f, 40.0f, UIDoodadSpawner__TextBoxEnter))
+  , _button(new UIButton(145.0f, winHeight - 24.0f, 132.0f, 28.0f, "Test", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", AddM2Click, 0))
   , _treeView(UITreeView::Ptr())
   , modelView(new UIModel(500.0f, 30.0f, 400.0f, 400.0f))
 {
