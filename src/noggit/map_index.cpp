@@ -504,7 +504,7 @@ void MapIndex::setBigAlpha()
 }
 
 
-uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename)
+uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
 {
     uint32_t highGUID = 0;
 
@@ -850,6 +850,24 @@ void MapIndex::fixUIDs()
       // restore the original map in World
       std::swap(gWorld->mModelInstances, modelInst);
       std::swap(gWorld->mWMOInstances, wmoInst);
+    }
+  }
+}
+
+void MapIndex::searchMaxUID()
+{
+  for (int z = 0; z < 64; ++z)
+  {
+    for (int x = 0; x < 64; ++x)
+    {
+      if (!(mTiles[z][x].flags & 1))
+      {
+        continue;
+      }
+
+      std::stringstream filename;
+      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+      highestGUID = std::max(highestGUID, getHighestGUIDFromFile(filename.str()));
     }
   }
 }

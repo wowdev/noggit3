@@ -168,9 +168,7 @@ public:
 	bool hasAdt();
 	void setAdt(bool value);
 
-	void save();
-
-  uint32_t getHighestGUIDFromFile(const std::string& pFilename);
+  void save();
 
   void fixUIDs();
 
@@ -183,8 +181,11 @@ public:
   bool hasBigAlpha() const { return mBigAlpha; }
 
   uint32_t newGUID();
+  void searchMaxUID();
 
 private:
+  uint32_t getHighestGUIDFromFile(const std::string& pFilename) const;
+  
   bool hasTile(int tileX, int tileZ) const;
   bool tileLoaded(int tileX, int tileZ) const;
 
