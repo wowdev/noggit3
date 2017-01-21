@@ -2528,34 +2528,3 @@ void World::clearHiddenModelList()
   ModelManager::clearHiddenModelList();
   WMOManager::clearHiddenWMOList();
 }
-
-void World::ensureModelIdUniqueness()
-{
-  std::set<std::size_t> ids;
-
-  std::map<int, WMOInstance> wmos;
-  std::swap(mWMOInstances, wmos);
-
-  for (WMOInstance& instance : wmos | boost::adaptors::map_values)
-  {
-    if (!ids.emplace(instance.mUniqueID).second)
-    {
-      instance.mUniqueID = mapIndex->newGUID();
-      ids.emplace(instance.mUniqueID);
-    }
-    mWMOInstances.emplace(instance.mUniqueID, std::move(instance));
-  }
-
-  std::map<int, ModelInstance> m2s;
-  std::swap(mModelInstances, m2s);
-
-  for (ModelInstance& instance : m2s | boost::adaptors::map_values)
-  {
-    if (!ids.emplace(instance.d1).second)
-    {
-      instance.d1 = mapIndex->newGUID();
-      ids.emplace(instance.d1);
-    }
-    mModelInstances.emplace(instance.d1, std::move(instance));
-  }
-}

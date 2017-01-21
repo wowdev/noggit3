@@ -170,8 +170,6 @@ public:
 
   void save();
 
-  uint32_t getHighestGUIDFromFile(const std::string& pFilename);
-
   MapTile* getTile(const tile_index& tile) const;
   MapTile* getTileAbove(MapTile* tile) const;
   MapTile* getTileLeft(MapTile* tile) const;
@@ -181,8 +179,14 @@ public:
   bool hasBigAlpha() const { return mBigAlpha; }
 
   uint32_t newGUID();
+  void fixUIDs();
+  void searchMaxUID();
+  void saveMaxUID();
+  void loadMaxUID();
 
 private:
+  uint32_t getHighestGUIDFromFile(const std::string& pFilename) const;
+  
   bool hasTile(int tileX, int tileZ) const;
   bool tileLoaded(int tileX, int tileZ) const;
 

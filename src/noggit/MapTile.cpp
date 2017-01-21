@@ -32,7 +32,7 @@ int indexMapBuf(int x, int y)
   return ((y + 1) / 2) * 9 + (y / 2) * 8 + x;
 }
 
-MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
+MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, bool pLoadModels)
   : modelCount(0)
   , index(tile_index(pX, pZ))
   , xbase(pX * TILESIZE)
@@ -120,70 +120,73 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
     }
   }
 
-  // - MMDX ----------------------------------------------
-
-  theFile.seek(Header.mmdx + 0x14);
-  theFile.read(&fourcc, 4);
-  theFile.read(&size, 4);
-
-  assert(fourcc == 'MMDX');
-
+  if (pLoadModels)
   {
-    char* lCurPos = reinterpret_cast<char*>(theFile.getPointer());
-    char* lEnd = lCurPos + size;
+    // - MMDX ----------------------------------------------
 
-    while (lCurPos < lEnd)
+    theFile.seek(Header.mmdx + 0x14);
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
+
+    assert(fourcc == 'MMDX');
+
     {
-      mModelFilenames.push_back(std::string(lCurPos));
-      lCurPos += strlen(lCurPos) + 1;
+      char* lCurPos = reinterpret_cast<char*>(theFile.getPointer());
+      char* lEnd = lCurPos + size;
+
+      while (lCurPos < lEnd)
+      {
+        mModelFilenames.push_back(std::string(lCurPos));
+        lCurPos += strlen(lCurPos) + 1;
+      }
     }
-  }
 
-  // - MWMO ----------------------------------------------
+    // - MWMO ----------------------------------------------
 
-  theFile.seek(Header.mwmo + 0x14);
-  theFile.read(&fourcc, 4);
-  theFile.read(&size, 4);
+    theFile.seek(Header.mwmo + 0x14);
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
 
-  assert(fourcc == 'MWMO');
+    assert(fourcc == 'MWMO');
 
-  {
-    char* lCurPos = reinterpret_cast<char*>(theFile.getPointer());
-    char* lEnd = lCurPos + size;
-
-    while (lCurPos < lEnd)
     {
-      mWMOFilenames.push_back(std::string(lCurPos));
-      lCurPos += strlen(lCurPos) + 1;
+      char* lCurPos = reinterpret_cast<char*>(theFile.getPointer());
+      char* lEnd = lCurPos + size;
+
+      while (lCurPos < lEnd)
+      {
+        mWMOFilenames.push_back(std::string(lCurPos));
+        lCurPos += strlen(lCurPos) + 1;
+      }
     }
-  }
 
-  // - MDDF ----------------------------------------------
+    // - MDDF ----------------------------------------------
 
-  theFile.seek(Header.mddf + 0x14);
-  theFile.read(&fourcc, 4);
-  theFile.read(&size, 4);
+    theFile.seek(Header.mddf + 0x14);
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
 
-  assert(fourcc == 'MDDF');
+    assert(fourcc == 'MDDF');
 
-  ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>(theFile.getPointer());
-  for (unsigned int i = 0; i < size / sizeof(ENTRY_MDDF); ++i)
-  {
-    lModelInstances.push_back(mddf_ptr[i]);
-  }
+    ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>(theFile.getPointer());
+    for (unsigned int i = 0; i < size / sizeof(ENTRY_MDDF); ++i)
+    {
+      lModelInstances.push_back(mddf_ptr[i]);
+    }
 
-  // - MODF ----------------------------------------------
+    // - MODF ----------------------------------------------
 
-  theFile.seek(Header.modf + 0x14);
-  theFile.read(&fourcc, 4);
-  theFile.read(&size, 4);
+    theFile.seek(Header.modf + 0x14);
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
 
-  assert(fourcc == 'MODF');
+    assert(fourcc == 'MODF');
 
-  ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>(theFile.getPointer());
-  for (unsigned int i = 0; i < size / sizeof(ENTRY_MODF); ++i)
-  {
-    lWMOInstances.push_back(modf_ptr[i]);
+    ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>(theFile.getPointer());
+    for (unsigned int i = 0; i < size / sizeof(ENTRY_MODF); ++i)
+    {
+      lWMOInstances.push_back(modf_ptr[i]);
+    }
   }
 
   // - MISC ----------------------------------------------
@@ -269,18 +272,22 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha)
 
   //! \note We no longer pre load textures but the chunks themselves do.
 
-  // - Load WMOs -----------------------------------------
-
-  for (std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it)
+  if (pLoadModels)
   {
-    gWorld->mWMOInstances.emplace(it->uniqueID, WMOInstance(mWMOFilenames[it->nameID], &(*it)));
-  }
 
-  // - Load M2s ------------------------------------------
+    // - Load WMOs -----------------------------------------
 
-  for (std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it)
-  {
-    gWorld->mModelInstances.emplace(it->uniqueID, ModelInstance(mModelFilenames[it->nameID], &(*it)));
+    for (std::vector<ENTRY_MODF>::iterator it = lWMOInstances.begin(); it != lWMOInstances.end(); ++it)
+    {
+      gWorld->mWMOInstances.emplace(it->uniqueID, WMOInstance(mWMOFilenames[it->nameID], &(*it)));
+    }
+
+    // - Load M2s ------------------------------------------
+
+    for (std::vector<ENTRY_MDDF>::iterator it = lModelInstances.begin(); it != lModelInstances.end(); ++it)
+    {
+      gWorld->mModelInstances.emplace(it->uniqueID, ModelInstance(mModelFilenames[it->nameID], &(*it)));
+    }
   }
 
   // - Load chunks ---------------------------------------
@@ -313,6 +320,9 @@ MapTile::~MapTile()
       }
     }
   }
+
+  delete Water;
+  Water = nullptr;
 
   mTextureFilenames.clear();
 
@@ -541,7 +551,7 @@ void MapTile::clearAllModels()
   }
 }
 
-void MapTile::saveTile()
+void MapTile::saveTile(bool saveAllModels)
 {
 
   Log << "Saving ADT \"" << mFilename << "\"." << std::endl;
@@ -558,31 +568,33 @@ void MapTile::saveTile()
     LogDebug << "WOD Save path is set to : " << wodSavePath << std::endl;
   }
 
+  std::map<int, WMOInstance> lObjectInstances;
+  std::map<int, ModelInstance> lModelInstances;
+
   // Collect some information we need later.
 
   // Check which doodads and WMOs are on this ADT.
   math::vector_3d lTileExtents[2];
   lTileExtents[0] = math::vector_3d(xbase, 0.0f, zbase);
   lTileExtents[1] = math::vector_3d(xbase + TILESIZE, 0.0f, zbase + TILESIZE);
-  // unsigned int UID(0);
-  std::map<int, WMOInstance> lObjectInstances;
-  std::map<int, ModelInstance> lModelInstances;
+
 
   for (std::map<int, WMOInstance>::iterator it = gWorld->mWMOInstances.begin(); it != gWorld->mWMOInstances.end(); ++it)
   {
-    if (it->second.isInsideRect(lTileExtents))
+    if (saveAllModels || it->second.isInsideRect(lTileExtents))
     {
       lObjectInstances.emplace(it->second.mUniqueID, it->second);
-    }    
+    }
   }
 
   for (std::map<int, ModelInstance>::iterator it = gWorld->mModelInstances.begin(); it != gWorld->mModelInstances.end(); ++it)
   {
-    if (it->second.isInsideRect(lTileExtents))
+    if (saveAllModels || it->second.isInsideRect(lTileExtents))
     {
       lModelInstances.emplace(it->second.d1, it->second);
-    }    
+    }
   }
+  
 
   filenameOffsetThing nullyThing = { 0, 0 };
 

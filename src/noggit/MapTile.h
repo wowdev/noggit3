@@ -25,10 +25,10 @@ class MapTile
 {
 
 public:
-  MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha);
-  ~MapTile();
-  //! \brief Get the maximum height of terrain on this map tile.
-  float getMaxHeight();
+	MapTile(int x0, int z0, const std::string& pFilename, bool pBigAlpha, bool pLoadModels = true);
+	~MapTile();
+	//! \brief Get the maximum height of terrain on this map tile.
+	float getMaxHeight();
 
   void toBigAlpha();
 
@@ -50,9 +50,9 @@ public:
 
   bool GetVertex(float x, float z, math::vector_3d *V);
 
-  void saveTile();
-  void CropWater();
-  void ClearShader();
+  void saveTile(bool saveAllModels = false);
+	void CropWater();
+	void ClearShader();
 
   bool isTile(int pX, int pZ);
   void clearAllModels();
