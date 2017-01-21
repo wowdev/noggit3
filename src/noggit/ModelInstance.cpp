@@ -45,11 +45,13 @@ ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
 ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
   : model (filename)
 {
-  d1 = d->uniqueID;
-  pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
-  dir = math::vector_3d(d->rot[0], d->rot[1], d->rot[2]);
-  // scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
-  sc = d->scale / 1024.0f;
+	d1 = d->uniqueID;
+	pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
+	dir = math::vector_3d(d->rot[0], d->rot[1], d->rot[2]);
+	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
+	sc = d->scale / 1024.0f;
+
+  recalcExtents();
 }
 
 void ModelInstance::draw (Frustum const& frustum)

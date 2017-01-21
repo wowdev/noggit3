@@ -9,9 +9,12 @@
 #include <noggit/Video.h>
 #include <noggit/World.h>
 #include <noggit/ui/Text.h>
+#include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/application.h>
 #include <noggit/map_index.hpp>
+#include <noggit/uid_storage.hpp>
 #include <opengl/scoped.hpp>
+
 
 #include <sstream>
 #include <string>
@@ -85,7 +88,15 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
 
   if (mMenuLink)
   {
-    mMenuLink->enterMapAt(pos);
+    if (uid_storage::getInstance()->hasMaxUIDStored(gWorld->mMapId))
+    {
+      gWorld->mapIndex->loadMaxUID();
+      mMenuLink->enterMapAt(pos);
+    }
+    else
+    {
+      mMenuLink->uidFixWindow->enterAt(pos);
+    }
   }
   else if (map)
   {
@@ -234,3 +245,4 @@ void UIMinimapWindow::render() const
     }
   }
 }
+

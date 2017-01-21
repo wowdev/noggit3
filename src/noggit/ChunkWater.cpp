@@ -17,7 +17,13 @@ ChunkWater::ChunkWater(float pX, float pY)
 }
 
 ChunkWater::~ChunkWater()
-{}
+{
+  for (int i = 0; i < Header.nLayers; ++i)
+  {
+    delete Liquids[i];
+    Liquids[i] = nullptr;
+  }
+}
 
 void ChunkWater::reloadRendering()
 {

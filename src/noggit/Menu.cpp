@@ -25,6 +25,7 @@
 #include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
 #include <noggit/ui/MinimapWindow.h> // UIMinimapWindow
 #include <noggit/ui/StatusBar.h> // UIStatusBar
+#include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/WMOInstance.h> // WMOInstance (only for loading WMO only maps, we never load..)
 #include <noggit/World.h>
 #include <noggit/Settings.h>
@@ -49,13 +50,14 @@ void showBookmark(UIFrame *, int bookmarkID)
 }
 
 Menu::Menu()
-  : mGUIFrame(nullptr)
-  , mGUIStatusbar(nullptr)
-  , mGUICreditsWindow(nullptr)
-  , mGUIMinimapWindow(nullptr)
-  , mGUImenuBar(nullptr)
-  , mBackgroundModel(boost::none)
-  , mLastBackgroundId(-1)
+	: mGUIFrame(nullptr)
+	, mGUIStatusbar(nullptr)
+	, mGUICreditsWindow(nullptr)
+	, mGUIMinimapWindow(nullptr)
+	, mGUImenuBar(nullptr)
+	, mBackgroundModel(boost::none)
+	, mLastBackgroundId(-1)
+  , uidFixWindow(nullptr)
 {
   gWorld = nullptr;
   theMenu = this;
@@ -70,10 +72,15 @@ Menu::Menu()
   mGUIStatusbar = new UIStatusBar(0.0f, (float)video.yres() - 30.0f, (float)video.xres(), 30.0f);
   mGUIFrame->addChild(mGUIStatusbar);
 
-  createMapList();
-  createBookmarkList();
-  buildMenuBar();
-  randBackground();
+  uidFixWindow = new ui::uid_fix_window(this);
+  uidFixWindow->hide();
+  mGUIFrame->addChild(uidFixWindow);
+
+
+	createMapList();
+	createBookmarkList();
+	buildMenuBar();
+	randBackground();
 }
 
 //! \todo Add TBC and WOTLK.
@@ -199,28 +206,27 @@ void Menu::display(float /*t*/, float /*dt*/)
 
 void Menu::keypressed(SDL_KeyboardEvent* e)
 {
-  if (e->type == SDL_KEYDOWN && e->keysym.sym == SDLK_ESCAPE)
-  {
-    if (gWorld)
-    {
-      mGUIMinimapWindow->hide();
-      mGUICreditsWindow->show();
-      delete gWorld;
-      gWorld = nullptr;
-    }
-    else
-    {
-      app.pop = true;
-    }
-  }
+	if (e->type == SDL_KEYDOWN && e->keysym.sym == SDLK_ESCAPE)
+	{
+		if (gWorld)
+		{
+			mGUIMinimapWindow->hide();
+      uidFixWindow->hide();
+			mGUICreditsWindow->show();
+			delete gWorld;
+			gWorld = nullptr;
+		}
+		else
+		{
+			app.pop = true;
+		}
+	}
 }
 
 UIFrame::Ptr LastClickedMenu = nullptr;
 
 void Menu::mouseclick(SDL_MouseButtonEvent* e)
 {
-
-
   if (e->button != SDL_BUTTON_LEFT)
   {
     return;
@@ -261,16 +267,18 @@ void Menu::loadMap(int mapID)
   delete gWorld;
   gWorld = nullptr;
 
-  for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
-  {
-    if (it->getInt(MapDB::MapID) == mapID)
-    {
-      gWorld = new World(it->getString(MapDB::InternalName));
-      mGUICreditsWindow->hide();
-      mGUIMinimapWindow->show();
-      return;
-    }
-  }
+  uidFixWindow->hide();
+
+	for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
+	{
+		if (it->getInt(MapDB::MapID) == mapID)
+		{
+			gWorld = new World(it->getString(MapDB::InternalName));
+			mGUICreditsWindow->hide();
+			mGUIMinimapWindow->show();
+			return;
+		}
+	}
 
   LogError << "Map with ID " << mapID << " not found. Failed loading." << std::endl;
 }
