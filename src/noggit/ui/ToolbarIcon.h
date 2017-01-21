@@ -2,17 +2,15 @@
 
 #pragma once
 
-#include <string>
-
-#include <noggit/ui/EventClasses.h>
 #include <noggit/ui/Frame.h>
+
+#include <functional>
+#include <string>
 
 namespace OpenGL { class Texture; };
 
-class UIToolbarIcon : public UIFrame, public UIEventSender
+class UIToolbarIcon : public UIFrame
 {
-public:
-  UIEventEventHandlerDefinition(int);
 protected:
   OpenGL::Texture* texture;
   OpenGL::Texture* textureSelected;
@@ -20,10 +18,10 @@ protected:
   std::string _textureFilename;
   std::string _textureSelectedFilename;
 
-  int iconId;
+  std::function<void()> _callback;
 
 public:
-  UIToolbarIcon(float x, float y, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments);
+  UIToolbarIcon(float x, float y, const std::string& tex, const std::string& texd, std::function<void()>);
   ~UIToolbarIcon();
 
   void render() const;

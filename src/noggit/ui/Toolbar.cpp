@@ -45,7 +45,12 @@ UIToolbar::UIToolbar(float xPos, float yPos)
 
 void UIToolbar::SetIcon(int pIcon, const std::string& pIconFile)
 {
-  mToolbarIcons[pIcon] = new UIToolbarIcon(5.0f, (pIcon)* 40.0f + 5.0f, pIconFile, std::string("Interface\\BUTTONS\\CheckButtonGlow.blp"), pIcon, UIEventConstructorArgument(UIToolbarIcon, this, UIToolbar::IconSelect));
+  mToolbarIcons[pIcon] = new UIToolbarIcon ( 5.0f
+                                           , (pIcon)* 40.0f + 5.0f
+                                           , pIconFile
+                                           , "Interface\\BUTTONS\\CheckButtonGlow.blp"
+                                           , [this, pIcon] { IconSelect (pIcon); }
+                                           );
   addChild(mToolbarIcons[pIcon]);
 }
 

@@ -8,14 +8,13 @@
 #include <noggit/Video.h> // gl*
 #include <opengl/scoped.hpp>
 
-UIToolbarIcon::UIToolbarIcon(float xPos, float yPos, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments)
+UIToolbarIcon::UIToolbarIcon(float xPos, float yPos, const std::string& tex, const std::string& texd, std::function<void()> callback)
   : UIFrame(xPos, yPos, 35.0f, 35.0f)
-  , UIEventClassConstructorSuperCall()
   , texture(TextureManager::newTexture(tex))
   , textureSelected(TextureManager::newTexture(texd))
   , _textureFilename(tex)
   , _textureSelectedFilename(texd)
-  , iconId(id)
+  , _callback (std::move (callback))
   , selected(false)
 {
 }
@@ -28,7 +27,7 @@ UIToolbarIcon::~UIToolbarIcon()
 
 UIFrame* UIToolbarIcon::processLeftClick(float /*mx*/, float /*my*/)
 {
-  UIEventEventHandlerCall(iconId);
+  _callback();
 
   return this;
 }

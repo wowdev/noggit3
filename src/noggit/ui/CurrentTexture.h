@@ -4,13 +4,12 @@
 
 #include <string>
 
-#include <noggit/ui/EventClasses.h>
 #include <noggit/ui/Window.h>
 
 class UIMapViewGUI;
 class UITexture;
 
-class UICurrentTexture : public UIWindow, public UIEventListener
+class UICurrentTexture : public UIWindow
 {
 private:
   UIMapViewGUI* mainGui;
