@@ -1532,7 +1532,7 @@ void MapView::tick(float t, float dt)
         ObjPos = boost::get<selected_model_type> (*Selection)->pos - gWorld->camera;
         math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, math::degrees(av));
         math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, math::degrees(ah));
-        ObjPos.x = abs(ObjPos.x);
+        ObjPos.x = std::abs(ObjPos.x);
       }
 
       // moving and scaling objects

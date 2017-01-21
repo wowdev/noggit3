@@ -5,7 +5,6 @@
 #include <string>
 #include <noggit/ui/Frame.h>
 
-using namespace std;
 namespace freetype { class font_data; }
 
 enum eJustify
@@ -22,7 +21,7 @@ public:
 
 protected:
   const freetype::font_data& font;
-  string mText;
+  std::string mText;
   int justify;
   bool background;
   float bgColor[4];

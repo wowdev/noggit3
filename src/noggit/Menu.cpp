@@ -315,7 +315,7 @@ void Menu::buildMenuBar()
 
       for (int j = 2; j <= nMenu; j++)
       {
-        stringstream name;
+        std::stringstream name;
         name << typeToName[i] << " (" << j << ")";
         mGUImenuBar->AddMenu(name.str());
       }
@@ -333,7 +333,7 @@ void Menu::buildMenuBar()
     }
     else
     {
-      stringstream name;
+      std::stringstream name;
       name << typeToName[it->areaType] << " (" << (nMapByType[it->areaType] / nBookmarksPerMenu + 1) << ")";
       mGUImenuBar->GetMenu(name.str())->AddMenuItemButton(it->name, &showMap, it->mapID);
     }
