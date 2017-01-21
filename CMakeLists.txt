@@ -82,8 +82,8 @@ macro(includePlattform SUFFIX)
       #SDL
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/SDL/lib/x86/")
       set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/SDL/include/")
-        #boost
-      SET(IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
+      #boost
+      include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
       set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/libs/")
       set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
 	  endif(WIN32)
@@ -107,8 +107,8 @@ MARK_AS_ADVANCED( SDL_LIBRARY SDL_INCLUDE_DIR )
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( SDL DEFAULT_MSG SDL_LIBRARY SDL_INCLUDE_DIR )
 
 # Add the found include directories to our include list.
-SET(IncludeDirectories ${GLEW_INCLUDE_PATH} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${SDL_INCLUDE_DIR})
-SET(IncludeDirectories ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/include/")
+include_directories (SYSTEM ${GLEW_INCLUDE_PATH} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${SDL_INCLUDE_DIR})
+include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/include/")
 
 OPTION(NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
 
@@ -123,10 +123,10 @@ includePlattform("postfind")
 
 # Find revision ID and hash of the sourcetree
 include( "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cmake" )
-SET(IncludeDirectories ${IncludeDirectories} "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
+include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
 # And do the job.
-INCLUDE_DIRECTORIES( ${IncludeDirectories} "${CMAKE_SOURCE_DIR}/src" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
 ADD_EXECUTABLE( noggit WIN32 MACOSX_BUNDLE ${SourceFiles} ${ResFiles})
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
