@@ -86,6 +86,7 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
 
   if (mMenuLink)
   {
+    gWorld->mapIndex->fixUIDs();
     mMenuLink->enterMapAt(pos);
   }
   else if (map)
