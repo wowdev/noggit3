@@ -50,6 +50,9 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-date-time)
 # we don't care for a few bytes
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-padded)
 
+# msvc++ mangles struct/class into name, thus symbols may be called differently
+# with a bad forward-decl. we want compilation to fail, not linking.
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4099)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH bin)

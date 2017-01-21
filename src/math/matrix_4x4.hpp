@@ -9,9 +9,9 @@
 
 namespace math
 {
-  class vector_3d;
+  struct vector_3d;
 
-  class matrix_4x4
+  struct matrix_4x4
   {
   public:
     static struct uninitialized_t {} uninitialized;

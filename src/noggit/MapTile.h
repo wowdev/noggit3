@@ -18,7 +18,7 @@ class MapChunk;
 class TileWater;
 namespace math
 {
-  class vector_3d;
+  struct vector_3d;
 }
 
 class MapTile

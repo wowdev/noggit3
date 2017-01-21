@@ -14,7 +14,7 @@
 class MPQFile;
 namespace math
 {
-  class vector_4d;
+  struct vector_4d;
 }
 class Brush;
 class Alphamap;
