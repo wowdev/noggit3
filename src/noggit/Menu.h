@@ -17,6 +17,11 @@ class UIStatusBar;
 class UIAbout;
 class UIMinimapWindow;
 class UIMenuBar;
+namespace ui
+{
+  class uid_fix_window;
+}
+
 
 class World;
 class Model;
@@ -57,6 +62,8 @@ public:
 
 	//! \brief Enter the the map on the given location.
 	void enterMapAt(math::vector_3d pos, bool pAutoHeight = true, float av = -30.0f, float ah = -90.0f);
+
+  ui::uid_fix_window* uidFixWindow;
 
 private:
 	UIFrame* mGUIFrame;

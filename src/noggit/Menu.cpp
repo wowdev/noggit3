@@ -25,6 +25,7 @@
 #include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
 #include <noggit/ui/MinimapWindow.h> // UIMinimapWindow
 #include <noggit/ui/StatusBar.h> // UIStatusBar
+#include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/WMOInstance.h> // WMOInstance (only for loading WMO only maps, we never load..)
 #include <noggit/World.h>
 #include <noggit/Settings.h>
@@ -56,6 +57,7 @@ Menu::Menu()
 	, mGUImenuBar(nullptr)
 	, mBackgroundModel(boost::none)
 	, mLastBackgroundId(-1)
+  , uidFixWindow(nullptr)
 {
 	gWorld = nullptr;
 	theMenu = this;
@@ -69,6 +71,11 @@ Menu::Menu()
 	//! \todo Use? Yes - later i will show here the adt cords where you enter and some otehr infos
 	mGUIStatusbar = new UIStatusBar(0.0f, (float)video.yres() - 30.0f, (float)video.xres(), 30.0f);
 	mGUIFrame->addChild(mGUIStatusbar);
+
+  uidFixWindow = new ui::uid_fix_window(this);
+  uidFixWindow->hide();
+  mGUIFrame->addChild(uidFixWindow);
+
 
 	createMapList();
 	createBookmarkList();
@@ -204,6 +211,7 @@ void Menu::keypressed(SDL_KeyboardEvent* e)
 		if (gWorld)
 		{
 			mGUIMinimapWindow->hide();
+      uidFixWindow->hide();
 			mGUICreditsWindow->show();
 			delete gWorld;
 			gWorld = nullptr;
@@ -260,6 +268,8 @@ void Menu::loadMap(int mapID)
 {
 	delete gWorld;
 	gWorld = nullptr;
+
+  uidFixWindow->hide();
 
 	for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
 	{
