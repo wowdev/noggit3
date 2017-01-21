@@ -295,6 +295,7 @@ namespace OpenGL
 		MPQFile f(_filename);
 		if (f.isEof())
 		{
+      LogError << "file not found: '" << _filename << "'" << std::endl;
       throw std::runtime_error ("bad filename");
 		}
 
