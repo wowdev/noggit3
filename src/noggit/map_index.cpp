@@ -8,6 +8,7 @@
 #include <noggit/Misc.h>
 #include <noggit/World.h>
 #include <noggit/MapChunk.h>
+#include <noggit/uid_storage.hpp>
 
 #include <boost/range/adaptor/map.hpp>
 
@@ -405,10 +406,10 @@ bool MapIndex::isTileExternal(const tile_index& tile)
 
 void MapIndex::saveTile(const tile_index& tile)
 {
-	// save goven tile
+	// save given tile
 	if (tileLoaded(tile))
 	{
-    gWorld->ensureModelIdUniqueness();
+    saveMaxUID();
 		mTiles[tile.z][tile.x].tile->saveTile();
 	}
 }
@@ -418,9 +419,8 @@ void MapIndex::saveChanged()
 	if (changed)
 		save();
 
-  gWorld->ensureModelIdUniqueness();
+  saveMaxUID();
 
-	// Now save all marked as 1 and 2 because UIDs now fits.
   for (MapTile* tile : loaded_tiles())
   {
     if (tile->changed)
@@ -852,6 +852,8 @@ void MapIndex::fixUIDs()
       std::swap(gWorld->mWMOInstances, wmoInst);
     }
   }
+  
+  saveMaxUID();
 }
 
 void MapIndex::searchMaxUID()
@@ -870,4 +872,11 @@ void MapIndex::searchMaxUID()
       highestGUID = std::max(highestGUID, getHighestGUIDFromFile(filename.str()));
     }
   }
+  saveMaxUID();
+}
+
+void MapIndex::saveMaxUID()
+{
+  // save the max UID on the disc
+  uid_storage::getInstance()->saveMaxUID(gWorld->mMapId, highestGUID);
 }

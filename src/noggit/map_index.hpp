@@ -182,6 +182,7 @@ public:
 
   uint32_t newGUID();
   void searchMaxUID();
+  void saveMaxUID();
 
 private:
   uint32_t getHighestGUIDFromFile(const std::string& pFilename) const;
