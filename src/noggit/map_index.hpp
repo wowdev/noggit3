@@ -172,6 +172,8 @@ public:
 
   uint32_t getHighestGUIDFromFile(const std::string& pFilename);
 
+  void fixUIDs();
+
 	MapTile* getTile(const tile_index& tile) const;
   MapTile* getTileAbove(MapTile* tile) const;
   MapTile* getTileLeft(MapTile* tile) const;

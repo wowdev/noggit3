@@ -11,6 +11,8 @@
 
 #include <boost/range/adaptor/map.hpp>
 
+#include <forward_list>
+
 MapIndex::MapIndex(const std::string &pBasename)
 	: mHasAGlobalWMO(false)
 	, mBigAlpha(false)
@@ -87,8 +89,6 @@ MapIndex::MapIndex(const std::string &pBasename)
 				mTiles[j][i].flags |= 1;
 				changed = true;
 			}
-
-      highestGUID = std::max(highestGUID, getHighestGUIDFromFile(filename.str()));
 		}
 	}
 
@@ -575,4 +575,281 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename)
 uint32_t MapIndex::newGUID()
 {
   return ++highestGUID;
+}
+
+
+inline bool floatEqual(float& a, float& b)
+{
+  return std::abs(a - b) < 0.0001f;
+}
+
+void MapIndex::fixUIDs()
+{
+  // pre-cond: mTiles[z][x].flags are set
+
+  std::forward_list<ModelInstance> models;
+  std::forward_list<WMOInstance> wmos;
+  std::map<std::size_t, std::map<std::size_t, std::forward_list<ModelInstance*>>> modelsOnTile;
+  std::map<std::size_t, std::map<std::size_t, std::forward_list<WMOInstance*>>> wmosOnTile;
+  
+  for (int z = 0; z < 64; ++z)
+  {
+    for (int x = 0; x < 64; ++x)
+    {
+      if (!(mTiles[z][x].flags & 1))
+      {
+        continue;
+      }
+
+      std::stringstream filename;
+      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+      MPQFile file(filename.str());
+
+      if (file.isEof())
+      {
+        continue;
+      }
+
+      std::forward_list<ENTRY_MDDF> modelEntries;
+      std::forward_list<ENTRY_MODF> wmoEntries;
+      std::vector<std::string> modelFilenames;
+      std::vector<std::string> wmoFilenames;
+
+      uint32_t fourcc;
+      uint32_t size;
+
+      MHDR Header;
+
+      // - MVER ----------------------------------------------
+      uint32_t version;
+      file.read(&fourcc, 4);
+      file.seekRelative(4);
+      file.read(&version, 4);
+      assert(fourcc == 'MVER' && version == 18);
+
+      // - MHDR ----------------------------------------------
+      file.read(&fourcc, 4);
+      file.seekRelative(4);
+      assert(fourcc == 'MHDR');
+      file.read(&Header, sizeof(MHDR));
+
+      // - MDDF ----------------------------------------------
+      file.seek(Header.mddf + 0x14);
+      file.read(&fourcc, 4);
+      file.read(&size, 4);
+      assert(fourcc == 'MDDF');
+
+      ENTRY_MDDF* mddf_ptr = reinterpret_cast<ENTRY_MDDF*>(file.getPointer());
+
+      for (unsigned int i = 0; i < size / sizeof(ENTRY_MDDF); ++i)
+      {
+        modelEntries.push_front(mddf_ptr[i]);        
+      }
+
+      // - MODF ----------------------------------------------
+      file.seek(Header.modf + 0x14);
+      file.read(&fourcc, 4);
+      file.read(&size, 4);
+      assert(fourcc == 'MODF');
+
+      ENTRY_MODF* modf_ptr = reinterpret_cast<ENTRY_MODF*>(file.getPointer());
+
+      for (unsigned int i = 0; i < size / sizeof(ENTRY_MODF); ++i)
+      {
+        wmoEntries.push_front(modf_ptr[i]);
+      }
+
+      // - MMDX ----------------------------------------------
+      file.seek(Header.mmdx + 0x14);
+      file.read(&fourcc, 4);
+      file.read(&size, 4);
+      assert(fourcc == 'MMDX');
+
+      {
+        char* lCurPos = reinterpret_cast<char*>(file.getPointer());
+        char* lEnd = lCurPos + size;
+
+        while (lCurPos < lEnd)
+        {
+          modelFilenames.push_back(std::string(lCurPos));
+          lCurPos += strlen(lCurPos) + 1;
+        }
+      }
+
+      // - MWMO ----------------------------------------------
+      file.seek(Header.mwmo + 0x14);
+      file.read(&fourcc, 4);
+      file.read(&size, 4);
+      assert(fourcc == 'MWMO');
+
+      {
+        char* lCurPos = reinterpret_cast<char*>(file.getPointer());
+        char* lEnd = lCurPos + size;
+
+        while (lCurPos < lEnd)
+        {
+          wmoFilenames.push_back(std::string(lCurPos));
+          lCurPos += strlen(lCurPos) + 1;
+        }
+      }
+
+      file.close();
+
+      for (ENTRY_MDDF& entry : modelEntries)
+      {
+        math::vector_3d pos(entry.pos[0], entry.pos[1], entry.pos[2]);
+        tile_index tile(pos);
+
+        bool add = true;
+        // check for duplicates
+        for (ModelInstance* instance : modelsOnTile[tile.z][tile.x])
+        {
+          if ( floatEqual(entry.pos[0], instance->pos.x)
+            && floatEqual(entry.pos[1], instance->pos.y)
+            && floatEqual(entry.pos[2], instance->pos.z)
+            && floatEqual(entry.rot[0], instance->dir.x)
+            && floatEqual(entry.rot[1], instance->dir.y)
+            && floatEqual(entry.rot[2], instance->dir.z)
+            && entry.scale == instance->sc
+            && modelFilenames[entry.nameID] == instance->model->_filename
+            )
+          {
+            add = false;
+            break;
+          }
+        }
+
+        if (add)
+        {
+          models.emplace_front(modelFilenames[entry.nameID], &entry);
+          modelsOnTile[tile.z][tile.x].emplace_front(&models.front());
+        }
+      }
+      for (ENTRY_MODF& entry : wmoEntries)
+      {
+        math::vector_3d pos(entry.pos[0], entry.pos[1], entry.pos[2]);
+        tile_index tile(pos);
+
+        bool add = true;
+        // check for duplicates
+        for (WMOInstance* instance: wmosOnTile[tile.z][tile.x])
+        {
+          if ( floatEqual(entry.pos[0], instance->pos.x)
+            && floatEqual(entry.pos[1], instance->pos.y)
+            && floatEqual(entry.pos[2], instance->pos.z)
+            && floatEqual(entry.rot[0], instance->dir.x)
+            && floatEqual(entry.rot[1], instance->dir.y)
+            && floatEqual(entry.rot[2], instance->dir.z)
+            && wmoFilenames[entry.nameID] == instance->wmo->_filename
+            )
+          {
+            add = false;
+            break;
+          }
+        }
+
+        if (add)
+        {
+          wmos.emplace_front(wmoFilenames[entry.nameID], &entry);
+          wmosOnTile[tile.z][tile.x].emplace_front(&wmos.front());
+        }
+      }
+    }
+  }
+
+  modelsOnTile.clear();
+  wmosOnTile.clear();
+
+  // set all uids
+  // for each tile save the m2/wmo present inside
+  uint32_t uid{ 0 };
+  std::map<std::size_t, std::map<std::size_t, std::forward_list<ModelInstance*>>> modelPerTile;
+  std::map<std::size_t, std::map<std::size_t, std::forward_list<WMOInstance*>>> wmoPerTile;
+
+  for (ModelInstance& instance : models)
+  {
+    instance.d1 = uid++;
+    
+    // to avoid going outside of bound
+    std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
+    std::size_t sz = std::max((std::size_t)(instance.extents[0].z / TILESIZE), (std::size_t)0);
+    std::size_t ex = std::min((std::size_t)(instance.extents[1].x / TILESIZE), (std::size_t)63);
+    std::size_t ez = std::min((std::size_t)(instance.extents[1].z / TILESIZE), (std::size_t)63);
+    
+
+    for (std::size_t z = sz; z <= ez; ++z)
+    {
+      for (std::size_t x = sx; x <= ex; ++x)
+      {
+        modelPerTile[z][x].emplace_front(&instance);
+      }
+    }
+  }
+
+  for (WMOInstance& instance : wmos)
+  {
+    instance.mUniqueID = uid++;
+
+    // to avoid going outside of bound
+    std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
+    std::size_t sz = std::max((std::size_t)(instance.extents[0].z / TILESIZE), (std::size_t)0);
+    std::size_t ex = std::min((std::size_t)(instance.extents[1].x / TILESIZE), (std::size_t)63);
+    std::size_t ez = std::min((std::size_t)(instance.extents[1].z / TILESIZE), (std::size_t)63);
+
+    for (std::size_t z = sz; z <= ez; ++z)
+    {
+      for (std::size_t x = sx; x <= ex; ++x)
+      {
+        wmoPerTile[z][x].emplace_front(&instance);
+      }
+    }
+  }
+
+  // save the current highest guid
+  highestGUID = uid - 1;
+
+  // load each tile without the models and 
+  // save them with the models from modelPerTile / wmoPerTile
+  for (int z = 0; z < 64; ++z)
+  {
+    for (int x = 0; x < 64; ++x)
+    {
+      if (!mTiles[z][x].flags & 1)
+      {
+        continue;
+      }
+
+      // load even the tiles without models in case there are old ones 
+      // that shouldn't be there to avoid creating new duplicates
+
+      std::stringstream filename;
+      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+
+      // load the tile without the models
+      MapTile tile(x, z, filename.str(), mBigAlpha, false);
+
+      std::map<int, ModelInstance> modelInst;
+      std::map<int, WMOInstance> wmoInst;
+
+      for (ModelInstance* instance : modelPerTile[z][x])
+      {
+        modelInst.emplace(instance->d1, *instance);
+      }
+      modelPerTile[z][x].clear();
+
+      for (WMOInstance* instance : wmoPerTile[z][x])
+      {
+        wmoInst.emplace(instance->mUniqueID, *instance);
+      }
+      wmoPerTile[z][x].clear();
+
+      // save using the models selected beforehand
+      std::swap(gWorld->mModelInstances, modelInst);
+      std::swap(gWorld->mWMOInstances, wmoInst);
+      tile.saveTile(true);
+      // restore the original map in World
+      std::swap(gWorld->mModelInstances, modelInst);
+      std::swap(gWorld->mWMOInstances, wmoInst);
+    }
+  }
 }
