@@ -13,12 +13,12 @@ class UITexture;
 class UICurrentTexture : public UIWindow, public UIEventListener
 {
 private:
-	UIMapViewGUI* mainGui;
+  UIMapViewGUI* mainGui;
 
 public:
 
-	// current active texture
-	UITexture* current_texture;
-	UICurrentTexture(float x, float y, UIMapViewGUI *setGui);
-	void IconSelect(int i);
+  // current active texture
+  UITexture* current_texture;
+  UICurrentTexture(float x, float y, UIMapViewGUI *setGui);
+  void IconSelect(int i);
 };

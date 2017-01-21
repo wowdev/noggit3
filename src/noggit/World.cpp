@@ -64,7 +64,7 @@ namespace
     float dx2 = size*cos(orientation + math::constants::pi / 2) - size*sin(orientation + math::constants::pi / 2);
     float dz1 = size*sin(orientation) + size*cos(orientation);
     float dz2 = size*sin(orientation + math::constants::pi / 2) + size*cos(orientation + math::constants::pi / 2);
-    
+
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
 
     gl.begin(GL_QUADS);
@@ -2535,7 +2535,7 @@ void World::ensureModelIdUniqueness()
 
   std::map<int, WMOInstance> wmos;
   std::swap(mWMOInstances, wmos);
-  
+
   for (WMOInstance& instance : wmos | boost::adaptors::map_values)
   {
     if (!ids.emplace(instance.mUniqueID).second)

@@ -39,9 +39,9 @@ using selection_type = boost::variant < selected_model_type
 //! \note Keep in same order as variant!
 enum eSelectionEntryTypes
 {
-	eEntry_Model,
-	eEntry_WMO,
-	eEntry_MapChunk
+  eEntry_Model,
+  eEntry_WMO,
+  eEntry_MapChunk
 };
 
 using selection_entry = std::pair<float, selection_type>;

@@ -12,117 +12,117 @@
 #include <boost/range/adaptor/map.hpp>
 
 MapIndex::MapIndex(const std::string &pBasename)
-	: mHasAGlobalWMO(false)
-	, mBigAlpha(false)
-	, noadt(false)
-	, changed(false)
-	, cx(-1)
-	, cz(-1)
-	, basename(pBasename)
+  : mHasAGlobalWMO(false)
+  , mBigAlpha(false)
+  , noadt(false)
+  , changed(false)
+  , cx(-1)
+  , cz(-1)
+  , basename(pBasename)
   , highestGUID(0)
 {
 
-	std::stringstream filename;
-	filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
+  std::stringstream filename;
+  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
 
-	MPQFile theFile(filename.str());
+  MPQFile theFile(filename.str());
 
-	uint32_t fourcc;
-	uint32_t size;
+  uint32_t fourcc;
+  uint32_t size;
 
-	// - MVER ----------------------------------------------
+  // - MVER ----------------------------------------------
 
-	uint32_t version;
+  uint32_t version;
 
-	theFile.read(&fourcc, 4);
-	theFile.read(&size, 4);
-	theFile.read(&version, 4);
+  theFile.read(&fourcc, 4);
+  theFile.read(&size, 4);
+  theFile.read(&version, 4);
 
-	//! \todo find the correct version of WDT files.
-	assert(fourcc == 'MVER' && version == 18);
+  //! \todo find the correct version of WDT files.
+  assert(fourcc == 'MVER' && version == 18);
 
-	// - MHDR ----------------------------------------------
+  // - MHDR ----------------------------------------------
 
-	theFile.read(&fourcc, 4);
-	theFile.read(&size, 4);
+  theFile.read(&fourcc, 4);
+  theFile.read(&size, 4);
 
-	assert(fourcc == 'MPHD');
+  assert(fourcc == 'MPHD');
 
-	theFile.read(&mphd, sizeof(MPHD));
+  theFile.read(&mphd, sizeof(MPHD));
 
-	mHasAGlobalWMO = mphd.flags & 1;
-	mBigAlpha = (mphd.flags & 4) != 0;
+  mHasAGlobalWMO = mphd.flags & 1;
+  mBigAlpha = (mphd.flags & 4) != 0;
 
-	if (!(mphd.flags & FLAG_SHADING))
-	{
-		mphd.flags |= FLAG_SHADING;
-		changed = true;
-	}
+  if (!(mphd.flags & FLAG_SHADING))
+  {
+    mphd.flags |= FLAG_SHADING;
+    changed = true;
+  }
 
-	// - MAIN ----------------------------------------------
+  // - MAIN ----------------------------------------------
 
-	theFile.read(&fourcc, 4);
-	theFile.seekRelative(4);
+  theFile.read(&fourcc, 4);
+  theFile.seekRelative(4);
 
-	assert(fourcc == 'MAIN');
+  assert(fourcc == 'MAIN');
 
-	/// this is the theory. Sadly, we are also compiling on 64 bit machines with size_t being 8 byte, not 4. Therefore, we can't do the same thing, Blizzard does in its 32bit executable.
-	//theFile.read( &(mTiles[0][0]), sizeof( 8 * 64 * 64 ) );
+  /// this is the theory. Sadly, we are also compiling on 64 bit machines with size_t being 8 byte, not 4. Therefore, we can't do the same thing, Blizzard does in its 32bit executable.
+  //theFile.read( &(mTiles[0][0]), sizeof( 8 * 64 * 64 ) );
 
-	for (int j = 0; j < 64; ++j)
-	{
-		for (int i = 0; i < 64; ++i)
-		{
-			theFile.read(&mTiles[j][i].flags, 4);
-			theFile.seekRelative(4);
+  for (int j = 0; j < 64; ++j)
+  {
+    for (int i = 0; i < 64; ++i)
+    {
+      theFile.read(&mTiles[j][i].flags, 4);
+      theFile.seekRelative(4);
 
-			std::stringstream filename;
-			filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
+      std::stringstream filename;
+      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
 
-			mTiles[j][i].tile = nullptr;
-			mTiles[j][i].onDisc = MPQFile::existsOnDisk(filename.str());
+      mTiles[j][i].tile = nullptr;
+      mTiles[j][i].onDisc = MPQFile::existsOnDisk(filename.str());
 
-			if (mTiles[j][i].onDisc && !(mTiles[j][i].flags & 1))
-			{
-				mTiles[j][i].flags |= 1;
-				changed = true;
-			}
+      if (mTiles[j][i].onDisc && !(mTiles[j][i].flags & 1))
+      {
+        mTiles[j][i].flags |= 1;
+        changed = true;
+      }
 
       highestGUID = std::max(highestGUID, getHighestGUIDFromFile(filename.str()));
-		}
-	}
+    }
+  }
 
-	if (!theFile.isEof() && mHasAGlobalWMO)
-	{
-		//! \note We actually don't load WMO only worlds, so we just stop reading here, k?
-		//! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
-		//! \nofuckingbug  on eof read returns just without doing sth to the var and some wdts have a MWMO without having a MODF so only checking for eof above is not enough
+  if (!theFile.isEof() && mHasAGlobalWMO)
+  {
+    //! \note We actually don't load WMO only worlds, so we just stop reading here, k?
+    //! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
+    //! \nofuckingbug  on eof read returns just without doing sth to the var and some wdts have a MWMO without having a MODF so only checking for eof above is not enough
 
-		mHasAGlobalWMO = false;
+    mHasAGlobalWMO = false;
 
-		// - MWMO ----------------------------------------------
+    // - MWMO ----------------------------------------------
 
-		theFile.read(&fourcc, 4);
-		theFile.read(&size, 4);
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
 
-		assert(fourcc == 'MWMO');
+    assert(fourcc == 'MWMO');
 
-		globalWMOName = std::string(theFile.getPointer(), size);
-		theFile.seekRelative(size);
+    globalWMOName = std::string(theFile.getPointer(), size);
+    theFile.seekRelative(size);
 
-		// - MODF ----------------------------------------------
+    // - MODF ----------------------------------------------
 
-		theFile.read(&fourcc, 4);
-		theFile.read(&size, 4);
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
 
-		assert(fourcc == 'MODF');
+    assert(fourcc == 'MODF');
 
-		theFile.read(&wmoEntry, sizeof(ENTRY_MODF));
-	}
+    theFile.read(&wmoEntry, sizeof(ENTRY_MODF));
+  }
 
-	// -----------------------------------------------------
+  // -----------------------------------------------------
 
-	theFile.close();
+  theFile.close();
 }
 
 MapIndex::~MapIndex()
@@ -136,111 +136,111 @@ MapIndex::~MapIndex()
 
 void MapIndex::save()
 {
-	std::stringstream filename;
-	filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
+  std::stringstream filename;
+  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
 
-	//Log << "Saving WDT \"" << filename << "\"." << std::endl;
+  //Log << "Saving WDT \"" << filename << "\"." << std::endl;
 
-	sExtendableArray wdtFile = sExtendableArray();
-	int curPos = 0;
+  sExtendableArray wdtFile = sExtendableArray();
+  int curPos = 0;
 
-	// MVER
-	//  {
-	wdtFile.Extend(8 + 0x4);
-	SetChunkHeader(wdtFile, curPos, 'MVER', 4);
+  // MVER
+  //  {
+  wdtFile.Extend(8 + 0x4);
+  SetChunkHeader(wdtFile, curPos, 'MVER', 4);
 
-	// MVER data
-	*(wdtFile.GetPointer<int>(8)) = 18;
+  // MVER data
+  *(wdtFile.GetPointer<int>(8)) = 18;
 
-	curPos += 8 + 0x4;
-	//  }
+  curPos += 8 + 0x4;
+  //  }
 
-	// MPHD
-	//  {
-	wdtFile.Extend(8);
-	SetChunkHeader(wdtFile, curPos, 'MPHD', sizeof(MPHD));
-	curPos += 8;
+  // MPHD
+  //  {
+  wdtFile.Extend(8);
+  SetChunkHeader(wdtFile, curPos, 'MPHD', sizeof(MPHD));
+  curPos += 8;
 
-	wdtFile.Insert(curPos, sizeof(MPHD), (char*)&mphd);
-	curPos += sizeof(MPHD);
-	//  }
+  wdtFile.Insert(curPos, sizeof(MPHD), (char*)&mphd);
+  curPos += sizeof(MPHD);
+  //  }
 
-	// MAIN
-	//  {
-	wdtFile.Extend(8);
-	SetChunkHeader(wdtFile, curPos, 'MAIN', 64 * 64 * 8);
-	curPos += 8;
+  // MAIN
+  //  {
+  wdtFile.Extend(8);
+  SetChunkHeader(wdtFile, curPos, 'MAIN', 64 * 64 * 8);
+  curPos += 8;
 
-	for (int j = 0; j < 64; ++j)
-	{
-		for (int i = 0; i < 64; ++i)
-		{
-			wdtFile.Insert(curPos, 4, (char*)&mTiles[j][i].flags);
-			wdtFile.Extend(4);
-			curPos += 8;
-		}
-	}
-	//  }
+  for (int j = 0; j < 64; ++j)
+  {
+    for (int i = 0; i < 64; ++i)
+    {
+      wdtFile.Insert(curPos, 4, (char*)&mTiles[j][i].flags);
+      wdtFile.Extend(4);
+      curPos += 8;
+    }
+  }
+  //  }
 
-	if (mHasAGlobalWMO)
-	{
-		// MWMO
-		//  {
-		wdtFile.Extend(8);
-		SetChunkHeader(wdtFile, curPos, 'MWMO', globalWMOName.size());
-		curPos += 8;
+  if (mHasAGlobalWMO)
+  {
+    // MWMO
+    //  {
+    wdtFile.Extend(8);
+    SetChunkHeader(wdtFile, curPos, 'MWMO', globalWMOName.size());
+    curPos += 8;
 
-		wdtFile.Insert(curPos, globalWMOName.size(), globalWMOName.data());
-		curPos += globalWMOName.size();
-		//  }
+    wdtFile.Insert(curPos, globalWMOName.size(), globalWMOName.data());
+    curPos += globalWMOName.size();
+    //  }
 
-		// MODF
-		//  {
-		wdtFile.Extend(8);
-		SetChunkHeader(wdtFile, curPos, 'MODF', sizeof(ENTRY_MODF));
-		curPos += 8;
+    // MODF
+    //  {
+    wdtFile.Extend(8);
+    SetChunkHeader(wdtFile, curPos, 'MODF', sizeof(ENTRY_MODF));
+    curPos += 8;
 
-		wdtFile.Insert(curPos, sizeof(ENTRY_MODF), (char*)&wmoEntry);
-		curPos += sizeof(ENTRY_MODF);
-		//  }
-	}
+    wdtFile.Insert(curPos, sizeof(ENTRY_MODF), (char*)&wmoEntry);
+    curPos += sizeof(ENTRY_MODF);
+    //  }
+  }
 
-	MPQFile f(filename.str());
-	f.setBuffer(wdtFile.GetPointer<char>(), wdtFile.mSize);
-	f.SaveFile();
-	f.close();
+  MPQFile f(filename.str());
+  f.setBuffer(wdtFile.GetPointer<char>(), wdtFile.mSize);
+  f.SaveFile();
+  f.close();
 
-	changed = false;
+  changed = false;
 }
 
 void MapIndex::enterTile(const tile_index& tile)
 {
-	if (!hasTile(tile))
-	{
-		noadt = true;
-		return;
-	}
+  if (!hasTile(tile))
+  {
+    noadt = true;
+    return;
+  }
 
-	noadt = false;
-	cx = tile.x;
-	cz = tile.z;
+  noadt = false;
+  cx = tile.x;
+  cz = tile.z;
 
-	for (int pz = std::max(cz - 1, 0); pz < std::min(cz + 2, 63); ++pz)
-	{
-		for (int px = std::max(cx - 1, 0); px < std::min(cx + 2, 63); ++px)
-		{
-			mTiles[pz][px].tile = loadTile(tile_index(px, pz));
-		}
-	}
+  for (int pz = std::max(cz - 1, 0); pz < std::min(cz + 2, 63); ++pz)
+  {
+    for (int px = std::max(cx - 1, 0); px < std::min(cx + 2, 63); ++px)
+    {
+      mTiles[pz][px].tile = loadTile(tile_index(px, pz));
+    }
+  }
 
-	if (autoheight && tileLoaded(tile))
-	{
-		float maxHeight = mTiles[cz][cx].tile->getMaxHeight();
-		maxHeight = std::max(maxHeight, 0.0f);
-		gWorld->camera.y = maxHeight + 50.0f;
+  if (autoheight && tileLoaded(tile))
+  {
+    float maxHeight = mTiles[cz][cx].tile->getMaxHeight();
+    maxHeight = std::max(maxHeight, 0.0f);
+    gWorld->camera.y = maxHeight + 50.0f;
 
-		autoheight = false;
-	}
+    autoheight = false;
+  }
 }
 
 void MapIndex::setChanged(float x, float z)
@@ -265,7 +265,7 @@ void MapIndex::setChanged(MapTile* tile)
 
 void MapIndex::unsetChanged(const tile_index& tile)
 {
-	// change the changed flag of the map tile
+  // change the changed flag of the map tile
   if (mTiles[tile.z][tile.x].tile)
   {
     mTiles[tile.z][tile.x].tile->changed = 0;
@@ -274,15 +274,15 @@ void MapIndex::unsetChanged(const tile_index& tile)
 
 int MapIndex::getChanged(const tile_index& tile)
 {
-	// Changed 2 are adts around the changed one that have 1 in changed.
+  // Changed 2 are adts around the changed one that have 1 in changed.
   // You must save them also IF you do any UID recalculation on changed 1 adts.
   // Because the new UIDs MUST also get saved in surrounding adts to ahve no model duplucation.
   // So to avoid unnneeded save you can also skip changed 2 adts IF no models get added or moved around.
   // This would be stepp to IF uid workes. Steff
-	if (mTiles[tile.z][tile.x].tile) // why do we need to save tile with changed=2? What "2" means? its adts which have models with new adts, and who ever added this here broke everything, thanks
-		return mTiles[tile.z][tile.x].tile->changed;
-	else
-		return 0;
+  if (mTiles[tile.z][tile.x].tile) // why do we need to save tile with changed=2? What "2" means? its adts which have models with new adts, and who ever added this here broke everything, thanks
+    return mTiles[tile.z][tile.x].tile->changed;
+  else
+    return 0;
 }
 
 void MapIndex::setFlag(bool to, float x, float z)
@@ -317,24 +317,24 @@ void MapIndex::setWater(bool to, float x, float z)
 
 MapTile* MapIndex::loadTile(const tile_index& tile)
 {
-	if (!hasTile(tile))
-	{
-		return nullptr;
-	}
+  if (!hasTile(tile))
+  {
+    return nullptr;
+  }
 
-	if (tileLoaded(tile))
-	{
-		return mTiles[tile.z][tile.x].tile;
-	}
+  if (tileLoaded(tile))
+  {
+    return mTiles[tile.z][tile.x].tile;
+  }
 
-	std::stringstream filename;
-	filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
+  std::stringstream filename;
+  filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
-	if (!MPQFile::exists(filename.str()))
-	{
-		LogError << "The requested tile \"" << filename.str() << "\" does not exist! Oo" << std::endl;
-		return nullptr;
-	}
+  if (!MPQFile::exists(filename.str()))
+  {
+    LogError << "The requested tile \"" << filename.str() << "\" does not exist! Oo" << std::endl;
+    return nullptr;
+  }
 
   mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha);
 
@@ -343,30 +343,30 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
 
 void MapIndex::reloadTile(const tile_index& tile)
 {
-	if (tileLoaded(tile))
-	{
-		delete mTiles[tile.z][tile.x].tile;
-		mTiles[tile.z][tile.x].tile = nullptr;
+  if (tileLoaded(tile))
+  {
+    delete mTiles[tile.z][tile.x].tile;
+    mTiles[tile.z][tile.x].tile = nullptr;
 
-		std::stringstream filename;
-		filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
+    std::stringstream filename;
+    filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
-		mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha);
-		enterTile(tile_index(cx, cz));
-	}
+    mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha);
+    enterTile(tile_index(cx, cz));
+  }
 }
 
 void MapIndex::unloadTiles(const tile_index& tile)
 {
-	if ( ((clock() / CLOCKS_PER_SEC) - this->lastUnloadTime) > 5) // only unload every 5 seconds
-	{
-		int unloadBoundery = 6; // means noggit hold always plus X adts in all direction in ram - perhaps move this into settings file?
-		for (int pz = 0; pz < 64; ++pz)
-		{
-			for (int px = 0; px < 64; ++px)
-			{
-				if (std::abs(px - tile.x) > unloadBoundery || std::abs(pz - tile.z) > unloadBoundery)
-				{
+  if ( ((clock() / CLOCKS_PER_SEC) - this->lastUnloadTime) > 5) // only unload every 5 seconds
+  {
+    int unloadBoundery = 6; // means noggit hold always plus X adts in all direction in ram - perhaps move this into settings file?
+    for (int pz = 0; pz < 64; ++pz)
+    {
+      for (int px = 0; px < 64; ++px)
+      {
+        if (std::abs(px - tile.x) > unloadBoundery || std::abs(pz - tile.z) > unloadBoundery)
+        {
           tile_index id(px, pz);
 
           //Only unload adts not marked to save
@@ -374,53 +374,53 @@ void MapIndex::unloadTiles(const tile_index& tile)
           {
             unloadTile(id);
           }
-				}
-			}
-		}
-		this->lastUnloadTime = clock() / CLOCKS_PER_SEC;
-	}
+        }
+      }
+    }
+    this->lastUnloadTime = clock() / CLOCKS_PER_SEC;
+  }
 }
 
 void MapIndex::unloadTile(const tile_index& tile)
 {
-	// unloads a tile with givn cords
-	if (tileLoaded(tile))
-	{
-		delete mTiles[tile.z][tile.x].tile;
-		mTiles[tile.z][tile.x].tile = nullptr;
-		Log << "Unload Tile " << tile.x << "-" << tile.z << "\n";
-	}
+  // unloads a tile with givn cords
+  if (tileLoaded(tile))
+  {
+    delete mTiles[tile.z][tile.x].tile;
+    mTiles[tile.z][tile.x].tile = nullptr;
+    Log << "Unload Tile " << tile.x << "-" << tile.z << "\n";
+  }
 }
 
 void MapIndex::markOnDisc(const tile_index& tile, bool mto)
 {
-	mTiles[tile.z][tile.x].onDisc = mto;
+  mTiles[tile.z][tile.x].onDisc = mto;
 }
 
 bool MapIndex::isTileExternal(const tile_index& tile)
 {
-	// is onDisc
-	return mTiles[tile.z][tile.x].onDisc;
+  // is onDisc
+  return mTiles[tile.z][tile.x].onDisc;
 }
 
 void MapIndex::saveTile(const tile_index& tile)
 {
-	// save goven tile
-	if (tileLoaded(tile))
-	{
+  // save goven tile
+  if (tileLoaded(tile))
+  {
     gWorld->ensureModelIdUniqueness();
-		mTiles[tile.z][tile.x].tile->saveTile();
-	}
+    mTiles[tile.z][tile.x].tile->saveTile();
+  }
 }
 
 void MapIndex::saveChanged()
 {
-	if (changed)
-		save();
+  if (changed)
+    save();
 
   gWorld->ensureModelIdUniqueness();
 
-	// Now save all marked as 1 and 2 because UIDs now fits.
+  // Now save all marked as 1 and 2 because UIDs now fits.
   for (MapTile* tile : loaded_tiles())
   {
     if (tile->changed)
@@ -428,18 +428,18 @@ void MapIndex::saveChanged()
       tile->saveTile();
       tile->changed = 0;
     }
-	}
+  }
 }
 
 bool MapIndex::hasAGlobalWMO()
 {
-	return mHasAGlobalWMO;
+  return mHasAGlobalWMO;
 }
 
 
 bool MapIndex::hasTile(const tile_index& tile) const
 {
-	return (mTiles[tile.z][tile.x].flags & 1);
+  return (mTiles[tile.z][tile.x].flags & 1);
 }
 
 bool MapIndex::hasTile(int tileX, int tileZ) const
@@ -449,7 +449,7 @@ bool MapIndex::hasTile(int tileX, int tileZ) const
 
 bool MapIndex::tileLoaded(const tile_index& tile) const
 {
-	return hasTile(tile) && mTiles[tile.z][tile.x].tile;
+  return hasTile(tile) && mTiles[tile.z][tile.x].tile;
 }
 
 bool MapIndex::tileLoaded(int tileX, int tileZ) const
@@ -459,17 +459,17 @@ bool MapIndex::tileLoaded(int tileX, int tileZ) const
 
 bool MapIndex::hasAdt()
 {
-	return noadt;
+  return noadt;
 }
 
 void MapIndex::setAdt(bool value)
 {
-	noadt = value;
+  noadt = value;
 }
 
 MapTile* MapIndex::getTile(const tile_index& tile) const
 {
-	return mTiles[tile.z][tile.x].tile;
+  return mTiles[tile.z][tile.x].tile;
 }
 
 MapTile* MapIndex::getTileAbove(MapTile* tile) const
@@ -494,7 +494,7 @@ MapTile* MapIndex::getTileLeft(MapTile* tile) const
 
 uint32_t MapIndex::getFlag(const tile_index& tile) const
 {
-	return mTiles[tile.z][tile.x].flags;
+  return mTiles[tile.z][tile.x].flags;
 }
 
 void MapIndex::setBigAlpha()

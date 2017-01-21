@@ -16,25 +16,25 @@ class Model;
 class ModelInstance
 {
 public:
-	scoped_model_reference model;
-	math::vector_3d extents[2];
+  scoped_model_reference model;
+  math::vector_3d extents[2];
 
-	math::vector_3d pos, dir;
+  math::vector_3d pos, dir;
 
-	//! \todo  Get this out and do somehow else.
-	unsigned int d1;
+  //! \todo  Get this out and do somehow else.
+  unsigned int d1;
 
-	float w, sc;
+  float w, sc;
 
-	math::vector_3d ldir;
-	math::vector_3d lcol;
+  math::vector_3d ldir;
+  math::vector_3d lcol;
 
-	explicit ModelInstance(std::string const& filename);
-	explicit ModelInstance(std::string const& filename, MPQFile* f);
-	explicit ModelInstance(std::string const& filename, ENTRY_MDDF *d);
+  explicit ModelInstance(std::string const& filename);
+  explicit ModelInstance(std::string const& filename, MPQFile* f);
+  explicit ModelInstance(std::string const& filename, ENTRY_MDDF *d);
 
-	ModelInstance(ModelInstance const& other) = default;
-	ModelInstance& operator= (ModelInstance const& other) = default;
+  ModelInstance(ModelInstance const& other) = default;
+  ModelInstance& operator= (ModelInstance const& other) = default;
 
   ModelInstance (ModelInstance&& other)
     : model (std::move (other.model))
@@ -51,7 +51,7 @@ public:
   }
   ModelInstance& operator= (ModelInstance&& other)
   {
-  	std::swap (model, other.model);
+    std::swap (model, other.model);
     std::swap (extents, other.extents);
     std::swap (pos, other.pos);
     std::swap (dir, other.dir);
@@ -63,15 +63,15 @@ public:
     return *this;
   }
 
-	void draw (Frustum const&);
-	void drawMapTile();
-	//  void drawHighlight();
+  void draw (Frustum const&);
+  void drawMapTile();
+  //  void drawHighlight();
   void intersect (math::ray const&, selection_result*);
-	void draw2(const math::vector_3d& ofs, const math::degrees, Frustum const&);
+  void draw2(const math::vector_3d& ofs, const math::degrees, Frustum const&);
 
-	void resetDirection();
+  void resetDirection();
 
-	bool isInsideRect(math::vector_3d rect[2]);
+  bool isInsideRect(math::vector_3d rect[2]);
 
-	void recalcExtents();
+  void recalcExtents();
 };

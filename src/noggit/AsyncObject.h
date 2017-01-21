@@ -5,13 +5,13 @@
 class AsyncObject
 {
 protected:
-	bool finished;
+  bool finished;
 public:
-	virtual ~AsyncObject() {}
+  virtual ~AsyncObject() {}
 
-	virtual bool finishedLoading() const
-	{
-		return finished;
-	}
-	virtual void finishLoading() = 0;
+  virtual bool finishedLoading() const
+  {
+    return finished;
+  }
+  virtual void finishLoading() = 0;
 };

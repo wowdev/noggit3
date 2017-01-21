@@ -11,10 +11,10 @@ class Model;
 class ModelManager
 {
 public:
-	static void resetAnim();
-	static void updateEmitters(float dt);
+  static void resetAnim();
+  static void updateEmitters(float dt);
 
-	static void report();
+  static void report();
   static void toggleModelVisibility(Model* model);
   static void clearHiddenModelList();
 
@@ -23,8 +23,8 @@ private:
   static Model* add(std::string name);
   static void delbyname(std::string name);
 
-	typedef std::map<std::string, Model*> mapType;
-	static mapType items;
+  typedef std::map<std::string, Model*> mapType;
+  static mapType items;
   typedef std::vector<Model*> vectorType;
   static vectorType hiddenItems;
 };

@@ -1,17 +1,17 @@
 /*----------------------------------------------------------------------------
 
-	NAME
-		Utils.c
+  NAME
+    Utils.c
 
-	PURPOSE
-		Some general-purpose functions for the WinTab demos.
+  PURPOSE
+    Some general-purpose functions for the WinTab demos.
 
-	COPYRIGHT
-		Copyright (c) Wacom Company, Ltd. 2014 All Rights Reserved
-		All rights reserved.
+  COPYRIGHT
+    Copyright (c) Wacom Company, Ltd. 2014 All Rights Reserved
+    All rights reserved.
 
-		The text and information contained in this file may be freely used,
-		copied, or distributed without compensation or licensing restrictions.
+    The text and information contained in this file may be freely used,
+    copied, or distributed without compensation or licensing restrictions.
 
 ---------------------------------------------------------------------------- */
 #include <external/wacom/Utils.h>
@@ -47,113 +47,113 @@ WTMGRDEFCONTEXTEX gpWTMgrDefContextEx = nullptr;
 char* pszProgramName = nullptr;
 
 #define GETPROCADDRESS(type, func) \
-	gp##func = (type)GetProcAddress(ghWintab, #func); \
-	if (!gp##func){ WACOM_ASSERT(FALSE); UnloadWintab(); return FALSE; }
+  gp##func = (type)GetProcAddress(ghWintab, #func); \
+  if (!gp##func){ WACOM_ASSERT(FALSE); UnloadWintab(); return FALSE; }
 
 //////////////////////////////////////////////////////////////////////////////
 // Purpose
-//		Find wintab32.dll and load it.
-//		Find the exported functions we need from it.
+//    Find wintab32.dll and load it.
+//    Find the exported functions we need from it.
 //
-//	Returns
-//		TRUE on success.
-//		FALSE on failure.
+//  Returns
+//    TRUE on success.
+//    FALSE on failure.
 //
 BOOL LoadWintab( void )
 {
-//	ghWintab = LoadLibraryA(  "C:\\dev\\mainline\\Wacom\\Win\\Win32\\Debug\\Wacom_Tablet.dll" );
-//	ghWintab = LoadLibraryA(  "C:\\dev\\mainline\\Wacom\\Win\\Win32\\Debug\\Wintab32.dll" );
-	ghWintab = LoadLibraryA( "Wintab32.dll" );
+//  ghWintab = LoadLibraryA(  "C:\\dev\\mainline\\Wacom\\Win\\Win32\\Debug\\Wacom_Tablet.dll" );
+//  ghWintab = LoadLibraryA(  "C:\\dev\\mainline\\Wacom\\Win\\Win32\\Debug\\Wintab32.dll" );
+  ghWintab = LoadLibraryA( "Wintab32.dll" );
 
-	if ( FAILED(ghWintab) || ghWintab == nullptr)
-	{
-		DWORD err = GetLastError();
-		WACOM_TRACE("LoadLibrary error: %i\n", err);
-		return FALSE;
-	}
+  if ( FAILED(ghWintab) || ghWintab == nullptr)
+  {
+    DWORD err = GetLastError();
+    WACOM_TRACE("LoadLibrary error: %i\n", err);
+    return FALSE;
+  }
 
-	// Explicitly find the exported Wintab functions in which we are interested.
-	// We are using the ASCII, not unicode versions (where applicable).
-	GETPROCADDRESS( WTOPENA, WTOpenA );
-	GETPROCADDRESS( WTINFOA, WTInfoA );
-	GETPROCADDRESS( WTGETA, WTGetA );
-	GETPROCADDRESS( WTSETA, WTSetA );
-	GETPROCADDRESS( WTPACKET, WTPacket );
-	GETPROCADDRESS( WTCLOSE, WTClose );
-	GETPROCADDRESS( WTENABLE, WTEnable );
-	GETPROCADDRESS( WTOVERLAP, WTOverlap );
-	GETPROCADDRESS( WTSAVE, WTSave );
-	GETPROCADDRESS( WTCONFIG, WTConfig );
-	GETPROCADDRESS( WTRESTORE, WTRestore );
-	GETPROCADDRESS( WTEXTSET, WTExtSet );
-	GETPROCADDRESS( WTEXTGET, WTExtGet );
-	GETPROCADDRESS( WTQUEUESIZESET, WTQueueSizeSet );
-	GETPROCADDRESS( WTDATAPEEK, WTDataPeek );
-	GETPROCADDRESS( WTPACKETSGET, WTPacketsGet );
-	GETPROCADDRESS( WTMGROPEN, WTMgrOpen );
-	GETPROCADDRESS( WTMGRCLOSE, WTMgrClose );
-	GETPROCADDRESS( WTMGRDEFCONTEXT, WTMgrDefContext );
-	GETPROCADDRESS( WTMGRDEFCONTEXTEX, WTMgrDefContextEx );
+  // Explicitly find the exported Wintab functions in which we are interested.
+  // We are using the ASCII, not unicode versions (where applicable).
+  GETPROCADDRESS( WTOPENA, WTOpenA );
+  GETPROCADDRESS( WTINFOA, WTInfoA );
+  GETPROCADDRESS( WTGETA, WTGetA );
+  GETPROCADDRESS( WTSETA, WTSetA );
+  GETPROCADDRESS( WTPACKET, WTPacket );
+  GETPROCADDRESS( WTCLOSE, WTClose );
+  GETPROCADDRESS( WTENABLE, WTEnable );
+  GETPROCADDRESS( WTOVERLAP, WTOverlap );
+  GETPROCADDRESS( WTSAVE, WTSave );
+  GETPROCADDRESS( WTCONFIG, WTConfig );
+  GETPROCADDRESS( WTRESTORE, WTRestore );
+  GETPROCADDRESS( WTEXTSET, WTExtSet );
+  GETPROCADDRESS( WTEXTGET, WTExtGet );
+  GETPROCADDRESS( WTQUEUESIZESET, WTQueueSizeSet );
+  GETPROCADDRESS( WTDATAPEEK, WTDataPeek );
+  GETPROCADDRESS( WTPACKETSGET, WTPacketsGet );
+  GETPROCADDRESS( WTMGROPEN, WTMgrOpen );
+  GETPROCADDRESS( WTMGRCLOSE, WTMgrClose );
+  GETPROCADDRESS( WTMGRDEFCONTEXT, WTMgrDefContext );
+  GETPROCADDRESS( WTMGRDEFCONTEXTEX, WTMgrDefContextEx );
 
 
-	// TODO - don't forget to nullptr out pointers in UnloadWintab().
-	return TRUE;
+  // TODO - don't forget to nullptr out pointers in UnloadWintab().
+  return TRUE;
 }
 
 
 
 //////////////////////////////////////////////////////////////////////////////
 // Purpose
-//		Uninitializes use of wintab32.dll
+//    Uninitializes use of wintab32.dll
 //
 // Returns
-//		Nothing.
+//    Nothing.
 //
 void UnloadWintab( void )
 {
-	WACOM_TRACE( "UnloadWintab()\n" );
+  WACOM_TRACE( "UnloadWintab()\n" );
 
-	if ( ghWintab )
-	{
-		FreeLibrary( ghWintab );
-		ghWintab = nullptr;
-	}
+  if ( ghWintab )
+  {
+    FreeLibrary( ghWintab );
+    ghWintab = nullptr;
+  }
 
-	gpWTOpenA			= nullptr;
-	gpWTClose			= nullptr;
-	gpWTInfoA			= nullptr;
-	gpWTPacket			= nullptr;
-	gpWTEnable			= nullptr;
-	gpWTOverlap			= nullptr;
-	gpWTSave				= nullptr;
-	gpWTConfig			= nullptr;
-	gpWTGetA				= nullptr;
-	gpWTSetA				= nullptr;
-	gpWTRestore			= nullptr;
-	gpWTExtSet			= nullptr;
-	gpWTExtGet			= nullptr;
-	gpWTQueueSizeSet	= nullptr;
-	gpWTDataPeek		= nullptr;
-	gpWTPacketsGet		= nullptr;
-	gpWTMgrOpen			= nullptr;
-	gpWTMgrClose		= nullptr;
-	gpWTMgrDefContext = nullptr;
-	gpWTMgrDefContextEx = nullptr;
+  gpWTOpenA      = nullptr;
+  gpWTClose      = nullptr;
+  gpWTInfoA      = nullptr;
+  gpWTPacket      = nullptr;
+  gpWTEnable      = nullptr;
+  gpWTOverlap      = nullptr;
+  gpWTSave        = nullptr;
+  gpWTConfig      = nullptr;
+  gpWTGetA        = nullptr;
+  gpWTSetA        = nullptr;
+  gpWTRestore      = nullptr;
+  gpWTExtSet      = nullptr;
+  gpWTExtGet      = nullptr;
+  gpWTQueueSizeSet  = nullptr;
+  gpWTDataPeek    = nullptr;
+  gpWTPacketsGet    = nullptr;
+  gpWTMgrOpen      = nullptr;
+  gpWTMgrClose    = nullptr;
+  gpWTMgrDefContext = nullptr;
+  gpWTMgrDefContextEx = nullptr;
 }
 
 
 
 //////////////////////////////////////////////////////////////////////////////
 // Purpose
-//		Display error to user.
+//    Display error to user.
 //
 void ShowError( char *pszErrorMessage )
 {
-	WACOM_TRACE( "ShowError()\n" );
+  WACOM_TRACE( "ShowError()\n" );
 
-	WACOM_ASSERT( pszErrorMessage );
+  WACOM_ASSERT( pszErrorMessage );
 
-	MessageBoxA( nullptr, pszErrorMessage, gpszProgramName, MB_OK | MB_ICONHAND );
+  MessageBoxA( nullptr, pszErrorMessage, gpszProgramName, MB_OK | MB_ICONHAND );
 }
 
 
@@ -164,25 +164,25 @@ void ShowError( char *pszErrorMessage )
 
 void WacomTrace( char *lpszFormat, ...)
 {
-	char szTraceMessage[ 128 ];
+  char szTraceMessage[ 128 ];
 
-	int nBytesWritten;
+  int nBytesWritten;
 
-	va_list args;
+  va_list args;
 
-	WACOM_ASSERT( lpszFormat );
+  WACOM_ASSERT( lpszFormat );
 
-	va_start( args, lpszFormat );
+  va_start( args, lpszFormat );
 
-	nBytesWritten = _vsnprintf( szTraceMessage, sizeof( szTraceMessage ) - 1,
-		lpszFormat, args );
+  nBytesWritten = _vsnprintf( szTraceMessage, sizeof( szTraceMessage ) - 1,
+    lpszFormat, args );
 
-	if ( nBytesWritten > 0 )
-	{
-		OutputDebugStringA( szTraceMessage );
-	}
+  if ( nBytesWritten > 0 )
+  {
+    OutputDebugStringA( szTraceMessage );
+  }
 
-	va_end( args );
+  va_end( args );
 }
 
 #endif // WACOM_DEBUG

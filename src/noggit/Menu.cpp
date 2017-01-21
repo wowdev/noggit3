@@ -34,46 +34,46 @@ Menu* theMenu = nullptr;
 
 void showMap(UIFrame *, int mapID)
 {
-	if (theMenu)
-	{
-		theMenu->loadMap(mapID);
-	}
+  if (theMenu)
+  {
+    theMenu->loadMap(mapID);
+  }
 }
 
 void showBookmark(UIFrame *, int bookmarkID)
 {
-	if (theMenu)
-	{
-		theMenu->loadBookmark(bookmarkID);
-	}
+  if (theMenu)
+  {
+    theMenu->loadBookmark(bookmarkID);
+  }
 }
 
 Menu::Menu()
-	: mGUIFrame(nullptr)
-	, mGUIStatusbar(nullptr)
-	, mGUICreditsWindow(nullptr)
-	, mGUIMinimapWindow(nullptr)
-	, mGUImenuBar(nullptr)
-	, mBackgroundModel(boost::none)
-	, mLastBackgroundId(-1)
+  : mGUIFrame(nullptr)
+  , mGUIStatusbar(nullptr)
+  , mGUICreditsWindow(nullptr)
+  , mGUIMinimapWindow(nullptr)
+  , mGUImenuBar(nullptr)
+  , mBackgroundModel(boost::none)
+  , mLastBackgroundId(-1)
 {
-	gWorld = nullptr;
-	theMenu = this;
+  gWorld = nullptr;
+  theMenu = this;
 
-	mGUIFrame = new UIFrame(0.0f, 0.0f, (float)video.xres(), (float)video.yres());
-	mGUIMinimapWindow = new UIMinimapWindow(this);
-	mGUIMinimapWindow->hide();
-	mGUIFrame->addChild(mGUIMinimapWindow);
-	mGUICreditsWindow = new UIAbout();
-	mGUIFrame->addChild(mGUICreditsWindow);
-	//! \todo Use? Yes - later i will show here the adt cords where you enter and some otehr infos
-	mGUIStatusbar = new UIStatusBar(0.0f, (float)video.yres() - 30.0f, (float)video.xres(), 30.0f);
-	mGUIFrame->addChild(mGUIStatusbar);
+  mGUIFrame = new UIFrame(0.0f, 0.0f, (float)video.xres(), (float)video.yres());
+  mGUIMinimapWindow = new UIMinimapWindow(this);
+  mGUIMinimapWindow->hide();
+  mGUIFrame->addChild(mGUIMinimapWindow);
+  mGUICreditsWindow = new UIAbout();
+  mGUIFrame->addChild(mGUICreditsWindow);
+  //! \todo Use? Yes - later i will show here the adt cords where you enter and some otehr infos
+  mGUIStatusbar = new UIStatusBar(0.0f, (float)video.yres() - 30.0f, (float)video.xres(), 30.0f);
+  mGUIFrame->addChild(mGUIStatusbar);
 
-	createMapList();
-	createBookmarkList();
-	buildMenuBar();
-	randBackground();
+  createMapList();
+  createBookmarkList();
+  buildMenuBar();
+  randBackground();
 }
 
 //! \todo Add TBC and WOTLK.
@@ -85,134 +85,134 @@ const std::string uiModels[] = { "Deathknight", "Draenei", "Dwarf", "MainMenu", 
 
 std::string buildModelPath(size_t index)
 {
-	assert(index < sizeof(uiModels) / sizeof(const std::string));
+  assert(index < sizeof(uiModels) / sizeof(const std::string));
 
-	return "Interface\\Glues\\Models\\UI_" + uiModels[index] + "\\UI_" + uiModels[index] + ".m2";
+  return "Interface\\Glues\\Models\\UI_" + uiModels[index] + "\\UI_" + uiModels[index] + ".m2";
 }
 
 Menu::~Menu()
 {
-	delete mGUIFrame;
-	mGUIFrame = nullptr;
+  delete mGUIFrame;
+  mGUIFrame = nullptr;
 
-	delete gWorld;
-	gWorld = nullptr;
+  delete gWorld;
+  gWorld = nullptr;
 }
 
 void Menu::randBackground()
 {
-	mBackgroundModel.reset();
+  mBackgroundModel.reset();
 
-	int randnum;
-	do
-	{
-		randnum = misc::randint(0, sizeof(uiModels) / sizeof(const std::string) - 1);
-	} while (randnum == mLastBackgroundId);
+  int randnum;
+  do
+  {
+    randnum = misc::randint(0, sizeof(uiModels) / sizeof(const std::string) - 1);
+  } while (randnum == mLastBackgroundId);
 
-	mLastBackgroundId = randnum;
+  mLastBackgroundId = randnum;
 
-	mBackgroundModel = scoped_model_reference (buildModelPath(randnum));
-	mBackgroundModel.get()->mPerInstanceAnimation = true;
+  mBackgroundModel = scoped_model_reference (buildModelPath(randnum));
+  mBackgroundModel.get()->mPerInstanceAnimation = true;
 }
 
 
 void Menu::enterMapAt(math::vector_3d pos, bool pAutoHeight, float av, float ah)
 {
-	video.farclip((const float)Settings::getInstance()->FarZ);
+  video.farclip((const float)Settings::getInstance()->FarZ);
 
-	gWorld->autoheight = pAutoHeight;
+  gWorld->autoheight = pAutoHeight;
 
-	gWorld->camera = math::vector_3d(pos.x, pos.y, pos.z);
-	gWorld->lookat = math::vector_3d(pos.x, pos.y, pos.z - 1.0f);
+  gWorld->camera = math::vector_3d(pos.x, pos.y, pos.z);
+  gWorld->lookat = math::vector_3d(pos.x, pos.y, pos.z - 1.0f);
 
-	gWorld->initDisplay();
-	gWorld->mapIndex->enterTile(tile_index(pos));
+  gWorld->initDisplay();
+  gWorld->mapIndex->enterTile(tile_index(pos));
 
-	app.getStates().push_back(new MapView(ah, av)); // on gPop, MapView is deleted.
+  app.getStates().push_back(new MapView(ah, av)); // on gPop, MapView is deleted.
 
-	mGUIMinimapWindow->hide();
+  mGUIMinimapWindow->hide();
 
-	mBackgroundModel.reset();
+  mBackgroundModel.reset();
 }
 
 void Menu::tick(float t, float /*dt*/)
 {
-	globalTime = (int)(t * 1000.0f);
+  globalTime = (int)(t * 1000.0f);
 
-	if (mBackgroundModel)
-	{
-		mBackgroundModel.get()->updateEmitters(t);
-	}
-	else
-	{
-		randBackground();
-	}
+  if (mBackgroundModel)
+  {
+    mBackgroundModel.get()->updateEmitters(t);
+  }
+  else
+  {
+    randBackground();
+  }
 }
 
 void Menu::display(float /*t*/, float /*dt*/)
 {
-	// 3D: Background.
-	video.clearScreen();
+  // 3D: Background.
+  video.clearScreen();
 
-	video.set3D();
+  video.set3D();
 
-	gl.disable(GL_FOG);
+  gl.disable(GL_FOG);
 
-	gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	math::vector_4d la(0.1f, 0.1f, 0.1f, 1.0f);
-	gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
+  math::vector_4d la(0.1f, 0.1f, 0.1f, 1.0f);
+  gl.lightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
 
-	gl.enable(GL_COLOR_MATERIAL);
-	gl.colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-	for (OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
-	{
-		gl.lightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
-		gl.lightf(light, GL_LINEAR_ATTENUATION, 0.7f);
-		gl.lightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
-		gl.disable(light);
-	}
+  gl.enable(GL_COLOR_MATERIAL);
+  gl.colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+  for (OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
+  {
+    gl.lightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
+    gl.lightf(light, GL_LINEAR_ATTENUATION, 0.7f);
+    gl.lightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
+    gl.disable(light);
+  }
 
-	gl.enable(GL_CULL_FACE);
-	gl.enable(GL_DEPTH_TEST);
-	gl.depthFunc(GL_LEQUAL);
-	gl.enable(GL_LIGHTING);
-	opengl::texture::enable_texture();
+  gl.enable(GL_CULL_FACE);
+  gl.enable(GL_DEPTH_TEST);
+  gl.depthFunc(GL_LEQUAL);
+  gl.enable(GL_LIGHTING);
+  opengl::texture::enable_texture();
 
-	mBackgroundModel.get()->cam.setup(globalTime);
-	mBackgroundModel.get()->draw();
+  mBackgroundModel.get()->cam.setup(globalTime);
+  mBackgroundModel.get()->draw();
 
-	opengl::texture::disable_texture();
-	gl.disable(GL_LIGHTING);
-	gl.disable(GL_DEPTH_TEST);
-	gl.disable(GL_CULL_FACE);
+  opengl::texture::disable_texture();
+  gl.disable(GL_LIGHTING);
+  gl.disable(GL_DEPTH_TEST);
+  gl.disable(GL_CULL_FACE);
 
-	// 2D: UI.
+  // 2D: UI.
 
-	video.set2D();
-	gl.enable(GL_BLEND);
-	gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  video.set2D();
+  gl.enable(GL_BLEND);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	mGUIFrame->render();
+  mGUIFrame->render();
 }
 
 void Menu::keypressed(SDL_KeyboardEvent* e)
 {
-	if (e->type == SDL_KEYDOWN && e->keysym.sym == SDLK_ESCAPE)
-	{
-		if (gWorld)
-		{
-			mGUIMinimapWindow->hide();
-			mGUICreditsWindow->show();
-			delete gWorld;
-			gWorld = nullptr;
-		}
-		else
-		{
-			app.pop = true;
-		}
-	}
+  if (e->type == SDL_KEYDOWN && e->keysym.sym == SDLK_ESCAPE)
+  {
+    if (gWorld)
+    {
+      mGUIMinimapWindow->hide();
+      mGUICreditsWindow->show();
+      delete gWorld;
+      gWorld = nullptr;
+    }
+    else
+    {
+      app.pop = true;
+    }
+  }
 }
 
 UIFrame::Ptr LastClickedMenu = nullptr;
@@ -221,82 +221,82 @@ void Menu::mouseclick(SDL_MouseButtonEvent* e)
 {
 
 
-	if (e->button != SDL_BUTTON_LEFT)
-	{
-		return;
-	}
+  if (e->button != SDL_BUTTON_LEFT)
+  {
+    return;
+  }
 
-	if (e->type == SDL_MOUSEBUTTONDOWN)
-	{
-		LastClickedMenu = mGUIFrame->processLeftClick(e->x, e->y);
-	}
-	else
-	{
-		if (LastClickedMenu)
-		{
-			LastClickedMenu->processUnclick();
-		}
+  if (e->type == SDL_MOUSEBUTTONDOWN)
+  {
+    LastClickedMenu = mGUIFrame->processLeftClick(e->x, e->y);
+  }
+  else
+  {
+    if (LastClickedMenu)
+    {
+      LastClickedMenu->processUnclick();
+    }
 
-		LastClickedMenu = nullptr;
-	}
+    LastClickedMenu = nullptr;
+  }
 }
 
 void Menu::mousemove(SDL_MouseMotionEvent *e)
 {
-	if (LastClickedMenu)
-	{
-		LastClickedMenu->processLeftDrag((float)(e->x - 4), (float)(e->y - 4), (float)(e->xrel), (float)(e->yrel));
-	}
-	else
-		this->mGUIMinimapWindow->mousemove(e); //fix for Noggit's exit while moving a mouse on start menu
+  if (LastClickedMenu)
+  {
+    LastClickedMenu->processLeftDrag((float)(e->x - 4), (float)(e->y - 4), (float)(e->xrel), (float)(e->yrel));
+  }
+  else
+    this->mGUIMinimapWindow->mousemove(e); //fix for Noggit's exit while moving a mouse on start menu
 }
 
 void Menu::resizewindow()
 {
-	mGUIFrame->resize();
+  mGUIFrame->resize();
 }
 
 void Menu::loadMap(int mapID)
 {
-	delete gWorld;
-	gWorld = nullptr;
+  delete gWorld;
+  gWorld = nullptr;
 
-	for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
-	{
-		if (it->getInt(MapDB::MapID) == mapID)
-		{
-			gWorld = new World(it->getString(MapDB::InternalName));
-			mGUICreditsWindow->hide();
-			mGUIMinimapWindow->show();
-			return;
-		}
-	}
+  for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
+  {
+    if (it->getInt(MapDB::MapID) == mapID)
+    {
+      gWorld = new World(it->getString(MapDB::InternalName));
+      mGUICreditsWindow->hide();
+      mGUIMinimapWindow->show();
+      return;
+    }
+  }
 
-	LogError << "Map with ID " << mapID << " not found. Failed loading." << std::endl;
+  LogError << "Map with ID " << mapID << " not found. Failed loading." << std::endl;
 }
 
 void Menu::loadBookmark(int bookmarkID)
 {
-	BookmarkEntry e = mBookmarks.at(bookmarkID);
-	loadMap(e.mapID);
-	enterMapAt(e.pos, false, e.av, e.ah);
+  BookmarkEntry e = mBookmarks.at(bookmarkID);
+  loadMap(e.mapID);
+  enterMapAt(e.pos, false, e.av, e.ah);
 }
 
 void Menu::buildMenuBar()
 {
-	if (mGUImenuBar)
-	{
-		mGUIFrame->removeChild(mGUImenuBar);
-		delete mGUImenuBar;
-		mGUImenuBar = nullptr;
-	}
+  if (mGUImenuBar)
+  {
+    mGUIFrame->removeChild(mGUImenuBar);
+    delete mGUImenuBar;
+    mGUImenuBar = nullptr;
+  }
 
-	mGUImenuBar = new UIMenuBar();
-	mGUImenuBar->AddMenu("File");
-	mGUImenuBar->GetMenu("File")->AddMenuItemSwitch("exit ESC", &app.pop, true);
-	mGUIFrame->addChild(mGUImenuBar);
+  mGUImenuBar = new UIMenuBar();
+  mGUImenuBar->AddMenu("File");
+  mGUImenuBar->GetMenu("File")->AddMenuItemSwitch("exit ESC", &app.pop, true);
+  mGUIFrame->addChild(mGUImenuBar);
 
-	static const char* typeToName[] = { "Continent", "Dungeons", "Raid", "Battleground", "Arena" };
+  static const char* typeToName[] = { "Continent", "Dungeons", "Raid", "Battleground", "Arena" };
   static int nMapByType[] = { 0, 0, 0, 0, 0 };
 
   for (std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it)
@@ -325,8 +325,8 @@ void Menu::buildMenuBar()
   }
 
 
-	for (std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it)
-	{
+  for (std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it)
+  {
     if (nMapByType[it->areaType]++ < nBookmarksPerMenu)
     {
       mGUImenuBar->GetMenu(typeToName[it->areaType])->AddMenuItemButton(it->name, &showMap, it->mapID);
@@ -337,82 +337,82 @@ void Menu::buildMenuBar()
       name << typeToName[it->areaType] << " (" << (nMapByType[it->areaType] / nBookmarksPerMenu + 1) << ")";
       mGUImenuBar->GetMenu(name.str())->AddMenuItemButton(it->name, &showMap, it->mapID);
     }
-	}
+  }
 
-	const size_t nBookmarkMenus = (mBookmarks.size() / nBookmarksPerMenu) + 1;
+  const size_t nBookmarkMenus = (mBookmarks.size() / nBookmarksPerMenu) + 1;
 
-	if (mBookmarks.size())
-	{
-		mGUImenuBar->AddMenu("Bookmarks");
-	}
+  if (mBookmarks.size())
+  {
+    mGUImenuBar->AddMenu("Bookmarks");
+  }
 
-	for (size_t i = 1; i < nBookmarkMenus; ++i)
-	{
-		std::stringstream name;
-		name << "Bookmarks (" << (i + 1) << ")";
-		mGUImenuBar->AddMenu(name.str());
-	}
+  for (size_t i = 1; i < nBookmarkMenus; ++i)
+  {
+    std::stringstream name;
+    name << "Bookmarks (" << (i + 1) << ")";
+    mGUImenuBar->AddMenu(name.str());
+  }
 
-	int n = -1;
-	for (std::vector<BookmarkEntry>::const_iterator it = mBookmarks.begin(); it != mBookmarks.end(); ++it)
-	{
-		std::stringstream name;
-		const int page = (++n / nBookmarksPerMenu);
-		if (page)
-		{
-			name << "Bookmarks (" << (page + 1) << ")";
-		}
-		else
-		{
-			name << "Bookmarks";
-		}
+  int n = -1;
+  for (std::vector<BookmarkEntry>::const_iterator it = mBookmarks.begin(); it != mBookmarks.end(); ++it)
+  {
+    std::stringstream name;
+    const int page = (++n / nBookmarksPerMenu);
+    if (page)
+    {
+      name << "Bookmarks (" << (page + 1) << ")";
+    }
+    else
+    {
+      name << "Bookmarks";
+    }
 
-		mGUImenuBar->GetMenu(name.str())->AddMenuItemButton(it->name, &showBookmark, n);
-	}
+    mGUImenuBar->GetMenu(name.str())->AddMenuItemButton(it->name, &showBookmark, n);
+  }
 }
 
 void Menu::createMapList()
 {
-	for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
-	{
-		MapEntry e;
-		e.mapID = i->getInt(MapDB::MapID);
-		e.name = i->getLocalizedString(MapDB::Name);
-		e.areaType = i->getUInt(MapDB::AreaType);
-		if (e.areaType == 3) e.name = i->getString(MapDB::InternalName);
+  for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
+  {
+    MapEntry e;
+    e.mapID = i->getInt(MapDB::MapID);
+    e.name = i->getLocalizedString(MapDB::Name);
+    e.areaType = i->getUInt(MapDB::AreaType);
+    if (e.areaType == 3) e.name = i->getString(MapDB::InternalName);
 
-		if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
-			continue;
+    if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
+      continue;
 
-		mMaps.push_back(e);
-	}
+    mMaps.push_back(e);
+  }
 }
 
 void Menu::createBookmarkList()
 {
-	mBookmarks.clear();
+  mBookmarks.clear();
 
-	std::ifstream f("bookmarks.txt");
-	if (!f.is_open())
-	{
-		LogDebug << "No bookmarks file." << std::endl;
-		return;
-	}
+  std::ifstream f("bookmarks.txt");
+  if (!f.is_open())
+  {
+    LogDebug << "No bookmarks file." << std::endl;
+    return;
+  }
 
-	std::string basename;
-	int areaID;
-	BookmarkEntry b;
-	int mapID = -1;
-	while (f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.ah >> b.av >> areaID)
-	{
-		if (mapID == -1)
-			continue;
+  std::string basename;
+  int areaID;
+  BookmarkEntry b;
+  int mapID = -1;
+  while (f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.ah >> b.av >> areaID)
+  {
+    if (mapID == -1)
+      continue;
 
-		std::stringstream temp;
-		temp << MapDB::getMapName(mapID) << ": " << AreaDB::getAreaName(areaID);
-		b.name = temp.str();
-		b.mapID = mapID;
-		mBookmarks.push_back(b);
-	}
-	f.close();
+    std::stringstream temp;
+    temp << MapDB::getMapName(mapID) << ": " << AreaDB::getAreaName(areaID);
+    b.name = temp.str();
+    b.mapID = mapID;
+    mBookmarks.push_back(b);
+  }
+  f.close();
 }

@@ -7,9 +7,9 @@
 class UIWaterSaveWarning : public UIWindow
 {
 private:
-	static const int winWidth = 320;
-	static const int winHeight = 80;
+  static const int winWidth = 320;
+  static const int winHeight = 80;
 public:
-	UIWaterSaveWarning();
-	void resize();
+  UIWaterSaveWarning();
+  void resize();
 };

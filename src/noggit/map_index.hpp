@@ -22,14 +22,14 @@
 class MapTileEntry
 {
 private:
-	uint32_t flags;
-	MapTile* tile;
-	bool onDisc;
+  uint32_t flags;
+  MapTile* tile;
+  bool onDisc;
 
 
-	MapTileEntry() : flags(0), tile(nullptr) {}
+  MapTileEntry() : flags(0), tile(nullptr) {}
 
-	friend class MapIndex;
+  friend class MapIndex;
 };
 
 class MapIndex
@@ -138,44 +138,44 @@ public:
       );
   }
 
-	MapIndex(const std::string& pBasename);
-	~MapIndex();
+  MapIndex(const std::string& pBasename);
+  ~MapIndex();
 
-	void enterTile(const tile_index& tile);
-	MapTile *loadTile(const tile_index& tile);
+  void enterTile(const tile_index& tile);
+  MapTile *loadTile(const tile_index& tile);
 
-	void setChanged(float x, float z);
-	void setChanged(const tile_index& tile);
+  void setChanged(float x, float z);
+  void setChanged(const tile_index& tile);
   void setChanged(MapTile* tile);
 
-	void unsetChanged(const tile_index& tile);
-	void setFlag(bool to, float x, float z);
-	void setWater(bool to, float x, float z);
-	int getChanged(const tile_index& tile);
+  void unsetChanged(const tile_index& tile);
+  void setFlag(bool to, float x, float z);
+  void setWater(bool to, float x, float z);
+  int getChanged(const tile_index& tile);
 
-	void saveTile(const tile_index& tile);
-	void saveChanged();
-	void reloadTile(const tile_index& tile);
-	void unloadTiles(const tile_index& tile);	// unloads all tiles more then x adts away from given
-	void unloadTile(const tile_index& tile);	// unload given tile
-	void markOnDisc(const tile_index& tile, bool mto);
-	bool isTileExternal(const tile_index& tile);
+  void saveTile(const tile_index& tile);
+  void saveChanged();
+  void reloadTile(const tile_index& tile);
+  void unloadTiles(const tile_index& tile);  // unloads all tiles more then x adts away from given
+  void unloadTile(const tile_index& tile);  // unload given tile
+  void markOnDisc(const tile_index& tile, bool mto);
+  bool isTileExternal(const tile_index& tile);
 
-	bool hasAGlobalWMO();
-	bool hasTile(const tile_index& index) const;
-	bool tileLoaded(const tile_index& tile) const;
+  bool hasAGlobalWMO();
+  bool hasTile(const tile_index& index) const;
+  bool tileLoaded(const tile_index& tile) const;
 
-	bool hasAdt();
-	void setAdt(bool value);
+  bool hasAdt();
+  void setAdt(bool value);
 
-	void save();
+  void save();
 
   uint32_t getHighestGUIDFromFile(const std::string& pFilename);
 
-	MapTile* getTile(const tile_index& tile) const;
+  MapTile* getTile(const tile_index& tile) const;
   MapTile* getTileAbove(MapTile* tile) const;
   MapTile* getTileLeft(MapTile* tile) const;
-	uint32_t getFlag(const tile_index& tile) const;
+  uint32_t getFlag(const tile_index& tile) const;
 
   void setBigAlpha();
   bool hasBigAlpha() const { return mBigAlpha; }
@@ -186,27 +186,27 @@ private:
   bool hasTile(int tileX, int tileZ) const;
   bool tileLoaded(int tileX, int tileZ) const;
 
-	const std::string basename;
-	std::string globalWMOName;
+  const std::string basename;
+  std::string globalWMOName;
 
-	int lastUnloadTime;
+  int lastUnloadTime;
 
-	// Is the WDT telling us to use a different alphamap structure.
-	bool mBigAlpha;
-	bool mHasAGlobalWMO;
-	bool noadt;
-	bool changed;
+  // Is the WDT telling us to use a different alphamap structure.
+  bool mBigAlpha;
+  bool mHasAGlobalWMO;
+  bool noadt;
+  bool changed;
 
-	bool autoheight;
+  bool autoheight;
 
-	int cx;
-	int cz;
+  int cx;
+  int cz;
 
   uint32_t highestGUID;
 
-	ENTRY_MODF wmoEntry;
-	MPHD mphd;
+  ENTRY_MODF wmoEntry;
+  MPHD mphd;
 
-	// Holding all MapTiles there can be in a World.
-	MapTileEntry mTiles[64][64];
+  // Holding all MapTiles there can be in a World.
+  MapTileEntry mTiles[64][64];
 };

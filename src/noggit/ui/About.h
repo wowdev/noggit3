@@ -7,10 +7,10 @@
 class UIAbout : public UIWindow
 {
 private:
-	static const int winWidth = 400;
-	static const int winHeight = 230;
+  static const int winWidth = 400;
+  static const int winHeight = 230;
 
 public:
-	UIAbout();
-	void resize();
+  UIAbout();
+  void resize();
 };

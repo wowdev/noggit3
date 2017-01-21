@@ -13,8 +13,8 @@
 
 void texturePickerClick(UIFrame* f, int id)
 {
-	// redirect to sender object.
-	(static_cast<UITexturePicker *>(f->parent()))->setTexture(id);
+  // redirect to sender object.
+  (static_cast<UITexturePicker *>(f->parent()))->setTexture(id);
 }
 
 void shiftLeft(UIFrame* f, int)
@@ -28,21 +28,21 @@ void shiftRight(UIFrame* f, int)
 }
 
 UITexturePicker::UITexturePicker(float x, float y, float w, float h)
-	: UICloseWindow(x, y, w, h, "Pick one of the textures.", true)
+  : UICloseWindow(x, y, w, h, "Pick one of the textures.", true)
 {
-	const int textureSize = 110;
-	const int startingX = 10;
-	const int paddingX = 10;
-	const int positionY = 30;
+  const int textureSize = 110;
+  const int startingX = 10;
+  const int paddingX = 10;
+  const int positionY = 30;
 
   _chunk = nullptr;
 
-	for (size_t i = 0; i < 4; ++i)
-	{
-		_textures[i] = new UITexture((float)(startingX + (textureSize + paddingX) * i), (float)positionY, (float)textureSize, (float)textureSize, "tileset\\generic\\black.blp");
-		_textures[i]->setClickFunc(texturePickerClick, i);
-		addChild(_textures[i]);
-	}
+  for (size_t i = 0; i < 4; ++i)
+  {
+    _textures[i] = new UITexture((float)(startingX + (textureSize + paddingX) * i), (float)positionY, (float)textureSize, (float)textureSize, "tileset\\generic\\black.blp");
+    _textures[i]->setClickFunc(texturePickerClick, i);
+    addChild(_textures[i]);
+  }
 
   UIButton* bleft = new UIButton((w / 2 - 65), (h - 27.5), 60.0f, 30.0f, "<<<"
                                 , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
@@ -58,33 +58,33 @@ UITexturePicker::UITexturePicker(float x, float y, float w, float h)
 
 void UITexturePicker::getTextures(selection_type lSelection)
 {
-	show();
+  show();
 
-	if (lSelection.which() == eEntry_MapChunk)
-	{
-		MapChunk* chunk = boost::get<selected_chunk_type> (lSelection).chunk;
+  if (lSelection.which() == eEntry_MapChunk)
+  {
+    MapChunk* chunk = boost::get<selected_chunk_type> (lSelection).chunk;
     _chunk = chunk;
-		size_t index = 0;
+    size_t index = 0;
 
-		for (; index < 4U && chunk->textureSet->num() > index; ++index)
-		{
-			_textures[index]->setTexture(chunk->textureSet->texture(index));
-			_textures[index]->show();
-		}
+    for (; index < 4U && chunk->textureSet->num() > index; ++index)
+    {
+      _textures[index]->setTexture(chunk->textureSet->texture(index));
+      _textures[index]->show();
+    }
 
-		for (; index < 4U; ++index)
-		{
-			_textures[index]->hide();
-		}
-	}
+    for (; index < 4U; ++index)
+    {
+      _textures[index]->hide();
+    }
+  }
 }
 
 void UITexturePicker::setTexture(size_t id)
 {
-	assert(id < 4);
+  assert(id < 4);
 
-	UITexturingGUI::setSelectedTexture(_textures[id]->getTexture());
-	UITexturingGUI::updateSelectedTexture();
+  UITexturingGUI::setSelectedTexture(_textures[id]->getTexture());
+  UITexturingGUI::updateSelectedTexture();
 }
 
 void UITexturePicker::shiftSelectedTextureLeft()

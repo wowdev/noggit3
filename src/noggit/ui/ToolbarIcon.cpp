@@ -9,74 +9,74 @@
 #include <opengl/scoped.hpp>
 
 UIToolbarIcon::UIToolbarIcon(float xPos, float yPos, const std::string& tex, const std::string& texd, const int& id, UIEventClassConstructorArguments)
-	: UIFrame(xPos, yPos, 35.0f, 35.0f)
-	, UIEventClassConstructorSuperCall()
-	, texture(TextureManager::newTexture(tex))
-	, textureSelected(TextureManager::newTexture(texd))
-	, _textureFilename(tex)
-	, _textureSelectedFilename(texd)
-	, iconId(id)
-	, selected(false)
+  : UIFrame(xPos, yPos, 35.0f, 35.0f)
+  , UIEventClassConstructorSuperCall()
+  , texture(TextureManager::newTexture(tex))
+  , textureSelected(TextureManager::newTexture(texd))
+  , _textureFilename(tex)
+  , _textureSelectedFilename(texd)
+  , iconId(id)
+  , selected(false)
 {
 }
 
 UIToolbarIcon::~UIToolbarIcon()
 {
-	TextureManager::delbyname(_textureFilename);
-	TextureManager::delbyname(_textureSelectedFilename);
+  TextureManager::delbyname(_textureFilename);
+  TextureManager::delbyname(_textureSelectedFilename);
 }
 
 UIFrame* UIToolbarIcon::processLeftClick(float /*mx*/, float /*my*/)
 {
-	UIEventEventHandlerCall(iconId);
+  UIEventEventHandlerCall(iconId);
 
-	return this;
+  return this;
 }
 
 void UIToolbarIcon::render() const
 {
   opengl::scoped::matrix_pusher const matrix;
-	gl.translatef(x(), y(), 0.0f);
+  gl.translatef(x(), y(), 0.0f);
 
-	gl.color3f(1.0f, 1.0f, 1.0f);
+  gl.color3f(1.0f, 1.0f, 1.0f);
 
-	opengl::texture::set_active_texture();
-	opengl::texture::enable_texture();
+  opengl::texture::set_active_texture();
+  opengl::texture::enable_texture();
 
-	texture->bind();
+  texture->bind();
 
-	gl.begin(GL_TRIANGLE_STRIP);
-	gl.texCoord2f(0.0f, 0.0f);
-	gl.vertex2f(0.0f, 0.0f);
-	gl.texCoord2f(1.0f, 0.0f);
-	gl.vertex2f(width(), 0.0f);
-	gl.texCoord2f(0.0f, 1.0f);
-	gl.vertex2f(0.0f, height());
-	gl.texCoord2f(1.0f, 1.0f);
-	gl.vertex2f(width(), height());
-	gl.end();
+  gl.begin(GL_TRIANGLE_STRIP);
+  gl.texCoord2f(0.0f, 0.0f);
+  gl.vertex2f(0.0f, 0.0f);
+  gl.texCoord2f(1.0f, 0.0f);
+  gl.vertex2f(width(), 0.0f);
+  gl.texCoord2f(0.0f, 1.0f);
+  gl.vertex2f(0.0f, height());
+  gl.texCoord2f(1.0f, 1.0f);
+  gl.vertex2f(width(), height());
+  gl.end();
 
-	opengl::texture::disable_texture();
+  opengl::texture::disable_texture();
 
-	if (selected)
-	{
-		static const float sizer = 18.0f;
+  if (selected)
+  {
+    static const float sizer = 18.0f;
 
-		opengl::texture::enable_texture();
+    opengl::texture::enable_texture();
 
-		textureSelected->bind();
+    textureSelected->bind();
 
-		gl.begin(GL_TRIANGLE_STRIP);
-		gl.texCoord2f(0.0f, 0.0f);
-		gl.vertex2f(-sizer, -sizer);
-		gl.texCoord2f(1.0f, 0.0f);
-		gl.vertex2f(width() + sizer, -sizer);
-		gl.texCoord2f(0.0f, 1.0f);
-		gl.vertex2f(-sizer, height() + sizer);
-		gl.texCoord2f(1.0f, 1.0f);
-		gl.vertex2f(width() + sizer, height() + sizer);
-		gl.end();
+    gl.begin(GL_TRIANGLE_STRIP);
+    gl.texCoord2f(0.0f, 0.0f);
+    gl.vertex2f(-sizer, -sizer);
+    gl.texCoord2f(1.0f, 0.0f);
+    gl.vertex2f(width() + sizer, -sizer);
+    gl.texCoord2f(0.0f, 1.0f);
+    gl.vertex2f(-sizer, height() + sizer);
+    gl.texCoord2f(1.0f, 1.0f);
+    gl.vertex2f(width() + sizer, height() + sizer);
+    gl.end();
 
-		opengl::texture::disable_texture();
-	}
+    opengl::texture::disable_texture();
+  }
 }
