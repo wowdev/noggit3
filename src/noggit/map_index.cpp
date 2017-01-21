@@ -880,3 +880,8 @@ void MapIndex::saveMaxUID()
   // save the max UID on the disc
   uid_storage::getInstance()->saveMaxUID(gWorld->mMapId, highestGUID);
 }
+
+void MapIndex::loadMaxUID()
+{
+  highestGUID = uid_storage::getInstance()->getMaxUID(gWorld->mMapId);
+}
