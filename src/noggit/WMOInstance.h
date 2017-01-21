@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include <set>
-#include <stdint.h>
-
+#include <math/ray.hpp>
 #include <math/vector_3d.hpp> // math::vector_3d
 #include <noggit/WMO.h>
-#include <math/ray.hpp>
+
+#include <cstdint>
+#include <set>
 
 class MPQFile;
 struct ENTRY_MODF;

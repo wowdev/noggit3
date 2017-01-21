@@ -1,16 +1,15 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/Log.h>
 #include <opengl/context.hpp>
 #include <opengl/scoped.hpp>
-
-#include <noggit/Log.h>
 
 #include <boost/current_function.hpp>
 
 #include <functional>
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 opengl::context gl;
 

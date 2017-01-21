@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include <math/interpolation.hpp>
 #include <math/vector_4d.hpp>
+
+#include <cstdint>
 
 namespace math
 {

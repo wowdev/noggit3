@@ -3,6 +3,7 @@
 #pragma once
 
 #include <boost/thread.hpp>
+
 #include <list>
 
 class AsyncObject;

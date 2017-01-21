@@ -4,7 +4,8 @@
 
 #include <noggit/MPQ.h>
 #include <noggit/alphamap.hpp>
-#include <stdint.h>
+
+#include <cstdint>
 
 namespace OpenGL
 {

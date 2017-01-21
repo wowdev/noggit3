@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include <string>
-
 #include <noggit/DBCFile.h>
+
+#include <string>
 
 class AreaDB : public DBCFile
 {

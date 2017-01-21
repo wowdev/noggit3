@@ -1,19 +1,18 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/texture_set.hpp>
-
 #include <noggit/Brush.h>
 #include <noggit/Environment.h>
-#include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/Video.h>
+#include <noggit/Log.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
-#include <noggit/Log.h>
+#include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/Video.h>
 #include <noggit/World.h>
+#include <noggit/texture_set.hpp>
 
-#include <iostream>     // std::cout
 #include <algorithm>    // std::min
+#include <iostream>     // std::cout
 
 TextureSet::TextureSet()
 {}

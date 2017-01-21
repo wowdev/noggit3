@@ -1,12 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/matrix_4x4.hpp>
-
-#include <cstring> // memcpy, memset
-#include <cmath>
-
 #include <math/quaternion.hpp>
 #include <math/vector_3d.hpp>
+
+#include <cmath>
+#include <cstring> // memcpy, memset
 
 namespace math
 {

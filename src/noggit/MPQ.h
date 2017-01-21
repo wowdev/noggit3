@@ -2,12 +2,13 @@
 
 #pragma once
 
-#include <set>
+#include <noggit/AsyncObject.h>
+
 #include <StormLib.h>
+
+#include <set>
 #include <string>
 #include <vector>
-
-#include <noggit/AsyncObject.h>
 
 class MPQArchive;
 class MPQFile;

@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
+#include <math/vector_3d.hpp>
 #include <noggit/AppState.h>
 #include <noggit/ModelManager.h>
-#include <math/vector_3d.hpp>
 
 #include <boost/optional.hpp>
+
+#include <string>
+#include <vector>
 
 // ui classes
 class UIFrame;

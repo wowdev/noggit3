@@ -1,11 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/ConfigFile.h>
+#include <noggit/Log.h>
 #include <noggit/Settings.h>
 
 #include <boost/filesystem.hpp>
-
-#include <noggit/ConfigFile.h>
-#include <noggit/Log.h>
 
 Settings::Settings()
 {

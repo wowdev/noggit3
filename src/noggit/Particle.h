@@ -2,15 +2,17 @@
 
 #pragma once
 
-#include <list>
-#include <vector>
-
-class ParticleSystem;
-class RibbonEmitter;
-
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/Model.h>
 #include <noggit/Video.h>
+
+#include <list>
+#include <vector>
+
+class Bone;
+class Model;
+class ParticleSystem;
+class RibbonEmitter;
 
 struct Particle {
   math::vector_3d pos, speed, down, origin, dir;

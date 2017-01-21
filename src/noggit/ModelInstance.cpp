@@ -1,13 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ModelInstance.h>
-
 #include <noggit/Frustum.h>
 #include <noggit/Log.h>
 #include <noggit/Misc.h> // checkinside
 #include <noggit/Model.h> // Model, etc.
-#include <noggit/World.h> // gWorld
+#include <noggit/ModelInstance.h>
 #include <noggit/Settings.h> // gWorld
+#include <noggit/World.h> // gWorld
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 

@@ -2,16 +2,16 @@
 
 #pragma once
 
-#include <vector>
-#include <map>
-#include <string>
-
 #include <math/ray.hpp>
 #include <noggit/MapHeaders.h>
 #include <noggit/Selection.h>
 #include <noggit/Video.h> // GLfloat, GLshort, ...
 #include <noggit/tile_index.hpp>
 #include <opengl/shader.fwd.hpp>
+
+#include <map>
+#include <string>
+#include <vector>
 
 class Frustum;
 class MapChunk;

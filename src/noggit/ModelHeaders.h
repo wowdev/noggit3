@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include <stdint.h>
-
 #include <math/vector_2d.hpp>
 #include <math/vector_3d.hpp>
+
+#include <cstdint>
 
 #pragma pack(push,1)
 

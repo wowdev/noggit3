@@ -2,13 +2,12 @@
 
 #pragma once
 
-#include <noggit/MapTile.h> // MapTile
 #include <math/quaternion.hpp> // math::vector_4d
-#include <noggit/Video.h> // GLuint
-#include <noggit/WMOInstance.h>
+#include <noggit/MapTile.h> // MapTile
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
-
+#include <noggit/Video.h> // GLuint
+#include <noggit/WMOInstance.h>
 #include <opengl/texture.hpp>
 
 class MPQFile;

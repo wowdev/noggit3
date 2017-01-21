@@ -1,17 +1,17 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <algorithm>
-#include <cassert>
-#include <map>
-#include <sstream>
-#include <string>
-
 #include <noggit/Log.h>
 #include <noggit/Model.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
+
+#include <algorithm>
+#include <cassert>
+#include <map>
+#include <sstream>
+#include <string>
 
 int globalTime = 0;
 

@@ -14,6 +14,29 @@ char* gpszProgramName = "Noggit3";
 static LOGCONTEXT  glogContext = { 0 };
 #endif
 
+#include <noggit/AppState.h>
+#include <noggit/AsyncLoader.h>
+#include <noggit/ConfigFile.h>
+#include <noggit/Environment.h>  // This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
+#include <noggit/Liquid.h>
+#include <noggit/Log.h>
+#include <noggit/MPQ.h>
+#include <noggit/MapView.h>
+#include <noggit/Menu.h>
+#include <noggit/Model.h>
+#include <noggit/ModelManager.h> // ModelManager::report()
+#include <noggit/Project.h>    // This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
+#include <noggit/Settings.h>    // In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
+#include <noggit/TextureManager.h> // TextureManager::report()
+#include <noggit/Video.h>
+#include <noggit/WMO.h> // WMOManager::report()
+#include <noggit/errorHandling.h>
+
+#include <boost/filesystem.hpp>
+#include <boost/thread/thread.hpp>
+
+#include <SDL.h>
+
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
@@ -21,29 +44,6 @@ static LOGCONTEXT  glogContext = { 0 };
 #include <iostream>
 #include <list>
 #include <vector>
-
-#include <boost/filesystem.hpp>
-#include <boost/thread/thread.hpp>
-
-#include <SDL.h>
-
-#include <noggit/AppState.h>
-#include <noggit/AsyncLoader.h>
-#include <noggit/ConfigFile.h>
-#include <noggit/Environment.h>  // This singleton holds all vars you dont must save. Like bools for display options. We should move all global stuff here to get it OOP!
-#include <noggit/errorHandling.h>
-#include <noggit/Liquid.h>
-#include <noggit/Log.h>
-#include <noggit/MapView.h>
-#include <noggit/Menu.h>
-#include <noggit/Model.h>
-#include <noggit/MPQ.h>
-#include <noggit/Project.h>    // This singleton holds later all settings for the current project. Will also be serialized to a selectable place on disk.
-#include <noggit/Settings.h>    // In this singleton you can insert user settings. This object will later be serialized to disk (userpath)
-#include <noggit/Video.h>
-#include <noggit/TextureManager.h> // TextureManager::report()
-#include <noggit/WMO.h> // WMOManager::report()
-#include <noggit/ModelManager.h> // ModelManager::report()
 
 #include "revision.h"
 

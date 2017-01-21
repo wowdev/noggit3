@@ -2,10 +2,10 @@
 
 #pragma once
 
+#include <noggit/Log.h>
+
 #include <csignal>
 #include <string>
-
-#include <noggit/Log.h>
 
 void printStacktrace();
 

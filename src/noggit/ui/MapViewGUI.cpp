@@ -58,6 +58,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   objectEditor->hide();
   addChild(objectEditor);
 
+
   rotationEditor = new UIRotationEditor((float)video.xres() - 520.0f, 30.0f);
   rotationEditor->movable(true);
   rotationEditor->hide();

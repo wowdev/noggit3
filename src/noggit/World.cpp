@@ -1,45 +1,44 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#define _CRT_SECURE_NO_WARNINGS
-#include <noggit/World.h>
-#include <algorithm>
-#include <cassert>
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <sstream>
-#include <string>
-#include <utility>
-#include <time.h>
-#include <boost/filesystem.hpp>
-#include <boost/range/adaptor/map.hpp>
-#include <boost/thread/thread.hpp>
-
+#include <noggit/Brush.h> // brush
+#include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
 #include <noggit/Environment.h>
 #include <noggit/Frustum.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
-#include <noggit/texture_set.hpp>
+#include <noggit/MapTile.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/Project.h>
 #include <noggit/Settings.h>
 #include <noggit/TextureManager.h>
-#include <noggit/ui/TexturingGUI.h>
+#include <noggit/TileWater.hpp>// tile water
 #include <noggit/Video.h>
 #include <noggit/WMOInstance.h> // WMOInstance
-#include <noggit/MapTile.h>
-#include <noggit/Brush.h> // brush
-#include <noggit/ConfigFile.h>
+#include <noggit/World.h>
 #include <noggit/map_index.hpp>
-#include <noggit/TileWater.hpp>// tile water
+#include <noggit/texture_set.hpp>
+#include <noggit/ui/TexturingGUI.h>
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
+#include <boost/filesystem.hpp>
+#include <boost/range/adaptor/map.hpp>
+#include <boost/thread/thread.hpp>
+
+#include <algorithm>
+#include <cassert>
+#include <ctime>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
 #include <unordered_set>
+#include <utility>
 
 World *gWorld = nullptr;
 

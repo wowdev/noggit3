@@ -3,10 +3,9 @@
 #pragma once
 
 #include <math/matrix_4x4.hpp>
-#include <math/trig.hpp>
 #include <math/projection.hpp>
+#include <math/trig.hpp>
 #include <math/vector_3d.hpp>
-
 #include <opengl/context.hpp>
 
 namespace opengl

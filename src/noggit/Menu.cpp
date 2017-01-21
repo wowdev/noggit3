@@ -1,6 +1,29 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/DBC.h>
+#include <noggit/DBCFile.h>
+#include <noggit/Log.h>
+#include <noggit/MPQ.h>
+#include <noggit/MapView.h>
 #include <noggit/Menu.h>
+#include <noggit/Misc.h>
+#include <noggit/ModelManager.h> // ModelManager
+#include <noggit/Settings.h>
+#include <noggit/Settings.h>
+#include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/WMOInstance.h> // WMOInstance (only for loading WMO only maps, we never load..)
+#include <noggit/WMOInstance.h> // WMOInstance (only for loading WMO only maps, we never load..)
+#include <noggit/World.h>
+#include <noggit/World.h>
+#include <noggit/application.h> // fonts, APP_*
+#include <noggit/map_index.hpp>
+#include <noggit/map_index.hpp>
+#include <noggit/ui/About.h> // UIAbout
+#include <noggit/ui/Frame.h> // UIFrame
+#include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
+#include <noggit/ui/MinimapWindow.h> // UIMinimapWindow
+#include <noggit/ui/StatusBar.h> // UIStatusBar
+#include <noggit/ui/uid_fix_window.hpp>
 
 #include <cstdlib>
 #include <ctime>
@@ -11,25 +34,6 @@
 #include <string>
 #include <vector>
 
-#include <noggit/DBC.h>
-#include <noggit/DBCFile.h>
-#include <noggit/Log.h>
-#include <noggit/MapView.h>
-#include <noggit/Misc.h>
-#include <noggit/ModelManager.h> // ModelManager
-#include <noggit/MPQ.h>
-#include <noggit/application.h> // fonts, APP_*
-#include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/ui/About.h> // UIAbout
-#include <noggit/ui/Frame.h> // UIFrame
-#include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
-#include <noggit/ui/MinimapWindow.h> // UIMinimapWindow
-#include <noggit/ui/StatusBar.h> // UIStatusBar
-#include <noggit/ui/uid_fix_window.hpp>
-#include <noggit/WMOInstance.h> // WMOInstance (only for loading WMO only maps, we never load..)
-#include <noggit/World.h>
-#include <noggit/Settings.h>
-#include <noggit/map_index.hpp>
 
 Menu* theMenu = nullptr;
 

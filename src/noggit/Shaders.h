@@ -2,11 +2,10 @@
 
 #pragma once
 
-#include <string>
-
+#include <noggit/MPQ.h>
 #include <noggit/Video.h>
 
-#include <noggit/MPQ.h>
+#include <string>
 
 #ifdef USEBLSSHADER
 class BLSShader

@@ -2,24 +2,10 @@
 
 #undef _UNICODE
 
-#include <algorithm>
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <map>
-#include <stdlib.h>
-#include <string>
-#include <vector>
-
-#include <boost/filesystem.hpp>
-
-#ifdef __FILESAREMISSING
-#include <IL/il.h>
-#endif
-
 #include <noggit/Brush.h> // brush
 #include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
+#include <noggit/Environment.h>
 #include <noggit/Environment.h>
 #include <noggit/FreeType.h> // freetype::
 #include <noggit/Log.h>
@@ -27,11 +13,13 @@
 #include <noggit/MapView.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/application.h> // app.getStates(), gPop, gFPS, app.getArial14(), morpheus40, arial...
 #include <noggit/Project.h>
 #include <noggit/Settings.h>
-#include <noggit/Environment.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
+#include <noggit/WMOInstance.h> // WMOInstance
+#include <noggit/World.h>
+#include <noggit/application.h> // app.getStates(), gPop, gFPS, app.getArial14(), morpheus40, arial...
+#include <noggit/map_index.hpp>
 #include <noggit/ui/AppInfo.h> // appInfo
 #include <noggit/ui/CapsWarning.h>
 #include <noggit/ui/CheckBox.h> // UICheckBox
@@ -60,11 +48,19 @@
 #include <noggit/ui/WaterSaveWarning.h>
 #include <noggit/ui/WaterTypeBrowser.h>
 #include <noggit/ui/ZoneIDBrowser.h>
-#include <noggit/WMOInstance.h> // WMOInstance
-#include <noggit/World.h>
-#include <noggit/map_index.hpp>
-#include <opengl/scoped.hpp>
 #include <opengl/matrix.hpp>
+#include <opengl/scoped.hpp>
+
+#include <boost/filesystem.hpp>
+
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;

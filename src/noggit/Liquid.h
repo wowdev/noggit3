@@ -6,18 +6,16 @@
 
 class Liquid;
 
-#include <string>
-#include <vector>
-
-#include <noggit/Video.h>
 #include <noggit/MPQ.h>
+#include <noggit/MapTile.h>
 #ifdef USEBLSFILES
 #include <noggit/Shaders.h>
 #endif
-#include <noggit/MapTile.h>
+#include <noggit/Video.h>
 #include <noggit/WMO.h>
 
-//#include <noggit/Log.h>
+#include <string>
+#include <vector>
 
 namespace OpenGL
 {

@@ -2,19 +2,19 @@
 
 #pragma once
 
-#include <assert.h>
-#include <string>
-#include <stdint.h>
-#include <sstream>
-#include <fstream>
-#include <ctime>
-
 #include <noggit/MapHeaders.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/tile_index.hpp>
 
 #include <boost/range/iterator_range.hpp>
+
+#include <cassert>
+#include <cstdint>
+#include <ctime>
+#include <fstream>
+#include <sstream>
+#include <string>
 
 /*!
 \brief This class is only a holder to have easier access to MapTiles and their flags for easier WDT parsing. This is private and for the class World only.

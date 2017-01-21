@@ -3,10 +3,10 @@
 #include <noggit/Misc.h>
 
 #include <iomanip>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace misc
 {

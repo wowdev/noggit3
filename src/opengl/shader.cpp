@@ -1,14 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <opengl/shader.hpp>
-
 #include <math/matrix_4x4.hpp>
 #include <math/vector_2d.hpp>
 #include <math/vector_3d.hpp>
 #include <math/vector_4d.hpp>
-
 #include <opengl/context.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
 #include <opengl/texture.hpp>
 
 #include <list>

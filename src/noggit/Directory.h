@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include <string>
-#include <map>
-#include <vector>
-
-#include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/shared_ptr.hpp>
+
+#include <map>
+#include <string>
+#include <vector>
 
 class Directory : public boost::enable_shared_from_this<Directory>
 {
