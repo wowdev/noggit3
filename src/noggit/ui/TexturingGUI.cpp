@@ -135,7 +135,7 @@ bool TextureInPalette(const std::string& pFName)
 
   if (showOnlySpecularTextures)
   {
-    if (!std::any_of(std::begin(specularTextureNames), std::end(specularTextureNames), [&](string i) { return i == pFName; })) return false;
+    if (!std::any_of(std::begin(specularTextureNames), std::end(specularTextureNames), [&](std::string i) { return i == pFName; })) return false;
   }
 
 
