@@ -14,6 +14,8 @@ public:
 
   void saveMaxUID(std::size_t mapID, uint32_t uid);
 
+  // save the uids on the disc
+  void save();
   
 private:
   ConfigFile _uidFile;
