@@ -97,7 +97,7 @@ includePlattform("prefind")
 
 FIND_PACKAGE( Freetype REQUIRED )
 FIND_PACKAGE( OpenGL REQUIRED )
-FIND_PACKAGE( Boost COMPONENTS thread filesystem system REQUIRED )
+FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test_exec_monitor REQUIRED )
 FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
 FIND_PACKAGE( SDL REQUIRED )
@@ -145,3 +145,27 @@ if (NOGGIT_LOGTOCONSOLE AND WIN32)
 endif()
 
 includePlattform("pack")
+
+add_library (noggit-math STATIC
+  "src/math/matrix_4x4.cpp"
+  "src/math/vector_2d.cpp"
+)
+add_library (noggit::math ALIAS noggit-math)
+
+include (CTest)
+enable_testing()
+
+add_executable (math-vector_2d.test test/math/vector_2d.cpp)
+target_compile_definitions (math-vector_2d.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
+target_link_libraries (math-vector_2d.test Boost::unit_test_framework Boost::test_exec_monitor noggit::math)
+add_test (NAME math-vector_2d COMMAND $<TARGET_FILE:math-vector_2d.test>)
+
+add_executable (math-trig.test test/math/trig.cpp)
+target_compile_definitions (math-trig.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
+target_link_libraries (math-trig.test Boost::unit_test_framework Boost::test_exec_monitor noggit::math)
+add_test (NAME math-trig COMMAND $<TARGET_FILE:math-trig.test>)
+
+add_executable (math-matrix_4x4.test test/math/matrix_4x4.cpp)
+target_compile_definitions (math-matrix_4x4.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
+target_link_libraries (math-matrix_4x4.test Boost::unit_test_framework Boost::test_exec_monitor noggit::math)
+add_test (NAME math-matrix_4x4 COMMAND $<TARGET_FILE:math-matrix_4x4.test>)

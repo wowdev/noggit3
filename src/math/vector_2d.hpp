@@ -4,6 +4,9 @@
 
 #include <math/trig.hpp>
 
+#include <ostream>
+#include <tuple>
+
 namespace math
 {
   struct vector_2d
@@ -27,6 +30,10 @@ namespace math
     {
       return _data;
     }
+    inline operator float const*() const
+    {
+      return _data;
+    }
 
     vector_2d operator* (float factor) const
     {
@@ -35,6 +42,15 @@ namespace math
     vector_2d operator+ (vector_2d const& other) const
     {
       return {x + other.x, y + other.y};
+    }
+
+    bool operator== (vector_2d const& rhs) const
+    {
+      return std::tie (x, y) == std::tie (rhs.x, rhs.y);
+    }
+    friend std::ostream& operator<< (std::ostream& os, vector_2d const& x)
+    {
+      return os << x.x << ", " << x.y;
     }
   };
 

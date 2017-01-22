@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <ostream>
+#include <tuple>
 
 namespace math
 {
@@ -145,6 +147,16 @@ namespace math
           && a.y < y && b.y > y
           && a.z < z && b.z > z;
     }
+
+    bool operator== (vector_3d_base<T> const& rhs) const
+    {
+      return std::tie (x, y, z) == std::tie (rhs.x, rhs.y, rhs.z);
+    }
+    friend std::ostream& operator<< (std::ostream& os, vector_3d_base<T> const& x)
+    {
+      return os << x.x << ", " << x.y << ", " << x.z;
+    }
+
   };
 
   template<typename T>
