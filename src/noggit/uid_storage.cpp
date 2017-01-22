@@ -2,6 +2,8 @@
 
 #include <noggit/uid_storage.hpp>
 
+#include <noggit/Log.h>
+
 #include <boost/filesystem.hpp>
 
 
@@ -55,4 +57,32 @@ uint32_t uid_storage::getMaxUID(std::size_t mapID) const
 void uid_storage::saveMaxUID(std::size_t mapID, uint32_t uid)
 {
   _uidFile.add<uint32_t>(to_str(mapID), uid);
+  save();
+}
+
+void uid_storage::save()
+{
+  // create the file if not exists
+  std::ofstream fs;
+
+  if (!boost::filesystem::exists("uid.txt"))
+  {  
+    fs.open("uid.txt", std::ios::out);
+  }
+  else
+  {
+    fs.open("uid.txt", std::ios::trunc);
+  }
+
+  if (!fs.is_open())
+  {
+    LogError << "Could not open uid.txt" << std::endl;
+    return;
+  }
+  
+  fs << "# UID storage file" << std::endl;
+  fs << "# map_id,max_id" << std::endl;
+  fs << _uidFile;
+
+  fs.close();
 }
