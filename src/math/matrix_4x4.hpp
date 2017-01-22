@@ -117,7 +117,18 @@ namespace math
       return {_m[0][i], _m[1][i], _m[2][i], _m[3][i]};
     }
 
-  private:
+    bool operator== (matrix_4x4 const& rhs)
+    {
+      for (std::size_t i (0); i < 16; ++i)
+      {
+        if (_m[i] != rhs._m[i])
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
     union
     {
       float _m[4][4];
