@@ -1304,9 +1304,9 @@ void MapView::createGUI()
   mainGui->addChild(mbar);
 
 
-  addHotkey(SDLK_ESCAPE, MOD_none, static_cast<AppState::Function>(&MapView::quitask));
-  addHotkey(SDLK_s, MOD_ctrl, static_cast<AppState::Function>(&MapView::save));
-  addHotkey(SDLK_s, MOD_meta, static_cast<AppState::Function>(&MapView::save));
+  addHotkey (SDLK_ESCAPE, MOD_none, [this] { quitask(); });
+  addHotkey (SDLK_s, MOD_ctrl, [this] { save(); });
+  addHotkey (SDLK_s, MOD_meta, [this] { save(); });
 
   // ESC warning
   mainGui->escWarning = new UIExitWarning(this);
