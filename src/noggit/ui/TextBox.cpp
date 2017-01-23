@@ -2,7 +2,6 @@
 
 #include <noggit/ui/TextBox.h>
 
-#include <SDL.h>
 #include <utf8.h>
 
 #include <string>
@@ -125,24 +124,24 @@ const std::string& UITextBox::value() const
   return _value;
 }
 
-bool UITextBox::KeyBoardEvent(SDL_KeyboardEvent* e)
+bool UITextBox::key_down (SDLKey sym, Uint16 unicode)
 {
-  if (!_focus || e->type != SDL_KEYDOWN)
+  if (!_focus)
   {
     return false;
   }
 
-  if (e->keysym.sym == SDLK_BACKSPACE && !_value.empty())
+  if (sym == SDLK_BACKSPACE && !_value.empty())
   {
     const char* firstBeforeEnd(_value.c_str() + _value.length());
     utf8::prior(firstBeforeEnd, _value.c_str());
     _value.erase(firstBeforeEnd - _value.c_str());
   }
-  else if (e->keysym.sym == SDLK_ESCAPE)
+  else if (sym == SDLK_ESCAPE)
   {
     _focus = false;
   }
-  else if (e->keysym.sym == SDLK_RETURN)
+  else if (sym == SDLK_RETURN)
   {
     _focus = false;
     if (_enterFunction)
@@ -150,9 +149,9 @@ bool UITextBox::KeyBoardEvent(SDL_KeyboardEvent* e)
       _enterFunction(this, _value);
     }
   }
-  else if (e->keysm.unicode)
+  else if (unicode)
   {
-    utf8::append(e->keysym.unicode, std::back_inserter(_value));
+    utf8::append(unicode, std::back_inserter(_value));
   }
 
   _uiText->setText(_value);

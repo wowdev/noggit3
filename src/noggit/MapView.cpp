@@ -2105,7 +2105,10 @@ void MapView::resizewindow()
 
 void MapView::keypressed(SDL_KeyboardEvent *e)
 {
-  if (LastClicked && LastClicked->KeyBoardEvent(e)) return;
+  if (e->type == SDL_KEYDOWN && LastClicked && LastClicked->key_down (e->keysym.sym, e->keysym.unicode))
+  {
+    return;
+  }
 
   if (e->keysym.mod & KMOD_CAPS)
     mainGui->capsWarning->show();

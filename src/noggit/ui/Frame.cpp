@@ -2,7 +2,6 @@
 
 #include <noggit/ui/Frame.h>
 
-#include <SDL.h>
 #include <algorithm>
 #include <vector>
 
@@ -119,7 +118,7 @@ void UIFrame::getOffset(float* xOff, float* yOff)
   *yOff = ty + y();
 }
 
-bool UIFrame::KeyBoardEvent(SDL_KeyboardEvent *e)
+bool UIFrame::key_down (SDLKey, uint16_t unicode)
 {
   return false;
 }

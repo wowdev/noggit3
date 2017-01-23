@@ -5,7 +5,6 @@
 #include <sstream>
 #include <algorithm>
 #include <vector>
-#include <SDL.h>
 
 #include <noggit/DBC.h>
 #include <noggit/Environment.h>

@@ -7,7 +7,6 @@
 #include <noggit/ui/Frame.h>
 #include <noggit/ui/Text.h>
 
-struct SDL_KeyboardEvent;
 namespace OpenGL { class Texture; };
 
 class UITextBox : public UIFrame
@@ -39,7 +38,7 @@ public:
 
   UIFrame::Ptr processLeftClick(float mx, float my);
 
-  bool KeyBoardEvent(SDL_KeyboardEvent *e);
+  bool key_down (SDLKey sym, Uint16 unicode);
 
   void value(const std::string& pText);
   const std::string& value() const;
