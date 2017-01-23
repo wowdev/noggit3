@@ -13,7 +13,6 @@ Settings::Settings()
   this->random_size = false;
   this->random_tilt = false;
   this->AutoSelectingMode = true;
-  this->holelinesOn = false;
   this->FarZ = 1024;
   this->_noAntiAliasing = false;
   this->copyModelStats = true;
