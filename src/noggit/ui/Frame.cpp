@@ -65,6 +65,17 @@ UIFrame::Ptr UIFrame::processLeftClick(float mx, float my)
   return nullptr;
 }
 
+void UIFrame::mouse_moved (float mx, float my)
+{
+  for (auto&& child : _children)
+  {
+    if (!child->hidden() && child->IsHit (mx, my))
+    {
+      child->mouse_moved (mx - child->x(), my - child->y());
+    }
+  }
+}
+
 bool UIFrame::processLeftDrag(float /*mx*/, float /*my*/, float xDrag, float yDrag)
 {
   if (movable())

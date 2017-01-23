@@ -2879,7 +2879,6 @@ void MapView::inserObjectFromExtern(int model)
 
 void MapView::mousemove(SDL_MouseMotionEvent *e)
 {
-  mainGui->minimapWindow->mousemove(e);
   if ((look && !(Environment::getInstance()->ShiftDown || Environment::getInstance()->CtrlDown || Environment::getInstance()->AltDown)) || video.fullscreen())
   {
     ah += e->xrel / XSENS;
@@ -2980,7 +2979,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
     updown = (e->yrel / YSENS);
   }
 
-
+  mainGui->mouse_moved (e->x, e->y);
 
   Environment::getInstance()->screenX = MouseX = e->x;
   Environment::getInstance()->screenY = MouseY = e->y;

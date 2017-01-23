@@ -23,7 +23,7 @@ public:
   explicit UIMinimapWindow(Menu* menuLink);
   explicit UIMinimapWindow(World* setMap);
   UIFrame* processLeftClick(float mx, float my);
-  void mousemove(SDL_MouseMotionEvent *e);
+  virtual void mouse_moved (float, float) override;
   void resize();
   void render() const;
   void changePlayerLookAt(math::degrees ah);
