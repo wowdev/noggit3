@@ -23,7 +23,7 @@ enum eFlattenMode
   eFlattenMode_Count
 };
 
-class MapView : public AppState, public HotKeyReceiver
+class MapView : public AppState
 {
 private:
   float ah, av, moving, strafing, updown, mousedir, movespd, turn, lookat;

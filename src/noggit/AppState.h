@@ -4,12 +4,8 @@
 
 #include <SDL.h>
 
-#include <list>
-
-class HotKeyReceiver
-{
-public:
-};
+#include <forward_list>
+#include <functional>
 
 /*!
 \class AppState
@@ -19,8 +15,6 @@ public:
 class AppState
 {
 protected:
-  typedef void (AppState::* Function)();
-
   enum Modifier
   {
     MOD_shift = 0x01,
@@ -36,15 +30,15 @@ protected:
   {
     SDLKey key;
     size_t modifiers;
-    AppState::Function function;
+    std::function<void()> function;
+    HotKey (SDLKey k, size_t m, std::function<void()> f) : key (k), modifiers (m), function (f) {}
   };
 
-  std::list<HotKey> hotkeys;
+  std::forward_list<HotKey> hotkeys;
 
-  void addHotkey(SDLKey key, size_t modifiers, AppState::Function function)
+  void addHotkey(SDLKey key, size_t modifiers, std::function<void()> function)
   {
-    HotKey h = { key, modifiers, function };
-    hotkeys.push_back(h);
+    hotkeys.emplace_front (key, modifiers, function);
   }
 
   bool handleHotkeys(SDL_KeyboardEvent* e)
@@ -73,11 +67,11 @@ protected:
 
     //LogError << modifier<< std::endl;
 
-    for (std::list<HotKey>::iterator it = hotkeys.begin(); it != hotkeys.end(); ++it)
+    for (auto&& hotkey : hotkeys)
     {
-      if (e->keysym.sym == it->key && modifier == it->modifiers)
+      if (e->keysym.sym == hotkey.key && modifier == hotkey.modifiers)
       {
-        (this->*(it->function))();
+        hotkey.function();
         return true;
       }
     }
