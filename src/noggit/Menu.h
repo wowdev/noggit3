@@ -52,7 +52,6 @@ public:
   void tick(float t, float dt);
   void display(float t, float dt);
 
-  void keypressed(SDL_KeyboardEvent* e);
   void mouseclick(SDL_MouseButtonEvent* e);
   void mousemove(SDL_MouseMotionEvent* e);
 

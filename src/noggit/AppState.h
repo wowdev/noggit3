@@ -112,7 +112,16 @@ public:
   \brief This method gets called when a key is pressed or released.
   \param e The event given by SDL containing information about the key stroke.
   */
-  virtual void keypressed(SDL_KeyboardEvent* /*e*/) { }
+  virtual void keypressed(SDL_KeyboardEvent* e)
+  {
+    if (e->type == SDL_KEYDOWN)
+    {
+      if (handleHotkeys(e))
+      {
+        return;
+      }
+    }
+  }
 
   /*!
   \brief This is called when the window is getting resized.
