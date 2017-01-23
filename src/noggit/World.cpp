@@ -1125,10 +1125,6 @@ void main()
   ez = (int)(camera.z / TILESIZE);
 }
 
-static const GLuint MapObjName = 1;
-static const GLuint DoodadName = 2;
-static const GLuint MapTileName = 3;
-
 selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
 {
   selection_result results;

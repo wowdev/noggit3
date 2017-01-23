@@ -316,8 +316,6 @@ void ParticleSystem::draw()
   const float f = 1;//0.707106781f; // sqrt(2)/2
   math::vector_3d bv0 = math::vector_3d(-f, +f, 0);
   math::vector_3d bv1 = math::vector_3d(+f, +f, 0);
-  math::vector_3d bv2 = math::vector_3d(+f, -f, 0);
-  math::vector_3d bv3 = math::vector_3d(-f, -f, 0);
 
   if (billboard) {
     float modelview[16];

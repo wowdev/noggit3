@@ -772,16 +772,6 @@ void view_texture_palette(UIFrame*, int)
   mainGui->TexturePalette->toggleVisibility();
 }
 
-void exit_tilemode(UIFrame*, int)
-{
-  app.pop = true;
-}
-
-void test_menu_action(UIFrame*, int)
-{
-  gWorld->saveWDT();
-}
-
 void moveHeightmap(UIFrame*, int)
 {
   // set areaid on all chunks of the current ADT
@@ -1248,9 +1238,6 @@ void MapView::createGUI()
   mbar->GetMenu("File")->AddMenuItemSeperator(" ");
   mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", SaveOrReload, 3);
   addHotkey (SDLK_ESCAPE, MOD_none, [this] { quitask(); });
-
-  //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
-  //mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("selected object");
   mbar->GetMenu("Edit")->AddMenuItemButton("DEL delete", DeleteSelectedObject, 0);

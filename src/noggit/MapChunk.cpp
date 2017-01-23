@@ -22,13 +22,6 @@
 
 extern int terrainMode;
 
-static const int HEIGHT_TOP = 1000;
-static const int HEIGHT_MID = 600;
-static const int HEIGHT_LOW = 300;
-static const int HEIGHT_ZERO = 0;
-static const int HEIGHT_SHALLOW = -100;
-static const int HEIGHT_DEEP = -250;
-
 bool DrawMapContour = false;
 
 GLuint Contour = 0;
@@ -1012,7 +1005,6 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
 
 bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, int flattenType, float angle, float orientation)
 {
-  float speed = 1.00f;
   float dist, xdiff, zdiff, nremain;
   bool changed = false;
 
@@ -1074,7 +1066,6 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
 
 bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, float angle, float orientation)
 {
-  float speed = 1.00f;
   float dist, xdiff, zdiff, nremain;
   bool changed = false;
 
@@ -1766,7 +1757,15 @@ _textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
 
 
 
-/*void HeightColor(float height, math::vector_3d *Color)
+/*
+static const int HEIGHT_TOP = 1000;
+static const int HEIGHT_MID = 600;
+static const int HEIGHT_LOW = 300;
+static const int HEIGHT_ZERO = 0;
+static const int HEIGHT_SHALLOW = -100;
+static const int HEIGHT_DEEP = -250;
+
+void HeightColor(float height, math::vector_3d *Color)
 {
 White  1.00  1.00  1.00
 Brown  0.75  0.50  0.00
