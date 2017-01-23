@@ -18,7 +18,6 @@ UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pTex
   , _textureFilename(pTexNormal)
   , _textureDownFilename(pTexDown)
   , clickFunc(nullptr)
-  , id(0)
   , clicked(false)
   , text(new UIText(width() / 2.0f, 2.0f, app.getArial12(), eJustifyCenter))
 {
@@ -32,7 +31,6 @@ UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pTex
   , _textureFilename(pTexNormal)
   , _textureDownFilename(pTexDown)
   , clickFunc(nullptr)
-  , id(0)
   , clicked(false)
   , text(new UIText(width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter))
 {
@@ -46,7 +44,6 @@ UIButton::UIButton(float pX, float pY, float h, const std::string& pText, const 
   , _textureFilename(pTexNormal)
   , _textureDownFilename(pTexDown)
   , clickFunc(nullptr)
-  , id(0)
   , clicked(false)
   , text(new UIText(width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter))
 {
@@ -59,8 +56,7 @@ UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pTex
   , textureDown(TextureManager::newTexture(pTexDown))
   , _textureFilename(pTexNormal)
   , _textureDownFilename(pTexDown)
-  , clickFunc(pFunc)
-  , id(pFuncParam)
+  , clickFunc ([this, pFunc, pFuncParam] { pFunc (this, pFuncParam); })
   , clicked(false)
   , text(new UIText(width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter))
 {
@@ -73,8 +69,7 @@ UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pTex
   , textureDown(TextureManager::newTexture(pTexDown))
   , _textureFilename(pTexNormal)
   , _textureDownFilename(pTexDown)
-  , clickFunc(pFunc)
-  , id(pFuncParam)
+  , clickFunc ([this, pFunc, pFuncParam] { pFunc (this, pFuncParam); })
   , clicked(false)
   , text(new UIText(width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter))
 {
@@ -133,7 +128,7 @@ UIFrame* UIButton::processLeftClick(float /*mx*/, float /*my*/)
 {
   clicked = true;
   if (clickFunc)
-    clickFunc(this, id);
+    clickFunc();
   return this;
 }
 
@@ -144,6 +139,9 @@ void UIButton::processUnclick()
 
 void UIButton::setClickFunc(void(*f)(UIFrame *, int), int num)
 {
-  clickFunc = f;
-  id = num;
+  setClickFunc ([this, num, f] { f (this, num); });
+}
+void UIButton::setClickFunc (std::function<void()> fun)
+{
+  clickFunc = fun;
 }
