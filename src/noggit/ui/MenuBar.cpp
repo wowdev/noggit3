@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include <noggit/Environment.h> // CtrlDown
 #include <noggit/ui/CheckBox.h>
 #include <noggit/ui/Text.h>
 #include <noggit/Video.h>
@@ -59,13 +58,9 @@ void UIMenuBar::resize()
 
 void UIMenuBar::CloseAll()
 {
-  if (!Environment::getInstance()->CtrlDown)
+  for (MenuPanes::iterator it(mMenuPanes.begin()), end(mMenuPanes.end()); it != end; ++it)
   {
-    for (MenuPanes::iterator it(mMenuPanes.begin()), end(mMenuPanes.end())
-      ; it != end; ++it)
-    {
-      it->second->hide();
-    }
+    it->second->hide();
   }
 }
 
@@ -130,8 +125,7 @@ UIFrame* MenuItemButton::processLeftClick(float /*pX*/, float /*pY*/)
   if (clickFunc)
     clickFunc(this, id);
 
-  if (!Environment::getInstance()->CtrlDown)
-    mParent->Close();
+  mParent->Close();
 
   return this;
 }

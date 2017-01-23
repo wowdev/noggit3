@@ -26,6 +26,11 @@ enum eFlattenMode
 class MapView : public AppState
 {
 private:
+  bool _mod_alt_down = false;
+  bool _mod_ctrl_down = false;
+  bool _mod_shift_down = false;
+  bool _mod_space_down = false;
+
   float ah, av, moving, strafing, updown, mousedir, movespd, turn, lookat;
   bool key_w;
   bool look;

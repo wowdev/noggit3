@@ -6,10 +6,6 @@
 Environment::Environment()
 {
   this->view_holelines = false;
-  this->ShiftDown = false;
-  this->AltDown = false;
-  this->CtrlDown = false;
-  this->SpaceDown = false;
   this->flagPaintMode = FLAG_IMPASS;
   this->paintMode = true;
   this->highlightPaintableChunks = true;
