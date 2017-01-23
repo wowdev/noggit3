@@ -2165,9 +2165,9 @@ void MapView::resizewindow()
   mainGui->resize();
 }
 
-void MapView::keypressed(SDL_KeyboardEvent *e)
+void MapView::keyPressEvent (SDL_KeyboardEvent *e)
 {
-  if (e->type == SDL_KEYDOWN && LastClicked && LastClicked->key_down (e->keysym.sym, e->keysym.unicode))
+  if (LastClicked && LastClicked->key_down (e->keysym.sym, e->keysym.unicode))
   {
     return;
   }
@@ -2177,579 +2177,568 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
   else
     mainGui->capsWarning->hide();
 
-  if (e->type == SDL_KEYDOWN)
+  if (handleHotkeys(e))
+    return;
+
+  if (e->keysym.sym == SDLK_LSHIFT || e->keysym.sym == SDLK_RSHIFT)
+    _mod_shift_down = true;
+
+  if (e->keysym.sym == SDLK_LALT || e->keysym.sym == SDLK_RALT)
+    _mod_alt_down = true;
+
+  if (e->keysym.sym == SDLK_LCTRL || e->keysym.sym == SDLK_RCTRL)
+    _mod_ctrl_down = true;
+
+  if (e->keysym.sym == SDLK_SPACE)
+    _mod_space_down = true;
+
+  // movement
+  if (e->keysym.sym == SDLK_w)
   {
+    key_w = true;
+    moving = 1.0f;
+  }
 
+  if (e->keysym.sym == SDLK_UP)
+  {
+    lookat = 0.75f;
+  }
 
-    if (handleHotkeys(e))
-      return;
+  if (e->keysym.sym == SDLK_DOWN)
+  {
+    lookat = -0.75f;
+  }
 
-    // key DOWN
+  if (e->keysym.sym == SDLK_LEFT)
+  {
+    turn = -0.75f;
+  }
 
-    if (e->keysym.sym == SDLK_LSHIFT || e->keysym.sym == SDLK_RSHIFT)
-      _mod_shift_down = true;
+  if (e->keysym.sym == SDLK_RIGHT)
+  {
+    turn = 0.75f;
+  }
 
-    if (e->keysym.sym == SDLK_LALT || e->keysym.sym == SDLK_RALT)
-      _mod_alt_down = true;
+  // save
+  if (e->keysym.sym == SDLK_s)
+    moving = -1.0f;
 
-    if (e->keysym.sym == SDLK_LCTRL || e->keysym.sym == SDLK_RCTRL)
-      _mod_ctrl_down = true;
+  if (e->keysym.sym == SDLK_a)
+    strafing = -1.0f;
 
-    if (e->keysym.sym == SDLK_SPACE)
-      _mod_space_down = true;
+  if (e->keysym.sym == SDLK_d)
+    strafing = 1.0f;
 
-    // movement
-    if (e->keysym.sym == SDLK_w)
+  if (e->keysym.sym == SDLK_e)
+    updown = -1.0f;
+
+  if (e->keysym.sym == SDLK_q)
+    updown = 1.0f;
+
+  // position correction with num pad
+  if (e->keysym.sym == SDLK_KP8)
+    keyx = -1;
+
+  if (e->keysym.sym == SDLK_KP2)
+    keyx = 1;
+
+  if (e->keysym.sym == SDLK_KP6)
+    keyz = -1;
+
+  if (e->keysym.sym == SDLK_KP4)
+    keyz = 1;
+
+  if (e->keysym.sym == SDLK_KP1)
+    keyy = -1;
+
+  if (e->keysym.sym == SDLK_KP3)
+    keyy = 1;
+
+  if (e->keysym.sym == SDLK_KP7)
+    keyr = 1;
+
+  if (e->keysym.sym == SDLK_KP9)
+    keyr = -1;
+
+  if (e->keysym.sym == SDLK_KP0)
+    if (terrainMode == 6)
     {
-      key_w = true;
-      moving = 1.0f;
+      gWorld->setWaterHeight(tile_index(gWorld->camera), 0.0f);
+      mainGui->guiWater->updateData();
     }
 
-    if (e->keysym.sym == SDLK_UP)
-    {
-      lookat = 0.75f;
-    }
-
-    if (e->keysym.sym == SDLK_DOWN)
-    {
-      lookat = -0.75f;
-    }
-
-    if (e->keysym.sym == SDLK_LEFT)
-    {
-      turn = -0.75f;
-    }
-
-    if (e->keysym.sym == SDLK_RIGHT)
-    {
-      turn = 0.75f;
-    }
-
-    // save
-    if (e->keysym.sym == SDLK_s)
-      moving = -1.0f;
-
-    if (e->keysym.sym == SDLK_a)
-      strafing = -1.0f;
-
-    if (e->keysym.sym == SDLK_d)
-      strafing = 1.0f;
-
-    if (e->keysym.sym == SDLK_e)
-      updown = -1.0f;
-
-    if (e->keysym.sym == SDLK_q)
-      updown = 1.0f;
-
-    // position correction with num pad
-    if (e->keysym.sym == SDLK_KP8)
-      keyx = -1;
-
-    if (e->keysym.sym == SDLK_KP2)
-      keyx = 1;
-
-    if (e->keysym.sym == SDLK_KP6)
-      keyz = -1;
-
-    if (e->keysym.sym == SDLK_KP4)
-      keyz = 1;
-
-    if (e->keysym.sym == SDLK_KP1)
-      keyy = -1;
-
-    if (e->keysym.sym == SDLK_KP3)
-      keyy = 1;
-
-    if (e->keysym.sym == SDLK_KP7)
-      keyr = 1;
-
-    if (e->keysym.sym == SDLK_KP9)
-      keyr = -1;
-
-    if (e->keysym.sym == SDLK_KP0)
-      if (terrainMode == 6)
-      {
-        gWorld->setWaterHeight(tile_index(gWorld->camera), 0.0f);
-        mainGui->guiWater->updateData();
-      }
-
-
-
-    // copy model to clipboard
-    if (e->keysym.sym == SDLK_c)
-    {
-      if (_mod_ctrl_down && gWorld->GetCurrentSelection())
-        mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
-      else if (_mod_alt_down && _mod_ctrl_down)
-        mainGui->toggleCursorSwitcher();
-      else if (_mod_shift_down)
-        InsertObject(0, 14);
-      else if (_mod_alt_down)
-        InsertObject(0, 15);
-      else
-      {
-        if (terrainMode == 9)
-        {
-          mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
-        }
-        else
-        {
-          Environment::getInstance()->cursorType++;
-          Environment::getInstance()->cursorType %= 4;
-        }
-      }
-    }
-
-    if (e->keysym.sym == SDLK_t)
-    {
-      // toggle flatten angle mode
-      if (terrainMode == 1)
-      {
-        if (_mod_space_down)
-        {
-          gFlattenTypeGroup->Activate((flattenType + 1) % eFlattenMode_Count);
-        }
-        else
-        {
-          toggle_flatten->setState(!(Environment::getInstance()->flattenAngleEnabled));
-          toggleFlattenAngle(!(Environment::getInstance()->flattenAngleEnabled), 0);
-        }
-      }
-      else if (terrainMode == 2)
-      {
-        sprayBrushActive = !sprayBrushActive;
-        toggleSpray->setState(sprayBrushActive);
-      }
-      else if (terrainMode == 3)
-      {
-        math::vector_3d cam = gWorld->camera;
-        if (_mod_alt_down)
-        {
-          gWorld->addHoleADT(cam.x, cam.z);
-        }
-        else
-        {
-          gWorld->removeHoleADT(cam.x, cam.z);
-        }
-      }
-      else if (terrainMode == 9)
-      {
-        mainGui->objectEditor->togglePasteMode();
-      }
-
-
-    }
-
-    // toggle "terrain texturing mode" / draw models
-    if (e->keysym.sym == SDLK_F1)
-    {
-      if (_mod_shift_down)
-      {
-        if (alloff)
-        {
-          alloff_models = gWorld->drawmodels;
-          alloff_doodads = gWorld->drawdoodads;
-          alloff_contour = DrawMapContour;
-          alloff_wmo = gWorld->drawwmo;
-          alloff_fog = gWorld->drawfog;
-          alloff_terrain = gWorld->drawterrain;
-
-          gWorld->drawmodels = false;
-          gWorld->drawdoodads = false;
-          DrawMapContour = true;
-          gWorld->drawwmo = false;
-          gWorld->drawterrain = true;
-          gWorld->drawfog = false;
-        }
-        else
-        {
-          gWorld->drawmodels = alloff_models;
-          gWorld->drawdoodads = alloff_doodads;
-          DrawMapContour = alloff_contour;
-          gWorld->drawwmo = alloff_wmo;
-          gWorld->drawterrain = alloff_terrain;
-          gWorld->drawfog = alloff_fog;
-        }
-        alloff = !alloff;
-      }
-    }
-
-    // toggle help window
-    if (e->keysym.sym == SDLK_h)
+  // copy model to clipboard
+  if (e->keysym.sym == SDLK_c)
+  {
+    if (_mod_ctrl_down && gWorld->GetCurrentSelection())
+      mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
+    else if (_mod_alt_down && _mod_ctrl_down)
+      mainGui->toggleCursorSwitcher();
+    else if (_mod_shift_down)
+      InsertObject(0, 14);
+    else if (_mod_alt_down)
+      InsertObject(0, 15);
+    else
     {
       if (terrainMode == 9)
       {
-        // toggle hidden models visibility
-        if (_mod_space_down)
-        {
-          Environment::getInstance()->showModelFromHiddenList = !Environment::getInstance()->showModelFromHiddenList;
-        }
-        else if (_mod_shift_down)
-        {
-          gWorld->clearHiddenModelList();
-        }
-        else
-        {
-          // toggle selected model visibility
-          if (gWorld->HasSelection())
-          {
-            auto selection = gWorld->GetCurrentSelection();
-            if (selection->which() == eEntry_Model)
-            {
-              boost::get<selected_model_type> (*selection)->model->toggleVisibility();
-            }
-            else if (selection->which() == eEntry_WMO)
-            {
-              boost::get<selected_wmo_type> (*selection)->wmo->toggleVisibility();
-            }
-          }
-        }
-
+        mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
       }
       else
       {
-        mainGui->toggleHelp();
+        Environment::getInstance()->cursorType++;
+        Environment::getInstance()->cursorType %= 4;
       }
     }
+  }
 
-
-
-    if (e->keysym.sym == SDLK_f)
+  if (e->keysym.sym == SDLK_t)
+  {
+    // toggle flatten angle mode
+    if (terrainMode == 1)
     {
-      if (terrainMode == 1)
+      if (_mod_space_down)
       {
-        if (_mod_space_down)
-        {
-          toggleFlattenLock(!flattenRelativeMode, 0);
-          toggle_flatten_relative->setState(flattenRelativeMode);
-        }
-        else
-        {
-          flattenRelativePos = Environment::getInstance()->get_cursor_pos();
-          flatten_relative_x->value(misc::floatToStr(flattenRelativePos.x));
-          flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
-          flatten_relative_z->value(misc::floatToStr(flattenRelativePos.z));
-        }
+        gFlattenTypeGroup->Activate((flattenType + 1) % eFlattenMode_Count);
       }
-      else if (terrainMode == 9)
+      else
       {
+        toggle_flatten->setState(!(Environment::getInstance()->flattenAngleEnabled));
+        toggleFlattenAngle(!(Environment::getInstance()->flattenAngleEnabled), 0);
+      }
+    }
+    else if (terrainMode == 2)
+    {
+      sprayBrushActive = !sprayBrushActive;
+      toggleSpray->setState(sprayBrushActive);
+    }
+    else if (terrainMode == 3)
+    {
+      math::vector_3d cam = gWorld->camera;
+      if (_mod_alt_down)
+      {
+        gWorld->addHoleADT(cam.x, cam.z);
+      }
+      else
+      {
+        gWorld->removeHoleADT(cam.x, cam.z);
+      }
+    }
+    else if (terrainMode == 9)
+    {
+      mainGui->objectEditor->togglePasteMode();
+    }
+  }
+
+  // toggle "terrain texturing mode" / draw models
+  if (e->keysym.sym == SDLK_F1)
+  {
+    if (_mod_shift_down)
+    {
+      if (alloff)
+      {
+        alloff_models = gWorld->drawmodels;
+        alloff_doodads = gWorld->drawdoodads;
+        alloff_contour = DrawMapContour;
+        alloff_wmo = gWorld->drawwmo;
+        alloff_fog = gWorld->drawfog;
+        alloff_terrain = gWorld->drawterrain;
+
+        gWorld->drawmodels = false;
+        gWorld->drawdoodads = false;
+        DrawMapContour = true;
+        gWorld->drawwmo = false;
+        gWorld->drawterrain = true;
+        gWorld->drawfog = false;
+      }
+      else
+      {
+        gWorld->drawmodels = alloff_models;
+        gWorld->drawdoodads = alloff_doodads;
+        DrawMapContour = alloff_contour;
+        gWorld->drawwmo = alloff_wmo;
+        gWorld->drawterrain = alloff_terrain;
+        gWorld->drawfog = alloff_fog;
+      }
+      alloff = !alloff;
+    }
+  }
+
+  // toggle help window
+  if (e->keysym.sym == SDLK_h)
+  {
+    if (terrainMode == 9)
+    {
+      // toggle hidden models visibility
+      if (_mod_space_down)
+      {
+        Environment::getInstance()->showModelFromHiddenList = !Environment::getInstance()->showModelFromHiddenList;
+      }
+      else if (_mod_shift_down)
+      {
+        gWorld->clearHiddenModelList();
+      }
+      else
+      {
+        // toggle selected model visibility
         if (gWorld->HasSelection())
         {
-          math::vector_3d pos = Environment::getInstance()->get_cursor_pos();
           auto selection = gWorld->GetCurrentSelection();
-
           if (selection->which() == eEntry_Model)
           {
-            gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
-            boost::get<selected_model_type> (*selection)->pos = pos;
-            boost::get<selected_model_type> (*selection)->recalcExtents();
-            gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
+            boost::get<selected_model_type> (*selection)->model->toggleVisibility();
           }
           else if (selection->which() == eEntry_WMO)
           {
-            gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
-            boost::get<selected_wmo_type> (*selection)->pos = pos;
-            boost::get<selected_wmo_type> (*selection)->recalcExtents();
-            gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+            boost::get<selected_wmo_type> (*selection)->wmo->toggleVisibility();
           }
         }
-      }
-      else // draw fog
-      {
-        gWorld->drawfog = !gWorld->drawfog;
       }
     }
-
-
-    // reload a map tile STEFF out because of UID recalc. reload could kill all.
-    //if( e->keysym.sym == SDLK_j && _mod_shift_down )
-    //  gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
-
-    // fog distance or brush radius
-    if (e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS)
+    else
     {
-      if (_mod_alt_down)
-      {
-        switch (terrainMode)
-        {
-        case 0:
-          groundBrushRadius = std::min(1000.0f, groundBrushRadius + 0.01f);
-          ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
-          break;
-        case 1:
-          blurBrushRadius = std::min(1000.0f, blurBrushRadius + 0.01f);
-          blur_brush->setValue(blurBrushRadius / 1000.0f);
-          break;
-        case 2:
-          textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
-          paint_brush->setValue(textureBrush.getRadius() / 100.0f);
-          break;
-        case 6:
-          tile_index tile(gWorld->camera);
-          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 2.0f));
-          mainGui->guiWater->updateData();
-          break;
-        }
-      }
-      else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
-      {
-        if (terrainMode == 6)
-        {
-          tile_index tile(gWorld->camera);
+      mainGui->toggleHelp();
+    }
+  }
 
-          if (_mod_shift_down)
-          {
-            gWorld->setWaterTrans(tile, static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(tile)) + 1)));
-          }
-          else if (_mod_ctrl_down)
-          {
-            gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 5.0f));
-          }
-          else
-          {
-            gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 1.0f));
-          }
-
-          mainGui->guiWater->updateData();
-        }
-        else if (_mod_shift_down)
-        {
-          gWorld->fogdistance += 60.0f;// fog change only when no model is selected!
-        }
+  if (e->keysym.sym == SDLK_f)
+  {
+    if (terrainMode == 1)
+    {
+      if (_mod_space_down)
+      {
+        toggleFlattenLock(!flattenRelativeMode, 0);
+        toggle_flatten_relative->setState(flattenRelativeMode);
       }
       else
       {
-        //change selected model size
-        keys = 1;
+        flattenRelativePos = Environment::getInstance()->get_cursor_pos();
+        flatten_relative_x->value(misc::floatToStr(flattenRelativePos.x));
+        flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
+        flatten_relative_z->value(misc::floatToStr(flattenRelativePos.z));
       }
     }
-
-    if (e->keysym.sym == SDLK_KP_MINUS || e->keysym.sym == SDLK_MINUS)
+    else if (terrainMode == 9)
     {
-      if (_mod_alt_down)
+      if (gWorld->HasSelection())
       {
-        switch (terrainMode)
-        {
-        case 0:
-          groundBrushRadius = std::max(0.0f, groundBrushRadius - 0.01f);
-          ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
-          break;
-        case 1:
-          blurBrushRadius = std::max(0.0f, blurBrushRadius - 0.01f);
-          blur_brush->setValue(blurBrushRadius / 1000);
-          break;
-        case 2:
-          textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
-          paint_brush->setValue(textureBrush.getRadius() / 100);
-          break;
-        case 6:
-          tile_index tile(gWorld->camera);
-          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 2.0f));
-          mainGui->guiWater->updateData();
-          break;
-        }
-      }
-      else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
-      {
-        if (terrainMode == 6)
-        {
-          tile_index tile(gWorld->camera);
-          if (_mod_shift_down)
-          {
-            gWorld->setWaterTrans(tile, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(tile))) - 1));
-          }
-          else if (_mod_ctrl_down)
-          {
-            gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 5.0f));
-          }
-          else
-          {
-            gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 1.0f));
-          }
+        math::vector_3d pos = Environment::getInstance()->get_cursor_pos();
+        auto selection = gWorld->GetCurrentSelection();
 
-          mainGui->guiWater->updateData();
-        }
-        else if (_mod_shift_down)
+        if (selection->which() == eEntry_Model)
         {
-          gWorld->fogdistance -= 60.0f;// fog change only when no model is selected!
+          gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
+          boost::get<selected_model_type> (*selection)->pos = pos;
+          boost::get<selected_model_type> (*selection)->recalcExtents();
+          gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
         }
-
-      }
-      else
-      {
-        //change selected model size
-        keys = -1;
+        else if (selection->which() == eEntry_WMO)
+        {
+          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+          boost::get<selected_wmo_type> (*selection)->pos = pos;
+          boost::get<selected_wmo_type> (*selection)->recalcExtents();
+          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+        }
       }
     }
-
-    if (e->keysym.sym == SDLK_g)
+    else // draw fog
     {
-      // write teleport cords to txt file
-      std::ofstream f("ports.txt", std::ios_base::app);
-      f << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID()) << " on ADT " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE) << std::endl;
-      f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << gWorld->getMapID() << std::endl;
-      f << "ArcEmu:" << std::endl << ".worldport " << gWorld->getMapID() << " " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << std::endl << std::endl;
-      f.close();
+      gWorld->drawfog = !gWorld->drawfog;
     }
+  }
 
+  // reload a map tile STEFF out because of UID recalc. reload could kill all.
+  //if( e->keysym.sym == SDLK_j && _mod_shift_down )
+  //  gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
 
-    // toogle between smooth / flat / linear
-    if (e->keysym.sym == SDLK_y)
+  // fog distance or brush radius
+  if (e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS)
+  {
+    if (_mod_alt_down)
     {
       switch (terrainMode)
       {
       case 0:
-        gGroundToggleGroup->Activate((Environment::getInstance()->groundBrushType + 1) % 6);
+        groundBrushRadius = std::min(1000.0f, groundBrushRadius + 0.01f);
+        ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
         break;
-
       case 1:
-        gBlurToggleGroup->Activate((blurBrushType + 1) % 3);
+        blurBrushRadius = std::min(1000.0f, blurBrushRadius + 0.01f);
+        blur_brush->setValue(blurBrushRadius / 1000.0f);
+        break;
+      case 2:
+        textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
+        paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+        break;
+      case 6:
+        tile_index tile(gWorld->camera);
+        gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 2.0f));
+        mainGui->guiWater->updateData();
         break;
       }
     }
-
-    // toogle tile mode
-    if (e->keysym.sym == SDLK_u)
+    else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
     {
-      if (mViewMode == eViewMode_2D)
+      if (terrainMode == 6)
       {
-        mViewMode = eViewMode_3D;
-        terrainMode = saveterrainMode;
-        // Set the right icon in toolbar
-        mainGui->guiToolbar->IconSelect(terrainMode);
-      }
-      else
-      {
-        mViewMode = eViewMode_2D;
-        saveterrainMode = terrainMode;
-        terrainMode = 2;
-        // Set the right icon in toolbar
-        mainGui->guiToolbar->IconSelect(terrainMode);
-      }
-    }
+        tile_index tile(gWorld->camera);
 
-    // doodads set
-    if (e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9)
-    {
-      if (gWorld->IsSelection(eEntry_WMO))
-      {
-        boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = e->keysym.sym - SDLK_0;
+        if (_mod_shift_down)
+        {
+          gWorld->setWaterTrans(tile, static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(tile)) + 1)));
+        }
+        else if (_mod_ctrl_down)
+        {
+          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 5.0f));
+        }
+        else
+        {
+          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 1.0f));
+        }
+
+        mainGui->guiWater->updateData();
       }
       else if (_mod_shift_down)
       {
-        if (e->keysym.sym == SDLK_1)
-          movespd = 15.0f;
-        if (e->keysym.sym == SDLK_2)
-          movespd = 50.0f;
-        if (e->keysym.sym == SDLK_3)
-          movespd = 200.0f;
-        if (e->keysym.sym == SDLK_4)
-          movespd = 800.0f;
+        gWorld->fogdistance += 60.0f;// fog change only when no model is selected!
       }
-      else if (_mod_alt_down)
-      {
-        if (e->keysym.sym == SDLK_1)
-          mainGui->G1->setValue(0.01f);
-        if (e->keysym.sym == SDLK_2)
-          mainGui->G1->setValue(0.25f);
-        if (e->keysym.sym == SDLK_3)
-          mainGui->G1->setValue(0.50f);
-        if (e->keysym.sym == SDLK_4)
-          mainGui->G1->setValue(0.75f);
-        if (e->keysym.sym == SDLK_5)
-          mainGui->G1->setValue(0.99f);
-      }
-      else if (e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_9)
-      {
-        terrainMode = e->keysym.sym - SDLK_1;
-        mainGui->guiToolbar->IconSelect(terrainMode);
-      }
-      else if (e->keysym.sym == SDLK_0)
-      {
-        terrainMode = 9; // object editor
-        mainGui->guiToolbar->IconSelect(terrainMode);
-      }
+    }
+    else
+    {
+      //change selected model size
+      keys = 1;
     }
   }
-  else
+
+  if (e->keysym.sym == SDLK_KP_MINUS || e->keysym.sym == SDLK_MINUS)
   {
-    // key UP
-    if (e->keysym.sym == SDLK_LSHIFT || e->keysym.sym == SDLK_RSHIFT)
-      _mod_shift_down = false;
-
-    if (e->keysym.sym == SDLK_LALT || e->keysym.sym == SDLK_RALT)
-      _mod_alt_down = false;
-
-    if (e->keysym.sym == SDLK_LCTRL || e->keysym.sym == SDLK_RCTRL)
-      _mod_ctrl_down = false;
-
-    if (e->keysym.sym == SDLK_SPACE)
-      _mod_space_down = false;
-
-    // movement
-    if (e->keysym.sym == SDLK_w)
+    if (_mod_alt_down)
     {
-      key_w = false;
-      if (!(leftMouse && rightMouse) && moving > 0.0f) {
-
-        moving = 0.0f;
+      switch (terrainMode)
+      {
+      case 0:
+        groundBrushRadius = std::max(0.0f, groundBrushRadius - 0.01f);
+        ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
+        break;
+      case 1:
+        blurBrushRadius = std::max(0.0f, blurBrushRadius - 0.01f);
+        blur_brush->setValue(blurBrushRadius / 1000);
+        break;
+      case 2:
+        textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
+        paint_brush->setValue(textureBrush.getRadius() / 100);
+        break;
+      case 6:
+        tile_index tile(gWorld->camera);
+        gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 2.0f));
+        mainGui->guiWater->updateData();
+        break;
       }
     }
+    else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
+    {
+      if (terrainMode == 6)
+      {
+        tile_index tile(gWorld->camera);
+        if (_mod_shift_down)
+        {
+          gWorld->setWaterTrans(tile, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(tile))) - 1));
+        }
+        else if (_mod_ctrl_down)
+        {
+          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 5.0f));
+        }
+        else
+        {
+          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 1.0f));
+        }
 
-    if (e->keysym.sym == SDLK_s && moving < 0.0f) {
+        mainGui->guiWater->updateData();
+      }
+      else if (_mod_shift_down)
+      {
+        gWorld->fogdistance -= 60.0f;// fog change only when no model is selected!
+      }
 
+    }
+    else
+    {
+      //change selected model size
+      keys = -1;
+    }
+  }
+
+  if (e->keysym.sym == SDLK_g)
+  {
+    // write teleport cords to txt file
+    std::ofstream f("ports.txt", std::ios_base::app);
+    f << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID()) << " on ADT " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE) << std::endl;
+    f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << gWorld->getMapID() << std::endl;
+    f << "ArcEmu:" << std::endl << ".worldport " << gWorld->getMapID() << " " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << std::endl << std::endl;
+    f.close();
+  }
+
+  // toogle between smooth / flat / linear
+  if (e->keysym.sym == SDLK_y)
+  {
+    switch (terrainMode)
+    {
+    case 0:
+      gGroundToggleGroup->Activate((Environment::getInstance()->groundBrushType + 1) % 6);
+      break;
+
+    case 1:
+      gBlurToggleGroup->Activate((blurBrushType + 1) % 3);
+      break;
+    }
+  }
+
+  // toogle tile mode
+  if (e->keysym.sym == SDLK_u)
+  {
+    if (mViewMode == eViewMode_2D)
+    {
+      mViewMode = eViewMode_3D;
+      terrainMode = saveterrainMode;
+      // Set the right icon in toolbar
+      mainGui->guiToolbar->IconSelect(terrainMode);
+    }
+    else
+    {
+      mViewMode = eViewMode_2D;
+      saveterrainMode = terrainMode;
+      terrainMode = 2;
+      // Set the right icon in toolbar
+      mainGui->guiToolbar->IconSelect(terrainMode);
+    }
+  }
+
+  // doodads set
+  if (e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9)
+  {
+    if (gWorld->IsSelection(eEntry_WMO))
+    {
+      boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = e->keysym.sym - SDLK_0;
+    }
+    else if (_mod_shift_down)
+    {
+      if (e->keysym.sym == SDLK_1)
+        movespd = 15.0f;
+      if (e->keysym.sym == SDLK_2)
+        movespd = 50.0f;
+      if (e->keysym.sym == SDLK_3)
+        movespd = 200.0f;
+      if (e->keysym.sym == SDLK_4)
+        movespd = 800.0f;
+    }
+    else if (_mod_alt_down)
+    {
+      if (e->keysym.sym == SDLK_1)
+        mainGui->G1->setValue(0.01f);
+      if (e->keysym.sym == SDLK_2)
+        mainGui->G1->setValue(0.25f);
+      if (e->keysym.sym == SDLK_3)
+        mainGui->G1->setValue(0.50f);
+      if (e->keysym.sym == SDLK_4)
+        mainGui->G1->setValue(0.75f);
+      if (e->keysym.sym == SDLK_5)
+        mainGui->G1->setValue(0.99f);
+    }
+    else if (e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_9)
+    {
+      terrainMode = e->keysym.sym - SDLK_1;
+      mainGui->guiToolbar->IconSelect(terrainMode);
+    }
+    else if (e->keysym.sym == SDLK_0)
+    {
+      terrainMode = 9; // object editor
+      mainGui->guiToolbar->IconSelect(terrainMode);
+    }
+  }
+}
+
+void MapView::keyReleaseEvent (SDL_KeyboardEvent* e)
+{
+  if (e->keysym.mod & KMOD_CAPS)
+    mainGui->capsWarning->show();
+  else
+    mainGui->capsWarning->hide();
+
+  if (e->keysym.sym == SDLK_LSHIFT || e->keysym.sym == SDLK_RSHIFT)
+    _mod_shift_down = false;
+
+  if (e->keysym.sym == SDLK_LALT || e->keysym.sym == SDLK_RALT)
+    _mod_alt_down = false;
+
+  if (e->keysym.sym == SDLK_LCTRL || e->keysym.sym == SDLK_RCTRL)
+    _mod_ctrl_down = false;
+
+  if (e->keysym.sym == SDLK_SPACE)
+    _mod_space_down = false;
+
+  // movement
+  if (e->keysym.sym == SDLK_w)
+  {
+    key_w = false;
+    if (!(leftMouse && rightMouse) && moving > 0.0f)
+    {
       moving = 0.0f;
     }
-
-    if (e->keysym.sym == SDLK_UP || e->keysym.sym == SDLK_DOWN)
-      lookat = 0.0f;
-
-    if (e->keysym.sym == SDLK_LEFT || e->keysym.sym == SDLK_RIGHT)
-      turn = 0.0f;
-
-    if (e->keysym.sym == SDLK_d && strafing > 0.0f) {
-
-      strafing = 0.0f;
-    }
-
-    if (e->keysym.sym == SDLK_a && strafing < 0.0f) {
-
-      strafing = 0.0f;
-    }
-
-    if (e->keysym.sym == SDLK_q && updown > 0.0f)
-      updown = 0.0f;
-
-    if (e->keysym.sym == SDLK_e && updown < 0.0f)
-      updown = 0.0f;
-
-    if (e->keysym.sym == SDLK_KP8)
-      keyx = 0;
-
-    if (e->keysym.sym == SDLK_KP2)
-      keyx = 0;
-
-    if (e->keysym.sym == SDLK_KP6)
-      keyz = 0;
-
-    if (e->keysym.sym == SDLK_KP4)
-      keyz = 0;
-
-    if (e->keysym.sym == SDLK_KP1)
-      keyy = 0;
-
-    if (e->keysym.sym == SDLK_KP3)
-      keyy = 0;
-
-    if (e->keysym.sym == SDLK_KP7)
-      keyr = 0;
-
-    if (e->keysym.sym == SDLK_KP9)
-      keyr = 0;
-
-    if (e->keysym.sym == SDLK_KP_MINUS || e->keysym.sym == SDLK_MINUS || e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS)
-      keys = 0;
   }
+
+  if (e->keysym.sym == SDLK_s && moving < 0.0f)
+  {
+    moving = 0.0f;
+  }
+
+  if (e->keysym.sym == SDLK_UP || e->keysym.sym == SDLK_DOWN)
+    lookat = 0.0f;
+
+  if (e->keysym.sym == SDLK_LEFT || e->keysym.sym == SDLK_RIGHT)
+    turn = 0.0f;
+
+  if (e->keysym.sym == SDLK_d && strafing > 0.0f)
+  {
+    strafing = 0.0f;
+  }
+
+  if (e->keysym.sym == SDLK_a && strafing < 0.0f)
+  {
+    strafing = 0.0f;
+  }
+
+  if (e->keysym.sym == SDLK_q && updown > 0.0f)
+    updown = 0.0f;
+
+  if (e->keysym.sym == SDLK_e && updown < 0.0f)
+    updown = 0.0f;
+
+  if (e->keysym.sym == SDLK_KP8)
+    keyx = 0;
+
+  if (e->keysym.sym == SDLK_KP2)
+    keyx = 0;
+
+  if (e->keysym.sym == SDLK_KP6)
+    keyz = 0;
+
+  if (e->keysym.sym == SDLK_KP4)
+    keyz = 0;
+
+  if (e->keysym.sym == SDLK_KP1)
+    keyy = 0;
+
+  if (e->keysym.sym == SDLK_KP3)
+    keyy = 0;
+
+  if (e->keysym.sym == SDLK_KP7)
+    keyr = 0;
+
+  if (e->keysym.sym == SDLK_KP9)
+    keyr = 0;
+
+  if (e->keysym.sym == SDLK_KP_MINUS || e->keysym.sym == SDLK_MINUS || e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS)
+    keys = 0;
 }
 
 void MapView::inserObjectFromExtern(int model)
@@ -2877,181 +2866,179 @@ void MapView::selectModel(selection_type entry)
   mainGui->objectEditor->copy(entry);
 }
 
-void MapView::mouseclick(SDL_MouseButtonEvent *e)
+void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
 {
-  if (e->type == SDL_MOUSEBUTTONDOWN)
+  switch (e->button)
   {
-    switch (e->button)
+  case SDL_BUTTON_LEFT:
+    leftMouse = true;
+    break;
+
+  case SDL_BUTTON_RIGHT:
+    rightMouse = true;
+    break;
+
+  case SDL_BUTTON_MIDDLE:
+    if (gWorld->HasSelection())
     {
-    case SDL_BUTTON_LEFT:
-      leftMouse = true;
-      break;
-
-    case SDL_BUTTON_RIGHT:
-      rightMouse = true;
-      break;
-
-    case SDL_BUTTON_MIDDLE:
-      if (gWorld->HasSelection())
+      MoveObj = true;
+      auto selection = gWorld->GetCurrentSelection();
+      math::vector_3d objPos;
+      if (selection->which() == eEntry_WMO)
       {
-        MoveObj = true;
-        auto selection = gWorld->GetCurrentSelection();
-        math::vector_3d objPos;
-        if (selection->which() == eEntry_WMO)
-        {
-          objPos = boost::get<selected_wmo_type> (*selection)->pos;
-        }
-        else if (selection->which() == eEntry_Model)
-        {
-          objPos = boost::get<selected_model_type> (*selection)->pos;
-        }
-
-        objMoveOffset = Environment::getInstance()->get_cursor_pos() - objPos;
+        objPos = boost::get<selected_wmo_type> (*selection)->pos;
+      }
+      else if (selection->which() == eEntry_Model)
+      {
+        objPos = boost::get<selected_model_type> (*selection)->pos;
       }
 
-      break;
-
-    case SDL_BUTTON_WHEELUP:
-      if (terrainMode == 1)
-      {
-        if (_mod_alt_down)
-        {
-          flattenOrientation += _mod_ctrl_down ? 1.0f : 10.0f;
-          if (flattenOrientation > 360.0f)
-            flattenOrientation = 0.0f;
-          flatten_orientation->setValue(flattenOrientation / 360);
-        }
-        else if (_mod_shift_down)
-        {
-          flattenAngle += _mod_ctrl_down ? 0.2f : 2.0f;
-          if (flattenAngle > 89.0f)
-            flattenAngle = 89.0f;
-          flatten_angle->setValue(flattenAngle / 90);
-        }
-        else if (_mod_space_down)
-        {
-          flattenRelativePos.y += 1;
-          flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
-        }
-      }
-      else if (terrainMode == 2)
-      {
-        if (_mod_space_down)
-        {
-          brushLevel = std::min(255.0f, brushLevel + 10.0f);
-          mainGui->G1->setValue((255.0f - brushLevel) / 255.0f);
-        }
-        else if (_mod_alt_down)
-        {
-          brushSpraySize = std::min(40.0f, brushSpraySize + 2.0f);
-          spray_size->setValue(brushSpraySize / 40.0f);
-        }
-        else if (_mod_shift_down)
-        {
-          brushSprayPressure = std::min(100.0f, brushSprayPressure + 2.5f);
-          spray_pressure->setValue(brushSprayPressure / 100.0f);
-        }
-      }
-      break;
-    case SDL_BUTTON_WHEELDOWN:
-      if (terrainMode == 1)
-      {
-        if (_mod_alt_down)
-        {
-          flattenOrientation -= _mod_ctrl_down ? 1.0f : 10.0f;
-          if (flattenOrientation < 0.0f)
-            flattenOrientation = 360.0f;
-          flatten_orientation->setValue(flattenOrientation / 360);
-        }
-        else if (_mod_shift_down)
-        {
-          flattenAngle -= _mod_ctrl_down ? 0.2f : 2.0f;;
-          if (flattenAngle < 0.0f)
-            flattenAngle = 0.0f;
-          flatten_angle->setValue(flattenAngle / 90);
-        }
-        else if (_mod_space_down)
-        {
-          flattenRelativePos.y -= 1;
-          flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
-        }
-      }
-      else if (terrainMode == 2)
-      {
-        if (_mod_space_down)
-        {
-          brushLevel = std::max(0.0f, brushLevel - 10.0f);
-          mainGui->G1->setValue((255.0f - brushLevel) / 255.0f);
-        }
-        else if (_mod_alt_down)
-        {
-          brushSpraySize = std::max(1.0f, brushSpraySize - 2.0f);
-          spray_size->setValue(brushSpraySize / 40.0f);
-        }
-        else if (_mod_shift_down)
-        {
-          brushSprayPressure = std::max(0.0f, brushSprayPressure - 2.5f);
-          spray_pressure->setValue(brushSprayPressure / 100.0f);
-        }
-      }
-      break;
+      objMoveOffset = Environment::getInstance()->get_cursor_pos() - objPos;
     }
 
-    if (leftMouse && rightMouse)
+    break;
+
+  case SDL_BUTTON_WHEELUP:
+    if (terrainMode == 1)
     {
-      // Both buttons
-      moving = 1.0f;
-    }
-    else if (leftMouse)
-    {
-      LastClicked = mainGui->processLeftClick(static_cast<float>(MouseX), static_cast<float>(MouseY));
-      if (mViewMode == eViewMode_3D && !LastClicked)
+      if (_mod_alt_down)
       {
-        doSelection(false);
+        flattenOrientation += _mod_ctrl_down ? 1.0f : 10.0f;
+        if (flattenOrientation > 360.0f)
+          flattenOrientation = 0.0f;
+        flatten_orientation->setValue(flattenOrientation / 360);
+      }
+      else if (_mod_shift_down)
+      {
+        flattenAngle += _mod_ctrl_down ? 0.2f : 2.0f;
+        if (flattenAngle > 89.0f)
+          flattenAngle = 89.0f;
+        flatten_angle->setValue(flattenAngle / 90);
+      }
+      else if (_mod_space_down)
+      {
+        flattenRelativePos.y += 1;
+        flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
       }
     }
-    else if (rightMouse)
+    else if (terrainMode == 2)
     {
-      look = true;
+      if (_mod_space_down)
+      {
+        brushLevel = std::min(255.0f, brushLevel + 10.0f);
+        mainGui->G1->setValue((255.0f - brushLevel) / 255.0f);
+      }
+      else if (_mod_alt_down)
+      {
+        brushSpraySize = std::min(40.0f, brushSpraySize + 2.0f);
+        spray_size->setValue(brushSpraySize / 40.0f);
+      }
+      else if (_mod_shift_down)
+      {
+        brushSprayPressure = std::min(100.0f, brushSprayPressure + 2.5f);
+        spray_pressure->setValue(brushSprayPressure / 100.0f);
+      }
+    }
+    break;
+  case SDL_BUTTON_WHEELDOWN:
+    if (terrainMode == 1)
+    {
+      if (_mod_alt_down)
+      {
+        flattenOrientation -= _mod_ctrl_down ? 1.0f : 10.0f;
+        if (flattenOrientation < 0.0f)
+          flattenOrientation = 360.0f;
+        flatten_orientation->setValue(flattenOrientation / 360);
+      }
+      else if (_mod_shift_down)
+      {
+        flattenAngle -= _mod_ctrl_down ? 0.2f : 2.0f;;
+        if (flattenAngle < 0.0f)
+          flattenAngle = 0.0f;
+        flatten_angle->setValue(flattenAngle / 90);
+      }
+      else if (_mod_space_down)
+      {
+        flattenRelativePos.y -= 1;
+        flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
+      }
+    }
+    else if (terrainMode == 2)
+    {
+      if (_mod_space_down)
+      {
+        brushLevel = std::max(0.0f, brushLevel - 10.0f);
+        mainGui->G1->setValue((255.0f - brushLevel) / 255.0f);
+      }
+      else if (_mod_alt_down)
+      {
+        brushSpraySize = std::max(1.0f, brushSpraySize - 2.0f);
+        spray_size->setValue(brushSpraySize / 40.0f);
+      }
+      else if (_mod_shift_down)
+      {
+        brushSprayPressure = std::max(0.0f, brushSprayPressure - 2.5f);
+        spray_pressure->setValue(brushSprayPressure / 100.0f);
+      }
+    }
+    break;
+  }
+
+  if (leftMouse && rightMouse)
+  {
+    // Both buttons
+    moving = 1.0f;
+  }
+  else if (leftMouse)
+  {
+    LastClicked = mainGui->processLeftClick(static_cast<float>(MouseX), static_cast<float>(MouseY));
+    if (mViewMode == eViewMode_3D && !LastClicked)
+    {
+      doSelection(false);
     }
   }
-  else if (e->type == SDL_MOUSEBUTTONUP)
+  else if (rightMouse)
   {
-    switch (e->button)
+    look = true;
+  }
+}
+
+void MapView::mouseReleaseEvent (SDL_MouseButtonEvent* e)
+{
+  switch (e->button)
+  {
+  case SDL_BUTTON_LEFT:
+    leftMouse = false;
+
+    if (LastClicked)
+      LastClicked->processUnclick();
+
+    if (!key_w && moving > 0.0f)
+      moving = 0.0f;
+
+    if (mViewMode == eViewMode_2D)
     {
-    case SDL_BUTTON_LEFT:
-      leftMouse = false;
-
-      if (LastClicked)
-        LastClicked->processUnclick();
-
-      if (!key_w && moving > 0.0f)
-        moving = 0.0f;
-
-      if (mViewMode == eViewMode_2D)
-      {
-        strafing = 0;
-        moving = 0;
-      }
-      break;
-
-    case SDL_BUTTON_RIGHT:
-      rightMouse = false;
-
-      look = false;
-
-      if (!key_w && moving > 0.0f)
-        moving = 0.0f;
-
-      if (mViewMode == eViewMode_2D)
-        updown = 0;
-
-      break;
-
-    case SDL_BUTTON_MIDDLE:
-      MoveObj = false;
-      break;
+      strafing = 0;
+      moving = 0;
     }
+    break;
+
+  case SDL_BUTTON_RIGHT:
+    rightMouse = false;
+
+    look = false;
+
+    if (!key_w && moving > 0.0f)
+      moving = 0.0f;
+
+    if (mViewMode == eViewMode_2D)
+      updown = 0;
+
+    break;
+
+  case SDL_BUTTON_MIDDLE:
+    MoveObj = false;
+    break;
   }
 }
 

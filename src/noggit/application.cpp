@@ -435,7 +435,7 @@ void Noggit::mainLoop()
         e.type = SDL_KEYDOWN;
         e.keysym.sym = SDLK_ESCAPE;
         e.keysym.mod = KMOD_NONE;
-        activeAppState->keypressed(&e);
+        activeAppState->keyPressEvent (&e);
       }
       else if (event.type == SDL_VIDEORESIZE)
       {
@@ -444,9 +444,13 @@ void Noggit::mainLoop()
       }
       else if (hasInputFocus)
       {
-        if ((event.type == SDL_KEYDOWN || event.type == SDL_KEYUP))
+        if (event.type == SDL_KEYDOWN)
         {
-          activeAppState->keypressed(&event.key);
+          activeAppState->keyPressEvent (&event.key);
+        }
+        else if (event.type == SDL_KEYUP)
+        {
+          activeAppState->keyReleaseEvent (&event.key);
         }
         else if (hasMouseFocus)
         {
@@ -454,9 +458,13 @@ void Noggit::mainLoop()
           {
             activeAppState->mousemove(&event.motion);
           }
-          else if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)
+          else if (event.type == SDL_MOUSEBUTTONDOWN)
           {
-            activeAppState->mouseclick(&event.button);
+            activeAppState->mousePressEvent (&event.button);
+          }
+          else if (event.type == SDL_MOUSEBUTTONUP)
+          {
+            activeAppState->mouseReleaseEvent (&event.button);
           }
         }
       }
