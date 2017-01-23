@@ -138,9 +138,9 @@ bool UITextBox::KeyBoardEvent(SDL_KeyboardEvent* e)
     utf8::prior(firstBeforeEnd, _value.c_str());
     _value.erase(firstBeforeEnd - _value.c_str());
   }
-  else if (e->keysym.unicode > 31)
+  else if (e->keysym.sym == SDLK_ESCAPE)
   {
-    utf8::append(e->keysym.unicode, std::back_inserter(_value));
+    _focus = false;
   }
   else if (e->keysym.sym == SDLK_RETURN)
   {
@@ -150,9 +150,9 @@ bool UITextBox::KeyBoardEvent(SDL_KeyboardEvent* e)
       _enterFunction(this, _value);
     }
   }
-  else
+  else if (e->keysm.unicode)
   {
-    _focus = false;
+    utf8::append(e->keysym.unicode, std::back_inserter(_value));
   }
 
   _uiText->setText(_value);
