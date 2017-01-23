@@ -463,8 +463,6 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
       xPos = xbase;
       for (int i = 0; i < 64; ++i)
       {
-        float cx = xPos, cz = zPos;
-
         dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
 
         if (dist>radius)

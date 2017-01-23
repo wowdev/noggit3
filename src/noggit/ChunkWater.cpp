@@ -67,8 +67,6 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
   f.read(&Header, sizeof(MH2O_Header));
   if (!Header.nLayers) return;
 
-  size_t infoMaskPos, heightDataPos;
-
   //render
   if (Header.ofsRenderMask)
   {
@@ -313,8 +311,6 @@ void ChunkWater::addLayer(size_t layer)
 
 void ChunkWater::CropWater(MapChunk* chunkTerrain)
 {
-  int k = 0;
-
   for (size_t k = 0; k < Header.nLayers; ++k)
   {
     for (int i = 0; i < 8; ++i)

@@ -101,7 +101,6 @@ namespace misc
   float getShortestDist(float x, float z, float squareX, float squareZ, float unitSize)
   {
     float px, pz;
-    float midx = squareX + unitSize / 2, midz = squareZ + unitSize / 2;
 
     if (x >= squareX && x < squareX + unitSize)
     {

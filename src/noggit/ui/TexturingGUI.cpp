@@ -461,7 +461,6 @@ UIFrame* UITexturingGUI::createSelectedTexture()
 
 UIFrame* UITexturingGUI::createTilesetLoader()
 {
-  float buttonSize = 150.0f;
   LoadTextureNames();
 
   int columns = tilesetDirectories.size() / 4;
