@@ -29,7 +29,6 @@ static const int HEIGHT_ZERO = 0;
 static const int HEIGHT_SHALLOW = -100;
 static const int HEIGHT_DEEP = -250;
 
-bool drawFlags = false;
 bool DrawMapContour = false;
 
 GLuint Contour = 0;
