@@ -85,6 +85,25 @@ Menu::Menu()
 	createBookmarkList();
 	buildMenuBar();
 	randBackground();
+
+  addHotkey ( SDLK_ESCAPE
+            , MOD_none
+            , [this]
+              {
+                if (gWorld)
+                {
+                  mGUIMinimapWindow->hide();
+                  uidFixWindow->hide();
+                  mGUICreditsWindow->show();
+                  delete gWorld;
+                  gWorld = nullptr;
+                }
+                else
+                {
+                  app.pop = true;
+                }
+              }
+            );
 }
 
 //! \todo Add TBC and WOTLK.
@@ -206,25 +225,6 @@ void Menu::display(float /*t*/, float /*dt*/)
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   mGUIFrame->render();
-}
-
-void Menu::keypressed(SDL_KeyboardEvent* e)
-{
-	if (e->type == SDL_KEYDOWN && e->keysym.sym == SDLK_ESCAPE)
-	{
-		if (gWorld)
-		{
-			mGUIMinimapWindow->hide();
-      uidFixWindow->hide();
-			mGUICreditsWindow->show();
-			delete gWorld;
-			gWorld = nullptr;
-		}
-		else
-		{
-			app.pop = true;
-		}
-	}
 }
 
 UIFrame::Ptr LastClickedMenu = nullptr;
