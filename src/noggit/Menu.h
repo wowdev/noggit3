@@ -52,7 +52,9 @@ public:
   void tick(float t, float dt);
   void display(float t, float dt);
 
-  void mouseclick(SDL_MouseButtonEvent* e);
+  virtual void mouseReleaseEvent (SDL_MouseButtonEvent*) override;
+  virtual void mousePressEvent (SDL_MouseButtonEvent*) override;
+
   void mousemove(SDL_MouseMotionEvent* e);
 
   //! \todo Make private when new buttons are implemented.

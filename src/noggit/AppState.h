@@ -104,25 +104,19 @@ public:
   */
   virtual void mousemove(SDL_MouseMotionEvent* /*e*/) { }
 
-  /*!
-  \brief This method gets called upon a mouse click.
-  \param e The event given by SDL containing information about the mouse click.
-  */
-  virtual void mouseclick(SDL_MouseButtonEvent* /*e*/) { }
-
-  /*!
-  \brief This method gets called when a key is pressed or released.
-  \param e The event given by SDL containing information about the key stroke.
-  */
-  virtual void keypressed(SDL_KeyboardEvent* e)
+  virtual void mouseReleaseEvent (SDL_MouseButtonEvent*)
   {
-    if (e->type == SDL_KEYDOWN)
-    {
-      if (handleHotkeys(e))
-      {
-        return;
-      }
-    }
+  }
+  virtual void mousePressEvent (SDL_MouseButtonEvent*)
+  {
+  }
+
+  virtual void keyPressEvent (SDL_KeyboardEvent* e)
+  {
+    handleHotkeys(e);
+  }
+  virtual void keyReleaseEvent (SDL_KeyboardEvent*)
+  {
   }
 
   /*!

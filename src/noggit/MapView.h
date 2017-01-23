@@ -62,9 +62,11 @@ public:
   void tick(float t, float dt);
   void display(float t, float dt);
 
-  void keypressed(SDL_KeyboardEvent *e);
   void mousemove(SDL_MouseMotionEvent *e);
-  void mouseclick(SDL_MouseButtonEvent *e);
+  virtual void keyReleaseEvent (SDL_KeyboardEvent*) override;
+  virtual void keyPressEvent (SDL_KeyboardEvent*) override;
+  virtual void mouseReleaseEvent (SDL_MouseButtonEvent*) override;
+  virtual void mousePressEvent (SDL_MouseButtonEvent*) override;
   void resizewindow();
 
   void quit();

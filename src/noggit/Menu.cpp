@@ -229,26 +229,28 @@ void Menu::display(float /*t*/, float /*dt*/)
 
 UIFrame::Ptr LastClickedMenu = nullptr;
 
-void Menu::mouseclick(SDL_MouseButtonEvent* e)
+void Menu::mouseReleaseEvent (SDL_MouseButtonEvent* e)
 {
   if (e->button != SDL_BUTTON_LEFT)
   {
     return;
   }
 
-  if (e->type == SDL_MOUSEBUTTONDOWN)
+  LastClickedMenu = mGUIFrame->processLeftClick (e->x, e->y);
+}
+void Menu::mousePressEvent (SDL_MouseButtonEvent* e)
+{
+  if (e->button != SDL_BUTTON_LEFT)
   {
-    LastClickedMenu = mGUIFrame->processLeftClick(e->x, e->y);
+    return;
   }
-  else
-  {
-    if (LastClickedMenu)
-    {
-      LastClickedMenu->processUnclick();
-    }
 
-    LastClickedMenu = nullptr;
+  if (LastClickedMenu)
+  {
+    LastClickedMenu->processUnclick();
   }
+
+  LastClickedMenu = nullptr;
 }
 
 void Menu::mousemove(SDL_MouseMotionEvent *e)
