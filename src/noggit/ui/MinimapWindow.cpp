@@ -47,13 +47,10 @@ UIMinimapWindow::UIMinimapWindow(World* setMap)
 
 
 
-void UIMinimapWindow::mousemove(SDL_MouseMotionEvent *e)
+void UIMinimapWindow::mouse_moved (float mx, float my)
 {
   if (hidden()) return;
   if (!gWorld) return;
-
-  int mx = (int)(e->x - ((video.xres() - this->width()) / 2));
-  int my = (int)(e->y - ((video.yres() - this->height()) / 2));
 
   if (
     mx < borderwidth || mx > height() - borderwidth ||
@@ -245,4 +242,3 @@ void UIMinimapWindow::render() const
     }
   }
 }
-

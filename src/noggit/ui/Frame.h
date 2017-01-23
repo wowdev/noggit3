@@ -123,6 +123,7 @@ public:
 
   virtual void render() const;
   virtual UIFrame::Ptr processLeftClick(float mx, float my);
+  virtual void mouse_moved (float, float);
   virtual bool processLeftDrag(float mx, float my, float xChange, float yChange);
   virtual void processUnclick() { }
   virtual bool processRightClick(float mx, float my);
