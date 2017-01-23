@@ -88,7 +88,6 @@ boost::optional<selection_type> lastSelected;
 bool TestSelection = false;
 
 extern bool DrawMapContour;
-extern bool drawFlags;
 
 // extern row and col form Palette UI
 
@@ -2716,11 +2715,6 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
         break;
       }
     }
-
-    // is not used somewere else!!
-    //! \todo  what is this?
-    if (e->keysym.sym == SDLK_g)
-      drawFlags = !drawFlags;
 
     // toogle tile mode
     if (e->keysym.sym == SDLK_u)
