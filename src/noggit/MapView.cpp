@@ -1239,12 +1239,15 @@ void MapView::createGUI()
 
   // mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", SaveOrReload, 0 );
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", SaveOrReload, 2);
+  addHotkey (SDLK_s, MOD_ctrl, [this] { save(); });
+  addHotkey (SDLK_s, MOD_meta, [this] { save(); });
   // mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", SaveOrReload, 1 );
   //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
   // mbar->GetMenu( "File" )->AddMenuItemButton( "Export heightmap", exportPNG, 1 );
   // mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
   mbar->GetMenu("File")->AddMenuItemSeperator(" ");
   mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", SaveOrReload, 3);
+  addHotkey (SDLK_ESCAPE, MOD_none, [this] { quitask(); });
 
   //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Test" );
   //mbar->GetMenu( "File" )->AddMenuItemButton( "AreaID", test_menu_action, 1 );
@@ -1282,14 +1285,23 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemButton("Cursor options", showCursorSwitcher, 0);
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
   mbar->GetMenu("View")->AddMenuItemToggle("F1 M2s", &gWorld->drawmodels);
+  addHotkey (SDLK_F1, MOD_none, [] { gWorld->drawmodels = !gWorld->drawmodels; });
   mbar->GetMenu("View")->AddMenuItemToggle("F2 WMO doodadsets", &gWorld->drawdoodads);
+  addHotkey (SDLK_F2, MOD_none, [] { gWorld->drawdoodads = !gWorld->drawdoodads; });
   mbar->GetMenu("View")->AddMenuItemToggle("F3 Terrain", &gWorld->drawterrain);
+  addHotkey (SDLK_F3, MOD_none, [] { gWorld->drawterrain = !gWorld->drawterrain; });
   mbar->GetMenu("View")->AddMenuItemToggle("F4 Water", &gWorld->drawwater);
+  addHotkey (SDLK_F4, MOD_none, [] { gWorld->drawwater = !gWorld->drawwater; });
   mbar->GetMenu("View")->AddMenuItemToggle("F6 WMOs", &gWorld->drawwmo);
+  addHotkey (SDLK_F6, MOD_none, [] { gWorld->drawwmo = !gWorld->drawwmo; });
   mbar->GetMenu("View")->AddMenuItemToggle("F7 Lines", &gWorld->drawlines);
+  addHotkey (SDLK_F7, MOD_none, [] { gWorld->drawlines = !gWorld->drawlines; });
   mbar->GetMenu("View")->AddMenuItemToggle("F8 Detail infos", mainGui->guidetailInfos->hidden_evil(), true);
+  addHotkey (SDLK_F8, MOD_none, [this] { mainGui->guidetailInfos->toggleVisibility(); });
   mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &DrawMapContour);
+  addHotkey (SDLK_F9, MOD_none, [] { DrawMapContour = !DrawMapContour; });
   mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &gWorld->renderAnimations);
+  addHotkey (SDLK_F11, MOD_none, [] { gWorld->renderAnimations = !gWorld->renderAnimations; });
   mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &gWorld->draw_mfbo);
   mbar->GetMenu("View")->AddMenuItemToggle("F Fog", &gWorld->drawfog);
   mbar->GetMenu("View")->AddMenuItemToggle("Hole lines always on", &Settings::getInstance()->holelinesOn, false);
@@ -1302,10 +1314,61 @@ void MapView::createGUI()
 
   mainGui->addChild(mbar);
 
+  addHotkey (SDLK_m, MOD_none, [this] { mainGui->minimapWindow->toggleVisibility(); });
 
-  addHotkey (SDLK_ESCAPE, MOD_none, [this] { quitask(); });
-  addHotkey (SDLK_s, MOD_ctrl, [this] { save(); });
-  addHotkey (SDLK_s, MOD_meta, [this] { save(); });
+  addHotkey ( SDLK_F5
+            , MOD_none
+            , [this]
+              {
+                std::ofstream f("bookmarks.txt", std::ios_base::app);
+                f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << ah << " " << av << " " << gWorld->getAreaID() << std::endl;
+              }
+            );
+
+  addHotkey (SDLK_PAGEDOWN, MOD_none, [] { SnapSelectedObjectToGround (0, 0); });
+
+  addHotkey (SDLK_n, MOD_none, [this] { mTimespeed += 90.0f; });
+  addHotkey (SDLK_b, MOD_none, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
+  addHotkey (SDLK_j, MOD_none, [this] { mTimespeed = 0.0f; });
+
+  addHotkey (SDLK_l, MOD_none, [] { gWorld->lighting = !gWorld->lighting; });
+
+  addHotkey (SDLK_TAB, MOD_none, [this] { _GUIDisplayingEnabled = !_GUIDisplayingEnabled; });
+
+  addHotkey (SDLK_DELETE, MOD_none, [] { DeleteSelectedObject(0, 0); });
+
+  addHotkey (SDLK_v, MOD_shift, [] { InsertObject (0, 14); });
+  addHotkey (SDLK_v, MOD_alt, [] { InsertObject (0, 15); });
+  addHotkey (SDLK_v, MOD_ctrl, [] { mainGui->objectEditor->pasteObject(); });
+  addHotkey ( SDLK_v
+            , MOD_none
+            , [] { mainGui->objectEditor->pasteObject(); }
+            , [] { return terrainMode == 9; }
+            );
+
+  addHotkey ( SDLK_x
+            , MOD_none
+            , [] { view_texture_palette (0, 0); }
+            , [] { return terrainMode == 2; }
+            );
+
+  addHotkey (SDLK_F4, MOD_shift, [] { Settings::getInstance()->AutoSelectingMode = !Settings::getInstance()->AutoSelectingMode; });
+  addHotkey (SDLK_F7, MOD_shift, [] { Environment::getInstance()->view_holelines = !Environment::getInstance()->view_holelines; });
+
+  addHotkey (SDLK_x, MOD_ctrl, [] { mainGui->guidetailInfos->toggleVisibility(); });
+
+  addHotkey (SDLK_i, MOD_none, [this] { mousedir *= -1.f; });
+
+  addHotkey (SDLK_i, MOD_ctrl, [] { Environment::getInstance()->paintMode = !Environment::getInstance()->paintMode; });
+
+  addHotkey (SDLK_o, MOD_none, [this] { movespd *= 0.5f; });
+  addHotkey (SDLK_p, MOD_none, [this] { movespd *= 2.0f; });
+
+  addHotkey (SDLK_p, MOD_shift | MOD_ctrl, [] { Saving = true; });
+
+  addHotkey (SDLK_r, MOD_none, [this] { ah += 180.f; });
+  addHotkey (SDLK_r, MOD_ctrl, [] { ResetSelectedObjectRotation(0, 0); });
+
 
   // ESC warning
   mainGui->escWarning = new UIExitWarning(this);
@@ -2211,9 +2274,6 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
       }
 
 
-    // delete object
-    if (e->keysym.sym == SDLK_DELETE)
-      DeleteSelectedObject(0, 0);
 
     // copy model to clipboard
     if (e->keysym.sym == SDLK_c)
@@ -2238,85 +2298,6 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
           Environment::getInstance()->cursorType %= 4;
         }
       }
-    }
-
-
-    // paste model
-    if (e->keysym.sym == SDLK_v)
-    {
-      if (_mod_shift_down)
-      {
-        InsertObject(0, 14);
-      }
-      else if (_mod_alt_down)
-      {
-        InsertObject(0, 15);
-      }
-      else if (terrainMode == 9 || _mod_ctrl_down)
-      {
-        mainGui->objectEditor->pasteObject();
-      }
-    }
-
-
-    // with ctrl toggle detail window
-    // without toggle the settings of the current edit mode.
-    if (e->keysym.sym == SDLK_x)
-    {
-      if (_mod_ctrl_down)
-      {
-        // toggle detail window
-        mainGui->guidetailInfos->toggleVisibility();
-      }
-      else
-      {
-        // toggle terrainMode window
-        if (terrainMode == 2)
-        {
-          view_texture_palette(0, 0);
-        }
-
-
-      }
-    }
-
-    // invert mouse or swap paint modes
-    if (e->keysym.sym == SDLK_i)
-    {
-      if (_mod_ctrl_down)
-      {
-        // temp till fixe draw texture.
-        if (Environment::getInstance()->paintMode) Environment::getInstance()->paintMode = false;
-        else Environment::getInstance()->paintMode = true;
-      }
-      else
-      {
-        mousedir *= -1.0f;
-      }
-
-    }
-    // move speed doubling or raw saving
-    if (e->keysym.sym == SDLK_p)
-    {
-      if (_mod_ctrl_down && _mod_shift_down)
-      {
-        Saving = true;
-      }
-      else
-      {
-        movespd *= 2.0f;
-      }
-    }
-
-    if (e->keysym.sym == SDLK_o)
-      movespd *= 0.5f;
-
-    // turn around or reset object orientation
-    if (e->keysym.sym == SDLK_r)
-    {
-      if (_mod_ctrl_down)
-        ResetSelectedObjectRotation(0, 0);
-      else ah += 180.0f;
     }
 
     if (e->keysym.sym == SDLK_t)
@@ -2359,33 +2340,6 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
 
     }
 
-    // clip object to ground
-    if (e->keysym.sym == SDLK_PAGEDOWN)
-      SnapSelectedObjectToGround(0, 0);
-
-    // speed of daytime.
-    if (e->keysym.sym == SDLK_n)
-      this->mTimespeed += 90.0f;
-
-    if (e->keysym.sym == SDLK_b)
-      this->mTimespeed -= 90.0f;
-
-    // no negativ time speed!
-    if (this->mTimespeed < 0.0f)  this->mTimespeed = 0.0f;
-
-    if (e->keysym.sym == SDLK_j)
-      this->mTimespeed = 0.0f;
-
-
-
-    // toggle lightning
-    if (e->keysym.sym == SDLK_l)
-      gWorld->lighting = !gWorld->lighting;
-
-    // toggle interface
-    if (e->keysym.sym == SDLK_TAB)
-      _GUIDisplayingEnabled = !_GUIDisplayingEnabled;
-
     // toggle "terrain texturing mode" / draw models
     if (e->keysym.sym == SDLK_F1)
     {
@@ -2418,65 +2372,7 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
         }
         alloff = !alloff;
       }
-      else
-      {
-        gWorld->drawmodels = !gWorld->drawmodels;
-      }
     }
-
-
-    // toggle drawing of doodads in WMOs.
-    if (e->keysym.sym == SDLK_F2)
-      gWorld->drawdoodads = !gWorld->drawdoodads;
-
-    // toggle terrain
-    if (e->keysym.sym == SDLK_F3)
-      gWorld->drawterrain = !gWorld->drawterrain;
-
-    // toggle better selection mode
-    if (e->keysym.sym == SDLK_F4 && _mod_shift_down)
-    {
-      Settings::getInstance()->AutoSelectingMode = !Settings::getInstance()->AutoSelectingMode;
-    }
-
-    // toggle draw water
-    if (e->keysym.sym == SDLK_F4 && !_mod_shift_down)
-      gWorld->drawwater = !gWorld->drawwater;
-
-    // toggle Animation
-    if (e->keysym.sym == SDLK_F11)
-    {
-      gWorld->renderAnimations = !gWorld->renderAnimations;
-    }
-
-    // toggle chunk limitation lines
-    if (e->keysym.sym == SDLK_F7)
-    {
-      if (_mod_shift_down)
-      {
-        Environment::getInstance()->view_holelines = !Environment::getInstance()->view_holelines;
-      }
-      else
-      {
-        gWorld->drawlines = !gWorld->drawlines;
-      }
-    }
-
-    // toggle drawing of WMOs
-    if (e->keysym.sym == SDLK_F6)
-      gWorld->drawwmo = !gWorld->drawwmo;
-
-    // toggle showing a lot of information about selected item
-    if (e->keysym.sym == SDLK_F8)
-    {
-      mainGui->guidetailInfos->toggleVisibility();
-    }
-
-    // toggle height contours on terrain
-    if (e->keysym.sym == SDLK_F9)
-      DrawMapContour = !DrawMapContour;
-
-
 
     // toggle help window
     if (e->keysym.sym == SDLK_h)
@@ -2686,10 +2582,6 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
       }
     }
 
-    // minimap
-    if (e->keysym.sym == SDLK_m)
-      mainGui->minimapWindow->toggleVisibility();
-
     if (e->keysym.sym == SDLK_g)
     {
       // write teleport cords to txt file
@@ -2777,14 +2669,6 @@ void MapView::keypressed(SDL_KeyboardEvent *e)
         terrainMode = 9; // object editor
         mainGui->guiToolbar->IconSelect(terrainMode);
       }
-    }
-
-    // add a new bookmark
-    if (e->keysym.sym == SDLK_F5)
-    {
-      std::ofstream f("bookmarks.txt", std::ios_base::app);
-      f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << ah << " " << av << " " << gWorld->getAreaID() << std::endl;
-      f.close();
     }
   }
   else

@@ -31,14 +31,16 @@ protected:
     SDLKey key;
     size_t modifiers;
     std::function<void()> function;
-    HotKey (SDLKey k, size_t m, std::function<void()> f) : key (k), modifiers (m), function (f) {}
+    std::function<bool()> condition;
+    HotKey (SDLKey k, size_t m, std::function<void()> f, std::function<bool()> c)
+      : key (k), modifiers (m), function (f), condition (c) {}
   };
 
   std::forward_list<HotKey> hotkeys;
 
-  void addHotkey(SDLKey key, size_t modifiers, std::function<void()> function)
+  void addHotkey(SDLKey key, size_t modifiers, std::function<void()> function, std::function<bool()> condition = [] { return true; })
   {
-    hotkeys.emplace_front (key, modifiers, function);
+    hotkeys.emplace_front (key, modifiers, function, condition);
   }
 
   bool handleHotkeys(SDL_KeyboardEvent* e)
