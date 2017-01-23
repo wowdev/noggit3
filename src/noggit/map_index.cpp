@@ -589,8 +589,6 @@ void MapIndex::fixUIDs()
 
   std::forward_list<ModelInstance> models;
   std::forward_list<WMOInstance> wmos;
-  std::map<std::size_t, std::map<std::size_t, std::forward_list<ModelInstance*>>> modelsOnTile;
-  std::map<std::size_t, std::map<std::size_t, std::forward_list<WMOInstance*>>> wmosOnTile;
   
   for (int z = 0; z < 64; ++z)
   {
@@ -609,6 +607,10 @@ void MapIndex::fixUIDs()
       {
         continue;
       }
+
+      math::vector_3d tileExtents[2];
+      tileExtents[0] = { x*TILESIZE, 0, z*TILESIZE };
+      tileExtents[1] = { (x+1)*TILESIZE, 0, (z+1)*TILESIZE };
 
       std::forward_list<ENTRY_MDDF> modelEntries;
       std::forward_list<ENTRY_MODF> wmoEntries;
@@ -643,7 +645,36 @@ void MapIndex::fixUIDs()
 
       for (unsigned int i = 0; i < size / sizeof(ENTRY_MDDF); ++i)
       {
-        modelEntries.push_front(mddf_ptr[i]);        
+        bool add = true;
+        ENTRY_MDDF& mddf = mddf_ptr[i];
+
+        if (!pointInside({ mddf.pos[0], 0, mddf.pos[2] }, tileExtents))
+        {
+          continue;
+        }
+
+        // check for duplicates
+        for (ENTRY_MDDF& entry : modelEntries)
+        {
+          if ( mddf.nameID == entry.nameID
+            && floatEqual(mddf.pos[0], entry.pos[0])
+            && floatEqual(mddf.pos[1], entry.pos[1])
+            && floatEqual(mddf.pos[2], entry.pos[2])
+            && floatEqual(mddf.rot[0], entry.rot[0])
+            && floatEqual(mddf.rot[1], entry.rot[1])
+            && floatEqual(mddf.rot[2], entry.rot[2])
+            && mddf.scale == entry.scale
+            )
+          {
+            add = false;
+            break;
+          }
+        }
+
+        if (add)
+        {
+          modelEntries.emplace_front(mddf);
+        }
       }
 
       // - MODF ----------------------------------------------
@@ -656,7 +687,35 @@ void MapIndex::fixUIDs()
 
       for (unsigned int i = 0; i < size / sizeof(ENTRY_MODF); ++i)
       {
-        wmoEntries.push_front(modf_ptr[i]);
+        bool add = true;
+        ENTRY_MODF& modf = modf_ptr[i];
+
+        if (!pointInside({ modf.pos[0], 0, modf.pos[2] }, tileExtents))
+        {
+          continue;
+        }
+
+        // check for duplicates
+        for (ENTRY_MODF& entry : wmoEntries)
+        {
+          if (modf.nameID == entry.nameID
+            && floatEqual(modf.pos[0], entry.pos[0])
+            && floatEqual(modf.pos[1], entry.pos[1])
+            && floatEqual(modf.pos[2], entry.pos[2])
+            && floatEqual(modf.rot[0], entry.rot[0])
+            && floatEqual(modf.rot[1], entry.rot[1])
+            && floatEqual(modf.rot[2], entry.rot[2])
+            )
+          {
+            add = false;
+            break;
+          }
+        }
+
+        if (add)
+        {
+          wmoEntries.emplace_front(modf);
+        }
       }
 
       // - MMDX ----------------------------------------------
@@ -697,68 +756,14 @@ void MapIndex::fixUIDs()
 
       for (ENTRY_MDDF& entry : modelEntries)
       {
-        math::vector_3d pos(entry.pos[0], entry.pos[1], entry.pos[2]);
-        tile_index tile(pos);
-
-        bool add = true;
-        // check for duplicates
-        for (ModelInstance* instance : modelsOnTile[tile.z][tile.x])
-        {
-          if ( floatEqual(entry.pos[0], instance->pos.x)
-            && floatEqual(entry.pos[1], instance->pos.y)
-            && floatEqual(entry.pos[2], instance->pos.z)
-            && floatEqual(entry.rot[0], instance->dir.x)
-            && floatEqual(entry.rot[1], instance->dir.y)
-            && floatEqual(entry.rot[2], instance->dir.z)
-            && entry.scale == instance->sc
-            && modelFilenames[entry.nameID] == instance->model->_filename
-            )
-          {
-            add = false;
-            break;
-          }
-        }
-
-        if (add)
-        {
-          models.emplace_front(modelFilenames[entry.nameID], &entry);
-          modelsOnTile[tile.z][tile.x].emplace_front(&models.front());
-        }
+        models.emplace_front(modelFilenames[entry.nameID], &entry);
       }
       for (ENTRY_MODF& entry : wmoEntries)
       {
-        math::vector_3d pos(entry.pos[0], entry.pos[1], entry.pos[2]);
-        tile_index tile(pos);
-
-        bool add = true;
-        // check for duplicates
-        for (WMOInstance* instance: wmosOnTile[tile.z][tile.x])
-        {
-          if ( floatEqual(entry.pos[0], instance->pos.x)
-            && floatEqual(entry.pos[1], instance->pos.y)
-            && floatEqual(entry.pos[2], instance->pos.z)
-            && floatEqual(entry.rot[0], instance->dir.x)
-            && floatEqual(entry.rot[1], instance->dir.y)
-            && floatEqual(entry.rot[2], instance->dir.z)
-            && wmoFilenames[entry.nameID] == instance->wmo->_filename
-            )
-          {
-            add = false;
-            break;
-          }
-        }
-
-        if (add)
-        {
-          wmos.emplace_front(wmoFilenames[entry.nameID], &entry);
-          wmosOnTile[tile.z][tile.x].emplace_front(&wmos.front());
-        }
+        wmos.emplace_front(wmoFilenames[entry.nameID], &entry);
       }
     }
   }
-
-  modelsOnTile.clear();
-  wmosOnTile.clear();
 
   // set all uids
   // for each tile save the m2/wmo present inside
@@ -781,7 +786,7 @@ void MapIndex::fixUIDs()
     {
       for (std::size_t x = sx; x <= ex; ++x)
       {
-        modelPerTile[z][x].emplace_front(&instance);
+        modelPerTile[z][x].push_front(&instance);
       }
     }
   }
@@ -800,7 +805,7 @@ void MapIndex::fixUIDs()
     {
       for (std::size_t x = sx; x <= ex; ++x)
       {
-        wmoPerTile[z][x].emplace_front(&instance);
+        wmoPerTile[z][x].push_front(&instance);
       }
     }
   }
