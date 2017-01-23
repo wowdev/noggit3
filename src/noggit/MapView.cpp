@@ -1316,6 +1316,39 @@ void MapView::createGUI()
 
   addHotkey (SDLK_m, MOD_none, [this] { mainGui->minimapWindow->toggleVisibility(); });
 
+  addHotkey ( SDLK_F1
+            , MOD_shift
+            , []
+              {
+                if (alloff)
+                {
+                  alloff_models = gWorld->drawmodels;
+                  alloff_doodads = gWorld->drawdoodads;
+                  alloff_contour = DrawMapContour;
+                  alloff_wmo = gWorld->drawwmo;
+                  alloff_fog = gWorld->drawfog;
+                  alloff_terrain = gWorld->drawterrain;
+
+                  gWorld->drawmodels = false;
+                  gWorld->drawdoodads = false;
+                  DrawMapContour = true;
+                  gWorld->drawwmo = false;
+                  gWorld->drawterrain = true;
+                  gWorld->drawfog = false;
+                }
+                else
+                {
+                  gWorld->drawmodels = alloff_models;
+                  gWorld->drawdoodads = alloff_doodads;
+                  DrawMapContour = alloff_contour;
+                  gWorld->drawwmo = alloff_wmo;
+                  gWorld->drawterrain = alloff_terrain;
+                  gWorld->drawfog = alloff_fog;
+                }
+                alloff = !alloff;
+              }
+            );
+
   addHotkey ( SDLK_F5
             , MOD_none
             , [this]
@@ -1368,6 +1401,53 @@ void MapView::createGUI()
 
   addHotkey (SDLK_r, MOD_none, [this] { ah += 180.f; });
   addHotkey (SDLK_r, MOD_ctrl, [] { ResetSelectedObjectRotation(0, 0); });
+
+  addHotkey ( SDLK_g
+            , MOD_none
+            , []
+              {
+                // write teleport cords to txt file
+                std::ofstream f("ports.txt", std::ios_base::app);
+                f << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID()) << " on ADT " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE) << std::endl;
+                f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << gWorld->getMapID() << std::endl;
+                f << "ArcEmu:" << std::endl << ".worldport " << gWorld->getMapID() << " " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << std::endl << std::endl;
+                f.close();
+              }
+            );
+
+  addHotkey ( SDLK_y
+            , MOD_none
+            , [] { gGroundToggleGroup->Activate((Environment::getInstance()->groundBrushType + 1) % 6); }
+            , [] { return terrainMode == 0; }
+            );
+
+  addHotkey ( SDLK_y
+            , MOD_none
+            , [] { gBlurToggleGroup->Activate((blurBrushType + 1) % 3); }
+            , [] { return terrainMode == 1; }
+            );
+
+  addHotkey ( SDLK_u
+            , MOD_none
+            , [this]
+              {
+                if (mViewMode == eViewMode_2D)
+                {
+                  mViewMode = eViewMode_3D;
+                  terrainMode = saveterrainMode;
+                  // Set the right icon in toolbar
+                  mainGui->guiToolbar->IconSelect(terrainMode);
+                }
+                else
+                {
+                  mViewMode = eViewMode_2D;
+                  saveterrainMode = terrainMode;
+                  terrainMode = 2;
+                  // Set the right icon in toolbar
+                  mainGui->guiToolbar->IconSelect(terrainMode);
+                }
+              }
+            );
 
 
   // ESC warning
@@ -2330,40 +2410,6 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
     }
   }
 
-  // toggle "terrain texturing mode" / draw models
-  if (e->keysym.sym == SDLK_F1)
-  {
-    if (_mod_shift_down)
-    {
-      if (alloff)
-      {
-        alloff_models = gWorld->drawmodels;
-        alloff_doodads = gWorld->drawdoodads;
-        alloff_contour = DrawMapContour;
-        alloff_wmo = gWorld->drawwmo;
-        alloff_fog = gWorld->drawfog;
-        alloff_terrain = gWorld->drawterrain;
-
-        gWorld->drawmodels = false;
-        gWorld->drawdoodads = false;
-        DrawMapContour = true;
-        gWorld->drawwmo = false;
-        gWorld->drawterrain = true;
-        gWorld->drawfog = false;
-      }
-      else
-      {
-        gWorld->drawmodels = alloff_models;
-        gWorld->drawdoodads = alloff_doodads;
-        DrawMapContour = alloff_contour;
-        gWorld->drawwmo = alloff_wmo;
-        gWorld->drawterrain = alloff_terrain;
-        gWorld->drawfog = alloff_fog;
-      }
-      alloff = !alloff;
-    }
-  }
-
   // toggle help window
   if (e->keysym.sym == SDLK_h)
   {
@@ -2565,51 +2611,6 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
     {
       //change selected model size
       keys = -1;
-    }
-  }
-
-  if (e->keysym.sym == SDLK_g)
-  {
-    // write teleport cords to txt file
-    std::ofstream f("ports.txt", std::ios_base::app);
-    f << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID()) << " on ADT " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE) << std::endl;
-    f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << gWorld->getMapID() << std::endl;
-    f << "ArcEmu:" << std::endl << ".worldport " << gWorld->getMapID() << " " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << std::endl << std::endl;
-    f.close();
-  }
-
-  // toogle between smooth / flat / linear
-  if (e->keysym.sym == SDLK_y)
-  {
-    switch (terrainMode)
-    {
-    case 0:
-      gGroundToggleGroup->Activate((Environment::getInstance()->groundBrushType + 1) % 6);
-      break;
-
-    case 1:
-      gBlurToggleGroup->Activate((blurBrushType + 1) % 3);
-      break;
-    }
-  }
-
-  // toogle tile mode
-  if (e->keysym.sym == SDLK_u)
-  {
-    if (mViewMode == eViewMode_2D)
-    {
-      mViewMode = eViewMode_3D;
-      terrainMode = saveterrainMode;
-      // Set the right icon in toolbar
-      mainGui->guiToolbar->IconSelect(terrainMode);
-    }
-    else
-    {
-      mViewMode = eViewMode_2D;
-      saveterrainMode = terrainMode;
-      terrainMode = 2;
-      // Set the right icon in toolbar
-      mainGui->guiToolbar->IconSelect(terrainMode);
     }
   }
 
