@@ -24,7 +24,7 @@ protected:
   std::string _textureDownFilename;
 
 
-  std::function<void(UIFrame::Ptr, int)> clickFunc;
+  std::function<void()> clickFunc;
   int id;
 
   bool clicked;
@@ -45,5 +45,6 @@ public:
 
   UIFrame::Ptr processLeftClick(float mx, float my);
   void setClickFunc(ClickFunction f, int num);
+  void setClickFunc (std::function<void()>);
   void processUnclick();
 };

@@ -119,11 +119,9 @@ MenuItemButton::MenuItemButton(MenuPane::Ptr pParent, float pX, float pY, const 
   setClickFunc(pClickFunc, pClickFuncID);
 }
 
-UIFrame* MenuItemButton::processLeftClick(float /*pX*/, float /*pY*/)
+UIFrame* MenuItemButton::processLeftClick(float x, float y)
 {
-  clicked = true;
-  if (clickFunc)
-    clickFunc(this, id);
+  UIButton::processLeftClick (x, y);
 
   mParent->Close();
 
