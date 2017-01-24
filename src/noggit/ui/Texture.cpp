@@ -91,14 +91,13 @@ UIFrame *UITexture::processLeftClick(float /*mx*/, float /*my*/)
 {
   if (clickFunc)
   {
-    clickFunc(this, id);
+    clickFunc();
     return this;
   }
   return 0;
 }
 
-void UITexture::setClickFunc(void(*f)(UIFrame *, int), int num)
+void UITexture::setClickFunc (std::function<void()> fun)
 {
-  clickFunc = f;
-  id = num;
+  clickFunc = fun;
 }

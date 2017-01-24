@@ -72,6 +72,5 @@ public:
   void quit();
   void quitask();
   void inserObjectFromExtern(int model);
-  void addModelFromTextSelection(int id);
   void selectModel(selection_type entry);
 };

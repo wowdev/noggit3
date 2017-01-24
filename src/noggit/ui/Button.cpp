@@ -63,13 +63,13 @@ UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pTex
   addChild(text);
 }
 
-UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, std::function<void(UIFrame::Ptr, int)> pFunc, int pFuncParam)
+UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, std::function<void()> fun)
   : UIFrame(pX, pY, w, h)
   , texture(TextureManager::newTexture(pTexNormal))
   , textureDown(TextureManager::newTexture(pTexDown))
   , _textureFilename(pTexNormal)
   , _textureDownFilename(pTexDown)
-  , clickFunc ([this, pFunc, pFuncParam] { pFunc (this, pFuncParam); })
+  , clickFunc (fun)
   , clicked(false)
   , text(new UIText(width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter))
 {
@@ -137,10 +137,6 @@ void UIButton::processUnclick()
   clicked = false;
 }
 
-void UIButton::setClickFunc(void(*f)(UIFrame *, int), int num)
-{
-  setClickFunc ([this, num, f] { f (this, num); });
-}
 void UIButton::setClickFunc (std::function<void()> fun)
 {
   clickFunc = fun;

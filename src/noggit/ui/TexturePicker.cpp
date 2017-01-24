@@ -11,22 +11,6 @@
 
 #include <cassert>
 
-void texturePickerClick(UIFrame* f, int id)
-{
-  // redirect to sender object.
-  (static_cast<UITexturePicker *>(f->parent()))->setTexture(id);
-}
-
-void shiftLeft(UIFrame* f, int)
-{
-  (static_cast<UITexturePicker *>(f->parent()))->shiftSelectedTextureLeft();
-}
-
-void shiftRight(UIFrame* f, int)
-{
-  (static_cast<UITexturePicker *>(f->parent()))->shiftSelectedTextureRight();
-}
-
 UITexturePicker::UITexturePicker(float x, float y, float w, float h)
   : UICloseWindow(x, y, w, h, "Pick one of the textures.", true)
 {
@@ -40,18 +24,18 @@ UITexturePicker::UITexturePicker(float x, float y, float w, float h)
   for (size_t i = 0; i < 4; ++i)
   {
     _textures[i] = new UITexture((float)(startingX + (textureSize + paddingX) * i), (float)positionY, (float)textureSize, (float)textureSize, "tileset\\generic\\black.blp");
-    _textures[i]->setClickFunc(texturePickerClick, i);
+    _textures[i]->setClickFunc ([this, i] { setTexture (i); });
     addChild(_textures[i]);
   }
 
   UIButton* bleft = new UIButton((w / 2 - 65), (h - 27.5), 60.0f, 30.0f, "<<<"
                                 , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
                                 , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
-                                , shiftLeft, 1);
+                                , [this] { shiftSelectedTextureLeft(); });
   UIButton* bright = new UIButton((w / 2 + 5), (h - 27.5), 60.0f, 30.0f, ">>>"
                                   , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
                                   , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
-                                  , shiftRight, 1);
+                                 , [this] { shiftSelectedTextureRight(); });
   addChild(bleft);
   addChild(bright);
 }
