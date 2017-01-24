@@ -34,25 +34,6 @@
 #include <string>
 #include <vector>
 
-
-Menu* theMenu = nullptr;
-
-void showMap(UIFrame *, int mapID)
-{
-  if (theMenu)
-  {
-    theMenu->loadMap(mapID);
-  }
-}
-
-void showBookmark(UIFrame *, int bookmarkID)
-{
-  if (theMenu)
-  {
-    theMenu->loadBookmark(bookmarkID);
-  }
-}
-
 Menu::Menu()
 	: mGUIFrame(nullptr)
 	, mGUIStatusbar(nullptr)
@@ -64,7 +45,6 @@ Menu::Menu()
   , uidFixWindow(nullptr)
 {
   gWorld = nullptr;
-  theMenu = this;
 
   mGUIFrame = new UIFrame(0.0f, 0.0f, (float)video.xres(), (float)video.yres());
   mGUIMinimapWindow = new UIMinimapWindow(this);
@@ -343,15 +323,16 @@ void Menu::buildMenuBar()
 
   for (std::vector<MapEntry>::const_iterator it = mMaps.begin(); it != mMaps.end(); ++it)
   {
+    auto const map_id (it->mapID);
     if (nMapByType[it->areaType]++ < nBookmarksPerMenu)
     {
-      mGUImenuBar->GetMenu(typeToName[it->areaType])->AddMenuItemButton(it->name, &showMap, it->mapID);
+      mGUImenuBar->GetMenu(typeToName[it->areaType])->AddMenuItemButton(it->name, [map_id, this] { loadMap (map_id); });
     }
     else
     {
       std::stringstream name;
       name << typeToName[it->areaType] << " (" << (nMapByType[it->areaType] / nBookmarksPerMenu + 1) << ")";
-      mGUImenuBar->GetMenu(name.str())->AddMenuItemButton(it->name, &showMap, it->mapID);
+      mGUImenuBar->GetMenu(name.str())->AddMenuItemButton(it->name, [map_id, this] { loadMap (map_id); });
     }
   }
 
@@ -383,7 +364,7 @@ void Menu::buildMenuBar()
       name << "Bookmarks";
     }
 
-    mGUImenuBar->GetMenu(name.str())->AddMenuItemButton(it->name, &showBookmark, n);
+    mGUImenuBar->GetMenu(name.str())->AddMenuItemButton(it->name, [n, this] { loadBookmark (n); });
   }
 }
 

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 
 #include <noggit/ui/Frame.h>
@@ -21,7 +22,7 @@ protected:
   std::string _textureFilename;
 
   bool highlight;
-  void(*clickFunc)(UIFrame *, int);
+  std::function<void()> clickFunc;
   int id;
 
 public:
@@ -33,7 +34,7 @@ public:
   void render() const;
 
   UIFrame *processLeftClick(float mx, float my);
-  void setClickFunc(void(*f)(UIFrame *, int), int num);
+  void setClickFunc(std::function<void()>);
   void setHighlight(bool h)
   {
     highlight = h;

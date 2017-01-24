@@ -23,6 +23,5 @@ private:
 public:
   UIWaterTypeBrowser(float xPos, float yPos, float w, float h, UIMapViewGUI *setGui);
 
-  void setWaterTypeID(UIFrame *f, int id);
   void buildTypeList();
 };

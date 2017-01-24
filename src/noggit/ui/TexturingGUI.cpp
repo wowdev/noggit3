@@ -239,7 +239,7 @@ void UITexturingGUI::updateSelectedTexture()
 
 }
 
-void texturePaletteClick(UIFrame* /*f*/, int id)
+void texturePaletteClick(int id)
 {
   if (curTextures[id]->hidden())
     return;
@@ -262,7 +262,7 @@ void texturePaletteClick(UIFrame* /*f*/, int id)
 
 // --- List stuff ------------------------
 
-void LoadTileset(UIFrame* /*button*/, int id)
+void LoadTileset(int id)
 {
   for (std::vector<std::string>::iterator it = textureNames.begin(); it != textureNames.end(); ++it)
   {
@@ -411,7 +411,7 @@ UIFrame* UITexturingGUI::createTexturePalette(UIMapViewGUI *setgui)
   for (int i = 0; i<(pal_cols*pal_rows); ++i)
   {
     curTextures[i] = new UITexture(12.0f + (i%pal_rows)*68.0f, 32.0f + (i / pal_rows)*68.0f, 64.0f, 64.0f, "tileset\\generic\\black.blp");
-    curTextures[i]->setClickFunc(texturePaletteClick, i);
+    curTextures[i]->setClickFunc([i] { texturePaletteClick (i); });
     windowTexturePalette->addChild(curTextures[i]);
   }
 
@@ -419,13 +419,13 @@ UIFrame* UITexturingGUI::createTexturePalette(UIMapViewGUI *setgui)
   textSelectedTexture = nullptr;
 
   updateTextures();
-  texturePaletteClick(0, 0);
+  texturePaletteClick(0);
 
   windowTexturePalette->addChild(gPageNumber = new UIText(44.0f, 4.0f, "1 / 1", app.getArialn13(), eJustifyLeft));
   windowTexturePalette->addChild(new UIButton(20.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-NextPage-Down.blp", changePage, +1));
   windowTexturePalette->addChild(new UIButton(2.0f, 2.0f, 20.0f, 20.0f, "", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up.blp", "Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Down.blp", changePage, -1));
 
-  windowTexturePalette->addChild(new UIButton(7.0f, windowTexturePalette->height() - 28.0f, 132.0f, 32.0f, "Load all Sets", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", LoadTileset, -1));
+  windowTexturePalette->addChild(new UIButton(7.0f, windowTexturePalette->height() - 28.0f, 132.0f, 32.0f, "Load all Sets", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", [] { LoadTileset (-1); }));
   windowTexturePalette->addChild(new UIButton(145.0f, windowTexturePalette->height() - 28.0f, 132.0f, 32.0f, "Load Tilesets", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureLoader, 0));
   windowTexturePalette->addChild(new UIButton(283.0f, windowTexturePalette->height() - 28.0f, 132.0f, 32.0f, "Filter Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureFilter, 0));
 
@@ -493,7 +493,7 @@ UIFrame* UITexturingGUI::createTilesetLoader()
     setname = tilesetDirectories[i];
 
     name->setText(setname);
-    name->setClickFunc(LoadTileset, i);
+    name->setClickFunc ([i] { LoadTileset (i); });
     windowTilesetLoader->addChild(name);
   }
 

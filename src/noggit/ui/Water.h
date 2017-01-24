@@ -16,22 +16,12 @@ class UIWater : public UIWindow
 public:
   UIWater(UIMapViewGUI *setGui);
 
-  void resize();
-
   void updatePos(int tileX, int tileZ);
   void updateData();
 
   void setWaterTrans(float val);
-  void setWaterHeight(float val);
-  void changeWaterHeight(UIFrame::Ptr, int someint);
-  void changeWaterHeightChunk(UIFrame::Ptr, int someint, int i, int j);
-  void addWaterLayer(UIFrame::Ptr, int);
-  void deleteWaterLayer(UIFrame::Ptr ptr, int someint);
+  void changeWaterHeight(float);
   void changeWaterType(int waterint);
-  void openWaterTypeBrowser(UIFrame::Ptr /*ptr*/, int someint);
-  void autoGen(UIFrame::Ptr ptr, int someint);
-  void AddWater(UIFrame::Ptr ptr, int someint);
-  void CropWater(UIFrame::Ptr ptr, int someint);
 
 private:
   static const int winWidth = 180;

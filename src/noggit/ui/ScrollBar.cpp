@@ -15,11 +15,6 @@
 
 const float UIScrollBar::WIDTH = 16.0f;
 
-void scrollbarProcessClick(UIFrame::Ptr f, int id)
-{
-  (static_cast<UIScrollBar::Ptr>(f->parent()))->clickReturn(id);
-}
-
 UIScrollBar::UIScrollBar(float xpos, float ypos, float h, int n, Orientation orientation)
   : UIFrame(xpos, ypos, 0.0f, 0.0f)
   , mTarget()
@@ -55,9 +50,8 @@ UIScrollBar::UIScrollBar(float xpos, float ypos, float h, int n, Orientation ori
   addChild(ScrollDown);
   addChild(ScrollKnob);
 
-  ScrollUp->setClickFunc(scrollbarProcessClick, -1);
-  ScrollKnob->setClickFunc(scrollbarProcessClick, 0);
-  ScrollDown->setClickFunc(scrollbarProcessClick, 1);
+  ScrollUp->setClickFunc ([this] { clickReturn (-1); });
+  ScrollDown->setClickFunc ([this] { clickReturn (1); });
 }
 
 bool UIScrollBar::processLeftDrag(float mx, float my, float /*xChange*/, float /*yChange*/)

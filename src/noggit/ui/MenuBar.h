@@ -27,7 +27,7 @@ public:
 
   void fixSizes();
 
-  void AddMenuItemButton(const std::string& pName, void(*pClickFunc)(UIFrame::Ptr, int), int pClickFuncID);
+  void AddMenuItemButton(const std::string& pName, std::function<void()>);
   void AddMenuItemToggle(const std::string& pName, bool * pMyState, bool pInvert = false);
   void AddMenuItemSwitch(const std::string& pName, bool * pMyState, bool pInvert = false);
   void AddMenuItemSet(const std::string& pName, int * pMyIntState, int pSet = 1);
@@ -91,7 +91,7 @@ class MenuItemButton : public MenuItem
 public:
   typedef MenuItemButton* Ptr;
 
-  MenuItemButton(MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, void(*pClickFunc)(UIFrame::Ptr, int), int pClickFuncID);
+  MenuItemButton(MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, std::function<void()>);
 
   UIFrame::Ptr processLeftClick(float pX, float pY);
 };

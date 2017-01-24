@@ -353,34 +353,9 @@ void setSprayBrushPressure(float f)
   brushSprayPressure = f;
 }
 
-void setTextureBrushLevel(float f)
-{
-  brushLevel = (1.0f - f)*255.0f;
-}
-
 void toggleFlattenAngle(bool state, int)
 {
   Environment::getInstance()->flattenAngleEnabled = state;
-}
-
-void SaveOrReload(UIFrame*, int pMode)
-{
-  if (pMode == 1)
-  {
-    gWorld->mapIndex->reloadTile(tile_index(gWorld->camera));
-  }
-  else if (pMode == 0)
-  {
-    gWorld->mapIndex->saveTile(tile_index(gWorld->camera));
-  }
-  else if (pMode == 2)
-  {
-    gWorld->mapIndex->saveChanged();
-  }
-  else if (pMode == 3)
-  {
-    mainGui->escWarning->show();
-  }
 }
 
 void change_settings_window(int oldid, int newid)
@@ -478,24 +453,7 @@ void change_settings_window(int oldid, int newid)
   }
 }
 
-void openSwapper(UIFrame*, int)
-{
-  mainGui->TextureSwitcher->show();
-  settings_paint->hide();
-}
-
-void removeTexDuplicateOnADT(UIFrame*, int)
-{
-  gWorld->removeTexDuplicateOnADT(tile_index(gWorld->camera));
-}
-
-void openHelp(UIFrame*, int)
-{
-  mainGui->showHelp();
-}
-
-
-void openURL(UIFrame*, int target)
+void openURL(int target)
 {
 #if defined(_WIN32) || defined(WIN32)
   if (target == 1)  ShellExecute(nullptr, "open", "http://modcraft.superparanoid.de", nullptr, nullptr, SW_SHOWNORMAL);
@@ -503,7 +461,7 @@ void openURL(UIFrame*, int target)
 #endif
 }
 
-void ResetSelectedObjectRotation(UIFrame*, int)
+void ResetSelectedObjectRotation()
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
@@ -522,7 +480,7 @@ void ResetSelectedObjectRotation(UIFrame*, int)
   }
 }
 
-void SnapSelectedObjectToGround(UIFrame*, int)
+void SnapSelectedObjectToGround()
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
@@ -543,7 +501,7 @@ void SnapSelectedObjectToGround(UIFrame*, int)
 }
 
 
-void DeleteSelectedObject(UIFrame*, int)
+void DeleteSelectedObject()
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
@@ -555,17 +513,12 @@ void DeleteSelectedObject(UIFrame*, int)
   }
 }
 
-void showHelperModels(UIFrame*, int)
-{
-  mainGui->HelperModels->show();
-}
-
 /*!
 \brief Import a new model form a text file or a hard coded one.
 Imports a model from the import.txt (or the ImportFile from the config), the wowModelViewer log or just insert some hard coded testing models.
 \param id the id switch the import kind
 */
-void InsertObject(UIFrame*, int id)
+void InsertObject(int id)
 {
   //! \todo Beautify.
 
@@ -767,11 +720,6 @@ void InsertObject(UIFrame*, int id)
   //! \todo Memoryleak: These models will never get deleted.
 }
 
-void view_texture_palette(UIFrame*, int)
-{
-  mainGui->TexturePalette->toggleVisibility();
-}
-
 void moveHeightmap(UIFrame*, int)
 {
   // set areaid on all chunks of the current ADT
@@ -779,62 +727,6 @@ void moveHeightmap(UIFrame*, int)
   {
     gWorld->moveHeight(Environment::getInstance()->selectedAreaID, tile_index(gWorld->camera));
   }
-}
-
-void clearHeightmap(UIFrame*, int)
-{
-  // set areaid on all chunks of the current ADT
-  if (Environment::getInstance()->selectedAreaID)
-  {
-    gWorld->clearHeight(Environment::getInstance()->selectedAreaID, tile_index(gWorld->camera));
-  }
-}
-
-void adtSetAreaID(UIFrame*, int)
-{
-  // set areaid on all chunks of the current ADT
-  if (Environment::getInstance()->selectedAreaID)
-  {
-    gWorld->setAreaID(Environment::getInstance()->selectedAreaID, tile_index(gWorld->camera));
-  }
-}
-
-void clearAllModels(UIFrame*, int)
-{
-  // call the clearAllModelsOnADT method to clear them all on current ADT
-  gWorld->clearAllModelsOnADT(tile_index(gWorld->camera));
-}
-
-void ClearDupModels(UIFrame*, int)
-{
-  gWorld->delete_duplicate_model_and_wmo_instances();
-}
-
-void menuWater(UIFrame*, int id)
-{
-  if (id == 1)
-  {
-    gWorld->addWaterLayer(tile_index(gWorld->camera));
-  }
-  else if (id == 0)
-  {
-    gWorld->deleteWaterLayer(tile_index(gWorld->camera));
-  }
-}
-
-void funcAllFix(UIFrame*, int id)
-{
-  gWorld->fixAllGaps();
-}
-
-void ClearShader(UIFrame*, int id)
-{
-  gWorld->ClearShader(tile_index(gWorld->camera));
-}
-
-void toBigAlpha(UIFrame*, int)
-{
-  gWorld->convertMapToBigAlpha();
 }
 
 void changeZoneIDValue(UIFrame* /*f*/, int set)
@@ -864,18 +756,6 @@ std::string getCurrentHeightmapPath()
     << "_" << misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE) << "_" << misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE) << ".png";
   return png_filename.str();
 
-}
-
-void clearTexture(UIFrame* /*f*/, int /*set*/)
-{
-  // set areaid on all chunks of the current ADT
-  gWorld->setBaseTexture(tile_index(gWorld->camera));
-}
-
-
-void showCursorSwitcher(UIFrame* /*f*/, int /*set*/)
-{
-  mainGui->showCursorSwitcher();
 }
 
 #ifdef __FILESAREMISSING
@@ -953,7 +833,7 @@ void MapView::createGUI()
 {
   // create main gui object that holds all other gui elements for access ( in the future ;) )
   mainGui = new UIMapViewGUI(this);
-  mainGui->guiCurrentTexture->current_texture->setClickFunc(view_texture_palette, 0);
+  mainGui->guiCurrentTexture->current_texture->setClickFunc ([] { mainGui->TexturePalette->toggleVisibility(); });
 
   mainGui->ZoneIDBrowser->setMapID(gWorld->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc(changeZoneIDValue);
@@ -1159,7 +1039,7 @@ void MapView::createGUI()
   mainGui->G1->setMinColor(0.0f, 0.0f, 0.0f, 1.0f);
   mainGui->G1->horiz = false;
   mainGui->G1->setClickColor(1.0f, 0.0f, 0.0f, 1.0f);
-  mainGui->G1->setClickFunc(setTextureBrushLevel);
+  mainGui->G1->setClickFunc ([] (float f) { brushLevel = (1.0f - f)*255.0f; });
   mainGui->G1->setValue(0.0f);
 
   settings_paint->addChild(mainGui->G1);
@@ -1203,10 +1083,14 @@ void MapView::createGUI()
   settings_paint->addChild(spray_pressure);
 
   UIButton* B1;
-  B1 = new UIButton(6.0f, 230.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", openSwapper, 1);
+  B1 = new UIButton(6.0f, 230.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", []
+                   {
+                     mainGui->TextureSwitcher->show();
+                     settings_paint->hide();
+                   });
   settings_paint->addChild(B1);
 
-  UIButton* rmDup = new UIButton(6.0f, 255.0f, 170.0f, 30.0f, "Remove texture duplicates", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", removeTexDuplicateOnADT, 0);
+  UIButton* rmDup = new UIButton(6.0f, 255.0f, 170.0f, 30.0f, "Remove texture duplicates", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", [] { gWorld->removeTexDuplicateOnADT(tile_index(gWorld->camera)); });
   settings_paint->addChild(rmDup);
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
@@ -1227,49 +1111,75 @@ void MapView::createGUI()
   mbar->AddMenu("Assist");
   mbar->AddMenu("Help");
 
-  // mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", SaveOrReload, 0 );
-  mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", SaveOrReload, 2);
+  // mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [] { gWorld->mapIndex->saveTile(tile_index(gWorld->camera)); });
+  mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex->saveChanged(); });
   addHotkey (SDLK_s, MOD_ctrl, [this] { save(); });
   addHotkey (SDLK_s, MOD_meta, [this] { save(); });
-  // mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", SaveOrReload, 1 );
+  // mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
   //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
   // mbar->GetMenu( "File" )->AddMenuItemButton( "Export heightmap", exportPNG, 1 );
   // mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
   mbar->GetMenu("File")->AddMenuItemSeperator(" ");
-  mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", SaveOrReload, 3);
+  mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", [] { mainGui->escWarning->show(); });
   addHotkey (SDLK_ESCAPE, MOD_none, [this] { quitask(); });
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("selected object");
-  mbar->GetMenu("Edit")->AddMenuItemButton("DEL delete", DeleteSelectedObject, 0);
-  mbar->GetMenu("Edit")->AddMenuItemButton("CTRL + R reset rotation", ResetSelectedObjectRotation, 0);
-  mbar->GetMenu("Edit")->AddMenuItemButton("PAGE DOWN set to ground", SnapSelectedObjectToGround, 0);
+  mbar->GetMenu("Edit")->AddMenuItemButton("DEL delete", DeleteSelectedObject);
+  mbar->GetMenu("Edit")->AddMenuItemButton("CTRL + R reset rotation", ResetSelectedObjectRotation);
+  mbar->GetMenu("Edit")->AddMenuItemButton("PAGE DOWN set to ground", SnapSelectedObjectToGround);
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("Options");
   mbar->GetMenu("Edit")->AddMenuItemToggle("Auto select mode", &Settings::getInstance()->AutoSelectingMode, false);
 
 
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Model");
-  mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", InsertObject, 14);
-  mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", InsertObject, 15);
-  mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", showHelperModels, 2);
+  mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", [] { InsertObject (14); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", [] { InsertObject (15); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", [] { mainGui->HelperModels->show(); });
   mbar->GetMenu("Assist")->AddMenuItemSeperator("ADT");
-  mbar->GetMenu("Assist")->AddMenuItemButton("Set Area ID", adtSetAreaID, 0);
-  mbar->GetMenu("Assist")->AddMenuItemButton("Clear height map", clearHeightmap, 0);
+  mbar->GetMenu("Assist")->AddMenuItemButton ( "Set Area ID"
+                                             , []
+                                               {
+                                                 if (Environment::getInstance()->selectedAreaID)
+                                                 {
+                                                   gWorld->setAreaID(Environment::getInstance()->selectedAreaID, tile_index(gWorld->camera));
+                                                 }
+                                               }
+                                             );
+  mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear height map"
+                                             , []
+                                               {
+                                                 if (Environment::getInstance()->selectedAreaID)
+                                                 {
+                                                   gWorld->clearHeight(Environment::getInstance()->selectedAreaID, tile_index(gWorld->camera));
+                                                 }
+                                               }
+                                             );
 
-  mbar->GetMenu("Assist")->AddMenuItemButton("Clear texture", clearTexture, 0);
-  mbar->GetMenu("Assist")->AddMenuItemButton("Clear models", clearAllModels, 0);
-  mbar->GetMenu("Assist")->AddMenuItemButton("Clear duplicate models", ClearDupModels, 0);
-  mbar->GetMenu("Assist")->AddMenuItemButton("Clear water", menuWater, 0);
-  mbar->GetMenu("Assist")->AddMenuItemButton("Create water", menuWater, 1);
-  mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded adts)", funcAllFix, 0);
-  mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", ClearShader, 0);
-  mbar->GetMenu("Assist")->AddMenuItemButton("Map to big alpha", toBigAlpha, 0);
+  mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear texture"
+                                             , [] { gWorld->setBaseTexture(tile_index(gWorld->camera)); }
+                                             );
+  mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear models"
+                                             , [] { gWorld->clearAllModelsOnADT(tile_index(gWorld->camera)); }
+                                             );
+  mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear duplicate models"
+                                             , [] { gWorld->delete_duplicate_model_and_wmo_instances(); }
+                                             );
+  mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear water"
+                                             , [] { gWorld->deleteWaterLayer(tile_index(gWorld->camera)); }
+                                             );
+  mbar->GetMenu("Assist")->AddMenuItemButton ( "Create water"
+                                             , [] { gWorld->addWaterLayer(tile_index(gWorld->camera)); }
+                                             );
+  mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded adts)", [] { gWorld->fixAllGaps(); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", [] { gWorld->ClearShader(tile_index(gWorld->camera)); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Map to big alpha", [] { gWorld->convertMapToBigAlpha(); });
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
   mbar->GetMenu("View")->AddMenuItemToggle("Toolbar", mainGui->guiToolbar->hidden_evil(), true);
 
   mbar->GetMenu("View")->AddMenuItemToggle("Texture palette", mainGui->TexturePalette->hidden_evil(), true);
-  mbar->GetMenu("View")->AddMenuItemButton("Cursor options", showCursorSwitcher, 0);
+  mbar->GetMenu("View")->AddMenuItemButton("Cursor options", [] { mainGui->showCursorSwitcher(); });
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
   mbar->GetMenu("View")->AddMenuItemToggle("F1 M2s", &gWorld->drawmodels);
   addHotkey (SDLK_F1, MOD_none, [] { gWorld->drawmodels = !gWorld->drawmodels; });
@@ -1295,9 +1205,9 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemToggle("Wireframe", &gWorld->drawwireframe);
   mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &Settings::getInstance()->renderModelsWithBox);
 
-  mbar->GetMenu("Help")->AddMenuItemButton("Key Bindings F10", openHelp, 0);
-  mbar->GetMenu("Help")->AddMenuItemButton("Manual online", openURL, 2);
-  mbar->GetMenu("Help")->AddMenuItemButton("Homepage", openURL, 1);
+  mbar->GetMenu("Help")->AddMenuItemButton("Key Bindings F10", [] { mainGui->showHelp(); });
+  mbar->GetMenu("Help")->AddMenuItemButton("Manual online", [] { openURL (2); });
+  mbar->GetMenu("Help")->AddMenuItemButton("Homepage", [] { openURL (1); });
 
   mainGui->addChild(mbar);
 
@@ -1345,7 +1255,7 @@ void MapView::createGUI()
               }
             );
 
-  addHotkey (SDLK_PAGEDOWN, MOD_none, [] { SnapSelectedObjectToGround (0, 0); });
+  addHotkey (SDLK_PAGEDOWN, MOD_none, [] { SnapSelectedObjectToGround(); });
 
   addHotkey (SDLK_n, MOD_none, [this] { mTimespeed += 90.0f; });
   addHotkey (SDLK_b, MOD_none, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
@@ -1355,10 +1265,10 @@ void MapView::createGUI()
 
   addHotkey (SDLK_TAB, MOD_none, [this] { _GUIDisplayingEnabled = !_GUIDisplayingEnabled; });
 
-  addHotkey (SDLK_DELETE, MOD_none, [] { DeleteSelectedObject(0, 0); });
+  addHotkey (SDLK_DELETE, MOD_none, [] { DeleteSelectedObject(); });
 
-  addHotkey (SDLK_v, MOD_shift, [] { InsertObject (0, 14); });
-  addHotkey (SDLK_v, MOD_alt, [] { InsertObject (0, 15); });
+  addHotkey (SDLK_v, MOD_shift, [] { InsertObject (14); });
+  addHotkey (SDLK_v, MOD_alt, [] { InsertObject (15); });
   addHotkey (SDLK_v, MOD_ctrl, [] { mainGui->objectEditor->pasteObject(); });
   addHotkey ( SDLK_v
             , MOD_none
@@ -1368,7 +1278,7 @@ void MapView::createGUI()
 
   addHotkey ( SDLK_x
             , MOD_none
-            , [] { view_texture_palette (0, 0); }
+            , [] { mainGui->TexturePalette->toggleVisibility(); }
             , [] { return terrainMode == 2; }
             );
 
@@ -1387,7 +1297,7 @@ void MapView::createGUI()
   addHotkey (SDLK_p, MOD_shift | MOD_ctrl, [] { Saving = true; });
 
   addHotkey (SDLK_r, MOD_none, [this] { ah += 180.f; });
-  addHotkey (SDLK_r, MOD_ctrl, [] { ResetSelectedObjectRotation(0, 0); });
+  addHotkey (SDLK_r, MOD_ctrl, [] { ResetSelectedObjectRotation(); });
 
   addHotkey ( SDLK_g
             , MOD_none
@@ -2342,9 +2252,9 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
     else if (_mod_alt_down && _mod_ctrl_down)
       mainGui->toggleCursorSwitcher();
     else if (_mod_shift_down)
-      InsertObject(0, 14);
+      InsertObject(14);
     else if (_mod_alt_down)
-      InsertObject(0, 15);
+      InsertObject(15);
     else
     {
       if (terrainMode == 9)
@@ -2731,7 +2641,7 @@ void MapView::keyReleaseEvent (SDL_KeyboardEvent* e)
 
 void MapView::inserObjectFromExtern(int model)
 {
-  InsertObject(0, model);
+  InsertObject (model);
 }
 
 
@@ -2842,11 +2752,6 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
   Environment::getInstance()->screenX = MouseX = e->x;
   Environment::getInstance()->screenY = MouseY = e->y;
   checkWaterSave();
-}
-
-void MapView::addModelFromTextSelection(int id)
-{
-  InsertObject(0, id);
 }
 
 void MapView::selectModel(selection_type entry)

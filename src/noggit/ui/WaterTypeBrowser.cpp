@@ -53,19 +53,12 @@ void UIWaterTypeBrowser::buildTypeList()
       ss.str(),
       "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp",
       "Interface\\DialogFrame\\UI-DialogBox-Background-Dark.blp",
-      boost::bind(&UIWaterTypeBrowser::setWaterTypeID, this, _1, _2), //steff: kidding me? we talked about this some h before u did this
-      i->getInt(LiquidTypeDB::ID)
+      [this, i] { mainGui->guiWater->changeWaterType(i->getInt(LiquidTypeDB::ID)); } //steff: kidding me? we talked about this some h before u did this
       );
     tempButton->setLeft();
     curFrame->addChild(tempButton);
     WaterTypeList->addElement(curFrame);
-
   }
 
   WaterTypeList->recalcElements(1);
-}
-
-void UIWaterTypeBrowser::setWaterTypeID(UIFrame *f, int id)
-{
-  mainGui->guiWater->changeWaterType(id);
 }

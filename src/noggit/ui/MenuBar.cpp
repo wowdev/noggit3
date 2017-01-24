@@ -113,10 +113,10 @@ MenuItem::MenuItem(MenuPane::Ptr pParent, float pX, float pY, float pHeight, con
   setLeft();
 }
 
-MenuItemButton::MenuItemButton(MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, void(*pClickFunc)(UIFrame::Ptr, int), int pClickFuncID)
+MenuItemButton::MenuItemButton(MenuPane::Ptr pParent, float pX, float pY, const std::string& pText, std::function<void()> fun)
   : MenuItem(pParent, pX, pY, 30.0f, pText, "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp")
 {
-  setClickFunc(pClickFunc, pClickFuncID);
+  setClickFunc (fun);
 }
 
 UIFrame* MenuItemButton::processLeftClick(float x, float y)
@@ -270,9 +270,9 @@ void MenuPane::fixSizes()
   }
 }
 
-void MenuPane::AddMenuItemButton(const std::string& pName, void(*pClickFunc)(UIFrame::Ptr, int), int pClickFuncID)
+void MenuPane::AddMenuItemButton(const std::string& pName, std::function<void()> fun)
 {
-  addChild(new MenuItemButton(this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, pClickFunc, pClickFuncID));
+  addChild(new MenuItemButton(this, 5.0f, 5.0f + 25.0f * mNumItems++, pName, fun));
   fixSizes();
 }
 void MenuPane::AddMenuItemToggle(const std::string& pName, bool * pMyState, bool pInvert)
