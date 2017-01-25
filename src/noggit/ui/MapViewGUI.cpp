@@ -16,9 +16,11 @@
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // UIDetailInfos
 #include <noggit/ui/DoodadSpawner.h>
+#include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Help.h>
 #include <noggit/ui/MinimapWindow.h>
 #include <noggit/ui/StatusBar.h> // UIStatusBar
+#include <noggit/ui/terrain_tool.hpp>
 #include <noggit/ui/TexturePicker.h> //
 #include <noggit/ui/TextureSwitcher.h>
 #include <noggit/ui/TexturingGUI.h>
@@ -40,8 +42,6 @@
 
 #include <noggit/ui/Alphamap.h>
 #include <noggit/Settings.h>
-
-#include <noggit/ui/FlattenTool.hpp>
 
 
 
@@ -65,7 +65,18 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   rotationEditor->hide();
   addChild(rotationEditor);
 
+#ifdef _WIN32
+  if (app.tabletActive && Settings::getInstance()->tabletMode)
+    terrainTool = new ui::terrain_tool((float)video.xres() - 190.0f, 30.0f, true);
+  else
+#endif
+    terrainTool = new ui::terrain_tool((float)video.xres() - 190.0f, 30.0f, false);
+
+  terrainTool->show();
+  addChild(terrainTool);
+
   flattenTool = new ui::FlattenTool((float)video.xres() - 210.0f, 30.0f);
+  flattenTool->hide();
   addChild(flattenTool);
 
   // UICurrentTexture

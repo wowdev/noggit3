@@ -28,6 +28,7 @@ class UIRotationEditor;
 namespace ui
 {
   class FlattenTool;
+  class terrain_tool;
 }
 
 class UIModel;
@@ -75,12 +76,11 @@ public:
   UIWater* guiWater;
   UIWaterTypeBrowser* guiWaterTypeSelector;
   UICurrentTexture* guiCurrentTexture;
-  UIWindow *setting_ground;
-  UIWindow *setting_blur;
   UIWindow *settings_paint;
   UIObjectEditor *objectEditor;
   UIRotationEditor *rotationEditor;
   ui::FlattenTool *flattenTool;
+  ui::terrain_tool *terrainTool;
 
   UIExitWarning *escWarning;
   UICapsWarning *capsWarning;

@@ -37,6 +37,7 @@
 #include <noggit/ui/RotationEditor.h>
 #include <noggit/ui/Slider.h> // UISlider
 #include <noggit/ui/StatusBar.h> // statusBar
+#include <noggit/ui/terrain_tool.hpp>
 #include <noggit/ui/Text.h> // UIText
 #include <noggit/ui/Texture.h> // textureUI
 #include <noggit/ui/TexturePicker.h>
@@ -129,14 +130,9 @@ float shaderGreen = 1.0f;
 float shaderBlue = 1.0f;
 
 
-UISlider* ground_brush_radius;
-float groundBrushRadius = 15.0f;
-UISlider* ground_brush_speed;
-float groundBrushSpeed = 1.0f;
+
 
 #ifdef _WIN32
-int    groundTabletControlSelect = 1;
-int    groundTabletSelect = 1;
 int shaderTabletControlSelect = 0;//Defaulting to off
 #endif
 
@@ -171,26 +167,14 @@ UIMapViewGUI* mainGui;
 
 UIFrame* MapChunkWindow;
 
-UIToggleGroup * gFlattenTypeGroup;
-UIToggleGroup * gGroundToggleGroup;
 UIToggleGroup * gFlagsToggleGroup;
 
 #ifdef _WIN32
-UIToggleGroup * gGroundTabletControl;
 UIToggleGroup * gShaderTabletControl;
-UIToggleGroup * gGroundTabletActiveGroup;
 #endif
 
-UIWindow *setting_ground;
 UIWindow *settings_paint;
 UIWindow *settings_shader;
-
-
-
-void setGroundBrushRadius(float f)
-{
-  groundBrushRadius = f;
-}
 
 void SetShaderRadius(float f)
 {
@@ -219,14 +203,6 @@ void SetShaderBlue(float f)
   shaderBlue = f;
   Environment::getInstance()->cursorColorB = f / 2;
 }
-
-void setGroundBrushSpeed(float f)
-{
-  groundBrushSpeed = f;
-}
-
-
-
 
 
 void setTextureBrushHardness(float f)
@@ -270,14 +246,14 @@ void setSprayBrushPressure(float f)
 
 void change_settings_window(int oldid, int newid)
 {
-  if (oldid + 1 == newid || !setting_ground || !mainGui->flattenTool || !settings_paint
-    || !settings_shader || !mainGui || !mainGui->guiWater || !mainGui->objectEditor)
+  if (oldid + 1 == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !settings_paint
+    || !settings_shader || !mainGui->guiWater || !mainGui->objectEditor)
   {
     return;
   }
 
   mainGui->guiWaterTypeSelector->hide();
-  setting_ground->hide();
+  mainGui->terrainTool->hide();
   mainGui->flattenTool->hide();
   settings_paint->hide();
   settings_shader->hide();
@@ -296,8 +272,8 @@ void change_settings_window(int oldid, int newid)
   switch (oldid)
   {
   case 1:
-    tool_settings_x = (int)setting_ground->x();
-    tool_settings_y = (int)setting_ground->y();
+    tool_settings_x = (int)mainGui->terrainTool->x();
+    tool_settings_y = (int)mainGui->terrainTool->y();
     break;
   case 2:
     tool_settings_x = (int)mainGui->flattenTool->x();
@@ -324,9 +300,9 @@ void change_settings_window(int oldid, int newid)
   switch (newid)
   {
   case 1:
-    setting_ground->x((const float)tool_settings_x);
-    setting_ground->y((const float)tool_settings_y);
-    setting_ground->show();
+    mainGui->terrainTool->x((const float)tool_settings_x);
+    mainGui->terrainTool->y((const float)tool_settings_y);
+    mainGui->terrainTool->show();
     break;
   case 2:
     mainGui->flattenTool->x((const float)tool_settings_x);
@@ -748,59 +724,7 @@ void MapView::createGUI()
   mainGui->ZoneIDBrowser->setMapID(gWorld->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc(changeZoneIDValue);
   tool_settings_x = video.xres() - 186;
-  tool_settings_y = 38;
-
-
-  // Raise/Lower
-#ifdef _WIN32
-  if (app.tabletActive && Settings::getInstance()->tabletMode)
-    setting_ground = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 240.0f);
-  else
-#endif
-    setting_ground = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 160.0f);
-
-  setting_ground->movable(true);
-  mainGui->addChild(setting_ground);
-
-  setting_ground->addChild(new UIText(78.5f, 2.0f, "Raise / Lower", app.getArial14(), eJustifyCenter));
-
-  gGroundToggleGroup = new UIToggleGroup(&Environment::getInstance()->groundBrushType);
-  setting_ground->addChild(new UICheckBox(6.0f, 15.0f, "Flat", gGroundToggleGroup, 0));
-  setting_ground->addChild(new UICheckBox(85.0f, 15.0f, "Linear", gGroundToggleGroup, 1));
-  setting_ground->addChild(new UICheckBox(6.0f, 40.0f, "Smooth", gGroundToggleGroup, 2));
-  setting_ground->addChild(new UICheckBox(85.0f, 40.0f, "Polynomial", gGroundToggleGroup, 3));
-  setting_ground->addChild(new UICheckBox(6.0f, 65.0f, "Trigonom", gGroundToggleGroup, 4));
-  setting_ground->addChild(new UICheckBox(85.0f, 65.0f, "Quadratic", gGroundToggleGroup, 5));
-  gGroundToggleGroup->Activate(1);
-
-  ground_brush_radius = new UISlider(6.0f, 120.0f, 167.0f, 1000.0f, 0.00001f);
-  ground_brush_radius->setFunc(setGroundBrushRadius);
-  ground_brush_radius->setValue(groundBrushRadius / 1000);
-  ground_brush_radius->setText("Brush radius: ");
-  setting_ground->addChild(ground_brush_radius);
-
-  ground_brush_speed = new UISlider(6.0f, 145.0f, 167.0f, 10.0f, 0.00001f);
-  ground_brush_speed->setFunc(setGroundBrushSpeed);
-  ground_brush_speed->setValue(groundBrushSpeed / 10);
-  ground_brush_speed->setText("Brush Speed: ");
-  setting_ground->addChild(ground_brush_speed);
-
-#ifdef _WIN32
-  if (app.tabletActive && Settings::getInstance()->tabletMode)
-  {
-    setting_ground->addChild(new UIText(78.5f, 170.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
-
-    gGroundTabletControl = new UIToggleGroup(&groundTabletControlSelect);
-    setting_ground->addChild(new UICheckBox(6.0f, 182.0f, "Off", gGroundTabletControl, 0));
-    setting_ground->addChild(new UICheckBox(85.0f, 182.0f, "On", gGroundTabletControl, 1));
-    gGroundTabletControl->Activate(1);
-
-    gGroundTabletActiveGroup = new UIToggleGroup(&groundTabletSelect);
-    setting_ground->addChild(new UICheckBox(6.0f, 207.0f, "Radius", gGroundTabletActiveGroup, 0));
-    setting_ground->addChild(new UICheckBox(85.0f, 207.0f, "Speed", gGroundTabletActiveGroup, 1));
-    gGroundTabletActiveGroup->Activate(1);
-  }
-#endif
+  tool_settings_y = 38; 
 
   // shader
 #ifdef _WIN32
@@ -1150,7 +1074,7 @@ void MapView::createGUI()
 
   addHotkey ( SDLK_y
             , MOD_none
-            , [] { gGroundToggleGroup->Activate((Environment::getInstance()->groundBrushType + 1) % 6); }
+            , [] { mainGui->terrainTool->nextType(); }
             , [] { return terrainMode == 0; }
             );
 
@@ -1282,25 +1206,7 @@ void MapView::tick(float t, float dt)
     switch (terrainMode)
     {
     case 0:
-      switch (groundTabletSelect)
-      {
-      case 0:
-        if (groundTabletControlSelect == 1)
-        {
-          groundBrushRadius = std::max(0.0f, std::min(1000.0f, (float)app.pressure / 20.48f));
-          ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
-        }
-        break;
-      case 1:
-        if (groundTabletControlSelect == 1)
-        {
-          groundBrushSpeed = std::max(0.0f, std::min(10.0f, (float)app.pressure / 204.8f));
-          ground_brush_speed->setValue(groundBrushSpeed / 10.0f);
-        }
-        break;
-      }
-      break;
-
+      mainGui->terrainTool->setTabletControlValue((float)app.pressure);
     case 1:
       mainGui->flattenTool->setRadius((float)app.pressure / 20.0f);
       break;
@@ -1558,11 +1464,11 @@ void MapView::tick(float t, float dt)
           {
             if (_mod_shift_down)
             {
-              gWorld->changeTerrain(xPos, zPos, 7.5f * dt * groundBrushSpeed, groundBrushRadius, Environment::getInstance()->groundBrushType);
+              mainGui->terrainTool->changeTerrain(7.5f * dt);
             }
             else if (_mod_ctrl_down)
             {
-              gWorld->changeTerrain(xPos, zPos, -7.5f * dt * groundBrushSpeed, groundBrushRadius, Environment::getInstance()->groundBrushType);
+              mainGui->terrainTool->changeTerrain(-7.5f * dt);
             }
           }
           break;
@@ -1913,7 +1819,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
 
   switch (terrainMode)
   {
-    case 0: radius = groundBrushRadius; break;
+    case 0: radius = mainGui->terrainTool->brushRadius(); break;
     case 1: radius = mainGui->flattenTool->brushRadius(); break;
     case 2: 
       radius = textureBrush.getRadius(); 
@@ -2225,8 +2131,7 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
       switch (terrainMode)
       {
       case 0:
-        groundBrushRadius = std::min(1000.0f, groundBrushRadius + 0.01f);
-        ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
+        mainGui->terrainTool->changeRadius(0.01f);
         break;
       case 1:
         mainGui->flattenTool->changeRadius(0.01f);
@@ -2282,8 +2187,7 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
       switch (terrainMode)
       {
       case 0:
-        groundBrushRadius = std::max(0.0f, groundBrushRadius - 0.01f);
-        ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
+        mainGui->terrainTool->changeRadius(-0.01f);
         break;
       case 1:
         mainGui->flattenTool->changeRadius(-0.01f);
@@ -2512,8 +2416,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
     switch (terrainMode)
     {
     case 0:
-      groundBrushRadius = std::max(0.0f, std::min(1000.0f, groundBrushRadius + e->xrel / XSENS));
-      ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
+      mainGui->terrainTool->changeRadius(e->xrel / XSENS);
       break;
     case 1:
       mainGui->flattenTool->changeRadius(e->xrel / XSENS);
@@ -2534,8 +2437,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
     switch (terrainMode)
     {
     case 0:
-      groundBrushSpeed = std::max(0.0f, std::min(10.0f, groundBrushSpeed + e->xrel / 30.0f));
-      ground_brush_speed->setValue(groundBrushSpeed / 10.0f);
+      mainGui->terrainTool->changeSpeed(e->xrel / 30.0f);
       break;
     case 1:
       mainGui->flattenTool->changeSpeed(e->xrel / 30.0f);

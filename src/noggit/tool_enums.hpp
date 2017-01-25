@@ -2,6 +2,28 @@
 
 #pragma once
 
+enum eTerrainType
+{
+  eTerrainType_Flat,
+  eTerrainType_Linear,
+  eTerrainType_Smooth,
+  eTerrainType_Polynom,
+  eTerrainType_Trigo,
+  eTerrainType_Quadra,
+  eTerrainType_Count,
+};
+
+enum eTerrainTabletCtrl
+{
+  eTerrainTabletCtrl_Off,
+  eTerrainTabletCtrl_On
+};
+
+enum eTerrainTabletActiveGroup
+{
+  eTerrainTabletActiveGroup_Radius,
+  eTerrainTabletActiveGroup_Speed,
+};
 
 enum eFlattenType
 {
