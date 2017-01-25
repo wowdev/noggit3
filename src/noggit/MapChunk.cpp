@@ -883,12 +883,6 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
   float dist, xdiff, zdiff;
   bool changed = false;
 
-  xdiff = xbase - x + CHUNKSIZE / 2;
-  zdiff = zbase - z + CHUNKSIZE / 2;
-  dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
-
-  if (dist > (radius + MAPCHUNK_RADIUS))
-    return changed;
   vmin.y = 9999999.0f;
   vmax.y = -9999999.0f;
   for (int i = 0; i < mapbufsize; ++i)
@@ -950,13 +944,6 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
   float dist, xdiff, zdiff;
   bool changed = false;
 
-  xdiff = xbase - x + CHUNKSIZE / 2;
-  zdiff = zbase - z + CHUNKSIZE / 2;
-  dist = sqrt(xdiff*xdiff + zdiff*zdiff);
-
-  if (dist > (radius + MAPCHUNK_RADIUS))
-    return changed;
-
   if (!hasMCCV)
   {
     ClearShader(); // create default shaders
@@ -1011,11 +998,6 @@ bool MapChunk::flattenTerrain ( float x
                               , math::degrees orientation
                               )
 {
-  if (misc::dist (xbase, zbase, x + CHUNKSIZE / 2, z + CHUNKSIZE / 2) > (radius + MAPCHUNK_RADIUS))
-  {
-    return false;
-  }
-
   bool changed (false);
 
   for (int i (0); i < mapbufsize; ++i)
@@ -1071,11 +1053,6 @@ bool MapChunk::flattenTerrain ( float x
 
 bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
-  if (misc::dist (xbase, zbase, x + CHUNKSIZE / 2, z + CHUNKSIZE / 2) > (radius + MAPCHUNK_RADIUS))
-  {
-    return false;
-  }
-
   bool changed (false);
 
   for (int i (0); i < mapbufsize; ++i)
