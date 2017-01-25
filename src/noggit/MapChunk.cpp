@@ -1071,79 +1071,67 @@ bool MapChunk::flattenTerrain ( float x
 
 bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
-  float dist, dist2, xdiff, zdiff, nremain;
-  bool changed = false;
-  xdiff = xbase - x + CHUNKSIZE / 2;
-  zdiff = zbase - z + CHUNKSIZE / 2;
-  dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
-
-  if (dist > (radius + MAPCHUNK_RADIUS))
-    return false;
-
-  vmin.y = 9999999.0f;
-  vmax.y = -9999999.0f;
-
-  for (int i = 0; i < mapbufsize; ++i)
+  if (misc::dist (xbase, zbase, x + CHUNKSIZE / 2, z + CHUNKSIZE / 2) > (radius + MAPCHUNK_RADIUS))
   {
-    xdiff = mVertices[i].x - x;
-    zdiff = mVertices[i].z - z;
+    return false;
+  }
 
-    dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
+  bool changed (false);
 
-    if (dist < radius)
+  for (int i (0); i < mapbufsize; ++i)
+  {
+    float const dist (misc::dist (mVertices[i].x, mVertices[i].z, x, z));
+
+    if (dist >= radius)
     {
-      float TotalHeight;
-      float TotalWeight;
-      float tx, tz, h;
-      math::vector_3d TempVec;
-      int Rad = (int)(radius / UNITSIZE);
-
-      TotalHeight = 0;
-      TotalWeight = 0;
-      for (int j = -Rad * 2; j <= Rad * 2; ++j)
-      {
-        tz = z + j * UNITSIZE / 2;
-        for (int k = -Rad; k <= Rad; ++k)
-        {
-          tx = x + k*UNITSIZE + (j % 2) * UNITSIZE / 2.0f;
-          xdiff = tx - mVertices[i].x;
-          zdiff = tz - mVertices[i].z;
-          dist2 = std::sqrt(xdiff*xdiff + zdiff*zdiff);
-          if (dist2 > radius)
-            continue;
-          gWorld->GetVertex(tx, tz, &TempVec);
-          TotalHeight += (1.0f - dist2 / radius) * TempVec.y;
-          TotalWeight += (1.0f - dist2 / radius);
-        }
-      }
-
-      h = TotalHeight / TotalWeight;
-
-      if (BrushType == eFlattenType_Flat)
-      {
-        mVertices[i].y = remain * mVertices[i].y + (1 - remain) * h;
-      }
-      else if (BrushType == eFlattenType_Linear)
-      {
-        nremain = 1 - (1 - remain) * (1 - dist / radius);
-        mVertices[i].y = nremain * mVertices[i].y + (1 - nremain) * h;
-      }
-      else if (BrushType == eFlattenType_Smooth)
-      {
-        nremain = 1.0f - pow(1.0f - remain, (1.0f + dist / radius));
-        mVertices[i].y = nremain*mVertices[i].y + (1 - nremain)*h;
-      }
-
-      changed = true;
+      continue;
     }
 
-    vmin.y = std::min(vmin.y, mVertices[i].y);
-    vmax.y = std::max(vmax.y, mVertices[i].y);
+    int Rad = (int)(radius / UNITSIZE);
+    float TotalHeight = 0;
+    float TotalWeight = 0;
+    for (int j = -Rad * 2; j <= Rad * 2; ++j)
+    {
+      float tz = z + j * UNITSIZE / 2;
+      for (int k = -Rad; k <= Rad; ++k)
+      {
+        float tx = x + k*UNITSIZE + (j % 2) * UNITSIZE / 2.0f;
+        float dist2 = misc::dist (tx, tz, mVertices[i].x, mVertices[i].z);
+        if (dist2 > radius)
+          continue;
+        math::vector_3d TempVec;
+        gWorld->GetVertex(tx, tz, &TempVec);
+        TotalHeight += (1.0f - dist2 / radius) * TempVec.y;
+        TotalWeight += (1.0f - dist2 / radius);
+      }
+    }
+
+    mVertices[i].y = math::interpolation::linear
+      ( BrushType == eFlattenType_Flat ? remain
+      : BrushType == eFlattenType_Linear ? remain * (1.f - dist / radius)
+      : BrushType == eFlattenType_Smooth ? pow (remain, 1.f + dist / radius)
+      : throw std::logic_error ("bad brush type")
+      , mVertices[i].y
+      , TotalHeight / TotalWeight
+      );
+
+    changed = true;
   }
+
   if (changed)
   {
+    vmin.y = std::numeric_limits<float>::max();
+    vmax.y = std::numeric_limits<float>::lowest();
+
+    for (int i (0); i < mapbufsize; ++i)
+    {
+      vmin.y = std::min (vmin.y, mVertices[i].y);
+      vmax.y = std::max (vmax.y, mVertices[i].y);
+    }
+
     gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
+
   return changed;
 }
 
