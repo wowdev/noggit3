@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <cassert>
 #include <ctime>
+#include <forward_list>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -1443,121 +1444,118 @@ bool World::GetVertex(float x, float z, math::vector_3d *V)
   return mapIndex->getTile(tile)->GetVertex(x, z, V);
 }
 
-void World::changeShader(float x, float z, float change, float radius, bool editMode)
+template<typename Fun>
+  bool World::for_all_chunks_in_range (float x, float z, float radius, Fun&& fun)
 {
-  for (MapTile* tile : mapIndex->tiles_in_range(x, z, radius))
+  bool changed (false);
+
+  for (MapTile* tile : mapIndex->tiles_in_range (x, z, radius))
   {
-    for (size_t ty = 0; ty < 16; ++ty)
+    for (MapChunk* chunk : tile->chunks_in_range (x, z, radius))
     {
-      for (size_t tx = 0; tx < 16; ++tx)
+      if (fun (chunk))
       {
-        if (tile->getChunk(ty, tx)->ChangeMCCV(x, z, change, radius, editMode))
-        {
-          mapIndex->setChanged(tile);
-        }
+        changed = true;
+        mapIndex->setChanged (tile);
       }
     }
   }
+
+  return changed;
+}
+template<typename Fun, typename Post>
+  bool World::for_all_chunks_in_range (float x, float z, float radius, Fun&& fun, Post&& post)
+{
+  std::forward_list<MapChunk*> modified_chunks;
+
+  bool changed ( for_all_chunks_in_range
+                   ( x, z, radius
+                   , [&] (MapChunk* chunk)
+                     {
+                       if (fun (chunk))
+                       {
+                         modified_chunks.emplace_front (chunk);
+                         return true;
+                       }
+                       return false;
+                     }
+                   )
+               );
+
+  for (MapChunk* chunk : modified_chunks)
+  {
+    post (chunk);
+  }
+
+  return changed;
+}
+
+
+void World::changeShader(float x, float z, float change, float radius, bool editMode)
+{
+  for_all_chunks_in_range
+    ( x, z, radius
+    , [&] (MapChunk* chunk)
+      {
+        return chunk->ChangeMCCV(x, z, change, radius, editMode);
+      }
+    );
 }
 
 void World::changeTerrain(float x, float z, float change, float radius, int BrushType)
 {
-  std::vector<MapChunk*> chunks;
-
-  for (MapTile* tile : mapIndex->tiles_in_range(x, z, radius))
-  {
-    for (size_t ty = 0; ty < 16; ++ty)
-    {
-      for (size_t tx = 0; tx < 16; ++tx)
+  for_all_chunks_in_range
+    ( x, z, radius
+    , [&] (MapChunk* chunk)
       {
-        MapChunk* chunk = tile->getChunk(ty, tx);
-        if (chunk->changeTerrain(x, z, change, radius, BrushType))
-        {
-          chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile);
-        }
+        return chunk->changeTerrain(x, z, change, radius, BrushType);
       }
-    }
-  }
-
-  for (MapChunk* chunk : chunks)
-  {
-    chunk->recalcNorms();
-  }
+    , [] (MapChunk* chunk)
+      {
+        chunk->recalcNorms();
+      }
+    );
 }
 
 void World::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation)
 {
-  std::vector<MapChunk*> chunks;
-
-  for (MapTile* tile : mapIndex->tiles_in_range(x, z, radius))
-  {
-    for (size_t ty = 0; ty < 16; ++ty)
-    {
-      for (size_t tx = 0; tx < 16; ++tx)
+  for_all_chunks_in_range
+    ( x, z, radius
+    , [&] (MapChunk* chunk)
       {
-        MapChunk* chunk = tile->getChunk(ty, tx);
-        if (chunk->flattenTerrain(x, z, remain, radius, BrushType, flattenType, origin, angle, orientation))
-        {
-          chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile);
-        }
+        return chunk->flattenTerrain(x, z, remain, radius, BrushType, flattenType, origin, angle, orientation);
       }
-    }
-  }
-
-  for (MapChunk* chunk : chunks)
-  {
-    chunk->recalcNorms();
-  }
+    , [] (MapChunk* chunk)
+      {
+        chunk->recalcNorms();
+      }
+    );
 }
 
 void World::blurTerrain(float x, float z, float remain, float radius, int BrushType)
 {
-  std::vector<MapChunk*> chunks;
-
-  for (MapTile* tile : mapIndex->tiles_in_range(x, z, radius))
-  {
-    for (size_t ty = 0; ty < 16; ++ty)
-    {
-      for (size_t tx = 0; tx < 16; ++tx)
+  for_all_chunks_in_range
+    ( x, z, radius
+    , [&] (MapChunk* chunk)
       {
-        MapChunk* chunk = tile->getChunk(ty, tx);
-        if (chunk->blurTerrain(x, z, remain, radius, BrushType))
-        {
-          chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile);
-        }
+        return chunk->blurTerrain(x, z, remain, radius, BrushType);
       }
-    }
-  }
-
-  for (MapChunk* chunk : chunks)
-  {
-    chunk->recalcNorms();
-  }
+    , [] (MapChunk* chunk)
+      {
+        chunk->recalcNorms();
+      }
+    );
 }
 
 bool World::paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture)
 {
-  bool succ = false;
-
-  for (MapTile* tile : mapIndex->tiles_in_range(x, z, brush->getRadius()))
-  {
-    for (size_t ty = 0; ty < 16; ++ty)
-    {
-      for (size_t tx = 0; tx < 16; ++tx)
+  return for_all_chunks_in_range
+    ( x, z, brush->getRadius()
+    , [&] (MapChunk* chunk)
       {
-        if (tile->getChunk(ty, tx)->paintTexture(x, z, brush, strength, pressure, texture))
-        {
-          succ |= true;
-          mapIndex->setChanged(tile);
-        }
+        return chunk->paintTexture(x, z, brush, strength, pressure, texture);
       }
-    }
-  }
-
-  return succ;
+    );
 }
 
 bool World::sprayTexture(float x, float z, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, OpenGL::Texture* texture)

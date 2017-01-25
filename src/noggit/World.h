@@ -166,6 +166,20 @@ public:
   // check if the cursor is under map or in an unloaded tile
   bool isUnderMap(float x, float z, float h);
 
+  template<typename Fun>
+    bool for_all_chunks_in_range ( float x
+                                 , float z
+                                 , float radius
+                                 , Fun&& /* MapChunk* -> bool changed */
+                                 );
+  template<typename Fun, typename Post>
+    bool for_all_chunks_in_range ( float x
+                                 , float z
+                                 , float radius
+                                 , Fun&& /* MapChunk* -> bool changed */
+                                 , Post&& /* MapChunk* -> void; called for all changed chunks */
+                                 );
+
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void changeShader(float x, float z, float change, float radius, bool editMode);
   void flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
