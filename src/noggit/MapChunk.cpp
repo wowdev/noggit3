@@ -1000,63 +1000,72 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
   return changed;
 }
 
-bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, float angle, float orientation)
+bool MapChunk::flattenTerrain ( float x
+                              , float z
+                              , float remain
+                              , float radius
+                              , int BrushType
+                              , int flattenType
+                              , math::vector_3d const& origin
+                              , math::degrees angle
+                              , math::degrees orientation
+                              )
 {
-  float dist, xdiff, zdiff, nremain;
-  bool changed = false;
-
-  xdiff = xbase - x + CHUNKSIZE / 2;
-  zdiff = zbase - z + CHUNKSIZE / 2;
-  dist = sqrt(xdiff*xdiff + zdiff*zdiff);
-
-  if (dist > (radius + MAPCHUNK_RADIUS))
-    return changed;
-
-  vmin.y = 9999999.0f;
-  vmax.y = -9999999.0f;
-
-  for (int i = 0; i < mapbufsize; ++i)
+  if (misc::dist (xbase, zbase, x + CHUNKSIZE / 2, z + CHUNKSIZE / 2) > (radius + MAPCHUNK_RADIUS))
   {
-    xdiff = mVertices[i].x - x;
-    zdiff = mVertices[i].z - z;
+    return false;
+  }
 
-    dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+  bool changed (false);
 
-    if (dist < radius)
+  for (int i (0); i < mapbufsize; ++i)
+  {
+    float const dist (misc::dist (mVertices[i].x, mVertices[i].z, x, z));
+
+    if (dist >= radius)
     {
-      float o = orientation*math::constants::pi / 180, tanA = tan(angle*math::constants::pi / 180);
-      float ah = origin.y + ((mVertices[i].x - origin.x)*cos(o) + (mVertices[i].z - origin.z)*sin(o))*  tanA;
-      
-      if ((flattenType == eFlattenMode_Raise && ah < mVertices[i].y) || (flattenType == eFlattenMode_Lower && ah > mVertices[i].y))
-      {
-        continue;
-      }
-
-      if (BrushType == eFlattenType_Flat)
-      {
-        mVertices[i].y = remain*mVertices[i].y + (1 - remain)*ah;
-      }
-      else if (BrushType == eFlattenType_Linear)
-      {
-        nremain = 1 - (1 - remain) * (1 - dist / radius);
-        mVertices[i].y = nremain*mVertices[i].y + (1 - nremain)*ah;
-      }
-      else if (BrushType == eFlattenType_Smooth)
-      {
-        nremain = 1.0f - pow(1.0f - remain, (1.0f + dist / radius));
-        mVertices[i].y = nremain*mVertices[i].y + ((1 - nremain)*ah);
-      }
-
-      changed = true;
+      continue;
     }
 
-    vmin.y = std::min(vmin.y, mVertices[i].y);
-    vmax.y = std::max(vmax.y, mVertices[i].y);
+    float const ah ( origin.y
+                   + ( (mVertices[i].x - origin.x) * math::cos (orientation)
+                     + (mVertices[i].z - origin.z) * math::sin (orientation)
+                     ) * math::tan (angle)
+                   );
+
+    if ( (flattenType == eFlattenMode_Raise && ah < mVertices[i].y)
+       || (flattenType == eFlattenMode_Lower && ah > mVertices[i].y)
+       )
+    {
+      continue;
+    }
+
+    mVertices[i].y = math::interpolation::linear
+      ( BrushType == eFlattenType_Flat ? remain
+      : BrushType == eFlattenType_Linear ? remain * (1.f - dist / radius)
+      : BrushType == eFlattenType_Smooth ? pow (remain, 1.f + dist / radius)
+      : throw std::logic_error ("bad brush type")
+      , mVertices[i].y
+      , ah
+      );
+
+    changed = true;
   }
+
   if (changed)
   {
+    vmin.y = std::numeric_limits<float>::max();
+    vmax.y = std::numeric_limits<float>::lowest();
+
+    for (int i (0); i < mapbufsize; ++i)
+    {
+      vmin.y = std::min (vmin.y, mVertices[i].y);
+      vmax.y = std::max (vmax.y, mVertices[i].y);
+    }
+
     gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   }
+
   return changed;
 }
 
