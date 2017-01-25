@@ -1726,36 +1726,29 @@ void World::removeHole(float x, float z, bool big)
   }
 }
 
-void World::addHoleADT(float x, float z)
+template<typename Fun>
+  void World::for_all_chunks_on_tile (float x, float z, Fun&& fun)
 {
-  tile_index tile(math::vector_3d(x, 0, z));
-
-  MapTile* mTile = mapIndex->getTile(tile);
-  mapIndex->setChanged(tile);
+  MapTile* tile (mapIndex->getTile (math::vector_3d (x, 0, z)));
+  mapIndex->setChanged (tile);
 
   for (size_t ty = 0; ty < 16; ++ty)
   {
     for (size_t tx = 0; tx < 16; ++tx)
     {
-      mTile->getChunk(ty, tx)->addHoleEverywhere();
+      fun (tile->getChunk (ty, tx));
     }
   }
 }
 
+void World::addHoleADT(float x, float z)
+{
+  for_all_chunks_on_tile (x, z, [] (MapChunk* chunk) { chunk->addHoleEverywhere(); });
+}
+
 void World::removeHoleADT(float x, float z)
 {
-  tile_index tile(math::vector_3d(x, 0, z));
-
-  MapTile* mTile = mapIndex->getTile(tile);
-  mapIndex->setChanged(x, z);
-
-  for (size_t ty = 0; ty < 16; ++ty)
-  {
-    for (size_t tx = 0; tx < 16; ++tx)
-    {
-      mTile->getChunk(tx, ty)->removeAllHoles();
-    }
-  }
+  for_all_chunks_on_tile (x, z, [] (MapChunk* chunk) { chunk->removeAllHoles(); });
 }
 
 void World::jumpToCords(math::vector_3d pos)
