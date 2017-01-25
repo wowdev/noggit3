@@ -13,6 +13,7 @@
 #include <noggit/World.h>
 #include <noggit/alphamap.hpp>
 #include <noggit/texture_set.hpp>
+#include <noggit/tool_enums.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <opengl/scoped.hpp>
 
@@ -1019,22 +1020,21 @@ bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float rad
       float o = orientation*math::constants::pi / 180, tanA = tan(angle*math::constants::pi / 180);
       float ah = h + (xdiff*cos(o) + zdiff*sin(o))*  tanA;
 
-      // 1 = raise only, 2 = lower only
-      if ((flattenType == 1 && ah < mVertices[i].y) || (flattenType == 2 && ah > mVertices[i].y))
+      if ((flattenType == eFlattenMode_Raise && ah < mVertices[i].y) || (flattenType == eFlattenMode_Lower && ah > mVertices[i].y))
       {
         continue;
       }
 
-      if (BrushType == 0)//Flat
+      if (BrushType == eFlattenType_Flat)
       {
         mVertices[i].y = remain*mVertices[i].y + (1 - remain)*ah;
       }
-      else if (BrushType == 1)//Linear
+      else if (BrushType == eFlattenType_Linear)
       {
         nremain = 1 - (1 - remain) * (1 - dist / radius);
         mVertices[i].y = nremain*mVertices[i].y + (1 - nremain)*ah;
       }
-      else if (BrushType == 2)//Smooth
+      else if (BrushType == eFlattenType_Smooth)
       {
         nremain = 1.0f - pow(1.0f - remain, (1.0f + dist / radius));
         mVertices[i].y = nremain*mVertices[i].y + ((1 - nremain)*ah);
@@ -1079,22 +1079,22 @@ bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int 
     {
       float o = orientation*math::constants::pi / 180, tanA = tan(angle*math::constants::pi / 180);
       float ah = origin.y + ((mVertices[i].x - origin.x)*cos(o) + (mVertices[i].z - origin.z)*sin(o))*  tanA;
-      // 1 = raise only, 2 = lower only
-      if ((flattenType == 1 && ah < mVertices[i].y) || (flattenType == 2 && ah > mVertices[i].y))
+      
+      if ((flattenType == eFlattenMode_Raise && ah < mVertices[i].y) || (flattenType == eFlattenMode_Lower && ah > mVertices[i].y))
       {
         continue;
       }
 
-      if (BrushType == 0)//Flat
+      if (BrushType == eFlattenType_Flat)
       {
         mVertices[i].y = remain*mVertices[i].y + (1 - remain)*ah;
       }
-      else if (BrushType == 1)//Linear
+      else if (BrushType == eFlattenType_Linear)
       {
         nremain = 1 - (1 - remain) * (1 - dist / radius);
         mVertices[i].y = nremain*mVertices[i].y + (1 - nremain)*ah;
       }
-      else if (BrushType == 2)//Smooth
+      else if (BrushType == eFlattenType_Smooth)
       {
         nremain = 1.0f - pow(1.0f - remain, (1.0f + dist / radius));
         mVertices[i].y = nremain*mVertices[i].y + ((1 - nremain)*ah);
@@ -1163,16 +1163,16 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
 
       h = TotalHeight / TotalWeight;
 
-      if (BrushType == 0)//Flat
+      if (BrushType == eFlattenType_Flat)
       {
         mVertices[i].y = remain * mVertices[i].y + (1 - remain) * h;
       }
-      else if (BrushType == 1)//Linear
+      else if (BrushType == eFlattenType_Linear)
       {
         nremain = 1 - (1 - remain) * (1 - dist / radius);
         mVertices[i].y = nremain * mVertices[i].y + (1 - nremain) * h;
       }
-      else if (BrushType == 2)//Smooth
+      else if (BrushType == eFlattenType_Smooth)
       {
         nremain = 1.0f - pow(1.0f - remain, (1.0f + dist / radius));
         mVertices[i].y = nremain*mVertices[i].y + (1 - nremain)*h;
