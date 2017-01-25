@@ -939,7 +939,14 @@ void World::draw(float brushRadius, float hardness)
     if (terrainMode == 1 && Environment::getInstance()->flattenAngleEnabled)
     {
       math::degrees o = math::degrees(Environment::getInstance()->flattenOrientation);
-      render_line(pos, pos + math::vector_3d(brushRadius * cos(o), 0.0f, brushRadius * sin(o)));
+      float x = brushRadius * cos(o);
+      float z = brushRadius * sin(o);
+      float h = brushRadius * tan(math::degrees(Environment::getInstance()->flattenAngle));
+      math::vector_3d const dest1 = pos + math::vector_3d(x, 0.0f, z);
+      math::vector_3d const dest2 = pos + math::vector_3d(x, h, z);
+      render_line(pos, dest1);
+      render_line(pos, dest2);
+      render_line(dest1, dest2);
     }
 
 
