@@ -500,6 +500,25 @@ MapChunk* MapTile::getChunk(unsigned int x, unsigned int z)
   }
 }
 
+std::vector<MapChunk*> MapTile::chunks_in_range (float x, float z, float radius) const
+{
+  std::vector<MapChunk*> chunks;
+
+  for (size_t ty (0); ty < 16; ++ty)
+  {
+    for (size_t tx (0); tx < 16; ++tx)
+    {
+      if (misc::getShortestDist (x, z, mChunks[ty][tx]->xbase, mChunks[ty][tx]->zbase, CHUNKSIZE) <= radius)
+      {
+        chunks.emplace_back (mChunks[ty][tx]);
+      }
+    }
+  }
+
+  return chunks;
+}
+
+
 bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
 {
   int xcol = (int)((x - xbase) / CHUNKSIZE);
