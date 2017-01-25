@@ -110,28 +110,16 @@ namespace ui
   {
     math::vector_3d const& pos = Environment::getInstance()->get_cursor_pos();
 
-    if (_angled_mode)
-    {
-      if (_locked)
-      {
-        gWorld->flattenTerrain(pos.x, pos.z, pow(0.5f, dt *_speed), _radius, _flatten_type, _flatten_mode, _lock_pos, _angle, _orientation);
-      }
-      else
-      {
-        gWorld->flattenTerrain(pos.x, pos.z, pos.y, pow(0.5f, dt *_speed), _radius, _flatten_type, _flatten_mode, _angle, _orientation);
-      }
-    }
-    else
-    {
-      if (_locked)
-      {
-        gWorld->flattenTerrain(pos.x, pos.z, pow(0.5f, dt *_speed), _radius, _flatten_type, _flatten_mode, _lock_pos);
-      }
-      else
-      {
-        gWorld->flattenTerrain(pos.x, pos.z, pos.y, pow(0.5f, dt *_speed), _radius, _flatten_type, _flatten_mode);
-      }
-    }
+    gWorld->flattenTerrain ( pos.x
+                           , pos.z
+                           , pow (0.5f, dt *_speed)
+                           , _radius
+                           , _flatten_type
+                           , _flatten_mode
+                           , _locked ? _lock_pos : pos
+                           , _angled_mode ? _angle : 0.0f
+                           , _angled_mode ? _orientation : 0.0f
+                           );
   }
 
   void FlattenTool::blur(float dt)

@@ -1486,32 +1486,6 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
   }
 }
 
-void World::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, int flattenType, float angle, float orientation)
-{
-  std::vector<MapChunk*> chunks;
-
-  for (MapTile* tile : mapIndex->tiles_in_range(x, z, radius))
-  {
-    for (size_t ty = 0; ty < 16; ++ty)
-    {
-      for (size_t tx = 0; tx < 16; ++tx)
-      {
-        MapChunk* chunk = tile->getChunk(ty, tx);
-        if (chunk->flattenTerrain(x, z, h, remain, radius, BrushType, flattenType, angle, orientation))
-        {
-          chunks.emplace_back(chunk);
-          mapIndex->setChanged(tile);
-        }
-      }
-    }
-  }
-
-  for (MapChunk* chunk : chunks)
-  {
-    chunk->recalcNorms();
-  }
-}
-
 void World::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, float angle, float orientation)
 {
   std::vector<MapChunk*> chunks;
