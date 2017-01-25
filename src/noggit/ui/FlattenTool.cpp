@@ -126,7 +126,12 @@ namespace ui
   {
     math::vector_3d const& pos = Environment::getInstance()->get_cursor_pos();
 
-    gWorld->blurTerrain(pos.x, pos.z, pow(0.5, dt*_speed), _radius, _flatten_type);
+    gWorld->blurTerrain ( pos.x
+                        , pos.z
+                        , 1.f - pow (0.5f, dt * _speed)
+                        , _radius
+                        , _flatten_type
+                       );
   }
 
   void FlattenTool::nextFlattenType()
