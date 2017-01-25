@@ -1486,7 +1486,7 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
   }
 }
 
-void World::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, float angle, float orientation)
+void World::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation)
 {
   std::vector<MapChunk*> chunks;
 

@@ -112,13 +112,13 @@ namespace ui
 
     gWorld->flattenTerrain ( pos.x
                            , pos.z
-                           , pow (0.5f, dt *_speed)
+                           , 1.f - pow (0.5f, dt *_speed)
                            , _radius
                            , _flatten_type
                            , _flatten_mode
                            , _locked ? _lock_pos : pos
-                           , _angled_mode ? _angle : 0.0f
-                           , _angled_mode ? _orientation : 0.0f
+                           , math::degrees (_angled_mode ? _angle : 0.0f)
+                           , math::degrees (_angled_mode ? _orientation : 0.0f)
                            );
   }
 
