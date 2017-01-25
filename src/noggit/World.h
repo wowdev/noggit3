@@ -168,8 +168,7 @@ public:
 
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void changeShader(float x, float z, float change, float radius, bool editMode);
-  void flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, int flattenType, float angle = 0.0f, float orientation = 0.0f);
-  void flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, float angle = 0.0f, float orientation = 0.0f);
+  void flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, float angle, float orientation);
   void blurTerrain(float x, float z, float remain, float radius, int BrushType);
   bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
   bool sprayTexture(float x, float z, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, OpenGL::Texture* texture);

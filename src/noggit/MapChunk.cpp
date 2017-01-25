@@ -1000,66 +1000,6 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
   return changed;
 }
 
-bool MapChunk::flattenTerrain(float x, float z, float h, float remain, float radius, int BrushType, int flattenType, float angle, float orientation)
-{
-  float dist, xdiff, zdiff, nremain;
-  bool changed = false;
-
-  xdiff = xbase - x + CHUNKSIZE / 2;
-  zdiff = zbase - z + CHUNKSIZE / 2;
-  dist = sqrt(xdiff*xdiff + zdiff*zdiff);
-
-  if (dist > (radius + MAPCHUNK_RADIUS))
-    return changed;
-
-  vmin.y = 9999999.0f;
-  vmax.y = -9999999.0f;
-
-  for (int i = 0; i < mapbufsize; ++i)
-  {
-    xdiff = mVertices[i].x - x;
-    zdiff = mVertices[i].z - z;
-
-    dist = sqrt(xdiff*xdiff + zdiff*zdiff);
-
-    if (dist < radius)
-    {
-      float o = orientation*math::constants::pi / 180, tanA = tan(angle*math::constants::pi / 180);
-      float ah = h + (xdiff*cos(o) + zdiff*sin(o))*  tanA;
-
-      if ((flattenType == eFlattenMode_Raise && ah < mVertices[i].y) || (flattenType == eFlattenMode_Lower && ah > mVertices[i].y))
-      {
-        continue;
-      }
-
-      if (BrushType == eFlattenType_Flat)
-      {
-        mVertices[i].y = remain*mVertices[i].y + (1 - remain)*ah;
-      }
-      else if (BrushType == eFlattenType_Linear)
-      {
-        nremain = 1 - (1 - remain) * (1 - dist / radius);
-        mVertices[i].y = nremain*mVertices[i].y + (1 - nremain)*ah;
-      }
-      else if (BrushType == eFlattenType_Smooth)
-      {
-        nremain = 1.0f - pow(1.0f - remain, (1.0f + dist / radius));
-        mVertices[i].y = nremain*mVertices[i].y + ((1 - nremain)*ah);
-      }
-
-      changed = true;
-    }
-
-    vmin.y = std::min(vmin.y, mVertices[i].y);
-    vmax.y = std::max(vmax.y, mVertices[i].y);
-  }
-  if (changed)
-  {
-    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
-  }
-  return changed;
-}
-
 bool MapChunk::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, float angle, float orientation)
 {
   float dist, xdiff, zdiff, nremain;
