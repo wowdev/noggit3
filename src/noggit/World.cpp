@@ -784,14 +784,9 @@ void World::setupFog()
   }
 }
 
-extern float groundBrushRadius;
-extern float blurBrushRadius;
-extern float shaderRadius;
 extern int terrainMode;
-extern Brush textureBrush;
 
-
-void World::draw()
+void World::draw(float brushRadius, float hardness)
 {
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
@@ -921,56 +916,32 @@ void World::draw()
     //gl.depthMask(false);
     //gl.disable(GL_DEPTH_TEST);
 
-    if (terrainMode == 0)
+    if (terrainMode == 0 && Environment::getInstance()->groundBrushType == 5)
     {
-      // quadratic
-      if (Environment::getInstance()->groundBrushType == 5)
+      render_square(pos, brushRadius / 2.0f, 0.0f);
+    }
+    else
+    {
+      if (Environment::getInstance()->cursorType == 1)
       {
-        render_square (pos, groundBrushRadius / 2.0f, 0.0f);
-      }
-      else if (Environment::getInstance()->cursorType == 1)
-      {
-        render_disk (pos, groundBrushRadius);
+        render_disk(pos, brushRadius);
+        if (hardness >= 0.01f)
+        {
+          render_disk(pos, brushRadius * hardness);
+        }
       }
       else if (Environment::getInstance()->cursorType == 2)
       {
-        render_sphere (pos, groundBrushRadius);
+        render_sphere(pos, brushRadius);
       }
     }
-    else if (terrainMode == 1)
-    {
 
-      if (Environment::getInstance()->cursorType == 1)
-        render_disk (pos, blurBrushRadius);
-      else if (Environment::getInstance()->cursorType == 2)
-        render_sphere (pos, blurBrushRadius);
+    if (terrainMode == 1 && Environment::getInstance()->flattenAngleEnabled)
+    {
+      math::degrees o = math::degrees(Environment::getInstance()->flattenOrientation);
+      render_line(pos, pos + math::vector_3d(brushRadius * cos(o), 0.0f, brushRadius * sin(o)));
+    }
 
-      if (Environment::getInstance()->flattenAngleEnabled)
-      {
-        float const o = Environment::getInstance()->flattenOrientation;
-        render_line(pos, pos + math::vector_3d (blurBrushRadius * cos (o), 0.0f, blurBrushRadius * sin(o)));
-      }
-    }
-    else if (terrainMode == 2)
-    {
-      if (Environment::getInstance()->cursorType == 1)
-      {
-        render_disk (pos, textureBrush.getRadius());
-        render_disk (pos, textureBrush.getRadius() * textureBrush.getHardness());
-      }
-      else if (Environment::getInstance()->cursorType == 2)
-      {
-        render_sphere (pos, textureBrush.getRadius());
-      }
-    }
-    else if (terrainMode == 8)
-    {
-      if (Environment::getInstance()->cursorType == 1)
-        render_disk (pos, shaderRadius);
-      else if (Environment::getInstance()->cursorType == 2)
-        render_sphere (pos, shaderRadius);
-    }
-    else render_sphere (pos, 0.3f);
 
     gl.enable(GL_CULL_FACE);
     gl.enable(GL_DEPTH_TEST);

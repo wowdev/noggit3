@@ -41,6 +41,8 @@
 #include <noggit/ui/Alphamap.h>
 #include <noggit/Settings.h>
 
+#include <noggit/ui/FlattenTool.hpp>
+
 
 
 UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
@@ -62,6 +64,9 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   rotationEditor->movable(true);
   rotationEditor->hide();
   addChild(rotationEditor);
+
+  flattenTool = new ui::FlattenTool((float)video.xres() - 210.0f, 30.0f);
+  addChild(flattenTool);
 
   // UICurrentTexture
   guiCurrentTexture = new UICurrentTexture(6.0f, 35.0f, this);

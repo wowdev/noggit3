@@ -26,6 +26,7 @@
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
 #include <noggit/ui/ExitWarning.h>
+#include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Gradient.h> // UIGradient
 #include <noggit/ui/HelperModels.h>
 #include <noggit/ui/MapViewGUI.h> // UIMapViewGUI
@@ -132,8 +133,6 @@ UISlider* ground_brush_radius;
 float groundBrushRadius = 15.0f;
 UISlider* ground_brush_speed;
 float groundBrushSpeed = 1.0f;
-UISlider* ground_blur_speed;
-float groundBlurSpeed = 2.0f;
 
 #ifdef _WIN32
 int    groundTabletControlSelect = 1;
@@ -141,26 +140,7 @@ int    groundTabletSelect = 1;
 int shaderTabletControlSelect = 0;//Defaulting to off
 #endif
 
-UISlider* blur_brush;
-float blurBrushRadius = 10.0f;
-int    blurBrushType = 1;
 
-int flattenType = eFlattenMode_Both;
-
-UICheckBox* toggle_flatten;
-
-UISlider* flatten_angle;
-float flattenAngle = 0.0f;
-
-UISlider* flatten_orientation;
-float flattenOrientation = 0.0f;
-
-math::vector_3d flattenRelativePos(0, 0, 0);
-bool flattenRelativeMode = false;
-UITextBox* flatten_relative_x;
-UITextBox* flatten_relative_y;
-UITextBox* flatten_relative_z;
-UICheckBox* toggle_flatten_relative;
 
 UISlider* paint_brush;
 UISlider* spray_size;
@@ -192,7 +172,6 @@ UIMapViewGUI* mainGui;
 UIFrame* MapChunkWindow;
 
 UIToggleGroup * gFlattenTypeGroup;
-UIToggleGroup * gBlurToggleGroup;
 UIToggleGroup * gGroundToggleGroup;
 UIToggleGroup * gFlagsToggleGroup;
 
@@ -203,56 +182,10 @@ UIToggleGroup * gGroundTabletActiveGroup;
 #endif
 
 UIWindow *setting_ground;
-UIWindow *setting_blur;
 UIWindow *settings_paint;
 UIWindow *settings_shader;
 
-void toggleFlattenLock(bool b, int)
-{
-  flattenRelativeMode = b;
-}
 
-void updateFlattenRelativeX(UITextBox::Ptr textBox, const std::string& value)
-{
-  try
-  {
-    float val = std::atof(value.c_str());
-    flattenRelativePos.x = val;
-    flatten_relative_x->value(misc::floatToStr(val));
-  }
-  catch (std::exception const & e)
-  {
-    flatten_relative_x->value(misc::floatToStr(flattenRelativePos.x));
-  }
-}
-
-void updateFlattenRelativeY(UITextBox::Ptr textBox, const std::string& value)
-{
-  try
-  {
-    float val = std::atof(value.c_str());
-    flattenRelativePos.y = val;
-    flatten_relative_y->value(misc::floatToStr(val));
-  }
-  catch (std::exception const & e)
-  {
-    flatten_relative_x->value(misc::floatToStr(flattenRelativePos.y));
-  }
-}
-
-void updateFlattenRelativeZ(UITextBox::Ptr textBox, const std::string& value)
-{
-  try
-  {
-    float val = std::atof(value.c_str());
-    flattenRelativePos.z = val;
-    flatten_relative_z->value(misc::floatToStr(val));
-  }
-  catch (std::exception const & e)
-  {
-    flatten_relative_x->value(misc::floatToStr(flattenRelativePos.z));
-  }
-}
 
 void setGroundBrushRadius(float f)
 {
@@ -293,27 +226,7 @@ void setGroundBrushSpeed(float f)
 }
 
 
-void setBlurBrushRadius(float f)
-{
-  blurBrushRadius = f;
-}
 
-void setBlurBrushSpeed(float f)
-{
-  groundBlurSpeed = f;
-}
-
-void setFlattenAngle(float f)
-{
-  flattenAngle = f;
-  Environment::getInstance()->flattenAngle = f;
-}
-
-void setFlattenOrientation(float f)
-{
-  flattenOrientation = f;
-  Environment::getInstance()->flattenOrientation = (math::constants::pi*f) / 180;
-}
 
 
 void setTextureBrushHardness(float f)
@@ -353,14 +266,11 @@ void setSprayBrushPressure(float f)
   brushSprayPressure = f;
 }
 
-void toggleFlattenAngle(bool state, int)
-{
-  Environment::getInstance()->flattenAngleEnabled = state;
-}
+
 
 void change_settings_window(int oldid, int newid)
 {
-  if (oldid + 1 == newid || !setting_ground || !setting_blur || !settings_paint
+  if (oldid + 1 == newid || !setting_ground || !mainGui->flattenTool || !settings_paint
     || !settings_shader || !mainGui || !mainGui->guiWater || !mainGui->objectEditor)
   {
     return;
@@ -368,7 +278,7 @@ void change_settings_window(int oldid, int newid)
 
   mainGui->guiWaterTypeSelector->hide();
   setting_ground->hide();
-  setting_blur->hide();
+  mainGui->flattenTool->hide();
   settings_paint->hide();
   settings_shader->hide();
   mainGui->guiWater->hide();
@@ -390,8 +300,8 @@ void change_settings_window(int oldid, int newid)
     tool_settings_y = (int)setting_ground->y();
     break;
   case 2:
-    tool_settings_x = (int)setting_blur->x();
-    tool_settings_y = (int)setting_blur->y();
+    tool_settings_x = (int)mainGui->flattenTool->x();
+    tool_settings_y = (int)mainGui->flattenTool->y();
     break;
   case 3:
     tool_settings_x = (int)settings_paint->x();
@@ -419,9 +329,9 @@ void change_settings_window(int oldid, int newid)
     setting_ground->show();
     break;
   case 2:
-    setting_blur->x((const float)tool_settings_x);
-    setting_blur->y((const float)tool_settings_y);
-    setting_blur->show();
+    mainGui->flattenTool->x((const float)tool_settings_x);
+    mainGui->flattenTool->y((const float)tool_settings_y);
+    mainGui->flattenTool->show();
     break;
   case 3:
     settings_paint->x((const float)tool_settings_x);
@@ -946,80 +856,6 @@ void MapView::createGUI()
   }
 #endif
 
-  // flatten/blur
-  setting_blur = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 400.0f);
-  setting_blur->movable(true);
-  setting_blur->hide();
-  mainGui->addChild(setting_blur);
-
-  setting_blur->addChild(new UIText(78.5f, 2.0f, "Flatten / Blur", app.getArial14(), eJustifyCenter));
-
-  gBlurToggleGroup = new UIToggleGroup(&blurBrushType);
-  setting_blur->addChild(new UICheckBox(6.0f, 15.0f, "Flat", gBlurToggleGroup, 0));
-  setting_blur->addChild(new UICheckBox(80.0f, 15.0f, "Linear", gBlurToggleGroup, 1));
-  setting_blur->addChild(new UICheckBox(6.0f, 40.0f, "Smooth", gBlurToggleGroup, 2));
-  gBlurToggleGroup->Activate(1);
-
-  blur_brush = new UISlider(6.0f, 85.0f, 167.0f, 1000.0f, 0.00001f);
-  blur_brush->setFunc(setBlurBrushRadius);
-  blur_brush->setValue(blurBrushRadius / 1000);
-  blur_brush->setText("Brush radius: ");
-  setting_blur->addChild(blur_brush);
-
-  ground_blur_speed = new UISlider(6.0f, 110.0f, 167.0f, 10.0f, 0.00001f);
-  ground_blur_speed->setFunc(setBlurBrushSpeed);
-  ground_blur_speed->setValue(groundBlurSpeed / 10);
-  ground_blur_speed->setText("Brush Speed: ");
-  setting_blur->addChild(ground_blur_speed);
-
-  setting_blur->addChild(new UIText(5.0f, 130.0f, "Flatten options:", app.getArial14(), eJustifyLeft));
-
-  toggle_flatten = new UICheckBox(6.0f, 150.0f, "Flatten Angle", toggleFlattenAngle, 0);
-  toggle_flatten->setState(Environment::getInstance()->flattenAngleEnabled);
-  setting_blur->addChild(toggle_flatten);
-
-  flatten_angle = new UISlider(6.0f, 190.0f, 167.0f, 90.0f, 0.00001f);
-  flatten_angle->setValue(flattenAngle / 10);
-  flatten_angle->setText("Angle: ");
-  flatten_angle->setFunc(setFlattenAngle);
-  setting_blur->addChild(flatten_angle);
-
-  flatten_orientation = new UISlider(6.0f, 220.0f, 167.0f, 360.0f, 0.00001f);
-  flatten_orientation->setValue(flattenOrientation / 10);
-  flatten_orientation->setText("Orientation: ");
-  flatten_orientation->setFunc(setFlattenOrientation);
-  setting_blur->addChild(flatten_orientation);
-
-  toggle_flatten_relative = new UICheckBox(5.0f, 235.0f, "flatten relative to:", toggleFlattenLock, 0);
-  toggle_flatten_relative->setState(flattenRelativeMode);
-  setting_blur->addChild(toggle_flatten_relative);
-
-  setting_blur->addChild(new UIText(5.0f, 265.0f, "X:", app.getArial12(), eJustifyLeft));
-  flatten_relative_x = new UITextBox(50.0f, 265.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeX);
-  flatten_relative_x->value(misc::floatToStr(flattenRelativePos.x));
-  setting_blur->addChild(flatten_relative_x);
-
-  setting_blur->addChild(new UIText(5.0f, 285.0f, "Z:", app.getArial12(), eJustifyLeft));
-  flatten_relative_z = new UITextBox(50.0f, 285.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeZ);
-  flatten_relative_z->value(misc::floatToStr(flattenRelativePos.z));
-  setting_blur->addChild(flatten_relative_z);
-
-  setting_blur->addChild(new UIText(5.0f, 305.0f, "Height:", app.getArial12(), eJustifyLeft));
-  flatten_relative_y = new UITextBox(50.0f, 305.0f, 100.0f, 30.0f, app.getArial12(), updateFlattenRelativeY);
-  flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
-  setting_blur->addChild(flatten_relative_y);
-
-  setting_blur->addChild(new UIText(5.0f, 330.0, "Flatten Type:", app.getArial14(), eJustifyLeft));
-
-  gFlattenTypeGroup = new UIToggleGroup(&flattenType);
-
-  setting_blur->addChild(new UICheckBox(5.0f, 345.0f, "Raise/Lower", gFlattenTypeGroup, eFlattenMode_Both));
-  setting_blur->addChild(new UICheckBox(105.0f, 345.0f, "Raise", gFlattenTypeGroup, eFlattenMode_Raise));
-  setting_blur->addChild(new UICheckBox(5.0f, 370.0f, "Lower", gFlattenTypeGroup, eFlattenMode_Lower));
-
-  gFlattenTypeGroup->Activate(flattenType);
-
-
   //3D Paint settings UIWindow
   settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 280.0f);
   settings_paint->hide();
@@ -1320,7 +1156,7 @@ void MapView::createGUI()
 
   addHotkey ( SDLK_y
             , MOD_none
-            , [] { gBlurToggleGroup->Activate((blurBrushType + 1) % 3); }
+            , [] { mainGui->flattenTool->nextFlattenMode(); }
             , [] { return terrainMode == 1; }
             );
 
@@ -1466,8 +1302,7 @@ void MapView::tick(float t, float dt)
       break;
 
     case 1:
-      blurBrushRadius = std::max(0.0f, std::min(1000.0f, (float)app.pressure / 20.0f));
-      blur_brush->setValue(blurBrushRadius / 1000.0f);
+      mainGui->flattenTool->setRadius((float)app.pressure / 20.0f);
       break;
     case 2:
       mainGui->paintPressureSlider->setValue(std::max(0.0f, std::min(1.0f, (float)app.pressure / 2048.0f)));
@@ -1736,33 +1571,11 @@ void MapView::tick(float t, float dt)
           {
             if (_mod_shift_down)
             {
-              if (flattenRelativeMode)
-              {
-                if (Environment::getInstance()->flattenAngleEnabled)
-                {
-                  gWorld->flattenTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenType, flattenRelativePos, flattenAngle, flattenOrientation);
-                }
-                else
-                {
-                  gWorld->flattenTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenType, flattenRelativePos);
-                }
-              }
-              else
-              {
-                if (Environment::getInstance()->flattenAngleEnabled)
-                {
-                  gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenType, flattenAngle, flattenOrientation);
-                }
-                else
-                {
-                  gWorld->flattenTerrain(xPos, zPos, yPos, pow(0.5f, dt * groundBlurSpeed), blurBrushRadius, blurBrushType, flattenType);
-                }
-              }
-
+              mainGui->flattenTool->flatten(dt);
             }
             else if (_mod_ctrl_down)
             {
-              gWorld->blurTerrain(xPos, zPos, pow(0.5f, dt * groundBlurSpeed), std::min(blurBrushRadius, 30.0f), blurBrushType);
+              mainGui->flattenTool->blur(dt);
             }
           }
           break;
@@ -2095,7 +1908,22 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
 
   video.set3D();
 
-  gWorld->draw();
+  //! \ todo: make the current tool return the radius
+  float radius = 0.0f, hardness = 0.0f;
+
+  switch (terrainMode)
+  {
+    case 0: radius = groundBrushRadius; break;
+    case 1: radius = mainGui->flattenTool->brushRadius(); break;
+    case 2: 
+      radius = textureBrush.getRadius(); 
+      hardness = textureBrush.getHardness();
+      break;
+    case 6: //! \ todo: water: get radius
+    case 8: radius = shaderRadius; break;
+  }
+
+  gWorld->draw(radius, hardness);
 
   displayGUIIfEnabled();
 }
@@ -2276,12 +2104,11 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
     {
       if (_mod_space_down)
       {
-        gFlattenTypeGroup->Activate((flattenType + 1) % eFlattenMode_Count);
+        mainGui->flattenTool->nextFlattenMode();
       }
       else
       {
-        toggle_flatten->setState(!(Environment::getInstance()->flattenAngleEnabled));
-        toggleFlattenAngle(!(Environment::getInstance()->flattenAngleEnabled), 0);
+        mainGui->flattenTool->toggleFlattenAngle();
       }
     }
     else if (terrainMode == 2)
@@ -2350,15 +2177,11 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
     {
       if (_mod_space_down)
       {
-        toggleFlattenLock(!flattenRelativeMode, 0);
-        toggle_flatten_relative->setState(flattenRelativeMode);
+        mainGui->flattenTool->toggleFlattenLock();
       }
       else
       {
-        flattenRelativePos = Environment::getInstance()->get_cursor_pos();
-        flatten_relative_x->value(misc::floatToStr(flattenRelativePos.x));
-        flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
-        flatten_relative_z->value(misc::floatToStr(flattenRelativePos.z));
+        mainGui->flattenTool->lockPos();
       }
     }
     else if (terrainMode == 9)
@@ -2406,8 +2229,7 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
         ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
         break;
       case 1:
-        blurBrushRadius = std::min(1000.0f, blurBrushRadius + 0.01f);
-        blur_brush->setValue(blurBrushRadius / 1000.0f);
+        mainGui->flattenTool->changeRadius(0.01f);
         break;
       case 2:
         textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
@@ -2464,8 +2286,7 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
         ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
         break;
       case 1:
-        blurBrushRadius = std::max(0.0f, blurBrushRadius - 0.01f);
-        blur_brush->setValue(blurBrushRadius / 1000);
+        mainGui->flattenTool->changeRadius(-0.01f);
         break;
       case 2:
         textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
@@ -2695,8 +2516,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
       ground_brush_radius->setValue(groundBrushRadius / 1000.0f);
       break;
     case 1:
-      blurBrushRadius = std::max(0.0f, std::min(1000.0f, blurBrushRadius + e->xrel / XSENS));
-      blur_brush->setValue(blurBrushRadius / 1000.0f);
+      mainGui->flattenTool->changeRadius(e->xrel / XSENS);
       break;
     case 2:
       textureBrush.setRadius(std::max(0.0f, std::min(100.0f, textureBrush.getRadius() + e->xrel / XSENS)));
@@ -2718,8 +2538,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
       ground_brush_speed->setValue(groundBrushSpeed / 10.0f);
       break;
     case 1:
-      groundBlurSpeed = std::max(0.0f, std::min(10.0f, groundBlurSpeed + e->xrel / 30.0f));
-      ground_blur_speed->setValue(groundBlurSpeed / 10.0f);
+      mainGui->flattenTool->changeSpeed(e->xrel / 30.0f);
       break;
     case 2:
       mainGui->paintPressureSlider->setValue(std::max(0.0f, std::min(1.0f, mainGui->paintPressureSlider->value + e->xrel / 300.0f)));
@@ -2796,22 +2615,15 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
     {
       if (_mod_alt_down)
       {
-        flattenOrientation += _mod_ctrl_down ? 1.0f : 10.0f;
-        if (flattenOrientation > 360.0f)
-          flattenOrientation = 0.0f;
-        flatten_orientation->setValue(flattenOrientation / 360);
+        mainGui->flattenTool->changeOrientation(_mod_ctrl_down ? 1.0f : 10.0f);
       }
       else if (_mod_shift_down)
       {
-        flattenAngle += _mod_ctrl_down ? 0.2f : 2.0f;
-        if (flattenAngle > 89.0f)
-          flattenAngle = 89.0f;
-        flatten_angle->setValue(flattenAngle / 90);
+        mainGui->flattenTool->changeAngle(_mod_ctrl_down ? 0.2f : 2.0f);
       }
       else if (_mod_space_down)
       {
-        flattenRelativePos.y += 1;
-        flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
+        mainGui->flattenTool->changeHeight(1.0f);
       }
     }
     else if (terrainMode == 2)
@@ -2838,22 +2650,15 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
     {
       if (_mod_alt_down)
       {
-        flattenOrientation -= _mod_ctrl_down ? 1.0f : 10.0f;
-        if (flattenOrientation < 0.0f)
-          flattenOrientation = 360.0f;
-        flatten_orientation->setValue(flattenOrientation / 360);
+        mainGui->flattenTool->changeOrientation(_mod_ctrl_down ? -1.0f : -10.0f);
       }
       else if (_mod_shift_down)
       {
-        flattenAngle -= _mod_ctrl_down ? 0.2f : 2.0f;;
-        if (flattenAngle < 0.0f)
-          flattenAngle = 0.0f;
-        flatten_angle->setValue(flattenAngle / 90);
+        mainGui->flattenTool->changeAngle(_mod_ctrl_down ? -0.2f : -2.0f);
       }
       else if (_mod_space_down)
       {
-        flattenRelativePos.y -= 1;
-        flatten_relative_y->value(misc::floatToStr(flattenRelativePos.y));
+        mainGui->flattenTool->changeHeight(-1.0f);
       }
     }
     else if (terrainMode == 2)
