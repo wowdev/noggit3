@@ -945,10 +945,6 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
   return changed;
 }
 
-extern float shaderRed;
-extern float shaderGreen;
-extern float shaderBlue;
-
 bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool editMode)
 {
   float dist, xdiff, zdiff;
@@ -979,9 +975,9 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
       float edit = change * (1.0f - dist / radius);
       if (editMode)
       {
-        mccv[i].x += (shaderRed - mccv[i].x)* edit;
-        mccv[i].y += (shaderGreen - mccv[i].y)* edit;
-        mccv[i].z += (shaderBlue - mccv[i].z)* edit;
+        mccv[i].x += (Environment::getInstance()->cursorColorR - mccv[i].x)* edit;
+        mccv[i].y += (Environment::getInstance()->cursorColorG - mccv[i].y)* edit;
+        mccv[i].z += (Environment::getInstance()->cursorColorB - mccv[i].z)* edit;
       }
       else
       {

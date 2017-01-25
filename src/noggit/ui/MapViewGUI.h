@@ -28,6 +28,7 @@ class UIRotationEditor;
 namespace ui
 {
   class FlattenTool;
+  class shader_tool;
   class terrain_tool;
 }
 
@@ -81,6 +82,7 @@ public:
   UIRotationEditor *rotationEditor;
   ui::FlattenTool *flattenTool;
   ui::terrain_tool *terrainTool;
+  ui::shader_tool *shaderTool;
 
   UIExitWarning *escWarning;
   UICapsWarning *capsWarning;
