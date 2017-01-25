@@ -19,6 +19,7 @@
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Help.h>
 #include <noggit/ui/MinimapWindow.h>
+#include <noggit/ui/shader_tool.hpp>
 #include <noggit/ui/StatusBar.h> // UIStatusBar
 #include <noggit/ui/terrain_tool.hpp>
 #include <noggit/ui/TexturePicker.h> //
@@ -67,10 +68,10 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 
 #ifdef _WIN32
   if (app.tabletActive && Settings::getInstance()->tabletMode)
-    terrainTool = new ui::terrain_tool((float)video.xres() - 190.0f, 30.0f, true);
+    terrainTool = new ui::terrain_tool((float)video.xres() - 185.0f, 30.0f, true);
   else
 #endif
-    terrainTool = new ui::terrain_tool((float)video.xres() - 190.0f, 30.0f, false);
+    terrainTool = new ui::terrain_tool((float)video.xres() - 185.0f, 30.0f, false);
 
   terrainTool->show();
   addChild(terrainTool);
@@ -78,6 +79,16 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   flattenTool = new ui::FlattenTool((float)video.xres() - 210.0f, 30.0f);
   flattenTool->hide();
   addChild(flattenTool);
+
+#ifdef _WIN32
+  if (app.tabletActive && Settings::getInstance()->tabletMode)
+    shaderTool = new ui::shader_tool((float)video.xres() - 185.0f, 30.0f, true);
+  else
+#endif
+    shaderTool = new ui::shader_tool((float)video.xres() - 185.0f, 30.0f, false);
+  
+  shaderTool->hide();
+  addChild(shaderTool);
 
   // UICurrentTexture
   guiCurrentTexture = new UICurrentTexture(6.0f, 35.0f, this);

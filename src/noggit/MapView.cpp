@@ -35,6 +35,7 @@
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
+#include <noggit/ui/shader_tool.hpp>
 #include <noggit/ui/Slider.h> // UISlider
 #include <noggit/ui/StatusBar.h> // statusBar
 #include <noggit/ui/terrain_tool.hpp>
@@ -117,27 +118,6 @@ bool  alloff_detailselect = false;
 bool  alloff_fog = false;
 bool  alloff_terrain = false;
 
-
-UISlider* shader_radius;
-UISlider* shader_red;
-UISlider* shader_green;
-UISlider* shader_blue;
-UISlider* shader_speed;
-float shaderRadius = 15.0f;
-float shaderSpeed = 1.0f;
-float shaderRed = 1.0f;
-float shaderGreen = 1.0f;
-float shaderBlue = 1.0f;
-
-
-
-
-#ifdef _WIN32
-int shaderTabletControlSelect = 0;//Defaulting to off
-#endif
-
-
-
 UISlider* paint_brush;
 UISlider* spray_size;
 UISlider* spray_pressure;
@@ -169,40 +149,7 @@ UIFrame* MapChunkWindow;
 
 UIToggleGroup * gFlagsToggleGroup;
 
-#ifdef _WIN32
-UIToggleGroup * gShaderTabletControl;
-#endif
-
 UIWindow *settings_paint;
-UIWindow *settings_shader;
-
-void SetShaderRadius(float f)
-{
-  shaderRadius = f;
-}
-
-void SetShaderSpeed(float f)
-{
-  shaderSpeed = f;
-}
-
-void SetShaderRed(float f)
-{
-  shaderRed = f;
-  Environment::getInstance()->cursorColorR = f / 2;
-}
-
-void SetShaderGreen(float f)
-{
-  shaderGreen = f;
-  Environment::getInstance()->cursorColorG = f / 2;
-}
-
-void SetShaderBlue(float f)
-{
-  shaderBlue = f;
-  Environment::getInstance()->cursorColorB = f / 2;
-}
 
 
 void setTextureBrushHardness(float f)
@@ -247,7 +194,7 @@ void setSprayBrushPressure(float f)
 void change_settings_window(int oldid, int newid)
 {
   if (oldid + 1 == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !settings_paint
-    || !settings_shader || !mainGui->guiWater || !mainGui->objectEditor)
+    || !mainGui->shaderTool || !mainGui->guiWater || !mainGui->objectEditor)
   {
     return;
   }
@@ -256,7 +203,7 @@ void change_settings_window(int oldid, int newid)
   mainGui->terrainTool->hide();
   mainGui->flattenTool->hide();
   settings_paint->hide();
-  settings_shader->hide();
+  mainGui->shaderTool->hide();
   mainGui->guiWater->hide();
   mainGui->TextureSwitcher->hide();
   mainGui->objectEditor->hide();
@@ -292,8 +239,8 @@ void change_settings_window(int oldid, int newid)
     tool_settings_y = (int)mainGui->guiWater->y();
     break;
   case 9:
-    tool_settings_x = (int)settings_shader->x();
-    tool_settings_y = (int)settings_shader->y();
+    tool_settings_x = (int)mainGui->shaderTool->x();
+    tool_settings_y = (int)mainGui->shaderTool->y();
     break;
   }
   // set new win pos and make visible
@@ -325,9 +272,9 @@ void change_settings_window(int oldid, int newid)
     mainGui->guiWater->show();
     break;
   case 9:
-    settings_shader->x((const float)tool_settings_x);
-    settings_shader->y((const float)tool_settings_y);
-    settings_shader->show();
+    mainGui->shaderTool->x((const float)tool_settings_x);
+    mainGui->shaderTool->y((const float)tool_settings_y);
+    mainGui->shaderTool->show();
     break;
   case 10:
     mainGui->objectEditor->x((const float)tool_settings_x - 90.0f);
@@ -725,60 +672,6 @@ void MapView::createGUI()
   mainGui->ZoneIDBrowser->setChangeFunc(changeZoneIDValue);
   tool_settings_x = video.xres() - 186;
   tool_settings_y = 38; 
-
-  // shader
-#ifdef _WIN32
-  if (app.tabletActive && Settings::getInstance()->tabletMode)
-    settings_shader = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 200.0f);
-  else
-#endif
-    settings_shader = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 160.0f);
-  settings_shader->movable(true);
-  settings_shader->hide();
-  mainGui->addChild(settings_shader);
-
-  settings_shader->addChild(new UIText(78.5f, 2.0f, "Shader", app.getArial14(), eJustifyCenter));
-
-  shader_radius = new UISlider(6.0f, 33.0f, 167.0f, 1000.0f, 0.00001f);
-  shader_radius->setFunc(SetShaderRadius);
-  shader_radius->setValue(shaderRadius / 1000);
-  shader_radius->setText("Radius: ");
-  settings_shader->addChild(shader_radius);
-
-  shader_speed = new UISlider(6.0f, 59.0f, 167.0f, 10.0f, 0.00001f);
-  shader_speed->setFunc(SetShaderSpeed);
-  shader_speed->setValue(shaderSpeed / 10.0f);
-  shader_speed->setText("Speed: ");
-  settings_shader->addChild(shader_speed);
-
-  shader_red = new UISlider(6.0f, 85.0f, 167.0f, 2.0f, 0.00001f);
-  shader_red->setFunc(SetShaderRed);
-  shader_red->setValue(shaderRed / 2.0f);
-  shader_red->setText("Red: ");
-  settings_shader->addChild(shader_red);
-
-  shader_green = new UISlider(6.0f, 111.0f, 167.0f, 2.0f, 0.00001f);
-  shader_green->setFunc(SetShaderGreen);
-  shader_green->setValue(shaderGreen / 2.0f);
-  shader_green->setText("Green: ");
-  settings_shader->addChild(shader_green);
-
-  shader_blue = new UISlider(6.0f, 137.0f, 167.0f, 2.0f, 0.00001f);
-  shader_blue->setFunc(SetShaderBlue);
-  shader_blue->setValue(shaderBlue / 2.0f);
-  shader_blue->setText("Blue: ");
-  settings_shader->addChild(shader_blue);
-#ifdef _WIN32
-  if (app.tabletActive && Settings::getInstance()->tabletMode)
-  {
-    settings_shader->addChild(new UIText(78.5f, 137.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
-
-    gShaderTabletControl = new UIToggleGroup(&shaderTabletControlSelect);
-    settings_shader->addChild(new UICheckBox(6.0f, 151.0f, "Off", gShaderTabletControl, 0));
-    settings_shader->addChild(new UICheckBox(85.0f, 151.0f, "On", gShaderTabletControl, 1));
-    gShaderTabletControl->Activate(0);
-  }
-#endif
 
   //3D Paint settings UIWindow
   settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 280.0f);
@@ -1215,12 +1108,7 @@ void MapView::tick(float t, float dt)
       mainGui->paintPressureSlider->setValue(mainGui->paintPressureSlider->value);
       break;
     case 8:
-      if (shaderTabletControlSelect == 1)
-      {
-        shaderRadius = std::max(0.0f, std::min(1000.0f, (float)app.pressure / 20.48f));
-        shader_radius->setValue(shaderRadius / 1000.0f);
-      }
-
+      mainGui->shaderTool->setTabletControlValue((float)app.pressure);
       break;
     }
   }
@@ -1611,9 +1499,13 @@ void MapView::tick(float t, float dt)
           if (mViewMode == eViewMode_3D && !underMap)
           {
             if (_mod_shift_down)
-              gWorld->changeShader(xPos, zPos, dt*shaderSpeed * 2, shaderRadius, true);
+            {
+              mainGui->shaderTool->changeShader(dt, true);
+            }
             if (_mod_ctrl_down)
-              gWorld->changeShader(xPos, zPos, dt*shaderSpeed * 2, shaderRadius, false);
+            {
+              mainGui->shaderTool->changeShader(dt, false);
+            }
           }
           break;
         }
@@ -1825,8 +1717,8 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
       radius = textureBrush.getRadius(); 
       hardness = textureBrush.getHardness();
       break;
-    case 6: //! \ todo: water: get radius
-    case 8: radius = shaderRadius; break;
+    case 6: break; //! \ todo: water: get radius 
+    case 8: radius = mainGui->shaderTool->brushRadius(); break;
   }
 
   gWorld->draw(radius, hardness);
@@ -2426,8 +2318,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
       paint_brush->setValue(textureBrush.getRadius() / 100.0f);
       break;
     case 8:
-      shaderRadius = std::max(0.0f, std::min(1000.0f, shaderRadius + e->xrel / XSENS));
-      shader_radius->setValue(shaderRadius / 1000.0f);
+      mainGui->shaderTool->changeRadius(e->xrel / XSENS);
       break;
     }
   }
@@ -2446,8 +2337,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
       mainGui->paintPressureSlider->setValue(std::max(0.0f, std::min(1.0f, mainGui->paintPressureSlider->value + e->xrel / 300.0f)));
       break;
     case 8:
-      shaderSpeed = std::max(0.0f, std::min(10.0f, shaderSpeed + e->xrel / 30.0f));
-      shader_speed->setValue(shaderSpeed / 10.0f);
+      mainGui->shaderTool->changeSpeed(e->xrel / XSENS);
       break;
     }
   }

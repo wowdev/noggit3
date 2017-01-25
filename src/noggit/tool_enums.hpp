@@ -13,10 +13,10 @@ enum eTerrainType
   eTerrainType_Count,
 };
 
-enum eTerrainTabletCtrl
+enum eTabletControl
 {
-  eTerrainTabletCtrl_Off,
-  eTerrainTabletCtrl_On
+  eTabletControl_Off,
+  eTabletControl_On
 };
 
 enum eTerrainTabletActiveGroup

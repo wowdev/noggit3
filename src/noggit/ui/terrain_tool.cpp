@@ -20,7 +20,7 @@ namespace ui
     , _speed(2.0f)
     , _tablet(tablet)
     , _edit_type(Environment::getInstance()->groundBrushType)
-    , _tablet_control(eTerrainTabletCtrl_On)
+    , _tablet_control(eTabletControl_On)
     , _tablet_active_group(eTerrainTabletActiveGroup_Speed)
   {
     addChild(new UIText(78.5f, 2.0f, "Raise / Lower", app.getArial14(), eJustifyCenter));
@@ -51,9 +51,9 @@ namespace ui
       addChild(new UIText(78.5f, 170.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
 
       _tablet_control_toggle = new UIToggleGroup(&_tablet_control);
-      addChild(new UICheckBox(6.0f, 182.0f, "Off", _tablet_control_toggle, eTerrainTabletCtrl_Off));
-      addChild(new UICheckBox(85.0f, 182.0f, "On", _tablet_control_toggle, eTerrainTabletCtrl_On));
-      _tablet_control_toggle->Activate(eTerrainTabletCtrl_On);
+      addChild(new UICheckBox(6.0f, 182.0f, "Off", _tablet_control_toggle, eTabletControl_Off));
+      addChild(new UICheckBox(85.0f, 182.0f, "On", _tablet_control_toggle, eTabletControl_On));
+      _tablet_control_toggle->Activate(eTabletControl_On);
 
       _tablet_active_group_toggle = new UIToggleGroup(&_tablet_active_group);
       addChild(new UICheckBox(6.0f, 207.0f, "Radius", _tablet_active_group_toggle, eTerrainTabletActiveGroup_Radius));
@@ -87,7 +87,7 @@ namespace ui
 
   void terrain_tool::setTabletControlValue(float pressure)
   {
-    if (_tablet_control == eTerrainTabletCtrl_On)
+    if (_tablet_control == eTabletControl_On)
     {
       if (_tablet_active_group == eTerrainTabletActiveGroup_Radius)
       {
