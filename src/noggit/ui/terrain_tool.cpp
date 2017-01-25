@@ -91,12 +91,12 @@ namespace ui
     {
       if (_tablet_active_group == eTerrainTabletActiveGroup_Radius)
       {
-        _radius = std::max(0.0f, std::min(1000.0f, (float)app.pressure / 20.48f));
+        _radius = std::max(0.0f, std::min(1000.0f, pressure / 20.48f));
         _radius_slider->value = _radius / 1000.0f;
       }
       else if (_tablet_active_group == eTerrainTabletActiveGroup_Speed)
       {
-        _speed = std::max(0.0f, std::min(10.0f, (float)app.pressure / 204.8f));
+        _speed = std::max(0.0f, std::min(10.0f, pressure / 204.8f));
         _speed_slider->value = _speed / 10.0f;
       }
     }
