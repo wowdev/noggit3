@@ -25,6 +25,10 @@ class UIGradient;
 class UIWater;
 class UIObjectEditor;
 class UIRotationEditor;
+namespace ui
+{
+  class FlattenTool;
+}
 
 class UIModel;
 class UIAlphamap;
@@ -76,6 +80,7 @@ public:
   UIWindow *settings_paint;
   UIObjectEditor *objectEditor;
   UIRotationEditor *rotationEditor;
+  ui::FlattenTool *flattenTool;
 
   UIExitWarning *escWarning;
   UICapsWarning *capsWarning;

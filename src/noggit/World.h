@@ -133,7 +133,7 @@ public:
   void initDisplay();
 
   void tick(float dt);
-  void draw();
+  void draw(float brushRadius, float hardness = 0.0f);
 
   void outdoorLights(bool on);
   void setupFog();

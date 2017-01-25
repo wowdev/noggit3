@@ -7,13 +7,15 @@
 #include <noggit/ui/Frame.h>
 #include <noggit/ui/Text.h>
 
+#include <functional>
+
 namespace OpenGL { class Texture; };
 
 class UITextBox : public UIFrame
 {
 public:
   typedef UITextBox* Ptr;
-  typedef void(*TriggerFunction)(UITextBox::Ptr, const std::string& value);
+  typedef std::function<void(UITextBox::Ptr, const std::string&)> TriggerFunction;
 
 private:
   OpenGL::Texture* _texture;

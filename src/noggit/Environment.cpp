@@ -4,25 +4,25 @@
 #include <noggit/MapHeaders.h>
 
 Environment::Environment()
+  : view_holelines(false)
+  , flagPaintMode(FLAG_IMPASS)
+  , paintMode(true)
+  , highlightPaintableChunks(true)
+  , flattenAngle(45.0f)
+  , flattenOrientation(0.0f)
+  , flattenAngleEnabled(false)
+  , minRotation(0.0f)
+  , maxRotation(360.0f)
+  , minTilt(-5.0f)
+  , maxTilt(5.0f)
+  , minScale(0.9f)
+  , maxScale(1.1f)
+  , groundBrushType(1)
+  , currentWaterLayer(0)
+  , displayAllWaterLayers(true)
+  , moveModelToCursorPos(false)
+  , showModelFromHiddenList(true)
 {
-  this->view_holelines = false;
-  this->flagPaintMode = FLAG_IMPASS;
-  this->paintMode = true;
-  this->highlightPaintableChunks = true;
-  this->flattenAngle = 0.0f;
-  this->flattenOrientation = 0.0f;
-  this->flattenAngleEnabled = false;
-  this->minRotation = 0.0f;
-  this->maxRotation = 360.0f;
-  this->minTilt = -5.0f;
-  this->maxTilt = 5.0f;
-  this->minScale = 0.9f;
-  this->maxScale = 1.1f;
-  this->groundBrushType = 1;
-  this->currentWaterLayer = 0;
-  this->displayAllWaterLayers = true;
-  this->moveModelToCursorPos = false;
-  this->showModelFromHiddenList = true;
 }
 
 Environment* Environment::instance = 0;
