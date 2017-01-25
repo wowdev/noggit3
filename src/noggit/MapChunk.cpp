@@ -895,8 +895,10 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
   {
     xdiff = mVertices[i].x - x;
     zdiff = mVertices[i].z - z;
-    if (BrushType == 5) {
-      if ((std::abs(xdiff) < std::abs(radius / 2)) && (std::abs(zdiff) < std::abs(radius / 2))) {
+    if (BrushType == eTerrainType_Quadra)
+    {
+      if ((std::abs(xdiff) < std::abs(radius / 2)) && (std::abs(zdiff) < std::abs(radius / 2))) 
+      {
         mVertices[i].y += change;
         changed = true;
       }
@@ -906,21 +908,30 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
       dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
       if (dist < radius)
       {
-        if (BrushType == 0)//Flat
-          mVertices[i].y += change;
-
-        else if (BrushType == 1)//Linear
-          mVertices[i].y += change*(1.0f - dist / radius);
-
-        else if (BrushType == 2)//Smooth
-          mVertices[i].y += change / (1.0f + dist / radius);
-
-        else if (BrushType == 3) //x^2
-          mVertices[i].y += change*((dist / radius)*(dist / radius) + dist / radius + 1.0f);
-
-        else if (BrushType == 4) //cos
-          mVertices[i].y += change*cos(dist / radius);
         changed = true;
+
+        switch (BrushType)
+        {
+          case eTerrainType_Flat:
+            mVertices[i].y += change;
+            break;
+          case eTerrainType_Linear:
+            mVertices[i].y += change*(1.0f - dist / radius);
+            break;
+          case eTerrainType_Smooth:
+            mVertices[i].y += change / (1.0f + dist / radius);
+            break;
+          case eTerrainType_Polynom:
+            mVertices[i].y += change*((dist / radius)*(dist / radius) + dist / radius + 1.0f);
+            break;
+          case eTerrainType_Trigo:
+            mVertices[i].y += change*cos(dist / radius);
+            break;
+          default:
+            LogError << "Invalid terrain edit type (" << BrushType << ")" << std::endl;
+            changed = false;
+            break;
+        }
       }
     }
 
