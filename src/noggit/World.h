@@ -179,6 +179,8 @@ public:
                                  , Fun&& /* MapChunk* -> bool changed */
                                  , Post&& /* MapChunk* -> void; called for all changed chunks */
                                  );
+  template<typename Fun>
+    void for_all_chunks_on_tile (float x, float z, Fun&&);
 
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void changeShader(float x, float z, float change, float radius, bool editMode);
