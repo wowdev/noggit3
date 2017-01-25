@@ -3,28 +3,14 @@
 #pragma once
 
 #include <math/vector_3d.hpp>
+#include <noggit/tool_enums.hpp>
 #include <noggit/ui/Window.h>
+
 
 class UIToggleGroup;
 class UISlider;
 class UITextBox;
 class UICheckBox;
-
-enum eFlattenType
-{
-  eFlattenType_Flat,
-  eFlattenType_Linear,
-  eFlattenType_Smooth,
-  eFlattenType_Count
-};
-
-enum eFlattenMode
-{
-  eFlattenMode_Both,
-  eFlattenMode_Raise,
-  eFlattenMode_Lower,
-  eFlattenMode_Count
-};
 
 namespace ui
 {
