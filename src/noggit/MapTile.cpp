@@ -32,8 +32,7 @@ int indexMapBuf(int x, int y)
 }
 
 MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, bool pLoadModels)
-  : modelCount(0)
-  , index(tile_index(pX, pZ))
+  : index(tile_index(pX, pZ))
   , xbase(pX * TILESIZE)
   , zbase(pZ * TILESIZE)
   , changed(0)
@@ -338,17 +337,6 @@ MapTile::~MapTile()
   // constantly updating the reference counters.
   // Note that both approaches do not cover the issue that the instance might not
   // be saved to any tile, thus the movement might have been lost.
-
-  /*for( std::vector<Liquid*>::iterator it = mLiquids.begin(); it != mLiquids.end(); ++it )
-  {
-  if( *it )
-  {
-  delete *it;
-  *it  = nullptr;
-  }
-  }
-
-  mLiquids.clear();*/
 }
 
 
@@ -445,11 +433,6 @@ void MapTile::drawWater()
 
   gl.enable(GL_LIGHTING);
   gl.enable(GL_COLOR_MATERIAL);
-}
-
-void MapTile::addChunksLiquid(TileWater *lq)
-{
-  //chunksLiquids.push_back( lq );
 }
 
 bool MapTile::canWaterSave() {

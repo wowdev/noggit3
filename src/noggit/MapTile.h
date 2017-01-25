@@ -35,7 +35,6 @@ public:
   //! \brief Get chunk for sub offset x,z.
   MapChunk* getChunk(unsigned int x, unsigned int z);
 
-  int modelCount;
   const tile_index index;
   float xbase, zbase;
 
@@ -56,7 +55,6 @@ public:
 
   bool isTile(int pX, int pZ);
   void clearAllModels();
-  void addChunksLiquid(TileWater *lq);
 
   bool canWaterSave();
 
@@ -81,7 +79,6 @@ private:
   std::string mFilename;
 
   MapChunk* mChunks[16][16];
-  std::vector<TileWater*> mLiquids;
   std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
 
   friend class MapChunk;
