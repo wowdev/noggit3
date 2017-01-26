@@ -791,7 +791,7 @@ void MapView::createGUI()
                                                {
                                                  if (Environment::getInstance()->selectedAreaID)
                                                  {
-                                                   gWorld->setAreaID(Environment::getInstance()->selectedAreaID, tile_index(gWorld->camera));
+                                                   gWorld->setAreaID(gWorld->camera.x, gWorld->camera.z, Environment::getInstance()->selectedAreaID, true);
                                                  }
                                                }
                                              );
@@ -1445,8 +1445,7 @@ void MapView::tick(float t, float dt)
             if (_mod_shift_down)
             {
               // draw the selected AreaId on current selected chunk
-              MapChunk* chnk (boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk);
-              gWorld->setAreaID(Environment::getInstance()->selectedAreaID, chnk->mt->index, chnk->px, chnk->py);
+              gWorld->setAreaID(xPos, zPos, Environment::getInstance()->selectedAreaID, false);
             }
             else if (_mod_ctrl_down)
             {

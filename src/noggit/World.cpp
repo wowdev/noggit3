@@ -1277,32 +1277,15 @@ void World::addWaterLayer(const tile_index& tile, float height, unsigned char tr
   }
 }
 
-void World::setAreaID(int id, const tile_index& tile)
+void World::setAreaID(float x, float z, int id, bool adt)
 {
-  // set the Area ID on a tile x,z on all chunks
-  for (int j = 0; j<16; ++j)
+  if (adt) 
   {
-    for (int i = 0; i<16; ++i)
-    {
-      setAreaID(id, tile, j, i);
-    }
+    for_all_chunks_on_tile(x, z, [&](MapChunk* chunk) { chunk->setAreaID(id);});
   }
-}
-
-void World::setAreaID(int id, const tile_index& tile, int _cx, int _cz)
-{
-  // set the Area ID on a tile x,z on the chunk cx,cz
-  MapTile* curTile = mapIndex->getTile(tile);
-
-  if (curTile)
+  else
   {
-    mapIndex->setChanged(tile);
-    MapChunk *curChunk = curTile->getChunk((unsigned int)_cx, (unsigned int)_cz);
-
-    if (curChunk)
-    {
-      curChunk->setAreaID(id);
-    }
+    for_chunk_at(x, z, [&](MapChunk* chunk) { chunk->setAreaID(id);});
   }
 }
 

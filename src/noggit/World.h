@@ -140,13 +140,7 @@ public:
 
   //! \brief Get the area ID of the tile on which the camera currently is on.
   unsigned int getAreaID();
-  void setAreaID(int id, const tile_index& tile);
-  void setAreaID(int id, const tile_index& tile, int cx, int cz);
-  void setBaseTexture(const tile_index& tile);
-
-  //void moveADT(); does not exist
-  //void drawSelectionChunk(int cursorX,int cursorY); does not exist
-  //bool hasAdt(); does not exist
+  void setAreaID(float x, float z, int id, bool adt);
 
   selection_result intersect (math::ray const&, bool only_map);
   void drawTileMode(float ah);
