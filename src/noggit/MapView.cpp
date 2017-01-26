@@ -734,7 +734,12 @@ void MapView::createGUI()
                    });
   settings_paint->addChild(B1);
 
-  UIButton* rmDup = new UIButton(6.0f, 255.0f, 170.0f, 30.0f, "Remove texture duplicates", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", [] { gWorld->removeTexDuplicateOnADT(tile_index(gWorld->camera)); });
+  UIButton* rmDup = new UIButton( 6.0f, 255.0f, 170.0f, 30.0f
+                                , "Remove texture duplicates"
+                                , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
+                                , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
+                                , [] { gWorld->removeTexDuplicateOnADT(gWorld->camera.x, gWorld->camera.z); }
+                                );
   settings_paint->addChild(rmDup);
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
@@ -801,7 +806,7 @@ void MapView::createGUI()
                                              );
 
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear texture"
-                                             , [] { gWorld->setBaseTexture(tile_index(gWorld->camera)); }
+                                             , [] { gWorld->setBaseTexture(gWorld->camera.x, gWorld->camera.z); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear models"
                                              , [] { gWorld->clearAllModelsOnADT(tile_index(gWorld->camera)); }
