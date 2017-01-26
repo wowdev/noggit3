@@ -35,7 +35,7 @@ public:
   //! \brief Get chunk for sub offset x,z.
   MapChunk* getChunk(unsigned int x, unsigned int z);
   //! \todo map_index style iterators
-  std::vector<MapChunk*> chunks_in_range (float x, float z, float radius) const;
+  std::vector<MapChunk*> chunks_in_range (math::vector_3d const& pos, float radius) const;
 
   const tile_index index;
   float xbase, zbase;

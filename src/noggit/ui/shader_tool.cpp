@@ -69,7 +69,7 @@ namespace ui
 
   void shader_tool::changeShader(math::vector_3d const& pos, float dt, bool add)
   {
-    gWorld->changeShader (pos.x, pos.z, 2.0f*dt*_speed, _radius, add);
+    gWorld->changeShader (pos, 2.0f*dt*_speed, _radius, add);
   }
 
   void shader_tool::changeRadius(float change)
