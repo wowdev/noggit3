@@ -809,19 +809,19 @@ void MapView::createGUI()
                                              , [] { gWorld->setBaseTexture(gWorld->camera.x, gWorld->camera.z); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear models"
-                                             , [] { gWorld->clearAllModelsOnADT(tile_index(gWorld->camera)); }
+                                             , [] { gWorld->clearAllModelsOnADT(gWorld->camera.x, gWorld->camera.z); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear duplicate models"
                                              , [] { gWorld->delete_duplicate_model_and_wmo_instances(); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear water"
-                                             , [] { gWorld->deleteWaterLayer(tile_index(gWorld->camera)); }
+                                             , [] { gWorld->deleteWaterLayer(gWorld->camera.x, gWorld->camera.z); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Create water"
-                                             , [] { gWorld->addWaterLayer(tile_index(gWorld->camera)); }
+                                             , [] { gWorld->addWaterLayer(gWorld->camera.x, gWorld->camera.z); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded adts)", [] { gWorld->fixAllGaps(); });
-  mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", [] { gWorld->ClearShader(tile_index(gWorld->camera)); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", [] { gWorld->ClearShader(gWorld->camera.x, gWorld->camera.z); });
   mbar->GetMenu("Assist")->AddMenuItemButton("Map to big alpha", [] { gWorld->convertMapToBigAlpha(); });
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
@@ -1478,11 +1478,11 @@ void MapView::tick(float t, float dt)
 
             if (_mod_shift_down)
             {
-              gWorld->addWaterLayerChunk(chnk->mt->index, chnk->px, chnk->py);
+              gWorld->addWaterLayerChunk(chnk->xbase, chnk->zbase, chnk->px, chnk->py);
             }
             if (_mod_ctrl_down && !_mod_alt_down)
             {
-              gWorld->delWaterLayerChunk(chnk->mt->index, chnk->px, chnk->py);
+              gWorld->delWaterLayerChunk(chnk->xbase, chnk->zbase, chnk->px, chnk->py);
             }
             if (_mod_alt_down && !_mod_ctrl_down)
             {
@@ -2036,7 +2036,7 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
 
         if (_mod_shift_down)
         {
-          gWorld->setWaterTrans(tile, static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(tile)) + 1)));
+          gWorld->setWaterTrans(gWorld->camera.x, gWorld->camera.z, static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(tile)) + 1)));
         }
         else if (_mod_ctrl_down)
         {
@@ -2091,7 +2091,7 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
         tile_index tile(gWorld->camera);
         if (_mod_shift_down)
         {
-          gWorld->setWaterTrans(tile, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(tile))) - 1));
+          gWorld->setWaterTrans(gWorld->camera.x, gWorld->camera.z, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(tile))) - 1));
         }
         else if (_mod_ctrl_down)
         {

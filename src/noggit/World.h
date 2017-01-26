@@ -179,6 +179,9 @@ public:
   template<typename Fun>
     void for_chunk_at(float x, float z, Fun&&);
 
+  template<typename Fun>
+    void for_tile_at(float x, float z, Fun&&);
+
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void changeShader(float x, float z, float change, float radius, bool editMode);
   void flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
@@ -215,34 +218,34 @@ public:
   void delete_duplicate_model_and_wmo_instances();
 
 	static bool IsEditableWorld(int pMapId);
-	void clearHeight(int id, const tile_index& tile);
-	void clearHeight(int id, const tile_index& tile, int _cx, int _cz);
+
   void clearHeight(float x, float z);
 
+  void ClearShader(float x, float z);
+
   void saveWDT();
-  void clearAllModelsOnADT(const tile_index& tile);
+  void clearAllModelsOnADT(float x, float z);
 
   bool canWaterSave(const tile_index& tile);
 
   void setWaterHeight(const tile_index& tile, float h);
   float getWaterHeight(const tile_index& tile);
   float HaveSelectWater(const tile_index& tile);
-  void CropWaterADT(const tile_index& tile);
-  void setWaterTrans(const tile_index& tile, unsigned char value);
+  void CropWaterADT(float x, float z);
+  void setWaterTrans(float x, float z, unsigned char value);
   unsigned char getWaterTrans(const tile_index& tile);
 
-  void setWaterType(const tile_index& tile, int type);
+  void setWaterType(float x, float z, int type);
   int getWaterType(const tile_index& tile);
 
-  void deleteWaterLayer(const tile_index& tile);
-  void ClearShader(const tile_index& tile);
+  void deleteWaterLayer(float x, float z);
 
-  void addWaterLayer(const tile_index& tile);
-  void addWaterLayer(const tile_index& tile, float height, unsigned char trans);
-  void addWaterLayerChunk(const tile_index& tile, int i, int j);
-  void delWaterLayerChunk(const tile_index& tile, int i, int j);
+  void addWaterLayer(float x, float z);
+  void addWaterLayer(float x, float z, float height, unsigned char trans);
+  void addWaterLayerChunk(float x, float z, int i, int j);
+  void delWaterLayerChunk(float x, float z, int i, int j);
 
-  void autoGenWaterTrans(const tile_index& tile, int factor);
+  void autoGenWaterTrans(float x, float z, int factor);
   void AddWaters(const tile_index& tile);
 
   void fixAllGaps();

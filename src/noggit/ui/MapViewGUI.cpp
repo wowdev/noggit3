@@ -242,7 +242,8 @@ void UIMapViewGUI::render() const
   guiStatusbar->setLeftInfo(statusbarInfo.str());
 
   guiStatusbar->setRightInfo("");
-  guiWater->updatePos(misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE), misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE));
+  tile_index tile(gWorld->camera);
+  guiWater->updatePos(tile);
 
   if (!_tilemode && !guidetailInfos->hidden())
   {
