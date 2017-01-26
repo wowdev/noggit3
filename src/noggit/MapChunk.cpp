@@ -511,6 +511,21 @@ float MapChunk::getMinHeight()
   return min;
 }
 
+void MapChunk::clearHeight()
+{
+  for (int i = 0; i < mapbufsize; ++i)
+  {
+    mVertices[i].y = 0.0f;
+  }
+
+  vmin.y = 0.0f;
+  vmax.y = 0.0f;
+
+  gl.bufferData<GL_ARRAY_BUFFER>
+    (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+
+}
+
 void MapChunk::drawLines (Frustum const& frustum)
 {
   if (!frustum.intersects(vmin, vmax))

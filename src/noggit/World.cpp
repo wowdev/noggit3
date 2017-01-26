@@ -1184,71 +1184,16 @@ unsigned int World::getAreaID()
   return !curChunk ? (unsigned int)(curChunk->getAreaID()) : 0;
 }
 
-void World::clearHeight(int id, const tile_index& tile)
+void World::clearHeight(float x, float z)
 {
-  // set the Area ID on a tile x,z on all chunks
-  for (int j = 0; j<16; ++j)
-  {
-    for (int i = 0; i<16; ++i)
-    {
-      clearHeight(id, tile, j, i);
-    }
-  }
-
-  MapTile *curTile;
-  curTile = mapIndex->getTile(tile);
-
-  if (curTile)
-  {
-    mapIndex->setChanged(tile);
-  }
-  for (int j = 0; j<16; ++j)
-  {
-    for (int i = 0; i<16; ++i)
-    {
-      // set the Area ID on a tile x,z on the chunk cx,cz
-      MapChunk *curChunk = curTile->getChunk((unsigned int)j, (unsigned int)i);
-      curChunk->recalcNorms();
-    }
-  }
-
+  for_all_chunks_on_tile(x, z, [](MapChunk* chunk) {
+    chunk->clearHeight();
+  });
+  for_all_chunks_on_tile(x, z, [](MapChunk* chunk) {
+    chunk->recalcNorms();
+  });
 }
 
-void World::clearHeight(int /*id*/, const tile_index& tile, int _cx, int _cz)
-{
-  // set the Area ID on a tile x,z on the chunk cx,cz
-  MapTile* curTile = mapIndex->getTile(tile);
-
-  if (!curTile)
-  {
-    return;
-  }
-
-  mapIndex->setChanged(tile);
-  MapChunk *curChunk = curTile->getChunk((unsigned int)_cx, (unsigned int)_cz);
-
-  if (curChunk == nullptr)
-  {
-    return;
-  }
-
-
-  curChunk->vmin.y = 9999999.0f;
-  curChunk->vmax.y = -9999999.0f;
-
-  for (int i = 0; i < mapbufsize; ++i)
-  {
-    curChunk->mVertices[i].y = 0.0f;
-
-    curChunk->vmin.y = std::min(curChunk->vmin.y, curChunk->mVertices[i].y);
-    curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
-  }
-
-  gl.bufferData<GL_ARRAY_BUFFER>
-    (curChunk->vertices, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
-
-  curChunk->recalcNorms();
-}
 
 void World::clearAllModelsOnADT(const tile_index& tile)
 {
@@ -2035,62 +1980,9 @@ unsigned int World::getMapID()
 
 void World::moveHeight(int id, const tile_index& tile)
 {
-
-  // set the Area ID on a tile x,z on all chunks
-  for (int j = 0; j<16; ++j)
+  if (!!UITexturingGUI::getSelectedTexture())
   {
-    for (int i = 0; i<16; ++i)
-    {
-      moveHeight(id, tile, j, i);
-    }
-  }
-
-  MapTile* curTile = mapIndex->getTile(tile);
-
-  if (!curTile)
-  {
-    return;
-  }
-
-  for (int j = 0; j<16; ++j)
-  {
-    for (int i = 0; i<16; ++i)
-    {
-      // set the Area ID on a tile x,z on the chunk cx,cz
-      MapChunk *curChunk = curTile->getChunk((size_t)j, (size_t)i);
-      curChunk->recalcNorms();
-    }
-  }
-
-  mapIndex->setChanged(tile);
-}
-
-void World::moveHeight(int /*id*/, const tile_index& tile, int _cx, int _cz)
-{
-  // set the Area ID on a tile x,z on the chunk cx,cz
-  MapTile* curTile = mapIndex->getTile(tile);
-
-  if (!curTile)
-  {
-    return;
-  }
-
-  mapIndex->setChanged(tile);
-  MapChunk* curChunk = curTile->getChunk((size_t)_cx, (size_t)_cz);
-  if (!curChunk)
-  {
-    return;
-  }
-
-  curChunk->vmin.y = 9999999.0f;
-  curChunk->vmax.y = -9999999.0f;
-
-  float heightDelta = 0.0f;
-  auto&& selection = gWorld->GetCurrentSelection();
-
-  if (selection)
-  {
-    if (selection->which() == eEntry_MapChunk)
+    for_all_chunks_on_tile(x, z, [&](MapChunk* chunk) 
     {
       // chunk selected
       heightDelta = gWorld->camera.y - boost::get<selected_chunk_type> (*selection).chunk->py;
