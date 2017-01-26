@@ -16,7 +16,7 @@ class UIWater : public UIWindow
 public:
   UIWater(UIMapViewGUI *setGui);
 
-  void updatePos(int tileX, int tileZ);
+  void updatePos(tile_index const& newTile);
   void updateData();
 
   void setWaterTrans(float val);

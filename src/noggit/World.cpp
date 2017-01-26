@@ -1194,87 +1194,44 @@ void World::clearHeight(float x, float z)
   });
 }
 
-
-void World::clearAllModelsOnADT(const tile_index& tile)
+void World::clearAllModelsOnADT(float x, float z)
 {
-  MapTile* curTile = mapIndex->getTile(tile);
-
-  if (curTile)
-  {
-    curTile->clearAllModels();
-    mapIndex->setChanged(tile);
-  }
+  for_tile_at(x, z, [](MapTile* tile) { tile->clearAllModels(); });
 }
 
-void World::deleteWaterLayer(const tile_index& tile)
+void World::deleteWaterLayer(float x, float z)
 {
-  MapTile* curTile = mapIndex->getTile(tile);
-  if (curTile)
-  {
-    curTile->Water->deleteLayer(Environment::getInstance()->currentWaterLayer);
-    mapIndex->setChanged(tile);
-  }
+  for_tile_at(x, z, [](MapTile* tile) { tile->Water->deleteLayer(Environment::getInstance()->currentWaterLayer); });
 }
 
-void World::ClearShader(const tile_index& tile)
+void World::ClearShader(float x, float z)
 {
-  MapTile* curTile = mapIndex->getTile(tile);
-  if (curTile)
-  {
-    curTile->ClearShader();
-    mapIndex->setChanged(tile);
-  }
+  for_tile_at(x, z, [](MapTile* tile) { tile->ClearShader(); });
 }
 
-void World::CropWaterADT(const tile_index& tile)
+void World::CropWaterADT(float x, float z)
 {
-  MapTile* curTile = mapIndex->getTile(tile);
-  if (curTile)
-  {
-    curTile->CropWater();
-    mapIndex->setChanged(tile);
-  }
+  for_tile_at(x, z, [](MapTile* tile) { tile->CropWater(); });
 }
 
-void World::addWaterLayer(const tile_index& tile)
+void World::addWaterLayer(float x, float z)
 {
-  MapTile* curTile = mapIndex->getTile(tile);
-
-  if (curTile)
-  {
-    curTile->Water->addLayer(1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer);
-    mapIndex->setChanged(tile);
-  }
+  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->addLayer(1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer); });
 }
 
-void World::addWaterLayerChunk(const tile_index& tile, int i, int j)
+void World::addWaterLayerChunk(float x, float z, int i, int j)
 {
-  MapTile* curTile = mapIndex->getTile(tile);
-  if (curTile)
-  {
-    curTile->Water->addLayer(i, j, 1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer);
-    mapIndex->setChanged(tile);
-  }
+  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->addLayer(i, j, 1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer); });
 }
 
-void World::delWaterLayerChunk(const tile_index& tile, int i, int j)
+void World::delWaterLayerChunk(float x, float z, int i, int j)
 {
-  MapTile* curTile = mapIndex->getTile(tile);
-  if (curTile)
-  {
-    curTile->Water->deleteLayer(i, j, Environment::getInstance()->currentWaterLayer);
-    mapIndex->setChanged(tile);
-  }
+  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->deleteLayer(i, j, Environment::getInstance()->currentWaterLayer); });
 }
 
-void World::addWaterLayer(const tile_index& tile, float height, unsigned char trans)
+void World::addWaterLayer(float x, float z, float height, unsigned char trans)
 {
-  MapTile* curTile = mapIndex->getTile(tile);
-  if (curTile)
-  {
-    curTile->Water->addLayer(height, trans, Environment::getInstance()->currentWaterLayer);
-    mapIndex->setChanged(tile);
-  }
+  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->addLayer(height, trans, Environment::getInstance()->currentWaterLayer); });
 }
 
 void World::setAreaID(float x, float z, int id, bool adt)
@@ -1542,13 +1499,25 @@ template<typename Fun>
   }
 }
 
-  template<typename Fun>
+template<typename Fun>
   void World::for_chunk_at(float x, float z, Fun&& fun)
   {
     MapTile* tile(mapIndex->getTile(math::vector_3d(x, 0, z)));
     mapIndex->setChanged(tile);
     
     fun(tile->getChunk((x - tile->xbase) / CHUNKSIZE, (z - tile->zbase) / CHUNKSIZE));
+  }
+
+template<typename Fun>
+  void World::for_tile_at(float x, float z, Fun&& fun)
+  {
+    tile_index index(math::vector_3d(x, 0.0f, z));
+    MapTile* tile(mapIndex->getTile(index));
+    if (tile)
+    {
+      mapIndex->setChanged(index);
+      fun(tile);
+    }
   }
 
 
@@ -1837,7 +1806,7 @@ void World::setBaseTexture(float x, float z)
 {
   if (!!UITexturingGUI::getSelectedTexture())
   {
-    for_all_chunks_on_tile(x, z, [&](MapChunk* chunk) 
+    for_all_chunks_on_tile(x, z, [](MapChunk* chunk) 
     {
       chunk->eraseTextures();
       chunk->addTexture(UITexturingGUI::getSelectedTexture());
@@ -1850,13 +1819,13 @@ void World::swapTexture(float x, float z, OpenGL::Texture *tex)
 {
   if (!!UITexturingGUI::getSelectedTexture())
   {
-    for_all_chunks_on_tile(camera.x, camera.z, [&](MapChunk* chunk) { chunk->switchTexture(tex, UITexturingGUI::getSelectedTexture()); });
+    for_all_chunks_on_tile(x, z, [&](MapChunk* chunk) { chunk->switchTexture(tex, UITexturingGUI::getSelectedTexture()); });
   }  
 }
 
 void World::removeTexDuplicateOnADT(float x, float z)
 {
-  for_all_chunks_on_tile(x, z, [&](MapChunk* chunk) { chunk->textureSet->removeDuplicate(); } );
+  for_all_chunks_on_tile(x, z, [](MapChunk* chunk) { chunk->textureSet->removeDuplicate(); } );
 }
 
 void World::saveWDT()
@@ -1939,13 +1908,9 @@ float World::getWaterHeight(const tile_index& tile)
        ;
 }
 
-void World::setWaterTrans(const tile_index& tile, unsigned char value)
+void World::setWaterTrans(float x, float z, unsigned char value)
 {
-  if (mapIndex->tileLoaded(tile))
-  {
-    mapIndex->getTile(tile)->Water->setTrans(value, Environment::getInstance()->currentWaterLayer);
-    mapIndex->setChanged(tile);
-  }
+  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->setTrans(value, Environment::getInstance()->currentWaterLayer); });
 }
 
 unsigned char World::getWaterTrans(const tile_index& tile)
@@ -1960,13 +1925,9 @@ unsigned char World::getWaterTrans(const tile_index& tile)
   }
 }
 
-void World::setWaterType(const tile_index& tile, int type)
+void World::setWaterType(float x, float z, int type)
 {
-  if (mapIndex->tileLoaded(tile))
-  {
-    mapIndex->getTile(tile)->Water->setType(type, Environment::getInstance()->currentWaterLayer);
-    mapIndex->setChanged(tile);
-  }
+  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->setType(type, Environment::getInstance()->currentWaterLayer);});
 }
 
 int World::getWaterType(const tile_index& tile)
@@ -1981,13 +1942,9 @@ int World::getWaterType(const tile_index& tile)
   }
 }
 
-void World::autoGenWaterTrans(const tile_index& tile, int factor)
+void World::autoGenWaterTrans(float x, float z, int factor)
 {
-  if (mapIndex->tileLoaded(tile))
-  {
-    mapIndex->getTile(tile)->Water->autoGen(factor);
-    mapIndex->setChanged(tile);
-  }
+  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->autoGen(factor); });
 }
 
 void World::AddWaters(const tile_index& tile)

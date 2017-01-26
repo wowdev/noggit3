@@ -105,7 +105,7 @@ UIWater::UIWater(UIMapViewGUI *setGui)
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
     [this]
     {
-      gWorld->autoGenWaterTrans(tile, (int)waterGenFactor->value * 100);
+      gWorld->autoGenWaterTrans(gWorld->camera.x, gWorld->camera.z, (int)waterGenFactor->value * 100);
       updateData();
     }
     );
@@ -130,7 +130,7 @@ UIWater::UIWater(UIMapViewGUI *setGui)
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
     [this]
     {
-      gWorld->CropWaterADT(tile);
+      gWorld->CropWaterADT(gWorld->camera.x, gWorld->camera.z);
       updateData();
     }
     );
@@ -179,11 +179,11 @@ UIWater::UIWater(UIMapViewGUI *setGui)
   updateData();
 }
 
-void UIWater::updatePos(int tileX, int tileZ)
+void UIWater::updatePos(tile_index const& newTile)
 {
-  if (tile.x == tileX && tile.z == tileZ) return;
+  if (newTile == tile) return;
 
-  tile = tile_index(tileX, tileZ);
+  tile = newTile;
 
   updateData();
 }
@@ -214,7 +214,7 @@ void UIWater::updateData()
 void UIWater::setWaterTrans(float val)
 {
   if (std::fmod(val, 0.1f) > 0.1f) return; //reduce performence hit
-  gWorld->setWaterTrans(tile, (unsigned char)val);
+  gWorld->setWaterTrans(gWorld->camera.x, gWorld->camera.z, (unsigned char)val);
 }
 
 void UIWater::changeWaterHeight (float height)
@@ -225,6 +225,6 @@ void UIWater::changeWaterHeight (float height)
 
 void UIWater::changeWaterType(int waterint)
 {
-  gWorld->setWaterType(tile, waterint);
+  gWorld->setWaterType(gWorld->camera.x, gWorld->camera.z, waterint);
   updateData();
 }
