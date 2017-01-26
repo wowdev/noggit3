@@ -191,8 +191,12 @@ public:
   void blurTerrain(float x, float z, float remain, float radius, int BrushType);
   bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
   bool sprayTexture(float x, float z, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, OpenGL::Texture* texture);
+  
   void eraseTextures(float x, float z);
   void overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
+  void setBaseTexture(float x, float z);
+  void swapTexture(float x, float z, OpenGL::Texture *tex);
+  void removeTexDuplicateOnADT(float x, float z);
 
   void setHole(float x, float z, bool big, bool hole);
   void setHoleADT(float x, float z, bool hole);
@@ -223,8 +227,6 @@ public:
 
   void saveWDT();
   void clearAllModelsOnADT(const tile_index& tile);
-  void swapTexture(const tile_index& tile, OpenGL::Texture *tex);
-  void removeTexDuplicateOnADT(const tile_index& tile);
 
   bool canWaterSave(const tile_index& tile);
 

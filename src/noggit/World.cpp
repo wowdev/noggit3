@@ -1524,70 +1524,13 @@ bool World::sprayTexture(float x, float z, Brush *brush, float strength, float p
 
 void World::eraseTextures(float x, float z)
 {
-  tile_index tile(math::vector_3d(x, 0, z));
-  mapIndex->setChanged(tile);
-
-  LogDebug << "Erasing Textures at " << x << " and " << z << std::endl;
-
-  for (size_t j = tile.z - 1; j < tile.z + 1; ++j)
-  {
-    for (size_t i = tile.x - 1; i < tile.x + 1; ++i)
-    {
-      tile_index curTile = tile_index(i, j);
-      if (mapIndex->tileLoaded(curTile))
-      {
-        MapTile* mTile = mapIndex->getTile(curTile);
-
-        for (size_t ty = 0; ty < 16; ++ty)
-        {
-          for (size_t tx = 0; tx < 16; ++tx)
-          {
-            MapChunk* chunk = mTile->getChunk(ty, tx);
-            if (chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
-            {
-              chunk->eraseTextures();
-              mapIndex->setChanged(curTile);
-            }
-          }
-        }
-      }
-    }
-  }
-
-
+  for_chunk_at(x, z, [](MapChunk* chunk) {chunk->eraseTextures();});
 }
 
 void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
 {
-  tile_index tile(math::vector_3d(x, 0, z));
-  mapIndex->setChanged(tile);
-
   LogDebug << "Switching Textures at " << x << " and " << z << std::endl;
-
-  for (size_t j = tile.z - 1; j < tile.z + 1; ++j)
-  {
-    for (size_t i = tile.x - 1; i < tile.x + 1; ++i)
-    {
-      tile_index curTile = tile_index(i, j);
-      if (mapIndex->tileLoaded(curTile))
-      {
-        MapTile* mTile = mapIndex->getTile(curTile);
-
-        for (size_t ty = 0; ty < 16; ++ty)
-        {
-          for (size_t tx = 0; tx < 16; ++tx)
-          {
-            MapChunk* chunk = mTile->getChunk(ty, tx);
-            if (chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
-            {
-              chunk->switchTexture(oldTexture, newTexture);
-              mapIndex->setChanged(curTile);
-            }
-          }
-        }
-      }
-    }
-  }
+  for_chunk_at(x, z, [&](MapChunk* chunk) {chunk->switchTexture(oldTexture, newTexture);});
 }
 
 void World::setHole(float x, float z, bool big, bool hole)
@@ -1907,116 +1850,30 @@ unsigned int World::getMapID()
   return this->mMapId;
 }
 
-
-void World::moveHeight(int id, const tile_index& tile)
+void World::setBaseTexture(float x, float z)
 {
   if (!!UITexturingGUI::getSelectedTexture())
   {
     for_all_chunks_on_tile(x, z, [&](MapChunk* chunk) 
     {
-      // chunk selected
-      heightDelta = gWorld->camera.y - boost::get<selected_chunk_type> (*selection).chunk->py;
-    }
-  }
-  if (heightDelta * heightDelta <= 0.1f) return;
-
-  for (int i = 0; i < mapbufsize; ++i)
-  {
-    curChunk->mVertices[i].y = curChunk->mVertices[i].y + heightDelta;
-
-    curChunk->vmin.y = std::min(curChunk->vmin.y, curChunk->mVertices[i].y);
-    curChunk->vmax.y = std::max(curChunk->vmax.y, curChunk->mVertices[i].y);
-  }
-
-  gl.bufferData<GL_ARRAY_BUFFER>
-    (curChunk->vertices, sizeof(curChunk->mVertices), curChunk->mVertices, GL_STATIC_DRAW);
-
-  curChunk->recalcNorms();
-}
-
-void World::setBaseTexture(const tile_index& tile)
-{
-  if (!UITexturingGUI::getSelectedTexture())
-  {
-    return;
-  }
-
-  MapTile* curTile = mapIndex->getTile(tile);
-
-  if (!curTile)
-  {
-    return;
-  }
-
-  mapIndex->setChanged(tile);
-
-  // clear all textures on the adt and set selected texture as base texture
-  for (int j = 0; j<16; ++j)
-  {
-    for (int i = 0; i<16; ++i)
-    {
-      MapChunk *curChunk = curTile->getChunk((size_t)j, (size_t)i);
-      curChunk->eraseTextures();
-      curChunk->addTexture(UITexturingGUI::getSelectedTexture());
+      chunk->eraseTextures();
+      chunk->addTexture(UITexturingGUI::getSelectedTexture());
       UITexturingGUI::getSelectedTexture()->addReference();
-    }
+    });
   }
 }
 
-void World::swapTexture(const tile_index& tile, OpenGL::Texture *tex)
+void World::swapTexture(float x, float z, OpenGL::Texture *tex)
 {
-  if (!UITexturingGUI::getSelectedTexture())
+  if (!!UITexturingGUI::getSelectedTexture())
   {
-    return;
-  }
-
-  MapTile* curTile = mapIndex->getTile(tile);
-
-  if (!curTile)
-  {
-    return;
-  }
-
-  // clear all textures on the adt and set selected texture as base texture
-  for (int j = 0; j<16; ++j)
-  {
-    for (int i = 0; i<16; ++i)
-    {
-      MapChunk *curChunk = curTile->getChunk((size_t)j, (size_t)i);
-      curChunk->switchTexture(tex, UITexturingGUI::getSelectedTexture());
-    }
-  }
-
-  mapIndex->setChanged(tile);
+    for_all_chunks_on_tile(camera.x, camera.z, [&](MapChunk* chunk) { chunk->switchTexture(tex, UITexturingGUI::getSelectedTexture()); });
+  }  
 }
 
-void World::removeTexDuplicateOnADT(const tile_index& tile)
+void World::removeTexDuplicateOnADT(float x, float z)
 {
-  MapTile* mTile = mapIndex->getTile(tile);
-
-  if (!mTile)
-  {
-    return;
-  }
-
-  bool changed = false;
-
-  // clear all textures on the adt and set selected texture as base texture
-  for (int j = 0; j<16; ++j)
-  {
-    for (int i = 0; i<16; ++i)
-    {
-      if (mTile->getChunk((size_t)j, (size_t)i)->textureSet->removeDuplicate())
-      {
-        changed = true;
-      }
-    }
-  }
-
-  if (changed)
-  {
-    mapIndex->setChanged(tile);
-  }
+  for_all_chunks_on_tile(x, z, [&](MapChunk* chunk) { chunk->textureSet->removeDuplicate(); } );
 }
 
 void World::saveWDT()
