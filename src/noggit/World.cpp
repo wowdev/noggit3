@@ -1874,13 +1874,8 @@ void World::saveWDT()
 
 bool World::canWaterSave(const tile_index& tile)
 {
-
-  if (!mapIndex->tileLoaded(tile)) //! \todo else there are null pointers
-  {
-    return false;
-  }
-
-  return mapIndex->getTile(tile)->canWaterSave();
+  MapTile* mt = mapIndex->getTile(tile);
+  return !!mt && mt->canWaterSave();
 }
 
 void World::setWaterHeight(const tile_index& tile, float h)
@@ -1982,7 +1977,7 @@ int World::getWaterType(const tile_index& tile)
   }
   else
   {
-    return false;
+    return 0;
   }
 }
 
