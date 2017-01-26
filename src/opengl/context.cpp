@@ -317,7 +317,7 @@ namespace opengl
   void context::pointSize (GLfloat size)
   {
     verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
-    return glLineWidth (size);
+    return glPointSize (size);
   }
 
   void context::hint (GLenum target, GLenum mode)
