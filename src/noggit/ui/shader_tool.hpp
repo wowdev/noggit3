@@ -14,7 +14,7 @@ namespace ui
   public:
     shader_tool(float x, float y, bool tablet);
 
-    void changeShader(float dt, bool add);
+    void changeShader (math::vector_3d const& pos, float dt, bool add);
 
     void changeRadius(float change);
     void changeSpeed(float change);

@@ -106,28 +106,24 @@ namespace ui
     _mode_toggle->Activate(eFlattenMode_Both);
   }
 
-  void FlattenTool::flatten(float dt)
+  void FlattenTool::flatten(math::vector_3d const& cursor_pos, float dt)
   {
-    math::vector_3d const& pos = Environment::getInstance()->get_cursor_pos();
-
-    gWorld->flattenTerrain ( pos.x
-                           , pos.z
+    gWorld->flattenTerrain ( cursor_pos.x
+                           , cursor_pos.z
                            , 1.f - pow (0.5f, dt *_speed)
                            , _radius
                            , _flatten_type
                            , _flatten_mode
-                           , _locked ? _lock_pos : pos
+                           , _locked ? _lock_pos : cursor_pos
                            , math::degrees (_angled_mode ? _angle : 0.0f)
                            , math::degrees (_angled_mode ? _orientation : 0.0f)
                            );
   }
 
-  void FlattenTool::blur(float dt)
+  void FlattenTool::blur(math::vector_3d const& cursor_pos, float dt)
   {
-    math::vector_3d const& pos = Environment::getInstance()->get_cursor_pos();
-
-    gWorld->blurTerrain ( pos.x
-                        , pos.z
+    gWorld->blurTerrain ( cursor_pos.x
+                        , cursor_pos.z
                         , 1.f - pow (0.5f, dt * _speed)
                         , _radius
                         , _flatten_type
@@ -157,10 +153,10 @@ namespace ui
     _locked = !_locked;
     _lock_checkbox->setState(_locked);
   }
-  
-  void FlattenTool::lockPos()
+
+  void FlattenTool::lockPos (math::vector_3d const& cursor_pos)
   {
-    _lock_pos = Environment::getInstance()->get_cursor_pos();
+    _lock_pos = cursor_pos;
     _lock_x->value(misc::floatToStr(_lock_pos.x));
     _lock_z->value(misc::floatToStr(_lock_pos.z));
     _lock_h->value(misc::floatToStr(_lock_pos.y));

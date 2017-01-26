@@ -62,9 +62,9 @@ namespace ui
     }
   }
 
-  void terrain_tool::changeTerrain(float dt)
+  void terrain_tool::changeTerrain(math::vector_3d const& pos, float dt)
   {
-    gWorld->changeTerrain(Environment::getInstance()->Pos3DX, Environment::getInstance()->Pos3DZ, dt*_speed, _radius, _edit_type);
+    gWorld->changeTerrain(pos.x, pos.z, dt*_speed, _radius, _edit_type);
   }
 
   void terrain_tool::nextType()

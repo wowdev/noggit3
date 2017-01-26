@@ -787,7 +787,7 @@ void World::setupFog()
 
 extern int terrainMode;
 
-void World::draw(float brushRadius, float hardness)
+void World::draw(math::vector_3d const& cursor_pos, float brushRadius, float hardness)
 {
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
@@ -902,11 +902,6 @@ void World::draw(float brushRadius, float hardness)
     }
   }
 
-  math::vector_3d const pos ( Environment::getInstance()->Pos3DX
-                            , Environment::getInstance()->Pos3DY
-                            , Environment::getInstance()->Pos3DZ
-                            );
-
   // Selection circle
   if (this->IsSelection(eEntry_MapChunk))
   {
@@ -919,21 +914,21 @@ void World::draw(float brushRadius, float hardness)
 
     if (terrainMode == 0 && Environment::getInstance()->groundBrushType == 5)
     {
-      render_square(pos, brushRadius / 2.0f, 0.0f);
+      render_square(cursor_pos, brushRadius / 2.0f, 0.0f);
     }
     else
     {
       if (Environment::getInstance()->cursorType == 1)
       {
-        render_disk(pos, brushRadius);
+        render_disk(cursor_pos, brushRadius);
         if (hardness >= 0.01f)
         {
-          render_disk(pos, brushRadius * hardness);
+          render_disk(cursor_pos, brushRadius * hardness);
         }
       }
       else if (Environment::getInstance()->cursorType == 2)
       {
-        render_sphere(pos, brushRadius);
+        render_sphere(cursor_pos, brushRadius);
       }
     }
 
@@ -943,10 +938,10 @@ void World::draw(float brushRadius, float hardness)
       float x = brushRadius * cos(o);
       float z = brushRadius * sin(o);
       float h = brushRadius * tan(math::degrees(Environment::getInstance()->flattenAngle));
-      math::vector_3d const dest1 = pos + math::vector_3d(x, 0.0f, z);
-      math::vector_3d const dest2 = pos + math::vector_3d(x, h, z);
-      render_line(pos, dest1);
-      render_line(pos, dest2);
+      math::vector_3d const dest1 = cursor_pos + math::vector_3d(x, 0.0f, z);
+      math::vector_3d const dest2 = cursor_pos + math::vector_3d(x, h, z);
+      render_line(cursor_pos, dest1);
+      render_line(cursor_pos, dest2);
       render_line(dest1, dest2);
     }
 
@@ -1139,7 +1134,7 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
   return results;
 }
 
-math::vector_3d World::getCursorPosOnModel()
+boost::optional<math::vector_3d> World::getCursorPosOnModel()
 {
   if (terrainMode == 9)
   {
@@ -1153,7 +1148,7 @@ math::vector_3d World::getCursorPosOnModel()
     }
   }
 
-  return Environment::getInstance()->get_cursor_pos();
+  return boost::none;
 }
 
 void World::tick(float dt)

@@ -53,8 +53,3 @@ bool Environment::is_clipboard()
 {
   return !!clipboard;
 }
-
-math::vector_3d Environment::get_cursor_pos()
-{
-  return math::vector_3d(Pos3DX, Pos3DY, Pos3DZ);
-}

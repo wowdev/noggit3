@@ -18,7 +18,6 @@ public:
   void set_clipboard(boost::optional<selection_type> entry);
   void clear_clipboard();
   bool is_clipboard();
-  math::vector_3d get_cursor_pos();
 
   bool view_holelines;
   // values for areaID painting
@@ -30,10 +29,6 @@ public:
   int flagPaintMode;
   int screenX;
   int screenY;
-
-  float Pos3DX;
-  float Pos3DY;
-  float Pos3DZ;
 
   bool flattenAngleEnabled;
   float flattenAngle;

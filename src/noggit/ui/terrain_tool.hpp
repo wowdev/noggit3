@@ -14,7 +14,7 @@ namespace ui
   public:
     terrain_tool(float x, float y, bool tablet);
 
-    void changeTerrain(float dt);
+    void changeTerrain(math::vector_3d const& pos, float dt);
     void nextType();
     void changeRadius(float change);
     void changeSpeed(float change);

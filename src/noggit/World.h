@@ -133,7 +133,7 @@ public:
   void initDisplay();
 
   void tick(float dt);
-  void draw(float brushRadius, float hardness = 0.0f);
+  void draw(math::vector_3d const& cursor_pos, float brushRadius, float hardness);
 
   void outdoorLights(bool on);
   void setupFog();
@@ -253,7 +253,7 @@ public:
   void convertMapToBigAlpha();
 
   // get the real cursor pos in the world, TODO: get the correct pos on models/wmos
-  math::vector_3d getCursorPosOnModel();
+  boost::optional<math::vector_3d> getCursorPosOnModel();
 private:
   void getSelection();
 };

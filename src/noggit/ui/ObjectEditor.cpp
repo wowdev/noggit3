@@ -213,22 +213,19 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   addChild(new UIButton(5.0f, 295.0f, 150.0f, 30.0f, "Clear list", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", clearHiddenModels, 0));
 }
 
-void UIObjectEditor::pasteObject()
+void UIObjectEditor::pasteObject (math::vector_3d pos)
 {
   if (!hasSelection() || selected->which() == eEntry_MapChunk)
   {
     return;
   }
 
-  // default value
-  math::vector_3d pos = Environment::getInstance()->get_cursor_pos();
-
   switch (pasteMode)
   {
     case PASTE_ON_TERRAIN: // use cursor pos
       break;
     case PASTE_ON_MODEL:
-      pos = gWorld->getCursorPosOnModel();
+      pos = gWorld->getCursorPosOnModel().get_value_or (pos);
       break;
     case PASTE_ON_SELECTION:
       if (gWorld->HasSelection())

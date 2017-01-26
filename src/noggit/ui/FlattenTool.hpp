@@ -19,14 +19,14 @@ namespace ui
   public:
     FlattenTool(float x, float y);
 
-    void flatten(float dt);
-    void blur(float dt);
+    void flatten(math::vector_3d const& cursor_pos, float dt);
+    void blur(math::vector_3d const& cursor_pos, float dt);
 
     void nextFlattenType();
     void nextFlattenMode();
     void toggleFlattenAngle();
     void toggleFlattenLock();
-    void lockPos();
+    void lockPos (math::vector_3d const& cursor_pos);
 
     void changeRadius(float change);
     void changeSpeed(float change);
