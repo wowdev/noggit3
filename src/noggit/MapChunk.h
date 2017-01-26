@@ -119,6 +119,8 @@ public:
   float getHeight(int x, int z);
   float getMinHeight();
 
+  void clearHeight();
+
   //! \todo this is ugly create a build struct or sth
   void save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::map<int, WMOInstance> &lObjectInstances, std::map<int, ModelInstance> &lModelInstances);
 

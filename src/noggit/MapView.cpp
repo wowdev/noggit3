@@ -553,15 +553,6 @@ void InsertObject(int id)
   //! \todo Memoryleak: These models will never get deleted.
 }
 
-void moveHeightmap(UIFrame*, int)
-{
-  // set areaid on all chunks of the current ADT
-  if (Environment::getInstance()->selectedAreaID)
-  {
-    gWorld->moveHeight(Environment::getInstance()->selectedAreaID, tile_index(gWorld->camera));
-  }
-}
-
 void changeZoneIDValue(UIFrame* /*f*/, int set)
 {
   Environment::getInstance()->selectedAreaID = set;
@@ -804,7 +795,7 @@ void MapView::createGUI()
                                                {
                                                  if (Environment::getInstance()->selectedAreaID)
                                                  {
-                                                   gWorld->clearHeight(Environment::getInstance()->selectedAreaID, tile_index(gWorld->camera));
+                                                   gWorld->clearHeight(gWorld->camera.x, gWorld->camera.z);
                                                  }
                                                }
                                              );
