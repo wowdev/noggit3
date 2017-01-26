@@ -244,11 +244,6 @@ void MapIndex::enterTile(const tile_index& tile)
   }
 }
 
-void MapIndex::setChanged(float x, float z)
-{
-  setChanged(tile_index(math::vector_3d(x, 0.0f, z)));
-}
-
 void MapIndex::setChanged(const tile_index& tile)
 {
   MapTile* mTile = loadTile(tile);
@@ -286,31 +281,31 @@ int MapIndex::getChanged(const tile_index& tile)
     return 0;
 }
 
-void MapIndex::setFlag(bool to, float x, float z)
+void MapIndex::setFlag(bool to, math::vector_3d const& pos)
 {
-  tile_index tile(math::vector_3d(x, 0.0f, z));
+  tile_index tile(pos);
 
   if (tileLoaded(tile))
   {
     setChanged(tile);
 
-    int cx = (x - tile.x * TILESIZE) / CHUNKSIZE;
-    int cz = (z - tile.z * TILESIZE) / CHUNKSIZE;
+    int cx = (pos.x - tile.x * TILESIZE) / CHUNKSIZE;
+    int cz = (pos.z - tile.z * TILESIZE) / CHUNKSIZE;
 
     getTile(tile)->getChunk(cx, cz)->setFlag(to);
   }
 }
 
-void MapIndex::setWater(bool to, float x, float z)
+void MapIndex::setWater(bool to, math::vector_3d const& pos)
 {
-  tile_index tile(math::vector_3d(x, 0.0f, z));
+  tile_index tile(pos);
 
   if (tileLoaded(tile))
   {
     setChanged(tile);
 
-    int cx = (x - tile.x * TILESIZE) / CHUNKSIZE;
-    int cz = (z - tile.z * TILESIZE) / CHUNKSIZE;
+    int cx = (pos.x - tile.x * TILESIZE) / CHUNKSIZE;
+    int cz = (pos.z - tile.z * TILESIZE) / CHUNKSIZE;
 
     getTile(tile)->getChunk(cx, cz)->SetWater(to);
   }

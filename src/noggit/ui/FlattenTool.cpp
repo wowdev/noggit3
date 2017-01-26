@@ -108,8 +108,7 @@ namespace ui
 
   void FlattenTool::flatten(math::vector_3d const& cursor_pos, float dt)
   {
-    gWorld->flattenTerrain ( cursor_pos.x
-                           , cursor_pos.z
+    gWorld->flattenTerrain ( cursor_pos
                            , 1.f - pow (0.5f, dt *_speed)
                            , _radius
                            , _flatten_type
@@ -122,8 +121,7 @@ namespace ui
 
   void FlattenTool::blur(math::vector_3d const& cursor_pos, float dt)
   {
-    gWorld->blurTerrain ( cursor_pos.x
-                        , cursor_pos.z
+    gWorld->blurTerrain ( cursor_pos
                         , 1.f - pow (0.5f, dt * _speed)
                         , _radius
                         , _flatten_type

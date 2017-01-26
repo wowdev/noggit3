@@ -738,7 +738,7 @@ void MapView::createGUI()
                                 , "Remove texture duplicates"
                                 , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
                                 , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
-                                , [] { gWorld->removeTexDuplicateOnADT(gWorld->camera.x, gWorld->camera.z); }
+                                , [] { gWorld->removeTexDuplicateOnADT(gWorld->camera); }
                                 );
   settings_paint->addChild(rmDup);
 
@@ -791,7 +791,7 @@ void MapView::createGUI()
                                                {
                                                  if (Environment::getInstance()->selectedAreaID)
                                                  {
-                                                   gWorld->setAreaID(gWorld->camera.x, gWorld->camera.z, Environment::getInstance()->selectedAreaID, true);
+                                                   gWorld->setAreaID(gWorld->camera, Environment::getInstance()->selectedAreaID, true);
                                                  }
                                                }
                                              );
@@ -800,28 +800,28 @@ void MapView::createGUI()
                                                {
                                                  if (Environment::getInstance()->selectedAreaID)
                                                  {
-                                                   gWorld->clearHeight(gWorld->camera.x, gWorld->camera.z);
+                                                   gWorld->clearHeight(gWorld->camera);
                                                  }
                                                }
                                              );
 
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear texture"
-                                             , [] { gWorld->setBaseTexture(gWorld->camera.x, gWorld->camera.z); }
+                                             , [] { gWorld->setBaseTexture(gWorld->camera); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear models"
-                                             , [] { gWorld->clearAllModelsOnADT(gWorld->camera.x, gWorld->camera.z); }
+                                             , [] { gWorld->clearAllModelsOnADT(gWorld->camera); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear duplicate models"
                                              , [] { gWorld->delete_duplicate_model_and_wmo_instances(); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear water"
-                                             , [] { gWorld->deleteWaterLayer(gWorld->camera.x, gWorld->camera.z); }
+                                             , [] { gWorld->deleteWaterLayer(gWorld->camera); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Create water"
-                                             , [] { gWorld->addWaterLayer(gWorld->camera.x, gWorld->camera.z); }
+                                             , [] { gWorld->addWaterLayer(gWorld->camera); }
                                              );
   mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded adts)", [] { gWorld->fixAllGaps(); });
-  mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", [] { gWorld->ClearShader(gWorld->camera.x, gWorld->camera.z); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", [] { gWorld->ClearShader(gWorld->camera); });
   mbar->GetMenu("Assist")->AddMenuItemButton("Map to big alpha", [] { gWorld->convertMapToBigAlpha(); });
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
@@ -1333,7 +1333,7 @@ void MapView::tick(float t, float dt)
 
       if (leftMouse && Selection->which() == eEntry_MapChunk)
       {
-        bool underMap = gWorld->isUnderMap(_cursor_pos.x, _cursor_pos.z, _cursor_pos.y);
+        bool underMap = gWorld->isUnderMap(_cursor_pos);
 
         switch (terrainMode)
         {
@@ -1368,9 +1368,9 @@ void MapView::tick(float t, float dt)
           {
             // clear chunk texture
             if (mViewMode == eViewMode_3D && !underMap)
-              gWorld->eraseTextures(_cursor_pos.x, _cursor_pos.z);
+              gWorld->eraseTextures(_cursor_pos);
             else if (mViewMode == eViewMode_2D)
-              gWorld->eraseTextures(CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z);
+              gWorld->eraseTextures({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z});
           }
           else if (_mod_ctrl_down)
           {
@@ -1392,19 +1392,19 @@ void MapView::tick(float t, float dt)
                 {
                   if (sprayBrushActive)
                   {
-                    gWorld->sprayTexture(_cursor_pos.x, _cursor_pos.z, &sprayBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f),
+                    gWorld->sprayTexture(_cursor_pos, &sprayBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f),
                       textureBrush.getRadius(), brushSprayPressure,
                       UITexturingGUI::getSelectedTexture()
                     );
                   }
                   else
                   {
-                    gWorld->paintTexture(_cursor_pos.x, _cursor_pos.z, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
+                    gWorld->paintTexture(_cursor_pos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
                   }
                 }
                 else
                 {
-                  gWorld->overwriteTextureAtCurrentChunk(_cursor_pos.x, _cursor_pos.z, mainGui->TextureSwitcher->getTextures(), UITexturingGUI::getSelectedTexture());
+                  gWorld->overwriteTextureAtCurrentChunk(_cursor_pos, mainGui->TextureSwitcher->getTextures(), UITexturingGUI::getSelectedTexture());
                 }
               }
             }
@@ -1414,7 +1414,7 @@ void MapView::tick(float t, float dt)
               textureBrush.GenerateTexture();
             }
             if (mViewMode == eViewMode_2D)
-              gWorld->paintTexture(CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
+              gWorld->paintTexture({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z}, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
           }
           break;
 
@@ -1425,11 +1425,11 @@ void MapView::tick(float t, float dt)
             if (_mod_shift_down)
             {
               auto pos (boost::get<selected_chunk_type> (*Selection).position);
-              gWorld->setHole(pos.x, pos.z, _mod_alt_down, false);
+              gWorld->setHole(pos, _mod_alt_down, false);
             }
             else if (_mod_ctrl_down && !underMap)
             {
-              gWorld->setHole(_cursor_pos.x, _cursor_pos.z, _mod_alt_down, true);
+              gWorld->setHole(_cursor_pos, _mod_alt_down, true);
             }
           }
           break;
@@ -1439,7 +1439,7 @@ void MapView::tick(float t, float dt)
             if (_mod_shift_down)
             {
               // draw the selected AreaId on current selected chunk
-              gWorld->setAreaID(_cursor_pos.x, _cursor_pos.z, Environment::getInstance()->selectedAreaID, false);
+              gWorld->setAreaID(_cursor_pos, Environment::getInstance()->selectedAreaID, false);
             }
             else if (_mod_ctrl_down)
             {
@@ -1456,11 +1456,11 @@ void MapView::tick(float t, float dt)
           {
             if (_mod_shift_down)
             {
-              gWorld->mapIndex->setFlag(true, _cursor_pos.x, _cursor_pos.z);
+              gWorld->mapIndex->setFlag(true, _cursor_pos);
             }
             else if (_mod_ctrl_down)
             {
-              gWorld->mapIndex->setFlag(false, _cursor_pos.x, _cursor_pos.z);
+              gWorld->mapIndex->setFlag(false, _cursor_pos);
             }
           }
           break;
@@ -1472,18 +1472,18 @@ void MapView::tick(float t, float dt)
 
             if (_mod_shift_down)
             {
-              gWorld->addWaterLayerChunk(chnk->xbase, chnk->zbase, chnk->px, chnk->py);
+              gWorld->addWaterLayerChunk({chnk->xbase, 0.f, chnk->zbase}, chnk->px, chnk->py);
             }
             if (_mod_ctrl_down && !_mod_alt_down)
             {
-              gWorld->delWaterLayerChunk(chnk->xbase, chnk->zbase, chnk->px, chnk->py);
+              gWorld->delWaterLayerChunk({chnk->xbase, 0.f, chnk->zbase}, chnk->px, chnk->py);
             }
             if (_mod_alt_down && !_mod_ctrl_down)
             {
-              gWorld->mapIndex->setWater(true, _cursor_pos.x, _cursor_pos.z);
+              gWorld->mapIndex->setWater(true, _cursor_pos);
             }
             if (_mod_alt_down && _mod_ctrl_down)
-              gWorld->mapIndex->setWater(false, _cursor_pos.x, _cursor_pos.z);
+              gWorld->mapIndex->setWater(false, _cursor_pos);
           }
           break;
         case 8:
@@ -1903,7 +1903,7 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
     }
     else if (terrainMode == 3)
     {
-      gWorld->setHoleADT(gWorld->camera.x, gWorld->camera.z, _mod_alt_down);
+      gWorld->setHoleADT(gWorld->camera, _mod_alt_down);
     }
     else if (terrainMode == 9)
     {
@@ -2025,7 +2025,7 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
 
         if (_mod_shift_down)
         {
-          gWorld->setWaterTrans(gWorld->camera.x, gWorld->camera.z, static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(tile)) + 1)));
+          gWorld->setWaterTrans(gWorld->camera, static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(tile)) + 1)));
         }
         else if (_mod_ctrl_down)
         {
@@ -2080,7 +2080,7 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
         tile_index tile(gWorld->camera);
         if (_mod_shift_down)
         {
-          gWorld->setWaterTrans(gWorld->camera.x, gWorld->camera.z, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(tile))) - 1));
+          gWorld->setWaterTrans(gWorld->camera, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(tile))) - 1));
         }
         else if (_mod_ctrl_down)
         {

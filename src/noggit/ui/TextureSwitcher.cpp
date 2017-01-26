@@ -20,7 +20,7 @@ extern World *gWorld;
 
 void swapADT(UIFrame *f, int id)
 {
-  gWorld->swapTexture(gWorld->camera.x, gWorld->camera.z, (static_cast<UITextureSwitcher *>(f->parent()))->getTextures());
+  gWorld->swapTexture(gWorld->camera, (static_cast<UITextureSwitcher *>(f->parent()))->getTextures());
 }
 
 
