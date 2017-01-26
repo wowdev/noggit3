@@ -1158,49 +1158,18 @@ bool MapChunk::isHole(int i, int j)
   return (holes & ((1 << ((j * 4) + i)))) != 0;
 }
 
-void MapChunk::addHole(int i, int j)
+void MapChunk::setHole(float x, float z, bool big, bool add)
 {
-  holes = holes | ((1 << ((j * 4) + i)));
-  initStrip();
-}
-
-void MapChunk::addHoleBig(int i, int j)
-{
-  for (int x = -3; x < 4; ++x)
+  if (big)
   {
-    for (int y = -3; y < 4; ++y)
-    {
-      addHole(i + x, j + y);
-    }
+    holes = add ? 0xFFFFFFFF : 0x0;
   }
-}
-
-void MapChunk::addHoleEverywhere()
-{
-  holes = 0x7FFFFFFF;
-  initStrip();
-}
-
-void MapChunk::removeHole(int i, int j)
-{
-  holes = holes & ~((1 << ((j * 4) + i)));
-  initStrip();
-}
-
-void MapChunk::removeHoleBig(int i, int j)
-{
-  for (int x = -3; x<4; x++)
+  else
   {
-    for (int y = -3; y<4; y++)
-    {
-      removeHole(i + x, j + y);
-    }
+    int v = 1 << ((int)((z - zbase) / MINICHUNKSIZE) * 4 + (int)((x - xbase) / MINICHUNKSIZE));
+    holes = add ? (holes & ~v) : (holes | v);
   }
-}
 
-void MapChunk::removeAllHoles()
-{
-  holes = 0x0;
   initStrip();
 }
 
