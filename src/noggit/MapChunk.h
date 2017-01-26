@@ -102,12 +102,7 @@ public:
 
   //! \todo implement Action stack for these
   bool isHole(int i, int j);
-  void addHole(int i, int j);
-  void addHoleBig(int i, int j);
-  void addHoleEverywhere();
-  void removeHole(int i, int j);
-  void removeHoleBig(int i, int j);
-  void removeAllHoles();
+  void setHole(float x, float z, bool big, bool add);
 
   void setFlag(bool value);
   int getFlag();

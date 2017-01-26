@@ -1590,86 +1590,16 @@ void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* ol
   }
 }
 
-void World::addHole(float x, float z, bool big)
+void World::setHole(float x, float z, bool big, bool hole)
 {
-  tile_index tile(math::vector_3d(x, 0, z));
-
-  for (size_t j = tile.z - 1; j < tile.z + 1; ++j)
-  {
-    for (size_t i = tile.x - 1; i < tile.x + 1; ++i)
-    {
-      tile_index curTile = tile_index(i, j);
-      if (mapIndex->tileLoaded(curTile))
-      {
-        MapTile* mTile = mapIndex->getTile(curTile);
-
-        for (size_t ty = 0; ty < 16; ++ty)
-        {
-          for (size_t tx = 0; tx < 16; ++tx)
-          {
-            MapChunk* chunk = mTile->getChunk(ty, tx);
-            // check if the cursor is not undermap
-            if (chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
-            {
-              mapIndex->setChanged(curTile);
-              int k = (int)((x - chunk->xbase) / MINICHUNKSIZE);
-              int l = (int)((z - chunk->zbase) / MINICHUNKSIZE);
-              if (big)
-              {
-                chunk->addHoleBig(k, l);
-              }
-              else
-              {
-                chunk->addHole(k, l);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  for_chunk_at(x, z, [&](MapChunk* chunk) { chunk->setHole(x, z, big, hole); });
 }
 
-void World::removeHole(float x, float z, bool big)
+void World::setHoleADT(float x, float z, bool hole)
 {
-  tile_index tile(math::vector_3d(x, 0, z));
-
-  for (size_t j = tile.z - 1; j < tile.z + 1; ++j)
-  {
-    for (size_t i = tile.x - 1; i < tile.x + 1; ++i)
-    {
-      tile_index curTile = tile_index(i, j);
-      if (mapIndex->tileLoaded(curTile))
-      {
-        MapTile* mTile = mapIndex->getTile(curTile);
-
-        for (size_t ty = 0; ty < 16; ++ty)
-        {
-          for (size_t tx = 0; tx < 16; ++tx)
-          {
-            MapChunk* chunk = mTile->getChunk(ty, tx);
-
-            if (chunk->xbase < x && chunk->xbase + CHUNKSIZE > x && chunk->zbase < z && chunk->zbase + CHUNKSIZE > z)
-            {
-              mapIndex->setChanged(curTile);
-
-              int k = (int)((x - chunk->xbase) / MINICHUNKSIZE);
-              int l = (int)((z - chunk->zbase) / MINICHUNKSIZE);
-              if (big)
-              {
-                chunk->removeHoleBig(k, l);
-              }
-              else
-              {
-                chunk->removeHole(k, l);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
+  for_all_chunks_on_tile(x, z, [&](MapChunk* chunk) { chunk->setHole(x, z, true, hole); });
 }
+
 
 template<typename Fun>
   void World::for_all_chunks_on_tile (float x, float z, Fun&& fun)
@@ -1686,15 +1616,15 @@ template<typename Fun>
   }
 }
 
-void World::addHoleADT(float x, float z)
-{
-  for_all_chunks_on_tile (x, z, [] (MapChunk* chunk) { chunk->addHoleEverywhere(); });
-}
+  template<typename Fun>
+  void World::for_chunk_at(float x, float z, Fun&& fun)
+  {
+    MapTile* tile(mapIndex->getTile(math::vector_3d(x, 0, z)));
+    mapIndex->setChanged(tile);
+    
+    fun(tile->getChunk((x - tile->xbase) / CHUNKSIZE, (z - tile->zbase) / CHUNKSIZE));
+  }
 
-void World::removeHoleADT(float x, float z)
-{
-  for_all_chunks_on_tile (x, z, [] (MapChunk* chunk) { chunk->removeAllHoles(); });
-}
 
 void World::jumpToCords(math::vector_3d pos)
 {

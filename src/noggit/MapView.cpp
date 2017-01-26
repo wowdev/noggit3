@@ -1426,10 +1426,12 @@ void MapView::tick(float t, float dt)
             if (_mod_shift_down)
             {
               auto pos (boost::get<selected_chunk_type> (*Selection).position);
-              gWorld->removeHole(pos.x, pos.z, _mod_alt_down);
+              gWorld->setHole(pos.x, pos.z, _mod_alt_down, false);
             }
             else if (_mod_ctrl_down && !underMap)
-              gWorld->addHole(xPos, zPos, _mod_alt_down);
+            {
+              gWorld->setHole(xPos, zPos, _mod_alt_down, true);
+            }              
           }
           break;
         case 4:
@@ -1907,15 +1909,7 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
     }
     else if (terrainMode == 3)
     {
-      math::vector_3d cam = gWorld->camera;
-      if (_mod_alt_down)
-      {
-        gWorld->addHoleADT(cam.x, cam.z);
-      }
-      else
-      {
-        gWorld->removeHoleADT(cam.x, cam.z);
-      }
+      gWorld->setHoleADT(gWorld->camera.x, gWorld->camera.z, _mod_alt_down);
     }
     else if (terrainMode == 9)
     {

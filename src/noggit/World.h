@@ -182,6 +182,9 @@ public:
   template<typename Fun>
     void for_all_chunks_on_tile (float x, float z, Fun&&);
 
+  template<typename Fun>
+    void for_chunk_at(float x, float z, Fun&&);
+
   void changeTerrain(float x, float z, float change, float radius, int BrushType);
   void changeShader(float x, float z, float change, float radius, bool editMode);
   void flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
@@ -191,10 +194,8 @@ public:
   void eraseTextures(float x, float z);
   void overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
 
-  void addHole(float x, float z, bool big);
-  void removeHole(float x, float z, bool big);
-  void addHoleADT(float x, float z);
-  void removeHoleADT(float x, float z);
+  void setHole(float x, float z, bool big, bool hole);
+  void setHoleADT(float x, float z, bool hole);
 
   void addModel(selection_type, math::vector_3d newPos, bool copyit);
   void addM2(std::string const& filename, math::vector_3d newPos, bool copyit);
