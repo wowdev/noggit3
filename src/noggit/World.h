@@ -252,8 +252,28 @@ public:
 
   // get the real cursor pos in the world, TODO: get the correct pos on models/wmos
   boost::optional<math::vector_3d> getCursorPosOnModel();
+
+  void deselectVertices(math::vector_3d const& pos, float radius);
+  void selectVertices(math::vector_3d const& pos, float radius);
+
+  void moveVertices(float h);
+  void rotateVertices(math::vector_3d const& pos, float angle, float orientation);
+  void flattenVertices();
+
+  void updateSelectedVertices();
+  void updateVertexCenter();
+  void clearVertexSelection();
+
+  math::vector_3d& vertexCenter();
+
 private:
   void getSelection();
+
+  std::set<MapTile*> _vertex_tiles;
+  std::set<MapChunk*> _vertex_chunks;
+  std::set<math::vector_3d*> _vertices_selected;
+  math::vector_3d _vertex_center;
+  bool _vertex_center_updated = false;
 };
 
 extern World *gWorld;

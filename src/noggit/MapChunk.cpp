@@ -827,6 +827,20 @@ void MapChunk::intersect (math::ray const& ray, selection_result* results)
   }
 }
 
+void MapChunk::updateVerticesData()
+{
+  vmin.y = std::numeric_limits<float>::max();
+  vmax.y = std::numeric_limits<float>::lowest();
+
+  for (int i(0); i < mapbufsize; ++i)
+  {
+    vmin.y = std::min(vmin.y, mVertices[i].y);
+    vmax.y = std::max(vmax.y, mVertices[i].y);
+  }
+
+  gl.bufferData<GL_ARRAY_BUFFER>(vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+}
+
 void MapChunk::recalcNorms()
 {
   math::vector_3d P1, P2, P3, P4;
@@ -898,8 +912,6 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
   float dist, xdiff, zdiff;
   bool changed = false;
 
-  vmin.y = 9999999.0f;
-  vmax.y = -9999999.0f;
   for (int i = 0; i < mapbufsize; ++i)
   {
     xdiff = mVertices[i].x - pos.x;
@@ -943,13 +955,10 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
         }
       }
     }
-
-    vmin.y = std::min(vmin.y, mVertices[i].y);
-    vmax.y = std::max(vmax.y, mVertices[i].y);
   }
   if (changed)
   {
-    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    updateVerticesData();
   }
   return changed;
 }
@@ -1050,16 +1059,7 @@ bool MapChunk::flattenTerrain ( math::vector_3d const& pos
 
   if (changed)
   {
-    vmin.y = std::numeric_limits<float>::max();
-    vmax.y = std::numeric_limits<float>::lowest();
-
-    for (int i (0); i < mapbufsize; ++i)
-    {
-      vmin.y = std::min (vmin.y, mVertices[i].y);
-      vmax.y = std::max (vmax.y, mVertices[i].y);
-    }
-
-    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    updateVerticesData();
   }
 
   return changed;
@@ -1568,151 +1568,53 @@ bool MapChunk::fixGapAbove(const MapChunk* chunk)
   return changed;
 }
 
-//! ------ unused functions -----
 
-/*
-void MapChunk::drawNoDetail()
+void MapChunk::selectVertex(math::vector_3d const& pos, float radius, std::set<math::vector_3d*>& vertices)
 {
-opengl::texture::set_active_texture (1);
-opengl::texture::disable_texture();
-opengl::texture::set_active_texture (0);
-opengl::texture::disable_texture();
-gl.disable( GL_LIGHTING );
+  if (misc::getShortestDist(pos.x, pos.z, xbase, zbase, CHUNKSIZE) > radius)
+  {
+    return;
+  }
 
-//gl.color3fv(gWorld->skies->colorSet[FOG_COLOR]);
-//gl.color3f(1,0,0);
-//gl.disable(GL_FOG);
-
-// low detail version
-gl.vertexPointer (vertices, 3, GL_FLOAT, 0, 0 );
-gl.disableClientState( GL_NORMAL_ARRAY );
-gl.drawElements( GL_TRIANGLE_STRIP, stripsize, GL_UNSIGNED_SHORT, gWorld->mapstrip );
-gl.enableClientState( GL_NORMAL_ARRAY );
-
-gl.color4f( 1.0f, 1.0f, 1.0f, 1.0f );
-//gl.enable(GL_FOG);
-
-gl.enable( GL_LIGHTING );
-opengl::texture::set_active_texture (1);
-opengl::texture::enable_texture();
-opengl::texture::set_active_texture (0);
-opengl::texture::enable_texture();
-}
-*/
-
-/*
-void MapChunk::drawColor()
-{
-
-if (!gWorld->frustum.intersects(vmin,vmax))
-return;
-
-float mydist = (gWorld->camera - vcenter).length() - r;
-
-if (mydist > (mapdrawdistance * mapdrawdistance))
-return;
-
-if (mydist > gWorld->culldistance) {
-if (gWorld->drawfog) this->drawNoDetail();
-return;
+  for (int i = 0; i < mapbufsize; ++i)
+  {
+    if (misc::dist(pos.x, pos.z, mVertices[i].x, mVertices[i].z) <= radius)
+    {
+      vertices.emplace(&mVertices[i]);
+    }
+  }
 }
 
-opengl::texture::set_active_texture (1);
-opengl::texture::disable_texture();
-
-opengl::texture::set_active_texture (0);
-opengl::texture::disable_texture();
-//gl.disable(GL_LIGHTING);
-
-math::vector_3d Color;
-gl.begin(GL_TRIANGLE_STRIP);
-for(int i=0; i < striplen; ++i)
+void MapChunk::fixVertices(std::set<math::vector_3d*>& selected)
 {
-HeightColor( mVertices[strip[i]].y, &Color);
-gl.color3fv(&Color.x);
-gl.normal3fv(&mNormals[strip[i]].x);
-gl.vertex3fv(&mVertices[strip[i]].x);
-}
-gl.end();
-//gl.enable(GL_LIGHTING);
-}
-*/
+  std::vector<int> ids ={ 0, 1, 17, 18 };
+  // iterate through each "square" of vertices
+  for (int i = 0; i < 64; ++i)
+  {
+    int not_selected = 0, count = 0, mid_vertex = ids[0] + 9;
+    float h = 0.0f;
 
-/*
-void MapChunk::loadTextures()
-{
-//! \todo Use this kind of preloading again?
-return;
-for(int i=0; i < nTextures; ++i)
-_textures[i] = TextureManager::get(mt->mTextureFilenames[tex[i]]);
+    for (int& index : ids)
+    {
+      if (selected.find(&mVertices[index]) == selected.end())
+      {
+        not_selected = index;
+      }
+      else
+      {
+        count++;
+      }
+      h += mVertices[index].y;
+      index += (((i+1) % 8) == 0) ? 10 : 1;
+    }
+
+    if (count == 2)
+    {
+      mVertices[mid_vertex].y = h * 0.25f;
+    }
+    else if (count == 3)
+    {
+      mVertices[mid_vertex].y = (h - mVertices[not_selected].y) / 3.0f;
+    }
+  }
 }
-*/
-
-
-
-/*
-static const int HEIGHT_TOP = 1000;
-static const int HEIGHT_MID = 600;
-static const int HEIGHT_LOW = 300;
-static const int HEIGHT_ZERO = 0;
-static const int HEIGHT_SHALLOW = -100;
-static const int HEIGHT_DEEP = -250;
-
-void HeightColor(float height, math::vector_3d *Color)
-{
-White  1.00  1.00  1.00
-Brown  0.75  0.50  0.00
-Green  0.00  1.00  0.00
-Yellow  1.00  1.00  0.00
-Lt Blue  0.00  1.00  1.00
-Blue  0.00  0.00  1.00
-Black  0.00  0.00  0.00
-
-float Amount;
-
-if(height>HEIGHT_TOP)
-{
-Color->x=1.0;
-Color->y=1.0;
-Color->z=1.0;
-}
-else if(height>HEIGHT_MID)
-{
-Amount=(height-HEIGHT_MID)/(HEIGHT_TOP-HEIGHT_MID);
-Color->x=.75f+Amount*0.25f;
-Color->y=0.5f+0.5f*Amount;
-Color->z=Amount;
-}
-else if(height>HEIGHT_LOW)
-{
-Amount=(height-HEIGHT_LOW)/(HEIGHT_MID-HEIGHT_LOW);
-Color->x=Amount*0.75f;
-Color->y=1.00f-0.5f*Amount;
-Color->z=0.0f;
-}
-else if(height>HEIGHT_ZERO)
-{
-Amount=(height-HEIGHT_ZERO)/(HEIGHT_LOW-HEIGHT_ZERO);
-
-Color->x=1.0f-Amount;
-Color->y=1.0f;
-Color->z=0.0f;
-}
-else if(height>HEIGHT_SHALLOW)
-{
-Amount=(height-HEIGHT_SHALLOW)/(HEIGHT_ZERO-HEIGHT_SHALLOW);
-Color->x=0.0f;
-Color->y=Amount;
-Color->z=1.0f;
-}
-else if(height>HEIGHT_DEEP)
-{
-Amount=(height-HEIGHT_DEEP)/(HEIGHT_SHALLOW-HEIGHT_DEEP);
-Color->x=0.0f;
-Color->y=0.0f;
-Color->z=Amount;
-}
-else
-(*Color)*=0.0f;
-
-}*/

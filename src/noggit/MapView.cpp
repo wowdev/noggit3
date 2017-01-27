@@ -925,6 +925,12 @@ void MapView::createGUI()
             , [] { return terrainMode == 9; }
             );
 
+  addHotkey ( SDLK_c
+            , MOD_none
+            , [] { gWorld->clearVertexSelection(); }
+            , [] { return terrainMode == 0; }
+            );
+
   addHotkey ( SDLK_x
             , MOD_none
             , [] { mainGui->TexturePalette->toggleVisibility(); }
@@ -1950,7 +1956,11 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
 
   if (e->keysym.sym == SDLK_f)
   {
-    if (terrainMode == 1)
+    if (terrainMode == 0 && _mod_space_down)
+    {
+      mainGui->terrainTool->flattenVertices();
+    }
+    else if (terrainMode == 1)
     {
       if (_mod_space_down)
       {
@@ -2242,7 +2252,7 @@ void MapView::inserObjectFromExtern(int model)
 
 void MapView::mousemove(SDL_MouseMotionEvent *e)
 {
-  if ((look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down)) || video.fullscreen())
+  if ((look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down)) || video.fullscreen())
   {
     ah += e->xrel / XSENS;
     av += mousedir * e->yrel / YSENS;
@@ -2265,7 +2275,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
     mv = 0.0f;
   }
 
-  if (_mod_shift_down || _mod_ctrl_down || _mod_alt_down)
+  if (_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down)
   {
     rh = e->xrel / XSENS * 5.0f;
     rv = e->yrel / YSENS * 5.0f;
@@ -2273,12 +2283,21 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
 
   if (rightMouse && _mod_alt_down)
   {
+    if (terrainMode == 0)
+    {
+      mainGui->terrainTool->moveVertices(-e->yrel / YSENS);
+    }
     if (terrainMode == 2)
     {
       float hardness = std::max(0.0f, std::min(1.0f, textureBrush.getHardness() + e->xrel / 300.0f));
       setTextureBrushHardness(hardness);
       mainGui->paintHardnessSlider->setValue(hardness);
     }
+  }
+
+  if (rightMouse && _mod_space_down)
+  {
+    mainGui->terrainTool->setOrientRelativeTo(_cursor_pos);
   }
 
   if (leftMouse && _mod_alt_down)
@@ -2381,7 +2400,18 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
     break;
 
   case SDL_BUTTON_WHEELUP:
-    if (terrainMode == 1)
+    if (terrainMode == 0)
+    {
+      if (_mod_alt_down)
+      {
+        mainGui->terrainTool->changeAngle(_cursor_pos, _mod_ctrl_down ? 0.2f : 2.0f);
+      }
+      else if (_mod_shift_down)
+      {
+        mainGui->terrainTool->changeOrientation(_cursor_pos, _mod_ctrl_down ? 1.0f : 10.0f);
+      }
+    }
+    else if (terrainMode == 1)
     {
       if (_mod_alt_down)
       {
@@ -2416,7 +2446,18 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
     }
     break;
   case SDL_BUTTON_WHEELDOWN:
-    if (terrainMode == 1)
+    if (terrainMode == 0)
+    {
+      if (_mod_alt_down)
+      {
+        mainGui->terrainTool->changeAngle(_cursor_pos, _mod_ctrl_down ? -0.2f : -2.0f);
+      }
+      else if (_mod_shift_down)
+      {
+        mainGui->terrainTool->changeOrientation(_cursor_pos, _mod_ctrl_down ? -1.0f : -10.0f);
+      }
+    }
+    else if (terrainMode == 1)
     {
       if (_mod_alt_down)
       {
