@@ -36,6 +36,8 @@ namespace ui
     float brushRadius() const { return _radius; }
   
   private:
+    void updateVertices(math::vector_3d const& cursor_pos);
+
     static const int winWidth = 180;
     
     float _radius;

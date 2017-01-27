@@ -258,7 +258,7 @@ public:
   void selectVertices(math::vector_3d const& pos, float radius);
 
   void moveVertices(float h);
-  void rotateVertices(math::vector_3d const& pos);
+  void orientVertices(math::vector_3d const& ref_pos);
   void flattenVertices();
 
   void updateSelectedVertices();

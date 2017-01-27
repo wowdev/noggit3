@@ -2167,14 +2167,14 @@ void World::updateSelectedVertices()
   }
 }
 
-void World::rotateVertices(math::vector_3d const& pos)
+void World::orientVertices(math::vector_3d const& ref_pos)
 {
   math::degrees a(vertex_angle), o(vertex_orientation);
   for (math::vector_3d* v : _vertices_selected)
   {
-    v->y = ( pos.y 
-           + ((v->x - pos.x) * math::cos(o)
-            + (v->z - pos.z) * math::sin(o)
+    v->y = (ref_pos.y
+           + ((v->x - ref_pos.x) * math::cos(o)
+            + (v->z - ref_pos.z) * math::sin(o)
              ) * math::tan(a)
            );
   }

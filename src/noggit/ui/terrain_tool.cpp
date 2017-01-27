@@ -139,7 +139,7 @@ namespace ui
       {
         _orientation -= 360.0f;
       }
-      gWorld->rotateVertices(pos);
+      updateVertices(pos);
     }
   }
 
@@ -149,7 +149,7 @@ namespace ui
     {
       math::vector_3d const& center = gWorld->vertexCenter();
       _orientation = std::atan2(center.z - pos.z, center.x - pos.x) * 180.0f / math::constants::pi;
-      gWorld->rotateVertices(pos);
+      updateVertices(pos);
     }
   }
 
@@ -158,8 +158,13 @@ namespace ui
     if (_edit_type == eTerrainType_Vertex)
     {
       _angle = std::max(-89.0f, std::min(89.0f, _angle + change));
-      gWorld->rotateVertices(pos);
+      updateVertices(pos);
     }
+  }
+
+  void terrain_tool::updateVertices(math::vector_3d const& cursor_pos)
+  {
+    gWorld->orientVertices(_vertex_mode == eVertexMode_Mouse ? cursor_pos : gWorld->vertexCenter());
   }
 
   void terrain_tool::setTabletControlValue(float pressure)
