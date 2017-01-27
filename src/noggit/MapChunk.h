@@ -96,6 +96,8 @@ public:
 
   void selectVertex(math::vector_3d const& pos, float radius, std::set<math::vector_3d*>& vertices);
   void fixVertices(std::set<math::vector_3d*>& selected);
+  // for the vertex tool
+  bool isBorderChunk(std::set<math::vector_3d*>& selected);
 
   //! \todo implement Action stack for these
   bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);

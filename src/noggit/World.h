@@ -269,11 +269,15 @@ public:
 private:
   void getSelection();
 
+  std::set<MapChunk*>& vertexBorderChunks();
+
   std::set<MapTile*> _vertex_tiles;
   std::set<MapChunk*> _vertex_chunks;
+  std::set<MapChunk*> _vertex_border_chunks;
   std::set<math::vector_3d*> _vertices_selected;
   math::vector_3d _vertex_center;
   bool _vertex_center_updated = false;
+  bool _vertex_border_updated = false;
 };
 
 extern World *gWorld;
