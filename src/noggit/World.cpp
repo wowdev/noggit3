@@ -2139,6 +2139,7 @@ void World::moveVertices(float h)
   {
     v->y += h;
   }
+
   updateVertexCenter();
   updateSelectedVertices();
 }
@@ -2152,6 +2153,7 @@ void World::updateSelectedVertices()
 
   for (MapChunk* chunk : _vertexChunks)
   {
+    chunk->fixVertices(_verticesSelected);
     chunk->updateVerticesData();
     chunk->recalcNorms();
   }

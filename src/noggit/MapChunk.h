@@ -95,6 +95,7 @@ public:
   bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
 
   void selectVertex(float x, float z, float radius, std::set<math::vector_3d*>& vertices);
+  void fixVertices(std::set<math::vector_3d*>& selected);
 
   //! \todo implement Action stack for these
   bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
