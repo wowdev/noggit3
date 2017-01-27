@@ -20,6 +20,7 @@
 #include <noggit/World.h>
 #include <noggit/map_index.hpp>
 #include <noggit/texture_set.hpp>
+#include <noggit/tool_enums.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <opengl/matrix.hpp>
 #include <opengl/scoped.hpp>
@@ -936,7 +937,6 @@ void World::draw(float brushRadius, float hardness)
         render_sphere(pos, brushRadius);
       }
     }
-
     if (terrainMode == 1 && Environment::getInstance()->flattenAngleEnabled)
     {
       math::degrees o = math::degrees(Environment::getInstance()->flattenOrientation);
@@ -956,6 +956,26 @@ void World::draw(float brushRadius, float hardness)
     //GlDepthMask(true);
     gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+  }
+
+  if ( terrainMode == 0 && Environment::getInstance()->groundBrushType == eTerrainType_Vertex )
+  {
+    gl.pointSize(4.0f);
+    gl.color3f(1.0f, 0.0f, 0.0f);
+    gl.begin(GL_POINTS);
+
+    for (math::vector_3d const* pos : _verticesSelected)
+    {
+      gl.vertex3f(pos->x, pos->y, pos->z);
+    }
+    gl.end();
+
+    if (_vertex_center_updated)
+    {
+      gl.color3f(0.0f, 0.0f, 1.0f);
+      render_sphere(_vertex_center, 2.0f);
+      gl.color3f(1.0f, 1.0f, 1.0f);
+    }
   }
 
 
@@ -2079,4 +2099,115 @@ void World::clearHiddenModelList()
   Environment::getInstance()->showModelFromHiddenList = true;
   ModelManager::clearHiddenModelList();
   WMOManager::clearHiddenWMOList();
+}
+
+
+void World::selectVertices(float x, float z, float radius)
+{
+  _vertex_center_updated = false;
+  for_all_chunks_in_range(x, z, radius, [&](MapChunk* chunk){
+    _vertexChunks.emplace(chunk);
+    _vertexTiles.emplace(chunk->mt);
+    chunk->selectVertex(x, z, radius, _verticesSelected);
+    return true;
+  });
+}
+
+void World::deselectVertices(float x, float z, float radius)
+{
+  _vertex_center_updated = false;
+  std::set<math::vector_3d*> inRange;
+
+  for (math::vector_3d* v : _verticesSelected)
+  {
+    if (misc::dist(v->x, v->z, x, z) <= radius)
+    {
+      inRange.emplace(v);
+    }
+  }
+
+  for (math::vector_3d* v : inRange)
+  {
+    _verticesSelected.erase(v);
+  }
+}
+
+void World::moveVertices(float h)
+{
+  _vertex_center_updated = false;
+  for (math::vector_3d* v : _verticesSelected)
+  {
+    v->y += h;
+  }
+  updateVertexCenter();
+  updateSelectedVertices();
+}
+
+void World::updateSelectedVertices()
+{
+  for (MapTile* tile : _vertexTiles)
+  {
+    mapIndex->setChanged(tile);
+  }
+
+  for (MapChunk* chunk : _vertexChunks)
+  {
+    chunk->updateVerticesData();
+    chunk->recalcNorms();
+  }
+}
+
+void World::rotateVertices(int mode, float angle, float orientation)
+{
+  math::vector_3d const& pos = mode == eVertexMode_Mouse ? Environment::getInstance()->get_cursor_pos() : vertexCenter();
+  math::degrees a(angle), o(orientation);
+  for (math::vector_3d* v : _verticesSelected)
+  {
+    v->y = ( pos.y 
+           + ((v->x - pos.x) * math::cos(o)
+            + (v->z - pos.z) * math::sin(o)
+             ) * math::tan(a)
+           );
+  }
+  updateSelectedVertices();
+}
+
+void World::flattenVertices()
+{
+  float h = vertexCenter().y;
+  for (math::vector_3d* v : _verticesSelected)
+  {
+    v->y = h;
+  }
+
+  updateSelectedVertices();
+}
+
+void World::clearVertexSelection()
+{
+  _vertex_center_updated = false;
+  _verticesSelected.clear();
+  _vertexChunks.clear();
+  _vertexTiles.clear();
+}
+
+void World::updateVertexCenter()
+{
+  _vertex_center_updated = true;
+  _vertex_center = { 0,0,0 };
+  float f = 1.0f / _verticesSelected.size();
+  for (math::vector_3d* v : _verticesSelected)
+  {
+    _vertex_center += (*v) * f;
+  }
+}
+
+math::vector_3d& World::vertexCenter()
+{
+  if (!_vertex_center_updated)
+  {
+    updateVertexCenter();
+  }
+
+  return _vertex_center;
 }
