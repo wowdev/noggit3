@@ -18,8 +18,8 @@ namespace ui
     : UIWindow(x, y, winWidth, tablet ? 290.0f : 255.0f)
     , _radius(15.0f)
     , _speed(2.0f)
-    , _angle(0.0f)
-    , _orientation(0.0f)
+    , _angle(gWorld->vertex_angle._)
+    , _orientation(gWorld->vertex_orientation._)
     , _tablet(tablet)
     , _edit_type(Environment::getInstance()->groundBrushType)
     , _vertex_mode(eVertexMode_Center)
@@ -139,7 +139,7 @@ namespace ui
       {
         _orientation -= 360.0f;
       }
-      gWorld->rotateVertices(pos, _angle, _orientation);
+      gWorld->rotateVertices(pos);
     }
   }
 
@@ -149,7 +149,7 @@ namespace ui
     {
       math::vector_3d const& center = gWorld->vertexCenter();
       _orientation = std::atan2(center.z - pos.z, center.x - pos.x) * 180.0f / math::constants::pi;
-      gWorld->rotateVertices(pos, _angle, _orientation);
+      gWorld->rotateVertices(pos);
     }
   }
 
@@ -158,7 +158,7 @@ namespace ui
     if (_edit_type == eTerrainType_Vertex)
     {
       _angle = std::max(-89.0f, std::min(89.0f, _angle + change));
-      gWorld->rotateVertices(pos, _angle, _orientation);
+      gWorld->rotateVertices(pos);
     }
   }
 

@@ -23,6 +23,7 @@ namespace ui
     // vertex edit only functions
     void moveVertices(float dt);
     void flattenVertices();
+    void resetVertex();
 
     void changeOrientation(math::vector_3d const& pos, float change);
     void changeAngle(math::vector_3d const& pos, float change);
@@ -39,8 +40,8 @@ namespace ui
     
     float _radius;
     float _speed;
-    float _angle;
-    float _orientation;
+    float& _angle;
+    float& _orientation;
 
     bool _tablet;
 

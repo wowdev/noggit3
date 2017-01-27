@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <math/trig.hpp>
 #include <noggit/Frustum.h> // Frustum
 #include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h>
@@ -257,7 +258,7 @@ public:
   void selectVertices(math::vector_3d const& pos, float radius);
 
   void moveVertices(float h);
-  void rotateVertices(math::vector_3d const& pos, float angle, float orientation);
+  void rotateVertices(math::vector_3d const& pos);
   void flattenVertices();
 
   void updateSelectedVertices();
@@ -265,6 +266,9 @@ public:
   void clearVertexSelection();
 
   math::vector_3d& vertexCenter();
+
+  math::degrees vertex_angle;
+  math::degrees vertex_orientation;
 
 private:
   void getSelection();
