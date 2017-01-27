@@ -2098,6 +2098,8 @@ void World::clearHiddenModelList()
 void World::selectVertices(math::vector_3d const& pos, float radius)
 {
   _vertex_center_updated = false;
+  _vertex_border_updated = false;
+
   for_all_chunks_in_range(pos, radius, [&](MapChunk* chunk){
     _vertex_chunks.emplace(chunk);
     _vertex_tiles.emplace(chunk->mt);
@@ -2109,6 +2111,7 @@ void World::selectVertices(math::vector_3d const& pos, float radius)
 void World::deselectVertices(math::vector_3d const& pos, float radius)
 {
   _vertex_center_updated = false;
+  _vertex_border_updated = false;
   std::set<math::vector_3d*> inRange;
 
   for (math::vector_3d* v : _vertices_selected)
@@ -2144,9 +2147,14 @@ void World::updateSelectedVertices()
     mapIndex->setChanged(tile);
   }
 
-  for (MapChunk* chunk : _vertex_chunks)
+  // fix only the border chunks to be more efficient
+  for (MapChunk* chunk : vertexBorderChunks())
   {
     chunk->fixVertices(_vertices_selected);
+  }
+
+  for (MapChunk* chunk : _vertex_chunks)
+  {  
     chunk->updateVerticesData();
     chunk->recalcNorms();
   }
@@ -2204,4 +2212,22 @@ math::vector_3d& World::vertexCenter()
   }
 
   return _vertex_center;
+}
+
+std::set<MapChunk*>& World::vertexBorderChunks()
+{
+  if (!_vertex_border_updated)
+  {
+    _vertex_border_updated = true;
+    _vertex_border_chunks.clear();
+
+    for (MapChunk* chunk : _vertex_chunks)
+    {
+      if (chunk->isBorderChunk(_vertices_selected))
+      {
+        _vertex_border_chunks.emplace(chunk);
+      }
+    }
+  }
+  return _vertex_border_chunks;
 }

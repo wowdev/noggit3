@@ -1618,3 +1618,17 @@ void MapChunk::fixVertices(std::set<math::vector_3d*>& selected)
     }
   }
 }
+
+bool MapChunk::isBorderChunk(std::set<math::vector_3d*>& selected)
+{
+  for (int i = 0; i < mapbufsize; ++i)
+  {
+    // border chunk if at least a vertex isn't selected
+    if (selected.find(&mVertices[i]) == selected.end())
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
