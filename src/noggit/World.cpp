@@ -291,6 +291,8 @@ World::World(const std::string& name)
   , mapstrip2(nullptr)
   , camera(math::vector_3d(0.0f, 0.0f, 0.0f))
   , lookat(math::vector_3d(0.0f, 0.0f, 0.0f))
+  , vertex_angle(0.0f)
+  , vertex_orientation(0.0f)
 {
   for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
   {
@@ -2126,6 +2128,11 @@ void World::deselectVertices(math::vector_3d const& pos, float radius)
   {
     _vertices_selected.erase(v);
   }
+
+  if (_vertices_selected.empty())
+  {
+    clearVertexSelection();
+  }
 }
 
 void World::moveVertices(float h)
@@ -2160,9 +2167,9 @@ void World::updateSelectedVertices()
   }
 }
 
-void World::rotateVertices(math::vector_3d const& pos, float angle, float orientation)
+void World::rotateVertices(math::vector_3d const& pos)
 {
-  math::degrees a(angle), o(orientation);
+  math::degrees a(vertex_angle), o(vertex_orientation);
   for (math::vector_3d* v : _vertices_selected)
   {
     v->y = ( pos.y 
@@ -2187,6 +2194,9 @@ void World::flattenVertices()
 
 void World::clearVertexSelection()
 {
+  vertex_angle._ = 0.0f;
+  vertex_orientation._ = 0.0f;
+  _vertex_border_updated = false;
   _vertex_center_updated = false;
   _vertices_selected.clear();
   _vertex_chunks.clear();
