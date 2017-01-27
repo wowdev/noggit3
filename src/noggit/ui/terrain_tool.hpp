@@ -14,19 +14,23 @@ namespace ui
   public:
     terrain_tool(float x, float y, bool tablet);
 
-    void changeTerrain(float dt);
-    void moveVertices(float dt);
-    void flattenVertices();
+    void changeTerrain(math::vector_3d const& pos, float dt);
 
     void nextType();
     void changeRadius(float change);
     void changeSpeed(float change);
-    void changeOrientation(float change);
-    void changeAngle(float change);
+    
+    // vertex edit only functions
+    void moveVertices(float dt);
+    void flattenVertices();
 
-    void setOrientation(float orientation);
+    void changeOrientation(math::vector_3d const& pos, float change);
+    void changeAngle(math::vector_3d const& pos, float change);
+    void setOrientRelativeTo(math::vector_3d const& pos);
 
+    // tablet
     void setTabletControlValue(float pressure);
+
 
     float brushRadius() const { return _radius; }
   

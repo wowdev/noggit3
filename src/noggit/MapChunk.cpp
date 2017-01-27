@@ -907,18 +907,18 @@ void MapChunk::recalcNorms()
   gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 }
 
-bool MapChunk::changeTerrain(float x, float z, float change, float radius, int BrushType)
+bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType)
 {
   float dist, xdiff, zdiff;
   bool changed = false;
 
   for (int i = 0; i < mapbufsize; ++i)
   {
-    xdiff = mVertices[i].x - x;
-    zdiff = mVertices[i].z - z;
+    xdiff = mVertices[i].x - pos.x;
+    zdiff = mVertices[i].z - pos.z;
     if (BrushType == eTerrainType_Quadra)
     {
-      if ((std::abs(xdiff) < std::abs(radius / 2)) && (std::abs(zdiff) < std::abs(radius / 2))) 
+      if ((std::abs(xdiff) < std::abs(radius / 2)) && (std::abs(zdiff) < std::abs(radius / 2)))
       {
         mVertices[i].y += change;
         changed = true;
@@ -963,7 +963,7 @@ bool MapChunk::changeTerrain(float x, float z, float change, float radius, int B
   return changed;
 }
 
-bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool editMode)
+bool MapChunk::ChangeMCCV(math::vector_3d const& pos, float change, float radius, bool editMode)
 {
   float dist, xdiff, zdiff;
   bool changed = false;
@@ -978,8 +978,8 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
 
   for (int i = 0; i < mapbufsize; ++i)
   {
-    xdiff = mVertices[i].x - x;
-    zdiff = mVertices[i].z - z;
+    xdiff = mVertices[i].x - pos.x;
+    zdiff = mVertices[i].z - pos.z;
     dist = sqrt(xdiff*xdiff + zdiff*zdiff);
     if (dist <= radius)
     {
@@ -1011,8 +1011,7 @@ bool MapChunk::ChangeMCCV(float x, float z, float change, float radius, bool edi
   return changed;
 }
 
-bool MapChunk::flattenTerrain ( float x
-                              , float z
+bool MapChunk::flattenTerrain ( math::vector_3d const& pos
                               , float remain
                               , float radius
                               , int BrushType
@@ -1026,7 +1025,7 @@ bool MapChunk::flattenTerrain ( float x
 
   for (int i (0); i < mapbufsize; ++i)
   {
-    float const dist (misc::dist (mVertices[i].x, mVertices[i].z, x, z));
+    float const dist (misc::dist (mVertices[i].x, mVertices[i].z, pos.x, pos.z));
 
     if (dist >= radius)
     {
@@ -1066,13 +1065,13 @@ bool MapChunk::flattenTerrain ( float x
   return changed;
 }
 
-bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int BrushType)
+bool MapChunk::blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType)
 {
   bool changed (false);
 
   for (int i (0); i < mapbufsize; ++i)
   {
-    float const dist (misc::dist (mVertices[i].x, mVertices[i].z, x, z));
+    float const dist (misc::dist (mVertices[i].x, mVertices[i].z, pos.x, pos.z));
 
     if (dist >= radius)
     {
@@ -1084,10 +1083,10 @@ bool MapChunk::blurTerrain(float x, float z, float remain, float radius, int Bru
     float TotalWeight = 0;
     for (int j = -Rad * 2; j <= Rad * 2; ++j)
     {
-      float tz = z + j * UNITSIZE / 2;
+      float tz = pos.z + j * UNITSIZE / 2;
       for (int k = -Rad; k <= Rad; ++k)
       {
-        float tx = x + k*UNITSIZE + (j % 2) * UNITSIZE / 2.0f;
+        float tx = pos.x + k*UNITSIZE + (j % 2) * UNITSIZE / 2.0f;
         float dist2 = misc::dist (tx, tz, mVertices[i].x, mVertices[i].z);
         if (dist2 > radius)
           continue;
@@ -1143,9 +1142,9 @@ void MapChunk::switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTe
   textureSet->switchTexture(oldTexture, newTexture);
 }
 
-bool MapChunk::paintTexture(float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
+bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
 {
-  return textureSet->paintTexture(xbase, zbase, x, z, brush, strength, pressure, texture);
+  return textureSet->paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, texture);
 }
 
 bool MapChunk::canPaintTexture(OpenGL::Texture* texture)
@@ -1158,7 +1157,7 @@ bool MapChunk::isHole(int i, int j)
   return (holes & ((1 << ((j * 4) + i)))) != 0;
 }
 
-void MapChunk::setHole(float x, float z, bool big, bool add)
+void MapChunk::setHole(math::vector_3d const& pos, bool big, bool add)
 {
   if (big)
   {
@@ -1166,7 +1165,7 @@ void MapChunk::setHole(float x, float z, bool big, bool add)
   }
   else
   {
-    int v = 1 << ((int)((z - zbase) / MINICHUNKSIZE) * 4 + (int)((x - xbase) / MINICHUNKSIZE));
+    int v = 1 << ((int)((pos.z - zbase) / MINICHUNKSIZE) * 4 + (int)((pos.x - xbase) / MINICHUNKSIZE));
     holes = add ? (holes & ~v) : (holes | v);
   }
 
@@ -1570,16 +1569,16 @@ bool MapChunk::fixGapAbove(const MapChunk* chunk)
 }
 
 
-void MapChunk::selectVertex(float x, float z, float radius, std::set<math::vector_3d*>& vertices)
+void MapChunk::selectVertex(math::vector_3d const& pos, float radius, std::set<math::vector_3d*>& vertices)
 {
-  if (misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE) > radius)
+  if (misc::getShortestDist(pos.x, pos.z, xbase, zbase, CHUNKSIZE) > radius)
   {
     return;
   }
 
   for (int i = 0; i < mapbufsize; ++i)
   {
-    if (misc::dist(x, z, mVertices[i].x, mVertices[i].z) <= radius)
+    if (misc::dist(pos.x, pos.z, mVertices[i].x, mVertices[i].z) <= radius)
     {
       vertices.emplace(&mVertices[i]);
     }

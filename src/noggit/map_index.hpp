@@ -127,13 +127,13 @@ public:
       ([] (tile_index const&, MapTile* tile) { return !!tile; });
   }
 
-  auto tiles_in_range (float x, float z, float radius)
+  auto tiles_in_range (math::vector_3d const& pos, float radius)
   {
     return tiles<true>
-      ( [this, x, z, radius] (tile_index const& index, MapTile*)
+      ( [this, pos, radius] (tile_index const& index, MapTile*)
         {
           return hasTile(index) && misc::getShortestDist
-            (x, z, index.x * TILESIZE, index.z * TILESIZE, TILESIZE) <= radius;
+            (pos.x, pos.z, index.x * TILESIZE, index.z * TILESIZE, TILESIZE) <= radius;
         }
       );
   }
@@ -144,13 +144,12 @@ public:
   void enterTile(const tile_index& tile);
   MapTile *loadTile(const tile_index& tile);
 
-  void setChanged(float x, float z);
   void setChanged(const tile_index& tile);
   void setChanged(MapTile* tile);
 
   void unsetChanged(const tile_index& tile);
-  void setFlag(bool to, float x, float z);
-  void setWater(bool to, float x, float z);
+  void setFlag(bool to, math::vector_3d const& pos);
+  void setWater(bool to, math::vector_3d const& pos);
   int getChanged(const tile_index& tile);
 
   void saveTile(const tile_index& tile);

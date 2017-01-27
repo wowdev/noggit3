@@ -500,7 +500,7 @@ MapChunk* MapTile::getChunk(unsigned int x, unsigned int z)
   }
 }
 
-std::vector<MapChunk*> MapTile::chunks_in_range (float x, float z, float radius) const
+std::vector<MapChunk*> MapTile::chunks_in_range (math::vector_3d const& pos, float radius) const
 {
   std::vector<MapChunk*> chunks;
 
@@ -508,7 +508,7 @@ std::vector<MapChunk*> MapTile::chunks_in_range (float x, float z, float radius)
   {
     for (size_t tx (0); tx < 16; ++tx)
     {
-      if (misc::getShortestDist (x, z, mChunks[ty][tx]->xbase, mChunks[ty][tx]->zbase, CHUNKSIZE) <= radius)
+      if (misc::getShortestDist (pos.x, pos.z, mChunks[ty][tx]->xbase, mChunks[ty][tx]->zbase, CHUNKSIZE) <= radius)
       {
         chunks.emplace_back (mChunks[ty][tx]);
       }

@@ -788,7 +788,7 @@ void World::setupFog()
 
 extern int terrainMode;
 
-void World::draw(float brushRadius, float hardness)
+void World::draw(math::vector_3d const& cursor_pos, float brushRadius, float hardness)
 {
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
@@ -903,11 +903,6 @@ void World::draw(float brushRadius, float hardness)
     }
   }
 
-  math::vector_3d const pos ( Environment::getInstance()->Pos3DX
-                            , Environment::getInstance()->Pos3DY
-                            , Environment::getInstance()->Pos3DZ
-                            );
-
   // Selection circle
   if (this->IsSelection(eEntry_MapChunk))
   {
@@ -920,21 +915,21 @@ void World::draw(float brushRadius, float hardness)
 
     if (terrainMode == 0 && Environment::getInstance()->groundBrushType == 5)
     {
-      render_square(pos, brushRadius / 2.0f, 0.0f);
+      render_square(cursor_pos, brushRadius / 2.0f, 0.0f);
     }
     else
     {
       if (Environment::getInstance()->cursorType == 1)
       {
-        render_disk(pos, brushRadius);
+        render_disk(cursor_pos, brushRadius);
         if (hardness >= 0.01f)
         {
-          render_disk(pos, brushRadius * hardness);
+          render_disk(cursor_pos, brushRadius * hardness);
         }
       }
       else if (Environment::getInstance()->cursorType == 2)
       {
-        render_sphere(pos, brushRadius);
+        render_sphere(cursor_pos, brushRadius);
       }
     }
     if (terrainMode == 1 && Environment::getInstance()->flattenAngleEnabled)
@@ -943,10 +938,10 @@ void World::draw(float brushRadius, float hardness)
       float x = brushRadius * cos(o);
       float z = brushRadius * sin(o);
       float h = brushRadius * tan(math::degrees(Environment::getInstance()->flattenAngle));
-      math::vector_3d const dest1 = pos + math::vector_3d(x, 0.0f, z);
-      math::vector_3d const dest2 = pos + math::vector_3d(x, h, z);
-      render_line(pos, dest1);
-      render_line(pos, dest2);
+      math::vector_3d const dest1 = cursor_pos + math::vector_3d(x, 0.f, z);
+      math::vector_3d const dest2 = cursor_pos + math::vector_3d(x, h, z);
+      render_line(cursor_pos, dest1);
+      render_line(cursor_pos, dest2);
       render_line(dest1, dest2);
     }
 
@@ -964,7 +959,7 @@ void World::draw(float brushRadius, float hardness)
     gl.color3f(1.0f, 0.0f, 0.0f);
     gl.begin(GL_POINTS);
 
-    for (math::vector_3d const* pos : _verticesSelected)
+    for (math::vector_3d const* pos : _vertices_selected)
     {
       gl.vertex3f(pos->x, pos->y, pos->z);
     }
@@ -1159,7 +1154,7 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
   return results;
 }
 
-math::vector_3d World::getCursorPosOnModel()
+boost::optional<math::vector_3d> World::getCursorPosOnModel()
 {
   if (terrainMode == 9)
   {
@@ -1173,7 +1168,7 @@ math::vector_3d World::getCursorPosOnModel()
     }
   }
 
-  return Environment::getInstance()->get_cursor_pos();
+  return boost::none;
 }
 
 void World::tick(float dt)
@@ -1204,65 +1199,65 @@ unsigned int World::getAreaID()
   return !curChunk ? (unsigned int)(curChunk->getAreaID()) : 0;
 }
 
-void World::clearHeight(float x, float z)
+void World::clearHeight(math::vector_3d const& pos)
 {
-  for_all_chunks_on_tile(x, z, [](MapChunk* chunk) {
+  for_all_chunks_on_tile(pos, [](MapChunk* chunk) {
     chunk->clearHeight();
   });
-  for_all_chunks_on_tile(x, z, [](MapChunk* chunk) {
+  for_all_chunks_on_tile(pos, [](MapChunk* chunk) {
     chunk->recalcNorms();
   });
 }
 
-void World::clearAllModelsOnADT(float x, float z)
+void World::clearAllModelsOnADT(math::vector_3d const& pos)
 {
-  for_tile_at(x, z, [](MapTile* tile) { tile->clearAllModels(); });
+  for_tile_at(pos, [](MapTile* tile) { tile->clearAllModels(); });
 }
 
-void World::deleteWaterLayer(float x, float z)
+void World::deleteWaterLayer(math::vector_3d const& pos)
 {
-  for_tile_at(x, z, [](MapTile* tile) { tile->Water->deleteLayer(Environment::getInstance()->currentWaterLayer); });
+  for_tile_at(pos, [](MapTile* tile) { tile->Water->deleteLayer(Environment::getInstance()->currentWaterLayer); });
 }
 
-void World::ClearShader(float x, float z)
+void World::ClearShader(math::vector_3d const& pos)
 {
-  for_tile_at(x, z, [](MapTile* tile) { tile->ClearShader(); });
+  for_tile_at(pos, [](MapTile* tile) { tile->ClearShader(); });
 }
 
-void World::CropWaterADT(float x, float z)
+void World::CropWaterADT(math::vector_3d const& pos)
 {
-  for_tile_at(x, z, [](MapTile* tile) { tile->CropWater(); });
+  for_tile_at(pos, [](MapTile* tile) { tile->CropWater(); });
 }
 
-void World::addWaterLayer(float x, float z)
+void World::addWaterLayer(math::vector_3d const& pos)
 {
-  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->addLayer(1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer); });
+  for_tile_at(pos, [&](MapTile* tile) { tile->Water->addLayer(1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer); });
 }
 
-void World::addWaterLayerChunk(float x, float z, int i, int j)
+void World::addWaterLayerChunk(math::vector_3d const& pos, int i, int j)
 {
-  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->addLayer(i, j, 1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer); });
+  for_tile_at(pos, [&](MapTile* tile) { tile->Water->addLayer(i, j, 1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer); });
 }
 
-void World::delWaterLayerChunk(float x, float z, int i, int j)
+void World::delWaterLayerChunk(math::vector_3d const& pos, int i, int j)
 {
-  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->deleteLayer(i, j, Environment::getInstance()->currentWaterLayer); });
+  for_tile_at(pos, [&](MapTile* tile) { tile->Water->deleteLayer(i, j, Environment::getInstance()->currentWaterLayer); });
 }
 
-void World::addWaterLayer(float x, float z, float height, unsigned char trans)
+void World::addWaterLayer(math::vector_3d const& pos, float height, unsigned char trans)
 {
-  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->addLayer(height, trans, Environment::getInstance()->currentWaterLayer); });
+  for_tile_at(pos, [&](MapTile* tile) { tile->Water->addLayer(height, trans, Environment::getInstance()->currentWaterLayer); });
 }
 
-void World::setAreaID(float x, float z, int id, bool adt)
+void World::setAreaID(math::vector_3d const& pos, int id, bool adt)
 {
-  if (adt) 
+  if (adt)
   {
-    for_all_chunks_on_tile(x, z, [&](MapChunk* chunk) { chunk->setAreaID(id);});
+    for_all_chunks_on_tile(pos, [&](MapChunk* chunk) { chunk->setAreaID(id);});
   }
   else
   {
-    for_chunk_at(x, z, [&](MapChunk* chunk) { chunk->setAreaID(id);});
+    for_chunk_at(pos, [&](MapChunk* chunk) { chunk->setAreaID(id);});
   }
 }
 
@@ -1339,7 +1334,7 @@ void World::drawTileMode(float /*ah*/)
 
 bool World::GetVertex(float x, float z, math::vector_3d *V)
 {
-  tile_index tile(math::vector_3d(x, 0, z));
+  tile_index tile({x, 0, z});
 
   if (!mapIndex->tileLoaded(tile))
   {
@@ -1350,13 +1345,13 @@ bool World::GetVertex(float x, float z, math::vector_3d *V)
 }
 
 template<typename Fun>
-  bool World::for_all_chunks_in_range (float x, float z, float radius, Fun&& fun)
+  bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, Fun&& fun)
 {
   bool changed (false);
 
-  for (MapTile* tile : mapIndex->tiles_in_range (x, z, radius))
+  for (MapTile* tile : mapIndex->tiles_in_range (pos, radius))
   {
-    for (MapChunk* chunk : tile->chunks_in_range (x, z, radius))
+    for (MapChunk* chunk : tile->chunks_in_range (pos, radius))
     {
       if (fun (chunk))
       {
@@ -1369,12 +1364,12 @@ template<typename Fun>
   return changed;
 }
 template<typename Fun, typename Post>
-  bool World::for_all_chunks_in_range (float x, float z, float radius, Fun&& fun, Post&& post)
+  bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, Fun&& fun, Post&& post)
 {
   std::forward_list<MapChunk*> modified_chunks;
 
   bool changed ( for_all_chunks_in_range
-                   ( x, z, radius
+                   ( pos, radius
                    , [&] (MapChunk* chunk)
                      {
                        if (fun (chunk))
@@ -1396,24 +1391,24 @@ template<typename Fun, typename Post>
 }
 
 
-void World::changeShader(float x, float z, float change, float radius, bool editMode)
+void World::changeShader(math::vector_3d const& pos, float change, float radius, bool editMode)
 {
   for_all_chunks_in_range
-    ( x, z, radius
+    ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        return chunk->ChangeMCCV(x, z, change, radius, editMode);
+        return chunk->ChangeMCCV(pos, change, radius, editMode);
       }
     );
 }
 
-void World::changeTerrain(float x, float z, float change, float radius, int BrushType)
+void World::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType)
 {
   for_all_chunks_in_range
-    ( x, z, radius
+    ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        return chunk->changeTerrain(x, z, change, radius, BrushType);
+        return chunk->changeTerrain(pos, change, radius, BrushType);
       }
     , [] (MapChunk* chunk)
       {
@@ -1422,13 +1417,13 @@ void World::changeTerrain(float x, float z, float change, float radius, int Brus
     );
 }
 
-void World::flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation)
+void World::flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation)
 {
   for_all_chunks_in_range
-    ( x, z, radius
+    ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        return chunk->flattenTerrain(x, z, remain, radius, BrushType, flattenType, origin, angle, orientation);
+        return chunk->flattenTerrain(pos, remain, radius, BrushType, flattenType, origin, angle, orientation);
       }
     , [] (MapChunk* chunk)
       {
@@ -1437,13 +1432,13 @@ void World::flattenTerrain(float x, float z, float remain, float radius, int Bru
     );
 }
 
-void World::blurTerrain(float x, float z, float remain, float radius, int BrushType)
+void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType)
 {
   for_all_chunks_in_range
-    ( x, z, radius
+    ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        return chunk->blurTerrain(x, z, remain, radius, BrushType);
+        return chunk->blurTerrain(pos, remain, radius, BrushType);
       }
     , [] (MapChunk* chunk)
       {
@@ -1452,29 +1447,29 @@ void World::blurTerrain(float x, float z, float remain, float radius, int BrushT
     );
 }
 
-bool World::paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture)
+bool World::paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, OpenGL::Texture* texture)
 {
   return for_all_chunks_in_range
-    ( x, z, brush->getRadius()
+    ( pos, brush->getRadius()
     , [&] (MapChunk* chunk)
       {
-        return chunk->paintTexture(x, z, brush, strength, pressure, texture);
+        return chunk->paintTexture(pos, brush, strength, pressure, texture);
       }
     );
 }
 
-bool World::sprayTexture(float x, float z, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, OpenGL::Texture* texture)
+bool World::sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, OpenGL::Texture* texture)
 {
   bool succ = false;
   float inc = brush->getRadius() / 4.0f;
 
-  for (float pz = z - spraySize; pz < z + spraySize; pz += inc)
+  for (float pz = pos.z - spraySize; pz < pos.z + spraySize; pz += inc)
   {
-    for (float px = x - spraySize; px < x + spraySize; px += inc)
+    for (float px = pos.x - spraySize; px < pos.x + spraySize; px += inc)
     {
-      if ((sqrt(pow(px - x, 2) + pow(pz - z, 2)) <= spraySize) && ((rand() % 1000) < sprayPressure))
+      if ((sqrt(pow(px - pos.x, 2) + pow(pz - pos.z, 2)) <= spraySize) && ((rand() % 1000) < sprayPressure))
       {
-        succ |= paintTexture(px, pz, brush, strength, pressure, texture);
+        succ |= paintTexture({px, pos.y, pz}, brush, strength, pressure, texture);
       }
     }
   }
@@ -1482,32 +1477,31 @@ bool World::sprayTexture(float x, float z, Brush *brush, float strength, float p
   return succ;
 }
 
-void World::eraseTextures(float x, float z)
+void World::eraseTextures(math::vector_3d const& pos)
 {
-  for_chunk_at(x, z, [](MapChunk* chunk) {chunk->eraseTextures();});
+  for_chunk_at(pos, [](MapChunk* chunk) {chunk->eraseTextures();});
 }
 
-void World::overwriteTextureAtCurrentChunk(float x, float z, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
+void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
 {
-  LogDebug << "Switching Textures at " << x << " and " << z << std::endl;
-  for_chunk_at(x, z, [&](MapChunk* chunk) {chunk->switchTexture(oldTexture, newTexture);});
+  for_chunk_at(pos, [&](MapChunk* chunk) {chunk->switchTexture(oldTexture, newTexture);});
 }
 
-void World::setHole(float x, float z, bool big, bool hole)
+void World::setHole(math::vector_3d const& pos, bool big, bool hole)
 {
-  for_chunk_at(x, z, [&](MapChunk* chunk) { chunk->setHole(x, z, big, hole); });
+  for_chunk_at(pos, [&](MapChunk* chunk) { chunk->setHole(pos, big, hole); });
 }
 
-void World::setHoleADT(float x, float z, bool hole)
+void World::setHoleADT(math::vector_3d const& pos, bool hole)
 {
-  for_all_chunks_on_tile(x, z, [&](MapChunk* chunk) { chunk->setHole(x, z, true, hole); });
+  for_all_chunks_on_tile(pos, [&](MapChunk* chunk) { chunk->setHole(pos, true, hole); });
 }
 
 
 template<typename Fun>
-  void World::for_all_chunks_on_tile (float x, float z, Fun&& fun)
+  void World::for_all_chunks_on_tile (math::vector_3d const& pos, Fun&& fun)
 {
-  MapTile* tile (mapIndex->getTile (math::vector_3d (x, 0, z)));
+  MapTile* tile (mapIndex->getTile (pos));
   mapIndex->setChanged (tile);
 
   for (size_t ty = 0; ty < 16; ++ty)
@@ -1520,22 +1514,21 @@ template<typename Fun>
 }
 
 template<typename Fun>
-  void World::for_chunk_at(float x, float z, Fun&& fun)
+  void World::for_chunk_at(math::vector_3d const& pos, Fun&& fun)
   {
-    MapTile* tile(mapIndex->getTile(math::vector_3d(x, 0, z)));
+    MapTile* tile(mapIndex->getTile(pos));
     mapIndex->setChanged(tile);
-    
-    fun(tile->getChunk((x - tile->xbase) / CHUNKSIZE, (z - tile->zbase) / CHUNKSIZE));
+
+    fun(tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
   }
 
 template<typename Fun>
-  void World::for_tile_at(float x, float z, Fun&& fun)
+  void World::for_tile_at(math::vector_3d const& pos, Fun&& fun)
   {
-    tile_index index(math::vector_3d(x, 0.0f, z));
-    MapTile* tile(mapIndex->getTile(index));
+    MapTile* tile(mapIndex->getTile(pos));
     if (tile)
     {
-      mapIndex->setChanged(index);
+      mapIndex->setChanged(tile);
       fun(tile);
     }
   }
@@ -1822,11 +1815,11 @@ unsigned int World::getMapID()
   return this->mMapId;
 }
 
-void World::setBaseTexture(float x, float z)
+void World::setBaseTexture(math::vector_3d const& pos)
 {
   if (!!UITexturingGUI::getSelectedTexture())
   {
-    for_all_chunks_on_tile(x, z, [](MapChunk* chunk) 
+    for_all_chunks_on_tile(pos, [](MapChunk* chunk)
     {
       chunk->eraseTextures();
       chunk->addTexture(UITexturingGUI::getSelectedTexture());
@@ -1835,17 +1828,17 @@ void World::setBaseTexture(float x, float z)
   }
 }
 
-void World::swapTexture(float x, float z, OpenGL::Texture *tex)
+void World::swapTexture(math::vector_3d const& pos, OpenGL::Texture *tex)
 {
   if (!!UITexturingGUI::getSelectedTexture())
   {
-    for_all_chunks_on_tile(x, z, [&](MapChunk* chunk) { chunk->switchTexture(tex, UITexturingGUI::getSelectedTexture()); });
-  }  
+    for_all_chunks_on_tile(pos, [&](MapChunk* chunk) { chunk->switchTexture(tex, UITexturingGUI::getSelectedTexture()); });
+  }
 }
 
-void World::removeTexDuplicateOnADT(float x, float z)
+void World::removeTexDuplicateOnADT(math::vector_3d const& pos)
 {
-  for_all_chunks_on_tile(x, z, [](MapChunk* chunk) { chunk->textureSet->removeDuplicate(); } );
+  for_all_chunks_on_tile(pos, [](MapChunk* chunk) { chunk->textureSet->removeDuplicate(); } );
 }
 
 void World::saveWDT()
@@ -1928,9 +1921,9 @@ float World::getWaterHeight(const tile_index& tile)
        ;
 }
 
-void World::setWaterTrans(float x, float z, unsigned char value)
+void World::setWaterTrans(math::vector_3d const& pos, unsigned char value)
 {
-  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->setTrans(value, Environment::getInstance()->currentWaterLayer); });
+  for_tile_at(pos, [&](MapTile* tile) { tile->Water->setTrans(value, Environment::getInstance()->currentWaterLayer); });
 }
 
 unsigned char World::getWaterTrans(const tile_index& tile)
@@ -1945,9 +1938,9 @@ unsigned char World::getWaterTrans(const tile_index& tile)
   }
 }
 
-void World::setWaterType(float x, float z, int type)
+void World::setWaterType(math::vector_3d const& pos, int type)
 {
-  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->setType(type, Environment::getInstance()->currentWaterLayer);});
+  for_tile_at(pos, [&](MapTile* tile) { tile->Water->setType(type, Environment::getInstance()->currentWaterLayer);});
 }
 
 int World::getWaterType(const tile_index& tile)
@@ -1962,9 +1955,9 @@ int World::getWaterType(const tile_index& tile)
   }
 }
 
-void World::autoGenWaterTrans(float x, float z, int factor)
+void World::autoGenWaterTrans(math::vector_3d const& pos, int factor)
 {
-  for_tile_at(x, z, [&](MapTile* tile) { tile->Water->autoGen(factor); });
+  for_tile_at(pos, [&](MapTile* tile) { tile->Water->autoGen(factor); });
 }
 
 void World::AddWaters(const tile_index& tile)
@@ -2078,17 +2071,17 @@ void World::fixAllGaps()
   }
 }
 
-bool World::isUnderMap(float x, float z, float h)
+bool World::isUnderMap(math::vector_3d const& pos)
 {
-  tile_index tile(math::vector_3d(x, 0, z));
+  tile_index const tile (pos);
 
   if (mapIndex->tileLoaded(tile))
   {
-    size_t chnkX = (x / CHUNKSIZE) - tile.x * 16;
-    size_t chnkZ = (z / CHUNKSIZE) - tile.z * 16;
+    size_t chnkX = (pos.x / CHUNKSIZE) - tile.x * 16;
+    size_t chnkZ = (pos.z / CHUNKSIZE) - tile.z * 16;
 
     // check using the cursor height
-    return (mapIndex->getTile(tile)->getChunk(chnkX, chnkZ)->getMinHeight()) > h + 2.0f;
+    return (mapIndex->getTile(tile)->getChunk(chnkX, chnkZ)->getMinHeight()) > pos.y + 2.0f;
   }
 
   return true;
@@ -2102,25 +2095,25 @@ void World::clearHiddenModelList()
 }
 
 
-void World::selectVertices(float x, float z, float radius)
+void World::selectVertices(math::vector_3d const& pos, float radius)
 {
   _vertex_center_updated = false;
-  for_all_chunks_in_range(x, z, radius, [&](MapChunk* chunk){
-    _vertexChunks.emplace(chunk);
-    _vertexTiles.emplace(chunk->mt);
-    chunk->selectVertex(x, z, radius, _verticesSelected);
+  for_all_chunks_in_range(pos, radius, [&](MapChunk* chunk){
+    _vertex_chunks.emplace(chunk);
+    _vertex_tiles.emplace(chunk->mt);
+    chunk->selectVertex(pos, radius, _vertices_selected);
     return true;
   });
 }
 
-void World::deselectVertices(float x, float z, float radius)
+void World::deselectVertices(math::vector_3d const& pos, float radius)
 {
   _vertex_center_updated = false;
   std::set<math::vector_3d*> inRange;
 
-  for (math::vector_3d* v : _verticesSelected)
+  for (math::vector_3d* v : _vertices_selected)
   {
-    if (misc::dist(v->x, v->z, x, z) <= radius)
+    if (misc::dist(v->x, v->z, pos.x, pos.z) <= radius)
     {
       inRange.emplace(v);
     }
@@ -2128,14 +2121,14 @@ void World::deselectVertices(float x, float z, float radius)
 
   for (math::vector_3d* v : inRange)
   {
-    _verticesSelected.erase(v);
+    _vertices_selected.erase(v);
   }
 }
 
 void World::moveVertices(float h)
 {
   _vertex_center_updated = false;
-  for (math::vector_3d* v : _verticesSelected)
+  for (math::vector_3d* v : _vertices_selected)
   {
     v->y += h;
   }
@@ -2146,24 +2139,23 @@ void World::moveVertices(float h)
 
 void World::updateSelectedVertices()
 {
-  for (MapTile* tile : _vertexTiles)
+  for (MapTile* tile : _vertex_tiles)
   {
     mapIndex->setChanged(tile);
   }
 
-  for (MapChunk* chunk : _vertexChunks)
+  for (MapChunk* chunk : _vertex_chunks)
   {
-    chunk->fixVertices(_verticesSelected);
+    chunk->fixVertices(_vertices_selected);
     chunk->updateVerticesData();
     chunk->recalcNorms();
   }
 }
 
-void World::rotateVertices(int mode, float angle, float orientation)
+void World::rotateVertices(math::vector_3d const& pos, float angle, float orientation)
 {
-  math::vector_3d const& pos = mode == eVertexMode_Mouse ? Environment::getInstance()->get_cursor_pos() : vertexCenter();
   math::degrees a(angle), o(orientation);
-  for (math::vector_3d* v : _verticesSelected)
+  for (math::vector_3d* v : _vertices_selected)
   {
     v->y = ( pos.y 
            + ((v->x - pos.x) * math::cos(o)
@@ -2177,7 +2169,7 @@ void World::rotateVertices(int mode, float angle, float orientation)
 void World::flattenVertices()
 {
   float h = vertexCenter().y;
-  for (math::vector_3d* v : _verticesSelected)
+  for (math::vector_3d* v : _vertices_selected)
   {
     v->y = h;
   }
@@ -2188,17 +2180,17 @@ void World::flattenVertices()
 void World::clearVertexSelection()
 {
   _vertex_center_updated = false;
-  _verticesSelected.clear();
-  _vertexChunks.clear();
-  _vertexTiles.clear();
+  _vertices_selected.clear();
+  _vertex_chunks.clear();
+  _vertex_tiles.clear();
 }
 
 void World::updateVertexCenter()
 {
   _vertex_center_updated = true;
   _vertex_center = { 0,0,0 };
-  float f = 1.0f / _verticesSelected.size();
-  for (math::vector_3d* v : _verticesSelected)
+  float f = 1.0f / _vertices_selected.size();
+  for (math::vector_3d* v : _vertices_selected)
   {
     _vertex_center += (*v) * f;
   }

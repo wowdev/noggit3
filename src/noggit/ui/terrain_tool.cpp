@@ -15,7 +15,7 @@
 namespace ui
 {
   terrain_tool::terrain_tool(float x, float y, bool tablet)
-    : UIWindow(x, y, winWidth, tablet ? 300.0f : 255.0f)
+    : UIWindow(x, y, winWidth, tablet ? 290.0f : 255.0f)
     , _radius(15.0f)
     , _speed(2.0f)
     , _angle(0.0f)
@@ -57,39 +57,39 @@ namespace ui
     addChild(new UICheckBox(85.0f, 197.0f, "Selection\ncenter", _vertex_toggle, eVertexMode_Center));
     _vertex_toggle->Activate(eVertexMode_Center);
 
-    /*
+    
     if (tablet)
     {
-      addChild(new UIText(78.5f, 220.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
+      addChild(new UIText(78.5f, 225.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
 
       _tablet_control_toggle = new UIToggleGroup(&_tablet_control);
-      addChild(new UICheckBox(6.0f, 230.0f, "Off", _tablet_control_toggle, eTabletControl_Off));
-      addChild(new UICheckBox(85.0f, 230.0f, "On", _tablet_control_toggle, eTabletControl_On));
+      addChild(new UICheckBox(6.0f, 235.0f, "Off", _tablet_control_toggle, eTabletControl_Off));
+      addChild(new UICheckBox(85.0f, 235.0f, "On", _tablet_control_toggle, eTabletControl_On));
       _tablet_control_toggle->Activate(eTabletControl_On);
 
       _tablet_active_group_toggle = new UIToggleGroup(&_tablet_active_group);
-      addChild(new UICheckBox(6.0f, 255.0f, "Radius", _tablet_active_group_toggle, eTerrainTabletActiveGroup_Radius));
-      addChild(new UICheckBox(85.0f, 255.0f, "Speed", _tablet_active_group_toggle, eTerrainTabletActiveGroup_Speed));
+      addChild(new UICheckBox(6.0f, 260.0f, "Radius", _tablet_active_group_toggle, eTerrainTabletActiveGroup_Radius));
+      addChild(new UICheckBox(85.0f, 260.0f, "Speed", _tablet_active_group_toggle, eTerrainTabletActiveGroup_Speed));
       _tablet_active_group_toggle->Activate(eTerrainTabletActiveGroup_Speed);
     }
-    */
   }
 
-  void terrain_tool::changeTerrain(float dt)
+  void terrain_tool::changeTerrain(math::vector_3d const& pos, float dt)
   {
     if(_edit_type != eTerrainType_Vertex)
     {
-      gWorld->changeTerrain(Environment::getInstance()->Pos3DX, Environment::getInstance()->Pos3DZ, dt*_speed, _radius, _edit_type);
+      gWorld->changeTerrain(pos, dt*_speed, _radius, _edit_type);
     }
     else
     {
+      // < 0 ==> control is pressed
       if (dt >= 0.0f)
       {
-        gWorld->selectVertices(Environment::getInstance()->Pos3DX, Environment::getInstance()->Pos3DZ, _radius);
+        gWorld->selectVertices(pos, _radius);
       }
       else
       {
-        gWorld->deselectVertices(Environment::getInstance()->Pos3DX, Environment::getInstance()->Pos3DZ, _radius);
+        gWorld->deselectVertices(pos, _radius);
       }      
     }
   }
@@ -125,44 +125,40 @@ namespace ui
     _speed_slider->setValue(_speed / 10.0f);
   }
 
-  void terrain_tool::changeOrientation(float change)
+  void terrain_tool::changeOrientation(math::vector_3d const& pos, float change)
   {
-    _orientation += change;
-    
-    if (_orientation < 0.0f)
-    {
-      _orientation += 360.0f;
-    }
-    else if (_orientation > 360.0f)
-    {
-      _orientation -= 360.0f;
-    }
-
     if (_edit_type == eTerrainType_Vertex)
     {
-      gWorld->rotateVertices(_vertex_mode, _angle, _orientation);
+      _orientation += change;
+
+      if (_orientation < 0.0f)
+      {
+        _orientation += 360.0f;
+      }
+      else if (_orientation > 360.0f)
+      {
+        _orientation -= 360.0f;
+      }
+      gWorld->rotateVertices(pos, _angle, _orientation);
     }
   }
 
-  void terrain_tool::setOrientation(float orientation)
+  void terrain_tool::setOrientRelativeTo(math::vector_3d const& pos)
   {
-    math::vector_3d const& center  = gWorld->vertexCenter();
-    math::vector_3d const& pos = Environment::getInstance()->get_cursor_pos();
-    _orientation = std::atan2(center.z - pos.z, center.x - pos.x) * 180.0f / math::constants::pi;
-
     if (_edit_type == eTerrainType_Vertex)
     {
-      gWorld->rotateVertices(_vertex_mode, _angle, _orientation);
+      math::vector_3d const& center = gWorld->vertexCenter();
+      _orientation = std::atan2(center.z - pos.z, center.x - pos.x) * 180.0f / math::constants::pi;
+      gWorld->rotateVertices(pos, _angle, _orientation);
     }
   }
 
-  void terrain_tool::changeAngle(float change)
+  void terrain_tool::changeAngle(math::vector_3d const& pos, float change)
   {
-    _angle = std::max(-89.0f, std::min(89.0f, _angle + change));
-
     if (_edit_type == eTerrainType_Vertex)
     {
-      gWorld->rotateVertices(_vertex_mode, _angle, _orientation);
+      _angle = std::max(-89.0f, std::min(89.0f, _angle + change));
+      gWorld->rotateVertices(pos, _angle, _orientation);
     }
   }
 

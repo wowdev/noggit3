@@ -24,6 +24,7 @@ private:
   bool _mod_space_down = false;
 
   float ah, av, moving, strafing, updown, mousedir, movespd, turn, lookat;
+  math::vector_3d _cursor_pos;
   bool key_w;
   bool look;
   bool _GUIDisplayingEnabled;
