@@ -1585,3 +1585,37 @@ void MapChunk::selectVertex(float x, float z, float radius, std::set<math::vecto
     }
   }
 }
+
+void MapChunk::fixVertices(std::set<math::vector_3d*>& selected)
+{
+  std::vector<int> ids ={ 0, 1, 17, 18 };
+  // iterate through each "square" of vertices
+  for (int i = 0; i < 64; ++i)
+  {
+    int not_selected = 0, count = 0, mid_vertex = ids[0] + 9;
+    float h = 0.0f;
+
+    for (int& index : ids)
+    {
+      if (selected.find(&mVertices[index]) == selected.end())
+      {
+        not_selected = index;
+      }
+      else
+      {
+        count++;
+      }
+      h += mVertices[index].y;
+      index += (((i+1) % 8) == 0) ? 10 : 1;
+    }
+
+    if (count == 2)
+    {
+      mVertices[mid_vertex].y = h * 0.25f;
+    }
+    else if (count == 3)
+    {
+      mVertices[mid_vertex].y = (h - mVertices[not_selected].y) / 3.0f;
+    }
+  }
+}
