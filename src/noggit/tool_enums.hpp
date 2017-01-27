@@ -10,7 +10,15 @@ enum eTerrainType
   eTerrainType_Polynom,
   eTerrainType_Trigo,
   eTerrainType_Quadra,
+  eTerrainType_Vertex,
   eTerrainType_Count,
+};
+
+enum eVertexMode
+{
+  eVertexMode_Mouse,
+  eVertexMode_Center,
+  eVertexMode_Count
 };
 
 enum eTabletControl

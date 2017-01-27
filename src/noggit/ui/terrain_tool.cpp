@@ -15,11 +15,14 @@
 namespace ui
 {
   terrain_tool::terrain_tool(float x, float y, bool tablet)
-    : UIWindow(x, y, winWidth, tablet ? 240.0f : 160.0f)
+    : UIWindow(x, y, winWidth, tablet ? 300.0f : 255.0f)
     , _radius(15.0f)
     , _speed(2.0f)
+    , _angle(0.0f)
+    , _orientation(0.0f)
     , _tablet(tablet)
     , _edit_type(Environment::getInstance()->groundBrushType)
+    , _vertex_mode(eVertexMode_Center)
     , _tablet_control(eTabletControl_On)
     , _tablet_active_group(eTerrainTabletActiveGroup_Speed)
   {
@@ -32,39 +35,76 @@ namespace ui
     addChild(new UICheckBox(85.0f, 40.0f, "Polynomial", _type_toggle, eTerrainType_Polynom));
     addChild(new UICheckBox(6.0f, 65.0f, "Trigonom", _type_toggle, eTerrainType_Trigo));
     addChild(new UICheckBox(85.0f, 65.0f, "Quadratic", _type_toggle, eTerrainType_Quadra));
+    addChild(new UICheckBox(6.0f, 90.0f, "Vertex", _type_toggle, eTerrainType_Vertex));
     _type_toggle->Activate(eTerrainType_Linear);
 
-    _radius_slider = new UISlider(6.0f, 120.0f, 167.0f, 1000.0f, 0.00001f);
+    _radius_slider = new UISlider(6.0f, 140.0f, 167.0f, 1000.0f, 0.00001f);
     _radius_slider->setFunc([&](float f) { _radius = f; });
     _radius_slider->setValue(_radius / 1000);
     _radius_slider->setText("Brush radius: ");
     addChild(_radius_slider);
 
-    _speed_slider = new UISlider(6.0f, 145.0f, 167.0f, 10.0f, 0.00001f);
+    _speed_slider = new UISlider(6.0f, 165.0f, 167.0f, 10.0f, 0.00001f);
     _speed_slider->setFunc([&](float f) { _speed = f; });
     _speed_slider->setValue(_speed / 10.0f);
     _speed_slider->setText("Brush Speed: ");
     addChild(_speed_slider);
 
+    addChild(new UIText(10.0f, 185.0f, "Vertex edit relative to:", app.getArial12(), eJustifyLeft));
+
+    _vertex_toggle = new UIToggleGroup(&_vertex_mode);
+    addChild(new UICheckBox(6.0f, 197.0f, "Mouse", _vertex_toggle, eVertexMode_Mouse));
+    addChild(new UICheckBox(85.0f, 197.0f, "Selection\ncenter", _vertex_toggle, eVertexMode_Center));
+    _vertex_toggle->Activate(eVertexMode_Center);
+
+    /*
     if (tablet)
     {
-      addChild(new UIText(78.5f, 170.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
+      addChild(new UIText(78.5f, 220.0f, "Tablet Control", app.getArial14(), eJustifyCenter));
 
       _tablet_control_toggle = new UIToggleGroup(&_tablet_control);
-      addChild(new UICheckBox(6.0f, 182.0f, "Off", _tablet_control_toggle, eTabletControl_Off));
-      addChild(new UICheckBox(85.0f, 182.0f, "On", _tablet_control_toggle, eTabletControl_On));
+      addChild(new UICheckBox(6.0f, 230.0f, "Off", _tablet_control_toggle, eTabletControl_Off));
+      addChild(new UICheckBox(85.0f, 230.0f, "On", _tablet_control_toggle, eTabletControl_On));
       _tablet_control_toggle->Activate(eTabletControl_On);
 
       _tablet_active_group_toggle = new UIToggleGroup(&_tablet_active_group);
-      addChild(new UICheckBox(6.0f, 207.0f, "Radius", _tablet_active_group_toggle, eTerrainTabletActiveGroup_Radius));
-      addChild(new UICheckBox(85.0f, 207.0f, "Speed", _tablet_active_group_toggle, eTerrainTabletActiveGroup_Speed));
+      addChild(new UICheckBox(6.0f, 255.0f, "Radius", _tablet_active_group_toggle, eTerrainTabletActiveGroup_Radius));
+      addChild(new UICheckBox(85.0f, 255.0f, "Speed", _tablet_active_group_toggle, eTerrainTabletActiveGroup_Speed));
       _tablet_active_group_toggle->Activate(eTerrainTabletActiveGroup_Speed);
     }
+    */
   }
 
   void terrain_tool::changeTerrain(float dt)
   {
-    gWorld->changeTerrain(Environment::getInstance()->Pos3DX, Environment::getInstance()->Pos3DZ, dt*_speed, _radius, _edit_type);
+    if(_edit_type != eTerrainType_Vertex)
+    {
+      gWorld->changeTerrain(Environment::getInstance()->Pos3DX, Environment::getInstance()->Pos3DZ, dt*_speed, _radius, _edit_type);
+    }
+    else
+    {
+      if (dt >= 0.0f)
+      {
+        gWorld->selectVertices(Environment::getInstance()->Pos3DX, Environment::getInstance()->Pos3DZ, _radius);
+      }
+      else
+      {
+        gWorld->deselectVertices(Environment::getInstance()->Pos3DX, Environment::getInstance()->Pos3DZ, _radius);
+      }      
+    }
+  }
+
+  void terrain_tool::moveVertices(float dt)
+  {
+    gWorld->moveVertices(dt * _speed);
+  }
+
+  void terrain_tool::flattenVertices()
+  {
+    if (_edit_type == eTerrainType_Vertex)
+    {
+      gWorld->flattenVertices();
+    }
   }
 
   void terrain_tool::nextType()
@@ -83,6 +123,47 @@ namespace ui
   {
     _speed = std::max(0.0f, std::min(10.0f, _speed + change));
     _speed_slider->setValue(_speed / 10.0f);
+  }
+
+  void terrain_tool::changeOrientation(float change)
+  {
+    _orientation += change;
+    
+    if (_orientation < 0.0f)
+    {
+      _orientation += 360.0f;
+    }
+    else if (_orientation > 360.0f)
+    {
+      _orientation -= 360.0f;
+    }
+
+    if (_edit_type == eTerrainType_Vertex)
+    {
+      gWorld->rotateVertices(_vertex_mode, _angle, _orientation);
+    }
+  }
+
+  void terrain_tool::setOrientation(float orientation)
+  {
+    math::vector_3d const& center  = gWorld->vertexCenter();
+    math::vector_3d const& pos = Environment::getInstance()->get_cursor_pos();
+    _orientation = std::atan2(center.z - pos.z, center.x - pos.x) * 180.0f / math::constants::pi;
+
+    if (_edit_type == eTerrainType_Vertex)
+    {
+      gWorld->rotateVertices(_vertex_mode, _angle, _orientation);
+    }
+  }
+
+  void terrain_tool::changeAngle(float change)
+  {
+    _angle = std::max(-89.0f, std::min(89.0f, _angle + change));
+
+    if (_edit_type == eTerrainType_Vertex)
+    {
+      gWorld->rotateVertices(_vertex_mode, _angle, _orientation);
+    }
   }
 
   void terrain_tool::setTabletControlValue(float pressure)

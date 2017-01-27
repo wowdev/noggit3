@@ -86,12 +86,15 @@ public:
   void SetWater(bool w);
   bool GetWater();
 
+  void updateVerticesData();
   void recalcNorms();
 
   //! \todo implement Action stack for these
   bool changeTerrain(float x, float z, float change, float radius, int BrushType);
   bool flattenTerrain(float x, float z, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
   bool blurTerrain(float x, float z, float remain, float radius, int BrushType);
+
+  void selectVertex(float x, float z, float radius, std::set<math::vector_3d*>& vertices);
 
   //! \todo implement Action stack for these
   bool paintTexture(float x, float z, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
