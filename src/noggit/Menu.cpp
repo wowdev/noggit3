@@ -190,7 +190,7 @@ void Menu::display(float /*t*/, float /*dt*/)
   gl.enable(GL_LIGHTING);
   opengl::texture::enable_texture();
 
-  mBackgroundModel.get()->cam.setup(globalTime);
+  mBackgroundModel.get()->cam->setup(globalTime);
   mBackgroundModel.get()->draw();
 
   opengl::texture::disable_texture();

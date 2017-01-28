@@ -7,6 +7,7 @@
 #include <noggit/Video.h>
 
 #include <list>
+#include <memory>
 #include <vector>
 
 class Bone;
@@ -51,11 +52,12 @@ struct TexCoordSet {
 };
 
 class ParticleSystem {
+  Model *model;
+  std::unique_ptr<ParticleEmitter> emitter;
   Animation::M2Value<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw, deacceleration;
   Animation::M2Value<uint8_t> enabled;
   math::vector_4d colors[3];
   float sizes[3];
-  ParticleEmitter *emitter;
   float mid, slowdown, rotation;
   math::vector_3d pos;
   OpenGL::Texture* _texture;
@@ -75,30 +77,9 @@ class ParticleSystem {
   int32_t flags;
 
 public:
-  Model *model;
   float tofs;
 
-  ParticleSystem() : emitter(nullptr), mid(0), rem(0)
-  {
-    blend = 0;
-    order = 0;
-    type = 0;
-    manim = 0;
-    mtime = 0;
-    rows = 0;
-    cols = 0;
-
-    model = 0;
-    parent = 0;
-    _texture = nullptr;
-
-    slowdown = 0;
-    rotation = 0;
-    tofs = 0;
-  }
-  ~ParticleSystem() { if (emitter) { delete emitter; emitter = nullptr; } }
-
-  void init(const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals);
+  ParticleSystem(Model*, const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals);
   void update(float dt);
 
   void setup(int anim, int time);
@@ -113,9 +94,15 @@ public:
 struct RibbonSegment {
   math::vector_3d pos, up, back;
   float len, len0;
+  RibbonSegment (::math::vector_3d pos_, float len_)
+    : pos (pos_)
+    , len (len_)
+  {}
 };
 
 class RibbonEmitter {
+  Model *model;
+
   Animation::M2Value<math::vector_3d> color;
   Animation::M2Value<float, int16_t> opacity;
   Animation::M2Value<float> above, below;
@@ -125,7 +112,8 @@ class RibbonEmitter {
   math::vector_3d pos;
 
   int manim, mtime;
-  float length, seglen;
+  int seglen;
+  float length;
   int numsegs;
 
   math::vector_3d tpos;
@@ -137,9 +125,7 @@ class RibbonEmitter {
   std::list<RibbonSegment> segs;
 
 public:
-  Model *model;
-
-  void init(const MPQFile &f, ModelRibbonEmitterDef &mta, int *globals);
+  RibbonEmitter(Model*, const MPQFile &f, ModelRibbonEmitterDef &mta, int *globals);
   void setup(int anim, int time);
   void draw();
 };
