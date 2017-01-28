@@ -176,7 +176,7 @@ namespace Animation
     }
 
     //! \todo Use a vector of MPQFile& for the anim files instead for safety.
-    void init(const AnimationBlock& animationBlock, const MPQFile& file, int32_t* globalSequences, MPQFile** animfiles = nullptr)
+    M2Value (const AnimationBlock& animationBlock, const MPQFile& file, int32_t* globalSequences, MPQFile** animfiles = nullptr)
     {
       assert(animationBlock.nTimes == animationBlock.nKeys);
 

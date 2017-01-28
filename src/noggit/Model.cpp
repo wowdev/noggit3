@@ -22,17 +22,8 @@ Model::Model(const std::string& filename)
 {
   memset(&header, 0, sizeof(ModelHeader));
 
-  globalSequences = nullptr;
   indices = nullptr;
-  anims = nullptr;
   origVertices = nullptr;
-  bones = nullptr;
-  texanims = nullptr;
-  colors = nullptr;
-  transparency = nullptr;
-  lights = nullptr;
-  particleSystems = nullptr;
-  ribbons = nullptr;
 
   showGeosets = nullptr;
 
@@ -60,20 +51,14 @@ void Model::finishLoading()
 
   vbuf = nbuf = tbuf = 0;
 
-  globalSequences = 0;
   animtime = 0;
   anim = 0;
-  colors = 0;
-  lights = 0;
-  transparency = 0;
-  particleSystems = 0;
   header.nParticleEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   header.nRibbonEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
-  ribbons = 0;
   if (header.nGlobalSequences)
   {
-    globalSequences = new int[header.nGlobalSequences];
-    memcpy(globalSequences, (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
+    globalSequences.resize (header.nGlobalSequences);
+    memcpy(globalSequences.data(), (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
   }
 
   //! \todo  This takes a biiiiiit long. Have a look at this.
@@ -98,9 +83,6 @@ Model::~Model()
   _textures.clear();
   _textureFilenames.clear();
 
-  if (globalSequences)
-    delete[] globalSequences;
-
   if (showGeosets)
     delete[] showGeosets;
 
@@ -114,31 +96,13 @@ Model::~Model()
   if (animated) {
     // unload all sorts of crap
     //delete[] normals;
-    if (colors)
-      delete[] colors;
-    if (transparency)
-      delete[] transparency;
-    if (anims)
-      delete[] anims;
     if (origVertices)
       delete[] origVertices;
-    if (bones)
-      delete[] bones;
     if (!animGeometry) {
       gl.deleteBuffers(1, &nbuf);
     }
     gl.deleteBuffers(1, &vbuf);
     gl.deleteBuffers(1, &tbuf);
-
-    if (animTextures && texanims)
-      delete[] texanims;
-    if (lights)
-      delete[] lights;
-
-    if (particleSystems)
-      delete[] particleSystems;
-    if (ribbons)
-      delete[] ribbons;
   }
   else {
     gl.deleteLists(ModelDrawList, 1);
@@ -299,16 +263,14 @@ void Model::initCommon(const MPQFile& f)
 
   // init colors
   if (header.nColors) {
-    colors = new ModelColor[header.nColors];
     ModelColorDef *colorDefs = reinterpret_cast<ModelColorDef*>(f.getBuffer() + header.ofsColors);
-    for (size_t i = 0; i<header.nColors; ++i) colors[i].init(f, colorDefs[i], globalSequences);
+    for (size_t i = 0; i<header.nColors; ++i) colors.emplace_back(f, colorDefs[i], globalSequences.data());
   }
   // init transparency
   int16_t *transLookup = reinterpret_cast<int16_t*>(f.getBuffer() + header.ofsTransparencyLookup);
   if (header.nTransparency) {
-    transparency = new ModelTransparency[header.nTransparency];
     ModelTransDef *trDefs = reinterpret_cast<ModelTransDef*>(f.getBuffer() + header.ofsTransparency);
-    for (size_t i = 0; i<header.nTransparency; ++i) transparency[i].init(f, trDefs[i], globalSequences);
+    for (size_t i = 0; i<header.nTransparency; ++i) transparency.emplace_back (f, trDefs[i], globalSequences.data());
   }
 
 
@@ -450,10 +412,6 @@ void Model::initStatic(const MPQFile& f)
   // clean up vertices, indices etc
   if (normals)
     delete[] normals;
-  if (colors)
-    delete[] colors;
-  if (transparency)
-    delete[] transparency;
 }
 
 void Model::initAnimated(const MPQFile& f)
@@ -469,8 +427,8 @@ void Model::initAnimated(const MPQFile& f)
   initCommon(f);
 
   if (header.nAnimations > 0) {
-    anims = new ModelAnimation[header.nAnimations];
-    memcpy(anims, f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
+    anims.resize (header.nAnimations);
+    memcpy(anims.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
     for (size_t i = 0; i < header.nAnimations; ++i)
     {
       //! \note Fix for world\kalimdor\diremaul\activedoodads\crystalcorrupter\corruptedcrystalshard.m2 having a zero length for its stand animation.
@@ -497,10 +455,9 @@ void Model::initAnimated(const MPQFile& f)
 
   if (animBones) {
     // init bones...
-    bones = new Bone[header.nBones];
     ModelBoneDef *mb = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
     for (size_t i = 0; i<header.nBones; ++i) {
-      bones[i].init(f, mb[i], globalSequences, animfiles);
+      bones.emplace_back(f, mb[i], globalSequences.data(), animfiles);
     }
   }
 
@@ -517,45 +474,39 @@ void Model::initAnimated(const MPQFile& f)
   delete[] texcoords;
 
   if (animTextures) {
-    texanims = new TextureAnim[header.nTexAnims];
     ModelTexAnimDef *ta = reinterpret_cast<ModelTexAnimDef*>(f.getBuffer() + header.ofsTexAnims);
     for (size_t i = 0; i<header.nTexAnims; ++i) {
-      texanims[i].init(f, ta[i], globalSequences);
+      texanims.emplace_back(f, ta[i], globalSequences.data());
     }
   }
 
   // particle systems
   if (header.nParticleEmitters) {
     ModelParticleEmitterDef *pdefs = reinterpret_cast<ModelParticleEmitterDef*>(f.getBuffer() + header.ofsParticleEmitters);
-    particleSystems = new ParticleSystem[header.nParticleEmitters];
     for (size_t i = 0; i<header.nParticleEmitters; ++i) {
-      particleSystems[i].model = this;
-      particleSystems[i].init(f, pdefs[i], globalSequences);
+      particleSystems.emplace_back (this, f, pdefs[i], globalSequences.data());
     }
   }
 
   // ribbons
   if (header.nRibbonEmitters) {
     ModelRibbonEmitterDef *rdefs = reinterpret_cast<ModelRibbonEmitterDef*>(f.getBuffer() + header.ofsRibbonEmitters);
-    ribbons = new RibbonEmitter[header.nRibbonEmitters];
     for (size_t i = 0; i<header.nRibbonEmitters; ++i) {
-      ribbons[i].model = this;
-      ribbons[i].init(f, rdefs[i], globalSequences);
+      ribbons.emplace_back(this, f, rdefs[i], globalSequences.data());
     }
   }
 
   // just use the first camera, meh
   if (header.nCameras>0) {
     ModelCameraDef *camDefs = reinterpret_cast<ModelCameraDef*>(f.getBuffer() + header.ofsCameras);
-    cam.init(f, camDefs[0], globalSequences);
+    cam = ModelCamera(f, camDefs[0], globalSequences.data());
   }
 
   // init lights
   if (header.nLights) {
-    lights = new ModelLight[header.nLights];
     ModelLightDef *lDefs = reinterpret_cast<ModelLightDef*>(f.getBuffer() + header.ofsLights);
     for (size_t i = 0; i<header.nLights; ++i)
-      lights[i].init(f, lDefs[i], globalSequences);
+      lights.emplace_back(f, lDefs[i], globalSequences.data());
   }
 
   animcalc = false;
@@ -568,7 +519,7 @@ void Model::calcBones(int _anim, int time)
   }
 
   for (size_t i = 0; i<header.nBones; ++i) {
-    bones[i].calcMatrix(bones, _anim, time);
+    bones[i].calcMatrix(bones.data(), _anim, time);
   }
 }
 
@@ -577,7 +528,7 @@ void Model::animate(int _anim)
   this->anim = _anim;
   ModelAnimation &a = anims[anim];
 
-  if (!anims)
+  if (anims.empty())
     return;
 
   int t = globalTime; //(int)(gWorld->animtime /* / a.playSpeed*/);
@@ -936,28 +887,22 @@ void TextureAnim::setup(int anim)
   }
 }
 
-void ModelCamera::init(const MPQFile& f, const ModelCameraDef &mcd, int *global)
+ModelCamera::ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *global)
+  : nearclip (mcd.nearclip)
+  , farclip (mcd.farclip)
+  , fov (mcd.fov)
+  , pos (fixCoordSystem(mcd.pos))
+  , target (fixCoordSystem(mcd.target))
+  , tPos (mcd.transPos, f, global)
+  , tTarget (mcd.transTarget, f, global)
+  , rot (mcd.rot, f, global)
 {
-  ok = true;
-  nearclip = mcd.nearclip;
-  farclip = mcd.farclip;
-  fov = mcd.fov;
-  pos = fixCoordSystem(mcd.pos);
-  target = fixCoordSystem(mcd.target);
-  tPos.init(mcd.transPos, f, global);
-  tTarget.init(mcd.transTarget, f, global);
-  rot.init(mcd.rot, f, global);
   tPos.apply(fixCoordSystem);
   tTarget.apply(fixCoordSystem);
 }
 
 void ModelCamera::setup(int time)
 {
-  if (!ok)
-  {
-    return;
-  }
-
   video.fov(math::radians (fov / 2));
   video.nearclip(nearclip);
   video.farclip(farclip);
@@ -969,28 +914,27 @@ void ModelCamera::setup(int time)
                           );
 }
 
-void ModelColor::init(const MPQFile& f, const ModelColorDef &mcd, int *global)
-{
-  color.init(mcd.color, f, global);
-  opacity.init(mcd.opacity, f, global);
-}
+ModelColor::ModelColor(const MPQFile& f, const ModelColorDef &mcd, int *global)
+  : color (mcd.color, f, global)
+  , opacity(mcd.opacity, f, global)
+{}
 
-void ModelTransparency::init(const MPQFile& f, const ModelTransDef &mcd, int *global)
-{
-  trans.init(mcd.trans, f, global);
-}
+ModelTransparency::ModelTransparency(const MPQFile& f, const ModelTransDef &mcd, int *global)
+  : trans (mcd.trans, f, global)
+{}
 
-void ModelLight::init(const MPQFile& f, const ModelLightDef &mld, int *global)
-{
-  tpos = pos = fixCoordSystem(mld.pos);
-  tdir = dir = math::vector_3d(0, 1, 0); // no idea
-  type = mld.type;
-  parent = mld.bone;
-  ambColor.init(mld.ambColor, f, global);
-  ambIntensity.init(mld.ambIntensity, f, global);
-  diffColor.init(mld.color, f, global);
-  diffIntensity.init(mld.intensity, f, global);
-}
+ModelLight::ModelLight(const MPQFile& f, const ModelLightDef &mld, int *global)
+  : tpos (fixCoordSystem(mld.pos))
+  , pos (fixCoordSystem(mld.pos))
+  , tdir (::math::vector_3d(0,1,0)) // obviously wrong
+  , dir (::math::vector_3d(0,1,0))
+  , type (mld.type)
+  , parent (mld.bone)
+  , ambColor (mld.ambColor, f, global)
+  , ambIntensity (mld.ambIntensity, f, global)
+  , diffColor (mld.color, f, global)
+  , diffIntensity (mld.intensity, f, global)
+{}
 
 void ModelLight::setup(int time, OpenGL::Light l)
 {
@@ -1022,25 +966,26 @@ void ModelLight::setup(int time, OpenGL::Light l)
   gl.enable(l);
 }
 
-void TextureAnim::init(const MPQFile& f, const ModelTexAnimDef &mta, int *global)
+TextureAnim::TextureAnim (const MPQFile& f, const ModelTexAnimDef &mta, int *global)
+  : trans (mta.trans, f, global)
+  , rot (mta.rot, f, global)
+  , scale (mta.scale, f, global)
+{}
+
+namespace
 {
-  trans.init(mta.trans, f, global);
-  rot.init(mta.rot, f, global);
-  scale.init(mta.scale, f, global);
+  //! \todo other billboard types
+  static const int MODELBONE_BILLBOARD = 8;
 }
 
-void Bone::init(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **animfiles)
+Bone::Bone(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **animfiles)
+  : parent (b.parent)
+  , pivot (fixCoordSystem (b.pivot))
+  , billboard (b.flags & MODELBONE_BILLBOARD)
+  , trans (b.translation, f, global, animfiles)
+  , rot (b.rotation, f, global, animfiles)
+  , scale (b.scaling, f, global, animfiles)
 {
-  parent = b.parent;
-  pivot = fixCoordSystem(b.pivot);
-
-  static const int MODELBONE_BILLBOARD = 8;
-
-  billboard = (b.flags & MODELBONE_BILLBOARD) != 0;
-
-  trans.init(b.translation, f, global, animfiles);
-  rot.init(b.rotation, f, global, animfiles);
-  scale.init(b.scaling, f, global, animfiles);
   trans.apply(fixCoordSystem);
   rot.apply(fixCoordSystemQuat);
   scale.apply(fixCoordSystem2);
