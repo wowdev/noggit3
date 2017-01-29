@@ -216,8 +216,14 @@ void Menu::mouseReleaseEvent (SDL_MouseButtonEvent* e)
     return;
   }
 
-  LastClickedMenu = mGUIFrame->processLeftClick (e->x, e->y);
+  if (LastClickedMenu)
+  {
+    LastClickedMenu->processUnclick();
+  }
+
+  LastClickedMenu = nullptr;
 }
+
 void Menu::mousePressEvent (SDL_MouseButtonEvent* e)
 {
   if (e->button != SDL_BUTTON_LEFT)
@@ -225,12 +231,7 @@ void Menu::mousePressEvent (SDL_MouseButtonEvent* e)
     return;
   }
 
-  if (LastClickedMenu)
-  {
-    LastClickedMenu->processUnclick();
-  }
-
-  LastClickedMenu = nullptr;
+  LastClickedMenu = mGUIFrame->processLeftClick(e->x, e->y);
 }
 
 void Menu::mousemove(SDL_MouseMotionEvent *e)
