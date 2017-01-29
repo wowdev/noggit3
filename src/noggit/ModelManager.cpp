@@ -10,7 +10,6 @@
 #include <algorithm>
 
 ModelManager::mapType ModelManager::items;
-ModelManager::vectorType ModelManager::hiddenItems;
 
 void ModelManager::report()
 {
@@ -88,30 +87,4 @@ void ModelManager::updateEmitters(float dt)
 {
   for (ModelManager::mapType::iterator it = items.begin(); it != items.end(); ++it)
     it->second->updateEmitters(dt);
-}
-
-void ModelManager::clearHiddenModelList()
-{
-  for (ModelManager::vectorType::iterator it = hiddenItems.begin(); it != hiddenItems.end(); ++it)
-  {
-    (*it)->hidden = false;
-  }
-
-  hiddenItems.clear();
-}
-
-void ModelManager::toggleModelVisibility(Model* model)
-{
-  auto it = std::find(hiddenItems.begin(), hiddenItems.end(), model);
-
-  if (it != hiddenItems.end())
-  {
-    hiddenItems.erase(it);
-    model->hidden = false;
-  }
-  else
-  {
-    hiddenItems.push_back(model);
-    model->hidden = true;
-  }
 }

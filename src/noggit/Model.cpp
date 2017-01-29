@@ -18,7 +18,6 @@ int globalTime = 0;
 Model::Model(const std::string& filename)
   : ManagedItem()
   , _filename(filename)
-  , hidden(false)
 {
   memset(&header, 0, sizeof(ModelHeader));
 
@@ -1120,9 +1119,4 @@ void Model::updateEmitters(float dt)
   for (size_t i = 0; i<header.nParticleEmitters; ++i) {
     particleSystems[i].update(dt);
   }
-}
-
-void Model::toggleVisibility()
-{
-  ModelManager::toggleModelVisibility(this);
 }

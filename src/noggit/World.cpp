@@ -1072,9 +1072,10 @@ void main()
     gl.enable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
     for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
     {
-      if (!it->second.model->hidden || renderHidden)
+      bool const is_hidden (_hidden_models.count (it->second.model.get()));
+      if (!is_hidden || renderHidden)
       {
-        it->second.draw (frustum);
+        it->second.draw (frustum, is_hidden);
       }
     }
   }
@@ -1092,9 +1093,10 @@ void main()
 
     for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
     {
-      if (!it->second.wmo->hidden || renderHidden)
+      bool const is_hidden (_hidden_map_objects.count (it->second.wmo.get()));
+      if (!is_hidden || renderHidden)
       {
-        it->second.draw (frustum);
+        it->second.draw (frustum, is_hidden);
       }
     }
 
@@ -1140,6 +1142,7 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
     {
       for (auto&& model_instance : mModelInstances)
       {
+        //! \todo don't intersect with _hidden_models
         model_instance.second.intersect (ray, &results);
       }
     }
@@ -1148,6 +1151,7 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
     {
       for (auto&& wmo_instance : mWMOInstances)
       {
+        //! \todo don't intersect with _hidden_map_objects
         wmo_instance.second.intersect (ray, &results);
       }
     }
@@ -2091,8 +2095,8 @@ bool World::isUnderMap(math::vector_3d const& pos)
 void World::clearHiddenModelList()
 {
   Environment::getInstance()->showModelFromHiddenList = true;
-  ModelManager::clearHiddenModelList();
-  WMOManager::clearHiddenWMOList();
+  _hidden_map_objects.clear();
+  _hidden_models.clear();
 }
 
 

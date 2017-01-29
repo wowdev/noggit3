@@ -46,11 +46,6 @@ void WMOUnhighlight()
   gl.depthMask(GL_TRUE);
 }
 
-void WMO::toggleVisibility()
-{
-  WMOManager::toggleWMOvisibility(this);
-}
-
 const std::string& WMO::filename() const
 {
   return _filename;
@@ -59,7 +54,6 @@ const std::string& WMO::filename() const
 WMO::WMO(const std::string& filenameArg)
   : ManagedItem()
   , _filename(filenameArg)
-  , hidden(false)
 {
   MPQFile f(_filename);
   if (f.isEof()) {
@@ -948,7 +942,6 @@ void WMOFog::setup()
 }
 
 WMOManager::mapType WMOManager::items;
-WMOManager::vectorType WMOManager::hiddenItems;
 
 void WMOManager::report()
 {
@@ -989,30 +982,5 @@ void WMOManager::delbyname(std::string name)
       delete items[name];
       items.erase(items.find(name));
     }
-  }
-}
-
-void WMOManager::clearHiddenWMOList()
-{
-  for (WMOManager::vectorType::iterator it = hiddenItems.begin(); it != hiddenItems.end(); ++it)
-  {
-    (*it)->hidden = false;
-  }
-
-  hiddenItems.clear();
-}
-
-void WMOManager::toggleWMOvisibility(WMO* wmo)
-{
-  auto it = std::find(hiddenItems.begin(), hiddenItems.end(), wmo);
-  if (it != hiddenItems.end())
-  {
-    hiddenItems.erase(it);
-    wmo->hidden = false;
-  }
-  else
-  {
-    hiddenItems.push_back(wmo);
-    wmo->hidden = true;
   }
 }

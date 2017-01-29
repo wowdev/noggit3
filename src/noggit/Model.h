@@ -210,7 +210,4 @@ public:
   friend struct ModelRenderPass;
 
   virtual void finishLoading();
-
-  bool hidden;
-  void toggleVisibility();
 };
