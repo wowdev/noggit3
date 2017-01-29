@@ -2,11 +2,13 @@
 
 #pragma once
 
+#include <noggit/TextureManager.h>
+
+#include <boost/optional.hpp>
+
 class MapChunk;
 class UIFrame;
 class UIMapViewGUI;
-
-namespace OpenGL { class Texture; };
 
 class UITexturingGUI
 {
@@ -16,10 +18,10 @@ public:
   static UIFrame* createTilesetLoader();
   static UIFrame* createTextureFilter();
   static UIFrame* createMapChunkWindow();
-  static void setSelectedTexture(OpenGL::Texture* t);
-  static OpenGL::Texture* getSelectedTexture();
+  static void setSelectedTexture(scoped_blp_texture_reference t);
+  static boost::optional<scoped_blp_texture_reference> getSelectedTexture();
   static void setChunk(MapChunk *chunk);
   static void setChunkWindow(MapChunk *chunk);
   static void updateSelectedTexture();
-  static OpenGL::Texture* selectedTexture;
+  static boost::optional<scoped_blp_texture_reference> selectedTexture;
 };

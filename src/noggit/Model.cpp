@@ -76,10 +76,6 @@ Model::~Model()
 {
   LogDebug << "Unloading model \"" << _filename << "\"." << std::endl;
 
-  for (std::vector<std::string>::iterator it = _textureFilenames.begin(); it != _textureFilenames.end(); ++it)
-  {
-    TextureManager::delbyname(*it);
-  }
   _textures.clear();
   _textureFilenames.clear();
 
@@ -226,20 +222,16 @@ void Model::initCommon(const MPQFile& f)
 
   // textures
   ModelTextureDef* texdef = reinterpret_cast<ModelTextureDef*>(f.getBuffer() + header.ofsTextures);
-  _textures.resize(header.nTextures);
-  _replaceTextures.resize(header.nTextures);
   _textureFilenames.resize(header.nTextures);
   _specialTextures.resize(header.nTextures);
-  _useReplaceTextures.resize(header.nTextures);
 
   for (size_t i = 0; i < header.nTextures; ++i)
   {
     if (texdef[i].type == 0)
     {
       _specialTextures[i] = -1;
-      _useReplaceTextures[i] = false;
       _textureFilenames[i] = std::string(f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen);
-      _textures[i] = TextureManager::newTexture(_textureFilenames[i]);
+      _textures.emplace_back (_textureFilenames[i]);
     }
     else
     {
@@ -247,16 +239,13 @@ void Model::initCommon(const MPQFile& f)
       //! \todo Check if this is actually correct. Or just remove it.
       throw std::exception(); //this just fucks things up, dont load them for now
 
-      _textures[i] = nullptr;
       _specialTextures[i] = texdef[i].type;
-
-      _useReplaceTextures[texdef[i].type] = true;
 
       if (texdef[i].type == 3)
       {
         _textureFilenames[i] = "Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP";
         // a fix for weapons with type-3 textures.
-        _replaceTextures[texdef[i].type] = TextureManager::newTexture(_textureFilenames[i]);
+        _replaceTextures.emplace (texdef[i].type, _textureFilenames[i]);
       }
     }
   }
@@ -640,7 +629,7 @@ bool ModelRenderPass::init(Model *m)
     if (m->_specialTextures[tex] == -1)
       m->_textures[tex]->bind();
     else
-      m->_replaceTextures[m->_specialTextures[tex]]->bind();
+      m->_replaceTextures.at (m->_specialTextures[tex])->bind();
 
     //! \todo Add proper support for multi-texturing.
 

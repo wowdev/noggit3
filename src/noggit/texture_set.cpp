@@ -42,7 +42,7 @@ void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
     {
       animated[i] = 0;
     }
-    textures[i] = TextureManager::newTexture(maintile->mTextureFilenames[tex[i]]);
+    textures.emplace_back (maintile->mTextureFilenames[tex[i]]);
   }
 }
 
@@ -71,7 +71,7 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool 
   }
 }
 
-int TextureSet::addTexture(OpenGL::Texture* texture)
+int TextureSet::addTexture(scoped_blp_texture_reference texture)
 {
   int texLevel = -1;
 
@@ -82,7 +82,7 @@ int TextureSet::addTexture(OpenGL::Texture* texture)
 
     texture->addReference();
 
-    textures[texLevel] = texture;
+    textures.emplace_back (texture);
     animated[texLevel] = 0;
     texFlags[texLevel] = 0;
     effectID[texLevel] = 0;
@@ -102,7 +102,7 @@ int TextureSet::addTexture(OpenGL::Texture* texture)
   return texLevel;
 }
 
-void TextureSet::switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
+void TextureSet::switchTexture (scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture)
 {
   int texLevel = -1;
   for (size_t i = 0; i < nTextures; ++i)
@@ -125,7 +125,7 @@ void TextureSet::swapTexture(int id1, int id2)
 {
   if (id1 >= 0 && id2 >= 0 && id1 < nTextures && id2 < nTextures)
   {
-    OpenGL::Texture* temp = textures[id1];
+    scoped_blp_texture_reference temp = textures[id1];
     textures[id1] = textures[id2];
     textures[id2] = temp;
 
@@ -188,8 +188,6 @@ void TextureSet::eraseTexture(size_t id)
   if (id > 3)
     return;
 
-  TextureManager::delbyname(textures[id]->filename());
-
   if (id)
   {
     delete alphamaps[id - 1];
@@ -211,12 +209,12 @@ void TextureSet::eraseTexture(size_t id)
   }
 
   alphamaps[nTextures - 2] = nullptr;
-  textures[nTextures - 1] = nullptr;
+  textures.pop_back();
 
   nTextures--;
 }
 
-bool TextureSet::canPaintTexture(OpenGL::Texture* texture)
+bool TextureSet::canPaintTexture(scoped_blp_texture_reference texture)
 {
   if (nTextures)
   {
@@ -386,7 +384,7 @@ bool TextureSet::eraseUnusedTextures()
   return texRemoved;
 }
 
-bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
+bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
   bool changed = false;
 
@@ -648,7 +646,7 @@ const unsigned char *TextureSet::getAlpha(size_t id)
   return alphamaps[id]->getAlpha();
 }
 
-OpenGL::Texture* TextureSet::texture(size_t id)
+scoped_blp_texture_reference TextureSet::texture(size_t id)
 {
   return textures[id];
 }

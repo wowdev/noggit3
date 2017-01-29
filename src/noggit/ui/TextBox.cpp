@@ -20,8 +20,8 @@ static const std::string textureFocused("Interface\\Common\\Common-Input-Border.
 
 UITextBox::UITextBox(float xPos, float yPos, float w, float h)
   : UIFrame(xPos, yPos, w, h)
-  , _texture(TextureManager::newTexture(texture))
-  , _textureFocused(TextureManager::newTexture(textureFocused))
+  , _texture (texture)
+  , _textureFocused (textureFocused)
   , _uiText(new UIText(8.0f, 2.5f, app.getArial16(), eJustifyLeft))
   , _value("")
   , _focus(false)
@@ -32,8 +32,8 @@ UITextBox::UITextBox(float xPos, float yPos, float w, float h)
 
 UITextBox::UITextBox(float xPos, float yPos, float w, float h, TriggerFunction enterFunction)
   : UIFrame(xPos, yPos, w, h)
-  , _texture(TextureManager::newTexture(texture))
-  , _textureFocused(TextureManager::newTexture(textureFocused))
+  , _texture (texture)
+  , _textureFocused (textureFocused)
   , _uiText(new UIText(8.0f, 2.5f, app.getArial16(), eJustifyLeft))
   , _value("")
   , _focus(false)
@@ -44,8 +44,8 @@ UITextBox::UITextBox(float xPos, float yPos, float w, float h, TriggerFunction e
 
 UITextBox::UITextBox(float xPos, float yPos, float w, float h, const freetype::font_data& pFont)
   : UIFrame(xPos, yPos, w, h)
-  , _texture(TextureManager::newTexture(texture))
-  , _textureFocused(TextureManager::newTexture(textureFocused))
+  , _texture (texture)
+  , _textureFocused (textureFocused)
   , _uiText(new UIText(8.0f, 2.5f, pFont, eJustifyLeft))
   , _value("")
   , _focus(false)
@@ -56,20 +56,14 @@ UITextBox::UITextBox(float xPos, float yPos, float w, float h, const freetype::f
 
 UITextBox::UITextBox(float xPos, float yPos, float w, float h, const freetype::font_data& pFont, TriggerFunction enterFunction)
   : UIFrame(xPos, yPos, w, h)
-  , _texture(TextureManager::newTexture(texture))
-  , _textureFocused(TextureManager::newTexture(textureFocused))
+  , _texture (texture)
+  , _textureFocused (textureFocused)
   , _uiText(new UIText(8.0f, 2.5f, pFont, eJustifyLeft))
   , _value("")
   , _focus(false)
   , _enterFunction(enterFunction)
   , _updateFunction(nullptr)
 {
-}
-
-UITextBox::~UITextBox()
-{
-  TextureManager::delbyname(texture);
-  TextureManager::delbyname(textureFocused);
 }
 
 void UITextBox::render() const

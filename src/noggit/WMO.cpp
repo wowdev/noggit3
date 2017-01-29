@@ -118,7 +118,7 @@ WMO::WMO(const std::string& filenameArg)
 
         std::string const texpath (texbuf + mat[i].nameStart);
 
-        mat[i]._texture = TextureManager::newTexture (texpath);
+        mat[i]._texture = texpath;
         textures.push_back (texpath);
       }
     }
@@ -233,10 +233,6 @@ WMO::~WMO()
   {
     delete[] groups;
     groups = nullptr;
-  }
-
-  for (std::vector<std::string>::iterator it = textures.begin(); it != textures.end(); ++it) {
-    TextureManager::delbyname(*it);
   }
 
   if (mat)
@@ -646,7 +642,7 @@ void WMOGroup::initDisplayList()
 
     _lists[b].first->start_recording(GL_COMPILE);
 
-    mat->_texture->bind();
+    mat->_texture.get()->bind();
 
     bool atest = (mat->transparent) != 0;
 

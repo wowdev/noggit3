@@ -49,14 +49,14 @@ OpenGL::Texture* TextureManager::newTexture(std::string name)
   return items[name];
 }
 
-std::vector<OpenGL::Texture*> TextureManager::getAllTexturesMatching(bool(*function)(const std::string& name))
+std::vector<scoped_blp_texture_reference> TextureManager::getAllTexturesMatching(bool(*function)(const std::string& name))
 {
-  std::vector<OpenGL::Texture*> returnVector;
+  std::vector<scoped_blp_texture_reference> returnVector;
   for (mapType::iterator t = items.begin(); t != items.end(); ++t)
   {
     if (function(t->first))
     {
-      returnVector.push_back(items[t->first]);
+      returnVector.emplace_back(items[t->first]->filename());
     }
   }
   return returnVector;

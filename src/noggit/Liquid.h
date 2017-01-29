@@ -13,14 +13,11 @@ class Liquid;
 #endif
 #include <noggit/Video.h>
 #include <noggit/WMO.h>
+#include <noggit/TextureManager.h>
 
 #include <string>
 #include <vector>
 
-namespace OpenGL
-{
-  class Texture;
-};
 namespace opengl
 {
   class call_list;
@@ -80,8 +77,6 @@ public:
   void draw();
 
 private:
-  void delTextures();
-
   int mShaderType;
   int mLiquidType;
   bool mTransparency;
@@ -101,7 +96,7 @@ private:
   void initTextures(const std::string& pFilename);
 
   int type;
-  std::vector<OpenGL::Texture*> textures;
+  std::vector<scoped_blp_texture_reference> textures;
   math::vector_3d col;
   int tmpflag;
   bool trans;

@@ -146,17 +146,6 @@ Liquid::~Liquid()
     delete mDrawList;
     mDrawList = nullptr;
   }
-
-  delTextures();
-}
-
-void Liquid::delTextures()
-{
-  for (std::vector<OpenGL::Texture*>::iterator it = textures.begin(); it != textures.end(); ++it)
-  {
-    TextureManager::delbyname((*it)->filename());
-  }
-  textures.clear();
 }
 
 void Liquid::initFromWMO(MPQFile* f, const WMOMaterial &mat, bool indoor)
@@ -437,7 +426,6 @@ void Liquid::initTextures(const std::string& pFilename)
   textures.clear(); //! \todo this assumes that the same textures are used af befor!
   for (int i = pFirst; i <= pLast; ++i)
   {
-    std::string filename(boost::str(boost::format(pFilename) % i));
-    textures.push_back(TextureManager::newTexture(filename));
+    textures.emplace_back (boost::str (boost::format (pFilename) % i));
   }
 }

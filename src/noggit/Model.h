@@ -12,6 +12,7 @@
 #include <noggit/Manager.h> // ManagedItem
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
+#include <noggit/TextureManager.h>
 #include <noggit/Video.h> // GLuint
 
 #include <string>
@@ -187,9 +188,9 @@ public:
   // ===============================
   // Texture data
   // ===============================
-  std::vector<OpenGL::Texture*> _textures;
+  std::vector<scoped_blp_texture_reference> _textures;
   std::vector<std::string> _textureFilenames;
-  std::vector<OpenGL::Texture*> _replaceTextures;
+  std::map<std::size_t, scoped_blp_texture_reference> _replaceTextures;
   std::vector<int> _specialTextures;
   std::vector<bool> _useReplaceTextures;
 

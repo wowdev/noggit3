@@ -6,6 +6,7 @@
 #include <noggit/MapTile.h> // MapTile
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
+#include <noggit/TextureManager.h>
 #include <noggit/Video.h> // GLuint
 #include <noggit/WMOInstance.h>
 #include <opengl/texture.hpp>
@@ -100,10 +101,10 @@ public:
   bool isBorderChunk(std::set<math::vector_3d*>& selected);
 
   //! \todo implement Action stack for these
-  bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
-  bool canPaintTexture(OpenGL::Texture* texture);
-  int addTexture(OpenGL::Texture* texture);
-  void switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
+  bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool canPaintTexture(scoped_blp_texture_reference texture);
+  int addTexture(scoped_blp_texture_reference texture);
+  void switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
   void eraseTextures();
 
   //! \todo implement Action stack for these

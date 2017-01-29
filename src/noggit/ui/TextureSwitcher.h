@@ -12,7 +12,7 @@ class UITextureSwitcher : public UIWindow
 public:
   UITextureSwitcher(int x, int y);
 
-  OpenGL::Texture* getTextures();
+  scoped_blp_texture_reference const& getTextures();
   void setTexture();
   void setPosition(float x, float y);
 

@@ -11,21 +11,14 @@
 
 UIWindow::UIWindow(float xPos, float yPos, float w, float h)
   : UIFrame(xPos, yPos, w, h)
-  , texture(TextureManager::newTexture("interface\\tooltips\\ui-tooltip-border.blp"))
-  , _textureFilename("interface\\tooltips\\ui-tooltip-border.blp")
+  , texture ("interface\\tooltips\\ui-tooltip-border.blp")
 {
 }
 
 UIWindow::UIWindow(float xPos, float yPos, float w, float h, const std::string& pTexture)
   : UIFrame(xPos, yPos, w, h)
-  , texture(TextureManager::newTexture(pTexture))
-  , _textureFilename(pTexture)
+  , texture (pTexture)
 {
-}
-
-UIWindow::~UIWindow()
-{
-  TextureManager::delbyname(_textureFilename);
 }
 
 UIFrame::Ptr UIWindow::processLeftClick(float mx, float my)

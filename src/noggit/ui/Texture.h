@@ -5,12 +5,8 @@
 #include <functional>
 #include <string>
 
+#include <noggit/TextureManager.h>
 #include <noggit/ui/Frame.h>
-
-namespace OpenGL
-{
-  class Texture;
-}
 
 class UITexture : public UIFrame
 {
@@ -18,7 +14,7 @@ public:
   typedef UITexture* Ptr;
 
 protected:
-  OpenGL::Texture* texture;
+  scoped_blp_texture_reference texture;
   std::string _textureFilename;
 
   bool highlight;
@@ -27,10 +23,9 @@ protected:
 
 public:
   UITexture(float x, float y, float width, float height, const std::string& tex);
-  ~UITexture();
 
   void setTexture(const std::string& tex);
-  void setTexture(OpenGL::Texture* tex);
+  void setTexture(scoped_blp_texture_reference const& tex);
   void render() const;
 
   UIFrame *processLeftClick(float mx, float my);
@@ -39,5 +34,5 @@ public:
   {
     highlight = h;
   }
-  OpenGL::Texture* getTexture();
+  scoped_blp_texture_reference const& getTexture();
 };

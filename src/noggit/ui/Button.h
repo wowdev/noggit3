@@ -5,6 +5,7 @@
 #include <string>
 #include <boost/function.hpp>
 
+#include <noggit/TextureManager.h>
 #include <noggit/ui/Frame.h>
 #include <noggit/ui/Text.h>
 
@@ -18,11 +19,8 @@ public:
   typedef void(*ClickFunction)(UIFrame::Ptr, int);
 
 protected:
-  OpenGL::Texture* texture;
-  OpenGL::Texture* textureDown;
-  std::string _textureFilename;
-  std::string _textureDownFilename;
-
+  scoped_blp_texture_reference texture;
+  scoped_blp_texture_reference textureDown;
 
   std::function<void()> clickFunc;
   int id;
@@ -36,7 +34,6 @@ public:
   explicit UIButton(float x, float y, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown);
   explicit UIButton(float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, ClickFunction pFunc, int pFuncParam);
   explicit UIButton(float x, float y, float width, float height, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, std::function<void()>);
-  ~UIButton();
 
   void render() const;
 

@@ -10,42 +10,24 @@
 
 UITexture::UITexture(float xPos, float yPos, float w, float h, const std::string& tex)
   : UIFrame(xPos, yPos, w, h)
-  , texture(TextureManager::newTexture(tex))
-  , _textureFilename(tex)
+  , texture(tex)
   , highlight(false)
   , clickFunc(nullptr)
   , id(0)
 {
 }
 
-UITexture::~UITexture()
+void UITexture::setTexture(scoped_blp_texture_reference const& tex)
 {
-  if (texture)
-  {
-    TextureManager::delbyname(_textureFilename);
-    texture = nullptr;
-  }
-}
-
-void UITexture::setTexture(OpenGL::Texture* tex)
-{
-  //! \todo Free current texture.
-  //! \todo New reference?
   texture = tex;
 }
 
 void UITexture::setTexture(const std::string& textureFilename)
 {
-  if (texture)
-  {
-    TextureManager::delbyname(_textureFilename);
-    texture = nullptr;
-  }
-  _textureFilename = textureFilename;
-  texture = TextureManager::newTexture(textureFilename);
+  texture = textureFilename;
 }
 
-OpenGL::Texture* UITexture::getTexture()
+scoped_blp_texture_reference const& UITexture::getTexture()
 {
   return texture;
 }
