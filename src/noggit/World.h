@@ -135,7 +135,11 @@ public:
   void initDisplay();
 
   void tick(float dt);
-  void draw(math::vector_3d const& cursor_pos, float brushRadius, float hardness);
+  void draw ( math::vector_3d const& cursor_pos
+            , float brushRadius
+            , float hardness
+            , bool highlightPaintableChunks
+            );
 
   void outdoorLights(bool on);
   void setupFog();

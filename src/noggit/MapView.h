@@ -29,6 +29,8 @@ private:
   bool look;
   bool _GUIDisplayingEnabled;
 
+  bool _highlightPaintableChunks = true;
+
   void save();
 
   float lastBrushUpdate;

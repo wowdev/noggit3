@@ -173,11 +173,6 @@ void toggleSprayBrush(bool b, int)
   sprayBrushActive = b;
 }
 
-void toggleHighlightPaintable(bool b, int)
-{
-  Environment::getInstance()->highlightPaintableChunks = b;
-}
-
 void setSprayBrushSize(float f)
 {
   brushSpraySize = f;
@@ -706,10 +701,11 @@ void MapView::createGUI()
   mainGui->paintPressureSlider->setText("Pressure: ");
   settings_paint->addChild(mainGui->paintPressureSlider);
 
-  UICheckBox* toggleHighlight = new UICheckBox(3.0f, 105.0f, "Hightligh paintable chunks", toggleHighlightPaintable, 0);
-  toggleHighlight->setState(Environment::getInstance()->highlightPaintableChunks);
-  settings_paint->addChild(toggleHighlight);
-
+  settings_paint->addChild ( new UICheckBox ( 3.0f, 105.0f
+                                            , "Highlight paintable chunks"
+                                            , &_highlightPaintableChunks
+                                            )
+                           );
 
   toggleSpray = new UICheckBox(3.0f, 138.0f, "Toggle spray", toggleSprayBrush, 0);
   settings_paint->addChild(toggleSpray);
@@ -1714,7 +1710,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
     case 8: radius = mainGui->shaderTool->brushRadius(); break;
   }
 
-  gWorld->draw(_cursor_pos, radius, hardness);
+  gWorld->draw(_cursor_pos, radius, hardness, _highlightPaintableChunks);
 
   displayGUIIfEnabled();
 }

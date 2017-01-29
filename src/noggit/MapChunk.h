@@ -76,7 +76,10 @@ public:
 
   math::vector_3d mVertices[mapbufsize];
 
-  void draw (Frustum const&); //! \todo only this function should be public, all others should be called from it
+  void draw ( Frustum const&
+            , bool highlightPaintableChunks
+            );
+  //! \todo only this function should be public, all others should be called from it
 
   void drawContour();
   void intersect (math::ray const&, selection_result*);

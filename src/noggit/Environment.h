@@ -25,7 +25,6 @@ public:
   std::map<int, math::vector_3d> areaIDColors; // List of all area IDs to draw them with different colors
 
   bool paintMode;
-  bool highlightPaintableChunks;
   int flagPaintMode;
   int screenX;
   int screenY;

@@ -611,7 +611,9 @@ void MapChunk::drawContour()
   gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void MapChunk::draw (Frustum const& frustum)
+void MapChunk::draw ( Frustum const& frustum
+                    , bool highlightPaintableChunks
+                    )
 {
   if (!frustum.intersects(vmin, vmax))
     return;
@@ -623,7 +625,7 @@ void MapChunk::draw (Frustum const& frustum)
 
   bool cantPaint = UITexturingGUI::getSelectedTexture()
                  && !canPaintTexture(*UITexturingGUI::getSelectedTexture())
-                 && Environment::getInstance()->highlightPaintableChunks
+                 && highlightPaintableChunks
                  && terrainMode == 2;
 
   if (cantPaint)
