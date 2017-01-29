@@ -790,7 +790,11 @@ void World::setupFog()
 
 extern int terrainMode;
 
-void World::draw(math::vector_3d const& cursor_pos, float brushRadius, float hardness)
+void World::draw ( math::vector_3d const& cursor_pos
+                 , float brushRadius
+                 , float hardness
+                 , bool highlightPaintableChunks
+                 )
 {
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
@@ -901,7 +905,7 @@ void World::draw(math::vector_3d const& cursor_pos, float brushRadius, float har
     opengl::scoped::matrix_pusher const matrix;
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
-      tile->draw(frustum);
+      tile->draw(frustum, highlightPaintableChunks);
     }
   }
 
@@ -976,7 +980,7 @@ void World::draw(math::vector_3d const& cursor_pos, float brushRadius, float har
   }
 
 
-  if (drawlines || (terrainMode == 2 && Environment::getInstance()->highlightPaintableChunks))
+  if (drawlines || (terrainMode == 2 && highlightPaintableChunks))
   {
     gl.disable(GL_COLOR_MATERIAL);
     opengl::texture::set_active_texture (0);

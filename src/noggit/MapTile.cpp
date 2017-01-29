@@ -374,14 +374,21 @@ extern Brush textureBrush;
 
 
 
-void MapTile::draw (Frustum const& frustum)
+void MapTile::draw ( Frustum const& frustum
+                   , bool highlightPaintableChunks
+                   )
 {
   gl.color4f(1, 1, 1, 1);
 
   for (int j = 0; j<16; ++j)
+  {
     for (int i = 0; i<16; ++i)
-      mChunks[j][i]->draw(frustum);
-
+    {
+      mChunks[j][i]->draw ( frustum
+                          , highlightPaintableChunks
+                          );
+    }
+  }
 }
 
 void MapTile::intersect (math::ray const& ray, selection_result* results) const
@@ -595,7 +602,7 @@ void MapTile::saveTile(bool saveAllModels)
       lModelInstances.emplace(it->second.d1, it->second);
     }
   }
-  
+
 
   filenameOffsetThing nullyThing = { 0, 0 };
 
