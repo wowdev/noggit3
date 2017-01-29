@@ -672,7 +672,7 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
     p.speed = dir.normalize() * spd * misc::randfloat(0, var);
   }
   else if (sys->flags == 25 && sys->parent->parent<1) { // Weapon Flame
-    p.pos = sys->parent->pivot * (sys->pos + math::vector_3d(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
+    p.pos = sys->parent->pivot + (sys->pos + math::vector_3d(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
     math::vector_3d dir = mrot * math::vector_3d(0.0f, 1.0f, 0.0f);
     p.dir = dir.normalize();
     //math::vector_3d dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * math::vector_3d(0.0f, 1.0f, 0.0f);
@@ -681,12 +681,12 @@ Particle PlaneParticleEmitter::newParticle(int anim, int time, float w, float l,
   }
   else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
     p.pos = sys->parent->mat * (sys->pos + math::vector_3d(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
-    math::vector_3d dir = math::vector_3d(sys->parent->mat (1, 0), sys->parent->mat (1, 1), sys->parent->mat (1, 2)) * math::vector_3d(0.0f, 1.0f, 0.0f);
+    math::vector_3d dir = math::vector_3d(sys->parent->mat (1, 0), sys->parent->mat (1, 1), sys->parent->mat (1, 2)) + math::vector_3d(0.0f, 1.0f, 0.0f);
     p.speed = dir.normalize() * spd * misc::randfloat(0, var * 2);
 
   }
   else if (sys->flags == 17 && sys->parent->parent<1) { // Weapon Glow
-    p.pos = sys->parent->pivot * (sys->pos + math::vector_3d(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
+    p.pos = sys->parent->pivot + (sys->pos + math::vector_3d(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
     math::vector_3d dir = mrot * math::vector_3d(0, 1, 0);
     p.dir = dir.normalize();
 
