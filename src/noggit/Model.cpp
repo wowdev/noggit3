@@ -16,8 +16,7 @@
 int globalTime = 0;
 
 Model::Model(const std::string& filename)
-  : ManagedItem()
-  , _filename(filename)
+  : _filename(filename)
 {
   memset(&header, 0, sizeof(ModelHeader));
 
@@ -27,6 +26,9 @@ Model::Model(const std::string& filename)
   showGeosets = nullptr;
 
   finished = false;
+
+  //! \note hack: we currently would never load them otherwise
+  finishLoading();
 }
 
 void Model::finishLoading()

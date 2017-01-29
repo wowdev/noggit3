@@ -99,13 +99,11 @@ private:
   SDL_Surface* _primary;
 };
 
-#include <noggit/Manager.h> // ManagedItem
-
 struct BLPHeader;
 
 namespace OpenGL
 {
-  class Texture : public ManagedItem, public opengl::texture
+  class Texture : public opengl::texture
   {
   public:
     Texture();

@@ -6,11 +6,11 @@
 #include <math/ray.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/MPQ.h>
-#include <noggit/Manager.h>
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/ModelManager.h>
 #include <noggit/TextureManager.h>
 #include <noggit/Video.h>
+#include <noggit/multimap_with_normalized_key.hpp>
 #include <opengl/call_list.hpp>
 
 #include <boost/optional.hpp>
@@ -145,7 +145,7 @@ struct WMOFog {
   void setup();
 };
 
-class WMO : public ManagedItem
+class WMO
 {
 public:
   bool draw_group_boundingboxes;
@@ -187,12 +187,7 @@ public:
 
 private:
   friend struct scoped_wmo_reference;
-  static WMO* add(std::string name);
-  static void delbyname(std::string name);
-
-  typedef std::map<std::string, WMO*> mapType;
-  static mapType items;
-  typedef std::vector<WMO*> vectorType;
+  static noggit::multimap_with_normalized_key<WMO> _;
 };
 
 struct scoped_wmo_reference
@@ -200,19 +195,19 @@ struct scoped_wmo_reference
   scoped_wmo_reference (std::string const& filename)
     : _valid (true)
     , _filename (filename)
-    , _wmo (WMOManager::add (_filename))
+    , _wmo (WMOManager::_.emplace (_filename))
   {}
 
   scoped_wmo_reference (scoped_wmo_reference const& other)
     : _valid (other._valid)
     , _filename (other._filename)
-    , _wmo (WMOManager::add (_filename))
+    , _wmo (WMOManager::_.emplace (_filename))
   {}
   scoped_wmo_reference& operator= (scoped_wmo_reference const& other)
   {
     _valid = other._valid;
     _filename = other._filename;
-    _wmo = WMOManager::add (_filename);
+    _wmo = WMOManager::_.emplace (_filename);
     return *this;
   }
 
@@ -236,7 +231,7 @@ struct scoped_wmo_reference
   {
     if (_valid)
     {
-      WMOManager::delbyname (_filename);
+      WMOManager::_.erase (_filename);
     }
   }
 

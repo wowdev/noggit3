@@ -172,8 +172,7 @@ struct BLPHeader
 namespace OpenGL
 {
   Texture::Texture()
-    : ManagedItem()
-    , opengl::texture()
+    : opengl::texture()
     , _width(0)
     , _height(0)
     , _filename("")
