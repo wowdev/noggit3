@@ -53,7 +53,7 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
   recalcExtents();
 }
 
-void ModelInstance::draw (Frustum const& frustum)
+void ModelInstance::draw (Frustum const& frustum, bool force_box)
 {
   /*  float dist = ( pos - gWorld->camera ).length() - model->rad;
 
@@ -83,8 +83,7 @@ void ModelInstance::draw (Frustum const& frustum)
 
   bool currentSelection = gWorld->IsSelection(eEntry_Model) && boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->d1 == d1;
 
-  // no need to check Environment::showModelFromHiddenList as it's done beforehand in World::draw()
-  if (currentSelection || model->hidden)
+  if (currentSelection || force_box)
   {
     if (gWorld && gWorld->drawfog)
       gl.disable(GL_FOG);
@@ -99,7 +98,7 @@ void ModelInstance::draw (Frustum const& frustum)
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    math::vector_4d color = model->hidden ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(1.0f, 1.0f, 0.0f, 1.0f);
+    math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(1.0f, 1.0f, 0.0f, 1.0f);
 
     opengl::primitives::wire_box ( TransformCoordsForModel(model->header.BoundingBoxMin)
                                  , TransformCoordsForModel(model->header.BoundingBoxMax)

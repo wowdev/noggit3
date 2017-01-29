@@ -178,17 +178,12 @@ public:
   std::vector<float> intersect (math::ray const&) const;
   //void drawPortals();
   bool drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vector_3d pUpper) const;
-
-  bool hidden;
-  void toggleVisibility();
 };
 
 class WMOManager
 {
 public:
   static void report();
-  static void clearHiddenWMOList();
-  static void toggleWMOvisibility(WMO* wmo);
 
 private:
   friend struct scoped_wmo_reference;
@@ -198,7 +193,6 @@ private:
   typedef std::map<std::string, WMO*> mapType;
   static mapType items;
   typedef std::vector<WMO*> vectorType;
-  static vectorType hiddenItems;
 };
 
 struct scoped_wmo_reference
@@ -247,6 +241,10 @@ struct scoped_wmo_reference
   }
 
   WMO* operator->() const
+  {
+    return _wmo;
+  }
+  WMO* get() const
   {
     return _wmo;
   }

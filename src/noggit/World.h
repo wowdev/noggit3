@@ -12,6 +12,7 @@
 
 #include <map>
 #include <string>
+#include <unordered_set>
 
 namespace OpenGL
 {
@@ -206,6 +207,8 @@ public:
   void updateTilesWMO(WMOInstance* wmo);
   void updateTilesModel(ModelInstance* m2);
 
+  std::unordered_set<WMO*> _hidden_map_objects;
+  std::unordered_set<Model*> _hidden_models;
   void clearHiddenModelList();
 
   void jumpToCords(math::vector_3d pos);

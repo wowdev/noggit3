@@ -47,7 +47,7 @@ WMOInstance::WMOInstance(std::string const& filename)
 {
 }
 
-void WMOInstance::draw (Frustum const& frustum)
+void WMOInstance::draw (Frustum const& frustum, bool force_box)
 {
   {
     opengl::scoped::matrix_pusher const matrix;
@@ -65,8 +65,7 @@ void WMOInstance::draw (Frustum const& frustum)
       wmo->draw(doodadset, pos, math::degrees (roty), false, false, false, frustum);
   }
 
-  // no need to check showModelFromHiddenList in Environment as it's done beforehand in World::draw()
-  if (wmo->hidden || ( gWorld->IsSelection(eEntry_WMO) && boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->mUniqueID == this->mUniqueID))
+  if (force_box || ( gWorld->IsSelection(eEntry_WMO) && boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->mUniqueID == this->mUniqueID))
   {
     gl.disable(GL_LIGHTING);
 
@@ -78,7 +77,7 @@ void WMOInstance::draw (Frustum const& frustum)
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    math::vector_4d color = wmo->hidden ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f);
+    math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f);
     opengl::primitives::wire_box (extents[0], extents[1]).draw (color, 1.0f);
 
     opengl::texture::set_active_texture (1);

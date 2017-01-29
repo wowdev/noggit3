@@ -1939,11 +1939,29 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
           auto selection = gWorld->GetCurrentSelection();
           if (selection->which() == eEntry_Model)
           {
-            boost::get<selected_model_type> (*selection)->model->toggleVisibility();
+            auto&& entity (boost::get<selected_model_type> (*selection)->model.get());
+            auto&& hidden (gWorld->_hidden_models);
+            if (hidden.count (entity))
+            {
+              hidden.erase (entity);
+            }
+            else
+            {
+              hidden.emplace (entity);
+            }
           }
           else if (selection->which() == eEntry_WMO)
           {
-            boost::get<selected_wmo_type> (*selection)->wmo->toggleVisibility();
+            auto&& entity (boost::get<selected_wmo_type> (*selection)->wmo.get());
+            auto&& hidden (gWorld->_hidden_map_objects);
+            if (hidden.count (entity))
+            {
+              hidden.erase (entity);
+            }
+            else
+            {
+              hidden.emplace (entity);
+            }
           }
         }
       }
