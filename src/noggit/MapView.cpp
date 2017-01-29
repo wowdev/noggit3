@@ -1400,17 +1400,17 @@ void MapView::tick(float t, float dt)
                   {
                     gWorld->sprayTexture(_cursor_pos, &sprayBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f),
                       textureBrush.getRadius(), brushSprayPressure,
-                      UITexturingGUI::getSelectedTexture()
+                      *UITexturingGUI::getSelectedTexture()
                     );
                   }
                   else
                   {
-                    gWorld->paintTexture(_cursor_pos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
+                    gWorld->paintTexture(_cursor_pos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), *UITexturingGUI::getSelectedTexture());
                   }
                 }
                 else
                 {
-                  gWorld->overwriteTextureAtCurrentChunk(_cursor_pos, mainGui->TextureSwitcher->getTextures(), UITexturingGUI::getSelectedTexture());
+                  gWorld->overwriteTextureAtCurrentChunk(_cursor_pos, mainGui->TextureSwitcher->getTextures(), *UITexturingGUI::getSelectedTexture());
                 }
               }
             }
@@ -1420,7 +1420,7 @@ void MapView::tick(float t, float dt)
               textureBrush.GenerateTexture();
             }
             if (mViewMode == eViewMode_2D)
-              gWorld->paintTexture({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z}, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
+              gWorld->paintTexture({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z}, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), *UITexturingGUI::getSelectedTexture());
           }
           break;
 

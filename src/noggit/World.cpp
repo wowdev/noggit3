@@ -1449,7 +1449,7 @@ void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, 
     );
 }
 
-bool World::paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, OpenGL::Texture* texture)
+bool World::paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
   return for_all_chunks_in_range
     ( pos, brush->getRadius()
@@ -1460,7 +1460,7 @@ bool World::paintTexture(math::vector_3d const& pos, Brush *brush, float strengt
     );
 }
 
-bool World::sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, OpenGL::Texture* texture)
+bool World::sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture)
 {
   bool succ = false;
   float inc = brush->getRadius() / 4.0f;
@@ -1484,7 +1484,7 @@ void World::eraseTextures(math::vector_3d const& pos)
   for_chunk_at(pos, [](MapChunk* chunk) {chunk->eraseTextures();});
 }
 
-void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
+void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture)
 {
   for_chunk_at(pos, [&](MapChunk* chunk) {chunk->switchTexture(oldTexture, newTexture);});
 }
@@ -1824,17 +1824,16 @@ void World::setBaseTexture(math::vector_3d const& pos)
     for_all_chunks_on_tile(pos, [](MapChunk* chunk)
     {
       chunk->eraseTextures();
-      chunk->addTexture(UITexturingGUI::getSelectedTexture());
-      UITexturingGUI::getSelectedTexture()->addReference();
+      chunk->addTexture(*UITexturingGUI::getSelectedTexture());
     });
   }
 }
 
-void World::swapTexture(math::vector_3d const& pos, OpenGL::Texture *tex)
+void World::swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex)
 {
   if (!!UITexturingGUI::getSelectedTexture())
   {
-    for_all_chunks_on_tile(pos, [&](MapChunk* chunk) { chunk->switchTexture(tex, UITexturingGUI::getSelectedTexture()); });
+    for_all_chunks_on_tile(pos, [&](MapChunk* chunk) { chunk->switchTexture(tex, *UITexturingGUI::getSelectedTexture()); });
   }
 }
 

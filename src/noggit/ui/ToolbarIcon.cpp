@@ -10,19 +10,11 @@
 
 UIToolbarIcon::UIToolbarIcon(float xPos, float yPos, const std::string& tex, const std::string& texd, std::function<void()> callback)
   : UIFrame(xPos, yPos, 35.0f, 35.0f)
-  , texture(TextureManager::newTexture(tex))
-  , textureSelected(TextureManager::newTexture(texd))
-  , _textureFilename(tex)
-  , _textureSelectedFilename(texd)
+  , texture (tex)
+  , textureSelected (texd)
   , _callback (std::move (callback))
   , selected(false)
 {
-}
-
-UIToolbarIcon::~UIToolbarIcon()
-{
-  TextureManager::delbyname(_textureFilename);
-  TextureManager::delbyname(_textureSelectedFilename);
 }
 
 UIFrame* UIToolbarIcon::processLeftClick(float /*mx*/, float /*my*/)

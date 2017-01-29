@@ -73,7 +73,7 @@ void UITexturePicker::setTexture(size_t id)
 
 void UITexturePicker::shiftSelectedTextureLeft()
 {
-  OpenGL::Texture* selectedTexture = UITexturingGUI::getSelectedTexture();
+  auto&& selectedTexture = UITexturingGUI::getSelectedTexture();
   TextureSet* ts = _chunk->textureSet;
   for (int i = 1; i < ts->num(); i++)
   {
@@ -88,7 +88,7 @@ void UITexturePicker::shiftSelectedTextureLeft()
 
 void UITexturePicker::shiftSelectedTextureRight()
 {
-  OpenGL::Texture* selectedTexture = UITexturingGUI::getSelectedTexture();
+  auto&& selectedTexture = UITexturingGUI::getSelectedTexture();
   TextureSet* ts = _chunk->textureSet;
   for (int i = 0; i < ts->num() - 1; i++)
   {

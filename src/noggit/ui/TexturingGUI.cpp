@@ -44,13 +44,13 @@ std::vector<std::string> textureNames;
 std::vector<std::string> specularTextureNames;
 bool showOnlySpecularTextures = true;
 std::vector<std::string> tilesetDirectories;
-std::vector<OpenGL::Texture*> gTexturesInList;
+std::vector<scoped_blp_texture_reference> gTexturesInList;
 
 //Texture Palette Window
 UICloseWindow  *windowTexturePalette;
 
 UITexture  *curTextures[64];
-OpenGL::Texture* gTexturesInPage[64];
+std::map<int, scoped_blp_texture_reference> gTexturesInPage;
 UIText *gPageNumber;
 
 //Selected Texture Window
@@ -78,7 +78,7 @@ UIText      *chunkTextureNames[4];
 UIText      *chunkTextureFlags[4];
 UIText      *chunkTextureEffectID[4];
 
-OpenGL::Texture* UITexturingGUI::selectedTexture = nullptr;
+boost::optional<scoped_blp_texture_reference> UITexturingGUI::selectedTexture = boost::none;
 
 void LoadTextureNames()
 {
@@ -170,7 +170,7 @@ int gCurrentPage;
 
 void showPage(int pPage)
 {
-  OpenGL::Texture* lSelectedTexture = UITexturingGUI::getSelectedTexture();
+  boost::optional<scoped_blp_texture_reference> lSelectedTexture = UITexturingGUI::getSelectedTexture();
 
   if (gPageNumber)
   {
@@ -182,12 +182,14 @@ void showPage(int pPage)
   int i = 0;
   const unsigned int lIndex = pal_cols * pal_rows * pPage;
 
-  for (std::vector<OpenGL::Texture*>::iterator lPageStart = gTexturesInList.begin() + (lIndex > gTexturesInList.size() ? 0 : lIndex); lPageStart != gTexturesInList.end(); lPageStart++)
+  gTexturesInPage.clear();
+
+  for (std::vector<scoped_blp_texture_reference>::iterator lPageStart = gTexturesInList.begin() + (lIndex > gTexturesInList.size() ? 0 : lIndex); lPageStart != gTexturesInList.end(); lPageStart++)
   {
     curTextures[i]->show();
     curTextures[i]->setTexture(*lPageStart);
     curTextures[i]->setHighlight(*lPageStart == lSelectedTexture);
-    gTexturesInPage[i] = *lPageStart;
+    gTexturesInPage.emplace (i, *lPageStart);
 
     if (++i >= (pal_cols * pal_rows))
     {
@@ -204,18 +206,7 @@ void showPage(int pPage)
 
 void updateTextures()
 {
-  for (OpenGL::Texture *tex : gTexturesInList)
-  {
-    tex->removeReference();
-  }
-
-  gTexturesInList.clear();
   gTexturesInList = TextureManager::getAllTexturesMatching(TextureInPalette);
-
-  for (OpenGL::Texture *tex : gTexturesInList)
-  {
-    tex->addReference();
-  }
 
   showPage(0);
 }
@@ -230,11 +221,11 @@ void changePage(UIFrame*, int direction)
 void UITexturingGUI::updateSelectedTexture()
 {
   if (textureSelected)
-    textureSelected->setTexture(UITexturingGUI::getSelectedTexture());
+    textureSelected->setTexture(*UITexturingGUI::getSelectedTexture());
   if (textSelectedTexture)
-    textSelectedTexture->setText(UITexturingGUI::getSelectedTexture()->filename());
+    textSelectedTexture->setText(UITexturingGUI::getSelectedTexture().get()->filename());
   if (textGui)
-    textGui->guiCurrentTexture->current_texture->setTexture(UITexturingGUI::getSelectedTexture());
+    textGui->guiCurrentTexture->current_texture->setTexture(*UITexturingGUI::getSelectedTexture());
 
 
 }
@@ -244,7 +235,7 @@ void texturePaletteClick(int id)
   if (curTextures[id]->hidden())
     return;
 
-  UITexturingGUI::setSelectedTexture(gTexturesInPage[id]);
+  UITexturingGUI::setSelectedTexture(gTexturesInPage.at (id));
 
   if (UITexturingGUI::getSelectedTexture())
   {
@@ -268,8 +259,7 @@ void LoadTileset(int id)
   {
     if (id == -1 || it->find(tilesetDirectories[id]) != std::string::npos)
     {
-      //! \todo Actually save the texture returned here and do no longer iterate over all cached textures.
-      TextureManager::newTexture(*it);
+      gTexturesInList.emplace_back (*it);
     }
   }
   updateTextures();
@@ -429,7 +419,7 @@ UIFrame* UITexturingGUI::createTexturePalette(UIMapViewGUI *setgui)
   windowTexturePalette->addChild(new UIButton(145.0f, windowTexturePalette->height() - 28.0f, 132.0f, 32.0f, "Load Tilesets", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureLoader, 0));
   windowTexturePalette->addChild(new UIButton(283.0f, windowTexturePalette->height() - 28.0f, 132.0f, 32.0f, "Filter Textures", "Interface\\Buttons\\UI-DialogBox-Button-Up.blp", "Interface\\Buttons\\UI-DialogBox-Button-Down.blp", showTextureFilter, 0));
 
-  std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->filename() : "tileset\\generic\\black.blp";
+  std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture.get()->filename() : "tileset\\generic\\black.blp";
 
   textureSelected = new UITexture(18.0f + pal_rows*68.0f, 32.0f, 336.0f, 336.0f, lTexture);
   windowTexturePalette->addChild(textureSelected);
@@ -672,16 +662,10 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
   chunkNumEffects->setText(ss.str().c_str());///
 }
 
-OpenGL::Texture* UITexturingGUI::getSelectedTexture(){
+boost::optional<scoped_blp_texture_reference> UITexturingGUI::getSelectedTexture(){
   return UITexturingGUI::selectedTexture;
 }
 
-void UITexturingGUI::setSelectedTexture(OpenGL::Texture * t){
-  if (UITexturingGUI::selectedTexture)
-  {
-    UITexturingGUI::selectedTexture->removeReference();
-  }
-  t->addReference();
-
+void UITexturingGUI::setSelectedTexture(scoped_blp_texture_reference t){
   UITexturingGUI::selectedTexture = t;
 }

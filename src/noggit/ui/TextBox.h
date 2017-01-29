@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include <noggit/TextureManager.h>
 #include <noggit/ui/Frame.h>
 #include <noggit/ui/Text.h>
 
@@ -18,8 +19,8 @@ public:
   typedef std::function<void(UITextBox::Ptr, const std::string&)> TriggerFunction;
 
 private:
-  OpenGL::Texture* _texture;
-  OpenGL::Texture* _textureFocused;
+  scoped_blp_texture_reference _texture;
+  scoped_blp_texture_reference _textureFocused;
 
   UIText::Ptr _uiText;
   std::string _value;
@@ -34,7 +35,6 @@ public:
   UITextBox(float xPos, float yPos, float w, float h, TriggerFunction enterFunction);
   UITextBox(float xPos, float yPos, float w, float h, const freetype::font_data& pFont);
   UITextBox(float xPos, float yPos, float w, float h, const freetype::font_data& pFont, TriggerFunction enterFunction);
-  virtual ~UITextBox();
 
   void render() const;
 

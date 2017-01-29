@@ -52,14 +52,17 @@ UITextureSwitcher::UITextureSwitcher(int x, int y)
   addChild(new UIButton(10, 30, (float)textureSize, 30, "swap ADT", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", swapADT, 0));
 }
 
-OpenGL::Texture*  UITextureSwitcher::getTextures()
+scoped_blp_texture_reference const& UITextureSwitcher::getTextures()
 {
   return _textureFrom->getTexture();
 }
 
 void UITextureSwitcher::setTexture()
 {
-  _textureFrom->setTexture(UITexturingGUI::getSelectedTexture());
+  if (!!UITexturingGUI::getSelectedTexture())
+  {
+    _textureFrom->setTexture(*UITexturingGUI::getSelectedTexture());
+  }
 }
 
 void UITextureSwitcher::setPosition(float setX, float setY)

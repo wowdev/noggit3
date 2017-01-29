@@ -17,8 +17,8 @@
 
 UISlider::UISlider(float xPos, float yPos, float w, float s, float o)
   : UIFrame(xPos, yPos, w, 10.0f)
-  , texture(TextureManager::newTexture("Interface\\Buttons\\UI-SliderBar-Border.blp"))
-  , sliderTexture(TextureManager::newTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal.blp"))
+  , texture ("Interface\\Buttons\\UI-SliderBar-Border.blp")
+  , sliderTexture ("Interface\\Buttons\\UI-SliderBar-Button-Horizontal.blp")
   , scale(s)
   , offset(o)
   , func(nullptr)
@@ -26,12 +26,6 @@ UISlider::UISlider(float xPos, float yPos, float w, float s, float o)
   , value(0.5f)
 {
   clickable(true);
-}
-
-UISlider::~UISlider()
-{
-  TextureManager::delbyname("Interface\\Buttons\\UI-SliderBar-Border.blp");
-  TextureManager::delbyname("Interface\\Buttons\\UI-SliderBar-Button-Horizontal.blp");
 }
 
 void UISlider::setFunc(void(*f)(float val))

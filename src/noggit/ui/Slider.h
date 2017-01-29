@@ -5,15 +5,14 @@
 #include <string>
 #include <boost/function.hpp>
 
+#include <noggit/TextureManager.h>
 #include <noggit/ui/Frame.h>
-
-namespace OpenGL { class Texture; }
 
 class UISlider : public UIFrame
 {
 protected:
-  OpenGL::Texture* texture;
-  OpenGL::Texture* sliderTexture;
+  scoped_blp_texture_reference texture;
+  scoped_blp_texture_reference sliderTexture;
   float scale;
   float offset;
   std::function<void(float)> func;
@@ -26,7 +25,6 @@ public:
   void setValue(float f);
   void setText(const std::string& text);
   UISlider(float x, float y, float width, float s, float o);
-  ~UISlider();
   UIFrame* processLeftClick(float mx, float my);
   bool processLeftDrag(float mx, float my, float xChange, float yChange);
   void render() const;

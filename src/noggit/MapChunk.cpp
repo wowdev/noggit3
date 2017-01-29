@@ -621,7 +621,8 @@ void MapChunk::draw (Frustum const& frustum)
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
 
-  bool cantPaint = !canPaintTexture(UITexturingGUI::getSelectedTexture())
+  bool cantPaint = UITexturingGUI::getSelectedTexture()
+                 && !canPaintTexture(*UITexturingGUI::getSelectedTexture())
                  && Environment::getInstance()->highlightPaintableChunks
                  && terrainMode == 2;
 
@@ -1132,22 +1133,22 @@ void MapChunk::eraseTextures()
   textureSet->eraseTextures();
 }
 
-int MapChunk::addTexture(OpenGL::Texture* texture)
+int MapChunk::addTexture(scoped_blp_texture_reference texture)
 {
   return textureSet->addTexture(texture);
 }
 
-void MapChunk::switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
+void MapChunk::switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture)
 {
   textureSet->switchTexture(oldTexture, newTexture);
 }
 
-bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
+bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
   return textureSet->paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, texture);
 }
 
-bool MapChunk::canPaintTexture(OpenGL::Texture* texture)
+bool MapChunk::canPaintTexture(scoped_blp_texture_reference texture)
 {
   return textureSet->canPaintTexture(texture);
 }

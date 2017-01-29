@@ -9,6 +9,7 @@
 #include <noggit/Manager.h>
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/ModelManager.h>
+#include <noggit/TextureManager.h>
 #include <noggit/Video.h>
 #include <opengl/call_list.hpp>
 
@@ -91,7 +92,7 @@ struct WMOMaterial {
   uint32_t texture1; // this is the first texture object. of course only in RAM. leave this alone. :D
   uint32_t texture2; // this is the second texture object.
   // read up to here -_-
-  OpenGL::Texture* _texture;
+  boost::optional<scoped_blp_texture_reference> _texture;
 };
 
 struct WMOLight {
