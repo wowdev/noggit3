@@ -67,11 +67,18 @@ void ModelInstance::draw (Frustum const& frustum, bool force_box)
 
   opengl::scoped::matrix_pusher const matrix;
 
-  gl.translatef(pos.x, pos.y, pos.z);
-  gl.rotatef(dir.y - 90.0f, 0.0f, 1.0f, 0.0f);
-  gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
-  gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
-  gl.scalef(sc, sc, sc);
+  math::matrix_4x4 const model_matrix
+    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation
+                       , { math::degrees (dir.z)
+                         , math::degrees (dir.y - 90.0f)
+                         , math::degrees (-dir.x)
+                         }
+                       )
+    * math::matrix_4x4 (math::matrix_4x4::scale, sc)
+    );
+
+  gl.multMatrixf (model_matrix.transposed());
 
   if (Settings::getInstance()->renderModelsWithBox)
   {
