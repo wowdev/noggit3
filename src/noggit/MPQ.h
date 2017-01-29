@@ -103,3 +103,11 @@ private:
   static std::string getAlternateDiskPath(const std::string& pFilename, const std::string& pDiscpath);
   static std::string getMPQPath(const std::string& pFilename);
 };
+
+namespace noggit
+{
+  namespace mpq
+  {
+    std::string normalized_filename (std::string filename);
+  }
+}

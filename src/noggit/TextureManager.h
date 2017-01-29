@@ -2,23 +2,24 @@
 
 #pragma once
 
+#include <noggit/Video.h>
+#include <noggit/multimap_with_normalized_key.hpp>
+
 #include <map>
 #include <string>
 #include <vector>
 
-namespace OpenGL
+struct blp_texture : public OpenGL::Texture
 {
-  class Texture;
-}
+  blp_texture (std::string filename)
+  {
+    loadFromBLP (filename);
+  }
+};
 
 struct scoped_blp_texture_reference;
 class TextureManager
 {
-private:
-  friend struct scoped_blp_texture_reference;
-  static void delbyname(std::string name);
-  static OpenGL::Texture* newTexture(std::string name);
-
 public:
   static void report();
 
@@ -27,25 +28,25 @@ public:
   static std::vector<scoped_blp_texture_reference> getAllTexturesMatching(bool(*function)(const std::string& name));
 
 private:
-  typedef std::map<std::string, OpenGL::Texture*> mapType;
-  static mapType items;
+  friend struct scoped_blp_texture_reference;
+  static noggit::multimap_with_normalized_key<blp_texture> _;
 };
 
 struct scoped_blp_texture_reference
 {
   scoped_blp_texture_reference (std::string const& filename)
     : _filename (filename)
-    , _blp_texture (TextureManager::newTexture (_filename))
+    , _blp_texture (TextureManager::_.emplace (_filename))
   {}
 
   scoped_blp_texture_reference (scoped_blp_texture_reference const& other)
     : _filename (other._filename)
-    , _blp_texture (other._blp_texture ? TextureManager::newTexture (_filename) : nullptr)
+    , _blp_texture (other._blp_texture ? TextureManager::_.emplace (_filename) : nullptr)
   {}
   scoped_blp_texture_reference& operator= (scoped_blp_texture_reference const& other)
   {
     _filename = other._filename;
-    _blp_texture = other._blp_texture ? TextureManager::newTexture (_filename) : nullptr;
+    _blp_texture = other._blp_texture ? TextureManager::_.emplace (_filename) : nullptr;
     return *this;
   }
 
@@ -67,11 +68,11 @@ struct scoped_blp_texture_reference
   {
     if (_blp_texture)
     {
-      TextureManager::delbyname (_filename);
+      TextureManager::_.erase (_filename);
     }
   }
 
-  OpenGL::Texture* operator->() const
+  blp_texture* operator->() const
   {
     return _blp_texture;
   }
@@ -83,5 +84,5 @@ struct scoped_blp_texture_reference
 
 private:
   std::string _filename;
-  OpenGL::Texture* _blp_texture;
+  blp_texture* _blp_texture;
 };

@@ -9,7 +9,6 @@
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/AsyncObject.h> // AsyncObject
 #include <noggit/MPQ.h>
-#include <noggit/Manager.h> // ManagedItem
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
 #include <noggit/TextureManager.h>
@@ -132,7 +131,7 @@ struct ModelLight {
   void setup(int time, OpenGL::Light l);
 };
 
-class Model : public ManagedItem, public AsyncObject {
+class Model : public AsyncObject {
 
   GLuint ModelDrawList;
   //GLuint TileModeModelDrawList;

@@ -52,8 +52,7 @@ const std::string& WMO::filename() const
 }
 
 WMO::WMO(const std::string& filenameArg)
-  : ManagedItem()
-  , _filename(filenameArg)
+  : _filename(filenameArg)
 {
   MPQFile f(_filename);
   if (f.isEof()) {
@@ -941,46 +940,15 @@ void WMOFog::setup()
   gl.disable(GL_FOG);
 }
 
-WMOManager::mapType WMOManager::items;
+decltype (WMOManager::_) WMOManager::_;
 
 void WMOManager::report()
 {
   std::string output = "Still in the WMO manager:\n";
-  for (mapType::iterator t = items.begin(); t != items.end(); ++t)
-  {
-    output += "- " + t->first + "\n";
-  }
+  _.apply ( [&] (std::string const& key, WMO const&)
+            {
+              output += " - " + key + "\n";
+            }
+          );
   LogDebug << output;
-}
-
-WMO* WMOManager::add(std::string name)
-{
-  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-  if (items.find(name) == items.end())
-  {
-    items[name] = new WMO(name);
-    //! \todo Uncomment this, if loading is threaded.
-    //items[name]->finishLoading();
-    //app.loader()->addObject( items[name] );
-  }
-
-  items[name]->addReference();
-  return items[name];
-}
-
-void WMOManager::delbyname(std::string name)
-{
-  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-  if (items.find(name) != items.end())
-  {
-    items[name]->removeReference();
-
-    if (items[name]->hasNoReferences())
-    {
-      delete items[name];
-      items.erase(items.find(name));
-    }
-  }
 }

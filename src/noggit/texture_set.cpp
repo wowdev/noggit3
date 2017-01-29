@@ -80,8 +80,6 @@ int TextureSet::addTexture(scoped_blp_texture_reference texture)
     texLevel = nTextures;
     nTextures++;
 
-    texture->addReference();
-
     textures.emplace_back (texture);
     animated[texLevel] = 0;
     texFlags[texLevel] = 0;
