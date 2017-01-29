@@ -30,6 +30,7 @@ public:
   UICheckBox(float, float, const std::string&);
   UICheckBox(float, float, const std::string&, UIToggleGroup *, int);
   UICheckBox(float xPos, float yPos, const std::string& pText, ClickFunction function, int pClickFuncParameter);
+  UICheckBox (float x, float y, std::string const& name, bool* value);
   void SetToggleGroup(UIToggleGroup *, int);
   void setText(const std::string&);
   void setState(bool);

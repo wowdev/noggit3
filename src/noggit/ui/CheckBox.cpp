@@ -56,6 +56,12 @@ UICheckBox::UICheckBox(float xPos, float yPos, const std::string& pText, UIToggl
   mToggleGroup->Add(this, pToggleID);
 }
 
+UICheckBox::UICheckBox (float x, float y, std::string const& name, bool* value)
+  : UICheckBox (x, y, name, [value] (bool v, int) { *value = v; }, 0)
+{
+  setState (*value);
+}
+
 void UICheckBox::SetToggleGroup(UIToggleGroup * pToggleGroup, int pToggleID)
 {
   mToggleGroup = pToggleGroup;
