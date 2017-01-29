@@ -1138,12 +1138,17 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
   // only check when using the ObjectEditor
   if (!pOnlyMap && terrainMode == 9)
   {
+    bool const render_hidden (Environment::getInstance()->showModelFromHiddenList);
+
     if (drawmodels)
     {
       for (auto&& model_instance : mModelInstances)
       {
-        //! \todo don't intersect with _hidden_models
-        model_instance.second.intersect (ray, &results);
+        bool const is_hidden (_hidden_models.count (model_instance.second.model.get()));
+        if (!is_hidden || render_hidden)
+        {
+          model_instance.second.intersect (ray, &results);
+        }
       }
     }
 
@@ -1151,8 +1156,11 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
     {
       for (auto&& wmo_instance : mWMOInstances)
       {
-        //! \todo don't intersect with _hidden_map_objects
-        wmo_instance.second.intersect (ray, &results);
+        bool const is_hidden (_hidden_map_objects.count (wmo_instance.second.wmo.get()));
+        if (!is_hidden || render_hidden)
+        {
+          wmo_instance.second.intersect (ray, &results);
+        }
       }
     }
   }
