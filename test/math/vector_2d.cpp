@@ -12,7 +12,7 @@ namespace math
       BOOST_REQUIRE_EQUAL (v.y, 0.0f);
     }
     {
-      vector_2d const v (1.0f);
+      vector_2d const v (1.0f, 0.0f);
       BOOST_REQUIRE_EQUAL (v.x, 1.0f);
       BOOST_REQUIRE_EQUAL (v.y, 0.0f);
     }
@@ -27,8 +27,8 @@ namespace math
 
   BOOST_AUTO_TEST_CASE (equality)
   {
-    BOOST_REQUIRE_EQUAL (vector_2d{}, vector_2d{});
-    BOOST_REQUIRE_NE (vector_2d {1.0f}, vector_2d{});
+    BOOST_REQUIRE_EQUAL ((vector_2d{0.f, 0.f}), vector_2d{});
+    BOOST_REQUIRE_NE ((vector_2d {1.0f, 0.0f}), vector_2d{});
     BOOST_REQUIRE_NE ((vector_2d {0.0f, 1.0f}), vector_2d{});
     BOOST_REQUIRE_EQUAL ((vector_2d {0.0f, 1.0f}), (vector_2d {0.0f, 1.0f}));
   }

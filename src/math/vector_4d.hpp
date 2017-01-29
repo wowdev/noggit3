@@ -20,11 +20,8 @@ namespace math
       };
     };
 
-    vector_4d ( const float& x_ = 0.0f
-              , const float& y_ = 0.0f
-              , const float& z_ = 0.0f
-              , const float& w_ = 0.0f
-              )
+    vector_4d() : vector_4d (0.f, 0.f, 0.f, 0.f) {}
+    vector_4d (float x_, float y_, float z_, float w_)
       : x (x_)
       , y (y_)
       , z (z_)

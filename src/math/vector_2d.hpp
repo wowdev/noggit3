@@ -21,7 +21,8 @@ namespace math
       };
     };
 
-    vector_2d (float x_ = 0.0f, float y_ = 0.0f)
+    vector_2d() : vector_2d (0.f, 0.f) {}
+    vector_2d (float x_, float y_)
       : x (x_)
       , y (y_)
     {}

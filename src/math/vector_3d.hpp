@@ -26,7 +26,8 @@ namespace math
       };
     };
 
-    vector_3d_base<T> (T x_ = 0.0f, T y_ = 0.0f, T z_ = 0.0f)
+    vector_3d_base<T>() : vector_3d_base (0.f, 0.f, 0.f) {}
+    vector_3d_base<T> (T x_, T y_, T z_)
       : x (x_)
       , y (y_)
       , z (z_)
