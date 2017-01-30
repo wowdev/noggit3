@@ -35,7 +35,6 @@ private:
   UIButton *addWater;
   UIButton *cropWater;
   UISlider *waterGenFactor;
-  UICheckBox *displayAllLayers;
   UIText *waterLayer;
 
   tile_index tile;

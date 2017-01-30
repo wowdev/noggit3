@@ -110,31 +110,6 @@ void SaveObjecttoTXT(UIFrame* f, int)
   (static_cast<UIObjectEditor *>(f->parent())->modelImport->builModelList());
 }
 
-void toggleRandomRotation(bool b, int)
-{
-  Settings::getInstance()->random_rotation = b;
-}
-
-void toggleRandomTilt(bool b, int)
-{
-  Settings::getInstance()->random_tilt = b;
-}
-
-void toggleRandomSize(bool b, int)
-{
-  Settings::getInstance()->random_size = b;
-}
-
-void toggleCopyModelStats(bool b, int)
-{
-  Settings::getInstance()->copyModelStats = b;
-}
-
-void toggleMoveModelToCursorPos(bool b, int)
-{
-  Environment::getInstance()->moveModelToCursorPos = b;
-}
-
 void updateHiddenModelsVisibility(UIFrame*, int)
 {
   Environment::getInstance()->showModelFromHiddenList = !Environment::getInstance()->showModelFromHiddenList;
@@ -180,11 +155,11 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
   tb->value(misc::floatToStr(env->maxScale));
   addChild(tb);
 
-  addChild(new UICheckBox(5.0f, 35.0f, "Random rotation", toggleRandomRotation, 0));
-  addChild(new UICheckBox(5.0f, 60.0f, "Random tilt", toggleRandomTilt, 0));
-  addChild(new UICheckBox(5.0f, 85.0f, "Random scale", toggleRandomSize, 0)); 
+  addChild(new UICheckBox(5.0f, 35.0f, "Random rotation", &Settings::getInstance()->random_rotation));
+  addChild(new UICheckBox(5.0f, 60.0f, "Random tilt", &Settings::getInstance()->random_tilt));
+  addChild(new UICheckBox(5.0f, 85.0f, "Random scale", &Settings::getInstance()->random_size));
 
-  UICheckBox* copyCB = new UICheckBox(5.0f, 110.0f, "Copy model rotation / scale / tilt", toggleCopyModelStats, 0);
+  UICheckBox* copyCB = new UICheckBox(5.0f, 110.0f, "Copy model rotation / scale / tilt", &Settings::getInstance()->copyModelStats);
   copyCB->setState(Settings::getInstance()->copyModelStats);
   addChild(copyCB);
 
@@ -199,9 +174,7 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
 
   pasteModeGroup->Activate(pasteMode);
 
-  UICheckBox* moveToCursorCB = new UICheckBox(5.0f, 215.0f, "Model movement mode: to cursor pos", toggleMoveModelToCursorPos, 0);
-  moveToCursorCB->setState(Environment::getInstance()->moveModelToCursorPos);
-  addChild(moveToCursorCB);
+  addChild(new UICheckBox(5.0f, 215.0f, "Model movement mode: to cursor pos", &Environment::getInstance()->moveModelToCursorPos));
 
   addChild(new UIText(190.0f, 250.0f, "Import:", app.getArial14(), eJustifyLeft));
   addChild(new UIButton(190.0f, 270.0f, 75.0f, 30.0f, "To txt", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", SaveObjecttoTXT, 0));
