@@ -2,32 +2,9 @@
 
 #pragma once
 
-// #define USEBLSFILES
+#include <noggit/liquid_render.hpp>
+#include <noggit/MapHeaders.h>
 
-class Liquid;
-
-#include <noggit/MPQ.h>
-#include <noggit/MapTile.h>
-#ifdef USEBLSFILES
-#include <noggit/Shaders.h>
-#endif
-#include <noggit/Video.h>
-#include <noggit/WMO.h>
-#include <noggit/TextureManager.h>
-
-#include <string>
-#include <vector>
-
-namespace opengl
-{
-  class call_list;
-}
-
-//static int lCount = 0;
-
-void loadWaterShader();
-
-const float LQ_DEFAULT_TILESIZE = CHUNKSIZE / 8.0f;
 
 struct MH2O_Tile
 {
@@ -46,22 +23,25 @@ struct MH2O_Tile
     mMinimum = 0.0f;
     mMaximum = 0.0f;
     for (int i = 0; i < 8; ++i)
+    {
       for (int j = 0; j < 8; j++)
+      {
         mRender[i][j] = false;
+      }        
+    }
 
     for (int i = 0; i < 9; ++i)
+    {
       for (int j = 0; j < 9; j++)
       {
-      mHeightmap[i][j] = 0.0f;
-      mDepth[i][j] = 255.0f;
+        mHeightmap[i][j] = 0.0f;
+        mDepth[i][j] = 255.0f;
       }
+    }      
   }
 };
 
-struct LiquidVertex {
-  unsigned char c[4];
-  float h;
-};
+
 
 // handle liquids like oceans, lakes, rivers, slime, magma
 class Liquid
@@ -69,39 +49,25 @@ class Liquid
 public:
 
   Liquid(int x, int y, math::vector_3d base, float ptilesize = LQ_DEFAULT_TILESIZE);
-  ~Liquid();
 
-  void initFromWMO(MPQFile* f, const WMOMaterial &mat, bool indoor);
   void initFromMH2O(MH2O_Tile &pTileInfo);
 
-  void draw();
+  void draw() { render->draw(); }
 
 private:
   int mShaderType;
   int mLiquidType;
   bool mTransparency;
-
+  
   int xtiles, ytiles;
-  opengl::call_list* mDrawList;
 
   math::vector_3d pos;
 
   float tilesize;
   float ydir;
   float texRepeats;
-
-  void initGeometry(MPQFile* f);
-
-  template<int pFirst, int pLast>
-  void initTextures(const std::string& pFilename);
-
   int type;
-  std::vector<scoped_blp_texture_reference> textures;
   math::vector_3d col;
-  int tmpflag;
-  bool trans;
 
-  //int number;
-  MH2O_Tile mTileData;
-
+  std::unique_ptr<liquid_render> render;
 };
