@@ -24,7 +24,10 @@ std::vector<scoped_blp_texture_reference> TextureManager::getAllTexturesMatching
   std::vector<scoped_blp_texture_reference> results;
   _.apply ( [&] (std::string const& key, blp_texture const&)
             {
-              results.emplace_back (key);
+              if (function (key))
+              {
+                results.emplace_back (key);
+              }
             }
           );
   return results;
