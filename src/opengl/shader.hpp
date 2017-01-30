@@ -68,8 +68,9 @@ namespace opengl
       use_program& operator= (use_program&&) = delete;
 
       void uniform (std::string const& name, std::vector<int> const&);
-      void uniform (std::string const& name, int);
-      void uniform (std::string const& name, float);
+      void uniform (std::string const& name, GLint);
+      void uniform (std::string const& name, GLuint);
+      void uniform (std::string const& name, GLfloat);
       void uniform (std::string const& name, math::vector_3d const&);
       void uniform (std::string const& name, math::vector_4d const&);
       void uniform (std::string const& name, math::matrix_4x4 const&);

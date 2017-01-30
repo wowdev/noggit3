@@ -809,6 +809,11 @@ namespace opengl
     verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
     return glUniform1i (location, value);
   }
+  void context::uniform1ui (GLint location, GLuint value)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glUniform1ui (location, value);
+  }
   void context::uniform1f (GLint location, GLfloat value)
   {
     verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
