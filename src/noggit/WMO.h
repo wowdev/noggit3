@@ -25,7 +25,7 @@ class WMO;
 class WMOGroup;
 class WMOInstance;
 class WMOManager;
-class Liquid;
+class wmo_liquid;
 class Model;
 
 struct WMOBatch {
@@ -46,7 +46,7 @@ class WMOGroup {
   int32_t fog;
   int32_t nDoodads, nBatches;
   int16_t *ddr;
-  Liquid *lq;
+  wmo_liquid *lq;
   std::vector< std::pair<opengl::call_list*, bool> > _lists;
 
   std::vector<math::vector_3d> vertices;

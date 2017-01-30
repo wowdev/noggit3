@@ -2,7 +2,7 @@
 
 #include <noggit/Environment.h>
 #include <noggit/Frustum.h>
-#include <noggit/Liquid.h>
+#include <noggit/wmo_liquid.hpp>
 #include <noggit/Log.h> // LogDebug
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/Shaders.h>
@@ -598,11 +598,7 @@ void WMOGroup::initDisplayList()
       WMOLiquidHeader hlq;
       gf.read(&hlq, 0x1E);
 
-      //gLog("WMO Liquid: %dx%d, %dx%d, (%f,%f,%f) %d\n", hlq.X, hlq.Y, hlq.A, hlq.B, hlq.pos.x, hlq.pos.y, hlq.pos.z, hlq.type);
-
-      // Do not even try to render water (nonamed programmer)... I'll try (beket) =))
-      lq = new Liquid(hlq.A, hlq.B, math::vector_3d (hlq.pos.x, hlq.pos.z, -hlq.pos.y));
-      lq->initFromWMO(&gf, wmo->mat[hlq.type], (flags & 0x2000) != 0);
+      lq = new wmo_liquid(&gf, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
     }
 
     //! \todo  figure out/use MFOG ?
