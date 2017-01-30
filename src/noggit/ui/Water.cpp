@@ -136,12 +136,7 @@ UIWater::UIWater(UIMapViewGUI *setGui)
     );
   addChild(cropWater);
 
-  displayAllLayers = new UICheckBox(5.0f, 270.0f, "Show all layers", [] (bool b, int)
-  {
-    Environment::getInstance()->displayAllWaterLayers = b;
-  }, 0);
-  displayAllLayers->setState(Environment::getInstance()->displayAllWaterLayers);
-  addChild(displayAllLayers);
+  addChild(new UICheckBox(5.0f, 270.0f, "Show all layers", &Environment::getInstance()->displayAllWaterLayers));
 
   UIText *txt = new UIText(5.0f, 300.0f, app.getArial12(), eJustifyLeft);
   txt->setText("Current layer:");

@@ -51,9 +51,7 @@ namespace ui
 
     addChild(new UIText(5.0f, 130.0f, "Flatten options:", app.getArial14(), eJustifyLeft));
 
-    _angle_checkbox = new UICheckBox(6.0f, 150.0f, "Flatten Angle", [&](bool b, int) { _angled_mode = b; }, 0);
-    _angle_checkbox->setState(_angled_mode);
-    addChild(_angle_checkbox);
+    addChild (_angle_checkbox = new UICheckBox(6.0f, 150.0f, "Flatten Angle", &_angled_mode));
 
     _angle_slider = new UISlider(6.0f, 190.0f, 167.0f, 89.0f, 0.00001f);
     _angle_slider->setFunc( [&] (float f) { _angle = f; });
@@ -68,9 +66,7 @@ namespace ui
     addChild(_orientation_slider);
 
 
-    _lock_checkbox = new UICheckBox(5.0f, 235.0f, "flatten relative to:", [&] (bool b, int) { _locked = b; }, 0);
-    _lock_checkbox->setState(_locked);
-    addChild(_lock_checkbox);
+    addChild (_lock_checkbox = new UICheckBox(5.0f, 235.0f, "flatten relative to:", &_locked));
 
     addChild(new UIText(5.0f, 265.0f, "X:", app.getArial12(), eJustifyLeft));
     _lock_x = new UITextBox(50.0f, 265.0f, 100.0f, 30.0f, app.getArial12(), [&] (UITextBox::Ptr ptr, const std::string str) 

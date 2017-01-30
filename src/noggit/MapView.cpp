@@ -168,11 +168,6 @@ void setTextureBrushPressure(float f)
   brushPressure = f;
 }
 
-void toggleSprayBrush(bool b, int)
-{
-  sprayBrushActive = b;
-}
-
 void setSprayBrushSize(float f)
 {
   brushSpraySize = f;
@@ -707,7 +702,7 @@ void MapView::createGUI()
                                             )
                            );
 
-  toggleSpray = new UICheckBox(3.0f, 138.0f, "Toggle spray", toggleSprayBrush, 0);
+  toggleSpray = new UICheckBox(3.0f, 138.0f, "Toggle spray", &sprayBrushActive);
   settings_paint->addChild(toggleSpray);
 
   spray_size = new UISlider(6.0f, 180.0f, 170.0f, 40.0f, 0.0001f);
