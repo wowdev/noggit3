@@ -24,6 +24,8 @@
 #include <noggit/ui/Toolbar.h> // Toolbar
 #include <noggit/Video.h>
 
+#include <unordered_set>
+
 //! \todo  Get this whole thing in a seperate class.
 
 //! \todo  Get this via singleton.
@@ -41,8 +43,8 @@ std::map<int, std::string> gFilenameFilters;
 std::vector<std::string> gActiveFilenameFilters;
 std::vector<std::string> gActiveDirectoryFilters;
 std::vector<std::string> textureNames;
-std::vector<std::string> specularTextureNames;
 bool showOnlySpecularTextures = true;
+std::unordered_set<std::string> textures_with_specular_variant;
 std::vector<std::string> tilesetDirectories;
 std::vector<scoped_blp_texture_reference> gTexturesInList;
 
@@ -93,17 +95,19 @@ void LoadTextureNames()
 
   for (std::list<std::string>::iterator it = gListfile.begin(); it != gListfile.end(); ++it)
   {
-    if (it->find("tileset") != std::string::npos)
+    auto&& normalized (noggit::mpq::normalized_filename (*it));
+    if (normalized.find("tileset") != std::string::npos)
     {
       tilesetsfound = true;
-      if (it->find("_s.blp") == std::string::npos)
+      auto suffix_pos (normalized.find ("_s.blp"));
+      if (suffix_pos  == std::string::npos)
       {
-        textureNames.push_back(*it);
+        textureNames.push_back (normalized);
       }
       else
       {
-        it->replace(it->find("_s"), sizeof("_s") - 1, "");
-        specularTextureNames.push_back(*it);
+        normalized.erase (suffix_pos, strlen ("_s"));
+        textures_with_specular_variant.emplace (normalized);
       }
     }
     else
@@ -135,9 +139,11 @@ bool TextureInPalette(const std::string& pFName)
 
   if (showOnlySpecularTextures)
   {
-    if (!std::any_of(std::begin(specularTextureNames), std::end(specularTextureNames), [&](std::string i) { return i == pFName; })) return false;
+    if (!textures_with_specular_variant.count (pFName))
+    {
+      return false;
+    }
   }
-
 
   if (gActiveFilenameFilters.size())
   {
