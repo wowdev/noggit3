@@ -153,9 +153,22 @@ WMO::WMO(const std::string& filenameArg)
     else if (fourcc == 'MODD') {
       nModels = size / 0x28;
       for (unsigned int i = 0; i<nModels; ++i) {
-        int ofs;
-        f.read(&ofs, 4);
-        modelis.push_back(ModelInstance (ddnames + ofs, &f));
+        struct
+        {
+          uint32_t name_offset : 24;
+          uint32_t flag_AcceptProjTex : 1;
+          uint32_t flag_0x2 : 1;
+          uint32_t flag_0x4 : 1;
+          uint32_t flag_0x8 : 1;
+          uint32_t : 4;
+        } x;
+
+        size_t after_entry (f.getPos() + 0x28);
+        f.read (&x, sizeof (x));
+
+        modelis.push_back(ModelInstance (ddnames + x.name_offset, &f));
+
+        f.seek (after_entry);
       }
 
     }
