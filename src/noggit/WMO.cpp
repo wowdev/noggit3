@@ -160,7 +160,7 @@ WMO::WMO(const std::string& filenameArg)
           uint32_t flag_0x2 : 1;
           uint32_t flag_0x4 : 1;
           uint32_t flag_0x8 : 1;
-          uint32_t : 4;
+          uint32_t flags_unused : 4;
         } x;
 
         size_t after_entry (f.getPos() + 0x28);
