@@ -1071,11 +1071,11 @@ void MapTile::saveTile(bool saveAllModels)
 
 void MapTile::CropWater()
 {
-  for (int i = 0; i < 16; ++i)
+  for (int z = 0; z < 16; ++z)
   {
-    for (int j = 0; j < 16; ++j)
+    for (int x = 0; x < 16; ++x)
     {
-      Water->CropMiniChunk(i, j, mChunks[i][j]);
+      Water->CropMiniChunk(x, z, mChunks[z][x]);
     }
   }
 }

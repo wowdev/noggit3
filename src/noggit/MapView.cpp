@@ -813,13 +813,6 @@ void MapView::createGUI()
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear duplicate models"
                                              , [] { gWorld->delete_duplicate_model_and_wmo_instances(); }
                                              );
-  mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear water"
-                                             , [] { gWorld->deleteWaterLayer(gWorld->camera); }
-                                             );
-  mbar->GetMenu("Assist")->AddMenuItemButton ( "Create water"
-                                             , [] { gWorld->addWaterLayer(gWorld->camera); }
-                                             );
-
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Loaded ADTs");
   mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded ADTs)", [] { gWorld->fixAllGaps(); });
 
@@ -1488,14 +1481,6 @@ void MapView::tick(float t, float dt)
             auto lSelection = gWorld->GetCurrentSelection();
             MapChunk* chnk = boost::get<selected_chunk_type> (*Selection).chunk;
 
-            if (_mod_shift_down)
-            {
-              gWorld->addWaterLayerChunk({chnk->xbase, 0.f, chnk->zbase}, chnk->px, chnk->py);
-            }
-            if (_mod_ctrl_down && !_mod_alt_down)
-            {
-              gWorld->delWaterLayerChunk({chnk->xbase, 0.f, chnk->zbase}, chnk->px, chnk->py);
-            }
             if (_mod_alt_down && !_mod_ctrl_down)
             {
               gWorld->mapIndex->setWater(true, _cursor_pos);
@@ -1879,12 +1864,6 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
   if (e->keysym.sym == SDLK_KP9)
     keyr = -1;
 
-  if (e->keysym.sym == SDLK_KP0)
-    if (terrainMode == 6)
-    {
-      gWorld->setWaterHeight(tile_index(gWorld->camera), 0.0f);
-      mainGui->guiWater->updateData();
-    }
 
   // copy model to clipboard
   if (e->keysym.sym == SDLK_c)
@@ -2061,35 +2040,11 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
         textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
         paint_brush->setValue(textureBrush.getRadius() / 100.0f);
         break;
-      case 6:
-        tile_index tile(gWorld->camera);
-        gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 2.0f));
-        mainGui->guiWater->updateData();
-        break;
       }
     }
     else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
     {
-      if (terrainMode == 6)
-      {
-        tile_index tile(gWorld->camera);
-
-        if (_mod_shift_down)
-        {
-          gWorld->setWaterTrans(gWorld->camera, static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(tile)) + 1)));
-        }
-        else if (_mod_ctrl_down)
-        {
-          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 5.0f));
-        }
-        else
-        {
-          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 1.0f));
-        }
-
-        mainGui->guiWater->updateData();
-      }
-      else if (_mod_shift_down)
+      if (_mod_shift_down)
       {
         gWorld->fogdistance += 60.0f;// fog change only when no model is selected!
       }
@@ -2117,34 +2072,11 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
         textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
         paint_brush->setValue(textureBrush.getRadius() / 100);
         break;
-      case 6:
-        tile_index tile(gWorld->camera);
-        gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 2.0f));
-        mainGui->guiWater->updateData();
-        break;
       }
     }
     else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
     {
-      if (terrainMode == 6)
-      {
-        tile_index tile(gWorld->camera);
-        if (_mod_shift_down)
-        {
-          gWorld->setWaterTrans(gWorld->camera, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(tile))) - 1));
-        }
-        else if (_mod_ctrl_down)
-        {
-          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 5.0f));
-        }
-        else
-        {
-          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 1.0f));
-        }
-
-        mainGui->guiWater->updateData();
-      }
-      else if (_mod_shift_down)
+      if (_mod_shift_down)
       {
         gWorld->fogdistance -= 60.0f;// fog change only when no model is selected!
       }

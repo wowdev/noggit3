@@ -31,61 +31,7 @@ UIWater::UIWater(UIMapViewGUI *setGui)
   addChild(new UIText(78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter));
 
 
-  waterOpacity = new UISlider(5.0f, 40.0f, 169.0f, 255.0f, 0.0f);
-  waterOpacity->setValue(1);
-  waterOpacity->setText("Opacity: ");
-  waterOpacity->setFunc(boost::bind(&UIWater::setWaterTrans, this, _1));
-  addChild(waterOpacity);
-  addChild(new UIText(5.0f, 50.0f, "shift + numpad +/-", app.getArial12(), eJustifyLeft));
-
-  addChild(new UIText(60.0f, 74.0f, "Level: ", app.getArial12(), eJustifyLeft));
-  waterLevel = new UIText(95.0f, 74.0f, "0.0", app.getArial12(), eJustifyLeft);
-  addChild(waterLevel);
-
-  addChild(new UIButton(5.0f, 90.0f, 38.0f, 30.0f,
-    "-100",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this] { changeWaterHeight (-100.f); }
-    ));
-
-  addChild(new UIButton(45.0f, 90.0f, 23.0f, 30.0f,
-    "-10",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this] { changeWaterHeight (-10.f); }
-    ));
-
-  addChild(new UIButton(70.0f, 90.0f, 19.0f, 30.0f,
-    "-1",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this] { changeWaterHeight (-1.f); }
-    ));
-
-  addChild(new UIButton(91.0f, 90.0f, 19.0f, 30.0f,
-    "+1",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this] { changeWaterHeight (1.f); }
-    ));
-
-  addChild(new UIButton(112.0f, 90.0f, 23.0f, 30.0f,
-    "+10",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this] { changeWaterHeight (10.f); }
-    ));
-
-  addChild(new UIButton(137.0f, 90.0f, 38.0f, 30.0f,
-    "+100",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this] { changeWaterHeight (100.f); }
-    ));
-  addChild(new UIText(5.0f, 108.f, "numpad +/- (alt *2, ctrl *5)", app.getArial12(), eJustifyLeft));
-
-  waterType = new UIButton(5.0f, 135.0f, 170.0f, 30.0f,
+  waterType = new UIButton(5.0f, 130.0f, 170.0f, 30.0f,
     "Type: none",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
@@ -94,35 +40,19 @@ UIWater::UIWater(UIMapViewGUI *setGui)
 
   addChild(waterType);
 
-  waterGenFactor = new UISlider(5.0f, 185.0f, 169.0f, 100.0f, 0.0f);
-  waterGenFactor->setValue(0.5f);
-  waterGenFactor->setText("Opacity Gen Factor: ");
-  addChild(waterGenFactor);
-
-  waterGen = new UIButton(5.0f, 205.0f, 170.0f, 30.0f,
-    "Auto Opacity",
+  addChild(new UIText(5.0f, 170.0f, "Auto transparency:", app.getArial12(), eJustifyLeft));
+  addChild(new UIButton(5.0f, 190.0f, 75.0f, 30.0f,
+    "River",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this]
-    {
-      gWorld->autoGenWaterTrans(gWorld->camera, (int)waterGenFactor->value * 100);
-      updateData();
-    }
-    );
-
-  addChild(waterGen);
-
-  addWater = new UIButton(5.0f, 225.0f, 170.0f, 30.0f,
-    "Fill with water",
+    [] { gWorld->autoGenWaterTrans(0.0337f); } // value found by experimenting
+  ));
+  addChild(new UIButton(95.0f, 190.0f, 75.0f, 30.0f,
+    "Ocean",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this]
-    {
-      gWorld->AddWaters(tile);
-      updateData();
-    }
-    );
-  addChild(addWater);
+    [] { gWorld->autoGenWaterTrans(0.007f); }
+  ));
 
   cropWater = new UIButton(5.0f, 245.0f, 170.0f, 30.0f,
     "Crop water",
@@ -185,37 +115,10 @@ void UIWater::updatePos(tile_index const& newTile)
 
 void UIWater::updateData()
 {
-  float h = gWorld->HaveSelectWater(tile);
-  if (h)
-  {
-    std::stringstream ms;
-    ms << h;
-    waterLevel->setText(ms.str());
-  }
-  else
-  {
-    std::stringstream ms;
-    ms << gWorld->getWaterHeight(tile);
-    waterLevel->setText(ms.str());
-  }
-  waterOpacity->value = (gWorld->getWaterTrans(tile) / 255.0f);
-
   std::stringstream mt;
   mt << gWorld->getWaterType(tile) << " - " << LiquidTypeDB::getLiquidName(gWorld->getWaterType(tile));
 
   waterType->setText(mt.str());
-}
-
-void UIWater::setWaterTrans(float val)
-{
-  if (std::fmod(val, 0.1f) > 0.1f) return; //reduce performence hit
-  gWorld->setWaterTrans(gWorld->camera, (unsigned char)val);
-}
-
-void UIWater::changeWaterHeight (float height)
-{
-  gWorld->setWaterHeight(tile, height);
-  updateData();
 }
 
 void UIWater::changeWaterType(int waterint)

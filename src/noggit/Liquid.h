@@ -5,6 +5,8 @@
 #include <noggit/liquid_render.hpp>
 #include <noggit/MapHeaders.h>
 
+class MapChunk;
+class sExtendableArray;
 
 struct MH2O_Tile
 {
@@ -50,19 +52,30 @@ public:
 
   Liquid(math::vector_3d const& base, MH2O_Tile const& tile_info);
 
-  void draw() { render->draw(); }
 
-  void changeLiquidID(int id);
+  void save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
+
+  void draw() { render->draw(); }
   void updateRender();
+  void changeLiquidID(int id);
+  
+  void crop(MapChunk* chunk);
+  void updateTransparency(MapChunk* chunk, float factor);
+
 
   float min() const { return _minimum; }
+  float max() const { return _maximum; }
+  int liquidID() const { return _liquid_id; }
+
+  bool hasSubchunk(int x, int z) const;
+  void setSubchunk(int x, int z, bool water);
 
 private:
   int _liquid_id;
   int _flags;
   float _minimum;
   float _maximum;
-  std::vector<bool> _subchunks;
+  std::uint64_t _subchunks;
   std::vector<math::vector_3d> _vertices;
   std::vector<float> _depth;
 

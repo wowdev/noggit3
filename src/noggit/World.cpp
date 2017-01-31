@@ -1237,34 +1237,9 @@ void World::clearAllModelsOnADT(math::vector_3d const& pos)
   for_tile_at(pos, [](MapTile* tile) { tile->clearAllModels(); });
 }
 
-void World::deleteWaterLayer(math::vector_3d const& pos)
-{
-  for_tile_at(pos, [](MapTile* tile) { tile->Water->deleteLayer(Environment::getInstance()->currentWaterLayer); });
-}
-
 void World::CropWaterADT(math::vector_3d const& pos)
 {
   for_tile_at(pos, [](MapTile* tile) { tile->CropWater(); });
-}
-
-void World::addWaterLayer(math::vector_3d const& pos)
-{
-  for_tile_at(pos, [&](MapTile* tile) { tile->Water->addLayer(1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer); });
-}
-
-void World::addWaterLayerChunk(math::vector_3d const& pos, int i, int j)
-{
-  for_tile_at(pos, [&](MapTile* tile) { tile->Water->addLayer(i, j, 1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer); });
-}
-
-void World::delWaterLayerChunk(math::vector_3d const& pos, int i, int j)
-{
-  for_tile_at(pos, [&](MapTile* tile) { tile->Water->deleteLayer(i, j, Environment::getInstance()->currentWaterLayer); });
-}
-
-void World::addWaterLayer(math::vector_3d const& pos, float height, unsigned char trans)
-{
-  for_tile_at(pos, [&](MapTile* tile) { tile->Water->addLayer(height, trans, Environment::getInstance()->currentWaterLayer); });
 }
 
 void World::setAreaID(math::vector_3d const& pos, int id, bool adt)
@@ -1877,84 +1852,6 @@ bool World::canWaterSave(const tile_index& tile)
   return !!mt && mt->canWaterSave();
 }
 
-void World::setWaterHeight(const tile_index& tile, float h)
-{
-  MapTile* curTile = mapIndex->getTile(tile);
-  if (!curTile)
-  {
-    return;
-  }
-
-  size_t currentLayer = Environment::getInstance()->currentWaterLayer;
-  int i, j, k = 0;
-  float newh = 0.0f;
-  for (i = 0; i < 16; ++i)
-  {
-    for (j = 0; j < 16; ++j)
-    {
-      if (curTile->getChunk((size_t)i, (size_t)j)->GetWater())
-      {
-        if (curTile->Water->getHeightChunk(j, i, currentLayer))
-        {
-          if (!k)
-          {
-            newh = curTile->Water->getHeightChunk(j, i, currentLayer) + h;
-          }
-          ++k;
-        }
-      }
-    }
-  }
-
-  if (k == 0)
-  {
-    if (mapIndex->tileLoaded(tile))
-    {
-      mapIndex->getTile(tile)->Water->setHeight(gWorld->getWaterHeight(tile) + h, currentLayer);
-      mapIndex->setChanged(tile);
-    }
-  }
-  else
-  {
-    for (i = 0; i < 16; ++i)
-    {
-      for (j = 0; j < 16; ++j)
-      {
-        if (curTile->getChunk((size_t)i, (size_t)j)->GetWater())
-        {
-          curTile->Water->setHeight(j, i, newh, currentLayer);
-        }
-      }
-    }
-    mapIndex->setChanged(tile);
-  }
-}
-
-float World::getWaterHeight(const tile_index& tile)
-{
-  return mapIndex->tileLoaded(tile)
-       ? mapIndex->getTile(tile)->Water->getHeight(Environment::getInstance()->currentWaterLayer)
-       : 0
-       ;
-}
-
-void World::setWaterTrans(math::vector_3d const& pos, unsigned char value)
-{
-  for_tile_at(pos, [&](MapTile* tile) { tile->Water->setTrans(value, Environment::getInstance()->currentWaterLayer); });
-}
-
-unsigned char World::getWaterTrans(const tile_index& tile)
-{
-  if (mapIndex->tileLoaded(tile))
-  {
-    return mapIndex->getTile(tile)->Water->getOpacity(Environment::getInstance()->currentWaterLayer);
-  }
-  else
-  {
-    return 255;
-  }
-}
-
 void World::setWaterType(math::vector_3d const& pos, int type)
 {
   for_tile_at(pos, [&](MapTile* tile) { tile->Water->setType(type, Environment::getInstance()->currentWaterLayer);});
@@ -1972,44 +1869,11 @@ int World::getWaterType(const tile_index& tile)
   }
 }
 
-void World::autoGenWaterTrans(math::vector_3d const& pos, int factor)
+void World::autoGenWaterTrans(float factor)
 {
-  for_tile_at(pos, [&](MapTile* tile) { tile->Water->autoGen(factor); });
+  for_tile_at(camera, [&](MapTile* tile) { tile->Water->autoGen(factor); });
 }
 
-void World::AddWaters(const tile_index& tile)
-{
-  if (mapIndex->tileLoaded(tile))
-  {
-    MapTile* curTile = mapIndex->getTile(tile);
-    for (int i = 0; i < 16; ++i)
-    {
-      for (int j = 0; j < 16; ++j)
-      {
-        if (curTile->getChunk((size_t)i, (size_t)j)->GetWater())
-        {
-          curTile->Water->addLayer(i, j, 1.0f, (unsigned char)255, Environment::getInstance()->currentWaterLayer);
-        }
-      }
-    }
-
-    mapIndex->setChanged(tile);
-  }
-}
-
-float World::HaveSelectWater(const tile_index& tile)
-{
-  if (mapIndex->tileLoaded(tile))
-  {
-    MapTile* curTile = mapIndex->getTile(tile);
-    if (curTile == 0) return 0;
-    for (int i = 0; i < 16; ++i)
-      for (int j = 0; j < 16; ++j)
-        if (curTile->getChunk((size_t)i, (size_t)j)->GetWater() && curTile->Water->HaveWater(i, j))
-          return curTile->Water->HaveWater(i, j);
-  }
-  return 0;
-}
 
 void World::fixAllGaps()
 {
