@@ -139,10 +139,13 @@ namespace
   }
   void draw_disk (float radius)
   {
-    int const slices (std::max (15.0f, radius * 1.5f));
+    int const slices (std::max (35.0f, radius * 1.5f));
     static math::radians const max (2.0f * math::constants::pi);
+
     float const stride (max._ / slices);
 
+	glLineWidth(3.0f);
+
     gl.begin (GL_LINE_LOOP);
     for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
     {
@@ -150,20 +153,7 @@ namespace
     }
     gl.end();
 
-    gl.begin (GL_LINE_LOOP);
-    for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
-    {
-      draw_disk_point (radius + 1.0f, arc);
-    }
-    gl.end();
-
-    for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
-    {
-      gl.begin (GL_LINES);
-      draw_disk_point (radius, arc);
-      draw_disk_point (radius + 1.0f, arc);
-      gl.end();
-    }
+	glLineWidth(1.0f);
   }
 
   void render_disk (::math::vector_3d const& position, float radius)
@@ -187,14 +177,6 @@ namespace
                  );
 
       draw_disk (radius);
-    }
-
-    {
-      opengl::scoped::matrix_pusher matrix;
-
-      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
-
-      draw_sphere (0.3f);
     }
   }
 }
