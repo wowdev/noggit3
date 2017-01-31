@@ -71,7 +71,7 @@ protected:
 
     for (auto&& hotkey : hotkeys)
     {
-      if (e->keysym.sym == hotkey.key && modifier == hotkey.modifiers)
+      if (e->keysym.sym == hotkey.key && modifier == hotkey.modifiers && hotkey.condition())
       {
         hotkey.function();
         return true;
