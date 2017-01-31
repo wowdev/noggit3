@@ -4,6 +4,8 @@
 
 #include <noggit/MapHeaders.h>
 
+#include <vector>
+
 class MPQFile;
 class Liquid;
 class sExtendableArray;
@@ -52,16 +54,10 @@ private:
 
   bool subchunkHasWater(size_t x, size_t y, size_t layer);
 
-  MH2O_Header Header;
-  MH2O_Information Info[5];
-  MH2O_HeightMask HeightData[5];
   MH2O_Render Render;
 
-  Liquid * Liquids[5];
-
-  bool existsTable[5][8][8];
-
-  uint8_t InfoMask[8];
+  std::vector<Liquid> _liquids;
+  
 
   float x, y;
 };
