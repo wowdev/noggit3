@@ -845,7 +845,7 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemToggle("Wireframe", &gWorld->drawwireframe);
   mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &Settings::getInstance()->renderModelsWithBox);
 
-  mbar->GetMenu("Help")->AddMenuItemButton("Key Bindings F10", [] { mainGui->showHelp(); });
+  mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [] { mainGui->showHelp(); });
   mbar->GetMenu("Help")->AddMenuItemButton("Manual online", [] { openURL (2); });
   mbar->GetMenu("Help")->AddMenuItemButton("Homepage", [] { openURL (1); });
 
