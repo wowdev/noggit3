@@ -13,10 +13,8 @@
 
 
 
-Liquid::Liquid(int x, int y, math::vector_3d base, MH2O_Tile const& tile_info)
-  : xtiles(x)
-  , ytiles(y)
-  , pos(base)
+Liquid::Liquid(math::vector_3d const& base, MH2O_Tile const& tile_info)
+  : pos(base)
   , texRepeats(4.0f)
   , _flags(tile_info.mFlags)
   , _minimum(tile_info.mMinimum)
@@ -38,7 +36,7 @@ Liquid::Liquid(int x, int y, math::vector_3d base, MH2O_Tile const& tile_info)
     {
       _depth.emplace_back(tile_info.mDepth[z][x]);
       _vertices.emplace_back( pos.x + LQ_DEFAULT_TILESIZE * x
-                            , tile_info.mDepth[z][x]
+                            , tile_info.mHeightmap[z][x]
                             , pos.z + LQ_DEFAULT_TILESIZE * z
                             );
     }

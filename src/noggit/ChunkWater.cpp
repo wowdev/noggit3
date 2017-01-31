@@ -11,22 +11,123 @@ ChunkWater::ChunkWater(float pX, float pY)
   : x(pX)
   , y(pY)
 {
-  for (int i = 0; i < 5; ++i)
-    Liquids[i] = nullptr;
 }
 
 ChunkWater::~ChunkWater()
 {
-  for (int i = 0; i < Header.nLayers; ++i)
+}
+
+
+
+void ChunkWater::fromFile(MPQFile &f, size_t basePos)
+{
+  MH2O_Header header;
+  f.read(&header, sizeof(MH2O_Header));
+  if (!header.nLayers) return;
+
+  //render
+  if (header.ofsRenderMask)
   {
-    delete Liquids[i];
-    Liquids[i] = nullptr;
+    f.seek(basePos + header.ofsRenderMask + sizeof(MH2O_Render));
+    f.read(&Render, sizeof(MH2O_Render));
+  }
+  else
+  {
+    memset(&Render.mask, 255, 8);
+  }
+
+  for (int k = 0; k < (int)header.nLayers; ++k)
+  {
+    MH2O_Tile tile;
+    MH2O_Information info;
+
+    //info
+    f.seek(basePos + header.ofsInformation + sizeof(MH2O_Information)* k);
+    f.read(&info, sizeof(MH2O_Information));
+
+    tile.mFlags = info.Flags;
+    tile.mMinimum = info.minHeight;
+    tile.mMaximum = info.maxHeight;
+    tile.mLiquidType = info.LiquidType;
+
+    //mask
+    if (info.ofsInfoMask > 0 && info.height > 0)
+    {
+      uint64_t infoMask(0);
+      f.seek(info.ofsInfoMask + basePos);
+      f.read(&infoMask, 8);
+
+      int bitOfs = 0;
+      for (int y = 0; y < info.height; ++y)
+      {
+        for (int x = 0; x < info.width; ++x)
+        {
+          tile.mRender[y + info.yOffset][x + info.xOffset] = ((infoMask >> bitOfs) & 1);
+          bitOfs++;
+        }
+      }
+    }
+    else
+    {
+      // no bitmap = all subchunks have water
+      for (int y = 0; y < 8; ++y)
+      {
+        for (int x = 0; x < 8; ++x)
+        {
+          tile.mRender[y][x] = true;
+        }
+      }
+    }   
+    
+    // set default value
+    for (int h = 0; h < 9; ++h)
+    {
+      for (int w = 0; w < 9; ++w)
+      {
+        tile.mHeightmap[w][h] = info.minHeight;
+        tile.mDepth[w][h] = 1.0f;
+      }
+    }
+
+    // load existing heightMap
+    if (info.ofsHeightMap)
+    {      
+      f.seek(info.ofsHeightMap + basePos);
+
+      if (info.Flags != 2)
+      {
+        for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w)
+        {
+          for (int h = info.xOffset; h < info.xOffset + info.width + 1; ++h)
+          {
+            f.read(&tile.mHeightmap[w][h], sizeof(float));
+          }
+        }
+      }
+
+      for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w)
+      {
+        for (int h = info.xOffset; h < info.xOffset + info.width + 1; ++h)
+        {
+          unsigned char depth;
+          f.read(&depth, sizeof(unsigned char));
+          tile.mDepth[w][h] = depth / 255.0f;
+        }
+      }
+    }
+
+    _liquids.emplace_back(math::vector_3d(x, 0.0f, y), tile);
   }
 }
 
 void ChunkWater::reloadRendering()
 {
-  if (!Header.nLayers) return;
+  for (Liquid& layer : _liquids)
+  {
+    layer.updateRender();
+  }
+  
+  /*if (!Header.nLayers) return;
 
   for (size_t k = 0; k < Header.nLayers; ++k)
   {
@@ -54,106 +155,18 @@ void ChunkWater::reloadRendering()
     }
 
     Liquids[k] = new Liquid(Info[k].width, Info[k].height, math::vector_3d(x, Info[k].minHeight, y), lTile);
-  }
-}
-
-void ChunkWater::fromFile(MPQFile &f, size_t basePos)
-{
-  f.read(&Header, sizeof(MH2O_Header));
-  if (!Header.nLayers) return;
-
-  //render
-  if (Header.ofsRenderMask)
-  {
-    f.seek(basePos + Header.ofsRenderMask + sizeof(MH2O_Render));
-    f.read(&Render, sizeof(MH2O_Render));
-  }
-  else
-  {
-    memset(&Render.mask, 255, 8);
-  }
-
-  for (int k = 0; k < (int)Header.nLayers; ++k)
-  {
-    memset(existsTable[k], 0, 8 * 8);
-    memset(InfoMask, 0, 8);
-
-    //info
-    f.seek(basePos + Header.ofsInformation + sizeof(MH2O_Information)* k);
-    f.read(&Info[k], sizeof(MH2O_Information));
-
-
-    //mask
-    if (Info[k].ofsInfoMask > 0 && Info[k].height > 0)
-    {
-      f.seek(Info[k].ofsInfoMask + basePos);
-      size_t size((size_t)(std::ceil(Info[k].height * Info[k].width / 8.0f)));
-      f.read(InfoMask, size);
-    }
-
-    int bitOffset = 0;
-
-    for (int h = 0; h < Info[k].height; ++h)
-    {
-      for (int w = 0; w < Info[k].width; ++w)
-      {
-        bool render = true;
-
-        if (Info[k].ofsInfoMask > 0)
-        {
-          render = (InfoMask[bitOffset / 8] >> (bitOffset % 8)) & 1;
-          bitOffset++;
-        }
-
-        existsTable[k][h + Info[k].yOffset][w + Info[k].xOffset] = render;
-      }
-    }
-
-    for (int h = 0; h < 9; ++h)
-    {
-      for (int w = 0; w < 9; ++w)
-      {
-        HeightData[k].mHeightValues[w][h] = Info[k].minHeight;
-        HeightData[k].mTransparency[w][h] = 255;
-      }
-    }
-
-    if (!Info[k].ofsHeightMap)
-    {
-      continue;
-    }
-
-    f.seek(basePos + Info[k].ofsHeightMap);
-
-    if (Info[k].Flags != 2)
-    {
-      for (int w = Info[k].yOffset; w < Info[k].yOffset + Info[k].height + 1; ++w)
-      {
-        for (int h = Info[k].xOffset; h < Info[k].xOffset + Info[k].width + 1; ++h)
-        {
-          f.read(&HeightData[k].mHeightValues[w][h], sizeof(float));
-        }
-      }
-    }
-
-    for (int w = Info[k].yOffset; w < Info[k].yOffset + Info[k].height + 1; ++w)
-    {
-      for (int h = Info[k].xOffset; h < Info[k].xOffset + Info[k].width + 1; ++h)
-      {
-        f.read(&HeightData[k].mTransparency[w][h], sizeof(unsigned char));
-      }
-    }
-  }
+  }*/
 }
 
 void ChunkWater::writeHeader(sExtendableArray &lADTFile, int &lCurrentPosition)
 {
-  lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Header), reinterpret_cast<char*>(&Header));
-  lCurrentPosition += sizeof(MH2O_Header);
+  //lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Header), reinterpret_cast<char*>(&Header));
+  //lCurrentPosition += sizeof(MH2O_Header);
 }
 
 void ChunkWater::writeInfo(sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
 {
+  /*
   if (!hasData(0))
   {
     return;
@@ -165,12 +178,12 @@ void ChunkWater::writeInfo(sExtendableArray &lADTFile, size_t basePos, int &lCur
   {
     lADTFile.Insert(lCurrentPosition, sizeof(MH2O_Information), reinterpret_cast<char*>(&Info[i])); //insert MH2O_Information
     lCurrentPosition += sizeof(MH2O_Information);
-  }
+  }*/
 }
 
 void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t basePos, int &lCurrentPosition)
 {
-  if (!hasData(0))
+  /*if (!hasData(0))
   {
     return;
   }
@@ -261,11 +274,12 @@ void ChunkWater::writeData(size_t offHeader, sExtendableArray &lADTFile, size_t 
     }
     memcpy(lADTFile.GetPointer<char>(basePos + Header.ofsInformation + sizeof(MH2O_Information)*i), &Info[i], sizeof(MH2O_Information));
   }
-  memcpy(lADTFile.GetPointer<char>(offHeader), &Header, sizeof(MH2O_Header));
+  memcpy(lADTFile.GetPointer<char>(offHeader), &Header, sizeof(MH2O_Header));*/
 }
 
 void ChunkWater::autoGen(MapChunk *chunk, int factor)
 {
+  /*
   for (size_t k = 0; k < Header.nLayers; ++k)
   {
     for (size_t y = 0; y < 9; ++y)
@@ -284,28 +298,31 @@ void ChunkWater::autoGen(MapChunk *chunk, int factor)
   }
 
   reloadRendering();
+  */
 }
 
 bool ChunkWater::subchunkHasWater(size_t x, size_t y, size_t layer)
 {
-  if (layer >= Header.nLayers) return false;
+  /*if (layer >= Header.nLayers) return false;
   if (x > 8 || y > 8) return false;
-  return existsTable[layer][y][x];
+  return existsTable[layer][y][x];*/
+  return false;
 }
 
 void ChunkWater::addLayer(size_t layer)
 {
-  for (size_t y = 0; y < 8; ++y)
+  /*for (size_t y = 0; y < 8; ++y)
   {
     for (size_t x = 0; x < 8; ++x)
     {
       addLayer(x, y, layer);
     }
-  }
+  }*/
 }
 
 void ChunkWater::CropWater(MapChunk* chunkTerrain)
 {
+  /*
   for (size_t k = 0; k < Header.nLayers; ++k)
   {
     for (int i = 0; i < 8; ++i)
@@ -333,11 +350,12 @@ void ChunkWater::CropWater(MapChunk* chunkTerrain)
   }
 
   reloadRendering();
-
+  */
 }
 
 void ChunkWater::cleanLayer(size_t layer)
 {
+  /*
   if (layer >= Header.nLayers)
   {
     return;
@@ -355,10 +373,12 @@ void ChunkWater::cleanLayer(size_t layer)
   }
 
   deleteLayer(layer);
+  */
 }
 
 void ChunkWater::addLayer(size_t x, size_t y, size_t layer)
 {
+  /*
   if (subchunkHasWater(x, y, layer)) return;
 
   if (!hasData(layer))
@@ -367,10 +387,12 @@ void ChunkWater::addLayer(size_t x, size_t y, size_t layer)
     reloadRendering();
   }
   existsTable[layer][y][x] = true;
+  */
 }
 
 void ChunkWater::deleteLayer(size_t layer)
 {
+  /*
   if (!hasData(layer))
   {
     return;
@@ -411,18 +433,22 @@ void ChunkWater::deleteLayer(size_t layer)
     HeightData[0] = MH2O_HeightMask();
     Render = MH2O_Render();
   }
+  */
 }
 
 void ChunkWater::deleteLayer(size_t x, size_t y, size_t layer)
 {
+  /*
   if (subchunkHasWater(x, y, layer))
   {
     existsTable[layer][y][x] = false;
   }
+  */
 }
 
 void ChunkWater::setHeight(float height, size_t layer)
 {
+  /*
   for (size_t y = 0; y < 9; ++y)
   {
     for (size_t x = 0; x < 9; ++x)
@@ -431,10 +457,12 @@ void ChunkWater::setHeight(float height, size_t layer)
     }
   }
   reloadRendering();
+  */
 }
 
 void ChunkWater::setHeight(size_t x, size_t y, float height, size_t layer)
 {
+  /*
   if (x > 8 || y > 8 || !subchunkHasWater(x, y, layer))
   {
     return;
@@ -446,10 +474,12 @@ void ChunkWater::setHeight(size_t x, size_t y, float height, size_t layer)
   HeightData[layer].mHeightValues[y + 1][x + 1] = height;
 
   reloadRendering();
+  */
 }
 
 float ChunkWater::getHeight(size_t layer)
 {
+  /*
   for (size_t y = 0; y < 9; ++y)
   {
     for (size_t x = 0; x < 9; ++x)
@@ -459,30 +489,43 @@ float ChunkWater::getHeight(size_t layer)
         return getHeight(x, y, layer);
       }
     }
+  }*/
+  if (_liquids.size() > layer)
+  {
+    return _liquids[layer].min();
   }
-  return -1;
+  return 0.0f;
 }
 
 float ChunkWater::getHeight(size_t x, size_t y, size_t layer)
 {
+  /*
   if (!subchunkHasWater(x, y, layer)) return -1;
   return HeightData[layer].mHeightValues[y][x];
+  */
+  if (_liquids.size() > layer)
+  {
+    return _liquids[layer].min();
+  }
+  return 0.0f;
 }
 
 int ChunkWater::getType(size_t layer)
 {
-  return hasData(layer) ? Info[0].LiquidType : 0;
+  return 0;//return hasData(layer) ? Info[0].LiquidType : 0;
 }
 
 void ChunkWater::setType(int type, size_t layer)
 {
+  /*
   if (!hasData(layer)) return;
   Info[layer].LiquidType = type;
-  reloadRendering();
+  reloadRendering();*/
 }
 
 unsigned char ChunkWater::getTrans(size_t layer)
 {
+  /*
   for (size_t y = 0; y < 9; ++y)
   {
     for (size_t x = 0; x < 9; ++x)
@@ -494,15 +537,18 @@ unsigned char ChunkWater::getTrans(size_t layer)
     }
   }
   return 0;
+  */
+  return 255;
 }
 
 unsigned char ChunkWater::getTrans(size_t x, size_t y, size_t layer)
 {
-  return subchunkHasWater(x, y, layer) ? HeightData[layer].mTransparency[y][x] : 0;
+  return 255; // subchunkHasWater(x, y, layer) ? HeightData[layer].mTransparency[y][x] : 0;
 }
 
 void ChunkWater::setTrans(size_t x, size_t y, unsigned char trans, size_t layer)
 {
+  /*
   if (!subchunkHasWater(x, y, layer)) return;
 
   HeightData[layer].mTransparency[y][x] = trans;
@@ -510,11 +556,12 @@ void ChunkWater::setTrans(size_t x, size_t y, unsigned char trans, size_t layer)
   HeightData[layer].mTransparency[y][x + 1] = trans;
   HeightData[layer].mTransparency[y + 1][x + 1] = trans;
 
-  reloadRendering();
+  reloadRendering();*/
 }
 
 void ChunkWater::setTrans(unsigned char trans, size_t layer)
 {
+  /*
   for (size_t y = 0; y < 9; ++y)
   {
     for (size_t x = 0; x < 9; ++x)
@@ -523,30 +570,30 @@ void ChunkWater::setTrans(unsigned char trans, size_t layer)
     }
   }
 
-  reloadRendering();
+  reloadRendering();*/
 }
 
 bool ChunkWater::hasData(size_t layer)
 {
-  return (Header.nLayers > layer);
+  return true; //(Header.nLayers > layer);
 }
 
 void ChunkWater::draw()
 {
-  if (!hasData(0))
+  if (_liquids.empty())
   {
     return;
   }
 
   if (Environment::getInstance()->displayAllWaterLayers)
   {
-    for (size_t i = 0; i < Header.nLayers; ++i)
+    for (Liquid& liquid : _liquids)
     {
-      Liquids[i]->draw();
+      liquid.draw();
     }
   }
-  else if (Environment::getInstance()->currentWaterLayer < Header.nLayers)
+  else if (Environment::getInstance()->currentWaterLayer < _liquids.size())
   {
-    Liquids[Environment::getInstance()->currentWaterLayer]->draw();
+    _liquids[Environment::getInstance()->currentWaterLayer].draw();
   }
 }

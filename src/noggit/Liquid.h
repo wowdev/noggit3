@@ -48,12 +48,14 @@ class Liquid
 {
 public:
 
-  Liquid(int x, int y, math::vector_3d base, MH2O_Tile const& tile_info);
+  Liquid(math::vector_3d const& base, MH2O_Tile const& tile_info);
 
   void draw() { render->draw(); }
 
   void changeLiquidID(int id);
   void updateRender();
+
+  float min() const { return _minimum; }
 
 private:
   int _liquid_id;
