@@ -234,25 +234,12 @@ public:
 
   bool canWaterSave(const tile_index& tile);
 
-  void setWaterHeight(const tile_index& tile, float h);
-  float getWaterHeight(const tile_index& tile);
-  float HaveSelectWater(const tile_index& tile);
   void CropWaterADT(math::vector_3d const& pos);
-  void setWaterTrans(math::vector_3d const& pos, unsigned char value);
-  unsigned char getWaterTrans(const tile_index& tile);
 
   void setWaterType(math::vector_3d const& pos, int type);
   int getWaterType(const tile_index& tile);
 
-  void deleteWaterLayer(math::vector_3d const& pos);
-
-  void addWaterLayer(math::vector_3d const& pos);
-  void addWaterLayer(math::vector_3d const& pos, float height, unsigned char trans);
-  void addWaterLayerChunk(math::vector_3d const& pos, int i, int j);
-  void delWaterLayerChunk(math::vector_3d const& pos, int i, int j);
-
-  void autoGenWaterTrans(math::vector_3d const& pos, int factor);
-  void AddWaters(const tile_index& tile);
+  void autoGenWaterTrans(float factor);
 
   void fixAllGaps();
 
