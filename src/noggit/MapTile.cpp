@@ -1005,11 +1005,11 @@ void MapTile::saveTile(bool saveAllModels)
   }
 #endif
 
-  lADTFile->Extend(lCurrentPosition - lADTFile->mSize); // cleaning unused nulls at the end of file
+  lADTFile->Extend(lCurrentPosition - lADTFile->data.size()); // cleaning unused nulls at the end of file
 
 
   MPQFile *f = new MPQFile(mFilename);
-  f->setBuffer(lADTFile->GetPointer<char>(), lADTFile->mSize);
+  f->setBuffer(lADTFile->data);
   f->SaveFile();
   f->close();
 
@@ -1018,7 +1018,7 @@ void MapTile::saveTile(bool saveAllModels)
   {
     // ADT root file
     MPQFile *f1 = new MPQFile(mFilename, wodSavePath);
-    f1->setBuffer(lADTRootFile->GetPointer<char>(), lADTRootFile->mSize);
+    f1->setBuffer(lADTRootFile->data);
     f1->SaveFile();
     f1->close();
 
@@ -1030,12 +1030,12 @@ void MapTile::saveTile(bool saveAllModels)
 
 
     MPQFile *f2 = new MPQFile(texFilename1.str(), wodSavePath);
-    f2->setBuffer(lADTTexFile->GetPointer<char>(), lADTTexFile->mSize);
+    f2->setBuffer(lADTTexFile->data);
     f2->SaveFile();
     f2->close();
 
     MPQFile *f3 = new MPQFile(texFilename2.str(), wodSavePath);
-    f3->setBuffer(lADTTexFile->GetPointer<char>(), lADTTexFile->mSize);
+    f3->setBuffer(lADTTexFile->data);
     f3->SaveFile();
     f3->close();
 
@@ -1047,12 +1047,12 @@ void MapTile::saveTile(bool saveAllModels)
 
 
     MPQFile *f4 = new MPQFile(objFilename1.str(), wodSavePath);
-    f4->setBuffer(lADTObjFile->GetPointer<char>(), lADTObjFile->mSize);
+    f4->setBuffer(lADTObjFile->data);
     f4->SaveFile();
     f4->close();
 
     MPQFile *f5 = new MPQFile(objFilename2.str(), wodSavePath);
-    f5->setBuffer(lADTObjFile->GetPointer<char>(), lADTObjFile->mSize);
+    f5->setBuffer(lADTObjFile->data);
     f5->SaveFile();
     f5->close();
   }
