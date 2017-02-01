@@ -23,48 +23,12 @@
 
 extern int terrainMode;
 
-GLuint Contour = 0;
-float CoordGen[4];
-static const int CONTOUR_WIDTH = 128;
-
 static const float texDetail = 8.0f;
 
 static const float TEX_RANGE = 1.0f;
 
 StripType LineStrip[32];
 StripType HoleStrip[128];
-
-
-void GenerateContourMap()
-{
-  unsigned char CTexture[CONTOUR_WIDTH * 4];
-
-  CoordGen[0] = 0.0f;
-  CoordGen[1] = 0.25f;
-  CoordGen[2] = 0.0f;
-  CoordGen[3] = 0.0f;
-
-  for (int i = 0; i<(CONTOUR_WIDTH * 4); ++i)
-    CTexture[i] = 0;
-  CTexture[3 + CONTOUR_WIDTH / 2] = 0xff;
-  CTexture[7 + CONTOUR_WIDTH / 2] = 0xff;
-  CTexture[11 + CONTOUR_WIDTH / 2] = 0xff;
-
-  opengl::scoped::bool_setter<GL_TEXTURE_2D, GL_TRUE> const texture_2d;
-  gl.genTextures(1, &Contour);
-  gl.bindTexture(GL_TEXTURE_2D, Contour);
-
-  gl.texImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, CONTOUR_WIDTH, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, CTexture);
-  gl.generateMipmap (GL_TEXTURE_2D);
-
-  opengl::scoped::bool_setter<GL_TEXTURE_GEN_S, GL_TRUE> const texture_gen_s;
-  gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-  gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
-
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-}
 
 void CreateStrips()
 {
@@ -591,20 +555,49 @@ void MapChunk::drawLines (Frustum const& frustum)
 
 void MapChunk::drawContour()
 {
+  float CoordGen[4];
+  static const int CONTOUR_WIDTH = 128;
+
   gl.color4f(1, 1, 1, 1);
   opengl::scoped::texture_setter<0, GL_TRUE> const texture;
   opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   opengl::scoped::bool_setter<GL_ALPHA_TEST, GL_FALSE> const alpha_test;
-  if (Contour == 0)
-    GenerateContourMap();
+
+  unsigned char CTexture[CONTOUR_WIDTH * 4];
+
+  CoordGen[0] = 0.0f;
+  CoordGen[1] = 0.25f;
+  CoordGen[2] = 0.0f;
+  CoordGen[3] = 0.0f;
+
+  for (int i = 0; i<(CONTOUR_WIDTH * 4); ++i)
+    CTexture[i] = 0;
+  CTexture[3 + CONTOUR_WIDTH / 2] = 0xff;
+  CTexture[7 + CONTOUR_WIDTH / 2] = 0xff;
+  CTexture[11 + CONTOUR_WIDTH / 2] = 0xff;
+
+  opengl::scoped::bool_setter<GL_TEXTURE_2D, GL_TRUE> const texture_2d;
+  GLuint Contour;
+  gl.genTextures(1, &Contour);
   gl.bindTexture(GL_TEXTURE_2D, Contour);
+
+  gl.texImage2D (GL_TEXTURE_2D, 0, GL_RGBA8, CONTOUR_WIDTH, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, CTexture);
+  gl.generateMipmap (GL_TEXTURE_2D);
 
   opengl::scoped::bool_setter<GL_TEXTURE_GEN_S, GL_TRUE> const texture_gen_s;
   gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
   gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
 
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+
+  gl.bindTexture(GL_TEXTURE_2D, Contour);
+
   gl.drawElements (GL_TRIANGLES, striplen, GL_UNSIGNED_SHORT, nullptr);
+
+  gl.deleteTextures (1, &Contour);
 }
 
 void MapChunk::draw ( Frustum const& frustum
