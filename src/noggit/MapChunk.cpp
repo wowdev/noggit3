@@ -1052,10 +1052,14 @@ bool MapChunk::flattenTerrain ( math::vector_3d const& pos
       ( BrushType == eFlattenType_Flat ? remain
       : BrushType == eFlattenType_Linear ? remain * (1.f - dist / radius)
       : BrushType == eFlattenType_Smooth ? pow (remain, 1.f + dist / radius)
+	  : BrushType == eFlattenType_Origin ? remain
       : throw std::logic_error ("bad brush type")
       , mVertices[i].y
       , ah
       );
+
+	if (BrushType == eFlattenType_Origin)
+		mVertices[i].y = origin.y;
 
     changed = true;
   }

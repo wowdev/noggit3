@@ -34,6 +34,8 @@ namespace ui
     addChild(new UICheckBox(6.0f, 15.0f, "Flat", _type_toggle, eFlattenType_Flat));
     addChild(new UICheckBox(80.0f, 15.0f, "Linear", _type_toggle, eFlattenType_Linear));
     addChild(new UICheckBox(6.0f, 40.0f, "Smooth", _type_toggle, eFlattenType_Smooth));
+	addChild(new UICheckBox(80.0f, 40.0f, "Origin", _type_toggle, eFlattenType_Origin));
+
     _type_toggle->Activate(eFlattenType_Linear);
 
     _radius_slider = new UISlider(6.0f, 85.0f, 167.0f, 1000.0f, 0.00001f);

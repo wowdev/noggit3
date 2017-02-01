@@ -38,7 +38,8 @@ enum eFlattenType
   eFlattenType_Flat,
   eFlattenType_Linear,
   eFlattenType_Smooth,
-  eFlattenType_Count
+  eFlattenType_Count,
+  eFlattenType_Origin
 };
 
 enum eFlattenMode
