@@ -1049,7 +1049,7 @@ bool MapChunk::flattenTerrain ( math::vector_3d const& pos
 	  }
 
 	  if (BrushType == eFlattenType_Origin)
-	  {  
+	  {
 		  mVertices[i].y = origin.y;
 		  changed = true;
 		  continue;
