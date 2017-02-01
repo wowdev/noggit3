@@ -23,8 +23,6 @@
 
 extern int terrainMode;
 
-bool DrawMapContour = false;
-
 GLuint Contour = 0;
 float CoordGen[4];
 static const int CONTOUR_WIDTH = 128;
@@ -593,8 +591,6 @@ void MapChunk::drawLines (Frustum const& frustum)
 
 void MapChunk::drawContour()
 {
-  if (!DrawMapContour)
-    return;
   gl.color4f(1, 1, 1, 1);
   opengl::scoped::texture_setter<0, GL_TRUE> const texture;
   opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
@@ -613,6 +609,7 @@ void MapChunk::drawContour()
 
 void MapChunk::draw ( Frustum const& frustum
                     , bool highlightPaintableChunks
+                    , bool draw_contour
                     )
 {
   if (!frustum.intersects(vmin, vmax))
@@ -719,7 +716,10 @@ void MapChunk::draw ( Frustum const& frustum
   opengl::texture::disable_texture();
   gl.disable(GL_LIGHTING);
 
-  drawContour();
+  if (draw_contour)
+  {
+    drawContour();
+  }
 
   if (terrainMode == 5)
   {

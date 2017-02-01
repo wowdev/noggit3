@@ -78,6 +78,7 @@ public:
 
   void draw ( Frustum const&
             , bool highlightPaintableChunks
+            , bool draw_contour
             );
   //! \todo only this function should be public, all others should be called from it
 

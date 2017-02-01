@@ -376,6 +376,7 @@ extern Brush textureBrush;
 
 void MapTile::draw ( Frustum const& frustum
                    , bool highlightPaintableChunks
+                   , bool draw_contour
                    )
 {
   gl.color4f(1, 1, 1, 1);
@@ -386,6 +387,7 @@ void MapTile::draw ( Frustum const& frustum
     {
       mChunks[j][i]->draw ( frustum
                           , highlightPaintableChunks
+                          , draw_contour
                           );
     }
   }

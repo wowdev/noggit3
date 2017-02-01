@@ -42,7 +42,10 @@ public:
 
   int changed;
 
-  void draw (Frustum const&, bool highlightPaintableChunks);
+  void draw ( Frustum const&
+            , bool highlightPaintableChunks
+            , bool draw_contour
+            );
   void intersect (math::ray const&, selection_result*) const;
   void drawLines (Frustum const&);
   void drawWater();

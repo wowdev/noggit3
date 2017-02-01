@@ -776,6 +776,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , float brushRadius
                  , float hardness
                  , bool highlightPaintableChunks
+                 , bool draw_contour
                  )
 {
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
@@ -887,7 +888,7 @@ void World::draw ( math::vector_3d const& cursor_pos
     opengl::scoped::matrix_pusher const matrix;
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
-      tile->draw(frustum, highlightPaintableChunks);
+      tile->draw(frustum, highlightPaintableChunks, draw_contour);
     }
   }
 

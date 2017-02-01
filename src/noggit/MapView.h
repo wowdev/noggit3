@@ -30,6 +30,7 @@ private:
   bool _GUIDisplayingEnabled;
 
   bool _highlightPaintableChunks = true;
+  bool _draw_contour = false;
 
   void save();
 
