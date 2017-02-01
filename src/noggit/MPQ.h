@@ -89,6 +89,17 @@ public:
     buffer = Buf;
     size = Size;
   }
+  void setBuffer (std::vector<char> const& vec)
+  {
+    if (buffer)
+    {
+      delete buffer;
+      buffer = nullptr;
+    }
+    size = vec.size();
+    buffer = new char[size];
+    memcpy (buffer, vec.data(), vec.size());
+  }
 
   void SaveFile();
 

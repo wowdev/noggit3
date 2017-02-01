@@ -207,7 +207,7 @@ void MapIndex::save()
   }
 
   MPQFile f(filename.str());
-  f.setBuffer(wdtFile.GetPointer<char>(), wdtFile.mSize);
+  f.setBuffer(wdtFile.data);
   f.SaveFile();
   f.close();
 

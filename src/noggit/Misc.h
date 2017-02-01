@@ -35,92 +35,39 @@ namespace misc
 class sExtendableArray
 {
 public:
-  int mSize;
-  char* mData;
+  std::vector<char> data;
 
-  bool Allocate(int pSize)
-  {
-    mSize = pSize;
-    mData = static_cast<char*>(realloc(mData, mSize));
-    memset(mData, 0, mSize);
-    return(mData != nullptr);
+	void Allocate(int pSize)
+	{
+    data.resize (pSize);
+	}
+
+	void Extend(int pAddition)
+	{
+    data.resize (data.size() + pAddition);
+	}
+
+  void Insert(int pPosition, int pAddition)
+	{
+    std::vector<char> tmp (pAddition);
+    data.insert (data.begin() + pPosition, tmp.begin(), tmp.end());
   }
 
-  bool Extend(int pAddition)
-  {
-    mSize = mSize + pAddition;
-    mData = static_cast<char*>(realloc(mData, mSize));
-    if (pAddition > 0)
-      memset(mData + mSize - pAddition, 0, pAddition);
-    return(mData != nullptr);
-  }
+	void Insert(int pPosition, int pAddition, const char * pAdditionalData)
+	{
+    data.insert (data.begin() + pPosition, pAdditionalData, pAdditionalData + pAddition);
+	}
 
-  bool Insert(int pPosition, int pAddition)
-  {
-    const int lPostSize = mSize - pPosition;
+	template<typename To>
+	To * GetPointer(unsigned int pPosition = 0)
+	{
+		return(reinterpret_cast<To*>(data.data() + pPosition));
+	}
 
-    char *lPost = static_cast<char*>(malloc(lPostSize));
-    memcpy(lPost, mData + pPosition, lPostSize);
-
-    if (!Extend(pAddition))
-      return false;
-
-    memcpy(mData + pPosition + pAddition, lPost, lPostSize);
-    memset(mData + pPosition, 0, pAddition);
-
-    free(lPost);
-
-    return true;
-  }
-
-  bool Insert(int pPosition, int pAddition, const char * pAdditionalData)
-  {
-    const int lPostSize = mSize - pPosition;
-
-    char *lPost = static_cast<char*>(malloc(lPostSize));
-    memcpy(lPost, mData + pPosition, lPostSize);
-
-    if (!Extend(pAddition))
-      return false;
-
-    memcpy(mData + pPosition + pAddition, lPost, lPostSize);
-    memcpy(mData + pPosition, pAdditionalData, pAddition);
-
-    free(lPost);
-
-    return true;
-  }
-
-  template<typename To>
-  To * GetPointer()
-  {
-    return(reinterpret_cast<To*>(mData));
-  }
-
-  template<typename To>
-  To * GetPointer(unsigned int pPosition)
-  {
-    return(reinterpret_cast<To*>(mData + pPosition));
-  }
-
-  sExtendableArray()
-  {
-    mSize = 0;
-    mData = nullptr;
-  }
-
-  sExtendableArray(int pSize, const char *pData)
-  {
-    if (Allocate(pSize))
-      memcpy(mData, pData, pSize);
-    else
-      LogError << "Allocating " << pSize << " bytes failed. This may crash soon." << std::endl;
-  }
-
-  void Destroy()
-  {
-    free(mData);
-  }
+  sExtendableArray() = default;
+	sExtendableArray(int pSize, const char *pData)
+    : data (pData, pData + pSize)
+	{}
 };
 
 struct sChunkHeader
