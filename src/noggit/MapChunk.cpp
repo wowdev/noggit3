@@ -1026,40 +1026,43 @@ bool MapChunk::flattenTerrain ( math::vector_3d const& pos
 {
   bool changed (false);
 
-  for (int i (0); i < mapbufsize; ++i)
+  for (int i(0); i < mapbufsize; ++i)
   {
-    float const dist (misc::dist (mVertices[i].x, mVertices[i].z, pos.x, pos.z));
+	  float const dist(misc::dist(mVertices[i].x, mVertices[i].z, pos.x, pos.z));
 
-    if (dist >= radius)
-    {
-      continue;
-    }
+	  if (dist >= radius)
+	  {
+		  continue;
+	  }
 
-    float const ah ( origin.y
-                   + ( (mVertices[i].x - origin.x) * math::cos (orientation)
-                     + (mVertices[i].z - origin.z) * math::sin (orientation)
-                     ) * math::tan (angle)
-                   );
+	  float const ah(origin.y
+		  + ((mVertices[i].x - origin.x) * math::cos(orientation)
+			  + (mVertices[i].z - origin.z) * math::sin(orientation)
+			  ) * math::tan(angle)
+	  );
 
-    if ( (flattenType == eFlattenMode_Raise && ah < mVertices[i].y)
-       || (flattenType == eFlattenMode_Lower && ah > mVertices[i].y)
-       )
-    {
-      continue;
-    }
+	  if ((flattenType == eFlattenMode_Raise && ah < mVertices[i].y)
+		  || (flattenType == eFlattenMode_Lower && ah > mVertices[i].y)
+		  )
+	  {
+		  continue;
+	  }
+
+	  if (BrushType == eFlattenType_Origin)
+	  {  
+		  mVertices[i].y = origin.y;
+		  changed = true;
+		  continue;
+	  }
 
     mVertices[i].y = math::interpolation::linear
       ( BrushType == eFlattenType_Flat ? remain
       : BrushType == eFlattenType_Linear ? remain * (1.f - dist / radius)
       : BrushType == eFlattenType_Smooth ? pow (remain, 1.f + dist / radius)
-	  : BrushType == eFlattenType_Origin ? remain
       : throw std::logic_error ("bad brush type")
       , mVertices[i].y
       , ah
       );
-
-	if (BrushType == eFlattenType_Origin)
-		mVertices[i].y = origin.y;
 
     changed = true;
   }
@@ -1103,6 +1106,11 @@ bool MapChunk::blurTerrain(math::vector_3d const& pos, float remain, float radiu
         TotalWeight += (1.0f - dist2 / radius);
       }
     }
+
+	if (BrushType == eFlattenType_Origin)
+	{
+		continue;
+	}
 
     mVertices[i].y = math::interpolation::linear
       ( BrushType == eFlattenType_Flat ? remain
