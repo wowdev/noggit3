@@ -122,16 +122,20 @@ UISlider* spray_pressure;
 
 float brushPressure = 0.9f;
 float brushLevel = 255.0f;
-float brushSpraySize = 10.0f;
-float brushSprayPressure = 5.0f;
+float brushSpraySize = 0.24f;
+float brushSprayPressure = 2.0f;
+
 bool sprayBrushActive = false;
+bool innerRadius = false;
 
 UICheckBox* toggleSpray;
+UICheckBox* toggleInnerRadius;
 
 int terrainMode = 0;
 int saveterrainMode = 0;
 
 Brush textureBrush;
+Brush textureBrushInnerRadius;
 Brush sprayBrush;
 
 UICursorSwitcher* CursorSwitcher;
@@ -154,6 +158,8 @@ void setTextureBrushHardness(float f)
 {
   textureBrush.setHardness(f);
   sprayBrush.setHardness(f);
+  textureBrushInnerRadius.setHardness(f);
+  textureBrushInnerRadius.setRadius(f); // yes, that belongs here. InnerRadius is the same value as hardness.
 }
 
 void setTextureBrushRadius(float f)
@@ -176,6 +182,7 @@ void setSprayBrushPressure(float f)
 {
   brushSprayPressure = f;
 }
+
 
 
 
@@ -700,8 +707,11 @@ void MapView::createGUI()
                                             )
                            );
 
-  toggleSpray = new UICheckBox(3.0f, 138.0f, "Toggle spray", &sprayBrushActive);
+  toggleSpray = new UICheckBox(3.0f, 138.0f, "Spray", &sprayBrushActive);
   settings_paint->addChild(toggleSpray);
+
+  toggleInnerRadius = new UICheckBox(80.0f, 138.0f, "Inner radius", &innerRadius);
+  settings_paint->addChild(toggleInnerRadius);
 
   spray_size = new UISlider(6.0f, 180.0f, 170.0f, 40.0f, 0.0001f);
   spray_size->setFunc(setSprayBrushSize);
@@ -1034,8 +1044,9 @@ MapView::MapView(float ah0, float av0)
 
   lastBrushUpdate = 0;
   textureBrush.init();
+  textureBrushInnerRadius.init();
   sprayBrush.init();
-  setSprayBrushSize(10.0f);
+  setSprayBrushSize(0.24f);
 
   look = false;
   mViewMode = eViewMode_3D;
@@ -1380,7 +1391,9 @@ void MapView::tick(float t, float dt)
               if (textureBrush.needUpdate())
               {
                 textureBrush.GenerateTexture();
+                textureBrushInnerRadius.GenerateTexture();
               }
+
               if (mViewMode == eViewMode_3D && !underMap)
               {
                 if (mainGui->TextureSwitcher->hidden())
@@ -1391,6 +1404,11 @@ void MapView::tick(float t, float dt)
                       textureBrush.getRadius(), brushSprayPressure,
                       *UITexturingGUI::getSelectedTexture()
                     );
+
+                    if (innerRadius)
+                    {
+                      gWorld->paintTexture(_cursor_pos, &textureBrushInnerRadius, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), *UITexturingGUI::getSelectedTexture());
+                    }
                   }
                   else
                   {
@@ -1407,7 +1425,9 @@ void MapView::tick(float t, float dt)
             if (textureBrush.needUpdate())
             {
               textureBrush.GenerateTexture();
+              textureBrushInnerRadius.GenerateTexture();
             }
+
             if (mViewMode == eViewMode_2D)
               gWorld->paintTexture({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z}, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), *UITexturingGUI::getSelectedTexture());
           }
@@ -1554,7 +1574,9 @@ void MapView::tick(float t, float dt)
   if ((t - lastBrushUpdate) > 0.1f && textureBrush.needUpdate())
   {
     textureBrush.GenerateTexture();
+    textureBrushInnerRadius.GenerateTexture();
   }
+
 
   gWorld->time += this->mTimespeed * dt;
 
