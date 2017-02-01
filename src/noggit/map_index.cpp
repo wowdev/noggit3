@@ -582,7 +582,7 @@ void MapIndex::fixUIDs()
 
   std::forward_list<ModelInstance> models;
   std::forward_list<WMOInstance> wmos;
-  
+
   for (int z = 0; z < 64; ++z)
   {
     for (int x = 0; x < 64; ++x)
@@ -767,13 +767,13 @@ void MapIndex::fixUIDs()
   for (ModelInstance& instance : models)
   {
     instance.d1 = uid++;
-    
+
     // to avoid going outside of bound
     std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);
     std::size_t sz = std::max((std::size_t)(instance.extents[0].z / TILESIZE), (std::size_t)0);
     std::size_t ex = std::min((std::size_t)(instance.extents[1].x / TILESIZE), (std::size_t)63);
     std::size_t ez = std::min((std::size_t)(instance.extents[1].z / TILESIZE), (std::size_t)63);
-    
+
 
     for (std::size_t z = sz; z <= ez; ++z)
     {
@@ -806,7 +806,7 @@ void MapIndex::fixUIDs()
   // save the current highest guid
   highestGUID = uid - 1;
 
-  // load each tile without the models and 
+  // load each tile without the models and
   // save them with the models from modelPerTile / wmoPerTile
   for (int z = 0; z < 64; ++z)
   {
@@ -817,7 +817,7 @@ void MapIndex::fixUIDs()
         continue;
       }
 
-      // load even the tiles without models in case there are old ones 
+      // load even the tiles without models in case there are old ones
       // that shouldn't be there to avoid creating new duplicates
 
       std::stringstream filename;
@@ -850,7 +850,7 @@ void MapIndex::fixUIDs()
       std::swap(gWorld->mWMOInstances, wmoInst);
     }
   }
-  
+
   saveMaxUID();
 }
 

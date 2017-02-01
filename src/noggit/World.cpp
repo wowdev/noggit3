@@ -2159,7 +2159,7 @@ void World::updateSelectedVertices()
   }
 
   for (MapChunk* chunk : _vertex_chunks)
-  {  
+  {
     chunk->updateVerticesData();
     chunk->recalcNorms();
   }

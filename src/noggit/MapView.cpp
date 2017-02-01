@@ -650,7 +650,7 @@ void MapView::createGUI()
   mainGui->ZoneIDBrowser->setMapID(gWorld->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc(changeZoneIDValue);
   tool_settings_x = video.xres() - 186;
-  tool_settings_y = 38; 
+  tool_settings_y = 38;
 
   //3D Paint settings UIWindow
   settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 280.0f);
@@ -1695,11 +1695,11 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
   {
     case 0: radius = mainGui->terrainTool->brushRadius(); break;
     case 1: radius = mainGui->flattenTool->brushRadius(); break;
-    case 2: 
-      radius = textureBrush.getRadius(); 
+    case 2:
+      radius = textureBrush.getRadius();
       hardness = textureBrush.getHardness();
       break;
-    case 6: break; //! \ todo: water: get radius 
+    case 6: break; //! \ todo: water: get radius
     case 8: radius = mainGui->shaderTool->brushRadius(); break;
   }
 
