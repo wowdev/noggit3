@@ -9,6 +9,4 @@ class UICursorSwitcher : public UICloseWindow
 {
 public:
   UICursorSwitcher();
-
-  void changeCursor(int Type);
 };
