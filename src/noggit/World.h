@@ -139,6 +139,7 @@ public:
             , float brushRadius
             , float hardness
             , bool highlightPaintableChunks
+            , bool draw_contour
             );
 
   void outdoorLights(bool on);

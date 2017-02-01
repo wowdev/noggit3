@@ -90,8 +90,6 @@ boost::optional<selection_type> lastSelected;
 
 bool TestSelection = false;
 
-extern bool DrawMapContour;
-
 // extern row and col form Palette UI
 
 
@@ -835,8 +833,8 @@ void MapView::createGUI()
   addHotkey (SDLK_F7, MOD_none, [] { gWorld->drawlines = !gWorld->drawlines; });
   mbar->GetMenu("View")->AddMenuItemToggle("F8 Detail infos", mainGui->guidetailInfos->hidden_evil(), true);
   addHotkey (SDLK_F8, MOD_none, [this] { mainGui->guidetailInfos->toggleVisibility(); });
-  mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &DrawMapContour);
-  addHotkey (SDLK_F9, MOD_none, [] { DrawMapContour = !DrawMapContour; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &_draw_contour);
+  addHotkey (SDLK_F9, MOD_none, [this] { _draw_contour = !_draw_contour; });
   mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &gWorld->renderAnimations);
   addHotkey (SDLK_F11, MOD_none, [] { gWorld->renderAnimations = !gWorld->renderAnimations; });
   mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &gWorld->draw_mfbo);
@@ -855,20 +853,20 @@ void MapView::createGUI()
 
   addHotkey ( SDLK_F1
             , MOD_shift
-            , []
+            , [this]
               {
                 if (alloff)
                 {
                   alloff_models = gWorld->drawmodels;
                   alloff_doodads = gWorld->drawdoodads;
-                  alloff_contour = DrawMapContour;
+                  alloff_contour = _draw_contour;
                   alloff_wmo = gWorld->drawwmo;
                   alloff_fog = gWorld->drawfog;
                   alloff_terrain = gWorld->drawterrain;
 
                   gWorld->drawmodels = false;
                   gWorld->drawdoodads = false;
-                  DrawMapContour = true;
+                  _draw_contour = true;
                   gWorld->drawwmo = false;
                   gWorld->drawterrain = true;
                   gWorld->drawfog = false;
@@ -877,7 +875,7 @@ void MapView::createGUI()
                 {
                   gWorld->drawmodels = alloff_models;
                   gWorld->drawdoodads = alloff_doodads;
-                  DrawMapContour = alloff_contour;
+                  _draw_contour = alloff_contour;
                   gWorld->drawwmo = alloff_wmo;
                   gWorld->drawterrain = alloff_terrain;
                   gWorld->drawfog = alloff_fog;
@@ -1705,7 +1703,12 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
     case 8: radius = mainGui->shaderTool->brushRadius(); break;
   }
 
-  gWorld->draw(_cursor_pos, radius, hardness, _highlightPaintableChunks);
+  gWorld->draw ( _cursor_pos
+               , radius
+               , hardness
+               , _highlightPaintableChunks
+               , _draw_contour
+               );
 
   displayGUIIfEnabled();
 }
