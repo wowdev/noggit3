@@ -784,7 +784,7 @@ void MapView::createGUI()
   mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", [] { InsertObject (14); });
   mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", [] { InsertObject (15); });
   mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", [] { mainGui->HelperModels->show(); });
-  mbar->GetMenu("Assist")->AddMenuItemSeperator("ADT");
+  mbar->GetMenu("Assist")->AddMenuItemSeperator("Current ADT");
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Set Area ID"
                                              , []
                                                {
@@ -819,8 +819,11 @@ void MapView::createGUI()
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Create water"
                                              , [] { gWorld->addWaterLayer(gWorld->camera); }
                                              );
-  mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded adts)", [] { gWorld->fixAllGaps(); });
-  mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", [] { gWorld->ClearShader(gWorld->camera); });
+
+  mbar->GetMenu("Assist")->AddMenuItemSeperator("Loaded ADTs");
+  mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded ADTs)", [] { gWorld->fixAllGaps(); });
+
+  mbar->GetMenu("Assist")->AddMenuItemSeperator("Global");
   mbar->GetMenu("Assist")->AddMenuItemButton("Map to big alpha", [] { gWorld->convertMapToBigAlpha(); });
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");

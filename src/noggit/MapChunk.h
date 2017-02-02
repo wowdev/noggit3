@@ -87,7 +87,6 @@ public:
   void drawLines (Frustum const&);
   void drawTextures();
   bool ChangeMCCV(math::vector_3d const& pos, float change, float radius, bool editMode);
-  void ClearShader();
   void SetWater(bool w);
   bool GetWater();
 

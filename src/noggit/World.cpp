@@ -1242,11 +1242,6 @@ void World::deleteWaterLayer(math::vector_3d const& pos)
   for_tile_at(pos, [](MapTile* tile) { tile->Water->deleteLayer(Environment::getInstance()->currentWaterLayer); });
 }
 
-void World::ClearShader(math::vector_3d const& pos)
-{
-  for_tile_at(pos, [](MapTile* tile) { tile->ClearShader(); });
-}
-
 void World::CropWaterADT(math::vector_3d const& pos)
 {
   for_tile_at(pos, [](MapTile* tile) { tile->CropWater(); });

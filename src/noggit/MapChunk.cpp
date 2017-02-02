@@ -324,15 +324,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 }
 
-void MapChunk::ClearShader()
-{
-  for (int i = 0; i < mapbufsize; ++i)
-  {
-    mccv[i] = math::vector_3d(1.0f, 1.0f, 1.0f);
-  }
-
-  gl.bufferData<GL_ARRAY_BUFFER> (mccvEntry, sizeof(mccv), mccv, GL_STATIC_DRAW);
-}
 
 void MapChunk::drawTextures()
 {
@@ -973,7 +964,13 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, float change, float radius
 
   if (!hasMCCV)
   {
-    ClearShader(); // create default shaders
+    for (int i = 0; i < mapbufsize; ++i)
+    {
+      mccv[i].x = 1.0f; // set default shaders
+      mccv[i].y = 1.0f;
+      mccv[i].z = 1.0f;
+    }
+
     changed = true;
     Flags |= FLAG_MCCV;
     hasMCCV = true;

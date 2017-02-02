@@ -56,7 +56,6 @@ public:
 
   void saveTile(bool saveAllModels = false);
 	void CropWater();
-	void ClearShader();
 
   bool isTile(int pX, int pZ);
   void clearAllModels();
