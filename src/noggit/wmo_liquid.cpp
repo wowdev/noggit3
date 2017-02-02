@@ -17,10 +17,7 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
   : xtiles(header.A)
   , ytiles(header.B)
   , pos(math::vector_3d(header.pos.x, header.pos.z, -header.pos.y))
-  , tilesize(LQ_DEFAULT_TILESIZE)
-  , ydir(-1.0f)
   , texRepeats(4.0f)
-  , trans(false)
 {
   opengl::call_list* draw_list = new opengl::call_list();
   int flag = initGeometry(f, draw_list);
@@ -31,33 +28,23 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
   {
     // "XTEXTURES\\SLIME\\slime.%d.blp"
     texture = "XTextures\\river\\lake_a.%d.blp";
-    type = 0;
     texRepeats = 2.0f;
     mTransparency = false;
   }
-  else if (flag & 2) {
+  else if (flag & 2) 
+  {
     // "XTEXTURES\\LAVA\\lava.%d.blp"
     texture = "XTextures\\river\\lake_a.%d.blp";
-    type = 0;
     mTransparency = false;
   }
-  else {
+  else 
+  {
     // "XTEXTURES\\river\\lake_a.%d.blp"
     texture = "XTextures\\river\\lake_a.%d.blp";
-
-    if (indoor) {
-      trans = true;
-      type = 1;
-      col = math::vector_3d(((mat.col2 & 0xFF0000) >> 16) / 255.0f, ((mat.col2 & 0xFF00) >> 8) / 255.0f, (mat.col2 & 0xFF) / 255.0f);
-    }
-    else {
-      trans = true;
-      type = 2; // outdoor water (...?)
-    }
     mTransparency = true;
   }
 
-  render.reset(new liquid_render(col, mTransparency, draw_list, texture));
+  render.reset(new liquid_render(mTransparency, texture, draw_list));
 }
 
 int wmo_liquid::initGeometry(MPQFile* f, opengl::call_list* draw_list)
@@ -79,7 +66,10 @@ int wmo_liquid::initGeometry(MPQFile* f, opengl::call_list* draw_list)
       {
         h = pos.y;
       }
-      lVertices[p] = math::vector_3d(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
+      lVertices[p] = math::vector_3d( pos.x + LQ_DEFAULT_TILESIZE * i
+                                    , h
+                                    , pos.z + -1.0f * LQ_DEFAULT_TILESIZE * j
+                                    );
     }
   }
 

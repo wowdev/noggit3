@@ -133,7 +133,12 @@ void enableWaterShader()
 
 void liquid_render::draw()
 {
-  glEnable(GL_FRAGMENT_PROGRAM_ARB);
+  if (!_ready)
+  {
+    return;
+  }
+
+  gl.enable(GL_FRAGMENT_PROGRAM_ARB);
 #ifdef USEBLSFILES
   if (type == 2 && mWaterShader->IsOkay())
     mWaterShader->EnableShader();
@@ -143,25 +148,25 @@ void liquid_render::draw()
   enableWaterShader();
 #endif
 
-  math::vector_3d col2;
-  glDisable(GL_CULL_FACE);
-  glDepthFunc(GL_LESS);
+  
+  gl.disable(GL_CULL_FACE);
+  gl.depthFunc(GL_LESS);
   size_t texidx = (size_t)(gWorld->animtime / 60.0f) % _textures.size();
 
   const float tcol = _transparency ? 0.85f : 1.0f;
 
   if (_transparency)
   {
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthMask(GL_FALSE);
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.depthMask(GL_FALSE);
   }
 
-  _col = gWorld->skies->colorSet[WATER_COLOR_LIGHT] * 0.7f; //! \todo  add variable water color
-  col2 = gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.2f;
+  math::vector_3d color  = gWorld->skies->colorSet[WATER_COLOR_LIGHT] * 0.7f; //! \todo  add variable water color
+  math::vector_3d color2 = gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.2f;
 
-  glColor4f(_col.x, _col.y, _col.z, tcol);
-  glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0, col2.x, col2.y, col2.z, tcol);
+  gl.color4f(color.x, color.y, color.z, tcol);
+  glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0, color2.x, color2.y, color2.z, tcol);
 
   opengl::texture::set_active_texture(0);
   opengl::texture::enable_texture();
@@ -173,7 +178,6 @@ void liquid_render::draw()
 
   if (_draw_list)
   {
-    //! \todo THIS LINE THROWS GL_INVALID_OPERATION! Steff. It donwt do in anymore now. Perhaps because water rendering was called double in maptile::draw()
     _draw_list->render();
   }
 
@@ -181,21 +185,25 @@ void liquid_render::draw()
   opengl::texture::disable_texture();
   opengl::texture::set_active_texture(0);
 
-  glColor4f(1, 1, 1, 0.4f);
+  gl.color4f(1, 1, 1, 0.4f);
   if (_transparency)
   {
-    glDepthMask(GL_TRUE);
-    glDisable(GL_BLEND);
+    gl.depthMask(GL_TRUE);
+    gl.disable(GL_BLEND);
   }
-  glDisable(GL_FRAGMENT_PROGRAM_ARB);
+  gl.disable(GL_FRAGMENT_PROGRAM_ARB);
 }
 
-liquid_render::liquid_render(math::vector_3d const& col, bool transparency, opengl::call_list* draw_list, std::string const& filename)
+liquid_render::liquid_render(bool transparency, std::string const& filename, opengl::call_list* draw_list)
   : _transparency(transparency)
-  , _col(col)
   , _draw_list(draw_list)
 {
-  setTextures(filename);
+  if (filename != "")
+  {
+    setTextures(filename);
+  }
+
+  _ready = !!_draw_list && !_textures.empty();
 }
 
 void liquid_render::setTextures(std::string const& filename)
@@ -206,9 +214,15 @@ void liquid_render::setTextures(std::string const& filename)
   {
     _textures.emplace_back(boost::str(boost::format(filename) % i));
   }
+
+  _ready = !!_draw_list;
 }
 
 void liquid_render::changeDrawList(opengl::call_list* draw_list)
 {
-  _draw_list.reset(draw_list);
+  if (draw_list)
+  {
+    _draw_list.reset(draw_list);
+    _ready = !_textures.empty();
+  }
 }

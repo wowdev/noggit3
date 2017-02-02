@@ -24,14 +24,8 @@ private:
   int initGeometry(MPQFile* f, opengl::call_list* draw_list);
 
   math::vector_3d pos;
-
-  float tilesize;
-  float ydir;
   float texRepeats;
   bool mTransparency;
-  int type;
-  bool trans;
-  math::vector_3d col;
   int xtiles, ytiles;
 
   std::unique_ptr<liquid_render> render;

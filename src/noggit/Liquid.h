@@ -48,26 +48,27 @@ class Liquid
 {
 public:
 
-  Liquid(int x, int y, math::vector_3d base, float ptilesize = LQ_DEFAULT_TILESIZE);
-
-  void initFromMH2O(MH2O_Tile &pTileInfo);
+  Liquid(int x, int y, math::vector_3d base, MH2O_Tile const& tile_info);
 
   void draw() { render->draw(); }
 
+  void changeLiquidID(int id);
+  void updateRender();
+
 private:
-  int mShaderType;
-  int mLiquidType;
-  bool mTransparency;
-  
+  int _liquid_id;
+  int _flags;
+  float _minimum;
+  float _maximum;
+  std::vector<bool> _subchunks;
+  std::vector<math::vector_3d> _vertices;
+  std::vector<float> _depth;
+
+private:
+  bool mTransparency;  
   int xtiles, ytiles;
-
   math::vector_3d pos;
-
-  float tilesize;
-  float ydir;
   float texRepeats;
-  int type;
-  math::vector_3d col;
 
   std::unique_ptr<liquid_render> render;
 };
