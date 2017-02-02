@@ -40,8 +40,8 @@ private:
   unsigned char mShadowMap[8 * 64];
   opengl::texture shadow;
 
-  StripType *strip;
-  int striplen;
+  StripType *strip_with_holes;
+  int strip_with_holeslen;
 
   bool water;
 
