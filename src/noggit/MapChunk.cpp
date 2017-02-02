@@ -1126,16 +1126,7 @@ bool MapChunk::blurTerrain(math::vector_3d const& pos, float remain, float radiu
 
   if (changed)
   {
-    vmin.y = std::numeric_limits<float>::max();
-    vmax.y = std::numeric_limits<float>::lowest();
-
-    for (int i (0); i < mapbufsize; ++i)
-    {
-      vmin.y = std::min (vmin.y, mVertices[i].y);
-      vmax.y = std::max (vmax.y, mVertices[i].y);
-    }
-
-    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    updateVerticesData();
   }
 
   return changed;
@@ -1554,8 +1545,9 @@ bool MapChunk::fixGapLeft(const MapChunk* chunk)
 
   if (changed)
   {
-    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    updateVerticesData();
   }
+
   return changed;
 }
 
@@ -1578,8 +1570,9 @@ bool MapChunk::fixGapAbove(const MapChunk* chunk)
 
   if (changed)
   {
-    gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    updateVerticesData();
   }
+
   return changed;
 }
 
