@@ -1068,16 +1068,6 @@ void MapTile::saveTile(bool saveAllModels)
   delete f;
 }
 
-void MapTile::ClearShader()
-{
-  for (int i = 0; i < 16; ++i)
-  {
-    for (int j = 0; j < 16; ++j)
-    {
-      mChunks[i][j]->ClearShader();
-    }
-  }
-}
 
 void MapTile::CropWater()
 {
