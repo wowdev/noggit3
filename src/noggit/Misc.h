@@ -83,7 +83,7 @@ struct filenameOffsetThing
   int filenamePosition;
 };
 
-void SetChunkHeader(sExtendableArray pArray, int pPosition, int pMagix, int pSize = 0);
+void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize = 0);
 
 bool pointInside(math::vector_3d point, math::vector_3d extents[2]);
 void minmax(math::vector_3d* a, math::vector_3d* b);
