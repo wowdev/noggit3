@@ -137,26 +137,34 @@ namespace
   {
     gl.vertex3f (radius * math::sin (arc), radius * math::cos (arc), 0.0f);
   }
-  void draw_disk (float radius)
+  void draw_disk (float radius, bool stipple = false)
   {
     int const slices (std::max (35.0f, radius * 1.5f));
     static math::radians const max (2.0f * math::constants::pi);
 
     float const stride (max._ / slices);
 
-	glLineWidth(3.0f);
-
-    gl.begin (GL_LINE_LOOP);
-    for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
+    if (stipple)
     {
-      draw_disk_point (radius, arc);
+      glEnable(GL_LINE_STIPPLE);
+      glLineStipple(10, 0xAAAA);
     }
-    gl.end();
 
-	glLineWidth(1.0f);
+	  glLineWidth(3.0f);
+
+      gl.begin (GL_LINE_LOOP);
+      for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
+      {
+        draw_disk_point (radius, arc);
+      }
+      gl.end();
+
+	  glLineWidth(1.0f);
+    glDisable(GL_LINE_STIPPLE);
+
   }
 
-  void render_disk (::math::vector_3d const& position, float radius)
+  void render_disk (::math::vector_3d const& position, float radius, bool stipple = false)
   {
     opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
 
@@ -176,7 +184,7 @@ namespace
                  , Environment::getInstance()->cursorColorA
                  );
 
-      draw_disk (radius);
+      draw_disk (radius, stipple);
     }
   }
 }
@@ -777,6 +785,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , float hardness
                  , bool highlightPaintableChunks
                  , bool draw_contour
+                 , float innerRadius
                  )
 {
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
@@ -911,9 +920,13 @@ void World::draw ( math::vector_3d const& cursor_pos
       if (Environment::getInstance()->cursorType == 1)
       {
         render_disk(cursor_pos, brushRadius);
+        if (innerRadius >= 0.01f)
+        {
+          render_disk(cursor_pos, brushRadius * innerRadius, true);
+        }
         if (hardness >= 0.01f)
         {
-          render_disk(cursor_pos, brushRadius * hardness);
+          render_disk(cursor_pos, brushRadius * hardness, true);
         }
       }
       else if (Environment::getInstance()->cursorType == 2)
@@ -1403,13 +1416,13 @@ void World::changeShader(math::vector_3d const& pos, float change, float radius,
     );
 }
 
-void World::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType)
+void World::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
 {
   for_all_chunks_in_range
     ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        return chunk->changeTerrain(pos, change, radius, BrushType);
+        return chunk->changeTerrain(pos, change, radius, BrushType, inner_radius);
       }
     , [] (MapChunk* chunk)
       {

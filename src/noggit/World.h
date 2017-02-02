@@ -140,6 +140,7 @@ public:
             , float hardness
             , bool highlightPaintableChunks
             , bool draw_contour
+            , float innerRadius
             );
 
   void outdoorLights(bool on);
@@ -187,7 +188,7 @@ public:
   template<typename Fun>
     void for_tile_at(math::vector_3d const& pos, Fun&&);
 
-  void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType);
+  void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
   void changeShader(math::vector_3d const& pos, float change, float radius, bool editMode);
   void flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
   void blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType);

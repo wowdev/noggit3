@@ -18,6 +18,7 @@ namespace ui
 
     void nextType();
     void changeRadius(float change);
+    void changeInnerRadius(float change);
     void changeSpeed(float change);
     
     // vertex edit only functions
@@ -34,6 +35,7 @@ namespace ui
 
 
     float brushRadius() const { return _radius; }
+    float innerRadius() const { return _inner_radius;  }
   
   private:
     void updateVertices(math::vector_3d const& cursor_pos);
@@ -42,6 +44,7 @@ namespace ui
     
     float _radius;
     float _speed;
+    float _inner_radius;
     float& _angle;
     float& _orientation;
 
@@ -60,6 +63,7 @@ namespace ui
     UIToggleGroup* _tablet_active_group_toggle = nullptr;
 
     UISlider* _radius_slider;
+    UISlider* _inner_radius_slider;
     UISlider* _speed_slider;
   };
 }

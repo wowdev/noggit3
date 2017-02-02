@@ -910,7 +910,7 @@ void MapChunk::recalcNorms()
   gl.bufferData<GL_ARRAY_BUFFER> (minishadows, sizeof(mFakeShadows), mFakeShadows, GL_STATIC_DRAW);
 }
 
-bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType)
+bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
 {
   float dist, xdiff, zdiff;
   bool changed = false;
@@ -940,7 +940,7 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
             mVertices[i].y += change;
             break;
           case eTerrainType_Linear:
-            mVertices[i].y += change*(1.0f - dist / radius);
+            mVertices[i].y += change*(1.0f - dist * (1.0f - inner_radius) / radius);
             break;
           case eTerrainType_Smooth:
             mVertices[i].y += change / (1.0f + dist / radius);
