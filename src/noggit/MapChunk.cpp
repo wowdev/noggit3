@@ -1181,7 +1181,7 @@ void MapChunk::setHole(math::vector_3d const& pos, bool big, bool add)
   else
   {
     int v = 1 << ((int)((pos.z - zbase) / MINICHUNKSIZE) * 4 + (int)((pos.x - xbase) / MINICHUNKSIZE));
-    holes = add ? (holes & ~v) : (holes | v);
+    holes = add ? (holes | v) : (holes & ~v);
   }
 
   initStrip();
