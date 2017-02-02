@@ -186,6 +186,15 @@ namespace
 
       draw_disk (radius, stipple);
     }
+
+    {
+      opengl::scoped::matrix_pusher matrix;
+
+      gl.multMatrixf(math::matrix_4x4(math::matrix_4x4::translation, position).transposed());
+
+      draw_sphere(0.3f);
+    }
+
   }
 }
 
