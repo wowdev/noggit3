@@ -2055,21 +2055,19 @@ void World::fixAllGaps()
     }
 
     // fix gaps within the adt
-    for (size_t ty = 0; ty < 16; ty++)
+    for (size_t ty = 1; ty < 16; ty++)
     {
-      for (size_t tx = 0; tx < 16; tx++)
+      for (size_t tx = 1; tx < 16; tx++)
       {
         MapChunk* chunk = tile->getChunk(tx, ty);
         bool changed = false;
 
-        // if the chunk isn't the first of the row
-        if (tx && chunk->fixGapLeft(tile->getChunk(tx - 1, ty)))
+        if (chunk->fixGapLeft(tile->getChunk(tx - 1, ty)))
         {
           changed = true;
         }
 
-        // if the chunk isn't the first of the column
-        if (ty && chunk->fixGapAbove(tile->getChunk(tx, ty - 1)))
+        if (chunk->fixGapAbove(tile->getChunk(tx, ty - 1)))
         {
           changed = true;
         }
