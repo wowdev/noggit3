@@ -974,7 +974,7 @@ void MapView::createGUI()
 
   addHotkey ( SDLK_y
             , MOD_none
-            , [] { mainGui->flattenTool->nextFlattenMode(); }
+            , [] { mainGui->flattenTool->nextFlattenType(); }
             , [] { return terrainMode == 1; }
             );
 
