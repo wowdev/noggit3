@@ -30,11 +30,6 @@ void ChunkWater::reloadRendering()
 
   for (size_t k = 0; k < Header.nLayers; ++k)
   {
-    if (!Liquids[k])
-    {
-      Liquids[k] = new Liquid(Info[k].width, Info[k].height, math::vector_3d(x, Info[k].minHeight, y));
-    }
-
     MH2O_Tile lTile;
     lTile.mLiquidType = Info[k].LiquidType;
     lTile.mMaximum = Info[k].maxHeight;
@@ -58,7 +53,7 @@ void ChunkWater::reloadRendering()
       }
     }
 
-    Liquids[k]->initFromMH2O(lTile);
+    Liquids[k] = new Liquid(Info[k].width, Info[k].height, math::vector_3d(x, Info[k].minHeight, y), lTile);
   }
 }
 
