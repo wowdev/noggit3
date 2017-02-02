@@ -1711,11 +1711,14 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
   video.set3D();
 
   //! \ todo: make the current tool return the radius
-  float radius = 0.0f, hardness = 0.0f;
+  float radius = 0.0f, hardness = 0.0f, inner_radius = 0.0f;
 
   switch (terrainMode)
   {
-    case 0: radius = mainGui->terrainTool->brushRadius(); break;
+    case 0: 
+      radius = mainGui->terrainTool->brushRadius();
+      inner_radius = mainGui->terrainTool->innerRadius();
+      break;
     case 1: radius = mainGui->flattenTool->brushRadius(); break;
     case 2:
       radius = textureBrush.getRadius();
@@ -1730,6 +1733,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , hardness
                , _highlightPaintableChunks
                , _draw_contour
+               , inner_radius
                );
 
   displayGUIIfEnabled();
@@ -2319,7 +2323,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
   {
     if (terrainMode == 0)
     {
-      mainGui->terrainTool->moveVertices(-e->yrel / YSENS);
+      mainGui->terrainTool->changeInnerRadius(e->xrel / 100.0f);
     }
     if (terrainMode == 2)
     {
@@ -2328,6 +2332,15 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
       mainGui->paintHardnessSlider->setValue(hardness);
     }
   }
+
+  if (rightMouse && _mod_shift_down)
+  {
+    if (terrainMode == 0)
+    {
+      mainGui->terrainTool->moveVertices(-e->yrel / YSENS);
+    }
+  }
+
 
   if (rightMouse && _mod_space_down)
   {

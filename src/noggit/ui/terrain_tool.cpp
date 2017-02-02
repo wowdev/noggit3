@@ -15,8 +15,9 @@
 namespace ui
 {
   terrain_tool::terrain_tool(float x, float y, bool tablet)
-    : UIWindow(x, y, winWidth, tablet ? 290.0f : 255.0f)
+    : UIWindow(x, y, winWidth, tablet ? 315.0f : 280.0f)
     , _radius(15.0f)
+    , _inner_radius(0.0f)
     , _speed(2.0f)
     , _angle(gWorld->vertex_angle._)
     , _orientation(gWorld->vertex_orientation._)
@@ -41,20 +42,26 @@ namespace ui
     _radius_slider = new UISlider(6.0f, 140.0f, 167.0f, 1000.0f, 0.00001f);
     _radius_slider->setFunc([&](float f) { _radius = f; });
     _radius_slider->setValue(_radius / 1000);
-    _radius_slider->setText("Brush radius: ");
+    _radius_slider->setText("Outer radius: ");
     addChild(_radius_slider);
 
-    _speed_slider = new UISlider(6.0f, 165.0f, 167.0f, 10.0f, 0.00001f);
+    _inner_radius_slider = new UISlider(6.0f, 165.0f, 167.0f, 1.0f, 0.00001f);
+    _inner_radius_slider->setFunc([&](float f) { _inner_radius = f; });
+    _inner_radius_slider->setValue(_inner_radius / 1.0f);
+    _inner_radius_slider->setText("Inner radius: ");
+    addChild(_inner_radius_slider);
+
+    _speed_slider = new UISlider(6.0f, 190.0f, 167.0f, 10.0f, 0.00001f);
     _speed_slider->setFunc([&](float f) { _speed = f; });
     _speed_slider->setValue(_speed / 10.0f);
     _speed_slider->setText("Brush Speed: ");
     addChild(_speed_slider);
 
-    addChild(new UIText(10.0f, 185.0f, "Vertex edit relative to:", app.getArial12(), eJustifyLeft));
+    addChild(new UIText(10.0f, 210.0f, "Vertex edit relative to:", app.getArial12(), eJustifyLeft));
 
     _vertex_toggle = new UIToggleGroup(&_vertex_mode);
-    addChild(new UICheckBox(6.0f, 197.0f, "Mouse", _vertex_toggle, eVertexMode_Mouse));
-    addChild(new UICheckBox(85.0f, 197.0f, "Selection\ncenter", _vertex_toggle, eVertexMode_Center));
+    addChild(new UICheckBox(6.0f, 222.0f, "Mouse", _vertex_toggle, eVertexMode_Mouse));
+    addChild(new UICheckBox(85.0f, 222.0f, "Selection\ncenter", _vertex_toggle, eVertexMode_Center));
     _vertex_toggle->Activate(eVertexMode_Center);
 
     
@@ -78,7 +85,7 @@ namespace ui
   {
     if(_edit_type != eTerrainType_Vertex)
     {
-      gWorld->changeTerrain(pos, dt*_speed, _radius, _edit_type);
+      gWorld->changeTerrain(pos, dt*_speed, _radius, _edit_type, _inner_radius);
     }
     else
     {
@@ -118,6 +125,13 @@ namespace ui
     _radius = std::max(0.0f, std::min(1000.0f, _radius + change));
     _radius_slider->setValue(_radius / 1000.0f);
   }
+
+  void terrain_tool::changeInnerRadius(float change)
+  {
+    _inner_radius = std::max(0.0f, std::min(1.0f, _inner_radius + change));
+    _inner_radius_slider->setValue(_inner_radius / 1.0f);
+  }
+
 
   void terrain_tool::changeSpeed(float change)
   {
