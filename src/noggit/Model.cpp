@@ -236,9 +236,13 @@ void Model::initCommon(const MPQFile& f)
     }
     else
     {
+#ifndef NO_REPLACIBLE_TEXTURES_HACK
+      _specialTextures[i] = -1;
+      _textureFilenames[i] = "tileset/generic/black.blp";
+      _textures.emplace_back (_textureFilenames[i]);
+#else
       //! \note special texture - only on characters and such... Noggit should not even render these.
       //! \todo Check if this is actually correct. Or just remove it.
-      throw std::exception(); //this just fucks things up, dont load them for now
 
       _specialTextures[i] = texdef[i].type;
 
@@ -248,6 +252,7 @@ void Model::initCommon(const MPQFile& f)
         // a fix for weapons with type-3 textures.
         _replaceTextures.emplace (texdef[i].type, _textureFilenames[i]);
       }
+#endif
     }
   }
 
