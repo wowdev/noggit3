@@ -170,7 +170,7 @@ struct MH2O_Header{
 struct MH2O_Information{
   uint16_t LiquidType;
   uint16_t Flags;
-  float minHeight;//I just took these random ._.
+  float minHeight;
   float maxHeight;
   uint8_t xOffset;
   uint8_t yOffset;
