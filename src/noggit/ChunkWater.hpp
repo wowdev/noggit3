@@ -9,7 +9,7 @@
 #include <set>
 
 class MPQFile;
-class Liquid;
+class liquid_layer;
 class sExtendableArray;
 class MapChunk;
 
@@ -40,5 +40,5 @@ private:
 
   MH2O_Render Render;
 
-  std::vector<Liquid> _liquids;
+  std::vector<liquid_layer> _layers;
 };

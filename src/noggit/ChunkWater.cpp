@@ -2,7 +2,7 @@
 
 #include <noggit/ChunkWater.hpp>
 #include <noggit/Environment.h>
-#include <noggit/Liquid.h>
+#include <noggit/liquid_layer.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
@@ -16,7 +16,6 @@ ChunkWater::ChunkWater(float x, float z)
 ChunkWater::~ChunkWater()
 {
 }
-
 
 
 void ChunkWater::fromFile(MPQFile &f, size_t basePos)
@@ -90,13 +89,13 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
       }
     }
 
-    _liquids.emplace_back(math::vector_3d(xbase, 0.0f, zbase), info, heightmask, infoMask);
+    _layers.emplace_back(math::vector_3d(xbase, 0.0f, zbase), info, heightmask, infoMask);
   }
 }
 
 void ChunkWater::reloadRendering()
 {
-  for (Liquid& layer : _liquids)
+  for (liquid_layer& layer : _layers)
   {
     layer.updateRender();
   }
@@ -105,7 +104,7 @@ void ChunkWater::reloadRendering()
 void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos)
 {
   MH2O_Header header;
-  header.nLayers = _liquids.size();
+  header.nLayers = _layers.size();
 
   if (hasData(0))
   {
@@ -116,14 +115,14 @@ void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int&
     header.ofsInformation = current_pos - base_pos;
     int info_pos = current_pos;
 
-    std::size_t info_size = sizeof(MH2O_Information) * _liquids.size();
+    std::size_t info_size = sizeof(MH2O_Information) * _layers.size();
     current_pos += info_size;
 
     adt.Extend(info_size);
 
-    for (Liquid& liquid : _liquids)
+    for (liquid_layer& layer : _layers)
     {
-      liquid.save(adt, base_pos, info_pos, current_pos);
+      layer.save(adt, base_pos, info_pos, current_pos);
     }
   }  
 
@@ -134,55 +133,55 @@ void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int&
 
 void ChunkWater::autoGen(MapChunk *chunk, float factor)
 {
-  for (Liquid& liquid : _liquids)
+  for (liquid_layer& layer : _layers)
   {
-    liquid.updateTransparency(chunk, factor);
+    layer.updateTransparency(chunk, factor);
   }
 }
 
 
 void ChunkWater::CropWater(MapChunk* chunkTerrain)
 {
-  for (Liquid& liquid : _liquids)
+  for (liquid_layer& layer : _layers)
   {
-    liquid.crop(chunkTerrain);
+    layer.crop(chunkTerrain);
   }
 }
 
 int ChunkWater::getType(size_t layer) const
 {
-  return hasData(layer) ? _liquids[layer].liquidID() : 0;
+  return hasData(layer) ? _layers[layer].liquidID() : 0;
 }
 
 void ChunkWater::setType(int type, size_t layer)
 {
   if(hasData(layer))
   {
-    _liquids[layer].changeLiquidID(type);
+    _layers[layer].changeLiquidID(type);
   }
 }
 
 void ChunkWater::draw()
 {
-  if (_liquids.empty())
+  if (_layers.empty())
   {
     return;
   }
 
   if (Environment::getInstance()->displayAllWaterLayers)
   {
-    for (Liquid& liquid : _liquids)
+    for (liquid_layer& layer : _layers)
     {
-      liquid.draw();
+      layer.draw();
     }
   }
-  else if (Environment::getInstance()->currentWaterLayer < _liquids.size())
+  else if (Environment::getInstance()->currentWaterLayer < _layers.size())
   {
-    _liquids[Environment::getInstance()->currentWaterLayer].draw();
+    _layers[Environment::getInstance()->currentWaterLayer].draw();
   }
 }
 
 bool ChunkWater::hasData(size_t layer) const
 { 
-  return _liquids.size() > layer; 
+  return _layers.size() > layer; 
 }

@@ -5,7 +5,6 @@
 #include <noggit/Brush.h>
 #include <noggit/Environment.h>
 #include <noggit/Frustum.h>
-#include <noggit/Liquid.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
