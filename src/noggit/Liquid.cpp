@@ -14,20 +14,23 @@
 #include <string>
 
 
-Liquid::Liquid(math::vector_3d const& base, MH2O_Tile const& tile_info)
+Liquid::Liquid(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask)
   : pos(base)
   , texRepeats(4.0f)
-  , _flags(tile_info.mFlags)
-  , _minimum(tile_info.mMinimum)
-  , _maximum(tile_info.mMaximum)
-  , _liquid_id(tile_info.mLiquidType)
+  , _flags(info.Flags)
+  , _minimum(info.minHeight)
+  , _maximum(info.maxHeight)
+  , _liquid_id(info.LiquidType)
+  , _subchunks(0)
   , render(new liquid_render(true))
 {
-  for (int z = 0; z < 8; ++z)
+  int offset = 0;
+  for (int z = 0; z < info.height; ++z)
   {
-    for (int x = 0; x < 8; ++x)
+    for (int x = 0; x < info.width; ++x)
     {
-      setSubchunk(x, z, tile_info.mRender[z][x]);
+      setSubchunk(x + info.xOffset, z + info.yOffset, (infomask >> offset) & 1);
+      offset++;
     }
   }
 
@@ -35,9 +38,9 @@ Liquid::Liquid(math::vector_3d const& base, MH2O_Tile const& tile_info)
   {
     for (int x = 0; x < 9; ++x)
     {
-      _depth.emplace_back(tile_info.mDepth[z][x]);
+      _depth.emplace_back(heightmask.mTransparency[z][x]/255.0f);
       _vertices.emplace_back( pos.x + LQ_DEFAULT_TILESIZE * x
-                            , tile_info.mHeightmap[z][x]
+                            , heightmask.mHeightValues[z][x]
                             , pos.z + LQ_DEFAULT_TILESIZE * z
                             );
     }
@@ -107,9 +110,7 @@ void Liquid::save(sExtendableArray& adt, int base_pos, int& info_pos, int& curre
       adt.Insert(current_pos, 8, reinterpret_cast<char*>(&mask));
       current_pos += 8;
     }
-  }
- 
-  
+  } 
 
   info.ofsHeightMap = current_pos - base_pos;
 
@@ -132,7 +133,7 @@ void Liquid::save(sExtendableArray& adt, int base_pos, int& info_pos, int& curre
   {
     for (int x = info.xOffset; x <= info.xOffset + info.width; ++x)
     {
-      char depth = static_cast<char>(_depth[z * 9 + x] * 255.0f);
+      unsigned char depth = static_cast<unsigned char>(_depth[z * 9 + x] * 255.0f);
       memcpy(adt.GetPointer<char>(current_pos), &depth, sizeof(char));
       current_pos += sizeof(char);
     }

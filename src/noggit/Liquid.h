@@ -8,49 +8,13 @@
 class MapChunk;
 class sExtendableArray;
 
-struct MH2O_Tile
-{
-  int mLiquidType;
-  int mFlags;
-  float mMinimum;
-  float mMaximum;
-  bool mRender[8][8];
-  float mHeightmap[9][9];
-  float mDepth[9][9];
-
-  MH2O_Tile()
-  {
-    mLiquidType = 0;
-    mFlags = 0;
-    mMinimum = 0.0f;
-    mMaximum = 0.0f;
-    for (int i = 0; i < 8; ++i)
-    {
-      for (int j = 0; j < 8; j++)
-      {
-        mRender[i][j] = false;
-      }        
-    }
-
-    for (int i = 0; i < 9; ++i)
-    {
-      for (int j = 0; j < 9; j++)
-      {
-        mHeightmap[i][j] = 0.0f;
-        mDepth[i][j] = 255.0f;
-      }
-    }      
-  }
-};
-
-
 
 // handle liquids like oceans, lakes, rivers, slime, magma
 class Liquid
 {
 public:
 
-  Liquid(math::vector_3d const& base, MH2O_Tile const& tile_info);
+  Liquid(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask);
 
 
   void save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;

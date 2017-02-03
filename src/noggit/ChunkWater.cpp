@@ -38,54 +38,28 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 
   for (int k = 0; k < (int)header.nLayers; ++k)
   {
-    MH2O_Tile tile;
     MH2O_Information info;
+    MH2O_HeightMask heightmask;
+    uint64_t infoMask = -1; // default = all water
 
     //info
     f.seek(basePos + header.ofsInformation + sizeof(MH2O_Information)* k);
     f.read(&info, sizeof(MH2O_Information));
 
-    tile.mFlags = info.Flags;
-    tile.mMinimum = info.minHeight;
-    tile.mMaximum = info.maxHeight;
-    tile.mLiquidType = info.LiquidType;
-
     //mask
     if (info.ofsInfoMask > 0 && info.height > 0)
     {
-      uint64_t infoMask(0);
       f.seek(info.ofsInfoMask + basePos);
       f.read(&infoMask, 8);
-
-      int bitOfs = 0;
-      for (int y = 0; y < info.height; ++y)
-      {
-        for (int x = 0; x < info.width; ++x)
-        {
-          tile.mRender[y + info.yOffset][x + info.xOffset] = ((infoMask >> bitOfs) & 1);
-          bitOfs++;
-        }
-      }
     }
-    else
-    {
-      // no bitmap = all subchunks have water
-      for (int y = 0; y < 8; ++y)
-      {
-        for (int x = 0; x < 8; ++x)
-        {
-          tile.mRender[y][x] = true;
-        }
-      }
-    }   
     
     // set default value
     for (int h = 0; h < 9; ++h)
     {
       for (int w = 0; w < 9; ++w)
       {
-        tile.mHeightmap[w][h] = info.minHeight;
-        tile.mDepth[w][h] = 1.0f;
+        heightmask.mHeightValues[w][h] = info.minHeight;
+        heightmask.mTransparency[w][h] = 255;
       }
     }
 
@@ -100,7 +74,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
         {
           for (int h = info.xOffset; h < info.xOffset + info.width + 1; ++h)
           {
-            f.read(&tile.mHeightmap[w][h], sizeof(float));
+            f.read(&heightmask.mHeightValues[w][h], sizeof(float));
           }
         }
       }
@@ -109,14 +83,14 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
       {
         for (int h = info.xOffset; h < info.xOffset + info.width + 1; ++h)
         {
-          unsigned char depth;
-          f.read(&depth, sizeof(unsigned char));
-          tile.mDepth[w][h] = depth / 255.0f;
+          
+          f.read(&heightmask.mTransparency[w][h], sizeof(unsigned char));
+          
         }
       }
     }
 
-    _liquids.emplace_back(math::vector_3d(xbase, 0.0f, zbase), tile);
+    _liquids.emplace_back(math::vector_3d(xbase, 0.0f, zbase), info, heightmask, infoMask);
   }
 }
 
