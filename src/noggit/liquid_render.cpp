@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/DBC.h>
-#include <noggit/Liquid.h>
+#include <noggit/liquid_layer.hpp>
 #include <noggit/Log.h>
 #include <noggit/Shaders.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture

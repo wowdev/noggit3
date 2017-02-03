@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/DBC.h>
-#include <noggit/Liquid.h>
+#include <noggit/liquid_layer.hpp>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
@@ -14,7 +14,7 @@
 #include <string>
 
 
-Liquid::Liquid(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask)
+liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask)
   : pos(base)
   , texRepeats(4.0f)
   , _flags(info.Flags)
@@ -50,7 +50,7 @@ Liquid::Liquid(math::vector_3d const& base, MH2O_Information const& info, MH2O_H
   updateRender();
 }
 
-void Liquid::save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const
+void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const
 {
   int min_x = 9, min_z = 9, max_x = 0, max_z = 0;
   bool filled = true;
@@ -144,7 +144,7 @@ void Liquid::save(sExtendableArray& adt, int base_pos, int& info_pos, int& curre
 }
 
 
-void Liquid::changeLiquidID(int id)
+void liquid_layer::changeLiquidID(int id)
 {
   _liquid_id = id;
 
@@ -163,7 +163,7 @@ void Liquid::changeLiquidID(int id)
   }
 }
 
-void Liquid::updateRender()
+void liquid_layer::updateRender()
 {
   opengl::call_list* draw_list = new opengl::call_list();
   draw_list->start_recording();
@@ -216,7 +216,7 @@ void Liquid::updateRender()
 }
 
 
-void Liquid::crop(MapChunk* chunk)
+void liquid_layer::crop(MapChunk* chunk)
 {
   bool changed = false;
 
@@ -255,7 +255,7 @@ void Liquid::crop(MapChunk* chunk)
   }
 }
 
-void Liquid::updateTransparency(MapChunk* chunk, float factor)
+void liquid_layer::updateTransparency(MapChunk* chunk, float factor)
 {
   for (int z = 0; z < 9; ++z)
   {
@@ -269,12 +269,12 @@ void Liquid::updateTransparency(MapChunk* chunk, float factor)
   updateRender();
 }
 
-bool Liquid::hasSubchunk(int x, int z) const
+bool liquid_layer::hasSubchunk(int x, int z) const
 {
   return (_subchunks >> (z * 8 + x)) & 1;
 }
 
-void Liquid::setSubchunk(int x, int z, bool water)
+void liquid_layer::setSubchunk(int x, int z, bool water)
 {
   std::uint64_t v = std::uint64_t(1) << (z*8+x);
   _subchunks = water ? (_subchunks | v) : (_subchunks & ~v);

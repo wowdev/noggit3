@@ -10,11 +10,11 @@ class sExtendableArray;
 
 
 // handle liquids like oceans, lakes, rivers, slime, magma
-class Liquid
+class liquid_layer
 {
 public:
 
-  Liquid(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask);
+  liquid_layer(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask);
 
 
   void save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
