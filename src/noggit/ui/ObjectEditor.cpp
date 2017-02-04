@@ -169,7 +169,6 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
 
   addChild(new UICheckBox(5.0f, 155.0f, "Terrain", pasteModeGroup, PASTE_ON_TERRAIN));
   addChild(new UICheckBox(105.0f, 155.0f, "Selection", pasteModeGroup, PASTE_ON_SELECTION));
-  addChild(new UICheckBox(5.0f, 180.0f, "Model", pasteModeGroup, PASTE_ON_MODEL));
   addChild(new UICheckBox(105.0f, 180.0f, "Camera", pasteModeGroup, PASTE_ON_CAMERA));
 
   pasteModeGroup->Activate(pasteMode);
@@ -196,9 +195,6 @@ void UIObjectEditor::pasteObject (math::vector_3d pos)
   switch (pasteMode)
   {
     case PASTE_ON_TERRAIN: // use cursor pos
-      break;
-    case PASTE_ON_MODEL:
-      pos = gWorld->getCursorPosOnModel().get_value_or (pos);
       break;
     case PASTE_ON_SELECTION:
       if (gWorld->HasSelection())
