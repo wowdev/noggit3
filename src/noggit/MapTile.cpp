@@ -367,13 +367,6 @@ void MapTile::toBigAlpha()
   }
 }
 
-extern float groundBrushRadius;
-extern float blurBrushRadius;
-extern int terrainMode;
-extern Brush textureBrush;
-
-
-
 void MapTile::draw ( Frustum const& frustum
                    , bool highlightPaintableChunks
                    , bool draw_contour
