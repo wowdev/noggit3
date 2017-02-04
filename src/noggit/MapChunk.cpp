@@ -742,7 +742,7 @@ void MapChunk::draw ( Frustum const& frustum
 
   if (Environment::getInstance()->cursorType == 3)
   {
-    if (gWorld->IsSelection(eEntry_MapChunk) && boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk == this && terrainMode != editing_mode::holes)
+    if (gWorld->IsSelection(eEntry_MapChunk) && boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk == this)
     {
       int poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
 
