@@ -842,13 +842,14 @@ void MapView::createGUI()
   addHotkey (SDLK_F8, MOD_none, [this] { mainGui->guidetailInfos->toggleVisibility(); });
   mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &_draw_contour);
   addHotkey (SDLK_F9, MOD_none, [this] { _draw_contour = !_draw_contour; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F10 Wireframe", &gWorld->drawwireframe);
+  addHotkey(SDLK_F10, MOD_none, [] { gWorld->drawwireframe = !gWorld->drawwireframe; });
   mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &gWorld->renderAnimations);
   addHotkey (SDLK_F11, MOD_none, [] { gWorld->renderAnimations = !gWorld->renderAnimations; });
-  mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &gWorld->draw_mfbo);
   mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &gWorld->drawfog);
-  addHotkey (SDLK_F12, MOD_none, [] { gWorld->drawfog = !gWorld->drawfog; });
+  addHotkey(SDLK_F12, MOD_none, [] { gWorld->drawfog = !gWorld->drawfog; });
+  mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &gWorld->draw_mfbo);
   mbar->GetMenu("View")->AddMenuItemToggle("Hole lines always on", &Environment::getInstance()->view_holelines, false);
-  mbar->GetMenu("View")->AddMenuItemToggle("Wireframe", &gWorld->drawwireframe);
   mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &Settings::getInstance()->renderModelsWithBox);
 
   mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [] { mainGui->showHelp(); });
