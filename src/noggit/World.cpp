@@ -973,7 +973,7 @@ void World::draw ( math::vector_3d const& cursor_pos
 
     for (math::vector_3d const* pos : _vertices_selected)
     {
-      gl.vertex3f(pos->x, pos->y, pos->z);
+      gl.vertex3f(pos->x, pos->y + 0.1f, pos->z);
     }
     gl.end();
 
