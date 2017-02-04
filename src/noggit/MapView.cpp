@@ -1884,7 +1884,7 @@ void MapView::doSelection (bool selectTerrainOnly)
 
   math::ray ray (gWorld->camera, pos - gWorld->camera);
 
-  selection_result results (gWorld->intersect (ray, selectTerrainOnly));
+  selection_result results (gWorld->intersect (ray, selectTerrainOnly, terrainMode == editing_mode::object));
 
   std::sort ( results.begin()
             , results.end()
