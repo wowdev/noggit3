@@ -249,9 +249,6 @@ public:
 
   void convertMapToBigAlpha();
 
-  // get the real cursor pos in the world, TODO: get the correct pos on models/wmos
-  boost::optional<math::vector_3d> getCursorPosOnModel();
-
   void deselectVertices(math::vector_3d const& pos, float radius);
   void selectVertices(math::vector_3d const& pos, float radius);
 

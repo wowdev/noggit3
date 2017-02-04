@@ -1186,23 +1186,6 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
   return results;
 }
 
-boost::optional<math::vector_3d> World::getCursorPosOnModel()
-{
-  if (terrainMode == editing_mode::object)
-  {
-    if (IsSelection (eEntry_Model))
-    {
-      return boost::get<selected_model_type> (*GetCurrentSelection())->pos;
-    }
-    else if (IsSelection (eEntry_WMO))
-    {
-      return boost::get<selected_wmo_type> (*GetCurrentSelection())->pos;
-    }
-  }
-
-  return boost::none;
-}
-
 void World::tick(float dt)
 {
   mapIndex->enterTile(tile_index(ex, ez));
