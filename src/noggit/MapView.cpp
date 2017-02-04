@@ -844,7 +844,8 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &gWorld->renderAnimations);
   addHotkey (SDLK_F11, MOD_none, [] { gWorld->renderAnimations = !gWorld->renderAnimations; });
   mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &gWorld->draw_mfbo);
-  mbar->GetMenu("View")->AddMenuItemToggle("F Fog", &gWorld->drawfog);
+  mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &gWorld->drawfog);
+  addHotkey (SDLK_F12, MOD_none, [] { gWorld->drawfog = !gWorld->drawfog; });
   mbar->GetMenu("View")->AddMenuItemToggle("Hole lines always on", &Environment::getInstance()->view_holelines, false);
   mbar->GetMenu("View")->AddMenuItemToggle("Wireframe", &gWorld->drawwireframe);
   mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &Settings::getInstance()->renderModelsWithBox);
@@ -2012,10 +2013,6 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
           gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
         }
       }
-    }
-    else // draw fog
-    {
-      gWorld->drawfog = !gWorld->drawfog;
     }
   }
 
