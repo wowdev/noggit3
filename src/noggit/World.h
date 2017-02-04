@@ -9,6 +9,7 @@
 #include <noggit/Sky.h> // Skies, OutdoorLighting, OutdoorLightStats
 #include <noggit/WMO.h> // WMOManager
 #include <noggit/tile_index.hpp>
+#include <noggit/tool_enums.hpp>
 
 #include <map>
 #include <string>
@@ -145,6 +146,8 @@ public:
             , bool draw_chunk_flag_overlay
             , bool draw_water_overlay
             , bool draw_areaid_overlay
+            //! \todo passing editing_mode is _so_ wrong, I don't believe I'm doing this
+            , editing_mode
             );
 
   void outdoorLights(bool on);
