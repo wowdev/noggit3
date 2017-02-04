@@ -787,7 +787,7 @@ void World::setupFog()
   }
 }
 
-extern int terrainMode;
+extern editing_mode terrainMode;
 
 void World::draw ( math::vector_3d const& cursor_pos
                  , float brushRadius
@@ -920,7 +920,7 @@ void World::draw ( math::vector_3d const& cursor_pos
     //gl.depthMask(false);
     //gl.disable(GL_DEPTH_TEST);
 
-    if (terrainMode == 0 && Environment::getInstance()->groundBrushType == 5)
+    if (terrainMode == editing_mode::ground && Environment::getInstance()->groundBrushType == 5)
     {
       render_square(cursor_pos, brushRadius / 2.0f, 0.0f);
     }
@@ -943,7 +943,7 @@ void World::draw ( math::vector_3d const& cursor_pos
         render_sphere(cursor_pos, brushRadius);
       }
     }
-    if (terrainMode == 1 && Environment::getInstance()->flattenAngleEnabled)
+    if (terrainMode == editing_mode::flatten_blur && Environment::getInstance()->flattenAngleEnabled)
     {
       math::degrees o = math::degrees(Environment::getInstance()->flattenOrientation);
       float x = brushRadius * cos(o);
@@ -964,7 +964,7 @@ void World::draw ( math::vector_3d const& cursor_pos
 
   }
 
-  if ( terrainMode == 0 && Environment::getInstance()->groundBrushType == eTerrainType_Vertex )
+  if ( terrainMode == editing_mode::ground && Environment::getInstance()->groundBrushType == eTerrainType_Vertex )
   {
     gl.pointSize(4.0f);
     gl.color3f(1.0f, 0.0f, 0.0f);
@@ -985,7 +985,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   }
 
 
-  if (drawlines || (terrainMode == 2 && highlightPaintableChunks))
+  if (drawlines || (terrainMode == editing_mode::paint && highlightPaintableChunks))
   {
     gl.disable(GL_COLOR_MATERIAL);
     opengl::texture::set_active_texture (0);
@@ -1145,7 +1145,7 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
   }
 
   // only check when using the ObjectEditor
-  if (!pOnlyMap && terrainMode == 9)
+  if (!pOnlyMap && terrainMode == editing_mode::object)
   {
     bool const render_hidden (Environment::getInstance()->showModelFromHiddenList);
 
@@ -1179,7 +1179,7 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
 
 boost::optional<math::vector_3d> World::getCursorPosOnModel()
 {
-  if (terrainMode == 9)
+  if (terrainMode == editing_mode::object)
   {
     if (IsSelection (eEntry_Model))
     {
