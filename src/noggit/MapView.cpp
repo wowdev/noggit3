@@ -912,6 +912,45 @@ void MapView::createGUI()
 
   addHotkey (SDLK_DELETE, MOD_none, [] { DeleteSelectedObject(); });
 
+  addHotkey ( SDLK_c
+            , MOD_ctrl
+            , [this]
+              {
+                mainGui->objectEditor->copy (*gWorld->GetCurrentSelection());
+              }
+            , [this]
+              {
+                return !!gWorld->GetCurrentSelection();
+              }
+            );
+
+  addHotkey ( SDLK_c
+            , MOD_alt | MOD_ctrl
+            , [this]
+              {
+                mainGui->toggleCursorSwitcher();
+              }
+            );
+
+  addHotkey ( SDLK_c
+            , MOD_none
+            , [this]
+              {
+                mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
+              }
+            , [] { return terrainMode == 9; }
+            );
+
+  addHotkey ( SDLK_c
+            , MOD_shift
+            , [this]
+              {
+                Environment::getInstance()->cursorType++;
+                Environment::getInstance()->cursorType %= 4;
+              }
+            , [] { return terrainMode != 9; }
+            );
+
   addHotkey (SDLK_v, MOD_shift, [] { InsertObject (14); });
   addHotkey (SDLK_v, MOD_alt, [] { InsertObject (15); });
   addHotkey (SDLK_v, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos); });
@@ -995,6 +1034,164 @@ void MapView::createGUI()
                   mainGui->guiToolbar->IconSelect(terrainMode);
                 }
               }
+            );
+
+  addHotkey ( SDLK_t
+            , MOD_none
+            , [&]
+              {
+                //! \todo space as global modifier?
+                if (_mod_space_down)
+                {
+                  mainGui->flattenTool->nextFlattenMode();
+                }
+                else
+                {
+                  mainGui->flattenTool->toggleFlattenAngle();
+                }
+              }
+            , [&] { return terrainMode == 1; }
+            );
+
+  addHotkey ( SDLK_t
+            , MOD_none
+            , [&]
+              {
+                sprayBrushActive = !sprayBrushActive;
+                toggleSpray->setState(sprayBrushActive);
+              }
+            , [&] { return terrainMode == 2; }
+            );
+
+  addHotkey ( SDLK_t
+            , MOD_none
+            , [&]
+              {
+                gWorld->setHoleADT (gWorld->camera, _mod_alt_down);
+              }
+            , [&] { return terrainMode == 3; }
+            );
+
+  addHotkey ( SDLK_t
+            , MOD_none
+            , [&]
+              {
+                mainGui->objectEditor->togglePasteMode();
+              }
+            , [&] { return terrainMode == 9; }
+            );
+
+  addHotkey ( SDLK_h
+            , MOD_none
+            , [&]
+              {
+                mainGui->toggleHelp();
+              }
+            , [&] { return terrainMode != 9; }
+            );
+
+  addHotkey ( SDLK_h
+            , MOD_none
+            , [&]
+              {
+                // toggle hidden models visibility
+                if (_mod_space_down)
+                {
+                  Environment::getInstance()->showModelFromHiddenList = !Environment::getInstance()->showModelFromHiddenList;
+                }
+                else if (_mod_shift_down)
+                {
+                  gWorld->clearHiddenModelList();
+                }
+                else
+                {
+                  // toggle selected model visibility
+                  if (gWorld->HasSelection())
+                  {
+                    auto selection = gWorld->GetCurrentSelection();
+                    if (selection->which() == eEntry_Model)
+                    {
+                      auto&& entity (boost::get<selected_model_type> (*selection)->model.get());
+                      auto&& hidden (gWorld->_hidden_models);
+                      if (hidden.count (entity))
+                      {
+                        hidden.erase (entity);
+                      }
+                      else
+                      {
+                        hidden.emplace (entity);
+                      }
+                    }
+                    else if (selection->which() == eEntry_WMO)
+                    {
+                      auto&& entity (boost::get<selected_wmo_type> (*selection)->wmo.get());
+                      auto&& hidden (gWorld->_hidden_map_objects);
+                      if (hidden.count (entity))
+                      {
+                        hidden.erase (entity);
+                      }
+                      else
+                      {
+                        hidden.emplace (entity);
+                      }
+                    }
+                  }
+                }
+              }
+            , [&] { return terrainMode == 9; }
+            );
+
+  addHotkey ( SDLK_f
+            , MOD_none
+            , [&]
+              {
+                if (_mod_space_down)
+                {
+                  mainGui->terrainTool->flattenVertices();
+                }
+              }
+            , [&] { return terrainMode == 0; }
+            );
+  addHotkey ( SDLK_f
+            , MOD_none
+            , [&]
+              {
+                if (_mod_space_down)
+                {
+                  mainGui->flattenTool->toggleFlattenLock();
+                }
+                else
+                {
+                  mainGui->flattenTool->lockPos (_cursor_pos);
+                }
+              }
+            , [&] { return terrainMode == 1; }
+            );
+  addHotkey ( SDLK_f
+            , MOD_none
+            , [&]
+              {
+                if (gWorld->HasSelection())
+                {
+                  auto selection = gWorld->GetCurrentSelection();
+
+                  if (selection->which() == eEntry_Model)
+                  {
+                    gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
+                    boost::get<selected_model_type> (*selection)->pos = _cursor_pos;
+                    boost::get<selected_model_type> (*selection)->recalcExtents();
+                    gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
+                  }
+                  else if (selection->which() == eEntry_WMO)
+                  {
+                    gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+                    boost::get<selected_wmo_type> (*selection)->pos = _cursor_pos;
+                    boost::get<selected_wmo_type> (*selection)->recalcExtents();
+                    gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+                  }
+                }
+              }
+            , [&] { return terrainMode == 9; }
             );
 
 
@@ -1864,157 +2061,6 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
 
   if (e->keysym.sym == SDLK_KP9)
     keyr = -1;
-
-
-  // copy model to clipboard
-  if (e->keysym.sym == SDLK_c)
-  {
-    if (_mod_ctrl_down && gWorld->GetCurrentSelection())
-      mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
-    else if (_mod_alt_down && _mod_ctrl_down)
-      mainGui->toggleCursorSwitcher();
-    else if (_mod_shift_down)
-      InsertObject(14);
-    else if (_mod_alt_down)
-      InsertObject(15);
-    else
-    {
-      if (terrainMode == 9)
-      {
-        mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
-      }
-      else
-      {
-        Environment::getInstance()->cursorType++;
-        Environment::getInstance()->cursorType %= 4;
-      }
-    }
-  }
-
-  if (e->keysym.sym == SDLK_t)
-  {
-    // toggle flatten angle mode
-    if (terrainMode == 1)
-    {
-      if (_mod_space_down)
-      {
-        mainGui->flattenTool->nextFlattenMode();
-      }
-      else
-      {
-        mainGui->flattenTool->toggleFlattenAngle();
-      }
-    }
-    else if (terrainMode == 2)
-    {
-      sprayBrushActive = !sprayBrushActive;
-      toggleSpray->setState(sprayBrushActive);
-    }
-    else if (terrainMode == 3)
-    {
-      gWorld->setHoleADT(gWorld->camera, _mod_alt_down);
-    }
-    else if (terrainMode == 9)
-    {
-      mainGui->objectEditor->togglePasteMode();
-    }
-  }
-
-  // toggle help window
-  if (e->keysym.sym == SDLK_h)
-  {
-    if (terrainMode == 9)
-    {
-      // toggle hidden models visibility
-      if (_mod_space_down)
-      {
-        Environment::getInstance()->showModelFromHiddenList = !Environment::getInstance()->showModelFromHiddenList;
-      }
-      else if (_mod_shift_down)
-      {
-        gWorld->clearHiddenModelList();
-      }
-      else
-      {
-        // toggle selected model visibility
-        if (gWorld->HasSelection())
-        {
-          auto selection = gWorld->GetCurrentSelection();
-          if (selection->which() == eEntry_Model)
-          {
-            auto&& entity (boost::get<selected_model_type> (*selection)->model.get());
-            auto&& hidden (gWorld->_hidden_models);
-            if (hidden.count (entity))
-            {
-              hidden.erase (entity);
-            }
-            else
-            {
-              hidden.emplace (entity);
-            }
-          }
-          else if (selection->which() == eEntry_WMO)
-          {
-            auto&& entity (boost::get<selected_wmo_type> (*selection)->wmo.get());
-            auto&& hidden (gWorld->_hidden_map_objects);
-            if (hidden.count (entity))
-            {
-              hidden.erase (entity);
-            }
-            else
-            {
-              hidden.emplace (entity);
-            }
-          }
-        }
-      }
-    }
-    else
-    {
-      mainGui->toggleHelp();
-    }
-  }
-
-  if (e->keysym.sym == SDLK_f)
-  {
-    if (terrainMode == 0 && _mod_space_down)
-    {
-      mainGui->terrainTool->flattenVertices();
-    }
-    else if (terrainMode == 1)
-    {
-      if (_mod_space_down)
-      {
-        mainGui->flattenTool->toggleFlattenLock();
-      }
-      else
-      {
-        mainGui->flattenTool->lockPos (_cursor_pos);
-      }
-    }
-    else if (terrainMode == 9)
-    {
-      if (gWorld->HasSelection())
-      {
-        auto selection = gWorld->GetCurrentSelection();
-
-        if (selection->which() == eEntry_Model)
-        {
-          gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
-          boost::get<selected_model_type> (*selection)->pos = _cursor_pos;
-          boost::get<selected_model_type> (*selection)->recalcExtents();
-          gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
-        }
-        else if (selection->which() == eEntry_WMO)
-        {
-          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
-          boost::get<selected_wmo_type> (*selection)->pos = _cursor_pos;
-          boost::get<selected_wmo_type> (*selection)->recalcExtents();
-          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
-        }
-      }
-    }
-  }
 
   // reload a map tile STEFF out because of UID recalc. reload could kill all.
   //if( e->keysym.sym == SDLK_j && _mod_shift_down )
