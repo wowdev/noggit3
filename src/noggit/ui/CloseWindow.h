@@ -9,5 +9,5 @@
 class UICloseWindow : public UIWindow
 {
 public:
-  UICloseWindow(float x, float y, float w, float h, const std::string& pTitle, bool pMoveable = false);
+  UICloseWindow(float x, float y, float w, float h, const std::string& pTitle, bool pMoveable = false, std::function<void()> on_hide = []{});
 };
