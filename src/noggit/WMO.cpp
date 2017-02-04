@@ -5,7 +5,6 @@
 #include <noggit/wmo_liquid.hpp>
 #include <noggit/Log.h> // LogDebug
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/Shaders.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/WMO.h>
 #include <noggit/World.h>
@@ -772,16 +771,7 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
   gl.color4f(1, 1, 1, 1);
   for (int i = 0; i<nBatches; ++i)
   {
-    if (video.mSupportShaders && _lists[i].second && wmoShader)
-    {
-      wmoShader->bind();
-      _lists[i].first->render();
-      wmoShader->unbind();
-    }
-    else
-    {
-      _lists[i].first->render();
-    }
+    _lists[i].first->render();
   }
 
   gl.color4f(1, 1, 1, 1);
