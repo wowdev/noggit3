@@ -20,7 +20,7 @@
 #include <iostream>
 #include <map>
 
-extern int terrainMode;
+extern editing_mode terrainMode;
 
 GLuint Contour = 0;
 float CoordGen[4];
@@ -613,7 +613,7 @@ void MapChunk::draw ( Frustum const& frustum
   bool cantPaint = UITexturingGUI::getSelectedTexture()
                  && !canPaintTexture(*UITexturingGUI::getSelectedTexture())
                  && highlightPaintableChunks
-                 && terrainMode == 2;
+                 && terrainMode == editing_mode::paint;
 
   if (cantPaint)
   {
@@ -711,7 +711,7 @@ void MapChunk::draw ( Frustum const& frustum
     drawContour();
   }
 
-  if (terrainMode == 5)
+  if (terrainMode == editing_mode::flags)
   {
     // draw chunk white if impassible flag is set
     if (Flags & FLAG_IMPASS)
@@ -720,7 +720,7 @@ void MapChunk::draw ( Frustum const& frustum
       gl.drawElements (GL_TRIANGLES, strip_with_holeslen, GL_UNSIGNED_SHORT, nullptr);
     }
   }
-  if (terrainMode == 6)
+  if (terrainMode == editing_mode::water)
   {
     if (water)
     {
@@ -729,7 +729,7 @@ void MapChunk::draw ( Frustum const& frustum
     }
   }
 
-  if (terrainMode == 4)
+  if (terrainMode == editing_mode::areaid)
   {
     // draw chunks in color depending on AreaID and list color from environment
     if (Environment::getInstance()->areaIDColors.find(areaID) != Environment::getInstance()->areaIDColors.end())
@@ -742,7 +742,7 @@ void MapChunk::draw ( Frustum const& frustum
 
   if (Environment::getInstance()->cursorType == 3)
   {
-    if (gWorld->IsSelection(eEntry_MapChunk) && boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk == this && terrainMode != 3)
+    if (gWorld->IsSelection(eEntry_MapChunk) && boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk == this && terrainMode != editing_mode::holes)
     {
       int poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
 
