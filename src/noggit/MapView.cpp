@@ -2011,6 +2011,10 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _highlightPaintableChunks
                , _draw_contour
                , inner_radius
+               , terrainMode == editing_mode::paint
+               , terrainMode == editing_mode::flags
+               , terrainMode == editing_mode::water
+               , terrainMode == editing_mode::areaid
                );
 
   displayGUIIfEnabled();

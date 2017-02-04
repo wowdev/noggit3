@@ -79,6 +79,10 @@ public:
   void draw ( Frustum const&
             , bool highlightPaintableChunks
             , bool draw_contour
+            , bool draw_paintability_overlay
+            , bool draw_chunk_flag_overlay
+            , bool draw_water_overlay
+            , bool draw_areaid_overlay
             );
   //! \todo only this function should be public, all others should be called from it
 

@@ -795,6 +795,10 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool highlightPaintableChunks
                  , bool draw_contour
                  , float innerRadius
+                 , bool draw_paintability_overlay
+                 , bool draw_chunk_flag_overlay
+                 , bool draw_water_overlay
+                 , bool draw_areaid_overlay
                  )
 {
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
@@ -906,7 +910,14 @@ void World::draw ( math::vector_3d const& cursor_pos
     opengl::scoped::matrix_pusher const matrix;
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
-      tile->draw(frustum, highlightPaintableChunks, draw_contour);
+      tile->draw ( frustum
+                 , highlightPaintableChunks
+                 , draw_contour
+                 , draw_paintability_overlay
+                 , draw_chunk_flag_overlay
+                 , draw_water_overlay
+                 , draw_areaid_overlay
+                 );
     }
   }
 
