@@ -763,7 +763,8 @@ void MapView::createGUI()
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex->saveChanged(); });
   addHotkey (SDLK_s, MOD_ctrl, [this] { save(); });
   addHotkey (SDLK_s, MOD_meta, [this] { save(); });
-  // mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
+  mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
+  addHotkey (SDLK_j, MOD_shift, [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
   //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
   // mbar->GetMenu( "File" )->AddMenuItemButton( "Export heightmap", exportPNG, 1 );
   // mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
@@ -2061,10 +2062,6 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
 
   if (e->keysym.sym == SDLK_KP9)
     keyr = -1;
-
-  // reload a map tile STEFF out because of UID recalc. reload could kill all.
-  //if( e->keysym.sym == SDLK_j && _mod_shift_down )
-  //  gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
 
   // fog distance or brush radius
   if (e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS)
