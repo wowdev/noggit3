@@ -49,6 +49,7 @@ public:
             , bool draw_chunk_flag_overlay
             , bool draw_water_overlay
             , bool draw_areaid_overlay
+            , bool draw_wireframe_overlay
             );
   void intersect (math::ray const&, selection_result*) const;
   void drawLines (Frustum const&);

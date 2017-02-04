@@ -374,6 +374,7 @@ void MapTile::draw ( Frustum const& frustum
                    , bool draw_chunk_flag_overlay
                    , bool draw_water_overlay
                    , bool draw_areaid_overlay
+                   , bool draw_wireframe_overlay
                    )
 {
   gl.color4f(1, 1, 1, 1);
@@ -389,6 +390,7 @@ void MapTile::draw ( Frustum const& frustum
                           , draw_chunk_flag_overlay
                           , draw_water_overlay
                           , draw_areaid_overlay
+                          , draw_wireframe_overlay
                           );
     }
   }

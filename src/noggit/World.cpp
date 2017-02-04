@@ -916,6 +916,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , draw_chunk_flag_overlay
                  , draw_water_overlay
                  , draw_areaid_overlay
+                 , drawwireframe
                  );
     }
   }
