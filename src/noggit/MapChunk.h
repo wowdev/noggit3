@@ -83,6 +83,7 @@ public:
             , bool draw_chunk_flag_overlay
             , bool draw_water_overlay
             , bool draw_areaid_overlay
+            , bool draw_wireframe_overlay
             );
   //! \todo only this function should be public, all others should be called from it
 

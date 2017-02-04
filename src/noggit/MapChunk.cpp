@@ -602,6 +602,7 @@ void MapChunk::draw ( Frustum const& frustum
                     , bool draw_chunk_flag_overlay
                     , bool draw_water_overlay
                     , bool draw_areaid_overlay
+                    , bool draw_wireframe_overlay
                     )
 {
   if (!frustum.intersects(vmin, vmax))
@@ -762,7 +763,7 @@ void MapChunk::draw ( Frustum const& frustum
     }
   }
 
-  if (gWorld->drawwireframe)
+  if (draw_wireframe_overlay)
   {
     opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> const lighting;
     opengl::texture::disable_texture();
