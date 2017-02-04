@@ -95,7 +95,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   addChild(guiCurrentTexture);
 
   // UIToolbar
-  guiToolbar = new UIToolbar(6.0f, 145.0f);
+  guiToolbar = new UIToolbar(6.0f, 145.0f, [this] (editing_mode mode) { theMapview->set_editing_mode (mode); });
   addChild(guiToolbar);
 
 

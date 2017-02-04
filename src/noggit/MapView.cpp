@@ -274,6 +274,14 @@ void change_settings_window(editing_mode oldid, editing_mode newid)
   }
 }
 
+void MapView::set_editing_mode (editing_mode mode)
+{
+  change_settings_window (terrainMode, mode);
+  terrainMode = mode;
+  Environment::getInstance()->view_holelines = (mode == editing_mode::holes);
+  mainGui->guiToolbar->IconSelect (mode);
+}
+
 void openURL(int target)
 {
 #if defined(_WIN32) || defined(WIN32)
@@ -1016,17 +1024,13 @@ void MapView::createGUI()
                 if (mViewMode == eViewMode_2D)
                 {
                   mViewMode = eViewMode_3D;
-                  terrainMode = saveterrainMode;
-                  // Set the right icon in toolbar
-                  mainGui->guiToolbar->IconSelect(terrainMode);
+                  set_editing_mode (saveterrainMode);
                 }
                 else
                 {
                   mViewMode = eViewMode_2D;
                   saveterrainMode = terrainMode;
-                  terrainMode = editing_mode::paint;
-                  // Set the right icon in toolbar
-                  mainGui->guiToolbar->IconSelect(terrainMode);
+                  set_editing_mode (editing_mode::paint);
                 }
               }
             );
@@ -1256,16 +1260,16 @@ void MapView::createGUI()
   addHotkey (SDLK_4, MOD_alt, [] { mainGui->G1->setValue(0.75f); });
   addHotkey (SDLK_5, MOD_alt, [] { mainGui->G1->setValue(0.99f); });
 
-  addHotkey (SDLK_1, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = editing_mode::ground); });
-  addHotkey (SDLK_2, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = editing_mode::flatten_blur); });
-  addHotkey (SDLK_3, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = editing_mode::paint); });
-  addHotkey (SDLK_4, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = editing_mode::holes); });
-  addHotkey (SDLK_5, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = editing_mode::areaid); });
-  addHotkey (SDLK_6, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = editing_mode::flags); });
-  addHotkey (SDLK_7, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = editing_mode::water); });
-  addHotkey (SDLK_8, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = editing_mode::light); });
-  addHotkey (SDLK_9, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = editing_mode::mccv); });
-  addHotkey (SDLK_0, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = editing_mode::object); });
+  addHotkey (SDLK_1, MOD_none, [this] { set_editing_mode (editing_mode::ground); });
+  addHotkey (SDLK_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); });
+  addHotkey (SDLK_3, MOD_none, [this] { set_editing_mode (editing_mode::paint); });
+  addHotkey (SDLK_4, MOD_none, [this] { set_editing_mode (editing_mode::holes); });
+  addHotkey (SDLK_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); });
+  addHotkey (SDLK_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); });
+  addHotkey (SDLK_7, MOD_none, [this] { set_editing_mode (editing_mode::water); });
+  addHotkey (SDLK_8, MOD_none, [this] { set_editing_mode (editing_mode::light); });
+  addHotkey (SDLK_9, MOD_none, [this] { set_editing_mode (editing_mode::mccv); });
+  addHotkey (SDLK_0, MOD_none, [this] { set_editing_mode (editing_mode::object); });
 
   addHotkey (SDLK_0, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 0; }, [] { return gWorld->IsSelection(eEntry_WMO); });
   addHotkey (SDLK_1, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 1; }, [] { return gWorld->IsSelection(eEntry_WMO); });
@@ -1330,6 +1334,8 @@ MapView::MapView(float ah0, float av0)
   mViewMode = eViewMode_3D;
 
   createGUI();
+
+  set_editing_mode (editing_mode::ground);
 
   // Set camera y (height) position to current ground height plus some space.
   math::vector_3d t = math::vector_3d(0, 0, 0);
