@@ -49,3 +49,17 @@ enum eFlattenMode
   eFlattenMode_Lower,
   eFlattenMode_Count
 };
+
+enum class editing_mode
+{
+  ground,
+  flatten_blur,
+  paint,
+  holes,
+  areaid,
+  flags,
+  water,
+  light,
+  mccv,
+  object,
+};
