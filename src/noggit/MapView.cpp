@@ -90,13 +90,6 @@ boost::optional<selection_type> lastSelected;
 
 bool TestSelection = false;
 
-// extern row and col form Palette UI
-
-
-// This variables store the current status of the
-// Shift, Alt and CTRL keys
-
-
 bool  leftMouse = false;
 bool  leftClicked = false;
 bool  rightMouse = false;
