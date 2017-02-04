@@ -154,7 +154,7 @@ public:
   unsigned int getAreaID();
   void setAreaID(math::vector_3d const& pos, int id, bool adt);
 
-  selection_result intersect (math::ray const&, bool only_map);
+  selection_result intersect (math::ray const&, bool only_map, bool do_objects);
   void drawTileMode(float ah);
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);

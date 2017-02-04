@@ -1141,7 +1141,7 @@ void main()
   ez = (int)(camera.z / TILESIZE);
 }
 
-selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
+selection_result World::intersect (math::ray const& ray, bool pOnlyMap, bool do_objects)
 {
   selection_result results;
 
@@ -1153,8 +1153,7 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap)
     }
   }
 
-  // only check when using the ObjectEditor
-  if (!pOnlyMap && terrainMode == editing_mode::object)
+  if (!pOnlyMap && do_objects)
   {
     bool const render_hidden (Environment::getInstance()->showModelFromHiddenList);
 
