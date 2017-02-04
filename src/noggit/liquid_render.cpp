@@ -3,7 +3,6 @@
 #include <noggit/DBC.h>
 #include <noggit/liquid_layer.hpp>
 #include <noggit/Log.h>
-#include <noggit/Shaders.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 
