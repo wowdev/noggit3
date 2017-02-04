@@ -966,7 +966,8 @@ void World::draw ( math::vector_3d const& cursor_pos
 
   if ( terrainMode == editing_mode::ground && Environment::getInstance()->groundBrushType == eTerrainType_Vertex )
   {
-    gl.pointSize(4.0f);
+    float size = (vertexCenter() - camera).length();
+    gl.pointSize(std::max(0.001f, 10.0f - (1.25f * size / CHUNKSIZE)));
     gl.color3f(1.0f, 0.0f, 0.0f);
     gl.begin(GL_POINTS);
 
@@ -976,12 +977,9 @@ void World::draw ( math::vector_3d const& cursor_pos
     }
     gl.end();
 
-    if (_vertex_center_updated)
-    {
-      gl.color3f(0.0f, 0.0f, 1.0f);
-      render_sphere(_vertex_center, 2.0f);
-      gl.color3f(1.0f, 1.0f, 1.0f);
-    }
+    gl.color3f(0.0f, 0.0f, 1.0f);
+    render_sphere(vertexCenter(), 2.0f);
+    gl.color3f(1.0f, 1.0f, 1.0f);
   }
 
 
