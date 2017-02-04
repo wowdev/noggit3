@@ -20,8 +20,6 @@
 #include <iostream>
 #include <map>
 
-extern editing_mode terrainMode;
-
 GLuint Contour = 0;
 float CoordGen[4];
 static const int CONTOUR_WIDTH = 128;
@@ -600,6 +598,10 @@ void MapChunk::drawContour()
 void MapChunk::draw ( Frustum const& frustum
                     , bool highlightPaintableChunks
                     , bool draw_contour
+                    , bool draw_paintability_overlay
+                    , bool draw_chunk_flag_overlay
+                    , bool draw_water_overlay
+                    , bool draw_areaid_overlay
                     )
 {
   if (!frustum.intersects(vmin, vmax))
@@ -613,7 +615,7 @@ void MapChunk::draw ( Frustum const& frustum
   bool cantPaint = UITexturingGUI::getSelectedTexture()
                  && !canPaintTexture(*UITexturingGUI::getSelectedTexture())
                  && highlightPaintableChunks
-                 && terrainMode == editing_mode::paint;
+                 && draw_paintability_overlay;
 
   if (cantPaint)
   {
@@ -711,7 +713,7 @@ void MapChunk::draw ( Frustum const& frustum
     drawContour();
   }
 
-  if (terrainMode == editing_mode::flags)
+  if (draw_chunk_flag_overlay)
   {
     // draw chunk white if impassible flag is set
     if (Flags & FLAG_IMPASS)
@@ -720,7 +722,7 @@ void MapChunk::draw ( Frustum const& frustum
       gl.drawElements (GL_TRIANGLES, strip_with_holeslen, GL_UNSIGNED_SHORT, nullptr);
     }
   }
-  if (terrainMode == editing_mode::water)
+  if (draw_water_overlay)
   {
     if (water)
     {
@@ -729,7 +731,7 @@ void MapChunk::draw ( Frustum const& frustum
     }
   }
 
-  if (terrainMode == editing_mode::areaid)
+  if (draw_areaid_overlay)
   {
     // draw chunks in color depending on AreaID and list color from environment
     if (Environment::getInstance()->areaIDColors.find(areaID) != Environment::getInstance()->areaIDColors.end())
