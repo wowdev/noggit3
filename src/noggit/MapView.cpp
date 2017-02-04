@@ -1695,7 +1695,7 @@ void MapView::tick(float t, float dt)
                 }
                 else
                 {
-                  gWorld->overwriteTextureAtCurrentChunk(_cursor_pos, mainGui->TextureSwitcher->getTextures(), *UITexturingGUI::getSelectedTexture());
+                  gWorld->overwriteTextureAtCurrentChunk(_cursor_pos, mainGui->TextureSwitcher->current_texture(), *UITexturingGUI::getSelectedTexture());
                 }
               }
             }

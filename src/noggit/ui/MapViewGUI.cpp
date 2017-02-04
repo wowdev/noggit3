@@ -129,10 +129,8 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   TexturePicker->movable(true);
   addChild(TexturePicker);
 
-  TextureSwitcher = new UITextureSwitcher(100, 100);
-  TextureSwitcher->setPosition(video.xres() - TextureSwitcher->getW(), 40);
+  TextureSwitcher = new UITextureSwitcher (video.xres(), 40, settings_paint);
   TextureSwitcher->hide();
-  TextureSwitcher->movable(true);
   addChild(TextureSwitcher);
 
   // Cursor Switcher

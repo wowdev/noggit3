@@ -2,22 +2,19 @@
 
 #pragma once
 
-#include <noggit/ui/Window.h>
+#include <noggit/ui/CloseWindow.h>
+#include <noggit/ui/Texture.h>
 
-class UITexture;
-class UIButton;
-
-class UITextureSwitcher : public UIWindow
+class UITextureSwitcher : public UICloseWindow
 {
 public:
-  UITextureSwitcher(int x, int y);
+  UITextureSwitcher (float x_right, float y, UIWindow* parent);
 
-  scoped_blp_texture_reference const& getTextures();
-  void setTexture();
-  void setPosition(float x, float y);
+  scoped_blp_texture_reference const& current_texture() const
+  {
+    return _textureFrom->getTexture();
+  }
 
 private:
-  UITexture *_textureFrom;
-
-  UIButton *_setFromButton;
+  UITexture* _textureFrom;
 };
