@@ -2014,6 +2014,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , terrainMode == editing_mode::flags
                , terrainMode == editing_mode::water
                , terrainMode == editing_mode::areaid
+               , terrainMode
                );
 
   displayGUIIfEnabled();

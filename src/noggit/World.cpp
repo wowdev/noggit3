@@ -787,8 +787,6 @@ void World::setupFog()
   }
 }
 
-extern editing_mode terrainMode;
-
 void World::draw ( math::vector_3d const& cursor_pos
                  , float brushRadius
                  , float hardness
@@ -799,6 +797,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_chunk_flag_overlay
                  , bool draw_water_overlay
                  , bool draw_areaid_overlay
+                 , editing_mode terrainMode
                  )
 {
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
