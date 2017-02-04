@@ -1195,6 +1195,95 @@ void MapView::createGUI()
             , [&] { return terrainMode == 9; }
             );
 
+  addHotkey (SDLK_KP_PLUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(0.01f); }, [] { return terrainMode == 0; });
+  addHotkey (SDLK_PLUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(0.01f); }, [] { return terrainMode == 0; });
+
+  addHotkey (SDLK_KP_PLUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(0.01f); }, [] { return terrainMode == 1; });
+  addHotkey (SDLK_PLUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(0.01f); }, [] { return terrainMode == 1; });
+
+  addHotkey ( SDLK_KP_PLUS
+            , MOD_alt
+            , []
+              {
+                textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
+                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+              }
+            , [] { return terrainMode == 2; }
+            );
+  addHotkey ( SDLK_PLUS
+            , MOD_alt
+            , []
+              {
+                textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
+                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+              }
+            , [] { return terrainMode == 2; }
+            );
+
+  addHotkey (SDLK_KP_PLUS, MOD_shift, [] { gWorld->fogdistance += 60.0f; });
+  addHotkey (SDLK_PLUS, MOD_shift, [] { gWorld->fogdistance += 60.0f; });
+
+
+  addHotkey (SDLK_KP_MINUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(-0.01f); }, [] { return terrainMode == 0; });
+  addHotkey (SDLK_MINUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(-0.01f); }, [] { return terrainMode == 0; });
+
+  addHotkey (SDLK_KP_MINUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(-0.01f); }, [] { return terrainMode == 1; });
+  addHotkey (SDLK_MINUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(-0.01f); }, [] { return terrainMode == 1; });
+
+  addHotkey ( SDLK_KP_MINUS
+            , MOD_alt
+            , []
+              {
+                textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
+                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+              }
+            , [] { return terrainMode == 2; }
+            );
+  addHotkey ( SDLK_MINUS
+            , MOD_alt
+            , []
+              {
+                textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
+                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+              }
+            , [] { return terrainMode == 2; }
+            );
+
+  addHotkey (SDLK_KP_MINUS, MOD_shift, [] { gWorld->fogdistance -= 60.0f; });
+  addHotkey (SDLK_MINUS, MOD_shift, [] { gWorld->fogdistance -= 60.0f; });
+
+  addHotkey (SDLK_1, MOD_shift, [this] { movespd = 15.0f; });
+  addHotkey (SDLK_2, MOD_shift, [this] { movespd = 50.0f; });
+  addHotkey (SDLK_3, MOD_shift, [this] { movespd = 200.0f; });
+  addHotkey (SDLK_4, MOD_shift, [this] { movespd = 800.0f; });
+  addHotkey (SDLK_1, MOD_alt, [] { mainGui->G1->setValue(0.01f); });
+  addHotkey (SDLK_2, MOD_alt, [] { mainGui->G1->setValue(0.25f); });
+  addHotkey (SDLK_3, MOD_alt, [] { mainGui->G1->setValue(0.50f); });
+  addHotkey (SDLK_4, MOD_alt, [] { mainGui->G1->setValue(0.75f); });
+  addHotkey (SDLK_5, MOD_alt, [] { mainGui->G1->setValue(0.99f); });
+
+  addHotkey (SDLK_1, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = 0); });
+  addHotkey (SDLK_2, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = 1); });
+  addHotkey (SDLK_3, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = 2); });
+  addHotkey (SDLK_4, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = 3); });
+  addHotkey (SDLK_5, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = 4); });
+  addHotkey (SDLK_6, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = 5); });
+  addHotkey (SDLK_7, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = 6); });
+  addHotkey (SDLK_8, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = 7); });
+  addHotkey (SDLK_9, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = 8); });
+  addHotkey (SDLK_0, MOD_none, [] { mainGui->guiToolbar->IconSelect (terrainMode = 9); });
+
+  addHotkey (SDLK_0, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 0; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_1, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 1; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_2, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 2; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_3, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 3; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_4, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 4; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_5, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 5; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_6, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 6; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_7, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 7; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_8, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 8; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_9, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 9; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+
 
   // ESC warning
   mainGui->escWarning = new UIExitWarning(this);
@@ -2066,110 +2155,16 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
   // fog distance or brush radius
   if (e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS)
   {
-    if (_mod_alt_down)
-    {
-      switch (terrainMode)
-      {
-      case 0:
-        mainGui->terrainTool->changeRadius(0.01f);
-        break;
-      case 1:
-        mainGui->flattenTool->changeRadius(0.01f);
-        break;
-      case 2:
-        textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
-        paint_brush->setValue(textureBrush.getRadius() / 100.0f);
-        break;
-      }
-    }
-    else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
-    {
-      if (_mod_shift_down)
-      {
-        gWorld->fogdistance += 60.0f;// fog change only when no model is selected!
-      }
-    }
-    else
-    {
-      //change selected model size
-      keys = 1;
-    }
+    //change selected model size
+    if (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() != eEntry_MapChunk)
+    keys = 1;
   }
 
   if (e->keysym.sym == SDLK_KP_MINUS || e->keysym.sym == SDLK_MINUS)
   {
-    if (_mod_alt_down)
-    {
-      switch (terrainMode)
-      {
-      case 0:
-        mainGui->terrainTool->changeRadius(-0.01f);
-        break;
-      case 1:
-        mainGui->flattenTool->changeRadius(-0.01f);
-        break;
-      case 2:
-        textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
-        paint_brush->setValue(textureBrush.getRadius() / 100);
-        break;
-      }
-    }
-    else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
-    {
-      if (_mod_shift_down)
-      {
-        gWorld->fogdistance -= 60.0f;// fog change only when no model is selected!
-      }
-
-    }
-    else
-    {
-      //change selected model size
-      keys = -1;
-    }
-  }
-
-  // doodads set
-  if (e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9)
-  {
-    if (gWorld->IsSelection(eEntry_WMO))
-    {
-      boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = e->keysym.sym - SDLK_0;
-    }
-    else if (_mod_shift_down)
-    {
-      if (e->keysym.sym == SDLK_1)
-        movespd = 15.0f;
-      if (e->keysym.sym == SDLK_2)
-        movespd = 50.0f;
-      if (e->keysym.sym == SDLK_3)
-        movespd = 200.0f;
-      if (e->keysym.sym == SDLK_4)
-        movespd = 800.0f;
-    }
-    else if (_mod_alt_down)
-    {
-      if (e->keysym.sym == SDLK_1)
-        mainGui->G1->setValue(0.01f);
-      if (e->keysym.sym == SDLK_2)
-        mainGui->G1->setValue(0.25f);
-      if (e->keysym.sym == SDLK_3)
-        mainGui->G1->setValue(0.50f);
-      if (e->keysym.sym == SDLK_4)
-        mainGui->G1->setValue(0.75f);
-      if (e->keysym.sym == SDLK_5)
-        mainGui->G1->setValue(0.99f);
-    }
-    else if (e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_9)
-    {
-      terrainMode = e->keysym.sym - SDLK_1;
-      mainGui->guiToolbar->IconSelect(terrainMode);
-    }
-    else if (e->keysym.sym == SDLK_0)
-    {
-      terrainMode = 9; // object editor
-      mainGui->guiToolbar->IconSelect(terrainMode);
-    }
+    //change selected model size
+    if (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() != eEntry_MapChunk)
+    keys = -1;
   }
 }
 
