@@ -1712,7 +1712,7 @@ void MapView::tick(float t, float dt)
               textureBrushInnerRadius.GenerateTexture();
             }
 
-            if (mViewMode == eViewMode_2D)
+            if (mViewMode == eViewMode_2D && !!UITexturingGUI::getSelectedTexture())
               gWorld->paintTexture({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z}, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), *UITexturingGUI::getSelectedTexture());
           }
           break;
