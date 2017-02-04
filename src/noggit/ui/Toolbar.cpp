@@ -18,10 +18,10 @@
 
 
 
-UIToolbar::UIToolbar(float xPos, float yPos)
+UIToolbar::UIToolbar(float xPos, float yPos, std::function<void (editing_mode)> set_editing_mode)
   : UIWindow(xPos, yPos + 10.0f, 45.0f, 405, "interface\\tooltips\\ui-tooltip-border.blp")
   , text(new UIText(6, -26, "TEXT", app.getArialn13(), eJustifyLeft))
-  , selectedIcon (editing_mode::ground)
+  , _set_editing_mode (set_editing_mode)
 {
   movable(false);
   addChild(text);
@@ -37,8 +37,6 @@ UIToolbar::UIToolbar(float xPos, float yPos)
   SetIcon (editing_mode::light, "Interface\\ICONS\\INV_Enchant_ShardBrilliantSmall.blp");
   SetIcon (editing_mode::mccv, "Interface\\ICONS\\Ability_Mage_MissileBarrage.blp");
   SetIcon (editing_mode::object, "Interface\\ICONS\\INV_Crate_04.blp");
-
-  IconSelect (editing_mode::ground);
 }
 
 void UIToolbar::SetIcon(editing_mode pIcon, const std::string& pIconFile)
@@ -47,31 +45,24 @@ void UIToolbar::SetIcon(editing_mode pIcon, const std::string& pIconFile)
                                                 , mToolbarIcons.size() * 40.0f + 5.0f
                                                 , pIconFile
                                                 , "Interface\\BUTTONS\\CheckButtonGlow.blp"
-                                                , [this, pIcon] { IconSelect (pIcon); }
+                                                , [this, pIcon]
+                                                  {
+                                                    _set_editing_mode (pIcon);
+                                                  }
                                                 )
                              );
   addChild(mToolbarIcons.back());
 }
 
-//! From MapView.cpp
-void change_settings_window(editing_mode oldid, editing_mode newid);
-extern editing_mode terrainMode;
-
 void UIToolbar::IconSelect(editing_mode pIcon)
 {
-  change_settings_window(selectedIcon, pIcon);
-  terrainMode = pIcon;
-
   const char * Names[] = { "Raise / Lower", "Flatten / Blur", "3D Paint", "Holes", "AreaID Paint", "Impassible Flag", "Water edit", "Light edit", "Shader editor", "Object editor" };
   text->setText(Names[static_cast<std::size_t> (pIcon)]);
-
-  Environment::getInstance()->view_holelines = (pIcon == editing_mode::holes);
 
   for (auto& icon : mToolbarIcons)
   {
     icon->selected = false;
   }
 
-  selectedIcon = pIcon;
   mToolbarIcons[static_cast<std::size_t> (pIcon)]->selected = true;
 }

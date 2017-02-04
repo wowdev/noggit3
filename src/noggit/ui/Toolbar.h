@@ -18,10 +18,10 @@ private:
 
   std::vector<UIToolbarIcon*> mToolbarIcons;
   UIText* text;
-  // current selected Icon
-  editing_mode selectedIcon;
+
+  std::function<void (editing_mode)> _set_editing_mode;
 
 public:
-  UIToolbar(float x, float y);
+  UIToolbar(float x, float y, std::function<void (editing_mode)> set_editing_mode);
   void IconSelect(editing_mode);
 };
