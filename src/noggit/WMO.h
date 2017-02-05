@@ -11,6 +11,7 @@
 #include <noggit/TextureManager.h>
 #include <noggit/Video.h>
 #include <noggit/multimap_with_normalized_key.hpp>
+#include <noggit/wmo_liquid.hpp>
 #include <opengl/call_list.hpp>
 
 #include <boost/optional.hpp>
@@ -45,9 +46,9 @@ class WMOGroup {
   int32_t num;
   int32_t fog;
   int32_t nDoodads, nBatches;
-  int16_t *ddr;
-  wmo_liquid *lq;
-  std::vector< std::pair<opengl::call_list*, bool> > _lists;
+  std::vector<int16_t> ddr;
+  std::unique_ptr<wmo_liquid> lq;
+  std::vector< std::pair<std::unique_ptr<opengl::call_list>, bool> > _lists;
 
   std::vector<math::vector_3d> vertices;
   std::vector<WMOBatch> batches;
@@ -65,7 +66,6 @@ public:
   std::string name;
 
   WMOGroup() :nBatches(0) {}
-  ~WMOGroup();
   void init(WMO *wmo, MPQFile* f, int num, char *names);
   void initDisplayList();
   void initLighting(int nLR, uint16_t *useLights);
@@ -74,25 +74,6 @@ public:
   void drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const, Frustum const&);
   void setupFog();
   void intersect (math::ray const&, std::vector<float>* results) const;
-};
-
-struct WMOMaterial {
-  int32_t flags;
-  int32_t specular;
-  int32_t transparent; // Blending: 0 for opaque, 1 for transparent
-  int32_t nameStart; // Start position for the first texture filename in the MOTX data block
-  uint32_t col1; // color
-  int32_t d3; // flag
-  int32_t nameEnd; // Start position for the second texture filename in the MOTX data block
-  uint32_t col2; // color
-  int32_t d4; // flag
-  uint32_t col3;
-  float f2;
-  float diffColor[3];
-  uint32_t texture1; // this is the first texture object. of course only in RAM. leave this alone. :D
-  uint32_t texture2; // this is the second texture object.
-  // read up to here -_-
-  boost::optional<scoped_blp_texture_reference> _texture;
 };
 
 struct WMOLight {
@@ -123,12 +104,6 @@ struct WMODoodadSet {
   int32_t start;
   int32_t size;
   int32_t unused;
-};
-
-struct WMOLiquidHeader {
-  int32_t X, Y, A, B;
-  math::vector_3d pos;
-  int16_t type;
 };
 
 struct WMOFog {

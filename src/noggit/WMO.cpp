@@ -2,7 +2,6 @@
 
 #include <noggit/Environment.h>
 #include <noggit/Frustum.h>
-#include <noggit/wmo_liquid.hpp>
 #include <noggit/Log.h> // LogDebug
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/TextureManager.h> // TextureManager, Texture
@@ -445,10 +444,7 @@ void WMOGroup::init(WMO *_wmo, MPQFile* f, int _num, char *names)
   }
   else name = "(no name)";
 
-  ddr = 0;
   nDoodads = 0;
-
-  lq = 0;
 }
 
 void setGLColor(unsigned int col)
@@ -579,8 +575,8 @@ void WMOGroup::initDisplayList()
     }
     else if (fourcc == 'MODR') {
       nDoodads = size / 2;
-      ddr = new int16_t[nDoodads];
-      gf.read(ddr, size);
+      ddr.resize (nDoodads);
+      gf.read(ddr.data(), size);
     }
     else if (fourcc == 'MOBA') {
       nBatches = size / 24;
@@ -597,7 +593,7 @@ void WMOGroup::initDisplayList()
       WMOLiquidHeader hlq;
       gf.read(&hlq, 0x1E);
 
-      lq = new wmo_liquid(&gf, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
+      lq = std::make_unique<wmo_liquid> (&gf, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
     }
 
     //! \todo  figure out/use MFOG ?
@@ -638,7 +634,7 @@ void WMOGroup::initDisplayList()
     bool overbright = ((mat->flags & 0x10) && !hascv);
     bool spec_shader = (mat->specular && !hascv && !overbright);
 
-    _lists[b].first = new opengl::call_list();
+    _lists[b].first = std::make_unique<opengl::call_list>();
     _lists[b].second = spec_shader;
 
     _lists[b].first->start_recording(GL_COMPILE);
@@ -886,31 +882,6 @@ void WMOGroup::setupFog()
     wmo->fogs[fog].setup();
   }
 }
-
-
-
-WMOGroup::~WMOGroup()
-{
-  //if (dl) gl.deleteLists(dl, 1);
-  //if (dl_light) gl.deleteLists(dl_light, 1);
-  for (auto it = _lists.begin(); it != _lists.end(); ++it)
-  {
-    delete it->first;
-  }
-  _lists.clear();
-
-  if (nDoodads)
-  {
-    delete[] ddr;
-    ddr = nullptr;
-  }
-  if (lq)
-  {
-    delete lq;
-    lq = nullptr;
-  }
-}
-
 
 void WMOFog::init(MPQFile* f)
 {
