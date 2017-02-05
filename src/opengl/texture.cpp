@@ -2,6 +2,7 @@
 
 #include <opengl/context.hpp>
 #include <opengl/texture.hpp>
+#include <utility>
 
 namespace opengl
 {
@@ -13,7 +14,22 @@ namespace opengl
 
   texture::~texture()
   {
-    gl.deleteTextures (1, &_id);
+    if (_id != -1)
+    {
+      gl.deleteTextures (1, &_id);
+    }
+  }
+
+  texture::texture (texture&& other)
+    : _id (other._id)
+  {
+    other._id = -1;
+  }
+
+  texture& texture::operator= (texture&& other)
+  {
+    std::swap (_id, other._id);
+    return *this;
   }
 
   void texture::bind() const

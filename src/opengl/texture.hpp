@@ -13,9 +13,9 @@ namespace opengl
     ~texture();
 
     texture (texture const&) = delete;
-    texture (texture&&) = delete;
+    texture (texture&&);
     texture& operator= (texture const&) = delete;
-    texture& operator= (texture&&) = delete;
+    texture& operator= (texture&&);
 
     void bind() const;
 
