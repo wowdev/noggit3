@@ -14,6 +14,8 @@
 #include <algorithm>    // std::min
 #include <iostream>     // std::cout
 
+#include <boost/utility/in_place_factory.hpp>
+
 void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
 {
   // texture info

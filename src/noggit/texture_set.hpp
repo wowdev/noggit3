@@ -6,6 +6,7 @@
 #include <noggit/alphamap.hpp>
 
 #include <cstdint>
+#include <array>
 
 class Brush;
 class MapTile;
