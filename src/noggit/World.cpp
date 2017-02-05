@@ -185,7 +185,7 @@ namespace
       opengl::scoped::bool_setter<GL_COLOR_MATERIAL, GL_TRUE> color_material;
 
       gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
-      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, math::degrees::vec3 {math::degrees (90.0f), math::degrees (0.0f), math::degrees (0.0f)}).transposed());
+      gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation_xyz, math::degrees::vec3 {math::degrees (90.0f), math::degrees (0.0f), math::degrees (0.0f)}).transposed());
 
       //! \todo This should be passed in!
       gl.color4f ( Environment::getInstance()->cursorColorR

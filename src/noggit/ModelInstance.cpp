@@ -68,10 +68,10 @@ void ModelInstance::draw (Frustum const& frustum, bool force_box)
 
   math::matrix_4x4 const model_matrix
     ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation
-                       , { math::degrees (dir.z)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
+                       , { math::degrees (-dir.z)
                          , math::degrees (dir.y - 90.0f)
-                         , math::degrees (-dir.x)
+                         , math::degrees (dir.x)
                          }
                        )
     * math::matrix_4x4 (math::matrix_4x4::scale, sc)
@@ -170,10 +170,10 @@ void ModelInstance::intersect (math::ray const& ray, selection_result* results)
 {
   math::matrix_4x4 const model_matrix
     ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation
-                       , { math::degrees (dir.z)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
+                       , { math::degrees (-dir.z)
                          , math::degrees (dir.y - 90.0f)
-                         , math::degrees (-dir.x)
+                         , math::degrees (dir.x)
                          }
                        )
     * math::matrix_4x4 (math::matrix_4x4::scale, sc)
@@ -231,10 +231,10 @@ void ModelInstance::recalcExtents()
   math::vector_3d max(-100000, -100000, -100000);
   math::matrix_4x4 rot
     ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation
-                       , { math::degrees (dir.z)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
+                       , { math::degrees (-dir.z)
                          , math::degrees (dir.y - 90.0f)
-                         , math::degrees (-dir.x)
+                         , math::degrees (dir.x)
                          }
                        )
     * math::matrix_4x4 (math::matrix_4x4::scale, sc)
