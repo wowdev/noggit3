@@ -291,26 +291,6 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   LogDebug << "Done loading tile " << index.x << "," << index.z << "." << std::endl;
 }
 
-MapTile::~MapTile()
-{
-  LogDebug << "Unloading tile " << index.x << "," << index.z << "." << std::endl;
-
-  //! \todo unload ModelInstances and WMOInstances on this tile:
-  // a) either keep up the information what tiles the instances are on at all times
-  //    (even while moving), to then check if all tiles it was on were unloaded, or
-  // b) do the reference count lazily by iterating over all instances and checking
-  //    what MapTiles they span. if any of those tiles is still loaded, keep it,
-  //    otherwise remove it.
-  //
-  // I think b) is easier. It only requires
-  // `std::set<C2iVector> XInstance::spanning_tiles() const` followed by
-  // `if_none (isTileLoaded (x, y)): unload instance`, which is way easier than
-  // constantly updating the reference counters.
-  // Note that both approaches do not cover the issue that the instance might not
-  // be saved to any tile, thus the movement might have been lost.
-}
-
-
 bool MapTile::isTile(int pX, int pZ)
 {
   return pX == index.x && pZ == index.z;
