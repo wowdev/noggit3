@@ -15,10 +15,14 @@ namespace math
   struct quaternion : public vector_4d
   {
   public:
-   quaternion ( const float& x = 0.0f
-              , const float& y = 0.0f
-              , const float& z = 0.0f
-              , const float& w = 1.0f
+    quaternion()
+      : quaternion (0.f, 0.f, 0.f, 1.0f)
+    {}
+
+   quaternion ( const float& x
+              , const float& y
+              , const float& z
+              , const float& w
               )
      : vector_4d (x, y, z, w)
    { }
