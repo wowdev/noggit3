@@ -126,15 +126,6 @@ MapIndex::MapIndex(const std::string &pBasename)
   theFile.close();
 }
 
-MapIndex::~MapIndex()
-{
-  for (MapTile* tile : loaded_tiles())
-  {
-    delete tile;
-    tile = nullptr;
-  }
-}
-
 void MapIndex::save()
 {
   std::stringstream filename;
@@ -230,7 +221,7 @@ void MapIndex::enterTile(const tile_index& tile)
   {
     for (int px = std::max(cx - 1, 0); px < std::min(cx + 2, 63); ++px)
     {
-      mTiles[pz][px].tile = loadTile(tile_index(px, pz));
+      loadTile(tile_index(px, pz));
     }
   }
 
@@ -320,7 +311,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
 
   if (tileLoaded(tile))
   {
-    return mTiles[tile.z][tile.x].tile;
+    return mTiles[tile.z][tile.x].tile.get();
   }
 
   std::stringstream filename;
@@ -332,22 +323,21 @@ MapTile* MapIndex::loadTile(const tile_index& tile)
     return nullptr;
   }
 
-  mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha);
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha);
 
-  return mTiles[tile.z][tile.x].tile;
+  return mTiles[tile.z][tile.x].tile.get();
 }
 
 void MapIndex::reloadTile(const tile_index& tile)
 {
   if (tileLoaded(tile))
   {
-    delete mTiles[tile.z][tile.x].tile;
     mTiles[tile.z][tile.x].tile = nullptr;
 
     std::stringstream filename;
     filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
-    mTiles[tile.z][tile.x].tile = new MapTile(tile.x, tile.z, filename.str(), mBigAlpha);
+    mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha);
     enterTile(tile_index(cx, cz));
   }
 }
@@ -382,7 +372,6 @@ void MapIndex::unloadTile(const tile_index& tile)
   // unloads a tile with givn cords
   if (tileLoaded(tile))
   {
-    delete mTiles[tile.z][tile.x].tile;
     mTiles[tile.z][tile.x].tile = nullptr;
     Log << "Unload Tile " << tile.x << "-" << tile.z << "\n";
   }
@@ -464,7 +453,7 @@ void MapIndex::setAdt(bool value)
 
 MapTile* MapIndex::getTile(const tile_index& tile) const
 {
-  return mTiles[tile.z][tile.x].tile;
+  return mTiles[tile.z][tile.x].tile.get();
 }
 
 MapTile* MapIndex::getTileAbove(MapTile* tile) const
@@ -474,7 +463,7 @@ MapTile* MapIndex::getTileAbove(MapTile* tile) const
     return nullptr;
   }
 
-  return mTiles[tile->index.z - 1][tile->index.x].tile;
+  return mTiles[tile->index.z - 1][tile->index.x].tile.get();
 }
 
 MapTile* MapIndex::getTileLeft(MapTile* tile) const
@@ -484,7 +473,7 @@ MapTile* MapIndex::getTileLeft(MapTile* tile) const
     return nullptr;
   }
 
-  return mTiles[tile->index.z][tile->index.x - 1].tile;
+  return mTiles[tile->index.z][tile->index.x - 1].tile.get();
 }
 
 uint32_t MapIndex::getFlag(const tile_index& tile) const
