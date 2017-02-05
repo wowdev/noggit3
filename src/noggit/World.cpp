@@ -1821,7 +1821,7 @@ void World::swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference
 
 void World::removeTexDuplicateOnADT(math::vector_3d const& pos)
 {
-  for_all_chunks_on_tile(pos, [](MapChunk* chunk) { chunk->textureSet->removeDuplicate(); } );
+  for_all_chunks_on_tile(pos, [](MapChunk* chunk) { chunk->_texture_set.removeDuplicate(); } );
 }
 
 void World::saveWDT()

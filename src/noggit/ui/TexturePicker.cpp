@@ -50,9 +50,9 @@ void UITexturePicker::getTextures(selection_type lSelection)
     _chunk = chunk;
     size_t index = 0;
 
-    for (; index < 4U && chunk->textureSet->num() > index; ++index)
+    for (; index < 4U && chunk->_texture_set.num() > index; ++index)
     {
-      _textures[index]->setTexture(chunk->textureSet->texture(index));
+      _textures[index]->setTexture(chunk->_texture_set.texture(index));
       _textures[index]->show();
     }
 
@@ -74,12 +74,12 @@ void UITexturePicker::setTexture(size_t id)
 void UITexturePicker::shiftSelectedTextureLeft()
 {
   auto&& selectedTexture = UITexturingGUI::getSelectedTexture();
-  TextureSet* ts = _chunk->textureSet;
-  for (int i = 1; i < ts->num(); i++)
+  TextureSet& ts = _chunk->_texture_set;
+  for (int i = 1; i < ts.num(); i++)
   {
-    if (ts->texture(i) == selectedTexture)
+    if (ts.texture(i) == selectedTexture)
     {
-      ts->swapTexture(i - 1, i);
+      ts.swapTexture(i - 1, i);
       update();
       return;
     }
@@ -89,12 +89,12 @@ void UITexturePicker::shiftSelectedTextureLeft()
 void UITexturePicker::shiftSelectedTextureRight()
 {
   auto&& selectedTexture = UITexturingGUI::getSelectedTexture();
-  TextureSet* ts = _chunk->textureSet;
-  for (int i = 0; i < ts->num() - 1; i++)
+  TextureSet& ts = _chunk->_texture_set;
+  for (int i = 0; i < ts.num() - 1; i++)
   {
-    if (ts->texture(i) == selectedTexture)
+    if (ts.texture(i) == selectedTexture)
     {
-      ts->swapTexture(i, i + 1);
+      ts.swapTexture(i, i + 1);
       update();
       return;
     }
@@ -105,9 +105,9 @@ void UITexturePicker::update()
 {
   _chunk->mt->changed = true;
 
-  for (size_t index = 0; index < 4U && _chunk->textureSet->num() > index; ++index)
+  for (size_t index = 0; index < 4U && _chunk->_texture_set.num() > index; ++index)
   {
-    _textures[index]->setTexture(_chunk->textureSet->texture(index));
+    _textures[index]->setTexture(_chunk->_texture_set.texture(index));
     _textures[index]->show();
   }
 }

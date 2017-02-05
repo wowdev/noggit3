@@ -462,9 +462,9 @@ void MapTile::getAlpha(size_t id, unsigned char *amap)
 
     for (int i = 0; i < 16; ++i)
     {
-      if (mChunks[index][i]->textureSet->num() > id + 1)
+      if (mChunks[index][i]->_texture_set.num() > id + 1)
       {
-        memcpy(amap + j * 1024 + i * 64, mChunks[index][i]->textureSet->getAlpha(id) + offsetIndex * 64, 64);
+        memcpy(amap + j * 1024 + i * 64, mChunks[index][i]->_texture_set.getAlpha(id) + offsetIndex * 64, 64);
       }
       else
       {
@@ -636,9 +636,9 @@ void MapTile::saveTile(bool saveAllModels)
 
   for (int i = 0; i < 16; ++i)
     for (int j = 0; j < 16; ++j)
-      for (size_t tex = 0; tex < mChunks[i][j]->textureSet->num(); tex++)
-        if (lTextures.find(mChunks[i][j]->textureSet->filename(tex)) == lTextures.end())
-          lTextures.insert(std::pair<std::string, int>(mChunks[i][j]->textureSet->filename(tex), -1));
+      for (size_t tex = 0; tex < mChunks[i][j]->_texture_set.num(); tex++)
+        if (lTextures.find(mChunks[i][j]->_texture_set.filename(tex)) == lTextures.end())
+          lTextures.insert(std::pair<std::string, int>(mChunks[i][j]->_texture_set.filename(tex), -1));
 
   lID = 0;
   for (std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it)

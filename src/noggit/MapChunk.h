@@ -9,6 +9,7 @@
 #include <noggit/TextureManager.h>
 #include <noggit/Video.h> // GLuint
 #include <noggit/WMOInstance.h>
+#include <noggit/texture_set.hpp>
 #include <opengl/texture.hpp>
 
 class MPQFile;
@@ -18,7 +19,6 @@ namespace math
 }
 class Brush;
 class Alphamap;
-class TextureSet;
 class sExtendableArray;
 class Frustum;
 
@@ -70,7 +70,7 @@ public:
   unsigned int Flags;
 
 
-  TextureSet* textureSet;
+  TextureSet _texture_set;
 
   GLuint vertices, normals, indices, minimap, minishadows, mccvEntry;
 
