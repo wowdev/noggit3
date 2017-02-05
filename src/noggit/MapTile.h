@@ -5,6 +5,7 @@
 #include <math/ray.hpp>
 #include <noggit/MapHeaders.h>
 #include <noggit/Selection.h>
+#include <noggit/TileWater.hpp>
 #include <noggit/Video.h> // GLfloat, GLshort, ...
 #include <noggit/tile_index.hpp>
 #include <opengl/shader.fwd.hpp>
@@ -15,7 +16,6 @@
 
 class Frustum;
 class MapChunk;
-class TileWater;
 namespace math
 {
   struct vector_3d;
@@ -69,7 +69,7 @@ public:
 
   void getAlpha(size_t id, unsigned char *amap);
 
-  TileWater * Water;
+  TileWater Water;
 private:
 
   // MFBO:

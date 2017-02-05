@@ -2,6 +2,7 @@
 
 #include <noggit/ChunkWater.hpp>
 #include <noggit/Log.h>
+#include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/TileWater.hpp>
 

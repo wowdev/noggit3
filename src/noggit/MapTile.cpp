@@ -38,6 +38,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   , changed(0)
   , mBigAlpha(pBigAlpha)
   , mFilename(pFilename)
+  , Water (this, xbase, zbase)
 {
 
   for (int i = 0; i < 16; ++i)
@@ -200,11 +201,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
     int ofsW = Header.mh2o + 0x14 + 0x8;
     assert(fourcc == 'MH2O');
 
-    Water = new TileWater(this, xbase, zbase); //has water
-    Water->readFromFile(theFile, ofsW); //reading MH2O data at separated class...
-  }
-  else {
-    Water = new TileWater(this, xbase, zbase); //empty water tile
+    Water.readFromFile(theFile, ofsW);
   }
 
   // - MFBO ----------------------------------------------
@@ -319,9 +316,6 @@ MapTile::~MapTile()
     }
   }
 
-  delete Water;
-  Water = nullptr;
-
   mTextureFilenames.clear();
 
   //! \todo unload ModelInstances and WMOInstances on this tile:
@@ -433,7 +427,7 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
 
 void MapTile::drawWater()
 {
-  if (!Water->hasData(0))
+  if (!Water.hasData(0))
   {
     return; //no need to draw water on tile without water =)
   }
@@ -441,7 +435,7 @@ void MapTile::drawWater()
   gl.disable(GL_COLOR_MATERIAL);
   gl.disable(GL_LIGHTING);
 
-  Water->draw();
+  Water.draw();
 
   gl.enable(GL_LIGHTING);
   gl.enable(GL_COLOR_MATERIAL);
@@ -958,7 +952,7 @@ void MapTile::saveTile(bool saveAllModels)
   lCurrentPosition += 8 + lMODF_Size;
 
   //MH2O
-  Water->saveToFile(*lADTFile, lMHDR_Position, lCurrentPosition);
+  Water.saveToFile(*lADTFile, lMHDR_Position, lCurrentPosition);
 
   // MCNK
   for (int y = 0; y < 16; ++y)
@@ -1078,7 +1072,7 @@ void MapTile::CropWater()
   {
     for (int x = 0; x < 16; ++x)
     {
-      Water->CropMiniChunk(x, z, mChunks[z][x]);
+      Water.CropMiniChunk(x, z, mChunks[z][x]);
     }
   }
 }

@@ -1845,14 +1845,14 @@ bool World::canWaterSave(const tile_index& tile)
 
 void World::setWaterType(math::vector_3d const& pos, int type)
 {
-  for_tile_at(pos, [&](MapTile* tile) { tile->Water->setType(type, Environment::getInstance()->currentWaterLayer);});
+  for_tile_at(pos, [&](MapTile* tile) { tile->Water.setType(type, Environment::getInstance()->currentWaterLayer);});
 }
 
 int World::getWaterType(const tile_index& tile)
 {
   if (mapIndex->tileLoaded(tile))
   {
-    return mapIndex->getTile(tile)->Water->getType(Environment::getInstance()->currentWaterLayer);
+    return mapIndex->getTile(tile)->Water.getType(Environment::getInstance()->currentWaterLayer);
   }
   else
   {
@@ -1862,7 +1862,7 @@ int World::getWaterType(const tile_index& tile)
 
 void World::autoGenWaterTrans(float factor)
 {
-  for_tile_at(camera, [&](MapTile* tile) { tile->Water->autoGen(factor); });
+  for_tile_at(camera, [&](MapTile* tile) { tile->Water.autoGen(factor); });
 }
 
 
