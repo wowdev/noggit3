@@ -78,7 +78,9 @@ namespace opengl
 
       void sampler (std::string const& name, GLenum type, GLenum texture_slot, GLint id);
 
+      void attrib (std::string const& name, std::vector<float> const&);
       void attrib (std::string const& name, std::vector<math::vector_2d> const&);
+      void attrib (std::string const& name, std::vector<math::vector_3d> const&);
       void attrib (std::string const& name, math::vector_3d const*);
       void attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
       void attrib (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
