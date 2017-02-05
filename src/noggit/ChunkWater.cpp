@@ -13,11 +13,6 @@ ChunkWater::ChunkWater(float x, float z)
 {
 }
 
-ChunkWater::~ChunkWater()
-{
-}
-
-
 void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 {
   MH2O_Header header;
@@ -51,7 +46,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
       f.seek(info.ofsInfoMask + basePos);
       f.read(&infoMask, 8);
     }
-    
+
     // set default value
     for (int h = 0; h < 9; ++h)
     {
@@ -64,7 +59,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 
     // load existing heightMap
     if (info.ofsHeightMap)
-    {      
+    {
       f.seek(info.ofsHeightMap + basePos);
 
       if (info.Flags != 2)
@@ -82,9 +77,9 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
       {
         for (int h = info.xOffset; h < info.xOffset + info.width + 1; ++h)
         {
-          
+
           f.read(&heightmask.mTransparency[w][h], sizeof(unsigned char));
-          
+
         }
       }
     }
@@ -124,7 +119,7 @@ void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int&
     {
       layer.save(adt, base_pos, info_pos, current_pos);
     }
-  }  
+  }
 
   memcpy(adt.GetPointer<char>(header_pos), &header, sizeof(MH2O_Header));
   header_pos += sizeof(MH2O_Header);
@@ -182,6 +177,6 @@ void ChunkWater::draw()
 }
 
 bool ChunkWater::hasData(size_t layer) const
-{ 
-  return _layers.size() > layer; 
+{
+  return _layers.size() > layer;
 }
