@@ -13,9 +13,6 @@ class MapTile;
 class TextureSet
 {
 public:
-  TextureSet();
-  ~TextureSet();
-
   void initTextures(MPQFile* f, MapTile *maintile, uint32_t size);
   void initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool doNotFixAlpha);
 
@@ -59,7 +56,7 @@ public:
 
 private:
   std::vector<scoped_blp_texture_reference> textures;
-  Alphamap* alphamaps[3];
+  std::array<boost::optional<Alphamap>, 3> alphamaps;
   size_t nTextures;
 
   int tex[4];

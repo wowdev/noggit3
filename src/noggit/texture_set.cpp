@@ -14,15 +14,6 @@
 #include <algorithm>    // std::min
 #include <iostream>     // std::cout
 
-TextureSet::TextureSet()
-{}
-
-TextureSet::~TextureSet()
-{
-  for (size_t i = 1; i < nTextures; ++i)
-    delete alphamaps[i - 1];
-}
-
 void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
 {
   // texture info
@@ -50,17 +41,12 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool 
 {
   unsigned int MCALbase = f->getPos();
 
-  for (size_t i = 0; i < 3; ++i)
-  {
-    alphamaps[i] = nullptr;
-  }
-
   for (unsigned int layer = 0; layer < nLayers; ++layer)
   {
     if (texFlags[layer] & 0x100)
     {
       f->seek(MCALbase + MCALoffset[layer]);
-      alphamaps[layer - 1] = new Alphamap(f, texFlags[layer], mBigAlpha, doNotFixAlpha);
+      alphamaps[layer - 1] = boost::in_place (f, texFlags[layer], mBigAlpha, doNotFixAlpha);
     }
   }
 
@@ -87,13 +73,7 @@ int TextureSet::addTexture(scoped_blp_texture_reference texture)
 
     if (texLevel)
     {
-      if (alphamaps[texLevel - 1])
-      {
-        LogError << "Alpha Map has invalid texture binding" << std::endl;
-        nTextures--;
-        return -1;
-      }
-      alphamaps[texLevel - 1] = new Alphamap();
+      alphamaps[texLevel - 1] = boost::in_place();
     }
   }
 
@@ -186,18 +166,13 @@ void TextureSet::eraseTexture(size_t id)
   if (id > 3)
     return;
 
-  if (id)
-  {
-    delete alphamaps[id - 1];
-    alphamaps[id - 1] = nullptr;
-  }
-
   // shift textures above
   for (size_t i = id; i < nTextures - 1; i++)
   {
     if (i)
     {
-      alphamaps[i - 1] = alphamaps[i];
+      alphamaps[id - 1] = boost::none;
+      std::swap (alphamaps[i - 1], alphamaps[i]);
     }
 
     textures[i] = textures[i + 1];
@@ -206,7 +181,7 @@ void TextureSet::eraseTexture(size_t id)
     effectID[i] = effectID[i + 1];
   }
 
-  alphamaps[nTextures - 2] = nullptr;
+  alphamaps[nTextures - 2] = boost::none;
   textures.pop_back();
 
   nTextures--;
