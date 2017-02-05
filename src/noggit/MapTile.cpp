@@ -295,8 +295,6 @@ MapTile::~MapTile()
 {
   LogDebug << "Unloading tile " << index.x << "," << index.z << "." << std::endl;
 
-  mTextureFilenames.clear();
-
   //! \todo unload ModelInstances and WMOInstances on this tile:
   // a) either keep up the information what tiles the instances are on at all times
   //    (even while moving), to then check if all tiles it was on were unloaded, or
