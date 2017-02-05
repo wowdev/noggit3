@@ -25,7 +25,7 @@ namespace math
         return T (start * (1.0f - percentage) + end * percentage);
       }
 
-      radians const a (acos (radians (dot)) * percentage);
+      radians const a (acos (dot)._ * percentage);
 
       return T (start * cos (a) + T (end - start * dot).normalize() * sin (a));
     }
