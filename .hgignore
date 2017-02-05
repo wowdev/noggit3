@@ -1,0 +1,31 @@
+syntax: glob
+
+# Back-up
+*~
+
+# Mac
+.DS_Store
+
+# Executables
+**/build/**  
+*.o
+.depend
+
+# IDE (eclipse)
+.project
+.cproject
+
+# IDE (QtCreator)
+*.config
+*.creator
+*.creator.user
+*.files
+*.includes
+
+# Python
+*.pyc
+
+# Java
+*.class
+
+syntax: regexp

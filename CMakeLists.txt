@@ -91,7 +91,7 @@ macro(includePlattform SUFFIX)
 endmacro(includePlattform)
 
 #find all src files
-file(GLOB SourceFiles "src/*/*.h" "src/*/*.hpp" "src/*/*.cpp" "src/external/wacom/*.cpp" "src/noggit/ui/*.cpp")
+file(GLOB SourceFiles "src/*/*.h" "src/*/*.hpp" "src/*/*.cpp" "src/*/*.mm" "src/external/wacom/*.cpp" "src/noggit/ui/*.cpp")
 
 includePlattform("prefind")
 
