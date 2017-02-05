@@ -14,6 +14,10 @@ char* gpszProgramName = "Noggit3";
 static LOGCONTEXT  glogContext = { 0 };
 #endif
 
+#ifdef __APPLE__
+#include <noggit/MacDialog.hpp>
+#endif
+
 #include <noggit/AppState.h>
 #include <noggit/AsyncLoader.h>
 #include <noggit/ConfigFile.h>
@@ -279,7 +283,29 @@ boost::filesystem::path Noggit::getGamePath()
       return "";
     RegCloseKey(key);
 #else
-    return "/Applications/World of Warcraft/";
+      std::string defaultPath = "/Applications/World of Warcraft/";
+      bool exists = boost::filesystem::exists(defaultPath);
+      bool versionMatches = checkWoWVersionAtPath(defaultPath);
+      if (exists && versionMatches) {
+          return defaultPath;
+      } else {
+          if (exists && !versionMatches) {
+              std::string path = applicationSupportPath();
+              showAlertDialog("Incompatible WoW version.",
+                              "The World of Warcraft installation found will not work with Noggit.\n\nPlease select the location of your Wrath of the Lich King (3.3.5) installation.");
+          } else {
+              showAlertDialog("Unable to locate WoW installation.",
+                              "Please select the location of your Wrath of the Lich King (3.3.5) installation.");
+          }
+          
+          std::string requestedPath = requestWoWPath();
+          if (requestedPath.length()) {
+//              ConfigFile("noggit.conf").add("Path", requestedPath);
+              return requestedPath;
+          }
+      }
+#warning Finish Me!
+    return "";
 #endif
 
   }
