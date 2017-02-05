@@ -19,12 +19,15 @@ public:
   scoped_model_reference model;
   math::vector_3d extents[2];
 
-  math::vector_3d pos, dir;
+  math::vector_3d pos;
+  math::vector_3d dir;
+
+  math::quaternion _wmo_orientation;
 
   //! \todo  Get this out and do somehow else.
   unsigned int d1;
 
-  float w, sc;
+  float sc;
 
   math::vector_3d ldir;
   math::vector_3d lcol;
@@ -41,8 +44,8 @@ public:
     // , extents (other.extents)
     , pos (other.pos)
     , dir (other.dir)
+    , _wmo_orientation (other._wmo_orientation)
     , d1 (other.d1)
-    , w (other.w)
     , sc (other.sc)
     , ldir (other.ldir)
     , lcol (other.lcol)
@@ -55,8 +58,8 @@ public:
     std::swap (extents, other.extents);
     std::swap (pos, other.pos);
     std::swap (dir, other.dir);
+    std::swap (_wmo_orientation, other._wmo_orientation);
     std::swap (d1, other.d1);
-    std::swap (w, other.w);
     std::swap (sc, other.sc);
     std::swap (ldir, other.ldir);
     std::swap (lcol, other.lcol);
@@ -67,7 +70,7 @@ public:
   void drawMapTile();
   //  void drawHighlight();
   void intersect (math::ray const&, selection_result*);
-  void draw2(const math::vector_3d& ofs, const math::degrees, Frustum const&);
+  void draw_wmo(const math::vector_3d& ofs, const math::degrees, Frustum const&);
 
   void resetDirection();
 
