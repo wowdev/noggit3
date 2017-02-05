@@ -59,8 +59,6 @@ void main()
       static std::array<unsigned char, 16> const indices
         {5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7};
 
-      gl.genBuffers (sizeof (_buffers) / sizeof (*_buffers), _buffers);
-
       {
         scoped::buffer_binder<GL_ARRAY_BUFFER> const buffer (_positions);
         gl.bufferData ( GL_ARRAY_BUFFER
@@ -78,11 +76,6 @@ void main()
                       , GL_STATIC_DRAW
                       );
       }
-    }
-
-    wire_box::~wire_box()
-    {
-      gl.deleteBuffers (sizeof (_buffers) / sizeof (*_buffers), _buffers);
     }
 
     void wire_box::draw (math::vector_4d const& color, float line_width) const

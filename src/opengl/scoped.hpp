@@ -189,5 +189,28 @@ namespace opengl
       buffer_binder& operator= (buffer_binder const&) = delete;
       buffer_binder& operator= (buffer_binder&&) = delete;
     };
+
+    template<std::size_t count>
+      struct buffers
+    {
+      buffers()
+      {
+        gl.genBuffers (count, _buffers);
+      }
+      ~buffers()
+      {
+        gl.deleteBuffers (count, _buffers);
+      }
+
+      buffers (buffers const&) = delete;
+      buffers (buffers&&) = delete;
+      buffers& operator= (buffers const&) = delete;
+      buffers& operator= (buffers&&) = delete;
+
+      GLuint const& operator[] (std::size_t i) const { return _buffers[i]; }
+
+    private:
+      GLuint _buffers[count];
+    };
   }
 }
