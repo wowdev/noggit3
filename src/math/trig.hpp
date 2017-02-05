@@ -46,8 +46,16 @@ namespace math
   {
     return std::tan (x._);
   }
-  inline float acos (radians x)
+  inline radians asin (float x)
   {
-    return std::acos (x._);
+    return radians {std::asin (x)};
+  }
+  inline radians acos (float x)
+  {
+    return radians {std::acos (x)};
+  }
+  inline radians atan2 (float y, float x)
+  {
+    return radians {std::atan2 (y, x)};
   }
 }
