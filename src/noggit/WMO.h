@@ -129,9 +129,9 @@ public:
 
   //std::string WMOName;
   std::string _filename;
-  WMOGroup *groups;
+  std::vector<WMOGroup> groups;
   unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
-  WMOMaterial *mat;
+  std::vector<WMOMaterial> mat;
   math::vector_3d extents[2];
   std::vector<std::string> textures;
   std::vector<std::string> models;
@@ -148,8 +148,7 @@ public:
   boost::optional<scoped_model_reference> skybox;
 
   explicit WMO(const std::string& name);
-  ~WMO();
-  void draw(int doodadset, const math::vector_3d& ofs, math::degrees const, bool boundingbox, bool groupboxes, bool highlight, Frustum const&) const;
+  void draw(int doodadset, const math::vector_3d& ofs, math::degrees const, bool boundingbox, bool groupboxes, bool highlight, Frustum const&);
   std::vector<float> intersect (math::ray const&) const;
   //void drawPortals();
   bool drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vector_3d pUpper) const;
