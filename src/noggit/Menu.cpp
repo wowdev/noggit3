@@ -46,7 +46,7 @@ Menu::Menu()
 {
   gWorld = nullptr;
 
-  mGUIFrame = new UIFrame(0.0f, 0.0f, (float)video.xres(), (float)video.yres());
+  mGUIFrame = std::make_unique<UIFrame> (0.0f, 0.0f, (float)video.xres(), (float)video.yres());
   mGUIMinimapWindow = new UIMinimapWindow(this);
   mGUIMinimapWindow->hide();
   mGUIFrame->addChild(mGUIMinimapWindow);
@@ -102,9 +102,6 @@ std::string buildModelPath(size_t index)
 
 Menu::~Menu()
 {
-  delete mGUIFrame;
-  mGUIFrame = nullptr;
-
   delete gWorld;
   gWorld = nullptr;
 }

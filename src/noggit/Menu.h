@@ -67,7 +67,7 @@ public:
   ui::uid_fix_window* uidFixWindow;
 
 private:
-  UIFrame* mGUIFrame;
+  std::unique_ptr<UIFrame> mGUIFrame;
   UIStatusBar* mGUIStatusbar;
   UIAbout* mGUICreditsWindow;
   UIMinimapWindow* mGUIMinimapWindow;
