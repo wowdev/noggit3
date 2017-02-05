@@ -4,12 +4,12 @@
 
 #include <math/vector_3d.hpp>
 #include <noggit/MapHeaders.h>
+#include <noggit/liquid_layer.hpp>
 
 #include <vector>
 #include <set>
 
 class MPQFile;
-class liquid_layer;
 class sExtendableArray;
 class MapChunk;
 
@@ -17,7 +17,6 @@ class ChunkWater
 {
 public:
   ChunkWater(float x, float z);
-  ~ChunkWater();
 
   void fromFile(MPQFile &f, size_t basePos);
   void reloadRendering();
