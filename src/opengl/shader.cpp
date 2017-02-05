@@ -121,12 +121,26 @@ namespace opengl
       gl.bindTexture (GL_TEXTURE_2D, id);
     }
 
+    void use_program::attrib (std::string const& name, std::vector<float> const& data)
+    {
+      GLuint const location (_program.attrib_location (name));
+      gl.enableVertexAttribArray (location);
+      _enabled_vertex_attrib_arrays.emplace (location);
+      gl.vertexAttribPointer (location, 1, GL_FLOAT, GL_FALSE, 0, data.data());
+    }
     void use_program::attrib (std::string const& name, std::vector<math::vector_2d> const& data)
     {
       GLuint const location (_program.attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 2, GL_FLOAT, GL_FALSE, 0, data.data());
+    }
+    void use_program::attrib (std::string const& name, std::vector<math::vector_3d> const& data)
+    {
+      GLuint const location (_program.attrib_location (name));
+      gl.enableVertexAttribArray (location);
+      _enabled_vertex_attrib_arrays.emplace (location);
+      gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data.data());
     }
     void use_program::attrib (std::string const& name, math::vector_3d const* data)
     {
