@@ -416,8 +416,8 @@ int MapChunk::indexNoLoD(int x, int y)
 
 void MapChunk::initStrip()
 {
-  strip_with_holes = new StripType[768]; //! \todo  figure out exact length of strip needed
-  StripType* s = strip_with_holes;
+  strip_with_holes.resize (768); //! \todo  figure out exact length of strip needed
+  StripType* s = strip_with_holes.data();
 
   for (int x = 0; x<8; ++x)
   {
@@ -440,10 +440,10 @@ void MapChunk::initStrip()
       *s++ = indexNoLoD(y, x); //0
     }
   }
-  strip_with_holeslen = static_cast<int>(s - strip_with_holes);
+  strip_with_holes.resize (s - strip_with_holes.data());
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
-  gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holeslen * sizeof (StripType), strip_with_holes, GL_STATIC_DRAW);
+  gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
 }
 
 MapChunk::~MapChunk()
@@ -452,12 +452,6 @@ MapChunk::~MapChunk()
   gl.deleteBuffers(1, &normals);
   gl.deleteBuffers(1, &mccvEntry);
   gl.deleteBuffers (1, &indices);
-
-  if (strip_with_holes)
-  {
-    delete strip_with_holes;
-    strip_with_holes = nullptr;
-  }
 }
 
 bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
@@ -589,7 +583,7 @@ void MapChunk::drawContour()
   gl.texGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
   gl.texGenfv(GL_S, GL_OBJECT_PLANE, CoordGen);
 
-  gl.drawElements (GL_TRIANGLES, strip_with_holeslen, GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
 }
 
 void MapChunk::draw ( Frustum const& frustum
@@ -655,7 +649,7 @@ void MapChunk::draw ( Frustum const& frustum
   }
 
   gl.enable(GL_LIGHTING);
-  gl.drawElements (GL_TRIANGLES, strip_with_holeslen, GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
 
   if (_texture_set.num() > 1U) {
     //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
@@ -670,7 +664,7 @@ void MapChunk::draw ( Frustum const& frustum
     _texture_set.bindAlphamap(i - 1, 1);
 
     _texture_set.startAnim (i);
-    gl.drawElements (GL_TRIANGLES, strip_with_holeslen, GL_UNSIGNED_SHORT, nullptr);
+    gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
     _texture_set.stopAnim (i);
   }
 
@@ -701,7 +695,7 @@ void MapChunk::draw ( Frustum const& frustum
   opengl::texture::enable_texture (1);
   shadow.bind();
 
-  gl.drawElements (GL_TRIANGLES, strip_with_holeslen, GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
 
   opengl::texture::disable_texture();
   gl.disable(GL_LIGHTING);
@@ -717,7 +711,7 @@ void MapChunk::draw ( Frustum const& frustum
     if (Flags & FLAG_IMPASS)
     {
       gl.color4f(1, 1, 1, 0.6f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holeslen, GL_UNSIGNED_SHORT, nullptr);
+      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
     }
   }
   if (draw_water_overlay)
@@ -725,7 +719,7 @@ void MapChunk::draw ( Frustum const& frustum
     if (water)
     {
       gl.color4f(0.2f, 0.2f, 0.8f, 0.6f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holeslen, GL_UNSIGNED_SHORT, nullptr);
+      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
     }
   }
 
@@ -736,7 +730,7 @@ void MapChunk::draw ( Frustum const& frustum
     {
       math::vector_3d colorValues = Environment::getInstance()->areaIDColors.find(areaID)->second;
       gl.color4f(colorValues.x, colorValues.y, colorValues.z, 0.7f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holeslen, GL_UNSIGNED_SHORT, nullptr);
+      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
     }
   }
 
@@ -771,7 +765,7 @@ void MapChunk::draw ( Frustum const& frustum
       gl.lineWidth(1);
       gl.polygonOffset(-1, -1);
       gl.color4f(1, 1, 1, 0.2f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holeslen, GL_UNSIGNED_SHORT, nullptr);
+      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
     }
     {
       opengl::scoped::bool_setter<GL_POLYGON_OFFSET_POINT, GL_TRUE> const polygon_offset_point;
@@ -779,7 +773,7 @@ void MapChunk::draw ( Frustum const& frustum
       gl.pointSize(2);
       gl.polygonOffset(-1, -1);
       gl.color4f(1, 1, 1, 0.5f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holeslen, GL_UNSIGNED_SHORT, nullptr);
+      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
     }
 
     gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -806,7 +800,7 @@ void MapChunk::intersect (math::ray const& ray, selection_result* results)
     return;
   }
 
-  for (int i (0); i < strip_with_holeslen; i += 3)
+  for (int i (0); i < strip_with_holes.size(); i += 3)
   {
     if ( auto&& distance = ray.intersect_triangle ( mVertices[strip_with_holes[i + 0]]
                                                   , mVertices[strip_with_holes[i + 1]]
