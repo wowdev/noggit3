@@ -59,7 +59,7 @@ namespace
     gl.end();
   }
 
-  void render_square(math::vector_3d const& pos, float size, float orientation)
+  void draw_square(math::vector_3d const& pos, float size, float orientation)
   {
     float dx1 = size*cos(orientation) - size*sin(orientation);
     float dx2 = size*cos(orientation + math::constants::pi / 2) - size*sin(orientation + math::constants::pi / 2);
@@ -77,6 +77,16 @@ namespace
     gl.end();
   }
 
+  void render_square(math::vector_3d const& pos, float radius, float orientation, float inner_radius = 0.0f, bool useInnerRadius = true)
+  {
+    draw_square(pos, radius, orientation);
+
+    if (useInnerRadius)
+    {
+      draw_square(pos, inner_radius, orientation);
+    }
+  }
+  
 
   std::size_t const sphere_segments (15);
   void draw_sphere_point (int i, int j, float radius)
@@ -931,9 +941,9 @@ void World::draw ( math::vector_3d const& cursor_pos
     //gl.depthMask(false);
     //gl.disable(GL_DEPTH_TEST);
 
-    if (terrainMode == editing_mode::ground && Environment::getInstance()->groundBrushType == 5)
+    if (terrainMode == editing_mode::ground && Environment::getInstance()->groundBrushType == eTerrainType_Quadra)
     {
-      render_square(cursor_pos, brushRadius / 2.0f, 0.0f);
+      render_square(cursor_pos, brushRadius / 2.0f, 0.0f, brushRadius / 2.0f * innerRadius, true);
     }
     else
     {

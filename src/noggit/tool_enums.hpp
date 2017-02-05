@@ -11,6 +11,7 @@ enum eTerrainType
   eTerrainType_Trigo,
   eTerrainType_Quadra,
   eTerrainType_Vertex,
+  eTerrainType_Gaussian,
   eTerrainType_Count,
 };
 

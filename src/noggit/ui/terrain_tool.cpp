@@ -36,7 +36,8 @@ namespace ui
     addChild(new UICheckBox(85.0f, 40.0f, "Polynomial", _type_toggle, eTerrainType_Polynom));
     addChild(new UICheckBox(6.0f, 65.0f, "Trigonom", _type_toggle, eTerrainType_Trigo));
     addChild(new UICheckBox(85.0f, 65.0f, "Quadratic", _type_toggle, eTerrainType_Quadra));
-    addChild(new UICheckBox(6.0f, 90.0f, "Vertex", _type_toggle, eTerrainType_Vertex));
+    addChild(new UICheckBox(6.0f, 90.0f, "Gaussian", _type_toggle, eTerrainType_Gaussian));
+    addChild(new UICheckBox(85.0f, 90.0f, "Vertex", _type_toggle, eTerrainType_Vertex));
     _type_toggle->Activate(eTerrainType_Linear);
 
     _radius_slider = new UISlider(6.0f, 140.0f, 167.0f, 1000.0f, 0.00001f);
