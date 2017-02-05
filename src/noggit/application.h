@@ -34,7 +34,6 @@ public:
   BOOL tabletActive;
 #endif
   Noggit();
-  ~Noggit();
 
   int start(int argc, char *argv[]);
 
