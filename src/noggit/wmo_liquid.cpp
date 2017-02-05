@@ -54,7 +54,7 @@ int wmo_liquid::initGeometry(MPQFile* f, opengl::call_list* draw_list)
   int last_flag;
 
   // generate vertices
-  math::vector_3d * lVertices = new math::vector_3d[(xtiles + 1)*(ytiles + 1)];
+  std::vector<math::vector_3d> lVertices ((xtiles + 1)*(ytiles + 1));
 
   for (int j = 0; j<ytiles + 1; j++)
   {
@@ -118,12 +118,6 @@ int wmo_liquid::initGeometry(MPQFile* f, opengl::call_list* draw_list)
   glEnd();
 
   draw_list->end_recording();
-
-  if (lVertices)
-  {
-    delete[] lVertices;
-    lVertices = nullptr;
-  }
 
   return last_flag;
 }
