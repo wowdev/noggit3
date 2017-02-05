@@ -990,54 +990,74 @@ void Bone::calcMatrix(Bone *allbones, int anim, int time)
 {
   if (calc) return;
 
-  if (parent != -1)
+  math::matrix_4x4 m {math::matrix_4x4::unit};
+  math::quaternion q;
+
+  if (rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard)
+  {
+    m = {math::matrix_4x4::translation, pivot};
+
+    if (trans.uses(anim))
+    {
+      m *= math::matrix_4x4 (math::matrix_4x4::translation, trans.getValue (anim, time));
+    }
+
+    if (rot.uses(anim))
+    {
+      m *= math::matrix_4x4 (math::matrix_4x4::rotation, q = rot.getValue (anim, time));
+    }
+
+    if (scale.uses(anim))
+    {
+      m *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue (anim, time));
+    }
+
+    if (billboard)
+    {
+      float modelview[16];
+      gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
+
+      math::vector_3d vRight (modelview[0], modelview[4], modelview[8]);
+      math::vector_3d vUp (modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+      //math::vector_3d vUp = math::vector_3d(0,1,0); // Cylindrical billboarding
+      vRight = vRight * -1;
+      m (0, 2, vRight.x);
+      m (1, 2, vRight.y);
+      m (2, 2, vRight.z);
+      m (0, 1, vUp.x);
+      m (1, 1, vUp.y);
+      m (2, 1, vUp.z);
+    }
+
+    m *= math::matrix_4x4 (math::matrix_4x4::translation, -pivot);
+  }
+
+  if (parent >= 0)
   {
     allbones[parent].calcMatrix (allbones, anim, time);
-
-    mat = allbones[parent].mat;
-    mrot = allbones[parent].mrot;
+    mat = allbones[parent].mat * m;
   }
   else
   {
-    mat = math::matrix_4x4::unit;
+    mat = m;
+  }
+
+  // transform matrix for normal vectors ... ??
+  if (rot.uses(anim))
+  {
+    if (parent >= 0)
+    {
+      mrot = allbones[parent].mrot * math::matrix_4x4 (math::matrix_4x4::rotation, q);
+    }
+    else
+    {
+      mrot = math::matrix_4x4 (math::matrix_4x4::rotation, q);
+    }
+  }
+  else
+  {
     mrot = math::matrix_4x4::unit;
   }
-
-  mat = {math::matrix_4x4::translation, pivot};
-
-  if (trans.uses(anim))
-  {
-    mat *= math::matrix_4x4 (math::matrix_4x4::translation, trans.getValue(anim, time));
-  }
-
-  mrot = math::matrix_4x4::unit;
-
-  if (rot.uses(anim)) {
-    mrot = math::matrix_4x4 (math::matrix_4x4::rotation, rot.getValue(anim, time));
-    mat *= mrot;
-  }
-
-  if (scale.uses(anim)) {
-    mat *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue(anim, time));
-  }
-
-  if (billboard) {
-    float modelview[16];
-    gl.getFloatv(GL_MODELVIEW_MATRIX, modelview);
-
-    math::vector_3d vRight = math::vector_3d(modelview[0], modelview[4], modelview[8]);
-    math::vector_3d vUp = math::vector_3d(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
-    //math::vector_3d vUp = math::vector_3d(0,1,0); // Cylindrical billboarding
-    vRight = vRight * -1;
-    mat (0, 2, vRight.x);
-    mat(1, 2, vRight.y);
-    mat (2, 2, vRight.z);
-    mat (0, 1, vUp.x);
-    mat (1, 1, vUp.y);
-    mat (2, 1, vUp.z);
-  }
-
-  mat *= math::matrix_4x4 (math::matrix_4x4::translation, -pivot);
 
   calc = true;
 }
