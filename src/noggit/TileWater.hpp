@@ -3,10 +3,12 @@
 #pragma once
 
 #include <math/vector_3d.hpp>
+#include <noggit/ChunkWater.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/MapHeaders.h>
 
-class ChunkWater;
+#include <memory>
+
 class MapTile;
 class sExtendableArray;
 
@@ -14,7 +16,6 @@ class TileWater
 {
 public:
   TileWater(MapTile *pTile, float pXbase, float pZbase);
-  ~TileWater(void);
 
   ChunkWater* getChunk(int x, int z);
 
@@ -34,7 +35,7 @@ private:
   void reload();
 
   MapTile *tile;
-  ChunkWater *chunks[16][16];
+  std::unique_ptr<ChunkWater> chunks[16][16];
 
   float xbase;
   float zbase;
