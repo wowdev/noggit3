@@ -40,15 +40,6 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   , mFilename(pFilename)
   , Water (this, xbase, zbase)
 {
-
-  for (int i = 0; i < 16; ++i)
-  {
-    for (int j = 0; j < 16; j++)
-    {
-      mChunks[i][j] = nullptr;
-    }
-  }
-
   MPQFile theFile(mFilename);
 
   Log << "Opening tile " << index.x << ", " << index.z << " (\"" << mFilename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
@@ -290,7 +281,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
   {
     theFile.seek(lMCNKOffsets[nextChunk]);
-    mChunks[nextChunk / 16][nextChunk % 16] = new MapChunk(this, &theFile, mBigAlpha);
+    mChunks[nextChunk / 16][nextChunk % 16] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha);
   }
 
   theFile.close();
@@ -303,18 +294,6 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 MapTile::~MapTile()
 {
   LogDebug << "Unloading tile " << index.x << "," << index.z << "." << std::endl;
-
-  for (int j = 0; j < 16; ++j)
-  {
-    for (int i = 0; i < 16; ++i)
-    {
-      if (mChunks[j][i])
-      {
-        delete mChunks[j][i];
-        mChunks[j][i] = nullptr;
-      }
-    }
-  }
 
   mTextureFilenames.clear();
 
@@ -498,7 +477,7 @@ MapChunk* MapTile::getChunk(unsigned int x, unsigned int z)
 {
   if (x < 16 && z < 16)
   {
-    return mChunks[z][x];
+    return mChunks[z][x].get();
   }
   else
   {
@@ -516,7 +495,7 @@ std::vector<MapChunk*> MapTile::chunks_in_range (math::vector_3d const& pos, flo
     {
       if (misc::getShortestDist (pos.x, pos.z, mChunks[ty][tx]->xbase, mChunks[ty][tx]->zbase, CHUNKSIZE) <= radius)
       {
-        chunks.emplace_back (mChunks[ty][tx]);
+        chunks.emplace_back (mChunks[ty][tx].get());
       }
     }
   }
@@ -1072,7 +1051,7 @@ void MapTile::CropWater()
   {
     for (int x = 0; x < 16; ++x)
     {
-      Water.CropMiniChunk(x, z, mChunks[z][x]);
+      Water.CropMiniChunk(x, z, mChunks[z][x].get());
     }
   }
 }

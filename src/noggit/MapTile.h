@@ -3,6 +3,7 @@
 #pragma once
 
 #include <math/ray.hpp>
+#include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/Selection.h>
 #include <noggit/TileWater.hpp>
@@ -15,7 +16,6 @@
 #include <vector>
 
 class Frustum;
-class MapChunk;
 namespace math
 {
   struct vector_3d;
@@ -87,7 +87,7 @@ private:
 
   std::string mFilename;
 
-  MapChunk* mChunks[16][16];
+  std::unique_ptr<MapChunk> mChunks[16][16];
   std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
 
   friend class MapChunk;
