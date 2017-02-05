@@ -27,15 +27,14 @@ ModelInstance::ModelInstance(std::string const& filename)
 ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
   : model (filename)
 {
-  float ff[3], temp;
+  float ff[4];
+
   f->read(ff, 12);
-  pos = math::vector_3d(ff[0], ff[1], ff[2]);
-  temp = pos.z;
-  pos.z = -pos.y;
-  pos.y = temp;
-  f->read(&w, 4);
-  f->read(ff, 12);
-  dir = math::vector_3d(ff[0], ff[1], ff[2]);
+  pos = math::vector_3d(ff[0], ff[2], -ff[1]);
+
+  f->read(ff, 16);
+  _wmo_orientation = math::quaternion (-ff[3], ff[1], ff[2], ff[0]);
+
   f->read(&sc, 4);
   f->read(&d1, 4);
   lcol = math::vector_3d(((d1 & 0xff0000) >> 16) / 255.0f, ((d1 & 0x00ff00) >> 8) / 255.0f, (d1 & 0x0000ff) / 255.0f);
@@ -198,12 +197,8 @@ void ModelInstance::intersect (math::ray const& ray, selection_result* results)
   }
 }
 
-void quaternionRotate(const math::vector_3d& vdir, float w)
-{
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, math::quaternion (vdir, w)));
-}
 
-void ModelInstance::draw2(const math::vector_3d& ofs, const math::degrees rotation, Frustum const& frustum)
+void ModelInstance::draw_wmo(const math::vector_3d& ofs, const math::degrees rotation, Frustum const& frustum)
 {
   math::vector_3d tpos(ofs + pos);
   math::rotate (ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
@@ -213,8 +208,7 @@ void ModelInstance::draw2(const math::vector_3d& ofs, const math::degrees rotati
   opengl::scoped::matrix_pusher const matrix;
 
   gl.translatef(pos.x, pos.y, pos.z);
-  math::vector_3d vdir(-dir.z, dir.x, dir.y);
-  quaternionRotate(vdir, w);
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_orientation));
   gl.scalef(sc, -sc, -sc);
 
   model->draw();

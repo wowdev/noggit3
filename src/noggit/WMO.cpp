@@ -818,7 +818,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, m
         WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
       }
       setupFog();
-      wmo->modelis[dd].draw2(ofs, angle, frustum);
+      wmo->modelis[dd].draw_wmo(ofs, angle, frustum);
     }
   }
 
