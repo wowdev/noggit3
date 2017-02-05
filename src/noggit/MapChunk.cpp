@@ -893,8 +893,9 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
     if (BrushType == eTerrainType_Quadra)
     {
       if ((std::abs(xdiff) < std::abs(radius / 2)) && (std::abs(zdiff) < std::abs(radius / 2)))
-      {
-        mVertices[i].y += change;
+      { 
+        dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
+        mVertices[i].y += change * (1.0f - dist * inner_radius / radius);
         changed = true;
       }
     }
@@ -911,7 +912,7 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
             mVertices[i].y += change;
             break;
           case eTerrainType_Linear:
-            mVertices[i].y += change*(1.0f - dist * (1.0f - inner_radius) / radius);
+            mVertices[i].y += change * (1.0f - dist * (1.0f - inner_radius) / radius);
             break;
           case eTerrainType_Smooth:
             mVertices[i].y += change / (1.0f + dist / radius);
@@ -921,6 +922,10 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
             break;
           case eTerrainType_Trigo:
             mVertices[i].y += change*cos(dist / radius);
+            break;
+          case eTerrainType_Gaussian:
+            mVertices[i].y += dist < radius * inner_radius ? change * std::exp(-(std::pow(radius * inner_radius / radius, 2) / (2 * std::pow(0.39f, 2)))) : change * std::exp(-(std::pow(dist / radius, 2) / (2 * std::pow(0.39f, 2)))); 
+
             break;
           default:
             LogError << "Invalid terrain edit type (" << BrushType << ")" << std::endl;
