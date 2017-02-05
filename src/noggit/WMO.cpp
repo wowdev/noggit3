@@ -90,9 +90,7 @@ WMO::WMO(const std::string& filenameArg)
       f.read(ff, 12);
       extents[1] = math::vector_3d(ff[0], ff[1], ff[2]);
 
-      groups = new WMOGroup[nGroups];
-      mat = new WMOMaterial[nTextures];
-
+      groups.resize (nGroups);
     }
     else if (fourcc == 'MOTX') {
       // textures
@@ -102,6 +100,7 @@ WMO::WMO(const std::string& filenameArg)
     else if (fourcc == 'MOMT')
     {
       std::size_t const num_materials (size / 0x40);
+      mat.resize (num_materials);
 
       for (std::size_t i (0); i < num_materials; ++i)
       {
@@ -230,26 +229,10 @@ WMO::WMO(const std::string& filenameArg)
     groups[i].initDisplayList();
 }
 
-WMO::~WMO()
-{
-  LogDebug << "Unloading WMO \"" << filename() << "\"." << std::endl;
-  if (groups)
-  {
-    delete[] groups;
-    groups = nullptr;
-  }
-
-  if (mat)
-  {
-    delete[] mat;
-    mat = nullptr;
-  }
-}
-
 // model.cpp
 void DrawABox(math::vector_3d pMin, math::vector_3d pMax, math::vector_4d pColor, float pLineWidth);
 
-void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const angle, bool boundingbox, bool groupboxes, bool /*highlight*/, Frustum const& frustum) const
+void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const angle, bool boundingbox, bool groupboxes, bool /*highlight*/, Frustum const& frustum)
 {
   if (gWorld && gWorld->drawfog)
     gl.enable(GL_FOG);
