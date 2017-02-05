@@ -20,6 +20,7 @@ namespace opengl
       wire_box ( math::vector_3d const& min_point
                , math::vector_3d const& max_point
                );
+      ~wire_box();
 
       void draw (math::vector_4d const& color, float line_width) const;
 
