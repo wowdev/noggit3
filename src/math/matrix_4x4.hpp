@@ -66,13 +66,6 @@ namespace math
     matrix_4x4 (rotation_t, quaternion const&);
     matrix_4x4 (rotation_t, degrees::vec3 const&);
 
-    matrix_4x4() = delete;
-    matrix_4x4 (matrix_4x4 const&) = default;
-    matrix_4x4 (matrix_4x4&&) = default;
-    matrix_4x4& operator= (matrix_4x4 const&) = default;
-    matrix_4x4& operator= (matrix_4x4&&) = default;
-    ~matrix_4x4() = default;
-
     float operator() (std::size_t const& j, std::size_t const& i) const
     {
       return _m[j][i];
