@@ -41,6 +41,11 @@ namespace opengl
         }
       }
 
+      bool_setter (bool_setter const&) = delete;
+      bool_setter (bool_setter&&) = delete;
+      bool_setter& operator= (bool_setter const&) = delete;
+      bool_setter& operator= (bool_setter&&) = delete;
+
     private:
       bool _was_enabled;
     };
@@ -59,6 +64,11 @@ namespace opengl
       {
         gl.depthMask (_was_enabled);
       }
+
+      depth_mask_setter (depth_mask_setter const&) = delete;
+      depth_mask_setter (depth_mask_setter&&) = delete;
+      depth_mask_setter& operator= (depth_mask_setter const&) = delete;
+      depth_mask_setter& operator= (depth_mask_setter&&) = delete;
 
     private:
       GLboolean _was_enabled;
@@ -96,6 +106,11 @@ namespace opengl
         }
       }
 
+      texture_setter (texture_setter const&) = delete;
+      texture_setter (texture_setter&&) = delete;
+      texture_setter& operator= (texture_setter const&) = delete;
+      texture_setter& operator= (texture_setter&&) = delete;
+
     private:
       bool _was_enabled;
     };
@@ -111,6 +126,11 @@ namespace opengl
       {
         gl.popMatrix();
       }
+
+      matrix_pusher (matrix_pusher const&) = delete;
+      matrix_pusher (matrix_pusher&&) = delete;
+      matrix_pusher& operator= (matrix_pusher const&) = delete;
+      matrix_pusher& operator= (matrix_pusher&&) = delete;
     };
 
     template<GLint matrix_mode>
@@ -126,6 +146,11 @@ namespace opengl
       {
         gl.matrixMode (_old_mode);
       }
+
+      matrix_mode_setter (matrix_mode_setter const&) = delete;
+      matrix_mode_setter (matrix_mode_setter&&) = delete;
+      matrix_mode_setter& operator= (matrix_mode_setter const&) = delete;
+      matrix_mode_setter& operator= (matrix_mode_setter&&) = delete;
 
     private:
       GLint _old_mode;
@@ -158,6 +183,11 @@ namespace opengl
       {
         gl.bindBuffer (type, _old);
       }
+
+      buffer_binder (buffer_binder const&) = delete;
+      buffer_binder (buffer_binder&&) = delete;
+      buffer_binder& operator= (buffer_binder const&) = delete;
+      buffer_binder& operator= (buffer_binder&&) = delete;
     };
   }
 }

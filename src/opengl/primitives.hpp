@@ -22,6 +22,11 @@ namespace opengl
                );
       ~wire_box();
 
+      wire_box (wire_box const&) = delete;
+      wire_box (wire_box&&) = delete;
+      wire_box& operator= (wire_box const&) = delete;
+      wire_box& operator= (wire_box&&) = delete;
+
       void draw (math::vector_4d const& color, float line_width) const;
 
     private:

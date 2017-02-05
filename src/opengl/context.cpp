@@ -69,6 +69,11 @@ namespace opengl
         }
 #endif
       }
+
+      verify_context_and_check_for_gl_errors (verify_context_and_check_for_gl_errors const&) = delete;
+      verify_context_and_check_for_gl_errors (verify_context_and_check_for_gl_errors&&) = delete;
+      verify_context_and_check_for_gl_errors& operator= (verify_context_and_check_for_gl_errors const&) = delete;
+      verify_context_and_check_for_gl_errors& operator= (verify_context_and_check_for_gl_errors&&) = delete;
     };
   }
 
