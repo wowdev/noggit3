@@ -58,11 +58,6 @@ Noggit::Noggit()
   , yres(720)
 {}
 
-Noggit::~Noggit()
-{
-
-}
-
 void Noggit::initPath(char *argv[])
 {
   try
