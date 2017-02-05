@@ -15,6 +15,7 @@ namespace math
   matrix_4x4::translation_t matrix_4x4::translation;
   matrix_4x4::scale_t matrix_4x4::scale;
   matrix_4x4::rotation_t matrix_4x4::rotation;
+  matrix_4x4::rotation_xyz_t matrix_4x4::rotation_xyz;
 
   matrix_4x4::matrix_4x4 (rotation_t, quaternion const& q)
   {
@@ -70,12 +71,19 @@ namespace math
     }
   }
 
-  matrix_4x4::matrix_4x4 (rotation_t, degrees::vec3 const& angle)
+  matrix_4x4::matrix_4x4 (rotation_xyz_t, degrees::vec3 const& angle)
     : matrix_4x4 (unit)
   {
     *this *= rotate_axis<x> (angle.x);
     *this *= rotate_axis<y> (angle.y);
     *this *= rotate_axis<z> (angle.z);
+  }
+  matrix_4x4::matrix_4x4 (rotation_yzx_t, degrees::vec3 const& angle)
+    : matrix_4x4 (unit)
+  {
+    *this *= rotate_axis<y> (angle.y);
+    *this *= rotate_axis<z> (angle.z);
+    *this *= rotate_axis<x> (angle.x);
   }
 
   vector_3d matrix_4x4::operator* (vector_3d const& v) const
