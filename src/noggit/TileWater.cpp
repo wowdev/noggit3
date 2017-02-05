@@ -15,19 +15,7 @@ TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase)
   {
     for (int x = 0; x < 16; ++x)
     {
-      chunks[z][x] = new ChunkWater(xbase + CHUNKSIZE * x, zbase + CHUNKSIZE * z);
-    }
-  }
-}
-
-TileWater::~TileWater(void)
-{
-  for (int z = 0; z < 16; ++z)
-  {
-    for (int x = 0; x < 16; ++x)
-    {
-      delete chunks[z][x];
-      chunks[z][x] = nullptr;
+      chunks[z][x] = std::make_unique<ChunkWater> (xbase + CHUNKSIZE * x, zbase + CHUNKSIZE * z);
     }
   }
 }
@@ -69,7 +57,7 @@ void TileWater::draw()
 
 ChunkWater* TileWater::getChunk(int x, int z)
 {
-  return chunks[z][x];
+  return chunks[z][x].get();
 }
 
 void TileWater::autoGen(float factor)
