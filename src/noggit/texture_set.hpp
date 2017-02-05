@@ -6,11 +6,7 @@
 #include <noggit/alphamap.hpp>
 
 #include <cstdint>
-
-namespace OpenGL
-{
-  class Texture;
-}
+#include <array>
 
 class Brush;
 class MapTile;
@@ -18,9 +14,6 @@ class MapTile;
 class TextureSet
 {
 public:
-  TextureSet();
-  ~TextureSet();
-
   void initTextures(MPQFile* f, MapTile *maintile, uint32_t size);
   void initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool doNotFixAlpha);
 
@@ -32,15 +25,15 @@ public:
   void bindTexture(size_t id, size_t activeTexture);
   void bindAlphamap(size_t id, size_t activeTexture);
 
-  int addTexture(OpenGL::Texture *texture);
+  int addTexture(scoped_blp_texture_reference texture);
   void eraseTexture(size_t id);
   void eraseTextures();
   // return true if at least 1 texture has been erased
   bool eraseUnusedTextures();
   void swapTexture(int id1, int id2);
-  void switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
-  bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture);
-  bool canPaintTexture(OpenGL::Texture* texture);
+  void switchTexture(scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
+  bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool canPaintTexture(scoped_blp_texture_reference texture);
 
   const std::string& filename(size_t id);
 
@@ -60,11 +53,11 @@ public:
   void mergeAlpha(size_t id1, size_t id2);
   bool removeDuplicate();
 
-  OpenGL::Texture* texture(size_t id);
+  scoped_blp_texture_reference texture(size_t id);
 
 private:
-  OpenGL::Texture* textures[4];
-  Alphamap* alphamaps[3];
+  std::vector<scoped_blp_texture_reference> textures;
+  std::array<boost::optional<Alphamap>, 3> alphamaps;
   size_t nTextures;
 
   int tex[4];

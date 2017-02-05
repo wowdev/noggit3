@@ -5,6 +5,7 @@
 #include <string>
 
 #include <noggit/ui/Window.h>
+#include <noggit/tool_enums.hpp>
 
 class UIMapViewGUI;
 class UIText;
@@ -13,14 +14,14 @@ class UIToolbarIcon;
 class UIToolbar : public UIWindow
 {
 private:
-  void SetIcon(int pIcon, const std::string& pIconFile);
+  void SetIcon(editing_mode pIcon, const std::string& pIconFile);
+
+  std::vector<UIToolbarIcon*> mToolbarIcons;
+  UIText* text;
+
+  std::function<void (editing_mode)> _set_editing_mode;
 
 public:
-  UIToolbarIcon* mToolbarIcons[10];
-  UIText* text;
-  // current selected Icon
-  int selectedIcon;
-
-  UIToolbar(float x, float y);
-  void IconSelect(int i);
+  UIToolbar(float x, float y, std::function<void (editing_mode)> set_editing_mode);
+  void IconSelect(editing_mode);
 };

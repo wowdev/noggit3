@@ -4,6 +4,7 @@
 
 #include <noggit/AppState.h>
 #include <noggit/Selection.h>
+#include <noggit/tool_enums.hpp>
 
 class UIFrame;
 class World;
@@ -28,6 +29,9 @@ private:
   bool key_w;
   bool look;
   bool _GUIDisplayingEnabled;
+
+  bool _highlightPaintableChunks = true;
+  bool _draw_contour = false;
 
   void save();
 
@@ -66,4 +70,6 @@ public:
   void quitask();
   void inserObjectFromExtern(int model);
   void selectModel(selection_type entry);
+
+  void set_editing_mode (editing_mode);
 };

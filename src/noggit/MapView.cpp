@@ -90,15 +90,6 @@ boost::optional<selection_type> lastSelected;
 
 bool TestSelection = false;
 
-extern bool DrawMapContour;
-
-// extern row and col form Palette UI
-
-
-// This variables store the current status of the
-// Shift, Alt and CTRL keys
-
-
 bool  leftMouse = false;
 bool  leftClicked = false;
 bool  rightMouse = false;
@@ -124,16 +115,20 @@ UISlider* spray_pressure;
 
 float brushPressure = 0.9f;
 float brushLevel = 255.0f;
-float brushSpraySize = 10.0f;
-float brushSprayPressure = 5.0f;
+float brushSpraySize = 0.24f;
+float brushSprayPressure = 2.0f;
+
 bool sprayBrushActive = false;
+bool innerRadius = false;
 
 UICheckBox* toggleSpray;
+UICheckBox* toggleInnerRadius;
 
-int terrainMode = 0;
-int saveterrainMode = 0;
+editing_mode terrainMode = editing_mode::ground;
+editing_mode saveterrainMode = terrainMode;
 
 Brush textureBrush;
+Brush textureBrushInnerRadius;
 Brush sprayBrush;
 
 UICursorSwitcher* CursorSwitcher;
@@ -156,26 +151,18 @@ void setTextureBrushHardness(float f)
 {
   textureBrush.setHardness(f);
   sprayBrush.setHardness(f);
+  textureBrushInnerRadius.setHardness(f);
 }
 
 void setTextureBrushRadius(float f)
 {
   textureBrush.setRadius(f);
+  textureBrushInnerRadius.setRadius(f * textureBrushInnerRadius.getHardness());
 }
 
 void setTextureBrushPressure(float f)
 {
   brushPressure = f;
-}
-
-void toggleSprayBrush(bool b, int)
-{
-  sprayBrushActive = b;
-}
-
-void toggleHighlightPaintable(bool b, int)
-{
-  Environment::getInstance()->highlightPaintableChunks = b;
 }
 
 void setSprayBrushSize(float f)
@@ -191,9 +178,10 @@ void setSprayBrushPressure(float f)
 
 
 
-void change_settings_window(int oldid, int newid)
+
+void change_settings_window(editing_mode oldid, editing_mode newid)
 {
-  if (oldid + 1 == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !settings_paint
+  if (oldid == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !settings_paint
     || !mainGui->shaderTool || !mainGui->guiWater || !mainGui->objectEditor)
   {
     return;
@@ -218,27 +206,27 @@ void change_settings_window(int oldid, int newid)
   // fetch old win position
   switch (oldid)
   {
-  case 1:
+  case editing_mode::ground:
     tool_settings_x = (int)mainGui->terrainTool->x();
     tool_settings_y = (int)mainGui->terrainTool->y();
     break;
-  case 2:
+  case editing_mode::flatten_blur:
     tool_settings_x = (int)mainGui->flattenTool->x();
     tool_settings_y = (int)mainGui->flattenTool->y();
     break;
-  case 3:
+  case editing_mode::paint:
     tool_settings_x = (int)settings_paint->x();
     tool_settings_y = (int)settings_paint->y();
     break;
-  case 5:
+  case editing_mode::areaid:
     tool_settings_x = (int)mainGui->ZoneIDBrowser->x() + 230;
     tool_settings_y = (int)mainGui->ZoneIDBrowser->y();
     break;
-  case 7:
+  case editing_mode::water:
     tool_settings_x = (int)mainGui->guiWater->x();
     tool_settings_y = (int)mainGui->guiWater->y();
     break;
-  case 9:
+  case editing_mode::mccv:
     tool_settings_x = (int)mainGui->shaderTool->x();
     tool_settings_y = (int)mainGui->shaderTool->y();
     break;
@@ -246,37 +234,37 @@ void change_settings_window(int oldid, int newid)
   // set new win pos and make visible
   switch (newid)
   {
-  case 1:
+  case editing_mode::ground:
     mainGui->terrainTool->x((const float)tool_settings_x);
     mainGui->terrainTool->y((const float)tool_settings_y);
     mainGui->terrainTool->show();
     break;
-  case 2:
+  case editing_mode::flatten_blur:
     mainGui->flattenTool->x((const float)tool_settings_x);
     mainGui->flattenTool->y((const float)tool_settings_y);
     mainGui->flattenTool->show();
     break;
-  case 3:
+  case editing_mode::paint:
     settings_paint->x((const float)tool_settings_x);
     settings_paint->y((const float)tool_settings_y);
     settings_paint->show();
     break;
-  case 5:
+  case editing_mode::areaid:
     mainGui->ZoneIDBrowser->x((const float)tool_settings_x - 230);
     mainGui->ZoneIDBrowser->y((const float)tool_settings_y);
     mainGui->ZoneIDBrowser->show();
     break;
-  case 7:
+  case editing_mode::water:
     mainGui->guiWater->x((const float)tool_settings_x);
     mainGui->guiWater->y((const float)tool_settings_y);
     mainGui->guiWater->show();
     break;
-  case 9:
+  case editing_mode::mccv:
     mainGui->shaderTool->x((const float)tool_settings_x);
     mainGui->shaderTool->y((const float)tool_settings_y);
     mainGui->shaderTool->show();
     break;
-  case 10:
+  case editing_mode::object:
     mainGui->objectEditor->x((const float)tool_settings_x - 90.0f);
     mainGui->objectEditor->y((const float)tool_settings_y);
     mainGui->objectEditor->show();
@@ -284,6 +272,14 @@ void change_settings_window(int oldid, int newid)
     mainGui->rotationEditor->x(mainGui->objectEditor->getX() - mainGui->rotationEditor->getW() - 10.0f);
     mainGui->rotationEditor->y((const float)tool_settings_y);
   }
+}
+
+void MapView::set_editing_mode (editing_mode mode)
+{
+  change_settings_window (terrainMode, mode);
+  terrainMode = mode;
+  Environment::getInstance()->view_holelines = (mode == editing_mode::holes);
+  mainGui->guiToolbar->IconSelect (mode);
 }
 
 void openURL(int target)
@@ -662,7 +658,7 @@ void MapView::createGUI()
   mainGui->ZoneIDBrowser->setMapID(gWorld->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc(changeZoneIDValue);
   tool_settings_x = video.xres() - 186;
-  tool_settings_y = 38; 
+  tool_settings_y = 38;
 
   //3D Paint settings UIWindow
   settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 280.0f);
@@ -706,13 +702,17 @@ void MapView::createGUI()
   mainGui->paintPressureSlider->setText("Pressure: ");
   settings_paint->addChild(mainGui->paintPressureSlider);
 
-  UICheckBox* toggleHighlight = new UICheckBox(3.0f, 105.0f, "Hightligh paintable chunks", toggleHighlightPaintable, 0);
-  toggleHighlight->setState(Environment::getInstance()->highlightPaintableChunks);
-  settings_paint->addChild(toggleHighlight);
+  settings_paint->addChild ( new UICheckBox ( 3.0f, 105.0f
+                                            , "Highlight paintable chunks"
+                                            , &_highlightPaintableChunks
+                                            )
+                           );
 
-
-  toggleSpray = new UICheckBox(3.0f, 138.0f, "Toggle spray", toggleSprayBrush, 0);
+  toggleSpray = new UICheckBox(3.0f, 138.0f, "Spray", &sprayBrushActive);
   settings_paint->addChild(toggleSpray);
+
+  toggleInnerRadius = new UICheckBox(80.0f, 138.0f, "Inner radius", &innerRadius);
+  settings_paint->addChild(toggleInnerRadius);
 
   spray_size = new UISlider(6.0f, 180.0f, 170.0f, 40.0f, 0.0001f);
   spray_size->setFunc(setSprayBrushSize);
@@ -764,7 +764,8 @@ void MapView::createGUI()
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex->saveChanged(); });
   addHotkey (SDLK_s, MOD_ctrl, [this] { save(); });
   addHotkey (SDLK_s, MOD_meta, [this] { save(); });
-  // mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
+  mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
+  addHotkey (SDLK_j, MOD_shift, [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
   //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
   // mbar->GetMenu( "File" )->AddMenuItemButton( "Export heightmap", exportPNG, 1 );
   // mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
@@ -785,7 +786,7 @@ void MapView::createGUI()
   mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", [] { InsertObject (14); });
   mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", [] { InsertObject (15); });
   mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", [] { mainGui->HelperModels->show(); });
-  mbar->GetMenu("Assist")->AddMenuItemSeperator("ADT");
+  mbar->GetMenu("Assist")->AddMenuItemSeperator("Current ADT");
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Set Area ID"
                                              , []
                                                {
@@ -814,14 +815,10 @@ void MapView::createGUI()
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear duplicate models"
                                              , [] { gWorld->delete_duplicate_model_and_wmo_instances(); }
                                              );
-  mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear water"
-                                             , [] { gWorld->deleteWaterLayer(gWorld->camera); }
-                                             );
-  mbar->GetMenu("Assist")->AddMenuItemButton ( "Create water"
-                                             , [] { gWorld->addWaterLayer(gWorld->camera); }
-                                             );
-  mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded adts)", [] { gWorld->fixAllGaps(); });
-  mbar->GetMenu("Assist")->AddMenuItemButton("Clear standard shader", [] { gWorld->ClearShader(gWorld->camera); });
+  mbar->GetMenu("Assist")->AddMenuItemSeperator("Loaded ADTs");
+  mbar->GetMenu("Assist")->AddMenuItemButton("Fix gaps (all loaded ADTs)", [] { gWorld->fixAllGaps(); });
+
+  mbar->GetMenu("Assist")->AddMenuItemSeperator("Global");
   mbar->GetMenu("Assist")->AddMenuItemButton("Map to big alpha", [] { gWorld->convertMapToBigAlpha(); });
 
   mbar->GetMenu("View")->AddMenuItemSeperator("Windows");
@@ -844,17 +841,19 @@ void MapView::createGUI()
   addHotkey (SDLK_F7, MOD_none, [] { gWorld->drawlines = !gWorld->drawlines; });
   mbar->GetMenu("View")->AddMenuItemToggle("F8 Detail infos", mainGui->guidetailInfos->hidden_evil(), true);
   addHotkey (SDLK_F8, MOD_none, [this] { mainGui->guidetailInfos->toggleVisibility(); });
-  mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &DrawMapContour);
-  addHotkey (SDLK_F9, MOD_none, [] { DrawMapContour = !DrawMapContour; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &_draw_contour);
+  addHotkey (SDLK_F9, MOD_none, [this] { _draw_contour = !_draw_contour; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F10 Wireframe", &gWorld->drawwireframe);
+  addHotkey(SDLK_F10, MOD_none, [] { gWorld->drawwireframe = !gWorld->drawwireframe; });
   mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &gWorld->renderAnimations);
   addHotkey (SDLK_F11, MOD_none, [] { gWorld->renderAnimations = !gWorld->renderAnimations; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &gWorld->drawfog);
+  addHotkey(SDLK_F12, MOD_none, [] { gWorld->drawfog = !gWorld->drawfog; });
   mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &gWorld->draw_mfbo);
-  mbar->GetMenu("View")->AddMenuItemToggle("F Fog", &gWorld->drawfog);
   mbar->GetMenu("View")->AddMenuItemToggle("Hole lines always on", &Environment::getInstance()->view_holelines, false);
-  mbar->GetMenu("View")->AddMenuItemToggle("Wireframe", &gWorld->drawwireframe);
   mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &Settings::getInstance()->renderModelsWithBox);
 
-  mbar->GetMenu("Help")->AddMenuItemButton("Key Bindings F10", [] { mainGui->showHelp(); });
+  mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [] { mainGui->showHelp(); });
   mbar->GetMenu("Help")->AddMenuItemButton("Manual online", [] { openURL (2); });
   mbar->GetMenu("Help")->AddMenuItemButton("Homepage", [] { openURL (1); });
 
@@ -864,20 +863,20 @@ void MapView::createGUI()
 
   addHotkey ( SDLK_F1
             , MOD_shift
-            , []
+            , [this]
               {
                 if (alloff)
                 {
                   alloff_models = gWorld->drawmodels;
                   alloff_doodads = gWorld->drawdoodads;
-                  alloff_contour = DrawMapContour;
+                  alloff_contour = _draw_contour;
                   alloff_wmo = gWorld->drawwmo;
                   alloff_fog = gWorld->drawfog;
                   alloff_terrain = gWorld->drawterrain;
 
                   gWorld->drawmodels = false;
                   gWorld->drawdoodads = false;
-                  DrawMapContour = true;
+                  _draw_contour = true;
                   gWorld->drawwmo = false;
                   gWorld->drawterrain = true;
                   gWorld->drawfog = false;
@@ -886,7 +885,7 @@ void MapView::createGUI()
                 {
                   gWorld->drawmodels = alloff_models;
                   gWorld->drawdoodads = alloff_doodads;
-                  DrawMapContour = alloff_contour;
+                  _draw_contour = alloff_contour;
                   gWorld->drawwmo = alloff_wmo;
                   gWorld->drawterrain = alloff_terrain;
                   gWorld->drawfog = alloff_fog;
@@ -916,25 +915,64 @@ void MapView::createGUI()
 
   addHotkey (SDLK_DELETE, MOD_none, [] { DeleteSelectedObject(); });
 
+  addHotkey ( SDLK_c
+            , MOD_ctrl
+            , [this]
+              {
+                mainGui->objectEditor->copy (*gWorld->GetCurrentSelection());
+              }
+            , [this]
+              {
+                return !!gWorld->GetCurrentSelection();
+              }
+            );
+
+  addHotkey ( SDLK_c
+            , MOD_alt | MOD_ctrl
+            , [this]
+              {
+                mainGui->toggleCursorSwitcher();
+              }
+            );
+
+  addHotkey ( SDLK_c
+            , MOD_none
+            , [this]
+              {
+                mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
+              }
+            , [] { return terrainMode == editing_mode::object; }
+            );
+
+  addHotkey ( SDLK_c
+            , MOD_shift
+            , [this]
+              {
+                Environment::getInstance()->cursorType++;
+                Environment::getInstance()->cursorType %= 4;
+              }
+            , [] { return terrainMode != editing_mode::object; }
+            );
+
   addHotkey (SDLK_v, MOD_shift, [] { InsertObject (14); });
   addHotkey (SDLK_v, MOD_alt, [] { InsertObject (15); });
   addHotkey (SDLK_v, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos); });
   addHotkey ( SDLK_v
             , MOD_none
             , [this] { mainGui->objectEditor->pasteObject (_cursor_pos); }
-            , [] { return terrainMode == 9; }
+            , [] { return terrainMode == editing_mode::object; }
             );
 
   addHotkey ( SDLK_c
             , MOD_none
             , [] { gWorld->clearVertexSelection(); }
-            , [] { return terrainMode == 0; }
+            , [] { return terrainMode == editing_mode::ground; }
             );
 
   addHotkey ( SDLK_x
             , MOD_none
             , [] { mainGui->TexturePalette->toggleVisibility(); }
-            , [] { return terrainMode == 2; }
+            , [] { return terrainMode == editing_mode::paint; }
             );
 
   addHotkey (SDLK_F4, MOD_shift, [] { Settings::getInstance()->AutoSelectingMode = !Settings::getInstance()->AutoSelectingMode; });
@@ -970,13 +1008,13 @@ void MapView::createGUI()
   addHotkey ( SDLK_y
             , MOD_none
             , [] { mainGui->terrainTool->nextType(); }
-            , [] { return terrainMode == 0; }
+            , [] { return terrainMode == editing_mode::ground; }
             );
 
   addHotkey ( SDLK_y
             , MOD_none
-            , [] { mainGui->flattenTool->nextFlattenMode(); }
-            , [] { return terrainMode == 1; }
+            , [] { mainGui->flattenTool->nextFlattenType(); }
+            , [] { return terrainMode == editing_mode::flatten_blur; }
             );
 
   addHotkey ( SDLK_u
@@ -986,20 +1024,263 @@ void MapView::createGUI()
                 if (mViewMode == eViewMode_2D)
                 {
                   mViewMode = eViewMode_3D;
-                  terrainMode = saveterrainMode;
-                  // Set the right icon in toolbar
-                  mainGui->guiToolbar->IconSelect(terrainMode);
+                  set_editing_mode (saveterrainMode);
                 }
                 else
                 {
                   mViewMode = eViewMode_2D;
                   saveterrainMode = terrainMode;
-                  terrainMode = 2;
-                  // Set the right icon in toolbar
-                  mainGui->guiToolbar->IconSelect(terrainMode);
+                  set_editing_mode (editing_mode::paint);
                 }
               }
             );
+
+  addHotkey ( SDLK_t
+            , MOD_none
+            , [&]
+              {
+                //! \todo space as global modifier?
+                if (_mod_space_down)
+                {
+                  mainGui->flattenTool->nextFlattenMode();
+                }
+                else
+                {
+                  mainGui->flattenTool->toggleFlattenAngle();
+                }
+              }
+            , [&] { return terrainMode == editing_mode::flatten_blur; }
+            );
+
+  addHotkey ( SDLK_t
+            , MOD_none
+            , [&]
+              {
+                sprayBrushActive = !sprayBrushActive;
+                toggleSpray->setState(sprayBrushActive);
+              }
+            , [&] { return terrainMode == editing_mode::paint; }
+            );
+
+  addHotkey ( SDLK_t
+            , MOD_none
+            , [&]
+              {
+                gWorld->setHoleADT (gWorld->camera, _mod_alt_down);
+              }
+            , [&] { return terrainMode == editing_mode::holes; }
+            );
+
+  addHotkey ( SDLK_t
+            , MOD_none
+            , [&]
+              {
+                mainGui->objectEditor->togglePasteMode();
+              }
+            , [&] { return terrainMode == editing_mode::object; }
+            );
+
+  addHotkey ( SDLK_h
+            , MOD_none
+            , [&]
+              {
+                mainGui->toggleHelp();
+              }
+            , [&] { return terrainMode != editing_mode::object; }
+            );
+
+  addHotkey ( SDLK_h
+            , MOD_none
+            , [&]
+              {
+                // toggle hidden models visibility
+                if (_mod_space_down)
+                {
+                  Environment::getInstance()->showModelFromHiddenList = !Environment::getInstance()->showModelFromHiddenList;
+                }
+                else if (_mod_shift_down)
+                {
+                  gWorld->clearHiddenModelList();
+                }
+                else
+                {
+                  // toggle selected model visibility
+                  if (gWorld->HasSelection())
+                  {
+                    auto selection = gWorld->GetCurrentSelection();
+                    if (selection->which() == eEntry_Model)
+                    {
+                      auto&& entity (boost::get<selected_model_type> (*selection)->model.get());
+                      auto&& hidden (gWorld->_hidden_models);
+                      if (hidden.count (entity))
+                      {
+                        hidden.erase (entity);
+                      }
+                      else
+                      {
+                        hidden.emplace (entity);
+                      }
+                    }
+                    else if (selection->which() == eEntry_WMO)
+                    {
+                      auto&& entity (boost::get<selected_wmo_type> (*selection)->wmo.get());
+                      auto&& hidden (gWorld->_hidden_map_objects);
+                      if (hidden.count (entity))
+                      {
+                        hidden.erase (entity);
+                      }
+                      else
+                      {
+                        hidden.emplace (entity);
+                      }
+                    }
+                  }
+                }
+              }
+            , [&] { return terrainMode == editing_mode::object; }
+            );
+
+  addHotkey ( SDLK_f
+            , MOD_none
+            , [&]
+              {
+                if (_mod_space_down)
+                {
+                  mainGui->terrainTool->flattenVertices();
+                }
+              }
+            , [&] { return terrainMode == editing_mode::ground; }
+            );
+  addHotkey ( SDLK_f
+            , MOD_none
+            , [&]
+              {
+                if (_mod_space_down)
+                {
+                  mainGui->flattenTool->toggleFlattenLock();
+                }
+                else
+                {
+                  mainGui->flattenTool->lockPos (_cursor_pos);
+                }
+              }
+            , [&] { return terrainMode == editing_mode::flatten_blur; }
+            );
+  addHotkey ( SDLK_f
+            , MOD_none
+            , [&]
+              {
+                if (gWorld->HasSelection())
+                {
+                  auto selection = gWorld->GetCurrentSelection();
+
+                  if (selection->which() == eEntry_Model)
+                  {
+                    gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
+                    boost::get<selected_model_type> (*selection)->pos = _cursor_pos;
+                    boost::get<selected_model_type> (*selection)->recalcExtents();
+                    gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
+                  }
+                  else if (selection->which() == eEntry_WMO)
+                  {
+                    gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+                    boost::get<selected_wmo_type> (*selection)->pos = _cursor_pos;
+                    boost::get<selected_wmo_type> (*selection)->recalcExtents();
+                    gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
+                  }
+                }
+              }
+            , [&] { return terrainMode == editing_mode::object; }
+            );
+
+  addHotkey (SDLK_KP_PLUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(0.01f); }, [] { return terrainMode == editing_mode::ground; });
+  addHotkey (SDLK_PLUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(0.01f); }, [] { return terrainMode == editing_mode::ground; });
+
+  addHotkey (SDLK_KP_PLUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(0.01f); }, [] { return terrainMode == editing_mode::flatten_blur; });
+  addHotkey (SDLK_PLUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(0.01f); }, [] { return terrainMode == editing_mode::flatten_blur; });
+
+  addHotkey ( SDLK_KP_PLUS
+            , MOD_alt
+            , []
+              {
+                textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
+                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+              }
+            , [] { return terrainMode == editing_mode::paint; }
+            );
+  addHotkey ( SDLK_PLUS
+            , MOD_alt
+            , []
+              {
+                textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
+                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+              }
+            , [] { return terrainMode == editing_mode::paint; }
+            );
+
+  addHotkey (SDLK_KP_PLUS, MOD_shift, [] { gWorld->fogdistance += 60.0f; });
+  addHotkey (SDLK_PLUS, MOD_shift, [] { gWorld->fogdistance += 60.0f; });
+
+
+  addHotkey (SDLK_KP_MINUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(-0.01f); }, [] { return terrainMode == editing_mode::ground; });
+  addHotkey (SDLK_MINUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(-0.01f); }, [] { return terrainMode == editing_mode::ground; });
+
+  addHotkey (SDLK_KP_MINUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(-0.01f); }, [] { return terrainMode == editing_mode::flatten_blur; });
+  addHotkey (SDLK_MINUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(-0.01f); }, [] { return terrainMode == editing_mode::flatten_blur; });
+
+  addHotkey ( SDLK_KP_MINUS
+            , MOD_alt
+            , []
+              {
+                textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
+                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+              }
+            , [] { return terrainMode == editing_mode::paint; }
+            );
+  addHotkey ( SDLK_MINUS
+            , MOD_alt
+            , []
+              {
+                textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
+                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+              }
+            , [] { return terrainMode == editing_mode::paint; }
+            );
+
+  addHotkey (SDLK_KP_MINUS, MOD_shift, [] { gWorld->fogdistance -= 60.0f; });
+  addHotkey (SDLK_MINUS, MOD_shift, [] { gWorld->fogdistance -= 60.0f; });
+
+  addHotkey (SDLK_1, MOD_shift, [this] { movespd = 15.0f; });
+  addHotkey (SDLK_2, MOD_shift, [this] { movespd = 50.0f; });
+  addHotkey (SDLK_3, MOD_shift, [this] { movespd = 200.0f; });
+  addHotkey (SDLK_4, MOD_shift, [this] { movespd = 800.0f; });
+  addHotkey (SDLK_1, MOD_alt, [] { mainGui->G1->setValue(0.01f); });
+  addHotkey (SDLK_2, MOD_alt, [] { mainGui->G1->setValue(0.25f); });
+  addHotkey (SDLK_3, MOD_alt, [] { mainGui->G1->setValue(0.50f); });
+  addHotkey (SDLK_4, MOD_alt, [] { mainGui->G1->setValue(0.75f); });
+  addHotkey (SDLK_5, MOD_alt, [] { mainGui->G1->setValue(0.99f); });
+
+  addHotkey (SDLK_1, MOD_none, [this] { set_editing_mode (editing_mode::ground); });
+  addHotkey (SDLK_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); });
+  addHotkey (SDLK_3, MOD_none, [this] { set_editing_mode (editing_mode::paint); });
+  addHotkey (SDLK_4, MOD_none, [this] { set_editing_mode (editing_mode::holes); });
+  addHotkey (SDLK_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); });
+  addHotkey (SDLK_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); });
+  addHotkey (SDLK_7, MOD_none, [this] { set_editing_mode (editing_mode::water); });
+  addHotkey (SDLK_8, MOD_none, [this] { set_editing_mode (editing_mode::light); });
+  addHotkey (SDLK_9, MOD_none, [this] { set_editing_mode (editing_mode::mccv); });
+  addHotkey (SDLK_0, MOD_none, [this] { set_editing_mode (editing_mode::object); });
+
+  addHotkey (SDLK_0, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 0; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_1, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 1; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_2, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 2; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_3, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 3; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_4, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 4; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_5, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 5; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_6, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 6; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_7, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 7; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_8, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 8; }, [] { return gWorld->IsSelection(eEntry_WMO); });
+  addHotkey (SDLK_9, MOD_ctrl, [] { boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = 9; }, [] { return gWorld->IsSelection(eEntry_WMO); });
 
 
   // ESC warning
@@ -1045,13 +1326,16 @@ MapView::MapView(float ah0, float av0)
 
   lastBrushUpdate = 0;
   textureBrush.init();
+  textureBrushInnerRadius.init();
   sprayBrush.init();
-  setSprayBrushSize(10.0f);
+  setSprayBrushSize(0.24f);
 
   look = false;
   mViewMode = eViewMode_3D;
 
   createGUI();
+
+  set_editing_mode (editing_mode::ground);
 
   // Set camera y (height) position to current ground height plus some space.
   math::vector_3d t = math::vector_3d(0, 0, 0);
@@ -1100,16 +1384,16 @@ void MapView::tick(float t, float dt)
   {
     switch (terrainMode)
     {
-    case 0:
+    case editing_mode::ground:
       mainGui->terrainTool->setTabletControlValue((float)app.pressure);
-    case 1:
+    case editing_mode::flatten_blur:
       mainGui->flattenTool->setRadius((float)app.pressure / 20.0f);
       break;
-    case 2:
+    case editing_mode::paint:
       mainGui->paintPressureSlider->setValue(std::max(0.0f, std::min(1.0f, (float)app.pressure / 2048.0f)));
       mainGui->paintPressureSlider->setValue(mainGui->paintPressureSlider->value);
       break;
-    case 8:
+    case editing_mode::mccv:
       mainGui->shaderTool->setTabletControlValue((float)app.pressure);
       break;
     }
@@ -1343,7 +1627,7 @@ void MapView::tick(float t, float dt)
 
         switch (terrainMode)
         {
-        case 0:
+        case editing_mode::ground:
           if (mViewMode == eViewMode_3D && !underMap)
           {
             if (_mod_shift_down)
@@ -1356,7 +1640,7 @@ void MapView::tick(float t, float dt)
             }
           }
           break;
-        case 1:
+        case editing_mode::flatten_blur:
           if (mViewMode == eViewMode_3D && !underMap)
           {
             if (_mod_shift_down)
@@ -1369,7 +1653,7 @@ void MapView::tick(float t, float dt)
             }
           }
           break;
-        case 2:
+        case editing_mode::paint:
           if (_mod_shift_down && _mod_ctrl_down && _mod_alt_down)
           {
             // clear chunk texture
@@ -1391,7 +1675,9 @@ void MapView::tick(float t, float dt)
               if (textureBrush.needUpdate())
               {
                 textureBrush.GenerateTexture();
+                textureBrushInnerRadius.GenerateTexture();
               }
+
               if (mViewMode == eViewMode_3D && !underMap)
               {
                 if (mainGui->TextureSwitcher->hidden())
@@ -1400,17 +1686,22 @@ void MapView::tick(float t, float dt)
                   {
                     gWorld->sprayTexture(_cursor_pos, &sprayBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f),
                       textureBrush.getRadius(), brushSprayPressure,
-                      UITexturingGUI::getSelectedTexture()
+                      *UITexturingGUI::getSelectedTexture()
                     );
+
+                    if (innerRadius)
+                    {
+                      gWorld->paintTexture(_cursor_pos, &textureBrushInnerRadius, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), *UITexturingGUI::getSelectedTexture());
+                    }
                   }
                   else
                   {
-                    gWorld->paintTexture(_cursor_pos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
+                    gWorld->paintTexture(_cursor_pos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), *UITexturingGUI::getSelectedTexture());
                   }
                 }
                 else
                 {
-                  gWorld->overwriteTextureAtCurrentChunk(_cursor_pos, mainGui->TextureSwitcher->getTextures(), UITexturingGUI::getSelectedTexture());
+                  gWorld->overwriteTextureAtCurrentChunk(_cursor_pos, mainGui->TextureSwitcher->current_texture(), *UITexturingGUI::getSelectedTexture());
                 }
               }
             }
@@ -1418,13 +1709,15 @@ void MapView::tick(float t, float dt)
             if (textureBrush.needUpdate())
             {
               textureBrush.GenerateTexture();
+              textureBrushInnerRadius.GenerateTexture();
             }
-            if (mViewMode == eViewMode_2D)
-              gWorld->paintTexture({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z}, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), UITexturingGUI::getSelectedTexture());
+
+            if (mViewMode == eViewMode_2D && !!UITexturingGUI::getSelectedTexture())
+              gWorld->paintTexture({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z}, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), *UITexturingGUI::getSelectedTexture());
           }
           break;
 
-        case 3:
+        case editing_mode::holes:
           if (mViewMode == eViewMode_3D)
           {
             // no undermap check here, else it's impossible to remove holes
@@ -1439,7 +1732,7 @@ void MapView::tick(float t, float dt)
             }
           }
           break;
-        case 4:
+        case editing_mode::areaid:
           if (mViewMode == eViewMode_3D && !underMap)
           {
             if (_mod_shift_down)
@@ -1457,7 +1750,7 @@ void MapView::tick(float t, float dt)
             }
           }
           break;
-        case 5:
+        case editing_mode::flags:
           if (mViewMode == eViewMode_3D && !underMap)
           {
             if (_mod_shift_down)
@@ -1470,20 +1763,12 @@ void MapView::tick(float t, float dt)
             }
           }
           break;
-        case 6:
+        case editing_mode::water:
           if (mViewMode == eViewMode_3D && !underMap)
           {
             auto lSelection = gWorld->GetCurrentSelection();
             MapChunk* chnk = boost::get<selected_chunk_type> (*Selection).chunk;
 
-            if (_mod_shift_down)
-            {
-              gWorld->addWaterLayerChunk({chnk->xbase, 0.f, chnk->zbase}, chnk->px, chnk->py);
-            }
-            if (_mod_ctrl_down && !_mod_alt_down)
-            {
-              gWorld->delWaterLayerChunk({chnk->xbase, 0.f, chnk->zbase}, chnk->px, chnk->py);
-            }
             if (_mod_alt_down && !_mod_ctrl_down)
             {
               gWorld->mapIndex->setWater(true, _cursor_pos);
@@ -1492,7 +1777,7 @@ void MapView::tick(float t, float dt)
               gWorld->mapIndex->setWater(false, _cursor_pos);
           }
           break;
-        case 8:
+        case editing_mode::mccv:
           if (mViewMode == eViewMode_3D && !underMap)
           {
             if (_mod_shift_down)
@@ -1565,7 +1850,9 @@ void MapView::tick(float t, float dt)
   if ((t - lastBrushUpdate) > 0.1f && textureBrush.needUpdate())
   {
     textureBrush.GenerateTexture();
+    textureBrushInnerRadius.GenerateTexture();
   }
+
 
   gWorld->time += this->mTimespeed * dt;
 
@@ -1597,7 +1884,7 @@ void MapView::doSelection (bool selectTerrainOnly)
 
   math::ray ray (gWorld->camera, pos - gWorld->camera);
 
-  selection_result results (gWorld->intersect (ray, selectTerrainOnly));
+  selection_result results (gWorld->intersect (ray, selectTerrainOnly, terrainMode == editing_mode::object));
 
   std::sort ( results.begin()
             , results.end()
@@ -1700,21 +1987,35 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
   video.set3D();
 
   //! \ todo: make the current tool return the radius
-  float radius = 0.0f, hardness = 0.0f;
+  float radius = 0.0f, hardness = 0.0f, inner_radius = 0.0f;
 
   switch (terrainMode)
   {
-    case 0: radius = mainGui->terrainTool->brushRadius(); break;
-    case 1: radius = mainGui->flattenTool->brushRadius(); break;
-    case 2: 
-      radius = textureBrush.getRadius(); 
+  case editing_mode::ground:
+      radius = mainGui->terrainTool->brushRadius();
+      inner_radius = mainGui->terrainTool->innerRadius();
+      break;
+  case editing_mode::flatten_blur: radius = mainGui->flattenTool->brushRadius(); break;
+  case editing_mode::paint:
+      radius = textureBrush.getRadius();
       hardness = textureBrush.getHardness();
       break;
-    case 6: break; //! \ todo: water: get radius 
-    case 8: radius = mainGui->shaderTool->brushRadius(); break;
+  case editing_mode::water: break; //! \ todo: water: get radius
+  case editing_mode::mccv: radius = mainGui->shaderTool->brushRadius(); break;
   }
 
-  gWorld->draw(_cursor_pos, radius, hardness);
+  gWorld->draw ( _cursor_pos
+               , radius
+               , hardness
+               , _highlightPaintableChunks
+               , _draw_contour
+               , inner_radius
+               , terrainMode == editing_mode::paint
+               , terrainMode == editing_mode::flags
+               , terrainMode == editing_mode::water
+               , terrainMode == editing_mode::areaid
+               , terrainMode
+               );
 
   displayGUIIfEnabled();
 }
@@ -1856,307 +2157,19 @@ void MapView::keyPressEvent (SDL_KeyboardEvent *e)
   if (e->keysym.sym == SDLK_KP9)
     keyr = -1;
 
-  if (e->keysym.sym == SDLK_KP0)
-    if (terrainMode == 6)
-    {
-      gWorld->setWaterHeight(tile_index(gWorld->camera), 0.0f);
-      mainGui->guiWater->updateData();
-    }
-
-  // copy model to clipboard
-  if (e->keysym.sym == SDLK_c)
-  {
-    if (_mod_ctrl_down && gWorld->GetCurrentSelection())
-      mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
-    else if (_mod_alt_down && _mod_ctrl_down)
-      mainGui->toggleCursorSwitcher();
-    else if (_mod_shift_down)
-      InsertObject(14);
-    else if (_mod_alt_down)
-      InsertObject(15);
-    else
-    {
-      if (terrainMode == 9)
-      {
-        mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
-      }
-      else
-      {
-        Environment::getInstance()->cursorType++;
-        Environment::getInstance()->cursorType %= 4;
-      }
-    }
-  }
-
-  if (e->keysym.sym == SDLK_t)
-  {
-    // toggle flatten angle mode
-    if (terrainMode == 1)
-    {
-      if (_mod_space_down)
-      {
-        mainGui->flattenTool->nextFlattenMode();
-      }
-      else
-      {
-        mainGui->flattenTool->toggleFlattenAngle();
-      }
-    }
-    else if (terrainMode == 2)
-    {
-      sprayBrushActive = !sprayBrushActive;
-      toggleSpray->setState(sprayBrushActive);
-    }
-    else if (terrainMode == 3)
-    {
-      gWorld->setHoleADT(gWorld->camera, _mod_alt_down);
-    }
-    else if (terrainMode == 9)
-    {
-      mainGui->objectEditor->togglePasteMode();
-    }
-  }
-
-  // toggle help window
-  if (e->keysym.sym == SDLK_h)
-  {
-    if (terrainMode == 9)
-    {
-      // toggle hidden models visibility
-      if (_mod_space_down)
-      {
-        Environment::getInstance()->showModelFromHiddenList = !Environment::getInstance()->showModelFromHiddenList;
-      }
-      else if (_mod_shift_down)
-      {
-        gWorld->clearHiddenModelList();
-      }
-      else
-      {
-        // toggle selected model visibility
-        if (gWorld->HasSelection())
-        {
-          auto selection = gWorld->GetCurrentSelection();
-          if (selection->which() == eEntry_Model)
-          {
-            boost::get<selected_model_type> (*selection)->model->toggleVisibility();
-          }
-          else if (selection->which() == eEntry_WMO)
-          {
-            boost::get<selected_wmo_type> (*selection)->wmo->toggleVisibility();
-          }
-        }
-      }
-    }
-    else
-    {
-      mainGui->toggleHelp();
-    }
-  }
-
-  if (e->keysym.sym == SDLK_f)
-  {
-    if (terrainMode == 0 && _mod_space_down)
-    {
-      mainGui->terrainTool->flattenVertices();
-    }
-    else if (terrainMode == 1)
-    {
-      if (_mod_space_down)
-      {
-        mainGui->flattenTool->toggleFlattenLock();
-      }
-      else
-      {
-        mainGui->flattenTool->lockPos (_cursor_pos);
-      }
-    }
-    else if (terrainMode == 9)
-    {
-      if (gWorld->HasSelection())
-      {
-        auto selection = gWorld->GetCurrentSelection();
-
-        if (selection->which() == eEntry_Model)
-        {
-          gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
-          boost::get<selected_model_type> (*selection)->pos = _cursor_pos;
-          boost::get<selected_model_type> (*selection)->recalcExtents();
-          gWorld->updateTilesModel(boost::get<selected_model_type> (*selection));
-        }
-        else if (selection->which() == eEntry_WMO)
-        {
-          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
-          boost::get<selected_wmo_type> (*selection)->pos = _cursor_pos;
-          boost::get<selected_wmo_type> (*selection)->recalcExtents();
-          gWorld->updateTilesWMO(boost::get<selected_wmo_type> (*selection));
-        }
-      }
-    }
-    else // draw fog
-    {
-      gWorld->drawfog = !gWorld->drawfog;
-    }
-  }
-
-  // reload a map tile STEFF out because of UID recalc. reload could kill all.
-  //if( e->keysym.sym == SDLK_j && _mod_shift_down )
-  //  gWorld->reloadTile( static_cast<int>( gWorld->camera.x ) / TILESIZE, static_cast<int>( gWorld->camera.z ) / TILESIZE );
-
   // fog distance or brush radius
   if (e->keysym.sym == SDLK_KP_PLUS || e->keysym.sym == SDLK_PLUS)
   {
-    if (_mod_alt_down)
-    {
-      switch (terrainMode)
-      {
-      case 0:
-        mainGui->terrainTool->changeRadius(0.01f);
-        break;
-      case 1:
-        mainGui->flattenTool->changeRadius(0.01f);
-        break;
-      case 2:
-        textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
-        paint_brush->setValue(textureBrush.getRadius() / 100.0f);
-        break;
-      case 6:
-        tile_index tile(gWorld->camera);
-        gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 2.0f));
-        mainGui->guiWater->updateData();
-        break;
-      }
-    }
-    else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
-    {
-      if (terrainMode == 6)
-      {
-        tile_index tile(gWorld->camera);
-
-        if (_mod_shift_down)
-        {
-          gWorld->setWaterTrans(gWorld->camera, static_cast<unsigned char>(std::ceil(static_cast<float>(gWorld->getWaterTrans(tile)) + 1)));
-        }
-        else if (_mod_ctrl_down)
-        {
-          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 5.0f));
-        }
-        else
-        {
-          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) + 1.0f));
-        }
-
-        mainGui->guiWater->updateData();
-      }
-      else if (_mod_shift_down)
-      {
-        gWorld->fogdistance += 60.0f;// fog change only when no model is selected!
-      }
-    }
-    else
-    {
-      //change selected model size
-      keys = 1;
-    }
+    //change selected model size
+    if (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() != eEntry_MapChunk)
+    keys = 1;
   }
 
   if (e->keysym.sym == SDLK_KP_MINUS || e->keysym.sym == SDLK_MINUS)
   {
-    if (_mod_alt_down)
-    {
-      switch (terrainMode)
-      {
-      case 0:
-        mainGui->terrainTool->changeRadius(-0.01f);
-        break;
-      case 1:
-        mainGui->flattenTool->changeRadius(-0.01f);
-        break;
-      case 2:
-        textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
-        paint_brush->setValue(textureBrush.getRadius() / 100);
-        break;
-      case 6:
-        tile_index tile(gWorld->camera);
-        gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 2.0f));
-        mainGui->guiWater->updateData();
-        break;
-      }
-    }
-    else if ((!gWorld->HasSelection() || (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() == eEntry_MapChunk)))
-    {
-      if (terrainMode == 6)
-      {
-        tile_index tile(gWorld->camera);
-        if (_mod_shift_down)
-        {
-          gWorld->setWaterTrans(gWorld->camera, static_cast<unsigned char>(std::floor(static_cast<float>(gWorld->getWaterTrans(tile))) - 1));
-        }
-        else if (_mod_ctrl_down)
-        {
-          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 5.0f));
-        }
-        else
-        {
-          gWorld->setWaterHeight(tile, std::ceil(gWorld->getWaterHeight(tile) - 1.0f));
-        }
-
-        mainGui->guiWater->updateData();
-      }
-      else if (_mod_shift_down)
-      {
-        gWorld->fogdistance -= 60.0f;// fog change only when no model is selected!
-      }
-
-    }
-    else
-    {
-      //change selected model size
-      keys = -1;
-    }
-  }
-
-  // doodads set
-  if (e->keysym.sym >= SDLK_0 && e->keysym.sym <= SDLK_9)
-  {
-    if (gWorld->IsSelection(eEntry_WMO))
-    {
-      boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->doodadset = e->keysym.sym - SDLK_0;
-    }
-    else if (_mod_shift_down)
-    {
-      if (e->keysym.sym == SDLK_1)
-        movespd = 15.0f;
-      if (e->keysym.sym == SDLK_2)
-        movespd = 50.0f;
-      if (e->keysym.sym == SDLK_3)
-        movespd = 200.0f;
-      if (e->keysym.sym == SDLK_4)
-        movespd = 800.0f;
-    }
-    else if (_mod_alt_down)
-    {
-      if (e->keysym.sym == SDLK_1)
-        mainGui->G1->setValue(0.01f);
-      if (e->keysym.sym == SDLK_2)
-        mainGui->G1->setValue(0.25f);
-      if (e->keysym.sym == SDLK_3)
-        mainGui->G1->setValue(0.50f);
-      if (e->keysym.sym == SDLK_4)
-        mainGui->G1->setValue(0.75f);
-      if (e->keysym.sym == SDLK_5)
-        mainGui->G1->setValue(0.99f);
-    }
-    else if (e->keysym.sym >= SDLK_1 && e->keysym.sym <= SDLK_9)
-    {
-      terrainMode = e->keysym.sym - SDLK_1;
-      mainGui->guiToolbar->IconSelect(terrainMode);
-    }
-    else if (e->keysym.sym == SDLK_0)
-    {
-      terrainMode = 9; // object editor
-      mainGui->guiToolbar->IconSelect(terrainMode);
-    }
+    //change selected model size
+    if (gWorld->HasSelection() && gWorld->GetCurrentSelection()->which() != eEntry_MapChunk)
+    keys = -1;
   }
 }
 
@@ -2283,17 +2296,26 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
 
   if (rightMouse && _mod_alt_down)
   {
-    if (terrainMode == 0)
+    if (terrainMode == editing_mode::ground)
     {
-      mainGui->terrainTool->moveVertices(-e->yrel / YSENS);
+      mainGui->terrainTool->changeInnerRadius(e->xrel / 100.0f);
     }
-    if (terrainMode == 2)
+    if (terrainMode == editing_mode::paint)
     {
       float hardness = std::max(0.0f, std::min(1.0f, textureBrush.getHardness() + e->xrel / 300.0f));
       setTextureBrushHardness(hardness);
       mainGui->paintHardnessSlider->setValue(hardness);
     }
   }
+
+  if (rightMouse && _mod_shift_down)
+  {
+    if (terrainMode == editing_mode::ground)
+    {
+      mainGui->terrainTool->moveVertices(-e->yrel / YSENS);
+    }
+  }
+
 
   if (rightMouse && _mod_space_down)
   {
@@ -2304,17 +2326,17 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
   {
     switch (terrainMode)
     {
-    case 0:
+    case editing_mode::ground:
       mainGui->terrainTool->changeRadius(e->xrel / XSENS);
       break;
-    case 1:
+    case editing_mode::flatten_blur:
       mainGui->flattenTool->changeRadius(e->xrel / XSENS);
       break;
-    case 2:
+    case editing_mode::paint:
       textureBrush.setRadius(std::max(0.0f, std::min(100.0f, textureBrush.getRadius() + e->xrel / XSENS)));
       paint_brush->setValue(textureBrush.getRadius() / 100.0f);
       break;
-    case 8:
+    case editing_mode::mccv:
       mainGui->shaderTool->changeRadius(e->xrel / XSENS);
       break;
     }
@@ -2324,16 +2346,16 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
   {
     switch (terrainMode)
     {
-    case 0:
+    case editing_mode::ground:
       mainGui->terrainTool->changeSpeed(e->xrel / 30.0f);
       break;
-    case 1:
+    case editing_mode::flatten_blur:
       mainGui->flattenTool->changeSpeed(e->xrel / 30.0f);
       break;
-    case 2:
+    case editing_mode::paint:
       mainGui->paintPressureSlider->setValue(std::max(0.0f, std::min(1.0f, mainGui->paintPressureSlider->value + e->xrel / 300.0f)));
       break;
-    case 8:
+    case editing_mode::mccv:
       mainGui->shaderTool->changeSpeed(e->xrel / XSENS);
       break;
     }
@@ -2400,7 +2422,7 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
     break;
 
   case SDL_BUTTON_WHEELUP:
-    if (terrainMode == 0)
+    if (terrainMode == editing_mode::ground)
     {
       if (_mod_alt_down)
       {
@@ -2411,7 +2433,7 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
         mainGui->terrainTool->changeOrientation(_cursor_pos, _mod_ctrl_down ? 1.0f : 10.0f);
       }
     }
-    else if (terrainMode == 1)
+    else if (terrainMode == editing_mode::flatten_blur)
     {
       if (_mod_alt_down)
       {
@@ -2426,7 +2448,7 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
         mainGui->flattenTool->changeHeight(1.0f);
       }
     }
-    else if (terrainMode == 2)
+    else if (terrainMode == editing_mode::paint)
     {
       if (_mod_space_down)
       {
@@ -2446,7 +2468,7 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
     }
     break;
   case SDL_BUTTON_WHEELDOWN:
-    if (terrainMode == 0)
+    if (terrainMode == editing_mode::ground)
     {
       if (_mod_alt_down)
       {
@@ -2457,7 +2479,7 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
         mainGui->terrainTool->changeOrientation(_cursor_pos, _mod_ctrl_down ? -1.0f : -10.0f);
       }
     }
-    else if (terrainMode == 1)
+    else if (terrainMode == editing_mode::flatten_blur)
     {
       if (_mod_alt_down)
       {
@@ -2472,7 +2494,7 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
         mainGui->flattenTool->changeHeight(-1.0f);
       }
     }
-    else if (terrainMode == 2)
+    else if (terrainMode == editing_mode::paint)
     {
       if (_mod_space_down)
       {

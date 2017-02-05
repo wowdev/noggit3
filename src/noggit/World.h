@@ -9,9 +9,11 @@
 #include <noggit/Sky.h> // Skies, OutdoorLighting, OutdoorLightStats
 #include <noggit/WMO.h> // WMOManager
 #include <noggit/tile_index.hpp>
+#include <noggit/tool_enums.hpp>
 
 #include <map>
 #include <string>
+#include <unordered_set>
 
 namespace OpenGL
 {
@@ -134,7 +136,19 @@ public:
   void initDisplay();
 
   void tick(float dt);
-  void draw(math::vector_3d const& cursor_pos, float brushRadius, float hardness);
+  void draw ( math::vector_3d const& cursor_pos
+            , float brushRadius
+            , float hardness
+            , bool highlightPaintableChunks
+            , bool draw_contour
+            , float innerRadius
+            , bool draw_paintability_overlay
+            , bool draw_chunk_flag_overlay
+            , bool draw_water_overlay
+            , bool draw_areaid_overlay
+            //! \todo passing editing_mode is _so_ wrong, I don't believe I'm doing this
+            , editing_mode
+            );
 
   void outdoorLights(bool on);
   void setupFog();
@@ -143,7 +157,7 @@ public:
   unsigned int getAreaID();
   void setAreaID(math::vector_3d const& pos, int id, bool adt);
 
-  selection_result intersect (math::ray const&, bool only_map);
+  selection_result intersect (math::ray const&, bool only_map, bool do_objects);
   void drawTileMode(float ah);
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
@@ -181,17 +195,17 @@ public:
   template<typename Fun>
     void for_tile_at(math::vector_3d const& pos, Fun&&);
 
-  void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType);
+  void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
   void changeShader(math::vector_3d const& pos, float change, float radius, bool editMode);
   void flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
   void blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType);
-  bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, OpenGL::Texture* texture);
-  bool sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, OpenGL::Texture* texture);
+  bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture);
 
   void eraseTextures(math::vector_3d const& pos);
-  void overwriteTextureAtCurrentChunk(math::vector_3d const& pos, OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture);
+  void overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture);
   void setBaseTexture(math::vector_3d const& pos);
-  void swapTexture(math::vector_3d const& pos, OpenGL::Texture *tex);
+  void swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex);
   void removeTexDuplicateOnADT(math::vector_3d const& pos);
 
   void setHole(math::vector_3d const& pos, bool big, bool hole);
@@ -206,6 +220,8 @@ public:
   void updateTilesWMO(WMOInstance* wmo);
   void updateTilesModel(ModelInstance* m2);
 
+  std::unordered_set<WMO*> _hidden_map_objects;
+  std::unordered_set<Model*> _hidden_models;
   void clearHiddenModelList();
 
   void jumpToCords(math::vector_3d pos);
@@ -220,39 +236,21 @@ public:
 
   void clearHeight(math::vector_3d const& pos);
 
-  void ClearShader(math::vector_3d const& pos);
-
   void saveWDT();
   void clearAllModelsOnADT(math::vector_3d const& pos);
 
   bool canWaterSave(const tile_index& tile);
 
-  void setWaterHeight(const tile_index& tile, float h);
-  float getWaterHeight(const tile_index& tile);
-  float HaveSelectWater(const tile_index& tile);
   void CropWaterADT(math::vector_3d const& pos);
-  void setWaterTrans(math::vector_3d const& pos, unsigned char value);
-  unsigned char getWaterTrans(const tile_index& tile);
 
   void setWaterType(math::vector_3d const& pos, int type);
   int getWaterType(const tile_index& tile);
 
-  void deleteWaterLayer(math::vector_3d const& pos);
-
-  void addWaterLayer(math::vector_3d const& pos);
-  void addWaterLayer(math::vector_3d const& pos, float height, unsigned char trans);
-  void addWaterLayerChunk(math::vector_3d const& pos, int i, int j);
-  void delWaterLayerChunk(math::vector_3d const& pos, int i, int j);
-
-  void autoGenWaterTrans(math::vector_3d const& pos, int factor);
-  void AddWaters(const tile_index& tile);
+  void autoGenWaterTrans(float factor);
 
   void fixAllGaps();
 
   void convertMapToBigAlpha();
-
-  // get the real cursor pos in the world, TODO: get the correct pos on models/wmos
-  boost::optional<math::vector_3d> getCursorPosOnModel();
 
   void deselectVertices(math::vector_3d const& pos, float radius);
   void selectVertices(math::vector_3d const& pos, float radius);

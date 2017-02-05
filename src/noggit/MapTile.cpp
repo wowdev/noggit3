@@ -38,16 +38,8 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   , changed(0)
   , mBigAlpha(pBigAlpha)
   , mFilename(pFilename)
+  , Water (this, xbase, zbase)
 {
-
-  for (int i = 0; i < 16; ++i)
-  {
-    for (int j = 0; j < 16; j++)
-    {
-      mChunks[i][j] = nullptr;
-    }
-  }
-
   MPQFile theFile(mFilename);
 
   Log << "Opening tile " << index.x << ", " << index.z << " (\"" << mFilename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
@@ -200,11 +192,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
     int ofsW = Header.mh2o + 0x14 + 0x8;
     assert(fourcc == 'MH2O');
 
-    Water = new TileWater(this, xbase, zbase); //has water
-    Water->readFromFile(theFile, ofsW); //reading MH2O data at separated class...
-  }
-  else {
-    Water = new TileWater(this, xbase, zbase); //empty water tile
+    Water.readFromFile(theFile, ofsW);
   }
 
   // - MFBO ----------------------------------------------
@@ -293,7 +281,7 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
   for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
   {
     theFile.seek(lMCNKOffsets[nextChunk]);
-    mChunks[nextChunk / 16][nextChunk % 16] = new MapChunk(this, &theFile, mBigAlpha);
+    mChunks[nextChunk / 16][nextChunk % 16] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha);
   }
 
   theFile.close();
@@ -302,43 +290,6 @@ MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, b
 
   LogDebug << "Done loading tile " << index.x << "," << index.z << "." << std::endl;
 }
-
-MapTile::~MapTile()
-{
-  LogDebug << "Unloading tile " << index.x << "," << index.z << "." << std::endl;
-
-  for (int j = 0; j < 16; ++j)
-  {
-    for (int i = 0; i < 16; ++i)
-    {
-      if (mChunks[j][i])
-      {
-        delete mChunks[j][i];
-        mChunks[j][i] = nullptr;
-      }
-    }
-  }
-
-  delete Water;
-  Water = nullptr;
-
-  mTextureFilenames.clear();
-
-  //! \todo unload ModelInstances and WMOInstances on this tile:
-  // a) either keep up the information what tiles the instances are on at all times
-  //    (even while moving), to then check if all tiles it was on were unloaded, or
-  // b) do the reference count lazily by iterating over all instances and checking
-  //    what MapTiles they span. if any of those tiles is still loaded, keep it,
-  //    otherwise remove it.
-  //
-  // I think b) is easier. It only requires
-  // `std::set<C2iVector> XInstance::spanning_tiles() const` followed by
-  // `if_none (isTileLoaded (x, y)): unload instance`, which is way easier than
-  // constantly updating the reference counters.
-  // Note that both approaches do not cover the issue that the instance might not
-  // be saved to any tile, thus the movement might have been lost.
-}
-
 
 bool MapTile::isTile(int pX, int pZ)
 {
@@ -367,21 +318,33 @@ void MapTile::toBigAlpha()
   }
 }
 
-extern float groundBrushRadius;
-extern float blurBrushRadius;
-extern int terrainMode;
-extern Brush textureBrush;
-
-
-
-void MapTile::draw (Frustum const& frustum)
+void MapTile::draw ( Frustum const& frustum
+                   , bool highlightPaintableChunks
+                   , bool draw_contour
+                   , bool draw_paintability_overlay
+                   , bool draw_chunk_flag_overlay
+                   , bool draw_water_overlay
+                   , bool draw_areaid_overlay
+                   , bool draw_wireframe_overlay
+                   )
 {
   gl.color4f(1, 1, 1, 1);
 
   for (int j = 0; j<16; ++j)
+  {
     for (int i = 0; i<16; ++i)
-      mChunks[j][i]->draw(frustum);
-
+    {
+      mChunks[j][i]->draw ( frustum
+                          , highlightPaintableChunks
+                          , draw_contour
+                          , draw_paintability_overlay
+                          , draw_chunk_flag_overlay
+                          , draw_water_overlay
+                          , draw_areaid_overlay
+                          , draw_wireframe_overlay
+                          );
+    }
+  }
 }
 
 void MapTile::intersect (math::ray const& ray, selection_result* results) const
@@ -421,7 +384,7 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
 
 void MapTile::drawWater()
 {
-  if (!Water->hasData(0))
+  if (!Water.hasData(0))
   {
     return; //no need to draw water on tile without water =)
   }
@@ -429,7 +392,7 @@ void MapTile::drawWater()
   gl.disable(GL_COLOR_MATERIAL);
   gl.disable(GL_LIGHTING);
 
-  Water->draw();
+  Water.draw();
 
   gl.enable(GL_LIGHTING);
   gl.enable(GL_COLOR_MATERIAL);
@@ -450,9 +413,9 @@ void MapTile::getAlpha(size_t id, unsigned char *amap)
 
     for (int i = 0; i < 16; ++i)
     {
-      if (mChunks[index][i]->textureSet->num() > id + 1)
+      if (mChunks[index][i]->_texture_set.num() > id + 1)
       {
-        memcpy(amap + j * 1024 + i * 64, mChunks[index][i]->textureSet->getAlpha(id) + offsetIndex * 64, 64);
+        memcpy(amap + j * 1024 + i * 64, mChunks[index][i]->_texture_set.getAlpha(id) + offsetIndex * 64, 64);
       }
       else
       {
@@ -492,7 +455,7 @@ MapChunk* MapTile::getChunk(unsigned int x, unsigned int z)
 {
   if (x < 16 && z < 16)
   {
-    return mChunks[z][x];
+    return mChunks[z][x].get();
   }
   else
   {
@@ -510,7 +473,7 @@ std::vector<MapChunk*> MapTile::chunks_in_range (math::vector_3d const& pos, flo
     {
       if (misc::getShortestDist (pos.x, pos.z, mChunks[ty][tx]->xbase, mChunks[ty][tx]->zbase, CHUNKSIZE) <= radius)
       {
-        chunks.emplace_back (mChunks[ty][tx]);
+        chunks.emplace_back (mChunks[ty][tx].get());
       }
     }
   }
@@ -595,7 +558,7 @@ void MapTile::saveTile(bool saveAllModels)
       lModelInstances.emplace(it->second.d1, it->second);
     }
   }
-  
+
 
   filenameOffsetThing nullyThing = { 0, 0 };
 
@@ -624,9 +587,9 @@ void MapTile::saveTile(bool saveAllModels)
 
   for (int i = 0; i < 16; ++i)
     for (int j = 0; j < 16; ++j)
-      for (size_t tex = 0; tex < mChunks[i][j]->textureSet->num(); tex++)
-        if (lTextures.find(mChunks[i][j]->textureSet->filename(tex)) == lTextures.end())
-          lTextures.insert(std::pair<std::string, int>(mChunks[i][j]->textureSet->filename(tex), -1));
+      for (size_t tex = 0; tex < mChunks[i][j]->_texture_set.num(); tex++)
+        if (lTextures.find(mChunks[i][j]->_texture_set.filename(tex)) == lTextures.end())
+          lTextures.insert(std::pair<std::string, int>(mChunks[i][j]->_texture_set.filename(tex), -1));
 
   lID = 0;
   for (std::map<std::string, int>::iterator it = lTextures.begin(); it != lTextures.end(); ++it)
@@ -946,7 +909,7 @@ void MapTile::saveTile(bool saveAllModels)
   lCurrentPosition += 8 + lMODF_Size;
 
   //MH2O
-  Water->saveToFile(*lADTFile, lMHDR_Position, lCurrentPosition);
+  Water.saveToFile(*lADTFile, lMHDR_Position, lCurrentPosition);
 
   // MCNK
   for (int y = 0; y < 16; ++y)
@@ -998,11 +961,11 @@ void MapTile::saveTile(bool saveAllModels)
   }
 #endif
 
-  lADTFile->Extend(lCurrentPosition - lADTFile->mSize); // cleaning unused nulls at the end of file
+  lADTFile->Extend(lCurrentPosition - lADTFile->data.size()); // cleaning unused nulls at the end of file
 
 
   MPQFile *f = new MPQFile(mFilename);
-  f->setBuffer(lADTFile->GetPointer<char>(), lADTFile->mSize);
+  f->setBuffer(lADTFile->data);
   f->SaveFile();
   f->close();
 
@@ -1011,7 +974,7 @@ void MapTile::saveTile(bool saveAllModels)
   {
     // ADT root file
     MPQFile *f1 = new MPQFile(mFilename, wodSavePath);
-    f1->setBuffer(lADTRootFile->GetPointer<char>(), lADTRootFile->mSize);
+    f1->setBuffer(lADTRootFile->data);
     f1->SaveFile();
     f1->close();
 
@@ -1023,12 +986,12 @@ void MapTile::saveTile(bool saveAllModels)
 
 
     MPQFile *f2 = new MPQFile(texFilename1.str(), wodSavePath);
-    f2->setBuffer(lADTTexFile->GetPointer<char>(), lADTTexFile->mSize);
+    f2->setBuffer(lADTTexFile->data);
     f2->SaveFile();
     f2->close();
 
     MPQFile *f3 = new MPQFile(texFilename2.str(), wodSavePath);
-    f3->setBuffer(lADTTexFile->GetPointer<char>(), lADTTexFile->mSize);
+    f3->setBuffer(lADTTexFile->data);
     f3->SaveFile();
     f3->close();
 
@@ -1040,12 +1003,12 @@ void MapTile::saveTile(bool saveAllModels)
 
 
     MPQFile *f4 = new MPQFile(objFilename1.str(), wodSavePath);
-    f4->setBuffer(lADTObjFile->GetPointer<char>(), lADTObjFile->mSize);
+    f4->setBuffer(lADTObjFile->data);
     f4->SaveFile();
     f4->close();
 
     MPQFile *f5 = new MPQFile(objFilename2.str(), wodSavePath);
-    f5->setBuffer(lADTObjFile->GetPointer<char>(), lADTObjFile->mSize);
+    f5->setBuffer(lADTObjFile->data);
     f5->SaveFile();
     f5->close();
   }
@@ -1059,24 +1022,14 @@ void MapTile::saveTile(bool saveAllModels)
   delete f;
 }
 
-void MapTile::ClearShader()
-{
-  for (int i = 0; i < 16; ++i)
-  {
-    for (int j = 0; j < 16; ++j)
-    {
-      mChunks[i][j]->ClearShader();
-    }
-  }
-}
 
 void MapTile::CropWater()
 {
-  for (int i = 0; i < 16; ++i)
+  for (int z = 0; z < 16; ++z)
   {
-    for (int j = 0; j < 16; ++j)
+    for (int x = 0; x < 16; ++x)
     {
-      Water->CropMiniChunk(i, j, mChunks[i][j]);
+      Water.CropMiniChunk(x, z, mChunks[z][x].get());
     }
   }
 }

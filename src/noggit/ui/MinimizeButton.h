@@ -6,10 +6,11 @@
 
 class UIMinimizeButton : public UIButton
 {
+  std::function<void()> _on_hide;
 public:
   typedef UIMinimizeButton* Ptr;
 
-  UIMinimizeButton(float pWidth);
+  UIMinimizeButton(float pWidth, std::function<void()> on_hide = []{});
 
   UIFrame::Ptr processLeftClick(float mx, float my);
 };

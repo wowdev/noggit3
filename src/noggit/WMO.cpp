@@ -2,10 +2,8 @@
 
 #include <noggit/Environment.h>
 #include <noggit/Frustum.h>
-#include <noggit/Liquid.h>
 #include <noggit/Log.h> // LogDebug
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/Shaders.h>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/WMO.h>
 #include <noggit/World.h>
@@ -46,20 +44,13 @@ void WMOUnhighlight()
   gl.depthMask(GL_TRUE);
 }
 
-void WMO::toggleVisibility()
-{
-  WMOManager::toggleWMOvisibility(this);
-}
-
 const std::string& WMO::filename() const
 {
   return _filename;
 }
 
 WMO::WMO(const std::string& filenameArg)
-  : ManagedItem()
-  , _filename(filenameArg)
-  , hidden(false)
+  : _filename(filenameArg)
 {
   MPQFile f(_filename);
   if (f.isEof()) {
@@ -99,9 +90,7 @@ WMO::WMO(const std::string& filenameArg)
       f.read(ff, 12);
       extents[1] = math::vector_3d(ff[0], ff[1], ff[2]);
 
-      groups = new WMOGroup[nGroups];
-      mat = new WMOMaterial[nTextures];
-
+      groups.resize (nGroups);
     }
     else if (fourcc == 'MOTX') {
       // textures
@@ -111,6 +100,7 @@ WMO::WMO(const std::string& filenameArg)
     else if (fourcc == 'MOMT')
     {
       std::size_t const num_materials (size / 0x40);
+      mat.resize (num_materials);
 
       for (std::size_t i (0); i < num_materials; ++i)
       {
@@ -118,7 +108,7 @@ WMO::WMO(const std::string& filenameArg)
 
         std::string const texpath (texbuf + mat[i].nameStart);
 
-        mat[i]._texture = TextureManager::newTexture (texpath);
+        mat[i]._texture = texpath;
         textures.push_back (texpath);
       }
     }
@@ -160,9 +150,22 @@ WMO::WMO(const std::string& filenameArg)
     else if (fourcc == 'MODD') {
       nModels = size / 0x28;
       for (unsigned int i = 0; i<nModels; ++i) {
-        int ofs;
-        f.read(&ofs, 4);
-        modelis.push_back(ModelInstance (ddnames + ofs, &f));
+        struct
+        {
+          uint32_t name_offset : 24;
+          uint32_t flag_AcceptProjTex : 1;
+          uint32_t flag_0x2 : 1;
+          uint32_t flag_0x4 : 1;
+          uint32_t flag_0x8 : 1;
+          uint32_t flags_unused : 4;
+        } x;
+
+        size_t after_entry (f.getPos() + 0x28);
+        f.read (&x, sizeof (x));
+
+        modelis.push_back(ModelInstance (ddnames + x.name_offset, &f));
+
+        f.seek (after_entry);
       }
 
     }
@@ -226,30 +229,10 @@ WMO::WMO(const std::string& filenameArg)
     groups[i].initDisplayList();
 }
 
-WMO::~WMO()
-{
-  LogDebug << "Unloading WMO \"" << filename() << "\"." << std::endl;
-  if (groups)
-  {
-    delete[] groups;
-    groups = nullptr;
-  }
-
-  for (std::vector<std::string>::iterator it = textures.begin(); it != textures.end(); ++it) {
-    TextureManager::delbyname(*it);
-  }
-
-  if (mat)
-  {
-    delete[] mat;
-    mat = nullptr;
-  }
-}
-
 // model.cpp
 void DrawABox(math::vector_3d pMin, math::vector_3d pMax, math::vector_4d pColor, float pLineWidth);
 
-void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const angle, bool boundingbox, bool groupboxes, bool /*highlight*/, Frustum const& frustum) const
+void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const angle, bool boundingbox, bool groupboxes, bool /*highlight*/, Frustum const& frustum)
 {
   if (gWorld && gWorld->drawfog)
     gl.enable(GL_FOG);
@@ -444,10 +427,7 @@ void WMOGroup::init(WMO *_wmo, MPQFile* f, int _num, char *names)
   }
   else name = "(no name)";
 
-  ddr = 0;
   nDoodads = 0;
-
-  lq = 0;
 }
 
 void setGLColor(unsigned int col)
@@ -578,8 +558,8 @@ void WMOGroup::initDisplayList()
     }
     else if (fourcc == 'MODR') {
       nDoodads = size / 2;
-      ddr = new int16_t[nDoodads];
-      gf.read(ddr, size);
+      ddr.resize (nDoodads);
+      gf.read(ddr.data(), size);
     }
     else if (fourcc == 'MOBA') {
       nBatches = size / 24;
@@ -596,11 +576,7 @@ void WMOGroup::initDisplayList()
       WMOLiquidHeader hlq;
       gf.read(&hlq, 0x1E);
 
-      //gLog("WMO Liquid: %dx%d, %dx%d, (%f,%f,%f) %d\n", hlq.X, hlq.Y, hlq.A, hlq.B, hlq.pos.x, hlq.pos.y, hlq.pos.z, hlq.type);
-
-      // Do not even try to render water (nonamed programmer)... I'll try (beket) =))
-      lq = new Liquid(hlq.A, hlq.B, math::vector_3d (hlq.pos.x, hlq.pos.z, -hlq.pos.y));
-      lq->initFromWMO(&gf, wmo->mat[hlq.type], (flags & 0x2000) != 0);
+      lq = std::make_unique<wmo_liquid> (&gf, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
     }
 
     //! \todo  figure out/use MFOG ?
@@ -641,12 +617,12 @@ void WMOGroup::initDisplayList()
     bool overbright = ((mat->flags & 0x10) && !hascv);
     bool spec_shader = (mat->specular && !hascv && !overbright);
 
-    _lists[b].first = new opengl::call_list();
+    _lists[b].first = std::make_unique<opengl::call_list>();
     _lists[b].second = spec_shader;
 
     _lists[b].first->start_recording(GL_COMPILE);
 
-    mat->_texture->bind();
+    mat->_texture.get()->bind();
 
     bool atest = (mat->transparent) != 0;
 
@@ -774,16 +750,7 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
   gl.color4f(1, 1, 1, 1);
   for (int i = 0; i<nBatches; ++i)
   {
-    if (video.mSupportShaders && _lists[i].second && wmoShader)
-    {
-      wmoShader->bind();
-      _lists[i].first->render();
-      wmoShader->unbind();
-    }
-    else
-    {
-      _lists[i].first->render();
-    }
+    _lists[i].first->render();
   }
 
   gl.color4f(1, 1, 1, 1);
@@ -851,7 +818,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, m
         WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
       }
       setupFog();
-      wmo->modelis[dd].draw2(ofs, angle, frustum);
+      wmo->modelis[dd].draw_wmo(ofs, angle, frustum);
     }
   }
 
@@ -899,31 +866,6 @@ void WMOGroup::setupFog()
   }
 }
 
-
-
-WMOGroup::~WMOGroup()
-{
-  //if (dl) gl.deleteLists(dl, 1);
-  //if (dl_light) gl.deleteLists(dl_light, 1);
-  for (auto it = _lists.begin(); it != _lists.end(); ++it)
-  {
-    delete it->first;
-  }
-  _lists.clear();
-
-  if (nDoodads)
-  {
-    delete[] ddr;
-    ddr = nullptr;
-  }
-  if (lq)
-  {
-    delete lq;
-    lq = nullptr;
-  }
-}
-
-
 void WMOFog::init(MPQFile* f)
 {
   f->read(this, 0x30);
@@ -951,72 +893,15 @@ void WMOFog::setup()
   gl.disable(GL_FOG);
 }
 
-WMOManager::mapType WMOManager::items;
-WMOManager::vectorType WMOManager::hiddenItems;
+decltype (WMOManager::_) WMOManager::_;
 
 void WMOManager::report()
 {
   std::string output = "Still in the WMO manager:\n";
-  for (mapType::iterator t = items.begin(); t != items.end(); ++t)
-  {
-    output += "- " + t->first + "\n";
-  }
+  _.apply ( [&] (std::string const& key, WMO const&)
+            {
+              output += " - " + key + "\n";
+            }
+          );
   LogDebug << output;
-}
-
-WMO* WMOManager::add(std::string name)
-{
-  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-  if (items.find(name) == items.end())
-  {
-    items[name] = new WMO(name);
-    //! \todo Uncomment this, if loading is threaded.
-    //items[name]->finishLoading();
-    //app.loader()->addObject( items[name] );
-  }
-
-  items[name]->addReference();
-  return items[name];
-}
-
-void WMOManager::delbyname(std::string name)
-{
-  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-
-  if (items.find(name) != items.end())
-  {
-    items[name]->removeReference();
-
-    if (items[name]->hasNoReferences())
-    {
-      delete items[name];
-      items.erase(items.find(name));
-    }
-  }
-}
-
-void WMOManager::clearHiddenWMOList()
-{
-  for (WMOManager::vectorType::iterator it = hiddenItems.begin(); it != hiddenItems.end(); ++it)
-  {
-    (*it)->hidden = false;
-  }
-
-  hiddenItems.clear();
-}
-
-void WMOManager::toggleWMOvisibility(WMO* wmo)
-{
-  auto it = std::find(hiddenItems.begin(), hiddenItems.end(), wmo);
-  if (it != hiddenItems.end())
-  {
-    hiddenItems.erase(it);
-    wmo->hidden = false;
-  }
-  else
-  {
-    hiddenItems.push_back(wmo);
-    wmo->hidden = true;
-  }
 }

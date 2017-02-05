@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include <noggit/Model.h>
+#include <noggit/multimap_with_normalized_key.hpp>
+
 #include <map>
 #include <string>
 #include <vector>
@@ -15,18 +18,10 @@ public:
   static void updateEmitters(float dt);
 
   static void report();
-  static void toggleModelVisibility(Model* model);
-  static void clearHiddenModelList();
 
 private:
   friend struct scoped_model_reference;
-  static Model* add(std::string name);
-  static void delbyname(std::string name);
-
-  typedef std::map<std::string, Model*> mapType;
-  static mapType items;
-  typedef std::vector<Model*> vectorType;
-  static vectorType hiddenItems;
+  static noggit::multimap_with_normalized_key<Model> _;
 };
 
 struct scoped_model_reference
@@ -34,19 +29,19 @@ struct scoped_model_reference
   scoped_model_reference (std::string const& filename)
     : _valid (true)
     , _filename (filename)
-    , _model (ModelManager::add (_filename))
+    , _model (ModelManager::_.emplace (_filename))
   {}
 
   scoped_model_reference (scoped_model_reference const& other)
     : _valid (other._valid)
     , _filename (other._filename)
-    , _model (ModelManager::add (_filename))
+    , _model (ModelManager::_.emplace (_filename))
   {}
   scoped_model_reference& operator= (scoped_model_reference const& other)
   {
     _valid = other._valid;
     _filename = other._filename;
-    _model = ModelManager::add (_filename);
+    _model = ModelManager::_.emplace (_filename);
     return *this;
   }
 
@@ -70,11 +65,15 @@ struct scoped_model_reference
   {
     if (_valid)
     {
-      ModelManager::delbyname (_filename);
+      ModelManager::_.erase (_filename);
     }
   }
 
   Model* operator->() const
+  {
+    return _model;
+  }
+  Model* get() const
   {
     return _model;
   }

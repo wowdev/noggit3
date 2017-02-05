@@ -23,7 +23,7 @@ class MapTileEntry
 {
 private:
   uint32_t flags;
-  MapTile* tile;
+  std::unique_ptr<MapTile> tile;
   bool onDisc;
 
 
@@ -139,7 +139,6 @@ public:
   }
 
   MapIndex(const std::string& pBasename);
-  ~MapIndex();
 
   void enterTile(const tile_index& tile);
   MapTile *loadTile(const tile_index& tile);

@@ -9,9 +9,9 @@
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/AsyncObject.h> // AsyncObject
 #include <noggit/MPQ.h>
-#include <noggit/Manager.h> // ManagedItem
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
+#include <noggit/TextureManager.h>
 #include <noggit/Video.h> // GLuint
 
 #include <string>
@@ -39,7 +39,7 @@ public:
 
   bool calc;
   void calcMatrix(Bone* allbones, int anim, int time);
-  void init(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **animfiles);
+  Bone (const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **animfiles);
 
 };
 
@@ -51,7 +51,7 @@ public:
   math::vector_3d tval, rval, sval;
 
   void calc(int anim, int time);
-  void init(const MPQFile& f, const ModelTexAnimDef &mta, int *global);
+  TextureAnim(const MPQFile& f, const ModelTexAnimDef &mta, int *global);
   void setup(int anim);
 };
 
@@ -59,13 +59,13 @@ struct ModelColor {
   Animation::M2Value<math::vector_3d> color;
   Animation::M2Value<float, int16_t> opacity;
 
-  void init(const MPQFile& f, const ModelColorDef &mcd, int *global);
+  ModelColor(const MPQFile& f, const ModelColorDef &mcd, int *global);
 };
 
 struct ModelTransparency {
   Animation::M2Value<float, int16_t> trans;
 
-  void init(const MPQFile& f, const ModelTransDef &mtd, int *global);
+  ModelTransparency(const MPQFile& f, const ModelTransDef &mtd, int *global);
 };
 
 // copied from the .mdl docs? this might be completely wrong
@@ -109,17 +109,14 @@ struct ModelRenderPass {
 };
 
 struct ModelCamera {
-  bool ok;
 
   math::vector_3d pos, target;
   float nearclip, farclip, fov;
   Animation::M2Value<math::vector_3d> tPos, tTarget;
   Animation::M2Value<float> rot;
 
-  void init(const MPQFile& f, const ModelCameraDef &mcd, int *global);
+  ModelCamera(const MPQFile& f, const ModelCameraDef &mcd, int *global);
   void setup(int time = 0);
-
-  ModelCamera() :ok(false) {}
 };
 
 struct ModelLight {
@@ -130,11 +127,11 @@ struct ModelLight {
   //Animation::M2Value<float> attStart,attEnd;
   //Animation::M2Value<bool> Enabled;
 
-  void init(const MPQFile&  f, const ModelLightDef &mld, int *global);
+  ModelLight(const MPQFile&  f, const ModelLightDef &mld, int *global);
   void setup(int time, OpenGL::Light l);
 };
 
-class Model : public ManagedItem, public AsyncObject {
+class Model : public AsyncObject {
 
   GLuint ModelDrawList;
   //GLuint TileModeModelDrawList;
@@ -146,17 +143,17 @@ class Model : public ManagedItem, public AsyncObject {
   MPQFile **animfiles;
 
 
-  void init(const MPQFile& f);
+  Model(const MPQFile& f);
 
 
-  TextureAnim *texanims;
-  ModelAnimation *anims;
-  int *globalSequences;
-  ModelColor *colors;
-  ModelTransparency *transparency;
-  ModelLight *lights;
-  ParticleSystem *particleSystems;
-  RibbonEmitter *ribbons;
+  std::vector<TextureAnim> texanims;
+  std::vector<ModelAnimation> anims;
+  std::vector<int> globalSequences;
+  std::vector<ModelColor> colors;
+  std::vector<ModelTransparency> transparency;
+  std::vector<ModelLight> lights;
+  std::vector<ParticleSystem> particleSystems;
+  std::vector<RibbonEmitter> ribbons;
 
   void drawModel( /*bool unlit*/);
 
@@ -179,8 +176,8 @@ class Model : public ManagedItem, public AsyncObject {
 
 public:
   std::string _filename; //! \todo ManagedItem already has a name. Use that?
-  ModelCamera cam;
-  Bone *bones;
+  boost::optional<ModelCamera> cam;
+  std::vector<Bone> bones;
   ModelHeader header;
 
   // ===============================
@@ -190,9 +187,9 @@ public:
   // ===============================
   // Texture data
   // ===============================
-  std::vector<OpenGL::Texture*> _textures;
+  std::vector<scoped_blp_texture_reference> _textures;
   std::vector<std::string> _textureFilenames;
-  std::vector<OpenGL::Texture*> _replaceTextures;
+  std::map<std::size_t, scoped_blp_texture_reference> _replaceTextures;
   std::vector<int> _specialTextures;
   std::vector<bool> _useReplaceTextures;
 
@@ -212,7 +209,4 @@ public:
   friend struct ModelRenderPass;
 
   virtual void finishLoading();
-
-  bool hidden;
-  void toggleVisibility();
 };

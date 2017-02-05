@@ -488,3 +488,21 @@ void MPQFile::SaveFile()
     //save(lFilename.c_str());
   }
 }
+
+namespace noggit
+{
+  namespace mpq
+  {
+    std::string normalized_filename (std::string filename)
+    {
+      std::transform (filename.begin(), filename.end(), filename.begin(), ::tolower);
+      std::transform ( filename.begin(), filename.end(), filename.begin()
+                     , [] (char c)
+                       {
+                         return c == '\\' ? '/' : c;
+                       }
+                     );
+      return filename;
+    }
+  }
+}

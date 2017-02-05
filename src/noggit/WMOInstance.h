@@ -63,7 +63,7 @@ public:
     return *this;
   }
 
-  void draw (Frustum const&);
+  void draw (Frustum const&, bool force_box);
   void intersect (math::ray const&, selection_result*);
 
   void recalcExtents();

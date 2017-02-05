@@ -34,6 +34,8 @@ namespace ui
     addChild(new UICheckBox(6.0f, 15.0f, "Flat", _type_toggle, eFlattenType_Flat));
     addChild(new UICheckBox(80.0f, 15.0f, "Linear", _type_toggle, eFlattenType_Linear));
     addChild(new UICheckBox(6.0f, 40.0f, "Smooth", _type_toggle, eFlattenType_Smooth));
+	addChild(new UICheckBox(80.0f, 40.0f, "Origin", _type_toggle, eFlattenType_Origin));
+
     _type_toggle->Activate(eFlattenType_Linear);
 
     _radius_slider = new UISlider(6.0f, 85.0f, 167.0f, 1000.0f, 0.00001f);
@@ -51,9 +53,7 @@ namespace ui
 
     addChild(new UIText(5.0f, 130.0f, "Flatten options:", app.getArial14(), eJustifyLeft));
 
-    _angle_checkbox = new UICheckBox(6.0f, 150.0f, "Flatten Angle", [&](bool b, int) { _angled_mode = b; }, 0);
-    _angle_checkbox->setState(_angled_mode);
-    addChild(_angle_checkbox);
+    addChild (_angle_checkbox = new UICheckBox(6.0f, 150.0f, "Flatten Angle", &_angled_mode));
 
     _angle_slider = new UISlider(6.0f, 190.0f, 167.0f, 89.0f, 0.00001f);
     _angle_slider->setFunc( [&] (float f) { _angle = f; });
@@ -68,9 +68,7 @@ namespace ui
     addChild(_orientation_slider);
 
 
-    _lock_checkbox = new UICheckBox(5.0f, 235.0f, "flatten relative to:", [&] (bool b, int) { _locked = b; }, 0);
-    _lock_checkbox->setState(_locked);
-    addChild(_lock_checkbox);
+    addChild (_lock_checkbox = new UICheckBox(5.0f, 235.0f, "flatten relative to:", &_locked));
 
     addChild(new UIText(5.0f, 265.0f, "X:", app.getArial12(), eJustifyLeft));
     _lock_x = new UITextBox(50.0f, 265.0f, 100.0f, 30.0f, app.getArial12(), [&] (UITextBox::Ptr ptr, const std::string str) 
@@ -97,12 +95,12 @@ namespace ui
     addChild(_lock_h);
 
 
-    addChild(new UIText(5.0f, 330.0, "Flatten Type:", app.getArial14(), eJustifyLeft));
+    addChild(new UIText(5.0f, 330.0, "Lock:", app.getArial14(), eJustifyLeft));
 
     _mode_toggle = new UIToggleGroup(&_flatten_mode);
-    addChild(new UICheckBox(5.0f, 345.0f, "Raise/Lower", _mode_toggle, eFlattenMode_Both));
-    addChild(new UICheckBox(105.0f, 345.0f, "Raise", _mode_toggle, eFlattenMode_Raise));
-    addChild(new UICheckBox(5.0f, 370.0f, "Lower", _mode_toggle, eFlattenMode_Lower));
+    addChild(new UICheckBox(5.0f, 345.0f, "Off", _mode_toggle, eFlattenMode_Both));
+    addChild(new UICheckBox(105.0f, 345.0f, "Up", _mode_toggle, eFlattenMode_Raise));
+    addChild(new UICheckBox(5.0f, 370.0f, "Down", _mode_toggle, eFlattenMode_Lower));
     _mode_toggle->Activate(eFlattenMode_Both);
   }
 

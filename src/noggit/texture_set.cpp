@@ -14,14 +14,7 @@
 #include <algorithm>    // std::min
 #include <iostream>     // std::cout
 
-TextureSet::TextureSet()
-{}
-
-TextureSet::~TextureSet()
-{
-  for (size_t i = 1; i < nTextures; ++i)
-    delete alphamaps[i - 1];
-}
+#include <boost/utility/in_place_factory.hpp>
 
 void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
 {
@@ -42,7 +35,7 @@ void TextureSet::initTextures(MPQFile* f, MapTile* maintile, uint32_t size)
     {
       animated[i] = 0;
     }
-    textures[i] = TextureManager::newTexture(maintile->mTextureFilenames[tex[i]]);
+    textures.emplace_back (maintile->mTextureFilenames[tex[i]]);
   }
 }
 
@@ -50,17 +43,12 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool 
 {
   unsigned int MCALbase = f->getPos();
 
-  for (size_t i = 0; i < 3; ++i)
-  {
-    alphamaps[i] = nullptr;
-  }
-
   for (unsigned int layer = 0; layer < nLayers; ++layer)
   {
     if (texFlags[layer] & 0x100)
     {
       f->seek(MCALbase + MCALoffset[layer]);
-      alphamaps[layer - 1] = new Alphamap(f, texFlags[layer], mBigAlpha, doNotFixAlpha);
+      alphamaps[layer - 1] = boost::in_place (f, texFlags[layer], mBigAlpha, doNotFixAlpha);
     }
   }
 
@@ -71,7 +59,7 @@ void TextureSet::initAlphamaps(MPQFile* f, size_t nLayers, bool mBigAlpha, bool 
   }
 }
 
-int TextureSet::addTexture(OpenGL::Texture* texture)
+int TextureSet::addTexture(scoped_blp_texture_reference texture)
 {
   int texLevel = -1;
 
@@ -80,29 +68,21 @@ int TextureSet::addTexture(OpenGL::Texture* texture)
     texLevel = nTextures;
     nTextures++;
 
-    texture->addReference();
-
-    textures[texLevel] = texture;
+    textures.emplace_back (texture);
     animated[texLevel] = 0;
     texFlags[texLevel] = 0;
     effectID[texLevel] = 0;
 
     if (texLevel)
     {
-      if (alphamaps[texLevel - 1])
-      {
-        LogError << "Alpha Map has invalid texture binding" << std::endl;
-        nTextures--;
-        return -1;
-      }
-      alphamaps[texLevel - 1] = new Alphamap();
+      alphamaps[texLevel - 1] = boost::in_place();
     }
   }
 
   return texLevel;
 }
 
-void TextureSet::switchTexture(OpenGL::Texture* oldTexture, OpenGL::Texture* newTexture)
+void TextureSet::switchTexture (scoped_blp_texture_reference oldTexture, scoped_blp_texture_reference newTexture)
 {
   int texLevel = -1;
   for (size_t i = 0; i < nTextures; ++i)
@@ -125,7 +105,7 @@ void TextureSet::swapTexture(int id1, int id2)
 {
   if (id1 >= 0 && id2 >= 0 && id1 < nTextures && id2 < nTextures)
   {
-    OpenGL::Texture* temp = textures[id1];
+    scoped_blp_texture_reference temp = textures[id1];
     textures[id1] = textures[id2];
     textures[id2] = temp;
 
@@ -188,20 +168,13 @@ void TextureSet::eraseTexture(size_t id)
   if (id > 3)
     return;
 
-  TextureManager::delbyname(textures[id]->filename());
-
-  if (id)
-  {
-    delete alphamaps[id - 1];
-    alphamaps[id - 1] = nullptr;
-  }
-
   // shift textures above
   for (size_t i = id; i < nTextures - 1; i++)
   {
     if (i)
     {
-      alphamaps[i - 1] = alphamaps[i];
+      alphamaps[id - 1] = boost::none;
+      std::swap (alphamaps[i - 1], alphamaps[i]);
     }
 
     textures[i] = textures[i + 1];
@@ -210,13 +183,13 @@ void TextureSet::eraseTexture(size_t id)
     effectID[i] = effectID[i + 1];
   }
 
-  alphamaps[nTextures - 2] = nullptr;
-  textures[nTextures - 1] = nullptr;
+  alphamaps[nTextures - 2] = boost::none;
+  textures.pop_back();
 
   nTextures--;
 }
 
-bool TextureSet::canPaintTexture(OpenGL::Texture* texture)
+bool TextureSet::canPaintTexture(scoped_blp_texture_reference texture)
 {
   if (nTextures)
   {
@@ -386,7 +359,7 @@ bool TextureSet::eraseUnusedTextures()
   return texRemoved;
 }
 
-bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, OpenGL::Texture* texture)
+bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
   bool changed = false;
 
@@ -648,7 +621,7 @@ const unsigned char *TextureSet::getAlpha(size_t id)
   return alphamaps[id]->getAlpha();
 }
 
-OpenGL::Texture* TextureSet::texture(size_t id)
+scoped_blp_texture_reference TextureSet::texture(size_t id)
 {
   return textures[id];
 }

@@ -6,8 +6,6 @@
 #include <ctime>
 #include <fstream>
 
-std::ofstream gLogStream;
-
 std::ostream& _LogError(const char * pFile, int pLine)
 {
   return std::cerr << clock() * 1000 / CLOCKS_PER_SEC << " - (" << ((strrchr(pFile, '/') ? strrchr(pFile, '/') : (strrchr(pFile, '\\') ? strrchr(pFile, '\\') : pFile - 1)) + 1) << ":" << pLine << "): [Error] ";
@@ -21,11 +19,18 @@ std::ostream& _Log(const char * pFile, int pLine)
   return std::cout << clock() * 1000 / CLOCKS_PER_SEC << " - (" << ((strrchr(pFile, '/') ? strrchr(pFile, '/') : (strrchr(pFile, '\\') ? strrchr(pFile, '\\') : pFile - 1)) + 1) << ":" << pLine << "): ";
 }
 
+#if DEBUG__LOGGINGTOCONSOLE
 void InitLogging()
 {
-#if DEBUG__LOGGINGTOCONSOLE
   LogDebug << "Logging to console window." << std::endl;
+}
 #else
+namespace
+{
+  std::ofstream gLogStream;
+}
+void InitLogging()
+{
   // Set up log.
   gLogStream.open("log.txt", std::ios_base::out | std::ios_base::trunc);
   if (gLogStream)
@@ -34,5 +39,5 @@ void InitLogging()
     std::clog.rdbuf(gLogStream.rdbuf());
     std::cerr.rdbuf(gLogStream.rdbuf());
   }
-#endif
 }
+#endif

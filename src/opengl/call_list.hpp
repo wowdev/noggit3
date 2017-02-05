@@ -12,6 +12,11 @@ namespace opengl
     call_list();
     ~call_list();
 
+    call_list (call_list const&) = delete;
+    call_list (call_list&&) = delete;
+    call_list& operator= (call_list const&) = delete;
+    call_list& operator= (call_list&&) = delete;
+
     typedef GLuint mode_type;
 
     void start_recording (mode_type mode = GL_COMPILE);

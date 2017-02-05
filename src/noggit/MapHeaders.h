@@ -43,6 +43,7 @@ static const float MINICHUNKSIZE = (CHUNKSIZE / 4.0f);
 static const float TEXDETAILSIZE = (CHUNKSIZE / 64.0f);
 static const float ZEROPOINT = (32.0f * (TILESIZE));
 static const double MAPCHUNK_RADIUS = 47.140452079103168293389624140323; //sqrt((533.33333/16)^2 + (533.33333/16)^2)
+static const float LQ_DEFAULT_TILESIZE = CHUNKSIZE / 8.0f;
 
 struct MHDR
 {
@@ -169,7 +170,7 @@ struct MH2O_Header{
 struct MH2O_Information{
   uint16_t LiquidType;
   uint16_t Flags;
-  float minHeight;//I just took these random ._.
+  float minHeight;
   float maxHeight;
   uint8_t xOffset;
   uint8_t yOffset;

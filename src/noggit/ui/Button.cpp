@@ -13,10 +13,8 @@
 
 UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pTexNormal, const std::string& pTexDown)
   : UIFrame(pX, pY, w, h)
-  , texture(TextureManager::newTexture(pTexNormal))
-  , textureDown(TextureManager::newTexture(pTexDown))
-  , _textureFilename(pTexNormal)
-  , _textureDownFilename(pTexDown)
+  , texture (pTexNormal)
+  , textureDown (pTexDown)
   , clickFunc(nullptr)
   , clicked(false)
   , text(new UIText(width() / 2.0f, 2.0f, app.getArial12(), eJustifyCenter))
@@ -26,10 +24,8 @@ UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pTex
 
 UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown)
   : UIFrame(pX, pY, w, h)
-  , texture(TextureManager::newTexture(pTexNormal))
-  , textureDown(TextureManager::newTexture(pTexDown))
-  , _textureFilename(pTexNormal)
-  , _textureDownFilename(pTexDown)
+  , texture (pTexNormal)
+  , textureDown (pTexDown)
   , clickFunc(nullptr)
   , clicked(false)
   , text(new UIText(width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter))
@@ -39,10 +35,8 @@ UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pTex
 
 UIButton::UIButton(float pX, float pY, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown)
   : UIFrame(pX, pY, app.getArial12().width(pText) + 20.0f, h)
-  , texture(TextureManager::newTexture(pTexNormal))
-  , textureDown(TextureManager::newTexture(pTexDown))
-  , _textureFilename(pTexNormal)
-  , _textureDownFilename(pTexDown)
+  , texture (pTexNormal)
+  , textureDown (pTexDown)
   , clickFunc(nullptr)
   , clicked(false)
   , text(new UIText(width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter))
@@ -52,10 +46,8 @@ UIButton::UIButton(float pX, float pY, float h, const std::string& pText, const 
 
 UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, void(*pFunc)(UIFrame *, int), int pFuncParam)
   : UIFrame(pX, pY, w, h)
-  , texture(TextureManager::newTexture(pTexNormal))
-  , textureDown(TextureManager::newTexture(pTexDown))
-  , _textureFilename(pTexNormal)
-  , _textureDownFilename(pTexDown)
+  , texture (pTexNormal)
+  , textureDown (pTexDown)
   , clickFunc ([this, pFunc, pFuncParam] { pFunc (this, pFuncParam); })
   , clicked(false)
   , text(new UIText(width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter))
@@ -65,21 +57,13 @@ UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pTex
 
 UIButton::UIButton(float pX, float pY, float w, float h, const std::string& pText, const std::string& pTexNormal, const std::string& pTexDown, std::function<void()> fun)
   : UIFrame(pX, pY, w, h)
-  , texture(TextureManager::newTexture(pTexNormal))
-  , textureDown(TextureManager::newTexture(pTexDown))
-  , _textureFilename(pTexNormal)
-  , _textureDownFilename(pTexDown)
+  , texture (pTexNormal)
+  , textureDown (pTexDown)
   , clickFunc (fun)
   , clicked(false)
   , text(new UIText(width() / 2.0f, 2.0f, pText, app.getArial12(), eJustifyCenter))
 {
   addChild(text);
-}
-
-UIButton::~UIButton()
-{
-  TextureManager::delbyname(_textureFilename);
-  TextureManager::delbyname(_textureDownFilename);
 }
 
 void UIButton::setLeft()

@@ -85,11 +85,15 @@ namespace opengl
       gl.useProgram (0);
     }
 
-    void use_program::uniform (std::string const& name, int value)
+    void use_program::uniform (std::string const& name, GLint value)
     {
       gl.uniform1i (_program.uniform_location (name), value);
     }
-    void use_program::uniform (std::string const& name, float value)
+    void use_program::uniform (std::string const& name, GLuint value)
+    {
+      gl.uniform1ui (_program.uniform_location (name), value);
+    }
+    void use_program::uniform (std::string const& name, GLfloat value)
     {
       gl.uniform1f (_program.uniform_location (name), value);
     }
@@ -112,17 +116,31 @@ namespace opengl
 
     void use_program::sampler (std::string const& name, GLenum type, GLenum texture_slot, GLint id)
     {
-      uniform (name, int (texture_slot - GL_TEXTURE0));
+      uniform (name, texture_slot - GL_TEXTURE0);
       texture::enable_texture (texture_slot - GL_TEXTURE0);
       gl.bindTexture (GL_TEXTURE_2D, id);
     }
 
+    void use_program::attrib (std::string const& name, std::vector<float> const& data)
+    {
+      GLuint const location (_program.attrib_location (name));
+      gl.enableVertexAttribArray (location);
+      _enabled_vertex_attrib_arrays.emplace (location);
+      gl.vertexAttribPointer (location, 1, GL_FLOAT, GL_FALSE, 0, data.data());
+    }
     void use_program::attrib (std::string const& name, std::vector<math::vector_2d> const& data)
     {
       GLuint const location (_program.attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 2, GL_FLOAT, GL_FALSE, 0, data.data());
+    }
+    void use_program::attrib (std::string const& name, std::vector<math::vector_3d> const& data)
+    {
+      GLuint const location (_program.attrib_location (name));
+      gl.enableVertexAttribArray (location);
+      _enabled_vertex_attrib_arrays.emplace (location);
+      gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data.data());
     }
     void use_program::attrib (std::string const& name, math::vector_3d const* data)
     {

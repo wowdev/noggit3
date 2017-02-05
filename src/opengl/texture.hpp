@@ -12,6 +12,11 @@ namespace opengl
     texture();
     ~texture();
 
+    texture (texture const&) = delete;
+    texture (texture&&);
+    texture& operator= (texture const&) = delete;
+    texture& operator= (texture&&);
+
     void bind() const;
 
     static void enable_texture();

@@ -11,6 +11,7 @@ enum eTerrainType
   eTerrainType_Trigo,
   eTerrainType_Quadra,
   eTerrainType_Vertex,
+  eTerrainType_Gaussian,
   eTerrainType_Count,
 };
 
@@ -38,7 +39,8 @@ enum eFlattenType
   eFlattenType_Flat,
   eFlattenType_Linear,
   eFlattenType_Smooth,
-  eFlattenType_Count
+  eFlattenType_Count,
+  eFlattenType_Origin
 };
 
 enum eFlattenMode
@@ -47,4 +49,18 @@ enum eFlattenMode
   eFlattenMode_Raise,
   eFlattenMode_Lower,
   eFlattenMode_Count
+};
+
+enum class editing_mode
+{
+  ground,
+  flatten_blur,
+  paint,
+  holes,
+  areaid,
+  flags,
+  water,
+  light,
+  mccv,
+  object,
 };

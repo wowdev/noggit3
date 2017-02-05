@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
 namespace math
@@ -24,15 +25,9 @@ namespace opengl
       void draw (math::vector_4d const& color, float line_width) const;
 
     private:
-      union
-      {
-        GLuint _buffers[2];
-        struct
-        {
-          GLuint _positions;
-          GLuint _indices;
-        };
-      };
+      scoped::buffers<2> _buffers;
+      GLuint const& _positions = _buffers[0];
+      GLuint const& _indices = _buffers[1];
       opengl::program _program;
     };
   }

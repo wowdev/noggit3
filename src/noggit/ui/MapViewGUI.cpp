@@ -95,7 +95,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   addChild(guiCurrentTexture);
 
   // UIToolbar
-  guiToolbar = new UIToolbar(6.0f, 145.0f);
+  guiToolbar = new UIToolbar(6.0f, 145.0f, [this] (editing_mode mode) { theMapview->set_editing_mode (mode); });
   addChild(guiToolbar);
 
 
@@ -129,10 +129,8 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   TexturePicker->movable(true);
   addChild(TexturePicker);
 
-  TextureSwitcher = new UITextureSwitcher(100, 100);
-  TextureSwitcher->setPosition(video.xres() - TextureSwitcher->getW(), 40);
+  TextureSwitcher = new UITextureSwitcher (video.xres(), 40, settings_paint);
   TextureSwitcher->hide();
-  TextureSwitcher->movable(true);
   addChild(TextureSwitcher);
 
   // Cursor Switcher
@@ -315,7 +313,7 @@ void UIMapViewGUI::render() const
                      << (flags & FLAG_LQ_RIVER ? "river " : "")
                      << (flags & FLAG_LQ_OCEAN ? "ocean " : "")
                      << (flags & FLAG_LQ_MAGMA ? "lava" : "")
-                     << "\ntextures used: " << chunk->textureSet->num();
+                     << "\ntextures used: " << chunk->_texture_set.num();
 
           //! \todo get a list of textures and their flags as well as detail doodads.
           /*

@@ -89,6 +89,17 @@ public:
     buffer = Buf;
     size = Size;
   }
+  void setBuffer (std::vector<char> const& vec)
+  {
+    if (buffer)
+    {
+      delete buffer;
+      buffer = nullptr;
+    }
+    size = vec.size();
+    buffer = new char[size];
+    memcpy (buffer, vec.data(), vec.size());
+  }
 
   void SaveFile();
 
@@ -103,3 +114,11 @@ private:
   static std::string getAlternateDiskPath(const std::string& pFilename, const std::string& pDiscpath);
   static std::string getMPQPath(const std::string& pFilename);
 };
+
+namespace noggit
+{
+  namespace mpq
+  {
+    std::string normalized_filename (std::string filename);
+  }
+}

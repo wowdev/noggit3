@@ -27,15 +27,14 @@ ModelInstance::ModelInstance(std::string const& filename)
 ModelInstance::ModelInstance(std::string const& filename, MPQFile* f)
   : model (filename)
 {
-  float ff[3], temp;
+  float ff[4];
+
   f->read(ff, 12);
-  pos = math::vector_3d(ff[0], ff[1], ff[2]);
-  temp = pos.z;
-  pos.z = -pos.y;
-  pos.y = temp;
-  f->read(&w, 4);
-  f->read(ff, 12);
-  dir = math::vector_3d(ff[0], ff[1], ff[2]);
+  pos = math::vector_3d(ff[0], ff[2], -ff[1]);
+
+  f->read(ff, 16);
+  _wmo_orientation = math::quaternion (-ff[3], ff[1], ff[2], ff[0]);
+
   f->read(&sc, 4);
   f->read(&d1, 4);
   lcol = math::vector_3d(((d1 & 0xff0000) >> 16) / 255.0f, ((d1 & 0x00ff00) >> 8) / 255.0f, (d1 & 0x0000ff) / 255.0f);
@@ -53,7 +52,7 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
   recalcExtents();
 }
 
-void ModelInstance::draw (Frustum const& frustum)
+void ModelInstance::draw (Frustum const& frustum, bool force_box)
 {
   /*  float dist = ( pos - gWorld->camera ).length() - model->rad;
 
@@ -67,11 +66,18 @@ void ModelInstance::draw (Frustum const& frustum)
 
   opengl::scoped::matrix_pusher const matrix;
 
-  gl.translatef(pos.x, pos.y, pos.z);
-  gl.rotatef(dir.y - 90.0f, 0.0f, 1.0f, 0.0f);
-  gl.rotatef(-dir.x, 0.0f, 0.0f, 1.0f);
-  gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
-  gl.scalef(sc, sc, sc);
+  math::matrix_4x4 const model_matrix
+    ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
+                       , { math::degrees (-dir.z)
+                         , math::degrees (dir.y - 90.0f)
+                         , math::degrees (dir.x)
+                         }
+                       )
+    * math::matrix_4x4 (math::matrix_4x4::scale, sc)
+    );
+
+  gl.multMatrixf (model_matrix.transposed());
 
   if (Settings::getInstance()->renderModelsWithBox)
   {
@@ -83,8 +89,7 @@ void ModelInstance::draw (Frustum const& frustum)
 
   bool currentSelection = gWorld->IsSelection(eEntry_Model) && boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->d1 == d1;
 
-  // no need to check Environment::showModelFromHiddenList as it's done beforehand in World::draw()
-  if (currentSelection || model->hidden)
+  if (currentSelection || force_box)
   {
     if (gWorld && gWorld->drawfog)
       gl.disable(GL_FOG);
@@ -99,7 +104,7 @@ void ModelInstance::draw (Frustum const& frustum)
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    math::vector_4d color = model->hidden ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(1.0f, 1.0f, 0.0f, 1.0f);
+    math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f) : math::vector_4d(1.0f, 1.0f, 0.0f, 1.0f);
 
     opengl::primitives::wire_box ( TransformCoordsForModel(model->header.BoundingBoxMin)
                                  , TransformCoordsForModel(model->header.BoundingBoxMax)
@@ -165,10 +170,10 @@ void ModelInstance::intersect (math::ray const& ray, selection_result* results)
 {
   math::matrix_4x4 const model_matrix
     ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation
-                       , { math::degrees (dir.z)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
+                       , { math::degrees (-dir.z)
                          , math::degrees (dir.y - 90.0f)
-                         , math::degrees (-dir.x)
+                         , math::degrees (dir.x)
                          }
                        )
     * math::matrix_4x4 (math::matrix_4x4::scale, sc)
@@ -192,12 +197,8 @@ void ModelInstance::intersect (math::ray const& ray, selection_result* results)
   }
 }
 
-void quaternionRotate(const math::vector_3d& vdir, float w)
-{
-  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, math::quaternion (vdir, w)));
-}
 
-void ModelInstance::draw2(const math::vector_3d& ofs, const math::degrees rotation, Frustum const& frustum)
+void ModelInstance::draw_wmo(const math::vector_3d& ofs, const math::degrees rotation, Frustum const& frustum)
 {
   math::vector_3d tpos(ofs + pos);
   math::rotate (ofs.x, ofs.z, &tpos.x, &tpos.z, rotation);
@@ -207,8 +208,7 @@ void ModelInstance::draw2(const math::vector_3d& ofs, const math::degrees rotati
   opengl::scoped::matrix_pusher const matrix;
 
   gl.translatef(pos.x, pos.y, pos.z);
-  math::vector_3d vdir(-dir.z, dir.x, dir.y);
-  quaternionRotate(vdir, w);
+  gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation, _wmo_orientation));
   gl.scalef(sc, -sc, -sc);
 
   model->draw();
@@ -231,10 +231,10 @@ void ModelInstance::recalcExtents()
   math::vector_3d max(-100000, -100000, -100000);
   math::matrix_4x4 rot
     ( math::matrix_4x4 (math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 ( math::matrix_4x4::rotation
-                       , { math::degrees (dir.z)
+    * math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
+                       , { math::degrees (-dir.z)
                          , math::degrees (dir.y - 90.0f)
-                         , math::degrees (-dir.x)
+                         , math::degrees (dir.x)
                          }
                        )
     * math::matrix_4x4 (math::matrix_4x4::scale, sc)

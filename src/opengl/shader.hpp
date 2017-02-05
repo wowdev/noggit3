@@ -68,15 +68,19 @@ namespace opengl
       use_program& operator= (use_program&&) = delete;
 
       void uniform (std::string const& name, std::vector<int> const&);
-      void uniform (std::string const& name, int);
-      void uniform (std::string const& name, float);
+      void uniform (std::string const& name, GLint);
+      void uniform (std::string const& name, GLuint);
+      void uniform (std::string const& name, GLfloat);
       void uniform (std::string const& name, math::vector_3d const&);
       void uniform (std::string const& name, math::vector_4d const&);
       void uniform (std::string const& name, math::matrix_4x4 const&);
+      template<typename T> void uniform (std::string const&, T) = delete;
 
       void sampler (std::string const& name, GLenum type, GLenum texture_slot, GLint id);
 
+      void attrib (std::string const& name, std::vector<float> const&);
       void attrib (std::string const& name, std::vector<math::vector_2d> const&);
+      void attrib (std::string const& name, std::vector<math::vector_3d> const&);
       void attrib (std::string const& name, math::vector_3d const*);
       void attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
       void attrib (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);

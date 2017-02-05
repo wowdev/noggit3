@@ -4,18 +4,14 @@
 #include <opengl/context.hpp>
 
 Alphamap::Alphamap()
-  : map(0)
 {
-  gl.genTextures(1, &map);
   createNew();
   genTexture();
 }
 
-Alphamap::Alphamap(MPQFile *f, unsigned int &flags, bool mBigAlpha, bool doNotFixAlpha)
-  : map(0)
+Alphamap::Alphamap(MPQFile *f, unsigned int flags, bool mBigAlpha, bool doNotFixAlpha)
 {
   createNew();
-  gl.genTextures(1, &map);
 
   if(flags & 0x200 )
     readCompressed(f);
@@ -25,11 +21,6 @@ Alphamap::Alphamap(MPQFile *f, unsigned int &flags, bool mBigAlpha, bool doNotFi
     readNotCompressed(f, doNotFixAlpha);
 
   genTexture();
-}
-
-Alphamap::~Alphamap()
-{
-  gl.deleteTextures(1, &map);
 }
 
 void Alphamap::readCompressed(MPQFile *f)
@@ -100,7 +91,7 @@ void Alphamap::createNew()
 
 void Alphamap::loadTexture()
 {
-  gl.bindTexture(GL_TEXTURE_2D, map);
+  bind();
   gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, amap);
 }
 
@@ -115,12 +106,7 @@ void Alphamap::genTexture()
 
 void Alphamap::bind()
 {
-  gl.bindTexture(GL_TEXTURE_2D, map);
-}
-
-bool Alphamap::isValid()
-{
-  return (map > 0);
+  map.bind();
 }
 
 void Alphamap::setAlpha(size_t offset, unsigned char value)
