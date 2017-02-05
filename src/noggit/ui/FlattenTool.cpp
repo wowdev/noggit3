@@ -95,12 +95,12 @@ namespace ui
     addChild(_lock_h);
 
 
-    addChild(new UIText(5.0f, 330.0, "Flatten Type:", app.getArial14(), eJustifyLeft));
+    addChild(new UIText(5.0f, 330.0, "Lock:", app.getArial14(), eJustifyLeft));
 
     _mode_toggle = new UIToggleGroup(&_flatten_mode);
-    addChild(new UICheckBox(5.0f, 345.0f, "Raise/Lower", _mode_toggle, eFlattenMode_Both));
-    addChild(new UICheckBox(105.0f, 345.0f, "Raise", _mode_toggle, eFlattenMode_Raise));
-    addChild(new UICheckBox(5.0f, 370.0f, "Lower", _mode_toggle, eFlattenMode_Lower));
+    addChild(new UICheckBox(5.0f, 345.0f, "Off", _mode_toggle, eFlattenMode_Both));
+    addChild(new UICheckBox(105.0f, 345.0f, "Up", _mode_toggle, eFlattenMode_Raise));
+    addChild(new UICheckBox(5.0f, 370.0f, "Down", _mode_toggle, eFlattenMode_Lower));
     _mode_toggle->Activate(eFlattenMode_Both);
   }
 
