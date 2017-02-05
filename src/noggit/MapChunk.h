@@ -10,6 +10,7 @@
 #include <noggit/Video.h> // GLuint
 #include <noggit/WMOInstance.h>
 #include <noggit/texture_set.hpp>
+#include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
 
 class MPQFile;
@@ -56,7 +57,6 @@ private:
 
 public:
   MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha);
-  ~MapChunk();
 
   MapTile *mt;
   math::vector_3d vmin, vmax, vcenter;
@@ -71,7 +71,13 @@ public:
 
   TextureSet _texture_set;
 
-  GLuint vertices, normals, indices, minimap, minishadows, mccvEntry;
+  opengl::scoped::buffers<4> _buffers;
+  GLuint const& vertices = _buffers[0];
+  GLuint const& normals = _buffers[1];
+  GLuint const& indices = _buffers[2];
+  GLuint const& mccvEntry = _buffers[3];
+
+  GLuint minimap, minishadows;
 
   math::vector_3d mVertices[mapbufsize];
 

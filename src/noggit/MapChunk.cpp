@@ -247,11 +247,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   }
 
   // create vertex buffers
-  gl.genBuffers(1, &vertices);
-  gl.genBuffers(1, &normals);
-  gl.genBuffers(1, &mccvEntry);
-  gl.genBuffers (1, &indices);
-
   gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER> (mccvEntry, sizeof(mccv), mccv, GL_STATIC_DRAW);
@@ -444,14 +439,6 @@ void MapChunk::initStrip()
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
-}
-
-MapChunk::~MapChunk()
-{
-  gl.deleteBuffers(1, &vertices);
-  gl.deleteBuffers(1, &normals);
-  gl.deleteBuffers(1, &mccvEntry);
-  gl.deleteBuffers (1, &indices);
 }
 
 bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
