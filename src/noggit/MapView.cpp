@@ -152,12 +152,12 @@ void setTextureBrushHardness(float f)
   textureBrush.setHardness(f);
   sprayBrush.setHardness(f);
   textureBrushInnerRadius.setHardness(f);
-  textureBrushInnerRadius.setRadius(f); // yes, that belongs here. InnerRadius is the same value as hardness.
 }
 
 void setTextureBrushRadius(float f)
 {
   textureBrush.setRadius(f);
+  textureBrushInnerRadius.setRadius(f * textureBrushInnerRadius.getHardness());
 }
 
 void setTextureBrushPressure(float f)
