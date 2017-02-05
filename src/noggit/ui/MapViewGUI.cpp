@@ -313,7 +313,7 @@ void UIMapViewGUI::render() const
                      << (flags & FLAG_LQ_RIVER ? "river " : "")
                      << (flags & FLAG_LQ_OCEAN ? "ocean " : "")
                      << (flags & FLAG_LQ_MAGMA ? "lava" : "")
-                     << "\ntextures used: " << chunk->textureSet->num();
+                     << "\ntextures used: " << chunk->_texture_set.num();
 
           //! \todo get a list of textures and their flags as well as detail doodads.
           /*
