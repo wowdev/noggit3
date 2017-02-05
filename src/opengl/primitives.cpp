@@ -80,6 +80,11 @@ void main()
       }
     }
 
+    wire_box::~wire_box()
+    {
+      gl.deleteBuffers (sizeof (_buffers) / sizeof (*_buffers), _buffers);
+    }
+
     void wire_box::draw (math::vector_4d const& color, float line_width) const
     {
       opengl::scoped::use_program wire_box_shader {_program};
