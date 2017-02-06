@@ -1,12 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/Log.h>
 #include <noggit/Settings.h>
 #include <noggit/Video.h>
 #include <opengl/matrix.hpp>
-
-#include <cassert>
-#include <string>
 
 Video video;
 
