@@ -5,8 +5,6 @@
 #include <noggit/Video.h>
 #include <opengl/matrix.hpp>
 
-#include <SDL.h>
-
 #include <cassert>
 #include <string>
 
@@ -23,17 +21,19 @@ void Video::resize(int xres_, int yres_)
   _yres = yres_;
   _ratio = static_cast<float>(xres()) / static_cast<float>(yres());
 
-  LogDebug << "resize(" << xres() << ", " << yres() << ");" << std::endl;
-
-  _primary = SDL_SetVideoMode(xres(), yres(), 0, _primary->flags);
   gl.viewport(0.0f, 0.0f, xres(), yres());
 }
 
 bool Video::init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_)
 {
-  _xres = xres_;
-  _yres = yres_;
-  _ratio = static_cast<float>(xres()) / static_cast<float>(yres());
+  GLenum err = glewInit();
+  if (GLEW_OK != err)
+  {
+    LogError << "GLEW: " << glewGetErrorString(err) << std::endl;
+    return false;
+  }
+
+  resize (xres_, yres_);
 
   _fov = math::degrees (45.0f);
   _nearclip = 1.0f;
@@ -42,52 +42,9 @@ bool Video::init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_)
   _fullscreen = fullscreen_;
   _doAntiAliasing = doAntiAliasing_;
 
-  if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO))
-  {
-    LogError << "SDL: " << SDL_GetError() << std::endl;
-    exit(1);
-  }
-
-  int flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
-  if (fullscreen())
-  {
-    flags |= SDL_FULLSCREEN;
-  }
-
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-  SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
-  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-  SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-  SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-  SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-  SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-  if (doAntiAliasing())
-  {
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    //! \todo Make sample count configurable.
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-  }
-
-  _primary = SDL_SetVideoMode(_xres, _yres, 0, flags);
-
-  if (!_primary)
-  {
-    LogError << "SDL: " << SDL_GetError() << std::endl;
-    exit(1);
-  }
-
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
-  {
-    LogError << "GLEW: " << glewGetErrorString(err) << std::endl;
-    return false;
-  }
-
-  gl.viewport(0.0f, 0.0f, xres(), yres());
-
-  gl.enableClientState(GL_VERTEX_ARRAY);
-  gl.enableClientState(GL_NORMAL_ARRAY);
-  gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
+  gl.enableClientState (GL_VERTEX_ARRAY);
+  gl.enableClientState (GL_NORMAL_ARRAY);
+  gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
 
   if (doAntiAliasing())
   {
@@ -102,17 +59,6 @@ bool Video::init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_)
   LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
 
   return mSupportCompression;
-}
-
-void Video::close()
-{
-  SDL_FreeSurface(_primary);
-  SDL_Quit();
-}
-
-void Video::flip() const
-{
-  SDL_GL_SwapBuffers();
 }
 
 void Video::clearScreen() const

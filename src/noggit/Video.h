@@ -10,18 +10,11 @@
 #include <stack>
 #include <string>
 
-class Video;
-
-struct SDL_Surface;
-
 class Video
 {
 public:
   bool init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_);
 
-  void close();
-
-  void flip() const;
   void clearScreen() const;
   void set3D() const;
   void set2D() const;
@@ -95,8 +88,6 @@ private:
 
   bool _fullscreen;
   bool _doAntiAliasing;
-
-  SDL_Surface* _primary;
 };
 
 struct BLPHeader;
