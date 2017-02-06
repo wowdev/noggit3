@@ -39,8 +39,6 @@ void AddM2Click(UIFrame* f, int i)
   (static_cast<UIDoodadSpawner *>(textBox->parent()))->AddM2(textBox->value());
 }
 
-extern std::list<std::string> gListfile;
-
 UIDoodadSpawner::UIDoodadSpawner()
   : UICloseWindow(video.xres() / 2.0f - winWidth / 2.0f, video.yres() / 2.0f - winHeight / 2.0f, winWidth, winHeight, "Test", true)
   , _tbox(new UITextBox(30.0f, 30.0f, 400.0f, 40.0f, UIDoodadSpawner__TextBoxEnter))
@@ -57,15 +55,15 @@ UIDoodadSpawner::UIDoodadSpawner()
   Directory::Ptr fileList(new Directory());
 
   size_t found(std::string::npos);
-  for (std::list<std::string>::const_iterator it(gListfile.begin()), end(gListfile.end()); it != end; ++it)
+  for (std::string const& entry : gListfile)
   {
-    if (it->find("m2") != std::string::npos)
+    if (entry.find("m2") != std::string::npos)
     {
-      found = it->find_last_of("/\\");
+      found = entry.find_last_of("/");
       if (found != std::string::npos)
-        fileList->addDirectory(it->substr(0, found))->addFile(it->substr(found + 1));
+        fileList->addDirectory(entry.substr(0, found))->addFile(entry.substr(found + 1));
       else
-        fileList->addFile(*it);
+        fileList->addFile(entry);
     }
   }
 
