@@ -10,8 +10,6 @@
 
 #include <functional>
 
-namespace OpenGL { class Texture; };
-
 class UITextBox : public UIFrame
 {
 public:
