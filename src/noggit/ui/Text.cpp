@@ -7,6 +7,7 @@
 #include <noggit/FreeType.h>
 #include <noggit/Video.h>
 #include <noggit/Log.h>
+#include <opengl/context.hpp>
 
 UIText::UIText(float pX, float pY, const std::string& pText, const freetype::font_data& pFont, eJustify pJustify)
   : UIFrame(pX, pY, (float)pFont.width(pText), (float)pFont.h)

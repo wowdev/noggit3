@@ -31,6 +31,7 @@ static LOGCONTEXT  glogContext = { 0 };
 #include <noggit/Video.h>
 #include <noggit/WMO.h> // WMOManager::report()
 #include <noggit/errorHandling.h>
+#include <opengl/context.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/thread/thread.hpp>

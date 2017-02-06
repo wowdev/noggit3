@@ -4,7 +4,7 @@
 
 #include <math/trig.hpp>
 #include <math/vector_4d.hpp>
-#include <opengl/context.hpp>
+#include <opengl/types.hpp>
 #include <opengl/texture.hpp>
 
 #include <stack>
