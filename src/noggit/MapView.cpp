@@ -1298,7 +1298,7 @@ void MapView::createGUI()
   mainGui->addChild(mainGui->capsWarning);
 
   // Save current warning
-  mainGui->scWarning = new UISaveCurrentWarning();
+  mainGui->scWarning = new UISaveCurrentWarning (mainGui);
   mainGui->scWarning->hide();
   mainGui->addChild(mainGui->scWarning);
 

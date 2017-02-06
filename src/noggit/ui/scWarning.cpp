@@ -6,7 +6,6 @@
 #include <noggit/ui/Text.h>
 #include <noggit/ui/Button.h>
 #include <noggit/ui/Texture.h>
-#include <noggit/Video.h> // video
 #include <noggit/World.h>
 #include <noggit/map_index.hpp>
 
@@ -16,9 +15,9 @@ namespace
   float const winHeight = 120;
 }
 
-UISaveCurrentWarning::UISaveCurrentWarning()
-  : UICloseWindow ( (float)video.xres() / 2.0f - winWidth / 2.0f
-                  , (float)video.yres() / 2.0f - winHeight / 2.0f - (float)(video.yres() / 4)
+UISaveCurrentWarning::UISaveCurrentWarning (UIFrame* parent)
+  : UICloseWindow ( parent->width() / 2.0f - winWidth / 2.0f
+                  , parent->height() / 2.0f - winHeight / 2.0f - (float)(parent->height() / 4)
                   , winWidth
                   , winHeight
                   , ""
