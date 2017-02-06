@@ -179,7 +179,6 @@ namespace freetype
     gl.color3f(colorR, colorG, colorB);
 
     gl.pushAttrib(GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT);
-    gl.matrixMode(GL_MODELVIEW);
     gl.disable(GL_LIGHTING);
     opengl::texture::enable_texture();
     gl.disable(GL_DEPTH_TEST);
