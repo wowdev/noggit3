@@ -69,28 +69,8 @@ private:
   float _nearclip;
   float _farclip;
 };
-
-struct BLPHeader;
-
 namespace OpenGL
 {
-  class Texture : public opengl::texture
-  {
-  public:
-    Texture();
-
-    void loadFromBLP(const std::string& filename);
-    void loadFromUncompressedData(BLPHeader* lHeader, char* lData);
-    void loadFromCompressedData(BLPHeader* lHeader, char* lData);
-
-    const std::string& filename();
-
-  private:
-    int _width;
-    int _height;
-    std::string _filename;
-  };
-
   typedef GLuint Shader;
   typedef GLuint Light;
 }
