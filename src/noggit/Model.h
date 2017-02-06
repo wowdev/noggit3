@@ -150,10 +150,6 @@ class Model : public AsyncObject
   bool animGeometry, animTextures, animBones;
   MPQFile **animfiles;
 
-
-  Model(const MPQFile& f);
-
-
   bool _finished_upload;
 
   void drawModel( /*bool unlit*/);
