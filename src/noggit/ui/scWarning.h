@@ -7,5 +7,5 @@
 class UISaveCurrentWarning : public UICloseWindow
 {
 public:
-	UISaveCurrentWarning();
+	UISaveCurrentWarning (UIFrame* parent);
 };
