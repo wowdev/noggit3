@@ -70,7 +70,7 @@ namespace freetype
     GlyphData glyphData;
     glyphData._width = _face->glyph->advance.x >> 6;
 
-    glyphData._texture = new OpenGL::Texture();
+    glyphData._texture = new opengl::texture();
     glyphData._texture->bind();
 
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

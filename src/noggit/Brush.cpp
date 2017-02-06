@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/Brush.h>
-#include <noggit/Video.h> // OpenGL::Texture
+#include <noggit/Video.h>
 #include <opengl/context.hpp>
 
 #include <cmath>
@@ -12,7 +12,6 @@ void Brush::init()
   hardness = 0.5f;
   iradius = hardness * radius;
   oradius = radius - iradius;
-  _texture = new OpenGL::Texture();
   GenerateTexture();
 }
 
@@ -41,7 +40,7 @@ void Brush::GenerateTexture()
     }
     y += change;
   }
-  _texture->bind();
+  _texture.bind();
   gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 256, 256, 0, GL_ALPHA, GL_UNSIGNED_BYTE, tex);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -78,9 +77,9 @@ float Brush::getValue(float dist)
     return 1.0f;
   return(1.0f - (dist - iradius) / oradius);
 }
-OpenGL::Texture* Brush::getTexture()
+opengl::texture* Brush::getTexture()
 {
-  return _texture;
+  return &_texture;
 }
 bool Brush::needUpdate()
 {
