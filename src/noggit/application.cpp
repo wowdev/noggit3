@@ -547,16 +547,38 @@ int Noggit::start(int argc, char *argv[])
     return -2;
   }
 
-  if (!video.init(xres, yres, fullscreen, doAntiAliasing))
+  GLenum err = glewInit();
+  if (GLEW_OK != err)
   {
-    LogError << "Initializing video failed." << std::endl;
+    LogError << "GLEW: " << glewGetErrorString(err) << std::endl;
+    return -3;
+  }
+
+  gl.enableClientState (GL_VERTEX_ARRAY);
+  gl.enableClientState (GL_NORMAL_ARRAY);
+  gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
+
+  LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
+  LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
+  LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
+
+  if (doAntiAliasing)
+  {
+    gl.enable(GL_MULTISAMPLE);
+  }
+
+  video.init(xres, yres);
+
+  if (!GLEW_ARB_texture_compression)
+  {
+    LogError << "You GPU does not support ARB texture compression. Initializing video failed." << std::endl;
     return -1;
   }
 
   SDL_WM_SetCaption("Noggit Studio - " STRPRODUCTVER, "");
   initFont();
 
-  if (video.mSupportShaders)
+  if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program)
     loadWaterShader();
   else
     LogError << "Your GPU does not support ARB vertex programs (shaders). Sorry." << std::endl;

@@ -24,41 +24,13 @@ void Video::resize(int xres_, int yres_)
   gl.viewport(0.0f, 0.0f, xres(), yres());
 }
 
-bool Video::init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_)
+void Video::init(int xres_, int yres_)
 {
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
-  {
-    LogError << "GLEW: " << glewGetErrorString(err) << std::endl;
-    return false;
-  }
-
   resize (xres_, yres_);
 
   _fov = math::degrees (45.0f);
   _nearclip = 1.0f;
   _farclip = Settings::getInstance()->FarZ;
-
-  _fullscreen = fullscreen_;
-  _doAntiAliasing = doAntiAliasing_;
-
-  gl.enableClientState (GL_VERTEX_ARRAY);
-  gl.enableClientState (GL_NORMAL_ARRAY);
-  gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
-
-  if (doAntiAliasing())
-  {
-    gl.enable(GL_MULTISAMPLE);
-  }
-
-  mSupportCompression = GLEW_ARB_texture_compression;
-  mSupportShaders = GLEW_ARB_vertex_program && GLEW_ARB_fragment_program;
-
-  LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
-  LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
-  LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
-
-  return mSupportCompression;
 }
 
 void Video::set3D() const

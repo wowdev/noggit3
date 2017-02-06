@@ -13,9 +13,8 @@
 class Video
 {
 public:
-  bool init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_);
+  void init(int xres_, int yres_);
 
-  void clearScreen() const;
   void set3D() const;
   void set2D() const;
   void setTileMode() const;
@@ -33,14 +32,6 @@ public:
   {
     return _ratio;
   }
-  bool fullscreen() const
-  {
-    return _fullscreen;
-  }
-  bool doAntiAliasing() const
-  {
-    return _doAntiAliasing;
-  }
   math::degrees fov() const
   {
     return _fov;
@@ -54,10 +45,6 @@ public:
     return _farclip;
   }
 
-  void doAntiAliasing(bool doAntiAliasing_)
-  {
-    _doAntiAliasing = doAntiAliasing_;
-  }
   void fov(math::degrees fov_)
   {
     _fov = fov_;
@@ -73,10 +60,6 @@ public:
 
   math::vector_4d normalized_device_coords (int x, int y) const;
 
-  /// is * supported:
-  bool mSupportShaders;
-  bool mSupportCompression;
-
 private:
   int _xres;
   int _yres;
@@ -85,9 +68,6 @@ private:
   math::degrees _fov = math::degrees (45.0f);
   float _nearclip;
   float _farclip;
-
-  bool _fullscreen;
-  bool _doAntiAliasing;
 };
 
 struct BLPHeader;
