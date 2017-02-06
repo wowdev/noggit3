@@ -17,8 +17,8 @@
 BLSShader * mWaterShader;
 BLSShader * mMagmaShader;
 #else
-OpenGL::Shader  waterShader;
-OpenGL::Shader  waterFogShader;
+GLuint waterShader;
+GLuint waterFogShader;
 #endif
 
 void loadWaterShader()

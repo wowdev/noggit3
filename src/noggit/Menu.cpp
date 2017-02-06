@@ -174,7 +174,7 @@ void Menu::display(float /*t*/, float /*dt*/)
   gl.enable(GL_COLOR_MATERIAL);
   gl.colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
   gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-  for (OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
+  for (opengl::light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
   {
     gl.lightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
     gl.lightf(light, GL_LINEAR_ATTENUATION, 0.7f);
