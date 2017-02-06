@@ -9,7 +9,6 @@
 #include <noggit/ui/Frame.h>
 #include <noggit/ui/Text.h>
 
-namespace OpenGL { class Texture; };
 namespace freetype { class font_data; };
 
 class UIButton : public UIFrame

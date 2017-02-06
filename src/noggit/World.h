@@ -15,10 +15,6 @@
 #include <string>
 #include <unordered_set>
 
-namespace OpenGL
-{
-  class Texture;
-};
 namespace opengl
 {
   class call_list;
