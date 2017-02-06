@@ -86,7 +86,7 @@ namespace
       draw_square(pos, inner_radius, orientation);
     }
   }
-  
+
 
   std::size_t const sphere_segments (15);
   void draw_sphere_point (int i, int j, float radius)
@@ -1608,7 +1608,7 @@ void World::saveMap()
 
       ATile->drawTextures();
       gl.readPixels(video.xres() / 2 - 128, video.yres() / 2 - 128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
-      video.flip();
+
       std::stringstream ss;
       ss << basename.c_str() << "_map_" << x << "_" << y << ".raw";
       fid = fopen(ss.str().c_str(), "wb");
