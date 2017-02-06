@@ -1081,7 +1081,7 @@ void main()
   gl.disable(GL_ALPHA_TEST);
 
   // TEMP: for fucking around with lighting
-  for (OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
+  for (opengl::light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
   {
     gl.lightf(light, GL_CONSTANT_ATTENUATION, l_const);
     gl.lightf(light, GL_LINEAR_ATTENUATION, l_linear);

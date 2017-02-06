@@ -931,7 +931,7 @@ ModelLight::ModelLight(const MPQFile& f, const ModelLightDef &mld, int *global)
   , diffIntensity (mld.intensity, f, global)
 {}
 
-void ModelLight::setup(int time, OpenGL::Light l)
+void ModelLight::setup(int time, opengl::light l)
 {
   math::vector_4d ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
   math::vector_4d diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
@@ -1130,13 +1130,13 @@ std::vector<float> Model::intersect (math::ray const& ray)
   return results;
 }
 
-void Model::lightsOn(OpenGL::Light lbase)
+void Model::lightsOn(opengl::light lbase)
 {
   // setup lights
   for (unsigned int i = 0, l = lbase; i<header.nLights; ++i) lights[i].setup(animtime, l++);
 }
 
-void Model::lightsOff(OpenGL::Light lbase)
+void Model::lightsOff(opengl::light lbase)
 {
   for (unsigned int i = 0, l = lbase; i<header.nLights; ++i) gl.disable(l++);
 }
