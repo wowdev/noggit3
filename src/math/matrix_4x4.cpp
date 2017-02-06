@@ -16,6 +16,7 @@ namespace math
   matrix_4x4::scale_t matrix_4x4::scale;
   matrix_4x4::rotation_t matrix_4x4::rotation;
   matrix_4x4::rotation_xyz_t matrix_4x4::rotation_xyz;
+  matrix_4x4::rotation_yzx_t matrix_4x4::rotation_yzx;
 
   matrix_4x4::matrix_4x4 (rotation_t, quaternion const& q)
   {
