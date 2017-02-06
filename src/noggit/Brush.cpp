@@ -2,6 +2,7 @@
 
 #include <noggit/Brush.h>
 #include <noggit/Video.h> // OpenGL::Texture
+#include <opengl/context.hpp>
 
 #include <cmath>
 
