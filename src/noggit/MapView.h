@@ -34,6 +34,8 @@ private:
   bool _draw_contour = false;
 
   void save();
+  void savecurrent();
+  void saveall();
 
   float lastBrushUpdate;
 
