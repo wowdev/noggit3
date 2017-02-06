@@ -61,12 +61,6 @@ bool Video::init(int xres_, int yres_, bool fullscreen_, bool doAntiAliasing_)
   return mSupportCompression;
 }
 
-void Video::clearScreen() const
-{
-  gl.clearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
 void Video::set3D() const
 {
   gl.matrixMode(GL_PROJECTION);

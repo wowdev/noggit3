@@ -159,7 +159,8 @@ void Menu::tick(float t, float /*dt*/)
 void Menu::display(float /*t*/, float /*dt*/)
 {
   // 3D: Background.
-  video.clearScreen();
+  gl.clearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   video.set3D();
 
