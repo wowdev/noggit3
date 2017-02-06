@@ -50,7 +50,6 @@ static LOGCONTEXT  glogContext = { 0 };
 
 Noggit app;
 void CreateStrips();
-extern std::list<std::string> gListfile;
 
 Noggit::Noggit()
   : fullscreen(false)

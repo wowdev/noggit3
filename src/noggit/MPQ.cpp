@@ -19,12 +19,13 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 typedef std::pair<std::string, MPQArchive*> ArchiveEntry;
 typedef std::list<ArchiveEntry> ArchivesMap;
 ArchivesMap _openArchives;
 
-std::list<std::string> gListfile;
+std::unordered_set<std::string> gListfile;
 boost::mutex gListfileLoadingMutex;
 boost::mutex gMPQFileMutex;
 std::string modmpqpath = "";//this will be the path to modders archive (with 'myworld' file inside)
@@ -65,27 +66,34 @@ void MPQArchive::finishLoading()
   {
     size_t filesize = SFileGetFileSize(fh, nullptr); //last nullptr for newer version of StormLib
 
-        char* readbuffer = new char[filesize];
-    SFileReadFile(fh, readbuffer, filesize, nullptr, nullptr); //last nullptrs for newer version of StormLib
+    std::vector<char> readbuffer (filesize);
+    SFileReadFile(fh, readbuffer.data(), filesize, nullptr, nullptr); //last nullptrs for newer version of StormLib
     SFileCloseFile(fh);
 
-        std::string list(readbuffer);
-        boost::algorithm::to_lower(list);
-        boost::algorithm::replace_all(list, "\r\n", "\n");
+    std::string current;
+    for (char c : readbuffer)
+    {
+      if (c == '\r') continue;
+      if (c == '\n')
+      {
+        gListfile.emplace (noggit::mpq::normalized_filename (current));
+        current.resize (0);
+      }
 
-        std::vector<std::string> temp;
-        boost::algorithm::split(temp, list, boost::algorithm::is_any_of("\n"));
-        gListfile.insert(gListfile.end(), temp.begin(), temp.end());
-        delete[] readbuffer;
+      current += c;
+    }
+
+    if (!current.empty())
+    {
+      gListfile.emplace (noggit::mpq::normalized_filename (current));
+    }
   }
 
   finished = true;
 
   if (MPQArchive::allFinishedLoading())
   {
-    gListfile.sort();
-    gListfile.unique();
-    LogDebug << "Completed listfile loading.\n";
+    LogDebug << "Completed listfile loading: " << gListfile.size() << " files\n";
   }
 }
 

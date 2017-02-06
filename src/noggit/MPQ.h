@@ -8,10 +8,13 @@
 
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 class MPQArchive;
 class MPQFile;
+
+extern std::unordered_set<std::string> gListfile;
 
 class MPQArchive : public AsyncObject
 {
