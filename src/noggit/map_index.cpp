@@ -126,6 +126,21 @@ MapIndex::MapIndex(const std::string &pBasename)
   theFile.close();
 }
 
+void MapIndex::saveall()
+{
+  for (MapTile* tile : loaded_tiles())
+  {
+    tile->saveTile();
+    tile->changed = 0;
+  }
+}
+
+void MapIndex::savecurrent()
+{
+  gWorld->mapIndex->saveTile(tile_index(gWorld->camera));
+}
+
+
 void MapIndex::save()
 {
   std::stringstream filename;
