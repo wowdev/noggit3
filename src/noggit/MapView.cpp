@@ -2284,7 +2284,7 @@ void MapView::inserObjectFromExtern(int model)
 
 void MapView::mousemove(SDL_MouseMotionEvent *e)
 {
-  if ((look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down)) || video.fullscreen())
+  if (look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down))
   {
     ah += e->xrel / XSENS;
     av += mousedir * e->yrel / YSENS;
