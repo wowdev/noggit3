@@ -1,10 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/DBC.h>
-#include <noggit/wmo_liquid.hpp>
 #include <noggit/Log.h>
 #include <noggit/World.h>
+#include <noggit/wmo_liquid.hpp>
 #include <opengl/context.hpp>
+#include <opengl/matrix.hpp>
+#include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
@@ -20,8 +23,7 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
   , pos(math::vector_3d(header.pos.x, header.pos.z, -header.pos.y))
   , texRepeats(4.0f)
 {
-  opengl::call_list* draw_list = new opengl::call_list();
-  int flag = initGeometry(f, draw_list);
+  int flag = initGeometry (f);
   std::string texture;
     
   // value for the last drawn tile
@@ -45,10 +47,10 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
     mTransparency = true;
   }
 
-  render.reset(new liquid_render(mTransparency, texture, draw_list));
+  render.reset(new liquid_render(mTransparency, texture, nullptr));
 }
 
-int wmo_liquid::initGeometry(MPQFile* f, opengl::call_list* draw_list)
+int wmo_liquid::initGeometry(MPQFile* f)
 {
   LiquidVertex *map = reinterpret_cast<LiquidVertex*>(f->getPointer());
   unsigned char *flags = reinterpret_cast<unsigned char*>(f->getPointer() + (xtiles + 1)*(ytiles + 1) * sizeof(LiquidVertex));
@@ -74,51 +76,60 @@ int wmo_liquid::initGeometry(MPQFile* f, opengl::call_list* draw_list)
     }
   }
 
-  draw_list->start_recording();
+  std::uint16_t index (0);
 
-  //! \todo  handle light/dark liquid colors
-
-  gl.begin(GL_QUADS);
-  gl.normal3f(0, 1, 0);
-
-  // draw tiles
   for (int j = 0; j<ytiles; j++)
   {
     for (int i = 0; i<xtiles; ++i)
     {
       unsigned char flag = flags[j*xtiles + i];
+
       if (!(flag & 8))
       {
         last_flag = flag;
         // 15 seems to be "don't draw"
         size_t p = j*(xtiles + 1) + i;
-        float c;
 
-        c = static_cast<float>(map[p].c[0]) / 255.0f;
-        gl.multiTexCoord2f(GL_TEXTURE1, c, c);
-        gl.texCoord2f(i / texRepeats, j / texRepeats);
-        gl.vertex3fv(lVertices[p]);
+        depths.emplace_back (static_cast<float>(map[p].c[0]) / 255.0f);
+        tex_coords.emplace_back (0.f, 0.f);
+        vertices.emplace_back (lVertices[p]);
+        indices.emplace_back (index++);
 
-        c = static_cast<float>(map[p + 1].c[0]) / 255.0f;
-        gl.multiTexCoord2f(GL_TEXTURE1, c, c);
-        gl.texCoord2f((i + 1) / texRepeats, j / texRepeats);
-        gl.vertex3fv(lVertices[p + 1]);
+        depths.emplace_back (static_cast<float>(map[p + 1].c[0]) / 255.0f);
+        tex_coords.emplace_back (1.f, 0.f);
+        vertices.emplace_back (lVertices[p + 1]);
+        indices.emplace_back (index++);
 
-        c = static_cast<float>(map[p + xtiles + 1 + 1].c[0]) / 255.0f;
-        gl.multiTexCoord2f(GL_TEXTURE1, c, c);
-        gl.texCoord2f((i + 1) / texRepeats, (j + 1) / texRepeats);
-        gl.vertex3fv(lVertices[p + xtiles + 1 + 1]);
+        depths.emplace_back (static_cast<float>(map[p + xtiles + 1 + 1].c[0]) / 255.0f);
+        tex_coords.emplace_back (1.f, 1.f);
+        vertices.emplace_back (lVertices[p + xtiles + 1 + 1]);
+        indices.emplace_back (index++);
 
-        c = static_cast<float>(map[p + xtiles + 1].c[0]) / 255.0f;
-        gl.multiTexCoord2f(GL_TEXTURE1, c, c);
-        gl.texCoord2f(i / texRepeats, (j + 1) / texRepeats);
-        gl.vertex3fv(lVertices[p + xtiles + 1]);
+        depths.emplace_back (static_cast<float>(map[p + xtiles + 1].c[0]) / 255.0f);
+        tex_coords.emplace_back (0.f, 1.f);
+        vertices.emplace_back (lVertices[p + xtiles + 1]);
+        indices.emplace_back (index++);
       }
     }
   }
-  gl.end();
-
-  draw_list->end_recording();
 
   return last_flag;
+}
+
+void wmo_liquid::draw_actual (opengl::scoped::use_program& water_shader)
+{
+  water_shader.attrib ("position", vertices);
+  water_shader.attrib ("tex_coord", tex_coords);
+  water_shader.attrib ("depth", depths);
+  water_shader.uniform ("tex_repeat", texRepeats);
+
+  opengl::scoped::buffers<1> index_buffer;
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (index_buffer[0]);
+  gl.bufferData ( GL_ELEMENT_ARRAY_BUFFER
+                , indices.size() * sizeof (indices[0])
+                , indices.data()
+                , GL_STATIC_DRAW
+                );
+
+  gl.drawElements (GL_QUADS, indices.size(), GL_UNSIGNED_SHORT, nullptr);
 }
