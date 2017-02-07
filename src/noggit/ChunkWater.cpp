@@ -86,6 +86,8 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 
     _layers.emplace_back(math::vector_3d(xbase, 0.0f, zbase), info, heightmask, infoMask);
   }
+
+  update_layers();
 }
 
 
@@ -125,6 +127,7 @@ void ChunkWater::autoGen(MapChunk *chunk, float factor)
   {
     layer.updateTransparency(chunk, factor);
   }
+  update_layers();
 }
 
 
@@ -134,6 +137,7 @@ void ChunkWater::CropWater(MapChunk* chunkTerrain)
   {
     layer.crop(chunkTerrain);
   }
+  update_layers();
 }
 
 int ChunkWater::getType(size_t layer) const
@@ -166,6 +170,14 @@ void ChunkWater::draw()
   else if (Environment::getInstance()->currentWaterLayer < _layers.size())
   {
     _layers[Environment::getInstance()->currentWaterLayer].draw();
+  }
+}
+
+void ChunkWater::update_layers()
+{
+  for (liquid_layer& layer : _layers)
+  {
+    layer.updateRender();
   }
 }
 
@@ -203,6 +215,7 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
 
   if (!add || painted)
   {
+    update_layers();
     return;
   }
   
@@ -225,6 +238,8 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
     layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin);
     _layers.push_back(layer);
   }
+
+  update_layers();
 }
 
 void ChunkWater::cleanup()

@@ -23,7 +23,6 @@ public:
 
   void draw();
 
-
   void autoGen(MapChunk* chunk, float factor);
   void CropWater(MapChunk* chunkTerrain);
 
@@ -47,6 +46,8 @@ public:
 private:
   // remove empty layers
   void cleanup();
+  // update every layer's render
+  void update_layers();
 
 
   MH2O_Render Render;
