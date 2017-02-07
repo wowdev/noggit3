@@ -2000,16 +2000,19 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
   switch (terrainMode)
   {
   case editing_mode::ground:
-      radius = mainGui->terrainTool->brushRadius();
-      inner_radius = mainGui->terrainTool->innerRadius();
-      break;
-  case editing_mode::flatten_blur: radius = mainGui->flattenTool->brushRadius(); break;
+    radius = mainGui->terrainTool->brushRadius();
+    inner_radius = mainGui->terrainTool->innerRadius();
+    break;
+  case editing_mode::flatten_blur: radius = mainGui->flattenTool->brushRadius(); 
+    break;
   case editing_mode::paint:
-      radius = textureBrush.getRadius();
-      hardness = textureBrush.getHardness();
-      break;
-  case editing_mode::water: break; //! \ todo: water: get radius
-  case editing_mode::mccv: radius = mainGui->shaderTool->brushRadius(); break;
+    radius = textureBrush.getRadius();
+    hardness = textureBrush.getHardness();
+    break;
+  case editing_mode::water: radius = mainGui->guiWater->brushRadius(); 
+    break;
+  case editing_mode::mccv: radius = mainGui->shaderTool->brushRadius(); 
+    break;
   }
 
   gWorld->draw ( _cursor_pos
@@ -2353,6 +2356,9 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
     case editing_mode::paint:
       textureBrush.setRadius(std::max(0.0f, std::min(100.0f, textureBrush.getRadius() + e->xrel / XSENS)));
       paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+      break;
+    case editing_mode::water:
+      mainGui->guiWater->changeRadius(e->xrel / XSENS);
       break;
     case editing_mode::mccv:
       mainGui->shaderTool->changeRadius(e->xrel / XSENS);
