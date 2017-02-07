@@ -22,6 +22,7 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
   , ytiles(header.B)
   , pos(math::vector_3d(header.pos.x, header.pos.z, -header.pos.y))
   , texRepeats(4.0f)
+  , render(new liquid_render())
 {
   int flag = initGeometry (f);
   std::string texture;
@@ -47,7 +48,8 @@ wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial co
     mTransparency = true;
   }
 
-  render.reset(new liquid_render(mTransparency, texture, nullptr));
+  render->setTransparency(mTransparency);
+  render->setTextures(texture);
 }
 
 int wmo_liquid::initGeometry(MPQFile* f)

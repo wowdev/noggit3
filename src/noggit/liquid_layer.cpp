@@ -14,15 +14,41 @@
 #include <string>
 
 
-liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask)
-  : pos(base)
+liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid_id)
+  : _liquid_id(liquid_id)
+  , _flags(0)
+  , _minimum(height)
+  , _maximum(height)
+  , _subchunks(0)
+  , pos(base)
   , texRepeats(4.0f)
-  , _flags(info.Flags)
+  , _render()
+{
+  for (int z = 0; z < 9; ++z)
+  {
+    for (int x = 0; x < 9; ++x)
+    {
+      _depth.emplace_back(1.0f);
+      _vertices.emplace_back(pos.x + LQ_DEFAULT_TILESIZE * x
+        , height
+        , pos.z + LQ_DEFAULT_TILESIZE * z
+      );
+    }
+  }
+
+  changeLiquidID(_liquid_id);
+  updateRender();
+}
+
+liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask)
+  : _flags(info.Flags)
   , _minimum(info.minHeight)
   , _maximum(info.maxHeight)
   , _liquid_id(info.LiquidType)
   , _subchunks(0)
-  , render(new liquid_render(true))
+  , pos(base)
+  , texRepeats(4.0f)
+  , _render()
 {
   int offset = 0;
   for (int z = 0; z < info.height; ++z)
@@ -48,6 +74,36 @@ liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& 
   
   changeLiquidID(_liquid_id);
   updateRender();
+}
+
+liquid_layer::liquid_layer(liquid_layer const& other)
+  : _liquid_id(other._liquid_id)
+  , _flags(other._flags)
+  , _minimum(other._minimum)
+  , _maximum(other._maximum)
+  , _subchunks(other._subchunks)
+  , _vertices(other._vertices)
+  , _depth(other._depth)
+  , pos(other.pos)
+  , texRepeats(other.texRepeats)
+{
+  changeLiquidID(_liquid_id);
+  updateRender();
+}
+
+liquid_layer& liquid_layer::operator=(liquid_layer const& other)
+{
+  changeLiquidID(other._liquid_id);
+  _flags = other._flags;  
+  _minimum = other._minimum;
+  _maximum = other._maximum;
+  _subchunks = other._subchunks;
+  _vertices = other._vertices;
+  _depth = other._depth;
+  pos = other.pos;
+  texRepeats = other.texRepeats;
+  
+  return *this;
 }
 
 void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const
@@ -143,7 +199,6 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
   info_pos += sizeof(MH2O_Information);
 }
 
-
 void liquid_layer::changeLiquidID(int id)
 {
   _liquid_id = id;
@@ -151,22 +206,20 @@ void liquid_layer::changeLiquidID(int id)
   try
   {
     DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID(_liquid_id);
-    render->setTextures(lLiquidTypeRow.getString(LiquidTypeDB::TextureFilenames - 1));
-    mTransparency = lLiquidTypeRow.getInt(LiquidTypeDB::ShaderType) & 1;
+    _render.setTextures(lLiquidTypeRow.getString(LiquidTypeDB::TextureFilenames - 1));
     //! \todo  Get texRepeats too.
   }
   catch (...)
   {
     // Fallback, when there is no information.
-    render->setTextures("XTextures\\river\\lake_a.%d.blp");
-    mTransparency = true;
+    _render.setTextures("XTextures\\river\\lake_a.%d.blp");
   }
 }
 
 void liquid_layer::updateRender()
 {
-  opengl::call_list* draw_list = new opengl::call_list();
-  draw_list->start_recording();
+  _render.draw_list.reset(new opengl::call_list());
+  _render.draw_list->start_recording();
 
   gl.begin(GL_QUADS);
 
@@ -210,11 +263,8 @@ void liquid_layer::updateRender()
 
   gl.end();
 
-  draw_list->end_recording();
-
-  render->changeDrawList(draw_list);
+  _render.draw_list->end_recording();
 }
-
 
 void liquid_layer::crop(MapChunk* chunk)
 {
@@ -278,4 +328,20 @@ void liquid_layer::setSubchunk(int x, int z, bool water)
 {
   std::uint64_t v = std::uint64_t(1) << (z*8+x);
   _subchunks = water ? (_subchunks | v) : (_subchunks & ~v);
+}
+
+void liquid_layer::paintLiquid(math::vector_3d const& pos, float radius, bool add)
+{
+  for (int z = 0; z < 8; ++z)
+  {
+    for (int x = 0; x < 8; ++x)
+    {
+      math::vector_3d& v = _vertices[z * 9 + x];
+      if (misc::getShortestDist(pos.x, pos.z, v.x, v.z, LQ_DEFAULT_TILESIZE) <= radius)
+      {
+        setSubchunk(x, z, add);
+      }
+    }
+  }
+  updateRender();
 }

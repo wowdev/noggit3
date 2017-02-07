@@ -27,6 +27,7 @@ UIWater::UIWater(UIMapViewGUI *setGui)
   : UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f - (float)(video.yres() / 4), (float)winWidth, (float)winHeight)
   , mainGui(setGui)
   , tile(0, 0)
+  , _liquid_id(2)
 {
   addChild(new UIText(78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter));
 
@@ -116,13 +117,17 @@ void UIWater::updatePos(tile_index const& newTile)
 void UIWater::updateData()
 {
   std::stringstream mt;
-  mt << gWorld->getWaterType(tile) << " - " << LiquidTypeDB::getLiquidName(gWorld->getWaterType(tile));
-
+  mt << _liquid_id << " - " << LiquidTypeDB::getLiquidName(_liquid_id);
   waterType->setText(mt.str());
 }
 
 void UIWater::changeWaterType(int waterint)
 {
-  gWorld->setWaterType(gWorld->camera, waterint);
+  _liquid_id = waterint;
   updateData();
+}
+
+void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
+{
+  gWorld->paintLiquid(pos, 1.0f, _liquid_id, add);
 }

@@ -21,9 +21,13 @@ public:
 
   void changeWaterType(int waterint);
 
+  void paintLiquid(math::vector_3d const& pos, bool add);
+
 private:
   static const int winWidth = 180;
   static const int winHeight = 350;
+
+  int _liquid_id;
 
   UIMapViewGUI *mainGui;
   

@@ -1775,6 +1775,14 @@ void MapView::tick(float t, float dt)
         case editing_mode::water:
           if (mViewMode == eViewMode_3D && !underMap)
           {
+            if (_mod_shift_down)
+            {
+              mainGui->guiWater->paintLiquid(_cursor_pos, true);
+            }
+            else if (_mod_ctrl_down)
+            {
+              mainGui->guiWater->paintLiquid(_cursor_pos, false);
+            }
             auto lSelection = gWorld->GetCurrentSelection();
             MapChunk* chnk = boost::get<selected_chunk_type> (*Selection).chunk;
 

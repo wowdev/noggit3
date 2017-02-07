@@ -88,13 +88,6 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
   }
 }
 
-void ChunkWater::reloadRendering()
-{
-  for (liquid_layer& layer : _layers)
-  {
-    layer.updateRender();
-  }
-}
 
 void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos)
 {
@@ -179,4 +172,61 @@ void ChunkWater::draw()
 bool ChunkWater::hasData(size_t layer) const
 {
   return _layers.size() > layer;
+}
+
+
+void ChunkWater::paintLiquid(math::vector_3d const& pos, float radius, int liquid_id, bool add)
+{
+  bool painted = false;
+  for (liquid_layer& layer : _layers)
+  {
+    // remove the water on all layers or paint the layer with selected id
+    if (!add || layer.liquidID() == liquid_id)
+    {
+      layer.paintLiquid(pos, radius, add);
+      painted = true;
+    }
+    else
+    {
+      layer.paintLiquid(pos, radius, false);
+    }
+  }
+
+  cleanup();
+
+  if (!add || painted)
+  {
+    return;
+  }
+  
+  if (hasData(0))
+  {
+    // wow only suport 5 layers
+    if (_layers.size() < 5)
+    {
+      liquid_layer layer(_layers[0]);
+      layer.clear(); // remove the liquid to not override the other layer
+      layer.paintLiquid(pos, radius, true);
+      layer.changeLiquidID(liquid_id);
+      _layers.push_back(layer);
+    }
+  }
+  else
+  {
+    // had new layer at just above the cursor
+    liquid_layer layer(math::vector_3d(xbase, 0.0f, zbase), pos.y + 1.0f, liquid_id);
+    layer.paintLiquid(pos, radius, true);
+    _layers.push_back(layer);
+  }
+}
+
+void ChunkWater::cleanup()
+{
+  for (int i = _layers.size() - 1; i >= 0; --i)
+  {
+    if (_layers[i].empty())
+    {
+      _layers.erase(_layers.begin() + i);
+    }
+  }
 }
