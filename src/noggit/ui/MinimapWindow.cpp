@@ -170,7 +170,7 @@ void UIMinimapWindow::render() const
       {
         if (gWorld->mapIndex->isTileExternal(tile))
         {
-          glColor4f(1.0f, 0.7f, 0.5f, 0.6f);
+          gl.color4f(1.0f, 0.7f, 0.5f, 0.6f);
         }
         else if (gWorld->mapIndex->tileLoaded(tile))
         {
@@ -178,7 +178,7 @@ void UIMinimapWindow::render() const
         }
         else
         {
-          glColor4f(0.8f, 0.8f, 0.8f, 0.4f);
+          gl.color4f(0.8f, 0.8f, 0.8f, 0.4f);
         }
       }
       else

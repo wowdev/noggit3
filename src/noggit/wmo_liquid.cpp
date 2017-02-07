@@ -78,8 +78,8 @@ int wmo_liquid::initGeometry(MPQFile* f, opengl::call_list* draw_list)
 
   //! \todo  handle light/dark liquid colors
 
-  glBegin(GL_QUADS);
-  glNormal3f(0, 1, 0);
+  gl.begin(GL_QUADS);
+  gl.normal3f(0, 1, 0);
 
   // draw tiles
   for (int j = 0; j<ytiles; j++)
@@ -95,28 +95,28 @@ int wmo_liquid::initGeometry(MPQFile* f, opengl::call_list* draw_list)
         float c;
 
         c = static_cast<float>(map[p].c[0]) / 255.0f;
-        glMultiTexCoord2f(GL_TEXTURE1, c, c);
+        gl.multiTexCoord2f(GL_TEXTURE1, c, c);
         gl.texCoord2f(i / texRepeats, j / texRepeats);
         gl.vertex3fv(lVertices[p]);
 
         c = static_cast<float>(map[p + 1].c[0]) / 255.0f;
-        glMultiTexCoord2f(GL_TEXTURE1, c, c);
+        gl.multiTexCoord2f(GL_TEXTURE1, c, c);
         gl.texCoord2f((i + 1) / texRepeats, j / texRepeats);
         gl.vertex3fv(lVertices[p + 1]);
 
         c = static_cast<float>(map[p + xtiles + 1 + 1].c[0]) / 255.0f;
-        glMultiTexCoord2f(GL_TEXTURE1, c, c);
+        gl.multiTexCoord2f(GL_TEXTURE1, c, c);
         gl.texCoord2f((i + 1) / texRepeats, (j + 1) / texRepeats);
         gl.vertex3fv(lVertices[p + xtiles + 1 + 1]);
 
         c = static_cast<float>(map[p + xtiles + 1].c[0]) / 255.0f;
-        glMultiTexCoord2f(GL_TEXTURE1, c, c);
+        gl.multiTexCoord2f(GL_TEXTURE1, c, c);
         gl.texCoord2f(i / texRepeats, (j + 1) / texRepeats);
         gl.vertex3fv(lVertices[p + xtiles + 1]);
       }
     }
   }
-  glEnd();
+  gl.end();
 
   draw_list->end_recording();
 

@@ -156,11 +156,11 @@ namespace
 
     if (stipple)
     {
-      glEnable(GL_LINE_STIPPLE);
-      glLineStipple(10, 0xAAAA);
+      gl.enable(GL_LINE_STIPPLE);
+      gl.lineStipple(10, 0xAAAA);
     }
 
-	  glLineWidth(3.0f);
+	  gl.lineWidth(3.0f);
 
       gl.begin (GL_LINE_LOOP);
       for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
@@ -169,9 +169,12 @@ namespace
       }
       gl.end();
 
-	  glLineWidth(1.0f);
-    glDisable(GL_LINE_STIPPLE);
+	  gl.lineWidth(1.0f);
 
+    if (stipple)
+    {
+      gl.disable(GL_LINE_STIPPLE);
+    }
   }
 
   void render_disk (::math::vector_3d const& position, float radius, bool stipple = false)
