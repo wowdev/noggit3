@@ -348,6 +348,17 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
                               , math::vector_3d const& origin
                               )
 {
+  bool ocean = _liquid_vertex_format == 2;
+
+  // make sure the ocean layers are flat
+  if (ocean)
+  {
+    for (math::vector_3d& v : _vertices)
+    {
+      v.y = lock ? origin.y : pos.y + 1.0f;
+    }
+  }
+
   for (int z = 0; z < 8; ++z)
   {
     for (int x = 0; x < 8; ++x)
@@ -358,7 +369,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
       {
         setSubchunk(x, z, add);
 
-        if (lock)
+        if (lock & !ocean)
         {
           v.y = misc::angledHeight(origin, v, angle, orientation);
           _vertices[index + 1].y = misc::angledHeight(origin, _vertices[index + 1], angle, orientation);
@@ -391,5 +402,11 @@ void liquid_layer::update_min_max()
       z++;
       x = 0;
     }
+  }
+
+  // LVF 2 => flat water (ocean)
+  if (_liquid_vertex_format == 2)
+  {
+    _maximum = _minimum;
   }
 }
