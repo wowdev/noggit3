@@ -62,7 +62,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
     {
       f.seek(info.ofsHeightMap + basePos);
 
-      if (info.Flags != 2)
+      if (info.liquid_vertex_format != 2)
       {
         for (int w = info.yOffset; w < info.yOffset + info.height + 1; ++w)
         {

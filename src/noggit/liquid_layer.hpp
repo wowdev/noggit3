@@ -54,7 +54,7 @@ private:
   void update_min_max();
 
   int _liquid_id;
-  int _flags;
+  int _liquid_vertex_format;
   float _minimum;
   float _maximum;
   std::uint64_t _subchunks;
