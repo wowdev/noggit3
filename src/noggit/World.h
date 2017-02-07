@@ -141,6 +141,7 @@ public:
             , math::vector_3d const& ref_pos
             , float angle
             , float orientation
+            , bool use_ref_pos
             , bool angled_mode
             , bool draw_paintability_overlay
             , bool draw_chunk_flag_overlay

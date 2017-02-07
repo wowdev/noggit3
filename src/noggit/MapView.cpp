@@ -2005,7 +2005,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
   //! \ todo: make the current tool return the radius
   float radius = 0.0f, hardness = 0.0f, inner_radius = 0.0f, angle = 0.0f, orientation = 0.0f;
   math::vector_3d ref_pos;
-  bool angled_mode = false;
+  bool angled_mode = false, use_ref_pos = false;
 
   switch (terrainMode)
   {
@@ -2019,6 +2019,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
     orientation = mainGui->flattenTool->orientation();
     ref_pos = mainGui->flattenTool->ref_pos();
     angled_mode = mainGui->flattenTool->angled_mode();
+    use_ref_pos = mainGui->flattenTool->use_ref_pos();
     break;
   case editing_mode::paint:
     radius = textureBrush.getRadius();
@@ -2030,6 +2031,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
     orientation = mainGui->guiWater->orientation();
     ref_pos = mainGui->guiWater->ref_pos();
     angled_mode = mainGui->guiWater->angled_mode();
+    use_ref_pos = mainGui->guiWater->use_ref_pos();
     break;
   case editing_mode::mccv: 
     radius = mainGui->shaderTool->brushRadius(); 
@@ -2045,6 +2047,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , ref_pos
                , angle
                , orientation
+               , use_ref_pos
                , angled_mode
                , terrainMode == editing_mode::paint
                , terrainMode == editing_mode::flags
