@@ -300,6 +300,8 @@ void liquid_layer::crop(MapChunk* chunk)
       }
     }
   }
+
+  update_min_max();
 }
 
 void liquid_layer::updateTransparency(MapChunk* chunk, float factor)
@@ -352,6 +354,30 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
           _vertices[index + 10].y = misc::angledHeight(origin, _vertices[index + 10], angle, orientation);
         }
       }
+    }
+  }
+
+  update_min_max();
+}
+
+void liquid_layer::update_min_max()
+{
+  _minimum = std::numeric_limits<float>::max();
+  _maximum = std::numeric_limits<float>::lowest();
+  int x = 0, z = 0;
+
+  for (math::vector_3d& v : _vertices)
+  {
+    if (hasSubchunk(std::min(x, 7), std::min(z, 7)))
+    {
+      _maximum = std::max(_maximum, v.y);
+      _minimum = std::min(_minimum, v.y);
+    }
+
+    if (++x == 9)
+    {
+      z++;
+      x = 0;
     }
   }
 }

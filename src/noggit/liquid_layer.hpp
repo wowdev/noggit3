@@ -51,6 +51,8 @@ public:
   );
 
 private:
+  void update_min_max();
+
   int _liquid_id;
   int _flags;
   float _minimum;
