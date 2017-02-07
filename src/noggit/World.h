@@ -235,14 +235,15 @@ public:
   void saveWDT();
   void clearAllModelsOnADT(math::vector_3d const& pos);
 
+
+  // liquids
+  void paintLiquid(math::vector_3d const& pos, float radius, int liquid_id, bool add);
   bool canWaterSave(const tile_index& tile);
-
   void CropWaterADT(math::vector_3d const& pos);
-
   void setWaterType(math::vector_3d const& pos, int type);
   int getWaterType(const tile_index& tile);
-
   void autoGenWaterTrans(float factor);
+
 
   void fixAllGaps();
 

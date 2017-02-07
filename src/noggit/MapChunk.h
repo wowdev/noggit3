@@ -20,6 +20,7 @@ namespace math
 }
 class Brush;
 class Alphamap;
+class ChunkWater;
 class sExtendableArray;
 class Frustum;
 
@@ -99,6 +100,8 @@ public:
   bool ChangeMCCV(math::vector_3d const& pos, float change, float radius, bool editMode);
   void SetWater(bool w);
   bool GetWater();
+
+  ChunkWater* liquid_chunk() const;
 
   void updateVerticesData();
   void recalcNorms();

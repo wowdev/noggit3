@@ -32,7 +32,6 @@ public:
   int getType(size_t layer);
 
 private:
-  void reload();
 
   MapTile *tile;
   std::unique_ptr<ChunkWater> chunks[16][16];

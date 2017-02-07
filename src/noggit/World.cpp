@@ -1,13 +1,16 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+
+#include <noggit/World.h>
+
 #include <noggit/Brush.h> // brush
+#include <noggit/ChunkWater.hpp>
 #include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
 #include <noggit/Environment.h>
 #include <noggit/Frustum.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
-#include <noggit/MapTile.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelManager.h> // ModelManager
@@ -17,7 +20,6 @@
 #include <noggit/TileWater.hpp>// tile water
 #include <noggit/Video.h>
 #include <noggit/WMOInstance.h> // WMOInstance
-#include <noggit/World.h>
 #include <noggit/map_index.hpp>
 #include <noggit/texture_set.hpp>
 #include <noggit/tool_enums.hpp>
@@ -1862,6 +1864,11 @@ void World::saveWDT()
   // f.setBuffer( lWDTFile.GetPointer<uint8_t>(), lWDTFile.mSize );
   // f.SaveFile();
   // f.close();
+}
+
+void World::paintLiquid(math::vector_3d const& pos, float radius, int liquid_id, bool add)
+{
+  for_all_chunks_in_range(pos, radius, [&](MapChunk* chunk) { chunk->liquid_chunk()->paintLiquid(pos, radius, liquid_id, add); return true; });
 }
 
 bool World::canWaterSave(const tile_index& tile)

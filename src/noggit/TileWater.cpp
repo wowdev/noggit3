@@ -30,18 +30,6 @@ void TileWater::readFromFile(MPQFile &theFile, size_t basePos)
       chunks[z][x]->fromFile(theFile, basePos);
     }
   }
-  reload();
-}
-
-void TileWater::reload()
-{
-  for (int z = 0; z < 16; ++z)
-  {
-    for (int x = 0; x < 16; ++x)
-    {
-      chunks[z][x]->reloadRendering();
-    }
-  }
 }
 
 void TileWater::draw()
