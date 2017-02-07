@@ -351,7 +351,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
   bool ocean = _liquid_vertex_format == 2;
 
   // make sure the ocean layers are flat
-  if (ocean)
+  if (add && ocean)
   {
     for (math::vector_3d& v : _vertices)
     {
@@ -369,7 +369,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
       {
         setSubchunk(x, z, add);
 
-        if (lock & !ocean)
+        if (add && lock & !ocean)
         {
           v.y = misc::angledHeight(origin, v, angle, orientation);
           _vertices[index + 1].y = misc::angledHeight(origin, _vertices[index + 1], angle, orientation);
