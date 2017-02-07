@@ -1783,15 +1783,6 @@ void MapView::tick(float t, float dt)
             {
               mainGui->guiWater->paintLiquid(_cursor_pos, false);
             }
-            auto lSelection = gWorld->GetCurrentSelection();
-            MapChunk* chnk = boost::get<selected_chunk_type> (*Selection).chunk;
-
-            if (_mod_alt_down && !_mod_ctrl_down)
-            {
-              gWorld->mapIndex->setWater(true, _cursor_pos);
-            }
-            if (_mod_alt_down && _mod_ctrl_down)
-              gWorld->mapIndex->setWater(false, _cursor_pos);
           }
           break;
         case editing_mode::mccv:

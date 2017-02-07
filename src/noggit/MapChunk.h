@@ -44,8 +44,6 @@ private:
 
   std::vector<StripType> strip_with_holes;
 
-  bool water;
-
   math::vector_3d mNormals[mapbufsize];
   math::vector_3d mMinimap[mapbufsize];
   math::vector_4d mFakeShadows[mapbufsize];
@@ -98,8 +96,6 @@ public:
   void drawLines (Frustum const&);
   void drawTextures();
   bool ChangeMCCV(math::vector_3d const& pos, float change, float radius, bool editMode);
-  void SetWater(bool w);
-  bool GetWater();
 
   ChunkWater* liquid_chunk() const;
 

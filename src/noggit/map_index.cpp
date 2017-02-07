@@ -304,21 +304,6 @@ void MapIndex::setFlag(bool to, math::vector_3d const& pos)
   }
 }
 
-void MapIndex::setWater(bool to, math::vector_3d const& pos)
-{
-  tile_index tile(pos);
-
-  if (tileLoaded(tile))
-  {
-    setChanged(tile);
-
-    int cx = (pos.x - tile.x * TILESIZE) / CHUNKSIZE;
-    int cz = (pos.z - tile.z * TILESIZE) / CHUNKSIZE;
-
-    getTile(tile)->getChunk(cx, cz)->SetWater(to);
-  }
-}
-
 MapTile* MapIndex::loadTile(const tile_index& tile)
 {
   if (!hasTile(tile))
