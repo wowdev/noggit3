@@ -808,6 +808,10 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool highlightPaintableChunks
                  , bool draw_contour
                  , float innerRadius
+                 , math::vector_3d const& ref_pos
+                 , float angle
+                 , float orientation
+                 , bool angled_mode
                  , bool draw_paintability_overlay
                  , bool draw_chunk_flag_overlay
                  , bool draw_water_overlay
@@ -969,17 +973,22 @@ void World::draw ( math::vector_3d const& cursor_pos
         render_sphere(cursor_pos, brushRadius);
       }
     }
-    if (terrainMode == editing_mode::flatten_blur && Environment::getInstance()->flattenAngleEnabled)
+    if (angled_mode)
     {
-      math::degrees o = math::degrees(Environment::getInstance()->flattenOrientation);
+      math::degrees o = math::degrees(orientation);
       float x = brushRadius * cos(o);
       float z = brushRadius * sin(o);
-      float h = brushRadius * tan(math::degrees(Environment::getInstance()->flattenAngle));
+      float h = brushRadius * tan(math::degrees(angle));
       math::vector_3d const dest1 = cursor_pos + math::vector_3d(x, 0.f, z);
       math::vector_3d const dest2 = cursor_pos + math::vector_3d(x, h, z);
       render_line(cursor_pos, dest1);
       render_line(cursor_pos, dest2);
       render_line(dest1, dest2);
+    }
+
+    if (ref_pos != math::vector_3d())
+    {
+      render_sphere(ref_pos, 1.0f);
     }
 
 

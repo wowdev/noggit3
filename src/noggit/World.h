@@ -138,6 +138,10 @@ public:
             , bool highlightPaintableChunks
             , bool draw_contour
             , float innerRadius
+            , math::vector_3d const& ref_pos
+            , float angle
+            , float orientation
+            , bool angled_mode
             , bool draw_paintability_overlay
             , bool draw_chunk_flag_overlay
             , bool draw_water_overlay
