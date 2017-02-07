@@ -62,6 +62,7 @@ namespace opengl
     void readPixels (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* data);
 
     void lineWidth (GLfloat);
+    void lineStipple (GLint factor, GLushort pattern);
 
     void pointParameterf (GLenum pname, GLfloat param);
     void pointParameteri (GLenum pname, GLint param);

@@ -298,6 +298,11 @@ namespace opengl
     verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
     return glLineWidth (width);
   }
+  void context::lineStipple (GLint factor, GLushort pattern)
+  {
+    verify_context_and_check_for_gl_errors const _ (BOOST_CURRENT_FUNCTION);
+    return glLineStipple (factor, pattern);
+  }
 
   void context::pointParameterf (GLenum pname, GLfloat param)
   {

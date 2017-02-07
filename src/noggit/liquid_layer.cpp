@@ -187,22 +187,22 @@ void liquid_layer::updateRender()
 
       float c;
       c = _depth[index];
-      glMultiTexCoord2f(GL_TEXTURE1, c, c);
+      gl.multiTexCoord2f(GL_TEXTURE1, c, c);
       gl.texCoord2f(i / texRepeats, j / texRepeats);
       gl.vertex3fv(_vertices[index]);
 
       c = _depth[index+1];
-      glMultiTexCoord2f(GL_TEXTURE1, c, c);
+      gl.multiTexCoord2f(GL_TEXTURE1, c, c);
       gl.texCoord2f((i + 1) / texRepeats, j / texRepeats);
       gl.vertex3fv(_vertices[index + 1]);
 
       c = _depth[index + 10];
-      glMultiTexCoord2f(GL_TEXTURE1, c, c);
+      gl.multiTexCoord2f(GL_TEXTURE1, c, c);
       gl.texCoord2f((i + 1) / texRepeats, (j + 1) / texRepeats);
       gl.vertex3fv(_vertices[index + 10]);
 
       c = _depth[index + 9];
-      glMultiTexCoord2f(GL_TEXTURE1, c, c);
+      gl.multiTexCoord2f(GL_TEXTURE1, c, c);
       gl.texCoord2f(i / texRepeats, (j + 1) / texRepeats);
       gl.vertex3fv(_vertices[index + 9]);
     }
