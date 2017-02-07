@@ -928,9 +928,10 @@ void WMOGroup::load()
 
     assert (fourcc == 'MLIQ');
 
-    //! \todo actually use this, the _right_ way
+    WMOLiquidHeader hlq;
+    f.read(&hlq, 0x1E);
 
-    f.seekRelative (size);
+    lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
   }
   // - MORI ----------------------------------------------
   if (header.flags & 0x20000)
