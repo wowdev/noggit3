@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <math/trig.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/Log.h>
 
@@ -29,6 +30,8 @@ namespace misc
   float dist(float x1, float z1, float x2, float z2);
   float getShortestDist(float x, float z, float squareX, float squareZ, float unitSize);
   bool rectOverlap(math::vector_3d *r1, math::vector_3d *r2);
+  // used for angled tools, get the height a point (pos) should be given an origin, angle and orientation
+  float angledHeight(math::vector_3d const& origin, math::vector_3d const& pos, math::radians const& angle, math::radians const& orientation);
 }
 
 //! \todo collect all lose functions/classes/structs for now, sort them later

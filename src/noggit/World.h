@@ -237,7 +237,15 @@ public:
 
 
   // liquids
-  void paintLiquid(math::vector_3d const& pos, float radius, int liquid_id, bool add);
+  void paintLiquid( math::vector_3d const& pos
+                  , float radius
+                  , int liquid_id
+                  , bool add
+                  , math::radians const& angle
+                  , math::radians const& orientation
+                  , bool lock
+                  , math::vector_3d const& origin
+                  );
   bool canWaterSave(const tile_index& tile);
   void CropWaterADT(math::vector_3d const& pos);
   void setWaterType(math::vector_3d const& pos, int type);

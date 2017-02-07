@@ -130,6 +130,14 @@ namespace misc
       && r1[0].z <= r2[1].z
       && r2[0].z <= r1[1].z;
   }
+
+  float angledHeight(math::vector_3d const& origin, math::vector_3d const& pos, math::radians const& angle, math::radians const& orientation)
+  {
+    return ( origin.y 
+           + (  (pos.x - origin.x) * math::cos(orientation) 
+              + (pos.z - origin.z) * math::sin(orientation)
+             ) * math::tan(angle));
+  }
 }
 
 void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize)

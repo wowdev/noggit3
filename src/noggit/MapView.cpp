@@ -1170,6 +1170,14 @@ void MapView::createGUI()
               }
             , [&] { return terrainMode == editing_mode::flatten_blur; }
             );
+  addHotkey( SDLK_f
+            , MOD_none
+            , [&]
+              {
+                mainGui->guiWater->lockPos(_cursor_pos);
+              }
+          , [&] { return terrainMode == editing_mode::water; }
+          );
   addHotkey ( SDLK_f
             , MOD_none
             , [&]
