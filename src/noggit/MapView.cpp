@@ -2018,7 +2018,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
     angle = mainGui->flattenTool->angle();
     orientation = mainGui->flattenTool->orientation();
     ref_pos = mainGui->flattenTool->ref_pos();
-    angled_mode = Environment::getInstance()->flattenAngle;
+    angled_mode = mainGui->flattenTool->angled_mode();
     break;
   case editing_mode::paint:
     radius = textureBrush.getRadius();
