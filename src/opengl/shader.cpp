@@ -120,6 +120,12 @@ namespace opengl
       texture::enable_texture (texture_slot - GL_TEXTURE0);
       gl.bindTexture (GL_TEXTURE_2D, id);
     }
+    void use_program::sampler (std::string const& name, GLenum texture_slot, texture* tex)
+    {
+      uniform (name, GLint (texture_slot - GL_TEXTURE0));
+      texture::enable_texture (texture_slot - GL_TEXTURE0);
+      tex->bind();
+    }
 
     void use_program::attrib (std::string const& name, std::vector<float> const& data)
     {
