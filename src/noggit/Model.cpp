@@ -382,6 +382,8 @@ void Model::initCommon(const MPQFile& f)
 
 void Model::initAnimated(const MPQFile& f)
 {
+  std::vector<std::unique_ptr<MPQFile>> animation_files;
+
   if (header.nAnimations > 0) {
     _animations.resize (header.nAnimations);
     memcpy(_animations.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
@@ -391,20 +393,14 @@ void Model::initAnimated(const MPQFile& f)
       _animations[i].length = std::max(_animations[i].length, 1U);
     }
 
-    animfiles = new MPQFile*[header.nAnimations];
-
     std::stringstream tempname;
-    for (size_t i = 0; i<header.nAnimations; ++i)
+    for (size_t i = 0; i < header.nAnimations; ++i)
     {
       std::string lodname = _filename.substr(0, _filename.length() - 3);
       tempname << lodname << _animations[i].animID << "-" << _animations[i].subAnimID;
       if (MPQFile::exists(tempname.str()))
       {
-        animfiles[i] = new MPQFile(tempname.str());
-      }
-      else
-      {
-        animfiles[i] = nullptr;
+        animation_files.push_back(std::make_unique<MPQFile>(tempname.str()));
       }
     }
   }
@@ -413,7 +409,7 @@ void Model::initAnimated(const MPQFile& f)
     // init bones...
     ModelBoneDef *mb = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
     for (size_t i = 0; i<header.nBones; ++i) {
-      bones.emplace_back(f, mb[i], _global_sequences.data(), animfiles);
+      bones.emplace_back(f, mb[i], _global_sequences.data(), animation_files);
     }
   }
 
@@ -902,13 +898,16 @@ namespace
   static const int MODELBONE_BILLBOARD = 8;
 }
 
-Bone::Bone(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **animfiles)
+Bone::Bone( const MPQFile& f, 
+            const ModelBoneDef &b, 
+            int *global, 
+            const std::vector<std::unique_ptr<MPQFile>>& animation_files)
   : parent (b.parent)
   , pivot (fixCoordSystem (b.pivot))
   , billboard (b.flags & MODELBONE_BILLBOARD)
-  , trans (b.translation, f, global, animfiles)
-  , rot (b.rotation, f, global, animfiles)
-  , scale (b.scaling, f, global, animfiles)
+  , trans (b.translation, f, global, animation_files)
+  , rot (b.rotation, f, global, animation_files)
+  , scale (b.scaling, f, global, animation_files)
 {
   trans.apply(fixCoordSystem);
   rot.apply(fixCoordSystemQuat);
