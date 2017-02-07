@@ -330,16 +330,32 @@ void liquid_layer::setSubchunk(int x, int z, bool water)
   _subchunks = water ? (_subchunks | v) : (_subchunks & ~v);
 }
 
-void liquid_layer::paintLiquid(math::vector_3d const& pos, float radius, bool add)
+void liquid_layer::paintLiquid( math::vector_3d const& pos
+                              , float radius
+                              , bool add
+                              , math::radians const& angle
+                              , math::radians const& orientation
+                              , bool lock
+                              , math::vector_3d const& origin
+                              )
 {
   for (int z = 0; z < 8; ++z)
   {
     for (int x = 0; x < 8; ++x)
     {
-      math::vector_3d& v = _vertices[z * 9 + x];
+      int index = z * 9 + x;
+      math::vector_3d& v = _vertices[index];
       if (misc::getShortestDist(pos.x, pos.z, v.x, v.z, LQ_DEFAULT_TILESIZE) <= radius)
       {
         setSubchunk(x, z, add);
+
+        if (lock)
+        {
+          v.y = misc::angledHeight(origin, v, angle, orientation);
+          _vertices[index + 1].y = misc::angledHeight(origin, _vertices[index + 1], angle, orientation);
+          _vertices[index + 9].y = misc::angledHeight(origin, _vertices[index + 9], angle, orientation);
+          _vertices[index + 10].y = misc::angledHeight(origin, _vertices[index + 10], angle, orientation);
+        }
       }
     }
   }

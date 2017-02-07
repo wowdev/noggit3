@@ -175,7 +175,14 @@ bool ChunkWater::hasData(size_t layer) const
 }
 
 
-void ChunkWater::paintLiquid(math::vector_3d const& pos, float radius, int liquid_id, bool add)
+void ChunkWater::paintLiquid( math::vector_3d const& pos
+                            , float radius
+                            , int liquid_id
+                            , bool add
+                            , math::radians const& angle
+                            , math::radians const& orientation
+                            , bool lock
+                            , math::vector_3d const& origin)
 {
   bool painted = false;
   for (liquid_layer& layer : _layers)
@@ -183,12 +190,12 @@ void ChunkWater::paintLiquid(math::vector_3d const& pos, float radius, int liqui
     // remove the water on all layers or paint the layer with selected id
     if (!add || layer.liquidID() == liquid_id)
     {
-      layer.paintLiquid(pos, radius, add);
+      layer.paintLiquid(pos, radius, add, angle, orientation, lock, origin);
       painted = true;
     }
     else
     {
-      layer.paintLiquid(pos, radius, false);
+      layer.paintLiquid(pos, radius, false, angle, orientation, lock, origin);
     }
   }
 
@@ -206,7 +213,7 @@ void ChunkWater::paintLiquid(math::vector_3d const& pos, float radius, int liqui
     {
       liquid_layer layer(_layers[0]);
       layer.clear(); // remove the liquid to not override the other layer
-      layer.paintLiquid(pos, radius, true);
+      layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin);
       layer.changeLiquidID(liquid_id);
       _layers.push_back(layer);
     }
@@ -215,7 +222,7 @@ void ChunkWater::paintLiquid(math::vector_3d const& pos, float radius, int liqui
   {
     // had new layer at just above the cursor
     liquid_layer layer(math::vector_3d(xbase, 0.0f, zbase), pos.y + 1.0f, liquid_id);
-    layer.paintLiquid(pos, radius, true);
+    layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin);
     _layers.push_back(layer);
   }
 }

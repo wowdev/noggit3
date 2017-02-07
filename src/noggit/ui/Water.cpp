@@ -29,6 +29,11 @@ UIWater::UIWater(UIMapViewGUI *setGui)
   , tile(0, 0)
   , _liquid_id(2)
   , _radius(10.0f)
+  , _angle(10.0f)
+  , _orientation(0.0f)
+  , _locked(false)
+  , _angled_mode(false)
+  , _lock_pos(math::vector_3d(0.0f, 0.0f, 0.0f))
 {
   addChild(new UIText(78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter));
 
@@ -38,7 +43,22 @@ UIWater::UIWater(UIMapViewGUI *setGui)
   _radius_slider->setText("Radius:");
   addChild(_radius_slider);
 
-  waterType = new UIButton(5.0f, 130.0f, 170.0f, 30.0f,
+  _angle_slider = new UISlider(6.0f, 65.0f, 167.0f, 89.0f, 0.00001f);
+  _angle_slider->setFunc([&](float f) { _angle = f; });
+  _angle_slider->setValue(_angle / 89.0f);
+  _angle_slider->setText("Angle: ");
+  addChild(_angle_slider);
+
+  _orientation_slider = new UISlider(6.0f, 95.0f, 167.0f, 360.0f, 0.00001f);
+  _orientation_slider->setFunc([&](float f) { _orientation = f; });
+  _orientation_slider->setValue(_orientation / 360.0f);
+  _orientation_slider->setText("Orientation: ");
+  addChild(_orientation_slider);
+
+  addChild(_angle_checkbox = new UICheckBox(5.0f, 110.0f, "Angled water", &_angled_mode));
+  addChild(_lock_checkbox = new UICheckBox(5.0f, 135.0f, "Lock position", &_locked));
+
+  waterType = new UIButton(5.0f, 170.0f, 170.0f, 30.0f,
     "Type: none",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
@@ -47,21 +67,21 @@ UIWater::UIWater(UIMapViewGUI *setGui)
 
   addChild(waterType);
 
-  addChild(new UIText(5.0f, 170.0f, "Auto transparency:", app.getArial12(), eJustifyLeft));
-  addChild(new UIButton(5.0f, 190.0f, 75.0f, 30.0f,
+  addChild(new UIText(5.0f, 200.0f, "Auto transparency:", app.getArial12(), eJustifyLeft));
+  addChild(new UIButton(5.0f, 220.0f, 75.0f, 30.0f,
     "River",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
     [] { gWorld->autoGenWaterTrans(0.0337f); } // value found by experimenting
   ));
-  addChild(new UIButton(95.0f, 190.0f, 75.0f, 30.0f,
+  addChild(new UIButton(95.0f, 220.0f, 75.0f, 30.0f,
     "Ocean",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
     [] { gWorld->autoGenWaterTrans(0.007f); }
   ));
 
-  cropWater = new UIButton(5.0f, 245.0f, 170.0f, 30.0f,
+  cropWater = new UIButton(5.0f, 250.0f, 170.0f, 30.0f,
     "Crop water",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
@@ -133,13 +153,43 @@ void UIWater::changeWaterType(int waterint)
   updateData();
 }
 
-void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
-{
-  gWorld->paintLiquid(pos, _radius, _liquid_id, add);
-}
-
 void UIWater::changeRadius(float change)
 {
   _radius = std::max(0.0f, std::min(250.0f, _radius + change));
   _radius_slider->setValue(_radius / 250.0f);
+}
+
+void UIWater::changeOrientation(float change)
+{
+  _orientation += change;
+
+  if (_orientation < 0.0f)
+  {
+    _orientation += 360.0f;
+  }
+  else if (_orientation > 360.0f)
+  {
+    _orientation -= 360.0f;
+  }
+
+  _orientation_slider->setValue(_orientation / 360.0f);
+}
+
+void UIWater::changeAngle(float change)
+{
+  _angle = std::max(0.0f, std::min(89.0f, _angle + change));
+  _angle_slider->setValue(_angle / 90.0f);
+}
+
+void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
+{
+  if (_angled_mode)
+  {
+    gWorld->paintLiquid(pos, _radius, _liquid_id, add, math::degrees(_angle), math::degrees(_orientation), _locked, _lock_pos);
+  }
+  else
+  {
+    gWorld->paintLiquid(pos, _radius, _liquid_id, add, math::radians(0.0f), math::radians(0.0f), _locked, _lock_pos);
+  }
+  
 }

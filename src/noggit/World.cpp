@@ -1866,9 +1866,21 @@ void World::saveWDT()
   // f.close();
 }
 
-void World::paintLiquid(math::vector_3d const& pos, float radius, int liquid_id, bool add)
+void World::paintLiquid( math::vector_3d const& pos
+                       , float radius
+                       , int liquid_id
+                       , bool add
+                       , math::radians const& angle
+                       , math::radians const& orientation
+                       , bool lock
+                       , math::vector_3d const& origin
+                       )
 {
-  for_all_chunks_in_range(pos, radius, [&](MapChunk* chunk) { chunk->liquid_chunk()->paintLiquid(pos, radius, liquid_id, add); return true; });
+  for_all_chunks_in_range(pos, radius, [&](MapChunk* chunk) 
+  { 
+    chunk->liquid_chunk()->paintLiquid(pos, radius, liquid_id, add, angle, orientation, lock, origin);
+    return true;
+  });
 }
 
 bool World::canWaterSave(const tile_index& tile)
@@ -2076,11 +2088,7 @@ void World::orientVertices(math::vector_3d const& ref_pos)
   math::degrees a(vertex_angle), o(vertex_orientation);
   for (math::vector_3d* v : _vertices_selected)
   {
-    v->y = (ref_pos.y
-           + ((v->x - ref_pos.x) * math::cos(o)
-            + (v->z - ref_pos.z) * math::sin(o)
-             ) * math::tan(a)
-           );
+    v->y = misc::angledHeight(ref_pos, *v, a, o);
   }
   updateSelectedVertices();
 }

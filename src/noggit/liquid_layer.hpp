@@ -41,7 +41,14 @@ public:
   bool full() const { return _subchunks == std::uint64_t(-1); }
   void clear() { _subchunks = std::uint64_t(0); }
 
-  void paintLiquid(math::vector_3d const& pos, float radius, bool add);
+  void paintLiquid(math::vector_3d const& pos
+    , float radius
+    , bool add
+    , math::radians const& angle
+    , math::radians const& orientation
+    , bool lock
+    , math::vector_3d const& origin
+  );
 
 private:
   int _liquid_id;
