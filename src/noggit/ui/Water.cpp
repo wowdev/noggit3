@@ -28,9 +28,15 @@ UIWater::UIWater(UIMapViewGUI *setGui)
   , mainGui(setGui)
   , tile(0, 0)
   , _liquid_id(2)
+  , _radius(10.0f)
 {
   addChild(new UIText(78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter));
 
+  _radius_slider = new UISlider(5.0f, 35.0f, 170.0f, 250.0f, 0.0f);
+  _radius_slider->setFunc([&](float f) { _radius = f;});
+  _radius_slider->setValue(_radius / 250.0f);
+  _radius_slider->setText("Radius:");
+  addChild(_radius_slider);
 
   waterType = new UIButton(5.0f, 130.0f, 170.0f, 30.0f,
     "Type: none",
@@ -129,5 +135,11 @@ void UIWater::changeWaterType(int waterint)
 
 void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
 {
-  gWorld->paintLiquid(pos, 1.0f, _liquid_id, add);
+  gWorld->paintLiquid(pos, _radius, _liquid_id, add);
+}
+
+void UIWater::changeRadius(float change)
+{
+  _radius = std::max(0.0f, std::min(250.0f, _radius + change));
+  _radius_slider->setValue(_radius / 250.0f);
 }
