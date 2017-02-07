@@ -348,7 +348,7 @@ void WMO::upload()
     mat[i]._texture = textures[i];
 
   for (unsigned int i = 0; i < nGroups; ++i)
-    groups[i].initDisplayList ();
+    groups[i].upload ();
 
   _finished_upload = true;
 }
@@ -659,7 +659,7 @@ namespace
   };
 }
 
-void WMOGroup::initDisplayList()
+void WMOGroup::upload()
 {
   gl.genBuffers (1, &_vertices_buffer);
   gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);

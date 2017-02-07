@@ -85,7 +85,7 @@ public:
 
   WMOGroup() {}
   void init(WMO *wmo, MPQFile* f, int num, char *names);
-  void initDisplayList();
+  void upload();
   void load ();
   void initLighting(int nLR, uint16_t *useLights);
   void draw(const math::vector_3d& ofs, math::degrees const, Frustum const&);
