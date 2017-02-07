@@ -148,7 +148,6 @@ public:
 
   void unsetChanged(const tile_index& tile);
   void setFlag(bool to, math::vector_3d const& pos);
-  void setWater(bool to, math::vector_3d const& pos);
   int getChanged(const tile_index& tile);
 
   void saveTile(const tile_index& tile);
