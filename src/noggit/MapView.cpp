@@ -2003,7 +2003,9 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
   video.set3D();
 
   //! \ todo: make the current tool return the radius
-  float radius = 0.0f, hardness = 0.0f, inner_radius = 0.0f;
+  float radius = 0.0f, hardness = 0.0f, inner_radius = 0.0f, angle = 0.0f, orientation = 0.0f;
+  math::vector_3d ref_pos;
+  bool angled_mode = false;
 
   switch (terrainMode)
   {
@@ -2011,15 +2013,26 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
     radius = mainGui->terrainTool->brushRadius();
     inner_radius = mainGui->terrainTool->innerRadius();
     break;
-  case editing_mode::flatten_blur: radius = mainGui->flattenTool->brushRadius(); 
+  case editing_mode::flatten_blur: 
+    radius = mainGui->flattenTool->brushRadius(); 
+    angle = mainGui->flattenTool->angle();
+    orientation = mainGui->flattenTool->orientation();
+    ref_pos = mainGui->flattenTool->ref_pos();
+    angled_mode = Environment::getInstance()->flattenAngle;
     break;
   case editing_mode::paint:
     radius = textureBrush.getRadius();
     hardness = textureBrush.getHardness();
     break;
-  case editing_mode::water: radius = mainGui->guiWater->brushRadius(); 
+  case editing_mode::water: 
+    radius = mainGui->guiWater->brushRadius(); 
+    angle = mainGui->guiWater->angle();
+    orientation = mainGui->guiWater->orientation();
+    ref_pos = mainGui->guiWater->ref_pos();
+    angled_mode = mainGui->guiWater->angled_mode();
     break;
-  case editing_mode::mccv: radius = mainGui->shaderTool->brushRadius(); 
+  case editing_mode::mccv: 
+    radius = mainGui->shaderTool->brushRadius(); 
     break;
   }
 
@@ -2029,6 +2042,10 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _highlightPaintableChunks
                , _draw_contour
                , inner_radius
+               , ref_pos
+               , angle
+               , orientation
+               , angled_mode
                , terrainMode == editing_mode::paint
                , terrainMode == editing_mode::flags
                , terrainMode == editing_mode::water

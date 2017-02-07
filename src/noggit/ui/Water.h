@@ -30,7 +30,10 @@ public:
   void lockPos(math::vector_3d const& cursor_pos) { _lock_pos = cursor_pos; }
 
   float brushRadius() const { return _radius; }
-
+  float angle() const { return _angle; }
+  float orientation() const { return _orientation; }
+  math::vector_3d ref_pos() const { return _lock_pos; }
+  bool angled_mode() const { return _angled_mode; }
 
 private:
   static const int winWidth = 180;

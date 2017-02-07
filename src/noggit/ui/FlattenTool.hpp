@@ -37,6 +37,9 @@ namespace ui
     void setRadius(float radius);
 
     float brushRadius() const { return _radius; }
+    float angle() const { return _angle; }
+    float orientation() const { return _orientation; }
+    math::vector_3d ref_pos() const { return _lock_pos; }
 
   private:
     static const int winWidth = 180;
