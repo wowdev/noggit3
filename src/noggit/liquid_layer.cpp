@@ -29,9 +29,9 @@ liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid
     for (int x = 0; x < 9; ++x)
     {
       _depth.emplace_back(1.0f);
-      _vertices.emplace_back(pos.x + LQ_DEFAULT_TILESIZE * x
+      _vertices.emplace_back(pos.x + UNITSIZE * x
         , height
-        , pos.z + LQ_DEFAULT_TILESIZE * z
+        , pos.z + UNITSIZE * z
       );
     }
   }
@@ -64,9 +64,9 @@ liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& 
     for (int x = 0; x < 9; ++x)
     {
       _depth.emplace_back(heightmask.mTransparency[z][x]/255.0f);
-      _vertices.emplace_back( pos.x + LQ_DEFAULT_TILESIZE * x
+      _vertices.emplace_back( pos.x + UNITSIZE * x
                             , heightmask.mHeightValues[z][x]
-                            , pos.z + LQ_DEFAULT_TILESIZE * z
+                            , pos.z + UNITSIZE * z
                             );
     }
   }
@@ -340,7 +340,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
     {
       int index = z * 9 + x;
       math::vector_3d& v = _vertices[index];
-      if (misc::getShortestDist(pos.x, pos.z, v.x, v.z, LQ_DEFAULT_TILESIZE) <= radius)
+      if (misc::getShortestDist(pos.x, pos.z, v.x, v.z, UNITSIZE) <= radius)
       {
         setSubchunk(x, z, add);
 
