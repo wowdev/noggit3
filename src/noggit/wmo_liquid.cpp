@@ -71,9 +71,9 @@ int wmo_liquid::initGeometry(MPQFile* f)
       {
         h = pos.y;
       }
-      lVertices[p] = math::vector_3d( pos.x + LQ_DEFAULT_TILESIZE * i
+      lVertices[p] = math::vector_3d( pos.x + UNITSIZE * i
                                     , h
-                                    , pos.z + -1.0f * LQ_DEFAULT_TILESIZE * j
+                                    , pos.z + -1.0f * UNITSIZE * j
                                     );
     }
   }
