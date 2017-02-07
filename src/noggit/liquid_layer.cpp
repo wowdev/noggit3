@@ -37,7 +37,6 @@ liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid
   }
 
   changeLiquidID(_liquid_id);
-  updateRender();
 }
 
 liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask)
@@ -73,7 +72,6 @@ liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& 
   }
   
   changeLiquidID(_liquid_id);
-  updateRender();
 }
 
 liquid_layer::liquid_layer(liquid_layer const& other)
@@ -88,7 +86,6 @@ liquid_layer::liquid_layer(liquid_layer const& other)
   , texRepeats(other.texRepeats)
 {
   changeLiquidID(_liquid_id);
-  updateRender();
 }
 
 liquid_layer& liquid_layer::operator=(liquid_layer const& other)
@@ -199,6 +196,11 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
   info_pos += sizeof(MH2O_Information);
 }
 
+void liquid_layer::draw()
+{
+  _render.draw();
+}
+
 void liquid_layer::changeLiquidID(int id)
 {
   _liquid_id = id;
@@ -298,11 +300,6 @@ void liquid_layer::crop(MapChunk* chunk)
       }
     }
   }
-  
-  if (changed)
-  {
-    updateRender();
-  }
 }
 
 void liquid_layer::updateTransparency(MapChunk* chunk, float factor)
@@ -315,8 +312,6 @@ void liquid_layer::updateTransparency(MapChunk* chunk, float factor)
       _depth[z * 9 + x] = diff < 0.0f ? 0.0f : (std::min(1.0f, std::max(0.0f, (diff + 1.0f) * factor)));
     }
   }
-
-  updateRender();
 }
 
 bool liquid_layer::hasSubchunk(int x, int z) const
@@ -359,5 +354,4 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
       }
     }
   }
-  updateRender();
 }

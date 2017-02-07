@@ -22,7 +22,7 @@ public:
 
   void save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
 
-  void draw() { _render.draw(); }
+  void draw();
   void updateRender();
   void changeLiquidID(int id);
   
