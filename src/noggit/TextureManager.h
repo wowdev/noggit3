@@ -84,6 +84,10 @@ struct scoped_blp_texture_reference
   {
     return _blp_texture;
   }
+  blp_texture* get() const
+  {
+    return _blp_texture;
+  }
 
   bool operator== (scoped_blp_texture_reference const& other) const
   {
