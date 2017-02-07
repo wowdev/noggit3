@@ -145,11 +145,14 @@ namespace
     draw_sphere (radius);
   }
 
-  void draw_disk_point (float radius, math::radians arc)
+  void draw_disk_point (float radius, math::radians& arc, math::radians const& angle, math::radians const& orientation)
   {
-    gl.vertex3f (radius * math::sin (arc), radius * math::cos (arc), 0.0f);
+    float x = radius * math::sin(arc);
+    float y = radius * math::cos(arc);
+    float z = (y * math::cos(orientation) + x * math::sin(orientation)) * math::tan(angle);;
+    gl.vertex3f (x, y, z);
   }
-  void draw_disk (float radius, bool stipple = false)
+  void draw_disk (float radius, bool stipple, math::radians const& angle, math::radians const& orientation)
   {
     int const slices (std::max (35.0f, radius * 1.5f));
     static math::radians const max (2.0f * math::constants::pi);
@@ -167,7 +170,7 @@ namespace
       gl.begin (GL_LINE_LOOP);
       for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
       {
-        draw_disk_point (radius, arc);
+        draw_disk_point (radius, arc, angle, orientation);
       }
       gl.end();
 
@@ -179,7 +182,12 @@ namespace
     }
   }
 
-  void render_disk (::math::vector_3d const& position, float radius, bool stipple = false)
+  void render_disk( ::math::vector_3d const& position
+                  , float radius
+                  , bool stipple = false
+                  , math::radians const& angle = math::radians(0.0f)
+                  , math::radians const& orientation = math::radians(0.0f)
+                  )
   {
     opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
 
@@ -199,7 +207,7 @@ namespace
                  , Environment::getInstance()->cursorColorA
                  );
 
-      draw_disk (radius, stipple);
+      draw_disk (radius, stipple, angle, orientation);
     }
 
     {
@@ -811,6 +819,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , math::vector_3d const& ref_pos
                  , float angle
                  , float orientation
+                 , bool use_ref_pos
                  , bool angled_mode
                  , bool draw_paintability_overlay
                  , bool draw_chunk_flag_overlay
@@ -822,9 +831,6 @@ void World::draw ( math::vector_3d const& cursor_pos
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
   Frustum const frustum;
-
-  ///gl.disable(GL_LIGHTING);
-  ///gl.color4f(1,1,1,1);World::draw()
 
   bool hadSky = false;
   if (drawwmo || mapIndex->hasAGlobalWMO())
@@ -973,7 +979,7 @@ void World::draw ( math::vector_3d const& cursor_pos
         render_sphere(cursor_pos, brushRadius);
       }
     }
-    if (angled_mode)
+    if (angled_mode && !use_ref_pos)
     {
       math::degrees o = math::degrees(orientation);
       float x = brushRadius * cos(o);
@@ -986,9 +992,28 @@ void World::draw ( math::vector_3d const& cursor_pos
       render_line(dest1, dest2);
     }
 
-    if (ref_pos != math::vector_3d())
+    if (use_ref_pos)
     {
       render_sphere(ref_pos, 1.0f);
+
+      math::vector_3d pos = cursor_pos;
+
+      if (angled_mode)
+      {
+        // orient + 90.0f because of the rotation done in render_disk
+        math::degrees a(angle), o(orientation+90.0f);
+        pos.y = misc::angledHeight(ref_pos, pos, a, math::degrees(orientation));
+        render_disk(pos, brushRadius, false, a, o);
+        render_line(ref_pos, cursor_pos);
+        render_line(ref_pos, pos);
+      }
+      else
+      {  
+        pos.y = ref_pos.y;
+        render_disk(pos, brushRadius);
+      }
+
+      render_line(cursor_pos, pos);
     }
 
 
