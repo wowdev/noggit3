@@ -742,44 +742,6 @@ void ModelUnhighlight()
   //  gl.depthMask( GL_TRUE );
 }
 
-void Model::drawModel( /*bool unlit*/)
-{
-  // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
-  opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-  gl.vertexPointer (3, GL_FLOAT, sizeof (model_vertex), 0);
-  gl.normalPointer (GL_FLOAT, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-  gl.texCoordPointer (2, GL_FLOAT, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
-
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.alphaFunc(GL_GREATER, 0.3f);
-
-  for (size_t i = 0; i < _passes.size(); ++i)
-  {
-    ModelRenderPass& p = _passes[i];
-
-    // we don't want to render completely transparent parts
-    if (p.init(this))
-    {
-      //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-      // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
-      // I can't notice a difference but I guess it can't hurt
-      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart);
-
-      p.deinit();
-    }
-
-  }
-  // done with all render ops
-
-  gl.alphaFunc(GL_GREATER, 0.0f);
-  gl.disable(GL_ALPHA_TEST);
-
-  GLfloat czero[4] = { 0, 0, 0, 1 };
-  gl.materialfv(GL_FRONT, GL_EMISSION, czero);
-  gl.color4f(1, 1, 1, 1);
-  gl.depthMask(GL_TRUE);
-}
-
 void TextureAnim::calc(int anim, int time)
 {
   if (trans.uses(anim)) {
@@ -1013,7 +975,42 @@ void Model::draw()
   }
 
   lightsOn(GL_LIGHT4);
-  drawModel( /*false*/);
+
+  // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
+  opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
+  gl.vertexPointer (3, GL_FLOAT, sizeof (model_vertex), 0);
+  gl.normalPointer (GL_FLOAT, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+  gl.texCoordPointer (2, GL_FLOAT, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
+
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.alphaFunc(GL_GREATER, 0.3f);
+
+  for (size_t i = 0; i < _passes.size(); ++i)
+  {
+    ModelRenderPass& p = _passes[i];
+
+    // we don't want to render completely transparent parts
+    if (p.init(this))
+    {
+      //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+      // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
+      // I can't notice a difference but I guess it can't hurt
+      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart);
+
+      p.deinit();
+    }
+
+  }
+  // done with all render ops
+
+  gl.alphaFunc(GL_GREATER, 0.0f);
+  gl.disable(GL_ALPHA_TEST);
+
+  GLfloat czero[4] = { 0, 0, 0, 1 };
+  gl.materialfv(GL_FRONT, GL_EMISSION, czero);
+  gl.color4f(1, 1, 1, 1);
+  gl.depthMask(GL_TRUE);
+
   lightsOff(GL_LIGHT4);
 
   // draw particle systems & _ribbons
