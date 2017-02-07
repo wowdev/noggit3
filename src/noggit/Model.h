@@ -192,8 +192,6 @@ public:
   int anim, animtime;
 
 private:
-  void drawModel( /*bool unlit*/);
-
   void initCommon(const MPQFile& f);
   bool isAnimated(const MPQFile& f);
   void initAnimated(const MPQFile& f);
