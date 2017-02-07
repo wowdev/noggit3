@@ -29,10 +29,6 @@ public:
   int screenX;
   int screenY;
 
-  bool flattenAngleEnabled;
-  float flattenAngle;
-  float flattenOrientation;
-
   float cursorColorR;
   float cursorColorG;
   float cursorColorB;

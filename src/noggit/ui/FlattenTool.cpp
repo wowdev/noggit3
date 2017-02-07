@@ -20,10 +20,10 @@ namespace ui
     : UIWindow(x, y, (float)winWidth, (float)winHeight)
     , _radius(10.0f)
     , _speed(2.0f)
-    , _angle(Environment::getInstance()->flattenAngle)
-    , _orientation(Environment::getInstance()->flattenOrientation)
+    , _angle(45.0f)
+    , _orientation(0.0f)
     , _locked(false)
-    , _angled_mode(Environment::getInstance()->flattenAngleEnabled)
+    , _angled_mode(false)
     , _flatten_type(eFlattenType_Linear)
     , _flatten_mode(eFlattenMode_Both)
   {
