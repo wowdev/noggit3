@@ -16,7 +16,7 @@
 
 liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid_id)
   : _liquid_id(liquid_id)
-  , _flags(0)
+  , _liquid_vertex_format(0)
   , _minimum(height)
   , _maximum(height)
   , _subchunks(0)
@@ -40,10 +40,10 @@ liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid
 }
 
 liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& info, MH2O_HeightMask const& heightmask, std::uint64_t infomask)
-  : _flags(info.Flags)
+  : _liquid_vertex_format(info.liquid_vertex_format)
   , _minimum(info.minHeight)
   , _maximum(info.maxHeight)
-  , _liquid_id(info.LiquidType)
+  , _liquid_id(info.liquid_id)
   , _subchunks(0)
   , pos(base)
   , texRepeats(4.0f)
@@ -76,7 +76,7 @@ liquid_layer::liquid_layer(math::vector_3d const& base, MH2O_Information const& 
 
 liquid_layer::liquid_layer(liquid_layer const& other)
   : _liquid_id(other._liquid_id)
-  , _flags(other._flags)
+  , _liquid_vertex_format(other._liquid_vertex_format)
   , _minimum(other._minimum)
   , _maximum(other._maximum)
   , _subchunks(other._subchunks)
@@ -91,7 +91,7 @@ liquid_layer::liquid_layer(liquid_layer const& other)
 liquid_layer& liquid_layer::operator=(liquid_layer const& other)
 {
   changeLiquidID(other._liquid_id);
-  _flags = other._flags;  
+  _liquid_vertex_format = other._liquid_vertex_format;  
   _minimum = other._minimum;
   _maximum = other._maximum;
   _subchunks = other._subchunks;
@@ -129,8 +129,8 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
   MH2O_Information info;
   std::uint64_t mask = 0;
 
-  info.LiquidType = _liquid_id;
-  info.Flags = _flags;
+  info.liquid_id = _liquid_id;
+  info.liquid_vertex_format = _liquid_vertex_format;
   info.minHeight = _minimum;
   info.maxHeight = _maximum;
   info.xOffset = min_x;
@@ -170,7 +170,7 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
   std::size_t heighmap_size = (info.width + 1) * (info.height +1) * (sizeof(char) + ((_liquid_id != 2) ? sizeof(float) : 0));
   adt.Extend(heighmap_size);
 
-  if (_liquid_id != 2)
+  if (_liquid_vertex_format != 2)
   {
     for (int z = info.yOffset; z <= info.yOffset + info.height; ++z)
     {
@@ -209,6 +209,18 @@ void liquid_layer::changeLiquidID(int id)
   {
     DBCFile::Record lLiquidTypeRow = gLiquidTypeDB.getByID(_liquid_id);
     _render.setTextures(lLiquidTypeRow.getString(LiquidTypeDB::TextureFilenames - 1));
+
+    // !\ todo: handle lava (type == 2) that use uv_mapping
+    switch (lLiquidTypeRow.getInt(LiquidTypeDB::Type))
+    {
+    case 1: // ocean
+      _liquid_vertex_format = 2;
+      break;
+    default:
+      _liquid_vertex_format = 0;
+      break;
+    }
+    
     //! \todo  Get texRepeats too.
   }
   catch (...)
