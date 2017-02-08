@@ -36,20 +36,26 @@ int Native::showAlertDialog(std::string title, std::string message)
 //    return [version isEqualToString:@"3.3.5"];
 //}
 //
-//std::string NativeMac::requestWoWPath()
-//{
-//    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-//    openPanel.canChooseDirectories = YES;
-//    openPanel.canChooseFiles = NO;
-//    
-//    if ([openPanel runModal] == NSFileHandlingPanelOKButton) {
-//        NSString *path = openPanel.URL.relativePath;
-//        
-//        return std::string([path UTF8String]);
-//    }
-//    
-//    return std::string("");
-//}
+std::string Native::getGamePath()
+{
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    openPanel.canChooseDirectories = YES;
+    openPanel.canChooseFiles = NO;
+    
+    if ([openPanel runModal] == NSFileHandlingPanelOKButton) {
+        NSString *path = openPanel.URL.relativePath;
+        
+        return std::string([path UTF8String]);
+    }
+    
+    return std::string("");
+}
+
+std::string Native::getArialPath()
+{
+	return "/Library/Fonts/Arial.ttf";
+}
+
 //
 //std::string NativeMac::applicationSupportPath()
 //{

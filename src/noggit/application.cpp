@@ -85,14 +85,8 @@ void Noggit::initPath(char *argv[])
 void Noggit::initFont()
 {
 
-  std::string arialFilename("<PLEASE GET SOME FONT FOR YOUR OS>");
-#ifdef _WIN32
-  //! \todo This might not work on windows 7 or something. Please fix.
-  arialFilename = "C:\\windows\\fonts\\arial.ttf";
-#endif
-#ifdef __APPLE__
-  arialFilename = "/Library/Fonts/Arial.ttf";
-#endif
+	std::string arialFilename = Native::getArialPath();
+
   if (!boost::filesystem::exists(arialFilename))
   {
     arialFilename = "arial.ttf";
@@ -262,53 +256,7 @@ boost::filesystem::path Noggit::getGamePath()
       LogError << "You must rename noggit_template.conf to noggit.conf if noggit should use the config file!" << std::endl;
     }
 
-
-#ifdef _WIN32
-	int test = Native::showAlertDialog("Foo", "Bar");
-    Log << "Will try to load the game path from you registry now:" << std::endl;
-    HKEY key;
-    DWORD t;
-    const DWORD s(1024);
-    char temp[s];
-    memset(temp, 0, s);
-    LONG l = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft", 0, KEY_QUERY_VALUE, &key);
-    if (l != ERROR_SUCCESS)
-      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR", 0, KEY_QUERY_VALUE, &key);
-    if (l != ERROR_SUCCESS)
-      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Blizzard Entertainment\\World of Warcraft", 0, KEY_QUERY_VALUE, &key);
-    if (l == ERROR_SUCCESS && RegQueryValueEx(key, "InstallPath", 0, &t, (LPBYTE)temp, (LPDWORD)&s) == ERROR_SUCCESS)
-      return temp;
-    else
-      return "";
-    RegCloseKey(key);
-#else
-      std::string defaultPath = "/Applications/World of Warcraft/";
-      bool exists = boost::filesystem::exists(defaultPath);
-      Native::showAlertDialog("Foo", "Bar");
-//      bool versionMatches = checkWoWVersionAtPath(defaultPath);
-//      if (exists && versionMatches) {
-//          return defaultPath;
-//      } else {
-//          if (exists && !versionMatches) {
-//              std::string path = applicationSupportPath();
-//              showAlertDialog("Incompatible WoW version.",
-//                              "The World of Warcraft installation found will not work with Noggit.\n\nPlease select the location of your Wrath of the Lich King (3.3.5) installation.");
-//              Native::showAlertDialog("foo", "bar");
-//          } else {
-//              showAlertDialog("Unable to locate WoW installation.",
-//                              "Please select the location of your Wrath of the Lich King (3.3.5) installation.");
-//          }
-//          
-//          std::string requestedPath = requestWoWPath();
-//          if (requestedPath.length()) {
-////              ConfigFile("noggit.conf").add("Path", requestedPath);
-//              return requestedPath;
-//          }
-//      }
-#warning Finish Me!
-    return "";
-#endif
-
+	return Native::getGamePath();
   }
   else
   {
