@@ -1,6 +1,7 @@
 #ifdef _WIN32
 
 #include <windows.h>
+#include <shlobj.h>
 #include "Native.hpp"
 
 int Native::showAlertDialog(std::string title, std::string message)
@@ -39,24 +40,23 @@ std::string Native::getGamePath()
 	Native::showAlertDialog("Unable to locate World of Warcraft",
 		"Please select the location of your Wrath of the Lich King (3.3.5) installation.");
 
-	OPENFILENAME opendialog = { sizeof(OPENFILENAME) };
-	std::string path(MAX_PATH, '\0');
+	TCHAR wstrPath[MAX_PATH] = { 0 };
 
-	opendialog.lStructSize = sizeof(opendialog);
-	opendialog.hInstance = GetModuleHandle(NULL);
-	opendialog.lpstrFile = &path[0];
-	opendialog.nFilterIndex = 0;
-	opendialog.nMaxFile = 256;
-	opendialog.lpstrInitialDir = NULL;
-	opendialog.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	BROWSEINFO bInfo = { 0 };
+	bInfo.pidlRoot = NULL;
+	bInfo.lpszTitle = "Select your World of Warcraft installation"; // Title of the dialog
+	bInfo.ulFlags = BIF_NEWDIALOGSTYLE;
+	bInfo.lpfn = NULL;
+	bInfo.lParam = 0;
+	bInfo.iImage = -1;
 
-	if (GetOpenFileName(&opendialog)) {
-		path.resize(strlen(path.c_str()));
-	} else {
-		return "";
+	LPITEMIDLIST lpItem = SHBrowseForFolder(&bInfo);
+	if (lpItem != NULL)
+	{
+		SHGetPathFromIDList(lpItem, wstrPath);
 	}
 
-	return path;
+	return wstrPath;
 }
 
 std::string Native::getArialPath()
