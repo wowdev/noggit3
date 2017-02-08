@@ -4,10 +4,9 @@
 
 #include <cstdint>
 
-
 class Mysql
 {
 public:
-	uint32_t getGUIDFromDB();
-	uint32_t UpdateUIDInDB(uint32_t NewUID);
+  std::uint32_t getGUIDFromDB();
+  void UpdateUIDInDB (std::uint32_t NewUID);
 };

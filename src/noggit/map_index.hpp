@@ -179,8 +179,7 @@ public:
   bool hasBigAlpha() const { return mBigAlpha; }
 
   uint32_t newGUID();
-  uint32_t newGUIDDB(const std::string filename);
-  uint32_t UpdateUIDInDB(uint32_t NewUID);
+  uint32_t newGUIDDB();
   void fixUIDs();
   void searchMaxUID();
   void saveMaxUID();
@@ -188,8 +187,8 @@ public:
 
 private:
 	uint32_t getHighestGUIDFromFile(const std::string& pFilename) const;
-	uint32_t getHighestGUIDFromDB(const std::string& pFilename) const;
-  
+	uint32_t getHighestGUIDFromDB() const;
+
   bool hasTile(int tileX, int tileZ) const;
   bool tileLoaded(int tileX, int tileZ) const;
 
