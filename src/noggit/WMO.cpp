@@ -779,7 +779,7 @@ void WMOGroup::load()
   }
 
   center = (VertexBoxMax + VertexBoxMin) * 0.5f;
-  rad = (VertexBoxMax - center).length ();
+  rad = (VertexBoxMax - center).length () + 300.0f;;
 
   f.seekRelative (size);
 
@@ -1043,10 +1043,13 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
 
   if (hascv)
   {
-    gl.enableClientState (GL_COLOR_ARRAY);
-    gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
-    gl.colorPointer (4, GL_FLOAT, 0, 0);
-
+    if(indoor)
+    {
+      gl.enableClientState (GL_COLOR_ARRAY);
+      gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
+      gl.colorPointer (4, GL_FLOAT, 0, 0);
+    }
+    
     gl.disable(GL_LIGHTING);
     gWorld->outdoorLights(false);
   }
