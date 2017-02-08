@@ -95,8 +95,6 @@ endmacro(includePlattform)
 
 includePlattform("prefind")
 
-OPTION(USE_MYSQL_UID_STORAGE "Store max uid in a mysql database ?" OFF)
-
 FIND_PACKAGE( Freetype REQUIRED )
 FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test_exec_monitor REQUIRED )
@@ -443,6 +441,7 @@ ADD_EXECUTABLE ( noggit
                   ${external_headers}
                   ${mysql_headers}
                   ${os_headers}
+                  ${ResFiles}
                 )
 
 TARGET_LINK_LIBRARIES (noggit
