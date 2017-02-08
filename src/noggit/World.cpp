@@ -1711,7 +1711,7 @@ void World::addM2(std::string const& filename, math::vector_3d newPos, bool copy
   ModelInstance newModelis = ModelInstance(filename);
   if (Settings::getInstance()->MysqlUse == true)
   {
-    newModelis.d1 = mapIndex->newGUIDDB(filename);
+    newModelis.d1 = mapIndex->newGUIDDB();
   }
   else
   {
@@ -1762,7 +1762,7 @@ void World::addWMO(std::string const& filename, math::vector_3d newPos, bool cop
   WMOInstance newWMOis(filename);
   if (Settings::getInstance()->MysqlUse == true)
   {
-	  newWMOis.mUniqueID = mapIndex->newGUIDDB(filename);
+	  newWMOis.mUniqueID = mapIndex->newGUIDDB();
   }
   else
   {

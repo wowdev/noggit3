@@ -573,63 +573,9 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
     return highGUID;
 }
 
-uint32_t MapIndex::getHighestGUIDFromDB(const std::string& pFilename) const
+uint32_t MapIndex::getHighestGUIDFromDB() const
 {
-	uint32_t highGUID = 0;
-
-	MPQFile theFile(pFilename);
-	if (theFile.isEof())
-	{
-		return highGUID;
-	}
-
-	uint32_t fourcc;
-	uint32_t size;
-
-	MHDR Header;
-
-	// - MVER ----------------------------------------------
-
-	uint32_t version;
-
-	theFile.read(&fourcc, 4);
-	theFile.seekRelative(4);
-	theFile.read(&version, 4);
-
-	assert(fourcc == 'MVER' && version == 18);
-
-	// - MHDR ----------------------------------------------
-
-	theFile.read(&fourcc, 4);
-	theFile.seekRelative(4);
-
-	assert(fourcc == 'MHDR');
-
-	theFile.read(&Header, sizeof(MHDR));
-
-	// - MDDF ----------------------------------------------
-
-	theFile.seek(Header.mddf + 0x14);
-	theFile.read(&fourcc, 4);
-	theFile.read(&size, 4);
-
-	assert(fourcc == 'MDDF');
-
-	highGUID = MysqlI->getGUIDFromDB();
-
-	// - MODF ----------------------------------------------
-
-	theFile.seek(Header.modf + 0x14);
-	theFile.read(&fourcc, 4);
-	theFile.read(&size, 4);
-
-	assert(fourcc == 'MODF');
-
-	highGUID = MysqlI->getGUIDFromDB();
-
-	theFile.close();
-	return highGUID;
-
+	return MysqlI->getGUIDFromDB();
 }
 
 uint32_t MapIndex::newGUID()
@@ -637,9 +583,9 @@ uint32_t MapIndex::newGUID()
   return ++highestGUID;
 }
 
-uint32_t MapIndex::newGUIDDB(const std::string filename)
+uint32_t MapIndex::newGUIDDB()
 {
-  highestGUIDDB = std::max(getHighestGUIDFromDB(filename), getHighestGUIDFromDB(filename));
+  highestGUIDDB = std::max(highestGUIDDB, getHighestGUIDFromDB());
   highGUIDDB = ++highestGUIDDB;
   MysqlI->UpdateUIDInDB(highGUIDDB);
   return highGUIDDB;
