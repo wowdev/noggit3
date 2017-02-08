@@ -39,7 +39,9 @@ private:
 
   float lastBrushUpdate;
 
+  selection_result intersect_result(bool terrain_only);
   void doSelection(bool selectTerrainOnly);
+  void update_cursor_pos();
 
   int mViewMode;
 

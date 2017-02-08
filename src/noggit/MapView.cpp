@@ -1383,11 +1383,12 @@ MapView::~MapView()
 
 void MapView::tick(float t, float dt)
 {
-
   // start unloading tiles
   gWorld->mapIndex->unloadTiles(tile_index(gWorld->camera));
 
   dt = std::min(dt, 1.0f);
+
+  update_cursor_pos();
 
   // write some stuff into infos window for debuging
   std::stringstream appinfoText;
@@ -1884,29 +1885,36 @@ void MapView::tick(float t, float dt)
   }
 }
 
-void MapView::doSelection (bool selectTerrainOnly)
+selection_result MapView::intersect_result(bool terrain_only)
 {
   math::vector_3d const pos
-    ( ( ( math::look_at (gWorld->camera, gWorld->lookat, {0.0f, 1.0f, 0.0f}).transposed()
-        * math::perspective (video.fov(), video.ratio(), video.nearclip(), video.farclip()).transposed()
-        ).inverted().transposed()
-      * video.normalized_device_coords ( Environment::getInstance()->screenX
-                                       , Environment::getInstance()->screenY
-                                       )
-      ).xyz_normalized_by_w()
-    );
+  (((math::look_at(gWorld->camera, gWorld->lookat, { 0.0f, 1.0f, 0.0f }).transposed()
+    * math::perspective(video.fov(), video.ratio(), video.nearclip(), video.farclip()).transposed()
+    ).inverted().transposed()
+    * video.normalized_device_coords(Environment::getInstance()->screenX
+      , Environment::getInstance()->screenY
+    )
+    ).xyz_normalized_by_w()
+  );
 
-  math::ray ray (gWorld->camera, pos - gWorld->camera);
+  math::ray ray(gWorld->camera, pos - gWorld->camera);
 
-  selection_result results (gWorld->intersect (ray, selectTerrainOnly, terrainMode == editing_mode::object));
+  selection_result results(gWorld->intersect(ray, terrain_only, terrainMode == editing_mode::object));
 
-  std::sort ( results.begin()
-            , results.end()
-            , [] (selection_entry const& lhs, selection_entry const& rhs)
-              {
-                return lhs.first < rhs.first;
-              }
-            );
+  std::sort(results.begin()
+    , results.end()
+    , [](selection_entry const& lhs, selection_entry const& rhs)
+  {
+    return lhs.first < rhs.first;
+  }
+  );
+
+  return results;
+}
+
+void MapView::doSelection (bool selectTerrainOnly)
+{
+  selection_result results(intersect_result(selectTerrainOnly));
 
   if (results.empty())
   {
@@ -1917,13 +1925,24 @@ void MapView::doSelection (bool selectTerrainOnly)
     auto const& hit (results.front().second);
     gWorld->SetCurrentSelection (hit);
 
-    _cursor_pos = hit.which() == eEntry_Model ? boost::get<selected_model_type> (hit)->pos
-      : hit.which() == eEntry_WMO ? boost::get<selected_wmo_type> (hit)->pos
-      : hit.which() == eEntry_MapChunk ? boost::get<selected_chunk_type> (hit).position
-      : throw std::logic_error ("bad variant");
+    _cursor_pos = hit.which() == eEntry_Model ? boost::get<selected_model_type>(hit)->pos
+      : hit.which() == eEntry_WMO ? boost::get<selected_wmo_type>(hit)->pos
+      : hit.which() == eEntry_MapChunk ? boost::get<selected_chunk_type>(hit).position
+      : throw std::logic_error("bad variant");
   }
 }
 
+void MapView::update_cursor_pos()
+{
+  selection_result results(intersect_result(true));
+
+  if (!results.empty())
+  {
+    auto const& hit(results.front().second);
+    // hit cannot be something else than a chunk
+    _cursor_pos = boost::get<selected_chunk_type>(hit).position;
+  }
+}
 
 void MapView::displayGUIIfEnabled()
 {
