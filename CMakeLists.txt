@@ -93,10 +93,9 @@ macro(includePlattform SUFFIX)
   endif(UNIX)
 endmacro(includePlattform)
 
-#find all src files
-file(GLOB SourceFiles "src/*/*.h" "src/*/*.hpp" "src/*/*.cpp" "src/external/wacom/*.cpp" "src/noggit/ui/*.cpp")
-
 includePlattform("prefind")
+
+OPTION(USE_MYSQL_UID_STORAGE "Store max uid in a mysql database ?" OFF)
 
 FIND_PACKAGE( Freetype REQUIRED )
 FIND_PACKAGE( OpenGL REQUIRED )
@@ -104,14 +103,28 @@ FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test
 FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
 FIND_PACKAGE( SDL REQUIRED )
-find_library(MYSQL_LIBRARY
-    NAMES libmysql
-    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql"
-)
-find_library(MYSQLCPPCONN_LIBRARY
-    NAMES mysqlcppconn
-    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector"
-)
+
+IF(USE_MYSQL_UID_STORAGE)
+  find_library(MYSQL_LIBRARY
+      NAMES libmysql
+      HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql"
+  )
+  find_library(MYSQLCPPCONN_LIBRARY
+      NAMES mysqlcppconn
+      HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector"
+  )
+  ADD_DEFINITIONS( -DUSE_MYSQL_UID_STORAGE )
+  
+  set ( mysql_sources
+        src/mysql/mysql.cpp
+      )    
+    
+  set ( mysql_headers
+        src/mysql/mysql.h
+      )
+  source_group("mysql"  FILES ${mysql_sources} ${mysql_headers})
+ENDIF(USE_MYSQL_UID_STORAGE) 
+
 
 
 # Hack as at least my FindSDL does not do this itself.
@@ -139,7 +152,303 @@ include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
 # And do the job.
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
-ADD_EXECUTABLE( noggit WIN32 MACOSX_BUNDLE ${SourceFiles} ${ResFiles})
+
+set ( noggit_root_sources 
+      src/noggit/AsyncLoader.cpp
+      src/noggit/Brush.cpp
+      src/noggit/ChunkWater.cpp
+      src/noggit/ConfigFile.cpp
+      src/noggit/DBC.cpp
+      src/noggit/DBCFile.cpp
+      src/noggit/Directory.cpp
+      src/noggit/Environment.cpp
+      src/noggit/FreeType.cpp
+      src/noggit/Frustum.cpp
+      src/noggit/Log.cpp
+      src/noggit/MPQ.cpp
+      src/noggit/MapChunk.cpp
+      src/noggit/MapTile.cpp
+      src/noggit/MapView.cpp
+      src/noggit/Menu.cpp
+      src/noggit/Misc.cpp
+      src/noggit/Model.cpp
+      src/noggit/ModelInstance.cpp
+      src/noggit/ModelManager.cpp
+      src/noggit/Particle.cpp
+      src/noggit/Project.cpp
+      src/noggit/Settings.cpp
+      src/noggit/Sky.cpp
+      src/noggit/TextureManager.cpp
+      src/noggit/TileWater.cpp
+      src/noggit/Video.cpp
+      src/noggit/WMO.cpp
+      src/noggit/WMOInstance.cpp
+      src/noggit/World.cpp
+      src/noggit/alphamap.cpp
+      src/noggit/application.cpp
+      src/noggit/liquid_layer.cpp
+      src/noggit/liquid_render.cpp
+      src/noggit/map_index.cpp
+      src/noggit/texture_set.cpp
+      src/noggit/uid_storage.cpp
+      src/noggit/wmo_liquid.cpp
+    )
+  
+set ( noggit_ui_sources
+      src/noggit/ui/About.cpp
+      src/noggit/ui/Alphamap.cpp
+      src/noggit/ui/AppInfo.cpp
+      src/noggit/ui/Button.cpp
+      src/noggit/ui/CapsWarning.cpp
+      src/noggit/ui/CheckBox.cpp
+      src/noggit/ui/CloseWindow.cpp
+      src/noggit/ui/CurrentTexture.cpp
+      src/noggit/ui/CursorSwitcher.cpp
+      src/noggit/ui/DetailInfos.cpp
+      src/noggit/ui/DoodadSpawner.cpp
+      src/noggit/ui/ExitWarning.cpp
+      src/noggit/ui/FlattenTool.cpp
+      src/noggit/ui/Frame.cpp
+      src/noggit/ui/Gradient.cpp
+      src/noggit/ui/Help.cpp
+      src/noggit/ui/HelperModels.cpp
+      src/noggit/ui/ListView.cpp
+      src/noggit/ui/MapViewGUI.cpp
+      src/noggit/ui/MenuBar.cpp
+      src/noggit/ui/MinimapWindow.cpp
+      src/noggit/ui/MinimizeButton.cpp
+      src/noggit/ui/Model.cpp
+      src/noggit/ui/ModelImport.cpp
+      src/noggit/ui/ModelSelectorFromTxt.cpp
+      src/noggit/ui/ObjectEditor.cpp
+      src/noggit/ui/RotationEditor.cpp
+      src/noggit/ui/ScrollBar.cpp
+      src/noggit/ui/ScrollableFrame.cpp
+      src/noggit/ui/Slider.cpp
+      src/noggit/ui/StatusBar.cpp
+      src/noggit/ui/Text.cpp
+      src/noggit/ui/TextBox.cpp
+      src/noggit/ui/Texture.cpp
+      src/noggit/ui/TexturePicker.cpp
+      src/noggit/ui/TextureSwitcher.cpp
+      src/noggit/ui/TexturingGUI.cpp
+      src/noggit/ui/ToggleGroup.cpp
+      src/noggit/ui/Toolbar.cpp
+      src/noggit/ui/ToolbarIcon.cpp
+      src/noggit/ui/TreeView.cpp
+      src/noggit/ui/Water.cpp
+      src/noggit/ui/WaterSaveWarning.cpp
+      src/noggit/ui/WaterTypeBrowser.cpp
+      src/noggit/ui/Window.cpp
+      src/noggit/ui/ZoneIDBrowser.cpp
+      src/noggit/ui/scWarning.cpp
+      src/noggit/ui/shader_tool.cpp
+      src/noggit/ui/terrain_tool.cpp
+      src/noggit/ui/uid_fix_window.cpp
+    )
+  
+set ( math_sources
+      src/math/matrix_4x4.cpp
+      src/math/ray.cpp
+      src/math/vector_2d.cpp
+    )
+
+set ( opengl_sources
+      src/opengl/call_list.cpp
+      src/opengl/context.cpp
+      src/opengl/primitives.cpp
+      src/opengl/shader.cpp
+      src/opengl/texture.cpp
+    )
+
+set ( external_sources
+      src/external/wacom/Utils.cpp
+    )
+ 
+set ( noggit_root_headers
+      src/noggit/Animated.h
+      src/noggit/AppState.h
+      src/noggit/AsyncLoader.h
+      src/noggit/AsyncObject.h
+      src/noggit/Brush.h
+      src/noggit/ChunkWater.hpp
+      src/noggit/ConfigFile.h
+      src/noggit/DBC.h
+      src/noggit/DBCFile.h
+      src/noggit/Directory.h
+      src/noggit/Environment.h
+      src/noggit/FreeType.h
+      src/noggit/Frustum.h
+      src/noggit/Log.h
+      src/noggit/MPQ.h
+      src/noggit/MapChunk.h
+      src/noggit/MapHeaders.h
+      src/noggit/MapTile.h
+      src/noggit/MapView.h
+      src/noggit/Menu.h
+      src/noggit/Misc.h
+      src/noggit/Model.h
+      src/noggit/ModelHeaders.h
+      src/noggit/ModelInstance.h
+      src/noggit/ModelManager.h
+      src/noggit/Particle.h
+      src/noggit/Project.h
+      src/noggit/Selection.h
+      src/noggit/Settings.h
+      src/noggit/Sky.h
+      src/noggit/TextureManager.h
+      src/noggit/TileWater.hpp
+      src/noggit/Video.h
+      src/noggit/WMO.h
+      src/noggit/WMOInstance.h
+      src/noggit/World.h
+      src/noggit/alphamap.hpp
+      src/noggit/application.h
+      src/noggit/errorHandling.h
+      src/noggit/liquid_layer.hpp
+      src/noggit/liquid_render.hpp
+      src/noggit/map_index.hpp
+      src/noggit/multimap_with_normalized_key.hpp
+      src/noggit/texture_set.hpp
+      src/noggit/tile_index.hpp
+      src/noggit/tool_enums.hpp
+      src/noggit/uid_storage.hpp
+      src/noggit/wmo_liquid.hpp
+    )
+    
+set ( noggit_ui_headers
+      src/noggit/ui/About.h
+      src/noggit/ui/Alphamap.h
+      src/noggit/ui/AppInfo.h
+      src/noggit/ui/Button.h
+      src/noggit/ui/CapsWarning.h
+      src/noggit/ui/CheckBox.h
+      src/noggit/ui/CloseWindow.h
+      src/noggit/ui/CurrentTexture.h
+      src/noggit/ui/CursorSwitcher.h
+      src/noggit/ui/DetailInfos.h
+      src/noggit/ui/DoodadSpawner.h
+      src/noggit/ui/ExitWarning.h
+      src/noggit/ui/FlattenTool.hpp
+      src/noggit/ui/Frame.h
+      src/noggit/ui/Gradient.h
+      src/noggit/ui/Help.h
+      src/noggit/ui/HelperModels.h
+      src/noggit/ui/ListView.h
+      src/noggit/ui/MapViewGUI.h
+      src/noggit/ui/MenuBar.h
+      src/noggit/ui/MinimapWindow.h
+      src/noggit/ui/MinimizeButton.h
+      src/noggit/ui/Model.h
+      src/noggit/ui/ModelImport.h
+      src/noggit/ui/ModelSelectorFromTxt.h
+      src/noggit/ui/ObjectEditor.h
+      src/noggit/ui/RotationEditor.h
+      src/noggit/ui/ScrollBar.h
+      src/noggit/ui/ScrollableFrame.h
+      src/noggit/ui/Slider.h
+      src/noggit/ui/StatusBar.h
+      src/noggit/ui/Text.h
+      src/noggit/ui/TextBox.h
+      src/noggit/ui/Texture.h
+      src/noggit/ui/TexturePicker.h
+      src/noggit/ui/TextureSwitcher.h
+      src/noggit/ui/TexturingGUI.h
+      src/noggit/ui/ToggleGroup.h
+      src/noggit/ui/Toolbar.h
+      src/noggit/ui/ToolbarIcon.h
+      src/noggit/ui/TreeView.h
+      src/noggit/ui/Water.h
+      src/noggit/ui/WaterSaveWarning.h
+      src/noggit/ui/WaterTypeBrowser.h
+      src/noggit/ui/Window.h
+      src/noggit/ui/ZoneIDBrowser.h
+      src/noggit/ui/scWarning.h
+      src/noggit/ui/shader_tool.hpp
+      src/noggit/ui/terrain_tool.hpp
+      src/noggit/ui/uid_fix_window.hpp
+    )
+    
+set ( math_headers
+      src/math/constants.hpp
+      src/math/interpolation.hpp
+      src/math/matrix_4x4.hpp
+      src/math/projection.hpp
+      src/math/quaternion.hpp
+      src/math/ray.hpp
+      src/math/trig.hpp
+      src/math/vector_2d.hpp
+      src/math/vector_3d.hpp
+      src/math/vector_4d.hpp
+    )
+    
+set ( opengl_headers
+      src/opengl/call_list.hpp
+      src/opengl/context.hpp
+      src/opengl/matrix.hpp
+      src/opengl/primitives.hpp
+      src/opengl/scoped.hpp
+      src/opengl/shader.fwd.hpp
+      src/opengl/shader.hpp
+      src/opengl/texture.hpp
+      src/opengl/types.hpp
+    )
+    
+set ( external_headers
+      src/external/wacom/MSGPACK.H
+      src/external/wacom/PKTDEF.H
+      src/external/wacom/Utils.h
+      src/external/wacom/WINTAB.H
+    )
+
+IF(WIN32)
+  set ( os_sources
+        include/win/StackWalker.cpp
+      )
+
+  set ( os_headers
+        include/win/StackWalker.h
+      )  
+ENDIF(WIN32)
+
+IF(APPLE)
+  set ( os_sources
+        include/osx/SDLMain.m
+      )
+
+  set ( os_headers
+        include/osx/SDLMain.h
+      )
+ENDIF(APPLE)
+
+
+
+source_group("noggit"  FILES ${noggit_root_sources} ${noggit_root_headers})
+source_group("noggit\\ui"  FILES ${noggit_ui_sources} ${noggit_ui_headers})
+source_group("opengl"  FILES ${opengl_sources} ${opengl_headers})
+source_group("math"  FILES ${math_sources} ${math_headers})
+source_group("external"  FILES ${external_sources} ${external_headers})
+source_group("os"  FILES ${os_sources} ${os_headers})
+
+ADD_EXECUTABLE ( noggit
+                  WIN32 
+                  MACOSX_BUNDLE
+                  ${noggit_root_sources}
+                  ${noggit_ui_sources}
+                  ${opengl_sources}
+                  ${math_sources}
+                  ${external_sources}
+                  ${mysql_sources}
+                  ${os_sources}
+                  ${noggit_root_headers}
+                  ${noggit_ui_headers}
+                  ${opengl_headers}
+                  ${math_headers}
+                  ${external_headers}
+                  ${mysql_headers}
+                  ${os_headers}
+                )
+
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   ${FREETYPE_LIBRARIES}
