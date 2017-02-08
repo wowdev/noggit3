@@ -7,7 +7,9 @@
 #include <noggit/Misc.h>
 #include <noggit/Project.h>
 #include <noggit/World.h>
-#include <noggit/mysql.h>
+#ifdef USE_MYSQL_UID_STORAGE
+  #include <noggit/mysql.h>
+#endif
 #include <noggit/map_index.hpp>
 #include <noggit/uid_storage.hpp>
 
@@ -556,24 +558,31 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
     return highGUID;
 }
 
+#ifdef USE_MYSQL_UID_STORAGE
 uint32_t MapIndex::getHighestGUIDFromDB() const
 {
 	return mysql::getGUIDFromDB (*Settings::getInstance()->mysql);
 }
 
-uint32_t MapIndex::newGUID()
-{
-  return ++highestGUID;
-}
-
 uint32_t MapIndex::newGUIDDB()
 {
   highestGUIDDB = std::max(highestGUIDDB, getHighestGUIDFromDB());
+  highGUIDDB = std::max(highestGUID, highestGUIDDB);
   highGUIDDB = ++highestGUIDDB;
+  highestGUID = highGUIDDB; // update local max uid too
   mysql::UpdateUIDInDB(*Settings::getInstance()->mysql, highGUIDDB);
   return highGUIDDB;
 }
+#endif
 
+uint32_t MapIndex::newGUID()
+{
+#ifdef USE_MYSQL_UID_STORAGE
+  return newGUIDDB();
+#else
+  return ++highestGUID;
+#endif
+}
 
 inline bool floatEqual(float& a, float& b)
 {
