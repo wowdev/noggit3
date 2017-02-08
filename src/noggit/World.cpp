@@ -156,11 +156,11 @@ namespace
 
     if (stipple)
     {
-      glEnable(GL_LINE_STIPPLE);
-      glLineStipple(10, 0xAAAA);
+      gl.enable(GL_LINE_STIPPLE);
+      gl.lineStipple(10, 0xAAAA);
     }
 
-	  glLineWidth(3.0f);
+	  gl.lineWidth(3.0f);
 
       gl.begin (GL_LINE_LOOP);
       for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
@@ -169,9 +169,12 @@ namespace
       }
       gl.end();
 
-	  glLineWidth(1.0f);
-    glDisable(GL_LINE_STIPPLE);
+	  gl.lineWidth(1.0f);
 
+    if (stipple)
+    {
+      gl.disable(GL_LINE_STIPPLE);
+    }
   }
 
   void render_disk (::math::vector_3d const& position, float radius, bool stipple = false)
@@ -1706,7 +1709,14 @@ void World::addModel(selection_type entry, math::vector_3d newPos, bool copyit)
 void World::addM2(std::string const& filename, math::vector_3d newPos, bool copyit)
 {
   ModelInstance newModelis = ModelInstance(filename);
-  newModelis.d1 = mapIndex->newGUID();
+  if (Settings::getInstance()->MysqlUse == true)
+  {
+    newModelis.d1 = mapIndex->newGUIDDB(filename);
+  }
+  else
+  {
+    newModelis.d1 = mapIndex->newGUID();
+  }
   newModelis.pos = newPos;
   newModelis.sc = 1;
 
@@ -1750,8 +1760,15 @@ void World::addM2(std::string const& filename, math::vector_3d newPos, bool copy
 void World::addWMO(std::string const& filename, math::vector_3d newPos, bool copyit)
 {
   WMOInstance newWMOis(filename);
+  if (Settings::getInstance()->MysqlUse == true)
+  {
+	  newWMOis.mUniqueID = mapIndex->newGUIDDB(filename);
+  }
+  else
+  {
+	  newWMOis.mUniqueID = mapIndex->newGUID();
+  }
   newWMOis.pos = newPos;
-  newWMOis.mUniqueID = mapIndex->newGUID();
 
   if (Settings::getInstance()->copyModelStats
     && copyit

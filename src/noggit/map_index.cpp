@@ -7,12 +7,15 @@
 #include <noggit/Misc.h>
 #include <noggit/Project.h>
 #include <noggit/World.h>
+#include <noggit/mysql.h>
 #include <noggit/map_index.hpp>
 #include <noggit/uid_storage.hpp>
 
 #include <boost/range/adaptor/map.hpp>
 
 #include <forward_list>
+
+Mysql *MysqlI;
 
 MapIndex::MapIndex(const std::string &pBasename)
   : basename(pBasename)
@@ -23,6 +26,7 @@ MapIndex::MapIndex(const std::string &pBasename)
   , cx(-1)
   , cz(-1)
   , highestGUID(0)
+  , highestGUIDDB(0)
 {
 
   std::stringstream filename;
@@ -505,7 +509,7 @@ void MapIndex::setBigAlpha()
 
 uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
 {
-    uint32_t highGUID = 0;
+	uint32_t highGUID = 0;
 
     MPQFile theFile(pFilename);
     if (theFile.isEof())
@@ -569,9 +573,76 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
     return highGUID;
 }
 
+uint32_t MapIndex::getHighestGUIDFromDB(const std::string& pFilename) const
+{
+	uint32_t highGUID = 0;
+
+	MPQFile theFile(pFilename);
+	if (theFile.isEof())
+	{
+		return highGUID;
+	}
+
+	uint32_t fourcc;
+	uint32_t size;
+
+	MHDR Header;
+
+	// - MVER ----------------------------------------------
+
+	uint32_t version;
+
+	theFile.read(&fourcc, 4);
+	theFile.seekRelative(4);
+	theFile.read(&version, 4);
+
+	assert(fourcc == 'MVER' && version == 18);
+
+	// - MHDR ----------------------------------------------
+
+	theFile.read(&fourcc, 4);
+	theFile.seekRelative(4);
+
+	assert(fourcc == 'MHDR');
+
+	theFile.read(&Header, sizeof(MHDR));
+
+	// - MDDF ----------------------------------------------
+
+	theFile.seek(Header.mddf + 0x14);
+	theFile.read(&fourcc, 4);
+	theFile.read(&size, 4);
+
+	assert(fourcc == 'MDDF');
+
+	highGUID = MysqlI->getGUIDFromDB();
+
+	// - MODF ----------------------------------------------
+
+	theFile.seek(Header.modf + 0x14);
+	theFile.read(&fourcc, 4);
+	theFile.read(&size, 4);
+
+	assert(fourcc == 'MODF');
+
+	highGUID = MysqlI->getGUIDFromDB();
+
+	theFile.close();
+	return highGUID;
+
+}
+
 uint32_t MapIndex::newGUID()
 {
   return ++highestGUID;
+}
+
+uint32_t MapIndex::newGUIDDB(const std::string filename)
+{
+  highestGUIDDB = std::max(getHighestGUIDFromDB(filename), getHighestGUIDFromDB(filename));
+  highGUIDDB = ++highestGUIDDB;
+  MysqlI->UpdateUIDInDB(highGUIDDB);
+  return highGUIDDB;
 }
 
 

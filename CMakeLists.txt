@@ -54,6 +54,9 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-padded)
 # with a bad forward-decl. we want compilation to fail, not linking.
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4099)
 
+# yes, we intend to use multi-character character constants
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
+
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBARY_OUTPUT_PATH bin)
@@ -101,6 +104,15 @@ FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test
 FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
 FIND_PACKAGE( SDL REQUIRED )
+find_library(MYSQL_LIBRARY
+    NAMES libmysql
+    HINTS "${CMAKE_SOURCE_DIR}/src/external/mysql"
+)
+find_library(MYSQLCPPCONN_LIBRARY
+    NAMES mysqlcppconn
+    HINTS "${CMAKE_SOURCE_DIR}/src/external/mysql/connector"
+)
+
 
 # Hack as at least my FindSDL does not do this itself.
 MARK_AS_ADVANCED( SDL_LIBRARY SDL_INCLUDE_DIR )
@@ -137,6 +149,9 @@ TARGET_LINK_LIBRARIES (noggit
   Boost::filesystem
   Boost::system
   ${GLEW_LIBRARY}
+  ${MYSQL_LIBRARY}
+  ${MYSQLCPPCONN_LIBRARY}
+
 )
 
 if (NOGGIT_LOGTOCONSOLE AND WIN32)

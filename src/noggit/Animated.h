@@ -9,6 +9,7 @@
 #include <cassert>
 #include <map>
 #include <vector>
+#include <memory>
 
 //! \todo Pass this in somehow and don't define as extern.
 // global time for global sequences
@@ -176,7 +177,7 @@ namespace Animation
     }
 
     //! \todo Use a vector of MPQFile& for the anim files instead for safety.
-    M2Value (const AnimationBlock& animationBlock, const MPQFile& file, int32_t* globalSequences, MPQFile** animfiles = nullptr)
+    M2Value (const AnimationBlock& animationBlock, const MPQFile& file, int32_t* globalSequences, const std::vector<std::unique_ptr<MPQFile>>& animation_files = std::vector<std::unique_ptr<MPQFile>>())
     {
       assert(animationBlock.nTimes == animationBlock.nKeys);
 
@@ -194,8 +195,8 @@ namespace Animation
 
       for (size_t j = 0; j < animationBlock.nTimes; ++j)
       {
-        const TimestampType* timestamps = animfiles && animfiles[j] ?
-          animfiles[j]->get<TimestampType>(timestampHeaders[j].ofsEntries) :
+        const TimestampType* timestamps = j < animation_files.size() && animation_files[j] ?
+          animation_files[j]->get<TimestampType>(timestampHeaders[j].ofsEntries) :
           file.get<TimestampType>(timestampHeaders[j].ofsEntries);
 
         for (size_t i = 0; i < timestampHeaders[j].nEntries; ++i)
@@ -206,8 +207,8 @@ namespace Animation
 
       for (size_t j = 0; j < animationBlock.nKeys; ++j)
       {
-        const DataType* keys = animfiles && animfiles[j] ?
-          animfiles[j]->get<DataType>(keyHeaders[j].ofsEntries) :
+        const DataType* keys = j < animation_files.size() && animation_files[j] ?
+          animation_files[j]->get<DataType>(keyHeaders[j].ofsEntries) :
           file.get<DataType>(keyHeaders[j].ofsEntries);
 
         switch (_interpolationType)

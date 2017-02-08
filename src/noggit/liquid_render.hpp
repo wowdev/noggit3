@@ -9,6 +9,7 @@
 #endif
 #include <noggit/Video.h>
 #include <noggit/TextureManager.h>
+#include <opengl/shader.hpp>
 
 #include <string>
 #include <vector>
@@ -27,6 +28,7 @@ class liquid_render
 public:
   liquid_render(bool transparency, std::string const& filename = "", opengl::call_list* draw_list = nullptr);
   void draw();
+  void draw (std::function<void (opengl::scoped::use_program&)>);
 
   void setTextures(std::string const& filename);
   void changeDrawList(opengl::call_list* draw_list);

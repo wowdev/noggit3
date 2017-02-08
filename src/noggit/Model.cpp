@@ -17,11 +17,9 @@ int globalTime = 0;
 
 Model::Model(const std::string& filename)
   : _filename(filename)
+  , _finished_upload(false)
 {
   memset(&header, 0, sizeof(ModelHeader));
-
-  indices = nullptr;
-  origVertices = nullptr;
 
   showGeosets = nullptr;
 
@@ -50,23 +48,20 @@ void Model::finishLoading()
 
   trans = 1.0f;
 
-  vbuf = nbuf = tbuf = 0;
-
-  animtime = 0;
   anim = 0;
   header.nParticleEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   header.nRibbonEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   if (header.nGlobalSequences)
   {
-    globalSequences.resize (header.nGlobalSequences);
-    memcpy(globalSequences.data(), (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
+    _global_sequences.resize (header.nGlobalSequences);
+    memcpy(_global_sequences.data(), (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * 4);
   }
 
   //! \todo  This takes a biiiiiit long. Have a look at this.
-  if (animated)
+  initCommon(f);
+
+  if(animated)
     initAnimated(f);
-  else
-    initStatic(f);
 
   f.close();
 
@@ -83,27 +78,7 @@ Model::~Model()
   if (showGeosets)
     delete[] showGeosets;
 
-  //! \note if animated geometry, these are a mapped GPU buffer
-  if (!animGeometry)
-  {
-    delete[] vertices;
-  }
-  delete[] indices;
-
-  if (animated) {
-    // unload all sorts of crap
-    //delete[] normals;
-    if (origVertices)
-      delete[] origVertices;
-    if (!animGeometry) {
-      gl.deleteBuffers(1, &nbuf);
-    }
-    gl.deleteBuffers(1, &vbuf);
-    gl.deleteBuffers(1, &tbuf);
-  }
-  else {
-    gl.deleteLists(ModelDrawList, 1);
-  }
+  gl.deleteBuffers (1, &_vertices_buffer);
 }
 
 
@@ -198,28 +173,35 @@ math::quaternion fixCoordSystemQuat(math::quaternion v)
 
 void Model::initCommon(const MPQFile& f)
 {
-  // assume: origVertices already set
-  if (!animGeometry) {
-    vertices = new math::vector_3d[header.nVertices];
-    normals = new math::vector_3d[header.nVertices];
-  }
+  // vertices, normals, texcoords
+  ModelVertex* vertices = reinterpret_cast<ModelVertex *> (f.getBuffer() + header.ofsVertices);
 
-  // vertices, normals
-  for (size_t i = 0; i<header.nVertices; ++i) {
-    origVertices[i].pos = fixCoordSystem(origVertices[i].pos);
-    origVertices[i].normal = fixCoordSystem(origVertices[i].normal);
+  _vertices.resize (header.nVertices);
+  _vertices_parameters.resize (header.nVertices);
 
-    if (!animGeometry) {
-      vertices[i] = origVertices[i].pos;
-      normals[i] = origVertices[i].normal.normalize();
-    }
+  for (size_t i (0); i < header.nVertices; ++i)
+  {
+    _vertices[i].position = fixCoordSystem (vertices[i].pos);
+    _vertices[i].normal = fixCoordSystem (vertices[i].normal);
+    _vertices[i].texcoords = vertices[i].texcoords;
 
-    float len = origVertices[i].pos.length_squared();
-    if (len > rad){
+    memcpy (_vertices_parameters[i].bones, vertices[i].bones, 4 * sizeof (uint8_t));
+    memcpy (_vertices_parameters[i].weights, vertices[i].weights, 4 * sizeof (uint8_t));
+
+    float len = _vertices[i].position.length_squared();
+
+    if (len > rad)
+    {
       rad = len;
     }
   }
-  rad = sqrtf(rad);
+
+  rad = std::sqrt (rad);
+
+  if (!animGeometry)
+  {
+    _current_vertices.swap (_vertices);
+  }
 
   // textures
   ModelTextureDef* texdef = reinterpret_cast<ModelTextureDef*>(f.getBuffer() + header.ofsTextures);
@@ -232,14 +214,12 @@ void Model::initCommon(const MPQFile& f)
     {
       _specialTextures[i] = -1;
       _textureFilenames[i] = std::string(f.getBuffer() + texdef[i].nameOfs, texdef[i].nameLen);
-      _textures.emplace_back (_textureFilenames[i]);
     }
     else
     {
 #ifndef NO_REPLACIBLE_TEXTURES_HACK
       _specialTextures[i] = -1;
       _textureFilenames[i] = "tileset/generic/black.blp";
-      _textures.emplace_back (_textureFilenames[i]);
 #else
       //! \note special texture - only on characters and such... Noggit should not even render these.
       //! \todo Check if this is actually correct. Or just remove it.
@@ -259,13 +239,19 @@ void Model::initCommon(const MPQFile& f)
   // init colors
   if (header.nColors) {
     ModelColorDef *colorDefs = reinterpret_cast<ModelColorDef*>(f.getBuffer() + header.ofsColors);
-    for (size_t i = 0; i<header.nColors; ++i) colors.emplace_back(f, colorDefs[i], globalSequences.data());
+    for (size_t i = 0; i < header.nColors; ++i)
+    {
+      _colors.emplace_back (f, colorDefs[i], _global_sequences.data());
+    }
   }
   // init transparency
   int16_t *transLookup = reinterpret_cast<int16_t*>(f.getBuffer() + header.ofsTransparencyLookup);
   if (header.nTransparency) {
     ModelTransDef *trDefs = reinterpret_cast<ModelTransDef*>(f.getBuffer() + header.ofsTransparency);
-    for (size_t i = 0; i<header.nTransparency; ++i) transparency.emplace_back (f, trDefs[i], globalSequences.data());
+    for (size_t i = 0; i < header.nTransparency; ++i)
+    {
+      _transparency.emplace_back (f, trDefs[i], _global_sequences.data());
+    }
   }
 
 
@@ -285,10 +271,11 @@ void Model::initCommon(const MPQFile& f)
 
     uint16_t *indexLookup = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsIndex);
     uint16_t *triangles = reinterpret_cast<uint16_t*>(g.getBuffer() + view->ofsTris);
-    nIndices = view->nTris;
-    indices = new uint16_t[nIndices];
-    for (size_t i = 0; i<nIndices; ++i) {
-      indices[i] = indexLookup[triangles[i]];
+
+    _indices.resize (view->nTris);
+
+    for (size_t i (0); i < _indices.size(); ++i) {
+      _indices[i] = indexLookup[triangles[i]];
     }
 
     // render ops
@@ -383,67 +370,37 @@ void Model::initCommon(const MPQFile& f)
         pass.texanim = -1; // no texture animation
       }
 
-      passes.push_back(pass);
+      _passes.push_back(pass);
     }
     g.close();
     // transparent parts come later
-    std::sort(passes.begin(), passes.end());
+    std::sort(_passes.begin(), _passes.end());
   }
 
   // zomg done
 }
 
-void Model::initStatic(const MPQFile& f)
-{
-  origVertices = (ModelVertex*)(f.getBuffer() + header.ofsVertices);
-
-  initCommon(f);
-
-  ModelDrawList = gl.genLists(1);
-  gl.newList(ModelDrawList, GL_COMPILE);
-  drawModel( /*false*/);
-  gl.endList();
-
-  // clean up vertices, indices etc
-  if (normals)
-    delete[] normals;
-}
-
 void Model::initAnimated(const MPQFile& f)
 {
-  origVertices = new ModelVertex[header.nVertices];
-  memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
-
-  gl.genBuffers(1, &vbuf);
-  gl.genBuffers(1, &tbuf);
-  const size_t size = header.nVertices * sizeof(float);
-  vbufsize = 3 * size;
-
-  initCommon(f);
+  std::vector<std::unique_ptr<MPQFile>> animation_files;
 
   if (header.nAnimations > 0) {
-    anims.resize (header.nAnimations);
-    memcpy(anims.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
+    _animations.resize (header.nAnimations);
+    memcpy(_animations.data(), f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
     for (size_t i = 0; i < header.nAnimations; ++i)
     {
       //! \note Fix for world\kalimdor\diremaul\activedoodads\crystalcorrupter\corruptedcrystalshard.m2 having a zero length for its stand animation.
-      anims[i].length = std::max(anims[i].length, 1U);
+      _animations[i].length = std::max(_animations[i].length, 1U);
     }
 
-    animfiles = new MPQFile*[header.nAnimations];
-
     std::stringstream tempname;
-    for (size_t i = 0; i<header.nAnimations; ++i)
+    for (size_t i = 0; i < header.nAnimations; ++i)
     {
       std::string lodname = _filename.substr(0, _filename.length() - 3);
-      tempname << lodname << anims[i].animID << "-" << anims[i].subAnimID;
+      tempname << lodname << _animations[i].animID << "-" << _animations[i].subAnimID;
       if (MPQFile::exists(tempname.str()))
       {
-        animfiles[i] = new MPQFile(tempname.str());
-      }
-      else
-      {
-        animfiles[i] = nullptr;
+        animation_files.push_back(std::make_unique<MPQFile>(tempname.str()));
       }
     }
   }
@@ -452,26 +409,14 @@ void Model::initAnimated(const MPQFile& f)
     // init bones...
     ModelBoneDef *mb = reinterpret_cast<ModelBoneDef*>(f.getBuffer() + header.ofsBones);
     for (size_t i = 0; i<header.nBones; ++i) {
-      bones.emplace_back(f, mb[i], globalSequences.data(), animfiles);
+      bones.emplace_back(f, mb[i], _global_sequences.data(), animation_files);
     }
   }
 
-  if (!animGeometry) {
-    gl.bufferData<GL_ARRAY_BUFFER> (vbuf, vbufsize, vertices, GL_STATIC_DRAW);
-    gl.genBuffers(1, &nbuf);
-    gl.bufferData<GL_ARRAY_BUFFER> (nbuf, vbufsize, normals, GL_STATIC_DRAW);
-    delete[] normals;
-  }
-  math::vector_2d *texcoords = new math::vector_2d[header.nVertices];
-  for (size_t i = 0; i<header.nVertices; ++i)
-    texcoords[i] = origVertices[i].texcoords;
-  gl.bufferData<GL_ARRAY_BUFFER> (tbuf, 2 * size, texcoords, GL_STATIC_DRAW);
-  delete[] texcoords;
-
   if (animTextures) {
     ModelTexAnimDef *ta = reinterpret_cast<ModelTexAnimDef*>(f.getBuffer() + header.ofsTexAnims);
-    for (size_t i = 0; i<header.nTexAnims; ++i) {
-      texanims.emplace_back(f, ta[i], globalSequences.data());
+    for (size_t i=0; i<header.nTexAnims; ++i) {
+      _texture_animations.emplace_back (f, ta[i], _global_sequences.data());
     }
   }
 
@@ -479,7 +424,7 @@ void Model::initAnimated(const MPQFile& f)
   if (header.nParticleEmitters) {
     ModelParticleEmitterDef *pdefs = reinterpret_cast<ModelParticleEmitterDef*>(f.getBuffer() + header.ofsParticleEmitters);
     for (size_t i = 0; i<header.nParticleEmitters; ++i) {
-      particleSystems.emplace_back (this, f, pdefs[i], globalSequences.data());
+      _particles.emplace_back (this, f, pdefs[i], _global_sequences.data());
     }
   }
 
@@ -487,21 +432,21 @@ void Model::initAnimated(const MPQFile& f)
   if (header.nRibbonEmitters) {
     ModelRibbonEmitterDef *rdefs = reinterpret_cast<ModelRibbonEmitterDef*>(f.getBuffer() + header.ofsRibbonEmitters);
     for (size_t i = 0; i<header.nRibbonEmitters; ++i) {
-      ribbons.emplace_back(this, f, rdefs[i], globalSequences.data());
+      _ribbons.emplace_back(this, f, rdefs[i], _global_sequences.data());
     }
   }
 
   // just use the first camera, meh
   if (header.nCameras>0) {
     ModelCameraDef *camDefs = reinterpret_cast<ModelCameraDef*>(f.getBuffer() + header.ofsCameras);
-    cam = ModelCamera(f, camDefs[0], globalSequences.data());
+    cam = ModelCamera(f, camDefs[0], _global_sequences.data());
   }
 
   // init lights
   if (header.nLights) {
     ModelLightDef *lDefs = reinterpret_cast<ModelLightDef*>(f.getBuffer() + header.ofsLights);
-    for (size_t i = 0; i<header.nLights; ++i)
-      lights.emplace_back(f, lDefs[i], globalSequences.data());
+    for (size_t i=0; i<header.nLights; ++i)
+      _lights.emplace_back (f, lDefs[i], _global_sequences.data());
   }
 
   animcalc = false;
@@ -521,9 +466,9 @@ void Model::calcBones(int _anim, int time)
 void Model::animate(int _anim)
 {
   this->anim = _anim;
-  ModelAnimation &a = anims[anim];
+  ModelAnimation &a = _animations[anim];
 
-  if (anims.empty())
+  if (_animations.empty())
     return;
 
   int t = globalTime; //(int)(gWorld->animtime /* / a.playSpeed*/);
@@ -536,55 +481,57 @@ void Model::animate(int _anim)
   }
 
   if (animGeometry) {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (vbuf);
-    gl.bufferData (GL_ARRAY_BUFFER, 2 * vbufsize, nullptr, GL_STREAM_DRAW);
-    vertices = reinterpret_cast<math::vector_3d*>(gl.mapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
-
     // transform vertices
-    ModelVertex *ov = origVertices;
-    for (size_t i = 0; i<header.nVertices; ++i, ++ov) {
-      math::vector_3d v(0, 0, 0), n(0, 0, 0);
+    _current_vertices.resize (header.nVertices);
 
-      for (size_t b = 0; b<4; ++b) {
-        if (ov->weights[b]>0) {
-          math::vector_3d tv = bones[ov->bones[b]].mat * ov->pos;
-          math::vector_3d tn = bones[ov->bones[b]].mrot * ov->normal;
-          v += tv * (static_cast<float>(ov->weights[b]) / 255.0f);
-          n += tn * (static_cast<float>(ov->weights[b]) / 255.0f);
-        }
+    for (size_t i (0); i < header.nVertices; ++i)
+    {
+      model_vertex const& vertex (_vertices[i]);
+      model_vertex_parameter const& param (_vertices_parameters[i]);
+
+      ::math::vector_3d v(0,0,0), n(0,0,0);
+
+      for (size_t b (0); b < 4; ++b)
+      {
+        if (param.weights[b] <= 0)
+          continue;
+
+        ::math::vector_3d tv = bones[param.bones[b]].mat * vertex.position;
+        ::math::vector_3d tn = bones[param.bones[b]].mrot * vertex.normal;
+
+        v += tv * (static_cast<float> (param.weights[b]) / 255.0f);
+        n += tn * (static_cast<float> (param.weights[b]) / 255.0f);
       }
 
-      /*
-      vertices[i] = v;
-      normals[i] = n;
-      */
-      vertices[i] = v;
-      vertices[header.nVertices + i] = n.normalize(); // shouldn't these be normal by default?
+      _current_vertices[i].position = v;
+      _current_vertices[i].normal = n.normalize();
+      _current_vertices[i].texcoords = vertex.texcoords;
     }
 
-    gl.unmapBuffer(GL_ARRAY_BUFFER);
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
+    gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (model_vertex), _current_vertices.data(), GL_STREAM_DRAW);
   }
 
-  for (size_t i = 0; i<header.nLights; ++i) {
-    if (lights[i].parent >= 0) {
-      lights[i].tpos = bones[lights[i].parent].mat * lights[i].pos;
-      lights[i].tdir = bones[lights[i].parent].mrot * lights[i].dir;
+  for (size_t i=0; i<header.nLights; ++i) {
+    if (_lights[i].parent>=0) {
+      _lights[i].tpos = bones[_lights[i].parent].mat * _lights[i].pos;
+      _lights[i].tdir = bones[_lights[i].parent].mrot * _lights[i].dir;
     }
   }
 
   for (size_t i = 0; i<header.nParticleEmitters; ++i) {
     // random time distribution for teh win ..?
-    int pt = (t + static_cast<int>(tmax*particleSystems[i].tofs)) % tmax;
-    particleSystems[i].setup(anim, pt);
+    int pt = (t + static_cast<int>(tmax*_particles[i].tofs)) % tmax;
+    _particles[i].setup(anim, pt);
   }
 
   for (size_t i = 0; i<header.nRibbonEmitters; ++i) {
-    ribbons[i].setup(anim, t);
+    _ribbons[i].setup(anim, t);
   }
 
   if (animTextures) {
-    for (size_t i = 0; i<header.nTexAnims; ++i) {
-      texanims[i].calc(anim, t);
+    for (size_t i=0; i<header.nTexAnims; ++i) {
+      _texture_animations[i].calc(anim, t);
     }
   }
 }
@@ -603,11 +550,12 @@ bool ModelRenderPass::init(Model *m)
     //  return false;
 
     // emissive colors
-    if (color != -1 && m->colors[color].color.uses(0)) {
-      math::vector_3d c = m->colors[color].color.getValue(0, m->animtime);
-      if (m->colors[color].opacity.uses(m->anim)) {
-        float o = m->colors[color].opacity.getValue(m->anim, m->animtime);
-        ocol.w = o;
+    if (color!=-1 && m->_colors[color].color.uses(0))
+    {
+      ::math::vector_3d c (m->_colors[color].color.getValue (0, m->animtime));
+      if (m->_colors[color].opacity.uses (m->anim))
+      {
+        ocol.w = m->_colors[color].opacity.getValue (m->anim, m->animtime);
       }
 
       if (unlit) {
@@ -622,9 +570,12 @@ bool ModelRenderPass::init(Model *m)
     }
 
     // opacity
-    if (opacity != -1) {
-      if (m->transparency[opacity].trans.uses(0))
-        ocol.w *= m->transparency[opacity].trans.getValue(0, m->animtime);
+    if (opacity!=-1)
+    {
+      if (m->_transparency[opacity].trans.uses (0))
+      {
+        ocol.w = ocol.w * m->_transparency[opacity].trans.getValue (0, m->animtime);
+      }
     }
 
     // exit and return false before affecting the opengl render state
@@ -711,7 +662,7 @@ bool ModelRenderPass::init(Model *m)
       gl.matrixMode(GL_TEXTURE);
       gl.pushMatrix();
 
-      m->texanims[texanim].setup(texanim);
+      m->_texture_animations[texanim].setup(texanim);
     }
 
     // color
@@ -789,70 +740,6 @@ void ModelUnhighlight()
   opengl::texture::enable_texture();
   gl.color4fv(math::vector_4d(1, 1, 1, 1));
   //  gl.depthMask( GL_TRUE );
-}
-
-void Model::drawModel( /*bool unlit*/)
-{
-  // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
-
-  if (animated)
-  {
-    if (animGeometry)
-    {
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (vbuf);
-      gl.vertexPointer (3, GL_FLOAT, 0, 0);
-      gl.normalPointer (GL_FLOAT, 0, reinterpret_cast<void*>(vbufsize));
-    }
-    else
-    {
-      gl.vertexPointer (vbuf, 3, GL_FLOAT, 0, 0);
-      gl.normalPointer (nbuf, GL_FLOAT, 0, 0);
-    }
-
-    gl.texCoordPointer (tbuf, 2, GL_FLOAT, 0, 0);
-  }
-
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  gl.alphaFunc(GL_GREATER, 0.3f);
-
-  for (size_t i = 0; i<passes.size(); ++i) {
-    ModelRenderPass &p = passes[i];
-
-    if (p.init(this)) {
-      // we don't want to render completely transparent parts
-
-      // render
-      if (animated) {
-        //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-        // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
-        // I can't notice a difference but I guess it can't hurt
-        gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-
-      }
-      else {
-        gl.begin(GL_TRIANGLES);
-        for (size_t k = 0, b = p.indexStart; k<p.indexCount; ++k, ++b) {
-          uint16_t a = indices[b];
-          gl.normal3fv(normals[a]);
-          gl.texCoord2fv(origVertices[a].texcoords);
-          gl.vertex3fv(vertices[a]);
-        }
-        gl.end();
-      }
-
-      p.deinit();
-    }
-
-  }
-  // done with all render ops
-
-  gl.alphaFunc(GL_GREATER, 0.0f);
-  gl.disable(GL_ALPHA_TEST);
-
-  GLfloat czero[4] = { 0, 0, 0, 1 };
-  gl.materialfv(GL_FRONT, GL_EMISSION, czero);
-  gl.color4f(1, 1, 1, 1);
-  gl.depthMask(GL_TRUE);
 }
 
 void TextureAnim::calc(int anim, int time)
@@ -973,13 +860,16 @@ namespace
   static const int MODELBONE_BILLBOARD = 8;
 }
 
-Bone::Bone(const MPQFile& f, const ModelBoneDef &b, int *global, MPQFile **animfiles)
+Bone::Bone( const MPQFile& f, 
+            const ModelBoneDef &b, 
+            int *global, 
+            const std::vector<std::unique_ptr<MPQFile>>& animation_files)
   : parent (b.parent)
   , pivot (fixCoordSystem (b.pivot))
   , billboard (b.flags & MODELBONE_BILLBOARD)
-  , trans (b.translation, f, global, animfiles)
-  , rot (b.rotation, f, global, animfiles)
-  , scale (b.scaling, f, global, animfiles)
+  , trans (b.translation, f, global, animation_files)
+  , rot (b.rotation, f, global, animation_files)
+  , scale (b.scaling, f, global, animation_files)
 {
   trans.apply(fixCoordSystem);
   rot.apply(fixCoordSystemQuat);
@@ -1068,61 +958,90 @@ void Model::draw()
   if (!finishedLoading())
     return;
 
+  if (!_finished_upload) {
+    upload();
+    return;
+  }
+
   if (gWorld && gWorld->drawfog)
     gl.enable(GL_FOG);
   else
     gl.disable(GL_FOG);
 
-  if (!animated)
+  if (animated && (!animcalc || mPerInstanceAnimation))
   {
-    gl.callList(ModelDrawList);
+    animate(0);
+    animcalc = true;
   }
-  else
+
+  lightsOn(GL_LIGHT4);
+
+  // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
+  opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
+  gl.vertexPointer (3, GL_FLOAT, sizeof (model_vertex), 0);
+  gl.normalPointer (GL_FLOAT, sizeof (model_vertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+  gl.texCoordPointer (2, GL_FLOAT, sizeof (model_vertex), reinterpret_cast<void*> (2 * sizeof (::math::vector_3d)));
+
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  gl.alphaFunc(GL_GREATER, 0.3f);
+
+  for (size_t i = 0; i < _passes.size(); ++i)
   {
-    if (!animcalc || mPerInstanceAnimation)
+    ModelRenderPass& p = _passes[i];
+
+    // we don't want to render completely transparent parts
+    if (p.init(this))
     {
-      animate(0);
-      animcalc = true;
+      //gl.drawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+      // a GDC OpenGL Performace Tuning paper recommended gl.drawRangeElements over gl.drawElements
+      // I can't notice a difference but I guess it can't hurt
+      gl.drawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, _indices.data() + p.indexStart);
+
+      p.deinit();
     }
 
-
-    lightsOn(GL_LIGHT4);
-    drawModel( /*false*/);
-    lightsOff(GL_LIGHT4);
-
-
-    // draw particle systems & ribbons
-    for (size_t i = 0; i < header.nParticleEmitters; ++i)
-      particleSystems[i].draw();
-
-    for (size_t i = 0; i < header.nRibbonEmitters; ++i)
-      ribbons[i].draw();
   }
+  // done with all render ops
+
+  gl.alphaFunc(GL_GREATER, 0.0f);
+  gl.disable(GL_ALPHA_TEST);
+
+  GLfloat czero[4] = { 0, 0, 0, 1 };
+  gl.materialfv(GL_FRONT, GL_EMISSION, czero);
+  gl.color4f(1, 1, 1, 1);
+  gl.depthMask(GL_TRUE);
+
+  lightsOff(GL_LIGHT4);
+
+  // draw particle systems & _ribbons
+  for (size_t i = 0; i < header.nParticleEmitters; ++i)
+    _particles[i].draw();
+
+  for (size_t i = 0; i < header.nRibbonEmitters; ++i)
+    _ribbons[i].draw();
 }
 
 std::vector<float> Model::intersect (math::ray const& ray)
 {
   std::vector<float> results;
 
-  if (finishedLoading())
+  if (animated && (!animcalc || mPerInstanceAnimation))
   {
-    if (animated && (!animcalc || mPerInstanceAnimation))
-    {
-      animate (0);
-      animcalc = true;
-    }
+    animate (0);
+    animcalc = true;
+  }
 
-    for (auto&& pass : passes)
+  for (auto&& pass : _passes)
+  {
+    for (size_t i (pass.indexStart); i < pass.indexStart + pass.indexCount; i += 3)
     {
-      for (size_t i (pass.indexStart); i < pass.indexStart + pass.indexCount; i += 3)
+      if ( auto distance
+          = ray.intersect_triangle( _current_vertices[_indices[i + 0]].position, 
+                                    _current_vertices[_indices[i + 1]].position, 
+                                    _current_vertices[_indices[i + 2]].position)
+          )
       {
-        if ( auto distance
-           = ray.intersect_triangle
-               (vertices[indices[i + 0]], vertices[indices[i + 1]], vertices[indices[i + 2]])
-           )
-        {
-          results.emplace_back (*distance);
-        }
+        results.emplace_back (*distance);
       }
     }
   }
@@ -1133,7 +1052,7 @@ std::vector<float> Model::intersect (math::ray const& ray)
 void Model::lightsOn(opengl::light lbase)
 {
   // setup lights
-  for (unsigned int i = 0, l = lbase; i<header.nLights; ++i) lights[i].setup(animtime, l++);
+  for (unsigned int i=0, l=lbase; i<header.nLights; ++i) _lights[i].setup(animtime, l++);
 }
 
 void Model::lightsOff(opengl::light lbase)
@@ -1141,9 +1060,25 @@ void Model::lightsOff(opengl::light lbase)
   for (unsigned int i = 0, l = lbase; i<header.nLights; ++i) gl.disable(l++);
 }
 
+void Model::upload()
+{
+  for (std::string texture : _textureFilenames)
+    _textures.emplace_back(texture);
+
+  gl.genBuffers (1, &_vertices_buffer);
+
+  if (!animGeometry)
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
+    gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (model_vertex), _current_vertices.data(), GL_STATIC_DRAW);
+  }
+
+  _finished_upload = true;
+}
+
 void Model::updateEmitters(float dt)
 {
   for (size_t i = 0; i<header.nParticleEmitters; ++i) {
-    particleSystems[i].update(dt);
+    _particles[i].update(dt);
   }
 }
