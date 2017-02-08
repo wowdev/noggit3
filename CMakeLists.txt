@@ -106,11 +106,11 @@ FIND_PACKAGE( StormLib REQUIRED )
 FIND_PACKAGE( SDL REQUIRED )
 find_library(MYSQL_LIBRARY
     NAMES libmysql
-    HINTS "${CMAKE_SOURCE_DIR}/src/external/mysql"
+    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql"
 )
 find_library(MYSQLCPPCONN_LIBRARY
     NAMES mysqlcppconn
-    HINTS "${CMAKE_SOURCE_DIR}/src/external/mysql/connector"
+    HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector"
 )
 
 
