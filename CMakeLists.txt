@@ -108,7 +108,11 @@ find_library(MYSQL_LIBRARY
 find_library(MYSQLCPPCONN_LIBRARY
   NAMES mysqlcppconn
   HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
-if (${MYSQL_LIBRARY} AND ${MYSQLCPPCONN_LIBRARY})
+find_path (MYSQLCPPCONN_INCLUDE
+  NAMES cppconn/driver.h
+  HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
+
+if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
   add_definitions ( -DUSE_MYSQL_UID_STORAGE )
 
   set ( mysql_sources
@@ -455,8 +459,9 @@ TARGET_LINK_LIBRARIES (noggit
   ${GLEW_LIBRARY}
 )
 
-if (${MYSQL_LIBRARY} AND ${MYSQLCPPCONN_LIBRARY})
+if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
   target_link_libraries (noggit ${MYSQL_LIBRARY} ${MYSQLCPPCONN_LIBRARY})
+  target_include_directories (noggit SYSTEM PRIVATE ${MYSQLCPPCONN_INCLUDE})
 endif()
 
 if (NOGGIT_LOGTOCONSOLE AND WIN32)
