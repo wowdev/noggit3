@@ -17,7 +17,6 @@ Settings::Settings()
   this->_noAntiAliasing = false;
   this->copyModelStats = true;
   this->tabletMode = false;
-  this->MysqlUse = false;
   this->renderModelsWithBox = false;
 
   if (boost::filesystem::exists("noggit.conf"))
@@ -27,11 +26,21 @@ Settings::Settings()
     config.readInto(_noAntiAliasing, "noAntiAliasing");
     config.readInto(this->wodSavePath, "wodSavePath");
 	config.readInto(this->tabletMode, "TabletMode");
-	config.readInto(this->MysqlUse, "MySQL");
-	config.readInto(this->Server, "Server");
-	config.readInto(this->User, "User");
-	config.readInto(this->Pass, "Pass");
-	config.readInto(this->Database, "Database");
+
+    {
+      bool use (false);
+      config.readInto(use, "MySQL");
+      if (use)
+      {
+        mysql_connection_info info;
+        config.readInto(info.Server, "Server");
+        config.readInto(info.User, "User");
+        config.readInto(info.Pass, "Pass");
+        config.readInto(info.Database, "Database");
+        mysql = info;
+      }
+    }
+
     if (!config.readInto(this->importFile, "ImportFile"))
     {
       // use default import file if not found in config

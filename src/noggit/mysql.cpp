@@ -8,10 +8,10 @@
 
 std::unique_ptr<sql::Connection> connect()
 {
-  const char* server = Settings::getInstance()->Server.c_str();
-  const char* user = Settings::getInstance()->User.c_str();
-  const char* password = Settings::getInstance()->Pass.c_str();
-  const char* database = Settings::getInstance()->Database.c_str();
+  const char* server = Settings::getInstance()->mysql->Server.c_str();
+  const char* user = Settings::getInstance()->mysql->User.c_str();
+  const char* password = Settings::getInstance()->mysql->Pass.c_str();
+  const char* database = Settings::getInstance()->mysql->Database.c_str();
 
   std::unique_ptr<sql::Connection> Con
     (get_driver_instance()->connect (server, user, password));
