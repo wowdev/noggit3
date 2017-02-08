@@ -2,8 +2,8 @@
 
 #include <mysql/mysql.h>
 
-#include <../mysql/connector/cppconn/driver.h>
-#include <../mysql/connector/cppconn/prepared_statement.h>
+#include <cppconn/driver.h>
+#include <cppconn/prepared_statement.h>
 
 namespace
 {
