@@ -561,8 +561,6 @@ void WMOGroup::init(WMO *_wmo, MPQFile* f, int _num, char *names)
     name = std::string(names + nameOfs);
   }
   else name = "(no name)";
-
-  nDoodads = 0;
 }
 
 void setGLColor(unsigned int col)
@@ -1116,7 +1114,7 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
 void WMOGroup::drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const angle, Frustum const& frustum)
 {
   if (!visible) return;
-  if (nDoodads == 0) return;
+  if (ddr.empty()) return;
   if (doodadset >= wmo->doodadsets.size()) return;
 
   gWorld->outdoorLights(outdoorLights);
@@ -1132,8 +1130,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, m
 
   // draw doodads
   gl.color4f(1, 1, 1, 1);
-  for (int i = 0; i<nDoodads; ++i) {
-    int16_t dd = ddr[i];
+  for (const auto& dd : ddr) {
     if ( dd >= wmo->doodadsets[doodadset].start
       && dd < (wmo->doodadsets[doodadset].start + wmo->doodadsets[doodadset].size)
       && dd < wmo->modelis.size()
