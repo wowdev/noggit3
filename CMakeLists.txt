@@ -104,6 +104,15 @@ FIND_PACKAGE( Boost COMPONENTS thread filesystem system unit_test_framework test
 FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
 FIND_PACKAGE( SDL REQUIRED )
+find_library(MYSQL_LIBRARY
+    NAMES libmysql
+    HINTS "${CMAKE_SOURCE_DIR}/src/external/mysql"
+)
+find_library(MYSQLCPPCONN_LIBRARY
+    NAMES mysqlcppconn
+    HINTS "${CMAKE_SOURCE_DIR}/src/external/mysql/connector"
+)
+
 
 # Hack as at least my FindSDL does not do this itself.
 MARK_AS_ADVANCED( SDL_LIBRARY SDL_INCLUDE_DIR )
@@ -140,6 +149,9 @@ TARGET_LINK_LIBRARIES (noggit
   Boost::filesystem
   Boost::system
   ${GLEW_LIBRARY}
+  ${MYSQL_LIBRARY}
+  ${MYSQLCPPCONN_LIBRARY}
+
 )
 
 if (NOGGIT_LOGTOCONSOLE AND WIN32)
