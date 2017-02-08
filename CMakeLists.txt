@@ -104,17 +104,15 @@ FIND_PACKAGE( GLEW REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
 FIND_PACKAGE( SDL REQUIRED )
 
-IF(USE_MYSQL_UID_STORAGE)
-  find_library(MYSQL_LIBRARY
-      NAMES libmysql
-      HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql"
-  )
-  find_library(MYSQLCPPCONN_LIBRARY
-      NAMES mysqlcppconn
-      HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector"
-  )
-  ADD_DEFINITIONS( -DUSE_MYSQL_UID_STORAGE )
-  
+find_library(MYSQL_LIBRARY
+  NAMES libmysql
+  HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql")
+find_library(MYSQLCPPCONN_LIBRARY
+  NAMES mysqlcppconn
+  HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
+if (${MYSQL_LIBRARY} AND ${MYSQLCPPCONN_LIBRARY})
+  add_definitions ( -DUSE_MYSQL_UID_STORAGE )
+
   set ( mysql_sources
         src/mysql/mysql.cpp
       )    
@@ -123,9 +121,7 @@ IF(USE_MYSQL_UID_STORAGE)
         src/mysql/mysql.h
       )
   source_group("mysql"  FILES ${mysql_sources} ${mysql_headers})
-ENDIF(USE_MYSQL_UID_STORAGE) 
-
-
+endif()
 
 # Hack as at least my FindSDL does not do this itself.
 MARK_AS_ADVANCED( SDL_LIBRARY SDL_INCLUDE_DIR )
@@ -458,10 +454,11 @@ TARGET_LINK_LIBRARIES (noggit
   Boost::filesystem
   Boost::system
   ${GLEW_LIBRARY}
-  ${MYSQL_LIBRARY}
-  ${MYSQLCPPCONN_LIBRARY}
-
 )
+
+if (${MYSQL_LIBRARY} AND ${MYSQLCPPCONN_LIBRARY})
+  target_link_libraries (noggit ${MYSQL_LIBRARY} ${MYSQLCPPCONN_LIBRARY})
+endif()
 
 if (NOGGIT_LOGTOCONSOLE AND WIN32)
   set_property (TARGET noggit APPEND PROPERTY LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
