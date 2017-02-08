@@ -37,22 +37,40 @@ struct WMOBatch {
 };
 
 class WMOGroup {
+  struct wmo_batch
+  {
+    int8_t unused[12];
+
+    uint32_t index_start;
+    uint16_t index_count;
+    uint16_t vertex_start;
+    uint16_t vertex_end;
+
+    uint8_t flags;
+    uint8_t texture;
+  };
+
   WMO *wmo;
   uint32_t flags;
-  math::vector_3d v1, v2;
-  uint32_t nTriangles, nVertices;
-  math::vector_3d center;
+  ::math::vector_3d v1,v2;
+  ::math::vector_3d center;
   float rad;
   int32_t num;
   int32_t fog;
-  int32_t nDoodads, nBatches;
+  int32_t nDoodads;
   std::vector<int16_t> ddr;
   std::unique_ptr<wmo_liquid> lq;
   std::vector< std::pair<std::unique_ptr<opengl::call_list>, bool> > _lists;
 
-  std::vector<math::vector_3d> vertices;
-  std::vector<WMOBatch> batches;
-  std::vector<uint16_t> indices;
+  std::vector<wmo_batch> _batches;
+
+  GLuint _vertices_buffer, _normals_buffer, _texcoords_buffer, _vertex_colors_buffer;
+
+  std::vector<::math::vector_3d> _vertices;
+  std::vector<::math::vector_3d> _normals;
+  std::vector<::math::vector_2d> _texcoords;
+  std::vector<::math::vector_4d> _vertex_colors;
+  std::vector<uint16_t> _indices;
 
 public:
   math::vector_3d BoundingBoxMin;
@@ -65,9 +83,10 @@ public:
   bool outdoorLights;
   std::string name;
 
-  WMOGroup() :nBatches(0) {}
+  WMOGroup() {}
   void init(WMO *wmo, MPQFile* f, int num, char *names);
-  void initDisplayList();
+  void upload();
+  void load ();
   void initLighting(int nLR, uint16_t *useLights);
   void draw(const math::vector_3d& ofs, math::degrees const, Frustum const&);
   void drawLiquid();
@@ -120,14 +139,15 @@ struct WMOFog {
   void setup();
 };
 
-class WMO
+class WMO : public AsyncObject
 {
 public:
   bool draw_group_boundingboxes;
 
   const std::string& filename() const;
 
-  //std::string WMOName;
+  bool _finished_upload;
+
   std::string _filename;
   std::vector<WMOGroup> groups;
   unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
@@ -152,6 +172,10 @@ public:
   std::vector<float> intersect (math::ray const&) const;
   //void drawPortals();
   bool drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vector_3d pUpper) const;
+
+  void finishLoading();
+
+  void upload();
 };
 
 class WMOManager

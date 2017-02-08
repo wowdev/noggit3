@@ -51,6 +51,14 @@ const std::string& WMO::filename() const
 
 WMO::WMO(const std::string& filenameArg)
   : _filename(filenameArg)
+  , _finished_upload(false)
+{
+  finished = false;
+
+  finishLoading();
+}
+
+void WMO::finishLoading ()
 {
   MPQFile f(_filename);
   if (f.isEof()) {
@@ -58,175 +66,291 @@ WMO::WMO(const std::string& filenameArg)
     return;
   }
 
+  LogDebug << "Loading WMO \"" << _filename << "\"." << std::endl;
+
   uint32_t fourcc;
   uint32_t size;
+
   float ff[3];
 
+  char *texbuf = nullptr;
   char *ddnames = nullptr;
   char *groupnames = nullptr;
 
-  char *texbuf = 0;
+  // - MVER ----------------------------------------------
 
-  while (!f.isEof()) {
-    f.read(&fourcc, 4);
-    f.read(&size, 4);
+  uint32_t version;
 
-    size_t nextpos = f.getPos() + size;
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+  f.read (&version, 4);
 
-    if (fourcc == 'MOHD') {
-      unsigned int col;
-      // header
-      f.read(&nTextures, 4);
-      f.read(&nGroups, 4);
-      f.read(&nP, 4);
-      f.read(&nLights, 4);
-      f.read(&nModels, 4);
-      f.read(&nDoodads, 4);
-      f.read(&nDoodadSets, 4);
-      f.read(&col, 4);
-      f.read(&nX, 4);
-      f.read(ff, 12);
-      extents[0] = math::vector_3d(ff[0], ff[1], ff[2]);
-      f.read(ff, 12);
-      extents[1] = math::vector_3d(ff[0], ff[1], ff[2]);
+  assert (fourcc == 'MVER' && version == 17);
 
-      groups.resize (nGroups);
-    }
-    else if (fourcc == 'MOTX') {
-      // textures
-      texbuf = new char[size];
-      f.read(texbuf, size);
-    }
-    else if (fourcc == 'MOMT')
-    {
-      std::size_t const num_materials (size / 0x40);
-      mat.resize (num_materials);
+  // - MOHD ----------------------------------------------
 
-      for (std::size_t i (0); i < num_materials; ++i)
-      {
-        f.read (&mat[i], 0x40);
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
 
-        std::string const texpath (texbuf + mat[i].nameStart);
+  assert (fourcc == 'MOHD');
 
-        mat[i]._texture = texpath;
-        textures.push_back (texpath);
-      }
-    }
-    else if (fourcc == 'MOGN') {
-      groupnames = reinterpret_cast<char*>(f.getPointer());
-    }
-    else if (fourcc == 'MOGI') {
-      // group info - important information! ^_^
-      for (unsigned int i = 0; i<nGroups; ++i) {
-        groups[i].init(this, &f, i, groupnames);
+  unsigned int col;
+  // header
+  f.read (&nTextures, 4);
+  f.read (&nGroups, 4);
+  f.read (&nP, 4);
+  f.read (&nLights, 4);
+  f.read (&nModels, 4);
+  f.read (&nDoodads, 4);
+  f.read (&nDoodadSets, 4);
+  f.read (&col, 4);
+  f.read (&nX, 4);
+  f.read (ff, 12);
+  extents[0] = ::math::vector_3d (ff[0], ff[1], ff[2]);
+  f.read (ff, 12);
+  extents[1] = ::math::vector_3d (ff[0], ff[1], ff[2]);
+  f.seekRelative (4);
 
-      }
-    }
-    else if (fourcc == 'MOLT') {
-      // Lights?
-      for (unsigned int i = 0; i<nLights; ++i) {
-        WMOLight l;
-        l.init(&f);
-        lights.push_back(l);
-      }
-    }
-    else if (fourcc == 'MODN') {
-      // models ...
-      // MMID would be relative offsets for MMDX filenames
-      if (size) {
+  groups.resize (nGroups);
 
-        ddnames = reinterpret_cast<char*>(f.getPointer());
+  // - MOTX ----------------------------------------------
 
-        f.seekRelative(size);
-      }
-    }
-    else if (fourcc == 'MODS') {
-      for (unsigned int i = 0; i<nDoodadSets; ++i) {
-        WMODoodadSet dds;
-        f.read(&dds, 32);
-        doodadsets.push_back(dds);
-      }
-    }
-    else if (fourcc == 'MODD') {
-      nModels = size / 0x28;
-      for (unsigned int i = 0; i<nModels; ++i) {
-        struct
-        {
-          uint32_t name_offset : 24;
-          uint32_t flag_AcceptProjTex : 1;
-          uint32_t flag_0x2 : 1;
-          uint32_t flag_0x4 : 1;
-          uint32_t flag_0x8 : 1;
-          uint32_t flags_unused : 4;
-        } x;
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
 
-        size_t after_entry (f.getPos() + 0x28);
-        f.read (&x, sizeof (x));
+  assert (fourcc == 'MOTX');
 
-        modelis.push_back(ModelInstance (ddnames + x.name_offset, &f));
+  texbuf = new char[size];
+  f.read (texbuf, size);
 
-        f.seek (after_entry);
-      }
+  // - MOMT ----------------------------------------------
 
-    }
-    else if (fourcc == 'MOSB')
-    {
-      if (size>4)
-      {
-        std::string path = std::string(reinterpret_cast<char*>(f.getPointer()));
-        if (path.length())
-        {
-          LogDebug << "SKYBOX:" << std::endl;
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
 
-          if (MPQFile::exists(path))
-          {
-            skybox = scoped_model_reference (path);
-          }
-        }
-      }
-    }
-    else if (fourcc == 'MOPV') {
-      WMOPV p;
-      for (unsigned int i = 0; i<nP; ++i) {
-        f.read(ff, 12);
-        p.a = math::vector_3d(ff[0], ff[2], -ff[1]);
-        f.read(ff, 12);
-        p.b = math::vector_3d(ff[0], ff[2], -ff[1]);
-        f.read(ff, 12);
-        p.c = math::vector_3d(ff[0], ff[2], -ff[1]);
-        f.read(ff, 12);
-        p.d = math::vector_3d(ff[0], ff[2], -ff[1]);
-        pvs.push_back(p);
-      }
-    }
-    else if (fourcc == 'MOPR') {
-      int nn = size / 8;
-      WMOPR *pr = reinterpret_cast<WMOPR*>(f.getPointer());
-      for (int i = 0; i<nn; ++i) {
-        prs.push_back(*pr++);
-      }
-    }
-    else if (fourcc == 'MFOG') {
-      int nfogs = size / 0x30;
-      for (int i = 0; i<nfogs; ++i) {
-        WMOFog fog;
-        fog.init(&f);
-        fogs.push_back(fog);
-      }
-    }
+  assert (fourcc == 'MOMT');
 
-    f.seek(nextpos);
+  std::size_t const num_materials (size / 0x40);
+  mat.resize (num_materials);
+
+  for (size_t i (0); i < num_materials; ++i)
+  {
+    f.read (&mat[i], 0x40);
+
+    std::string const texpath (texbuf + mat[i].nameStart);
+    textures.push_back (texpath);
   }
 
-  f.close();
+  // - MOGN ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOGN');
+
+  groupnames = reinterpret_cast<char*> (f.getPointer ());
+
+  f.seekRelative (size);
+
+  // - MOGI ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOGI');
+
+  for (size_t i (0); i < nGroups; ++i) {
+    groups[i].init (this, &f, i, groupnames);
+  }
+
+  // - MOSB ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOSB');
+
+  if (size > 4)
+  {
+    std::string path = std::string (reinterpret_cast<char*>(f.getPointer ()));
+    if (path.length ())
+    {
+      LogDebug << "SKYBOX:" << std::endl;
+
+      if (MPQFile::exists(path))
+      {
+        skybox = scoped_model_reference (path);
+      }
+    }
+  }
+
+  f.seekRelative (size);
+
+  // - MOPV ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+
+  assert (fourcc == 'MOPV');
+
+  WMOPV p;
+  for (size_t i (0); i < nP; ++i) {
+    f.read (ff, 12);
+    p.a = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    f.read (ff, 12);
+    p.b = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    f.read (ff, 12);
+    p.c = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    f.read (ff, 12);
+    p.d = ::math::vector_3d (ff[0], ff[2], -ff[1]);
+    pvs.push_back (p);
+  }
+
+  // - MOPT ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOPT');
+
+  f.seekRelative (size);
+
+  // - MOPR ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOPR');
+
+  int nn = size / 8;
+  WMOPR *pr = reinterpret_cast<WMOPR*> (f.getPointer ());
+  for (size_t i (0); i < nn; ++i) {
+    prs.push_back (*pr++);
+  }
+
+  f.seekRelative (size);
+
+  // - MOVV ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOVV');
+
+  f.seekRelative (size);
+
+  // - MOVB ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOVB');
+
+  f.seekRelative (size);
+
+  // - MOLT ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+
+  assert (fourcc == 'MOLT');
+
+  for (size_t i (0); i < nLights; ++i) {
+    WMOLight l;
+    l.init (&f);
+    lights.push_back (l);
+  }
+
+  // - MODS ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+
+  assert (fourcc == 'MODS');
+
+  for (size_t i (0); i < nDoodadSets; ++i) {
+    WMODoodadSet dds;
+    f.read (&dds, 32);
+    doodadsets.push_back (dds);
+  }
+
+  // - MODN ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MODN');
+
+  if (size)
+  {
+    ddnames = reinterpret_cast<char*> (f.getPointer ());
+    f.seekRelative (size);
+  }
+
+  // - MODD ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MODD');
+
+  nModels = size / 0x28;
+  for (size_t i (0); i < nModels; ++i) {
+    struct
+    {
+      uint32_t name_offset : 24;
+      uint32_t flag_AcceptProjTex : 1;
+      uint32_t flag_0x2 : 1;
+      uint32_t flag_0x4 : 1;
+      uint32_t flag_0x8 : 1;
+      uint32_t flags_unused : 4;
+    } x;
+
+    size_t after_entry (f.getPos() + 0x28);
+    f.read (&x, sizeof (x));
+
+    modelis.push_back(ModelInstance (ddnames + x.name_offset, &f));
+
+    f.seek (after_entry);
+  }
+
+  // - MFOG ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MFOG');
+
+  int nfogs = size / 0x30;
+  for (size_t i (0); i < nfogs; ++i) {
+    WMOFog fog;
+    fog.init (&f);
+    fogs.push_back (fog);
+  }
+
+  for (size_t i (0); i < nGroups; ++i)
+  {
+    groups[i].load ();
+  }
+
   if (texbuf)
   {
     delete[] texbuf;
     texbuf = nullptr;
   }
 
-  for (unsigned int i = 0; i<nGroups; ++i)
-    groups[i].initDisplayList();
+  finished = true;
+}
+
+void WMO::upload()
+{
+  for (unsigned int i = 0; i < mat.size(); ++i)
+    mat[i]._texture = textures[i];
+
+  for (unsigned int i = 0; i < nGroups; ++i)
+    groups[i].upload ();
+
+  _finished_upload = true;
 }
 
 // model.cpp
@@ -234,6 +358,14 @@ void DrawABox(math::vector_3d pMin, math::vector_3d pMax, math::vector_4d pColor
 
 void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const angle, bool boundingbox, bool groupboxes, bool /*highlight*/, Frustum const& frustum)
 {
+  if (!finishedLoading ())
+    return;
+
+  if (!_finished_upload) {
+    upload ();
+    return;
+  }
+
   if (gWorld && gWorld->drawfog)
     gl.enable(GL_FOG);
   else
@@ -301,6 +433,9 @@ void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const an
 std::vector<float> WMO::intersect (math::ray const& ray) const
 {
   std::vector<float> results;
+
+  if (!finishedLoading ())
+    return results;
 
   for (size_t i (0); i < nGroups; ++i)
   {
@@ -458,247 +593,413 @@ struct WMOGroupHeader {
   int32_t unk1, id, unk2, unk3;
 };
 
-void WMOGroup::initDisplayList()
+namespace
 {
-  math::vector_3d *normals = nullptr;
-  math::vector_2d *texcoords = nullptr;
-  struct SMOPoly *materials = nullptr;
+  struct scoped_material_setter
+  {
+    scoped_material_setter (WMOMaterial* material, bool vertex_colors)
+      : _over_bright ((material->flags & 0x10) && !vertex_colors)
+      , _specular (material->specular && !vertex_colors && !_over_bright)
+      , _alpha_test ((material->transparent) != 0)
+      , _back_face_cull (material->flags & 0x04)
+    {
+      if (_alpha_test)
+      {
+        gl.enable (GL_ALPHA_TEST);
 
-  WMOGroupHeader gh;
+        float aval = 0;
 
-  uint16_t *useLights = 0;
-  int nLR = 0;
+        if (material->flags & 0x80) aval = 0.3f;
+        if (material->flags & 0x01) aval = 0.0f;
 
+        gl.alphaFunc (GL_GREATER, aval);
+      }
 
+      if (_back_face_cull)
+        gl.disable (GL_CULL_FACE);
+      else
+        gl.enable (GL_CULL_FACE);
+
+      if (_specular)
+      {
+        gl.materialfv (GL_FRONT_AND_BACK, GL_SPECULAR, colorFromInt(material->col2));
+      }
+      else
+      {
+        ::math::vector_4d nospec(0, 0, 0, 1);
+        gl.materialfv (GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
+      }
+
+      if (_over_bright)
+      {
+        //! \todo  use emissive color from the WMO Material instead of 1,1,1,1
+        GLfloat em[4] = {1,1,1,1};
+        gl.materialfv (GL_FRONT, GL_EMISSION, em);
+      }
+    }
+
+    ~scoped_material_setter()
+    {
+      if (_over_bright)
+      {
+        GLfloat em[4] = {0,0,0,1};
+        gl.materialfv (GL_FRONT, GL_EMISSION, em);
+      }
+
+      if (_alpha_test)
+      {
+        gl.disable (GL_ALPHA_TEST);
+      }
+    }
+
+    const bool _over_bright;
+    const bool _specular;
+    const bool _alpha_test;
+    const bool _back_face_cull;
+  };
+}
+
+void WMOGroup::upload()
+{
+  gl.genBuffers (1, &_vertices_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _vertices.size () * sizeof (::math::vector_3d), _vertices.data (), GL_STATIC_DRAW);
+
+  gl.genBuffers (1, &_normals_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _normals_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _normals.size () * sizeof (::math::vector_3d), _normals.data (), GL_STATIC_DRAW);
+
+  gl.genBuffers (1, &_texcoords_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _texcoords_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _texcoords.size () * sizeof (::math::vector_2d), _texcoords.data (), GL_STATIC_DRAW);
+
+  gl.genBuffers (1, &_vertex_colors_buffer);
+  gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
+  gl.bufferData (GL_ARRAY_BUFFER, _vertex_colors.size () * sizeof (::math::vector_4d), _vertex_colors.data (), GL_STATIC_DRAW);
+}
+
+void WMOGroup::load()
+{
   // open group file
-
   std::stringstream curNum;
-  curNum << "_" << std::setw(3) << std::setfill('0') << num;
+  curNum << "_" << std::setw (3) << std::setfill ('0') << num;
 
-  std::string fname = wmo->filename();
-  fname.insert(fname.find(".wmo"), curNum.str());
+  std::string fname = wmo->filename ();
+  fname.insert (fname.find (".wmo"), curNum.str ());
 
-  MPQFile gf(fname);
-  if (gf.isEof()) {
+  MPQFile f(fname);
+  if (f.isEof()) {
     LogError << "Error loading WMO \"" << fname << "\"." << std::endl;
     return;
   }
 
-  /*if(!gf.isExternal())
-  gLog("    Loading WMO from MPQ %s\n", fname);
-  else
-  gLog("    Loading WMO from File %s\n", fname);
-  */
-  gf.seek(0x14);
-  // read header
-  gf.read(&gh, sizeof(WMOGroupHeader));
-  WMOFog &wf = wmo->fogs[gh.fogs[0]];
-  if (wf.r2 <= 0) fog = -1; // default outdoor fog..?
-  else fog = gh.fogs[0];
-
-  BoundingBoxMin = math::vector_3d(gh.box1[0], gh.box1[2], -gh.box1[1]);
-  BoundingBoxMax = math::vector_3d(gh.box2[0], gh.box2[2], -gh.box2[1]);
-
-  gf.seek(0x58); // first chunk
-
   uint32_t fourcc;
   uint32_t size;
 
-  unsigned int *cv = nullptr;
   hascv = false;
 
-  while (!gf.isEof()) {
-    gf.read(&fourcc, 4);
-    gf.read(&size, 4);
+  int nLR = 0;
+  uint16_t *useLights = nullptr;
 
-    size_t nextpos = gf.getPos() + size;
+  // - MVER ----------------------------------------------
 
-    // why copy stuff when I can just map it from memory ^_^
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
 
-    if (fourcc == 'MOPY') {
-      // materials per triangle
-      nTriangles = size / 2;
-      materials = reinterpret_cast<SMOPoly*>(gf.getPointer());
-    }
-    else if (fourcc == 'MOVI') {
-      // indices
-      auto nIndices (size / 2);
-      auto indices_raw = reinterpret_cast<uint16_t*>(gf.getPointer());
-      indices.insert (indices.end(), indices_raw, indices_raw + nIndices);
-    }
-    else if (fourcc == 'MOVT') {
-      nVertices = size / 12;
-      // let's hope it's padded to 12 bytes, not 16...
-      auto vertices_raw = reinterpret_cast<math::vector_3d*>(gf.getPointer());
-      vertices.insert (vertices.end(), vertices_raw, vertices_raw + nVertices);
-      VertexBoxMin = math::vector_3d(9999999.0f, 9999999.0f, 9999999.0f);
-      VertexBoxMax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
-      rad = 0;
-      for (size_t i = 0; i<nVertices; ++i) {
-        math::vector_3d v(vertices[i].x, vertices[i].z, -vertices[i].y);
-        if (v.x < VertexBoxMin.x) VertexBoxMin.x = v.x;
-        if (v.y < VertexBoxMin.y) VertexBoxMin.y = v.y;
-        if (v.z < VertexBoxMin.z) VertexBoxMin.z = v.z;
-        if (v.x > VertexBoxMax.x) VertexBoxMax.x = v.x;
-        if (v.y > VertexBoxMax.y) VertexBoxMax.y = v.y;
-        if (v.z > VertexBoxMax.z) VertexBoxMax.z = v.z;
-      }
-      center = (VertexBoxMax + VertexBoxMin) * 0.5f;
-      rad = (VertexBoxMax - center).length() + 300.0f;
-    }
-    else if (fourcc == 'MONR') {
-      normals = reinterpret_cast<math::vector_3d*>(gf.getPointer());
-    }
-    else if (fourcc == 'MOTV') {
-      texcoords = reinterpret_cast<math::vector_2d*>(gf.getPointer());
-    }
-    else if (fourcc == 'MOLR') {
-      nLR = size / 2;
-      useLights = reinterpret_cast<uint16_t*>(gf.getPointer());
-    }
-    else if (fourcc == 'MODR') {
-      nDoodads = size / 2;
-      ddr.resize (nDoodads);
-      gf.read(ddr.data(), size);
-    }
-    else if (fourcc == 'MOBA') {
-      nBatches = size / 24;
-      auto batches_raw = reinterpret_cast<WMOBatch*>(gf.getPointer());
-      batches.insert (batches.end(), batches_raw, batches_raw + nBatches);
-    }
-    else if (fourcc == 'MOCV') {
-      //gLog("CV: %d\n", size);
-      hascv = true;
-      cv = reinterpret_cast<uint32_t*>(gf.getPointer());
-    }
-    else if (fourcc == 'MLIQ') {
-      // liquids
-      WMOLiquidHeader hlq;
-      gf.read(&hlq, 0x1E);
+  uint32_t version;
 
-      lq = std::make_unique<wmo_liquid> (&gf, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
-    }
+  f.read (&version, 4);
 
-    //! \todo  figure out/use MFOG ?
+  assert (fourcc == 'MVER' && version == 17);
 
-    gf.seek(nextpos);
+  // - MOGP ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.seekRelative (4);
+
+  assert (fourcc == 'MOGP');
+
+  WMOGroupHeader header;
+
+  f.read (&header, sizeof (WMOGroupHeader));
+
+  WMOFog &wf = wmo->fogs[header.fogs[0]];
+  if (wf.r2 <= 0) fog = -1; // default outdoor fog..?
+  else fog = header.fogs[0];
+
+  BoundingBoxMin = ::math::vector_3d (header.box1[0], header.box1[2], -header.box1[1]);
+  BoundingBoxMax = ::math::vector_3d (header.box2[0], header.box2[2], -header.box2[1]);
+
+  // - MOPY ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOPY');
+
+  f.seekRelative (size);
+
+  // - MOVI ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOVI');
+
+  _indices.resize (size / sizeof (uint16_t));
+
+  f.read (_indices.data (), size);
+
+  // - MOVT ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOVT');
+
+  // let's hope it's padded to 12 bytes, not 16...
+  ::math::vector_3d *vertices = reinterpret_cast< ::math::vector_3d*>(f.getPointer ());
+
+  VertexBoxMin = ::math::vector_3d (9999999.0f, 9999999.0f, 9999999.0f);
+  VertexBoxMax = ::math::vector_3d (-9999999.0f, -9999999.0f, -9999999.0f);
+
+  rad = 0;
+
+  for (size_t i = 0; i < size / sizeof (::math::vector_3d); ++i) {
+    ::math::vector_3d v (vertices[i].x, vertices[i].z, -vertices[i].y);
+
+    if (v.x < VertexBoxMin.x) VertexBoxMin.x = v.x;
+    if (v.y < VertexBoxMin.y) VertexBoxMin.y = v.y;
+    if (v.z < VertexBoxMin.z) VertexBoxMin.z = v.z;
+    if (v.x > VertexBoxMax.x) VertexBoxMax.x = v.x;
+    if (v.y > VertexBoxMax.y) VertexBoxMax.y = v.y;
+    if (v.z > VertexBoxMax.z) VertexBoxMax.z = v.z;
+
+    _vertices.push_back (v);
   }
 
-  // ok, make a display list
+  center = (VertexBoxMax + VertexBoxMin) * 0.5f;
+  rad = (VertexBoxMax - center).length () + 300.0f;;
 
-  indoor = (flags & 8192) != 0;
-  //gLog("Lighting: %s %X\n\n", indoor?"Indoor":"Outdoor", flags);
+  f.seekRelative (size);
 
-  initLighting(nLR, useLights);
+  // - MONR ----------------------------------------------
 
-  //dl = gl.genLists(1);
-  //gl.newList(dl, GL_COMPILE);
-  //gl.disable(GL_BLEND);
-  //gl.color4f(1,1,1,1);
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
 
-  /*
-  float xr=0,xg=0,xb=0;
-  if (flags & 0x0040) xr = 1;
-  if (flags & 0x2000) xg = 1;
-  if (flags & 0x8000) xb = 1;
-  gl.color4f(xr,xg,xb,1);
-  */
+  assert (fourcc == 'MONR');
 
-  // generate lists for each batch individually instead
-  _lists.resize(nBatches);
+  _normals.resize (size / sizeof (::math::vector_3d));
 
-  // assume that texturing is on, for unit 1
+  f.read (_normals.data (), size);
 
-  for (int b = 0; b<nBatches; b++)
+  // - MOTV ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOTV');
+
+  _texcoords.resize (size / sizeof (::math::vector_2d));
+
+  f.read (_texcoords.data (), size);
+
+  // - MOBA ----------------------------------------------
+
+  f.read (&fourcc, 4);
+  f.read (&size, 4);
+
+  assert (fourcc == 'MOBA');
+
+  _batches.resize (size / sizeof (wmo_batch));
+  f.read (_batches.data (), size);
+
+  // - MOLR ----------------------------------------------
+  if (header.flags & 0x200)
   {
-    WMOBatch *batch = &batches[b];
-    WMOMaterial *mat = &wmo->mat[batch->texture];
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
 
-    bool overbright = ((mat->flags & 0x10) && !hascv);
-    bool spec_shader = (mat->specular && !hascv && !overbright);
+    assert (fourcc == 'MOLR');
 
-    _lists[b].first = std::make_unique<opengl::call_list>();
-    _lists[b].second = spec_shader;
+    nLR = size / 2;
+    useLights = reinterpret_cast<uint16_t*>(f.getPointer ());
 
-    _lists[b].first->start_recording(GL_COMPILE);
+    f.seekRelative (size);
+  }
+  // - MODR ----------------------------------------------
+  if (header.flags & 0x800)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
 
-    mat->_texture.get()->bind();
+    assert (fourcc == 'MODR');
 
-    bool atest = (mat->transparent) != 0;
+    ddr.resize (size / sizeof (int16_t));
 
-    if (atest) {
-      gl.enable(GL_ALPHA_TEST);
-      float aval = 0;
-      if (mat->flags & 0x80) aval = 0.3f;
-      if (mat->flags & 0x01) aval = 0.0f;
-      gl.alphaFunc(GL_GREATER, aval);
+    f.read (ddr.data (), size);
+  }
+  // - MOBN ----------------------------------------------
+  if (header.flags & 0x1)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MOBN');
+
+    f.seekRelative (size);
+  }
+  // - MOBR ----------------------------------------------
+  if (header.flags & 0x1)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MOBR');
+
+    f.seekRelative (size);
+  }
+  // - MPBV ----------------------------------------------
+  if (header.flags & 0x400)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MPBV');
+
+    f.seekRelative (size);
+  }
+  // - MPBP ----------------------------------------------
+  if (header.flags & 0x400)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MPBP');
+
+    f.seekRelative (size);
+  }
+  // - MPBI ----------------------------------------------
+  if (header.flags & 0x400)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MPBI');
+
+    f.seekRelative (size);
+  }
+  // - MPBG ----------------------------------------------
+  if (header.flags & 0x400)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MPBG');
+
+    f.seekRelative (size);
+  }
+  // - MOCV ----------------------------------------------
+  if (header.flags & 0x4)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MOCV');
+
+    hascv = true;
+
+    uint32_t* colors = reinterpret_cast<uint32_t*> (f.getPointer ());
+    _vertex_colors.resize (size / sizeof (uint32_t));
+
+    for(size_t i (0); i < size / sizeof (uint32_t); ++i)
+    {
+      _vertex_colors[i] = colorFromInt (colors[i]);
     }
 
-    if (mat->flags & 0x04) gl.disable(GL_CULL_FACE);
-    else gl.enable(GL_CULL_FACE);
+    f.seekRelative (size);
+  }
+  // - MLIQ ----------------------------------------------
+  if (header.flags & 0x1000)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
 
-    if (spec_shader) {
-      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorFromInt(mat->col2));
-    }
-    else {
-      math::vector_4d nospec(0, 0, 0, 1);
-      gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, nospec);
-    }
+    assert (fourcc == 'MLIQ');
 
-    if (overbright) {
-      //! \todo  use emissive color from the WMO Material instead of 1,1,1,1
-      GLfloat em[4] = { 1, 1, 1, 1 };
-      gl.materialfv(GL_FRONT, GL_EMISSION, em);
-    }
+    WMOLiquidHeader hlq;
+    f.read(&hlq, 0x1E);
 
-    // render
-    gl.begin(GL_TRIANGLES);
-    for (int t = 0, i = batch->indexStart; t<batch->indexCount; t++, ++i) {
-      int a = indices[i];
-      if (indoor && hascv) {
-        setGLColor(cv[a]);
-      }
-      gl.normal3f(normals[a].x, normals[a].z, -normals[a].y);
-      gl.texCoord2fv(texcoords[a]);
-      gl.vertex3f(vertices[a].x, vertices[a].z, -vertices[a].y);
-    }
-    gl.end();
+    lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
+  }
+  // - MORI ----------------------------------------------
+  if (header.flags & 0x20000)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
 
-    if (overbright) {
-      GLfloat em[4] = { 0, 0, 0, 1 };
-      gl.materialfv(GL_FRONT, GL_EMISSION, em);
-    }
+    assert (fourcc == 'MORI');
 
-    if (atest) {
-      gl.disable(GL_ALPHA_TEST);
-    }
+    f.seekRelative (size);
+  }
+  // - MORB ----------------------------------------------
+  if (header.flags & 0x20000)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
 
-    _lists[b].first->end_recording();
+    assert (fourcc == 'MORB');
+
+    f.seekRelative (size);
+  }
+  // - MOTV ----------------------------------------------
+  if (header.flags & 0x2000000)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MORI');
+
+    f.seekRelative (size);
+  }
+  // - MOCV ----------------------------------------------
+  if (header.flags & 0x1000000)
+  {
+    f.read (&fourcc, 4);
+    f.read (&size, 4);
+
+    assert (fourcc == 'MORI');
+
+    f.seekRelative (size);
   }
 
-  indoor = false;
+  indoor = flags & 8192;
+  initLighting (nLR, useLights);
 }
-
 
 void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 {
   //dl_light = 0;
   // "real" lighting?
-  if ((flags & 0x2000) && hascv) {
-
-    math::vector_3d dirmin(1, 1, 1);
+  if ((flags & 0x2000) && hascv)
+  {
+    ::math::vector_3d dirmin(1, 1, 1);
     float lenmin;
     int lmin;
 
-    for (int i = 0; i<nDoodads; ++i) {
-      lenmin = 999999.0f*999999.0f;
+    for (auto doodad : ddr)
+    {
+      lenmin = 999999.0f * 999999.0f;
       lmin = 0;
-      ModelInstance &mi = wmo->modelis[ddr[i]];
-      for (unsigned int j = 0; j<wmo->nLights; j++) {
-        WMOLight &l = wmo->lights[j];
-        math::vector_3d dir = l.pos - mi.pos;
-        float ll = dir.length_squared();
-        if (ll < lenmin) {
+      ModelInstance& mi = wmo->modelis[doodad];
+      for (unsigned int j = 0; j < wmo->nLights; j++)
+      {
+        WMOLight& l = wmo->lights[j];
+        ::math::vector_3d dir = l.pos - mi.pos;
+        float ll = dir.length_squared ();
+        if (ll < lenmin)
+        {
           lenmin = ll;
           dirmin = dir;
           lmin = j;
@@ -709,7 +1010,8 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
 
     outdoorLights = false;
   }
-  else {
+  else
+  {
     outdoorLights = true;
   }
 }
@@ -730,7 +1032,24 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
   visible = true;
   setupFog();
 
-  if (hascv) {
+  gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
+  gl.vertexPointer (3, GL_FLOAT, 0, 0);
+
+  gl.bindBuffer (GL_ARRAY_BUFFER, _normals_buffer);
+  gl.normalPointer (GL_FLOAT, 0, 0);
+
+  gl.bindBuffer (GL_ARRAY_BUFFER, _texcoords_buffer);
+  gl.texCoordPointer (2, GL_FLOAT, 0, 0);
+
+  if (hascv)
+  {
+    if(indoor)
+    {
+      gl.enableClientState (GL_COLOR_ARRAY);
+      gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
+      gl.colorPointer (4, GL_FLOAT, 0, 0);
+    }
+    
     gl.disable(GL_LIGHTING);
     gWorld->outdoorLights(false);
   }
@@ -744,20 +1063,29 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
     else gl.disable(GL_LIGHTING);
   }
 
+  gl.bindBuffer (GL_ARRAY_BUFFER, 0);
 
-  //gl.callList(dl);
   gl.disable(GL_BLEND);
-  gl.color4f(1, 1, 1, 1);
-  for (int i = 0; i<nBatches; ++i)
+  gl.color4f(1,1,1,1);
+
+  for (wmo_batch& batch : _batches)
   {
-    _lists[i].first->render();
+    WMOMaterial* mat (&wmo->mat.at (batch.texture));
+    scoped_material_setter const material_setter (mat, _vertex_colors.size ());
+
+    mat->_texture.get()->bind();
+
+    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, _indices.data () + batch.index_start);
   }
 
   gl.color4f(1, 1, 1, 1);
   gl.enable(GL_CULL_FACE);
 
   if (hascv && gWorld->lighting)
-    gl.enable(GL_LIGHTING);
+  {
+    gl.disableClientState (GL_COLOR_ARRAY);
+    gl.enable (GL_LIGHTING);
+  }
 }
 
 void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) const
@@ -768,14 +1096,14 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
   }
 
   //! \todo Also allow clicking on doodads and liquids.
-  for (auto&& batch : batches)
+  for (auto&& batch : _batches)
   {
-    for (size_t i (batch.indexStart); i < batch.indexStart + batch.indexCount; i += 3)
+    for (size_t i (batch.index_start); i < batch.index_start + batch.index_count; i += 3)
     {
       if ( auto&& distance
-         = ray.intersect_triangle ( vertices[indices[i + 0]]
-                                  , vertices[indices[i + 1]]
-                                  , vertices[indices[i + 2]]
+         = ray.intersect_triangle ( _vertices[_indices[i + 0]]
+                                  , _vertices[_indices[i + 1]]
+                                  , _vertices[_indices[i + 2]]
                                   )
          )
       {
@@ -787,7 +1115,6 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
 
 void WMOGroup::drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const angle, Frustum const& frustum)
 {
-
   if (!visible) return;
   if (nDoodads == 0) return;
   if (doodadset >= wmo->doodadsets.size()) return;

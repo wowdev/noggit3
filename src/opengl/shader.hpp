@@ -77,6 +77,7 @@ namespace opengl
       template<typename T> void uniform (std::string const&, T) = delete;
 
       void sampler (std::string const& name, GLenum type, GLenum texture_slot, GLint id);
+      void sampler (std::string const& name, GLenum texture_slot, texture*);
 
       void attrib (std::string const& name, std::vector<float> const&);
       void attrib (std::string const& name, std::vector<math::vector_2d> const&);

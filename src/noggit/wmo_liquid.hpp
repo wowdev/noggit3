@@ -4,6 +4,7 @@
 
 // #define USEBLSFILES
 
+#include <math/vector_2d.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/TextureManager.h>
@@ -47,11 +48,10 @@ class wmo_liquid
 {
 public:
   wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, bool indoor);
-
-  void draw() { render->draw(); }
+  void draw() { render->draw ([&] (opengl::scoped::use_program& shader) { draw_actual (shader); }); }
 
 private:
-  int initGeometry(MPQFile* f, opengl::call_list* draw_list);
+  int initGeometry(MPQFile* f);
 
   math::vector_3d pos;
   float texRepeats;
@@ -59,4 +59,11 @@ private:
   int xtiles, ytiles;
 
   std::unique_ptr<liquid_render> render;
+
+  std::vector<float> depths;
+  std::vector<math::vector_2d> tex_coords;
+  std::vector<math::vector_3d> vertices;
+  std::vector<std::uint16_t> indices;
+
+  void draw_actual (opengl::scoped::use_program&);
 };
