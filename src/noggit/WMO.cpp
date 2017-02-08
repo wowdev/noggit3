@@ -1063,6 +1063,8 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
     else gl.disable(GL_LIGHTING);
   }
 
+  gl.bindBuffer (GL_ARRAY_BUFFER, 0);
+
   gl.disable(GL_BLEND);
   gl.color4f(1,1,1,1);
 
