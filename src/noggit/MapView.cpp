@@ -145,8 +145,6 @@ UIFrame* MapChunkWindow;
 
 UIToggleGroup * gFlagsToggleGroup;
 
-UIWindow *settings_paint;
-
 
 void setTextureBrushHardness(float f)
 {
@@ -182,7 +180,7 @@ void setSprayBrushPressure(float f)
 
 void change_settings_window(editing_mode oldid, editing_mode newid)
 {
-  if (oldid == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !settings_paint
+  if (oldid == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !mainGui->settings_paint 
     || !mainGui->shaderTool || !mainGui->guiWater || !mainGui->objectEditor)
   {
     return;
@@ -191,10 +189,11 @@ void change_settings_window(editing_mode oldid, editing_mode newid)
   mainGui->guiWaterTypeSelector->hide();
   mainGui->terrainTool->hide();
   mainGui->flattenTool->hide();
-  settings_paint->hide();
+  mainGui->settings_paint->hide();
   mainGui->shaderTool->hide();
   mainGui->guiWater->hide();
   mainGui->TextureSwitcher->hide();
+  mainGui->TexturePicker->hide();
   mainGui->objectEditor->hide();
   mainGui->objectEditor->filename->hide();
   mainGui->objectEditor->modelImport->hide();
@@ -216,8 +215,8 @@ void change_settings_window(editing_mode oldid, editing_mode newid)
     tool_settings_y = (int)mainGui->flattenTool->y();
     break;
   case editing_mode::paint:
-    tool_settings_x = (int)settings_paint->x();
-    tool_settings_y = (int)settings_paint->y();
+    tool_settings_x = (int)mainGui->settings_paint->x();
+    tool_settings_y = (int)mainGui->settings_paint->y();
     break;
   case editing_mode::areaid:
     tool_settings_x = (int)mainGui->ZoneIDBrowser->x() + 230;
@@ -246,9 +245,9 @@ void change_settings_window(editing_mode oldid, editing_mode newid)
     mainGui->flattenTool->show();
     break;
   case editing_mode::paint:
-    settings_paint->x((const float)tool_settings_x);
-    settings_paint->y((const float)tool_settings_y);
-    settings_paint->show();
+    mainGui->settings_paint->x((const float)tool_settings_x);
+    mainGui->settings_paint->y((const float)tool_settings_y);
+    mainGui->settings_paint->show();
     break;
   case editing_mode::areaid:
     mainGui->ZoneIDBrowser->x((const float)tool_settings_x - 230);
@@ -662,18 +661,17 @@ void MapView::createGUI()
   tool_settings_y = 38;
 
   //3D Paint settings UIWindow
-  settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 280.0f);
-  settings_paint->hide();
-  settings_paint->movable(true);
+  mainGui->settings_paint->hide();
+  mainGui->settings_paint->movable(true);
 
-  mainGui->addChild(settings_paint);
+  mainGui->addChild(mainGui->settings_paint);
 
-  settings_paint->addChild(new UIText(78.5f, 2.0f, "3D Paint", app.getArial14(), eJustifyCenter));
+  mainGui->settings_paint->addChild(new UIText(78.5f, 2.0f, "3D Paint", app.getArial14(), eJustifyCenter));
 
 
   mainGui->G1 = new UIGradient;
   mainGui->G1->width(20.0f);
-  mainGui->G1->x(settings_paint->width() - 4.0f - mainGui->G1->width());
+  mainGui->G1->x(mainGui->settings_paint->width() - 4.0f - mainGui->G1->width());
   mainGui->G1->y(4.0f);
   mainGui->G1->height(92.0f);
   mainGui->G1->setMaxColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -683,57 +681,57 @@ void MapView::createGUI()
   mainGui->G1->setClickFunc ([] (float f) { brushLevel = (1.0f - f)*255.0f; });
   mainGui->G1->setValue(0.0f);
 
-  settings_paint->addChild(mainGui->G1);
+  mainGui->settings_paint->addChild(mainGui->G1);
 
   mainGui->paintHardnessSlider = new UISlider(6.0f, 33.0f, 145.0f, 1.0f, 0.0f);
   mainGui->paintHardnessSlider->setFunc(setTextureBrushHardness);
   mainGui->paintHardnessSlider->setValue(textureBrush.getHardness());
   mainGui->paintHardnessSlider->setText("Hardness: ");
-  settings_paint->addChild(mainGui->paintHardnessSlider);
+  mainGui->settings_paint->addChild(mainGui->paintHardnessSlider);
 
   paint_brush = new UISlider(6.0f, 59.0f, 145.0f, 100.0f, 0.00001f);
   paint_brush->setFunc(setTextureBrushRadius);
   paint_brush->setValue(textureBrush.getRadius() / 100);
   paint_brush->setText("Radius: ");
-  settings_paint->addChild(paint_brush);
+  mainGui->settings_paint->addChild(paint_brush);
 
   mainGui->paintPressureSlider = new UISlider(6.0f, 85.0f, 145.0f, 0.99f, 0.01f);
   mainGui->paintPressureSlider->setFunc(setTextureBrushPressure);
   mainGui->paintPressureSlider->setValue(brushPressure);
   mainGui->paintPressureSlider->setText("Pressure: ");
-  settings_paint->addChild(mainGui->paintPressureSlider);
+  mainGui->settings_paint->addChild(mainGui->paintPressureSlider);
 
-  settings_paint->addChild ( new UICheckBox ( 3.0f, 105.0f
+  mainGui->settings_paint->addChild ( new UICheckBox ( 3.0f, 105.0f
                                             , "Highlight paintable chunks"
                                             , &_highlightPaintableChunks
                                             )
                            );
 
   toggleSpray = new UICheckBox(3.0f, 138.0f, "Spray", &sprayBrushActive);
-  settings_paint->addChild(toggleSpray);
+  mainGui->settings_paint->addChild(toggleSpray);
 
   toggleInnerRadius = new UICheckBox(80.0f, 138.0f, "Inner radius", &innerRadius);
-  settings_paint->addChild(toggleInnerRadius);
+  mainGui->settings_paint->addChild(toggleInnerRadius);
 
   spray_size = new UISlider(6.0f, 180.0f, 170.0f, 40.0f, 0.0001f);
   spray_size->setFunc(setSprayBrushSize);
   spray_size->setValue(brushSpraySize / 40.0f);
   spray_size->setText("Spray size: ");
-  settings_paint->addChild(spray_size);
+  mainGui->settings_paint->addChild(spray_size);
 
   spray_pressure = new UISlider(6.0f, 205.0f, 170.0f, 100.0f, 0.0001f);
   spray_pressure->setFunc(setSprayBrushPressure);
   spray_pressure->setValue(brushSprayPressure / 100.0f);
   spray_pressure->setText("Spray pressure (/1k): ");
-  settings_paint->addChild(spray_pressure);
+  mainGui->settings_paint->addChild(spray_pressure);
 
   UIButton* B1;
   B1 = new UIButton(6.0f, 230.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", []
                    {
                      mainGui->TextureSwitcher->show();
-                     settings_paint->hide();
+                     mainGui->settings_paint->hide();
                    });
-  settings_paint->addChild(B1);
+  mainGui->settings_paint->addChild(B1);
 
   UIButton* rmDup = new UIButton( 6.0f, 255.0f, 170.0f, 30.0f
                                 , "Remove texture duplicates"
@@ -741,7 +739,7 @@ void MapView::createGUI()
                                 , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
                                 , [] { gWorld->removeTexDuplicateOnADT(gWorld->camera); }
                                 );
-  settings_paint->addChild(rmDup);
+  mainGui->settings_paint->addChild(rmDup);
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
   mainGui->TexturePalette->hide();

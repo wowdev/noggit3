@@ -129,6 +129,9 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   TexturePicker->movable(true);
   addChild(TexturePicker);
 
+  // create settings_paint window here otherwise TextureSwitcher use an outdated pointer
+  settings_paint = new UIWindow(video.xres() - 190.0f, 40.0f, 180.0f, 280.0f);
+
   TextureSwitcher = new UITextureSwitcher (video.xres(), 40, settings_paint);
   TextureSwitcher->hide();
   addChild(TextureSwitcher);
