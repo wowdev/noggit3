@@ -40,7 +40,8 @@ void Brush::GenerateTexture()
     }
     y += change;
   }
-  _texture.bind();
+  _texture.reset (new opengl::texture);
+  _texture->bind();
   gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 256, 256, 0, GL_ALPHA, GL_UNSIGNED_BYTE, tex);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -79,7 +80,7 @@ float Brush::getValue(float dist)
 }
 opengl::texture* Brush::getTexture()
 {
-  return &_texture;
+  return _texture.get();
 }
 bool Brush::needUpdate()
 {

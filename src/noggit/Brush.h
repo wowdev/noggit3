@@ -4,6 +4,8 @@
 
 #include <opengl/texture.hpp>
 
+#include <memory>
+
 class Brush
 {
 private:
@@ -11,7 +13,7 @@ private:
   float iradius;
   float oradius;
   float radius;
-  opengl::texture _texture;
+  std::unique_ptr<opengl::texture> _texture;
   char tex[256 * 256];
   bool update;
 
