@@ -18,25 +18,28 @@ namespace
   }
 }
 
-uint32_t Mysql::getGUIDFromDB()
+namespace mysql
 {
-  auto Con (connect (*Settings::getInstance()->mysql));
-  std::unique_ptr<sql::PreparedStatement> pstmt (Con->prepareStatement ("SELECT UID FROM UIDs"));
-  std::unique_ptr<sql::ResultSet> res (pstmt->executeQuery());
-
-  uint32_t highGUID (0);
-  while (res->next())
+  uint32_t getGUIDFromDB()
   {
-	  highGUID = res->getInt (1);
+    auto Con (connect (*Settings::getInstance()->mysql));
+    std::unique_ptr<sql::PreparedStatement> pstmt (Con->prepareStatement ("SELECT UID FROM UIDs"));
+    std::unique_ptr<sql::ResultSet> res (pstmt->executeQuery());
+
+    uint32_t highGUID (0);
+    while (res->next())
+    {
+      highGUID = res->getInt (1);
+    }
+
+    return highGUID;
   }
 
-  return highGUID;
-}
-
-void Mysql::UpdateUIDInDB(uint32_t NewUID)
-{
-  auto Con (connect (*Settings::getInstance()->mysql));
-  std::unique_ptr<sql::PreparedStatement> pstmt (Con->prepareStatement ("UPDATE UIDs SET UID=(?)"));
-  pstmt->setInt (1, NewUID);
-  pstmt->executeUpdate();
+  void UpdateUIDInDB(uint32_t NewUID)
+  {
+    auto Con (connect (*Settings::getInstance()->mysql));
+    std::unique_ptr<sql::PreparedStatement> pstmt (Con->prepareStatement ("UPDATE UIDs SET UID=(?)"));
+    pstmt->setInt (1, NewUID);
+    pstmt->executeUpdate();
+  }
 }
