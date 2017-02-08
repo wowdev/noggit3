@@ -43,21 +43,27 @@ namespace opengl
         }
 
         std::string errors;
-        while (GLenum error = glGetError())
-        {
-          switch (error)
-          {
-          case GL_INVALID_ENUM: errors += " GL_INVALID_ENUM"; break;
-          case GL_INVALID_FRAMEBUFFER_OPERATION: errors += " GL_INVALID_FRAMEBUFFER_OPERATION"; break;
-          case GL_INVALID_OPERATION: errors += " GL_INVALID_OPERATION"; break;
-          case GL_INVALID_VALUE: errors += " GL_INVALID_VALUE"; break;
-          case GL_OUT_OF_MEMORY: errors += " GL_OUT_OF_MEMORY"; break;
-          case GL_STACK_OVERFLOW: errors += " GL_STACK_OVERFLOW"; break;
-          case GL_STACK_UNDERFLOW: errors += " GL_STACK_UNDERFLOW"; break;
-          case GL_TABLE_TOO_LARGE: errors += " GL_TABLE_TOO_LARGE"; break;
-          default: errors += " UNKNOWN_ERROR"; break;
-          }
-        }
+		GLenum last_error(0);
+		while (GLenum error = glGetError())
+		{
+			if (error == last_error)
+			{
+				break;
+			}
+			switch (error)
+			{
+			case GL_INVALID_ENUM: errors += " GL_INVALID_ENUM"; break;
+			case GL_INVALID_FRAMEBUFFER_OPERATION: errors += " GL_INVALID_FRAMEBUFFER_OPERATION"; break;
+			case GL_INVALID_OPERATION: errors += " GL_INVALID_OPERATION"; break;
+			case GL_INVALID_VALUE: errors += " GL_INVALID_VALUE"; break;
+			case GL_OUT_OF_MEMORY: errors += " GL_OUT_OF_MEMORY"; break;
+			case GL_STACK_OVERFLOW: errors += " GL_STACK_OVERFLOW"; break;
+			case GL_STACK_UNDERFLOW: errors += " GL_STACK_UNDERFLOW"; break;
+			case GL_TABLE_TOO_LARGE: errors += " GL_TABLE_TOO_LARGE"; break;
+			default: errors += " UNKNOWN_ERROR"; break;
+			}
+			last_error = error;
+		}
         if (!errors.empty())
         {
           errors += _extra_info();
