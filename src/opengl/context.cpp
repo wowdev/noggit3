@@ -43,19 +43,9 @@ namespace opengl
         }
 
         std::string errors;
-        GLenum last_error(0);
-        while (GLenum error = glGetError())
+        std::size_t error_count;
+        while (GLenum error = glGetError() && error_count < 10)
         {
-          //! HACK: this should not happen, and only does because
-          //! glGetError is called before initialization and on
-          //! Windows, glGetError() does not return 0 on own error but
-          //! GL_INVALID_OPERATION, which is just wrong in the API.
-          if (error == last_error)
-          {
-            break;
-          }
-          last_error = error;
-
           switch (error)
           {
           case GL_INVALID_ENUM: errors += " GL_INVALID_ENUM"; break;
@@ -68,6 +58,13 @@ namespace opengl
           case GL_TABLE_TOO_LARGE: errors += " GL_TABLE_TOO_LARGE"; break;
           default: errors += " UNKNOWN_ERROR"; break;
           }
+
+          ++error_count;
+        }
+
+        if (error_count == 10 && glGetError())
+        {
+          errors += " and more...";
         }
 
         if (!errors.empty())
