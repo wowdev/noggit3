@@ -578,7 +578,12 @@ uint32_t MapIndex::newGUIDDB()
 uint32_t MapIndex::newGUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
-  return newGUIDDB();
+  if (Settings::getInstance()->mysql) {
+    return newGUIDDB();
+  }
+  else {
+  return ++highestGUID;
+  }
 #else
   return ++highestGUID;
 #endif
