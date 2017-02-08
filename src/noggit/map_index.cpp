@@ -8,7 +8,7 @@
 #include <noggit/Project.h>
 #include <noggit/World.h>
 #ifdef USE_MYSQL_UID_STORAGE
-  #include <noggit/mysql.h>
+  #include <mysql/mysql.h>
 #endif
 #include <noggit/map_index.hpp>
 #include <noggit/uid_storage.hpp>
