@@ -1,22 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
- #include <noggit/mysql.h>
- #include <noggit/Settings.h>
- #include <external/mysql/connector/cppconn/driver.h>
- #include <external/mysql/connector/cppconn/prepared_statement.h>
-
-#include <noggit/MPQ.h>
-#include <noggit/MapChunk.h>
-#include <noggit/MapChunk.h>
-#include <noggit/MapTile.h>
-#include <noggit/Misc.h>
-#include <noggit/Project.h>
-#include <noggit/World.h>
+#include <noggit/Settings.h>
 #include <noggit/mysql.h>
-#include <noggit/map_index.hpp>
-#include <noggit/uid_storage.hpp>
 
-#include <boost/range/adaptor/map.hpp>
+#include <cppconn/driver.h>
+#include <cppconn/prepared_statement.h>
 
 #include <forward_list>
 
