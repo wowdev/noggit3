@@ -193,3 +193,15 @@ void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
   }
   
 }
+
+void UIWater::toggle_lock()
+{
+  _locked = !_locked;
+  _lock_checkbox->setState(_locked);
+}
+
+void UIWater::toggle_angled_mode()
+{
+  _angled_mode = !_angled_mode;
+  _angle_checkbox->setState(_angled_mode);
+}

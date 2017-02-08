@@ -1073,6 +1073,16 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::holes; }
             );
 
+  addHotkey( SDLK_t
+           , MOD_none
+           , [&]
+             {
+               mainGui->guiWater->toggle_angled_mode();
+             }
+          , [&] { return terrainMode == editing_mode::water; }
+          );
+
+
   addHotkey ( SDLK_t
             , MOD_none
             , [&]
@@ -1172,7 +1182,14 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                mainGui->guiWater->lockPos(_cursor_pos);
+                if (_mod_space_down)
+                {
+                  mainGui->guiWater->toggle_lock();
+                }
+                else
+                {
+                  mainGui->guiWater->lockPos(_cursor_pos);
+                }
               }
           , [&] { return terrainMode == editing_mode::water; }
           );
@@ -2535,6 +2552,21 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
         spray_pressure->setValue(brushSprayPressure / 100.0f);
       }
     }
+    else if (terrainMode == editing_mode::water)
+    {
+      if (_mod_alt_down)
+      {
+        mainGui->guiWater->changeOrientation(_mod_ctrl_down ? 1.0f : 10.0f);
+      }
+      else if (_mod_shift_down)
+      {
+        mainGui->guiWater->changeAngle(_mod_ctrl_down ? 0.2f : 2.0f);
+      }
+      else if (_mod_space_down)
+      {
+        mainGui->guiWater->change_height(_mod_ctrl_down ? 0.1f : 1.0f);
+      }
+    }
     break;
   case SDL_BUTTON_WHEELDOWN:
     if (terrainMode == editing_mode::ground)
@@ -2579,6 +2611,21 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
       {
         brushSprayPressure = std::max(0.0f, brushSprayPressure - 2.5f);
         spray_pressure->setValue(brushSprayPressure / 100.0f);
+      }
+    }
+    else if (terrainMode == editing_mode::water)
+    {
+      if (_mod_alt_down)
+      {
+        mainGui->guiWater->changeOrientation(_mod_ctrl_down ? -1.0f : -10.0f);
+      }
+      else if (_mod_shift_down)
+      {
+        mainGui->guiWater->changeAngle(_mod_ctrl_down ? -0.2f : -2.0f);
+      }
+      else if (_mod_space_down)
+      {
+        mainGui->guiWater->change_height(_mod_ctrl_down ? -0.1f : -1.0f);
       }
     }
     break;
