@@ -6,6 +6,7 @@
 
 #include <csignal>
 #include <string>
+#include <vector>
 
 void printStacktrace();
 
