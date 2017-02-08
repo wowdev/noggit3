@@ -18,6 +18,10 @@ following libraries:
 * Boost
 * SDL 1.2
 
+Further following libraries are required for MySQL GUID Storage builts:
+* LibMySQL
+* MySQLCPPConn
+
 For Windows there is a repo with all needed libs to compile noggit3.
 Read the description there before you start.
 
