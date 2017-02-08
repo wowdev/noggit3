@@ -21,6 +21,11 @@ public:
 
   bool tabletMode;
   bool renderModelsWithBox;
+  bool MysqlUse;
+  std::string Server;
+  std::string User;
+  std::string Pass;
+  std::string Database;
 
   const bool& noAntiAliasing() const;
 
