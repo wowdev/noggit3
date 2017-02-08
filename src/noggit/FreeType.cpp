@@ -70,7 +70,7 @@ namespace freetype
     GlyphData glyphData;
     glyphData._width = _face->glyph->advance.x >> 6;
 
-    glyphData._texture = new OpenGL::Texture();
+    glyphData._texture = new opengl::texture();
     glyphData._texture->bind();
 
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -179,7 +179,6 @@ namespace freetype
     gl.color3f(colorR, colorG, colorB);
 
     gl.pushAttrib(GL_LIST_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_TRANSFORM_BIT);
-    gl.matrixMode(GL_MODELVIEW);
     gl.disable(GL_LIGHTING);
     opengl::texture::enable_texture();
     gl.disable(GL_DEPTH_TEST);

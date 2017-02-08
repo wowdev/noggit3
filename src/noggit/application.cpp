@@ -33,6 +33,7 @@ static LOGCONTEXT  glogContext = { 0 };
 #include <noggit/Video.h>
 #include <noggit/WMO.h> // WMOManager::report()
 #include <noggit/errorHandling.h>
+#include <opengl/context.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/thread/thread.hpp>
@@ -51,7 +52,6 @@ static LOGCONTEXT  glogContext = { 0 };
 
 Noggit app;
 void CreateStrips();
-extern std::list<std::string> gListfile;
 
 Noggit::Noggit()
   : fullscreen(false)
@@ -264,6 +264,7 @@ boost::filesystem::path Noggit::getGamePath()
 
 
 #ifdef _WIN32
+	int test = Native::showAlertDialog("Foo", "Bar");
     Log << "Will try to load the game path from you registry now:" << std::endl;
     HKEY key;
     DWORD t;
@@ -407,7 +408,7 @@ void Noggit::loadMPQs()
   }
 }
 
-void Noggit::mainLoop()
+void Noggit::mainLoop (SDL_Surface* primary)
 {
   uint32_t timeA, timeB, diff;
   bool done(false);
@@ -441,7 +442,7 @@ void Noggit::mainLoop()
       const float ftickDelta(tickDelta / 1000.0f);
       activeAppState->tick(ftime, ftickDelta);
       activeAppState->display(ftime, ftickDelta);
-      video.flip();
+      SDL_GL_SwapBuffers();
     }
     else
     {
@@ -460,7 +461,8 @@ void Noggit::mainLoop()
       }
       else if (event.type == SDL_VIDEORESIZE)
       {
-        video.resize(event.resize.w, event.resize.h);
+        primary = SDL_SetVideoMode (event.resize.w, event.resize.h, 0, primary->flags);
+        video.resize (event.resize.w, event.resize.h);
         activeAppState->resizewindow();
       }
       else if (hasInputFocus)
@@ -538,16 +540,72 @@ int Noggit::start(int argc, char *argv[])
   loadMPQs(); // listfiles are not available straight away! They are async! Do not rely on anything at this point!
   OpenDBs();
 
-  if (!video.init(xres, yres, fullscreen, doAntiAliasing))
+  if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO))
   {
-    LogError << "Initializing video failed." << std::endl;
+    LogError << "SDL: " << SDL_GetError() << std::endl;
+    return -2;
+  }
+
+  int flags = SDL_OPENGL | SDL_HWSURFACE | SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
+  if (fullscreen)
+  {
+    flags |= SDL_FULLSCREEN;
+  }
+
+  SDL_GL_SetAttribute (SDL_GL_DOUBLEBUFFER, 1);
+  SDL_GL_SetAttribute (SDL_GL_STENCIL_SIZE, 1);
+  SDL_GL_SetAttribute (SDL_GL_DEPTH_SIZE, 24);
+  SDL_GL_SetAttribute (SDL_GL_RED_SIZE, 8);
+  SDL_GL_SetAttribute (SDL_GL_GREEN_SIZE, 8);
+  SDL_GL_SetAttribute (SDL_GL_BLUE_SIZE, 8);
+  SDL_GL_SetAttribute (SDL_GL_ALPHA_SIZE, 8);
+  if (doAntiAliasing)
+  {
+    SDL_GL_SetAttribute (SDL_GL_MULTISAMPLEBUFFERS, 1);
+    //! \todo Make sample count configurable.
+    SDL_GL_SetAttribute (SDL_GL_MULTISAMPLESAMPLES, 4);
+  }
+
+  SDL_Surface* primary (SDL_SetVideoMode (xres, yres, 0, flags));
+
+  if (!primary)
+  {
+    LogError << "SDL: " << SDL_GetError() << std::endl;
+    return -2;
+  }
+
+  GLenum err = glewInit();
+  if (GLEW_OK != err)
+  {
+    LogError << "GLEW: " << glewGetErrorString(err) << std::endl;
+    return -3;
+  }
+
+  gl.enableClientState (GL_VERTEX_ARRAY);
+  gl.enableClientState (GL_NORMAL_ARRAY);
+  gl.enableClientState (GL_TEXTURE_COORD_ARRAY);
+
+  LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
+  LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
+  LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
+
+  if (doAntiAliasing)
+  {
+    gl.enable(GL_MULTISAMPLE);
+  }
+
+  video.init(xres, yres);
+
+  if (!GLEW_ARB_texture_compression)
+  {
+    LogError << "You GPU does not support ARB texture compression. Initializing video failed." << std::endl;
     return -1;
   }
 
   SDL_WM_SetCaption("Noggit Studio - " STRPRODUCTVER, "");
   initFont();
 
-  if (video.mSupportShaders)
+  if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program)
     loadWaterShader();
   else
     LogError << "Your GPU does not support ARB vertex programs (shaders). Sorry." << std::endl;
@@ -556,9 +614,10 @@ int Noggit::start(int argc, char *argv[])
   states.push_back(new Menu());
 
   LogDebug << "Entering Main Loop" << std::endl;
-  mainLoop();
+  mainLoop (primary);
 
-  video.close();
+  SDL_FreeSurface(primary);
+  SDL_Quit();
 
   TextureManager::report();
   ModelManager::report();

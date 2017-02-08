@@ -37,8 +37,6 @@ int pal_cols;
 //! \todo  Maybe get this out?
 bool gFilenameFiltersInited = false;
 
-extern std::list<std::string> gListfile;
-
 std::map<int, std::string> gFilenameFilters;
 std::vector<std::string> gActiveFilenameFilters;
 std::vector<std::string> gActiveDirectoryFilters;
@@ -93,9 +91,9 @@ void LoadTextureNames()
 
   while (!MPQArchive::allFinishedLoading()) MPQArchive::allFinishLoading(); // wait for listfiles.
 
-  for (std::list<std::string>::iterator it = gListfile.begin(); it != gListfile.end(); ++it)
+  for (std::string const& entry : gListfile)
   {
-    auto&& normalized (noggit::mpq::normalized_filename (*it));
+    auto&& normalized (noggit::mpq::normalized_filename (entry));
     if (normalized.find("tileset") != std::string::npos)
     {
       tilesetsfound = true;

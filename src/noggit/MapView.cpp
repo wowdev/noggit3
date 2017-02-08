@@ -22,6 +22,7 @@
 #include <noggit/map_index.hpp>
 #include <noggit/ui/AppInfo.h> // appInfo
 #include <noggit/ui/CapsWarning.h>
+#include <noggit/ui/scWarning.h>
 #include <noggit/ui/CheckBox.h> // UICheckBox
 #include <noggit/ui/CursorSwitcher.h> // UICursorSwitcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
@@ -760,8 +761,11 @@ void MapView::createGUI()
   mbar->AddMenu("Assist");
   mbar->AddMenu("Help");
 
-  // mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [] { gWorld->mapIndex->saveTile(tile_index(gWorld->camera)); });
+  mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [] { mainGui->scWarning->show(); });
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex->saveChanged(); });
+  mbar->GetMenu("File")->AddMenuItemButton("CTRL+SHIFT+A Save all", [] { gWorld->mapIndex->saveall(); });
+  addHotkey(SDLK_s, MOD_ctrl + MOD_shift, [this] { savecurrent(); });
+  addHotkey(SDLK_a, MOD_ctrl + MOD_shift, [this] { saveall(); });
   addHotkey (SDLK_s, MOD_ctrl, [this] { save(); });
   addHotkey (SDLK_s, MOD_meta, [this] { save(); });
   mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
@@ -1292,6 +1296,11 @@ void MapView::createGUI()
   mainGui->capsWarning = new UICapsWarning;
   mainGui->capsWarning->hide();
   mainGui->addChild(mainGui->capsWarning);
+
+  // Save current warning
+  mainGui->scWarning = new UISaveCurrentWarning (mainGui);
+  mainGui->scWarning->hide();
+  mainGui->addChild(mainGui->scWarning);
 
   // Water unable to save warning
   mainGui->waterSaveWarning = new UIWaterSaveWarning;
@@ -2047,6 +2056,16 @@ void MapView::save()
   gWorld->mapIndex->saveChanged();
 }
 
+void MapView::saveall()
+{
+  gWorld->mapIndex->saveall();
+}
+
+void MapView::savecurrent()
+{
+  mainGui->scWarning->show();
+}
+
 void MapView::quit()
 {
   app.pop = true;
@@ -2265,7 +2284,7 @@ void MapView::inserObjectFromExtern(int model)
 
 void MapView::mousemove(SDL_MouseMotionEvent *e)
 {
-  if ((look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down)) || video.fullscreen())
+  if (look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down))
   {
     ah += e->xrel / XSENS;
     av += mousedir * e->yrel / YSENS;

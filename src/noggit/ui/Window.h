@@ -8,8 +8,6 @@
 #include <noggit/ui/Frame.h>
 #include <noggit/TextureManager.h>
 
-namespace OpenGL { class Texture; }
-
 class UIWindow : public UIFrame
 {
 public:

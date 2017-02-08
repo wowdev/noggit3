@@ -128,7 +128,7 @@ struct ModelLight {
   //Animation::M2Value<bool> Enabled;
 
   ModelLight(const MPQFile&  f, const ModelLightDef &mld, int *global);
-  void setup(int time, OpenGL::Light l);
+  void setup(int time, opengl::light l);
 };
 
 class Model : public AsyncObject {
@@ -171,8 +171,8 @@ class Model : public AsyncObject {
   void animate(int anim);
   void calcBones(int anim, int time);
 
-  void lightsOn(OpenGL::Light lbase);
-  void lightsOff(OpenGL::Light lbase);
+  void lightsOn(opengl::light lbase);
+  void lightsOff(opengl::light lbase);
 
 public:
   std::string _filename; //! \todo ManagedItem already has a name. Use that?

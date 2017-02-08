@@ -167,6 +167,8 @@ public:
   void setAdt(bool value);
 
   void save();
+  void saveall();
+  void savecurrent();
 
   MapTile* getTile(const tile_index& tile) const;
   MapTile* getTileAbove(MapTile* tile) const;

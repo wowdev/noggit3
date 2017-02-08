@@ -8,16 +8,17 @@
 #include <map>
 #include <string>
 
-#include <opengl/call_list.hpp>
-#include <noggit/Video.h>
 #include <noggit/MPQ.h>
+#include <noggit/Video.h>
+#include <opengl/call_list.hpp>
+#include <opengl/texture.hpp>
 
 namespace freetype
 {
   struct GlyphData
   {
     opengl::call_list* _callList;
-    OpenGL::Texture* _texture;
+    opengl::texture* _texture;
     int _width;
 
     inline void render() const

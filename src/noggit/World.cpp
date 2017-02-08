@@ -86,7 +86,7 @@ namespace
       draw_square(pos, inner_radius, orientation);
     }
   }
-  
+
 
   std::size_t const sphere_segments (15);
   void draw_sphere_point (int i, int j, float radius)
@@ -1081,7 +1081,7 @@ void main()
   gl.disable(GL_ALPHA_TEST);
 
   // TEMP: for fucking around with lighting
-  for (OpenGL::Light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
+  for (opengl::light light = GL_LIGHT0; light < GL_LIGHT0 + 8; ++light)
   {
     gl.lightf(light, GL_CONSTANT_ATTENUATION, l_const);
     gl.lightf(light, GL_LINEAR_ATTENUATION, l_linear);
@@ -1608,7 +1608,7 @@ void World::saveMap()
 
       ATile->drawTextures();
       gl.readPixels(video.xres() / 2 - 128, video.yres() / 2 - 128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
-      video.flip();
+
       std::stringstream ss;
       ss << basename.c_str() << "_map_" << x << "_" << y << ".raw";
       fid = fopen(ss.str().c_str(), "wb");

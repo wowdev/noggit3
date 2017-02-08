@@ -2,19 +2,27 @@
 
 #pragma once
 
-#include <noggit/Video.h>
 #include <noggit/multimap_with_normalized_key.hpp>
+#include <opengl/texture.hpp>
 
 #include <map>
 #include <string>
 #include <vector>
 
-struct blp_texture : public OpenGL::Texture
+struct BLPHeader;
+
+struct blp_texture : public opengl::texture
 {
-  blp_texture (std::string filename)
-  {
-    loadFromBLP (filename);
-  }
+  blp_texture (std::string const& filename);
+
+  void loadFromUncompressedData(BLPHeader* lHeader, char* lData);
+  void loadFromCompressedData(BLPHeader* lHeader, char* lData);
+
+  const std::string& filename();
+private:
+  int _width;
+  int _height;
+  std::string _filename;
 };
 
 struct scoped_blp_texture_reference;

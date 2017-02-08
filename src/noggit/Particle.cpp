@@ -2,6 +2,7 @@
 
 #include <noggit/Misc.h>
 #include <noggit/Particle.h>
+#include <opengl/context.hpp>
 
 #include <list>
 
