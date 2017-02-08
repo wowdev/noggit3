@@ -19,6 +19,7 @@ following libraries:
 * SDL 1.2
 
 Further following libraries are required for MySQL GUID Storage builts:
+
 * LibMySQL
 * MySQLCPPConn
 
