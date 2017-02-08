@@ -43,27 +43,33 @@ namespace opengl
         }
 
         std::string errors;
-		GLenum last_error(0);
-		while (GLenum error = glGetError())
-		{
-			if (error == last_error)
-			{
-				break;
-			}
-			switch (error)
-			{
-			case GL_INVALID_ENUM: errors += " GL_INVALID_ENUM"; break;
-			case GL_INVALID_FRAMEBUFFER_OPERATION: errors += " GL_INVALID_FRAMEBUFFER_OPERATION"; break;
-			case GL_INVALID_OPERATION: errors += " GL_INVALID_OPERATION"; break;
-			case GL_INVALID_VALUE: errors += " GL_INVALID_VALUE"; break;
-			case GL_OUT_OF_MEMORY: errors += " GL_OUT_OF_MEMORY"; break;
-			case GL_STACK_OVERFLOW: errors += " GL_STACK_OVERFLOW"; break;
-			case GL_STACK_UNDERFLOW: errors += " GL_STACK_UNDERFLOW"; break;
-			case GL_TABLE_TOO_LARGE: errors += " GL_TABLE_TOO_LARGE"; break;
-			default: errors += " UNKNOWN_ERROR"; break;
-			}
-			last_error = error;
-		}
+        GLenum last_error(0);
+        while (GLenum error = glGetError())
+        {
+          //! HACK: this should not happen, and only does because
+          //! glGetError is called before initialization and on
+          //! Windows, glGetError() does not return 0 on own error but
+          //! GL_INVALID_OPERATION, which is just wrong in the API.
+          if (error == last_error)
+          {
+            break;
+          }
+          last_error = error;
+
+          switch (error)
+          {
+          case GL_INVALID_ENUM: errors += " GL_INVALID_ENUM"; break;
+          case GL_INVALID_FRAMEBUFFER_OPERATION: errors += " GL_INVALID_FRAMEBUFFER_OPERATION"; break;
+          case GL_INVALID_OPERATION: errors += " GL_INVALID_OPERATION"; break;
+          case GL_INVALID_VALUE: errors += " GL_INVALID_VALUE"; break;
+          case GL_OUT_OF_MEMORY: errors += " GL_OUT_OF_MEMORY"; break;
+          case GL_STACK_OVERFLOW: errors += " GL_STACK_OVERFLOW"; break;
+          case GL_STACK_UNDERFLOW: errors += " GL_STACK_UNDERFLOW"; break;
+          case GL_TABLE_TOO_LARGE: errors += " GL_TABLE_TOO_LARGE"; break;
+          default: errors += " UNKNOWN_ERROR"; break;
+          }
+        }
+
         if (!errors.empty())
         {
           errors += _extra_info();
