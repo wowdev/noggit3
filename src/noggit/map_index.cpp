@@ -573,7 +573,7 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
 
 uint32_t MapIndex::getHighestGUIDFromDB() const
 {
-	return mysql::getGUIDFromDB();
+	return mysql::getGUIDFromDB (*Settings::getInstance()->mysql);
 }
 
 uint32_t MapIndex::newGUID()
@@ -585,7 +585,7 @@ uint32_t MapIndex::newGUIDDB()
 {
   highestGUIDDB = std::max(highestGUIDDB, getHighestGUIDFromDB());
   highGUIDDB = ++highestGUIDDB;
-  mysql::UpdateUIDInDB(highGUIDDB);
+  mysql::UpdateUIDInDB(*Settings::getInstance()->mysql, highGUIDDB);
   return highGUIDDB;
 }
 

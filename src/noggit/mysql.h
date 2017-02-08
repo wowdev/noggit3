@@ -2,10 +2,12 @@
 
 #pragma once
 
+#include <noggit/Settings.h>
+
 #include <cstdint>
 
 namespace mysql
 {
-  std::uint32_t getGUIDFromDB();
-  void UpdateUIDInDB (std::uint32_t NewUID);
+  std::uint32_t getGUIDFromDB (Settings::mysql_connection_info const& info);
+  void UpdateUIDInDB (Settings::mysql_connection_info const& info, std::uint32_t NewUID);
 };
