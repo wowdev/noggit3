@@ -180,7 +180,7 @@ void setSprayBrushPressure(float f)
 
 void change_settings_window(editing_mode oldid, editing_mode newid)
 {
-  if (oldid == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !mainGui->settings_paint 
+  if (oldid == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !mainGui->settings_paint
     || !mainGui->shaderTool || !mainGui->guiWater || !mainGui->objectEditor)
   {
     return;
@@ -1903,26 +1903,34 @@ void MapView::tick(float t, float dt)
 selection_result MapView::intersect_result(bool terrain_only)
 {
   math::vector_3d const pos
-  (((math::look_at(gWorld->camera, gWorld->lookat, { 0.0f, 1.0f, 0.0f }).transposed()
-    * math::perspective(video.fov(), video.ratio(), video.nearclip(), video.farclip()).transposed()
-    ).inverted().transposed()
-    * video.normalized_device_coords(Environment::getInstance()->screenX
-      , Environment::getInstance()->screenY
-    )
-    ).xyz_normalized_by_w()
-  );
+    ( ( ( math::look_at ( gWorld->camera
+                        , gWorld->lookat
+                        , { 0.0f, 1.0f, 0.0f }
+                        ).transposed()
+        * math::perspective ( video.fov()
+                            , video.ratio()
+                            , video.nearclip()
+                            , video.farclip()
+                            ).transposed()
+        ).inverted().transposed()
+      * video.normalized_device_coords ( Environment::getInstance()->screenX
+                                       , Environment::getInstance()->screenY
+                                       )
+      ).xyz_normalized_by_w()
+    );
 
-  math::ray ray(gWorld->camera, pos - gWorld->camera);
+  math::ray ray (gWorld->camera, pos - gWorld->camera);
 
-  selection_result results(gWorld->intersect(ray, terrain_only, terrainMode == editing_mode::object));
+  selection_result results
+    (gWorld->intersect(ray, terrain_only, terrainMode == editing_mode::object));
 
-  std::sort(results.begin()
-    , results.end()
-    , [](selection_entry const& lhs, selection_entry const& rhs)
-  {
-    return lhs.first < rhs.first;
-  }
-  );
+  std::sort ( results.begin()
+            , results.end()
+            , [](selection_entry const& lhs, selection_entry const& rhs)
+              {
+                return lhs.first < rhs.first;
+              }
+            );
 
   return results;
 }
@@ -1949,7 +1957,7 @@ void MapView::doSelection (bool selectTerrainOnly)
 
 void MapView::update_cursor_pos()
 {
-  selection_result results(intersect_result(true));
+  selection_result results (intersect_result (true));
 
   if (!results.empty())
   {
@@ -2045,8 +2053,8 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
     radius = mainGui->terrainTool->brushRadius();
     inner_radius = mainGui->terrainTool->innerRadius();
     break;
-  case editing_mode::flatten_blur: 
-    radius = mainGui->flattenTool->brushRadius(); 
+  case editing_mode::flatten_blur:
+    radius = mainGui->flattenTool->brushRadius();
     angle = mainGui->flattenTool->angle();
     orientation = mainGui->flattenTool->orientation();
     ref_pos = mainGui->flattenTool->ref_pos();
@@ -2057,16 +2065,16 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
     radius = textureBrush.getRadius();
     hardness = textureBrush.getHardness();
     break;
-  case editing_mode::water: 
-    radius = mainGui->guiWater->brushRadius(); 
+  case editing_mode::water:
+    radius = mainGui->guiWater->brushRadius();
     angle = mainGui->guiWater->angle();
     orientation = mainGui->guiWater->orientation();
     ref_pos = mainGui->guiWater->ref_pos();
     angled_mode = mainGui->guiWater->angled_mode();
     use_ref_pos = mainGui->guiWater->use_ref_pos();
     break;
-  case editing_mode::mccv: 
-    radius = mainGui->shaderTool->brushRadius(); 
+  case editing_mode::mccv:
+    radius = mainGui->shaderTool->brushRadius();
     break;
   }
 
