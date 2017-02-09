@@ -502,7 +502,20 @@ int Noggit::start(int argc, char *argv[])
   wowpath = getGamePath();
 
   if (wowpath == "")
+  {
+    LogError << "Empty wow path" << std::endl;
     return -1;
+  }
+
+  boost::filesystem::path data_path = wowpath;
+  data_path.concat("data/");
+
+  if (!boost::filesystem::exists(data_path))
+  {
+    LogError << "Could not find data directory: " << data_path << std::endl;
+    return -1;
+  }
+    
   Log << "Game path: " << wowpath << std::endl;
 
   if (Project::getInstance()->getPath() == "")
@@ -621,35 +634,7 @@ int main(int argc, char *argv[])
   return app.start(argc, argv);
 }
 
-//! \todo  Get this out?
-//gFileList = new Directory( "root" );
-//size_t found;
-// This is an example with filter:
-/*
-std::vector<std::string>::iterator it;
-for( it = gListfile.begin(); it != gListfile.end(); ++it )
-{
-if( it->find( pFilter ) != std::string::npos )
-{
-found = it->find_last_of("/\\");
-if( found != std::string::npos )
-mDirectory->AddSubDirectory( it->substr(0,found) )->AddFile( it->substr(found+1) );
-else
-mDirectory->AddFile( *it );
-}
-}
-*/
-// This is an example for getting all files in the list.
-/*  std::list<std::string>::iterator it;
-for( it = gListfile.begin(); it != gListfile.end(); ++it )
-{
-found = it->find_last_of("/\\");
-if( found != std::string::npos )
-gFileList->AddSubDirectory( it->substr(0,found) )->AddFile( it->substr(found+1) );
-else
-gFileList->AddFile( *it );
-}
-*/
+
 #ifdef _WIN32
 HCTX static NEAR TabletInit(HWND hWnd)
 {
