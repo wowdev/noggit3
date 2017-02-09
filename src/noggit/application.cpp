@@ -507,8 +507,7 @@ int Noggit::start(int argc, char *argv[])
     return -1;
   }
 
-  boost::filesystem::path data_path = wowpath;
-  data_path.concat("data/");
+  boost::filesystem::path data_path = wowpath / "Data";
 
   if (!boost::filesystem::exists(data_path))
   {
