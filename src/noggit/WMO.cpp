@@ -931,33 +931,32 @@ void WMOGroup::load()
 
     lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
   }
-  // - MORI ----------------------------------------------
   if (header.flags & 0x20000)
   {
+    // - MORI ----------------------------------------------
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MORI');
 
     f.seekRelative (size);
-  }
-  // - MORB ----------------------------------------------
-  if (header.flags & 0x20000)
-  {
-    f.read (&fourcc, 4);
-    f.read (&size, 4);
 
-    assert (fourcc == 'MORB');
+    // - MORB ----------------------------------------------
+    f.read(&fourcc, 4);
+    f.read(&size, 4);
 
-    f.seekRelative (size);
+    assert(fourcc == 'MORB');
+
+    f.seekRelative(size);
   }
+  
   // - MOTV ----------------------------------------------
   if (header.flags & 0x2000000)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
-    assert (fourcc == 'MORI');
+    assert (fourcc == 'MOTV');
 
     f.seekRelative (size);
   }
@@ -967,7 +966,7 @@ void WMOGroup::load()
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
-    assert (fourcc == 'MORI');
+    assert (fourcc == 'MOCV');
 
     f.seekRelative (size);
   }
