@@ -221,20 +221,15 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
   
   if (hasData(0))
   {
-    // wow only suport 5 layers
-    if (_layers.size() < 5)
-    {
-      liquid_layer layer(_layers[0]);
-      layer.clear(); // remove the liquid to not override the other layer
-      layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin);
-      layer.changeLiquidID(liquid_id);
-      _layers.push_back(layer);
-    }
+    liquid_layer layer(_layers[0]);
+    layer.clear(); // remove the liquid to not override the other layer
+    layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin);
+    layer.changeLiquidID(liquid_id);
+    _layers.push_back(layer);
   }
   else
   {
-    // had new layer at just above the cursor
-    liquid_layer layer(math::vector_3d(xbase, 0.0f, zbase), pos.y + 1.0f, liquid_id);
+    liquid_layer layer(math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
     layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin);
     _layers.push_back(layer);
   }
