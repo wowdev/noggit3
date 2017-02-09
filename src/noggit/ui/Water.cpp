@@ -194,6 +194,16 @@ void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
   
 }
 
+void UIWater::lockPos(math::vector_3d const& cursor_pos)
+{ 
+  _lock_pos = cursor_pos;
+
+  if (!_locked)
+  {
+    toggle_lock();
+  }
+}
+
 void UIWater::toggle_lock()
 {
   _locked = !_locked;

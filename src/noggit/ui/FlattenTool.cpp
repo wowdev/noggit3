@@ -156,6 +156,11 @@ namespace ui
     _lock_x->value(misc::floatToStr(_lock_pos.x));
     _lock_z->value(misc::floatToStr(_lock_pos.z));
     _lock_h->value(misc::floatToStr(_lock_pos.y));
+
+    if (!_locked)
+    {
+      toggleFlattenLock();
+    }
   }
 
   void FlattenTool::changeRadius(float change)
