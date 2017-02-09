@@ -349,7 +349,10 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
                               )
 {
   bool ocean = _liquid_vertex_format == 2;
-  math::vector_3d const& ref = lock ? origin : pos + math::vector_3d(0.0f, 1.0f, 0.0f);
+  math::vector_3d ref ( lock
+                      ? origin
+                      : math::vector_3d (pos.x, pos.y + 1.0f, pos.z)
+                      );
 
   // make sure the ocean layers are flat
   if (add && ocean)
