@@ -13,6 +13,7 @@
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
 #include <noggit/MPQ.h>
+#include <noggit/Project.h>
 #include <noggit/application.h> // app.getArial14(), app.getapp.getArialn13()()
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/ui/Button.h> // UIButton
@@ -25,6 +26,10 @@
 #include <noggit/Video.h>
 
 #include <unordered_set>
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/range/iterator_range.hpp>
 
 //! \todo  Get this whole thing in a seperate class.
 
@@ -80,12 +85,35 @@ UIText      *chunkTextureEffectID[4];
 
 boost::optional<scoped_blp_texture_reference> UITexturingGUI::selectedTexture = boost::none;
 
+void load_project_dir_tilesets()
+{
+  boost::filesystem::path projet_path(Project::getInstance()->getPath());
+  int path_size = projet_path.string().length();
+  projet_path.append("tileset/");
+
+  if (!boost::filesystem::exists(projet_path))
+  {
+    return;
+  }
+
+  for(auto& entry : boost::make_iterator_range(boost::filesystem::recursive_directory_iterator(projet_path), {}))
+  {
+    std::string str = entry.path().string();
+    if (str.find(".blp") != std::string::npos)
+    {
+      gListfile.emplace(noggit::mpq::normalized_filename(str.substr(path_size)));
+    }    
+  }
+}
+
 void LoadTextureNames()
 {
   if (textureNames.size())
   {
     return;
   }
+
+  load_project_dir_tilesets();
 
   while (!MPQArchive::allFinishedLoading()) MPQArchive::allFinishLoading(); // wait for listfiles.
 
