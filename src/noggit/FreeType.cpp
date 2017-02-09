@@ -134,12 +134,17 @@ namespace freetype
 
     if (failed)
     {
-		std::string message = "Please ensure that you have a valid copy of Arial installed.\n\nNoggit will now quit.";
+		std::string message = "Noggit encountered an error loading fonts required for its UI. ";
 		if (fromMPQ) {
-			message = "Please ensure that your WoW installation is valid.\n\nNoggit will now quit.";
+			message += "Please ensure that the WoW installation at the path below is valid:\n\n";
+			message += Native::getGamePath();
+		} else {
+			message += "Please ensure that your system has a valid copy of Arial installed.";
 		}
 
-		Native::showAlertDialog("Unable to load required fonts", message);
+		message += "\n\nNoggit will now quit.";
+
+		Native::showAlertDialog("Unable to load fonts", message);
 
 		LogError << "FT_New_Face failed (there is probably a problem with your font file)" << std::endl;
 		throw std::runtime_error("FT_New_Face failed (there is probably a problem with your font file)");
