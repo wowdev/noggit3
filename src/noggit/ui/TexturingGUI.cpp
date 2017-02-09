@@ -87,9 +87,8 @@ boost::optional<scoped_blp_texture_reference> UITexturingGUI::selectedTexture = 
 
 void load_project_dir_tilesets()
 {
-  boost::filesystem::path projet_path(Project::getInstance()->getPath());
+  auto projet_path(boost::filesystem::path (Project::getInstance()->getPath()) / "tileset");
   int path_size = projet_path.string().length();
-  projet_path.append("tileset/");
 
   if (!boost::filesystem::exists(projet_path))
   {
