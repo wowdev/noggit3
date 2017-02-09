@@ -52,6 +52,14 @@ public:
 
 private:
   void update_min_max();
+  
+  void update_if_in_range(math::vector_3d const& pos
+                         , float radius
+                         , math::vector_3d& vertex
+                         , math::vector_3d const& origin
+                         , math::radians const& angle
+                         , math::radians const& orientation
+                         );
 
   int _liquid_id;
   int _liquid_vertex_format;
