@@ -2056,7 +2056,7 @@ void World::deselectVertices(math::vector_3d const& pos, float radius)
 
   for (math::vector_3d* v : _vertices_selected)
   {
-    if (misc::dist(v->x, v->z, pos.x, pos.z) <= radius)
+    if (misc::dist(*v, pos) <= radius)
     {
       inRange.emplace(v);
     }
