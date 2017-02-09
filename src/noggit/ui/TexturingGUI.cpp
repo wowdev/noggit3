@@ -87,25 +87,22 @@ void LoadTextureNames()
     return;
   }
 
-  bool tilesetsfound = false;
-
   while (!MPQArchive::allFinishedLoading()) MPQArchive::allFinishLoading(); // wait for listfiles.
 
   for (std::string const& entry : gListfile)
   {
-    auto&& normalized (noggit::mpq::normalized_filename (entry));
-    if (normalized.find("tileset") != std::string::npos)
+    if (entry.find("tileset") != std::string::npos)
     {
-      tilesetsfound = true;
-      auto suffix_pos (normalized.find ("_s.blp"));
+      auto suffix_pos (entry.find ("_s.blp"));
       if (suffix_pos  == std::string::npos)
       {
-        textureNames.push_back (normalized);
+        textureNames.push_back (entry);
       }
       else
       {
-        normalized.erase (suffix_pos, strlen ("_s"));
-        textures_with_specular_variant.emplace (normalized);
+        std::string specular = entry;
+        specular.erase(suffix_pos, strlen("_s"));
+        textures_with_specular_variant.emplace (specular);
       }
     }
   }
