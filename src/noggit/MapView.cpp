@@ -743,8 +743,6 @@ void MapView::createGUI()
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
   mainGui->TexturePalette->hide();
-  //mainGui->addChild(mainGui->SelectedTexture = UITexturingGUI::createSelectedTexture());
-  //mainGui->SelectedTexture->hide();
   mainGui->addChild(UITexturingGUI::createTilesetLoader());
   mainGui->addChild(UITexturingGUI::createTextureFilter());
   mainGui->addChild(MapChunkWindow = UITexturingGUI::createMapChunkWindow());
