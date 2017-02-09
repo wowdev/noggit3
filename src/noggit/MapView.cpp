@@ -2697,7 +2697,9 @@ void MapView::mouseReleaseEvent (SDL_MouseButtonEvent* e)
 
 void MapView::checkWaterSave()
 {
-  if (gWorld->canWaterSave(tile_index(gWorld->camera)))
+  tile_index const current (gWorld->camera);
+
+  if (!gWorld->mapIndex->hasTile (current) || gWorld->canWaterSave(current))
   {
     mainGui->waterSaveWarning->hide();
   }
