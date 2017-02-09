@@ -189,21 +189,15 @@ void WMO::finishLoading ()
   // - MOPV ----------------------------------------------
 
   f.read (&fourcc, 4);
-  f.seekRelative (4);
+  f.read(&size, 4);
 
   assert (fourcc == 'MOPV');
 
-  WMOPV p;
-  for (size_t i (0); i < nP; ++i) {
+  std::vector<math::vector_3d> portal_vertices;
+
+  for (size_t i (0); i < size / 12; ++i) {
     f.read (ff, 12);
-    p.a = ::math::vector_3d (ff[0], ff[2], -ff[1]);
-    f.read (ff, 12);
-    p.b = ::math::vector_3d (ff[0], ff[2], -ff[1]);
-    f.read (ff, 12);
-    p.c = ::math::vector_3d (ff[0], ff[2], -ff[1]);
-    f.read (ff, 12);
-    p.d = ::math::vector_3d (ff[0], ff[2], -ff[1]);
-    pvs.push_back (p);
+    portal_vertices.push_back(math::vector_3d(ff[0], ff[2], -ff[1]));
   }
 
   // - MOPT ----------------------------------------------
@@ -220,13 +214,7 @@ void WMO::finishLoading ()
   f.read (&fourcc, 4);
   f.read (&size, 4);
 
-  assert (fourcc == 'MOPR');
-
-  int nn = size / 8;
-  WMOPR *pr = reinterpret_cast<WMOPR*> (f.getPointer ());
-  for (size_t i (0); i < nn; ++i) {
-    prs.push_back (*pr++);
-  }
+  assert(fourcc == 'MOPR');
 
   f.seekRelative (size);
 
@@ -931,33 +919,32 @@ void WMOGroup::load()
 
     lq = std::make_unique<wmo_liquid> (&f, hlq, wmo->mat[hlq.type], (flags & 0x2000) != 0);
   }
-  // - MORI ----------------------------------------------
   if (header.flags & 0x20000)
   {
+    // - MORI ----------------------------------------------
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
     assert (fourcc == 'MORI');
 
     f.seekRelative (size);
-  }
-  // - MORB ----------------------------------------------
-  if (header.flags & 0x20000)
-  {
-    f.read (&fourcc, 4);
-    f.read (&size, 4);
 
-    assert (fourcc == 'MORB');
+    // - MORB ----------------------------------------------
+    f.read(&fourcc, 4);
+    f.read(&size, 4);
 
-    f.seekRelative (size);
+    assert(fourcc == 'MORB');
+
+    f.seekRelative(size);
   }
+  
   // - MOTV ----------------------------------------------
   if (header.flags & 0x2000000)
   {
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
-    assert (fourcc == 'MORI');
+    assert (fourcc == 'MOTV');
 
     f.seekRelative (size);
   }
@@ -967,7 +954,7 @@ void WMOGroup::load()
     f.read (&fourcc, 4);
     f.read (&size, 4);
 
-    assert (fourcc == 'MORI');
+    assert (fourcc == 'MOCV');
 
     f.seekRelative (size);
   }

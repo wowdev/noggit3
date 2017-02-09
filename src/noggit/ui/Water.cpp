@@ -27,7 +27,7 @@ UIWater::UIWater(UIMapViewGUI *setGui)
   : UIWindow((float)video.xres() / 2.0f - (float)winWidth / 2.0f, (float)video.yres() / 2.0f - (float)winHeight / 2.0f - (float)(video.yres() / 4), (float)winWidth, (float)winHeight)
   , mainGui(setGui)
   , tile(0, 0)
-  , _liquid_id(2)
+  , _liquid_id(5)
   , _radius(10.0f)
   , _angle(10.0f)
   , _orientation(0.0f)
@@ -192,6 +192,16 @@ void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
     gWorld->paintLiquid(pos, _radius, _liquid_id, add, math::radians(0.0f), math::radians(0.0f), _locked, _lock_pos);
   }
   
+}
+
+void UIWater::lockPos(math::vector_3d const& cursor_pos)
+{ 
+  _lock_pos = cursor_pos;
+
+  if (!_locked)
+  {
+    toggle_lock();
+  }
 }
 
 void UIWater::toggle_lock()

@@ -28,7 +28,7 @@ public:
   void changeAngle(float change);
   void change_height(float change) { _lock_pos.y += change; }
 
-  void lockPos(math::vector_3d const& cursor_pos) { _lock_pos = cursor_pos; }
+  void lockPos(math::vector_3d const& cursor_pos);
   void toggle_lock();
   void toggle_angled_mode();
 

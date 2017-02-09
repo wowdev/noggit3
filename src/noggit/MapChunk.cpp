@@ -926,7 +926,7 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
 
 bool MapChunk::ChangeMCCV(math::vector_3d const& pos, float change, float radius, bool editMode)
 {
-  float dist, xdiff, zdiff;
+  float dist;
   bool changed = false;
 
   if (!hasMCCV)
@@ -945,9 +945,7 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, float change, float radius
 
   for (int i = 0; i < mapbufsize; ++i)
   {
-    xdiff = mVertices[i].x - pos.x;
-    zdiff = mVertices[i].z - pos.z;
-    dist = sqrt(xdiff*xdiff + zdiff*zdiff);
+    dist = misc::dist(mVertices[i], pos);
     if (dist <= radius)
     {
       float edit = change * (1.0f - dist / radius);
@@ -992,7 +990,7 @@ bool MapChunk::flattenTerrain ( math::vector_3d const& pos
 
   for (int i(0); i < mapbufsize; ++i)
   {
-	  float const dist(misc::dist(mVertices[i].x, mVertices[i].z, pos.x, pos.z));
+	  float const dist(misc::dist(mVertices[i], pos));
 
 	  if (dist >= radius)
 	  {
@@ -1045,7 +1043,7 @@ bool MapChunk::blurTerrain(math::vector_3d const& pos, float remain, float radiu
 
   for (int i (0); i < mapbufsize; ++i)
   {
-    float const dist (misc::dist (mVertices[i].x, mVertices[i].z, pos.x, pos.z));
+    float const dist(misc::dist(mVertices[i], pos));
 
     if (dist >= radius)
     {

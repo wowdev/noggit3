@@ -28,7 +28,9 @@ namespace misc
   std::string explode(std::string original, std::string exploder = ".");
   std::string floatToStr(float f, int precision = 2);
   float dist(float x1, float z1, float x2, float z2);
+  float dist(math::vector_3d const& p1, math::vector_3d const& p2);
   float getShortestDist(float x, float z, float squareX, float squareZ, float unitSize);
+  float getShortestDist(math::vector_3d const& pos, math::vector_3d const& square_pos, float unitSize);
   bool rectOverlap(math::vector_3d *r1, math::vector_3d *r2);
   // used for angled tools, get the height a point (pos) should be given an origin, angle and orientation
   float angledHeight(math::vector_3d const& origin, math::vector_3d const& pos, math::radians const& angle, math::radians const& orientation);

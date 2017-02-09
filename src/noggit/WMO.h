@@ -157,8 +157,6 @@ public:
   std::vector<ModelInstance> modelis;
 
   std::vector<WMOLight> lights;
-  std::vector<WMOPV> pvs;
-  std::vector<WMOPR> prs;
 
   std::vector<WMOFog> fogs;
 

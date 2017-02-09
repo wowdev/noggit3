@@ -349,35 +349,45 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
                               )
 {
   bool ocean = _liquid_vertex_format == 2;
+  math::vector_3d ref ( lock
+                      ? origin
+                      : math::vector_3d (pos.x, pos.y + 1.0f, pos.z)
+                      );
 
   // make sure the ocean layers are flat
   if (add && ocean)
   {
     for (math::vector_3d& v : _vertices)
     {
-      v.y = lock ? origin.y : pos.y + 1.0f;
+      v.y = ref.y;
     }
   }
+
+  int id = 0;  
 
   for (int z = 0; z < 8; ++z)
   {
     for (int x = 0; x < 8; ++x)
-    {
-      int index = z * 9 + x;
-      math::vector_3d& v = _vertices[index];
-      if (misc::getShortestDist(pos.x, pos.z, v.x, v.z, UNITSIZE) <= radius)
+    {      
+      if (misc::getShortestDist(pos, _vertices[id], UNITSIZE) <= radius)
       {
-        setSubchunk(x, z, add);
-
-        if (add && lock & !ocean)
+        if (add && !ocean)
         {
-          v.y = misc::angledHeight(origin, v, angle, orientation);
-          _vertices[index + 1].y = misc::angledHeight(origin, _vertices[index + 1], angle, orientation);
-          _vertices[index + 9].y = misc::angledHeight(origin, _vertices[index + 9], angle, orientation);
-          _vertices[index + 10].y = misc::angledHeight(origin, _vertices[index + 10], angle, orientation);
+          for (int index : {id, id + 1, id + 9, id + 10})
+          {
+            if (!hasSubchunk(x, z) || misc::dist(pos, _vertices[index]) <= radius)
+            {
+              _vertices[index].y = misc::angledHeight(ref, _vertices[index], angle, orientation);
+            }
+          }
         }
+        setSubchunk(x, z, add);
       }
+
+      id++;
     }
+    // to go to the next row of subchunks
+    id++;
   }
 
   update_min_max();

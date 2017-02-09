@@ -13,6 +13,7 @@
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
 #include <noggit/MPQ.h>
+#include <noggit/Project.h>
 #include <noggit/application.h> // app.getArial14(), app.getapp.getArialn13()()
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/ui/Button.h> // UIButton
@@ -25,6 +26,10 @@
 #include <noggit/Video.h>
 
 #include <unordered_set>
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/range/iterator_range.hpp>
 
 //! \todo  Get this whole thing in a seperate class.
 
@@ -80,6 +85,26 @@ UIText      *chunkTextureEffectID[4];
 
 boost::optional<scoped_blp_texture_reference> UITexturingGUI::selectedTexture = boost::none;
 
+void load_project_dir_tilesets()
+{
+  auto projet_path(boost::filesystem::path (Project::getInstance()->getPath()) / "tileset");
+  int path_size = projet_path.string().length();
+
+  if (!boost::filesystem::exists(projet_path))
+  {
+    return;
+  }
+
+  for(auto& entry : boost::make_iterator_range(boost::filesystem::recursive_directory_iterator(projet_path), {}))
+  {
+    std::string str = entry.path().string();
+    if (str.find(".blp") != std::string::npos)
+    {
+      gListfile.emplace(noggit::mpq::normalized_filename(str.substr(path_size)));
+    }    
+  }
+}
+
 void LoadTextureNames()
 {
   if (textureNames.size())
@@ -87,33 +112,24 @@ void LoadTextureNames()
     return;
   }
 
-  bool tilesetsfound = false;
+  load_project_dir_tilesets();
 
   while (!MPQArchive::allFinishedLoading()) MPQArchive::allFinishLoading(); // wait for listfiles.
 
   for (std::string const& entry : gListfile)
   {
-    auto&& normalized (noggit::mpq::normalized_filename (entry));
-    if (normalized.find("tileset") != std::string::npos)
+    if (entry.find("tileset") != std::string::npos)
     {
-      tilesetsfound = true;
-      auto suffix_pos (normalized.find ("_s.blp"));
+      auto suffix_pos (entry.find ("_s.blp"));
       if (suffix_pos  == std::string::npos)
       {
-        textureNames.push_back (normalized);
+        textureNames.push_back (entry);
       }
       else
       {
-        normalized.erase (suffix_pos, strlen ("_s"));
-        textures_with_specular_variant.emplace (normalized);
-      }
-    }
-    else
-    {
-      if (tilesetsfound)
-      {
-        // we don't need the rest of this vector as it is sorted.
-        break;
+        std::string specular = entry;
+        specular.erase(suffix_pos, strlen("_s"));
+        textures_with_specular_variant.emplace (specular);
       }
     }
   }
@@ -424,23 +440,6 @@ UIFrame* UITexturingGUI::createTexturePalette(UIMapViewGUI *setgui)
   return windowTexturePalette;
 }
 
-UIFrame* UITexturingGUI::createSelectedTexture()
-{
-  /*
-  windowSelectedTexture = new UICloseWindow( video.xres() - 148.0f - 128.0f, video.yres() - 320.0f, 274.0f, 288.0f, "Current Texture", true );
-
-  std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->filename() : "tileset\\generic\\black.blp";
-
-  windowSelectedTexture->addChild( textureSelected );
-
-
-  windowSelectedTexture->addChild( textSelectedTexture );
-
-  return windowSelectedTexture;
-  */
-  return nullptr;
-}
-
 UIFrame* UITexturingGUI::createTilesetLoader()
 {
   LoadTextureNames();
@@ -621,9 +620,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
 {
   std::stringstream Temp;
   Temp << "Chunk " << chunk->px << ", " << chunk->py << " at (" << chunk->xbase << ", " << chunk->ybase << ", " << chunk->zbase << ")";
-  chunkLocation->setText(Temp.str().c_str());///
-
-
+  chunkLocation->setText(Temp.str().c_str());
 
   std::string areaName;
   try
@@ -660,7 +657,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
 
   std::stringstream ss;
   ss << "Num Effects: " << chunk->header.nEffectDoodad;
-  chunkNumEffects->setText(ss.str().c_str());///
+  chunkNumEffects->setText(ss.str().c_str());
 }
 
 boost::optional<scoped_blp_texture_reference> UITexturingGUI::getSelectedTexture(){

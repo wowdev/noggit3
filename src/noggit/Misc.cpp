@@ -96,6 +96,11 @@ namespace misc
     return std::sqrt(xdiff*xdiff + zdiff*zdiff);
   }
 
+  float dist(math::vector_3d const& p1, math::vector_3d const& p2)
+  {
+    return dist(p1.x, p1.z, p2.x, p2.z);
+  }
+
   // return the shortest distance between the point (x, z)
   // and square at (squareX, squareZ) with a size of unitSize
   float getShortestDist(float x, float z, float squareX, float squareZ, float unitSize)
@@ -121,6 +126,11 @@ namespace misc
     }
 
     return (px == x && pz == z) ? 0.0f : dist(x, z, px, pz);
+  }
+
+  float getShortestDist(math::vector_3d const& pos, math::vector_3d const& square_pos, float unitSize)
+  {
+    return getShortestDist(pos.x, pos.z, square_pos.x, square_pos.z, unitSize);
   }
 
   bool rectOverlap(math::vector_3d *r1, math::vector_3d *r2)
