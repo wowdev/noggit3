@@ -3,6 +3,7 @@
 #include <math/quaternion.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/Brush.h>
+#include <noggit/TileWater.hpp>
 #include <noggit/Environment.h>
 #include <noggit/Frustum.h>
 #include <noggit/Log.h>
@@ -102,7 +103,6 @@ void CreateStrips()
 
 MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
   : mBigAlpha(bigAlpha)
-  , water(false)
   , mt(maintile)
 {
   uint32_t fourcc;
@@ -701,14 +701,6 @@ void MapChunk::draw ( Frustum const& frustum
       gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
     }
   }
-  if (draw_water_overlay)
-  {
-    if (water)
-    {
-      gl.color4f(0.2f, 0.2f, 0.8f, 0.6f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-    }
-  }
 
   if (draw_areaid_overlay)
   {
@@ -768,16 +760,6 @@ void MapChunk::draw ( Frustum const& frustum
 
   gl.enable(GL_LIGHTING);
   gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-}
-
-void MapChunk::SetWater(bool w)
-{
-  this->water = w;
-}
-
-bool MapChunk::GetWater()
-{
-  return this->water;
 }
 
 void MapChunk::intersect (math::ray const& ray, selection_result* results)
@@ -1621,4 +1603,9 @@ bool MapChunk::isBorderChunk(std::set<math::vector_3d*>& selected)
   }
 
   return false;
+}
+
+ChunkWater* MapChunk::liquid_chunk() const
+{
+  return mt->Water.getChunk(px, py);
 }

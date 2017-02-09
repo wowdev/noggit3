@@ -177,9 +177,9 @@ void liquid_render::draw()
   opengl::texture::set_active_texture(1);
   opengl::texture::enable_texture();
 
-  if (_draw_list)
+  if(draw_list)
   {
-    _draw_list->render();
+    draw_list->render();
   }
 
   opengl::texture::set_active_texture(1);
@@ -262,16 +262,16 @@ void main()
   actual (water_shader);
 }
 
-liquid_render::liquid_render(bool transparency, std::string const& filename, opengl::call_list* draw_list)
+liquid_render::liquid_render(bool transparency, std::string const& filename)
   : _transparency(transparency)
-  , _draw_list(draw_list)
+  , draw_list(nullptr)
 {
   if (filename != "")
   {
     setTextures(filename);
   }
-
-  _ready = !!_draw_list && !_textures.empty();
+  
+  _ready = !_textures.empty();
 }
 
 void liquid_render::setTextures(std::string const& filename)
@@ -283,14 +283,5 @@ void liquid_render::setTextures(std::string const& filename)
     _textures.emplace_back(boost::str(boost::format(filename) % i));
   }
 
-  _ready = !!_draw_list;
-}
-
-void liquid_render::changeDrawList(opengl::call_list* draw_list)
-{
-  if (draw_list)
-  {
-    _draw_list.reset(draw_list);
-    _ready = !_textures.empty();
-  }
+  _ready = true;
 }

@@ -138,6 +138,11 @@ public:
             , bool highlightPaintableChunks
             , bool draw_contour
             , float innerRadius
+            , math::vector_3d const& ref_pos
+            , float angle
+            , float orientation
+            , bool use_ref_pos
+            , bool angled_mode
             , bool draw_paintability_overlay
             , bool draw_chunk_flag_overlay
             , bool draw_water_overlay
@@ -235,14 +240,23 @@ public:
   void saveWDT();
   void clearAllModelsOnADT(math::vector_3d const& pos);
 
+
+  // liquids
+  void paintLiquid( math::vector_3d const& pos
+                  , float radius
+                  , int liquid_id
+                  , bool add
+                  , math::radians const& angle
+                  , math::radians const& orientation
+                  , bool lock
+                  , math::vector_3d const& origin
+                  );
   bool canWaterSave(const tile_index& tile);
-
   void CropWaterADT(math::vector_3d const& pos);
-
   void setWaterType(math::vector_3d const& pos, int type);
   int getWaterType(const tile_index& tile);
-
   void autoGenWaterTrans(float factor);
+
 
   void fixAllGaps();
 

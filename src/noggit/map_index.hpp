@@ -148,7 +148,6 @@ public:
 
   void unsetChanged(const tile_index& tile);
   void setFlag(bool to, math::vector_3d const& pos);
-  void setWater(bool to, math::vector_3d const& pos);
   int getChanged(const tile_index& tile);
 
   void saveTile(const tile_index& tile);
@@ -179,8 +178,7 @@ public:
   bool hasBigAlpha() const { return mBigAlpha; }
 
   uint32_t newGUID();
-  uint32_t newGUIDDB(const std::string filename);
-  uint32_t UpdateUIDInDB(uint32_t NewUID);
+
   void fixUIDs();
   void searchMaxUID();
   void saveMaxUID();
@@ -188,8 +186,11 @@ public:
 
 private:
 	uint32_t getHighestGUIDFromFile(const std::string& pFilename) const;
-	uint32_t getHighestGUIDFromDB(const std::string& pFilename) const;
-  
+#ifdef USE_MYSQL_UID_STORAGE
+  uint32_t getHighestGUIDFromDB() const;
+  uint32_t newGUIDDB();
+#endif
+
   bool hasTile(int tileX, int tileZ) const;
   bool tileLoaded(int tileX, int tileZ) const;
 

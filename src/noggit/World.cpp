@@ -1,13 +1,16 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+
+#include <noggit/World.h>
+
 #include <noggit/Brush.h> // brush
+#include <noggit/ChunkWater.hpp>
 #include <noggit/ConfigFile.h>
 #include <noggit/DBC.h>
 #include <noggit/Environment.h>
 #include <noggit/Frustum.h>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
-#include <noggit/MapTile.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/ModelManager.h> // ModelManager
@@ -17,7 +20,6 @@
 #include <noggit/TileWater.hpp>// tile water
 #include <noggit/Video.h>
 #include <noggit/WMOInstance.h> // WMOInstance
-#include <noggit/World.h>
 #include <noggit/map_index.hpp>
 #include <noggit/texture_set.hpp>
 #include <noggit/tool_enums.hpp>
@@ -143,11 +145,14 @@ namespace
     draw_sphere (radius);
   }
 
-  void draw_disk_point (float radius, math::radians arc)
+  void draw_disk_point (float radius, math::radians& arc, math::radians const& angle, math::radians const& orientation)
   {
-    gl.vertex3f (radius * math::sin (arc), radius * math::cos (arc), 0.0f);
+    float x = radius * math::sin(arc);
+    float y = radius * math::cos(arc);
+    float z = (y * math::cos(orientation) + x * math::sin(orientation)) * math::tan(angle);;
+    gl.vertex3f (x, y, z);
   }
-  void draw_disk (float radius, bool stipple = false)
+  void draw_disk (float radius, bool stipple, math::radians const& angle, math::radians const& orientation)
   {
     int const slices (std::max (35.0f, radius * 1.5f));
     static math::radians const max (2.0f * math::constants::pi);
@@ -165,7 +170,7 @@ namespace
       gl.begin (GL_LINE_LOOP);
       for (math::radians arc (0.0f); arc._ < max._; arc._ += stride)
       {
-        draw_disk_point (radius, arc);
+        draw_disk_point (radius, arc, angle, orientation);
       }
       gl.end();
 
@@ -177,7 +182,12 @@ namespace
     }
   }
 
-  void render_disk (::math::vector_3d const& position, float radius, bool stipple = false)
+  void render_disk( ::math::vector_3d const& position
+                  , float radius
+                  , bool stipple = false
+                  , math::radians const& angle = math::radians(0.0f)
+                  , math::radians const& orientation = math::radians(0.0f)
+                  )
   {
     opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
 
@@ -197,7 +207,7 @@ namespace
                  , Environment::getInstance()->cursorColorA
                  );
 
-      draw_disk (radius, stipple);
+      draw_disk (radius, stipple, angle, orientation);
     }
 
     {
@@ -806,6 +816,11 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool highlightPaintableChunks
                  , bool draw_contour
                  , float innerRadius
+                 , math::vector_3d const& ref_pos
+                 , float angle
+                 , float orientation
+                 , bool use_ref_pos
+                 , bool angled_mode
                  , bool draw_paintability_overlay
                  , bool draw_chunk_flag_overlay
                  , bool draw_water_overlay
@@ -816,9 +831,6 @@ void World::draw ( math::vector_3d const& cursor_pos
   opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
 
   Frustum const frustum;
-
-  ///gl.disable(GL_LIGHTING);
-  ///gl.color4f(1,1,1,1);World::draw()
 
   bool hadSky = false;
   if (drawwmo || mapIndex->hasAGlobalWMO())
@@ -967,17 +979,41 @@ void World::draw ( math::vector_3d const& cursor_pos
         render_sphere(cursor_pos, brushRadius);
       }
     }
-    if (terrainMode == editing_mode::flatten_blur && Environment::getInstance()->flattenAngleEnabled)
+    if (angled_mode && !use_ref_pos)
     {
-      math::degrees o = math::degrees(Environment::getInstance()->flattenOrientation);
+      math::degrees o = math::degrees(orientation);
       float x = brushRadius * cos(o);
       float z = brushRadius * sin(o);
-      float h = brushRadius * tan(math::degrees(Environment::getInstance()->flattenAngle));
+      float h = brushRadius * tan(math::degrees(angle));
       math::vector_3d const dest1 = cursor_pos + math::vector_3d(x, 0.f, z);
       math::vector_3d const dest2 = cursor_pos + math::vector_3d(x, h, z);
       render_line(cursor_pos, dest1);
       render_line(cursor_pos, dest2);
       render_line(dest1, dest2);
+    }
+
+    if (use_ref_pos)
+    {
+      render_sphere(ref_pos, 1.0f);
+
+      math::vector_3d pos = cursor_pos;
+
+      if (angled_mode)
+      {
+        // orient + 90.0f because of the rotation done in render_disk
+        math::degrees a(angle), o(orientation+90.0f);
+        pos.y = misc::angledHeight(ref_pos, pos, a, math::degrees(orientation));
+        render_disk(pos, brushRadius, false, a, o);
+        render_line(ref_pos, cursor_pos);
+        render_line(ref_pos, pos);
+      }
+      else
+      {  
+        pos.y = ref_pos.y;
+        render_disk(pos, brushRadius);
+      }
+
+      render_line(cursor_pos, pos);
     }
 
 
@@ -1709,14 +1745,8 @@ void World::addModel(selection_type entry, math::vector_3d newPos, bool copyit)
 void World::addM2(std::string const& filename, math::vector_3d newPos, bool copyit)
 {
   ModelInstance newModelis = ModelInstance(filename);
-  if (Settings::getInstance()->MysqlUse == true)
-  {
-    newModelis.d1 = mapIndex->newGUIDDB(filename);
-  }
-  else
-  {
-    newModelis.d1 = mapIndex->newGUID();
-  }
+  
+  newModelis.d1 = mapIndex->newGUID();
   newModelis.pos = newPos;
   newModelis.sc = 1;
 
@@ -1760,14 +1790,8 @@ void World::addM2(std::string const& filename, math::vector_3d newPos, bool copy
 void World::addWMO(std::string const& filename, math::vector_3d newPos, bool copyit)
 {
   WMOInstance newWMOis(filename);
-  if (Settings::getInstance()->MysqlUse == true)
-  {
-	  newWMOis.mUniqueID = mapIndex->newGUIDDB(filename);
-  }
-  else
-  {
-	  newWMOis.mUniqueID = mapIndex->newGUID();
-  }
+	
+  newWMOis.mUniqueID = mapIndex->newGUID();
   newWMOis.pos = newPos;
 
   if (Settings::getInstance()->copyModelStats
@@ -1862,6 +1886,23 @@ void World::saveWDT()
   // f.setBuffer( lWDTFile.GetPointer<uint8_t>(), lWDTFile.mSize );
   // f.SaveFile();
   // f.close();
+}
+
+void World::paintLiquid( math::vector_3d const& pos
+                       , float radius
+                       , int liquid_id
+                       , bool add
+                       , math::radians const& angle
+                       , math::radians const& orientation
+                       , bool lock
+                       , math::vector_3d const& origin
+                       )
+{
+  for_all_chunks_in_range(pos, radius, [&](MapChunk* chunk) 
+  { 
+    chunk->liquid_chunk()->paintLiquid(pos, radius, liquid_id, add, angle, orientation, lock, origin);
+    return true;
+  });
 }
 
 bool World::canWaterSave(const tile_index& tile)
@@ -2069,11 +2110,7 @@ void World::orientVertices(math::vector_3d const& ref_pos)
   math::degrees a(vertex_angle), o(vertex_orientation);
   for (math::vector_3d* v : _vertices_selected)
   {
-    v->y = (ref_pos.y
-           + ((v->x - ref_pos.x) * math::cos(o)
-            + (v->z - ref_pos.z) * math::sin(o)
-             ) * math::tan(a)
-           );
+    v->y = misc::angledHeight(ref_pos, *v, a, o);
   }
   updateSelectedVertices();
 }

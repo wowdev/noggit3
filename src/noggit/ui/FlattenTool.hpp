@@ -37,6 +37,11 @@ namespace ui
     void setRadius(float radius);
 
     float brushRadius() const { return _radius; }
+    float angle() const { return _angle; }
+    float orientation() const { return _orientation; }
+    bool angled_mode() const { return _angled_mode; }
+    bool use_ref_pos() const { return _locked; }
+    math::vector_3d ref_pos() const { return _lock_pos; }
 
   private:
     static const int winWidth = 180;
@@ -44,13 +49,13 @@ namespace ui
 
     float _radius;
     float _speed;
-    float& _angle;
-    float& _orientation;
+    float _angle;
+    float _orientation;
 
     math::vector_3d _lock_pos;
 
     bool _locked;
-    bool& _angled_mode;
+    bool _angled_mode;
 
     int _flatten_type;
     int _flatten_mode;

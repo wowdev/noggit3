@@ -145,8 +145,6 @@ UIFrame* MapChunkWindow;
 
 UIToggleGroup * gFlagsToggleGroup;
 
-UIWindow *settings_paint;
-
 
 void setTextureBrushHardness(float f)
 {
@@ -182,7 +180,7 @@ void setSprayBrushPressure(float f)
 
 void change_settings_window(editing_mode oldid, editing_mode newid)
 {
-  if (oldid == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !settings_paint
+  if (oldid == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !mainGui->settings_paint 
     || !mainGui->shaderTool || !mainGui->guiWater || !mainGui->objectEditor)
   {
     return;
@@ -191,10 +189,11 @@ void change_settings_window(editing_mode oldid, editing_mode newid)
   mainGui->guiWaterTypeSelector->hide();
   mainGui->terrainTool->hide();
   mainGui->flattenTool->hide();
-  settings_paint->hide();
+  mainGui->settings_paint->hide();
   mainGui->shaderTool->hide();
   mainGui->guiWater->hide();
   mainGui->TextureSwitcher->hide();
+  mainGui->TexturePicker->hide();
   mainGui->objectEditor->hide();
   mainGui->objectEditor->filename->hide();
   mainGui->objectEditor->modelImport->hide();
@@ -216,8 +215,8 @@ void change_settings_window(editing_mode oldid, editing_mode newid)
     tool_settings_y = (int)mainGui->flattenTool->y();
     break;
   case editing_mode::paint:
-    tool_settings_x = (int)settings_paint->x();
-    tool_settings_y = (int)settings_paint->y();
+    tool_settings_x = (int)mainGui->settings_paint->x();
+    tool_settings_y = (int)mainGui->settings_paint->y();
     break;
   case editing_mode::areaid:
     tool_settings_x = (int)mainGui->ZoneIDBrowser->x() + 230;
@@ -246,9 +245,9 @@ void change_settings_window(editing_mode oldid, editing_mode newid)
     mainGui->flattenTool->show();
     break;
   case editing_mode::paint:
-    settings_paint->x((const float)tool_settings_x);
-    settings_paint->y((const float)tool_settings_y);
-    settings_paint->show();
+    mainGui->settings_paint->x((const float)tool_settings_x);
+    mainGui->settings_paint->y((const float)tool_settings_y);
+    mainGui->settings_paint->show();
     break;
   case editing_mode::areaid:
     mainGui->ZoneIDBrowser->x((const float)tool_settings_x - 230);
@@ -662,18 +661,17 @@ void MapView::createGUI()
   tool_settings_y = 38;
 
   //3D Paint settings UIWindow
-  settings_paint = new UIWindow((float)tool_settings_x, (float)tool_settings_y, 180.0f, 280.0f);
-  settings_paint->hide();
-  settings_paint->movable(true);
+  mainGui->settings_paint->hide();
+  mainGui->settings_paint->movable(true);
 
-  mainGui->addChild(settings_paint);
+  mainGui->addChild(mainGui->settings_paint);
 
-  settings_paint->addChild(new UIText(78.5f, 2.0f, "3D Paint", app.getArial14(), eJustifyCenter));
+  mainGui->settings_paint->addChild(new UIText(78.5f, 2.0f, "3D Paint", app.getArial14(), eJustifyCenter));
 
 
   mainGui->G1 = new UIGradient;
   mainGui->G1->width(20.0f);
-  mainGui->G1->x(settings_paint->width() - 4.0f - mainGui->G1->width());
+  mainGui->G1->x(mainGui->settings_paint->width() - 4.0f - mainGui->G1->width());
   mainGui->G1->y(4.0f);
   mainGui->G1->height(92.0f);
   mainGui->G1->setMaxColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -683,57 +681,57 @@ void MapView::createGUI()
   mainGui->G1->setClickFunc ([] (float f) { brushLevel = (1.0f - f)*255.0f; });
   mainGui->G1->setValue(0.0f);
 
-  settings_paint->addChild(mainGui->G1);
+  mainGui->settings_paint->addChild(mainGui->G1);
 
   mainGui->paintHardnessSlider = new UISlider(6.0f, 33.0f, 145.0f, 1.0f, 0.0f);
   mainGui->paintHardnessSlider->setFunc(setTextureBrushHardness);
   mainGui->paintHardnessSlider->setValue(textureBrush.getHardness());
   mainGui->paintHardnessSlider->setText("Hardness: ");
-  settings_paint->addChild(mainGui->paintHardnessSlider);
+  mainGui->settings_paint->addChild(mainGui->paintHardnessSlider);
 
   paint_brush = new UISlider(6.0f, 59.0f, 145.0f, 100.0f, 0.00001f);
   paint_brush->setFunc(setTextureBrushRadius);
   paint_brush->setValue(textureBrush.getRadius() / 100);
   paint_brush->setText("Radius: ");
-  settings_paint->addChild(paint_brush);
+  mainGui->settings_paint->addChild(paint_brush);
 
   mainGui->paintPressureSlider = new UISlider(6.0f, 85.0f, 145.0f, 0.99f, 0.01f);
   mainGui->paintPressureSlider->setFunc(setTextureBrushPressure);
   mainGui->paintPressureSlider->setValue(brushPressure);
   mainGui->paintPressureSlider->setText("Pressure: ");
-  settings_paint->addChild(mainGui->paintPressureSlider);
+  mainGui->settings_paint->addChild(mainGui->paintPressureSlider);
 
-  settings_paint->addChild ( new UICheckBox ( 3.0f, 105.0f
+  mainGui->settings_paint->addChild ( new UICheckBox ( 3.0f, 105.0f
                                             , "Highlight paintable chunks"
                                             , &_highlightPaintableChunks
                                             )
                            );
 
   toggleSpray = new UICheckBox(3.0f, 138.0f, "Spray", &sprayBrushActive);
-  settings_paint->addChild(toggleSpray);
+  mainGui->settings_paint->addChild(toggleSpray);
 
   toggleInnerRadius = new UICheckBox(80.0f, 138.0f, "Inner radius", &innerRadius);
-  settings_paint->addChild(toggleInnerRadius);
+  mainGui->settings_paint->addChild(toggleInnerRadius);
 
   spray_size = new UISlider(6.0f, 180.0f, 170.0f, 40.0f, 0.0001f);
   spray_size->setFunc(setSprayBrushSize);
   spray_size->setValue(brushSpraySize / 40.0f);
   spray_size->setText("Spray size: ");
-  settings_paint->addChild(spray_size);
+  mainGui->settings_paint->addChild(spray_size);
 
   spray_pressure = new UISlider(6.0f, 205.0f, 170.0f, 100.0f, 0.0001f);
   spray_pressure->setFunc(setSprayBrushPressure);
   spray_pressure->setValue(brushSprayPressure / 100.0f);
   spray_pressure->setText("Spray pressure (/1k): ");
-  settings_paint->addChild(spray_pressure);
+  mainGui->settings_paint->addChild(spray_pressure);
 
   UIButton* B1;
   B1 = new UIButton(6.0f, 230.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", []
                    {
                      mainGui->TextureSwitcher->show();
-                     settings_paint->hide();
+                     mainGui->settings_paint->hide();
                    });
-  settings_paint->addChild(B1);
+  mainGui->settings_paint->addChild(B1);
 
   UIButton* rmDup = new UIButton( 6.0f, 255.0f, 170.0f, 30.0f
                                 , "Remove texture duplicates"
@@ -741,7 +739,7 @@ void MapView::createGUI()
                                 , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
                                 , [] { gWorld->removeTexDuplicateOnADT(gWorld->camera); }
                                 );
-  settings_paint->addChild(rmDup);
+  mainGui->settings_paint->addChild(rmDup);
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
   mainGui->TexturePalette->hide();
@@ -1075,6 +1073,16 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::holes; }
             );
 
+  addHotkey( SDLK_t
+           , MOD_none
+           , [&]
+             {
+               mainGui->guiWater->toggle_angled_mode();
+             }
+          , [&] { return terrainMode == editing_mode::water; }
+          );
+
+
   addHotkey ( SDLK_t
             , MOD_none
             , [&]
@@ -1170,6 +1178,21 @@ void MapView::createGUI()
               }
             , [&] { return terrainMode == editing_mode::flatten_blur; }
             );
+  addHotkey( SDLK_f
+            , MOD_none
+            , [&]
+              {
+                if (_mod_space_down)
+                {
+                  mainGui->guiWater->toggle_lock();
+                }
+                else
+                {
+                  mainGui->guiWater->lockPos(_cursor_pos);
+                }
+              }
+          , [&] { return terrainMode == editing_mode::water; }
+          );
   addHotkey ( SDLK_f
             , MOD_none
             , [&]
@@ -1377,11 +1400,12 @@ MapView::~MapView()
 
 void MapView::tick(float t, float dt)
 {
-
   // start unloading tiles
   gWorld->mapIndex->unloadTiles(tile_index(gWorld->camera));
 
   dt = std::min(dt, 1.0f);
+
+  update_cursor_pos();
 
   // write some stuff into infos window for debuging
   std::stringstream appinfoText;
@@ -1775,15 +1799,14 @@ void MapView::tick(float t, float dt)
         case editing_mode::water:
           if (mViewMode == eViewMode_3D && !underMap)
           {
-            auto lSelection = gWorld->GetCurrentSelection();
-            MapChunk* chnk = boost::get<selected_chunk_type> (*Selection).chunk;
-
-            if (_mod_alt_down && !_mod_ctrl_down)
+            if (_mod_shift_down)
             {
-              gWorld->mapIndex->setWater(true, _cursor_pos);
+              mainGui->guiWater->paintLiquid(_cursor_pos, true);
             }
-            if (_mod_alt_down && _mod_ctrl_down)
-              gWorld->mapIndex->setWater(false, _cursor_pos);
+            else if (_mod_ctrl_down)
+            {
+              mainGui->guiWater->paintLiquid(_cursor_pos, false);
+            }
           }
           break;
         case editing_mode::mccv:
@@ -1879,29 +1902,36 @@ void MapView::tick(float t, float dt)
   }
 }
 
-void MapView::doSelection (bool selectTerrainOnly)
+selection_result MapView::intersect_result(bool terrain_only)
 {
   math::vector_3d const pos
-    ( ( ( math::look_at (gWorld->camera, gWorld->lookat, {0.0f, 1.0f, 0.0f}).transposed()
-        * math::perspective (video.fov(), video.ratio(), video.nearclip(), video.farclip()).transposed()
-        ).inverted().transposed()
-      * video.normalized_device_coords ( Environment::getInstance()->screenX
-                                       , Environment::getInstance()->screenY
-                                       )
-      ).xyz_normalized_by_w()
-    );
+  (((math::look_at(gWorld->camera, gWorld->lookat, { 0.0f, 1.0f, 0.0f }).transposed()
+    * math::perspective(video.fov(), video.ratio(), video.nearclip(), video.farclip()).transposed()
+    ).inverted().transposed()
+    * video.normalized_device_coords(Environment::getInstance()->screenX
+      , Environment::getInstance()->screenY
+    )
+    ).xyz_normalized_by_w()
+  );
 
-  math::ray ray (gWorld->camera, pos - gWorld->camera);
+  math::ray ray(gWorld->camera, pos - gWorld->camera);
 
-  selection_result results (gWorld->intersect (ray, selectTerrainOnly, terrainMode == editing_mode::object));
+  selection_result results(gWorld->intersect(ray, terrain_only, terrainMode == editing_mode::object));
 
-  std::sort ( results.begin()
-            , results.end()
-            , [] (selection_entry const& lhs, selection_entry const& rhs)
-              {
-                return lhs.first < rhs.first;
-              }
-            );
+  std::sort(results.begin()
+    , results.end()
+    , [](selection_entry const& lhs, selection_entry const& rhs)
+  {
+    return lhs.first < rhs.first;
+  }
+  );
+
+  return results;
+}
+
+void MapView::doSelection (bool selectTerrainOnly)
+{
+  selection_result results(intersect_result(selectTerrainOnly));
 
   if (results.empty())
   {
@@ -1912,13 +1942,24 @@ void MapView::doSelection (bool selectTerrainOnly)
     auto const& hit (results.front().second);
     gWorld->SetCurrentSelection (hit);
 
-    _cursor_pos = hit.which() == eEntry_Model ? boost::get<selected_model_type> (hit)->pos
-      : hit.which() == eEntry_WMO ? boost::get<selected_wmo_type> (hit)->pos
-      : hit.which() == eEntry_MapChunk ? boost::get<selected_chunk_type> (hit).position
-      : throw std::logic_error ("bad variant");
+    _cursor_pos = hit.which() == eEntry_Model ? boost::get<selected_model_type>(hit)->pos
+      : hit.which() == eEntry_WMO ? boost::get<selected_wmo_type>(hit)->pos
+      : hit.which() == eEntry_MapChunk ? boost::get<selected_chunk_type>(hit).position
+      : throw std::logic_error("bad variant");
   }
 }
 
+void MapView::update_cursor_pos()
+{
+  selection_result results(intersect_result(true));
+
+  if (!results.empty())
+  {
+    auto const& hit(results.front().second);
+    // hit cannot be something else than a chunk
+    _cursor_pos = boost::get<selected_chunk_type>(hit).position;
+  }
+}
 
 void MapView::displayGUIIfEnabled()
 {
@@ -1996,21 +2037,39 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
   video.set3D();
 
   //! \ todo: make the current tool return the radius
-  float radius = 0.0f, hardness = 0.0f, inner_radius = 0.0f;
+  float radius = 0.0f, hardness = 0.0f, inner_radius = 0.0f, angle = 0.0f, orientation = 0.0f;
+  math::vector_3d ref_pos;
+  bool angled_mode = false, use_ref_pos = false;
 
   switch (terrainMode)
   {
   case editing_mode::ground:
-      radius = mainGui->terrainTool->brushRadius();
-      inner_radius = mainGui->terrainTool->innerRadius();
-      break;
-  case editing_mode::flatten_blur: radius = mainGui->flattenTool->brushRadius(); break;
+    radius = mainGui->terrainTool->brushRadius();
+    inner_radius = mainGui->terrainTool->innerRadius();
+    break;
+  case editing_mode::flatten_blur: 
+    radius = mainGui->flattenTool->brushRadius(); 
+    angle = mainGui->flattenTool->angle();
+    orientation = mainGui->flattenTool->orientation();
+    ref_pos = mainGui->flattenTool->ref_pos();
+    angled_mode = mainGui->flattenTool->angled_mode();
+    use_ref_pos = mainGui->flattenTool->use_ref_pos();
+    break;
   case editing_mode::paint:
-      radius = textureBrush.getRadius();
-      hardness = textureBrush.getHardness();
-      break;
-  case editing_mode::water: break; //! \ todo: water: get radius
-  case editing_mode::mccv: radius = mainGui->shaderTool->brushRadius(); break;
+    radius = textureBrush.getRadius();
+    hardness = textureBrush.getHardness();
+    break;
+  case editing_mode::water: 
+    radius = mainGui->guiWater->brushRadius(); 
+    angle = mainGui->guiWater->angle();
+    orientation = mainGui->guiWater->orientation();
+    ref_pos = mainGui->guiWater->ref_pos();
+    angled_mode = mainGui->guiWater->angled_mode();
+    use_ref_pos = mainGui->guiWater->use_ref_pos();
+    break;
+  case editing_mode::mccv: 
+    radius = mainGui->shaderTool->brushRadius(); 
+    break;
   }
 
   gWorld->draw ( _cursor_pos
@@ -2019,6 +2078,11 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _highlightPaintableChunks
                , _draw_contour
                , inner_radius
+               , ref_pos
+               , angle
+               , orientation
+               , use_ref_pos
+               , angled_mode
                , terrainMode == editing_mode::paint
                , terrainMode == editing_mode::flags
                , terrainMode == editing_mode::water
@@ -2355,6 +2419,9 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
       textureBrush.setRadius(std::max(0.0f, std::min(100.0f, textureBrush.getRadius() + e->xrel / XSENS)));
       paint_brush->setValue(textureBrush.getRadius() / 100.0f);
       break;
+    case editing_mode::water:
+      mainGui->guiWater->changeRadius(e->xrel / XSENS);
+      break;
     case editing_mode::mccv:
       mainGui->shaderTool->changeRadius(e->xrel / XSENS);
       break;
@@ -2485,6 +2552,21 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
         spray_pressure->setValue(brushSprayPressure / 100.0f);
       }
     }
+    else if (terrainMode == editing_mode::water)
+    {
+      if (_mod_alt_down)
+      {
+        mainGui->guiWater->changeOrientation(_mod_ctrl_down ? 1.0f : 10.0f);
+      }
+      else if (_mod_shift_down)
+      {
+        mainGui->guiWater->changeAngle(_mod_ctrl_down ? 0.2f : 2.0f);
+      }
+      else if (_mod_space_down)
+      {
+        mainGui->guiWater->change_height(_mod_ctrl_down ? 0.1f : 1.0f);
+      }
+    }
     break;
   case SDL_BUTTON_WHEELDOWN:
     if (terrainMode == editing_mode::ground)
@@ -2529,6 +2611,21 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
       {
         brushSprayPressure = std::max(0.0f, brushSprayPressure - 2.5f);
         spray_pressure->setValue(brushSprayPressure / 100.0f);
+      }
+    }
+    else if (terrainMode == editing_mode::water)
+    {
+      if (_mod_alt_down)
+      {
+        mainGui->guiWater->changeOrientation(_mod_ctrl_down ? -1.0f : -10.0f);
+      }
+      else if (_mod_shift_down)
+      {
+        mainGui->guiWater->changeAngle(_mod_ctrl_down ? -0.2f : -2.0f);
+      }
+      else if (_mod_space_down)
+      {
+        mainGui->guiWater->change_height(_mod_ctrl_down ? -0.1f : -1.0f);
       }
     }
     break;

@@ -7,15 +7,15 @@
 #include <noggit/Misc.h>
 #include <noggit/Project.h>
 #include <noggit/World.h>
-#include <noggit/mysql.h>
+#ifdef USE_MYSQL_UID_STORAGE
+  #include <mysql/mysql.h>
+#endif
 #include <noggit/map_index.hpp>
 #include <noggit/uid_storage.hpp>
 
 #include <boost/range/adaptor/map.hpp>
 
 #include <forward_list>
-
-Mysql *MysqlI;
 
 MapIndex::MapIndex(const std::string &pBasename)
   : basename(pBasename)
@@ -306,21 +306,6 @@ void MapIndex::setFlag(bool to, math::vector_3d const& pos)
   }
 }
 
-void MapIndex::setWater(bool to, math::vector_3d const& pos)
-{
-  tile_index tile(pos);
-
-  if (tileLoaded(tile))
-  {
-    setChanged(tile);
-
-    int cx = (pos.x - tile.x * TILESIZE) / CHUNKSIZE;
-    int cz = (pos.z - tile.z * TILESIZE) / CHUNKSIZE;
-
-    getTile(tile)->getChunk(cx, cz)->SetWater(to);
-  }
-}
-
 MapTile* MapIndex::loadTile(const tile_index& tile)
 {
   if (!hasTile(tile))
@@ -573,78 +558,36 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
     return highGUID;
 }
 
-uint32_t MapIndex::getHighestGUIDFromDB(const std::string& pFilename) const
+#ifdef USE_MYSQL_UID_STORAGE
+uint32_t MapIndex::getHighestGUIDFromDB() const
 {
-	uint32_t highGUID = 0;
-
-	MPQFile theFile(pFilename);
-	if (theFile.isEof())
-	{
-		return highGUID;
-	}
-
-	uint32_t fourcc;
-	uint32_t size;
-
-	MHDR Header;
-
-	// - MVER ----------------------------------------------
-
-	uint32_t version;
-
-	theFile.read(&fourcc, 4);
-	theFile.seekRelative(4);
-	theFile.read(&version, 4);
-
-	assert(fourcc == 'MVER' && version == 18);
-
-	// - MHDR ----------------------------------------------
-
-	theFile.read(&fourcc, 4);
-	theFile.seekRelative(4);
-
-	assert(fourcc == 'MHDR');
-
-	theFile.read(&Header, sizeof(MHDR));
-
-	// - MDDF ----------------------------------------------
-
-	theFile.seek(Header.mddf + 0x14);
-	theFile.read(&fourcc, 4);
-	theFile.read(&size, 4);
-
-	assert(fourcc == 'MDDF');
-
-	highGUID = MysqlI->getGUIDFromDB();
-
-	// - MODF ----------------------------------------------
-
-	theFile.seek(Header.modf + 0x14);
-	theFile.read(&fourcc, 4);
-	theFile.read(&size, 4);
-
-	assert(fourcc == 'MODF');
-
-	highGUID = MysqlI->getGUIDFromDB();
-
-	theFile.close();
-	return highGUID;
-
+	return mysql::getGUIDFromDB (*Settings::getInstance()->mysql);
 }
+
+uint32_t MapIndex::newGUIDDB()
+{
+  highestGUIDDB = std::max(highestGUIDDB, getHighestGUIDFromDB());
+  highGUIDDB = std::max(highestGUID, highestGUIDDB);
+  highGUIDDB = ++highestGUIDDB;
+  highestGUID = highGUIDDB; // update local max uid too
+  mysql::UpdateUIDInDB(*Settings::getInstance()->mysql, highGUIDDB);
+  return highGUIDDB;
+}
+#endif
 
 uint32_t MapIndex::newGUID()
 {
+#ifdef USE_MYSQL_UID_STORAGE
+  if (Settings::getInstance()->mysql) {
+    return newGUIDDB();
+  }
+  else {
   return ++highestGUID;
+  }
+#else
+  return ++highestGUID;
+#endif
 }
-
-uint32_t MapIndex::newGUIDDB(const std::string filename)
-{
-  highestGUIDDB = std::max(getHighestGUIDFromDB(filename), getHighestGUIDFromDB(filename));
-  highGUIDDB = ++highestGUIDDB;
-  MysqlI->UpdateUIDInDB(highGUIDDB);
-  return highGUIDDB;
-}
-
 
 inline bool floatEqual(float& a, float& b)
 {
