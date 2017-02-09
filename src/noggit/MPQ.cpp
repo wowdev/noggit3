@@ -73,14 +73,19 @@ void MPQArchive::finishLoading()
     std::string current;
     for (char c : readbuffer)
     {
-      if (c == '\r') continue;
+      if (c == '\r')
+      {
+        continue;
+      }
       if (c == '\n')
       {
         gListfile.emplace (noggit::mpq::normalized_filename (current));
         current.resize (0);
       }
-
-      current += c;
+      else
+      {
+        current += c;
+      }
     }
 
     if (!current.empty())
