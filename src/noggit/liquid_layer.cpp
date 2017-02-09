@@ -198,7 +198,7 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
 
 void liquid_layer::draw()
 {
-  _render.draw();
+  _render.draw ([this] (opengl::scoped::use_program& prog) { draw_actual (prog); });
 }
 
 void liquid_layer::changeLiquidID(int id)
@@ -232,52 +232,63 @@ void liquid_layer::changeLiquidID(int id)
 
 void liquid_layer::updateRender()
 {
-  _render.draw_list.reset(new opengl::call_list());
-  _render.draw_list->start_recording();
+  depths.clear();
+  tex_coords.clear();
+  indices.clear();
+  vertices.clear();
 
-  gl.begin(GL_QUADS);
+  std::uint16_t index (0);
 
-  gl.normal3f(0.0f, 1.0f, 0.0f);
-
-  // draw tiles
   for (int j = 0; j < 8; ++j)
   {
     for (int i = 0; i < 8; ++i)
     {
-      
       if (!hasSubchunk(i, j))
       {
         continue;
       }
 
-      int index = j * 9 + i;
+      size_t p = j * 9 + i;
 
-      float c;
-      c = _depth[index];
-      gl.multiTexCoord2f(GL_TEXTURE1, c, c);
-      gl.texCoord2f(i / texRepeats, j / texRepeats);
-      gl.vertex3fv(_vertices[index]);
+      depths.emplace_back (_depth[p]);
+      tex_coords.emplace_back (0.f, 0.f);
+      vertices.emplace_back (_vertices[p]);
+      indices.emplace_back (index++);
 
-      c = _depth[index+1];
-      gl.multiTexCoord2f(GL_TEXTURE1, c, c);
-      gl.texCoord2f((i + 1) / texRepeats, j / texRepeats);
-      gl.vertex3fv(_vertices[index + 1]);
+      depths.emplace_back (_depth[p + 1]);
+      tex_coords.emplace_back (1.f, 0.f);
+      vertices.emplace_back (_vertices[p + 1]);
+      indices.emplace_back (index++);
 
-      c = _depth[index + 10];
-      gl.multiTexCoord2f(GL_TEXTURE1, c, c);
-      gl.texCoord2f((i + 1) / texRepeats, (j + 1) / texRepeats);
-      gl.vertex3fv(_vertices[index + 10]);
+      depths.emplace_back (_depth[p + 10]);
+      tex_coords.emplace_back (1.f, 1.f);
+      vertices.emplace_back (_vertices[p + 10]);
+      indices.emplace_back (index++);
 
-      c = _depth[index + 9];
-      gl.multiTexCoord2f(GL_TEXTURE1, c, c);
-      gl.texCoord2f(i / texRepeats, (j + 1) / texRepeats);
-      gl.vertex3fv(_vertices[index + 9]);
+      depths.emplace_back (_depth[p + 9]);
+      tex_coords.emplace_back (0.f, 1.f);
+      vertices.emplace_back (_vertices[p + 9]);
+      indices.emplace_back (index++);
     }
   }
+}
 
-  gl.end();
+void liquid_layer::draw_actual (opengl::scoped::use_program& water_shader)
+{
+  water_shader.attrib ("position", vertices);
+  water_shader.attrib ("tex_coord", tex_coords);
+  water_shader.attrib ("depth", depths);
+  water_shader.uniform ("tex_repeat", texRepeats);
 
-  _render.draw_list->end_recording();
+  opengl::scoped::buffers<1> index_buffer;
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (index_buffer[0]);
+  gl.bufferData ( GL_ELEMENT_ARRAY_BUFFER
+                , indices.size() * sizeof (indices[0])
+                , indices.data()
+                , GL_STATIC_DRAW
+                );
+
+  gl.drawElements (GL_QUADS, indices.size(), GL_UNSIGNED_SHORT, nullptr);
 }
 
 void liquid_layer::crop(MapChunk* chunk)

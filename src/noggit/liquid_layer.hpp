@@ -53,6 +53,12 @@ public:
 private:
   void update_min_max();
 
+  std::vector<float> depths;
+  std::vector<math::vector_2d> tex_coords;
+  std::vector<math::vector_3d> vertices;
+  std::vector<std::uint16_t> indices;
+  void draw_actual (opengl::scoped::use_program&);
+
   int _liquid_id;
   int _liquid_vertex_format;
   float _minimum;
