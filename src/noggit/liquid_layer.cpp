@@ -372,11 +372,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
         {
           for (int index : {id, id + 1, id + 9, id + 10})
           {
-            if (hasSubchunk(x, z))
-            {
-              update_if_in_range(pos, radius, _vertices[index], ref, angle, orientation);
-            }
-            else
+            if (!hasSubchunk(x, z) || misc::dist(pos, _vertices[index]) <= radius)
             {
               _vertices[index].y = misc::angledHeight(ref, _vertices[index], angle, orientation);
             }
@@ -392,20 +388,6 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
   }
 
   update_min_max();
-}
-
-void liquid_layer::update_if_in_range( math::vector_3d const& pos
-                                     , float radius
-                                     , math::vector_3d& vertex
-                                     , math::vector_3d const& origin
-                                     , math::radians const& angle
-                                     , math::radians const& orientation
-                                     )
-{
-  if (misc::dist(pos, vertex) <= radius)
-  {
-    vertex.y = misc::angledHeight(origin, vertex, angle, orientation);
-  }
 }
 
 void liquid_layer::update_min_max()
