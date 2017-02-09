@@ -108,14 +108,6 @@ void LoadTextureNames()
         textures_with_specular_variant.emplace (normalized);
       }
     }
-    else
-    {
-      if (tilesetsfound)
-      {
-        // we don't need the rest of this vector as it is sorted.
-        break;
-      }
-    }
   }
 
   for (std::vector<std::string>::iterator it = textureNames.begin(); it != textureNames.end(); ++it)
@@ -424,23 +416,6 @@ UIFrame* UITexturingGUI::createTexturePalette(UIMapViewGUI *setgui)
   return windowTexturePalette;
 }
 
-UIFrame* UITexturingGUI::createSelectedTexture()
-{
-  /*
-  windowSelectedTexture = new UICloseWindow( video.xres() - 148.0f - 128.0f, video.yres() - 320.0f, 274.0f, 288.0f, "Current Texture", true );
-
-  std::string lTexture = UITexturingGUI::selectedTexture ? selectedTexture->filename() : "tileset\\generic\\black.blp";
-
-  windowSelectedTexture->addChild( textureSelected );
-
-
-  windowSelectedTexture->addChild( textSelectedTexture );
-
-  return windowSelectedTexture;
-  */
-  return nullptr;
-}
-
 UIFrame* UITexturingGUI::createTilesetLoader()
 {
   LoadTextureNames();
@@ -621,9 +596,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
 {
   std::stringstream Temp;
   Temp << "Chunk " << chunk->px << ", " << chunk->py << " at (" << chunk->xbase << ", " << chunk->ybase << ", " << chunk->zbase << ")";
-  chunkLocation->setText(Temp.str().c_str());///
-
-
+  chunkLocation->setText(Temp.str().c_str());
 
   std::string areaName;
   try
@@ -660,7 +633,7 @@ void UITexturingGUI::setChunkWindow(MapChunk *chunk)
 
   std::stringstream ss;
   ss << "Num Effects: " << chunk->header.nEffectDoodad;
-  chunkNumEffects->setText(ss.str().c_str());///
+  chunkNumEffects->setText(ss.str().c_str());
 }
 
 boost::optional<scoped_blp_texture_reference> UITexturingGUI::getSelectedTexture(){
