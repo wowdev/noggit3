@@ -1,10 +1,4 @@
-//
-//  MacDialog.m
-//  Noggit
-//
-//  Created by John Wells on 1/28/17.
-//
-//
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #ifdef __APPLE__
 
