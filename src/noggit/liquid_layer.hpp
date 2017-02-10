@@ -4,6 +4,7 @@
 
 #include <noggit/liquid_render.hpp>
 #include <noggit/MapHeaders.h>
+#include <opengl/scoped.hpp>
 
 class MapChunk;
 class sExtendableArray;
@@ -53,6 +54,7 @@ public:
 private:
   void update_min_max();
 
+  opengl::scoped::buffers<1> _index_buffer;
   std::vector<float> depths;
   std::vector<math::vector_2d> tex_coords;
   std::vector<math::vector_3d> vertices;

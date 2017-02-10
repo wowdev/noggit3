@@ -271,6 +271,13 @@ void liquid_layer::updateRender()
       indices.emplace_back (index++);
     }
   }
+
+  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>
+    ( _index_buffer[0]
+    , indices.size() * sizeof (*indices.data())
+    , indices.data()
+    , GL_STATIC_DRAW
+    );
 }
 
 void liquid_layer::draw_actual (opengl::scoped::use_program& water_shader)
@@ -280,15 +287,7 @@ void liquid_layer::draw_actual (opengl::scoped::use_program& water_shader)
   water_shader.attrib ("depth", depths);
   water_shader.uniform ("tex_repeat", texRepeats);
 
-  opengl::scoped::buffers<1> index_buffer;
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (index_buffer[0]);
-  gl.bufferData ( GL_ELEMENT_ARRAY_BUFFER
-                , indices.size() * sizeof (indices[0])
-                , indices.data()
-                , GL_STATIC_DRAW
-                );
-
-  gl.drawElements (GL_QUADS, indices.size(), GL_UNSIGNED_SHORT, nullptr);
+  gl.drawElements (GL_QUADS, _index_buffer[0], indices.size(), GL_UNSIGNED_SHORT, nullptr);
 }
 
 void liquid_layer::crop(MapChunk* chunk)
