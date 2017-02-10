@@ -1877,19 +1877,6 @@ void World::removeTexDuplicateOnADT(math::vector_3d const& pos)
   for_all_chunks_on_tile(pos, [](MapChunk* chunk) { chunk->_texture_set.removeDuplicate(); } );
 }
 
-void World::saveWDT()
-{
-  // int lCurrentPosition = 0;
-  //sExtendableArray lWDTFile = sExtendableArray();
-  // lWDTFile.Extend( 8 + 0x4 );
-  // SetChunkHeader( lWDTFile, lCurrentPosition, 'MPHD', 4 );
-
-  // MPQFile f( "test.WDT" );
-  // f.setBuffer( lWDTFile.GetPointer<uint8_t>(), lWDTFile.mSize );
-  // f.SaveFile();
-  // f.close();
-}
-
 void World::paintLiquid( math::vector_3d const& pos
                        , float radius
                        , int liquid_id
