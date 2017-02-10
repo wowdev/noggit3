@@ -126,7 +126,7 @@ void WMOInstance::recalcExtents()
                        )
     );
 
-  std::vector<math::vector_3d> bounds (8 * (wmo->nGroups + 1));
+  std::vector<math::vector_3d> bounds (8 * (wmo->groups.size() + 1));
   math::vector_3d *ptr = bounds.data();
   math::vector_3d wmoMin(wmo->extents[0].x, wmo->extents[0].z, -wmo->extents[0].y);
   math::vector_3d wmoMax(wmo->extents[1].x, wmo->extents[1].z, -wmo->extents[1].y);
@@ -140,7 +140,7 @@ void WMOInstance::recalcExtents()
   *ptr++ = rot * math::vector_3d(wmoMin.x, wmoMax.y, wmoMax.z);
   *ptr++ = rot * math::vector_3d(wmoMin.x, wmoMin.y, wmoMax.z);
 
-  for (int i = 0; i < (int)wmo->nGroups; ++i)
+  for (int i = 0; i < (int)wmo->groups.size(); ++i)
   {
     *ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMax.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
     *ptr++ = rot * math::vector_3d(wmo->groups[i].BoundingBoxMin.x, wmo->groups[i].BoundingBoxMax.y, wmo->groups[i].BoundingBoxMin.z);
@@ -153,7 +153,7 @@ void WMOInstance::recalcExtents()
   }
 
 
-  for (int i = 0; i < 8 * ((int)wmo->nGroups + 1); ++i)
+  for (int i = 0; i < 8 * ((int)wmo->groups.size() + 1); ++i)
   {
     if (bounds[i].x < min.x) min.x = bounds[i].x;
     if (bounds[i].y < min.y) min.y = bounds[i].y;

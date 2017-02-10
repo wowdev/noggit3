@@ -94,7 +94,7 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MOHD');
 
-  unsigned int col;
+  unsigned int col, nGroups;
   // header
   f.read (&nTextures, 4);
   f.read (&nGroups, 4);
@@ -314,10 +314,8 @@ void WMO::finishLoading ()
     fogs.push_back (fog);
   }
 
-  for (size_t i (0); i < nGroups; ++i)
-  {
-    groups[i].load ();
-  }
+  for (auto &group : groups)
+    group.load();
 
   if (texbuf)
   {
@@ -333,8 +331,8 @@ void WMO::upload()
   for (unsigned int i = 0; i < mat.size(); ++i)
     mat[i]._texture = textures[i];
 
-  for (unsigned int i = 0; i < nGroups; ++i)
-    groups[i].upload ();
+  for (auto &group : groups)
+    group.upload ();
 
   _finished_upload = true;
 }
@@ -357,16 +355,16 @@ void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const an
   else
     gl.disable(GL_FOG);
 
-  for (unsigned int i = 0; i<nGroups; ++i)
+  for (auto &group : groups)
   {
-    groups[i].draw(ofs, angle, frustum);
+    group.draw(ofs, angle, frustum);
 
     if (gWorld->drawdoodads)
     {
-      groups[i].drawDoodads(doodadset, ofs, angle, frustum);
+      group.drawDoodads(doodadset, ofs, angle, frustum);
     }
 
-    groups[i].drawLiquid();
+    group.drawLiquid();
   }
 
   if (boundingbox)
@@ -381,8 +379,8 @@ void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const an
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    for (unsigned int i = 0; i < nGroups; ++i)
-      opengl::primitives::wire_box (groups[i].BoundingBoxMin, groups[i].BoundingBoxMax)
+    for (auto &group : groups)
+      opengl::primitives::wire_box (group.BoundingBoxMin, group.BoundingBoxMax)
         .draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
 
     opengl::primitives::wire_box ( math::vector_3d(extents[0].x, extents[0].z, -extents[0].y)
@@ -423,9 +421,9 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
   if (!finishedLoading ())
     return results;
 
-  for (size_t i (0); i < nGroups; ++i)
+  for (auto &group : groups)
   {
-    groups[i].intersect (ray, &results);
+    group.intersect (ray, &results);
   }
 
   std::cout << _filename << " " << results.size() << "\n";
