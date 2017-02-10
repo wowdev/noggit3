@@ -356,12 +356,14 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
                       );
 
   // make sure the ocean layers are flat
-  if (add && ocean && override_height)
+  if (add && ocean)
   {
     for (math::vector_3d& v : _vertices)
     {
       v.y = ref.y;
     }
+    _minimum = ref.y;
+    _maximum = ref.y;
   }
 
   int id = 0;  
@@ -391,7 +393,11 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
     id++;
   }
 
-  update_min_max();
+  // update done earlier for oceans
+  if (!ocean)
+  {
+    update_min_max();
+  }
 }
 
 void liquid_layer::update_min_max()
