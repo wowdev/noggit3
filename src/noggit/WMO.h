@@ -29,27 +29,20 @@ class WMOManager;
 class wmo_liquid;
 class Model;
 
-struct WMOBatch {
-  signed char bytes[12];
-  uint32_t indexStart;
-  uint16_t indexCount, vertexStart, vertexEnd;
-  unsigned char flags, texture;
+struct wmo_batch
+{
+  int8_t unused[12];
+
+  uint32_t index_start;
+  uint16_t index_count;
+  uint16_t vertex_start;
+  uint16_t vertex_end;
+
+  uint8_t flags;
+  uint8_t texture;
 };
 
 class WMOGroup {
-  struct wmo_batch
-  {
-    int8_t unused[12];
-
-    uint32_t index_start;
-    uint16_t index_count;
-    uint16_t vertex_start;
-    uint16_t vertex_end;
-
-    uint8_t flags;
-    uint8_t texture;
-  };
-
   WMO *wmo;
   uint32_t flags;
   ::math::vector_3d center;
