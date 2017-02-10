@@ -30,7 +30,7 @@ public:
   int getType(size_t layer) const;
   bool hasData(size_t layer) const;
 
-  void paintLiquid(math::vector_3d const& pos
+  void paintLiquid( math::vector_3d const& pos
                   , float radius
                   , int liquid_id
                   , bool add
@@ -40,6 +40,8 @@ public:
                   , math::vector_3d const& origin
                   , bool override_height
                   , bool override_liquid_id
+                  , MapChunk* chunk
+                  , float opacity_factor
                   );
 
 
