@@ -102,7 +102,7 @@ void CreateStrips()
 }
 
 MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
-  : mBigAlpha(bigAlpha)
+  : use_big_alphamap(bigAlpha)
   , mt(maintile)
 {
   uint32_t fourcc;
@@ -227,7 +227,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     }
     else if (fourcc == 'MCAL')
     {
-      _texture_set.initAlphamaps(f, header.nLayers, mBigAlpha, (header.flags & FLAG_do_not_fix_alpha_map) == 0);
+      _texture_set.initAlphamaps(f, header.nLayers, use_big_alphamap, (header.flags & FLAG_do_not_fix_alpha_map) == 0);
     }
     else if (fourcc == 'MCCV')
     {
@@ -1334,7 +1334,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
     // if not first, have alpha layer, if first, have not. never have compression.
     lLayer->flags = (j > 0 ? lLayer->flags | FLAG_USE_ALPHA : lLayer->flags & (~FLAG_USE_ALPHA)) & (~FLAG_ALPHA_COMPRESSED);
 
-    lLayer->ofsAlpha = (j == 0 ? 0 : (mBigAlpha ? 64 * 64 * (j - 1) : 32 * 64 * (j - 1)));
+    lLayer->ofsAlpha = (j == 0 ? 0 : (use_big_alphamap ? 64 * 64 * (j - 1) : 32 * 64 * (j - 1)));
     lLayer->effectID = _texture_set.effect(j);
   }
 
@@ -1426,7 +1426,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   }
 
   // MCAL
-  int lDimensions = 64 * (mBigAlpha ? 64 : 32);
+  int lDimensions = 64 * (use_big_alphamap ? 64 : 32);
 
   size_t lMaps = _texture_set.num() ? _texture_set.num() - 1U : 0U;
 
@@ -1441,13 +1441,13 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   char * lAlphaMaps = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
   // convert bigAlpha to the correct format for saving
-  if (mBigAlpha)
+  if (use_big_alphamap)
     _texture_set.convertToBigAlpha();
 
   for (size_t j = 0; j < lMaps; j++)
   {
     //First thing we have to do is downsample the alpha maps before we can write them
-    if (mBigAlpha)
+    if (use_big_alphamap)
       for (int k = 0; k < lDimensions; k++)
         lAlphaMaps[lDimensions * j + k] = _texture_set.getAlpha(j, k);
     else
@@ -1463,7 +1463,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   }
 
   // convert bigAlpha to the correct old format to be able to edit them correctly
-  if (mBigAlpha)
+  if (use_big_alphamap)
     _texture_set.convertToOldAlpha();
 
   lCurrentPosition += 8 + lMCAL_Size;

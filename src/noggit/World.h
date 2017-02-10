@@ -236,10 +236,7 @@ public:
 	static bool IsEditableWorld(int pMapId);
 
   void clearHeight(math::vector_3d const& pos);
-
-  void saveWDT();
   void clearAllModelsOnADT(math::vector_3d const& pos);
-
 
   // liquids
   void paintLiquid( math::vector_3d const& pos
@@ -250,6 +247,9 @@ public:
                   , math::radians const& orientation
                   , bool lock
                   , math::vector_3d const& origin
+                  , bool override_height
+                  , bool override_liquid_id
+                  , float opacity_factor
                   );
   bool canWaterSave(const tile_index& tile);
   void CropWaterADT(math::vector_3d const& pos);
@@ -260,7 +260,7 @@ public:
 
   void fixAllGaps();
 
-  void convertMapToBigAlpha();
+  void convert_alphamap(bool to_big_alpha);
 
   void deselectVertices(math::vector_3d const& pos, float radius);
   void selectVertices(math::vector_3d const& pos, float radius);

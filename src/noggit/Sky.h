@@ -88,8 +88,6 @@ public:
 
   bool drawSky(const math::vector_3d &pos);
   bool hasSkies() { return numSkies > 0; }
-
-  void setupLighting();
 };
 
 

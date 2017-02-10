@@ -485,10 +485,17 @@ uint32_t MapIndex::getFlag(const tile_index& tile) const
   return mTiles[tile.z][tile.x].flags;
 }
 
-void MapIndex::setBigAlpha()
+void MapIndex::convert_alphamap(bool to_big_alpha)
 {
-  mBigAlpha = true;
-  mphd.flags |= 4;
+  mBigAlpha = to_big_alpha;
+  if (to_big_alpha)
+  {
+    mphd.flags |= 4;
+  }
+  else
+  {
+    mphd.flags &= 0xFFFFFFFB;
+  }
 }
 
 

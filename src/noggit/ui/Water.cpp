@@ -12,6 +12,7 @@
 #include <noggit/ui/Button.h>
 #include <noggit/ui/CheckBox.h>
 #include <noggit/ui/Texture.h>
+#include <noggit/ui/ToggleGroup.h>
 #include <noggit/ui/Slider.h>
 #include <noggit/ui/MapViewGUI.h>
 #include <noggit/Misc.h>
@@ -33,6 +34,10 @@ UIWater::UIWater(UIMapViewGUI *setGui)
   , _orientation(0.0f)
   , _locked(false)
   , _angled_mode(false)
+  , _override_liquid_id(true)
+  , _override_height(true)
+  , _opacity_mode(river_opacity)
+  , _custom_opacity_factor(0.0337f)
   , _lock_pos(math::vector_3d(0.0f, 0.0f, 0.0f))
 {
   addChild(new UIText(78.5f, 2.0f, "Water edit", app.getArial14(), eJustifyCenter));
@@ -67,21 +72,35 @@ UIWater::UIWater(UIMapViewGUI *setGui)
 
   addChild(waterType);
 
-  addChild(new UIText(5.0f, 200.0f, "Auto transparency:", app.getArial12(), eJustifyLeft));
-  addChild(new UIButton(5.0f, 220.0f, 75.0f, 30.0f,
-    "River",
+  addChild(new UIText(5.0f, 200.0f, "Override :", app.getArial12(), eJustifyLeft));
+
+  addChild(new UICheckBox(5.0f, 215.0f, "Liquid ID", &_override_liquid_id));
+  addChild(new UICheckBox(95.0f, 215.0f, "Height", &_override_height));
+
+  addChild(new UIText(5.0f, 245.0f, "Auto opacity:", app.getArial12(), eJustifyLeft));
+
+  UIToggleGroup *transparency_toggle = new UIToggleGroup(&_opacity_mode);
+
+  addChild(new UICheckBox(5.0f, 260.0f, "River", transparency_toggle, river_opacity));
+  addChild(new UICheckBox(95.0f, 260.0f, "Ocean", transparency_toggle, ocean_opacity));
+  addChild(new UICheckBox(5.0f, 285.0f, "", transparency_toggle, custom_opacity));
+
+  transparency_toggle->Activate(river_opacity);
+
+  UISlider *opacity_slider = new UISlider(35.0f, 300.0f, 140.0f, 10.0f, 0.0f);
+  opacity_slider->setValue(_custom_opacity_factor * 10.0f);
+  opacity_slider->setText("custom factor:");
+  opacity_slider->setFunc([&](float f) { _custom_opacity_factor = f * 0.01f; });
+  addChild(opacity_slider);
+
+  addChild(new UIButton(5.0f, 320.0f, 170.0f, 30.0f,
+    "Regen ADT opacity",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [] { gWorld->autoGenWaterTrans(0.0337f); } // value found by experimenting
-  ));
-  addChild(new UIButton(95.0f, 220.0f, 75.0f, 30.0f,
-    "Ocean",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
-    "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [] { gWorld->autoGenWaterTrans(0.007f); }
+    [this] { gWorld->autoGenWaterTrans(get_opacity_factor()); }
   ));
 
-  cropWater = new UIButton(5.0f, 250.0f, 170.0f, 30.0f,
+  cropWater = new UIButton(5.0f, 350.0f, 170.0f, 30.0f,
     "Crop water",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
@@ -93,18 +112,18 @@ UIWater::UIWater(UIMapViewGUI *setGui)
     );
   addChild(cropWater);
 
-  addChild(new UICheckBox(5.0f, 270.0f, "Show all layers", &Environment::getInstance()->displayAllWaterLayers));
+  addChild(new UICheckBox(5.0f, 370.0f, "Show all layers", &Environment::getInstance()->displayAllWaterLayers));
 
-  UIText *txt = new UIText(5.0f, 300.0f, app.getArial12(), eJustifyLeft);
+  UIText *txt = new UIText(5.0f, 400.0f, app.getArial12(), eJustifyLeft);
   txt->setText("Current layer:");
   addChild(txt);
 
 
-  waterLayer = new UIText(90.0f, 322.0f, app.getArial12(), eJustifyCenter);
+  waterLayer = new UIText(90.0f, 422.0f, app.getArial12(), eJustifyCenter);
   waterLayer->setText(std::to_string(Environment::getInstance()->currentWaterLayer + 1));
   addChild(waterLayer);
 
-  addChild(new UIButton(28.0f, 320.0f, 50.0f, 30.0f,
+  addChild(new UIButton(28.0f, 420.0f, 50.0f, 30.0f,
     "<<",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
@@ -116,7 +135,7 @@ UIWater::UIWater(UIMapViewGUI *setGui)
     }
     ));
 
-  addChild(new UIButton(102.0f, 320.0f, 50.0f, 30.0f,
+  addChild(new UIButton(102.0f, 420.0f, 50.0f, 30.0f,
     ">>",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
@@ -183,15 +202,18 @@ void UIWater::changeAngle(float change)
 
 void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
 {
-  if (_angled_mode)
-  {
-    gWorld->paintLiquid(pos, _radius, _liquid_id, add, math::degrees(_angle), math::degrees(_orientation), _locked, _lock_pos);
-  }
-  else
-  {
-    gWorld->paintLiquid(pos, _radius, _liquid_id, add, math::radians(0.0f), math::radians(0.0f), _locked, _lock_pos);
-  }
-  
+  gWorld->paintLiquid( pos
+                     , _radius
+                     , _liquid_id
+                     , add
+                     , math::degrees(_angled_mode ? _angle : 0.0f)
+                     , math::degrees(_angled_mode ? _orientation : 0.0f)
+                     , _locked
+                     , _lock_pos
+                     , _override_height
+                     , _override_liquid_id
+                     , get_opacity_factor()
+                     );
 }
 
 void UIWater::lockPos(math::vector_3d const& cursor_pos)
@@ -214,4 +236,15 @@ void UIWater::toggle_angled_mode()
 {
   _angled_mode = !_angled_mode;
   _angle_checkbox->setState(_angled_mode);
+}
+
+float UIWater::get_opacity_factor() const
+{
+  switch (_opacity_mode)
+  {
+  default:          // values found by experimenting
+  case river_opacity:  return 0.0337f;
+  case ocean_opacity:  return 0.007f;
+  case custom_opacity: return _custom_opacity_factor;
+  }
 }

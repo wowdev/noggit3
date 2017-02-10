@@ -32,7 +32,6 @@ class MapChunk
 private:
   float r;
 
-  bool mBigAlpha;
   bool hasMCCV;
 
   int holes;
@@ -66,7 +65,7 @@ public:
   float xbase, ybase, zbase;
 
   unsigned int Flags;
-
+  bool use_big_alphamap;
 
   TextureSet _texture_set;
 
@@ -142,6 +141,4 @@ public:
   bool fixGapLeft(const MapChunk* chunk);
   // fix the gaps with the chunk above
   bool fixGapAbove(const MapChunk* chunk);
-
-  void toBigAlpha(){ mBigAlpha = true;}
 };
