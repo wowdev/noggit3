@@ -40,8 +40,10 @@ public:
   math::vector_3d ref_pos() const { return _lock_pos; }
 
 private:
+  float get_opacity_factor() const;
+
   static const int winWidth = 180;
-  static const int winHeight = 350;
+  static const int winHeight = 450;
 
   int _liquid_id;
   float _radius;
@@ -51,6 +53,12 @@ private:
 
   bool _locked;
   bool _angled_mode;
+
+  bool _override_liquid_id;
+  bool _override_height;
+
+  int _opacity_mode;
+  float _custom_opacity_factor;
 
   math::vector_3d _lock_pos;  
 
@@ -70,3 +78,4 @@ private:
 
   tile_index tile;
 };
+
