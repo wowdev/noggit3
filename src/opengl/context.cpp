@@ -943,6 +943,7 @@ namespace opengl
     return bufferData (target, size, data, usage);
   }
   template void context::bufferData<GL_ARRAY_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
+  template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
 
   void context::vertexPointer (GLuint buffer, GLint size, GLenum type, GLsizei stride, GLvoid const* pointer)
   {
