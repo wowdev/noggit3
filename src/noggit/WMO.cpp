@@ -94,7 +94,7 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MOHD');
 
-  unsigned int col, nGroups;
+  unsigned int col, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
   // header
   f.read (&nTextures, 4);
   f.read (&nGroups, 4);
@@ -280,8 +280,7 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MODD');
 
-  nModels = size / 0x28;
-  for (size_t i (0); i < nModels; ++i) {
+  for (size_t i (0); i < size / 0x28; ++i) {
     struct
     {
       uint32_t name_offset : 24;
@@ -969,7 +968,7 @@ void WMOGroup::load()
       lenmin = 999999.0f * 999999.0f;
       lmin = 0;
       ModelInstance& mi = wmo->modelis[doodad];
-      for (unsigned int j = 0; j < wmo->nLights; j++)
+      for (unsigned int j = 0; j < wmo->lights.size(); j++)
       {
         WMOLight& l = wmo->lights[j];
         ::math::vector_3d dir = l.pos - mi.pos;
