@@ -157,7 +157,7 @@ public:
 
   std::string _filename;
   std::vector<WMOGroup> groups;
-  unsigned int nTextures, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
+  unsigned int nTextures;
   std::vector<WMOMaterial> mat;
   math::vector_3d extents[2];
   std::vector<std::string> textures;
