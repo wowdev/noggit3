@@ -43,6 +43,36 @@ struct wmo_batch
 };
 
 class WMOGroup {
+public:
+  WMOGroup() {}
+
+  void init(WMO *wmo, MPQFile* f, int num, char *names);
+  void initLighting(int nLR, uint16_t *useLights);
+
+  void load ();
+
+  void upload();
+
+  void draw(const math::vector_3d& ofs, math::degrees const, Frustum const&);
+  void drawLiquid();
+  void drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const, Frustum const&);
+
+  void setupFog();
+
+  void intersect (math::ray const&, std::vector<float>* results) const;
+
+  math::vector_3d BoundingBoxMin;
+  math::vector_3d BoundingBoxMax;
+  math::vector_3d VertexBoxMin;
+  math::vector_3d VertexBoxMax;
+
+  bool indoor, hascv;
+  bool visible;
+
+  bool outdoorLights;
+  std::string name;
+
+private:
   WMO *wmo;
   uint32_t flags;
   ::math::vector_3d center;
@@ -61,28 +91,6 @@ class WMOGroup {
   std::vector<::math::vector_2d> _texcoords;
   std::vector<::math::vector_4d> _vertex_colors;
   std::vector<uint16_t> _indices;
-
-public:
-  math::vector_3d BoundingBoxMin;
-  math::vector_3d BoundingBoxMax;
-  math::vector_3d VertexBoxMin;
-  math::vector_3d VertexBoxMax;
-  bool indoor, hascv;
-  bool visible;
-
-  bool outdoorLights;
-  std::string name;
-
-  WMOGroup() {}
-  void init(WMO *wmo, MPQFile* f, int num, char *names);
-  void upload();
-  void load ();
-  void initLighting(int nLR, uint16_t *useLights);
-  void draw(const math::vector_3d& ofs, math::degrees const, Frustum const&);
-  void drawLiquid();
-  void drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const, Frustum const&);
-  void setupFog();
-  void intersect (math::ray const&, std::vector<float>* results) const;
 };
 
 struct WMOLight {
