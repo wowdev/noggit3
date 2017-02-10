@@ -94,7 +94,7 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MOHD');
 
-  unsigned int col, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
+  unsigned int col, nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
   // header
   f.read (&nTextures, 4);
   f.read (&nGroups, 4);
