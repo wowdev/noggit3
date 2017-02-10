@@ -13,6 +13,7 @@
 #include <noggit/application.h>
 #include <noggit/map_index.hpp>
 #include <noggit/uid_storage.hpp>
+#include <mysql/mysql.h>
 #include <opengl/scoped.hpp>
 
 
@@ -85,6 +86,33 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
 
   if (mMenuLink)
   {
+#ifdef USE_MYSQL_UID_STORAGE 
+	if (mysql::IsMySQLConfigTrue())
+	{
+      if (mysql::hasMaxUIDStoredDB(*Settings::getInstance()->mysql, gWorld->mMapId))
+      {
+        gWorld->mapIndex->loadMaxUID();
+	    mMenuLink->enterMapAt(pos);
+	  }
+	  else
+	  {
+        mMenuLink->uidFixWindow->enterAt(pos);
+	  }
+	}
+	else
+	{
+	  if (uid_storage::getInstance()->hasMaxUIDStored(gWorld->mMapId))
+	  {
+	    gWorld->mapIndex->loadMaxUID();
+	    mMenuLink->enterMapAt(pos);
+	  }
+	  else
+	  {
+	    mMenuLink->uidFixWindow->enterAt(pos);
+	  }
+	}
+  }
+#else
     if (uid_storage::getInstance()->hasMaxUIDStored(gWorld->mMapId))
     {
       gWorld->mapIndex->loadMaxUID();
@@ -94,13 +122,13 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
     {
       mMenuLink->uidFixWindow->enterAt(pos);
     }
-  }
+#endif
   else if (map)
   {
-    gWorld->GetVertex(pos.x, pos.z, &pos);
-    pos.y += 50;
-    map->jumpToCords(pos);
-  }
+	  gWorld->GetVertex(pos.x, pos.z, &pos);
+	  pos.y += 50;
+	  map->jumpToCords(pos);
+  }  
 
 
   return this;
