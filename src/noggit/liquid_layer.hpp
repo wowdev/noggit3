@@ -42,13 +42,16 @@ public:
   void clear() { _subchunks = std::uint64_t(0); }
 
   void paintLiquid(math::vector_3d const& pos
-    , float radius
-    , bool add
-    , math::radians const& angle
-    , math::radians const& orientation
-    , bool lock
-    , math::vector_3d const& origin
-  );
+                  , float radius
+                  , bool add
+                  , math::radians const& angle
+                  , math::radians const& orientation
+                  , bool lock
+                  , math::vector_3d const& origin
+                  , bool override_height
+                  );
+
+  void copy_subchunk_height(int x, int z, liquid_layer const& from);
 
 private:
   void update_min_max();

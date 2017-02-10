@@ -31,14 +31,16 @@ public:
   bool hasData(size_t layer) const;
 
   void paintLiquid(math::vector_3d const& pos
-    , float radius
-    , int liquid_id
-    , bool add
-    , math::radians const& angle
-    , math::radians const& orientation
-    , bool lock
-    , math::vector_3d const& origin
-  );
+                  , float radius
+                  , int liquid_id
+                  , bool add
+                  , math::radians const& angle
+                  , math::radians const& orientation
+                  , bool lock
+                  , math::vector_3d const& origin
+                  , bool override_height
+                  , bool override_liquid_id
+                  );
 
 
   float xbase, zbase;
@@ -48,6 +50,8 @@ private:
   void cleanup();
   // update every layer's render
   void update_layers();
+
+  void copy_height_to_layer(liquid_layer& target, math::vector_3d const& pos, float radius);
 
 
   MH2O_Render Render;

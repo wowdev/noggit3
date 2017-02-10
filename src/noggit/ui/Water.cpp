@@ -202,15 +202,17 @@ void UIWater::changeAngle(float change)
 
 void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
 {
-  if (_angled_mode)
-  {
-    gWorld->paintLiquid(pos, _radius, _liquid_id, add, math::degrees(_angle), math::degrees(_orientation), _locked, _lock_pos);
-  }
-  else
-  {
-    gWorld->paintLiquid(pos, _radius, _liquid_id, add, math::radians(0.0f), math::radians(0.0f), _locked, _lock_pos);
-  }
-  
+  gWorld->paintLiquid( pos
+                     , _radius
+                     , _liquid_id
+                     , add
+                     , (_angled_mode ? math::degrees(_angle) : math::radians(0.0f))
+                     , (_angled_mode ? math::degrees(_orientation) : math::radians(0.0f))
+                     , _locked
+                     , _lock_pos
+                     , _override_height
+                     , _override_liquid_id
+                     );
 }
 
 void UIWater::lockPos(math::vector_3d const& cursor_pos)
