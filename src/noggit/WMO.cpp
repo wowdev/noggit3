@@ -648,20 +648,32 @@ namespace
 void WMOGroup::upload()
 {
   gl.genBuffers (1, &_vertices_buffer);
-  gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
-  gl.bufferData (GL_ARRAY_BUFFER, _vertices.size () * sizeof (::math::vector_3d), _vertices.data (), GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> ( _vertices_buffer
+                                 , _vertices.size() * sizeof (*_vertices.data())
+                                 , _vertices.data()
+                                 , GL_STATIC_DRAW
+                                 );
 
   gl.genBuffers (1, &_normals_buffer);
-  gl.bindBuffer (GL_ARRAY_BUFFER, _normals_buffer);
-  gl.bufferData (GL_ARRAY_BUFFER, _normals.size () * sizeof (::math::vector_3d), _normals.data (), GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> ( _normals_buffer
+                                 , _normals.size() * sizeof (*_normals.data())
+                                 , _normals.data()
+                                 , GL_STATIC_DRAW
+                                 );
 
   gl.genBuffers (1, &_texcoords_buffer);
-  gl.bindBuffer (GL_ARRAY_BUFFER, _texcoords_buffer);
-  gl.bufferData (GL_ARRAY_BUFFER, _texcoords.size () * sizeof (::math::vector_2d), _texcoords.data (), GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> ( _texcoords_buffer
+                                 , _texcoords.size() * sizeof (*_texcoords.data())
+                                 , _texcoords.data()
+                                 , GL_STATIC_DRAW
+                                 );
 
   gl.genBuffers (1, &_vertex_colors_buffer);
-  gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
-  gl.bufferData (GL_ARRAY_BUFFER, _vertex_colors.size () * sizeof (::math::vector_4d), _vertex_colors.data (), GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> ( _vertex_colors_buffer
+                                 , _vertex_colors.size() * sizeof (*_vertex_colors.data())
+                                 , _vertex_colors.data()
+                                 , GL_STATIC_DRAW
+                                 );
 }
 
 void WMOGroup::load()
@@ -1017,22 +1029,16 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
   visible = true;
   setupFog();
 
-  gl.bindBuffer (GL_ARRAY_BUFFER, _vertices_buffer);
-  gl.vertexPointer (3, GL_FLOAT, 0, 0);
-
-  gl.bindBuffer (GL_ARRAY_BUFFER, _normals_buffer);
-  gl.normalPointer (GL_FLOAT, 0, 0);
-
-  gl.bindBuffer (GL_ARRAY_BUFFER, _texcoords_buffer);
-  gl.texCoordPointer (2, GL_FLOAT, 0, 0);
+  gl.vertexPointer (_vertices_buffer, 3, GL_FLOAT, 0, nullptr);
+  gl.normalPointer (_normals_buffer, GL_FLOAT, 0, nullptr);
+  gl.texCoordPointer (_texcoords_buffer, 2, GL_FLOAT, 0, nullptr);
 
   if (hascv)
   {
     if(indoor)
     {
       gl.enableClientState (GL_COLOR_ARRAY);
-      gl.bindBuffer (GL_ARRAY_BUFFER, _vertex_colors_buffer);
-      gl.colorPointer (4, GL_FLOAT, 0, 0);
+      gl.colorPointer (_vertex_colors_buffer, 4, GL_FLOAT, 0, 0);
     }
     
     gl.disable(GL_LIGHTING);
@@ -1047,8 +1053,6 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
     }
     else gl.disable(GL_LIGHTING);
   }
-
-  gl.bindBuffer (GL_ARRAY_BUFFER, 0);
 
   gl.disable(GL_BLEND);
   gl.color4f(1,1,1,1);
