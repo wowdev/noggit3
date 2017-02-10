@@ -52,14 +52,12 @@ class WMOGroup {
 
   WMO *wmo;
   uint32_t flags;
-  ::math::vector_3d v1,v2;
   ::math::vector_3d center;
   float rad;
   int32_t num;
   int32_t fog;
   std::vector<int16_t> ddr;
   std::unique_ptr<wmo_liquid> lq;
-  std::vector< std::pair<std::unique_ptr<opengl::call_list>, bool> > _lists;
 
   std::vector<wmo_batch> _batches;
 
