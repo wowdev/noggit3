@@ -44,7 +44,7 @@ public:
 	//! \brief Get the maximum height of terrain on this map tile.
 	float getMaxHeight();
 
-  void toBigAlpha();
+  void convert_alphamap(bool to_big_alpha);
 
   //! \brief Get chunk for sub offset x,z.
   MapChunk* getChunk(unsigned int x, unsigned int z);

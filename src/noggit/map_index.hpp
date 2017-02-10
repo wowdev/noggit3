@@ -174,7 +174,7 @@ public:
   MapTile* getTileLeft(MapTile* tile) const;
   uint32_t getFlag(const tile_index& tile) const;
 
-  void setBigAlpha();
+  void convert_alphamap(bool to_big_alpha);
   bool hasBigAlpha() const { return mBigAlpha; }
 
   uint32_t newGUID();
