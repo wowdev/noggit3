@@ -262,7 +262,7 @@ public:
 
   void fixAllGaps();
 
-  void convertMapToBigAlpha();
+  void convert_alphamap(bool to_big_alpha);
 
   void deselectVertices(math::vector_3d const& pos, float radius);
   void selectVertices(math::vector_3d const& pos, float radius);

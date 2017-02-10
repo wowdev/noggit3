@@ -1572,10 +1572,12 @@ void World::jumpToCords(math::vector_3d pos)
   this->camera = pos;
 }
 
-void World::convertMapToBigAlpha()
+void World::convert_alphamap(bool to_big_alpha)
 {
-  if (mapIndex->hasBigAlpha())
+  if (to_big_alpha == mapIndex->hasBigAlpha())
+  {
     return;
+  }    
 
   for (size_t z = 0; z < 64; z++)
   {
@@ -1589,7 +1591,7 @@ void World::convertMapToBigAlpha()
 
       if (mTile)
       {
-        mTile->toBigAlpha();
+        mTile->convert_alphamap(to_big_alpha);
         mTile->saveTile();
         mapIndex->unsetChanged(tile);
 
@@ -1601,7 +1603,7 @@ void World::convertMapToBigAlpha()
     }
   }
 
-  mapIndex->setBigAlpha();
+  mapIndex->convert_alphamap(to_big_alpha);
   mapIndex->save();
 }
 
