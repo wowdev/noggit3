@@ -381,11 +381,17 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
         {
           for (int index : {id, id + 1, id + 9, id + 10})
           {
-            if (!hasSubchunk(x, z) || (misc::dist(pos, _vertices[index]) <= radius && override_height))
+            bool no_subchunk = !hasSubchunk(x, z);
+            bool in_range = misc::dist(pos, _vertices[index]) <= radius;
+
+            if (no_subchunk || (in_range && override_height))
             {
               _vertices[index].y = misc::angledHeight(ref, _vertices[index], angle, orientation);
-              update_vertex_opacity(index % 9, index / 9, chunk, opacity_factor);
             }
+            if (no_subchunk || in_range)
+            {
+              update_vertex_opacity(index % 9, index / 9, chunk, opacity_factor);
+            }            
           }
         }
         setSubchunk(x, z, add);
