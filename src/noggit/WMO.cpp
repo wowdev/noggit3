@@ -111,8 +111,6 @@ void WMO::finishLoading ()
   extents[1] = ::math::vector_3d (ff[0], ff[1], ff[2]);
   f.seekRelative (4);
 
-  groups.resize (nGroups);
-
   // - MOTX ----------------------------------------------
 
   f.read (&fourcc, 4);
@@ -160,7 +158,7 @@ void WMO::finishLoading ()
   assert (fourcc == 'MOGI');
 
   for (size_t i (0); i < nGroups; ++i) {
-    groups[i].init (this, &f, i, groupnames);
+    groups.emplace_back (this, &f, i, groupnames);
   }
 
   // - MOSB ----------------------------------------------
@@ -529,11 +527,10 @@ void WMOLight::setupOnce(GLint light, math::vector_3d dir, math::vector_3d lcol)
 
 
 
-void WMOGroup::init(WMO *_wmo, MPQFile* f, int _num, char *names)
+WMOGroup::WMOGroup(WMO *_wmo, MPQFile* f, int _num, char *names)
+  : wmo(_wmo)
+  , num(_num)
 {
-  this->wmo = _wmo;
-  this->num = _num;
-
   // extract group info from f
   f->read(&flags, 4);
   float ff[3];
@@ -960,11 +957,7 @@ void WMOGroup::load()
   }
 
   indoor = flags & 8192;
-  initLighting (nLR, useLights);
-}
 
-void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
-{
   //dl_light = 0;
   // "real" lighting?
   if ((flags & 0x2000) && hascv)

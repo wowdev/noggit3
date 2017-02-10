@@ -44,13 +44,10 @@ struct wmo_batch
 
 class WMOGroup {
 public:
-  WMOGroup() {}
-
-  void init(WMO *wmo, MPQFile* f, int num, char *names);
-  void initLighting(int nLR, uint16_t *useLights);
+  WMOGroup(WMO *wmo, MPQFile* f, int num, char *names);
 
   void load ();
-
+  
   void upload();
 
   void draw(const math::vector_3d& ofs, math::degrees const, Frustum const&);
