@@ -47,7 +47,7 @@ public:
   WMOGroup(WMO *wmo, MPQFile* f, int num, char *names);
 
   void load ();
-  
+
   void upload();
 
   void draw(const math::vector_3d& ofs, math::degrees const, Frustum const&);
@@ -157,7 +157,7 @@ public:
 
   std::string _filename;
   std::vector<WMOGroup> groups;
-  unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
+  unsigned int nTextures, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
   std::vector<WMOMaterial> mat;
   math::vector_3d extents[2];
   std::vector<std::string> textures;
