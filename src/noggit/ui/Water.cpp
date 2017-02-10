@@ -206,8 +206,8 @@ void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
                      , _radius
                      , _liquid_id
                      , add
-                     , (_angled_mode ? math::degrees(_angle) : math::radians(0.0f))
-                     , (_angled_mode ? math::degrees(_orientation) : math::radians(0.0f))
+                     , math::degrees(_angled_mode ? _angle : 0.0f)
+                     , math::degrees(_angled_mode ? _orientation : 0.0f)
                      , _locked
                      , _lock_pos
                      , _override_height
