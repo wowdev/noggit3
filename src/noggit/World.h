@@ -250,6 +250,8 @@ public:
                   , math::radians const& orientation
                   , bool lock
                   , math::vector_3d const& origin
+                  , bool override_height
+                  , bool override_liquid_id
                   );
   bool canWaterSave(const tile_index& tile);
   void CropWaterADT(math::vector_3d const& pos);

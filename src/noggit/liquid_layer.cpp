@@ -346,6 +346,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
                               , math::radians const& orientation
                               , bool lock
                               , math::vector_3d const& origin
+                              , bool override_height
                               )
 {
   bool ocean = _liquid_vertex_format == 2;
@@ -355,7 +356,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
                       );
 
   // make sure the ocean layers are flat
-  if (add && ocean)
+  if (add && ocean && override_height)
   {
     for (math::vector_3d& v : _vertices)
     {
@@ -368,14 +369,14 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
   for (int z = 0; z < 8; ++z)
   {
     for (int x = 0; x < 8; ++x)
-    {      
+    {
       if (misc::getShortestDist(pos, _vertices[id], UNITSIZE) <= radius)
       {
         if (add && !ocean)
         {
           for (int index : {id, id + 1, id + 9, id + 10})
           {
-            if (!hasSubchunk(x, z) || misc::dist(pos, _vertices[index]) <= radius)
+            if (!hasSubchunk(x, z) || (misc::dist(pos, _vertices[index]) <= radius && override_height))
             {
               _vertices[index].y = misc::angledHeight(ref, _vertices[index], angle, orientation);
             }
@@ -419,4 +420,16 @@ void liquid_layer::update_min_max()
   {
     _maximum = _minimum;
   }
+}
+
+void liquid_layer::copy_subchunk_height(int x, int z, liquid_layer const& from)
+{
+  int id = 9 * z + x;
+
+  for (int index : {id, id + 1, id + 9, id + 10})
+  {
+    _vertices[index].y = from._vertices[index].y;
+  }
+
+  setSubchunk(x, z, true);
 }

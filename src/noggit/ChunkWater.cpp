@@ -194,20 +194,44 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
                             , math::radians const& angle
                             , math::radians const& orientation
                             , bool lock
-                            , math::vector_3d const& origin)
+                            , math::vector_3d const& origin
+                            , bool override_height
+                            , bool override_liquid_id
+                            )
 {
+  if (override_liquid_id && !override_height)
+  {
+    bool layer_found = false;
+    for (liquid_layer& layer : _layers)
+    {
+      if (layer.liquidID() == liquid_id)
+      {
+        copy_height_to_layer(layer, pos, radius);
+        layer_found = true;
+        break;
+      }
+    }
+
+    if (!layer_found)
+    {
+      liquid_layer layer(math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
+      copy_height_to_layer(layer, pos, radius);
+      _layers.push_back(layer);
+    }
+  }
+
   bool painted = false;
   for (liquid_layer& layer : _layers)
   {
     // remove the water on all layers or paint the layer with selected id
-    if (!add || layer.liquidID() == liquid_id)
+    if (!add || layer.liquidID() == liquid_id || !override_liquid_id)
     {
-      layer.paintLiquid(pos, radius, add, angle, orientation, lock, origin);
+      layer.paintLiquid(pos, radius, add, angle, orientation, lock, origin, override_height);
       painted = true;
     }
     else
     {
-      layer.paintLiquid(pos, radius, false, angle, orientation, lock, origin);
+      layer.paintLiquid(pos, radius, false, angle, orientation, lock, origin, override_height);
     }
   }
 
@@ -223,14 +247,14 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
   {
     liquid_layer layer(_layers[0]);
     layer.clear(); // remove the liquid to not override the other layer
-    layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin);
+    layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height);
     layer.changeLiquidID(liquid_id);
     _layers.push_back(layer);
   }
   else
   {
     liquid_layer layer(math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
-    layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin);
+    layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height);
     _layers.push_back(layer);
   }
 
@@ -244,6 +268,31 @@ void ChunkWater::cleanup()
     if (_layers[i].empty())
     {
       _layers.erase(_layers.begin() + i);
+    }
+  }
+}
+
+void ChunkWater::copy_height_to_layer(liquid_layer& target, math::vector_3d const& pos, float radius)
+{
+  for (liquid_layer& layer : _layers)
+  {
+    if (layer.liquidID() == target.liquidID())
+    {
+      continue;
+    }
+
+    for (int z = 0; z < 8; ++z)
+    {
+      for (int x = 0; x < 8; ++x)
+      {
+        if (misc::getShortestDist(pos.x, pos.z, xbase + x*UNITSIZE, zbase + z*UNITSIZE, UNITSIZE) <= radius)
+        {
+          if (layer.hasSubchunk(x, z))
+          {
+            target.copy_subchunk_height(x, z, layer);
+          }
+        }
+      }
     }
   }
 }
