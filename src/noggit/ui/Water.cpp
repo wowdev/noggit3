@@ -212,6 +212,7 @@ void UIWater::paintLiquid(math::vector_3d const& pos, bool add)
                      , _lock_pos
                      , _override_height
                      , _override_liquid_id
+                     , get_opacity_factor()
                      );
 }
 

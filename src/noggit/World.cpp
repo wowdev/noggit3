@@ -1900,11 +1900,12 @@ void World::paintLiquid( math::vector_3d const& pos
                        , math::vector_3d const& origin
                        , bool override_height
                        , bool override_liquid_id
+                       , float opacity_factor
                        )
 {
   for_all_chunks_in_range(pos, radius, [&](MapChunk* chunk) 
   { 
-    chunk->liquid_chunk()->paintLiquid(pos, radius, liquid_id, add, angle, orientation, lock, origin, override_height, override_liquid_id);
+    chunk->liquid_chunk()->paintLiquid(pos, radius, liquid_id, add, angle, orientation, lock, origin, override_height, override_liquid_id, chunk, opacity_factor);
     return true;
   });
 }

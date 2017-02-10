@@ -27,7 +27,7 @@ public:
   void changeLiquidID(int id);
   
   void crop(MapChunk* chunk);
-  void updateTransparency(MapChunk* chunk, float factor);
+  void update_opacity(MapChunk* chunk, float factor);
 
 
   float min() const { return _minimum; }
@@ -49,12 +49,15 @@ public:
                   , bool lock
                   , math::vector_3d const& origin
                   , bool override_height
+                  , MapChunk* chunk
+                  , float opacity_factor
                   );
 
   void copy_subchunk_height(int x, int z, liquid_layer const& from);
 
 private:
   void update_min_max();
+  void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);
 
   int _liquid_id;
   int _liquid_vertex_format;

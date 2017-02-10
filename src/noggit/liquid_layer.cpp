@@ -316,14 +316,13 @@ void liquid_layer::crop(MapChunk* chunk)
   update_min_max();
 }
 
-void liquid_layer::updateTransparency(MapChunk* chunk, float factor)
+void liquid_layer::update_opacity(MapChunk* chunk, float factor)
 {
   for (int z = 0; z < 9; ++z)
   {
     for (int x = 0; x < 9; ++x)
     {
-      float diff = _vertices[z * 9 + x].y - chunk->mVertices[z * 17 + x].y;
-      _depth[z * 9 + x] = diff < 0.0f ? 0.0f : (std::min(1.0f, std::max(0.0f, (diff + 1.0f) * factor)));
+      update_vertex_opacity(x, z, chunk, factor);
     }
   }
 }
@@ -347,6 +346,8 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
                               , bool lock
                               , math::vector_3d const& origin
                               , bool override_height
+                              , MapChunk* chunk
+                              , float opacity_factor
                               )
 {
   bool ocean = _liquid_vertex_format == 2;
@@ -364,6 +365,8 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
     }
     _minimum = ref.y;
     _maximum = ref.y;
+
+    update_opacity(chunk, opacity_factor);
   }
 
   int id = 0;  
@@ -381,6 +384,7 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
             if (!hasSubchunk(x, z) || (misc::dist(pos, _vertices[index]) <= radius && override_height))
             {
               _vertices[index].y = misc::angledHeight(ref, _vertices[index], angle, orientation);
+              update_vertex_opacity(index % 9, index / 9, chunk, opacity_factor);
             }
           }
         }
@@ -398,6 +402,8 @@ void liquid_layer::paintLiquid( math::vector_3d const& pos
   {
     update_min_max();
   }
+
+  
 }
 
 void liquid_layer::update_min_max()
@@ -438,4 +444,10 @@ void liquid_layer::copy_subchunk_height(int x, int z, liquid_layer const& from)
   }
 
   setSubchunk(x, z, true);
+}
+
+void liquid_layer::update_vertex_opacity(int x, int z, MapChunk* chunk, float factor)
+{
+  float diff = _vertices[z * 9 + x].y - chunk->mVertices[z * 17 + x].y;
+  _depth[z * 9 + x] = diff < 0.0f ? 0.0f : (std::min(1.0f, std::max(0.0f, (diff + 1.0f) * factor)));
 }

@@ -125,7 +125,7 @@ void ChunkWater::autoGen(MapChunk *chunk, float factor)
 {
   for (liquid_layer& layer : _layers)
   {
-    layer.updateTransparency(chunk, factor);
+    layer.update_opacity(chunk, factor);
   }
   update_layers();
 }
@@ -197,6 +197,8 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
                             , math::vector_3d const& origin
                             , bool override_height
                             , bool override_liquid_id
+                            , MapChunk* chunk
+                            , float opacity_factor
                             )
 {
   if (override_liquid_id && !override_height)
@@ -226,12 +228,12 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
     // remove the water on all layers or paint the layer with selected id
     if (!add || layer.liquidID() == liquid_id || !override_liquid_id)
     {
-      layer.paintLiquid(pos, radius, add, angle, orientation, lock, origin, override_height);
+      layer.paintLiquid(pos, radius, add, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
       painted = true;
     }
     else
     {
-      layer.paintLiquid(pos, radius, false, angle, orientation, lock, origin, override_height);
+      layer.paintLiquid(pos, radius, false, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
     }
   }
 
@@ -247,14 +249,14 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
   {
     liquid_layer layer(_layers[0]);
     layer.clear(); // remove the liquid to not override the other layer
-    layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height);
+    layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
     layer.changeLiquidID(liquid_id);
     _layers.push_back(layer);
   }
   else
   {
     liquid_layer layer(math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
-    layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height);
+    layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
     _layers.push_back(layer);
   }
 
