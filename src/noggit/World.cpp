@@ -820,9 +820,10 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_areaid_overlay
                  , editing_mode terrainMode
                  , math::vector_3d const& camera_pos
+                 , math::vector_3d const& camera_lookat
                  )
 {
-  opengl::matrix::look_at (camera_pos, lookat, {0.0f, 1.0f, 0.0f});
+  opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
 
   Frustum const frustum;
 
