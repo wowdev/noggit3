@@ -57,6 +57,44 @@ std::string Native::getGamePath()
     return std::string("");
 }
 
+std::string Native::getConfigPath()
+{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSArray *urls = [[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask];
+    
+    if (urls.count == 0) {
+        return "";
+    }
+    
+    NSString *appSupportPath = [urls[0] relativePath];
+    NSString *noggitPath = [appSupportPath stringByAppendingPathComponent:@"Noggit"];
+    BOOL isDirectory = NO;
+    NSError *error = NULL;
+    
+    if (![fileManager fileExistsAtPath:noggitPath isDirectory:&isDirectory]) {
+        [fileManager createDirectoryAtPath:noggitPath withIntermediateDirectories:NO attributes:NULL error:&error];
+        
+        if (error) {
+            LogError << "NoggitCocoa:" << error.localizedFailureReason << std::endl;
+            LogError << "NoggitCocoa:" << error.localizedDescription << std::endl;
+            [[NSApplication sharedApplication] presentError:error];
+            
+            return "";
+        }
+    } else if (!isDirectory) {
+        error = [NSError errorWithDomain:NSCocoaErrorDomain
+                                    code:0
+                                userInfo:@{ NSLocalizedFailureReasonErrorKey : @"Could not create application support subdirectory.",
+                                             NSLocalizedDescriptionKey : @"A file with the name \"Noggit\" already exists. Please delete the file and try again."}];
+        LogError << "NoggitCocoa:" << error.localizedFailureReason << std::endl;
+        LogError << "NoggitCocoa:" << error.localizedDescription << std::endl;
+        [[NSApplication sharedApplication] presentError:error];
+    }
+    
+    NSString *configPath = [noggitPath stringByAppendingPathComponent:@"noggit.conf"];
+    return [configPath UTF8String];
+}
+
 std::string Native::getArialPath()
 {
     // Size does not affect ability to find font, but is required by method
@@ -85,17 +123,5 @@ std::string Native::getArialPath()
     
     return [fontPath UTF8String];
 }
-
-//
-//std::string NativeMac::applicationSupportPath()
-//{
-//    NSArray *urls = [[NSFileManager defaultManager] URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask];
-//    
-//    if (urls.count) {
-//        return std::string([[[urls[0] relativePath] stringByAppendingString:@"/Noggit/"] UTF8String]);
-//    }
-//    
-//    return "";
-//}
 
 #endif

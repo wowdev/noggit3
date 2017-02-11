@@ -218,32 +218,6 @@ void Noggit::parseArgs(int argc, char *argv[])
   }
 }
 
-boost::filesystem::path Noggit::getGamePath()
-{
-  if (!boost::filesystem::exists("noggit.conf"))
-  {
-    Log << "Did not find config file, guessing game path..." << std::endl;
-
-    if (boost::filesystem::exists("noggit.conf.conf"))
-    {
-      LogError << "You have named your config file noggit.conf.conf!" << std::endl;
-      LogError << "Erase the second .conf!" << std::endl;
-    }
-    else if (boost::filesystem::exists("noggit_template.conf"))
-    {
-      LogError << "You must rename noggit_template.conf to noggit.conf if noggit should use the config file!" << std::endl;
-    }
-
-	return Native::getGamePath();
-  }
-  else
-  {
-    Log << "Using config file." << std::endl;
-    return ConfigFile("noggit.conf").read<std::string>("Path");
-  }
-}
-
-
 void Noggit::loadMPQs()
 {
   asyncLoader = std::make_unique<AsyncLoader>();
@@ -454,8 +428,9 @@ int Noggit::start(int argc, char *argv[])
 
   initEnv();
   parseArgs(argc, argv);
+
   srand(::time(nullptr));
-  wowpath = getGamePath();
+  wowpath = Settings::getInstance()->gamePath;
 
   if (wowpath == "")
   {

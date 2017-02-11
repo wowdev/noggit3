@@ -92,7 +92,6 @@ private:
   unsigned int time = 0;
   void mainLoop (SDL_Surface* primary);
 
-  boost::filesystem::path getGamePath();
   boost::filesystem::path wowpath;
 
   AreaDB areaDB;
