@@ -172,6 +172,10 @@ set ( noggit_root_sources
       src/noggit/Model.cpp
       src/noggit/ModelInstance.cpp
       src/noggit/ModelManager.cpp
+      src/noggit/Native.cpp
+      src/noggit/NativeLinux.cpp
+      src/noggit/NativeMac.mm
+      src/noggit/NativeWindows.cpp
       src/noggit/Particle.cpp
       src/noggit/Project.cpp
       src/noggit/Settings.cpp
@@ -289,6 +293,7 @@ set ( noggit_root_headers
       src/noggit/ModelHeaders.h
       src/noggit/ModelInstance.h
       src/noggit/ModelManager.h
+      src/noggit/Native.hpp
       src/noggit/Particle.h
       src/noggit/Project.h
       src/noggit/Selection.h
