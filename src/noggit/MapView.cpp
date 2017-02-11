@@ -2098,6 +2098,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , terrainMode == editing_mode::areaid
                , terrainMode
                , gWorld->camera
+               , gWorld->lookat
                );
 
   displayGUIIfEnabled();
