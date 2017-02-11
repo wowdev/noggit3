@@ -1400,6 +1400,7 @@ MapView::~MapView()
 void MapView::tick(float t, float dt)
 {
   // start unloading tiles
+  gWorld->mapIndex->enterTile (tile_index (gWorld->_enter_tile_x, gWorld->_enter_tile_z));
   gWorld->mapIndex->unloadTiles(tile_index(gWorld->camera));
 
   dt = std::min(dt, 1.0f);
@@ -1998,6 +1999,9 @@ void MapView::displayViewMode_2D(float /*t*/, float /*dt*/)
 {
   video.setTileMode();
   gWorld->drawTileMode(_camera_ah);
+  gWorld->_enter_tile_x = (int)(gWorld->camera.x / TILESIZE);
+  gWorld->_enter_tile_z = (int)(gWorld->camera.z / TILESIZE);
+
 
   const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x) / CHUNKSIZE;
   const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z) / CHUNKSIZE;
@@ -2096,6 +2100,9 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , terrainMode == editing_mode::areaid
                , terrainMode
                );
+
+  gWorld->_enter_tile_x = (int)(gWorld->camera.x / TILESIZE);
+  gWorld->_enter_tile_z = (int)(gWorld->camera.z / TILESIZE);
 
   displayGUIIfEnabled();
 }
