@@ -21,7 +21,7 @@ public:
   void fromFile(MPQFile &f, size_t basePos);
   void save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
 
-  void draw();
+  void draw (opengl::scoped::use_program& water_shader);
 
   void autoGen(MapChunk* chunk, float factor);
   void CropWater(MapChunk* chunkTerrain);

@@ -196,11 +196,6 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
   info_pos += sizeof(MH2O_Information);
 }
 
-void liquid_layer::draw()
-{
-  _render.draw ([this] (opengl::scoped::use_program& prog) { draw_actual (prog); });
-}
-
 void liquid_layer::changeLiquidID(int id)
 {
   _liquid_id = id;
@@ -250,24 +245,24 @@ void liquid_layer::updateRender()
 
       size_t p = j * 9 + i;
 
-      depths.emplace_back (_depth[p]);
+      depths.emplace_back (1.f - _depth[p]);
       tex_coords.emplace_back (0.f, 0.f);
       vertices.emplace_back (_vertices[p]);
       indices.emplace_back (index++);
 
-      depths.emplace_back (_depth[p + 1]);
-      tex_coords.emplace_back (1.f, 0.f);
-      vertices.emplace_back (_vertices[p + 1]);
+      depths.emplace_back (1.f - _depth[p + 9]);
+      tex_coords.emplace_back (0.f, 1.f);
+      vertices.emplace_back (_vertices[p + 9]);
       indices.emplace_back (index++);
 
-      depths.emplace_back (_depth[p + 10]);
+      depths.emplace_back (1.f - _depth[p + 10]);
       tex_coords.emplace_back (1.f, 1.f);
       vertices.emplace_back (_vertices[p + 10]);
       indices.emplace_back (index++);
 
-      depths.emplace_back (_depth[p + 9]);
-      tex_coords.emplace_back (0.f, 1.f);
-      vertices.emplace_back (_vertices[p + 9]);
+      depths.emplace_back (1.f - _depth[p + 1]);
+      tex_coords.emplace_back (1.f, 0.f);
+      vertices.emplace_back (_vertices[p + 1]);
       indices.emplace_back (index++);
     }
   }
@@ -280,8 +275,10 @@ void liquid_layer::updateRender()
     );
 }
 
-void liquid_layer::draw_actual (opengl::scoped::use_program& water_shader)
+void liquid_layer::draw (opengl::scoped::use_program& water_shader)
 {
+  _render.prepare_draw (water_shader);
+
   water_shader.attrib ("position", vertices);
   water_shader.attrib ("tex_coord", tex_coords);
   water_shader.attrib ("depth", depths);

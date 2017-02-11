@@ -18,9 +18,15 @@ class liquid_render
 public:
   liquid_render(bool transparency = true, std::string const& filename = "");
   void draw (std::function<void (opengl::scoped::use_program&)>);
+  void prepare_draw (opengl::scoped::use_program& water_shader);
 
   void setTextures(std::string const& filename);
   void setTransparency(bool b) { _transparency = b; }
+
+  opengl::program const& shader_program() const
+  {
+    return program;
+  }
 
 private:
   opengl::program const program
