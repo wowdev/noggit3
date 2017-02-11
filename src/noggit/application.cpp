@@ -14,6 +14,8 @@ char* gpszProgramName = "Noggit3";
 static LOGCONTEXT  glogContext = { 0 };
 #endif
 
+#include <noggit/Native.hpp>
+
 #include <noggit/AppState.h>
 #include <noggit/AsyncLoader.h>
 #include <noggit/ConfigFile.h>
@@ -83,14 +85,8 @@ void Noggit::initPath(char *argv[])
 void Noggit::initFont()
 {
 
-  std::string arialFilename("<PLEASE GET SOME FONT FOR YOUR OS>");
-#ifdef _WIN32
-  //! \todo This might not work on windows 7 or something. Please fix.
-  arialFilename = "C:\\windows\\fonts\\arial.ttf";
-#endif
-#ifdef __APPLE__
-  arialFilename = "/Library/Fonts/Arial.ttf";
-#endif
+	std::string arialFilename = Native::getArialPath();
+
   if (!boost::filesystem::exists(arialFilename))
   {
     arialFilename = "arial.ttf";
@@ -126,7 +122,7 @@ void Noggit::initEnv()
   SDL_SysWMinfo SysInfo;
   SDL_GetWMInfo(&SysInfo);
   WindowHandle = SysInfo.window;
-  hInst = (HINSTANCE)GetWindowLong(WindowHandle, GWL_HINSTANCE);
+  hInst = (HINSTANCE)GetWindowLongPtr(WindowHandle, GWLP_HINSTANCE);
   hCtx = nullptr;
   tabletActive = FALSE;
 
@@ -260,28 +256,7 @@ boost::filesystem::path Noggit::getGamePath()
       LogError << "You must rename noggit_template.conf to noggit.conf if noggit should use the config file!" << std::endl;
     }
 
-
-#ifdef _WIN32
-    Log << "Will try to load the game path from you registry now:" << std::endl;
-    HKEY key;
-    DWORD t;
-    const DWORD s(1024);
-    char temp[s];
-    memset(temp, 0, s);
-    LONG l = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft", 0, KEY_QUERY_VALUE, &key);
-    if (l != ERROR_SUCCESS)
-      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR", 0, KEY_QUERY_VALUE, &key);
-    if (l != ERROR_SUCCESS)
-      l = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\Blizzard Entertainment\\World of Warcraft", 0, KEY_QUERY_VALUE, &key);
-    if (l == ERROR_SUCCESS && RegQueryValueEx(key, "InstallPath", 0, &t, (LPBYTE)temp, (LPDWORD)&s) == ERROR_SUCCESS)
-      return temp;
-    else
-      return "";
-    RegCloseKey(key);
-#else
-    return "/Applications/World of Warcraft/";
-#endif
-
+	return Native::getGamePath();
   }
   else
   {
