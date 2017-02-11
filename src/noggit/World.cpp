@@ -268,8 +268,8 @@ bool World::IsEditableWorld(int pMapId)
 }
 
 World::World(const std::string& name)
-  : ex(-1)
-  , ez(-1)
+  : _enter_tile_x (-1)
+  , _enter_tile_z (-1)
   , cx(-1)
   , cz(-1)
   , mCurrentSelection()
@@ -1218,8 +1218,8 @@ void main()
   }
 
 
-  ex = (int)(camera.x / TILESIZE);
-  ez = (int)(camera.z / TILESIZE);
+  _enter_tile_x = (int)(camera.x / TILESIZE);
+  _enter_tile_z = (int)(camera.z / TILESIZE);
 }
 
 selection_result World::intersect (math::ray const& ray, bool pOnlyMap, bool do_objects)
@@ -1268,7 +1268,7 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap, bool do_
 
 void World::tick(float dt)
 {
-  mapIndex->enterTile(tile_index(ex, ez));
+  mapIndex->enterTile(tile_index(_enter_tile_x, _enter_tile_z));
 
   while (dt > 0.1f) {
     ModelManager::updateEmitters(0.1f);
@@ -1393,8 +1393,8 @@ void World::drawTileMode(float /*ah*/)
     }
   }
 
-  ex = (int)(camera.x / TILESIZE);
-  ez = (int)(camera.z / TILESIZE);
+  _enter_tile_x = (int)(camera.x / TILESIZE);
+  _enter_tile_z = (int)(camera.z / TILESIZE);
 }
 
 bool World::GetVertex(float x, float z, math::vector_3d *V)
