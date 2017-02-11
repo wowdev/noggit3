@@ -82,7 +82,7 @@ void main()
     {
       opengl::scoped::use_program wire_box_shader {_program};
 
-      gl.enable (GL_LINE_SMOOTH);
+      opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
       gl.lineWidth (line_width);
 
