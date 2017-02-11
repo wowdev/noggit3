@@ -84,8 +84,7 @@ void Noggit::initPath(char *argv[])
 
 void Noggit::initFont()
 {
-
-	std::string arialFilename = Native::getArialPath();
+  std::string arialFilename = Native::getArialPath();
 
   if (!boost::filesystem::exists(arialFilename))
   {
