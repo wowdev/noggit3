@@ -927,11 +927,8 @@ void World::draw ( math::vector_3d const& cursor_pos
   gl.clientActiveTexture(GL_TEXTURE0);
 
   // height map w/ a zillion texture passes
-  //! \todo  Do we need to push the matrix here?
-
   if (drawterrain)
   {
-    opengl::scoped::matrix_pusher const matrix;
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
       tile->draw ( frustum
