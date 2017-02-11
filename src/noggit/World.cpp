@@ -819,9 +819,10 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_water_overlay
                  , bool draw_areaid_overlay
                  , editing_mode terrainMode
+                 , math::vector_3d const& camera_pos
                  )
 {
-  opengl::matrix::look_at (camera, lookat, {0.0f, 1.0f, 0.0f});
+  opengl::matrix::look_at (camera_pos, lookat, {0.0f, 1.0f, 0.0f});
 
   Frustum const frustum;
 
@@ -830,7 +831,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   {
     for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
     {
-      hadSky = it->second.wmo->drawSkybox(this->camera, it->second.extents[0], it->second.extents[1]);
+      hadSky = it->second.wmo->drawSkybox(camera_pos, it->second.extents[0], it->second.extents[1]);
       if (hadSky)
       {
         break;
@@ -846,10 +847,10 @@ void World::draw ( math::vector_3d const& cursor_pos
 
   int daytime = static_cast<int>(time) % 2880;
   outdoorLightStats = ol->getLightStats(daytime);
-  skies->initSky(camera, daytime);
+  skies->initSky(camera_pos, daytime);
 
   if (!hadSky)
-    hadSky = skies->drawSky(camera);
+    hadSky = skies->drawSky(camera_pos);
 
   // clearing the depth buffer only - color buffer is/has been overwritten anyway
   // unless there is no sky OR skybox
@@ -1021,7 +1022,7 @@ void World::draw ( math::vector_3d const& cursor_pos
 
   if ( terrainMode == editing_mode::ground && Environment::getInstance()->groundBrushType == eTerrainType_Vertex )
   {
-    float size = (vertexCenter() - camera).length();
+    float size = (vertexCenter() - camera_pos).length();
     gl.pointSize(std::max(0.001f, 10.0f - (1.25f * size / CHUNKSIZE)));
     gl.color3f(1.0f, 0.0f, 0.0f);
     gl.begin(GL_POINTS);
@@ -1272,11 +1273,11 @@ void World::tick(float dt)
   ModelManager::updateEmitters(dt);
 }
 
-unsigned int World::getAreaID()
+unsigned int World::getAreaID (math::vector_3d const& pos)
 {
-  tile_index tile(camera);
-  const int mcx = (const int)(fmod(camera.x, TILESIZE) / CHUNKSIZE);
-  const int mcz = (const int)(fmod(camera.z, TILESIZE) / CHUNKSIZE);
+  tile_index tile(pos);
+  const int mcx = (const int)(fmod(pos.x, TILESIZE) / CHUNKSIZE);
+  const int mcz = (const int)(fmod(pos.z, TILESIZE) / CHUNKSIZE);
 
   MapTile* curTile = mapIndex->getTile(tile);
   if (!curTile)
@@ -1321,7 +1322,7 @@ void World::setAreaID(math::vector_3d const& pos, int id, bool adt)
   }
 }
 
-void World::drawTileMode(float /*ah*/)
+void World::drawTileMode(float /*ah*/, math::vector_3d const& camera_pos)
 {
   gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   gl.enable(GL_BLEND);
@@ -1333,12 +1334,12 @@ void World::drawTileMode(float /*ah*/)
 
   {
     opengl::scoped::matrix_pusher const matrix;
-    gl.translatef(-camera.x / CHUNKSIZE, -camera.z / CHUNKSIZE, 0);
+    gl.translatef(-camera_pos.x / CHUNKSIZE, -camera_pos.z / CHUNKSIZE, 0);
 
-    minX = camera.x / CHUNKSIZE - 2.0f*video.ratio() / zoom;
-    maxX = camera.x / CHUNKSIZE + 2.0f*video.ratio() / zoom;
-    minY = camera.z / CHUNKSIZE - 2.0f / zoom;
-    maxY = camera.z / CHUNKSIZE + 2.0f / zoom;
+    minX = camera_pos.x / CHUNKSIZE - 2.0f*video.ratio() / zoom;
+    maxX = camera_pos.x / CHUNKSIZE + 2.0f*video.ratio() / zoom;
+    minY = camera_pos.z / CHUNKSIZE - 2.0f / zoom;
+    maxY = camera_pos.z / CHUNKSIZE + 2.0f / zoom;
 
     gl.enableClientState(GL_COLOR_ARRAY);
     gl.disableClientState(GL_NORMAL_ARRAY);
@@ -1358,7 +1359,7 @@ void World::drawTileMode(float /*ah*/)
   }
 
   if (drawlines) {
-    gl.translatef((GLfloat)fmod(-camera.x / CHUNKSIZE, 16), (GLfloat)fmod(-camera.z / CHUNKSIZE, 16), 0);
+    gl.translatef((GLfloat)fmod(-camera_pos.x / CHUNKSIZE, 16), (GLfloat)fmod(-camera_pos.z / CHUNKSIZE, 16), 0);
     /*  for(int x=-32;x<=48;x++)
     {
     if(x%16==0)
@@ -1590,12 +1591,6 @@ template<typename Fun>
     }
   }
 
-
-void World::jumpToCords(math::vector_3d pos)
-{
-  this->camera = pos;
-}
-
 void World::convert_alphamap(bool to_big_alpha)
 {
   if (to_big_alpha == mapIndex->hasBigAlpha())
@@ -1667,7 +1662,7 @@ void World::saveMap()
       opengl::scoped::matrix_pusher const matrix;
       gl.scalef(0.08333333f, 0.08333333f, 1.0f);
 
-      //gl.translatef(-camera.x/CHUNKSIZE,-camera.z/CHUNKSIZE,0);
+      //gl.translatef(-camera_pos.x/CHUNKSIZE,-camera_pos.z/CHUNKSIZE,0);
       gl.translatef(x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f);
 
 
@@ -1944,9 +1939,9 @@ int World::getWaterType(const tile_index& tile)
   }
 }
 
-void World::autoGenWaterTrans(float factor)
+void World::autoGenWaterTrans(math::vector_3d const& pos, float factor)
 {
-  for_tile_at(camera, [&](MapTile* tile) { tile->Water.autoGen(factor); });
+  for_tile_at(pos, [&](MapTile* tile) { tile->Water.autoGen(factor); });
 }
 
 

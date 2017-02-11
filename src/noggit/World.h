@@ -137,17 +137,17 @@ public:
             , bool draw_areaid_overlay
             //! \todo passing editing_mode is _so_ wrong, I don't believe I'm doing this
             , editing_mode
+            , math::vector_3d const& camera_pos
             );
 
   void outdoorLights(bool on);
   void setupFog();
 
-  //! \brief Get the area ID of the tile on which the camera currently is on.
-  unsigned int getAreaID();
+  unsigned int getAreaID (math::vector_3d const&);
   void setAreaID(math::vector_3d const& pos, int id, bool adt);
 
   selection_result intersect (math::ray const&, bool only_map, bool do_objects);
-  void drawTileMode(float ah);
+  void drawTileMode(float ah, math::vector_3d const& camera_pos);
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
 
@@ -213,7 +213,6 @@ public:
   std::unordered_set<Model*> _hidden_models;
   void clearHiddenModelList();
 
-  void jumpToCords(math::vector_3d pos);
   void saveMap();
 
   void deleteModelInstance(int pUniqueID);
@@ -243,7 +242,7 @@ public:
   void CropWaterADT(math::vector_3d const& pos);
   void setWaterType(math::vector_3d const& pos, int type);
   int getWaterType(const tile_index& tile);
-  void autoGenWaterTrans(float factor);
+  void autoGenWaterTrans(math::vector_3d const&, float factor);
 
 
   void fixAllGaps();
