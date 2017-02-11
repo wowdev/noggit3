@@ -246,22 +246,22 @@ void liquid_layer::updateRender()
       size_t p = j * 9 + i;
 
       depths.emplace_back (1.f - _depth[p]);
-      tex_coords.emplace_back (0.f, 0.f);
+      tex_coords.emplace_back (i + 0.f, j + 0.f);
       vertices.emplace_back (_vertices[p]);
       indices.emplace_back (index++);
 
       depths.emplace_back (1.f - _depth[p + 9]);
-      tex_coords.emplace_back (0.f, 1.f);
+      tex_coords.emplace_back (i + 0.f, j + 1.f);
       vertices.emplace_back (_vertices[p + 9]);
       indices.emplace_back (index++);
 
       depths.emplace_back (1.f - _depth[p + 10]);
-      tex_coords.emplace_back (1.f, 1.f);
+      tex_coords.emplace_back (i + 1.f, j + 1.f);
       vertices.emplace_back (_vertices[p + 10]);
       indices.emplace_back (index++);
 
       depths.emplace_back (1.f - _depth[p + 1]);
-      tex_coords.emplace_back (1.f, 0.f);
+      tex_coords.emplace_back (i + 1.f, j + 0.f);
       vertices.emplace_back (_vertices[p + 1]);
       indices.emplace_back (index++);
     }
