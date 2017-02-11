@@ -33,7 +33,10 @@ public:
   boost::optional<mysql_connection_info> mysql = boost::none;
 
   const bool& noAntiAliasing() const;
+  bool saveToDisk();
 
+  std::string gamePath;
+  std::string projectPath;
   std::string wodSavePath;
   std::string importFile;
   std::string wmvLogFile;
@@ -42,5 +45,6 @@ private:
   bool _noAntiAliasing;
 
   Settings();
+  bool createConfigFile();
   static Settings* instance;
 };

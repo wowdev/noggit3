@@ -79,6 +79,11 @@ std::string Native::getGamePath()
 	return gamePath;
 }
 
+std::string Native::getConfigPath()
+{
+	return "noggit.conf"
+}
+
 std::string Native::getArialPath()
 {
 	TCHAR fontPath[MAX_PATH] = { 0 };

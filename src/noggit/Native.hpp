@@ -6,6 +6,7 @@ class Native {
 public:
 	static std::string getArialPath();
     static std::string getGamePath();
+    static std::string getConfigPath();
     static std::string showFileChooser();
     static int showAlertDialog(std::string title, std::string message);
 };
