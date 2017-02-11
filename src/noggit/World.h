@@ -38,8 +38,6 @@ public:
   // Which tile are we over / entering?
   int _enter_tile_x;
   int _enter_tile_z;
-  int cx;
-  int cz;
 
   MapIndex *mapIndex;
 
