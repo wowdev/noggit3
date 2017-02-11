@@ -585,7 +585,7 @@ uint32_t MapIndex::newGUIDDB()
 uint32_t MapIndex::newGUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
-  if (mysql::IsMySQLConfigTrue()) {
+  if (Settings::getInstance()->mysql) {
     return newGUIDDB();
   }
   else {
