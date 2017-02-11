@@ -32,13 +32,13 @@ void TileWater::readFromFile(MPQFile &theFile, size_t basePos)
   }
 }
 
-void TileWater::draw()
+void TileWater::draw (opengl::scoped::use_program& water_shader)
 {
   for (int z = 0; z < 16; ++z)
   {
     for (int x = 0; x < 16; ++x)
     {
-      chunks[z][x]->draw();
+      chunks[z][x]->draw (water_shader);
     }
   }
 }

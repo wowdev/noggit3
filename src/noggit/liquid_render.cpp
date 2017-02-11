@@ -19,6 +19,13 @@ void liquid_render::draw (std::function<void (opengl::scoped::use_program&)> act
 {
   opengl::scoped::use_program water_shader {program};
 
+  prepare_draw (water_shader);
+
+  actual (water_shader);
+}
+
+void liquid_render::prepare_draw (opengl::scoped::use_program& water_shader)
+{
   water_shader.uniform ("model_view", opengl::matrix::model_view());
   water_shader.uniform ("projection", opengl::matrix::projection());
 
@@ -30,8 +37,6 @@ void liquid_render::draw (std::function<void (opengl::scoped::use_program&)> act
     , GL_TEXTURE0
     , _textures[static_cast<std::size_t> (gWorld->animtime / 60.0f) % _textures.size()].get()
     );
-
-  actual (water_shader);
 }
 
 liquid_render::liquid_render(bool transparency, std::string const& filename)
