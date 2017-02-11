@@ -577,7 +577,7 @@ uint32_t MapIndex::newGUIDDB()
   highGUIDDB = std::max(highestGUID, highestGUIDDB);
   highGUIDDB = ++highestGUIDDB;
   highestGUID = highGUIDDB; // update local max uid too
-  mysql::updateUIDinDB(*Settings::getInstance()->mysql, gWorld->mMapId, highGUIDDB);
+  mysql::updateUIDinDB(*Settings::getInstance()->mysql, gWorld->mMapId, highGUIDDB);  // it's neccesary to update the uid in database after every place, other then in the file uid storage system, because of cloudworking
   return highGUIDDB;
 }
 #endif
@@ -901,7 +901,7 @@ void MapIndex::searchMaxUID()
 void MapIndex::saveMaxUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
-  if (mysql::IsMySQLConfigTrue()) {
+  if (Settings::getInstance()->mysql) {
   if (mysql::hasMaxUIDStoredDB(*Settings::getInstance()->mysql, gWorld->mMapId))
   {
 	  mysql::updateUIDinDB(*Settings::getInstance()->mysql, gWorld->mMapId, highestGUID);
@@ -925,7 +925,7 @@ void MapIndex::saveMaxUID()
 void MapIndex::loadMaxUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
-if (mysql::IsMySQLConfigTrue()) {
+if (Settings::getInstance()->mysql) {
   highestGUID = mysql::getGUIDFromDB(*Settings::getInstance()->mysql, gWorld->mMapId);
 }
 else
