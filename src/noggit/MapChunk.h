@@ -42,6 +42,7 @@ private:
   opengl::texture shadow;
 
   std::vector<StripType> strip_with_holes;
+  std::vector<StripType> strip_without_holes;
 
   math::vector_3d mNormals[mapbufsize];
   math::vector_3d mMinimap[mapbufsize];
