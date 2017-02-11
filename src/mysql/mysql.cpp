@@ -20,12 +20,6 @@ namespace
 
 namespace mysql
 {
-
-  bool IsMySQLConfigTrue()
-  {
-    return Settings::getInstance()->mysql;
-  }
-
   bool hasMaxUIDStoredDB(Settings::mysql_connection_info const& info, std::size_t mapID)
   {
 	  auto Con(connect(info));

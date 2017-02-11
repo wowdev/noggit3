@@ -8,7 +8,6 @@
 
 namespace mysql
 {
-  bool IsMySQLConfigTrue();
   bool hasMaxUIDStoredDB(Settings::mysql_connection_info const& info, std::size_t mapID);
   std::uint32_t getGUIDFromDB(Settings::mysql_connection_info const& info, std::size_t mapID);
   void insertUIDinDB(Settings::mysql_connection_info const& info, std::size_t mapID, std::uint32_t NewUID);
