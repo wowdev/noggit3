@@ -16,6 +16,7 @@
 #include <opengl/scoped.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/Log.h>
+#include <noggit/Native.hpp>
 #include <noggit/Video.h>
 
 namespace freetype
@@ -133,8 +134,20 @@ namespace freetype
 
     if (failed)
     {
-      LogError << "FT_New_Face failed (there is probably a problem with your font file)" << std::endl;
-      throw std::runtime_error("FT_New_Face failed (there is probably a problem with your font file)");
+		std::string message = "Noggit encountered an error loading fonts required for its UI. ";
+		if (fromMPQ) {
+			message += "Please ensure that the WoW installation at the path below is valid:\n\n";
+			message += Native::getGamePath();
+		} else {
+			message += "Please ensure that your system has a valid copy of Arial installed.";
+		}
+
+		message += "\n\nNoggit will now quit.";
+
+		Native::showAlertDialog("Unable to load fonts", message);
+
+		LogError << "FT_New_Face failed (there is probably a problem with your font file)" << std::endl;
+		throw std::runtime_error("FT_New_Face failed (there is probably a problem with your font file)");
     }
 
     // For some twisted reason, Freetype measures font size in terms of 1/64ths of pixels.
