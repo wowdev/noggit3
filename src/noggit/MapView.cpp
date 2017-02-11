@@ -900,7 +900,7 @@ void MapView::createGUI()
             , [this]
               {
                 std::ofstream f("bookmarks.txt", std::ios_base::app);
-                f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << ah << " " << av << " " << gWorld->getAreaID() << std::endl;
+                f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << _camera_ah << " " << _camera_av << " " << gWorld->getAreaID() << std::endl;
               }
             );
 
@@ -990,7 +990,7 @@ void MapView::createGUI()
 
   addHotkey (SDLK_p, MOD_shift | MOD_ctrl, [] { Saving = true; });
 
-  addHotkey (SDLK_r, MOD_none, [this] { ah += 180.f; });
+  addHotkey (SDLK_r, MOD_none, [this] { _camera_ah += 180.f; });
   addHotkey (SDLK_r, MOD_ctrl, [] { ResetSelectedObjectRotation(); });
 
   addHotkey ( SDLK_g
@@ -1341,9 +1341,9 @@ void MapView::createGUI()
   mainGui->addChild(mainGui->HelperModels);
 }
 
-MapView::MapView(float ah0, float av0)
-  : ah(ah0)
-  , av(av0)
+MapView::MapView(float _camera_ah0, float _camera_av0)
+  : _camera_ah(_camera_ah0)
+  , _camera_av(_camera_av0)
   , _GUIDisplayingEnabled(true)
   , mTimespeed(0.0f)
 {
@@ -1437,8 +1437,8 @@ void MapView::tick(float t, float dt)
     math::vector_3d dir(1.0f, 0.0f, 0.0f);
     math::vector_3d dirUp(1.0f, 0.0f, 0.0f);
     math::vector_3d dirRight(0.0f, 0.0f, 1.0f);
-    math::rotate(0.0f, 0.0f, &dir.x, &dir.y, math::degrees(av));
-    math::rotate(0.0f, 0.0f, &dir.x, &dir.z, math::degrees(ah));
+    math::rotate(0.0f, 0.0f, &dir.x, &dir.y, math::degrees(_camera_av));
+    math::rotate(0.0f, 0.0f, &dir.x, &dir.z, math::degrees(_camera_ah));
 
     if (_mod_shift_down)
     {
@@ -1450,15 +1450,15 @@ void MapView::tick(float t, float dt)
     {
       dirUp.x = 0.0f;
       dirUp.y = 1.0f;
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.y, math::degrees(av));
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.y, math::degrees(av));
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees(ah));
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees(ah));
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.y, math::degrees(_camera_av));
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.y, math::degrees(_camera_av));
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees(_camera_ah));
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees(_camera_ah));
     }
     else
     {
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees(ah));
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees(ah));
+      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, math::degrees(_camera_ah));
+      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, math::degrees(_camera_ah));
     }
     auto Selection = gWorld->GetCurrentSelection();
     if (Selection)
@@ -1512,8 +1512,8 @@ void MapView::tick(float t, float dt)
       {
         //! \todo  Tell me what this is.
         ObjPos = boost::get<selected_model_type> (*Selection)->pos - gWorld->camera;
-        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, math::degrees(av));
-        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, math::degrees(ah));
+        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.y, math::degrees(_camera_av));
+        math::rotate(0.0f, 0.0f, &ObjPos.x, &ObjPos.z, math::degrees(_camera_ah));
         ObjPos.x = std::abs(ObjPos.x);
       }
 
@@ -1829,17 +1829,17 @@ void MapView::tick(float t, float dt)
     {
       if (turn != 0.0f)
       {
-        ah += turn;
-        mainGui->minimapWindow->changePlayerLookAt(math::degrees (ah));
+        _camera_ah += turn;
+        mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera_ah));
       }
       if (lookat)
       {
-        av += lookat;
-        if (av < -80.0f)
-          av = -80.0f;
-        else if (av > 80.0f)
-          av = 80.0f;
-        mainGui->minimapWindow->changePlayerLookAt(math::degrees (ah));
+        _camera_av += lookat;
+        if (_camera_av < -80.0f)
+          _camera_av = -80.0f;
+        else if (_camera_av > 80.0f)
+          _camera_av = 80.0f;
+        mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera_ah));
       }
       if (moving)
         gWorld->camera += dir * dt * movespd * moving;
@@ -1997,7 +1997,7 @@ void MapView::displayGUIIfEnabled()
 void MapView::displayViewMode_2D(float /*t*/, float /*dt*/)
 {
   video.setTileMode();
-  gWorld->drawTileMode(ah);
+  gWorld->drawTileMode(_camera_ah);
 
   const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x) / CHUNKSIZE;
   const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z) / CHUNKSIZE;
@@ -2357,14 +2357,14 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
 {
   if (look && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down))
   {
-    ah += e->xrel / XSENS;
-    av += mousedir * e->yrel / YSENS;
-    if (av < -80.0f)
-      av = -80.0f;
-    else if (av > 80.0f)
-      av = 80.0f;
+    _camera_ah += e->xrel / XSENS;
+    _camera_av += mousedir * e->yrel / YSENS;
+    if (_camera_av < -80.0f)
+      _camera_av = -80.0f;
+    else if (_camera_av > 80.0f)
+      _camera_av = 80.0f;
 
-    mainGui->minimapWindow->changePlayerLookAt(math::degrees (ah));
+    mainGui->minimapWindow->changePlayerLookAt(math::degrees (_camera_ah));
   }
 
   if (MoveObj)
