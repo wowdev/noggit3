@@ -173,9 +173,6 @@ set ( noggit_root_sources
       src/noggit/ModelInstance.cpp
       src/noggit/ModelManager.cpp
       src/noggit/Native.cpp
-      src/noggit/NativeLinux.cpp
-      src/noggit/NativeMac.mm
-      src/noggit/NativeWindows.cpp
       src/noggit/Particle.cpp
       src/noggit/Project.cpp
       src/noggit/Settings.cpp
@@ -195,7 +192,15 @@ set ( noggit_root_sources
       src/noggit/uid_storage.cpp
       src/noggit/wmo_liquid.cpp
     )
-  
+
+if(APPLE)
+  list (APPEND noggit_root_sources src/noggit/NativeMac.mm)
+elseif(UNIX)
+  list (APPEND noggit_root_sources src/noggit/NativeLinux.cpp)
+elseif(WIN32)
+  list (APPEND noggit_root_sources src/noggit/NativeWindows.cpp)
+endif()
+
 set ( noggit_ui_sources
       src/noggit/ui/About.cpp
       src/noggit/ui/Alphamap.cpp
