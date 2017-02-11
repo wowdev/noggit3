@@ -173,6 +173,7 @@ set ( noggit_root_sources
       src/noggit/ModelInstance.cpp
       src/noggit/ModelManager.cpp
       src/noggit/Native.cpp
+      src/noggit/NativeLinux.cpp
       src/noggit/NativeMac.mm
       src/noggit/NativeWindows.cpp
       src/noggit/Particle.cpp
