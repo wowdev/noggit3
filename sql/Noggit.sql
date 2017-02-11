@@ -1,5 +1,5 @@
 CREATE TABLE `UIDs` (
-  `UID` int(11) NOT NULL
+  `UID` int(11) NOT NULL,
   `MapId` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
