@@ -112,9 +112,9 @@ void LoadTextureNames()
     return;
   }
 
-  load_project_dir_tilesets();
-
   while (!MPQArchive::allFinishedLoading()) MPQArchive::allFinishLoading(); // wait for listfiles.
+
+  load_project_dir_tilesets();
 
   for (std::string const& entry : gListfile)
   {

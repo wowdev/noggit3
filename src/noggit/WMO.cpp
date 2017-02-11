@@ -94,7 +94,7 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MOHD');
 
-  unsigned int col;
+  unsigned int col, nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
   // header
   f.read (&nTextures, 4);
   f.read (&nGroups, 4);
@@ -110,8 +110,6 @@ void WMO::finishLoading ()
   f.read (ff, 12);
   extents[1] = ::math::vector_3d (ff[0], ff[1], ff[2]);
   f.seekRelative (4);
-
-  groups.resize (nGroups);
 
   // - MOTX ----------------------------------------------
 
@@ -160,7 +158,7 @@ void WMO::finishLoading ()
   assert (fourcc == 'MOGI');
 
   for (size_t i (0); i < nGroups; ++i) {
-    groups[i].init (this, &f, i, groupnames);
+    groups.emplace_back (this, &f, i, groupnames);
   }
 
   // - MOSB ----------------------------------------------
@@ -282,8 +280,7 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MODD');
 
-  nModels = size / 0x28;
-  for (size_t i (0); i < nModels; ++i) {
+  for (size_t i (0); i < size / 0x28; ++i) {
     struct
     {
       uint32_t name_offset : 24;
@@ -316,10 +313,8 @@ void WMO::finishLoading ()
     fogs.push_back (fog);
   }
 
-  for (size_t i (0); i < nGroups; ++i)
-  {
-    groups[i].load ();
-  }
+  for (auto &group : groups)
+    group.load();
 
   if (texbuf)
   {
@@ -335,8 +330,8 @@ void WMO::upload()
   for (unsigned int i = 0; i < mat.size(); ++i)
     mat[i]._texture = textures[i];
 
-  for (unsigned int i = 0; i < nGroups; ++i)
-    groups[i].upload ();
+  for (auto &group : groups)
+    group.upload ();
 
   _finished_upload = true;
 }
@@ -359,16 +354,16 @@ void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const an
   else
     gl.disable(GL_FOG);
 
-  for (unsigned int i = 0; i<nGroups; ++i)
+  for (auto &group : groups)
   {
-    groups[i].draw(ofs, angle, frustum);
+    group.draw(ofs, angle, frustum);
 
     if (gWorld->drawdoodads)
     {
-      groups[i].drawDoodads(doodadset, ofs, angle, frustum);
+      group.drawDoodads(doodadset, ofs, angle, frustum);
     }
 
-    groups[i].drawLiquid();
+    group.drawLiquid();
   }
 
   if (boundingbox)
@@ -383,8 +378,8 @@ void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const an
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    for (unsigned int i = 0; i < nGroups; ++i)
-      opengl::primitives::wire_box (groups[i].BoundingBoxMin, groups[i].BoundingBoxMax)
+    for (auto &group : groups)
+      opengl::primitives::wire_box (group.BoundingBoxMin, group.BoundingBoxMax)
         .draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
 
     opengl::primitives::wire_box ( math::vector_3d(extents[0].x, extents[0].z, -extents[0].y)
@@ -425,9 +420,9 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
   if (!finishedLoading ())
     return results;
 
-  for (size_t i (0); i < nGroups; ++i)
+  for (auto &group : groups)
   {
-    groups[i].intersect (ray, &results);
+    group.intersect (ray, &results);
   }
 
   std::cout << _filename << " " << results.size() << "\n";
@@ -529,11 +524,10 @@ void WMOLight::setupOnce(GLint light, math::vector_3d dir, math::vector_3d lcol)
 
 
 
-void WMOGroup::init(WMO *_wmo, MPQFile* f, int _num, char *names)
+WMOGroup::WMOGroup(WMO *_wmo, MPQFile* f, int _num, char *names)
+  : wmo(_wmo)
+  , num(_num)
 {
-  this->wmo = _wmo;
-  this->num = _num;
-
   // extract group info from f
   f->read(&flags, 4);
   float ff[3];
@@ -972,11 +966,7 @@ void WMOGroup::load()
   }
 
   indoor = flags & 8192;
-  initLighting (nLR, useLights);
-}
 
-void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
-{
   //dl_light = 0;
   // "real" lighting?
   if ((flags & 0x2000) && hascv)
@@ -990,7 +980,7 @@ void WMOGroup::initLighting(int /*nLR*/, uint16_t* /*useLights*/)
       lenmin = 999999.0f * 999999.0f;
       lmin = 0;
       ModelInstance& mi = wmo->modelis[doodad];
-      for (unsigned int j = 0; j < wmo->nLights; j++)
+      for (unsigned int j = 0; j < wmo->lights.size(); j++)
       {
         WMOLight& l = wmo->lights[j];
         ::math::vector_3d dir = l.pos - mi.pos;

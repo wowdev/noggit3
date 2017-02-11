@@ -306,14 +306,14 @@ float MapTile::getMaxHeight()
   return maxHeight;
 }
 
-void MapTile::toBigAlpha()
+void MapTile::convert_alphamap(bool to_big_alpha)
 {
   mBigAlpha = true;
   for (size_t i = 0; i < 16; i++)
   {
     for (size_t j = 0; j < 16; j++)
     {
-      mChunks[i][j]->toBigAlpha();
+      mChunks[i][j]->use_big_alphamap = to_big_alpha;
     }
   }
 }

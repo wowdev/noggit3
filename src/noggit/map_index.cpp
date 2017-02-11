@@ -485,10 +485,17 @@ uint32_t MapIndex::getFlag(const tile_index& tile) const
   return mTiles[tile.z][tile.x].flags;
 }
 
-void MapIndex::setBigAlpha()
+void MapIndex::convert_alphamap(bool to_big_alpha)
 {
-  mBigAlpha = true;
-  mphd.flags |= 4;
+  mBigAlpha = to_big_alpha;
+  if (to_big_alpha)
+  {
+    mphd.flags |= 4;
+  }
+  else
+  {
+    mphd.flags &= 0xFFFFFFFB;
+  }
 }
 
 
@@ -561,7 +568,7 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
 #ifdef USE_MYSQL_UID_STORAGE
 uint32_t MapIndex::getHighestGUIDFromDB() const
 {
-	return mysql::getGUIDFromDB (*Settings::getInstance()->mysql);
+	return mysql::getGUIDFromDB (*Settings::getInstance()->mysql, gWorld->mMapId);
 }
 
 uint32_t MapIndex::newGUIDDB()
@@ -570,7 +577,7 @@ uint32_t MapIndex::newGUIDDB()
   highGUIDDB = std::max(highestGUID, highestGUIDDB);
   highGUIDDB = ++highestGUIDDB;
   highestGUID = highGUIDDB; // update local max uid too
-  mysql::UpdateUIDInDB(*Settings::getInstance()->mysql, highGUIDDB);
+  mysql::updateUIDinDB(*Settings::getInstance()->mysql, gWorld->mMapId, highGUIDDB);
   return highGUIDDB;
 }
 #endif
@@ -578,7 +585,7 @@ uint32_t MapIndex::newGUIDDB()
 uint32_t MapIndex::newGUID()
 {
 #ifdef USE_MYSQL_UID_STORAGE
-  if (Settings::getInstance()->mysql) {
+  if (mysql::IsMySQLConfigTrue()) {
     return newGUIDDB();
   }
   else {
@@ -893,11 +900,39 @@ void MapIndex::searchMaxUID()
 
 void MapIndex::saveMaxUID()
 {
+#ifdef USE_MYSQL_UID_STORAGE
+  if (mysql::IsMySQLConfigTrue()) {
+  if (mysql::hasMaxUIDStoredDB(*Settings::getInstance()->mysql, gWorld->mMapId))
+  {
+	  mysql::updateUIDinDB(*Settings::getInstance()->mysql, gWorld->mMapId, highestGUID);
+  }
+  else
+  {
+	  mysql::insertUIDinDB(*Settings::getInstance()->mysql, gWorld->mMapId, highestGUID);
+  }
+  }
+  else
+  {
+    // save the max UID on the disc
+    uid_storage::getInstance()->saveMaxUID(gWorld->mMapId, highestGUID);
+  }
+#else
   // save the max UID on the disc
   uid_storage::getInstance()->saveMaxUID(gWorld->mMapId, highestGUID);
+#endif
 }
 
 void MapIndex::loadMaxUID()
 {
+#ifdef USE_MYSQL_UID_STORAGE
+if (mysql::IsMySQLConfigTrue()) {
+  highestGUID = mysql::getGUIDFromDB(*Settings::getInstance()->mysql, gWorld->mMapId);
+}
+else
+{
   highestGUID = uid_storage::getInstance()->getMaxUID(gWorld->mMapId);
+}
+#else
+  highestGUID = uid_storage::getInstance()->getMaxUID(gWorld->mMapId);
+#endif
 }

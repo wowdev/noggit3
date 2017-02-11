@@ -64,3 +64,10 @@ enum class editing_mode
   mccv,
   object,
 };
+
+enum water_opacity
+{
+  river_opacity,
+  ocean_opacity,
+  custom_opacity,
+};
