@@ -23,14 +23,7 @@ namespace mysql
 
   bool IsMySQLConfigTrue()
   {
-    if (Settings::getInstance()->mysql)
-	{
-      return true;
-	}
-	else
-	{
-      return false;
-	}
+    return Settings::getInstance()->mysql;
   }
 
   bool hasMaxUIDStoredDB(Settings::mysql_connection_info const& info, std::size_t mapID)
@@ -39,14 +32,7 @@ namespace mysql
 	  std::unique_ptr<sql::PreparedStatement> pstmt(Con->prepareStatement("SELECT * FROM UIDs WHERE MapId=(?)"));
 	  pstmt->setInt(1, mapID);
 	  std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
-	  if (res->rowsCount() >= 1)
-	  {
-		  return true;
-	  }
-	  else
-	  {
-		  return false;
-	  }
+	  return res->rowsCount();
   }
 
   std::uint32_t getGUIDFromDB(Settings::mysql_connection_info const& info, std::size_t mapID)
@@ -57,7 +43,10 @@ namespace mysql
 	  std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
 
 	  std::uint32_t highGUID(0);
-	  if (res->rowsCount() == 0) { return 0; }
+	  if (res->rowsCount() == 0) 
+    { 
+      return 0; 
+    }
 	  while (res->next())
 	  {
 		  highGUID = res->getInt(1);
