@@ -268,11 +268,7 @@ bool World::IsEditableWorld(int pMapId)
 }
 
 World::World(const std::string& name)
-  : _enter_tile_x (-1)
-  , _enter_tile_z (-1)
-  , cx(-1)
-  , cz(-1)
-  , mCurrentSelection()
+  : mCurrentSelection()
   , SelectionMode(false)
   , mWmoFilename("")
   , mWmoEntry(ENTRY_MODF())
@@ -878,6 +874,11 @@ void World::draw ( math::vector_3d const& cursor_pos
     //gl.color3f(0,1,0);
     //gl.disable(GL_FOG);
     const int lrr = 2;
+
+    int cx (2);
+    int cz (2);
+
+    //! \todo broken: should be current tile +- lrr
     for (int i = cx - lrr; i <= cx + lrr; ++i) { //! \todo maybe broke this, investigate
       for (int j = cz - lrr; j <= cz + lrr; ++j) {
         //! \todo  some annoying visual artifacts when the verylowres terrain overlaps
