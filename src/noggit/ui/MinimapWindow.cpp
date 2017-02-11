@@ -89,7 +89,7 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
   if (mMenuLink)
   {
 #ifdef USE_MYSQL_UID_STORAGE 
-    if ( mysql::IsMySQLConfigTrue()
+    if ( Settings::getInstance()->mysql
       && mysql::hasMaxUIDStoredDB(*Settings::getInstance()->mysql, gWorld->mMapId)
        )
     {
