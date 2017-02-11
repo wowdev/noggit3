@@ -1216,10 +1216,6 @@ void main()
       tile->drawWater (water_shader);
     }
   }
-
-
-  _enter_tile_x = (int)(camera.x / TILESIZE);
-  _enter_tile_z = (int)(camera.z / TILESIZE);
 }
 
 selection_result World::intersect (math::ray const& ray, bool pOnlyMap, bool do_objects)
@@ -1268,8 +1264,6 @@ selection_result World::intersect (math::ray const& ray, bool pOnlyMap, bool do_
 
 void World::tick(float dt)
 {
-  mapIndex->enterTile(tile_index(_enter_tile_x, _enter_tile_z));
-
   while (dt > 0.1f) {
     ModelManager::updateEmitters(0.1f);
     dt -= 0.1f;
@@ -1392,9 +1386,6 @@ void World::drawTileMode(float /*ah*/)
       gl.end();
     }
   }
-
-  _enter_tile_x = (int)(camera.x / TILESIZE);
-  _enter_tile_z = (int)(camera.z / TILESIZE);
 }
 
 bool World::GetVertex(float x, float z, math::vector_3d *V)
