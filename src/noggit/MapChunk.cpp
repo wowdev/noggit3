@@ -411,31 +411,43 @@ int MapChunk::indexNoLoD(int x, int y)
 
 void MapChunk::initStrip()
 {
-  strip_with_holes.resize (768); //! \todo  figure out exact length of strip needed
-  StripType* s = strip_with_holes.data();
+  strip_with_holes.clear();
+  strip_without_holes.clear();
 
   for (int x = 0; x<8; ++x)
   {
     for (int y = 0; y<8; ++y)
     {
+      strip_without_holes.emplace_back (indexLoD(y, x)); //9
+      strip_without_holes.emplace_back (indexNoLoD(y, x)); //0
+      strip_without_holes.emplace_back (indexNoLoD(y + 1, x)); //17
+      strip_without_holes.emplace_back (indexLoD(y, x)); //9
+      strip_without_holes.emplace_back (indexNoLoD(y + 1, x)); //17
+      strip_without_holes.emplace_back (indexNoLoD(y + 1, x + 1)); //18
+      strip_without_holes.emplace_back (indexLoD(y, x)); //9
+      strip_without_holes.emplace_back (indexNoLoD(y + 1, x + 1)); //18
+      strip_without_holes.emplace_back (indexNoLoD(y, x + 1)); //1
+      strip_without_holes.emplace_back (indexLoD(y, x)); //9
+      strip_without_holes.emplace_back (indexNoLoD(y, x + 1)); //1
+      strip_without_holes.emplace_back (indexNoLoD(y, x)); //0
+
       if (isHole(x / 2, y / 2))
         continue;
 
-      *s++ = indexLoD(y, x); //9
-      *s++ = indexNoLoD(y, x); //0
-      *s++ = indexNoLoD(y + 1, x); //17
-      *s++ = indexLoD(y, x); //9
-      *s++ = indexNoLoD(y + 1, x); //17
-      *s++ = indexNoLoD(y + 1, x + 1); //18
-      *s++ = indexLoD(y, x); //9
-      *s++ = indexNoLoD(y + 1, x + 1); //18
-      *s++ = indexNoLoD(y, x + 1); //1
-      *s++ = indexLoD(y, x); //9
-      *s++ = indexNoLoD(y, x + 1); //1
-      *s++ = indexNoLoD(y, x); //0
+      strip_with_holes.emplace_back (indexLoD(y, x)); //9
+      strip_with_holes.emplace_back (indexNoLoD(y, x)); //0
+      strip_with_holes.emplace_back (indexNoLoD(y + 1, x)); //17
+      strip_with_holes.emplace_back (indexLoD(y, x)); //9
+      strip_with_holes.emplace_back (indexNoLoD(y + 1, x)); //17
+      strip_with_holes.emplace_back (indexNoLoD(y + 1, x + 1)); //18
+      strip_with_holes.emplace_back (indexLoD(y, x)); //9
+      strip_with_holes.emplace_back (indexNoLoD(y + 1, x + 1)); //18
+      strip_with_holes.emplace_back (indexNoLoD(y, x + 1)); //1
+      strip_with_holes.emplace_back (indexLoD(y, x)); //9
+      strip_with_holes.emplace_back (indexNoLoD(y, x + 1)); //1
+      strip_with_holes.emplace_back (indexNoLoD(y, x)); //0
     }
   }
-  strip_with_holes.resize (s - strip_with_holes.data());
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
@@ -726,9 +738,9 @@ void MapChunk::draw ( Frustum const& frustum
       opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const depth_test;
 
       gl.begin(GL_TRIANGLES);
-      gl.vertex3fv(mVertices[strip_with_holes[poly + 0]]);
-      gl.vertex3fv(mVertices[strip_with_holes[poly + 1]]);
-      gl.vertex3fv(mVertices[strip_with_holes[poly + 2]]);
+      gl.vertex3fv(mVertices[strip_without_holes[poly + 0]]);
+      gl.vertex3fv(mVertices[strip_without_holes[poly + 1]]);
+      gl.vertex3fv(mVertices[strip_without_holes[poly + 2]]);
       gl.end();
     }
   }
@@ -769,12 +781,12 @@ void MapChunk::intersect (math::ray const& ray, selection_result* results)
     return;
   }
 
-  for (int i (0); i < strip_with_holes.size(); i += 3)
+  for (int i (0); i < strip_without_holes.size(); i += 3)
   {
-    if ( auto&& distance = ray.intersect_triangle ( mVertices[strip_with_holes[i + 0]]
-                                                  , mVertices[strip_with_holes[i + 1]]
-                                                  , mVertices[strip_with_holes[i + 2]]
-                                                  )
+    if ( auto distance = ray.intersect_triangle ( mVertices[strip_without_holes[i + 0]]
+                                                , mVertices[strip_without_holes[i + 1]]
+                                                , mVertices[strip_without_holes[i + 2]]
+                                                )
        )
     {
       results->emplace_back
