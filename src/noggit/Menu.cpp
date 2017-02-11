@@ -19,6 +19,7 @@
 #include <noggit/map_index.hpp>
 #include <noggit/map_index.hpp>
 #include <noggit/ui/About.h> // UIAbout
+#include <noggit/ui/SettingsPanel.h> //UISettings
 #include <noggit/ui/Frame.h> // UIFrame
 #include <noggit/ui/MenuBar.h> // UIMenuBar, menu items, ..
 #include <noggit/ui/MinimapWindow.h> // UIMinimapWindow
@@ -38,6 +39,7 @@ Menu::Menu()
 	: mGUIFrame(nullptr)
 	, mGUIStatusbar(nullptr)
 	, mGUICreditsWindow(nullptr)
+    , mGUISettingsWindow(nullptr)
 	, mGUIMinimapWindow(nullptr)
 	, mGUImenuBar(nullptr)
 	, mBackgroundModel(boost::none)
@@ -52,6 +54,9 @@ Menu::Menu()
   mGUIFrame->addChild(mGUIMinimapWindow);
   mGUICreditsWindow = new UIAbout();
   mGUIFrame->addChild(mGUICreditsWindow);
+  mGUISettingsWindow = new UISettings();
+  mGUISettingsWindow->hide();
+  mGUIFrame->addChild(mGUISettingsWindow);
   //! \todo Use? Yes - later i will show here the adt cords where you enter and some otehr infos
   mGUIStatusbar = new UIStatusBar(0.0f, (float)video.yres() - 30.0f, (float)video.xres(), 30.0f);
   mGUIFrame->addChild(mGUIStatusbar);
@@ -274,6 +279,12 @@ void Menu::loadBookmark(int bookmarkID)
   enterMapAt(e.pos, e.av, e.ah);
 }
 
+void Menu::showSettings()
+{
+  mGUICreditsWindow->hide();
+  mGUISettingsWindow->show();
+}
+
 void Menu::buildMenuBar()
 {
   if (mGUImenuBar)
@@ -285,6 +296,7 @@ void Menu::buildMenuBar()
 
   mGUImenuBar = new UIMenuBar();
   mGUImenuBar->AddMenu("File");
+    mGUImenuBar->GetMenu("File")->AddMenuItemButton("Settings", [this] { showSettings(); });
   mGUImenuBar->GetMenu("File")->AddMenuItemSwitch("exit ESC", &app.pop, true);
   mGUIFrame->addChild(mGUImenuBar);
 
