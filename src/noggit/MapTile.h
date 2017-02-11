@@ -66,7 +66,9 @@ public:
             , bool draw_wireframe_overlay
             );
   void intersect (math::ray const&, selection_result*) const;
-  void drawLines (Frustum const&);
+  void drawLines ( opengl::scoped::use_program& line_shader
+                 , Frustum const&
+                 );
   void drawWater (opengl::scoped::use_program& water_shader);
   void drawTextures();
   void drawMFBO (opengl::scoped::use_program&);

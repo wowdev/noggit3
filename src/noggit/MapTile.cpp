@@ -358,15 +358,13 @@ void MapTile::intersect (math::ray const& ray, selection_result* results) const
   }
 }
 
-void MapTile::drawLines (Frustum const& frustum)//draw red lines around the square of a chunk
+void MapTile::drawLines ( opengl::scoped::use_program& line_shader
+                        , Frustum const& frustum
+                        )
 {
-  gl.disable(GL_COLOR_MATERIAL);
-
   for (int j = 0; j<16; ++j)
     for (int i = 0; i<16; ++i)
-      mChunks[j][i]->drawLines (frustum);
-
-  gl.enable(GL_COLOR_MATERIAL);
+      mChunks[j][i]->drawLines (line_shader, frustum);
 }
 
 void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)

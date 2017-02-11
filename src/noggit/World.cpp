@@ -1039,18 +1039,45 @@ void World::draw ( math::vector_3d const& cursor_pos
 
   if (drawlines || (terrainMode == editing_mode::paint && highlightPaintableChunks))
   {
-    gl.disable(GL_COLOR_MATERIAL);
-    opengl::texture::set_active_texture (0);
-    opengl::texture::disable_texture();
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    opengl::program program { { GL_VERTEX_SHADER
+                              , R"code(
+#version 110
+
+attribute vec4 position;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+void main()
+{
+  gl_Position = projection * model_view * (position + vec4 (0.0, 0.5, 0.0, 0.0));
+}
+)code"
+                              }
+                            , { GL_FRAGMENT_SHADER
+                              , R"code(
+#version 110
+
+uniform vec4 color;
+
+void main()
+{
+  gl_FragColor = color;
+}
+)code"
+                              }
+                            };
+
+
+    opengl::scoped::use_program line_shader {program};
+
+    line_shader.uniform ("model_view", opengl::matrix::model_view());
+    line_shader.uniform ("projection", opengl::matrix::projection());
 
     setupFog();
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
-      tile->drawLines(frustum);
+      tile->drawLines (line_shader, frustum);
     }
   }
 
