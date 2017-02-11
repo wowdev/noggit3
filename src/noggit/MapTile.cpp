@@ -382,7 +382,7 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
   gl.drawElements (GL_TRIANGLE_FAN, sizeof (indices) / sizeof (*indices), GL_UNSIGNED_BYTE, indices);
 }
 
-void MapTile::drawWater()
+void MapTile::drawWater (opengl::scoped::use_program& water_shader)
 {
   if (!Water.hasData(0))
   {
@@ -392,7 +392,7 @@ void MapTile::drawWater()
   gl.disable(GL_COLOR_MATERIAL);
   gl.disable(GL_LIGHTING);
 
-  Water.draw();
+  Water.draw (water_shader);
 
   gl.enable(GL_LIGHTING);
   gl.enable(GL_COLOR_MATERIAL);

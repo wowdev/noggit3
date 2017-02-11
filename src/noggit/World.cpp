@@ -1179,9 +1179,16 @@ void main()
 
   if (this->drawwater)
   {
+    liquid_render liquid_renderer;
+
+    opengl::scoped::use_program water_shader {liquid_renderer.shader_program()};
+
+    water_shader.uniform ("model_view", opengl::matrix::model_view());
+    water_shader.uniform ("projection", opengl::matrix::projection());
+
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
-      tile->drawWater();
+      tile->drawWater (water_shader);
     }
   }
 

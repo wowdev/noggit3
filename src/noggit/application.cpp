@@ -590,11 +590,6 @@ int Noggit::start(int argc, char *argv[])
   SDL_WM_SetCaption("Noggit Studio - " STRPRODUCTVER, "");
   initFont();
 
-  if (GLEW_ARB_vertex_program && GLEW_ARB_fragment_program)
-    loadWaterShader();
-  else
-    LogError << "Your GPU does not support ARB vertex programs (shaders). Sorry." << std::endl;
-
   LogDebug << "Creating Menu" << std::endl;
   states.push_back(new Menu());
 

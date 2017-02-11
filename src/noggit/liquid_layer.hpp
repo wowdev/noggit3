@@ -4,6 +4,7 @@
 
 #include <noggit/liquid_render.hpp>
 #include <noggit/MapHeaders.h>
+#include <opengl/scoped.hpp>
 
 class MapChunk;
 class sExtendableArray;
@@ -22,7 +23,7 @@ public:
 
   void save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
 
-  void draw();
+  void draw (opengl::scoped::use_program& water_shader);
   void updateRender();
   void changeLiquidID(int id);
   
@@ -58,6 +59,13 @@ public:
 private:
   void update_min_max();
   void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);
+
+  opengl::scoped::buffers<1> _index_buffer;
+  std::vector<float> depths;
+  std::vector<math::vector_2d> tex_coords;
+  std::vector<math::vector_3d> vertices;
+  std::vector<std::uint16_t> indices;
+  void draw_actual (opengl::scoped::use_program&);
 
   int _liquid_id;
   int _liquid_vertex_format;

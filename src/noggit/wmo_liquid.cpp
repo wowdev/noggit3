@@ -93,22 +93,22 @@ int wmo_liquid::initGeometry(MPQFile* f)
         size_t p = j*(xtiles + 1) + i;
 
         depths.emplace_back (static_cast<float>(map[p].c[0]) / 255.0f);
-        tex_coords.emplace_back (0.f, 0.f);
+        tex_coords.emplace_back (i + 0.f, j + 0.f);
         vertices.emplace_back (lVertices[p]);
         indices.emplace_back (index++);
 
         depths.emplace_back (static_cast<float>(map[p + 1].c[0]) / 255.0f);
-        tex_coords.emplace_back (1.f, 0.f);
+        tex_coords.emplace_back (i + 1.f, j + 0.f);
         vertices.emplace_back (lVertices[p + 1]);
         indices.emplace_back (index++);
 
         depths.emplace_back (static_cast<float>(map[p + xtiles + 1 + 1].c[0]) / 255.0f);
-        tex_coords.emplace_back (1.f, 1.f);
+        tex_coords.emplace_back (i + 1.f, j + 1.f);
         vertices.emplace_back (lVertices[p + xtiles + 1 + 1]);
         indices.emplace_back (index++);
 
         depths.emplace_back (static_cast<float>(map[p + xtiles + 1].c[0]) / 255.0f);
-        tex_coords.emplace_back (0.f, 1.f);
+        tex_coords.emplace_back (i + 0.f, j + 1.f);
         vertices.emplace_back (lVertices[p + xtiles + 1]);
         indices.emplace_back (index++);
       }

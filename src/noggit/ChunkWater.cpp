@@ -153,7 +153,7 @@ void ChunkWater::setType(int type, size_t layer)
   }
 }
 
-void ChunkWater::draw()
+void ChunkWater::draw (opengl::scoped::use_program& water_shader)
 {
   if (_layers.empty())
   {
@@ -164,12 +164,12 @@ void ChunkWater::draw()
   {
     for (liquid_layer& layer : _layers)
     {
-      layer.draw();
+      layer.draw (water_shader);
     }
   }
   else if (Environment::getInstance()->currentWaterLayer < _layers.size())
   {
-    _layers[Environment::getInstance()->currentWaterLayer].draw();
+    _layers[Environment::getInstance()->currentWaterLayer].draw (water_shader);
   }
 }
 
