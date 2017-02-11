@@ -35,10 +35,6 @@ using StripType = uint16_t;
 class World
 {
 public:
-  // Which tile are we over / entering?
-  int _enter_tile_x;
-  int _enter_tile_z;
-
   MapIndex *mapIndex;
 
   // Information about the currently selected model / WMO / triangle.
