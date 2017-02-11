@@ -29,37 +29,55 @@ class WMOManager;
 class wmo_liquid;
 class Model;
 
-struct WMOBatch {
-  signed char bytes[12];
-  uint32_t indexStart;
-  uint16_t indexCount, vertexStart, vertexEnd;
-  unsigned char flags, texture;
+struct wmo_batch
+{
+  int8_t unused[12];
+
+  uint32_t index_start;
+  uint16_t index_count;
+  uint16_t vertex_start;
+  uint16_t vertex_end;
+
+  uint8_t flags;
+  uint8_t texture;
 };
 
 class WMOGroup {
-  struct wmo_batch
-  {
-    int8_t unused[12];
+public:
+  WMOGroup(WMO *wmo, MPQFile* f, int num, char *names);
 
-    uint32_t index_start;
-    uint16_t index_count;
-    uint16_t vertex_start;
-    uint16_t vertex_end;
+  void load ();
 
-    uint8_t flags;
-    uint8_t texture;
-  };
+  void upload();
 
+  void draw(const math::vector_3d& ofs, math::degrees const, Frustum const&);
+  void drawLiquid();
+  void drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const, Frustum const&);
+
+  void setupFog();
+
+  void intersect (math::ray const&, std::vector<float>* results) const;
+
+  math::vector_3d BoundingBoxMin;
+  math::vector_3d BoundingBoxMax;
+  math::vector_3d VertexBoxMin;
+  math::vector_3d VertexBoxMax;
+
+  bool indoor, hascv;
+  bool visible;
+
+  bool outdoorLights;
+  std::string name;
+
+private:
   WMO *wmo;
   uint32_t flags;
-  ::math::vector_3d v1,v2;
   ::math::vector_3d center;
   float rad;
   int32_t num;
   int32_t fog;
   std::vector<int16_t> ddr;
   std::unique_ptr<wmo_liquid> lq;
-  std::vector< std::pair<std::unique_ptr<opengl::call_list>, bool> > _lists;
 
   std::vector<wmo_batch> _batches;
 
@@ -70,28 +88,6 @@ class WMOGroup {
   std::vector<::math::vector_2d> _texcoords;
   std::vector<::math::vector_4d> _vertex_colors;
   std::vector<uint16_t> _indices;
-
-public:
-  math::vector_3d BoundingBoxMin;
-  math::vector_3d BoundingBoxMax;
-  math::vector_3d VertexBoxMin;
-  math::vector_3d VertexBoxMax;
-  bool indoor, hascv;
-  bool visible;
-
-  bool outdoorLights;
-  std::string name;
-
-  WMOGroup() {}
-  void init(WMO *wmo, MPQFile* f, int num, char *names);
-  void upload();
-  void load ();
-  void initLighting(int nLR, uint16_t *useLights);
-  void draw(const math::vector_3d& ofs, math::degrees const, Frustum const&);
-  void drawLiquid();
-  void drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, math::degrees const, Frustum const&);
-  void setupFog();
-  void intersect (math::ray const&, std::vector<float>* results) const;
 };
 
 struct WMOLight {
@@ -141,15 +137,26 @@ struct WMOFog {
 class WMO : public AsyncObject
 {
 public:
-  bool draw_group_boundingboxes;
+  explicit WMO(const std::string& name);
+
+  void draw(int doodadset, const math::vector_3d& ofs, math::degrees const, bool boundingbox, bool groupboxes, bool highlight, Frustum const&);
+  bool drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vector_3d pUpper) const;
+  //void drawPortals();
+
+  std::vector<float> intersect (math::ray const&) const;
+  
+  void finishLoading();
+
+  void upload();
 
   const std::string& filename() const;
+
+  bool draw_group_boundingboxes;
 
   bool _finished_upload;
 
   std::string _filename;
   std::vector<WMOGroup> groups;
-  unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
   std::vector<WMOMaterial> mat;
   math::vector_3d extents[2];
   std::vector<std::string> textures;
@@ -163,16 +170,6 @@ public:
   std::vector<WMODoodadSet> doodadsets;
 
   boost::optional<scoped_model_reference> skybox;
-
-  explicit WMO(const std::string& name);
-  void draw(int doodadset, const math::vector_3d& ofs, math::degrees const, bool boundingbox, bool groupboxes, bool highlight, Frustum const&);
-  std::vector<float> intersect (math::ray const&) const;
-  //void drawPortals();
-  bool drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vector_3d pUpper) const;
-
-  void finishLoading();
-
-  void upload();
 };
 
 class WMOManager

@@ -287,13 +287,15 @@ void UIMapViewGUI::render() const
                      << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
                      << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
                      << "\ndoodad set: " << instance->doodadset
-                     << "\ntextures used: " << instance->wmo->nTextures;
+                     << "\ntextures used: " << instance->wmo->textures.size();
 
-          for (unsigned int j = 0; j < std::min(instance->wmo->nTextures, 8U); j++)
+
+          const unsigned int texture_count (std::min((unsigned int)(instance->wmo->textures.size()), 8U));
+          for (unsigned int j = 0; j < texture_count; j++)
           {
             detailInfo << "\n " << (j + 1) << ": " << instance->wmo->textures[j];
           }
-          if (instance->wmo->nTextures > 25)
+          if (instance->wmo->textures.size() > 25)
           {
             detailInfo << "\n and more.";
           }

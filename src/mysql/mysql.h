@@ -8,6 +8,9 @@
 
 namespace mysql
 {
-  std::uint32_t getGUIDFromDB (Settings::mysql_connection_info const& info);
-  void UpdateUIDInDB (Settings::mysql_connection_info const& info, std::uint32_t NewUID);
+  bool IsMySQLConfigTrue();
+  bool hasMaxUIDStoredDB(Settings::mysql_connection_info const& info, std::size_t mapID);
+  std::uint32_t getGUIDFromDB(Settings::mysql_connection_info const& info, std::size_t mapID);
+  void insertUIDinDB(Settings::mysql_connection_info const& info, std::size_t mapID, std::uint32_t NewUID);
+  void updateUIDinDB (Settings::mysql_connection_info const& info, std::size_t mapID, std::uint32_t NewUID);
 };
