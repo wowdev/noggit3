@@ -900,7 +900,7 @@ void MapView::createGUI()
             , [this]
               {
                 std::ofstream f("bookmarks.txt", std::ios_base::app);
-                f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << _camera_ah << " " << _camera_av << " " << gWorld->getAreaID() << std::endl;
+                f << gWorld->getMapID() << " " << gWorld->camera.x << " " << gWorld->camera.y << " " << gWorld->camera.z << " " << _camera_ah << " " << _camera_av << " " << gWorld->getAreaID (gWorld->camera) << std::endl;
               }
             );
 
@@ -999,7 +999,7 @@ void MapView::createGUI()
               {
                 // write teleport cords to txt file
                 std::ofstream f("ports.txt", std::ios_base::app);
-                f << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID()) << " on ADT " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE) << std::endl;
+                f << "Map: " << gAreaDB.getAreaName(gWorld->getAreaID (gWorld->camera)) << " on ADT " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE) << std::endl;
                 f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << gWorld->getMapID() << std::endl;
                 f << "ArcEmu:" << std::endl << ".worldport " << gWorld->getMapID() << " " << (ZEROPOINT - gWorld->camera.z) << " " << (ZEROPOINT - gWorld->camera.x) << " " << gWorld->camera.y << " " << std::endl << std::endl;
                 f.close();
@@ -1998,7 +1998,7 @@ void MapView::displayGUIIfEnabled()
 void MapView::displayViewMode_2D(float /*t*/, float /*dt*/)
 {
   video.setTileMode();
-  gWorld->drawTileMode(_camera_ah);
+  gWorld->drawTileMode(_camera_ah, gWorld->camera);
 
 
   const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x) / CHUNKSIZE;
@@ -2097,6 +2097,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , terrainMode == editing_mode::water
                , terrainMode == editing_mode::areaid
                , terrainMode
+               , gWorld->camera
                );
 
   displayGUIIfEnabled();

@@ -97,7 +97,7 @@ UIWater::UIWater(UIMapViewGUI *setGui)
     "Regen ADT opacity",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp",
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
-    [this] { gWorld->autoGenWaterTrans(get_opacity_factor()); }
+                       [this] { gWorld->autoGenWaterTrans(gWorld->camera, get_opacity_factor()); }
   ));
 
   cropWater = new UIButton(5.0f, 350.0f, 170.0f, 30.0f,

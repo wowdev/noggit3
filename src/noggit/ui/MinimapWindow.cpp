@@ -121,7 +121,7 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
   {
 	  gWorld->GetVertex(pos.x, pos.z, &pos);
 	  pos.y += 50;
-	  map->jumpToCords(pos);
+	  map->camera = pos;
   }
 
   return this;
