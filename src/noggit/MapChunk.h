@@ -93,7 +93,7 @@ public:
 
   void drawContour();
   void intersect (math::ray const&, selection_result*);
-  void drawLines (Frustum const&);
+  void drawLines (opengl::scoped::use_program&, Frustum const&);
   void drawTextures();
   bool ChangeMCCV(math::vector_3d const& pos, float change, float radius, bool editMode);
 

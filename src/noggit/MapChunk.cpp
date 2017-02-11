@@ -16,6 +16,7 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <opengl/scoped.hpp>
+#include <opengl/matrix.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -502,12 +503,11 @@ void MapChunk::clearHeight()
 
 }
 
-void MapChunk::drawLines (Frustum const& frustum)
+void MapChunk::drawLines ( opengl::scoped::use_program& line_shader
+                         , Frustum const& frustum
+                         )
 {
   if (!frustum.intersects(vmin, vmax))
-    return;
-
-  if (!gWorld->drawlines)
     return;
 
   float mydist = (gWorld->camera - vcenter).length() - r;
@@ -515,47 +515,41 @@ void MapChunk::drawLines (Frustum const& frustum)
   if (mydist > (mapdrawdistance * mapdrawdistance))
     return;
 
-  gl.vertexPointer (vertices, 3, GL_FLOAT, 0, 0);
-
-  opengl::texture::disable_texture();
-
-  opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> const lighting;
-  opengl::scoped::matrix_pusher const matrix;
-
   opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
-  gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+  gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+  gl.lineWidth (1.5);
 
-  gl.translatef(0.0f, 0.05f, 0.0f);
-  gl.lineWidth(1.5);
-  gl.color4f(1.0, 0.0, 0.0f, 0.5f);
+  line_shader.attrib ("position", vertices, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
   if ((px != 15) && (py != 0))
   {
+    line_shader.uniform ("color", math::vector_4d (1.f, 0.f, 0.f, 0.5f));
     gl.drawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
   }
   else if ((px == 15) && (py == 0))
   {
-    gl.color4f(0.0, 1.0, 0.0f, 0.5f);
+    line_shader.uniform ("color", math::vector_4d (0.f, 1.f, 0.f, 0.5f));
     gl.drawElements(GL_LINE_STRIP, 17, GL_UNSIGNED_SHORT, LineStrip);
   }
   else if (px == 15)
   {
+    line_shader.uniform ("color", math::vector_4d (1.f, 0.f, 0.f, 0.5f));
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
-    gl.color4f(0.0, 1.0, 0.0f, 0.5f);
+    line_shader.uniform ("color", math::vector_4d (0.f, 1.f, 0.f, 0.5f));
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
   }
   else if (py == 0)
   {
-    gl.color4f(0.0, 1.0, 0.0f, 0.5f);
+    line_shader.uniform ("color", math::vector_4d (0.f, 1.f, 0.f, 0.5f));
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, LineStrip);
-    gl.color4f(1.0, 0.0, 0.0f, 0.5f);
+    line_shader.uniform ("color", math::vector_4d (1.f, 0.f, 0.f, 0.5f));
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
   }
 
   if (Environment::getInstance()->view_holelines)
   {
     // Draw hole lines if view_subchunk_lines is true
-    gl.color4f(0.0, 0.0, 1.0f, 0.5f);
+    line_shader.uniform ("color", math::vector_4d (0.f, 0.f, 1.f, 0.5f));
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, HoleStrip);
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[9]);
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[18]);
@@ -563,8 +557,6 @@ void MapChunk::drawLines (Frustum const& frustum)
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[36]);
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &HoleStrip[45]);
   }
-
-  gl.color4f(1, 1, 1, 1);
 }
 
 void MapChunk::drawContour()
