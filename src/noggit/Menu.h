@@ -15,6 +15,7 @@
 class UIFrame;
 class UIStatusBar;
 class UIAbout;
+class UISettings;
 class UIMinimapWindow;
 class UIMenuBar;
 namespace ui
@@ -70,6 +71,7 @@ private:
   std::unique_ptr<UIFrame> mGUIFrame;
   UIStatusBar* mGUIStatusbar;
   UIAbout* mGUICreditsWindow;
+  UISettings* mGUISettingsWindow;
   UIMinimapWindow* mGUIMinimapWindow;
   UIMenuBar* mGUImenuBar;
 
@@ -82,6 +84,7 @@ private:
   void createBookmarkList();
   void createMapList();
   void buildMenuBar();
+  void showSettings();
   void randBackground();
 
   void resizewindow();
