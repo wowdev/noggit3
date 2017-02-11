@@ -29,8 +29,8 @@ void liquid_render::prepare_draw (opengl::scoped::use_program& water_shader)
   water_shader.uniform ("model_view", opengl::matrix::model_view());
   water_shader.uniform ("projection", opengl::matrix::projection());
 
-  water_shader.uniform ("color_light", {gWorld->skies->colorSet[WATER_COLOR_LIGHT], 1.f});
-  water_shader.uniform ("color_dark", {gWorld->skies->colorSet[WATER_COLOR_DARK], 1.f});
+  water_shader.uniform ("color_light", {gWorld->skies->colorSet[WATER_COLOR_LIGHT], 0.7f});
+  water_shader.uniform ("color_dark", {gWorld->skies->colorSet[WATER_COLOR_DARK], 0.9f});
 
   water_shader.sampler
     ( "texture"
