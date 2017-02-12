@@ -43,6 +43,7 @@ std::string Native::showFileChooser()
     
     if ([openPanel runModal] == NSFileHandlingPanelOKButton) {
         NSString *path = [openPanel.URL relativePath];
+        path = [path stringByAppendingString:@"/"];
         
         return std::string([path UTF8String]);
     }
@@ -60,6 +61,7 @@ std::string Native::getGamePath()
     
     if ([openPanel runModal] == NSFileHandlingPanelOKButton) {
         NSString *path = [openPanel.URL relativePath];
+        path = [path stringByAppendingString:@"/"];
         
         if (!checkWoWVersionAtPath(path)) {
             Native::showAlertDialog(kMismatchTitle, kMismatchMessage);

@@ -92,6 +92,9 @@ UISettings::UISettings()
     addChild(randTiltCheck = new UICheckBox(350, 195, "Random tilt", &Settings::getInstance()->random_tilt));
     addChild(modelStatsCheck = new UICheckBox(350, 220, "Copy model stats", &Settings::getInstance()->copyModelStats));
     
+    addChild(new UITexture(5, height()-29, 16, 16, "Interface\\GossipFrame\\AvailableQuestIcon.blp"));
+    addChild(new UIText(22, height()-29, "Changes may not take effect until next launch.", app.getArial12(), eJustifyLeft));
+    
     addChild(new UIButton(width()-110, height()-32, 100, 32, "Save", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", saveSettings, 0));
     addChild(new UIButton(width()-215, height()-32, 100, 32, "Cancel", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", discardSettingsChanges, 0));
 }
