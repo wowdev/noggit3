@@ -187,6 +187,7 @@ set ( noggit_root_sources
       src/noggit/application.cpp
       src/noggit/liquid_layer.cpp
       src/noggit/liquid_render.cpp
+      src/noggit/map_horizon.cpp
       src/noggit/map_index.cpp
       src/noggit/texture_set.cpp
       src/noggit/uid_storage.cpp
@@ -315,6 +316,7 @@ set ( noggit_root_headers
       src/noggit/errorHandling.h
       src/noggit/liquid_layer.hpp
       src/noggit/liquid_render.hpp
+      src/noggit/map_horizon.h
       src/noggit/map_index.hpp
       src/noggit/multimap_with_normalized_key.hpp
       src/noggit/texture_set.hpp
