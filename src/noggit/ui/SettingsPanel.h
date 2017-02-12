@@ -17,7 +17,7 @@ public:
   UITextBox *farZField;
 private:
   static const int winWidth = 500;
-  static const int winHeight = 400;
+  static const int winHeight = 300;
     
   UICheckBox *tabletModeCheck;
   UICheckBox *autoselectCheck;
