@@ -23,7 +23,7 @@ std::string showFileChooser()
 
 std::string Native::getConfigPath()
 {
-	return "noggit.conf"
+	return "noggit.conf";
 }
 
 std::string Native::getArialPath()
