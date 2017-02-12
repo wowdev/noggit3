@@ -301,7 +301,7 @@ World::World(const std::string& name)
   , loading(false)
   , autoheight(false)
   , outdoorLightStats(OutdoorLightStats())
-  , minimap(0)
+  , horizon(name)
   , mapstrip(nullptr)
   , mapstrip2(nullptr)
   , camera(math::vector_3d(0.0f, 0.0f, 0.0f))
@@ -332,192 +332,9 @@ World::World(const std::string& name)
 
   mapIndex = new MapIndex(basename);
 
-  if (!mapIndex->hasAGlobalWMO())
-    initMinimap();
-
-}
-
-static inline unsigned int color_for_height (int16_t height)
-{
-  //TEMP: this is not here to stay.
-  // eventually all this stuff should get its own class.
-  struct color
-  {
-    color(unsigned char r, unsigned char g, unsigned char b)
-      : _r(r)
-      , _g(g)
-      , _b(b)
-    {}
-
-    unsigned int to_int() const {
-      return (_r) | (_g << 8) | (_b << 16) | (unsigned int)(255 << 24);
-    }
-
-    operator unsigned int () const {
-      return to_int();
-    }
-
-    unsigned char _r;
-    unsigned char _g;
-    unsigned char _b;
-  };
-
-  struct ranged_color
-  {
-    ranged_color (const color& c, const int16_t& start, const int16_t& stop)
-      : _color (c)
-      , _start (start)
-      , _stop (stop) 
-    {}
-
-    const color   _color;
-    const int16_t _start;
-    const int16_t _stop;
-  };
-
-  static const ranged_color colors[] =
-    { ranged_color (color (20, 149, 7), 0, 600)
-    , ranged_color (color (137, 84, 21), 600, 1200)
-    , ranged_color (color (96, 96, 96), 1200, 1600)
-    , ranged_color (color (255, 255, 255), 1600, 0x7FFF)
-    };
-  static const size_t num_colors (sizeof (colors) / sizeof (ranged_color));
-
-  if (height < colors[0]._start)
-  {
-    return color (0, 0, 255 + std::max (height / 2.0, -255.0));
+  if (!mapIndex->hasAGlobalWMO()) {
+    horizon.upload();
   }
-  else if (height >= colors[num_colors - 1]._stop)
-  {
-    return colors[num_colors]._color;
-  }
-
-  float t (1.0);
-  size_t correct_color (num_colors - 1);
-
-  for (size_t i (0); i < num_colors - 1; ++i)
-  {
-    if (height >= colors[i]._start && height < colors[i]._stop)
-    {
-      t = float(height - colors[i]._start) / float (colors[i]._stop - colors[i]._start);
-      correct_color = i;
-      break;
-    }
-  }
-
-  return color ( (colors[correct_color + 1]._color._r) * t + (colors[correct_color]._color._r) * (1.0 - t)
-               , (colors[correct_color + 1]._color._g) * t + (colors[correct_color]._color._g) * (1.0 - t)
-               , (colors[correct_color + 1]._color._b) * t + (colors[correct_color]._color._b) * (1.0 - t)
-               );
-}
-
-void World::initMinimap()
-{
-  std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
-
-  MPQFile wdl_file (filename.str());
-  if (wdl_file.isEof())
-  {
-    LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
-    return;
-  }
-
-  uint32_t fourcc;
-  uint32_t size;
-
-  // - MVER ----------------------------------------------
-
-  uint32_t version;
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-  wdl_file.read (&version, 4);
-
-  assert (fourcc == 'MVER' && size == 4 && version == 18);
-
-  // - MWMO ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MWMO');
-      // Filenames for WMO that appear in the low resolution map. Zero terminated strings.
-
-  wdl_file.seekRelative (size);
-
-  // - MWID ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MWID');
-      // List of indexes into the MWMO chunk.
-
-  wdl_file.seekRelative (size);
-
-  // - MODF ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MODF');
-      // Placement information for the WMO. Appears to be the same 64 byte structure used in the WDT and ADT MODF chunks.
-
-  wdl_file.seekRelative (size);
-
-  // - MAOF ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MAOF' && size == 64 * 64 * sizeof (uint32_t));
-
-  uint32_t mare_offsets[64][64];
-  wdl_file.read (mare_offsets, 64 * 64 * sizeof (uint32_t));
-
-  // - MARE and MAHO by offset ---------------------------
-
-  gl.genTextures(1, &minimap);
-
-  unsigned int *texbuf = new unsigned int[512 * 512];
-  memset(texbuf, 0, 512 * 512 * 4);
-
-  for (size_t y (0); y < 64; ++y)
-  {
-    for (size_t x (0); x < 64; ++x)
-    {
-      if (!mare_offsets[y][x])
-        continue;
-
-      wdl_file.seek (mare_offsets[y][x]);
-      wdl_file.read (&fourcc, 4);
-      wdl_file.read (&size, 4);
-
-      assert (fourcc == 'MARE');
-      assert (size == 0x442);
-
-      //! \todo There also is a second heightmap appended which has additional 16*16 pixels.
-      //! \todo There also is MAHO giving holes into this heightmap.
-
-      const int16_t* data (wdl_file.get<int16_t> (mare_offsets[y][x] + 8));
-
-      for (size_t j (0); j < 8; ++j)
-      {
-        for (size_t i (0); i < 8; ++i)
-        {
-          texbuf[(y * 8 + j) * 512 + x * 8 + i] = color_for_height (data[(j * 2) * 17 + i * 2]);
-        }
-      }
-    }
-  }
-
-  gl.bindTexture(GL_TEXTURE_2D, minimap);
-  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, texbuf);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-  delete[] texbuf;
 }
 
 bool World::IsSelection(int pSelectionType)
@@ -752,12 +569,6 @@ World::~World()
         lowrestiles[j][i] = nullptr;
       }
     }
-  }
-
-  if (minimap)
-  {
-    gl.deleteTextures(1, &minimap);
-    minimap = 0;
   }
 
   if (skies)
