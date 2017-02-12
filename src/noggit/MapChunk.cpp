@@ -108,145 +108,174 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 {
   uint32_t fourcc;
   uint32_t size;
+  
+  size_t base = f->getPos();
+
   hasMCCV = false;
 
-  f->read(&fourcc, 4);
-  f->read(&size, 4);
-
-  assert(fourcc == 'MCNK');
-
-  size_t lastpos = f->getPos() + size;
-
-  f->read(&header, 0x80);
-
-  Flags = header.flags;
-  areaID = header.areaid;
-
-  if (Environment::getInstance()->areaIDColors.find(areaID) == Environment::getInstance()->areaIDColors.end())
-  {
-    math::vector_3d newColor = math::vector_3d(misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f));
-    Environment::getInstance()->areaIDColors.insert(std::pair<int, math::vector_3d>(areaID, newColor));
-  }
-
-  Environment::getInstance()->selectedAreaID = areaID; //The last loaded is selected on start.
-
-  zbase = header.zpos;
-  xbase = header.xpos;
-  ybase = header.ypos;
-
-  px = header.ix;
-  py = header.iy;
-
-  holes = header.holes;
-
-  // correct the x and z values ^_^
-  zbase = zbase*-1.0f + ZEROPOINT;
-  xbase = xbase*-1.0f + ZEROPOINT;
-
-  vmin = math::vector_3d(9999999.0f, 9999999.0f, 9999999.0f);
-  vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
-
-  while (f->getPos() < lastpos)
+  // - MCNK ----------------------------------------------
   {
     f->read(&fourcc, 4);
     f->read(&size, 4);
 
-    size_t nextpos = f->getPos() + size;
+    assert(fourcc == 'MCNK');
 
-    if (fourcc == 'MCNR') {
-      nextpos = f->getPos() + 0x1C0; // size fix
-                                     // normal vectors
-      char nor[3];
-      math::vector_3d *ttn = mNormals;
-      for (int j = 0; j<17; ++j) {
-        for (int i = 0; i<((j % 2) ? 8 : 9); ++i) {
-          f->read(nor, 3);
-          // order X,Z,Y
-          // *ttn++ = math::vector_3d((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
-          *ttn++ = math::vector_3d(-nor[1] / 127.0f, nor[2] / 127.0f, -nor[0] / 127.0f);
-        }
-      }
-    }
-    else if (fourcc == 'MCVT')
+    f->read(&header, 0x80);
+
+    Flags = header.flags;
+    areaID = header.areaid;
+
+    if (Environment::getInstance()->areaIDColors.find(areaID) == Environment::getInstance()->areaIDColors.end())
     {
-      math::vector_3d *ttv = mVertices;
-
-      // vertices
-      for (int j = 0; j < 17; ++j) {
-        for (int i = 0; i < ((j % 2) ? 8 : 9); ++i) {
-          float h, xpos, zpos;
-          f->read(&h, 4);
-          xpos = i * UNITSIZE;
-          zpos = j * 0.5f * UNITSIZE;
-          if (j % 2) {
-            xpos += UNITSIZE*0.5f;
-          }
-          math::vector_3d v = math::vector_3d(xbase + xpos, ybase + h, zbase + zpos);
-          *ttv++ = v;
-          vmin.y = std::min(vmin.y, v.y);
-          vmax.y = std::max(vmax.y, v.y);
-        }
-      }
-
-      vmin.x = xbase;
-      vmin.z = zbase;
-      vmax.x = xbase + 8 * UNITSIZE;
-      vmax.z = zbase + 8 * UNITSIZE;
-      
-      // use absolute y pos in vertices
-      ybase = 0.0f;
-      header.ypos = 0.0f;
+      math::vector_3d newColor = math::vector_3d(misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f));
+      Environment::getInstance()->areaIDColors.insert(std::pair<int, math::vector_3d>(areaID, newColor));
     }
-    else if (fourcc == 'MCLY')
-    {
-      _texture_set.initTextures(f, mt, size);
-    }
-    else if (fourcc == 'MCSH')
-    {
-      // shadow map 64 x 64
 
-      f->read(mShadowMap, 0x200);
-      f->seekRelative(-0x200);
+    Environment::getInstance()->selectedAreaID = areaID; //The last loaded is selected on start.
 
-      unsigned char sbuf[64 * 64], *p, c[8];
-      p = sbuf;
-      for (int j = 0; j<64; ++j) {
-        f->read(c, 8);
-        for (int i = 0; i<8; ++i) {
-          for (int b = 0x01; b != 0x100; b <<= 1) {
-            *p++ = (c[i] & b) ? 85 : 0;
-          }
-        }
-      }
-      shadow.bind();
-      gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    zbase = header.zpos;
+    xbase = header.xpos;
+    ybase = header.ypos;
 
-    }
-    else if (fourcc == 'MCAL')
-    {
-      _texture_set.initAlphamaps(f, header.nLayers, use_big_alphamap, (header.flags & FLAG_do_not_fix_alpha_map) == 0);
-    }
-    else if (fourcc == 'MCCV')
-    {
-      if (!(Flags & FLAG_MCCV))
-        Flags |= FLAG_MCCV;
-      hasMCCV = true;
+    px = header.ix;
+    py = header.iy;
 
-      unsigned char t[4];
+    holes = header.holes;
 
-      for (int i = 0; i < mapbufsize; ++i)
-      {
-        f->read(t, 4);
-        mccv[i] = math::vector_3d((float)t[2] / 127.0f, (float)t[1] / 127.0f, (float)t[0] / 127.0f);
-      }
-    }
-    f->seek(nextpos);
+    // correct the x and z values ^_^
+    zbase = zbase*-1.0f + ZEROPOINT;
+    xbase = xbase*-1.0f + ZEROPOINT;
+
+    vmin = math::vector_3d(9999999.0f, 9999999.0f, 9999999.0f);
+    vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
   }
+  // - MCVT ----------------------------------------------
+  {
+    f->seek(base + header.ofsHeight);
+    f->read(&fourcc, 4);
+    f->read(&size, 4);
 
+    assert(fourcc == 'MCVT');
+
+    math::vector_3d *ttv = mVertices;
+
+    // vertices
+    for (int j = 0; j < 17; ++j) {
+      for (int i = 0; i < ((j % 2) ? 8 : 9); ++i) {
+        float h, xpos, zpos;
+        f->read(&h, 4);
+        xpos = i * UNITSIZE;
+        zpos = j * 0.5f * UNITSIZE;
+        if (j % 2) {
+          xpos += UNITSIZE*0.5f;
+        }
+        math::vector_3d v = math::vector_3d(xbase + xpos, ybase + h, zbase + zpos);
+        *ttv++ = v;
+        vmin.y = std::min(vmin.y, v.y);
+        vmax.y = std::max(vmax.y, v.y);
+      }
+    }
+
+    vmin.x = xbase;
+    vmin.z = zbase;
+    vmax.x = xbase + 8 * UNITSIZE;
+    vmax.z = zbase + 8 * UNITSIZE;
+    
+    // use absolute y pos in vertices
+    ybase = 0.0f;
+    header.ypos = 0.0f;
+  }
+  // - MCNR ----------------------------------------------
+  {
+    f->seek(base + header.ofsNormal);
+    f->read(&fourcc, 4);
+    f->read(&size, 4);
+
+    assert(fourcc == 'MCNR');
+
+    char nor[3];
+    math::vector_3d *ttn = mNormals;
+    for (int j = 0; j<17; ++j) {
+      for (int i = 0; i<((j % 2) ? 8 : 9); ++i) {
+        f->read(nor, 3);
+        // order X,Z,Y
+        // *ttn++ = math::vector_3d((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
+        *ttn++ = math::vector_3d(-nor[1] / 127.0f, nor[2] / 127.0f, -nor[0] / 127.0f);
+      }
+    }
+  }
+  // - MCLY ----------------------------------------------
+  {
+    f->seek(base + header.ofsLayer);
+    f->read(&fourcc, 4);
+    f->read(&size, 4);
+
+    assert(fourcc == 'MCLY');
+
+    _texture_set.initTextures(f, mt, size);
+  }
+  // - MCSH ----------------------------------------------
+  if(header.ofsShadow && header.sizeShadow)
+  {
+    f->seek(base + header.ofsShadow);
+    f->read(&fourcc, 4);
+    f->read(&size, 4);
+
+    assert(fourcc == 'MCSH');
+
+    // shadow map 64 x 64
+    f->read(mShadowMap, 0x200);
+    f->seekRelative(-0x200);
+
+    unsigned char sbuf[64 * 64], *p, c[8];
+    p = sbuf;
+    for (int j = 0; j<64; ++j) {
+      f->read(c, 8);
+      for (int i = 0; i<8; ++i) {
+        for (int b = 0x01; b != 0x100; b <<= 1) {
+          *p++ = (c[i] & b) ? 85 : 0;
+        }
+      }
+    }
+    shadow.bind();
+    gl.texImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 64, 64, 0, GL_ALPHA, GL_UNSIGNED_BYTE, sbuf);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  }
+  // - MCAL ----------------------------------------------
+  {
+    f->seek(base + header.ofsAlpha);
+    f->read(&fourcc, 4);
+    f->read(&size, 4);
+
+    assert(fourcc == 'MCAL');
+
+    _texture_set.initAlphamaps(f, header.nLayers, use_big_alphamap, (header.flags & FLAG_do_not_fix_alpha_map) == 0);
+  }
+  // - MCCV ----------------------------------------------
+  if(header.ofsMCCV)
+  {
+    f->seek(base + header.ofsMCCV);
+    f->read(&fourcc, 4);
+    f->read(&size, 4);
+
+    assert(fourcc == 'MCCV');
+
+    if (!(Flags & FLAG_MCCV))
+      Flags |= FLAG_MCCV;
+
+    hasMCCV = true;
+
+    unsigned char t[4];
+    for (int i = 0; i < mapbufsize; ++i)
+    {
+      f->read(t, 4);
+      mccv[i] = math::vector_3d((float)t[2] / 127.0f, (float)t[1] / 127.0f, (float)t[0] / 127.0f);
+    }
+  }
+  
   // create vertex buffers
   gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
