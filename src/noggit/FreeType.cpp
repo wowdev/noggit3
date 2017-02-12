@@ -14,6 +14,7 @@
 #include <utf8.h>
 
 #include <opengl/scoped.hpp>
+#include <noggit/Settings.h>
 #include <noggit/MPQ.h>
 #include <noggit/Log.h>
 #include <noggit/Native.hpp>
@@ -137,7 +138,7 @@ namespace freetype
 		std::string message = "Noggit encountered an error loading fonts required for its UI. ";
 		if (fromMPQ) {
 			message += "Please ensure that the WoW installation at the path below is valid:\n\n";
-			message += Native::getGamePath();
+			message += Settings::getInstance()->gamePath;
 		} else {
 			message += "Please ensure that your system has a valid copy of Arial installed.";
 		}
