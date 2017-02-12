@@ -30,8 +30,6 @@ static const int mapbufsize = 9 * 9 + 8 * 8; // chunk size
 class MapChunk
 {
 private:
-  float r;
-
   bool hasMCCV;
 
   int holes;
@@ -79,6 +77,11 @@ public:
   GLuint minimap, minishadows;
 
   math::vector_3d mVertices[mapbufsize];
+
+  bool is_visible ( const float& cull_distance
+                  , const Frustum& frustum
+                  , const math::vector_3d& camera
+                  ) const;
 
   void draw ( Frustum const&
             , bool highlightPaintableChunks

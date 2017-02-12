@@ -192,7 +192,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       vmin.z = zbase;
       vmax.x = xbase + 8 * UNITSIZE;
       vmax.z = zbase + 8 * UNITSIZE;
-      r = (vmax - vmin).length() * 0.5f;
+      
       // use absolute y pos in vertices
       ybase = 0.0f;
       header.ypos = 0.0f;
@@ -503,16 +503,22 @@ void MapChunk::clearHeight()
 
 }
 
+bool MapChunk::is_visible ( const float& cull_distance
+                          , const Frustum& frustum
+                          , const math::vector_3d& camera
+                          ) const
+{
+  static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f); //was (vmax - vmin).length() * 0.5f;
+
+  return frustum.intersects (vmin, vmax)
+      && (((camera - vcenter).length() - chunk_radius) < cull_distance);
+}
+
 void MapChunk::drawLines ( opengl::scoped::use_program& line_shader
                          , Frustum const& frustum
                          )
 {
-  if (!frustum.intersects(vmin, vmax))
-    return;
-
-  float mydist = (gWorld->camera - vcenter).length() - r;
-
-  if (mydist > (mapdrawdistance * mapdrawdistance))
+  if (!is_visible (gWorld->culldistance, frustum, gWorld->camera))
     return;
 
   opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
@@ -587,12 +593,7 @@ void MapChunk::draw ( Frustum const& frustum
                     , bool draw_wireframe_overlay
                     )
 {
-  if (!frustum.intersects(vmin, vmax))
-    return;
-
-  float mydist = (gWorld->camera - vcenter).length() - r;
-
-  if (mydist > (mapdrawdistance * mapdrawdistance))
+  if (!is_visible (gWorld->culldistance, frustum, gWorld->camera))
     return;
 
   bool cantPaint = UITexturingGUI::getSelectedTexture()
