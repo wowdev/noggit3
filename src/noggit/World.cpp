@@ -322,14 +322,6 @@ World::World(const std::string& name)
 
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
 
-  for (size_t j = 0; j < 64; ++j)
-  {
-    for (size_t i = 0; i < 64; ++i)
-    {
-      lowrestiles[j][i] = nullptr;
-    }
-  }
-
   mapIndex = new MapIndex(basename);
 
   if (!mapIndex->hasAGlobalWMO()) {
@@ -345,144 +337,6 @@ bool World::IsSelection(int pSelectionType)
 bool World::HasSelection()
 {
   return !!mCurrentSelection;
-}
-
-void World::initLowresTerrain()
-{
-  std::stringstream filename;
-  filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
-
-  MPQFile wdl_file (filename.str());
-  if (wdl_file.isEof())
-  {
-    LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
-    return;
-  }
-
-  uint32_t fourcc;
-  uint32_t size;
-
-  // - MVER ----------------------------------------------
-
-  uint32_t version;
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-  wdl_file.read (&version, 4);
-
-  assert (fourcc == 'MVER' && size == 4 && version == 18);
-
-  // - MWMO ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MWMO');
-      // Filenames for WMO that appear in the low resolution map. Zero terminated strings.
-
-  wdl_file.seekRelative (size);
-
-  // - MWID ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MWID');
-      // List of indexes into the MWMO chunk.
-
-  wdl_file.seekRelative (size);
-
-  // - MODF ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MODF');
-      // Placement information for the WMO. Appears to be the same 64 byte structure used in the WDT and ADT MODF chunks.
-
-  wdl_file.seekRelative (size);
-
-  // - MAOF ----------------------------------------------
-
-  wdl_file.read (&fourcc, 4);
-  wdl_file.read (&size, 4);
-
-  assert (fourcc == 'MAOF' && size == 64 * 64 * sizeof (uint32_t));
-
-  uint32_t mare_offsets[64][64];
-  wdl_file.read (mare_offsets, 64 * 64 * sizeof (uint32_t));
-
-  // - MARE and MAHO by offset ---------------------------
-  for (size_t y (0); y < 64; ++y)
-  {
-    for (size_t x (0); x < 64; ++x)
-    {
-      if (!mare_offsets[y][x])
-        continue;
-
-      wdl_file.seek (mare_offsets[y][x]);
-      wdl_file.read (&fourcc, 4);
-      wdl_file.read (&size, 4);
-
-      assert (fourcc == 'MARE');
-      assert (size == 0x442);
-
-      math::vector_3d vertices_17[17][17];
-      math::vector_3d vertices_16[16][16];
-
-      const int16_t* data_17 (wdl_file.get<int16_t> (mare_offsets[y][x] + 8));
-
-      for (size_t j (0); j < 17; ++j)
-      {
-        for (size_t i (0); i < 17; ++i)
-        {
-          vertices_17[j][i] = math::vector_3d ( TILESIZE * (x + i / 16.0f)
-                                    , data_17[j * 17 + i]
-                                    , TILESIZE * (y + j / 16.0f)
-                                    );
-        }
-      }
-
-      const int16_t* data_16 (wdl_file.get<int16_t> (mare_offsets[y][x] + 8 + 17 * 17 * sizeof (int16_t)));
-
-      for (size_t j (0); j < 16; ++j)
-      {
-        for (size_t i (0); i < 16; ++i)
-        {
-          vertices_16[j][i] = math::vector_3d ( TILESIZE * (x + (i + 0.5f) / 16.0f)
-                                    , data_16[j * 16 + i]
-                                    , TILESIZE * (y + (j + 0.5f) / 16.0f)
-                                    );
-        }
-      }
-
-      lowrestiles[y][x] = new opengl::call_list();
-      lowrestiles[y][x]->start_recording();
-
-      gl.begin( GL_TRIANGLES );
-      for (size_t j (0); j < 16; ++j )
-      {
-        for (size_t i (0); i < 16; ++i )
-        {
-          gl.vertex3fv (vertices_17[j][i]);
-          gl.vertex3fv (vertices_16[j][i]);
-          gl.vertex3fv (vertices_17[j][i + 1]);
-          gl.vertex3fv (vertices_17[j][i + 1]);
-          gl.vertex3fv (vertices_16[j][i]);
-          gl.vertex3fv (vertices_17[j + 1][i + 1]);
-          gl.vertex3fv (vertices_17[j + 1][i + 1]);
-          gl.vertex3fv (vertices_16[j][i]);
-          gl.vertex3fv (vertices_17[j + 1][i]);
-          gl.vertex3fv (vertices_17[j + 1][i]);
-          gl.vertex3fv (vertices_16[j][i]);
-          gl.vertex3fv (vertices_17[j][i]);
-        }
-      }
-      gl.end();
-
-      lowrestiles[y][x]->end_recording();
-    }
-  }
 }
 
 void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
@@ -553,24 +407,10 @@ void World::initDisplay()
   skies = new Skies(mMapId);
 
   ol = new OutdoorLighting("World\\dnc.db");
-
-  initLowresTerrain();
 }
 
 World::~World()
 {
-  for (int j = 0; j < 64; ++j)
-  {
-    for (int i = 0; i < 64; ++i)
-    {
-      if (lowrestiles[j][i])
-      {
-        delete lowrestiles[j][i];
-        lowrestiles[j][i] = nullptr;
-      }
-    }
-  }
-
   if (skies)
   {
     delete skies;
@@ -752,30 +592,7 @@ void World::draw ( math::vector_3d const& cursor_pos
 
   // Draw verylowres heightmap
   if (drawfog && drawterrain) {
-    gl.enable(GL_CULL_FACE);
-    gl.disable(GL_DEPTH_TEST);
-    gl.disable(GL_LIGHTING);
-    gl.color3fv(this->skies->colorSet[FOG_COLOR]);
-    //gl.color3f(0,1,0);
-    //gl.disable(GL_FOG);
-    const int lrr = 2;
-
-    int cx (2);
-    int cz (2);
-
-    //! \todo broken: should be current tile +- lrr
-    for (int i = cx - lrr; i <= cx + lrr; ++i) { //! \todo maybe broke this, investigate
-      for (int j = cz - lrr; j <= cz + lrr; ++j) {
-        //! \todo  some annoying visual artifacts when the verylowres terrain overlaps
-        // maptiles that are close (1-off) - figure out how to fix.
-        // still less annoying than hoels in the horizon when only 2-off verylowres tiles are drawn
-        if (!(i == cx&&j == cz) && !(i < 0 || j < 0 || i > 64 || j > 64) && lowrestiles[j][i])
-        {
-          lowrestiles[j][i]->render();
-        }
-      }
-    }
-    //gl.enable(GL_FOG);
+    horizon.draw(mapIndex, gWorld->skies->colorSet[FOG_COLOR], culldistance, frustum, camera);
   }
 
   // Draw height map

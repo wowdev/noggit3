@@ -43,9 +43,6 @@ public:
   boost::optional<selection_type> mCurrentSelection;
   bool SelectionMode;
 
-  // Call lists for the low resolution heightmaps.
-  opengl::call_list *lowrestiles[64][64];
-
   // Temporary variables for loading a WMO, if we have a global WMO.
   std::string mWmoFilename;
   ENTRY_MODF mWmoEntry;
@@ -61,7 +58,6 @@ public:
   OutdoorLighting *ol;
 
   void initMinimap();
-  void initLowresTerrain();
 
   void outdoorLighting();
   void outdoorLighting2();
