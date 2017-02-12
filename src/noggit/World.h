@@ -10,6 +10,7 @@
 #include <noggit/WMO.h> // WMOManager
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
+#include <noggit/map_horizon.h>
 
 #include <map>
 #include <string>
@@ -36,6 +37,7 @@ class World
 {
 public:
   MapIndex *mapIndex;
+  map_horizon horizon;
 
   // Information about the currently selected model / WMO / triangle.
   boost::optional<selection_type> mCurrentSelection;
@@ -105,8 +107,6 @@ public:
   std::map<int, WMOInstance> mWMOInstances;
 
   OutdoorLightStats outdoorLightStats;
-
-  GLuint minimap;
 
   StripType *mapstrip;
   StripType *mapstrip2;

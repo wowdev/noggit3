@@ -157,10 +157,10 @@ void UIMinimapWindow::render() const
   opengl::scoped::matrix_pusher const matrix;
   gl.translatef(x() + borderwidth, y() + borderwidth, 0.0f);
 
-  if (gWorld->minimap)
+  if (gWorld->horizon._finished_upload)
   {
     opengl::texture::enable_texture();
-    gl.bindTexture(GL_TEXTURE_2D, gWorld->minimap);
+    gWorld->horizon.minimap.bind();
 
     gl.begin(GL_QUADS);
     gl.texCoord2f(0.0f, 0.0f);
