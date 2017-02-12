@@ -596,12 +596,6 @@ void World::initLowresTerrain()
   wdl_file.read (mare_offsets, 64 * 64 * sizeof (uint32_t));
 
   // - MARE and MAHO by offset ---------------------------
-
-  gl.genTextures(1, &minimap);
-
-  unsigned int *texbuf = new unsigned int[512 * 512];
-  memset(texbuf, 0, 512 * 512 * 4);
-
   for (size_t y (0); y < 64; ++y)
   {
     for (size_t x (0); x < 64; ++x)
