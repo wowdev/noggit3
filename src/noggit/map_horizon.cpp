@@ -3,7 +3,9 @@
 #include <noggit/MPQ.h>
 #include <noggit/Log.h>
 #include <noggit/map_index.hpp>
+#include <noggit/World.h>
 #include <opengl/context.hpp>
+#include <opengl/matrix.hpp>
 
 #include <sstream>
 
@@ -177,7 +179,16 @@ map_horizon::map_horizon(const std::string& basename)
   wdl_file.close();
 }
 
-void map_horizon::upload() {
+void map_horizon::upload()
+{
+  upload_minimap();
+  upload_horizon();
+  
+  _finished_upload = true;
+}
+
+void map_horizon::upload_minimap()
+{
   uint32_t texture[1024][1024];
   memset(texture, 0, 1024 * 1024 * sizeof(uint32_t));
 
@@ -190,7 +201,7 @@ void map_horizon::upload() {
 
       //! \todo There also is a second heightmap appended which has additional 16*16 pixels.
 
-      // use the (nearly) the full resolution available to us.
+      // use the (nearly) full resolution available to us.
       // the data is layed out as a triangle fans with with 17 outer values
       // and 16 midpoints per tile. which in turn means:
       //      _tiles[y][x]->height_17[16][16] == _tiles[y][x + 1]->height_17[0][0]
@@ -208,6 +219,146 @@ void map_horizon::upload() {
   gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
 
-  _finished_upload = true;
+void map_horizon::upload_horizon()
+{
+  std::vector<math::vector_3d> vertices;
+
+  for (size_t y (0); y < 64; ++y)
+  {
+    for (size_t x (0); x < 64; ++x)
+    {
+      if (!_tiles[y][x])
+        continue;
+
+      _batches[y][x] = map_horizon_batch (vertices.size(), 17 * 17 + 16 * 16);
+
+      for (size_t j (0); j < 17; ++j)
+      {
+        for (size_t i (0); i < 17; ++i)
+        {
+          vertices.emplace_back ( TILESIZE * (x + i / 16.0f)
+                                , _tiles[y][x]->height_17[j][i]
+                                , TILESIZE * (y + j / 16.0f)
+                                );
+        }
+      }
+
+      for (size_t j (0); j < 16; ++j)
+      {
+        for (size_t i (0); i < 16; ++i)
+        {
+          vertices.emplace_back ( TILESIZE * (x + (i + 0.5f) / 16.0f)
+                                , _tiles[y][x]->height_16[j][i]
+                                , TILESIZE * (y + (j + 0.5f) / 16.0f)
+                                );
+        }
+      }
+    }
+  }
+
+  gl.bufferData<GL_ARRAY_BUFFER> (_vertex_buffer, vertices.size() * sizeof (math::vector_3d), vertices.data(), GL_STATIC_DRAW);
+}
+
+static inline uint32_t outer_index(const map_horizon_batch &batch, int y, int x)
+{
+  return batch.vertex_start + y * 17 + x;
+};
+
+static inline uint32_t inner_index(const map_horizon_batch &batch, int y, int x)
+{
+  return batch.vertex_start + 17 * 17 + y * 16 + x;
+};
+
+void map_horizon::draw( MapIndex *index
+                      , const math::vector_3d& color
+                      , const float& cull_distance
+                      , const Frustum& frustum
+                      , const math::vector_3d& camera)
+{
+  std::vector<uint32_t> indices;
+
+  const tile_index current_index(camera);
+  const int lrr = 2;
+
+  for (size_t y (current_index.z - lrr); y <= current_index.z + lrr; ++y)
+  {
+    for (size_t x (current_index.x - lrr); x < current_index.x + lrr; ++x)
+    {
+      map_horizon_batch const& batch = _batches[y][x];
+
+      if (batch.vertex_count == 0)
+        continue;
+
+      for (size_t j (0); j < 16; ++j)
+      {
+        for (size_t i (0); i < 16; ++i)
+        {
+          // do not draw over visible chunks
+          if (index->tileLoaded ({y, x}) && index->getTile ({y, x})->getChunk (j, i)->is_visible (cull_distance, frustum, camera))
+            continue;
+
+          indices.push_back (inner_index (batch, j, i));
+          indices.push_back (outer_index (batch, j, i));
+          indices.push_back (outer_index (batch, j + 1, i));
+
+          indices.push_back (inner_index (batch, j, i));
+          indices.push_back (outer_index (batch, j + 1, i));
+          indices.push_back (outer_index (batch, j + 1, i + 1));
+
+          indices.push_back (inner_index (batch, j, i));
+          indices.push_back (outer_index (batch, j + 1, i + 1));
+          indices.push_back (outer_index (batch, j, i + 1));
+
+          indices.push_back (inner_index (batch, j, i));
+          indices.push_back (outer_index (batch, j, i + 1));
+          indices.push_back (outer_index (batch, j, i));
+        }
+      }
+    }
+  }
+
+  static opengl::program const program
+      { { GL_VERTEX_SHADER
+        , R"code(
+#version 110
+
+attribute vec4 position;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+void main()
+{
+  gl_Position = projection * model_view * position;
+}
+)code"
+        }
+      , { GL_FRAGMENT_SHADER
+        , R"code(
+#version 110
+
+uniform vec3 color;
+
+void main()
+{
+  gl_FragColor = vec4(color, 1.0);
+}
+)code"
+        }
+      };
+
+    opengl::scoped::use_program shader {program};
+
+    shader.uniform ("model_view", opengl::matrix::model_view());
+    shader.uniform ("projection", opengl::matrix::projection());
+    shader.uniform ("color", color);
+
+    shader.attrib ("position", _vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> _ (_index_buffer);
+
+    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof (uint32_t), indices.data(), GL_STATIC_DRAW);
+    gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
