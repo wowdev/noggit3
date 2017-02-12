@@ -34,7 +34,7 @@ LONG readRegistryKey(const char* path, HKEY *key)
 	return RegOpenKeyEx(HKEY_LOCAL_MACHINE, path, 0, KEY_QUERY_VALUE, key);
 }
 
-std::string Native:showFileChooser()
+std::string Native::showFileChooser()
 {
 	TCHAR path[MAX_PATH] = { 0 };
 
@@ -51,7 +51,9 @@ std::string Native:showFileChooser()
 		SHGetPathFromIDList(lpItem, path);
 	}
 
-	return path;
+	std::string stdPath = std::string(path);
+
+	return stdPath + "\\";
 }
 
 std::string Native::getGamePath()
@@ -87,7 +89,7 @@ std::string Native::getGamePath()
 
 std::string Native::getConfigPath()
 {
-	return "noggit.conf"
+	return "noggit.conf";
 }
 
 std::string Native::getArialPath()
