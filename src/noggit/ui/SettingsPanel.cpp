@@ -76,21 +76,34 @@ UISettings::UISettings()
     addChild(wodPathField = new UITextBox(99, 89, 286, 32, app.getArial12()));
     addChild(new UIButton(390, 88, 100, 32, "Browse…", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", chooseWoDPath, 0));
     
-    addChild(new UIText(13, 122, "View Distance:", app.getArial12(), eJustifyLeft));
-    addChild(farZField = new UITextBox(99, 120, 128, 32, app.getArial12()));
-    addChild(new UIButton(195, 122, 16, 16, "", "Interface\\BUTTONS\\UI-MinusButton-Up.blp", "Interface\\BUTTONS\\UI-MinusButton-Down.blp", adjustFarZ, -256));
-    addChild(new UIButton(210, 122, 16, 16, "", "Interface\\BUTTONS\\UI-AttributeButton-Encourage-Up.blp", "Interface\\BUTTONS\\UI-AttributeButton-Encourage-Down.blp", adjustFarZ, 256));
+    addChild(new UIText(28, 118, "Import Path:", app.getArial12(), eJustifyLeft));
+    addChild(wodPathField = new UITextBox(99, 117, 286, 32, app.getArial12()));
+    addChild(new UIButton(390, 116, 100, 32, "Browse…", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", chooseWoDPath, 0));
     
-    addChild(new UIText(14, 154, "Editor Options:", app.getArial12(), eJustifyLeft));
-    addChild(tabletModeCheck = new UICheckBox(95, 145, "Drawing tablet support", &Settings::getInstance()->tabletMode));
-    addChild(autoselectCheck = new UICheckBox(95, 170, "Auto select mode", &Settings::getInstance()->AutoSelectingMode));
-    addChild(modelsBoxCheck = new UICheckBox(95, 195, "Render models with box", &Settings::getInstance()->renderModelsWithBox));
+    addChild(new UIText(10, 148, "WMV Log Path:", app.getArial12(), eJustifyLeft));
+    addChild(wodPathField = new UITextBox(99, 147, 286, 32, app.getArial12()));
+    addChild(new UIButton(390, 146, 100, 32, "Browse…", "Interface\\BUTTONS\\UI-DialogBox-Button-Up.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", chooseWoDPath, 0));
     
-    addChild(new UIText(285, 154, "Model Tool:", app.getArial12(), eJustifyLeft));
-    addChild(randRotCheck = new UICheckBox(350, 145, "Random rotation", &Settings::getInstance()->random_rotation));
-    addChild(randSizeCheck = new UICheckBox(350, 170, "Random size", &Settings::getInstance()->random_size));
-    addChild(randTiltCheck = new UICheckBox(350, 195, "Random tilt", &Settings::getInstance()->random_tilt));
-    addChild(modelStatsCheck = new UICheckBox(350, 220, "Copy model stats", &Settings::getInstance()->copyModelStats));
+    addChild(new UIText(13, 186, "View Distance:", app.getArial12(), eJustifyLeft));
+    addChild(viewDistanceField = new UITextBox(99, 184, 128, 32, app.getArial12()));
+    addChild(new UIButton(195, 186, 16, 16, "", "Interface\\BUTTONS\\UI-MinusButton-Up.blp", "Interface\\BUTTONS\\UI-MinusButton-Down.blp", adjustFarZ, -256));
+    addChild(new UIButton(210, 186, 16, 16, "", "Interface\\BUTTONS\\UI-AttributeButton-Encourage-Up.blp", "Interface\\BUTTONS\\UI-AttributeButton-Encourage-Down.blp", adjustFarZ, 256));
+    
+    addChild(new UIText(329, 186, "FarZ:", app.getArial12(), eJustifyLeft));
+    addChild(farZField = new UITextBox(362, 184, 128, 32, app.getArial12()));
+    addChild(new UIButton(458, 186, 16, 16, "", "Interface\\BUTTONS\\UI-MinusButton-Up.blp", "Interface\\BUTTONS\\UI-MinusButton-Down.blp", adjustFarZ, -256));
+    addChild(new UIButton(473, 186, 16, 16, "", "Interface\\BUTTONS\\UI-AttributeButton-Encourage-Up.blp", "Interface\\BUTTONS\\UI-AttributeButton-Encourage-Down.blp", adjustFarZ, 256));
+    
+    addChild(new UIText(14, 220, "Editor Options:", app.getArial12(), eJustifyLeft));
+    addChild(tabletModeCheck = new UICheckBox(95, 211, "Drawing tablet support", &Settings::getInstance()->tabletMode));
+    addChild(autoselectCheck = new UICheckBox(95, 236, "Auto select mode", &Settings::getInstance()->AutoSelectingMode));
+    addChild(modelsBoxCheck = new UICheckBox(95, 261, "Render models with box", &Settings::getInstance()->renderModelsWithBox));
+    
+    addChild(new UIText(293, 220, "Model Tool:", app.getArial12(), eJustifyLeft));
+    addChild(randRotCheck = new UICheckBox(358, 211, "Random rotation", &Settings::getInstance()->random_rotation));
+    addChild(randSizeCheck = new UICheckBox(358, 236, "Random size", &Settings::getInstance()->random_size));
+    addChild(randTiltCheck = new UICheckBox(358, 261, "Random tilt", &Settings::getInstance()->random_tilt));
+    addChild(modelStatsCheck = new UICheckBox(358, 286, "Copy model stats", &Settings::getInstance()->copyModelStats));
     
     addChild(new UITexture(5, height()-29, 16, 16, "Interface\\GossipFrame\\AvailableQuestIcon.blp"));
     addChild(new UIText(22, height()-29, "Changes may not take effect until next launch.", app.getArial12(), eJustifyLeft));

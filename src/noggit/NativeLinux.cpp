@@ -16,7 +16,7 @@ std::string Native::getGamePath()
     return "";
 }
 
-std::string showFileChooser()
+std::string Native::showFileChooser()
 {
 	return "";
 }
