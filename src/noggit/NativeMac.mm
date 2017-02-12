@@ -35,6 +35,21 @@ BOOL checkWoWVersionAtPath(NSString *filePath)
     return [version isEqualToString:@"3.3.5"];
 }
 
+std::string Native::showFileChooser()
+{
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+    openPanel.canChooseDirectories = YES;
+    openPanel.canChooseFiles = NO;
+    
+    if ([openPanel runModal] == NSFileHandlingPanelOKButton) {
+        NSString *path = [openPanel.URL relativePath];
+        
+        return std::string([path UTF8String]);
+    }
+    
+    return std::string("");
+}
+
 std::string Native::getGamePath()
 {
     Native::showAlertDialog(kNotFoundTitle, kNotFoundMessage);
@@ -44,7 +59,7 @@ std::string Native::getGamePath()
     openPanel.canChooseFiles = NO;
     
     if ([openPanel runModal] == NSFileHandlingPanelOKButton) {
-        NSString *path = openPanel.URL.relativePath;
+        NSString *path = [openPanel.URL relativePath];
         
         if (!checkWoWVersionAtPath(path)) {
             Native::showAlertDialog(kMismatchTitle, kMismatchMessage);

@@ -34,6 +34,26 @@ LONG readRegistryKey(const char* path, HKEY *key)
 	return RegOpenKeyEx(HKEY_LOCAL_MACHINE, path, 0, KEY_QUERY_VALUE, key);
 }
 
+std::string Native:showFileChooser()
+{
+	TCHAR path[MAX_PATH] = { 0 };
+
+	BROWSEINFO bInfo = { 0 };
+	bInfo.pidlRoot = NULL;
+	bInfo.ulFlags = BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON;
+	bInfo.lpfn = NULL;
+	bInfo.lParam = 0;
+	bInfo.iImage = -1;
+
+	LPITEMIDLIST lpItem = SHBrowseForFolder(&bInfo);
+	if (lpItem != NULL)
+	{
+		SHGetPathFromIDList(lpItem, path);
+	}
+
+	return path;
+}
+
 std::string Native::getGamePath()
 {
 	Log << "Will try to load the game path from you registry now:" << std::endl;
@@ -60,21 +80,7 @@ std::string Native::getGamePath()
 
 	Native::showAlertDialog(kNotFoundTitle, kNotFoundMessage);
 
-	TCHAR gamePath[MAX_PATH] = { 0 };
-
-	BROWSEINFO bInfo = { 0 };
-	bInfo.pidlRoot = NULL;
-	bInfo.lpszTitle = kFolderDialogTitle;
-	bInfo.ulFlags = BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON;
-	bInfo.lpfn = NULL;
-	bInfo.lParam = 0;
-	bInfo.iImage = -1;
-
-	LPITEMIDLIST lpItem = SHBrowseForFolder(&bInfo);
-	if (lpItem != NULL)
-	{
-		SHGetPathFromIDList(lpItem, gamePath);
-	}
+	std::string gamePath = showFileChooser();
 
 	return gamePath;
 }

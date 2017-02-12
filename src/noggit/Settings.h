@@ -33,6 +33,7 @@ public:
   boost::optional<mysql_connection_info> mysql = boost::none;
 
   const bool& noAntiAliasing() const;
+  void readFromDisk();
   bool saveToDisk();
 
   std::string gamePath;
