@@ -264,6 +264,7 @@ void Menu::loadMap(int mapID)
 		{
 			gWorld = new World(it->getString(MapDB::InternalName));
 			mGUICreditsWindow->hide();
+            mGUISettingsWindow->hide();
 			mGUIMinimapWindow->show();
 			return;
 		}
@@ -282,6 +283,8 @@ void Menu::loadBookmark(int bookmarkID)
 void Menu::showSettings()
 {
   mGUICreditsWindow->hide();
+    
+  mGUISettingsWindow->readInValues();
   mGUISettingsWindow->show();
 }
 
@@ -296,7 +299,7 @@ void Menu::buildMenuBar()
 
   mGUImenuBar = new UIMenuBar();
   mGUImenuBar->AddMenu("File");
-    mGUImenuBar->GetMenu("File")->AddMenuItemButton("Settings", [this] { showSettings(); });
+  mGUImenuBar->GetMenu("File")->AddMenuItemButton("Settings", [this] { showSettings(); });
   mGUImenuBar->GetMenu("File")->AddMenuItemSwitch("exit ESC", &app.pop, true);
   mGUIFrame->addChild(mGUImenuBar);
 

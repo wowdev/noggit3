@@ -10,52 +10,61 @@
 
 Settings::Settings()
 {
-  // set hardcoded till settings get serialized
-  this->random_rotation = false;
-  this->random_size = false;
-  this->random_tilt = false;
-  this->AutoSelectingMode = true;
-  this->FarZ = 1024;
-  this->_noAntiAliasing = false;
-  this->copyModelStats = true;
-  this->tabletMode = false;
-  this->renderModelsWithBox = false;
-  this->importFile = "Import.txt";
+    readFromDisk();
+}
 
-  std::string configPath = Native::getConfigPath();
-  bool configFileExists = boost::filesystem::exists(configPath);
-  if (!configFileExists) {
-      if (createConfigFile()) {
-          configFileExists = saveToDisk();
-      };
-  }
-                           
-  if (configFileExists)
-  {
-    ConfigFile config(configPath);
-    config.readInto(this->gamePath, "Path");
-    config.readInto(this->projectPath, "ProjectPath");
-    config.readInto(this->FarZ, "FarZ");
-    config.readInto(_noAntiAliasing, "noAntiAliasing");
-    config.readInto(this->wodSavePath, "wodSavePath");
-	config.readInto(this->tabletMode, "TabletMode");
-    config.readInto(this->importFile, "ImportFile");
-    config.readInto(this->wmvLogFile, "wmvLogFile");
-
-    {
-      bool use (false);
-      config.readInto(use, "MySQL");
-      if (use)
-      {
-        mysql_connection_info info;
-        config.readInto(info.Server, "Server");
-        config.readInto(info.User, "User");
-        config.readInto(info.Pass, "Pass");
-        config.readInto(info.Database, "Database");
-        mysql = info;
-      }
+void Settings::readFromDisk()
+{
+    // set hardcoded till settings get serialized
+    this->random_rotation = false;
+    this->random_size = false;
+    this->random_tilt = false;
+    this->AutoSelectingMode = true;
+    this->FarZ = 1024;
+    this->_noAntiAliasing = false;
+    this->copyModelStats = true;
+    this->tabletMode = false;
+    this->renderModelsWithBox = false;
+    this->importFile = "Import.txt";
+    
+    std::string configPath = Native::getConfigPath();
+    bool configFileExists = boost::filesystem::exists(configPath);
+    if (!configFileExists) {
+        if (createConfigFile()) {
+            configFileExists = saveToDisk();
+        };
     }
-  }
+    
+    if (configFileExists)
+    {
+        ConfigFile config(configPath);
+        config.readInto(this->gamePath, "Path");
+        config.readInto(this->projectPath, "ProjectPath");
+        config.readInto(this->FarZ, "FarZ");
+        config.readInto(_noAntiAliasing, "noAntiAliasing");
+        config.readInto(this->wodSavePath, "wodSavePath");
+        config.readInto(this->tabletMode, "TabletMode");
+        config.readInto(this->importFile, "ImportFile");
+        config.readInto(this->wmvLogFile, "wmvLogFile");
+        config.readInto(this->random_tilt, "randomTilt");
+        config.readInto(this->random_rotation, "randomRotation");
+        config.readInto(this->random_size, "randomSize");
+        config.readInto(this->renderModelsWithBox, "renderModelsWithBox");
+        
+        {
+            bool use (false);
+            config.readInto(use, "MySQL");
+            if (use)
+            {
+                mysql_connection_info info;
+                config.readInto(info.Server, "Server");
+                config.readInto(info.User, "User");
+                config.readInto(info.Pass, "Pass");
+                config.readInto(info.Database, "Database");
+                mysql = info;
+            }
+        }
+    }
 }
 
 bool Settings::createConfigFile()
@@ -98,6 +107,7 @@ bool Settings::saveToDisk()
     config.add("randomRotation", this->random_rotation);
     config.add("randomTilt", this->random_tilt);
     config.add("randomSize", this->random_size);
+    config.add("renderModelsWithBox", this->renderModelsWithBox);
     config.add("autoSelectingMode", this->AutoSelectingMode);
     config.add("copyModelStats", this->copyModelStats);
     config.add("TabletMode", this->tabletMode);

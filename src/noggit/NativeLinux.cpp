@@ -16,6 +16,11 @@ std::string Native::getGamePath()
     return "";
 }
 
+std::string showFileChooser()
+{
+	return "";
+}
+
 std::string Native::getConfigPath()
 {
 	return "noggit.conf"
