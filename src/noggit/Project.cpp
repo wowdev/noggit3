@@ -2,6 +2,7 @@
 
 #include <noggit/ConfigFile.h>
 #include <noggit/Project.h>
+#include <noggit/Settings.h>
 
 #include <boost/filesystem.hpp>
 
@@ -11,15 +12,8 @@ Project::Project()
 {
   // Read out config and set path in project if exists.
   // will later come direct from the project file.
-  if (boost::filesystem::exists("noggit.conf"))
-  {
-    ConfigFile config("noggit.conf");
-    if (config.keyExists("ProjectPath"))
-      config.readInto(path, "ProjectPath");
-  }
+  path = Settings::getInstance()->projectPath;
   // else set the project path to the wow std path
-
-
 }
 
 Project* Project::instance = 0;
