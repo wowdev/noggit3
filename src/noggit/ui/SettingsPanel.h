@@ -14,10 +14,13 @@ public:
   UITextBox *gamePathField;
   UITextBox *wodPathField;
   UITextBox *projectPathField;
+  UITextBox *importPathField;
+  UITextBox *wmvLogPathField;
+  UITextBox *viewDistanceField;
   UITextBox *farZField;
 private:
   static const int winWidth = 500;
-  static const int winHeight = 300;
+  static const int winHeight = 374;
     
   UICheckBox *tabletModeCheck;
   UICheckBox *autoselectCheck;
