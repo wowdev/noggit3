@@ -846,8 +846,8 @@ void MapView::createGUI()
   addHotkey (SDLK_F9, MOD_none, [this] { _draw_contour = !_draw_contour; });
   mbar->GetMenu("View")->AddMenuItemToggle("F10 Wireframe", &_draw_wireframe);
   addHotkey(SDLK_F10, MOD_none, [this] { _draw_wireframe = !_draw_wireframe; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &gWorld->renderAnimations);
-  addHotkey (SDLK_F11, MOD_none, [] { gWorld->renderAnimations = !gWorld->renderAnimations; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &_draw_model_animations);
+  addHotkey (SDLK_F11, MOD_none, [this] { _draw_model_animations = !_draw_model_animations; });
   mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &gWorld->drawfog);
   addHotkey(SDLK_F12, MOD_none, [] { gWorld->drawfog = !gWorld->drawfog; });
   mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &_draw_mfbo);
@@ -2118,6 +2118,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _draw_water
                , _draw_wmo_doodads
                , _draw_models
+               , _draw_model_animations
                );
 
   displayGUIIfEnabled();

@@ -278,7 +278,6 @@ World::World(const std::string& name)
   , ol(nullptr)
   , drawfog(false)
   , lighting(true)
-  , renderAnimations(false)
   , animtime(0)
   , time(1450)
   , basename(name)
@@ -542,6 +541,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_water
                  , bool draw_wmo_doodads
                  , bool draw_models
+                 , bool draw_model_animations
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -860,7 +860,8 @@ void main()
   // M2s / models
   if (draw_models)
   {
-    if (renderAnimations)ModelManager::resetAnim();
+    if (draw_model_animations)
+      ModelManager::resetAnim();
 
     gl.enable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
     for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)

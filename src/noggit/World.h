@@ -66,7 +66,6 @@ public:
   // Do we draw *? Should be moved somewhere else, these are not World related.
   bool drawfog;
   bool lighting;
-  bool renderAnimations;
   // Time of the day.
   float animtime;
   float time;
@@ -132,6 +131,7 @@ public:
             , bool draw_water
             , bool draw_doodads
             , bool draw_models
+            , bool draw_model_animations
             );
 
   void outdoorLights(bool on);
