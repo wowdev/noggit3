@@ -279,7 +279,6 @@ World::World(const std::string& name)
   , drawdoodads(true)
   , drawfog(false)
   , drawmodels(true)
-  , drawterrain(true)
   , drawwater(true)
   , drawwmo(true)
   , lighting(true)
@@ -543,6 +542,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_mfbo
                  , bool draw_wireframe
                  , bool draw_lines
+                 , bool draw_terrain
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -590,7 +590,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   setupFog();
 
   // Draw verylowres heightmap
-  if (drawfog && drawterrain) {
+  if (drawfog && draw_terrain) {
     horizon.draw(mapIndex, gWorld->skies->colorSet[FOG_COLOR], culldistance, frustum, camera);
   }
 
@@ -626,7 +626,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   gl.clientActiveTexture(GL_TEXTURE0);
 
   // height map w/ a zillion texture passes
-  if (drawterrain)
+  if (draw_terrain)
   {
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
@@ -920,11 +920,15 @@ void main()
   }
 }
 
-selection_result World::intersect (math::ray const& ray, bool pOnlyMap, bool do_objects)
+selection_result World::intersect ( math::ray const& ray
+                                  , bool pOnlyMap
+                                  , bool do_objects
+                                  , bool draw_terrain
+                                  )
 {
   selection_result results;
 
-  if (drawterrain)
+  if (draw_terrain)
   {
     for (auto&& tile : mapIndex->loaded_tiles())
     {

@@ -38,6 +38,7 @@ private:
   bool _draw_mfbo = false;
   bool _draw_wireframe = false;
   bool _draw_lines = false;
+  bool _draw_terrain = true;
 
   void save();
   void savecurrent();
