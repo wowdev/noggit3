@@ -277,7 +277,6 @@ World::World(const std::string& name)
   , mMapId(0xFFFFFFFF)
   , ol(nullptr)
   , drawfog(false)
-  , drawmodels(true)
   , lighting(true)
   , renderAnimations(false)
   , animtime(0)
@@ -542,6 +541,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_wmo
                  , bool draw_water
                  , bool draw_wmo_doodads
+                 , bool draw_models
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -858,7 +858,7 @@ void main()
 
   bool renderHidden = Environment::getInstance()->showModelFromHiddenList;
   // M2s / models
-  if (drawmodels)
+  if (draw_models)
   {
     if (renderAnimations)ModelManager::resetAnim();
 
@@ -924,6 +924,7 @@ selection_result World::intersect ( math::ray const& ray
                                   , bool do_objects
                                   , bool draw_terrain
                                   , bool draw_wmo
+                                  , bool draw_models
                                   )
 {
   selection_result results;
@@ -940,7 +941,7 @@ selection_result World::intersect ( math::ray const& ray
   {
     bool const render_hidden (Environment::getInstance()->showModelFromHiddenList);
 
-    if (drawmodels)
+    if (draw_models)
     {
       for (auto&& model_instance : mModelInstances)
       {
