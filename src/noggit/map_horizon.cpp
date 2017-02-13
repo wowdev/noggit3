@@ -189,8 +189,8 @@ void map_horizon::upload()
 
 void map_horizon::upload_minimap()
 {
-  uint32_t texture[1024][1024];
-  memset(texture, 0, 1024 * 1024 * sizeof(uint32_t));
+  std::vector<uint32_t> texture(1024 * 1024);
+  memset(texture.data(), 0, 1024 * 1024 * sizeof(uint32_t));
 
   for (size_t y (0); y < 64; ++y)
   {
@@ -209,14 +209,14 @@ void map_horizon::upload_minimap()
       {
         for (size_t i (0); i < 16; ++i)
         {
-          texture[y * 16 + j][x * 16 + i] = color_for_height (_tiles[y][x]->height_17[j][i]);
+          texture[(y * 16 + j) * 1024 + x * 16 + i] = color_for_height (_tiles[y][x]->height_17[j][i]);
         }
       }
     }
   }
 
   minimap.bind();
-  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture);
+  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.data());
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
