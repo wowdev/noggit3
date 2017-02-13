@@ -704,7 +704,7 @@ void World::draw ( math::vector_3d const& cursor_pos
         render_line(ref_pos, pos);
       }
       else
-      {  
+      {
         pos.y = ref_pos.y;
         render_disk(pos, brushRadius);
       }
@@ -1296,7 +1296,7 @@ void World::convert_alphamap(bool to_big_alpha)
   if (to_big_alpha == mapIndex->hasBigAlpha())
   {
     return;
-  }    
+  }
 
   for (size_t z = 0; z < 64; z++)
   {
@@ -1466,7 +1466,7 @@ void World::addModel(selection_type entry, math::vector_3d newPos, bool copyit)
 void World::addM2(std::string const& filename, math::vector_3d newPos, bool copyit)
 {
   ModelInstance newModelis = ModelInstance(filename);
-  
+
   newModelis.d1 = mapIndex->newGUID();
   newModelis.pos = newPos;
   newModelis.sc = 1;
@@ -1511,7 +1511,7 @@ void World::addM2(std::string const& filename, math::vector_3d newPos, bool copy
 void World::addWMO(std::string const& filename, math::vector_3d newPos, bool copyit)
 {
   WMOInstance newWMOis(filename);
-	
+
   newWMOis.mUniqueID = mapIndex->newGUID();
   newWMOis.pos = newPos;
 
@@ -1609,8 +1609,8 @@ void World::paintLiquid( math::vector_3d const& pos
                        , float opacity_factor
                        )
 {
-  for_all_chunks_in_range(pos, radius, [&](MapChunk* chunk) 
-  { 
+  for_all_chunks_in_range(pos, radius, [&](MapChunk* chunk)
+  {
     chunk->liquid_chunk()->paintLiquid(pos, radius, liquid_id, add, angle, orientation, lock, origin, override_height, override_liquid_id, chunk, opacity_factor);
     return true;
   });
