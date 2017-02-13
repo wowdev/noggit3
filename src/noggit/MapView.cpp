@@ -1341,9 +1341,10 @@ void MapView::createGUI()
   mainGui->addChild(mainGui->HelperModels);
 }
 
-MapView::MapView(float _camera_ah0, float _camera_av0)
+MapView::MapView(float _camera_ah0, float _camera_av0, math::vector_3d camera_lookat)
   : _camera_ah(_camera_ah0)
   , _camera_av(_camera_av0)
+  , _camera_lookat (camera_lookat)
   , _GUIDisplayingEnabled(true)
   , mTimespeed(0.0f)
 {
@@ -1853,7 +1854,7 @@ void MapView::tick(float t, float dt)
       if (updown)
         gWorld->camera += math::vector_3d(0.0f, dt * movespd * updown, 0.0f);
 
-      gWorld->lookat = gWorld->camera + dir;
+      _camera_lookat = gWorld->camera + dir;
     }
     else
     {
@@ -1906,7 +1907,7 @@ selection_result MapView::intersect_result(bool terrain_only)
 {
   math::vector_3d const pos
     ( ( ( math::look_at ( gWorld->camera
-                        , gWorld->lookat
+                        , _camera_lookat
                         , { 0.0f, 1.0f, 0.0f }
                         ).transposed()
         * math::perspective ( video.fov()
@@ -2098,7 +2099,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , terrainMode == editing_mode::areaid
                , terrainMode
                , gWorld->camera
-               , gWorld->lookat
+               , _camera_lookat
                );
 
   displayGUIIfEnabled();

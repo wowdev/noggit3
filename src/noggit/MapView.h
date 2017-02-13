@@ -26,6 +26,7 @@ private:
 
   float _camera_ah;
   float _camera_av;
+  math::vector_3d _camera_lookat;
   float moving, strafing, updown, mousedir, movespd, turn, lookat;
   math::vector_3d _cursor_pos;
   bool key_w;
@@ -59,7 +60,7 @@ private:
   void checkWaterSave();
 
 public:
-  MapView(float ah0 = -90.0f, float av0 = -30.0f);
+  MapView(float ah0, float av0, math::vector_3d camera_lookat);
   ~MapView();
 
   void tick(float t, float dt);

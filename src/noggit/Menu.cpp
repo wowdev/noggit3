@@ -130,12 +130,11 @@ void Menu::enterMapAt(math::vector_3d pos, bool pAutoHeight, float av, float ah)
   gWorld->autoheight = pAutoHeight;
 
   gWorld->camera = math::vector_3d(pos.x, pos.y, pos.z);
-  gWorld->lookat = math::vector_3d(pos.x, pos.y, pos.z - 1.0f);
 
   gWorld->initDisplay();
   gWorld->mapIndex->enterTile(tile_index(pos));
 
-  app.getStates().push_back(new MapView(ah, av)); // on gPop, MapView is deleted.
+  app.getStates().push_back(new MapView(ah, av, math::vector_3d(pos.x, pos.y, pos.z - 1.0f))); // on gPop, MapView is deleted.
 
   mGUIMinimapWindow->hide();
 
