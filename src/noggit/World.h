@@ -72,7 +72,6 @@ public:
   bool drawwater;
   bool drawwmo;
   bool drawwireframe;
-  bool draw_mfbo;
   bool lighting;
   bool renderAnimations;
   // Time of the day.
@@ -134,6 +133,7 @@ public:
             , editing_mode
             , math::vector_3d const& camera_pos
             , math::vector_3d const& camera_lookat
+            , bool draw_mfbo
             );
 
   void outdoorLights(bool on);
