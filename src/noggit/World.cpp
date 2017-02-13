@@ -740,7 +740,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   }
 
 
-  if (drawlines || (terrainMode == editing_mode::paint && highlightPaintableChunks))
+  if (drawlines)
   {
     opengl::program program { { GL_VERTEX_SHADER
                               , R"code(
