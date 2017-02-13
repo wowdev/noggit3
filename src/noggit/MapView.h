@@ -35,6 +35,7 @@ private:
 
   bool _highlightPaintableChunks = true;
   bool _draw_contour = false;
+  bool _draw_mfbo = false;
 
   void save();
   void savecurrent();

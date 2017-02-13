@@ -284,7 +284,6 @@ World::World(const std::string& name)
   , drawwater(true)
   , drawwmo(true)
   , drawwireframe(false)
-  , draw_mfbo (false)
   , lighting(true)
   , renderAnimations(false)
   , animtime(0)
@@ -543,6 +542,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , editing_mode terrainMode
                  , math::vector_3d const& camera_pos
                  , math::vector_3d const& camera_lookat
+                 , bool draw_mfbo
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
