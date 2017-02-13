@@ -283,7 +283,6 @@ World::World(const std::string& name)
   , drawterrain(true)
   , drawwater(true)
   , drawwmo(true)
-  , drawwireframe(false)
   , lighting(true)
   , renderAnimations(false)
   , animtime(0)
@@ -543,6 +542,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , math::vector_3d const& camera_pos
                  , math::vector_3d const& camera_lookat
                  , bool draw_mfbo
+                 , bool draw_wireframe
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -637,7 +637,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , draw_chunk_flag_overlay
                  , draw_water_overlay
                  , draw_areaid_overlay
-                 , drawwireframe
+                 , draw_wireframe
                  );
     }
   }

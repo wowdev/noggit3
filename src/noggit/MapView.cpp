@@ -844,8 +844,8 @@ void MapView::createGUI()
   addHotkey (SDLK_F8, MOD_none, [this] { mainGui->guidetailInfos->toggleVisibility(); });
   mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &_draw_contour);
   addHotkey (SDLK_F9, MOD_none, [this] { _draw_contour = !_draw_contour; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F10 Wireframe", &gWorld->drawwireframe);
-  addHotkey(SDLK_F10, MOD_none, [] { gWorld->drawwireframe = !gWorld->drawwireframe; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F10 Wireframe", &_draw_wireframe);
+  addHotkey(SDLK_F10, MOD_none, [this] { _draw_wireframe = !_draw_wireframe; });
   mbar->GetMenu("View")->AddMenuItemToggle("F11 Toggle Animation", &gWorld->renderAnimations);
   addHotkey (SDLK_F11, MOD_none, [] { gWorld->renderAnimations = !gWorld->renderAnimations; });
   mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &gWorld->drawfog);
@@ -2101,6 +2101,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , gWorld->camera
                , _camera_lookat
                , _draw_mfbo
+               , _draw_wireframe
                );
 
   displayGUIIfEnabled();
