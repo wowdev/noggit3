@@ -339,7 +339,15 @@ void WMO::upload()
 // model.cpp
 void DrawABox(math::vector_3d pMin, math::vector_3d pMax, math::vector_4d pColor, float pLineWidth);
 
-void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const angle, bool boundingbox, bool groupboxes, bool /*highlight*/, Frustum const& frustum)
+void WMO::draw ( int doodadset
+               , const math::vector_3d &ofs
+               , math::degrees const angle
+               , bool boundingbox
+               , bool groupboxes
+               , bool /*highlight*/
+               , Frustum const& frustum
+               , bool draw_doodads
+               )
 {
   if (!finishedLoading ())
     return;
@@ -358,7 +366,7 @@ void WMO::draw(int doodadset, const math::vector_3d &ofs, math::degrees const an
   {
     group.draw(ofs, angle, frustum);
 
-    if (gWorld->drawdoodads)
+    if (draw_doodads)
     {
       group.drawDoodads(doodadset, ofs, angle, frustum);
     }
@@ -943,7 +951,7 @@ void WMOGroup::load()
 
     f.seekRelative(size);
   }
-  
+
   // - MOTV ----------------------------------------------
   if (header.flags & 0x2000000)
   {
@@ -1030,7 +1038,7 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
       gl.enableClientState (GL_COLOR_ARRAY);
       gl.colorPointer (_vertex_colors_buffer, 4, GL_FLOAT, 0, 0);
     }
-    
+
     gl.disable(GL_LIGHTING);
     gWorld->outdoorLights(false);
   }

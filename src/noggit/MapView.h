@@ -41,6 +41,7 @@ private:
   bool _draw_terrain = true;
   bool _draw_wmo = true;
   bool _draw_water = true;
+  bool _draw_wmo_doodads = true;
 
   void save();
   void savecurrent();

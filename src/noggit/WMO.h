@@ -139,12 +139,20 @@ class WMO : public AsyncObject
 public:
   explicit WMO(const std::string& name);
 
-  void draw(int doodadset, const math::vector_3d& ofs, math::degrees const, bool boundingbox, bool groupboxes, bool highlight, Frustum const&);
+  void draw ( int doodadset
+            , const math::vector_3d& ofs
+            , math::degrees const
+            , bool boundingbox
+            , bool groupboxes
+            , bool highlight
+            , Frustum const&
+            , bool draw_doodads
+            );
   bool drawSkybox(math::vector_3d pCamera, math::vector_3d pLower, math::vector_3d pUpper) const;
   //void drawPortals();
 
   std::vector<float> intersect (math::ray const&) const;
-  
+
   void finishLoading();
 
   void upload();

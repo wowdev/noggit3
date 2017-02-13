@@ -276,7 +276,6 @@ World::World(const std::string& name)
   , alphatexcoords(0)
   , mMapId(0xFFFFFFFF)
   , ol(nullptr)
-  , drawdoodads(true)
   , drawfog(false)
   , drawmodels(true)
   , lighting(true)
@@ -542,6 +541,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_terrain
                  , bool draw_wmo
                  , bool draw_water
+                 , bool draw_wmo_doodads
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -889,7 +889,7 @@ void main()
       bool const is_hidden (_hidden_map_objects.count (it->second.wmo.get()));
       if (!is_hidden || renderHidden)
       {
-        it->second.draw (frustum, is_hidden);
+        it->second.draw (frustum, is_hidden, draw_wmo_doodads);
       }
     }
 
