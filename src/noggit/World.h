@@ -88,8 +88,6 @@ public:
 
   Skies *skies;
 
-  bool loading;
-
   bool autoheight;
 
   //! \todo  Get these managed? ._.
