@@ -68,7 +68,6 @@ public:
   bool drawfog;
   bool drawmodels;
   bool drawwater;
-  bool drawwmo;
   bool lighting;
   bool renderAnimations;
   // Time of the day.
@@ -134,6 +133,7 @@ public:
             , bool draw_wireframe
             , bool draw_lines
             , bool draw_terrain
+            , bool draw_wmo
             );
 
   void outdoorLights(bool on);
@@ -146,6 +146,7 @@ public:
                              , bool only_map
                              , bool do_objects
                              , bool draw_terrain
+                             , bool draw_wmo
                              );
   void drawTileMode ( float ah
                     , math::vector_3d const& camera_pos

@@ -280,7 +280,6 @@ World::World(const std::string& name)
   , drawfog(false)
   , drawmodels(true)
   , drawwater(true)
-  , drawwmo(true)
   , lighting(true)
   , renderAnimations(false)
   , animtime(0)
@@ -543,6 +542,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_wireframe
                  , bool draw_lines
                  , bool draw_terrain
+                 , bool draw_wmo
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -550,7 +550,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   Frustum const frustum;
 
   bool hadSky = false;
-  if (drawwmo || mapIndex->hasAGlobalWMO())
+  if (draw_wmo || mapIndex->hasAGlobalWMO())
   {
     for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
     {
@@ -878,7 +878,7 @@ void main()
 
 
   // WMOs / map objects
-  if (drawwmo || mapIndex->hasAGlobalWMO())
+  if (draw_wmo || mapIndex->hasAGlobalWMO())
   {
     gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (1.0f, 1.0f, 1.0f, 1.0f));
     gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 10);
@@ -924,6 +924,7 @@ selection_result World::intersect ( math::ray const& ray
                                   , bool pOnlyMap
                                   , bool do_objects
                                   , bool draw_terrain
+                                  , bool draw_wmo
                                   )
 {
   selection_result results;
@@ -952,7 +953,7 @@ selection_result World::intersect ( math::ray const& ray
       }
     }
 
-    if (drawwmo)
+    if (draw_wmo)
     {
       for (auto&& wmo_instance : mWMOInstances)
       {
