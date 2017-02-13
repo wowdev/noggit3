@@ -67,7 +67,6 @@ public:
   bool drawdoodads;
   bool drawfog;
   bool drawmodels;
-  bool drawterrain;
   bool drawwater;
   bool drawwmo;
   bool lighting;
@@ -134,6 +133,7 @@ public:
             , bool draw_mfbo
             , bool draw_wireframe
             , bool draw_lines
+            , bool draw_terrain
             );
 
   void outdoorLights(bool on);
@@ -142,7 +142,11 @@ public:
   unsigned int getAreaID (math::vector_3d const&);
   void setAreaID(math::vector_3d const& pos, int id, bool adt);
 
-  selection_result intersect (math::ray const&, bool only_map, bool do_objects);
+  selection_result intersect ( math::ray const&
+                             , bool only_map
+                             , bool do_objects
+                             , bool draw_terrain
+                             );
   void drawTileMode ( float ah
                     , math::vector_3d const& camera_pos
                     , bool draw_lines

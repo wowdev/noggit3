@@ -832,8 +832,8 @@ void MapView::createGUI()
   addHotkey (SDLK_F1, MOD_none, [] { gWorld->drawmodels = !gWorld->drawmodels; });
   mbar->GetMenu("View")->AddMenuItemToggle("F2 WMO doodadsets", &gWorld->drawdoodads);
   addHotkey (SDLK_F2, MOD_none, [] { gWorld->drawdoodads = !gWorld->drawdoodads; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F3 Terrain", &gWorld->drawterrain);
-  addHotkey (SDLK_F3, MOD_none, [] { gWorld->drawterrain = !gWorld->drawterrain; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F3 Terrain", &_draw_terrain);
+  addHotkey (SDLK_F3, MOD_none, [this] { _draw_terrain = !_draw_terrain; });
   mbar->GetMenu("View")->AddMenuItemToggle("F4 Water", &gWorld->drawwater);
   addHotkey (SDLK_F4, MOD_none, [] { gWorld->drawwater = !gWorld->drawwater; });
   mbar->GetMenu("View")->AddMenuItemToggle("F6 WMOs", &gWorld->drawwmo);
@@ -873,13 +873,13 @@ void MapView::createGUI()
                   alloff_contour = _draw_contour;
                   alloff_wmo = gWorld->drawwmo;
                   alloff_fog = gWorld->drawfog;
-                  alloff_terrain = gWorld->drawterrain;
+                  alloff_terrain = _draw_terrain;
 
                   gWorld->drawmodels = false;
                   gWorld->drawdoodads = false;
                   _draw_contour = true;
                   gWorld->drawwmo = false;
-                  gWorld->drawterrain = true;
+                  _draw_terrain = true;
                   gWorld->drawfog = false;
                 }
                 else
@@ -888,7 +888,7 @@ void MapView::createGUI()
                   gWorld->drawdoodads = alloff_doodads;
                   _draw_contour = alloff_contour;
                   gWorld->drawwmo = alloff_wmo;
-                  gWorld->drawterrain = alloff_terrain;
+                  _draw_terrain = alloff_terrain;
                   gWorld->drawfog = alloff_fog;
                 }
                 alloff = !alloff;
@@ -1925,7 +1925,12 @@ selection_result MapView::intersect_result(bool terrain_only)
   math::ray ray (gWorld->camera, pos - gWorld->camera);
 
   selection_result results
-    (gWorld->intersect(ray, terrain_only, terrainMode == editing_mode::object));
+    ( gWorld->intersect ( ray
+                        , terrain_only
+                        , terrainMode == editing_mode::object
+                        , _draw_terrain
+                        )
+    );
 
   std::sort ( results.begin()
             , results.end()
@@ -2106,6 +2111,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _draw_mfbo
                , _draw_wireframe
                , _draw_lines
+               , _draw_terrain
                );
 
   displayGUIIfEnabled();
