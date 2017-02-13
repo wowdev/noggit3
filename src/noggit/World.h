@@ -64,7 +64,6 @@ public:
 
   unsigned int getMapID();
   // Do we draw *? Should be moved somewhere else, these are not World related.
-  bool drawdoodads;
   bool drawfog;
   bool drawmodels;
   bool lighting;
@@ -132,6 +131,7 @@ public:
             , bool draw_terrain
             , bool draw_wmo
             , bool draw_water
+            , bool draw_doodads
             );
 
   void outdoorLights(bool on);

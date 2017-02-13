@@ -47,7 +47,10 @@ WMOInstance::WMOInstance(std::string const& filename)
 {
 }
 
-void WMOInstance::draw (Frustum const& frustum, bool force_box)
+void WMOInstance::draw ( Frustum const& frustum
+                       , bool force_box
+                       , bool draw_doodads
+                       )
 {
   {
     opengl::scoped::matrix_pusher const matrix;
@@ -60,9 +63,25 @@ void WMOInstance::draw (Frustum const& frustum, bool force_box)
     gl.rotatef(dir.z, 1.0f, 0.0f, 0.0f);
 
     if (gWorld->IsSelection(eEntry_WMO) && boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->mUniqueID == this->mUniqueID)
-      wmo->draw(doodadset, pos, math::degrees (roty), true, true, true, frustum);
+      wmo->draw ( doodadset
+                , pos
+                , math::degrees (roty)
+                , true
+                , true
+                , true
+                , frustum
+                , draw_doodads
+                );
     else
-      wmo->draw(doodadset, pos, math::degrees (roty), false, false, false, frustum);
+      wmo->draw ( doodadset
+                , pos
+                , math::degrees (roty)
+                , false
+                , false
+                , false
+                , frustum
+                , draw_doodads
+                );
   }
 
   if (force_box || ( gWorld->IsSelection(eEntry_WMO) && boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->mUniqueID == this->mUniqueID))

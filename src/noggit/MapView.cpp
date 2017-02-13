@@ -830,8 +830,8 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
   mbar->GetMenu("View")->AddMenuItemToggle("F1 M2s", &gWorld->drawmodels);
   addHotkey (SDLK_F1, MOD_none, [] { gWorld->drawmodels = !gWorld->drawmodels; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F2 WMO doodadsets", &gWorld->drawdoodads);
-  addHotkey (SDLK_F2, MOD_none, [] { gWorld->drawdoodads = !gWorld->drawdoodads; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F2 WMO doodadsets", &_draw_wmo_doodads);
+  addHotkey (SDLK_F2, MOD_none, [this] { _draw_wmo_doodads = !_draw_wmo_doodads; });
   mbar->GetMenu("View")->AddMenuItemToggle("F3 Terrain", &_draw_terrain);
   addHotkey (SDLK_F3, MOD_none, [this] { _draw_terrain = !_draw_terrain; });
   mbar->GetMenu("View")->AddMenuItemToggle("F4 Water", &_draw_water);
@@ -869,14 +869,14 @@ void MapView::createGUI()
                 if (alloff)
                 {
                   alloff_models = gWorld->drawmodels;
-                  alloff_doodads = gWorld->drawdoodads;
+                  alloff_doodads = _draw_wmo_doodads;
                   alloff_contour = _draw_contour;
                   alloff_wmo = _draw_wmo;
                   alloff_fog = gWorld->drawfog;
                   alloff_terrain = _draw_terrain;
 
                   gWorld->drawmodels = false;
-                  gWorld->drawdoodads = false;
+                  _draw_wmo_doodads = false;
                   _draw_contour = true;
                   _draw_wmo = false;
                   _draw_terrain = true;
@@ -885,7 +885,7 @@ void MapView::createGUI()
                 else
                 {
                   gWorld->drawmodels = alloff_models;
-                  gWorld->drawdoodads = alloff_doodads;
+                  _draw_wmo_doodads = alloff_doodads;
                   _draw_contour = alloff_contour;
                   _draw_wmo = alloff_wmo;
                   _draw_terrain = alloff_terrain;
@@ -2115,6 +2115,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _draw_terrain
                , _draw_wmo
                , _draw_water
+               , _draw_wmo_doodads
                );
 
   displayGUIIfEnabled();
