@@ -229,12 +229,6 @@ void UIMapViewGUI::render() const
     app.getArial16().shprint(video.xres() - 200.0f, 5.0f, timestrs.str());
   }
 
-  if (gWorld->loading)
-  {
-    std::string toDisplay(gWorld->mapIndex->hasAdt() ? "No ADT at this Point" : "Loading...");
-    app.getArial16().shprint(video.xres() / 2.0f - app.getArial16().width(toDisplay) / 2.0f, 30.0f, toDisplay);
-  }
-
   std::ostringstream statusbarInfo;
   statusbarInfo << "tile: " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE)
     << "; coordinates: client (x: " << gWorld->camera.x << ", y: " << gWorld->camera.z << ", z: " << gWorld->camera.y
