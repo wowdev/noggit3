@@ -910,8 +910,6 @@ void MapView::createGUI()
   addHotkey (SDLK_b, MOD_none, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
   addHotkey (SDLK_j, MOD_none, [this] { mTimespeed = 0.0f; });
 
-  addHotkey (SDLK_l, MOD_none, [] { gWorld->lighting = !gWorld->lighting; });
-
   addHotkey (SDLK_TAB, MOD_none, [this] { _GUIDisplayingEnabled = !_GUIDisplayingEnabled; });
 
   addHotkey (SDLK_DELETE, MOD_none, [] { DeleteSelectedObject(); });
