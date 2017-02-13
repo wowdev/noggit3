@@ -838,8 +838,8 @@ void MapView::createGUI()
   addHotkey (SDLK_F4, MOD_none, [] { gWorld->drawwater = !gWorld->drawwater; });
   mbar->GetMenu("View")->AddMenuItemToggle("F6 WMOs", &gWorld->drawwmo);
   addHotkey (SDLK_F6, MOD_none, [] { gWorld->drawwmo = !gWorld->drawwmo; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F7 Lines", &gWorld->drawlines);
-  addHotkey (SDLK_F7, MOD_none, [] { gWorld->drawlines = !gWorld->drawlines; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F7 Lines", &_draw_lines);
+  addHotkey (SDLK_F7, MOD_none, [this] { _draw_lines = !_draw_lines; });
   mbar->GetMenu("View")->AddMenuItemToggle("F8 Detail infos", mainGui->guidetailInfos->hidden_evil(), true);
   addHotkey (SDLK_F8, MOD_none, [this] { mainGui->guidetailInfos->toggleVisibility(); });
   mbar->GetMenu("View")->AddMenuItemToggle("F9 Map contour infos", &_draw_contour);
@@ -1999,7 +1999,10 @@ void MapView::displayGUIIfEnabled()
 void MapView::displayViewMode_2D(float /*t*/, float /*dt*/)
 {
   video.setTileMode();
-  gWorld->drawTileMode(_camera_ah, gWorld->camera);
+  gWorld->drawTileMode ( _camera_ah
+                       , gWorld->camera
+                       , _draw_lines
+                       );
 
 
   const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x) / CHUNKSIZE;
@@ -2102,6 +2105,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _camera_lookat
                , _draw_mfbo
                , _draw_wireframe
+               , _draw_lines
                );
 
   displayGUIIfEnabled();

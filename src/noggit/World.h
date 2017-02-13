@@ -66,7 +66,6 @@ public:
   // Do we draw *? Should be moved somewhere else, these are not World related.
   bool drawdoodads;
   bool drawfog;
-  bool drawlines;
   bool drawmodels;
   bool drawterrain;
   bool drawwater;
@@ -134,6 +133,7 @@ public:
             , math::vector_3d const& camera_lookat
             , bool draw_mfbo
             , bool draw_wireframe
+            , bool draw_lines
             );
 
   void outdoorLights(bool on);
@@ -143,7 +143,10 @@ public:
   void setAreaID(math::vector_3d const& pos, int id, bool adt);
 
   selection_result intersect (math::ray const&, bool only_map, bool do_objects);
-  void drawTileMode(float ah, math::vector_3d const& camera_pos);
+  void drawTileMode ( float ah
+                    , math::vector_3d const& camera_pos
+                    , bool draw_lines
+                    );
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
 
