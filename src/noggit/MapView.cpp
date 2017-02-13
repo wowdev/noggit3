@@ -834,8 +834,8 @@ void MapView::createGUI()
   addHotkey (SDLK_F2, MOD_none, [] { gWorld->drawdoodads = !gWorld->drawdoodads; });
   mbar->GetMenu("View")->AddMenuItemToggle("F3 Terrain", &_draw_terrain);
   addHotkey (SDLK_F3, MOD_none, [this] { _draw_terrain = !_draw_terrain; });
-  mbar->GetMenu("View")->AddMenuItemToggle("F4 Water", &gWorld->drawwater);
-  addHotkey (SDLK_F4, MOD_none, [] { gWorld->drawwater = !gWorld->drawwater; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F4 Water", &_draw_water);
+  addHotkey (SDLK_F4, MOD_none, [this] { _draw_water = !_draw_water; });
   mbar->GetMenu("View")->AddMenuItemToggle("F6 WMOs", &_draw_wmo);
   addHotkey (SDLK_F6, MOD_none, [this] { _draw_wmo = !_draw_wmo; });
   mbar->GetMenu("View")->AddMenuItemToggle("F7 Lines", &_draw_lines);
@@ -2114,6 +2114,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _draw_lines
                , _draw_terrain
                , _draw_wmo
+               , _draw_water
                );
 
   displayGUIIfEnabled();

@@ -279,7 +279,6 @@ World::World(const std::string& name)
   , drawdoodads(true)
   , drawfog(false)
   , drawmodels(true)
-  , drawwater(true)
   , lighting(true)
   , renderAnimations(false)
   , animtime(0)
@@ -543,6 +542,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_lines
                  , bool draw_terrain
                  , bool draw_wmo
+                 , bool draw_water
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -904,7 +904,7 @@ void main()
   gl.color4f(1, 1, 1, 1);
   gl.enable(GL_BLEND);
 
-  if (this->drawwater)
+  if (draw_water)
   {
     liquid_render liquid_renderer;
 

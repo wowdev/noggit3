@@ -67,7 +67,6 @@ public:
   bool drawdoodads;
   bool drawfog;
   bool drawmodels;
-  bool drawwater;
   bool lighting;
   bool renderAnimations;
   // Time of the day.
@@ -134,6 +133,7 @@ public:
             , bool draw_lines
             , bool draw_terrain
             , bool draw_wmo
+            , bool draw_water
             );
 
   void outdoorLights(bool on);
