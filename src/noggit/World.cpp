@@ -278,7 +278,6 @@ World::World(const std::string& name)
   , ol(nullptr)
   , drawdoodads(true)
   , drawfog(false)
-  , drawlines(false)
   , drawmodels(true)
   , drawterrain(true)
   , drawwater(true)
@@ -543,6 +542,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , math::vector_3d const& camera_lookat
                  , bool draw_mfbo
                  , bool draw_wireframe
+                 , bool draw_lines
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -739,7 +739,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   }
 
 
-  if (drawlines)
+  if (draw_lines)
   {
     opengl::program program { { GL_VERTEX_SHADER
                               , R"code(
@@ -1022,7 +1022,10 @@ void World::setAreaID(math::vector_3d const& pos, int id, bool adt)
   }
 }
 
-void World::drawTileMode(float /*ah*/, math::vector_3d const& camera_pos)
+void World::drawTileMode ( float /*ah*/
+                         , math::vector_3d const& camera_pos
+                         , bool draw_lines
+                         )
 {
   gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   gl.enable(GL_BLEND);
@@ -1058,7 +1061,7 @@ void World::drawTileMode(float /*ah*/, math::vector_3d const& camera_pos)
     gl.enableClientState(GL_TEXTURE_COORD_ARRAY);
   }
 
-  if (drawlines) {
+  if (draw_lines) {
     gl.translatef((GLfloat)fmod(-camera_pos.x / CHUNKSIZE, 16), (GLfloat)fmod(-camera_pos.z / CHUNKSIZE, 16), 0);
     /*  for(int x=-32;x<=48;x++)
     {
