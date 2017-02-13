@@ -108,7 +108,6 @@ public:
   StripType *mapstrip2;
 
   math::vector_3d camera;
-  math::vector_3d lookat;
 
   explicit World(const std::string& name);
   ~World();

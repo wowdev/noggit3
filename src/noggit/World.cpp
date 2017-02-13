@@ -305,7 +305,6 @@ World::World(const std::string& name)
   , mapstrip(nullptr)
   , mapstrip2(nullptr)
   , camera(math::vector_3d(0.0f, 0.0f, 0.0f))
-  , lookat(math::vector_3d(0.0f, 0.0f, 0.0f))
   , vertex_angle(0.0f)
   , vertex_orientation(0.0f)
 {
