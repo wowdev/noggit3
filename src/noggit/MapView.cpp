@@ -828,8 +828,8 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemToggle("Texture palette", mainGui->TexturePalette->hidden_evil(), true);
   mbar->GetMenu("View")->AddMenuItemButton("Cursor options", [] { mainGui->showCursorSwitcher(); });
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
-  mbar->GetMenu("View")->AddMenuItemToggle("F1 M2s", &gWorld->drawmodels);
-  addHotkey (SDLK_F1, MOD_none, [] { gWorld->drawmodels = !gWorld->drawmodels; });
+  mbar->GetMenu("View")->AddMenuItemToggle("F1 M2s", &_draw_models);
+  addHotkey (SDLK_F1, MOD_none, [this] { _draw_models = !_draw_models; });
   mbar->GetMenu("View")->AddMenuItemToggle("F2 WMO doodadsets", &_draw_wmo_doodads);
   addHotkey (SDLK_F2, MOD_none, [this] { _draw_wmo_doodads = !_draw_wmo_doodads; });
   mbar->GetMenu("View")->AddMenuItemToggle("F3 Terrain", &_draw_terrain);
@@ -868,14 +868,14 @@ void MapView::createGUI()
               {
                 if (alloff)
                 {
-                  alloff_models = gWorld->drawmodels;
+                  alloff_models = _draw_models;
                   alloff_doodads = _draw_wmo_doodads;
                   alloff_contour = _draw_contour;
                   alloff_wmo = _draw_wmo;
                   alloff_fog = gWorld->drawfog;
                   alloff_terrain = _draw_terrain;
 
-                  gWorld->drawmodels = false;
+                  _draw_models = false;
                   _draw_wmo_doodads = false;
                   _draw_contour = true;
                   _draw_wmo = false;
@@ -884,7 +884,7 @@ void MapView::createGUI()
                 }
                 else
                 {
-                  gWorld->drawmodels = alloff_models;
+                  _draw_models = alloff_models;
                   _draw_wmo_doodads = alloff_doodads;
                   _draw_contour = alloff_contour;
                   _draw_wmo = alloff_wmo;
@@ -1930,6 +1930,7 @@ selection_result MapView::intersect_result(bool terrain_only)
                         , terrainMode == editing_mode::object
                         , _draw_terrain
                         , _draw_wmo
+                        , _draw_models
                         )
     );
 
@@ -2116,6 +2117,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _draw_wmo
                , _draw_water
                , _draw_wmo_doodads
+               , _draw_models
                );
 
   displayGUIIfEnabled();

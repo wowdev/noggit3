@@ -65,7 +65,6 @@ public:
   unsigned int getMapID();
   // Do we draw *? Should be moved somewhere else, these are not World related.
   bool drawfog;
-  bool drawmodels;
   bool lighting;
   bool renderAnimations;
   // Time of the day.
@@ -132,6 +131,7 @@ public:
             , bool draw_wmo
             , bool draw_water
             , bool draw_doodads
+            , bool draw_models
             );
 
   void outdoorLights(bool on);
@@ -145,6 +145,7 @@ public:
                              , bool do_objects
                              , bool draw_terrain
                              , bool draw_wmo
+                             , bool draw_models
                              );
   void drawTileMode ( float ah
                     , math::vector_3d const& camera_pos
