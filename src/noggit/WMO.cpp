@@ -1068,7 +1068,7 @@ void WMOGroup::draw(const math::vector_3d& ofs, const math::degrees angle, Frust
   gl.color4f(1, 1, 1, 1);
   gl.enable(GL_CULL_FACE);
 
-  if (hascv && gWorld->lighting)
+  if (hascv)
   {
     gl.disableClientState (GL_COLOR_ARRAY);
     gl.enable (GL_LIGHTING);
