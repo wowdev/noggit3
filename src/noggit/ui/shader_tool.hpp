@@ -4,6 +4,7 @@
 
 #include <noggit/ui/Window.h>
 
+class UIGradient;
 class UISlider;
 class UIToggleGroup;
 
@@ -41,9 +42,9 @@ namespace ui
 
     UISlider* _radius_slider;
     UISlider* _speed_slider;
-    UISlider* _red_slider;
-    UISlider* _green_slider;
-    UISlider* _blue_slider;
+    UIGradient* _red_gradient;
+    UIGradient* _green_gradient;
+    UIGradient* _blue_gradient;
   };
 }
 
