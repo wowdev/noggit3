@@ -74,14 +74,14 @@ void UIZoneIDBrowser::setZoneID(int id)
         subZoneID = 0;
         SubZoneName = "";;
         if (changeFunc)
-          changeFunc(this, id);
+          changeFunc (id);
       }
       else
       {
         SubZoneName = gAreaDB.getAreaName(i->getInt(AreaDB::AreaID));
         subZoneID = id;
         if (changeFunc)
-          changeFunc(this, id);
+          changeFunc (id);
       }
     }
   }
@@ -99,7 +99,7 @@ void UIZoneIDBrowser::ButtonMapPressed(int id)
       subZoneID = 0;
       SubZoneName = "";
       if (changeFunc)
-        changeFunc(this, zoneID);
+        changeFunc (zoneID);
     }
     else
     {
@@ -107,7 +107,7 @@ void UIZoneIDBrowser::ButtonMapPressed(int id)
       zoneID = 0;
       ZoneName = "";
       if (changeFunc)
-        changeFunc(this, 0);
+        changeFunc (0);
     }
     refreshMapPath();
     buildAreaList();
@@ -167,7 +167,7 @@ void UIZoneIDBrowser::refreshMapPath()
   ZoneIDPath->setText(AreaPath.str());
 }
 
-void UIZoneIDBrowser::setChangeFunc(void(*f)(UIFrame *, int))
+void UIZoneIDBrowser::setChangeFunc(std::function<void (int)> f)
 {
   changeFunc = f;
 }

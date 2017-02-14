@@ -65,6 +65,11 @@ private:
 
   void checkWaterSave();
 
+  void ResetSelectedObjectRotation();
+  void SnapSelectedObjectToGround();
+  void DeleteSelectedObject();
+  void changeZoneIDValue (int set);
+
 public:
   math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
   int cursor_type = 1;
