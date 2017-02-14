@@ -84,7 +84,6 @@ public:
 
   OutdoorLightStats outdoorLightStats;
 
-  StripType *mapstrip;
   StripType *mapstrip2;
 
   math::vector_3d camera;
