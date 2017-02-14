@@ -28,11 +28,6 @@ UISlider::UISlider(float xPos, float yPos, float w, float s, float o)
   clickable(true);
 }
 
-void UISlider::setFunc(void(*f)(float val))
-{
-  func = f;
-}
-
 void UISlider::setFunc(std::function<void(float)> pFunc)
 {
   func = pFunc;

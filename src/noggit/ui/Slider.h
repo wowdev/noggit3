@@ -20,7 +20,6 @@ protected:
 
 public:
   float value;
-  void setFunc(void(*f)(float value));
   void setFunc(std::function<void(float value)> pFunc);
   void setValue(float f);
   void setText(const std::string& text);

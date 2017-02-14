@@ -8,6 +8,13 @@
 #include <iostream>     // std::cout
 #include <algorithm>    // std::min
 
+
+UIGradient::UIGradient(float x, float y, float width, float height, bool horizontal)
+  : UIFrame(x, y, width, height)
+  , horiz(horizontal)
+{
+}
+
 void UIGradient::render() const
 {
   if (hidden())
@@ -79,10 +86,10 @@ void UIGradient::setClickColor(float r, float g, float b, float a)
   ClickColor = math::vector_4d(r, g, b, a);
 }
 
-void UIGradient::setClickFunc(void(*f)(float val))
+void UIGradient::setClickFunc(std::function<void(float)> f)
 {
   value = 0.0f;
-  clickFunc = f;
+  func = f;
   clickable(true);
 }
 
@@ -97,7 +104,7 @@ UIFrame::Ptr UIGradient::processLeftClick(float mx, float my)
 
     value = std::min(std::max(value, 0.0f), 1.0f);
 
-    clickFunc(value);
+    func(value);
     return this;
   }
 
@@ -125,8 +132,8 @@ bool UIGradient::processLeftDrag(float mx, float my, float xDrag, float yDrag)
 void UIGradient::setValue(float f)
 {
   value = std::min(std::max(f, 0.0f), 1.0f);
-  if (clickFunc)
+  if (func)
   {
-    clickFunc(value);
+    func(value);
   }
 }
