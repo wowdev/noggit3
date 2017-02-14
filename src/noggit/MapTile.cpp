@@ -326,6 +326,7 @@ void MapTile::draw ( Frustum const& frustum
                    , bool draw_water_overlay
                    , bool draw_areaid_overlay
                    , bool draw_wireframe_overlay
+                   , int cursor_type
                    )
 {
   gl.color4f(1, 1, 1, 1);
@@ -342,6 +343,7 @@ void MapTile::draw ( Frustum const& frustum
                           , draw_water_overlay
                           , draw_areaid_overlay
                           , draw_wireframe_overlay
+                          , cursor_type
                           );
     }
   }

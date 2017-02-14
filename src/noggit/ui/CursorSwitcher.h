@@ -8,5 +8,5 @@
 class UICursorSwitcher : public UICloseWindow
 {
 public:
-  UICursorSwitcher();
+  UICursorSwitcher(math::vector_4d& color, int& cursor_type);
 };

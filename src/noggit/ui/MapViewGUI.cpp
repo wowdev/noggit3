@@ -83,10 +83,10 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
 
 #ifdef _WIN32
   if (app.tabletActive && Settings::getInstance()->tabletMode)
-    shaderTool = new ui::shader_tool((float)video.xres() - 185.0f, 30.0f, true);
+    shaderTool = new ui::shader_tool((float)video.xres() - 185.0f, 30.0f, true, theMapview->cursor_color);
   else
 #endif
-    shaderTool = new ui::shader_tool((float)video.xres() - 185.0f, 30.0f, false);
+    shaderTool = new ui::shader_tool((float)video.xres() - 185.0f, 30.0f, false, theMapview->cursor_color);
   
   shaderTool->hide();
   addChild(shaderTool);
@@ -135,7 +135,7 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   addChild(TexturePicker);
 
   // Cursor Switcher
-  CursorSwitcher = new UICursorSwitcher();
+  CursorSwitcher = new UICursorSwitcher(theMapview->cursor_color, theMapview->cursor_type);
   CursorSwitcher->hide();
   CursorSwitcher->movable(true);
   addChild(CursorSwitcher);

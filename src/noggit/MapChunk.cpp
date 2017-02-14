@@ -620,6 +620,7 @@ void MapChunk::draw ( Frustum const& frustum
                     , bool draw_water_overlay
                     , bool draw_areaid_overlay
                     , bool draw_wireframe_overlay
+                    , int cursor_type
                     )
 {
   if (!is_visible (gWorld->culldistance, frustum, gWorld->camera))
@@ -747,7 +748,7 @@ void MapChunk::draw ( Frustum const& frustum
     }
   }
 
-  if (Environment::getInstance()->cursorType == 3)
+  if (cursor_type == 3)
   {
     if (gWorld->IsSelection(eEntry_MapChunk) && boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk == this)
     {
@@ -958,7 +959,7 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
   return changed;
 }
 
-bool MapChunk::ChangeMCCV(math::vector_3d const& pos, float change, float radius, bool editMode)
+bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
 {
   float dist;
   bool changed = false;
@@ -985,9 +986,9 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, float change, float radius
       float edit = change * (1.0f - dist / radius);
       if (editMode)
       {
-        mccv[i].x += (Environment::getInstance()->cursorColorR - mccv[i].x)* edit;
-        mccv[i].y += (Environment::getInstance()->cursorColorG - mccv[i].y)* edit;
-        mccv[i].z += (Environment::getInstance()->cursorColorB - mccv[i].z)* edit;
+        mccv[i].x += (color.x - mccv[i].x)* edit;
+        mccv[i].y += (color.y - mccv[i].y)* edit;
+        mccv[i].z += (color.z - mccv[i].z)* edit;
       }
       else
       {

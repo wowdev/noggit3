@@ -64,6 +64,7 @@ public:
             , bool draw_water_overlay
             , bool draw_areaid_overlay
             , bool draw_wireframe_overlay
+            , int cursor_type
             );
   void intersect (math::ray const&, selection_result*) const;
   void drawLines ( opengl::scoped::use_program& line_shader
