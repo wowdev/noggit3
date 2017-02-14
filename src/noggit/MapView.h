@@ -7,8 +7,14 @@
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
 
+#include <boost/optional.hpp>
+
 class UIFrame;
 class World;
+
+class UICursorSwitcher;
+class UIToggleGroup;
+class UIMapViewGUI;
 
 enum eViewMode
 {
@@ -72,6 +78,59 @@ private:
 
   void insert_last_m2_from_wmv();
   void insert_last_wmo_from_wmv();
+
+  int MouseX;
+  int MouseY;
+  float mh, mv, rh, rv;
+
+  float moveratio = 0.1f;
+  float rotratio = 0.2f;
+  float keyx, keyy, keyz, keyr, keys;
+
+  float tool_settings_x;
+  float tool_settings_y;
+
+  bool MoveObj;
+
+  math::vector_3d objMove;
+  math::vector_3d objMoveOffset;
+  math::vector_3d objRot;
+
+  boost::optional<selection_type> lastSelected;
+
+  bool TestSelection = false;
+
+  bool  leftMouse = false;
+  bool  leftClicked = false;
+  bool  rightMouse = false;
+  bool  painting = false;
+
+  // Vars for the ground editing toggle mode store the status of some
+  // view settings when the ground editing mode is switched on to
+  // restore them if switch back again
+
+  bool  alloff = true;
+  bool  alloff_models = false;
+  bool  alloff_doodads = false;
+  bool  alloff_contour = false;
+  bool  alloff_wmo = false;
+  bool  alloff_detailselect = false;
+  bool  alloff_fog = false;
+  bool  alloff_terrain = false;
+
+  editing_mode terrainMode = editing_mode::ground;
+  editing_mode saveterrainMode = terrainMode;
+
+  UICursorSwitcher* CursorSwitcher;
+
+  bool Saving = false;
+
+  UIFrame* LastClicked;
+
+  UIMapViewGUI* mainGui;
+
+  UIFrame* MapChunkWindow;
+  UIToggleGroup * gFlagsToggleGroup;
 
 public:
   math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
