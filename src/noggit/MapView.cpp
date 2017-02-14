@@ -488,95 +488,6 @@ void MapView::changeZoneIDValue (int set)
   }
 }
 
-std::string getCurrentHeightmapPath()
-{
-  // get MapName
-  std::string mapName;
-  int id = gWorld->getMapID();
-  for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
-  {
-    if (i->getInt(MapDB::MapID) == id)
-      mapName = i->getString(MapDB::InternalName);
-  }
-
-  // build the path and filename string.
-  std::stringstream png_filename;
-  png_filename << Project::getInstance()->getPath() << "world\\maps\\" << mapName << "\\H_" << mapName
-    << "_" << misc::FtoIround((gWorld->camera.x - (TILESIZE / 2)) / TILESIZE) << "_" << misc::FtoIround((gWorld->camera.z - (TILESIZE / 2)) / TILESIZE) << ".png";
-  return png_filename.str();
-
-}
-
-#ifdef __FILESAREMISSING
-void exportPNG(UIFrame *f, int set)
-{
-  // create the image and write to disc.
-  GLfloat* data = new GLfloat[272 * 272];
-
-  ilInit();
-
-  int width = 272;
-  int height = 272;
-  int bytesToUsePerPixel = 32;  // 16 bit per channel
-  int sizeOfByte = sizeof(unsigned char);
-  int theSize = width * height * sizeOfByte * bytesToUsePerPixel;
-
-  unsigned char * imData = (unsigned char*)malloc(theSize);
-
-  int colors = 0;
-  // write the height data to the image array
-  for (int i = 0; i < theSize; i++)
-  {
-    imData[i] = colors;
-    if (i == 100)colors = 200;
-    if (i == 200)colors = 4000;
-  }
-
-
-  ILuint ImageName; // The image name.
-  ilGenImages(1, &ImageName); // Grab a new image name.
-  ilBindImage(ImageName); // bind it
-  ilTexImage(width, height, 1, bytesToUsePerPixel, GL_LUMINANCE, IL_UNSIGNED_BYTE, nullptr);
-  ilSetData(imData);
-  ilEnable(IL_FILE_OVERWRITE);
-  //ilSave(IL_PNG, getCurrentHeightmapPath().c_str());
-  ilSave(IL_PNG, "test2.png");
-  free(imData);
-}
-
-void importPNG(UIFrame *f, int set)
-{
-  ilInit();
-
-  //ILboolean loadImage = ilLoadImage( getCurrentHeightmapPath().c_str() ) ;
-  const char *image = "test.png";
-  ILboolean loadImage = ilLoadImage(image);
-
-  std::stringstream MessageText;
-  if (loadImage)
-  {
-
-    LogDebug << "Image loaded: " << image << "\n";
-    LogDebug << "ImageSize: " << ilGetInteger(IL_IMAGE_SIZE_OF_DATA) << "\n";
-    LogDebug << "BPP: " << ilGetInteger(IL_IMAGE_BITS_PER_PIXEL) << "\n";
-    LogDebug << "Format: " << ilGetInteger(IL_IMAGE_FORMAT) << "\n";
-    LogDebug << "SizeofData: " << ilGetInteger(IL_IMAGE_SIZE_OF_DATA) << "\n";
-
-  }
-  else
-  {
-    LogDebug << "Cant load Image: " << image << "\n";
-    ILenum err = ilGetError();
-
-    MessageText << err << "\n";
-    //MessageText << ilGetString(ilGetError()) << "\n";
-    LogDebug << MessageText.str();
-  }
-}
-#else
-void exportPNG(UIFrame*, int) {}
-void importPNG(UIFrame*, int) {}
-#endif
 
 void MapView::createGUI()
 {
@@ -616,9 +527,6 @@ void MapView::createGUI()
   addHotkey (SDLK_s, MOD_meta, [this] { gWorld->mapIndex->saveChanged(); });
   mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
   addHotkey (SDLK_j, MOD_shift, [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
-  //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
-  // mbar->GetMenu( "File" )->AddMenuItemButton( "Export heightmap", exportPNG, 1 );
-  // mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
   mbar->GetMenu("File")->AddMenuItemSeperator(" ");
   mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", [] { mainGui->escWarning->show(); });
   addHotkey (SDLK_ESCAPE, MOD_none, [this] { mainGui->escWarning->show(); });
