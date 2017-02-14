@@ -219,7 +219,7 @@ void MapView::set_editing_mode (editing_mode mode)
   mainGui->guiToolbar->IconSelect (mode);
 }
 
-void ResetSelectedObjectRotation()
+void MapView::ResetSelectedObjectRotation()
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
@@ -238,7 +238,7 @@ void ResetSelectedObjectRotation()
   }
 }
 
-void SnapSelectedObjectToGround()
+void MapView::SnapSelectedObjectToGround()
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
@@ -259,7 +259,7 @@ void SnapSelectedObjectToGround()
 }
 
 
-void DeleteSelectedObject()
+void MapView::DeleteSelectedObject()
 {
   if (gWorld->IsSelection(eEntry_WMO))
   {
@@ -478,7 +478,7 @@ void InsertObject(int id)
   //! \todo Memoryleak: These models will never get deleted.
 }
 
-void changeZoneIDValue(UIFrame* /*f*/, int set)
+void MapView::changeZoneIDValue (int set)
 {
   Environment::getInstance()->selectedAreaID = set;
   if (Environment::getInstance()->areaIDColors.find(set) == Environment::getInstance()->areaIDColors.end())
@@ -585,11 +585,11 @@ void MapView::createGUI()
   mainGui->guiCurrentTexture->current_texture->setClickFunc ([] { mainGui->TexturePalette->toggleVisibility(); });
 
   mainGui->ZoneIDBrowser->setMapID(gWorld->getMapID());
-  mainGui->ZoneIDBrowser->setChangeFunc(changeZoneIDValue);
+  mainGui->ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
   tool_settings_x = video.xres() - 186;
   tool_settings_y = 38;
 
-  
+
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
   mainGui->TexturePalette->hide();
@@ -624,12 +624,12 @@ void MapView::createGUI()
   addHotkey (SDLK_ESCAPE, MOD_none, [this] { mainGui->escWarning->show(); });
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("selected object");
-  mbar->GetMenu("Edit")->AddMenuItemButton("DEL delete", DeleteSelectedObject);
-  addHotkey (SDLK_DELETE, MOD_none, [] { DeleteSelectedObject(); });
-  mbar->GetMenu("Edit")->AddMenuItemButton("CTRL + R reset rotation", ResetSelectedObjectRotation);
-  addHotkey (SDLK_r, MOD_ctrl, [] { ResetSelectedObjectRotation(); });
-  mbar->GetMenu("Edit")->AddMenuItemButton("PAGE DOWN set to ground", SnapSelectedObjectToGround);
-  addHotkey (SDLK_PAGEDOWN, MOD_none, [] { SnapSelectedObjectToGround(); });
+  mbar->GetMenu("Edit")->AddMenuItemButton("DEL delete", [this] { DeleteSelectedObject(); });
+  addHotkey (SDLK_DELETE, MOD_none, [this] { DeleteSelectedObject(); });
+  mbar->GetMenu("Edit")->AddMenuItemButton("CTRL + R reset rotation", [this] { ResetSelectedObjectRotation(); });
+  addHotkey (SDLK_r, MOD_ctrl, [this] { ResetSelectedObjectRotation(); });
+  mbar->GetMenu("Edit")->AddMenuItemButton("PAGE DOWN set to ground", [this] { SnapSelectedObjectToGround(); });
+  addHotkey (SDLK_PAGEDOWN, MOD_none, [this] { SnapSelectedObjectToGround(); });
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("Options");
   mbar->GetMenu("Edit")->AddMenuItemToggle("Auto select mode", &Settings::getInstance()->AutoSelectingMode, false);

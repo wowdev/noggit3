@@ -17,7 +17,7 @@ public:
   typedef UIZoneIDBrowser* Ptr;
 
 private:
-  void(*changeFunc)(UIFrame *, int);
+  std::function<void (int)> changeFunc;
   UIMapViewGUI *mainGui;
   UIListView* ZoneIdList;
   int mapID;
@@ -41,5 +41,5 @@ public:
   void setZoneID(int id);
   void ButtonMapPressed(int id);
   void refreshMapPath();
-  void setChangeFunc(void(*f)(UIFrame *, int));
+  void setChangeFunc(std::function<void (int)>);
 };
