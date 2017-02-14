@@ -431,7 +431,7 @@ void MapTile::getAlpha(size_t id, unsigned char *amap)
 }
 
 // This is for the 2D mode only.
-void MapTile::drawTextures()
+void MapTile::drawTextures (float minX, float minY, float maxX, float maxY)
 {
   float xOffset, yOffset;
 
@@ -445,7 +445,7 @@ void MapTile::drawTextures()
 
   for (int j = 0; j<16; ++j) {
     for (int i = 0; i<16; ++i) {
-      if (((i + 1 + xOffset)>gWorld->minX) && ((j + 1 + yOffset)>gWorld->minY) && ((i + xOffset)<gWorld->maxX) && ((j + yOffset)<gWorld->maxY))
+      if (((i + 1 + xOffset)>minX) && ((j + 1 + yOffset)>minY) && ((i + xOffset)<maxX) && ((j + yOffset)<maxY))
         mChunks[j][i]->drawTextures();
     }
   }
