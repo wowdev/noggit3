@@ -47,8 +47,10 @@ void Model::finishLoading()
   animated = isAnimated(f);  // isAnimated will set animGeometry and animTextures
 
   trans = 1.0f;
-
   anim = 0;
+
+  rad = header.VertexBoxRadius;
+  
   header.nParticleEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   header.nRibbonEmitters = 0;      //! \todo  Get Particles to 3.*? ._.
   if (header.nGlobalSequences)
@@ -187,16 +189,7 @@ void Model::initCommon(const MPQFile& f)
 
     memcpy (_vertices_parameters[i].bones, vertices[i].bones, 4 * sizeof (uint8_t));
     memcpy (_vertices_parameters[i].weights, vertices[i].weights, 4 * sizeof (uint8_t));
-
-    float len = _vertices[i].position.length_squared();
-
-    if (len > rad)
-    {
-      rad = len;
-    }
   }
-
-  rad = std::sqrt (rad);
 
   if (!animGeometry)
   {
