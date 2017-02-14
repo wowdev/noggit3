@@ -273,7 +273,6 @@ World::World(const std::string& name)
   , basename(name)
   , fogdistance(777.0f)
   , culldistance(fogdistance)
-  , zoom(0.25f)
   , skies(nullptr)
   , autoheight(false)
   , outdoorLightStats(OutdoorLightStats())
@@ -1020,6 +1019,7 @@ void World::setAreaID(math::vector_3d const& pos, int id, bool adt)
 void World::drawTileMode ( float /*ah*/
                          , math::vector_3d const& camera_pos
                          , bool draw_lines
+                         , float zoom
                          )
 {
   gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);

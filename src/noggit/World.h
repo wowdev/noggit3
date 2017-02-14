@@ -76,8 +76,6 @@ public:
   float fogdistance;
   float culldistance;
 
-  float zoom;
-
   Skies *skies;
 
   bool autoheight;
@@ -147,6 +145,7 @@ public:
   void drawTileMode ( float ah
                     , math::vector_3d const& camera_pos
                     , bool draw_lines
+                    , float zoom
                     );
 
   void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);

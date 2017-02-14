@@ -28,6 +28,7 @@ private:
   float _camera_ah;
   float _camera_av;
   math::vector_3d _camera_lookat;
+  float _2d_zoom = 0.25f;
   float moving, strafing, updown, mousedir, movespd, turn, lookat;
   math::vector_3d _cursor_pos;
   bool key_w;

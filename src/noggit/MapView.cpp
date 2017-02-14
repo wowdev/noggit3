@@ -1569,7 +1569,7 @@ void MapView::tick(float t, float dt)
             if (mViewMode == eViewMode_3D && !underMap)
               gWorld->eraseTextures(_cursor_pos);
             else if (mViewMode == eViewMode_2D)
-              gWorld->eraseTextures({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z});
+              gWorld->eraseTextures({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + gWorld->camera.z});
           }
           else if (_mod_ctrl_down)
           {
@@ -1584,9 +1584,9 @@ void MapView::tick(float t, float dt)
             }
             else if (mViewMode == eViewMode_2D)
             {
-              math::vector_3d pos( CHUNKSIZE * 4.0f * video.ratio() * ((float)MouseX / (float)video.xres() - 0.5f ) / gWorld->zoom
+              math::vector_3d pos( CHUNKSIZE * 4.0f * video.ratio() * ((float)MouseX / (float)video.xres() - 0.5f ) / _2d_zoom
                                   , 0.0f
-                                  , CHUNKSIZE * 4.0f * ((float)MouseY / (float)video.yres() - 0.5f) / gWorld->zoom
+                                  , CHUNKSIZE * 4.0f * ((float)MouseY / (float)video.yres() - 0.5f) / _2d_zoom
                                   );
 
               pos += gWorld->camera;
@@ -1703,13 +1703,13 @@ void MapView::tick(float t, float dt)
     else
     {
       if (moving)
-        gWorld->camera.z -= dt * movespd * moving / (gWorld->zoom * 1.5f);
+        gWorld->camera.z -= dt * movespd * moving / (_2d_zoom * 1.5f);
       if (strafing)
-        gWorld->camera.x += dt * movespd * strafing / (gWorld->zoom * 1.5f);
+        gWorld->camera.x += dt * movespd * strafing / (_2d_zoom * 1.5f);
       if (updown)
-        gWorld->zoom *= pow(2.0f, dt * updown * 4.0f);
+        _2d_zoom *= pow(2.0f, dt * updown * 4.0f);
 
-      gWorld->zoom = std::min(std::max(gWorld->zoom, 0.1f), 2.0f);
+      _2d_zoom = std::min(std::max(_2d_zoom, 0.1f), 2.0f);
     }
   }
   else
@@ -1852,17 +1852,18 @@ void MapView::displayViewMode_2D(float /*t*/, float /*dt*/)
   gWorld->drawTileMode ( _camera_ah
                        , gWorld->camera
                        , _draw_lines
+                       , _2d_zoom
                        );
 
 
-  const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x) / CHUNKSIZE;
-  const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z) / CHUNKSIZE;
+  const float mX = (CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / _2d_zoom + gWorld->camera.x) / CHUNKSIZE;
+  const float mY = (CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / _2d_zoom + gWorld->camera.z) / CHUNKSIZE;
 
   // draw brush
   {
     opengl::scoped::matrix_pusher const matrix;
 
-    gl.scalef(gWorld->zoom, gWorld->zoom, 1.0f);
+    gl.scalef(_2d_zoom, _2d_zoom, 1.0f);
     gl.translatef(-gWorld->camera.x / CHUNKSIZE, -gWorld->camera.z / CHUNKSIZE, 0);
 
     gl.color4f(1.0f, 1.0f, 1.0f, 0.5f);
@@ -1873,7 +1874,7 @@ void MapView::displayViewMode_2D(float /*t*/, float /*dt*/)
 
     mainGui->texturingTool->bind_brush_texture();
 
-    const float tRadius = mainGui->texturingTool->brush_radius() / CHUNKSIZE;// *gWorld->zoom;
+    const float tRadius = mainGui->texturingTool->brush_radius() / CHUNKSIZE;// *_2d_zoom;
     gl.begin(GL_QUADS);
     gl.texCoord2f(0.0f, 0.0f);
     gl.vertex3f(mX - tRadius, mY + tRadius, 0);
