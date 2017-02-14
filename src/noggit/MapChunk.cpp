@@ -384,7 +384,7 @@ void MapChunk::drawTextures()
   if (_texture_set.num() > 1U)
   {
     //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
-    //gl.depthMask(GL_FALSE);
+    gl.depthMask(GL_FALSE);
   }
 
   for (size_t i = 1; i < _texture_set.num(); ++i)
@@ -414,7 +414,7 @@ void MapChunk::drawTextures()
     gl.vertex3f(static_cast<float>(px), py + 1.0f, -2.0f);
     gl.end();
 
-    _texture_set.start2DAnim(i);
+    _texture_set.stop2DAnim(i);
   }
 
   opengl::texture::set_active_texture (0);
@@ -427,6 +427,12 @@ void MapChunk::drawTextures()
   gl.colorPointer (minishadows, 4, GL_FLOAT, 0, 0);
 
   gl.drawElements(GL_TRIANGLE_STRIP, mapstrip2.size(), GL_UNSIGNED_SHORT, mapstrip2.data());
+
+  if (_texture_set.num() > 1U)
+  {
+    //gl.depthFunc(GL_LEQUAL);
+    gl.depthMask(GL_TRUE);
+  }
 }
 
 int MapChunk::indexLoD(int x, int y)
