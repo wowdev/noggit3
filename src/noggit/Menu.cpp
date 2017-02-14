@@ -123,11 +123,9 @@ void Menu::randBackground()
 }
 
 
-void Menu::enterMapAt(math::vector_3d pos, bool pAutoHeight, float av, float ah)
+void Menu::enterMapAt(math::vector_3d pos, float av, float ah)
 {
   video.farclip((const float)Settings::getInstance()->FarZ);
-
-  gWorld->autoheight = pAutoHeight;
 
   gWorld->camera = math::vector_3d(pos.x, pos.y, pos.z);
 
@@ -273,7 +271,7 @@ void Menu::loadBookmark(int bookmarkID)
 {
   BookmarkEntry e = mBookmarks.at(bookmarkID);
   loadMap(e.mapID);
-  enterMapAt(e.pos, false, e.av, e.ah);
+  enterMapAt(e.pos, e.av, e.ah);
 }
 
 void Menu::buildMenuBar()

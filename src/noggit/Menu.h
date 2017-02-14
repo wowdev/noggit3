@@ -62,7 +62,7 @@ public:
   void loadBookmark(int bookmarkID);
 
   //! \brief Enter the the map on the given location.
-  void enterMapAt(math::vector_3d pos, bool pAutoHeight = true, float av = -30.0f, float ah = -90.0f);
+  void enterMapAt(math::vector_3d pos, float av = -30.0f, float ah = -90.0f);
 
   ui::uid_fix_window* uidFixWindow;
 
