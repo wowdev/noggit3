@@ -219,14 +219,6 @@ void MapView::set_editing_mode (editing_mode mode)
   mainGui->guiToolbar->IconSelect (mode);
 }
 
-void openURL(int target)
-{
-#if defined(_WIN32) || defined(WIN32)
-  if (target == 1)  ShellExecute(nullptr, "open", "http://modcraft.superparanoid.de", nullptr, nullptr, SW_SHOWNORMAL);
-  if (target == 2)  ShellExecute(nullptr, "open", "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual", nullptr, nullptr, SW_SHOWNORMAL);
-#endif
-}
-
 void ResetSelectedObjectRotation()
 {
   if (gWorld->IsSelection(eEntry_WMO))
@@ -716,8 +708,32 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &Settings::getInstance()->renderModelsWithBox);
 
   mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [] { mainGui->showHelp(); });
-  mbar->GetMenu("Help")->AddMenuItemButton("Manual online", [] { openURL (2); });
-  mbar->GetMenu("Help")->AddMenuItemButton("Homepage", [] { openURL (1); });
+#if defined(_WIN32) || defined(WIN32)
+  mbar->GetMenu("Help")->AddMenuItemButton ( "Manual online"
+                                           , []
+                                             {
+                                               ShellExecute ( nullptr
+                                                            , "open"
+                                                            , "http://modcraft.superparanoid.de/wiki/index.php5?title=Noggit_user_manual"
+                                                            , nullptr
+                                                            , nullptr
+                                                            , SW_SHOWNORMAL
+                                                            );
+                                             }
+                                           );
+  mbar->GetMenu("Help")->AddMenuItemButton ( "Homepage"
+                                           , []
+                                             {
+                                               ShellExecute ( nullptr
+                                                            , "open"
+                                                            , "http://modcraft.superparanoid.de"
+                                                            , nullptr
+                                                            , nullptr
+                                                            , SW_SHOWNORMAL
+                                                            );
+                                             }
+                                           );
+#endif
 
   mainGui->addChild(mbar);
 
