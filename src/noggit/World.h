@@ -84,8 +84,6 @@ public:
 
   OutdoorLightStats outdoorLightStats;
 
-  StripType *mapstrip2;
-
   math::vector_3d camera;
 
   explicit World(const std::string& name);

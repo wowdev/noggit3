@@ -26,11 +26,6 @@
 #include <utility>
 #include <vector>
 
-int indexMapBuf(int x, int y)
-{
-  return ((y + 1) / 2) * 9 + (y / 2) * 8 + x;
-}
-
 MapTile::MapTile(int pX, int pZ, const std::string& pFilename, bool pBigAlpha, bool pLoadModels)
   : index(tile_index(pX, pZ))
   , xbase(pX * TILESIZE)

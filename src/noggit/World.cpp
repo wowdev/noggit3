@@ -276,7 +276,6 @@ World::World(const std::string& name)
   , skies(nullptr)
   , outdoorLightStats(OutdoorLightStats())
   , horizon(name)
-  , mapstrip2(nullptr)
   , camera(math::vector_3d(0.0f, 0.0f, 0.0f))
   , vertex_angle(0.0f)
   , vertex_orientation(0.0f)
@@ -359,12 +358,6 @@ void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
 
 void World::initDisplay()
 {
-  StripType *defstrip = new StripType[stripsize2];
-  for (int i = 0; i<stripsize2; ++i) defstrip[i] = (StripType)i; // note: this is ugly and should be handled in stripify
-  mapstrip2 = new StripType[stripsize2];
-  stripify2<StripType>(defstrip, mapstrip2);
-  delete[] defstrip;
-
   initGlobalVBOs(&detailtexcoords, &alphatexcoords);
 
   mapIndex->setAdt(false);
@@ -393,12 +386,6 @@ World::~World()
   {
     delete ol;
     ol = nullptr;
-  }
-
-  if (mapstrip2)
-  {
-    delete[] mapstrip2;
-    mapstrip2 = nullptr;
   }
 
   /*

@@ -41,6 +41,7 @@ private:
 
   std::vector<StripType> strip_with_holes;
   std::vector<StripType> strip_without_holes;
+  std::vector<StripType> mapstrip2;
 
   math::vector_3d mNormals[mapbufsize];
   math::vector_3d mMinimap[mapbufsize];

@@ -426,7 +426,7 @@ void MapChunk::drawTextures()
   gl.vertexPointer (minimap, 3, GL_FLOAT, 0, 0);
   gl.colorPointer (minishadows, 4, GL_FLOAT, 0, 0);
 
-  gl.drawElements(GL_TRIANGLE_STRIP, stripsize2, GL_UNSIGNED_SHORT, gWorld->mapstrip2);
+  gl.drawElements(GL_TRIANGLE_STRIP, mapstrip2.size(), GL_UNSIGNED_SHORT, mapstrip2.data());
 }
 
 int MapChunk::indexLoD(int x, int y)
@@ -437,6 +437,41 @@ int MapChunk::indexLoD(int x, int y)
 int MapChunk::indexNoLoD(int x, int y)
 {
   return x * 8 + x * 9 + y;
+}
+
+
+int indexMapBuf(int x, int y)
+{
+  return ((y + 1) / 2) * 9 + (y / 2) * 8 + x;
+}
+
+// high res version, size = 16*18 + 7*2 + 8*2
+const int stripsize2 = 16 * 18 + 7 * 2 + 8 * 2;
+template <class V>
+void stripify2(V *in, V *out)
+{
+  for (int row = 0; row<8; row++) {
+    V *thisrow = &in[indexMapBuf(0, row * 2)];
+    V *nextrow = &in[indexMapBuf(0, row * 2 + 1)];
+    V *overrow = &in[indexMapBuf(0, (row + 1) * 2)];
+
+    if (row>0) *out++ = thisrow[0];// jump end
+    for (int col = 0; col<8; col++) {
+      *out++ = thisrow[col];
+      *out++ = nextrow[col];
+    }
+    *out++ = thisrow[8];
+    *out++ = overrow[8];
+    *out++ = overrow[8];// jump start
+    *out++ = thisrow[0];// jump end
+    *out++ = thisrow[0];
+    for (int col = 0; col<8; col++) {
+      *out++ = overrow[col];
+      *out++ = nextrow[col];
+    }
+    if (row<8) *out++ = overrow[8];
+    if (row<7) *out++ = overrow[8];// jump start
+  }
 }
 
 void MapChunk::initStrip()
@@ -481,6 +516,12 @@ void MapChunk::initStrip()
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (indices);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
+
+  StripType *defstrip = new StripType[stripsize2];
+  for (int i = 0; i<stripsize2; ++i) defstrip[i] = (StripType)i; // note: this is ugly and should be handled in stripify
+  mapstrip2.resize (stripsize2);
+  stripify2<StripType>(defstrip, mapstrip2.data());
+  delete[] defstrip;
 }
 
 bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
