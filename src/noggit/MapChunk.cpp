@@ -108,7 +108,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
 {
   uint32_t fourcc;
   uint32_t size;
-  
+
   size_t base = f->getPos();
 
   hasMCCV = false;
@@ -180,7 +180,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     vmin.z = zbase;
     vmax.x = xbase + 8 * UNITSIZE;
     vmax.z = zbase + 8 * UNITSIZE;
-    
+
     // use absolute y pos in vertices
     ybase = 0.0f;
     header.ypos = 0.0f;
@@ -275,7 +275,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       mccv[i] = math::vector_3d((float)t[2] / 127.0f, (float)t[1] / 127.0f, (float)t[0] / 127.0f);
     }
   }
-  
+
   // create vertex buffers
   gl.bufferData<GL_ARRAY_BUFFER> (vertices, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER> (normals, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
@@ -951,7 +951,7 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
     if (BrushType == eTerrainType_Quadra)
     {
       if ((std::abs(xdiff) < std::abs(radius / 2)) && (std::abs(zdiff) < std::abs(radius / 2)))
-      { 
+      {
         dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
         mVertices[i].y += change * (1.0f - dist * inner_radius / radius);
         changed = true;
@@ -982,7 +982,7 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
             mVertices[i].y += change*cos(dist / radius);
             break;
           case eTerrainType_Gaussian:
-            mVertices[i].y += dist < radius * inner_radius ? change * std::exp(-(std::pow(radius * inner_radius / radius, 2) / (2 * std::pow(0.39f, 2)))) : change * std::exp(-(std::pow(dist / radius, 2) / (2 * std::pow(0.39f, 2)))); 
+            mVertices[i].y += dist < radius * inner_radius ? change * std::exp(-(std::pow(radius * inner_radius / radius, 2) / (2 * std::pow(0.39f, 2)))) : change * std::exp(-(std::pow(dist / radius, 2) / (2 * std::pow(0.39f, 2))));
 
             break;
           default:
