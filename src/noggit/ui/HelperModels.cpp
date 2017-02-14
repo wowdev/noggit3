@@ -58,7 +58,7 @@ UIHelperModels::UIHelperModels(MapView *mapview)
   addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Disc 777", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 10));
   addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Sphere 50", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 11));
   addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Sphere 200", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 12));
-  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Sphere 777", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 12));
+  addChild(new UIButton(leftStart, currentPos += (buttonheight - 5), buttonWidth, buttonheight, "Sphere 777", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", addModel, 13));
 
 
 }
