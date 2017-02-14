@@ -70,6 +70,9 @@ private:
   void DeleteSelectedObject();
   void changeZoneIDValue (int set);
 
+  void insert_last_m2_from_wmv();
+  void insert_last_wmo_from_wmv();
+
 public:
   math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
   int cursor_type = 1;

@@ -271,63 +271,7 @@ void MapView::DeleteSelectedObject()
   }
 }
 
-/*!
-\brief Import a new model form a text file or a hard coded one.
-Imports a model from the import.txt (or the ImportFile from the config), the wowModelViewer log or just insert some hard coded testing models.
-\param id the id switch the import kind
-*/
-void InsertObject(int id)
-{
-  //! \todo Beautify.
-
-  if (!gWorld->HasSelection())
-    return;
-
-  std::string m2_to_add;
-
-  const char* filesToAdd[15] = { ""
-                                 , ""
-                                 , "World\\Scale\\humanmalescale.m2"
-                                 , "World\\Scale\\50x50.m2"
-                                 , "World\\Scale\\100x100.m2"
-                                 , "World\\Scale\\250x250.m2"
-                                 , "World\\Scale\\500x500.m2"
-                                 , "World\\Scale\\1000x1000.m2"
-                                 , "World\\Scale\\50yardradiusdisc.m2"
-                                 , "World\\Scale\\200yardradiusdisc.m2"
-                                 , "World\\Scale\\777yardradiusdisc.m2"
-                                 , "World\\Scale\\50yardradiussphere.m2"
-                                 , "World\\Scale\\200yardradiussphere.m2"
-                                 , "World\\Scale\\777yardradiussphere.m2"
-                                 , ""
-  };
-
-  m2_to_add = filesToAdd[id];
-
-  math::vector_3d selectionPosition;
-  switch (gWorld->GetCurrentSelection()->which())
-  {
-  case eEntry_Model:
-    selectionPosition = boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->pos;
-    break;
-  case eEntry_WMO:
-    selectionPosition = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->pos;
-    break;
-  case eEntry_MapChunk:
-    selectionPosition = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).position;
-    break;
-  }
-
-  if (!MPQFile::exists(m2_to_add))
-  {
-    LogError << "Failed adding " << m2_to_add << ". It was not in any MPQ." << std::endl;
-  }
-
-  gWorld->addM2(m2_to_add, selectionPosition, false);
-  //! \todo Memoryleak: These models will never get deleted.
-}
-
-void insert_last_m2_from_wmv()
+void MapView::insert_last_m2_from_wmv()
 {
   //! \todo Beautify.
 
@@ -410,7 +354,7 @@ void insert_last_m2_from_wmv()
   }
 }
 
-void insert_last_wmo_from_wmv()
+void MapView::insert_last_wmo_from_wmv()
 {
   //! \todo Beautify.
 
@@ -556,8 +500,10 @@ void MapView::createGUI()
 
 
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Model");
-  mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", [] { insert_last_m2_from_wmv(); });
-  mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", [] { insert_last_wmo_from_wmv(); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", [this] { insert_last_m2_from_wmv(); });
+  addHotkey (SDLK_v, MOD_shift, [this] { insert_last_m2_from_wmv(); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", [this] { insert_last_wmo_from_wmv(); });
+  addHotkey (SDLK_v, MOD_alt, [this] { insert_last_wmo_from_wmv(); });
   mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", [] { mainGui->HelperModels->show(); });
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Current ADT");
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Set Area ID"
@@ -745,8 +691,6 @@ void MapView::createGUI()
             , [] { return terrainMode != editing_mode::object; }
             );
 
-  addHotkey (SDLK_v, MOD_shift, [] { insert_last_m2_from_wmv(); });
-  addHotkey (SDLK_v, MOD_alt, [] { insert_last_wmo_from_wmv(); });
   addHotkey (SDLK_v, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos); });
   addHotkey ( SDLK_v
             , MOD_none
@@ -2121,7 +2065,51 @@ void MapView::keyReleaseEvent (SDL_KeyboardEvent* e)
 
 void MapView::inserObjectFromExtern(int model)
 {
-  InsertObject (model);
+  if (!gWorld->HasSelection())
+    return;
+
+  std::string m2_to_add;
+
+  const char* filesToAdd[15] = { ""
+                                 , ""
+                                 , "World\\Scale\\humanmalescale.m2"
+                                 , "World\\Scale\\50x50.m2"
+                                 , "World\\Scale\\100x100.m2"
+                                 , "World\\Scale\\250x250.m2"
+                                 , "World\\Scale\\500x500.m2"
+                                 , "World\\Scale\\1000x1000.m2"
+                                 , "World\\Scale\\50yardradiusdisc.m2"
+                                 , "World\\Scale\\200yardradiusdisc.m2"
+                                 , "World\\Scale\\777yardradiusdisc.m2"
+                                 , "World\\Scale\\50yardradiussphere.m2"
+                                 , "World\\Scale\\200yardradiussphere.m2"
+                                 , "World\\Scale\\777yardradiussphere.m2"
+                                 , ""
+  };
+
+  m2_to_add = filesToAdd[model];
+
+  math::vector_3d selectionPosition;
+  switch (gWorld->GetCurrentSelection()->which())
+  {
+  case eEntry_Model:
+    selectionPosition = boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->pos;
+    break;
+  case eEntry_WMO:
+    selectionPosition = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->pos;
+    break;
+  case eEntry_MapChunk:
+    selectionPosition = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).position;
+    break;
+  }
+
+  if (!MPQFile::exists(m2_to_add))
+  {
+    LogError << "Failed adding " << m2_to_add << ". It was not in any MPQ." << std::endl;
+  }
+
+  gWorld->addM2(m2_to_add, selectionPosition, false);
+  //! \todo Memoryleak: These models will never get deleted.
 }
 
 
