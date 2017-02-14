@@ -79,8 +79,8 @@ float moveratio = 0.1f;
 float rotratio = 0.2f;
 float keyx, keyy, keyz, keyr, keys;
 
-int tool_settings_x;
-int tool_settings_y;
+float tool_settings_x;
+float tool_settings_y;
 
 bool MoveObj;
 
@@ -126,16 +126,8 @@ UIMapViewGUI* mainGui;
 UIFrame* MapChunkWindow;
 UIToggleGroup * gFlagsToggleGroup;
 
-
-
-void change_settings_window(editing_mode oldid, editing_mode newid)
+void MapView::set_editing_mode (editing_mode mode)
 {
-  if (oldid == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !mainGui->texturingTool
-    || !mainGui->shaderTool || !mainGui->guiWater || !mainGui->objectEditor)
-  {
-    return;
-  }
-
   mainGui->guiWaterTypeSelector->hide();
   mainGui->terrainTool->hide();
   mainGui->flattenTool->hide();
@@ -153,79 +145,75 @@ void change_settings_window(editing_mode oldid, editing_mode newid)
     return;
   mainGui->TexturePalette->hide();
   // fetch old win position
-  switch (oldid)
+  switch (terrainMode)
   {
   case editing_mode::ground:
-    tool_settings_x = (int)mainGui->terrainTool->x();
-    tool_settings_y = (int)mainGui->terrainTool->y();
+    tool_settings_x = mainGui->terrainTool->x();
+    tool_settings_y = mainGui->terrainTool->y();
     break;
   case editing_mode::flatten_blur:
-    tool_settings_x = (int)mainGui->flattenTool->x();
-    tool_settings_y = (int)mainGui->flattenTool->y();
+    tool_settings_x = mainGui->flattenTool->x();
+    tool_settings_y = mainGui->flattenTool->y();
     break;
   case editing_mode::paint:
-    tool_settings_x = (int)mainGui->texturingTool->x();
-    tool_settings_y = (int)mainGui->texturingTool->y();
+    tool_settings_x = mainGui->texturingTool->x();
+    tool_settings_y = mainGui->texturingTool->y();
     break;
   case editing_mode::areaid:
-    tool_settings_x = (int)mainGui->ZoneIDBrowser->x() + 230;
-    tool_settings_y = (int)mainGui->ZoneIDBrowser->y();
+    tool_settings_x = mainGui->ZoneIDBrowser->x() + 230;
+    tool_settings_y = mainGui->ZoneIDBrowser->y();
     break;
   case editing_mode::water:
-    tool_settings_x = (int)mainGui->guiWater->x();
-    tool_settings_y = (int)mainGui->guiWater->y();
+    tool_settings_x = mainGui->guiWater->x();
+    tool_settings_y = mainGui->guiWater->y();
     break;
   case editing_mode::mccv:
-    tool_settings_x = (int)mainGui->shaderTool->x();
-    tool_settings_y = (int)mainGui->shaderTool->y();
+    tool_settings_x = mainGui->shaderTool->x();
+    tool_settings_y = mainGui->shaderTool->y();
     break;
   }
   // set new win pos and make visible
-  switch (newid)
+  switch (mode)
   {
   case editing_mode::ground:
-    mainGui->terrainTool->x((const float)tool_settings_x);
-    mainGui->terrainTool->y((const float)tool_settings_y);
+    mainGui->terrainTool->x(tool_settings_x);
+    mainGui->terrainTool->y(tool_settings_y);
     mainGui->terrainTool->show();
     break;
   case editing_mode::flatten_blur:
-    mainGui->flattenTool->x((const float)tool_settings_x);
-    mainGui->flattenTool->y((const float)tool_settings_y);
+    mainGui->flattenTool->x(tool_settings_x);
+    mainGui->flattenTool->y(tool_settings_y);
     mainGui->flattenTool->show();
     break;
   case editing_mode::paint:
-    mainGui->texturingTool->x((const float)tool_settings_x);
-    mainGui->texturingTool->y((const float)tool_settings_y);
+    mainGui->texturingTool->x(tool_settings_x);
+    mainGui->texturingTool->y(tool_settings_y);
     mainGui->texturingTool->show();
     break;
   case editing_mode::areaid:
-    mainGui->ZoneIDBrowser->x((const float)tool_settings_x - 230);
-    mainGui->ZoneIDBrowser->y((const float)tool_settings_y);
+    mainGui->ZoneIDBrowser->x(tool_settings_x - 230);
+    mainGui->ZoneIDBrowser->y(tool_settings_y);
     mainGui->ZoneIDBrowser->show();
     break;
   case editing_mode::water:
-    mainGui->guiWater->x((const float)tool_settings_x);
-    mainGui->guiWater->y((const float)tool_settings_y);
+    mainGui->guiWater->x(tool_settings_x);
+    mainGui->guiWater->y(tool_settings_y);
     mainGui->guiWater->show();
     break;
   case editing_mode::mccv:
-    mainGui->shaderTool->x((const float)tool_settings_x);
-    mainGui->shaderTool->y((const float)tool_settings_y);
+    mainGui->shaderTool->x(tool_settings_x);
+    mainGui->shaderTool->y(tool_settings_y);
     mainGui->shaderTool->show();
     break;
   case editing_mode::object:
-    mainGui->objectEditor->x((const float)tool_settings_x - 90.0f);
-    mainGui->objectEditor->y((const float)tool_settings_y);
+    mainGui->objectEditor->x(tool_settings_x - 90.0f);
+    mainGui->objectEditor->y(tool_settings_y);
     mainGui->objectEditor->show();
     mainGui->objectEditor->filename->show();
     mainGui->rotationEditor->x(mainGui->objectEditor->getX() - mainGui->rotationEditor->getW() - 10.0f);
-    mainGui->rotationEditor->y((const float)tool_settings_y);
+    mainGui->rotationEditor->y(tool_settings_y);
   }
-}
 
-void MapView::set_editing_mode (editing_mode mode)
-{
-  change_settings_window (terrainMode, mode);
   terrainMode = mode;
   Environment::getInstance()->view_holelines = (mode == editing_mode::holes);
   mainGui->guiToolbar->IconSelect (mode);
