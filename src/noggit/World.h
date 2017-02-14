@@ -78,8 +78,6 @@ public:
 
   Skies *skies;
 
-  bool autoheight;
-
   //! \todo  Get these managed? ._.
   std::map<int, ModelInstance> mModelInstances;
   std::map<int, WMOInstance> mWMOInstances;
