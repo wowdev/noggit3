@@ -54,12 +54,8 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
 
 void ModelInstance::draw (Frustum const& frustum, bool force_box)
 {
-  /*  float dist = ( pos - gWorld->camera ).length() - model->rad;
-
-  if( dist > 2.0f * gWorld->modeldrawdistance )
-  return;
-  if( CheckUniques( d1 ) )
-  return;*/
+  if(((pos - gWorld->camera).length() - model->rad * sc) >= gWorld->culldistance)
+    return;
 
   if (!frustum.intersectsSphere(pos, model->rad * sc))
     return;
