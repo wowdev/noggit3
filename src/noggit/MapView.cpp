@@ -71,61 +71,6 @@ static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
 static const float SPEED = 200.6f;
 
-int MouseX;
-int MouseY;
-float mh, mv, rh, rv;
-
-float moveratio = 0.1f;
-float rotratio = 0.2f;
-float keyx, keyy, keyz, keyr, keys;
-
-float tool_settings_x;
-float tool_settings_y;
-
-bool MoveObj;
-
-math::vector_3d objMove;
-math::vector_3d objMoveOffset;
-math::vector_3d objRot;
-
-boost::optional<selection_type> lastSelected;
-
-bool TestSelection = false;
-
-bool  leftMouse = false;
-bool  leftClicked = false;
-bool  rightMouse = false;
-bool  painting = false;
-
-// Vars for the ground editing toggle mode
-// store the status of some view settings when
-// the ground editing mode is switched on
-// to restore them if switch back again
-
-bool  alloff = true;
-bool  alloff_models = false;
-bool  alloff_doodads = false;
-bool  alloff_contour = false;
-bool  alloff_wmo = false;
-bool  alloff_detailselect = false;
-bool  alloff_fog = false;
-bool  alloff_terrain = false;
-
-editing_mode terrainMode = editing_mode::ground;
-editing_mode saveterrainMode = terrainMode;
-
-UICursorSwitcher* CursorSwitcher;
-
-bool Saving = false;
-
-UIFrame* LastClicked;
-
-// main GUI object
-UIMapViewGUI* mainGui;
-
-UIFrame* MapChunkWindow;
-UIToggleGroup * gFlagsToggleGroup;
-
 void MapView::set_editing_mode (editing_mode mode)
 {
   mainGui->guiWaterTypeSelector->hide();
@@ -449,7 +394,7 @@ void MapView::createGUI()
 {
   // create main gui object that holds all other gui elements for access ( in the future ;) )
   mainGui = new UIMapViewGUI(this);
-  mainGui->guiCurrentTexture->current_texture->setClickFunc ([] { mainGui->TexturePalette->toggleVisibility(); });
+  mainGui->guiCurrentTexture->current_texture->setClickFunc ([this] { mainGui->TexturePalette->toggleVisibility(); });
 
   mainGui->ZoneIDBrowser->setMapID(gWorld->getMapID());
   mainGui->ZoneIDBrowser->setChangeFunc([this] (int id){ changeZoneIDValue (id); });
@@ -474,7 +419,7 @@ void MapView::createGUI()
   mbar->AddMenu("Assist");
   mbar->AddMenu("Help");
 
-  mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [] { mainGui->scWarning->show(); });
+  mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [this] { mainGui->scWarning->show(); });
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex->saveChanged(); });
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+SHIFT+A Save all", [] { gWorld->mapIndex->saveall(); });
   addHotkey(SDLK_s, MOD_ctrl + MOD_shift, [this] { mainGui->scWarning->show(); });
@@ -484,7 +429,7 @@ void MapView::createGUI()
   mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
   addHotkey (SDLK_j, MOD_shift, [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
   mbar->GetMenu("File")->AddMenuItemSeperator(" ");
-  mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", [] { mainGui->escWarning->show(); });
+  mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", [this] { mainGui->escWarning->show(); });
   addHotkey (SDLK_ESCAPE, MOD_none, [this] { mainGui->escWarning->show(); });
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("selected object");
@@ -504,7 +449,7 @@ void MapView::createGUI()
   addHotkey (SDLK_v, MOD_shift, [this] { insert_last_m2_from_wmv(); });
   mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", [this] { insert_last_wmo_from_wmv(); });
   addHotkey (SDLK_v, MOD_alt, [this] { insert_last_wmo_from_wmv(); });
-  mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", [] { mainGui->HelperModels->show(); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", [this] { mainGui->HelperModels->show(); });
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Current ADT");
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Set Area ID"
                                              , []
@@ -545,7 +490,7 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemToggle("Toolbar", mainGui->guiToolbar->hidden_evil(), true);
 
   mbar->GetMenu("View")->AddMenuItemToggle("Texture palette", mainGui->TexturePalette->hidden_evil(), true);
-  mbar->GetMenu("View")->AddMenuItemButton("Cursor options", [] { mainGui->showCursorSwitcher(); });
+  mbar->GetMenu("View")->AddMenuItemButton("Cursor options", [this] { mainGui->showCursorSwitcher(); });
   mbar->GetMenu("View")->AddMenuItemSeperator("Toggle");
   mbar->GetMenu("View")->AddMenuItemToggle("F1 M2s", &_draw_models);
   addHotkey (SDLK_F1, MOD_none, [this] { _draw_models = !_draw_models; });
@@ -573,7 +518,7 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemToggle("Hole lines always on", &Environment::getInstance()->view_holelines, false);
   mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &Settings::getInstance()->renderModelsWithBox);
 
-  mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [] { mainGui->showHelp(); });
+  mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [this] { mainGui->showHelp(); });
 #if defined(_WIN32) || defined(WIN32)
   mbar->GetMenu("Help")->AddMenuItemButton ( "Manual online"
                                            , []
@@ -679,7 +624,7 @@ void MapView::createGUI()
               {
                 mainGui->objectEditor->copy(*gWorld->GetCurrentSelection());
               }
-            , [] { return terrainMode == editing_mode::object; }
+            , [this] { return terrainMode == editing_mode::object; }
             );
 
   addHotkey ( SDLK_c
@@ -688,32 +633,32 @@ void MapView::createGUI()
               {
                 cursor_type = ++cursor_type % 4;
               }
-            , [] { return terrainMode != editing_mode::object; }
+            , [this] { return terrainMode != editing_mode::object; }
             );
 
   addHotkey (SDLK_v, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos); });
   addHotkey ( SDLK_v
             , MOD_none
             , [this] { mainGui->objectEditor->pasteObject (_cursor_pos); }
-            , [] { return terrainMode == editing_mode::object; }
+            , [this] { return terrainMode == editing_mode::object; }
             );
 
   addHotkey ( SDLK_c
             , MOD_none
             , [] { gWorld->clearVertexSelection(); }
-            , [] { return terrainMode == editing_mode::ground; }
+            , [this] { return terrainMode == editing_mode::ground; }
             );
 
   addHotkey ( SDLK_x
             , MOD_none
-            , [] { mainGui->TexturePalette->toggleVisibility(); }
-            , [] { return terrainMode == editing_mode::paint; }
+            , [this] { mainGui->TexturePalette->toggleVisibility(); }
+            , [this] { return terrainMode == editing_mode::paint; }
             );
 
   addHotkey (SDLK_F4, MOD_shift, [] { Settings::getInstance()->AutoSelectingMode = !Settings::getInstance()->AutoSelectingMode; });
   addHotkey (SDLK_F7, MOD_shift, [] { Environment::getInstance()->view_holelines = !Environment::getInstance()->view_holelines; });
 
-  addHotkey (SDLK_x, MOD_ctrl, [] { mainGui->guidetailInfos->toggleVisibility(); });
+  addHotkey (SDLK_x, MOD_ctrl, [this] { mainGui->guidetailInfos->toggleVisibility(); });
 
   addHotkey (SDLK_i, MOD_none, [this] { mousedir *= -1.f; });
 
@@ -722,7 +667,7 @@ void MapView::createGUI()
   addHotkey (SDLK_o, MOD_none, [this] { movespd *= 0.5f; });
   addHotkey (SDLK_p, MOD_none, [this] { movespd *= 2.0f; });
 
-  addHotkey (SDLK_p, MOD_shift | MOD_ctrl, [] { Saving = true; });
+  addHotkey (SDLK_p, MOD_shift | MOD_ctrl, [this] { Saving = true; });
 
   addHotkey (SDLK_r, MOD_none, [this] { _camera_ah += 180.f; });
 
@@ -741,14 +686,14 @@ void MapView::createGUI()
 
   addHotkey ( SDLK_y
             , MOD_none
-            , [] { mainGui->terrainTool->nextType(); }
-            , [] { return terrainMode == editing_mode::ground; }
+            , [this] { mainGui->terrainTool->nextType(); }
+            , [this] { return terrainMode == editing_mode::ground; }
             );
 
   addHotkey ( SDLK_y
             , MOD_none
-            , [] { mainGui->flattenTool->nextFlattenType(); }
-            , [] { return terrainMode == editing_mode::flatten_blur; }
+            , [this] { mainGui->flattenTool->nextFlattenType(); }
+            , [this] { return terrainMode == editing_mode::flatten_blur; }
             );
 
   addHotkey ( SDLK_u
@@ -951,11 +896,11 @@ void MapView::createGUI()
             , [&] { return terrainMode == editing_mode::object; }
             );
 
-  addHotkey (SDLK_KP_PLUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(0.01f); }, [] { return terrainMode == editing_mode::ground; });
-  addHotkey (SDLK_PLUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(0.01f); }, [] { return terrainMode == editing_mode::ground; });
+  addHotkey (SDLK_KP_PLUS, MOD_alt, [this] { mainGui->terrainTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::ground; });
+  addHotkey (SDLK_PLUS, MOD_alt, [this] { mainGui->terrainTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::ground; });
 
-  addHotkey (SDLK_KP_PLUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(0.01f); }, [] { return terrainMode == editing_mode::flatten_blur; });
-  addHotkey (SDLK_PLUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(0.01f); }, [] { return terrainMode == editing_mode::flatten_blur; });
+  addHotkey (SDLK_KP_PLUS, MOD_alt, [this] { mainGui->flattenTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
+  addHotkey (SDLK_PLUS, MOD_alt, [this] { mainGui->flattenTool->changeRadius(0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
 
   addHotkey ( SDLK_KP_PLUS
             , MOD_alt
@@ -963,7 +908,7 @@ void MapView::createGUI()
               {
                 mainGui->texturingTool->change_radius(0.1f);
               }
-            , [] { return terrainMode == editing_mode::paint; }
+            , [this] { return terrainMode == editing_mode::paint; }
             );
   addHotkey ( SDLK_PLUS
             , MOD_alt
@@ -971,18 +916,18 @@ void MapView::createGUI()
               {
                 mainGui->texturingTool->change_radius(0.1f);
               }
-            , [] { return terrainMode == editing_mode::paint; }
+            , [this] { return terrainMode == editing_mode::paint; }
             );
 
   addHotkey (SDLK_KP_PLUS, MOD_shift, [] { gWorld->fogdistance += 60.0f; });
   addHotkey (SDLK_PLUS, MOD_shift, [] { gWorld->fogdistance += 60.0f; });
 
 
-  addHotkey (SDLK_KP_MINUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(-0.01f); }, [] { return terrainMode == editing_mode::ground; });
-  addHotkey (SDLK_MINUS, MOD_alt, [] { mainGui->terrainTool->changeRadius(-0.01f); }, [] { return terrainMode == editing_mode::ground; });
+  addHotkey (SDLK_KP_MINUS, MOD_alt, [this] { mainGui->terrainTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::ground; });
+  addHotkey (SDLK_MINUS, MOD_alt, [this] { mainGui->terrainTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::ground; });
 
-  addHotkey (SDLK_KP_MINUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(-0.01f); }, [] { return terrainMode == editing_mode::flatten_blur; });
-  addHotkey (SDLK_MINUS, MOD_alt, [] { mainGui->flattenTool->changeRadius(-0.01f); }, [] { return terrainMode == editing_mode::flatten_blur; });
+  addHotkey (SDLK_KP_MINUS, MOD_alt, [this] { mainGui->flattenTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
+  addHotkey (SDLK_MINUS, MOD_alt, [this] { mainGui->flattenTool->changeRadius(-0.01f); }, [this] { return terrainMode == editing_mode::flatten_blur; });
 
   addHotkey ( SDLK_KP_MINUS
             , MOD_alt
@@ -990,7 +935,7 @@ void MapView::createGUI()
               {
                 mainGui->texturingTool->change_radius(-0.1f);
               }
-            , [] { return terrainMode == editing_mode::paint; }
+            , [this] { return terrainMode == editing_mode::paint; }
             );
   addHotkey ( SDLK_MINUS
             , MOD_alt
@@ -998,7 +943,7 @@ void MapView::createGUI()
               {
                 mainGui->texturingTool->change_radius(-0.1f);
               }
-            , [] { return terrainMode == editing_mode::paint; }
+            , [this] { return terrainMode == editing_mode::paint; }
             );
 
   addHotkey (SDLK_KP_MINUS, MOD_shift, [] { gWorld->fogdistance -= 60.0f; });
@@ -1008,11 +953,11 @@ void MapView::createGUI()
   addHotkey (SDLK_2, MOD_shift, [this] { movespd = 50.0f; });
   addHotkey (SDLK_3, MOD_shift, [this] { movespd = 200.0f; });
   addHotkey (SDLK_4, MOD_shift, [this] { movespd = 800.0f; });
-  addHotkey (SDLK_1, MOD_alt, [] { mainGui->texturingTool->set_brush_level(0.0f); });
-  addHotkey (SDLK_2, MOD_alt, [] { mainGui->texturingTool->set_brush_level(255.0f* 0.25f); });
-  addHotkey (SDLK_3, MOD_alt, [] { mainGui->texturingTool->set_brush_level(255.0f* 0.5f); });
-  addHotkey (SDLK_4, MOD_alt, [] { mainGui->texturingTool->set_brush_level(255.0f* 0.75f); });
-  addHotkey (SDLK_5, MOD_alt, [] { mainGui->texturingTool->set_brush_level(255.0f); });
+  addHotkey (SDLK_1, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(0.0f); });
+  addHotkey (SDLK_2, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.25f); });
+  addHotkey (SDLK_3, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.5f); });
+  addHotkey (SDLK_4, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f* 0.75f); });
+  addHotkey (SDLK_5, MOD_alt, [this] { mainGui->texturingTool->set_brush_level(255.0f); });
 
   addHotkey (SDLK_1, MOD_none, [this] { set_editing_mode (editing_mode::ground); });
   addHotkey (SDLK_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); });
