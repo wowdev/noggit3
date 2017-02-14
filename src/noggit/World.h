@@ -104,6 +104,8 @@ public:
 
   void tick(float dt);
   void draw ( math::vector_3d const& cursor_pos
+            , math::vector_4d const& cursor_color
+            , int cursor_type
             , float brushRadius
             , float hardness
             , bool highlightPaintableChunks
@@ -187,7 +189,7 @@ public:
     void for_tile_at(math::vector_3d const& pos, Fun&&);
 
   void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
-  void changeShader(math::vector_3d const& pos, float change, float radius, bool editMode);
+  void changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
   void flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, int flattenType, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
   void blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType);
   bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);

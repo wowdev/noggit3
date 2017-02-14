@@ -91,6 +91,7 @@ public:
             , bool draw_water_overlay
             , bool draw_areaid_overlay
             , bool draw_wireframe_overlay
+            , int cursor_type
             );
   //! \todo only this function should be public, all others should be called from it
 
@@ -98,7 +99,7 @@ public:
   void intersect (math::ray const&, selection_result*);
   void drawLines (opengl::scoped::use_program&, Frustum const&);
   void drawTextures();
-  bool ChangeMCCV(math::vector_3d const& pos, float change, float radius, bool editMode);
+  bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
 
   ChunkWater* liquid_chunk() const;
 

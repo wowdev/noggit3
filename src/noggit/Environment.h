@@ -29,12 +29,6 @@ public:
   int screenX;
   int screenY;
 
-  float cursorColorR;
-  float cursorColorG;
-  float cursorColorB;
-  float cursorColorA;
-  int cursorType;
-
   int groundBrushType;
 
   float minRotation;

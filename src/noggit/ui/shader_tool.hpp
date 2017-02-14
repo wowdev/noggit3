@@ -13,7 +13,7 @@ namespace ui
   class shader_tool : public UIWindow
   {
   public:
-    shader_tool(float x, float y, bool tablet);
+    shader_tool(float x, float y, bool tablet, math::vector_4d& color);
 
     void changeShader (math::vector_3d const& pos, float dt, bool add);
 
@@ -29,9 +29,7 @@ namespace ui
     
     float _radius;
     float _speed;
-    float& _red;
-    float& _green;
-    float& _blue;
+    math::vector_4d& _color;
 
     bool _tablet;
 

@@ -125,17 +125,12 @@ namespace
       gl.end();
     }
   }
-  void render_sphere (::math::vector_3d const& position, float radius)
+  void render_sphere (::math::vector_3d const& position, float radius, math::vector_4d const& color)
   {
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth_test;
     opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> lighting;
 
-    //! \todo This should be passed in!
-    gl.color4f ( Environment::getInstance()->cursorColorR
-               , Environment::getInstance()->cursorColorG
-               , Environment::getInstance()->cursorColorB
-               , Environment::getInstance()->cursorColorA
-               );
+    gl.color4f(color.x, color.y, color.z, color.x);
 
     opengl::scoped::matrix_pusher matrix;
 
@@ -184,6 +179,7 @@ namespace
 
   void render_disk( ::math::vector_3d const& position
                   , float radius
+                  , math::vector_4d const& color
                   , bool stipple = false
                   , math::radians const& angle = math::radians(0.0f)
                   , math::radians const& orientation = math::radians(0.0f)
@@ -200,12 +196,7 @@ namespace
       gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::translation, position).transposed());
       gl.multMatrixf (math::matrix_4x4 (math::matrix_4x4::rotation_xyz, math::degrees::vec3 {math::degrees (90.0f), math::degrees (0.0f), math::degrees (0.0f)}).transposed());
 
-      //! \todo This should be passed in!
-      gl.color4f ( Environment::getInstance()->cursorColorR
-                 , Environment::getInstance()->cursorColorG
-                 , Environment::getInstance()->cursorColorB
-                 , Environment::getInstance()->cursorColorA
-                 );
+      gl.color4f(color.x, color.y, color.z, color.x);
 
       draw_disk (radius, stipple, angle, orientation);
     }
@@ -515,6 +506,8 @@ void World::setupFog()
 }
 
 void World::draw ( math::vector_3d const& cursor_pos
+                 , math::vector_4d const& cursor_color
+                 , int cursor_type
                  , float brushRadius
                  , float hardness
                  , bool highlightPaintableChunks
@@ -636,6 +629,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , draw_water_overlay
                  , draw_areaid_overlay
                  , draw_wireframe
+                 , cursor_type
                  );
     }
   }
@@ -656,21 +650,21 @@ void World::draw ( math::vector_3d const& cursor_pos
     }
     else
     {
-      if (Environment::getInstance()->cursorType == 1)
+      if (cursor_type == 1)
       {
-        render_disk(cursor_pos, brushRadius);
+        render_disk(cursor_pos, brushRadius, cursor_color);
         if (innerRadius >= 0.01f)
         {
-          render_disk(cursor_pos, brushRadius * innerRadius, true);
+          render_disk(cursor_pos, brushRadius * innerRadius, cursor_color, true);
         }
         if (hardness >= 0.01f)
         {
-          render_disk(cursor_pos, brushRadius * hardness, true);
+          render_disk(cursor_pos, brushRadius * hardness, cursor_color, true);
         }
       }
-      else if (Environment::getInstance()->cursorType == 2)
+      else if (cursor_type == 2)
       {
-        render_sphere(cursor_pos, brushRadius);
+        render_sphere(cursor_pos, brushRadius, cursor_color);
       }
     }
     if (angled_mode && !use_ref_pos)
@@ -688,7 +682,7 @@ void World::draw ( math::vector_3d const& cursor_pos
 
     if (use_ref_pos)
     {
-      render_sphere(ref_pos, 1.0f);
+      render_sphere(ref_pos, 1.0f, cursor_color);
 
       math::vector_3d pos = cursor_pos;
 
@@ -697,14 +691,14 @@ void World::draw ( math::vector_3d const& cursor_pos
         // orient + 90.0f because of the rotation done in render_disk
         math::degrees a(angle), o(orientation+90.0f);
         pos.y = misc::angledHeight(ref_pos, pos, a, math::degrees(orientation));
-        render_disk(pos, brushRadius, false, a, o);
+        render_disk(pos, brushRadius, cursor_color, false, a, o);
         render_line(ref_pos, cursor_pos);
         render_line(ref_pos, pos);
       }
       else
       {
         pos.y = ref_pos.y;
-        render_disk(pos, brushRadius);
+        render_disk(pos, brushRadius, cursor_color);
       }
 
       render_line(cursor_pos, pos);
@@ -732,7 +726,7 @@ void World::draw ( math::vector_3d const& cursor_pos
     gl.end();
 
     gl.color3f(0.0f, 0.0f, 1.0f);
-    render_sphere(vertexCenter(), 2.0f);
+    render_sphere(vertexCenter(), 2.0f, cursor_color);
     gl.color3f(1.0f, 1.0f, 1.0f);
   }
 
@@ -1157,13 +1151,13 @@ template<typename Fun, typename Post>
 }
 
 
-void World::changeShader(math::vector_3d const& pos, float change, float radius, bool editMode)
+void World::changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
 {
   for_all_chunks_in_range
     ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        return chunk->ChangeMCCV(pos, change, radius, editMode);
+        return chunk->ChangeMCCV(pos, color, change, radius, editMode);
       }
     );
 }

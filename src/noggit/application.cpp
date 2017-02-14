@@ -146,29 +146,6 @@ void Noggit::initEnv()
   }
 #endif
 
-  // init
-  Environment::getInstance()->cursorColorR = 1.0f;
-  Environment::getInstance()->cursorColorG = 1.0f;
-  Environment::getInstance()->cursorColorB = 1.0f;
-  Environment::getInstance()->cursorColorA = 1.0f;
-  Environment::getInstance()->cursorType = 1;
-
-  // load cursor settings
-  if (boost::filesystem::exists("noggit.conf"))
-  {
-    ConfigFile myConfigfile = ConfigFile("noggit.conf");
-    if (myConfigfile.keyExists("RedColor") && myConfigfile.keyExists("GreenColor") && myConfigfile.keyExists("BlueColor") && myConfigfile.keyExists("AlphaColor"))
-    {
-      Environment::getInstance()->cursorColorR = myConfigfile.read<float>("RedColor");
-      Environment::getInstance()->cursorColorG = myConfigfile.read<float>("GreenColor");
-      Environment::getInstance()->cursorColorB = myConfigfile.read<float>("BlueColor");
-      Environment::getInstance()->cursorColorA = myConfigfile.read<float>("AlphaColor");
-    }
-
-    if (myConfigfile.keyExists("CursorType"))
-      Environment::getInstance()->cursorType = myConfigfile.read<int>("CursorType");
-  }
-
   Settings::getInstance();
   Project::getInstance();
   Environment::getInstance();

@@ -7,27 +7,7 @@
 
 #include <noggit/World.h>
 
-void setRed(float f)
-{
-  Environment::getInstance()->cursorColorR = f;
-}
-
-void setGreen(float f)
-{
-  Environment::getInstance()->cursorColorG = f;
-}
-
-void setBlue(float f)
-{
-  Environment::getInstance()->cursorColorB = f;
-}
-
-void setAlpha(float f)
-{
-  Environment::getInstance()->cursorColorA = f;
-}
-
-UICursorSwitcher::UICursorSwitcher()
+UICursorSwitcher::UICursorSwitcher(math::vector_4d& color, int& cursor_type)
   : UICloseWindow ( (float)video.xres() / 2.0f - 290.f / 2.0f
                   , (float)video.yres() / 2.0f - 250.f / 2.0f
                   , 290.f
@@ -39,32 +19,32 @@ UICursorSwitcher::UICursorSwitcher()
   float leftMargin = 10.0f;
   float SliderWidth = width() - (leftMargin * 2);
 
-  auto Toggle = new UIToggleGroup(&Environment::getInstance()->cursorType);
+  auto Toggle = new UIToggleGroup(&cursor_type);
   addChild(new UICheckBox(leftMargin, 30.0f, "Cursor - Disk", Toggle, 1));
   addChild(new UICheckBox(leftMargin + 150.0f, 30.0f, "Cursor - Sphere", Toggle, 2));
   addChild(new UICheckBox(leftMargin, 60.0f, "Cursor - Triangle", Toggle, 3));
   addChild(new UICheckBox(leftMargin + 150.0f, 60.0f, "Cursor - None", Toggle, 0));
-  Toggle->Activate(Environment::getInstance()->cursorType);
+  Toggle->Activate(cursor_type);
 
-  auto RedColorSlider = new UISlider(leftMargin, 110.0f, SliderWidth, 1.0f, 0.00001f);
+  auto RedColorSlider = new UISlider(leftMargin, 110.0f, SliderWidth, 1.0f, 0.0f);
   RedColorSlider->setText("Red Channel: ");
-  RedColorSlider->setValue(Environment::getInstance()->cursorColorR);
-  RedColorSlider->setFunc(setRed);
+  RedColorSlider->setValue(color.x);
+  RedColorSlider->setFunc([&](float f) { color.x = f; });
 
-  auto GreenColorSlider = new UISlider(leftMargin, 150.0f, SliderWidth, 1.0f, 0.00001f);
+  auto GreenColorSlider = new UISlider(leftMargin, 150.0f, SliderWidth, 1.0f, 0.0f);
   GreenColorSlider->setText("Green Channel: ");
-  GreenColorSlider->setValue(Environment::getInstance()->cursorColorG);
-  GreenColorSlider->setFunc(setGreen);
+  GreenColorSlider->setValue(color.y);
+  GreenColorSlider->setFunc([&](float f) { color.y = f; });
 
-  auto BlueColorSlider = new UISlider(leftMargin, 190.0f, SliderWidth, 1.0f, 0.00001f);
+  auto BlueColorSlider = new UISlider(leftMargin, 190.0f, SliderWidth, 1.0f, 0.0f);
   BlueColorSlider->setText("Blue Channel: ");
-  BlueColorSlider->setValue(Environment::getInstance()->cursorColorB);
-  BlueColorSlider->setFunc(setBlue);
+  BlueColorSlider->setValue(color.z);
+  BlueColorSlider->setFunc([&](float f) { color.z = f; });
 
-  auto AlphaColorSlider = new UISlider(leftMargin, 230.0f, SliderWidth, 1.0f, 0.00001f);
+  auto AlphaColorSlider = new UISlider(leftMargin, 230.0f, SliderWidth, 1.0f, 0.0f);
   AlphaColorSlider->setText("Alpha Channel: ");
-  AlphaColorSlider->setValue(Environment::getInstance()->cursorColorA);
-  AlphaColorSlider->setFunc(setAlpha);
+  AlphaColorSlider->setValue(color.w);
+  AlphaColorSlider->setFunc([&](float f) { color.w = f; });
 
   addChild(RedColorSlider);
   addChild(GreenColorSlider);

@@ -817,8 +817,7 @@ void MapView::createGUI()
             , MOD_shift
             , [this]
               {
-                Environment::getInstance()->cursorType++;
-                Environment::getInstance()->cursorType %= 4;
+                cursor_type = ++cursor_type % 4;
               }
             , [] { return terrainMode != editing_mode::object; }
             );
@@ -1213,6 +1212,24 @@ MapView::MapView(float _camera_ah0, float _camera_av0, math::vector_3d camera_lo
 {
   LastClicked = nullptr;
 
+  // load cursor settings
+  if (boost::filesystem::exists("noggit.conf"))
+  {
+    ConfigFile myConfigfile = ConfigFile("noggit.conf");
+    if (myConfigfile.keyExists("RedColor") && myConfigfile.keyExists("GreenColor") && myConfigfile.keyExists("BlueColor") && myConfigfile.keyExists("AlphaColor"))
+    {
+      cursor_color.x = myConfigfile.read<float>("RedColor");
+      cursor_color.y = myConfigfile.read<float>("GreenColor");
+      cursor_color.z = myConfigfile.read<float>("BlueColor");
+      cursor_color.w = myConfigfile.read<float>("AlphaColor");
+    }
+
+    if (myConfigfile.keyExists("CursorType"))
+    {
+      cursor_type = myConfigfile.read<int>("CursorType");
+    }      
+  }
+
   moving = strafing = updown = lookat = turn = 0.0f;
 
   mousedir = -1.0f;
@@ -1270,7 +1287,7 @@ void MapView::tick(float t, float dt)
   // write some stuff into infos window for debuging
   std::stringstream appinfoText;
   appinfoText << "Project Path: " << Project::getInstance()->getPath() << std::endl;
-  appinfoText << "Current cursor: " << Environment::getInstance()->cursorType << std::endl;
+  appinfoText << "Current cursor: " << cursor_type << std::endl;
   mainGui->guiappInfo->setText(appinfoText.str());
 #ifdef _WIN32
   if (app.tabletActive && Settings::getInstance()->tabletMode)
@@ -1919,6 +1936,8 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
   }
 
   gWorld->draw ( _cursor_pos
+               , cursor_color
+               , cursor_type
                , radius
                , hardness
                , mainGui->texturingTool->highlight_paintable_chunks()

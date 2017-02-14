@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <math/vector_4d.hpp>
 #include <noggit/AppState.h>
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
@@ -68,6 +69,9 @@ private:
   void checkWaterSave();
 
 public:
+  math::vector_4d cursor_color = math::vector_4d(1.0f, 1.0f, 1.0f, 1.0f);
+  int cursor_type = 1;
+
   MapView(float ah0, float av0, math::vector_3d camera_lookat);
   ~MapView();
 
