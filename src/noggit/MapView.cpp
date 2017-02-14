@@ -280,127 +280,29 @@ void InsertObject(int id)
 {
   //! \todo Beautify.
 
-  // Test if there is an selection
   if (!gWorld->HasSelection())
     return;
-  // the list of the models to import
-  std::vector<std::string> m2s_to_add;
-  std::vector<std::string> wmos_to_add;
 
-  // the import file
-  std::string importFile;
+  std::string m2_to_add;
 
-  const char* filesToAdd[15] = { "", "", "World\\Scale\\humanmalescale.m2", "World\\Scale\\50x50.m2", "World\\Scale\\100x100.m2", "World\\Scale\\250x250.m2", "World\\Scale\\500x500.m2", "World\\Scale\\1000x1000.m2", "World\\Scale\\50yardradiusdisc.m2", "World\\Scale\\200yardradiusdisc.m2", "World\\Scale\\777yardradiusdisc.m2", "World\\Scale\\50yardradiussphere.m2", "World\\Scale\\200yardradiussphere.m2", "World\\Scale\\777yardradiussphere.m2", "" };
+  const char* filesToAdd[15] = { ""
+                                 , ""
+                                 , "World\\Scale\\humanmalescale.m2"
+                                 , "World\\Scale\\50x50.m2"
+                                 , "World\\Scale\\100x100.m2"
+                                 , "World\\Scale\\250x250.m2"
+                                 , "World\\Scale\\500x500.m2"
+                                 , "World\\Scale\\1000x1000.m2"
+                                 , "World\\Scale\\50yardradiusdisc.m2"
+                                 , "World\\Scale\\200yardradiusdisc.m2"
+                                 , "World\\Scale\\777yardradiusdisc.m2"
+                                 , "World\\Scale\\50yardradiussphere.m2"
+                                 , "World\\Scale\\200yardradiussphere.m2"
+                                 , "World\\Scale\\777yardradiussphere.m2"
+                                 , ""
+  };
 
-  // MODELINSERT FROM TEXTFILE
-  // is a source file set in config file?
-
-
-  if (id == 0 || id == 14 || id == 15)
-  {
-    importFile = Settings::getInstance()->wmvLogFile;
-  }
-  else if (id == 1 || id > 99)
-  {
-    importFile = Settings::getInstance()->importFile;
-  }
-  else
-  {
-    m2s_to_add.push_back(filesToAdd[id]);
-  }
-
-  LogDebug << id << "-" << importFile << std::endl;
-
-  std::string lastModel;
-  std::string lastWMO;
-
-  if (importFile != "")
-  {
-    size_t foundString;
-    std::string line;
-    std::string findThis;
-    std::ifstream fileReader(importFile.c_str());
-    int counter = 1;
-    if (fileReader.is_open())
-    {
-      while (!fileReader.eof())
-      {
-        getline(fileReader, line);
-        std::transform(line.begin(), line.end(), line.begin(), ::tolower);
-
-        if (line.find(".m2") != std::string::npos || line.find(".mdx") != std::string::npos)
-        {
-          if (id < 99 || (id - 99) == counter)
-          {
-            if (id == 14)
-            {
-              // M2 inside line
-              // is it the modelviewer log then cut the log messages out
-              findThis = "loading model: ";
-              foundString = line.find(findThis);
-              if (foundString != std::string::npos)
-              {
-                // cut path
-                line = line.substr(foundString + findThis.size());
-              }
-              else
-              {
-                // invalid line
-                continue;
-              }
-            }
-            // swap mdx to m2
-            size_t found = line.rfind(".mdx");
-            if (found != std::string::npos)
-            {
-              line.replace(found, 4, ".m2");
-            }
-
-            line = line.substr(0, line.find(".m2") + 3);
-
-            m2s_to_add.push_back(line);
-            lastModel = line;
-          }
-          counter++;
-        }
-        else if (line.find(".wmo") != std::string::npos)
-        {
-          if (id < 99 || (id - 99) == counter)
-          {
-            if (id == 15)
-            {
-              // WMO inside line
-              findThis = "loading wmo ";
-              foundString = line.find(findThis);
-              // is it the modelviewer log then cut the log messages out
-              if (foundString != std::string::npos)
-              {
-                // cut path
-                line = line.substr(foundString + findThis.size());
-              }
-              else
-              {
-                // invalid line
-                continue;
-              }
-            }
-
-            line = line.substr(0, line.find(".wmo") + 4);
-            wmos_to_add.push_back(line);
-            lastWMO = line;
-          }
-          counter++;
-        }
-      }
-      fileReader.close();
-    }
-    else
-    {
-      // file not exist, no rights ore other error
-      LogError << importFile << std::endl;
-    }
-  }
-
+  m2_to_add = filesToAdd[id];
 
   math::vector_3d selectionPosition;
   switch (gWorld->GetCurrentSelection()->which())
@@ -416,65 +318,12 @@ void InsertObject(int id)
     break;
   }
 
-
-  if (id == 14)
+  if (!MPQFile::exists(m2_to_add))
   {
-    LogDebug << "M2 Problem 14:" << lastModel << " - " << id << std::endl;
-    if (lastModel != "")
-    {
-      if (!MPQFile::exists(lastModel))
-      {
-        LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
-      }
-      else
-      {
-        gWorld->addM2(lastModel, selectionPosition, false);
-      }
-    }
+    LogError << "Failed adding " << m2_to_add << ". It was not in any MPQ." << std::endl;
   }
-  else if (id == 15)
-  {
-    LogDebug << "Wmo Problem 15:" << lastModel << " - " << id << std::endl;
-    if (lastWMO != "")
-    {
-      if (!MPQFile::exists(lastWMO))
-      {
-        LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
-      }
-      else
-      {
-        gWorld->addWMO(lastWMO, selectionPosition, false);
-      }
-    }
-  }
-  else
-  {
 
-    for (std::vector<std::string>::iterator it = wmos_to_add.begin(); it != wmos_to_add.end(); ++it)
-    {
-
-      if (!MPQFile::exists(*it))
-      {
-        LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
-        continue;
-      }
-
-      gWorld->addWMO(*it, selectionPosition, false);
-    }
-
-    for (std::vector<std::string>::iterator it = m2s_to_add.begin(); it != m2s_to_add.end(); ++it)
-    {
-
-      if (!MPQFile::exists(*it))
-      {
-
-        LogError << "Failed adding " << *it << ". It was not in any MPQ." << std::endl;
-        continue;
-      }
-
-      gWorld->addM2(*it, selectionPosition, false);
-    }
-  }
+  gWorld->addM2(m2_to_add, selectionPosition, false);
   //! \todo Memoryleak: These models will never get deleted.
 }
 
