@@ -12,7 +12,6 @@
 #include <noggit/Video.h>
 #include <noggit/multimap_with_normalized_key.hpp>
 #include <noggit/wmo_liquid.hpp>
-#include <opengl/call_list.hpp>
 
 #include <boost/optional.hpp>
 
