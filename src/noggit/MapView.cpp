@@ -478,6 +478,169 @@ void InsertObject(int id)
   //! \todo Memoryleak: These models will never get deleted.
 }
 
+void insert_last_m2_from_wmv()
+{
+  //! \todo Beautify.
+
+  // Test if there is an selection
+  if (!gWorld->HasSelection())
+    return;
+
+  std::string importFile (Settings::getInstance()->wmvLogFile);
+
+  std::string lastModel;
+
+  size_t foundString;
+  std::string line;
+  std::string findThis;
+  std::ifstream fileReader(importFile.c_str());
+  if (fileReader.is_open())
+  {
+    while (!fileReader.eof())
+    {
+      getline(fileReader, line);
+      std::transform(line.begin(), line.end(), line.begin(), ::tolower);
+
+      if (line.find(".m2") != std::string::npos || line.find(".mdx") != std::string::npos)
+      {
+        // M2 inside line
+        // is it the modelviewer log then cut the log messages out
+        findThis = "loading model: ";
+        foundString = line.find(findThis);
+        if (foundString != std::string::npos)
+        {
+          // cut path
+          line = line.substr(foundString + findThis.size());
+        }
+        else
+        {
+          // invalid line
+          continue;
+        }
+      }
+      // swap mdx to m2
+      size_t found = line.rfind(".mdx");
+      if (found != std::string::npos)
+      {
+        line.replace(found, 4, ".m2");
+      }
+
+      lastModel = line.substr(0, line.find(".m2") + 3);
+    }
+  }
+  else
+  {
+    // file not exist, no rights ore other error
+    LogError << importFile << std::endl;
+  }
+
+  math::vector_3d selectionPosition;
+  switch (gWorld->GetCurrentSelection()->which())
+  {
+  case eEntry_Model:
+    selectionPosition = boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->pos;
+    break;
+  case eEntry_WMO:
+    selectionPosition = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->pos;
+    break;
+  case eEntry_MapChunk:
+    selectionPosition = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).position;
+    break;
+  }
+
+  if (lastModel != "")
+  {
+    if (!MPQFile::exists(lastModel))
+    {
+      LogError << "Failed adding " << lastModel << ". It was not in any MPQ." << std::endl;
+    }
+    else
+    {
+      gWorld->addM2(lastModel, selectionPosition, false);
+    }
+  }
+}
+
+void insert_last_wmo_from_wmv()
+{
+  //! \todo Beautify.
+
+  if (!gWorld->HasSelection())
+    return;
+
+  std::string importFile (Settings::getInstance()->wmvLogFile);
+
+  std::string lastWMO;
+
+  size_t foundString;
+  std::string line;
+  std::string findThis;
+  std::ifstream fileReader(importFile.c_str());
+  if (fileReader.is_open())
+  {
+    while (!fileReader.eof())
+    {
+      getline(fileReader, line);
+      std::transform(line.begin(), line.end(), line.begin(), ::tolower);
+
+      if (line.find(".wmo") != std::string::npos)
+      {
+        // WMO inside line
+        findThis = "loading wmo ";
+        foundString = line.find(findThis);
+        // is it the modelviewer log then cut the log messages out
+        if (foundString != std::string::npos)
+        {
+          // cut path
+          line = line.substr(foundString + findThis.size());
+        }
+        else
+        {
+          // invalid line
+          continue;
+        }
+
+        lastWMO = line.substr(0, line.find(".wmo") + 4);
+      }
+    }
+  }
+  else
+  {
+    // file not exist, no rights ore other error
+    LogError << importFile << std::endl;
+  }
+
+
+  math::vector_3d selectionPosition;
+  switch (gWorld->GetCurrentSelection()->which())
+  {
+  case eEntry_Model:
+    selectionPosition = boost::get<selected_model_type> (*gWorld->GetCurrentSelection())->pos;
+    break;
+  case eEntry_WMO:
+    selectionPosition = boost::get<selected_wmo_type> (*gWorld->GetCurrentSelection())->pos;
+    break;
+  case eEntry_MapChunk:
+    selectionPosition = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).position;
+    break;
+  }
+
+  if (lastWMO != "")
+  {
+    if (!MPQFile::exists(lastWMO))
+    {
+      LogError << "Failed adding " << lastWMO << ". It was not in any MPQ." << std::endl;
+    }
+    else
+    {
+      gWorld->addWMO(lastWMO, selectionPosition, false);
+    }
+  }
+  //! \todo Memoryleak: These models will never get deleted.
+}
+
+
+
 void MapView::changeZoneIDValue (int set)
 {
   Environment::getInstance()->selectedAreaID = set;
@@ -544,8 +707,8 @@ void MapView::createGUI()
 
 
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Model");
-  mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", [] { InsertObject (14); });
-  mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", [] { InsertObject (15); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Last M2 from MV", [] { insert_last_m2_from_wmv(); });
+  mbar->GetMenu("Assist")->AddMenuItemButton("Last WMO from MV", [] { insert_last_wmo_from_wmv(); });
   mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", [] { mainGui->HelperModels->show(); });
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Current ADT");
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Set Area ID"
@@ -733,8 +896,8 @@ void MapView::createGUI()
             , [] { return terrainMode != editing_mode::object; }
             );
 
-  addHotkey (SDLK_v, MOD_shift, [] { InsertObject (14); });
-  addHotkey (SDLK_v, MOD_alt, [] { InsertObject (15); });
+  addHotkey (SDLK_v, MOD_shift, [] { insert_last_m2_from_wmv(); });
+  addHotkey (SDLK_v, MOD_alt, [] { insert_last_wmo_from_wmv(); });
   addHotkey (SDLK_v, MOD_ctrl, [this] { mainGui->objectEditor->pasteObject (_cursor_pos); });
   addHotkey ( SDLK_v
             , MOD_none
