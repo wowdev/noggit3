@@ -38,10 +38,12 @@ void UIGradient::render() const
 
     if (clickable())
     {
+      gl.begin(GL_TRIANGLE_STRIP);
       gl.color4fv(&ClickColor.x);
-      gl.begin(GL_LINE);
-      gl.vertex2f(width() * value, 0.0f);
-      gl.vertex2f(width() * value, height());
+      gl.vertex2f(width()* value, height());
+      gl.vertex2f(width()* value, 0.0f);
+      gl.vertex2f(width()* value - 1.5f, height());
+      gl.vertex2f(width()* value - 1.5f, 0.0f);
       gl.end();
     }
   }
