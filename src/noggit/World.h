@@ -76,10 +76,6 @@ public:
   float fogdistance;
   float culldistance;
 
-  float minX;
-  float maxX;
-  float minY;
-  float maxY;
   float zoom;
 
   Skies *skies;

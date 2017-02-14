@@ -71,7 +71,7 @@ public:
                  , Frustum const&
                  );
   void drawWater (opengl::scoped::use_program& water_shader);
-  void drawTextures();
+  void drawTextures (float minX, float minY, float maxX, float maxY);
   void drawMFBO (opengl::scoped::use_program&);
 
   bool GetVertex(float x, float z, math::vector_3d *V);

@@ -273,10 +273,6 @@ World::World(const std::string& name)
   , basename(name)
   , fogdistance(777.0f)
   , culldistance(fogdistance)
-  , minX(0.0f)
-  , maxX(0.0f)
-  , minY(0.0f)
-  , maxY(0.0f)
   , zoom(0.25f)
   , skies(nullptr)
   , autoheight(false)
@@ -1038,10 +1034,10 @@ void World::drawTileMode ( float /*ah*/
     opengl::scoped::matrix_pusher const matrix;
     gl.translatef(-camera_pos.x / CHUNKSIZE, -camera_pos.z / CHUNKSIZE, 0);
 
-    minX = camera_pos.x / CHUNKSIZE - 2.0f*video.ratio() / zoom;
-    maxX = camera_pos.x / CHUNKSIZE + 2.0f*video.ratio() / zoom;
-    minY = camera_pos.z / CHUNKSIZE - 2.0f / zoom;
-    maxY = camera_pos.z / CHUNKSIZE + 2.0f / zoom;
+    float minX = camera_pos.x / CHUNKSIZE - 2.0f*video.ratio() / zoom;
+    float maxX = camera_pos.x / CHUNKSIZE + 2.0f*video.ratio() / zoom;
+    float minY = camera_pos.z / CHUNKSIZE - 2.0f / zoom;
+    float maxY = camera_pos.z / CHUNKSIZE + 2.0f / zoom;
 
     gl.enableClientState(GL_COLOR_ARRAY);
     gl.disableClientState(GL_NORMAL_ARRAY);
@@ -1051,7 +1047,7 @@ void World::drawTileMode ( float /*ah*/
 
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
-      tile->drawTextures();
+      tile->drawTextures (minX, minY, maxX, maxY);
     }
 
     gl.disableClientState(GL_COLOR_ARRAY);
@@ -1338,10 +1334,10 @@ void World::saveMap()
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   gl.readBuffer(GL_BACK);
 
-  minX = -64 * 16;
-  maxX = 64 * 16;
-  minY = -64 * 16;
-  maxY = 64 * 16;
+  float minX = -64 * 16;
+  float maxX = 64 * 16;
+  float minY = -64 * 16;
+  float maxY = 64 * 16;
 
   gl.enableClientState(GL_COLOR_ARRAY);
   gl.disableClientState(GL_NORMAL_ARRAY);
@@ -1368,7 +1364,7 @@ void World::saveMap()
       gl.translatef(x * -16.0f - 8.0f, y * -16.0f - 8.0f, 0.0f);
 
 
-      ATile->drawTextures();
+      ATile->drawTextures (minX, minY, maxX, maxY);
       gl.readPixels(video.xres() / 2 - 128, video.yres() / 2 - 128, 256, 256, GL_RGB, GL_UNSIGNED_BYTE, image);
 
       std::stringstream ss;
