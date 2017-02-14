@@ -630,10 +630,10 @@ void MapView::createGUI()
   mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [] { mainGui->scWarning->show(); });
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex->saveChanged(); });
   mbar->GetMenu("File")->AddMenuItemButton("CTRL+SHIFT+A Save all", [] { gWorld->mapIndex->saveall(); });
-  addHotkey(SDLK_s, MOD_ctrl + MOD_shift, [this] { savecurrent(); });
-  addHotkey(SDLK_a, MOD_ctrl + MOD_shift, [this] { saveall(); });
-  addHotkey (SDLK_s, MOD_ctrl, [this] { save(); });
-  addHotkey (SDLK_s, MOD_meta, [this] { save(); });
+  addHotkey(SDLK_s, MOD_ctrl + MOD_shift, [this] { mainGui->scWarning->show(); });
+  addHotkey(SDLK_a, MOD_ctrl + MOD_shift, [this] { gWorld->mapIndex->saveall(); });
+  addHotkey (SDLK_s, MOD_ctrl, [this] { gWorld->mapIndex->saveChanged(); });
+  addHotkey (SDLK_s, MOD_meta, [this] { gWorld->mapIndex->saveChanged(); });
   mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
   addHotkey (SDLK_j, MOD_shift, [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
   //  mbar->GetMenu( "File" )->AddMenuItemSeperator( "Import and Export" );
@@ -641,12 +641,15 @@ void MapView::createGUI()
   // mbar->GetMenu( "File" )->AddMenuItemButton( "Import heightmap", importPNG, 1 );
   mbar->GetMenu("File")->AddMenuItemSeperator(" ");
   mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", [] { mainGui->escWarning->show(); });
-  addHotkey (SDLK_ESCAPE, MOD_none, [this] { quitask(); });
+  addHotkey (SDLK_ESCAPE, MOD_none, [this] { mainGui->escWarning->show(); });
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("selected object");
   mbar->GetMenu("Edit")->AddMenuItemButton("DEL delete", DeleteSelectedObject);
+  addHotkey (SDLK_DELETE, MOD_none, [] { DeleteSelectedObject(); });
   mbar->GetMenu("Edit")->AddMenuItemButton("CTRL + R reset rotation", ResetSelectedObjectRotation);
+  addHotkey (SDLK_r, MOD_ctrl, [] { ResetSelectedObjectRotation(); });
   mbar->GetMenu("Edit")->AddMenuItemButton("PAGE DOWN set to ground", SnapSelectedObjectToGround);
+  addHotkey (SDLK_PAGEDOWN, MOD_none, [] { SnapSelectedObjectToGround(); });
 
   mbar->GetMenu("Edit")->AddMenuItemSeperator("Options");
   mbar->GetMenu("Edit")->AddMenuItemToggle("Auto select mode", &Settings::getInstance()->AutoSelectingMode, false);
@@ -774,15 +777,11 @@ void MapView::createGUI()
               }
             );
 
-  addHotkey (SDLK_PAGEDOWN, MOD_none, [] { SnapSelectedObjectToGround(); });
-
   addHotkey (SDLK_n, MOD_none, [this] { mTimespeed += 90.0f; });
   addHotkey (SDLK_b, MOD_none, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
   addHotkey (SDLK_j, MOD_none, [this] { mTimespeed = 0.0f; });
 
   addHotkey (SDLK_TAB, MOD_none, [this] { _GUIDisplayingEnabled = !_GUIDisplayingEnabled; });
-
-  addHotkey (SDLK_DELETE, MOD_none, [] { DeleteSelectedObject(); });
 
   addHotkey ( SDLK_c
             , MOD_ctrl
@@ -858,7 +857,6 @@ void MapView::createGUI()
   addHotkey (SDLK_p, MOD_shift | MOD_ctrl, [] { Saving = true; });
 
   addHotkey (SDLK_r, MOD_none, [this] { _camera_ah += 180.f; });
-  addHotkey (SDLK_r, MOD_ctrl, [] { ResetSelectedObjectRotation(); });
 
   addHotkey ( SDLK_g
             , MOD_none
@@ -1227,7 +1225,7 @@ MapView::MapView(float _camera_ah0, float _camera_av0, math::vector_3d camera_lo
     if (myConfigfile.keyExists("CursorType"))
     {
       cursor_type = myConfigfile.read<int>("CursorType");
-    }      
+    }
   }
 
   moving = strafing = updown = lookat = turn = 0.0f;
@@ -1992,29 +1990,9 @@ void MapView::display(float t, float dt)
   }
 }
 
-void MapView::save()
-{
-  gWorld->mapIndex->saveChanged();
-}
-
-void MapView::saveall()
-{
-  gWorld->mapIndex->saveall();
-}
-
-void MapView::savecurrent()
-{
-  mainGui->scWarning->show();
-}
-
 void MapView::quit()
 {
   app.pop = true;
-}
-
-void MapView::quitask()
-{
-  mainGui->escWarning->show();
 }
 
 void MapView::resizewindow()
