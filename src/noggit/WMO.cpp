@@ -313,7 +313,7 @@ void WMO::finishLoading ()
     fogs.push_back (fog);
   }
 
-  for (auto &group : groups)
+  for (auto& group : groups)
     group.load();
 
   if (texbuf)
@@ -330,7 +330,7 @@ void WMO::upload()
   for (unsigned int i = 0; i < mat.size(); ++i)
     mat[i]._texture = textures[i];
 
-  for (auto &group : groups)
+  for (auto& group : groups)
     group.upload ();
 
   _finished_upload = true;
@@ -362,7 +362,7 @@ void WMO::draw ( int doodadset
   else
     gl.disable(GL_FOG);
 
-  for (auto &group : groups)
+  for (auto& group : groups)
   {
     group.draw(ofs, angle, frustum);
 
@@ -386,7 +386,7 @@ void WMO::draw ( int doodadset
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    for (auto &group : groups)
+    for (auto& group : groups)
       opengl::primitives::wire_box (group.BoundingBoxMin, group.BoundingBoxMax)
         .draw ({1.0f, 1.0f, 1.0f, 1.0f}, 1.0f);
 
@@ -428,7 +428,7 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
   if (!finishedLoading ())
     return results;
 
-  for (auto &group : groups)
+  for (auto& group : groups)
   {
     group.intersect (ray, &results);
   }
@@ -1125,7 +1125,7 @@ void WMOGroup::drawDoodads(unsigned int doodadset, const math::vector_3d& ofs, m
       && dd < wmo->modelis.size()
       )
     {
-      ModelInstance &mi = wmo->modelis[dd];
+      ModelInstance& mi = wmo->modelis[dd];
 
       if (!outdoorLights) {
         WMOLight::setupOnce(GL_LIGHT2, mi.ldir, mi.lcol);
