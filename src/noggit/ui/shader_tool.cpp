@@ -7,6 +7,7 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/World.h>
 #include <noggit/ui/CheckBox.h>
+#include <noggit/ui/Gradient.h>
 #include <noggit/ui/Slider.h>
 #include <noggit/ui/Text.h>
 #include <noggit/ui/ToggleGroup.h>
@@ -38,23 +39,31 @@ namespace ui
     _speed_slider->setText("Speed: ");
     addChild(_speed_slider);
 
-    _red_slider = new UISlider(6.0f, 85.0f, 167.0f, 2.0f, 0.00001f);
-    _red_slider->setFunc([&](float f) { _red = f; });
-    _red_slider->setValue(_red / 2.0f);
-    _red_slider->setText("Red: ");
-    addChild(_red_slider);
+    addChild(new UIText(5.0f, 80.0f, "Color:", app.getArial12(), eJustifyLeft));
 
-    _green_slider = new UISlider(6.0f, 111.0f, 167.0f, 2.0f, 0.00001f);
-    _green_slider->setFunc([&](float f) { _green = f; });
-    _green_slider->setValue(_green / 2.0f);
-    _green_slider->setText("Green: ");
-    addChild(_green_slider);
+    _red_gradient = new UIGradient(6.0f, 100.0f, 167.0f, 15.0f, true);
+    _red_gradient->setClickFunc([&](float f) { _red = f * 2.0f; });
+    _red_gradient->setMinColor(1.0f, 0.0f, 0.0f, 0.0f);
+    _red_gradient->setMaxColor(1.0f, 0.0f, 0.0f, 1.0f);
+    _red_gradient->setClickColor(0.0f, 0.0f, 0.0f, 1.0f);
+    _red_gradient->setValue(_red / 2.0f);
+    addChild(_red_gradient);
 
-    _blue_slider = new UISlider(6.0f, 137.0f, 167.0f, 2.0f, 0.00001f);
-    _blue_slider->setFunc([&](float f) { _blue = f; });
-    _blue_slider->setValue(_blue / 2.0f);
-    _blue_slider->setText("Blue: ");
-    addChild(_blue_slider);
+    _green_gradient = new UIGradient(6.0f, 120.0f, 167.0f, 15.0f, true);
+    _green_gradient->setClickFunc([&](float f) { _green = f * 2.0f; });
+    _green_gradient->setMinColor(0.0f, 1.0f, 0.0f, 0.0f);
+    _green_gradient->setMaxColor(0.0f, 1.0f, 0.0f, 1.0f);
+    _green_gradient->setClickColor(0.0f, 0.0f, 0.0f, 1.0f);
+    _green_gradient->setValue(_green / 2.0f);
+    addChild(_green_gradient);
+
+    _blue_gradient = new UIGradient(6.0f, 140.0f, 167.0f, 15.0f, true);
+    _blue_gradient->setClickFunc([&](float f) { _blue = f * 2.0f; });
+    _blue_gradient->setMinColor(0.0f, 0.0f, 1.0f, 0.0f);
+    _blue_gradient->setMaxColor(0.0f, 0.0f, 1.0f, 1.0f);
+    _blue_gradient->setClickColor(0.0f, 0.0f, 0.0f, 1.0f);
+    _blue_gradient->setValue(_blue / 2.0f);
+    addChild(_blue_gradient);
 
     if (tablet)
     {
