@@ -46,10 +46,6 @@ private:
   bool _draw_models = true;
   bool _draw_model_animations = false;
 
-  void save();
-  void savecurrent();
-  void saveall();
-
   float lastBrushUpdate;
 
   selection_result intersect_result(bool terrain_only);
@@ -87,7 +83,6 @@ public:
   void resizewindow();
 
   void quit();
-  void quitask();
   void inserObjectFromExtern(int model);
   void selectModel(selection_type entry);
 
