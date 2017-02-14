@@ -190,7 +190,6 @@ void map_horizon::upload()
 void map_horizon::upload_minimap()
 {
   std::vector<uint32_t> texture(1024 * 1024);
-  memset(texture.data(), 0, 1024 * 1024 * sizeof(uint32_t));
 
   for (size_t y (0); y < 64; ++y)
   {
