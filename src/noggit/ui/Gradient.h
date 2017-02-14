@@ -5,6 +5,8 @@
 #include <math/quaternion.hpp> // math::vector_4d
 #include <noggit/ui/Frame.h> // UIFrame
 
+#include <functional>
+
 class UIGradient : public UIFrame
 {
 protected:
@@ -12,13 +14,15 @@ protected:
   math::vector_4d  MaxColor;
   math::vector_4d  ClickColor;
   float  value;
-  void(*clickFunc)(float val);
+  std::function<void(float)> func;
 
 public:
   bool  horiz;
 
+  UIGradient(float x, float y, float width, float height, bool horizontal);
+
   void  setValue(float f);
-  void  setClickFunc(void(*f)(float val));
+  void  setClickFunc(std::function<void(float)> f);
   void  setMinColor(float r, float g, float b, float a);
   void  setMaxColor(float r, float g, float b, float a);
   void  setClickColor(float r, float g, float b, float a);

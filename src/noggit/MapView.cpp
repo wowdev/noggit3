@@ -45,6 +45,7 @@
 #include <noggit/ui/TexturePicker.h>
 #include <noggit/ui/TextureSwitcher.h>
 #include <noggit/ui/TexturingGUI.h>
+#include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/ToggleGroup.h> // UIToggleGroup
 #include <noggit/ui/Toolbar.h> // UIToolbar
 #include <noggit/ui/ToolbarIcon.h> // ToolbarIcon
@@ -110,27 +111,8 @@ bool  alloff_detailselect = false;
 bool  alloff_fog = false;
 bool  alloff_terrain = false;
 
-UISlider* paint_brush;
-UISlider* spray_size;
-UISlider* spray_pressure;
-
-float brushPressure = 0.9f;
-float brushLevel = 255.0f;
-float brushSpraySize = 0.24f;
-float brushSprayPressure = 2.0f;
-
-bool sprayBrushActive = false;
-bool innerRadius = false;
-
-UICheckBox* toggleSpray;
-UICheckBox* toggleInnerRadius;
-
 editing_mode terrainMode = editing_mode::ground;
 editing_mode saveterrainMode = terrainMode;
-
-Brush textureBrush;
-Brush textureBrushInnerRadius;
-Brush sprayBrush;
 
 UICursorSwitcher* CursorSwitcher;
 
@@ -142,45 +124,13 @@ UIFrame* LastClicked;
 UIMapViewGUI* mainGui;
 
 UIFrame* MapChunkWindow;
-
 UIToggleGroup * gFlagsToggleGroup;
-
-
-void setTextureBrushHardness(float f)
-{
-  textureBrush.setHardness(f);
-  sprayBrush.setHardness(f);
-  textureBrushInnerRadius.setHardness(f);
-}
-
-void setTextureBrushRadius(float f)
-{
-  textureBrush.setRadius(f);
-  textureBrushInnerRadius.setRadius(f * textureBrushInnerRadius.getHardness());
-}
-
-void setTextureBrushPressure(float f)
-{
-  brushPressure = f;
-}
-
-void setSprayBrushSize(float f)
-{
-  brushSpraySize = f;
-  sprayBrush.setRadius(std::max(f, 1.0f) * TEXDETAILSIZE / 2.0f);
-}
-
-void setSprayBrushPressure(float f)
-{
-  brushSprayPressure = f;
-}
-
 
 
 
 void change_settings_window(editing_mode oldid, editing_mode newid)
 {
-  if (oldid == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !mainGui->settings_paint
+  if (oldid == newid || !mainGui || !mainGui->terrainTool || !mainGui->flattenTool || !mainGui->texturingTool
     || !mainGui->shaderTool || !mainGui->guiWater || !mainGui->objectEditor)
   {
     return;
@@ -189,10 +139,9 @@ void change_settings_window(editing_mode oldid, editing_mode newid)
   mainGui->guiWaterTypeSelector->hide();
   mainGui->terrainTool->hide();
   mainGui->flattenTool->hide();
-  mainGui->settings_paint->hide();
+  mainGui->texturingTool->hide();
   mainGui->shaderTool->hide();
   mainGui->guiWater->hide();
-  mainGui->TextureSwitcher->hide();
   mainGui->TexturePicker->hide();
   mainGui->objectEditor->hide();
   mainGui->objectEditor->filename->hide();
@@ -215,8 +164,8 @@ void change_settings_window(editing_mode oldid, editing_mode newid)
     tool_settings_y = (int)mainGui->flattenTool->y();
     break;
   case editing_mode::paint:
-    tool_settings_x = (int)mainGui->settings_paint->x();
-    tool_settings_y = (int)mainGui->settings_paint->y();
+    tool_settings_x = (int)mainGui->texturingTool->x();
+    tool_settings_y = (int)mainGui->texturingTool->y();
     break;
   case editing_mode::areaid:
     tool_settings_x = (int)mainGui->ZoneIDBrowser->x() + 230;
@@ -245,9 +194,9 @@ void change_settings_window(editing_mode oldid, editing_mode newid)
     mainGui->flattenTool->show();
     break;
   case editing_mode::paint:
-    mainGui->settings_paint->x((const float)tool_settings_x);
-    mainGui->settings_paint->y((const float)tool_settings_y);
-    mainGui->settings_paint->show();
+    mainGui->texturingTool->x((const float)tool_settings_x);
+    mainGui->texturingTool->y((const float)tool_settings_y);
+    mainGui->texturingTool->show();
     break;
   case editing_mode::areaid:
     mainGui->ZoneIDBrowser->x((const float)tool_settings_x - 230);
@@ -660,86 +609,7 @@ void MapView::createGUI()
   tool_settings_x = video.xres() - 186;
   tool_settings_y = 38;
 
-  //3D Paint settings UIWindow
-  mainGui->settings_paint->hide();
-  mainGui->settings_paint->movable(true);
-
-  mainGui->addChild(mainGui->settings_paint);
-
-  mainGui->settings_paint->addChild(new UIText(78.5f, 2.0f, "3D Paint", app.getArial14(), eJustifyCenter));
-
-
-  mainGui->G1 = new UIGradient;
-  mainGui->G1->width(20.0f);
-  mainGui->G1->x(mainGui->settings_paint->width() - 4.0f - mainGui->G1->width());
-  mainGui->G1->y(4.0f);
-  mainGui->G1->height(92.0f);
-  mainGui->G1->setMaxColor(1.0f, 1.0f, 1.0f, 1.0f);
-  mainGui->G1->setMinColor(0.0f, 0.0f, 0.0f, 1.0f);
-  mainGui->G1->horiz = false;
-  mainGui->G1->setClickColor(1.0f, 0.0f, 0.0f, 1.0f);
-  mainGui->G1->setClickFunc ([] (float f) { brushLevel = (1.0f - f)*255.0f; });
-  mainGui->G1->setValue(0.0f);
-
-  mainGui->settings_paint->addChild(mainGui->G1);
-
-  mainGui->paintHardnessSlider = new UISlider(6.0f, 33.0f, 145.0f, 1.0f, 0.0f);
-  mainGui->paintHardnessSlider->setFunc(setTextureBrushHardness);
-  mainGui->paintHardnessSlider->setValue(textureBrush.getHardness());
-  mainGui->paintHardnessSlider->setText("Hardness: ");
-  mainGui->settings_paint->addChild(mainGui->paintHardnessSlider);
-
-  paint_brush = new UISlider(6.0f, 59.0f, 145.0f, 100.0f, 0.00001f);
-  paint_brush->setFunc(setTextureBrushRadius);
-  paint_brush->setValue(textureBrush.getRadius() / 100);
-  paint_brush->setText("Radius: ");
-  mainGui->settings_paint->addChild(paint_brush);
-
-  mainGui->paintPressureSlider = new UISlider(6.0f, 85.0f, 145.0f, 0.99f, 0.01f);
-  mainGui->paintPressureSlider->setFunc(setTextureBrushPressure);
-  mainGui->paintPressureSlider->setValue(brushPressure);
-  mainGui->paintPressureSlider->setText("Pressure: ");
-  mainGui->settings_paint->addChild(mainGui->paintPressureSlider);
-
-  mainGui->settings_paint->addChild ( new UICheckBox ( 3.0f, 105.0f
-                                            , "Highlight paintable chunks"
-                                            , &_highlightPaintableChunks
-                                            )
-                           );
-
-  toggleSpray = new UICheckBox(3.0f, 138.0f, "Spray", &sprayBrushActive);
-  mainGui->settings_paint->addChild(toggleSpray);
-
-  toggleInnerRadius = new UICheckBox(80.0f, 138.0f, "Inner radius", &innerRadius);
-  mainGui->settings_paint->addChild(toggleInnerRadius);
-
-  spray_size = new UISlider(6.0f, 180.0f, 170.0f, 40.0f, 0.0001f);
-  spray_size->setFunc(setSprayBrushSize);
-  spray_size->setValue(brushSpraySize / 40.0f);
-  spray_size->setText("Spray size: ");
-  mainGui->settings_paint->addChild(spray_size);
-
-  spray_pressure = new UISlider(6.0f, 205.0f, 170.0f, 100.0f, 0.0001f);
-  spray_pressure->setFunc(setSprayBrushPressure);
-  spray_pressure->setValue(brushSprayPressure / 100.0f);
-  spray_pressure->setText("Spray pressure (/1k): ");
-  mainGui->settings_paint->addChild(spray_pressure);
-
-  UIButton* B1;
-  B1 = new UIButton(6.0f, 230.0f, 170.0f, 30.0f, "Texture swapper", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", []
-                   {
-                     mainGui->TextureSwitcher->show();
-                     mainGui->settings_paint->hide();
-                   });
-  mainGui->settings_paint->addChild(B1);
-
-  UIButton* rmDup = new UIButton( 6.0f, 255.0f, 170.0f, 30.0f
-                                , "Remove texture duplicates"
-                                , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
-                                , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
-                                , [] { gWorld->removeTexDuplicateOnADT(gWorld->camera); }
-                                );
-  mainGui->settings_paint->addChild(rmDup);
+  
 
   mainGui->addChild(mainGui->TexturePalette = UITexturingGUI::createTexturePalette(mainGui));
   mainGui->TexturePalette->hide();
@@ -1055,8 +925,7 @@ void MapView::createGUI()
             , MOD_none
             , [&]
               {
-                sprayBrushActive = !sprayBrushActive;
-                toggleSpray->setState(sprayBrushActive);
+                mainGui->texturingTool->toggle_spray();
               }
             , [&] { return terrainMode == editing_mode::paint; }
             );
@@ -1225,19 +1094,17 @@ void MapView::createGUI()
 
   addHotkey ( SDLK_KP_PLUS
             , MOD_alt
-            , []
+            , [&]
               {
-                textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
-                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+                mainGui->texturingTool->change_radius(0.1f);
               }
             , [] { return terrainMode == editing_mode::paint; }
             );
   addHotkey ( SDLK_PLUS
             , MOD_alt
-            , []
+            , [&]
               {
-                textureBrush.setRadius(std::min(100.0f, textureBrush.getRadius() + 0.1f));
-                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+                mainGui->texturingTool->change_radius(0.1f);
               }
             , [] { return terrainMode == editing_mode::paint; }
             );
@@ -1254,19 +1121,17 @@ void MapView::createGUI()
 
   addHotkey ( SDLK_KP_MINUS
             , MOD_alt
-            , []
+            , [&]
               {
-                textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
-                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+                mainGui->texturingTool->change_radius(-0.1f);
               }
             , [] { return terrainMode == editing_mode::paint; }
             );
   addHotkey ( SDLK_MINUS
             , MOD_alt
-            , []
+            , [&]
               {
-                textureBrush.setRadius(std::max(0.0f, textureBrush.getRadius() - 0.1f));
-                paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+                mainGui->texturingTool->change_radius(-0.1f);
               }
             , [] { return terrainMode == editing_mode::paint; }
             );
@@ -1278,11 +1143,11 @@ void MapView::createGUI()
   addHotkey (SDLK_2, MOD_shift, [this] { movespd = 50.0f; });
   addHotkey (SDLK_3, MOD_shift, [this] { movespd = 200.0f; });
   addHotkey (SDLK_4, MOD_shift, [this] { movespd = 800.0f; });
-  addHotkey (SDLK_1, MOD_alt, [] { mainGui->G1->setValue(0.01f); });
-  addHotkey (SDLK_2, MOD_alt, [] { mainGui->G1->setValue(0.25f); });
-  addHotkey (SDLK_3, MOD_alt, [] { mainGui->G1->setValue(0.50f); });
-  addHotkey (SDLK_4, MOD_alt, [] { mainGui->G1->setValue(0.75f); });
-  addHotkey (SDLK_5, MOD_alt, [] { mainGui->G1->setValue(0.99f); });
+  addHotkey (SDLK_1, MOD_alt, [] { mainGui->texturingTool->set_brush_level(0.0f); });
+  addHotkey (SDLK_2, MOD_alt, [] { mainGui->texturingTool->set_brush_level(255.0f* 0.25f); });
+  addHotkey (SDLK_3, MOD_alt, [] { mainGui->texturingTool->set_brush_level(255.0f* 0.5f); });
+  addHotkey (SDLK_4, MOD_alt, [] { mainGui->texturingTool->set_brush_level(255.0f* 0.75f); });
+  addHotkey (SDLK_5, MOD_alt, [] { mainGui->texturingTool->set_brush_level(255.0f); });
 
   addHotkey (SDLK_1, MOD_none, [this] { set_editing_mode (editing_mode::ground); });
   addHotkey (SDLK_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); });
@@ -1355,10 +1220,6 @@ MapView::MapView(float _camera_ah0, float _camera_av0, math::vector_3d camera_lo
   movespd = SPEED;
 
   lastBrushUpdate = 0;
-  textureBrush.init();
-  textureBrushInnerRadius.init();
-  sprayBrush.init();
-  setSprayBrushSize(0.24f);
 
   look = false;
   mViewMode = eViewMode_3D;
@@ -1422,8 +1283,7 @@ void MapView::tick(float t, float dt)
       mainGui->flattenTool->setRadius((float)app.pressure / 20.0f);
       break;
     case editing_mode::paint:
-      mainGui->paintPressureSlider->setValue(std::max(0.0f, std::min(1.0f, (float)app.pressure / 2048.0f)));
-      mainGui->paintPressureSlider->setValue(mainGui->paintPressureSlider->value);
+      mainGui->texturingTool->change_pressure((float)app.pressure / 2048.0f);
       break;
     case editing_mode::mccv:
       mainGui->shaderTool->setTabletControlValue((float)app.pressure);
@@ -1699,53 +1559,22 @@ void MapView::tick(float t, float dt)
             // Pick texture
             mainGui->TexturePicker->getTextures(*gWorld->GetCurrentSelection());
           }
-          else  if (_mod_shift_down)
+          else  if (_mod_shift_down && !!UITexturingGUI::getSelectedTexture())
           {
-            // Paint 3d if shift down.
-            if (UITexturingGUI::getSelectedTexture())
+            if (mViewMode == eViewMode_3D && !underMap)
             {
-              if (textureBrush.needUpdate())
-              {
-                textureBrush.GenerateTexture();
-                textureBrushInnerRadius.GenerateTexture();
-              }
-
-              if (mViewMode == eViewMode_3D && !underMap)
-              {
-                if (mainGui->TextureSwitcher->hidden())
-                {
-                  if (sprayBrushActive)
-                  {
-                    gWorld->sprayTexture(_cursor_pos, &sprayBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f),
-                      textureBrush.getRadius(), brushSprayPressure,
-                      *UITexturingGUI::getSelectedTexture()
-                    );
-
-                    if (innerRadius)
-                    {
-                      gWorld->paintTexture(_cursor_pos, &textureBrushInnerRadius, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), *UITexturingGUI::getSelectedTexture());
-                    }
-                  }
-                  else
-                  {
-                    gWorld->paintTexture(_cursor_pos, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), *UITexturingGUI::getSelectedTexture());
-                  }
-                }
-                else
-                {
-                  gWorld->overwriteTextureAtCurrentChunk(_cursor_pos, mainGui->TextureSwitcher->current_texture(), *UITexturingGUI::getSelectedTexture());
-                }
-              }
+              mainGui->texturingTool->paint(_cursor_pos, dt, *UITexturingGUI::getSelectedTexture());
             }
-            // paint 2d if nothing is pressed.
-            if (textureBrush.needUpdate())
+            else if (mViewMode == eViewMode_2D)
             {
-              textureBrush.GenerateTexture();
-              textureBrushInnerRadius.GenerateTexture();
-            }
+              math::vector_3d pos( CHUNKSIZE * 4.0f * video.ratio() * ((float)MouseX / (float)video.xres() - 0.5f ) / gWorld->zoom
+                                  , 0.0f
+                                  , CHUNKSIZE * 4.0f * ((float)MouseY / (float)video.yres() - 0.5f) / gWorld->zoom
+                                  );
 
-            if (mViewMode == eViewMode_2D && !!UITexturingGUI::getSelectedTexture())
-              gWorld->paintTexture({CHUNKSIZE * 4.0f * video.ratio() * (static_cast<float>(MouseX) / static_cast<float>(video.xres()) - 0.5f) / gWorld->zoom + gWorld->camera.x, 0.f, CHUNKSIZE * 4.0f * (static_cast<float>(MouseY) / static_cast<float>(video.yres()) - 0.5f) / gWorld->zoom + gWorld->camera.z}, &textureBrush, brushLevel, 1.0f - pow(1.0f - brushPressure, dt * 10.0f), *UITexturingGUI::getSelectedTexture());
+              pos += gWorld->camera;
+              mainGui->texturingTool->paint(pos, dt, *UITexturingGUI::getSelectedTexture());
+            }
           }
           break;
 
@@ -1878,10 +1707,9 @@ void MapView::tick(float t, float dt)
     updown = 0;
   }
 
-  if ((t - lastBrushUpdate) > 0.1f && textureBrush.needUpdate())
+  if ((t - lastBrushUpdate) > 0.1f)
   {
-    textureBrush.GenerateTexture();
-    textureBrushInnerRadius.GenerateTexture();
+    mainGui->texturingTool->update_brushes();
   }
 
 
@@ -2026,9 +1854,9 @@ void MapView::displayViewMode_2D(float /*t*/, float /*dt*/)
     opengl::texture::set_active_texture(0);
     opengl::texture::enable_texture();
 
-    textureBrush.getTexture()->bind();
+    mainGui->texturingTool->bind_brush_texture();
 
-    const float tRadius = textureBrush.getRadius() / CHUNKSIZE;// *gWorld->zoom;
+    const float tRadius = mainGui->texturingTool->brush_radius() / CHUNKSIZE;// *gWorld->zoom;
     gl.begin(GL_QUADS);
     gl.texCoord2f(0.0f, 0.0f);
     gl.vertex3f(mX - tRadius, mY + tRadius, 0);
@@ -2074,8 +1902,8 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
     use_ref_pos = mainGui->flattenTool->use_ref_pos();
     break;
   case editing_mode::paint:
-    radius = textureBrush.getRadius();
-    hardness = textureBrush.getHardness();
+    radius = mainGui->texturingTool->brush_radius();
+    hardness = mainGui->texturingTool->hardness();
     break;
   case editing_mode::water:
     radius = mainGui->guiWater->brushRadius();
@@ -2093,7 +1921,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
   gWorld->draw ( _cursor_pos
                , radius
                , hardness
-               , _highlightPaintableChunks
+               , mainGui->texturingTool->highlight_paintable_chunks()
                , _draw_contour
                , inner_radius
                , ref_pos
@@ -2414,9 +2242,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
     }
     if (terrainMode == editing_mode::paint)
     {
-      float hardness = std::max(0.0f, std::min(1.0f, textureBrush.getHardness() + e->xrel / 300.0f));
-      setTextureBrushHardness(hardness);
-      mainGui->paintHardnessSlider->setValue(hardness);
+      mainGui->texturingTool->change_hardness(e->xrel / 300.0f);
     }
   }
 
@@ -2445,8 +2271,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
       mainGui->flattenTool->changeRadius(e->xrel / XSENS);
       break;
     case editing_mode::paint:
-      textureBrush.setRadius(std::max(0.0f, std::min(100.0f, textureBrush.getRadius() + e->xrel / XSENS)));
-      paint_brush->setValue(textureBrush.getRadius() / 100.0f);
+      mainGui->texturingTool->change_radius(e->xrel / XSENS);
       break;
     case editing_mode::water:
       mainGui->guiWater->changeRadius(e->xrel / XSENS);
@@ -2468,7 +2293,7 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
       mainGui->flattenTool->changeSpeed(e->xrel / 30.0f);
       break;
     case editing_mode::paint:
-      mainGui->paintPressureSlider->setValue(std::max(0.0f, std::min(1.0f, mainGui->paintPressureSlider->value + e->xrel / 300.0f)));
+      mainGui->texturingTool->change_pressure(e->xrel / 300.0f);
       break;
     case editing_mode::mccv:
       mainGui->shaderTool->changeSpeed(e->xrel / XSENS);
@@ -2567,18 +2392,15 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
     {
       if (_mod_space_down)
       {
-        brushLevel = std::min(255.0f, brushLevel + 10.0f);
-        mainGui->G1->setValue((255.0f - brushLevel) / 255.0f);
+        mainGui->texturingTool->change_brush_level(10.0f);
       }
       else if (_mod_alt_down)
       {
-        brushSpraySize = std::min(40.0f, brushSpraySize + 2.0f);
-        spray_size->setValue(brushSpraySize / 40.0f);
+        mainGui->texturingTool->change_spray_size(1.0f);
       }
       else if (_mod_shift_down)
       {
-        brushSprayPressure = std::min(100.0f, brushSprayPressure + 2.5f);
-        spray_pressure->setValue(brushSprayPressure / 100.0f);
+        mainGui->texturingTool->change_spray_pressure(0.25);
       }
     }
     else if (terrainMode == editing_mode::water)
@@ -2628,18 +2450,15 @@ void MapView::mousePressEvent (SDL_MouseButtonEvent *e)
     {
       if (_mod_space_down)
       {
-        brushLevel = std::max(0.0f, brushLevel - 10.0f);
-        mainGui->G1->setValue((255.0f - brushLevel) / 255.0f);
+        mainGui->texturingTool->change_brush_level(-10.0f);
       }
       else if (_mod_alt_down)
       {
-        brushSpraySize = std::max(1.0f, brushSpraySize - 2.0f);
-        spray_size->setValue(brushSpraySize / 40.0f);
+        mainGui->texturingTool->change_spray_size(-1.0f);
       }
       else if (_mod_shift_down)
       {
-        brushSprayPressure = std::max(0.0f, brushSprayPressure - 2.5f);
-        spray_pressure->setValue(brushSprayPressure / 100.0f);
+        mainGui->texturingTool->change_spray_pressure(-0.25);
       }
     }
     else if (terrainMode == editing_mode::water)

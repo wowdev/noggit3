@@ -31,6 +31,7 @@ namespace ui
   class FlattenTool;
   class shader_tool;
   class terrain_tool;
+  class texturing_tool;
 }
 
 class UIModel;
@@ -54,9 +55,6 @@ public:
   // position of the tools window(s)
   int tool_settings_x;
   int tool_settings_y;
-  UISlider* paintPressureSlider;
-  UISlider* paintHardnessSlider;
-  UIGradient *G1;
 
   // Editor paramter
   int ground_edit_mode;
@@ -74,16 +72,15 @@ public:
   UIAppInfo* guiappInfo;
   UIZoneIDBrowser* ZoneIDBrowser;
   UITexturePicker* TexturePicker;
-  UITextureSwitcher* TextureSwitcher;
   UIWater* guiWater;
   UIWaterTypeBrowser* guiWaterTypeSelector;
   UICurrentTexture* guiCurrentTexture;
-  UIWindow *settings_paint;
-  UIObjectEditor *objectEditor;
-  UIRotationEditor *rotationEditor;
-  ui::FlattenTool *flattenTool;
-  ui::terrain_tool *terrainTool;
-  ui::shader_tool *shaderTool;
+  UIObjectEditor* objectEditor;
+  UIRotationEditor* rotationEditor;
+  ui::FlattenTool* flattenTool;
+  ui::terrain_tool* terrainTool;
+  ui::shader_tool* shaderTool;
+  ui::texturing_tool* texturingTool;
 
   UIExitWarning *escWarning;
   UISaveCurrentWarning *scWarning;

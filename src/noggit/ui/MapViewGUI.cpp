@@ -22,6 +22,7 @@
 #include <noggit/ui/shader_tool.hpp>
 #include <noggit/ui/StatusBar.h> // UIStatusBar
 #include <noggit/ui/terrain_tool.hpp>
+#include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/TexturePicker.h> //
 #include <noggit/ui/TextureSwitcher.h>
 #include <noggit/ui/TexturingGUI.h>
@@ -90,6 +91,10 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   shaderTool->hide();
   addChild(shaderTool);
 
+  texturingTool = new ui::texturing_tool((float)video.xres() - 190.0f, 30.0f);
+  texturingTool->hide();
+  addChild(texturingTool);
+
   // UICurrentTexture
   guiCurrentTexture = new UICurrentTexture(6.0f, 35.0f, this);
   addChild(guiCurrentTexture);
@@ -128,13 +133,6 @@ UIMapViewGUI::UIMapViewGUI(MapView *setMapview)
   TexturePicker->hide();
   TexturePicker->movable(true);
   addChild(TexturePicker);
-
-  // create settings_paint window here otherwise TextureSwitcher use an outdated pointer
-  settings_paint = new UIWindow(video.xres() - 190.0f, 40.0f, 180.0f, 280.0f);
-
-  TextureSwitcher = new UITextureSwitcher (video.xres(), 40, settings_paint);
-  TextureSwitcher->hide();
-  addChild(TextureSwitcher);
 
   // Cursor Switcher
   CursorSwitcher = new UICursorSwitcher();
