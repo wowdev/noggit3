@@ -462,10 +462,7 @@ void MapView::createGUI()
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Clear height map"
                                              , []
                                                {
-                                                 if (Environment::getInstance()->selectedAreaID)
-                                                 {
-                                                   gWorld->clearHeight(gWorld->camera);
-                                                 }
+                                                 gWorld->clearHeight(gWorld->camera);
                                                }
                                              );
 
