@@ -123,6 +123,7 @@ public:
             , bool draw_models
             , bool draw_model_animations
             , bool draw_hole_lines
+            , bool draw_models_with_box
             );
 
   void outdoorLights(bool on);

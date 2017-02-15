@@ -22,7 +22,6 @@ public:
   bool AutoSelectingMode;  // true activates auto selection when you deselect a model. False not.
 
   bool tabletMode;
-  bool renderModelsWithBox;
 
   struct mysql_connection_info
   {
