@@ -227,7 +227,6 @@ set ( noggit_ui_sources
       src/noggit/ui/MinimizeButton.cpp
       src/noggit/ui/Model.cpp
       src/noggit/ui/ModelImport.cpp
-      src/noggit/ui/ModelSelectorFromTxt.cpp
       src/noggit/ui/ObjectEditor.cpp
       src/noggit/ui/RotationEditor.cpp
       src/noggit/ui/ScrollBar.cpp
@@ -352,7 +351,6 @@ set ( noggit_ui_headers
       src/noggit/ui/MinimizeButton.h
       src/noggit/ui/Model.h
       src/noggit/ui/ModelImport.h
-      src/noggit/ui/ModelSelectorFromTxt.h
       src/noggit/ui/ObjectEditor.h
       src/noggit/ui/RotationEditor.h
       src/noggit/ui/ScrollBar.h
