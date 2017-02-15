@@ -1570,9 +1570,7 @@ selection_result MapView::intersect_result(bool terrain_only)
                             , video.farclip()
                             ).transposed()
         ).inverted().transposed()
-      * video.normalized_device_coords ( Environment::getInstance()->screenX
-                                       , Environment::getInstance()->screenY
-                                       )
+      * video.normalized_device_coords (MouseX, MouseY)
       ).xyz_normalized_by_w()
     );
 
@@ -2180,8 +2178,8 @@ void MapView::mousemove(SDL_MouseMotionEvent *e)
 
   mainGui->mouse_moved (e->x, e->y);
 
-  Environment::getInstance()->screenX = MouseX = e->x;
-  Environment::getInstance()->screenY = MouseY = e->y;
+  MouseX = e->x;
+  MouseY = e->y;
   checkWaterSave();
 }
 

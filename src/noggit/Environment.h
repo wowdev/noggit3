@@ -25,8 +25,6 @@ public:
 
   bool paintMode;
   int flagPaintMode;
-  int screenX;
-  int screenY;
 
   int groundBrushType;
 
