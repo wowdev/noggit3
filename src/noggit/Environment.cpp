@@ -4,8 +4,7 @@
 #include <noggit/MapHeaders.h>
 
 Environment::Environment()
-  : view_holelines(false)
-  , flagPaintMode(FLAG_IMPASS)
+  : flagPaintMode(FLAG_IMPASS)
   , paintMode(true)
   , minRotation(0.0f)
   , maxRotation(360.0f)

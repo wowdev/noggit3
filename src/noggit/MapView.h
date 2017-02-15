@@ -51,6 +51,7 @@ private:
   bool _draw_wmo_doodads = true;
   bool _draw_models = true;
   bool _draw_model_animations = false;
+  bool _draw_hole_lines = false;
 
   float lastBrushUpdate;
 

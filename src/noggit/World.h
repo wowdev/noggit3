@@ -122,6 +122,7 @@ public:
             , bool draw_doodads
             , bool draw_models
             , bool draw_model_animations
+            , bool draw_hole_lines
             );
 
   void outdoorLights(bool on);

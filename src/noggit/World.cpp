@@ -509,6 +509,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_wmo_doodads
                  , bool draw_models
                  , bool draw_model_animations
+                 , bool draw_hole_lines
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -746,7 +747,7 @@ void main()
     setupFog();
     for (MapTile* tile : mapIndex->loaded_tiles())
     {
-      tile->drawLines (line_shader, frustum);
+      tile->drawLines (line_shader, frustum, draw_hole_lines);
     }
   }
 
