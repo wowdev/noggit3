@@ -23,7 +23,6 @@ private:
   int mapID;
   unsigned int zoneID;
   int subZoneID;
-  int selectedAreaID;
   std::string MapName;
   std::string ZoneName;
   std::string SubZoneName;
