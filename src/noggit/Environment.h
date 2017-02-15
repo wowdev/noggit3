@@ -21,8 +21,6 @@ public:
   void clear_clipboard();
   bool is_clipboard();
 
-  bool paintMode;
-
   int groundBrushType;
 
   float minRotation;

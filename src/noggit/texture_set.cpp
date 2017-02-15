@@ -361,9 +361,6 @@ bool TextureSet::eraseUnusedTextures()
 
 bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
-  if (!Environment::getInstance()->paintMode)
-    return false;
-
   bool changed = false;
 
   float zPos, xPos, dist, radius;
