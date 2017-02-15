@@ -511,7 +511,8 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_model_animations
                  , bool draw_hole_lines
                  , bool draw_models_with_box
-                 , bool draw_hidden_models
+                 , std::unordered_set<WMO*> const& hidden_map_objects
+                 , std::unordered_set<Model*> const& hidden_models
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -834,8 +835,8 @@ void main()
     gl.enable(GL_LIGHTING);  //! \todo  Is this needed? Or does this fuck something up?
     for (std::map<int, ModelInstance>::iterator it = mModelInstances.begin(); it != mModelInstances.end(); ++it)
     {
-      bool const is_hidden (_hidden_models.count (it->second.model.get()));
-      if (!is_hidden || draw_hidden_models)
+      bool const is_hidden (hidden_models.count (it->second.model.get()));
+      if (!is_hidden)
       {
         it->second.draw (frustum, is_hidden, draw_models_with_box);
       }
@@ -855,8 +856,8 @@ void main()
 
     for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
     {
-      bool const is_hidden (_hidden_map_objects.count (it->second.wmo.get()));
-      if (!is_hidden || draw_hidden_models)
+      bool const is_hidden (hidden_map_objects.count (it->second.wmo.get()));
+      if (!is_hidden)
       {
         it->second.draw (frustum, is_hidden, draw_wmo_doodads);
       }
@@ -894,7 +895,8 @@ selection_result World::intersect ( math::ray const& ray
                                   , bool draw_terrain
                                   , bool draw_wmo
                                   , bool draw_models
-                                  , bool draw_hidden_models
+                                  , std::unordered_set<WMO*> const& hidden_map_objects
+                                  , std::unordered_set<Model*> const& hidden_models
                                   )
 {
   selection_result results;
@@ -913,8 +915,8 @@ selection_result World::intersect ( math::ray const& ray
     {
       for (auto&& model_instance : mModelInstances)
       {
-        bool const is_hidden (_hidden_models.count (model_instance.second.model.get()));
-        if (!is_hidden || draw_hidden_models)
+        bool const is_hidden (hidden_models.count (model_instance.second.model.get()));
+        if (!is_hidden)
         {
           model_instance.second.intersect (ray, &results);
         }
@@ -925,8 +927,8 @@ selection_result World::intersect ( math::ray const& ray
     {
       for (auto&& wmo_instance : mWMOInstances)
       {
-        bool const is_hidden (_hidden_map_objects.count (wmo_instance.second.wmo.get()));
-        if (!is_hidden || draw_hidden_models)
+        bool const is_hidden (hidden_map_objects.count (wmo_instance.second.wmo.get()));
+        if (!is_hidden)
         {
           wmo_instance.second.intersect (ray, &results);
         }
@@ -1714,13 +1716,6 @@ bool World::isUnderMap(math::vector_3d const& pos)
 
   return true;
 }
-
-void World::clearHiddenModelList()
-{
-  _hidden_map_objects.clear();
-  _hidden_models.clear();
-}
-
 
 void World::selectVertices(math::vector_3d const& pos, float radius)
 {
