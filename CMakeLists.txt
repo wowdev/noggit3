@@ -117,8 +117,8 @@ if (MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
 
   set ( mysql_sources
         src/mysql/mysql.cpp
-      )    
-    
+      )
+
   set ( mysql_headers
         src/mysql/mysql.h
       )
@@ -151,7 +151,7 @@ include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 # And do the job.
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
 
-set ( noggit_root_sources 
+set ( noggit_root_sources
       src/noggit/AsyncLoader.cpp
       src/noggit/Brush.cpp
       src/noggit/ChunkWater.cpp
@@ -254,7 +254,7 @@ set ( noggit_ui_sources
       src/noggit/ui/terrain_tool.cpp
       src/noggit/ui/uid_fix_window.cpp
     )
-  
+
 set ( math_sources
       src/math/matrix_4x4.cpp
       src/math/ray.cpp
@@ -272,7 +272,7 @@ set ( opengl_sources
 set ( external_sources
       src/external/wacom/Utils.cpp
     )
- 
+
 set ( noggit_root_headers
       src/noggit/Animated.h
       src/noggit/AppState.h
@@ -325,7 +325,7 @@ set ( noggit_root_headers
       src/noggit/uid_storage.hpp
       src/noggit/wmo_liquid.hpp
     )
-    
+
 set ( noggit_ui_headers
       src/noggit/ui/About.h
       src/noggit/ui/Alphamap.h
@@ -378,7 +378,7 @@ set ( noggit_ui_headers
       src/noggit/ui/terrain_tool.hpp
       src/noggit/ui/uid_fix_window.hpp
     )
-    
+
 set ( math_headers
       src/math/constants.hpp
       src/math/interpolation.hpp
@@ -391,7 +391,7 @@ set ( math_headers
       src/math/vector_3d.hpp
       src/math/vector_4d.hpp
     )
-    
+
 set ( opengl_headers
       src/opengl/call_list.hpp
       src/opengl/context.hpp
@@ -403,7 +403,7 @@ set ( opengl_headers
       src/opengl/texture.hpp
       src/opengl/types.hpp
     )
-    
+
 set ( external_headers
       src/external/wacom/MSGPACK.H
       src/external/wacom/PKTDEF.H
@@ -418,7 +418,7 @@ IF(WIN32)
 
   set ( os_headers
         include/win/StackWalker.h
-      )  
+      )
 ENDIF(WIN32)
 
 IF(APPLE)
@@ -441,7 +441,7 @@ source_group("external"  FILES ${external_sources} ${external_headers})
 source_group("os"  FILES ${os_sources} ${os_headers})
 
 ADD_EXECUTABLE ( noggit
-                  WIN32 
+                  WIN32
                   MACOSX_BUNDLE
                   ${noggit_root_sources}
                   ${noggit_ui_sources}
