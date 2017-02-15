@@ -16,7 +16,6 @@ Environment::Environment()
   , currentWaterLayer(0)
   , displayAllWaterLayers(true)
   , moveModelToCursorPos(false)
-  , showModelFromHiddenList(true)
 {
 }
 

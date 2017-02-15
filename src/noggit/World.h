@@ -124,6 +124,7 @@ public:
             , bool draw_model_animations
             , bool draw_hole_lines
             , bool draw_models_with_box
+            , bool draw_hidden_models
             );
 
   void outdoorLights(bool on);
@@ -138,6 +139,7 @@ public:
                              , bool draw_terrain
                              , bool draw_wmo
                              , bool draw_models
+                             , bool draw_hidden_models
                              );
   void drawTileMode ( float ah
                     , math::vector_3d const& camera_pos
