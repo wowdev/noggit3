@@ -57,14 +57,7 @@ public:
   int changed;
 
   void draw ( Frustum const&
-            , bool highlightPaintableChunks
-            , bool draw_contour
-            , bool draw_paintability_overlay
-            , bool draw_chunk_flag_overlay
-            , bool draw_water_overlay
-            , bool draw_areaid_overlay
-            , bool draw_wireframe_overlay
-            , int cursor_type
+            , opengl::scoped::use_program& mcnk_shader
             );
   void intersect (math::ray const&, selection_result*) const;
   void drawLines ( opengl::scoped::use_program& line_shader

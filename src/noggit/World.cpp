@@ -619,21 +619,110 @@ void World::draw ( math::vector_3d const& cursor_pos
   // height map w/ a zillion texture passes
   if (draw_terrain)
   {
-    for (MapTile* tile : mapIndex->loaded_tiles())
-    {
-      tile->draw ( frustum
-                 , highlightPaintableChunks
-                 , draw_contour
-                 , draw_paintability_overlay
-                 , draw_chunk_flag_overlay
-                 , draw_water_overlay
-                 , draw_areaid_overlay
-                 , draw_wireframe
-                 , cursor_type
-                 );
+
+    opengl::program const program
+    { { GL_VERTEX_SHADER
+      , R"code(
+#version 110
+
+attribute vec4 position;
+attribute vec3 normal;
+attribute vec2 texcoord;
+attribute vec2 alphacoord;
+attribute vec3 mccv;
+
+uniform mat4 model_view;
+uniform mat4 projection;
+
+varying vec4 vary_position;
+varying vec2 vary_texcoord;
+varying vec2 vary_alphacoord;
+varying vec3 vary_normal;
+varying vec3 vary_mccv;
+
+void main()
+{
+  gl_Position = projection * model_view * position;
+  //! \todo gl_NormalMatrix deprecated
+  vary_normal = normalize (gl_NormalMatrix * normal);
+  vary_position = position;
+  vary_texcoord = texcoord;
+  vary_alphacoord = alphacoord;
+  vary_mccv = mccv;
+}
+)code"
     }
+    ,{ GL_FRAGMENT_SHADER
+    , R"code(
+#version 110
+
+uniform mat4 model_view;
+
+uniform sampler2D textures[4];
+uniform sampler2D alphamaps[3];
+uniform int layer_count;
+uniform bool has_mccv;
+
+varying vec4 vary_position;
+varying vec2 vary_texcoord;
+varying vec2 vary_alphacoord;
+varying vec3 vary_normal;
+varying vec3 vary_mccv;
+
+const float contour_height_delta = 2.0;
+
+vec4 blend_by_alpha (in vec4 source, in vec4 dest)
+{
+  return source * source.w + dest * (1.0 - source.w);
+}
+
+vec4 texture_blend() {
+  if(layer_count == 0)
+    return vec4 (1.0, 1.0, 1.0, 1.0);
+
+  vec4 color = vec4 (0.0, 0.0, 0.0, 0.0);
+  
+  for (int i = 0; i < layer_count; ++i)
+  {
+    float alpha = 1.0;
+    vec4 texture_color = texture2D (textures[i], vary_texcoord);
+
+    if (i != 0)
+    {
+      alpha = texture2D (alphamaps[i - 1], vary_alphacoord).a;
+    }
+
+    color = blend_by_alpha (vec4 (texture_color.rgb, alpha), color);
   }
 
+  return color;
+}
+
+void main()
+{
+  vec4 blend = texture_blend();
+  if(has_mccv)
+  {
+    blend = vec4(blend.xyz * vary_mccv, blend.a);
+  }
+  gl_FragColor = blend;
+}
+)code"
+    }
+    };
+
+    opengl::scoped::use_program mcnk_shader{ program };
+
+    mcnk_shader.uniform("model_view", opengl::matrix::model_view());
+    mcnk_shader.uniform("projection", opengl::matrix::projection());
+
+
+    for (MapTile* tile : mapIndex->loaded_tiles())
+    {
+      tile->draw(frustum, mcnk_shader);
+    }
+  }
+  
   // Selection circle
   if (this->IsSelection(eEntry_MapChunk))
   {

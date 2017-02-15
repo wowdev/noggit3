@@ -613,188 +613,49 @@ void MapChunk::drawContour()
 }
 
 void MapChunk::draw ( Frustum const& frustum
-                    , bool highlightPaintableChunks
-                    , bool draw_contour
-                    , bool draw_paintability_overlay
-                    , bool draw_chunk_flag_overlay
-                    , bool draw_water_overlay
-                    , bool draw_areaid_overlay
-                    , bool draw_wireframe_overlay
-                    , int cursor_type
+                    , opengl::scoped::use_program& mcnk_shader
                     )
 {
-  if (!is_visible (gWorld->culldistance, frustum, gWorld->camera))
+  if (!is_visible(gWorld->culldistance, frustum, gWorld->camera))
+  {
     return;
+  }
 
-  bool cantPaint = UITexturingGUI::getSelectedTexture()
-                 && !canPaintTexture(*UITexturingGUI::getSelectedTexture())
-                 && highlightPaintableChunks
-                 && draw_paintability_overlay;
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer(indices);
 
-  if (cantPaint)
+  std::vector<int> texture_indices;
+  std::vector<int> alphamap_indices;
+
+
+  for (int i = 0; i < _texture_set.num(); ++i)
   {
-    gl.color4f(1, 0, 0, 1);
+    texture_indices.push_back(i + 1);
+    _texture_set.bindTexture(i, i + 1);
+
+    if (i == 0) continue;
+
+    alphamap_indices.push_back(i + 5);
+    _texture_set.bindAlphamap(i - 1, i + 5);
   }
 
-  // setup vertex buffers
-  gl.vertexPointer (vertices, 3, GL_FLOAT, 0, 0);
-  gl.normalPointer (normals, GL_FLOAT, 0, 0);
+  mcnk_shader.uniform("textures", texture_indices);
+  mcnk_shader.uniform("alphamaps", alphamap_indices);
+  mcnk_shader.uniform("layer_count", int(_texture_set.num()));
+  mcnk_shader.uniform("has_mccv", (hasMCCV ? 1 : 0));
+  
+  mcnk_shader.attrib("texcoord", gWorld->detailtexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+  mcnk_shader.attrib("alphacoord", gWorld->alphatexcoords, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+  mcnk_shader.attrib("position", mVertices);
+  mcnk_shader.attrib("normal", mNormals);
+  mcnk_shader.attrib("mccv", mccv);
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (indices);
+  
+  gl.drawElements(GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
 
-  if (hasMCCV)
+  for (int i : texture_indices)
   {
-    gl.colorPointer (mccvEntry, 3, GL_FLOAT, 0, 0);
-    gl.enableClientState(GL_COLOR_ARRAY);
+    opengl::texture::disable_texture(i);
   }
-
-  // ASSUME: texture coordinates set up already
-
-  // first pass: base texture
-
-  if (_texture_set.num() == 0U)
-  {
-    opengl::texture::set_active_texture (0);
-    opengl::texture::disable_texture();
-
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-
-    gl.color3f(1.0f, 1.0f, 1.0f);
-  }
-  else
-  {
-    _texture_set.bindTexture(0, 0);
-
-    opengl::texture::set_active_texture (1);
-    opengl::texture::disable_texture();
-  }
-
-  gl.enable(GL_LIGHTING);
-  gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-
-  if (_texture_set.num() > 1U) {
-    //gl.depthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
-    gl.depthMask(GL_FALSE);
-  }
-
-  // additional passes: if required
-  for (size_t i = 1; i < _texture_set.num(); ++i)
-  {
-    // this time, use blending:
-    _texture_set.bindTexture(i, 0);
-    _texture_set.bindAlphamap(i - 1, 1);
-
-    _texture_set.startAnim (i);
-    gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-    _texture_set.stopAnim (i);
-  }
-
-  if (_texture_set.num() > 1U)
-  {
-    //gl.depthFunc(GL_LEQUAL);
-    gl.depthMask(GL_TRUE);
-  }
-
-  if (hasMCCV)
-    gl.disableClientState(GL_COLOR_ARRAY);
-
-  if (cantPaint)
-  {
-    gl.color4f(1, 1, 1, 1);
-  }
-
-  // shadow map
-  opengl::texture::set_active_texture (0);
-  opengl::texture::disable_texture();
-  gl.disable(GL_LIGHTING);
-
-  math::vector_3d shc = gWorld->skies->colorSet[WATER_COLOR_DARK] * 0.3f;
-  gl.color4f(shc.x, shc.y, shc.z, 1);
-
-  //gl.color4f(1,1,1,1);
-
-  opengl::texture::enable_texture (1);
-  shadow.bind();
-
-  gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-
-  opengl::texture::disable_texture();
-  gl.disable(GL_LIGHTING);
-
-  if (draw_contour)
-  {
-    drawContour();
-  }
-
-  if (draw_chunk_flag_overlay)
-  {
-    // draw chunk white if impassible flag is set
-    if (Flags & FLAG_IMPASS)
-    {
-      gl.color4f(1, 1, 1, 0.6f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-    }
-  }
-
-  if (draw_areaid_overlay)
-  {
-    // draw chunks in color depending on AreaID and list color from environment
-    if (Environment::getInstance()->areaIDColors.find(areaID) != Environment::getInstance()->areaIDColors.end())
-    {
-      math::vector_3d colorValues = Environment::getInstance()->areaIDColors.find(areaID)->second;
-      gl.color4f(colorValues.x, colorValues.y, colorValues.z, 0.7f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-    }
-  }
-
-  if (cursor_type == 3)
-  {
-    if (gWorld->IsSelection(eEntry_MapChunk) && boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk == this)
-    {
-      int poly = boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).triangle;
-
-      gl.color4f(1.0f, 1.0f, 0.0f, 1.0f);
-
-      opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull_face;
-      opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
-      opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const depth_test;
-
-      gl.begin(GL_TRIANGLES);
-      gl.vertex3fv(mVertices[strip_without_holes[poly + 0]]);
-      gl.vertex3fv(mVertices[strip_without_holes[poly + 1]]);
-      gl.vertex3fv(mVertices[strip_without_holes[poly + 2]]);
-      gl.end();
-    }
-  }
-
-  if (draw_wireframe_overlay)
-  {
-    opengl::scoped::bool_setter<GL_LIGHTING, GL_FALSE> const lighting;
-    opengl::texture::disable_texture();
-
-    {
-      opengl::scoped::bool_setter<GL_POLYGON_OFFSET_LINE, GL_TRUE> const polygon_offset_line;
-      gl.polygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      gl.lineWidth(1);
-      gl.polygonOffset(-1, -1);
-      gl.color4f(1, 1, 1, 0.2f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-    }
-    {
-      opengl::scoped::bool_setter<GL_POLYGON_OFFSET_POINT, GL_TRUE> const polygon_offset_point;
-      gl.polygonMode(GL_FRONT_AND_BACK, GL_POINT);
-      gl.pointSize(2);
-      gl.polygonOffset(-1, -1);
-      gl.color4f(1, 1, 1, 0.5f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-    }
-
-    gl.polygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  }
-
-  gl.enable(GL_LIGHTING);
-  gl.color4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void MapChunk::intersect (math::ray const& ray, selection_result* results)
