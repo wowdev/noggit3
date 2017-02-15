@@ -125,12 +125,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
     Flags = header.flags;
     areaID = header.areaid;
 
-    if (Environment::getInstance()->areaIDColors.find(areaID) == Environment::getInstance()->areaIDColors.end())
-    {
-      math::vector_3d newColor = math::vector_3d(misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f));
-      Environment::getInstance()->areaIDColors.insert(std::pair<int, math::vector_3d>(areaID, newColor));
-    }
-
     zbase = header.zpos;
     xbase = header.xpos;
     ybase = header.ypos;
@@ -786,12 +780,8 @@ void MapChunk::draw ( Frustum const& frustum
   if (draw_areaid_overlay)
   {
     // draw chunks in color depending on AreaID and list color from environment
-    if (Environment::getInstance()->areaIDColors.find(areaID) != Environment::getInstance()->areaIDColors.end())
-    {
-      math::vector_3d colorValues = Environment::getInstance()->areaIDColors.find(areaID)->second;
-      gl.color4f(colorValues.x, colorValues.y, colorValues.z, 0.7f);
-      gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
-    }
+    gl.color4fv (Environment::getInstance()->areaIDColors[areaID]);
+    gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
   }
 
   if (cursor_type == 3)

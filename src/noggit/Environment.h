@@ -3,12 +3,25 @@
 #pragma once
 
 #include <math/vector_3d.hpp>
+#include <math/vector_4d.hpp>
 #include <noggit/Selection.h>
+#include <noggit/Misc.h>
 
 #include <boost/optional.hpp>
 
 #include <map>
 #include <string>
+
+struct random_color : math::vector_4d
+{
+  random_color()
+    : math::vector_4d ( misc::randfloat(0.0f, 1.0f)
+                      , misc::randfloat(0.0f, 1.0f)
+                      , misc::randfloat(0.0f, 1.0f)
+                      , 0.7f
+                      )
+  {}
+};
 
 class Environment
 {
@@ -20,7 +33,7 @@ public:
   bool is_clipboard();
 
   // values for areaID painting
-  std::map<int, math::vector_3d> areaIDColors; // List of all area IDs to draw them with different colors
+  std::map<int, random_color> areaIDColors; // List of all area IDs to draw them with different colors
 
   bool paintMode;
   int flagPaintMode;

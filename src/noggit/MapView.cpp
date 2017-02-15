@@ -381,11 +381,6 @@ void MapView::insert_last_wmo_from_wmv()
 void MapView::changeZoneIDValue (int set)
 {
   _selected_area_id = set;
-  if (Environment::getInstance()->areaIDColors.find(set) == Environment::getInstance()->areaIDColors.end())
-  {
-    math::vector_3d newColor = math::vector_3d(misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f));
-    Environment::getInstance()->areaIDColors.insert(std::pair<int, math::vector_3d>(set, newColor));
-  }
 }
 
 
