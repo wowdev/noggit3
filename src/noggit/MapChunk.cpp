@@ -131,8 +131,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha)
       Environment::getInstance()->areaIDColors.insert(std::pair<int, math::vector_3d>(areaID, newColor));
     }
 
-    Environment::getInstance()->selectedAreaID = areaID; //The last loaded is selected on start.
-
     zbase = header.zpos;
     xbase = header.xpos;
     ybase = header.ypos;
