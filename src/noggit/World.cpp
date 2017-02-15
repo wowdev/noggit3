@@ -513,6 +513,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_models_with_box
                  , std::unordered_set<WMO*> const& hidden_map_objects
                  , std::unordered_set<Model*> const& hidden_models
+                 , std::map<int, misc::random_color>& area_id_colors
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -609,6 +610,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , draw_areaid_overlay
                  , draw_wireframe
                  , cursor_type
+                 , area_id_colors
                  );
     }
   }

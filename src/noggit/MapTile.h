@@ -10,6 +10,7 @@
 #include <noggit/Video.h> // GLfloat, GLshort, ...
 #include <noggit/tile_index.hpp>
 #include <opengl/shader.fwd.hpp>
+#include <noggit/Misc.h>
 
 #include <map>
 #include <string>
@@ -65,6 +66,7 @@ public:
             , bool draw_areaid_overlay
             , bool draw_wireframe_overlay
             , int cursor_type
+            , std::map<int, misc::random_color>& area_id_colors
             );
   void intersect (math::ray const&, selection_result*) const;
   void drawLines ( opengl::scoped::use_program& line_shader

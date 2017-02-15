@@ -6,8 +6,11 @@
 #include <noggit/AppState.h>
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
+#include <noggit/Misc.h>
 
 #include <boost/optional.hpp>
+
+#include <map>
 
 class UIFrame;
 class World;
@@ -62,6 +65,7 @@ public:
   bool _draw_hidden_models = false;
 private:
   int _selected_area_id = -1;
+  std::map<int, misc::random_color> _area_id_colors;
 
   float lastBrushUpdate;
 
