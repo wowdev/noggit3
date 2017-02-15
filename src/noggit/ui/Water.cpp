@@ -141,7 +141,7 @@ UIWater::UIWater(UIMapViewGUI *setGui)
     "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp",
     [this]
     {
-      size_t layer = std::min(4, Environment::getInstance()->currentWaterLayer + 1);
+      size_t layer = Environment::getInstance()->currentWaterLayer + 1;
       waterLayer->setText(std::to_string(layer + 1));
       Environment::getInstance()->currentWaterLayer = layer;
     })
