@@ -110,12 +110,6 @@ void SaveObjecttoTXT(UIFrame* f, int)
   (static_cast<UIObjectEditor *>(f->parent())->modelImport->builModelList());
 }
 
-void updateHiddenModelsVisibility(UIFrame*, int)
-{
-  Environment::getInstance()->showModelFromHiddenList = !Environment::getInstance()->showModelFromHiddenList;
-}
-
-
 void clearHiddenModels(UIFrame*, int)
 {
   gWorld->clearHiddenModelList();
@@ -181,7 +175,20 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
 
   addChild(new UIButton(5.0f, 245.0f, 150.0f, 30.0f, "Rotation editor", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", toggleRotationEditor, 0));
 
-  addChild(new UIButton(5.0f, 270.0f, 150.0f, 30.0f, "Toggle visibility", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", updateHiddenModelsVisibility, 0));
+  addChild ( new UIButton ( 5.0f
+                          , 270.0f
+                          , 150.0f
+                          , 30.0f
+                          , "Toggle visibility"
+                          , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
+                          , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
+                          , [mainGui]
+                            {
+                              mainGui->theMapview->_draw_hidden_models
+                                = !mainGui->theMapview->_draw_hidden_models;
+                            }
+                          )
+           );
   addChild(new UIButton(5.0f, 295.0f, 150.0f, 30.0f, "Clear list", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", clearHiddenModels, 0));
 }
 

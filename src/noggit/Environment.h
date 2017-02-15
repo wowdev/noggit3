@@ -41,8 +41,6 @@ public:
   bool displayAllWaterLayers;
   int currentWaterLayer;
 
-  bool showModelFromHiddenList;
-
 private:
   Environment();
   static Environment* instance;

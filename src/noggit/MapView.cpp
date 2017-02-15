@@ -783,7 +783,7 @@ void MapView::createGUI()
                 // toggle hidden models visibility
                 if (_mod_space_down)
                 {
-                  Environment::getInstance()->showModelFromHiddenList = !Environment::getInstance()->showModelFromHiddenList;
+                  _draw_hidden_models = !_draw_hidden_models;
                 }
                 else if (_mod_shift_down)
                 {
@@ -1584,6 +1584,7 @@ selection_result MapView::intersect_result(bool terrain_only)
                         , _draw_terrain
                         , _draw_wmo
                         , _draw_models
+                        , _draw_hidden_models
                         )
     );
 
@@ -1777,6 +1778,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _draw_model_animations
                , _draw_hole_lines || terrainMode == editing_mode::holes
                , _draw_models_with_box
+               , _draw_hidden_models
                );
 
   displayGUIIfEnabled();
