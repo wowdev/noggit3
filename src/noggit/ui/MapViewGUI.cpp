@@ -231,7 +231,6 @@ void UIMapViewGUI::render() const
   statusbarInfo << "tile: " << std::floor(gWorld->camera.x / TILESIZE) << " " << std::floor(gWorld->camera.z / TILESIZE)
     << "; coordinates: client (x: " << gWorld->camera.x << ", y: " << gWorld->camera.z << ", z: " << gWorld->camera.y
     << "), server (x: " << (ZEROPOINT - gWorld->camera.z) << ", y:" << (ZEROPOINT - gWorld->camera.x) << ", z:" << (gWorld->camera.y) << ")";
-  if (Environment::getInstance()->paintMode) statusbarInfo << "PM:1"; else statusbarInfo << "PM:2";
   guiStatusbar->setLeftInfo(statusbarInfo.str());
 
   guiStatusbar->setRightInfo("");

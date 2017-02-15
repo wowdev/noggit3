@@ -653,8 +653,6 @@ void MapView::createGUI()
 
   addHotkey (SDLK_i, MOD_none, [this] { mousedir *= -1.f; });
 
-  addHotkey (SDLK_i, MOD_ctrl, [] { Environment::getInstance()->paintMode = !Environment::getInstance()->paintMode; });
-
   addHotkey (SDLK_o, MOD_none, [this] { movespd *= 0.5f; });
   addHotkey (SDLK_p, MOD_none, [this] { movespd *= 2.0f; });
 

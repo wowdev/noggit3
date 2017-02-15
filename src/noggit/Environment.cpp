@@ -4,8 +4,7 @@
 #include <noggit/MapHeaders.h>
 
 Environment::Environment()
-  : paintMode(true)
-  , minRotation(0.0f)
+  : minRotation(0.0f)
   , maxRotation(360.0f)
   , minTilt(-5.0f)
   , maxTilt(5.0f)
