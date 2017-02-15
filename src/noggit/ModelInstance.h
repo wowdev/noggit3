@@ -66,7 +66,10 @@ public:
     return *this;
   }
 
-  void draw (Frustum const&, bool force_box);
+  void draw ( Frustum const&
+            , bool force_box
+            , bool all_boxes
+            );
   void drawMapTile();
   //  void drawHighlight();
   void intersect (math::ray const&, selection_result*);

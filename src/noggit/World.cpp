@@ -510,6 +510,7 @@ void World::draw ( math::vector_3d const& cursor_pos
                  , bool draw_models
                  , bool draw_model_animations
                  , bool draw_hole_lines
+                 , bool draw_models_with_box
                  )
 {
   opengl::matrix::look_at (camera_pos, camera_lookat, {0.0f, 1.0f, 0.0f});
@@ -838,7 +839,7 @@ void main()
       bool const is_hidden (_hidden_models.count (it->second.model.get()));
       if (!is_hidden || renderHidden)
       {
-        it->second.draw (frustum, is_hidden);
+        it->second.draw (frustum, is_hidden, draw_models_with_box);
       }
     }
   }

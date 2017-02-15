@@ -516,7 +516,7 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &_draw_mfbo);
   mbar->GetMenu("View")->AddMenuItemToggle("SHIFT+F7 Hole lines always on", &_draw_hole_lines, false);
   addHotkey (SDLK_F7, MOD_shift, [this] { _draw_hole_lines = !_draw_hole_lines; });
-  mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &Settings::getInstance()->renderModelsWithBox);
+  mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &_draw_models_with_box);
 
   mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [this] { mainGui->showHelp(); });
 #if defined(_WIN32) || defined(WIN32)
@@ -1776,6 +1776,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _draw_models
                , _draw_model_animations
                , _draw_hole_lines || terrainMode == editing_mode::holes
+               , _draw_models_with_box
                );
 
   displayGUIIfEnabled();

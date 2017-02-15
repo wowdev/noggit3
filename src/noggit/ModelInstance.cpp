@@ -52,7 +52,10 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF *d)
   recalcExtents();
 }
 
-void ModelInstance::draw (Frustum const& frustum, bool force_box)
+void ModelInstance::draw ( Frustum const& frustum
+                         , bool force_box
+                         , bool all_boxes
+                         )
 {
   if(((pos - gWorld->camera).length() - model->rad * sc) >= gWorld->culldistance)
     return;
@@ -75,7 +78,7 @@ void ModelInstance::draw (Frustum const& frustum, bool force_box)
 
   gl.multMatrixf (model_matrix.transposed());
 
-  if (Settings::getInstance()->renderModelsWithBox)
+  if (all_boxes)
   {
     opengl::primitives::wire_box ( TransformCoordsForModel(model->header.VertexBoxMin)
                                  , TransformCoordsForModel(model->header.VertexBoxMax)

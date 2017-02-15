@@ -52,6 +52,7 @@ private:
   bool _draw_models = true;
   bool _draw_model_animations = false;
   bool _draw_hole_lines = false;
+  bool _draw_models_with_box = false;
 
   float lastBrushUpdate;
 
