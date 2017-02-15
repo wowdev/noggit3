@@ -380,7 +380,7 @@ void MapView::insert_last_wmo_from_wmv()
 
 void MapView::changeZoneIDValue (int set)
 {
-  Environment::getInstance()->selectedAreaID = set;
+  _selected_area_id = set;
   if (Environment::getInstance()->areaIDColors.find(set) == Environment::getInstance()->areaIDColors.end())
   {
     math::vector_3d newColor = math::vector_3d(misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f), misc::randfloat(0.0f, 1.0f));
@@ -451,11 +451,11 @@ void MapView::createGUI()
   mbar->GetMenu("Assist")->AddMenuItemButton("Helper models", [this] { mainGui->HelperModels->show(); });
   mbar->GetMenu("Assist")->AddMenuItemSeperator("Current ADT");
   mbar->GetMenu("Assist")->AddMenuItemButton ( "Set Area ID"
-                                             , []
+                                             , [this]
                                                {
-                                                 if (Environment::getInstance()->selectedAreaID)
+                                                 if (_selected_area_id != -1)
                                                  {
-                                                   gWorld->setAreaID(gWorld->camera, Environment::getInstance()->selectedAreaID, true);
+                                                   gWorld->setAreaID(gWorld->camera, _selected_area_id, true);
                                                  }
                                                }
                                              );
@@ -1424,14 +1424,14 @@ void MapView::tick(float t, float dt)
             if (_mod_shift_down)
             {
               // draw the selected AreaId on current selected chunk
-              gWorld->setAreaID(_cursor_pos, Environment::getInstance()->selectedAreaID, false);
+              gWorld->setAreaID(_cursor_pos, _selected_area_id, false);
             }
             else if (_mod_ctrl_down)
             {
               // pick areaID from chunk
               MapChunk* chnk (boost::get<selected_chunk_type> (*gWorld->GetCurrentSelection()).chunk);
               int newID = chnk->getAreaID();
-              Environment::getInstance()->selectedAreaID = newID;
+              _selected_area_id = newID;
               mainGui->ZoneIDBrowser->setZoneID(newID);
             }
           }

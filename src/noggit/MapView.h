@@ -61,6 +61,7 @@ public:
   std::unordered_set<Model*> _hidden_models;
   bool _draw_hidden_models = false;
 private:
+  int _selected_area_id = -1;
 
   float lastBrushUpdate;
 

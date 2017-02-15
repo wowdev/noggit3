@@ -20,7 +20,6 @@ public:
   bool is_clipboard();
 
   // values for areaID painting
-  int selectedAreaID;
   std::map<int, math::vector_3d> areaIDColors; // List of all area IDs to draw them with different colors
 
   bool paintMode;
