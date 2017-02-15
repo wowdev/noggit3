@@ -36,7 +36,6 @@ UIZoneIDBrowser::UIZoneIDBrowser(int xPos, int yPos, int w, int h, UIMapViewGUI 
   , mapID(-1)
   , zoneID(-1)
   , subZoneID(-1)
-  , selectedAreaID(-1)
   , MapName("")
   , ZoneName("")
   , SubZoneName("")
