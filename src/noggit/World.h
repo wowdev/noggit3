@@ -124,7 +124,8 @@ public:
             , bool draw_model_animations
             , bool draw_hole_lines
             , bool draw_models_with_box
-            , bool draw_hidden_models
+            , std::unordered_set<WMO*> const& hidden_map_objects
+            , std::unordered_set<Model*> const& hidden_models
             );
 
   void outdoorLights(bool on);
@@ -139,7 +140,8 @@ public:
                              , bool draw_terrain
                              , bool draw_wmo
                              , bool draw_models
-                             , bool draw_hidden_models
+                             , std::unordered_set<WMO*> const& hidden_map_objects
+                             , std::unordered_set<Model*> const& hidden_models
                              );
   void drawTileMode ( float ah
                     , math::vector_3d const& camera_pos
@@ -206,10 +208,6 @@ public:
   void updateTilesEntry(selection_type const& entry);
   void updateTilesWMO(WMOInstance* wmo);
   void updateTilesModel(ModelInstance* m2);
-
-  std::unordered_set<WMO*> _hidden_map_objects;
-  std::unordered_set<Model*> _hidden_models;
-  void clearHiddenModelList();
 
   void saveMap();
 

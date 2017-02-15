@@ -23,6 +23,9 @@ enum eViewMode
   eViewMode_3D
 };
 
+class WMO;
+class Model;
+
 class MapView : public AppState
 {
 private:
@@ -54,6 +57,8 @@ private:
   bool _draw_hole_lines = false;
   bool _draw_models_with_box = false;
 public:
+  std::unordered_set<WMO*> _hidden_map_objects;
+  std::unordered_set<Model*> _hidden_models;
   bool _draw_hidden_models = false;
 private:
 

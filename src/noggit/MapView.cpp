@@ -787,7 +787,8 @@ void MapView::createGUI()
                 }
                 else if (_mod_shift_down)
                 {
-                  gWorld->clearHiddenModelList();
+                  _hidden_map_objects.clear();
+                  _hidden_models.clear();
                 }
                 else
                 {
@@ -798,7 +799,7 @@ void MapView::createGUI()
                     if (selection->which() == eEntry_Model)
                     {
                       auto&& entity (boost::get<selected_model_type> (*selection)->model.get());
-                      auto&& hidden (gWorld->_hidden_models);
+                      auto& hidden (_hidden_models);
                       if (hidden.count (entity))
                       {
                         hidden.erase (entity);
@@ -811,7 +812,7 @@ void MapView::createGUI()
                     else if (selection->which() == eEntry_WMO)
                     {
                       auto&& entity (boost::get<selected_wmo_type> (*selection)->wmo.get());
-                      auto&& hidden (gWorld->_hidden_map_objects);
+                      auto& hidden (_hidden_map_objects);
                       if (hidden.count (entity))
                       {
                         hidden.erase (entity);
@@ -1584,7 +1585,8 @@ selection_result MapView::intersect_result(bool terrain_only)
                         , _draw_terrain
                         , _draw_wmo
                         , _draw_models
-                        , _draw_hidden_models
+                        , _draw_hidden_models ? std::unordered_set<WMO*>() : _hidden_map_objects
+                        , _draw_hidden_models ? std::unordered_set<Model*>() : _hidden_models
                         )
     );
 
@@ -1778,7 +1780,8 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _draw_model_animations
                , _draw_hole_lines || terrainMode == editing_mode::holes
                , _draw_models_with_box
-               , _draw_hidden_models
+               , _draw_hidden_models ? std::unordered_set<WMO*>() : _hidden_map_objects
+               , _draw_hidden_models ? std::unordered_set<Model*>() : _hidden_models
                );
 
   displayGUIIfEnabled();

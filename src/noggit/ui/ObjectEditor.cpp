@@ -110,11 +110,6 @@ void SaveObjecttoTXT(UIFrame* f, int)
   (static_cast<UIObjectEditor *>(f->parent())->modelImport->builModelList());
 }
 
-void clearHiddenModels(UIFrame*, int)
-{
-  gWorld->clearHiddenModelList();
-}
-
 UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
    : UIWindow(x, y, 270.0f, 320.0f)
    , selected()
@@ -189,7 +184,20 @@ UIObjectEditor::UIObjectEditor(float x, float y, UIMapViewGUI* mainGui)
                             }
                           )
            );
-  addChild(new UIButton(5.0f, 295.0f, 150.0f, 30.0f, "Clear list", "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp", "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp", clearHiddenModels, 0));
+  addChild ( new UIButton ( 5.0f
+                          , 295.0f
+                          , 150.0f
+                          , 30.0f
+                          , "Clear list"
+                          , "Interface\\BUTTONS\\UI-DialogBox-Button-Disabled.blp"
+                          , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
+                          , [mainGui]
+                            {
+                              mainGui->theMapview->_hidden_map_objects.clear();
+                              mainGui->theMapview->_hidden_models.clear();
+                            }
+                          )
+           );
 }
 
 void UIObjectEditor::pasteObject (math::vector_3d pos)
