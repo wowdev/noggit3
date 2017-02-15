@@ -291,7 +291,7 @@ int MapIndex::getChanged(const tile_index& tile)
     return 0;
 }
 
-void MapIndex::setFlag(bool to, math::vector_3d const& pos)
+void MapIndex::setFlag(bool to, math::vector_3d const& pos, uint32_t flag)
 {
   tile_index tile(pos);
 
@@ -302,7 +302,7 @@ void MapIndex::setFlag(bool to, math::vector_3d const& pos)
     int cx = (pos.x - tile.x * TILESIZE) / CHUNKSIZE;
     int cz = (pos.z - tile.z * TILESIZE) / CHUNKSIZE;
 
-    getTile(tile)->getChunk(cx, cz)->setFlag(to);
+    getTile(tile)->getChunk(cx, cz)->setFlag(to, flag);
   }
 }
 

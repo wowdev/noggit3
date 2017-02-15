@@ -147,7 +147,7 @@ public:
   void setChanged(MapTile* tile);
 
   void unsetChanged(const tile_index& tile);
-  void setFlag(bool to, math::vector_3d const& pos);
+  void setFlag(bool to, math::vector_3d const& pos, uint32_t flag);
   int getChanged(const tile_index& tile);
 
   void saveTile(const tile_index& tile);

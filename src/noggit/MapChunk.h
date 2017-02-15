@@ -135,7 +135,7 @@ public:
   bool isHole(int i, int j);
   void setHole(math::vector_3d const& pos, bool big, bool add);
 
-  void setFlag(bool value);
+  void setFlag(bool value, uint32_t);
   int getFlag();
 
   int getAreaID();
