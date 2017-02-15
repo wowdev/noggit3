@@ -361,226 +361,226 @@ bool TextureSet::eraseUnusedTextures()
 
 bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
+  if (!Environment::getInstance()->paintMode)
+    return false;
+
   bool changed = false;
 
-  if (Environment::getInstance()->paintMode == true)
+  float zPos, xPos, dist, radius;
+
+  // hacky fix to make sure textures are blended between 2 chunks
+  if (z < zbase)
   {
-    float zPos, xPos, dist, radius;
+    zbase -= TEXDETAILSIZE;
+  }
+  else if (z > zbase + CHUNKSIZE)
+  {
+    zbase += TEXDETAILSIZE;
+  }
 
-    // hacky fix to make sure textures are blended between 2 chunks
-    if (z < zbase)
-    {
-      zbase -= TEXDETAILSIZE;
-    }
-    else if (z > zbase + CHUNKSIZE)
-    {
-      zbase += TEXDETAILSIZE;
-    }
+  if (x < xbase)
+  {
+    xbase -= TEXDETAILSIZE;
+  }
+  else if (x > xbase + CHUNKSIZE)
+  {
+    xbase += TEXDETAILSIZE;
+  }
 
-    if (x < xbase)
-    {
-      xbase -= TEXDETAILSIZE;
-    }
-    else if (x > xbase + CHUNKSIZE)
-    {
-      xbase += TEXDETAILSIZE;
-    }
+  //xbase, zbase mapchunk pos
+  //x, y mouse pos
 
-    //xbase, zbase mapchunk pos
-    //x, y mouse pos
+  int texLevel = -1;
+  radius = brush->getRadius();
+  dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
 
-    int texLevel = -1;
-    radius = brush->getRadius();
-    dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
+  if (dist > radius)
+    return changed;
 
-    if (dist > radius)
-      return changed;
+  //First Lets find out do we have the texture already
+  for (size_t i = 0; i<nTextures; ++i)
+    if (textures[i] == texture)
+      texLevel = i;
 
-    //First Lets find out do we have the texture already
-    for (size_t i = 0; i<nTextures; ++i)
-      if (textures[i] == texture)
-        texLevel = i;
+  if (texLevel == -1 && strength == 0)
+  {
+    return false;
+  }
 
-    if (texLevel == -1 && strength == 0)
-    {
-      return false;
-    }
+  if ((texLevel == -1) && (nTextures == 4) && !eraseUnusedTextures())
+  {
+    LogDebug << "paintTexture: No free texture slot" << std::endl;
+    return false;
+  }
 
-    if ((texLevel == -1) && (nTextures == 4) && !eraseUnusedTextures())
-    {
-      LogDebug << "paintTexture: No free texture slot" << std::endl;
-      return false;
-    }
+  //Only 1 layer and its that layer
+  if ((texLevel != -1) && (nTextures == 1))
+    return true;
 
-    //Only 1 layer and its that layer
-    if ((texLevel != -1) && (nTextures == 1))
+  if (texLevel == -1)
+  {
+    texLevel = addTexture(texture);
+    if (texLevel == 0)
       return true;
-
     if (texLevel == -1)
     {
-      texLevel = addTexture(texture);
-      if (texLevel == 0)
-        return true;
-      if (texLevel == -1)
-      {
-        LogDebug << "paintTexture: Unable to add texture." << std::endl;
-        return false;
-      }
+      LogDebug << "paintTexture: Unable to add texture." << std::endl;
+      return false;
     }
+  }
 
-    zPos = zbase;
-    bool texVisible[4] = { false, false, false, false };
+  zPos = zbase;
+  bool texVisible[4] = { false, false, false, false };
 
-    for (int j = 0; j < 64; j++)
+  for (int j = 0; j < 64; j++)
+  {
+    xPos = xbase;
+    for (int i = 0; i < 64; ++i)
     {
-      xPos = xbase;
-      for (int i = 0; i < 64; ++i)
+      dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
+
+      if (dist>radius)
       {
-        dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
-
-        if (dist>radius)
+        bool baseVisible = true;
+        for (size_t k = nTextures - 1; k > 0; k--)
         {
-          bool baseVisible = true;
-          for (size_t k = nTextures - 1; k > 0; k--)
-          {
-            unsigned char a = alphamaps[k - 1]->getAlpha(i + j * 64);
+          unsigned char a = alphamaps[k - 1]->getAlpha(i + j * 64);
 
-            if (a > 0)
+          if (a > 0)
+          {
+            texVisible[k] = true;
+
+            if (a == 255)
             {
-              texVisible[k] = true;
-
-              if (a == 255)
-              {
-                baseVisible = false;
-              }
-            }
-          }
-          texVisible[0] = texVisible[0] || baseVisible;
-
-          xPos += TEXDETAILSIZE;
-          continue;
-        }
-
-        float tPressure = pressure*brush->getValue(dist);
-        float alphas[3] = { 0.0f, 0.0f, 0.0f };
-        float visibility[4] = { 255.0f, 0.0f, 0.0f, 0.0f };
-
-        for (size_t k = 0; k < nTextures - 1; k++)
-        {
-          float f = static_cast<float>(alphamaps[k]->getAlpha(i + j * 64));
-          visibility[k+1] = f;
-          alphas[k] = f;
-          for (size_t n = 0; n <= k; n++)
-            visibility[n] = (visibility[n] * ((255.0f - f)) / 255.0f);
-        }
-
-        // nothing to do
-        if (visibility[texLevel] == strength)
-        {
-          for (size_t k = 0; k < nTextures; k++)
-          {
-            texVisible[k] = texVisible[k] || (visibility[k] > 0.0f);
-          }
-
-          xPos += TEXDETAILSIZE;
-          continue;
-        }
-
-        // at this point we know for sure that the textures will be changed
-        changed = true;
-
-        // alpha delta
-        float diffA = (strength - visibility[texLevel])* tPressure;
-
-        // visibility = 255 => all other at 0
-        if (visibility[texLevel] + diffA >= 255.0f)
-        {
-          for (size_t k = 0; k < nTextures; k++)
-          {
-            visibility[k] = (k == texLevel) ? 255.0f : 0.0f;
-          }
-        }
-        else
-        {
-          float other = 255.0f - visibility[texLevel];
-
-          if (visibility[texLevel] == 255.0f && diffA < 0.0f)
-          {
-            visibility[texLevel] += diffA;
-            int idTex = (!texLevel) ? 1 : texLevel - 1; // nTexture > 1 else it'd have returned true at the beginning
-            visibility[idTex] -= diffA;
-          }
-          else
-          {
-            visibility[texLevel] += diffA;
-
-            for (size_t k = 0; k < nTextures; k++)
-            {
-              if (k == texLevel || visibility[k] == 0)
-                continue;
-
-              visibility[k] = visibility[k] - (diffA * (visibility[k] / other));
+              baseVisible = false;
             }
           }
         }
+        texVisible[0] = texVisible[0] || baseVisible;
 
-        for (int k = nTextures - 2; k >= 0; k--)
-        {
-          alphas[k] = visibility[k+1];
-          for (int n = nTextures - 2; n > k; n--)
-          {
-            // prevent 0 division
-            if (alphas[n] == 255.0f)
-            {
-              alphas[k] = 0.0f;
-              break;
-            }
-            else
-              alphas[k] = (alphas[k] / (255.0f - alphas[n])) * 255.0f;
-          }
-        }
+        xPos += TEXDETAILSIZE;
+        continue;
+      }
 
+      float tPressure = pressure*brush->getValue(dist);
+      float alphas[3] = { 0.0f, 0.0f, 0.0f };
+      float visibility[4] = { 255.0f, 0.0f, 0.0f, 0.0f };
+
+      for (size_t k = 0; k < nTextures - 1; k++)
+      {
+        float f = static_cast<float>(alphamaps[k]->getAlpha(i + j * 64));
+        visibility[k+1] = f;
+        alphas[k] = f;
+        for (size_t n = 0; n <= k; n++)
+          visibility[n] = (visibility[n] * ((255.0f - f)) / 255.0f);
+      }
+
+      // nothing to do
+      if (visibility[texLevel] == strength)
+      {
         for (size_t k = 0; k < nTextures; k++)
         {
-          if (k < nTextures - 1)
-          {
-            alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f)));
-          }
           texVisible[k] = texVisible[k] || (visibility[k] > 0.0f);
         }
 
         xPos += TEXDETAILSIZE;
-      }
-      zPos += TEXDETAILSIZE;
-    }
-
-    if (!changed)
-    {
-      return false;
-    }
-
-    // stop after k=0 because k is unsigned
-    for (size_t k = nTextures - 1; k < 4; k--)
-    {
-      if (!texVisible[k])
-        eraseTexture(k);
-    }
-
-    if (nTextures < 2)
-    {
-      return changed;
-    }
-
-    for (size_t j = 0; j < nTextures - 1; j++)
-    {
-      if (j > 2)
-      {
-        LogError << "WTF how did you get here??? Get a cookie." << std::endl;
         continue;
       }
 
-      alphamaps[j]->loadTexture();
+      // at this point we know for sure that the textures will be changed
+      changed = true;
+
+      // alpha delta
+      float diffA = (strength - visibility[texLevel])* tPressure;
+
+      // visibility = 255 => all other at 0
+      if (visibility[texLevel] + diffA >= 255.0f)
+      {
+        for (size_t k = 0; k < nTextures; k++)
+        {
+          visibility[k] = (k == texLevel) ? 255.0f : 0.0f;
+        }
+      }
+      else
+      {
+        float other = 255.0f - visibility[texLevel];
+
+        if (visibility[texLevel] == 255.0f && diffA < 0.0f)
+        {
+          visibility[texLevel] += diffA;
+          int idTex = (!texLevel) ? 1 : texLevel - 1; // nTexture > 1 else it'd have returned true at the beginning
+          visibility[idTex] -= diffA;
+        }
+        else
+        {
+          visibility[texLevel] += diffA;
+
+          for (size_t k = 0; k < nTextures; k++)
+          {
+            if (k == texLevel || visibility[k] == 0)
+              continue;
+
+            visibility[k] = visibility[k] - (diffA * (visibility[k] / other));
+          }
+        }
+      }
+
+      for (int k = nTextures - 2; k >= 0; k--)
+      {
+        alphas[k] = visibility[k+1];
+        for (int n = nTextures - 2; n > k; n--)
+        {
+          // prevent 0 division
+          if (alphas[n] == 255.0f)
+          {
+            alphas[k] = 0.0f;
+            break;
+          }
+          else
+            alphas[k] = (alphas[k] / (255.0f - alphas[n])) * 255.0f;
+        }
+      }
+
+      for (size_t k = 0; k < nTextures; k++)
+      {
+        if (k < nTextures - 1)
+        {
+          alphamaps[k]->setAlpha(i + j * 64, static_cast<unsigned char>(std::min(std::max(std::round(alphas[k]), 0.0f), 255.0f)));
+        }
+        texVisible[k] = texVisible[k] || (visibility[k] > 0.0f);
+      }
+
+      xPos += TEXDETAILSIZE;
     }
+    zPos += TEXDETAILSIZE;
+  }
+
+  if (!changed)
+  {
+    return false;
+  }
+
+  // stop after k=0 because k is unsigned
+  for (size_t k = nTextures - 1; k < 4; k--)
+  {
+    if (!texVisible[k])
+      eraseTexture(k);
+  }
+
+  if (nTextures < 2)
+  {
+    return changed;
+  }
+
+  for (size_t j = 0; j < nTextures - 1; j++)
+  {
+    if (j > 2)
+    {
+      LogError << "WTF how did you get here??? Get a cookie." << std::endl;
+      continue;
+    }
+
+    alphamaps[j]->loadTexture();
   }
 
   return changed;
