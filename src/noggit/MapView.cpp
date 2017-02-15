@@ -1436,11 +1436,11 @@ void MapView::tick(float t, float dt)
           {
             if (_mod_shift_down)
             {
-              gWorld->mapIndex->setFlag(true, _cursor_pos);
+              gWorld->mapIndex->setFlag(true, _cursor_pos, FLAG_IMPASS);
             }
             else if (_mod_ctrl_down)
             {
-              gWorld->mapIndex->setFlag(false, _cursor_pos);
+              gWorld->mapIndex->setFlag(false, _cursor_pos, FLAG_IMPASS);
             }
           }
           break;

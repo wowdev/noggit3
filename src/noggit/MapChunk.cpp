@@ -1223,12 +1223,12 @@ int MapChunk::getAreaID()
 }
 
 
-void MapChunk::setFlag(bool changeto)
+void MapChunk::setFlag(bool changeto, uint32_t flag)
 {
   if (changeto)
-    this->Flags = this->Flags | (Environment::getInstance()->flagPaintMode);
+    this->Flags = this->Flags | (flag);
   else
-    this->Flags = this->Flags & ~(Environment::getInstance()->flagPaintMode);
+    this->Flags = this->Flags & ~(flag);
 }
 
 int MapChunk::getFlag()

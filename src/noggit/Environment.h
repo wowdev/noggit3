@@ -22,7 +22,6 @@ public:
   bool is_clipboard();
 
   bool paintMode;
-  int flagPaintMode;
 
   int groundBrushType;
 
