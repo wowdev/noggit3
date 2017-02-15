@@ -160,7 +160,6 @@ void MapView::set_editing_mode (editing_mode mode)
   }
 
   terrainMode = mode;
-  Environment::getInstance()->view_holelines = (mode == editing_mode::holes);
   mainGui->guiToolbar->IconSelect (mode);
 }
 
@@ -515,7 +514,8 @@ void MapView::createGUI()
   mbar->GetMenu("View")->AddMenuItemToggle("F12 Fog", &gWorld->drawfog);
   addHotkey(SDLK_F12, MOD_none, [] { gWorld->drawfog = !gWorld->drawfog; });
   mbar->GetMenu("View")->AddMenuItemToggle("Flight Bounds", &_draw_mfbo);
-  mbar->GetMenu("View")->AddMenuItemToggle("Hole lines always on", &Environment::getInstance()->view_holelines, false);
+  mbar->GetMenu("View")->AddMenuItemToggle("SHIFT+F7 Hole lines always on", &_draw_hole_lines, false);
+  addHotkey (SDLK_F7, MOD_shift, [this] { _draw_hole_lines = !_draw_hole_lines; });
   mbar->GetMenu("View")->AddMenuItemToggle("Models with box", &Settings::getInstance()->renderModelsWithBox);
 
   mbar->GetMenu("Help")->AddMenuItemButton("H Key Bindings", [this] { mainGui->showHelp(); });
@@ -656,7 +656,6 @@ void MapView::createGUI()
             );
 
   addHotkey (SDLK_F4, MOD_shift, [] { Settings::getInstance()->AutoSelectingMode = !Settings::getInstance()->AutoSelectingMode; });
-  addHotkey (SDLK_F7, MOD_shift, [] { Environment::getInstance()->view_holelines = !Environment::getInstance()->view_holelines; });
 
   addHotkey (SDLK_x, MOD_ctrl, [this] { mainGui->guidetailInfos->toggleVisibility(); });
 
@@ -1776,6 +1775,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _draw_wmo_doodads
                , _draw_models
                , _draw_model_animations
+               , _draw_hole_lines || terrainMode == editing_mode::holes
                );
 
   displayGUIIfEnabled();

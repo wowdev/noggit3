@@ -592,6 +592,7 @@ bool MapChunk::is_visible ( const float& cull_distance
 
 void MapChunk::drawLines ( opengl::scoped::use_program& line_shader
                          , Frustum const& frustum
+                         , bool draw_hole_lines
                          )
 {
   if (!is_visible (gWorld->culldistance, frustum, gWorld->camera))
@@ -628,7 +629,7 @@ void MapChunk::drawLines ( opengl::scoped::use_program& line_shader
     gl.drawElements(GL_LINE_STRIP, 9, GL_UNSIGNED_SHORT, &LineStrip[8]);
   }
 
-  if (Environment::getInstance()->view_holelines)
+  if (draw_hole_lines)
   {
     // Draw hole lines if view_subchunk_lines is true
     line_shader.uniform ("color", math::vector_4d (0.f, 0.f, 1.f, 0.5f));

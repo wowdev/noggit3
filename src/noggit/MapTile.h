@@ -69,6 +69,7 @@ public:
   void intersect (math::ray const&, selection_result*) const;
   void drawLines ( opengl::scoped::use_program& line_shader
                  , Frustum const&
+                 , bool draw_hole_lines
                  );
   void drawWater (opengl::scoped::use_program& water_shader);
   void drawTextures (float minX, float minY, float maxX, float maxY);

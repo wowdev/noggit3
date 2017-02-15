@@ -357,11 +357,12 @@ void MapTile::intersect (math::ray const& ray, selection_result* results) const
 
 void MapTile::drawLines ( opengl::scoped::use_program& line_shader
                         , Frustum const& frustum
+                        , bool draw_hole_lines
                         )
 {
   for (int j = 0; j<16; ++j)
     for (int i = 0; i<16; ++i)
-      mChunks[j][i]->drawLines (line_shader, frustum);
+      mChunks[j][i]->drawLines (line_shader, frustum, draw_hole_lines);
 }
 
 void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
