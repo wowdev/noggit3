@@ -12,6 +12,9 @@
 #include <noggit/texture_set.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
+#include <noggit/Misc.h>
+
+#include <map>
 
 class MPQFile;
 namespace math
@@ -93,6 +96,7 @@ public:
             , bool draw_areaid_overlay
             , bool draw_wireframe_overlay
             , int cursor_type
+            , std::map<int, misc::random_color>& area_id_colors
             );
   //! \todo only this function should be public, all others should be called from it
 

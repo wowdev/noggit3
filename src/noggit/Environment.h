@@ -12,17 +12,6 @@
 #include <map>
 #include <string>
 
-struct random_color : math::vector_4d
-{
-  random_color()
-    : math::vector_4d ( misc::randfloat(0.0f, 1.0f)
-                      , misc::randfloat(0.0f, 1.0f)
-                      , misc::randfloat(0.0f, 1.0f)
-                      , 0.7f
-                      )
-  {}
-};
-
 class Environment
 {
 public:
@@ -31,9 +20,6 @@ public:
   void set_clipboard(boost::optional<selection_type> entry);
   void clear_clipboard();
   bool is_clipboard();
-
-  // values for areaID painting
-  std::map<int, random_color> areaIDColors; // List of all area IDs to draw them with different colors
 
   bool paintMode;
   int flagPaintMode;

@@ -661,6 +661,7 @@ void MapChunk::draw ( Frustum const& frustum
                     , bool draw_areaid_overlay
                     , bool draw_wireframe_overlay
                     , int cursor_type
+                    , std::map<int, misc::random_color>& area_id_colors
                     )
 {
   if (!is_visible (gWorld->culldistance, frustum, gWorld->camera))
@@ -780,7 +781,7 @@ void MapChunk::draw ( Frustum const& frustum
   if (draw_areaid_overlay)
   {
     // draw chunks in color depending on AreaID and list color from environment
-    gl.color4fv (Environment::getInstance()->areaIDColors[areaID]);
+    gl.color4fv (area_id_colors[areaID]);
     gl.drawElements (GL_TRIANGLES, strip_with_holes.size(), GL_UNSIGNED_SHORT, nullptr);
   }
 

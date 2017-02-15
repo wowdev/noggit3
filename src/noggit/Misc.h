@@ -4,6 +4,7 @@
 
 #include <math/trig.hpp>
 #include <math/vector_3d.hpp>
+#include <math/vector_4d.hpp>
 #include <noggit/Log.h>
 
 #include <algorithm>
@@ -34,6 +35,17 @@ namespace misc
   bool rectOverlap(math::vector_3d *r1, math::vector_3d *r2);
   // used for angled tools, get the height a point (pos) should be given an origin, angle and orientation
   float angledHeight(math::vector_3d const& origin, math::vector_3d const& pos, math::radians const& angle, math::radians const& orientation);
+
+  struct random_color : math::vector_4d
+  {
+    random_color()
+      : math::vector_4d ( misc::randfloat(0.0f, 1.0f)
+                        , misc::randfloat(0.0f, 1.0f)
+                        , misc::randfloat(0.0f, 1.0f)
+                        , 0.7f
+                        )
+    {}
+  };
 }
 
 //! \todo collect all lose functions/classes/structs for now, sort them later

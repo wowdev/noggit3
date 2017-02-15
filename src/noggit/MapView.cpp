@@ -1772,6 +1772,7 @@ void MapView::displayViewMode_3D(float /*t*/, float /*dt*/)
                , _draw_models_with_box
                , _draw_hidden_models ? std::unordered_set<WMO*>() : _hidden_map_objects
                , _draw_hidden_models ? std::unordered_set<Model*>() : _hidden_models
+               , _area_id_colors
                );
 
   displayGUIIfEnabled();

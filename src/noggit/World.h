@@ -11,6 +11,7 @@
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/map_horizon.h>
+#include <noggit/Misc.h>
 
 #include <map>
 #include <string>
@@ -126,6 +127,7 @@ public:
             , bool draw_models_with_box
             , std::unordered_set<WMO*> const& hidden_map_objects
             , std::unordered_set<Model*> const& hidden_models
+            , std::map<int, misc::random_color>& area_id_colors
             );
 
   void outdoorLights(bool on);
