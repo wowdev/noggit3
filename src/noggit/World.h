@@ -4,14 +4,15 @@
 
 #include <math/trig.hpp>
 #include <noggit/Frustum.h> // Frustum
+#include <noggit/Misc.h>
 #include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h>
 #include <noggit/Sky.h> // Skies, OutdoorLighting, OutdoorLightStats
 #include <noggit/WMO.h> // WMOManager
+#include <noggit/map_horizon.h>
+#include <noggit/map_index.hpp>
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
-#include <noggit/map_horizon.h>
-#include <noggit/Misc.h>
 
 #include <map>
 #include <string>
@@ -24,7 +25,6 @@ namespace opengl
 
 class Brush;
 class MapTile;
-class MapIndex;
 
 static const float detail_size = 8.0f;
 static const float highresdistance = 384.0f;
@@ -37,7 +37,7 @@ using StripType = uint16_t;
 class World
 {
 public:
-  MapIndex *mapIndex;
+  MapIndex mapIndex;
   map_horizon horizon;
 
   // Information about the currently selected model / WMO / triangle.

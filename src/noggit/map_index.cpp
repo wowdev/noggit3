@@ -141,7 +141,7 @@ void MapIndex::saveall()
 
 void MapIndex::savecurrent()
 {
-  gWorld->mapIndex->saveTile(tile_index(gWorld->camera));
+  gWorld->mapIndex.saveTile(tile_index(gWorld->camera));
 }
 
 

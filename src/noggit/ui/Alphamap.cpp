@@ -24,7 +24,7 @@ void UIAlphamap::render() const
   tile_index tile(gWorld->camera);
   float colorf[3];
 
-  if (!gWorld->mapIndex->tileLoaded(tile))
+  if (!gWorld->mapIndex.tileLoaded(tile))
     return;
 
   gl.enable(GL_BLEND);
@@ -35,7 +35,7 @@ void UIAlphamap::render() const
   {
     for (size_t i = 0; i < 16; ++i)
     {
-      TextureSet& tex = gWorld->mapIndex->getTile(tile)->getChunk(i, j)->_texture_set;
+      TextureSet& tex = gWorld->mapIndex.getTile(tile)->getChunk(i, j)->_texture_set;
       for (size_t t = 0; t < tex.num() - 1; ++t)
       {
         memset(colorf, 0, 3 * sizeof(float));

@@ -259,7 +259,9 @@ bool World::IsEditableWorld(int pMapId)
 }
 
 World::World(const std::string& name)
-  : mCurrentSelection()
+  : mapIndex (name)
+  , horizon(name)
+  , mCurrentSelection()
   , SelectionMode(false)
   , mWmoFilename("")
   , mWmoEntry(ENTRY_MODF())
@@ -275,7 +277,6 @@ World::World(const std::string& name)
   , culldistance(fogdistance)
   , skies(nullptr)
   , outdoorLightStats(OutdoorLightStats())
-  , horizon(name)
   , camera(math::vector_3d(0.0f, 0.0f, 0.0f))
 {
   for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
@@ -291,9 +292,7 @@ World::World(const std::string& name)
 
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
 
-  mapIndex = new MapIndex(basename);
-
-  if (!mapIndex->hasAGlobalWMO()) {
+  if (!mapIndex.hasAGlobalWMO()) {
     horizon.upload();
   }
 }
@@ -358,9 +357,9 @@ void World::initDisplay()
 {
   initGlobalVBOs(&detailtexcoords, &alphatexcoords);
 
-  mapIndex->setAdt(false);
+  mapIndex.setAdt(false);
 
-  if (mapIndex->hasAGlobalWMO())
+  if (mapIndex.hasAGlobalWMO())
   {
     WMOInstance inst(mWmoFilename, &mWmoEntry);
     camera = inst.pos;
@@ -391,12 +390,6 @@ World::~World()
   {
   delete mCurrentSelection;
   mCurrentSelection = nullptr;
-  }
-
-  if (mapIndex)
-  {
-  delete mapIndex;
-  mapIndex = nullptr;
   }
   */
 
@@ -519,7 +512,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   Frustum const frustum;
 
   bool hadSky = false;
-  if (draw_wmo || mapIndex->hasAGlobalWMO())
+  if (draw_wmo || mapIndex.hasAGlobalWMO())
   {
     for (std::map<int, WMOInstance>::iterator it = mWMOInstances.begin(); it != mWMOInstances.end(); ++it)
     {
@@ -560,7 +553,7 @@ void World::draw ( math::vector_3d const& cursor_pos
 
   // Draw verylowres heightmap
   if (drawfog && draw_terrain) {
-    horizon.draw(mapIndex, gWorld->skies->colorSet[FOG_COLOR], culldistance, frustum, camera);
+    horizon.draw (&mapIndex, gWorld->skies->colorSet[FOG_COLOR], culldistance, frustum, camera);
   }
 
   // Draw height map
@@ -597,7 +590,7 @@ void World::draw ( math::vector_3d const& cursor_pos
   // height map w/ a zillion texture passes
   if (draw_terrain)
   {
-    for (MapTile* tile : mapIndex->loaded_tiles())
+    for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->draw ( frustum
                  , highlightPaintableChunks
@@ -748,7 +741,7 @@ void main()
     line_shader.uniform ("projection", opengl::matrix::projection());
 
     setupFog();
-    for (MapTile* tile : mapIndex->loaded_tiles())
+    for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->drawLines (line_shader, frustum, draw_hole_lines);
     }
@@ -791,7 +784,7 @@ void main()
     mfbo_shader.uniform ("model_view", opengl::matrix::model_view());
     mfbo_shader.uniform ("projection", opengl::matrix::projection());
 
-    for (MapTile* tile : mapIndex->loaded_tiles())
+    for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->drawMFBO (mfbo_shader);
     }
@@ -847,7 +840,7 @@ void main()
 
 
   // WMOs / map objects
-  if (draw_wmo || mapIndex->hasAGlobalWMO())
+  if (draw_wmo || mapIndex.hasAGlobalWMO())
   {
     gl.materialfv(GL_FRONT_AND_BACK, GL_SPECULAR, math::vector_4d (1.0f, 1.0f, 1.0f, 1.0f));
     gl.materiali(GL_FRONT_AND_BACK, GL_SHININESS, 10);
@@ -882,7 +875,7 @@ void main()
     water_shader.uniform ("model_view", opengl::matrix::model_view());
     water_shader.uniform ("projection", opengl::matrix::projection());
 
-    for (MapTile* tile : mapIndex->loaded_tiles())
+    for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->drawWater (water_shader);
     }
@@ -903,7 +896,7 @@ selection_result World::intersect ( math::ray const& ray
 
   if (draw_terrain)
   {
-    for (auto&& tile : mapIndex->loaded_tiles())
+    for (auto&& tile : mapIndex.loaded_tiles())
     {
       tile->intersect (ray, &results);
     }
@@ -954,7 +947,7 @@ unsigned int World::getAreaID (math::vector_3d const& pos)
   const int mcx = (const int)(fmod(pos.x, TILESIZE) / CHUNKSIZE);
   const int mcz = (const int)(fmod(pos.z, TILESIZE) / CHUNKSIZE);
 
-  MapTile* curTile = mapIndex->getTile(tile);
+  MapTile* curTile = mapIndex.getTile(tile);
   if (!curTile)
   {
     return 0;
@@ -1026,7 +1019,7 @@ void World::drawTileMode ( float /*ah*/
     gl.disable(GL_CULL_FACE);
     gl.depthMask(GL_FALSE);
 
-    for (MapTile* tile : mapIndex->loaded_tiles())
+    for (MapTile* tile : mapIndex.loaded_tiles())
     {
       tile->drawTextures (minX, minY, maxX, maxY);
     }
@@ -1073,12 +1066,12 @@ bool World::GetVertex(float x, float z, math::vector_3d *V)
 {
   tile_index tile({x, 0, z});
 
-  if (!mapIndex->tileLoaded(tile))
+  if (!mapIndex.tileLoaded(tile))
   {
     return false;
   }
 
-  return mapIndex->getTile(tile)->GetVertex(x, z, V);
+  return mapIndex.getTile(tile)->GetVertex(x, z, V);
 }
 
 template<typename Fun>
@@ -1086,14 +1079,14 @@ template<typename Fun>
 {
   bool changed (false);
 
-  for (MapTile* tile : mapIndex->tiles_in_range (pos, radius))
+  for (MapTile* tile : mapIndex.tiles_in_range (pos, radius))
   {
     for (MapChunk* chunk : tile->chunks_in_range (pos, radius))
     {
       if (fun (chunk))
       {
         changed = true;
-        mapIndex->setChanged (tile);
+        mapIndex.setChanged (tile);
       }
     }
   }
@@ -1238,8 +1231,8 @@ void World::setHoleADT(math::vector_3d const& pos, bool hole)
 template<typename Fun>
   void World::for_all_chunks_on_tile (math::vector_3d const& pos, Fun&& fun)
 {
-  MapTile* tile (mapIndex->getTile (pos));
-  mapIndex->setChanged (tile);
+  MapTile* tile (mapIndex.getTile (pos));
+  mapIndex.setChanged (tile);
 
   for (size_t ty = 0; ty < 16; ++ty)
   {
@@ -1253,8 +1246,8 @@ template<typename Fun>
 template<typename Fun>
   void World::for_chunk_at(math::vector_3d const& pos, Fun&& fun)
   {
-    MapTile* tile(mapIndex->getTile(pos));
-    mapIndex->setChanged(tile);
+    MapTile* tile(mapIndex.getTile(pos));
+    mapIndex.setChanged(tile);
 
     fun(tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
   }
@@ -1262,17 +1255,17 @@ template<typename Fun>
 template<typename Fun>
   void World::for_tile_at(math::vector_3d const& pos, Fun&& fun)
   {
-    MapTile* tile(mapIndex->getTile(pos));
+    MapTile* tile(mapIndex.getTile(pos));
     if (tile)
     {
-      mapIndex->setChanged(tile);
+      mapIndex.setChanged(tile);
       fun(tile);
     }
   }
 
 void World::convert_alphamap(bool to_big_alpha)
 {
-  if (to_big_alpha == mapIndex->hasBigAlpha())
+  if (to_big_alpha == mapIndex.hasBigAlpha())
   {
     return;
   }
@@ -1283,26 +1276,26 @@ void World::convert_alphamap(bool to_big_alpha)
     {
       tile_index tile(x, z);
 
-      bool unload = !mapIndex->tileLoaded(tile);
+      bool unload = !mapIndex.tileLoaded(tile);
 
-      MapTile* mTile = mapIndex->loadTile(tile);
+      MapTile* mTile = mapIndex.loadTile(tile);
 
       if (mTile)
       {
         mTile->convert_alphamap(to_big_alpha);
         mTile->saveTile();
-        mapIndex->unsetChanged(tile);
+        mapIndex.unsetChanged(tile);
 
         if (unload)
         {
-          mapIndex->unloadTile(tile);
+          mapIndex.unloadTile(tile);
         }
       }
     }
   }
 
-  mapIndex->convert_alphamap(to_big_alpha);
-  mapIndex->save();
+  mapIndex.convert_alphamap(to_big_alpha);
+  mapIndex.save();
 }
 
 void World::saveMap()
@@ -1330,12 +1323,12 @@ void World::saveMap()
     {
       tile_index tile(x, y);
 
-      if (!mapIndex->hasTile(tile))
+      if (!mapIndex.hasTile(tile))
       {
         continue;
       }
 
-      ATile = mapIndex->loadTile(tile);
+      ATile = mapIndex.loadTile(tile);
       gl.clear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
       opengl::scoped::matrix_pusher const matrix;
@@ -1446,7 +1439,7 @@ void World::addM2(std::string const& filename, math::vector_3d newPos, bool copy
 {
   ModelInstance newModelis = ModelInstance(filename);
 
-  newModelis.d1 = mapIndex->newGUID();
+  newModelis.d1 = mapIndex.newGUID();
   newModelis.pos = newPos;
   newModelis.sc = 1;
 
@@ -1491,7 +1484,7 @@ void World::addWMO(std::string const& filename, math::vector_3d newPos, bool cop
 {
   WMOInstance newWMOis(filename);
 
-  newWMOis.mUniqueID = mapIndex->newGUID();
+  newWMOis.mUniqueID = mapIndex.newGUID();
   newWMOis.pos = newPos;
 
   if (Settings::getInstance()->copyModelStats
@@ -1528,7 +1521,7 @@ void World::updateTilesWMO(WMOInstance* wmo)
   {
     for (int x = start.x; x <= end.x; ++x)
     {
-      mapIndex->setChanged(tile_index(x, z));
+      mapIndex.setChanged(tile_index(x, z));
     }
   }
 }
@@ -1540,7 +1533,7 @@ void World::updateTilesModel(ModelInstance* m2)
   {
     for (int x = start.x; x <= end.x; ++x)
     {
-      mapIndex->setChanged(tile_index(x, z));
+      mapIndex.setChanged(tile_index(x, z));
     }
   }
 }
@@ -1597,7 +1590,7 @@ void World::paintLiquid( math::vector_3d const& pos
 
 bool World::canWaterSave(const tile_index& tile)
 {
-  MapTile* mt = mapIndex->getTile(tile);
+  MapTile* mt = mapIndex.getTile(tile);
   return !!mt && mt->canWaterSave();
 }
 
@@ -1608,9 +1601,9 @@ void World::setWaterType(math::vector_3d const& pos, int type)
 
 int World::getWaterType(const tile_index& tile)
 {
-  if (mapIndex->tileLoaded(tile))
+  if (mapIndex.tileLoaded(tile))
   {
-    return mapIndex->getTile(tile)->Water.getType(Environment::getInstance()->currentWaterLayer);
+    return mapIndex.getTile(tile)->Water.getType(Environment::getInstance()->currentWaterLayer);
   }
   else
   {
@@ -1628,10 +1621,10 @@ void World::fixAllGaps()
 {
   std::vector<MapChunk*> chunks;
 
-  for (MapTile* tile : mapIndex->loaded_tiles())
+  for (MapTile* tile : mapIndex.loaded_tiles())
   {
-    MapTile* left = mapIndex->getTileLeft(tile);
-    MapTile* above = mapIndex->getTileAbove(tile);
+    MapTile* left = mapIndex.getTileLeft(tile);
+    MapTile* above = mapIndex.getTileAbove(tile);
     bool tileChanged = false;
 
     // fix the gaps with the adt at the left of the current one
@@ -1691,7 +1684,7 @@ void World::fixAllGaps()
     }
     if (tileChanged)
     {
-      mapIndex->setChanged(tile);
+      mapIndex.setChanged(tile);
     }
   }
 
@@ -1705,13 +1698,13 @@ bool World::isUnderMap(math::vector_3d const& pos)
 {
   tile_index const tile (pos);
 
-  if (mapIndex->tileLoaded(tile))
+  if (mapIndex.tileLoaded(tile))
   {
     size_t chnkX = (pos.x / CHUNKSIZE) - tile.x * 16;
     size_t chnkZ = (pos.z / CHUNKSIZE) - tile.z * 16;
 
     // check using the cursor height
-    return (mapIndex->getTile(tile)->getChunk(chnkX, chnkZ)->getMinHeight()) > pos.y + 2.0f;
+    return (mapIndex.getTile(tile)->getChunk(chnkX, chnkZ)->getMinHeight()) > pos.y + 2.0f;
   }
 
   return true;
@@ -1768,7 +1761,7 @@ void World::updateSelectedVertices()
 {
   for (MapTile* tile : _vertex_tiles)
   {
-    mapIndex->setChanged(tile);
+    mapIndex.setChanged(tile);
   }
 
   // fix only the border chunks to be more efficient

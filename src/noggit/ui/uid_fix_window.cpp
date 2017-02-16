@@ -48,14 +48,14 @@ namespace ui
   void uid_fix_window::fixAllTiles()
   {
     hide();
-    gWorld->mapIndex->fixUIDs();
+    gWorld->mapIndex.fixUIDs();
     _menuLink->enterMapAt(_pos);
   }
 
   void uid_fix_window::getMaxUID()
   {
     hide();
-    gWorld->mapIndex->searchMaxUID();
+    gWorld->mapIndex.searchMaxUID();
     _menuLink->enterMapAt(_pos);
   }
 }
