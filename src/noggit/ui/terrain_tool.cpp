@@ -19,8 +19,8 @@ namespace ui
     , _radius(15.0f)
     , _inner_radius(0.0f)
     , _speed(2.0f)
-    , _angle(gWorld->vertex_angle._)
-    , _orientation(gWorld->vertex_orientation._)
+    , _vertex_angle (0.0f)
+    , _vertex_orientation (0.0f)
     , _tablet(tablet)
     , _edit_type(Environment::getInstance()->groundBrushType)
     , _vertex_mode(eVertexMode_Center)
@@ -97,7 +97,12 @@ namespace ui
       }
       else
       {
-        gWorld->deselectVertices(pos, _radius);
+        if (gWorld->deselectVertices(pos, _radius))
+        {
+          _vertex_angle = math::degrees (0.0f);
+          _vertex_orientation = math::degrees (0.0f);
+          gWorld->clearVertexSelection();
+        }
       }      
     }
   }
@@ -111,7 +116,7 @@ namespace ui
   {
     if (_edit_type == eTerrainType_Vertex)
     {
-      gWorld->flattenVertices();
+      gWorld->flattenVertices (gWorld->vertexCenter().y);
     }
   }
 
@@ -144,15 +149,15 @@ namespace ui
   {
     if (_edit_type == eTerrainType_Vertex)
     {
-      _orientation += change;
+      _vertex_orientation._ += change;
 
-      if (_orientation < 0.0f)
+      while (_vertex_orientation._ < 0.0f)
       {
-        _orientation += 360.0f;
+        _vertex_orientation._ += 360.0f;
       }
-      else if (_orientation > 360.0f)
+      while (_vertex_orientation._ > 360.0f)
       {
-        _orientation -= 360.0f;
+        _vertex_orientation._ -= 360.0f;
       }
       updateVertices(pos);
     }
@@ -163,7 +168,7 @@ namespace ui
     if (_edit_type == eTerrainType_Vertex)
     {
       math::vector_3d const& center = gWorld->vertexCenter();
-      _orientation = std::atan2(center.z - pos.z, center.x - pos.x) * 180.0f / math::constants::pi;
+      _vertex_orientation = math::radians (std::atan2(center.z - pos.z, center.x - pos.x));
       updateVertices(pos);
     }
   }
@@ -172,14 +177,19 @@ namespace ui
   {
     if (_edit_type == eTerrainType_Vertex)
     {
-      _angle = std::max(-89.0f, std::min(89.0f, _angle + change));
+      _vertex_angle = math::degrees (std::max(-89.0f, std::min(89.0f, _vertex_angle._ + change)));
       updateVertices(pos);
     }
   }
 
   void terrain_tool::updateVertices(math::vector_3d const& cursor_pos)
   {
-    gWorld->orientVertices(_vertex_mode == eVertexMode_Mouse ? cursor_pos : gWorld->vertexCenter());
+    gWorld->orientVertices ( _vertex_mode == eVertexMode_Mouse
+                           ? cursor_pos
+                           : gWorld->vertexCenter()
+                           , _vertex_angle
+                           , _vertex_orientation
+                           );
   }
 
   void terrain_tool::setTabletControlValue(float pressure)
