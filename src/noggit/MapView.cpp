@@ -414,14 +414,14 @@ void MapView::createGUI()
   mbar->AddMenu("Help");
 
   mbar->GetMenu( "File" )->AddMenuItemButton( "CTRL+SHIFT+S Save current", [this] { mainGui->scWarning->show(); });
-  mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex->saveChanged(); });
-  mbar->GetMenu("File")->AddMenuItemButton("CTRL+SHIFT+A Save all", [] { gWorld->mapIndex->saveall(); });
+  mbar->GetMenu("File")->AddMenuItemButton("CTRL+S Save", [] { gWorld->mapIndex.saveChanged(); });
+  mbar->GetMenu("File")->AddMenuItemButton("CTRL+SHIFT+A Save all", [] { gWorld->mapIndex.saveall(); });
   addHotkey(SDLK_s, MOD_ctrl + MOD_shift, [this] { mainGui->scWarning->show(); });
-  addHotkey(SDLK_a, MOD_ctrl + MOD_shift, [this] { gWorld->mapIndex->saveall(); });
-  addHotkey (SDLK_s, MOD_ctrl, [this] { gWorld->mapIndex->saveChanged(); });
-  addHotkey (SDLK_s, MOD_meta, [this] { gWorld->mapIndex->saveChanged(); });
-  mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
-  addHotkey (SDLK_j, MOD_shift, [] { gWorld->mapIndex->reloadTile(tile_index(gWorld->camera)); });
+  addHotkey(SDLK_a, MOD_ctrl + MOD_shift, [this] { gWorld->mapIndex.saveall(); });
+  addHotkey (SDLK_s, MOD_ctrl, [this] { gWorld->mapIndex.saveChanged(); });
+  addHotkey (SDLK_s, MOD_meta, [this] { gWorld->mapIndex.saveChanged(); });
+  mbar->GetMenu( "File" )->AddMenuItemButton( "SHIFT+J Reload tile", [] { gWorld->mapIndex.reloadTile(tile_index(gWorld->camera)); });
+  addHotkey (SDLK_j, MOD_shift, [] { gWorld->mapIndex.reloadTile(tile_index(gWorld->camera)); });
   mbar->GetMenu("File")->AddMenuItemSeperator(" ");
   mbar->GetMenu("File")->AddMenuItemButton("ESC Exit", [this] { mainGui->escWarning->show(); });
   addHotkey (SDLK_ESCAPE, MOD_none, [this] { mainGui->escWarning->show(); });
@@ -1049,9 +1049,9 @@ MapView::MapView(float _camera_ah0, float _camera_av0, math::vector_3d camera_lo
   // Set camera y (height) position to current ground height plus some space.
   math::vector_3d t = math::vector_3d(0, 0, 0);
   tile_index tile(gWorld->camera);
-  if (!gWorld->mapIndex->tileLoaded(tile))
+  if (!gWorld->mapIndex.tileLoaded(tile))
   {
-    gWorld->mapIndex->loadTile(tile);
+    gWorld->mapIndex.loadTile(tile);
   }
 
   gWorld->GetVertex(gWorld->camera.x, gWorld->camera.z, &t);
@@ -1078,8 +1078,8 @@ MapView::~MapView()
 void MapView::tick(float t, float dt)
 {
   // start unloading tiles
-  gWorld->mapIndex->enterTile (tile_index (gWorld->camera));
-  gWorld->mapIndex->unloadTiles (tile_index (gWorld->camera));
+  gWorld->mapIndex.enterTile (tile_index (gWorld->camera));
+  gWorld->mapIndex.unloadTiles (tile_index (gWorld->camera));
 
   dt = std::min(dt, 1.0f);
 
@@ -1434,11 +1434,11 @@ void MapView::tick(float t, float dt)
           {
             if (_mod_shift_down)
             {
-              gWorld->mapIndex->setFlag(true, _cursor_pos, FLAG_IMPASS);
+              gWorld->mapIndex.setFlag(true, _cursor_pos, FLAG_IMPASS);
             }
             else if (_mod_ctrl_down)
             {
-              gWorld->mapIndex->setFlag(false, _cursor_pos, FLAG_IMPASS);
+              gWorld->mapIndex.setFlag(false, _cursor_pos, FLAG_IMPASS);
             }
           }
           break;
@@ -2391,7 +2391,7 @@ void MapView::checkWaterSave()
 {
   tile_index const current (gWorld->camera);
 
-  if (!gWorld->mapIndex->hasTile (current) || gWorld->canWaterSave(current))
+  if (!gWorld->mapIndex.hasTile (current) || gWorld->canWaterSave(current))
   {
     mainGui->waterSaveWarning->hide();
   }

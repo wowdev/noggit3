@@ -47,7 +47,7 @@ UISaveCurrentWarning::UISaveCurrentWarning (UIFrame* parent)
                           , "Interface\\BUTTONS\\UI-DialogBox-Button-Down.blp"
                           , [this]
                             {
-                              gWorld->mapIndex->savecurrent();
+                              gWorld->mapIndex.savecurrent();
                               hide();
                             }
                           )

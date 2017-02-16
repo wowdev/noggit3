@@ -83,7 +83,7 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
   pos *= TILESIZE / tilesize; // minimap pos => real pos
 
   // is there a tile?
-  if (!gWorld->mapIndex->hasTile(tile_index(pos)))
+  if (!gWorld->mapIndex.hasTile(tile_index(pos)))
     return nullptr;
 
   if (mMenuLink)
@@ -93,12 +93,12 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
       && mysql::hasMaxUIDStoredDB(*Settings::getInstance()->mysql, gWorld->mMapId)
        )
     {
-      gWorld->mapIndex->loadMaxUID();
+      gWorld->mapIndex.loadMaxUID();
       mMenuLink->enterMapAt(pos);
     }
     else if (uid_storage::getInstance()->hasMaxUIDStored(gWorld->mMapId))
     {
-      gWorld->mapIndex->loadMaxUID();
+      gWorld->mapIndex.loadMaxUID();
       mMenuLink->enterMapAt(pos);
     }
     else
@@ -108,7 +108,7 @@ UIFrame* UIMinimapWindow::processLeftClick(float mx, float my)
 #else
     if (uid_storage::getInstance()->hasMaxUIDStored(gWorld->mMapId))
     {
-      gWorld->mapIndex->loadMaxUID();
+      gWorld->mapIndex.loadMaxUID();
       mMenuLink->enterMapAt(pos);
     }
     else
@@ -187,13 +187,13 @@ void UIMinimapWindow::render() const
     {
       tile_index tile(i, j);
 
-      if (gWorld->mapIndex->hasTile(tile))
+      if (gWorld->mapIndex.hasTile(tile))
       {
-        if (gWorld->mapIndex->isTileExternal(tile))
+        if (gWorld->mapIndex.isTileExternal(tile))
         {
           gl.color4f(1.0f, 0.7f, 0.5f, 0.6f);
         }
-        else if (gWorld->mapIndex->tileLoaded(tile))
+        else if (gWorld->mapIndex.tileLoaded(tile))
         {
           gl.color4f(0.0f, 1.0f, 1.0f, 0.4f);
         }
@@ -215,7 +215,7 @@ void UIMinimapWindow::render() const
       gl.vertex2f(i * tilesize, ((j + 1) * tilesize) - 1);
       gl.end();
 
-      if (map && map->mapIndex->getChanged(tile))
+      if (map && map->mapIndex.getChanged(tile))
       {
         gl.color4f(1.0f, 1.0f, 1.0f, 0.6f);
 

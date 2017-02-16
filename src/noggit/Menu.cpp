@@ -130,7 +130,7 @@ void Menu::enterMapAt(math::vector_3d pos, float av, float ah)
   gWorld->camera = math::vector_3d(pos.x, pos.y, pos.z);
 
   gWorld->initDisplay();
-  gWorld->mapIndex->enterTile(tile_index(pos));
+  gWorld->mapIndex.enterTile(tile_index(pos));
 
   app.getStates().push_back(new MapView(ah, av, math::vector_3d(pos.x, pos.y, pos.z - 1.0f))); // on gPop, MapView is deleted.
 
