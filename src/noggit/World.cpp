@@ -1791,22 +1791,19 @@ void World::updateSelectedVertices()
 
 void World::orientVertices(math::vector_3d const& ref_pos)
 {
-  math::degrees a(vertex_angle), o(vertex_orientation);
   for (math::vector_3d* v : _vertices_selected)
   {
-    v->y = misc::angledHeight(ref_pos, *v, a, o);
+    v->y = misc::angledHeight(ref_pos, *v, vertex_angle, vertex_orientation);
   }
   updateSelectedVertices();
 }
 
 void World::flattenVertices()
 {
-  float h = vertexCenter().y;
   for (math::vector_3d* v : _vertices_selected)
   {
-    v->y = h;
+    v->y = vertexCenter().y;
   }
-
   updateSelectedVertices();
 }
 
