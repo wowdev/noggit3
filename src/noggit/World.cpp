@@ -1825,7 +1825,7 @@ void World::updateVertexCenter()
   }
 }
 
-math::vector_3d& World::vertexCenter()
+math::vector_3d const& World::vertexCenter()
 {
   if (!_vertex_center_updated)
   {

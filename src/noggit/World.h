@@ -261,7 +261,7 @@ public:
   void updateVertexCenter();
   void clearVertexSelection();
 
-  math::vector_3d& vertexCenter();
+  math::vector_3d const& vertexCenter();
 
 private:
   void getSelection();
