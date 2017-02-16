@@ -277,8 +277,6 @@ World::World(const std::string& name)
   , outdoorLightStats(OutdoorLightStats())
   , horizon(name)
   , camera(math::vector_3d(0.0f, 0.0f, 0.0f))
-  , vertex_angle(0.0f)
-  , vertex_orientation(0.0f)
 {
   for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
   {
@@ -1732,7 +1730,7 @@ void World::selectVertices(math::vector_3d const& pos, float radius)
   });
 }
 
-void World::deselectVertices(math::vector_3d const& pos, float radius)
+bool World::deselectVertices(math::vector_3d const& pos, float radius)
 {
   _vertex_center_updated = false;
   _vertex_border_updated = false;
@@ -1751,10 +1749,7 @@ void World::deselectVertices(math::vector_3d const& pos, float radius)
     _vertices_selected.erase(v);
   }
 
-  if (_vertices_selected.empty())
-  {
-    clearVertexSelection();
-  }
+  return _vertices_selected.empty();
 }
 
 void World::moveVertices(float h)
@@ -1789,7 +1784,10 @@ void World::updateSelectedVertices()
   }
 }
 
-void World::orientVertices(math::vector_3d const& ref_pos)
+void World::orientVertices ( math::vector_3d const& ref_pos
+                           , math::degrees vertex_angle
+                           , math::degrees vertex_orientation
+                           )
 {
   for (math::vector_3d* v : _vertices_selected)
   {
@@ -1798,7 +1796,7 @@ void World::orientVertices(math::vector_3d const& ref_pos)
   updateSelectedVertices();
 }
 
-void World::flattenVertices()
+void World::flattenVertices (float height)
 {
   for (math::vector_3d* v : _vertices_selected)
   {
@@ -1809,8 +1807,6 @@ void World::flattenVertices()
 
 void World::clearVertexSelection()
 {
-  vertex_angle._ = 0.0f;
-  vertex_orientation._ = 0.0f;
   _vertex_border_updated = false;
   _vertex_center_updated = false;
   _vertices_selected.clear();

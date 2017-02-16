@@ -45,8 +45,8 @@ namespace ui
     float _radius;
     float _speed;
     float _inner_radius;
-    float& _angle;
-    float& _orientation;
+    math::degrees _vertex_angle;
+    math::degrees _vertex_orientation;
 
     bool _tablet;
 

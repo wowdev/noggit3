@@ -247,21 +247,21 @@ public:
 
   void convert_alphamap(bool to_big_alpha);
 
-  void deselectVertices(math::vector_3d const& pos, float radius);
+  bool deselectVertices(math::vector_3d const& pos, float radius);
   void selectVertices(math::vector_3d const& pos, float radius);
 
   void moveVertices(float h);
-  void orientVertices(math::vector_3d const& ref_pos);
-  void flattenVertices();
+  void orientVertices ( math::vector_3d const& ref_pos
+                      , math::degrees vertex_angle
+                      , math::degrees vertex_orientation
+                      );
+  void flattenVertices (float height);
 
   void updateSelectedVertices();
   void updateVertexCenter();
   void clearVertexSelection();
 
   math::vector_3d& vertexCenter();
-
-  math::degrees vertex_angle;
-  math::degrees vertex_orientation;
 
 private:
   void getSelection();
